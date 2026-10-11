@@ -1,0 +1,8 @@
+{
+  "title": "视图 vs 拷贝的判定与污染实验",
+  "code_lang": "python",
+  "code_std": "3.13",
+  "stdin": "",
+  "expected_output": "源数组 a = [0 1 2 3 4 5 6 7 8 9]\n\n基本切片 a[2:6]            base is a: True   shares_memory: True\n步长切片 a[::2]            base is a: True   shares_memory: True\n布尔索引 a[a>4]            base is a: False  shares_memory: False\n花式索引 a[[0,3,7]]        base is a: False  shares_memory: False\n\n=== 污染实验：改视图会改到源 ===\n修改 view 后，源 big = [-1  1 -1  3 -1  5 -1  7 -1  9]  <- 源被静默污染\n\n=== 安全做法：显式 copy ===\n修改 copy 后，源 big2 = [0 1 2 3 4 5 6 7 8 9]  <- 源未受影响\n\nflatten() 永远拷贝: False\nravel() 连续时是视图: True",
+  "code": "import numpy as np\n\na = np.arange(10)\nprint(\"源数组 a =\", a)\nprint()\n\ncases = {\n    \"基本切片 a[2:6]\": a[2:6],\n    \"步长切片 a[::2]\": a[::2],\n    \"布尔索引 a[a>4]\": a[a > 4],\n    \"花式索引 a[[0,3,7]]\": a[[0, 3, 7]],\n}\nfor name, v in cases.items():\n    print(f\"{name:22s} base is a: {v.base is a!s:5s}  shares_memory: {np.shares_memory(a, v)}\")\n\nprint()\nprint(\"=== 污染实验：改视图会改到源 ===\")\nbig = np.arange(10)\nview = big[::2]          # 视图\nview[:] = -1\nprint(\"修改 view 后，源 big =\", big, \" <- 源被静默污染\")\n\nprint()\nprint(\"=== 安全做法：显式 copy ===\")\nbig2 = np.arange(10)\ncp = big2[::2].copy()\ncp[:] = -1\nprint(\"修改 copy 后，源 big2 =\", big2, \" <- 源未受影响\")\n\nprint()\nprint(\"flatten() 永远拷贝:\", np.shares_memory(a, a.reshape(2, 5).flatten()))\nprint(\"ravel() 连续时是视图:\", np.shares_memory(a, a.ravel()))\n"
+}

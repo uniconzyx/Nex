@@ -1,0 +1,90 @@
+{
+  "meta": {
+    "chapter": "fs-ch07",
+    "category": "system"
+  },
+  "items": [
+    {
+      "title": "契约驱动的博客系统：OpenAPI 单一事实来源 + 游标分页 + 归一化前端",
+      "requirement_md": "用「契约优先」的方式做一个最小可跑的博客系统，把本章第一、二部分打通，**只用 Node 内置能力**（`node:http`、`node:sqlite`）与纯函数，不装任何 npm 包：\n\n1. **契约先行**：先手写 `packages/contract/openapi.yaml`（或等价的 JSON schema 集合），定义 `posts` 资源：`GET /posts`（游标分页）、`POST /posts`（创建）、`GET /posts/{id}`、以及统一的 4xx `application/problem+json`（承接 fs-ch05）。契约先于实现冻结。\n2. **后端**：`apps/api` 用 `node:sqlite` 建表并实现上述路由；按契约对**请求体**做字段级校验（必填/类型/边界/枚举/多余字段），失败返回 422 + 字段路径；分页用**游标**（keyset），游标编码完整排序键 `(createdAt, id)` 并 base64 + 版本前缀。\n3. **共享层**：`packages/shared` 提供三个纯函数：`validate(schema, value)`、`normalize(payload)`、`mergePage(acc, page)`（幂等 + 稳定排序）。前后端都 import 这一份，**不得各写一份**。\n4. **前端数据层（纯 JS，不依赖 DOM/框架）**：模拟一个 store，实现：请求去重与取消、乐观创建（临时 id + 失败回滚）、TTL/SWR 缓存、无限滚动分页合并（乱序到达）。用整数逻辑时钟驱动，输出确定。\n5. **四态呈现**：把列表视图建模为 `loading/success/empty/error` 状态机，错误态区分「可重试 / 不可重试」。\n\n产出要求：一个 `node demo.js` 可跑的自测脚本，打印所有断言的名称与布尔结果（不打印端口号与墙钟耗时）。",
+      "tasks": [
+        {
+          "title": "定义契约并做双向 schema 校验",
+          "verification": {
+            "type": "test",
+            "desc": "对请求体跑 ≥1 组合法 + ≥6 组非法样例，输出 `req_ok_all_pass=true` 与 `req_bad_all_rejected=true`（6/6）；对响应体跑 ≥1 组合法 + ≥2 组非法样例，输出 `res_bad_all_rejected=true`（2/2）；每个非法样例的错误项都含 `$.field` 形式字段路径。"
+          }
+        },
+        {
+          "title": "实现游标分页并证明并发插入下稳定",
+          "verification": {
+            "type": "test",
+            "desc": "翻页中途插入一条新记录后，第 2 页结果与插入前完全一致（`cursor_stable=true`），且与第 1 页无重叠（`no_overlap_with_page1=true`）；同场景下 offset 分页出现与第 1 页重复的行（`offset_repeats=true`）作为对照。"
+          }
+        },
+        {
+          "title": "实现共享层的 normalize / mergePage 纯函数",
+          "verification": {
+            "type": "test",
+            "desc": "3 条 post 携带重复 author，归一化后 `normalized_user_count=2` 且 `dedup_saved=1`，`roundtrip_equal=true`；把两页乱序传入 mergePage，输出 `order_stable=true`、`no_duplicate_ids=true`，且重复调用结果不变（幂等）。"
+          }
+        },
+        {
+          "title": "实现前端数据层：去重取消 + 乐观更新 + TTL/SWR",
+          "verification": {
+            "type": "test",
+            "desc": "3 个并发同 key 请求 `sent_while_inflight=1`；取消的请求不投递（`cancelled_result=null`）；乐观创建成功 `success_count_kept=true`、失败 `failure_state_restored=true`；缓存时序输出 `fresh`→`stale`（仍返回旧值）→`expired`（返回空）。"
+          }
+        },
+        {
+          "title": "四态视图状态机 + CI 契约自检",
+          "verification": {
+            "type": "test",
+            "desc": "状态机输出满足 `happy=loading->success`、`empty=loading->empty`、`error_then_retry=loading->error->loading->success`，且非错误态 RETRY 为无操作；契约自检断言「每个 operation 都有实现、每个路由都进文档、所有 4xx 用 problem+json」，任一不满足退出码非 0。"
+          }
+        }
+      ]
+    },
+    {
+      "title": "带游标分页 + 乐观更新的任务看板（Kanban）：三态交互 + 虚拟化长列表",
+      "requirement_md": "做一个「任务看板」的全栈最小实现，重点是把「交互密集」场景下的状态流转与性能做扎实。同样只用 Node 内置能力与纯函数（不装 npm 包），前端逻辑用纯 JS 数据流表达（不依赖浏览器 DOM 与框架）：\n\n1. **领域模型**：任务 `task(id, title, status, order, createdAt)`，`status ∈ {todo, doing, done}`；拖拽改状态与排序 -> 用**乐观更新**先把本地顺序改掉，服务端确认后固定新 id/新 order，失败回滚并提示。\n2. **契约**：定义 `GET /tasks?status=&cursor=&limit=`（按 `status` 分组、组内 keyset 分页）、`POST /tasks`（创建，带 `Idempotency-Key` 防重复提交）、`PATCH /tasks/{id}`（改状态/排序）。所有错误统一 Problem Details。\n3. **数据层**：实现请求去重与取消（拖动过程中快速切换分组会触发大量请求）、TTL/SWR 缓存、以及**优先级队列 + 并发上限**（创建/更新比纯读更重要，优先级更高）；断言峰值并发不超上限。\n4. **虚拟化**：看板某一列可能有上千个任务，用虚拟化窗口公式计算渲染区间，断言「渲染行数 ≤ 视口行数 + 2·overscan」且 `end ≤ total`。\n5. **三态 + 可访问性**：每列独立四态（loading/success/empty/error），空列提示「拖入第一个任务」；对组件描述树做静态遍历，自动判定 `img-alt` 与 `button-name` 两类 a11y 违规，输出违规清单。\n\n产出要求：`node demo.js` 打印每个断言的名称与布尔结果；所有顺序敏感输出先排序或按定义序输出。",
+      "tasks": [
+        {
+          "title": "实现拖拽的乐观更新与回滚",
+          "verification": {
+            "type": "test",
+            "desc": "模拟「把任务从 todo 拖到 doing」：乐观阶段 `todo` 列少 1、`doing` 列多 1（本地先变）；服务端成功 -> 顺序与 id 固定且不重复插入（`success_count_kept=true`）；服务端失败 -> 两列恢复原状（`failure_state_restored=true`），且任务回到原列原顺序。"
+          }
+        },
+        {
+          "title": "实现幂等创建与优先级调度",
+          "verification": {
+            "type": "test",
+            "desc": "同一 `Idempotency-Key` 连发 3 次 `POST /tasks` 只新增 1 条且三次返回同一 id，同键换载荷返回 422；优先级队列在并发上限 3 下，写入类请求（priority 高）先于读取类完成，且 `peak_within_limit=true`、`max_concurrency_respected=true`。"
+          }
+        },
+        {
+          "title": "实现快速切换分组时的去重与取消",
+          "verification": {
+            "type": "test",
+            "desc": "连续快速切换分组触发 5 次请求，其中 3 次同 key：`sent_while_inflight` 只增加 1；被取消的请求 `cancelled_result=null`；最终每个分组渲染的数据与「只请求一次」的结果一致（`same_as_single_fetch=true`）。"
+          }
+        },
+        {
+          "title": "实现虚拟化长列表并断言性能判据",
+          "verification": {
+            "type": "test",
+            "desc": "列内 1000 个任务，配置 rowHeight/viewportHeight/overscan 后，任意 `scrollTop`（含顶部、中部、近底部、越界负值）下 `count ≤ visible + 2*overscan` 且 `end ≤ total`；4 个边界用例全部为 true。"
+          }
+        },
+        {
+          "title": "四态列视图 + 组件树 a11y 静态检查",
+          "verification": {
+            "type": "test",
+            "desc": "每列状态机输出覆盖 loading/success/empty/error 四态，空列进入 empty 而非 success；对组件描述树静态遍历输出违规清单，含 `img-alt` 与 `button-name` 两类规则（至少各命中 1 条），并给出节点类型与规则名。"
+          }
+        }
+      ]
+    }
+  ]
+}

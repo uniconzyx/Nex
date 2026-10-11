@@ -1,0 +1,8 @@
+{
+  "title": "ex06-status-code-table",
+  "code_lang": "java",
+  "code_std": "java23",
+  "stdin": "",
+  "expected_output": "CREATED -> 201\nNO_CONTENT -> 204\nUNAUTHORIZED -> 401\nMETHOD_NOT_ALLOWED -> 405\nCONFLICT -> 409\nUNPROCESSABLE -> 422\nSERVER_ERROR -> 500",
+  "code": "import java.util.*;\npublic class Main {\n    enum Scenario { OK, CREATED, NO_CONTENT, BAD_REQUEST, UNAUTHORIZED, FORBIDDEN, NOT_FOUND, METHOD_NOT_ALLOWED, CONFLICT, UNPROCESSABLE, SERVER_ERROR }\n    static int code(Scenario s){\n        switch(s){\n            case OK: return 200;\n            case CREATED: return 201;\n            case NO_CONTENT: return 204;\n            case BAD_REQUEST: return 400;\n            case UNAUTHORIZED: return 401;\n            case FORBIDDEN: return 403;\n            case NOT_FOUND: return 404;\n            case METHOD_NOT_ALLOWED: return 405;\n            case CONFLICT: return 409;\n            case UNPROCESSABLE: return 422;\n            case SERVER_ERROR: return 500;\n        }\n        return 500;\n    }\n    public static void main(String[] a){\n        Scenario[] ss={Scenario.CREATED,Scenario.NO_CONTENT,Scenario.UNAUTHORIZED,Scenario.METHOD_NOT_ALLOWED,Scenario.CONFLICT,Scenario.UNPROCESSABLE,Scenario.SERVER_ERROR};\n        for(Scenario s:ss) System.out.println(s+\" -> \"+code(s));\n    }\n}"
+}

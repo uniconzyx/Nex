@@ -1,0 +1,268 @@
+{
+  "meta": {
+    "chapter": "fs-ch05",
+    "note": "10 题：基础题 8（self）+ 算法题 2（github 1 / leetcode 1，仅存元数据与链接，不搬运题面）；覆盖选型判据、最左前缀与覆盖索引、查询计划判读、N+1 修复、游标分页、白名单校验、RFC 9457、令牌桶、二分下界与标准二分。"
+  },
+  "items": [
+    {
+      "id": "fs-ch05-ex01",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/01 · 数据库选型判据",
+      "difficulty": "mid",
+      "title": "什么场景更适合选文档型（MongoDB）",
+      "content_md": "按「一次业务操作能否落在同一个聚合根内」这一判据，下列哪种场景最适合选文档型数据库？",
+      "options": [
+        {
+          "key": "A",
+          "text": "需要跨多张表保证「扣库存 + 建订单」的原子性"
+        },
+        {
+          "key": "B",
+          "text": "读多写少、需要对多表做任意 JOIN 与聚合报表"
+        },
+        {
+          "key": "C",
+          "text": "一次读取就把一个聚合根（含嵌套子结构）整体取回，且几乎不跨聚合 JOIN"
+        },
+        {
+          "key": "D",
+          "text": "需要严格的外键约束防止脏数据"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "C"
+        ]
+      },
+      "explanation": "文档型把聚合边界编码进物理布局，整存整取极快。A 需要跨文档事务（关系型更省心）、B 与 D 都需要关系型的 JOIN 与约束能力。选型判据是「聚合边界是否与写入边界重合」，不是性能数字。",
+      "tags": [
+        "database",
+        "selection",
+        "nosql"
+      ]
+    },
+    {
+      "id": "fs-ch05-ex02",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/01 · 最左前缀与覆盖索引",
+      "difficulty": "mid",
+      "title": "复合索引 (tenant_id, kind) 上哪条查询无法用索引定位",
+      "content_md": "表 events 上有复合索引 idx_tenant_kind(tenant_id, kind)。查询需要返回列 tenant_id、kind 以外的 payload 列时，下列哪条 WHERE 无法利用该索引的最左前缀定位行？",
+      "options": [
+        {
+          "key": "A",
+          "text": "WHERE tenant_id = ?"
+        },
+        {
+          "key": "B",
+          "text": "WHERE tenant_id = ? AND kind = ?"
+        },
+        {
+          "key": "C",
+          "text": "WHERE tenant_id = ? AND kind > ?"
+        },
+        {
+          "key": "D",
+          "text": "WHERE kind = ?"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "D"
+        ]
+      },
+      "explanation": "索引只在 (tenant_id, kind) 这个列序上有序，(kind) 单独不是任何前缀，无法定位起点。本章 ex09 实跑显示该查询的计划退化为 SCAN events（uses_index=False）。",
+      "tags": [
+        "index",
+        "leftmost-prefix"
+      ]
+    },
+    {
+      "id": "fs-ch05-ex03",
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/01 · 读 EXPLAIN QUERY PLAN",
+      "difficulty": "easy",
+      "title": "读查询计划判据",
+      "content_md": "下表是同一张表上两条查询的真实计划串，请写出每条计划对应的判定结论（用 full_table_scan / covering_index / non_covering_index 之一）：\n```\nplan_a = SCAN events\nplan_b = SEARCH events USING COVERING INDEX idx_tenant_kind (tenant_id=? AND kind=?)\nplan_c = SEARCH events USING INDEX idx_tenant_kind (tenant_id=? AND kind=?)\n```",
+      "answer": {
+        "output": "plan_a=full_table_scan\nplan_b=covering_index\nplan_c=non_covering_index"
+      },
+      "explanation": "SCAN 表示未走索引；SEARCH ... USING COVERING INDEX 表示走了覆盖索引（查询列全在索引内，无需回表）；SEARCH ... USING INDEX 表示走了索引但需回表取非索引列。三者判据在本章 ex09 实跑中均可复现。",
+      "tags": [
+        "sqlite",
+        "query-plan",
+        "index"
+      ]
+    },
+    {
+      "id": "fs-ch05-ex04",
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/02 · N+1 查询",
+      "difficulty": "mid",
+      "title": "消除列表接口的 N+1 查询",
+      "content_md": "下面的 listNaive 对 5 个作者发出 6 次数据库操作（1+N），请改为常数次操作，并保证返回数据完全一致。要求可运行并打印操作计数。",
+      "answer": {
+        "reference_code": "// 修复前（N+1）：对每个 author 各查一次 posts\nfunction listNaive(db) {\n  const authors = db.findAllAuthors();               // 1 次\n  return authors.map(a => ({\n    name: a.name,\n    posts: db.findPostsByAuthorId(a.id).map(p => p.title),   // N 次\n  }));\n}\n\n// 修复后：一次批量取全部关联，再在内存里按外键分组\nfunction listBatched(db) {\n  const authors = db.findAllAuthors();                       // 1 次\n  const ids = authors.map(a => a.id);\n  const allPosts = db.findPostsByAuthorIds(ids);             // 1 次（IN 查询）\n  const byAuthor = new Map();\n  for (const p of allPosts) {\n    if (!byAuthor.has(p.authorId)) byAuthor.set(p.authorId, []);\n    byAuthor.get(p.authorId).push(p.title);\n  }\n  return authors.map(a => ({ name: a.name, posts: byAuthor.get(a.id) || [] }));\n}\n\n// 可运行的最小数据库桩：对操作计数\nfunction makeDb() {\n  const authors = [1, 2, 3, 4, 5].map(i => ({ id: i, name: 'author' + i }));\n  const posts = [];\n  let pid = 0;\n  for (const a of authors) {\n    for (let i = 0; i < (a.id % 3) + 1; i++) {\n      pid += 1;\n      posts.push({ id: pid, authorId: a.id, title: 'post' + pid });\n    }\n  }\n  let ops = 0;\n  return {\n    get ops() { return ops; },\n    reset() { ops = 0; },\n    findAllAuthors() { ops += 1; return authors.slice(); },\n    findPostsByAuthorId(id) { ops += 1; return posts.filter(p => p.authorId === id); },\n    findPostsByAuthorIds(ids) { ops += 1; return posts.filter(p => ids.includes(p.authorId)); },\n  };\n}\n\nconst db = makeDb();\ndb.reset();\nconst naive = listNaive(db);\nconsole.log('naive_ops=' + db.ops);\ndb.reset();\nconst batched = listBatched(db);\nconsole.log('batched_ops=' + db.ops);\nconsole.log('same_result=' + (JSON.stringify(naive) === JSON.stringify(batched)));\nconsole.log('batched_is_constant_ops=' + (db.ops === 2));\n"
+      },
+      "explanation": "把「逐个作者查 posts」换成「一次 IN 批量查 + 内存按外键分组」，操作数从 1+N 降为 2（一次取作者、一次取全部关联）。断言 same_result=true 才能证明优化没有改变语义。",
+      "tags": [
+        "n+1",
+        "orm",
+        "performance"
+      ]
+    },
+    {
+      "id": "fs-ch05-ex05",
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/03 · 分页：偏移 vs 游标",
+      "difficulty": "mid",
+      "title": "实现稳定的游标（keyset）分页",
+      "content_md": "用 Python 内置 sqlite3 实现游标分页：第一页无游标，之后以「上一页最后一行的完整排序键 (score, id)」为游标继续翻页。要求演示：并发插入一条最高分记录后，第二页结果不重复且与插入前一致。",
+      "answer": {
+        "reference_code": "import sqlite3\n\nconn = sqlite3.connect(':memory:')\ncur = conn.cursor()\ncur.execute('CREATE TABLE articles (id INTEGER PRIMARY KEY, score INTEGER NOT NULL)')\ncur.executemany('INSERT INTO articles(id, score) VALUES (?,?)',\n                [(i, i * 10) for i in range(1, 11)])   # score 10..100\n\nORDER = 'ORDER BY score DESC, id ASC'\n\ndef page_after(cursor, size):\n    \"\"\"cursor=None 表示第一页；否则为 (id, score)，用行值比较继续翻页。\"\"\"\n    if cursor is None:\n        sql = 'SELECT id, score FROM articles ' + ORDER + ' LIMIT ?'\n        args = (size,)\n    else:\n        # 行值比较 (score, id) > (cursor_score, cursor_id) 的展开形式\n        sql = ('SELECT id, score FROM articles WHERE score < ? OR (score = ? AND id > ?) '\n               + ORDER + ' LIMIT ?')\n        args = (cursor[1], cursor[1], cursor[0], size)\n    return [(r[0], r[1]) for r in cur.execute(sql, args)]\n\npage1 = page_after(None, 4)\nlast = page1[-1]\npage2 = page_after(last, 4)\n\n# 并发插入一条最高分记录\ncur.execute('INSERT INTO articles(id, score) VALUES (?,?)', (11, 1000))\npage2_again = page_after(last, 4)\n\nprint('page1=%s' % [r[0] for r in page1])\nprint('page2=%s' % [r[0] for r in page2])\nprint('page2_after_insert=%s' % [r[0] for r in page2_again])\nprint('cursor_stable=%s' % ([r[0] for r in page2] == [r[0] for r in page2_again]))\nprint('no_overlap_with_page1=%s' % (not (set(r[0] for r in page2_again) & set(r[0] for r in page1))))\nprint('cursor_encodes_full_sort_key=%s' % (last is not None and len(last) == 2))\n"
+      },
+      "explanation": "游标谓词用行值比较 `score < ? OR (score = ? AND id > ?)`，因为排序键 (score, id) 构成全序，所以不会漏行也不会重复；游标编码的是「位置」而非「偏移」，因此不受插入导致的窗口漂移影响。",
+      "tags": [
+        "pagination",
+        "cursor",
+        "sqlite"
+      ]
+    },
+    {
+      "id": "fs-ch05-ex06",
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/03 · 请求校验与参数白名单",
+      "difficulty": "mid",
+      "title": "排序与过滤参数的白名单校验",
+      "content_md": "实现 parseQuery(raw)：排序字段必须命中白名单（id / createdAt / score / title），支持 `-` 前缀表示降序；过滤字段按「字段名 → 类型」映射校验（字符串限字符集与长度、整数整体匹配正则）；limit 越界夹到上限 100。要求对合法与非法两组入参都给出结果，非法值不得进入 SQL。",
+      "answer": {
+        "reference_code": "const SORTABLE = new Set(['id', 'createdAt', 'score', 'title']);\nconst FILTERABLE = { status: 'string', tag: 'string', score: 'integer' };\nconst MAX_LIMIT = 100;\n\nfunction parseQuery(raw) {\n  const sp = new URLSearchParams(raw);\n  const errors = [];\n  const out = { orderSql: null, filters: {}, limit: 20, offset: 0 };\n\n  const sortRaw = sp.get('sort');\n  if (sortRaw !== null) {\n    const m = /^(-?)([A-Za-z][A-Za-z0-9]{0,20})$/.exec(sortRaw);\n    if (!m) errors.push('sort: malformed token');\n    else if (!SORTABLE.has(m[2])) errors.push('sort: field not in whitelist');\n    else out.orderSql = '\"' + m[2] + '\" ' + (m[1] === '-' ? 'DESC' : 'ASC');\n  }\n  for (const [k, kind] of Object.entries(FILTERABLE)) {\n    const v = sp.get(k);\n    if (v === null) continue;\n    if (kind === 'integer') {\n      if (!/^-?\\d{1,9}$/.test(v)) { errors.push('filter ' + k + ': not an integer'); continue; }\n      out.filters[k] = Number(v);\n    } else {\n      if (!/^[A-Za-z0-9_-]{1,40}$/.test(v)) { errors.push('filter ' + k + ': illegal characters'); continue; }\n      out.filters[k] = v;\n    }\n  }\n  const limit = sp.get('limit');\n  if (limit !== null) {\n    if (!/^\\d{1,9}$/.test(limit) || Number(limit) < 1) errors.push('limit: invalid');\n    else out.limit = Math.min(Number(limit), MAX_LIMIT);\n  }\n  return { ok: errors.length === 0, errors, query: out };\n}\n\nconst cases = [\n  ['sort=-score&status=published&limit=99999', true],\n  ['sort=password', false],\n  ['sort=id%3B%20DROP%20TABLE%20articles', false],\n  ['tag=%3Cscript%3E', false],\n  ['score=abc', false],\n];\nfor (const [raw, expectOk] of cases) {\n  const r = parseQuery(raw);\n  console.log(raw + ' -> ok=' + r.ok + ' match=' + (r.ok === expectOk)\n    + ' orderSql=' + (r.query.orderSql === null ? 'null' : JSON.stringify(r.query.orderSql))\n    + ' limit=' + r.query.limit + ' errors=' + JSON.stringify(r.errors));\n}\n"
+      },
+      "explanation": "字段名进入 SQL 标识符位置，参数化占位符保护不了它，必须白名单映射（先校验命中再拼标识符）；值走类型化正则校验。注意 limit 的越界策略要显式选择：这里夹到上限并保证 `limit >= 1`。",
+      "tags": [
+        "validation",
+        "whitelist",
+        "injection"
+      ]
+    },
+    {
+      "id": "fs-ch05-ex07",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/03 · RFC 9457 Problem Details",
+      "difficulty": "mid",
+      "title": "Problem Details 的成员与媒体类型",
+      "content_md": "关于 RFC 9457（Problem Details for HTTP APIs），下列说法哪一项正确？",
+      "options": [
+        {
+          "key": "A",
+          "text": "媒体类型是 application/json，错误体与成功资源共用同一结构"
+        },
+        {
+          "key": "B",
+          "text": "核心成员为 type / title / status / detail / instance，允许添加不与核心成员冲突的扩展成员"
+        },
+        {
+          "key": "C",
+          "text": "type 必须是绝对 URL，不允许使用 about:blank 作为缺省值"
+        },
+        {
+          "key": "D",
+          "text": "字段级校验错误必须直接平铺在顶层，不能用扩展成员承载"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "RFC 9457 的媒体类型是 application/problem+json，五个核心成员为 type/title/status/detail/instance；type 缺省为 about:blank，且允许相对 URI 引用；扩展成员（如 errors 数组、retryAfterSec）可自由添加但不得与核心成员冲突。本章 ex06 实跑验证了这一点。",
+      "tags": [
+        "error-handling",
+        "rfc9457",
+        "rest"
+      ]
+    },
+    {
+      "id": "fs-ch05-ex08",
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/04 · 令牌桶限流",
+      "difficulty": "mid",
+      "title": "实现令牌桶并用虚拟时钟验证突发与稳态",
+      "content_md": "实现 createBucket(capacity, refillPerSec)，用显式时间轴（不读墙钟）驱动，返回允许/拒绝序列。要求演示三组：t=0 连打 6 个（容量 3、补 1/s）应只有前 3 个放行；间隔 1s 的 5 个请求（容量 3、补 1/s）应全部放行；容量 2、补 1/s、间隔 500ms 的混合场景应呈现「先放行 2 个，之后每隔一个间隔放行 1 个」。",
+      "answer": {
+        "reference_code": "function createBucket(capacity, refillPerSec) {\n  let tokens = capacity;\n  let last = 0;\n  let now = 0;\n  return {\n    advance(ms) { now += ms; },\n    tryConsume() {\n      const added = (now - last) / 1000 * refillPerSec;\n      if (added > 0) { tokens = Math.min(capacity, tokens + added); last = now; }\n      const allowed = tokens >= 1;\n      if (allowed) tokens -= 1;\n      return { allowed, left: Math.round(tokens * 1000) / 1000 };\n    },\n  };\n}\n\nfunction run(capacity, rate, gaps) {\n  const b = createBucket(capacity, rate);\n  const out = [];\n  for (let i = 0; i < gaps.length; i++) {\n    if (gaps[i] > 0) b.advance(gaps[i]);\n    out.push(b.tryConsume().allowed ? 'A' : 'D');\n  }\n  return out.join('');\n}\n\n// 容量 3、补 1/s：t=0 连打 6 个 -> 前 3 个放行\nconsole.log('burst=' + run(3, 1, [0, 0, 0, 0, 0, 0]));\n// 同配置、间隔 1s：每个间隔内补满 1 个 -> 全部放行\nconsole.log('steady=' + run(3, 1, [0, 1000, 1000, 1000, 1000]));\n// 容量 2、补 1/s、间隔 500ms：每两个间隔才攒够 1 个令牌 -> A/A 之后 D/A 交替\nconsole.log('mixed=' + run(2, 1, [0, 0, 500, 500, 500, 500, 500]));\n"
+      },
+      "explanation": "令牌桶状态只有 tokens 与 lastRefillAt：补充量 = 经过秒数 × 补充速率，上限为容量；取用时 tokens ≥ 1 才放行。虚拟时钟（显式 advance）让输出确定、可断言，这是性能/状态机类示例应该采用的写法。",
+      "tags": [
+        "rate-limit",
+        "token-bucket",
+        "deterministic"
+      ]
+    },
+    {
+      "id": "fs-ch05-ex09",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "github",
+      "source": "github",
+      "source_ref": "trekhleb/javascript-algorithms · src/algorithms/search/binary-search（lower bound 变体）",
+      "external_url": "https://github.com/trekhleb/javascript-algorithms",
+      "difficulty": "easy",
+      "title": "GitHub 算法补充 · 二分下界（lower bound）",
+      "content_md": "实现 lowerBound(nums, target)：在升序数组中返回第一个大于等于 target 的元素下标；若所有元素都小于 target 则返回数组长度。该变体对应 B+ 树定位「第一个不小于目标键」的叶子位置。题面与实现参考见 external_url，此处不复述第三方题面正文。",
+      "answer": {
+        "reference_code": "// 第一个 >= target 的位置（lower_bound）；不存在则返回 nums.length\nfunction lowerBound(nums, target) {\n  let lo = 0;\n  let hi = nums.length;\n  while (lo < hi) {\n    const mid = lo + ((hi - lo) >> 1);\n    if (nums[mid] < target) lo = mid + 1;\n    else hi = mid;\n  }\n  return lo;\n}\n\nconst nums = [10, 20, 20, 30, 40];\nconsole.log('lb_20=' + lowerBound(nums, 20));   // 第一个 20 的下标\nconsole.log('lb_25=' + lowerBound(nums, 25));   // 插入位置\nconsole.log('lb_41=' + lowerBound(nums, 41));   // 越界 -> 返回长度\nconsole.log('lb_5=' + lowerBound(nums, 5));\n"
+      },
+      "explanation": "区间取左闭右开 [lo, hi)，循环不变式为「答案始终落在 [lo, hi) 内」；mid 命中时收缩右界为 mid（不排除 mid），因此最终 lo 即下界。与标准二分（命中即返回）的区别在于不提前返回。",
+      "tags": [
+        "binary-search",
+        "lower-bound",
+        "index"
+      ]
+    },
+    {
+      "id": "fs-ch05-ex10",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "source": "leetcode",
+      "source_ref": "LeetCode 704（binary-search）",
+      "external_url": "https://leetcode.cn/problems/binary-search/",
+      "difficulty": "easy",
+      "title": "LeetCode 704 · 二分查找（算法素养补充）",
+      "content_md": "给定升序数组与目标值，返回目标值的下标，不存在返回 -1。题面与约束以官方为准，详见 external_url，此处不复述题面正文。",
+      "answer": {
+        "reference_code": "function search(nums, target) {\n  let lo = 0;\n  let hi = nums.length - 1;\n  while (lo <= hi) {\n    const mid = lo + ((hi - lo) >> 1);   // 防溢出写法\n    if (nums[mid] === target) return mid;\n    if (nums[mid] < target) lo = mid + 1;\n    else hi = mid - 1;\n  }\n  return -1;\n}\n\nconst nums = [-1, 0, 3, 5, 9, 12];\nconsole.log('found_9=' + search(nums, 9));\nconsole.log('found_2=' + search(nums, 2));\nconsole.log('found_-1=' + search(nums, -1));\nconsole.log('empty_-1=' + search([], 3));\n"
+      },
+      "explanation": "标准二分：闭区间 [lo, hi]，每轮排除一半，命中即返回，未命中返回 -1。时间复杂度 O(log n)，与 B+ 树按层下探的代价特征同构（每步把搜索空间按分支因子收缩）。",
+      "tags": [
+        "binary-search",
+        "array"
+      ]
+    }
+  ]
+}

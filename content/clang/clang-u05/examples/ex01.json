@@ -1,0 +1,8 @@
+{
+  "title": "对象宏 vs 函数宏与括号陷阱",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "SQUARE_OBJ(2+1)  = 5\nSQUARE_SAFE(2+1) = 9\nsq_func(2+1)     = 9",
+  "code": "#include <stdio.h>\n#define SQUARE_OBJ(x) x * x            /* 对象式宏：纯文本替换 */\n#define SQUARE_SAFE(x) ((x) * (x))      /* 加括号避免运算符优先级破坏 */\n\nint sq_func(int x) { return x * x; }   /* 函数版 */\n\nint main(void) {\n    int a = SQUARE_OBJ(2 + 1);          /* 展开为 2+1 * 2+1 */\n    int b = SQUARE_SAFE(2 + 1);         /* 展开为 ((2+1)*(2+1)) */\n    int c = sq_func(2 + 1);\n    printf(\"SQUARE_OBJ(2+1)  = %d\\n\", a);\n    printf(\"SQUARE_SAFE(2+1) = %d\\n\", b);\n    printf(\"sq_func(2+1)     = %d\\n\", c);\n    return 0;\n}"
+}

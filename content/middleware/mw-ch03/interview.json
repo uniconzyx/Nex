@@ -1,0 +1,49 @@
+{
+  "meta": { "chapter": "mw-ch03" },
+  "items": [
+    {
+      "question": "Redis 主从复制中，全量同步和部分同步分别发生在什么场景？repl_backlog 起什么作用？",
+      "answer_md": "**全量同步（FULLRESYNC）**：从节点首次同步、或断线过久/换主导致 offset 已滑出 `repl_backlog` 窗口时触发；主节点 `fork + RDB` 全量传给从节点，从节点清空载入后再补增量写命令。\n**部分同步（CONTINUE）**：从节点短暂断线重连，只要断线期间写命令仍在主节点 `repl_backlog` 环形缓冲内（上报的 offset 仍在窗口），主节点只补发缺失区间，无需全量。\n**repl_backlog 作用**：固定大小环形缓冲，是「部分同步」与「复制断点续传」的关键——它保存最近写入的命令流，off-set 是复制逻辑时钟；窗口被覆盖就必须全量。配置 `repl-backlog-size` 决定可容忍的断线时长/写入量。",
+      "follow_ups": [
+        "从节点重启后为什么有时全量、有时部分同步？",
+        "repl_backlog 是固定大小，写入过快被覆盖会发生什么？",
+        "REPLCONF ACK 上报的 offset 除了部分同步还用来做什么（lag/min-replicas）？"
+      ],
+      "difficulty": "mid",
+      "company_tags": ["通用", "字节", "阿里"]
+    },
+    {
+      "question": "Redis 哨兵的 SDOWN 和 ODOWN 有什么区别？故障转移怎么选 leader、怎么选新主？",
+      "answer_md": "**SDOWN（主观下线）**：单个哨兵在 `down-after-milliseconds` 内未收到主节点有效心跳，单方面判定主节点下线——是易错的本地观测。\n**ODOWN（客观下线）**：达到 `quorum` 个哨兵都报告 SDOWN 后，哨兵集群共识判定主节点真正下线，才启动故障转移。注意 quorum 是「确认下线的哨兵数门槛」，**不是** Raft 的多数派。\n\n**选 leader**：ODOWN 后哨兵用类 Raft 机制（epoch 任期 + 先到先得 + 多数派 >N/2 票）选出一个 leader 来执行故障转移，保证同一时刻只有一个执行者。\n**选新主规则**：`replica-priority` 最小 → 复制 offset 最大（数据最新）→ runid 字典序最小。",
+      "follow_ups": [
+        "quorum 和 leader 选举的多数派为什么是两个不同概念？",
+        "选主规则里 priority 和 offset 的优先级方向分别是什么？",
+        "哨兵要几个节点、为什么不能只部署 2 个？"
+      ],
+      "difficulty": "hard",
+      "company_tags": ["通用", "腾讯", "美团"]
+    },
+    {
+      "question": "Redis Cluster 怎么分片？MOVED 和 ASK 重定向有什么区别？多 key 操作有什么限制？",
+      "answer_md": "**分片**：把键空间分成 16384 个槽，`slot = CRC16(key) & 16383`，槽分配给各主节点（每主负责一段）；客户端按槽路由到对应节点。\n**MOVED vs ASK**：MOVED 表示「槽归属已永久变更」，客户端应**刷新**本地槽→节点映射；ASK 仅发生在**槽迁移中间态**，是「本次临时」重定向，客户端**不刷新**映射，等迁移完成收到 MOVED 才更新。\n**多 key 限制**：跨槽多 key（`MSET`/`MGET`/多 key Lua）默认报 CROSSSLOT 错误；必须用 hash tag `{...}` 把相关 key 约束到同一槽（如 `u:{100}:name` 与 `u:{100}:age`）。\n\n此外 Cluster 的故障转移**内置**（从节点自动提升），无需单独部署 Sentinel。",
+      "follow_ups": [
+        "为什么槽数固定是 16384 而不是更大？",
+        "迁移期间客户端怎么感知 ASK 并正确取数据？",
+        "hash tag 用不好会导致什么问题？"
+      ],
+      "difficulty": "hard",
+      "company_tags": ["通用", "阿里", "百度"]
+    },
+    {
+      "question": "什么是 Redis 脑裂？怎么防护？这跟 CAP 有什么关系？",
+      "answer_md": "**脑裂**：网络分区使原主与多数从节点/哨兵失联，但从节点侧选出新主继续服务；分区恢复后旧主「复活」，造成双主并存、两边各写各的、数据分叉且无法靠补增量自然合并（只能丢一方的写）。\n**防护**：用 `min-replicas-to-write` + `min-replicas-max-lag`——当主节点发现「正常 ACK 且 lag ≤ 阈值的从节点数 < min-replicas-to-write」时，**主动拒绝写入**（返回 MINREPLICAS 错误），从而在网络分区、从节点不足时停写，避免旧主在孤立侧继续写。\n**与 CAP**：这是典型 CP 取舍——分区时宁可牺牲可用性（写失败）也要保一致性，防止不可合并的数据分叉。纯缓存/可重建数据通常不开启。需注意它是「软隔离」，并非绝对硬 fencing，且从节点 lag 过大也会意外触发停写。",
+      "follow_ups": [
+        "min-replicas 为什么说是软隔离而不是硬 fencing？",
+        "Cluster 模式下脑裂概率为什么比主从+哨兵低？",
+        "开了 min-replicas 后从节点慢会导致什么问题？"
+      ],
+      "difficulty": "hard",
+      "company_tags": ["通用", "拼多多", "京东"]
+    }
+  ]
+}

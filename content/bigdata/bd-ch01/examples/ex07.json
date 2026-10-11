@@ -1,0 +1,8 @@
+{
+  "title": "安全模式（Safe Mode）判定：最小副本比例阈值",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "start (0 reported) safemode_on: True\nhalf (500) safemode_on: True\n999 reported safemode_on: False\n1000 reported safemode_on: False",
+  "code": "\nTHRESHOLD = 0.999\nTOTAL = 1000\ndef safemode(ok):\n    return (ok / TOTAL) < THRESHOLD\nprint(\"start (0 reported) safemode_on:\", safemode(0))\nprint(\"half (500) safemode_on:\", safemode(500))\nprint(\"999 reported safemode_on:\", safemode(999))\nprint(\"1000 reported safemode_on:\", safemode(1000))\n"
+}

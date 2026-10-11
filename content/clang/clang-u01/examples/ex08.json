@@ -1,0 +1,8 @@
+{
+  "title": "函数指针数组当跳转表",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "add(6,3) = 9\nsub(6,3) = 3\nmul(6,3) = 18",
+  "code": "#include <stdio.h>\n\ntypedef int (*binop_t)(int, int);\n\nint add(int a, int b) { return a + b; }\nint sub(int a, int b) { return a - b; }\nint mul(int a, int b) { return a * b; }\n\nint main(void) {\n    binop_t ops[3] = {add, sub, mul};\n    const char *names[3] = {\"add\", \"sub\", \"mul\"};\n    for (int i = 0; i < 3; i++) {\n        printf(\"%s(6,3) = %d\\n\", names[i], ops[i](6, 3));\n    }\n    return 0;\n}"
+}

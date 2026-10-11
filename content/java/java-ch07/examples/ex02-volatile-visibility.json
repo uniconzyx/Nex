@@ -1,0 +1,8 @@
+{
+  "title": "volatile 与 synchronized 的可见性：让工作线程可靠地停下来",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "volatile flag stopped worker : true\nworker final state           : TERMINATED\nworker made progress ticks>0 : true\nsynchronized publish worked  : true",
+  "code": "public class Main {\n    static volatile boolean stop = false;\n    static volatile long ticks = 0L;\n    static boolean plainFlag = false;\n    static final Object LOCK = new Object();\n\n    public static void main(String[] args) throws Exception {\n        Thread worker = new Thread(() -> { while (!stop) { ticks++; } }, \"worker\");\n        worker.start();\n        Thread.sleep(200L);\n        stop = true;\n        worker.join(3000L);\n        System.out.println(\"volatile flag stopped worker : \" + !worker.isAlive());\n        System.out.println(\"worker final state           : \" + worker.getState().name());\n        System.out.println(\"worker made progress ticks>0 : \" + (ticks > 0L));\n\n        Thread plainWorker = new Thread(() -> {\n            while (true) {\n                boolean seen;\n                synchronized (LOCK) { seen = plainFlag; }\n                if (seen) break;\n            }\n        }, \"plain-worker\");\n        plainWorker.start();\n        Thread.sleep(100L);\n        synchronized (LOCK) { plainFlag = true; }\n        plainWorker.join(3000L);\n        System.out.println(\"synchronized publish worked  : \" + !plainWorker.isAlive());\n    }\n}\n"
+}

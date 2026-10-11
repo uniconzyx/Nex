@@ -1,0 +1,26 @@
+{
+  "meta": { "chapter": "cpp-ch04" },
+  "items": [
+    {
+      "question": "指针和引用的本质区别是什么？什么时候必须用指针？",
+      "answer_md": "引用是对象的别名，必须初始化且不可改绑，无空值语义；指针是独立变量存地址，可空、可重指向、可做地址运算。必须用指针的场景：需要表示“可能为空/可选”的对象（nullptr）、需要改变指向（如遍历/链表）、需要地址运算或底层内存操作、与 C API/数组交互。现代 C++ 默认 const 引用传参，仅在上述场景用指针（或智能指针）。",
+      "follow_ups": ["智能指针能完全取代裸指针吗？", "函数参数何时用指针何时用引用？"],
+      "difficulty": "easy",
+      "company_tags": ["通用"]
+    },
+    {
+      "question": "什么是内存泄漏？怎么在 C++ 里排查和预防？",
+      "answer_md": "内存泄漏是申请了堆内存却再也无法释放（地址丢失或路径漏 delete），进程占用的内存只增不减。预防：①优先 RAII/智能指针（unique_ptr/shared_ptr）自动释放；②配对 new/delete、new[]/delete[]；③异常路径也保证释放（析构函数/智能指针）。排查：AddressSanitizer（-fsanitize=address）、Valgrind、Visual Studio CRT 调试堆、以及监控 RSS 增长。",
+      "follow_ups": ["shared_ptr 循环引用为什么也会泄漏？", "怎么用 ASan 跑出问题？"],
+      "difficulty": "mid",
+      "company_tags": ["通用", "字节"]
+    },
+    {
+      "question": "栈（stack）和堆（heap）有什么区别？",
+      "answer_md": "①分配：栈由编译器自动（进入作用域分配、离开释放），堆由程序员 new/delete 手动管理；②速度：栈快（仅移动栈指针），堆慢（需查找空闲块）；③大小：栈有限（通常几 MB，大数组易溢出），堆大得多；④碎片：堆可能碎片化；⑤生命周期：栈对象随作用域结束，堆对象独立于作用域。大对象/需要跨作用域存活的用堆（或 vector 封装）。",
+      "follow_ups": ["为什么递归太深会栈溢出？", "线程有自己的栈吗？"],
+      "difficulty": "easy",
+      "company_tags": ["通用", "腾讯"]
+    }
+  ]
+}

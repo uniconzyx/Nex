@@ -1,0 +1,174 @@
+{
+  "meta": {
+    "chapter": "ai-ch02",
+    "title": "视觉与序列建模 —— 习题集",
+    "count": 8,
+    "note": "8 题，基础题 3 + 算法题 5（平台题仅存元数据与链接，不复述题面）"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "权值共享带来了什么",
+      "content_md": "一个普通卷积层：输入 C_in=3、输出 C_out=64、卷积核 3×3、无偏置。相比把同一形状的全连接层直接铺开，权值共享主要带来了哪一项？\n\nA. 更强的非线性表达能力\nB. 参数量从 3·H·W·(64·H·W) 降到 64·3·3·3\nC. 自动获得平移不变性（无需池化）\nD. 反向传播不再需要链式法则",
+      "answer": {
+        "correct": "B",
+        "explain": "权值共享让卷积核在所有空间位置复用，参数量 = C_out·C_in·k·k + C_out（此处无偏置为 64·3·9=1728），而等价全连接参数量随 H·W 平方爆炸。\n\nA 错（共享反而限制容量）；C 错（共享只带来**等变**，不变还需池化）；D 错（反向仍靠链式法则/BPTT）。"
+      },
+      "explanation": "权值共享的本质是参数复用，核心收益是参数量骤降。",
+      "tags": [
+        "卷积",
+        "权值共享",
+        "参数量"
+      ],
+      "source": "self",
+      "source_ref": "《Deep Learning》（Goodfellow）第9章 · 卷积网络"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "卷积输出尺寸计算",
+      "content_md": "输入特征图 224×224、卷积核 3×3、stride=2、padding=1。分别求 'valid' 与 'same' 模式下的输出尺寸（向上/下取整按框架标准）。",
+      "answer": {
+        "explain": "valid: out = floor((224 + 2·1 − 3)/2) + 1 = floor(223/2)+1 = 111+1 = **112**。\n\nsame: out = ceil(224/2) = **112**（此处整除，两者相同）。\n\n关键：valid 用 floor，same 用 ceil；当 n 不能被 s 整除时两者会不同（如 n=225,s=2 时 valid=112, same=113）。"
+      },
+      "explanation": "尺寸公式是卷积工程最常被手算核对的内容。",
+      "tags": [
+        "卷积",
+        "尺寸公式",
+        "padding"
+      ],
+      "source": "self",
+      "source_ref": "《Deep Learning》第9章 · 卷积的不变性"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "RNN 长程依赖训练失效的根因说明",
+      "content_md": "下面这段「修复梯度消失」的注释与代码，能真正解决 RNN 的长程梯度消失吗？指出问题：\n\n```python\n# 用大学习率强行把梯度推回去，解决 RNN 梯度消失\noptimizer = torch.optim.SGD(model.parameters(), lr=10.0)\n# 不做任何梯度裁剪与归一化\n```",
+      "answer": {
+        "reference_code": "# RNN 长程梯度消失是结构性的（BPTT 连乘谱半径 < 1），调大 lr 只会让训练发散\n# 正确思路：换用 LSTM/GRU（门控走恒等通路）或加残差/层归一化\n# 若仍用 RNN，配合梯度裁剪 + 正交初始化 + Truncated BPTT\nimport torch\noptimizer = torch.optim.Adam(model.parameters(), lr=1e-3)\ntorch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)",
+        "explain": "大学习率**不能**修复梯度消失（那是 BPTT 连乘谱半径 < 1 的结构性问题），只会让已经很小的有效梯度被放大成数值爆炸或发散。\n\n真正有效的手段：① 换成 LSTM/GRU，让记忆走恒等通路；② 加残差连接 / 层归一化稳定谱半径；③ Truncated BPTT 限制回传步数；④ 梯度裁剪只在**爆炸**时有用，对消失无效。lr=10 还远超常规区间。"
+      },
+      "explanation": "区分「梯度消失的结构性」与「可调超参」是本题考点。",
+      "tags": [
+        "RNN",
+        "梯度消失",
+        "BPTT"
+      ],
+      "source": "self",
+      "source_ref": "《Deep Learning》第10章 · 序列建模"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "github",
+      "difficulty": 4,
+      "title": "用 NumPy 从零实现滑窗卷积",
+      "content_md": "不用任何深度学习框架，仅用 NumPy 实现卷积层：支持多输入/输出通道、stride、padding，打印输出特征图形状、参数量，并与手动滑窗结果一致。",
+      "answer": {
+        "reference_code": "import numpy as np\ndef conv2d(x, k, b, stride=1, padding=0):\n    # x:(N,Cin,H,W) k:(Cout,Cin,kh,kw)\n    if padding:\n        x = np.pad(x, ((0,0),(0,0),(padding,padding),(padding,padding)))\n    N,_,H,W = x.shape\n    Cout,_,kh,kw = k.shape\n    oh = (H-kh)//stride+1; ow = (W-kw)//stride+1\n    out = np.zeros((N,Cout,oh,ow))\n    for n in range(N):\n        for c in range(Cout):\n            for i in range(oh):\n                for j in range(ow):\n                    patch = x[n,:, i*stride:i*stride+kh, j*stride:j*stride+kw]\n                    out[n,c,i,j] = np.sum(patch*k[c]) + b[c]\n    return out",
+        "explain": "四重循环是滑窗卷积最直观的实现，重点核对：(1) 输出尺寸公式；(2) 参数量 = Cout·Cin·kh·kw + Cout；(3) padding 用 np.pad 在 H/W 维补零，不在 N/C 维补。"
+      },
+      "explanation": "手写卷积是理解 CNN 内部计算的最短路径。",
+      "tags": [
+        "卷积",
+        "NumPy",
+        "反向传播前置"
+      ],
+      "source": "github",
+      "source_ref": "Atcold/pytorch-Deep-Learning · 卷积从零实现",
+      "external_url": "https://github.com/Atcold/pytorch-Deep-Learning"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "github",
+      "difficulty": 4,
+      "title": "实现缩放点积注意力（含因果掩码）",
+      "content_md": "用 NumPy 实现 Self-Attention：QK^T/√d_k → softmax → 加权 V，并支持因果掩码（未来位置不可见）。打印注意力权重行和（应≈1）与输出形状。",
+      "answer": {
+        "reference_code": "import numpy as np\ndef scaled_dot_attention(Q, K, V, causal=False):\n    d_k = Q.shape[-1]\n    scores = Q @ K.transpose(0,2,1) / np.sqrt(d_k)\n    if causal:\n        T = scores.shape[-1]\n        mask = np.triu(np.ones((T,T)), k=1).astype(bool)\n        scores = np.where(mask, -1e9, scores)\n    scores = scores - scores.max(-1, keepdims=True)\n    e = np.exp(scores)\n    attn = e / e.sum(-1, keepdims=True)\n    return attn @ V, attn",
+        "explain": "三处易错点：(1) 必须除以 √d_k 防饱和；(2) 因果掩码用 -inf 而非 0（0 仍会被 softmax 分到概率）；(3) softmax 先减最大值防上溢。注意力权重每行和为 1。"
+      },
+      "explanation": "注意力是 Transformer 的细胞，必须能徒手实现。",
+      "tags": [
+        "注意力",
+        "NumPy",
+        "Transformer"
+      ],
+      "source": "github",
+      "source_ref": "karpathy/nanoGPT · 注意力实现",
+      "external_url": "https://github.com/karpathy/nanoGPT"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "github",
+      "difficulty": 4,
+      "title": "用 NumPy 实现 LSTM 单步",
+      "content_md": "仅用 NumPy 实现 LSTM 的一个时间步：输入 h_prev、c_prev、x 与权重，输出 h_t、c_t。打印各门控的取值范围（sigmoid∈(0,1)）与输出形状。",
+      "answer": {
+        "reference_code": "import numpy as np\ndef sigmoid(x): return 1.0/(1.0+np.exp(-x))\ndef lstm_step(W, b, h_prev, c_prev, x):\n    cat = np.concatenate([h_prev, x])\n    f = sigmoid(W['f']@cat + b['f'])\n    i = sigmoid(W['i']@cat + b['i'])\n    o = sigmoid(W['o']@cat + b['o'])\n    g = np.tanh(W['c']@cat + b['c'])\n    c = f*c_prev + i*g\n    h = o*np.tanh(c)\n    return h, c",
+        "explain": "LSTM 单步五式：三个 sigmoid 门（遗忘/输入/输出）+ 候选 g + 细胞态 c_t + 隐藏态 h_t。遗忘门 f 与输入门 i 共同决定记忆的擦除与写入；c_t 的 f⊙c_prev 提供恒等通路，这是缓解梯度消失的关键。"
+      },
+      "explanation": "门控公式必须会写会算。",
+      "tags": [
+        "LSTM",
+        "门控",
+        "NumPy"
+      ],
+      "source": "github",
+      "source_ref": "huggingface/transformers · RNN 实现参考",
+      "external_url": "https://github.com/huggingface/transformers"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "github",
+      "difficulty": 3,
+      "title": "实现正弦位置编码",
+      "content_md": "用 NumPy 实现 Transformer 的正弦位置编码 PE(pos,2i)=sin(pos/10000^{2i/d})、PE(pos,2i+1)=cos(...)，打印前几个位置编码并验证不同位置向量不同。",
+      "answer": {
+        "reference_code": "import numpy as np\ndef positional_encoding(seq_len, d_model):\n    pe = np.zeros((seq_len, d_model))\n    pos = np.arange(seq_len)[:, None]\n    i = np.arange(d_model)[None, :]\n    div = 1.0/(10000.0**(2*(i//2)/d_model))\n    pe[:, 0::2] = np.sin(pos*div[:, 0::2])\n    pe[:, 1::2] = np.cos(pos*div[:, 1::2])\n    return pe",
+        "explain": "正弦编码用不同频率（10000^{2i/d}）刻画位置，低频管长程、高频管局部；相加到 token 嵌入上注入顺序。它能外推到比训练更长的位置，且任意两位置编码可被线性变换互表（相对位置可推）。"
+      },
+      "explanation": "位置编码是让注意力感知顺序的关键。",
+      "tags": [
+        "位置编码",
+        "Transformer",
+        "NumPy"
+      ],
+      "source": "github",
+      "source_ref": "Attention Is All You Need · 位置编码",
+      "external_url": "https://github.com/tensorflow/tensor2tensor"
+    },
+    {
+      "type": "choice",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": 3,
+      "title": "序列最优子结构（动态规划经典）",
+      "content_md": "（题面以链接为准，此处仅存元数据）本题考察「序列上的最优子结构与递推」，与 RNN/注意力处理序列信息的思路形成对照。以下哪个最能刻画「用动态规划从左到右扫一遍得到全局最优」的本质？\n\nA. 贪心每一步局部最优即可全局最优\nB. 最优解可由规模更小的子问题最优解递推得到（无后效性）\nC. 必须枚举所有子序列才能确定最优\nD. 子问题之间必须互相独立、不可重叠",
+      "answer": {
+        "correct": "B",
+        "explain": "动态规划的核心是**最优子结构 + 无后效性**：大问题的最优解可由小问题的最优解递推。这与 RNN 沿时间递推、注意力做全局两两比较是处理序列的三种不同范式。A 是贪心（未必全局最优），C 是指数枚举，D 描述的是分治而非 DP 的重叠子问题。"
+      },
+      "explanation": "用经典序列 DP 题对照序列建模思路，只存元数据。",
+      "tags": [
+        "序列",
+        "动态规划",
+        "对照理解"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 300 · Longest Increasing Subsequence",
+      "external_url": "https://leetcode.cn/problems/longest-increasing-subsequence/"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "meta": { "chapter": "clang-u04" },
+  "items": [
+    {
+      "question": "缓冲 IO（stdio）与直接 IO（read/write）各有什么取舍？什么时候该绕过 FILE？",
+      "answer_md": "**缓冲 IO（FILE）**：在底层 fd 之上加用户态缓冲，把多次小操作聚成少量系统调用，减少上下文切换、显著提升吞吐；还提供格式化（`fprintf`）、行读取（`fgets`）等便捷接口。代价是多了「缓冲状态」需要管理（flush/seek 约束），且与底层 fd 混用是 UB。\n\n**直接 IO（read/write）**：每次直接进内核，无用户态缓冲，可控性最高、语义最干净，适合：需要 `O_DIRECT` 绕过页缓存、需要 `select/poll/epoll` 多路复用、需要精确控制偏移与原子性、或要 `fsync` 的场景。代价是若自己不缓冲，小读写性能差。\n\n**结论**：绝大多数应用层用 `stdio` 即可；系统编程/网络/数据库/高性能场景绕过 FILE 用裸系统调用，并自己实现缓冲。绝不要在同一 fd 上混用两套 API。",
+      "follow_ups": [
+        "setvbuf 的三种模式分别在什么场景用？",
+        "为什么 read 可能返回「短读」（short read）？"
+      ],
+      "difficulty": "mid",
+      "company_tags": ["通用", "系统向", "后端"]
+    },
+    {
+      "question": "fwrite 返回成功了，数据就一定写到磁盘上了吗？要真正持久化怎么做？",
+      "answer_md": "**不是。** IO 栈分层：\n1. `fwrite` 成功 = 数据进了 `FILE` 的**用户态缓冲**；\n2. `fflush(fp)` 成功 = 数据经 `write()` 进入内核**页缓存（page cache）**；\n3. `fsync(fd)` / `fdatasync(fd)` = 内核把页缓存真正刷到**磁盘介质**。\n\n进程被 `kill -9` 或崩溃时，连内核页缓存都可能未落盘。`abort()` 同样不会 flush 用户缓冲。所以要持久化（数据库事务日志、重要配置）必须一路 `fflush` 再 `fsync(fileno(fp))`；并且在 `fclose` 前若发生错误也要检查返回值——忽略 `fclose` 会吞掉 flush 阶段的写失败。",
+      "follow_ups": [
+        "fsync 和 fdatasync 有什么区别？",
+        "O_DIRECT 和 fsync 各自解决什么问题？"
+      ],
+      "difficulty": "hard",
+      "company_tags": ["通用", "数据库向", "腾讯"]
+    },
+    {
+      "question": "为什么 feof 不能作为循环条件？正确读取到文件尾的写法是什么？",
+      "answer_md": "`feof(fp)` 反映「是否已经发生过一次越过文件尾的读操作」，它**只在读操作失败（越界）之后**才置位，而不是「接下来还有没有数据」的预告。所以 `while(!feof(fp))` 会在最后一次成功读完后**再进一次循环**，把 EOF(-1)/垃圾当数据使用——典型的多读一次 bug。\n\n**正确写法**：以读操作本身的返回值或 EOF 为终止条件：\n- `while ((c = fgetc(fp)) != EOF)`\n- `while (fread(&x,1,n,fp) == n)` / `fscanf(...)==期望个数`\n\n循环**结束后**，再用 `feof(fp)` 与 `ferror(fp)` 区分「正常到尾」还是「真出错」（短读 vs IO 错误）。",
+      "follow_ups": [
+        "feof 和 ferror 的状态什么时候需要 clearerr 清除？",
+        "读后写/写后读同一流为什么必须 fseek？"
+      ],
+      "difficulty": "mid",
+      "company_tags": ["通用", "字节", "美团"]
+    }
+  ]
+}

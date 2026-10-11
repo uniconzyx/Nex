@@ -1,0 +1,233 @@
+{
+  "meta": {
+    "chapter": "data-ch04",
+    "title": "Pandas 进阶 —— 习题集",
+    "count": 8,
+    "note": "6 道基础题 + 2 道算法题（LeetCode 题仅存元数据与链接，不搬运题面）"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "agg 与 transform 的返回形状",
+      "content_md": "要把「每个城市销售额的组内均值」加成一列（与 df 行数相同），下面哪个写法是正确的？",
+      "options": [
+        {
+          "key": "A",
+          "text": "`df[\"m\"] = df.groupby(\"city\")[\"sales\"].agg(\"mean\")`"
+        },
+        {
+          "key": "B",
+          "text": "`df[\"m\"] = df.groupby(\"city\")[\"sales\"].transform(\"mean\")`"
+        },
+        {
+          "key": "C",
+          "text": "`df[\"m\"] = df.groupby(\"city\")[\"sales\"].apply(\"mean\")`"
+        },
+        {
+          "key": "D",
+          "text": "`df[\"m\"] = df.groupby(\"city\")[\"sales\"].filter(\"mean\")`"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "**`transform` 的契约是「输入 n 行、输出 n 行」**，第 i 行的值由它所属的组决定，因此返回与 `df` 同长、索引一致的 Series，可以直接赋值成新列。`agg` 每组只返回一行（长度 = 组数），赋值会因长度不匹配而对不齐；`apply` 返回什么取决于函数（返回标量时同样不是同长序列）；`filter` 返回的是**行的子集**，语义完全不同。",
+      "tags": [
+        "pandas",
+        "groupby",
+        "transform"
+      ],
+      "source": "self",
+      "source_ref": "data-ch04 concept 01 · 四种聚合器"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "多对多合并后的行数",
+      "content_md": "左表 `id` 取值为 `[1, 1, 2]`（3 行），右表 `id` 取值为 `[1, 1, 3]`（3 行）。`pd.merge(left, right, on=\"id\", how=\"inner\")` 的结果有多少行？",
+      "options": [
+        {
+          "key": "A",
+          "text": "2 行（只保留两边都有的键 1）"
+        },
+        {
+          "key": "B",
+          "text": "3 行（与左表相同）"
+        },
+        {
+          "key": "C",
+          "text": "4 行（键 1 在左 2 行 × 右 2 行）"
+        },
+        {
+          "key": "D",
+          "text": "9 行（3 × 3 笛卡尔积）"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "C"
+        ]
+      },
+      "explanation": "连接的定义是**笛卡尔积再筛选**：$L \\bowtie R = \\sigma_{L.k=R.k}(L \\times R)$。对每个键 $k$，它贡献 $\\text{cnt}_L(k) \\times \\text{cnt}_R(k)$ 行。键 1：$2 \\times 2 = 4$ 行；键 2 只在左、键 3 只在右，`inner` 下都被丢弃。所以结果是 **4 行**。D 项的 9 行是把「全部键都做笛卡尔积」的错误理解——筛选条件必须先起作用。",
+      "tags": [
+        "pandas",
+        "merge",
+        "cartesian"
+      ],
+      "source": "self",
+      "source_ref": "data-ch04 concept 02 · 多对多膨胀"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "groupby 遇到 NaN 键",
+      "content_md": "下面的代码会打印什么？请说明为什么两者不同。\n\n```python\nimport pandas as pd, numpy as np\ndf = pd.DataFrame({\"city\": [\"BJ\", None, \"SH\"], \"v\": [1, 2, 3]})\nprint(df.groupby(\"city\")[\"v\"].sum().to_dict())\nprint(df.groupby(\"city\", dropna=False)[\"v\"].sum().to_dict())\n```",
+      "answer": {
+        "correct": [
+          "见解析"
+        ]
+      },
+      "explanation": "第一行输出 `{'BJ': 1, 'SH': 3}` —— **`dropna` 默认 `True`，键为 `NaN` 的那一行被整组丢弃**（`v=2` 静默消失）。\n第二行输出 `{'BJ': 1, nan: 2, 'SH': 3}` —— `dropna=False` 让缺失单独成一组。\n**这是一个不报错的静默错误**，做「缺失也算一类」的统计时（如渠道归因中的「未知来源」）必须显式写 `dropna=False`，否则合计对不上。",
+      "tags": [
+        "pandas",
+        "groupby",
+        "nan"
+      ],
+      "source": "self",
+      "source_ref": "data-ch04 concept 01 · 分组键的六种形态"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "join 连出一堆 NaN",
+      "content_md": "下面代码想按 `id` 列把两表左连接，但结果里 `b` 列全是 `NaN`。请指出原因并给出两种修法。\n\n```python\nl = pd.DataFrame({\"id\": [1, 2], \"a\": [\"x\", \"y\"]})\nr = pd.DataFrame({\"id\": [1, 2], \"b\": [10, 20]})\nout = l.join(r, how=\"left\", rsuffix=\"_r\")\n```",
+      "answer": {
+        "correct": [
+          "见解析"
+        ]
+      },
+      "explanation": "**原因**：`DataFrame.join` 默认按**索引**对齐，而两表的索引是 `0, 1`，`id` 只是一列**数据**。它拿左表索引 0/1 去匹配右表索引 0/1，虽然索引能对上，但 `b` 列的键并非 `id` 的对齐依据——在 `id` 与索引不一致的真实数据里就会大面积产生 `NaN`。\n\n**修法 1**：把右表的键设为索引\n```python\nout = l.join(r.set_index(\"id\"), on=\"id\", how=\"left\")\n```\n**修法 2**（更推荐）：直接用 `merge`，语义最明确\n```python\nout = pd.merge(l, r, on=\"id\", how=\"left\")\n```\n**记忆锚点**：`merge` 按列，`join` 按索引，`concat` 沿轴堆叠。",
+      "tags": [
+        "pandas",
+        "join",
+        "merge"
+      ],
+      "source": "self",
+      "source_ref": "data-ch04 concept 02 · 三者的定位"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "hard",
+      "title": "resample 的 M 与 MS",
+      "content_md": "对 2026 年 1 月的日频数据，`s.resample(\"M\").sum()` 与 `s.resample(\"MS\").sum()` 的区别是什么？",
+      "options": [
+        {
+          "key": "A",
+          "text": "完全一样，两个别名等价"
+        },
+        {
+          "key": "B",
+          "text": "`M` 按月末对齐（标签是 01-31），`MS` 按月初对齐（标签是 01-01）"
+        },
+        {
+          "key": "C",
+          "text": "`M` 是月度、`MS` 是季度，聚合区间不同"
+        },
+        {
+          "key": "D",
+          "text": "`MS` 会多出一行，因为它包含了 1 月之前的数据"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "`M` = **month end**，把整月数据归到**月末**那一天（2026-01-31）；`MS` = **month start**，归到**月初**（2026-01-01）。两者的**数值完全相同**，只有时间标签位置不同——这正是它危险的地方：数字全对，时间标签错位，肉眼很难发现。C 项的季度别名是 `Q`/`QS`，D 项无此性质。",
+      "tags": [
+        "pandas",
+        "resample",
+        "timeseries"
+      ],
+      "source": "self",
+      "source_ref": "data-ch04 concept 03 · 频率别名"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "rolling 的前几行为什么是 NaN",
+      "content_md": "`s` 是 10 天的日频序列。`s.rolling(3).mean()` 的前两个值是什么？如果希望从第一天就有值，应该怎么写？",
+      "answer": {
+        "correct": [
+          "前两个是 NaN；用 min_periods=1"
+        ]
+      },
+      "explanation": "`rolling(3)` 要求窗口内至少有 3 个观测，因此前 2 个位置不足窗口，结果为 `NaN`（默认 `min_periods=window`）。\n若希望第一个点就有值：\n```python\ns.rolling(3, min_periods=1).mean()\n```\n**边界口径**：`rolling(n)` 的第 $t$ 个窗口是 $[t-n+1,\\ t]$，**右端闭合、包含当前点**。若需要「不含当前点」的窗口用 `closed=\"left\"`。\n另需注意：窗口定义在「序」上，索引必须单调递增（先 `sort_index()`）。",
+      "tags": [
+        "pandas",
+        "rolling",
+        "window"
+      ],
+      "source": "self",
+      "source_ref": "data-ch04 concept 03 · 三种窗口"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "medium",
+      "title": "LeetCode 2891 · 方法链（Method Chaining）",
+      "content_md": "用一条**链式调用**完成数据筛选、排序与列重命名，不引入中间变量。本题为 LeetCode 官方 Pandas 专题题，题面与数据请见链接。",
+      "answer": {
+        "correct": [
+          "见链接"
+        ]
+      },
+      "explanation": "**考点**：把 `query` / `sort_values` / `rename` / `reset_index` 串成一条链，体现「无中间变量」的数据处理风格。\n\n链式写法的两个工程价值：\n① **步骤即文档** —— 每一步做了什么，从上到下读一遍就清楚；\n② **便于插入调试** —— 用 `.pipe()` 可以在链中间挂一个打印函数。\n\n常见坑：链中若出现 `df[col] = ...`（赋值）会打断链，应改用 `.assign(new=...)` 返回新对象。",
+      "tags": [
+        "pandas",
+        "method-chaining"
+      ],
+      "external_url": "https://leetcode.cn/problems/method-chaining/",
+      "source": "leetcode",
+      "source_ref": "LeetCode 2891（Pandas 专题）"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "hard",
+      "title": "LeetCode 185 · 部门工资前三高的员工",
+      "content_md": "按部门分组，取出每组薪资排名前三的员工。本题考察「分组 + 组内排名」，题面与数据请见链接。",
+      "answer": {
+        "correct": [
+          "见链接"
+        ]
+      },
+      "explanation": "**考点**：`groupby` + 组内排名/取前 k。两种思路：\n① 向量化路线：`groupby(\"dept\").apply(lambda g: g.nlargest(3, \"salary\"))`；\n② 全表路线：`df.groupby(\"dept\")[\"salary\"].rank(method=\"dense\", ascending=False)` 再筛 `<= 3`——**更向量化、更快**。\n\n**排名语义要点**：`rank(method=...)` 的 `dense` 表示并列名次不跳号（1,1,2），`min` 表示并列取最小名次（1,1,3）。此题要求「前三高」含并列，用 `dense` 更贴合题意——**看懂 `method` 参数是本题的隐藏考点**。",
+      "tags": [
+        "pandas",
+        "groupby",
+        "rank"
+      ],
+      "external_url": "https://leetcode.cn/problems/department-top-three-salaries/",
+      "source": "leetcode",
+      "source_ref": "LeetCode 185"
+    }
+  ]
+}

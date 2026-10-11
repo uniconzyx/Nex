@@ -1,0 +1,8 @@
+{
+  "title": "元字符与字面量：re.escape 与字符类的边界",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== 元字符与字面量的边界 ===\n未转义 re.findall(r'1+1', s)  : []  <- + 被当成量词\n已转义 re.findall(re.escape..) : ['1+1']\nre.escape('1+1') = 1\\+1\n\n=== 字符类：预定义 vs 自定义 ===\n\\d(数字)       -> ['1']\n\\w(词字符)      -> ['a', '1', '_', 'Z']\n\\s(空白)       -> [' ', '\\t']\n[a-z]        -> ['a']\n[^a-z]       -> ['1', ' ', '_', 'Z', '\\t']\n\n=== 字符类内的元字符陷阱 ===\n[.] 只匹配真实点 : ['.', '.']\n[a-z-] 里的 - 在末尾是字面量 : ['a', '-', 'b']\n[-a-z] 里的 - 在开头也是字面量 : ['a', '-', 'b']\n[a\\-z] 转义后同样是字面量 : ['a', '-']\n注意：[a-z-] 与 [a\\-z] 等价；但 [a-z] 是范围，写法差一个字符语义就变。",
+  "code": "import re\n\nprint(\"=== 元字符与字面量的边界 ===\")\nraw = \"1+1=2\"\nprint(\"未转义 re.findall(r'1+1', s)  :\", re.findall(\"1+1\", raw), \" <- + 被当成量词\")\nprint(\"已转义 re.findall(re.escape..) :\", re.findall(re.escape(\"1+1\"), raw))\nprint(\"re.escape('1+1') =\", re.escape(\"1+1\"))\n\nprint()\nprint(\"=== 字符类：预定义 vs 自定义 ===\")\ns = \"a1 _Z\\t\"\nfor name, pat in [(\"\\\\d(数字)\", r\"\\d\"), (\"\\\\w(词字符)\", r\"\\w\"),\n                  (\"\\\\s(空白)\", r\"\\s\"), (\"[a-z]\", r\"[a-z]\"), (\"[^a-z]\", r\"[^a-z]\")]:\n    print(\"%-12s -> %r\" % (name, re.findall(pat, s)))\n\nprint()\nprint(\"=== 字符类内的元字符陷阱 ===\")\nprint(r\"[.] 只匹配真实点 :\", re.findall(r\"[.]\", \"a.b.c\"))\nprint(r\"[a-z-] 里的 - 在末尾是字面量 :\", re.findall(r\"[a-z-]\", \"a-b\"))\nprint(r\"[-a-z] 里的 - 在开头也是字面量 :\", re.findall(r\"[-a-z]\", \"a-b\"))\nprint(r\"[a\\-z] 转义后同样是字面量 :\", re.findall(r\"[a\\-z]\", \"a-b\"))\nprint(\"注意：[a-z-] 与 [a\\\\-z] 等价；但 [a-z] 是范围，写法差一个字符语义就变。\")"
+}

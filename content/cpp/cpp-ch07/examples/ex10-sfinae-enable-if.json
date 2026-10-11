@@ -1,0 +1,8 @@
+{
+  "title": "SFINAE + std::enable_if 按类型筛选重载",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "integral:10\nfloating:3.14\n",
+  "code": "#include <iostream>\n#include <type_traits>\ntemplate <typename T>\ntypename std::enable_if<std::is_integral<T>::value, T>::type\nprocess(T v) { std::cout << \"integral:\" << v << '\\n'; return v; }\ntemplate <typename T>\ntypename std::enable_if<std::is_floating_point<T>::value, T>::type\nprocess(T v) { std::cout << \"floating:\" << v << '\\n'; return v; }\nint main() {\n    process(10);\n    process(3.14);\n}\n"
+}

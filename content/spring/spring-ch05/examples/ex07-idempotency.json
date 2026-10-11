@@ -1,0 +1,8 @@
+{
+  "title": "ex07-idempotency",
+  "code_lang": "java",
+  "code_std": "java23",
+  "stdin": "",
+  "expected_output": "before: {x=A}\nafter same PUT: {x=A}\nPUT idempotent (same value)? true\nafter change PUT: {x=B}\nPOST count (not idempotent): 2",
+  "code": "import java.util.*;\npublic class Main {\n    static class Store {\n        int version=0, postCount=0;\n        Map<String,String> data=new LinkedHashMap<>();\n        void put(String k,String v){ data.put(k,v); version++; }\n        void post(String v){ postCount++; data.put(\"item\"+postCount,v); }\n    }\n    public static void main(String[] a){\n        Store s=new Store();\n        s.put(\"x\",\"A\");\n        String before=s.data.toString();\n        s.put(\"x\",\"A\");\n        String afterSame=s.data.toString();\n        s.put(\"x\",\"B\");\n        String afterChange=s.data.toString();\n        System.out.println(\"before: \"+before);\n        System.out.println(\"after same PUT: \"+afterSame);\n        System.out.println(\"PUT idempotent (same value)? \"+before.equals(afterSame));\n        System.out.println(\"after change PUT: \"+afterChange);\n        Store p=new Store();\n        p.post(\"n\"); p.post(\"n\");\n        System.out.println(\"POST count (not idempotent): \"+p.postCount);\n    }\n}"
+}

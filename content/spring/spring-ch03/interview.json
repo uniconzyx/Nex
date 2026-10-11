@@ -1,0 +1,49 @@
+{
+  "meta": { "chapter": "spring-ch03" },
+  "items": [
+    {
+      "question": "JDK 动态代理和 CGLIB 的区别是什么？Spring 默认用哪种？",
+      "answer_md": "**JDK 动态代理**：基于接口，运行时生成接口实现类（`$Proxy`），所有方法路由到 `InvocationHandler.invoke`，内部反射调用目标；**只能代理接口**。\n\n**CGLIB**：基于继承，运行时用 ASM 生成目标类的**子类**并重写可覆写方法，在 `super.xxx()` 前后织入 `MethodInterceptor`；**无需接口**，但**不能代理 final 类 / final / private 方法**。\n\n**Spring 默认**：Spring Boot 2.x 之前「有接口用 JDK、无接口用 CGLIB」；Spring Boot 2.x 起**默认强制 CGLIB**（`proxy-target-class=true`），以统一行为。\n\n话术：先讲两者机制差异，再讲限制（接口 vs final），最后点默认策略演进。",
+      "follow_ups": [
+        "CGLIB 为什么不能代理 final 方法？",
+        "JDK 代理的方法调用为什么要反射，性能影响多大？",
+        "强制 CGLIB 后如果一个类是 final 会怎样？"
+      ],
+      "difficulty": "mid",
+      "company_tags": ["通用", "字节", "阿里"]
+    },
+    {
+      "question": "为什么 @Transactional 在同类方法互相调用时会失效？怎么解决？",
+      "answer_md": "Spring 的事务是基于**代理**的 AOP 增强：只有「从代理对象进入」的调用才会被拦截并开启事务。当 `serviceA()` 内部用 `this.serviceB()` 调用同类方法时，`this` 是**真实对象**而非代理，调用直接命中真实方法、不经过拦截层，于是 `serviceB()` 上的事务通知不触发。\n\n**解决方案（按推荐度）**：\n1. 把被调方法抽到另一个 Spring Bean，用依赖注入调用（最干净、可测试）；\n2. 自注入（`@Autowired X self;`）再 `self.serviceB()`，拿到的是代理；\n3. `AopContext.currentProxy()` 取代理调用，但需 `@EnableAspectJAutoProxy(exposeProxy=true)`，且依赖线程绑定、可测试性差。\n\n根因一句话：**AOP 增强只在调用经过代理时生效，对象内部自调用绕过代理。**",
+      "follow_ups": [
+        "AopContext.currentProxy() 的原理是什么？",
+        "AspectJ 编译期织入能解决自调用吗？为什么？",
+        "@Async 自调用是否也一样失效？"
+      ],
+      "difficulty": "hard",
+      "company_tags": ["通用", "腾讯", "美团"]
+    },
+    {
+      "question": "多个 AOP 通知（@Around/@Before/@After 等）在一个切点上，执行顺序是怎么样的？",
+      "answer_md": "同一切点多通知的执行顺序（单通知情况下）：\n\n`@Around` 进入 → `@Before` → **目标方法** → `@After`（无论成败都执行，类似 finally）→ `@AfterReturning`（正常返回）/ `@AfterThrowing`（异常）→ `@Around` 退出返回。\n\n即 **@Around 包裹其余通知**，@After 类通知在归程像 finally 一样始终执行，异常时走 @AfterThrowing 而不走 @AfterReturning。\n\n**多个同类通知之间**用 `@Order` 区分：数值越小越靠近目标（越早进入、越晚退出），形成「先进后出」的责任链嵌套（见 ex11 的拦截器链打印）。",
+      "follow_ups": [
+        "@After 和 @AfterReturning 能同时触发吗？",
+        "@Order 的数值大小与执行先后如何对应？",
+        "两个 @Around 嵌套时的打印顺序？"
+      ],
+      "difficulty": "mid",
+      "company_tags": ["通用", "京东", "拼多多"]
+    },
+    {
+      "question": "AOP 里的 this 和 target 分别指什么？在切点表达式里有区别吗？",
+      "answer_md": "- **target**：被代理的**真实对象**（业务实现，即 Handler 持有的 target / CGLIB 的 super）。\n- **this**：**代理对象本身**（`$Proxy` 或 `$$Enhancer` 实例）。\n\n二者是不同对象：`proxy == target` 恒为 false（见 ex08）。\n\n**切点表达式区别**：`target(X)` 匹配真实对象类型，`this(X)` 匹配代理对象类型。在 **JDK 代理**下 this 是实现接口的不相关类、`target` 是业务类；在 **CGLIB** 下 this 是 target 的**子类**——因此 CGLIB 代理时 `target(X)` 命中、`this(X)`（按精确类型）可能不命中（按父类匹配则命中）。写错会导致切点织不进去。",
+      "follow_ups": [
+        "CGLIB 代理下 this instanceof 业务类 是否为 true？",
+        "为什么要用 AopContext.currentProxy() 拿 this？",
+        "切点 this() 与 target() 在 JDK 代理下谁命中业务类？"
+      ],
+      "difficulty": "hard",
+      "company_tags": ["通用", "阿里", "字节"]
+    }
+  ]
+}

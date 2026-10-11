@@ -1,0 +1,8 @@
+{
+  "title": "折半查找：查询次数统计与判定树高度",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "折半查找  n=10  key=21\n比较次数=4  位置下标=3  找到=是\n判定树高度 h=ceil(log2(n+1))=4\n最坏比较次数 = 判定树高度 = 4",
+  "code": "#include <stdio.h>\n\nint main(void) {\n    int a[] = {5, 13, 19, 21, 37, 56, 64, 75, 80, 88};\n    int n = (int)(sizeof(a) / sizeof(a[0]));\n    int key = 21;\n    int lo = 0, hi = n - 1, mid = 0, cnt = 0, pos = -1;\n    int found;\n    const char *res;\n    int h = 0, t = n + 1;\n    while (lo <= hi) {\n        mid = lo + (hi - lo) / 2;\n        cnt++;\n        if (a[mid] == key) { pos = mid; break; }\n        else if (a[mid] < key) lo = mid + 1;\n        else hi = mid - 1;\n    }\n    found = (pos >= 0) ? 1 : 0;\n    res = found ? \"是\" : \"否\";\n    while (t > 1) { t = (t + 1) / 2; h++; }\n    printf(\"折半查找  n=%d  key=%d\\n\", n, key);\n    printf(\"比较次数=%d  位置下标=%d  找到=%s\\n\", cnt, pos, res);\n    printf(\"判定树高度 h=ceil(log2(n+1))=%d\\n\", h);\n    printf(\"最坏比较次数 = 判定树高度 = %d\\n\", h);\n    return 0;\n}\n"
+}

@@ -1,0 +1,102 @@
+{
+  "meta": {
+    "chapter": "cpp-ch14",
+    "note": "6 题：基础题 4（choice/fix_error/output/coding）+ 平台算法题 2（LeetCode 191/78 位运算与二进制枚举，仅存元数据+链接，不存题面）"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "difficulty": "easy",
+      "title": "关于头文件守卫与 #pragma once，正确的是",
+      "content_md": "选择**正确**的描述。",
+      "options": [
+        { "key": "A", "text": "#pragma once 由 C++ 标准规定，所有编译器必须支持" },
+        { "key": "B", "text": "头文件守卫靠宏名判重，宏名冲突可能导致该包含的内容被错误跳过" },
+        { "key": "C", "text": "#include 会做类型检查后再插入头文件内容" },
+        { "key": "D", "text": "#pragma once 按宏名判重，与 #ifndef 守卫机制相同" }
+      ],
+      "answer": { "correct": ["B"] },
+      "explanation": "#pragma once 非标准，靠「同一物理文件」判重（A 错）；#include 是预处理期的纯文本替换，不做类型检查（C 错）；#pragma once 按物理文件去重，与传统 #ifndef 按宏名去重不同（D 错）；守卫宏名若与其他头文件撞名，会错误地跳过本该包含的内容（B 对）。",
+      "tags": ["include-guard", "pragma-once"],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 2 章 预处理",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "fix_error",
+      "difficulty": "mid",
+      "title": "修复多语句宏在 if/else 中导致的编译错误",
+      "content_md": "下面宏用于 `if (cond) DBG(); else other();` 时会编译失败（else 悬空）。请修复，使宏在任何语句上下文中都表现为单条语句。\n\n```cpp\n#define DBG() std::cout << \"a\\n\"; std::cout << \"b\\n\"\n```",
+      "answer": {
+        "reference_code": "#define DBG() do { std::cout << \"a\\n\"; std::cout << \"b\\n\"; } while(0)"
+      },
+      "explanation": "多语句宏必须用 do{}while(0) 包裹成一条复合语句，否则展开后分号与 else 配合会悬空；do-while(0) 末尾需要调用处写分号，语义也自然。",
+      "tags": ["macro-hygiene", "do-while"],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 2 章 预处理",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "output",
+      "difficulty": "easy",
+      "title": "读代码写输出（宏括号陷阱）",
+      "content_md": "```cpp\n#include <iostream>\n#define SQUARE(x) x*x\nint main() {\n  std::cout << SQUARE(1+2) << '\\n';\n  std::cout << SQUARE(3) << '\\n';\n}\n```",
+      "answer": { "output": "5\n9" },
+      "explanation": "SQUARE(1+2) 展开为 1+2*1+2 = 5（缺少括号导致优先级错）；SQUARE(3) 展开为 3*3 = 9。这正是宏参数必须加括号的原因。",
+      "tags": ["macro", "parentheses"],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 2 章 预处理",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "coding",
+      "difficulty": "easy",
+      "title": "用 inline 函数替代宏实现 square 并避免副作用",
+      "content_md": "把「像函数」的宏 `SQUARE(x)` 改写为类型安全、参数只求值一次的 `inline` 函数（或函数模板），使其在 `square(x++)` 场景下只自增一次。",
+      "answer": {
+        "reference_code": "#include <iostream>\ninline int square(int x) { return x * x; }   // 参数只求值一次，且有类型检查\nint main() {\n  int x = 2;\n  int m = square(x++);   // x 只自增一次：m=4, x=3\n  std::cout << m << ' ' << x << '\\n';\n}"
+      },
+      "explanation": "inline 函数的形参是真正的变量，实参只求值一次；相比宏既消除多重求值副作用，又获得类型检查与可调试性（可设断点）。",
+      "tags": ["inline", "macro-replacement"],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 6 章 inline",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "design",
+      "difficulty": "easy",
+      "title": "LeetCode 191 · Number of 1 Bits",
+      "content_md": "编写一个函数返回无符号整数的二进制表示中「1」的个数。可借助位运算与掩码（与用宏定义标志位的位操作一脉相承）。注意 n 可能为 0 或全 1（补码）（详见 external_url，不在此复述题面）。",
+      "answer": {
+        "reference_code": "// 经典做法：n &= (n-1) 每次消去最低位的 1，计数直到 n 为 0；\n// 或用查表/并行位计数。完整接口与样例见 external_url 原题。"
+      },
+      "explanation": "位运算（与、移位、n&(n-1)）是底层标志位处理的基础，与用宏做位开关/标志判断的思维方式一致；注意无符号类型与边界。",
+      "tags": ["bit-manipulation", "mask"],
+      "source": "leetcode",
+      "source_ref": "LeetCode 191（number-of-1-bits）",
+      "external_url": "https://leetcode.cn/problems/number-of-1-bits/",
+      "category": "算法题",
+      "platform": "leetcode"
+    },
+    {
+      "type": "design",
+      "difficulty": "mid",
+      "title": "LeetCode 78 · Subsets（二进制枚举子集）",
+      "content_md": "给定不含重复元素的整数数组，返回其所有子集（幂集）。常用「二进制枚举」：对每个元素用 0/1 表示是否在子集中，共 2^n 种组合——这与条件编译按位开关的思想相通（详见 external_url，不在此复述题面）。",
+      "answer": {
+        "reference_code": "// 外层 i 从 0 到 (1<<n)-1，内层按 i 的每一位决定是否纳入 nums[j]；\n// 共枚举 2^n 个掩码，每个掩码对应一个子集。完整接口与样例见 external_url 原题。"
+      },
+      "explanation": "二进制枚举把「选/不选」映射为位 0/1，是条件编译开关思想在算法中的对应物；注意时间复杂度 O(n·2^n) 与空集的处理。",
+      "tags": ["bitmask", "subsets", "enumeration"],
+      "source": "leetcode",
+      "source_ref": "LeetCode 78（subsets）",
+      "external_url": "https://leetcode.cn/problems/subsets/",
+      "category": "算法题",
+      "platform": "leetcode"
+    }
+  ]
+}

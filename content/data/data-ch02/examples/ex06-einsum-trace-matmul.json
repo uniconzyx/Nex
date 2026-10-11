@@ -1,0 +1,8 @@
+{
+  "title": "einsum：迹、矩阵乘与全缩并",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "trace(A) = 12.0\nmatmul via einsum shape = (3, 2)\nmatches A@B = True\nsum over all = 36.0",
+  "code": "import numpy as np\nA = np.arange(9, dtype=np.float64).reshape(3, 3)\nprint(\"trace(A) =\", np.einsum('ii->', A))\nB = np.arange(6, dtype=np.float64).reshape(3, 2)\nC = np.einsum('ij,jk->ik', A, B)\nprint(\"matmul via einsum shape =\", C.shape)\nprint(\"matches A@B =\", np.allclose(C, A @ B))\nprint(\"sum over all =\", np.einsum('ij->', A))"
+}

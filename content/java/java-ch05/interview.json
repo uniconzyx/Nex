@@ -1,0 +1,67 @@
+{
+  "meta": {
+    "chapter": "java-ch05"
+  },
+  "items": [
+    {
+      "question": "Java 异常体系是怎样的？受检异常和非受检异常的区别与设计哲学。",
+      "answer_md": "Throwable 分 Error（如 OutOfMemoryError，严重且通常不应捕获）与 Exception。Exception 下 RuntimeException 及其子类（NullPointerException、IllegalArgumentException 等）是非受检的，编译器不强制处理；其余 Exception（IOException、SQLException 等）是受检的，编译器强制调用方 try/catch 或 throws 声明。设计哲学：受检异常表达「可合理恢复的、调用方应当知道的契约外情况」，把错误处理责任前移到编译期；非受检表达编程错误（bug）。但受检异常与 lambda/函数式接口冲突（函数式接口方法不能抛受检异常），所以现代实践倾向于对大多数业务异常使用非受检的自定义异常（继承 RuntimeException）。",
+      "follow_ups": [
+        "为什么很多人反对过度使用受检异常？",
+        "函数式接口里抛受检异常怎么办？",
+        "Error 能被 catch 吗（技术上讲）？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "阿里",
+        "字节"
+      ]
+    },
+    {
+      "question": "try-with-resources 在字节码层面做了什么？异常抑制（suppressed）怎么理解？",
+      "answer_md": "资源实现 AutoCloseable 后，编译器在 try 块前后插入对 close() 的调用，并把资源引用提升为隐式 final 变量。若 try 主体抛异常 A，而 close() 又抛异常 B，Java 会把 B 通过 A.addSuppressed(B) 挂到 A 上，然后抛出 A——这样主体异常不被掩盖，close 异常也不丢失，可用 getSuppressed() 遍历。多个资源按声明逆序关闭（后开的先关，符合依赖顺序）。相比手写 finally 中嵌套 try/catch，它更简洁且不会吞掉异常。",
+      "follow_ups": [
+        "AutoCloseable 与 Closeable 的区别？",
+        "资源初始化自身抛异常会怎样？",
+        "为什么关闭顺序是逆序？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "腾讯",
+        "美团"
+      ]
+    },
+    {
+      "question": "Java 泛型为什么是类型擦除？带来了哪些限制？桥接方法是什么？",
+      "answer_md": "Java 为兼容 Java 5 之前字节码而采用擦除法：泛型类型参数在编译期被检查，运行时被擦除为上限（无界即 Object），不生成新类。限制：不能 new T[]、不能 instanceof T、不能重载仅泛型参数不同的方法、基本类型不能作为类型参数（需装箱）。擦除破坏了多态覆盖——子类重写泛型父类方法时签名在擦除后与父类不一致，于是编译器生成桥接方法（synthetic bridge，参数类型为 Object）转发到实际方法，以维持动态分派正确。反射里通过 Method.isBridge() 可识别。",
+      "follow_ups": [
+        "为什么 List<String> 和 List<Integer> 是同一 Class？",
+        "如何用 super 类型令牌绕过擦除？",
+        "PECS 与擦除的关系？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "通用",
+        "字节",
+        "百度"
+      ]
+    },
+    {
+      "question": "PECS 原则是什么？通配符 ? extends 和 ? super 怎么用？",
+      "answer_md": "PECS = Producer Extends, Consumer Super（出自《Effective Java》）。若集合是「生产者」（只从中读取 T），用 ? extends T，可安全读出 T 但不能写入（除 null）；若集合是「消费者」（只向其中写入 T），用 ? super T，可安全写入 T 但不能可靠读出 T（只能当 Object 读）。示例：Collections.copy(dst, src) 的 dst 用 ? super T（消费），src 用 ? extends T（生产）。它本质是弥补泛型不可协变带来的灵活性损失，并借助通配符捕获保证类型安全。",
+      "follow_ups": [
+        "为什么 extends 不能写入？",
+        "List<?> 与 List<? extends Object> 一样吗？",
+        "通配符捕获（capture）是什么？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "通用",
+        "阿里",
+        "京东"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "title": "const 成员函数与 const 对象",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "2",
+  "code": "#include <iostream>\n\nclass Counter {\n    int v_ = 0;\npublic:\n    void inc() { ++v_; }\n    int get() const { return v_; }\n};\n\nint main() {\n    Counter c;\n    c.inc();\n    c.inc();\n    const Counter& r = c;   // const 引用只能调用 const 成员函数\n    std::cout << r.get();\n}"
+}

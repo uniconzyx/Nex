@@ -1,0 +1,8 @@
+{
+  "title": "形状变换与 strides：reshape/ravel/转置都是视图",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "a =\n[[ 0  1  2  3]\n [ 4  5  6  7]\n [ 8  9 10 11]]\nreshape 与 a 共享内存 : True\nravel   与 a 共享内存 : True\n转置    与 a 共享内存 : True\na   C_CONTIGUOUS = True\na.T C_CONTIGUOUS = False （转置只是改 strides，不是搬数据）\na.strides = (32, 8) | a.T.strides = (8, 32)\n--- 展开顺序 ---\nravel(order=C) = [ 0  1  2  3  4  5  6  7  8  9 10 11]\nravel(order=F) = [ 0  4  8  1  5  9  2  6 10  3  7 11]\n--- 带 -1 的 reshape ---\nreshape(-1, 6).shape = (2, 6)\nreshape(5, -1) 报错 : cannot reshape array of size 12 into shape (5,newaxis)",
+  "code": "import numpy as np\na = np.arange(12).reshape(3, 4)\nprint(\"a =\")\nprint(a)\nb = a.reshape(4, 3)\nprint(\"reshape 与 a 共享内存 :\", np.shares_memory(a, b))\nprint(\"ravel   与 a 共享内存 :\", np.shares_memory(a, a.ravel()))\nc = a.T\nprint(\"转置    与 a 共享内存 :\", np.shares_memory(a, c))\nprint(\"a   C_CONTIGUOUS =\", a.flags[\"C_CONTIGUOUS\"])\nprint(\"a.T C_CONTIGUOUS =\", c.flags[\"C_CONTIGUOUS\"], \"（转置只是改 strides，不是搬数据）\")\nprint(\"a.strides =\", a.strides, \"| a.T.strides =\", c.strides)\nprint(\"--- 展开顺序 ---\")\nprint(\"ravel(order=C) =\", a.ravel(order=\"C\"))\nprint(\"ravel(order=F) =\", a.ravel(order=\"F\"))\nprint(\"--- 带 -1 的 reshape ---\")\nprint(\"reshape(-1, 6).shape =\", a.reshape(-1, 6).shape)\ntry:\n    a.reshape(5, -1)\nexcept ValueError as exc:\n    print(\"reshape(5, -1) 报错 :\", str(exc)[:80])\n"
+}

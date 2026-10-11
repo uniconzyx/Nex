@@ -1,0 +1,8 @@
+{
+  "title": "fgets 逐行读取（保留换行符）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "LINE: first line\nLINE: second line\n",
+  "code": "#include <stdio.h>\nint main(void) {\n    FILE *w = fopen(\"lines.txt\", \"w\");\n    fputs(\"first line\\nsecond line\\n\", w);\n    fclose(w);\n    FILE *r = fopen(\"lines.txt\", \"r\");\n    char line[64];\n    while (fgets(line, sizeof line, r)) {   /* fgets 把换行符也读进来 */\n        printf(\"LINE: %s\", line);\n    }\n    fclose(r);\n    return 0;\n}"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "副本放置策略：机架感知三副本",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "placement: ['dn1', 'dn2', 'dn3']\nracks: ['/rack1', '/rack2', '/rack2']\nfirst_two_distinct_racks: 2",
+  "code": "\nTOPO = {\"dn1\": \"/rack1\", \"dn2\": \"/rack2\", \"dn3\": \"/rack2\", \"dn4\": \"/rack3\", \"dn5\": \"/rack1\"}\ndef place(block, writer=\"dn1\", rep=3):\n    chosen = []\n    racks_used = set()\n    order = [writer] + [d for d in TOPO if d != writer]\n    for dn in order:\n        if len(chosen) >= rep:\n            break\n        if dn in chosen:\n            continue\n        r = TOPO[dn]\n        if len(chosen) == 0:\n            chosen.append(dn); racks_used.add(r)\n        elif len(chosen) == 1:\n            if r != next(iter(racks_used)):   # 第2副本跨机架\n                chosen.append(dn); racks_used.add(r)\n        else:\n            if r in racks_used:               # 第3副本与第2同机架\n                chosen.append(dn)\n    return chosen\nres = place(\"blk_X\")\nprint(\"placement:\", res)\nprint(\"racks:\", [TOPO[d] for d in res])\nprint(\"first_two_distinct_racks:\", len(set(TOPO[d] for d in res[:2])))\n"
+}

@@ -1,0 +1,9 @@
+{
+  "title": "IN 子查询：查北京部门下的员工（优化器可转 semi-join）",
+  "code_lang": "sql",
+  "code_std": "mysql8",
+  "stdin": "",
+  "expected_output": "Query OK, 0 rows affected\nQuery OK, 3 rows affected\nQuery OK, 4 rows affected\nname\nAlice\nCarol",
+  "code": "CREATE TABLE department (dept_id INT PRIMARY KEY, dept_name VARCHAR(20), location VARCHAR(20));\nCREATE TABLE employee (emp_id INT PRIMARY KEY, name VARCHAR(20), dept_id INT);\nINSERT INTO department VALUES (10,'Sales','Beijing'),(20,'Engineering','Shanghai'),(30,'HR','Shenzhen');\nINSERT INTO employee VALUES (1,'Alice',10),(2,'Bob',20),(3,'Carol',10),(4,'Dave',30);\nSELECT name FROM employee WHERE dept_id IN (SELECT dept_id FROM department WHERE location='Beijing') ORDER BY name;",
+  "_verified": false
+}

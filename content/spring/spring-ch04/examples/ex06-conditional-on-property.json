@@ -1,0 +1,8 @@
+{
+  "title": "@ConditionalOnProperty 的 havingValue 与 matchIfMissing 语义",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "enabled=true,  havingValue=\"\"     -> true\nenabled=false, havingValue=\"\"     -> false\nenabled=abc,   havingValue=\"\"     -> true\nenabled=null,  matchIfMissing=false -> false\nenabled=null,  matchIfMissing=true  -> true\nmode=prod,     havingValue=prod     -> true\nmode=dev,      havingValue=prod     -> false",
+  "code": "public class Ex06ConditionalOnProperty {\n    static boolean matches(String value, String havingValue, boolean matchIfMissing) {\n        if (value == null) return matchIfMissing;\n        if (havingValue == null || havingValue.isEmpty()) {\n            // 未指定 havingValue 时：只要不是 \"false\" 即算匹配\n            return !\"false\".equalsIgnoreCase(value);\n        }\n        return havingValue.equals(value);\n    }\n\n    public static void main(String[] args) {\n        System.out.println(\"enabled=true,  havingValue=\\\"\\\"     -> \" + matches(\"true\", \"\", false));\n        System.out.println(\"enabled=false, havingValue=\\\"\\\"     -> \" + matches(\"false\", \"\", false));\n        System.out.println(\"enabled=abc,   havingValue=\\\"\\\"     -> \" + matches(\"abc\", \"\", false));\n        System.out.println(\"enabled=null,  matchIfMissing=false -> \" + matches(null, \"\", false));\n        System.out.println(\"enabled=null,  matchIfMissing=true  -> \" + matches(null, \"\", true));\n        System.out.println(\"mode=prod,     havingValue=prod     -> \" + matches(\"prod\", \"prod\", false));\n        System.out.println(\"mode=dev,      havingValue=prod     -> \" + matches(\"dev\", \"prod\", false));\n    }\n}"
+}

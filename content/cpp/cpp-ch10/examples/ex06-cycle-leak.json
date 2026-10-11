@@ -1,0 +1,8 @@
+{
+  "title": "循环引用导致泄漏（析构函数不被调用）",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "count a=2 b=2",
+  "code": "#include <iostream>\n#include <memory>\nstruct A; struct B;\nstruct A { std::shared_ptr<B> b; ~A(){ std::cout << \"~A\\n\"; } };\nstruct B { std::shared_ptr<A> a; ~B(){ std::cout << \"~B\\n\"; } };\nint main() {\n    auto a = std::make_shared<A>();\n    auto b = std::make_shared<B>();\n    a->b = b; b->a = a;                  // 互相强引用：强计数互相钉死\n    std::cout << \"count a=\" << a.use_count() << \" b=\" << b.use_count() << '\\n';\n}                                        // 离开作用域析构不触发（无 ~A ~B 输出 = 泄漏）"
+}

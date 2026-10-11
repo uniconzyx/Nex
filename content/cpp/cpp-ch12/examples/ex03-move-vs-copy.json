@@ -1,0 +1,8 @@
+{
+  "title": "移动构造与拷贝构造的调用时机对比",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "S b = a;            copies=1 moves=0\nS c = move(a);      copies=0 moves=1\npush_back(S(temp))  copies=0 moves=1",
+  "code": "#include <iostream>\n#include <string>\n#include <utility>\n#include <vector>\nusing namespace std;\n\nstruct S {\n    string name;\n    static int copies, moves;\n    explicit S(string n) : name(std::move(n)) {}\n    S(const S& o) : name(o.name) { ++copies; }\n    S(S&& o) noexcept : name(std::move(o.name)) { ++moves; }\n};\nint S::copies = 0;\nint S::moves = 0;\n\nint main() {\n    S a(\"A\");\n\n    S::copies = S::moves = 0;\n    S b = a;                       // 左值 → 拷贝构造\n    cout << \"S b = a;            copies=\" << S::copies << \" moves=\" << S::moves << \"\\n\";\n\n    S::copies = S::moves = 0;\n    S c = std::move(a);            // 右值 → 移动构造\n    cout << \"S c = move(a);      copies=\" << S::copies << \" moves=\" << S::moves << \"\\n\";\n\n    S::copies = S::moves = 0;\n    vector<S> v;\n    v.reserve(4);                  // 预留容量，排除扩容干扰\n    v.push_back(S(\"temp\"));        // 临时对象 → 移动构造\n    cout << \"push_back(S(temp))  copies=\" << S::copies << \" moves=\" << S::moves << \"\\n\";\n    (void)b; (void)c;\n}"
+}

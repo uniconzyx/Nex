@@ -1,0 +1,8 @@
+{
+  "title": "遍历 vector 并打印",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "1 2 3",
+  "code": "#include <iostream>\n#include <vector>\n\nint main() {\n    std::vector<int> v = {1, 2, 3};\n    for (int x : v) std::cout << x << ' ';\n}"
+}

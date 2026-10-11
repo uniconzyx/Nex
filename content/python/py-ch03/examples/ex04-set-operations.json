@@ -1,0 +1,8 @@
+{
+  "title": "set 集合运算：并/交/差/对称差/子集",
+  "code_lang": "python",
+  "code_std": "python3.11",
+  "stdin": "",
+  "expected_output": "union: {1, 2, 3, 4, 5, 6}\nintersection: {3, 4}\ndifference: {1, 2}\nsymmetric: {1, 2, 5, 6}\nsubset: True",
+  "code": "a = {1, 2, 3, 4}\nb = {3, 4, 5, 6}\nprint(\"union:\", a | b)\nprint(\"intersection:\", a & b)\nprint(\"difference:\", a - b)\nprint(\"symmetric:\", a ^ b)\nprint(\"subset:\", {3, 4}.issubset(a))"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "X-Macro：用一张表生成枚举与字符串表",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "颜色数量 = 3\nGREEN 的十六进制 = #00ff00",
+  "code": "#include <stdio.h>\n/* 1) 定义表（单一数据源） */\n#define COLOR_LIST(X) \\\n    X(RED,   \"#ff0000\") \\\n    X(GREEN, \"#00ff00\") \\\n    X(BLUE,  \"#0000ff\")\n/* 2) 用 X-Macro 生成枚举 */\n#define X_ENUM(name, hex) COLOR_##name,\ntypedef enum { COLOR_LIST(X_ENUM) COLOR_COUNT } Color;\n/* 3) 用 X-Macro 生成字符串表 */\n#define X_STR(name, hex) hex,\nstatic const char* color_hex[] = { COLOR_LIST(X_STR) };\nint main(void) {\n    printf(\"颜色数量 = %d\\n\", COLOR_COUNT);\n    printf(\"GREEN 的十六进制 = %s\\n\", color_hex[COLOR_GREEN]);\n    return 0;\n}"
+}

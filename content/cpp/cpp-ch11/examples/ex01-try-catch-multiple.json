@@ -1,0 +1,8 @@
+{
+  "title": "try/catch 多重捕获与匹配顺序（派生类须在前）",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "base: boom",
+  "code": "#include <iostream>\n#include <stdexcept>\n\nint main() {\n    try {\n        throw std::runtime_error(\"boom\");   // 派生自 std::logic_error? 不，runtime_error\n    } catch (const std::logic_error& e) {    // 基类在前会吃掉派生 → 这里故意顺序正确\n        std::cout << \"logic: \" << e.what() << '\\n';\n    } catch (const std::exception& e) {      // runtime_error 的基类，匹配到此\n        std::cout << \"base: \" << e.what() << '\\n';\n    } catch (...) {\n        std::cout << \"unknown\\n\";\n    }\n}"
+}

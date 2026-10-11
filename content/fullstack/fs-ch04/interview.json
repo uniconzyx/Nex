@@ -1,0 +1,93 @@
+{
+  "meta": {
+    "chapter": "fs-ch04"
+  },
+  "items": [
+    {
+      "question": "讲讲 Node 的事件循环，和浏览器事件循环有什么区别？有哪些阶段？",
+      "answer_md": "Node 靠 libuv 事件循环调度，固定六阶段：timers → pending callbacks → idle/prepare → poll → check → close。每阶段有独立 FIFO 队列，阶段间切换时先清空 nextTick 队列再清空微任务（PromiseJobs）。浏览器只有宏任务/微任务两轮，没有六阶段细分。结论顺序：sync → nextTick → Promise.then → 宏任务（setImmediate 在 check 阶段、setTimeout 在 timers 阶段）。顶层脚本中实测 setImmediate 常先于 setTimeout(0)。",
+      "follow_ups": [
+        "setImmediate 和 setTimeout(0) 谁先？",
+        "pending callbacks 阶段是什么？",
+        "nextTick 算事件循环的「阶段」吗？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "通用",
+        "字节",
+        "腾讯"
+      ]
+    },
+    {
+      "question": "Node 为什么适合 I/O 密集、不适合 CPU 密集？怎么解决 CPU 密集？",
+      "answer_md": "单线程事件循环一次只执行一个调用栈；I/O 用非阻塞 + 回调，期间事件循环可处理别请求，所以高并发 I/O 很省。但 CPU 密集任务同步执行会占满调用栈、饿死事件循环，所有 I/O 延迟。解决：CPU 密集放 worker_threads（独立线程并行 JS），或用 cluster 多进程利用多核；I/O 密集本身不用额外线程。",
+      "follow_ups": [
+        "worker_threads 和 cluster 区别？",
+        "libuv 线程池干什么？",
+        "如何判断该不该用 worker？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "阿里"
+      ]
+    },
+    {
+      "question": "CommonJS 和 ESM 有什么区别？循环依赖下表现如何？",
+      "answer_md": "CJS 用 require/module.exports，同步加载、有缓存（同路径只执行一次），模块被包进 (function(exports,require,module,...){})；ESM 用 import/export，静态可分析、异步、严格模式、live binding。循环依赖：CJS 在 a 未填充完就 require b、b 又 require a 时，a 拿到半截 exports（属性 undefined）；ESM 用活绑定，不会未定义而是暂存到初始化完成，更安全。",
+      "follow_ups": [
+        "exports 和 module.exports 什么关系？",
+        "require 缓存机制？",
+        "为什么 ESM 能 tree-shaking？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "美团"
+      ]
+    },
+    {
+      "question": "中间件（Koa/Express）的洋葱模型是什么？错误处理中间件为什么是四参数？",
+      "answer_md": "中间件 fn(ctx, next)；compose 用递归 next 串成洋葱：进入从外到内、返回从内到外（A in → B in → B out → A out）。错误处理中间件签名 (err, req, res, next) 四参数，框架靠形参长度 4 识别它；普通中间件是 2/3 参数。next(err) 时框架跳过普通中间件、直接找四参数错误中间件收口。async 中间件抛错不会自动进错误中间件，要 try/catch 后 next(err)。",
+      "follow_ups": [
+        "async 错误为什么收不到？",
+        "Koa 和 Express 中间件签名区别？",
+        "多个错误中间件怎么选？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "字节"
+      ]
+    },
+    {
+      "question": "什么是流（Stream）的背压？write() 返回值和 drain 事件怎么用？",
+      "answer_md": "背压是有界缓冲下的反馈：消费者慢于生产者时，Writable.write() 返回 false 表示内部缓冲将满，应暂停数据源（pause），监听 'drain' 事件（缓冲降回阈值下）再 resume。highWaterMark 是缓冲阈值（默认字节流 16KB）。pipe() 已内置这套反馈，工程优先用 pipe；手动转发流必须检测 write 返回值，否则内存无限增长 OOM。",
+      "follow_ups": [
+        "write 返回 false 是写入失败吗？",
+        "highWaterMark 是硬上限吗？",
+        "为什么大文件要用流？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "腾讯"
+      ]
+    },
+    {
+      "question": "process.nextTick、Promise.then、setImmediate 的优先级和典型用途？",
+      "answer_md": "优先级：process.nextTick 队列最高（独立于微任务）> Promise.then 微任务 > 宏任务（setImmediate 属 check 阶段、setTimeout 属 timers 阶段）。nextTick 用于「当前操作之后、任何 I/O 之前」的清理；Promise.then 处理异步结果；setImmediate 让出事件循环到下一轮 check 阶段；setTimeout(0) 是最小延迟计时。注意：顶层脚本中 setImmediate 常先于 setTimeout(0)。",
+      "follow_ups": [
+        "微任务饥饿是什么？",
+        "为什么不能用 nextTick 做长递归？",
+        "I/O 回调里二者顺序如何？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "通用",
+        "字节",
+        "腾讯"
+      ]
+    }
+  ]
+}

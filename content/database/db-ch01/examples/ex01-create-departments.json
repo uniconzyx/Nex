@@ -1,0 +1,8 @@
+{
+  "title": "DDL 建表与 DML 插入部门表",
+  "code_lang": "sql",
+  "code_std": "mysql",
+  "stdin": "",
+  "expected_output": "Query OK, 0 rows affected\nQuery OK, 3 rows affected",
+  "code": "CREATE TABLE department (dept_id INT PRIMARY KEY, dept_name VARCHAR(20), location VARCHAR(20));\nINSERT INTO department VALUES (10,'Sales','Beijing'),(20,'Engineering','Shanghai'),(30,'HR','Shenzhen');"
+}

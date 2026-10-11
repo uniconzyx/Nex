@@ -1,0 +1,109 @@
+name: Release (APK + EXE)
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write   # 用于创建 GitHub Release 并上传产物
+
+jobs:
+  # ===================== Android APK =====================
+  build-apk:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter (stable)
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      # 仓库未提交 android 平台目录（本机无 Flutter 工具链），云端生成
+      - name: Generate Android platform
+        run: flutter create --platforms=android --org com.nexapp --project-name cppmind .
+
+      - name: Inject Nex icon and app label
+        run: |
+          python -m pip install --quiet pillow
+          python ../deploy/ci/inject_android_icons.py assets/icon/nex_icon.png android/app/src/main/res
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      # 若项目使用 freezed / json_serializable 等代码生成，取消下一行注释
+      # - name: Generate code (if needed)
+      #   run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Build release APK
+        # API_BASE_URL 通过 secret 注入；缺省使用占位地址，发布前请在仓库 Secrets 中配置
+        run: >-
+          flutter build apk --release
+          --dart-define=API_BASE_URL=${{ secrets.API_BASE_URL || 'http://10.0.2.2:8000/api/v1' }}
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-apk
+          path: app/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+
+  # ===================== Windows 启动器 EXE =====================
+  build-exe:
+    name: Build Windows Launcher EXE
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: deploy/launcher
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install PyInstaller
+        run: python -m pip install --upgrade pip && python -m pip install pyinstaller
+
+      - name: Build EXE
+        run: python -m PyInstaller --clean --noconfirm launcher.spec
+
+      - name: Upload EXE artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nex-launcher-exe
+          path: deploy/launcher/dist/Nex-Launcher.exe
+          if-no-files-found: error
+
+  # ===================== 创建 Release 并挂载产物 =====================
+  release:
+    name: Create GitHub Release
+    needs: [build-apk, build-exe]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: List artifacts
+        run: ls -R artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: CppMind ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          generate_release_notes: true
+          files: |
+            artifacts/app-release-apk/app-release.apk
+            artifacts/cppmind-launcher-exe/CppMind-Launcher.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

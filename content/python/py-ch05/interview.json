@@ -1,0 +1,87 @@
+{
+  "meta": {
+    "chapter": "py-ch05",
+    "count": 6
+  },
+  "items": [
+    {
+      "question": "文本模式和二进制模式的区别，什么时候必须用 binary？",
+      "answer_md": "**文本模式**（`'r'`/`'w'`）返回 `str`，`open` 时做两件额外的事：按 `encoding` 解码/编码，以及按 `newline` 做换行翻译。**二进制模式**（`'rb'`/`'wb'`）返回 `bytes`，不做任何转换，也不能传 `encoding`。\n\n必须用 binary 的场景：图片/音视频/压缩包等非文本数据；需要精确控制换行字节（如生成 CRLF 的 Windows 批处理）；做校验和、加密、协议帧解析；把二进制 blob 直接存库。\n\n**易错**：用文本模式读二进制文件会先尝试解码，常见的报错就是 `UnicodeDecodeError: 'utf-8' codec can't decode byte 0x89 in position 0`（PNG 头）。",
+      "follow_ups": [
+        "`open(..., 'rb')` 传 `encoding=` 会怎样？",
+        "为什么要给 `errors='replace'`？会有什么代价？"
+      ],
+      "difficulty": "easy",
+      "company_tags": [
+        "通用",
+        "Python 基础"
+      ]
+    },
+    {
+      "question": "with 语句的本质是什么？为什么它比 try/finally 好？",
+      "answer_md": "`with` 是**上下文管理器协议**的语法糖：进入时调用 `__enter__()`（返回值绑定给 `as` 的名字），离开时**无论正常还是异常**都调用 `__exit__(exc_type, exc, tb)`。\n\n它比手写 `try/finally` 好在：① 资源释放逻辑跟资源定义放在一起，不会漏；② 支持嵌套与组合（`ExitStack`）；③ 可复用成形如 `contextlib.suppress`/`nullcontext` 的工具；④ 异常吞噬语义显式（`__exit__` 返回真值）。\n\n**易错**：用 `@contextmanager` 时，`yield` 必须放在 `try/finally` 里，否则 `with` 块内的异常无法回传给你；不放在 `try` 里，异常发生时 `yield` 之后的清理代码根本不会执行。",
+      "follow_ups": [
+        "`__exit__` 返回 True 后异常去哪了？",
+        "`ExitStack` 解决什么真实问题？"
+      ],
+      "difficulty": "medium",
+      "company_tags": [
+        "通用",
+        "Python 进阶"
+      ]
+    },
+    {
+      "question": "写了数据但文件大小是 0，可能有哪些原因？",
+      "answer_md": "按可能性排序排查：\n\n1. **缓冲区未刷**（最常见）：写入量小于缓冲阈值，数据停在用户态。`flush()` 或 `close()` 后大小才变。注意用 `with` 就不会有这个问题。\n2. **文件对象已关闭但你以为还开着**：后续 `write` 抛 `ValueError: I/O operation on closed file`，而之前那次没落盘的内容可能已丢。\n3. **看错了路径**：`Path.cwd()` 与脚本目录不同，尤其在 IDE 与命令行下运行时 CWD 不一样。\n4. **临时文件 + rename 模式**：写的是 `xxx.tmp`，你要观察的是最终名；原子写必须等 `os.replace` 之后才有内容。\n5. **NFS / 容器挂载的缓存**：客户端缓存导致 `stat` 看到旧大小。\n\n基线结论：**先确认用的哪个路径、再确认 flush 语义**，这两条覆盖 90% 的情况。",
+      "follow_ups": [
+        "`flush()` 之后一定能在另一个进程里读到吗？",
+        "原子写的标准姿势是什么？"
+      ],
+      "difficulty": "medium",
+      "company_tags": [
+        "工程排查",
+        "Python 进阶"
+      ]
+    },
+    {
+      "question": "CSV 读写有哪些必踩的坑？",
+      "answer_md": "1. **不用 `csv` 模块手拼字符串**：字段含逗号/引号/换行时会直接破坏列结构。\n2. **忘了 `newline=''`**：读时字段内的 `\\r\\n` 会被通用换行先行切成两行，行结构错乱；写时 Windows 上会多出空行。\n3. **BOM 污染首列名**：用 Excel 存过的文件首列 key 变成 `'\\ufeffid'`，`row['id']` 恒为 None。读时用 `utf-8-sig`。\n4. **全部当字符串**：`csv` 不推断类型，`'100' + 1` 直接报错，需要显式 `int()`/`Decimal`。\n5. **大文件用 `readlines()`**：应逐行迭代或分块。\n6. **`DictWriter` 的 `extrasaction`**：默认 `raise`，多一列直接抛 `ValueError`；想要宽松用 `'ignore'`。\n7. **方言不固定**：分隔符可能是 `;`/`\\t`/`|`，上线前用 `csv.Sniffer` 探测并**显式记录配置**，别依赖猜测。",
+      "follow_ups": [
+        "`csv.Sniffer` 在什么情况下会失败？",
+        "如何给 CSV 加流式校验（行数/列数一致性）？"
+      ],
+      "difficulty": "medium",
+      "company_tags": [
+        "数据工程",
+        "Python"
+      ]
+    },
+    {
+      "question": "JSON、JSON Lines、以及 pickle 该怎么选？",
+      "answer_md": "- **JSON**：跨语言、可读、有标准。缺点：类型有限（无 datetime/bytes/set），浮点有精度陷阱（`0.1+0.2` 的 repr 问题），必须全量载入。适合配置、API 响应、中小规模数据。\n- **JSON Lines（`.jsonl`）**：每行一个独立 JSON 对象。**可流式处理**（内存与文件大小无关）、可追加写入、单行损坏不影响其余行。适合日志、批量导出、数据管道。代价是不能表示嵌套的整体结构，且重复 key 无意义。\n- **pickle**：能还原任意 Python 对象（含类实例、自定义类型）。但**只限于 Python**、**反序列化任意代码可执行（安全禁区）**、跨版本不稳定。只应用于自己完全掌控的本地缓存。\n\n选型口诀：**对外用 JSON，大数据管道用 JSONL，二进制中间态优先考虑 parquet/msgpack，pickle 只在本地缓存场景出现。**",
+      "follow_ups": [
+        "JSON 的浮点往返一定精确吗？",
+        "为什么 `json.dumps` 默认 `ensure_ascii=True`？"
+      ],
+      "difficulty": "medium",
+      "company_tags": [
+        "数据工程",
+        "后端"
+      ]
+    },
+    {
+      "question": "如何处理一个 20 GB 的日志文件？",
+      "answer_md": "核心原则：**永远不要 `read()` 整个文件**。\n\n1. **逐行流式**：`for line in f`（TextIOWrapper 内部按块读），或需要并行时按 `f.tell()` 偏移切段、多进程分片。\n2. **编码要稳**：`open(..., encoding='utf-8', errors='replace')`，避免个别坏字节让整次运行崩掉；如果确定是 utf-8，也可 `errors='surrogateescape'` 保证可逆。\n3. **批处理落盘**：累积 N 条后一次写出，减少 `fsync` 次数。\n4. **别用正则全文扫描**：能按行前缀过滤就先用 `startswith` 粗筛，降低正则回溯成本。\n5. **顺序读优于随机读**：SSD 上顺序读吞吐是随机读的数十倍；能一遍扫描同时算多个指标就别多遍。\n6. **必要时压缩**：`.gz` 配合 `gzip.open` 流式读，磁盘 I/O 往往才是瓶颈。\n7. **可观测**：打印已处理行数与耗时进度（用计数与百分比，别打印每行）。",
+      "follow_ups": [
+        "如何在流式处理中做 top-K 统计？",
+        "多进程分片读取要注意什么？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "数据工程",
+        "后端",
+        "运维"
+      ]
+    }
+  ]
+}

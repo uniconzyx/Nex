@@ -1,0 +1,8 @@
+{
+  "title": "[[no_unique_address]] 实测空成员占位（C++20）",
+  "code_lang": "cpp",
+  "code_std": "cpp20",
+  "stdin": "",
+  "expected_output": "no_unique_address sizeof=4 普通成员 sizeof=8\n无状态分配器不占空间: 1\n对比省下 4 字节",
+  "code": "#include <cstdio>\n\nstruct Empty {};\n\n// C++20：允许无状态成员与其它成员共享地址\nstruct WithNUA    { [[no_unique_address]] Empty e; int x; };\nstruct WithoutNUA { Empty e; int x; };\n\nstruct Alloc {};                                  // 无状态分配器\nstruct Holder { [[no_unique_address]] Alloc a; int* ptr; };\n\nint main() {\n    printf(\"no_unique_address sizeof=%zu 普通成员 sizeof=%zu\\n\",\n           sizeof(WithNUA), sizeof(WithoutNUA));\n    printf(\"无状态分配器不占空间: %d\\n\",\n           (int)(sizeof(Holder) == sizeof(int*)));\n    printf(\"对比省下 %zu 字节\\n\", sizeof(WithoutNUA) - sizeof(WithNUA));\n    return 0;\n}"
+}

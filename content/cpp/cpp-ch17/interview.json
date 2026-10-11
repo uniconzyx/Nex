@@ -1,0 +1,61 @@
+{
+  "meta": {
+    "chapter": "cpp-ch17"
+  },
+  "items": [
+    {
+      "question": "SFINAE 是什么？enable_if 怎么用来约束模板？concept 又解决了什么？",
+      "answer_md": "**SFINAE**（Substitution Failure Is Not An Error）：模板实参替换过程中的失败不算错误，而是悄悄把该模板从重载候选中移除。\n\n**enable_if 约束**：`std::enable_if_t<Cond, T>` 在 `Cond` 为真时提供 `type`，为假时无该成员，触发替换失败→重载被剔除。常用于「只对满足 trait 的类型启用函数」。\n\n**concept 的改进**：SFINAE 报错信息冗长难读、语法啰嗦、条件易写错；C++20 的 `concept` + `requires` 把约束提升为一等公民——可读、可组合（`Integral && !FloatingPoint`）、错误信息直接说「不满足 X」，且参与重载决议的偏序。新项目优先 concept，老标准才退回 SFINAE。",
+      "follow_ups": [
+        "两个 enable_if 重载的条件必须互斥且完备，为什么？",
+        "函数模板为什么不支持偏特化，怎么替代？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "通用",
+        "字节",
+        "腾讯"
+      ]
+    },
+    {
+      "question": "if constexpr 和普通 if 在模板里有什么区别？为什么需要它？",
+      "answer_md": "普通 `if`：所有分支都会被**实例化**，对非适用类型会产生类型错误（如对非指针类型写 `*v`）。\n\n`if constexpr(cond)`：`cond` 必须是编译期常量；**不满足的分支不被实例化**——因此可以对不适用类型写「看似非法」的代码而安然通过，且零运行时分支开销。\n\n它取代了大量「为区分类型而写的模板特化/重载集」，是泛型代码降复杂度的关键工具。注意被裁剪分支仍需**语法**合法（只是不做类型检查）。",
+      "follow_ups": [
+        "被 if constexpr 裁剪的分支真的不检查类型吗？",
+        "if constexpr 能否用于非模板函数？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "美团",
+        "阿里"
+      ]
+    },
+    {
+      "question": "std::move 和 std::forward 有什么区别？各自依赖什么机制？",
+      "answer_md": "`std::move`：**无条件**把左值/右值转成右值引用（`static_cast<remove_reference_t<T>&&>(t)`），只是类型转换，不真正移动任何东西；用来「许可」移动语义。\n\n`std::forward<T>`：**有条件**还原参数原始值类别——当 `T` 推导为左值引用时转左值、推导为右值引用时转右值。它依赖**引用折叠**与转发引用 `T&&`，用于泛型函数把参数「原样」转发给下游，避免右值退化成左值导致多余拷贝。\n\n一句话：`move` 总是右值，`forward` 按原样。",
+      "follow_ups": [
+        "引用折叠的四条规则是什么？",
+        "为什么具名 forwarding reference 永远是左值？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "通用",
+        "百度",
+        "英伟达"
+      ]
+    },
+    {
+      "question": "type_traits 在 STL 里有哪些典型应用？举一个你熟悉的例子。",
+      "answer_md": "典型应用俯拾皆是：\n\n1. **std::move**：核心是 `remove_reference_t<T>&&`，先去引用再转右值;\n2. **std::decay**：`std::function` 参数类型归一（去引用/cv、数组退化指针）;\n3. **std::invoke / std::apply**：用 `is_member_function_pointer` 等 traits 区分「成员函数指针」「可调用对象」走不同调用路径;\n4. **容器/算法**：`is_nothrow_*` 决定是否用 `noexcept` 移动（影响 `vector` 扩容时的强异常保证）;\n5. **enable_if / concept 约束**：标准算法按 `is_iterator`/`is_invocable` 等筛选重载。\n\ntraits 让库在编译期做零开销的类型决策，是泛型编程的基石。",
+      "follow_ups": [
+        "is_destructible 和 is_nothrow_destructible 差在哪？",
+        "为什么 vector 扩容关心 is_nothrow_move_constructible？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "腾讯",
+        "通用"
+      ]
+    }
+  ]
+}

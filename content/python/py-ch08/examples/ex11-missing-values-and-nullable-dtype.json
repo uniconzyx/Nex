@@ -1,0 +1,8 @@
+{
+  "title": "缺失值处理与可空 Int64，astype 的截断行为",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "s =\n0    1.0\n1    2.0\n2    NaN\n3    4.0\ndtype: float64\ndtype = float64 （引入 None 后退化为 float，缺失值变成 nan）\nisna()    = {0: False, 1: False, 2: True, 3: False}\ndropna()  = {0: 1.0, 1: 2.0, 3: 4.0}\nfillna(0) = {0: 1.0, 1: 2.0, 2: 0.0, 3: 4.0}\n--- 可空整数类型 Int64（缺失用 pd.NA，不牺牲整数语义）---\nInt64 值 = [1, 2, <NA>] | dtype = Int64\nsum() = 3 （NA 被跳过）\n--- astype 是截断不是四舍五入 ---\n原值        = [1.7, 2.2, 3.9]\nastype(int) = [1, 2, 3] -> 直接截断\nround 后再转 = [2, 2, 4] -> 才是四舍五入",
+  "code": "import pandas as pd\ns = pd.Series([1, 2, None, 4])\nprint(\"s =\")\nprint(s)\nprint(\"dtype =\", s.dtype, \"（引入 None 后退化为 float，缺失值变成 nan）\")\nprint(\"isna()    =\", s.isna().to_dict())\nprint(\"dropna()  =\", s.dropna().to_dict())\nprint(\"fillna(0) =\", s.fillna(0).to_dict())\nprint(\"--- 可空整数类型 Int64（缺失用 pd.NA，不牺牲整数语义）---\")\nsi = pd.Series([1, 2, None], dtype=\"Int64\")\nprint(\"Int64 值 =\", si.tolist(), \"| dtype =\", si.dtype)\nprint(\"sum() =\", int(si.sum()), \"（NA 被跳过）\")\nprint(\"--- astype 是截断不是四舍五入 ---\")\nf = pd.Series([1.7, 2.2, 3.9])\nprint(\"原值        =\", f.tolist())\nprint(\"astype(int) =\", f.astype(int).tolist(), \"-> 直接截断\")\nprint(\"round 后再转 =\", f.round(0).astype(int).tolist(), \"-> 才是四舍五入\")\n"
+}

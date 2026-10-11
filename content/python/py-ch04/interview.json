@@ -1,0 +1,96 @@
+{
+  "meta": {
+    "chapter": "py-ch04",
+    "subject": "python",
+    "note": "偏深度追问：路径语义、时区与 DST、JSON 往返保真、IO 性能与原子性。与 _bagua.json（速记向）互补。"
+  },
+  "items": [
+    {
+      "question": "为什么 Python 要禁止 naive 与 aware datetime 直接相减？生产上你选哪种策略？",
+      "answer_md": "**禁止的原因**：naive datetime 只是一个「没有时区的日历时刻」，它无法确定对应哪个 UTC 瞬间；aware 则携带明确的 UTC 偏移。两者相减的语义未定义，静默猜一个时区可能造成数小时级偏差（跨 DST 甚至出现 23/25 小时的一天）。Python 选择直接抛 `TypeError` 而不是猜。\n\n**生产策略（推荐）**：\n1. **存储与传输一律 UTC aware**（`datetime.now(timezone.utc)` 或 `datetime.now(ZoneInfo('UTC'))`），数据库列用 `TIMESTAMP WITH TIME ZONE`；\n2. **展示层再转本地**：`dt.astimezone(ZoneInfo(user_tz))`；\n3. 避免使用已废弃的 `datetime.utcnow()` / `utcfromtimestamp()`——它们返回 **naive** 对象（语义是 UTC 却不带 tzinfo），是最常见的坑源，改用 `datetime.now(timezone.utc)` / `datetime.fromtimestamp(ts, timezone.utc)`。\n\n⚠️ 另一种常见误区是「用 `replace(tzinfo=tz)` 给 naive 附加时区」——`replace` 只是贴上标签、**不做换算**，若该 naive 值本意是 UTC，就应改用 `astimezone`。",
+      "follow_ups": [
+        "2026-03-08 是美国 DST 开始日，`ZoneInfo('America/New_York')` 下 `02:30` 这个本地时间存在吗？不存在该如何处理？",
+        "`time.time()` 与 `datetime.now().timestamp()` 有什么区别？后者在极端情况下会出错吗？",
+        "Unix 时间戳能表示闰秒吗？为什么 POSIX 时间刻意忽略闰秒？"
+      ],
+      "difficulty": "medium",
+      "company_tags": [
+        "后端",
+        "基础架构",
+        "Python 工程"
+      ]
+    },
+    {
+      "question": "`json.dumps` 往返（dumps → loads）不保真的地方有哪些？",
+      "answer_md": "按「最容易踩」排序：\n\n1. **键类型坍缩**：JSON 的键只能是字符串，`{1: 'a'}` → `{'1': 'a'}`。修复：保证键本身是字符串，或往返后显式还原类型。\n2. **tuple → list**：`(1, 2)` → `[1, 2]`。需要 tuple 就自己 `tuple(...)` 还原。\n3. **`NaN` / `Infinity` 是扩展语法**：Python 默认输出裸 `NaN`，但标准 JSON 不允许，Go/Java 的解析器会报错，浏览器 `JSON.parse` 也报错。跨语言必须 `allow_nan=False`（让它抛错、逼你处理）或用 `null` 表示。\n4. **大整数精度**：JSON 数字在 JS 里是 IEEE-754 double，超过 2^53 的 int（如雪花 ID）会被静默截断——序列化成**字符串**再传。\n5. **`-0.0`、浮点末位**：`repr` 的往返在 CPython 内是安全的（用最短往返表示），但经 JS 中转会变。\n6. **dict 顺序**：JSON 对象语义无序，虽然 Python 3.7+ 保序且 `sort_keys` 可控，但**不应依赖**接收端保持顺序。\n\n**诊断手段**：写完 `dumps` 后立刻 `loads` 回来做一次 `==` 断言，能把大部分坍缩在开发期暴露出来。",
+      "follow_ups": [
+        "如何处理 datetime / Decimal / 自定义类？`default=` 与自定义 `JSONEncoder` 的区别？",
+        "`orjson` / `msgspec` 相比标准库快在哪里？代价是什么？",
+        "JSONL（每行一个 JSON）相比整体 JSON 数组，在流式与容错上的优势是什么？"
+      ],
+      "difficulty": "medium",
+      "company_tags": [
+        "后端",
+        "数据工程",
+        "Python 工程"
+      ]
+    },
+    {
+      "question": "`pathlib` 的 `resolve()` 有哪些副作用？什么时候不该用它？",
+      "answer_md": "`Path.resolve()` 做的**不只是字符串规范化**，它会：\n\n1. **访问文件系统**——逐级解析符号链接（symlink）；\n2. 在严格模式下（`strict=True`）路径不存在就抛 `FileNotFoundError`（3.6+ 默认 `strict=False`，会尽量解析已存在的最长前缀）；\n3. 把相对路径按 **cwd** 展开成绝对路径；\n4. 折叠 `..`（但注意：**对 symlink 而言折叠 `..` 与先解析再折叠结果不同**，语义上有微妙差异）。\n\n**不该用 `resolve()` 的场景**：\n- 只是想做**纯字符串层**的规范化（如处理用户输入的虚拟路径、URL 路径、待创建的文件名）——应改用 `os.path.normpath` 或 `PurePosixPath`，避免意外触碰文件系统；\n- 需要**保留符号链接本身**（如打包、复制目录树）——`resolve()` 会把它展开成真实路径，破坏链接语义；\n- 路径中有**尚未创建的目录**且需要严格结果时，`resolve()` 的行为依赖中间层是否存在。\n\n**安全提示**：做「路径穿越」防护时，先 `resolve()` 再判断是否在允许目录内（`is_relative_to`）是常见做法，但必须注意检查发生在 resolve **之后**，否则 `../../etc/passwd` 能绕过。",
+      "follow_ups": [
+        "`Path.is_relative_to()` 与字符串 `startswith` 判断前缀相比，安全性好在哪？",
+        "`os.path.realpath` 与 `Path.resolve` 有何差异？",
+        "Windows 上长路径（>260 字符）与保留名（`CON`/`NUL`）如何处理？"
+      ],
+      "difficulty": "medium",
+      "company_tags": [
+        "Python 工程",
+        "安全"
+      ]
+    },
+    {
+      "question": "生产上写文件为什么要「临时文件 + `os.replace`」，而不是直接 `open(path, 'w')`？",
+      "answer_md": "`open(path, 'w')` 会**立刻截断**目标文件：此刻起，原内容已丢，新内容还没写完。于是存在三个真实风险窗口：\n\n1. **进程崩溃 / 被杀**：留下 0 字节或半截文件，下游读到损坏配置；\n2. **并发读**：另一个进程可能读到「写了一半」的状态；\n3. **磁盘写满 / 掉电**：即使 `write` 返回成功，数据可能还在页缓存里。\n\n**原子替换方案**：写入同目录的临时文件 → `flush()` + `os.fsync()` 落盘 → `os.replace(tmp, path)`。`os.replace` 在同文件系统内是**原子 rename**，读方要么看到旧内容、要么看到完整新内容。\n\n**三个易错点**：\n- 临时文件必须在**同一目录**（`tempfile.mkstemp(dir=target.parent)`）；跨文件系统 rename 会退化为复制，失去原子性；\n- 必须 `fsync` 文件**以及**（严谨地说）父目录，才能保证目录项本身落盘；\n- Windows 上应用 `os.replace`（覆盖语义），`os.rename` 在目标存在时会 `FileExistsError`。\n\n**延伸**：写入后立刻改权限（`chmod 0o600`）应在 replace **之前**对临时文件做，避免目标出现「先宽后窄」的短暂窗口。",
+      "follow_ups": [
+        "多进程同时写同一配置，如何避免丢失更新（lost update）？",
+        "`fsync` 对 SSD 与对网络文件系统（NFS）的语义差异？",
+        "JSON 配置热加载时，如何处理「读到旧文件」与「读时正好在替换」两种时序？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "基础架构",
+        "存储",
+        "中间件"
+      ]
+    },
+    {
+      "question": "`glob` / `rglob` / `os.walk` 各自的适用场景与性能差异？",
+      "answer_md": "**语义对比**：\n\n| 手段 | 产出 | 是否递归 | 支持通配 | 备注 |\n|---|---|---|---|---|\n| `iterdir()` | 直接子项 | 否 | 否 | 最省，只需一层时首选 |\n| `glob(pat)` | 匹配项 | 否 | 是（`*` `?` `[]` `**`） | 单层模式 |\n| `rglob(pat)` | 匹配项 | 是 | 是 | 等价 `glob('**/' + pat)` |\n| `os.walk()` | `(dirpath, dirnames, filenames)` 三元组 | 是 | 否 | **可就地剪枝**（改 `dirnames`） |\n| `os.scandir()` | `DirEntry` 迭代器 | 否 | 否 | 最底层、最快，自带类型信息 |\n\n**性能要点**：\n1. `Path.glob` / `os.walk` 内部都基于 `os.scandir`，性能差异主要来自**每项是否额外 `stat`**。`DirEntry.is_file()` 在多数文件系统上**不额外系统调用**（信息随目录读取一起返回），比 `Path.is_file()`（每次 stat）快；\n2. `rglob('*')` 会遍历**所有**条目（含目录），若只想匹配文件，模式写成 `rglob('*.py')` 能省掉大量匹配开销；\n3. **剪枝**：只需要某类子目录时，用 `os.walk` 并**原地修改** `dirnames[:] = [...]` 可剪掉整棵子树——`glob`/`rglob` 做不到；\n4. 超大目录树不要 `list(rglob(...))`（内存打满），要**流式消费**。",
+      "follow_ups": [
+        "符号链接形成的环会让 `rglob` 无限递归吗？`os.walk(followlinks=False)` 起什么作用？",
+        "如何实现「只进入名字以 `src` 开头的目录」的剪枝？",
+        "在含百万文件的目录上，`glob` 与 `find | while read` 谁更快？瓶颈在哪？"
+      ],
+      "difficulty": "medium",
+      "company_tags": [
+        "Python 工程",
+        "工具链"
+      ]
+    },
+    {
+      "question": "同一份代码在开发机正常、在容器里 `UnicodeDecodeError`，你的排查顺序是什么？",
+      "answer_md": "**一句话结论**：绝大多数是**未显式指定 encoding**，导致解释器回退到 locale 默认编码。\n\n**排查顺序（从快到慢）**：\n1. `python -c \"import locale,sys; print(locale.getpreferredencoding(False), sys.getdefaultencoding(), sys.stdout.encoding)\"` —— 容器的 `LANG`/`LC_ALL` 常为空，`preferredencoding` 会退化为 ASCII 或 ANSI_X3.4-1968；\n2. 检查所有 `open()` 调用是否**显式传了 `encoding`**（`grep -rn 'open(' --include=*.py`）；\n3. 确认文件本身的真实编码：读二进制头部看 BOM（`\\xef\\xbb\\xbf` = UTF-8 BOM、`\\xff\\xfe` = UTF-16LE），或 `chardet` / `charset_normalizer` 探测；\n4. 检查 `PYTHONIOENCODING` 与 `PYTHONUTF8`：置 `PYTHONUTF8=1`（或 `-X utf8`）可开全局 UTF-8 模式，但对**文件 IO 的 `open()` 默认编码**是最直接影响的选项；\n5. 输出侧同样会炸：`print('中文')` 在某些 Windows 控制台按 GBK 编码 stdout，需 `PYTHONIOENCODING=utf-8` 或 `sys.stdout.reconfigure(encoding='utf-8')`。\n\n**根治**：写进代码规范——**任何 IO 都显式指定 `encoding='utf-8'`**，并在 CI 里跑一次 `LANG=C` 的测试。",
+      "follow_ups": [
+        "`utf-8` 与 `utf-8-sig` 的区别？什么时候后者是必须的？",
+        "为什么 Windows 简中环境的默认文件编码是 CP936 而不是 UTF-8？",
+        "`PYTHONUTF8=1` 能否让已有的 `open()` 调用变成 UTF-8？有什么例外？"
+      ],
+      "difficulty": "medium",
+      "company_tags": [
+        "Python 工程",
+        "DevOps"
+      ]
+    }
+  ]
+}

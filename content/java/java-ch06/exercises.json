@@ -1,0 +1,182 @@
+{
+  "meta": {
+    "chapter": "java-ch06",
+    "note": "8 题：基础题 6 + 算法题 2；算法题来自 LeetCode，仅存元数据与链接，不搬运题面。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "关于 Java 流的分类与编码边界",
+      "content_md": "关于 Java 的字节流与字符流，选出**正确**的描述。",
+      "options": [
+        {
+          "key": "A",
+          "text": "FileReader 使用 UTF-8 编码，因此跨平台一致"
+        },
+        {
+          "key": "B",
+          "text": "InputStreamReader 是字节流到字符流的桥接点，可显式指定字符集"
+        },
+        {
+          "key": "C",
+          "text": "Reader.read() 返回 char，用 byte 也能接住"
+        },
+        {
+          "key": "D",
+          "text": "available() 返回文件总长度，可用于分配缓冲区"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "FileReader 使用平台默认字符集（Windows 常为 GBK），跨平台不一致，A 错。Reader.read() 返回 int，-1 表示 EOF，用 byte 接会丢失 EOF 判断，C 错。available() 只保证「不阻塞能读到的字节数」，不是文件长度，D 错。InputStreamReader 是唯一可显式控制编码的字节→字符转换入口（Files.newBufferedReader 内部封装了它）。",
+      "tags": [
+        "io",
+        "charset"
+      ],
+      "source": "book",
+      "source_ref": "《Java 核心技术 卷II》第 1 章 流与文件"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "ByteBuffer 的游标与模式切换",
+      "content_md": "对 `ByteBuffer.allocate(16)` 连续执行：`put(5 字节)` → `flip()` → `get()` 两次。此时 `position`、`limit`、`remaining()` 分别是多少？",
+      "options": [
+        {
+          "key": "A",
+          "text": "position=5, limit=16, remaining=11"
+        },
+        {
+          "key": "B",
+          "text": "position=2, limit=5, remaining=3"
+        },
+        {
+          "key": "C",
+          "text": "position=7, limit=16, remaining=9"
+        },
+        {
+          "key": "D",
+          "text": "position=0, limit=5, remaining=5"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "put 后 position=5；flip 令 limit=position=5、position=0；两次 get 后 position=2；remaining = limit - position = 3。flip 的等价写法是 limit(position()); position(0)。",
+      "tags": [
+        "nio",
+        "bytebuffer"
+      ],
+      "source": "book",
+      "source_ref": "CppMind java-ch06 concept 03 / examples/ex06-bytebuffer-state.json"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "读文件：read() 的返回值语义",
+      "content_md": "以下代码逐字节统计文件长度：\n\n```java\ntry (InputStream in = Files.newInputStream(p)) {\n    int n = 0;\n    while (in.read() != -1) n++;\n}\n```\n\n如果把 `in.read() != -1` 写成 `byte b = (byte) in.read(); if (b != -1) ...`，会出现什么后果？",
+      "answer_md": "会**多统计 1 个字节**：`read()` 返回 `int` 类型的 -1 表示 EOF，强转成 `byte` 后 -1 变成 0xFF（即 -1 的 byte 表示），但 `b != -1` 这个比较依然成立（因为 byte 比较仍是有符号），实际更危险的写法是`if ((byte) in.read() != -1)` 在只比较低 8 位时把数据字节 0xFF 误判为 EOF —— 即文件中只要出现一个 0xFF 字节，读取就会提前结束。正确做法始终用 `int` 接住返回值再与 -1 比较。",
+      "explanation": "`read()` 的契约是「返回 0~255 或 -1」，用窄类型接住会破坏区分能力。",
+      "tags": [
+        "io",
+        "eof"
+      ],
+      "source": "book",
+      "source_ref": "《Java 核心技术 卷II》第 1 章 流与文件 / class InputStream"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "修错：写完 Buffer 直接读，读出 0 字节",
+      "content_md": "下面代码本意是把 5 个字节写入文件，实际写到文件里却是 0 字节。找出原因并修正：\n\n```java\nByteBuffer b = ByteBuffer.allocate(16);\nb.put(\"hello\".getBytes(StandardCharsets.US_ASCII));\ntry (FileChannel ch = FileChannel.open(p, CREATE, WRITE)) {\n    ch.write(b);\n}\n```",
+      "answer_md": "缺少 **`b.flip()`**。`put` 之后 `position=5`、`limit=capacity=16`，`ch.write(b)` 从 position 开始写、最多写到 limit，理论上会写出 11 字节的未初始化数据（而不是 0 字节）；如果 capacity 恰好等于写入长度，则 `position == limit`，写入 0 字节。两种情形都是错的。\n\n正确写法：\n```java\nb.put(\"hello\".getBytes(StandardCharsets.US_ASCII));\nb.flip();            // limit = position; position = 0\nch.write(b);\n```\n凡是「写完转读」或「写完交给下游」，都必须先 flip。",
+      "explanation": "flip 是读写模式切换的唯一开关，漏写必然导致数据截断或写入垃圾。",
+      "tags": [
+        "nio",
+        "flip"
+      ],
+      "source": "self",
+      "source_ref": "CppMind java-ch06 concept 03 / examples/ex06-bytebuffer-state.json"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "装饰器顺序：缓冲流放在哪一层",
+      "content_md": "下面两种写法，哪种正确？为什么另一种编译不过？\n\n```java\nA: new BufferedReader(new FileReader(f))\nB: new FileReader(new BufferedReader(new InputStreamReader(...)))\n```",
+      "answer_md": "A 正确。`BufferedReader` 的构造器接收 `Reader`，`FileReader` 是 `Reader` 子类，所以可以包在外面；语义是「在底层字符源之上加缓冲」。\n\nB 编译不过：`FileReader` 的构造器只接收 `String`/`File`/`FileDescriptor`，不接受 `Reader`。这恰好是类型系统在帮我们拦住「把缓冲放在内层」的错误嵌套。\n\n正确顺序原则：**底层原始流 → 转换/桥接 → 缓冲**。如果先缓冲再加解码，缓冲区里存的是字节块，`InputStreamReader` 仍能工作但会多一次拷贝；且 `readLine` 这类「行语义」必须由 `BufferedReader` 提供，只能在最外层。",
+      "explanation": "装饰器模式的方向是「外层包装内层」，且功能语义（行读取）只在最外层可得。",
+      "tags": [
+        "io",
+        "decorator"
+      ],
+      "source": "book",
+      "source_ref": "《Java 核心技术 卷II》第 1 章 流与文件 / 装饰器"
+    },
+    {
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "hard",
+      "title": "流式统计大文件：内存占用与文件大小无关",
+      "content_md": "写一个方法 `static Stats scan(Path p)`，用**流式**方式统计 UTF-8 文本文件：\n- 总行数（注意：文件末尾没有换行时最后一行也要计入）\n- 非空行数、最长行的字符数\n- 各单词出现次数前 3 名（按次数降序、同次数按字典序）\n\n约束：**不得一次性 `readAllBytes`/`readAllLines`**；文件可能远大于堆。写出实现并说明为什么它是 O(1) 空间。",
+      "answer_md": "```java\nrecord Stats(long lines, long nonEmpty, int maxLen, List<String> top3) {}\n\nstatic Stats scan(Path p) throws IOException {\n    long lines = 0, nonEmpty = 0; int maxLen = 0;\n    Map<String, Integer> freq = new HashMap<>();\n    try (BufferedReader r = Files.newBufferedReader(p, StandardCharsets.UTF_8)) {\n        String line;\n        while ((line = r.readLine()) != null) {   // null 才是 EOF\n            lines++;\n            if (!line.isBlank()) nonEmpty++;\n            maxLen = Math.max(maxLen, line.length());\n            for (String w : line.toLowerCase().split(\"\\\\W+\"))\n                if (!w.isEmpty()) freq.merge(w, 1, Integer::sum);\n        }\n    }\n    List<String> top3 = freq.entrySet().stream()\n            .sorted(Map.Entry.<String,Integer>comparingByValue().reversed()\n                    .thenComparing(Map.Entry.comparingByKey()))\n            .limit(3).map(Map.Entry::getKey).toList();\n    return new Stats(lines, nonEmpty, maxLen, top3);\n}\n```\n\n空间为什么是 O(1)（相对于文件大小）：`BufferedReader` 内部只有固定大小的缓冲，每行处理完即被下一行覆盖；唯一的额外状态是「单词频次表」，其规模由**词汇表大小**决定而非文件行数。行数、最长行长度都是标量。\n\n两个易错点：① `readLine()` 返回 `\"\"` 表示空行，`null` 才是 EOF；② `split(\"\\\\W+\")` 会产生空串（行首非字母时），必须过滤。",
+      "explanation": "流式处理的关键是「只保留聚合量，不保留原始数据」。",
+      "tags": [
+        "io",
+        "streaming"
+      ],
+      "source": "self",
+      "source_ref": "CppMind java-ch06 concept 01 / examples/ex02-buffered-call-counts.json"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "LeetCode 622：设计循环队列（对应 Buffer 的环形复用）",
+      "content_md": "题目见 LeetCode 622. Design Circular Queue（设计循环队列）。它与 `ByteBuffer.compact()` 的环形复用思想同源：用**双游标 + 取模**在定长数组上实现无搬移的先进先出。只提供链接与元数据，不搬运题面。",
+      "answer_md": "核心是维护 `head`、`size`、`capacity` 三个量：\n- `enQueue`：若 `size == capacity` 返回 false；否则写入 `(head + size) % capacity`，`size++`。\n- `deQueue`：若 `size == 0` 返回 false；否则 `head = (head + 1) % capacity`，`size--`。\n- `Front/Back`：分别取 `data[head]` 与 `data[(head + size - 1) % capacity]`。\n\n与 `ByteBuffer` 的对应关系：`position` 相当于写指针，`compact()` 相当于「保留未读数据并重新对齐起点」，而取模实现则完全避免了搬移 —— 这就是循环缓冲比 compact 更高效的原因。\n\n复杂度：所有操作 O(1) 时间、O(k) 空间。",
+      "explanation": "循环缓冲的关键是「用取模代替数据搬移」，从而把出队代价从 O(n) 降到 O(1)。",
+      "tags": [
+        "design",
+        "circular-buffer"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 622（design-circular-queue）",
+      "external_url": "https://leetcode.cn/problems/design-circular-queue/"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "LeetCode 394：字符串解码（对应字符流的嵌套解码）",
+      "content_md": "题目见 LeetCode 394. Decode String（字符串解码）。与 `CharsetDecoder` 的嵌套状态机同构：遇到 `[` 进入子解码上下文，遇到 `]` 回退到父上下文。只提供链接与元数据，不搬运题面。",
+      "answer_md": "栈解法（一次遍历）：\n- 维护 `countStack` 与 `strStack`；当前重复次数 `k` 与当前串 `cur`。\n- 遇数字：累积到 `k`（注意多位数）。\n- 遇 `[`：把 `k` 与 `cur` 压栈，重置 `k = 0`、`cur = \"\"`。\n- 遇 `]`：弹出父串与次数，`cur = parent + cur.repeat(k)`。\n- 遇字母：追加到 `cur`。\n\n复杂度 O(n)——注意 `repeat` 产生的输出长度已在题面规模约束内。\n\n与 IO 的联系：这本质上是「嵌套上下文的栈式解码」，和 `InputStreamReader` 在遇到不完整字节序列时「挂起等待更多输入」是同一种状态机思维，只是 IO 场景的「输入」是懒到达的。",
+      "explanation": "栈 = 嵌套上下文；这是编译原理中「括号匹配 + 上下文切换」的最小模型。",
+      "tags": [
+        "stack",
+        "string"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 394（decode-string）",
+      "external_url": "https://leetcode.cn/problems/decode-string/"
+    }
+  ]
+}

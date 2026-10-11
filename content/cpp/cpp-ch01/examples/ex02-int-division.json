@@ -1,0 +1,8 @@
+{
+  "title": "整数除法截断（错误示范 vs 正确写法）",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "avg_wrong=2 avg_right=2.5",
+  "code": "#include <iostream>\n\nint main() {\n    int sum = 5, n = 2;\n    double avg_wrong = sum / n;\n    double avg_right = sum / static_cast<double>(n);\n    std::cout << \"avg_wrong=\" << avg_wrong << \" avg_right=\" << avg_right;\n}\n"
+}

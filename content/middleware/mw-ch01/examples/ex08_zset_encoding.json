@@ -1,0 +1,9 @@
+{
+  "title": "ZSet 编码切换：listpack 与 skiplist+dict",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "small zset -> listpack\nbig-value  -> skiplist+dict\nmany zset  -> skiplist+dict",
+  "code": "\nZSET_MAX_ENTRIES = 128\nZSET_MAX_VALUE = 64\n\ndef zset_encoding(items):\n    n = len(items)\n    if n == 0:\n        return \"listpack\"\n    if n <= ZSET_MAX_ENTRIES and all(len(m.encode()) <= ZSET_MAX_VALUE for _, m in items):\n        return \"listpack\"\n    return \"skiplist+dict\"\n\nsmall = [(1, \"a\"), (2, \"b\")]\nbig = [(i, \"m%d\" % i + \"x\" * 70) for i in range(5)]\nmany = [(i, \"m%d\" % i) for i in range(200)]\nprint(\"small zset ->\", zset_encoding(small))\nprint(\"big-value  ->\", zset_encoding(big))\nprint(\"many zset  ->\", zset_encoding(many))\n",
+  "_verified": true
+}

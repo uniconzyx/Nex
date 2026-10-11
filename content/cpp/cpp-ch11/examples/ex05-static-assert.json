@@ -1,0 +1,8 @@
+{
+  "title": "static_assert 编译期约束模板实参为算术类型",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "7",
+  "code": "#include <iostream>\n#include <type_traits>\n\ntemplate <typename T>\nT my_max(T a, T b) {\n    static_assert(std::is_arithmetic_v<T>, \"T must be arithmetic\");\n    return a > b ? a : b;\n}\n\nint main() {\n    std::cout << my_max(3, 7) << '\\n';\n}"
+}

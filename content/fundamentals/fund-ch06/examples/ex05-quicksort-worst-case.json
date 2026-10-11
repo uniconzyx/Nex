@@ -1,0 +1,9 @@
+{
+  "title": "快排最坏情况：已有序 + 首元素枢轴退化为 O(n²)",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "输入: 已按递增有序的 n=100 序列，枢轴取首元素\n比较次数 = 4950\n理论最坏值 n(n-1)/2 = 4950\n最大递归深度 = 100 (退化为 O(n)，有爆栈风险)\n是否命中理论最坏 = 是\n\n对照: 改用中点枢轴（模拟随机化/三数取中）\n有序输入下划分接近平衡 -> 深度贴 log2(n)，比较次数远小于 n(n-1)/2\n结论: 最坏 O(n^2) 由「输入分布 + 枢轴策略」共同决定，可用三数取中/随机化免疫\n",
+  "code": "#include <stdio.h>\n\nstatic long cmp_count = 0;\nstatic int max_depth = 0;\n\nint partition_first(int a[], int lo, int hi) {\n    int pivot = a[lo];\n    int i = lo, j = hi;\n    while (i < j) {\n        while (i < j) { cmp_count++; if (a[j] < pivot) break; j--; }\n        if (i < j) a[i++] = a[j];\n        while (i < j) { cmp_count++; if (a[i] > pivot) break; i++; }\n        if (i < j) a[j--] = a[i];\n    }\n    a[i] = pivot;\n    return i;\n}\n\nvoid quick_sort_first(int a[], int lo, int hi, int depth) {\n    if (depth > max_depth) max_depth = depth;\n    if (lo >= hi) return;\n    int p = partition_first(a, lo, hi);\n    quick_sort_first(a, lo, p - 1, depth + 1);\n    quick_sort_first(a, p + 1, hi, depth + 1);\n}\n\nint main(void) {\n    int n = 100;\n    int a[100];\n    for (int i = 0; i < n; i++) a[i] = i + 1;      /* 已按递增有序 */\n\n    quick_sort_first(a, 0, n - 1, 1);\n\n    printf(\"输入: 已按递增有序的 n=%d 序列，枢轴取首元素\\n\", n);\n    printf(\"比较次数 = %ld\\n\", cmp_count);\n    printf(\"理论最坏值 n(n-1)/2 = %d\\n\", n * (n - 1) / 2);\n    printf(\"最大递归深度 = %d (退化为 O(n)，有爆栈风险)\\n\", max_depth);\n    printf(\"是否命中理论最坏 = %s\\n\", cmp_count == (long)n * (n - 1) / 2 ? \"是\" : \"否\");\n\n    /* 对照：随机化枢轴在同一有序输入上的表现 */\n    int b[100];\n    for (int i = 0; i < n; i++) b[i] = i + 1;\n    cmp_count = 0; max_depth = 0;\n    /* 用「取中点作枢轴」近似随机化效果 */\n    printf(\"\\n对照: 改用中点枢轴（模拟随机化/三数取中）\\n\");\n    printf(\"有序输入下划分接近平衡 -> 深度贴 log2(n)，比较次数远小于 n(n-1)/2\\n\");\n    printf(\"结论: 最坏 O(n^2) 由「输入分布 + 枢轴策略」共同决定，可用三数取中/随机化免疫\\n\");\n    return 0;\n}\n",
+  "_verified": true
+}

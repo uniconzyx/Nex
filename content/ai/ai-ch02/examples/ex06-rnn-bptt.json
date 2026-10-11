@@ -1,0 +1,8 @@
+{
+  "title": "RNN 单步前向 + BPTT 梯度量化（消失）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "从末步(t=9)反传到各步的梯度范数:\n  反传至 t=9: norm=1.7315\n  反传至 t=8: norm=1.0192\n  反传至 t=7: norm=0.5649\n  反传至 t=6: norm=0.3213\n  反传至 t=5: norm=0.1504\n  反传至 t=4: norm=0.0842\n  反传至 t=3: norm=0.0313\n  反传至 t=2: norm=0.0181\n  反传至 t=1: norm=0.0098\n  反传至 t=0: norm=0.0059\n首步(反传1步)范数: 1.7315\n末步(反传10步)范数: 0.005894\n末步/首步 范数比: 0.003404  -> 梯度随步数衰减: True\n",
+  "code": "\nimport numpy as np\nnp.random.seed(42)\nH = 8\nW_hh = np.random.randn(H, H) * 0.3          # 谱半径 < 1，制造消失\nx_seq = [np.random.randn(H) for _ in range(10)]\nh = np.zeros(H)\nhs = []\nfor t in range(10):\n    h = np.tanh(W_hh @ h + x_seq[t])\n    hs.append(h.copy())\n\ndef sigmoid(x): return 1.0/(1.0+np.exp(-x))\n# 假设损失对最后一步 h_9 的梯度为单位方向，沿时间反传\ndh = np.ones(H)\nnorms = []\nfor t in range(9, -1, -1):\n    th = 1 - hs[t]**2\n    dh = W_hh.T @ (dh * th)\n    norms.append(float(np.linalg.norm(dh)))\n\nprint(\"从末步(t=9)反传到各步的梯度范数:\")\nfor step, nm in zip(range(9, -1, -1), norms):\n    print(f\"  反传至 t={step}: norm={nm:.4f}\")\nprint(\"首步(反传1步)范数:\", round(norms[0],4))\nprint(\"末步(反传10步)范数:\", round(norms[-1],6))\nratio = norms[-1]/norms[0]\nprint(\"末步/首步 范数比:\", round(ratio,6), \" -> 梯度随步数衰减:\", bool(ratio < 1))\n"
+}

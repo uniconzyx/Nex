@@ -1,0 +1,8 @@
+{
+  "title": "Condition 实现有界缓冲的生产者消费者",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "生产: 12 | 消费: 12\n数量守恒: True\n顺序一致（FIFO）: True\n缓冲区已清空: True",
+  "code": "import threading\nfrom collections import deque\n\n\n# Condition 是「锁 + 等待队列」的组合：经典的生产者/消费者。\n# 关键细节：等待必须写在 while 里（防虚假唤醒 / 条件被别的线程改掉）。\n\nCAP = 3\nTOTAL = 12\nbuf = deque()\ncv = threading.Condition()\nproduced = []\nconsumed = []\n\n\ndef producer():\n    for i in range(TOTAL):\n        with cv:\n            while len(buf) >= CAP:       # while 而非 if\n                cv.wait()\n            buf.append(i)\n            produced.append(i)\n            cv.notify_all()              # 条件变了，唤醒等待者\n\n\ndef consumer():\n    while True:\n        with cv:\n            while not buf and len(consumed) < TOTAL:\n                cv.wait()\n            if not buf:\n                cv.notify_all()\n                return\n            consumed.append(buf.popleft())\n            cv.notify_all()\n\n\np = threading.Thread(target=producer)\ncs = [threading.Thread(target=consumer) for _ in range(2)]\np.start()\nfor c in cs:\n    c.start()\np.join()\nfor c in cs:\n    c.join()\n\nprint(\"生产:\", len(produced), \"| 消费:\", len(consumed))\nprint(\"数量守恒:\", len(produced) == len(consumed) == TOTAL)\nprint(\"顺序一致（FIFO）:\", consumed == list(range(TOTAL)))\nprint(\"缓冲区已清空:\", len(buf) == 0)\n"
+}

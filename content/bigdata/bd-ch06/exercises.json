@@ -1,0 +1,200 @@
+{
+  "meta": {
+    "chapter": "bd-ch06",
+    "note": "8 题，基础题 5 + 算法题 3（LeetCode 2 + GitHub 实战 1）。覆盖四层职责与调用约束、SCD Type 2 拉链表、事实表粒度与扇出、星型/雪花取舍、幂等重跑（OVERWRITE vs INTO）、循环依赖检测、拓扑排序、关键路径与最大并行度。"
+  },
+  "items": [
+    {
+      "id": "bd-ch06-ex01",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "ODS / DWD / DWS / ADS 的职责边界",
+      "content_md": "某电商离线数仓每日凌晨跑一条从订单日志到管理层报表的链路。关于四层的职责，下列说法**正确**的是？",
+      "options": [
+        { "key": "A", "text": "ODS 层会对业务库数据做深度业务清洗与维度整合，产出可直接分析的宽表" },
+        { "key": "B", "text": "DWD 层存放最细粒度的明细事实，是下游所有复用逻辑的共同基础" },
+        { "key": "C", "text": "DWS 层是面向某一张具体报表的最终结果表，口径可以直接写死" },
+        { "key": "D", "text": "ADS 任务可以直接覆盖写入 DWD 表的分区来快速修正数据" }
+      ],
+      "answer": { "correct": ["B"] },
+      "explanation": "DWD 是清洗、标准化后的**明细事实层**，粒度最细、可被反复复用，说法正确。A 错：ODS 是业务库的**原样镜像**，不做业务清洗；C 错：DWS 面向**主题域**（交易/用户/流量），ADS 才面向**具体应用**；D 错：这是**越层写入**，会用高层逻辑污染低层数据，导致所有依赖该 DWD 表的下游一起出错。",
+      "tags": ["分层建模", "ODS", "DWD", "DWS", "ADS"],
+      "source": "self",
+      "source_ref": "bd-ch06 concept/01-layered-warehouse.md",
+      "time_limit_ms": 60000,
+      "memory_limit_mb": 256
+    },
+    {
+      "id": "bd-ch06-ex02",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "缓慢变化维 SCD Type 2 的必备机制",
+      "content_md": "用户维度从「北京 / V1」在 2026-02-01 变为「北京 / V2」，在 2026-02-15 又迁到「上海 / V2」。采用 SCD Type 2 拉链表时，下列说法正确的是？",
+      "options": [
+        { "key": "A", "text": "拉链表应为同一业务主键保留多行，并用代理键与事实表关联" },
+        { "key": "B", "text": "事实表应继续用业务主键 user_id 关联维表，靠 biz_date 过滤即可" },
+        { "key": "C", "text": "当前有效行的 end_date 应填为当天的日期，便于区间查询" },
+        { "key": "D", "text": "若某次变更的新属性与上一版本完全相同，也必须新增一行版本" }
+      ],
+      "answer": { "correct": ["A"] },
+      "explanation": "Type 2 用「新增一行版本」保留历史，同一业务主键会有多行，因此必须引入**代理键**供事实表关联，A 正确。B 错：用业务主键 join 会导致事实表**扇出**（一笔事实匹配多个历史版本）。C 错：当前行的 end_date 必须用**无穷大哨兵**（业界惯用 9999-12-31），否则区间查询会漏掉当天之后的数据。D 错：属性无实质变化时不产生新版本（本章 ex02 实测 6 条变更合并为 5 个版本）。",
+      "tags": ["SCD", "拉链表", "代理键", "缓慢变化维"],
+      "source": "self",
+      "source_ref": "bd-ch06 concept/03-scd-and-metrics.md；examples/ex02.json、ex03.json",
+      "time_limit_ms": 60000,
+      "memory_limit_mb": 256
+    },
+    {
+      "id": "bd-ch06-ex03",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "事实表粒度违背与 join 扇出",
+      "content_md": "订单明细表声明粒度为「一个订单的一个商品行」（粒度键 order_id + sku_id）。跑完后发现某个日期分区里 `count(*) = 12000` 而 `count(distinct order_id, sku_id) = 11800`。下列判断与对策正确的是？",
+      "options": [
+        { "key": "A", "text": "属于正常现象，OLAP 明细表允许少量重复行" },
+        { "key": "B", "text": "粒度已被违背（粒度键不再是超码），应先定位重复来源，最常见是 join 时维表连接键不唯一造成扇出" },
+        { "key": "C", "text": "在最终聚合时加 DISTINCT 即可，不必追溯原因" },
+        { "key": "D", "text": "说明 src 侧数据本身有 200 条脏数据，直接删除即可" }
+      ],
+      "answer": { "correct": ["B"] },
+      "explanation": "粒度声明等价于「粒度键是表的超码」，`count(*) != count(distinct 粒度键)` 就说明**粒度已被违背**。A 错：明细事实表不允许重复行。C 错：DISTINCT 只随机去掉重复行的表象，会把本该计入的金额一起删掉，导致 SUM 口径错误且难以发现。D 错：未定位原因就删数据是危险操作。正确对策是 join 前先把维表按连接键聚合到唯一。",
+      "tags": ["维度建模", "粒度", "扇出", "数据质量"],
+      "source": "self",
+      "source_ref": "bd-ch06 concept/02-dimensional-modeling.md；examples/ex05.json",
+      "time_limit_ms": 60000,
+      "memory_limit_mb": 256
+    },
+    {
+      "id": "bd-ch06-ex04",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "幂等重跑：INSERT OVERWRITE 与 INSERT INTO",
+      "content_md": "ADS 任务在 02:00 执行失败一次，运维在 02:30 手动重跑了同一天的同一任务。该任务的写表语句是 `INSERT INTO TABLE ads_gmv PARTITION(dt='2026-03-01')`。预料的结果是？",
+      "options": [
+        { "key": "A", "text": "分区仍是当天的正确结果，因为失败的那次没有写成功" },
+        { "key": "B", "text": "分区行数与金额合计翻倍（或增加失败那次残留的部分），说明写入方式不幂等" },
+        { "key": "C", "text": "分区被整分区替换，结果与跑一次完全相同" },
+        { "key": "D", "text": "调度系统会自动回滚失败的写入，无需关心" }
+      ],
+      "answer": { "correct": ["B"] },
+      "explanation": "`INSERT INTO` 是 **append（累积）语义**，重跑会把同样的数据再追加一遍：本章 ex12 实测同一批 100 行数据跑两次得到 200 行、金额 395 → 790、产生 100 个重复粒度键。正确写法是 `INSERT OVERWRITE TABLE t PARTITION(dt=...)` —— **put（赋值）语义**，天然幂等；注意必须指定分区，否则会退化成全表覆盖的历史删除事故。",
+      "tags": ["调度", "幂等", "INSERT OVERWRITE", "重跑安全"],
+      "source": "self",
+      "source_ref": "bd-ch06 concept/04-scheduling-and-tuning.md；examples/ex12.json",
+      "time_limit_ms": 60000,
+      "memory_limit_mb": 256
+    },
+    {
+      "id": "bd-ch06-ex05",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "星型模型与雪花模型的取舍（Kimball 维度建模）",
+      "content_md": "Kimball 维度建模体系中，关于星型模型与雪花模型的取舍，下列说法**错误**的是？",
+      "options": [
+        { "key": "A", "text": "星型模型的维表冗余度高，查询所需 JOIN 更少，通常更适合 OLAP 场景" },
+        { "key": "B", "text": "雪花模型把维度层级规范化，节省存储且维度改名的影响面更小" },
+        { "key": "C", "text": "现代列式存储对重复值的压缩率很高，因此星型的冗余带来的实际磁盘代价往往远小于逻辑单元数差异" },
+        { "key": "D", "text": "雪花模型因为符合第三范式，所以在任何场景下都应该优先选择" }
+      ],
+      "answer": { "correct": ["D"] },
+      "explanation": "D 的说法过于绝对，错误。本章 ex04 实测：同一查询星型只需 1 次 JOIN，雪花需 3 次；但雪花的维表单元总数 2220 小于星型的 3000，且部门改名的影响面是 10 行 vs 1000 行。工程上的标准结论是「**默认星型，必要时部分雪花化**」——OLAP 写多为整分区重建，规范化带来的更新异常防护收益有限，而 JOIN 成本是实打实的。",
+      "tags": ["维度建模", "星型模型", "雪花模型", "Kimball"],
+      "source": "book",
+      "source_ref": "《数据仓库工具箱（第 3 版）》第 2 章 Kimball 维度建模",
+      "time_limit_ms": 60000,
+      "memory_limit_mb": 256
+    },
+    {
+      "id": "bd-ch06-ex06",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "调度依赖的环检测（LeetCode 207：Detected Cycle in Course Dependencies）",
+      "content_md": "**工程背景**：调度系统要求任务依赖图必须是 DAG，否则无法确定执行顺序且会互相等待死锁。给定一个包含 `n` 个任务的调度列表，以及若干条依赖 `[a, b]`（表示任务 a 依赖任务 b），请判断这张依赖图能否拓扑排序（即是否无环）。\n\n**任务**：实现 `can_finish(n, prereq)`，返回布尔值。要求用 **Kahn 算法**（入度表 + 就绪队列）或 DFS 三色标记，时间复杂度 `O(n + m)`。\n\n> 本题来自 LeetCode 207（https://leetcode.cn/problems/course-schedule/），此处只给出工程背景与元数据，题面请以原站为准。请实现后自行与 LeetCode 的 10 组以上测试用例核对。",
+      "options": [],
+      "answer": {
+        "correct": [],
+        "output": "can_finish(2, [[1, 0]]) = True\ncan_finish(2, [[1, 0], [0, 1]]) = False",
+        "reference_code": "from collections import deque\n\n\ndef can_finish(n, prereq):\n    graph = [[] for _ in range(n)]\n    indeg = [0] * n\n    for a, b in prereq:\n        graph[b].append(a)\n        indeg[a] += 1\n    q = deque([i for i in range(n) if indeg[i] == 0])\n    done = 0\n    while q:\n        cur = q.popleft()\n        done += 1\n        for nxt in graph[cur]:\n            indeg[nxt] -= 1\n            if indeg[nxt] == 0:\n                q.append(nxt)\n    return done == n\n\n\nprint(can_finish(2, [[1, 0]]))\nprint(can_finish(2, [[1, 0], [0, 1]]))\n"
+      },
+      "explanation": "Kahn 算法的核心是反复剥离入度为 0 的节点。若最终已剥离的节点数 `done < n`，说明剩下的节点入度永远无法降到 0 —— 它们正处在（或依赖于）某个**环**上，因此图不可拓扑排序。这正是调度系统检测循环依赖的标准方法（本章 ex09 用例 B 误加回边后，Kahn 只排出了 0/10 个任务）。时间复杂度 `O(n + m)`，空间复杂度 `O(n + m)`。",
+      "tags": ["拓扑排序", "环检测", "DAG", "Kahn", "图论"],
+      "source": "leetcode",
+      "source_ref": "LeetCode 207（course-schedule）",
+      "external_url": "https://leetcode.cn/problems/course-schedule/",
+      "time_limit_ms": 2000,
+      "memory_limit_mb": 256,
+      "test_cases": [
+        { "input": "n = 2, prereq = [[1, 0]]", "expected_output": "True", "is_sample": true },
+        { "input": "n = 2, prereq = [[1, 0], [0, 1]]", "expected_output": "False", "is_sample": true },
+        { "input": "n = 3, prereq = [[1, 0], [2, 1], [2, 0]]", "expected_output": "True", "is_sample": false }
+      ]
+    },
+    {
+      "id": "bd-ch06-ex07",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "调度执行顺序求解（LeetCode 210：Topological Order of Tasks）",
+      "content_md": "**工程背景**：调度系统每晚需要根据任务依赖生成一份**执行顺序**（可以并行的任务会被分到同一层，但对外仍需给出一个合法的线性序）。给定 `n` 个任务与依赖列表 `[[a, b], ...]`（a 依赖 b），请输出一个合法的执行顺序；若存在环则输出空列表。\n\n**任务**：实现 `task_order(n, prereq)`，返回任务下标列表。为保证确定性，就绪队列每轮按**下标升序**取出。\n\n> 本题来自 LeetCode 210（https://leetcode.cn/problems/course-schedule-ii/），此处只给出工程背景与元数据，题面请以原站为准。",
+      "options": [],
+      "answer": {
+        "correct": [],
+        "output": "task_order(4, [[1, 0], [2, 0], [3, 1], [3, 2]]) = [0, 1, 2, 3]\ntask_order(2, [[1, 0], [0, 1]]) = []",
+        "reference_code": "import heapq\n\n\ndef task_order(n, prereq):\n    graph = [[] for _ in range(n)]\n    indeg = [0] * n\n    for a, b in prereq:\n        graph[b].append(a)\n        indeg[a] += 1\n    heap = [i for i in range(n) if indeg[i] == 0]\n    heapq.heapify(heap)\n    order = []\n    while heap:\n        cur = heapq.heappop(heap)\n        order.append(cur)\n        for nxt in graph[cur]:\n            indeg[nxt] -= 1\n            if indeg[nxt] == 0:\n                heapq.heappush(heap, nxt)\n    return order if len(order) == n else []\n\n\nprint(task_order(4, [[1, 0], [2, 0], [3, 1], [3, 2]]))\nprint(task_order(2, [[1, 0], [0, 1]]))\n"
+      },
+      "explanation": "拓扑排序可能有多解；生产环境为了**可复现的日志与回放**，通常用小顶堆（或排序）固定 tie-break 规则，这里按任务下标升序。存在环时 `len(order) < n`，按题意返回空列表。应用到数仓调度时，还要在拓扑序基础上叠加每个任务的**运行时长**做关键路径分析，才能得到整条链路的产出时间（见 ex09 / ex11）。复杂度 `O((n + m) log n)`。",
+      "tags": ["拓扑排序", "调度", "DAG", "确定性"],
+      "source": "leetcode",
+      "source_ref": "LeetCode 210（course-schedule-ii）",
+      "external_url": "https://leetcode.cn/problems/course-schedule-ii/",
+      "time_limit_ms": 2000,
+      "memory_limit_mb": 256,
+      "test_cases": [
+        { "input": "n = 4, prereq = [[1, 0], [2, 0], [3, 1], [3, 2]]", "expected_output": "[0, 1, 2, 3]", "is_sample": true },
+        { "input": "n = 2, prereq = [[1, 0], [0, 1]]", "expected_output": "[]", "is_sample": true }
+      ]
+    },
+    {
+      "id": "bd-ch06-ex08",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "github",
+      "difficulty": "hard",
+      "title": "离线链路的关键路径、总浮动与最大并行度",
+      "content_md": "给定一条离线数仓链路的任务字典（任务名 → 运行时长，整数时间单位）与依赖边列表 `(上游, 下游)`，实现三件事并打印：\n\n1. **关键路径（makespan）**：在 DAG 上做最长路 DP，求出整条链路的最短完成时间，并输出关键路径上的任务链；\n2. **总浮动（slack）**：对每个任务求 `最晚开始 - 最早开始`，并说明「只有 slack = 0 的任务提速才会缩短 makespan」；\n3. **最大并行度**：按最早开始时间做时间轴扫描，求同一时刻最多有多少个任务并行。\n\n**约束**：输出必须确定性（同层 ready 集按任务名字典序）；不得使用 `hash(str)`（需要哈希请用 `zlib.crc32`）。",
+      "options": [],
+      "answer": {
+        "correct": [],
+        "output": "关键路径用时 = 11\n关键链 = ods_sync -> dwd_order -> dws_trade -> ads_kpi\n总浮动 dwd_user = 1，总浮动 ads_item = 6\n最大并行度 = 3",
+        "reference_code": "DUR = {\n    'ods_sync': 2, 'dwd_order': 3, 'dwd_user': 2, 'dwd_item': 2,\n    'dws_trade': 4, 'dws_user': 2, 'ads_gmv': 1, 'ads_item': 1,\n    'ads_kpi': 2, 'ads_retain': 2,\n}\nEDGES = [\n    ('ods_sync', 'dwd_order'), ('ods_sync', 'dwd_user'), ('ods_sync', 'dwd_item'),\n    ('dwd_order', 'dws_trade'), ('dwd_user', 'dws_trade'), ('dwd_user', 'dws_user'),\n    ('dwd_item', 'ads_item'), ('dws_trade', 'ads_gmv'), ('dws_trade', 'ads_kpi'),\n    ('dws_user', 'ads_kpi'), ('dws_user', 'ads_retain'),\n]\n\n\ndef topo(nodes):\n    indeg = {n: 0 for n in nodes}\n    for u, v in EDGES:\n        indeg[v] += 1\n    ready = sorted(n for n in nodes if indeg[n] == 0)\n    order = []\n    while ready:\n        cur = ready.pop(0)\n        order.append(cur)\n        for u, v in EDGES:\n            if u == cur:\n                indeg[v] -= 1\n                if indeg[v] == 0:\n                    ready.append(v)\n        ready.sort()\n    return order\n\n\nnodes = sorted(DUR)\norder = topo(nodes)\nes = {n: 0 for n in nodes}\nfor cur in order:\n    for u, v in EDGES:\n        if u == cur:\n            es[v] = max(es[v], es[cur] + DUR[cur])\nef = {n: es[n] + DUR[n] for n in nodes}\nmakespan = max(ef.values())\n\nlf = {n: makespan for n in nodes}\nfor cur in reversed(order):\n    succ = [v for u, v in EDGES if u == cur]\n    if succ:\n        lf[cur] = min(lf[v] - DUR[v] for v in succ)\nls = {n: lf[n] - DUR[n] for n in nodes}\n\ncritical = [n for n in order if ls[n] - es[n] == 0]\nbest = 0\nfor t in range(makespan):\n    best = max(best, sum(1 for n in nodes if es[n] <= t < ef[n]))\n\nprint('关键路径用时 = ' + str(makespan))\nprint('关键链 = ' + ' -> '.join(critical))\nprint('总浮动 dwd_user = ' + str(ls['dwd_user'] - es['dwd_user']))\nprint('最大并行度 = ' + str(best))\n"
+      },
+      "explanation": "三段 DP 都建立在**拓扑序**之上：① 正向递推 `ES(v) = max(ES(u) + w(u))` 求最早开始（DAG 最长路，一般图上不可解，DAG 的无环性提供了阶段序）；② 反向递推求最晚开始，`slack = LS - ES`，slack 为 0 的节点构成关键路径；③ 用最早开始/完成区间做时间轴扫描得到最大并行度。工程含义：**只有关键路径上的任务提速才会缩短整条链路的产出时间**，这为「调优该调谁 / SLA 超时该压谁」提供了可判定的依据。",
+      "tags": ["关键路径", "AOE网", "动态规划", "调度", "并行度"],
+      "source": "github",
+      "source_ref": "DataTalksClub/data-engineering-zoomcamp（Week 4 Analytics Engineering / Workflow Orchestration）",
+      "external_url": "https://github.com/DataTalksClub/data-engineering-zoomcamp",
+      "time_limit_ms": 2000,
+      "memory_limit_mb": 256,
+      "test_cases": [
+        {
+          "input": "本章示例图：10 个任务、11 条边（见 reference_code 的 DUR / EDGES）",
+          "expected_output": "关键路径用时 = 11；关键链 = ods_sync -> dwd_order -> dws_trade -> ads_kpi；最大并行度 = 3",
+          "is_sample": true
+        }
+      ]
+    }
+  ]
+}

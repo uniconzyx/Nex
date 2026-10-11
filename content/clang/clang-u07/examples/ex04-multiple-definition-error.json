@@ -1,0 +1,16 @@
+{
+  "title": "复现多重定义：头文件里放变量定义",
+  "code_lang": "bash",
+  "code_std": "bash5",
+  "stdin": "",
+  "expected_output": "$ gcc -c main.c -o main.o    # 各自编译都能通过\n$ gcc -c other.c -o other.o  # 各自编译都能通过\n$ nm main.o                  # 每个 .o 都有一份 D counter\n0000000000000000 b .bss\r\n0000000000000000 d .data\r\n0000000000000000 p .pdata\r\n0000000000000000 r .rdata$zzz\r\n0000000000000000 t .text\r\n0000000000000000 r .xdata\r\n                 U __main\r\n0000000000000000 B counter\r\n0000000000000000 T main\r\n$ gcc main.o other.o -o app  # 链接期才暴露：multiple definition\nD:/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/bin/ld.exe: other.o:other.c:(.bss+0x0): multiple definition of `counter'; main.o:main.c:(.bss+0x0): first defined here\r\ncollect2.exe: error: ld returned 1 exit status",
+  "code": "#!/bin/sh\n# 复现多重定义：头文件里放变量定义\n# 期望输出见 expected_output（本机 MinGW 工具链真实执行捕获）\n\ncat > config.h << 'EOF'\n#ifndef CONFIG_H\n#define CONFIG_H\n\nint counter = 0;      /* 错误示范：头文件里放定义 */\n\n#endif\nEOF\n\ncat > main.c << 'EOF'\n#include \"config.h\"\n\nint main(void)\n{\n    counter = 1;\n    return counter;\n}\nEOF\n\ncat > other.c << 'EOF'\n#include \"config.h\"\n\nint bump(void)\n{\n    return ++counter;\n}\nEOF\n\ngcc -c main.c -o main.o    # 各自编译都能通过\ngcc -c other.c -o other.o  # 各自编译都能通过\nnm main.o                  # 每个 .o 都有一份 D counter\ngcc main.o other.o -o app  # 链接期才暴露：multiple definition\n",
+  "_step_rc": [
+    0,
+    0,
+    0,
+    1
+  ],
+  "_verify_note": "expected_output 为 Windows + MinGW-w64（gcc 15.2 / binutils 2.45）真实执行捕获；脚本中显示的是可移植命令形式（gcc/ar/nm/objdump/size），本机实际以 D:/mingw64/bin/ 下的同名工具驱动，二者等价。",
+  "_expect_fail": true
+}

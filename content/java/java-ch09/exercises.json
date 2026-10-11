@@ -1,0 +1,243 @@
+{
+  "meta": {
+    "chapter": "java-ch09",
+    "note": "8 题，基础题 6 + 算法题 2；LeetCode 题仅存元数据与链接，不搬运题面正文。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "依赖调解的两条规则",
+      "content_md": "关于 Maven 依赖调解（dependency mediation），下列说法正确的是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "路径最短优先；路径长度相同时后声明者优先"
+        },
+        {
+          "key": "B",
+          "text": "路径最短优先；路径长度相同时先声明者优先"
+        },
+        {
+          "key": "C",
+          "text": "版本号最大者优先"
+        },
+        {
+          "key": "D",
+          "text": "按 groupId 字典序决定"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "两条规则有严格顺序：① **最近优先**（路径最短者胜）；② 长度相同时**先声明者胜**（注意不是后者覆盖前者，这点最常错）。第三条「版本号最大者优先」是 Gradle 的默认策略（`newest wins`），与 Maven 不同——这是高频辨析点。排查用 `mvn dependency:tree -Dverbose`，被裁剪节点会标注 `omitted for duplicate` 或 `omitted for conflict with X`。",
+      "tags": [
+        "maven",
+        "dependency-mediation",
+        "build"
+      ],
+      "source": "self",
+      "source_ref": "自编 · 依赖调解规则"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "default 生命周期 phase 顺序",
+      "content_md": "Maven default 生命周期中，下列 phase 的正确先后顺序是？\n\n① `package` ② `compile` ③ `validate` ④ `test` ⑤ `install`",
+      "options": [
+        {
+          "key": "A",
+          "text": "③②④①⑤"
+        },
+        {
+          "key": "B",
+          "text": "②③④①⑤"
+        },
+        {
+          "key": "C",
+          "text": "③②①④⑤"
+        },
+        {
+          "key": "D",
+          "text": "②④③①⑤"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "A"
+        ]
+      },
+      "explanation": "顺序为 `validate → compile → test → package → verify → install → deploy`，即 ③②④①⑤。关键性质：**执行某 phase 会连带执行同生命周期中它前面的全部 phase**，所以 `mvn package` 会自动跑完 `validate/compile/test`。另需注意 `clean` 属于**独立的 clean 生命周期**，不在 default 之中。",
+      "tags": [
+        "maven",
+        "lifecycle",
+        "phase"
+      ],
+      "source": "book",
+      "source_ref": "《Maven 实战》第 4 章 · 生命周期与插件"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "@SpringBootApplication 的组成",
+      "content_md": "`@SpringBootApplication` 由下列哪三个注解组合而成？",
+      "options": [
+        {
+          "key": "A",
+          "text": "@Configuration + @EnableAutoConfiguration + @ComponentScan"
+        },
+        {
+          "key": "B",
+          "text": "@SpringBootConfiguration + @EnableAutoConfiguration + @ComponentScan"
+        },
+        {
+          "key": "C",
+          "text": "@SpringBootConfiguration + @EnableWebMvc + @ComponentScan"
+        },
+        {
+          "key": "D",
+          "text": "@Configuration + @EnableCaching + @MapperScan"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "标准答案是 **`@SpringBootConfiguration` + `@EnableAutoConfiguration` + `@ComponentScan`**。注意 A 选项具有迷惑性——`@SpringBootConfiguration` 自身**标注了 `@Configuration`**，但合成列表中写的是前者而不是后者。三个注解的分工：`@SpringBootConfiguration` 声明这是配置类；`@EnableAutoConfiguration` 通过 `AutoConfigurationImportSelector` 走 SPI 加载自动配置；`@ComponentScan` 扫描**主类所在包及子包**（因此启动类必须放最外层包）。",
+      "tags": [
+        "springboot",
+        "annotation",
+        "autoconfiguration"
+      ],
+      "source": "self",
+      "source_ref": "自编 · 启动类注解组成"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "写出依赖树被调解后的 classpath",
+      "content_md": "已知依赖树（缩进表示层级，同一父节点下按书写顺序排列）：\n\n```\napp:1.0\n+- lib-b:1.0\n|  +- lib-c:1.0\n|  \\- lib-d:1.0\n\\- lib-c:2.0\n   \\- lib-d:2.0\n```\n\n请写出最终进入 classpath 的 `lib-c` 与 `lib-d` 的版本，并说明理由。",
+      "answer": {
+        "reference": "lib-c = 2.0（深度 1 胜过深度 2，最近优先）；lib-d = 1.0（两者都在深度 2，先声明者胜——`lib-d:1.0` 出现在 `lib-d:2.0` 之前）"
+      },
+      "explanation": "`lib-c` 两个候选深度分别是 1（`app` 直接依赖）与 2（经 `lib-b`），**最近优先**取 2.0。`lib-d` 两个候选都在深度 2，于是进入第二条规则**先声明者胜**：遍历顺序上 `lib-b` 分支的 `lib-d:1.0` 先出现，故取 1.0。这正是「同层靠声明顺序」的典型示例，也是依赖顺序变化会导致构建结果变化的根源。可运行 `examples/ex01-dependency-mediation.json` 亲眼验证。",
+      "tags": [
+        "maven",
+        "dependency-tree",
+        "mediation"
+      ],
+      "source": "self",
+      "source_ref": "自编 · 依赖树手算"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "修复事务失效的自调用代码",
+      "content_md": "下面的 service 中，`createOrder` 里调用了同类方法 `deductStock`，两者都标注了 `@Transactional`，但压测发现扣库存失败时订单没有回滚：\n\n```java\n@Service\npublic class OrderService {\n    @Transactional\n    public void createOrder(long uid, long sku, int n) {\n        insertOrder(uid, sku, n);\n        deductStock(sku, n);   // 库存不足 -> 抛 BusinessException\n    }\n\n    @Transactional\n    public void deductStock(long sku, int n) { /* ... */ }\n}\n```\n\n请指出原因并给出修法。",
+      "answer": {
+        "reference": "同类内部自调用 `this.deductStock(...)` 不经过 AOP 代理，注解不生效；且受检/自定义异常若不满足回滚规则也不会回滚。修法：把 `deductStock` 抽到独立 Bean 注入调用，或让 `createOrder` 内部转为经代理调用（不推荐 `AopContext.currentProxy()`），并显式 `@Transactional(rollbackFor = Exception.class)`。"
+      },
+      "explanation": "**根因**是代理模式的必然推论：`@Transactional` 的语义是「在方法调用前后包一层 BEGIN/COMMIT/ROLLBACK」，而这一层只在**通过代理对象进入**时存在。`this.deductStock(...)` 绕开了代理，等于直接调用了目标对象的方法，注解形同虚设——**因此它跑在 `createOrder` 那个已存在的事务里，抛异常时按理应该整体回滚**；实际没回滚，通常是第二个问题：抛的是受检异常或自定义非 RuntimeException，未配 `rollbackFor`，Spring 判定「不回滚」。修法按优先级：① 抽独立 Bean（正解，也符合分层）；② 显式 `rollbackFor`；③ 确需自调用代理时用 `AopContext.currentProxy()` 并开启 `exposeProxy`（不推荐）。另有三个同类陷阱：方法非 `public`、异常被 `catch` 吞掉、多线程调用。",
+      "tags": [
+        "spring",
+        "transactional",
+        "aop",
+        "self-invocation"
+      ],
+      "source": "self",
+      "source_ref": "自编 · 事务失效排查"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "scope 与运行时可见性",
+      "content_md": "某依赖声明为 `<scope>provided</scope>`。下列说法正确的是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "编译、测试、运行时都可见，且会被打进 fat jar"
+        },
+        {
+          "key": "B",
+          "text": "编译与测试可见，运行时不可见，也不会被打进产物"
+        },
+        {
+          "key": "C",
+          "text": "仅运行时可见，编译期不可用"
+        },
+        {
+          "key": "D",
+          "text": "只在测试阶段可见"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "`provided` 的语义是「**运行环境会提供**」：编译期与测试期需要它（否则源码编译不过），但**运行时不进 classpath、也不打包进产物**。所以用 `java -jar` 独立启动一个把 `servlet-api` 标成 `provided` 的应用会直接 `ClassNotFoundException`——这是 `provided` 最经典的线上事故。对照记忆：`runtime` 反过来（编译不可见、运行可见，JDBC 驱动的工作方式）；`test` 只在测试可见（JUnit）。完整矩阵见 `examples/ex03-scope-visibility-matrix.json`。",
+      "tags": [
+        "maven",
+        "scope",
+        "classpath"
+      ],
+      "source": "self",
+      "source_ref": "自编 · scope 语义辨析"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "medium",
+      "title": "课程表 II（拓扑排序判定构建顺序）",
+      "external_url": "https://leetcode.cn/problems/course-schedule-ii/",
+      "content_md": "多模块 Maven 工程的构建顺序本质是对模块依赖图做拓扑排序；若图中存在环，Maven 会报 `the projects in the reactor contain a cyclic reference`。请实现一个通用拓扑排序，在存在环时返回空结果。",
+      "answer": {
+        "reference": "Kahn 算法：统计入度 → 入度为 0 入队 → 出队计数并松弛后继 → 若已排序节点数 < 总数则说明有环。"
+      },
+      "explanation": "与本章 `ex06` 的实现完全一致：Kahn 算法（BFS 版拓扑排序）天然带**环检测**能力——最终入队的节点数小于总数即存在环。注意与 DFS 版的区别：DFS 版需要额外维护「三色标记」（白/灰/黑）才能检测环，实现更易错；Kahn 版只需比较计数。复杂度均为 O(V+E)。本题只存题目链接与元数据，题面请到平台查看。",
+      "tags": [
+        "topological-sort",
+        "kahn",
+        "graph",
+        "build-order"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 210 · 课程表 II"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": "hard",
+      "title": "实现依赖调解（最近优先 + 同层先声明优先）",
+      "content_md": "给定根构件与一组有向边 `parent -> child:version`（边按 POM 中的书写顺序给出），实现依赖调解并输出最终 classpath：\n\n1. 用 BFS 计算每个坐标相对根的深度；\n2. 同一 `artifactId` 只保留一个版本：深度更小者胜；深度相同则**声明顺序在前者**胜；\n3. 输出被裁剪的坐标及其裁剪原因。",
+      "answer": {
+        "reference": "BFS 求深度 → 按 artifact 聚合，键为 (depth, declarationIndex) 取字典序最小者 → 逐个节点比对胜出版本，不同者即为被裁剪项。"
+      },
+      "explanation": "参考实现见 `examples/ex01-dependency-mediation.json`。要点有三：① **深度必须用 BFS 求**，因为「最近优先」比的是到根的**最短路径长度**，而 DFS 先遇到的未必最短；② 裁剪原因要区分两类——`deeper`（深度更大）与 `same depth, declared later`（同深度但声明靠后），这正是两条调解规则的分别体现；③ 输出必须**保持确定性**（用 `LinkedHashMap` 而非 `HashMap` 迭代），否则同一次依赖图会打印出不同顺序，无法作为可复现的验收依据。",
+      "tags": [
+        "dependency-mediation",
+        "bfs",
+        "deterministic"
+      ],
+      "source": "self",
+      "source_ref": "自编 · 依赖调解实现"
+    }
+  ]
+}

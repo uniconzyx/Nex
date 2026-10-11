@@ -1,0 +1,300 @@
+{
+  "meta": {
+    "chapter": "spring-ch06",
+    "note": "8 题，基础题 7 + 算法题 1（其中 1 题来自 LeetCode，仅存元数据与链接，不搬运题面正文）"
+  },
+  "items": [
+    {
+      "id": "ex1",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "#{} 与 ${} 的区别",
+      "content_md": "下列关于 MyBatis 中 `#{}` 与 `${}` 的说法，哪一项是正确的？",
+      "options": [
+        {
+          "key": "A",
+          "text": "${} 会被替换成 ? 占位符并预编译，#{} 是直接字符串拼接"
+        },
+        {
+          "key": "B",
+          "text": "#{} 被替换成 ? 占位符，参数经 PreparedStatement 预编译绑定，可防 SQL 注入；${} 是直接字符串拼接，有注入风险"
+        },
+        {
+          "key": "C",
+          "text": "#{} 与 ${} 只是写法不同，底层完全等价"
+        },
+        {
+          "key": "D",
+          "text": "只有 ${} 能防 SQL 注入，#{} 不能"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "#{} 在解析阶段被替换成 JDBC 的 ? 占位符，参数通过 PreparedStatement 单独绑定（预编译），数据库区分代码与数据，因此防注入；${} 是文本插值，把值直接拼进 SQL 文本，存在注入风险，仅用于表名/列名/排序等非值场景。",
+      "tags": [
+        "placeholder",
+        "injection"
+      ],
+      "source": "self",
+      "source_ref": "《MyBatis 从入门到精通》第3章"
+    },
+    {
+      "id": "ex2",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "resultType 与 resultMap 的区别",
+      "content_md": "下列关于 `resultType` 与 `resultMap` 的说法，正确的是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "resultMap 比 resultType 更快，应该一律用 resultMap"
+        },
+        {
+          "key": "B",
+          "text": "resultType 靠自动映射（同名/驼峰），简单快捷；resultMap 显式声明列-字段映射，支持别名、嵌套、关联，处理列名不一致与复杂结构"
+        },
+        {
+          "key": "C",
+          "text": "列名与属性名不一致时，开驼峰也查不出，必须用 JDBC 改名"
+        },
+        {
+          "key": "D",
+          "text": "resultType 无法使用，MyBatis 只支持 resultMap"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "resultType 依赖自动映射（同名或驼峰），适合简单 CRUD；resultMap 显式声明 column→property 映射，支持嵌套对象与关联（association/collection），用于处理列名不一致与复杂结果。简单场景手写 resultMap 是过度设计。",
+      "tags": [
+        "resultmap"
+      ],
+      "source": "self",
+      "source_ref": "《MyBatis 从入门到精通》第4章"
+    },
+    {
+      "id": "ex3",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "#{} 防 SQL 注入的底层原理",
+      "content_md": "为什么 `#{}` 能防止 SQL 注入？最准确的一项是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "MyBatis 对参数做了单引号转义，所以注入失效"
+        },
+        {
+          "key": "B",
+          "text": "#{} 被替换成 ? 占位符，SQL 模板先预编译，参数作为数据单独绑定，数据库区分指令与数据"
+        },
+        {
+          "key": "C",
+          "text": "#{} 会自动过滤掉 OR 和单引号等关键字"
+        },
+        {
+          "key": "D",
+          "text": "因为 MyBatis 默认开启了防火墙"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "核心机制是参数化查询（预编译）：带 ? 的 SQL 先发给数据库编译成执行计划，参数在 setXxx 阶段作为数据传入，数据库无法把数据当 SQL 指令执行。转义单引号是黑名单思维，预编译是白名单（结构固定、参数只是数据），更彻底。",
+      "tags": [
+        "injection",
+        "preparedstatement"
+      ],
+      "source": "self",
+      "source_ref": "JDBC PreparedStatement 官方文档"
+    },
+    {
+      "id": "ex4",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "一级缓存与二级缓存的范围",
+      "content_md": "关于 MyBatis 一级缓存与二级缓存的范围，正确的是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "一级缓存是 namespace 级，跨 SqlSession 共享"
+        },
+        {
+          "key": "B",
+          "text": "一级缓存是 SqlSession 级，同一会话内相同查询命中；二级缓存是 namespace（Mapper）级，跨 SqlSession 共享，需显式开启且对象可序列化"
+        },
+        {
+          "key": "C",
+          "text": "二级缓存默认开启，无需任何配置"
+        },
+        {
+          "key": "D",
+          "text": "一级缓存在 SqlSession 关闭后依然存在"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "一级缓存（local cache）默认开启，作用域是 SqlSession，同一会话内相同查询命中；二级缓存作用域是 Mapper 的 namespace，跨 SqlSession 共享，需显式 <cache/> 开启且缓存对象需可序列化；SqlSession 关闭/提交后一级缓存清空或晋升二级。",
+      "tags": [
+        "cache"
+      ],
+      "source": "self",
+      "source_ref": "《MyBatis 从入门到精通》缓存章节"
+    },
+    {
+      "id": "ex5",
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "修正「驼峰未开导致字段为 null」",
+      "content_md": "实体属性名为 `userName`，数据库列为 `user_name`。查询使用 `resultType` 且未做任何映射配置，结果 `userName` 为 null。下列哪种改法能解决问题？",
+      "options": [
+        {
+          "key": "A",
+          "text": "把数据库列改名为 userName"
+        },
+        {
+          "key": "B",
+          "text": "把实体属性改名为 user_name"
+        },
+        {
+          "key": "C",
+          "text": "在全局配置开启 mapUnderscoreToCamelCase=true"
+        },
+        {
+          "key": "D",
+          "text": "C（开驼峰）或手写 resultMap 显式映射 user_name→userName 均可"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "D"
+        ],
+        "reference_code": "<!-- 方案A：全局开驼峰（SpringBoot 配置） -->\nmybatis:\n  configuration:\n    map-underscore-to-camel-case: true\n\n<!-- 方案B：手写 resultMap -->\n<resultMap id=\"userMap\" type=\"User\">\n  <result column=\"user_name\" property=\"userName\"/>\n</resultMap>\n<select id=\"selectById\" resultMap=\"userMap\">\n  SELECT id, user_name FROM t_user WHERE id = #{id}\n</select>"
+      },
+      "explanation": "列名与属性名不一致时，要么开 mapUnderscoreToCamelCase 让下划线自动转驼峰，要么手写 resultMap 显式声明 column→property。两者都能解决；改列名/属性名通常不可行（受既有库表或领域模型约束）。",
+      "tags": [
+        "camel",
+        "resultmap"
+      ],
+      "source": "self",
+      "source_ref": "《MyBatis 从入门到精通》第4章"
+    },
+    {
+      "id": "ex6",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "插入后如何拿到自增主键",
+      "content_md": "向自增主键表插入一行后，如何正确获取数据库生成的主键？",
+      "options": [
+        {
+          "key": "A",
+          "text": "insert 语句的返回值就是主键"
+        },
+        {
+          "key": "B",
+          "text": "用 useGeneratedKeys=true 且 keyProperty 指定属性，插入后从传入实体对象取回主键；insert 返回值是受影响行数"
+        },
+        {
+          "key": "C",
+          "text": "必须再发一条 SELECT MAX(id) 查询"
+        },
+        {
+          "key": "D",
+          "text": "主键只能通过数据库序列获取"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "insert 返回的是受影响行数，不是主键。需配置 useGeneratedKeys=true 与 keyProperty=属性名，MyBatis 通过 JDBC getGeneratedKeys 把生成的主键回填到传入实体；Oracle 无自增列需用 <selectKey order=BEFORE> 取序列。",
+      "tags": [
+        "keygen"
+      ],
+      "source": "self",
+      "source_ref": "《MyBatis 从入门到精通》第5章"
+    },
+    {
+      "id": "ex7",
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "实现下划线命名转小驼峰",
+      "content_md": "实现 `to_camel(name)`：把下划线命名（如 `user_name`）转换为小驼峰（如 `userName`）。要求 O(n) 且正确处理多段（如 `create_time` → `createTime`）。",
+      "options": [],
+      "answer": {
+        "reference_code": "def to_camel(name):\n    parts = name.split(\"_\")\n    return parts[0] + \"\".join(p.capitalize() for p in parts[1:])\n\n\nif __name__ == \"__main__\":\n    print(to_camel(\"user_name\"))\n    print(to_camel(\"create_time\"))\n"
+      },
+      "explanation": "按 _ 切词，首段保留原样，其余每段首字母大写后拼接。这正是 MyBatis 驼峰映射的确定性变换函数。时间复杂度 O(n)（n 为字符串长度）。",
+      "tags": [
+        "camel",
+        "algorithm"
+      ],
+      "source": "self",
+      "source_ref": "MyBatis mapUnderscoreToCamelCase 原理"
+    },
+    {
+      "id": "ex8",
+      "type": "choice",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "easy",
+      "title": "LeetCode 175 Combine Two Tables（关联映射思想）",
+      "content_md": "本题为 LeetCode 原题，本条目仅存元数据与链接，不搬运题面正文。它常用于考查「关系表 LEFT JOIN 与结果投影」——这正是 MyBatis 用 resultMap/关联把多表行装配成对象图的思想来源：用 Person 的 id 关联 Address，缺失地址时地址字段为 null（对应嵌套对象为 null）。",
+      "options": [
+        {
+          "key": "A",
+          "text": "用 LEFT JOIN 保留左表全部行，右表缺失列补 null"
+        },
+        {
+          "key": "B",
+          "text": "用 INNER JOIN 只保留两表都匹配的行"
+        },
+        {
+          "key": "C",
+          "text": "用 CROSS JOIN 笛卡尔积"
+        },
+        {
+          "key": "D",
+          "text": "用 UNION 纵向拼接"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "A"
+        ]
+      },
+      "explanation": "标准解法是 LEFT JOIN：保证左表（Person）每一行都出现，右表（Address）无匹配时对应列为 null——对应 MyBatis 关联映射里「嵌套对象可能为 null」的语义。详见原题链接，题面不在此搬运。",
+      "tags": [
+        "join",
+        "mapping"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 175 Combine Two Tables",
+      "external_url": "https://leetcode.cn/problems/combine-two-tables/"
+    }
+  ]
+}

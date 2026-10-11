@@ -1,0 +1,8 @@
+{
+  "title": "因果掩码正确性验证（上三角 −inf → softmax 后 0）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "上三角(未来)掩码数: 6\n被掩位置 A 值(应全为0): [0. 0. 0. 0. 0. 0.]\n被掩位置==0: True\n每行和=1: [1. 1. 1. 1.]\n",
+  "code": "import numpy as np\nrng = np.random.default_rng(42)\nT = 4\nd = 4\nx = rng.standard_normal((T, d))\nWq = rng.standard_normal((d, d)); Wk = rng.standard_normal((d, d))\nQ = x @ Wq; K = x @ Wk\nscores = Q @ K.T\nmask = np.triu(np.ones((T, T)), k=1).astype(bool)\nmasked = np.where(mask, -np.inf, scores)\ndef softmax(z):\n    m = np.max(z, axis=-1, keepdims=True)\n    e = np.exp(z - m)\n    return e / e.sum(axis=-1, keepdims=True)\nA = softmax(masked)\nprint(\"上三角(未来)掩码数:\", int(mask.sum()))\nprint(\"被掩位置 A 值(应全为0):\", np.round(A[mask], 6))\nprint(\"被掩位置==0:\", bool(np.all(A[mask] == 0.0)))\nprint(\"每行和=1:\", np.round(A.sum(axis=1), 6))\n"
+}

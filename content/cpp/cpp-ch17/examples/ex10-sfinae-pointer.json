@@ -1,0 +1,8 @@
+{
+  "title": "SFINAE 重载选择（指针 vs 非指针）",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "1",
+  "code": "#include <iostream>\n#include <type_traits>\n\ntemplate <typename T>\ntypename std::enable_if<std::is_pointer<T>::value, int>::type\ncat(T) { return 1; }\n\ntemplate <typename T>\ntypename std::enable_if<!std::is_pointer<T>::value, int>::type\ncat(T) { return 2; }\n\nint main() {\n    int r = cat(static_cast<int*>(nullptr));\n    std::cout << r;\n}"
+}

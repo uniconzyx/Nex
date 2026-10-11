@@ -1,0 +1,23 @@
+{
+  "title": "静态库循环依赖：两种顺序都失败，--start-group 反复扫描才收敛",
+  "code_lang": "bash",
+  "code_std": "bash5",
+  "stdin": "",
+  "expected_output": "$ gcc -c a1.c -o a1.o\n$ gcc -c a2.c -o a2.o\n$ ar rcs liba.a a1.o a2.o\n$ gcc -c b1.c -o b1.o\n$ gcc -c b2.c -o b2.o\n$ ar rcs libb.a b1.o b2.o\n$ gcc -c main.c -o main.o\n$ gcc main.o -L. -la -lb -o appA   # 失败：b2.o 需要 fa 时 liba 已扫完\nD:/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/bin/ld.exe: ./libb.a(b2.o):b2.c:(.text+0x9): undefined reference to `fa'\r\ncollect2.exe: error: ld returned 1 exit status\n$ gcc main.o -L. -lb -la -o appB   # 对称失败：a2.o 需要 g 时 libb 已扫完\nD:/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/bin/ld.exe: ./liba.a(a2.o):a2.c:(.text+0x9): undefined reference to `g'\r\ncollect2.exe: error: ld returned 1 exit status\n$ gcc main.o -L. -Wl,--start-group -la -lb -Wl,--end-group -o appC   # 反复扫描至收敛\n$ ./appC\nfa_uses_g() = 101\r\ng_uses_fa() = 10\r",
+  "code": "#!/bin/sh\n# 静态库循环依赖：两种顺序都失败，--start-group 反复扫描才收敛\n# 期望输出见 expected_output（本机 MinGW 工具链真实执行捕获）\n\ncat > a1.c << 'EOF'\n/* liba 成员一：被 libb 依赖的 fa */\nint fa(void)\n{\n    return 1;\n}\nEOF\n\ncat > a2.c << 'EOF'\n/* liba 成员二：自己又依赖 libb 的 g */\nextern int g(void);\n\nint fa_uses_g(void)\n{\n    return g() + 1;\n}\nEOF\n\ncat > b1.c << 'EOF'\n/* libb 成员一：被 liba 依赖的 g */\nint g(void)\n{\n    return 100;\n}\nEOF\n\ncat > b2.c << 'EOF'\n/* libb 成员二：自己又依赖 liba 的 fa */\nextern int fa(void);\n\nint g_uses_fa(void)\n{\n    return fa() * 10;\n}\nEOF\n\ncat > main.c << 'EOF'\n#include <stdio.h>\n\nint fa_uses_g(void);\nint g_uses_fa(void);\n\nint main(void)\n{\n    printf(\"fa_uses_g() = %d\\n\", fa_uses_g());\n    printf(\"g_uses_fa() = %d\\n\", g_uses_fa());\n    return 0;\n}\nEOF\n\ngcc -c a1.c -o a1.o\ngcc -c a2.c -o a2.o\nar rcs liba.a a1.o a2.o\ngcc -c b1.c -o b1.o\ngcc -c b2.c -o b2.o\nar rcs libb.a b1.o b2.o\ngcc -c main.c -o main.o\ngcc main.o -L. -la -lb -o appA   # 失败：b2.o 需要 fa 时 liba 已扫完\ngcc main.o -L. -lb -la -o appB   # 对称失败：a2.o 需要 g 时 libb 已扫完\ngcc main.o -L. -Wl,--start-group -la -lb -Wl,--end-group -o appC   # 反复扫描至收敛\n./appC\n",
+  "_step_rc": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    0,
+    0
+  ],
+  "_verify_note": "expected_output 为 Windows + MinGW-w64（gcc 15.2 / binutils 2.45）真实执行捕获；脚本中显示的是可移植命令形式（gcc/ar/nm/objdump/size），本机实际以 D:/mingw64/bin/ 下的同名工具驱动，二者等价。",
+  "_expect_fail": true
+}

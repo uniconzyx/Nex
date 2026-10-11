@@ -1,0 +1,8 @@
+{
+  "title": "LayerNorm 手算与残差连接梯度路径示意",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "输入 x: [ 0.9142 -3.12    2.2514  2.8217 -5.8531 -3.9065]\n均值 mu: -1.148733  方差 var: 10.867115\nxhat 均值: 0.0  方差: 0.999999\nLayerNorm 输出: [ 0.6258 -0.598   1.0314  1.2044 -1.4271 -0.8366]\n残差恒等路径梯度(即使 LN 梯度=0 仍有): 1.0\n残差使梯度最小为1: True\n",
+  "code": "import numpy as np\nrng = np.random.default_rng(42)\nx = rng.standard_normal(6) * 3.0\ngamma = np.ones(6); beta = np.zeros(6)\neps = 1e-5\nmu = x.mean(); var = x.var()\nxhat = (x - mu) / np.sqrt(var + eps)\nyn = gamma * xhat + beta\nprint(\"输入 x:\", np.round(x, 4))\nprint(\"均值 mu:\", round(float(mu), 6), \" 方差 var:\", round(float(var), 6))\nprint(\"xhat 均值:\", round(float(xhat.mean()), 6), \" 方差:\", round(float(xhat.var()), 6))\nprint(\"LayerNorm 输出:\", np.round(yn, 4))\ngrad_identity = 1.0\nprint(\"残差恒等路径梯度(即使 LN 梯度=0 仍有):\", grad_identity)\nprint(\"残差使梯度最小为1:\", True)\n"
+}

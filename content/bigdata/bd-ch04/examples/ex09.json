@@ -1,0 +1,8 @@
+{
+  "title": "宽依赖导致失败重算的范围（窄依赖只重算单分区）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "场景: 第 3 个分区计算结果丢失, 需重算\n窄依赖(map/filter): 只需重算父 RDD 的 1 个对应分区 -> 重算分区数 = 1\n宽依赖(reduceByKey): 需重算父 RDD 全部 4 个分区 -> 重算分区数 = 4\n宽依赖失败重算成本是窄依赖的 4 倍\n",
+  "code": "narrow_parent_parts = 1\nwide_parent_parts = 4\nprint(\"场景: 第 3 个分区计算结果丢失, 需重算\")\nprint(f\"窄依赖(map/filter): 只需重算父 RDD 的 1 个对应分区 -> 重算分区数 = {narrow_parent_parts}\")\nprint(f\"宽依赖(reduceByKey): 需重算父 RDD 全部 {wide_parent_parts} 个分区 -> 重算分区数 = {wide_parent_parts}\")\nprint(f\"宽依赖失败重算成本是窄依赖的 {wide_parent_parts // narrow_parent_parts} 倍\")\n"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "auto 丢失引用造成的隐性拷贝（计数器实证）",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "for (auto t : v)        拷贝次数 = 2\nfor (const auto& t : v) 拷贝次数 = 0\nauto copy = v[0]        拷贝次数 = 1\n结论：想让 auto 绑定引用必须显式写 &，auto 从不推导出引用",
+  "code": "#include <iostream>\n#include <string>\n#include <utility>\n#include <vector>\nusing namespace std;\n\nstruct Tracker {\n    string name;\n    static int copies;\n    explicit Tracker(string n) : name(std::move(n)) {}\n    Tracker(const Tracker& o) : name(o.name) { ++copies; }\n};\nint Tracker::copies = 0;\n\nint main() {\n    vector<Tracker> v;\n    v.emplace_back(\"A\");          // 原地构造，不产生拷贝\n    v.emplace_back(\"B\");\n\n    Tracker::copies = 0;\n    for (auto t : v) { (void)t; }               // 值语义：每个元素拷贝一次\n    cout << \"for (auto t : v)        拷贝次数 = \" << Tracker::copies << \"\\n\";\n\n    Tracker::copies = 0;\n    for (const auto& t : v) { (void)t; }        // 引用：零拷贝\n    cout << \"for (const auto& t : v) 拷贝次数 = \" << Tracker::copies << \"\\n\";\n\n    Tracker::copies = 0;\n    auto copy = v[0];                            // auto 推导为 Tracker，触发拷贝\n    cout << \"auto copy = v[0]        拷贝次数 = \" << Tracker::copies << \"\\n\";\n    cout << \"结论：想让 auto 绑定引用必须显式写 &，auto 从不推导出引用\\n\";\n    (void)copy;\n}"
+}

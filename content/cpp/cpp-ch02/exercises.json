@@ -1,0 +1,117 @@
+{
+  "meta": {
+    "chapter": "cpp-ch02",
+    "note": "5 题，4 类题型混合；含 LeetCode 真题映射（仅元数据+链接）"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "difficulty": "easy",
+      "title": "关于函数重载，正确的是",
+      "content_md": "选择**正确**的描述。",
+      "options": [
+        {
+          "key": "A",
+          "text": "仅返回类型不同的两个同名函数可以重载"
+        },
+        {
+          "key": "B",
+          "text": "重载决议优先精确匹配，其次类型提升，再标准转换"
+        },
+        {
+          "key": "C",
+          "text": "默认参数可不连续地从任意位置开始"
+        },
+        {
+          "key": "D",
+          "text": "函数声明可以写多次，定义也可以写多次"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "重载看参数列表不看返回类型；默认参数须从右连续；定义只能一处。",
+      "tags": [
+        "overload",
+        "default-arg"
+      ],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 6 章 函数",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "fix_error",
+      "difficulty": "easy",
+      "title": "修复默认参数重定义",
+      "content_md": "以下代码报“默认参数重定义”，请修复（只保留一处默认参数）：\n\n```cpp\nvoid greet(const std::string& name, const std::string& suffix = \"!\");\nvoid greet(const std::string& name, const std::string& suffix = \"!\") { /* ... */ }\n```",
+      "answer": {
+        "reference_code": "void greet(const std::string& name, const std::string& suffix = \"!\");\nvoid greet(const std::string& name, const std::string& suffix) { /* ... */ }}"
+      },
+      "explanation": "默认参数只在声明处给一次，定义处省略。",
+      "tags": [
+        "default-arg"
+      ],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 6 章 函数",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "output",
+      "difficulty": "mid",
+      "title": "读代码写输出",
+      "content_md": "```cpp\n#include <iostream>\nvoid f(int& a, int b) { a += 5; b += 5; }\nint main() {\n    int x = 1, y = 2;\n    f(x, y);\n    std::cout << x << \" \" << y;\n}\n```",
+      "answer": {
+        "output": "6 2"
+      },
+      "explanation": "a 是引用，修改影响 x；b 是值传递，不影响 y。",
+      "tags": [
+        "pass-by-ref"
+      ],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 6 章 参数传递",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "coding",
+      "difficulty": "easy",
+      "title": "实现字符串反转函数",
+      "content_md": "实现 `std::string reverse_str(const std::string& s)`，返回反转后的字符串。",
+      "answer": {
+        "reference_code": "#include <iostream>\n#include <string>\nstd::string reverse_str(const std::string& s){std::string r;for(int i=(int)s.size()-1;i>=0;--i)r+=s[i];return r;}\nint main(){std::cout<<reverse_str(\"cat\");}"
+      },
+      "explanation": "从尾到头拼回即可；const 引用避免拷贝。",
+      "tags": [
+        "string",
+        "function"
+      ],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 6 章 习题",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "coding",
+      "difficulty": "mid",
+      "title": "LeetCode 20 · 有效的括号",
+      "content_md": "给定一个只含 '()[]{}' 的字符串，判断括号是否匹配。用栈实现，封装成函数 `bool isValid(const std::string& s)`。",
+      "answer": {
+        "reference_code": "#include <iostream>\n#include <string>\n#include <stack>\nbool isValid(const std::string& s){\n  std::stack<char> st;\n  for(char c: s){\n    if(c=='('||c=='['||c=='{') st.push(c);\n    else { if(st.empty()) return false; char t=st.top(); st.pop();\n      if((c==')'&&t!='(')||(c==']'&&t!='[')||(c=='}'&&t!='{')) return false; }\n  }\n  return st.empty();\n}\nint main(){ std::cout << (isValid(\"()[]{}\") ? 1 : 0); }"
+      },
+      "explanation": "经典栈题，函数式封装便于复用。",
+      "tags": [
+        "stack",
+        "function"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 20（有效的括号）",
+      "external_url": "https://leetcode.cn/problems/valid-parentheses/",
+      "category": "算法题",
+      "platform": "leetcode"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "title": "文本模式：fprintf 写盘再用 fscanf 读回",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "read: alice 95\nread: bob 88\n",
+  "code": "#include <stdio.h>\nint main(void) {\n    FILE *w = fopen(\"t.txt\", \"w\");\n    fprintf(w, \"name=%s score=%d\\n\", \"alice\", 95);\n    fprintf(w, \"name=%s score=%d\\n\", \"bob\", 88);\n    fclose(w);\n    FILE *r = fopen(\"t.txt\", \"r\");\n    char name[32]; int score;\n    while (fscanf(r, \"name=%31s score=%d\\n\", name, &score) == 2) {\n        printf(\"read: %s %d\\n\", name, score);\n    }\n    fclose(r);\n    return 0;\n}"
+}

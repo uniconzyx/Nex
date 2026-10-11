@@ -1,0 +1,253 @@
+{
+  "meta": {
+    "chapter": "fund-ch09",
+    "note": "进程/线程与调度练习：基础题考察状态机、六种调度算法的演算、信号量同步、死锁与银行家算法；算法题来自刷题平台（仅存元数据+链接，不搬运题面）。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "进程与线程：共享什么、独有什么",
+      "content_md": "关于进程与线程，下列说法正确的是？\n\nA. 进程是 CPU 调度的基本单位，线程是资源分配的基本单位\nB. 同一进程的线程共享地址空间与打开文件，但各有独立的栈、寄存器与程序计数器\nC. 线程切换一定比进程切换慢，因为要切换页表\nD. 一个线程崩溃不会影响同进程的其他线程",
+      "options": [
+        {
+          "key": "A",
+          "text": "进程是调度单位、线程是资源单位"
+        },
+        {
+          "key": "B",
+          "text": "线程共享地址空间，独有栈/寄存器/PC"
+        },
+        {
+          "key": "C",
+          "text": "线程切换更慢"
+        },
+        {
+          "key": "D",
+          "text": "线程崩溃不影响其他线程"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "A 说反了：进程是资源分配的基本单位，线程是 CPU 调度的基本单位。C 错：线程切换**更快**，因为不切地址空间，TLB 与缓存保持有效；进程切换要切页表、刷 TLB，间接开销才是大头。D 错：线程共享地址空间，一个线程触发段错误/异常未捕获会导致**整个进程**终止。",
+      "tags": [
+        "process",
+        "thread",
+        "context-switch"
+      ],
+      "source": "self",
+      "source_ref": "fund-ch09 concept/01 进程与线程"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "进程状态转换的主被动判据",
+      "content_md": "下列进程状态转换中，**由进程自身主动发起**的是？\n\nA. 运行 → 就绪\nB. 阻塞 → 就绪\nC. 运行 → 阻塞\nD. 就绪 → 运行",
+      "options": [
+        {
+          "key": "A",
+          "text": "运行 → 就绪"
+        },
+        {
+          "key": "B",
+          "text": "阻塞 → 就绪"
+        },
+        {
+          "key": "C",
+          "text": "运行 → 阻塞"
+        },
+        {
+          "key": "D",
+          "text": "就绪 → 运行"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "C"
+        ],
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "运行→阻塞是进程**主动**请求资源/等待 I/O 造成的（如发起 read 系统调用、P 操作失败）。运行→就绪是**被抢占**（时间片到或高优先级进程到达），阻塞→就绪是**被动**被中断处理程序唤醒（进程无法唤醒自己），就绪→运行是被调度程序选中。",
+      "tags": [
+        "process-state",
+        "scheduling"
+      ],
+      "source": "self",
+      "source_ref": "fund-ch09 concept/01 状态机"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "FCFS 与 SJF 的周转时间对比演算",
+      "content_md": "设有 4 个进程**同时到达**（到达时间均为 0），服务时间如下：\n\n| 进程 | 服务时间 |\n|---|---|\n| P1 | 8 |\n| P2 | 4 |\n| P3 | 9 |\n| P4 | 5 |\n\n请分别按 **FCFS（P1→P2→P3→P4 顺序）** 与 **SJF（非抢占，短作业优先）** 计算：\n1. 各自的调度顺序与完成时间；\n2. 每个进程的周转时间；\n3. 平均周转时间与平均带权周转时间；\n4. 说明 SJF 的平均周转时间是否确实更小。",
+      "answer": {
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "FCFS 顺序 P1P2P3P4：完成时间 8、12、21、26；周转 8、12、21、26；平均周转 = 67/4 = 16.75。SJF 顺序 P2(4)→P4(5)→P1(8)→P3(9)：完成时间 4、9、17、26；周转 4、9、17、26；平均周转 = 56/4 = 14.0。SJF 更小，这正是「所有进程同时到达时 SJF 平均周转时间最优」的实例（可用交换论证证明）。代价是长作业 P3 被排到最后，若持续有短作业到达就会饥饿。",
+      "tags": [
+        "fcfs",
+        "sjf",
+        "turnaround-time"
+      ],
+      "source": "self",
+      "source_ref": "fund-ch09 examples/ex01 ex02"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "信号量取值与 P/V 操作语义",
+      "content_md": "某系统用初值为 1 的互斥信号量 `mutex` 保护临界区。若当前已有 3 个进程因 `P(mutex)` 阻塞在等待队列中，则此时 `mutex` 的值为？\n\nA. 0\nB. −2\nC. −3\nD. 3",
+      "options": [
+        {
+          "key": "A",
+          "text": "0"
+        },
+        {
+          "key": "B",
+          "text": "-2"
+        },
+        {
+          "key": "C",
+          "text": "-3"
+        },
+        {
+          "key": "D",
+          "text": "3"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "C"
+        ],
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "信号量初值 1：第 1 个进程 P 后 mutex=0（获得资源，进入临界区）；此后每个进程执行 P 都会执行 `mutex--` 并阻塞，因此再有 3 个等待者后 mutex = −3。**通用规则**：`S > 0` 表示还有 S 个可用资源；`S < 0` 时 `|S|` 表示**等待队列中的进程数**。",
+      "tags": [
+        "semaphore",
+        "pv-operation",
+        "mutex"
+      ],
+      "source": "self",
+      "source_ref": "fund-ch09 concept/03 信号量"
+    },
+    {
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "hard",
+      "title": "实现银行家算法的安全性检测与请求检测",
+      "content_md": "用 Python 实现银行家算法：\n\n1. 给定 `Available`（可用资源向量）、`Max`、`Allocation`，先算 `Need = Max − Allocation`；\n2. 实现 `is_safe()`：找 `Need[i] <= Work` 的进程，假定其完成并 `Work += Allocation[i]`，反复推进，若能标记所有进程 finish 则输出**安全序列**；\n3. 实现 `request(i, req)`：先检查 `req <= Need[i]` 与 `req <= Available`，再试分配并做安全性检测，**安全才真正分配**；\n4. 用一个「安全」和一个「不安全」的测试用例分别验证。\n\n禁止用随机数据（输出必须可复现）。",
+      "answer": {
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "关键点：① 安全状态**一定**不死锁，但**不安全状态不一定死锁**——这是单向蕴含，银行家算法给出的是充分非必要条件；② 安全性检测中每轮要重新扫描**所有未 finish 的进程**，因为 Work 增大后原本不满足的进程可能变得满足；③ 试分配后若检测不安全必须**回滚**再让进程等待。",
+      "tags": [
+        "bankers-algorithm",
+        "deadlock-avoidance",
+        "safety"
+      ],
+      "source": "self",
+      "source_ref": "fund-ch09 examples/ex09"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "hard",
+      "title": "死锁的必要条件与预防手段",
+      "content_md": "关于死锁，下列叙述**错误**的是？\n\nA. 死锁的四个必要条件是：互斥、占有且等待、不可抢占、循环等待，缺一不可\nB. 破坏「循环等待」最实用的手段是资源有序分配法（给资源编号、按序申请）\nC. 系统处于不安全状态时一定已经发生死锁\nD. 银行家算法属于「死锁避免」，需要预知每个进程的最大资源需求",
+      "options": [
+        {
+          "key": "A",
+          "text": "四个必要条件缺一不可"
+        },
+        {
+          "key": "B",
+          "text": "资源有序分配法破坏循环等待"
+        },
+        {
+          "key": "C",
+          "text": "不安全状态一定已死锁"
+        },
+        {
+          "key": "D",
+          "text": "银行家算法属于死锁避免"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "C"
+        ],
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "C 是错的：**安全状态一定不死锁，但不安全状态只是「可能」死锁**。不安全状态的含义是「不存在任何能保证所有进程都能完成的推进顺序」，但进程可能提前释放资源、或实际需求小于声明的最大需求，因此未必真的死锁。这是 408 的经典单向蕴含陷阱。A、B、D 均正确。",
+      "tags": [
+        "deadlock",
+        "bankers-algorithm",
+        "prevention"
+      ],
+      "source": "self",
+      "source_ref": "fund-ch09 concept/03 死锁"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "medium",
+      "title": "按打印顺序 / 多线程交替打印（平台题，仅元数据）",
+      "content_md": "请在平台提交「交替打印 FooBar」与「按序打印」类题目。本章只登记元数据与链接，不搬运题面。\n\n能力点：信号量 / 条件变量的同步控制，直接对应本章「同步与互斥」。",
+      "answer": {
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "这类题的通用解法是给每个执行步骤配一个信号量（或条件变量），前驱步骤 V、后继步骤 P，形成一条「前驱链」。关键坑：不要在持有锁时等待另一个条件（会死锁），要用 `await/signal` 让出锁；也不要用忙等（`while` 空转），那会浪费 CPU 且在某些平台上导致超时。",
+      "tags": [
+        "concurrency",
+        "semaphore",
+        "ordering"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 1114 · 按序打印 / 1115 交替打印 FooBar",
+      "external_url": "https://leetcode.cn/problems/print-in-order/"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "nowcoder",
+      "difficulty": "easy",
+      "title": "进程调度模拟（平台题，仅元数据）",
+      "content_md": "请在平台提交「进程调度」类模拟题。本章只登记元数据与链接，不搬运题面。\n\n能力点：优先队列（堆）+ 调度策略模拟，对应本章六种调度算法。",
+      "answer": {
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "实现要点：① 用 `heapq`维护就绪队列，关键字为优先级/剩余时间；② 时间推进用「跳到下一个最早到达时刻」而不是逐 tick 自增（效率与正确性都更好）；③ 抢占式算法（SRTN）要在**每个新进程到达的时刻**重新决策；④ 计算周转时间时注意区分「完成时间 − 到达时间」与「等待时间」。",
+      "tags": [
+        "scheduling",
+        "heapq",
+        "simulation"
+      ],
+      "source": "nowcoder",
+      "source_ref": "牛客 · 进程调度模拟",
+      "external_url": "https://www.nowcoder.com/practice/46f812f0b8c041d2b7b7c1f7f0f2d4b6"
+    }
+  ]
+}

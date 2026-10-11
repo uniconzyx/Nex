@@ -1,0 +1,8 @@
+{
+  "title": "ex04-binding-failure-400",
+  "code_lang": "java",
+  "code_std": "java23",
+  "stdin": "",
+  "expected_output": "200 OK page=2\n400 Bad Request param 'page' not a number: 'abc'\n200 OK size=10\n400 Bad Request param 'size' not a number: '?'",
+  "code": "import java.util.*;\npublic class Main {\n    static String bindInt(String name, String raw){\n        try{\n            int v=Integer.parseInt(raw);\n            return \"200 OK \"+name+\"=\"+v;\n        }catch(NumberFormatException e){\n            return \"400 Bad Request param '\"+name+\"' not a number: '\"+raw+\"'\";\n        }\n    }\n    public static void main(String[] a){\n        System.out.println(bindInt(\"page\",\"2\"));\n        System.out.println(bindInt(\"page\",\"abc\"));\n        System.out.println(bindInt(\"size\",\"10\"));\n        System.out.println(bindInt(\"size\",\"?\"));\n    }\n}"
+}

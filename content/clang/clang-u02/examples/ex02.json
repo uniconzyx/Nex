@@ -1,0 +1,8 @@
+{
+  "title": "calloc 清零 vs malloc 未初始化",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "calloc 求和 = 0 (必为 0)\nmalloc 内容不确定，任何具体值都不可假设",
+  "code": "#include <stdio.h>\n#include <stdlib.h>\n\nint main(void) {\n    size_t n = 4;\n    int *z = calloc(n, sizeof(int));      /* 保证全 0 */\n    int sum = 0;\n    for (size_t i = 0; i < n; i++) sum += z[i];\n    printf(\"calloc 求和 = %d (必为 0)\\n\", sum);\n\n    int *d = malloc(n * sizeof(int));     /* 内容不确定，不可依赖 */\n    printf(\"malloc 内容不确定，任何具体值都不可假设\\n\");\n\n    free(z); free(d);\n    z = d = NULL;\n    return 0;\n}"
+}

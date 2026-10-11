@@ -1,0 +1,8 @@
+{
+  "title": "new[] / delete[] 数组",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "4",
+  "code": "#include <iostream>\n\nint main() {\n    int* a = new int[3]{1, 2, 3};\n    std::cout << a[0] + a[2];\n    delete[] a;\n}"
+}

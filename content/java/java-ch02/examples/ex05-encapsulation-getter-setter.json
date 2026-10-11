@@ -1,0 +1,8 @@
+{
+  "title": "封装：private 字段 + getter/setter + 不变式校验",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "20\ncaught: age invalid: -5",
+  "code": "public class E205 {\n    private int age;\n    public int getAge() { return age; }\n    public void setAge(int age) {\n        if (age < 0 || age > 150) throw new IllegalArgumentException(\"age invalid: \" + age);\n        this.age = age;\n    }\n    public static void main(String[] args) {\n        E205 p = new E205();\n        p.setAge(20);\n        System.out.println(p.getAge());\n        try {\n            p.setAge(-5);\n        } catch (IllegalArgumentException e) {\n            System.out.println(\"caught: \" + e.getMessage());\n        }\n    }\n}"
+}

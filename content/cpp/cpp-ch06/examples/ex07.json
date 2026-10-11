@@ -1,0 +1,8 @@
+{
+  "title": "dynamic_cast 向下转型失败（返回 null）",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "cast failed (null)\n",
+  "code": "#include <iostream>\nstruct Base { virtual ~Base() = default; };\nstruct Derived : Base {};\nstruct Other : Base {};\nint main() {\n    Other o;\n    Base* bp = &o;\n    if (Derived* dp = dynamic_cast<Derived*>(bp))   // 失败：o 不是 Derived\n        std::cout << \"cast ok\\n\";\n    else\n        std::cout << \"cast failed (null)\\n\";\n}\n"
+}

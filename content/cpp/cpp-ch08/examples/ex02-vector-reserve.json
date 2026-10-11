@@ -1,0 +1,8 @@
+{
+  "title": "vector reserve 预分配：避免反复扩容，capacity 不再变化",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "0 100\n50 100\n",
+  "code": "#include <iostream>\n#include <vector>\nint main() {\n    std::vector<int> v;\n    v.reserve(100);\n    std::cout << v.size() << ' ' << v.capacity() << '\\n';\n    for (int i = 0; i < 50; ++i) v.push_back(i);\n    std::cout << v.size() << ' ' << v.capacity() << '\\n';\n}\n"
+}

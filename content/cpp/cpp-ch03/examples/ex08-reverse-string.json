@@ -1,0 +1,8 @@
+{
+  "title": "反转字符串",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "cba",
+  "code": "#include <iostream>\n#include <string>\n#include <algorithm>\n\nint main() {\n    std::string s = \"abc\";\n    std::reverse(s.begin(), s.end());\n    std::cout << s;\n}"
+}

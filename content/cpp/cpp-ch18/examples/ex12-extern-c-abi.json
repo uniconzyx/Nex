@@ -1,0 +1,8 @@
+{
+  "title": "extern \"C\" 与 ABI 边界：名称修饰、结构体布局一致性判定",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "c_add(2,3)=5\nPodC 标准布局=1 可平凡复制=1\nPodC sizeof=24 align=8 off_value=8 off_tag=16\nABI 跨语言安全: 1\nC++ 函数签名含实参类型: 1\n签名文本: const char* pretty() [with T = int]",
+  "code": "#include <cstdio>\n#include <cstring>\n#include <cstddef>\n#include <type_traits>\n\n// 与 C 共享的 POD：布局必须与 C 编译器一致 → 要求标准布局 + 可平凡复制\nstruct PodC { int id; double value; char tag; };\n\n// extern \"C\"：C 链接，不做名称修饰（C++ 名字会被 mangle 成 _Z...）\nextern \"C\" int c_add(int a, int b);\nextern \"C\" int c_add(int a, int b) { return a + b; }\n\n// 模板函数的完整签名（含实参类型）→ 展示 C++ 名称修饰的\"可读形式\"\ntemplate <class T> const char* pretty() { return __PRETTY_FUNCTION__; }\n\nint main() {\n    printf(\"c_add(2,3)=%d\\n\", c_add(2, 3));\n\n    bool layout_ok = std::is_standard_layout<PodC>::value\n                  && std::is_trivially_copyable<PodC>::value;\n    printf(\"PodC 标准布局=%d 可平凡复制=%d\\n\",\n           (int)std::is_standard_layout<PodC>::value,\n           (int)std::is_trivially_copyable<PodC>::value);\n    printf(\"PodC sizeof=%zu align=%zu off_value=%zu off_tag=%zu\\n\",\n           sizeof(PodC), alignof(PodC), offsetof(PodC, value), offsetof(PodC, tag));\n    printf(\"ABI 跨语言安全: %d\\n\", (int)layout_ok);\n\n    const char* pf = pretty<int>();\n    printf(\"C++ 函数签名含实参类型: %d\\n\", (int)(std::strstr(pf, \"T = int\") != nullptr));\n    printf(\"签名文本: %s\\n\", pf);\n    return 0;\n}"
+}

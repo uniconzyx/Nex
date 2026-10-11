@@ -1,0 +1,8 @@
+{
+  "title": "static_assert 编译期断言",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "static_assert passed",
+  "code": "#include <iostream>\ntemplate <typename T>\nvoid check() {\n    static_assert(sizeof(T) >= 4, \"type too small\");\n}\nint main() {\n    static_assert(sizeof(int) == 4, \"int must be 4 bytes\");\n    check<int>();\n    std::cout << \"static_assert passed\\n\";\n}"
+}

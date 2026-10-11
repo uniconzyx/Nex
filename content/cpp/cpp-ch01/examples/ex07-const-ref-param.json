@@ -1,0 +1,8 @@
+{
+  "title": "const 引用只读传参",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "3",
+  "code": "#include <iostream>\n#include <string>\n\nvoid show(const std::string& s) { std::cout << s.size(); }\n\nint main() {\n    std::string t = \"cat\";\n    show(t);\n}"
+}

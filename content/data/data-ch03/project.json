@@ -1,0 +1,58 @@
+{
+  "meta": {
+    "chapter": "data-ch03",
+    "title": "Pandas 基础 —— 实战项目",
+    "count": 1,
+    "note": "一个「脏 CSV 清洗 + 内存优化 + 分块聚合」的端到端项目。"
+  },
+  "items": [
+    {
+      "title": "脏 CSV 清洗与内存优化流水线",
+      "requirement_md": "请用 **Python（pandas 3.x，仅标准库 + pandas/numpy）** 写一个**确定性**的数据清洗流水线，把本章的五条主线（IO / 索引 / 缺失 / dtype 内存 / 分块）串成一个可验证的整体。\n\n**第一部分：制造脏数据（用于自测）**\n- 用固定随机种子（`np.random.default_rng(42)`）生成 20 万行数据，列为：\n  `id`（字符串，**带前导零**如 `\"000123\"`）、`city`（5 个取值）、`amount`（数值，**混入 `\"-\"` 表示缺失**）、`ts`（日期字符串）、`note`（**为空率 60%**）；\n- 以 **utf-8-sig** 写出 CSV（模拟 Excel 导出）；\n- 额外再写一份 **GBK** 编码的小文件用于验证编码兼容。\n\n**第二部分：读入与类型契约**\n- 显式指定 `dtype={\"id\": str}`、`na_values=[\"-\"]`、`parse_dates=[\"ts\"]`、`usecols=[...]`；\n- **断言** `id` 的前导零被保留（`df[\"id\"].str.startswith(\"0\").any()` 为 True）；\n- **断言** `amount` 的 dtype 是数值型而不是 `object`；\n- 打印每一列的 dtype 与缺失比例。\n\n**第三部分：缺失值处理（含对统计量的影响）**\n- 打印 `isna().sum()` 与 `isna().mean()`；\n- 对 `amount` 分别用「删」「均值填」「中位数填」处理，**打印三种做法下该列的 `mean` 与 `std`**，并**断言「填充后的 std 严格小于只用非空值算的 std」**（验证方差压缩）；\n- 对 `note`（缺失 60%）**不填充**，而是新增一个布尔列 `note_missing` 作为指示特征。\n\n**第四部分：索引与对齐**\n- 用 `set_index(\"id\")` 建立业务索引，**断言** `index.has_duplicates` 为 False；\n- 构造一个「城市 → 目标额度」的小 Series，用对齐的方式新增一列 `target`，\n- **断言** 对齐后行数**没有变化**（这是对齐安全性的检查），且未匹配的 `city` 处为 `NaN`。\n\n**第五部分：内存优化（量化）**\n- 打印优化前 `memory_usage(deep=True)` 的总量与各列明细；\n- 把 `city` 转 `category`、把 `amount` 降到最小可用整型（**降位前先断言值域**）；\n- 打印优化后的总量与**节省比例**；\n- **断言** 优化后总量 < 优化前总量。\n\n**第六部分：分块聚合**\n- 以 `chunksize=50000` 重读该 CSV，累加 `(sum, count)` 得到全表均值；\n- 同时用「平均的平均」错误做法算一遍；\n- **断言** 累加法的结果与一次性读入的结果**完全一致**（误差 < 1e-9），而「平均的平均」**不相等**。\n\n**验收标准**\n- 程序可重复运行，两次输出**逐字节相同**；\n- 至少 8 个 `assert` 全部通过；\n- 输出末尾打印 `all_checks_passed = True`。",
+      "tasks": [
+        {
+          "title": "生成确定性的脏 CSV（utf-8-sig + 一份 GBK）",
+          "verification": {
+            "type": "test",
+            "desc": "文件存在且行数正确"
+          }
+        },
+        {
+          "title": "按类型契约读入",
+          "verification": {
+            "type": "test",
+            "desc": "断言 id 前导零保留、amount 为数值型"
+          }
+        },
+        {
+          "title": "缺失值处理与方差压缩验证",
+          "verification": {
+            "type": "test",
+            "desc": "断言填充后 std < 非空值 std"
+          }
+        },
+        {
+          "title": "set_index 对齐安全性",
+          "verification": {
+            "type": "test",
+            "desc": "断言无重复索引、对齐后行数不变"
+          }
+        },
+        {
+          "title": "内存优化量化",
+          "verification": {
+            "type": "test",
+            "desc": "打印节省比例并断言小于原始"
+          }
+        },
+        {
+          "title": "分块聚合正确性",
+          "verification": {
+            "type": "test",
+            "desc": "断言累加法与一次性结果一致、平均的必不一致"
+          }
+        }
+      ]
+    }
+  ]
+}

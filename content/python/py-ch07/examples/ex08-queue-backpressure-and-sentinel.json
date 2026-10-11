@@ -1,0 +1,8 @@
+{
+  "title": "Queue 背压、task_done 与哨兵退出",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "入队: 40 | 处理: 40\n无丢失: True\n处理结果完整: True\n队列已空且任务已清: True",
+  "code": "import queue\nimport threading\n\n\n# queue.Queue 自带锁与阻塞语义：有界队列天然提供背压。\n# task_done() + join() 是「全部处理完毕」的正确同步方式，\n# 用 q.empty() 判断在并发下是错的。\n\nQ = queue.Queue(maxsize=5)\nTOTAL = 40\nprocessed = []\nretries = 0\n\n\ndef producer():\n    for i in range(TOTAL):\n        Q.put(i)          # 队列满时阻塞 -> 背压\n    for _ in range(3):\n        Q.put(None)       # 哨兵：通知 3 个消费者退出\n\n\ndef worker():\n    global retries\n    while True:\n        item = Q.get()\n        try:\n            if item is None:\n                return\n            processed.append(item)\n        finally:\n            Q.task_done()   # 每个 get 后必须调用\n\n\nproducers = [threading.Thread(target=producer)]\nworkers = [threading.Thread(target=worker) for _ in range(3)]\nfor t in producers + workers:\n    t.start()\nQ.join()                  # 等待所有 task_done\nfor t in producers + workers:\n    t.join()\n\nprint(\"入队:\", TOTAL, \"| 处理:\", len(processed))\nprint(\"无丢失:\", len(processed) == TOTAL)\nprint(\"处理结果完整:\", sorted(processed) == list(range(TOTAL)))\nprint(\"队列已空且任务已清:\", Q.empty())\n"
+}

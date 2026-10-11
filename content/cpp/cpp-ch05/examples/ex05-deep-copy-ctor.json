@@ -1,0 +1,8 @@
+{
+  "title": "拷贝构造：深拷贝避免双重释放",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "copy 6",
+  "code": "#include <iostream>\n\nclass Buf {\n    int* data_;\n    int n_;\npublic:\n    Buf(int n) : data_(new int[n]), n_(n) {\n        for (int i = 0; i < n_; ++i) data_[i] = i;\n    }\n    Buf(const Buf& o) : data_(new int[o.n_]), n_(o.n_) {   // 深拷贝：重新分配内存\n        for (int i = 0; i < n_; ++i) data_[i] = o.data_[i];\n        std::cout << \"copy \";\n    }\n    ~Buf() { delete[] data_; }\n    int sum() const {\n        int s = 0;\n        for (int i = 0; i < n_; ++i) s += data_[i];\n        return s;\n    }\n};\n\nint main() {\n    Buf a(4);\n    Buf b = a;              // 调用拷贝构造，深拷贝后二者独立\n    std::cout << b.sum();\n}"
+}

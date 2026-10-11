@@ -1,0 +1,9 @@
+{
+  "title": "派生表（FROM 子查询）：先聚合再过滤",
+  "code_lang": "sql",
+  "code_std": "mysql8",
+  "stdin": "",
+  "expected_output": "Query OK, 0 rows affected\nQuery OK, 6 rows affected\ndept_id|avg_sal\n20|8000.00",
+  "code": "CREATE TABLE emp (emp_id INT PRIMARY KEY, dept_id INT, salary DECIMAL(10,2));\nINSERT INTO emp VALUES (1,10,6000.00),(2,20,8000.00),(3,10,4500.00),(4,20,9000.00),(5,30,5000.00),(6,20,7000.00);\nSELECT dept_id, avg_sal FROM (SELECT dept_id, AVG(salary) AS avg_sal FROM emp GROUP BY dept_id) t WHERE avg_sal > 7000 ORDER BY dept_id;",
+  "_verified": false
+}

@@ -1,0 +1,8 @@
+{
+  "title": "链表 vs vector：遍历时的指针跳转（间接访问）次数对比",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "vector 指针跳转=0 链表 指针跳转=1000\n链表跳转更多: 1\n校验 sums: vector=1000 list=1000",
+  "code": "#include <cstdio>\n#include <vector>\n#include <memory>\n\nstruct Node { int v; Node* next; };\n\nint main() {\n    const int N = 1000;\n\n    // vector：元素连续，第 i 个由基址 + i*sizeof 直接算出，无需追赶指针\n    std::vector<int> v(N, 1);\n    long long vector_jumps = 0, sum_v = 0;\n    for (int i = 0; i < N; ++i) sum_v += v[i];\n\n    // 链表：每一步都要先解引用 next 才能找到下一个元素 → 一次指针跳转\n    std::vector<std::unique_ptr<Node>> pool;\n    for (int i = 0; i < N; ++i) pool.push_back(std::make_unique<Node>(Node{1, nullptr}));\n    for (int i = 0; i + 1 < N; ++i) pool[i]->next = pool[i + 1].get();\n\n    long long list_jumps = 0, sum_l = 0;\n    for (Node* p = pool[0].get(); p; p = p->next) { ++list_jumps; sum_l += p->v; }\n\n    printf(\"vector 指针跳转=%lld 链表 指针跳转=%lld\\n\", vector_jumps, list_jumps);\n    printf(\"链表跳转更多: %d\\n\", (int)(list_jumps > vector_jumps));\n    printf(\"校验 sums: vector=%lld list=%lld\\n\", sum_v, sum_l);\n    return 0;\n}"
+}

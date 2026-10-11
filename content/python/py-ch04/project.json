@@ -1,0 +1,50 @@
+{
+  "meta": {
+    "chapter": "py-ch04",
+    "subject": "python",
+    "note": "综合项目：可配置的日志归档工具，覆盖 pathlib 路径遍历 / datetime 时区 / JSON 序列化 / 原子写入与 CLI 解析。"
+  },
+  "items": [
+    {
+      "title": "日志归档工具：按日期切分、时区安全、原子写入、可 CLI 配置",
+      "requirement_md": "实现一个命令行工具 `logarchive.py`，把一个目录下的 `.log` 文件按**日期**归档到子目录，并输出统计报告。\n\n## 功能要求\n\n1. **CLI 参数**（用 `argparse`）：\n   - `src`：源目录（必填）\n   - `--dest`：目标目录（默认 `archive/`）\n   - `--tz`：时区名（默认 `UTC`，用 `zoneinfo.ZoneInfo` 校验，非法时给出**可用时区提示**并退出码 2）\n   - `--dry-run`：只打印计划，不实际移动\n   - `--report`：输出 JSON 报告的文件路径（可选）\n2. **遍历与筛选**：用 `pathlib.Path.rglob('*.log')` 找出所有日志（大小写不敏感：`.LOG` 也要匹配，注意 `rglob` 的匹配是大小写敏感的，需自行处理）。\n3. **时间来源**：优先从**文件名**解析日期（约定 `YYYY-MM-DD` 前缀，如 `2026-10-08-app.log`）；解析失败则回退到文件的**修改时间**（`st_mtime`），并用 `datetime.fromtimestamp(ts, timezone.utc)`（**不要用已废弃的 `utcfromtimestamp`**）。\n4. **时区处理**：所有时间在内部一律用 **aware UTC** 表示；归档目录名按 `--tz` 指定的时区生成 `YYYY/MM/DD`（体现「同一 UTC 时刻在不同时区可能落在不同日期」）。\n5. **归档动作**：移动文件到 `<dest>/YYYY/MM/DD/<原文件名>`。移动前**必须创建目标目录**；若目标已存在同名文件，加 `-1`、`-2` 后缀避免覆盖。\n6. **原子与安全**：\n   - 移动用 `shutil.move`（同盘 rename）；\n   - 生成 `--report` 报告时用**临时文件 + `os.replace`** 原子写入，显式 `encoding='utf-8'`；\n   - `--dry-run` 下**不得**产生任何文件系统改动。\n7. **报告结构**（JSON，`ensure_ascii=False`）：\n   ```json\n   {\n     \"generated_at\": \"2026-10-08T12:00:00+00:00\",\n     \"source\": \"<src>\",\n     \"timezone\": \"Asia/Shanghai\",\n     \"total\": 12,\n     \"by_date\": {\"2026/10/08\": 3, \"2026/10/07\": 9},\n     \"skipped\": [\"bad-name.log\"]\n   }\n   ```\n   `generated_at` 用 `datetime.now(timezone.utc).isoformat()`。\n8. **幂等性**：对同一目录重复运行，第二次应报告 `total: 0`（因为文件已被移走）。\n\n## 验收要点\n\n- `--dry-run` 前后目录树**完全一致**（用 `ext_stats` 或文件计数证明）；\n- 非法 `--tz` 退出码为 2 且不触碰文件系统；\n- 报告 JSON 能被 `json.loads` 往返且含 `+00:00` 偏移；\n- 文件名无日期时正确回退到 mtime。",
+      "tasks": [
+        {
+          "title": "实现 CLI 骨架与参数校验",
+          "verification": {
+            "type": "test",
+            "desc": "`python logarchive.py --help` 正常；`--tz Mars/Base` 返回退出码 2 并打印可用时区数量提示；`--tz Asia/Shanghai` 通过校验。"
+          }
+        },
+        {
+          "title": "实现路径遍历与日期来源解析",
+          "verification": {
+            "type": "test",
+            "desc": "构造含 `2026-10-08-a.log`、`2026-10-07-b.LOG`、`bad-name.log` 的目录，断言前两者按文件名日期、最后一个回退到 mtime，且 `.LOG` 也被纳入。"
+          }
+        },
+        {
+          "title": "实现时区安全的日期分桶",
+          "verification": {
+            "type": "test",
+            "desc": "构造 mtime 为 UTC `2026-10-07T20:00:00Z` 的文件，断言 `--tz UTC` 归入 `2026/10/07`、`--tz Asia/Shanghai` 归入 `2026/10/08`（+8 小时跨日）。"
+          }
+        },
+        {
+          "title": "实现归档移动与重名防覆盖",
+          "verification": {
+            "type": "test",
+            "desc": "预置目标位置已有同名文件，断言归档后产生 `-1` 后缀文件且原文件内容未被覆盖（比对内容哈希）。"
+          }
+        },
+        {
+          "title": "实现原子报告写出与幂等性",
+          "verification": {
+            "type": "test",
+            "desc": "首次运行后 `json.load(rreport)` 得到 `total == 12`；再次运行得到 `total == 0`；`--dry-run` 时源目录文件数不变。"
+          }
+        }
+      ]
+    }
+  ]
+}

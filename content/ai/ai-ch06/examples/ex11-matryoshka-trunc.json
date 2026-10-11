@@ -1,0 +1,8 @@
+{
+  "title": "Matryoshka 截断：降维后的排名稳定性",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "全维度(16)排名 = [2, 1, 5, 3, 4, 0]\n截断到8 排名 = [5, 2, 1, 0, 3, 4]\n与全维度排名一致 = False\n截断到4 排名 = [1, 2, 5, 0, 4, 3]\n与全维度排名一致 = False\n",
+  "code": "import numpy as np\nrng = np.random.default_rng(42)\nD = 16\ndocs = rng.standard_normal((6, D))\nq = rng.standard_normal(D)\n\ndef rank(dim):\n    qn = q[:dim] / np.linalg.norm(q[:dim])\n    dn = docs[:, :dim]\n    dn = dn / np.linalg.norm(dn, axis=1, keepdims=True)\n    s = dn @ qn\n    return [i for i, _ in sorted(enumerate(s), key=lambda x: -x[1])]\n\nfull = rank(D)\nprint('全维度(%d)排名 =' % D, full)\nfor dim in (8, 4):\n    r = rank(dim)\n    print('截断到%d 排名 =' % dim, r)\n    print('与全维度排名一致 =', r == full)\n"
+}

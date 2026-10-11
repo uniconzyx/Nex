@@ -1,0 +1,215 @@
+{
+  "meta": {
+    "chapter": "fs-ch03",
+    "note": "8 题：基础题 6（self/book）+ 算法题 2（LeetCode 20 / 2621，仅存元数据+链接不抄题面）；覆盖类型与相等性、作用域闭包、this、事件循环、防抖、Promise。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "《JavaScript 高级程序设计（第4版）》第 3 章 数据类型",
+      "difficulty": "easy",
+      "title": "typeof 对 null 的结果是什么？",
+      "content_md": "在 JavaScript 中，`typeof null` 的返回值是什么？",
+      "options": [
+        {
+          "key": "A",
+          "text": "null"
+        },
+        {
+          "key": "B",
+          "text": "object"
+        },
+        {
+          "key": "C",
+          "text": "undefined"
+        },
+        {
+          "key": "D",
+          "text": "number"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "`typeof null` 返回 'object' 是历史包袱（初版 32 位 tag 中 null 的低位标识与对象相同），因此不能用于区分 null 与对象。",
+      "tags": [
+        "type",
+        "typeof"
+      ]
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "ECMAScript · Abstract Equality Comparison",
+      "difficulty": "easy",
+      "title": "下面哪条比较结果为 true？",
+      "content_md": "只凭隐式转换规则判断，下列哪个表达式求值为 true？",
+      "options": [
+        {
+          "key": "A",
+          "text": "1 === '1'"
+        },
+        {
+          "key": "B",
+          "text": "null == undefined"
+        },
+        {
+          "key": "C",
+          "text": "NaN === NaN"
+        },
+        {
+          "key": "D",
+          "text": "[] === false"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "`null == undefined` 为 true 是规范特例；其余：A 严格相等类型不同为 false；C NaN 不等于自身；D 不同类型无转换直接 false。",
+      "tags": [
+        "equality",
+        "coercion"
+      ]
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/04 · 事件循环",
+      "difficulty": "mid",
+      "title": "预测事件循环的输出顺序",
+      "content_md": "下面代码依次打印什么（按行写出输出）？\n```js\nconsole.log('1 sync');\nsetTimeout(() => console.log('5 macro'), 0);\nqueueMicrotask(() => console.log('3 micro'));\nPromise.resolve().then(() => console.log('4 then'));\n(async () => { console.log('2 sync-async'); await null; console.log('6 after-await'); })();\nconsole.log('7 sync-end');\n```",
+      "answer": {
+        "output": "1 sync\n2 sync-async\n7 sync-end\n3 micro\n4 then\n6 after-await\n5 macro"
+      },
+      "explanation": "同步代码先跑完（1,2,7）；然后微任务队列被一次性清空（3,4,6，其中 await 续体也是微任务）；最后才执行宏任务 setTimeout（5）。",
+      "tags": [
+        "event-loop",
+        "microtask"
+      ]
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/02 · 闭包",
+      "difficulty": "mid",
+      "title": "修复循环里 var 闭包打印全为终值的 bug",
+      "content_md": "下面代码点击三次都打印 3，请修复（保留用闭包捕获索引的意图）：\n```js\nvar fns = [];\nfor (var i = 0; i < 3; i++) { fns.push(() => console.log(i)); }\nfns.forEach(f => f());\n```",
+      "answer": {
+        "reference_code": "var fns = [];\nfor (let i = 0; i < 3; i++) { fns.push(() => console.log(i)); }\nfns.forEach(f => f());\n// 或保留 var：for (var i = 0; i < 3; i++) { (function (j) { fns.push(() => console.log(j)); })(i); }"
+      },
+      "explanation": "改用 let 让每次迭代拥有独立的块级绑定；或用手动 IIFE 传参固化值，使每个闭包捕获各自的索引。",
+      "tags": [
+        "closure",
+        "var",
+        "let"
+      ]
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/02 · this 绑定",
+      "difficulty": "mid",
+      "title": "箭头函数里的 this 来自哪里？",
+      "content_md": "`const obj = { name: 'o', fn() { const g = () => this.name; return g(); } }; obj.fn()` 的返回值是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "undefined（箭头没有 this）"
+        },
+        {
+          "key": "B",
+          "text": "String 'o'（捕获了 fn 的 this 即 obj）"
+        },
+        {
+          "key": "C",
+          "text": "全局对象的 name"
+        },
+        {
+          "key": "D",
+          "text": "运行时报错"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "箭头函数没有自己的 this，取定义时外层词法作用域（fn 调用时的 this=obj）的 this，因此返回 'o'。",
+      "tags": [
+        "this",
+        "arrow"
+      ]
+    },
+    {
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/02 · 闭包（手写防抖）",
+      "difficulty": "mid",
+      "title": "手写 debounce（防抖）",
+      "content_md": "实现一个 `debounce(fn, delay)`：连续触发时只在最后一次触发后等待 delay 毫秒才真正执行 fn，期间再次触发会重置计时。保留 this 与参数。",
+      "answer": {
+        "reference_code": "function debounce(fn, delay) {\n  let timer = null;\n  return function (...args) {\n    const ctx = this;\n    clearTimeout(timer);\n    timer = setTimeout(() => fn.apply(ctx, args), delay);\n  };\n}"
+      },
+      "explanation": "靠闭包持有 timer；每次调用先 clearTimeout 再重设，因此只有「安静 delay 毫秒」后才会真正执行，并保留调用上下文与参数。",
+      "tags": [
+        "closure",
+        "debounce"
+      ]
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "source": "leetcode",
+      "source_ref": "LeetCode 20（valid-parentheses）",
+      "difficulty": "easy",
+      "title": "LeetCode 20 · 有效的括号（算法素养补充）",
+      "content_md": "给定一个只包含 `'()[]{}'` 的字符串，判断括号是否成对匹配且顺序正确。题面与约束以官方为准，详见 external_url，此处不复述题面。",
+      "answer": {
+        "reference_code": "function isValid(s) {\n  const st = [];\n  const pair = { ')': '(', ']': '[', '}': '{' };\n  for (const ch of s) {\n    if (ch in pair) {\n      if (st.pop() !== pair[ch]) return false;\n    } else {\n      st.push(ch);\n    }\n  }\n  return st.length === 0;\n}"
+      },
+      "explanation": "栈的经典应用：左括号入栈，右括号与栈顶匹配；遍历完栈空即合法。时间 O(n)、空间 O(n)。",
+      "tags": [
+        "stack",
+        "string"
+      ],
+      "external_url": "https://leetcode.cn/problems/valid-parentheses/"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "source": "leetcode",
+      "source_ref": "LeetCode 2621（sleep）",
+      "difficulty": "easy",
+      "title": "LeetCode 2621 · Sleep（async/await 实践）",
+      "content_md": "实现一个 `sleep(milliseconds)` 异步函数，返回一个在指定毫秒后 resolve 的 Promise。题面与约束详见 external_url，不抄题面。",
+      "answer": {
+        "reference_code": "async function sleep(ms) {\n  return new Promise(function (resolve) {\n    setTimeout(resolve, ms);\n  });\n}"
+      },
+      "explanation": "用 Promise 包裹 setTimeout；async 函数自动把返回值包成 Promise，调用处可 `await sleep(200)`。",
+      "tags": [
+        "async",
+        "promise"
+      ],
+      "external_url": "https://leetcode.cn/problems/sleep/"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "title": "后缀表达式求值（数字版）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "后缀表达式: 34+2*\n求值结果: 14",
+  "code": "#include <stdio.h>\n\nint main(void) {\n    const char *s = \"34+2*\";   /* (3+4)*2 */\n    int st[64], top = 0;\n    for (int i = 0; s[i]; i++) {\n        char c = s[i];\n        if (c >= '0' && c <= '9') { st[top++] = c - '0'; }\n        else {\n            int b = st[--top], a = st[--top], r = 0;\n            if (c == '+') r = a + b;\n            else if (c == '-') r = a - b;\n            else if (c == '*') r = a * b;\n            else r = a / b;\n            st[top++] = r;\n        }\n    }\n    printf(\"后缀表达式: %s\\n\", s);\n    printf(\"求值结果: %d\\n\", st[--top]);\n    return 0;\n}"
+}

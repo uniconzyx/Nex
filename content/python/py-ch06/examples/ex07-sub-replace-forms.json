@@ -1,0 +1,8 @@
+{
+  "title": "re.sub 的三种替换方式与模板反斜杠陷阱",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== re.sub 的三种替换方式 ===\n① 字符串模板（\\1 编号组）: 08/10/2026 与 02/01/1999\n② 命名组 \\g<name>       : 08.10.2026 与 02.01.1999\n③ 函数替换（可做逻辑）   : 2026**08 与 1999**02\n\n=== count 限制替换次数 ===\n全部  : a#b#c#\n前 2 次: a#b#c3\n\n=== \\g<0> 引用整个匹配（常用于加壳）===\n价格 [100] 与 [20]\n\n=== 陷阱：模板里的反斜杠 ===\n模板以裸反斜杠结尾 -> 报错: bad escape (end of pattern) at position 0\n正确写法用 lambda 或 \\\\ 转义: a\\",
+  "code": "import re\n\nprint(\"=== re.sub 的三种替换方式 ===\")\ns = \"2026-10-08 与 1999-01-02\"\nprint(\"① 字符串模板（\\\\1 编号组）:\", re.sub(r\"(\\d{4})-(\\d{2})-(\\d{2})\", r\"\\3/\\2/\\1\", s))\nprint(\"② 命名组 \\\\g<name>       :\",\n      re.sub(r\"(?P<y>\\d{4})-(?P<m>\\d{2})-(?P<d>\\d{2})\", r\"\\g<d>.\\g<m>.\\g<y>\", s))\n\ndef mask(m):\n    return m.group(1) + \"**\" + m.group(3)\nprint(\"③ 函数替换（可做逻辑）   :\", re.sub(r\"(\\d{4})-(\\d{2})-(\\d{2})\", mask, s))\n\nprint()\nprint(\"=== count 限制替换次数 ===\")\nprint(\"全部  :\", re.sub(r\"\\d\", \"#\", \"a1b2c3\"))\nprint(\"前 2 次:\", re.sub(r\"\\d\", \"#\", \"a1b2c3\", count=2))\n\nprint()\nprint(\"=== \\\\g<0> 引用整个匹配（常用于加壳）===\")\nprint(re.sub(r\"\\d+\", r\"[\\g<0>]\", \"价格 100 与 20\"))\n\nprint()\nprint(\"=== 陷阱：模板里的反斜杠 ===\")\ntry:\n    re.sub(r\"\\d\", \"\\\\\", \"a1\")\nexcept re.error as e:\n    print(\"模板以裸反斜杠结尾 -> 报错:\", e)\nprint(\"正确写法用 lambda 或 \\\\\\\\ 转义:\", re.sub(r\"\\d\", lambda m: \"\\\\\", \"a1\"))"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "RDD 血缘 DAG 的构建与打印",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "血缘 DAG（自下而上，缩进=父级依赖）:\n        RDD#1 [parallelize 分区=4]\n      RDD#2 [map x=>x*2]\n    RDD#3 [filter x%2==0]\n  RDD#4 [reduceByKey 宽依赖]\nRDD#5 [collect Action]\n血缘节点总数 = 5\n构建 5 个 RDD 谱系，但全程未触发一次数据计算（惰性）\n",
+  "code": "class RDD:\n    _seq = 0\n    def __init__(self, deps, op):\n        RDD._seq += 1\n        self.rid = RDD._seq\n        self.deps = deps\n        self.op = op\n    def show(self, prefix=\"\"):\n        for d in self.deps:\n            d.show(prefix + \"  \")\n        print(f\"{prefix}RDD#{self.rid} [{self.op}]\")\n\nbase = RDD([], \"parallelize 分区=4\")\nm    = RDD([base], \"map x=>x*2\")\nf    = RDD([m], \"filter x%2==0\")\ng    = RDD([f], \"reduceByKey 宽依赖\")\nout  = RDD([g], \"collect Action\")\nprint(\"血缘 DAG（自下而上，缩进=父级依赖）:\")\nout.show()\nprint(\"血缘节点总数 =\", RDD._seq)\nprint(\"构建\", RDD._seq, \"个 RDD 谱系，但全程未触发一次数据计算（惰性）\")\n"
+}

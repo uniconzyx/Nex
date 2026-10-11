@@ -1,0 +1,273 @@
+{
+  "meta": {
+    "chapter": "ai-ch08",
+    "title": "LLM 应用工程：推理优化、评测、可观测性与安全 —— 习题集",
+    "count": 8,
+    "note": "8 题，基础题 6 + 算法题 2（含 LeetCode 2），仅存元数据与链接不复述题面"
+  },
+  "items": [
+    {
+      "id": "ai-ch08-q1",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "TTFT 与 TPOT 的归属阶段",
+      "content_md": "关于大模型推理的两阶段与延迟指标，下列说法正确的是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "TTFT 由 Decode 阶段决定，TPOT 由 Prefill 阶段决定"
+        },
+        {
+          "key": "B",
+          "text": "TTFT 主要计入 Prefill（含排队与首步 Decode），TPOT 是 Decode 阶段的均摊步时"
+        },
+        {
+          "key": "C",
+          "text": "TTFT 与 TPOT 是同一个指标的两种叫法"
+        },
+        {
+          "key": "D",
+          "text": "端到端时延与 TPOT 无关，只取决于 TTFT"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "explain": "Prefill 一次性处理整段 prompt，决定首 token 何时到达（TTFT）；Decode 逐 token 生成，其均摊步时即 TPOT。端到端 ≈ TTFT + TPOT×(N−1)。"
+      },
+      "explanation": "两阶段对应两指标：Prefill→TTFT、Decode→TPOT；二者需分开优化与告警。",
+      "tags": [
+        "inference",
+        "latency"
+      ],
+      "source": "self",
+      "source_ref": "ai-ch08 concept/01 · 推理两阶段与延迟指标"
+    },
+    {
+      "id": "ai-ch08-q2",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "KV Cache 显存的估算因子",
+      "content_md": "L 层、KV 头数 H_kv、头维 d、序列长 S、批 B、每元素字节 b 的 KV Cache 字节数为？",
+      "options": [
+        {
+          "key": "A",
+          "text": "L × H_kv × d × S × B × b"
+        },
+        {
+          "key": "B",
+          "text": "2 × L × H_kv × d × S × B × b"
+        },
+        {
+          "key": "C",
+          "text": "L × (H_kv × d)² × S × b"
+        },
+        {
+          "key": "D",
+          "text": "2 × L × H_kv × d × S × b（不含批）"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "explain": "K 与 V 各一份故乘 2；形状为 [B, H_kv, S, d]，各维相乘再乘层数与字节数。漏乘 2 或少乘 B 是常见错误。"
+      },
+      "explanation": "KV_bytes = 2·L·H_kv·d_head·S·B·bytes_dtype。",
+      "tags": [
+        "kv-cache",
+        "memory"
+      ],
+      "source": "self",
+      "source_ref": "ai-ch08 concept/02 · KV Cache 的显存账"
+    },
+    {
+      "id": "ai-ch08-q3",
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "修正 KV Cache 估算函数",
+      "content_md": "下面的 KV Cache 估算漏掉了 K/V 两份，请指出并修正。\n```python\nGB = 1024 ** 3\ndef kv_gb(layers, kv_heads, head_dim, seq, batch, dtype_bytes):\n    return layers * kv_heads * head_dim * seq * batch * dtype_bytes / GB\n```",
+      "answer": {
+        "reference_code": "GB = 1024 ** 3\n\ndef kv_gb(layers, kv_heads, head_dim, seq, batch, dtype_bytes):\n    # K 与 V 各一份, 故首项乘 2\n    return 2 * layers * kv_heads * head_dim * seq * batch * dtype_bytes / GB\n\n\nif __name__ == '__main__':\n    print(round(kv_gb(32, 32, 128, 4096, 1, 2), 3))\n",
+        "explain": "KV Cache 需同时存 K 与 V，公式首项必须乘 2。修正后 (32,32,128,4096,1,fp16) 得 2.0 GiB。"
+      },
+      "explanation": "缺了 K/V 两份的因子 2，修正为 2·L·H_kv·d·S·B·bytes。",
+      "tags": [
+        "kv-cache",
+        "debug"
+      ],
+      "source": "self",
+      "source_ref": "ai-ch08 concept/02 · KV Cache 的显存账"
+    },
+    {
+      "id": "ai-ch08-q4",
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "手算 GQA 下的 KV Cache 显存",
+      "content_md": "某模型 L=32、注意力头=32、KV 头=8、头维 d=128，fp16 推理，S=2048、B=1。求 KV Cache 的 GiB（保留 3 位小数，1 GiB=2³⁰ B）。",
+      "answer": {
+        "output": "1.0",
+        "reference_code": "GB = 1024 ** 3\nprint(round(2 * 32 * 8 * 128 * 2048 * 1 * 2 / GB, 3))\n",
+        "explain": "2×32×8×128×2048×1×2 = 1073741824 B = 1.0 GiB。注意用 KV 头数 8 而非注意力头数 32。"
+      },
+      "explanation": "2·L·H_kv·d·S·B·b = 2³⁰ B = 1.0 GiB。",
+      "tags": [
+        "kv-cache",
+        "gqa"
+      ],
+      "source": "self",
+      "source_ref": "ai-ch08 concept/02 · KV Cache 的显存账"
+    },
+    {
+      "id": "ai-ch08-q5",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "成本与延迟优化的正确顺序",
+      "content_md": "线上 LLM 应用要降本提速，下列优化顺序最合理的是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "先换推理框架并开启投机解码，再考虑其他"
+        },
+        {
+          "key": "B",
+          "text": "先度量 → 砍上下文 → 分模型（路由）→ 加缓存 → 再谈推理加速"
+        },
+        {
+          "key": "C",
+          "text": "先做模型路由，因为路由收益最大"
+        },
+        {
+          "key": "D",
+          "text": "先降价再优化，顺序无关"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "explain": "没有度量就优化等于蒙眼开车；砍上下文、路由、缓存通常是数倍收益且低风险，推理加速常是个位数收益且引入质量/工程风险，应放最后。"
+      },
+      "explanation": "正确顺序：度量 → 砍上下文 → 分模型 → 加缓存 → 推理加速。",
+      "tags": [
+        "cost",
+        "optimization"
+      ],
+      "source": "self",
+      "source_ref": "ai-ch08 concept/03 · 模型路由、语义缓存与优化顺序"
+    },
+    {
+      "id": "ai-ch08-q6",
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "修正 PII 脱敏正则会误伤订单号",
+      "content_md": "下面用 16~19 位数字匹配银行卡，但会把「订单号」等长数字串也脱敏，且未加边界。请修正为带数字边界且不误伤纯业务编号的版本。\n```python\nimport re\nPAT = re.compile(r'\\d{16,19}')\ndef mask(s):\n    return PAT.sub('****', s)\n```",
+      "answer": {
+        "reference_code": "import re\n\n# 加数字边界 (?<![0-9]) ... (?![0-9])，避免把更长数字串的片段当成卡号\nPAT = re.compile(r'(?<!\\d)\\d{16,19}(?!\\d)')\n\n\ndef mask(s):\n    return PAT.sub(lambda m: m.group()[:4] + ' **** **** ' + m.group()[-4:], s)\n\n\nif __name__ == '__main__':\n    print(mask('卡号 6222021234567890123 用于支付'))\n    print(mask('订单号 202409190001 已发货'))\n",
+        "explain": "加 (?<![0-9]) 与 (?![0-9]) 数字边界，并把替换改为部分掩码保留首末 4 位，业务编号（12 位）不匹配 16~19 位而保持原样。"
+      },
+      "explanation": "脱敏正则必须加数字边界并做正反例验证，否则会误伤业务编号。",
+      "tags": [
+        "pii",
+        "regex"
+      ],
+      "source": "self",
+      "source_ref": "ai-ch08 concept/05 · 数据合规：最小化、脱敏与可删除"
+    },
+    {
+      "id": "ai-ch08-q7",
+      "type": "choice",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "LRU 缓存（语义缓存/前缀缓存淘汰基础）",
+      "content_md": "语义缓存与前缀缓存都需要按容量淘汰最久未使用的条目。请在链接中查看题面与约束，并简述「O(1) 完成 get 与 put」的数据结构组合。",
+      "options": [
+        {
+          "key": "A",
+          "text": "哈希表 + 双向链表"
+        },
+        {
+          "key": "B",
+          "text": "数组 + 二分查找"
+        },
+        {
+          "key": "C",
+          "text": "单一哈希表即可"
+        },
+        {
+          "key": "D",
+          "text": "最小堆 + 哈希表"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "A"
+        ],
+        "explain": "哈希表提供 O(1) 定位，双向链表维护访问顺序，两者组合使 get/put 均摊 O(1)。堆只能做到 O(log n)。"
+      },
+      "explanation": "LRU 的标准实现是哈希表 + 双向链表。",
+      "tags": [
+        "lru",
+        "cache"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 146（lru-cache）",
+      "external_url": "https://leetcode.cn/problems/lru-cache/"
+    },
+    {
+      "id": "ai-ch08-q8",
+      "type": "choice",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "任务调度（批处理排程与冷却期的同构问题）",
+      "content_md": "连续批处理的「同一批内任务的竞争与冷却/依赖约束」与本题同构。请在链接中查看题面与约束，并简述贪心求解思路。",
+      "options": [
+        {
+          "key": "A",
+          "text": "按频次排序，用贪心填桶：以最高频任务为骨架，空格由其余任务与空槽填充"
+        },
+        {
+          "key": "B",
+          "text": "对所有任务做全排列枚举，取最优"
+        },
+        {
+          "key": "C",
+          "text": "直接用任务总数作为答案，忽略冷却期"
+        },
+        {
+          "key": "D",
+          "text": "用随机模拟若干次取平均"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "A"
+        ],
+        "explain": "经典贪心：设最高频次数为 f、并列最多者数为 m，答案至少为 (f−1)(n+1)+m，且不小于任务总数。枚举会超时，忽略冷却期会低估。"
+      },
+      "explanation": "任务调度用贪心填桶，与批处理排程的「最大化利用率」同源。",
+      "tags": [
+        "scheduling",
+        "greedy"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 621（task-scheduler）",
+      "external_url": "https://leetcode.cn/problems/task-scheduler/"
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "meta": {
+    "chapter": "cpp-ch10",
+    "note": "6 题，题型混合（基础题 3 + 算法题 3）；含 LeetCode 146 / 牛客 BM101 真题映射（仅存元数据+链接，不存题面），覆盖 unique_ptr / shared_ptr / weak_ptr / RAII / enable_shared_from_this。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "difficulty": "easy",
+      "title": "关于 unique_ptr 与 shared_ptr 的所有权语义，正确的是",
+      "content_md": "以下描述中，选出**正确**的一项。",
+      "options": [
+        { "key": "A", "text": "unique_ptr 可以随意拷贝，多个 unique_ptr 指向同一对象" },
+        { "key": "B", "text": "shared_ptr 的引用计数存放在 shared_ptr 对象本身里" },
+        { "key": "C", "text": "unique_ptr 默认删除器为空类型，经空基类优化后与裸指针同尺寸、零额外开销" },
+        { "key": "D", "text": "shared_ptr 能自动回收循环引用，无需 weak_ptr" }
+      ],
+      "answer": { "correct": ["C"] },
+      "explanation": "unique_ptr 独占、不可拷贝（A 错）；引用计数在独立的**控制块**里，不在 shared_ptr 对象里（B 错）；shared_ptr 无法自动回收循环引用，需把环的一侧改为 weak_ptr（D 错）。unique_ptr 的默认删除器是空类型，EBCO 后 sizeof(unique_ptr<T>)==sizeof(T*)，零额外内存、删除调用可内联（C 对）。",
+      "tags": ["unique_ptr", "shared_ptr", "control-block", "ownership"],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 12 章 动态内存 / 第 16 章",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "output",
+      "difficulty": "easy",
+      "title": "读代码写输出（shared_ptr use_count 变化）",
+      "content_md": "```cpp\n#include <iostream>\n#include <memory>\nint main() {\n  auto p = std::make_shared<int>(10);\n  std::cout << p.use_count() << '\\n';\n  auto q = p;\n  std::cout << p.use_count() << '\\n';\n  q.reset();\n  std::cout << p.use_count() << '\\n';\n}\n```",
+      "answer": { "output": "1\n2\n1" },
+      "explanation": "初始只有 p 持有 → 1；q=p 拷贝使强计数 +1 → 2；q.reset() 释放 q 的持有使强计数 -1 → 1。引用计数在共享的控制块里，p、q 看到同一数值。",
+      "tags": ["shared_ptr", "use_count", "reference-count"],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 12 章 shared_ptr",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "fix_error",
+      "difficulty": "mid",
+      "title": "修复 shared_ptr 循环引用导致泄漏",
+      "content_md": "以下代码 A、B 互相强引用，离开作用域后析构函数都不打印（泄漏）。请改最少代码打破循环（保留 A 强持有 B 的语义）：\n\n```cpp\nstruct A; struct B;\nstruct A { std::shared_ptr<B> b; ~A(){ std::cout << \"~A\\n\"; } };\nstruct B { std::shared_ptr<A> a; ~B(){ std::cout << \"~B\\n\"; } };\nint main() {\n  auto a = std::make_shared<A>();\n  auto b = std::make_shared<B>();\n  a->b = b; b->a = a;\n}\n```",
+      "answer": {
+        "reference_code": "struct B { std::weak_ptr<A> a; ~B(){ std::cout << \"~B\\n\"; } };  // 把 B 侧改为 weak_ptr\n// 若 B 需要访问 a 所指对象： auto sp = a.lock(); if (sp) sp->...;"
+      },
+      "explanation": "循环引用靠强引用互相钉死，必须把环的一侧改为 weak_ptr：B::a 改为 std::weak_ptr<A>，它不增加强计数，于是作用域结束时 A、B 的强计数能归零、析构正常触发。访问前用 lock() 提升并检查。",
+      "tags": ["shared_ptr", "weak_ptr", "cycle", "memory-leak"],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 12 章 weak_ptr",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "design",
+      "difficulty": "mid",
+      "title": "LeetCode 146 · LRU 缓存（用 shared_ptr 管理节点所有权）",
+      "content_md": "设计并实现一个容量固定的 LRU 缓存，支持 O(1) 的 get/put。建议用 `unordered_map<key, shared_ptr<Node>>` + 双向链表（或 `list`）管理节点；删除最久未用时 `shared_ptr` 引用归零自动回收，避免手动 delete（详见 external_url，不在此复述题面）。",
+      "answer": {
+        "reference_code": "struct Node { int key, val; shared_ptr<Node> prev, next; };\n// map: key -> shared_ptr<Node>；头尾哨兵节点\n// get: 命中则把节点移到最近使用（splice 到头部）\n// put: 命中改值并提到头部；未命中新建节点，超容量则 erase 最久节点（map 与链表同步删除，shared_ptr 自动释放）"
+      },
+      "explanation": "用 shared_ptr 持有节点可让删除逻辑只关心『从 map 与链表移除』，内存回收交给引用计数；双向链表维护使用顺序保证 O(1)。注意 map 与链表必须同步，否则会出现悬空 shared_ptr。",
+      "tags": ["shared_ptr", "lru-cache", "linked-list", "hash"],
+      "source": "leetcode",
+      "source_ref": "LeetCode 146（lru-cache）",
+      "external_url": "https://leetcode.cn/problems/lru-cache/",
+      "category": "算法题",
+      "platform": "leetcode"
+    },
+    {
+      "type": "design",
+      "difficulty": "mid",
+      "title": "牛客 BM101 · 设计 LRU 缓存（智能指针实现）",
+      "content_md": "牛客 BM101 要求实现一个 LRU 缓存。可用 `std::list` 存键值对、`unordered_map<int, list::iterator>` 做索引，节点所有权交给容器自动管理；或用 shared_ptr 管理节点（详见 external_url，不在此复述题面）。",
+      "answer": {
+        "reference_code": "// 思路同 LeetCode 146：list<pair<int,int>> 维护顺序，map<key, iterator> 索引；\n// 命中则 splice 到链头，超限则 pop_back 并 erase map 项，所有权由 STL 容器自动回收。"
+      },
+      "explanation": "BM101 与 LeetCode 146 同构。用 STL 容器（list/map）天然 RAII，省去手动内存管理；也可显式用 shared_ptr 体现本章知识点。",
+      "tags": ["shared_ptr", "lru-cache", "nowcoder", "stl"],
+      "source": "nowcoder",
+      "source_ref": "牛客 BM101（设计 LRU 缓存）",
+      "external_url": "https://www.nowcoder.com/practice/5dc964a449974eacae0d1d785a4c1599",
+      "category": "算法题",
+      "platform": "nowcoder"
+    },
+    {
+      "type": "coding",
+      "difficulty": "mid",
+      "title": "用 unique_ptr 实现工厂函数 safe_open（独占所有权 + 自定义删除器）",
+      "content_md": "实现一个工厂函数 `std::unique_ptr<File, FileDeleter> safe_open(const char* path)`，返回一个独占文件句柄；自定义删除器 `FileDeleter` 在 `fclose` 前打印 `\"closed\"`。要求：不能拷贝返回的句柄（只能移动），离开作用域自动关闭。",
+      "answer": {
+        "reference_code": "struct FileDeleter { void operator()(FILE* f) const { if (f) { std::cout << \"closed\\n\"; fclose(f); } } };\nstd::unique_ptr<FILE, FileDeleter> safe_open(const char* p) {\n  return std::unique_ptr<FILE, FileDeleter>(fopen(p, \"w\"), FileDeleter{});\n}\n// 调用方：auto f = safe_open(\"t.txt\");  // 独占，不可拷贝，作用域结束自动 closed"
+      },
+      "explanation": "unique_ptr 的删除器是编译期类型参数，自定义 FileDeleter 在析构时自动 fclose；由于 unique_ptr 不可拷贝，所有权必须通过 std::move 转移，天然防止重复关闭。",
+      "tags": ["unique_ptr", "deleter", "factory", "raii"],
+      "source": "self",
+      "source_ref": "《Effective Modern C++》条款 18（std::unique_ptr）",
+      "category": "基础题",
+      "platform": "self"
+    }
+  ]
+}

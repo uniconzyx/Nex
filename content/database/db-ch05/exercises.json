@@ -1,0 +1,152 @@
+{
+  "meta": {
+    "chapter": "db-ch05",
+    "note": "8 题：基础题 6 道覆盖参数模式 IN/OUT/INOUT、DELIMITER 的客户端语义、NEW/OLD 可用性矩阵、游标声明顺序与循环终止条件、触发器行级执行次数、审计触发器与递归防御；算法题 2 道为 LeetCode 数据库真题（仅存元数据与链接，不搬运题面正文）"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "关于存储过程 OUT 参数模式，下列说法正确的是",
+      "content_md": "存储过程 `p(IN a INT, OUT b INT, INOUT c INT)` 中，关于形参在过程体入口处的状态，正确的是：",
+      "options": [
+        { "key": "A", "text": "`b` 保留调用者传入的值，过程内可读；`c` 被置为 NULL" },
+        { "key": "B", "text": "`b` 在入口被重置为 NULL，只能由过程写回；`c` 保留调用者传入的初值，可读可写并回传" },
+        { "key": "C", "text": "`b` 与 `c` 都必须由调用者传入非空值，否则报错" },
+        { "key": "D", "text": "`b` 与 `c` 等价，都是值传递，过程内的修改都不会回传" }
+      ],
+      "answer": { "correct": ["B"] },
+      "explanation": "`IN` 是值传递的只读副本（默认模式，过程内改写不回传）；`OUT` 在进入过程时被重置为 `NULL`，只负责把结果带出；`INOUT` 兼具两者：保留初值、可读可写、最终回传。因此调用端 `CALL p(1, @b, @c)` 里的 `@b`、`@c` 必须是用户变量或局部变量，不能写字面量。",
+      "tags": ["stored-procedure", "param-mode", "out", "inout"],
+      "source": "self",
+      "source_ref": "《MySQL 必知必会》第 23 章（使用存储过程），对应 examples/ex01、ex09"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "关于 DELIMITER，下列说法正确的是",
+      "content_md": "定义存储过程时为什么要先写 `DELIMITER $$`？",
+      "options": [
+        { "key": "A", "text": "`DELIMITER` 是 MySQL 服务器语法，服务器靠它识别复合语句的边界" },
+        { "key": "B", "text": "`DELIMITER` 是客户端指令（如 mysql 命令行），用于临时改变语句结束符，使 `BEGIN...END` 内部分号不被误判为语句结束；它不会提交给服务器" },
+        { "key": "C", "text": "`DELIMITER` 用于设置字符集，与语句边界无关" },
+        { "key": "D", "text": "`DELIMITER` 只对存储函数无效，存储过程必须用分号收尾" }
+      ],
+      "answer": { "correct": ["B"] },
+      "explanation": "客户端默认以 `;` 判定「语句结束、可以发送」。`BEGIN ... END` 内部自带 `;`，不加 `DELIMITER` 会在第一个内部分号处把半截语句发出去，服务器报 `ERROR 1064`。`DELIMITER` 是客户端解析约定、不发给服务器，所以「命令行报错、JDBC 可能通过」并不矛盾。定义完成后必须 `DELIMITER ;` 恢复。",
+      "tags": ["delimiter", "client-directive", "1064"],
+      "source": "self",
+      "source_ref": "《MySQL 必知必会》第 23 章，对应 examples/ex02"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "basic",
+      "title": "触发器里 NEW / OLD 的可用性",
+      "content_md": "在行级触发器中，`NEW` 与 `OLD` 行镜像的可用性正确的是：",
+      "options": [
+        { "key": "A", "text": "`INSERT` 两者都可用；`DELETE` 两者都可用" },
+        { "key": "B", "text": "`INSERT` 只有 `NEW`；`UPDATE` 两者都有；`DELETE` 只有 `OLD`" },
+        { "key": "C", "text": "`INSERT` 只有 `OLD`；`DELETE` 只有 `NEW`" },
+        { "key": "D", "text": "三种事件下 `NEW` 与 `OLD` 都始终可用" }
+      ],
+      "answer": { "correct": ["B"] },
+      "explanation": "矩阵由「行版本数量」决定：`INSERT` 引入一个新版本（无旧版本）→ 只有 `NEW`；`DELETE` 移除一个旧版本（无新版本）→ 只有 `OLD`；`UPDATE` 是新旧替换 → 两者都有。在 `DELETE` 触发器里引用 `NEW.col` 会报无定义。另外只有 `BEFORE` 型触发器可以改写 `NEW`。",
+      "tags": ["trigger", "new", "old", "eca"],
+      "source": "self",
+      "source_ref": "《MySQL 必知必会》第 25 章（使用触发器），对应 examples/ex04、ex10"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "hard",
+      "title": "修复游标过程：声明顺序错误 + 死循环",
+      "content_md": "下面这段存储过程有两个缺陷：声明顺序不合法，且循环无法正常结束。请指出并给出修复后的完整定义。\n\n```sql\nDELIMITER $$\nCREATE PROCEDURE p_raise(IN p_pct DECIMAL(5,2))\nBEGIN\n    DECLARE v_done INT DEFAULT 0;\n    DECLARE cur_emp CURSOR FOR SELECT id, salary FROM employee WHERE status = 1;\n    DECLARE v_id  BIGINT;\n    DECLARE v_sal DECIMAL(10,2);\n    DECLARE CONTINUE HANDLER FOR NOT FOUND SET v_done = 1;\n    OPEN cur_emp;\n    WHILE 1 = 1 DO\n        FETCH cur_emp INTO v_id, v_sal;\n        UPDATE employee SET salary = v_sal * (1 + p_pct / 100) WHERE id = v_id;\n    END WHILE;\n    CLOSE cur_emp;\nEND$$\nDELIMITER ;\n```",
+      "answer": {
+        "reference_code": "DELIMITER $$\nCREATE PROCEDURE p_raise(IN p_pct DECIMAL(5,2))\nBEGIN\n    -- 强制顺序: 局部变量 -> 条件 -> 游标 -> 处理器\n    DECLARE v_id   BIGINT;\n    DECLARE v_sal  DECIMAL(10,2);\n    DECLARE v_done INT DEFAULT 0;\n    DECLARE cur_emp CURSOR FOR\n        SELECT id, salary FROM employee WHERE status = 1;\n    DECLARE CONTINUE HANDLER FOR NOT FOUND SET v_done = 1;\n\n    OPEN cur_emp;\n    read_loop: LOOP\n        FETCH cur_emp INTO v_id, v_sal;\n        IF v_done = 1 THEN LEAVE read_loop; END IF;   -- 关键: 自行退出\n        UPDATE employee SET salary = v_sal * (1 + p_pct / 100) WHERE id = v_id;\n    END LOOP;\n    CLOSE cur_emp;\nEND$$\nDELIMITER ;",
+        "explanation": "缺陷一：`DECLARE` 的强制顺序是「局部变量 → 条件 → 游标 → 处理器」，原代码把游标声明放在了局部变量之前，语法错误。\n缺陷二：`WHILE 1 = 1` 是死循环，且 `v_done` 置 1 后没有任何语句跳出循环 —— `FETCH` 取空后 `v_id`/`v_sal` 保持上一次的值，于是无限重复 `UPDATE` 同一行，典型症状是数据库 CPU 打满。\n修复要点：① 变量声明提到游标之前；② 循环体内在 `FETCH` 之后立即判 `v_done` 并 `LEAVE`；③ 更优解是直接用集合操作：`UPDATE employee SET salary = salary * (1 + p_pct/100) WHERE status = 1;`"
+      },
+      "explanation": "两个考点：`DECLARE` 的顺序是硬性规定；`CONTINUE` 型 handler 不会自动退出循环，必须显式 `LEAVE`。",
+      "tags": ["cursor", "declare-order", "continue-handler", "dead-loop"],
+      "source": "self",
+      "source_ref": "《MySQL 必知必会》第 24 章（使用游标），对应 examples/ex11、ex03"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "估算触发器的执行次数与审计表写入行数",
+      "content_md": "表 `emp(id, salary)` 有 10000 行。执行前建好一个 `AFTER UPDATE ON emp FOR EACH ROW` 的触发器，其内容为：当 `NEW.salary <> OLD.salary` 时向 `salary_audit` 插入一行。\n\n现在执行：\n\n```sql\nUPDATE emp SET salary = salary + 100 WHERE id <= 100;   -- 100 行工资都变了\nUPDATE emp SET salary = salary WHERE id <= 50;          -- 50 行值未变\n```\n\n请回答：(1) 触发器一共被激活多少次？(2) `salary_audit` 一共新增多少行？",
+      "answer": {
+        "reference_text": "(1) 触发器共被激活 150 次；行级触发器对「语句影响的每一行」执行一次，两条语句分别影响 100 行和 50 行，共 150 行。\n(2) `salary_audit` 新增 100 行；第二条语句 `SET salary = salary` 使 `NEW.salary = OLD.salary`，不满足 `<>` 条件，故不写审计。这正说明「条件留痕」是必要的——否则批量无效更新会把审计表撑爆。"
+      },
+      "explanation": "行级触发器的执行次数 = 语句影响的行数（不是语句条数）。这是「大表批量更新 + 触发器」性能事故的算术基础。",
+      "tags": ["trigger", "for-each-row", "audit"],
+      "source": "self",
+      "source_ref": "《高性能 MySQL》第 6 章（触发器不是免费的），对应 examples/ex06"
+    },
+    {
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "hard",
+      "title": "为员工工资表设计审计触发器（含递归防御）",
+      "content_md": "表结构：\n- `employee(id BIGINT PK, name VARCHAR(20), salary DECIMAL(10,2), status TINYINT)`\n- `salary_audit(audit_id BIGINT AI PK, emp_id BIGINT, op VARCHAR(8), old_salary DECIMAL(10,2), new_salary DECIMAL(10,2), changed_at DATETIME DEFAULT CURRENT_TIMESTAMP)`\n\n要求：\n1. 对 `employee` 的 `INSERT` / `UPDATE` / `DELETE` 三个事件都留痕；\n2. `UPDATE` 仅在工资真正变化时才写审计；\n3. 明确说明该触发器需要哪些配套设置，才能避免「行级放大」「主从分叉」「递归/自更新」三类问题。",
+      "answer": {
+        "reference_code": "DELIMITER $$\nCREATE TRIGGER trg_emp_ai AFTER INSERT ON employee\nFOR EACH ROW\nBEGIN\n    INSERT INTO salary_audit(emp_id, op, old_salary, new_salary)\n    VALUES (NEW.id, 'INSERT', NULL, NEW.salary);\nEND$$\n\nCREATE TRIGGER trg_emp_au AFTER UPDATE ON employee\nFOR EACH ROW\nBEGIN\n    IF NEW.salary <> OLD.salary THEN            -- 条件留痕, 等价于 ECA 的 C\n        INSERT INTO salary_audit(emp_id, op, old_salary, new_salary)\n        VALUES (OLD.id, 'UPDATE', OLD.salary, NEW.salary);\n    END IF;\nEND$$\n\nCREATE TRIGGER trg_emp_ad AFTER DELETE ON employee\nFOR EACH ROW\nBEGIN\n    INSERT INTO salary_audit(emp_id, op, old_salary, new_salary)\n    VALUES (OLD.id, 'DELETE', OLD.salary, NULL);\nEND$$\nDELIMITER ;",
+        "explanation": "① 行级放大：`FOR EACH ROW` 使一条影响 N 行的语句触发 N 次，因此批量导入/大表更新前应先 `DROP TRIGGER`、事后再建；审计插入必须走条件（`<>`）。\n② 主从分叉：触发器内不得使用非确定性函数（`NOW()`/`RAND()`/`UUID()`）；本方案用列默认值 `DEFAULT CURRENT_TIMESTAMP` 而非在触发器里调用，并把 `binlog_format` 设为 `ROW`。\n③ 递归/自更新：触发器绝不能对本表 `INSERT/UPDATE/DELETE`（MySQL 报 `ERROR 1442`）；审计表 `salary_audit` 本身不建触发器、不建外键，避免级联与自我触发。\n补充：审计表应对应用账号只授 `INSERT`/`SELECT`，并且只追加不更新。"
+      },
+      "explanation": "判据：三事件留痕 + `<>` 条件 + 不碰本表 + `binlog_format=ROW` + 审计表无外键，五条齐全才算合格答案。",
+      "tags": ["trigger", "audit", "recursion", "binlog"],
+      "source": "self",
+      "source_ref": "《MySQL 必知必会》第 25 章，对应 examples/ex06、ex10"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "LeetCode 196 · 删除重复的电子邮箱（delete-duplicate-emails）",
+      "content_md": "从 `Person` 表中删除所有重复邮箱的记录，只保留 `id` 最小的一条。请给出 `DELETE` 写法。",
+      "answer": {
+        "reference_code": "-- 自连接: 删除「存在更小 id 且 email 相同」的行\nDELETE p1 FROM Person p1\nJOIN Person p2 ON p1.email = p2.email\nWHERE p1.id > p2.id;\n\n-- 等价子查询写法\nDELETE FROM Person\nWHERE id NOT IN (SELECT keep_id FROM (\n    SELECT MIN(id) AS keep_id FROM Person GROUP BY email\n) t);"
+      },
+      "explanation": "自连接写法把「保留 id 最小」表达为「删掉所有存在更小同 email 的行」，一次集合操作即可，避免应用层逐行删除（游标逐行的等价反例）。子查询写法必须先在外层再包一层派生表，否则 MySQL 不允许在 `DELETE` 的子查询中引用被删表。",
+      "tags": ["delete", "self-join", "dedup"],
+      "source": "leetcode",
+      "source_ref": "LeetCode 196（delete-duplicate-emails）",
+      "external_url": "https://leetcode.cn/problems/delete-duplicate-emails/",
+      "external_id": "196",
+      "test_cases": [
+        { "input": "schema 与样例数据见 external_url", "expected_output": "见 external_url", "is_sample": true }
+      ]
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "LeetCode 626 · 换座位（exchange-seats）",
+      "content_md": "交换 `Seat` 表中相邻的座位 id（相邻两两互换，最大 id 为奇数时最后一个不动），按 id 升序返回。",
+      "answer": {
+        "reference_code": "SELECT\n    CASE\n        WHEN id % 2 = 1 AND id = (SELECT MAX(id) FROM Seat) THEN id\n        WHEN id % 2 = 1 THEN id + 1\n        ELSE id - 1\n    END AS id,\n    student\nFROM Seat\nORDER BY id;"
+      },
+      "explanation": "用 `CASE` 表达式在集合层面完成「相邻配对交换」：奇数列向后挪一位、偶数列向前挪一位，末尾奇数保持不动。这类「按位置配对」的题若用游标逐行改 id，既慢又容易在交换过程中撞主键唯一约束，是「集合操作优于逐行处理」的典型例证。",
+      "tags": ["case", "update-semantics", "ordering"],
+      "source": "leetcode",
+      "source_ref": "LeetCode 626（exchange-seats）",
+      "external_url": "https://leetcode.cn/problems/exchange-seats/",
+      "external_id": "626",
+      "test_cases": [
+        { "input": "schema 与样例数据见 external_url", "expected_output": "见 external_url", "is_sample": true }
+      ]
+    }
+  ]
+}

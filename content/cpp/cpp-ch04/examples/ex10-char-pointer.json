@@ -1,0 +1,8 @@
+{
+  "title": "指针遍历 C 字符串",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "h.i.",
+  "code": "#include <iostream>\n\nint main() {\n    const char* s = \"hi\";\n    for (const char* p = s; *p; ++p) std::cout << *p << '.';\n}"
+}

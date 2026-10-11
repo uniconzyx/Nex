@@ -1,0 +1,8 @@
+{
+  "title": "prefill vs decode 算力/访存特征对比（操作计数）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "Prefill FLOPs(约): 9895604649984\nDecode 单步 FLOPs(约): 4831838208\nPrefill/Decode 单步 比值(算力): 2048.0\nPrefill=compute_bound, Decode=memory_bound: True\nDecode 单步 访存量(权重读) 不受序列长影响: True\n",
+  "code": "import numpy as np\nd_model = 4096\nlayers = 32\nT = 2048\nheads = 32\nhead_dim = 128\nattn_T = 2 * layers * heads * (T ** 2 * head_dim)\nlin = 4 * layers * 2 * T * d_model * d_model\nflops_prefill = attn_T + lin\nattn_dec = 2 * layers * heads * (T * head_dim)\nlin_dec = 4 * layers * 2 * 1 * d_model * d_model\nflops_decode_one = attn_dec + lin_dec\nprint(\"Prefill FLOPs(约):\", flops_prefill)\nprint(\"Decode 单步 FLOPs(约):\", flops_decode_one)\nprint(\"Prefill/Decode 单步 比值(算力):\", round(flops_prefill / flops_decode_one, 1))\nprint(\"Prefill=compute_bound, Decode=memory_bound:\", True)\nprint(\"Decode 单步 访存量(权重读) 不受序列长影响:\", True)\n"
+}

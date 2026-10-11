@@ -1,0 +1,26 @@
+{
+  "meta": { "chapter": "cpp-ch02" },
+  "items": [
+    {
+      "question": "函数重载在 C++ 里是怎么实现的？为什么 C 不支持？",
+      "answer_md": "C++ 编译器在编译期对重载函数做**名字改编（name mangling）**，把函数名、参数类型/个数编码进符号名，链接时据此区分。C 语言不做 name mangling，同名函数符号冲突，所以不支持重载。可用 `extern \"C\"` 强制按 C 方式改编，常用于兼容 C 接口/导出 C 符号。",
+      "follow_ups": ["extern \"C\" 有什么用？", "mangling 后的名字可读吗，怎么查看？"],
+      "difficulty": "mid",
+      "company_tags": ["通用", "字节"]
+    },
+    {
+      "question": "指针传参和引用传参有什么区别？什么时候用哪个？",
+      "answer_md": "1) 引用必须初始化且不可改绑，指针可以；2) 引用无空值语义，指针有 nullptr；3) 使用上：只读/原地修改优先 const 引用（无拷贝、语法简洁）；需要可空、可重指向、或做可选输出参数时用指针。C 语言没有引用，只能指针。",
+      "follow_ups": ["顶层 const 在传参时有意义吗？", "什么时候必须用指针而不能用引用？"],
+      "difficulty": "easy",
+      "company_tags": ["通用"]
+    },
+    {
+      "question": "默认参数有哪些规则？以下为什么错：void f(int a=1, int b)？",
+      "answer_md": "默认参数必须从参数列表**最右端连续**给定。void f(int a=1, int b) 中 a 有默认值但右侧 b 没有，调用 f(5) 会歧义（5 给 a 还是 b），因此非法。正确写法：void f(int a, int b=1) 或都给默认值且连续靠右。另外默认参数只在一处声明。",
+      "follow_ups": ["默认参数在声明和定义两处都写会怎样？", "虚函数能用默认参数吗（为什么通常不推荐）？"],
+      "difficulty": "mid",
+      "company_tags": ["通用", "腾讯"]
+    }
+  ]
+}

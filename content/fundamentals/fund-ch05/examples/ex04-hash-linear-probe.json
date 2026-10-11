@@ -1,0 +1,8 @@
+{
+  "title": "哈希表：除留余数 + 线性探测（插入/查找探测次数）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "插入 47: h0= 3  探测1次  落位  3\n插入  7: h0= 7  探测1次  落位  7\n插入 29: h0= 7  探测2次  落位  8\n插入 11: h0= 0  探测1次  落位  0\n插入 16: h0= 5  探测1次  落位  5\n插入 92: h0= 4  探测1次  落位  4\n插入 22: h0= 0  探测2次  落位  1\n插入  8: h0= 8  探测2次  落位  9\n插入  3: h0= 3  探测4次  落位  6\n装填因子 alpha=9/11=0.818\n平均插入探测=1.667  查找成功 ASL=1.667",
+  "code": "#include <stdio.h>\n\n#define M 11\n#define P 11\n\nint main(void) {\n    int ht[M];\n    int i, kk, h0, j, c;\n    int keys[] = {47, 7, 29, 11, 16, 92, 22, 8, 3};\n    int k = (int)(sizeof(keys) / sizeof(keys[0]));\n    int total_probe = 0, total_srch = 0;\n    double asl_ins, asl_succ;\n    for (i = 0; i < M; i++) ht[i] = -1;\n    for (kk = 0; kk < k; kk++) {\n        h0 = keys[kk] % P;\n        j = h0; c = 1;\n        while (ht[j] != -1) { j = (j + 1) % M; c++; }\n        ht[j] = keys[kk];\n        total_probe += c;\n        printf(\"插入 %2d: h0=%2d  探测%d次  落位 %2d\\n\", keys[kk], h0, c, j);\n    }\n    asl_ins = (double)total_probe / (double)k;\n    for (kk = 0; kk < k; kk++) {\n        h0 = keys[kk] % P;\n        j = h0; c = 1;\n        while (ht[j] != -1 && ht[j] != keys[kk]) { j = (j + 1) % M; c++; }\n        total_srch += c;\n    }\n    asl_succ = (double)total_srch / (double)k;\n    printf(\"装填因子 alpha=%d/%d=%.3f\\n\", k, M, (double)k / (double)M);\n    printf(\"平均插入探测=%.3f  查找成功 ASL=%.3f\\n\", asl_ins, asl_succ);\n    return 0;\n}\n"
+}

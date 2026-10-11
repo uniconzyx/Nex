@@ -1,0 +1,8 @@
+{
+  "title": "注意力权重分布与「中间遗忘」量化",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "序列长度  6:\n  首位置权重 0.8942 | 末位置权重 0.0028 | 中间平均 0.0257\n  首/中 倍数 = 34.74 | 末/中 倍数 = 0.11\n  权重最大位置索引 = 0（序列长 6）\n  中间区域占总权重 10.3%\n\n序列长度 12:\n  首位置权重 0.8920 | 末位置权重 0.0000 | 中间平均 0.0108\n  首/中 倍数 = 82.58 | 末/中 倍数 = 0.00\n  权重最大位置索引 = 0（序列长 12）\n  中间区域占总权重 10.8%\n\n序列长度 20:\n  首位置权重 0.8919 | 末位置权重 0.0000 | 中间平均 0.0060\n  首/中 倍数 = 148.56 | 末/中 倍数 = 0.00\n  权重最大位置索引 = 0（序列长 20）\n  中间区域占总权重 10.8%\n\n观察: 中间片段的平均权重始终显著低于首尾，即所谓 lost-in-the-middle\n工程含义: 把关键证据放在上下文开头或结尾，而不是埋在中间",
+  "code": "import math\n\n\ndef softmax(xs):\n    m = max(xs)\n    es = [math.exp(x - m) for x in xs]\n    s = sum(es)\n    return [e / s for e in es]\n\n\ndef attn(n, decay=0.75, query_bias=2.0):\n    \"\"\"构造一个「首尾偏好」的注意力分布：\n    位置 0 得到 query_bias 加成，其余按与末尾的距离衰减。\"\"\"\n    scores = []\n    for i in range(n):\n        base = -decay * (i + 1)\n        if i == 0:\n            base += query_bias\n        scores.append(base)\n    return softmax(scores)\n\n\nfor n in (6, 12, 20):\n    w = attn(n)\n    mid = w[1:-1]\n    head, tail = w[0], w[-1]\n    mid_avg = sum(mid) / len(mid) if mid else 0.0\n    print(\"序列长度 %2d:\" % n)\n    print(\"  首位置权重 %.4f | 末位置权重 %.4f | 中间平均 %.4f\"\n          % (head, tail, mid_avg))\n    print(\"  首/中 倍数 = %.2f | 末/中 倍数 = %.2f\"\n          % (head / mid_avg if mid_avg else 0, tail / mid_avg if mid_avg else 0))\n    argmax = w.index(max(w))\n    print(\"  权重最大位置索引 = %d（序列长 %d）\" % (argmax, n))\n    mid_share = sum(mid) / sum(w) * 100\n    print(\"  中间区域占总权重 %.1f%%\" % mid_share)\n    print()\n\nprint(\"观察: 中间片段的平均权重始终显著低于首尾，即所谓 lost-in-the-middle\")\nprint(\"工程含义: 把关键证据放在上下文开头或结尾，而不是埋在中间\")"
+}

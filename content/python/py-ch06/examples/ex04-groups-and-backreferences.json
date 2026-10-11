@@ -1,0 +1,8 @@
+{
+  "title": "普通分组、命名分组与反向引用",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== 普通分组与编号 ===\ngroup(0) 整串 : 2026-10-08\ngroup(1)      : 2026\ngroup(2)      : 10\ngroup(3)      : 08\ngroups()      : ('2026', '10', '08')\n\n=== 命名分组 ===\ngroupdict()   : {'y': '2026', 'm': '10', 'd': '08'}\n\n=== 反向引用：匹配重复词 ===\n普通重复词 r'\\b(\\w+) \\1\\b' : ['cat', 'mat']\n命名反向引用 (?P=w)          : ['cat', 'mat']\n\n=== 分组的两种用途：捕获 vs 仅分组 ===\n捕获  (?:) 不记编号 : ['ababab']\n捕获  (...) 记编号  : ['ab']  <- 只保留最后一次",
+  "code": "import re\n\nprint(\"=== 普通分组与编号 ===\")\nm = re.search(r\"(\\d{4})-(\\d{2})-(\\d{2})\", \"日期 2026-10-08\")\nprint(\"group(0) 整串 :\", m.group(0))\nfor i in (1, 2, 3):\n    print(\"group(%d)      :\" % i, m.group(i))\nprint(\"groups()      :\", m.groups())\n\nprint()\nprint(\"=== 命名分组 ===\")\nm = re.search(r\"(?P<y>\\d{4})-(?P<m>\\d{2})-(?P<d>\\d{2})\", \"2026-10-08\")\nprint(\"groupdict()   :\", m.groupdict())\n\nprint()\nprint(\"=== 反向引用：匹配重复词 ===\")\ns = \"the cat cat sat on the mat mat\"\nprint(\"普通重复词 r'\\\\b(\\\\w+) \\\\1\\\\b' :\", re.findall(r\"\\b(\\w+) \\1\\b\", s))\nprint(\"命名反向引用 (?P=w)          :\", re.findall(r\"\\b(?P<w>\\w+) (?P=w)\\b\", s))\n\nprint()\nprint(\"=== 分组的两种用途：捕获 vs 仅分组 ===\")\nprint(\"捕获  (?:) 不记编号 :\", re.findall(r\"(?:ab)+\", \"ababab\"))\nprint(\"捕获  (...) 记编号  :\", re.findall(r\"(ab)+\", \"ababab\"), \" <- 只保留最后一次\")"
+}

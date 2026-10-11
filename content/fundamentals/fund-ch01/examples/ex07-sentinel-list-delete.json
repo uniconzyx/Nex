@@ -1,0 +1,8 @@
+{
+  "title": "哨兵节点：让头节点与中间节点走同一套删除逻辑",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "原链表      : 7 -> 3 -> 5 -> 3 -> 9\n删除首个 3 后: 7 -> 5 -> 3 -> 9\n删除头 7 后 : 5 -> 3 -> 9\n注意：删除头节点没有走任何特殊分支",
+  "code": "#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct Node { int data; struct Node *next; } Node;\n\n/* 带哨兵：不存在“删头节点”的特例分支 */\nNode *remove_value(Node *head, int v) {\n    Node dummy = {0, head};\n    Node *prev = &dummy;\n    while (prev->next && prev->next->data != v) prev = prev->next;\n    if (prev->next) {\n        Node *del = prev->next;\n        prev->next = del->next;\n        free(del);\n    }\n    return dummy.next;                 /* 新头 */\n}\n\nvoid print_list(const char *tag, Node *h) {\n    printf(\"%s: \", tag);\n    for (Node *p = h; p; p = p->next) printf(\"%d%s\", p->data, p->next ? \" -> \" : \"\");\n    printf(\"\\n\");\n}\n\nint main(void) {\n    /* 构造 7 -> 3 -> 5 -> 3 -> 9 */\n    int vals[] = {7, 3, 5, 3, 9};\n    Node *head = NULL, *tail = NULL;\n    for (int i = 0; i < 5; i++) {\n        Node *nd = malloc(sizeof(Node));\n        nd->data = vals[i]; nd->next = NULL;\n        if (!head) head = tail = nd; else { tail->next = nd; tail = nd; }\n    }\n    print_list(\"原链表      \", head);\n    head = remove_value(head, 3);\n    print_list(\"删除首个 3 后\", head);\n    head = remove_value(head, 7);        /* 删头节点：代码路径与上一行完全相同 */\n    print_list(\"删除头 7 后 \", head);\n    printf(\"注意：删除头节点没有走任何特殊分支\\n\");\n    return 0;\n}"
+}

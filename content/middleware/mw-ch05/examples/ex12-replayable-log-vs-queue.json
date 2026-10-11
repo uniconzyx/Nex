@@ -1,0 +1,9 @@
+{
+  "title": "可重放日志与队列模型的对比",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== Kafka 可重放：offset 是消费者的「播放头」 ===\n分区日志（与消费无关，append-only 持久化）: ['m0', 'm1', 'm2', 'm3', 'm4']\n\n消费动作                               读到的消息\n消费者 A 从 offset 0 读 3 条             ['m0', 'm1', 'm2']\n消费者 B 从 offset 2 读 3 条             ['m2', 'm3', 'm4']\nA 重置回 offset 0 再读 3 条              ['m0', 'm1', 'm2']\nC 从 offset 4 读到末尾                  ['m4']\n\n=== 三点差异（与「队列」模型的本质区别）===\n1) 同一份日志可被多个消费者/组独立读取: A 与 B 读同一条消息互不影响\n2) 重置 offset 即可重放历史: 补数、回溯排查、新增消费方都是零成本\n3) 传统队列消息一旦被 ack 就删除, 无法重放; 也无法让两组各自消费\n\n=== 由此派生出的两种典型用法 ===\n事件溯源 / 流式 ETL : 用 retention 保留窗口内的原始事件，多组并行消费（数仓、实时告警、风控）\n状态恢复 / CDC     : 用 compact 保留每 key 最新值，新实例启动时从头重放重建本地状态",
+  "code": "print(\"=== Kafka 可重放：offset 是消费者的「播放头」 ===\")\nlog = [\"m0\", \"m1\", \"m2\", \"m3\", \"m4\"]\nprint(\"分区日志（与消费无关，append-only 持久化）:\", log)\nprint()\n\n\ndef consume(from_offset, n):\n    return log[from_offset:from_offset + n]\n\n\nprint(\"%-34s %s\" % (\"消费动作\", \"读到的消息\"))\nprint(\"%-34s %s\" % (\"消费者 A 从 offset 0 读 3 条\", consume(0, 3)))\nprint(\"%-34s %s\" % (\"消费者 B 从 offset 2 读 3 条\", consume(2, 3)))\nprint(\"%-34s %s\" % (\"A 重置回 offset 0 再读 3 条\", consume(0, 3)))\nprint(\"%-34s %s\" % (\"C 从 offset 4 读到末尾\", consume(4, 5)))\nprint()\nprint(\"=== 三点差异（与「队列」模型的本质区别）===\")\nprint(\"1) 同一份日志可被多个消费者/组独立读取: A 与 B 读同一条消息互不影响\")\nprint(\"2) 重置 offset 即可重放历史: 补数、回溯排查、新增消费方都是零成本\")\nprint(\"3) 传统队列消息一旦被 ack 就删除, 无法重放; 也无法让两组各自消费\")\nprint()\nprint(\"=== 由此派生出的两种典型用法 ===\")\nprint(\"事件溯源 / 流式 ETL : 用 retention 保留窗口内的原始事件，多组并行消费（数仓、实时告警、风控）\")\nprint(\"状态恢复 / CDC     : 用 compact 保留每 key 最新值，新实例启动时从头重放重建本地状态\")",
+  "_verified": true
+}

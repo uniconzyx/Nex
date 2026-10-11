@@ -1,0 +1,8 @@
+{
+  "title": "ADL（参数依赖查找）演示",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "lib::inspect(Widget)\n",
+  "code": "#include <iostream>\n\nnamespace lib {\n    struct Widget {};\n    void inspect(const Widget&) { std::cout << \"lib::inspect(Widget)\\n\"; }\n}\n\nvoid inspect(int) { std::cout << \"global::inspect(int)\\n\"; }\n\nint main() {\n    lib::Widget w;\n    inspect(w);   // 未限定：实参类型在 lib，ADL 选中 lib::inspect\n}"
+}

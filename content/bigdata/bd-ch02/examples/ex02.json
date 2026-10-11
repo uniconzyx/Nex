@@ -1,0 +1,8 @@
+{
+  "title": "Partitioner：hash(key) % R 决定 key 去哪个 reducer",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "hello      -> reducer 1\nworld      -> reducer 0\nbigdata    -> reducer 1\nof         -> reducer 0\ndata       -> reducer 2\nmap        -> reducer 0\nreduce     -> reducer 0\nspark      -> reducer 2\n--num_reducers=3",
+  "code": "\ndef partition(key, num_reduce):\n    h = 0\n    for ch in key:\n        h = (h * 31 + ord(ch)) & 0x7fffffff\n    return h % num_reduce\n\nR = 3\nwords = [\"hello\", \"world\", \"bigdata\", \"of\", \"data\", \"map\", \"reduce\", \"spark\"]\nfor w in words:\n    print(f\"{w:10s} -> reducer {partition(w, R)}\")\nprint(f\"--num_reducers={R}\")\n"
+}

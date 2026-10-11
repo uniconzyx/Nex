@@ -1,0 +1,345 @@
+{
+  "schema_version": 1,
+  "subject": "spring",
+  "title": "CppMind · Spring 生态课程体系",
+  "note": "阶段7 技术栈扩展大纲。每章须齐备 7 类内容（见 _template 规范），由 server/scripts/validate_content.py 校验。resources 仅存元数据与链接，不存第三方题面/正文，符合合规红线。",
+  "groups": {
+    "S1": "Spring 核心",
+    "S2": "SpringBoot",
+    "S3": "持久层 MyBatis",
+    "S4": "工程实践"
+  },
+  "chapters": [
+    {
+      "id": "spring-ch01",
+      "order": 1,
+      "group": "S1",
+      "title": "Spring 核心：IoC 容器与依赖注入",
+      "summary": "IoC/DI 反转了什么；BeanFactory 与 ApplicationContext 的差异；构造器/Setter/字段注入的取舍（循环依赖与不可变性）；@Component/@Bean/@Configuration 与组件扫描；容器启动主流程；三级缓存如何解决单例循环依赖。",
+      "prerequisites": [],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "macrozheng/mall",
+          "spring-projects/spring-boot",
+          "YunaiV/ruoyi-vue-pro",
+          "eugenp/tutorials"
+        ],
+        "github_stars": [
+          84863,
+          81563,
+          39566,
+          37326
+        ],
+        "github_notes": [
+          "SpringBoot + MyBatis 完整电商项目，最佳工程范例",
+          "Spring Boot 官方仓库：源码、文档与示例",
+          "企业级快速开发平台：Spring Boot + MyBatis Plus 全栈实现",
+          "Spring 生态系统化教程代码"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Spring 实战（第6版）》第2章",
+          "《Spring 解密》IoC 部分"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "spring-ch02",
+      "order": 2,
+      "group": "S1",
+      "title": "Bean 生命周期与作用域",
+      "summary": "实例化→属性填充→Aware 回调→BeanPostProcessor 前置→@PostConstruct→初始化方法→后置处理→使用→销毁；singleton/prototype/request/session 的语义差异与 prototype 注入 singleton 的陷阱；BeanFactoryPostProcessor 与 BeanPostProcessor 的执行时机；懒加载与提前暴露。",
+      "prerequisites": [
+        "spring-ch01"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "macrozheng/mall",
+          "spring-projects/spring-boot",
+          "YunaiV/ruoyi-vue-pro",
+          "eugenp/tutorials"
+        ],
+        "github_stars": [
+          84863,
+          81563,
+          39566,
+          37326
+        ],
+        "github_notes": [
+          "SpringBoot + MyBatis 完整电商项目，最佳工程范例",
+          "Spring Boot 官方仓库：源码、文档与示例",
+          "企业级快速开发平台：Spring Boot + MyBatis Plus 全栈实现",
+          "Spring 生态系统化教程代码"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Spring 实战（第6版）》第2-3章"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "spring-ch03",
+      "order": 3,
+      "group": "S1",
+      "title": "AOP 与代理机制",
+      "summary": "横切关注点与 AOP 术语（切面/切点/通知）；JDK 动态代理与 CGLIB 的字节码原理与适用边界（final 类/方法、接口存在与否）；@Aspect/@Pointcut/@Around；自调用导致代理失效的根因；AOP 在事务、日志、鉴权中的落地。",
+      "prerequisites": [
+        "spring-ch01"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "macrozheng/mall",
+          "spring-projects/spring-boot",
+          "YunaiV/ruoyi-vue-pro",
+          "eugenp/tutorials"
+        ],
+        "github_stars": [
+          84863,
+          81563,
+          39566,
+          37326
+        ],
+        "github_notes": [
+          "SpringBoot + MyBatis 完整电商项目，最佳工程范例",
+          "Spring Boot 官方仓库：源码、文档与示例",
+          "企业级快速开发平台：Spring Boot + MyBatis Plus 全栈实现",
+          "Spring 生态系统化教程代码"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Spring 实战（第6版）》第4章"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "spring-ch04",
+      "order": 4,
+      "group": "S2",
+      "title": "SpringBoot 自动配置与起步依赖",
+      "summary": "@SpringBootApplication 三合一注解；SPI 机制的演进（spring.factories → AutoConfiguration.imports）；@ConditionalOnClass/@ConditionalOnMissingBean 等条件装配；@ConfigurationProperties 与松散绑定、配置优先级；内嵌容器与启动流程；自定义 starter。",
+      "prerequisites": [
+        "spring-ch02",
+        "spring-ch03"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "macrozheng/mall",
+          "spring-projects/spring-boot",
+          "YunaiV/ruoyi-vue-pro",
+          "eugenp/tutorials"
+        ],
+        "github_stars": [
+          84863,
+          81563,
+          39566,
+          37326
+        ],
+        "github_notes": [
+          "SpringBoot + MyBatis 完整电商项目，最佳工程范例",
+          "Spring Boot 官方仓库：源码、文档与示例",
+          "企业级快速开发平台：Spring Boot + MyBatis Plus 全栈实现",
+          "Spring 生态系统化教程代码"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Spring Boot 编程思想》核心篇",
+          "《Spring Boot 实战》"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "spring-ch05",
+      "order": 5,
+      "group": "S2",
+      "title": "Web 层：REST 控制器与参数校验",
+      "summary": "@RestController/@RequestMapping 与路径匹配；参数绑定（@RequestBody/@PathVariable/@RequestParam）与内容协商；统一响应体与 @ControllerAdvice 全局异常处理；Bean Validation 分组校验；过滤器 vs 拦截器 vs AOP 的执行顺序；CORS 与跨域根因。",
+      "prerequisites": [
+        "spring-ch04"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "macrozheng/mall",
+          "spring-projects/spring-boot",
+          "YunaiV/ruoyi-vue-pro",
+          "eugenp/tutorials"
+        ],
+        "github_stars": [
+          84863,
+          81563,
+          39566,
+          37326
+        ],
+        "github_notes": [
+          "SpringBoot + MyBatis 完整电商项目，最佳工程范例",
+          "Spring Boot 官方仓库：源码、文档与示例",
+          "企业级快速开发平台：Spring Boot + MyBatis Plus 全栈实现",
+          "Spring 生态系统化教程代码"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Spring 实战（第6版）》第7章"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "spring-ch06",
+      "order": 6,
+      "group": "S3",
+      "title": "MyBatis 基础：映射与 CRUD",
+      "summary": "半自动 ORM 的定位；SqlSession 与 Mapper 接口的动态代理绑定；#{} 预编译与 ${} 字符串拼接的 SQL 注入差异；resultMap、驼峰映射与关联映射；主键回填与 useGeneratedKeys；与原生 JDBC、JPA 的对比取舍。",
+      "prerequisites": [
+        "spring-ch01"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "macrozheng/mall",
+          "spring-projects/spring-boot",
+          "YunaiV/ruoyi-vue-pro",
+          "eugenp/tutorials"
+        ],
+        "github_stars": [
+          84863,
+          81563,
+          39566,
+          37326
+        ],
+        "github_notes": [
+          "SpringBoot + MyBatis 完整电商项目，最佳工程范例",
+          "Spring Boot 官方仓库：源码、文档与示例",
+          "企业级快速开发平台：Spring Boot + MyBatis Plus 全栈实现",
+          "Spring 生态系统化教程代码"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《MyBatis 从入门到精通》"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      },
+      "soft_prerequisites": [
+        {
+          "id": "java-ch04",
+          "note": "Java 集合与泛型（若已掌握可跳过）"
+        }
+      ]
+    },
+    {
+      "id": "spring-ch07",
+      "order": 7,
+      "group": "S3",
+      "title": "MyBatis 进阶：动态 SQL、缓存与插件",
+      "summary": "<if>/<choose>/<foreach>/<trim> 动态 SQL 与 <sql> 片段复用；一级缓存（SqlSession 级）与二级缓存（namespace 级）的失效条件与陷阱；延迟加载；分页插件的拦截器原理（改写 SQL）；TypeHandler 与枚举映射；与 Hibernate 的取舍。",
+      "prerequisites": [
+        "spring-ch06"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "macrozheng/mall",
+          "spring-projects/spring-boot",
+          "YunaiV/ruoyi-vue-pro",
+          "eugenp/tutorials"
+        ],
+        "github_stars": [
+          84863,
+          81563,
+          39566,
+          37326
+        ],
+        "github_notes": [
+          "SpringBoot + MyBatis 完整电商项目，最佳工程范例",
+          "Spring Boot 官方仓库：源码、文档与示例",
+          "企业级快速开发平台：Spring Boot + MyBatis Plus 全栈实现",
+          "Spring 生态系统化教程代码"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《MyBatis 从入门到精通》进阶篇"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "spring-ch08",
+      "order": 8,
+      "group": "S4",
+      "title": "事务管理与工程实践",
+      "summary": "@Transactional 的传播行为（REQUIRED/REQUIRES_NEW/NESTED）与隔离级别；事务失效的典型场景（自调用、非 public、异常被吞、非运行时异常不回滚、多线程）；事务与 AOP 代理的关系；分层架构与 DTO/VO/Entity 转换；多数据源与分布式事务概览。",
+      "prerequisites": [
+        "spring-ch03",
+        "spring-ch07"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "macrozheng/mall",
+          "spring-projects/spring-boot",
+          "YunaiV/ruoyi-vue-pro",
+          "eugenp/tutorials"
+        ],
+        "github_stars": [
+          84863,
+          81563,
+          39566,
+          37326
+        ],
+        "github_notes": [
+          "SpringBoot + MyBatis 完整电商项目，最佳工程范例",
+          "Spring Boot 官方仓库：源码、文档与示例",
+          "企业级快速开发平台：Spring Boot + MyBatis Plus 全栈实现",
+          "Spring 生态系统化教程代码"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Spring 实战（第6版）》第6章"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    }
+  ],
+  "github_resources": [
+    {
+      "repo": "macrozheng/mall",
+      "stars": 84863,
+      "url": "https://github.com/macrozheng/mall",
+      "note": "SpringBoot + MyBatis 完整电商项目，最佳工程范例"
+    },
+    {
+      "repo": "spring-projects/spring-boot",
+      "stars": 81563,
+      "url": "https://github.com/spring-projects/spring-boot",
+      "note": "Spring Boot 官方仓库：源码、文档与示例"
+    },
+    {
+      "repo": "YunaiV/ruoyi-vue-pro",
+      "stars": 39566,
+      "url": "https://github.com/YunaiV/ruoyi-vue-pro",
+      "note": "企业级快速开发平台：Spring Boot + MyBatis Plus 全栈实现"
+    },
+    {
+      "repo": "eugenp/tutorials",
+      "stars": 37326,
+      "url": "https://github.com/eugenp/tutorials",
+      "note": "Spring 生态系统化教程代码"
+    }
+  ],
+  "resources_fetched_at": "2026-09-21"
+}

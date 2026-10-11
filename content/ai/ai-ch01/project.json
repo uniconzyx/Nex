@@ -1,0 +1,56 @@
+{
+  "meta": {
+    "chapter": "ai-ch01",
+    "title": "深度学习基础 —— 综合项目",
+    "count": 1
+  },
+  "items": [
+    {
+      "title": "从零实现一个可训练的小型神经网络库（NumPy only）",
+      "requirement_md": "只用 NumPy（**不允许**用 PyTorch / TensorFlow）实现一个微型深度学习框架，并训练到可用：\n\n1. **Tensor 与 autograd**：实现 `add / mul / matmul / 求和 / ReLU / Softmax`，支持广播，实现拓扑排序反向传播，梯度用累加语义；\n2. **数值梯度校验**：用中心差分法对所有算子做校验，相对误差 < 1e-5，打印每个算子的校验结果表格；\n3. **网络与损失**：实现全连接层、交叉熵损失（含数值稳定的 log_softmax）；\n4. **优化器**：实现 SGD / Momentum / RMSProp / Adam / AdamW 五种，在同一非凸目标上对比收敛曲线与最终损失；\n5. **训练循环**：完整实现 zero_grad / backward / clip_grad_norm / step / 学习率调度（warmup + cosine），并在 eval 模式关闭随机性；\n6. **实证梯度消失**：构造 10 层 sigmoid 网络与 10 层 ReLU+He 网络，打印各层梯度范数，用数据证明前者梯度趋零、后者保持；\n7. **任务验证**：在一个非线性可分数据集（如螺旋线 / XOR 变体）上训练，测试集准确率 > 95%。\n\n**进阶**：加入 BatchNorm 与 Dropout，观察它们对训练速度与泛化的影响，并解释机理。",
+      "tasks": [
+        {
+          "title": "实现 autograd 并通过数值梯度校验",
+          "verification": {
+            "type": "output",
+            "desc": "每个算子的解析梯度与中心差分数值梯度的相对误差 < 1e-5，打印校验表格。"
+          }
+        },
+        {
+          "title": "实现五种优化器并对比",
+          "verification": {
+            "type": "output",
+            "desc": "在同一目标上跑固定步数，打印各优化器的最终损失与达到阈值所需步数；AdamW 应优于 Adam+L2 的泛化。"
+          }
+        },
+        {
+          "title": "实证梯度消失",
+          "verification": {
+            "type": "output",
+            "desc": "打印两种 10 层网络各层的梯度范数：sigmoid 版应指数衰减（<1e-6），ReLU+He 版应维持同量级。"
+          }
+        },
+        {
+          "title": "数值稳定性验证",
+          "verification": {
+            "type": "output",
+            "desc": "输入 logits 全为 1000 时，朴素 softmax 得到 nan，稳定写法正确输出均匀分布。"
+          }
+        },
+        {
+          "title": "端到端训练任务",
+          "verification": {
+            "type": "accuracy",
+            "desc": "在非线性可分数据集上测试集准确率 > 95%，并打印训练/验证损失曲线。"
+          }
+        }
+      ],
+      "tags": [
+        "自动微分",
+        "神经网络",
+        "NumPy",
+        "优化器"
+      ]
+    }
+  ]
+}

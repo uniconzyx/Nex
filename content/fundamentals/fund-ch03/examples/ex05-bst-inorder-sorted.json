@@ -1,0 +1,8 @@
+{
+  "title": "中序输出验证 BST 有序性",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "中序: 20 30 40 50 60 70 80\n是否严格递增: 是（是合法 BST）",
+  "code": "#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct T { int v; struct T *l, *r; } T;\nstatic T *ins(T *n, int v) {\n    if (!n) { T *x = malloc(sizeof(T)); x->v = v; x->l = x->r = NULL; return x; }\n    if (v < n->v) n->l = ins(n->l, v);\n    else if (v > n->v) n->r = ins(n->r, v);\n    return n;\n}\nstatic int prev = -1, ok = 1;\nstatic void ino(T *n) {\n    if (!n) return;\n    ino(n->l);\n    if (prev >= 0) {\n        printf(\" %d\", n->v);\n        if (n->v <= prev) ok = 0;      /* 必须严格递增 */\n    } else printf(\" %d\", n->v);\n    prev = n->v;\n    ino(n->r);\n}\nint main(void) {\n    int vals[] = {50, 30, 70, 20, 40, 60, 80};\n    T *root = NULL;\n    for (int i = 0; i < 7; i++) root = ins(root, vals[i]);\n    printf(\"中序:\");\n    ino(root);\n    printf(\"\\n是否严格递增: %s\\n\", ok ? \"是（是合法 BST）\" : \"否\");\n    return 0;\n}"
+}

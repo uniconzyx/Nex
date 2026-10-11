@@ -1,0 +1,8 @@
+{
+  "title": "type_traits 萃取：is_destructible",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "truetruefalse",
+  "code": "#include <iostream>\n#include <type_traits>\n\nstruct Good { ~Good() = default; };\nstruct NoDtor { ~NoDtor() = delete; };\n\nint main() {\n    bool a = std::is_destructible_v<int>;\n    bool b = std::is_destructible_v<Good>;\n    bool c = std::is_destructible_v<NoDtor>;\n    std::cout << std::boolalpha << a << b << c;\n}"
+}

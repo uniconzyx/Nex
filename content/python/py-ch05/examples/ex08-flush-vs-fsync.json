@@ -1,0 +1,8 @@
+{
+  "title": "flush 与 fsync：字节数相同、持久性不同",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "write 后    磁盘大小 = 0\nflush 后    磁盘大小 = 4\nfsync 后    磁盘大小 = 4\nclose 后    磁盘大小 = 4\n\nflush : 用户态缓冲 -> OS 页缓存（进程崩溃安全，断电不安全）\nfsync : 要求 OS 把文件数据写到存储介质（断电安全，代价是等待 I/O）\n二者字节数相同，但持久性等级不同 —— 统计文件大小时看不出差别",
+  "code": "import os\nfrom pathlib import Path\n\np = Path(\"durable.txt\")\nf = open(p, \"w\", encoding=\"utf-8\")\n\nrows = []\nf.write(\"data\")\nrows.append((\"write 后\", p.stat().st_size))\nf.flush()\nrows.append((\"flush 后\", p.stat().st_size))\nos.fsync(f.fileno())\nrows.append((\"fsync 后\", p.stat().st_size))\nf.close()\nrows.append((\"close 后\", p.stat().st_size))\n\nfor k, v in rows:\n    print(\"%-10s 磁盘大小 = %d\" % (k, v))\nprint()\nprint(\"flush : 用户态缓冲 -> OS 页缓存（进程崩溃安全，断电不安全）\")\nprint(\"fsync : 要求 OS 把文件数据写到存储介质（断电安全，代价是等待 I/O）\")\nprint(\"二者字节数相同，但持久性等级不同 —— 统计文件大小时看不出差别\")"
+}

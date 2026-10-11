@@ -1,0 +1,8 @@
+{
+  "title": "完美转发 std::forward（保持值类别）",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "01",
+  "code": "#include <iostream>\n#include <utility>\n\nvoid sink(int&) { std::cout << 0; }\nvoid sink(int&&) { std::cout << 1; }\n\ntemplate <typename T>\nvoid forwarder(T&& x) {\n    sink(std::forward<T>(x));\n}\n\nint main() {\n    int a = 5;\n    forwarder(a);\n    forwarder(7);\n}"
+}

@@ -1,0 +1,69 @@
+{
+  "meta": {
+    "chapter": "fs-ch06",
+    "category": "system"
+  },
+  "items": [
+    {
+      "title": "自包含鉴权服务：Session/JWT 双模式 + Refresh 轮换 + 中间件鉴权链",
+      "requirement_md": "只用 Node 内置能力（`node:http`、`node:crypto`、`node:sqlite`）实现一个小型鉴权服务，把本章核心考点全部打通，脚本自包含可跑（不联网、不装 npm 包、不依赖外部服务）：\n\n1. **口令存储**：注册时用 `crypto.pbkdf2Sync`（或 scrypt）加盐（`crypto.randomBytes(16)`）迭代存储口令哈希；登录时用 `crypto.timingSafeEqual` 做常量时间比对。数据库只存 `salt` 与 `hash`，绝不存明文。\n2. **令牌签发与校验**：自实现 `signHS256/verifyHS256`（`base64url` + `crypto.createHmac`），签发 `access_token`（TTL 15 分钟）与 `refresh_token`（单次使用）。校验函数必须实现完整清单：段数、alg 白名单（**写死 HS256，不读 token 头**）、用原始 base64url 段验签、常量时间比较、`exp` 校验。\n3. **Refresh 轮换**：`POST /auth/refresh` 使用旧 refresh 换取新的 access+refresh 并作废旧的；若同一 refresh 被二次使用，判定为泄露并**吊销整个 family**（该用户所有 refresh 失效），返回 401。\n4. **登出与撤销**：`POST /auth/logout` 把当前 access 的 `jti` 写入内存黑名单（Map + TTL = token 剩余寿命）；受保护接口先查黑名单再放行。\n5. **中间件鉴权链**：受保护路由经 `authenticate → authorize(permission) → resourceGuard` 三段；资源级校验对比 `ownerId`，无权访问且不可见时返回 404。覆盖 401 / 403 / 200 三种结果。\n6. **CSRF 兜底**：会话/刷新用 `Set-Cookie` 带上 `HttpOnly; Secure; SameSite=Lax`（本地演示时仅打印属性串），状态变更接口校验 `X-CSRF-Token` 与 Cookie 内 token 是否一致。\n\n验收方式是脚本自测：用内置 `fetch` 对 `listen(0)` 起的随机端口发真实请求，打印每步的「方法 路径 -> 状态码」与所有布尔判据（口令校验、验签、轮换、黑名单、鉴权链、CSRF）。**输出中不得出现端口号、墙钟耗时与随机盐值**（随机量只参与内部计算，不进断言输出）。",
+      "tasks": [
+        {
+          "title": "实现加盐口令存储与常量时间校验",
+          "verification": {
+            "type": "test",
+            "desc": "注册后 DB 内无明文；正确口令登录 200、错误口令 401；两次注册同一口令得到不同 salt 与不同 hash（布尔断言为 true）"
+          }
+        },
+        {
+          "title": "自实现 HS256 签发与完整校验清单",
+          "verification": {
+            "type": "test",
+            "desc": "合法 token 验签通过；篡改 payload、alg 改 none、错误密钥、已过期四类 token 全部被拒（4 个布尔断言均为 true）"
+          }
+        },
+        {
+          "title": "Refresh 轮换与复用检测",
+          "verification": {
+            "type": "test",
+            "desc": "正常刷新返回新的 access+refresh；用旧 refresh 二次刷新返回 401 且该 family 内所有 refresh 失效（reuse_detected=true）"
+          }
+        },
+        {
+          "title": "黑名单撤销与鉴权链状态码映射",
+          "verification": {
+            "type": "test",
+            "desc": "登出后携带原 access 访问受保护接口返回 401；无权限访问他人资源返回 403/404；有权访问返回 200（三种状态码均被真实请求命中）"
+          }
+        }
+      ]
+    },
+    {
+      "title": "JWT 安全校验器（红队视角的 CI 关卡）",
+      "requirement_md": "实现一个可独立运行的 JWT 校验器与攻击回放脚本，把「攻击者会怎么打」变成可重复执行的断言，可接入 CI：\n\n1. **校验器**：实现 `verifyJWT(token, {allowedAlgs, secretOrPublicKey, now, aud, iss})`，返回 `{ok, reasons[]}`。必须逐条给出被拒原因（`malformed`/`alg-not-allowed`/`bad-signature`/`expired`/`not-yet-valid`/`aud-mismatch`/`iss-mismatch`）。\n2. **攻击用例集**：构造一组攻击 token 并断言**全部被拒**——① `alg:none`（去签名）；② 算法混淆（用「公钥字符串」当 HMAC 密钥自签 `alg=HS256`）；③ 篡改 payload 保留原签名；④ 篡改 header 保留原签名；⑤ 截断签名；⑥ 过期 token；⑦ `aud`/`iss` 指向其他系统；⑧ 用弱口令字典对 HS256 密钥做离线爆破（演示弱密钥为何致命，断言「短密钥在 N 次内被猜中」）。\n3. **断言输出**：每个攻击用例输出 `name + rejected(true/false) + reason`，最后汇总 `all_attacks_rejected`。**只输出布尔量与计数**，不得输出墙钟耗时。\n4. **弱密钥检测器**：输入一段密钥字符串，依据长度与字符集给出熵上界估计（纯函数、确定性），低于阈值则告警——把「密钥硬编码/弱密钥」变成可自动检查的规则。\n\n产出要求：脚本 `node attack.js` 直接运行，输出每个用例的判定与原因，退出码非 0 表示存在未被拦住的攻击。",
+      "tasks": [
+        {
+          "title": "实现带 reasons 的校验器",
+          "verification": {
+            "type": "test",
+            "desc": "对每种非法输入返回 ok=false 且 reasons 精确包含对应原因码（7 类原因码各被触发至少一次）"
+          }
+        },
+        {
+          "title": "回放八类攻击并断言全被拒",
+          "verification": {
+            "type": "test",
+            "desc": "8 个攻击用例的 rejected 均为 true，汇总 all_attacks_rejected=true"
+          }
+        },
+        {
+          "title": "实现确定性弱密钥检测器",
+          "verification": {
+            "type": "test",
+            "desc": "对固定输入集合，熵估计为确定值（同输入同输出），低于阈值的密钥告警为 true，高于阈值的为 false"
+          }
+        }
+      ]
+    }
+  ]
+}

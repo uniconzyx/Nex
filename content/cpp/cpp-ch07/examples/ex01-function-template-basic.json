@@ -1,0 +1,8 @@
+{
+  "title": "函数模板基本用法（max）",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "7 2.5 z",
+  "code": "#include <iostream>\ntemplate <typename T>\nT my_max(T a, T b) { return a > b ? a : b; }\nint main() {\n    std::cout << my_max(3, 7) << ' ' << my_max(2.5, 1.2) << ' ' << my_max('z', 'a');\n}\n"
+}

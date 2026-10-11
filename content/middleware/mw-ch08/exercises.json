@@ -1,0 +1,180 @@
+{
+  "meta": {
+    "chapter_id": "mw-ch08",
+    "subject": "middleware",
+    "title": "消息队列选型与工程实践",
+    "count": 8,
+    "note": "8 题，基础题 5 + 算法题 3（选型决策 / 背压 / 积压诊断 / 扩容上限 / 事务消息边界）"
+  },
+  "items": [
+    {
+      "id": "mw8-ex01",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "mw-ch08 §一 ①削峰填谷的边界",
+      "difficulty": "基础",
+      "title": "削峰填谷能解决什么、不能解决什么",
+      "stem_md": "关于消息队列的「削峰填谷」，下列哪一项说法**错误**？",
+      "options": [
+        "它把瞬时高并发转成平稳消费，从而保护下游数据库",
+        "它把流量的时间分布摊平，但不减少总工作量",
+        "它引入了积压，因此必须配磁盘容量与积压监控",
+        "它能让系统的长期平均处理能力不足问题一并消失"
+      ],
+      "answer": {
+        "correct": [
+          3
+        ],
+        "reference_code": "",
+        "output": "削峰只平滑时间分布，不改变总工作量：净增速 r_p - r_c > 0 时积压单调增长、永不清空（见示例 x05）。"
+      },
+      "explanation_md": "削峰填谷解决的是**时间维度**的错配：把尖峰摊到谷时。它**不解决****产能不足**——那是空间/资源维度的问题。判断标准是净增速 r_p - r_c：为正则积压线性增长且永不清空，加多少缓冲也只是把崩溃时刻推迟。示例 x05 用四条用例把三态（增长 / 持平 / 清空）分开展示。",
+      "options_md": ""
+    },
+    {
+      "id": "mw8-ex02",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "mw-ch08 §二 ②选型矩阵",
+      "difficulty": "基础",
+      "title": "原生事务消息的归属",
+      "stem_md": "在 Kafka / RabbitMQ / RocketMQ / ActiveMQ 中，**原生支持事务消息**（半消息 + 事务回查）的是哪一个？",
+      "options": [
+        "Kafka",
+        "RabbitMQ",
+        "RocketMQ",
+        "ActiveMQ"
+      ],
+      "answer": {
+        "correct": [
+          2
+        ],
+        "reference_code": "",
+        "output": "RocketMQ 的事务消息 = 半消息（对消费者不可见）+ 本地事务 + commit/rollback + 超时回查。"
+      },
+      "explanation_md": "四点务必区分清楚：① **Kafka** 有事务，但只覆盖「分区写入 + 位移提交」的原子性，不覆盖外部数据库，因此跨系统一致性仍需业务兜底（示例 x12 对比了状态机）；② **RabbitMQ** 只有 channel 级 tx 与 publisher confirm，没有半消息概念；③ **RocketMQ** 原生事务消息，是「本地事务与消息发送原子性」的现成解法；④ **ActiveMQ** 走 XA/JMS 事务，属于分布式事务协议而非半消息模型。",
+      "options_md": ""
+    },
+    {
+      "id": "mw8-ex03",
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "mw-ch08 §三 ①积压诊断四变量",
+      "difficulty": "中等",
+      "title": "修正积压告警的判据",
+      "stem_md": "下面是一段积压告警逻辑，它在「临界」状态下会**永远不告警**（积压持平、永不自愈），请指出问题并修正。\\n\\n```python\\ndef should_alert(backlog_now, backlog_1min_ago):\\n    return backlog_now > 100000            # 只看绝对水位\\n```",
+      "answer": {
+        "correct": [],
+        "reference_code": "def should_alert(backlog_now, backlog_1min_ago, waterline=100000):\n    growth = backlog_now - backlog_1min_ago\n    # 斜率 > 0：必然恶化；斜率 == 0 且已有存量：永不自愈，同样要告警\n    return backlog_now > waterline or growth >= 0 and backlog_now > 0",
+        "output": "只看绝对水位会漏掉两类最危险的情况：(a) 斜率恒为正但水位尚低（迟早爆）；(b) 斜率恒为零且存量很大（永远不恢复）。判据必须同时看水位与斜率。"
+      },
+      "explanation_md": "积压由四个变量决定：生产速率 r_p、消费速率 r_c、分区数 P、单条处理耗时。**只监控水位**等于只看积分量而不看导数：r_p == r_c 时水位恒定、看板一片绿，但任何一次尖峰都会把水位永久抬高一级（示例 x05 第二行专门演示了这一态）。正确做法是**水位 + 斜率**双判据，并额外监控「按当前斜率预计的清空时间」。",
+      "options_md": ""
+    },
+    {
+      "id": "mw8-ex04",
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "mw-ch08 §三 ②清空时间计算",
+      "difficulty": "中等",
+      "title": "给定速率算清空时间与所需缓冲",
+      "stem_md": "某 topic 大促期间：生产 1500 条/s、消费 1000 条/s，峰值持续 120 秒后回落到生产 600 条/s、消费仍为 1000 条/s。\\n\\n请回答：\\n1. 峰值结束时积压多少条？\\n2. 之后需要多久清空？\\n3. 如果消费能力只能提到 900 条/s（峰值过后不变），能清空吗？",
+      "answer": {
+        "correct": [],
+        "reference_code": "python3 content/middleware/mw-ch08/examples/ex05-backlog-growth-and-drain-time.json",
+        "output": "1) 峰值 120s 内净增 (1500-1000)*120 = 60000 条；\\n2) 回落后清空时间 = 60000 / (1000-600) = 150 秒；\\n3) 不能——回落期生产 600 条/s 低于消费 900 条/s，仍可清空，但若生产未回落则永远清不掉。"
+      },
+      "explanation_md": "三个量由同一个模型给出：**净增速 r_p - r_c** 决定能否清空，**清空时间 T = L0 / (r_c - r_p)** 决定恢复时长，**峰值缓冲 L0 = (r_p - r_c) × T_peak** 决定磁盘与告警水位。注意这是确定性流体近似：真实系统在利用率接近 1 时排队延迟会急剧上升，实际清空时间会显著长于公式值。",
+      "options_md": ""
+    },
+    {
+      "id": "mw8-ex05",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "mw-ch08 §三 ③扩容上限",
+      "difficulty": "基础",
+      "title": "消费者数超过分区数之后",
+      "stem_md": "某 topic 有 6 个分区，消费者组已有 6 个消费者且分区均匀分配。此时再启动第 7 个消费者，会发生什么？",
+      "options": [
+        "7 个消费者重新分配，每个约处理 6/7 个分区",
+        "第 7 个消费者拿不到分区，处于空闲（仅作为容灾位置保留）",
+        "分区数自动扩容到 7 以适配消费者数",
+        "所有消费者都抛异常，消费组 rebalance 失败"
+      ],
+      "answer": {
+        "correct": [
+          1
+        ],
+        "reference_code": "",
+        "output": "分区数是并行度的上限：消费者数 > 分区数时，多出的消费者空闲，吞吐不再增长。"
+      },
+      "explanation_md": "这是积压扩容最常见的一次无效操作。并行度 = min(消费者数, 分区数)，因此扩容前必须先看分区数——示例 x06 用 (分区数, 消费者数) 组合矩阵做了实证：达到分区数上限后继续加消费者，有效并行度与吞吐量都不再变化。若确需更高并行度，只能**提前把分区数留足**（Kafka 只能增不能减），或改用批量消费 / 提升单条处理并行度。",
+      "options_md": ""
+    },
+    {
+      "id": "mw8-ex06",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "mw-ch08 §三 ②清空时间计算",
+      "difficulty": "进阶",
+      "title": "实现积压画像函数",
+      "stem_md": "实现 `backlog_profile(rate_produce, rate_consume, initial=0)`，返回 `(can_drain, drain_time)`：\\n- `rate_produce > rate_consume`：积压单调增长，返回 `(False, None)`；\\n- 两者相等：积压持平、永不自愈；仅当 `initial == 0` 时返回 `(True, None)`，否则 `(False, None)`；\\n- `rate_produce < rate_consume`：返回 `(True, initial / (rate_consume - rate_produce))`。\\n\\n要求纯函数、不使用任何真实计时。",
+      "answer": {
+        "correct": [],
+        "reference_code": "def backlog_profile(rate_produce, rate_consume, initial=0):\n    \"\"\"返回 (能否清空, 清空时间)。drain_time 为 None 表示不会自动清空。\"\"\"\n    net = rate_produce - rate_consume\n    if net > 0:\n        return False, None\n    if net == 0:\n        return initial == 0, None\n    return True, initial / (-net)\n\n\nassert backlog_profile(1500, 1000, 60000) == (False, None)\nassert backlog_profile(600, 1000, 60000) == (True, 150.0)\nassert backlog_profile(1000, 1000, 0) == (True, None)\nassert backlog_profile(1000, 1000, 500) == (False, None)\nprint(\"全部断言通过\")",
+        "output": "全部断言通过"
+      },
+      "explanation_md": "三态判定是全部积压结论的基础：净增速为正是「恶化」，为零是「持平但永不自愈」（最容易被监控漏掉），为负才是「可恢复」。`net == 0` 与 `initial == 0` 的边界必须单独处理——初始为空且速率相等时系统本来就是健康的，写成 `net >= 0 -> False` 会造成误报。",
+      "options_md": ""
+    },
+    {
+      "id": "mw8-ex07",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "mw-ch08 §二 ②选型矩阵（硬约束过滤 + 权重打分）",
+      "difficulty": "进阶",
+      "title": "实现 MQ 选型打分器",
+      "stem_md": "实现 `select(weights, require_tx=False, require_tenant=False)`：\\n\\n1. **硬约束过滤**：`require_tx=True` 时剔除 `tx_msg` 为 False 的候选；`require_tenant=True` 时剔除 `multi_tenant` 为 False 的候选。被剔除的返回为 `[(名称, 原因), ...]`，原因分别为 `无事务消息` / `不支持多租户`。\\n2. **权重打分**：对通过的候选，按 `sum(weights[d] * candidate[d] for d in DIMS)` 打分，按得分**降序**排列，得分相同按名称**升序**。\\n\\n返回 `(ranked_names, dropped)`。",
+      "answer": {
+        "correct": [],
+        "reference_code": "CANDIDATES = {\n    \"Kafka\":    {\"throughput\": 5, \"latency\": 3, \"order\": 4, \"tx\": 3, \"ops\": 3, \"tx_msg\": False, \"multi_tenant\": False},\n    \"RabbitMQ\": {\"throughput\": 3, \"latency\": 5, \"order\": 2, \"tx\": 3, \"ops\": 4, \"tx_msg\": False, \"multi_tenant\": False},\n    \"RocketMQ\": {\"throughput\": 4, \"latency\": 4, \"order\": 5, \"tx\": 5, \"ops\": 4, \"tx_msg\": True,  \"multi_tenant\": False},\n    \"Pulsar\":   {\"throughput\": 5, \"latency\": 4, \"order\": 4, \"tx\": 4, \"ops\": 2, \"tx_msg\": True,  \"multi_tenant\": True},\n}\nDIMS = [\"throughput\", \"latency\", \"order\", \"tx\", \"ops\"]\n\n\ndef select(weights, require_tx=False, require_tenant=False):\n    kept, dropped = [], []\n    for name, c in CANDIDATES.items():\n        if require_tx and not c[\"tx_msg\"]:\n            dropped.append((name, \"无事务消息\"))\n        elif require_tenant and not c[\"multi_tenant\"]:\n            dropped.append((name, \"不支持多租户\"))\n        else:\n            kept.append(name)\n    ranked = sorted(kept, key=lambda n: (-sum(weights[d] * CANDIDATES[n][d] for d in DIMS), n))\n    return ranked, dropped\n\n\nlog_w = {\"throughput\": 6, \"latency\": 1, \"order\": 0, \"tx\": 0, \"ops\": 2}\norder_w = {\"throughput\": 3, \"latency\": 4, \"order\": 5, \"tx\": 5, \"ops\": 3}\nprint(select(log_w)[0][0], select(order_w, require_tx=True)[0][0])",
+        "output": "Kafka RocketMQ"
+      },
+      "explanation_md": "选型必须**先硬约束、后打分**：若把「无事务消息」当成一个可以扣分的维度，一个吞吐极高的候选仍可能靠总分取胜，从而在订单链路上出事。硬约束是**资格线**，权重是**排序线**，两者语义不同、不可混算。另外权重必须随场景重排（示例 x04 用三个场景演示：日志管道选 Kafka、订单状态机选 RocketMQ、延迟敏感通知选 RabbitMQ），同一套权重套所有场景本身就是选型失败的主因。",
+      "options_md": ""
+    },
+    {
+      "id": "mw8-ex08",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "source": "leetcode",
+      "source_ref": "LeetCode 933 · Number of Recent Calls（时间窗口计数，是积压诊断里「到达率 r_p」的测量基础）",
+      "external_url": "https://leetcode.cn/problems/number-of-recent-calls/",
+      "difficulty": "基础",
+      "title": "最近请求次数（时间窗口到达率统计）",
+      "stem_md": "题目与输入输出格式见 LeetCode 原题（链接见下）。本题只保留元数据，题面不在此搬运。\\n\\n与本章的联系：诊断积压的第一步是**测准生产速率 r_p**，而 r_p 的定义就是「最近 T 时间窗内到达的消息数 / T」。滑动窗口计数是它的最小实现。",
+      "answer": {
+        "correct": [],
+        "reference_code": "from collections import deque\n\n\nclass RecentCounter:\n    def __init__(self):\n        self.q = deque()\n\n    def ping(self, t):\n        self.q.append(t)\n        while self.q[0] < t - 3000:\n            self.q.popleft()\n        return len(self.q)\n\n\nif __name__ == \"__main__\":\n    rc = RecentCounter()\n    print([rc.ping(t) for t in (1, 100, 3001, 3002)])",
+        "output": "[1, 2, 3, 3]"
+      },
+      "explanation_md": "队列里只保留窗口内的时刻，每个元素进出各一次，因此均摊 O(1)、总体 O(n)。工程含义：**用定长窗口而不是累计计数来估计速率**，累计计数会把历史峰值永远带在身上，导致对当前状况判断失真——这与「积压告警只看绝对水位」是同一类错误（示例 x11 用清空时间的敏感性分析说明口径选择的影响）。",
+      "options_md": ""
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "title": "CNN/RNN/Transformer 参数量与复杂度对比",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== 相同 hidden size H 下的参数量对比 ===\n  H=64: CNN≈36928  RNN≈33024  Transformer≈16640\n  H=128: CNN≈147584  RNN≈131584  Transformer≈66048\n  H=256: CNN≈590080  RNN≈525312  Transformer≈263168\n\n=== 复杂度: 自注意力 O(n^2*d) vs RNN O(n*d^2) ===\n  T(序列长)=128  H(维度)=256\n  自注意力单层 FLOPs ≈ 4194304\n  RNN 单层 FLOPs    ≈ 8388608\n  自注意力更省算力当且仅当 T < H -> True\n  结论: 短序列高维度(T<H)时注意力更优; 超长序列(T>>H)时 n^2 项拖垮注意力\n",
+  "code": "\nimport numpy as np\nprint(\"=== 相同 hidden size H 下的参数量对比 ===\")\nfor H in (64, 128, 256):\n    cnn_params = H*H*3*3 + H\n    rnn_params = 4*(H*H + H*H + H)\n    tf_params = 4*(H*H + H)\n    print(f\"  H={H}: CNN≈{cnn_params}  RNN≈{rnn_params}  Transformer≈{tf_params}\")\nprint()\nprint(\"=== 复杂度: 自注意力 O(n^2*d) vs RNN O(n*d^2) ===\")\nT, H = 128, 256\nattn_flops = T*T*H\nrnn_flops = T*H*H\nprint(f\"  T(序列长)={T}  H(维度)={H}\")\nprint(f\"  自注意力单层 FLOPs ≈ {attn_flops}\")\nprint(f\"  RNN 单层 FLOPs    ≈ {rnn_flops}\")\nprint(f\"  自注意力更省算力当且仅当 T < H -> {T < H}\")\nprint(\"  结论: 短序列高维度(T<H)时注意力更优; 超长序列(T>>H)时 n^2 项拖垮注意力\")\n"
+}

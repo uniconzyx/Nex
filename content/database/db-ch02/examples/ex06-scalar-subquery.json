@@ -1,0 +1,9 @@
+{
+  "title": "标量子查询：薪资高于全公司平均的员工",
+  "code_lang": "sql",
+  "code_std": "mysql8",
+  "stdin": "",
+  "expected_output": "Query OK, 0 rows affected\nQuery OK, 4 rows affected\nname|salary\nDave|9000.00\nBob|8000.00",
+  "code": "CREATE TABLE employee (emp_id INT PRIMARY KEY, name VARCHAR(20), salary DECIMAL(10,2));\nINSERT INTO employee VALUES (1,'Alice',6000.00),(2,'Bob',8000.00),(3,'Carol',4500.00),(4,'Dave',9000.00);\nSELECT name, salary FROM employee WHERE salary > (SELECT AVG(salary) FROM employee) ORDER BY salary DESC;",
+  "_verified": false
+}

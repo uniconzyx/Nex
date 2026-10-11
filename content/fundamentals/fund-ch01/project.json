@@ -1,0 +1,50 @@
+{
+  "meta": {
+    "subject": "fundamentals",
+    "chapter": "fund-ch01",
+    "title": "线性表综合项目"
+  },
+  "items": [
+    {
+      "title": "实现动态数组与链表两种容器，并用实验量化它们的真实差异",
+      "requirement_md": "**目标**：把本章的「复杂度理论」变成「可测量的实验结论」，理解为什么内存布局比复杂度常数更重要。\n\n**任务要求**\n1. 用 C 实现两个容器，提供统一接口：`init / push_back / insert_at / remove_at / get / size / destroy`。\n   - `dynarray`：连续内存 + 倍数扩容（需记录 `capacity`）；\n   - `slist`：单链表（带哨兵节点）。\n2. 实现三种实验并输出**确定性指标**（不要依赖墙钟时间的绝对值）：\n   - **搬移/跳转次数统计**：记录 `insert_at(0)`、`insert_at(n/2)`、`insert_at(n)` 各自触发的元素搬移次数（dynarray）与指针修改次数（slist）；\n   - **扩容轨迹**：打印 dynarray 在插入 N 个元素过程中每次扩容的「旧容量 → 新容量 → 搬移量」，并**用累计搬移量 / 元素数验证均摊常数**；\n   - **内存占用对比**：`sizeof` 节点 + 分配器开销估算，给出「同存 N 个 int」两种结构的理论占用比值。\n3. 用 `-fsanitize=address` 编译运行，确保**无内存错误与泄漏**（这是容器的验收门槛）。\n\n**验收标准**\n- 三组实验的输出可复现（同样的 N 得到同样的计数）；\n- ASan 下无报错；\n- 能用自己的实验数据解释：**为什么「链表插入 O(1)」在头插之外的场景并不成立**。",
+      "tasks": [
+        {
+          "title": "实现 dynarray（增长因子可配置 2.0 / 1.5）",
+          "verification": {
+            "type": "test",
+            "desc": "容量轨迹符合几何增长；累计搬移 < 2N（验证均摊 O(1)）"
+          }
+        },
+        {
+          "title": "实现带哨兵的单链表",
+          "verification": {
+            "type": "test",
+            "desc": "头/中/尾插入删除均走同一套代码路径，无特例分支"
+          }
+        },
+        {
+          "title": "搬移次数统计实验",
+          "verification": {
+            "type": "output",
+            "desc": "输出各位置插入的搬移/跳转计数，并对比两者"
+          }
+        },
+        {
+          "title": "内存占用对比",
+          "verification": {
+            "type": "output",
+            "desc": "给出两种结构的字节占用与比值，解释差额来源"
+          }
+        },
+        {
+          "title": "ASan 全绿",
+          "verification": {
+            "type": "command",
+            "desc": "gcc -fsanitize=address 运行无报错、无泄漏"
+          }
+        }
+      ]
+    }
+  ]
+}

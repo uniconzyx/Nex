@@ -1,0 +1,8 @@
+{
+  "title": "LoRA 初始化：为什么训练起点 ΔW 恒为 0",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "A 形状 = (2, 8) | B 形状 = (6, 2)\nA 元素标准差 = 0.01770\nB 是否全为 0: True\n初始增量 B@A 是否全为 0: True\n\n训练一步后 B 被更新, B@A 的 Frobenius 范数 = 0.002224 (>0)\n\n结论: A 随机初始化、B 置零 ==> 训练起点 ΔW = 0\n      模型从预训练状态出发, 不会在第一步就把主干能力破坏掉",
+  "code": "\nimport numpy as np\nrng = np.random.default_rng(42)\nd_in, d_out, r = 8, 6, 2\nA = rng.normal(0.0, 0.02, size=(r, d_in))\nB = np.zeros((d_out, r))\ndelta = B @ A\nprint('A 形状 =', A.shape, '| B 形状 =', B.shape)\nprint('A 元素标准差 = %.5f' % A.std())\nprint('B 是否全为 0:', bool(np.all(B == 0)))\nprint('初始增量 B@A 是否全为 0:', bool(np.allclose(delta, 0.0)))\nprint()\nB2 = rng.normal(0.0, 0.02, size=(d_out, r))\nd2 = B2 @ A\nprint('训练一步后 B 被更新, B@A 的 Frobenius 范数 = %.6f (>0)' % np.linalg.norm(d2))\nprint()\nprint('结论: A 随机初始化、B 置零 ==> 训练起点 ΔW = 0')\nprint('      模型从预训练状态出发, 不会在第一步就把主干能力破坏掉')\n"
+}

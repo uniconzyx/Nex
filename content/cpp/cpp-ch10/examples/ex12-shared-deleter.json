@@ -1,0 +1,8 @@
+{
+  "title": "shared_ptr 自定义删除器（类型擦除，不影响指针类型）",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "open\nok\ncustom delete\ndtor",
+  "code": "#include <iostream>\n#include <memory>\nstruct Res { Res(){ std::cout << \"open\\n\"; } ~Res(){ std::cout << \"dtor\\n\"; } };\nvoid my_delete(Res* r) { std::cout << \"custom delete\\n\"; delete r; }   // 删除器类型被擦除\nint main() {\n    std::shared_ptr<Res> p(new Res(), my_delete);   // 无论删除器类型，p 的类型都是 shared_ptr<Res>\n    std::cout << \"ok\\n\";\n}                                       // 析构时调用 my_delete → custom delete → dtor"
+}

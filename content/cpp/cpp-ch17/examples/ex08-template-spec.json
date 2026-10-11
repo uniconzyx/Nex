@@ -1,0 +1,8 @@
+{
+  "title": "模板全特化与偏特化",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "012",
+  "code": "#include <iostream>\n#include <type_traits>\n\ntemplate <typename T>\nstruct Kind { static const int value = 0; };\n\ntemplate <typename T>\nstruct Kind<T*> { static const int value = 1; };\n\ntemplate <>\nstruct Kind<double> { static const int value = 2; };\n\nint main() {\n    int a = Kind<int>::value;\n    int b = Kind<int*>::value;\n    int c = Kind<double>::value;\n    std::cout << a << b << c;\n}"
+}

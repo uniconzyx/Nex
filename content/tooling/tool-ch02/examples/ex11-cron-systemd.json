@@ -1,0 +1,8 @@
+{
+  "title": "cron 与 systemd 的环境与行为差异",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "cron 环境（极简）：\n  PATH=/usr/bin:/bin   HOME=/  LANG=(空)   （无交互 shell 的扩展 PATH）\n  非交互、非登录，不读 ~/.bashrc\n  => 脚本里相对命令 rsync 在 cron 的精简 PATH 里找不到\n\nsystemd 环境（可控）：\n  [Service] 可设 Environment=PATH=...  Restart=on-failure\n  KillSignal=SIGTERM  TimeoutStopSec=30  （优雅停止窗口）\n  journald 统一收集日志\n\n调度对比：\n  cron   : */5 * * * * /opt/backup.sh  （简单周期，无依赖、无日志聚合）\n  systemd: 需守护/重启/依赖顺序/日志的服务进程\n\n结论：周期单命令用 cron；需守护+自愈+依赖用 systemd；\ncron 脚本开头务必 export PATH 或用绝对路径命令",
+  "code": "# 模拟 cron 与 systemd 的环境与行为差异（确定性）\nprint(\"cron 环境（极简）：\")\nprint(\"  PATH=/usr/bin:/bin   HOME=/  LANG=(空)   （无交互 shell 的扩展 PATH）\")\nprint(\"  非交互、非登录，不读 ~/.bashrc\")\nprint(\"  => 脚本里相对命令 rsync 在 cron 的精简 PATH 里找不到\")\nprint()\nprint(\"systemd 环境（可控）：\")\nprint(\"  [Service] 可设 Environment=PATH=...  Restart=on-failure\")\nprint(\"  KillSignal=SIGTERM  TimeoutStopSec=30  （优雅停止窗口）\")\nprint(\"  journald 统一收集日志\")\nprint()\nprint(\"调度对比：\")\nprint(\"  cron   : */5 * * * * /opt/backup.sh  （简单周期，无依赖、无日志聚合）\")\nprint(\"  systemd: 需守护/重启/依赖顺序/日志的服务进程\")\nprint()\nprint(\"结论：周期单命令用 cron；需守护+自愈+依赖用 systemd；\")\nprint(\"cron 脚本开头务必 export PATH 或用绝对路径命令\")\n"
+}

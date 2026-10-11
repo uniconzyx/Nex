@@ -1,0 +1,97 @@
+{
+  "meta": { "chapter": "bd-ch02", "note": "基础题考察 MapReduce/YARN 概念、计算、Debug；算法题来自刷题平台与开源仓库，仅存元数据与链接（合规红线）。" },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "关于 MapReduce 中 Shuffle 阶段的描述，下列哪项正确？",
+      "content_md": "下列关于 MapReduce Shuffle 的说法，哪一项是正确的？",
+      "options": [
+        { "key": "A", "text": "Shuffle 只在 Map 阶段发生，Reduce 阶段不再涉及磁盘 IO" },
+        { "key": "B", "text": "Shuffle 横跨 Map 输出与 Reduce 输入：Map 端排序+溢写，Reduce 端 copy+归并" },
+        { "key": "C", "text": "Shuffle 是 Map 执行完毕之后才开始把数据发给 Reduce" },
+        { "key": "D", "text": "Shuffle 只对 value 排序，不对 key 排序" }
+      ],
+      "answer": { "correct": ["B"], "reference_code": "" },
+      "explanation": "Shuffle 横跨两端：Map 端把 kv 写环形缓冲区、达到阈值排序并溢写(spill)、结束前归并；Reduce 端 copy 拉取、merge 归并、再喂给 reduce。它不是 Map 之后才发生，也需要磁盘 IO，且是 (partition, key) 两级排序。",
+      "tags": ["Shuffle", "spill", "merge"],
+      "source": "self",
+      "source_ref": "《Hadoop 权威指南》第2、4章"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "给定词频，计算 Reducer 收到的输入形态",
+      "content_md": "输入文本经 Mapper 后产生如下 (word,1) 中间对：\n\n```\n(hello,1),(world,1),(hello,1),(world,1),(hello,1)\n```\n\n假设默认 Partitioner（hash(key)%R）保证相同 key 进同一 reducer，请问某 Reducer 处理 key=`hello` 时，收到的 value 迭代器内容是什么？",
+      "answer": { "output": "hello 对应的 value 迭代器为 [1, 1, 1]（共 3 个 1），即 (hello, [1,1,1])" },
+      "explanation": "Reducer 的输入是 (key, Iterable<value>)，同一 key 的所有 value 被分组到一起。hello 出现 3 次，故迭代器含 3 个 1，聚合后得到 (hello, 3)。",
+      "tags": ["Reducer 输入", "分组聚合"],
+      "source": "self",
+      "source_ref": "《Hadoop 权威指南》第2章"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "找出下列关于 Combiner 的错误说法并改正",
+      "content_md": "某教材写道：「Combiner 是 Map 端的本地 Reducer，它会对所有 Map 输出的 (key, value) 先做一轮平均聚合，从而减少网络传输量，并且可以完全替代 Reducer。」请指出错误并改正。",
+      "answer": { "correct": ["该说法错误"], "output": "Combiner 只能用于可结合/可交换的聚合（如 sum/count/min/max），求均值不可逆、不能直接当 Combiner（应传 (sum,count) 再除）；且 Combiner 不能替代 Reducer——它只在 Map 本地合并，跨 map 的最终合并仍由 Reducer 完成，且运行次数不确定、不能承载副作用。" },
+      "explanation": "两个错误点：① 求均值不满足可结合性，直接做平均会算错；② Combiner 是优化手段而非 Reducer 的替代，跨 map 合并与最终输出仍依赖 Reducer。",
+      "tags": ["Combiner", "可结合性"],
+      "source": "book",
+      "source_ref": "《Hadoop 权威指南》第4章"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "YARN 中哪个角色负责「每作业一个、向 RM 申请容器并启停 Task」？",
+      "content_md": "在 YARN 架构里，提交一个 MapReduce 作业后，由哪一个组件负责：向 ResourceManager 申请资源容器、在 NodeManager 上启动/监控 Task、并向 RM 汇报作业进度？",
+      "options": [
+        { "key": "A", "text": "ResourceManager" },
+        { "key": "B", "text": "NodeManager" },
+        { "key": "C", "text": "ApplicationMaster" },
+        { "key": "D", "text": "SecondaryNameNode" }
+      ],
+      "answer": { "correct": ["C"], "reference_code": "" },
+      "explanation": "ApplicationMaster 是每作业一个的角色，负责应用级调度与容错：向 RM 申请容器、在 NM 上启停 task、盯进度。RM 做全局调度，NM 只管容器生命周期，SecondaryNameNode 属于 HDFS 而非 YARN。",
+      "tags": ["YARN", "ApplicationMaster"],
+      "source": "self",
+      "source_ref": "《Hadoop 权威指南》第4章"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "频率排序（Top K 词频聚合思想同源）",
+      "content_md": "题面与完整描述请见外部链接（合规：只存元数据+链接）。本题统计字符串数组中各元素出现频率，思想与『MapReduce 中按 key 分组聚合、统计词频』同源：先分组计数，再按频率排序取前 K 个。",
+      "answer": { "reference_code": "见外部链接题解" },
+      "explanation": "分组计数本质是 map→group→reduce；可与 WordCount 的 Reducer 聚合类比理解。",
+      "tags": ["哈希", "计数", "排序"],
+      "source": "leetcode",
+      "source_ref": "LeetCode 692 (top-k-frequent-words)",
+      "external_url": "https://leetcode.cn/problems/top-k-frequent-words/"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "nowcoder",
+      "difficulty": "mid",
+      "title": "大数据倾斜下的多路归并（External Merge Sort 思想）",
+      "content_md": "题面与完整描述请见外部链接（合规：只存元数据+链接）。要求把多个已排序的有序段（run）归并成一个全局有序序列，思想与『Map 端多 spill 归并、Reduce 端多路归并』同源：用最小堆做 k 路归并。",
+      "answer": { "reference_code": "见外部链接题解" },
+      "explanation": "多路归并是 Shuffle 阶段 spill 文件合成有序大文件的核心算法，也是外部排序的基石。",
+      "tags": ["归并", "堆", "外部排序"],
+      "source": "nowcoder",
+      "source_ref": "牛客网 多路归并/外部排序经典题",
+      "external_url": "https://www.nowcoder.com/practice"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "meta": { "chapter": "mw-ch03", "category": "basic" },
+  "items": [
+    {
+      "title": "迷你 Redis 高可用模拟器（主从 / 哨兵 / Cluster）",
+      "requirement_md": "用 Python 从零实现一个「迷你 Redis 高可用模拟器」教学 Demo，覆盖本章三大主题并能打印真实运行结果（参考本章 examples/）：\n\n1. **主从复制**：模拟全量同步 PSYNC（主节点 fork 生成 RDB 快照、从节点清空载入再补增量）与部分同步（repl_backlog 环形缓冲 + offset 续传）；模拟 REPLCONF ACK 心跳上报 offset 并计算 lag。\n2. **哨兵**：模拟 SDOWN（单哨兵心跳缺失判定）与 ODOWN（向其他哨兵 is-master-down-by-addr 询问、quorum 投票累计）；模拟类 Raft 的 leader 选举（epoch + 多数派 >N/2）与故障转移选主规则（replica-priority 最小 → offset 最大 → runid 最小）。\n3. **Cluster**：模拟 16384 槽位分配、CRC16 键槽计算、MOVED/ASK 重定向；模拟槽迁移（SETSLOT IMPORTING/MIGRATING + MIGRATE 逐 key）与集群总线 gossip（PING/PONG 传播拓扑）；模拟脑裂与 min-replicas-to-write 防护（从节点不足时主节点拒绝写入）。\n\n要求每个模块都可运行并打印结构化状态，最终演示：从节点断线 3 秒（落 backlog 窗口内）走部分同步、断线过久走全量；3 哨兵 quorum=2 触发 ODOWN 并选出 leader 完成故障转移；Cluster 下某 key 经 CRC16 路由、错节点收到 MOVED、迁移期收到 ASK；脑裂分区下 min-replicas 触发停写。",
+      "tasks": [
+        {
+          "title": "实现主从 PSYNC 全量/部分同步 + REPLCONF ACK",
+          "verification": { "type": "test", "desc": "从节点断线时长在 backlog 窗口内重连走部分同步且只补缺失区间；窗口外退化全量；ACK 上报 offset 后主节点能算出 lag" }
+        },
+        {
+          "title": "实现哨兵 SDOWN/ODOWN + Raft leader 选举 + 选主规则",
+          "verification": { "type": "test", "desc": "单哨兵心跳缺失判 SDOWN；quorum=2 累计触发 ODOWN；leader 选举拿到 >N/2 票；选主按 priority→offset→runid 规则选出数据最新从节点" }
+        },
+        {
+          "title": "实现 Cluster 槽位/CRC16/MOVED/ASK + 槽迁移 + gossip",
+          "verification": { "type": "test", "desc": "CRC16&16383 计算槽号正确；错节点回 MOVED 且刷新映射、迁移中回 ASK 不刷新；MIGRATE 搬家后槽归属变更；gossip PING/PONG 收敛出一致拓扑" }
+        },
+        {
+          "title": "实现脑裂与 min-replicas 防护",
+          "verification": { "type": "test", "desc": "模拟网络分区使主节点从节点不足，min-replicas-to-write 触发后主节点拒绝写入（返回 MINREPLICAS）；分区恢复后不出现双主写入分叉" }
+        },
+        {
+          "title": "编写示例脚本并实测输出",
+          "verification": { "type": "test", "desc": "所有示例用解释器实测，expected_output 与运行结果一致、无脏数据（Traceback/编码损坏）" }
+        }
+      ]
+    }
+  ]
+}

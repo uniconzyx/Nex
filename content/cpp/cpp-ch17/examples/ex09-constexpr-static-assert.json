@@ -1,0 +1,8 @@
+{
+  "title": "constexpr 编译期计算 + static_assert 证明",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "55",
+  "code": "#include <iostream>\n\nconstexpr int fib(int n) {\n    return n <= 1 ? n : fib(n - 1) + fib(n - 2);\n}\n\nint main() {\n    static_assert(fib(10) == 55);\n    int v = fib(10);\n    std::cout << v;\n}"
+}

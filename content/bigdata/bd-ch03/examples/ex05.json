@@ -1,0 +1,8 @@
+{
+  "title": "JOIN 策略选择：MapJoin vs CommonJoin",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "场景: 大表 2GB JOIN 维度小表 8MB\n  选择: MapJoin(广播小表)\n  原因: 小表 8MB <= 25.0MB 阈值, 把小表放进分布式缓存广播到各 Map 任务, 大表在 Map 端直接关联, 本次 JOIN 完全消除 Shuffle, 无 Reducer 阶段\n\n场景: 大表 2GB JOIN 较大表 200MB\n  选择: CommonJoin(Shuffle Join)\n  原因: 两表均 > 25.0MB, 必须按 join key 做哈希分区, 跨网络 Shuffle 后 Reducer 端做关联\n\n提示: hive.auto.convert.join=true 时优化器自动选 MapJoin; 也可写 /*+ MAPJOIN(dim) */ 强制。\n",
+  "code": "# 模拟 Hive JOIN 策略选择: 小表广播(MapJoin) vs 常规 Shuffle(CommonJoin)\nMAPJOIN_THRESHOLD_MB = 25.0   # hive.auto.convert.join 默认约 25MB\n\ndef choose_join(big_mb, small_mb):\n    if small_mb <= MAPJOIN_THRESHOLD_MB:\n        return \"MapJoin(广播小表)\", (\n            f\"小表 {small_mb}MB <= {MAPJOIN_THRESHOLD_MB}MB 阈值, 把小表放进分布式缓存广播到各 Map 任务, \"\n            \"大表在 Map 端直接关联, 本次 JOIN 完全消除 Shuffle, 无 Reducer 阶段\")\n    return \"CommonJoin(Shuffle Join)\", (\n        f\"两表均 > {MAPJOIN_THRESHOLD_MB}MB, 必须按 join key 做哈希分区, 跨网络 Shuffle 后 Reducer 端做关联\")\n\ncases = [\n    (\"大表 2GB JOIN 维度小表 8MB\", 2048, 8),\n    (\"大表 2GB JOIN 较大表 200MB\", 2048, 200),\n]\nfor name, big, small in cases:\n    strat, reason = choose_join(big, small)\n    print(f\"场景: {name}\")\n    print(f\"  选择: {strat}\")\n    print(f\"  原因: {reason}\\n\")\nprint(\"提示: hive.auto.convert.join=true 时优化器自动选 MapJoin; 也可写 /*+ MAPJOIN(dim) */ 强制。\")\n"
+}

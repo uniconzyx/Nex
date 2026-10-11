@@ -1,0 +1,8 @@
+{
+  "title": "柔性数组成员：单块堆内存承载变长负载",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "sizeof header = 4 (payload 不计入)\nlen=5 payload=0 10 20 30 40 \n",
+  "code": "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\nstruct Packet {\n    unsigned int len;\n    unsigned char payload[];\n};\n\nint main(void) {\n    unsigned int n = 5;\n    struct Packet *p = malloc(sizeof *p + n);\n    p->len = n;\n    for (unsigned int i = 0; i < n; ++i) p->payload[i] = (unsigned char)(i * 10);\n    printf(\"sizeof header = %zu (payload 不计入)\\n\", sizeof(struct Packet));\n    printf(\"len=%u payload=\", p->len);\n    for (unsigned int i = 0; i < p->len; ++i) printf(\"%u \", p->payload[i]);\n    printf(\"\\n\");\n    free(p);\n    return 0;\n}"
+}

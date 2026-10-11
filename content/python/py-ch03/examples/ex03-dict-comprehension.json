@@ -1,0 +1,8 @@
+{
+  "title": "字典推导式",
+  "code_lang": "python",
+  "code_std": "python3.11",
+  "stdin": "",
+  "expected_output": "{'apple': 5, 'banana': 6, 'cherry': 6}\n{1: 1, 2: 4, 3: 9}",
+  "code": "words = [\"apple\", \"banana\", \"cherry\"]\nlengths = {w: len(w) for w in words}\nprint(lengths)\nsquares = {x: x * x for x in range(1, 4)}\nprint(squares)"
+}

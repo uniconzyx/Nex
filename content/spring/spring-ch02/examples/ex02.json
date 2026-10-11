@@ -1,0 +1,8 @@
+{
+  "title": "属性填充：反射把依赖 set 进字段（模拟 DI）",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "repo injected: true\ndata",
+  "code": "import java.lang.reflect.*;\n\npublic class Main {\n    static class Repo { String find() { return \"data\"; } }\n    static class Service { Repo repo; void use() { System.out.println(repo.find()); } }\n\n    public static void main(String[] args) throws Exception {\n        Service svc = new Service();\n        Repo repo = new Repo();\n        Field f = Service.class.getDeclaredField(\"repo\");\n        f.setAccessible(true);\n        f.set(svc, repo);\n        System.out.println(\"repo injected: \" + (f.get(svc) != null));\n        svc.use();\n    }\n}\n"
+}

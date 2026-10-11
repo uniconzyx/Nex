@@ -1,0 +1,119 @@
+{
+  "meta": {
+    "chapter": "cpp-ch08",
+    "note": "7 题，题型混合（基础题 3 + 算法题 4）；含 LeetCode 1/49/347 与牛客 BM50 真题映射（仅存元数据+链接，不存题面）"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "difficulty": "easy",
+      "title": "关于 vector 的扩容与迭代器失效，正确的是",
+      "content_md": "以下描述中，选出**正确**的一项。",
+      "options": [
+        { "key": "A", "text": "vector 每次 push_back 都会重新分配内存" },
+        { "key": "B", "text": "push_back 发生扩容时，所有已有的迭代器/引用/指针都会失效" },
+        { "key": "C", "text": "reserve(n) 会把 size 增加到 n" },
+        { "key": "D", "text": "vector 的 operator[] 会做越界检查并抛异常" }
+      ],
+      "answer": { "correct": ["B"] },
+      "explanation": "扩容会整体搬到新地址，故所有迭代器/引用/指针失效（B 对）；A 错在只有容量不足才分配；reserve 只改 capacity 不改 size（C 错）；operator[] 不检查越界、越界是 UB，at() 才抛异常（D 错）。",
+      "tags": ["vector", "iterator-invalidation", "amortized"],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 9 章 顺序容器",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "output",
+      "difficulty": "easy",
+      "title": "读代码写输出（reserve 与扩容）",
+      "content_md": "```cpp\n#include <iostream>\n#include <vector>\nint main() {\n  std::vector<int> v;\n  v.reserve(4);\n  for (int i = 0; i < 4; ++i) v.push_back(i);\n  std::cout << v.size() << ' ' << v.capacity() << '\\n';\n  v.push_back(4);\n  std::cout << v.size() << ' ' << v.capacity();\n}\n```",
+      "answer": { "output": "4 4\n5 8" },
+      "explanation": "reserve(4) 使初始 capacity=4；push 0..3 不扩容，size=4 cap=4；第 5 个元素触发 2× 扩容到 8，size=5。",
+      "tags": ["vector", "reserve", "capacity"],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 9 章 vector 扩容",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "fix_error",
+      "difficulty": "mid",
+      "title": "修复 erase 循环中迭代器失效",
+      "content_md": "以下代码在删除偶数元素时迭代器失效（erase 后 it 已悬空，再 ++it 是 UB）。请修复，使其能正确删除所有偶数且不崩溃：\n\n```cpp\nstd::vector<int> v = {1,2,3,4,5,6};\nfor (auto it = v.begin(); it != v.end(); ++it)\n  if (*it % 2 == 0) v.erase(it);\n```",
+      "answer": {
+        "reference_code": "std::vector<int> v = {1,2,3,4,5,6};\nfor (auto it = v.begin(); it != v.end(); )\n  it = (*it % 2 == 0) ? v.erase(it) : std::next(it);\n// 或 C++20：std::erase_if(v, [](int x){ return x % 2 == 0; });"
+      },
+      "explanation": "erase 返回下一个有效迭代器，必须用其推进；不能用失效的 it 再 ++。std::next(it) 在保留元素时前进。",
+      "tags": ["vector", "erase", "iterator-invalidation"],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 9 章 删除元素",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "design",
+      "difficulty": "easy",
+      "title": "LeetCode 1 · 两数之和",
+      "content_md": "给定一个整数数组与目标和 target，返回两个数下标使其和为 target。请用一次遍历 + `unordered_map` 记录「值→下标」来把时间降到 O(n)（详见 external_url，不在此复述题面）。",
+      "answer": {
+        "reference_code": "vector<int> twoSum(vector<int>& nums, int target) {\n  unordered_map<int,int> idx;            // 值 -> 下标\n  for (int i = 0; i < (int)nums.size(); ++i) {\n    auto it = idx.find(target - nums[i]);\n    if (it != idx.end()) return {it->second, i};\n    idx[nums[i]] = i;                     // 边走边存\n  }\n  return {};\n}"
+      },
+      "explanation": "每遇到 nums[i] 先查「补数 target-nums[i]」是否已在 map；不在就记录自身。平均 O(n)，空间 O(n)。",
+      "tags": ["unordered_map", "hash", "two-sum"],
+      "source": "leetcode",
+      "source_ref": "LeetCode 1（two-sum）",
+      "external_url": "https://leetcode.cn/problems/two-sum/",
+      "category": "算法题",
+      "platform": "leetcode"
+    },
+    {
+      "type": "design",
+      "difficulty": "mid",
+      "title": "LeetCode 49 · 字母异位词分组",
+      "content_md": "给定字符串数组，将互为字母异位词的字符串分到同一组。建议用「排序后的 key」或「计数 key」作为 `unordered_map` 的键，把同组串收集到 `vector`（详见 external_url，不在此复述题面）。",
+      "answer": {
+        "reference_code": "vector<vector<string>> groupAnagrams(vector<string>& s) {\n  unordered_map<string, vector<string>> mp;   // key=排序后的词\n  for (auto& w : s) {\n    string k = w; sort(k.begin(), k.end());\n    mp[k].push_back(w);\n  }\n  vector<vector<string>> ans;\n  for (auto& kv : mp) ans.push_back(move(kv.second));\n  return ans;\n}"
+      },
+      "explanation": "异位词排序后 key 相同，借 unordered_map<key,vector> 归类；平均 O(n·k·log k)（k 为词长）。",
+      "tags": ["unordered_map", "anagram", "grouping"],
+      "source": "leetcode",
+      "source_ref": "LeetCode 49（group-anagrams）",
+      "external_url": "https://leetcode.cn/problems/group-anagrams/",
+      "category": "算法题",
+      "platform": "leetcode"
+    },
+    {
+      "type": "design",
+      "difficulty": "mid",
+      "title": "LeetCode 347 · 前 K 个高频元素",
+      "content_md": "给定整数数组与 k，返回出现频率最高的前 k 个元素。建议先 `unordered_map` 统计频次，再用堆/快速选择取 Top-K（详见 external_url，不在此复述题面）。",
+      "answer": {
+        "reference_code": "vector<int> topKFrequent(vector<int>& nums, int k) {\n  unordered_map<int,int> freq;                 // 频次统计\n  for (int x : nums) freq[x]++;\n  // 用小顶堆维护前 k 大（按频次）\n  using P = pair<int,int>;\n  priority_queue<P, vector<P>, greater<P>> pq;\n  for (auto& kv : freq) {\n    pq.push({kv.second, kv.first});\n    if ((int)pq.size() > k) pq.pop();\n  }\n  vector<int> ans; while (!pq.empty()) { ans.push_back(pq.top().second); pq.pop(); }\n  return ans;\n}"
+      },
+      "explanation": "unordered_map 计数 O(n)；小顶堆取 Top-K 为 O(m·log k)（m 为不同元素数），整体远优于全排序。",
+      "tags": ["unordered_map", "top-k", "heap"],
+      "source": "leetcode",
+      "source_ref": "LeetCode 347（top-k-frequent-elements）",
+      "external_url": "https://leetcode.cn/problems/top-k-frequent-elements/",
+      "category": "算法题",
+      "platform": "leetcode"
+    },
+    {
+      "type": "design",
+      "difficulty": "easy",
+      "title": "牛客 BM50 · 两数之和",
+      "content_md": "在给定数组中找出和为 target 的两个数（返回下标，下标从 1 或 0 起依题面）。哈希表解法与 LeetCode 1 同思路（详见 external_url，不在此复述题面）。",
+      "answer": {
+        "reference_code": "// 同 LeetCode 1：unordered_map<值,下标> 边遍历边查补数，O(n) 命中即返回。"
+      },
+      "explanation": "牛客 BM50 与 LeetCode 1 思路一致，注意返回下标的起始编号依题面要求调整。",
+      "tags": ["unordered_map", "two-sum", "nowcoder"],
+      "source": "nowcoder",
+      "source_ref": "牛客 BM50（两数之和）",
+      "external_url": "https://www.nowcoder.com/practice/20ef0972485e4102a57743b995b8e1fb",
+      "category": "算法题",
+      "platform": "nowcoder"
+    }
+  ]
+}

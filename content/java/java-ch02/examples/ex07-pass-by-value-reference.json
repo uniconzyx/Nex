@@ -1,0 +1,8 @@
+{
+  "title": "Java 只有值传递：引用的值传递语义",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "after mutate: 100\nafter reassign: 100\nafter swap: 1,2",
+  "code": "public class E207 {\n    int v = 0;\n    static void mutate(E207 o) { o.v = 100; }\n    static void reassign(E207 o) { o = new E207(); o.v = 999; }\n    static void swap(int a, int b) { int t = a; a = b; b = t; }\n    public static void main(String[] args) {\n        E207 x = new E207();\n        mutate(x);\n        System.out.println(\"after mutate: \" + x.v);\n        reassign(x);\n        System.out.println(\"after reassign: \" + x.v);\n        int a = 1, b = 2;\n        swap(a, b);\n        System.out.println(\"after swap: \" + a + \",\" + b);\n    }\n}"
+}

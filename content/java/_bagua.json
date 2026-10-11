@@ -1,0 +1,175 @@
+{
+  "subject": "java",
+  "title": "Java 八股模块",
+  "note": "面试高频八股题库，按领域分类；答案标准化便于速记，与章节 interview.json 互补。合规：仅存要点与出处，不搬运第三方题面。",
+  "categories": [
+    {
+      "id": "lang",
+      "title": "语言基础",
+      "items": [
+        {
+          "q": "面向对象三大特性？",
+          "a": "- **封装**：隐藏内部实现，仅暴露接口（private 字段 + public getter/setter），保证对象不变式。\n- **继承**：复用父类行为（`extends`），Java 单继承、多实现。\n- **多态**：同一接口不同实现，运行期动态绑定（父类引用指向子类对象）；前提是继承/实现 + 方法重写 + 向上转型。",
+          "tags": ["OOP"],
+          "difficulty": "easy",
+          "hot": 5,
+          "source_ref": "《Java 核心技术 卷I》第 4 章"
+        },
+        {
+          "q": "重载（Overload）与重写（Override）的区别？",
+          "a": "- **重载**：同一类中同名方法、参数列表不同（类型/个数/顺序），与返回类型无关；**编译期**决议。\n- **重写**：子类重新实现父类方法，签名与返回类型须兼容（协变返回），访问权限不能更严格，不能抛出更宽泛的检查异常；**运行期**动态绑定；建议加 `@Override` 由编译器校验。",
+          "tags": ["OOP"],
+          "difficulty": "easy",
+          "hot": 5,
+          "source_ref": "《Java 核心技术 卷I》第 5 章"
+        },
+        {
+          "q": "String、StringBuilder、StringBuffer 的区别？",
+          "a": "- `String`：`final char[]/byte[]`，**不可变**，每次拼接产生新对象；适合少量、常量场景。\n- `StringBuilder`：可变、非线程安全，**单线程拼接首选**，性能最好。\n- `StringBuffer`：可变、`synchronized` 方法保证线程安全，性能略低。\n- 注意：循环内用 `+` 拼接 String 会创建大量中间对象，应改用 StringBuilder。",
+          "tags": ["String"],
+          "difficulty": "easy",
+          "hot": 5,
+          "source_ref": "《Java 核心技术 卷I》第 3 章"
+        },
+        {
+          "q": "== 与 equals() 的区别？",
+          "a": "- `==`：基本类型比较**值**；引用类型比较**内存地址**（是否同一对象）。\n- `equals()`：`Object` 默认实现等价于 `==`；`String`、`Integer` 等类**重写为内容比较**。\n- 重写 `equals()` 必须同时重写 `hashCode()`，保证「相等对象哈希码相同」，否则放入 `HashMap`/`HashSet` 会行为异常。",
+          "tags": ["基础"],
+          "difficulty": "easy",
+          "hot": 5,
+          "source_ref": "《Effective Java》条款 10-11"
+        },
+        {
+          "q": "Integer 的缓存机制？为什么 127==127 但 128!=128？",
+          "a": "`Integer` 对 **-128~127** 提供缓存（`IntegerCache`），自动装箱时复用同一对象，故 `Integer a=127,b=127; a==b` 为 `true`。超出该范围则新建对象，`==` 比较地址结果为 `false`。\n**避坑**：包装类型比较一律使用 `equals()`，不要用 `==`。",
+          "tags": ["装箱"],
+          "difficulty": "mid",
+          "hot": 4,
+          "source_ref": "《Java 核心技术 卷I》第 3 章"
+        },
+        {
+          "q": "final、finally、finalize 的区别？",
+          "a": "- `final`：修饰类（不可继承）、方法（不可重写）、变量（引用不可改/值不可变）。\n- `finally`：`try-catch-finally` 中**必定执行**的代码块（除 JVM 退出/线程被杀），用于释放资源；若其中有 `return` 会覆盖 try 中的返回值。\n- `finalize()`：`Object` 的protected方法，GC 前可能调用一次，**不可靠且已废弃**（Java 9+ 标记 deprecated），资源释放应改用 `try-with-resources`。",
+          "tags": ["关键字"],
+          "difficulty": "easy",
+          "hot": 4,
+          "source_ref": "《Java 核心技术 卷I》"
+        }
+      ]
+    },
+    {
+      "id": "collection",
+      "title": "集合框架",
+      "items": [
+        {
+          "q": "ArrayList 与 LinkedList 的区别与选型？",
+          "a": "- `ArrayList`：**动态数组**，随机访问 O(1)，尾部插入均摊 O(1)，中间插入/删除需搬移 O(n)；内存紧凑、缓存友好。\n- `LinkedList`：**双向链表**，按位置访问 O(n)，已知节点处插入/删除 O(1)；每个元素额外两个指针开销。\n- 选型：绝大多数场景选 `ArrayList`（遍历与随机访问更常见、缓存友好）；频繁在两端增删可用 `ArrayDeque`/`LinkedList`。",
+          "tags": ["集合"],
+          "difficulty": "easy",
+          "hot": 5,
+          "source_ref": "《Java 核心技术 卷I》第 9 章"
+        },
+        {
+          "q": "HashMap 的底层实现原理？",
+          "a": "- 结构：**数组 + 链表 + 红黑树**（JDK 8+）。\n- 存取：`hash(key)` 扰动后定位桶；桶内先比 hash 再 `equals`。\n- 解决冲突：链地址法；链表长度 **≥8 且数组容量 ≥64** 时树化为红黑树（查找由 O(n) 降为 O(log n)），扩容后 ≤6 退化回链表。\n- 扩容：默认容量 16、负载因子 0.75，容量翻倍并重新散列；扩容代价高，建议初始化时预估容量。\n- **非线程安全**：并发 put 可能死循环（JDK7 头插）或数据丢失，用 `ConcurrentHashMap`。",
+          "tags": ["HashMap"],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《Java 核心技术 卷I》第 9 章"
+        },
+        {
+          "q": "ConcurrentHashMap 如何保证线程安全？",
+          "a": "- **JDK 7**：分段锁 `Segment`，每段一把 `ReentrantLock`，不同段可并发写。\n- **JDK 8+**：放弃分段，采用 **CAS + synchronized（仅锁单个桶/链表头或树根）**，粒度更细；扩容时多线程协助迁移。\n- 读操作大多无锁（volatile 语义保证可见性）。\n- 与 `Hashtable`（全表 synchronized）和 `Collections.synchronizedMap`（全方法同步）相比性能更好。",
+          "tags": ["并发容器"],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《Java 并发编程实战》"
+        },
+        {
+          "q": "HashSet 如何保证元素不重复？",
+          "a": "`HashSet` 内部持有一个 `HashMap`，元素作为 key，value 为固定的 `PRESENT` 占位对象。判重依赖 `hashCode()` 定位桶 + `equals()` 比较内容。\n因此存入自定义对象**必须正确重写 `hashCode()` 与 `equals()`**，否则去重失效。",
+          "tags": ["集合"],
+          "difficulty": "easy",
+          "hot": 3,
+          "source_ref": "《Java 核心技术 卷I》第 9 章"
+        }
+      ]
+    },
+    {
+      "id": "concurrent",
+      "title": "并发",
+      "items": [
+        {
+          "q": "synchronized 与 ReentrantLock 的区别？",
+          "a": "- `synchronized`：JVM 关键字，自动加锁/释放（monitor），可重入，不可中断，非公平；JDK 6 后引入偏向锁/轻量级锁优化。\n- `ReentrantLock`：JDK 层 `AQS` 实现，需手动 `lock()/unlock()`（**必须放 finally**），可重入，支持**可中断、超时、公平锁、多个 Condition**。\n- 选型：简单场景用 synchronized（不易出错）；需要高级能力或高竞争下的可控性用 ReentrantLock。",
+          "tags": ["锁"],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《Java 并发编程实战》"
+        },
+        {
+          "q": "volatile 的作用与局限？",
+          "a": "- 保证**可见性**：写立即刷新到主存，读从主存加载。\n- 禁止**指令重排序**（内存屏障，实现 happens-before）。\n- **不保证原子性**：`volatile int i; i++` 仍非线程安全（读-改-写三步）。\n- 典型用途：状态标志位、双重检查锁定（DCL）单例中的实例字段、配合 CAS 的原子变量。",
+          "tags": ["volatile"],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《Java 并发编程实战》"
+        },
+        {
+          "q": "线程池的核心参数与工作流程？",
+          "a": "`ThreadPoolExecutor` 关键参数：\n- `corePoolSize` 核心线程数、`maximumPoolSize` 最大线程数、`keepAliveTime` 非核心线程空闲存活时间；\n- `workQueue` 任务队列、`threadFactory`、`RejectedExecutionHandler` 拒绝策略。\n**流程**：任务到来 → 核心线程未满则创建核心线程 → 否则入队 → 队列满且未达最大线程数则创建非核心线程 → 达到最大则执行拒绝策略（Abort/CallerRuns/Discard/DiscardOldest）。\n**避坑**：不要用 `Executors.newFixedThreadPool`（无界队列易 OOM），应显式构造并设置有界队列。",
+          "tags": ["线程池"],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《Java 并发编程实战》"
+        },
+        {
+          "q": "ThreadLocal 的原理与内存泄漏风险？",
+          "a": "- 每个 `Thread` 持有 `ThreadLocalMap`，key 为 `ThreadLocal` 的**弱引用**，value 为实际值 → 线程隔离。\n- **泄漏风险**：ThreadLocal 被回收后 key 变 `null`，但 value 仍被线程强引用；线程长期存活（如线程池复用）会导致 value 无法回收。\n- **规避**：使用完务必调用 `remove()`（尤其线程池场景）。",
+          "tags": ["并发"],
+          "difficulty": "mid",
+          "hot": 4,
+          "source_ref": "《Java 并发编程实战》"
+        }
+      ]
+    },
+    {
+      "id": "jvm",
+      "title": "JVM",
+      "items": [
+        {
+          "q": "JVM 运行时内存区域有哪些？",
+          "a": "- **程序计数器**：线程私有，当前指令地址（唯一不会 OOM 的区域）。\n- **虚拟机栈**：线程私有，栈帧（局部变量表/操作数栈/动态链接/返回地址）；过深 → `StackOverflowError`。\n- **本地方法栈**：Native 方法服务。\n- **堆**：线程共享，存放对象实例，GC 主战场；不足 → `OutOfMemoryError`。\n- **方法区（元空间，JDK8+）**：类元信息、常量池、静态变量、JIT 代码。",
+          "tags": ["JVM"],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《深入理解 Java 虚拟机》第 2 章"
+        },
+        {
+          "q": "如何判断对象可回收？GC 算法有哪些？",
+          "a": "- **可达性分析**：从 GC Roots（栈局部引用、静态引用、常量、JNI 引用等）出发，不可达即标记回收；引用计数法因循环引用问题不被 Java 采用。\n- **标记-清除**：简单但产生碎片。\n- **复制**：无碎片、效率高，但浪费一半空间；用于新生代（Eden + 2 Survivor）。\n- **标记-整理**：无碎片、适合老年代，但移动对象开销大。\n- **分代收集**：新生代（Minor GC，复制）、老年代（Major/Full GC，标记整理）。",
+          "tags": ["GC"],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《深入理解 Java 虚拟机》第 3 章"
+        },
+        {
+          "q": "什么是双亲委派机制？为什么需要？",
+          "a": "类加载请求先委派给父加载器，父无法完成才由子加载器尝试：**Bootstrap → Extension/Platform → Application → 自定义**。\n- 作用：保证**类的唯一性与安全性**（防止核心 API 被替换，如自定义 `java.lang.String` 无效），避免重复加载。\n- 打破场景：SPI（JDBC 线程上下文类加载器）、Tomcat 的 WebappClassLoader、OSGi。",
+          "tags": ["类加载"],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《深入理解 Java 虚拟机》第 7 章"
+        },
+        {
+          "q": "常见 OOM 类型与排查思路？",
+          "a": "- `java.lang.OutOfMemoryError: Java heap space`：堆不足或内存泄漏 → `-Xmx` 调大 + `jmap` dump 后用 MAT 分析主导集。\n- `Metaspace`：类加载过多/动态代理 → 调 `-XX:MaxMetaspaceSize`。\n- `unable to create new native thread`：线程数超系统限制 → 减少线程/用线程池。\n- `GC overhead limit exceeded`：GC 耗时过长而回收极少。\n- 排查工具：`jstat`、`jmap`、`jstack`、`jconsole`/`VisualVM`、Arthas。",
+          "tags": ["JVM", "排查"],
+          "difficulty": "mid",
+          "hot": 4,
+          "source_ref": "《深入理解 Java 虚拟机》"
+        }
+      ]
+    }
+  ]
+}

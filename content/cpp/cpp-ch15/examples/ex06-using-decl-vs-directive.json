@@ -1,0 +1,8 @@
+{
+  "title": "using 声明 vs using 指令（污染对比）",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "3 30\n",
+  "code": "#include <iostream>\n\nnamespace ns {\n    int x = 3;\n    int y = 30;\n}\n\nint main() {\n    using ns::x;          // using 声明：只引入 x（精确）\n    // using namespace ns; // using 指令：整桶引入（此处注释，演示声明版）\n    std::cout << x << ' ' << ns::y << '\\n';\n}"
+}

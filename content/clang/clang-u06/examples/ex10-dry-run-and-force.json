@@ -1,0 +1,18 @@
+{
+  "title": "调试利器：-n 只预览不执行，-B 无条件全部重建",
+  "code_lang": "bash",
+  "code_std": "bash5",
+  "stdin": "",
+  "expected_output": "$ mingw32-make -n            # 只打印将要执行的命令，不执行\nD:/mingw64/bin/gcc.exe -std=c11 -O2 -Wall -c main.c -o main.o\r\nD:/mingw64/bin/gcc.exe -std=c11 -O2 -Wall -c util.c -o util.o\r\nD:/mingw64/bin/gcc.exe -std=c11 -O2 -Wall -o app.exe main.o util.o\r\n$ mingw32-make status        # -n 之后：没有任何产物产生\nartifacts: [] []\n$ mingw32-make               # 真正构建\nD:/mingw64/bin/gcc.exe -std=c11 -O2 -Wall -c main.c -o main.o\r\nD:/mingw64/bin/gcc.exe -std=c11 -O2 -Wall -c util.c -o util.o\r\nD:/mingw64/bin/gcc.exe -std=c11 -O2 -Wall -o app.exe main.o util.o\r\n$ mingw32-make status\nartifacts: [main.o util.o] [app.exe]\n$ mingw32-make               # 已是最新\nmingw32-make: 'app.exe' is up to date.\r\n$ mingw32-make -B            # 无条件重建：忽略时间戳，全部重编\nD:/mingw64/bin/gcc.exe -std=c11 -O2 -Wall -c main.c -o main.o\r\nD:/mingw64/bin/gcc.exe -std=c11 -O2 -Wall -c util.c -o util.o\r\nD:/mingw64/bin/gcc.exe -std=c11 -O2 -Wall -o app.exe main.o util.o\r\n$ mingw32-make status\nartifacts: [main.o util.o] [app.exe]",
+  "code": "#!/bin/sh\n# 调试利器：-n 只预览不执行，-B 无条件全部重建\n# 期望输出见 expected_output（本机 MinGW 工具链 + GNU Make 真实执行捕获）\n\ncat > Makefile << 'EOF'\nCC := D:/mingw64/bin/gcc.exe\nCFLAGS := -std=c11 -O2 -Wall\nTARGET := app.exe\nOBJS := main.o util.o\n\n$(TARGET): $(OBJS)\n\t$(CC) $(CFLAGS) -o $@ $^\n\n%.o: %.c\n\t$(CC) $(CFLAGS) -c $< -o $@\n\n.PHONY: clean status\nclean:\n\t@rm -f $(TARGET) $(OBJS)\n\nstatus:\n\t@echo \"artifacts: [$(wildcard *.o)] [$(wildcard *.exe)]\"\nEOF\n\ncat > main.c << 'EOF'\n#include <stdio.h>\n#include \"util.h\"\n\nint main(void)\n{\n    printf(\"add(2, 3) = %d\\n\", add(2, 3));\n    return 0;\n}\nEOF\n\ncat > util.c << 'EOF'\n#include \"util.h\"\n\nint add(int a, int b)\n{\n    return a + b;\n}\nEOF\n\ncat > util.h << 'EOF'\nint add(int a, int b);\nEOF\n\nmingw32-make -n            # 只打印将要执行的命令，不执行\nmingw32-make status        # -n 之后：没有任何产物产生\nmingw32-make               # 真正构建\nmingw32-make status\nmingw32-make               # 已是最新\nmingw32-make -B            # 无条件重建：忽略时间戳，全部重编\nmingw32-make status\n",
+  "_step_rc": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "_verify_note": "expected_output 为 Windows + MinGW-w64 上 GNU Make 4.4.1 真实执行捕获。`make -n`（dry run）让你确认「make 打算做什么」，是排查「构建行为不符预期」的第一步；`make -B` 无条件重建，等价于把所有目标 `touch` 一遍。另一个同类工具是 `make -p`（打印内部规则数据库，输出很长，适合配合 grep 过滤）。"
+}

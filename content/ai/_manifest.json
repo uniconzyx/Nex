@@ -1,0 +1,409 @@
+{
+  "schema_version": 1,
+  "subject": "ai",
+  "title": "CppMind · AI / Agent 开发课程体系",
+  "note": "阶段7 技术栈扩展大纲（AI 方向）。覆盖深度学习基础 → 大模型原理 → 对齐与微调 → 提示/上下文工程 → RAG → Agent 开发 → 应用工程化，形成「能训练、能调优、能落地 Agent」的完整链路。每章须齐备 7 类内容（见 _template 规范）。resources 仅存元数据与链接，不存第三方题面/正文，符合合规红线。",
+  "groups": {
+    "A1": "深度学习基础",
+    "A2": "大模型原理与训练",
+    "A3": "提示与知识增强",
+    "A4": "Agent 与工程化"
+  },
+  "chapters": [
+    {
+      "id": "ai-ch01",
+      "order": 1,
+      "group": "A1",
+      "title": "深度学习基础：张量、前向与反向传播",
+      "summary": "张量与计算图；全连接网络与激活函数的必要性（非线性的来源）；损失函数与梯度下降；反向传播的链式法则与自动微分的向量-雅可比积；梯度消失/爆炸的机制与对策（好初始化、归一化、残差、梯度裁剪）；优化器演进（SGD→Momentum→Adam→AdamW）与学习率调度（warmup + cosine）；过拟合与正则化（L1/L2、Dropout、早停）；训练循环的工程要点（zero_grad、混合精度与 loss scaling、梯度检查点）。",
+      "prerequisites": [],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "tensorflow/tensorflow",
+          "firecrawl/firecrawl",
+          "Significant-Gravitas/AutoGPT",
+          "huggingface/transformers",
+          "langgenius/dify",
+          "langchain-ai/langchain",
+          "microsoft/ML-For-Beginners"
+        ],
+        "github_stars": [
+          200724,
+          189309,
+          187681,
+          167014,
+          157994,
+          147524,
+          91310
+        ],
+        "github_notes": [
+          "深度学习框架官方仓库，工业级模型工程范例",
+          "为 AI Agent 提供网页数据：抓取到结构化数据的工程实现",
+          "自主 Agent 的开创性项目，Agent 架构与工具循环的经典参考",
+          "Transformer 模型定义框架：从 BERT/GPT 到多模态的全量实现",
+          "Agentic 工作流与 RAG 流水线平台：生产级 LLM 应用工程范例",
+          "Agent 工程平台：工具、记忆、检索与编排的工业实现",
+          "微软官方机器学习 12 周课程"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "ai-ch02",
+      "order": 2,
+      "group": "A1",
+      "title": "视觉与序列建模：CNN、RNN 到注意力机制",
+      "summary": "卷积的局部连接与权值共享（参数量与平移等变的来源）；感受野、步长、池化与下采样；经典骨干（LeNet→ResNet 的残差动机）；序列建模的困境（RNN 的长程依赖与梯度消失）；LSTM/GRU 的门控机制；注意力机制的直觉与计算；从「对齐式注意力」到「自注意力」的演进——为 Transformer 铺路。",
+      "prerequisites": [
+        "ai-ch01"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "tensorflow/tensorflow",
+          "firecrawl/firecrawl",
+          "Significant-Gravitas/AutoGPT",
+          "huggingface/transformers",
+          "langgenius/dify",
+          "langchain-ai/langchain",
+          "microsoft/ML-For-Beginners"
+        ],
+        "github_stars": [
+          200724,
+          189309,
+          187681,
+          167014,
+          157994,
+          147524,
+          91310
+        ],
+        "github_notes": [
+          "深度学习框架官方仓库，工业级模型工程范例",
+          "为 AI Agent 提供网页数据：抓取到结构化数据的工程实现",
+          "自主 Agent 的开创性项目，Agent 架构与工具循环的经典参考",
+          "Transformer 模型定义框架：从 BERT/GPT 到多模态的全量实现",
+          "Agentic 工作流与 RAG 流水线平台：生产级 LLM 应用工程范例",
+          "Agent 工程平台：工具、记忆、检索与编排的工业实现",
+          "微软官方机器学习 12 周课程"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "ai-ch03",
+      "order": 3,
+      "group": "A2",
+      "title": "Transformer 与大语言模型原理",
+      "summary": "自注意力的 Q/K/V 计算与 √d_k 缩放的必要性；多头注意力的子空间并行；位置编码演进（正弦→可学习→相对位置→RoPE/ALiBi）；编码器-解码器与仅解码器架构的取舍；Decoder-only 自回归生成与采样策略（贪心/温度/top-k/top-p/重复惩罚）；预训练目标与 Scaling Law（含 Chinchilla 最优）；Tokenizer（BPE/词表大小的影响）；注意力复杂度与 FlashAttention/MQA/GQA 的工程解法。",
+      "prerequisites": [
+        "ai-ch02"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "tensorflow/tensorflow",
+          "firecrawl/firecrawl",
+          "Significant-Gravitas/AutoGPT",
+          "huggingface/transformers",
+          "langgenius/dify",
+          "langchain-ai/langchain",
+          "microsoft/ML-For-Beginners"
+        ],
+        "github_stars": [
+          200724,
+          189309,
+          187681,
+          167014,
+          157994,
+          147524,
+          91310
+        ],
+        "github_notes": [
+          "深度学习框架官方仓库，工业级模型工程范例",
+          "为 AI Agent 提供网页数据：抓取到结构化数据的工程实现",
+          "自主 Agent 的开创性项目，Agent 架构与工具循环的经典参考",
+          "Transformer 模型定义框架：从 BERT/GPT 到多模态的全量实现",
+          "Agentic 工作流与 RAG 流水线平台：生产级 LLM 应用工程范例",
+          "Agent 工程平台：工具、记忆、检索与编排的工业实现",
+          "微软官方机器学习 12 周课程"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "ai-ch04",
+      "order": 4,
+      "group": "A2",
+      "title": "高效微调与对齐：LoRA、RLHF 与 DPO",
+      "summary": "全量微调的显存构成（参数/梯度/优化器状态/激活）；LoRA 的低秩假设、初始化与 target_modules 选择；QLoRA 的 4bit 量化与分页优化器；Prefix/P-Tuning 与 Adapter 系；SFT 的数据构造与损失掩码（只对回答算 loss）；奖励模型与 PPO 的 KL 约束（防奖励黑客）；DPO 的闭式推导与工程优势；RLAIF/GRPO/Constitutional AI 等替代路线；**选型原则：注知识用 RAG、改行为用微调**。",
+      "prerequisites": [
+        "ai-ch03"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "tensorflow/tensorflow",
+          "firecrawl/firecrawl",
+          "Significant-Gravitas/AutoGPT",
+          "huggingface/transformers",
+          "langgenius/dify",
+          "langchain-ai/langchain",
+          "microsoft/ML-For-Beginners"
+        ],
+        "github_stars": [
+          200724,
+          189309,
+          187681,
+          167014,
+          157994,
+          147524,
+          91310
+        ],
+        "github_notes": [
+          "深度学习框架官方仓库，工业级模型工程范例",
+          "为 AI Agent 提供网页数据：抓取到结构化数据的工程实现",
+          "自主 Agent 的开创性项目，Agent 架构与工具循环的经典参考",
+          "Transformer 模型定义框架：从 BERT/GPT 到多模态的全量实现",
+          "Agentic 工作流与 RAG 流水线平台：生产级 LLM 应用工程范例",
+          "Agent 工程平台：工具、记忆、检索与编排的工业实现",
+          "微软官方机器学习 12 周课程"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "ai-ch05",
+      "order": 5,
+      "group": "A3",
+      "title": "提示工程与上下文工程",
+      "summary": "零样本/少样本与示例选择（顺序与标签分布的影响）；思维链（CoT）为何有效与涌现特性；Self-Consistency 与 Least-to-Most；结构化输出的四层手段（Schema 约定→原生结构化输出→Function Calling→文法约束解码）；校验-重试-降级的容错架构；**上下文工程**：分层组织（系统/记忆/证据/历史）、压缩（滚动摘要、状态槽）、位置策略（lost in the middle）、前缀缓存；token 预算与可观测性。",
+      "prerequisites": [
+        "ai-ch03"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "tensorflow/tensorflow",
+          "firecrawl/firecrawl",
+          "Significant-Gravitas/AutoGPT",
+          "huggingface/transformers",
+          "langgenius/dify",
+          "langchain-ai/langchain",
+          "microsoft/ML-For-Beginners"
+        ],
+        "github_stars": [
+          200724,
+          189309,
+          187681,
+          167014,
+          157994,
+          147524,
+          91310
+        ],
+        "github_notes": [
+          "深度学习框架官方仓库，工业级模型工程范例",
+          "为 AI Agent 提供网页数据：抓取到结构化数据的工程实现",
+          "自主 Agent 的开创性项目，Agent 架构与工具循环的经典参考",
+          "Transformer 模型定义框架：从 BERT/GPT 到多模态的全量实现",
+          "Agentic 工作流与 RAG 流水线平台：生产级 LLM 应用工程范例",
+          "Agent 工程平台：工具、记忆、检索与编排的工业实现",
+          "微软官方机器学习 12 周课程"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "ai-ch06",
+      "order": 6,
+      "group": "A3",
+      "title": "RAG：向量检索与知识增强",
+      "summary": "RAG 解决「知识过时/私有」与「幻觉」；索引链路（解析→分块→向量化→入库）与查询链路的完整拆解；分块策略（固定/结构/语义/父子块）与元数据增强；Embedding 模型选型（多语言、维度、Matryoshka、指令前缀）与「检索不到」的六类根因；混合检索（向量 + BM25）与 RRF 融合；两阶段「召回 + 重排」；查询改写（Multi-Query/HyDE/Step-back/对话式改写）；向量索引（HNSW/IVF/PQ）的召回-延迟-内存三角；分层评估（Recall@k、Faithfulness、引用准确率）与「换掉检索器」对照实验。",
+      "prerequisites": [
+        "ai-ch05"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "tensorflow/tensorflow",
+          "firecrawl/firecrawl",
+          "Significant-Gravitas/AutoGPT",
+          "huggingface/transformers",
+          "langgenius/dify",
+          "langchain-ai/langchain",
+          "microsoft/ML-For-Beginners"
+        ],
+        "github_stars": [
+          200724,
+          189309,
+          187681,
+          167014,
+          157994,
+          147524,
+          91310
+        ],
+        "github_notes": [
+          "深度学习框架官方仓库，工业级模型工程范例",
+          "为 AI Agent 提供网页数据：抓取到结构化数据的工程实现",
+          "自主 Agent 的开创性项目，Agent 架构与工具循环的经典参考",
+          "Transformer 模型定义框架：从 BERT/GPT 到多模态的全量实现",
+          "Agentic 工作流与 RAG 流水线平台：生产级 LLM 应用工程范例",
+          "Agent 工程平台：工具、记忆、检索与编排的工业实现",
+          "微软官方机器学习 12 周课程"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "ai-ch07",
+      "order": 7,
+      "group": "A4",
+      "title": "Agent 开发：工具调用、记忆与多智能体",
+      "summary": "Agent 三要素（目标/工具/循环）与 ReAct 范式；四种架构模式（单次工具调用→ReAct→Plan-Execute→多智能体）与「能用工作流就别用 Agent」的判据；Function Calling 机制与工具设计的七条原则（描述即提示词、参数强类型、返回精简、错误可行动、幂等、最小权限、危险操作人工确认）；记忆三层（工作/短期/长期）与写入-检索-遗忘策略；多智能体的六种失败模式（错误级联、通信爆炸、责任不清、循环死锁、一致性漂移、成本失控）与「层级编排 + 显式状态机」的工程建议；MCP 标准化与提示注入的纵深防御。",
+      "prerequisites": [
+        "ai-ch06"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "tensorflow/tensorflow",
+          "firecrawl/firecrawl",
+          "Significant-Gravitas/AutoGPT",
+          "huggingface/transformers",
+          "langgenius/dify",
+          "langchain-ai/langchain",
+          "microsoft/ML-For-Beginners"
+        ],
+        "github_stars": [
+          200724,
+          189309,
+          187681,
+          167014,
+          157994,
+          147524,
+          91310
+        ],
+        "github_notes": [
+          "深度学习框架官方仓库，工业级模型工程范例",
+          "为 AI Agent 提供网页数据：抓取到结构化数据的工程实现",
+          "自主 Agent 的开创性项目，Agent 架构与工具循环的经典参考",
+          "Transformer 模型定义框架：从 BERT/GPT 到多模态的全量实现",
+          "Agentic 工作流与 RAG 流水线平台：生产级 LLM 应用工程范例",
+          "Agent 工程平台：工具、记忆、检索与编排的工业实现",
+          "微软官方机器学习 12 周课程"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "ai-ch08",
+      "order": 8,
+      "group": "A4",
+      "title": "LLM 应用工程：推理优化、评测、可观测性与安全",
+      "summary": "推理两阶段（Prefill 决定 TTFT / Decode 决定 TPOT）与对应优化；KV Cache 与 PagedAttention、连续批处理、投机解码；量化（GPTQ/AWQ/GGUF/NF4）与精度取舍；模型路由与语义缓存；成本与延迟优化的正确顺序（先度量→砍上下文→分模型→加缓存→再谈推理加速）；可观测性三件套（Trace/Log/Metric）与 AI 特有维度（幻觉率、格式合规率、单请求成本、Agent 步数）；线上评测（影子模式、A/B、回放、人工抽检）与 LLM-as-Judge 的校准；OWASP LLM Top 10、提示注入的间接形态与纵深防御；数据合规（最小化、脱敏、可删除）。",
+      "prerequisites": [
+        "ai-ch07"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "tensorflow/tensorflow",
+          "firecrawl/firecrawl",
+          "Significant-Gravitas/AutoGPT",
+          "huggingface/transformers",
+          "langgenius/dify",
+          "langchain-ai/langchain",
+          "microsoft/ML-For-Beginners"
+        ],
+        "github_stars": [
+          200724,
+          189309,
+          187681,
+          167014,
+          157994,
+          147524,
+          91310
+        ],
+        "github_notes": [
+          "深度学习框架官方仓库，工业级模型工程范例",
+          "为 AI Agent 提供网页数据：抓取到结构化数据的工程实现",
+          "自主 Agent 的开创性项目，Agent 架构与工具循环的经典参考",
+          "Transformer 模型定义框架：从 BERT/GPT 到多模态的全量实现",
+          "Agentic 工作流与 RAG 流水线平台：生产级 LLM 应用工程范例",
+          "Agent 工程平台：工具、记忆、检索与编排的工业实现",
+          "微软官方机器学习 12 周课程"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    }
+  ],
+  "github_resources": [
+    {
+      "repo": "tensorflow/tensorflow",
+      "stars": 200724,
+      "url": "https://github.com/tensorflow/tensorflow",
+      "note": "深度学习框架官方仓库，工业级模型工程范例"
+    },
+    {
+      "repo": "firecrawl/firecrawl",
+      "stars": 189309,
+      "url": "https://github.com/firecrawl/firecrawl",
+      "note": "为 AI Agent 提供网页数据：抓取到结构化数据的工程实现"
+    },
+    {
+      "repo": "Significant-Gravitas/AutoGPT",
+      "stars": 187681,
+      "url": "https://github.com/Significant-Gravitas/AutoGPT",
+      "note": "自主 Agent 的开创性项目，Agent 架构与工具循环的经典参考"
+    },
+    {
+      "repo": "huggingface/transformers",
+      "stars": 167014,
+      "url": "https://github.com/huggingface/transformers",
+      "note": "Transformer 模型定义框架：从 BERT/GPT 到多模态的全量实现"
+    },
+    {
+      "repo": "langgenius/dify",
+      "stars": 157994,
+      "url": "https://github.com/langgenius/dify",
+      "note": "Agentic 工作流与 RAG 流水线平台：生产级 LLM 应用工程范例"
+    },
+    {
+      "repo": "langchain-ai/langchain",
+      "stars": 147524,
+      "url": "https://github.com/langchain-ai/langchain",
+      "note": "Agent 工程平台：工具、记忆、检索与编排的工业实现"
+    },
+    {
+      "repo": "microsoft/ML-For-Beginners",
+      "stars": 91310,
+      "url": "https://github.com/microsoft/ML-For-Beginners",
+      "note": "微软官方机器学习 12 周课程"
+    }
+  ],
+  "resources_fetched_at": "2026-09-21"
+}

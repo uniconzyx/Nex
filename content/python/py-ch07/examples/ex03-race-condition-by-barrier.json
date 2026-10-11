@@ -1,0 +1,8 @@
+{
+  "title": "用 Barrier 强制交错复现确定性的计数丢失",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "期望值（无竞态） = 400\n实际值           = 200\n丢失的更新次数   = 200\n是否丢失         = True\n根因: counter += 1 是 LOAD/BINARY_OP/STORE 三步，不是原子操作",
+  "code": "import threading\n\n# 用 Barrier 强制交错，构造**确定性**的竞态丢失，\n# 而不是依赖「跑很多次偶尔出问题」这种不可复现的演示。\n\nN = 200\ncounter = 0\nexpected = 2 * N\n\nenter = threading.Barrier(2)   # 两条线程都读到旧值\nleave = threading.Barrier(2)   # 两条线程都读完再写回\n\n\ndef unsafe_worker():\n    global counter\n    for _ in range(N):\n        enter.wait()          # 同步点 1：两边就位\n        tmp = counter         # 读\n        leave.wait()          # 同步点 2：保证两边都「读完」\n        counter = tmp + 1     # 写：两边都写回同一个旧值 + 1\n\n\nts = [threading.Thread(target=unsafe_worker) for _ in range(2)]\nfor t in ts:\n    t.start()\nfor t in ts:\n    t.join()\n\nprint(\"期望值（无竞态） =\", expected)\nprint(\"实际值           =\", counter)\nprint(\"丢失的更新次数   =\", expected - counter)\nprint(\"是否丢失         =\", counter != expected)\nprint(\"根因: counter += 1 是 LOAD/BINARY_OP/STORE 三步，不是原子操作\")\n"
+}

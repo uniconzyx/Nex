@@ -1,0 +1,8 @@
+{
+  "title": "默认参数",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "Hi Cat!Hi Dog.",
+  "code": "#include <iostream>\n#include <string>\n\nvoid greet(const std::string& name, const std::string& suffix = \"!\") {\n    std::cout << \"Hi \" << name << suffix;\n}\n\nint main() {\n    greet(\"Cat\");\n    greet(\"Dog\", \".\");\n}"
+}

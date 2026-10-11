@@ -1,0 +1,117 @@
+{
+  "meta": {
+    "chapter": "spring-ch07"
+  },
+  "items": [
+    {
+      "question": "一级缓存和二级缓存的作用域、失效时机分别是什么？Spring 环境下为什么常说「一级缓存的寿命等于一个事务」？",
+      "answer_md": "**一级缓存**：默认开启，且**没有「只开一半」的配置**（`localCacheScope=SESSION|STATEMENT`，二选一）。\n作用域是 `SqlSession`，CacheKey = `statementId + offset + limit + SQL 文本 + 参数列表`。\n失效有四个触发点：会话内任意增删改（走 `BaseExecutor.update()` → `clearLocalCache()`，**全会话清空**，因为 CacheKey 里没有表名）、`commit`/`rollback`、`clearCache()`、语句级 `flushCache=\"true\"`。\n\n**二级缓存**：作用域是 Mapper 的 **namespace**，需显式 `<cache/>` 开启，跨 SqlSession 共享；\n写入发生在**事务提交时**（`TransactionalCache.entriesToAddOnCommit` 在 commit 时才 put），所以提交前对其他会话不可见；因此「`close()` 时一级缓存晋升为二级」是错误说法。\n\n**Spring 下的关键差异**：`SqlSessionTemplate` 通过 `SqlSessionSynchronization` 把会话绑定到事务，\n于是一次事务 = 一个 SqlSession = 一级缓存的生命周期。这带来两后果：事务内重复查询零成本；\n**事务内读不到别的事务刚提交的数据**（在 `READ COMMITTED` 下本应能读到），\n也就是缓存语义比数据库隔离级别更强。",
+      "follow_ups": [
+        "为什么 `CacheKey` 要包含 SQL 文本？动态 SQL 下命中率会怎样变化？",
+        "说说 `useCache` 与 `flushCache` 的区别与各自的默认值。",
+        "多实例部署下二级缓存为什么不传播失效？你会怎么处理？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "阿里",
+        "字节",
+        "美团"
+      ]
+    },
+    {
+      "question": "MyBatis 的插件（Interceptor）是怎么工作的？分页插件为什么能改写 SQL，又为什么会在 count 查询上出错？",
+      "answer_md": "**机制**：MyBatis 在四大对象创建时给它们套代理（`Plugin.wrap` + JDK 动态代理），\n可拦截的四处是 `Executor`、`ParameterHandler`、`ResultSetHandler`、`StatementHandler`，\n通过 `@Intercepts/@Signature` 声明方法签名，多个插件构成**责任链**（`InterceptorChain.pluginAll`），\n执行顺序 = 配置顺序的正序、回收是逆序。\n\n**分页为什么能改写**：`StatementHandler#prepare` 时能拿到 `BoundSql`，\n插件把分页参数从 ThreadLocal 中取出，在原始 SQL 后追加方言相关的 `LIMIT/OFFSET`（或用嵌套包装),\n同时另生成一条 count SQL 用于算总页数。整个过程不需要业务代码感知。\n\n**count 出错的两个原因**：\n① **复杂 SQL**：带 `GROUP BY` / `DISTINCT` / `UNION` 的语句不能直接把 select 列换成 `count(0)`\n（那样得到的是分组行数，且结果不是一行），正确做法是把原 SQL 包一层子查询再 count；\n② **残留子句**：`ORDER BY` 对 count 无意义还应剥离，用对了即多一次排序、用错了某些方言直接报错。\n\n**使用约束**：`startPage()` 依赖 ThreadLocal，**只对紧随其后的那一次查询生效**，\n中间插了别的查询就会落到错误的语句上；线程池复用线程还可能带上一次请求的残余参数，\n所以要在 `finally` 里 `clearPage()`。",
+      "follow_ups": [
+        "插件能不能拦截 Mapper 接口方法本身？为什么不行？",
+        "多个插件的执行顺序由什么决定？想在最外层生效要怎么配置？",
+        "为什么 ThreadLocal 传分页参数在高并发线程池里是风险点？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "通用",
+        "字节",
+        "腾讯",
+        "拼多多"
+      ]
+    },
+    {
+      "question": "延迟加载、嵌套查询与 N+1 是什么关系？什么时候该改用嵌套结果？",
+      "answer_md": "**延迟加载**（`lazyLoadingEnabled` + `fetchType=\"lazy\"`）靠主对象的代理实现：\n只有真正访问关联属性时才触发子查询（见 ex09，未访问时 SQL 数为 0）。\n它推迟了子查询的**时机**，但没有减少**总量**——一旦后续遍历必然访问，总 SQL 数与即时加载完全相同，\n这就是 N+1：1 次主查询 + N 行各 1 次子查询（ex10 实测 `nestedQuery sql=6 rows=25`）。\n\n**什么时候用哪个**：\n- 列表/报表：必然遍历每行 → 用**嵌套结果**（`<resultMap>` 一次 join 后按父 id 分组，\n  ex10 实测 `nestedResult sql=1 rows=20`），代价是结果集行数膨胀（extra rows = 5）与 join 开销；\n- 详情页先取主对象、关联大概率不访问 → 延迟加载有价值；\n- `aggressiveLazyLoading=true` 时访问任一懒加载属性会触发该对象**全部**懒加载属性，等于白延迟。\n\n**生命周期边界**：代理持有创建它的 SqlSession，Session 关闭后再访问懒加载属性会抛\n`ExecutorException: ... no Session`（与 Hibernate 的 `LazyInitializationException` 同构）。\n修法是在 Session 仍开启的边界内完成取值（提前转 DTO），或用 `@Transactional(readOnly=true)` 包住读+序列化。",
+      "follow_ups": [
+        "延迟加载的代理是 JDK 动态代理还是字节码增强？对实体的继承/equals 有什么影响？",
+        "嵌套结果为什么会产生重复行？重复行数由什么决定？",
+        "批量查询场景下如何既避免 N+1 又避免 join 膨胀（如 batch 方式/IN 查询手工组装）？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "美团",
+        "京东",
+        "蚂蚁"
+      ]
+    },
+    {
+      "question": "既然 `${}` 有注入风险，为什么还要保留它？什么场景下不得不用，怎么才算用得安全？",
+      "answer_md": "**保留的原因**：SQL 的参数（`?`）只能出现在语法树的**叶子/值**位置，\n而表名、列名、`ORDER BY` 字段、`ASC/DESC` 这类**结构性标识符**在数据库协议层就不支持参数化\n（`COM_STMT_PREPARE` / Parse 消息都没有「参数占位标识符」，这不止是 JDBC 的限制）。\n不是不合理地留着 `${}`，而是这个位置只能用宏替换。\n\n**怎么算安全**：看三点——① 值是否可达外部输入？② 该位置是否允许表达式？③ 拼接结果是否被二次解析？\n`ORDER BY ${col}` 属于「可达但受限」，虽然不能直接 UNION 拖库，却能借子查询/`CASE WHEN` 做**布尔盲注与时间盲注**，\n所以「只是排序所以没事」是错的。安全做法只有一条：**白名单枚举**（`Set.of(\"id\", \"create_time\")`）+ 校验，\n而不是过滤 `--`/`;` 的黑名单（宽字节、`/**/`、大小写变体都能绕）。\n\n**反向坑**：反过来写成 `ORDER BY #{sortCol}` 也不对——占位符会被当成常量字符串，\nMySQL 下解析为 `ORDER BY 'name'`，**排序失效且不报错**，经常被误判成索引问题。\n\n**补充（协议层）**：说到底，MyBatis 只负责产出 `?` 并调用 `PreparedStatement`；\n是否真的「服务端预编译」取决于驱动与连接参数（MySQL 默认 `useServerPrepStmts=false`，实际是客户端转义后发文本）。\n能答到这一层，就比只会背「预编译防注入」的八股答案高一档。`${}` 同时还是**性能漏洞**：\n拼接使每次 SQL 文本都不同，数据库无法复用执行计划缓存。",
+      "follow_ups": [
+        "MyBatis 日志里怎么快速定位哪里用了 ${}？",
+        "为什么说预编译防注入是「白名单」而转义是「黑名单」？",
+        "<sql>/<include> 里的 ${} 属性替换与值位置的 ${} 是一回事吗？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "阿里",
+        "百度",
+        "安全岗"
+      ]
+    },
+    {
+      "question": "`<where>` 是怎么去掉多余 AND 的？它的能力边界在哪？",
+      "answer_md": "**等价形式**：`<where>` = `<trim prefix=\"WHERE\" prefixOverrides=\"AND |OR \">`，\n`<set>` = `<trim prefix=\"SET\" suffixOverrides=\",\">`。\n\n**算法**：`TrimSqlNode` 是「**先拼完整、再只剪首尾**」——子节点渲染成一个完整字符串后，\n逐个尝试 `startsWith(override)`，命中则 `substring(override.length)`；尾部由 `suffixOverrides` 回退。\n注意 `AND ` 的**尾空格是匹配内容的一部分**，写成 `AND|OR` 会让 `ANDname = ?` 逃过修剪。\n\n**两条保证**：内容为空 → 整条子句不生成（不会有悬空的 `WHERE`）；内容非空 → 加 `WHERE` 并去前导 `AND`/`OR`。\n\n**边界**：\n- 只剪首尾，**中间**重复的 `AND`、`<set>` 场景中间的重复逗号它管不了；\n- `<if>` 内部若产出以 `OR` 结尾的片段，`<where>` 没有尾部修剪能力，得用 `<trim suffixOverrides=\"OR\">`；\n- `<set>` 不提供「全空则跳过」的保护：所有字段为空时仍会产出缺 SET 的 UPDATE，\n  必须在 Java 侧校验「至少一个非空字段」（见 ex03 的 `set empty`）。\n\n**为什么要这样设计**：`<if>` 片段是可组合的，局部无法知道全局是否已有条件；\n首尾修剪把「需要全局信息」降级成「只看首尾一个 token」，代价是不能处理中间冗余，\n换来的是节点无状态、可任意嵌套。",
+      "follow_ups": [
+        "`<foreach>` 展开时参数顺序怎么保证与占位符顺序一致？",
+        "`<include>` 的展开发生在解析期还是执行期？循环 include 会怎样？",
+        "`<if test>` 里多参数不加 @Param 为什么永远不成立？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "字节",
+        "滴滴"
+      ]
+    },
+    {
+      "question": "MyBatis 与 Hibernate/JPA 该怎么取舍？",
+      "answer_md": "**机制差异**：JPA 是**对象模型驱动**——维护一级持久化上下文，靠脏检查在 flush 时自动生成\n`UPDATE ... SET 变更列 WHERE id = ?`（见 ex14 的 `jpa flush dirty only`）；\nMyBatis 是**SQL 驱动**——SQL 由人显式写出，天然所见即所得，但也因此\n「忘了写某个 set 列」不会被任何机制兜住（ex14 的 `forgotten loses write : True`）。\n\n**取舍维度**：\n- 控制力 vs 效率：MyBatis 对 SQL、索引、连接顺序完全可控，复杂报表/分库分表/大批量更新/手写 SQL 调优更踏实；\n  JPA 在 CRUD 密集、模型稳定的后台管理系统里省代码，且跨库移植性更好；\n- 泄漏点不同：JPA 的坑在隐式 SQL（N+1、脏检查意外触发全列更新、懒加载 `LazyInitializationException`）；\n  MyBatis 的坑在字符串/XML 层（拼错 AND、`${}` 注入、跨 namespace 缓存脏读）；\n- 团队与可维护性：SQL 能力强的团队 + 性能敏感系统偏向 MyBatis；模型驱动、业务迭代快的后台偏 JPA。\n\n**不必非此即彼**：很多团队是 JPA 管写 + 复杂查询走 MyBatis/手写 SQL，\n但要注意两者的一级缓存互不相通，混写时务必显式 flush 后再查，否则读到对方尚未刷出的旧值。",
+      "follow_ups": [
+        "JPA 脏检查为什么有时反而 UPDATE 了全列？怎么避免？",
+        "两者的一级缓存能共享吗？混用时要注意什么？",
+        "大批量插入/更新场景下各自的优化手段是什么？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "腾讯",
+        "百度",
+        "架构岗"
+      ]
+    },
+    {
+      "question": "MyBatis 枚举应该怎么映射？直接用默认的 `EnumOrdinalTypeHandler` 会有什么问题？",
+      "answer_md": "**默认行为的坑**：默认 `EnumOrdinalTypeHandler` 存的是 `ordinal()`——从 0 开始的**声明序号**。\n只要在枚举中间插入一个新常量，后面所有常量的序号整体位移，历史数据全部语义漂移，\n而这个过程既不报错也不告警（见 ex13：V1 到 V2 换了声明顺序后 `read by ordinal` 由 ACTIVE 变成 NEW，\n`ordinal corrupted : true`）。\n\n**三种方案对比**：\n- `EnumOrdinalTypeHandler`（序号）：存储最省（int），但**顺序就是数据**，禁不起任何重排；\n- `EnumTypeHandler`（`name()`）：可读、允许中间插入，代价是列宽更大、改名要刷库；\n- **自定义 TypeHandler 存业务 code**（如 10/20/30）：最稳，约定「code 一经上线永不重排」即可，\n  还可以对未知 code 抛异常而不是静默取默认值。\n\n**注册方式**：全局 `<typeHandler handler=\"...\" javaType=\"...\"/>`，\n或局部 `#{status, typeHandler=XxxTypeHandler}` / `<result column=\"status\" typeHandler=\"...\"/>`。\n\n**延伸**：TypeHandler 不只管枚举——加解密、JSON 列、自定义的地理/金额类型\n都是同一个扩展点（`TypeHandlerRegistry` 按 JavaType/JdbcType 选型），\n省略时会按参数的实际 Class 推断 javaType 再查注册表。",
+      "follow_ups": [
+        "TypeHandler 的选型优先级是什么？局部和全局冲突怎么办？",
+        "MyBatis 对每种 Java 类型的处理是怎么选出的？",
+        "加密字段用 TypeHandler 实现有什么坑（如 SQL 里无法参与计算/模糊查询）？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "美团",
+        "京东"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "meta": { "chapter": "cpp-ch12" },
+  "items": [
+    {
+      "question": "std::move 到底做了什么？它真的「移动」了对象吗？",
+      "answer_md": "std::move 本身**不做任何运行期动作**，它只是一个**无条件的类型转换**：把实参无条件转换为右值引用（本质是 `static_cast<remove_reference_t<T>&&>(arg)`），相当于告诉编译器「我允许你把这个对象当作右值来移动」。\n\n真正的「资源转移」发生在**移动构造函数 / 移动赋值运算符**内部（把源对象的指针/句柄偷过来，并把源置空）。所以「move 不移动，移动发生在构造里」。此外要记住：右值引用变量**本身是左值**（有名字可取地址），所以 `void f(T&& r){ g(r); }` 里 `r` 是左值，要再传递右值需 `g(std::move(r))`。",
+      "follow_ups": ["被 std::move 之后的源对象处于什么状态？还能再用吗？", "为什么返回值不要写 std::move(res)？", "右值引用变量为什么是左值？"],
+      "difficulty": "mid",
+      "company_tags": ["通用", "字节", "腾讯"]
+    },
+    {
+      "question": "移动构造为什么通常应该标 noexcept？",
+      "answer_md": "这关系到 std::vector 等标准容器在**重分配（扩容）**时的异常安全策略。扩容时需要把旧元素搬到新内存，搬完旧内存要释放。为保证「强异常安全」（要么全成功、要么原状），标准库的规则是：\n\n- 若元素的**移动构造是 noexcept**，库确认移动不会抛异常 → 放心使用**移动**（O(1) 偷资源）。\n- 若移动构造**可能抛异常**，库不敢用移动（否则搬到一半抛异常，新旧都没建好会损坏数据）→ **回退到拷贝构造**（拷贝通常强异常安全）。\n\n后果：未标 noexcept 的移动语义类在 vector 中会被悄悄退化成深拷贝，性能大打折扣（实测见 ex05）。因此写移动构造/移动赋值，只要内部操作不抛，一律加 noexcept。",
+      "follow_ups": ["强异常安全和基本异常安全有什么区别？", "如果不标 noexcept，什么操作会退化？", "swap 为什么也常标 noexcept？"],
+      "difficulty": "hard",
+      "company_tags": ["腾讯", "美团", "阿里"]
+    },
+    {
+      "question": "auto&& 是什么？它和 auto&、const auto& 有什么差别？",
+      "answer_md": "auto&& 是**转发引用（forwarding reference）**在局部变量上的形式：它既能绑定左值也能绑定右值，具体类型由初始化表达式决定：\n\n- 绑定到**左值**：推导为 `T&`（左值引用）。\n- 绑定到**右值/临时量**：推导为 `T&&`（右值引用），并且 `auto&&` 会**延长临时对象的生命**到整个作用域（这是范围 for 绑定 range 的写法 `auto&& __range = range;`）。\n\n对比：\n- `auto x`：按值，丢引用与顶层 const（可能大拷贝）。\n- `auto& x`：只能绑左值，保留引用（可改）。\n- `const auto& x`：可绑左值/右值/临时，只读且不拷贝，最常用作只读遍历。\n- `auto&& x`：万能绑定，常用于泛型转发、或要在循环里延长临时生命。\n\n注意 `auto&&` 落在左值时它就是左值引用，并非「一定产生右值引用」。",
+      "follow_ups": ["为什么范围 for 用 auto&& 绑定 range？", "decltype(auto) 和 auto&& 怎么选？", "转发引用和右值引用在模板里如何区分？"],
+      "difficulty": "hard",
+      "company_tags": ["通用", "字节"]
+    },
+    {
+      "question": "emplace_back 和 push_back 有什么本质区别？为什么说传入已存在对象反而可能多一次拷贝？",
+      "answer_md": "push_back 接收**一个已构造好的元素**（左值或右值临时），把它移动/拷贝进容器尾部，因此至少有「构造临时 + 移动/拷贝」两次动作。emplace_back 接收**构造函数的参数包 `T&&... args`**，用 `std::forward` 完美转发后**在容器预留内存里原地构造**，省去了「先构造临时再搬」中的临时构造，通常少一次移动/拷贝（ex08 实测对比）。\n\n但它有两个常见误解：\n1. **传入已存在的左值对象** `emplace_back(existing)` 时，args 是左值，会**拷贝构造**一个新元素——并没有「移动」效果，反而多了一次拷贝；要搬走已有对象应写 `push_back(std::move(existing))`。\n2. emplace 接受初始化列表 `{...}` 时转发常失败，此时 push_back 更顺手。\n\n结论：传「构造参数」用 emplace_back；搬「已有对象」用 push_back(std::move)。",
+      "follow_ups": ["完美转发是怎么实现的？", "什么情况下 emplace 不如 push_back？", "emplace 在 map/set 上的行为与 vector 一样吗？"],
+      "difficulty": "mid",
+      "company_tags": ["美团", "阿里", "通用"]
+    }
+  ]
+}

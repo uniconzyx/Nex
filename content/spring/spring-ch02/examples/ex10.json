@@ -1,0 +1,8 @@
+{
+  "title": "@Configuration 的 CGLIB 代理：子类覆盖 @Bean 保证类内互调单例",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "direct calls same: true\ninternal call same: true\ntotal Service instances: 1",
+  "code": "import java.util.*;\nimport java.util.function.*;\n\npublic class Main {\n    static class AppConfig {\n        Service service() { return new Service(); }\n        Audit audit() { return new Audit(service()); }\n    }\n    static class Service { static int n = 0; int id = ++n; }\n    static class Audit { Service s; Audit(Service s) { this.s = s; } }\n\n    static class Container {\n        Map<String, Object> singletons = new HashMap<>();\n        Object getSingleton(String name, Supplier<Object> factory) {\n            return singletons.computeIfAbsent(name, k -> factory.get());\n        }\n    }\n\n    // 模拟 CGLIB：生成子类覆盖 @Bean 方法，强制走容器单例缓存\n    static class AppConfig$$CGLIB extends AppConfig {\n        final Container c;\n        AppConfig$$CGLIB(Container c) { this.c = c; }\n        @Override Service service() { return (Service) c.getSingleton(\"service\", super::service); }\n        @Override Audit audit() { return (Audit) c.getSingleton(\"audit\", super::audit); }\n    }\n\n    public static void main(String[] args) {\n        Container c = new Container();\n        AppConfig cfg = new AppConfig$$CGLIB(c);\n        Service s1 = cfg.service();\n        Service s2 = cfg.service();\n        Audit au = cfg.audit();\n        System.out.println(\"direct calls same: \" + (s1 == s2));\n        System.out.println(\"internal call same: \" + (au.s == s1));\n        System.out.println(\"total Service instances: \" + Service.n);\n    }\n}\n"
+}

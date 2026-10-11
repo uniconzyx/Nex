@@ -1,0 +1,8 @@
+{
+  "title": "## 记号拼接运算符",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "CONCAT(1,2) = 12\nvar_7 = 7\nGENERIC_ADD(int) 指向 00007ff7ff2e1440 (函数 int_add)",
+  "code": "#include <stdio.h>\n#define CONCAT(a, b)  a##b\n#define MAKE_VAR(n)   int var_##n = n\n#define GENERIC_ADD(type) type##_add\nint int_add(int a, int b) { return a + b; }\nint main(void) {\n    int xy = CONCAT(1, 2);          /* 1##2 = 12? 实际是记号 12 作为整数字面量 */\n    printf(\"CONCAT(1,2) = %d\\n\", xy);\n    MAKE_VAR(7);                    /* int var_7 = 7; */\n    printf(\"var_7 = %d\\n\", var_7);\n    printf(\"GENERIC_ADD(int) 指向 %p (函数 int_add)\\n\", (void*)GENERIC_ADD(int));\n    return 0;\n}"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "自定义 fd 与 fd 泄漏",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "自定义 fd 演示（exec 3< file）：\n  打开后 fd 表：{0: 'stdin', 1: 'stdout', 2: 'stderr', 3: 'open(config.txt)  # exec 3< config.txt'}\n  之后可从 fd3 读取：read -u3 line\n\nfd 泄漏演示（exec 未设 CLOEXEC）：\n  父进程打开 100 个文件得到 fd 3..102，fork 子进程（fd 表继承副本）\n  若未设 FD_CLOEXEC，子进程 exec 后仍持有这些 fd -> 泄漏\n\n量化：父持有 100 个长生命周期 fd，fork 100 个子进程\n  => 泄漏 fd 数 = 10000（可能打满进程 fd 上限）\n修复：打开时加 O_CLOEXEC，exec 时自动关闭",
+  "code": "# 模拟自定义 fd 与 fd 泄漏（确定性）\nfd_table = {0: \"stdin\", 1: \"stdout\", 2: \"stderr\"}\nprint(\"自定义 fd 演示（exec 3< file）：\")\nfd_table[3] = \"open(config.txt)  # exec 3< config.txt\"\nprint(f\"  打开后 fd 表：{fd_table}\")\nprint(\"  之后可从 fd3 读取：read -u3 line\")\nprint()\nprint(\"fd 泄漏演示（exec 未设 CLOEXEC）：\")\nprint(\"  父进程打开 100 个文件得到 fd 3..102，fork 子进程（fd 表继承副本）\")\nprint(\"  若未设 FD_CLOEXEC，子进程 exec 后仍持有这些 fd -> 泄漏\")\nprint()\nN_child = 100\nN_fd = 100\nprint(f\"量化：父持有 {N_fd} 个长生命周期 fd，fork {N_child} 个子进程\")\nprint(f\"  => 泄漏 fd 数 = {N_child * N_fd}（可能打满进程 fd 上限）\")\nprint(\"修复：打开时加 O_CLOEXEC，exec 时自动关闭\")\n"
+}

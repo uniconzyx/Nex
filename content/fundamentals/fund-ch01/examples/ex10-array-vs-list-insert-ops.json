@@ -1,0 +1,8 @@
+{
+  "title": "同为「中间插入」：数组搬移 vs 链表指针操作（操作次数对比）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "n = 100，在下标 50 处插入：\n  数组：搬移 50 个元素（每个 4 字节，memmove 可 SIMD 加速）\n  链表：定位 50 次指针跳转 + 2 次指针写入\n  合计：数组 50 次数据移动 vs 链表 52 次操作\n\n结论：不带「已知节点指针」时，链表的 O(1) 优势被 O(n) 定位吃掉\n      且链表每次跳转大概率 cache miss，实际差距比次数更大",
+  "code": "#include <stdio.h>\n\n/* 对比「在下标 n/2 处插入一个元素」的操作代价（按操作次数计，确定性） */\nint main(void) {\n    const int n = 100;\n    int mid = n / 2;\n\n    int array_moves = n - mid;        /* 数组：搬移 mid..n-1 共 n-mid 个元素 */\n    int list_hops = mid;              /* 链表：先走 mid 步定位 */\n    int list_ptr_writes = 2;          /* 再改 2 个指针（保存后继 + 挂接） */\n\n    printf(\"n = %d，在下标 %d 处插入：\\n\", n, mid);\n    printf(\"  数组：搬移 %d 个元素（每个 4 字节，memmove 可 SIMD 加速）\\n\", array_moves);\n    printf(\"  链表：定位 %d 次指针跳转 + %d 次指针写入\\n\", list_hops, list_ptr_writes);\n    printf(\"  合计：数组 %d 次数据移动 vs 链表 %d 次操作\\n\",\n           array_moves, list_hops + list_ptr_writes);\n    printf(\"\\n结论：不带「已知节点指针」时，链表的 O(1) 优势被 O(n) 定位吃掉\\n\");\n    printf(\"      且链表每次跳转大概率 cache miss，实际差距比次数更大\\n\");\n    return 0;\n}"
+}

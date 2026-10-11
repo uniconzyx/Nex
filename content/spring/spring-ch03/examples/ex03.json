@@ -1,0 +1,8 @@
+{
+  "title": "JDK 动态代理：后置返回 + 异常通知",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "[afterReturning] place -> ok:10\nok:10\n[afterThrowing] bad id\n[after] place finished with exception\ncaught: bad id\n",
+  "code": "import java.lang.reflect.*;\n\ninterface Order { String place(int id); }\nclass OrderImpl implements Order {\n    public String place(int id) {\n        if (id <= 0) throw new IllegalArgumentException(\"bad id\");\n        return \"ok:\" + id;\n    }\n}\nclass AdvisedHandler implements InvocationHandler {\n    private Object target;\n    AdvisedHandler(Object t) { target = t; }\n    public Object invoke(Object p, Method m, Object[] args) throws Throwable {\n        Object r = null; boolean ok = true;\n        try {\n            r = m.invoke(target, args);\n            return r;\n        } catch (InvocationTargetException e) {\n            ok = false;\n            Throwable c = e.getCause();\n            System.out.println(\"[afterThrowing] \" + c.getMessage());\n            throw c;\n        } finally {\n            if (ok) System.out.println(\"[afterReturning] \" + m.getName() + \" -> \" + r);\n            else System.out.println(\"[after] \" + m.getName() + \" finished with exception\");\n        }\n    }\n}\npublic class Main {\n    public static void main(String[] a) throws Exception {\n        Order proxy = (Order) Proxy.newProxyInstance(Order.class.getClassLoader(),\n            new Class[]{Order.class}, new AdvisedHandler(new OrderImpl()));\n        System.out.println(proxy.place(10));\n        try { proxy.place(0); } catch (Exception e) {\n            System.out.println(\"caught: \" + e.getMessage());\n        }\n    }\n}\n"
+}

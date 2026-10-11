@@ -1,0 +1,12 @@
+{
+  "title": "告警即错误实测：同一份源码在 -Wall -Wextra 与追加 -Werror 下的返回码对比",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "[编译1] -Wall -Wextra            返回码=0 警告数=2\n[警告类别] -Wunused-parameter=1 -Wunused-variable=1\n[编译2] -Wall -Wextra -Werror    返回码=1 错误数=2\n[升级为错误] -Werror=2\n[首条诊断] unused parameter 'factor'\n[判定] 无 -Werror 时构建成功=True，加 -Werror 后构建失败=True -> 告警即错误生效\n[同一份源码] 警告 2 处，在 CI 上被 -Werror 拦下 1 次即中断整个流水线",
+  "code": "import re\nimport subprocess\nimport tempfile\nfrom pathlib import Path\n\nGXX = \"D:/mingw64/bin/g++.exe\"\nSRC = \"\"\"#include <cstdio>\nint scale(int v, int factor) { return v; }\nint main() {\n    int unused_var = 42;\n    int r = scale(1, 2);\n    std::printf(\"%d\\\\n\", r);\n}\n\"\"\"\nWARN = re.compile(r\"-W[a-z][a-z0-9-]*\")\n\n\ndef build(extra):\n    with tempfile.TemporaryDirectory() as td:\n        Path(td, \"main.cpp\").write_text(SRC, encoding=\"utf-8\")\n        p = subprocess.run([GXX, \"-std=c++17\", \"-O2\"] + extra + [\"main.cpp\", \"-o\", \"main.exe\"],\n                           cwd=td, capture_output=True, text=True, encoding=\"utf-8\", errors=\"replace\")\n        return p.returncode, p.stderr\n\n\ndef cats(text, kind):\n    out = {}\n    for line in text.splitlines():\n        if (\" %s: \" % kind) in line or line.startswith(kind + \":\"):\n            for m in WARN.findall(line):\n                out[m] = out.get(m, 0) + 1\n    return out\n\n\nrc1, err1 = build([\"-Wall\", \"-Wextra\"])\nc1 = cats(err1, \"warning\")\nprint(\"[编译1] -Wall -Wextra            返回码=%d 警告数=%d\" % (rc1, sum(c1.values())))\nprint(\"[警告类别] %s\" % \" \".join(\"%s=%d\" % (k, c1[k]) for k in sorted(c1)))\n\nrc2, err2 = build([\"-Wall\", \"-Wextra\", \"-Werror\"])\nc2 = cats(err2, \"error\")\nprint(\"[编译2] -Wall -Wextra -Werror    返回码=%d 错误数=%d\" % (rc2, sum(c2.values())))\nprint(\"[升级为错误] %s\" % \" \".join(\"%s=%d\" % (k, c2[k]) for k in sorted(c2)))\nfirst = \"\"\nfor line in err2.splitlines():\n    if \" error: \" in line:\n        first = line.split(\" error: \", 1)[1].split(\" [\", 1)[0]\n        break\nprint(\"[首条诊断] %s\" % first)\nprint(\"[判定] 无 -Werror 时构建成功=%s，加 -Werror 后构建失败=%s -> 告警即错误生效\" % (rc1 == 0, rc2 != 0))\nprint(\"[同一份源码] 警告 %d 处，在 CI 上被 -Werror 拦下 1 次即中断整个流水线\" % sum(c1.values()))\n",
+  "_verified": true,
+  "_step_rc": [
+    0
+  ]
+}

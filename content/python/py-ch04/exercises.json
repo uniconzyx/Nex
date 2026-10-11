@@ -1,0 +1,243 @@
+{
+  "meta": {
+    "chapter": "py-ch04",
+    "subject": "python",
+    "note": "文件与序列化章节习题：pathlib/os 路径语义、sys/CLI、datetime 时区、json 边界。算法题只存元数据与链接，题面以 external_url 为准，合规红线。",
+    "counts": {
+      "基础题": 5,
+      "算法题": 3
+    }
+  },
+  "items": [
+    {
+      "id": "py4-ex01",
+      "type": "choice",
+      "difficulty": "easy",
+      "title": "`PurePosixPath('/a/b/../c')` 的 `parts` 与字符串形态",
+      "content_md": "关于 `pathlib.PurePosixPath('/a/b/../c')`，下列说法正确的是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "`parts` 为 `('/', 'a', 'c')`，字符串为 `/a/c`（自动规范化掉 `..`）"
+        },
+        {
+          "key": "B",
+          "text": "`parts` 为 `('/', 'a', 'b', '..', 'c')`，字符串保留 `/a/b/../c`（不做规范化）"
+        },
+        {
+          "key": "C",
+          "text": "构造时直接抛 `ValueError`"
+        },
+        {
+          "key": "D",
+          "text": "`parts` 为 `('a', 'b', '..', 'c')`（首部斜杠被丢弃）"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "`pathlib` 的 `PurePath` 只做**语法**处理，不会去访问文件系统，也不折叠 `..`——`..` 作为普通名字片段保留在 `parts` 里。要折叠必须显式调用 `resolve()`（会访问文件系统、解析符号链接）或无参的 `os.path.normpath`。很多人的直觉是「路径都该被规范化」，这是 `pathlib` 最常被误解的一点。",
+      "tags": [
+        "pathlib",
+        "PurePath",
+        "路径规范化"
+      ],
+      "source": "self",
+      "source_ref": "Python 官方文档 pathlib",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "id": "py4-ex02",
+      "type": "choice",
+      "difficulty": "medium",
+      "title": "naive 与 aware datetime 相减",
+      "content_md": "`datetime(2026, 1, 1) - datetime(2026, 1, 1, tzinfo=timezone.utc)` 的结果是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "`timedelta(days=0)`，因为两者时刻相同"
+        },
+        {
+          "key": "B",
+          "text": "`timedelta(hours=-8)`，按 UTC+8 本地时区自动换算"
+        },
+        {
+          "key": "C",
+          "text": "抛 `TypeError: can't subtract offset-naive and offset-aware datetimes`"
+        },
+        {
+          "key": "D",
+          "text": "抛 `ValueError`"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "C"
+        ]
+      },
+      "explanation": "Python **拒绝**在 naive 与 aware 之间做算术，因为无法确定 naive 到底代表哪个时区，静默猜测会埋下 8 小时级的事故。正确做法：全链路统一用 aware（推荐 UTC 存储，展示时再转本地），或在边界处显式 `replace(tzinfo=...)` / `astimezone(...)` 明确语义。",
+      "tags": [
+        "datetime",
+        "时区",
+        "aware/naive"
+      ],
+      "source": "self",
+      "source_ref": "Python 官方文档 datetime",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "id": "py4-ex03",
+      "type": "output",
+      "difficulty": "medium",
+      "title": "`json.dumps` 的类型变换",
+      "content_md": "以下代码的输出是什么？\n\n```python\nimport json\nprint(json.dumps((1, 2)))\nprint(json.dumps({1: 'a'}))\nprint(json.dumps(float('nan')))\nprint(json.dumps('中文'))\n```",
+      "answer": {
+        "correct": [
+          "`[1, 2]`\\n`{\"1\": \"a\"}`\\n`NaN`\\n`\"\\\\u4e2d\\\\u6587\"`"
+        ],
+        "explanation": "① tuple 被序列化为 **JSON 数组**（`[1, 2]`）——json 没有 tuple 类型，往返 `loads` 后变成 list；② JSON 的键**必须是字符串**，整数键被 `int→str` 转换，往返后 `{1: 'a'}` 变成 `{'1': 'a'}`，这是「往返不保真」的经典来源；③ `NaN` 是 Python 扩展，标准 JSON 不允许（`allow_nan=False` 会抛 `ValueError`），跨语言传参会失败；④ `ensure_ascii=True`（默认）把非 ASCII 转成 `\\uXXXX` 转义，字节数膨胀但兼容性最好。"
+      },
+      "tags": [
+        "json",
+        "序列化",
+        "往返"
+      ],
+      "source": "self",
+      "source_ref": "Python 官方文档 json",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "id": "py4-ex04",
+      "type": "fix_error",
+      "difficulty": "medium",
+      "title": "`open()` 不指定 encoding 的跨平台事故",
+      "content_md": "下面这段在生产上偶发 `UnicodeDecodeError`（开发机正常、CI 或容器里崩），请指出根因并给出修复：\n\n```python\ndef load_cfg(path):\n    with open(path) as f:\n        return f.read()\n```",
+      "answer": {
+        "correct": [
+          "根因：未显式指定 `encoding`，Python 会使用 `locale.getpreferredencoding(False)`。Linux/容器（`LANG=C`）下常是 ASCII 或 UTF-8，\nWindows 简中下是 GBK/cp936——同一份含中文的 UTF-8 配置文件，在 GBK 环境下解码必然抛 `UnicodeDecodeError`。",
+          "修复：`open(path, encoding='utf-8')`；写入同理显式 `encoding='utf-8'`。若文件可能带 BOM，用 `encoding='utf-8-sig'`。"
+        ],
+        "explanation": "教科书示例为简短省略 `encoding`，但**任何进仓库的 IO 代码都必须显式指定编码**。配套要点：`newline=''` 交给 `csv` 模块处理换行；二进制场景用 `'rb'` 避免任何解码。"
+      },
+      "tags": [
+        "open",
+        "encoding",
+        "跨平台"
+      ],
+      "source": "self",
+      "source_ref": "Python 官方文档 io / locale",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "id": "py4-ex05",
+      "type": "choice",
+      "difficulty": "hard",
+      "title": "`sys.path` 的搜索顺序",
+      "content_md": "执行 `python script.py` 时，`import mymod` 的搜索顺序是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "当前工作目录 → 标准库 → site-packages"
+        },
+        {
+          "key": "B",
+          "text": "**脚本所在目录**（`sys.path[0]`）→ `PYTHONPATH` → 标准库 → site-packages"
+        },
+        {
+          "key": "C",
+          "text": "标准库 → 脚本所在目录 → site-packages"
+        },
+        {
+          "key": "D",
+          "text": "只搜索 `site-packages`"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "关键点：`sys.path[0]` 在**脚本模式下是脚本所在目录**，而 `python -c` 或交互式下才是**当前工作目录（cwd）**。这一差异导致「开发机上 `python src/app.py` 正常、装成包后 import 失败」的经典事故。此外 `-m` 模式会把 cwd 插到最前，进一步改变结果。排查手段：`import sys; print(sys.path)` 与 `python -X importtime`。",
+      "tags": [
+        "sys.path",
+        "import",
+        "模块搜索"
+      ],
+      "source": "self",
+      "source_ref": "Python 官方文档 sys.path / 模块搜索路径",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "id": "py4-ex06",
+      "type": "coding",
+      "difficulty": "medium",
+      "title": "用 pathlib 递归统计目录中的文件类型分布",
+      "content_md": "实现 `ext_stats(root)`，递归统计 `root` 下所有**文件**的扩展名分布，返回 `dict[ext, count]`。要求：\n\n1. 用 `pathlib.Path.rglob('*')` 遍历，只用 `is_file()` 判定；\n2. 无扩展名的文件归入 `'<none>'`；\n3. 扩展名统一**小写**（`README.MD` 与 `a.md` 合并）；\n4. 结果按**数量降序、同数量按扩展名字典序**排序后返回。",
+      "answer": {
+        "reference_code": "from pathlib import Path\n\n\ndef ext_stats(root):\n    counts = {}\n    for p in Path(root).rglob('*'):\n        if not p.is_file():\n            continue\n        ext = p.suffix.lower() or '<none>'\n        counts[ext] = counts.get(ext, 0) + 1\n    return dict(sorted(counts.items(), key=lambda kv: (-kv[1], kv[0])))\n\n\nif __name__ == '__main__':\n    import tempfile\n    with tempfile.TemporaryDirectory() as d:\n        d = Path(d)\n        for rel in ('a.md', 'sub/b.md', 'sub/c.txt', 'README', 'sub/DEEP/e.MD'):\n            f = d / rel\n            f.parent.mkdir(parents=True, exist_ok=True)\n            f.write_text('x', encoding='utf-8')\n        print(ext_stats(d))",
+        "explanation": "`rglob('*')` 一次性产出所有层级的条目（含目录），必须用 `is_file()` 过滤。`p.suffix` 只取**最后一个**后缀（`a.tar.gz` → `.gz`），要取全部后缀用 `p.suffixes`。排序用 `(-count, ext)` 双键实现「数量降序 + 名字升序」，注意用元组排序而不是先按 count 排再二次排。"
+      },
+      "tags": [
+        "pathlib",
+        "rglob",
+        "排序"
+      ],
+      "source": "self",
+      "source_ref": "Python 官方文档 pathlib.Path.rglob",
+      "category": "算法题",
+      "platform": "github",
+      "external_url": "https://docs.python.org/3/library/pathlib.html"
+    },
+    {
+      "id": "py4-ex07",
+      "type": "coding",
+      "difficulty": "medium",
+      "title": "简化 Unix 风格路径（LeetCode 71）",
+      "content_md": "给定一个 Unix 风格绝对路径字符串，将其简化为规范路径（`..` 回退、`.` 与多余斜杠忽略、栈空时 `..` 不越界）。\n\n请到 LeetCode 71 查看完整题面并用 Python 实现。",
+      "answer": {
+        "correct": [
+          "题面见 https://leetcode.cn/problems/simplify-path/"
+        ],
+        "explanation": "典型解法：按 `/` 切分，用列表当栈——`''` 与 `'.'` 跳过；`'..'` 时若栈非空则 `pop()`（栈空则忽略，因为根目录的上一级还是根）；其余 `push`。最后 `'/' + '/'.join(stack)`。进阶：可对照本题与 `pathlib.PurePosixPath` 的行为差异——`PurePosixPath` **不折叠** `..`，`resolve()` 才折叠且会访问文件系统，这也解释了为什么这类题不能直接用 `pathlib` 一行解决。"
+      },
+      "tags": [
+        "栈",
+        "字符串处理",
+        "路径规范化"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 71. Simplify Path",
+      "category": "算法题",
+      "platform": "leetcode",
+      "external_url": "https://leetcode.cn/problems/simplify-path/"
+    },
+    {
+      "id": "py4-ex08",
+      "type": "coding",
+      "difficulty": "hard",
+      "title": "安全的原子写入：临时文件 + `os.replace`",
+      "content_md": "实现 `atomic_write(path, text)`：写文件的过程中若进程被杀，**不能留下半截文件**，且不能留下临时文件残留。\n\n要求：\n\n1. 先写入同目录下的临时文件（同目录才能保证 `os.replace` 是同一文件系统内的原子 rename）；\n2. 显式 `encoding='utf-8'`；\n3. 成功后用 `os.replace` 覆盖目标（Windows 与 POSIX 都原子）；\n4. 失败时清理临时文件并**重新抛出**原异常。",
+      "answer": {
+        "reference_code": "import os\nimport tempfile\nfrom pathlib import Path\n\n\ndef atomic_write(path, text):\n    path = Path(path)\n    path.parent.mkdir(parents=True, exist_ok=True)\n    fd, tmp = tempfile.mkstemp(dir=str(path.parent), prefix='.tmp-', suffix='.swp')\n    try:\n        with os.fdopen(fd, 'w', encoding='utf-8') as f:\n            f.write(text)\n            f.flush()\n            os.fsync(f.fileno())\n        os.replace(tmp, path)\n    except BaseException:\n        try:\n            os.unlink(tmp)\n        except OSError:\n            pass\n        raise\n\n\nif __name__ == '__main__':\n    with tempfile.TemporaryDirectory() as d:\n        target = Path(d) / 'cfg.json'\n        atomic_write(target, '{\"k\": 1}')\n        print('content =', target.read_text(encoding='utf-8'))\n        atomic_write(target, '{\"k\": 2}')\n        print('content =', target.read_text(encoding='utf-8'))\n        print('residue =', sorted(p.name for p in Path(d).iterdir() if p.name != 'cfg.json'))",
+        "explanation": "要点三处：① 临时文件必须与目标**同目录**（`mkstemp(dir=...)`），跨文件系统的 `replace` 退化成「复制+删除」就不再原子；② `flush()` + `os.fsync()` 保证数据落到磁盘而非只到页缓存，否则掉电仍可能丢；③ 用 `except BaseException` 而非 `except Exception`，`KeyboardInterrupt` 也要走清理分支。`os.replace` 会覆盖已存在目标，`os.rename` 在 Windows 上则会报错——这是选它的原因。"
+      },
+      "tags": [
+        "原子写",
+        "os.replace",
+        "fsync"
+      ],
+      "source": "self",
+      "source_ref": "Python 官方文档 os.replace / tempfile.mkstemp",
+      "category": "算法题",
+      "platform": "github",
+      "external_url": "https://docs.python.org/3/library/os.html#os.replace"
+    }
+  ]
+}

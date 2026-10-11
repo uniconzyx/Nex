@@ -1,0 +1,8 @@
+{
+  "title": "unique_ptr 独占所有权（移动而非拷贝）",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "42\n42\n1",
+  "code": "#include <iostream>\n#include <memory>\nint main() {\n    std::unique_ptr<int> a = std::make_unique<int>(42);\n    std::cout << *a << '\\n';\n    std::unique_ptr<int> b = std::move(a);   // 移动：转移所有权，a 置空\n    std::cout << *b << '\\n';\n    std::cout << (a == nullptr);\n}"
+}

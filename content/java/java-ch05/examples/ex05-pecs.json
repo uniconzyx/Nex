@@ -1,0 +1,8 @@
+{
+  "title": "通配符 PECS 原则（? extends 生产者 / ? super 消费者）",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "sum=6.0\nints=[1, 2, 3]",
+  "code": "import java.util.*;\n\npublic class Ex05PECS {\n    static double sum(List<? extends Number> nums) {\n        double s = 0;\n        for (Number n : nums) s += n.doubleValue();\n        return s;\n    }\n    static void addIntegers(List<? super Integer> list) {\n        list.add(1); list.add(2); list.add(3);\n    }\n    public static void main(String[] args) {\n        List<Integer> ints = new ArrayList<>();\n        addIntegers(ints);\n        List<Number> nums = new ArrayList<>(ints);\n        System.out.println(\"sum=\" + sum(nums));\n        System.out.println(\"ints=\" + ints);\n    }\n}"
+}

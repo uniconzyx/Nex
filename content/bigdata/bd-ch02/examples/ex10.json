@@ -1,0 +1,8 @@
+{
+  "title": "YARN 容器分配：RM 在 NM 上按资源贪心分配",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "allocated containers on: ['nm1', 'nm1', 'nm1']\nnm1: mem 6/8 cores 3/8\nnm2: mem 0/8 cores 0/8",
+  "code": "\nnms = {\n    \"nm1\": {\"mem\": 8, \"cores\": 8, \"used_mem\": 0, \"used_cores\": 0},\n    \"nm2\": {\"mem\": 8, \"cores\": 8, \"used_mem\": 0, \"used_cores\": 0},\n}\nreq = {\"mem\": 2, \"cores\": 1, \"n\": 3}\nallocated = []\nfor _ in range(req[\"n\"]):\n    for nm, r in nms.items():\n        if r[\"used_mem\"] + req[\"mem\"] <= r[\"mem\"] and r[\"used_cores\"] + req[\"cores\"] <= r[\"cores\"]:\n            r[\"used_mem\"] += req[\"mem\"]\n            r[\"used_cores\"] += req[\"cores\"]\n            allocated.append(nm)\n            break\nprint(\"allocated containers on:\", allocated)\nfor nm, r in nms.items():\n    print(f\"{nm}: mem {r['used_mem']}/{r['mem']} cores {r['used_cores']}/{r['cores']}\")\n"
+}

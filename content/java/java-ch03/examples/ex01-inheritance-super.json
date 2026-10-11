@@ -1,0 +1,8 @@
+{
+  "title": "继承与 super：构造器链与方法调用",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "Animal()\nDog()\nanimal sound\nwoof",
+  "code": "public class E301 {\n    static class Animal {\n        String name = \"animal\";\n        Animal() { System.out.println(\"Animal()\"); }\n        void speak() { System.out.println(\"animal sound\"); }\n    }\n    static class Dog extends Animal {\n        Dog() { super(); System.out.println(\"Dog()\"); }\n        @Override void speak() { super.speak(); System.out.println(\"woof\"); }\n    }\n    public static void main(String[] args) {\n        Dog d = new Dog();\n        d.speak();\n    }\n}"
+}

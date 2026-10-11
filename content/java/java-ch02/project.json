@@ -1,0 +1,14 @@
+{
+  "meta": { "chapter": "java-ch02", "category": "basic" },
+  "items": [
+    {
+      "title": "实现不可变二维向量 Vector2D（封装 + 不变式 + equals/hashCode）",
+      "requirement_md": "设计一个不可变二维向量类 `Vector2D`：\n- 字段 `x`、`y` 为 `private final`（封装 + 不可变）；\n- 提供构造器，对非法输入（如 NaN）可抛异常以维护不变式；\n- 提供 `add(Vector2D)`、`sub(Vector2D)`、`dot(Vector2D)` 方法，三者都**返回新的 Vector2D** 而非修改自身；\n- 正确重写 `equals` 与 `hashCode`（成对、基于 x/y），并重写 `toString`；\n- 在 `public static void main` 中自测：构造两个向量、相加、点积、比较相等性并打印结果。\n要求全程使用本章知识点（封装、构造器、this、equals/hashCode 契约）。",
+      "tasks": [
+        { "title": "定义 private final 字段与校验构造器", "verification": { "type": "test", "desc": "构造后字段不可变，非法输入抛异常" } },
+        { "title": "实现 add/sub/dot 返回新实例", "verification": { "type": "test", "desc": "原向量不被修改，运算结果正确" } },
+        { "title": "成对重写 equals/hashCode 与 toString", "verification": { "type": "test", "desc": "相等向量 hashCode 一致、equals 对称、打印格式清晰" } }
+      ]
+    }
+  ]
+}

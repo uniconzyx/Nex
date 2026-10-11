@@ -1,0 +1,53 @@
+{
+  "meta": {
+    "chapter": "tool-ch03",
+    "category": "system",
+    "title": "Git 核心：对象模型与分支 —— 综合项目",
+    "count": 1,
+    "note": "一个可交付的迷你 Git 对象分析器，覆盖本章全部知识点且代码可独立运行"
+  },
+  "items": [
+    {
+      "title": "实现一个「迷你 Git 内容寻址分析器」mini-git-analyzer",
+      "requirement_md": "用纯 Python（仅标准库 `hashlib`/`os`/`subprocess`）实现一个 `mini-git-analyzer.py`，对给定 Git 仓库做**对象模型级别的体检**，要求覆盖本章全部知识点且脚本本身体现「真懂对象模型」。\n\n**功能要求**：\n\n1. **blob SHA 复算（内容寻址）**\n   - 给定若干文件内容字符串，用 `sha1(b'blob ' + len + b'\\0' + content)` 独立计算 SHA，   并与 `git hash-object -w` 的返回值比对，断言一致；演示「相同内容 → 相同 SHA、不同内容 → 不同 SHA」。\n\n2. **对象类型探查**\n   - 对仓库里某个 commit，依次 `git cat-file -t/-p` 打印其 tree、blob 的结构，说明「commit→tree→blob」的 Merkle 指向。\n\n3. **分支指针验证**\n   - 读取 `.git/refs/heads/*` 与 `.git/HEAD`，打印「分支名 → commit SHA」「HEAD → 当前分支」，验证分支只是指针。\n\n4. **三区状态体检**\n   - 用 `git status --porcelain` 与 `git diff --cached --stat` 的行数/计数，报告工作区、暂存区相对 HEAD 的偏差；   演示 `reset --soft/--mixed/--hard` 后三区计数的变化（呼应 examples/ex10）。\n\n5. **冲突/合并基线**\n   - 在临时仓库里制造一次真实分叉，调用 `git merge-base` 打印最近公共祖先 SHA，并说明它在三方合并中的基线角色。\n\n6. **救援演练**\n   - 进入 detached HEAD 做一次提交，打印 `.git/HEAD` 内容（应为 SHA 而非 ref），再 `git reflog` 找出该 SHA 并用 `git branch rescue` 收编。\n\n**提交物**：`mini-git-analyzer.py`、`README.md`（说明每项机制与对应章节概念）、`demo.sh`（一键造样例仓库并跑分析）。\n\n**进阶**：增加 packfile 体积分析（`git verify-pack -v` 解析 delta 链），或用 `networkx` 把 commit DAG 画成图。",
+      "tasks": [
+        {
+          "title": "任务 1：blob SHA 复算与内容寻址验证",
+          "verification": {
+            "type": "auto",
+            "desc": "脚本对样本内容计算的 SHA 与 git hash-object 完全一致；断言「相同内容同 SHA、不同内容异 SHA」通过。"
+          }
+        },
+        {
+          "title": "任务 2：commit/tree/blob 结构与分支指针探查",
+          "verification": {
+            "type": "auto",
+            "desc": "打印出某个 commit 的 tree SHA、tree 内 blob 条目；读取 refs/heads 与 HEAD，证明分支是指向 commit 的指针。"
+          }
+        },
+        {
+          "title": "任务 3：三区状态体检与 reset 三模式演示",
+          "verification": {
+            "type": "auto",
+            "desc": "用 status --porcelain 与 diff --cached --stat 的计数佐证三区；reset --soft/--mixed/--hard 后计数按预期变化（soft 只动 HEAD、hard 也动工作区）。"
+          }
+        },
+        {
+          "title": "任务 4：merge-base 基线与 detached HEAD 救援演练",
+          "verification": {
+            "type": "auto",
+            "desc": "制造分叉后 merge-base 输出等于分叉点 commit；detached 提交后 .git/HEAD 为 SHA，reflog 能找回并用 branch rescue 收编。"
+          }
+        }
+      ],
+      "tags": [
+        "git",
+        "对象模型",
+        "内容寻址",
+        "Merkle",
+        "reflog",
+        "python"
+      ]
+    }
+  ]
+}

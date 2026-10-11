@@ -1,0 +1,8 @@
+{
+  "title": "re.split / findall / finditer 的返回形状差异",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== re.split：按分隔符切分 ===\n单分隔符 : ['a1', ' b22;  c333']\n多分隔符 : ['a1', ' b22', '  c333']\n带捕获组 : ['a1', ',', ' b22', ';', '  c333']  <- 分隔符本身也被保留\n限制次数 : ['a1', ' b22;  c333']\n\n=== findall vs finditer ===\nfindall（无分组）: ['1', '22', '333']\nfindall（有 1 个分组）: ['1', '22', '333']\nfindall（有 2 个分组）: [('a', '1'), ('b', '22'), ('c', '333')]  <- 返回元组列表\nfinditer 保留位置信息:\n   span=(0, 3)  键=a  值=1\n   span=(4, 8)  键=b  值=22\n   span=(9, 14)  键=c  值=333\n\n=== 用 finditer 统计出现次数（不依赖额外 list）===\nbanana 中 a 的个数 = 3",
+  "code": "import re\n\ns = \"a1, b22;  c333\"\n\nprint(\"=== re.split：按分隔符切分 ===\")\nprint(\"单分隔符 :\", re.split(r\",\", s))\nprint(\"多分隔符 :\", re.split(r\"[,;]\", s))\nprint(\"带捕获组 :\", re.split(r\"([,;])\", s), \" <- 分隔符本身也被保留\")\nprint(\"限制次数 :\", re.split(r\"[,;]\", s, maxsplit=1))\n\nprint()\nprint(\"=== findall vs finditer ===\")\ntext = \"a=1 b=22 c=333\"\nprint(\"findall（无分组）:\", re.findall(r\"\\d+\", text))\nprint(\"findall（有 1 个分组）:\", re.findall(r\"(\\d+)\", text))\nprint(\"findall（有 2 个分组）:\", re.findall(r\"(\\w)=(\\d+)\", text), \" <- 返回元组列表\")\n\nprint(\"finditer 保留位置信息:\")\nfor m in re.finditer(r\"(\\w)=(\\d+)\", text):\n    print(\"   span=%s  键=%s  值=%s\" % (m.span(), m.group(1), m.group(2)))\n\nprint()\nprint(\"=== 用 finditer 统计出现次数（不依赖额外 list）===\")\ncnt = sum(1 for _ in re.finditer(r\"a\", \"banana\"))\nprint(\"banana 中 a 的个数 =\", cnt)"
+}

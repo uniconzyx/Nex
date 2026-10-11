@@ -1,0 +1,255 @@
+{
+  "meta": {
+    "chapter": "spring-ch07",
+    "note": "8 题，基础题 6 + 算法题 2（其中 1 题来自 LeetCode，仅存元数据与链接，不搬运题面正文）"
+  },
+  "items": [
+    {
+      "id": "ex1",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "`<where>` 的三条保证：哪一项是错的",
+      "content_md": "关于 MyBatis 的 `<where>` 标签，业界总结的四条说法中**有一条是错的**，请选出来。\n\n- A. 内部所有条件都不成立时，`<where>` 整体不生成 `WHERE` 关键字\n- B. 内部有内容时，自动加上 `WHERE` 并剔除片段开头多余的 `AND` / `OR`\n- C. 它等价于 `<trim prefix=\"WHERE\" prefixOverrides=\"AND |OR \">`\n- D. 它会同时剔除片段**中间**重复出现的 `AND`\n",
+      "options": [
+        {
+          "key": "A",
+          "text": "内部所有条件都不成立时，整体不生成 WHERE 关键字"
+        },
+        {
+          "key": "B",
+          "text": "有内容时自动加 WHERE 并剔除开头多余的 AND / OR"
+        },
+        {
+          "key": "C",
+          "text": "等价于 <trim prefix=\"WHERE\" prefixOverrides=\"AND |OR \">"
+        },
+        {
+          "key": "D",
+          "text": "会同时剔除片段中间重复出现的 AND"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "D"
+        ]
+      },
+      "explanation": "D 错。`TrimSqlNode` 的算法是「先拼完整串、再只剪首尾」：\n`startsWith(override)` 命中则 `substring(length)`，尾部由 `suffixOverrides` 回退，因此 `4=4 AND AND name = ?` 这种**中间**残留它管不了（中间多写了 AND 只能靠把每个条件的 `AND` 写在片段开头来保证局部性）。A/B 是 `<where>` 的两条核心保证，可视 ex01 的 `case2 where broken : false` 与 `case3 has WHERE : false`；C 是它的定义形式，注意 `AND |OR ` 末尾的空格属于匹配内容，写成 `AND|OR` 会失效。",
+      "tags": [
+        "dynamic-sql",
+        "where",
+        "trim"
+      ],
+      "source": "self",
+      "source_ref": "《MyBatis 从入门到精通》进阶篇 · 动态 SQL 章（对照 ex01）"
+    },
+    {
+      "id": "ex2",
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "修掉一段会被注入的排序查询",
+      "content_md": "下面是某列表接口的 Mapper 片段与调用代码，**至少有三处问题**：\n\n```xml\n<select id=\"list\" resultType=\"User\">\n  SELECT id, name FROM t_user\n  WHERE name = '${name}'\n  ORDER BY ${sortCol} ${sortDir}\n</select>\n```\n\n```java\n// Controller 直接透传前端参数\nmapper.list(req.getName(), req.getOrder(), req.getDir());\n```\n\n请指出问题所在并给出修改后的正确写法（Mappepr XML + Java 校验）。",
+      "answer": {
+        "output": "① `WHERE name = '${name}'` 是宏替换，输入 `' OR '1'='1` 即可拖走全表 —— 改为 `name = #{name}`；\n② `ORDER BY ${sortCol}` / `${sortDir}` 来自前端原始字符串，可借子查询做布尔盲注/时间盲注 —— 结构性位置只能靠白名单兜底，不能因为「只是排序」就放行；\n③ 缺乏 `LIMIT`，无条件时全表返回;\n④ 结果用 `resultType=\"User\"` + 同名映射，列名/属性名不一致时会静默 null。",
+        "reference_code": "<!-- 修正后的 Mapper：值是 #{}，结构位置 ${} 的取值来自白名单 -->\n<select id=\"list\" resultType=\"User\">\n  SELECT id, name FROM t_user\n  <where>\n    <if test=\"name != null and name != ''\"> AND name = #{name} </if>\n  </where>\n  ORDER BY ${sortCol} ${sortDir}\n  LIMIT #{offset}, #{limit}\n</select>\n\n// Java 侧白名单（放在 Service 层，不依赖调用方自觉）\nprivate static final Set<String> SORTABLE = Set.of(\"id\", \"name\", \"create_time\");\nprivate static final Set<String> DIRS = Set.of(\"ASC\", \"DESC\");\n\npublic void check(String col, String dir) {\n    if (!SORTABLE.contains(col) || !DIRS.contains(dir.toUpperCase())) {\n        throw new IllegalArgumentException(\"illegal sort argument\");\n    }\n}\n"
+      },
+      "explanation": "判据是「该位置在 SQL 语法里是值还是结构」：值（WHERE 的比较值、LIMIT 的参数）用 `#{}`，\n此时 SQL 模板不随参数变化，参数经 PreparedStatement 单独绑定；\n结构位置（列名、排序方向）不能参数化，只能用 `${}` + **白名单枚举**。黑名单式过滤（`;`/`--` 替换）会因宽字节、注释变体、大小写绕过。另一条常被同时踩到的坑是反过来写成 `ORDER BY #{sortCol}` —— 占位符被当成常量字符串，排序不生效且不报错。注入对照详见 ex05。",
+      "tags": [
+        "injection",
+        "hash-vs-dollar",
+        "whitelist"
+      ],
+      "source": "self",
+      "source_ref": "concept/02-hash-vs-dollar-deep.md（对照 ex05）"
+    },
+    {
+      "id": "ex3",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "`<foreach>` 传入空集合会发生什么",
+      "content_md": "Mapper 中写：\n\n```xml\n<select id=\"findByIds\" resultType=\"User\">\n  SELECT id, name FROM t_user WHERE id IN\n  <foreach collection=\"ids\" item=\"id\" open=\"(\" separator=\",\" close=\")\">\n    #{id}\n  </foreach>\n</select>\n```\n\n调用时传入 `List.of()`（空集合），MyBatis 的行为是哪一项？",
+      "options": [
+        {
+          "key": "A",
+          "text": "自动展开成 IN (NULL)，查询正常执行但返回 0 行"
+        },
+        {
+          "key": "B",
+          "text": "`<foreach>` 不产出任何内容，最终 SQL 是 ... WHERE id IN ()，MySQL 直接报语法错误"
+        },
+        {
+          "key": "C",
+          "text": "外层的 `<where>` 会识别到空的 IN 子句并自动整条剔除"
+        },
+        {
+          "key": "D",
+          "text": "MyBatis 在参数绑定阶段抛 BindingException 拦截下来"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "`<foreach>` 只负责把集合展开成占位符列表，**不提供空集合保护**：`open=\"(\" close=\")\"` 属于 `<foreach>` 自身的常量，无论集合是否为空都会输出，于是得到 `... WHERE id IN ()` —— MySQL 报 `You have an error in your SQL syntax`（见 ex02 的 `empty IN : SELECT * FROM t_user WHERE id IN ()` 与 `empty in ok : false`）。`<where>` 管不到它（这里也没有 `<where>`），MyBatis 更不会提前拦截。修法：Java 侧判空后直接返回空列表，或套一层 `<if test=\"ids != null and ids.size() > 0\">`。另一条高频坑是 `collection` 名写错（`list`/`array`/`@Param` 名），那才是真的会抛 BindingException。",
+      "tags": [
+        "foreach",
+        "empty-collection",
+        "dynamic-sql"
+      ],
+      "source": "self",
+      "source_ref": "concept/01-dynamic-sql-tags.md（对照 ex02）"
+    },
+    {
+      "id": "ex4",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "一级缓存的失效触发点",
+      "content_md": "在同一个 `SqlSession` 内（在 Spring 中即同一个事务内），下列哪种操作**不会**让一级缓存失效？",
+      "options": [
+        {
+          "key": "A",
+          "text": "在会话内执行任意一条 insert / update / delete（哪怕写的表与本次查询无关）"
+        },
+        {
+          "key": "B",
+          "text": "调用 sqlSession.commit() 或 rollback()"
+        },
+        {
+          "key": "C",
+          "text": "在会话内再执行一次相同 statementId + 相同 SQL + 相同参数的查询"
+        },
+        {
+          "key": "D",
+          "text": "该语句上配置了 flushCache=\"true\""
+        }
+      ],
+      "answer": {
+        "correct": [
+          "C"
+        ]
+      },
+      "explanation": "C 是命中路径而不是失效路径：CacheKey 由 statementId + offset + limit + SQL 文本 + 参数列表构成，三者相同即命中（见 ex06 的 `s1 select#2 : dbQueries=1 l1Hits=1`）。另外三项都会失效：写操作走 `BaseExecutor.update()` → `clearLocalCache()`，**清空的是整个会话缓存**（CacheKey 里没有表名，故无法按表失效）；`commit`/`rollback` 同样清；`flushCache=\"true\"` 是语句级的显式清空（`<select>` 默认为 false，写语句默认为 true）。注意 SqlSession 是**非线程安全**的，一级缓存也因此不需要并发保护——这比二级缓存轻得多。",
+      "tags": [
+        "l1-cache",
+        "cache-key",
+        "flushcache"
+      ],
+      "source": "self",
+      "source_ref": "concept/03-cache-l1-l2.md（对照 ex06）"
+    },
+    {
+      "id": "ex5",
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "二级缓存 namespace 隔离：写出三次查询的命中情况",
+      "content_md": "`UserMapper` 与 `OrderMapper` 都在各自的 Mapper XML 里声明了 `<cache/>`，\n按下列顺序执行（每行一次独立会话，会话结束前都提交）：\n\n```text\n① s1 SELECT UserMapper.selectById(1)      -> 查库\n② s2 SELECT UserMapper.selectById(1)      -> ?\n③ s3 UPDATE OrderMapper.updateUser(...)   -> 更新的是 t_user 同一行\n④ s4 SELECT UserMapper.selectById(1)      -> ?\n```\n\n请写出第 ② 步与第 ④ 步各自的命中来源，以及最终读到的是新值还是旧值。",
+      "answer": {
+        "output": "② l2hit=1 db=0        -> 命中 UserMapper 的二级缓存，未查库\n④ l2hit=1 db=0        -> 依然命中 UserMapper 的二级缓存，未查库\n最终读到             -> 旧值（脏读）"
+      },
+      "explanation": "二级缓存的作用域是 **Mapper namespace**，失效协议是「谁拥有 namespace，谁负责清」：`OrderMapper.updateUser` 只会 flush `OrderMapper` 自己的缓存，`UserMapper` 的缓存条目完好无损，于是 s4 读到的是 s3 更新**之前**的旧值。这正是 ex07 里 `s6 OrderMapper : db=4 l2=1 (unaffected)` 的镜像场景。只要「同一张表被两个以上 namespace 写」这个条件成立，二级缓存就会出现失效覆盖缺口——这不是 bug，而是按 namespace 约定失效的设计代价。修法：这类多写者场景不要开二级缓存；或用 `@CacheNamespaceRef` 显式把两个 namespace 的缓存合并管理。顺带复习另外两条：② 能跨会话命中是因为这批数据在 s1 提交时才由 `TransactionalCache` 刷入，「`close()` 时刷入二级」是错误说法；缓存对象还需要实现 `Serializable`。",
+      "tags": [
+        "l2-cache",
+        "namespace",
+        "stale-read"
+      ],
+      "source": "self",
+      "source_ref": "concept/03-cache-l1-l2.md（对照 ex07）"
+    },
+    {
+      "id": "ex6",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "hard",
+      "title": "分页插件：startPage 的生效范围与 count 改写",
+      "content_md": "关于 MyBatis 分页插件（以 PageHelper 为代表）的 `count` 查询与生效范围，哪一项说法是**正确的**？",
+      "options": [
+        {
+          "key": "A",
+          "text": "`startPage()` 调用后对本次线程随后执行的所有查询都生效，中间穿插其他 mapper 调用也不影响"
+        },
+        {
+          "key": "B",
+          "text": "`startPage()` 依赖 ThreadLocal 传递分页参数，只对紧随其后的那一次查询生效，中间插入别的查询会让分页落到错误的语句上或直接失效"
+        },
+        {
+          "key": "C",
+          "text": "count 查询一定是对原 SQL 的 select 列直接替换成 count(0)，所以原 SQL 带有 ORDER BY 也完全不影响"
+        },
+        {
+          "key": "D",
+          "text": "对带有 GROUP BY 的原 SQL，直接把列换成 count(0) 得到的就是正确的总记录数"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "B 正确。`startPage()` 把分页参数放在 ThreadLocal 里，拦截器在下一次 `StatementHandler#prepare` 处消费它，而它只对「紧随其后」的那一次查询才生效——\n所以调用必须与目标 mapper 查询**紧邻**（同一方法内、中间不插其他查询），\n中间只要多一次查询就会被提前消费；线程池复用线程时还可能带上一次请求的残余参数，因此规范的写法要在 `finally` 中 `PageHelper.clearPage()`。\nC/D 都错在 count 改写：对 `GROUP BY` / `DISTINCT` / `UNION` 的复杂 SQL，直接替换列得到的是**分组行数**而非总记录数，正确做法是把原 SQL 包一层子查询再 count（见 ex11 的 `groupby count` / `union count` 与反例 `naive count 1row : false`）；同时 count 分支应当剥离与原查询无关的 `ORDER BY`/`LIMIT`，否则既有可能在某些方言下报错，也要白白多一次排序。",
+      "tags": [
+        "plugin",
+        "pagination",
+        "count-query"
+      ],
+      "source": "self",
+      "source_ref": "MyBatis 官方文档 Interceptors 页 + pagehelper/Mybatis-PageHelper（对照 ex11）"
+    },
+    {
+      "id": "ex7",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "LRU 缓存（LeetCode 146）",
+      "content_md": "到 LeetCode 上完成第 146 题「LRU 缓存」。\n\n**合规说明**：本节只保留题目的元数据与链接，不搬运题面正文，请通过下方链接查看完整题面。\n\n**完成要求**：`get` 与 `put` 均为 `O(1)`；容量满时淘汰最久未使用的键。\n\n**与本章的关联**：MyBatis `LruCache` 正是用 `LinkedHashMap` 的**访问顺序**（access-order）记录热度、并在超过 `size` 时淘汰链头元素，思路与手写版本完全一致，\n只是把链表操作封装进了 `LinkedHashMap` 的访问顺序模式。\n实现后再对照 ex08 观察淘汰序列 `[a, c]`，可以理解 access-order 与LeetCode 版本手写「哈希表 + 双向链表」在本质上的等价性。\n",
+      "answer": {
+        "reference_code": "from collections import OrderedDict\n\n\nclass LRUCache:\n    \"\"\"哈希表 + 双向链表：这里直接用 OrderedDict 承担链表角色。\n    MyBatis 的 LruCache 用的就是同一套 access-order 语义。\n    \"\"\"\n\n    def __init__(self, capacity: int):\n        self.cap = capacity\n        self.data = OrderedDict()\n\n    def get(self, key: int) -> int:\n        if key not in self.data:\n            return -1\n        self.data.move_to_end(key)      # 访问后置到链尾\n        return self.data[key]\n\n    def put(self, key: int, value: int) -> None:\n        if key in self.data:\n            self.data[key] = value\n            self.data.move_to_end(key)\n            return\n        self.data[key] = value\n        if len(self.data) > self.cap:\n            self.data.popitem(last=False)  # 淘汰链头（最久未使用）\n\n\nif __name__ == \"__main__\":\n    cache = LRUCache(3)\n    for k, v in [(\"a\", 1), (\"b\", 2), (\"c\", 3)]:\n        cache.put(k, v)\n    cache.get(\"b\")                     # b 变成最近使用\n    cache.put(\"d\", 4)                  # 淘汰最久未使用的 a\n    print(\"keys\", list(cache.data.keys()))\n    print(\"get a\", cache.get(\"a\"))\n    print(\"get b\", cache.get(\"b\"))\n    print(\"size bounded\", len(cache.data) <= cache.cap)\n"
+      },
+      "explanation": "`get` 命中后把节点移到链尾（最近使用），`put` 超容量时弹出链头（最久未使用），两个操作都是 `O(1)`——这是「哈希表 + 双向链表」的经典配对：哈希表负责定位，链表负责维护顺序。MyBatis 的二级缓存默认 `eviction=\"LRU\"` 即 `LruCache` 装饰 `PerpetualCache`，内部就是一个 access-order 的 `LinkedHashMap`，超过 `size`（默认 1024）时移除链头。注意它**不是线程安全的**，MyBatis 依赖「按 namespace 单例 + 会话隔离」来规避并发问题。",
+      "tags": [
+        "lru",
+        "cache",
+        "linked-hashmap"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 146（lru-cache）",
+      "external_url": "https://leetcode.cn/problems/lru-cache/",
+      "time_limit_ms": 2000,
+      "memory_limit_mb": 256
+    },
+    {
+      "id": "ex8",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "实现带 namespace 隔离的 LRU 二级缓存",
+      "content_md": "用**纯 Python 单文件**实现一个简化的 MyBatis 二级缓存，要求：\n\n1. **按 namespace 隔离**：`UserMapper` 与 `OrderMapper` 各有一份 LRU，互不可见；\n2. **容量上限**：每个 namespace 的容量为 `size`，超过时淘汰最久未使用的 key；\n3. **写操作只失效本 namespace**：对某 namespace 执行 `update` 后，该 namespace 缓存清空，另一个 namespace 的缓存**不受影响**（这正是本章 pitfalls 第 11 条描述的脏读来源）；\n4. **提交后才可见**：查询结果先进入暂存区，`commit()` 之后才真正写入缓存——\n对照 `TransactionalCache` 的 `entriesToAddOnCommit` 语义。\n\n请实现 `CacheManager` 并给出可运行的验证代码。",
+      "answer": {
+        "reference_code": "from collections import OrderedDict\n\n\nclass NamespaceLRU:\n    \"\"\"单个 namespace 一份 access-order LRU。\"\"\"\n\n    def __init__(self, size: int = 3):\n        self.size = size\n        self.data: OrderedDict = OrderedDict()\n\n    def get(self, key):\n        if key not in self.data:\n            return None\n        self.data.move_to_end(key)\n        return self.data[key]\n\n    def put(self, key, value):\n        self.data[key] = value\n        self.data.move_to_end(key)\n        while len(self.data) > self.size:\n            self.data.popitem(last=False)\n\n    def clear(self):\n        self.data.clear()\n\n\nclass CacheManager:\n    \"\"\"模拟 MyBatis 二级缓存 + TransactionalCache 的提交可见性。\"\"\"\n\n    def __init__(self, size=3):\n        self.size = size\n        self.caches = {}                 # namespace -> NamespaceLRU\n        self.staging = {}                # (namespace, key) -> value，提交前不可见\n        self.db_queries = 0\n\n    def cache_of(self, ns):\n        return self.caches.setdefault(ns, NamespaceLRU(self.size))\n\n    def select(self, ns, key):\n        hit = self.cache_of(ns).get(key)\n        if hit is not None:\n            return hit, \"l2hit\"\n        self.db_queries += 1\n        value = \"row-%s-%s\" % (ns, key)\n        self.staging[(ns, key)] = value  # 先暂存，commit 后才入缓存\n        return value, \"db\"\n\n    def commit(self):\n        for (ns, key), value in self.staging.items():\n            self.cache_of(ns).put(key, value)\n        self.staging.clear()\n\n    def update(self, ns):\n        # 关键：只清本 namespace（这是脏读的来源）\n        self.cache_of(ns).clear()\n        for k in [k for k in self.staging if k[0] == ns]:\n            del self.staging[k]\n\n\nif __name__ == \"__main__\":\n    cm = CacheManager(size=3)\n    v1, src1 = cm.select(\"UserMapper\", 1)\n    print(\"s1 select\", v1, src1)\n    _, src2 = cm.select(\"UserMapper\", 1)\n    print(\"before commit\", src2)      # 尚未 commit，仍会查库\n    cm.commit()\n    _, src3 = cm.select(\"UserMapper\", 1)\n    print(\"after commit\", src3)       # l2hit\n    for k in (2, 3, 4):\n        cm.select(\"UserMapper\", k)\n        cm.commit()\n    print(\"lru keys\", list(cm.caches[\"UserMapper\"].data.keys()))\n    cm.select(\"OrderMapper\", 1)\n    cm.commit()\n    cm.update(\"OrderMapper\")          # 只清 OrderMapper\n    _, src4 = cm.select(\"UserMapper\", 2)   # key=2 仍在 UserMapper 缓存中\n    print(\"UserMapper after OrderMapper update\", src4)\n    print(\"db queries\", cm.db_queries)\n"
+      },
+      "explanation": "两条授课要点都在代码里：(1) `update(ns)` 只清自身 namespace，所以当有多方写同一张表时，缓存就出现了**失效覆盖缺口**——无论是 MyBatis 还是本 scaffold，「约定优于配置」的 namespace 失效协议都要求「单写者」这个前提；(2) 查询结果先进 `staging`、`commit()` 后才 `put` 入缓存，对应 `TransactionalCache` 的 `entriesToAddOnCommit` 语义——这正是「提交前对其他会话不可见」的实现来源，也因此，「`close()` 时把一级缓存晋升到二级」是错误的说法。参考输出：未提交时第二次同样是 `db`（区别于一级缓存的会话内立即命中），提交后变 `l2hit`；容量 3 时淘汰后保留最近使用的 3 个键；更新 OrderMapper 后 UserMapper 依然 `l2hit`（脏读）。",
+      "tags": [
+        "l2-cache",
+        "namespace",
+        "lru",
+        "transactional-cache"
+      ],
+      "source": "self",
+      "source_ref": "concept/03-cache-l1-l2.md（对照 ex07 / ex08）",
+      "time_limit_ms": 2000,
+      "memory_limit_mb": 256
+    }
+  ]
+}

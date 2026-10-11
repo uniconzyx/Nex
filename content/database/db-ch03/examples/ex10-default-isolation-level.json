@@ -1,0 +1,9 @@
+{
+  "title": "查看当前会话的默认事务隔离级别（REPEATABLE READ）",
+  "code_lang": "sql",
+  "code_std": "mysql8",
+  "stdin": "",
+  "expected_output": "@@transaction_isolation\nREPEATABLE-READ",
+  "code": "SELECT @@transaction_isolation;",
+  "_verified": false
+}

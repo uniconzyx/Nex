@@ -1,0 +1,8 @@
+{
+  "title": "equals 的 null 安全：instanceof 守卫",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "Safe equals null: false\nObjects.equals(Safe,null): false\nBuggy equals(null) -> NPE",
+  "code": "import java.util.Objects;\npublic class E212 {\n    static class Safe {\n        String name;\n        Safe(String n){ name = n; }\n        @Override public boolean equals(Object o){\n            if (!(o instanceof Safe s)) return false;  // null-safe\n            return Objects.equals(name, s.name);\n        }\n    }\n    static class Buggy {\n        String name;\n        Buggy(String n){ name = n; }\n        @Override public boolean equals(Object o){\n            Buggy b = (Buggy) o;          // 未判空：o==null 时 NPE\n            return name.equals(b.name);\n        }\n    }\n    public static void main(String[] args) {\n        Safe a = new Safe(\"java\");\n        System.out.println(\"Safe equals null: \" + a.equals(null));\n        System.out.println(\"Objects.equals(Safe,null): \" + Objects.equals(a, null));\n        Buggy b = new Buggy(\"java\");\n        try {\n            System.out.println(\"Buggy equals null: \" + b.equals(null));\n        } catch (NullPointerException e) {\n            System.out.println(\"Buggy equals(null) -> NPE\");\n        }\n    }\n}"
+}

@@ -1,0 +1,161 @@
+{
+  "subject": "fullstack",
+  "title": "全栈开发八股模块",
+  "note": "面试高频八股题库，按领域分类；答案标准化便于速记。合规：仅存要点与出处，不搬运第三方题面。全栈学习路线资源来自 GitHub 开源仓库。",
+  "categories": [
+    {
+      "id": "network",
+      "title": "网络与协议",
+      "items": [
+        {
+          "q": "从浏览器输入 URL 到页面展示，发生了什么？",
+          "a": "1) **URL 解析**：协议、域名、端口、路径。\n2) **DNS 解析**：浏览器缓存 → 系统缓存/hosts → 本地 DNS 服务器 → 根/顶级/权威域名服务器递归查询。\n3) **TCP 三次握手**建立连接（HTTPS 还需 TLS 握手）。\n4) 浏览器发送 **HTTP 请求**（请求行/头/体）。\n5) 服务器处理并返回响应（状态码、响应头、正文）。\n6) 浏览器**解析渲染**：HTML → DOM，CSS → CSSOM，合成 Render Tree → 布局（Layout/Reflow）→ 绘制（Paint）→ 合成（Composite）上屏。\n7) 遇到 JS 可能阻塞解析（`defer`/`async` 可优化）；加载子资源（图片、脚本）。\n8) 连接关闭（四次挥手）或保持 keep-alive 复用。",
+          "tags": ["浏览器", "网络"],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "MDN Web Docs / github.com/mdn/content"
+        },
+        {
+          "q": "GET 与 POST 的区别？",
+          "a": "- **语义**：GET 是**安全且幂等**的**获取**资源；POST 是**提交**数据、会改变服务器状态（非幂等）。\n- **传参**：GET 参数附在 URL（query string），有长度限制、会被缓存/留在历史与日志；POST 放在请求体，无长度硬限制、相对不暴露。\n- **编码**：GET 只支持 URL 编码；POST 支持多种（JSON、form-data、x-www-form-urlencoded）。\n- **注意**：二者**都不安全**（明文传输），敏感数据必须用 **HTTPS**；GET 也可带 body 但绝大多数服务端/中间件不支持。",
+          "tags": ["HTTP"],
+          "difficulty": "easy",
+          "hot": 5,
+          "source_ref": "MDN Web Docs"
+        },
+        {
+          "q": "HTTP 与 HTTPS 的区别？HTTPS 如何保证安全？",
+          "a": "- HTTPS = HTTP + **TLS/SSL**，默认端口 443（HTTP 为 80），对传输内容**加密 + 完整性校验 + 身份认证**。\n- 核心机制：通过**证书**（CA 签发）验证服务器身份，再用**非对称加密**协商出**对称会话密钥**，后续用对称加密传输（兼顾安全与性能）。\n- 流程概要（TLS 1.2/1.3）：ClientHello → ServerHello + 证书 → 验证证书 → 密钥交换（ECDHE）→ 生成会话密钥 → 加密通信。\n- HTTP 的风险：明文窃听、篡改、中间人伪装。",
+          "tags": ["HTTPS"],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "MDN Web Docs"
+        },
+        {
+          "q": "常见 HTTP 状态码？",
+          "a": "- **1xx** 信息（101 协议切换，用于 WebSocket）。\n- **2xx** 成功：200 OK、201 Created、204 No Content（常用于 DELETE）。\n- **3xx** 重定向：**301 永久**（会缓存，慎用）、**302 临时**、304 Not Modified（协商缓存命中）。\n- **4xx** 客户端错：400 参数错误、401 未认证、**403 无权限**、404 不存在、405 方法不允许、429 请求过多。\n- **5xx** 服务端错：500 内部错误、502 网关错误（上游返回非法）、503 不可用、**504 网关超时**。",
+          "tags": ["HTTP"],
+          "difficulty": "easy",
+          "hot": 5,
+          "source_ref": "MDN Web Docs"
+        },
+        {
+          "q": "TCP 三次握手与四次挥手？为什么不是两次/三次？",
+          "a": "- **三次握手**：客户端 SYN → 服务端 SYN+ACK → 客户端 ACK。目的是**双方确认彼此的发送与接收能力及初始序列号**；两次无法让服务端确认客户端的接收能力（易导致历史重复连接）。\n- **四次挥手**：主动方 FIN → 被动方 ACK（此时被动方可能仍有数据要发）→ 被动方 FIN → 主动方 ACK。因为 TCP 是**全双工**，两个方向需分别关闭，故比握手多一次；随后主动方进入 **TIME_WAIT**（约 2MSL）确保最后 ACK 到达并让旧报文消散。",
+          "tags": ["TCP"],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《计算机网络：自顶向下方法》"
+        },
+        {
+          "q": "什么是跨域（CORS）？如何解决？",
+          "a": "- 浏览器的**同源策略**（协议 + 域名 + 端口相同）阻止跨源读取响应，用于安全隔离。\n- **CORS**：服务端在响应头声明允许的来源，如 `Access-Control-Allow-Origin`、`-Methods`、`-Headers`、`-Credentials`。\n- **预检请求（preflight）**：非简单请求（如 `PUT`、自定义头、`application/json`）先发 `OPTIONS` 探测。\n- 解决方案：后端配置 CORS（推荐）；开发环境用**代理**（Vite/webpack devServer proxy、Nginx 反向代理）；JSONP 仅限 GET（已淘汰）。",
+          "tags": ["跨域", "CORS"],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "MDN Web Docs"
+        }
+      ]
+    },
+    {
+      "id": "frontend",
+      "title": "前端",
+      "items": [
+        {
+          "q": "Cookie、Session、Token（JWT）的区别？",
+          "a": "- **Cookie**：浏览器端小容量存储（~4KB），每次请求自动携带；可设 `HttpOnly`（防 XSS 读取）、`Secure`、`SameSite`（防 CSRF）。\n- **Session**：状态存**服务端**，浏览器只存 sessionId（通常放 Cookie）；服务端可即时失效，但**占用服务端内存、分布式需共享存储**（Redis）。\n- **Token/JWT**：**无状态**，服务端签发含用户信息与签名的令牌，客户端存储（localStorage/Cookie）并在请求头携带；便于**分布式/跨域**，但**难以主动失效**（需短有效期 + 刷新令牌/黑名单）。\n- 安全：优先 `HttpOnly + Secure + SameSite` Cookie 存令牌，避免 localStorage 存敏感令牌（XSS 风险）。",
+          "tags": ["认证"],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "github.com/auth0/node-jsonwebtoken"
+        },
+        {
+          "q": "事件循环：宏任务与微任务？",
+          "a": "- JS 单线程靠**事件循环**处理异步：同步代码 → **微任务**（`Promise.then/catch/finally`、`queueMicrotask`、`MutationObserver`）→ 渲染 → **宏任务**（`setTimeout`、`setInterval`、I/O、UI 事件、`script`）。\n- 规则：每执行完一个**宏任务**，会**清空整个微任务队列**，再取下一个宏任务。\n- `async/await` 本质是 Promise 语法糖，`await` 后的代码相当于放入微任务。\n- 典型输出题：先同步 → 再所有微任务 → 再宏任务。",
+          "tags": ["JS", "事件循环"],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "MDN Web Docs"
+        },
+        {
+          "q": "防抖（debounce）与节流（throttle）的区别？",
+          "a": "- **防抖**：事件停止触发后 **延迟 n 毫秒**才执行一次；期间再次触发则重新计时。适合**输入搜索联想、窗口 resize 结束、表单校验**。\n- **节流**：**固定时间间隔**内最多执行一次（无论触发多频繁）。适合**滚动加载、高频点击、鼠标移动**。\n- 实现要点：防抖用 `setTimeout + clearTimeout`；节流用时间戳或定时器；都要注意 `this` 绑定与传参、以及取消防抖（`cancel`）。",
+          "tags": ["JS", "性能"],
+          "difficulty": "easy",
+          "hot": 5,
+          "source_ref": "github.com/lodash/lodash"
+        },
+        {
+          "q": "虚拟 DOM 与 diff 算法的作用？",
+          "a": "- **虚拟 DOM**：用 JS 对象描述 UI 结构，作为真实 DOM 的轻量抽象。\n- 作用：将多次状态变更**批量计算**出最小差异，再一次性 patch 到真实 DOM，**减少重排重绘**；并提供跨平台渲染能力。\n- **diff 策略**（React/Vue 通用）：只做**同层比较**（不做跨层级移动，复杂度由 O(n³) 降到 O(n)）、用 `key` 标识节点以复用、类型不同则整体重建。\n- 注意：虚拟 DOM 不是“一定更快”，它换来的是**可维护性与可预测的更新**，极端场景直接操作 DOM 更快。",
+          "tags": ["框架", "虚拟DOM"],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "github.com/facebook/react"
+        },
+        {
+          "q": "强缓存与协商缓存的区别？",
+          "a": "- **强缓存**：不发请求，直接用本地副本。HTTP/1.1 用 `Cache-Control: max-age=xxx`（优先）；HTTP/1.0 用 `Expires`。命中返回 **200 (from disk/memory cache)**。\n- **协商缓存**：发请求问服务端是否过期，未过期返回 **304 Not Modified**（空响应体）。用 `Last-Modified/If-Modified-Since` 或 `ETag/If-None-Match`（ETag 更精确，优先）。\n- 实践：HTML 用 `no-cache`（协商），带 hash 的静态资源（JS/CSS/图片）用**长期强缓存** + 文件名 hash 更新。",
+          "tags": ["缓存", "性能"],
+          "difficulty": "mid",
+          "hot": 4,
+          "source_ref": "MDN Web Docs"
+        },
+        {
+          "q": "XSS 与 CSRF 的区别与防御？",
+          "a": "- **XSS（跨站脚本）**：注入恶意脚本在受害者浏览器执行，窃取 Cookie/会话。\n  防御：**输出转义/净化**（DOMPurify）、避免 `innerHTML`、CSP、Cookie 设 `HttpOnly`。\n- **CSRF（跨站请求伪造）**：诱导已登录用户发起非本意的请求（利用自动携带 Cookie）。\n  防御：**CSRF Token**、Cookie `SameSite=Lax/Strict`、校验 `Origin/Referer`、关键操作二次验证。\n- 区别：XSS 是**信任用户输入**导致脚本执行；CSRF 是**信任用户身份**冒用其权限。",
+          "tags": ["安全"],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "OWASP Cheat Sheet"
+        }
+      ]
+    },
+    {
+      "id": "backend",
+      "title": "后端与工程",
+      "items": [
+        {
+          "q": "RESTful API 设计的核心原则？",
+          "a": "- **资源导向**：URL 用名词复数表示资源（`/users/123/orders`），用 HTTP 方法表达动作（GET/POST/PUT/PATCH/DELETE）。\n- **无状态**：每个请求自带完整上下文，服务端不保存会话状态。\n- **统一接口与语义化状态码**：200/201/204/400/401/403/404/409/500。\n- **版本化**：`/api/v1/...`；**分页/过滤/排序**用查询参数（`?page=1&size=20&sort=-createdAt`）。\n- 返回统一 JSON 结构（code/message/data），错误体含可读信息；用 HTTPS；支持幂等（PUT/DELETE）。",
+          "tags": ["API"],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "github.com/microsoft/api-guidelines"
+        },
+        {
+          "q": "进程、线程、协程的区别？（全栈视角）",
+          "a": "- **进程**：资源分配单位，独立地址空间，切换开销最大；多进程可利用多核、隔离性好（Node.js `cluster`、PM2）。\n- **线程**：CPU 调度单位，共享进程内存，切换开销中等；需要锁/原子操作保证数据安全（Java/Python 线程）。\n- **协程**：**用户态**轻量级“线程”，由程序自身调度，切换开销极小、无内核态切换；适合**高并发 IO**（Go goroutine、Node async/await、Python asyncio）。\n- Node.js 特性：单线程事件循环 + 非阻塞 IO；CPU 密集用 `worker_threads`/子进程，避免阻塞事件循环。",
+          "tags": ["并发"],
+          "difficulty": "mid",
+          "hot": 4,
+          "source_ref": "github.com/nodejs/node"
+        },
+        {
+          "q": "数据库索引的作用与代价？后端如何避免慢查询？",
+          "a": "- 作用：把全表扫描变为**索引树查找**，大幅降低扫描行数，加速 WHERE/ORDER BY/JOIN。\n- 代价：**占用磁盘**；增删改需**维护索引**，写性能下降；过多索引让优化器选错。\n- 后端实践：为高频查询条件建**联合索引**并遵循最左前缀；避免 `SELECT *`（利于覆盖索引）；**深分页**用延迟关联或游标（`WHERE id > last_id`）；批量操作代替循环单条；加缓存；用 `EXPLAIN` 验证。\n（详见 database 学科八股「索引」分类）",
+          "tags": ["数据库", "性能"],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《高性能 MySQL》"
+        },
+        {
+          "q": "Docker 与虚拟机的区别？为什么要用容器？",
+          "a": "- **虚拟机**：Hypervisor 虚拟化**硬件**，每个 VM 跑完整 Guest OS，隔离强、体积大（GB 级）、启动慢（分钟级）。\n- **容器**：共享宿主**内核**，用 Namespace（隔离视图）+ Cgroups（限制资源）做进程级隔离，体积小（MB 级）、启动快（秒级）、密度高。\n- 价值：环境一致性（“我机器上能跑”）、快速交付、易水平扩展，配合 `Dockerfile` + 镜像仓库 + CI/CD 实现标准化部署。",
+          "tags": ["部署", "Docker"],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "github.com/docker/docs"
+        },
+        {
+          "q": "CI/CD 是什么？典型流水线包含哪些阶段？",
+          "a": "- **CI（持续集成）**：频繁合并代码并自动**构建 + 测试**，尽早发现冲突与缺陷。\n- **CD（持续交付/部署）**：通过流水线自动发布到测试/生产环境。\n- 典型阶段：代码检出 → 依赖安装（缓存）→ **静态检查**（ESLint/clang-tidy）→ **单元/集成测试**（覆盖率门禁）→ **构建产物**（Docker 镜像/前端 bundle）→ 推送制品库 → **部署**（滚动/蓝绿/金丝雀）→ 冒烟与健康检查 → 通知与回滚预案。\n- 工具：GitHub Actions、GitLab CI、Jenkins；关键实践：**流水线即代码**、环境与密钥分离、可回滚。",
+          "tags": ["CI/CD", "工程化"],
+          "difficulty": "mid",
+          "hot": 4,
+          "source_ref": "github.com/actions/starter-workflows"
+        }
+      ]
+    }
+  ]
+}

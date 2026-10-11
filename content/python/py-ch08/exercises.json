@@ -1,0 +1,154 @@
+{
+  "meta": {
+    "chapter": "py-ch08",
+    "note": "8 题，基础题 5 + 算法题 3（覆盖 ndarray/视图与副本/广播/axis/对齐/缺失值/分组聚合）"
+  },
+  "items": [
+    {
+      "id": "py8-ex01",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "py-ch08 concept 01 · dtype 推导规则",
+      "difficulty": "easy",
+      "title": "np.array([1, 2, 3.5]) 的 dtype 是什么",
+      "stem_md": "`np.array([1, 2, 3.5])` 得到的数组 dtype 是？",
+      "options": [
+        "int64",
+        "float64",
+        "object",
+        "报错"
+      ],
+      "answer": {
+        "index": 1,
+        "explain": "NumPy 会按能容纳所有元素的类型向上取齐。int64 装不下 3.5，于是整体提升为 float64，原整数也被转成浮点。"
+      },
+      "explanation_md": "类型提升（type promotion）按「宽度与语义向上取齐」规则：`int + float -> float`、`bool + int -> int`。\n\n若混入字符串，则退化为 `<U..` 或 object，**数值计算能力丧失**：`np.array([1, '2']).dtype` 得到 `<U21`，里面存的是文本而不是数字。"
+    },
+    {
+      "id": "py8-ex02",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "py-ch08 concept 02 · 视图与副本判定",
+      "difficulty": "medium",
+      "title": "哪些索引方式返回的是副本而不是视图",
+      "stem_md": "下列哪种操作返回的结果与**原数组不共享内存**（即副本）？",
+      "options": [
+        "`a[2:6]`（基本切片）",
+        "`a.reshape(3, 4)`",
+        "`a.T`（转置）",
+        "`a[[2, 3, 4]]`（花式索引）"
+      ],
+      "answer": {
+        "index": 3,
+        "explain": "基本切片、reshape、转置都只改视图的 shape/strides，仍指向同一块内存；花式索引（整数数组、布尔掩码）必须按新的下标顺序取值，无法用 strides 表达，只能返回副本。"
+      },
+      "explanation_md": "判定标准是**能否用「起始指针 + strides」表达结果**：\n\n- 能 -> 视图：基本切片、`reshape`、`ravel`、`transpose`、`broadcast_to`\n- 不能 -> 副本：花式索引、布尔索引、`astype`（换 dtype）、`copy()`、算术运算结果\n\n用 `np.shares_memory(a, b)` 可一行验证。**这是排查「改了 b 为什么 a 也变了」类 bug 的第一诊断工具。**"
+    },
+    {
+      "id": "py8-ex03",
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "py-ch08 concept 03 · axis 语义",
+      "difficulty": "easy",
+      "title": "写出 a.sum(axis=0) 的结果",
+      "stem_md": "```python\nimport numpy as np\na = np.arange(6).reshape(2, 3)\nprint(a.sum(axis=0))\nprint(a.sum(axis=1))\n```\n两行输出分别是什么？",
+      "answer": {
+        "stdout": "[3 5 7]\n[ 3 12]"
+      },
+      "explanation_md": "`a` 为 `[[0,1,2],[3,4,5]]`。\n\n- `axis=0` 表示**沿第 0 维（轴）推进**，把该轴的多个元素压成 1 个 -> 结果 shape 为 `(3,)`，即每一列的和 `[0+3, 1+4, 2+5] = [3,5,7]`。\n- `axis=1` 压掉第 1 维 -> 结果 shape 为 `(2,)`，即每一行的和 `[0+1+2, 3+4+5] = [3,12]`。\n\n记忆口诀：**「axis=n 就是消掉第 n 维」**，结果 shape 等于原 shape 去掉第 n 项。"
+    },
+    {
+      "id": "py8-ex04",
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "py-ch08 concept 03 · 广播规则",
+      "difficulty": "medium",
+      "title": "修正形状不匹配的广播运算",
+      "stem_md": "下面代码报 `operands could not be broadcast together`，请指出原因并给出一种修法。\n\n```python\nx = np.ones((3, 4))\ny = np.ones((3,))\nprint(x + y)\n```",
+      "answer": {
+        "explain": "广播从**最后一维往前**逐对比较：`(3,4)` 与 `(3,)` 相比，是把 `(3,)` 对齐到最后一维 4，于是 3 与 4 不相等且都不是 1 -> 失败。",
+        "reference_code": "import numpy as np\nx = np.ones((3, 4))\ny = np.ones((3,))\n# 方案一：把 y 补成列向量 (3,1)，让 3 对齐第 0 维，1 广播到第 1 维\ny_col = y.reshape(3, 1)\nprint((x + y_col).shape)\nprint((x + y_col)[0])\n# 方案二：显式加一维\ny_new = y[:, None]\nprint(np.array_equal(x + y_col, x + y_new))\n# 反例：y 长度为 4 时可以直接广播到列上\nz = np.arange(4)\nprint((x + z)[0])"
+      },
+      "explanation_md": "广播三步走：\n\n1. 把两个形状**右对齐**；\n2. 每一对维度要么相等，要么其中一个是 1（可拉伸），要么其中一个缺失（当作 1）；\n3. 全部满足才可广播，否则抛 `ValueError`。\n\n`(3,4)` 与 `(3,)` 右对齐后是 `(3,4)` vs `(_,3)` —— 4 与 3 冲突。**把它变成 `(3,1)` 才能表达「每行加同一个数」**；若不 reshape 而 `y` 恰好长度为 4，则语义会静默变成「每列加同一个数」，是极易混的两种意图。"
+    },
+    {
+      "id": "py8-ex05",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "py-ch08 concept 04 · loc 与 iloc",
+      "difficulty": "medium",
+      "title": "loc 与 iloc 的切片端点差异",
+      "stem_md": "对于索引为 `['a','b','c','d','e']` 的 Series，`s.loc['b':'d']` 与 `s.iloc[1:4]` 的元素个数分别是？",
+      "options": [
+        "3 个 和 3 个",
+        "3 个 和 4 个",
+        "4 个 和 3 个",
+        "4 个 和 4 个"
+      ],
+      "answer": {
+        "index": 0,
+        "explain": "`loc` 是标签切片，**含右端点** -> 'b','c','d' 共 3 个；`iloc` 是位置切片，遵循 Python 习惯**不含右端点** -> 位置 1,2,3 共 3 个。两者在这组数据上恰好数量相同，但端点语义完全不同。"
+      },
+      "explanation_md": "**这是 pandas 最经典的混淆点之一。** 记住：\n\n| 索引器 | 依据 | 切片端点 |\n|---|---|---|\n| `loc` | 标签 | 闭区间（含右） |\n| `iloc` | 位置 | 左闭右开 |\n\n数量「恰好相同」是数据巧合：当标签恰好等距且与位置错开 1 时才会出现。**判断依据只能是标签还是位置，不能靠数量推断。** 另外 `loc` 用于布尔/可调用对象时也不支持位置语义。"
+    },
+    {
+      "id": "py8-ex06",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "py-ch08 concept 01 · 向量化实现",
+      "difficulty": "medium",
+      "title": "用 NumPy 向量化实现 KNN 预测",
+      "stem_md": "给定训练集 `X_train (n,d)`、标签 `y_train (n,)` 与测试集 `X_test (m,d)`，用**向量化**方式（禁止 Python 循环）实现 k 近邻分类：先算 `(m,n)` 的距离矩阵，再取每行最小的 k 个下标做多数投票。",
+      "answer": {
+        "explain": "用 `||a-b||^2 = |a|^2 + |b|^2 - 2a·b` 展开成一次矩阵乘，避免三重循环；取 top-k 用 `argpartition` 而不是全排序。",
+        "reference_code": "import numpy as np\n\n\ndef knn_predict(X_train, y_train, X_test, k=3):\n    # (m,n) 的平方距离矩阵，全靠广播与矩阵乘\n    d2 = (X_test ** 2).sum(axis=1)[:, None] + (X_train ** 2).sum(axis=1)[None, :] \\\n         - 2.0 * X_test @ X_train.T\n    d2 = np.maximum(d2, 0.0)          # 数值误差可能给出极小负数\n    idx = np.argpartition(d2, k - 1, axis=1)[:, :k]\n    labels = y_train[idx]\n    # 逐行多数投票\n    out = np.empty(X_test.shape[0], dtype=y_train.dtype)\n    for i, row in enumerate(labels):\n        vals, counts = np.unique(row, return_counts=True)\n        out[i] = vals[np.argmax(counts)]\n    return out\n\n\nrng = np.random.default_rng(0)\nX_train = rng.normal(size=(20, 2))\ny_train = (X_train[:, 0] + X_train[:, 1] > 0).astype(int)\nX_test = np.array([[-2.0, -2.0], [2.0, 2.0], [0.1, -0.1]])\nprint('预测 =', knn_predict(X_train, y_train, X_test, k=3).tolist())\nprint('形状 =', knn_predict(X_train, y_train, X_test).shape)"
+      },
+      "explanation_md": "要点复盘：\n\n1. **距离矩阵展开**：`(m,1)` 与 `(1,n)` 广播成 `(m,n)`，这一步把 O(m·n·d) 的循环压成一次 BLAS 矩阵乘。\n2. **数值截断**：展开式有浮点误差，平方距离可能算出 `-1e-13`，`np.maximum(d2, 0)` 兜底，否则后续 `sqrt` 会得到 nan。\n3. **top-k 用 `argpartition`**：只需部分有序，平均 O(n) 而非 `argsort` 的 O(n log n)。\n4. **投票那层循环可以保留**：它只在 `m` 行上循环，属于「把无法向量化的聚合留给 Python」，实践中完全可接受；要彻底去掉可用 `np.apply_along_axis` 或 one-hot 加权求和。"
+    },
+    {
+      "id": "py8-ex07",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "py-ch08 concept 03 · 广播与 ufunc",
+      "difficulty": "medium",
+      "title": "向量化实现 Z-score 标准化与相关系数",
+      "stem_md": "给定 `X (n,d)`，实现 `standardize` 返回按列标准化的结果（均值 0、标准差 1），并实现 `pearson(a, b)` 计算两列的皮尔逊相关系数。要求全部用向量化运算。",
+      "answer": {
+        "explain": "按列标准化用 `axis=0` 的 mean/std 与广播；相关系数就是标准化之后的点积除以 n。",
+        "reference_code": "import numpy as np\n\n\ndef standardize(X):\n    mu = X.mean(axis=0)          # (d,)\n    sd = X.std(axis=0)           # (d,) 总体标准差（ddof=0）\n    return (X - mu) / sd\n\n\ndef pearson(a, b):\n    a = a - a.mean()\n    b = b - b.mean()\n    return float((a * b).sum() / np.sqrt((a * a).sum() * (b * b).sum()))\n\n\nrng = np.random.default_rng(1)\nX = rng.normal(size=(8, 3)) * np.array([1.0, 10.0, 100.0]) + np.array([0.0, 5.0, -5.0])\nZ = standardize(X)\nprint('原各列均值 =', np.round(X.mean(axis=0), 6).tolist())\nprint('标准化后均值 =', np.round(Z.mean(axis=0), 6).tolist())\nprint('标准化后标准差 =', np.round(Z.std(axis=0), 6).tolist())\n# 相关系数矩阵应等于 Z^T Z / n\ncorr = Z.T @ Z / Z.shape[0]\nprint('自相关矩阵对角线 =', np.round(np.diag(corr), 6).tolist())\nprint('pearson(第0列, 第1列) =', round(pearson(X[:, 0], X[:, 1]), 6))\nprint('与 corr[0,1] 一致 =', abs(pearson(X[:, 0], X[:, 1]) - corr[0, 1]) < 1e-12)"
+      },
+      "explanation_md": "关键点：\n\n- **`axis=0` 而不是 `axis=1`**：要对每一列（每个特征）做标准化，所以统计量必须沿行方向聚合。写成 `axis=1` 会把样本内标准化，语义完全错。\n- **`std` 默认 `ddof=0`（总体）**：numpy 用总体标准差、pandas 的 `Series.std()` 用样本标准差（`ddof=1`），**两者数值不同**，是跨库复现实验时的常见偏差来源。\n- **相关系数 = 标准化后点积 / n**：因为标准化消掉了均值与尺度，`Z^T Z / n` 就是相关系数矩阵。这也解释了为什么「相关系数对线性变换不变」。\n- 除以 `sqrt(Σa²·Σb²)` 的写法比除以 `n·σa·σb` 更稳，避免两次开方带来的相对误差放大。"
+    },
+    {
+      "id": "py8-ex08",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "source": "leetcode",
+      "source_ref": "LeetCode 相关题：矩阵/数组上的向量化统计",
+      "external_url": "https://leetcode.cn/problemset/",
+      "difficulty": "medium",
+      "title": "用 pandas 完成分组 TOP-N 与透视",
+      "stem_md": "给定订单表（`city`, `product`, `amount`），用 pandas 完成：① 每个城市金额最高的 2 个商品（TOP-N per group）；② 城市 × 商品的金额透视表；③ 计算每个城市的金额占比。要求用 `groupby`/`pivot_table` 完成，不做逐行循环。",
+      "answer": {
+        "explain": "分组内排序取前 N 用 `sort_values` + `groupby.head(N)`；透视用 `pivot_table`；占比用 `transform('sum')` 广播回原粒度。",
+        "reference_code": "import pandas as pd\n\ndf = pd.DataFrame({\n    'city': ['BJ', 'BJ', 'BJ', 'SH', 'SH', 'SH', 'GZ', 'GZ'],\n    'product': ['A', 'B', 'C', 'A', 'B', 'C', 'A', 'B'],\n    'amount': [100, 300, 200, 50, 40, 500, 80, 20],\n})\n# ① TOP-N per group\ntopn = (df.sort_values('amount', ascending=False)\n          .groupby('city', as_index=False).head(2)\n          .reset_index(drop=True))\nprint('各组金额 TOP2 :')\nprint(topn.to_string(index=False))\n# ② 透视表\npt = pd.pivot_table(df, index='city', columns='product', values='amount',\n                    aggfunc='sum', fill_value=0)\nprint('透视表 :')\nprint(pt.to_string())\n# ③ 组内占比（transform 把组和广播回每一行）\ndf = df.copy()\ndf['share'] = df['amount'] / df.groupby('city')['amount'].transform('sum')\nprint('占比 :')\nprint(df.round(4).to_string(index=False))\nprint('每组占比之和 =', df.groupby('city')['share'].sum().round(6).to_dict())"
+      },
+      "explanation_md": "要点：\n\n1. **TOP-N per group 的正确顺序是先排序再 `head`**，不是 `groupby.apply(lambda g: g.nlargest(...))` —— 前者是向量化的，后者每组建一次 Python 调用，规模大时慢一个量级。\n2. **`transform('sum')` 与 `agg('sum')` 的区别**：`agg` 把每组压成一行，`transform` 把组内聚合值**广播回每一行**并保持原索引 —— 这正是「算组内占比」需要的形状，也是面试高频问法。\n3. **`pivot_table` 的 `fill_value=0`** 决定缺失组合是 0 还是 NaN。选 0 让下游求和方便，选 NaN 才能区分「真的为 0」与「没有记录」。\n4. **`groupby` 默认 `dropna=True`**：分组键为 NaN 的行会被整体丢弃，若业务需要保留要用 `dropna=False`。"
+    }
+  ]
+}

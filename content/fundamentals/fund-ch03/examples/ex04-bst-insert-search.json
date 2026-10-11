@@ -1,0 +1,8 @@
+{
+  "title": "BST 的插入与查找",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "查找 40: 找到（比较 3 次）\n查找 45: 未找到（比较 3 次）",
+  "code": "#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct T { int v; struct T *l, *r; } T;\nstatic T *ins(T *n, int v) {\n    if (!n) { T *x = malloc(sizeof(T)); x->v = v; x->l = x->r = NULL; return x; }\n    if (v < n->v)      n->l = ins(n->l, v);\n    else if (v > n->v) n->r = ins(n->r, v);\n    /* v == n->v 时忽略（约定：不存重复键） */\n    return n;\n}\nstatic int find(T *n, int v, int *steps) {\n    *steps = 0;\n    while (n) {\n        (*steps)++;\n        if (v == n->v) return 1;\n        n = (v < n->v) ? n->l : n->r;\n    }\n    return 0;\n}\nint main(void) {\n    int vals[] = {50, 30, 70, 20, 40, 60, 80};\n    T *root = NULL;\n    for (int i = 0; i < 7; i++) root = ins(root, vals[i]);\n    int steps, f1, f2;\n    /* 注意：不能把 find(...) 与 steps 写在同一个 printf 的参数里 ——\n       C 未规定参数求值顺序，steps 可能在 find 之前被读取，得到上一次/未初始化的值。 */\n    f1 = find(root, 40, &steps);\n    printf(\"查找 40: %s（比较 %d 次）\\n\", f1 ? \"找到\" : \"未找到\", steps);\n    f2 = find(root, 45, &steps);\n    printf(\"查找 45: %s（比较 %d 次）\\n\", f2 ? \"找到\" : \"未找到\", steps);\n    return 0;\n}"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "元组 tuple",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "2\n3",
+  "code": "t = (1, 2, 3)\nprint(t[1])\nprint(len(t))"
+}

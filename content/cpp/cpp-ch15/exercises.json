@@ -1,0 +1,101 @@
+{
+  "meta": {
+    "chapter": "cpp-ch15",
+    "note": "6 题，题型混合（choice / fix_error / output / coding / explain / design）；含 1 道 GitHub 模块化实践题（仅存元数据+链接，不存题面）"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "关于命名空间与 ADL，正确的是",
+      "content_md": "选择**正确**的描述。",
+      "options": [
+        { "key": "A", "text": "命名空间改变符号的外部链接属性" },
+        { "key": "B", "text": "函数调用实参为用户自定义类型时，编译器会把该类型所在命名空间也纳入候选（ADL）" },
+        { "key": "C", "text": "匿名命名空间的符号具有外部链接，可跨翻译单元共享" },
+        { "key": "D", "text": "头文件中写 using namespace std; 是推荐做法" }
+      ],
+      "answer": { "correct": ["B"] },
+      "explanation": "ADL 会依据实参类型把对应命名空间拉入候选集；命名空间本身不改变链接（匿名除外）；匿名命名空间是内部链接；头文件禁用 using namespace。",
+      "tags": ["namespace", "adl"],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 18 章 命名空间"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "修复头文件中的 using namespace 污染",
+      "content_md": "某头文件 `util.h` 直接写了 `using namespace std;`，导致包含它的所有翻译单元都把 std 名字暴露出来，与项目里的 `count`/`equal` 等名字冲突。请写出「头文件里正确的写法」替换它。",
+      "answer": {
+        "reference_code": "// 头文件中：禁用 using namespace，改用限定名或点名引入\n#include <vector>\nstd::vector<int> make_vec();      // 用限定名 std::vector\n// 或仅引入需要的名字：\n// using std::size_t;"
+      },
+      "explanation": "头文件应避免整桶引入；用 std:: 限定或局部 using 声明（点名）即可，且不污染包含方作用域。",
+      "tags": ["namespace", "header-hygiene"],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 18 章 命名空间"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "读代码写输出（ADL 选中）",
+      "content_md": "```cpp\n#include <iostream>\nnamespace lib { struct W {}; void f(const W&) { std::cout << \"lib::f\\n\"; } }\nvoid f(int) { std::cout << \"int::f\\n\"; }\nint main() { lib::W w; f(w); }\n```",
+      "answer": { "output": "lib::f" },
+      "explanation": "实参 w 的类型在 lib，ADL 把 lib::f 拉入候选并因更匹配（W 参数）而胜出。",
+      "tags": ["adl", "lookup"],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 18 章 命名空间"
+    },
+    {
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "用 inline namespace 实现库版本切换",
+      "content_md": "实现一个 `mylib`，用 inline namespace 默认导出 v2 的 `greet()`（返回 『v2』），并保留 v1 的 `greet()`（返回 『v1』）可通过 `mylib::v1::greet()` 显式调用。主函数输出 `mylib::greet()` 与 `mylib::v1::greet()`。",
+      "answer": {
+        "reference_code": "#include <iostream>\nnamespace mylib {\n  inline namespace v2 { const char* greet() { return \"v2\"; } }\n  namespace v1 { const char* greet() { return \"v1\"; } }\n}\nint main() { std::cout << mylib::greet() << ' ' << mylib::v1::greet(); }"
+      },
+      "explanation": "inline 让 v2 透明穿透到 mylib，故 mylib::greet 命中 v2；v1 需显式限定。注意返回字符串用转义双引号 \"v2\"。",
+      "tags": ["inline-namespace", "versioning"],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 18 章 命名空间"
+    },
+    {
+      "type": "explain",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "匿名命名空间与 static 的区别与联系",
+      "content_md": "解释：匿名命名空间 `namespace { ... }` 与给变量/函数加 `static` 在链接属性上有何相同与不同？为何现代 C++ 更推荐匿名命名空间？",
+      "answer": {
+        "reference_code": "两者都赋予内部链接（仅本翻译单元可见）。区别在于：匿名命名空间可作用于类型与一组名字，且语义统一；static 在 C++ 中用于类成员时是「静态成员」语义，易混淆。现代 C++ 推荐匿名命名空间来替代文件级 static，表达「本 TU 私有」更清晰。"
+      },
+      "explanation": "核心是内部链接语义一致；匿名命名空间适用范围更广、意图更明确，且避免 static 多义。",
+      "tags": ["anonymous-namespace", "linkage"],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 18 章 命名空间"
+    },
+    {
+      "type": "design",
+      "category": "算法题",
+      "platform": "github",
+      "difficulty": "hard",
+      "title": "用命名空间与模块化组织一个多模块库",
+      "content_md": "设计一个分为「核心 core / 算法 algo / IO io」三层的库接口，要求：用命名空间分层、用 inline namespace 做版本化、说明头文件与 C++20 模块如何取舍（详见 external_url 仓库的模块化实践，不在此复述）。",
+      "answer": {
+        "reference_code": "// 分层：namespace mylib { inline namespace v1 { namespace core {...} namespace algo {...} namespace io {...} } }\n// 迁移到模块：export module mylib; export namespace mylib { ... }"
+      },
+      "explanation": "核心是「按职责分层命名空间 + inline 版本默认导出 + 模块迁移时整库切换避免 ODR」，与 LLVM 的模块化思路一致。",
+      "tags": ["modules", "namespace-design"],
+      "source": "github",
+      "source_ref": "llvm/llvm-project（模块化实践）",
+      "external_url": "https://github.com/llvm/llvm-project"
+    }
+  ]
+}

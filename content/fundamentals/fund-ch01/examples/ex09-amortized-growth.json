@@ -1,0 +1,8 @@
+{
+  "title": "动态数组扩容轨迹：验证 push_back 均摊 O(1)",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "元素数 新容量 本次搬移\n1        2        1       \n2        4        2       \n4        8        4       \n8        16       8       \n16       32       16      \n32       64       32      \n64       128      64      \n128      256      128     \n256      512      256     \n512      1024     512     \n\n插入 1024 个元素：扩容 10 次，累计搬移 1023 次\n平均每次插入搬移 = 0.999 次（< 2，符合均摊 O(1)）\n反例：若每次只 +1 扩容，累计搬移会是 523776 次（O(n^2)）",
+  "code": "#include <stdio.h>\n#include <stdlib.h>\n\nint main(void) {\n    int cap = 1, size = 0, doubles = 0;\n    long moved = 0;\n    const int N = 1024;\n\n    printf(\"%-8s %-8s %-8s\\n\", \"元素数\", \"新容量\", \"本次搬移\");\n    while (size < N) {\n        if (size == cap) {                      /* 需要扩容 */\n            int ncap = cap * 2;                 /* 倍数增长 */\n            moved += size;                      /* 搬移现有元素 */\n            printf(\"%-8d %-8d %-8d\\n\", size, ncap, size);\n            cap = ncap; doubles++;\n        }\n        size++;\n    }\n    printf(\"\\n插入 %d 个元素：扩容 %d 次，累计搬移 %ld 次\\n\", N, doubles, moved);\n    printf(\"平均每次插入搬移 = %.3f 次（< 2，符合均摊 O(1)）\\n\", (double)moved / N);\n    printf(\"反例：若每次只 +1 扩容，累计搬移会是 %d 次（O(n^2)）\\n\", N * (N - 1) / 2);\n    return 0;\n}"
+}

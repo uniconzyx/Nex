@@ -1,0 +1,8 @@
+{
+  "title": "规则版工具路由决策树：冲突澄清 + 危险工具人工确认",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "帮我搜一下今天的最新新闻 => search_web | 直接执行\r\n查询 订单 表里用户 id=7 的记录 => query_db | 直接执行\r\n给老板发送邮件通知结果 => send_email | 需人工确认\r\n计算 12 的 15% 是多少 => calculator | 直接执行\r\n计算并发送邮件通知结果 => NONE | 意图冲突(send_email/calculator)，先向用户澄清\r\n讲个笑话 => NONE | 无匹配工具，转人工或回答能力边界\r\n未直接执行（澄清/升级）的请求数 = 2\r\n",
+  "code": "\"\"\"ex03 规则版工具路由决策树：冲突则澄清，危险工具需人工确认。\"\"\"\n\nROUTES = [\n    (\"search_web\", (\"最新\", \"新闻\", \"今天\", \"实时\", \"搜索\")),\n    (\"query_db\", (\"订单\", \"表\", \"查询数据库\", \"用户 id\")),\n    (\"send_email\", (\"发送邮件\", \"通知\", \"抄送\")),\n    (\"calculator\", (\"计算\", \"求和\", \"百分比\", \"+\", \"*\")),\n]\n\nDANGEROUS = {\"send_email\"}   # 破坏性/外发类：需人工确认\n\n\ndef route(text):\n    hits = [name for name, kws in ROUTES if any(k in text for k in kws)]\n    if len(hits) == 1:\n        need_confirm = hits[0] in DANGEROUS\n        return hits[0], (\"需人工确认\" if need_confirm else \"直接执行\")\n    if len(hits) > 1:\n        return None, \"意图冲突(%s)，先向用户澄清\" % \"/\".join(hits)\n    return None, \"无匹配工具，转人工或回答能力边界\"\n\n\nCASES = [\n    \"帮我搜一下今天的最新新闻\",\n    \"查询 订单 表里用户 id=7 的记录\",\n    \"给老板发送邮件通知结果\",\n    \"计算 12 的 15% 是多少\",\n    \"计算并发送邮件通知结果\",\n    \"讲个笑话\",\n]\n\nif __name__ == \"__main__\":\n    clarify_n = 0\n    for c in CASES:\n        tool, how = route(c)\n        if tool is None:\n            clarify_n += 1\n        print(\"%s => %s | %s\" % (c, tool or \"NONE\", how))\n    print(\"未直接执行（澄清/升级）的请求数 = %d\" % clarify_n)\n"
+}

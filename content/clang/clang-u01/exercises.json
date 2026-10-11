@@ -1,0 +1,159 @@
+{
+  "meta": {
+    "chapter": "clang-u01",
+    "note": "指针与地址运算；基础题考察语义与 Debug，算法题来自刷题平台（仅存元数据与链接，不搬运题面）。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "数组退化的例外",
+      "content_md": "对于 `int a[10];`，下列哪些表达式中 `a` **不会**退化为指针？（多选）\n\nA. `sizeof(a)`\nB. `&a`\nC. `a + 1`\nD. `a[3]`",
+      "options": [
+        {
+          "key": "A",
+          "text": "sizeof(a)"
+        },
+        {
+          "key": "B",
+          "text": "&a"
+        },
+        {
+          "key": "C",
+          "text": "a + 1"
+        },
+        {
+          "key": "D",
+          "text": "a[3]"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "A",
+          "B"
+        ]
+      },
+      "explanation": "数组名退化的例外只有 `sizeof` 与取地址 `&` 两个上下文。`sizeof(a)` 得整个数组字节数；`&a` 得数组指针 `int(*)[10]`。`a + 1` 与 `a[3]`（等价 `*(a+3)`）都发生退化为 `int*`。",
+      "tags": [
+        "数组退化",
+        "sizeof"
+      ],
+      "source": "book",
+      "source_ref": "《C 程序设计语言》第5章"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "三个地址与两次步长",
+      "content_md": "写出下面程序的输出（假设 `int` 为 4 字节、指针为 8 字节）：\n\n```c\nint a[5];\nprintf(\"%zu %zu\\n\", sizeof(a), sizeof(&a[0]));\nprintf(\"%td %td\\n\", (a + 1) - a, (char *)(&a + 1) - (char *)&a);\n```",
+      "answer": {
+        "output": "20 8\n1 20"
+      },
+      "explanation": "`sizeof(a)` 是整数组 5×4=20；`&a[0]` 是指针，8 字节。`(a+1)-a` 按元素计为 1；`&a` 是数组指针，`+1` 前进整个数组 20 字节，转 `char*` 相减得 20。",
+      "tags": [
+        "指针算术",
+        "数组指针"
+      ],
+      "source": "self",
+      "source_ref": "clang-u01 自测"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "const 的位置",
+      "content_md": "`int * const p = &x;` 之后，下列哪项是**非法**的？\n\nA. `*p = 10;`\nB. `p = &y;`\nC. `printf(\"%d\", *p);`",
+      "options": [
+        {
+          "key": "A",
+          "text": "*p = 10;"
+        },
+        {
+          "key": "B",
+          "text": "p = &y;"
+        },
+        {
+          "key": "C",
+          "text": "printf 读取 *p"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "`const` 在 `*` 右侧，锁住的是**指针本身**：`p` 不能重新指向，但 `*p` 可改。所以改 `*p` 与读取都合法，`p = &y;` 编译错误。",
+      "tags": [
+        "const",
+        "指针"
+      ],
+      "source": "book",
+      "source_ref": "《C 程序设计语言》第2章"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "让函数真正分配内存",
+      "content_md": "下面的函数无法把分配到的内存交给调用方，且存在泄漏。指出问题并改正：\n\n```c\nvoid alloc(int *p, size_t n) {\n    p = malloc(n * sizeof(int));\n}\nint main(void) {\n    int *buf = NULL;\n    alloc(buf, 10);\n    /* buf 仍是 NULL */\n}\n```",
+      "answer": {
+        "reference_code": "void alloc(int **out, size_t n) {\n    *out = malloc(n * sizeof(int));\n}\nint main(void) {\n    int *buf = NULL;\n    alloc(&buf, 10);\n    if (!buf) { return 1; }\n    free(buf);\n    buf = NULL;\n    return 0;\n}"
+      },
+      "explanation": "参数 `int *p` 是**值传递**，函数内 `p` 只是实参的副本，给它赋值不影响调用方的 `buf`；且副本丢失导致内存泄漏。要修改调用方的指针，必须传**指针的地址**（二级指针 `int **out`），在函数内 `*out = malloc(...)`。",
+      "tags": [
+        "二级指针",
+        "参数传递"
+      ],
+      "source": "self",
+      "source_ref": "clang-u01 自测"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "easy",
+      "title": "反转字符串（双指针原地交换）",
+      "content_md": "给定一个字符数组，原地反转它。要求空间复杂度 O(1)，使用双指针从两端向中间交换。",
+      "answer": {
+        "reference_code": "void reverseString(char *s, int sSize) {\n    int i = 0, j = sSize - 1;\n    while (i < j) {\n        char t = s[i];\n        s[i++] = s[j];\n        s[j--] = t;\n    }\n}"
+      },
+      "explanation": "经典双指针：`i` 从头、`j` 从尾，交换后相向移动直到相遇。考察指针/下标的边界控制与原地交换。",
+      "tags": [
+        "双指针",
+        "原地"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 344（reverse-string）",
+      "external_url": "https://leetcode.cn/problems/reverse-string/",
+      "time_limit_ms": 2000,
+      "memory_limit_mb": 256
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "easy",
+      "title": "移动零（快慢指针）",
+      "content_md": "把数组中所有 0 移到末尾，同时保持非零元素的相对顺序，要求原地操作。",
+      "answer": {
+        "reference_code": "void moveZeroes(int *nums, int numsSize) {\n    int slow = 0;\n    for (int fast = 0; fast < numsSize; fast++) {\n        if (nums[fast] != 0) {\n            int t = nums[slow];\n            nums[slow++] = nums[fast];\n            nums[fast] = t;\n        }\n    }\n}"
+      },
+      "explanation": "快慢指针：`fast` 遍历，遇到非零就与 `slow` 位置交换，`slow` 只在写入后前进。交换写法天然把 0 推到后面，无需额外清零。",
+      "tags": [
+        "双指针",
+        "原地"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 283（move-zeroes）",
+      "external_url": "https://leetcode.cn/problems/move-zeroes/",
+      "time_limit_ms": 2000,
+      "memory_limit_mb": 256
+    }
+  ]
+}

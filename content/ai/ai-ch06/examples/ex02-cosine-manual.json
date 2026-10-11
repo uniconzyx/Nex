@@ -1,0 +1,8 @@
+{
+  "title": "余弦相似度手算：点积、模长与余弦值",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "q = [1.0, 2.0, 3.0, 4.0]\nd = [2.0, 0.0, 1.0, 3.0]\n点积 q·d = 17.0000\n|q| = 5.4772  |d| = 3.7417\ncos(q,d) = 17.0000 / (5.4772 * 3.7417) = 0.8295\n",
+  "code": "import numpy as np\nq = np.array([1.0, 2.0, 3.0, 4.0])\nd = np.array([2.0, 0.0, 1.0, 3.0])\ndot = float(np.dot(q, d))\nnq = float(np.linalg.norm(q))\nnd = float(np.linalg.norm(d))\ncos = dot / (nq * nd)\nprint('q =', q.tolist())\nprint('d =', d.tolist())\nprint('点积 q·d = %.4f' % dot)\nprint('|q| = %.4f  |d| = %.4f' % (nq, nd))\nprint('cos(q,d) = %.4f / (%.4f * %.4f) = %.4f' % (dot, nq, nd, cos))\n"
+}

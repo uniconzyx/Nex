@@ -1,0 +1,8 @@
+{
+  "title": "建堆与堆排序（含 O(N) 建堆）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "原始数组: 4 10 3 5 1 8 2\n建成大顶堆: 10 5 8 4 1 3 2  (堆顶 a[0]=10)\n堆排序后(升序): 1 2 3 4 5 8 10",
+  "code": "#include <stdio.h>\n\nstatic void swap(int *a, int *b) { int t = *a; *a = *b; *b = t; }\n\nstatic void sift_down(int *a, int n, int i) {\n    while (1) {\n        int L = 2 * i + 1, R = 2 * i + 2, big = i;\n        if (L < n && a[L] > a[big]) big = L;\n        if (R < n && a[R] > a[big]) big = R;\n        if (big == i) break;              /* 已满足堆序 */\n        swap(&a[i], &a[big]);\n        i = big;\n    }\n}\n\nint main(void) {\n    int a[] = {4, 10, 3, 5, 1, 8, 2};\n    int n = 7;\n    printf(\"原始数组:\");\n    for (int i = 0; i < n; i++) printf(\" %d\", a[i]);\n    printf(\"\\n\");\n\n    /* 自底向上建堆：从最后一个非叶节点 (n/2-1) 往前 sift_down，总代价 O(N) */\n    for (int i = n / 2 - 1; i >= 0; i--) sift_down(a, n, i);\n    printf(\"建成大顶堆:\");\n    for (int i = 0; i < n; i++) printf(\" %d\", a[i]);\n    printf(\"  (堆顶 a[0]=%d)\\n\", a[0]);\n\n    /* 堆排序：反复把堆顶换到末尾，再对缩小后的堆 sift_down */\n    for (int end = n - 1; end > 0; end--) {\n        swap(&a[0], &a[end]);\n        sift_down(a, end, 0);\n    }\n    printf(\"堆排序后(升序):\");\n    for (int i = 0; i < n; i++) printf(\" %d\", a[i]);\n    printf(\"\\n\");\n    return 0;\n}"
+}

@@ -1,0 +1,92 @@
+{
+  "meta": {
+    "chapter": "mw-ch05",
+    "note": "Kafka 架构与副本机制高频面试问答。"
+  },
+  "items": [
+    {
+      "question": "为什么说 Kafka 是「提交日志」而不是「消息队列」？这个设计带来什么好处？",
+      "answer_md": "**核心区别在于消息的生命周期由谁决定。**\n\n传统 MQ（RabbitMQ / ActiveMQ）以「队列」为抽象：消息被消费并 ack 后即从队列移除，是个**会消费掉的通道**。Kafka 以「提交日志（commit log）」为抽象：消息 append-only 追加到分区末尾，**永不为消费而删除**，只在 `retention.ms` / `retention.bytes` 到期或 `cleanup.policy=compact` 时清理。消费者读到哪里由自己提交的 offset 记录，与 broker 无耦合。\n\n带来的好处：\n1. **可重放**：重置 offset 就能重读历史，天然支持「补数」「回溯排查」「新增消费方」。\n2. **多消费者组独立**：同一份数据可被 N 个组各按自己的节奏消费，互不影响（传统 MQ 一条消息通常只给一个消费者）。\n3. **顺序写 + 页缓存 + 零拷贝**：append-only 顺序 I/O 把随机写变为顺序写，配合 OS 页缓存与 `sendfile`，用极低成本支撑高吞吐。\n4. **易于扩缩容与回放式流处理**：日志是不可变事实序列，适合做事件溯源与流式 ETL。\n\n代价：需要自己管理 offset 与重复消费（at-least-once），存储成本随保留期上升。",
+      "follow_ups": [
+        "retention.bytes 和 retention.ms 同时配置时以哪个为准？（满足任一即删除）",
+        "log compaction 保留的是什么？（每个 key 的最新值，适合 changelog / 状态恢复场景）"
+      ],
+      "difficulty": "easy",
+      "company_tags": [
+        "字节跳动",
+        "美团",
+        "阿里巴巴"
+      ]
+    },
+    {
+      "question": "Kafka 如何保证消息不丢？请分别从生产者、broker、消费者三个环节说明。",
+      "answer_md": "必须**三端同时收紧**，任一环有缺口都会丢。\n\n**① 生产者**：`acks=all`（等待 ISR 全部副本落盘）+ `retries` 足够大 + 开启幂等（`enable.idempotence=true`）防止重试导致重复。注意 `acks=all` 的效果取决于 `min.insync.replicas`：它规定「ISR 至少剩几个副本时才接受写入」，设为 2 且副本因子 3 时，若 ISR 只剩 1 个副本，写入会被拒绝（`NotEnoughReplicasException`），从而避免「以为是 all 实际只有 1 份」的假安全。\n\n**② broker**：副本因子 ≥ 3、`min.insync.replicas` ≥ 2、关闭 `unclean.leader.election.enable`（否则可能从落后副本中选主）。同时关注 `replica.lag.time.max.ms`——落后超时的副本会被踢出 ISR，ISR 收缩会让 acks=all 的保护变弱。\n\n**③ 消费者**：关闭自动提交（`enable.auto.commit=false`），改为「处理成功后再提交 offset」，即 at-least-once；`auto.offset.reset` 要显式设为 `earliest` 或 `latest` 而非依赖默认，避免启动时静默跳过数据。\n\n**补充**：若要求 exactly-once，需要 Kafka 事务（`transactional.id` + `sendOffsetsToTransaction`）或下游按业务主键幂等去重。",
+      "follow_ups": [
+        "acs=all 但 ISR 只剩 leader 一个副本时会怎样？（若 min.insync.replicas=2 则写入直接失败）",
+        "为什么说 at-least-once 比 at-most-once 更常用？（丢数据通常比重复更不可接受）"
+      ],
+      "difficulty": "medium",
+      "company_tags": [
+        "腾讯",
+        "快手",
+        "滴滴"
+      ]
+    },
+    {
+      "question": "ISR 是什么？为什么需要它，而不是让所有副本都必须同步？",
+      "answer_md": "**ISR（In-Sync Replicas）是「与 leader 保持同步的副本集合」**，包含 leader 自己。判定标准是副本的 LEO 落后 leader 不超过 `replica.lag.time.max.ms`（默认 30s）——注意 Kafka 2.5+ 用「是否按时发起 fetch 请求」而非「消息条数差」来判定，避免流量低谷时的误踢。\n\n**为什么不能要求全部副本同步？** 这是**可用性与一致性**的经典权衡（CAP 的取舍点）：\n\n- 若要求「全部副本必须同步才算写入成功」，那么任一副本宕机或卡顿（网络抖动、磁盘慢）都会让整个分区**停止写入**——可用性崩塌。\n- ISR 的思路是：**只让「健康的多数/部分副本」参与一致性判定**。落后太多的副本被踢出 ISR，写入不再等它；而一旦它追上进度，又会被重新纳入 ISR。\n\n**HW 与消费者可见性正建立在 ISR 之上**：HW = min(ISR 各副本 LEO)，消费者只能读到 HW 之前的数据。这样即使发生 leader 切换，新 leader 也一定拥有 [0, HW) 的全部数据，消费者不会看到「读过的数据倒退了」这种诡异现象。\n\n**风险点**：ISR 收缩到只剩 leader 时，acks=all 实际退化为 acks=1，所以必须配 `min.insync.replicas` 兜底。",
+      "follow_ups": [
+        "controller 如何决定换 leader？（优先从 ISR 中选 LEO 最大的副本）",
+        "unclean.leader.election.enable=true 有什么代价？（可能选到落后副本 -> 丢数据 + 数据不一致）"
+      ],
+      "difficulty": "medium",
+      "company_tags": [
+        "字节跳动",
+        "京东",
+        "网易"
+      ]
+    },
+    {
+      "question": "消费者组 rebalance 触发条件有哪些？如何避免 rebalance 引发的重复消费与消费停顿？",
+      "answer_md": "**触发条件（三类）**：\n1. 组内成员数量变化——新消费者加入、消费者主动离开、消费者崩溃（会话超时 `session.timeout.ms`）。\n2. 订阅的 topic 分区数变化（管理员扩容分区）。\n3. 订阅的 topic 集合变化（正则订阅时新 topic 被创建）。\n\n**rebalance 的代价**：\n- **Stop-The-World**：Eager 协议下所有消费者先放弃全部分区（`revoke`），再重新分配，期间整组**停止消费**。\n- **重复消费**：分区被转交给新消费者时，新消费者从**已提交 offset** 继续，而上一个消费者可能在 `poll` 返回后、提交前崩溃——这段未提交的处理结果会重来一次。\n\n**缓解手段**：\n1. **增量协作式再平衡（CooperativeSticky）**：只回收「需要移动」的分区，其余原地不动，避免全组停顿。\n2. **合理设置超时**：`session.timeout.ms`（心跳超时）、`heartbeat.interval.ms`（心跳间隔，约 1/3 会话超时）、`max.poll.interval.ms`（两次 poll 的最大间隔——**处理单批太慢会被判定为死亡从而踢出组**，这是最常见的「莫名其妙 rebalance」元凶）。\n3. **静态成员（Static Membership）**：`group.instance.id` 让消费者重启后在 `session.timeout.ms` 内不触发 rebalance，适合滚动发布。\n4. **业务侧幂等**：即使发生重复，也能靠业务主键去重。\n5. 控制单次 `max.poll.records`，避免一批处理过久。",
+      "follow_ups": [
+        "max.poll.interval.ms 设小了会怎样？（处理超时被踢 -> rebalance 风暴）",
+        "range 与 round-robin 分配策略的差别？（range 按 topic 逐段切分，分区多时容易不均）"
+      ],
+      "difficulty": "medium",
+      "company_tags": [
+        "阿里巴巴",
+        "美团",
+        "携程"
+      ]
+    },
+    {
+      "question": "Kafka 为什么这么快？请从存储、I/O、网络三个层面分析。",
+      "answer_md": "**① 存储层：顺序写 + append-only**\n\n分区日志以 append-only 方式顺序写盘。机械盘顺序写吞吐可达数百 MB/s，与随机写相差 2~3 个数量级；即使是 SSD，顺序写也能显著减少写放大。消息不可变，无需原地更新。\n\n**② I/O 层：页缓存 + 零拷贝**\n\nKafka 不自己管理缓存，而是**直接用 OS 页缓存**（`PageCache`）：热数据天然驻留内存，且进程崩溃不影响缓存有效性。消费时用 `sendfile`（`FileChannel.transferTo`）实现零拷贝，把「磁盘→页缓存→用户缓冲→socket 缓冲→网卡」的 4 次拷贝压缩为 3 次（其中 2 次是 DMA），上下文切换从 4 次降到 2 次——**数据从未进入用户态**。\n\n注意零拷贝有前提：数据不能在用户态加工。所以开启 SSL/TLS、或 broker 端做压缩格式转换时，零拷贝会失效退化为普通拷贝。\n\n**③ 网络层：批量 + 分区并行**\n\n- **批量发送**：生产者 `batch.size` + `linger.ms` 攒批；broker 端以「消息集（message set）」为单位整体落盘，摊薄单条开销。\n- **分区并行**：一个 topic 的多个分区分布在多台 broker 上，读写天然并行；消费者组内多个消费者并行消费不同分区。\n- **稀疏索引**：`log.index` 每约 4KB 记一个 entry，二分定位到段内位置后只顺序扫描极少数几条，避免全量索引的内存开销。\n\n**综合结果**：单 broker 顺序写 + 页缓存 + 零拷贝 + 批量，让 Kafka 在普通硬件上轻松跑到数十万条/秒。",
+      "follow_ups": [
+        "页缓存与 JVM 堆内存相比有什么优势？（不受 GC 影响、崩溃不丢、可被 OS 全局调度）",
+        "为什么 Kafka 建议堆内存不要设太大？（对象多、GC 停顿长；大量数据应交给页缓存而非堆）"
+      ],
+      "difficulty": "medium",
+      "company_tags": [
+        "字节跳动",
+        "腾讯",
+        "百度"
+      ]
+    },
+    {
+      "question": "Kafka 支持 exactly-once 吗？它靠什么实现，边界在哪里？",
+      "answer_md": "**支持，但仅限于「Kafka 内部」的端到端场景。** 实现分两层：\n\n**① 幂等生产者（Idempotent Producer）**\n\n`enable.idempotence=true` 后，生产者获得一个 **PID（Producer ID）**，并为每个分区维护单调递增的 **sequence number**。broker 按 `(PID, partition)` 缓存最近若干条 sequence，收到重复序号时直接丢弃并返回成功。这解决了「生产者重试导致的重复写入」。它还顺带保证了**单分区内**的写入顺序（broker 会拒绝 seq 跳变，触发 `OutOfOrderSequenceException`）。\n\n**② 事务（Transactions）**\n\n跨分区、跨 topic 的「原子写入」需要事务：`initTransactions()` 取得 `transactional.id`，`beginTransaction()` → `send()` → `sendOffsetsToTransaction()`（把**消费 offset 与生产消息放在同一个事务里**）→ `commitTransaction()`。broker 侧由 **Transaction Coordinator** 管理两阶段提交，消费端需设 `isolation.level=read_committed` 才能不读到未提交事务的消息。\n\n**边界（重要）**：\n1. exactly-once 只在 **Kafka → 处理 → Kafka** 的闭环内成立。一旦写入外部系统（MySQL / Redis / HTTP 接口 / 文件），就回到「至少一次+业务幂等」的老路。\n2. `transactional.id` 必须唯一且稳定绑定到生产者实例（通常用 `transactional.id = <业务名>-<分区号>`），否则事务恢复机制失效。\n3. 事务会带来明显的性能开销（标记写入、协调开销、`read_committed` 的读取等待），高吞吐场景要权衡。\n4. 消费端 `isolation.level` 默认是 `read_uncommitted`，不改的话可能读到会被回滚的消息。",
+      "follow_ups": [
+        "read_committed 下消费者读到事务未提交的消息会怎样？（卡在 LSO 处等待，可能造成消费延迟）",
+        "PID 与 transactional.id 的区别？（PID 是 broker 分配的运行时标识，transactional.id 是用户提供的跨会话稳定标识）"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "字节跳动",
+        "阿里巴巴",
+        "美团"
+      ]
+    }
+  ]
+}

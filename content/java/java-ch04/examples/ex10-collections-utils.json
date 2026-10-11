@@ -1,0 +1,8 @@
+{
+  "title": "Collections 工具类：排序、二分、频率、不可变视图",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "sorted=[1, 1, 2, 3, 4, 5, 9]\nbinarySearch 4 idx=4\nfrequency of 1=2\ncaught UnsupportedOperationException",
+  "code": "import java.util.*;\n\npublic class Ex10CollectionsUtils {\n    public static void main(String[] args) {\n        List<Integer> list = new ArrayList<>(List.of(3, 1, 4, 1, 5, 9, 2));\n        Collections.sort(list);\n        System.out.println(\"sorted=\" + list);\n        System.out.println(\"binarySearch 4 idx=\" + Collections.binarySearch(list, 4));\n        System.out.println(\"frequency of 1=\" + Collections.frequency(list, 1));\n        List<Integer> unmod = Collections.unmodifiableList(list);\n        try {\n            unmod.add(0);\n            System.out.println(\"added\");\n        } catch (UnsupportedOperationException e) {\n            System.out.println(\"caught \" + e.getClass().getSimpleName());\n        }\n    }\n}"
+}

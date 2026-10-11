@@ -1,0 +1,8 @@
+{
+  "title": "list 与 ndarray 的内存占用对比（对象开销的实证）",
+  "code_lang": "python",
+  "code_std": "3.13",
+  "stdin": "",
+  "expected_output": "元素个数 N = 1000000\n\nlist 指针数组      : 8,000,056 字节\nlist 中 int 对象   : 28,000,000 字节（抽样 1000 个估算）\nlist 合计          : 36,000,056 字节\n\nndarray (int64)    : 8,000,000 字节\n\n内存倍数 list/ndarray = 4.5 倍\n\n单个 PyLongObject 开销: 28 字节（存 8 字节整数却用这么多）\nndarray 元数据大小    : 8000112 字节（不含数据区）\n\n结论：list 为存 8 字节整数付出了约 36 字节（28 对象 + 8 指针），\n      且对象散落在堆上、每次访问都要解引用 -> 几乎必然 cache miss。",
+  "code": "import sys\nimport numpy as np\n\nN = 1_000_000\nlst = list(range(N))\narr = np.arange(N, dtype=np.int64)\n\nlist_bytes = sys.getsizeof(lst)          # 只算指针数组本身\nobj_bytes = sum(sys.getsizeof(x) for x in lst[:1000]) / 1000 * N   # 抽样估算对象开销\narr_bytes = arr.nbytes\n\nprint(\"元素个数 N =\", N)\nprint()\nprint(\"list 指针数组      :\", f\"{list_bytes:,}\", \"字节\")\nprint(\"list 中 int 对象   :\", f\"{int(obj_bytes):,}\", \"字节（抽样 1000 个估算）\")\nprint(\"list 合计          :\", f\"{int(list_bytes + obj_bytes):,}\", \"字节\")\nprint()\nprint(\"ndarray (int64)    :\", f\"{arr_bytes:,}\", \"字节\")\nprint()\nratio = (list_bytes + obj_bytes) / arr_bytes\nprint(\"内存倍数 list/ndarray =\", round(ratio, 1), \"倍\")\nprint()\nprint(\"单个 PyLongObject 开销:\", sys.getsizeof(0), \"字节（存 8 字节整数却用这么多）\")\nprint(\"ndarray 元数据大小    :\", sys.getsizeof(arr), \"字节（不含数据区）\")\nprint()\nprint(\"结论：list 为存 8 字节整数付出了约 36 字节（28 对象 + 8 指针），\")\nprint(\"      且对象散落在堆上、每次访问都要解引用 -> 几乎必然 cache miss。\")\n"
+}

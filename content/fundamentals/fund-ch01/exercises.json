@@ -1,0 +1,128 @@
+{
+  "meta": {
+    "subject": "fundamentals",
+    "chapter": "fund-ch01",
+    "title": "数据结构：线性表与链表 · 习题集",
+    "note": "3 道基础题（数组/链表模型与复杂度）+ 3 道算法题（来自 LeetCode，仅存元数据与链接，不存题面正文）。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "顺序表插入的复杂度判断",
+      "content_md": "已知一个长度为 n 的顺序表（数组），要在**下标为 i 的位置**（0 ≤ i ≤ n）插入一个新元素。关于时间复杂度，下列说法正确的是？\n\nA. 无论如何都是 O(1)\nB. 无论如何都是 O(N)\nC. 头插是 O(N)，尾插（不扩容）是 O(1)，平均 O(N)\nD. 是 O(log N)",
+      "answer": {
+        "choice": "C"
+      },
+      "explanation": "顺序表插入需要把 i 位置及其后的所有元素**整体后移一位**，搬移量为 n − i。i=0（头插）时搬移 n 个 → O(N)；i=n（尾插）且容量足够时搬移 0 个 → O(1)；对所有位置取平均，期望搬移 n/2 → O(N)。**注意如果尾插触发扩容，还要 O(N) 的搬移，但均摊回每次仍是 O(1)**（见 concept/03 的聚合分析）。",
+      "tags": [
+        "复杂度",
+        "顺序表",
+        "插入"
+      ],
+      "source": "self",
+      "source_ref": "《数据结构（C 语言版）》第2章"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "修复链表删除节点的断链错误",
+      "content_md": "下面函数要从**带头结点**的单链表中删除第一个值为 `v` 的节点，但存在断链 bug。请指出错误并修正。\n\n```c\nvoid delete_value(Node *head, int v) {\n    Node *prev = head;\n    while (prev->next && prev->next->data != v) prev = prev->next;\n    if (prev->next) {\n        prev->next = prev->next->next;\n        free(prev->next);          /* 问题在这里 */\n    }\n}\n```",
+      "answer": {
+        "reference_code": "void delete_value(Node *head, int v) {\n    Node *prev = head;\n    while (prev->next && prev->next->data != v) prev = prev->next;\n    if (prev->next) {\n        Node *del = prev->next;      /* 先保存待删节点 */\n        prev->next = del->next;      /* 再断链 */\n        free(del);                   /* 最后释放 */\n    }\n}"
+      },
+      "explanation": "`prev->next = prev->next->next;` 执行后，`prev->next` **已经指向被删节点的后继**，此时 `free(prev->next)` 释放的是**后继节点**（把没被删的节点释放了），而真正要删的节点泄漏了。正确顺序是**先保存待删节点到一个临时指针，再断链，最后 free 临时指针**。这是「先接后断」原则在删除场景的体现。",
+      "tags": [
+        "链表",
+        "指针",
+        "内存管理",
+        "断链"
+      ],
+      "source": "self",
+      "source_ref": "《数据结构（C 语言版）》第2章"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "快慢指针找链表中点的输出",
+      "content_md": "单链表为 `1 -> 2 -> 3 -> 4 -> 5 -> 6`（偶数个节点）。执行下面的代码后，`slow->data` 的值是多少？\n\n```c\nNode *slow = head, *fast = head;\nwhile (fast && fast->next) {\n    slow = slow->next;\n    fast = fast->next->next;\n}\nprintf(\"%d\\n\", slow->data);\n```",
+      "answer": {
+        "expected_output": "4"
+      },
+      "explanation": "偶数长度时循环会在 `fast` 变成 NULL 时退出。追踪：slow/fast 依次为 (1,1) → (2,3) → (3,5) → fast->next 为 NULL（6 的 next）→ 循环结束，此时 slow 在第 3 步已走到 3，**实际执行过程是**：初始 (1,1)；第 1 轮 → (2,3)；第 2 轮 → (3,5)；第 3 轮 → (4,NULL)。所以 `slow->data = 4`，即**偶数长度返回「中间偏右」的那个节点**。若想返回偏左（3），循环条件改为 `while (fast->next && fast->next->next)`。",
+      "tags": [
+        "链表",
+        "快慢指针",
+        "边界"
+      ],
+      "source": "self",
+      "source_ref": "《剑指 Offer》第22题改编"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "原地删除有序数组中的重复元素",
+      "content_md": "给定**非递减有序**数组 nums，**原地**删除重复元素，使每个元素只出现一次，返回新长度。要求空间复杂度 O(1)（不允许使用额外数组）。\n\n请用 C 语言实现，并打印处理后的数组前 k 个元素。",
+      "answer": {
+        "reference_code": "int remove_duplicates(int *a, int n) {\n    if (n == 0) return 0;\n    int k = 1;                       /* k 指向下一个可写入位置 */\n    for (int i = 1; i < n; i++)\n        if (a[i] != a[k - 1]) a[k++] = a[i];\n    return k;\n}",
+        "expected_output": "k=5, a=[0,1,2,3,4]"
+      },
+      "explanation": "**双指针（读写指针）**：`k` 是写指针，始终指向「已去重区间的下一个位置」；`i` 是读指针扫描全数组。因为数组有序，**重复元素一定相邻**，所以只需比较 `a[i]` 与「已写入的最后一个元素」`a[k-1]`。时间复杂度 O(N)，空间 O(1)。这是「原地算法」的经典范式——用两个指针在同一数组里一个读一个写。",
+      "tags": [
+        "双指针",
+        "原地算法",
+        "数组"
+      ],
+      "source": "self",
+      "source_ref": "LeetCode 26 同型题"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "easy",
+      "title": "反转链表",
+      "content_md": "经典链表基础题：反转一个单链表。请给出**迭代**与**递归**两种写法，并说明各自的空间复杂度。",
+      "answer": {
+        "reference_code": "/* 迭代：O(N) 时间，O(1) 空间 */\nNode *reverse_list(Node *head) {\n    Node *prev = NULL, *cur = head;\n    while (cur) {\n        Node *next = cur->next;   /* 1. 先保存后继 */\n        cur->next = prev;         /* 2. 掉转方向 */\n        prev = cur;               /* 3. 前移 */\n        cur = next;               /* 4. 前移 */\n    }\n    return prev;                  /* prev 最终指向原尾节点＝新头 */\n}"
+      },
+      "explanation": "迭代法的关键是**「先保存后继再掉头」**——顺序错了就断链（与 pitfall #1 同源）。递归法是 `head->next->next = head; head->next = NULL;` 并递归处理 `head->next` 之前的部分，空间复杂度 O(N)（**递归栈深度**，这是常被忽略的点）。面试延伸：「哨兵节点 + 头插法」也能实现反转（遍历原链表，逐个头插到新链表）。",
+      "tags": [
+        "链表",
+        "反转",
+        "迭代与递归"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 206",
+      "external_url": "https://leetcode.cn/problems/reverse-linked-list/"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "环形链表 II（找环入口）",
+      "content_md": "判断链表是否有环，若有则返回入环的第一个节点。请说明「快慢指针相遇后，为什么把其中一个放回头部再同速前进，相遇点就是环入口」的数学推导。",
+      "answer": {
+        "reference_code": "Node *detect_cycle(Node *head) {\n    Node *slow = head, *fast = head;\n    while (fast && fast->next) {\n        slow = slow->next;\n        fast = fast->next->next;\n        if (slow == fast) {                 /* 相遇 */\n            Node *p = head;\n            while (p != slow) { p = p->next; slow = slow->next; }\n            return p;                       /* 入口 */\n        }\n    }\n    return NULL;\n}"
+      },
+      "explanation": "设头到环入口距离为 a，入口到相遇点距离为 b，环长为 c。相遇时慢指针走了 a+b，快指针走了 a+b+kc（多绕了 k 圈），且快指针路程是慢指针的 2 倍：`2(a+b) = a+b+kc` → **`a = kc − b`**。右侧的含义是「从相遇点继续走 k 圈再退 b 步」，等价于「从相遇点走到入口」。所以**从头出发的指针与从相遇点出发的指针同速前进，必在入口相遇**。这是快慢指针最漂亮的一道题。",
+      "tags": [
+        "链表",
+        "快慢指针",
+        "数学推导"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 142",
+      "external_url": "https://leetcode.cn/problems/linked-list-cycle-ii/"
+    }
+  ]
+}

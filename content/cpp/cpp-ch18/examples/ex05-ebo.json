@@ -1,0 +1,8 @@
+{
+  "title": "空基类优化（EBO）实测 sizeof",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "sizeof(Empty)=1 sizeof(Base)=4\nWithEBO sizeof=4\nEBO 生效: 1\nWithMember sizeof=8",
+  "code": "#include <cstdio>\n\nstruct Empty {};                 // 空类，sizeof 至少为 1\nstruct Base  { int x; };\n\n// 空基类作为基类时可以被\"优化掉\"，不占独立存储\nstruct WithEBO   : Empty, Base {};\n// 空类作为普通成员时，必须占位置（C++17 及以前）\nstruct WithMember { int x; Empty e; };\n\nint main() {\n    printf(\"sizeof(Empty)=%zu sizeof(Base)=%zu\\n\", sizeof(Empty), sizeof(Base));\n    printf(\"WithEBO sizeof=%zu\\n\", sizeof(WithEBO));\n    printf(\"EBO 生效: %d\\n\", (int)(sizeof(WithEBO) == sizeof(Base)));\n    printf(\"WithMember sizeof=%zu\\n\", sizeof(WithMember));\n    return 0;\n}"
+}

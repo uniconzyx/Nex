@@ -1,0 +1,26 @@
+{
+  "meta": { "chapter": "fs-ch02" },
+  "items": [
+    {
+      "question": "从输入 URL 到页面渲染出来，浏览器经历了哪些关键阶段？请讲清楚关键渲染路径（CRP）。",
+      "answer_md": "大致分：① 网络层解析域名、建立连接、下载 HTML（含 preload scanner 提前拉取子资源）；② 解析 HTML 生成 **DOM 树**，解析 CSS 生成 **CSSOM**；③ **样式计算**把 CSSOM 与 DOM 匹配得到每个元素的 Computed Style，形成 **Render Tree**；④ **布局（Layout/Reflow）**计算每个盒子的几何坐标；⑤ **绘制（Paint）**生成绘制指令并光栅化；⑥ **合成（Composite）**把图层交 GPU 输出像素。其中 JS（主线程）会阻塞解析（同步脚本），而 transform/opacity 动画可走独立的合成器线程保持流畅。优化方向：缩短首屏 CRP、把变更尽量落在合成层、批量读写避免 layout thrashing。",
+      "follow_ups": ["什么是强制同步布局？如何避免？", "重排、重绘、合成的区别是什么？哪些属性只触发合成？", "defer 和 async 脚本对 CRP 的影响有何不同？"],
+      "difficulty": "hard",
+      "company_tags": ["通用", "字节", "腾讯"]
+    },
+    {
+      "question": "什么是 BFC（块级格式化上下文）？如何触发？能解决哪些实际问题？",
+      "answer_md": "BFC 是一块独立的布局区域，内部块级盒正常流排布且与外部互不干扰。触发条件：`float` 非 none、`position:absolute/fixed`、`display:flex/grid/inline-block/flow-root`、`overflow` 非 visible、`contain:layout/paint`、根元素等。它能：① 包含浮动，解决父容器高度塌陷；② 阻止相邻/父子 margin 折叠；③ 防止元素与浮动重叠（多列等高）。最干净的触发方式是 `display:flow-root`，无裁切副作用。",
+      "follow_ups": ["为什么 display:flow-root 比 overflow:hidden 更适合清除浮动？", "IFC（行内格式化上下文）和 BFC 有何区别？", "margin 折叠发生在哪些场景？"],
+      "difficulty": "mid",
+      "company_tags": ["通用", "美团"]
+    },
+    {
+      "question": "content-box 和 border-box 的区别？为什么工程上推荐全局 border-box？",
+      "answer_md": "默认 `content-box` 下 `width/height` 只含内容区，padding 与 border 会额外撑大元素实际占位（如 width:200 + padding16*2 + border2*2 = 236px）；`border-box` 下 width 包含 content+padding+border，元素总宽固定为设定值，排版可预测。因此常见重置 `* { box-sizing: border-box; }`，避免「设了宽度又加 padding 导致溢出」的坑（可用 Node 直接算出两种模式差异，见 examples/ex10）。",
+      "follow_ups": ["margin 算进 width 吗？", "inline 元素与 block 元素的盒模型差异？", "box-sizing 可以被继承吗？"],
+      "difficulty": "easy",
+      "company_tags": ["通用", "字节"]
+    }
+  ]
+}

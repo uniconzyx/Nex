@@ -1,0 +1,8 @@
+{
+  "title": "ex09-global-exception",
+  "code_lang": "java",
+  "code_std": "java23",
+  "stdin": "",
+  "expected_output": "NotFoundException -> 404\nUnauthorizedException -> 401\nConflictException -> 409\nRuntimeException -> 500",
+  "code": "import java.util.*;\npublic class Main {\n    static class NotFoundException extends RuntimeException {}\n    static class UnauthorizedException extends RuntimeException {}\n    static class ConflictException extends RuntimeException {}\n    static int handle(Exception e){\n        if(e instanceof NotFoundException) return 404;\n        if(e instanceof UnauthorizedException) return 401;\n        if(e instanceof ConflictException) return 409;\n        return 500;\n    }\n    public static void main(String[] a){\n        Exception[] xs={new NotFoundException(),new UnauthorizedException(),new ConflictException(),new RuntimeException(\"boom\")};\n        for(Exception e:xs) System.out.println(e.getClass().getSimpleName()+\" -> \"+handle(e));\n    }\n}"
+}

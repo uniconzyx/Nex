@@ -1,0 +1,9 @@
+{
+  "title": "近似 LRU 淘汰：随机采样 5 个候选",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "近似 LRU 淘汰 (allkeys-lru, 采样5):\n  当前: {'a': 4, 'b': 5, 'c': 3}\n    内存满, 采样候选, 淘汰最久未用 c\n    内存满, 采样候选, 淘汰最久未用 a\n  最终: {'b': 5, 'd': 6, 'e': 7}\n  Redis 用随机采样近似 LRU, 而非全局严格 LRU, 节省开销",
+  "code": "import random\nclass LRUApprox:\n    def __init__(self, maxkeys):\n        self.data = {}\n        self.maxkeys = maxkeys\n        self.clock = 0\n    def _now(self):\n        self.clock += 1\n        return self.clock\n    def put(self, k):\n        if k in self.data:\n            self.data[k] = self._now()\n            return\n        if len(self.data) >= self.maxkeys:\n            sample = random.sample(list(self.data.keys()), min(5, len(self.data)))\n            victim = min(sample, key=lambda x: self.data[x])\n            del self.data[victim]\n            print(f\"    内存满, 采样候选, 淘汰最久未用 {victim}\")\n        self.data[k] = self._now()\n    def touch(self, k):\n        if k in self.data:\n            self.data[k] = self._now()\n\nrandom.seed(1)\nc = LRUApprox(maxkeys=3)\nfor k in [\"a\", \"b\", \"c\"]:\n    c.put(k)\nc.touch(\"a\"); c.touch(\"b\")\nprint(\"近似 LRU 淘汰 (allkeys-lru, 采样5):\")\nprint(\"  当前:\", c.data)\nc.put(\"d\")\nc.put(\"e\")\nprint(\"  最终:\", c.data)\nprint(\"  Redis 用随机采样近似 LRU, 而非全局严格 LRU, 节省开销\")\n",
+  "_verified": true
+}

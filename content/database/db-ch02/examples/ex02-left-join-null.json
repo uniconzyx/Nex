@@ -1,0 +1,9 @@
+{
+  "title": "LEFT JOIN 保留左表全部行，右表无匹配补 NULL",
+  "code_lang": "sql",
+  "code_std": "mysql8",
+  "stdin": "",
+  "expected_output": "Query OK, 0 rows affected\nQuery OK, 3 rows affected\nQuery OK, 2 rows affected\ncust_name|amount\nTom|200.00\nTom|350.00\nJerry|NULL\nLucy|NULL",
+  "code": "CREATE TABLE customer (cust_id INT PRIMARY KEY, cust_name VARCHAR(20));\nCREATE TABLE orders (order_id INT PRIMARY KEY, cust_id INT, amount DECIMAL(10,2));\nINSERT INTO customer VALUES (1,'Tom'),(2,'Jerry'),(3,'Lucy');\nINSERT INTO orders VALUES (101,1,200.00),(102,1,350.00);\nSELECT c.cust_name, o.amount FROM customer c LEFT JOIN orders o ON c.cust_id = o.cust_id ORDER BY c.cust_id;",
+  "_verified": false
+}

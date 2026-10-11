@@ -1,0 +1,8 @@
+{
+  "title": "GROUP BY + HAVING 过滤平均薪资大于 7000 的部门",
+  "code_lang": "sql",
+  "code_std": "mysql",
+  "stdin": "",
+  "expected_output": "Query OK, 0 rows affected\nQuery OK, 6 rows affected\ndept_id|avg_salary\n20|8000.00",
+  "code": "CREATE TABLE employee (emp_id INT PRIMARY KEY, name VARCHAR(20), dept_id INT, salary DECIMAL(10,2));\nINSERT INTO employee VALUES (1,'Alice',10,6000.00),(2,'Bob',20,8000.00),(3,'Carol',10,4500.00),(4,'Dave',20,9000.00),(5,'Eve',30,5000.00),(6,'Frank',20,7000.00);\nSELECT dept_id, ROUND(AVG(salary),2) AS avg_salary FROM employee GROUP BY dept_id HAVING AVG(salary) > 7000 ORDER BY dept_id;"
+}

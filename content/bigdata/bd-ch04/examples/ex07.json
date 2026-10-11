@@ -1,0 +1,8 @@
+{
+  "title": "缓存 persist/cache 前后重算次数的差异（计数器证明）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "未缓存: 2 次 action 各自重算整条血缘, 累计 compute 调用 = 4\npersist 后: 首次计算并落缓存, 后续 action 命中缓存, 累计 compute 调用 = 4\n结论: 缓存把重复 action 的重算量从 4 次降到 4 次 (节省 0 次)\n",
+  "code": "class Node:\n    rc = 0\n    def __init__(self, op, parent=None):\n        self.op = op\n        self.parent = parent\n        self.store = None\n    def run(self):\n        Node.rc += 1\n        if self.store is not None:\n            return self.store\n        v = 10\n        if self.parent:\n            v = self.parent.run() + 1\n        return v\n    def persist(self):\n        self.store = self.run()\n\nbase = Node(\"parallelize\")\nm = Node(\"map\", base)\nNode.rc = 0\nfor _ in range(2):\n    m.run()\nuncached = Node.rc\nNode.rc = 0\nm.persist()\nfor _ in range(2):\n    m.run()\ncached = Node.rc\nprint(\"未缓存: 2 次 action 各自重算整条血缘, 累计 compute 调用 =\", uncached)\nprint(\"persist 后: 首次计算并落缓存, 后续 action 命中缓存, 累计 compute 调用 =\", cached)\nprint(f\"结论: 缓存把重复 action 的重算量从 {uncached} 次降到 {cached} 次 (节省 {uncached - cached} 次)\")\n"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "Shell 变量展开顺序与 $? 取值",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "变量展开演示：\n  echo \"$VAR\"  => 'hello world'   （加引号：一个整体，保留空格）\n  echo $VAR     => ['hello', 'world']   （未加引号：词拆分，空格变多词）\n\n$? 取值时机：\n  执行 false （退出码 1）\n  $? = 1   （紧接其后取值，正确）\n  若先 echo 再取 $?，则 $? 变成 echo 的码(0)，丢失原值\n\n  $(date +%Y) 命令替换 => 2026\n\n结论：变量展开经历『参数展开->词拆分->globbing』；$? 只保留最近一条命令的码",
+  "code": "# 模拟 Shell 变量展开顺序与 $? 取值时机（确定性）\nVAR = \"hello world\"\nprint(\"变量展开演示：\")\nprint(\"  echo \\\"$VAR\\\"  => \" + repr(VAR) + \"   （加引号：一个整体，保留空格）\")\nprint(\"  echo $VAR     => \" + str(VAR.split()) + \"   （未加引号：词拆分，空格变多词）\")\nprint()\n\nfalse_rc = 1\nprint(\"$? 取值时机：\")\nprint(\"  执行 false （退出码 1）\")\nprint(f\"  $? = {false_rc}   （紧接其后取值，正确）\")\nprint(\"  若先 echo 再取 $?，则 $? 变成 echo 的码(0)，丢失原值\")\nprint()\n\nresult = \"2026\"\nprint(\"  $(date +%Y) 命令替换 => \" + result)\nprint()\nprint(\"结论：变量展开经历『参数展开->词拆分->globbing』；$? 只保留最近一条命令的码\")\n"
+}

@@ -1,0 +1,14 @@
+{
+  "meta": { "chapter": "cpp-ch16", "category": "system" },
+  "items": [
+    {
+      "title": "实现一个线程安全的任务队列与线程池",
+      "requirement_md": "设计并实现一个线程池：\n1. `ThreadSafeQueue<T>`：用 `mutex` + `condition_variable` 实现阻塞的 `push` / `pop`（pop 在空时等待，带谓词防虚假唤醒）；\n2. `ThreadPool`：构造时启动固定数量 worker 线程（可用 `std::jthread` 方便协作取消），从队列取任务执行；\n3. 提供 `submit(Func)` 返回 `std::future<Result>`，用 `std::packaged_task` / `promise` 传递结果与异常；\n4. 析构时设置停止标志并 `notify_all`，worker 优雅退出（不调用 terminate）；\n5. 主程序提交若干任务，验证结果汇总正确、无数据竞争、无死锁。",
+      "tasks": [
+        { "title": "实现线程安全阻塞队列", "verification": { "type": "test", "desc": "空队列 pop 阻塞；push 后 pop 拿到正确元素；单生产者单消费者无误" } },
+        { "title": "实现 ThreadPool 与 submit", "verification": { "type": "test", "desc": "submit 返回的 future 能 get 到正确结果；异常能经 future 重抛" } },
+        { "title": "优雅关闭与无死锁", "verification": { "type": "test", "desc": "析构时所有 worker 退出，不 terminate；多任务并发无死锁" } }
+      ]
+    }
+  ]
+}

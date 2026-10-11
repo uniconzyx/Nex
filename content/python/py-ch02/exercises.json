@@ -1,0 +1,125 @@
+{
+  "meta": {
+    "chapter": "py-ch02",
+    "subject": "python",
+    "note": "函数与作用域章节习题。算法题只存元数据与链接，题面以 external_url 为准，合规红线。",
+    "counts": { "基础题": 5, "算法题": 2 }
+  },
+  "items": [
+    {
+      "type": "choice",
+      "difficulty": "easy",
+      "title": "可变默认参数的真实行为",
+      "content_md": "观察下列代码，`add(1)` 后再 `add(2)` 的返回值是：\n\n```python\ndef add(x, lst=[]):\n    lst.append(x)\n    return lst\n```\n\n第二次调用 `add(2)` 返回什么？",
+      "options": [
+        { "key": "A", "text": "[2]" },
+        { "key": "B", "text": "[1, 2]" },
+        { "key": "C", "text": "[]" },
+        { "key": "D", "text": "抛出 TypeError" }
+      ],
+      "answer": { "correct": ["B"] },
+      "explanation": "默认参数 `[]` 在 def 执行时求值一次，被后续所有调用共享（存于函数对象的 __defaults__）。因此两次调用累积成 [1, 2]。正确写法用 None 哨兵惰性初始化。",
+      "tags": ["默认参数", "可变对象", "__defaults__"],
+      "source": "self",
+      "source_ref": "《流畅的 Python》第 8 章 函数对象与默认参数",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "fix_error",
+      "difficulty": "mid",
+      "title": "修复闭包延迟绑定",
+      "content_md": "下列代码期望输出 `[0, 1, 2]`，实际输出 `[2, 2, 2]`。请指出根因并给出修复后的代码：\n\n```python\nfuncs = [lambda: i for i in range(3)]\nprint([f() for f in funcs])\n```",
+      "answer": {
+        "reference_code": "funcs = [lambda i=i: i for i in range(3)]  # 用默认参数在定义时固化当前值\nprint([f() for f in funcs])  # [0, 1, 2]\n\n# 或用工厂函数：\ndef make(n):\n    return lambda: n\nfuncs = [make(i) for i in range(3)]"
+      },
+      "explanation": "闭包捕获的是变量 i 这个 cell（自由变量按引用绑定），调用时才求值；循环结束时 i=2，所以三个 lambda 都返回 2。用默认参数 `i=i` 把当时的值固化到函数对象上即可。",
+      "tags": ["闭包", "延迟绑定", "cell 变量"],
+      "source": "self",
+      "source_ref": "《流畅的 Python》第 7 章 闭包与自由变量",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "output",
+      "difficulty": "mid",
+      "title": "LEGB 作用域与 global 的影响",
+      "content_md": "写出下列代码的输出，并说明 `x` 在函数内外分别绑定于哪个作用域：\n\n```python\nx = 10\ndef f():\n    x = 1\n    print('in f:', x)\nf()\nprint('outer:', x)\n\ndef g():\n    global x\n    x = 99\ng()\nprint('after g:', x)\n```",
+      "answer": {
+        "reference_code": "in f: 1\nouter: 10\nafter g: 99"
+      },
+      "explanation": "`f` 内的 `x = 1` 使 x 成为局部变量（编译期决定），不影响模块级 x，故 outer 仍为 10。`g` 用 `global x` 声明后赋值的就是模块级名字，故 after g 为 99。作用域归属在编译期由函数体内是否出现赋值决定，可用 f.__code__.co_varnames 验证。",
+      "tags": ["LEGB", "global", "作用域"],
+      "source": "self",
+      "source_ref": "《Python 编程：从入门到实践》函数作用域 / 《流畅的 Python》第 7 章",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "coding",
+      "difficulty": "mid",
+      "title": "实现一个保留元信息的计时装饰器",
+      "content_md": "用闭包实现一个装饰器 `timed`：\n\n1. 打印被装饰函数的调用耗时（用 `time.perf_counter`）；\n2. 必须用 `functools.wraps` 保留原函数的 `__name__` 与 `__doc__`；\n3. 支持接收任意位置/关键字参数并返回原返回值；\n4. 用它装饰一个 `slow_add(a, b)`（内部 `time.sleep(0.01)`），验证 `slow_add.__name__` 仍为 slow_add。",
+      "answer": {
+        "reference_code": "import time\nfrom functools import wraps\n\ndef timed(f):\n    @wraps(f)\n    def wrapper(*args, **kwargs):\n        t0 = time.perf_counter()\n        try:\n            return f(*args, **kwargs)\n        finally:\n            print(f'{f.__name__} took {time.perf_counter()-t0:.6f}s')\n    return wrapper\n\n@timed\ndef slow_add(a, b):\n    'slow add'\n    time.sleep(0.01)\n    return a + b\n\nprint(slow_add(1, 2), slow_add.__name__)"
+      },
+      "explanation": "装饰器本质是「接受函数返回函数」的高阶函数；@wraps 把 __name__/__doc__/__module__/__wrapped__ 从原函数复制到 wrapper，避免元信息丢失。`*args/**kwargs` 保证透传任意签名。",
+      "tags": ["装饰器", "functools.wraps", "高阶函数"],
+      "source": "self",
+      "source_ref": "《流畅的 Python》第 7 章 装饰器",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "choice",
+      "difficulty": "easy",
+      "title": "关于一等公民函数，正确的是",
+      "content_md": "Python 中函数是一等公民。下列说法正确的是：",
+      "options": [
+        { "key": "A", "text": "函数只能定义在模块顶层，不能嵌套定义" },
+        { "key": "B", "text": "函数可以赋值、作为参数传入、作为返回值、存入容器" },
+        { "key": "C", "text": "lambda 可以包含多条语句和 return" },
+        { "key": "D", "text": "函数不能作为 dict 的 value" }
+      ],
+      "answer": { "correct": ["B"] },
+      "explanation": "函数对象与其他对象一样可赋值、传参、返回、入容器（dict 分发是常见模式）。lambda 只能含单个表达式；函数可以嵌套（这正是闭包的基础）。",
+      "tags": ["一等函数", "lambda", "高阶函数"],
+      "source": "self",
+      "source_ref": "《Python 编程：从入门到实践》第 8 章 函数",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "coding",
+      "difficulty": "mid",
+      "title": "用函数封装解决 two-sum（函数签名与高阶函数实践）",
+      "content_md": "完成 LeetCode 1（two-sum）的函数封装实现：定义 `def two_sum(nums, target)` 返回下标列表，要求：\n\n1. 内部用 dict 做「值→下标」映射，单次遍历 O(n)；\n2. 额外提供一个高阶函数 `make_checker(target)`，返回一个用于判断某数是否被命中的闭包；\n3. 说明为何把 target 用闭包捕获比每次传参更利于复用。\n\n题面与示例以链接为准（不在本文件复述题干）。",
+      "answer": {
+        "reference_code": "def make_checker(target):\n    # 工厂函数：捕获 target，返回一个判断配对的闭包\n    def check(seen, v):\n        return (target - v) in seen\n    return check\n\ndef two_sum(nums, target):\n    check = make_checker(target)   # target 被闭包捕获，调用时无需重复传参\n    seen = {}\n    for i, v in enumerate(nums):\n        if check(seen, v):\n            return [seen[target - v], i]\n        seen[v] = i\n    return []\n\nprint(two_sum([2, 7, 11, 15], 9))  # [0, 1]"
+      },
+      "explanation": "哈希表单次遍历把 O(n^2) 降到 O(n)。把 target 用闭包捕获（工厂函数）可生成一批「预设条件的检查器」，避免每次调用重复传参，是高阶函数的典型收益；但要注意闭包捕获的是变量本身（见本章延迟绑定坑）。",
+      "tags": ["哈希", "闭包工厂", "two-sum"],
+      "source": "leetcode",
+      "source_ref": "LeetCode 1 two-sum",
+      "category": "算法题",
+      "platform": "leetcode",
+      "external_url": "https://leetcode.cn/problems/two-sum/"
+    },
+    {
+      "type": "coding",
+      "difficulty": "mid",
+      "title": "用函数式风格实现字符串变换（reverse-string 变体）",
+      "content_md": "完成 LeetCode 344（reverse-string）的函数式实现：定义 `def reverse_str(s)`，要求：\n\n1. 至少给出两种实现：切片 `s[::-1]` 与「首尾双指针原地交换」（字符串不可变需先转 list）；\n2. 用 `timeit` 或 `perf_counter` 对比两者在 length=10**6 时的耗时差异；\n3. 说明为何切片通常更快（C 层实现 vs Python 层循环）。\n\n题面以链接为准。",
+      "answer": {
+        "reference_code": "def reverse_str_slice(s):\n    return s[::-1]\n\ndef reverse_str_pointers(s):\n    a = list(s)\n    i, j = 0, len(a) - 1\n    while i < j:\n        a[i], a[j] = a[j], a[i]\n        i += 1; j -= 1\n    return ''.join(a)\n\ns = 'abcdef' * 100000\nimport time\nt0 = time.perf_counter(); reverse_str_slice(s); t1 = time.perf_counter()\nt2 = time.perf_counter(); reverse_str_pointers(s); t3 = time.perf_counter()\nprint(f'slice={t1-t0:.6f}s pointers={t3-t2:.6f}s')"
+      },
+      "explanation": "切片在 CPython 中由 C 层实现（一次拷贝），而双指针是 Python 字节码循环，解释器开销大得多。字符串不可变，原地交换必须借助 list 中转，且 join 回字符串——这也是「可变/不可变」语义对性能的直接影响。",
+      "tags": ["切片", "不可变对象", "性能对比"],
+      "source": "leetcode",
+      "source_ref": "LeetCode 344 reverse-string",
+      "category": "算法题",
+      "platform": "leetcode",
+      "external_url": "https://leetcode.cn/problems/reverse-string/"
+    }
+  ]
+}

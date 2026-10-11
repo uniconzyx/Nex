@@ -1,0 +1,104 @@
+{
+  "meta": {
+    "chapter": "mw-ch06",
+    "note": "Kafka 生产者可靠性、幂等/事务、rebalance 与交付语义的高频面试问答。"
+  },
+  "items": [
+    {
+      "question": "Kafka 如何保证消息不丢？",
+      "answer_md": "要**分三个环节**回答，每个环节给一条对策，而不是只背一句「acks=all」。\n\n**① 生产端**\n- 配置 `acks=all`（等当前 ISR 全部确认）；\n- `retries` 调大（或 `retries=Integer.MAX_VALUE`）；\n- 开启 `enable.idempotence=true`（它会自动把 `acks` 提升为 `all`，并限制 `max.in.flight ≤ 5`）；\n- **必须处理回调异常** —— 最常见的丢消息是 `send()` 层的 try-catch 掩盖了异步失败。\n\n**② 存储端**\n- `replication.factor >= 3`；\n- **`min.insync.replicas >= 2`**（这是最容易被漏掉的一条）；\n- `unclean.leader.election.enable=false`（禁止落后副本当选 leader）。\n\n**③ 消费端**\n- `enable.auto.commit=false`，改为**处理成功后手动提交位移**；\n- 若用异步提交，务必在 `close()` 与 rebalance 回调里补一次 `commitSync()`；\n- 业务侧做幂等，消化 at-least-once 带来的重复。\n\n**一句话总结**：生产看 acks、存储看 ISR 与 min.insync、消费看提交时机。\n",
+      "follow_ups": [
+        "为什么只配 `acks=all` 不够？请说出 `min.insync.replicas` 的作用。",
+        "`acks=all` 和 `replication.factor=3` 是不是同一件事？",
+        "如果消费端已经保证不丢，生产端还需要 `acks=all` 吗？"
+      ],
+      "difficulty": "medium",
+      "company_tags": [
+        "字节跳动",
+        "美团",
+        "阿里巴巴",
+        "滴滴"
+      ]
+    },
+    {
+      "question": "为什么会重复消费？怎么解决？",
+      "answer_md": "**先说结论**：重复消费不是 bug，而是 **at-least-once 语义的必然代价** —— 除非引入跨系统事务。\n\n**两个具体窗口**：\n1. **处理完但提交位移前崩溃** → 重启后从上次提交点重放；\n2. **rebalance 导致分区易主** → 新消费者从旧提交点开始重放。\n\n**为什么不能靠\"调参\"根治**：因为「业务处理」与「位移提交」在两个独立系统上（业务可能在 MySQL，\n位移在 `__consumer_offsets`），它们之间没有原子提交协议。先提交则可能丢，先处理则可能重，二者不可兼得。\n\n**正确的解法是业务幂等**，三种常用手段：\n- **唯一键 / 去重表**：把消息 ID 写入带唯一索引的表，插入冲突即视为重复；\n- **状态机 / 版本号**：只接受状态向前的更新（如订单只允许 `已支付 → 已发货`，重复的 `已支付` 被忽略）；\n- **Redis `SETNX`**：适合高 QPS 场景，需注意 key 的 TTL 与内存占用。\n\n**加分点**：如果业务是 Kafka → Kafka 的流处理，可以用**生产者事务 + `isolation.level=read_committed`**\n实现 Kafka 内部的 exactly-once；一旦跨到外部系统，就必须回到业务幂等。\n",
+      "follow_ups": [
+        "`enable.idempotence=true` 能防止消费者重复吗？",
+        "rebalance 为什么也是重复消费的高发窗口？",
+        "用 Redis 做去重时，TTL 设多长合适？"
+      ],
+      "difficulty": "medium",
+      "company_tags": [
+        "阿里巴巴",
+        "腾讯",
+        "快手",
+        "京东"
+      ]
+    },
+    {
+      "question": "rebalance 是什么？如何减少 rebalance？",
+      "answer_md": "**定义**：消费者组内重新分配「分区 → 消费者」归属的过程。\n\n**三类触发条件**：\n1. **成员变化**：新消费者加入、消费者主动 `close()`、消费者崩溃被踢；\n2. **订阅变化**：`subscribe()` 的 Topic 列表变更；\n3. **分区数变化**：Topic 增加了分区。\n\n**「假故障」才是线上主因**（这三条最值得展开）：\n- `max.poll.interval.ms` 太小 → **业务处理超时被踢**（注意它管的不是网络，而是两次 `poll()` 的间隔）；\n- `session.timeout.ms` 太小 → 网络抖动 / GC 停顿导致心跳超时（约束：`heartbeat < session/3`）；\n- 消费者频繁重启（滚动发布、OOM Kill、健康检查误杀）。\n\n**减少手段**：\n1. 调大 `max.poll.interval.ms`，或调小 `max.poll.records` 让每批更小；\n2. 调大 `session.timeout.ms` 并让 `heartbeat.interval.ms < session/3`；\n3. 使用 **`CooperativeStickyAssignor`** —— 把「全体停摆」改成「只搬迁必要分区」；\n4. 消除消费者重启的外部原因。\n\n**要主动提的点**：Eager 协议下 rebalance 是 **Stop-The-World**（所有消费者先放弃全部分区），\nCooperative 协议只撤销需要变动的分区，停摆面与搬迁量成正比。这是 2.4 之后最重要的改进。\n",
+      "follow_ups": [
+        "`max.poll.interval.ms` 与 `session.timeout.ms` 的区别是什么？",
+        "StickyAssignor 和 CooperativeStickyAssignor 有什么不同？",
+        "从 Eager 切到 Cooperative 需要注意什么？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "字节跳动",
+        "美团",
+        "拼多多",
+        "网易"
+      ]
+    },
+    {
+      "question": "Kafka 的三种消息交付语义分别怎么实现？",
+      "answer_md": "**一张表说清，顺序不能错**：\n\n| 语义 | 实现方式 | 代价 |\n|---|---|---|\n| **at-most-once** | `enable.auto.commit=true`，或先 `commitSync()` 再处理 | 可能**丢** |\n| **at-least-once** | `enable.auto.commit=false` + 处理成功后 `commitSync()` | 可能**重**（需业务幂等） |\n| **exactly-once** | 生产者事务（`transactional.id`）+ 消费者 `isolation.level=read_committed` | 仅限 **Kafka 内部** |\n\n**必须点出的三个易错点**：\n1. **Kafka 默认不是 at-least-once**：`enable.auto.commit` 默认为 `true`，属于 at-most-once 风险区；\n2. **exactly-once 覆盖不到外部系统**：它只保证「消费位移」与「生产输出」在 Kafka 内部原子提交，\n   Kafka → MySQL 仍需两阶段提交或业务幂等；\n3. **生产者 `acks` 与交付语义是两回事**：前者是生产端持久性，后者是消费端处理与提交的顺序。\n\n**一句话记忆**：先提交后处理 = 至多一次；先处理后提交 = 至少一次；两者同事务 = 精确一次。\n",
+      "follow_ups": [
+        "exactly-once 为什么必须依赖事务？",
+        "at-least-once 的重复规模怎么估算？",
+        "如果业务既不能丢也不能重，工程上怎么做？"
+      ],
+      "difficulty": "medium",
+      "company_tags": [
+        "腾讯",
+        "百度",
+        "shopee",
+        "蚂蚁集团"
+      ]
+    },
+    {
+      "question": "Kafka 的消费者位移存在哪里？为什么这样设计？",
+      "answer_md": "**存在内部 Topic `__consumer_offsets` 里**（Kafka 0.9 起从 ZooKeeper 迁移过来）。\n\n**三个要点**：\n1. **默认 50 个分区**，路由规则 `partition = hash(groupId) % 50` —— **同一个 group 的位移落在同一分区**，\n   因此天然有序（避免位移乱序回退）；\n2. **`cleanup.policy=compact`（日志压缩）**：只需保留每个 `(group, topic, partition)` 的**最新值**，\n   空间占用与**提交次数无关**，只与 group 数 × 分区数相关；\n3. **它本身也走副本机制**（受 `offsets.topic.replication.factor` 控制），因此不具备额外的单点。\n\n**为什么这样设计（这是加分点）**：\n- **一致性**：位移更新与业务消息写入共用同一套复制与 ISR 机制，不需要引入外部位移存储；\n- **消除故障域拆分**：若位移存在 MySQL/Redis，就多了一个「消费链路的单点」；\n- **顺序性**：按 groupId 哈希到固定分区，保证同一 group 的位移提交有序。\n\n**工程推论**：位移提交本身是**一次真实写入**，所以「每条消息都 commitSync」会给 broker 带来可观负载。\n这正是「批量提交优于逐条提交」的硬理由 —— 不只是网络往返，还有 broker 端写入压力。\n",
+      "follow_ups": [
+        "为什么不建议修改 `offsets.topic.num.partitions`？",
+        "compact 与 delete 两种清理策略分别适合什么场景？",
+        "如何查询某个消费者组的 lag？"
+      ],
+      "difficulty": "medium",
+      "company_tags": [
+        "美团",
+        "字节跳动",
+        "携程",
+        "小红书"
+      ]
+    },
+    {
+      "question": "如何保证 Kafka 消息的顺序性？",
+      "answer_md": "**先明确边界**：Kafka **只保证单个分区内有序**，不保证 Topic 全局有序。\n\n**要实现「同一维度有序」，需要三个条件同时满足**：\n1. **同分区**：用该维度作 key（如订单号），让 `murmur2(key) % N` 落到同一分区；\n2. **幂等开启**：`enable.idempotence=true`，否则重试会造成同分区乱序；\n3. **`max.in.flight.requests.per.connection ≤ 5`**：开启幂等后 Kafka 会强制这个上限。\n\n**三个高频误区**：\n- 用**消息 ID** 当 key → 每个 key 都不同 → 散到不同分区 → **完全没有有序性**；\n- 认为「单分区天然有序，所以单分区最安全」→ 但单分区意味**并行度 1**，吞吐受限；\n- 认为「开了幂等就有序」→ 幂等主要解决**重复**，顺序还需要 `in.flight` 配合。\n\n**如果必须全局有序**：只能单分区（或消费端做全局排序，代价是延迟与内存）。\n实际业务中更常见的是「**局部有序 + 全局无序**」：例如按用户有序、按订单有序，\n跨用户/跨订单不要求有序 —— 这是正确的工程取舍。\n",
+      "follow_ups": [
+        "为什么重试会导致乱序？",
+        "扩分区为什么会影响有序性？",
+        "消费者多线程处理时怎么保持分区内有序？"
+      ],
+      "difficulty": "medium",
+      "company_tags": [
+        "阿里巴巴",
+        "拼多多",
+        "字节跳动",
+        "bilibili"
+      ]
+    }
+  ]
+}

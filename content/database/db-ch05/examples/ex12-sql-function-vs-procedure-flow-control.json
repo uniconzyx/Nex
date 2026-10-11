@@ -1,0 +1,9 @@
+{
+  "title": "SQL：自定义函数（DETERMINISTIC）与流程控制 IF/CASE/WHILE/REPEAT/LOOP",
+  "code_lang": "sql",
+  "code_std": "mysql",
+  "stdin": "",
+  "expected_output": "-- 期望结构要点(非实测):\n--   1) FUNCTION 必须 RETURNS 一个标量; 不可含 COMMIT/ROLLBACK; 不可返回结果集\n--   2) DETERMINISTIC / NO SQL 声明影响基于 statement 的 binlog 复制正确性\n--   3) 函数可出现在 SELECT/WHERE 表达式里; 过程只能 CALL, 不能 SELECT p(...)\n--   4) WHILE 前测(可能 0 次) 与 REPEAT...UNTIL 后测(至少 1 次) 是核心差异\n--   SELECT 结果集表头: tax (单列一行, 值需真实执行确认)",
+  "code": "-- ⚠️ 本机无 MySQL 凭证, 未实跑; 只作语法与写法参考\nDELIMITER $$\n-- 自定义函数: 必须 RETURNS 恰好一个标量, 且不可含事务控制语句\nCREATE FUNCTION f_tax(p_salary DECIMAL(10,2))\nRETURNS DECIMAL(10,2)\nDETERMINISTIC\nNO SQL\nBEGIN\n    RETURN p_salary * 0.10;\nEND$$\n\n-- 流程控制示例: IF / CASE / WHILE / REPEAT / LOOP\nCREATE PROCEDURE p_flow(IN p_n INT, OUT p_sum INT, OUT p_grade CHAR(1))\nBEGIN\n    DECLARE v_i INT DEFAULT 0;\n    SET p_sum = 0;\n    WHILE v_i < p_n DO              -- 前测循环: 可能 0 次\n        SET v_i = v_i + 1;\n        SET p_sum = p_sum + v_i;\n    END WHILE;\n    REPEAT                          -- 后测循环: 至少 1 次\n        SET v_i = v_i - 1;\n    UNTIL v_i <= 0 END REPEAT;\n    CASE                            -- 搜索 CASE(存储程序语句形态)\n        WHEN p_sum >= 90 THEN SET p_grade = 'A';\n        WHEN p_sum >= 60 THEN SET p_grade = 'B';\n        ELSE SET p_grade = 'F';\n    END CASE;\nEND$$\nDELIMITER ;\n\nSELECT f_tax(8000.00) AS tax;       -- 函数出现在表达式位置",
+  "_verified": false
+}

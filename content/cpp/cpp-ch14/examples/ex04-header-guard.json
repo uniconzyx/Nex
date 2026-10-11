@@ -1,0 +1,8 @@
+{
+  "title": "头文件守卫效果演示（#ifndef 防重定义）",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "ok",
+  "code": "#include <iostream>\n#define INCLUDED_ONCE\n#ifndef INCLUDED_ONCE\n#define INCLUDED_ONCE\nint helper() { return 1; }\n#endif\n#ifndef INCLUDED_ONCE\n#define INCLUDED_ONCE\nint helper() { return 2; }   // 若未被守卫会重复定义，编译失败\n#endif\nint main() { std::cout << \"ok\\n\"; }"
+}

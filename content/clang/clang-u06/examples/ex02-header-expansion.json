@@ -1,0 +1,17 @@
+{
+  "title": "预处理是文本包含：为什么一个头文件改动会波及所有包含它的 .c",
+  "code_lang": "bash",
+  "code_std": "bash5",
+  "stdin": "",
+  "expected_output": "$ wc -l main.c util.h\n  8 main.c\n  1 util.h\n  9 total\n$ gcc -E main.c -o main.i\n$ wc -l main.i            # 展开后行数：stdio.h + util.h 的内容都进来了\n1025 main.i\n$ grep -n 'int add' main.i   # 头文件里的声明出现在 main.i 中（文本复制）\n1018:int add(int a, int b);\n$ gcc -E util.c -o util.i\n$ grep -c 'int add' util.i   # util.i 里也有同一份声明\n2",
+  "code": "#!/bin/sh\n# 预处理是文本包含：为什么一个头文件改动会波及所有包含它的 .c\n# 期望输出见 expected_output（本机 MinGW 工具链 + GNU Make 真实执行捕获）\n\ncat > util.h << 'EOF'\nint add(int a, int b);\nEOF\n\ncat > util.c << 'EOF'\n#include \"util.h\"\n\nint add(int a, int b)\n{\n    return a + b;\n}\nEOF\n\ncat > main.c << 'EOF'\n#include <stdio.h>\n#include \"util.h\"\n\nint main(void)\n{\n    printf(\"add(2, 3) = %d\\n\", add(2, 3));\n    return 0;\n}\nEOF\n\nwc -l main.c util.h\ngcc -E main.c -o main.i\nwc -l main.i            # 展开后行数：stdio.h + util.h 的内容都进来了\ngrep -n 'int add' main.i   # 头文件里的声明出现在 main.i 中（文本复制）\ngcc -E util.c -o util.i\ngrep -c 'int add' util.i   # util.i 里也有同一份声明\n",
+  "_step_rc": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "_verify_note": "expected_output 为 Windows + MinGW-w64（gcc 15.2）真实执行捕获；行数取决于本地标准库版本。核心结论与版本无关：头文件被**文本复制**进每个包含它的翻译单元，所以 make 若不知道这条依赖，增量构建就会漏算重编集合。"
+}

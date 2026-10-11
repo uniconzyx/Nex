@@ -1,0 +1,9 @@
+{
+  "title": "缓存雪崩：统一 TTL 导致大批 key 同一时刻失效",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "方案 A 统一 TTL=300s, key 数=1000\n  失效时刻分布（10s 一档）: {300: 1000}\n  同一档位最大失效 key 数 = 1000 (100%)\n  结论: 1000 个 key 在 300s 时全部失效 -> DB 瞬时承受 100%% 流量 = 雪崩\n\n方案 B TTL=300s + rand(0,300) 抖动, key 数=1000\n  失效时刻分布（10s 一档）共 31 档\n  同一档位最大失效 key 数 = 46 (4.6%)\n  峰值下降: 1000 -> 46 (降低 95.4%)\n  结论: 抖动把瞬时失效峰值摊平到整个时间窗，DB 压力从尖峰变成平缓\n",
+  "code": "import random\n\ndef build_keys(n, base_ttl, jitter, seed=42):\n    rng = random.Random(seed)\n    return [base_ttl + (rng.randint(0, jitter) if jitter else 0) for _ in range(n)]\n\ndef expire_histogram(ttls, bucket_size=10):\n    hist = {}\n    for t in ttls:\n        b = t // bucket_size\n        hist[b] = hist.get(b, 0) + 1\n    return hist\n\nN = 1000\nBASE = 300\n\n# 方案 A：统一 TTL（同一时刻写入，同一时刻失效）\nttl_a = build_keys(N, BASE, 0)\nhist_a = expire_histogram(ttl_a)\npeak_a = max(hist_a.values())\nprint(\"方案 A 统一 TTL=%ds, key 数=%d\" % (BASE, N))\nprint(\"  失效时刻分布（10s 一档）: %s\" % {k * 10: v for k, v in sorted(hist_a.items())})\nprint(\"  同一档位最大失效 key 数 = %d (%.0f%%)\" % (peak_a, 100.0 * peak_a / N))\nprint(\"  结论: 1000 个 key 在 300s 时全部失效 -> DB 瞬时承受 100%% 流量 = 雪崩\")\n\n# 方案 B：TTL 随机抖动\nttl_b = build_keys(N, BASE, 300)\nhist_b = expire_histogram(ttl_b)\npeak_b = max(hist_b.values())\nprint(\"\")\nprint(\"方案 B TTL=%ds + rand(0,300) 抖动, key 数=%d\" % (BASE, N))\nprint(\"  失效时刻分布（10s 一档）共 %d 档\" % len(hist_b))\nprint(\"  同一档位最大失效 key 数 = %d (%.1f%%)\" % (peak_b, 100.0 * peak_b / N))\nprint(\"  峰值下降: %d -> %d (降低 %.1f%%)\" % (peak_a, peak_b, 100.0 * (peak_a - peak_b) / peak_a))\nprint(\"  结论: 抖动把瞬时失效峰值摊平到整个时间窗，DB 压力从尖峰变成平缓\")\n",
+  "_verified": true
+}

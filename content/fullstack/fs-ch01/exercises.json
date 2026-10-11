@@ -1,0 +1,229 @@
+{
+  "meta": {
+    "chapter": "fs-ch01",
+    "title": "Web 工作原理：HTTP 与浏览器-服务器交互",
+    "note": "平台题（leetcode/nowcoder/github）只存题号/标题与链接，不存题面正文。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "difficulty": "easy",
+      "title": "HTTP 方法的安全性与幂等性",
+      "content_md": "关于 HTTP 方法的**安全性（safe）**与**幂等性（idempotent）**，下列说法正确的是？\n\nA. GET 是安全的且幂等的，因此网络超时可以放心重试\nB. POST 是幂等的，重复提交不会产生副作用\nC. PUT 是安全的，因为它只修改资源不创建资源\nD. DELETE 不安全但也不幂等，重试会报错",
+      "options": [
+        {
+          "key": "A",
+          "text": "GET 是安全的且幂等的，因此网络超时可以放心重试"
+        },
+        {
+          "key": "B",
+          "text": "POST 是幂等的，重复提交不会产生副作用"
+        },
+        {
+          "key": "C",
+          "text": "PUT 是安全的，因为它只修改资源不创建资源"
+        },
+        {
+          "key": "D",
+          "text": "DELETE 不安全但也不幂等，重试会报错"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "A"
+        ]
+      },
+      "explanation": "GET 安全（不改服务端状态）且幂等（执行多次效果相同），因此可被预取、缓存，网络层也可自动重试。\nB 错：POST 既不安全也不幂等，重复提交会重复创建，必须靠幂等键去重。\nC 错：PUT **不安全**（会改变状态），但**幂等**（同一份内容重复 PUT 结果相同）。\nD 错：DELETE 不安全，但**幂等**——删同一个资源，删一次和删多次的最终状态相同。",
+      "tags": [
+        "http",
+        "method",
+        "idempotent"
+      ],
+      "source": "self",
+      "source_ref": "RFC 9110 §9.2（Safe/Idempotent Methods）",
+      "category": "基础题",
+      "platform": "self"
+    },
+    {
+      "type": "choice",
+      "difficulty": "mid",
+      "title": "301 / 302 / 307 的差别",
+      "content_md": "某站把 `/old` 临时迁移到 `/new`（几周后会迁回），但有工程师写成了 `301`。另一个接口在 POST 成功后返回 `302` 跳到结果页，导致部分客户端把 POST 变成了 GET。下列判断**正确**的是？\n\nA. 写成 301 没问题，301 和 302 只差一个数字\nB. 临时迁移应使用 302 或 307；301 会被浏览器长期缓存，难以回滚\nC. 302 保证方法不变，问题出在客户端实现有 bug\nD. POST 后应返回 301 以形成 POST-Redirect-GET 模式",
+      "options": [
+        {
+          "key": "A",
+          "text": "写成 301 没问题，301 和 302 只差一个数字"
+        },
+        {
+          "key": "B",
+          "text": "临时迁移应使用 302 或 307；301 会被浏览器长期缓存，难以回滚"
+        },
+        {
+          "key": "C",
+          "text": "302 保证方法不变，问题出在客户端实现有 bug"
+        },
+        {
+          "key": "D",
+          "text": "POST 后应返回 301 以形成 POST-Redirect-GET 模式"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "A 错、B 对：301 是**永久**重定向，浏览器/CDN 会**长期缓存**，临时迁移用 301 一旦要迁回极难生效。\nC 错：302 在**历史实现中允许把 POST 改写为 GET**，这不是客户端 bug 而是规范遗留；要保证方法不变必须用 **307/308**。\nD 错：POST-Redirect-GET 模式应返回 **303 See Other**（明确要求用 GET 取新地址），不是 301。",
+      "tags": [
+        "http",
+        "status-code",
+        "redirect"
+      ],
+      "source": "self",
+      "source_ref": "RFC 9110 §15.4（Redirection 3xx）",
+      "category": "基础题",
+      "platform": "self"
+    },
+    {
+      "type": "choice",
+      "difficulty": "mid",
+      "title": "no-cache 与 no-store 的区别",
+      "content_md": "服务端在一个含用户隐私数据的接口上写了 `Cache-Control: no-cache`，认为这样就「不会缓存、数据不会泄露」。这个判断的问题是？\n\nA. 没问题，no-cache 就是完全不缓存\nB. no-cache 表示「可缓存但每次必须校验」，仍可能被存下来；禁止存储应用 no-store\nC. no-cache 等价于 max-age=0，两者完全一致，写法没错\nD. 隐私数据只需把 max-age 设为 0 即可",
+      "options": [
+        {
+          "key": "A",
+          "text": "没问题，no-cache 就是完全不缓存"
+        },
+        {
+          "key": "B",
+          "text": "no-cache 表示「可缓存但每次必须校验」，仍可能被存下来；禁止存储应用 no-store"
+        },
+        {
+          "key": "C",
+          "text": "no-cache 等价于 max-age=0，两者完全一致，写法没错"
+        },
+        {
+          "key": "D",
+          "text": "隐私数据只需把 max-age 设为 0 即可"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "A 错、B 对：`no-cache` 的语义是「**可以缓存，但每次使用前必须向服务端校验**」，副本仍会被写入缓存；真正「任何情况下都不存储」是 **`no-store`**。\nC 错：`no-cache` 与 `max-age=0` 语义相近但不等价（前者更强制、不依赖启发式新鲜度）。\nD 错：隐私数据不仅要禁存储，还应配合 `private`（避免共享缓存/代理缓存造成越权），更稳妥的是 `no-store`。",
+      "tags": [
+        "http",
+        "cache",
+        "security"
+      ],
+      "source": "self",
+      "source_ref": "RFC 9111 §5.2（Cache-Control）",
+      "category": "基础题",
+      "platform": "self"
+    },
+    {
+      "type": "fix_error",
+      "difficulty": "mid",
+      "title": "把业务错误塞进 200 的反模式",
+      "content_md": "下面是一个存在问题的接口响应设计，请指出问题并给出修正方案。\n\n```json\nHTTP/1.1 200 OK\nContent-Type: application/json\n\n{ \"code\": 401, \"msg\": \"未登录\", \"data\": null }\n```\n\n该接口在未登录时返回 HTTP 200，把业务错误码放在响应体的 `code` 字段里。请说明这样做会造成什么后果，并给出符合协议语义的改法。",
+      "answer": {
+        "correct": "**后果**：网关、CDN、监控告警、自动重试中间件全部只看 HTTP 状态码，把错误塞进 200 会让它们认为「一切正常」——\n1. 监控的 4xx/5xx 指标恒为 0，**告警完全失效**；\n2. CDN/代理可能把这份「200 响应」**缓存**下来，导致其他用户也拿到「未登录」；\n3. 幂等重试逻辑无法判断是否该重试。\n\n**修正**：状态码表达协议级结果，详情放响应体。\n```json\nHTTP/1.1 401 Unauthorized\nContent-Type: application/json\nWWW-Authenticate: Bearer realm=\"api\"\n\n{ \"code\": \"UNAUTHENTICATED\", \"message\": \"未登录\", \"details\": null }\n```\n要点：① 用 401（未认证）/403（无权限）等正确状态码；② 401 应带 `WWW-Authenticate`；③ 响应体保留结构化错误（业务错误码用**字符串**枚举，与 HTTP 码分层，避免混淆）。"
+      },
+      "explanation": "考察「状态码是给机器/中间件判断的，响应体是给业务判断的」这一分层原则。",
+      "tags": [
+        "http",
+        "status-code",
+        "api-design"
+      ],
+      "source": "self",
+      "source_ref": "RFC 9110 §15 + REST 实践（错误响应设计）",
+      "category": "基础题",
+      "platform": "self"
+    },
+    {
+      "type": "output",
+      "difficulty": "mid",
+      "title": "重试策略的判定输出",
+      "content_md": "阅读下面代码，写出运行输出（`console.log` 的完整结果）：\n\n```js\nconst canRetry = (code, idempotent) =>\n  code === 408 || code === 429 || code >= 500 ? idempotent : false;\nconst cases = [[500, true], [503, false], [400, true], [429, true]];\nfor (const [code, idem] of cases) {\n  console.log(code + ' 幂等=' + idem + ' -> 可重试? ' + canRetry(code, idem));\n}\n```",
+      "answer": {
+        "correct": "```text\n500 幂等=true -> 可重试? true\n503 幂等=false -> 可重试? false\n400 幂等=true -> 可重试? false\n429 幂等=true -> 可重试? true\n```",
+        "explain": "关键在**运算符优先级**：`||` 与 `>=` 先算，`? :` 最后算，所以条件是 「(408 或 429 或 ≥500) ? 幂等 : false」。\n- 500：属于「可重试类别」且幂等 → true；\n- 503：类别可重试但**不幂等** → false（这是本题的核心考点：服务端错误可重试，但非幂等方法重试会重复产生副作用）；\n- 400：4xx 中不属可重试类别 → 即使幂等也 false（客户端错重试无意义）；\n- 429：限流，明确可重试（应遵守 `Retry-After`）且幂等 → true。"
+      },
+      "explanation": "把「状态码分类」与「幂等性」两个知识点结合成一条可执行的判定逻辑。",
+      "tags": [
+        "http",
+        "retry",
+        "operator-precedence"
+      ],
+      "source": "self",
+      "source_ref": "RFC 9110 §15.5（5xx）+ 幂等性重试约定",
+      "category": "基础题",
+      "platform": "self"
+    },
+    {
+      "type": "coding",
+      "difficulty": "mid",
+      "title": "用 Node 原生 http 实现符合语义的创建接口",
+      "content_md": "使用 Node.js 原生 `http` 模块实现一个最小的「创建用户」接口，要求：\n\n1. `POST /v1/users` → 成功返回 **201 Created**，并在 `Location` 头部给出新资源地址 `/v1/users/<id>`；\n2. 请求体不是合法 JSON → 返回 **400 Bad Request**；\n3. 请求体缺少 `name` 字段 → 返回 **422 Unprocessable Entity**（语法对但语义不合法）；\n4. 其他方法访问该路径 → 返回 **405 Method Not Allowed** 并带 `Allow` 头部；\n5. 所有响应都要有正确的 `Content-Type`。\n\n写出完整可运行代码，并简要说明每个状态码的选择依据。",
+      "answer": {
+        "reference_code": "const http = require('http');\n\nconst send = (res, status, body, extra = {}) => {\n  res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', ...extra });\n  res.end(JSON.stringify(body));\n};\n\nconst server = http.createServer((req, res) => {\n  if (req.url !== '/v1/users') return send(res, 404, { code: 'NOT_FOUND' });\n  if (req.method !== 'POST')\n    return send(res, 405, { code: 'METHOD_NOT_ALLOWED' }, { Allow: 'POST' });\n\n  let raw = '';\n  req.on('data', (c) => (raw += c));\n  req.on('end', () => {\n    let data;\n    try {\n      data = JSON.parse(raw);\n    } catch {\n      return send(res, 400, { code: 'INVALID_JSON' });      // 语法错 -> 400\n    }\n    if (!data || typeof data.name !== 'string' || !data.name.trim()) {\n      return send(res, 422, { code: 'VALIDATION_FAILED' }); // 语义错 -> 422\n    }\n    const id = 42;\n    send(res, 201, { id, name: data.name }, { Location: '/v1/users/' + id });\n  });\n});\n\nserver.listen(3000, () => console.log('listening on :3000'));\n",
+        "explain": "状态码依据：\n- **201 Created**：请求成功且**创建了新资源**，按规范应带 `Location` 指向新资源；\n- **400 Bad Request**：请求体不是合法 JSON，属于**报文/语法层面**的错误；\n- **422 Unprocessable Entity**：JSON 语法正确但**字段语义不合法**（缺 `name`），与 400 的区别正是「语法 vs 语义」；\n- **405 Method Not Allowed**：路径存在但方法不被支持，**必须带 `Allow`** 告知可用方法；\n- 另注意 `Content-Type` 明确声明 `charset=utf-8`，避免中文乱码；缺 `nosniff` 时浏览器可能嗅探类型。"
+      },
+      "explanation": "检验能否把状态码语义落到真实代码中，重点是 400 与 422 的分工、201 带 Location、405 带 Allow。",
+      "tags": [
+        "http",
+        "node",
+        "status-code",
+        "rest"
+      ],
+      "source": "github",
+      "source_ref": "Node.js 官方文档 http 模块（lib/http.js）示例改写",
+      "category": "算法题",
+      "platform": "github",
+      "external_url": "https://github.com/nodejs/node/blob/main/lib/http.js"
+    },
+    {
+      "type": "coding",
+      "difficulty": "hard",
+      "title": "LRU 缓存（缓存淘汰策略）",
+      "content_md": "设计并实现一个 LRU（最近最少使用）缓存，支持 `get(key)` 与 `put(key, value)`，两者都要求 **O(1)** 平均时间复杂度；容量满时淘汰最久未使用的键。\n\n提示：需要「哈希表 + 双向链表」的组合——哈希表负责 O(1) 定位节点，双向链表负责 O(1) 移动节点到表头 / 摘除表尾。\n\n（本题只给元数据与链接，题面以原站为准。）",
+      "answer": {
+        "correct": "解法要点（不给完整题面）：\n1. 用 `Map`（或手写哈希表）存 `key -> 链表节点`；\n2. 用**双向链表**维护使用顺序：表头 = 最近使用、表尾 = 最久未用；\n3. `get` 命中后把节点**移到表头**；\n4. `put` 时若 key 已存在则更新并移到表头；否则新建节点插到表头，若超出容量则**摘除表尾节点并同步删除哈希表条目**。\n\n与本章的关联：HTTP 缓存同样需要「淘汰策略」——`Cache-Control` 决定能否复用，而缓存空间有限时必须决定「淘汰谁」，LRU 正是 CDN/代理缓存与浏览器缓存的常用策略。"
+      },
+      "explanation": "考察哈希表 + 双向链表的组合设计能力，同时呼应 HTTP 缓存的淘汰策略。",
+      "tags": [
+        "algorithm",
+        "lru",
+        "hashmap",
+        "linked-list"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 146 · LRU 缓存",
+      "category": "算法题",
+      "platform": "leetcode",
+      "external_url": "https://leetcode.cn/problems/lru-cache/"
+    },
+    {
+      "type": "coding",
+      "difficulty": "mid",
+      "title": "日志速率限制器（限流与 429）",
+      "content_md": "设计一个日志速率限制器：给定一条消息与其时间戳，若该消息在**过去 10 秒内**已经出现过，则丢弃并返回 `false`；否则记录并返回 `true`。\n\n（本题只给元数据与链接，题面以原站为准。）",
+      "answer": {
+        "correct": "解法要点（不给完整题面）：\n用一个哈希表记录「消息 -> 上次通过的时间戳」，每次到来时判断差值是否 `< 10`：是则拒绝，否则更新时间戳并放行。\n\n与本章的关联：这正是服务端**限流**的最小模型。真实限流（令牌桶/漏桶/滑动窗口）触发时应返回 **429 Too Many Requests** 并带 **`Retry-After`** 告知客户端何时重试——这样客户端（以及中间件）才能正确地实施退避重试。"
+      },
+      "explanation": "考察时间窗口去重的实现，并关联 429 状态码与 Retry-After 的工程含义。",
+      "tags": [
+        "algorithm",
+        "rate-limit",
+        "hashmap",
+        "429"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 359 · 日志速率限制器",
+      "category": "算法题",
+      "platform": "leetcode",
+      "external_url": "https://leetcode.cn/problems/logger-rate-limiter/"
+    }
+  ]
+}

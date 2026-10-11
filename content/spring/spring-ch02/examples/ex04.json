@@ -1,0 +1,8 @@
+{
+  "title": "BeanPostProcessor 前置/后置拦截",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "[BPP] before bean\n[BPP] after bean\nprocessed: true",
+  "code": "public class Main {\n    interface BeanPostProcessor {\n        Object postBefore(Object b, String n);\n        Object postAfter(Object b, String n);\n    }\n\n    static class LogBPP implements BeanPostProcessor {\n        public Object postBefore(Object b, String n) { System.out.println(\"[BPP] before \" + n); return b; }\n        public Object postAfter(Object b, String n) { System.out.println(\"[BPP] after \" + n); return b; }\n    }\n\n    static class Bean { String name() { return \"bean\"; } }\n\n    public static void main(String[] args) {\n        Bean b = new Bean();\n        BeanPostProcessor bpp = new LogBPP();\n        Object x = bpp.postBefore(b, \"bean\");\n        Object y = bpp.postAfter(x, \"bean\");\n        System.out.println(\"processed: \" + (y == b));\n    }\n}\n"
+}

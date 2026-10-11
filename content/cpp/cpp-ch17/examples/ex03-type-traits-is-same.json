@@ -1,0 +1,8 @@
+{
+  "title": "type_traits 萃取：std::is_same",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "true",
+  "code": "#include <iostream>\n#include <type_traits>\n\nint main() {\n    bool b = std::is_same_v<int, int>;\n    std::cout << std::boolalpha << b;\n}"
+}

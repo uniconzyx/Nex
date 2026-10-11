@@ -1,0 +1,50 @@
+{
+  "meta": {
+    "chapter": "py-ch07",
+    "count": 1,
+    "note": "并发综合项目"
+  },
+  "items": [
+    {
+      "title": "可控并发的批量抓取器（含限流、重试与优雅退出）",
+      "requirement_md": "实现一个批量任务执行器，同时提供线程版与协程版，**共享同一套限流/重试/统计逻辑**，便于对比两种模型。\n\n**必须满足**：\n1. **并发限流**：任意时刻在途任务数不超过 `max_concurrency`（线程版用 `Semaphore`，协程版用 `asyncio.Semaphore`）。\n2. **重试**：失败任务按**指数退避**重试至多 N 次，退避时间可配置；重试计数必须正确统计。\n3. **超时**：单任务超时记为 `timeout`，不拖垮整体。\n4. **优雅退出**：收到停止信号后不再接收新任务，等在途任务完成再返回（不得强杀线程/任务）。\n5. **统计报表**：成功数、失败数、超时数、总重试次数、峰值并发（要求峰值 ≤ `max_concurrency`，作为正确性断言）。\n6. **可测性**：所有等待用**可注入的 fake 时钟/执行器**，使单元测试**不依赖真实时间**，判据为计数与布尔量。",
+      "tasks": [
+        {
+          "title": "抽象统一的执行接口",
+          "verification": {
+            "type": "test",
+            "desc": "线程版与协程版实现同一组方法签名（run_all / stats / stop），同一套用例可通过参数切换后端跑通"
+          }
+        },
+        {
+          "title": "实现限流与峰值统计",
+          "verification": {
+            "type": "test",
+            "desc": "提交 50 个任务、max_concurrency=4，断言 stats['peak_concurrency'] <= 4 且成功数为 50"
+          }
+        },
+        {
+          "title": "实现指数退避重试",
+          "verification": {
+            "type": "test",
+            "desc": "注入「前 2 次必失败」的假任务与 fake sleep，断言 retry_total == 2、退避序列严格递增"
+          }
+        },
+        {
+          "title": "验证优雅退出不丢结果",
+          "verification": {
+            "type": "test",
+            "desc": "在任务执行中途调用 stop()，断言「已开始的任务全部有终态」，且没有任务处于未完成状态"
+          }
+        },
+        {
+          "title": "对比两种模型的计数一致性",
+          "verification": {
+            "type": "test",
+            "desc": "同一输入下线程版与协程版的 success/fail/timeout 三元组完全相等（排除调度差异）"
+          }
+        }
+      ]
+    }
+  ]
+}

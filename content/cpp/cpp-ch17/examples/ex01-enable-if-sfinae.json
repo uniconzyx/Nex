@@ -1,0 +1,8 @@
+{
+  "title": "std::enable_if 与 SFINAE 重载选择（整型 vs 非整型）",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "1",
+  "code": "#include <iostream>\n#include <type_traits>\n\ntemplate <typename T>\ntypename std::enable_if<std::is_integral<T>::value, int>::type\ndispatch(T) { return 1; }\n\ntemplate <typename T>\ntypename std::enable_if<!std::is_integral<T>::value, int>::type\ndispatch(T) { return 2; }\n\nint main() {\n    int r = dispatch(42);\n    std::cout << r;\n}"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "中缀转后缀（调度场算法）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "中缀: a+b*c-d\n后缀: abc*+d-",
+  "code": "#include <stdio.h>\n\nstatic int prec(char c) {\n    if (c == '*' || c == '/') return 2;\n    if (c == '+' || c == '-') return 1;\n    return 0;\n}\n\nint main(void) {\n    const char *in = \"a+b*c-d\";\n    char st[64], out[64];\n    int top = 0, k = 0;\n    for (int i = 0; in[i]; i++) {\n        char c = in[i];\n        if (c >= 'a' && c <= 'z') { out[k++] = c; }\n        else {\n            while (top > 0 && prec(st[top - 1]) >= prec(c)) out[k++] = st[--top];\n            st[top++] = c;\n        }\n    }\n    while (top > 0) out[k++] = st[--top];\n    out[k] = 0;\n    printf(\"中缀: %s\\n\", in);\n    printf(\"后缀: %s\\n\", out);\n    return 0;\n}"
+}

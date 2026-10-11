@@ -1,0 +1,8 @@
+{
+  "title": "根据 Cache-Control 判定缓存策略",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "Cache-Control: public, max-age=31536000, immutable   [有 ETag]\n  判定: fresh+revalidate —— 强缓存 31536000 秒；过期后可用 ETag 协商\n\nCache-Control: no-cache   [有 ETag]\n  判定: revalidate —— 可缓存，但每次使用前必须校验（可能得到 304）\n\nCache-Control: no-store   [无 ETag]\n  判定: no-store —— 完全不存储，每次重新请求\n\nCache-Control: max-age=0   [有 ETag]\n  判定: revalidate —— 无新鲜度信息，必须校验\n\nCache-Control: private, max-age=60   [无 ETag]\n  判定: fresh —— 强缓存 60 秒；过期后需完整重新获取\n\n关键区分：no-cache 不是「不缓存」（它仍会缓存，只是每次必须校验）；no-store 才是真的不存储。",
+  "code": "function decide(cacheControl, hasETag) {\n  const cc = String(cacheControl || '').toLowerCase();\n  const has = (t) => cc.split(',').map((s) => s.trim()).includes(t);\n\n  if (has('no-store')) return ['no-store', '完全不存储，每次重新请求'];\n  if (has('no-cache')) return ['revalidate', '可缓存，但每次使用前必须校验（可能得到 304）'];\n\n  const m = cc.match(/max-age=(\\d+)/);\n  if (m && Number(m[1]) > 0) {\n    return hasETag\n      ? ['fresh+revalidate', '强缓存 ' + m[1] + ' 秒；过期后可用 ETag 协商']\n      : ['fresh', '强缓存 ' + m[1] + ' 秒；过期后需完整重新获取'];\n  }\n  return ['revalidate', '无新鲜度信息，必须校验'];\n}\n\nconst CASES = [\n  ['public, max-age=31536000, immutable', true],\n  ['no-cache', true],\n  ['no-store', false],\n  ['max-age=0', true],\n  ['private, max-age=60', false],\n];\n\nfor (const [cc, etag] of CASES) {\n  const [mode, note] = decide(cc, etag);\n  console.log('Cache-Control: ' + cc + (etag ? '   [有 ETag]' : '   [无 ETag]'));\n  console.log('  判定: ' + mode + ' —— ' + note);\n  console.log('');\n}\nconsole.log('关键区分：no-cache 不是「不缓存」（它仍会缓存，只是每次必须校验）；no-store 才是真的不存储。');"
+}

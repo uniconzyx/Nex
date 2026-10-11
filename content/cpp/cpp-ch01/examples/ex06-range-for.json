@@ -1,0 +1,8 @@
+{
+  "title": "范围 for 求和",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "12",
+  "code": "#include <iostream>\n#include <vector>\n\nint main() {\n    std::vector<int> v{5, 4, 3};\n    int s = 0;\n    for (int x : v) s += x;\n    std::cout << s;\n}"
+}

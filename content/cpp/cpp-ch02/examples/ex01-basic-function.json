@@ -1,0 +1,8 @@
+{
+  "title": "函数定义与调用",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "5",
+  "code": "#include <iostream>\n\nint add(int a, int b) { return a + b; }\n\nint main() {\n    std::cout << add(2, 3);\n}"
+}

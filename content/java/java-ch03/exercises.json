@@ -1,0 +1,129 @@
+{
+  "meta": {
+    "chapter": "java-ch03",
+    "note": "7 题，含选择题/输出题/改错题/编程题；算法题来自 LeetCode 仅存元数据+链接，不搬运题面。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "关于方法重写（override）与方法重载（overload），正确的是",
+      "content_md": "选择**正确**的描述。",
+      "options": [
+        { "key": "A", "text": "重载（overload）在运行期根据对象实际类型决定调用哪个方法" },
+        { "key": "B", "text": "重写（override）要求子类方法访问权限可以比父类更小（如 public→protected）" },
+        { "key": "C", "text": "重写（override）在运行期依据对象实际类型动态分派；重载（overload）在编译期按实参静态类型选定" },
+        { "key": "D", "text": "字段也会参与多态，父类引用访问到子类字段" }
+      ],
+      "answer": { "correct": ["C"] },
+      "explanation": "override 靠 invokevirtual 动态分派（运行期按实际类型），overload 编译期静态解析；重写不能缩小访问权限；字段没有多态（只有隐藏）。",
+      "tags": ["override", "overload", "polymorphism"],
+      "source": "book",
+      "source_ref": "《Java 核心技术 卷I》第 5 章 继承"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "读代码写输出（字段隐藏：字段无多态）",
+      "content_md": "```java\npublic class Main {\n    static class Base { int n = 1; }\n    static class Derived extends Base { int n = 2; }\n    public static void main(String[] args) {\n        Derived d = new Derived();\n        Base b = d;\n        System.out.println(d.n);\n        System.out.println(b.n);\n    }\n}\n```",
+      "answer": { "output": "2\n1" },
+      "explanation": "字段访问按静态类型解析：d.n 看 Derived 字段得 2，b.n 看 Base 字段得 1；字段不参与动态分派。",
+      "tags": ["field-hiding", "polymorphism"],
+      "source": "book",
+      "source_ref": "《Java 核心技术 卷I》第 5 章 字段隐藏"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "读代码写输出（super 触发父类构造与方法）",
+      "content_md": "```java\npublic class Main {\n    static class Animal {\n        Animal() { System.out.println(\"Animal()\"); }\n        void speak() { System.out.println(\"animal sound\"); }\n    }\n    static class Dog extends Animal {\n        Dog() { super(); System.out.println(\"Dog()\"); }\n        @Override void speak() { super.speak(); System.out.println(\"woof\"); }\n    }\n    public static void main(String[] args) { new Dog().speak(); }\n}\n```",
+      "answer": { "output": "Animal()\nDog()\nanimal sound\nwoof" },
+      "explanation": "构造器链：先父类 Animal() 再 Dog()；speak 用 super.speak() 显式调父类版后再打印 woof。",
+      "tags": ["inheritance", "super"],
+      "source": "book",
+      "source_ref": "《Java 核心技术 卷I》第 5 章 继承"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "修复编译错误：子类未调用父类带参构造器",
+      "content_md": "以下代码编译失败（父类没有无参构造器，子类未显式 super）。请修复：\n\n```java\npublic class Main {\n    static class Base {\n        int v;\n        Base(int v) { this.v = v; }\n    }\n    static class Sub extends Base {\n        Sub() { System.out.println(\"sub\"); }\n    }\n    public static void main(String[] args) { new Sub(); }\n}\n```",
+      "answer": {
+        "reference_code": "public class Main {\n    static class Base {\n        int v;\n        Base(int v) { this.v = v; }\n    }\n    static class Sub extends Base {\n        Sub() { super(0); System.out.println(\"sub\"); }\n    }\n    public static void main(String[] args) { new Sub(); }\n}"
+      },
+      "explanation": "父类只有带参构造器，子类必须用 super(实参) 显式调用，且为构造器第一条语句。",
+      "tags": ["inheritance", "constructor-chain"],
+      "source": "self",
+      "source_ref": "CppMind java-ch03 concept 01"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "关于抽象类与接口，正确的是",
+      "content_md": "选择**正确**的描述。",
+      "options": [
+        { "key": "A", "text": "抽象类可以多重继承，接口只能单实现" },
+        { "key": "B", "text": "接口的字段隐式为 public static final 常量，不能有实例字段；抽象类可以有实例字段与构造器" },
+        { "key": "C", "text": "抽象类的方法调用编译为 invokeinterface" },
+        { "key": "D", "text": "一个类可以实现多个抽象类" }
+      ],
+      "answer": { "correct": ["B"] },
+      "explanation": "抽象类是单继承、可有字段与构造器、方法走 invokevirtual；接口字段是常量、无实例字段、方法走 invokeinterface；类只能 extends 一个类但可 implements 多个接口。",
+      "tags": ["abstract", "interface"],
+      "source": "book",
+      "source_ref": "《Java 核心技术 卷I》第 6 章 接口"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "LeetCode 146 · LRU 缓存",
+      "content_md": "设计并实现一个 `LRUCache` 类，支持 `get(key)` 与 `put(key, value)`，容量满时淘汰最久未使用的项；封装为类并在 `main` 中自测。题面详见原题链接，本题不搬运题面。",
+      "answer": {
+        "reference_code": "import java.util.*;\npublic class Main {\n    static class Node { int k, v; Node prev, next; Node(int k,int v){this.k=k;this.v=v;} }\n    static class LRUCache {\n        private final int cap; private final Map<Integer,Node> map = new HashMap<>();\n        private final Node head = new Node(0,0), tail = new Node(0,0);\n        LRUCache(int c){ cap=c; head.next=tail; tail.prev=head; }\n        private void remove(Node n){ n.prev.next=n.next; n.next.prev=n.prev; }\n        private void toHead(Node n){ n.next=head.next; n.next.prev=n; n.prev=head; head.next=n; }\n        public int get(int k){ Node n=map.get(k); if(n==null) return -1; remove(n); toHead(n); return n.v; }\n        public void put(int k,int v){ Node n=map.get(k); if(n!=null){ n.v=v; remove(n); toHead(n); return; } n=new Node(k,v); map.put(k,n); toHead(n); if(map.size()>cap){ Node t=tail.prev; remove(t); map.remove(t.k); } }\n    }\n    public static void main(String[] args){\n        LRUCache c=new LRUCache(2);\n        c.put(1,1); c.put(2,2);\n        System.out.println(c.get(1)); c.put(3,3);\n        System.out.println(c.get(2)); c.put(4,4);\n        System.out.println(c.get(1)); System.out.println(c.get(3)); System.out.println(c.get(4));\n    }\n}"
+      },
+      "explanation": "用 HashMap + 双向链表：get/put 命中即把节点移到表头，超限时删除表尾（最久未用）。可结合 ch03 的封装与组合思想组织代码。",
+      "tags": ["design", "lru", "linked-list", "hashmap"],
+      "source": "leetcode",
+      "source_ref": "LeetCode 146（lru-cache）",
+      "external_url": "https://leetcode.cn/problems/lru-cache/",
+      "time_limit_ms": 2000,
+      "memory_limit_mb": 256,
+      "test_cases": [
+        { "input": "cap=2; put1,1; put2,2; get1; put3,3; get2; put4,4; get1/get3/get4", "expected_output": "1\n-1\n-1\n3\n4", "is_sample": true }
+      ]
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "easy",
+      "title": "LeetCode 232 · 用栈实现队列",
+      "content_md": "设计 `MyQueue` 类，仅用两个栈（组合/委托）实现 `push`、`pop`、`peek`、`empty`；封装为类并在 `main` 中自测。题面详见原题链接，本题不搬运题面。",
+      "answer": {
+        "reference_code": "import java.util.*;\npublic class Main {\n    static class MyQueue {\n        private final Deque<Integer> in = new ArrayDeque<>();\n        private final Deque<Integer> out = new ArrayDeque<>();\n        public void push(int x){ in.push(x); }\n        private void drain(){ if(out.isEmpty()) while(!in.isEmpty()) out.push(in.pop()); }\n        public int pop(){ drain(); return out.pop(); }\n        public int peek(){ drain(); return out.peek(); }\n        public boolean empty(){ return in.isEmpty() && out.isEmpty(); }\n    }\n    public static void main(String[] args){\n        MyQueue q=new MyQueue();\n        q.push(1); q.push(2);\n        System.out.println(q.peek()); System.out.println(q.pop()); System.out.println(q.empty());\n    }\n}"
+      },
+      "explanation": "用两个栈组合实现队列：push 入 in，pop/peek 时若 out 空则把 in 全部倒入 out，从而反转顺序。体现\"组合优于继承\"。",
+      "tags": ["design", "stack", "queue", "composition"],
+      "source": "leetcode",
+      "source_ref": "LeetCode 232（implement-queue-using-stacks）",
+      "external_url": "https://leetcode.cn/problems/implement-queue-using-stacks/",
+      "time_limit_ms": 2000,
+      "memory_limit_mb": 256,
+      "test_cases": [
+        { "input": "push 1; push 2; peek; pop; empty", "expected_output": "1\n1\nfalse", "is_sample": true }
+      ]
+    }
+  ]
+}

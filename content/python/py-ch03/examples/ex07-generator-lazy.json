@@ -1,0 +1,8 @@
+{
+  "title": "生成器表达式惰性求值：用到才计算",
+  "code_lang": "python",
+  "code_std": "python3.11",
+  "stdin": "",
+  "expected_output": "created, not yet computed\nyield 0\nfirst: 0\nyield 1\nsecond: 1",
+  "code": "def gen():\n    for i in range(3):\n        print(f\"yield {i}\")\n        yield i * i\n\ng = gen()\nprint(\"created, not yet computed\")\nprint(\"first:\", next(g))\nprint(\"second:\", next(g))"
+}

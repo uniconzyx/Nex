@@ -1,0 +1,8 @@
+{
+  "title": "切片产生新列表（浅拷贝）",
+  "code_lang": "python",
+  "code_std": "python3.11",
+  "stdin": "",
+  "expected_output": "xs: [1, 2, 3]\nys: [1, 2, 3, 4]",
+  "code": "xs = [1, 2, 3]\nys = xs[:]\nys.append(4)\nprint(\"xs:\", xs)\nprint(\"ys:\", ys)"
+}

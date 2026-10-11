@@ -1,0 +1,51 @@
+{
+  "meta": {
+    "chapter": "ai-ch06",
+    "category": "system",
+    "title": "RAG：向量检索与知识增强 —— 综合项目",
+    "count": 1
+  },
+  "items": [
+    {
+      "title": "只用 NumPy 搭一条可复现的 RAG 检索流水线",
+      "requirement_md": "只用 NumPy（**不允许** PyTorch / FAISS / LangChain），从零搭出一条可复现的 RAG 检索链路：\n\n1. **文档分块**：实现固定长度 + 重叠、结构感知（按句边界）、父子块三种切分，并汇报每种策略的块数与重叠占比；\n2. **向量化（合成）**：用确定性随机（np.random.default_rng(42)）为每块生成 embedding，并实现 L2 归一化；\n3. **相似度对照**：在同一批向量上分别用余弦 / 内积 / L2 计算排名，验证「归一化后三者排名一致」（复现 ex01）；\n4. **混合检索**：实现 BM25（TF 饱和 + IDF + 长度归一化）与向量检索，并用 RRF 融合，证明融合排名优于任一单路（复现 ex04/ex05）；\n5. **两阶段**：实现「双塔粗排 top-50 → 交叉编码器式重排 top-5」的简化版（重排用一个可解释的相关性打分），对比直接用 top-k 的精度；\n6. **向量索引对照**：实现 HNSW 分层下降与暴力检索，统计访问节点数与跳数（复现 ex07）；实现 IVF+PQ 量化，汇报量化误差与 top-5 召回重合（复现 ex08）；\n7. **评估闭环**：在固定相关集上计算 Recall@k / Precision@k / MRR / NDCG@k 的多组 k 对照表（复现 ex06）；\n8. **上下文拼接**：用相似度阈值过滤 + zlib.crc32 指纹去重，计算最终 token 数与压缩率（复现 ex10）。\n\n**进阶**：把 embedding 维度做成可配置，用存储估算器对比 384/768/1536 维的字节数与检索耗时判据（复现 ex09）；尝试 Matryoshka 截断后排名稳定性（复现 ex11）。",
+      "tasks": [
+        {
+          "title": "实现三种分块策略并汇报块数与重叠",
+          "verification": {
+            "type": "output",
+            "desc": "三种策略均输出块起止下标/长度/重叠字数；重叠策略无死循环（终态 end==len）；句边界策略按句聚合。"
+          }
+        },
+        {
+          "title": "验证余弦/内积/L2 归一化后排名一致",
+          "verification": {
+            "type": "output",
+            "desc": "在归一化向量上，余弦排名==内积排名、L2 升序==余弦降序，布尔判据为 True（复现 ex01）。"
+          }
+        },
+        {
+          "title": "BM25 + 向量 RRF 融合优于单路",
+          "verification": {
+            "type": "output",
+            "desc": "RRF 融合排名中，单路遗漏但在另一路靠前的文档进入 Top3；打印融合排名与单路排名对照。"
+          }
+        },
+        {
+          "title": "HNSW 与 IVF+PQ 的召回-成本对照",
+          "verification": {
+            "type": "output",
+            "desc": "HNSW 访问节点数显著少于暴力（布尔判据 True）；IVF+PQ 打印量化平均距离误差与 top-5 召回重合数，结论由实测数字推导。"
+          }
+        },
+        {
+          "title": "分层评估指标与上下文去重",
+          "verification": {
+            "type": "output",
+            "desc": "给出 k∈{1,3,5,8} 的 Recall/Precision/NDCG 对照表与 MRR；上下文拼接后打印去重块数、字符数与压缩率（用 zlib.crc32，不用 hash）。"
+          }
+        }
+      ]
+    }
+  ]
+}

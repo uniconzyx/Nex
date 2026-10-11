@@ -1,0 +1,8 @@
+{
+  "title": "完全二叉树的数组表示：父子下标关系",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "数组:  1 2 3 4 5 6 7\n父子下标关系（父=(i-1)/2, 左=2i+1, 右=2i+2）:\n  i=0 val=1 | 父=无(根) | 左=1(val=2) | 右=2(val=3)\n  i=1 val=2 | 父=0(val=1) | 左=3(val=4) | 右=4(val=5)\n  i=2 val=3 | 父=0(val=1) | 左=5(val=6) | 右=6(val=7)\n  i=3 val=4 | 父=1(val=2) | 左=无 | 右=无\n  i=4 val=5 | 父=1(val=2) | 左=无 | 右=无\n  i=5 val=6 | 父=2(val=3) | 左=无 | 右=无\n  i=6 val=7 | 父=2(val=3) | 左=无 | 右=无\n说明: 数组表示只在完全二叉树上无空洞；一般二叉树用数组会浪费 2^h 空间",
+  "code": "#include <stdio.h>\n\nint main(void) {\n    /* 完全二叉树按层序放进数组，下标从 0 开始 */\n    int t[] = {1, 2, 3, 4, 5, 6, 7};\n    int n = 7;\n    printf(\"数组: \");\n    for (int i = 0; i < n; i++) printf(\" %d\", t[i]);\n    printf(\"\\n\");\n    printf(\"父子下标关系（父=(i-1)/2, 左=2i+1, 右=2i+2）:\\n\");\n    for (int i = 0; i < n; i++) {\n        int p = (i - 1) / 2, L = 2 * i + 1, R = 2 * i + 2;\n        printf(\"  i=%d val=%d | 父=%s\", i, t[i], i == 0 ? \"无(根)\" : \"\");\n        if (i != 0) printf(\"%d(val=%d)\", p, t[p]);\n        printf(\" | 左=\");\n        if (L < n) printf(\"%d(val=%d)\", L, t[L]); else printf(\"无\");\n        printf(\" | 右=\");\n        if (R < n) printf(\"%d(val=%d)\", R, t[R]); else printf(\"无\");\n        printf(\"\\n\");\n    }\n    printf(\"说明: 数组表示只在完全二叉树上无空洞；一般二叉树用数组会浪费 2^h 空间\\n\");\n    return 0;\n}"
+}

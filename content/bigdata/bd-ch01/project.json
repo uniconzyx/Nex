@@ -1,0 +1,31 @@
+{
+  "meta": { "chapter": "bd-ch01", "category": "basic" },
+  "items": [
+    {
+      "title": "从零用 Python 模拟一个迷你 HDFS 元数据与副本调度内核",
+      "requirement_md": "不使用任何 Hadoop 组件，用纯 Python 实现一个**单进程、内存态**的迷你 HDFS 内核，覆盖本章核心机制：\n\n1. **NameNode 元数据**：维护命名空间（目录树）与 INode，记录每个文件的块列表、每块的副本所在 DataNode。\n2. **DataNode 块存储**：模拟若干 DataNode，能『存储』块并汇报块列表。\n3. **副本放置策略**：实现机架感知下的三副本放置（本地/跨机架/同第2机架），并打印每次放置的机架分布。\n4. **安全模式判定**：根据『达到最小副本数的块比例』阈值判定是否退出安全模式。\n5. **心跳与副本复制**：模拟某 DataNode 失联（心跳超时），由 NameNode 检测欠副本块并调度从现存副本复制补足。\n6. **fsimage/edits 合并**：用『快照 + 增量日志』模型模拟 checkpoint，验证崩溃重放的正确性。\n\n要求代码可运行、输出可追溯，并附一段说明『本模拟与真实 HDFS 的差异与简化假设』。",
+      "tasks": [
+        {
+          "title": "实现 NameNode 与 INode 元数据模型",
+          "verification": { "type": "test", "desc": "创建一个 130MB 文件，验证块数=ceil(130/128)=2，且每块记录 3 个副本 DataNode" }
+        },
+        {
+          "title": "实现机架感知三副本放置并验证故障域隔离",
+          "verification": { "type": "test", "desc": "给定机架拓扑，三副本中任意两副本不共机架，打印机架分布" }
+        },
+        {
+          "title": "实现安全模式判定（阈值可达性）",
+          "verification": { "type": "test", "desc": "块报告收齐前后，safemode 状态从 ON 变为 OFF，阈值默认 0.999" }
+        },
+        {
+          "title": "模拟 DataNode 失联触发副本复制恢复",
+          "verification": { "type": "manual", "desc": "杀掉一个 DataNode 后，欠副本块被重新复制，副本数回到设定值" }
+        },
+        {
+          "title": "实现 edits + fsimage 的 checkpoint 与重放",
+          "verification": { "type": "test", "desc": "写入若干操作后做 checkpoint，清空内存再重放 edits，命名空间状态一致" }
+        }
+      ]
+    }
+  ]
+}

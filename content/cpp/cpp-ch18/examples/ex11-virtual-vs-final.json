@@ -1,0 +1,8 @@
+{
+  "title": "虚调用 vs final 去虚化：分派点计数 + is_final 判定",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "间接分派调用=2 直接调用=2\nSquare is_final=1 Circle is_final=1\narea(Square)=4 求和=8",
+  "code": "#include <cstdio>\n#include <vector>\n#include <type_traits>\n\nstruct Shape {\n    virtual double area() const = 0;\n    virtual ~Shape() = default;\n};\n// final：向编译器声明\"不再有派生类覆盖\"，据此可去虚化/内联\nstruct Square final : Shape {\n    double s;\n    explicit Square(double x) : s(x) {}\n    double area() const override { return s * s; }\n};\nstruct Circle final : Shape {\n    double r;\n    explicit Circle(double x) : r(x) {}\n    double area() const override { return 3.14159 * r * r; }\n};\n\n// 经基类指针调用 → 运行时查虚表（间接分派）\nstatic long g_indirect = 0, g_direct = 0;\ndouble call_indirect(const Shape* p) { ++g_indirect; return p->area(); }\n// 静态类型已知且为 final → 编译器可解析到唯一实现（直接分派/内联）\ndouble call_direct(const Square& s)   { ++g_direct;   return s.area(); }\n\nint main() {\n    Square sq(2.0);\n    Circle ci(1.0);\n    std::vector<const Shape*> shapes{&sq, &ci};\n\n    double a1 = 0;\n    for (const Shape* p : shapes) a1 += call_indirect(p);\n    double a2 = call_direct(sq) + call_direct(sq);\n\n    printf(\"间接分派调用=%ld 直接调用=%ld\\n\", g_indirect, g_direct);\n    printf(\"Square is_final=%d Circle is_final=%d\\n\",\n           (int)std::is_final<Square>::value, (int)std::is_final<Circle>::value);\n    printf(\"area(Square)=%g 求和=%g\\n\", sq.area(), a2);\n    (void)a1;\n    return 0;\n}"
+}

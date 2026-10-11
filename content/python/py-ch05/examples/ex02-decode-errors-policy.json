@@ -1,0 +1,9 @@
+{
+  "title": "解码失败的四种 errors 策略",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "原始字节           = 636166e9206f6b | 长度 7\n\nstrict           -> UnicodeDecodeError: invalid continuation byte\nreplace          -> 'caf� ok'  (字符数 7)\nignore           -> 'caf ok'  (字符数 6)\nbackslashreplace -> 'caf\\\\xe9 ok'  (字符数 10)\n\n以 latin-1 解码（每字节恰一字符，永不报错但可能读出乱码）:\n  latin-1 -> 'café ok'\n\n要点: errors= 只改变[解码失败时]的行为; 编码猜错时它是不可逆的",
+  "code": "raw = b\"caf\\xe9 ok\"\n\nprint(\"原始字节           =\", raw.hex(), \"| 长度\", len(raw))\nprint()\nfor err in (\"strict\", \"replace\", \"ignore\", \"backslashreplace\"):\n    try:\n        s = raw.decode(\"utf-8\", errors=err)\n        print(\"%-16s -> %r  (字符数 %d)\" % (err, s, len(s)))\n    except UnicodeDecodeError as e:\n        print(\"%-16s -> UnicodeDecodeError: %s\" % (err, e.reason))\nprint()\nprint(\"以 latin-1 解码（每字节恰一字符，永不报错但可能读出乱码）:\")\nprint(\"  latin-1 ->\", repr(raw.decode(\"latin-1\")))\nprint()\nprint(\"要点: errors= 只改变[解码失败时]的行为; 编码猜错时它是不可逆的\")",
+  "_intentional_corrupt": "演示解码失败策略：errors='replace' 会产出 U+FFFD 替换字符，正是本示例的教学对象"
+}

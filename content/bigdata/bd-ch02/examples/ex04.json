@@ -1,0 +1,8 @@
+{
+  "title": "Shuffle 溢写与多路归并（外部排序范式）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "spill #1: [('apple', 1), ('banana', 1), ('cherry', 1)]\nspill #2: [('apple', 1), ('banana', 1), ('date', 1)]\nspill #3: [('cherry', 1), ('fig', 1)]\nmerged all spills (sorted): [('apple', 1), ('apple', 1), ('banana', 1), ('banana', 1), ('cherry', 1), ('cherry', 1), ('date', 1), ('fig', 1)]",
+  "code": "\nimport heapq\nrecords = [(\"banana\",1),(\"apple\",1),(\"cherry\",1),(\"apple\",1),(\"date\",1),(\"banana\",1),(\"fig\",1),(\"cherry\",1)]\nMEM = 3\nspills = []\nbuf = []\nfor rec in records:\n    buf.append(rec)\n    if len(buf) >= MEM:\n        buf.sort()\n        spills.append(list(buf))\n        print(f\"spill #{len(spills)}: {buf}\")\n        buf = []\nif buf:\n    buf.sort()\n    spills.append(list(buf))\n    print(f\"spill #{len(spills)}: {buf}\")\nmerged = list(heapq.merge(*spills))\nprint(\"merged all spills (sorted):\", merged)\n"
+}

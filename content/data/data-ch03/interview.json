@@ -1,0 +1,100 @@
+{
+  "meta": {
+    "chapter": "data-ch03",
+    "title": "Pandas 基础 —— 面经",
+    "count": 6,
+    "note": "覆盖对齐语义、索引器、缺失值、dtype 内存与 IO 五条主线。"
+  },
+  "items": [
+    {
+      "question": "Pandas 和 NumPy 最本质的区别是什么？",
+      "answer_md": "**一句话：Pandas 引入了「索引」，于是运算从「按位置」变成了「按标签对齐」。**\n\n具体展开成三个层次：\n\n**① 数据结构**\n- NumPy 是**同质稠密数组**：所有元素同一 `dtype`，用整数位置索引；\n- Pandas 是**列导向的异构表**：`Series = values + index + name`，\n  `DataFrame = 共享行索引的一组 Series`，**每列可以有自己的 `dtype`**。\n\n**② 运算语义**\n\n```python\na = pd.Series([1, 2], index=[\"x\", \"y\"])\nb = pd.Series([10], index=[\"y\"])\nprint((a + b).to_dict())        # {'x': nan, 'y': 12.0}\n```\n\n- **按标签对齐**（不是按位置）；\n- 索引不相交时取**并集**，缺失处为 `NaN`；\n- 因此**整数列一旦出现缺失就被提升为 `float64`**。\n\n**③ 缺失值**\n- NumPy 只有 `np.nan`（浮点），整数列无处安放缺失；\n- Pandas 有 `NaN` / `NaT` / `NA` 三类标记，还提供 **Nullable dtype**（`Int64`）\n  在不牺牲类型的前提下表达缺失。\n\n**实践影响**：正因为「对齐」这一条，两个表相减可能凭空多出 `NaN` 行，\n甚至因重复索引而**行数膨胀**。所以做任何表间运算前，先确认索引语义。",
+      "follow_ups": [
+        "两个索引相同的 Series 相加，为什么结果还是 float64？",
+        "怎么让缺失不产生 NaN？（add(b, fill_value=0)）",
+        "索引有重复标签时相加会发生什么？（笛卡尔式膨胀）"
+      ],
+      "difficulty": "medium",
+      "company_tags": [
+        "数据分析岗",
+        "算法工程",
+        "数据开发"
+      ]
+    },
+    {
+      "question": "loc、iloc 和直接下标有什么区别？链式赋值为什么危险？",
+      "answer_md": "**两种坐标（位置 / 标签）→ 两套索引器。**\n\n| 写法 | 语义 | 切片端点 |\n|---|---|---|\n| `df.iloc[1:3]` | **位置** | **左闭右开**（与 Python 一致） |\n| `df.loc[\"b\":\"d\"]` | **标签** | **两端都包含（闭区间）** |\n| `df[0:2]` | 整数切片走**位置**；字符串取**列** | 左闭右开 |\n\n**为什么 `loc` 是闭区间**：标签空间未必连续、未必有序，\n「开区间」没有自然定义（`\"d\"` 的下一个标签是什么？）。\n\n**链式赋值的问题**：\n\n```python\ndf[df[\"score\"] > 60][\"passed\"] = True    # ❌\n```\n\n第一步产生了**中间对象**，赋值作用在它身上，原 `df` 完全没变。\n之所以危险，是因为 Pandas 历史上**不保证**这个中间对象是视图还是副本，\n行为可能随版本与 dtype 变化 —— **程序的行为不该依赖实现细节**。\n\n**两种正确修法**：\n```python\ndf.loc[df[\"score\"] > 60, \"passed\"] = True      # 想改原表\nsubset = df[df[\"score\"] > 60].copy()          # 想改副本\nsubset[\"passed\"] = True\n```\n\n**Pandas 3.0 起 Copy-on-Write 成为默认**，中间对象一定是独立的，\n链式赋值**必然**改不到原表（语义反而变可预测了）。\n依赖旧行为的代码会**静默失效**，升级时必须回归测试。",
+      "follow_ups": [
+        "为什么不要用 df.colname 取列？（列名与方法名冲突时会取到方法）",
+        "多条件掩码为什么要加括号？（& 与 > 的优先级）",
+        "boolean dtype 的列含 pd.NA 时能直接当掩码吗？（不能，要先 fillna）"
+      ],
+      "difficulty": "medium",
+      "company_tags": [
+        "数据开发",
+        "BI 工程",
+        "算法工程"
+      ]
+    },
+    {
+      "question": "数据里的缺失值你会怎么处理？",
+      "answer_md": "**先体检，再决定，绝不直接 dropna。**\n\n**第 1 步：体检**\n```python\ndf.isna().sum()          # 每列缺失数\ndf.isna().mean()         # 每列缺失比例\ndf.isna().sum(axis=1)    # 每行缺失数\n```\n\n**第 2 步：判断缺失机制**（这一步最常被跳过，但决定方法是否有偏）\n\n| 机制 | 含义 | 后果 |\n|---|---|---|\n| **MCAR** 完全随机 | 缺失与任何变量无关 | 删除无偏，但样本减少 |\n| **MAR** 随机缺失 | 缺失依赖**可观测量** | 需建模插补 |\n| **MNAR** 非随机 | 缺失依赖**缺失值本身** | **数据内部无法识别，必有偏** |\n\n**第 3 步：选策略**\n\n| 场景 | 做法 |\n|---|---|\n| 缺失 < 5% 且随机 | `dropna(subset=[...])`，并**记录删了多少行** |\n| 数值列、分布偏斜 | 中位数填充（比均值抗离群） |\n| 时间序列 | `ffill()` / `interpolate(method=\"time\")` |\n| 类别列 | 填成显式的 `\"unknown\"`，**不要猜** |\n| 缺失本身有信息 | **额外加一列「是否缺失」的指示特征** |\n\n**必须知道的两个副作用**：\n1. **均值填充会压缩方差**：$\\mathrm{Var}_{filled} = (1-p)\\sigma^2$，\n   导致相关性、回归系数失真；\n2. **`ffill` 会在长缺失段复制旧值**，若跨越了趋势变化，会造出不存在的平稳期。\n\n**工程纪律**：填充统计量要来自**训练集**（否则是数据泄漏）；\n如果模型能原生处理缺失（XGBoost / LightGBM），往往**比强行填充效果更好**。",
+      "follow_ups": [
+        "为什么整数列的 NaN 会让 dtype 变成 float64？（int64 装不下 NaN）",
+        "怎么保住整数类型？（Int64 Nullable dtype）",
+        "均值填充为什么会让标准差偏小？"
+      ],
+      "difficulty": "medium",
+      "company_tags": [
+        "数据分析岗",
+        "风控建模",
+        "算法工程"
+      ]
+    },
+    {
+      "question": "一个 DataFrame 占了几个 G，你会怎么优化内存？",
+      "answer_md": "**核心思路：先定位大户，再分类型处理。**\n\n**第 1 步：量准**\n```python\ndf.memory_usage(deep=True).sort_values(ascending=False)\ndf.info(memory_usage=\"deep\")\n```\n\n⚠️ **必须加 `deep=True`**：否则 `object` 列只算 8 字节指针，\n完全低估真实占用（字符串内容在堆上）。\n\n**第 2 步：按列的 dtype 分别处理**\n\n| dtype | 手段 | 收益 |\n|---|---|---|\n| `object`（字符串） | `astype(\"category\")` | **最大**，若基数远小于行数 |\n| `int64` | `to_numeric(downcast=\"integer\")` | 4~8 倍 |\n| `float64` | `downcast=\"float\"` → `float32` | 2 倍（损失精度） |\n| 用不到的列 | 读入时就 `usecols=[...]` | 直接省掉 |\n\n**判据**：`nunique() / len(df) < 0.5` 才值得转 `category`。\n\n**反面教材**：把 **ID / 时间戳**这类高基数列转 `category`，\n字典表本身就要存近全量数据，**内存不降反升**，还会让部分操作变慢。\n\n**第 3 步：降位前必须检查值域**\n```python\nassert df[\"amount\"].max() <= 32767        # 才敢降到 int16\n```\n盲目 `astype(\"int8\")` 会**静默溢出**（超过 127 变成负数，且不报错）——\n这是最危险的一类 bug。\n\n**第 4 步：还有别的路**\n- **换存储格式**：Parquet / Feather 比 CSV 小很多，且**保留 dtype**，还支持列式读取；\n- **分块处理**：`chunksize` 流式聚合，不要一次全load；\n- **换引擎**：Polars / DuckDB 在同等数据量下内存与速度都更优。",
+      "follow_ups": [
+        "为什么 category 对 ID 列反而更费内存？",
+        "不加 deep=True 会低估多少？（object 列只算 8 字节指针）",
+        "Parquet 相比 CSV 的优势？（列式、压缩、保留 schema）"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "数据开发",
+        "大数据",
+        "算法工程"
+      ]
+    },
+    {
+      "question": "一个 CSV 有 50 GB，内存只有 16 GB，怎么处理？",
+      "answer_md": "**核心手段：`chunksize` 流式处理。**\n\n```python\ns = cnt = 0\nfor chunk in pd.read_csv(\"huge.csv\", chunksize=200_000, usecols=[\"amount\"]):\n    s += chunk[\"amount\"].sum()\n    cnt += chunk[\"amount\"].count()\nprint(s / cnt)\n```\n\n**关键陷阱：不能对 mean 做「平均的平均」**\n\n```python\n# ❌ 分块行数不等时结果错误\nmean_of_means = sum(c[\"amount\"].mean() for c in chunks) / n_chunks\n```\n\n**原因**：`mean` **不满足结合律**。只有**可结合的统计量**才能分块累加：\n\n| 可以分块 | 不能直接分块（需近似或两遍） |\n|---|---|\n| `sum` / `count` / `min` / `max` | `median` / `quantile` |\n| `mean`（需保留 sum 与 count） | `count(distinct)`（可用 HyperLogLog 近似） |\n| `std`（Welford 的三元组状态） | |\n\n**分组怎么办**：`groupby` 不能跨块直接合并，但**分组后的 sum/count 可以**：\n\n```python\nfrom collections import defaultdict\nacc = defaultdict(lambda: [0, 0])\nfor c in pd.read_csv(\"f.csv\", chunksize=200_000, usecols=[\"city\", \"amt\"]):\n    for city, grp in c.groupby(\"city\")[\"amt\"]:\n        acc[city][0] += grp.sum()\n        acc[city][1] += grp.count()\n```\n\n**其他手段**：\n- `dtype=` 与 `usecols=` 从读入阶段就减内存；\n- 先 `to_parquet()` 转一次，之后按列读会快很多；\n- 需要多轮分析时，改用 **DuckDB / Polars**（能 out-of-core 处理）；\n- 真正的超大规模换 Spark / Flink。",
+      "follow_ups": [
+        "为什么「平均的平均」会错？（分块大小不等 + mean 不可结合）",
+        "std 怎么分块算？（Welford：保留 n、mean、M2 三个量）",
+        "要算中位数怎么办？（近似算法如 t-digest，或两遍扫描）"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "数据开发",
+        "大数据",
+        "ETL 工程"
+      ]
+    },
+    {
+      "question": "读 CSV 时遇到过哪些坑？",
+      "answer_md": "按出现频率列六个：\n\n**① 中文乱码** —— `UnicodeDecodeError`。\n文件是 `gbk` / `gb18030`，不是 UTF-8。\n```python\npd.read_csv(\"f.csv\", encoding=\"gb18030\")\n```\n\n**② 列名多了 `\\ufeff`** —— Excel「另存为 CSV UTF-8」会写入 **BOM**（3 字节 `EF BB BF`），\n于是第一列名变成 `\"\\ufeffid\"`，`df[\"id\"]` 报 `KeyError`。\n```python\npd.read_csv(\"f.csv\", encoding=\"utf-8-sig\")     # sig = 吃掉 BOM\n```\n\n**③ 所有数据挤在一列** —— 分隔符不是逗号。\n```python\npd.read_csv(\"f.csv\", sep=\";\")        # 或 \"\\t\"\n```\n\n**④ ID 变成 `1001.0`（丢掉前导零 / 变浮点）** ——\n读入时被推断成数值型。**显式声明类型**：\n```python\npd.read_csv(\"f.csv\", dtype={\"id\": str})\n```\n\n**⑤ 数值列变成 `object`** —— 列里混了 `\"-\"`、`\"N/A\"`、`\"NULL\"` 这类脏值。\n```python\npd.read_csv(\"f.csv\", na_values=[\"-\", \"N/A\", \"NULL\", \"9999\"])\n```\n\n**⑥ 写出后 Excel 打开中文乱码** —— 写出时要带 BOM：\n```python\ndf.to_csv(\"out.csv\", index=False, encoding=\"utf-8-sig\")\n```\n\n**一条纪律**：**解析阶段永远显式指定 `dtype` 与 `usecols`**，\n把「类型」从**推断**变成**契约**。默认的采样推断在遇到第 10 万行的脏值时\n会静默失败（整列退化成 `object`），而不会报错。",
+      "follow_ups": [
+        "为什么 Excel 导出的 CSV 要特别处理？（BOM）",
+        "read_csv 的 dtype 推断是怎么做的？（采样前若干行，可能漏掉后面的脏值）",
+        "大文件为什么建议先转 Parquet？（列式 + 保留 dtype + 压缩）"
+      ],
+      "difficulty": "medium",
+      "company_tags": [
+        "数据分析岗",
+        "ETL 工程",
+        "数据开发"
+      ]
+    }
+  ]
+}

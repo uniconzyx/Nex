@@ -1,0 +1,33 @@
+{
+  "meta": {
+    "chapter": "cpp-ch20",
+    "category": "comprehensive"
+  },
+  "items": [
+    {
+      "title": "迷你 STL：实现 vector + shared_ptr + string，并配自写测试框架",
+      "requirement_md": "## 背景\n你已读完本章综合项目一（ex01-ex05）。请把读过的实现落成**机器可验收**的代码。\n\n## 任务\n1. 实现 `MiniVector<T>`：`push_back` / `reserve` / `capacity` / `size` / `operator[]`；容量倍增；`reserve` 后地址变化可见（用指针打印前后被测断言）。\n2. 实现 `MiniSharedPtr<T>`：引用计数（用 `std::atomic<long>` 或普通 `int` + 单线程验证）、控制块、`use_count()`；并演示循环引用泄漏 + `weak_ptr` 破环（use_count 归零）。\n3. 实现 `MiniString`：深拷贝 + 移动构造 + copy-and-swap；自赋值安全。\n4. 用本章 ex05 的 RAII scope_guard 思想，给每个资源类加析构释放断言（析构即打印/计数）。\n5. 配一个极简测试框架（参考 ex 的 `CHECK_EQ` 宏），对以上三类各写 >=3 个用例，覆盖：扩容失效、移动后源对象有效、循环引用破环。\n\n## 验收口径\n- 所有用例通过（通过/失败计数输出）；\n- `MiniVector` 容量序列符合倍增（如 1->2->4->8）；\n- `MiniSharedPtr` 循环引用示例在改用 weak_ptr 后 `use_count` 能归零。",
+      "tasks": [
+        "实现 MiniVector 并验证容量倍增与迭代器失效",
+        "实现 MiniSharedPtr 与 weak_ptr 破环",
+        "实现 MiniString 与 copy-and-swap",
+        "配测试框架并写 >=9 个用例"
+      ],
+      "verification": {
+        "desc": "用 g++ 编译运行测试主程序，输出 通过/失败 计数且失败为 0；MiniVector 容量序列为 1->2->4->8（或 2 的幂）；shared_ptr 破环示例 use_count 最终为 0。三者全满足即完成。"
+      }
+    },
+    {
+      "title": "线程池 + 简易 HTTP 请求行解析服务器",
+      "requirement_md": "## 背景\n你已读完本章综合项目二（ex06 / ex07）。把线程池与确定性解析组合成一个可演示的组件。\n\n## 任务\n1. 实现 `ThreadPool`（参考 ex06）：固定 N 线程、`submit` 返回 `future`、支持优雅关闭（`stop` 标志 + `notify_all` + `join`），验证提交 100 任务全部执行完与关闭后线程数归零为 True。\n2. 实现 `parseRequestLine(const std::string&)`（参考 ex07）：解析 `METHOD SP URI SP HTTP/x.y`，返回结构化结果（方法/URI/版本）；非法输入返回明确错误，不抛未定义异常。\n3. 用 `ThreadPool` 并发处理一批构造好的请求行字符串，把解析结果汇总输出。\n\n## 验收口径\n- 线程池：提交 100 个任务，断言全部执行: True 与优雅关闭后线程数归零: True（不打印顺序相关日志）。\n- 解析器：正例（GET /a HTTP/1.1 -> 方法 GET、URI /a、版本 1.1）与反例（缺 SP、版本格式错）均给出确定性结果。\n- 并发汇总结果与串行解析一致（去重/顺序无关，用排序后比对）。",
+      "tasks": [
+        "实现 ThreadPool 并验证优雅关闭",
+        "实现 parseRequestLine 确定性解析",
+        "并发处理请求行并汇总比对"
+      ],
+      "verification": {
+        "desc": "用 g++ -pthread 编译运行：线程池断言全部任务执行且关闭后线程归零；解析器正/反例输出确定；并发汇总与串行结果一致（排序后相等）。三项全满足即完成。"
+      }
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "title": "RLHF 与 DPO 的流程与复杂度对照",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "维度             RLHF (PPO)     DPO                说明\n训练阶段数          3 阶段           2 阶段               RLHF: SFT->RM->PPO; DPO: SFT->DPO\n在线模型数          4 个            2 个                RLHF 需 policy/ref/reward/critic\n需训练模型          3 个            1 个                RLHF 要训 RM + policy + critic\n奖励来源           显式奖励模型         隐式(策略对数比)          DPO 用 log 比率隐式定义奖励\n数据方式           在线采样           离线偏好对              RLHF 边训边采, DPO 用固定数据\n工程复杂度          高              低                  DPO 只需 SFT 模型 + 偏好数据\n\n结论: DPO 用更少阶段与模型达到相近的对齐目标, 是工程上性价比更高的选择\n      代价是离线偏好数据质量决定上限, 且缺少在线探索能力",
+  "code": "\nrows = [\n    ('训练阶段数', '3 阶段', '2 阶段', 'RLHF: SFT->RM->PPO; DPO: SFT->DPO'),\n    ('在线模型数', '4 个', '2 个', 'RLHF 需 policy/ref/reward/critic'),\n    ('需训练模型', '3 个', '1 个', 'RLHF 要训 RM + policy + critic'),\n    ('奖励来源', '显式奖励模型', '隐式(策略对数比)', 'DPO 用 log 比率隐式定义奖励'),\n    ('数据方式', '在线采样', '离线偏好对', 'RLHF 边训边采, DPO 用固定数据'),\n    ('工程复杂度', '高', '低', 'DPO 只需 SFT 模型 + 偏好数据'),\n]\nprint('%-14s %-14s %-18s %s' % ('维度', 'RLHF (PPO)', 'DPO', '说明'))\nfor a, b, c, e in rows:\n    print('%-14s %-14s %-18s %s' % (a, b, c, e))\nprint()\nprint('结论: DPO 用更少阶段与模型达到相近的对齐目标, 是工程上性价比更高的选择')\nprint('      代价是离线偏好数据质量决定上限, 且缺少在线探索能力')\n"
+}

@@ -1,0 +1,97 @@
+{
+  "meta": {
+    "chapter": "fs-ch07"
+  },
+  "items": [
+    {
+      "question": "一个全栈项目，你会怎么组织目录？为什么共享类型要从契约生成而不是手写？",
+      "answer_md": "按**依赖方向**组织，而不是按文件类型：`apps/web`（前端）、`apps/api`（后端）、`packages/shared`（纯逻辑）、`packages/contract`（OpenAPI 文档 + 生成物）。三条硬规则：① 依赖单向 `apps/* → packages/*`，**禁止反向依赖**；② `shared` 只放纯逻辑（无 IO、无 `fs`/`window`），否则同一份代码无法在浏览器/Node/Edge 三套宿主里跑；③ 契约置于依赖图下游，先于实现存在。\n\n**类型必须从契约生成**：手写两份类型（前端一份、后端一份）必然漂移——字段改名时只改一边，运行到线上才 500。从 `openapi.yaml` 用 openapi-typescript / orval / openapi-generator 生成前端类型与请求函数，同一份 yaml 再用 express-openapi-validator 之类生成服务端校验器，做到**单一事实来源**。\n\n进阶判据：契约要能进 CI——双向比对「文档里的 operation 是否都有实现」「实现是否都进了文档」，任一不满足就退出码非 0。没有 CI 关卡，契约会在两周内腐烂成一份没人看的 yaml。",
+      "follow_ups": [
+        "monorepo 与 multirepo 你怎么选？",
+        "循环依赖（反向依赖）在前端会产生什么具体故障？",
+        "契约新增可选字段算不算破坏性变更？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "通用",
+        "字节",
+        "腾讯"
+      ]
+    },
+    {
+      "question": "服务端状态和客户端状态怎么区分？为什么不该塞进同一个全局 store？",
+      "answer_md": "判据一句话：**「刷新页面后它还需要从服务器重新获取吗？」** 需要 → 服务端状态（文章列表、用户资料、订单），交给缓存/数据层；不需要 → 客户端状态（弹窗开关、输入草稿、当前 tab），本地存活即可。\n\n**为什么不能一锅端**：服务端状态的本质是「分布式共享可变状态的本地副本」，天然需要处理过期、去重、重试、失效、乐观更新、分页合并——这些正是 TanStack Query / SWR / Apollo 存在的原因。你把它塞进 redux/vuex，就得自己重造这六件事，且极易漏（漏掉就是幽灵数据或竞态覆盖）。反过来把弹窗开关塞进查询库，会得到一堆 `queryKey: []` 的怪异用法。\n\n落地：① 单组件内 → `useState`；② 兄弟共享 → 状态提升到最近公共父；③ 跨多层、低频变化 → Context；④ 高频跨页共享 → 带选择器的外部 store；⑤ 服务端数据 → 专用数据层（默认 stale-while-revalidate：先渲染缓存、后台静默刷新）。",
+      "follow_ups": [
+        "Context 为什么会造成大范围重渲染？怎么缓解？",
+        "归一化（normalize）解决的是什么问题？",
+        "同一个服务端资源，两个组件用不同的 queryKey 会怎样？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "阿里",
+        "美团"
+      ]
+    },
+    {
+      "question": "乐观更新怎么做？失败了怎么回滚？哪些场景不能用？",
+      "answer_md": "三段式：先用**临时 id** 把变更本地生效（乐观），服务端返回后把临时 id 换成真实 id（确认），失败则移除（回滚）。三个必备部件：① 临时 id（不与真实 id 冲突）；② 可逆操作或快照（用于回滚）；③ 并发同一资源的多次乐观变更要**有序结算**（多个 `tmp-*` 各自确认，不能假设最后一个成功的就是对的）。\n\n**回滚的正确性条件**：本地先行的效果必须有可计算的逆操作。本章 ex03 实跑：成功时 `after_confirm_ids=101`、`success_count_kept=true`（保留且不重复插入）；失败时 `after_rollback_count=0`、`failure_state_restored=true`（状态回到操作前）。\n\n**哪些场景不能用**：操作不可逆或服务端有额外副作用时（扣库存、发通知、自增计数），「先本地生效」会误导用户——此时应退化为「先 loading 再确认」的悲观更新。判断标准是「有没有代价可接受的补偿路径」。",
+      "follow_ups": [
+        "乐观更新与幂等键怎么配合？",
+        "多个并发乐观变更如何有序结算？",
+        "乐观更新失败时，要不要给用户强提示？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "通用",
+        "字节",
+        "快手"
+      ]
+    },
+    {
+      "question": "列表页请求返回乱序，或者无限滚动出现重复项，你怎么根治？",
+      "answer_md": "两个根因分开治：\n\n**乱序（竞态覆盖）**：响应到达顺序 ≠ 请求发出顺序。先发的慢请求后到，会把新数据覆盖回旧值（搜索框输入 `a`→`ab` 的经典 bug）。解法：① `AbortController` 取消过期请求；② 用递增 seq 标记请求，只接受「最新请求」的响应；③ 去重（同一资源只发一次）。本章 ex02 实跑：3 个并发同 key 请求只发 1 次（`sent_while_inflight=1`），取消的请求 `cancelled_result=null` 不投递。\n\n**重复项（合并层缺陷）**：网络乱序或重复触发会让第 2 页与第 1 页重叠。解法：合并层必须**幂等 + 可交换**——按 id 去重、按页序（或游标）稳定排序。本章 ex09 实跑：乱序到达（p3,p1,p2）合并后 `out_of_order_ids=1,2,3,4,5` 且 `order_stable=true`；重叠页去重后 `merged_count=4`（`raw_count=5`，`duplicates_removed=1`，`no_duplicate_ids=true`）。\n\n再叠加一层：分页本身用**游标**而非 offset（fs-ch05 ex03 已证 offset 在并发插入下会漏/重），游标把位置编码进数据，从源头消除窗口漂移。",
+      "follow_ups": [
+        "去重、去抖、节流三者的区别？",
+        "游标分页会不会漏行？什么情况下会？",
+        "无限滚动怎么保证滚动条不跳？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "通用",
+        "腾讯",
+        "字节"
+      ]
+    },
+    {
+      "question": "长列表怎么优化？为什么说「代码不是切得越碎越好」？",
+      "answer_md": "**长列表用虚拟化**：只渲染「视口 + overscan 缓冲」内的行，其余用占位撑高。公式：`first = floor(scrollTop/rowHeight)`、`visible = ceil(viewportHeight/rowHeight)`、`start = max(0, first-overscan)`、`end = min(total, first+visible+overscan)`，半开区间 `[start, end)`。本章 ex07 实跑：`total=1000` 时任意位置只渲染 3~14 行（`top` 12 行、`near_bottom` 仅 3 行），渲染量从 O(n) 降到 O(1)。三个坑：行高不固定、`Ctrl+F`/锚点失效、无障碍需声明 `aria-setsize`/`aria-posinset`。\n\n**代码分割为什么不是越碎越好**：设总字节 S，切 k 块后首屏需加载 `S/k`，但增加 k-1 个请求往返，每往返有固定延迟 RTT。首屏时间 ≈ `S_first/BW + (#首屏chunk)·RTT`。**盲目细切会因 RTT 惩罚反而变慢**（HTTP/2 多路复用缓解但不消除）。最优切分点数由「字节收益」与「往返惩罚」的平衡决定——按路由/重组件切（弹窗、富文本、图表、重型第三方库），首屏必需内容不切。\n\n另外两把刀：请求去重与取消（同 key 只发一次）、优先级队列 + 并发上限（保护后端，本章 ex10 断言 `max_concurrency_respected=true`）。",
+      "follow_ups": [
+        "虚拟化后怎么支持「跳转到第 N 行」？",
+        "LCP / INP / CLS 分别度量什么？",
+        "并发上限设多少合适？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "字节",
+        "美团"
+      ]
+    },
+    {
+      "question": "表单校验怎么做？前端校验能不能省掉后端校验？可访问性上要注意什么？",
+      "answer_md": "**双重防线，共享同一份 schema**：前端校验是**体验优化**（即时反馈、少一次往返），可以被绕过（改 JS、直接调接口）；后端校验是**安全边界**（信任边界在服务端），不可绕过。两端用同一份 schema，才能避免「前端说合法、后端说 422」的割裂。本章 ex06 的 6 类非法用例（缺必填、下界、正则、类型、上界、多余字段）既是前端也是后端的判据，且每个错误带字段路径（`$.title` 等）供前端精确高亮。\n\n**别漏掉校验响应**：服务端也可能违约（返回类型不符的值或该非空却 null 的字段）。ex06 的 `res_bad_all_rejected=true (2/2)` 就是拦服务端自身违约。\n\n**可访问性**：① 错误提示用 `aria-describedby` 关联到输入框，并设 `aria-invalid=\"true\"`，错误文本加 `role=\"alert\"`——仅仅「变红」对屏幕阅读器用户不可见；② 用语义化 `<label for>` 而非 placeholder 当标签；③ 图标按钮必须有 `aria-label`（本章 ex12 静态遍历可自动判定 `button-name` 与 `img-alt` 两类违规，实跑 `a11y_violations=2`）；④ 颜色不能是唯一信息载体（色盲），需配图标或文本，对比度达 WCAG AA。",
+      "follow_ups": [
+        "校验与净化（sanitization）的区别？",
+        "为什么 `additionalProperties: false` 是安全默认值？",
+        "失焦校验、提交校验、输入时校验分别适合什么字段？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "阿里",
+        "字节"
+      ]
+    }
+  ]
+}

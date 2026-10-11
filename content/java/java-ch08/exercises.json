@@ -1,0 +1,251 @@
+{
+  "meta": {
+    "chapter": "java-ch08",
+    "note": "8 题，基础题 6 + 算法题 2；LeetCode 题仅存元数据与链接，不搬运题面。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "运行时数据区的线程私有性",
+      "content_md": "下列 JVM 运行时数据区中，**全部为线程私有**的一组是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "程序计数器、虚拟机栈、本地方法栈"
+        },
+        {
+          "key": "B",
+          "text": "程序计数器、虚拟机栈、堆"
+        },
+        {
+          "key": "C",
+          "text": "虚拟机栈、堆、方法区"
+        },
+        {
+          "key": "D",
+          "text": "堆、方法区、运行时常量池"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "A"
+        ]
+      },
+      "explanation": "「两栈一计数私有，堆与方法区共享」。程序计数器、虚拟机栈、本地方法栈随线程创建/销毁；堆与方法区（JDK 8+ 为元空间）由所有线程共享。补充：程序计数器是唯一**不会抛 OutOfMemoryError** 的区域——它只存一个行号，大小由字节码格式固定。",
+      "tags": [
+        "jvm",
+        "runtime-data-area",
+        "thread-private"
+      ],
+      "source": "book",
+      "source_ref": "《深入理解 Java 虚拟机》第 2 章 Java 内存区域"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "medium",
+      "title": "准备阶段与初始化阶段的差别",
+      "content_md": "关于类加载的**准备阶段**，下列说法**正确**的是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "为所有静态变量赋源码中的初始值，因此 `static int a = 10;` 在准备阶段后 a 就是 10"
+        },
+        {
+          "key": "B",
+          "text": "为静态变量分配内存并设零值，`static int a = 10;` 在准备阶段是 0；但 `static final int A = 10;` 作为编译期常量在准备阶段即为 10"
+        },
+        {
+          "key": "C",
+          "text": "准备阶段会执行静态代码块"
+        },
+        {
+          "key": "D",
+          "text": "准备阶段会把符号引用替换为直接引用"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "准备阶段只做「分配内存 + 设零值」。`static int a = 10` 的赋值要等**初始化**阶段执行 `<clinit>()`。而 `static final int A = 10` 是**编译期常量**，其值已写入常量池，准备阶段直接就 10（且访问它不会触发初始化）。静态代码块在**初始化**阶段执行（C 错）；符号引用→直接引用是**解析**阶段的活（D 错）。",
+      "tags": [
+        "jvm",
+        "class-loading",
+        "preparation"
+      ],
+      "source": "book",
+      "source_ref": "《深入理解 Java 虚拟机》第 7 章 类加载机制"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "medium",
+      "title": "循环引用的回收与 GC Roots",
+      "content_md": "下面关于垃圾判定的说法，**正确**的是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "两个对象互相引用（`a.next=b; b.next=a`）永远不会被回收，所以 JVM 使用引用计数"
+        },
+        {
+          "key": "B",
+          "text": "JVM 使用可达性分析，上述互引对象只要从 GC Roots 不可达就会被回收"
+        },
+        {
+          "key": "C",
+          "text": "方法区中的静态变量引用的对象不能作为 GC Roots"
+        },
+        {
+          "key": "D",
+          "text": "被 synchronized 锁住的对象不能被回收"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "JVM 用**可达性分析**而非引用计数，所以循环引用不再是问题——只要从 GC Roots 不可达就会被回收（A 错 B 对）。GC Roots 包括：虚拟机栈局部变量、本地方法栈 JNI 引用、方法区静态变量、方法区常量、被 synchronized 持有的对象、JVM 内部引用（C、D 都说反了）。引用计数的致命伤正是循环引用。",
+      "tags": [
+        "jvm",
+        "gc",
+        "reachability",
+        "gc-roots"
+      ],
+      "source": "book",
+      "source_ref": "《深入理解 Java 虚拟机》第 3 章 垃圾收集器与内存分配策略"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "hard",
+      "title": "收集器选型与停顿模型",
+      "content_md": "关于垃圾收集器的取舍，下列说法**错误**的是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "CMS 使用标记-清除算法，会产生内存碎片，可能触发 Concurrent Mode Failure"
+        },
+        {
+          "key": "B",
+          "text": "G1 把堆划分为等大 Region，按回收收益优先回收，可设定目标停顿时间"
+        },
+        {
+          "key": "C",
+          "text": "ZGC 的停顿时间随堆大小线性增长，因此适合小堆"
+        },
+        {
+          "key": "D",
+          "text": "Parallel Scavenge / Parallel Old 以吞吐量为优先目标"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "C"
+        ]
+      },
+      "explanation": "ZGC 的目标是**停顿时间与堆大小无关**（只与 GC Roots 数量相关），做到亚毫秒级，适合**大堆/超大堆**（TB 级）低延迟场景——C 说反了。A 正确：CMS 用标记-清除，碎片化 + 浮动垃圾 + 并发模式失败是其固有代价。B 正确：G1 是 Garbage-First，Region + Remembered Set + SATB。D 正确：Parallel 系列的 `GCTimeRatio` 就是为吞吐量设计。",
+      "tags": [
+        "jvm",
+        "gc",
+        "collector",
+        "zgc",
+        "g1"
+      ],
+      "source": "book",
+      "source_ref": "《深入理解 Java 虚拟机》第 3 章 收集器"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "修复 ThreadLocal 在线程池中的内存泄漏",
+      "content_md": "下面的代码在线程池中长期运行会导致内存泄漏（value 无法回收、并连带阻止类卸载）。请指出问题并给出修复后的完整代码。\n\n```java\npublic class Holder {\n    private static final ThreadLocal<byte[]> CACHE = new ThreadLocal<>();\n\n    public void handle() {\n        CACHE.set(new byte[1024 * 1024]);\n        doWork();\n    }\n}\n```",
+      "answer": {
+        "text": "问题：`ThreadLocalMap` 的 Entry key 是弱引用（会被回收），但 **value 是强引用**且 Entry 本身挂在 Thread 对象上；线程池复用线程 ⇒ Thread 不销毁 ⇒ value 永远存活。必须在使用后 `remove()`，且要放在 `finally`。",
+        "code": "public class Holder {\n    private static final ThreadLocal<byte[]> CACHE = new ThreadLocal<>();\n\n    public void handle() {\n        try {\n            CACHE.set(new byte[1024 * 1024]);\n            doWork();\n        } finally {\n            CACHE.remove();          // 关键：归还前清理，避免线程复用时泄漏\n        }\n    }\n\n    private void doWork() { /* ... */ }\n}"
+      },
+      "explanation": "`ThreadLocal` 泄漏是面试高频题，根因有三层：① `ThreadLocalMap` 的 Entry 继承 `WeakReference<ThreadLocal>`，key 会被回收；② 但 Entry 对象本身挂在 `Thread.threadLocals` 上，是**强引用链**；③ value 只被 Entry 强引用，于是 key 为 null 的「僵尸 Entry」长期持有 value。线程池场景线程不销毁，泄漏会累积。修复就是在 `finally` 中 `remove()`。若 value 持有了 `Class` 对象，还会**连带阻止该类及其类加载器卸载**，表现为 Metaspace 持续增长。",
+      "tags": [
+        "jvm",
+        "threadlocal",
+        "memory-leak",
+        "thread-pool"
+      ],
+      "source": "self",
+      "source_ref": "java-ch08 concept 04 · 内存问题排查与调优实战"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "类初始化顺序的输出判断",
+      "content_md": "给出下面代码的运行输出顺序（只写标签）。\n\n```java\nclass Parent {\n    static int pf = P(\"Parent.static.field\");\n    static { P(\"Parent.static.block\"); }\n    int i1 = P(\"Parent.instance.field\");\n    { P(\"Parent.instance.block\"); }\n    Parent() { P(\"Parent.<init>\"); }\n    static int P(String s) { System.out.println(s); return 1; }\n}\nclass Child extends Parent {\n    static int cf = P(\"Child.static.field\");\n    static { P(\"Child.static.block\"); }\n    int i2 = P(\"Child.instance.field\");\n    { P(\"Child.instance.block\"); }\n    Child() { P(\"Child.<init>\"); }\n}\n// 入口：new Child();\n```",
+      "answer": {
+        "text": "Parent.static.field → Parent.static.block → Child.static.field → Child.static.block → Parent.instance.field → Parent.instance.block → Parent.<init> → Child.instance.field → Child.instance.block → Child.<init>"
+      },
+      "explanation": "两条规则叠加：① **静态先于实例，父类先于子类**——所以四个静态初始化块按「父静态字段 → 父静态块 → 子静态字段 → 子静态块」执行（`<clinit>` 内按源码顺序合并，且子类初始化前必先初始化父类）；② **实例初始化在构造器中进行**，顺序是「父类实例字段 → 父类实例块 → 父类构造器 → 子类实例字段 → 子类实例块 → 子类构造器」。注意实例块会被**内联进每个构造器**（在 `super()` 之后、构造器体之前）。",
+      "tags": [
+        "jvm",
+        "class-loading",
+        "clinit",
+        "initialization-order"
+      ],
+      "source": "self",
+      "source_ref": "java-ch08 concept 03 · 类加载机制"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "实现可达性分析：从 GC Roots 输出存活与回收集合",
+      "content_md": "给定一个有向对象图 `graph: Map<String, List<String>>`（key 为对象，value 为它引用的对象列表）与 `roots`，实现可达性分析：返回**不可达（将被回收）**的对象名列表（升序）。要求用三色标记（白/灰/黑）实现，并保证：\n- 循环引用的对象若从 roots 不可达，必须被回收；\n- 复杂度 O(V+E)。\n\n示例：`graph = {A:[B,C], B:[D], C:[], D:[], E:[F], F:[E]}`，`roots=[A]` → 回收 `[E, F]`。",
+      "answer": {
+        "text": "用队列做 BFS 三色标记：roots 入队并置灰；每次取出队头（灰）扫描其引用，把白邻居置灰入队，最后把当前节点置黑。遍历结束后所有仍为白的节点即不可达。E↔F 互引但没有任何 root 指向它们，因此两个都是白，都会被回收。",
+        "code": "import java.util.*;\n\npublic class Solution {\n    public static List<String> unreachable(Map<String, List<String>> graph, List<String> roots) {\n        Map<String, Integer> color = new HashMap<>();   // 0 white, 1 grey, 2 black\n        for (String k : graph.keySet()) color.put(k, 0);\n        Deque<String> queue = new ArrayDeque<>();\n        for (String r : roots) { color.put(r, 1); queue.add(r); }\n        while (!queue.isEmpty()) {\n            String cur = queue.poll();\n            for (String nxt : graph.getOrDefault(cur, List.of())) {\n                if (color.get(nxt) == 0) { color.put(nxt, 1); queue.add(nxt); }\n            }\n            color.put(cur, 2);\n        }\n        List<String> dead = new ArrayList<>();\n        for (Map.Entry<String, Integer> e : color.entrySet())\n            if (e.getValue() == 0) dead.add(e.getKey());\n        Collections.sort(dead);\n        return dead;\n    }\n}"
+      },
+      "explanation": "本题把 JVM 的可达性分析下拉成一道标准图遍历题。要点：① 白/灰/黑三色是为了**支持并发标记**——黑表示「已扫描完其引用」，灰表示「已发现但引用未扫完」；② 单线程实现里三色退化为「已访问/未访问」，但保留三色便于与并发 GC 衔接；③ 循环引用天然被处理（E、F 互相可达但对 roots 不可达）；④ 时间复杂度 O(V+E)，空间 O(V)。",
+      "tags": [
+        "jvm",
+        "gc",
+        "reachability",
+        "graph",
+        "bfs"
+      ],
+      "source": "self",
+      "source_ref": "java-ch08 concept 02 · 三色标记与漏标"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "medium",
+      "title": "LRU 缓存（淘汰策略与内存管理同源）",
+      "content_md": "请你设计并实现一个满足 LRU（最近最少使用）缓存约束的数据结构，支持 `get` 与 `put`，两者时间复杂度均为 O(1)。要求 `get(key)` 返回值；`put(key, value)` 在容量超限时淘汰最久未使用的键。\n\n（题面描述见链接，本条目只保留元数据与链接，不搬运题面正文。）",
+      "answer": {
+        "text": "哈希表 + 双向链表：哈希表定位节点，双向链表维护访问顺序（头部最新、尾部最旧）。`get` 命中后把节点移到头部；`put` 若 key 已存在则更新并移到头部，否则插入头部，超容量则删除尾节点并同步清理哈希表。两操作均 O(1)。"
+      },
+      "explanation": "LRU 与 JVM 的缓存淘汰、Redis 的近似 LRU 是同一族问题。Java 里最简实现是 `LinkedHashMap` 覆写 `removeEldestEntry`（`accessOrder=true`），但面试要求手写双向链表 + 哈希表以证明 O(1)。注意点：① 用**哑节点（dummy head/tail）**省去边界判断；② 删除节点时**必须同时从哈希表移除**，否则内存泄漏（与 JVM 的「引用不清理导致对象长期存活」同源）。",
+      "tags": [
+        "leetcode",
+        "lru",
+        "hashmap",
+        "linkedlist"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 146 (lru-cache)",
+      "external_url": "https://leetcode.cn/problems/lru-cache/"
+    }
+  ]
+}

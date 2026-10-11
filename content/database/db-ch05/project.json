@@ -1,0 +1,46 @@
+{
+  "meta": { "chapter": "db-ch05", "category": "system" },
+  "items": [
+    {
+      "title": "工资变动审计系统：触发器 + 存储过程 + 幂等批量调薪",
+      "requirement_md": "为一个 HR 系统的工资模块，用数据库侧能力实现「不可绕过」的审计与可重跑的批量调薪，并给出「哪些逻辑该留在数据库、哪些必须交给应用层」的完整论证。\n\n**表结构**\n- `employee(emp_id BIGINT PK, name VARCHAR(20), dept_id INT, salary DECIMAL(10,2), status TINYINT)`\n- `salary_audit(audit_id BIGINT AI PK, emp_id BIGINT, op VARCHAR(8), old_salary DECIMAL(10,2), new_salary DECIMAL(10,2), operator VARCHAR(32), changed_at DATETIME DEFAULT CURRENT_TIMESTAMP)`\n- `raise_batch(batch_id BIGINT AI PK, dept_id INT, pct DECIMAL(5,2), state VARCHAR(12), created_at DATETIME)`\n\n**必须完成的工作**\n1. **审计触发器**：对 `employee` 的 `INSERT`/`UPDATE`/`DELETE` 三事件留痕；`UPDATE` 仅在工资真正变化时写入；说明审计表为什么不建外键、为什么不建自己的触发器；说明 `binlog_format` 与 `DETERMINISTIC` 的配套要求。\n2. **递归防御**：给出「禁止在触发器中自更新本表」的具体写法与替代方案（`BEFORE ... SET NEW.col = ...` 或 `AFTER` 补正），并说明 MySQL `ERROR 1442` 的触发条件。\n3. **批量调薪存储过程**：写 `p_raise_batch(IN p_batch_id BIGINT, IN p_dept_id INT, IN p_pct DECIMAL(5,2), OUT p_affected INT)`，要求：`p_affected` 用 `OUT` 参数带回；按 `raise_batch.state` 做幂等控制（同一批次重复调用不得重复加薪）；过程体内不得出现 `COMMIT`/`ROLLBACK`。\n4. **游标 vs 集合对比**：分别用「集合 UPDATE」和「游标逐行」实现同一调薪逻辑，统计两者的 SQL 语句数（确定性判据），并给出结论。\n5. **职责边界论证**：写出「为什么 `raise_batch` 的状态机与幂等控制应该放在应用层而不是存储过程」的至少四条理由，并给出你最终的划分方案（哪部分留在 DB、哪部分上移到应用）。\n6. **注入自检**：如果过程里需要动态拼接 `ORDER BY` 或表名，写出白名单校验的代码，并说明为什么不能用转义解决。",
+      "tasks": [
+        {
+          "title": "审计触发器与一致性验证",
+          "verification": {
+            "type": "test",
+            "desc": "三事件均能留痕；等值 UPDATE 不产生审计行；业务回滚时审计行一并回滚（审计条数前后一致）"
+          }
+        },
+        {
+          "title": "递归与行级放大防御",
+          "verification": {
+            "type": "manual",
+            "desc": "方案中不存在触发器内自更新本表；给出 ERROR 1442 的说明；指出批处理前 DROP TRIGGER 的必要性"
+          }
+        },
+        {
+          "title": "幂等批量调薪过程",
+          "verification": {
+            "type": "manual",
+            "desc": "OUT 参数带回影响行数；重复调用同一 batch_id 不重复加薪；过程体内无 COMMIT/ROLLBACK；声明顺序合法"
+          }
+        },
+        {
+          "title": "游标 vs 集合的操作计数对比",
+          "verification": {
+            "type": "test",
+            "desc": "给出两种实现的 SQL 语句数（集合版为 1，游标版为 N）与最终结果一致性判据"
+          }
+        },
+        {
+          "title": "职责边界与注入自检",
+          "verification": {
+            "type": "manual",
+            "desc": "给出至少 4 条「逻辑放应用层」的理由与最终划分方案；动态标识符走白名单枚举而非转义"
+          }
+        }
+      ]
+    }
+  ]
+}

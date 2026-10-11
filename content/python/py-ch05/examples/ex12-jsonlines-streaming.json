@@ -1,0 +1,8 @@
+{
+  "title": "JSON Lines 流式处理与整体载入的对比",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "文件内容:\n{\"i\": 0, \"v\": 0}\n{\"i\": 1, \"v\": 1}\n{\"i\": 2, \"v\": 4}\n\n逐行解析条数 = 3\nv 求和       = 5\n\n若整体 json.load 多条记录:\n  JSONDecodeError: Extra data | 行号 2\n\n按 16 字节分块读取次数 = 4\n文件字节数             = 54\n\n要点: JSON Lines 可流式处理，内存占用与文件大小无关；整体 JSON 必须全量载入",
+  "code": "import json\nfrom pathlib import Path\n\np = Path(\"events.jsonl\")\nwith open(p, \"w\", encoding=\"utf-8\") as f:\n    for i in range(3):\n        f.write(json.dumps({\"i\": i, \"v\": i * i}, ensure_ascii=False) + \"\\n\")\n\nprint(\"文件内容:\")\nprint(p.read_text(encoding=\"utf-8\").rstrip(\"\\n\"))\nprint()\n\nn = 0\ntotal = 0\nwith open(p, \"r\", encoding=\"utf-8\") as f:\n    for line in f:\n        rec = json.loads(line)\n        n += 1\n        total += rec[\"v\"]\nprint(\"逐行解析条数 =\", n)\nprint(\"v 求和       =\", total)\nprint()\n\nprint(\"若整体 json.load 多条记录:\")\ntry:\n    json.loads(p.read_text(encoding=\"utf-8\"))\nexcept json.JSONDecodeError as e:\n    print(\"  JSONDecodeError:\", e.msg, \"| 行号\", e.lineno)\nprint()\n\nwith open(p, \"rb\") as f:\n    chunks = 0\n    while True:\n        blk = f.read(16)\n        if not blk:\n            break\n        chunks += 1\nprint(\"按 16 字节分块读取次数 =\", chunks)\nprint(\"文件字节数             =\", p.stat().st_size)\nprint()\nprint(\"要点: JSON Lines 可流式处理，内存占用与文件大小无关；整体 JSON 必须全量载入\")"
+}

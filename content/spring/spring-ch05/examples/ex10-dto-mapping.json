@@ -1,0 +1,8 @@
+{
+  "title": "ex10-dto-mapping",
+  "code_lang": "java",
+  "code_std": "java23",
+  "stdin": "",
+  "expected_output": "DTO: UserDTO{id=7, username=alice}\ndto field count (no password): 2\nentity password leaked? false",
+  "code": "import java.util.*;\npublic class Main {\n    static class UserEntity {\n        String id=\"7\"; String username=\"alice\"; String password=\"s3cret\";\n    }\n    static class UserDTO {\n        String id; String username;\n        public String toString(){ return \"UserDTO{id=\"+id+\", username=\"+username+\"}\"; }\n    }\n    static UserDTO toDto(UserEntity e){\n        UserDTO d=new UserDTO();\n        d.id=e.id; d.username=e.username;   // password intentionally NOT copied\n        return d;\n    }\n    public static void main(String[] a){\n        UserEntity e=new UserEntity();\n        UserDTO d=toDto(e);\n        System.out.println(\"DTO: \"+d);\n        System.out.println(\"dto field count (no password): \"+d.getClass().getDeclaredFields().length);\n        System.out.println(\"entity password leaked? \"+(d.toString().contains(\"s3cret\")));\n    }\n}"
+}

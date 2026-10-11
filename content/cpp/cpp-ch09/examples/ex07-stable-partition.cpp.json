@@ -1,0 +1,8 @@
+{
+  "title": "stable_partition：按谓词分组并保持组内顺序",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "边界前(偶数): 2 4 6 8 \n边界后: 1 3 5 7 \n偶数个数 = 4\n",
+  "code": "#include <iostream>\n#include <vector>\n#include <algorithm>\nint main() {\n    std::vector<int> v = {1,2,3,4,5,6,7,8};\n    auto mid = std::stable_partition(v.begin(), v.end(), [](int x){ return x % 2 == 0; });\n    std::cout << \"边界前(偶数): \";\n    for (auto it = v.begin(); it != mid; ++it) std::cout << *it << ' ';\n    std::cout << \"\\n边界后: \";\n    for (auto it = mid; it != v.end(); ++it) std::cout << *it << ' ';\n    std::cout << '\\n';\n    std::cout << \"偶数个数 = \" << (mid - v.begin()) << '\\n';\n}\n"
+}

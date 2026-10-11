@@ -1,0 +1,8 @@
+{
+  "title": "axis 语义：压掉的是哪一维",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "a =\n[[0 1 2]\n [3 4 5]]\nsum()           = 15\nsum(axis=0)     = [3 5 7] -> 压掉第 0 维（行方向），得到每列的和\nsum(axis=1)     = [ 3 12] -> 压掉第 1 维（列方向），得到每行的和\nargmax(axis=0)  = [1 1 1] -> 每列最大值所在的行号\nargmax(axis=1)  = [2 2] -> 每行最大值所在的列号\n--- 三维数组 ---\nb.shape              = (2, 3, 4)\nb.sum(axis=0).shape  = (3, 4)\nb.sum(axis=1).shape  = (2, 4)\nb.sum(axis=(0, 2)).shape = (3,)\nkeepdims 保留维度 :\nb.sum(axis=1, keepdims=True).shape = (2, 1, 4)",
+  "code": "import numpy as np\na = np.arange(6).reshape(2, 3)\nprint(\"a =\")\nprint(a)\nprint(\"sum()           =\", int(a.sum()))\nprint(\"sum(axis=0)     =\", a.sum(axis=0), \"-> 压掉第 0 维（行方向），得到每列的和\")\nprint(\"sum(axis=1)     =\", a.sum(axis=1), \"-> 压掉第 1 维（列方向），得到每行的和\")\nprint(\"argmax(axis=0)  =\", a.argmax(axis=0), \"-> 每列最大值所在的行号\")\nprint(\"argmax(axis=1)  =\", a.argmax(axis=1), \"-> 每行最大值所在的列号\")\nb = np.arange(24).reshape(2, 3, 4)\nprint(\"--- 三维数组 ---\")\nprint(\"b.shape              =\", b.shape)\nprint(\"b.sum(axis=0).shape  =\", b.sum(axis=0).shape)\nprint(\"b.sum(axis=1).shape  =\", b.sum(axis=1).shape)\nprint(\"b.sum(axis=(0, 2)).shape =\", b.sum(axis=(0, 2)).shape)\nprint(\"keepdims 保留维度 :\")\nprint(\"b.sum(axis=1, keepdims=True).shape =\", b.sum(axis=1, keepdims=True).shape)\n"
+}

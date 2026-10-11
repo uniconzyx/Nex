@@ -1,0 +1,23 @@
+{
+  "meta": {
+    "chapter": "java-ch07",
+    "note": "1 个项目：从零实现一个可监控、可优雅关闭、带反压的任务调度器。"
+  },
+  "items": [
+    {
+      "title": "MiniTaskScheduler：可监控 / 可反压 / 可优雅关闭的任务调度器",
+      "requirement_md": "用**纯 JDK**（不引入任何三方依赖）实现一个生产可用的迷你任务调度器 `MiniTaskScheduler`，把本章的线程池、并发容器、同步工具串起来。\n\n**功能要求**\n1. **双池隔离**：一个 `cpu` 池（CPU 密集型，核心 = `N_cpu + 1`，有界队列）与一个 `io` 池（IO 密集型，核心 = `N_cpu × 2`，有界队列），分别命名 `sched-cpu-N` / `sched-io-N`。\n2. **反压**：两个池都用 `CallerRunsPolicy`，队列满时压力回灌调用方而不是丢弃或抛异常。\n3. **提交接口**：`<T> CompletableFuture<T> submit(TaskType type, Callable<T> task)`，返回 `CompletableFuture` 支持链式编排。\n4. **限流**：用 `Semaphore` 限制全局同时在跑的任务数不超过 `maxInFlight`。\n5. **统计**：`stats()` 返回每个池的「活跃数 / 队列长度 / 累计完成 / 峰值线程数 / 拒绝或反压次数」。\n6. **优雅关闭**：`close(graceSeconds)` 先 `shutdown()`，超时 `shutdownNow()`，返回被丢弃的任务数；重复调用幂等。\n7. **死锁自检**：提供 `checkDeadlock()`，内部用 `ThreadMXBean.findDeadlockedThreads()`，发现死锁时打印线程名与堆栈。\n8. **不可变快照**：`stats()` 返回不可变对象（`record` 或 final 字段），避免调用方改到内部状态。\n\n**验收标准**\n- 提交 1000 个任务不出现 OOM、不丢任务（反压生效：总量守恒）。\n- `close()` 后不再接受新任务（抛 `RejectedExecutionException`），已提交任务全部执行完。\n- 压测 `stats()` 的峰值线程数不超过各自池的 `maximumPoolSize`。\n- 故意制造一段两把锁交叉加锁的代码，`checkDeadlock()` 能打印出 2 个死锁线程。",
+      "tasks": [
+        "定义 `TaskType` 枚举（CPU / IO）与不可变统计对象 `PoolStats`",
+        "实现 `NamedThreadFactory`，把线程命名为 `sched-<type>-<seq>`",
+        "用 `ThreadPoolExecutor + ArrayBlockingQueue + CallerRunsPolicy` 构建两个池",
+        "包装 `submit`：`Semaphore.acquire` 限流 → 提交 → `whenComplete` 里 `release`",
+        "实现 `stats()`：聚合两个池的 `getActiveCount/getQueue().size()/getCompletedTaskCount()/getLargestPoolSize`",
+        "用 `AtomicLong` 统计反压次数（自定义拒绝策略包一层 CallerRunsPolicy 并计数）",
+        "实现幂等的两段式 `close(graceSeconds)`，返回丢弃任务数",
+        "实现 `checkDeadlock()`：`ThreadMXBean.findDeadlockedThreads()` + `getThreadInfo` 打印堆栈",
+        "写自测 `main`：1000 任务压测 → 打印关闭前后快照 → 制造死锁并检测（死锁线程设为 daemon）"
+      ]
+    }
+  ]
+}

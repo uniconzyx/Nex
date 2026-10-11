@@ -1,0 +1,8 @@
+{
+  "title": "依赖版本仲裁：最近者优先（nearest wins）",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "resolved dependency versions (nearest wins):\n  org.slf4j:slf4j-api -> 2.0.9   (depth=2)\n  com.fasterxml.jackson.core:jackson-databind -> 2.9.10   (depth=1)\nresolved artifacts = 2",
+  "code": "import java.util.*;\n\npublic class Ex07DependencyMediation {\n    record Dep(String group, String artifact, String version, int depth) {}\n\n    public static void main(String[] args) {\n        List<Dep> tree = List.of(\n                new Dep(\"org.slf4j\", \"slf4j-api\", \"2.0.9\", 2),\n                new Dep(\"org.slf4j\", \"slf4j-api\", \"1.7.36\", 3),\n                new Dep(\"com.fasterxml.jackson.core\", \"jackson-databind\", \"2.15.2\", 2),\n                new Dep(\"com.fasterxml.jackson.core\", \"jackson-databind\", \"2.9.10\", 1));\n\n        Map<String, Dep> resolved = new LinkedHashMap<>();\n        for (Dep d : tree) {\n            String ga = d.group() + \":\" + d.artifact();\n            Dep cur = resolved.get(ga);\n            if (cur == null || d.depth() < cur.depth()) resolved.put(ga, d);\n        }\n\n        System.out.println(\"resolved dependency versions (nearest wins):\");\n        for (Dep d : resolved.values()) {\n            System.out.println(\"  \" + d.group() + \":\" + d.artifact()\n                    + \" -> \" + d.version() + \"   (depth=\" + d.depth() + \")\");\n        }\n        System.out.println(\"resolved artifacts = \" + resolved.size());\n    }\n}"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "final：常量、final 方法、final 类",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "MAX=100\nfinal method",
+  "code": "public class E311 {\n    static final int MAX = 100;\n    static class Base {\n        final void cannotOverride(){ System.out.println(\"final method\"); }\n    }\n    static class Sub extends Base {\n    }\n    public static void main(String[] args) {\n        System.out.println(\"MAX=\" + MAX);\n        Base b = new Sub();\n        b.cannotOverride();\n    }\n}"
+}

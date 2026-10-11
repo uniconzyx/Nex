@@ -1,0 +1,8 @@
+{
+  "title": "构造器重载与 this 引用",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "0 7",
+  "code": "public class E202 {\n    int a;\n    int b;\n    E202() { this(0, 0); }\n    E202(int a, int b) { this.a = a; this.b = b; }\n    int sum() { return a + b; }\n    public static void main(String[] args) {\n        E202 p = new E202();\n        E202 q = new E202(2, 5);\n        System.out.println(p.sum() + \" \" + q.sum());\n    }\n}"
+}

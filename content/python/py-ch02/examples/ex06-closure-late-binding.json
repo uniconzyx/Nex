@@ -1,0 +1,8 @@
+{
+  "title": "闭包延迟绑定陷阱与默认参数修复",
+  "code_lang": "python",
+  "code_std": "python3.11",
+  "stdin": "",
+  "expected_output": "[2, 2, 2]\n[0, 1, 2]",
+  "code": "# 陷阱：闭包捕获的是变量 i 本身，循环结束后 i==2\nfuncs = []\nfor i in range(3):\n    funcs.append(lambda: i)\nprint([f() for f in funcs])\n\n# 修复：用默认参数在定义期绑定当前值\nfuncs2 = []\nfor i in range(3):\n    funcs2.append(lambda i=i: i)\nprint([f() for f in funcs2])"
+}

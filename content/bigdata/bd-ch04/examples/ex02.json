@@ -1,0 +1,8 @@
+{
+  "title": "惰性求值：transformation 不触发计算，只有 action 触发（compute_calls 计数器）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "仅定义 RDD 谱系，未调用 compute\ncollect 之前的 compute_calls = 0\n只做 transformation，compute_calls 仍为 0\n调用 collect（Action）触发计算 ...\ncollect 返回 = [1, 2, 3, 4, 5]\ncollect 之后的 compute_calls = 1\n结论: transformation 期间 compute_calls=0，只有 action 触发计算 -> 惰性求值成立\n",
+  "code": "class RDD:\n    _seq = 0\n    compute_calls = 0\n    def __init__(self, deps, op):\n        RDD._seq += 1\n        self.rid = RDD._seq\n        self.deps = deps\n        self.op = op\n    def compute(self):\n        RDD.compute_calls += 1\n        return [1, 2, 3, 4, 5]\n\nbase = RDD([], \"parallelize\")\nm = RDD([base], \"map x=>x+1\")\nf = RDD([m], \"filter x>2\")\nprint(\"仅定义 RDD 谱系，未调用 compute\")\nprint(\"collect 之前的 compute_calls =\", RDD.compute_calls)\nres = f\nprint(\"只做 transformation，compute_calls 仍为\", RDD.compute_calls)\nprint(\"调用 collect（Action）触发计算 ...\")\ndata = base.compute()\nprint(\"collect 返回 =\", data)\nprint(\"collect 之后的 compute_calls =\", RDD.compute_calls)\nprint(\"结论: transformation 期间 compute_calls=0，只有 action 触发计算 -> 惰性求值成立\")\n"
+}

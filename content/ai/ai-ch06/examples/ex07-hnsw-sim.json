@@ -1,0 +1,8 @@
+{
+  "title": "HNSW 图结构模拟：分层下降路径 vs 暴力检索",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "HNSW 分层数 = 6\nHNSW 访问节点数 = 20\nHNSW 跳数 = 41\n暴力检索访问节点数 = 20\nHNSW 与暴力 最近节点一致 = True\n",
+  "code": "import numpy as np\nrng = np.random.default_rng(42)\nP = 20\nD = 4\nvecs = rng.standard_normal((P, D))\nq = rng.standard_normal(D)\n\nlayers = []\nlayer = list(range(P))\nwhile len(layer) > 1:\n    layers.append(layer)\n    layer = layer[::2]\nlayers.append(layer)\n\nvisited = set()\nhops = 0\ncur = layers[-1][0]\nfor layer in reversed(layers):\n    best = None\n    best_d = None\n    for node in layer:\n        d = float(np.linalg.norm(q - vecs[node]))\n        visited.add(node)\n        hops += 1\n        if best_d is None or d < best_d:\n            best_d = d\n            best = node\n    cur = best\n\nbrute_visited = 0\nbest_b = None\nbest_bd = None\nfor node in range(P):\n    brute_visited += 1\n    d = float(np.linalg.norm(q - vecs[node]))\n    if best_bd is None or d < best_bd:\n        best_bd = d\n        best_b = node\n\nprint('HNSW 分层数 =', len(layers))\nprint('HNSW 访问节点数 =', len(visited))\nprint('HNSW 跳数 =', hops)\nprint('暴力检索访问节点数 =', brute_visited)\nprint('HNSW 与暴力 最近节点一致 =', cur == best_b)\n"
+}

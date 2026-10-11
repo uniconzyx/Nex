@@ -1,0 +1,34 @@
+{
+  "meta": {
+    "chapter": "spring-ch03",
+    "category": "basic"
+  },
+  "items": [
+    {
+      "title": "手写迷你 AOP 代理框架（纯 JDK，不依赖 Spring）",
+      "requirement_md": "不引入任何第三方 jar（无 CGLIB/AspectJ/Spring），用纯 JDK 实现一个最小可用的 AOP 代理框架，覆盖本章核心知识点：\n\n1. **JDK 动态代理**：定义 `Advice` 接口（before/after/afterThrowing），用 `Proxy.newProxyInstance` + `InvocationHandler` 实现前置/环绕/后置返回/异常四类通知（对应 ex01~ex03）。\n2. **CGLIB 原理模拟**：额外用「继承 + 方法覆写」手写一个 `CglibStyleEnhancer`，证明「无接口的具体类也能被增强」（对应 ex05），并指出 `final` 方法无法覆写（对应 ex12）。\n3. **切点匹配器**：实现简化版 `execution(ret pkg.Cls.method(args))` 匹配器，支持 `*` 与 `..` 与 `save*` 前缀（对应 ex07）。\n4. **通知顺序与责任链**：用 `List<Advice>` 串成责任链，验证 @Around 包裹 @Before/@After 的嵌套顺序（对应 ex04、ex11）。\n5. **this 与 target**：在拦截器内打印/标注「代理对象」与「真实对象」的身份差异（对应 ex08）。\n6. **自调用失效演示**：写一个会内部 `this.xxx()` 调用同类增强方法的类，证明内部调用不走代理、通知丢失，并给出一种修复（拆 Bean / 自注入 / AopContext 思路）（对应 ex09）。\n\n验收：编写 `Main` 演示——① 对接口用 JDK 代理织入四类通知并打印顺序；② 对无接口类用 CGLIB 风格子类增强；③ 用切点匹配器过滤只对部分方法增强；④ 打印 this/target 差异；⑤ 复现并修复自调用失效。",
+      "tasks": [
+        {
+          "title": "定义 Advice 接口与 JDK 动态代理工厂（四类通知）",
+          "verification": { "type": "test", "desc": "对接口方法调用时 before/after/afterReturning/afterThrowing 按位置触发" }
+        },
+        {
+          "title": "实现 CGLIB 风格子类增强器（继承 + 方法覆写）",
+          "verification": { "type": "test", "desc": "无接口类可被增强；final 方法无法覆写、无通知" }
+        },
+        {
+          "title": "实现简化 execution 切点匹配器",
+          "verification": { "type": "test", "desc": "对给定 ret/类/方法/参数四元组正确判定是否命中，支持 * 与 .. 与 save* 前缀" }
+        },
+        {
+          "title": "用责任链串起多 Advice 并验证嵌套顺序",
+          "verification": { "type": "test", "desc": "Around 包裹 Before/After，按列表顺序先进后出嵌套" }
+        },
+        {
+          "title": "演示 this/target 差异与自调用失效及修复",
+          "verification": { "type": "manual", "desc": "Main 打印代理对象与真实对象身份不同；复现内部调用通知丢失并给出修复方案" }
+        }
+      ]
+    }
+  ]
+}

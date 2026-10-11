@@ -1,0 +1,9 @@
+{
+  "title": "Bitmap：基于 SDS 字节串的 SETBIT/GETBIT 与自动扩容",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "after set 3,10: bytes = [16, 32]\ngetbit 3 = 1  getbit 10 = 1  getbit 0 = 0\nafter set 20: len(bytes) = 3",
+  "code": "\nclass Bitmap:\n    def __init__(self):\n        self.buf = bytearray()\n    def setbit(self, off, val):\n        byte = off // 8; bit = off % 8\n        while len(self.buf) <= byte:\n            self.buf.append(0)\n        if val:\n            self.buf[byte] |= (1 << (7 - bit))\n        else:\n            self.buf[byte] &= ~(1 << (7 - bit))\n    def getbit(self, off):\n        byte = off // 8; bit = off % 8\n        if byte >= len(self.buf):\n            return 0\n        return (self.buf[byte] >> (7 - bit)) & 1\n\nbm = Bitmap()\nbm.setbit(3, 1)\nbm.setbit(10, 1)\nprint(\"after set 3,10: bytes =\", list(bm.buf))\nprint(\"getbit 3 =\", bm.getbit(3), \" getbit 10 =\", bm.getbit(10), \" getbit 0 =\", bm.getbit(0))\nbm.setbit(20, 1)\nprint(\"after set 20: len(bytes) =\", len(bm.buf))\n",
+  "_verified": true
+}

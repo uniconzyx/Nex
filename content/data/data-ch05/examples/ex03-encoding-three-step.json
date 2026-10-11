@@ -1,0 +1,9 @@
+{
+  "title": "编码与乱码三步定位法",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== 第 1 步: 拿到原始字节 ===\nutf-8 字节数 : 35\ngbk   字节数 : 26\n同一句话两种编码字节数不同 -> 字节本身没有'是什么编码'的答案\n\n=== 第 2 步: 声明正确时直接解 ===\nutf-8 解 utf-8 : True\ngbk   解 gbk   : True\n\n=== 第 3 步: 声明错误 -> 不可逆, 必须回到 bytes ===\nutf-8 字节按 gbk 解 : 浼樻儬娲诲姩:婊�199鍑�50,闄愭椂3澶�\n还能还原吗 : False\n-> 这就是'先存 content 再解码'的原因\n\n=== 兜底: 用 charset_normalizer 检测 ===\nutf-8 字节    判定=utf_8      还原正确=True\ngbk 字节      判定=gb18030    还原正确=True\n注: GBK 字节被判为 gb18030 是正常的 —— GBK 是 gb18030 的子集",
+  "code": "# 编码与乱码: 三步定位法\nfrom charset_normalizer import from_bytes\n\nSAMPLE = \"优惠活动:满199减50,限时3天\"\n\nprint(\"=== 第 1 步: 拿到原始字节 ===\")\nraw_utf8 = SAMPLE.encode(\"utf-8\")\nraw_gbk = SAMPLE.encode(\"gbk\")\nprint(\"utf-8 字节数 :\", len(raw_utf8))\nprint(\"gbk   字节数 :\", len(raw_gbk))\nprint(\"同一句话两种编码字节数不同 -> 字节本身没有'是什么编码'的答案\")\n\nprint(\"\")\nprint(\"=== 第 2 步: 声明正确时直接解 ===\")\nprint(\"utf-8 解 utf-8 :\", raw_utf8.decode(\"utf-8\") == SAMPLE)\nprint(\"gbk   解 gbk   :\", raw_gbk.decode(\"gbk\") == SAMPLE)\n\nprint(\"\")\nprint(\"=== 第 3 步: 声明错误 -> 不可逆, 必须回到 bytes ===\")\nbad = raw_utf8.decode(\"gbk\", errors=\"replace\")\nprint(\"utf-8 字节按 gbk 解 :\", bad)\nprint(\"还能还原吗 :\", bad.encode(\"gbk\", errors=\"replace\") == raw_utf8)\nprint(\"-> 这就是'先存 content 再解码'的原因\")\n\nprint(\"\")\nprint(\"=== 兜底: 用 charset_normalizer 检测 ===\")\nfor label, raw in ((\"utf-8 字节\", raw_utf8), (\"gbk 字节\", raw_gbk)):\n    best = from_bytes(raw).best()\n    enc = best.encoding if best else None\n    ok = str(best) == SAMPLE if best else False\n    print(\"%-11s 判定=%-10s 还原正确=%s\" % (label, enc, ok))\nprint(\"注: GBK 字节被判为 gb18030 是正常的 —— GBK 是 gb18030 的子集\")\n",
+  "_intentional_corrupt": "演示乱码不可逆：UTF-8 字节按 GBK 解码会产生替换字符，正是本示例要展示的现象"
+}

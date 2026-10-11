@@ -1,0 +1,8 @@
+{
+  "title": "排除自动配置：@SpringBootApplication(exclude=...) 的过滤效果",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "candidates = 4\nexcluded   = [SecurityAutoConfiguration]\neffective  = [DataSourceAutoConfiguration, WebMvcAutoConfiguration, JacksonAutoConfiguration]\ncount      = 3",
+  "code": "import java.util.*;\nimport java.util.stream.*;\n\npublic class Ex08ExclusionFilter {\n    public static void main(String[] args) {\n        List<String> candidates = new ArrayList<>(List.of(\n                \"DataSourceAutoConfiguration\",\n                \"WebMvcAutoConfiguration\",\n                \"SecurityAutoConfiguration\",\n                \"JacksonAutoConfiguration\"));\n\n        Set<String> excludes = new LinkedHashSet<>(List.of(\"SecurityAutoConfiguration\"));\n\n        List<String> effective = candidates.stream()\n                .filter(c -> !excludes.contains(c))\n                .collect(Collectors.toList());\n\n        System.out.println(\"candidates = \" + candidates.size());\n        System.out.println(\"excluded   = \" + excludes);\n        System.out.println(\"effective  = \" + effective);\n        System.out.println(\"count      = \" + effective.size());\n    }\n}"
+}

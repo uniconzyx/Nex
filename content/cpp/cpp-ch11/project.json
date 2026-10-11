@@ -1,0 +1,14 @@
+{
+  "meta": { "chapter": "cpp-ch11", "category": "basic" },
+  "items": [
+    {
+      "title": "实现一个带强异常安全保证的栈容器 SafeStack<T>",
+      "requirement_md": "用 RAII 自管理一块 `T` 的动态数组，实现一个栈 `SafeStack<T>`，对外提供：\n\n- `push(const T&)` / `push(T&&)`：压栈；**超容量扩容时满足强异常安全保证**（失败则栈状态完全不变）。\n- `pop()`：弹栈，空栈时抛 `std::runtime_error`（或自定义派生异常）。\n- `top()`：返回栈顶引用（`const` 重载），空栈抛异常。\n- `size()` / `empty()`。\n- 正确的五法则（析构/拷贝/移动，移动构造与移动赋值**必须 `noexcept`**，使该栈可被 `std::vector` 高效搬迁）。\n\n要求：用 copy-and-swap / 先建副本再不抛交换 实现强保证；自带单元测试验证「扩容失败时原栈内容不变」「拷贝独立」「移动后为空且 noexcept」。",
+      "tasks": [
+        { "title": "实现 RAII 存储与 push/pop/top", "verification": { "type": "test", "desc": "push 后 size+1、top 正确；pop 后 size-1；空栈 pop/top 抛异常" } },
+        { "title": "实现强异常安全的扩容", "verification": { "type": "test", "desc": "用会抛的移动/拷贝模拟扩容失败，验证原栈完全不变（commit-or-rollback）" } },
+        { "title": "实现 noexcept 移动与拷贝控制", "verification": { "type": "test", "desc": "noexcept(std::declval<SafeStack>().push(std::declval<T>())) 为真；移动后源为空；拷贝互不影响" } }
+      ]
+    }
+  ]
+}

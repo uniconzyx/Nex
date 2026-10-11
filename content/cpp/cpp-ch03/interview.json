@@ -1,0 +1,26 @@
+{
+  "meta": { "chapter": "cpp-ch03" },
+  "items": [
+    {
+      "question": "C 数组和指针是什么关系？数组名是常量指针吗？",
+      "answer_md": "数组是一段连续内存；数组名在表达式中（除 `sizeof`、`&`、`decltype` 外）会退化成指向首元素的指针，但它**不是**指针变量，不能被重新赋值（不是常量指针，而是不可修改的地址表达式）。`int a[5]; int* p=a;` 合法但 `a=p;` 非法。作为参数 `f(int a[])` 即 `f(int*)`，长度信息丢失。",
+      "follow_ups": ["为什么 sizeof(a) 在函数内是指针大小？", "std::array 和裸数组有什么区别？"],
+      "difficulty": "mid",
+      "company_tags": ["通用", "美团"]
+    },
+    {
+      "question": "std::string 是怎么管理内存的？有 COW 吗？",
+      "answer_md": "现代主流实现（libstdc++/libc++）采用 **SSO（短字符串优化）**：短字符串直接存在栈上对象内，不堆分配；长字符串才堆分配，遵循写时复制式的小字符串优化（不是传统 COW，C++11 起标准禁止 COW 因为迭代器/线程安全问题）。理解 SSO 有助于解释为何短字符串拷贝很快。",
+      "follow_ups": ["SSO 的容量大概多少？", "string 的迭代器失效规则？"],
+      "difficulty": "hard",
+      "company_tags": ["通用", "腾讯"]
+    },
+    {
+      "question": "std::string_view 适合什么场景？有什么坑？",
+      "answer_md": "适合**只读、短暂**的字符串观察：函数参数（避免拷贝）、解析/切片。坑：①不拥有底层存储，指向临时 string 会悬空；②不能保证以 \\0 结尾，不能直接传给只认 C 字符串的 API（需先转 string 或确保有 \\0）；③不可修改。只读且生命周期可控时优先它。",
+      "follow_ups": ["string_view 能做函数返回值吗？", "substr 在 string_view 上代价多大？"],
+      "difficulty": "mid",
+      "company_tags": ["通用", "字节"]
+    }
+  ]
+}

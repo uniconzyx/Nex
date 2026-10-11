@@ -1,0 +1,8 @@
+{
+  "title": "层序遍历：队列 + 逐层切分",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "第 0 层: 1\n第 1 层: 2 3\n第 2 层: 4 5 6",
+  "code": "#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct Node { int v; struct Node *l, *r; } Node;\nstatic Node *mk(int v) { Node *n = malloc(sizeof(Node)); n->v = v; n->l = n->r = NULL; return n; }\n\nint main(void) {\n    Node *a = mk(1), *b = mk(2), *c = mk(3), *d = mk(4), *e = mk(5), *f = mk(6);\n    a->l = b; a->r = c; b->l = d; b->r = e; c->r = f;\n\n    Node *q[64]; int head = 0, tail = 0, level = 0;\n    q[tail++] = a;\n    while (head < tail) {\n        int len = tail - head;              /* 锁定当前层节点数 */\n        printf(\"第 %d 层:\", level++);\n        for (int i = 0; i < len; i++) {\n            Node *n = q[head++];\n            printf(\" %d\", n->v);\n            if (n->l) q[tail++] = n->l;\n            if (n->r) q[tail++] = n->r;\n        }\n        printf(\"\\n\");\n    }\n    return 0;\n}"
+}

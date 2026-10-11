@@ -1,0 +1,8 @@
+{
+  "title": "PriorityQueue 基于二叉堆的出队顺序",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "poll in heap order: 1 3 5 7 9 ",
+  "code": "import java.util.*;\n\npublic class Ex06PriorityQueueHeap {\n    public static void main(String[] args) {\n        PriorityQueue<Integer> pq = new PriorityQueue<>();\n        int[] data = {5, 1, 9, 3, 7};\n        for (int v : data) pq.offer(v);\n        System.out.print(\"poll in heap order: \");\n        while (!pq.isEmpty()) System.out.print(pq.poll() + \" \");\n        System.out.println();\n    }\n}"
+}

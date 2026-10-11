@@ -1,0 +1,8 @@
+{
+  "title": "整数除法 vs 浮点除法",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "2 2.5",
+  "code": "#include <iostream>\n\nint main() {\n    int a = 5;\n    double d = a / 2;     // 整数除法先整除，再转 double\n    double e = a / 2.0;   // 浮点除法\n    std::cout << d << ' ' << e;\n}"
+}

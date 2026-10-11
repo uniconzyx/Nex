@@ -1,0 +1,8 @@
+{
+  "title": "ex03-sql-injection-demo",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "安全路径 #{} 生成: SELECT * FROM t_user WHERE name = '?' params= [\"' OR '1'='1\"]\n危险路径 ${} 生成: SELECT * FROM t_user WHERE name = '' OR '1'='1'\n注入使 WHERE 恒成立? True",
+  "code": "import re\n\ndef safe_path(sql, args):\n    params = []\n    def repl(m):\n        params.append(args[m.group(1)])\n        return \"?\"\n    return re.sub(r\"#\\{([^}]+)\\}\", repl, sql), params\n\ndef evil_path(sql, args):\n    return re.sub(r\"\\$\\{([^}]+)\\}\", lambda m: str(args[m.group(1)]), sql)\n\n# 原始查询形如 WHERE name = '<输入>'\nprefix = \"SELECT * FROM t_user WHERE name = '\"\nsuffix = \"'\"\nmalicious = \"' OR '1'='1\"\n# 安全路径：#{} 预编译，整个用户输入作为字符串值绑定\nsafe_sql, safe_params = safe_path(prefix + \"#{name}\" + suffix, {\"name\": malicious})\n# 危险路径：${} 直接拼接，输入闭合了前面的引号并注入 OR 条件\nevil_sql = evil_path(prefix + \"${name}\" + suffix, {\"name\": malicious})\nprint(\"安全路径 #{} 生成:\", safe_sql, \"params=\", safe_params)\nprint(\"危险路径 ${} 生成:\", evil_sql)\nprint(\"注入使 WHERE 恒成立?\", (\"OR '1'='1'\" in evil_sql) and (\"?\" in safe_sql))\n"
+}

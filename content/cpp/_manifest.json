@@ -1,0 +1,909 @@
+{
+  "schema_version": 1,
+  "subject": "cpp",
+  "title": "CppMind · C/C++ 20 章课程体系",
+  "note": "阶段7 资源整合大纲。每章须齐备 7 类内容（见 _template 规范），由 server/scripts/validate_content.py 校验。resources 仅存元数据与链接，不存第三方题面/正文，符合合规红线。",
+  "groups": {
+    "L1": "基础语法（类型/函数/数组/指针）",
+    "L2": "面向对象（类/继承/多态）",
+    "L3": "泛型与 STL（模板/容器/算法）",
+    "L4": "现代 C++（异常/移动语义/智能指针）",
+    "L5": "工程与系统（IO/预处理/并发/模块）",
+    "L6": "进阶底层（元编程/性能/工程化）",
+    "L7": "综合与面试冲刺"
+  },
+  "chapters": [
+    {
+      "id": "cpp-ch01",
+      "order": 1,
+      "group": "L1",
+      "title": "C++ 基础语法：类型、变量与引用",
+      "summary": "基本类型、变量常量、运算符与表达式；引用与指针的区别；std::string/std::vector 基础；搭建编译环境。",
+      "prerequisites": [],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "practical-tutorials/project-based-learning",
+          "TheAlgorithms/C-Plus-Plus",
+          "ssloy/tinyrenderer"
+        ],
+        "github_stars": [
+          286133,
+          34742,
+          24335
+        ],
+        "github_notes": [
+          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
+          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
+          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《C++ Primer（第5版）》第 2 章 变量与基本类型 / 第 3 章 字符串、向量和数组"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "cpp-ch02",
+      "order": 2,
+      "group": "L1",
+      "title": "函数：声明/定义、重载、默认参数与 lambda",
+      "summary": "函数声明与定义分离；参数传递（值/引用/指针）；函数重载决议；默认参数；inline；lambda 表达式与捕获；函数对象初步。",
+      "prerequisites": [
+        "cpp-ch01"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "practical-tutorials/project-based-learning",
+          "TheAlgorithms/C-Plus-Plus",
+          "ssloy/tinyrenderer"
+        ],
+        "github_stars": [
+          286133,
+          34742,
+          24335
+        ],
+        "github_notes": [
+          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
+          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
+          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《C++ Primer（第5版）》第 6 章 函数"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "cpp-ch03",
+      "order": 3,
+      "group": "L1",
+      "title": "数组与字符串：C 数组、std::string 与字符串视图",
+      "summary": "C 风格数组与指针退化；std::string 常用接口；std::string_view 零拷贝视图；字符数组与 C 字符串；常见字符串算法（反转/分割/匹配）。",
+      "prerequisites": [
+        "cpp-ch01",
+        "cpp-ch02"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "practical-tutorials/project-based-learning",
+          "TheAlgorithms/C-Plus-Plus",
+          "ssloy/tinyrenderer"
+        ],
+        "github_stars": [
+          286133,
+          34742,
+          24335
+        ],
+        "github_notes": [
+          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
+          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
+          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《C++ Primer（第5版）》第 3 章 字符串、向量和数组 / 第 9 章 顺序容器"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "cpp-ch04",
+      "order": 4,
+      "group": "L1",
+      "title": "指针与内存管理：指针运算、new/delete 与悬垂",
+      "summary": "指针本质与运算；数组与指针关系；动态内存 new/delete；内存布局（栈/堆/全局）；悬垂指针与内存泄漏；const 指针；this 指针初步。",
+      "prerequisites": [
+        "cpp-ch01"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "practical-tutorials/project-based-learning",
+          "TheAlgorithms/C-Plus-Plus",
+          "ssloy/tinyrenderer"
+        ],
+        "github_stars": [
+          286133,
+          34742,
+          24335
+        ],
+        "github_notes": [
+          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
+          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
+          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《C++ Primer（第5版）》第 4 章 表达式 / 第 12 章 动态内存"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "cpp-ch05",
+      "order": 5,
+      "group": "L2",
+      "title": "类与对象：封装、构造/析构、拷贝与运算符重载",
+      "summary": "类定义与访问控制；构造函数/析构函数；拷贝构造与拷贝赋值（三/五法则）；const 成员函数；运算符重载；友元；静态成员。",
+      "prerequisites": [
+        "cpp-ch02",
+        "cpp-ch04"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "practical-tutorials/project-based-learning",
+          "TheAlgorithms/C-Plus-Plus",
+          "ssloy/tinyrenderer"
+        ],
+        "github_stars": [
+          286133,
+          34742,
+          24335
+        ],
+        "github_notes": [
+          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
+          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
+          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《C++ Primer（第5版）》第 7 章 类"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "cpp-ch06",
+      "order": 6,
+      "group": "L2",
+      "title": "继承与多态：虚函数、抽象类与 RTTI",
+      "summary": "公有/保护/私有继承；派生类构造顺序；虚函数表与动态绑定；纯虚函数与抽象类；override/final；dynamic_cast 与 RTTI；多重继承要点。",
+      "prerequisites": [
+        "cpp-ch05"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "practical-tutorials/project-based-learning",
+          "TheAlgorithms/C-Plus-Plus",
+          "ssloy/tinyrenderer"
+        ],
+        "github_stars": [
+          286133,
+          34742,
+          24335
+        ],
+        "github_notes": [
+          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
+          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
+          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《C++ Primer（第5版）》第 15 章 面向对象程序设计"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "cpp-ch07",
+      "order": 7,
+      "group": "L3",
+      "title": "模板与泛型：函数模板、类模板与特化",
+      "summary": "函数模板与类型推导；类模板；模板特化（全/偏）；非类型模板参数；可变参数模板；模板实参推导与 SFINAE 入门。",
+      "prerequisites": [
+        "cpp-ch05"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "practical-tutorials/project-based-learning",
+          "TheAlgorithms/C-Plus-Plus",
+          "ssloy/tinyrenderer"
+        ],
+        "github_stars": [
+          286133,
+          34742,
+          24335
+        ],
+        "github_notes": [
+          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
+          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
+          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《C++ Primer（第5版）》第 16 章 模板与泛型编程"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "cpp-ch08",
+      "order": 8,
+      "group": "L3",
+      "title": "STL 容器：vector/list/map/set/unordered",
+      "summary": "顺序容器 vector/deque/list/forward_list；关联容器 map/set；无序容器 unordered_map/unordered_set；容器选择策略；迭代器类别。",
+      "prerequisites": [
+        "cpp-ch03",
+        "cpp-ch05"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "practical-tutorials/project-based-learning",
+          "TheAlgorithms/C-Plus-Plus",
+          "ssloy/tinyrenderer"
+        ],
+        "github_stars": [
+          286133,
+          34742,
+          24335
+        ],
+        "github_notes": [
+          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
+          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
+          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《C++ Primer（第5版）》第 9-11 章 顺序/关联/无序容器"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "cpp-ch09",
+      "order": 9,
+      "group": "L3",
+      "title": "STL 算法与迭代器：sort/find/lambda/范围",
+      "summary": "迭代器分类；常用算法 sort/stable_sort/find/count/transform/accumulate；lambda 配合算法；C++20 范围（ranges）入门。",
+      "prerequisites": [
+        "cpp-ch08"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "practical-tutorials/project-based-learning",
+          "TheAlgorithms/C-Plus-Plus",
+          "ssloy/tinyrenderer"
+        ],
+        "github_stars": [
+          286133,
+          34742,
+          24335
+        ],
+        "github_notes": [
+          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
+          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
+          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《C++ Primer（第5版）》第 10 章 泛型算法"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "cpp-ch10",
+      "order": 10,
+      "group": "L4",
+      "title": "智能指针与 RAII：unique_ptr/shared_ptr/weak_ptr",
+      "summary": "RAII 原则；unique_ptr 独占所有权；shared_ptr 引用计数与循环引用；weak_ptr 打破循环；自定义删除器；与裸指针的边界。",
+      "prerequisites": [
+        "cpp-ch04",
+        "cpp-ch05"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "practical-tutorials/project-based-learning",
+          "TheAlgorithms/C-Plus-Plus",
+          "ssloy/tinyrenderer"
+        ],
+        "github_stars": [
+          286133,
+          34742,
+          24335
+        ],
+        "github_notes": [
+          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
+          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
+          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《C++ Primer（第5版）》第 12 章 动态内存 / 第 13 章 拷贝控制"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "cpp-ch11",
+      "order": 11,
+      "group": "L4",
+      "title": "异常处理与断言：try/catch、noexcept 与契约",
+      "summary": "throw/try/catch；异常安全保证（基本/强/不抛）；noexcept；标准异常体系；断言 assert 与静态断言 static_assert；RAII 与异常交互。",
+      "prerequisites": [
+        "cpp-ch05"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "practical-tutorials/project-based-learning",
+          "TheAlgorithms/C-Plus-Plus",
+          "ssloy/tinyrenderer"
+        ],
+        "github_stars": [
+          286133,
+          34742,
+          24335
+        ],
+        "github_notes": [
+          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
+          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
+          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《C++ Primer（第5版）》第 18 章 用于大型程序的工具"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "cpp-ch12",
+      "order": 12,
+      "group": "L4",
+      "title": "现代 C++ 特性：auto/移动语义/范围 for/emplace",
+      "summary": "auto 与 decltype；右值引用与移动语义；std::move/forward；emplace 避免拷贝；结构化绑定；if constexpr；折叠表达式。",
+      "prerequisites": [
+        "cpp-ch07",
+        "cpp-ch10"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "practical-tutorials/project-based-learning",
+          "TheAlgorithms/C-Plus-Plus",
+          "ssloy/tinyrenderer"
+        ],
+        "github_stars": [
+          286133,
+          34742,
+          24335
+        ],
+        "github_notes": [
+          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
+          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
+          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Effective Modern C++》条款 1-42（Scott Meyers）"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "cpp-ch13",
+      "order": 13,
+      "group": "L5",
+      "title": "输入/输出与文件：iostream、fstream 与格式化",
+      "summary": "iostream 体系；格式化输出与操纵符；文件流 fstream 读写；字符串流 stringstream；二进制 IO；错误状态位。",
+      "prerequisites": [
+        "cpp-ch03"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "practical-tutorials/project-based-learning",
+          "TheAlgorithms/C-Plus-Plus",
+          "ssloy/tinyrenderer"
+        ],
+        "github_stars": [
+          286133,
+          34742,
+          24335
+        ],
+        "github_notes": [
+          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
+          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
+          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《C++ Primer（第5版）》第 8 章 IO 库"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "cpp-ch14",
+      "order": 14,
+      "group": "L5",
+      "title": "预处理与宏：include/define/条件编译/头文件守卫",
+      "summary": "翻译单元与编译流程；#include 守卫与 #pragma once；宏 vs 常量/模板；条件编译；__FILE__/__LINE__；避免宏陷阱。",
+      "prerequisites": [
+        "cpp-ch01"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "practical-tutorials/project-based-learning",
+          "TheAlgorithms/C-Plus-Plus",
+          "ssloy/tinyrenderer"
+        ],
+        "github_stars": [
+          286133,
+          34742,
+          24335
+        ],
+        "github_notes": [
+          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
+          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
+          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《C++ Primer（第5版）》第 2 章 预处理"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "cpp-ch15",
+      "order": 15,
+      "group": "L5",
+      "title": "命名空间与模块化：namespace/inline namespace/C++20 模块",
+      "summary": "namespace 与 using；匿名命名空间；inline namespace 版本控制；ADL；C++20 module 替代头文件包含；避免using namespace std 进头文件。",
+      "prerequisites": [
+        "cpp-ch14"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "practical-tutorials/project-based-learning",
+          "TheAlgorithms/C-Plus-Plus",
+          "ssloy/tinyrenderer"
+        ],
+        "github_stars": [
+          286133,
+          34742,
+          24335
+        ],
+        "github_notes": [
+          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
+          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
+          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《C++ Primer（第5版）》第 18 章 命名空间"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "cpp-ch16",
+      "order": 16,
+      "group": "L5",
+      "title": "并发与多线程：thread/mutex/atomic/async",
+      "summary": "std::thread 创建与 join/detach；互斥量 mutex/lock_guard；原子操作 atomic；条件变量；std::async 与 future；数据竞争与死锁规避。",
+      "prerequisites": [
+        "cpp-ch05",
+        "cpp-ch10"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "practical-tutorials/project-based-learning",
+          "TheAlgorithms/C-Plus-Plus",
+          "ssloy/tinyrenderer"
+        ],
+        "github_stars": [
+          286133,
+          34742,
+          24335
+        ],
+        "github_notes": [
+          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
+          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
+          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《C++ Concurrency in Action（第2版）》Anthony Williams"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "cpp-ch17",
+      "order": 17,
+      "group": "L6",
+      "title": "元编程与类型萃取：type_traits/constexpr/SFINAE/concept",
+      "summary": "编译期计算 constexpr；type_traits 与 enable_if；SFINAE；C++20 concept 与 requires；编译期 if；traits 类设计。",
+      "prerequisites": [
+        "cpp-ch07",
+        "cpp-ch12"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "practical-tutorials/project-based-learning",
+          "TheAlgorithms/C-Plus-Plus",
+          "ssloy/tinyrenderer"
+        ],
+        "github_stars": [
+          286133,
+          34742,
+          24335
+        ],
+        "github_notes": [
+          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
+          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
+          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《C++ Templates: The Complete Guide（第2版）》"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "cpp-ch18",
+      "order": 18,
+      "group": "L6",
+      "title": "性能与底层：内存对齐、缓存友好与内联",
+      "summary": "内存对齐 alignas/alignof；false sharing；缓存友好数据结构；内联与 devirtualization；简单 profiling；与 C 的 ABI 兼容。",
+      "prerequisites": [
+        "cpp-ch04",
+        "cpp-ch17"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "practical-tutorials/project-based-learning",
+          "TheAlgorithms/C-Plus-Plus",
+          "ssloy/tinyrenderer"
+        ],
+        "github_stars": [
+          286133,
+          34742,
+          24335
+        ],
+        "github_notes": [
+          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
+          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
+          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Effective C++》条款 16-25（内存与效率）"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "cpp-ch19",
+      "order": 19,
+      "group": "L6",
+      "title": "工程化与测试：CMake、单元测试与 CI",
+      "summary": "CMake 现代用法（target_*/fetchContent）；单元测试 googletest/catch2；静态分析 clang-tidy；CI 流水线；头文件/源文件组织约定。",
+      "prerequisites": [
+        "cpp-ch14",
+        "cpp-ch15"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "practical-tutorials/project-based-learning",
+          "TheAlgorithms/C-Plus-Plus",
+          "ssloy/tinyrenderer"
+        ],
+        "github_stars": [
+          286133,
+          34742,
+          24335
+        ],
+        "github_notes": [
+          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
+          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
+          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《CMake 实践》"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "cpp-ch20",
+      "order": 20,
+      "group": "L7",
+      "title": "综合项目与面试冲刺：系统设计、代码规范与复盘",
+      "summary": "综合项目（如迷你 STL / 线程池 / HTTP 服务器）；代码规范与可读性；面试高频八股串讲；白板 coding 训练；学习路线复盘与进阶方向。",
+      "prerequisites": [
+        "cpp-ch05",
+        "cpp-ch08",
+        "cpp-ch16"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "practical-tutorials/project-based-learning",
+          "TheAlgorithms/C-Plus-Plus",
+          "ssloy/tinyrenderer"
+        ],
+        "github_stars": [
+          286133,
+          34742,
+          24335
+        ],
+        "github_notes": [
+          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
+          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
+          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《剑指 Offer（第2版）》",
+          "《C++ 面试宝典》"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    }
+  ],
+  "clang_module": {
+    "title": "C 语言独立模块（7 单元）",
+    "note": "与 C++ 并列的一级入口，每单元同样满足 7 类内容要求，按 cpp-ch0X 同格式存放于 content/clang/。",
+    "units": [
+      {
+        "id": "clang-u01",
+        "title": "指针与地址运算",
+        "status": "complete",
+        "resources": {
+          "github": [
+            "practical-tutorials/project-based-learning",
+            "TheAlgorithms/C"
+          ],
+          "github_stars": [
+            286133,
+            22507
+          ],
+          "github_notes": [
+            "项目驱动的实战教程合集（含 C 专题）",
+            "C 语言实现的算法与数据结构合集"
+          ],
+          "github_fetched_at": "2026-09-21",
+          "books": [
+            "《C 程序设计语言（K&R）》第 5 章 指针与数组"
+          ],
+          "leetcode": [],
+          "nowcoder": []
+        }
+      },
+      {
+        "id": "clang-u02",
+        "title": "内存与动态分配（malloc/free）",
+        "status": "complete",
+        "resources": {
+          "github": [
+            "practical-tutorials/project-based-learning",
+            "TheAlgorithms/C"
+          ],
+          "github_stars": [
+            286133,
+            22507
+          ],
+          "github_notes": [
+            "项目驱动的实战教程合集（含 C 专题）",
+            "C 语言实现的算法与数据结构合集"
+          ],
+          "github_fetched_at": "2026-09-21",
+          "books": [
+            "《C 程序设计语言（K&R）》第 7 章 内存管理"
+          ],
+          "leetcode": [],
+          "nowcoder": []
+        }
+      },
+      {
+        "id": "clang-u03",
+        "title": "结构体与联合体",
+        "status": "complete",
+        "resources": {
+          "github": [
+            "practical-tutorials/project-based-learning",
+            "TheAlgorithms/C"
+          ],
+          "github_stars": [
+            286133,
+            22507
+          ],
+          "github_notes": [
+            "项目驱动的实战教程合集（含 C 专题）",
+            "C 语言实现的算法与数据结构合集"
+          ],
+          "github_fetched_at": "2026-09-21",
+          "books": [
+            "《C 程序设计语言（K&R）》第 6 章 结构"
+          ],
+          "leetcode": [],
+          "nowcoder": []
+        }
+      },
+      {
+        "id": "clang-u04",
+        "title": "文件 IO 与二进制",
+        "status": "complete",
+        "resources": {
+          "github": [
+            "practical-tutorials/project-based-learning",
+            "TheAlgorithms/C"
+          ],
+          "github_stars": [
+            286133,
+            22507
+          ],
+          "github_notes": [
+            "项目驱动的实战教程合集（含 C 专题）",
+            "C 语言实现的算法与数据结构合集"
+          ],
+          "github_fetched_at": "2026-09-21",
+          "books": [
+            "《C 程序设计语言（K&R）》第 7 章 输入与输出"
+          ],
+          "leetcode": [],
+          "nowcoder": []
+        }
+      },
+      {
+        "id": "clang-u05",
+        "title": "预处理与宏",
+        "status": "complete",
+        "resources": {
+          "github": [
+            "practical-tutorials/project-based-learning",
+            "TheAlgorithms/C"
+          ],
+          "github_stars": [
+            286133,
+            22507
+          ],
+          "github_notes": [
+            "项目驱动的实战教程合集（含 C 专题）",
+            "C 语言实现的算法与数据结构合集"
+          ],
+          "github_fetched_at": "2026-09-21",
+          "books": [
+            "《C 程序设计语言（K&R）》第 4 章 函数与程序结构"
+          ],
+          "leetcode": [],
+          "nowcoder": []
+        }
+      },
+      {
+        "id": "clang-u06",
+        "title": "Makefile 与构建",
+        "status": "complete",
+        "resources": {
+          "github": [
+            "practical-tutorials/project-based-learning",
+            "TheAlgorithms/C"
+          ],
+          "github_stars": [
+            286133,
+            22507
+          ],
+          "github_notes": [
+            "项目驱动的实战教程合集（含 C 专题）",
+            "C 语言实现的算法与数据结构合集"
+          ],
+          "github_fetched_at": "2026-09-21",
+          "books": [
+            "《GNU Make 手册》"
+          ],
+          "leetcode": [],
+          "nowcoder": []
+        }
+      },
+      {
+        "id": "clang-u07",
+        "title": "多文件编译与链接",
+        "status": "complete",
+        "resources": {
+          "github": [
+            "practical-tutorials/project-based-learning",
+            "TheAlgorithms/C"
+          ],
+          "github_stars": [
+            286133,
+            22507
+          ],
+          "github_notes": [
+            "项目驱动的实战教程合集（含 C 专题）",
+            "C 语言实现的算法与数据结构合集"
+          ],
+          "github_fetched_at": "2026-09-21",
+          "books": [
+            "《程序员的自我修养：链接、装载与库》"
+          ],
+          "leetcode": [],
+          "nowcoder": []
+        }
+      }
+    ]
+  },
+  "github_resources": [
+    {
+      "repo": "practical-tutorials/project-based-learning",
+      "stars": 286133,
+      "url": "https://github.com/practical-tutorials/project-based-learning",
+      "note": "项目驱动的多语言实战教程合集（含 C/C++ 专题）"
+    },
+    {
+      "repo": "TheAlgorithms/C-Plus-Plus",
+      "stars": 34742,
+      "url": "https://github.com/TheAlgorithms/C-Plus-Plus",
+      "note": "C++ 实现的经典算法与数据结构合集，可直接编译运行"
+    },
+    {
+      "repo": "ssloy/tinyrenderer",
+      "stars": 24335,
+      "url": "https://github.com/ssloy/tinyrenderer",
+      "note": "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+    }
+  ],
+  "resources_fetched_at": "2026-09-21"
+}

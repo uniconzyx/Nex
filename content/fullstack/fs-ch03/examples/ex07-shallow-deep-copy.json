@@ -1,0 +1,8 @@
+{
+  "title": "浅拷贝 / structuredClone / JSON 往返的差异",
+  "code_lang": "javascript",
+  "code_std": "node22",
+  "stdin": "",
+  "expected_output": "shallow 改动影响原 b.c: 99\nstructuredClone 隔离, 原 b.c: 99\nJSON 丢 undefined(d 在副本?): false\nJSON 丢函数(e 在副本?): false",
+  "code": "var src = { a: 1, b: { c: 2 } };\nvar shallow = Object.assign({}, src);\nshallow.b.c = 99;\nconsole.log('shallow 改动影响原 b.c:', src.b.c);\nvar deep = structuredClone(src);\ndeep.b.c = 7;\nconsole.log('structuredClone 隔离, 原 b.c:', src.b.c);\nvar withFn = { d: undefined, e: function(){} };\nvar jsonCopy = JSON.parse(JSON.stringify(withFn));\nconsole.log('JSON 丢 undefined(d 在副本?):', 'd' in jsonCopy);\nconsole.log('JSON 丢函数(e 在副本?):', 'e' in jsonCopy);"
+}

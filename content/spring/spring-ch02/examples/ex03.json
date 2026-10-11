@@ -1,0 +1,8 @@
+{
+  "title": "Aware 回调：BeanNameAware / BeanFactoryAware",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "name=myBean, hasFactory=true",
+  "code": "public class Main {\n    interface BeanNameAware { void setBeanName(String n); }\n    interface BeanFactoryAware { void setBeanFactory(Object bf); }\n\n    static class MyBean implements BeanNameAware, BeanFactoryAware {\n        String name;\n        Object factory;\n        public void setBeanName(String n) { this.name = n; }\n        public void setBeanFactory(Object bf) { this.factory = bf; }\n        String desc() { return \"name=\" + name + \", hasFactory=\" + (factory != null); }\n    }\n\n    public static void main(String[] args) {\n        MyBean b = new MyBean();\n        ((BeanNameAware) b).setBeanName(\"myBean\");\n        ((BeanFactoryAware) b).setBeanFactory(\"BeanFactory@mini\");\n        System.out.println(b.desc());\n    }\n}\n"
+}

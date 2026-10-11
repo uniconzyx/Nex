@@ -1,0 +1,8 @@
+{
+  "title": "prototype 注入 singleton 的陷阱：只注入一次，之后不变",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "singleton holds same proto: true\nproto id fixed: 1\nproto changes per call: false",
+  "code": "public class Main {\n    static class Proto { static int n = 0; int id = ++n; }\n    static class Singleton {\n        Proto proto;\n        Proto get() { return proto; }\n    }\n    public static void main(String[] args) {\n        Singleton s = new Singleton();\n        s.proto = new Proto();\n        Proto first = s.get();\n        Proto second = s.get();\n        System.out.println(\"singleton holds same proto: \" + (first == second));\n        System.out.println(\"proto id fixed: \" + first.id);\n        System.out.println(\"proto changes per call: \" + (first.id != second.id));\n    }\n}\n"
+}

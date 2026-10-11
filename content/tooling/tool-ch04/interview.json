@@ -1,0 +1,82 @@
+{
+  "meta": {
+    "chapter": "tool-ch04",
+    "title": "Git 协作：分支策略与冲突处理 —— 面试题",
+    "count": 6,
+    "note": "6 题：引用与 pull 语义、冲突解决、push 安全、rebase 黄金法则、搬运/救援三件套、分支策略选型"
+  },
+  "items": [
+    {
+      "id": "iv1",
+      "question": "请说明 `git fetch`、`git pull` 与 `git pull --rebase` 的区别，并说明为什么团队里推荐「先 fetch 再看差异」。",
+      "answer_md": "**三类引用**：本地分支 `refs/heads/*`、远端跟踪引用 `refs/remotes/origin/*`（上次通信时远端状态的快照）、远端真实引用。\n\n- `fetch`：搬运远端有而本地没有的对象，**只更新远端跟踪引用**，不碰本地分支、暂存区与工作区 → 幂等、随时可安全执行。\n- `pull` = `fetch` + 一次整合：默认 `merge`（非快进时产生 merge commit），配置 `pull.rebase=true` 或 `--rebase` 时改为重放本地提交 → **会移动你的 HEAD 并改写工作区**。\n- `pull --rebase`：把本地独有提交逐个重放到 `origin/main` 之上，历史线性，但**本地提交 SHA 被改写**。\n\n**推荐先 fetch 的原因**：整合策略（merge 保拓扑 vs rebase 保线性）是一个需要看具体差异才知道的**决策**，`pull` 会替你悄无声息地做这个决定，还可能当场停下要你解冲突。先 `fetch` 后 `git log --oneline main..origin/main`（落后）与 `origin/main..main`（领先）看清 a head/behind，再决定整合方式，是专业习惯。",
+      "follow_ups": [
+        "如果你已经 pull 产生了一个 merge commit 但想改成线性历史，怎么办？",
+        "`git pull --rebase` 在 CI 流水线里有什么风险？",
+        "为什么 origin/main 有时候会「比远端旧」？它什么时候更新？"
+      ],
+      "difficulty": "easy",
+      "company_tags": ["通用", "字节", "腾讯"]
+    },
+    {
+      "id": "iv2",
+      "question": "`git push` 被 rejected 了，你会怎么处理？请比较 `--force` 与 `--force-with-lease`，并说明共享分支的正确回滚方式。",
+      "answer_md": "**被拒原因**：绝大多数是 non-fast-forward —— 远端引用当前值不是你本地 tip 的祖先，即远端出现了你尚未整合的提交（其余可能：保护分支权限、hook 校验失败）。\n\n**处理顺序**：\n1. `git fetch`；\n2. `git rev-list --left-right --count <branch>...origin/<branch>` 看落后/领先；\n3. 整合：个人分支用 `git rebase origin/<branch>`，集成分支用 `git merge`；\n4. 解冲突 → 跑测试 → 再 push。\n\n**两种强推**：\n| | 校验 | 后果 |\n|---|---|---|\n| `--force` | 无 | 直接覆盖远端引用，他人未整合的提交静默丢失 |\n| `--force-with-lease` | 远端引用 == 本地记录的 `origin/main` | 不一致则 rejected (stale info)，不动远端 |\n\nlease 就是一次 **CAS（乐观锁）**：它保证「不覆盖我没看过的提交」。但它**仍然改写历史**，不等价于安全。\n\n**共享分支回滚**：用 `git revert <sha>` 追加反向提交（历史只增不减，所有人 pull 后一致）。若是 merge commit 需 `git revert -m 1 <sha>`；回滚后想再次引入同一批改动，要 `revert 掉那个 revert`。工程上还应给 main/release 配保护分支，从平台层面禁止强推。",
+      "follow_ups": [
+        "`--force-with-lease` 在刚 fetch 过的情况下为什么「保护失效」？",
+        "出了问题如何找回远端丢失的提交？",
+        " `push.default` 的 simple / current / nothing 有什么区别？"
+      ],
+      "difficulty": "mid",
+      "company_tags": ["通用", "阿里", "美团"]
+    },
+    {
+      "id": "iv3",
+      "question": "Git 什么时候会产生冲突？请描述完整的冲突解决流程，并说明 rebase 场景下 ours/theirs 为什么会「反了」。",
+      "answer_md": "**充要条件**：三方合并以 `merge-base` 为基线，对比 `ours`（当前 HEAD）与 `theirs`（被合入方）。当双方**改动了 base 的同一区域且结果不同**（含一侧删除、另一侧修改）时冲突。注意：「改了同一个文件」既不充分也不必要——不同区域自动合并；改同一处但结果完全相同也不冲突。\n\n**流程**：\n1. `git status` 看哪些路径 Unmerged；\n2. 手工编辑（建议开 `merge.conflictStyle diff3`，能看到 `|||||||` 共同祖先段），消除 `<<<<<<<` / `=======` / `>>>>>>>`；\n3. `git add <file>` —— 把 index 中的 stage 1/2/3 归一到 stage 0，这是「告诉 Git 我解决了」的本质；\n4. `git merge --continue`（rebase/cherry-pick 分别为各自的 `--continue`），反悔用 `--abort`；\n5. 提交前 grep 检查残留标记，`git diff HEAD~1` 复核，跑测试。\n\n**为什么 rebase 下 ours/theirs 会反**：merge 时 ours = 当前分支、theirs = 被合并的对方；而 rebase 是把**你的提交**重放到上游 `upstream` 之上，此刻工作区的基准是上游，所以 **ours = 上游，theirs = 你自己的提交**。因此不要依赖 ours/theirs 的字面含义，直接看冲突内容或用 `git checkout --conflict=diff3 <file>` 还原三方。\n\n**其他工具**：`rerere.enabled=true` 可复用已记录的解决（重放式 rebase 尤其有用）；`--ours/--theirs` 是整段丢弃另一侧，属于核按钮。",
+      "follow_ups": [
+        "存在多个共同祖先（criss-cross）时 Git 怎么处理？",
+        "为什么「自动合并成功」的代码仍可能编译失败？",
+        "`git checkout --conflict=diff3` 输出的三段分别是什么？"
+      ],
+      "difficulty": "mid",
+      "company_tags": ["通用", "字节", "小红书"]
+    },
+    {
+      "id": "iv4",
+      "question": "cherry-pick、revert、rebase、merge 都涉及「把改动搬到别处」，请说明它们的语义差异与各自的适用场景。",
+      "answer_md": "| 命令 | 语义 | 是否改写历史 | 场景 |\n|---|---|---|---|\n| `merge` | 保拓扑合并，非快进时产生有两个 parent 的 merge commit | 否 | 集成分支、保留并行开发真相 |\n| `rebase` | 把一段提交逐个「重放」到新基点，等价于循环 cherry-pick | **是** | 整理本地未推送提交、拉平历史 |\n| `cherry-pick` | 复制单个提交相对其父的差异到当前 HEAD（内部是一次三方合并：base=被摘提交的父，ours=HEAD，theirs=被摘提交） | 否（只新增） | 把 hotfix 复制到多条发布分支，建议 `-x` 记录来源 |\n| `revert` | 生成反向提交抵消某次改动 | 否（只新增） | 回滚已发布提交的**唯一正确方式** |\n\n要点：\n- `cherry-pick` 是**复制不是移动**：原提交仍在原分支；因为 parent 变了，**新提交的 SHA 必然变化**。\n- `cherry-pick` 只搬差异，不带祖先依赖；若目标分支缺少前置重构提交，会合进来但编译不过。\n- `revert` 一个 merge commit 必须 `-m <parent-number>`；revert 之后再次 merge 同一分支会被 Git 认为「已在历史里」而跳过，需要 `revert 掉 revert`。\n- 改写历史的**黄金法则**：只对本地尚未推送的提交做 rebase/amend/reset；已共享的用 merge/revert。",
+      "follow_ups": [
+        "为什么 cherry-pick 后的提交 SHA 与原提交不同？",
+        "如何把 feature 分支中间某一段连续提交整体搬到另一分支？",
+        "revert 之后再 merge 同一分支为什么会缺少改动？"
+      ],
+      "difficulty": "mid",
+      "company_tags": ["通用", "京东", "滴滴"]
+    },
+    {
+      "id": "iv5",
+      "question": "队友误执行了 `git reset --hard HEAD~3` 并且工作区也干净了（改动未提交），如何救援？stash 和 reflog 各自适用什么场景？",
+      "answer_md": "**救援思路**：\n1. `git reflog`（或 `git reflog show <branch>`）查看 HEAD/分支的移动流水，每条记录含移动前后的 SHA；\n2. 找到误操作前的那个 tip（形如 `HEAD@{3}` 或某个 SHA）；\n3. `git reset --hard <sha>` 恢复，或更稳妥地 `git checkout -b rescue <sha>` 先收编成分支再确认内容。\n同理可救：`git branch -D` 误删的分支、`commit --amend` 替换掉的提交、rebase 之前的旧 tip。\n\n**前提与边界**：reflog 是 `.git/logs/HEAD` 的**本地** append-only 流水，默认保留 90 天（`gc.reflogExpire`），**不随 push 传播、不能跨机器**；GC 只回收「从所有 ref + reflog + index 都不可达」的对象，所以被 reflog 指向的提交暂时安全。\n\n**工作区改动的情况**：未 commit 的内容既不在对象库也无引用指向，`reflog` 救不回来；预防手段是 reset 前先 `git stash`（或临时 commit）。\n\n**stash 的适用场景**：几分钟到几小时的临时跳转（半成品打个 `-m` 快照，进入 LIFO 栈，`stash@{0}` 是最近一条）。注意未跟踪文件默认不入栈（需 `-u`）、`pop` 遇到本地改动会被拒绝。半成品超过一天应 commit 到临时分支或用 `git worktree`，而不是堆在 stash 里。",
+      "follow_ups": [
+        "`git fsck --lost-found` 与 reflog 在找回上的区别？",
+        "stash 内部在对象模型里到底是什么？",
+        "为什么 reflog 救不了已 push 到远端后被强推覆盖的他人提交？"
+      ],
+      "difficulty": "hard",
+      "company_tags": ["通用", "字节", "快手"]
+    },
+    {
+      "id": "iv6",
+      "question": "项目该选哪种分支策略？请对比 Git Flow / GitHub Flow / Trunk Based，并给出你所在团队的选型理由。",
+      "answer_md": "| 策略 | 长期分支 | 发布单元 | 适用信号 | 失败模式 |\n|---|---|---|---|---|\n| Git Flow | 2（main + develop） | release 分支冻结后发布 | 多版本并行维护（1.x/2.x）、固定发布窗口 | develop 长期不合回 main，出现两个「真相」 |\n| GitHub Flow | 1（main，始终可部署） | 合入即发布 | 单一可部署主干、PR 驱动 | 合入过快、缺回归导致质量波动 |\n| Trunk Based | 1（trunk，分支寿命 < 1~2 天） | 主干随时可发布，靠 feature flag 控制暴露 | 每日多次发布、CI/测试完善、开关成熟 | 没有 feature flag 与测试护栏时主干持续红 |\n\n**选型规则**：需要多版本并行维护 → Git Flow；发布频率 ≥ 每天且 CI 完善 → Trunk Based；有发布窗口且团队较大 → Git Flow；其余默认 GitHub Flow。\n\n**理由模板（示例）**：8 人 SaaS 团队、每周上线、单版本维护 → 选 GitHub Flow：main 始终可部署，feature 分支 < 3 天，全部走 PR + CI 全绿才合入，发布用 tag + release note，避免 Git Flow 的 develop 双主干维护成本。\n\n**与策略无关的底座**：短命分支 + PR + Code Review + CI 全绿 + Conventional Commits（推算 SemVer 与 CHANGELOG）+ 仓库卫生三项（`.gitignore` / `.gitattributes` / 大文件 LFS 或 filter-repo 清理）。",
+      "follow_ups": [
+        "feature flag 为什么是 Trunk Based 的前提？",
+        "长期分支为什么会导致「合并地狱」？用成本模型怎么解释？",
+        "Conventional Commits 的 type 如何映射到 MAJOR/MINOR/PATCH？"
+      ],
+      "difficulty": "hard",
+      "company_tags": ["通用", "阿里", "Shopee"]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "title": "感受野递推：堆叠卷积与 stride 的影响",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "4 层 3x3 stride1 堆叠 -> 感受野: 9 (= 1+2+2+2=7)\n3 层 3x3 stride2 -> 感受野: 15\n1 个 7x7 stride1 -> 感受野: 7\n对比: 3x3x3 (7) vs 7x7 (7) 感受野相同, 但 3x3x3 参数量 27C^2 < 49C^2\n混合 (3,1)(3,2)(3,1) -> 感受野: 9\n",
+  "code": "\nimport numpy as np\ndef rf_of_layers(layers):\n    rf=1; jump=1\n    for k,s in layers:\n        rf = rf + (k-1)*jump\n        jump = jump*s\n    return rf, jump\nstack_3x3 = [(3,1),(3,1),(3,1),(3,1)]\nprint(\"4 层 3x3 stride1 堆叠 -> 感受野:\", rf_of_layers(stack_3x3)[0], \"(= 1+2+2+2=7)\")\nstack_stride = [(3,2),(3,2),(3,2)]\nrf2,_ = rf_of_layers(stack_stride)\nprint(\"3 层 3x3 stride2 -> 感受野:\", rf2)\n# 7x7 单层\nprint(\"1 个 7x7 stride1 -> 感受野:\", rf_of_layers([(7,1)])[0])\nprint(\"对比: 3x3x3 (7) vs 7x7 (7) 感受野相同, 但 3x3x3 参数量 27C^2 < 49C^2\")\n# 有 stride 的小核 vs 大核\nmixed = [(3,1),(3,2),(3,1)]\nprint(\"混合 (3,1)(3,2)(3,1) -> 感受野:\", rf_of_layers(mixed)[0])\n"
+}

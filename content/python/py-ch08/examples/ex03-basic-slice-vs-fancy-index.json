@@ -1,0 +1,8 @@
+{
+  "title": "基本切片是视图、花式索引与布尔索引是副本",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "a = [0 1 2 3 4 5 6 7 8 9]\n切片 s = a[2:6] = [2 3 4 5] | 共享内存 = True\n改 s[0] 之后 a = [ 0  1 99  3  4  5  6  7  8  9] （原数组被改，证明基本切片是视图）\n花式 f = a2[[2,3,4,5]] = [2 3 4 5] | 共享内存 = False\n改 f[0] 之后 a2 = [0 1 2 3 4 5 6 7 8 9] （原数组不变，证明花式索引是副本）\n--- 其它是否为副本 ---\nastype(新 dtype) 共享内存 = False\ncopy()           共享内存 = False\n布尔索引 a5[a5<5] 共享内存 = False",
+  "code": "import numpy as np\na = np.arange(10)\ns = a[2:6]\nprint(\"a =\", a)\nprint(\"切片 s = a[2:6] =\", s, \"| 共享内存 =\", np.shares_memory(a, s))\ns[0] = 99\nprint(\"改 s[0] 之后 a =\", a, \"（原数组被改，证明基本切片是视图）\")\na2 = np.arange(10)\nf = a2[[2, 3, 4, 5]]\nprint(\"花式 f = a2[[2,3,4,5]] =\", f, \"| 共享内存 =\", np.shares_memory(a2, f))\nf[0] = 99\nprint(\"改 f[0] 之后 a2 =\", a2, \"（原数组不变，证明花式索引是副本）\")\nprint(\"--- 其它是否为副本 ---\")\na3 = np.arange(10)\nprint(\"astype(新 dtype) 共享内存 =\", np.shares_memory(a3, a3.astype(np.int64)))\na4 = np.arange(10)\nprint(\"copy()           共享内存 =\", np.shares_memory(a4, a4.copy()))\na5 = np.arange(10)\nprint(\"布尔索引 a5[a5<5] 共享内存 =\", np.shares_memory(a5, a5[a5 < 5]))\n"
+}

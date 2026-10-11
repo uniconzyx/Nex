@@ -1,0 +1,9 @@
+{
+  "title": "AOF 重写(rewrite)：抵消冗余写命令",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "AOF 重写(rewrite):\n  重写前命令数: 5 [('SET', 'a', 1), ('SET', 'a', 2), ('SET', 'b', 1), ('SET', 'a', 3), ('SET', 'c', 9)]\n  重写后命令数: 3 [('SET', 'a', 3), ('SET', 'b', 1), ('SET', 'c', 9)]\n  效果: 抵消冗余写命令, AOF 体积大幅缩小, 恢复时间变短",
+  "code": "def aof_rewrite(commands):\n    latest = {}\n    for op, k, v in commands:\n        latest[k] = v  # 重放后每个 key 只保留最终值\n    return [(\"SET\", k, v) for k, v in latest.items()]\n\ncmds = [(\"SET\", \"a\", 1), (\"SET\", \"a\", 2), (\"SET\", \"b\", 1), (\"SET\", \"a\", 3), (\"SET\", \"c\", 9)]\nbefore = len(cmds)\nrew = aof_rewrite(cmds)\nprint(\"AOF 重写(rewrite):\")\nprint(\"  重写前命令数:\", before, cmds)\nprint(\"  重写后命令数:\", len(rew), rew)\nprint(\"  效果: 抵消冗余写命令, AOF 体积大幅缩小, 恢复时间变短\")\n",
+  "_verified": true
+}

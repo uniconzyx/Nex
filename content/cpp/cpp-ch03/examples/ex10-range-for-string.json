@@ -1,0 +1,8 @@
+{
+  "title": "范围 for 遍历字符串",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "h-i-",
+  "code": "#include <iostream>\n#include <string>\n\nint main() {\n    std::string s = \"hi\";\n    for (char c : s) std::cout << c << '-';\n}"
+}

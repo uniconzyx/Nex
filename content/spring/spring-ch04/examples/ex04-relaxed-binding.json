@@ -1,0 +1,8 @@
+{
+  "title": "松散绑定：把多种写法归一化成规范形式（小写短横线）",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "my-name  ->  my-name\nmyName  ->  my-name\nmy_name  ->  my-name\nMY_NAME  ->  my-name\nMYNAME  ->  myname\nmy.name  ->  my.name\napp.myName  ->  app.my-name\nMYNAME equals my-name ? false",
+  "code": "public class Ex04RelaxedBinding {\n    // 规范化：全大写视为环境变量式先转小写；下划线转短横线；驼峰前插短横线\n    static String canonical(String key) {\n        String k = key;\n        if (k.equals(k.toUpperCase())) k = k.toLowerCase();\n        k = k.replace('_', '-');\n        StringBuilder sb = new StringBuilder();\n        for (int i = 0; i < k.length(); i++) {\n            char c = k.charAt(i);\n            if (Character.isUpperCase(c)) {\n                if (sb.length() > 0 && sb.charAt(sb.length() - 1) != '-') sb.append('-');\n                sb.append(Character.toLowerCase(c));\n            } else {\n                sb.append(c);\n            }\n        }\n        return sb.toString();\n    }\n\n    public static void main(String[] args) {\n        String[] keys = {\"my-name\", \"myName\", \"my_name\", \"MY_NAME\", \"MYNAME\", \"my.name\", \"app.myName\"};\n        for (String k : keys) {\n            System.out.println(k + \"  ->  \" + canonical(k));\n        }\n        System.out.println(\"MYNAME equals my-name ? \" + canonical(\"MYNAME\").equals(canonical(\"my-name\")));\n    }\n}"
+}

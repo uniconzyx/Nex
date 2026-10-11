@@ -1,0 +1,9 @@
+{
+  "title": "AOF 追加：appendfsync no 耐久性",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "appendfsync no:\n  内核缓冲(未主动 fsync): [('SET', 'a', 1), ('SET', 'b', 2), ('SET', 'c', 3)]\n  已落盘 AOF: []\n  耐久性: 依赖 OS 刷盘, 崩溃可能丢失大量数据; 性能最高",
+  "code": "def aof_no(writes, crash_after):\n    buf = []\n    aof = []\n    for i, w in enumerate(writes):\n        buf.append(w)  # 只写内核缓冲, 不主动 fsync\n        if i + 1 == crash_after:\n            break\n    return aof, buf\n\nwrites = [(\"SET\", \"a\", 1), (\"SET\", \"b\", 2), (\"SET\", \"c\", 3)]\naof, buf = aof_no(writes, crash_after=3)\nprint(\"appendfsync no:\")\nprint(\"  内核缓冲(未主动 fsync):\", buf)\nprint(\"  已落盘 AOF:\", aof)\nprint(\"  耐久性: 依赖 OS 刷盘, 崩溃可能丢失大量数据; 性能最高\")\n",
+  "_verified": true
+}

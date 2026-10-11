@@ -1,0 +1,8 @@
+{
+  "title": "范围 for 的真实展开形式",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "for (int x : v) { ... } 等价于:\n  auto __begin = v.begin(), __end = v.end();\n  for (; __begin != __end; ++__begin) { int x = *__begin; ... }\n\n实测遍历结果: 1 2 3\n\n关键点：__end 在循环开始时就固定了 ——\n循环体内增删元素会让迭代器失效，而 __end 不会跟着更新",
+  "code": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n    vector<int> v{1, 2, 3};\n\n    cout << \"for (int x : v) { ... } 等价于:\\n\";\n    cout << \"  auto __begin = v.begin(), __end = v.end();\\n\";\n    cout << \"  for (; __begin != __end; ++__begin) { int x = *__begin; ... }\\n\\n\";\n    cout << \"实测遍历结果:\";\n    for (auto __begin = v.begin(), __end = v.end(); __begin != __end; ++__begin) {\n        int x = *__begin;\n        cout << \" \" << x;\n    }\n    cout << \"\\n\\n\";\n    cout << \"关键点：__end 在循环开始时就固定了 ——\\n\";\n    cout << \"循环体内增删元素会让迭代器失效，而 __end 不会跟着更新\\n\";\n}"
+}

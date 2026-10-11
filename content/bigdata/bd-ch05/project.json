@@ -1,0 +1,99 @@
+{
+  "meta": {
+    "chapter": "bd-ch05",
+    "category": "system",
+    "note": "离线自包含项目：不依赖 PySpark / Spark 集群，用纯 Python 复刻 Spark SQL 的 Catalyst 规则引擎、代价模型、Shuffle 边界判定、AQE 与 Tungsten 布局，全部打印真实模拟数字。"
+  },
+  "items": [
+    {
+      "title": "从零实现一个迷你 Spark SQL 引擎（Catalyst 规则引擎 + 代价模型 + AQE + Tungsten 布局）",
+      "requirement_md": "不使用任何 Spark 组件，用 **纯 Python 3** 实现一个**单进程、内存态**的迷你 Spark SQL 引擎，覆盖本章核心机制，全部打印**真实模拟数字**（判据一律用布尔值或操作计数，禁止输出墙钟耗时与内存地址）：\n\n1. **逻辑计划 IR**：定义 `Scan / Filter / Project / Join / Aggregate` 五种节点（字典或 dataclass），支持嵌套成树，并能打印缩进计划树。\n2. **EXPLAIN 格式化器**：实现 `explain(mode=\"formatted\")` 风格的缩进树输出（`+-` / `:-` 连接符），并额外提供**后序遍历**（自底向上）的阅读顺序输出。\n3. **谓词下推规则**：实现 `PushDownPredicate`，把 `Filter` 推到能提供其 `refs` 的那一侧；**必须实现正反两组用例**：\n   - 正例：确定性谓词 + 引用列在下方输出内 → 可下推；\n   - 反例 A：谓词含 `rand()`（非确定性）→ 不可下推；\n   - 反例 B：谓词引用列不在 `Project` 输出内 → 不可下推。\n   并额外实现「**下推并融合进 Scan**」（分区裁剪 / Parquet 下推），用代价数字证明**只有融合才有大收益**。\n4. **列裁剪规则**：实现 `ColumnPruning`，需求自顶向下传播；注意 `Filter` 的引用列要计入子节点 need、`Join` 的连接键要计入两侧 need。要求实测 orders 扫描列由 **5 降为 2**，并给出读取字节数的下降倍数。\n5. **常量折叠**：实现表达式树的常量折叠与代数化简（`x+0`、`x*1`、`x AND true`、字面量求值），输出节点数下降；并实现恒假谓词（`1=0`）把整棵子树替换为 `LocalRelation(空)`。\n6. **执行计划代价估算器**：给定算子权重（Scan / Filter / Join / Shuffle / Agg），对比两版 SQL（WHERE 在 JOIN 之后 vs 谓词下推到 Scan）的总代价与 Shuffle 记录数，输出布尔判据「下推版更优」。\n7. **CBO JOIN 重排**：给定 3 张表的基数与两两连接选择率，枚举**左深树、右深树、笛卡尔积前置**三种顺序，按中间结果总行数排序（排序保证确定性），输出 CBO 选择的顺序与下降倍数。\n8. **宽/窄依赖与 Shuffle 边界判定器**：给定算子序列，判定每个算子的依赖类型，切分 Stage 并统计 Shuffle 次数，验证「Shuffle 次数 = 宽依赖算子数」与「Stage 数 = Shuffle 次数 + 1」两个判据。\n9. **AQE 动态合并小分区**：实现只合并**相邻**分区的贪心算法，正反两组用例（大量小分区应合并；分区已达标不应合并）。\n10. **数据倾斜检测器**：按「分区大小 > 5 × 中位数 且 > 256MB」判定倾斜分区，正反两组用例，输出倾斜度（最大/中位数）与是否触发处理。\n11. **广播 JOIN 判定器**：给定小表大小、是否等值连接、阈值，输出选中的物理算子（`BroadcastHashJoin` / `SortMergeJoin` / `BroadcastNestedLoopJoin`），必须覆盖「统计信息缺失」的回退分支。\n12. **Tungsten 内存布局对比**：给定 schema 与各类型宽度，计算行式 JVM 对象布局（含对象头与装箱）与 `UnsafeRow` 紧凑布局（null 位图 + 定长区 + 8 字节对齐变长区）的每行字节数，并叠加列裁剪，输出省字节倍数。\n13. **全阶段代码生成收益**：用计数器统计火山模型的 `next()` 虚函数调用次数与装箱次数，对比 codegen 后二者降为 0，并验证聚合结果一致（语义等价）。\n14. **DataFrame 惰性求值**：构建操作链，用计数器证明「未触发 action 则执行次数 = 0，触发 N 次 action 后 = N」。\n\n**交付要求**：\n\n- 单个 `.py` 文件或按模块拆分的包均可，必须能 `python main.py` 直接跑通并打印全部结果；\n- 所有输出必须**确定性**（集合/字典先排序再输出；禁止 `hash(str)`，需要哈希用 `zlib.crc32`；禁止输出耗时与地址）；\n- 每个模块都要有「**判据行**」（布尔值或计数），不能只有过程打印；\n- 附一段 README 说明「本模拟与真实 Spark 的差异与简化假设」（例如：真实 Spark 跑在分布式 executor、Shuffle 走网络与磁盘、Catalyst 用 Scala 的 `Rule[LogicalPlan]` 与树变换框架、AQE 在 `QueryStageExec` 物化后重优化等）。",
+      "tasks": [
+        {
+          "title": "搭建逻辑计划 IR 与 EXPLAIN 格式化器",
+          "verification": {
+            "type": "test",
+            "desc": "能构造含 Scan/Filter/Project/Join/Aggregate 的计划树；formatted 缩进树与后序遍历输出均确定性且节点数正确"
+          }
+        },
+        {
+          "title": "实现谓词下推（含正反两组用例）与融合进 Scan",
+          "verification": {
+            "type": "test",
+            "desc": "确定性谓词可下推，rand() 谓词与引用列不在投影内的谓词不可下推；融合进 Scan 后总代价与 Join 输出行数显著下降，输出布尔判据"
+          }
+        },
+        {
+          "title": "实现列裁剪并量化读取字节数",
+          "verification": {
+            "type": "test",
+            "desc": "orders 扫描列由 5 降为 2；总读取字节数下降且倍数 > 2；未使用列确认不再出现在 Scan 的列列表中"
+          }
+        },
+        {
+          "title": "实现常量折叠与恒假谓词裁剪",
+          "verification": {
+            "type": "test",
+            "desc": "至少三个表达式的节点数下降；WHERE 1=0 的整棵子树被替换为 LocalRelation(空)，节点数从 N 降到 1"
+          }
+        },
+        {
+          "title": "实现执行计划代价估算器（两版 SQL 对比）",
+          "verification": {
+            "type": "test",
+            "desc": "两版 SQL 的总代价与 Shuffle 记录数均打印；布尔判据「谓词下推版更优」为 True，并给出下降倍数"
+          }
+        },
+        {
+          "title": "实现 CBO JOIN 重排",
+          "verification": {
+            "type": "test",
+            "desc": "枚举左深树/右深树/笛卡尔积前置并按中间结果总行数排序；CBO 选中的顺序与手写预期一致，下降倍数正确"
+          }
+        },
+        {
+          "title": "实现宽/窄依赖判定与 Stage 切分",
+          "verification": {
+            "type": "test",
+            "desc": "每个算子依赖类型判定正确；Stage 数 = Shuffle 次数 + 1；Shuffle 次数 = 宽依赖算子数，两个布尔判据均为 True"
+          }
+        },
+        {
+          "title": "实现 AQE 小分区合并（正反两组）",
+          "verification": {
+            "type": "test",
+            "desc": "小分区用例合并后分区数下降且各分区大小 ≤ 目标或为尾部残余；已达标用例分区数不变，两个布尔判据均正确"
+          }
+        },
+        {
+          "title": "实现数据倾斜检测器（正反两组）",
+          "verification": {
+            "type": "test",
+            "desc": "倾斜用例输出倾斜度 > 5 且触发处理；均匀用例倾斜度 ≈ 1 且不触发；倾斜分区下标正确"
+          }
+        },
+        {
+          "title": "实现广播 JOIN 判定器（含统计缺失回退）",
+          "verification": {
+            "type": "test",
+            "desc": "小表 ≤ 阈值且等值 → BroadcastHashJoin；超阈值 → SortMergeJoin；统计缺失 → SortMergeJoin；非等值 → BroadcastNestedLoopJoin"
+          }
+        },
+        {
+          "title": "实现 Tungsten 布局对比与 codegen 收益统计",
+          "verification": {
+            "type": "test",
+            "desc": "行式/紧凑/裁剪后的每行字节数与总字节数计算正确；codegen 后虚函数调用与装箱计数为 0 且聚合结果与火山模型一致"
+          }
+        },
+        {
+          "title": "撰写 README：模拟与真实 Spark 的差异与简化假设",
+          "verification": {
+            "type": "manual",
+            "desc": "README 明确列出至少 5 条差异（分布式执行、Shuffle 落盘与网络、Catalyst 的 Scala 规则框架与不动点迭代、AQE 的 QueryStage 重优化时机、统计信息来源等）"
+          }
+        }
+      ]
+    }
+  ]
+}

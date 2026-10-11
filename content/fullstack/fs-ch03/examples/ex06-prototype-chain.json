@@ -1,0 +1,8 @@
+{
+  "title": "原型链、class 继承、instanceof 与 getPrototypeOf",
+  "code_lang": "javascript",
+  "code_std": "node22",
+  "stdin": "",
+  "expected_output": "Rex barks\nproto === Dog.prototype: true\nAnimal.prototype in chain: true\nd instanceof Dog: true\nd instanceof Animal: true\nown name: true\nown speak?: false",
+  "code": "function Animal(name) { this.name = name; }\nAnimal.prototype.speak = function() { return this.name + ' makes a sound'; };\nfunction Dog(name) { Animal.call(this, name); }\nDog.prototype = Object.create(Animal.prototype);\nDog.prototype.constructor = Dog;\nDog.prototype.speak = function() { return this.name + ' barks'; };\nvar d = new Dog('Rex');\nconsole.log(d.speak());\nconsole.log('proto === Dog.prototype:', Object.getPrototypeOf(d) === Dog.prototype);\nconsole.log('Animal.prototype in chain:', Animal.prototype.isPrototypeOf(d));\nconsole.log('d instanceof Dog:', d instanceof Dog);\nconsole.log('d instanceof Animal:', d instanceof Animal);\nconsole.log('own name:', d.hasOwnProperty('name'));\nconsole.log('own speak?:', d.hasOwnProperty('speak'));"
+}

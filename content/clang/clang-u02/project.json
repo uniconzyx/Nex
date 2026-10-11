@@ -1,0 +1,49 @@
+{
+  "meta": {
+    "chapter": "clang-u02",
+    "category": "system"
+  },
+  "items": [
+    {
+      "title": "实现一个固定尺寸内存池，并用 ASan 验证零泄漏",
+      "requirement_md": "用纯 C 实现一个单尺寸内存池，取代高频的 `malloc/free`，并证明其正确性。\n\n1. 接口：`pool_create(block_size, capacity)`、`pool_destroy(pool)`、`pool_alloc(pool)`、`pool_free(pool, ptr)`、`pool_used(pool)`。\n2. 内部**只调用一次 `malloc`** 申请整块 slab，按 `block_size` 切成等长槽位，用**空闲链表**（复用槽位自身内存存 `next`）管理。\n3. `block_size` 必须向上对齐到指针大小，保证槽位能存下 `next` 指针。\n4. `pool_free` 必须做**基本校验**：指针须落在 slab 范围内，且不得重复释放（可加一个 used 计数与哨兵检查）。\n5. `pool_used` 返回当前已分配槽位数，`pool_destroy` 时打印统计（总分配次数、峰值占用）。\n6. 写测试：分配 - 全部释放 - 再分配（验证复用），并用 `gcc -fsanitize=address,undefined -g` 编译运行，**要求 sanitizer 零报错**。\n7. 对比测试：同一负载分别用内存池与 `malloc` 循环实现，测量耗时差异并记录在 README。",
+      "tasks": [
+        {
+          "title": "设计结构体与池创建/销毁",
+          "verification": {
+            "type": "test",
+            "desc": "create 后 used==0；destroy 后 ASan 报告 0 泄漏、0 越界"
+          }
+        },
+        {
+          "title": "实现空闲链表的 alloc/free",
+          "verification": {
+            "type": "test",
+            "desc": "反复 alloc/free 同一槽位复用正确，used 计数回到 0"
+          }
+        },
+        {
+          "title": "加入指针归属与重复释放校验",
+          "verification": {
+            "type": "test",
+            "desc": "传入非法指针或重复释放时返回错误码且不破坏池"
+          }
+        },
+        {
+          "title": "ASan/UBSan 全量验证",
+          "verification": {
+            "type": "test",
+            "desc": "`gcc -fsanitize=address,undefined -g` 运行无任何 sanitizer 报错"
+          }
+        },
+        {
+          "title": "性能对比与结论记录",
+          "verification": {
+            "type": "manual",
+            "desc": "README 中给出池化 vs 逐个 malloc 的耗时数据与结论"
+          }
+        }
+      ]
+    }
+  ]
+}

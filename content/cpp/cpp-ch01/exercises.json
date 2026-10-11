@@ -1,0 +1,149 @@
+{
+  "meta": {
+    "chapter": "cpp-ch01",
+    "note": "5 题，基础题 4 + 算法题 1（算法题来自 LeetCode，仅存元数据与链接，不搬运题面）"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "difficulty": "easy",
+      "title": "关于引用，下列说法正确的是",
+      "content_md": "选择所有**正确**的描述。",
+      "options": [
+        {
+          "key": "A",
+          "text": "引用定义后可以不初始化"
+        },
+        {
+          "key": "B",
+          "text": "引用一旦绑定就不能改绑其他对象"
+        },
+        {
+          "key": "C",
+          "text": "const 引用可以绑定到临时对象"
+        },
+        {
+          "key": "D",
+          "text": "引用占用独立的存储空间，与指针完全相同"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B",
+          "C"
+        ]
+      },
+      "explanation": "引用必须初始化且不可改绑；const 引用可延长临时对象生命周期；引用是否占存储是实现细节，语义上是别名。",
+      "tags": [
+        "reference"
+      ],
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "cpp-ch01 §1 类型与引用"
+    },
+    {
+      "type": "fix_error",
+      "difficulty": "easy",
+      "title": "修复悬垂引用",
+      "content_md": "以下代码返回局部变量的引用，存在未定义行为，请修复：\n\n```cpp\nint& make() { int x = 42; return x; }\n```",
+      "answer": {
+        "reference_code": "int make() { int x = 42; return x; }"
+      },
+      "explanation": "按值返回即可；不要返回局部对象的引用或指针。",
+      "tags": [
+        "reference",
+        "ub"
+      ],
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "cpp-ch01 §1 类型与引用"
+    },
+    {
+      "type": "output",
+      "difficulty": "mid",
+      "title": "读代码写输出",
+      "content_md": "```cpp\n#include <iostream>\nint main() {\n    int a = 5;\n    int& r = a;\n    r += 2;\n    std::cout << a << \" \" << r;\n}\n```",
+      "answer": {
+        "output": "7 7"
+      },
+      "explanation": "r 是 a 的别名，修改 r 即修改 a。",
+      "tags": [
+        "reference"
+      ],
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "cpp-ch01 §1 类型与引用"
+    },
+    {
+      "type": "coding",
+      "difficulty": "easy",
+      "title": "读取 n 个数求和",
+      "content_md": "第一行输入 n（1≤n≤1000），第二行输入 n 个整数，输出它们的和。",
+      "answer": {
+        "reference_code": "#include <iostream>\nint main(){int n;std::cin>>n;long long s=0;for(int i=0;i<n;i++){long long x;std::cin>>x;s+=x;}std::cout<<s;}"
+      },
+      "explanation": "注意用 long long 防溢出。",
+      "tags": [
+        "io",
+        "basics"
+      ],
+      "time_limit_ms": 2000,
+      "memory_limit_mb": 256,
+      "test_cases": [
+        {
+          "input": "3\n1 2 3",
+          "expected_output": "6",
+          "is_sample": true
+        },
+        {
+          "input": "1\n-5",
+          "expected_output": "-5",
+          "is_sample": false
+        },
+        {
+          "input": "5\n100000 200000 300000 400000 500000",
+          "expected_output": "1500000",
+          "is_sample": false
+        }
+      ],
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "cpp-ch01 §1 类型与引用（基础 IO 综合）"
+    },
+    {
+      "type": "coding",
+      "difficulty": "mid",
+      "title": "反转字符串中的单词",
+      "content_md": "反转字符串中单词的顺序（LeetCode 151）。请用 C++ 实现，注意只保留单词之间的单个空格。题面详见原题链接，本题不搬运题面正文。",
+      "answer": {
+        "reference_code": "#include <iostream>\n#include <vector>\n#include <string>\nint main(){std::vector<std::string> v;std::string w;while(std::cin>>w)v.push_back(w);for(auto it=v.rbegin();it!=v.rend();++it){if(it!=v.rbegin())std::cout<<\" \";std::cout<<*it;}}"
+      },
+      "explanation": "练习 vector 与迭代器的基本使用。",
+      "tags": [
+        "string",
+        "vector"
+      ],
+      "test_cases": [
+        {
+          "input": "hello world cpp",
+          "expected_output": "cpp world hello",
+          "is_sample": true
+        },
+        {
+          "input": "one",
+          "expected_output": "one",
+          "is_sample": false
+        }
+      ],
+      "category": "算法题",
+      "platform": "leetcode",
+      "source": "leetcode",
+      "source_ref": "LeetCode 151 (reverse-words-in-a-string)",
+      "external_url": "https://leetcode.cn/problems/reverse-words-in-a-string/"
+    }
+  ]
+}

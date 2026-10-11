@@ -1,0 +1,8 @@
+{
+  "title": "const 的三种形态对比",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "p1 -> 20\nx = 99\np3 -> 20\nconst 修饰的是它右边紧邻的部分，读声明从右往左",
+  "code": "#include <stdio.h>\n\nint main(void) {\n    int x = 10, y = 20;\n\n    const int *p1 = &x;         /* 指向常量的指针 */\n    p1 = &y;                    /* 改指针 OK */\n    printf(\"p1 -> %d\\n\", *p1);\n\n    int *const p2 = &x;         /* 常量指针 */\n    *p2 = 99;                   /* 改内容 OK */\n    printf(\"x = %d\\n\", x);\n\n    const int *const p3 = &y;   /* 两者都锁 */\n    printf(\"p3 -> %d\\n\", *p3);\n\n    printf(\"const 修饰的是它右边紧邻的部分，读声明从右往左\\n\");\n    return 0;\n}"
+}

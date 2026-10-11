@@ -1,0 +1,9 @@
+{
+  "title": "UNION ALL 不去重拼接两个结果集",
+  "code_lang": "sql",
+  "code_std": "mysql8",
+  "stdin": "",
+  "expected_output": "Query OK, 0 rows affected\nQuery OK, 3 rows affected\nname\nAlice\nBob\nCarol",
+  "code": "CREATE TABLE t_emp (emp_id INT PRIMARY KEY, name VARCHAR(20), status VARCHAR(10));\nINSERT INTO t_emp VALUES (1,'Alice','active'),(2,'Bob','active'),(3,'Carol','archived');\nSELECT name FROM t_emp WHERE status='active' UNION ALL SELECT name FROM t_emp WHERE status='archived' ORDER BY name;",
+  "_verified": false
+}

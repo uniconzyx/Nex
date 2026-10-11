@@ -1,0 +1,190 @@
+{
+  "meta": {
+    "chapter": "db-ch06",
+    "note": "9 题：基础题覆盖函数依赖/属性闭包/候选键/范式判定/无损连接与拆表修复；算法题为 LeetCode SQL 真题（M:N 中间表、1:N 连接、事实-维度建模），仅存元数据与链接，不搬运题面正文"
+  },
+  "items": [
+    {
+      "id": "db-ch06-ex01",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "《数据库系统概论》第 6 章（BCNF 与 3NF 的区别），对应 concept/02、examples/ex03",
+      "difficulty": "mid",
+      "title": "关于「满足 3NF 但不满足 BCNF」，下列说法正确的是",
+      "content_md": "已知关系模式 `R(A,B,C)`，函数依赖集 `F = { AB→C, C→B }`。\n\n下面哪一项正确？",
+      "options": [
+        { "key": "A", "text": "候选键只有 AB，且 R 满足 BCNF" },
+        { "key": "B", "text": "候选键为 AB 与 AC；C→B 的左部不是超键，故违反 BCNF；但 B 是主属性，故满足 3NF" },
+        { "key": "C", "text": "候选键为 AB 与 AC；因为 C→B 存在，所以连 2NF 都不满足" },
+        { "key": "D", "text": "R 不满足 3NF，因为存在非平凡函数依赖 C→B" }
+      ],
+      "answer": { "correct": ["B"] },
+      "explanation": "先求候选键：`AB+ = ABC`、`AC+ = ABC`，故候选键为 AB 与 AC，主属性为 {A,B,C}（全部属性都是主属性）。BCNF 要求每个非平凡 FD 的左部都是超键：`C→B` 的左部 C 闭包为 `{B,C} ≠ ABC`，不是超键 ⇒ 违反 BCNF。3NF 的形式化定义允许「右边是主属性」的例外，B 是主属性 ⇒ 满足 3NF。2NF 只约束非主属性，本模式无（不存在的）非主属性，故自动满足。A 错在漏了一个候选键并误判范式；C 错在把主属性依赖当成 2NF 违反；D 错在忽略了 3NF 的主属性例外。",
+      "tags": ["bcnf", "3nf", "candidate-key"]
+    },
+    {
+      "id": "db-ch06-ex02",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "《数据库系统概论》第 6 章（2NF 与部分函数依赖），对应 pitfalls 第 4、6 条",
+      "difficulty": "basic",
+      "title": "下列哪个函数依赖属于「部分函数依赖」",
+      "content_md": "关系模式 `SC(Sno, Cno, Grade, Cname)`，候选键为 `(Sno, Cno)`。\n\n给定 `F = { (Sno,Cno)→Grade, Cno→Cname }`，哪一条是部分函数依赖？",
+      "options": [
+        { "key": "A", "text": "(Sno,Cno) → Grade" },
+        { "key": "B", "text": "Cno → Cname" },
+        { "key": "C", "text": "两条都是部分依赖" },
+        { "key": "D", "text": "两条都不是部分依赖" }
+      ],
+      "answer": { "correct": ["B"] },
+      "explanation": "部分依赖的定义是「存在候选键的真子集也能决定该属性」。`Cno` 是候选键 `(Sno,Cno)` 的真子集，且 `Cno→Cname`（Cname 是非主属性），故它是部分依赖，违反 2NF。`(Sno,Cno)→Grade` 中，Sno 与 Cno 单独都不能决定 Grade（同一学生不同课成绩不同、同一课程不同学生成绩不同），是完全函数依赖。注意判断依据是「候选键的真子集是否决定该属性」，与左右两边属性个数无关。",
+      "tags": ["2nf", "partial-dependency"]
+    },
+    {
+      "id": "db-ch06-ex03",
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "《数据库系统概论》第 6 章（属性闭包计算），对应 examples/ex01",
+      "difficulty": "basic",
+      "title": "写出属性闭包 (CD)+ 与 (BD)+ 的结果",
+      "content_md": "关系模式 `R(A,B,C,D,E)`，函数依赖集：\n\n```\nF = { A→B, A→C, CD→E, B→D }\n```\n\n请分别写出 `A+`、`BD+`、`CD+` 的结果（属性按字母序写出），并说明哪些是超键。",
+      "answer": {
+        "output": "A+  = ABCDE   (超键)\nBD+ = BD      (非超键)\nCD+ = CDE     (非超键)",
+        "reference_text": "A+：从 A 出发，A→B 得 B，A→C 得 C；再由 B→D 得 D；此时 {{A,B,C,D}} 满足 CD→E 的左部，得 E。故 A+ = ABCDE，A 是超键。\n\nBD+：从 B、D 出发，B→D 已在集合内，A→B、A→C 因缺 A 不适用，CD→E 因缺 C 不适用。故 BD+ = BD，不是超键。\n\nCD+：从 C、D 出发，CD→E 得 E；B→D 缺 B 不适用，A→C 缺 A 不适用。故 CD+ = CDE，不是超键（少 A、B）。"
+      },
+      "explanation": "属性闭包的做法是不动点迭代：反复扫描所有 FD，只要左部已包含在结果集合里就把右部并进来，直到不再变化。判超键的唯一标准是 `X+ = U`。本题由 examples/ex01 真实跑出的结果一致（R=ABCDE，A+ 与 AE+ 为超键）。",
+      "tags": ["attribute-closure", "superkey"]
+    },
+    {
+      "id": "db-ch06-ex04",
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "《数据库系统概论》第 6 章（无损连接判定），对应 examples/ex05",
+      "difficulty": "mid",
+      "title": "判定分解 ρ 是否无损连接",
+      "content_md": "关系模式 `R(A,B,C)`，`F = { A→B, B→C }`。\n\n对下面两个分解分别判定无损连接性：\n\n```\nρ1 = { R1(A,B), R2(B,C) }\nρ2 = { R1(A,C), R2(B,C) }\n```",
+      "answer": {
+        "output": "ρ1: 无损 (YES)\nρ2: 有损 (NO)"
+      },
+      "explanation": "用**二元分解快速判据**：`ρ` 无损 ⟺ `R1∩R2 → (R1−R2)` 或 `R1∩R2 → (R2−R1)`。\n\nρ1：交集 `{B}`，`B+ = {B,C}`，覆盖了 `R1−R2 = {A}`？不；覆盖 `R2−R1 = {C}`？是。故无损。\n\nρ2：交集 `{C}`，`C+ = {C}`，既不覆盖 `{A}` 也不覆盖 `{B}`，故有损。\n\n用表格法（例 ex05）也能得到同样结论：ρ1 的 R1 行会被统一成全 a 行；ρ2 无任何 FD 可作用于交集列，两行始终无法统一，不存在全 a 行。注意二者都满足「属性并集 = U」这一前提。",
+      "tags": ["lossless-join", "decomposition"]
+    },
+    {
+      "id": "db-ch06-ex05",
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "《数据库系统概论》第 6 章（候选键求解算法），对应 examples/ex02",
+      "difficulty": "mid",
+      "title": "编程求出一个关系模式的全部候选键",
+      "content_md": "给定 `R(A,B,C,D)` 与 `F = { AB→C, C→D, D→A }`，完成两件事：\n\n1. 写出全部候选键，并说明主属性集合；\n2. 用 Python 实现「枚举子集 + 闭包验证 + 极小性过滤」的通用求解函数，打印候选键。",
+      "answer": {
+        "output": "候选键 = ['AB', 'BC', 'BD']\n主属性 = ABCD",
+        "reference_code": "def closure(attrs, fds):\n    res = set(attrs)\n    changed = True\n    while changed:\n        changed = False\n        for lhs, rhs in fds:\n            if lhs <= res and not rhs <= res:\n                res |= rhs\n                changed = True\n    return res\n\n\ndef candidate_keys(all_attrs, fds):\n    lst = sorted(all_attrs)\n    n = len(lst)\n    supers = []\n    for mask in range(1, 1 << n):\n        sub = frozenset(lst[i] for i in range(n) if mask >> i & 1)\n        if closure(sub, fds) == set(all_attrs):\n            supers.append(sub)\n    cands = [s for s in supers if not any(o < s for o in supers)]\n    return sorted(cands, key=lambda s: (len(s), ''.join(sorted(s))))\n\n\nfds = [(frozenset('AB'), frozenset('C')),\n       (frozenset('C'), frozenset('D')),\n       (frozenset('D'), frozenset('A'))]\nkeys = candidate_keys({'A', 'B', 'C', 'D'}, fds)\nprint('候选键 =', [''.join(sorted(k)) for k in keys])"
+      },
+      "explanation": "`B` 不出现在任何 FD 的右部（属 L 类之外的情形：B 只出现在 AB→C 的左部），故 B 必属于每个候选键；从 `{B}` 出发闭包只有 B，必须逐步加属性。加上 A：`AB+ = ABCD` 成立 → AB 是候选键；加上 C：`BC+ = BCDA` 成立 → BC 是候选键（注意 C→D→A 的传递链）；加上 D：`BD+ = BDA`，再由 D→A 得 A，此时含 A 后 AB→C 触发 → `BD+ = ABCD` → BD 是候选键。而 AC、AD 等含 A 且能成超键的组合都包含 AB 或 BC，非极小。主属性为三个候选键的并集 = {A,B,C,D}，即全码（All-key）。",
+      "tags": ["candidate-key", "closure", "all-key"]
+    },
+    {
+      "id": "db-ch06-ex06",
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "《数据库系统概论》第 6 章（2NF 分解），对应 concept/02 与 examples/ex07",
+      "difficulty": "mid",
+      "title": "修复违反 2NF 与 3NF 的订单表",
+      "content_md": "下面的宽表既存在部分依赖也存在传递依赖：\n\n```sql\nCREATE TABLE order_flat (\n  order_id      BIGINT,\n  product_name  VARCHAR(64),\n  qty           INT,\n  user_id       BIGINT,\n  user_name     VARCHAR(64),\n  product_price DECIMAL(10,2),\n  PRIMARY KEY (order_id, product_name)\n);\n```\n\n业务规则：`order_id → user_id`；`user_id → user_name`；`product_name → product_price`；`(order_id, product_name) → qty`。\n\n请指出违反的范式，并给出规范化后的建表语句（拆成 4 张表，注明主外键）。",
+      "answer": {
+        "reference_code": "CREATE TABLE users (\n  user_id   BIGINT PRIMARY KEY,\n  user_name VARCHAR(64) NOT NULL\n);\n\nCREATE TABLE products (\n  product_name  VARCHAR(64) PRIMARY KEY,\n  product_price DECIMAL(10,2) NOT NULL\n);\n\nCREATE TABLE orders (\n  order_id BIGINT PRIMARY KEY,\n  user_id  BIGINT NOT NULL,\n  FOREIGN KEY (user_id) REFERENCES users(user_id)\n);\n\nCREATE TABLE order_item (\n  order_id     BIGINT NOT NULL,\n  product_name VARCHAR(64) NOT NULL,\n  qty          INT NOT NULL,\n  PRIMARY KEY (order_id, product_name),\n  FOREIGN KEY (order_id)     REFERENCES orders(order_id),\n  FOREIGN KEY (product_name) REFERENCES products(product_name)\n);",
+        "explanation": "候选键为 `(order_id, product_name)`。`order_id → user_id` 与 `product_name → product_price` 都是对候选键真子集的依赖 → **部分依赖，违反 2NF**（`user_name`、`product_price` 只由候选键的一部分决定）。进一步 `order_id → user_id → user_name` 是**传递依赖 → 违反 3NF**。规范化后：users 与 products 各成维度表，orders 只保留 `order_id → user_id`，order_item 保留 `(order_id, product_name) → qty`。四张表均满足 BCNF。"
+      },
+      "explanation": "修复的核心是把「不同粒度的实体」分开：用户、商品是独立实体（维度），订单是交易粒度，订单明细是「订单×商品」的 M:N 联系（联系自身属性 qty）。注意 `order_item` 的复合主键同时承担「不重复同一商品」的唯一约束与访问路径职能。可用 examples/ex12 的判定器实测：拆表前 2NF=NO、3NF=NO，拆表后四张表全部 BCNF。",
+      "tags": ["2nf", "3nf", "normalization", "ddl"]
+    },
+    {
+      "id": "db-ch06-ex07",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "source": "leetcode",
+      "source_ref": "LeetCode 596（classes-more-than-5-students）",
+      "external_url": "https://leetcode.cn/problems/classes-more-than-5-students/",
+      "difficulty": "easy",
+      "title": "LeetCode 596 · 超过 5 名学生的课（M:N 中间表建模）",
+      "content_md": "给定 `courses(student, class)` 形式的选课表，找出学生数不少于 5 人的课程。\n\n本题是本章 M:N 联系的标准形态：学生与课程是多对多，选课关系本身就是中间表，`(student, class)` 就是它的复合主键。请用聚合 + HAVING 完成。",
+      "answer": {
+        "reference_code": "SELECT class\nFROM courses\nGROUP BY class\nHAVING COUNT(DISTINCT student) >= 5;",
+        "explanation": "M:N 中间表上做「按一端分组计数」是最典型的聚合查询。用 `COUNT(DISTINCT student)` 而不是 `COUNT(*)` 更稳：即便上游遗漏了复合主键约束（允许重复选课），统计结果也不会被重复行污染 —— 这正是本章 pitfalls 第 13 条强调「中间表必须设复合主键」的工程意义。"
+      },
+      "explanation": "建模视角：`courses` 就是 ER 图中「学生—选课—课程」这个 M:N 联系落成的中间表，字段为两端主键。若题目还要求给出成绩，成绩就属于**联系自身的属性**，应放在中间表里，而不是放到 `student` 或 `class` 表。",
+      "tags": ["m-n", "group-by", "having", "junction-table"],
+      "test_cases": [
+        {
+          "input": "schema 与样例数据见 external_url",
+          "expected_output": "见 external_url",
+          "is_sample": true
+        }
+      ]
+    },
+    {
+      "id": "db-ch06-ex08",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "source": "leetcode",
+      "source_ref": "LeetCode 184（department-highest-salary）",
+      "external_url": "https://leetcode.cn/problems/department-highest-salary/",
+      "difficulty": "mid",
+      "title": "LeetCode 184 · 部门工资最高的员工（1:N 连接的范式含义）",
+      "content_md": "给定 `Employee(id, name, salary, departmentId)` 与 `Department(id, name)`，找出每个部门工资最高的员工。\n\n请思考：为什么这里用两张表 + JOIN，而不是把部门名直接冗余在 Employee 里？",
+      "answer": {
+        "reference_code": "SELECT d.name AS Department, e.name AS Employee, e.salary AS Salary\nFROM Employee e\nJOIN Department d ON e.departmentId = d.id\nWHERE (e.departmentId, e.salary) IN (\n    SELECT departmentId, MAX(salary)\n    FROM Employee\n    GROUP BY departmentId\n);",
+        "explanation": "这是标准 1:N 落表：外键 `departmentId` 放在 N 端（Employee）。若把 `department_name` 冗余进 Employee，则存在 `departmentId → department_name` 这一**传递依赖**（Employee 的主键 → departmentId → department_name），部门改名时需更新该部门全部员工行，漏改即产生「同一部门两个名字」的不一致。因此范式化后用 JOIN 取部门名，是本处正确的设计。"
+      },
+      "explanation": "延伸考点：`(departmentId, salary) IN (子查询)` 是「行值构造器」比较，等价于按部门分组取最大工资再连接。若部门内最高工资并列，本写法会返回全部并列者 —— 这也是「用子查询而非窗口函数」时的经典陷阱（如需每组仅一行，应改用 `ROW_NUMBER() OVER (PARTITION BY ...)`）。",
+      "tags": ["1-n", "self-join", "transitive-dependency"],
+      "test_cases": [
+        {
+          "input": "schema 与样例数据见 external_url",
+          "expected_output": "见 external_url",
+          "is_sample": true
+        }
+      ]
+    },
+    {
+      "id": "db-ch06-ex09",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "source": "leetcode",
+      "source_ref": "LeetCode 1084（sales-analysis-iii）",
+      "external_url": "https://leetcode.cn/problems/sales-analysis-iii/",
+      "difficulty": "mid",
+      "title": "LeetCode 1084 · 销售分析 III（事实表 / 维度表建模）",
+      "content_md": "给定 `Product(product_id, product_name, unit_price)`、`Sales(product_id, year, quantity, price)`，找出仅在 2019-01-01 至 2019-03-31 期间售出的产品。\n\n请思考两张表的角色划分，以及为什么产品名不应冗余进 Sales 表。",
+      "answer": {
+        "reference_code": "SELECT p.product_id, p.product_name\nFROM Product p\nJOIN Sales s ON p.product_id = s.product_id\nGROUP BY p.product_id, p.product_name\nHAVING SUM(CASE WHEN s.sale_date BETWEEN '2019-01-01' AND '2019-03-31'\n                THEN 1 ELSE 0 END) = COUNT(*);",
+        "explanation": "`Product` 是维度表（主键 product_id，属性为产品的静态描述），`Sales` 是事实表（外键 product_id + 度量 quantity/price + 时间）。作者刻意把 `product_name`、`unit_price` 放在 Product 而非 Sales：若冗余进 Sales，则 `product_id → product_name` 成为事实表上的传递依赖（违反 3NF），商品改名会污染历史销售记录的口径。"
+      },
+      "explanation": "注意 `Sales.price` 是**成交价快照**（事实），与 `Product.unit_price`（当前标价，维度）语义不同 —— 这正是本章「反范式」一节强调的：**下单快照类冗余是业务需求，不是性能优化**，两者必须区分。HAVING 中 `SUM(CASE WHEN...) = COUNT(*)` 的写法表示「全部销售记录都落在该区间」。",
+      "tags": ["fact-table", "dimension-table", "3nf", "having"],
+      "test_cases": [
+        {
+          "input": "schema 与样例数据见 external_url",
+          "expected_output": "见 external_url",
+          "is_sample": true
+        }
+      ]
+    }
+  ]
+}

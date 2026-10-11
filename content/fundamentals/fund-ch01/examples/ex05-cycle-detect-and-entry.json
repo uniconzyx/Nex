@@ -1,0 +1,8 @@
+{
+  "title": "快慢指针判环并求环入口（含数学验证）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "环入口节点的值 = 3\n推导：2(a+b) = a+b+kc  =>  a = kc - b，故两指针必在入口相遇",
+  "code": "#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct Node { int data; struct Node *next; } Node;\n\nNode *detect(Node *head) {\n    Node *slow = head, *fast = head;\n    while (fast && fast->next) {\n        slow = slow->next;\n        fast = fast->next->next;\n        if (slow == fast) {\n            Node *p = head;\n            while (p != slow) { p = p->next; slow = slow->next; }\n            return p;\n        }\n    }\n    return NULL;\n}\n\nint main(void) {\n    /* 构造 1->2->3->4->5->6，并使 6 指回 3（环入口 data=3） */\n    Node nodes[6];\n    for (int i = 0; i < 6; i++) { nodes[i].data = i + 1; nodes[i].next = &nodes[i+1]; }\n    nodes[5].next = &nodes[2];                     /* 成环，入口是 3 */\n\n    Node *entry = detect(&nodes[0]);\n    printf(\"环入口节点的值 = %d\\n\", entry ? entry->data : -1);\n    printf(\"推导：2(a+b) = a+b+kc  =>  a = kc - b，故两指针必在入口相遇\\n\");\n    return 0;\n}"
+}

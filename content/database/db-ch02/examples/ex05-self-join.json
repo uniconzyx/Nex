@@ -1,0 +1,9 @@
+{
+  "title": "SELF JOIN 员工-经理层级（同一张表自连接）",
+  "code_lang": "sql",
+  "code_std": "mysql8",
+  "stdin": "",
+  "expected_output": "Query OK, 0 rows affected\nQuery OK, 4 rows affected\nemp|mgr\nAlice|NULL\nBob|Alice\nCarol|Alice\nDave|Bob",
+  "code": "CREATE TABLE emp_hier (emp_id INT PRIMARY KEY, name VARCHAR(20), mgr_id INT);\nINSERT INTO emp_hier VALUES (1,'Alice',NULL),(2,'Bob',1),(3,'Carol',1),(4,'Dave',2);\nSELECT e.name AS emp, m.name AS mgr FROM emp_hier e LEFT JOIN emp_hier m ON e.mgr_id = m.emp_id ORDER BY e.emp_id;",
+  "_verified": false
+}

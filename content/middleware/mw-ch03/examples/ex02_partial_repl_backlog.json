@@ -1,0 +1,9 @@
+{
+  "title": "部分同步：repl_backlog 环形缓冲 + offset 续传",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== 部分同步 repl_backlog 模拟 ===\n主节点写入3条, master_offset = 3\nrepl_backlog (环形, 容量 16): ['SET a 1', 'SET b 2', 'SET c 3']\n从节点同步到 slave_offset = 2 后断线\n断线期间主节点再写2条, master_offset = 5\n从节点重连: PSYNC <replid> 2\noffset 2 仍在 repl_backlog 窗口 [base=0, now=5] -> 部分同步 CONTINUE\n主节点只补发缺失区间命令: ['SET c 3', 'SET d 4', 'SET e 5']\n从节点应用缺失区间 -> slave_offset = 5\n结果: 主从恢复一致, 仅补增量未走全量",
+  "code": "print(\"=== 部分同步 repl_backlog 模拟 ===\")\nBACKLOG = 16\nbacklog = []\nmaster_offset = 0\ndef master_write(cmd):\n    global master_offset\n    backlog.append(cmd)\n    if len(backlog) > BACKLOG:\n        backlog.pop(0)\n    master_offset += 1\nfor c in [\"SET a 1\", \"SET b 2\", \"SET c 3\"]:\n    master_write(c)\nprint(\"主节点写入3条, master_offset =\", master_offset)\nprint(\"repl_backlog (环形, 容量 %d):\" % BACKLOG, backlog)\nslave_offset = 2\nprint(\"从节点同步到 slave_offset =\", slave_offset, \"后断线\")\nfor c in [\"SET d 4\", \"SET e 5\"]:\n    master_write(c)\nprint(\"断线期间主节点再写2条, master_offset =\", master_offset)\nwindow_base = master_offset - len(backlog)\nprint(\"从节点重连: PSYNC <replid> %d\" % slave_offset)\nif slave_offset >= window_base:\n    print(\"offset %d 仍在 repl_backlog 窗口 [base=%d, now=%d] -> 部分同步 CONTINUE\" % (slave_offset, window_base, master_offset))\n    missing = backlog[slave_offset - window_base:]\n    print(\"主节点只补发缺失区间命令:\", missing)\n    slave_offset = master_offset\n    print(\"从节点应用缺失区间 -> slave_offset =\", slave_offset)\nelse:\n    print(\"offset 已滑出窗口 -> 全量同步 FULLRESYNC\")\nprint(\"结果: 主从恢复一致, 仅补增量未走全量\")\n",
+  "_verified": true
+}

@@ -1,0 +1,8 @@
+{
+  "title": "shared_ptr 别名构造（alias constructor）",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "7\nalias.use_count=2\nholder.use_count=2",
+  "code": "#include <iostream>\n#include <memory>\nstruct Holder { int value = 7; };\nint main() {\n    auto holder = std::make_shared<Holder>();\n    std::shared_ptr<int> alias(holder, &holder->value);  // 指向成员，但共享 holder 的控制块与所有权\n    std::cout << *alias << '\\n';\n    std::cout << \"alias.use_count=\"  << alias.use_count()  << '\\n';\n    std::cout << \"holder.use_count=\" << holder.use_count() << '\\n';\n}"
+}

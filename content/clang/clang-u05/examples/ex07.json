@@ -1,0 +1,8 @@
+{
+  "title": "头文件守卫避免重复定义",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "my_add(3,4) = 7（头文件内容写了两次，守卫使第二次整段跳过，未发生重定义）",
+  "code": "#include <stdio.h>\n\n/* 以下两次写出「同一个头文件 mymath.h 的内容」，\n   第二次靠 include guard（#ifndef/#define/#endif）整段跳过，\n   否则 my_add 会被重复定义而编译失败。 */\n\n#ifndef MYMATH_H\n#define MYMATH_H\nint my_add(int a, int b) { return a + b; }\n#endif\n\n/* —— 第二次“包含”同一头文件 —— */\n#ifndef MYMATH_H\n#define MYMATH_H\nint my_add(int a, int b) { return a + b; }\n#endif\n\nint main(void) {\n    printf(\"my_add(3,4) = %d（头文件内容写了两次，守卫使第二次整段跳过，未发生重定义）\\n\",\n           my_add(3, 4));\n    return 0;\n}"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "接口的 default 方法",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "hello\nERR: boom",
+  "code": "public class E305 {\n    interface Logger {\n        void log(String s);\n        default void logErr(String s){ log(\"ERR: \" + s); }\n    }\n    static class ConsoleLogger implements Logger {\n        public void log(String s){ System.out.println(s); }\n    }\n    public static void main(String[] args) {\n        Logger l = new ConsoleLogger();\n        l.log(\"hello\");\n        l.logErr(\"boom\");\n    }\n}"
+}

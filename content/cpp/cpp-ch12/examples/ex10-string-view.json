@@ -1,0 +1,8 @@
+{
+  "title": "string_view：零拷贝的子串视图（以及必须小心的悬垂）",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "substr     -> \"modern\"  (size=6，拥有内存)\nstring_view-> \"modern\"  (size=6，不拥有内存)\nremove_prefix(15) 后 -> \"cpp\"\n\n注意：string_view 不延长被观察对象的生命周期。\nstring_view bad = string(\"temp\");  // 悬垂！临时 string 已析构\n结论：string_view 适合作只读参数，不适合长期持有",
+  "code": "#include <iostream>\n#include <string>\n#include <string_view>\nusing namespace std;\n\nint main() {\n    string s = \"cppmind:modern:cpp\";\n\n    string sub = s.substr(8, 6);              // 分配新 string（堆内存 + 拷贝）\n    string_view sv(s.data() + 8, 6);          // 只存指针 + 长度，零拷贝\n\n    cout << \"substr     -> \\\"\" << sub << \"\\\"  (size=\" << sub.size() << \"，拥有内存)\\n\";\n    cout << \"string_view-> \\\"\" << sv << \"\\\"  (size=\" << sv.size() << \"，不拥有内存)\\n\";\n\n    string_view tail = s;                     // 整个字符串的视图\n    tail.remove_prefix(15);\n    cout << \"remove_prefix(15) 后 -> \\\"\" << tail << \"\\\"\\n\";\n\n    cout << \"\\n注意：string_view 不延长被观察对象的生命周期。\\n\";\n    cout << \"string_view bad = string(\\\"temp\\\");  // 悬垂！临时 string 已析构\\n\";\n    cout << \"结论：string_view 适合作只读参数，不适合长期持有\\n\";\n}"
+}

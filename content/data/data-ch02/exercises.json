@@ -1,0 +1,132 @@
+{
+  "meta": {
+    "chapter": "data-ch02",
+    "title": "NumPy 进阶 —— 习题集",
+    "count": 6,
+    "note": "4 道基础题 + 2 道算法题（LeetCode/牛客题仅存元数据与链接，不搬运题面）"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "广播后的 shape 推导",
+      "content_md": "给定 `A.shape == (2, 1, 3)`、`B.shape == (4, 3)`，执行 `C = A + B`，`C.shape` 是多少？并说明从哪一维开始对齐。",
+      "answer": {
+        "correct": "C",
+        "explain": "从**尾维**对齐：B 补成 (1,4,3) 与 (2,1,3) 比较——尾维 3==3 相容、第 1 维 1==1 相容（1 可拉伸）、第 0 维 2 vs 1（1 可拉伸）。结果 (2,4,3)。"
+      },
+      "explanation": "广播对齐方向是「从最后一个维度向前」，这是本章第一性规则。",
+      "tags": [
+        "NumPy",
+        "广播",
+        "shape"
+      ],
+      "source": "self",
+      "source_ref": "《Python for Data Analysis》第4章 · Broadcasting"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "聚合后广播失败的归一化",
+      "content_md": "`x` 是 `(N, D)` 的特征矩阵（每行一个样本），想对**每一列**去中心化，有人写成 `x - x.mean(axis=0)` 报错。请指出问题并给出正确写法（至少两种）。",
+      "answer": {
+        "reference_code": "# 错误：x.mean(axis=0).shape == (D,)，与 (N, D) 尾维对齐 (D==D) 其实可广播，\n# 但若写成 axis=1 得到 (N,)，与 (N,D) 尾维 D vs N 不匹配 → ValueError\n\n# 正确写法 1：聚合时保持维度\nx_centered = x - x.mean(axis=0, keepdims=True)      # keepdims -> (1, D)，天然可广播\n\n# 正确写法 2：手工升维\nx_centered = x - x.mean(axis=0)[None, :]            # (D,) -> (1, D)",
+        "explain": "广播从尾维对齐。`(N,D)` 减 `(D,)` 其实**可以**广播（尾维 D==D），真正报错的是减 `(N,)`（尾维 D vs N）。最稳的是 `keepdims=True`，让结果保持 `(1,k)` 形状天然广播回去，可读性也最好。"
+      },
+      "explanation": "keepdims 是避免手工升维出错的标准手段。",
+      "tags": [
+        "NumPy",
+        "广播",
+        "keepdims"
+      ],
+      "source": "self",
+      "source_ref": "《Python for Data Analysis》第4章 · 广播与聚合"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "新旧随机数 API 的可复现性",
+      "content_md": "执行下面代码，分别输出什么？为什么第二段不是「接着第一段之后的流」？\n\n```python\nimport numpy as np\nprint(np.random.default_rng(0).standard_normal(1))\nprint(np.random.default_rng(0).standard_normal(1))\n\nr = np.random.default_rng(0)\nprint(r.standard_normal(1))\nprint(r.standard_normal(1))\n```",
+      "answer": {
+        "explain": "前两次都来自 `default_rng(0)`，每次调用都**从种子重建初始状态**，因此输出**相同**。后两次复用同一个 `r` 实例，第二次是在第一次推进后的状态上继续，因此输出**不同**。\n\n关键区别：反复 `default_rng(seed)` 是「重置」，复用实例是「延续」。要复现同一条流就**复用同一个 Generator**。",
+        "reference_code": "# 输出示意（具体数值取决于版本，重点是：1、2 相同，3、4 不同）\n# [0.12...]\n# [0.12...]\n# [0.12...]\n# [-1.04...]"
+      },
+      "explanation": "区分「重置随机流」与「延续随机流」是随机数工程的第一课。",
+      "tags": [
+        "NumPy",
+        "随机数",
+        "Generator"
+      ],
+      "source": "self",
+      "source_ref": "NumPy 官方文档 · random.default_rng"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": 2,
+      "title": "重塑矩阵（reshape 与 C 顺序）",
+      "content_md": "给定矩阵与目标行列数，若元素总数匹配则重塑，否则原样返回。用 NumPy 的 reshape 语义实现（详见题链，仅存链接不搬运题面）。",
+      "answer": {
+        "reference_code": "def matrix_reshape(mat, r, c):\n    import numpy as np\n    a = np.array(mat)\n    if a.size != r * c:\n        return mat\n    return a.reshape(r, c).tolist()   # 按 C order（行优先）填充",
+        "explain": "NumPy 的 reshape 默认 C order：按行读取原数据、按行填入新形状；这也是本题语义。注意 reshape 不改 dtype、通常返回视图（连续时）。"
+      },
+      "explanation": "理解 reshape 的填充顺序（C vs F）是向量化思维的进阶起点。",
+      "tags": [
+        "NumPy",
+        "reshape",
+        "矩阵"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 566 · Reshape the Matrix",
+      "external_url": "https://leetcode.cn/problems/reshape-the-matrix/"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "nowcoder",
+      "difficulty": 3,
+      "title": "矩阵乘法（向量化与 einsum）",
+      "content_md": "实现两个矩阵相乘，要求**向量化**完成（禁止显式三重循环），并分别用 `np.dot` / `@` 与 `np.einsum` 给出两种写法（详见题链，仅存链接不搬运题面）。",
+      "answer": {
+        "reference_code": "def matmul_vec(A, B):\n    import numpy as np\n    A = np.asarray(A, dtype=float); B = np.asarray(B, dtype=float)\n    return A @ B                      # 写法一：@（走 BLAS）\n    # return np.einsum('ij,jk->ik', A, B)   # 写法二：einsum 下标标记",
+        "explain": "向量化矩阵乘直接交给 NumPy/BLAS，避免 Python 层三重循环；`@` 通常走高度优化的 BLAS，大矩阵比朴素 einsum 更快。einsum 胜在可读性与无需中间数组。"
+      },
+      "explanation": "区分「语义上矩阵乘」与「工程最优实现」——金融/算法岗常考向量化改写。",
+      "tags": [
+        "NumPy",
+        "矩阵乘",
+        "向量化"
+      ],
+      "source": "nowcoder",
+      "source_ref": "牛客网 · 矩阵乘向量化（高频笔试题）",
+      "external_url": "https://www.nowcoder.com/"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "dtype 溢出与精度",
+      "content_md": "在 NumPy 中（继承 C 语义），下列说法正确的是？\n\nA. `np.int8(127) + np.int8(1)` 会抛出 OverflowError\nB. `np.uint8(255) + np.int8(1)` 结果是 0\nC. 对 1e7 个 float32 求和，误差通常可忽略（< 1e-6）\nD. `np.float64(1.7e308) * 10` 结果是 nan",
+      "answer": {
+        "correct": "B",
+        "explain": "A 错：NumPy 整数溢出**静默回绕**，int8 的 127+1 = -128，不抛异常。B 对：255+1 在 uint8 下模 256 回绕成 0。C 错：float32 仅约 7 位有效数字，1e7 个数求和误差可达 1 量级。D 错：float64 上溢变 `inf`，不是 nan（nan 来自 0/0 或 inf-inf）。"
+      },
+      "explanation": "dtype 精度与溢出是数值计算岗的高频隐蔽坑。",
+      "tags": [
+        "NumPy",
+        "dtype",
+        "溢出"
+      ],
+      "source": "self",
+      "source_ref": "《Python for Data Analysis》第4章 · dtype 与溢出"
+    }
+  ]
+}

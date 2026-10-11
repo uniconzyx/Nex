@@ -1,0 +1,188 @@
+{
+  "meta": {
+    "chapter": "py-ch03",
+    "subject": "python",
+    "note": "内置数据结构章节习题。算法题只存元数据与链接，题面以 external_url 为准，合规红线。",
+    "counts": {
+      "基础题": 5,
+      "算法题": 2
+    }
+  },
+  "items": [
+    {
+      "type": "choice",
+      "difficulty": "easy",
+      "title": "`[[0]] * 3` 的真实行为",
+      "content_md": "执行 `a = [[0]] * 3` 后，运行 `a[0].append(1)`，`a` 的值是什么？",
+      "options": [
+        {
+          "key": "A",
+          "text": "[[0, 1], [0], [0]]"
+        },
+        {
+          "key": "B",
+          "text": "[[0, 1], [0, 1], [0, 1]]"
+        },
+        {
+          "key": "C",
+          "text": "[[0], [0], [0]]"
+        },
+        {
+          "key": "D",
+          "text": "抛出 TypeError"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "`*` 对序列做的是重复引用：三个槽位指向同一个列表对象，改一个全都变。正确写法是 [[0] for _ in range(3)]，每次迭代新建列表。对不可变元素（如 [0]*3）则无此问题。",
+      "tags": [
+        "共享引用",
+        "列表乘法",
+        "可变对象"
+      ],
+      "source": "self",
+      "source_ref": "《流畅的 Python（第2版）》第 2 章 序列",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "output",
+      "difficulty": "mid",
+      "title": "浅拷贝与原地修改的影响",
+      "content_md": "写出下列代码的输出，并解释为何 `a` 也被修改：\n\n```python\na = [[1, 2], [3, 4]]\nb = a[:]\nb[0].append(99)\nb[1] = [9]\nprint(a)\nprint(b)\n```",
+      "answer": {
+        "reference_code": "[[1, 2, 99], [3, 4]]\n[[1, 2, 99], [9]]"
+      },
+      "explanation": "b = a[:] 是浅拷贝：只新建一层容器，槽位仍指向同一批子列表。b[0].append(99) 原地改共享的子列表，所以 a 也变；而 b[1] = [9] 是替换槽位（重新绑定 b 自己的槽），不影响 a。要完全独立需 copy.deepcopy。",
+      "tags": [
+        "浅拷贝",
+        "原地修改",
+        "引用共享"
+      ],
+      "source": "self",
+      "source_ref": "《流畅的 Python（第2版）》第 2 章 序列",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "fix_error",
+      "difficulty": "mid",
+      "title": "修复遍历中删除元素的问题",
+      "content_md": "下面两段代码都有问题，请指出错误（或异常类型）并给出修复方案：\n\n```python\n# ① 列表：看似正确实则会漏删\nnums = [1, 2, 2, 3, 2]\nfor x in nums:\n    if x == 2:\n        nums.remove(x)\n\n# ② 字典：直接抛异常\nd = {'a': 1, 'b': 2, 'c': 3}\nfor k in d:\n    if d[k] < 3:\n        del d[k]\n```",
+      "answer": {
+        "reference_code": "# ① 用推导式重建（推荐）\nnums = [x for x in nums if x != 2]\n\n# ② 遍历键的快照\nfor k in list(d):\n    if d[k] < 3:\n        del d[k]\n# 或同样用推导式重建\nd = {k: v for k, v in d.items() if v >= 3}"
+      },
+      "explanation": "迭代器按内部索引/表槽推进：列表删除会让后续元素前移导致漏处理；字典在迭代中改变大小直接抛 RuntimeError: dictionary changed size during iteration。修复方式是遍历副本（list(d)、d.copy()）或用推导式重建新容器。",
+      "tags": [
+        "遍历中修改",
+        "RuntimeError",
+        "推导式重建"
+      ],
+      "source": "self",
+      "source_ref": "《Python 编程：从入门到实践》第 6 章 字典",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "coding",
+      "difficulty": "mid",
+      "title": "推导式与生成器：内存与复用对比",
+      "content_md": "完成下列要求：\n\n1. 用**列表推导式**生成 0~999999 的平方列表，用 `sys.getsizeof` 打印其占用；\n2. 用**生成器表达式**生成同样的序列，打印 `sys.getsizeof`；\n3. 用生成器对同一个表达式连续 `sum()` 两次，观察第二次结果并解释；\n4. 说明何时应选生成器、何时应选列表。",
+      "answer": {
+        "reference_code": "import sys\n\nlst = [x * x for x in range(10**6)]\ngen = (x * x for x in range(10**6))\nprint('list bytes:', sys.getsizeof(lst))\nprint('gen  bytes:', sys.getsizeof(gen))\n\ng2 = (x * x for x in range(10**6))\nprint('sum1:', sum(g2))\nprint('sum2:', sum(g2))   # 0：生成器已耗尽"
+      },
+      "explanation": "列表推导式即时构建、占用随 n 线性增长（存的是 PyObject* 指针数组）；生成器只保存迭代状态，占用约百字节级别（O(1)）。但生成器是一次性的，消费完再迭代得到空。需要多次遍历或按索引访问用列表；处理大数据流、只遍历一次用生成器。",
+      "tags": [
+        "推导式",
+        "生成器",
+        "内存占用"
+      ],
+      "source": "self",
+      "source_ref": "《流畅的 Python（第2版）》第 2 章 序列",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "choice",
+      "difficulty": "mid",
+      "title": "dict 查找为何是 O(1)，且 3.7 起有序",
+      "content_md": "关于 CPython 的 dict，正确的是：",
+      "options": [
+        {
+          "key": "A",
+          "text": "dict 用红黑树实现，查找 O(log n)"
+        },
+        {
+          "key": "B",
+          "text": "dict 用开放寻址哈希表，平均查找 O(1)，3.7 起保证插入顺序"
+        },
+        {
+          "key": "C",
+          "text": "dict 的键可以是任意对象，包括 list"
+        },
+        {
+          "key": "D",
+          "text": "hash() 的值跨进程稳定，可安全用于持久化分片"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "CPython dict 用开放寻址（3.6+ 紧凑双表：indices + entries），平均 O(1)、最坏 O(n)；3.7 起语言规范保证插入顺序（遍历 entries 物理顺序）。list 不可哈希不能作键；hash() 自 3.3 起带随机盐（防碰撞攻击），跨进程不稳定，不能用于持久化或分片。",
+      "tags": [
+        "dict",
+        "开放寻址",
+        "哈希随机化"
+      ],
+      "source": "self",
+      "source_ref": "《流畅的 Python（第2版）》第 3 章 字典与集合",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "coding",
+      "difficulty": "easy",
+      "title": "用 dict 计数判断字母异位词（valid-anagram）",
+      "content_md": "完成 LeetCode 242（valid-anagram）：定义 `def is_anagram(s, t)` 判断两个字符串是否互为字母异位词。要求：\n\n1. 用 `dict` 或 `collections.Counter` 做字符计数；\n2. 说明为何比「排序后比较」复杂度更优（O(n) vs O(n log n)）；\n3. 扩展到 Unicode 场景说明差异。\n\n题面与示例以链接为准（不在本文件复述题干）。",
+      "answer": {
+        "reference_code": "from collections import Counter\n\ndef is_anagram(s, t):\n    if len(s) != len(t):\n        return False\n    return Counter(s) == Counter(t)\n\n# 手写 dict 版本\ndef is_anagram2(s, t):\n    if len(s) != len(t):\n        return False\n    cnt = {}\n    for ch in s:\n        cnt[ch] = cnt.get(ch, 0) + 1\n    for ch in t:\n        if ch not in cnt:\n            return False\n        cnt[ch] -= 1\n        if cnt[ch] == 0:\n            del cnt[ch]\n    return not cnt\n\nprint(is_anagram('anagram', 'nagaram'))  # True"
+      },
+      "explanation": "计数法 O(n) 时间、O(k) 空间（k 为字符集大小）；排序法 O(n log n)。Counter 内部就是 dict 计数，C 层实现更快。Unicode 场景需注意「组合字符」（如 é 可能是单码位或 e+́ 两个码位），此时应先 unicodedata.normalize('NFC', s)。",
+      "tags": [
+        "哈希计数",
+        "Counter",
+        "复杂度对比"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 242 valid-anagram",
+      "category": "算法题",
+      "platform": "leetcode",
+      "external_url": "https://leetcode.cn/problems/valid-anagram/"
+    },
+    {
+      "type": "coding",
+      "difficulty": "easy",
+      "title": "用 set 求交集并保序（intersection-of-two-arrays）",
+      "content_md": "完成 LeetCode 349（intersection-of-two-arrays）：定义 `def intersection(nums1, nums2)` 返回两数组的交集（去重）。要求：\n\n1. 先用 `set` 完成 O(n+m) 的去重交集；\n2. 额外实现**保序版本**：结果按 `nums1` 中首次出现的顺序排列（提示：用 `dict.fromkeys` 去重保序，再配合 set 判断）；\n3. 说明为何 `x in set` 是 O(1) 而 `x in list` 是 O(n)，以及这带来的数量级差异。\n\n题面以链接为准。",
+      "answer": {
+        "reference_code": "def intersection(nums1, nums2):\n    return list(set(nums1) & set(nums2))\n\ndef intersection_ordered(nums1, nums2):\n    s2 = set(nums2)\n    return [x for x in dict.fromkeys(nums1) if x in s2]\n\nprint(intersection([1, 2, 2, 1], [2, 2]))              # [2]\nprint(intersection_ordered([4, 9, 5, 9], [9, 4, 9, 8, 4]))  # [4, 9]"
+      },
+      "explanation": "set 基于哈希表，成员判断平均 O(1)，整体 O(n+m)；若直接双重循环则是 O(n·m)。dict.fromkeys(nums1) 利用 3.7+ 字典保序特性去重且保留首次出现顺序，再配合 set 做 O(1) 判断，得到保序结果。这是「set 提速 + dict 保序」的经典组合。",
+      "tags": [
+        "set",
+        "dict.fromkeys",
+        "保序去重"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 349 intersection-of-two-arrays",
+      "category": "算法题",
+      "platform": "leetcode",
+      "external_url": "https://leetcode.cn/problems/intersection-of-two-arrays/"
+    }
+  ]
+}

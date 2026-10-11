@@ -1,0 +1,8 @@
+{
+  "title": "调度器对比：FIFO / Capacity / Fair 首轮资源分配",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "FIFO: {'appA': 70, 'appB': 30, 'appC': 0}  total=100\nCapacity: {'appA': 50, 'appB': 0, 'appC': 40}  total=90\nFair: {'appA': 34, 'appB': 33, 'appC': 33}  total=100",
+  "code": "\napps = {\"appA\": 70, \"appB\": 50, \"appC\": 40}\ncluster = 100\n\ndef fifo(apps):\n    res = {a: 0 for a in apps}\n    free = cluster\n    for a in [\"appA\", \"appB\", \"appC\"]:\n        give = min(apps[a], free)\n        res[a] = give\n        free -= give\n    return res\n\ndef capacity(apps):\n    res = {}\n    q1cap, q2cap = 50, 50\n    a = min(apps[\"appA\"], q1cap); res[\"appA\"] = a; rem1 = q1cap - a\n    b = min(apps[\"appB\"], rem1); res[\"appB\"] = b\n    c = min(apps[\"appC\"], q2cap); res[\"appC\"] = c\n    return res\n\ndef fair(apps):\n    res = {a: 0 for a in apps}\n    free = cluster\n    order = list(apps.keys())\n    while free > 0:\n        progress = False\n        for a in order:\n            if res[a] < apps[a] and free > 0:\n                res[a] += 1\n                free -= 1\n                progress = True\n        if not progress:\n            break\n    return res\n\nfor name, fn in [(\"FIFO\", fifo), (\"Capacity\", capacity), (\"Fair\", fair)]:\n    r = fn(apps)\n    print(f\"{name}: {r}  total={sum(r.values())}\")\n"
+}

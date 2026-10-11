@@ -1,0 +1,8 @@
+{
+  "title": "try-with-resources 自动关闭 AutoCloseable（逆序关闭）",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "A opened\nB opened\nA used\nB used\nB closed\nA closed\nafter try-with-resources block",
+  "code": "public class Ex02TryWithResources {\n    static class MyResource implements AutoCloseable {\n        final String name;\n        MyResource(String name) { this.name = name; System.out.println(name + \" opened\"); }\n        void use() { System.out.println(name + \" used\"); }\n        public void close() { System.out.println(name + \" closed\"); }\n    }\n    public static void main(String[] args) {\n        try (MyResource r1 = new MyResource(\"A\");\n             MyResource r2 = new MyResource(\"B\")) {\n            r1.use();\n            r2.use();\n        }\n        System.out.println(\"after try-with-resources block\");\n    }\n}"
+}

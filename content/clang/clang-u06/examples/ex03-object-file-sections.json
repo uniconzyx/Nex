@@ -1,0 +1,19 @@
+{
+  "title": "目标文件结构：段布局、符号表与重定位表",
+  "code_lang": "bash",
+  "code_std": "bash5",
+  "stdin": "",
+  "expected_output": "$ gcc -c obj.c -o obj.o\n$ objdump -h obj.o              # 段表：.text/.data/.bss/.rdata\n\r\nobj.o:     file format pe-x86-64\r\n\r\nSections:\r\nIdx Name          Size      VMA               LMA               File off  Algn\r\n  0 .text         00000050  0000000000000000  0000000000000000  0000012c  2**4\r\n                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE\r\n  1 .data         00000010  0000000000000000  0000000000000000  0000017c  2**4\r\n                  CONTENTS, ALLOC, LOAD, DATA\r\n  2 .bss          00000010  0000000000000000  0000000000000000  00000000  2**4\r\n                  ALLOC\r\n  3 .rdata        00000010  0000000000000000  0000000000000000  0000018c  2**4\r\n                  CONTENTS, ALLOC, LOAD, READONLY, DATA\r\n  4 .xdata        00000014  0000000000000000  0000000000000000  0000019c  2**2\r\n                  CONTENTS, ALLOC, LOAD, READONLY, DATA\r\n  5 .pdata        00000018  0000000000000000  0000000000000000  000001b0  2**2\r\n                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, DATA\r\n  6 .rdata$zzz    00000050  0000000000000000  0000000000000000  000001c8  2**4\r\n                  CONTENTS, ALLOC, LOAD, READONLY, DATA\r\n$ size obj.o                    # text/data/bss 三段字节数\n   text\t   data\t    bss\t    dec\t    hex\tfilename\r\n    220\t     16\t     16\t    252\t     fc\tobj.o\r\n$ nm obj.o                      # T=外部定义 t=static B=bss D=data U=未定义\n0000000000000000 b .bss\r\n0000000000000000 d .data\r\n0000000000000000 p .pdata\r\n0000000000000000 r .rdata\r\n0000000000000000 r .rdata$zzz\r\n0000000000000000 t .text\r\n0000000000000000 r .xdata\r\n000000000000000f T exported\r\n0000000000000000 D g_inited\r\n0000000000000000 B g_zero\r\n0000000000000000 t helper\r\n0000000000000000 r msg\r\n                 U puts\r\n$ gcc -c main.c -o main.o\n$ nm main.o                     # 注意 U exported：本单元欠账\n0000000000000000 b .bss\r\n0000000000000000 d .data\r\n0000000000000000 p .pdata\r\n0000000000000000 r .rdata\r\n0000000000000000 r .rdata$zzz\r\n0000000000000000 t .text\r\n0000000000000000 r .xdata\r\n                 U __main\r\n                 U __mingw_printf\r\n                 U exported\r\n0000000000000000 T main\r\n$ gcc main.o obj.o -o app.exe\n$ ./app\nhi\r\nexported(1) = 44\r",
+  "code": "#!/bin/sh\n# 目标文件结构：段布局、符号表与重定位表\n# 期望输出见 expected_output（本机 MinGW 工具链 + GNU Make 真实执行捕获）\n\ncat > obj.c << 'EOF'\n#include <stdio.h>\n\nint g_inited = 42;              /* 已初始化 -> .data */\nint g_zero;                     /* 未初始化 -> .bss */\nstatic const char msg[] = \"hi\"; /* 只读 -> .rdata/.rodata */\n\nstatic int helper(int x)        /* static -> 内部链接（小写 t） */\n{\n    return x + 1;\n}\n\nint exported(int x)             /* 外部链接（大写 T） */\n{\n    printf(\"%s\\n\", msg);\n    return helper(x) + g_inited + g_zero;\n}\nEOF\n\ncat > main.c << 'EOF'\n#include <stdio.h>\n\nint exported(int);\n\nint main(void)\n{\n    printf(\"exported(1) = %d\\n\", exported(1));\n    return 0;\n}\nEOF\n\ngcc -c obj.c -o obj.o\nobjdump -h obj.o              # 段表：.text/.data/.bss/.rdata\nsize obj.o                    # text/data/bss 三段字节数\nnm obj.o                      # T=外部定义 t=static B=bss D=data U=未定义\ngcc -c main.c -o main.o\nnm main.o                     # 注意 U exported：本单元欠账\ngcc main.o obj.o -o app.exe\n./app\n",
+  "_step_rc": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "_verify_note": "expected_output 为 Windows + MinGW-w64（gcc 15.2 / binutils 2.45 / GNU Make 4.4.1）真实执行捕获。脚本中显示的是可移植命令形式（gcc/mingw32-make/objdump/size），本机实际以 D:/mingw64/bin/ 下的同名工具驱动，二者等价；MinGW 把 GNU Make 命名为 mingw32-make，Linux 上对应命令即 make。"
+}

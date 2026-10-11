@@ -1,0 +1,8 @@
+{
+  "title": "顺序 await 与 gather 并发的交错差异",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "顺序 await: ['s-X', 'e-X', 's-Y', 'e-Y']\ngather   : ['s-X', 's-Y', 'e-X', 'e-Y']\ngather 实现了交错: True\n顺序写法无交错: True\ngather 返回值按传入顺序: True",
+  "code": "import asyncio\n\n\n# 顺序 await vs gather 并发：结果的「顺序」都由写法决定，\n# 但「交错程度」不同 —— 这是 asyncio 最核心的直觉。\n\nasync def step(name, seq):\n    seq.append(\"s-\" + name)\n    await asyncio.sleep(0)\n    seq.append(\"e-\" + name)\n    return name\n\n\nasync def sequential():\n    seq = []\n    await step(\"X\", seq)        # 必须等 X 完全结束\n    await step(\"Y\", seq)\n    return seq\n\n\nasync def concurrent():\n    seq = []\n    await asyncio.gather(step(\"X\", seq), step(\"Y\", seq))\n    return seq\n\n\nasync def main():\n    a = await sequential()\n    b = await concurrent()\n    print(\"顺序 await:\", a)\n    print(\"gather   :\", b)\n    print(\"gather 实现了交错:\", b == [\"s-X\", \"s-Y\", \"e-X\", \"e-Y\"])\n    print(\"顺序写法无交错:\", a == [\"s-X\", \"e-X\", \"s-Y\", \"e-Y\"])\n    # gather 的返回值顺序仍按传入顺序，与完成先后无关\n    r = await asyncio.gather(step(\"P\", []), step(\"Q\", []))\n    print(\"gather 返回值按传入顺序:\", r == [\"P\", \"Q\"])\n\n\nasyncio.run(main())\n"
+}

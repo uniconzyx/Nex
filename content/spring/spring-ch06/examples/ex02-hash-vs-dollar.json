@@ -1,0 +1,8 @@
+{
+  "title": "ex02-hash-vs-dollar",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "hash -> SELECT * FROM t_user WHERE name = ? AND age > ? | params: ['name', 'age']\ndollar -> SELECT * FROM t_user ORDER BY age DESC",
+  "code": "import re\n\ndef hash_sub(sql):\n    params = []\n    def repl(m):\n        params.append(m.group(1))\n        return \"?\"\n    out = re.sub(r\"#\\{([^}]+)\\}\", repl, sql)\n    return out, params\n\ndef dollar_sub(sql, ctx):\n    return re.sub(r\"\\$\\{([^}]+)\\}\", lambda m: str(ctx[m.group(1)]), sql)\n\ns1, p1 = hash_sub(\"SELECT * FROM t_user WHERE name = #{name} AND age > #{age}\")\nprint(\"hash ->\", s1, \"| params:\", p1)\ns2 = dollar_sub(\"SELECT * FROM t_user ORDER BY ${column}\", {\"column\": \"age DESC\"})\nprint(\"dollar ->\", s2)\n"
+}

@@ -1,0 +1,122 @@
+{
+  "meta": {
+    "chapter": "clang-u04",
+    "note": "文件 IO 与二进制；基础题考察模式/缓冲/feof/错误处理，算法题来自刷题平台（仅存元数据与链接，不搬运题面）。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "fopen 模式的截断行为",
+      "content_md": "用 `fopen(\"data.txt\", \"w\")` 打开一个**已存在且非空**的文件，会发生什么？",
+      "options": [
+        { "key": "A", "text": "在原内容末尾追加" },
+        { "key": "B", "text": "文件被立即截断为 0 字节" },
+        { "key": "C", "text": "打开失败返回 NULL" },
+        { "key": "D", "text": "保留原内容，覆盖式写入" }
+      ],
+      "answer": { "correct": ["B"] },
+      "explanation": "`w` 模式语义是「写 + 若存在则截断为 0」。要保留内容并覆盖应从头写用 `r+`，要在末尾追加用 `a`。想「存在则报错」需 POSIX 的 O_EXCL。",
+      "tags": ["fopen", "模式"],
+      "source": "book",
+      "source_ref": "《C 程序设计语言》第7章 输入与输出"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "二进制文件大小",
+      "content_md": "下面程序向二进制文件写入 7 个 `int`（每个 4 字节），然后用 `fseek(SEEK_END)+ftell` 求大小。设 `int` 为 4 字节、`long` 足够大，写出程序打印的内容：\n\n```c\nFILE *w=fopen(\"s.bin\",\"wb\");\nint x=1; for(int i=0;i<7;i++) fwrite(&x,sizeof(int),1,w);\nfclose(w);\nFILE *r=fopen(\"s.bin\",\"rb\");\nfseek(r,0L,SEEK_END);\nprintf(\"size=%ld\\n\", ftell(r));\n```",
+      "answer": { "output": "size=28" },
+      "explanation": "7 个 int × 4 字节 = 28 字节。二进制流下 ftell 返回可靠字节位置；若在文本流下该值不可移植。",
+      "tags": ["ftell", "二进制"],
+      "source": "self",
+      "source_ref": "clang-u04 自测"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "修复 feof 误用导致的多读一次",
+      "content_md": "下面循环会多处理一次垃圾数据（把 EOF 当数据）。请改为以读操作的返回值为终止条件：\n\n```c\nFILE *f = fopen(\"in.txt\", \"r\");\nint x;\nwhile (!feof(f)) {        /* 错误：feof 在越界读之后才为真 */\n    fscanf(f, \"%d\", &x);\n    printf(\"%d \", x);\n}\nfclose(f);\n```",
+      "answer": {
+        "reference_code": "FILE *f = fopen(\"in.txt\", \"r\");\nif (!f) { perror(\"fopen\"); return 1; }\nint x;\nwhile (fscanf(f, \"%d\", &x) == 1) {   /* 以读成功为条件 */\n    printf(\"%d \", x);\n}\nif (ferror(f)) { /* 真出错 */ }\nclearerr(f);\nfclose(f);"
+      },
+      "explanation": "`feof` 是事后状态，不能作为前置条件。`fscanf` 返回成功转换的个数，`==1` 表示本次确实读到一个整数；读到 EOF 或出错时循环自然退出，退出后再用 `ferror` 区分异常。",
+      "tags": ["feof", "循环条件"],
+      "source": "self",
+      "source_ref": "clang-u04 自测"
+    },
+    {
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "写一个健壮的文件复制函数",
+      "content_md": "实现 `int copy_file(const char *src, const char *dst)`，用块读写（`fread`/`fwrite`，`size` 传 1）复制任意二进制文件，并：① 两个 fopen 都必须判 NULL 并用 `perror` 报因；② 依据 `fread` 返回值累加已复制字节，正确处理短读；③ 失败时清理已打开/已创建的文件并返回非 0。",
+      "answer": {
+        "reference_code": "#include <stdio.h>\nint copy_file(const char *src, const char *dst) {\n    FILE *s = fopen(src, \"rb\");\n    if (!s) { perror(src); return 1; }\n    FILE *d = fopen(dst, \"wb\");\n    if (!d) { perror(dst); fclose(s); return 1; }\n    unsigned char buf[4096];\n    size_t got;\n    while ((got = fread(buf, 1, sizeof buf, s)) > 0) {\n        if (fwrite(buf, 1, got, d) != got) { fclose(s); fclose(d); return 1; }\n    }\n    if (ferror(s)) { fclose(s); fclose(d); return 1; }\n    fclose(s); fclose(d);\n    return 0;\n}"
+      },
+      "explanation": "核心是「以 fread 返回值为准」「size=1 让返回值即字节数」「fwrite 也要检查」「任何失败路径都 fclose 避免泄漏」。这正是 ex04 的健壮版。",
+      "tags": ["文件复制", "错误处理"],
+      "source": "self",
+      "source_ref": "clang-u04 自测"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "文本 vs 二进制模式（Windows 换行陷阱）",
+      "content_md": "在 Windows 上，用文本模式 `fopen(f,\"w\")` 写入字节序列 `AB 0A CD`（即字符串 \"AB\\nCD\"），再用二进制模式 `\"rb\"` 读回，会得到多少字节？",
+      "options": [
+        { "key": "A", "text": "5 字节（0A 不变）" },
+        { "key": "B", "text": "6 字节（0A 被扩展为 0D 0A）" },
+        { "key": "C", "text": "4 字节（换行被吞掉）" },
+        { "key": "D", "text": "取决于编译器，标准未规定" }
+      ],
+      "answer": { "correct": ["B"] },
+      "explanation": "文本模式写会把 `\\n(0A)` 翻译成 `\\r\\n(0D 0A)` 落盘，于是磁盘上 6 字节；二进制读原样读出 6 字节。这正是「二进制数据误用文本模式会损坏」的根因。",
+      "tags": ["文本模式", "CRLF"],
+      "source": "book",
+      "source_ref": "C11 §7.21.2 文本流"
+    },
+    {
+      "type": "explain",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "hard",
+      "title": "fflush 之后数据就安全落盘了吗？",
+      "content_md": "解释：进程调用 `fflush(fp)` 成功后，数据是否一定已经在磁盘上？要真正持久化还需要什么？",
+      "answer": {
+        "reference_code": "/* 仅 flush 到内核还不够 */\nfflush(fp);\n/* 还需把内核页缓存刷到磁盘（POSIX） */\nfsync(fileno(fp));   /* 取底层 fd 再 fsync */"
+      },
+      "explanation": "IO 栈分多层：fwrite 进用户态缓冲 → fflush 刷到内核页缓存 → fsync 才真正写盘。fflush 成功只表示数据离开进程的用户缓冲，断电时内核缓存仍可能丢失。需要持久性（如数据库日志）必须一路 fsync（或 fdatasync）。",
+      "tags": ["fflush", "fsync", "缓冲"],
+      "source": "self",
+      "source_ref": "clang-u04 自测"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "easy",
+      "title": "LeetCode 1480 · 一维数组的动态和（用文件 IO 读入写出）",
+      "content_md": "给定数组，输出其「动态和」（running sum）。要求从文件 `in.txt` 读入整数序列、把结果写到 `out.txt`（每行一个）。详见 external_url，不在此复述题面。",
+      "answer": {
+        "reference_code": "/* 读 in.txt，算 running sum，写 out.txt */\n#include <stdio.h>\nint main(void){\n    FILE *in=fopen(\"in.txt\",\"r\"); if(!in){perror(\"in\");return 1;}\n    FILE *out=fopen(\"out.txt\",\"w\"); if(!out){perror(\"out\");fclose(in);return 1;}\n    int x, prev=0;\n    while(fscanf(in,\"%d\",&x)==1){ prev+=x; fprintf(out,\"%d\\n\",prev); }\n    fclose(in); fclose(out); return 0;\n}"
+      },
+      "explanation": "running sum 即前缀和：读一个数累加一个并写出。本题重点是「IO 必判 NULL + 正确循环条件」，运算本身 O(n)。",
+      "tags": ["前缀和", "文件IO"],
+      "source": "leetcode",
+      "source_ref": "LeetCode 1480（running-sum-of-1d-array）",
+      "external_url": "https://leetcode.cn/problems/running-sum-of-1d-array/",
+      "time_limit_ms": 2000,
+      "memory_limit_mb": 256
+    }
+  ]
+}

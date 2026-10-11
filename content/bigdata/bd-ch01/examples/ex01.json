@@ -1,0 +1,8 @@
+{
+  "title": "NameNode 元数据：INode 与块映射",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "file: /user/logs/access.log\nsize_mb: 300\nblock_size_mb: 128\nnum_blocks: 3\nblock_0: blk__user_logs_access.log_0 replicas: ['dn1', 'dn2', 'dn3']\nlast_block_size_mb: 44",
+  "code": "\nBLOCK = 128 * 1024 * 1024\nclass INode:\n    def __init__(self, path):\n        self.path = path\n        self.blocks = []\n        self.replicas = {}\ndns = [\"dn1\", \"dn2\", \"dn3\"]\ndef create(path, size, rep=3):\n    n = INode(path)\n    nb = (size + BLOCK - 1) // BLOCK\n    for i in range(nb):\n        blk = \"blk_\" + path.replace(\"/\", \"_\") + \"_\" + str(i)\n        n.blocks.append(blk)\n        n.replicas[blk] = dns[:rep]\n    return n\nf = create(\"/user/logs/access.log\", 300 * 1024 * 1024)\nprint(\"file:\", f.path)\nprint(\"size_mb:\", 300)\nprint(\"block_size_mb:\", BLOCK // (1024 * 1024))\nprint(\"num_blocks:\", len(f.blocks))\nprint(\"block_0:\", f.blocks[0], \"replicas:\", f.replicas[f.blocks[0]])\nprint(\"last_block_size_mb:\", 300 - 2 * 128)\n"
+}

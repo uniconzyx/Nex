@@ -1,0 +1,8 @@
+{
+  "title": "@SuppressWarnings 抑制未受检警告",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "safe.get(0)=hello",
+  "code": "import java.util.*;\n\npublic class Ex07SuppressWarnings {\n    @SuppressWarnings(\"unchecked\")\n    static List<String> unsafeCast(List raw) {\n        return (List<String>) raw;\n    }\n    public static void main(String[] args) {\n        List raw = new ArrayList();\n        raw.add(\"hello\");\n        List<String> safe = unsafeCast(raw);\n        System.out.println(\"safe.get(0)=\" + safe.get(0));\n    }\n}"
+}

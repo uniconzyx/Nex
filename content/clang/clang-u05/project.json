@@ -1,0 +1,35 @@
+{
+  "meta": {
+    "chapter": "clang-u05",
+    "category": "basic"
+  },
+  "items": [
+    {
+      "title": "设计并实现一个可维护的错误码模块",
+      "requirement_md": "用 **X-Macro** 定义一张错误码表（错误名、HTTP 状态、描述文本），由它**自动生成**枚举、字符串描述表、以及 `err_desc(code)` 查询函数；用**条件编译**提供 `DEBUG` 模式下额外的断言日志。\n\n要求：\n1. 新增一种错误码只需改「一张表」一行，枚举与描述表自动同步且索引严格对应；\n2. `err_desc(code)` 对全部错误码返回对应描述，越界返回「未知错误」；\n3. 定义 `DEBUG` 宏时查询额外打印日志，未定义时零开销；\n4. 自带简单单测验证 `err_desc(ERR_NOT_FOUND)` 等返回正确文本。",
+      "tasks": [
+        {
+          "title": "定义 X-Macro 错误码表并实现枚举/字符串表生成",
+          "verification": {
+            "type": "test",
+            "desc": "新增一行后枚举与描述自动同步，索引不偏移"
+          }
+        },
+        {
+          "title": "实现 err_desc(code) 查询函数",
+          "verification": {
+            "type": "test",
+            "desc": "对全部错误码返回对应描述，越界返回「未知错误」"
+          }
+        },
+        {
+          "title": "用 #ifdef DEBUG 增加调试断言日志",
+          "verification": {
+            "type": "manual",
+            "desc": "定义 DEBUG 时查询打印日志，未定义时为零开销空语句"
+          }
+        }
+      ]
+    }
+  ]
+}

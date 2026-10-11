@@ -1,0 +1,8 @@
+{
+  "title": "RAII：析构函数自动释放资源",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "acquire lock\nwork\nrelease lock\ndone",
+  "code": "#include <iostream>\n\nstruct Guard {\n    const char* name;\n    explicit Guard(const char* n) : name(n) { std::cout << \"acquire \" << name << '\\n'; }\n    ~Guard() { std::cout << \"release \" << name << '\\n'; }   // 离开作用域必被调用\n};\n\nint main() {\n    {\n        Guard g(\"lock\");\n        std::cout << \"work\\n\";\n    }                     // 作用域结束：自动 release，无需手动调用\n    std::cout << \"done\";\n}"
+}

@@ -1,0 +1,138 @@
+{
+  "meta": {
+    "chapter": "py-ch01",
+    "note": "6 题，4 类题型混合；含 LeetCode/牛客真题映射（仅元数据+链接，不存题面正文）"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "difficulty": "easy",
+      "title": "关于 Python 变量语义，正确的是",
+      "content_md": "选择**正确**的描述。",
+      "options": [
+        {
+          "key": "A",
+          "text": "变量在赋值前必须声明类型"
+        },
+        {
+          "key": "B",
+          "text": "变量是名字，绑定到对象；对象分可变/不可变"
+        },
+        {
+          "key": "C",
+          "text": "列表是可哈希的，可作为 dict 的键"
+        },
+        {
+          "key": "D",
+          "text": "a=1; b=a; a=a+1 之后 b 变成 2"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "Python 动态类型，变量只是名字；列表不可哈希；不可变对象重新绑定不影响原绑定。",
+      "tags": [
+        "variable",
+        "mutable"
+      ],
+      "source": "self",
+      "source_ref": "《Python 编程：从入门到实践》第 2 章 变量",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "fix_error",
+      "difficulty": "easy",
+      "title": "修复可变默认参数陷阱",
+      "content_md": "以下函数多次调用会共享同一列表，请修复（要求每次调用得到独立的新列表）：\n\n```python\ndef collect(x, buf=[]):\n    buf.append(x)\n    return buf\n```",
+      "answer": {
+        "reference_code": "def collect(x, buf=None):\n    if buf is None:\n        buf = []\n    buf.append(x)\n    return buf"
+      },
+      "explanation": "默认参数在定义期只创建一次，用 None 哨兵惰性初始化。",
+      "tags": [
+        "default-arg",
+        "mutable"
+      ],
+      "source": "self",
+      "source_ref": "《流畅的Python》第 1 章 数据模型",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "output",
+      "difficulty": "mid",
+      "title": "读代码写输出",
+      "content_md": "```python\ns = 'hello'\nprint(s[1:4])\nprint(s[::-1])\nnums = [3, 1, 2]\nprint(sorted(nums))\n```",
+      "answer": {
+        "output": "ell\nolleh\n[1, 2, 3]"
+      },
+      "explanation": "切片左闭右开；[::-1] 为反转；sorted 返回新列表且升序。",
+      "tags": [
+        "slice",
+        "sorted"
+      ],
+      "source": "self",
+      "source_ref": "《Python 编程：从入门到实践》第 3 章 字符串",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "coding",
+      "difficulty": "easy",
+      "title": "实现字符串反转函数",
+      "content_md": "实现 `def reverse_str(s: str) -> str:`，返回反转后的字符串。",
+      "answer": {
+        "reference_code": "def reverse_str(s):\n    return s[::-1]\n\nif __name__ == '__main__':\n    print(reverse_str('cat'))"
+      },
+      "explanation": "切步长 -1 即可反转；也可手写 for 拼装。",
+      "tags": [
+        "string",
+        "slice"
+      ],
+      "source": "self",
+      "source_ref": "《Python 编程：从入门到实践》第 3 章 习题",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "coding",
+      "difficulty": "mid",
+      "title": "LeetCode 704 · 二分查找（Python）",
+      "content_md": "实现函数 `def binary_search(nums, target):`，在升序整型列表中二分查找 target，返回下标，未找到返回 -1。",
+      "answer": {
+        "reference_code": "def binary_search(nums, target):\n    lo, hi = 0, len(nums) - 1\n    while lo <= hi:\n        mid = (lo + hi) // 2\n        if nums[mid] == target:\n            return mid\n        elif nums[mid] < target:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return -1\n\nif __name__ == '__main__':\n    print(binary_search([-1, 0, 3, 5, 9, 12], 9))"
+      },
+      "explanation": "经典二分，注意区间闭合与 mid 下取整；本题仅映射真题，题面以来源链接为准。",
+      "tags": [
+        "binary-search",
+        "list"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 704（binary-search）",
+      "external_url": "https://leetcode.cn/problems/binary-search/",
+      "category": "算法题",
+      "platform": "leetcode"
+    },
+    {
+      "type": "coding",
+      "difficulty": "mid",
+      "title": "牛客 BM21 · 旋转数组（Python）",
+      "content_md": "实现函数 `def rotate(nums, k):`，将整型列表向右旋转 k 位（原地修改优先，也可返回新列表）。",
+      "answer": {
+        "reference_code": "def rotate(nums, k):\n    n = len(nums)\n    if n == 0:\n        return nums\n    k %= n\n    return nums[-k:] + nums[:-k]\n\nif __name__ == '__main__':\n    print(rotate([1, 2, 3, 4, 5], 2))"
+      },
+      "explanation": "右旋 k 位等价于取末尾 k 个移到前面；本题仅映射真题，题面以来源链接为准。",
+      "tags": [
+        "array",
+        "rotate"
+      ],
+      "source": "nowcoder",
+      "source_ref": "牛客 BM21（旋转数组）",
+      "external_url": "https://www.nowcoder.com/exam/oj?tab=BM%E7%AF%87",
+      "category": "算法题",
+      "platform": "nowcoder"
+    }
+  ]
+}

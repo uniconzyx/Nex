@@ -1,0 +1,93 @@
+{
+  "meta": {
+    "chapter": "data-ch04",
+    "title": "Pandas 进阶 —— 面经",
+    "count": 6,
+    "note": "覆盖分组语义、多表连接、时间序列、透视与性能五条主线。"
+  },
+  "items": [
+    {
+      "question": "`groupby` 之后有哪四种「聚合器」？怎么选？",
+      "answer_md": "四种聚合器的**区别只有一个维度：返回的形状**。\n\n| 方法 | 返回形状 | 索引 | 何时用 |\n|---|---|---|---|\n| `agg` | 每组一行 | 组标签 | 出报表 |\n| `transform` | 与原表同长 | 原索引 | 给原表加组级统计列 |\n| `apply` | 任意 | 你定 | 组内排序、多列联动等复杂逻辑 |\n| `filter` | 原表的行子集 | 原索引 | 只保留满足条件的组 |\n\n**选择判据（一句话）**：结果要不要回到原表？\n要 → `transform`；不要 → `agg`；逻辑不可向量化 → `apply`；按组筛选行 → `filter`。\n\n**易错点**：`df[\"m\"] = df.groupby(\"k\")[\"v\"].agg(\"mean\")` 会因长度不匹配出错，必须用 `transform`——这是最高频的实战错误。",
+      "follow_ups": [
+        "`apply` 一定比 `agg` 慢吗？",
+        "`filter` 和布尔索引有什么区别？"
+      ],
+      "difficulty": "easy",
+      "company_tags": [
+        "数据分析",
+        "后端",
+        "大数据"
+      ]
+    },
+    {
+      "question": "合并两张表时，什么情况下结果行数会变多？怎么防？",
+      "answer_md": "**一句话：键不唯一（多对多）时行数必然膨胀，而且不报错。**\n\n**量化关系**：对每个键 $k$，贡献 $\\text{cnt}_L(k) \\times \\text{cnt}_R(k)$ 行。所以结果行数 $= \\sum_k \\text{cnt}_L(k)\\cdot\\text{cnt}_R(k)$（`inner`）。\n\n**数学原因**：连接的定义就是笛卡尔积再筛选，$|L \\times R| = |L| \\cdot |R|$，膨胀是**定义使然**，不是 bug。\n\n**三道防线**：\n1. 合并前查键唯一性：`left[key].is_unique` / `left.groupby(key).size().max()`；\n2. 用 `validate=` 让 Pandas 主动抛 `MergeError`：\n```python\npd.merge(l, r, on=\"id\", validate=\"many_to_one\")\n```\n3. 合并后核对行数：`how=\"left\"` 且右表键唯一时，`len(result) == len(left)` 必须成立（写成断言）。\n\n**为什么这是最危险的错误**：不报错、不告警，指标直接虚高，一路流到报表和决策里。",
+      "follow_ups": [
+        "`validate` 的四种取值分别对应什么基数关系？",
+        "如何用数据契约（如唯一约束）从根上避免这个问题？"
+      ],
+      "difficulty": "medium",
+      "company_tags": [
+        "数据分析",
+        "数据工程",
+        "后端"
+      ]
+    },
+    {
+      "question": "`resample` 和 `groupby` 有什么本质区别？",
+      "answer_md": "两者**共享同一套 split-apply-combine 结构**，区别在分组键的来源与稠密性：\n\n| | `groupby` | `resample` |\n|---|---|---|\n| 分组键 | 离散标签（列/Series） | 时间**区间**（由频率生成） |\n| 空区间 | **不产出**（只出现过的组） | **产出空桶**（值为 NaN） |\n| 索引 | 组标签 | `DatetimeIndex` |\n\n**「产出空桶」这一点是最大差异**，也最容易被忽略：\n一份只有 1 月和 3 月记录的数据，`resample(\"D\")` 会补出 2 月整月的桶。此时 `sum()` 得 0，`mean()` 得 NaN —— **不要盲目 `fillna(0)`**：「没有数据」和「数值为零」是两种完全不同的语义。\n\n**前提条件**：索引必须是 `DatetimeIndex` 且**单调**。字符串索引上 `resample` 直接报错，乱序索引会让窗口结果错位。",
+      "follow_ups": [
+        "`resample(\"M\")` 和 `resample(\"MS\")` 的区别？",
+        "重采样后出现 NaN，怎么判断该填 0 还是该保留 NaN？"
+      ],
+      "difficulty": "medium",
+      "company_tags": [
+        "数据分析",
+        "金融科技",
+        "风控"
+      ]
+    },
+    {
+      "question": "`pivot_table` 和 `groupby` 是什么关系？`pivot` 和 `pivot_table` 又有什么区别？",
+      "answer_md": "**第一问：`pivot_table` ≡ `groupby(...).agg(f).unstack()`**\n\n```python\ndf.pivot_table(index=\"city\", columns=\"month\", values=\"sales\", aggfunc=\"sum\")\n# 完全等价于\ndf.groupby([\"city\", \"month\"])[\"sales\"].sum().unstack()\n```\n对应关系：`index` / `columns` 是两个分组键，`values` 是聚合列，`aggfunc` 是聚合函数，`fill_value` 是 `unstack` 后的填充值。**记住这条等价关系，就不用单独背 `pivot_table` 的参数。**\n\n**第二问：`pivot` vs `pivot_table`**\n\n| | `pivot` | `pivot_table` |\n|---|---|---|\n| (index, columns) 组合重复 | **报错** | 自动聚合 |\n| 默认聚合 | 无 | **`mean`** |\n| 用途 | 纯形状变换 | 统计汇总 |\n\n判据：**能保证唯一就用 `pivot`**（更严格、更快）；否则用 `pivot_table`。\n注意 `pivot_table` 默认 `aggfunc=\"mean\"` —— 忘记写 `\"sum\"` 会得到完全不同的表。",
+      "follow_ups": [
+        "`crosstab` 和 `pivot_table` 的关系？",
+        "`normalize` 参数在 `crosstab` 里做什么？"
+      ],
+      "difficulty": "medium",
+      "company_tags": [
+        "数据分析",
+        "商业分析"
+      ]
+    },
+    {
+      "question": "为什么向量化比 `apply` 快？在什么情况下 `apply` 反而不吃亏？",
+      "answer_md": "**快在两点，且必须同时成立：**\n\n1. **内存布局连续**：`int64` 列在内存里是连续的 8 字节块，CPU 能按 cache line 预取。而 `object` 列存的是**指针数组**，每个元素指向堆上任意位置 —— **指针追逐（pointer chasing）** 打爆 cache。这才是 `object` 慢的根本原因，不是「Python 慢」；\n2. **循环在 C 层**：省掉了每行的解释器分派与对象装箱（单次解释器迭代约几十纳秒，一次 SIMD 加法不到一纳秒）。\n\n**代价模型**：设每行计算量为 $c$、解释器开销为常数 $k$（$k \\gg c$）：\n- 向量化：$T_V = n \\cdot c$\n- `apply`：$T_A = n \\cdot (k + c)$\n- 加速比 $T_A / T_V = 1 + k/c$\n\n**反直觉的结论**：加速比取决于 $k/c$，不是固定值。当每行计算本身很重（$c$ 很大，如调用网络/复杂状态机），$k/c \\to 0$，`apply` 的开销可忽略，\"优化掉 apply\" 几乎没有收益。\n\n**所以性能分析必须先测再优化**，不能凭「apply 慢」这条教条下刀。\n\n**另一个工程要点**：改完实现后，**先断言逐元素与原结果一致**，再谈性能。",
+      "follow_ups": [
+        "为什么 `object` 列的内存统计要加 `deep=True`？",
+        "如何在不写机器相关耗时的前提下，证明优化有效？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "数据工程",
+        "基础架构",
+        "大数据"
+      ]
+    },
+    {
+      "question": "时间序列分析里，最容易出错的三个地方是什么？",
+      "answer_md": "**① 时间列还是字符串**\n`df.dtypes` 里必须是 `datetime64[ns]`。看到 `object` 说明没转类型，此时 `.resample()` / `.rolling()` / `.dt` **全部不可用**。\n生产数据用 `pd.to_datetime(..., errors=\"coerce\")`，并把无法解析的值变成 `NaT` 后**断言数量**（不能默默吞掉脏数据）。\n\n**② 索引不单调**\n滑动窗口定义在「序」上，索引乱序时「最近 n 个」本身无定义。接手任何时间数据的第一件事：\n```python\ndf = df.sort_index()\nassert df.index.is_monotonic_increasing\n```\n\n**③ 频率别名与标签位置**\n`M`（月末）与 `MS`（月初）**数值完全相同、标签差一个月**；`W` 默认锚在周日（`W-SUN`）。报表用错，**所有数字都对、时间却整体错位**，是最难发现的一类错误。\n\n**附加两条**：重采样会为空区间补 `NaN`，填 0 前必须确认业务语义；`pct_change` 在分母为 0 时返回 `inf`，产报表前要 `replace([np.inf, -np.inf], np.nan)`。",
+      "follow_ups": [
+        "时区该怎么处理？`tz_localize` 与 `tz_convert` 有什么区别？",
+        "为什么存储要用 UTC、展示才转本地时区？"
+      ],
+      "difficulty": "medium",
+      "company_tags": [
+        "数据分析",
+        "金融科技",
+        "监控"
+      ]
+    }
+  ]
+}

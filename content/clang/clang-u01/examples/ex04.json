@@ -1,0 +1,8 @@
+{
+  "title": "指针算术与求最大值",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "max = 9\nmax 的下标 = 1",
+  "code": "#include <stdio.h>\n\nint main(void) {\n    int a[6] = {3, 9, 2, 7, 5, 4};\n    int *p = a;\n    int max = *p;\n    int *pmax = a;\n    for (p = a + 1; p < a + 6; p++) {\n        if (*p > max) { max = *p; pmax = p; }\n    }\n    printf(\"max = %d\\n\", max);\n    printf(\"max 的下标 = %td\\n\", pmax - a);\n    return 0;\n}"
+}

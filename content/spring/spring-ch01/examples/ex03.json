@@ -1,0 +1,8 @@
+{
+  "title": "构造器注入 vs Setter 注入（不可变性差异）",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "ctor immutable: dep\nsetter reassignable: dep2",
+  "code": "public class Ex03 {\n    static class Dep { String name = \"dep\"; }\n    // 构造器注入：final 字段可注入，构造后不可变\n    static class ByConstructor {\n        private final Dep dep;\n        ByConstructor(Dep d) { this.dep = d; }\n        String go() { return dep.name; }\n    }\n    // Setter 注入：字段可变，可重复赋值\n    static class BySetter {\n        private Dep dep;\n        void setDep(Dep d) { this.dep = d; }\n        String go() { return dep.name; }\n    }\n    public static void main(String[] args) {\n        Dep d = new Dep();\n        ByConstructor c = new ByConstructor(d);\n        BySetter s = new BySetter();\n        s.setDep(d);\n        System.out.println(\"ctor immutable: \" + c.go());\n        Dep another = new Dep();\n        another.name = \"dep2\";\n        s.setDep(another);\n        System.out.println(\"setter reassignable: \" + s.go());\n    }\n}\n"
+}

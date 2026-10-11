@@ -1,0 +1,262 @@
+{
+  "schema_version": 1,
+  "subject": "bigdata",
+  "title": "CppMind · 大数据课程体系（Hadoop / Hive / Spark）",
+  "note": "阶段7 技术栈扩展大纲。每章须齐备 7 类内容（见 _template 规范），由 server/scripts/validate_content.py 校验。resources 仅存元数据与链接，不存第三方题面/正文，符合合规红线。",
+  "groups": {
+    "B1": "HDFS 与 YARN",
+    "B2": "Hive 数仓",
+    "B3": "Spark",
+    "B4": "实战链路"
+  },
+  "chapters": [
+    {
+      "id": "bd-ch01",
+      "order": 1,
+      "group": "B1",
+      "title": "Hadoop 生态与 HDFS 架构",
+      "summary": "从单机到分布式的动机（容量、吞吐、容错）；HDFS 的 NameNode/DataNode/Block 与元数据设计；副本放置策略与机架感知；edits log 与 fsimage 的合并（checkpoint）；文件写入的流水线复制与读取的短路读；小文件问题的根因与治理。",
+      "prerequisites": [],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "DataTalksClub/data-engineering-zoomcamp",
+          "apache/spark",
+          "heibaiying/BigData-Notes",
+          "apache/hadoop"
+        ],
+        "github_stars": [
+          46045,
+          44136,
+          16979,
+          15681
+        ],
+        "github_notes": [
+          "免费 9 周数据工程课程：含 Hadoop/Spark/数仓实践",
+          "Apache Spark 官方仓库：RDD/SQL/调优权威来源",
+          "中文大数据入门指南：Hadoop/Hive/Spark/Flink 系统笔记",
+          "Apache Hadoop 官方仓库：HDFS/YARN/MapReduce 实现"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Hadoop 权威指南》第1-3章"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "bd-ch02",
+      "order": 2,
+      "group": "B1",
+      "title": "MapReduce 原理与 YARN 调度",
+      "summary": "Map/Shuffle/Reduce 三阶段数据流；Combiner 与 Partitioner 的作用与边界；Shuffle 的排序、溢写与归并；YARN 的 ResourceManager/NodeManager/ApplicationMaster 与调度器（FIFO/Capacity/Fair）；数据倾斜的识别与优化手段。",
+      "prerequisites": [
+        "bd-ch01"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "DataTalksClub/data-engineering-zoomcamp",
+          "apache/spark",
+          "heibaiying/BigData-Notes",
+          "apache/hadoop"
+        ],
+        "github_stars": [
+          46045,
+          44136,
+          16979,
+          15681
+        ],
+        "github_notes": [
+          "免费 9 周数据工程课程：含 Hadoop/Spark/数仓实践",
+          "Apache Spark 官方仓库：RDD/SQL/调优权威来源",
+          "中文大数据入门指南：Hadoop/Hive/Spark/Flink 系统笔记",
+          "Apache Hadoop 官方仓库：HDFS/YARN/MapReduce 实现"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Hadoop 权威指南》第2、4章"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "bd-ch03",
+      "order": 3,
+      "group": "B2",
+      "title": "Hive：数据仓库与 HQL",
+      "summary": "Hive 的本质（把 SQL 翻译成 MR/Tez/Spark 作业）；内部表 vs 外部表与数据生命周期；分区与分桶、分区裁剪；JOIN 的 MapJoin 与倾斜处理；HQL 与标准 SQL 的差异（行列转换、窗口函数、Lateral View）；Metastore 的作用。",
+      "prerequisites": [
+        "bd-ch02"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "DataTalksClub/data-engineering-zoomcamp",
+          "apache/spark",
+          "heibaiying/BigData-Notes",
+          "apache/hadoop"
+        ],
+        "github_stars": [
+          46045,
+          44136,
+          16979,
+          15681
+        ],
+        "github_notes": [
+          "免费 9 周数据工程课程：含 Hadoop/Spark/数仓实践",
+          "Apache Spark 官方仓库：RDD/SQL/调优权威来源",
+          "中文大数据入门指南：Hadoop/Hive/Spark/Flink 系统笔记",
+          "Apache Hadoop 官方仓库：HDFS/YARN/MapReduce 实现"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Hive 编程指南》"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "bd-ch04",
+      "order": 4,
+      "group": "B3",
+      "title": "Spark 核心：RDD 与惰性求值",
+      "summary": "为什么比 MapReduce 快（内存计算 + DAG 优化）；RDD 的五个属性与不可变性；Transformation 与 Action 的惰性求值；宽依赖与窄依赖、Stage 与 Task 的划分；缓存（cache/persist）级别与 checkpoint 的取舍；Shuffle 的代价与规避。",
+      "prerequisites": [
+        "bd-ch02"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "DataTalksClub/data-engineering-zoomcamp",
+          "apache/spark",
+          "heibaiying/BigData-Notes",
+          "apache/hadoop"
+        ],
+        "github_stars": [
+          46045,
+          44136,
+          16979,
+          15681
+        ],
+        "github_notes": [
+          "免费 9 周数据工程课程：含 Hadoop/Spark/数仓实践",
+          "Apache Spark 官方仓库：RDD/SQL/调优权威来源",
+          "中文大数据入门指南：Hadoop/Hive/Spark/Flink 系统笔记",
+          "Apache Hadoop 官方仓库：HDFS/YARN/MapReduce 实现"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Spark 快速大数据分析》",
+          "《Spark 内核设计的艺术》"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "bd-ch05",
+      "order": 5,
+      "group": "B3",
+      "title": "Spark SQL、DataFrame 与 Catalyst",
+      "summary": "DataFrame/Dataset 与 RDD 的取舍（结构化信息与优化空间）；Catalyst 优化器（逻辑计划 → 优化 → 物理计划）、谓词下推与列裁剪；Tungsten 的堆外内存与全阶段代码生成；AQE 自适应执行与动态分区合并；与 Hive 元数据的集成。",
+      "prerequisites": [
+        "bd-ch04"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "DataTalksClub/data-engineering-zoomcamp",
+          "apache/spark",
+          "heibaiying/BigData-Notes",
+          "apache/hadoop"
+        ],
+        "github_stars": [
+          46045,
+          44136,
+          16979,
+          15681
+        ],
+        "github_notes": [
+          "免费 9 周数据工程课程：含 Hadoop/Spark/数仓实践",
+          "Apache Spark 官方仓库：RDD/SQL/调优权威来源",
+          "中文大数据入门指南：Hadoop/Hive/Spark/Flink 系统笔记",
+          "Apache Hadoop 官方仓库：HDFS/YARN/MapReduce 实现"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Spark SQL 内核剖析》"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "bd-ch06",
+      "order": 6,
+      "group": "B4",
+      "title": "离线数仓实战：分层建模与调度",
+      "summary": "ODS/DWD/DWS/ADS 分层职责；维度建模与星型/雪花模型、缓慢变化维；指标口径一致性与数据质量校验；任务依赖与调度（DAG、补数、SLA）；一条端到端离线链路的拆解（采集 → 清洗 → 聚合 → 报表）；数据倾斜与资源调优的实战清单。",
+      "prerequisites": [
+        "bd-ch05"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "DataTalksClub/data-engineering-zoomcamp",
+          "apache/spark",
+          "heibaiying/BigData-Notes",
+          "apache/hadoop"
+        ],
+        "github_stars": [
+          46045,
+          44136,
+          16979,
+          15681
+        ],
+        "github_notes": [
+          "免费 9 周数据工程课程：含 Hadoop/Spark/数仓实践",
+          "Apache Spark 官方仓库：RDD/SQL/调优权威来源",
+          "中文大数据入门指南：Hadoop/Hive/Spark/Flink 系统笔记",
+          "Apache Hadoop 官方仓库：HDFS/YARN/MapReduce 实现"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《大数据之路：阿里巴巴大数据实践》"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    }
+  ],
+  "github_resources": [
+    {
+      "repo": "DataTalksClub/data-engineering-zoomcamp",
+      "stars": 46045,
+      "url": "https://github.com/DataTalksClub/data-engineering-zoomcamp",
+      "note": "免费 9 周数据工程课程：含 Hadoop/Spark/数仓实践"
+    },
+    {
+      "repo": "apache/spark",
+      "stars": 44136,
+      "url": "https://github.com/apache/spark",
+      "note": "Apache Spark 官方仓库：RDD/SQL/调优权威来源"
+    },
+    {
+      "repo": "heibaiying/BigData-Notes",
+      "stars": 16979,
+      "url": "https://github.com/heibaiying/BigData-Notes",
+      "note": "中文大数据入门指南：Hadoop/Hive/Spark/Flink 系统笔记"
+    },
+    {
+      "repo": "apache/hadoop",
+      "stars": 15681,
+      "url": "https://github.com/apache/hadoop",
+      "note": "Apache Hadoop 官方仓库：HDFS/YARN/MapReduce 实现"
+    }
+  ],
+  "resources_fetched_at": "2026-09-21"
+}

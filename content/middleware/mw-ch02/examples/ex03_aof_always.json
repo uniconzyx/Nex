@@ -1,0 +1,9 @@
+{
+  "title": "AOF 追加：appendfsync always 耐久性",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "appendfsync always:\n  崩溃前已 fsync 命令数: 3\n  AOF 重放后恢复数据: {'a': 1, 'b': 2, 'c': 3}\n  耐久性: 每次写都落盘, 进程崩溃也几乎无丢失; 代价: 每次写一次 fsync, 吞吐最低",
+  "code": "def aof_always(writes, crash_after):\n    aof = []\n    fsyncs = 0\n    for i, w in enumerate(writes):\n        aof.append(w)\n        fsyncs += 1  # always: 每次写命令都 fsync\n        if i + 1 == crash_after:\n            break\n    return aof, fsyncs\n\nwrites = [(\"SET\", \"a\", 1), (\"SET\", \"b\", 2), (\"SET\", \"c\", 3)]\naof, f = aof_always(writes, crash_after=3)\nprint(\"appendfsync always:\")\nprint(\"  崩溃前已 fsync 命令数:\", f)\nprint(\"  AOF 重放后恢复数据:\", {k: v for _, k, v in aof})\nprint(\"  耐久性: 每次写都落盘, 进程崩溃也几乎无丢失; 代价: 每次写一次 fsync, 吞吐最低\")\n",
+  "_verified": true
+}

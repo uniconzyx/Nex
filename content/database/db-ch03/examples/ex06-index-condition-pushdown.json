@@ -1,0 +1,9 @@
+{
+  "title": "索引下推 ICP：对索引列的前导通配过滤下推到存储引擎",
+  "code_lang": "sql",
+  "code_std": "mysql8",
+  "stdin": "",
+  "expected_output": "Query OK, 0 rows affected\nQuery OK, 3 rows affected\nQuery OK, 0 rows affected\nid|select_type|table|type|possible_keys|key|key_len|ref|rows|Extra\n1|SIMPLE|t|ref|idx_ab|idx_ab|5|const|2|Using index condition",
+  "code": "CREATE TABLE t (a INT, b VARCHAR(20));\nINSERT INTO t VALUES (1,'ax'),(1,'by'),(2,'cx');\nCREATE INDEX idx_ab ON t(a, b);\nEXPLAIN SELECT * FROM t WHERE a = 1 AND b LIKE '%x%';",
+  "_verified": false
+}

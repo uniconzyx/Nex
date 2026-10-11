@@ -1,0 +1,8 @@
+{
+  "title": "二进制模式：fwrite/fread 读写结构体数组",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "read 3 records\nid=1 v=1.5\nid=2 v=2.5\nid=3 v=3.5\n",
+  "code": "#include <stdio.h>\nstruct Rec { int id; double v; };\nint main(void) {\n    struct Rec a[3] = {{1,1.5},{2,2.5},{3,3.5}};\n    FILE *w = fopen(\"b.dat\", \"wb\");\n    fwrite(a, sizeof(struct Rec), 3, w);\n    fclose(w);\n    struct Rec b[3];\n    FILE *r = fopen(\"b.dat\", \"rb\");\n    size_t n = fread(b, sizeof(struct Rec), 3, r);\n    fclose(r);\n    printf(\"read %zu records\\n\", n);\n    for (size_t i = 0; i < n; i++) printf(\"id=%d v=%.1f\\n\", b[i].id, b[i].v);\n    return 0;\n}"
+}

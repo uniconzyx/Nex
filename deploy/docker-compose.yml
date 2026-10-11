@@ -1,0 +1,133 @@
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on: [api]
+    restart: unless-stopped
+
+  api:
+    build: ../server
+    env_file: ../server/.env
+    # 容器内 WORKDIR=/srv，config.py 默认 content_dir=../content / shared_dir=../shared
+    # 会解析为 /content、/shared，与下方挂载点不符；此处显式覆盖为挂载实际路径。
+    environment:
+      - CONTENT_DIR=/srv/content
+      - SHARED_DIR=/srv/shared
+    volumes:
+      - ../shared:/srv/shared:ro
+      - ../content:/srv/content:ro
+    depends_on: [postgres, redis]
+    restart: unless-stopped
+    # CMD: uvicorn app.main:app（Dockerfile 默认）
+
+  worker:
+    build: ../server
+    env_file: ../server/.env
+    environment:
+      - SHARED_DIR=/srv/shared
+    volumes:
+      - ../shared:/srv/shared:ro
+    command: ["arq", "app.workers.settings.WorkerSettings"]
+    depends_on: [postgres, redis]
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: cppmind
+      POSTGRES_PASSWORD: cppmind
+      POSTGRES_DB: cppmind
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: cppmind
+      MINIO_ROOT_PASSWORD: cppmind-secret
+    volumes:
+      - miniodata:/data
+    ports:
+      - "9001:9001"
+    restart: unless-stopped
+
+  # ===== Judge0 CE（官方镜像，isolate 沙箱）=====
+  judge0-server:
+    image: judge0/judge0:1.13.1
+    environment:
+      REDIS_HOST: judge0-redis
+      REDIS_PASSWORD: judge0pass
+      POSTGRES_HOST: judge0-db
+      POSTGRES_USER: judge0
+      POSTGRES_PASSWORD: judge0pass
+      POSTGRES_DB: judge0
+    depends_on: [judge0-db, judge0-redis]
+    restart: unless-stopped
+
+  judge0-workers:
+    image: judge0/judge0:1.13.1
+    command: ["./scripts/workers"]
+    privileged: true   # isolate 沙箱必需
+    environment:
+      REDIS_HOST: judge0-redis
+      REDIS_PASSWORD: judge0pass
+      POSTGRES_HOST: judge0-db
+      POSTGRES_USER: judge0
+      POSTGRES_PASSWORD: judge0pass
+      POSTGRES_DB: judge0
+      COUNT: "2"       # worker 并行度，按需水平扩
+    depends_on: [judge0-db, judge0-redis, judge0-server]
+    restart: unless-stopped
+
+  judge0-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: judge0
+      POSTGRES_PASSWORD: judge0pass
+      POSTGRES_DB: judge0
+    volumes:
+      - judge0db:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  judge0-redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--requirepass", "judge0pass"]
+    restart: unless-stopped
+
+  # ===== 监控 =====
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: cppmind
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafanadata:/var/lib/grafana
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  redisdata:
+  miniodata:
+  judge0db:
+  grafanadata:

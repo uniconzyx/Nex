@@ -1,0 +1,8 @@
+{
+  "title": "重写约束：协变返回类型",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "Derived.copy",
+  "code": "public class E308 {\n    static class Base {\n        public Base copy(){ System.out.println(\"Base.copy\"); return new Base(); }\n    }\n    static class Derived extends Base {\n        @Override public Derived copy(){ System.out.println(\"Derived.copy\"); return new Derived(); }\n    }\n    public static void main(String[] args) {\n        Base x = new Derived();\n        x.copy();\n    }\n}"
+}

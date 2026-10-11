@@ -1,0 +1,8 @@
+{
+  "title": "指针遍历数组",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "1234",
+  "code": "#include <iostream>\n\nint main() {\n    int a[4] = {1, 2, 3, 4};\n    for (int* p = a; p != a + 4; ++p) std::cout << *p;\n}"
+}

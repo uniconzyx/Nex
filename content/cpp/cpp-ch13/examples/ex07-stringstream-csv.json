@@ -1,0 +1,8 @@
+{
+  "title": "stringstream 解析 CSV 行",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "alice 23 98.5",
+  "code": "#include <iostream>\n#include <sstream>\n#include <string>\nint main() {\n    std::istringstream iss(\"alice,23,98.5\");\n    std::string name; int age; double score;\n    std::getline(iss, name, ',');\n    iss >> age; iss.ignore(); iss >> score;\n    std::cout << name << ' ' << age << ' ' << score << '\\n';\n}"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "低秩假设：截断 SVD 的重构误差曲线",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "构造 64x64 矩阵: 真实秩 8 + 1% 噪声, Frobenius 范数 = 169.8863\n\nrank   重构相对误差             能量占比\n1      0.877809           0.229452\n2      0.757948           0.425515\n4      0.563949           0.681961\n8      0.003317           0.999989\n16     0.002523           0.999994\n32     0.001309           0.999998\n64     0.000000           1.000000\n\n结论: 相对误差随 rank 单调下降 (Eckart-Young 定理保证最优)\n      误差在 rank = 8 处已接近 0, 正好等于真实秩 —— 这就是低秩假设的可验证形式",
+  "code": "\nimport numpy as np\nrng = np.random.default_rng(42)\nL = rng.normal(size=(64, 8))\nR = rng.normal(size=(8, 64))\nW = L @ R + 0.01 * rng.normal(size=(64, 64))\nU, S, Vt = np.linalg.svd(W, full_matrices=False)\nbase = np.linalg.norm(W)\ntotal = (S ** 2).sum()\nprint('构造 64x64 矩阵: 真实秩 8 + 1%% 噪声, Frobenius 范数 = %.4f' % base)\nprint()\nprint('%-6s %-18s %s' % ('rank', '重构相对误差', '能量占比'))\nfor k in (1, 2, 4, 8, 16, 32, 64):\n    Wk = U[:, :k] @ np.diag(S[:k]) @ Vt[:k, :]\n    err = np.linalg.norm(W - Wk) / base\n    energy = (S[:k] ** 2).sum() / total\n    print('%-6d %-18.6f %.6f' % (k, err, energy))\nprint()\nprint('结论: 相对误差随 rank 单调下降 (Eckart-Young 定理保证最优)')\nprint('      误差在 rank = 8 处已接近 0, 正好等于真实秩 —— 这就是低秩假设的可验证形式')\n"
+}

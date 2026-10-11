@@ -1,0 +1,8 @@
+{
+  "title": "一次性连续分配二维数组（更少碎片、更少 free）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": " 0  1  2  3 \n 4  5  6  7 \n 8  9 10 11 \n一次 malloc + 一次 free，内存连续",
+  "code": "#include <stdio.h>\n#include <stdlib.h>\n\nint main(void) {\n    size_t rows = 3, cols = 4;\n    int *flat = malloc(rows * cols * sizeof(int));   /* 只分配一次 */\n    if (!flat) return 1;\n\n    int (*m)[4] = (int (*)[4])flat;                  /* 数组指针，直接二维下标 */\n\n    for (size_t i = 0; i < rows; i++)\n        for (size_t j = 0; j < cols; j++)\n            m[i][j] = (int)(i * cols + j);\n\n    for (size_t i = 0; i < rows; i++) {\n        for (size_t j = 0; j < cols; j++) printf(\"%2d \", m[i][j]);\n        printf(\"\\n\");\n    }\n\n    printf(\"一次 malloc + 一次 free，内存连续\\n\");\n    free(flat);\n    flat = NULL;\n    return 0;\n}"
+}

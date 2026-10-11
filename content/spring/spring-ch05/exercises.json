@@ -1,0 +1,279 @@
+{
+  "meta": {
+    "chapter": "spring-ch05",
+    "note": "8 题，基础题 6 + 算法题 2（其中 1 题来自 LeetCode，仅存元数据与链接，不搬运题面正文）"
+  },
+  "items": [
+    {
+      "id": "ex1",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "@RestController 与 @Controller 的区别",
+      "content_md": "下列关于 `@RestController` 与 `@Controller` 的说法，哪一项是正确的？",
+      "options": [
+        {
+          "key": "A",
+          "text": "@RestController 比 @Controller 多了路由匹配能力，因此能处理更多请求"
+        },
+        {
+          "key": "B",
+          "text": "@RestController = @Controller + @ResponseBody，方法返回值直接写响应体而非视图名"
+        },
+        {
+          "key": "C",
+          "text": "@Controller 不能返回 JSON，只能返回视图名"
+        },
+        {
+          "key": "D",
+          "text": "两者完全等价，只是名字不同"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "`@RestController` 是 `@Controller` 与 `@ResponseBody` 的组合注解，方法返回值交给 HttpMessageConverter 直接写响应体；`@Controller` 默认交给 ViewResolver 解析为视图名。路由能力来自 `@RequestMapping` 系列，两者相同。",
+      "tags": [
+        "rest",
+        "controller"
+      ],
+      "source": "self",
+      "source_ref": "《Spring 实战（第6版）》第7章"
+    },
+    {
+      "id": "ex2",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "@RequestParam / @PathVariable / @RequestBody 的适用场景",
+      "content_md": "现有请求 `POST /users/42?verbose=true`，请求体是 JSON `{\"name\":\"alice\"}`。请问：路径里的 `42`、`verbose`、以及请求体里的 `name` 应分别用哪个注解接收？",
+      "options": [
+        {
+          "key": "A",
+          "text": "@PathVariable、@RequestParam、@RequestBody"
+        },
+        {
+          "key": "B",
+          "text": "@RequestParam、@PathVariable、@RequestBody"
+        },
+        {
+          "key": "C",
+          "text": "@RequestBody、@RequestParam、@PathVariable"
+        },
+        {
+          "key": "D",
+          "text": "三者都用 @RequestParam"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "A"
+        ]
+      },
+      "explanation": "位置决定注解：路径模板变量 `/users/{id}` 中的 `id` 用 `@PathVariable`；查询串 `?verbose=true` 用 `@RequestParam`；请求体 JSON 对象用 `@RequestBody`。混淆会导致收不到值或 400。",
+      "tags": [
+        "binding"
+      ],
+      "source": "self",
+      "source_ref": "《Spring 实战（第6版）》第7章"
+    },
+    {
+      "id": "ex3",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "HTTP 状态码的语义选择",
+      "content_md": "一个「创建用户」接口成功执行后，应返回哪个状态码最合适？",
+      "options": [
+        {
+          "key": "A",
+          "text": "200 OK"
+        },
+        {
+          "key": "B",
+          "text": "201 Created（并带 Location 头）"
+        },
+        {
+          "key": "C",
+          "text": "204 No Content"
+        },
+        {
+          "key": "D",
+          "text": "202 Accepted"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "创建资源成功用 201 Created，并通常带 `Location` 指向新资源；200 语义过泛、204 表示无内容（适合删除）、202 表示已接受异步处理尚未完成。",
+      "tags": [
+        "status-code"
+      ],
+      "source": "self",
+      "source_ref": "RFC 9110 HTTP Semantics / 《REST API 设计实战》"
+    },
+    {
+      "id": "ex4",
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "修正「校验不生效」的代码",
+      "content_md": "下面代码希望校验 `UserForm` 的 `username` 非空，但运行时校验未生效（username 为空也能通过）。请改正。\n\n```java\n@PostMapping(\"/users\")\npublic ResponseEntity<?> create(UserForm form) {\n    // 业务直接使用 form.getUsername() ...\n    return ResponseEntity.ok().build();\n}\n```\n\n其中 `UserForm` 字段已标注 `@NotBlank private String username;`。",
+      "options": [
+        {
+          "key": "A",
+          "text": "在方法参数前加 @Valid：public ResponseEntity<?> create(@Valid UserForm form)"
+        },
+        {
+          "key": "B",
+          "text": "在 UserForm 类上加 @Component"
+        },
+        {
+          "key": "C",
+          "text": "把 @NotBlank 改成 @NotNull 即可生效"
+        },
+        {
+          "key": "D",
+          "text": "在方法上加 @Transactional"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "A"
+        ],
+        "reference_code": "@PostMapping(\"/users\")\npublic ResponseEntity<?> create(@Valid UserForm form) {\n    // 缺 @Valid 时校验引擎不会触发；加上后框架在绑定后执行校验，\n    // 失败抛 MethodArgumentNotValidException, 由 @ExceptionHandler 转成 400/422\n    return ResponseEntity.ok().build();\n}"
+      },
+      "explanation": "Bean Validation 必须显式触发：方法参数前的 `@Valid` 才会让校验引擎读取字段上的约束注解并执行。只写注解而不加 `@Valid` 是「静默不生效」的最常见原因。",
+      "tags": [
+        "validation"
+      ],
+      "source": "self",
+      "source_ref": "《Spring 实战（第6版）》第7章 Bean Validation"
+    },
+    {
+      "id": "ex5",
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "幂等性判定（PUT 重复执行）",
+      "content_md": "对资源 `x` 依次执行下列写入序列，每次都提交相同请求：\n1) PUT /res/x  body={v:\"A\"}  （首次）\n2) PUT /res/x  body={v:\"A\"}  （网络重试，重复）\n3) PUT /res/x  body={v:\"B\"}  （值变更）\n\n问：步骤 2 执行后，资源 x 的最终状态与步骤 1 后相比是否一致？并写出「PUT 是否幂等」的结论与最终值。",
+      "options": [],
+      "answer": {
+        "output": "步骤1后 x={v:A}\n步骤2后 x={v:A}（与步骤1终态一致）\nPUT 幂等(same value)? true\n最终值 x={v:B}"
+      },
+      "explanation": "PUT 对相同值重复执行不改变资源终态，因此幂等；只有值真正变更（步骤3）才改变终态。幂等看副作用终态，而非响应体是否相同。",
+      "tags": [
+        "idempotency"
+      ],
+      "source": "self",
+      "source_ref": "RFC 9110 HTTP Semantics（幂等定义）"
+    },
+    {
+      "id": "ex6",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "全局异常处理的映射",
+      "content_md": "使用 `@ControllerAdvice` + `@ExceptionHandler` 做统一异常处理。对于「业务上资源不存在」抛出的 `ResourceNotFoundException`，最合适的状态码是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "400 Bad Request"
+        },
+        {
+          "key": "B",
+          "text": "404 Not Found"
+        },
+        {
+          "key": "C",
+          "text": "500 Internal Server Error"
+        },
+        {
+          "key": "D",
+          "text": "200 OK + 错误体"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "异常类型应映射到语义正确的状态码：资源不存在→404；未认证→401；无权限→403；业务冲突→409；未捕获运行时异常兜底 500。不要用 200 包错误体。",
+      "tags": [
+        "exception"
+      ],
+      "source": "self",
+      "source_ref": "《Spring 实战（第6版）》第7章 @ControllerAdvice"
+    },
+    {
+      "id": "ex7",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "实现路径变量提取算法",
+      "content_md": "给定路由模板（如 `/users/{id}/posts/{pid}`）与真实请求路径（如 `/users/7/posts/99`），实现 `match` 方法提取路径变量；若段数不同或非模板段字面值不匹配则返回 null。要求时间复杂度 O(n)（n 为路径段数）。",
+      "options": [],
+      "answer": {
+        "reference_code": "import java.util.*;\n\npublic class Main {\n    // 返回 LinkedHashMap 保证插入顺序；不匹配返回 null\n    static Map<String,String> match(String template, String path){\n        String[] tp = template.split(\"/\");\n        String[] pp = path.split(\"/\");\n        if (tp.length != pp.length) return null;\n        Map<String,String> vars = new LinkedHashMap<>();\n        for (int i = 0; i < tp.length; i++){\n            if (tp[i].startsWith(\"{\") && tp[i].endsWith(\"}\")){\n                vars.put(tp[i].substring(1, tp[i].length()-1), pp[i]);\n            } else if (!tp[i].equals(pp[i])){\n                return null;\n            }\n        }\n        return vars;\n    }\n\n    public static void main(String[] args){\n        System.out.println(match(\"/users/{id}/posts/{pid}\", \"/users/7/posts/99\"));\n        System.out.println(match(\"/users/{id}\", \"/posts/7\"));\n    }\n}\n"
+      },
+      "explanation": "逐段比较：模板段若为 `{name}` 则捕获真实段；否则要求字面值相等；段数不等直接不匹配。一次线性扫描即完成，复杂度 O(n)。这正是 Web 框架路径匹配的最小内核。",
+      "tags": [
+        "routing",
+        "algorithm"
+      ],
+      "source": "self",
+      "source_ref": "Spring RequestMappingHandlerMapping 路径匹配原理"
+    },
+    {
+      "id": "ex8",
+      "type": "choice",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "LeetCode 146 LRU 缓存（幂等请求结果缓存）",
+      "content_md": "本题为 LeetCode 原题，本条目仅存元数据与链接，不搬运题面正文。它常用于考查「用 LRU 缓存幂等请求/限流计数结果」的工程能力：容量满时淘汰最久未使用项，get/put 均 O(1)。",
+      "options": [
+        {
+          "key": "A",
+          "text": "哈希表 + 双向链表的 O(1) 实现"
+        },
+        {
+          "key": "B",
+          "text": "仅用数组顺序查找"
+        },
+        {
+          "key": "C",
+          "text": "用优先队列按时间戳排序"
+        },
+        {
+          "key": "D",
+          "text": "递归实现"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "A"
+        ]
+      },
+      "explanation": "标准解法是哈希表定位 + 双向链表维护最近使用顺序，使 get/put 均为 O(1)；常用于缓存幂等请求的响应（key=请求指纹）。详见原题链接，题面不在此搬运。",
+      "tags": [
+        "cache",
+        "lru"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 146 LRU Cache",
+      "external_url": "https://leetcode.cn/problems/lru-cache/"
+    }
+  ]
+}

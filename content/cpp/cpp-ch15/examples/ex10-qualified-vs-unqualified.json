@@ -1,0 +1,8 @@
+{
+  "title": "限定查找 vs 未限定查找（using 引入候选）",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "unqualified=2 qualified=2\n",
+  "code": "#include <iostream>\n\nnamespace ns { int v = 2; }\n\nint main() {\n    std::cout << \"unqualified=\";\n    {\n        using namespace ns;        // 块内局部引入，作用域可控\n        std::cout << v;             // 未限定：ns::v 被 using 纳入候选 → 2\n    }\n    std::cout << \" qualified=\" << ns::v << '\\n';   // 限定查找：始终命中 ns::v\n}"
+}

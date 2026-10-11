@@ -1,0 +1,31 @@
+{
+  "meta": { "chapter": "mw-ch01", "category": "basic" },
+  "items": [
+    {
+      "title": "迷你 Redis 内核：从零实现核心编码与结构",
+      "requirement_md": "用任意语言（建议 Python）从零实现一个「迷你 Redis 内核」教学 Demo，覆盖本章核心数据结构与编码逻辑，并能打印真实结构状态：\n\n1. **SDS**：实现带 len/alloc 的动态字符串，支持追加与二进制安全长度获取；\n2. **dict 渐进式 rehash**：双表 + rehashidx，模拟逐步搬迁与「迁移中写 ht[1]」；\n3. **对象编码判定**：对 String/Hash/Set/ZSet 实现 listpack/intset/embstr/raw/hashtable/skiplist 的阈值切换逻辑；\n4. **intset 升级**：插入超范围整数时整体升级位宽（16→32→64）且不回退；\n5. **skiplist**：实现带随机层数的跳表，支持按 score 范围查询；\n6. **quicklist / listpack**：模拟大列表分段为多个 8KB 节点。\n\n要求每个模块都有可运行示例并打印结构化状态（参考本章 examples/）。",
+      "tasks": [
+        {
+          "title": "实现 SDS 与 String 编码判定",
+          "verification": { "type": "test", "desc": "对整数/短串/长串分别输出 int/embstr/raw，并验证追加后 alloc 翻倍（<1MB）策略" }
+        },
+        {
+          "title": "实现 dict 渐进式 rehash 模拟",
+          "verification": { "type": "test", "desc": "插入触发扩容后，分多次操作逐步将 ht[0] 搬空，断言期间查找两张表均命中" }
+        },
+        {
+          "title": "实现 Hash/Set/ZSet/listpack 阈值切换",
+          "verification": { "type": "test", "desc": "构造小数据与大 value/多元素两种情况，断言编码在 listpack/hashtable/skiplist/intset 间正确切换" }
+        },
+        {
+          "title": "实现 skiplist 与 intset 升级",
+          "verification": { "type": "manual", "desc": "打印跳表各节点层数与范围查询结果；插入 65535 到 int16 集合断言升级为 int32 且升序" }
+        },
+        {
+          "title": "编写示例脚本并实测输出",
+          "verification": { "type": "test", "desc": "所有示例用解释器实测，expected_output 与运行结果一致，无脏数据" }
+        }
+      ]
+    }
+  ]
+}

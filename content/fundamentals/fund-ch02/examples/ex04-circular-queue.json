@@ -1,0 +1,8 @@
+{
+  "title": "循环队列：牺牲一个空位区分空与满",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "容量 4，实际可存 3 个元素\n入队 1 -> OK\n入队 2 -> OK\n入队 3 -> OK\n入队 4 -> FULL\n出队 -> 1\n再入队 5 -> OK\n剩余依次出队: 2 3 5",
+  "code": "#include <stdio.h>\n\n#define CAP 4\nstatic int q[CAP];\nstatic int front = 0, rear = 0;\n\nstatic int is_empty(void) { return front == rear; }\nstatic int is_full(void)  { return (rear + 1) % CAP == front; }\n\nstatic int enqueue(int v) {\n    if (is_full()) return 0;\n    q[rear] = v;\n    rear = (rear + 1) % CAP;\n    return 1;\n}\nstatic int dequeue(int *v) {\n    if (is_empty()) return 0;\n    *v = q[front];\n    front = (front + 1) % CAP;\n    return 1;\n}\n\nint main(void) {\n    printf(\"容量 %d，实际可存 %d 个元素\\n\", CAP, CAP - 1);\n    for (int i = 1; i <= 4; i++)\n        printf(\"入队 %d -> %s\\n\", i, enqueue(i) ? \"OK\" : \"FULL\");\n    int v = -1;\n    printf(\"出队 -> %d\\n\", dequeue(&v) ? v : -1);\n    printf(\"再入队 5 -> %s\\n\", enqueue(5) ? \"OK\" : \"FULL\");\n    printf(\"剩余依次出队:\");\n    while (dequeue(&v)) printf(\" %d\", v);\n    printf(\"\\n\");\n    return 0;\n}"
+}

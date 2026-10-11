@@ -1,0 +1,8 @@
+{
+  "title": "单链表反转（迭代法）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "原链表: 1 -> 2 -> 3 -> 4 -> 5\n反转后: 5 -> 4 -> 3 -> 2 -> 1",
+  "code": "#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct Node { int data; struct Node *next; } Node;\n\nNode *push_front(Node *head, int v) {\n    Node *n = malloc(sizeof(Node));\n    n->data = v; n->next = head;\n    return n;\n}\n\n/* 迭代反转：先保存后继，再掉转方向 */\nNode *reverse(Node *head) {\n    Node *prev = NULL, *cur = head;\n    while (cur) {\n        Node *next = cur->next;\n        cur->next = prev;\n        prev = cur;\n        cur = next;\n    }\n    return prev;\n}\n\nvoid print_list(const char *tag, Node *head) {\n    printf(\"%s: \", tag);\n    for (Node *p = head; p; p = p->next)\n        printf(\"%d%s\", p->data, p->next ? \" -> \" : \"\");\n    printf(\"\\n\");\n}\n\nvoid free_list(Node *head) {\n    while (head) { Node *n = head->next; free(head); head = n; }\n}\n\nint main(void) {\n    Node *head = NULL;\n    for (int i = 5; i >= 1; i--) head = push_front(head, i);\n    print_list(\"原链表\", head);\n    head = reverse(head);\n    print_list(\"反转后\", head);\n    free_list(head);\n    return 0;\n}"
+}

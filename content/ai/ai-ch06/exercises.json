@@ -1,0 +1,264 @@
+{
+  "meta": {
+    "chapter": "ai-ch06",
+    "title": "RAG：向量检索与知识增强 —— 习题集",
+    "count": 8,
+    "note": "8 题，基础题 5 + 算法题 3（含 LeetCode 2），仅存元数据与链接不复述题面"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "RAG 的标准链路顺序",
+      "content_md": "关于 RAG 的标准链路，下列说法正确的是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "在线查询时先生成再检索，把生成结果拿去补库"
+        },
+        {
+          "key": "B",
+          "text": "离线索引链路为 解析→分块→向量化→入库；在线查询链路为 query向量化→召回→(重排)→拼接→生成"
+        },
+        {
+          "key": "C",
+          "text": "检索与生成是同一阶段，无法分开优化"
+        },
+        {
+          "key": "D",
+          "text": "embedding 不需要归一化，内积天然等于余弦"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "explain": "RAG 分离线索引与在线查询两条链路；检索质量决定上限、生成质量决定下限，二者解耦可独立优化。余弦=内积仅在向量归一化后成立。"
+      },
+      "explanation": "RAG 的标准两条链路：索引（解析→分块→向量化→入库）与查询（向量化→召回→重排→拼接→生成）。",
+      "tags": [
+        "rag",
+        "pipeline"
+      ],
+      "source": "self",
+      "source_ref": "Lewis et al. 2020《Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks》· RAG 综述"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "余弦 / 内积 / L2 的等价条件",
+      "content_md": "设向量已 L2 归一化（模长均为 1），下列说法正确的是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "余弦排名与内积排名一定相反"
+        },
+        {
+          "key": "B",
+          "text": "归一化后 余弦=内积，且 L2 升序排名与余弦降序排名等价"
+        },
+        {
+          "key": "C",
+          "text": "L2 距离越小表示越不相关"
+        },
+        {
+          "key": "D",
+          "text": "未归一化时三者排名也总是一致"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "explain": "归一化后 |q|=|d|=1，余弦=内积；L2²=2-2·余弦，故 L2 升序等价于余弦降序。未归一化时内积受模长污染、排名可能反转。"
+      },
+      "explanation": "归一化后三者排名等价；工程上先归一化再只算内积（可矩阵加速）。",
+      "tags": [
+        "similarity",
+        "embedding"
+      ],
+      "source": "self",
+      "source_ref": "《向量检索工程实践》· 相似度度量章节"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "RAG 与微调的分工",
+      "content_md": "团队要「让模型稳定引用公司内部最新文档」，最合适的方案是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "全量微调把文档背进权重"
+        },
+        {
+          "key": "B",
+          "text": "RAG（检索增强生成）注入私有/实时知识"
+        },
+        {
+          "key": "C",
+          "text": "改 temperature 即可"
+        },
+        {
+          "key": "D",
+          "text": "两者等价，随便选"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "explain": "口诀「注知识用 RAG、改行为用微调」。注入私有/实时知识是 RAG 的强项；微调擅长改语气/格式/决策偏好，不适合背文档。"
+      },
+      "explanation": "RAG 注知识、微调改行为；知识类需求优先 RAG。",
+      "tags": [
+        "rag",
+        "finetune"
+      ],
+      "source": "self",
+      "source_ref": "ai-ch04 关键认知「注知识用 RAG、改行为用微调」"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "修正 BM25 的 IDF 实现",
+      "content_md": "下面 BM25 的 IDF 实现疑似有符号错误，请指出并修正。\n```python\nimport math\ndef bm25_idf(N, n):\n    return math.log((n + 0.5) / (N - n + 0.5))\n```",
+      "answer": {
+        "reference_code": "import math\ndef bm25_idf(N, n):\n    # 正确 IDF: 含词文档数 n 越多, 权重越低\n    return math.log((N - n + 0.5) / (n + 0.5))\n\nprint(round(bm25_idf(5, 2), 4))\n",
+        "explain": "标准 RSJ-IDF 为 log((N-n+0.5)/(n+0.5))，n 是含词文档数，越稀有权重越高。原题把分子分母写反，会惩罚稀有词。"
+      },
+      "explanation": "IDF 分子分母应互换：log((N-n+0.5)/(n+0.5))。",
+      "tags": [
+        "bm25",
+        "sparse"
+      ],
+      "source": "self",
+      "source_ref": "Robertson & Zaragoza 2009《The Probabilistic Relevance Framework》"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "手算余弦相似度",
+      "content_md": "给定 q=[1,2,3,4]、d=[2,0,1,3]，求 cos(q,d)（保留 4 位小数）。",
+      "answer": {
+        "output": "0.8295",
+        "reference_code": "import numpy as np\nq = np.array([1.0, 2.0, 3.0, 4.0])\nd = np.array([2.0, 0.0, 1.0, 3.0])\nprint(round(float(np.dot(q, d) / (np.linalg.norm(q) * np.linalg.norm(d))), 4))\n",
+        "explain": "点积=1*2+2*0+3*1+4*3=17；|q|=√30≈5.4772，|d|=√14≈3.7417；cos=17/(5.4772*3.7417)≈0.8295。"
+      },
+      "explanation": "cos = 点积 / (|q|·|d|) = 17/20.4932 ≈ 0.8295。",
+      "tags": [
+        "similarity"
+      ],
+      "source": "self",
+      "source_ref": "《线性代数》· 向量夹角与余弦"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "实现 RRF 融合",
+      "content_md": "实现 Reciprocal Rank Fusion：输入多路排名列表（每项是文档 id 序列，名次从 1 起），输出按 1/(k+rank) 求和降序融合后的文档列表（k=60）。",
+      "answer": {
+        "reference_code": "def rrf_fuse(rank_lists, k=60):\n    scores = {}\n    for rl in rank_lists:\n        for rank, doc_id in enumerate(rl, start=1):\n            scores[doc_id] = scores.get(doc_id, 0.0) + 1.0 / (k + rank)\n    return [d for d, _ in sorted(scores.items(), key=lambda x: -x[1])]\n\n\nif __name__ == '__main__':\n    a = [3, 1, 4, 2, 5]\n    b = [2, 5, 1, 3, 4]\n    print(rrf_fuse([a, b]))\n",
+        "explain": "RRF 只吃名次不吃分数，对多路排名按 1/(k+rank) 累加后降序。对分数量纲不一致的多检索器天然鲁棒。"
+      },
+      "explanation": "逐路累加 1/(k+rank)，再按总分降序输出文档 id。",
+      "tags": [
+        "rrf",
+        "fusion"
+      ],
+      "source": "self",
+      "source_ref": "Cormack et al. 2009《Reciprocal Rank Fusion outperforms Condorcet》"
+    },
+    {
+      "type": "choice",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "Top-K 频繁元素（RAG 重排/top-k 基础能力）",
+      "content_md": "本题考察「从 n 个元素中取频率最高的 k 个」的能力，RAG 重排阶段同样依赖 top-k 选择。题面与约束请见链接，简述你的时间复杂度最优思路。",
+      "options": [
+        {
+          "key": "A",
+          "text": "堆（最小堆维护 size=k）或快速选择，O(n log k)"
+        },
+        {
+          "key": "B",
+          "text": "先全排序再取前 k，O(n log n)"
+        },
+        {
+          "key": "C",
+          "text": "对每个候选都扫描一次，O(n·k)"
+        },
+        {
+          "key": "D",
+          "text": "哈希后直接返回，O(1)"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "A"
+        ],
+        "explain": "计数后用最小堆维护 k 个最高频元素，复杂度 O(n log k)；或用快速选择达期望 O(n)。全排序不够优。"
+      },
+      "explanation": "计数 + 最小堆（或快速选择）是 top-k 频繁元素的标准最优解。",
+      "tags": [
+        "topk",
+        "heap"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 347（top-k-frequent-elements）",
+      "external_url": "https://leetcode.cn/problems/top-k-frequent-elements/"
+    },
+    {
+      "type": "choice",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "K 个最近点（ANN 近邻检索基础能力）",
+      "content_md": "本题考察「在平面上找离原点最近的 k 个点」，与向量检索里的最近邻思想一致。题面与约束请见链接，最优思路是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "最小堆维护最近的 k 个点，O(n log k)"
+        },
+        {
+          "key": "B",
+          "text": "对所有点按距离全排序，O(n log n)"
+        },
+        {
+          "key": "C",
+          "text": "暴力两两比较，O(n^2)"
+        },
+        {
+          "key": "D",
+          "text": "随机选 k 个即可"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "A"
+        ],
+        "explain": "计算欧氏距离后用最小堆保留最近的 k 个，复杂度 O(n log k)；快速选择可降到期望 O(n)。全排序非最优。"
+      },
+      "explanation": "计算距离 + 最小堆（或快速选择）是 K 近邻的标准最优解，也是 ANN 索引加速的思想来源。",
+      "tags": [
+        "knn",
+        "heap"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 973（k-closest-points-to-origin）",
+      "external_url": "https://leetcode.cn/problems/k-closest-points-to-origin/"
+    }
+  ]
+}

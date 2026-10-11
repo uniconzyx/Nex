@@ -1,0 +1,8 @@
+{
+  "title": "缓冲与 flush：磁盘大小何时变化",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "write 5 字节后，磁盘大小  = 0\nflush 后，磁盘大小        = 5\n再 write 5 字节，磁盘大小 = 5\nclose 后，磁盘大小        = 10\n\nio.DEFAULT_BUFFER_SIZE = 8192\n\n要点: 缓冲未满时数据停在进程内; flush 把它交给 OS; close 一定会 flush",
+  "code": "import io\nfrom pathlib import Path\n\np = Path(\"buf.txt\")\nf = open(p, \"w\", encoding=\"utf-8\")\n\nf.write(\"hello\")\nprint(\"write 5 字节后，磁盘大小  =\", p.stat().st_size)\n\nf.flush()\nprint(\"flush 后，磁盘大小        =\", p.stat().st_size)\n\nf.write(\"world\")\nprint(\"再 write 5 字节，磁盘大小 =\", p.stat().st_size)\n\nf.close()\nprint(\"close 后，磁盘大小        =\", p.stat().st_size)\nprint()\n\nprint(\"io.DEFAULT_BUFFER_SIZE =\", io.DEFAULT_BUFFER_SIZE)\nprint()\nprint(\"要点: 缓冲未满时数据停在进程内; flush 把它交给 OS; close 一定会 flush\")"
+}

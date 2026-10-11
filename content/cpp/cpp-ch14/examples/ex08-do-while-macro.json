@@ -1,0 +1,8 @@
+{
+  "title": "多语句宏用 do-while(0) 包裹",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "a\nb\nend",
+  "code": "#include <iostream>\n#define GOOD_MACRO() do { std::cout << \"a\\n\"; std::cout << \"b\\n\"; } while(0)\nint main() {\n    if (false)\n        GOOD_MACRO();\n    else\n        GOOD_MACRO();\n    std::cout << \"end\\n\";\n}"
+}

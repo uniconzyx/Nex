@@ -1,0 +1,77 @@
+{
+  "meta": {
+    "chapter": "bd-ch04",
+    "category": "basic"
+  },
+  "items": [
+    {
+      "title": "从零用 Python 模拟一个迷你 Spark RDD 引擎（惰性求值 / 依赖 / Stage / 缓存 / 倾斜）",
+      "requirement_md": "不使用任何 Spark 组件，用纯 Python 实现一个**单进程、内存态**的迷你 Spark RDD 引擎，覆盖本章核心机制，全部打印真实模拟数字：\n\n1. **RDD 与血缘 DAG**：实现 `parallelize/map/filter/reduceByKey/collect`，每个 RDD 记录父依赖与算子，能打印血缘 DAG（缩进=依赖层次）。\n2. **惰性求值证明**：给每个 RDD 挂 `compute_calls` 计数器；在 `collect()` 前后打印计数，用**数字**证明 transformation 期间不触发计算、只有 action 触发。\n3. **窄/宽依赖判定**：实现 `is_wide(op)` 区分窄依赖与宽依赖（是否 Shuffle）。\n4. **Stage 划分与 Task 数**：以宽依赖为界切分 Stage，验证总 Task 数 = 各 Stage 末态分区数之和。\n5. **mapPartitions vs map**：统计函数调用次数，证明 mapPartitions 调用次数 = 分区数、map = 记录数。\n6. **reduceByKey vs groupByKey**：用**确定性哈希**（勿用 Python 内置 `hash`）分配 key 到 Reducer，对比两者的 shuffle 记录数（map 端预聚合 vs 全量搬运）。\n7. **缓存与 checkpoint**：对比 persist 前后重复 action 的 `compute_calls`；演示 checkpoint 截断 lineage 后下游 lineage 长度下降。\n8. **数据倾斜与宽依赖重算范围**：构造热 key 占比极高的数据，打印各 Reducer 负载（记录数）；对比窄依赖（只重算 1 个父分区）与宽依赖（重算全部父分区）的失败重算范围。\n9. **并行度影响**：扫描不同分区数，打印 Stage 内 Task 数与总 Task 数随并行度的变化。\n\n要求代码可运行、输出可追溯，并附一段说明「本模拟与真实 Spark 的差异与简化假设」（如：真实 Spark 跑在分布式 executor、Shuffle 走网络与磁盘、DAG 由 DAGScheduler 切分等）。",
+      "tasks": [
+        {
+          "title": "实现 RDD 与血缘 DAG 打印",
+          "verification": {
+            "type": "test",
+            "desc": "能构造多层 RDD 并打印缩进血缘，节点数正确"
+          }
+        },
+        {
+          "title": "实现惰性求值计数器证明",
+          "verification": {
+            "type": "test",
+            "desc": "collect 之前 compute_calls=0，之后>0，数字证明惰性"
+          }
+        },
+        {
+          "title": "实现窄/宽依赖判定",
+          "verification": {
+            "type": "test",
+            "desc": "map/filter 判窄依赖，reduceByKey/groupByKey/join 判宽依赖"
+          }
+        },
+        {
+          "title": "实现 Stage 划分与 Task 数计算",
+          "verification": {
+            "type": "test",
+            "desc": "以宽依赖为界切 Stage；总 Task 数=各 Stage 末态分区数之和"
+          }
+        },
+        {
+          "title": "对比 mapPartitions 与 map 调用次数",
+          "verification": {
+            "type": "test",
+            "desc": "map 调用次数=记录数，mapPartitions=分区数"
+          }
+        },
+        {
+          "title": "对比 reduceByKey 与 groupByKey 的 Shuffle 量",
+          "verification": {
+            "type": "test",
+            "desc": "reduceByKey shuffle 记录数≈不同 key 数，小于 groupByKey 的总记录数"
+          }
+        },
+        {
+          "title": "实现缓存与 checkpoint",
+          "verification": {
+            "type": "test",
+            "desc": "persist 后重复 action 重算次数下降；checkpoint 截断后 lineage 长度下降"
+          }
+        },
+        {
+          "title": "构造数据倾斜并量化重算范围",
+          "verification": {
+            "type": "test",
+            "desc": "热 key 导致部分 Reducer 负载极高；宽依赖失败重算范围大于窄依赖"
+          }
+        },
+        {
+          "title": "扫描并行度对 Task 数的影响",
+          "verification": {
+            "type": "test",
+            "desc": "分区数变化对应总 Task 数线性变化"
+          }
+        }
+      ]
+    }
+  ]
+}

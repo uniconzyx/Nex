@@ -1,0 +1,26 @@
+{
+  "meta": { "chapter": "cpp-ch01" },
+  "items": [
+    {
+      "question": "指针和引用有什么区别？",
+      "answer_md": "1) 引用必须初始化且不可改绑，指针可以；2) 引用没有空值语义（设计上），指针有 nullptr；3) 引用是别名，sizeof 得到被引用对象大小；4) 使用场景：参数传递优先 const 引用，需要可空/可改绑/地址运算时用指针。",
+      "follow_ups": ["const 引用绑定临时对象的生命周期规则？", "什么时候必须用指针而不能用引用？"],
+      "difficulty": "easy",
+      "company_tags": ["通用"]
+    },
+    {
+      "question": "为什么不建议在头文件里写 using namespace std？",
+      "answer_md": "头文件会被多个翻译单元包含，using 指令会污染所有包含者的全局命名空间，可能引发名称冲突且难以定位。允许在 .cpp 文件内局部使用，或使用 using std::cout 等精确声明。",
+      "follow_ups": ["ADL 是什么？它与命名空间有什么关系？"],
+      "difficulty": "easy",
+      "company_tags": ["通用"]
+    },
+    {
+      "question": "int a = 5; double d = a / 2; 结果是多少？为什么？",
+      "answer_md": "2.0。a / 2 是整数除法，先得到 int 结果 2，再隐式转换为 double 2.0。要得到 2.5 需让任一操作数为浮点：a / 2.0 或 static_cast<double>(a) / 2。",
+      "follow_ups": ["整型提升规则是什么？", "窄化转换在列表初始化中会怎样？"],
+      "difficulty": "easy",
+      "company_tags": ["通用"]
+    }
+  ]
+}

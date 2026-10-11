@@ -1,0 +1,53 @@
+{
+  "meta": {
+    "chapter": "tool-ch04",
+    "category": "system",
+    "title": "Git 协作：分支策略与冲突处理 —— 综合项目",
+    "count": 1,
+    "note": "一个纯标准库的 Git 协作工具箱：合并基线、三方合并、策略决策、提交校验、忽略匹配与 bisect，全部离线可跑"
+  },
+  "items": [
+    {
+      "title": "实现一个「Git 协作安全工具箱」git-collab-kit",
+      "requirement_md": "用**纯 Python 标准库**（`hashlib` / `difflib` / `re` / `zlib` / `collections`）实现 `git_collab_kit.py`，复刻本章 core mechanism，全部**离线自包含、不调用 git 命令、不联网**。要求实现下列子命令并自带可断言的验证用例：\n\n**功能要求**\n\n1. **`ancestors` / `merge-base`（合并基线）**\n   - 给定 `parents` 映射（节点 → 父节点列表），用 DFS 收集祖先集合 + BFS 分层扩展求最近公共祖先；\n   - 另实现 `merge_base_all` 返回**极大**共同祖先集合，并用 criss-cross 历史验证会返回两个并列基点。\n\n2. **`merge3`（三方合并 / 冲突判定）**\n   - 用 `difflib.SequenceMatcher` 做行级 diff，把两侧 hunk 按 base 区间聚类；\n   - 非重叠区域自动合并，重叠且结果不一致时输出 `<<<<<<<` / `=======` / `>>>>>>>`；\n   - 必须覆盖**正反三组**：不同区域自动 / 同行异值冲突 / 同行同值不冲突。\n\n3. **`push-check`（push 安全模拟）**\n   - 模型化远端引用与本地跟踪引用，分别模拟 `--force` 与 `--force-with-lease`；\n   - 输出 `force` 丢失的他人提交列表，以及 lease 不一致时的拒绝（stale info）。\n\n4. **`reflog-rescue`（误操作救援）**\n   - 记录每次 ref 移动的 from/to/action，`reset --hard HEAD~N` 之后仍能由 reflog 找回 tip；\n   - 额外支持「误删分支后的找回」。\n\n5. **`decide`（分支策略决策器）**\n   - 规则表驱动：输入团队规模 / 发布频率 / 是否多版本维护 / CI 覆盖，输出 Git Flow / GitHub Flow / Trunk Based 与理由。\n\n6. **`lint-commit`（提交信息校验）**\n   - Conventional Commits 正则校验 + `fix→PATCH / feat→MINOR / breaking→MAJOR` 版本推导，带非法用例对照。\n\n7. **`ignore-check`（.gitignore 匹配器）**\n   - 实现 glob 语义（行首锚定、行尾目录、`*`/`?`/`**`、否定 `!`、最后命中生效），\n   并演示「父目录被排除后 `!` 无法救回子文件」的经典坑。\n\n8. **`bisect`（二分定位）**\n   - 在单调的 good→bad 序列上二分查找首个坏提交，输出测试次数、skip 处理与相较于线性扫描的节省倍率。\n\n**提交物**：`git_collab_kit.py`、`tests_collab.py`（用 `assert` 或 `unittest` 覆盖上述 8 项，至少 16 条断言）、`README.md`（每项机制对应本章哪一节、真实 git 命令对照表）。\n\n**进阶（可选）**：给 `merge3` 加 `diff3` 风格的 base 段输出；把 `decide` 扩展成读取 `teams.yaml` 的批量推荐；实现 `cherry-pick` 补丁搬运（含 `-x` 来源标记与 SHA 变化验证）。",
+      "tasks": [
+        {
+          "title": "任务 1：merge-base 与极大共同祖先集合",
+          "verification": {
+            "type": "test",
+            "desc": "单基点 DAG 返回正确祖先 A；criss-cross 的 merge_base_all 返回两个并列基点；用 BFS 保证「最近」性并有断言证明"
+          }
+        },
+        {
+          "title": "任务 2：三方合并与冲突判定（正反三组）",
+          "verification": {
+            "type": "test",
+            "desc": "非重叠区域自动合并成功；同行改成不同值产生冲突标记；同行改成相同值不判冲突；三组断言全绿"
+          }
+        },
+        {
+          "title": "任务 3：push 安全模拟（force vs lease）",
+          "verification": {
+            "type": "test",
+            "desc": "force 场景列出丢失的他人提交；lease 场景在跟踪引用落后时被拒绝且远端引用不变；先 fetch 后 lease 成功且不丢提交"
+          }
+        },
+        {
+          "title": "任务 4：reflog 救援与误删分支找回",
+          "verification": {
+            "type": "test",
+            "desc": "reset --hard 后原 tip 不再被分支引用但仍在 reflog 中；按 reflog 恢复后提交数回到原值；误删分支可由 reflog 找回"
+          }
+        },
+        {
+          "title": "任务 5：策略决策、提交校验、忽略匹配与 bisect",
+          "verification": {
+            "type": "test",
+            "desc": "四组输入分别命中不同策略并有理由输出；提交信息正/反例与 SemVer 推导正确；gitignore 命中规则含父目录坑演示；bisect 定位到首个坏提交且步数 ≤ ceil(log2 N)+skip 次数"
+          }
+        }
+      ],
+      "tags": ["git", "merge-base", "三方合并", "force-with-lease", "reflog", "Conventional Commits", "gitignore", "bisect", "python"]
+    }
+  ]
+}

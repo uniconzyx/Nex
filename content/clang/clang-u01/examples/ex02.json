@@ -1,0 +1,8 @@
+{
+  "title": "同一地址，不同步长：a 与 &a",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "(a+1) - a       = 1  (元素)\n(char*)(&a+1) - (char*)&a = 20  (字节)\n整数组字节数 sizeof(a) = 20",
+  "code": "#include <stdio.h>\n\nint main(void) {\n    int a[5] = {0};\n    printf(\"(a+1) - a       = %td  (元素)\\n\", (a + 1) - a);\n    printf(\"(char*)(&a+1) - (char*)&a = %td  (字节)\\n\",\n           (char *)(&a + 1) - (char *)&a);\n    printf(\"整数组字节数 sizeof(a) = %zu\\n\", sizeof(a));\n    return 0;\n}"
+}

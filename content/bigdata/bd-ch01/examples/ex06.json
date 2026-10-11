@@ -1,0 +1,8 @@
+{
+  "title": "机架感知：节点到机架的拓扑映射",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "dn1 -> rack1\ndn2 -> rack2\ndn4 -> rack3\ndn9 -> default-rack\ndistinct_racks: 3\ndefault_rack_used_for_unknown: True",
+  "code": "\nNODES = {\"dn1\": \"rack1\", \"dn2\": \"rack2\", \"dn3\": \"rack2\", \"dn4\": \"rack3\"}\ndef rack_of(dn):\n    return NODES.get(dn, \"default-rack\")\nfor dn in [\"dn1\", \"dn2\", \"dn4\", \"dn9\"]:\n    print(dn, \"->\", rack_of(dn))\nprint(\"distinct_racks:\", len(set(NODES.values())))\nprint(\"default_rack_used_for_unknown:\", rack_of(\"dn9\") == \"default-rack\")\n"
+}

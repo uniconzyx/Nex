@@ -1,0 +1,8 @@
+{
+  "title": "游标分页与无限滚动合并：乱序到达时去重、保持顺序",
+  "code_lang": "javascript",
+  "code_std": "node18",
+  "stdin": "",
+  "expected_output": "in_order_ids=1,2,3,4,5\nout_of_order_ids=1,2,3,4,5\norder_stable=true\ndup_merged_ids=1,2,3,5\nmerged_count=4\nraw_count=5\nduplicates_removed=1\nno_duplicate_ids=true\n",
+  "code": "// 无限滚动：多页乱序到达，按页序合并并去重\nfunction mergePages(pages) {\n  const byIndex = [...pages].sort((a, b) => a.pageIndex - b.pageIndex);\n  const seen = new Set();\n  const out = [];\n  for (const p of byIndex) {\n    for (const it of p.items) {\n      if (seen.has(it.id)) continue;\n      seen.add(it.id);\n      out.push(it);\n    }\n  }\n  return out;\n}\nconst ids = arr => arr.map(x => x.id).join(',');\n\nconst p1 = { pageIndex: 0, items: [{ id: 1 }, { id: 2 }] };\nconst p2 = { pageIndex: 1, items: [{ id: 3 }, { id: 4 }] };\nconst p3 = { pageIndex: 2, items: [{ id: 5 }] };\n\nconst inOrder = mergePages([p1, p2, p3]);\nconst outOfOrder = mergePages([p3, p1, p2]);\nconst withDup = mergePages([p1, { pageIndex: 1, items: [{ id: 2 }, { id: 3 }] }, p3]);\n\nconsole.log('in_order_ids=' + ids(inOrder));\nconsole.log('out_of_order_ids=' + ids(outOfOrder));\nconsole.log('order_stable=' + (ids(inOrder) === ids(outOfOrder)));\nconsole.log('dup_merged_ids=' + ids(withDup));\nconsole.log('merged_count=' + withDup.length);\nconsole.log('raw_count=' + (2 + 2 + 1));\nconsole.log('duplicates_removed=' + (5 - withDup.length));\nconsole.log('no_duplicate_ids=' + (new Set(withDup.map(x => x.id)).size === withDup.length));\n"
+}

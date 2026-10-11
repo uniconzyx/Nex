@@ -1,0 +1,8 @@
+{
+  "title": "泛型擦除产生的桥接方法（bridge method）",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "IntNode method: setData paramTypes=[class java.lang.Integer] bridge=false\nIntNode method: setData paramTypes=[class java.lang.Object] bridge=true\nsetData(42) ok, data=42",
+  "code": "import java.lang.reflect.Method;\nimport java.util.Arrays;\n\npublic class Ex09BridgeMethod {\n    static class Node<T> {\n        T data;\n        void setData(T data) { this.data = data; }\n    }\n    static class IntNode extends Node<Integer> {\n        @Override void setData(Integer data) { super.setData(data); }\n    }\n    public static void main(String[] args) {\n        for (Method m : IntNode.class.getDeclaredMethods()) {\n            System.out.println(\"IntNode method: \" + m.getName()\n                + \" paramTypes=\" + Arrays.toString(m.getParameterTypes())\n                + \" bridge=\" + m.isBridge());\n        }\n        Node<Integer> n = new IntNode();\n        n.setData(42);\n        System.out.println(\"setData(42) ok, data=\" + n.data);\n    }\n}"
+}

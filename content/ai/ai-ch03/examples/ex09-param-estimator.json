@@ -1,0 +1,8 @@
+{
+  "title": "参数量估算器：embedding+attention+FFN 各占比",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "词嵌入参数量: 131072000\n注意力(每层4投影) 总: 2147483648\nFFN(每层) 总: 4294967296\nLayerNorm(每层) 总: 524288\n总参数量: 6574047232\n折合 B: 6.574\nFFN 占比约: 65.3 %\n",
+  "code": "d_model = 4096\nn_layers = 32\nvocab = 32000\nemb = vocab * d_model\nattn_per_layer = 4 * d_model * d_model\nffn_hidden = 4 * d_model\nffn_per_layer = 2 * (d_model * ffn_hidden)\nln_per_layer = 2 * 2 * d_model\ntotal_attn = n_layers * attn_per_layer\ntotal_ffn = n_layers * ffn_per_layer\ntotal_ln = n_layers * ln_per_layer\ntotal = emb + total_attn + total_ffn + total_ln\nprint(\"词嵌入参数量:\", emb)\nprint(\"注意力(每层4投影) 总:\", total_attn)\nprint(\"FFN(每层) 总:\", total_ffn)\nprint(\"LayerNorm(每层) 总:\", total_ln)\nprint(\"总参数量:\", total)\nprint(\"折合 B:\", round(total / 1e9, 3))\nprint(\"FFN 占比约:\", round(total_ffn / total * 100, 1), \"%\")\n"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "文本 vs 二进制模式的换行转换（Windows CRLF 陷阱）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "binary read: 6 bytes -> 41 42 0D 0A 43 44 \ntext read:   5 bytes -> 41 42 0A 43 44 \n",
+  "code": "#include <stdio.h>\nint main(void) {\n    FILE *w = fopen(\"nl.txt\", \"w\");   /* 文本模式写：\\n 会被转成 \\r\\n 落盘 */\n    fputs(\"AB\\nCD\", w);\n    fclose(w);\n    FILE *rb = fopen(\"nl.txt\", \"rb\"); /* 二进制读：原样 6 字节 */\n    unsigned char b[16]; size_t nb = fread(b, 1, 16, rb); fclose(rb);\n    FILE *rt = fopen(\"nl.txt\", \"r\");  /* 文本读：\\r\\n 被还原成 \\n，得 5 字节 */\n    unsigned char t[16]; size_t nt = fread(t, 1, 16, rt); fclose(rt);\n    printf(\"binary read: %zu bytes -> \", nb);\n    for (size_t i = 0; i < nb; i++) printf(\"%02X \", b[i]);\n    printf(\"\\n\");\n    printf(\"text read:   %zu bytes -> \", nt);\n    for (size_t i = 0; i < nt; i++) printf(\"%02X \", t[i]);\n    printf(\"\\n\");\n    return 0;\n}"
+}

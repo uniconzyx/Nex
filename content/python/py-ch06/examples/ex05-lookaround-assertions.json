@@ -1,0 +1,8 @@
+{
+  "title": "先行/后行断言的用法与定宽限制",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== 先行断言（lookahead）===\n数字后紧跟「元」: ['100', '20', '5']\n数字后不跟「元」: ['10', '2']\n\n=== 后行断言（lookbehind）===\n「价格 」之后的数字: ['100']\n\n=== 断言不消耗字符 ===\n普通匹配 密码= 会吃掉前缀: ['abc']\n用后行断言只取值     : ['abc']\n\n=== 后行断言必须定宽 ===\n(?<=a+)b 编译失败: look-behind requires fixed-width pattern\n定宽写法 (?<=aa)b : ['b']\n变长需求改用分组捕获:  ['b']",
+  "code": "import re\n\nprint(\"=== 先行断言（lookahead）===\")\ns = \"价格 100 元，折扣 20 元，运费 5 元\"\nprint(\"数字后紧跟「元」:\", re.findall(r\"\\d+(?= 元)\", s))\nprint(\"数字后不跟「元」:\", re.findall(r\"\\d+(?! 元)\", s))\n\nprint()\nprint(\"=== 后行断言（lookbehind）===\")\nprint(\"「价格 」之后的数字:\", re.findall(r\"(?<=价格 )\\d+\", s))\n\nprint()\nprint(\"=== 断言不消耗字符 ===\")\nprint(\"普通匹配 密码= 会吃掉前缀:\", re.findall(r\"密码=(\\w+)\", \"密码=abc\"))\nprint(\"用后行断言只取值     :\", re.findall(r\"(?<=密码=)\\w+\", \"密码=abc\"))\n\nprint()\nprint(\"=== 后行断言必须定宽 ===\")\ntry:\n    re.compile(r\"(?<=a+)b\")\n    print(\"(?<=a+)b 编译成功（不该发生）\")\nexcept re.error as e:\n    print(\"(?<=a+)b 编译失败:\", e)\nprint(\"定宽写法 (?<=aa)b :\", re.findall(r\"(?<=aa)b\", \"aab\"))\nprint(\"变长需求改用分组捕获: \", re.findall(r\"a+(b)\", \"aaab\"))"
+}

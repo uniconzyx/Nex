@@ -1,0 +1,9 @@
+{
+  "title": "AOF 追加：appendfsync everysec 耐久性",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "appendfsync everysec:\n  已落盘 AOF: [('SET', 'a', 1), ('SET', 'b', 2)]\n  未 fsync 丢失的缓冲: [('SET', 'c', 3)]\n  fsync 次数: 1 (远少于 always)\n  耐久性: 崩溃最多丢失约 1 秒数据; 平衡性能与耐久(Redis 默认)",
+  "code": "def aof_everysec(writes, crash_at):\n    aof = []\n    buf = []\n    fsyncs = 0\n    for i, w in enumerate(writes):\n        buf.append(w)\n        if (i + 1) % 2 == 0:  # 假设每 2 条约 1 秒, 定时 fsync 一次\n            aof.extend(buf)\n            fsyncs += 1\n            buf = []\n        if i + 1 == crash_at:\n            break\n    return aof, buf, fsyncs\n\nwrites = [(\"SET\", \"a\", 1), (\"SET\", \"b\", 2), (\"SET\", \"c\", 3), (\"SET\", \"d\", 4)]\naof, buf, f = aof_everysec(writes, crash_at=3)\nprint(\"appendfsync everysec:\")\nprint(\"  已落盘 AOF:\", aof)\nprint(\"  未 fsync 丢失的缓冲:\", buf)\nprint(\"  fsync 次数:\", f, \"(远少于 always)\")\nprint(\"  耐久性: 崩溃最多丢失约 1 秒数据; 平衡性能与耐久(Redis 默认)\")\n",
+  "_verified": true
+}

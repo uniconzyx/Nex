@@ -1,0 +1,8 @@
+{
+  "title": "泛型擦除验证：List<String> 与 List<Integer> 运行时同类型",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "strings.getClass() == ints.getClass(): true\nstrings type name: java.util.ArrayList\nraw contains non-String: 123",
+  "code": "import java.util.*;\n\npublic class Ex06GenericErasure {\n    public static void main(String[] args) {\n        List<String> strings = new ArrayList<>();\n        List<Integer> ints = new ArrayList<>();\n        System.out.println(\"strings.getClass() == ints.getClass(): \" + (strings.getClass() == ints.getClass()));\n        System.out.println(\"strings type name: \" + strings.getClass().getName());\n        List raw = strings;\n        raw.add(123);\n        System.out.println(\"raw contains non-String: \" + raw.get(0));\n    }\n}"
+}

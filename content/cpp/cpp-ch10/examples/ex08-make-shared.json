@@ -1,0 +1,8 @@
+{
+  "title": "make_shared 一次分配 vs shared_ptr(new) 两次分配",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "ctor\nmake_shared allocs=1\nctor\nshared_ptr(new) allocs=2",
+  "code": "#include <iostream>\n#include <memory>\n#include <cstdlib>\nstatic int allocs = 0;\nvoid* operator new(std::size_t n) { ++allocs; return std::malloc(n); }\nvoid operator delete(void* p) noexcept { std::free(p); }\nstruct S { S(){ std::cout << \"ctor\\n\"; } };\nint main() {\n    allocs = 0;\n    auto p = std::make_shared<S>();                 // 对象+控制块一次分配\n    std::cout << \"make_shared allocs=\" << allocs << '\\n';\n    allocs = 0;\n    auto q = std::shared_ptr<S>(new S());          // new 对象 + 控制块 两次分配\n    std::cout << \"shared_ptr(new) allocs=\" << allocs << '\\n';\n}"
+}

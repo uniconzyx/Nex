@@ -1,0 +1,9 @@
+{
+  "title": "过期键删除：定期采样删除(active/expire)",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "定期删除(active/expire):\n  采样 10 个 key, 删除过期: 5 个\n  删除前 key 数: 20  删除后: 15\n  特点: 每秒多次, 每次抽少量样本, 平衡 CPU 与内存回收(非全量扫描)",
+  "code": "import random\nclass DB:\n    def __init__(self):\n        self.kv = {f\"k{i}\": i for i in range(20)}\n        self.expire = {f\"k{i}\": (i < 8) for i in range(20)}  # 前 8 个已过期\n        self.active_deleted = 0\n    def active_expire(self, sample=10):\n        keys = random.sample(list(self.kv.keys()), sample)\n        for k in keys:\n            if self.expire.get(k):\n                del self.kv[k]; del self.expire[k]; self.active_deleted += 1\n        return len(keys)\n\nrandom.seed(0)\ndb = DB()\nprint(\"定期删除(active/expire):\")\nbefore = len(db.kv)\ndb.active_expire(10)\nprint(\"  采样 10 个 key, 删除过期:\", db.active_deleted, \"个\")\nprint(\"  删除前 key 数:\", before, \" 删除后:\", len(db.kv))\nprint(\"  特点: 每秒多次, 每次抽少量样本, 平衡 CPU 与内存回收(非全量扫描)\")\n",
+  "_verified": true
+}

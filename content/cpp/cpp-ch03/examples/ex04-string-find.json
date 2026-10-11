@@ -1,0 +1,8 @@
+{
+  "title": "std::string 查找",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "6",
+  "code": "#include <iostream>\n#include <string>\n\nint main() {\n    std::string s = \"hello world\";\n    std::cout << s.find(\"world\");\n}"
+}

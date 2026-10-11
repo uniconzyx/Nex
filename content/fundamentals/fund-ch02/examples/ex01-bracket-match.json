@@ -1,0 +1,8 @@
+{
+  "title": "括号匹配：栈的嵌套校验",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "([]{})   -> balanced\n([)]     -> NOT balanced\n(((      -> NOT balanced\n{[]}     -> balanced\n()(())   -> balanced",
+  "code": "#include <stdio.h>\n\nint main(void) {\n    const char *tests[] = {\"([]{})\", \"([)]\", \"(((\", \"{[]}\", \"()(())\"};\n    for (int t = 0; t < 5; t++) {\n        const char *s = tests[t];\n        char st[64];\n        int top = 0, ok = 1;\n        for (int i = 0; s[i]; i++) {\n            char c = s[i];\n            if (c == '(' || c == '[' || c == '{') { st[top++] = c; }\n            else {\n                if (top == 0) { ok = 0; break; }\n                char o = st[--top];\n                if ((c == ')' && o != '(') || (c == ']' && o != '[') || (c == '}' && o != '{')) { ok = 0; break; }\n            }\n        }\n        if (top != 0) ok = 0;\n        printf(\"%-8s -> %s\\n\", s, ok ? \"balanced\" : \"NOT balanced\");\n    }\n    return 0;\n}"
+}

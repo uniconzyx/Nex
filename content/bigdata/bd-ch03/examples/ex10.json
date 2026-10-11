@@ -1,0 +1,8 @@
+{
+  "title": "LATERAL VIEW explode 行列转换",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "原始表(user_id, tags[]):\n  u1\t['vip', 'new']\n  u2\t['old']\n  u3\t['vip', 'active', 'new']\n\nLATERAL VIEW explode(tags) 后 -> 6 行(一行一标签):\n  u1\tvip\n  u1\tnew\n  u2\told\n  u3\tvip\n  u3\tactive\n  u3\tnew\n\n用途: 统计各标签人数、把 JSON/数组字段摊平成可聚合的关系表; 反向用 collect_list 做行转列\n",
+  "code": "# 模拟 Hive 行列转换: LATERAL VIEW explode(数组列) 把一行展开成多行\nusers = [\n    (\"u1\", [\"vip\", \"new\"]),\n    (\"u2\", [\"old\"]),\n    (\"u3\", [\"vip\", \"active\", \"new\"]),\n]\n\ndef explode(rows):\n    out = []\n    for uid, tags in rows:\n        for t in tags:\n            out.append((uid, t))\n    return out\n\nprint(\"原始表(user_id, tags[]):\")\nfor uid, tags in users:\n    print(f\"  {uid}\\t{tags}\")\nexpanded = explode(users)\nprint(f\"\\nLATERAL VIEW explode(tags) 后 -> {len(expanded)} 行(一行一标签):\")\nfor uid, t in expanded:\n    print(f\"  {uid}\\t{t}\")\nprint(\"\\n用途: 统计各标签人数、把 JSON/数组字段摊平成可聚合的关系表; 反向用 collect_list 做行转列\")\n"
+}

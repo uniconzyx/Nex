@@ -1,0 +1,56 @@
+{
+  "meta": {
+    "chapter": "spring-ch07",
+    "category": "system"
+  },
+  "items": [
+    {
+      "title": "实现一个 MyBatis 式的动态 SQL 构建器 + 两级缓存（含缓存失效测试）",
+      "requirement_md": "用**纯 Python 单文件**（不连接任何数据库）实现一个 MyBatis 风格的 MiniBatis 进阶版，\n把本章四个进阶面落到可调试、可测试的代码上。\n\n**功能要求**\n1. **动态 SQL 构建器**：实现 `<if>` / `<choose><when><otherwise>` / `<foreach>` / `<trim>` 四个 SqlNode，\n   节点树一次构建、多次遍历求值，产出 `(SQL 文本, 有序参数列表)`；`<where>` / `<set>` 用 `<trim>` 的特例实现；\n2. **`#{}` 与 `${}` 两条管线**：`#{}` 产出 `?` 并登记 ParameterMapping，`${}` 做文本插值；\n   必须能对同一条 SQL 同时走两条路径做注入对照（参考 ex05）；\n3. **`<foreach>` 空集合保护**：实现 `IN` 展开并能检出、拒绝空集合产出的非法 SQL（参考 ex02）；\n4. **一级缓存**：SqlSession 级，CacheKey = statementId + offset + limit + SQL 文本 + 参数列表，\n   实现「会话内任意增删改 → 全会话清空」「commit/rollback → 清空」「flushCache=true → 清空」四类失效；\n5. **二级缓存**：按 namespace 隔离、LRU 淘汰（容量可配）、写入延迟到 commit（`TransactionalCache` 语义）、\n   readOnly 开关（true 返回同一引用 / false 序列化深拷贝）；\n6. **分页改写**：给定原 SQL 生成分页语句与 count 语句，必须覆盖 `ORDER BY` 剥离、\n   `GROUP BY` 与 `UNION` 的子查询包装三种情况（参考 ex11）；\n7. **缓存失效测试用例**：为下列四个场景各写一组正/反对照用例，每组必须同时包含\n   「 asserting 缓存命中」与「assert 缓存不应被命中」两个断言，不允许只写通过的那半。\n\n**验收标准（verification.desc 的可验收口径）**\n- 空条件的 `<where>` 不产出 `WHERE` 关键字，且前导 `AND`/`OR` 被剔除；\n- `<foreach>` 空集合被显式拒绝（不产出 `IN ()`）；\n- 同会话二次查询 `db_queries` 不增长、一级缓存命中计数 +1；换会话后 `db_queries` 增长；\n- 跨 namespace 写表**不清**读方 namespace 的二级缓存（给出一条可复现的脏读用例）；\n- `commit()` 之前其他会话看不到本会话的查询结果，`commit()` 之后可见；\n- LRU 达到容量上限时的淘汰序列可预测；\n- 带 `GROUP BY` / `UNION` 的原 SQL，count 语句必须包一层子查询，且 count 结果集行数为 1。",
+      "tasks": [
+        {
+          "title": "实现动态 SQL 节点树与 #{} / ${} 两条管线",
+          "verification": {
+            "type": "test",
+            "desc": "断言：节点树一次构建后可对两组不同参数各求值一次并产出不同的 (sql, params)；TrimSqlNode 仅在 content 非空时产出 WHERE 前缀且剔除前导 AND/OR，prefixOverrides 写成 AND|OR（无空格）时修剪失效；同一条 SQL 走 #{} 得到带 ? 的模板且参数保持原值，走 ${} 时把恶意输入拼成可执行片段。"
+          }
+        },
+        {
+          "title": "实现 <foreach> 展开与空集合保护",
+          "verification": {
+            "type": "test",
+            "desc": "断言：集合 [1,2,3] 展开为 IN (?,?,?) 且参数顺序与占位符顺序一致；空集合被显式拒绝并且不产出 'IN ()' 文本（正反两组用例：正常集合通过、空集合被拒绝）。"
+          }
+        },
+        {
+          "title": "实现一级缓存与四类失效触发点",
+          "verification": {
+            "type": "test",
+            "desc": "断言四个场景的 db_queries / 命中计数：① 同会话二次查询走缓存（db 计数不变）；② 会话内任意写操作后缓存全清（db 计数 +1）；③ commit/rollback 后全清；④ flushCache=true 的语句每次都查库。每个场景需同时给出「应命中」与「不应命中」两组断言。"
+          }
+        },
+        {
+          "title": "实现二级缓存：namespace 隔离 + LRU + 提交可见",
+          "verification": {
+            "type": "test",
+            "desc": "断言：跨会话同 namespace 命中二级缓存而 db 计数不增长；不同 namespace 互不可见（各自单独查库一次）；Update 只清当前 namespace 的缓存，另一 namespace 的条目仍然存活（脏读复现用例）；达到 size 上限时按访问顺序淘汰且淘汰序列可预测；readOnly=false 时取出的对象与缓存内对象不存在别名关系（修改返回值不影响缓存）。"
+          }
+        },
+        {
+          "title": "写出缓存失效的四组对照测试用例",
+          "verification": {
+            "type": "test",
+            "desc": "提交一个测试文件（≥4 组 test），每组必须同时包含正向断言（缓存应命中/应未命中）与反向对照（改动一个变量后结论翻转），全部用例通过且注释写明该用例对应的 pitfalls.md 条目编号。"
+          }
+        },
+        {
+          "title": "实现分页改写（含 ORDER BY 剥离与复杂 SQL 的 count 包装）",
+          "verification": {
+            "type": "test",
+            "desc": "断言：普通 SQL 生成 LIMIT/OFFSET 且 count 语句不含 ORDER BY；带 GROUP BY / UNION 的原 SQL，count 语句必须形如 SELECT count(0) FROM (<原 SQL>) tmp 且结果 1 行，同时用一个「直接替换 select 列」的朴素实现做负面样例证明其行数不为 1。"
+          }
+        }
+      ]
+    }
+  ]
+}

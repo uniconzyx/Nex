@@ -1,0 +1,8 @@
+{
+  "title": "集合 set 去重",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "{1, 2, 3}\n3",
+  "code": "s = {1, 2, 2, 3}\nprint(s)\nprint(len(s))"
+}

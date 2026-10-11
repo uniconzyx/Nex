@@ -1,0 +1,8 @@
+{
+  "title": "C++20 ranges：惰性管道 filter/transform/take",
+  "code_lang": "cpp",
+  "code_std": "c++20",
+  "stdin": "",
+  "expected_output": "4 16 36 \nfirst multiple of 3 = 3 (源访问 3 次)\n",
+  "code": "#include <iostream>\n#include <vector>\n#include <ranges>\nint main() {\n    std::vector<int> v = {1,2,3,4,5,6,7,8,9,10};\n    auto even = [](int x){ return x % 2 == 0; };\n    auto sq   = [](int x){ return x * x; };\n    for (int y : v | std::views::filter(even) | std::views::transform(sq) | std::views::take(3))\n        std::cout << y << ' ';\n    std::cout << '\\n';\n    int visited = 0;\n    for (int y : v | std::views::filter([&](int x){ visited++; return x % 3 == 0; }) | std::views::take(1))\n        std::cout << \"first multiple of 3 = \" << y << \" (源访问 \" << visited << \" 次)\\n\";\n}\n"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "文件复制程序（块读写 + 累计字节数）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "copied 10 bytes\n",
+  "code": "#include <stdio.h>\nint main(void) {\n    FILE *s = fopen(\"src.bin\", \"wb\");\n    for (int i = 0; i < 10; i++) { unsigned char c = (unsigned char)i; fwrite(&c, 1, 1, s); }\n    fclose(s);\n    FILE *src = fopen(\"src.bin\", \"rb\");\n    FILE *dst = fopen(\"dst.bin\", \"wb\");\n    unsigned char buf[4];\n    size_t total = 0, k;\n    while ((k = fread(buf, 1, sizeof buf, src)) > 0) { fwrite(buf, 1, k, dst); total += k; }\n    fclose(src); fclose(dst);\n    printf(\"copied %zu bytes\\n\", total);\n    return 0;\n}"
+}

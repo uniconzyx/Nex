@@ -1,0 +1,8 @@
+{
+  "title": "数组高阶方法 map/filter/reduce/every/some",
+  "code_lang": "javascript",
+  "code_std": "node22",
+  "stdin": "",
+  "expected_output": "filter: 2,4\nmap: 4,8\nreduce sum: 12\nevery >0: true\nsome >4: true",
+  "code": "var nums = [1,2,3,4,5];\nvar evens = nums.filter(function(n){ return n % 2 === 0; });\nvar doubled = evens.map(function(n){ return n * 2; });\nvar sum = doubled.reduce(function(acc, n){ return acc + n; }, 0);\nconsole.log('filter:', evens.join(','));\nconsole.log('map:', doubled.join(','));\nconsole.log('reduce sum:', sum);\nconsole.log('every >0:', nums.every(function(n){ return n > 0; }));\nconsole.log('some >4:', nums.some(function(n){ return n > 4; }));"
+}

@@ -1,0 +1,15 @@
+{
+  "title": "make 首次构建：依赖图驱动的完整编译链路",
+  "code_lang": "bash",
+  "code_std": "bash5",
+  "stdin": "",
+  "expected_output": "$ mingw32-make status     # 构建前：无产物\nartifacts: [] []\n$ mingw32-make            # 首次构建：两个 .o + 链接\nD:/mingw64/bin/gcc.exe -std=c11 -O2 -Wall -c main.c -o main.o\r\nD:/mingw64/bin/gcc.exe -std=c11 -O2 -Wall -c util.c -o util.o\r\nD:/mingw64/bin/gcc.exe -std=c11 -O2 -Wall -o app.exe main.o util.o\r\n$ mingw32-make status     # 构建后：产物清单\nartifacts: [main.o util.o] []\n$ ./app\nadd(2, 3) = 5\r",
+  "code": "#!/bin/sh\n# make 首次构建：依赖图驱动的完整编译链路\n# 期望输出见 expected_output（本机 MinGW 工具链 + GNU Make 真实执行捕获）\n\ncat > Makefile << 'EOF'\nCC := D:/mingw64/bin/gcc.exe\nCFLAGS := -std=c11 -O2 -Wall\nTARGET := app.exe\nOBJS := main.o util.o\n\n$(TARGET): $(OBJS)\n\t$(CC) $(CFLAGS) -o $@ $^\n\n%.o: %.c\n\t$(CC) $(CFLAGS) -c $< -o $@\n\n.PHONY: clean status\nclean:\n\t@rm -f $(TARGET) $(OBJS)\n\nstatus:\n\t@echo \"artifacts: [$(wildcard *.o)] [$(wildcard *.d)]\"\nEOF\n\ncat > main.c << 'EOF'\n#include <stdio.h>\n#include \"util.h\"\n\nint main(void)\n{\n    printf(\"add(2, 3) = %d\\n\", add(2, 3));\n    return 0;\n}\nEOF\n\ncat > util.c << 'EOF'\n#include \"util.h\"\n\nint add(int a, int b)\n{\n    return a + b;\n}\nEOF\n\ncat > util.h << 'EOF'\nint add(int a, int b);\nEOF\n\nmingw32-make status     # 构建前：无产物\nmingw32-make            # 首次构建：两个 .o + 链接\nmingw32-make status     # 构建后：产物清单\n./app\n",
+  "_step_rc": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "_verify_note": "expected_output 为 Windows + MinGW-w64 上 GNU Make 4.4.1 真实执行捕获。MinGW 发行版把 GNU Make 命名为 `mingw32-make` 以避免与 MSYS/Cygwin 的 `make` 冲突，Linux 上对应命令即 `make`。"
+}

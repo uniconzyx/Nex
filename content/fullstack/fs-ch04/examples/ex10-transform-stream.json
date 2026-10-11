@@ -1,0 +1,8 @@
+{
+  "title": "Transform 流：把输入转大写",
+  "code_lang": "javascript",
+  "code_std": "node22",
+  "stdin": "",
+  "expected_output": "transformed=HELLO NODE STREAM\ndone=true\n",
+  "code": "const { Transform } = require('stream');\nconst up = new Transform({\n  transform(chunk, enc, cb) { cb(null, chunk.toString().toUpperCase()); }\n});\nlet out = '';\nup.on('data', d => out += d);\nup.on('end', () => {\n  console.log('transformed=' + out);\n  console.log('done=' + (out === 'HELLO NODE STREAM'));\n});\nup.write('hello ');\nup.write('node ');\nup.write('stream');\nup.end();"
+}

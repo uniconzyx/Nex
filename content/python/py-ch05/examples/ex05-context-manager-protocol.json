@@ -1,0 +1,8 @@
+{
+  "title": "自实现 __enter__/__exit__ 与异常吞噬",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "正常退出:\n打开 A\n使用 A\n关闭 A (异常=无)\n\n只吞 ValueError:\n打开 B\n关闭 B (异常=ValueError)\n  -> __exit__ 返回 True，异常被吞掉\n  with 之后继续执行 -> 到达此行\n\nKeyError 未被吞，正常向外抛: 'k'\n打开 C\n关闭 C (异常=KeyError)\n\n要点: __exit__ 返回 True = 吞异常; 返回 None/False = 继续传播",
+  "code": "class Resource:\n    def __init__(self, name, swallow=None, log=None):\n        self.name = name\n        self.swallow = swallow\n        self.log = log\n\n    def __enter__(self):\n        self.log.append(\"打开 \" + self.name)\n        return self\n\n    def __exit__(self, et, ev, tb):\n        tag = et.__name__ if et else \"无\"\n        self.log.append(\"关闭 \" + self.name + \" (异常=\" + tag + \")\")\n        if self.swallow is not None and et is self.swallow:\n            self.log.append(\"  -> __exit__ 返回 True，异常被吞掉\")\n            return True\n        return False\n\n\nlog1 = []\nwith Resource(\"A\", log=log1) as r:\n    log1.append(\"使用 \" + r.name)\nprint(\"正常退出:\")\nprint(\"\\n\".join(log1))\nprint()\n\nlog2 = []\nwith Resource(\"B\", swallow=ValueError, log=log2):\n    raise ValueError(\"业务校验失败\")\nprint(\"只吞 ValueError:\")\nprint(\"\\n\".join(log2))\nprint(\"  with 之后继续执行 -> 到达此行\")\nprint()\n\nlog3 = []\ntry:\n    with Resource(\"C\", swallow=ValueError, log=log3):\n        raise KeyError(\"k\")\nexcept KeyError as e:\n    print(\"KeyError 未被吞，正常向外抛:\", e)\nprint(\"\\n\".join(log3))\nprint()\nprint(\"要点: __exit__ 返回 True = 吞异常; 返回 None/False = 继续传播\")"
+}

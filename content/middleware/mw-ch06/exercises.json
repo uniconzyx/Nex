@@ -1,0 +1,260 @@
+{
+  "meta": {
+    "chapter": "mw-ch06",
+    "note": "Kafka 生产者与消费者机制练习：基础题考察分区器、acks 与 min.insync.replicas 的配合、幂等与事务的边界、rebalance 触发与代价、位移提交与交付语义；算法题来自刷题平台（仅存元数据 + 链接，不搬运题面正文）。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "acks=all 究竟等价于写入几个副本",
+      "content_md": "关于 `acks=all`（即 `-1`）的语义，下列说法**正确**的是？\n\nA. 它保证消息一定写入全部 `replication.factor` 个副本\nB. 它要求写入**当前 ISR 中的全部副本**，因此 ISR 收缩后保护力度会下降\nC. 它等价于等待所有 broker（含非副本）确认\nD. 它比 `acks=1` 慢，但两者在数据安全性上等价",
+      "options": [
+        {
+          "key": "A",
+          "text": "保证写入全部 RF 个副本"
+        },
+        {
+          "key": "B",
+          "text": "写入当前 ISR 全部，ISR 收缩则保护下降"
+        },
+        {
+          "key": "C",
+          "text": "等所有 broker 确认"
+        },
+        {
+          "key": "D",
+          "text": "与 acks=1 安全性等价"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "`acks=all` 的准确含义是「等待**当前 ISR 中所有副本**完成写入」，而不是「所有的\n`replication.factor` 个副本」。ISR 会因副本落后而收缩：若只剩 leader，`acks=all` 就**退化成 `acks=1`**。\n所以只写 `acks=all`、不配 `min.insync.replicas` 是纸糊的持久性保证。\nC 错（非副本不参与）；A 错（不是全部 RF）；D 错（ISR 完整时两者差异巨大）。",
+      "tags": [
+        "kafka",
+        "acks",
+        "isr"
+      ],
+      "source": "self",
+      "source_ref": "mw-ch06 concept/02 acks 三档语义"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "min.insync.replicas 与 acks=all 的关系",
+      "content_md": "`replication.factor=3`、`acks=all` 已配置。若 `min.insync.replicas` 仍为默认值 1，\n当前 ISR 收缩到只有 leader 一个副本。此时最可能发生的是？\n\nA. 生产者写入被拒绝，抛出 `NotEnoughReplicasException`\nB. 写入正常成功，但**数据已失去持久性保护**，leader 宕机即丢\nC. Kafka 自动把 ISR 恢复到 3 个副本后才返回\nD. 生产者会自动降级为 `acks=1` 并打印警告",
+      "options": [
+        {
+          "key": "A",
+          "text": "写入被拒绝"
+        },
+        {
+          "key": "B",
+          "text": "写入成功但已无保护"
+        },
+        {
+          "key": "C",
+          "text": "自动恢复 ISR"
+        },
+        {
+          "key": "D",
+          "text": "自动降级并警告"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "`min.insync.replicas` 是**写入准入条件**：ISR 大小 < 它时拒写。\n默认值为 1，所以在 ISR=1 时 `1 >= 1` 成立 → **照常写入**，只是此时的 `acks=all` 等同于 `acks=1`。\n这不是自动降级（Kafka 不打印这种警告，也不会自动改配置），而是**配置组合本身的漏洞**。\n修正方式是把 `min.insync.replicas` 设为 2（3 副本场景），此时 ISR=1 会直接拒写。",
+      "tags": [
+        "kafka",
+        "min-insync-replicas"
+      ],
+      "source": "self",
+      "source_ref": "mw-ch06 concept/02 min.insync.replicas"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "同一批消息在两种提交顺序下的重复/丢失量",
+      "content_md": "一批 8 条消息，消费者在第 5 条**处理完之后**崩溃。\n\n- 写法甲：每条处理成功后立即 `commitSync()`\n- 写法乙：进入循环时先 `commitSync()` 提交整批，再处理\n\n请分别写出重启后**重复的条数**与**丢失的条数**（按至少一次 / 至多一次的语义推理）。",
+      "options": [],
+      "answer": {
+        "correct": [],
+        "reference_code": "",
+        "output": "甲（先处理后提交，至少一次）: 重复 0 条, 丢失 0 条\n乙（先提交后处理，至多一次）: 重复 0 条, 丢失 3 条"
+      },
+      "explanation": "写法甲是**逐条提交**：第 5 条处理完成后已提交位移，崩溃时前 5 条都已确认，\n重启从第 6 条开始 → 既不重复也不丢失（在崩溃点恰好在提交之后的前提下）。\n若崩溃发生在「处理完但提交前」，则重放 1 条 —— 这才是至少一次的典型代价。\n\n写法乙把整批位移在**处理之前**提交：崩溃后位移已前进到第 8 条，重启从第 9 条开始，\n第 6、7、8 条**从未被处理**却已跳过 → **丢失 3 条**。这就是 `enable.auto.commit=true` 的损失模型。",
+      "tags": [
+        "kafka",
+        "offset-commit",
+        "at-most-once"
+      ],
+      "source": "self",
+      "source_ref": "mw-ch06 concept/04 位移提交"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "消费者数超过分区数会发生什么",
+      "content_md": "某 Topic 有 6 个分区，某个消费者组已有 8 个消费者实例。下列说法正确的是？\n\nA. Kafka 会自动把一个分区同时分配给多个消费者以提升吞吐\nB. 有 2 个消费者因为没有分区而空闲，但它们仍然是组的成员并正常发送心跳\nC. 多出的 2 个消费者会被自动踢出组\nD. 集群总消费吞吐会随消费者数线性增长到 8 倍",
+      "options": [
+        {
+          "key": "A",
+          "text": "分区可被多消费者共享"
+        },
+        {
+          "key": "B",
+          "text": "2 个空闲但仍是成员"
+        },
+        {
+          "key": "C",
+          "text": "多出的被踢出组"
+        },
+        {
+          "key": "D",
+          "text": "吞吐线性增长到 8 倍"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "Kafka 的核心不变式是「一个分区在同一时刻只能被组内**一个**消费者消费」，\n因此并行度上限 = `min(消费者数, 分区数)` = 6。多出的 2 个消费者**没有分区可分**，\n但它们**仍是组成员**（心跳正常、会参与 rebalance），只是 `poll()` 永远返回空。\nA 违反不变式；C 错（空闲不等于死亡）；D 错（吞吐被分区数封顶）。",
+      "tags": [
+        "kafka",
+        "consumer-group",
+        "parallelism"
+      ],
+      "source": "self",
+      "source_ref": "mw-ch06 concept/03 组模型"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "修复「处理超时被踢出组」导致的反复 rebalance",
+      "content_md": "下面这段消费者代码在生产环境频繁触发 rebalance，日志里能看到\n`Member ... has left the group` 与 `This member will leave the group because consumer poll timeout has expired`。\n\n```java\nprops.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, \"false\");\nprops.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, \"2000\");\nprops.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, \"10000\");\nprops.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, \"5000\");\n// 每条消息的处理平均耗时 300ms\n\nwhile (true) {\n    ConsumerRecords<String, String> rs = consumer.poll(Duration.ofMillis(500));\n    for (ConsumerRecord<String, String> r : rs) {\n        process(r);              // 平均 300ms\n    }\n    consumer.commitSync();\n}\n```\n\n请指出**至少两处**配置问题并给出修正值。",
+      "options": [],
+      "answer": {
+        "correct": [],
+        "reference_code": "props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, \"200\");          // 200*300ms = 60s < 300s\nprops.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, \"45000\");      // 默认值即可\nprops.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, \"3000\");    // < session/3 = 15s\n// 并把 process() 中的同步远程调用移出 poll 循环（改为本地缓存 / 异步）",
+        "output": ""
+      },
+      "explanation": "问题一：**`max.poll.records=2000` × 300ms = 600s，远超默认 `max.poll.interval.ms=300s`**。\n后台心跳正常发送也没用 —— 判定「消费者是否存活」包含「它是否还在正常 `poll()`」。\n修正：把 `max.poll.records` 降到 200（200×300ms = 60s，留 5 倍余量），或调大 `max.poll.interval.ms`。\n\n问题二：**`session.timeout.ms=10000` 与 `heartbeat.interval.ms=5000` 违反 `heartbeat < session/3`**。\n5000 > 10000/3 ≈ 3333，网络抖动或 GC 停顿就会导致心跳超时被踢。\n修正：`session=45000`（默认）、`heartbeat=3000`。\n\n加分项：把 `process()` 里的同步 RPC / 慢查询移出 `poll()` 循环，这才是根治手段；\n单纯调参数只是把踢出的阈值抬高。",
+      "tags": [
+        "kafka",
+        "rebalance",
+        "max-poll-interval"
+      ],
+      "source": "self",
+      "source_ref": "mw-ch06 concept/03 rebalance 触发条件"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "hard",
+      "title": "enable.idempotence 的能力边界",
+      "content_md": "开启 `enable.idempotence=true` 后，关于它**能**与**不能**解决的问题，正确的是？\n\nA. 能防止消费者重复消费；不能防止生产者重试重复\nB. 能防止生产者重试导致的**同分区**重复；不能防止跨会话、跨分区的重复\nC. 能保证跨分区的全局去重；但不能保证顺序\nD. 能保证 exactly-once 语义；不能保证 `acks` 的耐久性",
+      "options": [
+        {
+          "key": "A",
+          "text": "防消费重复，不防生产重试"
+        },
+        {
+          "key": "B",
+          "text": "防同分区重试重复，不防跨会话/跨分区"
+        },
+        {
+          "key": "C",
+          "text": "能全局去重，不保证顺序"
+        },
+        {
+          "key": "D",
+          "text": "保证 exactly-once，不保证 acks"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "幂等生产者用 `(PID, 分区, 序列号)` 三元组在 broker 端去重，所以它的作用域是\n**单分区 + 单会话**：分区不同则去重域不同；生产者重启后 PID 变化、去重状态不延续。\n\nA 错（它是**生产端**机制，与消费者重复无关）；C 错（跨分区不生效）；\nD 错（幂等**会自动把 `acks` 提升为 `all`**，且 exactly-once 还需要事务，幂等本身不够）。\n补充：开启幂等后 Kafka 会把 `max.in.flight.requests.per.connection` 限制在 5 以保证顺序。",
+      "tags": [
+        "kafka",
+        "idempotence",
+        "exactly-once"
+      ],
+      "source": "self",
+      "source_ref": "mw-ch06 concept/02 幂等生产者"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "medium",
+      "title": "设计循环队列（对应 Kafka 日志段与攒批缓冲的环形结构）",
+      "content_md": "Kafka 的日志段写入、`RecordAccumulator` 的分区缓冲都建立在「容量固定的循环缓冲」\n之上：读写位置循环推进、用取模定位、用哨兵或计数器区分「空」与「满」。\n\nLeetCode 622「设计循环队列」正是这一结构的经典实现题。\n\n**本题仅提供平台链接与元数据，不在本 App 内搬运题面正文。** 请前往平台作答。",
+      "options": [],
+      "answer": {
+        "correct": [],
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "考点：用定长数组 + `head`/`count`（或 `head`/`tail` + 一个空位哨兵）实现\nO(1) 的 `enQueue` / `deQueue` / `Front` / `Rear` / `isEmpty` / `isFull`。\n\n与 Kafka 的关联：`RecordAccumulator` 按分区维护 batch 队列（有界缓冲，受 `buffer.memory` 约束），\n满了就阻塞 `send()` 直到 `max.block.ms` 超时；`.index` 稀疏索引的槽位计算也是取模定位。\n理解哨兵空位法能解释为什么日志段的 `baseOffset` 总是段大小的整数倍。",
+      "tags": [
+        "kafka",
+        "ring-buffer",
+        "design"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 622. Design Circular Queue",
+      "external_url": "https://leetcode.cn/problems/design-circular-queue/"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": "hard",
+      "title": "自命题：实现 murmur2 分区器并评估分布均匀度",
+      "content_md": "实现 Kafka 客户端使用的 **murmur2** 哈希（种子 `0x9747b28c`、乘子 `0x5bd1e995`、右移 24），\n并用它实现 `partition(key, numPartitions) = (murmur2(key) & 0x7fffffff) % numPartitions`。\n\n要求：\n1. 对 240 个形如 `order-00000` 的 key，在 12 个分区上统计分布，输出**标准差**与**极差**；\n2. 与「首字符 + 长度」这种弱哈希对比（后者会把带共同前缀的 key 全部压进同一分区）；\n3. 与 `zlib.crc32` 对比；\n4. 打印结论：为什么 Kafka 选 murmur2 而不是 `hashCode()`。\n\n**验证方式**：`expected_output` 由真实运行产生，见 `examples/ex01-hash-partitioner-comparison.json`。",
+      "options": [],
+      "answer": {
+        "correct": [],
+        "reference_code": "def murmur2(data):\n    length = len(data); seed = 0x9747b28c; m = 0x5bd1e995; r = 24\n    h = (seed ^ length) & 0xffffffff\n    for i in range(length // 4):\n        i4 = i * 4\n        k = ((data[i4] & 0xff) | ((data[i4+1] & 0xff) << 8)\n             | ((data[i4+2] & 0xff) << 16) | ((data[i4+3] & 0xff) << 24))\n        k = (k * m) & 0xffffffff; k ^= k >> r; k = (k * m) & 0xffffffff\n        h = (h * m) & 0xffffffff; h ^= k\n    extra = length & 3; base = length & ~3\n    if extra >= 3: h ^= (data[base+2] & 0xff) << 16\n    if extra >= 2: h ^= (data[base+1] & 0xff) << 8\n    if extra >= 1:\n        h ^= (data[base] & 0xff); h = (h * m) & 0xffffffff\n    h ^= h >> 13; h = (h * m) & 0xffffffff; h ^= h >> 15\n    return h\n\ndef partition(key, n):\n    return (murmur2(key.encode('utf-8')) & 0x7fffffff) % n",
+        "output": "见 examples/ex01-hash-partitioner-comparison.json"
+      },
+      "explanation": "关键点有三个：\n\n1. **必须做 32 位截断**（`& 0xffffffff`），否则 Python 的任意精度整数会让结果与 Java 实现不一致；\n2. **最后要取正数**（`& 0x7fffffff`），因为 `murmur2` 返回值可能为负，负数取模在 Java 与 Python 中行为不同\n   （Java `%` 保留符号，Python `%` 返回非负），Kafka 客户端统一用正数；\n3. **`naive` 哈希的退化**：`\"order-00000\"` 与 `\"order-00239\"` 的首字符都是 `o`、长度都是 11，\n   于是 240 个 key 全部落到同一分区 —— 这是「弱哈希 + 共同前缀 key」的经典事故。\n\n为什么用 murmur2 而不是 `hashCode()`：`HashMap.hashCode` 的扰动函数是针对短字符串设计的，\n对 Kafka 常见的长 key（如包含租户 ID 的复合键）分布不够均匀；且 Java 的 `String.hashCode` 是\n**可预测的线性哈希**（`h = 31h + c`），攻击者可以构造大量同余 key 打爆单个分区。",
+      "tags": [
+        "kafka",
+        "murmur2",
+        "partitioner"
+      ],
+      "source": "self",
+      "source_ref": "mw-ch06 concept/01 分区器"
+    }
+  ]
+}

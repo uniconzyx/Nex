@@ -1,0 +1,8 @@
+{
+  "title": "dict 自 3.7 保留插入序；同一进程内哈希稳定",
+  "code_lang": "python",
+  "code_std": "python3.11",
+  "stdin": "",
+  "expected_output": "['c', 'a', 'b']\nhash stable: True",
+  "code": "d = {}\nd[\"c\"] = 3\nd[\"a\"] = 1\nd[\"b\"] = 2\nprint(list(d.keys()))   # 插入序\nprint(\"hash stable:\", hash(\"hello\") == hash(\"hello\"))"
+}

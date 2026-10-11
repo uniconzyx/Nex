@@ -1,0 +1,8 @@
+{
+  "title": "GROUP BY 查询转 MapReduce 真实数据流",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "Map 输出(<dept,1>, 已过滤 salary<=5000):\n   ('eng', 1)\n   ('eng', 1)\n   ('sales', 1)\n   ('eng', 1)\n\nShuffle 分区(按 hash(dept)%2):\n  Reducer-0: [('eng', 1), ('eng', 1), ('sales', 1), ('eng', 1)]\n  Reducer-1: []\n\nReduce 聚合结果(同 dept 求和):\n  (eng, 3)\n  (sales, 1)\n\n注意: 被过滤掉的 (sales,3000)/(sales,2000)/(hr,4000) 不进 Map 输出 => 谓词下推减少 Shuffle 量\n",
+  "code": "# 把 HQL「SELECT dept,COUNT(*) FROM emp WHERE salary>5000 GROUP BY dept」\n# 转成 MapReduce 实际数据流, 打印每一阶段真实输出\nNUM_REDUCERS = 2\n\ndef stable_hash(s):\n    h = 0\n    for c in s:\n        h = (31 * h + ord(c)) & 0x7fffffff\n    return h\n\nemp = [\n    (\"eng\", 6000), (\"eng\", 7000), (\"sales\", 3000), (\"sales\", 8000),\n    (\"eng\", 9000), (\"hr\", 4000), (\"sales\", 2000), (\"hr\", 5000),\n]\n# Map 阶段: 过滤 salary>5000 并 emit (dept,1)\nmap_out = []\nfor dept, sal in emp:\n    if sal > 5000:\n        map_out.append((dept, 1))\nprint(\"Map 输出(<dept,1>, 已过滤 salary<=5000):\")\nfor r in map_out:\n    print(\"  \", r)\n# Shuffle: 按 dept 哈希分区, 相同 dept 进同一 Reducer\nbuckets = {r: [] for r in range(NUM_REDUCERS)}\nfor k, v in map_out:\n    buckets[stable_hash(k) % NUM_REDUCERS].append((k, v))\nprint(\"\\nShuffle 分区(按 hash(dept)%2):\")\nfor r in sorted(buckets):\n    print(f\"  Reducer-{r}: {buckets[r]}\")\n# Reduce: 同 dept 聚合\nresult = {}\nfor r in sorted(buckets):\n    for k, v in buckets[r]:\n        result[k] = result.get(k, 0) + v\nprint(\"\\nReduce 聚合结果(同 dept 求和):\")\nfor k in sorted(result):\n    print(f\"  ({k}, {result[k]})\")\nprint(\"\\n注意: 被过滤掉的 (sales,3000)/(sales,2000)/(hr,4000) 不进 Map 输出 => 谓词下推减少 Shuffle 量\")\n"
+}

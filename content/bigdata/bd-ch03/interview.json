@@ -1,0 +1,49 @@
+{
+  "meta": { "chapter": "bd-ch03" },
+  "items": [
+    {
+      "question": "Hive 内部表和外部表的区别是什么？生产上怎么选型？DROP 一张大表前你要确认什么？",
+      "answer_md": "**区别**：内部表（MANAGED）由 Hive 全托管，`DROP` 同时删**元数据 + HDFS 数据**；外部表（EXTERNAL）只由 Hive 记录元数据，`DROP` **只删元数据、保留数据**。二者查/写 SQL 完全一致，区别只在生命周期。\n\n**选型**：数据不是 Hive 独占的（Flume/Kafka 落盘、Spark 产出、多引擎共用）——一律外部表；纯 Hive 内部加工链路的临时/中间表——用内部表（删表即清数据）。\n\n**DROP 前确认**：① 是不是内部表？内部表 `DROP` 数据不可恢复（除非开了 Trash/快照）；② `LOCATION` 是否还被别的作业/表依赖；③ 有没有开 HDFS Trash 兜底。一句话：能建外部表就别建内部表，DROP 前先 `DESCRIBE EXTENDED` 看清类型与位置。",
+      "follow_ups": [
+        "外部表被 DROP 后数据还在，怎么重新挂回 Hive？",
+        "Hive Metastore 在多引擎共用数据时扮演什么角色？",
+        "Trash 和快照分别怎么救误删的内部表数据？"
+      ],
+      "difficulty": "easy",
+      "company_tags": ["通用", "阿里", "美团"]
+    },
+    {
+      "question": "一条 HQL 在 Hive 里是怎么变成分布式作业的？逻辑计划和物理计划有什么区别？",
+      "answer_md": "经历五步：① **语法分析（Antlr）** 生成 AST；② **语义分析** 绑定元数据、类型检查，生成**逻辑计划**（关系代数树：TableScan/Filter/Aggregate/Project，与引擎无关）；③ **逻辑优化**（谓词下推、列裁剪、常量折叠、CBO 代价重排 join 顺序）；④ 翻译成**物理计划**（具体算子 + 执行引擎：Map→Shuffle→Reduce，或 Tez DAG / Spark RDD）；⑤ 提交执行。\n\n**逻辑 vs 物理**：逻辑计划回答「做什么（关系代数、等价变换）」，不关心引擎；物理计划回答「怎么做（选哪个引擎、是否 MapJoin、几个 Reduce）」。排障时 `EXPLAIN` 能同时看到两者，上线前必看是否触发裁剪/MapJoin。",
+      "follow_ups": [
+        "谓词下推和列裁剪分别发生在哪个阶段？为什么能提速？",
+        "CBO 是基于什么统计信息估算代价的？",
+        "Hive 的优化器和 Spark Catalyst 有什么异同？"
+      ],
+      "difficulty": "mid",
+      "company_tags": ["通用", "字节", "腾讯"]
+    },
+    {
+      "question": "数据倾斜怎么识别和解决？MapJoin、加盐、自定义 Partitioner 分别适合什么场景？",
+      "answer_md": "**识别**：少数 Reduce 长尾卡 99%、其余早已完成；counters 里某 Reduce 输入远超均值；某 key（热用户/空值/某省份）呈幂律。先 `EXPLAIN`+counters 定位热 key，别盲调。\n\n**手段与边界**：\n1. **MapJoin**：倾斜来自「大表 JOIN 小维度表」时最优——小表广播、彻底消 shuffle，前提是小表能进内存。\n2. **加盐 + 两阶段聚合**：大表**自身**热 key（如某 vip 占大半）时，给热 key 加 `0..S-1` 枚举后缀打散到多 Reduce，阶段一按 `(key,salt)` 局部聚合、阶段二按原 key 合并；聚合须可结合（sum/count/min/max）。\n3. **自定义 Partitioner**：已知热 key 单独路由到一个/多个专属分区。\n4. **空值**：`nvl(col, rand())` 打散或单独过滤。\n\n选型顺序：能 MapJoin 就 MapJoin > 加盐/自定义 Partitioner > Combiner（只减总量、不解热 key 超大）。",
+      "follow_ups": [
+        "为什么「加大 Reduce 数」解决不了倾斜？",
+        "加盐后怎么保证最终结果和直接聚合一致？",
+        "Hive 的 skewjoin 自动优化是怎么做的？"
+      ],
+      "difficulty": "hard",
+      "company_tags": ["通用", "腾讯", "拼多多", "快手"]
+    },
+    {
+      "question": "分区和分桶的区别？ORC/Parquet 为什么比 TextFile 快？列裁剪和谓词下推是什么？",
+      "answer_md": "**分区 vs 分桶**：分区是**目录级**（按列值切目录、用于扫描裁剪），分桶是**文件级**（`hash(col)%N` 切文件、用于 JOIN 免 shuffle 与采样），二者正交可叠加。分桶 JOIN 提速前提是「同列+同桶数」。\n\n**列存为什么快**：ORC/Parquet 按列连续存储，同列类型一致、冗余高，便于 RLE/字典编码+压缩；分析查询多窄列访问，I/O 从「整行」降到「选中列」。\n\n**列裁剪**：只物化 `SELECT` 需要的列，跳过无关列字节。**谓词下推**：把 `WHERE` 过滤下沉到 Scan 层，利用列块 min/max 统计做整块跳过（strip/row-group skip），尽量少读、尽早过滤。三者（列存+列裁剪+下推）叠加是数仓提速的结构性原因；注意 `SELECT *` 或函数包裹列会抵消收益。",
+      "follow_ups": [
+        "分桶数改成 2 的幂以外的值会怎样？改桶数要全量重写吗？",
+        "ORC 的 bloom filter 在什么查询下推最有效？",
+        "行存和列存各自的适用场景（OLTP vs OLAP）？"
+      ],
+      "difficulty": "mid",
+      "company_tags": ["通用", "百度", "京东"]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "title": "sqlite 真实事务：ACID 原子性与回滚",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "after rollback count = 0\r\nafter commit count = 1\r\nafter failed batch count = 1\r\natomicity preserved (no partial row 4): True\r",
+  "code": "import sqlite3\n\ncon = sqlite3.connect(\":memory:\")\ncur = con.cursor()\ncur.execute(\"CREATE TABLE t(id INTEGER PRIMARY KEY, v TEXT)\")\n\n\ndef count():\n    return cur.execute(\"SELECT COUNT(*) FROM t\").fetchone()[0]\n\n\n# 1) 回滚：写入被丢弃（原子性）\ncur.execute(\"INSERT INTO t(id,v) VALUES(1,'A')\")\ncon.rollback()\nprint(\"after rollback count =\", count())\n\n# 2) 提交：写入持久化\ncur.execute(\"INSERT INTO t(id,v) VALUES(2,'B')\")\ncon.commit()\nprint(\"after commit count =\", count())\n\n# 3) 一批写入中途失败 -> 整体回滚（原子性）\ntry:\n    cur.execute(\"INSERT INTO t(id,v) VALUES(4,'C')\")    # ok\n    cur.execute(\"INSERT INTO t(id,v) VALUES(2,'D')\")    # 主键冲突（id=2 已存在）\n    con.commit()\nexcept sqlite3.IntegrityError:\n    con.rollback()\nprint(\"after failed batch count =\", count())\nprint(\"atomicity preserved (no partial row 4):\", count() == 1)\ncon.close()\n"
+}

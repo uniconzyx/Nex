@@ -1,0 +1,8 @@
+{
+  "title": "alpha/r 缩放：调 rank 为什么必须同步调 alpha",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "rank = 8, B@A 的 Frobenius 范数 = 0.015711\n\nalpha      缩放系数 alpha/r   缩放后 ΔW 范数\n1          0.125          0.001964\n4          0.500          0.007855\n8          1.000          0.015711\n16         2.000          0.031422\n32         4.000          0.062843\n\n说明: ΔW = (alpha / r) * B@A。缩放系数与 rank 成反比\n      因此调大 rank 时若不放大 alpha, 等效学习率会同步变小, 收敛会变慢",
+  "code": "\nimport numpy as np\nrng = np.random.default_rng(42)\nr = 8\nd_in = d_out = 16\nA = rng.normal(0.0, 0.02, size=(r, d_in))\nB = rng.normal(0.0, 0.02, size=(d_out, r))\nBA = B @ A\nprint('rank = %d, B@A 的 Frobenius 范数 = %.6f' % (r, np.linalg.norm(BA)))\nprint()\nprint('%-10s %-14s %s' % ('alpha', '缩放系数 alpha/r', '缩放后 ΔW 范数'))\nfor alpha in (1, 4, 8, 16, 32):\n    s = alpha / r\n    print('%-10d %-14.3f %.6f' % (alpha, s, np.linalg.norm(s * BA)))\nprint()\nprint('说明: ΔW = (alpha / r) * B@A。缩放系数与 rank 成反比')\nprint('      因此调大 rank 时若不放大 alpha, 等效学习率会同步变小, 收敛会变慢')\n"
+}

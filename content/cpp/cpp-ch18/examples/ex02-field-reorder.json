@@ -1,0 +1,8 @@
+{
+  "title": "字段重排把 sizeof 从 24 降到 16（实测两版对比）",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "重排前 sizeof=24 重排后 sizeof=16 省下=8 字节\nBefore: a=0 b=8 c=16\nAfter : b=0 a=8 c=9\n重排确实变小: 1",
+  "code": "#include <cstdio>\n#include <cstddef>\n\n// 差序：小成员夹在大成员之间，逼出两段填充\nstruct Before { char a; double b; char c; };\n// 好序：按对齐需求从大到小排列，填充被挤掉\nstruct After  { double b; char a; char c; };\n\nint main() {\n    printf(\"重排前 sizeof=%zu 重排后 sizeof=%zu 省下=%zu 字节\\n\",\n           sizeof(Before), sizeof(After), sizeof(Before) - sizeof(After));\n    printf(\"Before: a=%zu b=%zu c=%zu\\n\",\n           offsetof(Before, a), offsetof(Before, b), offsetof(Before, c));\n    printf(\"After : b=%zu a=%zu c=%zu\\n\",\n           offsetof(After, b), offsetof(After, a), offsetof(After, c));\n    printf(\"重排确实变小: %d\\n\", (int)(sizeof(After) < sizeof(Before)));\n    return 0;\n}"
+}

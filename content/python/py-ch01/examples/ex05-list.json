@@ -1,0 +1,8 @@
+{
+  "title": "列表基础",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "[3, 1, 2, 4]\n4",
+  "code": "nums = [3, 1, 2]\nnums.append(4)\nprint(nums)\nprint(len(nums))"
+}

@@ -1,0 +1,112 @@
+{
+  "meta": {
+    "chapter": "cpp-ch19"
+  },
+  "items": [
+    {
+      "question": "CMake 里 PUBLIC / PRIVATE / INTERFACE 到底有什么区别？什么时候用哪个？",
+      "answer_md": "三个关键字控制的是**使用要求（usage requirements）要不要向消费者传播**，它们只影响 `INTERFACE_*` 那一批属性（`INTERFACE_INCLUDE_DIRECTORIES`、`INTERFACE_COMPILE_DEFINITIONS`、`INTERFACE_COMPILE_FEATURES`、`INTERFACE_LINK_LIBRARIES`）。\n\n- `PRIVATE`：只有自己编译时可见，**不传给**任何链接我的目标。\n- `PUBLIC`：自己可见，**也传给**消费者。\n- `INTERFACE`：自己不可见（我没有编译单元），**只传给**消费者。\n\n判据只有一句话：**这个依赖是否出现在我的公开头文件里**。出现在 `.h` 里 → `PUBLIC`；只在 `.cpp` 里 → `PRIVATE`；整个目标都是头文件库 → `INTERFACE`。\n\n典型例子：`target_include_directories(core PUBLIC include PRIVATE src)`——`include/` 是对外接口，`src/` 是实现细节；`target_compile_options(core PRIVATE -Wall -Wextra -Werror)`——告警是我的开发纪律，不能强加给使用者（否则换编译器版本就会让下游大面积红灯）。\n\n漏写 `PUBLIC` 的症状是下游报 `fatal error: xxx.h: No such file or directory`；滥用 `PUBLIC` 的症状是编译时间随模块数增长、二进制被链进不需要的库。",
+      "follow_ups": [
+        "为什么全局 set(CMAKE_CXX_STANDARD 17) 会污染 FetchContent 拉进来的第三方库？",
+        "INTERFACE 库不产生任何二进制产物，那 add_library(x INTERFACE) 的意义是什么？",
+        "install(EXPORT) 导出后，为什么用 ${CMAKE_SOURCE_DIR} 拼的路径会失效？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "腾讯",
+        "字节"
+      ]
+    },
+    {
+      "question": "为什么现代 CMake 不推荐 include_directories() / link_libraries()？它们到底错在哪？",
+      "answer_md": "因为它们是**目录级（directory-scope）命令**，传播路径是**目录树**而不是**依赖图**。\n\n- `include_directories()`：把 `-I` 加给当前目录及子目录里的**全部目标**，包括你 `add_subdirectory` 拉进来的第三方代码。\n- `link_libraries()`：同理，把库链给全部目标。\n- `set(CMAKE_CXX_FLAGS ...)` / `set(CMAKE_CXX_STANDARD 17)`：污染全局，且换编译器时直接失效。\n\n后果有三：① **配置泄漏**——不相关的目标也被施加了你的设置；② **模块边界消失**——谁都能 include 谁，重构时无法按目标拆分；③ **不可重定位**——用 `${CMAKE_SOURCE_DIR}` 拼的绝对路径在被 install/export 后失效。\n\n正确写法是把信息挂到目标上：`target_include_directories` / `target_link_libraries` / `target_compile_features(core PUBLIC cxx_std_17)` / `target_compile_options`，并且路径一律用 `${CMAKE_CURRENT_SOURCE_DIR}` + 相对路径。\n\n补充两个常被一起问的点：`file(GLOB)` 不会在新增源文件时触发重新配置（要加 `CONFIGURE_DEPENDS`）；`target_link_libraries` 不写关键字是错误写法，依赖语义未声明。",
+      "follow_ups": [
+        "target_compile_features 与直接加 -std=c++17 有什么本质区别？",
+        "如何验证你写的 install(EXPORT) 真的可用？",
+        "add_subdirectory 建的目录树和 target_link_libraries 建的依赖图是一回事吗？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "华为",
+        "腾讯"
+      ]
+    },
+    {
+      "question": "什么样的单元测试才算「好」？你的用例是怎么设计的？",
+      "answer_md": "四个维度：\n\n**① 设计在前，编码在后。** 先做**等价类划分**（有效/无效），再取**边界值**（正好边界、边界 ±1、以及 0 个元素这种空情形），最后才写代码。本章 ex03 的例子：6 个等价类、12 个边界点，用例数量由等价类决定而不是凭感觉凑。\n\n**② 结构清晰（Arrange-Act-Assert）。** 准备 → 执行 → 断言，一段用例里只做一次 Act，只断言可观察结果，不断言实现细节。用例名就是文档（`split_trailing_empty` 比 `test2` 强得多）。\n\n**③ 互相隔离。** 每个用例拿到全新夹具实例（SetUp/TearDown），绝不让静态变量/单例/临时文件/环境变量在用例之间存活——否则就会出现「单独跑通过、整包跑失败」的假失败。\n\n**④ 结果可被机器判定。** 断言失败要**计数并继续跑**，最后汇总并 `return failed ? 1 : 0`。CI 只看退出码，返回 0 写死的话前面全白做。\n\n还要避免两个极端：只堆参数化数量（50 组数据全在同一个等价类里，覆盖率好看但抓不到 bug）；以及把覆盖率当目标（补一堆只调用不断言的用例能把行覆盖率刷高，分支和边界依旧没测）。正确做法是看**未覆盖行清单**去补用例。",
+      "follow_ups": [
+        "语句覆盖、判定覆盖、条件覆盖、路径覆盖，强度顺序是什么？100% 覆盖能说明没有 bug 吗？",
+        "整包跑失败、单独跑通过，你的排查顺序是什么？",
+        "参数化测试适合什么场景？什么情况下反而应该拆成不同夹具？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "字节",
+        "美团"
+      ]
+    },
+    {
+      "question": "时间、随机数、网络这类不可控依赖怎么测？stub、fake、mock 有什么区别？",
+      "answer_md": "**做法：不要在被测代码里直接取系统时间/随机数/网络，把它们抽成接口注入进来。**\n\n具体到时间：定义 `IClock { virtual long long now_ms() const = 0; }`，被测的 `RateLimiter` 只持有 `const IClock&`；生产注入 `SystemClock`（读 `steady_clock`），测试注入 `FakeClock`（`advance(1000)` 一步跨到下一个窗口）。**被测逻辑一行都不用改，也不需要任何 mock 框架**，100 个限流用例在毫秒级跑完且结果稳定——用真实 `sleep` 的等价测试要么被 CI 超时杀掉，要么在负载高的机器上偶发失败（flaky）。\n\n三个词的区别（面试常被问到，很多人混用）：\n- **stub（桩）**：只按需要**返回固定值**，不校验是否被正确调用。上面的 `FakeClock` 就是 stub。\n- **fake（假实现）**：能跑的轻量实现（如内存版 KV 存储），有行为但比真实现简单。\n- **mock / spy**：会**断言调用行为**——调用几次、参数是什么、顺序如何。只有当你需要验证「确实重试了 3 次」这类**交互**时才需要它。\n\n注入方式上还可以用模板（`template <class Clock> class RateLimiter`）做编译期绑定，零开销但头文件膨胀、不能运行期替换；接口稳定且需要运行期替换时用虚函数。\n\n坑：持有引用意味着**不拥有**该对象，调用方必须保证时钟活得比限流器长。",
+      "follow_ups": [
+        "虚函数注入与模板注入怎么选？各自的代价是什么？",
+        "flaky test（偶发失败用例）你一般怎么处理？",
+        "测试金字塔为什么要求断言尽量压在底层？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "字节",
+        "阿里"
+      ]
+    },
+    {
+      "question": "你会把 -Werror、sanitizer、覆盖率门槛都放进 PR 门禁吗？为什么？",
+      "answer_md": "**不会全部放进 PR 门禁，要分层。**\n\n- **PR 门禁（秒级~分钟级）**：编译 + 单元测试 + `-Wall -Wextra -Werror`。这一层要快，否则开发者会学会绕过它。`-Werror` 必须挂在目标上（`PRIVATE`），不能写进全局 `CMAKE_CXX_FLAGS`，否则第三方代码的告警也会被升级成错误。\n- **合并后 / 定时（十分钟级）**：sanitizer（ASan/UBSan）+ 覆盖率统计 + 全矩阵构建。\n\n**sanitizer 的排布**：不要给所有矩阵单元都开 sanitizer。本章 ex08 的做法是在主矩阵之外用 `include` 单独加一条 `os: ubuntu-latest, std: 20, sanitizer: address,undefined`——ASan 约 2× 开销、TSan 5–15×，而且 **ASan 与 TSan 不能同时开**（两者的 shadow memory 模型冲突），ASan 与 UBSan 可以同开。配 `-O1 -g -fno-omit-frame-pointer` 才能拿到可读的栈回溯，并配抑制文件屏蔽第三方库的历史问题。\n\n**覆盖率门槛**要看「未覆盖行清单」而不是只看百分比，并配分支覆盖一起看。覆盖率构建需要 `--coverage` 插桩，会改变二进制，**必须和发布构建分成两套配置**。\n\n另外两个流水线细节：`fail-fast: false` 让矩阵一次跑完（调试期一次看全所有平台）；`if: always()` 保证失败时也能上传测试报告，否则「CI 红了却看不到为什么红」。",
+      "follow_ups": [
+        "ASan 是怎么检测越界和 use-after-free 的？",
+        "为什么 -Werror 挂在 PUBLIC 会让下游崩溃？",
+        "新编译器版本新增告警导致 CI 突然变红，你怎么处理？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "通用",
+        "腾讯",
+        "华为"
+      ]
+    },
+    {
+      "question": "头文件里放非 inline 的函数定义会怎样？ODR 到底是什么？",
+      "answer_md": "**后果：两个及以上翻译单元（TU）包含这个头文件，就会产生两个强符号，链接期报 `multiple definition`。**\n\nODR（One Definition Rule，单一定义规则）的标准表述是：\n- 非 `inline` 的函数/变量，在整个程序中**只能有一个定义**；\n- `inline` 函数、类、模板可以在多个 TU 中各有一份定义，但**这些定义必须逐记号一致**，否则是**未定义行为**（标准不要求诊断）。\n\n注意第二种情况是 **UB 而不是「链接器随便挑一个」**——不同 TU 可能被内联出不同的代码。\n\n按链接属性分四类（本章 ex16 的判定规则）：\n| 属性 | 含义 | 同名多份定义 |\n|---|---|---|\n| `strong` | 外部链接的普通定义 | ❌ multiple definition |\n| `weak` | COMDAT，可折叠（模板实例化常见） | ✅ 链接器任选一份 |\n| `inline` | COMDAT 段，多定义合法 | ✅ 合并为一份（但须一致） |\n| `static` | 内部链接，各 TU 各自私有 | ✅ 不冲突 |\n\n头文件里可以放：声明、`inline`/模板定义、`constexpr`（C++17 起 `constexpr` 变量隐含内部链接）、类内定义的成员函数（隐含 `inline`）。**不要放**非 `inline` 的自由函数定义、非 `constexpr` 的全局变量定义。\n\n排查手法：`nm -C libcore.a | grep <符号>` 看是 `T`（强，已定义）/ `W`（弱）/ `U`（未定义）。\n\n隐藏的坑：头里的 `static int counter;` 虽然不冲突，但**每个 TU 各持一份、互不共享**，表现为「明明加了两次，怎么还是 1」。",
+      "follow_ups": [
+        "类的成员函数定义在类内和写在类外，ODR 上有什么区别？",
+        "static 在文件作用域和块作用域分别修饰什么？",
+        "模板实例化在 ELF 里落在哪个段？为什么多个 TU 各实例化一份不会冲突？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "通用",
+        "腾讯",
+        "字节"
+      ]
+    },
+    {
+      "question": "矩阵构建、缓存、artifact 在你眼里分别解决什么问题？踩过哪些坑？",
+      "answer_md": "**矩阵（matrix）解决「用组合换覆盖」。** 常见维度是平台（Linux/Windows/macOS）、编译器、C++ 标准档、构建类型。语义上：基础组合是各维度的**笛卡尔积**，规模指数增长（GitHub 上限 256）；`exclude` 只做**减法**（命中模式的全部组合都被剔除）；`include` 若能匹配已有组合就**合并键值**（不增加组合数），完全匹配不上才**新增**一个组合。坑：把「用例编号」做成矩阵维度——那是测试框架里参数化该干的事，不是 CI 的事；以及忽略成本（macOS runner 计费倍率高，可以用 `exclude` 只在 Linux 上跑重组合）。\n\n**缓存解决「用指纹换正确性 + 换时间」。** key 必须包含**影响产物的一切输入**，例如 `${{ matrix.os }}-${{ matrix.std }}-deps-${{ hashFiles('CMakeLists.txt') }}`：依赖一变 key 就变，缓存自动失效。坑：key 不带指纹 → 依赖更新后仍命中旧缓存，出现「本地新、CI 旧」的鬼影 bug；缓存编译产物目录而不带指纹 → 源码变了却用了旧的 `.o`。正确做法只缓存**依赖与工具链**（`build/_deps`、`~/.cache/ccache`）。\n\n**artifact 解决「跨 job 传产物」。** 编译产物给部署 job、测试报告给人看。它不是长期存储，retention 要设短。坑：不加 `if: always()` 时一旦测试失败就看不到报告。\n\n**调度层面**：`needs` 构成 DAG，流水线总时长的下界是**关键路径**长度——加机器只对不在关键路径上的 job 有用。优化只能靠：把能并行的 job 从 `needs` 链上摘下来、把慢 job 拆成矩阵、用缓存压低链上任务耗时。另外 `uses` 必须固定到 tag 或 SHA，并给每个 job 设 `timeout-minutes`。",
+      "follow_ups": [
+        "fail-fast 设成 true 和 false 各适合什么阶段？",
+        "给你一个 workflow，你怎么求它的拓扑序、并行层和关键路径？有环会怎样？",
+        "ccache 为什么能把二次构建从分钟级降到秒级？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "阿里",
+        "美团"
+      ]
+    }
+  ]
+}

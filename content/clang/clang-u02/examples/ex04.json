@@ -1,0 +1,8 @@
+{
+  "title": "malloc 失败返回 NULL 的处理",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "请求 (size_t)-1 字节 -> 返回 NULL\n请求 64 字节 -> 成功",
+  "code": "#include <stdio.h>\n#include <stdlib.h>\n\nint main(void) {\n    void *huge = malloc((size_t)-1);        /* 不可能满足的请求 */\n    printf(\"请求 (size_t)-1 字节 -> %s\\n\", huge ? \"成功(意外)\" : \"返回 NULL\");\n\n    void *small = malloc(64);\n    printf(\"请求 64 字节 -> %s\\n\", small ? \"成功\" : \"失败\");\n    free(small);\n    return 0;\n}"
+}

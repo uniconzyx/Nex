@@ -1,0 +1,14 @@
+{
+  "meta": { "chapter": "java-ch01", "category": "basic" },
+  "items": [
+    {
+      "title": "命令行成绩统计器",
+      "requirement_md": "实现一个控制台程序：用数组保存若干学生成绩（可在代码中初始化一组示例数据），利用循环与流程控制计算平均分、最高分、最低分，并统计及格（≥60）人数。要求代码含 `public class Main` 与 `public static void main`，全部使用本章知识点（变量、八种基本类型、运算符、if/for、数组）。",
+      "tasks": [
+        { "title": "声明成绩数组并遍历求和", "verification": { "type": "test", "desc": "sum 与平均成绩计算正确" } },
+        { "title": "用 if 比较求最高分/最低分", "verification": { "type": "test", "desc": "max/min 与真实极值一致" } },
+        { "title": "统计及格人数并格式化输出", "verification": { "type": "manual", "desc": "输出含平均分(保留一位)、最高/最低分与及格人数，格式清晰" } }
+      ]
+    }
+  ]
+}

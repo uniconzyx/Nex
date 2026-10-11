@@ -1,0 +1,14 @@
+{
+  "meta": { "chapter": "cpp-ch02", "category": "basic" },
+  "items": [
+    {
+      "title": "命令行简易计算器",
+      "requirement_md": "实现控制台计算器：输入形如 `3 + 5` 的表达式，输出结果。用函数分发处理 + - * /（除法注意除零），主循环读取输入直到 exit。要求用引用/指针分离输入输出，函数职责单一。",
+      "tasks": [
+        { "title": "实现四则运算函数与分发", "verification": { "type": "test", "desc": "覆盖整数/小数/除零返回错误" } },
+        { "title": "主循环读取与解析", "verification": { "type": "manual", "desc": "输入 exit 可退出，非法表达式有提示" } },
+        { "title": "用 lambda 做运算表（进阶）", "verification": { "type": "manual", "desc": "map<string, function> 分发，体验函数对象" } }
+      ]
+    }
+  ]
+}

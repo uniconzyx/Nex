@@ -1,0 +1,8 @@
+{
+  "title": "sizeof：数组与指针的根本差异",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "sizeof(a) = 20\nsizeof(p) = 8\n元素个数 = 5",
+  "code": "#include <stdio.h>\n\nint main(void) {\n    int a[5] = {0};\n    int *p = a;\n    printf(\"sizeof(a) = %zu\\n\", sizeof(a));\n    printf(\"sizeof(p) = %zu\\n\", sizeof(p));\n    printf(\"元素个数 = %zu\\n\", sizeof(a) / sizeof(a[0]));\n    return 0;\n}"
+}

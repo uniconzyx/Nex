@@ -1,0 +1,9 @@
+{
+  "title": "槽迁移与 ASK 重定向：迁移中临时跳转不刷新映射",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== 槽迁移与 ASK 重定向模拟 ===\n迁移前: 槽100 在 nodeA\n迁移中请求槽100的key -> ASK 100 nodeB (迁移中, 本次临时重定向, 不刷新映射)\n客户端按 ASK 临时去 nodeB 取数据 (本次不刷新映射)\n迁移完成: 槽100 归属 nodeB\n再次请求槽100的key -> MOVED 100 nodeB (槽归属已永久变更)\n此时客户端刷新映射到 nodeB",
+  "code": "print(\"=== 槽迁移与 ASK 重定向模拟 ===\")\nmigrating = {\"slot\": 100, \"src\": \"nodeA\", \"dst\": \"nodeB\", \"done\": False}\ndef handle_on_src(slot, key):\n    if migrating[\"done\"]:\n        return \"MOVED %d nodeB (槽归属已永久变更)\" % slot\n    return \"ASK %d nodeB (迁移中, 本次临时重定向, 不刷新映射)\" % slot\nprint(\"迁移前: 槽100 在 nodeA\")\nprint(\"迁移中请求槽100的key ->\", handle_on_src(100, \"k\"))\nprint(\"客户端按 ASK 临时去 nodeB 取数据 (本次不刷新映射)\")\nmigrating[\"done\"] = True\nprint(\"迁移完成: 槽100 归属 nodeB\")\nprint(\"再次请求槽100的key ->\", handle_on_src(100, \"k\"))\nprint(\"此时客户端刷新映射到 nodeB\")\n",
+  "_verified": true
+}

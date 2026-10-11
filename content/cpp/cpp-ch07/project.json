@@ -1,0 +1,15 @@
+{
+  "meta": { "chapter": "cpp-ch07", "category": "basic" },
+  "items": [
+    {
+      "title": "实现一个类型安全的泛型元组 MyTuple 与类型安全的 max 选择器",
+      "requirement_md": "用类模板 + 可变参数模板实现一个简化版 `MyTuple<Ts...>`：\n1. 支持用 `make_tuple(a, b, c)` 构造、用 `get<Index>(t)` 按编译期索引取值（`get` 用函数模板偏特化/重载实现，返回正确类型引用）。\n2. 实现一个 `my_max` 函数模板：对同类型可比较元素取最大值；并用 `std::enable_if` 区分整型与浮点型的“特殊处理”（如整型走快路径、浮点型额外打印精度提示），体验 SFINAE 筛选。\n3. （加分）为 `MyTuple<bool, bool>` 写一个**偏特化**，把两个 bool 位压缩存储到单个 `unsigned char`（体现特化优化）。\n要求：自带 `static_assert` 与简单 `main()` 单测，验证 `get` 返回类型正确、值正确，且编译期就能捕获越界/类型错误。",
+      "tasks": [
+        { "title": "实现 MyTuple 存储与 make_tuple", "verification": { "type": "test", "desc": "构造后 get<0>/get<1> 返回对应类型与值，类型可用 static_assert 校验" } },
+        { "title": "实现 get<Index> 的函数模板（按索引取值）", "verification": { "type": "test", "desc": "越界索引应在编译期报错（无法匹配）" } },
+        { "title": "实现 my_max + enable_if 区分整型/浮点", "verification": { "type": "test", "desc": "整型与浮点分别命中不同重载，编译期筛选正确" } },
+        { "title": "（加分）MyTuple<bool,bool> 位压缩偏特化", "verification": { "type": "manual", "desc": "验证两个 bool 仅占 1 字节、读写位正确" } }
+      ]
+    }
+  ]
+}

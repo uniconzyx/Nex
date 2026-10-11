@@ -1,0 +1,56 @@
+{
+  "meta": {
+    "chapter": "data-ch01",
+    "title": "NumPy —— 综合项目",
+    "count": 1
+  },
+  "items": [
+    {
+      "title": "实现一个向量化的数据标准化与异常检测流水线",
+      "requirement_md": "用 NumPy 实现一个端到端的小型数据流水线，要求**全程不出现 Python 层显式循环**：\n\n1. **加载与探查**：生成或读取一个 shape 为 (N, D) 的数值矩阵，打印 shape / dtype / strides / 是否 C 连续 / 内存占用（MB）；\n2. **缺失与异常值处理**：用布尔掩码去掉含 NaN 的行，再用分位数法（IQR）截尾异常值，打印每一步被过滤掉的行数与占比；\n3. **标准化**：实现 z-score 与 min-max 两种，用 `keepdims=True` 配合广播完成，验证标准化后每列均值≈0、标准差≈1；\n4. **批量距离矩阵**：用广播（不要用双重循环）计算 N×N 的欧氏距离矩阵，并与 `scipy.spatial.distance` 的结果对照验证正确性；\n5. **性能报告**：对比「Python 循环版」与「向量化版」在同一个任务上的耗时，给出加速比，并解释差距来源；\n6. **内存剖析**：用 `nbytes` 与 `np.shares_memory` 证明哪些中间结果是视图、哪些是拷贝，给出优化建议。\n\n**进阶**：把距离矩阵计算改为分块（chunking）实现，用 `out=` 复用缓冲区，观察内存峰值下降。",
+      "tasks": [
+        {
+          "title": "加载探查并打印内存画像",
+          "verification": {
+            "type": "output",
+            "desc": "打印 shape/dtype/strides/C_CONTIGUOUS/nbytes；能判断该数组是否连续。"
+          }
+        },
+        {
+          "title": "布尔掩码完成清洗",
+          "verification": {
+            "type": "output",
+            "desc": "NaN 行与 IQR 异常行被正确剔除，打印过滤数量与剩余占比，且全程无 for 循环。"
+          }
+        },
+        {
+          "title": "广播完成标准化并自检",
+          "verification": {
+            "type": "output",
+            "desc": "标准化后每列均值 |μ| < 1e-10、标准差 ≈ 1（误差 < 1e-10）。"
+          }
+        },
+        {
+          "title": "向量化距离矩阵并与基线对照",
+          "verification": {
+            "type": "output",
+            "desc": "与 scipy 的 cdist 结果最大绝对误差 < 1e-10；对角元全为 0。"
+          }
+        },
+        {
+          "title": "性能与内存报告",
+          "verification": {
+            "type": "benchmark",
+            "desc": "给出加速比数量级（预期 50~200 倍）并用 SIMD/局部性/解释器开销解释；列出视图与拷贝清单。"
+          }
+        }
+      ],
+      "tags": [
+        "NumPy",
+        "向量化",
+        "数据处理",
+        "性能"
+      ]
+    }
+  ]
+}

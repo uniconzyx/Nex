@@ -1,0 +1,8 @@
+{
+  "title": "事件委托模拟：父节点监听仅处理 li（Python）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "委托处理 li#2 click\n委托处理 li#3 click",
+  "code": "class El:\n    _id = 0\n    def __init__(self, tag, parent=None):\n        El._id += 1\n        self.id = El._id\n        self.tag = tag\n        self.parent = parent\n\nclass EventBus:\n    def __init__(self):\n        self.handlers = []\n    def on(self, predicate, cb):\n        self.handlers.append((predicate, cb))\n    def fire(self, target):\n        cur = target\n        while cur is not None:\n            for pred, cb in self.handlers:\n                if pred(cur):\n                    cb(cur)\n            cur = cur.parent\n\nroot = El('ul')\nchild1 = El('li', root)\nchild2 = El('li', root)\nbus = EventBus()\nbus.on(lambda e: e.tag == 'li', lambda e: print('委托处理 li#' + str(e.id) + ' click'))\nbus.fire(child1)\nbus.fire(child2)\nbus.fire(root)"
+}

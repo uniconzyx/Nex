@@ -1,0 +1,8 @@
+{
+  "title": "LLM-as-Judge 与人工标注一致率（Cohen's Kappa）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "样本数 = 20  类别数 = 3\n混淆矩阵(行=人工,列=judge):\n  类别0: [5, 1, 0]\n  类别1: [2, 5, 1]\n  类别2: [0, 1, 5]\n观测一致率 Po = 0.7500\n期望一致率 Pe = 0.3350\nCohen's Kappa = 0.6241\nKappa 达到『实质性一致』(>=0.61): True\njudge 与人工一致数 = 15 / 20\n",
+  "code": "\"\"\"LLM 评判与人工标注的一致性: 观测一致率 + Cohen's Kappa。\"\"\"\nhuman = [1, 1, 0, 2, 1, 0, 2, 2, 1, 0, 1, 2, 0, 1, 2, 1, 0, 0, 2, 1]\njudge = [1, 0, 0, 2, 1, 0, 1, 2, 1, 0, 2, 2, 0, 1, 2, 0, 0, 1, 2, 1]\nLABELS = [0, 1, 2]\nn = len(human)\n\npo = sum(1 for a, b in zip(human, judge) if a == b) / n\npe = 0.0\nfor lab in LABELS:\n    ph = sum(1 for a in human if a == lab) / n\n    pj = sum(1 for b in judge if b == lab) / n\n    pe += ph * pj\nkappa = (po - pe) / (1 - pe)\n\nconf = [[0] * len(LABELS) for _ in LABELS]\nfor a, b in zip(human, judge):\n    conf[a][b] += 1\n\nprint(\"样本数 = %d  类别数 = %d\" % (n, len(LABELS)))\nprint(\"混淆矩阵(行=人工,列=judge):\")\nfor r, lab in enumerate(LABELS):\n    print(\"  类别%d: %s\" % (lab, conf[r]))\nprint(\"观测一致率 Po = %.4f\" % po)\nprint(\"期望一致率 Pe = %.4f\" % pe)\nprint(\"Cohen's Kappa = %.4f\" % kappa)\nprint(\"Kappa 达到『实质性一致』(>=0.61):\", kappa >= 0.61)\nprint(\"judge 与人工一致数 = %d / %d\" % (sum(1 for a, b in zip(human, judge) if a == b), n))\n"
+}

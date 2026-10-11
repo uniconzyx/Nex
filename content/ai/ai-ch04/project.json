@@ -1,0 +1,51 @@
+{
+  "meta": {
+    "chapter": "ai-ch04",
+    "category": "dl",
+    "title": "高效微调与对齐：LoRA、RLHF 与 DPO —— 综合项目",
+    "count": 1
+  },
+  "items": [
+    {
+      "title": "只用 NumPy 实现一条完整的「LoRA 微调 + DPO 对齐」流水线",
+      "requirement_md": "只用 NumPy（**不允许** PyTorch / TensorFlow / PEFT），从零搭出一条可复现的微调与对齐流水线：\n\n1. **基座与 LoRA 层**：实现 `LoRALinear`（A 随机初始化、B 置零、alpha/r 缩放），并证明初始时 ΔW = 0、前向与纯 W 一致；\n2. **参数量与显存核算**：给定配置算出可训练参数量占比，以及全参 / LoRA / QLoRA 三种方案的显存估算；\n3. **量化**：实现分块 NF4 与 INT8 的量化-反量化，在固定权重上对比 MSE，并解释 NF4 级别非等距的设计动机；\n4. **SFT 阶段**：在固定的合成分类任务上，只训练 LoRA 参数（主干冻结），打印损失下降曲线与最终准确率；\n5. **奖励模型**：用 Bradley-Terry 目标在偏好对上训练线性奖励模型，报告与真实效用权重的余弦相似度；\n6. **DPO 阶段**：实现 DPO 损失，用中心差分校验梯度符号；在同一偏好数据上跑若干步，证明「chosen 的隐式奖励 − rejected 的隐式奖励」单调增大；\n7. **对齐对照实验**：同一基座分别做「仅 SFT」与「SFT + DPO」，在固定留出集上对比两类指标（目标任务得分 / 通用能力得分），量化对齐税；\n8. **rank 敏感性**：在 rank ∈ {4, 8, 16, 32} 上重复步骤 4，画出「rank - 验证损失」曲线并给出选 rank 的结论。\n\n**进阶**：把 alpha 与 rank 解耦（rsLoRA 的 alpha/sqrt(r)），对比两种缩放下同一配置的收敛速度差异；用可验证奖励（规则打分）替代奖励模型，复现一次 reward hacking 并观察 KL 惩罚如何抑制它。",
+      "tasks": [
+        {
+          "title": "实现 LoRA 层与初始化不变性验证",
+          "verification": {
+            "type": "output",
+            "desc": "B 全零时 `B@A` 全为 0（`np.allclose` 通过）；前向输出与纯 W 路径逐元素一致；`lora_param_count` 返回 r*(d_in+d_out)。"
+          }
+        },
+        {
+          "title": "实现分块 NF4 / INT8 量化并对比误差",
+          "verification": {
+            "type": "output",
+            "desc": "同一权重矩阵下两种量化的 MSE 可复现（固定种子）；INT8 的 MSE 小于 NF4；打印每参数字节开销。"
+          }
+        },
+        {
+          "title": "SFT 只训练 LoRA 且损失下降",
+          "verification": {
+            "type": "output",
+            "desc": "主干权重在训练前后逐元素不变（冻结验证）；损失序列末值显著小于首值；训练参数量等于 LoRA 参数量而非全参。"
+          }
+        },
+        {
+          "title": "DPO 训练使奖励差单调增大",
+          "verification": {
+            "type": "output",
+            "desc": "记录每 N 步的「chosen 隐式奖励 − rejected 隐式奖励」，该序列整体单调不降；中心差分得到的梯度符号为 dL/dlogp_chosen < 0 且 dL/dlogp_rejected > 0。"
+          }
+        },
+        {
+          "title": "rank 敏感性实验与结论",
+          "verification": {
+            "type": "output",
+            "desc": "给出 rank ∈ {4,8,16,32} 的最终验证损失表；结论行必须由该表推导（如「16 之后收益 < 1%」），不得硬编码一句断言。"
+          }
+        }
+      ]
+    }
+  ]
+}

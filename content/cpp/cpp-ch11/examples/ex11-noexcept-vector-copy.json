@@ -1,0 +1,8 @@
+{
+  "title": "非 noexcept 移动：扩容时改走拷贝（copies=1, moves=2）",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "copies=1 moves=2\n结论：非 noexcept 移动时，扩容退化为拷贝，copies 增大",
+  "code": "#include <iostream>\n#include <vector>\n\nstruct Widget {\n    static int copies, moves;\n    Widget() = default;\n    Widget(const Widget&) { ++copies; }        // 拷贝\n    Widget(Widget&&) { ++moves; }              // 非 noexcept 移动\n};\nint Widget::copies = 0, Widget::moves = 0;\n\nint main() {\n    std::vector<Widget> v;\n    v.reserve(1);\n    v.push_back(Widget());   // ① 临时对象移动进容器 -> moves=1\n    v.push_back(Widget());   // ② 临时移动(moves+1)；扩容搬移旧元素时移动可能抛，\n                             //    为保强异常安全改用拷贝 -> copies=1\n    std::cout << \"copies=\" << Widget::copies << \" moves=\" << Widget::moves << '\\n';\n    std::cout << \"结论：非 noexcept 移动时，扩容退化为拷贝，copies 增大\\n\";\n}"
+}

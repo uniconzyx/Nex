@@ -1,0 +1,8 @@
+{
+  "title": "C 字符串与 strcat",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "cat!",
+  "code": "#include <iostream>\n#include <cstring>\n\nint main() {\n    char a[20] = \"cat\";\n    std::strcat(a, \"!\");\n    std::cout << a;\n}"
+}

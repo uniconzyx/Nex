@@ -1,0 +1,8 @@
+{
+  "title": "count / count_if：统计出现次数与谓词计数",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "count 2 = 4\ncount_if even = 5\n",
+  "code": "#include <iostream>\n#include <vector>\n#include <algorithm>\nint main() {\n    std::vector<int> v = {1,2,2,3,2,4,5,2};\n    std::cout << \"count 2 = \" << std::count(v.begin(), v.end(), 2) << '\\n';\n    std::cout << \"count_if even = \" << std::count_if(v.begin(), v.end(), [](int x){ return x % 2 == 0; }) << '\\n';\n}\n"
+}

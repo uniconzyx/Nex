@@ -1,0 +1,8 @@
+{
+  "title": "友元函数：重载流输出运算符",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "12.34",
+  "code": "#include <iostream>\n\nclass Money {\n    long cents_;\npublic:\n    Money(long c) : cents_(c) {}\n    friend std::ostream& operator<<(std::ostream& os, const Money& m) {\n        return os << m.cents_ / 100 << '.' << (m.cents_ % 100);\n    }\n};\n\nint main() {\n    Money m(1234);\n    std::cout << m;      // 返回 ostream& 才能继续链式输出\n}"
+}

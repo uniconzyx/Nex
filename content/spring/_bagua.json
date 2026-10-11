@@ -1,0 +1,196 @@
+{
+  "subject": "spring",
+  "title": "Spring 生态八股模块",
+  "note": "Spring / SpringBoot / MyBatis 面试高频八股题库。侧重底层机制（容器启动流程、代理机制、事务传播、SQL 映射原理），与各章 interview.json 互补。",
+  "categories": [
+    {
+      "id": "ioc",
+      "title": "IoC 容器与依赖注入",
+      "items": [
+        {
+          "q": "BeanFactory 和 ApplicationContext 有什么区别？",
+          "a": "**要点**\n1. `BeanFactory` 是最顶层接口，只提供**基础 IoC 能力**（`getBean`），默认**懒加载**：用到才创建 Bean。\n2. `ApplicationContext` 继承 `BeanFactory`，是**面向应用**的容器，增加：国际化（MessageSource）、事件发布（ApplicationEventPublisher）、资源加载（ResourcePatternResolver）、自动注册 BeanPostProcessor。\n3. 默认**启动时预实例化**所有单例 Bean（`refresh()` 里 `preInstantiateSingletons`），所以启动慢但运行时快，且能**提前暴露配置错误**。\n4. 实践：几乎总是用 ApplicationContext；BeanFactory 只在极度受限的内存环境（如移动端/Applet）才有意义。",
+          "tags": [
+            "IoC",
+            "容器"
+          ],
+          "difficulty": "easy",
+          "hot": 5,
+          "source_ref": "《Spring 实战》第2章"
+        },
+        {
+          "q": "Spring 如何解决循环依赖？为什么三级缓存而不是两级？",
+          "a": "**要点**\n1. 三个缓存：`singletonObjects`（一级，成品）、`earlySingletonObjects`（二级，半成品）、`singletonFactories`（三级，ObjectFactory）。\n2. 流程（A 依赖 B，B 依赖 A）：A 实例化后把**工厂 lambda 放进三级缓存** → 注入 B → B 实例化后注入 A 时，从三级缓存取工厂并**提前调用 `getEarlyBeanReference`** 得到早期引用（必要时生成 AOP 代理），放入二级缓存 → B 完成 → A 完成。\n3. **为什么需要三级**：因为需要 AOP。若只有二级缓存，则提前暴露的必须是**原始对象**，等 A 初始化完再生成代理，B 里持有的就是原始对象而非代理 → 代理失效。三级缓存的工厂允许在**真正被依赖时**才决定是否返回代理。\n4. **局限**：只能解决**单例 + setter/字段注入**的循环依赖。构造器注入的循环依赖无解（无法提前暴露），Spring 启动直接抛 `BeanCurrentlyInCreationException`。`prototype` 作用域也不支持。\n5. 工程建议：循环依赖是**设计坏味道**，优先重构而不是依赖容器兜底。",
+          "tags": [
+            "IoC",
+            "循环依赖",
+            "三级缓存"
+          ],
+          "difficulty": "hard",
+          "hot": 5,
+          "source_ref": "《Spring 源码深度解析》第4章"
+        },
+        {
+          "q": "@Autowired、@Resource、@Inject 有什么区别？字段注入有什么问题？",
+          "a": "**要点**\n1. `@Autowired` 是 Spring 注解，**按类型**注入，多个候选时配合 `@Qualifier`/`@Primary`；可作用于构造器、setter、字段。\n2. `@Resource` 是 JSR-250（JDK 自带），**默认按名称**注入，找不到名称再按类型；只作用于字段和 setter。\n3. `@Inject` 是 JSR-330，语义等价 `@Autowired(required=true)`，但不支持 `required=false`。\n4. **字段注入的四个问题**：① 无法用 `final`，依赖可被外部改写；② 隐藏依赖关系（构造器参数一目了然，字段不是）；③ **单元测试必须启动容器或靠反射注入**；④ 可能与容器生命周期耦合（如字段在构造器里不可用）。\n5. **推荐构造器注入**：Spring 4.3 起单构造器可省略 `@Autowired`；天然支持 `final`、易测、能暴露循环依赖。",
+          "tags": [
+            "依赖注入",
+            "最佳实践"
+          ],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《Spring 实战》第2章"
+        },
+        {
+          "q": "Bean 有哪些作用域？单例 Bean 是线程安全的吗？",
+          "a": "**要点**\n1. 六种作用域：`singleton`（默认，容器内唯一）、`prototype`（每次 getBean 新建）、`request`、`session`、`application`、`websocket`（后四种仅 Web 环境）。\n2. **单例 Bean 不是线程安全的**——容器只保证**只有一个实例**，是否安全取决于你写的代码。Spring 自己 register 的 Bean（如 `DispatcherServlet`、各 `*Template`）都是无状态的，所以安全。\n3. 危险写法：单例 Bean 里放**可变的成员变量**（如 `private int count;`），多线程并发读写就出问题。\n4. 处理方式：① 无状态设计（首选）；② 用 ThreadLocal 隔离可变状态；③ 改 prototype（代价大）；④ 对共享状态加锁或用原子类。\n5. `prototype` 生命周期**不完整**：Spring 不负责销毁（不调用 `@PreDestroy`），需要调用方自己管理。",
+          "tags": [
+            "Bean",
+            "作用域",
+            "线程安全"
+          ],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《Spring 实战》第2章"
+        }
+      ]
+    },
+    {
+      "id": "aop",
+      "title": "AOP 与代理机制",
+      "items": [
+        {
+          "q": "Spring AOP 的实现原理是什么？JDK 动态代理和 CGLIB 有什么区别？",
+          "a": "**要点**\n1. **JDK 动态代理**：基于接口，运行时生成实现同一接口的代理类（`Proxy.newProxyInstance`），通过 `InvocationHandler` 回调。**要求目标类必须有接口**。\n2. **CGLIB**：基于继承，运行时用 ASM 生成目标类的**子类**并覆写方法，通过 `MethodInterceptor` 回调。**无法代理 final 类/final 方法/private 方法**。\n3. Spring 的默认策略（Spring Boot 2.x 起）：`spring.aop.proxy-target-class=true` → **统一用 CGLIB**。原因：避免「有接口用 JDK、没接口用 CGLIB」的不一致导致的注入类型问题（如按具体类注入失败）。\n4. Spring 5.2 的 CGLIB 已改为**内嵌**（不再需要额外的 cglib 依赖），字节码生成用 Spring 自己的 `SpringCglib`。\n5. 性能：现代 JVM 下两者差距很小；CGLIB 首次生成字节码较慢，之后调用更快（无接口方法转发）。",
+          "tags": [
+            "AOP",
+            "动态代理",
+            "CGLIB"
+          ],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《Spring 源码深度解析》第6章"
+        },
+        {
+          "q": "为什么在同一个类里调用自己的 @Transactional / @Cacheable 方法会失效？",
+          "a": "**要点**\n1. 根因：AOP 是**代理模式**。外部调用走的是**代理对象**（增强生效），而类内部 `this.foo()` 直接走**原始对象**，**完全不经过代理**。\n2. 表现：`@Transactional` 不生效（同一事务/无事务）、`@Async` 变成同步、`@Cacheable` 不走缓存。\n3. **解法**：① 把方法拆到另一个 Bean 里（推荐，职责更清晰）；② 自注入 `@Autowired private XxxService self;` 再 `self.foo()`；③ `AopContext.currentProxy()`（需 `@EnableAspectJAutoProxy(exposeProxy = true)`）；④ 用 `ApplicationContext.getBean()` 取代理。\n4. 同类问题的第二种：**private 方法**上的注解不生效（CGLIB 无法覆写 private）。\n5. 面试延伸：这题的通用答案是「**代理只拦截外部调用**」——凡是通过 `this` 的调用都绕过了增强链。",
+          "tags": [
+            "AOP",
+            "事务",
+            "自调用"
+          ],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《Spring 揭秘》第5章"
+        },
+        {
+          "q": "Spring 事务的七种传播行为，最常用哪几个？",
+          "a": "**要点**\n1. `REQUIRED`（默认）：有事务就加入，没有就新建。**绝大多数场景用这个**。\n2. `REQUIRES_NEW`：**总是新建**，挂起当前事务。用于「日志/审计必须落库，不能被主事务回滚」——注意会占两个连接，可能死锁。\n3. `NESTED`：嵌套事务（用 savepoint 实现），内层回滚不影响外层，外层回滚会带上内层。**只能用于 DataSourceTransactionManager**。\n4. `SUPPORTS`：有就加入，没有就非事务执行。`NOT_SUPPORTED`：挂起事务、非事务执行。`MANDATORY`：必须在事务中，否则抛异常（用于强制约束）。`NEVER`：必须无事务，否则抛异常。\n5. 面试追问「REQUIRES_NEW 和 NESTED 区别」：前者是**两个独立物理事务**（两层连接），后者是**同一事务内的保存点**（一个连接）。",
+          "tags": [
+            "事务",
+            "传播行为"
+          ],
+          "difficulty": "mid",
+          "hot": 4,
+          "source_ref": "《Spring 实战》第6章"
+        },
+        {
+          "q": "@Transactional 有哪些常见的失效场景？",
+          "a": "**要点**\n1. **自调用**：同类内 `this.method()` 绕过代理（见上题）。\n2. **方法非 public**：Spring 默认只代理 public 方法。\n3. **异常类型不匹配**：默认只对 `RuntimeException` / `Error` 回滚，**受检异常不回滚**。要回滚必须写 `@Transactional(rollbackFor = Exception.class)`——**这是线上事故高发点**。\n4. **异常被吞掉**：`try { ... } catch (Exception e) { log.error(...); }` 没有 rethrow，事务管理器根本感知不到异常，照样提交。\n5. **传播行为设置为 NOT_SUPPORTED / NEVER**，或类未交给 Spring 管理（`new` 出来的对象）。\n6. **多数据源未配置事务管理器**，或 `@Transactional` 与 `@Async` 同时用（异步线程无事务上下文）。\n7. 工程建议：统一在基类/约定里强制 `rollbackFor = Exception.class`，并用 ArchUnit 之类的测试守护。",
+          "tags": [
+            "事务",
+            "失效场景",
+            "踩坑"
+          ],
+          "difficulty": "hard",
+          "hot": 5,
+          "source_ref": "《Spring 实战》第6章"
+        }
+      ]
+    },
+    {
+      "id": "boot",
+      "title": "SpringBoot 自动配置",
+      "items": [
+        {
+          "q": "@SpringBootApplication 这个注解做了什么？",
+          "a": "**要点**它是三个注解的组合：\n1. `@SpringBootConfiguration`：本质是 `@Configuration`，标识这是配置类。\n2. `@ComponentScan`：从当前包开始**向下扫描**组件（这就是为什么启动类要放在**最外层包**）。\n3. `@EnableAutoConfiguration`：核心，等于 `@AutoConfigurationPackage` + `@Import(AutoConfigurationImportSelector.class)`。\n\n**自动配置的加载链路**：\n- `AutoConfigurationImportSelector` 读取所有 jar 的 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`（**2.7 起的新 SPI 文件**；2.7 前是 `spring.factories`）。\n- 去重、按 `@AutoConfigureOrder`/`@AutoConfigureBefore/After` 排序。\n- 逐个用 `@ConditionalOnClass` / `@ConditionalOnMissingBean` / `@ConditionalOnProperty` 等**条件注解过滤**，只有条件成立的配置类才生效。\n- 最后由 `ConfigurationClassPostProcessor` 解析成 BeanDefinition 注册进容器。",
+          "tags": [
+            "SpringBoot",
+            "自动配置",
+            "SPI"
+          ],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《Spring Boot 编程思想》第7章"
+        },
+        {
+          "q": "SpringBoot 的 starter 机制是什么？自己写一个 starter 要做什么？",
+          "a": "**要点**\n1. starter 本质是一个**依赖聚合 + 自动配置**的约定包：`xxx-spring-boot-starter` 负责拉依赖，`xxx-spring-boot-autoconfigure` 负责提供自动配置类，用户只引一个坐标即可开箱可用。\n2. **写一个 starter 的三步**：\n   - 定义 `XxxProperties`（`@ConfigurationProperties(prefix = \"xxx\")`）承载配置项；\n   - 定义 `XxxAutoConfiguration`，用 `@ConditionalOnClass` / `@ConditionalOnMissingBean` 保证「用户没自定义时才兜底」；\n   - 在 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` 里登记自动配置类全限定名。\n3. **关键设计原则**：`@ConditionalOnMissingBean` 是「**约定优于配置 + 允许覆盖**」的实现——SpringBoot 一切默认值都可被用户 Bean 顶替。\n4. 调试技巧：`--debug` 启动会打印 **ConditionEvaluationReport**，能看到每个自动配置类为什么生效/不生效（Positive/Negative matches）。",
+          "tags": [
+            "SpringBoot",
+            "starter",
+            "条件注解"
+          ],
+          "difficulty": "mid",
+          "hot": 4,
+          "source_ref": "《Spring Boot 编程思想》第9章"
+        },
+        {
+          "q": "SpringBoot 启动流程的关键阶段？",
+          "a": "**要点**\n1. `new SpringApplication(...)`：推断应用类型（SERVLET / REACTIVE / NONE）、加载 `ApplicationContextInitializer` 与 `ApplicationListener`（从 `spring.factories` 读）。\n2. `run()`：\n   - 创建 `StopWatch`、配置 `Environment`（发布 `ApplicationEnvironmentPreparedEvent`）；\n   - 打印 Banner；\n   - **创建 ApplicationContext**（Servlet 环境是 `AnnotationConfigServletWebServerApplicationContext`）；\n   - `prepareContext`：执行 initializer、注册主配置类、发布 `ApplicationContextInitializedEvent`；\n   - `refreshContext`：**核心**，即 Spring 的 `AbstractApplicationContext.refresh()`（12 步），其中 `onRefresh()` 阶段**启动内嵌 Web 服务器**（Tomcat/Jetty/Undertow）；\n   - `afterRefresh` + 发布 `ApplicationStartedEvent` / `ApplicationReadyEvent`。\n3. 之后若有 `ApplicationRunner` / `CommandLineRunner`，在 `callRunners` 中执行（此时容器已完全就绪，适合做预热/校验）。\n4. 失败时发布 `ApplicationFailedEvent` 便于排障。",
+          "tags": [
+            "SpringBoot",
+            "启动流程",
+            "refresh"
+          ],
+          "difficulty": "hard",
+          "hot": 4,
+          "source_ref": "《Spring Boot 编程思想》第5章"
+        }
+      ]
+    },
+    {
+      "id": "mybatis",
+      "title": "MyBatis 映射与缓存",
+      "items": [
+        {
+          "q": "#{} 和 ${} 有什么区别？为什么 ${} 有 SQL 注入风险？",
+          "a": "**要点**\n1. `#{}`：生成 **PreparedStatement 的占位符 `?`**，值通过 `setXxx()` 绑定 → **参数化查询，天然防注入**，且能复用执行计划。\n2. `${}`：**字符串直接拼接**进 SQL → 语义上是文本替换，**存在 SQL 注入**。\n3. `${}` 的正确用途只有**非值位置**：动态表名、动态列名、`ORDER BY` 字段（这些位置的 `?` 在 SQL 语法上不被允许）。此时必须**白名单校验**。\n4. `ORDER BY #{}` 为什么不行：预编译后 SQL 变成 `ORDER BY ?`，数据库把 `?` 当成一个常量表达式（排序列索引），语义错误。\n5. 面试延伸：`LIKE` 的正确写法是 `LIKE CONCAT('%', #{kw}, '%')`，而不是 `LIKE '%${kw}%'`。",
+          "tags": [
+            "MyBatis",
+            "SQL 注入",
+            "预编译"
+          ],
+          "difficulty": "easy",
+          "hot": 5,
+          "source_ref": "《MyBatis 技术内幕》第4章"
+        },
+        {
+          "q": "Mapper 接口只有方法声明、没有实现类，MyBatis 是怎么调用到 SQL 的？",
+          "a": "**要点**\n1. 核心是 **JDK 动态代理**：`MapperProxyFactory` 为每个 Mapper 接口生成代理对象，`MapperProxy` 实现 `InvocationHandler`。\n2. `invoke()` 里分两种情况：\n   - 调用 `Object` 的方法（`toString`/`equals`/`hashCode`）→ 直接放行；\n   - 其他 → 包装成 `MapperMethod`（缓存 method → MappedStatement 的映射）并执行。\n3. `MapperMethod.execute()` 按命令类型分派：`SELECT` / `INSERT` / `UPDATE` / `DELETE`，并根据方法签名决定走 `selectOne` 还是 `selectList`。\n4. `MapperMethod` 与 `MappedStatement` 的绑定发生在**启动时**：`MapperRegistry.addMapper` 解析接口注解，`MapperAnnotationBuilder` 把 `@Select` 等注解或 XML 里的 `namespace + id` 注册到 `Configuration.mappedStatements`。\n5. 延伸：Spring 里通过 `MapperFactoryBean` / `@MapperScan` 把代理对象注册成 Bean，所以能直接 `@Autowired`。",
+          "tags": [
+            "MyBatis",
+            "动态代理",
+            "Mapper"
+          ],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《MyBatis 技术内幕》第2章"
+        },
+        {
+          "q": "MyBatis 的一级缓存和二级缓存有什么区别？各自有什么坑？",
+          "a": "**要点**\n1. **一级缓存（SqlSession 级）**：默认开启、无法关闭。只在**同一个 SqlSession（同一个会话/事务）内**生效。执行 `update/insert/delete` 或 `commit/rollback` 会**清空**它。\n2. **二级缓存（namespace 级）**：需在 mapper XML 加 `<cache/>` 或接口加 `@CacheNamespace`。**跨 SqlSession 共享**，且要求返回对象**可序列化**。\n3. **一级缓存的坑**：在 Spring 集成下每个未开启事务的请求是**独立 SqlSession**，缓存的收益很小；若用同一次事务里的多个查询，可能出现**读到旧数据**（缓存未失效），所以 `@Transactional` 内的查询要小心。\n4. **二级缓存的坑**：多表关联时**脏读**——`order` 的 mapper 加了缓存，`user` 表更新不会清 `order` 的缓存，就会读到过期关联数据。所以**生产环境通常关闭二级缓存**，改用 Redis 做应用级缓存。\n5. 三级缓存（自定义 `Cache` 实现，如 `RedisCache`）是正确方向：把缓存责任交给 Redis，并用**明确的 key 设计与失效策略**控制一致性。",
+          "tags": [
+            "MyBatis",
+            "缓存",
+            "一致性"
+          ],
+          "difficulty": "hard",
+          "hot": 5,
+          "source_ref": "《MyBatis 技术内幕》第5章"
+        }
+      ]
+    }
+  ]
+}

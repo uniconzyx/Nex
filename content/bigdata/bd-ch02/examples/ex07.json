@@ -1,0 +1,8 @@
+{
+  "title": "端到端 WordCount：Map -> Partition -> Sort -> Reduce",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "bigdata\t3\nhello\t5\nworld\t4\n--reducers=2 total_words=12",
+  "code": "\ndef mh(key, n):\n    h = 0\n    for ch in key:\n        h = (h * 31 + ord(ch)) & 0x7fffffff\n    return h % n\nR = 2\ndocs = [\"hello world hello\", \"world bigdata\", \"hello bigdata world\", \"bigdata hello\", \"hello world\"]\npairs = []\nfor line in docs:\n    for w in line.lower().split():\n        pairs.append((w, 1))\nbuckets = {r: [] for r in range(R)}\nfor k, v in pairs:\n    buckets[mh(k, R)].append((k, v))\nfinal = {}\nfor r in range(R):\n    buckets[r].sort(key=lambda x: x[0])\n    agg = {}\n    for k, v in buckets[r]:\n        agg[k] = agg.get(k, 0) + v\n    for k in agg:\n        final[k] = final.get(k, 0) + agg[k]\nfor k in sorted(final):\n    print(f\"{k}\t{final[k]}\")\nprint(f\"--reducers={R} total_words={sum(final.values())}\")\n"
+}

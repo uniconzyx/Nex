@@ -1,0 +1,214 @@
+{
+  "meta": {
+    "chapter": "fs-ch06",
+    "note": "8 题：基础题 6（self）+ 算法题 2（github 1 / leetcode 1，仅存元数据与链接，不搬运题面）；覆盖认证 vs 鉴权、Session vs JWT、JWT 结构判读、校验清单修复、HS256 实现、加盐哈希、LRU 缓存（token 黑名单）、古典密码（密码学素养）。"
+  },
+  "items": [
+    {
+      "id": "fs-ch06-ex01",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/01 · 认证 vs 鉴权",
+      "difficulty": "easy",
+      "title": "401 与 403 的语义边界",
+      "content_md": "一个已登录用户（token 合法）请求 `DELETE /articles/42`，但缺少 `article:delete` 权限。服务端应返回哪个状态码，为什么？",
+      "options": [
+        {
+          "key": "A",
+          "text": "401，因为用户无权执行该操作"
+        },
+        {
+          "key": "B",
+          "text": "403，因为凭证有效但授权不足"
+        },
+        {
+          "key": "C",
+          "text": "400，因为请求非法"
+        },
+        {
+          "key": "D",
+          "text": "500，因为服务端无法处理"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "401 Unauthorized 的真实含义是「未认证」（缺或坏的凭证，须带 WWW-Authenticate）；403 Forbidden 才是「已认证但无权」。本例凭证合法、仅权限不足，故为 403。本章 ex11 实跑 `valid_but_no_perm status=403`。",
+      "tags": [
+        "authn",
+        "authz",
+        "status-code"
+      ]
+    },
+    {
+      "id": "fs-ch06-ex02",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/01 · 会话 vs 令牌",
+      "difficulty": "mid",
+      "title": "Session 与 JWT 在「主动失效 / 水平扩展」上的取舍",
+      "content_md": "关于 Session + Cookie 与 JWT 的对比，下列说法正确的是：",
+      "options": [
+        {
+          "key": "A",
+          "text": "JWT 天然支持服务端即时撤销，Session 不行"
+        },
+        {
+          "key": "B",
+          "text": "Session 可即时撤销但需共享会话存储，JWT 无需共享状态但无法主动失效"
+        },
+        {
+          "key": "C",
+          "text": "两者都把状态存在客户端，因此都能水平扩展"
+        },
+        {
+          "key": "D",
+          "text": "JWT 的内容是加密的，所以可以安全地存放敏感信息"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "Session 状态在服务端，撤销即时，但多实例要共享存储（Redis）或粘性会话；JWT 状态在客户端（自包含），验签即可横向扩展，但签发后到 exp 之前无法主动失效（缓解见 concept/03）。C 错在 Session 状态不在客户端；D 错在 JWT 只是 base64url 编码，不是加密。",
+      "tags": [
+        "session",
+        "jwt",
+        "scalability"
+      ]
+    },
+    {
+      "id": "fs-ch06-ex03",
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/02 · JWT 三段结构",
+      "difficulty": "easy",
+      "title": "判读一个 JWT 的结构与可读性",
+      "content_md": "给定 token：\n```\neyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1MSIsInJvbGUiOiJ1c2VyIn0.3vJ2hSk9m2Q1w0k1h0d9yQ6m9hK0qz6m4x9y3k2w1q8\n```\n请写出：① 段数（segments）；② header 解码后的 alg 值；③ payload 解码后的 role 值；④ payload 是否需要密钥才能被读取（yes/no）。",
+      "answer": {
+        "output": "segments=3\nalg=HS256\nrole=user\npayload_readable_without_key=yes"
+      },
+      "explanation": "JWT 恒定三段 `header.payload.signature`；前两段是 base64url 编码（不是加密），任意人无需密钥即可解码。本章 ex01 实跑 `token_segments=3`、`payload_is_readable_by_anyone=true`。",
+      "tags": [
+        "jwt",
+        "base64url",
+        "structure"
+      ]
+    },
+    {
+      "id": "fs-ch06-ex04",
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/02 · 校验清单",
+      "difficulty": "mid",
+      "title": "修复一个只验签名的 JWT 校验函数",
+      "content_md": "下面的 `verify_token` 只比较了签名，缺少 alg 白名单、常量时间比较与 exp 校验。请修复它，使其能被 `fs-ch06` 的校验清单检查通过，并给出被拒用例（过期 / alg 非白名单 / 签名错）。",
+      "answer": {
+        "reference_code": "import base64, hashlib, hmac, json\n\nSECRET = b'ch06-hidden-secret'\nALLOWED_ALG = ('HS256',)\n\n\ndef _b64url_dec(seg: str) -> bytes:\n    return base64.urlsafe_b64decode(seg + '=' * (-len(seg) % 4))\n\n\ndef verify_token(token: str, now: int):\n    parts = token.split('.')\n    if len(parts) != 3:                       # 1) 段数\n        return False\n    h_seg, p_seg, s_seg = parts\n    header = json.loads(_b64url_dec(h_seg))\n    if header.get('alg') not in ALLOWED_ALG:  # 2) alg 白名单（挡住 alg:none 与混淆）\n        return False\n    expected = hmac.new(SECRET, (h_seg + '.' + p_seg).encode('ascii'), hashlib.sha256).digest()\n    if not hmac.compare_digest(expected, _b64url_dec(s_seg)):   # 3) 常量时间验签\n        return False\n    payload = json.loads(_b64url_dec(p_seg))\n    if now >= payload.get('exp', 0):          # 4) exp 校验\n        return False\n    return True\n"
+      },
+      "explanation": "「只验签名」的校验器能被过期 token 与 alg:none token 打穿。补上四件事：段数、alg 白名单（服务端钉死）、常量时间比较、exp 校验。ex06 实跑显示补全后 `expired`/`missing_exp` 等用例全部被拒。",
+      "tags": [
+        "jwt",
+        "verify",
+        "security-checklist"
+      ]
+    },
+    {
+      "id": "fs-ch06-ex05",
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/02 · HS256 签发与验签",
+      "difficulty": "mid",
+      "title": "用标准库实现 HS256 签发与验签（含正反用例）",
+      "content_md": "用 Python 标准库（`hmac` / `hashlib` / `base64`）实现 HS256 的 `sign` 与 `verify`：`base64url(header).base64url(payload).base64url(HMAC-SHA256)`。要求演示四组结果：正例通过；篡改 payload 被拒；alg 改为 none 被拒；换密钥被拒。",
+      "answer": {
+        "reference_code": "import base64, hashlib, hmac, json\n\nSECRET = b'ch06-demo-secret-key'\n\n\ndef b64url(data: bytes) -> str:\n    return base64.urlsafe_b64encode(data).rstrip(b'=').decode('ascii')\n\n\ndef b64url_dec(seg: str) -> bytes:\n    return base64.urlsafe_b64decode(seg + '=' * (-len(seg) % 4))\n\n\ndef _seg(obj) -> str:\n    return b64url(json.dumps(obj, separators=(',', ':'), sort_keys=True).encode('utf-8'))\n\n\ndef sign(header, payload, secret=SECRET) -> str:\n    h, p = _seg(header), _seg(payload)\n    sig = hmac.new(secret, (h + '.' + p).encode('ascii'), hashlib.sha256).digest()\n    return h + '.' + p + '.' + b64url(sig)\n\n\ndef verify(token, now, secret=SECRET, allowed_alg=('HS256',)):\n    parts = token.split('.')\n    if len(parts) != 3:\n        return False\n    h_seg, p_seg, s_seg = parts\n    if json.loads(b64url_dec(h_seg)).get('alg') not in allowed_alg:\n        return False\n    expected = hmac.new(secret, (h_seg + '.' + p_seg).encode('ascii'), hashlib.sha256).digest()\n    if not hmac.compare_digest(expected, b64url_dec(s_seg)):\n        return False\n    return now < json.loads(b64url_dec(p_seg)).get('exp', 1 << 62)\n\n\ntok = sign({'alg': 'HS256', 'typ': 'JWT'}, {'sub': 'u1', 'exp': 1700000100})\nprint('valid=' + str(verify(tok, 1700000000)))\nh, p, s = tok.split('.')\nforged = b64url(json.dumps({'sub': 'admin', 'exp': 1700000100}, separators=(',', ':'), sort_keys=True).encode())\nprint('tampered=' + str(verify(h + '.' + forged + '.' + s, 1700000000)))\nnone_h = b64url(json.dumps({'alg': 'none'}, separators=(',', ':'), sort_keys=True).encode())\nprint('alg_none=' + str(verify(none_h + '.' + p + '.', 1700000000)))\nprint('wrong_secret=' + str(verify(sign({'alg': 'HS256'}, {'sub': 'u1', 'exp': 1700000100}, b'other'), 1700000000)))\n"
+      },
+      "explanation": "HS256 的签名对象是 `header.payload` 的**原始 base64url 串**，验证方必须用原串重建 signing input。四种被拒情形分别覆盖：篡改（完整性）、alg:none（算法降级）、错密钥（真实性），加上 exp 的语义校验。",
+      "tags": [
+        "jwt",
+        "hs256",
+        "hmac",
+        "python"
+      ]
+    },
+    {
+      "id": "fs-ch06-ex06",
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/03 · 密码存储",
+      "difficulty": "mid",
+      "title": "实现加盐慢哈希并校验（bcrypt 的标准库替代）",
+      "content_md": "bcrypt 非 Python 标准库，请用 `hashlib.pbkdf2_hmac` 实现 `hash_password` 与 `verify_password`（固定盐以输出确定）。要求：① 同一密码不同盐得到不同哈希；② 正确密码校验通过、错误密码不通过；③ 校验用常量时间比较。",
+      "answer": {
+        "reference_code": "import hashlib, hmac\n\nITERATIONS = 120000\n\n\ndef hash_password(password: str, salt: bytes, iterations: int = ITERATIONS) -> bytes:\n    return hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, iterations)\n\n\ndef verify_password(password: str, salt: bytes, expected: bytes, iterations: int = ITERATIONS) -> bool:\n    return hmac.compare_digest(hash_password(password, salt, iterations), expected)\n\n\nSALT_A = b'0123456789abcdef'\nSALT_B = b'fedcba9876543210'\nstored = hash_password('correct horse battery staple', SALT_A)\nprint('same_password_diff_salt_same_hash=' + str(stored == hash_password('correct horse battery staple', SALT_B)))\nprint('correct_ok=' + str(verify_password('correct horse battery staple', SALT_A, stored)))\nprint('wrong_ok=' + str(verify_password('wrong-password', SALT_A, stored)))\n"
+      },
+      "explanation": "加盐（每用户唯一、可公开）解决预计算与「同密码可见」；迭代成本（此处 12 万次）把每次猜测的代价抬高，抵抗离线暴力。校验用 `hmac.compare_digest` 防时序侧信道（对应 ex10）。工程里应换成 bcrypt/scrypt/argon2 并让成本可升级。",
+      "tags": [
+        "password",
+        "pbkdf2",
+        "salt",
+        "constant-time"
+      ]
+    },
+    {
+      "id": "fs-ch06-ex07",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "source": "leetcode",
+      "source_ref": "LeetCode 146（lru-cache）",
+      "external_url": "https://leetcode.cn/problems/lru-cache/",
+      "difficulty": "mid",
+      "title": "LeetCode 146 · LRU 缓存（token 黑名单 / 会话存储的底层结构）",
+      "content_md": "实现一个满足「容量上限 + O(1) 读取与写入」的 LRU 缓存。它与本章的 token 黑名单、会话存储直接相关：撤销列表需要按容量淘汰最久未用项，避免无限膨胀。题面与约束以官方为准，详见 external_url，此处不复述题面正文。",
+      "answer": {
+        "reference_code": "# 用 dict（保持插入序）+ move_to_end 实现 O(1) LRU\nfrom collections import OrderedDict\n\n\nclass LRUCache:\n    def __init__(self, capacity: int):\n        self.cap = capacity\n        self.data = OrderedDict()\n\n    def get(self, key: int) -> int:\n        if key not in self.data:\n            return -1\n        self.data.move_to_end(key)\n        return self.data[key]\n\n    def put(self, key: int, value: int) -> None:\n        if key in self.data:\n            self.data.move_to_end(key)\n        self.data[key] = value\n        if len(self.data) > self.cap:\n            self.data.popitem(last=False)   # 淘汰最久未使用\n\n\nc = LRUCache(2)\nc.put(1, 1)\nc.put(2, 2)\nprint('get1=' + str(c.get(1)))\nc.put(3, 3)          # 淘汰 key=2\nprint('get2_evicted=' + str(c.get(2)))\nprint('get3=' + str(c.get(3)))\n"
+      },
+      "explanation": "哈希表（O(1) 定位）+ 双向链表（O(1) 调整顺序）是 LRU 的标准结构；Python 的 `OrderedDict` 把两者合并。映射到本章：`jti` 黑名单与 refresh 存储都需要「有容量上限、按最近使用淘汰」的语义（ex08 用 TTL 做时间维度的淘汰）。",
+      "tags": [
+        "lru",
+        "hash-map",
+        "linked-list",
+        "cache"
+      ]
+    },
+    {
+      "id": "fs-ch06-ex08",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "github",
+      "source": "github",
+      "source_ref": "trekhleb/javascript-algorithms · src/algorithms/cryptography/caesar-cipher",
+      "external_url": "https://github.com/trekhleb/javascript-algorithms",
+      "difficulty": "easy",
+      "title": "GitHub 算法补充 · 凯撒密码（古典密码为何不安全）",
+      "content_md": "实现凯撒密码的加密与解密（按固定位移循环平移字母）。它的意义是**反例**：密钥空间只有 25，穷举即刻破解——这正是为什么现代密码存储必须用「加盐 + 慢哈希」，而不能依赖任何「可逆位移」。题面与实现参考见 external_url，此处不复述第三方题面正文。",
+      "answer": {
+        "reference_code": "function caesarCipher(text, shift) {\n  const s = ((shift % 26) + 26) % 26;\n  let out = '';\n  for (const ch of text) {\n    const code = ch.charCodeAt(0);\n    if (code >= 65 && code <= 90) out += String.fromCharCode((code - 65 + s) % 26 + 65);\n    else if (code >= 97 && code <= 122) out += String.fromCharCode((code - 97 + s) % 26 + 97);\n    else out += ch;\n  }\n  return out;\n}\n\nconst cipher = caesarCipher('Attack At Dawn', 3);\nconsole.log('cipher=' + cipher);\nconsole.log('decrypt=' + caesarCipher(cipher, -3));\nconsole.log('roundtrip_ok=' + (caesarCipher(cipher, -3) === 'Attack At Dawn'));\n\n// 密钥空间只有 25：穷举即破解（古典密码的双射位移无法提供任何计算难度）\nlet broken = '';\nfor (let k = 1; k <= 25; k++) {\n  if (caesarCipher(cipher, -k) === 'Attack At Dawn') { broken = String(k); break; }\n}\nconsole.log('bruteforced_shift=' + broken);\nconsole.log('keyspace_brute_forceable=true');\n"
+      },
+      "explanation": "凯撒密码是双射替换，密钥空间 26（有效 25）。穷举 25 次即可还原明文——这演示了「安全必须来自计算难度，而非算法保密」。对照本章：密码存储靠「加盐 + 可调成本的慢哈希」制造计算难度，JWT 签名靠 HMAC/非对称签名的计算难度。",
+      "tags": [
+        "cipher",
+        "cryptography",
+        "brute-force",
+        "security"
+      ]
+    }
+  ]
+}

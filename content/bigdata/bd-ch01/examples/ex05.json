@@ -1,0 +1,8 @@
+{
+  "title": "fsimage 与 edits 日志的 checkpoint 合并",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "edits_log: [('create', '/a'), ('create', '/b'), ('delete', '/a')]\nafter_checkpoint_files: ['/b']\nedits_len_before_clear: 3\nedits_len_after_checkpoint: 0",
+  "code": "\nstate = {\"files\": []}\nedits = []\ndef mk(op, name):\n    edits.append((op, name))\nmk(\"create\", \"/a\")\nmk(\"create\", \"/b\")\nmk(\"delete\", \"/a\")\nfs_files = set(state[\"files\"])\nfor op, name in edits:\n    if op == \"create\":\n        fs_files.add(name)\n    elif op == \"delete\":\n        fs_files.discard(name)\nprint(\"edits_log:\", edits)\nprint(\"after_checkpoint_files:\", sorted(fs_files))\nprint(\"edits_len_before_clear:\", len(edits))\nedits.clear()\nprint(\"edits_len_after_checkpoint:\", len(edits))\n"
+}

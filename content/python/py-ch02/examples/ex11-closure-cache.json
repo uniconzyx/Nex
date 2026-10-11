@@ -1,0 +1,8 @@
+{
+  "title": "闭包持有状态：记忆化缓存",
+  "code_lang": "python",
+  "code_std": "python3.11",
+  "stdin": "",
+  "expected_output": "4\n4\n9",
+  "code": "def memo():\n    cache = {}\n    def get(key, compute):\n        if key not in cache:\n            cache[key] = compute(key)\n        return cache[key]\n    return get\n\nm = memo()\nprint(m(2, lambda k: k * k))\nprint(m(2, lambda k: 999))   # 命中缓存，返回值不变\nprint(m(3, lambda k: k * k))"
+}

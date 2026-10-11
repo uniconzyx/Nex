@@ -1,0 +1,183 @@
+{
+  "meta": {
+    "chapter": "cpp-ch18",
+    "note": "8 题，混合基础题(5)与算法题(3)；含 LeetCode 867 / 牛客 C++ 内存对齐 / GitHub TheAlgorithms 元数据+链接（不搬运题面）。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "关于内存对齐与填充，下列说法正确的是",
+      "content_md": "选择**正确**的描述。",
+      "options": [
+        {
+          "key": "A",
+          "text": "alignas 可以把类型的对齐从 8 降低到 1"
+        },
+        {
+          "key": "B",
+          "text": "结构体的 sizeof 一定是其 alignof 的整数倍"
+        },
+        {
+          "key": "C",
+          "text": "把结构体 memcpy 到网络是安全且可移植的"
+        },
+        {
+          "key": "D",
+          "text": "#pragma pack(1) 会抬高成员对齐"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "sizeof 必须是 alignof 的整数倍，否则数组遍历会破坏成员对齐（B 正确）。alignas 只能抬高对齐（A 错）；带填充的结构体 memcpy 会泄漏未初始化内存且不可移植（C 错）；pack(1) 是**降低**对齐（D 错）。",
+      "tags": [
+        "alignment",
+        "padding",
+        "sizeof"
+      ],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 2 章 / cpp-ch18 examples/ex01"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "读代码写输出（结构体布局）",
+      "content_md": "```cpp\n#include <cstdio>\n#include <cstddef>\nstruct T { char a; int b; char c; };\nint main() {\n  printf(\"%zu %zu %zu %zu\", sizeof(T), offsetof(T,a), offsetof(T,b), offsetof(T,c));\n}\n```",
+      "answer": {
+        "output": "12 0 4 8"
+      },
+      "explanation": "a@0；b 需 4 字节对齐 → 补 3 字节，b@4；c@8；结构体对齐为 4 → 总大小向上取整到 4 → 12。故 sizeof=12，偏移依次 0/4/8。",
+      "tags": [
+        "layout",
+        "offsetof",
+        "output"
+      ],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 2 章"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "修复伪共享：让两个热点计数器分处不同缓存行",
+      "content_md": "下面两个线程各写一个计数器，却因为落在**同一条缓存行**而互相拖累。请改造结构，使两个计数器分处不同缓存行（缓存行按 64 字节计，用 `alignas` 或填充）。\n```cpp\nstruct Counters { std::atomic<long long> a{0}; std::atomic<long long> b{0}; };\nCounters g;\n```",
+      "answer": {
+        "reference_code": "struct alignas(64) Counters {\n    std::atomic<long long> a{0};\n    char pad[64 - sizeof(std::atomic<long long>)];  // 把 b 推到偏移 64\n    std::atomic<long long> b{0};\n};\nCounters g;  // a 在偏移 0（第 k 行），b 在偏移 64（第 k+1 行）→ 不同缓存行"
+      },
+      "explanation": "伪共享的根源是「一致性以缓存行为单位，而程序语义以变量为单位」。把两个变量推到不同缓存行（偏移 0 与 64）即可消除：每个核心写自己的行，不再互相使对方副本失效。注意结构体整体 `alignas(64)` 才能保证偏移 0 恰好在行首。",
+      "tags": [
+        "false-sharing",
+        "alignas",
+        "fix-error"
+      ],
+      "source": "self",
+      "source_ref": "cpp-ch18 concept/02 / examples/ex09"
+    },
+    {
+      "type": "explain",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "inline 是建议还是命令？final 如何帮助去虚化？",
+      "content_md": "解释：`inline` 关键字到底保证什么？`final` 为什么能帮助编译器去虚化（devirtualization）？",
+      "answer": {
+        "reference_code": "inline 主要保证「允许多个翻译单元重复定义同一函数而不违反 ODR」，同时**暗示**内联；是否真正内联由优化器决定，编译器可拒绝（如递归、取函数地址、跨 TU 且无 LTO）。想强制内联需用 __attribute__((always_inline)) 等扩展。\n\nfinal 让编译器确知「该类型不会被继承」。当静态类型是 final 类型（或指向 final 类型的引用/指针）时，动态类型唯一确定 → 编译器可把虚调用解析为直接调用并内联，从而去掉 vtable 间接跳转。"
+      },
+      "explanation": "核心是「inline 的关键作用是 ODR 例外而非强制内联」与「final 提供类型唯一性信息，使虚调用可静态解析」。",
+      "tags": [
+        "inline",
+        "final",
+        "devirtualization"
+      ],
+      "source": "self",
+      "source_ref": "《Effective C++》条款 30 / cpp-ch18 concept/04"
+    },
+    {
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "实现一个「缓存行隔离计数器」，并用确定性判据验证",
+      "content_md": "实现 `struct CacheAligned { std::atomic<long long> v; ... }`，使**多个**这样的计数器互不共享缓存行。写一个 `bool same_line(const void*, const void*)` 判据（按 64 字节行），并验证两个计数器的地址**不在**同一行。不得使用墙钟时间。",
+      "answer": {
+        "reference_code": "struct alignas(64) Cell {\n    std::atomic<long long> v{0};\n    char pad[64 - sizeof(std::atomic<long long>)];\n};\nbool same_line(const void* p, const void* q) {\n    return (reinterpret_cast<uintptr_t>(p) / 64) == (reinterpret_cast<uintptr_t>(q) / 64);\n}\n// Cell a, b;  ->  same_line(&a, &b) 应为 false"
+      },
+      "explanation": "把每条缓存行封成一个 `alignas(64)` 且大小恰为 64 的 `Cell`，则相邻 Cell 必然落在不同行。用地址整除 64 的商判断是否同行，是**确定性判据**（不依赖机器速度）。",
+      "tags": [
+        "cache-line",
+        "alignas",
+        "coding"
+      ],
+      "source": "self",
+      "source_ref": "cpp-ch18 concept/02 / examples/ex09"
+    },
+    {
+      "type": "design",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "easy",
+      "title": "LeetCode 867 · Transpose Matrix（转置与访存局部性）",
+      "content_md": "实现矩阵转置 `transpose(matrix)`。思考：行优先存储的矩阵，转置时读/写各自是「行优先」还是「列优先」，哪一种访存模式对缓存更友好？（详见 external_url，不在此搬运题面。）",
+      "answer": {
+        "reference_code": "// 思路：结果 res[j][i] = matrix[i][j]。\n// 读方向沿 matrix[i][j]（j 连续）→ 顺序读，局部性好；\n// 写方向 res[j][i] 中 j 变化 → 跨行写，局部性差。\n// 优化：分块（tile）转置，把读写工作集都压进缓存，减少缓存行未命中。\n// 具体输入输出格式见 external_url 原题。"
+      },
+      "explanation": "转置是「读写访存模式不匹配」的典型：即便都是 O(mn)，朴素实现的一方必然是跨行访问。分块转置是把工作集切到缓存装得下的经典手法，与本章的缓存局部性主线一致。",
+      "tags": [
+        "cache-locality",
+        "matrix",
+        "leetcode"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 867（transpose-matrix）",
+      "external_url": "https://leetcode.cn/problems/transpose-matrix/"
+    },
+    {
+      "type": "design",
+      "category": "算法题",
+      "platform": "nowcoder",
+      "difficulty": "mid",
+      "title": "牛客网 · C++ 内存对齐 / 结构体专项",
+      "content_md": "此类题要求给出结构体的 `sizeof` 与各成员偏移、判断对齐与填充，或要求用 `alignas`/`#pragma pack` 调整布局。请结合本章的对齐规则与 `offsetof` 实测方法作答（详见 external_url，不在此搬运题面）。",
+      "answer": {
+        "reference_code": "// 思路：① 逐成员按成员对齐排布并补填充；\n// ② 结构体对齐 = 最大成员对齐；\n// ③ sizeof 向上取整到结构体对齐。\n// 可用 offsetof/sizeof 实测验证（见 examples/ex01~ex04）。\n// 具体题目见 external_url 专项练习要求。"
+      },
+      "explanation": "牛客 C++ 专项常考「对齐与结构体布局」的计算题，是本章最直接的考点，标准解法是四步排布 + 实测验证。",
+      "tags": [
+        "alignment",
+        "struct-layout",
+        "nowcoder"
+      ],
+      "source": "nowcoder",
+      "source_ref": "牛客网 · C++ 专项练习（内存对齐与结构体）",
+      "external_url": "https://www.nowcoder.com/exam/"
+    },
+    {
+      "type": "design",
+      "category": "算法题",
+      "platform": "github",
+      "difficulty": "mid",
+      "title": "GitHub · TheAlgorithms/C-Plus-Plus：把一个算法的访存模式改成缓存友好",
+      "content_md": "在 TheAlgorithms/C-Plus-Plus 中选一个矩阵/数组算法，分析其访存模式，指出哪个循环破坏了空间局部性，并给出缓存友好改写（交换循环次序 / 分块 / SoA）。用操作计数或缓存行模型给出确定性对比（不得用耗时）。（详见 external_url 仓库，不在此搬运内容。）",
+      "answer": {
+        "reference_code": "// 思路：\n// ① 找出内层循环的地址步长；步长 > 缓存行（64B）即破坏局部性；\n// ② 改写：交换循环次序使内层沿连续维度推进；或分块把工作集压进缓存；\n// ③ 验证：自写直接映射缓存模型统计 miss，比较改前/改后（确定性判据）。\n// 仓库见 external_url。"
+      },
+      "explanation": "把「读代码 → 判断访存模式 → 改写 → 用确定性计数验证」的闭环走通，是本章能力目标的综合检验。",
+      "tags": [
+        "cache-friendly",
+        "github",
+        "refactor"
+      ],
+      "source": "github",
+      "source_ref": "TheAlgorithms/C-Plus-Plus",
+      "external_url": "https://github.com/TheAlgorithms/C-Plus-Plus"
+    }
+  ]
+}

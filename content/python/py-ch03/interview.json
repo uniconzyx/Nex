@@ -1,0 +1,57 @@
+{
+  "meta": {
+    "chapter": "py-ch03",
+    "subject": "python",
+    "note": "偏深度追问：dict/list 的 CPython 实现、哈希契约、拷贝语义。与 _bagua.json（速记向）互补。"
+  },
+  "items": [
+    {
+      "question": "CPython 的 dict 是怎么实现的？为什么 Python 3.7 之后遍历顺序稳定？扩容时机是什么？",
+      "answer_md": "**实现**：`dict` 用**开放寻址（open addressing）**哈希表，而非链地址法。\n\n- **3.6 起改为紧凑双表布局**：`indices`（稀疏索引表，存 entries 下标）+ `entries`（紧凑实体表，按插入顺序紧密存放 hash/key/value）。\n- **为什么 3.7 起有序**：遍历直接按 `entries` 的物理顺序走，而 entries 是紧凑追加的——顺序天然等于插入顺序。3.7 把这一行为写进了**语言规范**（3.6 只是实现副作用）。\n- **查找路径**：`hash(key)` → 用低位定位 `indices` 槽 → 取到 entries 下标 → 比对 key（先比 hash 再比 `==`）。\n- **扩容**：装载因子（used / 表大小）> **2/3** 时扩容（翻倍），需重建 indices 并重排 entries，是 O(n)；但摊销后插入仍是 O(1)。\n- **删除不缩容**：只把 entry 标记为 dummy，避免破坏探测链，所以长期增删后内存不会自动回落（需重建 dict）。\n- **探测序列**不是简单 +1，而是带扰动（`i = (5*i + 1 + perturb) & mask; perturb >>= 5`），用于打散聚类。\n\n**追问要点**：`hash()` 自 3.3 起带**随机盐**（防哈希碰撞攻击），因此跨进程不稳定——不要用它做持久化或分布式分片。",
+      "follow_ups": [
+        "为什么 dict 的键必须可哈希？哈希冲突了怎么办？",
+        "set 和 dict 在实现上有什么关系？",
+        "dict 的内存占用为什么比 list 大？",
+        "为何遍历 dict 时删除会抛 RuntimeError？"
+      ],
+      "difficulty": "hard",
+      "company_tags": ["通用", "字节", "阿里", "腾讯"]
+    },
+    {
+      "question": "为什么 `list.append` 是摊销 O(1)？扩容时到底发生什么？`insert(0, x)` 又为何是 O(n)？",
+      "answer_md": "**结构**：list 是**过度分配的动态指针数组**（`ob_item` 指向 `PyObject*` 数组，带 `allocated` 预留槽位）。\n\n- **append**：若 `ob_size < allocated`，直接写入 → O(1)。满时才 `realloc` 扩容并搬移全部指针 → 单次 O(n)。\n- **摊销 O(1)**：扩容按约 **1.125 倍 + 小列表固定余量**增长（CPython 公式 `new = n + n>>3 + (n<9 ? 3 : 6)`），扩容频率随规模指数下降，把 O(n) 的那次分摊到多次 append 上，平均仍是常数。\n- **为什么不是 2 倍**：2 倍在大列表上最坏浪费 50% 内存，且搬移代价更高；渐进增长更省内存，摊销复杂度不变。\n- **insert(0, x) / pop(0)**：需把后 n 个指针整体 `memmove` 后移/前移 → **O(n)**。循环里用就是 O(n²)。\n  → 需要两端频繁操作改用 `collections.deque`（双端 O(1)）。\n- **缩容**：`pop` 后若 `ob_size` 掉到 `allocated/2` 以下会缩容，避免长期占着大数组。\n\n**深层对比**：C++ `std::vector<int>` 存**值**（连续、缓存友好、可 SIMD）；CPython list 存**指针**，遍历要间接跳转到堆上各处对象，**缓存局部性差**——这是 Python 数值计算比 C/NumPy 慢一个数量级的结构性原因之一。",
+      "follow_ups": [
+        "list 和 tuple 的内存差多少？为什么？",
+        "什么场景下用 array 模块或 NumPy 替代 list？",
+        "pop() 尾删为什么是 O(1)？",
+        "如何实现一个 deque？"
+      ],
+      "difficulty": "mid",
+      "company_tags": ["通用", "字节", "美团"]
+    },
+    {
+      "question": "浅拷贝和深拷贝的区别？`copy.deepcopy` 如何处理循环引用？哪些对象不能深拷贝？",
+      "answer_md": "**浅拷贝**：只复制**容器本身**（新建一层指针数组），元素对象仍**共享**。`a[:]`、`list(a)`、`a.copy()`、`copy.copy(a)` 四者等价。\n\n- 替换槽位（`b[0] = [9]`）只影响副本；原地改共享子对象（`b[0].append(1)`）会**同时影响原容器**。\n\n**深拷贝**：`copy.deepcopy(a)` **递归重建整张对象图**，新旧完全独立。\n\n- **循环引用处理**：内部维护 `memo` 字典（`id(原对象) → 新对象`）。遇到已复制过的对象直接返回缓存的新对象，因此 `a = []; a.append(a)` 能安全深拷贝，不会无限递归；深拷贝后 `b[0] is b` 成立，环结构被保留。\n- **性能**：递归 + 类型分派，比浅拷贝慢很多；对大对象图开销显著。\n- **不可深拷贝的对象**：文件句柄、socket、线程锁、数据库连接、生成器、迭代器——它们语义上不可复制，会抛错或需要自定义 `__deepcopy__`。\n- **优化**：`deepcopy` 对**不可变原子类型**（int/str/纯不可变 tuple）直接返回原对象，不复制。\n\n**工程建议**：元素全不可变时浅拷贝即可；含可变子对象且要独立修改才用 deepcopy；大对象图建议**手工构造**（更快更可控）。",
+      "follow_ups": [
+        "如何为自定义类实现 __deepcopy__？",
+        "为什么 a = [[0]] * 3 会互相影响？",
+        "copy.copy 对不可变对象会真的复制吗？",
+        "深拷贝 dict 时 key 也会被复制吗？"
+      ],
+      "difficulty": "mid",
+      "company_tags": ["通用", "阿里", "腾讯"]
+    },
+    {
+      "question": "一个对象「可哈希」意味着什么？为什么定义了 `__eq__` 后对象就不可哈希了？",
+      "answer_md": "**可哈希（hashable）**要求：\n\n1. 有 `__hash__` 返回生命周期内**不变**的 int；\n2. 有 `__eq__`，且满足 **`a == b` ⟹ `hash(a) == hash(b)`**（反过来不要求，碰撞由 `__eq__` 兜底）；\n3. 哈希值必须基于**不可变字段**。\n\n**为什么定义 `__eq__` 会让对象不可哈希**：Python 规定，类中定义了 `__eq__` 但未定义 `__hash__` 时，`__hash__` 会被**隐式设为 `None`**，实例因此不可哈希（放进 dict/set 抛 `TypeError: unhashable type`）。\n\n**根因**：哈希表的探测位置由哈希值决定。若对象的哈希依赖可变字段，把它塞进 set 后**修改该字段**，探测位置就变了——对象会在表里「消失」（找不到也删不掉）。所以可变对象本质上不适合作为键。\n\n**修复**：\n```python\nclass P:\n    def __init__(self, x): self.x = x\n    def __eq__(self, o): return isinstance(o, P) and self.x == o.x\n    def __hash__(self): return hash((P, self.x))   # 用不可变字段\n```\n\n**内置对照**：`list`/`dict`/`set` 可变 → 不可哈希；`tuple`/`frozenset`/`str` 不可变 → 可哈希。但 `([1], 2)` 这样的元组**也不可哈希**，因为其中的 list 不可哈希——可哈希性是**递归**的。",
+      "follow_ups": [
+        "为什么 tuple 里装了 list 就不能作为 dict 的键？",
+        "如何让自定义对象既能比较相等又能放进 set？",
+        "frozenset 和普通 set 的区别？",
+        "哈希碰撞（hash 相同但 !=）时 dict 如何处理？"
+      ],
+      "difficulty": "hard",
+      "company_tags": ["通用", "字节", "快手"]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "title": "深分页 LIMIT offset 代价与延迟关联优化",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== 深分页代价模型 ===\n总行数 = 1000000, 每页 10 条, 请求第 100000 页 (OFFSET = 999990)\n\n写法                                       扫描行数           说明\nLIMIT 999990, 10  (朴素)                   1000000        丢弃 offset 行, 全量回表\n延迟关联: 覆盖索引先取主键                           2010           只读索引页, 仅回表 10 行\n\n扫描量下降 = 497.5 倍\n\n=== 扫过的行数与页数 ===\n朴素扫描行数 = 1000000\n覆盖索引扫描页数 = 2000  (每页 500 主键)\n\n要点: 页越深, 朴素 LIMIT 丢弃的行越多; 延迟关联把随机回表压到 PAGE 条\n      更优做法: 记住上一页最后的主键(游标分页) WHERE id > last_id LIMIT 10",
+  "code": "N = 1000000        # 总行数\nPAGE = 10          # 每页条数\nPAGE_NO = 100000   # 第 10 万页\n\ndef naive(offset):\n    \"\"\"LIMIT offset, PAGE: 需要先扫描并丢弃 offset 行\"\"\"\n    return offset + PAGE\n\ndef deferred(offset):\n    \"\"\"延迟关联: 先用覆盖索引取主键(只读索引页), 再回表取 PAGE 行\"\"\"\n    # 覆盖索引页每页可容纳 500 个主键\n    keys_per_page = 500\n    index_pages = -(-(offset + PAGE) // keys_per_page)\n    return index_pages + PAGE      # 索引页 + 回表 10 次\n\noff = (PAGE_NO - 1) * PAGE\na = naive(off)\nb = deferred(off)\nprint(\"=== 深分页代价模型 ===\")\nprint(\"总行数 = %d, 每页 %d 条, 请求第 %d 页 (OFFSET = %d)\" % (N, PAGE, PAGE_NO, off))\nprint()\nprint(\"%-40s %-14s %s\" % (\"写法\", \"扫描行数\", \"说明\"))\nprint(\"%-40s %-14d %s\" % (\"LIMIT %d, %d  (朴素)\" % (off, PAGE), a, \"丢弃 offset 行, 全量回表\"))\nprint(\"%-40s %-14d %s\" % (\"延迟关联: 覆盖索引先取主键\", b, \"只读索引页, 仅回表 10 行\"))\nprint()\nprint(\"扫描量下降 = %.1f 倍\" % (a / b))\nprint()\nprint(\"=== 扫过的行数与页数 ===\")\nprint(\"朴素扫描行数 = %d\" % a)\nprint(\"覆盖索引扫描页数 = %d  (每页 500 主键)\" % (-(-(off + PAGE) // 500)))\nprint()\nprint(\"要点: 页越深, 朴素 LIMIT 丢弃的行越多; 延迟关联把随机回表压到 PAGE 条\")\nprint(\"      更优做法: 记住上一页最后的主键(游标分页) WHERE id > last_id LIMIT 10\")"
+}

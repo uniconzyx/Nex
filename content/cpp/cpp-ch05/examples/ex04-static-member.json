@@ -1,0 +1,8 @@
+{
+  "title": "静态成员：类级别共享状态",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "2",
+  "code": "#include <iostream>\n\nclass Widget {\n    inline static int count_ = 0;   // C++17 内联静态成员，所有对象共享\npublic:\n    Widget() { ++count_; }\n    static int live() { return count_; }\n};\n\nint main() {\n    Widget a;\n    {\n        Widget b;                   // 离开作用域析构，但计数器不减（无析构逻辑）\n    }\n    std::cout << Widget::live();\n}"
+}

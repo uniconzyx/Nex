@@ -1,0 +1,14 @@
+{
+  "meta": { "chapter": "cpp-ch13", "category": "basic" },
+  "items": [
+    {
+      "title": "CSV 统计报表小工具",
+      "requirement_md": "实现一个命令行小工具 `report`：从指定文本文件读入 CSV（每行 `姓名,科目,分数`），用 `ifstream` + `getline` + `istringstream` 解析，按科目聚合（人数、总分、平均分），最后用 `setw`/`setfill`/`fixed`/`setprecision` 输出一张对齐的成绩统计报表到 `cout`（含表头与合计行）。要求：\n1. 打开文件后用 `is_open()` 防御性检查，失败给出明确报错。\n2. 平均分保留两位小数（定点）。\n3. 报表列对齐、表头清晰。\n4. 解析时妥善处理空行与分隔符缺失的边界。",
+      "tasks": [
+        { "title": "文件读取与解析", "verification": { "type": "test", "desc": "能正确解析多行 CSV，空行被跳过，分隔符缺失时给出合理默认而不崩溃" } },
+        { "title": "聚合统计", "verification": { "type": "test", "desc": "按科目统计人数/总分/平均分，数值正确" } },
+        { "title": "格式化输出报表", "verification": { "type": "manual", "desc": "setw/setfill 对齐、平均分为定点两位小数、含表头与合计行" } }
+      ]
+    }
+  ]
+}

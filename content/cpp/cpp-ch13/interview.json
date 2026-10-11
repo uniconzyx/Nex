@@ -1,0 +1,26 @@
+{
+  "meta": { "chapter": "cpp-ch13" },
+  "items": [
+    {
+      "question": "为什么 std::ios::sync_with_stdio(false) 能显著加速 cin/cout？它有什么代价？",
+      "answer_md": "默认情况下 `std::cin`/`std::cout` 与 C 标准库的 `stdin`/`stdout` **保持同步**（`sync_with_stdio(true)`），目的是让混用 `cin` 与 `scanf` 时顺序依然正确。同步意味着每次 C++ 流操作都要与 C 的缓冲对齐，通常带来额外的加锁与双缓冲拷贝开销。调用 `sync_with_stdio(false)` 后，C++ 流拥有**独立且更大的缓冲区**，不再为每个字符与 C 层做对齐，吞吐可提升数倍到数十倍。\n\n代价与注意点：\n1. 设置之后**严禁再混用** `scanf`/`printf` 与 `cin`/`cout`，否则二者缓冲互不感知，输出顺序错乱。\n2. 应在 `main` 最早期调用。\n3. 通常再配合 `cin.tie(nullptr)`（解除与 `cout` 的绑定刷新）与用 `'\n'` 而非 `endl`（避免频繁 flush）形成提速三连。\n4. 多线程下 `cout` 仍可能不是线程安全的逐行原子，需要整行拼接后再输出以保证不被交错。",
+      "follow_ups": ["tie(nullptr) 解决的是什么问题？", "为什么大数据读入时 endl 比 \\n 慢很多？", "多线程同时写 cout 会怎样？"],
+      "difficulty": "mid",
+      "company_tags": ["通用", "字节", "华为"]
+    },
+    {
+      "question": "iostream 相比 printf 慢在哪里？什么时候该改用 std::format 或 printf？",
+      "answer_md": "iostream 的慢主要来自两点：\n1. **虚函数派发**：`operator<<` 最终落到 `streambuf` 的虚函数（如 `sputc`），每次字符/字段处理都走虚调用，难以被内联与向量化。\n2. **locale 与 facet**：默认 locale 在处理每个数字时都要经过 `numpunct`/`ctype` 等 facet 的虚调用做本地化（千位分隔、小数点字符等）。\n\n`printf` 的格式串在运行期解析、直奔格式化，常数更小；但失去类型安全（类型不匹配是未定义行为/运行期崩溃）。\n\n取舍建议：\n- 通用控制台/文件 IO：`iostream` 足够，可读性更好。\n- 性能敏感且格式化简单：可用 `snprintf`（快、但类型靠自觉）。\n- 需要「printf 的速度 + iostream 的类型安全 + 编译期格式检查」：C++20 起用 `std::format`（源自 {fmt}），编译期校验占位符与类型，且避免 locale 全量开销。\n- 受限于 C++17 及以下：`stringstream` 能用但更慢，关键路径慎用。",
+      "follow_ups": ["std::format 为什么能在编译期检查格式串？", "{fmt} 是怎么绕过 locale facet 开销的？", "什么场景仍然推荐 iostream？"],
+      "difficulty": "hard",
+      "company_tags": ["通用", "阿里", "腾讯"]
+    },
+    {
+      "question": "输入失败后为什么要 clear()？goodbit/eofbit/failbit/badbit 各自含义与区别？",
+      "answer_md": "流内部维护一组**位标志**（`std::ios_base::iostate`）：\n- `goodbit`（值为 0）：无任何错误位，表示「一切正常」。`good()` 是「所有错误位都为 0」的合取，不是单独一位。\n- `eofbit`：已到达输入末尾（读到 EOF）。常与 `failbit` **同时**置位（读到末尾且最后一次提取失败）。\n- `failbit`：**逻辑错误**（格式不匹配、期望 int 却读到字母）。流**仍可恢复**——`clear()` 后继续。\n- `badbit`：**严重错误**（底层 buffer 崩溃、写只读流）。通常不可恢复。\n\n关键机制：一旦 `failbit`/`badbit` 被置位，**该流此后所有 `>>`/`<<` 都立即变成 no-op（直接失败）**，直到显式 `clear()`。所以输入失败的处理范式是：`clear()` 清状态 + `ignore()` 丢弃坏字符，再继续读取。直接用 `while(!cin.eof())` 当循环条件是错误的——应先提取、成功才进循环体。",
+      "follow_ups": ["为什么不能用 eof() 当循环条件？", "clear() 会丢弃坏字符吗？", "同时读写 fstream 切换方向前为什么要 seek？"],
+      "difficulty": "mid",
+      "company_tags": ["通用", "美团"]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "title": "checkpoint 截断 lineage",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "完整血缘长度 = 6\n在 reduceByKey 处 checkpoint 后, 下游血缘长度 = 2\ncheckpoint 把血缘从 6 截断到 2, 故障重算只需从 checkpoint 文件恢复\n",
+  "code": "class RDD:\n    _id = 0\n    def __init__(self, op, parent=None, cp=False):\n        RDD._id += 1\n        self.rid = RDD._id\n        self.op = op\n        self.parent = parent\n        self.checkpointed = cp\n    def lineage_len(self):\n        n = 1\n        p = self.parent\n        while p is not None:\n            if p.checkpointed:\n                break\n            n += 1\n            p = p.parent\n        return n\n\na = RDD(\"parallelize\")\nb = RDD(\"map\", a)\nc = RDD(\"filter\", b)\nd = RDD(\"reduceByKey\", c)\ne = RDD(\"map\", d)\nf = RDD(\"collect\", e)\nd.checkpointed = False\nfull = f.lineage_len()\nd.checkpointed = True\ntrunc = f.lineage_len()\nprint(\"完整血缘长度 =\", full)\nprint(\"在 reduceByKey 处 checkpoint 后, 下游血缘长度 =\", trunc)\nprint(f\"checkpoint 把血缘从 {full} 截断到 {trunc}, 故障重算只需从 checkpoint 文件恢复\")\n"
+}

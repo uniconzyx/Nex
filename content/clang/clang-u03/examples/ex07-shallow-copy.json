@@ -1,0 +1,8 @@
+{
+  "title": "结构体赋值浅拷贝：含指针成员会共享同一块内存",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "before: a=\"hi\" b=\"hi\"\nafter:  a=\"Xi\" (被 b 的写入影响)\n",
+  "code": "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\nstruct Buf { char *p; size_t n; };\n\nint main(void) {\n    struct Buf a;\n    a.p = malloc(4);\n    a.n = 4;\n    strcpy(a.p, \"hi\");\n    struct Buf b = a;          /* 浅拷贝：b.p 与 a.p 相同 */\n    printf(\"before: a=\\\"%s\\\" b=\\\"%s\\\"\\n\", a.p, b.p);\n    b.p[0] = 'X';              /* 改 b 影响 a，因为共享 */\n    printf(\"after:  a=\\\"%s\\\" (被 b 的写入影响)\\n\", a.p);\n    free(a.p);\n    return 0;\n}"
+}

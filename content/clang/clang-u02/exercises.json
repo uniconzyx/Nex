@@ -1,0 +1,163 @@
+{
+  "meta": {
+    "chapter": "clang-u02",
+    "note": "内存与动态分配；基础题考察 malloc 家族语义与 Debug，算法题来自刷题平台（仅存元数据与链接）。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "哪个函数会清零",
+      "content_md": "下列哪个函数申请的内存**保证初始化为 0**？\n\nA. `malloc`\nB. `calloc`\nC. `realloc`\nD. `alloca`",
+      "options": [
+        {
+          "key": "A",
+          "text": "malloc"
+        },
+        {
+          "key": "B",
+          "text": "calloc"
+        },
+        {
+          "key": "C",
+          "text": "realloc"
+        },
+        {
+          "key": "D",
+          "text": "alloca"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "只有 `calloc` 保证清零。`malloc` 与 `realloc` 都是脏数据（`realloc` 原数据保留、**新增部分不清零**）；`alloca` 是栈分配，内容不确定。",
+      "tags": [
+        "malloc",
+        "calloc"
+      ],
+      "source": "book",
+      "source_ref": "《C 程序设计语言》第8章"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "malloc 与 calloc 的初值",
+      "content_md": "下面程序中，`a[0]` 与 `b[0]` 的输出分别是什么？（`malloc` 返回的内存内容是脏数据）\n\n```c\nint *a = calloc(3, sizeof(int));\nint *b = malloc(3 * sizeof(int));\nprintf(\"a[0]=%d\\n\", a[0]);\nprintf(\"b 内容是否确定 = %s\\n\", \"否\");\n```",
+      "answer": {
+        "output": "a[0]=0\nb 内容是否确定 = 否"
+      },
+      "explanation": "`calloc` 清零所以 `a[0]` 必为 0（这也是本示例能可靠断言的原因）；`malloc` 的内容不确定，**任何**具体值都不可依赖——所以示例只能断言「不确定」这个事实，不能断言 `b[0]` 的数值。这本身就是重要一课：不要对未初始化内存的取值做假设。",
+      "tags": [
+        "calloc",
+        "未初始化"
+      ],
+      "source": "self",
+      "source_ref": "clang-u02 自测"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "修掉 realloc 的泄漏",
+      "content_md": "下面的扩容函数在 `realloc` 失败时会泄漏原内存。指出原因并改正：\n\n```c\nint grow(int *p, size_t new_n) {\n    p = realloc(p, new_n * sizeof(int));\n    if (!p) return -1;\n    return 0;\n}\n```",
+      "answer": {
+        "reference_code": "int grow(int **pp, size_t new_n) {\n    if (new_n > SIZE_MAX / sizeof(int)) return -1;\n    void *tmp = realloc(*pp, new_n * sizeof(int));\n    if (!tmp) return -1;      /* 原 *pp 仍有效，由调用方决定如何处理 */\n    *pp = tmp;\n    return 0;\n}\n/* 调用方：\n   int *buf = malloc(sizeof(int) * 4);\n   if (grow(&buf, 100) != 0) { free(buf); buf = NULL; }\n*/"
+      },
+      "explanation": "`p = realloc(p, ...)` 在失败时把 `NULL` 写回 `p`，**原内存地址彻底丢失**，既泄漏又无法继续使用。改正要点有二：① 用临时变量接收返回值，成功后再赋值；② 需要修改调用方的指针，参数应为二级指针 `int **pp`（与 clang-u01 的规则一致）。顺带补上乘法溢出检查。",
+      "tags": [
+        "realloc",
+        "内存泄漏",
+        "二级指针"
+      ],
+      "source": "self",
+      "source_ref": "clang-u02 自测"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "free 之后的行为",
+      "content_md": "关于 `free(p)`，下列说法**正确**的是？\n\nA. `free` 会把 `p` 置为 `NULL`\nB. `free(NULL)` 会导致崩溃\nC. `free` 后 `p` 的值不变，仍指向已归还的内存\nD. `free` 会把内存立即归还给操作系统",
+      "options": [
+        {
+          "key": "A",
+          "text": "free 会置 p 为 NULL"
+        },
+        {
+          "key": "B",
+          "text": "free(NULL) 会崩溃"
+        },
+        {
+          "key": "C",
+          "text": "free 后 p 的值不变，是悬垂指针"
+        },
+        {
+          "key": "D",
+          "text": "free 会立即归还内存给内核"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "C"
+        ]
+      },
+      "explanation": "`free` 只把块交还**分配器**，不修改传入的指针变量（C 是值传递），所以 `p` 成为悬垂指针。`free(NULL)` 是标准规定的**安全空操作**。小块 `free` 后内存进入分配器的空闲链表，**通常不归还内核**，所以进程 RSS 不下降是正常的。",
+      "tags": [
+        "free",
+        "悬垂指针"
+      ],
+      "source": "book",
+      "source_ref": "《C 程序设计语言》第8章"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "easy",
+      "title": "合并两个有序数组（原地，从后往前）",
+      "content_md": "给定两个非递减数组与各自长度，把第二个合并进第一个（第一个数组末尾预留了足够空间）。要求原地完成。",
+      "answer": {
+        "reference_code": "void merge(int *nums1, int nums1Size, int m,\n           int *nums2, int nums2Size, int n) {\n    int i = m - 1, j = n - 1, k = m + n - 1;\n    while (j >= 0) {\n        if (i >= 0 && nums1[i] > nums2[j]) nums1[k--] = nums1[i--];\n        else                              nums1[k--] = nums2[j--];\n    }\n}"
+      },
+      "explanation": "从**后往前**填充避免覆盖尚未处理的 `nums1` 元素（从前往前则需要额外 O(m) 空间）。考察下标/指针的边界控制——与 `memcpy` 的重叠区域处理是同一类问题。",
+      "tags": [
+        "双指针",
+        "原地合并"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 88（merge-sorted-array）",
+      "external_url": "https://leetcode.cn/problems/merge-sorted-array/",
+      "time_limit_ms": 2000,
+      "memory_limit_mb": 256
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "nowcoder",
+      "difficulty": "mid",
+      "title": "链表反转（指针操作）",
+      "content_md": "给定单链表头节点，反转整个链表并返回新的头节点。要求原地操作、只使用常数额外空间。",
+      "answer": {
+        "reference_code": "typedef struct ListNode { int val; struct ListNode *next; } ListNode;\n\nListNode *reverseList(ListNode *head) {\n    ListNode *prev = NULL, *cur = head;\n    while (cur) {\n        ListNode *nxt = cur->next;\n        cur->next = prev;\n        prev = cur;\n        cur = nxt;\n    }\n    return prev;\n}"
+      },
+      "explanation": "三指针迭代：`prev`/`cur`/`nxt`。关键是**先保存 `cur->next` 再改链**，否则丢失后半段。这是指针操作最经典的题，也是检验「是否真的理解指针」的标准题。",
+      "tags": [
+        "链表",
+        "指针"
+      ],
+      "source": "nowcoder",
+      "source_ref": "牛客 BM1（反转链表）",
+      "external_url": "https://www.nowcoder.com/practice/75e878df47f24fdc9dc3e400ec6058ca",
+      "time_limit_ms": 2000,
+      "memory_limit_mb": 256
+    }
+  ]
+}

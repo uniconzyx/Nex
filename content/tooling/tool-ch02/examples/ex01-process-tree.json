@@ -1,0 +1,8 @@
+{
+  "title": "进程树：fork/exec 建立进程树",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "fork/exec 进程树模拟（PID 为固定示意值）\nsystemd(pid=1000)\n  +-- bash(pid=1001)  交互 shell\n       +-- fork->exec ls(pid=1002)\n       +-- fork->exec grep(pid=1003)  来自管道 ls|grep\n       +-- fork->exec bash(pid=1004)  执行 script.sh\n\n结论：\n  bash 执行命令 = fork() 出子进程(pid=1002) + exec() 替换映像；子进程与父(pid=1001) 地址空间独立\n  source script.sh 不 fork，变量改动保留在 pid=1001；bash script.sh 在 pid=1004 执行，退出即丢\n  进程树深度 = 3，共 4 个进程（含 systemd）",
+  "code": "# 模拟 fork/exec：进程树的建立（无真实内核，确定性模拟）\nimport itertools\n\n_counter = itertools.count(1000)  # 固定起始 PID，保证输出可复现\n\ndef alloc_pid():\n    return next(_counter)\n\nroot = alloc_pid()      # 1000 systemd\nbash = alloc_pid()      # 1001 交互 shell\nls = alloc_pid()        # 1002\ngrep = alloc_pid()      # 1003\nscript = alloc_pid()    # 1004\n\nprint(\"fork/exec 进程树模拟（PID 为固定示意值）\")\nprint(f\"systemd(pid={root})\")\nprint(f\"  +-- bash(pid={bash})  交互 shell\")\nprint(f\"       +-- fork->exec ls(pid={ls})\")\nprint(f\"       +-- fork->exec grep(pid={grep})  来自管道 ls|grep\")\nprint(f\"       +-- fork->exec bash(pid={script})  执行 script.sh\")\nprint()\nprint(\"结论：\")\nprint(f\"  bash 执行命令 = fork() 出子进程(pid={ls}) + exec() 替换映像；子进程与父(pid={bash}) 地址空间独立\")\nprint(f\"  source script.sh 不 fork，变量改动保留在 pid={bash}；bash script.sh 在 pid={script} 执行，退出即丢\")\nprint(f\"  进程树深度 = 3，共 {4} 个进程（含 systemd）\")\n"
+}

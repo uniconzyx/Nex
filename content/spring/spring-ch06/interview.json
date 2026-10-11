@@ -1,0 +1,91 @@
+{
+  "meta": {
+    "chapter": "spring-ch06"
+  },
+  "items": [
+    {
+      "question": "#{} 和 ${} 的区别？为什么 #{} 能防 SQL 注入？",
+      "answer_md": "`#{}` 被 MyBatis 替换成 JDBC 的 `?` 占位符，参数通过 PreparedStatement 预编译后单独绑定，数据库区分 SQL 指令与数据，特殊字符只当作字段值，因此防注入。\n\n`${}` 是纯文本字符串拼接，把值直接拼进 SQL 文本后再提交，数据库无法区分代码与数据，来自前端的输入会被当 SQL 执行，存在注入风险。\n\n**使用边界**：值是 `#{}`；只有表名、列名、排序字段等不能作为占位符的才用 `${}`，且取值必须来自白名单。",
+      "follow_ups": [
+        "PreparedStatement 预编译在协议层是怎么实现的？",
+        "MyBatis 日志里怎么一眼看出哪里用了 ${}？"
+      ],
+      "difficulty": "easy",
+      "company_tags": [
+        "通用",
+        "阿里",
+        "字节"
+      ]
+    },
+    {
+      "question": "resultType 和 resultMap 的区别？什么时候必须手写 resultMap？",
+      "answer_md": "`resultType` 依赖自动映射（属性名=列名，或开驼峰后下划线转驼峰），简单快捷；`resultMap` 显式声明 column→property 映射，支持别名、嵌套对象与关联（association/collection）。\n\n**必须手写 resultMap 的场景**：列名与属性名不一致又没开驼峰、一对多/多对一关联、继承/discriminator、构造器注入。简单 CRUD 用 resultType + 驼峰最省事，手写 resultMap 是过度设计。",
+      "follow_ups": [
+        "关联映射为什么容易触发 N+1？怎么优化？",
+        "两表都有 id 列时 resultMap 怎么避免覆盖？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "美团",
+        "腾讯"
+      ]
+    },
+    {
+      "question": "MyBatis 的一级缓存和二级缓存分别是什么范围？有什么坑？",
+      "answer_md": "**一级缓存**（local cache）默认开启，作用域是 SqlSession，同一会话内相同查询命中缓存；SqlSession 关闭/提交后清空或晋升二级。\n\n**二级缓存**作用域是 Mapper 的 namespace，跨 SqlSession 共享，需显式 `<cache/>` 开启且缓存对象需可序列化。\n\n**坑**：一级缓存下若绕过 MyBatis 直连 JDBC 改库，会话内会读到旧值；二级缓存返回的是对象引用，把取出的对象改了会污染缓存，建议只读或防御性拷贝。",
+      "follow_ups": [
+        "一级缓存在什么情况下会失效？",
+        "二级缓存为什么要求对象可序列化？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "蚂蚁",
+        "京东"
+      ]
+    },
+    {
+      "question": "MyBatis 的动态 SQL 有哪些常用标签？各自解决什么？",
+      "answer_md": "常用标签：`<if>`（按条件拼接片段）、`<choose>/<when>/<otherwise>`（多选一，等价于 switch）、`<foreach>`（遍历集合做 IN 或批量插入）、`<where>`（智能加 WHERE 并去除前缀 AND/OR）、`<set>`（智能加 SET 并去除尾部逗号）、`<trim>`（通用修剪）、`<sql>/<include>`（片段复用）。\n\n它们本质是「带条件的 SQL 文本拼接」，由 OGNL 表达式驱动，避免手写 SQL 时拼出多余的 AND/逗号或 1=1 这种丑陋兜底。",
+      "follow_ups": [
+        "<where> 是怎么去掉前缀 AND 的？",
+        "<foreach> 的 collection 在不同参数类型下叫什么？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "百度",
+        "拼多多"
+      ]
+    },
+    {
+      "question": "Mapper 接口没有实现类，MyBatis 是怎么把方法调用路由到 SQL 的？",
+      "answer_md": "MyBatis 用 JDK 动态代理：调用 `sqlSession.getMapper(XxxMapper.class)` 时返回 MapperProxy 代理对象。方法调用被拦截后，按「接口全限定名 + 方法名」拼出 statementId，到 Configuration 的 mappedStatements 注册表取对应的 MappedStatement（无论来自 XML 还是注解），再交给 Executor 执行。\n\n因此 Mapper 接口方法不能重载（statementId 只看名字），且 XML 与注解混用同 id 会冲突。",
+      "follow_ups": [
+        "XML 和注解两种方式最终形态一样吗？",
+        "为什么 Mapper 接口不能方法重载？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "字节",
+        "阿里"
+      ]
+    },
+    {
+      "question": "插入数据后如何拿到自增主键？insert 的返回值是什么？",
+      "answer_md": "配置 `<insert useGeneratedKeys=\"true\" keyProperty=\"id\">`，MyBatis 通过 JDBC 的 `getGeneratedKeys()` 在插入后把数据库生成的主键回填到传入实体对象的 `id` 属性，之后用 `user.getId()` 获取。\n\n**insert 的返回值是受影响行数（int），不是主键**——这是高频易错点。Oracle 没有自增列，`useGeneratedKeys` 无效，需用 `<selectKey order=\"BEFORE\">` 先取序列号。",
+      "follow_ups": [
+        "Oracle 没有自增列怎么回填主键？",
+        "keyProperty 写错会怎样？"
+      ],
+      "difficulty": "easy",
+      "company_tags": [
+        "通用",
+        "腾讯",
+        "美团"
+      ]
+    }
+  ]
+}

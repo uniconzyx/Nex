@@ -1,0 +1,132 @@
+{
+  "meta": {
+    "chapter": "data-ch01",
+    "title": "NumPy 基础 —— 习题集",
+    "count": 6,
+    "note": "3 道基础题 + 3 道算法题（平台题仅存元数据与链接）"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "哪些操作返回视图",
+      "content_md": "对二维数组 `a = np.arange(12).reshape(3,4)`，下列哪些操作**一定**返回视图（与 a 共享内存）？\n\nA. `a[0]`\nB. `a[:, 0]`\nC. `a[a > 5]`\nD. `a.T`",
+      "answer": {
+        "correct": "A、B、D",
+        "explain": "A、B 是基本切片（可用「起点 + strides」表达）→ view；D 的转置只交换 strides → view。C 是布尔索引，结果元素个数未知、无法用 strides 描述 → 必然 copy。\n\n判定口诀：**能用 strides 表达的就是 view，需要「挑元素」的就是 copy。**"
+      },
+      "explanation": "视图 vs 拷贝是 NumPy 内存正确性的第一道关。",
+      "tags": [
+        "NumPy",
+        "视图",
+        "内存"
+      ],
+      "source": "self",
+      "source_ref": "《Python for Data Analysis》第4章 · NumPy 基础"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "广播失败的归一化写法",
+      "content_md": "想把矩阵每一列做标准化（每列减去该列均值再除以标准差），下面代码报错：\n\n```python\nx = np.random.randn(100, 5)\nz = (x - x.mean(axis=0)) / x.std(axis=0)\n```\n\n如果矩阵是 `x.shape == (5, 100)`（即每行是一个样本、每列是特征），有人写成 `x - x.mean(axis=1)` 也报错。请分别指出问题并给出正确写法。",
+      "answer": {
+        "reference_code": "# 情形一（列是特征）：axis=0 得到 shape (5,)，尾维 5 与 100 不匹配 → 报错\nz = (x - x.mean(axis=0)) / x.std(axis=0)          # ValueError\nz = (x - x.mean(axis=0, keepdims=True)) / x.std(axis=0, keepdims=True)   # ✓\n\n# 情形二（行是样本，想每行去均值）：axis=1 得到 shape (5,)，需升维到 (5,1)\nz = x - x.mean(axis=1, keepdims=True)             # ✓\nz = x - x.mean(axis=1)[:, None]                   # ✓ 等价写法",
+        "explain": "广播从**尾维**对齐。`(100,5)` 减去 `(5,)` 其实是**可以**广播的（尾维 5==5）；真正会报错的是 `(5,100)` 减去 `(5,)`（尾维 100 vs 5）。\n\n题目里两种写法的区别在于维度顺序。最稳妥、也最可读的做法是聚合时直接 `keepdims=True`，让结果保持 `(1, k)` 或 `(k, 1)` 的形状，天然可广播回去。"
+      },
+      "explanation": "广播从尾维对齐；keepdims 是避免手工升维的利器。",
+      "tags": [
+        "NumPy",
+        "广播",
+        "归一化"
+      ],
+      "source": "self",
+      "source_ref": "《Python for Data Analysis》第4章 · 广播"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "重复索引的就地加为何丢数据",
+      "content_md": "执行下面两段代码，分别输出什么？为什么不同？\n\n```python\na = np.zeros(3); idx = np.array([0, 0, 0, 1])\na[idx] += 1\nprint(a)\n\nb = np.zeros(3)\nnp.add.at(b, idx, 1)\nprint(b)\n```",
+      "answer": {
+        "explain": "输出分别是 `[1. 1. 0.]` 与 `[3. 1. 0.]`。\n\n**原因**：`a[idx] += 1` 被 Python 展开为 `tmp = a.__getitem__(idx)` → `tmp = tmp.__iadd__(1)` → `a.__setitem__(idx, tmp)`。idx 中 0 出现了 3 次，三次加法各自基于**同一个旧值 0**，得到 1，最后只写回一次 → 结果是 1 而非 3。\n\n`np.add.at` 是 ufunc 的**无缓冲就地**版本，它在 C 层逐个索引累加，因此重复索引会被正确计数 3 次。"
+      },
+      "explanation": "花式索引与就地运算的经典陷阱，做直方图/计数时必踩。",
+      "tags": [
+        "NumPy",
+        "花式索引",
+        "ufunc"
+      ],
+      "source": "self",
+      "source_ref": "NumPy 官方文档 · ufunc.at"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": 2,
+      "title": "重塑矩阵（reshape 与 C 顺序）",
+      "content_md": "给定矩阵与目标行列数，若元素总数匹配则重塑，否则原样返回。用 NumPy 的 reshape 语义实现。",
+      "answer": {
+        "reference_code": "np.arange(m*n).reshape(r, c)   # 按行优先（C order）填充",
+        "explain": "NumPy 的 reshape 默认 C order：按行读取原数据、按行填入新形状。这也是本题的语义。"
+      },
+      "explanation": "理解 reshape 的填充顺序（C vs F）是向量化思维的起点。",
+      "tags": [
+        "NumPy",
+        "reshape",
+        "矩阵"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 566 · 重塑矩阵",
+      "external_url": "https://leetcode.cn/problems/reshape-the-matrix/"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": 2,
+      "title": "转置矩阵（strides 与视图）",
+      "content_md": "求矩阵转置。用 NumPy 实现并说明：转置操作是否真的搬动了数据？",
+      "answer": {
+        "reference_code": "a.T   # 只交换 strides，O(1) 视图，不搬数据",
+        "explain": "转置后 `a.T.strides` 是原 strides 的逆序，`np.shares_memory(a, a.T)` 为 True。代价是结果不再 C 连续，后续某些运算可能变慢或被迫拷贝。"
+      },
+      "explanation": "strides 是理解 NumPy 零成本变形的钥匙。",
+      "tags": [
+        "NumPy",
+        "转置",
+        "strides"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 867 · 转置矩阵",
+      "external_url": "https://leetcode.cn/problems/transpose-matrix/"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": 3,
+      "title": "旋转图像（原地与视图的关系）",
+      "content_md": "将 n×n 矩阵顺时针旋转 90 度。用 NumPy 实现（允许 `np.rot90`），并讨论它是否原地。",
+      "answer": {
+        "reference_code": "np.rot90(a, k=-1)   # k=-1 表示顺时针 90 度；返回视图",
+        "explain": "`np.rot90` 通过翻转 + 转置实现，返回的是**视图**（共享内存）。若要得到独立结果需 `.copy()`。真正的「原地」写法是分层交换元素，但那样会失去向量化带来的简洁性与速度。"
+      },
+      "explanation": "区分「语义上旋转」与「物理上原地」——NumPy 倾向前者（返回视图）。",
+      "tags": [
+        "NumPy",
+        "矩阵旋转",
+        "视图"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 48 · 旋转图像",
+      "external_url": "https://leetcode.cn/problems/rotate-image/"
+    }
+  ]
+}

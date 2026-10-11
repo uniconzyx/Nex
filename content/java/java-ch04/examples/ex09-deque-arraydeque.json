@@ -1,0 +1,8 @@
+{
+  "title": "ArrayDeque 同时作为栈（LIFO）与队列（FIFO）",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "stack pop(LIFO): C B A \nqueue poll(FIFO): A B C ",
+  "code": "import java.util.*;\n\npublic class Ex09DequeArrayDeque {\n    public static void main(String[] args) {\n        Deque<String> stack = new ArrayDeque<>();\n        stack.push(\"A\"); stack.push(\"B\"); stack.push(\"C\");\n        System.out.print(\"stack pop(LIFO): \");\n        while (!stack.isEmpty()) System.out.print(stack.pop() + \" \");\n        System.out.println();\n        Deque<String> queue = new ArrayDeque<>();\n        queue.offer(\"A\"); queue.offer(\"B\"); queue.offer(\"C\");\n        System.out.print(\"queue poll(FIFO): \");\n        while (!queue.isEmpty()) System.out.print(queue.poll() + \" \");\n        System.out.println();\n    }\n}"
+}

@@ -1,0 +1,316 @@
+{
+  "meta": {
+    "chapter": "ai-ch07",
+    "title": "Agent 开发：工具调用、记忆与多智能体 —— 习题集",
+    "count": 9,
+    "note": "9 题，基础题 6 + 算法题 3（含 LeetCode 2），仅存元数据与链接不复述题面"
+  },
+  "items": [
+    {
+      "id": "ai07-q1",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "Agent 三要素与 ReAct 循环",
+      "content_md": "关于 Agent 的三要素与 ReAct 范式，下列说法正确的是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "只要接入了大模型就是 Agent，不需要工具与循环"
+        },
+        {
+          "key": "B",
+          "text": "三要素是 目标（可判定的终止条件）、工具（动作集合）、循环（观察-思考-行动迭代）；ReAct 的标准循环是 Thought -> Action -> Observation 直到 Final Answer"
+        },
+        {
+          "key": "C",
+          "text": "ReAct 与 CoT 完全等价，都是纯语言推理、不调用任何外部工具"
+        },
+        {
+          "key": "D",
+          "text": "Agent 的终止条件应由模型凭自觉判断，无需写进代码"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "explain": "三要素缺一不可：无工具只是聊天、无循环只是一次性调用、无可判定目标则无法终止。ReAct 交替产出推理与行动并用观察纠偏，与纯推理的 CoT 不同。终止条件必须写进代码（max_steps / 预算 / 重复动作）而非依赖模型自律。"
+      },
+      "explanation": "Agent = 目标 + 工具 + 循环；ReAct = Thought/Action/Observation 交替。",
+      "tags": [
+        "agent",
+        "react"
+      ],
+      "source": "self",
+      "source_ref": "Yao et al. 2022《ReAct: Synergizing Reasoning and Acting in Language Models》"
+    },
+    {
+      "id": "ai07-q2",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "四种架构模式的选型判据",
+      "content_md": "团队要实现「读表 -> 校验 -> 写库 -> 发通知」四步固定流程，最合适的架构是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "自由 ReAct，把控制权完全交给模型以提高灵活性"
+        },
+        {
+          "key": "B",
+          "text": "多智能体辩论，让四个 Agent 分别负责一步"
+        },
+        {
+          "key": "C",
+          "text": "确定性工作流（DAG）：步骤事先可枚举，就不该把控制权交给模型"
+        },
+        {
+          "key": "D",
+          "text": "Plan-Execute 两段式，先让模型生成计划再执行"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "C"
+        ],
+        "explain": "核心判据是「步骤是否事先可枚举」。可枚举 = 确定性 DAG，可单测、可回放、成本可预测；自由 ReAct 可能出现跳过校验等绕路（见 ex09），多智能体则引入不必要的通信与一致性成本。"
+      },
+      "explanation": "能用工作流就别用 Agent：步骤可枚举即用确定性 DAG。",
+      "tags": [
+        "architecture",
+        "workflow"
+      ],
+      "source": "self",
+      "source_ref": "Anthropic《Building effective agents》工程建议"
+    },
+    {
+      "id": "ai07-q3",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "工具设计的七条原则",
+      "content_md": "下列哪一组做法**违反**了工具设计的七条原则？",
+      "options": [
+        {
+          "key": "A",
+          "text": "description 写清「仅当用户明确询问天气时调用」，参数 days 限定 1~7"
+        },
+        {
+          "key": "B",
+          "text": "工具返回时把整页 HTML 原样回填上下文，错误时抛裸 KeyError 让模型自己猜"
+        },
+        {
+          "key": "C",
+          "text": "写操作工具带 idempotency_key，危险工具标记 requires_confirmation"
+        },
+        {
+          "key": "D",
+          "text": "只读工具与写工具分注册、凭据按工具注入"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "explain": "B 同时违反「返回精简」（整页 HTML 撑爆上下文）与「错误可行动」（裸 KeyError 无法让模型自纠）。A 对应描述即提示词 + 参数强类型，C 对应幂等 + 人工确认，D 对应最小权限。"
+      },
+      "explanation": "返回精简 + 错误可行动 是工具设计的关键红线。",
+      "tags": [
+        "tool-design",
+        "function-calling"
+      ],
+      "source": "self",
+      "source_ref": "ai-ch07 concept/02 工具设计七条原则"
+    },
+    {
+      "id": "ai07-q4",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "记忆三层的分工",
+      "content_md": "关于 Agent 记忆三层（工作 / 短期 / 长期），下列对应关系正确的是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "工作记忆存跨会话的用户偏好，长期记忆存当前任务的中间状态"
+        },
+        {
+          "key": "B",
+          "text": "工作记忆 = 当前任务的结构化状态草稿；短期记忆 = 会话消息滑动窗口（溢出压成摘要）；长期记忆 = 跨会话事实，靠检索与遗忘管理"
+        },
+        {
+          "key": "C",
+          "text": "三层都等价于「把历史消息全部拼进上下文窗口」"
+        },
+        {
+          "key": "D",
+          "text": "长期记忆只要不断写入即可，不需要遗忘或去重"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "explain": "三层按生命周期划分：工作记忆任务级、短期记忆会话级（滑窗 + 摘要压缩）、长期记忆跨会话（检索打分 α·相关度 + β·新近度 + γ·重要性）。只写不删会让记忆库膨胀并恶化检索精度与成本。"
+      },
+      "explanation": "记忆分层的本质是存储层级：越近越快越小越易失。",
+      "tags": [
+        "memory",
+        "context"
+      ],
+      "source": "self",
+      "source_ref": "ai-ch07 concept/03 记忆系统"
+    },
+    {
+      "id": "ai07-q5",
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "修复一个没有终止条件的 ReAct 循环",
+      "content_md": "下面的 ReAct 循环在工具持续返回相同观察时会无限循环，请指出问题并给出修复（要求同时具备步数上限与重复动作熔断）。\n```python\ndef react_loop(gen, tools):\n    history = []\n    while True:\n        action, arg = gen(history)\n        obs = tools[action](arg) if action in tools else None\n        history.append((action, arg, obs))\n        if action == 'finish':\n            return arg\n```",
+      "answer": {
+        "reference_code": "def react_loop(gen, tools, max_steps=8, max_repeat=2):\n    history = []\n    seen = {}\n    for _ in range(max_steps):\n        action, arg = gen(history)\n        if action == 'finish':\n            return arg\n        key = (action, str(arg))\n        seen[key] = seen.get(key, 0) + 1\n        if seen[key] > max_repeat:\n            return '熔断: 重复动作 %s' % (key,)\n        obs = tools[action](arg) if action in tools else 'UNKNOWN_TOOL'\n        history.append((action, arg, obs))\n    return '熔断: 超出步数上限'\n\n\nif __name__ == '__main__':\n    script = [('lookup', 'k')] * 10\n    it = iter(script)\n    print(react_loop(lambda h: next(it), {'lookup': lambda a: 'SAME'}, max_steps=8, max_repeat=2))\n",
+        "explain": "原实现 while True 且只看 finish，一旦模型不产出 finish 就永不退出。修复要点：① 用 for + max_steps 给步数硬上限；② 对 (action, args) 做重复计数，超阈值即熔断；③ 未知工具返回可辨识字符串而不是 None（否则模型无法区分「工具不存在」与「工具无返回」）。"
+      },
+      "explanation": "Agent 循环必须有外部硬熔断：步数上限 + 重复动作检测，不能依赖模型自觉产出终止信号。",
+      "tags": [
+        "react",
+        "termination"
+      ],
+      "source": "self",
+      "source_ref": "ai-ch07 pitfalls 第 2、5 条"
+    },
+    {
+      "id": "ai07-q6",
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "幂等键下的副作用次数",
+      "content_md": "某写操作工具带幂等键 `order-42`。调用方因响应丢失连续重试了 5 次，服务端每次都收到同样参数。问：真实的副作用（下单记录）发生几次？若去掉幂等键又是几次？",
+      "answer": {
+        "output": "有幂等键：1 次；无幂等键：5 次",
+        "reference_code": "SIDE = []\nSTORE = {}\n\n\ndef write(idem_key):\n    if idem_key is not None and idem_key in STORE:\n        return STORE[idem_key]\n    SIDE.append(idem_key)\n    if idem_key is not None:\n        STORE[idem_key] = 'ok'\n    return 'ok'\n\n\nfor _ in range(5):\n    write('order-42')\nprint('有幂等键:', len(SIDE))\nSIDE.clear()\nfor _ in range(5):\n    write(None)\nprint('无幂等键:', len(SIDE))\n",
+        "explain": "幂等的定义：同一请求执行一次与执行多次的副作用相同。有幂等键时服务端按 key 去重，副作用 1 次；无幂等键时每次调用都产生新副作用，共 5 次。"
+      },
+      "explanation": "幂等键使副作用与调用次数解耦，是写操作工具的必备设计。",
+      "tags": [
+        "idempotency",
+        "retry"
+      ],
+      "source": "self",
+      "source_ref": "ai-ch07 concept/02 原则五：幂等"
+    },
+    {
+      "id": "ai07-q7",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "实现多智能体消息的重复循环检测",
+      "content_md": "给定按时间顺序的消息序列 `[(sender, receiver, content)]`，实现 `detect_cycle(messages, max_repeat=2)`：对每条消息计算签名（发送方、接收方、内容指纹），当任一签名的出现次数**超过** `max_repeat` 时返回「触发熔断时的消息序号（从 1 起）」；若全程未超过则返回 `None`。内容指纹请使用 `zlib.crc32`（禁止用 `hash()`）。",
+      "answer": {
+        "reference_code": "import zlib\n\n\ndef detect_cycle(messages, max_repeat=2):\n    seen = {}\n    for i, (a, b, content) in enumerate(messages, start=1):\n        fingerprint = zlib.crc32(content.encode('utf-8'))\n        signature = (a, b, fingerprint)\n        seen[signature] = seen.get(signature, 0) + 1\n        if seen[signature] > max_repeat:\n            return i\n    return None\n\n\nif __name__ == '__main__':\n    msgs = [('A', 'B', '补充数据'), ('B', 'A', '请给指标'),\n            ('A', 'B', '补充数据'), ('B', 'A', '请给指标'),\n            ('A', 'B', '补充数据')]\n    print(detect_cycle(msgs, max_repeat=2))\n    print(detect_cycle([('A', 'B', 'x')], max_repeat=2))\n",
+        "explain": "用元组 (sender, receiver, crc32(content)) 作签名，字典计数即可。A->B 的同内容消息第 3 次出现时计数为 3 > 2，返回序号 5；单条消息时返回 None。用 crc32 而非 hash 是为了跨进程可复现（PYTHONHASHSEED 随机化会让 hash(str) 每次不同）。"
+      },
+      "explanation": "循环死锁/活锁的检测本质是「状态签名重复计数」，与分布式系统的消息去重同源。",
+      "tags": [
+        "multiagent",
+        "cycle-detection",
+        "dedup"
+      ],
+      "source": "self",
+      "source_ref": "ai-ch07 concept/04 失败模式四：循环死锁"
+    },
+    {
+      "id": "ai07-q8",
+      "type": "choice",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "课程表（有向图环检测，多智能体死锁判定同构）",
+      "content_md": "本题考察「判断有向图中是否存在环」，与多智能体依赖编排中的循环依赖/死锁判定完全同构。题面与约束请见链接，简述你判断是否存在环的最优思路。",
+      "options": [
+        {
+          "key": "A",
+          "text": "对每个节点做一次 BFS 统计入度之和是否为偶数"
+        },
+        {
+          "key": "B",
+          "text": "拓扑排序（Kahn 算法：入度 0 入队逐层剥离）或 DFS 三色标记；若最终剥离节点数少于总节点数则存在环，O(V+E)"
+        },
+        {
+          "key": "C",
+          "text": "枚举所有简单路径，O(2^V)"
+        },
+        {
+          "key": "D",
+          "text": "只要存在节点入度为 0 就一定无环"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "explain": "有向图环检测的标准解法是拓扑排序（Kahn）或 DFS 三色标记，复杂度 O(V+E)。若拓扑序长度小于节点总数，说明剩余节点互相依赖成环——这正是多智能体编排中「A 等 B、B 等 A」的死锁判据。"
+      },
+      "explanation": "拓扑排序 / DFS 三色标记是环检测的标准 O(V+E) 解法。",
+      "tags": [
+        "graph",
+        "topological-sort",
+        "deadlock"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 207（course-schedule）",
+      "external_url": "https://leetcode.cn/problems/course-schedule/"
+    },
+    {
+      "id": "ai07-q9",
+      "type": "choice",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "LRU 缓存（Agent 记忆容量淘汰的底层结构）",
+      "content_md": "本题考察「O(1) 时间完成 get/put 并做容量淘汰」的数据结构，与 Agent 长期记忆的 LRU 容量淘汰是同一套机制。题面与约束请见链接，最优实现是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "哈希表 + 双向链表，get/put 均摊 O(1)"
+        },
+        {
+          "key": "B",
+          "text": "单链表 + 线性扫描，O(n)"
+        },
+        {
+          "key": "C",
+          "text": "数组 + 每次快排，O(n log n)"
+        },
+        {
+          "key": "D",
+          "text": "只用哈希表即可实现 LRU 淘汰"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "A"
+        ],
+        "explain": "哈希表提供 O(1) 定位，双向链表提供 O(1) 的「移到最新」与「淘汰最旧」。只靠哈希表无法确定访问顺序（无论用哪种遍历都为 O(n)），只靠链表定位为 O(n)，必须两者结合。"
+      },
+      "explanation": "哈希表 + 双向链表 = O(1) 的 LRU。",
+      "tags": [
+        "lru",
+        "linked-list",
+        "hashmap"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 146（lru-cache）",
+      "external_url": "https://leetcode.cn/problems/lru-cache/"
+    }
+  ]
+}

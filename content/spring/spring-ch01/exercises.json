@@ -1,0 +1,169 @@
+{
+  "meta": {
+    "chapter": "spring-ch01",
+    "note": "基础题考察 IoC/DI 概念与输出；算法题考察依赖图环检测（与课程表同构）。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "IoC 与 DI 的关系",
+      "content_md": "下列关于 IoC（控制反转）与 DI（依赖注入）的说法，正确的是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "IoC 是依赖注入的一种具体实现"
+        },
+        {
+          "key": "B",
+          "text": "DI 是 IoC 最常用的实现手段，容器把依赖注入对象"
+        },
+        {
+          "key": "C",
+          "text": "IoC 等同于工厂模式"
+        },
+        {
+          "key": "D",
+          "text": "DI 与 IoC 是完全无关的两个概念"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "output": ""
+      },
+      "explanation": "IoC 是设计原则（把创建/装配控制权交给容器），DI 是实现手段；工厂模式只是 IoC 的载体之一，不能等同。",
+      "tags": [
+        "ioc",
+        "di"
+      ],
+      "source": "self",
+      "source_ref": "本章自命题 / 《Spring 实战（第6版）》第2章"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "修复字段注入导致的单测不可测",
+      "content_md": "下面代码用字段注入，单测无法传入 mock。请改为构造器注入（依赖可声明为 final）。\n\n```java\n@Service\npublic class OrderService {\n    @Autowired\n    private PaymentClient client;\n    public String pay(String id){ return client.charge(id); }\n}\n```",
+      "answer": {
+        "correct": [],
+        "output": "",
+        "reference_code": "@Service\npublic class OrderService {\n    private final PaymentClient client;\n    public OrderService(PaymentClient client) { this.client = client; }\n    public String pay(String id){ return client.charge(id); }\n}"
+      },
+      "explanation": "构造器注入让依赖为 final、对象不可变且单测可直接 `new OrderService(mock)` 传入，可测试性大幅提升。",
+      "tags": [
+        "di",
+        "testability"
+      ],
+      "source": "self",
+      "source_ref": "本章自命题"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "判断单例共享状态输出",
+      "content_md": "容器注册 `Counter` 为单例。下列代码输出什么？\n```java\nCounter a = ctx.getBean(Counter.class);\nCounter b = ctx.getBean(Counter.class);\na.n = 10;\nSystem.out.println(a == b);\nSystem.out.println(b.n);\n```",
+      "answer": {
+        "correct": [],
+        "output": "true\n10"
+      },
+      "explanation": "单例作用域下 `getBean` 返回同一实例，a、b 指向同一对象，对 a 的修改在 b 上可见。",
+      "tags": [
+        "scope",
+        "singleton"
+      ],
+      "source": "self",
+      "source_ref": "本章自命题 / 示例 Ex06"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "课程表（依赖图环检测，与 DI 循环依赖同构）",
+      "content_md": "给定课程先修依赖 `prerequisites`，判断能否完成所有课程。等价于检测有向图是否存在环——与「Spring 单例循环依赖能否被三级缓存解决」是同一建模。",
+      "answer": {
+        "correct": [],
+        "output": "",
+        "reference_code": "拓扑排序（Kahn 或 DFS 三色标记）检测有向图环"
+      },
+      "explanation": "把依赖建成有向图，能拓扑排序则无环（可完成）；有环则无法完成，类比 prototype 循环依赖必然失败。",
+      "tags": [
+        "graph",
+        "topo",
+        "circular"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 207（course-schedule）",
+      "external_url": "https://leetcode.cn/problems/course-schedule/"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "github",
+      "difficulty": "hard",
+      "title": "从零实现迷你 IoC 容器（反射 + 三级缓存）",
+      "content_md": "参考 Spring 思路，用纯 JDK 实现一个迷你容器：支持 @Component 扫描、@Autowired 字段反射注入、单例缓存，并尝试用三级缓存解决单例循环依赖。",
+      "answer": {
+        "correct": [],
+        "output": "",
+        "reference_code": "见参考仓库的最小实现思路"
+      },
+      "explanation": "综合考察 BeanDefinition 注册表、反射填充、早期引用暴露与缓存层级，是本章知识的工程落地。",
+      "tags": [
+        "ioc",
+        "reflection",
+        "cache"
+      ],
+      "source": "github",
+      "source_ref": "spring-projects/spring-framework（参考实现）",
+      "external_url": "https://github.com/spring-projects/spring-framework"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "BeanFactory 与 ApplicationContext 差异",
+      "content_md": "关于 BeanFactory 与 ApplicationContext，下列说法准确的是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "ApplicationContext 运行期获取单例比 BeanFactory 快"
+        },
+        {
+          "key": "B",
+          "text": "ApplicationContext 继承 BeanFactory，并在启动期预实例化单例，额外提供国际化/事件/AOP 等能力"
+        },
+        {
+          "key": "C",
+          "text": "BeanFactory 也默认提供 ApplicationEvent 事件发布"
+        },
+        {
+          "key": "D",
+          "text": "两者没有任何关系，是独立的两套容器"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "output": ""
+      },
+      "explanation": "ApplicationContext 是 BeanFactory 的超集，预实例化单例（fail-fast）、提供国际化/事件/AOP；运行期单例获取两者都是 Map 查找，无快慢之分。",
+      "tags": [
+        "container",
+        "applicationcontext"
+      ],
+      "source": "book",
+      "source_ref": "《Spring 实战（第6版）》第2章"
+    }
+  ]
+}

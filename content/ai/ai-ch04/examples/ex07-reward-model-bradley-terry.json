@@ -1,0 +1,8 @@
+{
+  "title": "Bradley-Terry 奖励模型训练与效用恢复",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "Bradley-Terry 奖励模型 (线性), 训练样本 400 对\n真实偏好权重前 3 项 = [ 0.0012  0.2987 -0.2741]\n\n训练前 BT loss = 0.693147\n训练后 BT loss = 0.134060\n损失是否下降: True\n学到的 w 与 w_true 的余弦相似度 = 0.9978\n\n结论: 偏好对足以让奖励模型恢复出真实效用方向(余弦接近 1)\n      这也说明奖励模型的质量完全取决于偏好数据的覆盖度与一致性",
+  "code": "\nimport numpy as np\nrng = np.random.default_rng(7)\nD = 8\nw_true = rng.normal(size=D)\n\nn = 400\nXa = rng.normal(size=(n, D))\nXb = rng.normal(size=(n, D))\ny = (Xa @ w_true > Xb @ w_true).astype(float)   # 偏好标签真由特征决定\n\ndef bt_loss(w):\n    margin = (Xa @ w) - (Xb @ w)\n    p = 1.0 / (1.0 + np.exp(-margin))\n    p = np.clip(p, 1e-9, 1.0 - 1e-9)\n    return float(-(y * np.log(p) + (1 - y) * np.log(1 - p)).mean())\n\nw = np.zeros(D)\nlr = 0.1\nlosses = [bt_loss(w)]\nfor step in range(300):\n    margin = (Xa @ w) - (Xb @ w)\n    p = 1.0 / (1.0 + np.exp(-margin))\n    g = -((y - p)[:, None] * (Xa - Xb)).mean(axis=0)\n    w = w - lr * g\n    losses.append(bt_loss(w))\n\ncos = float(np.dot(w, w_true) / (np.linalg.norm(w) * np.linalg.norm(w_true)))\nprint('Bradley-Terry 奖励模型 (线性), 训练样本 %d 对' % n)\nprint('真实偏好权重前 3 项 =', np.round(w_true[:3], 4))\nprint()\nprint('训练前 BT loss = %.6f' % losses[0])\nprint('训练后 BT loss = %.6f' % losses[-1])\nprint('损失是否下降:', bool(losses[-1] < losses[0]))\nprint('学到的 w 与 w_true 的余弦相似度 = %.4f' % cos)\nprint()\nprint('结论: 偏好对足以让奖励模型恢复出真实效用方向(余弦接近 1)')\nprint('      这也说明奖励模型的质量完全取决于偏好数据的覆盖度与一致性')\n"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "可变参数模板递归展开打印",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "1 2.5 hi x\n",
+  "code": "#include <iostream>\nvoid print() {}\ntemplate <typename First, typename... Rest>\nvoid print(First f, Rest... rest) {\n    std::cout << f;\n    if constexpr (sizeof...(rest) > 0) std::cout << ' ';\n    print(rest...);\n}\nint main() {\n    print(1, 2.5, \"hi\", 'x');\n    std::cout << '\\n';\n}\n"
+}

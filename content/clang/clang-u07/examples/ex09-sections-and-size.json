@@ -1,0 +1,17 @@
+{
+  "title": "段布局与体积：.bss 只记录长度，不占文件空间",
+  "code_lang": "bash",
+  "code_std": "bash5",
+  "stdin": "",
+  "expected_output": "$ gcc -c big.c -o big.o\n$ objdump -h big.o      # 看 .bss 的 size 与段属性\n\r\nbig.o:     file format pe-x86-64\r\n\r\nSections:\r\nIdx Name          Size      VMA               LMA               File off  Algn\r\n  0 .text         00000050  0000000000000000  0000000000000000  0000012c  2**4\r\n                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE\r\n  1 .data         00000400  0000000000000000  0000000000000000  0000017c  2**5\r\n                  CONTENTS, ALLOC, LOAD, DATA\r\n  2 .bss          00100000  0000000000000000  0000000000000000  00000000  2**5\r\n                  ALLOC\r\n  3 .rdata        00000030  0000000000000000  0000000000000000  0000057c  2**4\r\n                  CONTENTS, ALLOC, LOAD, READONLY, DATA\r\n  4 .xdata        0000000c  0000000000000000  0000000000000000  000005ac  2**2\r\n                  CONTENTS, ALLOC, LOAD, READONLY, DATA\r\n  5 .pdata        0000000c  0000000000000000  0000000000000000  000005b8  2**2\r\n                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, DATA\r\n  6 .rdata$zzz    00000050  0000000000000000  0000000000000000  000005c4  2**4\r\n                  CONTENTS, ALLOC, LOAD, READONLY, DATA\r\n$ size big.o            # text/data/bss 三段字节数\n   text\t   data\t    bss\t    dec\t    hex\tfilename\r\n    232\t   1024\t1048576\t1049832\t 1004e8\tbig.o\r\n$ gcc big.o -o big.exe\n$ size big.exe          # bss 约 1 MiB，但文件本身很小\n   text\t   data\t    bss\t    dec\t    hex\tfilename\r\n  36196\t   1296\t1051552\t1089044\t 109e14\tbig.exe\r\n$ ./big\nsections: bss[0]=x data[0]=1\r",
+  "code": "#!/bin/sh\n# 段布局与体积：.bss 只记录长度，不占文件空间\n# 期望输出见 expected_output（本机 MinGW 工具链真实执行捕获）\n\ncat > big.c << 'EOF'\n#include <stdio.h>\n#include <string.h>\n\nchar big_bss[1 << 20];              /* 1 MiB 未初始化：进 .bss */\nchar big_data[1024] = { 1 };        /* 已初始化（非零）：进 .data */\nstatic const char msg[] = \"sections\";   /* 只读：进 .rodata */\n\nint main(void)\n{\n    big_bss[0] = 'x';\n    printf(\"%s: bss[0]=%c data[0]=%d\\n\", msg, big_bss[0], big_data[0]);\n    return 0;\n}\nEOF\n\ngcc -c big.c -o big.o\nobjdump -h big.o      # 看 .bss 的 size 与段属性\nsize big.o            # text/data/bss 三段字节数\ngcc big.o -o big.exe\nsize big.exe          # bss 约 1 MiB，但文件本身很小\n./big\n",
+  "_step_rc": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "_verify_note": "expected_output 为 Windows + MinGW-w64（gcc 15.2 / binutils 2.45）真实执行捕获；脚本中显示的是可移植命令形式（gcc/ar/nm/objdump/size），本机实际以 D:/mingw64/bin/ 下的同名工具驱动，二者等价。"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "auto 类型推导",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "1 11",
+  "code": "#include <iostream>\n\nint main() {\n    auto x = 3.14;   // double\n    auto n = 10;     // int\n    std::cout << (x > 3.0) << ' ' << (n + 1);\n}"
+}

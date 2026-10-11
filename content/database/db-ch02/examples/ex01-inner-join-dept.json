@@ -1,0 +1,9 @@
+{
+  "title": "INNER JOIN 关联员工与部门（仅返回可匹配的行）",
+  "code_lang": "sql",
+  "code_std": "mysql8",
+  "stdin": "",
+  "expected_output": "Query OK, 0 rows affected\nQuery OK, 3 rows affected\nQuery OK, 6 rows affected\nname|dept_name\nAlice|Sales\nBob|Engineering\nCarol|Sales\nDave|Engineering\nEve|HR\nFrank|Engineering",
+  "code": "CREATE TABLE department (dept_id INT PRIMARY KEY, dept_name VARCHAR(20), location VARCHAR(20));\nCREATE TABLE employee (emp_id INT PRIMARY KEY, name VARCHAR(20), dept_id INT, salary DECIMAL(10,2));\nINSERT INTO department VALUES (10,'Sales','Beijing'),(20,'Engineering','Shanghai'),(30,'HR','Shenzhen');\nINSERT INTO employee VALUES (1,'Alice',10,6000.00),(2,'Bob',20,8000.00),(3,'Carol',10,4500.00),(4,'Dave',20,9000.00),(5,'Eve',30,5000.00),(6,'Frank',20,7000.00);\nSELECT e.name, d.dept_name FROM employee e INNER JOIN department d ON e.dept_id = d.dept_id ORDER BY e.emp_id;",
+  "_verified": false
+}

@@ -1,0 +1,15 @@
+{
+  "meta": { "chapter": "cpp-ch06", "category": "basic" },
+  "items": [
+    {
+      "title": "实现多态图形类层次 + 工厂模式 + 序列化",
+      "requirement_md": "设计一个 `Shape` 抽象基类（纯虚 `area()`、`draw()`、虚析构函数），派生 `Circle` / `Rectangle` / `Triangle` 三类，各自实现面积与绘制。要求：\n1. 用**工厂函数** `make_shape(type, params)` 按类型名创建派生对象并返回 `std::unique_ptr<Shape>`（避免切片、自动管理生命周期）。\n2. 提供一个 `serialize(const Shape&)` 把图形类型与参数输出为一行文本（如 `Circle 3.0`），`deserialize(line)` 反向重建对象——体会「通过基类接口操作派生对象」。\n3. 把所有图形放入 `std::vector<std::unique_ptr<Shape>>`，用范围 for + 基类指针统一遍历、求总面积、统一绘制，演示运行期多态。\n4. 进阶：增加一种 `Group`（组合模式），内部持有多个 `Shape`，其 `area()` 为子图形之和，演示多态递归。\n\n目标：掌握抽象类接口隔离、基类 virtual 析构的必要性、`unique_ptr<Base>` 承载多态、工厂解耦创建与使用。",
+      "tasks": [
+        { "title": "抽象基类与三个派生类", "verification": { "type": "test", "desc": "各自 area()/draw() 正确；Shape 不可实例化（纯虚）" } },
+        { "title": "工厂 + 序列化", "verification": { "type": "test", "desc": "make_shape 按类型返回正确派生对象；serialize/deserialize 往返一致" } },
+        { "title": "多态容器遍历", "verification": { "type": "test", "desc": "vector<unique_ptr<Shape>> 统一求面积和、绘制，无切片/泄漏" } },
+        { "title": "组合模式 Group（进阶）", "verification": { "type": "manual", "desc": "Group::area() 递归累加子图形，且支持嵌套" } }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,237 @@
+{
+  "meta": {
+    "chapter": "db-ch08",
+    "note": "8 题：基础题覆盖复制模式语义、分片维度选型、雪花 ID 位分配、Quorum 判据、一致性哈希实现、读写分离路由修复；算法题为跨分片归并（LeetCode 23）与多数派选主模拟（GitHub 资源）。来自刷题平台的题只存元数据与链接，不搬运题面正文。"
+  },
+  "items": [
+    {
+      "id": "db-ch08-ex01",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "《高性能 MySQL》第 9 章（复制模式），对应 concept/01 第二节与 examples/ex06",
+      "difficulty": "mid",
+      "title": "关于异步 / 半同步 / 组复制的提交路径，下列说法正确的是",
+      "content_md": "某订单库部署了 1 主 2 从。业务要求「主库宕机时已提交的订单不能丢」，运维把半同步参数设为 `rpl_semi_sync_master_wait_for_slave_count = 2`。\n\n下面哪一项的表述是正确的？",
+      "options": [
+        {
+          "key": "A",
+          "text": "半同步的含义是事务在从库已重放可见后才返回客户端，因此天然满足读己之写"
+        },
+        {
+          "key": "B",
+          "text": "等待数设为 2 时，任一从库抖动都会让主库写入卡到超时才返回；等待数必须严格小于可用从库数"
+        },
+        {
+          "key": "C",
+          "text": "半同步超时后会永久停留在异步状态，必须重启主库才能恢复"
+        },
+        {
+          "key": "D",
+          "text": "组复制（MGR）与半同步的区别只是等待的从库个数不同，其余机制完全一致"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "A 错：半同步的 ACK 语义是「事务已到达至少一个从库（relay log / 已提交）」，**不保证从库已重放可见**，因此半同步不提供读己之写，会话级修复仍然必需。B 对：等待数等于从库数时，任一从库抖动都会让主库写入卡在 `rpl_semi_sync_master_timeout` 上，表现为「写入超时」而慢查询日志里查不到；等待数必须严格小于可用从库数。C 错：超时后确实会退化为异步（这是「静默降级」的坑），但 8.0 会在从库恢复后自动恢复半同步状态，不需要重启主库。D 错：MGR 用的是多数派共识提交协议（Paxos 变体），与半同步的「等固定个 ACK」在提交协议、容错度（⌊(N-1)/2⌋）与自动选主能力上都不同。",
+      "tags": [
+        "replication",
+        "semi-sync",
+        "mgr"
+      ]
+    },
+    {
+      "id": "db-ch08-ex02",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "《数据密集型应用系统设计》第 6 章（分区），对应 concept/02 第一节与 examples/ex01、ex02",
+      "difficulty": "mid",
+      "title": "关于分片维度与扩容迁移量，下列说法正确的是",
+      "content_md": "某系统现有 4 个分片，用 `hash(key) % 4` 路由。运维计划扩容。\n\n结合本机实测数据（10000 个 key），下面哪一项正确？",
+      "options": [
+        {
+          "key": "A",
+          "text": "扩容到 5 个分片与扩容到 8 个分片，迁移率相同，都约 100%"
+        },
+        {
+          "key": "B",
+          "text": "取模扩容到 8 个分片迁移率恰为 50%，扩容到 5 个分片迁移率约 80%；一致性哈希在扩容到 5 个分片时只需约 21%"
+        },
+        {
+          "key": "C",
+          "text": "一致性哈希在任何扩容场景下迁移率都严格小于取模，因为虚拟节点会吸收全部迁移"
+        },
+        {
+          "key": "D",
+          "text": "范围分片在热点键分布下与哈希分片一样均衡，只是实现更简单"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "实测（examples/ex10）：取模 4→8 迁移 5000/10000 = **50.00%**；取模 4→5 迁移 8010/10000 = **80.10%**；哈希环 4→5 迁移 2146/10000 = **21.46%**；哈希环 4→8 迁移 5051/10000 = 50.51%。A 错在「都约 100%」——取模 N→N+1 是约 N/(N+1)（80%），N→2N 恰好约 1/2（50%），而不是 100%。B 完全正确。C 错：翻倍扩容时两者几乎相同（50.00% vs 50.51%），一致性哈希的优势只在非翻倍扩容（加 1 个节点）时体现。D 错：实测 ex02 显示范围分片在倾斜键分布下最大分片占比 80.0%（极差 7334），哈希分片最大占比 25.8%（极差 121），均衡性差距极大。",
+      "tags": [
+        "sharding",
+        "consistent-hashing",
+        "resharding"
+      ]
+    },
+    {
+      "id": "db-ch08-ex03",
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "《高性能 MySQL》第 11 章（高可用与 ID 生成），对应 concept/02 第三节与 examples/ex03",
+      "difficulty": "mid",
+      "title": "写出雪花算法的位分配与容量指标，并计算给定参数下的 ID",
+      "content_md": "某团队采用标准雪花算法，位分配为 `1 符号位 + 41 时间戳位 + 10 机器位 + 12 序列位`，自定义纪元 `EPOCH = 1704067200000`（毫秒）。\n\n请回答三件事：\n\n1. 单机每毫秒的最大发号量与单集群最大机器数各是多少？\n2. 41 位毫秒可支撑多少年（按 365 天/年计）？\n3. 已知 `worker = 7`、时间戳 `ts = 1704067200123`、`seq = 0`，按 `id = ((ts - EPOCH) << 22) | (worker << 12) | seq` 求出该 ID 的十进制值。",
+      "answer": {
+        "output": "单机每毫秒最大发号量 = 2^12 = 4096（即 409.6 万/秒）\n单集群最大机器数 = 2^10 = 1024\n41 位毫秒可支撑 = 69 年\nid = 515928064",
+        "reference_text": "① 序列位 12 位 → 每毫秒上限 2^12 = 4096；换算成每秒 = 4096 × 1000 = 409.6 万/秒·节点。机器位 10 位 → 2^10 = 1024 个节点。\n\n② 2^41 ms = 2199023255552 ms；除以 1000 得秒，再除以 86400 得天，再除以 365 得年，结果向下取整为 69 年（本机 ex03 实测输出 69）。\n\n③ 计算过程（务必写步骤）：\n   ts - EPOCH = 1704067200123 - 1704067200000 = 123\n   123 << 22 = 123 × 4194304 = 515899392\n   worker << 12 = 7 × 4096 = 28672\n   seq = 0\n   id = 515899392 + 28672 + 0 = 515928064\n\n反解验证：515928064 >> 22 = 123 → ts = 1704067200123；(515928064 >> 12) & 1023 = 7 → worker = 7；515928064 & 4095 = 0 → seq = 0，与 examples/ex03 的实测输出完全一致。"
+      },
+      "explanation": "雪花算法的位分配决定了三个容量维度：时间跨度（41 位 ≈ 69 年）、节点规模（10 位 = 1024）、单机吞吐（12 位 = 4096/ms）。三者此消彼长，因为总位宽固定 63 位（1 位符号不使用），这是信息论约束。本题的数值与 examples/ex03 的实测输出互相印证（`id[0] = 515928064`）。",
+      "tags": [
+        "snowflake",
+        "distributed-id",
+        "bit-layout"
+      ]
+    },
+    {
+      "id": "db-ch08-ex04",
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "《数据库系统概念》第 18 章（分布式数据库与 Quorum），对应 concept/04 第二节与 examples/ex09",
+      "difficulty": "basic",
+      "title": "用 W + R > N 判定强一致，并给出容错能力",
+      "content_md": "某多副本存储系统有 5 个副本。运维给出四组读写参数：\n\n```\n(a) N=5, W=3, R=3\n(b) N=5, W=2, R=3\n(c) N=5, W=2, R=2\n(d) N=3, W=2, R=1\n```\n\n请对每组判定「是否保证强一致」，并写出可容忍的写故障数与读故障数（写可用需存活 W 个节点，故容忍 N−W 个）。",
+      "answer": {
+        "output": "(a) N=5 W=3 R=3 : W+R=6 > 5 -> 强一致 True ；容忍写故障 2 个、读故障 2 个\n(b) N=5 W=2 R=3 : W+R=5 不 > 5 -> 强一致 False；容忍写故障 3 个、读故障 2 个\n(c) N=5 W=2 R=2 : W+R=4 不 > 5 -> 强一致 False；容忍写故障 3 个、读故障 3 个\n(d) N=3 W=2 R=1 : W+R=3 不 > 3 -> 强一致 False；容忍写故障 1 个、读故障 2 个"
+      },
+      "explanation": "判据 `W + R > N` 是「任意写集合与任意读集合必然相交」的**充要条件**（充分性用鸽巢原理，必要性用互补划分构造反例）。本机 ex09 已用组合枚举对同类 8 组参数逐例互证判据与枚举等价（全部 True）。\n\n特别注意 (b)(c)(d) 三组的 `W + R` 恰好**等于** N：此时读写集合可以完全不相交，读到的可能是不含本次写入的副本，因此不保证强一致。(c) 尤其容易误判——参数看起来对称（各 2），实则 2+2=4 ≤ 5。(d) 是经典边界：写 {n1,n2}、读 {n3} 不相交。\n\n选参数时要同时看三件事：一致性（W+R>N）、写可用性（N−W）、读可用性（N−R）。现实折衷常见 `N=3, W=2, R=2`：强一致且容忍 1 个节点故障。",
+      "tags": [
+        "quorum",
+        "consistency",
+        "cap"
+      ]
+    },
+    {
+      "id": "db-ch08-ex05",
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "《数据密集型应用系统设计》第 6 章（分区与再平衡），对应 concept/02 第一节与 examples/ex01",
+      "difficulty": "mid",
+      "title": "实现带虚拟节点的一致性哈希环，并实测增删节点的影响面",
+      "content_md": "请用 Python（仅标准库）实现一个一致性哈希环，满足：\n\n1. 支持 `add(node)` / `remove(node)` / `get(key)`；\n2. 每个物理节点映射为 `V` 个虚拟节点（默认 150）；\n3. **不得使用 Python 内置 `hash()`**（受 `PYTHONHASHSEED` 影响，结果不确定），请使用 `zlib.crc32`；\n4. 对 10000 个 key，计算把 4 个节点扩到 5 个节点时的**受影响 key 比例**，并与理论值 `1/N = 1/5 = 0.2` 比较（允许 ±0.02 误差）。",
+      "answer": {
+        "output": "受影响 key = 2150 / 10000 = 0.2150\n判据 |实测-理论| < 0.02 : True",
+        "reference_code": "import zlib\nfrom bisect import bisect_right\n\n\ndef h(s):\n    return zlib.crc32(s.encode('utf-8'))\n\n\nclass Ring:\n    def __init__(self, nodes, vn=150):\n        self.vn = vn\n        self.pts = []\n        self.owner = {}\n        for n in nodes:\n            self.add(n)\n\n    def add(self, n):\n        for i in range(self.vn):\n            p = h('%s#%d' % (n, i))\n            self.pts.append(p)\n            self.owner[p] = n\n        self.pts.sort()\n\n    def remove(self, n):\n        drop = set(h('%s#%d' % (n, i)) for i in range(self.vn))\n        self.pts = [p for p in self.pts if p not in drop]\n        for p in drop:\n            self.owner.pop(p, None)\n\n    def get(self, key):\n        p = h(key)\n        i = bisect_right(self.pts, p)\n        if i == len(self.pts):\n            i = 0\n        return self.owner[self.pts[i]]\n\n\nKEYS = ['key:%05d' % i for i in range(10000)]\nr = Ring(['N0', 'N1', 'N2', 'N3'])\nbefore = [r.get(k) for k in KEYS]\nr.add('N4')\nafter = [r.get(k) for k in KEYS]\nmoved = sum(1 for a, b in zip(before, after) if a != b)\nprint('受影响 key = %d / %d = %.4f' % (moved, len(KEYS), moved / len(KEYS)))\nprint('判据 |实测-理论| < 0.02 : %s' % (abs(moved / len(KEYS) - 0.2) < 0.02))"
+      },
+      "explanation": "实现要点三处：① 用 `zlib.crc32` 而非内置 `hash`，保证跨进程结果确定；② 虚拟节点的点是 `hash(node#i)` 而不是把节点名本身放进环（否则一个节点只有一个点，负载会极度倾斜——本机 ex01 实测虚拟节点数 1 时 5 节点 key 分布为 `[58, 37, 10, 129, 9766]`，标准差 3883.2）；③ 查找用 `bisect_right` 找顺时针第一个点，越界回绕到 0。\n\n实测结果与理论一致：受影响 2150/10000 = 0.2150，接近 `1/N = 0.2`。原因：只有落在新节点逆时针相邻弧段上的 key 会改变归属，该弧段长度期望为 `1/(N+1)`。把虚拟节点提到 150 后，同一实验的标准差降到 171.0（ex01 实测），倾斜被抹平。",
+      "tags": [
+        "consistent-hashing",
+        "virtual-node",
+        "crc32"
+      ]
+    },
+    {
+      "id": "db-ch08-ex06",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "source": "leetcode",
+      "source_ref": "LeetCode 23（merge-k-sorted-lists）",
+      "external_url": "https://leetcode.cn/problems/merge-k-sorted-lists/",
+      "difficulty": "hard",
+      "title": "LeetCode 23 · 合并 K 个升序链表（跨分片 top-k 归并的同构问题）",
+      "content_md": "给定 `k` 个升序链表，将它们合并为一个升序链表。\n\n本题与本章「跨分片 top-k 归并」是同构问题：每个有序链表相当于一个分片返回的局部有序结果，合并所有链表相当于全局归并。请思考它与 `examples/ex05` 中「每分片取 top-k_local 再归并」的正确性条件`k_local >= k` 之间的关系。",
+      "answer": {
+        "reference_code": "import heapq\n\n\ndef merge_k_lists(lists):\n    \"\"\"lists: List[Optional[ListNode]] -> Optional[ListNode]\"\"\"\n    heap = []\n    for i, node in enumerate(lists):\n        if node is not None:\n            heap.append((node.val, i, node))\n    heapq.heapify(heap)\n\n    dummy = tail = None\n    while heap:\n        val, i, node = heapq.heappop(heap)\n        if tail is None:\n            dummy = tail = node\n        else:\n            tail.next = node\n            tail = node\n        if node.next is not None:\n            heapq.heappush(heap, (node.next.val, i, node.next))\n    if tail is not None:\n        tail.next = None\n    return dummy",
+        "explanation": "用最小堆保存每个链表的当前头节点，每次弹出全局最小并把它所在链表的下一个节点压入 —— 这就是「k 路归并」，时间 O(N log k)、空间 O(k)（堆大小 = 链表数）。元组第二个元素放 `i` 是为了在值相等时避免比较 ListNode 对象（否则会抛 TypeError），这是 Python 实现的经典细节。"
+      },
+      "explanation": "同构性说明：分片归并中每个分片是一个有序（按 score 排序）的流，取「局部 top-k_local」等价于从这个流里取前 k_local 个元素。全局 top-k 必然被包含在「各分片前 k 个」的并集中（因为任一全局第 j 名在其分片内排名 ≤ j ≤ k），这与 k 路归并「每次只需比较各流的当前头」的正确性是同一个道理。反过来，若某分片只返回前 `k_local < k` 个元素，就可能在归并时提前耗尽该流的候选，漏掉本应进入全局 top-k 的元素 —— 这正是 `examples/ex05` 实测中 `k_local=2 < k=10` 导致结果与全局不一致的原因。",
+      "tags": [
+        "merge-k-sorted",
+        "top-k",
+        "heap",
+        "cross-shard"
+      ],
+      "test_cases": [
+        {
+          "input": "schema 与样例数据见 external_url",
+          "expected_output": "见 external_url",
+          "is_sample": true
+        }
+      ]
+    },
+    {
+      "id": "db-ch08-ex07",
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "《高性能 MySQL》第 9 章（读写分离），对应 concept/01 第三节与 examples/ex11",
+      "difficulty": "mid",
+      "title": "修复读写分离路由引擎的顺序错误",
+      "content_md": "下面的读写分离路由器有两个严重缺陷，会导致「事务内读走从库」和「写后读走从库（违反读己之写）」：\n\n```python\ndef route(req, replicas):\n    sql = req['sql'].strip().lower()\n    if sql.startswith(('select', 'show')):\n        return replicas[0]        # 缺陷 1\n    if req.get('in_tx'):\n        return 'master'\n    if req.get('need_master'):\n        return 'master'           # 缺陷 2\n    return 'master'\n```\n\n请指出两个缺陷分别会造成什么后果，并给出修复后的正确版本（要求：事务内读写都走主库；会话标了 force_master 的读走主库；写语句走主库；只有普通读且从库健康时才走从库；从库不可用或延迟超阈值时降级主库）。",
+      "answer": {
+        "reference_code": "WRITE_KW = ('insert', 'update', 'delete', 'replace')\n\n\ndef route(req, replicas, lag_ms=0, max_lag_ms=500):\n    sql = req['sql'].strip().lower()\n    if req.get('in_tx'):\n        return 'master', 'R1 事务内读写都走主库'\n    if req.get('need_master'):\n        return 'master', 'R2 会话 force_master（写后读）'\n    if sql.startswith(WRITE_KW):\n        return 'master', 'R3 写语句走主库'\n    if not replicas:\n        return 'master', 'R4 无健康从库，降级主库'\n    if lag_ms > max_lag_ms:\n        return 'master', 'R5 复制延迟超阈值，降级主库'\n    return replicas[0], 'R6 普通读走从库'\n\n\nassert route({'sql': 'SELECT 1', 'in_tx': True}, ['r0'])[0] == 'master'\nassert route({'sql': 'SELECT 1', 'need_master': True}, ['r0'])[0] == 'master'\nassert route({'sql': 'UPDATE t SET v=1'}, ['r0'])[0] == 'master'\nassert route({'sql': 'SELECT 1'}, ['r0'])[0] == 'r0'\nassert route({'sql': 'SELECT 1'}, [])[0] == 'master'\nassert route({'sql': 'SELECT 1'}, ['r0'], lag_ms=900)[0] == 'master'",
+        "explanation": "缺陷 1：把 `SELECT` 的判断放在 `in_tx` 之前，导致**事务内读被路由到从库**。事务内的读需要看到本事务尚未提交的修改（这些修改只在主库的 undo/当前版本里），走从库会读到「主库旧值」，表现为「刚 update 完在同一事务里 select 读不到」。缺陷 2：`need_master` 的判断被放在 `SELECT` 之后，永远不会生效 —— 而 `need_master` 正是用来修「写后立刻读从库拿到旧值」（违反读己之写）的开关。\n\n修复的关键是**顺序**：事务 > force_master > 写语句 > 降级 > 普通读。另外要补上「无健康从库」与「延迟超阈值」两条降级分支——本机 ex11 实测：从库全部不可用时路由到 master（R4），延迟 1200ms 超过 500ms 阈值时也降级到 master（R5）。"
+      },
+      "explanation": "路由引擎是「按优先级排序的判定链」，本质是一个**有序规则表**：越靠前的规则优先级越高。这类 bug 的共同特征是「规则都在，但顺序错了」，所以单测必须覆盖每条规则的**最优先命中**（用 assert 逐条钉住），而不能只测「某个写语句能路由到主库」。本机 ex11 的输出表就是这种逐条覆盖的形态。",
+      "tags": [
+        "read-write-split",
+        "routing",
+        "read-your-writes"
+      ]
+    },
+    {
+      "id": "db-ch08-ex08",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "github",
+      "source": "github",
+      "source_ref": "doocs/advanced-java#分库分表与高可用（多数派选主与脑裂判据）",
+      "external_url": "https://github.com/doocs/advanced-java",
+      "difficulty": "mid",
+      "title": "多数派选主模拟器：给定节点数与分区，判定是否脑裂",
+      "content_md": "请实现一个选主判据函数，模拟如下规则：\n\n1. 集群 N 个节点，`quorum = N // 2 + 1`；\n2. 某分区内的候选者只有在获得**该分区内所有存活节点**的授权、且授权数 ≥ quorum 时才能当选；\n3. 若两个分区各自都选出了主，则判定为**脑裂**。\n\n请对下面三个场景输出「是否脑裂」：\n\n```\n(A) 5 节点，1 个宕机，存活 4 个，quorum = 3\n(B) 5 节点，分区为 {n1,n2} 与 {n3,n4,n5}，quorum = 3\n(C) 同 (B) 的分区，但 quorum 被错误设为 2\n```\n\n并用一句话说明：为什么 `quorum = N//2 + 1` 能避免脑裂，而 `quorum = 2`（N=5）不能。",
+      "answer": {
+        "output": "(A) 存活 4, quorum 3 -> 得票 4 >= 3 -> 当选 True ；脑裂 False\n(B) 少数派 {n1,n2} 得票 2 < 3 -> 当选 False\n    多数派 {n3,n4,n5} 得票 3 >= 3 -> 当选 True ；脑裂 False\n(C) 少数派 {n1,n2} 得票 2 >= 2 -> 当选 True\n    多数派 {n3,n4,n5} 得票 3 >= 2 -> 当选 True ；脑裂 True",
+        "reference_code": "def quorum_of(n):\n    return n // 2 + 1\n\n\ndef elect(alive, quorum):\n    \"\"\"返回 (是否选出主, 得票数)。\"\"\"\n    votes = len(alive)\n    return votes >= quorum, votes\n\n\ndef split_brain(partitions, n):\n    \"\"\"partitions: 若干分区各自的存活节点列表。\"\"\"\n    q = quorum_of(n)\n    winners = [elect(p, q) for p in partitions]\n    elected = [ok for ok, _ in winners]\n    return sum(elected) >= 2, q, winners\n\n\nprint('集群 5 节点, quorum =', quorum_of(5))\nprint('(A)', split_brain([['n2', 'n3', 'n4', 'n5']], 5)[2])\nprint('(B)', split_brain([['n1', 'n2'], ['n3', 'n4', 'n5']], 5)[2])\n\n\ndef elect_with(quorum, alive):\n    return len(alive) >= quorum, len(alive)\n\n\nq = 2\nprint('(C) quorum =', q,\n      [elect_with(q, a) for a in (['n1', 'n2'], ['n3', 'n4', 'n5'])])\nprint('脑裂:', len(['x' for a in (['n1', 'n2'], ['n3', 'n4', 'n5'])\n                     if elect_with(q, a)[0]]) >= 2)",
+        "explanation": "判据实现的要点是把「参选」与「计票」解耦：每个分区独立计算自己能否凑够 quorum，只要**两个及以上**分区同时凑够，就是脑裂。\n\n为什么 `q = N//2 + 1` 安全：设两个多数派集合各含 q 个节点，则 |A| + |B| = 2q = 2⌊N/2⌋ + 2 > N，由**鸽巢原理**必有非空交集 —— 同一个节点不可能同时授权两个主，因此不可能双主。\n\n为什么 `q = 2`（N=5）不安全：2 + 2 = 4 ≤ 5，两个集合可以完全不相交，于是少数派 {n1,n2} 也能凑够 2 票当选，与多数派 {n3,n4,n5} 选出的主并存 —— 本机 ex12 实测：`quorum=3` 时脑裂 False、`quorum=2` 时脑裂 True。"
+      },
+      "explanation": "本题的工程延伸：即使选主规则正确，还必须有 **fencing** —— 旧主在失去仲裁后可能仍在接受写入，因此提升新主前必须先确认旧主已停止写入（顺序不能颠倒）。因为仅追加的日志一旦分叉就**无法在不丢数据的前提下合并**，这也是 CAP 中选 CP 时「宁可拒绝写也不能双写」的根本原因。另外 N 为偶数时多数派优势不增加（4 与 3 的 quorum 都是 3），所以集群节点数取奇数是更划算的选择。",
+      "tags": [
+        "failover",
+        "quorum",
+        "split-brain",
+        "leader-election"
+      ],
+      "test_cases": [
+        {
+          "input": "5 节点，分区 {n1,n2} | {n3,n4,n5}，quorum = 3",
+          "expected_output": "少数派当选 False，多数派当选 True，脑裂 False",
+          "is_sample": true
+        },
+        {
+          "input": "同上但 quorum = 2",
+          "expected_output": "两侧均当选 True，脑裂 True",
+          "is_sample": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "title": "环境变量与配置：带默认值、显式类型化",
+  "code_lang": "javascript",
+  "code_std": "node22",
+  "stdin": "",
+  "expected_output": "port=4000\nenv=development\ndebug=true\nisNumberPort=true\n",
+  "code": "process.env.APP_PORT = process.env.APP_PORT || '4000';\nprocess.env.APP_ENV = process.env.APP_ENV || 'development';\nprocess.env.APP_DEBUG = process.env.APP_DEBUG || 'true';\nconst cfg = {\n  port: Number(process.env.APP_PORT),\n  env: process.env.APP_ENV,\n  debug: process.env.APP_DEBUG === 'true'\n};\nconsole.log('port=' + cfg.port);\nconsole.log('env=' + cfg.env);\nconsole.log('debug=' + cfg.debug);\nconsole.log('isNumberPort=' + Number.isInteger(cfg.port));"
+}

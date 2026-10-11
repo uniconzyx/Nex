@@ -1,0 +1,46 @@
+name: cppmind
+description: Nex - 思维导图驱动的 C/C++ 学习 APP（蓝白猫咪版）
+publish_to: "none"
+version: 0.5.0+1
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # 状态管理 / 路由
+  flutter_riverpod: ^2.5.1
+  go_router: ^14.2.0
+  # 网络
+  dio: ^5.4.3
+  # 本地存储（token / 设置 / 离线缓存）
+  flutter_secure_storage: ^9.2.2
+  shared_preferences: ^2.2.3
+  hive_flutter: ^1.1.0
+  # 代码编辑器（纯 Dart，避免 WebView 性能坑）
+  code_text_field: ^1.1.0
+  highlight: ^0.7.0
+  # CppCat：Lottie 动画 + SVG 兜底
+  lottie: ^3.1.2
+  flutter_svg: ^2.0.10
+  # 内容渲染
+  flutter_markdown: ^0.7.3
+  url_launcher: ^6.2.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    # 缅因猫（Maine Coon）静态形象：WebP/PNG 带透明通道，半写实 2D / 3D 渲染
+    # mood: happy / thinking / confused / cheer / celebrate / comfort / sleeping / loading
+    # 资源未放置时 CppCat 组件自动回退到内置 CustomPainter 缅因猫（见 lib/widgets/cpp_cat.dart）
+    - assets/images/cat_mascot/
+    # Lottie 加载动画：尾巴摆动 / 眨眼 / 敲键盘（loading.json 等）
+    - assets/cat/
+    # AI 助手音效（7 个短音效，由 app/tool/gen_audio_assets.py 生成）
+    - assets/audio/

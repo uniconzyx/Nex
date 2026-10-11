@@ -1,0 +1,8 @@
+{
+  "title": "多态数组：统一接口遍历不同子类",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "total area = 24.5664",
+  "code": "public class E312 {\n    static abstract class Shape {\n        abstract double area();\n    }\n    static class Circle extends Shape {\n        double r; Circle(double r){ this.r = r; }\n        @Override double area(){ return Math.PI * r * r; }\n    }\n    static class Rect extends Shape {\n        double w, h; Rect(double w, double h){ this.w=w; this.h=h; }\n        @Override double area(){ return w * h; }\n    }\n    public static void main(String[] args) {\n        Shape[] shapes = { new Circle(2.0), new Rect(3.0, 4.0) };\n        double total = 0;\n        for (Shape s : shapes) { total += s.area(); }\n        System.out.printf(\"total area = %.4f%n\", total);\n    }\n}"
+}

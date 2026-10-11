@@ -1,0 +1,8 @@
+{
+  "title": "栈展开演示：异常传播时沿途对象按逆序析构",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "ctor a\nctor b\ndtro b\ndtro a\ncaught 42",
+  "code": "#include <iostream>\n\nstruct Tracer {\n    const char* n;\n    explicit Tracer(const char* s) : n(s) { std::cout << \"ctor \" << n << '\\n'; }\n    ~Tracer() { std::cout << \"dtro \" << n << '\\n'; }\n};\n\nvoid f() { Tracer b(\"b\"); throw 42; }\n\nint main() {\n    try {\n        Tracer a(\"a\");\n        f();                       // f 内抛异常，展开时先析构 b，再析构 a\n    } catch (int v) {\n        std::cout << \"caught \" << v << '\\n';\n    }\n}"
+}

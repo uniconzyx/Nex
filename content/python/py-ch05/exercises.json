@@ -1,0 +1,166 @@
+{
+  "meta": {
+    "chapter": "py-ch05",
+    "note": "8 题：基础题 6 + 算法题 2；覆盖文本/二进制模式、上下文管理器、缓冲与持久化、CSV/JSON"
+  },
+  "items": [
+    {
+      "id": "py5-ex01",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "py-ch05 概念 01 · 文本模式与编码",
+      "difficulty": "easy",
+      "title": "open 的 mode 参数语义",
+      "stem_md": "关于 `open(path, mode)`，下列说法**错误**的是？",
+      "options": [
+        "A. `'r'` 是默认值，要求文件必须存在",
+        "B. `'w'` 会截断已有文件，不存在则新建",
+        "C. `'a'` 追加写入，但写指针每次都被重置到文件开头",
+        "D. 带 `'b'` 的模式返回 `bytes`，不能指定 `encoding`"
+      ],
+      "answer": {
+        "value": "C",
+        "explanation_md": "`'a'` 会把写指针定位到文件末尾，正是「追加」的含义，C 说反了。A/B/D 正确：`encoding` 只在文本模式下合法，二进制模式给 `encoding` 会抛 `ValueError`。"
+      },
+      "explanation_md": "区分 `w`（截断）与 `a`（末尾追加）是日常最容易踩的坑：用 `w` 重跑一次任务就把上次结果清空。"
+    },
+    {
+      "id": "py5-ex02",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "py-ch05 概念 02 · 上下文管理器",
+      "difficulty": "medium",
+      "title": "__exit__ 的返回值语义",
+      "stem_md": "自定义上下文管理器的 `__exit__(self, exc_type, exc, tb)` **返回 True** 意味着什么？",
+      "options": [
+        "A. 关闭操作成功，正常继续",
+        "B. `with` 块内抛出的异常被吞掉，不再向外传播",
+        "C. 异常会被重新抛出并附加 traceback",
+        "D. 与返回 False 完全等价"
+      ],
+      "answer": {
+        "value": "B",
+        "explanation_md": "`__exit__` 返回真值等价于「异常已处理」，解释器不再传播；返回 `None`/`False` 则继续抛出。这正是 `contextlib.suppress` 的实现原理。"
+      },
+      "explanation_md": "对比 C：细节上返回真值后 traceback 也就丢了，所以吞噬异常要非常克制，通常只吞特定异常类型。"
+    },
+    {
+      "id": "py5-ex03",
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "py-ch05 概念 03 · 缓冲与 flush",
+      "difficulty": "medium",
+      "title": "写出顺序推断",
+      "stem_md": "```python\nfrom pathlib import Path\np = Path('x.txt')\nf = open(p, 'w', encoding='utf-8')\nf.write('abc')\nprint(p.stat().st_size)\nf.flush()\nprint(p.stat().st_size)\nf.write('de')\nprint(p.stat().st_size)\nf.close()\nprint(p.stat().st_size)\n```\n四次输出依次是？",
+      "options": [
+        "A. 3 3 5 5",
+        "B. 0 3 3 5",
+        "C. 0 0 0 5",
+        "D. 3 3 3 5"
+      ],
+      "answer": {
+        "value": "B",
+        "explanation_md": "写入先落在用户态缓冲：未满不落盘 → 0；`flush()` 交给 OS → 3；再写 2 字节又进缓冲 → 仍是 3；`close()` 强制 flush → 5。"
+      },
+      "explanation_md": "注意 `flush()` 与 `os.fsync()` 不等价：前者到 OS 页缓存，后者才要求落盘。"
+    },
+    {
+      "id": "py5-ex04",
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "py-ch05 概念 04 · 序列化",
+      "difficulty": "medium",
+      "title": "BOM 导致的 JSON 解析失败",
+      "stem_md": "下面代码在读取**用 Excel 另存的 UTF-8 文件**时抛 `json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)`，请修好。\n```python\nimport json\nwith open('config.json', encoding='utf-8') as f:\n    cfg = json.load(f)\n```",
+      "answer": {
+        "reference_code": "import json\n\n\ndef load_config(path):\n    # utf-8-sig 在读的时候自动剥掉开头的 BOM（U+FEFF）\n    with open(path, encoding='utf-8-sig') as f:\n        return json.load(f)\n\n\ndef dumps_config(cfg):\n    # 写的时候也别加 BOM，保持纯净 UTF-8\n    return json.dumps(cfg, ensure_ascii=False, indent=2)\n",
+        "fix_explanation_md": "根因是文件开头有 BOM（3 个字节 `EF BB BF`）。用 `utf-8` 读会把它当成正文首字符 U+FEFF，JSON 解析器在第 1 列就报错。改成 `encoding='utf-8-sig'` 即可（读时自动剥离、写时不写 BOM）。"
+      },
+      "explanation_md": "同类问题还有：BOM 混进 CSV 首列列名，导致 `DictReader` 的 key 变成 `'\\ufeffid'`，按 `'id'` 取值恒为 None。"
+    },
+    {
+      "id": "py5-ex05",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "py-ch05 概念 04 · CSV 解析",
+      "difficulty": "hard",
+      "title": "手写 CSV 行解析器（不依赖 csv 模块）",
+      "stem_md": "实现 `parse_csv_line(line)`：把一行 CSV 文本解析成字段列表。规则：逗号分隔；字段可被双引号包裹；被包裹时内部 `\"\"` 表示一个 `\"`，且内部的逗号/换行不视为分隔符。返回字段列表。",
+      "answer": {
+        "reference_code": "def parse_csv_line(line):\n    fields = []\n    buf = []\n    i = 0\n    n = len(line)\n    in_quotes = False\n    while i < n:\n        c = line[i]\n        if in_quotes:\n            if c == '\"':\n                if i + 1 < n and line[i + 1] == '\"':\n                    buf.append('\"')\n                    i += 2\n                    continue\n                in_quotes = False\n            else:\n                buf.append(c)\n        else:\n            if c == '\"':\n                in_quotes = True\n            elif c == ',':\n                fields.append(''.join(buf))\n                buf = []\n            else:\n                buf.append(c)\n        i += 1\n    fields.append(''.join(buf))\n    return fields\n",
+        "tests_md": "`parse_csv_line('a,b,c')` → `['a','b','c']`；`parse_csv_line('\"a,b\",c')` → `['a,b','c']`；`parse_csv_line('\"say \"\"hi\"\"\",x')` → `['say \"hi\"', 'x']`。"
+      },
+      "explanation_md": "状态机方法：`in_quotes` 是唯一状态位，遇到 `\"\"` 先探测下一字符再决定是转义还是收尾。该题正是 `csv` 模块内部的简化版。"
+    },
+    {
+      "id": "py5-ex06",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "py-ch05 概念 04 · 流式处理",
+      "difficulty": "medium",
+      "title": "流式统计大文件（不整体载入）",
+      "stem_md": "实现 `count_lines_and_max_len(path)`：返回 `(行数, 最长行字符数)`，要求**逐行处理、不把整个文件读进内存**。",
+      "answer": {
+        "reference_code": "def count_lines_and_max_len(path):\n    count = 0\n    max_len = 0\n    with open(path, 'r', encoding='utf-8', errors='replace') as f:\n        for line in f:          # 迭代器按块读，内存占用与文件大小无关\n            count += 1\n            cur = len(line.rstrip('\\n'))\n            if cur > max_len:\n                max_len = cur\n    return count, max_len\n",
+        "tests_md": "对一个含 3 行（长度 5/3/7）的文件返回 `(3, 7)`。"
+      },
+      "explanation_md": "`for line in f` 走的是 `TextIOWrapper.__next__`，内部按缓冲块读取，不会一次性 `read()`。用 `f.read().splitlines()` 则会把全文载入，10 GB 日志直接 OOM。"
+    },
+    {
+      "id": "py5-ex07",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "py-ch05 概念 01 · 编码",
+      "difficulty": "medium",
+      "title": "解码错误的不可逆性",
+      "stem_md": "字节串 `b'caf\\xe9 ok'`（本意是 latin-1 的 `café ok`）用 `decode('utf-8', errors='replace')` 再 `encode('utf-8')`，结果是？",
+      "options": [
+        "A. 与原始字节完全相同",
+        "B. 得到 `b'caf\\xef\\xbf\\xbd ok'`，替换字符已固化，原始信息不可恢复",
+        "C. 抛 UnicodeEncodeError",
+        "D. 自动探测出 latin-1 并正确还原"
+      ],
+      "answer": {
+        "value": "B",
+        "explanation_md": "`errors='replace'` 把无法解码的字节换成 U+FFFD（UTF-8 编码为 `EF BF BD`），原字节序列 `\\xe9` 已被丢弃。之后的编码只是在固化这个错误，无法回滚。"
+      },
+      "explanation_md": "所以排错顺序永远是：先确认真实编码（看响应头/文件声明/嗅探），再决定是否用宽松策略；宽松策略只用于「宁可丢几个字也要跑通」的场景。"
+    },
+    {
+      "id": "py5-ex08",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "py-ch05 概念 03 · 持久化",
+      "difficulty": "hard",
+      "title": "flush 与 fsync 的边界",
+      "stem_md": "关于 `f.flush()` 与 `os.fsync(f.fileno())`，正确的是？",
+      "options": [
+        "A. 二者等价，`flush()` 内部会调用 `fsync()`",
+        "B. `flush()` 把用户态缓冲推给操作系统；`fsync()` 才要求 OS 把数据写到存储介质",
+        "C. `fsync()` 只对二进制模式文件有效",
+        "D. 只要调用了 `flush()`，机器断电也不会丢数据"
+      ],
+      "answer": {
+        "value": "B",
+        "explanation_md": "`flush()` 之后数据在 OS 页缓存里，进程崩溃可保、断电不可保；`fsync()` 触发真正的落盘（还需注意部分文件系统只保证元数据之外的 `fdatasync` 差异）。只有 A+B 都做，才谈得上「断电安全」。"
+      },
+      "explanation_md": "代价是 `fsync` 要等磁盘，QPS 敏感场景常改成 `append + 定期 fsync`；数据库的 WAL 就是在这个矛盾上做折中。"
+    }
+  ]
+}

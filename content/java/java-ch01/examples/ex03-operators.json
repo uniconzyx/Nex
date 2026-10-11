@@ -1,0 +1,8 @@
+{
+  "title": "算术运算符",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "13\n7\n30\n3\n1",
+  "code": "public class Main {\n    public static void main(String[] args) {\n        int a = 10, b = 3;\n        System.out.println(a + b);\n        System.out.println(a - b);\n        System.out.println(a * b);\n        System.out.println(a / b);\n        System.out.println(a % b);\n    }\n}"
+}

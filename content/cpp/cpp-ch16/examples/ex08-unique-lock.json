@@ -1,0 +1,8 @@
+{
+  "title": "unique_lock 灵活加解锁保护计数",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "sum=2000",
+  "code": "#include <iostream>\n#include <mutex>\n#include <thread>\n#include <vector>\n\nlong sum = 0;\nstd::mutex m;\n\nvoid work() {\n    std::unique_lock<std::mutex> lk(m);   // 可延迟/手动 unlock，配合条件变量\n    for (int k = 0; k < 1000; ++k) ++sum;\n    lk.unlock();                           // 提前释放，缩小临界区\n}\n\nint main() {\n    std::vector<std::thread> ts;\n    for (int i = 0; i < 2; ++i) ts.emplace_back(work);\n    for (auto& t : ts) t.join();\n    std::cout << \"sum=\" << sum;   // 2*1000=2000，确定性\n}"
+}

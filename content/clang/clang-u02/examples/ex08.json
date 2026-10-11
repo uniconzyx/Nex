@@ -1,0 +1,8 @@
+{
+  "title": "动态字符串：手写 strdup",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "copy = hello, dynamic\nstrlen(copy) = 14\nsizeof(copy) = 8 (指针，不是数组)\n修改后 = Hello, dynamic (原字面量仍为 hello, dynamic)",
+  "code": "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\nchar *my_strdup(const char *s) {\n    size_t n = strlen(s) + 1;          /* 别忘结尾 '\\0' */\n    char *p = malloc(n);\n    if (!p) return NULL;\n    memcpy(p, s, n);\n    return p;\n}\n\nint main(void) {\n    const char *src = \"hello, dynamic\";\n    char *copy = my_strdup(src);\n    if (!copy) return 1;\n\n    printf(\"copy = %s\\n\", copy);\n    printf(\"strlen(copy) = %zu\\n\", strlen(copy));\n    printf(\"sizeof(copy) = %zu (指针，不是数组)\\n\", sizeof(copy));\n\n    copy[0] = 'H';                     /* 堆上是可写副本 */\n    printf(\"修改后 = %s (原字面量仍为 %s)\\n\", copy, src);\n    free(copy); copy = NULL;\n    return 0;\n}"
+}

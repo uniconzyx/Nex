@@ -1,0 +1,8 @@
+{
+  "title": "PPO 裁剪目标：四种典型情形的数值演算",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "clip epsilon = 0.20, 允许的比率区间 = [0.8, 1.2]\n\nratio    A        未裁剪          裁剪后          目标           比率被裁剪\n1.3      1.0      1.300        1.200        1.200        是\n1.3      -1.0     -1.300       -1.200       -1.300       是\n0.7      1.0      0.700        0.800        0.700        是\n0.7      -1.0     -0.700       -0.800       -0.800       是\n1.1      1.0      1.100        1.100        1.100        否\n1.1      -1.0     -1.100       -1.100       -1.100       否\n\n规律: A>0 且 ratio > 1.2 时, 目标被上限 1.2A 截断(不敢一次把好动作概率抬太多);\n      A<0 且 ratio < 0.8 时, 目标被下限截断(不敢一次把坏动作概率压太狠)\n      裁剪把每次策略更新的幅度限制在 eps 内, 是 PPO 稳定性的来源",
+  "code": "\nclip_eps = 0.2\n\ndef clipped_obj(ratio, adv):\n    unc = ratio * adv\n    cl = min(max(ratio, 1.0 - clip_eps), 1.0 + clip_eps) * adv\n    return unc, cl, min(unc, cl)\n\nprint('clip epsilon = %.2f, 允许的比率区间 = [%.1f, %.1f]' % (clip_eps, 1 - clip_eps, 1 + clip_eps))\nprint()\nprint('%-8s %-8s %-12s %-12s %-12s %s' % ('ratio', 'A', '未裁剪', '裁剪后', '目标', '比率被裁剪'))\ncases = [(1.3, 1.0), (1.3, -1.0), (0.7, 1.0), (0.7, -1.0), (1.1, 1.0), (1.1, -1.0)]\nfor ratio, adv in cases:\n    unc, cl, obj = clipped_obj(ratio, adv)\n    active = abs(ratio - 1.0) > clip_eps\n    print('%-8.1f %-8.1f %-12.3f %-12.3f %-12.3f %s' % (ratio, adv, unc, cl, obj, '是' if active else '否'))\nprint()\nprint('规律: A>0 且 ratio > 1.2 时, 目标被上限 1.2A 截断(不敢一次把好动作概率抬太多);')\nprint('      A<0 且 ratio < 0.8 时, 目标被下限截断(不敢一次把坏动作概率压太狠)')\nprint('      裁剪把每次策略更新的幅度限制在 eps 内, 是 PPO 稳定性的来源')\n"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "KV Cache 显存估算器（确定性数字）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "配置: 32 层 32 头 head_dim=128 序列=4096 fp16\n每 token KV 字节: 524288\n整序列(单样本) 字节: 2147483648\n折合 MB: 2048.0\nbatch=64 GB: 128.0\nfp32 同配置 GB: 4.0\n",
+  "code": "def kv_cache_bytes(layers, heads, head_dim, seq_len, dtype_bytes, batch=1):\n    per_tok = layers * heads * head_dim * 2 * dtype_bytes\n    return per_tok * seq_len * batch\ncfg = dict(layers=32, heads=32, head_dim=128, seq_len=4096, dtype_bytes=2)\nprint(\"配置: 32 层 32 头 head_dim=128 序列=4096 fp16\")\nprint(\"每 token KV 字节:\", kv_cache_bytes(**{**cfg, 'seq_len': 1}))\ntotal = kv_cache_bytes(**cfg)\nprint(\"整序列(单样本) 字节:\", total)\nprint(\"折合 MB:\", round(total / 1024 / 1024, 2))\nprint(\"batch=64 GB:\", round(kv_cache_bytes(**{**cfg, 'batch': 64}) / 1024 ** 3, 2))\nprint(\"fp32 同配置 GB:\", round(kv_cache_bytes(**{**cfg, 'dtype_bytes': 4}) / 1024 ** 3, 2))\n"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "自定义异常派生 std::exception 并重写 what()",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "custom failure",
+  "code": "#include <iostream>\n#include <exception>\n#include <string>\n\nstruct MyError : std::exception {\n    std::string msg;\n    explicit MyError(const char* m) : msg(m) {}\n    const char* what() const noexcept override { return msg.c_str(); }\n};\n\nint main() {\n    try {\n        throw MyError(\"custom failure\");\n    } catch (const std::exception& e) {   // 引用捕获：不切片，拿到派生 what()\n        std::cout << e.what() << '\\n';\n    }\n}"
+}

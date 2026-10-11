@@ -1,0 +1,8 @@
+{
+  "title": "tuple 不可变，但内部可变对象可改",
+  "code_lang": "python",
+  "code_std": "python3.11",
+  "stdin": "",
+  "expected_output": "1\n(1, [4, 5, 6])",
+  "code": "t = (1, 2, 3)\nprint(t[0])\ninner = [4, 5]\nt2 = (1, inner)\nt2[1].append(6)   # 元组本身不可变，所引用的列表可变\nprint(t2)"
+}

@@ -1,0 +1,10 @@
+{
+  "title": "外边距折叠：相邻与父子两种情况",
+  "code_lang": "css",
+  "code_std": "css3",
+  "stdin": "",
+  "expected_output": "折叠结果：\n- 相邻兄弟：30px 与 20px 折叠为 30px（取较大值，不是相加）。\n- 父子穿透：父 10px 与子 40px 折叠为 40px。\n- 阻断手段：加 padding/border、让父元素成为 BFC（display: flow-root）、或改用 Flex/Grid 布局（其容器内不折叠）。",
+  "code": "/* 情况一：相邻兄弟，取较大者 */\n.a { margin-bottom: 30px; }\n.b { margin-top: 20px; }\n\n/* 情况二：父子间无 border/padding/BFC 时穿透 */\n.parent { margin-top: 10px; }\n.child  { margin-top: 40px; }\n\n/* 阻断折叠 */\n.parent-fix { padding-top: 1px; }",
+  "_verified": "false",
+  "_verify_note": "HTML/CSS 渲染行为，本地无浏览器环境，输出为按规范的推理说明"
+}

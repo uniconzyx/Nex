@@ -1,0 +1,14 @@
+{
+  "title": "用 nm 读符号表：区分 T/U/d/b/t 符号类型",
+  "code_lang": "bash",
+  "code_std": "bash5",
+  "stdin": "",
+  "expected_output": "$ gcc -c util.c -o util.o\n$ nm util.o      # 大写=外部链接，小写=内部链接（static）；U=未定义待链接\n0000000000000000 b .bss\r\n0000000000000000 d .data\r\n0000000000000000 p .pdata\r\n0000000000000000 r .rdata\r\n0000000000000000 r .rdata$zzz\r\n0000000000000000 t .text\r\n0000000000000000 r .xdata\r\n                 U __mingw_printf\r\n000000000000001b T add\r\n0000000000000000 b call_count\r\n0000000000000000 D ext_init\r\n0000000000000000 t helper\r\n0000000000000043 T show\r\n$ nm -S util.o   # 附加符号大小\n0000000000000000 b .bss\r\n0000000000000000 d .data\r\n0000000000000000 p .pdata\r\n0000000000000000 r .rdata\r\n0000000000000000 r .rdata$zzz\r\n0000000000000000 t .text\r\n0000000000000000 r .xdata\r\n                 U __mingw_printf\r\n000000000000001b T add\r\n0000000000000000 b call_count\r\n0000000000000000 D ext_init\r\n0000000000000000 t helper\r\n0000000000000043 T show\r",
+  "code": "#!/bin/sh\n# 用 nm 读符号表：区分 T/U/d/b/t 符号类型\n# 期望输出见 expected_output（本机 MinGW 工具链真实执行捕获）\n\ncat > util.c << 'EOF'\n#include <stdio.h>\n\nint ext_init = 5;              /* D：已初始化的全局变量（外部链接） */\nstatic int call_count;         /* b：static 未初始化（内部链接，.bss） */\nstatic int helper(void)        /* t：static 函数（内部链接） */\n{\n    return ++call_count;\n}\n\nint add(int a, int b)          /* T：外部函数（外部链接） */\n{\n    return a + b + helper();\n}\n\nvoid show(void)\n{\n    printf(\"ext=%d count=%d\\n\", ext_init, call_count);   /* 引出 U printf */\n}\nEOF\n\ngcc -c util.c -o util.o\nnm util.o      # 大写=外部链接，小写=内部链接（static）；U=未定义待链接\nnm -S util.o   # 附加符号大小\n",
+  "_step_rc": [
+    0,
+    0,
+    0
+  ],
+  "_verify_note": "expected_output 为 Windows + MinGW-w64（gcc 15.2 / binutils 2.45）真实执行捕获；脚本中显示的是可移植命令形式（gcc/ar/nm/objdump/size），本机实际以 D:/mingw64/bin/ 下的同名工具驱动，二者等价。"
+}

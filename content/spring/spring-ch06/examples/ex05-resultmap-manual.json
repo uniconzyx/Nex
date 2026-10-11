@@ -1,0 +1,8 @@
+{
+  "title": "ex05-resultmap-manual",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "映射结果: {'id': 7, 'username': 'bob', 'createTime': '2026-01-01'}\nuser_name -> bob",
+  "code": "result_map = {\"user_id\": \"id\", \"user_name\": \"username\", \"create_time\": \"createTime\"}\nrow = {\"user_id\": 7, \"user_name\": \"bob\", \"create_time\": \"2026-01-01\"}\nentity = {}\nfor col, val in row.items():\n    entity[result_map.get(col, col)] = val\nprint(\"映射结果:\", entity)\nprint(\"user_name ->\", entity[\"username\"])\n"
+}

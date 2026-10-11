@@ -1,0 +1,8 @@
+{
+  "title": "递归求阶乘",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "120",
+  "code": "#include <iostream>\n\nint fact(int n) { return n <= 1 ? 1 : n * fact(n - 1); }\n\nint main() {\n    std::cout << fact(5);\n}"
+}

@@ -1,0 +1,9 @@
+{
+  "title": "Hash 编码切换：listpack 与 hashtable（且关系阈值）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "small hash  -> listpack\nbig-value   -> hashtable\nmany-entry  -> hashtable",
+  "code": "\nHASH_MAX_ENTRIES = 128\nHASH_MAX_VALUE = 64\n\ndef hash_encoding(d):\n    n = len(d)\n    if n == 0:\n        return \"listpack\"\n    if n <= HASH_MAX_ENTRIES and all(len(str(v).encode()) <= HASH_MAX_VALUE for v in d.values()):\n        return \"listpack\"\n    return \"hashtable\"\n\nsmall = {\"name\": \"alice\", \"age\": \"30\"}\nbig = {(\"f%d\" % i): (\"x\" * 70) for i in range(5)}      # 单值 70B > 64\nmany = {(\"k%d\" % i): (\"y\" * 10) for i in range(200)}  # 200 字段 > 128\nprint(\"small hash  ->\", hash_encoding(small))\nprint(\"big-value   ->\", hash_encoding(big))\nprint(\"many-entry  ->\", hash_encoding(many))\n",
+  "_verified": true
+}

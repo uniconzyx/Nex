@@ -1,0 +1,215 @@
+{
+  "meta": {
+    "chapter": "fs-ch04",
+    "note": "8 题，基础题 7（self）+ 算法题 1（LeetCode 1 two-sum，仅存元数据+链接不抄题面）；覆盖事件循环顺序、CommonJS/ESM、中间件 compose、路径匹配、Buffer 编码、async 错误传递。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/01 · Node 运行时模型",
+      "difficulty": "easy",
+      "title": "Node.js 最适合哪类场景？",
+      "content_md": "基于 Node 的单线程事件循环模型，下列哪一项是它的典型优势场景？",
+      "options": [
+        {
+          "key": "A",
+          "text": "CPU 密集型科学计算"
+        },
+        {
+          "key": "B",
+          "text": "高并发 I/O 密集型网络服务"
+        },
+        {
+          "key": "C",
+          "text": "海量内存图计算"
+        },
+        {
+          "key": "D",
+          "text": "GPU 模型训练"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "Node 单线程事件循环擅长非阻塞 I/O，适合高并发网络服务；CPU 密集任务会饿死事件循环，应放 worker_threads。",
+      "tags": [
+        "runtime",
+        "io-bound"
+      ]
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/04 · CommonJS vs ESM",
+      "difficulty": "mid",
+      "title": "关于 CommonJS 与 ESM，正确的是？",
+      "content_md": "下列关于 Node 模块系统的说法，哪一项正确？",
+      "options": [
+        {
+          "key": "A",
+          "text": "require 是异步加载"
+        },
+        {
+          "key": "B",
+          "text": "ESM 的 import 是静态可分析的、支持 tree-shaking"
+        },
+        {
+          "key": "C",
+          "text": "module.exports 与 exports 是两个互相独立的对象"
+        },
+        {
+          "key": "D",
+          "text": "CommonJS 循环依赖下永远拿到完整 exports"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "ESM 的 import/export 在编译期可静态分析，支持 tree-shaking；require 同步；exports 是 module.exports 的别名；CJS 循环依赖可能拿到半截（undefined）exports。",
+      "tags": [
+        "module",
+        "cjs",
+        "esm"
+      ]
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/01 · 事件循环顺序",
+      "difficulty": "mid",
+      "title": "预测事件循环打印顺序",
+      "content_md": "下面代码依次打印什么（按行写出输出）？\n```js\nconsole.log('1');\nprocess.nextTick(() => console.log('2'));\nPromise.resolve().then(() => console.log('3'));\nsetImmediate(() => console.log('5'));\nsetTimeout(() => console.log('4'), 0);\nconsole.log('6');\n```",
+      "answer": {
+        "output": "1\n6\n2\n3\n5\n4"
+      },
+      "explanation": "同步先跑（1,6）；然后清空 nextTick 队列（2）、微任务（3）；进入事件循环后 check 阶段 setImmediate（5）先于 timers 阶段 setTimeout（4）。",
+      "tags": [
+        "event-loop",
+        "microtask"
+      ]
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/02 · 错误处理中间件",
+      "difficulty": "mid",
+      "title": "修复 async 错误未传给错误中间件",
+      "content_md": "下面代码 async 抛出的错误进不了四参数错误中间件，请修复（保留中间件链结构）：\n```js\nuse(async (c, n) => { await risky(); });\nuse((err, c, req, n) => { c.log.push('status=500'); });\n```",
+      "answer": {
+        "reference_code": "async function risky() { throw new Error('db fail'); }\nconst stack = [];\nfunction use(fn) { stack.push(fn); }\nfunction run(ctx, final) {\n  let i = 0;\n  function next(err) {\n    while (i < stack.length) {\n      const mw = stack[i];\n      if (err) { if (mw.length === 4) { i++; mw(err, ctx, {}, next); return; } i++; continue; }\n      if (mw.length === 4) { i++; continue; }\n      i++;\n      try { const r = mw(ctx, next); if (r && r.catch) r.catch(e => next(e)); } catch (e) { next(e); }\n      return;\n    }\n    if (err) { ctx.log.push('UNHANDLED:' + err.message); return; }\n    final(ctx);\n  }\n  next();\n}\n// 修复：用 try/catch 把 async 错误传给 next(err)\nuse(async (c, n) => { try { await risky(); } catch (e) { return n(e); } await n(); });\nuse((err, c, req, n) => { c.log.push('status=500'); });\nconst ctx = { log: [] };\nrun(ctx, c => c.log.push('ok'));\nconsole.log(ctx.log.join('|'));"
+      },
+      "explanation": "async 函数 reject 不会自动冒泡到 next；用 try/catch 捕获后调用 next(err)（或捕获 Promise rejection 调 next(err)），错误中间件才能收到。",
+      "tags": [
+        "middleware",
+        "error",
+        "async"
+      ]
+    },
+    {
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/02 · 中间件 compose",
+      "difficulty": "mid",
+      "title": "手写中间件 compose",
+      "content_md": "实现一个 compose(middlewares)：返回一个 (ctx, final) 函数，按注册顺序串起中间件（fn(ctx, next)），支持四参数错误中间件 (err, ctx, req, next) 在 next(err) 时收口；要求可运行并演示洋葱顺序。",
+      "answer": {
+        "reference_code": "function compose(middlewares) {\n  return function (ctx, final) {\n    let i = 0;\n    function next(err) {\n      while (i < middlewares.length) {\n        const mw = middlewares[i];\n        if (err) {\n          if (mw.length === 4) { i++; mw(err, ctx, {}, next); return; }\n          i++; continue;\n        }\n        if (mw.length === 4) { i++; continue; }\n        i++;\n        try {\n          const r = mw(ctx, next);\n          if (r && typeof r.then === 'function') r.catch(e => next(e));\n        } catch (e) { next(e); }\n        return;\n      }\n      if (err) { ctx.log.push('UNHANDLED:' + err.message); return; }\n      final(ctx);\n    }\n    next();\n  };\n}\nconst stack = [];\nconst use = fn => stack.push(fn);\nconst run = compose(stack);\nuse((c, n) => { c.log.push('A'); n(); c.log.push('A-out'); });\nuse((c, n) => { c.log.push('B'); n(); });\nconst ctx = { log: [] };\nrun(ctx, c => c.log.push('final'));\nconsole.log(ctx.log.join('>'));"
+      },
+      "explanation": "用递归 next 推进；遇到 err 时跳过普通中间件、找形参长 4 的错误中间件；async 中间件的 reject 需 .catch 转 next(err)。",
+      "tags": [
+        "middleware",
+        "compose"
+      ]
+    },
+    {
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/02 · 路由与路径变量",
+      "difficulty": "mid",
+      "title": "手写路径匹配 /items/:id",
+      "content_md": "实现一个 matchRoute(method, path, routes)：支持 `:name` 路径变量提取（如 /items/:id 匹配 /items/42 得到 {id:'42'}），方法不匹配或路径不符返回 null。要求可运行。",
+      "answer": {
+        "reference_code": "function matchRoute(method, path, routes) {\n  for (const r of routes) {\n    if (r.method !== method) continue;\n    const keys = [];\n    const rx = new RegExp('^' + r.pattern.replace(/:(\\w+)/g, (_, k) => { keys.push(k); return '([^/]+)'; }) + '$');\n    const m = rx.exec(path);\n    if (m) { const params = {}; keys.forEach((k, i) => params[k] = m[i + 1]); return { handler: r.handler, params }; }\n  }\n  return null;\n}\nconst routes = [\n  { method: 'GET', pattern: '/items', handler: () => 'list' },\n  { method: 'GET', pattern: '/items/:id', handler: () => 'one' },\n];\nconsole.log(JSON.stringify(matchRoute('GET', '/items/42', routes).params));\nconsole.log(matchRoute('POST', '/items', routes) === null);"
+      },
+      "explanation": "把 `:name` 段替换为正则捕获组 `([^/]+)`，匹配后按 keys 顺序回填 params；方法先筛再匹配路径。",
+      "tags": [
+        "router",
+        "path-param"
+      ]
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "source": "leetcode",
+      "source_ref": "LeetCode 1（two-sum）",
+      "difficulty": "easy",
+      "title": "LeetCode 1 · 两数之和（算法素养补充）",
+      "content_md": "给定整数数组 nums 与目标值 target，返回两数之和等于 target 的下标（可假设恰有一组解）。题面与约束以官方为准，详见 external_url，此处不复述题面。",
+      "answer": {
+        "reference_code": "function twoSum(nums, target) {\n  const seen = new Map();\n  for (let i = 0; i < nums.length; i++) {\n    const need = target - nums[i];\n    if (seen.has(need)) return [seen.get(need), i];\n    seen.set(nums[i], i);\n  }\n  return [];\n}"
+      },
+      "explanation": "哈希表一次遍历：存「值→下标」，对当前数查 target-num 是否已在表中，O(n) 时间 O(n) 空间。",
+      "tags": [
+        "array",
+        "hash"
+      ],
+      "external_url": "https://leetcode.cn/problems/two-sum/"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/03 · Buffer 编码",
+      "difficulty": "easy",
+      "title": "Buffer 按字节切片会怎样？",
+      "content_md": "对于 `const buf = Buffer.from('你好', 'utf8'); buf.subarray(1).toString('utf8')`，结果特征是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "正常得到「好」，无影响"
+        },
+        {
+          "key": "B",
+          "text": "在码点中间切断，产生替换符（U+FFFD）乱码"
+        },
+        {
+          "key": "C",
+          "text": "抛出 RangeError"
+        },
+        {
+          "key": "D",
+          "text": "返回空字符串"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "UTF-8 变长编码，subarray(1) 从字节 1 切断「你」（3 字节）得到非法序列，解码替换为 U+FFFD；应按字符（string.slice）或 StringDecoder 处理。",
+      "tags": [
+        "buffer",
+        "encoding"
+      ]
+    }
+  ]
+}

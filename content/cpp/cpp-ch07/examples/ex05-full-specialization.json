@@ -1,0 +1,8 @@
+{
+  "title": "类模板全特化（Wrapper<bool>）",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "generic T\nbool spec\ngeneric T\n",
+  "code": "#include <iostream>\ntemplate <typename T>\nstruct Wrapper { static void describe() { std::cout << \"generic T\\n\"; } };\ntemplate <>\nstruct Wrapper<bool> { static void describe() { std::cout << \"bool spec\\n\"; } };\nint main() {\n    Wrapper<int>::describe();\n    Wrapper<bool>::describe();\n    Wrapper<double>::describe();\n}\n"
+}

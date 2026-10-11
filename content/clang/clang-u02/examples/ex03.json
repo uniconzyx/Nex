@@ -1,0 +1,8 @@
+{
+  "title": "realloc 扩容：安全写法与数据保留",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "0 1 2 3 400 500 600 700\n原有 4 个元素已保留",
+  "code": "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\nint main(void) {\n    size_t n = 4;\n    int *a = malloc(n * sizeof(int));\n    if (!a) return 1;\n    for (size_t i = 0; i < n; i++) a[i] = (int)i;\n\n    size_t new_n = 8;\n    int *tmp = realloc(a, new_n * sizeof(int));   /* 用临时变量接 */\n    if (!tmp) { free(a); return 1; }\n    a = tmp;\n\n    for (size_t i = n; i < new_n; i++) a[i] = (int)(i * 100);\n\n    for (size_t i = 0; i < new_n; i++) printf(\"%d%c\", a[i], i + 1 == new_n ? '\\n' : ' ');\n    printf(\"原有 %zu 个元素已保留\\n\", n);\n    free(a); a = NULL;\n    return 0;\n}"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "transform + lambda：映射生成新序列与就地变换",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "1 4 9 16 25 \n2 3 4 5 6 \n",
+  "code": "#include <iostream>\n#include <vector>\n#include <algorithm>\nint main() {\n    std::vector<int> a = {1,2,3,4,5};\n    std::vector<int> b(a.size());\n    std::transform(a.begin(), a.end(), b.begin(), [](int x){ return x * x; });\n    for (int x : b) std::cout << x << ' ';\n    std::cout << '\\n';\n    std::transform(a.begin(), a.end(), a.begin(), [](int x){ return x + 1; });\n    for (int x : a) std::cout << x << ' ';\n    std::cout << '\\n';\n}\n"
+}

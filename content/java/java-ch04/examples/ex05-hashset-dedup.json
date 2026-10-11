@@ -1,0 +1,8 @@
+{
+  "title": "HashSet 基于 equals/hashCode 的去重",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "size=2\ncontains(1,1)=true",
+  "code": "import java.util.*;\n\npublic class Ex05HashSetDedup {\n    static class Point {\n        int x, y;\n        Point(int x, int y) { this.x = x; this.y = y; }\n        @Override public boolean equals(Object o) { return o instanceof Point p && p.x == x && p.y == y; }\n        @Override public int hashCode() { return 31 * x + y; }\n    }\n    public static void main(String[] args) {\n        Set<Point> s = new HashSet<>();\n        s.add(new Point(1, 1));\n        s.add(new Point(1, 1));\n        s.add(new Point(2, 3));\n        System.out.println(\"size=\" + s.size());\n        System.out.println(\"contains(1,1)=\" + s.contains(new Point(1, 1)));\n    }\n}"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "type_traits 萃取：remove_reference 与 decay",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "truetruetrue",
+  "code": "#include <iostream>\n#include <type_traits>\n\nint main() {\n    bool a = std::is_same_v<std::remove_reference_t<int&>, int>;\n    bool b = std::is_same_v<std::decay_t<int&>, int>;\n    bool c = std::is_same_v<std::decay_t<int[3]>, int*>;\n    std::cout << std::boolalpha << a << b << c;\n}"
+}

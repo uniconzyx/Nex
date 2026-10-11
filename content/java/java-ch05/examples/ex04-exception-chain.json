@@ -1,0 +1,8 @@
+{
+  "title": "自定义异常与异常链（cause）",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "message=failed to load user\ncause=java.lang.IllegalStateException: db connection lost\ncause message=db connection lost",
+  "code": "public class Ex04CustomExceptionChain {\n    static class ServiceException extends Exception {\n        ServiceException(String msg, Throwable cause) { super(msg, cause); }\n    }\n    public static void main(String[] args) {\n        try {\n            try {\n                throw new IllegalStateException(\"db connection lost\");\n            } catch (IllegalStateException root) {\n                throw new ServiceException(\"failed to load user\", root);\n            }\n        } catch (ServiceException e) {\n            System.out.println(\"message=\" + e.getMessage());\n            System.out.println(\"cause=\" + e.getCause());\n            System.out.println(\"cause message=\" + e.getCause().getMessage());\n        }\n    }\n}"
+}

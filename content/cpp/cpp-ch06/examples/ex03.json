@@ -1,0 +1,8 @@
+{
+  "title": "虚函数动态绑定（基类引用调派生版本）",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "Dog\n",
+  "code": "#include <iostream>\nstruct Animal { virtual void speak() const { std::cout << \"Animal\\n\"; } };\nstruct Dog : Animal { void speak() const override { std::cout << \"Dog\\n\"; } };\nint main() {\n    Dog d;\n    Animal& a = d;     // 基类引用绑定派生对象\n    a.speak();         // 动态绑定 → Dog\n}\n"
+}

@@ -1,0 +1,9 @@
+{
+  "title": "主从全量同步 PSYNC（fork RDB + 从节点载入 + 补增量）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== 主从全量同步 PSYNC 模拟 ===\n主节点数据: {'k1': 100, 'k2': 200, 'k3': 300}\n从节点 -> 主节点: PSYNC ? -1 (首次, 请求全量)\n主节点 fork 子进程生成 RDB 快照: {'k1': 100, 'k2': 200, 'k3': 300}\n从节点清空本地并载入 RDB -> 数据: {'k1': 100, 'k2': 200, 'k3': 300}\n同步期间主节点新写 k4=400\n主节点补发增量写命令, 从节点应用 -> 数据: {'k1': 100, 'k2': 200, 'k3': 300, 'k4': 400}\n结果: 全量同步完成, 主从数据一致",
+  "code": "print(\"=== 主从全量同步 PSYNC 模拟 ===\")\nmaster_data = {\"k1\": 100, \"k2\": 200, \"k3\": 300}\nprint(\"主节点数据:\", master_data)\nprint(\"从节点 -> 主节点: PSYNC ? -1 (首次, 请求全量)\")\nsnapshot = dict(master_data)\nprint(\"主节点 fork 子进程生成 RDB 快照:\", snapshot)\nslave_data = dict(snapshot)\nprint(\"从节点清空本地并载入 RDB -> 数据:\", slave_data)\nmaster_data[\"k4\"] = 400\nprint(\"同步期间主节点新写 k4=400\")\nslave_data[\"k4\"] = 400\nprint(\"主节点补发增量写命令, 从节点应用 -> 数据:\", slave_data)\nprint(\"结果: 全量同步完成, 主从数据一致\")\n",
+  "_verified": true
+}

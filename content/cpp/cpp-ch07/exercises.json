@@ -1,0 +1,123 @@
+{
+  "meta": {
+    "chapter": "cpp-ch07",
+    "note": "7 题，题型混合 choice/fix_error/output/coding/design；含 nowcoder BM90、github 真题映射（仅存元数据+链接，不存题面）。覆盖函数模板推导、两阶段编译 typename、重载决议、SFINAE、可变参数模板。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "difficulty": "easy",
+      "title": "关于函数模板实例化与头文件，正确的是",
+      "content_md": "选择**正确**的描述。",
+      "options": [
+        { "key": "A", "text": "模板在编译时直接生成一份通用机器码，运行时按类型选择" },
+        { "key": "B", "text": "模板实现通常放头文件，因为实例化需要模板完整定义对调用方可见（包含模型）" },
+        { "key": "C", "text": "模板实参推导时，多个参数可以各自推出不同的 T" },
+        { "key": "D", "text": "函数模板不能与普通函数构成重载" }
+      ],
+      "answer": { "correct": ["B"] },
+      "explanation": "模板不是实体而是配方，实例化才生成具体代码（A 错）；多参数必须推出同一 T，否则推导冲突（C 错）；函数模板与普通函数参与同一套重载决议（D 错）。包含模型要求定义在调用处可见，故模板多放头文件（B 对）。",
+      "tags": ["instantiation", "inclusion-model"],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 16 章 模板与泛型编程",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "fix_error",
+      "difficulty": "mid",
+      "title": "修复模板中依赖名漏写 typename",
+      "content_md": "以下模板无法编译：编译器不知道 `T::value_type` 是类型还是值。请修复（只需补关键字，不改逻辑）：\n\n```cpp\ntemplate <typename T>\nvoid f() {\n    T::value_type x;   // 编译报错：依赖名默认不被视为类型\n}\n```",
+      "answer": {
+        "reference_code": "template <typename T>\nvoid f() {\n    typename T::value_type x;   // 加 typename：告诉编译器这是嵌套依赖类型名\n}"
+      },
+      "explanation": "两阶段编译下，依赖名 `T::value_type` 默认按“值/成员”解析；嵌套依赖类型名前必须加 `typename` 显式声明其为类型，否则语义阶段报语法错。",
+      "tags": ["dependent-name", "typename", "two-phase"],
+      "source": "self",
+      "source_ref": "《C++ Templates: The Complete Guide（第2版）》第 9 章 依赖名",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "output",
+      "difficulty": "easy",
+      "title": "读代码写输出（函数模板重载决议）",
+      "content_md": "```cpp\n#include <iostream>\ntemplate <typename T> void log(T v) { std::cout << \"T:\" << v << '\\n'; }\nvoid log(int v) { std::cout << \"int:\" << v << '\\n'; }\nint main() { log(42); log(3.14); log<>(7); }\n```",
+      "answer": {
+        "output": "int:42\nT:3.14\nT:7"
+      },
+      "explanation": "`log(42)` 有更特化的普通函数优先选中；`log(3.14)` 只有模板能匹配 double；`log<>(7)` 强制只从模板候选里选，故走模板版本。",
+      "tags": ["overload-resolution", "template"],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 16.3 节 重载与模板",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "coding",
+      "difficulty": "easy",
+      "title": "实现函数模板 my_max 并演示跨类型调用",
+      "content_md": "实现 `template<typename T> T my_max(T a, T b)`，返回较大者；并演示当两实参类型不一致时，应**显式指定模板实参** `my_max<double>(3, 2.5)` 以避免推导冲突。给出可编译运行的 `main()`。",
+      "answer": {
+        "reference_code": "#include <iostream>\ntemplate <typename T>\nT my_max(T a, T b) { return a > b ? a : b; }\nint main() {\n    std::cout << my_max(3, 7) << '\\n';\n    std::cout << my_max<double>(3, 2.5) << '\\n';   // 跨类型：显式指定 T\n}"
+      },
+      "explanation": "多参数必须推出同一 T；跨类型调用需显式 `<double>` 让两实参都转 double，否则推导冲突硬报错。",
+      "tags": ["function-template", "deduction"],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 16.1 节 函数模板",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "design",
+      "difficulty": "hard",
+      "title": "牛客 BM90 · 最小覆盖子串（泛型滑动窗口）",
+      "content_md": "用泛型/模板实现一个可复用的「滑动窗口」工具（如 `SlidingWindow<T, Eq>` 或模板函数 `min_window(s, t, eq)`），并基于它求解最小覆盖子串。题面与数据范围请见 external_url（不在此复述题面），本题重点考察：把窗口维护逻辑抽象为模板、用非类型/类型参数适配不同字符集与比较策略。",
+      "answer": {
+        "reference_code": "// 推荐结构：模板函数 min_window(string s, string t) 内部用数组作哈希（字符集固定）\n// 双指针维护窗口 [slow, fast]，用 need/count 两个计数判“窗口是否已覆盖 t”；\n// 收缩窗口求最小长度。完整题面与判题见 external_url。\n// 泛型点：把“窗口覆盖判定”与“元素相等性”参数化，便于迁移到其它元素类型。"
+      },
+      "explanation": "核心算法是双指针 + 滑动窗口；用模板把“窗口覆盖判定”与“元素相等性”参数化，体现泛型复用。注意本题来自 nowcoder，仅存元数据与链接，不搬运题面。",
+      "tags": ["sliding-window", "generic", "design"],
+      "source": "nowcoder",
+      "source_ref": "牛客 BM90（最小覆盖子串）",
+      "external_url": "https://www.nowcoder.com/practice/c466d480d20c4c7c9d322d12ca7955ac",
+      "category": "算法题",
+      "platform": "nowcoder"
+    },
+    {
+      "type": "choice",
+      "difficulty": "mid",
+      "title": "关于 SFINAE 与 std::enable_if，正确的是",
+      "content_md": "选择**正确**的描述。",
+      "options": [
+        { "key": "A", "text": "SFINAE 指替换失败时直接编译错误，必须修掉才能过" },
+        { "key": "B", "text": "把 enable_if 检查写进函数体，类型不满足时该候选会被悄悄丢弃" },
+        { "key": "C", "text": "SFINAE = 替换失败并非错误；enable_if 放在签名位置可在编译期按类型属性筛选重载" },
+        { "key": "D", "text": "std::enable_if 的两个条件无需互斥，编译器会自动选更优的一个" }
+      ],
+      "answer": { "correct": ["C"] },
+      "explanation": "SFINAE 是“替换失败并非错误”，候选出局而非报错（A 错）；enable_if 必须放在签名位置（返回类型/默认模板参数），写在函数体里是硬错误（B 错）；多个 enable_if 条件必须互斥，否则同时启用会歧义（D 错）。",
+      "tags": ["sfinae", "enable_if"],
+      "source": "self",
+      "source_ref": "《C++ Templates: The Complete Guide（第2版）》第 8 章 SFINAE",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "coding",
+      "difficulty": "hard",
+      "title": "GitHub · 用可变参数模板 + 折叠表达式实现泛型打印",
+      "content_md": "实现 `print_all(Ts... ts)`：用 C++17 折叠表达式把任意数量、任意类型的实参顺序打印到一行（以空格分隔，末尾换行）。再用一个 `sum(Ts...)` 折叠求和验证可变参数模板。参考 external_url 中 TheAlgorithms 的 C++ 模板实践（不在此复述题面）。",
+      "answer": {
+        "reference_code": "#include <iostream>\ntemplate <typename... Ts>\nvoid print_all(Ts... ts) { ((std::cout << ts << ' '), ...); std::cout << '\\n'; }\ntemplate <typename... Ts>\nauto sum(Ts... ts) { return (ts + ...); }\nint main() { print_all(1, 2.5, \"hi\", 'x'); std::cout << sum(1,2,3,4) << '\\n'; }"
+      },
+      "explanation": "折叠表达式 `(ts + ...)` 一行实现任意长参数求和，`((std::cout << ts << ' '), ...)` 用逗号运算符顺序打印；二者都在编译期展开，零运行时间接。本题来自 github 模板实践仓库，仅存元数据与链接。",
+      "tags": ["variadic", "fold-expression"],
+      "source": "github",
+      "source_ref": "TheAlgorithms/C-Plus-Plus（模板与泛型算法示例）",
+      "external_url": "https://github.com/TheAlgorithms/C-Plus-Plus",
+      "category": "算法题",
+      "platform": "github"
+    }
+  ]
+}

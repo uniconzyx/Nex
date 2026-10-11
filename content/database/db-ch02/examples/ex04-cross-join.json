@@ -1,0 +1,9 @@
+{
+  "title": "CROSS JOIN 笛卡尔积（无连接条件）",
+  "code_lang": "sql",
+  "code_std": "mysql8",
+  "stdin": "",
+  "expected_output": "Query OK, 0 rows affected\nQuery OK, 2 rows affected\nQuery OK, 2 rows affected\nc|s\nBlue|M\nBlue|S\nRed|M\nRed|S",
+  "code": "CREATE TABLE t_color (c VARCHAR(10));\nCREATE TABLE t_size (s VARCHAR(10));\nINSERT INTO t_color VALUES ('Red'),('Blue');\nINSERT INTO t_size VALUES ('S'),('M');\nSELECT c.c, s.s FROM t_color c CROSS JOIN t_size s ORDER BY c.c, s.s;",
+  "_verified": false
+}

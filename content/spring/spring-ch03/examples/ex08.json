@@ -1,0 +1,8 @@
+{
+  "title": "this 与 target 的区别（代理 vs 真实对象）",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "this is a JDK proxy: true\ntarget is the real bean: RepoImpl\nproxy == target ? false\n  [target] RepoImpl.find executed\n",
+  "code": "import java.lang.reflect.*;\n\ninterface Repo { void find(); }\nclass RepoImpl implements Repo { public void find() { System.out.println(\"  [target] RepoImpl.find executed\"); } }\nclass Handler implements InvocationHandler {\n    Object target;\n    Handler(Object t) { target = t; }\n    public Object invoke(Object proxy, Method m, Object[] args) throws Throwable {\n        System.out.println(\"this is a JDK proxy: \" + Proxy.isProxyClass(proxy.getClass()));\n        System.out.println(\"target is the real bean: \" + target.getClass().getSimpleName());\n        System.out.println(\"proxy == target ? \" + (proxy == target));\n        return m.invoke(target, args);\n    }\n}\npublic class Main {\n    public static void main(String[] a) throws Exception {\n        Repo proxy = (Repo) Proxy.newProxyInstance(Repo.class.getClassLoader(),\n            new Class[]{Repo.class}, new Handler(new RepoImpl()));\n        proxy.find();\n    }\n}\n"
+}

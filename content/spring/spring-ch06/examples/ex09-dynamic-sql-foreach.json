@@ -1,0 +1,8 @@
+{
+  "title": "ex09-dynamic-sql-foreach",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "批量插入SQL: INSERT INTO t_log(score) VALUES (?, ?, ?)\n占位符数: 3 参数数: 3",
+  "code": "def foreach_values(values):\n    return \"(\" + \", \".join(\"?\" for _ in values) + \")\"\n\nvals = [10, 20, 30]\nsql = \"INSERT INTO t_log(score) VALUES \" + foreach_values(vals)\nprint(\"批量插入SQL:\", sql)\nprint(\"占位符数:\", len(vals), \"参数数:\", len(vals))\n"
+}

@@ -1,0 +1,122 @@
+{
+  "meta": {
+    "chapter": "cpp-ch11",
+    "note": "7 题，题型混合（选择/改错/读输出/简答/编码/设计）；含 CppCoreGuidelines 与 cppreference 真实链接（仅存元数据+链接，不存题面）"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "difficulty": "easy",
+      "title": "关于栈展开（stack unwinding），正确的是",
+      "content_md": "选择**正确**的描述。",
+      "options": [
+        { "key": "A", "text": "异常发生时，只有抛异常的那个函数里的对象会被析构" },
+        { "key": "B", "text": "栈展开期间，从 throw 点到 catch 之间沿途的局部对象按其构造逆序被析构" },
+        { "key": "C", "text": "try 块本身在运行时会产生异常检测指令，因此有性能开销" },
+        { "key": "D", "text": "catch 子句按派生类在前、基类在后的顺序匹配，与书写顺序无关" }
+      ],
+      "answer": { "correct": ["B"] },
+      "explanation": "栈展开从 throw 点逐帧向上，逆序析构沿途局部对象（RAII 异常安全的基础）。异常路径才有成本，正常路径无异常检测指令（零开销原则）；catch 匹配按书写顺序取第一个可转换的子句，故派生类应写在基类前。",
+      "tags": ["stack-unwinding", "raii"],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 18 章 异常处理",
+      "external_url": "https://en.cppreference.com/w/cpp/language/exceptions",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "fix_error",
+      "difficulty": "mid",
+      "title": "修复 catch 顺序错误与按值切片",
+      "content_md": "以下代码意图捕获运行时错误，但有两处问题：① `catch` 顺序写反，② 按值捕获导致切片。请修复：\n\n```cpp\ntry { throw std::runtime_error(\"x\"); }\ncatch (std::exception e) { std::cout << e.what() << '\\n'; }   // 问题①按值 ②基类在前\ncatch (std::runtime_error e) { std::cout << \"rt\\n\"; }\n```",
+      "answer": {
+        "reference_code": "try { throw std::runtime_error(\"x\"); }\ncatch (const std::runtime_error& e) { std::cout << \"rt: \" << e.what() << '\\n'; }\ncatch (const std::exception& e)        { std::cout << \"base: \" << e.what() << '\\n'; }"
+      },
+      "explanation": "派生类 catch 必须写在基类之前（否则被基类吃掉）；用 const 引用捕获避免切片并保留动态类型与零拷贝。",
+      "tags": ["catch", "slicing", "order"],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 18 章 catch 子句",
+      "external_url": "https://en.cppreference.com/w/cpp/language/try_catch",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "output",
+      "difficulty": "easy",
+      "title": "读代码写输出（catch 顺序与引用）",
+      "content_md": "```cpp\n#include <iostream>\n#include <stdexcept>\nstruct E : std::runtime_error { E():std::runtime_error(\"E\"){} };\nint main() {\n  try { throw E(); }\n  catch (const std::runtime_error& e) { std::cout << e.what() << ' '; }\n  catch (const E& e) { std::cout << \"E \" << e.what() << ' '; }\n  std::cout << \"end\\n\";\n}\n```",
+      "answer": { "output": "E end" },
+      "explanation": "抛出的 E 对象先匹配到第一个可转换的 const std::runtime_error&，于是打印 E 并结束；第二个 catch(E&) 因已匹配而不可达。注意 0 结束的 what() 字符串打印出 \"E\"。",
+      "tags": ["catch", "output", "order"],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 18 章 catch 匹配",
+      "external_url": "https://en.cppreference.com/w/cpp/language/try_catch",
+      "category": "基础题",
+      "platform": "self"
+    },
+    {
+      "type": "explain",
+      "difficulty": "mid",
+      "title": "解释异常安全三保证（基本 / 强 / 不抛）",
+      "content_md": "简述异常安全的三个保证级别分别承诺什么，并指出 RAII 与 copy-and-swap 各自对应/实现哪一级。",
+      "answer": {
+        "reference_code": "基本保证：不泄漏资源、对象保持有效且不变式不破坏，但具体值可能变。强保证：要么成功要么完全回滚（commit-or-rollback，类似事务）。不抛保证（nothrow/noexcept）：函数绝不抛异常。RAII 通过析构确定性释放资源，天然提供基本保证；copy-and-swap / move-and-swap 用「先建副本再不抛交换」提供强保证；swap 与析构必须 noexcept 才能支撑强保证。"
+      },
+      "explanation": "等级：不抛 ⊃ 强 ⊃ 基本。RAII 给基本保证；强保证靠「先构造临时、再 noexcept swap 提交」；函数整体等级等于最弱操作的等级。",
+      "tags": ["exception-safety", "raii", "copy-and-swap"],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 18 章；Herb Sutter 异常安全系列",
+      "external_url": "https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md#e-exception-safety",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "coding",
+      "difficulty": "mid",
+      "title": "实现 noexcept 移动构造与移动赋值",
+      "content_md": "给定管理 `int*` 缓冲的类 `Buf`，请实现**不抛的移动构造与移动赋值**（使用 `noexcept`），使该类型能被 `std::vector` 在扩容时高效移动而非拷贝。已给出析构。",
+      "answer": {
+        "reference_code": "class Buf {\n  int* p_ = nullptr; size_t n_ = 0;\npublic:\n  ~Buf() { delete[] p_; }\n  Buf(Buf&& o) noexcept : p_(o.p_), n_(o.n_) { o.p_ = nullptr; o.n_ = 0; }   // 窃取并置空源\n  Buf& operator=(Buf&& o) noexcept {\n    if (this != &o) { delete[] p_; p_ = o.p_; n_ = o.n_; o.p_ = nullptr; o.n_ = 0; }\n    return *this;\n  }\n};"
+      },
+      "explanation": "移动构造/赋值标记为 noexcept 是关键：std::vector 仅在元素移动为 noexcept 时才在扩容时移动，否则退化为拷贝。移动后源对象须保持可析构（置空 p_）。",
+      "tags": ["noexcept", "move", "vector-realloc"],
+      "source": "self",
+      "source_ref": "《Effective Modern C++》条款 14（标记为 noexcept 的移动）",
+      "external_url": "https://en.cppreference.com/w/cpp/language/noexcept",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "design",
+      "difficulty": "hard",
+      "title": "实现强异常安全的 push_back（copy-and-swap）",
+      "content_md": "设计一个动态数组 `Vec`，其 `push_back` 在扩容失败时**保持原对象不变**（强保证）。请用 copy-and-swap / 先建副本再不抛交换 的思路给出核心实现，并说明为何要先把新缓冲建好再提交。",
+      "answer": {
+        "reference_code": "void push_back(const T& v) {\n  if (size_ == cap_) {\n    size_t nc = cap_ ? cap_ * 2 : 1;\n    auto np = std::make_unique<T[]>(nc);          // 先建新缓冲（可能抛，但只影响 np）\n    for (size_t i = 0; i < size_; ++i) np[i] = data_[i];  // 拷贝旧数据\n    np[size_] = v;                                // 放入新元素\n    data_ = std::move(np);                        // 提交：unique_ptr 移动 noexcept\n    cap_ = nc;                                    // 原生赋值不抛\n  } else {\n    data_[size_] = v;\n  }\n  ++size_;\n}"
+      },
+      "explanation": "「先分配新缓冲并拷贝，最后用 noexcept 的 unique_ptr 移动替换」保证：若任何一步抛异常，原 data_ 与 size_ 完全没动 → 强保证（回滚）。这正是标准容器 push_back 的强保证实现思路。",
+      "tags": ["exception-safety", "strong-guarantee", "copy-and-swap", "vector"],
+      "source": "github",
+      "source_ref": "C++ Core Guidelines E.4–E.6（异常安全设计）",
+      "external_url": "https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md#e-exception-safety",
+      "category": "算法题",
+      "platform": "github"
+    },
+    {
+      "type": "coding",
+      "difficulty": "mid",
+      "title": "用 RAII 把会泄漏的裸指针代码改写为异常安全",
+      "content_md": "下面代码在 `use()` 抛异常时会泄漏 `p`。请用 RAII（自定义 Guard 或 `std::unique_ptr`）改写，使无论正常还是异常退出都释放资源。",
+      "answer": {
+        "reference_code": "#include <memory>\nvoid f() {\n  auto p = std::make_unique<int>(42);   // RAII：离开作用域必释放\n  use(*p);                              // 若 use 抛异常，p 的析构仍运行\n}"
+      },
+      "explanation": "裸指针 + 手动 delete 在异常路径下极易泄漏；交给 unique_ptr/作用域 Guard 后，析构的确定性调用（基本保证）自动覆盖异常路径。",
+      "tags": ["raii", "leak", "unique_ptr"],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 12 章 动态内存 / 第 18 章",
+      "external_url": "https://en.cppreference.com/w/cpp/memory/unique_ptr",
+      "category": "算法题",
+      "platform": "self"
+    }
+  ]
+}

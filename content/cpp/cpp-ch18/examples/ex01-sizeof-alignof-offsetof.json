@@ -1,0 +1,8 @@
+{
+  "title": "sizeof / alignof / offsetof 实测结构体布局与填充",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "sizeof(S)=24 alignof(S)=8\noffset a=0 b=8 c=16\n填充字节总数=14",
+  "code": "#include <cstdio>\n#include <cstddef>\n\n// a 占 1 字节；b 是 double，必须 8 字节对齐 → a 后补 7 字节\n// c 占 1 字节；结构体整体按最大成员对齐（8）→ 尾部再补 7 字节\nstruct S {\n    char   a;\n    double b;\n    char   c;\n};\n\nint main() {\n    printf(\"sizeof(S)=%zu alignof(S)=%zu\\n\", sizeof(S), alignof(S));\n    printf(\"offset a=%zu b=%zu c=%zu\\n\",\n           offsetof(S, a), offsetof(S, b), offsetof(S, c));\n    // 填充字节 = 结构体总大小 - 各成员有效大小之和\n    size_t raw = sizeof(char) + sizeof(double) + sizeof(char);\n    printf(\"填充字节总数=%zu\\n\", sizeof(S) - raw);\n    return 0;\n}"
+}

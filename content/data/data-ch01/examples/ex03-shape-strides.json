@@ -1,0 +1,8 @@
+{
+  "title": "形状变换与 strides：reshape / transpose 为何零成本",
+  "code_lang": "python",
+  "code_std": "3.13",
+  "stdin": "",
+  "expected_output": "a.shape  = (3, 4)\na.strides= (32, 8)  (行方向跨 4*8=32 字节，列方向跨 8 字节)\n[[ 0  1  2  3]\n [ 4  5  6  7]\n [ 8  9 10 11]]\n\n转置后 b.shape  = (4, 3)\n转置后 b.strides= (8, 32)  <- 只是把 strides 换了顺序\n转置共享内存: True  -> 转置是 O(1) 视图，不搬数据\nb 是否 C 连续: False  <- 转置后失去连续性\n\nreshape 前后共享内存: True\nreshape(4,3) 是否 C 连续: True\n\n切片 a[:, ::2] strides = (32, 16)  共享内存: True\n该切片是否 C 连续: False\n对它 ravel() 是否共享内存: False  (非连续 -> 被迫拷贝)\n\n结论：reshape/转置/切片只改元数据；一旦需要真正重排内存（如非连续的 ravel），就会拷贝。",
+  "code": "import numpy as np\n\na = np.arange(12, dtype=np.int64).reshape(3, 4)\nprint(\"a.shape  =\", a.shape)\nprint(\"a.strides=\", a.strides, \" (行方向跨 4*8=32 字节，列方向跨 8 字节)\")\nprint(a)\nprint()\n\nb = a.T\nprint(\"转置后 b.shape  =\", b.shape)\nprint(\"转置后 b.strides=\", b.strides, \" <- 只是把 strides 换了顺序\")\nprint(\"转置共享内存:\", np.shares_memory(a, b), \" -> 转置是 O(1) 视图，不搬数据\")\nprint(\"b 是否 C 连续:\", b.flags[\"C_CONTIGUOUS\"], \" <- 转置后失去连续性\")\nprint()\n\nprint(\"reshape 前后共享内存:\", np.shares_memory(a, a.reshape(4, 3)))\nr = a.reshape(4, 3)\nprint(\"reshape(4,3) 是否 C 连续:\", r.flags[\"C_CONTIGUOUS\"])\nprint()\n\nc = a[:, ::2]\nprint(\"切片 a[:, ::2] strides =\", c.strides, \" 共享内存:\", np.shares_memory(a, c))\nprint(\"该切片是否 C 连续:\", c.flags[\"C_CONTIGUOUS\"])\nprint(\"对它 ravel() 是否共享内存:\", np.shares_memory(a, c.ravel()), \" (非连续 -> 被迫拷贝)\")\nprint()\nprint(\"结论：reshape/转置/切片只改元数据；一旦需要真正重排内存（如非连续的 ravel），就会拷贝。\")\n"
+}

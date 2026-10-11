@@ -1,0 +1,8 @@
+{
+  "title": "as_strided 的重叠视图写破坏（危险演示）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "initial view =\n[[0, 1, 2], [2, 3, 4]]\nafter view[0,2]=777:\n  view = [[0, 1, 777], [777, 3, 4]]\n  base a = [0, 1, 777, 3, 4, 5]\ndanger: a[2] is shared by view[1,0] -> corrupted",
+  "code": "import numpy as np\nfrom numpy.lib.stride_tricks import as_strided\na = np.arange(6, dtype=np.int64)\n# 步长 2 的窗口：窗口之间共享元素（重叠）\nview = as_strided(a, shape=(2, 3), strides=(2 * a.itemsize, a.itemsize))\nprint(\"initial view =\")\nprint(view.tolist())\nview[0, 2] = 777            # 写 a[2]\nprint(\"after view[0,2]=777:\")\nprint(\"  view =\", view.tolist())\nprint(\"  base a =\", a.tolist())\nprint(\"danger: a[2] is shared by view[1,0] -> corrupted\")"
+}

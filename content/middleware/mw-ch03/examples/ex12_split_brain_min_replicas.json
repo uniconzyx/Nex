@@ -1,0 +1,9 @@
+{
+  "title": "脑裂与 min-replicas-to-write 防护：分区时主节点停写",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== 脑裂与 min-replicas 防护模拟 ===\n正常: 从节点 lag=2 <= 10, 健康从节点数=1 >= min_replicas(1)\n主节点可写: True\n脑裂分区: 从节点 lag=999 > 10, 健康从节点数=0\nmin-replicas-to-write 触发 -> 主节点拒绝写入(MINREPLICAS), 宁可停写也不制造分叉\n分区恢复后: 旧主已停写, 不出现双主数据分叉",
+  "code": "print(\"=== 脑裂与 min-replicas 防护模拟 ===\")\nmin_replicas = 1\nmax_lag = 10\nreplicas = [{\"lag\": 2}]\nhealthy = [r for r in replicas if r[\"lag\"] <= max_lag]\ncan_write = len(healthy) >= min_replicas\nprint(\"正常: 从节点 lag=%d <= %d, 健康从节点数=%d >= min_replicas(%d)\" % (replicas[0][\"lag\"], max_lag, len(healthy), min_replicas))\nprint(\"主节点可写:\", can_write)\nreplicas = [{\"lag\": 999}]\nhealthy = [r for r in replicas if r[\"lag\"] <= max_lag]\ncan_write = len(healthy) >= min_replicas\nprint(\"脑裂分区: 从节点 lag=%d > %d, 健康从节点数=%d\" % (replicas[0][\"lag\"], max_lag, len(healthy)))\nif not can_write:\n    print(\"min-replicas-to-write 触发 -> 主节点拒绝写入(MINREPLICAS), 宁可停写也不制造分叉\")\nelse:\n    print(\"主节点继续写入\")\nprint(\"分区恢复后: 旧主已停写, 不出现双主数据分叉\")\n",
+  "_verified": true
+}

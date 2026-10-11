@@ -1,0 +1,23 @@
+{
+  "meta": { "chapter": "db-ch03", "category": "system" },
+  "items": [
+    {
+      "title": "高并发订单系统的索引设计与事务一致性方案",
+      "requirement_md": "为一个订单系统（orders、order_item、inventory）设计既快又安全的存储与访问层，必须覆盖本章全部知识点：B+树索引规划、覆盖索引避免回表、最左前缀、事务 ACID、隔离级别与并发控制。\n\n**数据表**：\n- orders(order_id PK, user_id, status, amount, created_at)\n- order_item(order_id, sku, qty, price)\n- inventory(sku PK, stock INT)\n\n**必须完成的设计与验证**：\n1. **索引设计**：为'用户维度订单列表' WHERE user_id=? AND status=? ORDER BY created_at 设计联合覆盖索引；为'按时间区间统计'设计独立索引。用 SHOW INDEX 与 EXPLAIN 验证列序与覆盖（Extra: Using index）。\n2. **避免回表**：高频列表查询只 SELECT 必要列，证明走覆盖索引。\n3. **事务一致性（下单扣库存）**：用 BEGIN + SELECT ... FOR UPDATE（当前读锁住库存行）+ UPDATE inventory SET stock=stock-? + INSERT orders + COMMIT，验证'超卖'被锁机制阻止；构造并发冲突说明 InnoDB 的 Next-Key Lock 与死锁回滚重试。\n4. **隔离级别验证**：在 RR 下用两个会话演示'快照读看不到别的事务未提交修改'与'当前读看到最新'，记录 EXPLAIN/SELECT @@transaction_isolation。\n\n**进阶**：用 SHOW VARIABLES LIKE 'innodb_flush_log_at_trx_commit' 说明持久性档位；压测中观察长事务导致的 undo 膨胀（information_schema.innodb_trx）。",
+      "tasks": [
+        {
+          "title": "设计并创建覆盖索引与最左前缀索引",
+          "verification": { "type": "test", "desc": "EXPLAIN 高频列表查询出现 type=ref/range 且 Extra 含 Using index；SHOW INDEX 列序符合 (等值,等值,排序)" }
+        },
+        {
+          "title": "实现下单扣库存的事务（FOR UPDATE + 提交）",
+          "verification": { "type": "test", "desc": "库存不足时扣减失败并回滚；并发下不出现超卖；能复现死锁并正确处理回滚重试" }
+        },
+        {
+          "title": "验证 RR 快照读与当前读差异",
+          "verification": { "type": "manual", "desc": "两会话演示 RR 下普通 SELECT 一致性、FOR UPDATE 当前读加锁；说明 undo/redo 如何支撑原子性与持久性" }
+        }
+      ]
+    }
+  ]
+}

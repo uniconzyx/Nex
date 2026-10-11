@@ -1,0 +1,8 @@
+{
+  "title": "this 解析字段遮蔽",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "42",
+  "code": "public class E203 {\n    int value;\n    E203(int value) { this.value = value; }\n    int get() { return this.value; }\n    public static void main(String[] args) {\n        E203 o = new E203(42);\n        System.out.println(o.get());\n    }\n}"
+}

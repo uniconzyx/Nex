@@ -1,0 +1,8 @@
+{
+  "title": "加 Lock 后同样交错节奏下不再丢失",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "期望值 = 400\n实际值 = 400\n是否丢失 = False\n对照结论: 同样的交错节奏下，加锁后计数完全正确",
+  "code": "import threading\n\n# 与 ex03 完全相同的交错节奏，唯一区别是临界区加了 Lock。\n# 对照可见：Lock 把「读—改—写」变成互斥序列，丢失消失。\n\nN = 200\ncounter = 0\nexpected = 2 * N\n\nenter = threading.Barrier(2)\nlock = threading.Lock()\n\n\ndef safe_worker():\n    global counter\n    for _ in range(N):\n        enter.wait()          # 仍然强制两边同时进入\n        with lock:            # 临界区：同一时刻只有一条线程\n            counter += 1\n\n\nts = [threading.Thread(target=safe_worker) for _ in range(2)]\nfor t in ts:\n    t.start()\nfor t in ts:\n    t.join()\n\nprint(\"期望值 =\", expected)\nprint(\"实际值 =\", counter)\nprint(\"是否丢失 =\", counter != expected)\nprint(\"对照结论: 同样的交错节奏下，加锁后计数完全正确\")\n"
+}

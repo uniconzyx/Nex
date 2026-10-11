@@ -1,0 +1,8 @@
+{
+  "title": "BM25 手写实现：TF 饱和、IDF 与长度归一化",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "BM25 各文档得分:\ndoc3 = 0.3365\ndoc0 = -0.3365\ndoc1 = -0.3365\ndoc2 = -0.3365\ndoc4 = -0.6729\n排名(降序) = [3, 0, 1, 2, 4]\n",
+  "code": "import math\ncorpus = [\n    ['rag', '向量', '检索', '知识'],\n    ['rag', '微调', '对齐', '行为'],\n    ['向量', '数据库', '索引', 'hnsw'],\n    ['bm25', '关键词', '检索', '稀疏'],\n    ['rag', '向量', '重排', '召回'],\n]\nquery = ['rag', '向量', '检索']\nN = len(corpus)\ndf = {}\nfor doc in corpus:\n    for t in set(doc):\n        df[t] = df.get(t, 0) + 1\nk1, b = 1.5, 0.75\navgdl = sum(len(d) for d in corpus) / N\n\ndef bm25(doc):\n    score = 0.0\n    dl = len(doc)\n    for t in query:\n        if t not in doc:\n            continue\n        n = df.get(t, 0)\n        idf = math.log((N - n + 0.5) / (n + 0.5))\n        f = doc.count(t)\n        score += idf * (f * (k1 + 1)) / (f + k1 * (1 - b + b * dl / avgdl))\n    return score\n\nscores = [(i, round(bm25(d), 4)) for i, d in enumerate(corpus)]\nscores.sort(key=lambda x: -x[1])\nprint('BM25 各文档得分:')\nfor i, s in scores:\n    print('doc%d = %.4f' % (i, s))\nprint('排名(降序) =', [i for i, _ in scores])\n"
+}

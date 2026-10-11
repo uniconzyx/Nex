@@ -1,0 +1,8 @@
+{
+  "title": "cin 读取多类型并检查流状态位",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "42 3.14 hello",
+  "expected_output": "a=42 b=3.14 c=hello\ngood=0 eof=1",
+  "code": "#include <iostream>\n#include <string>\nint main() {\n    int a; double b; std::string c;\n    std::cin >> a >> b >> c;\n    std::cout << \"a=\" << a << \" b=\" << b << \" c=\" << c << '\\n';\n    std::cout << \"good=\" << std::cin.good() << \" eof=\" << std::cin.eof() << '\\n';\n}"
+}

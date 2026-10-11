@@ -1,0 +1,8 @@
+{
+  "title": "类与对象：定义、实例化与字段访问",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "3 25.0",
+  "code": "public class E201 {\n    public int x = 3;\n    public int y = 4;\n    public double norm2() { return x * x + y * y; }\n    public static void main(String[] args) {\n        E201 p = new E201();\n        System.out.println(p.x + \" \" + p.norm2());\n    }\n}"
+}

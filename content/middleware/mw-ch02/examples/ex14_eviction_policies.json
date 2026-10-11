@@ -1,0 +1,9 @@
+{
+  "title": "maxmemory 八种淘汰策略",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "maxmemory 八种淘汰策略:\n  noeviction: 默认: 不淘汰, 写满返回错误\n  allkeys-lru: 对所有 key 用近似 LRU 淘汰\n  volatile-lru: 仅对设了 TTL 的 key 用近似 LRU\n  allkeys-lfu: 对所有 key 用近似 LFU 淘汰\n  volatile-lfu: 仅对设 TTL 的 key 用近似 LFU\n  allkeys-random: 随机淘汰所有 key\n  volatile-random: 随机淘汰设了 TTL 的 key\n  volatile-ttl: 淘汰剩余 TTL 最短的 key\n  选型: 缓存用 allkeys-lru/lfu; 持久数据用 noeviction 或 volatile-*",
+  "code": "policies = [\n    (\"noeviction\", \"默认: 不淘汰, 写满返回错误\"),\n    (\"allkeys-lru\", \"对所有 key 用近似 LRU 淘汰\"),\n    (\"volatile-lru\", \"仅对设了 TTL 的 key 用近似 LRU\"),\n    (\"allkeys-lfu\", \"对所有 key 用近似 LFU 淘汰\"),\n    (\"volatile-lfu\", \"仅对设 TTL 的 key 用近似 LFU\"),\n    (\"allkeys-random\", \"随机淘汰所有 key\"),\n    (\"volatile-random\", \"随机淘汰设了 TTL 的 key\"),\n    (\"volatile-ttl\", \"淘汰剩余 TTL 最短的 key\"),\n]\nprint(\"maxmemory 八种淘汰策略:\")\nfor p, d in policies:\n    print(f\"  {p}: {d}\")\nprint(\"  选型: 缓存用 allkeys-lru/lfu; 持久数据用 noeviction 或 volatile-*\")\n",
+  "_verified": true
+}

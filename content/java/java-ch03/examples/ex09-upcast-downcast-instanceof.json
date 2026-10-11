@@ -1,0 +1,8 @@
+{
+  "title": "向上/向下转型与 instanceof",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "a is Cat: true\ndowncast ok: true\ncaught ClassCastException",
+  "code": "public class E309 {\n    static class Animal {}\n    static class Cat extends Animal {}\n    public static void main(String[] args) {\n        Animal a = new Cat();\n        System.out.println(\"a is Cat: \" + (a instanceof Cat));\n        Cat c = (Cat) a;\n        System.out.println(\"downcast ok: \" + (c != null));\n        Animal d = new Animal();\n        try {\n            Cat bad = (Cat) d;\n        } catch (ClassCastException e) {\n            System.out.println(\"caught ClassCastException\");\n        }\n    }\n}"
+}

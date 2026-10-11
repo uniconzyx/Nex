@@ -1,0 +1,19 @@
+{
+  "title": "编译四阶段：-E / -S / -c / 链接 各自的产物",
+  "code_lang": "bash",
+  "code_std": "bash5",
+  "stdin": "",
+  "expected_output": "$ gcc -E util.c -o util.i        # ① 预处理：仍是 C 源码（含展开的头文件）\n$ gcc -S util.c -o util.s        # ② 编译：汇编代码\n$ gcc -c util.c -o util.o        # ③ 汇编：可重定位目标文件\n$ wc -l util.c util.i util.s    # 行数变化：预处理会大幅膨胀\n  6 util.c\n 12 util.i\n 20 util.s\n 38 total\n$ head -3 util.s                 # 汇编片段\n\t.file\t\"util.c\"\r\n\t.text\r\n\t.globl\tadd\r\n$ gcc -c main.c -o main.o        # 编译 main.c 为可重定位目标文件\n$ gcc main.o util.o -o app.exe   # ④ 链接：合并目标文件并补齐 CRT 启动代码\n$ ./app\nadd(2, 3) = 5\r",
+  "code": "#!/bin/sh\n# 编译四阶段：-E / -S / -c / 链接 各自的产物\n# 期望输出见 expected_output（本机 MinGW 工具链 + GNU Make 真实执行捕获）\n\ncat > util.c << 'EOF'\n#include \"util.h\"\n\nint add(int a, int b)\n{\n    return a + b;\n}\nEOF\n\ncat > util.h << 'EOF'\nint add(int a, int b);\nEOF\n\ncat > main.c << 'EOF'\n#include <stdio.h>\n#include \"util.h\"\n\nint main(void)\n{\n    printf(\"add(2, 3) = %d\\n\", add(2, 3));\n    return 0;\n}\nEOF\n\ngcc -E util.c -o util.i        # ① 预处理：仍是 C 源码（含展开的头文件）\ngcc -S util.c -o util.s        # ② 编译：汇编代码\ngcc -c util.c -o util.o        # ③ 汇编：可重定位目标文件\nwc -l util.c util.i util.s    # 行数变化：预处理会大幅膨胀\nhead -3 util.s                 # 汇编片段\ngcc -c main.c -o main.o        # 编译 main.c 为可重定位目标文件\ngcc main.o util.o -o app.exe   # ④ 链接：合并目标文件并补齐 CRT 启动代码\n./app\n",
+  "_step_rc": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "_verify_note": "expected_output 为 Windows + MinGW-w64（gcc 15.2）真实执行捕获。`wc`/`head` 步骤在脚本中写作可移植形式，本机由 Git Bash 提供同名工具驱动。行数与字节数随工具链版本变化，此处为实测值。"
+}

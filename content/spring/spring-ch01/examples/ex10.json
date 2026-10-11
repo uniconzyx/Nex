@@ -1,0 +1,8 @@
+{
+  "title": "依赖解析：按类型命中多个时按名称（@Qualifier）",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "resolved: pg-engine\nresolved: mysql-engine",
+  "code": "import java.util.*;\n\npublic class Ex10 {\n    static class Engine { String name; Engine(String n){name=n;} }\n    static class Container {\n        Map<String, Engine> engines = new HashMap<>();\n        void register(String n, Engine e){ engines.put(n, e); }\n        Engine getByTypeAndName(String preferName){\n            if (engines.containsKey(preferName)) return engines.get(preferName); // 按名称命中\n            return engines.values().iterator().next();\n        }\n    }\n    public static void main(String[] args) {\n        Container c = new Container();\n        c.register(\"mysql\", new Engine(\"mysql-engine\"));\n        c.register(\"pg\", new Engine(\"pg-engine\"));\n        Engine e = c.getByTypeAndName(\"pg\");\n        System.out.println(\"resolved: \" + e.name);\n        Engine e2 = c.getByTypeAndName(\"mysql\");\n        System.out.println(\"resolved: \" + e2.name);\n    }\n}\n"
+}

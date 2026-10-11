@@ -1,0 +1,9 @@
+{
+  "title": "集群总线 gossip：PING/PONG 收敛出一致拓扑",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== 集群总线 gossip 拓扑传播模拟 ===\n初始: 每节点只认识自己 -> A:['A'] B:['B'] C:['C']\n经过 1 轮 gossip PING/PONG 交换:\n  A 已知节点: ['A', 'B', 'C']\n  B 已知节点: ['A', 'B', 'C']\n  C 已知节点: ['A', 'B', 'C']\n结果: 所有节点对集群视图达成一致 (最终一致)",
+  "code": "print(\"=== 集群总线 gossip 拓扑传播模拟 ===\")\nnodes = {\n    \"A\": {\"knows\": set([\"A\"])},\n    \"B\": {\"knows\": set([\"B\"])},\n    \"C\": {\"knows\": set([\"C\"])},\n}\nprint(\"初始: 每节点只认识自己 -> A:%s B:%s C:%s\" % (sorted(nodes[\"A\"][\"knows\"]), sorted(nodes[\"B\"][\"knows\"]), sorted(nodes[\"C\"][\"knows\"])))\nimport itertools\nrounds = 0\nwhile not all(nodes[n][\"knows\"] == set([\"A\", \"B\", \"C\"]) for n in nodes):\n    for a, b in itertools.permutations(nodes, 2):\n        nodes[a][\"knows\"] |= nodes[b][\"knows\"]\n    rounds += 1\n    if rounds > 5:\n        break\nprint(\"经过 %d 轮 gossip PING/PONG 交换:\" % rounds)\nfor n in sorted(nodes):\n    print(\"  %s 已知节点: %s\" % (n, sorted(nodes[n][\"knows\"])))\nprint(\"结果: 所有节点对集群视图达成一致 (最终一致)\")\n",
+  "_verified": true
+}

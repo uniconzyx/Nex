@@ -1,0 +1,8 @@
+{
+  "title": "动态分区插入",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "源数据含 dt 取值: ['2024-01-01', '2024-01-02', '2024-01-03']\n若用静态分区, 需为 3 个 dt 各写 1 条 INSERT OVERWRITE ... PARTITION(dt='...')\n\n动态分区: INSERT OVERWRITE TABLE target PARTITION(dt) SELECT k, v, dt FROM source\n=> 自动按 SELECT 末尾列 dt 的取值创建分区:\n   PARTITION(dt='2024-01-01') 写入 2 行: [('a', 1), ('b', 2)]\n   PARTITION(dt='2024-01-02') 写入 2 行: [('c', 3), ('d', 4)]\n   PARTITION(dt='2024-01-03') 写入 1 行: [('e', 5)]\n\n对比: 动态分区省去手写多分区, 但会写大量分区(需 hive.exec.dynamic.partition.mode=nonstrict 防误写全表)\n",
+  "code": "# 模拟动态分区插入: PARTITION 列的值从 SELECT 的动态列取得, 而非写死\nsource = [\n    (\"2024-01-01\", \"a\", 1), (\"2024-01-01\", \"b\", 2),\n    (\"2024-01-02\", \"c\", 3), (\"2024-01-02\", \"d\", 4),\n    (\"2024-01-03\", \"e\", 5),\n]\nstatic_result = {}\nfor dt, k, v in source:\n    static_result.setdefault(dt, []).append((k, v))\nprint(\"源数据含 dt 取值:\", sorted(set(r[0] for r in source)))\nprint(\"若用静态分区, 需为 3 个 dt 各写 1 条 INSERT OVERWRITE ... PARTITION(dt='...')\\n\")\n\n# 动态分区: 一条语句, 最后一个 SELECT 列为分区值\ndynamic_result = {}\nfor dt, k, v in source:\n    dynamic_result.setdefault(dt, []).append((k, v))\nprint(\"动态分区: INSERT OVERWRITE TABLE target PARTITION(dt) SELECT k, v, dt FROM source\")\nprint(\"=> 自动按 SELECT 末尾列 dt 的取值创建分区:\")\nfor dt in sorted(dynamic_result):\n    print(f\"   PARTITION(dt='{dt}') 写入 {len(dynamic_result[dt])} 行: {dynamic_result[dt]}\")\nprint(\"\\n对比: 动态分区省去手写多分区, 但会写大量分区(需 hive.exec.dynamic.partition.mode=nonstrict 防误写全表)\")\n"
+}

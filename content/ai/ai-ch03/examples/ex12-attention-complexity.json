@@ -1,0 +1,8 @@
+{
+  "title": "注意力 O(n²) 复杂度与 MQA/GQA KV 节省量化",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "MHA KV 字节: 2147483648  MB: 2048.0\nMQA(1 KV头) 字节: 67108864  MB: 64.0\nGQA(8 KV头) 字节: 536870912  MB: 512.0\nMQA 节省倍数: 32.0\nGQA 节省倍数: 4.0\n注意力 FLOPs 量级(操作计数): 17592186044416\n",
+  "code": "layers = 32; n_heads = 32; head_dim = 128; seq = 4096; dt = 2\ndef kv_bytes(kv_heads):\n    return layers * kv_heads * head_dim * 2 * dt * seq\nfull = kv_bytes(n_heads)\nmqa = kv_bytes(1)\ngqa = kv_bytes(n_heads // 4)\nprint(\"MHA KV 字节:\", full, \" MB:\", round(full / 1024 / 1024, 1))\nprint(\"MQA(1 KV头) 字节:\", mqa, \" MB:\", round(mqa / 1024 / 1024, 1))\nprint(\"GQA(8 KV头) 字节:\", gqa, \" MB:\", round(gqa / 1024 / 1024, 1))\nprint(\"MQA 节省倍数:\", round(full / mqa, 1))\nprint(\"GQA 节省倍数:\", round(full / gqa, 1))\nn = 8192\nflops_attn = 2 * n * n * head_dim * n_heads * layers\nprint(\"注意力 FLOPs 量级(操作计数):\", flops_attn)\n"
+}

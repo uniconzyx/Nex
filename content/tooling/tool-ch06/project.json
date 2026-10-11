@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "chapter": "tool-ch06",
+    "category": "system",
+    "title": "Docker Compose 与部署实践 —— 综合项目",
+    "count": 1,
+    "note": "一个可离线运行的 compose 静态分析器，覆盖本章全部知识点且代码可独立运行（不依赖 docker 命令）"
+  },
+  "items": [
+    {
+      "title": "实现一个「Compose 静态分析器」compose-lite",
+      "requirement_md": "用纯 Python 3.13 标准库（`json` / `re` / `pathlib` / `collections`，**不调用任何 docker / docker compose 命令**）实现 `compose_lite.py`，对一份 compose 配置做静态体检。要求覆盖本章全部知识点，且脚本本身要体现「真懂编排语义」。\n\n**功能要求**\n\n1. **服务解析器 + 依赖图**\n   - 归一化 `depends_on` 的短语法（列表）与长语法（映射，含 `condition`）；\n   - 用 Kahn 算法做**拓扑排序**并输出**启动批次**（同批次可并行）；\n   - **环检测**：拓扑排序后入度仍 > 0 的节点即为环上节点，输出升序列表。\n\n2. **依赖就绪性检查器（核心）**\n   - 用**整数逻辑时钟**模拟启动：每个服务有 `ready_after`（初始化耗时 tick）；\n   - 分别模拟 `service_started` 与 `service_healthy` 两种 condition；\n   - 判据：若上游 `start` 时刻 < 依赖的 `ready` 时刻，即为「抢跑」；\n   - 内置正反两组用例，输出抢跑数量与布尔结论。\n\n3. **健康检查状态机**\n   - 输入探测结果序列（1 / 0），按 `interval` / `timeout` / `retries` / `start_period`\n     推进状态（`starting` → `healthy` → `unhealthy`）；\n   - 连续失败达到 `retries` 才转 unhealthy，中间成功即清零；`start_period` 内失败不计入；\n   - 实测：抖动序列不触发 unhealthy，连续失败触发。\n\n4. **restart 策略模拟器**\n   - 实现 `no` / `always` / `unless-stopped` / `on-failure` 四种语义；\n   - `on-failure` 要带**指数退避**（`base × 2ⁿ`，设 cap）；\n   - 实现 `start-limit-hit` 熔断（窗口内重启次数达 burst 即停）。\n\n5. **资源限制与 OOM 判定器**\n   - 给定 `mem_limit` 与峰值，判定是否 OOMKilled 并给出退出码（137 / 0）；\n   - 支持 swap 额度与「应用未感知 cgroup」场景（JVM 按宿主内存 1/4 算堆）；\n   - 正反两组用例。\n\n6. **日志轮转计算器**\n   - 给定 `max-size` / `max-file` / 容器数 → 计算恒定占用上限；\n   - 无轮转时按速率与剩余空间计算撑爆的**整数小时数**。\n\n7. **环境变量优先级求解器 + 插值器**\n   - 实现官方五级优先级，至少 6 组用例覆盖每一级；\n   - 实现 `${VAR}` / `${VAR:-d}` / `${VAR-d}` / `${VAR:?e}` / `${VAR?e}` / `$$`。\n\n8. **合规与冲突检查**\n   - **12-Factor 合规检查器**：配置硬编码、密钥进镜像、依赖声明、日志 stdout、\n     无状态、端口外置，输出每条 PASS/FAIL 与**合规率**（正反两组）；\n   - **宿主端口冲突检测**：归一化三种 `ports` 写法，按（IP, 端口, 协议）判冲突；\n   - **镜像标签策略检查**：拒绝 `latest`，要求 semver 或 digest。\n\n9. **compose → K8s 映射器**\n   - 逐服务生成 Deployment / StatefulSet / Service / Probe / ConfigMap / Secret / resources.limits；\n   - 卷映射为 PVC；输出对象清单与按 kind 的计数。\n\n10. **故障排查规则库**\n    - 覆盖端口占用 / 卷权限 / 网络不通 / DNS 失败 / 时区 / 编码六类症状；\n    - 输入症状文本 → 输出根因与处置步骤，含正反两组（含易误判对照）。\n\n**交付物**\n\n- 单文件 `compose_lite.py`，`python compose_lite.py` 直接跑出全部检查报告；\n- 一份 `README.md`，说明每条规则的判据与「为什么这么判」；\n- 所有输出必须**确定性**（整数逻辑时钟，无墙钟耗时、无地址、无随机哈希）。",
+      "tasks": [
+        {
+          "title": "阶段一：解析与依赖图（要求 1）",
+          "verification": {
+            "type": "test",
+            "desc": "4 服务 DAG 输出 3 个启动批次且拓扑序为 db → redis → api → web；三节点环与自环均被判为不可编排，环内服务列表升序输出"
+          }
+        },
+        {
+          "title": "阶段二：就绪性模拟与健康检查（要求 2、3）",
+          "verification": {
+            "type": "test",
+            "desc": "service_started 组抢跑数 > 0；service_healthy 组抢跑数 = 0；抖动序列最终状态为 healthy，连续失败序列在某时刻转 unhealthy"
+          }
+        },
+        {
+          "title": "阶段三：restart、日志与 OOM（要求 4、5、6）",
+          "verification": {
+            "type": "test",
+            "desc": "policy=no 重启 0 次；always 在退出码 0 时仍重启；on-failure 持续崩溃被 start-limit-hit 熔断；520MiB 峰值 / 512MiB 上限判为 137，380MiB 判为 0；轮转上限 = max-size × max-file × 容器数"
+          }
+        },
+        {
+          "title": "阶段四：环境变量与合规/冲突检查（要求 7、8）",
+          "verification": {
+            "type": "test",
+            "desc": "五级优先级 6 组用例逐级命中；${TAG:?err} 在缺值时报错中止；反例项目合规率 < 50%，正例 = 100%；同一宿主端口被两个服务声明时判冲突，绑不同宿主 IP 时不判冲突"
+          }
+        },
+        {
+          "title": "阶段五：K8s 映射与故障排查（要求 9、10）",
+          "verification": {
+            "type": "test",
+            "desc": "有状态服务映射为 StatefulSet；敏感变量进 Secret 而非 ConfigMap；命名卷映射为 PVC；六类症状全部正确归类且含易误判对照"
+          }
+        },
+        {
+          "title": "阶段六：自检与文档（交付物）",
+          "verification": {
+            "type": "manual",
+            "desc": "连续执行两次输出完全一致（确定性）；README 逐条说明判据与依据的官方口径"
+          }
+        }
+      ]
+    }
+  ]
+}

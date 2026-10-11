@@ -1,0 +1,63 @@
+{
+  "meta": {
+    "chapter": "cpp-ch19",
+    "category": "system"
+  },
+  "items": [
+    {
+      "title": "单文件项目改造：CMake 多目标工程 + 自实现测试框架 + GitHub Actions 流水线",
+      "requirement_md": "## 背景\n你手上有一个「能跑但没法接手」的单文件项目：一个 `main.cpp` 里塞了解析、计算、输出三件事，\n没有构建脚本、没有测试、没有 CI。请把它改造成一个**机器可验收**的工程。\n\n## 任务要求\n\n### 阶段一：拆分成 CMake 多目标工程\n- 拆成三个目标：`core`（STATIC 库，放解析与计算）、`log`（INTERFACE 头文件库）、`app`（可执行文件）。\n- `core` 的公开头放 `core/include/`，实现头放 `core/src/`，分别以 `PUBLIC` / `PRIVATE` 声明；\n  **禁止**出现 `include_directories()` / `link_libraries()` / `set(CMAKE_CXX_FLAGS ...)` 等目录级或全局命令。\n- 语言级要求用 `target_compile_features(core PUBLIC cxx_std_17)` 表达；\n  告警用 `target_compile_options(core PRIVATE -Wall -Wextra -Werror)` 表达（**不得外传**）。\n- include 路径一律用 `${CMAKE_CURRENT_SOURCE_DIR}` + 相对路径，保证可重定位。\n- 源码文件**显式列出**，不要用 `file(GLOB)`。\n\n### 阶段二：自实现测试框架 + 用例\n- 不依赖 googletest，自己写一个 ≤120 行的极简框架：`TEST` 注册宏（静态对象构造期注册）、\n  `CHECK_EQ` / `CHECK_TRUE` 断言（带 `__LINE__` 失败定位）、断言计数、`[SUMMARY]` 汇总、\n  **退出码语义**（`return failed ? 1 : 0`）。\n- 至少覆盖：`clamp` 的三段等价类、`split` 的**末尾空字段**边界、一个参数化用例（≥10 组数据）、\n  一个夹具用例（`TEST_F`，验证 SetUp 每用例都被调用）。\n- 用依赖注入处理时间/随机：至少有一个模块通过接口注入可控实现（如 `IClock` + `FakeClock`）。\n- `enable_testing()` + `add_test(...)`，确保 `ctest --output-on-failure` 能跑通。\n\n### 阶段三：GitHub Actions 流水线\n- 一个 workflow：`on: push(main) + pull_request`；至少 3 个 job，用 `needs` 串成 DAG。\n- 矩阵构建：至少 2 个维度（建议 `os` × `std`），并用 `exclude` 或 `include` 调整组合；\n  `fail-fast: false`，每个 job 都设 `timeout-minutes`，所有 `uses` 固定到 `@v4` 或 SHA。\n- 缓存：key 必须含 `${{ hashFiles('CMakeLists.txt') }}` 之类的输入指纹，只缓存依赖与 ccache。\n- artifact：测试报告用 `if: always()` 上传。\n- 另加一条带 sanitizer 的矩阵单元（`sanitizer: address,undefined`），不要给全部单元都开。\n\n## 交付物\n一个 Git 仓库，含 `CMakeLists.txt`、`src/`、`include/`、`tests/`、`.github/workflows/ci.yml`，\n以及一份 `README.md` 说明「如何本地构建、如何跑测试、CI 上有哪些门禁」。",
+      "tasks": [
+        {
+          "title": "拆分为 core / log / app 三个目标并写出现代 CMakeLists",
+          "verification": {
+            "type": "test",
+            "desc": "cmake -S . -B build 无警告配置成功；把这份 CMakeLists 喂给 ex09 的检查器（CM001–CM010 规则库）得到 0 问题；grep 不到 include_directories / link_libraries / CMAKE_CXX_FLAGS / CMAKE_SOURCE_DIR / file(GLOB)；所有 target_* 命令均带 PUBLIC/PRIVATE/INTERFACE 关键字。"
+          }
+        },
+        {
+          "title": "实现公开头（PUBLIC）与实现头（PRIVATE）分离",
+          "verification": {
+            "type": "test",
+            "desc": "用 ex15 的头文件可见性检查器判定：app 包含 core/src 下的 PRIVATE 头必须报 HS001；app 包含 core/include 下的 PUBLIC 头判定 OK；违规数在正例上为 0、反例上为 1（正反两组可区分）。"
+          }
+        },
+        {
+          "title": "自实现极简测试框架（注册 / 断言 / 计数 / 退出码）",
+          "verification": {
+            "type": "test",
+            "desc": "手工把某个被测函数改坏一处后，框架输出 [SUMMARY] 失败断言≥1 且进程退出码为 1；改回后失败断言为 0 且退出码为 0——正反两组对比成立。"
+          }
+        },
+        {
+          "title": "用等价类 / 边界值 / 参数化 / 夹具设计用例，覆盖末尾空字段等边界",
+          "verification": {
+            "type": "test",
+            "desc": "README 里给出等价类与边界点清单（≥6 个等价类、≥12 个边界点）；参数化用例展开 ≥10 组数据；TEST_F 用例输出中 SetUp 调用次数 == 用例数，且故意写入的静态状态泄漏反例被判失败。"
+          }
+        },
+        {
+          "title": "用依赖注入消除不可控依赖（时间/随机），并接进 CTest",
+          "verification": {
+            "type": "test",
+            "desc": "被测模块中不出现 steady_clock::now() / rand() 的直接调用；全部用例在 1 秒内跑完（不 sleep）；ctest --output-on-failure 全绿且退出码为 0。"
+          }
+        },
+        {
+          "title": "编写 GitHub Actions workflow（矩阵 + 缓存 + artifact + sanitizer + needs DAG）",
+          "verification": {
+            "type": "test",
+            "desc": "用 ex13 的校验器（WF001–WF007）判定 0 问题；用 ex11 的分析器能求出拓扑序与关键路径且环检测为无环；用 ex12 的展开器能算出最终组合数与 exclude/include 的命中数；缓存 key 含 hashFiles 指纹；报告上传步骤带 if: always()。"
+          }
+        },
+        {
+          "title": "补一条 -Werror 与行覆盖率的门禁说明",
+          "verification": {
+            "type": "manual",
+            "desc": "按 ex17 的做法，同一份源码在 -Wall -Wextra 与追加 -Werror 下返回码分别为 0 和 1；README 写明覆盖率门槛口径（可执行行定义、当前覆盖率、未覆盖行清单），并说明覆盖率构建与发布构建必须是两套配置。"
+          }
+        }
+      ]
+    }
+  ]
+}

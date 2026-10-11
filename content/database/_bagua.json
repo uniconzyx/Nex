@@ -1,0 +1,167 @@
+{
+  "subject": "database",
+  "title": "数据库（MySQL）八股模块",
+  "note": "面试高频八股题库，按领域分类；答案标准化便于速记，与章节 interview.json 互补。合规：仅存要点与出处，不搬运第三方题面。",
+  "categories": [
+    {
+      "id": "sql",
+      "title": "SQL 基础",
+      "items": [
+        {
+          "q": "DROP、DELETE、TRUNCATE 的区别？",
+          "a": "- `DELETE`：DML，**逐行删除**，可带 `WHERE`，写 undo/redo 日志，可回滚，触发触发器，不释放表空间（仅标记删除），速度慢。\n- `TRUNCATE`：DDL，**整表重建**，不可带 WHERE，隐含提交**不可回滚**，不触发触发器，重置自增，速度快。\n- `DROP`：DDL，删除**表结构及数据**，不可回滚，最彻底。\n- 速度：DROP > TRUNCATE > DELETE。",
+          "tags": ["SQL"],
+          "difficulty": "easy",
+          "hot": 5,
+          "source_ref": "《MySQL 必知必会》"
+        },
+        {
+          "q": "CHAR 与 VARCHAR 的区别？",
+          "a": "- `CHAR(n)`：**定长**，不足补空格，读取时去尾空格；存取快（无需记录长度），浪费空间；适合长度固定的值（如 MD5、手机号、状态码）。\n- `VARCHAR(n)`：**变长**，额外 1~2 字节记录长度；省空间，但更新变长可能引起行迁移/页分裂。\n- `n` 指**字符数**（非字节），UTF-8 下 `VARCHAR(10)` 最多存 10 个汉字、约占 30 字节。",
+          "tags": ["类型"],
+          "difficulty": "easy",
+          "hot": 4,
+          "source_ref": "《高性能 MySQL》第 4 章"
+        },
+        {
+          "q": "WHERE 与 HAVING 的区别？",
+          "a": "- `WHERE`：在**分组前**过滤**行**，不能使用聚合函数（如 `SUM()`）。\n- `HAVING`：在**分组后**过滤**组**，可以使用聚合函数，通常配合 `GROUP BY`。\n- 执行顺序：`FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT`。\n- 性能：能写在 WHERE 中的条件不要放到 HAVING，尽早过滤减少分组数据量。",
+          "tags": ["SQL"],
+          "difficulty": "easy",
+          "hot": 4,
+          "source_ref": "《MySQL 必知必会》"
+        },
+        {
+          "q": "INNER JOIN / LEFT JOIN / RIGHT JOIN / FULL JOIN 的区别？",
+          "a": "- `INNER JOIN`：只返回两表**匹配**的行。\n- `LEFT JOIN`：返回**左表全部**行，右表不匹配处填 NULL。\n- `RIGHT JOIN`：返回右表全部行，左表不匹配处填 NULL。\n- `FULL OUTER JOIN`：返回两侧全部（MySQL 需用 `LEFT JOIN UNION RIGHT JOIN` 模拟）。\n- 注意：`LEFT JOIN` 中把右表条件写在 `WHERE` 会**退化成 INNER JOIN**（NULL 行被过滤），应写在 `ON` 中。",
+          "tags": ["JOIN"],
+          "difficulty": "easy",
+          "hot": 5,
+          "source_ref": "《MySQL 必知必会》"
+        },
+        {
+          "q": "数据库三大范式是什么？",
+          "a": "- **1NF**：字段**原子性**，不可再分（无重复的列/数组）。\n- **2NF**：在 1NF 基础上，非主属性**完全依赖**于候选键（消除部分函数依赖）。\n- **3NF**：在 2NF 基础上，非主属性不**传递依赖**于候选键。\n- 实践：范式减少冗余、保证一致性；但高并发查询场景常**反范式化**（冗余字段、宽表）以减少 JOIN。",
+          "tags": ["建模"],
+          "difficulty": "easy",
+          "hot": 4,
+          "source_ref": "《数据库系统概念》"
+        }
+      ]
+    },
+    {
+      "id": "index",
+      "title": "索引",
+      "items": [
+        {
+          "q": "为什么 MySQL 索引使用 B+ 树而不是 B 树或哈希表？",
+          "a": "- **对比哈希**：哈希仅支持等值 O(1)，**不支持范围查询与排序**；B+ 树支持范围扫描。\n- **对比 B 树**：B 树每个节点都存数据，导致单节点能容纳的 key 更少 → 树更高 → **IO 次数更多**；B+ 树**只有叶子存数据**、非叶子仅存索引 key，因此扇出更大、树更矮（通常 3~4 层即千万级）。\n- 另外 B+ 树叶子节点用**链表相连**，范围查询只需顺序遍历，极其高效。",
+          "tags": ["索引", "B+树"],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《高性能 MySQL》第 5 章"
+        },
+        {
+          "q": "聚簇索引与非聚簇索引（二级索引）的区别？什么是回表？",
+          "a": "- **聚簇索引**（InnoDB 主键）：叶子节点存**整行数据**，表数据即索引，一个表只有一个。\n- **二级索引**：叶子节点存**索引列 + 主键值**。\n- **回表**：通过二级索引拿到主键后，再回聚簇索引查整行 → 多一次 B+ 树查找。\n- **覆盖索引**：若查询字段都在二级索引中，则无需回表，性能显著提升（EXPLAIN 显示 `Using index`）。",
+          "tags": ["索引"],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《高性能 MySQL》第 5 章"
+        },
+        {
+          "q": "什么是最左前缀原则？",
+          "a": "联合索引 `(a, b, c)` 的 B+ 树按 a、b、c **依次排序**，因此只有从**最左列开始且连续**的条件才能利用索引：\n- 可用：`a=1`、`a=1 AND b=2`、`a=1 AND b=2 AND c=3`。\n- **不可用/部分可用**：`b=2`（跳过 a，全表扫）、`a=1 AND c=3`（只用到 a）。\n- 范围查询（`<`、`>`、`BETWEEN`）**右侧的列无法再用索引**；`LIKE 'x%'` 可用，`LIKE '%x'` 不可用。",
+          "tags": ["索引"],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《高性能 MySQL》第 5 章"
+        },
+        {
+          "q": "哪些情况会导致索引失效？",
+          "a": "1) 对索引列做**函数/运算**（`WHERE YEAR(col)=2024`、`col+1=5`）。\n2) **隐式类型转换**（字符串列传数字，或反之）。\n3) 左模糊/全模糊 `LIKE '%abc'`。\n4) 违反最左前缀（联合索引跳列）。\n5) `OR` 连接非索引列；`!=`、`<>`、`NOT IN` 通常无法有效利用。\n6) 优化器判断**回表代价高于全表扫**（低选择性，如性别列）而放弃索引。\n7) 字符集/排序规则不一致导致 JOIN 时索引失效。",
+          "tags": ["索引", "优化"],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《高性能 MySQL》第 5 章"
+        },
+        {
+          "q": "EXPLAIN 关键字段如何看？",
+          "a": "- `type`：访问类型，性能 `system > const > eq_ref > ref > range > index > ALL`，**至少优化到 range/ref，避免 ALL**。\n- `key`：实际使用的索引；`possible_keys` 为候选。\n- `rows`：预估扫描行数，越小越好。\n- `Extra`：`Using index`（覆盖索引，好）、`Using where`、`Using filesort`（需排序，考虑加索引）、`Using temporary`（临时表，需优化）。",
+          "tags": ["优化", "EXPLAIN"],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《高性能 MySQL》附录 D"
+        }
+      ]
+    },
+    {
+      "id": "transaction",
+      "title": "事务与锁",
+      "items": [
+        {
+          "q": "事务的 ACID 特性分别由什么保证？",
+          "a": "- **A 原子性**：`undo log`（回滚日志），失败时回滚到事务前状态。\n- **C 一致性**：由 A、I、D 共同保证 + 应用层的约束（主键、外键、唯一、CHECK）。\n- **I 隔离性**：锁机制 + `MVCC`（多版本并发控制）。\n- **D 持久性**：`redo log`（重做日志），崩溃后可通过 redo 恢复已提交事务。",
+          "tags": ["事务", "ACID"],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《高性能 MySQL》第 1 章"
+        },
+        {
+          "q": "事务的隔离级别有哪些？分别解决什么问题？",
+          "a": "| 级别 | 脏读 | 不可重复读 | 幻读 |\n|---|---|---|---|\n| 读未提交 RU | ✗ 有 | ✗ 有 | ✗ 有 |\n| 读已提交 RC | ✓ 解决 | ✗ 有 | ✗ 有 |\n| 可重复读 RR（InnoDB 默认）| ✓ | ✓ | ✓（靠 next-key 锁）|\n| 串行化 Serializable | ✓ | ✓ | ✓ |\n- **脏读**：读到未提交数据。\n- **不可重复读**：同事务内两次读同一行，值被别的事务修改。\n- **幻读**：同事务内两次范围查询，行数被别的事务插入/删除改变。\n- MySQL InnoDB 在 RR 下通过 **MVCC + next-key lock** 已能避免大部分幻读。",
+          "tags": ["隔离级别"],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《高性能 MySQL》第 1 章"
+        },
+        {
+          "q": "MVCC 的实现原理？",
+          "a": "- 每行隐藏列：`DB_TRX_ID`（最近修改事务 ID）、`DB_ROLL_PTR`（指向 undo log 中旧版本）。\n- **undo log 版本链**：多次修改形成历史版本链表。\n- **ReadView**：快照读时生成，记录活跃事务列表，据此判断某版本对当前事务是否可见。\n- **RC 与 RR 差异**：RC **每次快照读都生成新 ReadView**；RR 只在**第一次**生成，故可重复读。\n- 注意：`SELECT ... FOR UPDATE` / `LOCK IN SHARE MODE` 是**当前读**，不走 MVCC 快照。",
+          "tags": ["MVCC", "并发"],
+          "difficulty": "hard",
+          "hot": 5,
+          "source_ref": "《高性能 MySQL》第 1 章"
+        },
+        {
+          "q": "MySQL 有哪些锁？行锁何时升级为表锁？",
+          "a": "- 按粒度：行锁（`Record Lock`）、间隙锁（`Gap Lock`）、临键锁（`Next-Key Lock` = 行+间隙）、表锁。\n- 按性质：共享锁（S，读）、排他锁（X，写）、意向锁（IS/IX，表级，用于快速判断冲突）。\n- InnoDB 行锁依赖**索引**：若 WHERE 条件**未命中索引**或走了全表扫，会锁住扫描过的所有行甚至退化为**表级锁**，并发急剧下降。\n- 间隙锁在 RR 下用于防止幻读，也会带来**死锁风险**。",
+          "tags": ["锁"],
+          "difficulty": "hard",
+          "hot": 5,
+          "source_ref": "《高性能 MySQL》第 1 章"
+        },
+        {
+          "q": "死锁是如何产生的？如何排查与避免？",
+          "a": "- 产生：两个及以上事务**循环等待**对方持有的锁（资源互斥 + 持有并等待 + 不可抢占 + 循环等待四条件同时成立）。\n- 处理：InnoDB 自动检测（等待图）并**回滚代价较小的事务**（`innodb_lock_wait_timeout` 超时兜底）。\n- 排查：`SHOW ENGINE INNODB STATUS` 查看 LATEST DETECTED DEADLOCK。\n- 避免：**固定加锁顺序**、缩小事务范围、避免大事务、为 WHERE 建好索引（减少锁范围）、降低隔离级别到 RC（减少间隙锁）。",
+          "tags": ["锁", "死锁"],
+          "difficulty": "mid",
+          "hot": 4,
+          "source_ref": "《高性能 MySQL》第 1 章"
+        }
+      ]
+    },
+    {
+      "id": "arch",
+      "title": "架构与运维",
+      "items": [
+        {
+          "q": "主从复制的原理与常见延迟原因？",
+          "a": "- 流程：主库写 `binlog` → 从库 `IO 线程` 拉取 binlog 写入 `relay log` → 从库 `SQL 线程` 回放 relay log。\n- 延迟原因：从库单线程回放跟不上主库并发写、大事务、从库负载高、网络延迟、无主键表回放慢。\n- 缓解：开启**并行复制**（基于库/组提交）、拆小事务、从库加主键、提升从库硬件、读写分离时**关键读走主库**。",
+          "tags": ["主从", "架构"],
+          "difficulty": "mid",
+          "hot": 4,
+          "source_ref": "《高性能 MySQL》第 10 章"
+        },
+        {
+          "q": "慢查询如何排查与优化？",
+          "a": "- 开启**慢查询日志**（`slow_query_log`、`long_query_time`），用 `mysqldumpslow` 或 pt-query-digest 分析。\n- `EXPLAIN` 看是否走索引、扫描行数、是否有 filesort/temporary。\n- 优化手段：补/改索引（联合索引、覆盖索引）、改写 SQL（避免 `SELECT *`、拆分大分页用**延迟关联**或游标分页）、避免函数包裹索引列、适当反范式冗余。\n- 架构层：读写分离、缓存（Redis）、分库分表、异步化。",
+          "tags": ["优化"],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《高性能 MySQL》第 3 章"
+        }
+      ]
+    }
+  ]
+}

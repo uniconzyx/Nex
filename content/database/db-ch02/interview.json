@@ -1,0 +1,38 @@
+{
+  "meta": { "chapter": "db-ch02" },
+  "items": [
+    {
+      "question": "MySQL 的 JOIN 有哪几种执行算法？分别适合什么场景？",
+      "answer_md": "主要有四类：\n\n1. **Index Nested Loop Join（NLJ）**：驱动表每行拿连接键走内表索引，`O(驱动行数·log 内表)`。前提是**内表连接列有索引**，最常见、最理想。\n2. **Block Nested Loop Join（BNL）**：无可用索引时的兜底，把驱动表一批行放进 `join_buffer`，批量探测内表，减少内表被扫描的轮数（仍 `O(M·N)`，但 I/O 次数大幅下降）。\n3. **Hash Join（8.0.18+）**：等值连接时，用较小的表 build 哈希表、大表 probe，平均 `O(M+N)`，适合大表无索引的等值连接；不支持非等值/范围连接。\n4. **Merge Join**：两表连接列已有序时先排序再双指针归并，支持非等值连接。\n\n**核心结论**：保证连接列有索引 → 走 Index NLJ（最快）；无索引大表等值连接 → 优化器选 Hash Join；都不是 → BNL（最慢，应避免）。",
+      "follow_ups": [
+        "为什么常说「小表驱动大表」？",
+        "EXPLAIN 里怎么看出用了哪种 JOIN（type / Extra: Using join buffer）？",
+        "连接列类型不一致为什么会退化成 BNL？"
+      ],
+      "difficulty": "mid",
+      "company_tags": ["通用", "字节", "美团"]
+    },
+    {
+      "question": "IN 和 EXISTS 怎么选？NOT IN 有什么坑？",
+      "answer_md": "- 现代 MySQL（5.6+ semi-join 优化）下，`IN (子查询)` 与 `EXISTS` 都会被优化器转成等价的 **semi-join** 执行，性能差异通常可忽略，**不必死记「大表用 EXISTS」**。\n- **真正的坑在 `NOT IN`**：若子查询返回集合里含 `NULL`，`WHERE col NOT IN (..., NULL)` 整体结果为 `UNKNOWN`，查询返回**空集**。而 `NOT EXISTS` / `LEFT JOIN ... IS NULL` 只对「是否存在匹配行」求值，**对 NULL 安全**。\n- 所以「求差集 / 找不存在的」一律用 `NOT EXISTS` 或 `LEFT JOIN ... IS NULL`，避免 `NOT IN` 的 NULL 地雷。",
+      "follow_ups": [
+        "semi-join 有哪几种策略（FirstMatch / MaterializedLookup ...）？",
+        "为什么 NOT IN 遇到 NULL 会变 UNKNOWN？",
+        "派生表什么情况下会被优化器合并（derived merge）？"
+      ],
+      "difficulty": "mid",
+      "company_tags": ["通用", "阿里"]
+    },
+    {
+      "question": "一个千万行的订单表 JOIN 用户表很慢，你怎么排查和优化？",
+      "answer_md": "1. **看执行计划**：`EXPLAIN` 找 `type: ALL` + `Extra: Using join buffer (Block Nested Loop)` —— 说明连接列没索引，退化成 BNL。\n2. **建索引**：在「被驱动表」的连接列（如 `orders.user_id`）建索引，让优化器走 Index NLJ，复杂度从 `O(M·N)` 降到 `O(M·log N)`。\n3. **统一类型/字符集**：连接列两边类型、字符集必须一致，否则隐式转换让索引用不上。\n4. **减少参与 JOIN 的列与行**：先 `WHERE` 过滤、只 `SELECT` 必要列，使 join buffer 能装更多驱动行、减少轮数。\n5. **架构层**：超大数据量考虑分库分表（按连接键分片，让 JOIN 在单分片内完成）或把热点统计预计算成汇总表（反范式）。",
+      "follow_ups": [
+        "join_buffer_size 调大一定能加速 BNL 吗？",
+        "如果连接列是低基数列（如性别），建索引还有用吗？",
+        "什么情况下应该把 JOIN 下推到应用端做？"
+      ],
+      "difficulty": "hard",
+      "company_tags": ["通用", "腾讯", "拼多多"]
+    }
+  ]
+}

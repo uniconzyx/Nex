@@ -1,0 +1,9 @@
+{
+  "title": "redo/undo 相关系统变量（持久化档位与 undo 表空间）",
+  "code_lang": "sql",
+  "code_std": "mysql8",
+  "stdin": "",
+  "expected_output": "Variable_name|Value\ninnodb_flush_log_at_trx_commit|1\nVariable_name|Value\ninnodb_undo_tablespaces|2",
+  "code": "SHOW VARIABLES LIKE 'innodb_flush_log_at_trx_commit';\nSHOW VARIABLES LIKE 'innodb_undo_tablespaces';",
+  "_verified": false
+}

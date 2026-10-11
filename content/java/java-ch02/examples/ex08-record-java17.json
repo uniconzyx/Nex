@@ -1,0 +1,8 @@
+{
+  "title": "Java 17 record：编译器自动封装",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "3 25.0\nPoint[x=3, y=4]",
+  "code": "public class E208 {\n    record Point(int x, int y) {\n        double norm2() { return x * x + y * y; }\n    }\n    public static void main(String[] args) {\n        Point p = new Point(3, 4);\n        System.out.println(p.x() + \" \" + p.norm2());\n        System.out.println(p);\n    }\n}"
+}

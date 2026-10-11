@@ -1,0 +1,8 @@
+{
+  "title": "结构体数组与指针遍历、按成员取最大",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "unsorted:\n  (3,1)\n  (1,9)\n  (2,5)\nmax x = (3,1)\n",
+  "code": "#include <stdio.h>\n\nstruct Point { int x; int y; };\n\nint main(void) {\n    struct Point arr[3] = { {3,1}, {1,9}, {2,5} };\n    struct Point *p;\n    printf(\"unsorted:\\n\");\n    for (p = arr; p < arr + 3; ++p) printf(\"  (%d,%d)\\n\", p->x, p->y);\n    struct Point *max = &arr[0];\n    for (p = arr + 1; p < arr + 3; ++p)\n        if (p->x > max->x) max = p;\n    printf(\"max x = (%d,%d)\\n\", max->x, max->y);\n    return 0;\n}"
+}

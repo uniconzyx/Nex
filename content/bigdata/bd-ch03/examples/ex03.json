@@ -1,0 +1,8 @@
+{
+  "title": "分桶表：哈希取模决定桶文件",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "分桶数 = 4, 哈希取模公式: bucket = stable_hash(user_id) % 4\n  bucket-0: ['u1', 'u5', 'u9', 'u10']\n  bucket-1: ['u2', 'u6']\n  bucket-2: ['u3', 'u7']\n  bucket-3: ['u4', 'u8']\n不变量验证: 同一 user_id 多次计算 bucket 一致 => True\n分桶用途: 1) 两表同桶 JOIN 可避免 shuffle(分桶 MapJoin); 2) TABLESAMPLE 高效采样; 3) 等值查询桶内定位\n",
+  "code": "# 模拟分桶表: 按 user_id 哈希取模决定落哪个桶文件\nNUM_BUCKETS = 4\n\ndef stable_hash(s):\n    # 用确定性的多项式哈希(仿 Hive 对字符串的哈希意图), 避免 Python 内置 hash 的随机化\n    h = 0\n    for ch in s:\n        h = (31 * h + ord(ch)) & 0x7fffffff\n    return h\n\ndef bucket_of(key):\n    return stable_hash(key) % NUM_BUCKETS   # 非负取模, 与 Hive 一致\n\nusers = [\"u1\", \"u2\", \"u3\", \"u4\", \"u5\", \"u6\", \"u7\", \"u8\", \"u9\", \"u10\"]\nplacement = {}\nfor u in users:\n    b = bucket_of(u)\n    placement.setdefault(b, []).append(u)\n\nprint(f\"分桶数 = {NUM_BUCKETS}, 哈希取模公式: bucket = stable_hash(user_id) % {NUM_BUCKETS}\")\nfor b in sorted(placement):\n    print(f\"  bucket-{b}: {placement[b]}\")\n# 验证: 相同 user_id 必落同一桶(分桶 JOIN 的正确性不变量)\nprint(\"不变量验证: 同一 user_id 多次计算 bucket 一致 =>\", all(bucket_of(u) == bucket_of(u) for u in users))\nprint(\"分桶用途: 1) 两表同桶 JOIN 可避免 shuffle(分桶 MapJoin); 2) TABLESAMPLE 高效采样; 3) 等值查询桶内定位\")\n"
+}

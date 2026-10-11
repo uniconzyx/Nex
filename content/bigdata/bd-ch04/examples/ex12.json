@@ -1,0 +1,8 @@
+{
+  "title": "Transformation 与 Action 分类与计数",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "Transformation 惰性, 返回新 RDD:\n  - map\n  - filter\n  - flatMap\n  - groupByKey\n  - reduceByKey\n  - join\n  - union\n  - distinct\n  - sortBy\n  - persist\nAction 触发计算:\n  - collect\n  - count\n  - take\n  - saveAsTextFile\n  - reduce\n  - foreach\n  - first\nTransformation 数 = 10, Action 数 = 7\n判别法则: 返回值是否为 RDD -> 是则 transformation, 否则 action\n",
+  "code": "transformations = [\"map\", \"filter\", \"flatMap\", \"groupByKey\", \"reduceByKey\", \"join\", \"union\", \"distinct\", \"sortBy\", \"persist\"]\nactions = [\"collect\", \"count\", \"take\", \"saveAsTextFile\", \"reduce\", \"foreach\", \"first\"]\nprint(\"Transformation 惰性, 返回新 RDD:\")\nfor t in transformations:\n    print(\"  -\", t)\nprint(\"Action 触发计算:\")\nfor a in actions:\n    print(\"  -\", a)\nprint(f\"Transformation 数 = {len(transformations)}, Action 数 = {len(actions)}\")\nprint(\"判别法则: 返回值是否为 RDD -> 是则 transformation, 否则 action\")\n"
+}

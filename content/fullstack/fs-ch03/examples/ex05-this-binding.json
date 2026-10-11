@@ -1,0 +1,8 @@
+{
+  "title": "this 五条绑定规则（含箭头函数）",
+  "code_lang": "javascript",
+  "code_std": "node22",
+  "stdin": "",
+  "expected_output": "1 隐式绑定: A\n2 显式绑定 call: B\n3 new绑定 tag: C\n4 箭头捕获外层this: D\n5 默认绑定(非严格): undefined",
+  "code": "function show() { return this && this.tag; }\nvar a = { tag: 'A', show: show };\nvar b = { tag: 'B' };\nconsole.log('1 隐式绑定:', a.show());\nconsole.log('2 显式绑定 call:', show.call(b));\nfunction Ctor(tag) { this.tag = tag; }\nvar c = new Ctor('C');\nconsole.log('3 new绑定 tag:', c.tag);\nvar d = {\n  tag: 'D',\n  fn: function() {\n    var inner = () => this.tag;\n    return inner();\n  }\n};\nconsole.log('4 箭头捕获外层this:', d.fn());\nconsole.log('5 默认绑定(非严格):', show());"
+}

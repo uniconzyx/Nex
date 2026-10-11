@@ -1,0 +1,8 @@
+{
+  "title": "显存估算：全参 vs LoRA vs QLoRA 拆解",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "模型参数量 = 7 B, LoRA 可训练参数占比 = 0.10%\n\n方案                           显存 (GB)        相对全参\n全参微调 (Adam 混合精度)             104.3          1.00x\nLoRA (bf16)                  13.1           0.13x\nQLoRA (NF4 冻结权重)             3.3            0.03x\n\n构成拆解 (全参):\n  fp16 权重      = 13.0 GB\n  fp16 梯度      = 13.0 GB\n  fp32 master    = 26.1 GB\n  Adam m, v      = 52.2 GB\n\n说明: 优化器状态与梯度是大头; LoRA 冻结主干后只保留极小可训练集, 显存骤降",
+  "code": "\nP = 7.0e9\ndef gb(nbytes):\n    return nbytes / (1024.0 ** 3)\n\nr_frac = 0.001\nlora_p = P * r_frac\n\nfull = P * (2 + 2 + 4 + 8)              # fp16 权重 + fp16 梯度 + fp32 master + Adam(m,v) fp32\nlora = P * 2 + lora_p * (2 + 2 + 8)     # 冻结 fp16 权重 + LoRA 的权重/梯度/优化器状态\nqlora = P * 0.5 + lora_p * (2 + 2 + 8)  # NF4 权重(0.5B/参数) + LoRA 同上\n\nprint('模型参数量 = %.0f B, LoRA 可训练参数占比 = %.2f%%' % (P / 1e9, 100 * r_frac))\nprint()\nprint('%-28s %-14s %s' % ('方案', '显存 (GB)', '相对全参'))\nprint('%-28s %-14.1f %s' % ('全参微调 (Adam 混合精度)', gb(full), '1.00x'))\nprint('%-28s %-14.1f %.2fx' % ('LoRA (bf16)', gb(lora), gb(lora) / gb(full)))\nprint('%-28s %-14.1f %.2fx' % ('QLoRA (NF4 冻结权重)', gb(qlora), gb(qlora) / gb(full)))\nprint()\nprint('构成拆解 (全参):')\nprint('  fp16 权重      = %.1f GB' % gb(P * 2))\nprint('  fp16 梯度      = %.1f GB' % gb(P * 2))\nprint('  fp32 master    = %.1f GB' % gb(P * 4))\nprint('  Adam m, v      = %.1f GB' % gb(P * 8))\nprint()\nprint('说明: 优化器状态与梯度是大头; LoRA 冻结主干后只保留极小可训练集, 显存骤降')\n"
+}

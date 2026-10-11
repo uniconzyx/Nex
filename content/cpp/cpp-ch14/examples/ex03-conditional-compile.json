@@ -1,0 +1,8 @@
+{
+  "title": "条件编译开关（#if / #elif / #else）",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "mode2",
+  "code": "#include <iostream>\n#define MODE 2\nint main() {\n#if MODE == 1\n    std::cout << \"mode1\\n\";\n#elif MODE == 2\n    std::cout << \"mode2\\n\";\n#else\n    std::cout << \"other\\n\";\n#endif\n}"
+}

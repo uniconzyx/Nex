@@ -1,0 +1,8 @@
+{
+  "title": "find / find_if：查找元素与返回 end 的边界",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "found 4 at idx 2\nfind 7 -> end\nfirst >5 = 9\n",
+  "code": "#include <iostream>\n#include <vector>\n#include <algorithm>\nint main() {\n    std::vector<int> v = {3,1,4,1,5,9};\n    auto it = std::find(v.begin(), v.end(), 4);\n    if (it != v.end()) std::cout << \"found \" << *it << \" at idx \" << (it - v.begin()) << '\\n';\n    else std::cout << \"not found\\n\";\n    auto it2 = std::find(v.begin(), v.end(), 7);\n    std::cout << \"find 7 -> \" << (it2 == v.end() ? \"end\" : \"hit\") << '\\n';\n    auto p = std::find_if(v.begin(), v.end(), [](int x){ return x > 5; });\n    std::cout << \"first >5 = \" << (p != v.end() ? std::to_string(*p) : \"none\") << '\\n';\n}\n"
+}

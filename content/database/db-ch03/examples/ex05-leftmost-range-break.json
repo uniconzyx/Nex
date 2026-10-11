@@ -1,0 +1,9 @@
+{
+  "title": "范围查询截断后续列：a=等值 + b>范围 时 c 不能用于索引定位",
+  "code_lang": "sql",
+  "code_std": "mysql8",
+  "stdin": "",
+  "expected_output": "Query OK, 0 rows affected\nQuery OK, 4 rows affected\nQuery OK, 0 rows affected\nid|select_type|table|type|possible_keys|key|key_len|ref|rows|Extra\n1|SIMPLE|t|range|idx_abc|idx_abc|10|NULL|2|Using index condition",
+  "code": "CREATE TABLE t (a INT, b INT, c INT);\nINSERT INTO t VALUES (1,5,1),(1,15,5),(1,20,9),(2,10,3);\nCREATE INDEX idx_abc ON t(a, b, c);\nEXPLAIN SELECT * FROM t WHERE a = 1 AND b > 10 AND c = 5;",
+  "_verified": false
+}

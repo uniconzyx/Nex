@@ -1,0 +1,8 @@
+{
+  "title": "装饰器原理：基于闭包包装函数",
+  "code_lang": "python",
+  "code_std": "python3.11",
+  "stdin": "",
+  "expected_output": "call double((5,), {})\n-> 10\ncall double((10,), {})\n-> 20",
+  "code": "def trace(fn):\n    def wrapper(*args, **kwargs):\n        print(f\"call {fn.__name__}({args}, {kwargs})\")\n        result = fn(*args, **kwargs)\n        print(f\"-> {result}\")\n        return result\n    return wrapper\n\n@trace\ndef double(x):\n    return x * 2\n\ndouble(5)\ndouble(10)"
+}

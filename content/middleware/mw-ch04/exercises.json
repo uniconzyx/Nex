@@ -1,0 +1,213 @@
+{
+  "meta": {
+    "chapter": "mw-ch04",
+    "note": "缓存设计与三大经典问题练习：基础题考察穿透/击穿/雪崩的成因与防护、布隆过滤器误判率、一致性更新顺序；算法题来自刷题平台（仅存元数据+链接，不搬运题面）。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "缓存穿透的成因与布隆过滤器的定位",
+      "content_md": "关于缓存穿透与布隆过滤器，下列说法正确的是？\n\nA. 布隆过滤器能确定某 key「一定存在」，可完全替代数据库查询\nB. 布隆过滤器判定「不存在」时一定不存在（无假阴性）；判定「存在」时可能不存在（有假阳性）\nC. 布隆过滤器支持直接删除元素，删除后不影响其他元素的判定\nD. 缓存穿透只能用布隆过滤器解决，缓存空值没有意义",
+      "options": [
+        {
+          "key": "A",
+          "text": "布隆能确定一定存在"
+        },
+        {
+          "key": "B",
+          "text": "无假阴性、有假阳性"
+        },
+        {
+          "key": "C",
+          "text": "支持直接删除"
+        },
+        {
+          "key": "D",
+          "text": "只能用布隆，空值无意义"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "布隆过滤器的 bit 由多个元素共享：某元素插入过的所有 bit 都为 1 才判「可能存在」，因此不存在假阴性（漏判），但存在假阳性（误判）。bit 共享也导致无法直接删除（清零会影响他元素），需 Counting Bloom Filter。缓存空值（短 TTL）是对穿透的有效兜底，二者常组合使用。",
+      "tags": [
+        "cache",
+        "bloom-filter",
+        "penetration"
+      ],
+      "source": "self",
+      "source_ref": "mw-ch04 concept/01 缓存穿透"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "缓存击穿与缓存雪崩的区别",
+      "content_md": "关于击穿与雪崩，下列判断正确的是？\n\nA. 击穿是「大量不同 key 同时失效」，雪崩是「单个热点 key 失效」\nB. 击穿是「单个热点 key 失效后高并发全部回源」，雪崩是「大批 key 在同一时刻集体失效」\nC. 雪崩只能通过加锁解决，与 TTL 设置无关\nD. 逻辑过期（异步重建）只能用于雪崩，不能用于击穿",
+      "options": [
+        {
+          "key": "A",
+          "text": "击穿是大量 key 同时失效"
+        },
+        {
+          "key": "B",
+          "text": "击穿=单 key 热点；雪崩=大批 key 集体失效"
+        },
+        {
+          "key": "C",
+          "text": "雪崩只能加锁，与 TTL 无关"
+        },
+        {
+          "key": "D",
+          "text": "逻辑过期只能用于雪崩"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "击穿（breakdown / hot-key invalid）指单个被高频访问的热点 key 过期，瞬间大量请求同时回源；雪崩（avalanche）指大批 key 因统一 TTL 在同一时刻集体失效，DB 被整体打垮。雪崩的正解是 TTL 加随机抖动摊平失效 + 多级缓存 + 熔断降级，加锁并不对症；逻辑过期正是击穿的典型解法之一（不阻塞请求、异步重建）。",
+      "tags": [
+        "cache",
+        "breakdown",
+        "avalanche"
+      ],
+      "source": "self",
+      "source_ref": "mw-ch04 concept/02 击穿与雪崩"
+    },
+    {
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "实现布隆过滤器并计算误判率",
+      "content_md": "用 Python 实现一个布隆过滤器：`BloomFilter(m_bits, k)`，提供 `add(key)` 与 `contains(key)`。\n\n要求：\n1. 用 `zlib.crc32` 派生 k 个哈希（禁止用内置 `hash()`，因其受 PYTHONHASHSEED 随机化影响，结果不可复现）；\n2. 插入 n=1000 个元素后，用另外 1000 个**从未插入**的元素测误判率；\n3. 打印理论误判率 `(1 - e^{-kn/m})^k` 与实测误判率，并验证二者接近。\n\n禁止把墙钟耗时写进输出。",
+      "answer": {
+        "reference_code": "",
+        "output": "理论误判率与实测误判率数量级一致（相差不超过一个数量级）即可通过。"
+      },
+      "explanation": "误判率随 m 增大而降低、随 n 增大而升高；k 存在最优值 k_opt = (m/n)·ln2，k 过大反而升高误判（每个元素置更多 bit，碰撞更快）。哈希必须用确定性算法（crc32 / murmur），内置 hash() 在 PYTHONHASHSEED 随机化下每次进程结果不同，会导致输出不可复现。",
+      "tags": [
+        "bloom-filter",
+        "false-positive",
+        "crc32"
+      ],
+      "source": "self",
+      "source_ref": "mw-ch04 examples/ex01 ex02"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "hard",
+      "title": "Cache-Aside 两种写顺序的脏数据风险",
+      "content_md": "一次写操作要「更新数据库 + 删除缓存」，一次并发读要「读缓存(miss) → 读库 → 回填缓存」。\n\n请分别枚举「先删缓存后更新库」与「先更新库后删缓存」两种顺序下，写线程 2 个步骤与读线程 3 个步骤的**所有合法交错**（保持各线程内部顺序不变），并统计每种顺序下会产生「缓存与库不一致」的交错数量与占比。\n\n问：哪种顺序的脏数据窗口更小？延迟双删为什么能进一步降低风险？",
+      "answer": {
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "「先删缓存后更新库」的脏窗口大：删缓存后到更新库之间，读线程极易 miss 读到旧值并回填，随后写线程才更新库 → 缓存长期是旧值。「先更新库后删缓存」只有在「读线程恰好在写线程更新库之前读完旧值、且在删缓存之后才回填」这一极窄窗口才脏。延迟双删（更新库 → 删缓存 → 延迟 → 再删）用于清除那次迟到的旧值回填，延迟取「读库+回填」的经验上限。",
+      "tags": [
+        "cache-aside",
+        "consistency",
+        "interleaving"
+      ],
+      "source": "self",
+      "source_ref": "mw-ch04 examples/ex09 ex10"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "三种更新策略的一致性取舍",
+      "content_md": "关于 Write-Through / Write-Behind / Cache-Aside，下列说法正确的是？\n\nA. Write-Behind 是强一致策略，崩溃不丢数据\nB. Write-Through 同步写缓存与库，一致性最好但写延迟高\nC. Cache-Aside 由调用方维护缓存，写时通常「更新缓存」而非「删除缓存」\nD. 三种策略对写延迟的影响相同",
+      "options": [
+        {
+          "key": "A",
+          "text": "Write-Behind 强一致"
+        },
+        {
+          "key": "B",
+          "text": "Write-Through 一致性最好但写延迟高"
+        },
+        {
+          "key": "C",
+          "text": "Cache-Aside 写时更新缓存"
+        },
+        {
+          "key": "D",
+          "text": "三者写延迟相同"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "Write-Through 同步双写缓存与库，一致性最强但每次写都要落库、延迟高；Write-Behind 先写缓存、异步批量刷盘，吞吐最高但崩溃会丢未刷盘的写，只适合可重建的计数类数据；Cache-Aside 由应用层维护，写时推荐「删除缓存」而非「更新缓存」——更新缓存在并发写下会产生乱序覆盖，且可能写进很少被读的冷数据。",
+      "tags": [
+        "write-through",
+        "write-behind",
+        "cache-aside"
+      ],
+      "source": "self",
+      "source_ref": "mw-ch04 concept/03 一致性"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "easy",
+      "title": "LRU 缓存（平台题，仅元数据）",
+      "content_md": "设计和实现一个满足 LRU（最近最少使用）缓存约束的数据结构。请只阅读原题后在平台提交：本题只登记元数据与链接，不搬运题面。\n\n能力点：哈希表 + 双向链表，O(1) 的 get/put；与本章「缓存淘汰策略」直接对应。",
+      "answer": {
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "LRU 的工程落地要点：HashMap 定位 + 双向链表维护访问序，get 命中后移到头部，put 超容量淘汰尾部。Redis 的 maxmemory-policy=allkeys-lru 是**近似** LRU（随机采样 N 个 key 淘汰最久未用的），用采样换取内存与 CPU，并非严格 LRU。",
+      "tags": [
+        "lru",
+        "cache",
+        "design"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 146 · LRU Cache",
+      "external_url": "https://leetcode.cn/problems/lru-cache/"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "nowcoder",
+      "difficulty": "medium",
+      "title": "设计 LFU 缓存（平台题，仅元数据）",
+      "content_md": "为 LFU（最不经常使用）缓存设计并实现数据结构，get/put 均摊 O(1)。请只阅读原题后在平台提交：本题只登记元数据与链接，不搬运题面。\n\n能力点：频次分桶 + 双向链表；与本章「LRU/LFU 近似淘汰」对应。",
+      "answer": {
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "LFU 实现：HashMap<key, Node> + HashMap<freq, DoublyLinkedList> + minFreq 指针。Redis 的 LFU 用 24 位字段存「8 位对数访问计数 + 16 位衰减时间」，计数按概率增长并随时间衰减，因此能适应访问模式变化。",
+      "tags": [
+        "lfu",
+        "cache",
+        "design"
+      ],
+      "source": "nowcoder",
+      "source_ref": "牛客 · LFU 缓存结构设计",
+      "external_url": "https://www.nowcoder.com/practice/93aacb4a887b46d897b00823d30bfea1"
+    }
+  ]
+}

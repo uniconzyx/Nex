@@ -1,0 +1,8 @@
+{
+  "title": "用事件而非时间判定 Future 完成",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "未放开 gate 时已完成数: 1\n未放开 gate 时挂起数: 2\n放开 gate 后已完成数: 2\n放开 gate 后挂起数: 0\n全部结果: ['fast', 'slow', 'slow2']\n无任务被丢弃: True",
+  "code": "import threading\nimport time\nfrom concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED\n\n\n# wait() 用「事件」而不是「时间」做判据，\n# 因此结果确定：哪个 future 先被 set，哪个就先完成。\n\ngate = threading.Event()\nresults = {}\n\n\ndef blocking(name, wait_for_gate):\n    if wait_for_gate:\n        gate.wait(timeout=5)\n    results[name] = \"done\"\n    return name\n\n\nwith ThreadPoolExecutor(max_workers=3) as pool:\n    f_fast = pool.submit(blocking, \"fast\", False)\n    f_slow = pool.submit(blocking, \"slow\", True)\n    f_slow2 = pool.submit(blocking, \"slow2\", True)\n\n    # 立刻检查：fast 应已完成，两个 slow 仍在等 gate\n    done, pending = wait([f_fast, f_slow, f_slow2], timeout=0)\n    print(\"未放开 gate 时已完成数:\", len(done))\n    print(\"未放开 gate 时挂起数:\", len(pending))\n\n    gate.set()                                  # 放开闸门\n    done2, pending2 = wait([f_slow, f_slow2], timeout=5)\n    print(\"放开 gate 后已完成数:\", len(done2))\n    print(\"放开 gate 后挂起数:\", len(pending2))\n\nprint(\"全部结果:\", sorted(results))\nprint(\"无任务被丢弃:\", len(results) == 3)\n"
+}

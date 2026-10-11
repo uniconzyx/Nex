@@ -1,0 +1,8 @@
+{
+  "title": "CGLIB 子类代理原理（继承 + 方法覆写模拟）",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "[cglib before]\n[cglib after]\nhello bob\nproxy is subclass of Target: true\nproxy class name: Target_Enhancer\n",
+  "code": "interface Interceptor { void before(); void after(); }\nclass LogInterceptor implements Interceptor {\n    public void before() { System.out.println(\"[cglib before]\"); }\n    public void after() { System.out.println(\"[cglib after]\"); }\n}\n// 被代理的目标类（无需接口 —— CGLIB 直接代理类）\nclass Target {\n    public String hello(String name) { return \"hello \" + name; }\n}\n// 模拟 CGLIB 增强器：生成目标类的【子类】并重写方法，在 super 调用前后织入通知\nclass Target_Enhancer extends Target {\n    private Interceptor ic;\n    Target_Enhancer(Interceptor ic) { this.ic = ic; }\n    @Override public String hello(String name) {\n        ic.before();\n        String r = super.hello(name);\n        ic.after();\n        return r;\n    }\n}\npublic class Main {\n    public static void main(String[] a) {\n        Target proxy = new Target_Enhancer(new LogInterceptor());\n        System.out.println(proxy.hello(\"bob\"));\n        System.out.println(\"proxy is subclass of Target: \" + (proxy instanceof Target));\n        System.out.println(\"proxy class name: \" + proxy.getClass().getSimpleName());\n    }\n}\n"
+}

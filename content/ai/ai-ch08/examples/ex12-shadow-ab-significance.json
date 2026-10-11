@@ -1,0 +1,8 @@
+{
+  "title": "影子模式与 A/B 的显著性判断（两比例 z 检验）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "== 场景A: 样本充足, 差异明显 ==\n对照转化率=0.0400 实验转化率=0.0470 z=2.4266 p=0.015242\n显著(p<0.05): True\n== 场景B: 差异小, 不显著 ==\n对照转化率=0.0400 实验转化率=0.0412 z=0.4299 p=0.667243\n显著(p<0.05): False\n== 场景C: 样本过小, 谨慎下线 ==\n对照转化率=0.0800 实验转化率=0.1500 z=1.5515 p=0.120773\n显著(p<0.05): False\n小样本显著需延长观测或改用贝叶斯估计: True\n",
+  "code": "\"\"\"线上评测: 对照组 vs 实验组的转化率差异是否显著(z 检验)。\"\"\"\nimport math\n\ndef z_test(x1, n1, x2, n2):\n    p1, p2 = x1 / n1, x2 / n2\n    p = (x1 + x2) / (n1 + n2)\n    se = math.sqrt(p * (1 - p) * (1 / n1 + 1 / n2))\n    z = (p2 - p1) / se if se > 0 else 0.0\n    pval = 2 * (1 - 0.5 * (1 + math.erf(abs(z) / math.sqrt(2))))\n    return p1, p2, z, pval\n\nprint(\"== 场景A: 样本充足, 差异明显 ==\")\np1, p2, z, pv = z_test(x1=400, n1=10000, x2=470, n2=10000)\nprint(\"对照转化率=%.4f 实验转化率=%.4f z=%.4f p=%.6f\" % (p1, p2, z, pv))\nprint(\"显著(p<0.05):\", pv < 0.05)\n\nprint(\"== 场景B: 差异小, 不显著 ==\")\np1, p2, z, pv = z_test(x1=400, n1=10000, x2=412, n2=10000)\nprint(\"对照转化率=%.4f 实验转化率=%.4f z=%.4f p=%.6f\" % (p1, p2, z, pv))\nprint(\"显著(p<0.05):\", pv < 0.05)\n\nprint(\"== 场景C: 样本过小, 谨慎下线 ==\")\np1, p2, z, pv = z_test(x1=8, n1=100, x2=15, n2=100)\nprint(\"对照转化率=%.4f 实验转化率=%.4f z=%.4f p=%.6f\" % (p1, p2, z, pv))\nprint(\"显著(p<0.05):\", pv < 0.05)\nprint(\"小样本显著需延长观测或改用贝叶斯估计: True\")\n"
+}

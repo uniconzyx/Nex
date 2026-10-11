@@ -1,0 +1,8 @@
+{
+  "title": "async/await 的 try/catch/finally 错误处理",
+  "code_lang": "javascript",
+  "code_std": "node22",
+  "stdin": "",
+  "expected_output": "await ok: 42\ncaught: boom\nfinally ran",
+  "code": "async function ok() { return 42; }\nasync function fail() { throw new Error('boom'); }\nasync function main() {\n  try {\n    var v = await ok();\n    console.log('await ok:', v);\n    await fail();\n  } catch (e) {\n    console.log('caught:', e.message);\n  } finally {\n    console.log('finally ran');\n  }\n}\nmain();"
+}

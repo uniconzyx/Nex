@@ -1,0 +1,8 @@
+{
+  "title": "逐字段拆解 `ls -l` 的一行：每个位置是什么含义",
+  "code_lang": "bash",
+  "code_std": "bash5",
+  "stdin": "",
+  "expected_output": "原始行          : -rw-r--r-- 2 alice devs 4096 Oct  7 19:30 report.txt\n\n① 类型 + 权限串 : -rw-r--r--\n     类型字符   : -      (- 普通文件 / d 目录 / l 符号链接)\n     属主 rwx   : rw-\n     属组 rwx   : r--\n     其他 rwx   : r--\n     八进制     : 644\n\n② 硬链接计数   : 2  (i_nlink；>1 表示该 inode 有多个名字)\n③ 属主         : alice\n④ 属组         : devs\n⑤ 字节大小     : 4096  (inode.i_size，与占用块数不成正比)\n⑥ 最近修改时间 : Oct 7 19:30\n⑦ 文件名       : report.txt  (★ 文件名不在 inode 里，只存在于目录中)",
+  "code": "#!/bin/bash\n# 用固定样本行拆解 ls -l 输出，避免依赖真实文件系统的随机状态（保证输出可复现）\nSAMPLE='-rw-r--r-- 2 alice devs 4096 Oct  7 19:30 report.txt'\n\necho \"$SAMPLE\" | awk '{\n  printf \"原始行          : %s\\n\", $0\n  printf \"\\n① 类型 + 权限串 : %s\\n\", $1\n  printf \"     类型字符   : %s      (- 普通文件 / d 目录 / l 符号链接)\\n\", substr($1,1,1)\n  printf \"     属主 rwx   : %s\\n\", substr($1,2,3)\n  printf \"     属组 rwx   : %s\\n\", substr($1,5,3)\n  printf \"     其他 rwx   : %s\\n\", substr($1,8,3)\n  printf \"     八进制     : %d%d%d\\n\", \\\n     (substr($1,2,1)!=\"-\")*4+(substr($1,3,1)!=\"-\")*2+(substr($1,4,1)!=\"-\")*1, \\\n     (substr($1,5,1)!=\"-\")*4+(substr($1,6,1)!=\"-\")*2+(substr($1,7,1)!=\"-\")*1, \\\n     (substr($1,8,1)!=\"-\")*4+(substr($1,9,1)!=\"-\")*2+(substr($1,10,1)!=\"-\")*1\n  printf \"\\n② 硬链接计数   : %s  (i_nlink；>1 表示该 inode 有多个名字)\\n\", $2\n  printf \"③ 属主         : %s\\n\", $3\n  printf \"④ 属组         : %s\\n\", $4\n  printf \"⑤ 字节大小     : %s  (inode.i_size，与占用块数不成正比)\\n\", $5\n  printf \"⑥ 最近修改时间 : %s %s %s\\n\", $6, $7, $8\n  printf \"⑦ 文件名       : %s  (★ 文件名不在 inode 里，只存在于目录中)\\n\", $9\n}'\n"
+}

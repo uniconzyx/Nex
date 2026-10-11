@@ -1,0 +1,8 @@
+{
+  "title": "向量化 vs Python 循环：实测加速比（仅布尔判据）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "N = 2000000\n结果一致(循环 vs 向量化): True\n循环慢于向量化: True\n加速比 > 20 倍: True\n说明：绝对耗时随机器波动，此处不打印毫秒，只给布尔判据保证可复现。",
+  "code": "import time\nimport numpy as np\nN = 2_000_000\na = np.random.default_rng(0).random(N)\nb = np.random.default_rng(1).random(N)\nt0 = time.perf_counter()\ns_loop = 0.0\nfor i in range(N):\n    s_loop += a[i] * b[i]\nt_loop = time.perf_counter() - t0\nt0 = time.perf_counter()\ns_np = float(np.dot(a, b))\nt_np = time.perf_counter() - t0\nprint(\"N =\", N)\nprint(\"结果一致(循环 vs 向量化):\", abs(s_loop - s_np) < 1e-6)\nprint(\"循环慢于向量化:\", t_loop > t_np)\nprint(\"加速比 > 20 倍:\", t_loop / t_np > 20)\nprint(\"说明：绝对耗时随机器波动，此处不打印毫秒，只给布尔判据保证可复现。\")"
+}

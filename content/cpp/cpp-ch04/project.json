@@ -1,0 +1,14 @@
+{
+  "meta": { "chapter": "cpp-ch04", "category": "basic" },
+  "items": [
+    {
+      "title": "简易动态数组 MyVector",
+      "requirement_md": "用裸指针 + new[]/delete[] 实现一个简化版动态数组类：支持构造、push_back 动态扩容、下标访问、size()、析构释放。练习指针管理、扩容策略与析构防泄漏；进阶用 std::unique_ptr<T[]> 改写以消除手动 delete。",
+      "tasks": [
+        { "title": "实现构造/析构与 new[]/delete[] 配对", "verification": { "type": "test", "desc": "用 ASan 跑无泄漏报告" } },
+        { "title": "实现 push_back 扩容", "verification": { "type": "test", "desc": "超过容量后数据不丢、容量翻倍" } },
+        { "title": "用 unique_ptr 改写（进阶）", "verification": { "type": "manual", "desc": "等价功能且无需手写 delete" } }
+      ]
+    }
+  ]
+}

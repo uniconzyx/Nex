@@ -1,0 +1,8 @@
+{
+  "title": "content-box 与 border-box 的尺寸计算对比（可执行）",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "content-box: {\"boxSizing\":\"content-box\",\"content\":200,\"borderBox\":250,\"outerWithMargin\":270}\nborder-box : {\"boxSizing\":\"border-box\",\"content\":150,\"borderBox\":200,\"outerWithMargin\":220}",
+  "code": "function totalWidth(boxSizing, width, padding, border, margin) {\n  const pad = padding * 2, bd = border * 2, mg = margin * 2;\n  const borderBox = boxSizing === 'border-box' ? width : width + pad + bd;\n  const content = boxSizing === 'border-box' ? width - pad - bd : width;\n  return { boxSizing, content, borderBox, outerWithMargin: borderBox + mg };\n}\nconsole.log('content-box:', JSON.stringify(totalWidth('content-box', 200, 20, 5, 10)));\nconsole.log('border-box :', JSON.stringify(totalWidth('border-box', 200, 20, 5, 10)));"
+}

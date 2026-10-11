@@ -1,0 +1,8 @@
+{
+  "title": "ostringstream 内存格式化与复用",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "score=95 name=bob\nreused=7",
+  "code": "#include <iostream>\n#include <sstream>\nint main() {\n    std::ostringstream oss;\n    oss << \"score=\" << 95 << \" name=\" << \"bob\";\n    std::cout << oss.str() << '\\n';\n    oss.str(\"\"); oss.clear();        // 复用：清内容 + 清状态\n    oss << \"reused=\" << 7;\n    std::cout << oss.str() << '\\n';\n}"
+}

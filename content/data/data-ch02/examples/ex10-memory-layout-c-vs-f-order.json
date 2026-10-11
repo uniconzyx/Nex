@@ -1,0 +1,8 @@
+{
+  "title": "内存布局：C/F order 与 transpose 连续性",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "a C-contiguous = True\na.T F-contiguous = True\na.T C-contiguous = False\nf F-contiguous = True\nf strides = (8, 24)\nC order flatten = [0, 1, 2, 3, 4, 5]\nF order flatten = [0, 2, 4, 1, 3, 5]",
+  "code": "import numpy as np\na = np.arange(12, dtype=np.int64).reshape(3, 4)\nprint(\"a C-contiguous =\", bool(a.flags['C_CONTIGUOUS']))\nt = a.T\nprint(\"a.T F-contiguous =\", bool(t.flags['F_CONTIGUOUS']))\nprint(\"a.T C-contiguous =\", bool(t.flags['C_CONTIGUOUS']))\nf = np.asfortranarray(a)\nprint(\"f F-contiguous =\", bool(f.flags['F_CONTIGUOUS']))\nprint(\"f strides =\", f.strides)\nc_order = np.reshape(np.arange(6), (2, 3), order='C')\nf_order = np.reshape(np.arange(6), (2, 3), order='F')\nprint(\"C order flatten =\", c_order.flatten().tolist())\nprint(\"F order flatten =\", f_order.flatten().tolist())"
+}

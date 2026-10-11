@@ -1,0 +1,67 @@
+{
+  "meta": {
+    "chapter": "java-ch04"
+  },
+  "items": [
+    {
+      "question": "ArrayList 和 LinkedList 区别？各自适合什么场景？为什么 LinkedList 随机访问慢？",
+      "answer_md": "ArrayList 底层是动态 Object[]，支持 O(1) 随机访问与尾部追加（均摊 O(1)），中间插入/删除需搬移元素 O(n)；扩容触发数组拷贝。LinkedList 是双向链表，插入/删除节点本身 O(1)（已知节点时），但随机访问 get(i) 要沿指针走 i 步 O(n)，且节点分散在堆上、缓存局部性差。结论：读多写少、尤其随机读用 ArrayList；频繁在两端插入删除且很少随机下标访问才考虑 LinkedList。JDK 源码里 LinkedList 的 get 也是从头/尾遍历。",
+      "follow_ups": [
+        "LinkedList 的遍历为什么对 CPU 缓存不友好？",
+        "ArrayList 1.5 倍扩容的数学依据？为什么不是 2 倍？",
+        "什么情况下 LinkedList 反而比 ArrayList 慢得离谱？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "美团",
+        "阿里"
+      ]
+    },
+    {
+      "question": "HashMap 的 put 流程、哈希扰动、树化阈值与扩容 rehash 说一下。",
+      "answer_md": "JDK 8 的 put：先对 key.hashCode() 做扰动（(h = key.hashCode()) ^ (h >>> 16)，高 16 位异或低 16 位，让高位也参与索引计算）得到 hash；索引 i = (n-1) & hash（n 为 2 的幂，等价于取模且更快）。桶为空直接放 Node；冲突时若已是红黑树则按树插入，否则遍历链表，key 相同则替换，否则尾插到链表尾；插入后若链表长度 ≥ 8 且 table.length ≥ 64 则树化为 TreeNode（否则优先扩容）；put 返回被替换的旧值或 null。扩容：容量翻倍，重新分配 table，节点 rehash 到新桶——JDK 8 利用容量 2 倍的特性，每个节点要么留在原位置，要么移动到原位置+oldCap，避免了 1.7 整体 rehash 的开销，并用尾插法消除并发成环隐患。",
+      "follow_ups": [
+        "为什么容量必须是 2 的幂？",
+        "负载因子 0.75 是怎么来的？",
+        "为什么树化阈值是 8、退化是 6（有滞后）？",
+        "HashMap 为什么线程不安全、ConcurrentHashMap 怎么解决？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "通用",
+        "字节",
+        "腾讯"
+      ]
+    },
+    {
+      "question": "为什么重写 equals 必须重写 hashCode？把可变对象作为 HashMap 的键有什么坑？",
+      "answer_md": "契约规定相等对象必须有相等哈希码。HashMap 先 hashCode 定位桶再 equals 比对；只重写 equals 不重写 hashCode 会让逻辑相等的键落到不同桶，导致查不到。坑在可变键：把对象放入集合后若修改了参与 hashCode 的字段，其桶位置随之改变，之后 containsKey/get 按新哈希找桶，自然找不到旧位置的对象——数据「凭空消失」。因此键应当是不可变的（用 String、Integer、record 或显式 final 字段）。",
+      "follow_ups": [
+        "String 为什么适合做键？",
+        "用 record 做键还要注意什么？",
+        "equals 里用浮点字段怎么比较才安全？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "京东",
+        "拼多多"
+      ]
+    },
+    {
+      "question": "fail-fast 是什么？迭代集合时删除元素的安全写法有哪些？",
+      "answer_md": "fail-fast 是 Java 集合迭代器的快速失败机制：迭代器创建时记录 expectedModCount = modCount，每次 next()/remove() 都检查二者是否一致，发现结构性修改（add/remove/clear 等，set 不算）就抛 ConcurrentModificationException，避免在不一致状态下继续产生不可预期结果。安全删除写法：① 用 iterator.remove()（它同步更新 expectedModCount）；② Java 8+ 用 removeIf；③ 收集待删元素后批量 removeAll；④ 需要并发修改则用 CopyOnWriteArrayList 或并发容器。",
+      "follow_ups": [
+        "fail-fast 能保证线程安全吗？",
+        "CopyOnWriteArrayList 的实现代价是什么？",
+        "forEachRemaining 与 CME 的关系？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "蚂蚁"
+      ]
+    }
+  ]
+}

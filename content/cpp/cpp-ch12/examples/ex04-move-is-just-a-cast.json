@@ -1,0 +1,8 @@
+{
+  "title": "std::move 只是类型转换，不搬运任何数据",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "move 前: s = \"hello, cppmind\", size=14\nmove 后: t = \"hello, cppmind\"\nmove 后: s.size() = 0  （被移动对象处于「有效但未指定」状态）\n重新赋值后: s = \"reused\"，说明它仍然有效\n结论: std::move 一行数据都不会搬，它只把左值转成右值引用",
+  "code": "#include <iostream>\n#include <string>\n#include <utility>\nusing namespace std;\n\nint main() {\n    string s = \"hello, cppmind\";\n    cout << \"move 前: s = \\\"\" << s << \"\\\", size=\" << s.size() << \"\\n\";\n\n    string t = std::move(s);   // std::move 本身只做 cast；搬数据的是移动构造函数\n\n    cout << \"move 后: t = \\\"\" << t << \"\\\"\\n\";\n    cout << \"move 后: s.size() = \" << s.size()\n         << \"  （被移动对象处于「有效但未指定」状态）\\n\";\n\n    s = \"reused\";\n    cout << \"重新赋值后: s = \\\"\" << s << \"\\\"，说明它仍然有效\\n\";\n    cout << \"结论: std::move 一行数据都不会搬，它只把左值转成右值引用\\n\";\n}"
+}

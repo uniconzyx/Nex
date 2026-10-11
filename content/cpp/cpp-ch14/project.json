@@ -1,0 +1,14 @@
+{
+  "meta": { "chapter": "cpp-ch14", "category": "basic" },
+  "items": [
+    {
+      "title": "可配置的日志模块（宏 + 条件编译）",
+      "requirement_md": "用宏与条件编译实现一个轻量日志模块 `log.h`/`log.cpp`：\n1. 提供 `LOG(level, stream_expr)` 宏，自动携带 `__FILE__`/`__LINE__`，并用 `do{}while(0)` 包裹以支持 `if/else`。\n2. 用条件编译提供日志级别开关：定义 `LOG_LEVEL` 宏（DEBUG/INFO/WARN/ERROR），低于当前级别的日志在**编译期**被剔除（用 `#if`/`#ifdef` 控制），而非运行期判断。\n3. 提供 `NDEBUG` 下的发布裁剪：定义 `NDEBUG` 时关闭 DEBUG 级别日志。\n4. 日志宏不直接展开出问题（注意多语句卫生、避免头文件 `using namespace`）。\n要求自测：用不同 `LOG_LEVEL` 与是否定义 `NDEBUG` 编译两次，确认低级别日志确实未进入二进制（可用输出或条件分支验证）。",
+      "tasks": [
+        { "title": "实现位置感知日志宏", "verification": { "type": "test", "desc": "LOG 输出包含文件名与行号，且可在 if/else 中安全使用" } },
+        { "title": "实现编译期级别开关", "verification": { "type": "test", "desc": "用 #if 控制级别，低于阈值的日志不生成代码（改 LOG_LEVEL 后观察输出变化）" } },
+        { "title": "NDEBUG 发布裁剪", "verification": { "type": "manual", "desc": "定义 NDEBUG 后 DEBUG 日志被剔除，编译通过且输出符合预期" } }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "title": "list 中间插入/删除：O(1) 且不使其他迭代器失效",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "1 9 3 \nsize=3\n",
+  "code": "#include <iostream>\n#include <list>\nint main() {\n    std::list<int> l = {1, 2, 3};\n    auto it = std::next(l.begin());   // 指向 2\n    l.insert(it, 9);                   // 在 2 前插入 9 -> {1,9,2,3}\n    l.erase(std::next(l.begin(), 2));  // 删除下标定 2 的元素（值为 2）\n    for (int x : l) std::cout << x << ' ';\n    std::cout << '\\n';\n    std::cout << \"size=\" << l.size() << '\\n';\n}\n"
+}

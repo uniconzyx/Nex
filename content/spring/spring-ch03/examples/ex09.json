@@ -1,0 +1,8 @@
+{
+  "title": "代理失效：同类内部方法调用不走代理",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "--- external call to a() ---\n[advice] before a\n  [a] call b() internally\n  [b] business logic\n[advice] after a\n--- external call to b() ---\n[advice] before b\n  [b] business logic\n[advice] after b\n",
+  "code": "import java.lang.reflect.*;\n\ninterface Biz { void a(); void b(); }\nclass BizImpl implements Biz {\n    public void a() { System.out.println(\"  [a] call b() internally\"); b(); }\n    public void b() { System.out.println(\"  [b] business logic\"); }\n}\nclass H implements InvocationHandler {\n    Object target;\n    H(Object t) { target = t; }\n    public Object invoke(Object p, Method m, Object[] args) throws Throwable {\n        System.out.println(\"[advice] before \" + m.getName());\n        Object r = m.invoke(target, args);\n        System.out.println(\"[advice] after \" + m.getName());\n        return r;\n    }\n}\npublic class Main {\n    public static void main(String[] a) throws Exception {\n        Biz proxy = (Biz) Proxy.newProxyInstance(Biz.class.getClassLoader(),\n            new Class[]{Biz.class}, new H(new BizImpl()));\n        System.out.println(\"--- external call to a() ---\");\n        proxy.a();\n        System.out.println(\"--- external call to b() ---\");\n        proxy.b();\n    }\n}\n"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "浏览器渲染管线阶段顺序（可执行模拟）",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "== 渲染管线 ==\n1. Parse HTML -> DOM\n2. Parse CSS -> CSSOM\n3. Recalculate Style (DOM + CSSOM -> Render Tree)\n4. Layout / Reflow (计算几何位置)\n5. Paint (生成绘制指令)\n6. Composite (分层合成，GPU)\nJS 在主线程执行，过长任务会阻塞 Layout/Paint -> 掉帧\n优化：只改 transform/opacity 可跳过 Layout 与 Paint，只走 Composite",
+  "code": "const stages = [\n  '1. Parse HTML -> DOM',\n  '2. Parse CSS -> CSSOM',\n  '3. Recalculate Style (DOM + CSSOM -> Render Tree)',\n  '4. Layout / Reflow (计算几何位置)',\n  '5. Paint (生成绘制指令)',\n  '6. Composite (分层合成，GPU)'\n];\nconsole.log('== 渲染管线 ==');\nfor (const s of stages) console.log(s);\nconsole.log('JS 在主线程执行，过长任务会阻塞 Layout/Paint -> 掉帧');\nconsole.log('优化：只改 transform/opacity 可跳过 Layout 与 Paint，只走 Composite');"
+}

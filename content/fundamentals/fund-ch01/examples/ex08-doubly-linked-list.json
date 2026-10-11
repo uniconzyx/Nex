@@ -1,0 +1,8 @@
+{
+  "title": "双链表：O(1) 摘除已知节点的实现",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "正向: 10 <-> 20 <-> 30 <-> 40\n正向: 10 <-> 30 <-> 40\n摘除任意已知节点都是 O(1)：只需改 prev/next 两个指针",
+  "code": "#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct DNode { int data; struct DNode *prev, *next; } DNode;\n\nDNode *push_back(DNode *head, int v, DNode **tail_out) {\n    DNode *n = malloc(sizeof(DNode));\n    n->data = v; n->next = NULL;\n    if (!head) { n->prev = NULL; *tail_out = n; return n; }\n    DNode *t = *tail_out;\n    t->next = n; n->prev = t; *tail_out = n;\n    return head;\n}\n\n/* 核心：已知节点指针即可 O(1) 摘除（这是单链表做不到的） */\nvoid unlink_node(DNode **head, DNode **tail, DNode *target) {\n    if (target->prev) target->prev->next = target->next;\n    else *head = target->next;                 /* 是头节点 */\n    if (target->next) target->next->prev = target->prev;\n    else *tail = target->prev;                 /* 是尾节点 */\n    free(target);\n}\n\nvoid print_list(DNode *h) {\n    printf(\"正向: \");\n    for (DNode *p = h; p; p = p->next) printf(\"%d%s\", p->data, p->next ? \" <-> \" : \"\");\n    printf(\"\\n\");\n}\n\nint main(void) {\n    DNode *head = NULL, *tail = NULL;\n    for (int i = 1; i <= 4; i++) head = push_back(head, i * 10, &tail);\n    print_list(head);\n    unlink_node(&head, &tail, head->next);      /* 摘除 20（已知指针） */\n    print_list(head);\n    printf(\"摘除任意已知节点都是 O(1)：只需改 prev/next 两个指针\\n\");\n    return 0;\n}"
+}

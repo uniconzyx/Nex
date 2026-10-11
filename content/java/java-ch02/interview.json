@@ -1,0 +1,40 @@
+{
+  "meta": { "chapter": "java-ch02" },
+  "items": [
+    {
+      "question": "Java 的对象是存在栈上还是堆上？对象头里到底有什么？压缩指针（Compressed Oops）是什么？",
+      "answer_md": "局部变量（引用）在栈上，真正的对象实例在堆上。每个对象开头有对象头：Mark Word（8 字节，存哈希码、GC 分代年龄、锁状态标志位等）与 Klass Pointer（指向元空间中的类元数据）。开启 Compressed Oops（默认）后对象引用与 Klass Pointer 占 4 字节，关闭（堆 > 32GB）后占 8 字节。对象大小还会按 8 字节对齐填充。",
+      "follow_ups": ["Mark Word 在偏向锁/轻量级锁/重量级锁下分别存什么？", "为什么空对象也至少占 16 字节？", "指针压缩为什么以 32GB 为界？"],
+      "difficulty": "mid",
+      "company_tags": ["通用", "阿里", "字节"]
+    },
+    {
+      "question": "Java 到底是值传递还是引用传递？为什么说\"对象参数传递\"容易让人误解？",
+      "answer_md": "Java 只有值传递。基本类型传的是值的副本；对象类型传的是\"引用的副本\"（一个地址拷贝），而非对象本身，也不是引用变量本身。因此方法内通过形参修改对象状态对调用方可见，但方法内让形参指向新对象（o = new X()）不会影响调用方的变量——这常被误称为\"引用传递\"，严格说不准确。",
+      "follow_ups": ["能不能写一个方法真正交换两个对象引用？为什么不能？", "数组作为参数时，修改元素和重指数组变量分别有什么效果？"],
+      "difficulty": "mid",
+      "company_tags": ["通用", "腾讯"]
+    },
+    {
+      "question": "为什么重写 equals 必须重写 hashCode？不写会怎样？",
+      "answer_md": "契约规定：相等的对象必须有相等的哈希码。HashMap 先按 hashCode 定位桶再用 equals 比对；若只重写 equals 不重写 hashCode，两个逻辑相等的对象会产生不同哈希码、落到不同桶，导致 get/contains 找不到已有元素（看似\"数据丢失\"）。反过来只重写 hashCode 不重写 equals 同样认不出相等。必须用同一组字段计算二者。",
+      "follow_ups": ["用可变字段参与 hashCode 会有什么坑？", "为什么 String 的 hashCode 用 31 做因子？", "用 record 还需要手动写吗？"],
+      "difficulty": "mid",
+      "company_tags": ["通用", "美团"]
+    },
+    {
+      "question": "封装到底解决了什么问题？private/protected/public 是运行期保护吗？",
+      "answer_md": "封装的本质是收窄对象的合法状态空间、把不变式的维护责任收归类型自身，而不是\"藏数据\"。访问控制（private/包/protected/public）是编译期的名字可见性规则，只影响能否通过名字访问，**不提供任何运行期保护**——反射可绕过。它是一条工程纪律，保证调用方只能通过你提供的受控方法改变状态。",
+      "follow_ups": ["protected 在不同包子类中到底怎么访问？", "为什么返回可变对象会破坏封装？", "record 与 JavaBean 在封装上的取舍？"],
+      "difficulty": "mid",
+      "company_tags": ["通用", "京东"]
+    },
+    {
+      "question": "Java 16+ 的 record 解决了什么痛点？和普通的 JavaBean 有什么区别？",
+      "answer_md": "record 是承载不可变纯数据载体的语法糖：编译器自动生成 private final 字段、基于全部组件的构造器、访问器（命名即组件名如 x()）、equals/hashCode/toString，且字段不可重新赋值。相比手写 JavaBean（private 字段 + getXxx/setXxx），record 消除了样板代码、默认满足等值/哈希契约、语义是不可变值对象，适合 DTO、返回值、集合元素。",
+      "follow_ups": ["record 能继承或被继承吗？", "record 里可以加自定义方法或可变字段吗？", "record 的序列化与 JavaBean 有何不同？"],
+      "difficulty": "easy",
+      "company_tags": ["通用", "上海"]
+    }
+  ]
+}

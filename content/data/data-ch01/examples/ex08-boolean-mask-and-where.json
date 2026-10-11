@@ -1,0 +1,8 @@
+{
+  "title": "布尔掩码与 np.where（含惰性陷阱）",
+  "code_lang": "python",
+  "code_std": "3.13",
+  "stdin": "",
+  "expected_output": "a = [-2 -1  0  1  2  3]\n\n组合掩码 (a>0) & (a<3) = [False False False  True  True False]\n筛选结果 a[mask]       = [1 2]\n\n用 and 组合 -> ValueError : The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()\n  数组真值未定义，必须用按位运算符 & | ~，且子表达式要加括号\n\n=== np.where 的两种用法 ===\nnp.where(cond)      -> (array([4, 5]),)  返回满足条件的下标元组\nnp.where(cond,x,y)  -> [ 0  0  0 10 20 30]  三元选择\n\n=== np.where 会被完全求值的陷阱 ===\nnp.where(y!=0, 1/y, 0) -> [1.  0.  0.5]  1/y 分支仍被求值（只是被抑制了警告）\nnp.divide(..., where=) -> [1.  0.  0.5]  只在不为 0 处计算，更安全",
+  "code": "import numpy as np\n\na = np.array([-2, -1, 0, 1, 2, 3])\nprint(\"a =\", a)\nprint()\n\nmask = (a > 0) & (a < 3)\nprint(\"组合掩码 (a>0) & (a<3) =\", mask)\nprint(\"筛选结果 a[mask]       =\", a[mask])\nprint()\n\ntry:\n    _ = (a > 0) and (a < 3)\nexcept ValueError as e:\n    print(\"用 and 组合 ->\", type(e).__name__, \":\", e)\n    print(\"  数组真值未定义，必须用按位运算符 & | ~，且子表达式要加括号\")\nprint()\n\nprint(\"=== np.where 的两种用法 ===\")\nprint(\"np.where(cond)      ->\", np.where(a > 1), \" 返回满足条件的下标元组\")\nprint(\"np.where(cond,x,y)  ->\", np.where(a > 0, a * 10, 0), \" 三元选择\")\nprint()\n\nprint(\"=== np.where 会被完全求值的陷阱 ===\")\ny = np.array([1.0, 0.0, 2.0])\nwith np.errstate(divide=\"ignore\", invalid=\"ignore\"):\n    naive = np.where(y != 0, 1.0 / y, 0.0)\nprint(\"np.where(y!=0, 1/y, 0) ->\", naive, \" 1/y 分支仍被求值（只是被抑制了警告）\")\nsafe = np.divide(1.0, y, out=np.zeros_like(y), where=y != 0)\nprint(\"np.divide(..., where=) ->\", safe, \" 只在不为 0 处计算，更安全\")\n"
+}

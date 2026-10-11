@@ -1,0 +1,8 @@
+{
+  "title": "哈希装填因子 alpha 对成功 ASL 的影响（线性探测模拟）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "alpha=0.248 (n=25/M=101)  成功查找平均探测 ASL=1.000  (理论 1/(1-a)=1.329)\nalpha=0.495 (n=50/M=101)  成功查找平均探测 ASL=1.000  (理论 1/(1-a)=1.980)\nalpha=0.743 (n=75/M=101)  成功查找平均探测 ASL=1.000  (理论 1/(1-a)=3.885)\nalpha=0.891 (n=90/M=101)  成功查找平均探测 ASL=1.000  (理论 1/(1-a)=9.182)",
+  "code": "#include <stdio.h>\n\n#define M 101\n\nint ht[M];\n\nint lcg(int *st) {\n    *st = ((*st) * 1103515245 + 12345) & 0x7fffffff;\n    return *st;\n}\n\nint main(void) {\n    int alpha_n[] = {25, 50, 75, 90};\n    int t, n, i, state, inserted, key, h0, j, c, total;\n    int nn = (int)(sizeof(alpha_n) / sizeof(alpha_n[0]));\n    for (t = 0; t < nn; t++) {\n        n = alpha_n[t];\n        for (i = 0; i < M; i++) ht[i] = -1;\n        state = 12345;\n        inserted = 0;\n        while (inserted < n) {\n            key = lcg(&state) % 1000;\n            h0 = key % M;\n            j = h0;\n            while (ht[j] != -1) { j = (j + 1) % M; }\n            ht[j] = key;\n            inserted++;\n        }\n        total = 0;\n        for (i = 0; i < M; i++) {\n            if (ht[i] == -1) continue;\n            key = ht[i];\n            h0 = key % M;\n            j = h0; c = 1;\n            while (ht[j] != -1 && ht[j] != key) { j = (j + 1) % M; c++; }\n            total += c;\n        }\n        {\n            double a = (double)n / (double)M;\n            double asl = (double)total / (double)n;\n            printf(\"alpha=%.3f (n=%d/M=%d)  成功查找平均探测 ASL=%.3f  (理论 1/(1-a)=%.3f)\\n\",\n                   a, n, M, asl, 1.0 / (1.0 - a));\n        }\n    }\n    return 0;\n}\n"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "fstream 二进制读写",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "7 8 9",
+  "code": "#include <iostream>\n#include <fstream>\nint main() {\n    {\n        std::ofstream out(\"demo_bin.bin\", std::ios::binary);\n        int a[3] = {7, 8, 9};\n        out.write(reinterpret_cast<const char*>(a), sizeof(a));\n    }\n    std::ifstream in(\"demo_bin.bin\", std::ios::binary);\n    int b[3];\n    in.read(reinterpret_cast<char*>(b), sizeof(b));\n    std::cout << b[0] << ' ' << b[1] << ' ' << b[2] << '\\n';\n}"
+}

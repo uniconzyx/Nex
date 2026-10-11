@@ -1,0 +1,8 @@
+{
+  "title": "迷你 IoC 容器：容器接管对象装配",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "hello from service\ncontroller wired: true",
+  "code": "import java.util.*;\n\npublic class Ex01 {\n    static class Container {\n        private final Map<String, Object> beans = new HashMap<>();\n        public void register(String name, Object bean) { beans.put(name, bean); }\n        public Object get(String name) { return beans.get(name); }\n    }\n    static class Service { String hello() { return \"hello from service\"; } }\n    static class Controller {\n        private final Service service;\n        Controller(Service s) { this.service = s; }\n        String handle() { return service.hello(); }\n    }\n    public static void main(String[] args) {\n        Container c = new Container();\n        // 容器负责装配：程序员不再手动 new Controller(new Service())\n        Service s = new Service();\n        c.register(\"service\", s);\n        c.register(\"controller\", new Controller(s));\n        Controller ctrl = (Controller) c.get(\"controller\");\n        System.out.println(ctrl.handle());\n        System.out.println(\"controller wired: \" + (ctrl != null));\n    }\n}\n"
+}

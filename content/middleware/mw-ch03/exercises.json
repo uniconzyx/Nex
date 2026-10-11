@@ -1,0 +1,216 @@
+{
+  "meta": {
+    "chapter": "mw-ch03",
+    "note": "Redis 高可用（主从/哨兵/Cluster）练习：基础题考察复制、哨兵判定、Cluster 路由与脑裂概念，算法题来自刷题平台（仅存元数据+链接，不搬运题面）。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "主从复制中全量同步与部分同步的触发条件",
+      "content_md": "关于 Redis 主从复制，下列说法正确的是？\n\nA. 从节点每次重连都会触发全量同步（FULLRESYNC）\nB. 从节点断线重连时，只要断线期间写命令仍在主节点 `repl_backlog` 窗口内，就走部分同步只补缺失区间\nC. `repl_backlog` 是无限增长的缓冲，永远不会被覆盖\nD. `REPLCONF ACK` 只用于 TCP 心跳，与复制进度无关",
+      "options": [
+        {
+          "key": "A",
+          "text": "每次重连都全量同步"
+        },
+        {
+          "key": "B",
+          "text": "backlog 窗口内重连走部分同步"
+        },
+        {
+          "key": "C",
+          "text": "repl_backlog 无限增长"
+        },
+        {
+          "key": "D",
+          "text": "REPLCONF ACK 只做 TCP 心跳"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "从节点断线重连时若上报的 offset 仍在 repl_backlog 窗口内则走部分同步（CONTINUE）只补缺失区间；只有首次/换主/窗口被覆盖才 FULLRESYNC。repl_backlog 是固定大小环形缓冲会被覆盖；REPLCONF ACK 上报的是复制 offset，用于计算 lag 与 min-replicas 保护。",
+      "tags": [
+        "replication",
+        "psync",
+        "backlog"
+      ],
+      "source": "self",
+      "source_ref": "mw-ch03 §1 全量/部分同步"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "哨兵 quorum 与 leader 选举多数派的区别",
+      "content_md": "关于 Redis 哨兵，下列说法正确的是？\n\nA. ODOWN 需要「多数派（>N/2）」哨兵确认，quorum 必须等于 N/2+1\nB. quorum 是确认主节点 SDOWN 的哨兵数门槛，用于达成 ODOWN，通常小于哨兵总数\nC. 故障转移由所有哨兵同时执行，无需选 leader\nD. SDOWN 自动等同于 ODOWN",
+      "options": [
+        {
+          "key": "A",
+          "text": "ODOWN 需多数派，quorum=N/2+1"
+        },
+        {
+          "key": "B",
+          "text": "quorum 是确认下线门槛，通常 < 总数"
+        },
+        {
+          "key": "C",
+          "text": "所有哨兵同时执行故障转移"
+        },
+        {
+          "key": "D",
+          "text": "SDOWN 自动等同 ODOWN"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "quorum 只是「确认 SDOWN 的哨兵数门槛」用于达成 ODOWN，不要求多数派、通常小于哨兵总数；真正执行故障转移的 leader 选举才需要 >N/2 多数派。SDOWN 是单哨兵主观判定，需经 is-master-down-by-addr 投票累计到 quorum 才变 ODOWN，且由选出的 leader 执行转移。",
+      "tags": [
+        "sentinel",
+        "quorum",
+        "odown"
+      ],
+      "source": "self",
+      "source_ref": "mw-ch03 §2 哨兵 SDOWN/ODOWN"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "hard",
+      "title": "Cluster 的 MOVED 与 ASK 重定向区别",
+      "content_md": "Redis Cluster 中，关于 MOVED 与 ASK，下列说法正确的是？\n\nA. MOVED 与 ASK 都会让客户端刷新本地槽→节点映射\nB. MOVED 表示槽归属已永久变更，客户端应刷新映射；ASK 仅发生在迁移中间态，本次临时重定向、不刷新映射\nC. ASK 表示槽归属已永久变更，MOVED 是临时重定向\nD. 二者都只在跨槽多 key 时出现",
+      "options": [
+        {
+          "key": "A",
+          "text": "二者都刷新映射"
+        },
+        {
+          "key": "B",
+          "text": "MOVED 刷新、ASK 不刷新"
+        },
+        {
+          "key": "C",
+          "text": "ASK 刷新、MOVED 临时"
+        },
+        {
+          "key": "D",
+          "text": "只在跨槽多 key 出现"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "MOVED 表示槽归属已永久变更，客户端应刷新本地映射；ASK 仅发生在槽迁移中间态，是本次临时重定向、不刷新映射，等迁移完成收到 MOVED 才更新。二者都出现在单 key 路由错误/迁移场景，与跨槽多 key 的 CROSSSLOT 限制无关。",
+      "tags": [
+        "cluster",
+        "moved",
+        "ask"
+      ],
+      "source": "self",
+      "source_ref": "mw-ch03 §3 Cluster 重定向"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "Cluster 选新主的优先级排序",
+      "content_md": "Redis Cluster / 哨兵故障转移选新主时，依次按什么规则排序？（写出顺序与方向）",
+      "options": [],
+      "answer": {
+        "correct": [],
+        "output": "1) replica-priority 最小优先\n2) 复制 offset 最大（数据最新）优先\n3) runid 字典序最小优先"
+      },
+      "reference_code": "",
+      "source": "self",
+      "source_ref": "mw-ch03 §3 Cluster 故障转移选主规则"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "一致性哈希（Consistent Hashing，LeetCode 设计题思路）",
+      "content_md": "设计并实现一个一致性哈希结构，支持 addNode/removeNode/ getNode(key)，使节点增减时只有少量 key 需要重新映射。详见原题，本题仅存元数据与链接，不搬运题面。与本章「Cluster 固定 16384 槽」思想相通——都是减少重分片成本的路由策略。",
+      "options": [],
+      "answer": {
+        "correct": [],
+        "output": "",
+        "reference_code": ""
+      },
+      "explanation": "一致性哈希用「哈希环 + 虚拟节点」把 key 与节点映射到同一环上，节点增减只影响环上相邻区间的 key；与 Cluster 的「固定 16384 槽 + 槽→节点映射」异曲同工——二者都把『重分片影响范围』从 O(N) 降到局部。",
+      "tags": [
+        "hash",
+        "consistenthash",
+        "sharding"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 设计类（consistent-hashing 思路）",
+      "external_url": "https://leetcode.cn/problems/design-consistent-hashing/"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "hard",
+      "title": "LFU 缓存（LeetCode 460，与 repl_backlog 频率思想对比）",
+      "content_md": "设计并实现 LFU(最不经常使用) 缓存，get/put 均 O(1)，按访问频次淘汰最低频者，频次相同淘汰最久未用。详见原题，仅存元数据与链接。与本章「复制偏移量/频率统计」不同，但都体现了「用计数刻画热度」的思想。",
+      "options": [],
+      "answer": {
+        "correct": [],
+        "output": "",
+        "reference_code": ""
+      },
+      "explanation": "严格 O(1) LFU（频率桶 + 双向链表 + 最小频链表头）；Redis 自身用对数计数器+衰减+随机采样近似 LFU 省开销。本题训练「用计数/频率做淘汰」的建模能力，与高可用章节的「统计类机制」思维互补。",
+      "tags": [
+        "lfu",
+        "hash",
+        "linkedlist"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 460（lfu-cache）",
+      "external_url": "https://leetcode.cn/problems/lfu-cache/"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "nowcoder",
+      "difficulty": "mid",
+      "title": "分布式选主 / Raft 相关笔试题（牛客）",
+      "content_md": "牛客网分布式/Redis 高频笔试题：给定若干节点心跳与 epoch，模拟选出 leader 的过程。详见原题，仅存元数据与链接，不搬运题面。与本章「哨兵类 Raft 选举（epoch + 多数派）」直接对应。",
+      "options": [],
+      "answer": {
+        "correct": [],
+        "output": "",
+        "reference_code": ""
+      },
+      "explanation": "牛客常考「类 Raft 选主」：epoch 任期递增、先到先得、拿到 >N/2 票当选、旧任期选票作废。与哨兵 leader 选举机制一致，是分布式共识的入门建模题。",
+      "tags": [
+        "raft",
+        "election",
+        "distributed"
+      ],
+      "source": "nowcoder",
+      "source_ref": "牛客 分布式/Raft 选主笔试题",
+      "external_url": "https://www.nowcoder.com/"
+    }
+  ]
+}

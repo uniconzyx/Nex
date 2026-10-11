@@ -1,0 +1,8 @@
+{
+  "title": "二维数组访问",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "6",
+  "code": "#include <iostream>\n\nint main() {\n    int m[2][3] = {{1, 2, 3}, {4, 5, 6}};\n    std::cout << m[1][2];\n}"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "量化精度损失数值模拟：fp16 / int8 / NF4 的最大相对误差",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "采样权重数 = 200000  |W|max = 5.0072\nint8 量化步长 scale = 0.039427\nfp16   最大绝对误差=0.001921 平均绝对误差=0.000141 最大相对误差(|w|>=0.1)=0.0005\nint8   最大绝对误差=0.019714 平均绝对误差=0.009855 最大相对误差(|w|>=0.1)=0.1828\nnf4    最大绝对误差=0.750226 平均绝对误差=0.114758 最大相对误差(|w|>=0.1)=1.0000\nnf4 最大绝对误差 > int8 最大绝对误差: True\n",
+  "code": "\"\"\"量化舍入误差实测: fp16 / int8-per-tensor / NF4。\n结论必须来自实测数字, 不得编造。\"\"\"\nimport numpy as np\n\nrng = np.random.default_rng(42)\nW = rng.standard_normal(200000).astype(np.float64)\n\n# --- fp16 ---\nw16 = W.astype(np.float16).astype(np.float64)\n# --- int8 对称 per-tensor ---\nabsmax = float(np.max(np.abs(W)))\nscale8 = absmax / 127.0\nq8 = np.clip(np.round(W / scale8), -127, 127)\nw8 = q8 * scale8\n# --- NF4: 16 个量化电平 (QLoRA 论文表) ---\nNF4 = np.array([-1.0, -0.6961928, -0.5250731, -0.3949175, -0.2844414,\n                -0.1847734, -0.0910500, 0.0, 0.0795803, 0.1609302,\n                0.2461123, 0.3379152, 0.4407098, 0.5626170, 0.7229568, 1.0])\nnorm = W / absmax\nidx = np.abs(norm[:, None] - NF4[None, :]).argmin(axis=1)\nw4 = NF4[idx] * absmax\n\n\ndef stats(name, approx):\n    err = np.abs(approx - W)\n    mask = np.abs(W) >= 0.1          # 仅在 |w|>=0.1 上算相对误差, 避免除零噪声\n    rel = err[mask] / np.abs(W[mask])\n    print(\"%-6s 最大绝对误差=%.6f 平均绝对误差=%.6f 最大相对误差(|w|>=0.1)=%.4f\"\n          % (name, float(err.max()), float(err.mean()), float(rel.max())))\n\n\nprint(\"采样权重数 = %d  |W|max = %.4f\" % (W.size, absmax))\nprint(\"int8 量化步长 scale = %.6f\" % scale8)\nstats(\"fp16\", w16)\nstats(\"int8\", w8)\nstats(\"nf4\", w4)\nprint(\"nf4 最大绝对误差 > int8 最大绝对误差:\", float(np.abs(w4 - W).max()) > float(np.abs(w8 - W).max()))\n"
+}

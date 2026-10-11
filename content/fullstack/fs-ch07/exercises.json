@@ -1,0 +1,213 @@
+{
+  "meta": {
+    "chapter": "fs-ch07",
+    "note": "8 题：基础题 6（self）+ 算法题 2（github 1 / leetcode 1，仅存元数据与链接，不搬运题面）；覆盖服务端/客户端状态分类、四态视图、虚拟化窗口计算、reducer 引用 identity 修复、TTL/SWR 缓存状态机、优先级队列并发调度、二分下界、LRU 缓存。"
+  },
+  "items": [
+    {
+      "id": "fs-ch07-ex01",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/02 · 服务端状态 vs 客户端状态",
+      "difficulty": "easy",
+      "title": "下列哪一项属于「服务端状态」而非「客户端状态」",
+      "content_md": "按本章「刷新页面后是否还需要从服务器重新获取」这一判据，下列哪一项最应被建模为服务端状态（交给缓存/数据层）？",
+      "options": [
+        {
+          "key": "A",
+          "text": "当前打开的模态框是否可见"
+        },
+        {
+          "key": "B",
+          "text": "用户刚在下拉框里选择的筛选条件"
+        },
+        {
+          "key": "C",
+          "text": "文章列表（可被其他用户修改、随时可能过期）"
+        },
+        {
+          "key": "D",
+          "text": "输入框中尚未提交的草稿文本"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "C"
+        ]
+      },
+      "explanation": "服务端状态的特征是「服务端是唯一事实来源、前端只持有可过期的副本」，需要 TTL/失效/去重/重试（本章 ex04/ex02/ex09）。A 弹窗可见性是纯 UI 状态；B 筛选条件与 D 草稿属于客户端状态，本地存活即可，刷新后无需从服务器恢复。",
+      "tags": [
+        "state-management",
+        "server-state",
+        "client-state"
+      ]
+    },
+    {
+      "id": "fs-ch07-ex02",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/03 · 三态呈现 loading/empty/error/success",
+      "difficulty": "easy",
+      "title": "为什么「空结果」必须是独立状态而不是 success 的分支",
+      "content_md": "数据驱动视图有四态：loading / success / empty / error。关于 empty 为何要独立成态，下列说法哪一项最准确？",
+      "options": [
+        {
+          "key": "A",
+          "text": "empty 与 success 在信息论上等价，只是为了代码好看才拆开"
+        },
+        {
+          "key": "B",
+          "text": "empty 对应的用户行为与 success 不同（需引导创建 / 更换筛选条件），合并会丢失这一信息"
+        },
+        {
+          "key": "C",
+          "text": "empty 状态一定意味着请求失败，必须显示错误"
+        },
+        {
+          "key": "D",
+          "text": "empty 只能在服务端返回 404 时进入"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "empty 是「请求成功但结果为空」，用户需要的是「创建第一条 / 换个筛选条件 / 换个关键词」等引导，与有数据时的展示行为不同。状态粒度应等于「用户可区分的行为」粒度。本章 ex05 实跑 empty=loading->empty，与 success 是两条不同转移。empty 不是错误（C 错），也不是 404（D 错）。",
+      "tags": [
+        "ui-state",
+        "fsm",
+        "error-handling"
+      ]
+    },
+    {
+      "id": "fs-ch07-ex03",
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/04 · 列表虚拟化窗口计算",
+      "difficulty": "mid",
+      "title": "写出虚拟化渲染窗口的区间",
+      "content_md": "列表虚拟化配置：`rowHeight = 40`、`viewportHeight = 400`、`total = 1000`、`overscan = 2`。按公式 `first = floor(scrollTop / rowHeight)`、`visible = ceil(viewportHeight / rowHeight)`、`start = max(0, first - overscan)`、`end = min(total, first + visible + overscan)`，写出 `scrollTop = 4000` 时的 `start / end / count / offsetY`（`offsetY = start * rowHeight`，区间为半开 `[start, end)`）。",
+      "answer": {
+        "output": "start=98 end=112 count=14 offsetY=3920"
+      },
+      "explanation": "first = floor(4000/40) = 100；visible = ceil(400/40) = 10；start = max(0, 100-2) = 98；end = min(1000, 100+10+2) = 112；count = 112-98 = 14；offsetY = 98*40 = 3920。本章 ex07 实跑输出 `mid=start=98 end=112 count=14 offsetY=3920`，另有 `top`（start=0,end=12）与 `near_bottom`（start=997,end=1000）两个边界用例。",
+      "tags": [
+        "virtualization",
+        "performance",
+        "window"
+      ]
+    },
+    {
+      "id": "fs-ch07-ex04",
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/02 · reducer 的引用 identity",
+      "difficulty": "mid",
+      "title": "修复 reducer：未知 action 导致的无谓重渲染",
+      "content_md": "下面的 reducer 在 `default` 分支返回了新对象，导致任何未知 action 都会让订阅者被通知（多余重渲染）。请修复它，使「未知 action 不触发通知」，并打印修复前后各自的通知次数。",
+      "answer": {
+        "reference_code": "\n// 有 bug 的 reducer：default 分支返回新对象 -> 未知 action 也触发重渲染\nfunction badReducer(state, action) {\n  switch (action.type) {\n    case 'ADD':\n      return { ...state, todos: [...state.todos, action.todo] };\n    default:\n      return { ...state };          // BUG：引用变了，订阅者被无谓通知\n  }\n}\n// 修复：未知 action 原样返回旧引用，让「引用剪枝」生效\nfunction goodReducer(state, action) {\n  switch (action.type) {\n    case 'ADD':\n      return { ...state, todos: [...state.todos, action.todo] };\n    default:\n      return state;                 // FIX\n  }\n}\n\nconst base = { todos: [] };\nfunction countNotifies(reducer) {\n  let state = base;\n  let notify = 0;\n  for (let i = 0; i < 3; i++) {\n    const next = reducer(state, { type: 'NOOP' });\n    if (next !== state) notify += 1;\n    state = next;\n  }\n  return notify;\n}\nconsole.log('buggy_notifies=' + countNotifies(badReducer));\nconsole.log('fixed_notifies=' + countNotifies(goodReducer));\n"
+      },
+      "explanation": "`{ ...state }` 会创建一个引用不同的新对象，破坏「引用剪枝」——订阅者据此判定「状态变了」而重渲染。修复是在 default 分支**原样返回旧引用** `return state`。对应本章 ex01 的 `unknown_action_keeps_identity=true` 与 `renders_after_noop_action=3`。不可变更新只用于真正发生变化的 action。",
+      "tags": [
+        "reducer",
+        "immutability",
+        "performance"
+      ]
+    },
+    {
+      "id": "fs-ch07-ex05",
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/02 · 缓存失效 TTL / stale-while-revalidate",
+      "difficulty": "mid",
+      "title": "实现 TTL + stale-while-revalidate 缓存并输出状态序列",
+      "content_md": "用整数逻辑时钟（显式 advance，不读墙钟）实现 `create_cache(ttl_ms, swr_ms)`：`read(key)` 返回 `fresh`（age ≤ ttl）、`stale`（ttl < age ≤ ttl+swr，仍返回旧值）、`expired`（age > ttl+swr，返回 None）三态。要求打印 t0 / write 后 / t110 / t310 的状态与取值。",
+      "answer": {
+        "reference_code": "\n# TTL + stale-while-revalidate：用整数逻辑时钟给出 fresh/stale/expired 状态序列\ndef create_cache(ttl_ms, swr_ms):\n    store = {}\n    clock = {'now': 0}\n\n    def advance(ms):\n        clock['now'] += ms\n\n    def write(key, value):\n        store[key] = {'value': value, 'at': clock['now']}\n\n    def read(key):\n        e = store.get(key)\n        if e is None:\n            return {'value': None, 'state': 'miss'}\n        age = clock['now'] - e['at']\n        if age <= ttl_ms:\n            return {'value': e['value'], 'state': 'fresh'}\n        if age <= ttl_ms + swr_ms:\n            return {'value': e['value'], 'state': 'stale'}     # 先给旧值，后台刷新\n        return {'value': None, 'state': 'expired'}\n\n    return {'advance': advance, 'write': write, 'read': read}\n\n\nc = create_cache(100, 200)\nprint('t0=%s' % c['read']('k')['state'])\nc['write']('k', 'v1')\nprint('after_write=%s' % c['read']('k')['state'])\nc['advance'](110)\nprint('t110=%s value=%s' % (c['read']('k')['state'], c['read']('k')['value']))\nc['advance'](200)\nprint('t310=%s value=%s' % (c['read']('k')['state'], c['read']('k')['value']))\n"
+      },
+      "explanation": "缓存状态是**三态**而非二态：`stale` 仍返回旧值以支持「先给用户看、后台刷新」的丝滑体验，`expired` 才返回空。用整数逻辑时钟而非墙钟，保证输出确定可断言。对应本章 ex04 实跑：`t50=fresh`、`t110=stale`（value=v1）、`t310=expired`（value=null）。",
+      "tags": [
+        "cache",
+        "ttl",
+        "swr",
+        "deterministic"
+      ]
+    },
+    {
+      "id": "fs-ch07-ex06",
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/04 · 请求优先级队列 + 并发限制",
+      "difficulty": "mid",
+      "title": "实现请求调度：优先级队列 + 最大并发上限",
+      "content_md": "实现 `createScheduler(maxConcurrent)`：入队时指定优先级，调度时按「优先级降序、同优先级 FIFO」选择；任一时刻在飞任务数不得超过上限；任务完成后**立即补位**。要求打印峰值并发、完成顺序，并断言峰值不超限、全部完成。",
+      "answer": {
+        "reference_code": "\n// 请求调度：优先级队列 + 最大并发限制（峰值并发不超限，完成即补位）\nfunction createScheduler(maxConcurrent) {\n  const waiting = [];\n  const active = [];\n  let seq = 0;\n  let peak = 0;\n  function admit() {\n    while (active.length < maxConcurrent && waiting.length) {\n      waiting.sort((a, b) => (b.priority - a.priority) || (a.seq - b.seq));\n      active.push(waiting.shift());\n    }\n    peak = Math.max(peak, active.length);\n  }\n  return {\n    enqueue(id, priority) { waiting.push({ id, priority, seq: seq++ }); return this; },\n    admit,\n    completeOne() {\n      if (active.length === 0) return null;\n      const job = active.shift();\n      admit();                 // 完成一个立刻补位，保持并发打满\n      return job.id;\n    },\n    get peak() { return peak; },\n    get active() { return active.length; },\n    get waiting() { return waiting.length; },\n  };\n}\n\nconst s = createScheduler(3);\nfor (const [id, p] of [['a', 1], ['b', 5], ['c', 3], ['d', 5], ['e', 2], ['f', 4], ['g', 1]]) {\n  s.enqueue(id, p);\n}\ns.admit();\nconsole.log('peak=' + s.peak + ' active=' + s.active + ' waiting=' + s.waiting);\nconst order = [];\nwhile (s.waiting > 0 || s.active > 0) {\n  const id = s.completeOne();\n  if (id === null) break;\n  order.push(id);\n}\nconsole.log('order=' + order.join(','));\nconsole.log('peak_within_limit=' + (s.peak <= 3));\nconsole.log('all_done=' + (order.length === 7));\n"
+      },
+      "explanation": "排序键为 `(priority desc, seq asc)`；`admit()` 在启动时与每次 `completeOne()` 后都被调用，从而把并发始终打满（而非等整批完成）。断言 `peak_within_limit=true` 是「上限不被突破」的可验证判据。对应本章 ex10：上限 2 时 `peak_after_admit=2`、完成顺序 `b,d,c,e,a`、`max_concurrency_respected=true`。",
+      "tags": [
+        "concurrency",
+        "priority-queue",
+        "scheduling"
+      ]
+    },
+    {
+      "id": "fs-ch07-ex07",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "github",
+      "source": "github",
+      "source_ref": "trekhleb/javascript-algorithms · src/algorithms/search（binary-search / lower bound）",
+      "external_url": "https://github.com/trekhleb/javascript-algorithms",
+      "difficulty": "easy",
+      "title": "GitHub 算法补充 · 二分下界（lower bound）",
+      "content_md": "实现 `lowerBound(nums, target)`：在升序数组中返回第一个大于等于 target 的元素下标；不存在则返回数组长度。该变体是「有序集合中定位第一个不小于目标的位置」的通用工具，与虚拟化窗口定位起始行、游标分页定位起点同构。题面与参考实现见 external_url，此处不复述第三方题面正文。",
+      "answer": {
+        "reference_code": "\n// 二分下界：返回第一个 >= target 的下标；越界返回数组长度\n// 参考实现见 trekhleb/javascript-algorithms 的二分查找章节（本题仅存元数据与链接）\nfunction lowerBound(nums, target) {\n  let lo = 0;\n  let hi = nums.length;\n  while (lo < hi) {\n    const mid = lo + ((hi - lo) >> 1);\n    if (nums[mid] < target) lo = mid + 1;\n    else hi = mid;\n  }\n  return lo;\n}\nconst nums = [10, 20, 20, 30, 40];\nconsole.log('lb_20=' + lowerBound(nums, 20));\nconsole.log('lb_25=' + lowerBound(nums, 25));\nconsole.log('lb_41=' + lowerBound(nums, 41));\nconsole.log('lb_5=' + lowerBound(nums, 5));\n"
+      },
+      "explanation": "区间取左闭右开 `[lo, hi)`，循环不变式为「答案始终落在 [lo, hi) 内」；`mid` 命中时收缩右界为 `mid`（不排除 mid），因此最终 `lo` 即下界。与标准二分（命中即返回）的区别在于**不提前返回**。对应本章 ex07 的 `first = floor(scrollTop/rowHeight)` 在有序行高下可用二分加速定位。",
+      "tags": [
+        "binary-search",
+        "lower-bound",
+        "github"
+      ]
+    },
+    {
+      "id": "fs-ch07-ex08",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "source": "leetcode",
+      "source_ref": "LeetCode 146（lru-cache）",
+      "external_url": "https://leetcode.cn/problems/lru-cache/",
+      "difficulty": "mid",
+      "title": "LeetCode 146 · LRU 缓存（与本章缓存策略同构）",
+      "content_md": "设计并实现一个 LRU（最近最少使用）缓存：`get` 与 `put` 均需 O(1)；容量满时淘汰最久未使用的键。题面与约束以官方为准，详见 external_url，此处不复述题面正文。",
+      "answer": {
+        "reference_code": "\n// LRU 缓存（哈希表 + 双向链表）：get/put 均 O(1)\n// 与本章「服务端状态缓存」同构：容量满时淘汰最久未使用项\nclass LRUCache {\n  constructor(capacity) {\n    this.capacity = capacity;\n    this.map = new Map();          // key -> node\n    this.head = { key: null, val: null, prev: null, next: null };\n    this.tail = { key: null, val: null, prev: null, next: null };\n    this.head.next = this.tail;\n    this.tail.prev = this.head;\n  }\n  _remove(node) {\n    node.prev.next = node.next;\n    node.next.prev = node.prev;\n  }\n  _pushFront(node) {\n    node.next = this.head.next;\n    node.prev = this.head;\n    this.head.next.prev = node;\n    this.head.next = node;\n  }\n  get(key) {\n    if (!this.map.has(key)) return -1;\n    const node = this.map.get(key);\n    this._remove(node);\n    this._pushFront(node);         // 命中即移到最前（最近使用）\n    return node.val;\n  }\n  put(key, val) {\n    if (this.map.has(key)) {\n      const node = this.map.get(key);\n      node.val = val;\n      this._remove(node);\n      this._pushFront(node);\n      return;\n    }\n    if (this.map.size >= this.capacity) {\n      const lru = this.tail.prev;  // 链表尾部 = 最久未使用\n      this._remove(lru);\n      this.map.delete(lru.key);\n    }\n    const node = { key, val, prev: null, next: null };\n    this._pushFront(node);\n    this.map.set(key, node);\n  }\n}\n\nconst c = new LRUCache(2);\nc.put(1, 1);\nc.put(2, 2);\nconsole.log('get_1=' + c.get(1));\nc.put(3, 3);\nconsole.log('get_2=' + c.get(2));\nconsole.log('get_3=' + c.get(3));\nc.put(4, 4);\nconsole.log('get_1_after_evict=' + c.get(1));\nconsole.log('get_3_kept=' + c.get(3));\nconsole.log('get_4_kept=' + c.get(4));\n"
+      },
+      "explanation": "哈希表提供 O(1) 定位，双向链表提供 O(1) 的「移到最近使用 / 淘汰最久未使用」；命中后必须把节点移到链表头部。这与本章 ex04 的 TTL 缓存是**同族**但有区别：LRU 按访问时间淘汰、TTL 按写入时间过期；真实缓存常把两者叠加（先过期再按 LRU 淘汰）。",
+      "tags": [
+        "lru",
+        "cache",
+        "hashmap",
+        "linked-list",
+        "leetcode"
+      ]
+    }
+  ]
+}

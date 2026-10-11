@@ -1,0 +1,49 @@
+{
+  "meta": {
+    "chapter": "spring-ch06",
+    "category": "system"
+  },
+  "items": [
+    {
+      "title": "实现一个迷你 MyBatis 核心引擎（MiniBatis）",
+      "requirement_md": "用**纯 Python**实现一个可运行的迷你持久层引擎，把本章抽象概念落到可调试的代码上，从零复现 MyBatis 的核心机制（不连任何数据库）。\n\n**功能要求**\n1. **Mapper XML 解析**：用 `xml.etree` 解析 `<mapper namespace>` 与 `<select>/<insert>` 等语句，提取 statementId（namespace + id）与 SQL 文本；\n2. **#{} 与 ${} 替换**：`#{}` 替换为 `?` 占位符并收集参数名列表；`${}` 按上下文做字符串替换（演示与 `#{}` 的语义差异）；\n3. **SQL 注入对照**：用同一查询分别走 `#{}` 与 `${}` 两条路径，构造恶意输入演示注入生效（参考 ex03）；\n4. **PreparedStatement 占位符绑定**：把参数按 `#{}` 出现顺序绑定到 `?`，校验绑定顺序与数量；\n5. **ResultMap/驼峰映射**：实现手动列→字段映射与 `mapUnderscoreToCamelCase` 自动映射；\n6. **CRUD SQL 生成**：根据表名与字段列表生成 INSERT/SELECT/UPDATE/DELETE；\n7. **动态 SQL 标签**：实现 `<if>`/`<choose>`/`<foreach>`/`<where>`/`<set>` 的解析与拼接；\n8. **一级/二级缓存**：模拟 SqlSession 级一级缓存与 namespace 级二级缓存的命中与失效；\n9. **插件责任链**：实现拦截器链的环绕执行（before 顺序、after 逆序）。\n\n**验收标准**\n- 至少 12 个示例连通运行（对应 examples/ 的 12 个 JSON）；\n- 注入对照能清晰说明 `#{}` 与 `${}` 的结果差异；\n- 缓存示例能演示「同会话命中 L1、跨会话命中 L2、新会话 L1 失效」；\n- 责任链示例能演示环绕顺序（before 正序、after 逆序）。",
+      "tasks": [
+        {
+          "title": "实现 Mapper XML 解析与 #{} / ${} 替换",
+          "verification": {
+            "type": "test",
+            "desc": "给定 mapper XML，断言解析出 namespace、statementId 列表；#{} 替换为 ? 且参数列表顺序正确，与 ${} 路径输出不同"
+          }
+        },
+        {
+          "title": "实现 SQL 注入对照与 PreparedStatement 绑定",
+          "verification": {
+            "type": "test",
+            "desc": "用恶意输入分别走 #{} 与 ${}，断言 #{} 路径生成带 ? 的语句且参数保留原值、${} 路径把输入拼成可执行片段"
+          }
+        },
+        {
+          "title": "实现 ResultMap 手动映射与驼峰自动映射",
+          "verification": {
+            "type": "test",
+            "desc": "对 user_name/user_id 行，断言驼峰开启后映射到 userName/userId；关闭时按同名匹配"
+          }
+        },
+        {
+          "title": "实现 CRUD SQL 生成与动态 SQL 标签（if/choose/foreach/where/set）",
+          "verification": {
+            "type": "test",
+            "desc": "断言四类 CRUD 语句正确生成；<if> 剔除不满足条件片段；<foreach> 正确展开占位符；<choose> 选中首个满足分支；<set> 去尾逗号"
+          }
+        },
+        {
+          "title": "实现一级/二级缓存与插件责任链",
+          "verification": {
+            "type": "test",
+            "desc": "断言同会话命中 L1、跨会话命中 L2、新会话 L1 失效；责任链 before 正序、after 逆序输出"
+          }
+        }
+      ]
+    }
+  ]
+}

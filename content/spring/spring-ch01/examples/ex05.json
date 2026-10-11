@@ -1,0 +1,8 @@
+{
+  "title": "BeanFactory 懒加载 vs ApplicationContext 预实例化",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "-- BeanFactory (lazy) --\nfactory created, bean not yet built\n[bean] constructed\n-- ApplicationContext (eager) --\n[bean] constructed",
+  "code": "import java.util.*;\n\npublic class Ex05 {\n    static class Bean { Bean() { System.out.println(\"[bean] constructed\"); } }\n    static class BeanFactory {\n        private final Map<String, Bean> cache = new HashMap<>();\n        Bean get() { return cache.computeIfAbsent(\"b\", k -> new Bean()); } // 懒加载\n    }\n    static class AppContext {\n        final Bean b; // 构造即创建（预实例化/饿汉）\n        AppContext() { this.b = new Bean(); }\n        Bean get() { return b; }\n    }\n    public static void main(String[] args) {\n        System.out.println(\"-- BeanFactory (lazy) --\");\n        BeanFactory bf = new BeanFactory();\n        System.out.println(\"factory created, bean not yet built\");\n        bf.get(); // 此刻才构造\n        bf.get(); // 命中缓存，不再构造\n        System.out.println(\"-- ApplicationContext (eager) --\");\n        AppContext ctx = new AppContext(); // 构造时即创建\n        ctx.get();\n    }\n}\n"
+}

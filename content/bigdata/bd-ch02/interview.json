@@ -1,0 +1,38 @@
+{
+  "meta": { "chapter": "bd-ch02" },
+  "items": [
+    {
+      "question": "MapReduce 的 Shuffle 阶段到底做了什么？为什么它既是性能瓶颈又不可避免？",
+      "answer_md": "Shuffle 是把 Map 端产生的 `(key,value)` 按 key 「搬运 + 排序」到对应 Reducer 的过程，**横跨两端**：\n\n- **Map 端**：kv 先写**环形缓冲区**；达到 `spill.percent`（默认 0.8）阈值触发**溢写**——先按 partition、再按 key 排序（快排），写本地磁盘 spill 文件；Map 结束前把所有 spill **多路归并**成有序大文件，并写 index 供 Reduce 拉取。\n- **Reduce 端**：copy/fetch 线程并行从各 Map 拉取本分区数据；内存缓冲落满也 spill；数据到齐后**多路归并**（内存段 + 磁盘 spill）成全局 (key) 有序流，再逐 key 喂给 reduce 函数。\n\n为什么是瓶颈且不可避免：MapReduce 的语义保证「相同 key 必进同一 reducer」，因此必须对中间数据做**跨节点重分区 + 排序**，这一步的网络传输（规模 = Map 输出总量）与磁盘 IO 是物理上绕不开的。对比：Spark 用内存 + DAG 把多次 shuffle 合并、减少落盘，但「宽依赖必须 shuffle」这一本质未变。",
+      "follow_ups": [
+        "Map 端排序用什么算法？为什么先按 partition 再按 key？",
+        "环形缓冲区大小怎么调？spill 次数过多说明什么？",
+        "Spark 的 shuffle 和 MapReduce 的 shuffle 有什么本质区别？"
+      ],
+      "difficulty": "mid",
+      "company_tags": ["通用", "阿里", "字节"]
+    },
+    {
+      "question": "数据倾斜怎么识别、怎么解决？Combiner、加盐、自定义 Partitioner、MapJoin 分别在什么场景用？",
+      "answer_md": "**识别**：作业监控里少数 reduce 长尾卡在 99%、其余早已完成；counters 里某 reducer 输入记录数远超均值；或某 key（如 `vip_user`、空值、某省份）出现频率呈幂律。\n\n**手段与边界**：\n1. **Combiner**：可结合运算（sum/count/min/max）先在 Map 端本地聚合，直接削减 shuffle 量——零成本，首选，但只缓解、不解决单 key 超大（因为同一个热 key 的局部和仍全去一个 reducer）。\n2. **加盐（salting）**：给热 key 加随机/枚举后缀打散到多 reduce，先局部聚合，再起一轮作业去掉后缀二次聚合——解决「单 key 超大数据量」。\n3. **自定义 Partitioner**：把已知热 key 单独路由到一个/多个专属分区，避免与正常 key 撞车。\n4. **MapJoin（小表广播）**：倾斜来自「大表 join 小维度表」时，把小表广播到各 map 端直接关联，**彻底消除这次 join 的 shuffle**——前提是小表能放进内存。\n\n选型顺序：能 MapJoin 就 MapJoin（消 shuffle）> 加盐/自定义 Partitioner（拆热 key）> Combiner（减总量）。",
+      "follow_ups": [
+        "空值导致的倾斜怎么处理？",
+        "加盐后怎么保证最终聚合结果正确？",
+        "Hive 里 `skewjoin` / `MAPJOIN`  Hint 是怎么做的？"
+      ],
+      "difficulty": "hard",
+      "company_tags": ["通用", "腾讯", "美团", "拼多多"]
+    },
+    {
+      "question": "YARN 的资源调度：FIFO / Capacity / Fair 三种调度器有什么区别？生产怎么选？",
+      "answer_md": "三者是「吞吐量 vs 公平性 vs 隔离性」的不同取舍：\n\n- **FIFO**：单队列、先到先得，大作业独占集群，小作业会被堵死。只适合单机/单团队纯批处理。\n- **Capacity**：多队列、**每队列保底容量（`capacity`）** + 弹性上限（`maximum-capacity`），队列内 FIFO。保证多租户 SLA、互不影响，适合「生产队列保底、实验队列借用空闲」。默认调度器即它。\n- **Fair**：多队列、**动态公平共享**，空闲资源被「最饿」的作业使用，可配 weight 与抢占（preemption）。适合交互式 SQL + 批处理混跑，资源利用率最高。\n\n生产选型：① 一个团队纯离线批处理 → FIFO；② 多部门共用、要保关键队列资源 → **Capacity**（给生产 60% 保底，实验 40%）；③ 交互+批处理混跑、希望空闲时互相借资源 → **Fair**。注意：调度器是 RM 全局唯一配置，不能混用；Capacity 的层级队列可模拟部分公平。",
+      "follow_ups": [
+        "Capacity 的 capacity 是上限还是保底？maximum-capacity 不配会怎样？",
+        "Fair 的抢占（preemption）有什么代价？",
+        "RM 自身要做 HA 吗？为什么？"
+      ],
+      "difficulty": "mid",
+      "company_tags": ["通用", "百度", "京东"]
+    }
+  ]
+}

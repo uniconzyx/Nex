@@ -1,0 +1,15 @@
+{
+  "meta": { "chapter": "cpp-ch10", "category": "basic" },
+  "items": [
+    {
+      "title": "实现一个引用计数的资源句柄 ResourceHandle（智能指针实战）",
+      "requirement_md": "用 `std::shared_ptr` 实现一个封装任意资源的 `ResourceHandle<T>`，要求：\n1. 提供工厂 `make_resource(args...)`，内部用 `std::make_shared` 一次性构造资源 + 控制块；\n2. 资源析构时打印 `\"released\"` 以验证引用计数归零才释放；\n3. 演示：把同一句柄复制到 3 个 `shared_ptr`，打印 `use_count()`，随后逐个 `reset()`，观察仅最后一次 `reset` 触发 `\"released\"`；\n4. 用 `std::weak_ptr` 实现一个 `Observer` 观察该资源：在资源存活时 `lock()` 成功并读取，在全部 `shared_ptr` 释放后 `lock()` 返回空（验证弱引用不阻止析构）；\n5. （加分）把其中一个观察者改为 `enable_shared_from_this` 风格的成员函数，证明可通过 `shared_from_this()` 安全延续所有权。\n\n要求自带 `main()` 单测，输出可观察『计数变化 → 最终释放』全过程，且**全程无裸 `delete`、无泄漏**（可用 ASan 验证）。",
+      "tasks": [
+        { "title": "用 make_shared 实现工厂与资源封装", "verification": { "type": "test", "desc": "工厂返回 shared_ptr，构造只一次分配（可借自定义 operator new 计数验证）" } },
+        { "title": "演示引用计数变化与确定性释放", "verification": { "type": "test", "desc": "复制 3 份 use_count=3；逐个 reset 直到最后一份才打印 released" } },
+        { "title": "用 weak_ptr 实现观察者并验证不阻止析构", "verification": { "type": "test", "desc": "资源存活时 lock() 成功；全部 shared_ptr 释放后 lock() 返回空，且 released 已打印" } },
+        { "title": "（加分）enable_shared_from_this 延续所有权", "verification": { "type": "manual", "desc": "成员函数中 shared_from_this() 返回有效 shared_ptr，use_count 正确 +1" } }
+      ]
+    }
+  ]
+}

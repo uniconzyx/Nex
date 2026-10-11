@@ -1,0 +1,9 @@
+{
+  "title": "UNION 去重并集（隐式 filesort 去重）",
+  "code_lang": "sql",
+  "code_std": "mysql8",
+  "stdin": "",
+  "expected_output": "Query OK, 0 rows affected\nQuery OK, 3 rows affected\nQuery OK, 3 rows affected\nx\na\nb\nc\nd",
+  "code": "CREATE TABLE t_a (x CHAR(1));\nCREATE TABLE t_b (x CHAR(1));\nINSERT INTO t_a VALUES ('a'),('b'),('c');\nINSERT INTO t_b VALUES ('b'),('c'),('d');\nSELECT x FROM t_a UNION SELECT x FROM t_b ORDER BY x;",
+  "_verified": false
+}

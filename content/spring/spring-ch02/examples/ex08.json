@@ -1,0 +1,8 @@
+{
+  "title": "singleton 与 prototype 作用域差异",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "singleton same: true\nprototype same: false\nprototype ids: 2,3",
+  "code": "public class Main {\n    static class Bean { static int cnt = 0; int id = ++cnt; }\n    static class ScopeContainer {\n        java.util.Map<String, Object> singletons = new java.util.HashMap<>();\n        Object getSingleton(String n) { return singletons.computeIfAbsent(n, k -> new Bean()); }\n        Object getPrototype(String n) { return new Bean(); }\n    }\n    public static void main(String[] args) {\n        ScopeContainer c = new ScopeContainer();\n        Object s1 = c.getSingleton(\"b\"), s2 = c.getSingleton(\"b\");\n        Object p1 = c.getPrototype(\"b\"), p2 = c.getPrototype(\"b\");\n        System.out.println(\"singleton same: \" + (s1 == s2));\n        System.out.println(\"prototype same: \" + (p1 == p2));\n        System.out.println(\"prototype ids: \" + ((Bean) p1).id + \",\" + ((Bean) p2).id);\n    }\n}\n"
+}

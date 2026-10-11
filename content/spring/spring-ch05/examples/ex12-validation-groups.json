@@ -1,0 +1,8 @@
+{
+  "title": "ex12-validation-groups",
+  "code_lang": "java",
+  "code_std": "java23",
+  "stdin": "",
+  "expected_output": "create violations: [create: password min 6]\nupdate violations: [update: id required]",
+  "code": "import java.util.*;\npublic class Main {\n    static List<String> validateCreate(Map<String,String> m){\n        List<String> e=new ArrayList<>();\n        if(!m.containsKey(\"username\")||m.get(\"username\").isEmpty()) e.add(\"create: username required\");\n        if(!m.containsKey(\"password\")||m.get(\"password\").length()<6) e.add(\"create: password min 6\");\n        return e;\n    }\n    static List<String> validateUpdate(Map<String,String> m){\n        List<String> e=new ArrayList<>();\n        if(!m.containsKey(\"id\")||m.get(\"id\").isEmpty()) e.add(\"update: id required\");\n        return e;\n    }\n    public static void main(String[] a){\n        Map<String,String> create=new LinkedHashMap<>();\n        create.put(\"username\",\"bob\"); create.put(\"password\",\"123\");\n        Map<String,String> update=new LinkedHashMap<>();\n        update.put(\"username\",\"bob\");\n        System.out.println(\"create violations: \"+validateCreate(create));\n        System.out.println(\"update violations: \"+validateUpdate(update));\n    }\n}"
+}

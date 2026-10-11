@@ -1,0 +1,8 @@
+{
+  "title": "上下文拼接与去重：相似度过滤 + crc32 指纹",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "原始块数 = 6\n相似度过滤后块数 = 5\n指纹去重后块数 = 4\n指纹示例(crc32) = 0x74b17232\n去重前字符数 = 108\n去重后字符数 = 70\n压缩率 = 0.6481\n",
+  "code": "import zlib\nimport numpy as np\nchunks = [\n    'RAG 通过检索外部知识增强大模型。',\n    'RAG 通过检索外部知识增强大模型。',\n    '向量数据库用于存储 embedding。',\n    '向量数据库用于存储 embedding。',\n    'BM25 是一种稀疏检索方法。',\n    'HNSW 是常用的 ANN 索引。',\n]\n\ndef emb(c):\n    v = np.zeros(26)\n    for ch in c:\n        if 'a' <= ch <= 'z':\n            v[ord(ch) - ord('a')] += 1\n    n = np.linalg.norm(v)\n    return v / n if n > 0 else v\n\nembs = [emb(c) for c in chunks]\nTHRESH = 0.95\nkept_idx = []\nfor i in range(len(chunks)):\n    is_dup = False\n    for j in kept_idx:\n        if float(np.dot(embs[i], embs[j])) > THRESH:\n            is_dup = True\n            break\n    if not is_dup:\n        kept_idx.append(i)\n\nfinal = []\nseen_fp = set()\nfor i in kept_idx:\n    fp = zlib.crc32(chunks[i].encode('utf-8')) & 0xffffffff\n    if fp in seen_fp:\n        continue\n    seen_fp.add(fp)\n    final.append(i)\n\nbefore = sum(len(c) for c in chunks)\nafter = sum(len(chunks[i]) for i in final)\nprint('原始块数 =', len(chunks))\nprint('相似度过滤后块数 =', len(kept_idx))\nprint('指纹去重后块数 =', len(final))\nprint('指纹示例(crc32) =', hex(zlib.crc32(chunks[0].encode('utf-8')) & 0xffffffff))\nprint('去重前字符数 =', before)\nprint('去重后字符数 =', after)\nprint('压缩率 =', round(after / before, 4))\n"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "属性占位符注入：模拟 @PropertySource + @Value",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "appName=CppMind\nport=8080",
+  "code": "import java.util.*;\n\npublic class Ex12 {\n    static class Config { String appName; int port; }\n    public static void main(String[] args) {\n        // 模拟 @PropertySource 加载的外部配置\n        Map<String,String> props = Map.of(\"app.name\",\"CppMind\",\"app.port\",\"8080\");\n        Config cfg = new Config();\n        // 容器按字段名把占位符值反射注入\n        cfg.appName = props.get(\"app.name\");\n        cfg.port = Integer.parseInt(props.get(\"app.port\"));\n        System.out.println(\"appName=\" + cfg.appName);\n        System.out.println(\"port=\" + cfg.port);\n    }\n}\n"
+}

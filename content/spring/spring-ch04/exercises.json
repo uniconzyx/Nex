@@ -1,0 +1,172 @@
+{
+  "meta": {
+    "chapter": "spring-ch04",
+    "note": "覆盖自动配置 SPI、条件装配、配置绑定与自定义 starter"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "@SpringBootApplication 的组成",
+      "content_md": "`@SpringBootApplication` 等价于以下哪组注解的组合？",
+      "options": [
+        {
+          "key": "A",
+          "text": "`@SpringBootConfiguration` + `@EnableAutoConfiguration` + `@ComponentScan`"
+        },
+        {
+          "key": "B",
+          "text": "`@Configuration` + `@EnableWebMvc` + `@ComponentScan`"
+        },
+        {
+          "key": "C",
+          "text": "`@SpringBootConfiguration` + `@EnableAutoConfiguration` + `@MapperScan`"
+        },
+        {
+          "key": "D",
+          "text": "`@Configuration` + `@EnableTransactionManagement` + `@ComponentScan`"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "A"
+        ]
+      },
+      "explanation": "三者分工：`@SpringBootConfiguration` 标记主配置类（本质是特殊 `@Configuration`）、`@EnableAutoConfiguration` 通过 SPI 引入自动配置类、`@ComponentScan` 扫描当前包及子包。注意 `@ComponentScan` 只扫**自己的包**，官方自动配置类不在其中，靠 SPI 加载。",
+      "tags": [
+        "autoconfiguration",
+        "启动类"
+      ],
+      "source": "self",
+      "source_ref": "《Spring Boot 编程思想》核心篇 第2章"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "@ConditionalOnMissingBean 失效的根因",
+      "content_md": "在**用户自己的** `@Configuration` 类中标注 `@ConditionalOnMissingBean` 时，经常出现「判定结果不符合预期」的情况。最本质的原因是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "该注解只对 `@Bean` 方法有效，对类无效"
+        },
+        {
+          "key": "B",
+          "text": "判定依赖注册顺序，而用户的配置类与自动配置类的处理次序不确定"
+        },
+        {
+          "key": "C",
+          "text": "该注解只能用于 `@Component`，不能用于 `@Configuration`"
+        },
+        {
+          "key": "D",
+          "text": "它需要配合 `@DependsOn` 才能生效"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "`@ConditionalOnMissingBean` 在 **BeanDefinition 阶段**求值，结论取决于「此刻容器里已有什么」。自动配置类被约定为**最后**处理，因此在该处使用是安全的；在用户配置类中使用则受顺序影响，结论不可靠。需要控制顺序时用 `@AutoConfigureBefore/After`。",
+      "tags": [
+        "conditional",
+        "顺序"
+      ],
+      "source": "self",
+      "source_ref": "Spring Boot 官方文档：Condition Annotations"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "条件结果推导",
+      "content_md": "给定：类路径上存在 `HikariDataSource`，**不存在** `RedisOperations`；容器中**还没有** `dataSource` Bean。以下两个自动配置类，哪些会生效？\n\n```java\n@ConditionalOnClass(name = \"com.zaxxer.hikari.HikariDataSource\")\n@ConditionalOnMissingBean(name = \"dataSource\")\nclass PoolAutoConfiguration { }\n\n@ConditionalOnClass(name = \"org.springframework.data.redis.core.RedisOperations\")\nclass RedisAutoConfiguration { }\n```",
+      "answer": {
+        "correct": [
+          "PoolAutoConfiguration 生效，RedisAutoConfiguration 不生效"
+        ],
+        "output": "PoolAutoConfiguration = true\nRedisAutoConfiguration = false"
+      },
+      "explanation": "`PoolAutoConfiguration` 两个条件同时满足（类存在 + 容器无同名 Bean），故生效；`RedisAutoConfiguration` 的 `@ConditionalOnClass` 不满足（类路径无 `RedisOperations`），故不生效。注意 `@ConditionalOnClass` 要用 `name` 字符串形式，直接写 `.class` 会在类缺失时抛 `NoClassDefFoundError`。",
+      "tags": [
+        "conditional",
+        "推导"
+      ],
+      "source": "self",
+      "source_ref": "Spring Boot 官方文档：Class Conditions"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "修复条件注解的写法",
+      "content_md": "下面的自动配置类在**依赖缺失**时会直接启动失败，请指出并修复：\n\n```java\n@Configuration\n@ConditionalOnClass(RedisOperations.class)\npublic class MyRedisAutoConfiguration {\n    @Bean\n    @ConditionalOnMissingBean\n    public MyRedisTemplate myRedisTemplate() { return new MyRedisTemplate(); }\n}\n```",
+      "answer": {
+        "reference_code": "@Configuration\n@ConditionalOnClass(name = \"org.springframework.data.redis.core.RedisOperations\")\npublic class MyRedisAutoConfiguration {\n    @Bean\n    @ConditionalOnMissingBean\n    public MyRedisTemplate myRedisTemplate() { return new MyRedisTemplate(); }\n}"
+      },
+      "explanation": "`@ConditionalOnClass(RedisOperations.class)` 会在**类加载阶段**就尝试解析 `RedisOperations`，当依赖不存在时抛出 `NoClassDefFoundError`，条件根本没机会求值。正确写法是用 `name` 属性传全限定名字符串，让判定只依赖类名比较。",
+      "tags": [
+        "conditional",
+        "NoClassDefFoundError"
+      ],
+      "source": "self",
+      "source_ref": "Spring Boot 官方文档：Class Conditions（推荐 name 形式）"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "自动配置的拓扑排序",
+      "content_md": "给定自动配置类之间的依赖关系 `Map<String, List<String>> deps`（含义：key 依赖列表中的所有类，即它们必须先于 key 生效），输出一个合法的生效顺序；若存在环，则输出环中涉及的类。\n\n**输入**（示例）：\n```\nMyBatisAutoConfiguration -> [DataSourceAutoConfiguration]\nTransactionAutoConfiguration -> [DataSourceAutoConfiguration]\nDataSourceAutoConfiguration -> []\n```\n\n**要求**：同层节点按类名字典序输出，保证结果确定。",
+      "answer": {
+        "output": "DataSourceAutoConfiguration\nMyBatisAutoConfiguration\nTransactionAutoConfiguration",
+        "reference_code": "// Kahn 算法：入度为 0 的节点进优先队列（字典序），出队后减少后继入度\nstatic List<String> topoSort(Map<String, List<String>> deps) {\n    Map<String, Integer> indeg = new LinkedHashMap<>();\n    Map<String, List<String>> adj = new LinkedHashMap<>();\n    for (String k : deps.keySet()) { indeg.putIfAbsent(k, 0); adj.putIfAbsent(k, new ArrayList<>()); }\n    for (var e : deps.entrySet())\n        for (String d : e.getValue()) {\n            adj.computeIfAbsent(d, x -> new ArrayList<>()).add(e.getKey());\n            indeg.merge(e.getKey(), 1, Integer::sum);\n        }\n    PriorityQueue<String> pq = new PriorityQueue<>();\n    indeg.forEach((k, v) -> { if (v == 0) pq.add(k); });\n    List<String> order = new ArrayList<>();\n    while (!pq.isEmpty()) {\n        String cur = pq.poll(); order.add(cur);\n        for (String nx : adj.get(cur))\n            if (indeg.merge(nx, -1, Integer::sum) == 0) pq.add(nx);\n    }\n    return order;   // size < deps.size() 说明有环\n}"
+      },
+      "explanation": "Spring 处理 `@AutoConfigureAfter/Before` 的方式与此同构：把相对顺序约束建成有向图，做拓扑排序（Kahn 算法，O(V+E)）。出现环时无法线性化，Spring 退化为字典序并打印告警，以保证应用始终能启动（可用性优先）。`order.size() != deps.size()` 即为有环判据。",
+      "tags": [
+        "拓扑排序",
+        "自动配置顺序"
+      ],
+      "source": "self",
+      "source_ref": "408 数据结构：拓扑排序 / 《Spring Boot 编程思想》第3章",
+      "time_limit_ms": 2000,
+      "memory_limit_mb": 256,
+      "test_cases": [
+        {
+          "input": "MyBatis->DataSource; Transaction->DataSource; DataSource->[]",
+          "expected_output": "DataSourceAutoConfiguration, MyBatisAutoConfiguration, TransactionAutoConfiguration",
+          "is_sample": true
+        }
+      ]
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "课程表 II（拓扑排序模板题）",
+      "content_md": "本题是自动配置顺序问题的**通用模板**：给定先修课程关系，返回一个合法的学习顺序；若存在环则返回空数组。请到 LeetCode 完成该题，体会与 `@AutoConfigureAfter` 排序同构的算法。",
+      "answer": {
+        "correct": []
+      },
+      "explanation": "与自动配置拓扑排序完全同构：入度表 + 队列（或优先队列）。差异仅在「同层顺序」是否要求确定：LeetCode 判定任意合法顺序，而 Spring 需要确定性，故用类名字典序兜底。",
+      "tags": [
+        "拓扑排序",
+        "图"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 210（course-schedule-ii）",
+      "external_url": "https://leetcode.cn/problems/course-schedule-ii/",
+      "time_limit_ms": 2000,
+      "memory_limit_mb": 256
+    }
+  ]
+}

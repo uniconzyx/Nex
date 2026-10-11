@@ -1,0 +1,8 @@
+{
+  "title": "抽象类方法 vs 接口 default 方法分派",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "abs-impl\niface-default",
+  "code": "public class E310 {\n    interface Greet { default String hi(){ return \"iface-default\"; } }\n    abstract static class Abs { abstract String hello(); }\n    static class Impl extends Abs implements Greet {\n        @Override String hello(){ return \"abs-impl\"; }\n    }\n    public static void main(String[] args) {\n        Abs a = new Impl();\n        Greet g = new Impl();\n        System.out.println(a.hello());\n        System.out.println(g.hi());\n    }\n}"
+}

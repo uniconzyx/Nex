@@ -1,0 +1,107 @@
+{
+  "meta": {
+    "chapter": "tool-ch05",
+    "title": "Docker 基础：镜像、容器与 Dockerfile —— 高频追问",
+    "count": 6,
+    "note": "偏深度追问，考察底层机制与工程判断，非背诵型"
+  },
+  "items": [
+    {
+      "question": "容器和虚拟机的本质区别是什么？为什么容器启动更快、体积更小？",
+      "answer_md": "**隔离层次不同**：\n\n- 虚拟机在**硬件抽象层**做隔离（VMX/SVM、影子页表、虚拟设备），每个实例都要引导一份完整的 Guest 内核；\n- 容器在**系统调用层**做隔离：namespace 让进程只看见属于自己的资源视图（mount/pid/net/ipc/uts/user 六类），cgroup 限制它能用多少（cpu/memory/pids/io），**内核由宿主共享**。\n\n**因此代价不同**：\n\n- 启动：虚拟机要走「固件 → Hypervisor → Guest 内核 → initrd → 用户态 init」；容器只需「复用已运行的内核 → clone 时挂 namespace/cgroup → exec entrypoint」。文件系统的挂载也是惰性的（overlayfs 按需 copy-up），所以是秒级；\n- 体积：虚拟机镜像是一块含完整 OS 的磁盘（GB 级），容器镜像只是应用与依赖的分层 rootfs（MB 级）。\n\n**代价是隔离强度**：容器的攻击面是数百个系统调用，共享同一份可信计算基（TCB），内核提权漏洞会波及全部容器；所以多租户强隔离场景要用 Kata/gVisor 或虚拟机。\n\n补充：Windows/macOS 上的 Docker Desktop 仍需要一层轻量 Linux VM，容器共享的是那层 VM 的内核。",
+      "follow_ups": [
+        "容器里能装内核模块吗？（不能，内核是共享的，除非用特权容器且模块与宿主内核完全匹配）",
+        "容器中的 PID 1 与宿主的 PID 1 是什么关系？（不同 pid namespace，容器内 PID 1 在宿主上是普通进程号）",
+        "为什么说「轻量」不等于「安全」？（共享内核 = 共享 TCB；且 docker 组权限等价 root）"
+      ],
+      "difficulty": "easy",
+      "company_tags": [
+        "通用",
+        "字节跳动",
+        "阿里云",
+        "腾讯"
+      ]
+    },
+    {
+      "question": "镜像为什么是分层的？在 Dockerfile 里用 RUN rm -rf 删掉大文件，镜像体积会变小吗？",
+      "answer_md": "**分层的目的**：把「共享」与「可变」分离。每层只读、由内容摘要（sha256）寻址，因此可以被任意多个镜像和容器共享，推送/拉取只传缺失的层，还能天然去重与校验。\n\n**不会变小**。原因在 overlayfs 的删除语义：\n\n- 只读层（lower）不可写入任何元数据，删除来自 lower 的文件只能在容器/构建的可写层（upper）放一个 **whiteout** 把它遮蔽；\n- whiteout 只是一个「遮蔽标记」，**被删数据仍完整地躺在那个只读层里**，体积一分不减。\n\n正确做法有两个层次：\n\n1. **同一条 RUN 内下载—使用—删除**（`curl | tar && make && rm`），让临时文件在层提交前就在可写层里被删掉；\n2. **多阶段构建**：把编译器、SDK、包缓存留在中间阶段，最终镜像只 `COPY --from` 产物——中间阶段的层根本不进最终镜像，这才是真正的「删除」。\n\n实测数据（examples/ex07）：单阶段 1555.6MB → 多阶段 14.0MB，降幅 99.1%。",
+      "follow_ups": [
+        "COPY 一个大文件进镜像再 RUN rm，能用 docker history 看出来吗？（能，那一层的大小就是文件本身）",
+        "多个容器跑同一个镜像，磁盘占用会翻倍吗？（不会，只读层共享，每个容器只多一个可写层）",
+        "层是不是越多越好？（不是，每层有元数据开销；合并 RUN 会变粗但缓存粒度也变粗，要权衡）"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "美团",
+        "字节跳动",
+        "华为云"
+      ]
+    },
+    {
+      "question": "为什么 Dockerfile 里要先 COPY 依赖清单、装依赖，再 COPY 源码？背后的缓存规则是什么？",
+      "answer_md": "**缓存规则**（三层）：\n\n1. 每层的缓存键 = **父层键 + 本层键**，父层失效则其后**全部**重建；\n2. `RUN` 的键是**命令行字符串**；\n3. `COPY`/`ADD` 的键是**被拷贝文件内容**的摘要——不是路径、也不是 mtime。\n\n**推论**：只要被 COPY 的任一文件变了，该层及其后所有层都白干。所以要把**变化频率低的指令放前面**：\n\n```dockerfile\nCOPY requirements.txt .\nRUN pip install --no-cache-dir -r requirements.txt\nCOPY src/ ./src/\n```\n\n只改一行源码时：依赖清单没变 → 第 3、4 层命中，只需重建最后两层，不用重装依赖。\n\n**反模式** `COPY . .` 写在 `pip install` 之前：整个上下文（含 `.git`、日志、`node_modules`）都进了缓存键，改任何一个文件都会击穿它，`pip install` 被迫重跑——CI 从几秒变成几分钟。\n\n配套动作：必配 `.dockerignore`（注意 `*` 不跨 `/`，子目录要写 `**/*.log`），否则上下文污染会让缓存形同虚设。",
+      "follow_ups": [
+        "改了 Dockerfile 里 RUN 命令的一个空格，缓存会失效吗？（会，RUN 的键就是命令行字符串本身）",
+        "ARG 变化会让哪些层失效？（从第一个使用该 ARG 的层开始，其后全部失效）",
+        "CI 里怎么跨机器复用缓存？（--cache-from 拉远端缓存，或把依赖层做成 base 镜像）"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "腾讯",
+        "字节跳动",
+        "京东"
+      ]
+    },
+    {
+      "question": "容器删除后数据还在吗？volume、bind mount、tmpfs 和容器可写层有什么区别？",
+      "answer_md": "**生命周期归属不同**：\n\n| 类型 | 存放位置 | 容器删除后 | 典型用途 |\n|---|---|---|---|\n| volume（命名卷） | `/var/lib/docker/volumes/<name>/_data` | 保留 | 数据库数据、跨容器共享 |\n| bind mount | 宿主任意路径 | 保留 | 挂载配置、源码热重载 |\n| tmpfs | 宿主内存 | 丢失 | 密钥、session 等绝不落盘的数据 |\n| 容器可写层 | overlay upper | **丢失** | 只放能丢的东西 |\n\n**根因**：可写层是容器的私有状态，与容器的 namespace/cgroup 同生共死；而 volume 是 Docker 管理的**独立对象**，容器只是引用它，删除引用不触发对象回收（需要显式 `docker volume rm`，或 `docker rm -v` 连带删除匿名卷）。\n\n**工程铁律**：数据库、上传文件、要留存的日志必须挂卷；容器保持无状态，可随时被替换重建。日志优先打到 stdout 交给日志驱动收集。\n\n**常见坑**：容器改成非 root（uid 10001）运行后，bind mount 的宿主目录属主若不匹配会直接 Permission denied，需要在 Dockerfile 里对齐 uid/gid。",
+      "follow_ups": [
+        "docker rm -v 会删除命名卷吗？（会删除匿名卷；命名卷仍保留，需 volume rm）",
+        "多个容器挂同一个 volume 会冲突吗？（不冲突，这就是共享数据的手段，但要自己处理并发写）",
+        "数据库负载要不要走 overlay 可写层？（不要，写放大严重，应直接挂卷绕开）"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "阿里云",
+        "美团",
+        "滴滴"
+      ]
+    },
+    {
+      "question": "CMD 和 ENTRYPOINT 有什么区别？docker run 的尾部参数到底覆盖谁？",
+      "answer_md": "**职责分工**：ENTRYPOINT 定「可执行文件」，CMD 给「默认参数」；运行时拼成 argv。\n\n**组合规则**：\n\n1. ENTRYPOINT 为 exec 形式时，CMD 的内容**整体作为参数**追加在其后：`ENTRYPOINT [\"python\"]` + `CMD [\"app.py\"]` → `python app.py`；\n2. **没有 ENTRYPOINT** 时，CMD 就是完整命令，`docker run img --help` 会**整体替换** CMD → 最终执行 `--help`（通常报 command not found）；\n3. **有 ENTRYPOINT** 时，run 的尾部参数替换的是 **CMD 而非 ENTRYPOINT**：`docker run img -u` → `python -u`；\n4. ENTRYPOINT 为 **shell 形式**时，CMD **被完全忽略**，等价于 `/bin/sh -c \"...\"`。\n\n**为什么强烈建议用 exec 形式**：shell 形式下 PID 1 是 `/bin/sh`，它**不会把 SIGTERM 转发**给子进程，`docker stop` 每次都要等满 10 秒才被 SIGKILL，滚动发布会被拖慢。\n\n**推荐写法**：`ENTRYPOINT [\"/app/server\"]` + `CMD [\"--port\", \"8080\"]`，既固定了可执行文件，又允许使用者传参。\n\n补充：CMD 为 shell 形式而 ENTRYPOINT 为 exec 形式时，CMD 会以 `/bin/sh -c <cmd>` 两个参数的形式被追加，属于应避免的写法。",
+      "follow_ups": [
+        "怎么让容器既能跑服务又能跑一次性任务？（ENTRYPOINT 指可执行文件，docker run img migrate 传子命令）",
+        "为什么 docker stop 要等 10 秒？（默认宽限期，SIGTERM 后未退出才 SIGKILL）",
+        "shell 形式下 exec 与信号转发具体差在哪？（sh 不会给子进程发信号，需要 exec 或用 tini/dumb-init 做 init）"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "字节跳动",
+        "腾讯",
+        "小红书"
+      ]
+    },
+    {
+      "question": "如何写出一个体积小、可复现且安全的生产级 Dockerfile？请给出可检查的清单。",
+      "answer_md": "**可复现**：\n\n1. 基础镜像固定到具体版本（最好是 `@sha256:<digest>`），**不用 latest**；\n2. `apt-get update && apt-get install` 必须在**同一条 RUN**（否则索引层被缓存，会装到过期/被撤销的包）；\n3. `COPY` 依赖清单 → 安装依赖 → `COPY` 源码，把变化频率低的放前面。\n\n**体积小**：\n\n4. 选小基础镜像（alpine ~5MB / distroless ~2MB）；\n5. 合并 RUN 并清理缓存：`rm -rf /var/lib/apt/lists/*`、`pip install --no-cache-dir`、`npm ci --omit=dev && npm cache clean --force`；\n6. 必配 `.dockerignore`（`.git`、`**/node_modules`、`**/__pycache__`、`**/*.log`、构建产物）；\n7. **多阶段构建**，最终镜像只 `COPY --from` 产物（实测降幅可达 99%）。\n\n**安全**：\n\n8. 显式 `USER 10001` 非 root 运行（同时对齐 bind mount 的宿主目录属主）；\n9. 声明 `HEALTHCHECK`，让编排系统能判断「进程在但不服务」；\n10. **密钥绝不进镜像层**：不写 `ENV TOKEN=...`、不 `COPY .env`——层里的数据 `RUN rm` 也删不掉；运行时注入或构建期用 BuildKit `--secret`；\n11. 运行时再加 `--cap-drop=ALL`、`--security-opt no-new-privileges`、`--read-only` + tmpfs；\n12. CI 接入镜像漏洞扫描（trivy/grype）。\n\n这套清单可直接做成静态检查器（examples/ex13 实测：反例合规率 16.7%，正例 100%）。",
+      "follow_ups": [
+        "为什么 RUN rm 删不掉 ENV 里写的密钥？（ENV 存在镜像配置与层里，rm 只生成 whiteout）",
+        "alpine 一定更好吗？（musl 与 glibc 在 DNS 解析、locale、线程栈上有差异，需先验证）",
+        "怎么在 CI 里强制这些规范？（hadolint 静态检查 + trivy 扫描 + 镜像体积阈值门禁）"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "通用",
+        "字节跳动",
+        "阿里云",
+        "美团",
+        "腾讯"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "title": "相似度度量对比：余弦 / 内积 / L2 的等价关系",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "文档数 = 5  维度 = 8\n余弦相似度 = [-0.2554, -0.1326, 0.006, 0.3168, -0.5575]\n内积 = [-1.0912, -0.411, 0.0174, 1.1388, -1.7406]\nL2 距离 = [3.555, 2.7158, 2.4548, 2.402, 3.1775]\n余弦排名(降序) = [3, 2, 1, 0, 4]\n内积排名(降序) = [3, 2, 1, 0, 4]\nL2排名(升序) = [3, 2, 1, 4, 0]\n归一化后 余弦排名 == 内积排名 = True\nL2排名(升序) 与 余弦排名(降序) 一致 = False\n",
+  "code": "import numpy as np\nrng = np.random.default_rng(42)\nD = 8\ndocs = rng.standard_normal((5, D))\nq = rng.standard_normal(D)\n\ndef cosine(a, b):\n    return float(np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)))\n\ncos_scores = [cosine(q, d) for d in docs]\nip_scores = [float(np.dot(q, d)) for d in docs]\nl2_scores = [float(np.linalg.norm(q - d)) for d in docs]\n\nrank_cos = [i for i, _ in sorted(enumerate(cos_scores), key=lambda x: -x[1])]\nrank_ip = [i for i, _ in sorted(enumerate(ip_scores), key=lambda x: -x[1])]\nrank_l2 = [i for i, _ in sorted(enumerate(l2_scores), key=lambda x: x[1])]\n\nqn = q / np.linalg.norm(q)\ndn = docs / np.linalg.norm(docs, axis=1, keepdims=True)\nip_norm = [float(np.dot(qn, d)) for d in dn]\nrank_ipn = [i for i, _ in sorted(enumerate(ip_norm), key=lambda x: -x[1])]\n\nprint('文档数 = %d  维度 = %d' % (len(docs), D))\nprint('余弦相似度 =', [round(x, 4) for x in cos_scores])\nprint('内积 =', [round(x, 4) for x in ip_scores])\nprint('L2 距离 =', [round(x, 4) for x in l2_scores])\nprint('余弦排名(降序) =', rank_cos)\nprint('内积排名(降序) =', rank_ip)\nprint('L2排名(升序) =', rank_l2)\nprint('归一化后 余弦排名 == 内积排名 =', rank_cos == rank_ipn)\nprint('L2排名(升序) 与 余弦排名(降序) 一致 =', rank_l2 == rank_cos)\n"
+}

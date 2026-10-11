@@ -1,0 +1,72 @@
+{
+  "meta": {
+    "chapter": "ai-ch02",
+    "title": "视觉与序列建模 —— 综合项目",
+    "category": "dl",
+    "count": 1
+  },
+  "items": [
+    {
+      "title": "从零实现一个小型序列/视觉建模库（NumPy only）",
+      "requirement_md": "只用 NumPy（**不允许** PyTorch/TensorFlow）实现本章核心算子，并做定量实证：\n\n1. **卷积算子**：手写滑窗卷积（或 im2col + 矩阵乘等价实现），支持多通道、stride、padding；打印输出特征图形状、参数量、感受野递推结果，并验证两种实现输出一致。\n2. **池化与尺寸公式**：实现 max/avg pooling，针对多组 (n,k,s,p) 验证 out = floor((n+2p−k)/s)+1 与 same=ceil(n/s)。\n3. **RNN + BPTT 梯度量化**：实现 RNN 单步前向与沿时间反向，固定随机种子，把末步梯度反传到首步，打印各步梯度范数，用数据证明谱半径 < 1 时指数衰减。\n4. **LSTM/GRU 门控演算**：给定输入与权重，数值演算 LSTM 三门的取值区间与细胞/隐藏态更新；说明恒等通路如何缓解消失。\n5. **缩放点积注意力**：完整实现 QK^T/√d_k → softmax → V，含因果掩码（用 -inf）；打印注意力权重行和（应≈1）。\n6. **多头 + 位置编码**：实现拆头/合并的维度变换验证与正弦位置编码，打印不同位置编码向量。\n7. **复杂度/参数量对比表**：在相同 hidden size 下，输出 CNN / RNN / Transformer 的参数量与 O(n²d) vs O(nd²) 操作计数（确定性计数，不跑计时）。\n\n**进阶**：把注意力与 RNN 接到同一个序列任务（如字符级预测），对比两者在长程依赖上的准确率差异。",
+      "tasks": [
+        {
+          "title": "实现卷积与尺寸/参数量/感受野公式验证",
+          "verification": {
+            "type": "output",
+            "desc": "滑窗与 im2col 两种卷积输出最大误差 < 1e-6；对多组参数，输出尺寸、参数量、感受野递推结果与公式一致。"
+          }
+        },
+        {
+          "title": "池化与 padding 尺寸公式验证",
+          "verification": {
+            "type": "output",
+            "desc": "对 ≥6 组 (n,k,s,p)，打印 valid/same 输出尺寸，与 floor/ceil 公式逐项吻合。"
+          }
+        },
+        {
+          "title": "RNN BPTT 梯度消失定量证明",
+          "verification": {
+            "type": "output",
+            "desc": "固定种子下，末步梯度反传到首步的范数呈指数衰减（比值随步数下降），打印各步范数与首/末比。"
+          }
+        },
+        {
+          "title": "LSTM/GRU 门控数值演算",
+          "verification": {
+            "type": "output",
+            "desc": "打印三门口取值均落入 (0,1)，细胞态更新符合 c=f·c_prev+i·g，隐藏态符合 h=o·tanh(c)。"
+          }
+        },
+        {
+          "title": "缩放点积注意力 + 因果掩码",
+          "verification": {
+            "type": "output",
+            "desc": "注意力权重每行和 ≈ 1（误差 < 1e-6）；因果掩码下未来位置权重 = 0（非接近 0 的小值）。"
+          }
+        },
+        {
+          "title": "多头拆分与正弦位置编码",
+          "verification": {
+            "type": "output",
+            "desc": "拆头后形状为 (B,h,T,d_k)，合并回 (B,T,d_model) 误差为 0；打印前几个位置编码向量互不相同。"
+          }
+        },
+        {
+          "title": "复杂度与参数量对比表",
+          "verification": {
+            "type": "output",
+            "desc": "相同 hidden size 下输出 CNN/RNN/Transformer 参数量，以及自注意力 O(n²d) 与 RNN O(nd²) 的确定性操作计数，并给出 n<d 时谁更省的结论。"
+          }
+        }
+      ],
+      "tags": [
+        "CNN",
+        "RNN",
+        "注意力",
+        "NumPy",
+        "复杂度分析"
+      ]
+    }
+  ]
+}

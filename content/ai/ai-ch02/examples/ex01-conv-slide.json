@@ -1,0 +1,8 @@
+{
+  "title": "滑窗卷积：输出尺寸、参数量与感受野",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "输入形状: (1, 1, 5, 5)  核形状: (3, 1, 3, 3)\n输出特征图形状: (1, 3, 3, 3)\n参数量: 30 (= Cout*Cin*k*k + Cout = 27 + 3 )\n输出尺寸公式: floor((5 + 0 - 3)/1) + 1 = 3\n单层 3x3 stride1 感受野: 3\n",
+  "code": "\nimport numpy as np\nnp.random.seed(42)\nX = np.random.randn(1, 1, 5, 5)                 # (N, Cin, H, W)\nK = np.random.randn(3, 1, 3, 3)                 # (Cout, Cin, kh, kw)\nb = np.zeros(3)\n\ndef conv2d_slide(x, k, bias, stride=1, padding=0):\n    if padding:\n        x = np.pad(x, ((0,0),(0,0),(padding,padding),(padding,padding)))\n    N, Cin, H, W = x.shape\n    Cout, _, kh, kw = k.shape\n    oh = (H - kh)//stride + 1\n    ow = (W - kw)//stride + 1\n    out = np.zeros((N, Cout, oh, ow))\n    for n in range(N):\n        for c in range(Cout):\n            for i in range(oh):\n                for j in range(ow):\n                    patch = x[n,:, i*stride:i*stride+kh, j*stride:j*stride+kw]\n                    out[n,c,i,j] = np.sum(patch*k[c]) + bias[c]\n    return out\n\nout = conv2d_slide(X, K, b, stride=1, padding=0)\nparams = K.size + b.size\nprint(\"输入形状:\", X.shape, \" 核形状:\", K.shape)\nprint(\"输出特征图形状:\", out.shape)\nprint(\"参数量:\", params, \"(= Cout*Cin*k*k + Cout =\", K.size, \"+\", b.size, \")\")\nprint(\"输出尺寸公式: floor((5 + 0 - 3)/1) + 1 =\", (5+0-3)//1 + 1)\n# 感受野递推：单层 3x3 stride1 感受野 = 1 + (3-1)*1 = 3\nprint(\"单层 3x3 stride1 感受野:\", 1 + (3-1)*1)\n"
+}

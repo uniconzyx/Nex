@@ -1,0 +1,8 @@
+{
+  "title": "if constexpr 按类型在编译期裁剪分支",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "20",
+  "code": "#include <iostream>\n#include <type_traits>\n\ntemplate <typename T>\nint describe(T) {\n    if constexpr (std::is_integral_v<T>) {\n        return 10;\n    } else if constexpr (std::is_floating_point_v<T>) {\n        return 20;\n    } else {\n        return 30;\n    }\n}\n\nint main() {\n    int r = describe(3.5);\n    std::cout << r;\n}"
+}

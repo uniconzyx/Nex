@@ -1,0 +1,8 @@
+{
+  "title": "inline 小函数",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "7",
+  "code": "#include <iostream>\n\ninline int max(int a, int b) { return a > b ? a : b; }\n\nint main() {\n    std::cout << max(4, 7);\n}"
+}

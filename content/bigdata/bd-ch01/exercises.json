@@ -1,0 +1,97 @@
+{
+  "meta": { "chapter": "bd-ch01", "note": "基础题考察 HDFS 概念/计算/Debug；算法题来自刷题平台与开源仓库，仅存元数据与链接（合规红线）。" },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "HDFS 默认三副本的放置顺序，下列哪项正确？",
+      "content_md": "关于 HDFS 默认副本因子为 3 时的放置策略，哪一项符合官方口径？",
+      "options": [
+        { "key": "A", "text": "第1副本本地，第2副本同机架，第3副本跨机架" },
+        { "key": "B", "text": "第1副本本地，第2副本跨机架，第3副本与第2同机架的另一节点" },
+        { "key": "C", "text": "三副本随机分散在三台机器，不区分机架" },
+        { "key": "D", "text": "第1副本本地，其余两份都放在与第1同机架的不同节点" }
+      ],
+      "answer": { "correct": ["B"], "reference_code": "" },
+      "explanation": "官方策略：第1副本在客户端本地节点；第2副本放在不同机架；第3副本放在与第2同机架的另一节点。第2副本即已跨机架，兼顾容灾与写带宽。",
+      "tags": ["副本放置", "机架感知"],
+      "source": "self",
+      "source_ref": "《Hadoop 权威指南》第3章"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "计算一个 300MB 文件在默认 128MB 块大小下的块数",
+      "content_md": "HDFS 默认块大小为 128MB。给定文件大小 300MB，问该文件被切成多少块（最后一块可小于 128MB）？请写出计算结果。",
+      "answer": { "output": "块数 = ceil(300 / 128) = 3 块" },
+      "explanation": "块数 = ceil(文件大小 / 块大小)。300/128 = 2.34，向上取整为 3；前两块各 128MB，第三块 44MB。",
+      "tags": ["块大小", "计算"],
+      "source": "self",
+      "source_ref": "《Hadoop 权威指南》第3章"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "找出下列关于 Secondary NameNode 的错误说法并改正",
+      "content_md": "某教材写道：「Secondary NameNode 是 NameNode 的热备，当 NameNode 宕机时 Secondary NameNode 会自动接管集群，保证高可用。」请指出错误并改正。",
+      "answer": { "correct": ["该说法错误"], "output": "Secondary NameNode 只做 fsimage/edits 的 checkpoint 合并，并非热备；真正的热备是 HA（Active/Standby + QJM + ZKFC）。" },
+      "explanation": "Secondary NameNode 不能接管服务，它只负责周期性合并 fsimage 与 edits。生产高可用必须启用 HA。",
+      "tags": ["Secondary NameNode", "HA", "checkpoint"],
+      "source": "book",
+      "source_ref": "《Hadoop 权威指南》第3章"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "岛屿数量（与集群机架连通域分析思想同源）",
+      "content_md": "题面与完整描述请见外部链接（合规：只存元数据+链接）。本题用 DFS/BFS 求网格中连通块数量，思想与『判断机架/节点连通域、块副本故障域隔离』同源：把矩阵中的 1 视为连通区域，统计独立连通块个数。",
+      "answer": { "reference_code": "见外部链接题解" },
+      "explanation": "连通分量计数；可与 HDFS 机架拓扑中的『故障域识别』类比理解。",
+      "tags": ["图", "DFS", "连通分量"],
+      "source": "leetcode",
+      "source_ref": "LeetCode 200 (number-of-islands)",
+      "external_url": "https://leetcode.cn/problems/number-of-islands/"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "github",
+      "difficulty": "mid",
+      "title": "副本放置：在机架拓扑下实现 fault-domain 隔离放置",
+      "content_md": "题面与完整描述请见外部仓库（合规：只存元数据+链接）。要求在给定『节点→机架』拓扑下，为某个块的 r 个副本挑选节点，使得任意两副本不共机架（在 r ≤ 机架数时），并尽量让首个副本本地。",
+      "answer": { "reference_code": "见外部仓库实现" },
+      "explanation": "本质是带约束的候选节点剪枝：按拓扑树保证副本落在不同故障域，对应 HDFS 机架感知放置策略。",
+      "tags": ["副本放置", "机架感知", "约束满足"],
+      "source": "github",
+      "source_ref": "apache/hadoop HDFS BlockPlacementPolicy",
+      "external_url": "https://github.com/apache/hadoop/tree/trunk/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/blockmanagement"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "HDFS 刚启动后处于安全模式（Safe Mode），原因是什么？",
+      "content_md": "NameNode 重启后，集群会先进入安全模式（只读不写），直到满足阈值才自动退出。其根本原因是什么？",
+      "options": [
+        { "key": "A", "text": "NameNode 在等待所有 DataNode 全部重启完成" },
+        { "key": "B", "text": "块到 DataNode 的映射需由 DataNode 块报告动态重建，未收齐前数据完整性无法保证" },
+        { "key": "C", "text": "edits 日志损坏需要人工修复" },
+        { "key": "D", "text": "HDFS 默认启动就是只读模式，与状态无关" }
+      ],
+      "answer": { "correct": ["B"], "reference_code": "" },
+      "explanation": "块位置映射不持久化在 fsimage，而是启动后由块报告重建；安全模式是『数据完整性闸门』，待达到最小副本比例的块数达标才退出。",
+      "tags": ["安全模式", "块报告"],
+      "source": "self",
+      "source_ref": "《Hadoop 权威指南》第3章"
+    }
+  ]
+}

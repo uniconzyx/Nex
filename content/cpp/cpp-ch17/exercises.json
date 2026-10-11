@@ -1,0 +1,140 @@
+{
+  "meta": {
+    "chapter": "cpp-ch17",
+    "note": "6 题，混合基础题(4)与算法题(2)；含 LeetCode 50 / 牛客 C++ 专项元数据+链接（不搬运题面）。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "关于 SFINAE，下列说法正确的是",
+      "content_md": "选择**正确**的描述。",
+      "options": [
+        {
+          "key": "A",
+          "text": "SFINAE 能把函数体内的任何错误都变成软失败"
+        },
+        {
+          "key": "B",
+          "text": "模板参数替换阶段发生的失败会被忽略，该模板从候选集移除"
+        },
+        {
+          "key": "C",
+          "text": "enable_if 的条件不必互斥，编译器会自动补全"
+        },
+        {
+          "key": "D",
+          "text": "函数模板支持偏特化来模拟约束"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "SFINAE 仅作用于替换阶段；函数体错误是硬错误。enable_if 条件需互斥且完备；函数模板不支持偏特化（只能重载/全特化）。",
+      "tags": [
+        "sfinae",
+        "enable_if"
+      ],
+      "source": "self",
+      "source_ref": "《C++ Templates: The Complete Guide（第2版）》第 8、19 章"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "读代码写输出（type_traits 萃取）",
+      "content_md": "```cpp\n#include <iostream>\n#include <type_traits>\nint main() {\n  bool a = std::is_same_v<std::remove_reference_t<int&>, int>;\n  bool b = std::is_same_v<std::decay_t<int[3]>, int*>;\n  std::cout << std::boolalpha << a << b;\n}\n```",
+      "answer": {
+        "output": "truetrue"
+      },
+      "explanation": "remove_reference_t<int&> 为 int；decay_t<int[3]> 退化为 int*，两者均 true。",
+      "tags": [
+        "type-traits",
+        "output"
+      ],
+      "source": "self",
+      "source_ref": "《C++ Templates: The Complete Guide（第2版）》第 14 章"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "修复完美转发丢失值类别",
+      "content_md": "下面 `wrapper` 直接把 `x` 传给 `callee`，右值性会丢失。请用 `std::forward` 修复（保留值类别）：\n```cpp\ntemplate <typename T>\nvoid wrapper(T&& x) { callee(x); }\n```",
+      "answer": {
+        "reference_code": "template <typename T>\nvoid wrapper(T&& x) { callee(std::forward<T>(x)); }"
+      },
+      "explanation": "具名转发引用 `x` 永远是左值；必须 `std::forward<T>(x)` 才能还原传入时的值类别（引用折叠在此生效）。",
+      "tags": [
+        "perfect-forward",
+        "fix-error"
+      ],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 16 章"
+    },
+    {
+      "type": "explain",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "constexpr 与 const 的区别；如何证明函数确在编译期执行",
+      "content_md": "解释：`constexpr` 与 `const` 有何本质区别？如何证明一个 `constexpr` 函数真的在编译期求值？",
+      "answer": {
+        "reference_code": "const 只保证运行时不修改；constexpr 保证值可在编译期确定。证明方式：把结果用于需要编译期常量的语境，如 static_assert(f(10)==X) 或 constexpr int x = f(10); 或 int arr[f(5)];。若这些能编译通过，说明确在编译期求值。"
+      },
+      "explanation": "核心是「constexpr=编译期可知，const=运行时不改」；用 static_assert / 编译期数组大小强制编译期求值。",
+      "tags": [
+        "constexpr",
+        "const"
+      ],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 19 章"
+    },
+    {
+      "type": "design",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "LeetCode 50 · Pow(x, n)（可用 constexpr 编译期预计算）",
+      "content_md": "实现 `double myPow(double x, int n)` 计算 x 的 n 次幂，要求 O(log n)。可借 constexpr/模板元编程在编译期预计算查表以提速（详见 external_url，不在此搬运题面）。",
+      "answer": {
+        "reference_code": "// 思路：快速幂（二分）。若要求编译期：可用 constexpr 实现幂并 static_assert 校验；\n// 或模板元编程在编译期生成小指数查表。具体实现见 external_url 原题要求。"
+      },
+      "explanation": "快速幂是 constexpr 友好的经典场景；编译期预计算可把运行开销降为零（以编译时间为代价）。",
+      "tags": [
+        "constexpr",
+        "fast-pow",
+        "leetcode"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 50（powx-n）",
+      "external_url": "https://leetcode.cn/problems/powx-n/"
+    },
+    {
+      "type": "design",
+      "category": "算法题",
+      "platform": "nowcoder",
+      "difficulty": "mid",
+      "title": "牛客网 · C++ 模板/泛型专项（类型萃取与 SFINAE 实战）",
+      "content_md": "此类题目要求用模板元编程/type_traits 实现类型安全的泛型工具（如根据类型选择不同实现）。请结合本章 SFINAE 与 concept 知识作答（详见 external_url，不在此搬运题面）。",
+      "answer": {
+        "reference_code": "// 思路：用 enable_if/if constexpr 按 type_traits 选择分支；C++20 用 concept 表达约束。\n// 具体题目与实现见 external_url 专项练习要求。"
+      },
+      "explanation": "牛客 C++ 专项常考「泛型 + traits + 编译期约束」，是 SFINAE/concept 的标准应用场景。",
+      "tags": [
+        "sfinae",
+        "type-traits",
+        "nowcoder"
+      ],
+      "source": "nowcoder",
+      "source_ref": "牛客网 · C++ 专项练习（模板与泛型）",
+      "external_url": "https://www.nowcoder.com/exam/"
+    }
+  ]
+}

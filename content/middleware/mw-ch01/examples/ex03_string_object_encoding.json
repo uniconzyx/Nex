@@ -1,0 +1,9 @@
+{
+  "title": "String 对象编码判定：int / embstr / raw",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "'123'                  -> int\n'hello'                -> embstr\n'xxxxxxxxxxxxxxxxxxxx' -> embstr\n'xxxxxxxxxxxxxxxxxxxx' -> raw\n'99999999999999999999' -> embstr",
+  "code": "\ndef encoding_of(value):\n    try:\n        iv = int(value)\n        if str(iv) == value and -(2 ** 63) <= iv < 2 ** 63:\n            return \"int\"\n    except ValueError:\n        pass\n    if len(value.encode(\"utf-8\")) <= 44:\n        return \"embstr\"\n    return \"raw\"\n\ncases = [\"123\", \"hello\", \"x\" * 44, \"x\" * 45, \"99999999999999999999\"]\nfor v in cases:\n    print(\"%-22s -> %s\" % (repr(v[:20]), encoding_of(v)))\n",
+  "_verified": true
+}

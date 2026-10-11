@@ -1,0 +1,8 @@
+{
+  "title": "结构化绑定：解构 pair / 结构体 / map 迭代器",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "auto [status, score] = fetch();  -> AC / 42\n引用绑定后修改 -> p = (13, 24)\n遍历 map:\n  cpp = 90\n  java = 85",
+  "code": "#include <iostream>\n#include <map>\n#include <string>\n#include <utility>\nusing namespace std;\n\npair<string, int> fetch() { return {\"AC\", 42}; }\n\nstruct Point { int x, y; };\n\nint main() {\n    auto [status, score] = fetch();\n    cout << \"auto [status, score] = fetch();  -> \" << status << \" / \" << score << \"\\n\";\n\n    Point p{3, 4};\n    auto& [px, py] = p;      // 绑定到引用才能修改原对象\n    px += 10;\n    py += 20;\n    cout << \"引用绑定后修改 -> p = (\" << p.x << \", \" << p.y << \")\\n\";\n\n    cout << \"遍历 map:\\n\";\n    map<string, int> m{{\"cpp\", 90}, {\"java\", 85}};\n    for (const auto& [k, v] : m) {\n        cout << \"  \" << k << \" = \" << v << \"\\n\";\n    }\n}"
+}

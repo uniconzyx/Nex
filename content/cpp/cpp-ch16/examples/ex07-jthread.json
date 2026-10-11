@@ -1,0 +1,8 @@
+{
+  "title": "jthread（C++20）自动 join 与协作取消",
+  "code_lang": "cpp",
+  "code_std": "c++20",
+  "stdin": "",
+  "expected_output": "jthread done",
+  "code": "#include <iostream>\n#include <thread>\n\nvoid worker(std::stop_token st) {\n    while (!st.stop_requested()) {   // 协作式取消：定期检查\n        // 模拟工作（此处空转，主线程 join 时会请求停止）\n        break;                        // 演示中直接退出循环\n    }\n}\n\nint main() {\n    std::jthread t(worker);   // 析构自动请求停止并 join，不会 terminate\n    // t 在此析构：自动 stop + join\n    std::cout << \"jthread done\";\n}"
+}

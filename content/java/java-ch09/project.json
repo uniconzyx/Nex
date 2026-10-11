@@ -1,0 +1,70 @@
+{
+  "meta": {
+    "chapter": "java-ch09",
+    "note": "1 个工程化项目：从零搭建一个可运行的 Spring Boot 服务，并做依赖与构建治理。"
+  },
+  "items": [
+    {
+      "title": "从零搭建「短链服务」并完成工程治理",
+      "requirement_md": "以本机可用工具（JDK 17+、Maven 3.8+、无需外网仓库时可先用本地仓库离线演示）搭建一个可运行的最小 Web 服务，并完成依赖与构建层治理。目标是走通「**写代码 → 构建 → 打包 → 运行 → 测试**」全链路，而不是堆功能。\n\n**功能范围（保持最小）**\n- `POST /api/links` 提交长链接，返回短码\n- `GET /{code}` 302 跳转到原链接\n- `GET /api/links/{code}` 查询元数据（创建时间、访问次数）\n\n**工程要求**\n- 分层清晰：controller / service / repository 三层，DTO 与 Entity 分离\n- 全部使用**构造器注入**，依赖声明为 `final`\n- 参数校验用 `@Valid` + 全局异常处理（`@ControllerAdvice`），不在 controller 里写 try-catch\n- 用 Maven 管理依赖，父 POM 收敛版本，禁止在子模块散落 `<version>`\n- 测试分三层：service 单元测试（Mockito）、controller 切片测试、一条关键路径集成测试；集成测试命名 `*IT`",
+      "tasks": [
+        {
+          "title": "初始化工程骨架与父 POM",
+          "detail": "建多模块工程 `shortlink-parent`（common / service / web），父 POM 中用 `<dependencyManagement>` 收敛全部版本，子模块不写 `<version>`；确认 `mvn -q clean package` 通过。",
+          "verification": {
+            "type": "test",
+            "desc": "`mvn clean package` 退出码为 0，且 `mvn dependency:tree -Dverbose` 无 omitted for conflict 告警"
+          }
+        },
+        {
+          "title": "实现分层与依赖注入",
+          "detail": "controller / service / repository 三层，全部构造器注入；用 `record` 定义 DTO；repository 先用内存 `Map` 实现，便于后续替换。",
+          "verification": {
+            "type": "test",
+            "desc": "service 的单元测试可在**不启动 Spring 容器**的情况下直接 `new` 出实例并通过"
+          }
+        },
+        {
+          "title": "参数校验与全局异常处理",
+          "detail": "请求体用 `@Valid` + `@NotBlank`/`@Pattern` 校验；写 `@ControllerAdvice` 把校验失败（400）、找不到（404）、系统异常（500）映射为统一错误结构。",
+          "verification": {
+            "type": "test",
+            "desc": "`@WebMvcTest` 切片测试覆盖 400/404/500 三条分支，且 controller 内无 try-catch"
+          }
+        },
+        {
+          "title": "短码生成与并发安全",
+          "detail": "短码用 Base62 编码自增序号或 CRC32 摘要生成；service 为单例，**不得持有可变实例字段**（计数器改用 `AtomicLong` 或交给 repository）。",
+          "verification": {
+            "type": "test",
+            "desc": "并发测试下生成的短码无重复；service 类的字段全部为 final"
+          }
+        },
+        {
+          "title": "构建产物与启动验证",
+          "detail": "用 `spring-boot-maven-plugin` 打可执行 jar，`java -jar` 启动后能完成一次「提交 → 跳转 → 查元数据」闭环；确认 `provided`/`test` 依赖未进入 `BOOT-INF/lib`。",
+          "verification": {
+            "type": "manual",
+            "desc": "`unzip -l target/*.jar | grep BOOT-INF/lib` 中不含 servlet-api 与 junit"
+          }
+        },
+        {
+          "title": "测试分层与 CI 提速",
+          "detail": "单测命名 `*Test`、集成测试命名 `*IT`；配置 failsafe 绑到 `verify`；比较 `mvn test` 与 `mvn verify` 的耗时差异。",
+          "verification": {
+            "type": "test",
+            "desc": "`mvn test` 不启动 Spring 上下文（日志中无 ApplicationContext 启动记录）"
+          }
+        },
+        {
+          "title": "依赖治理复盘",
+          "detail": "人为引入一次版本冲突（两个模块依赖同一库的不同版本），用 `dependency:tree -Dverbose` 定位，再用 `dependencyManagement` 钉死版本，记录排查过程。",
+          "verification": {
+            "type": "manual",
+            "desc": "提交一份排查笔记：冲突现象 → 定位命令 → 裁剪原因 → 修复方式"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "title": "String 编码转换：int / embstr / raw",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "String 编码转换 (OBJ_ENCODING):\n  SET k 123 -> int\n  SET k 'hello' -> embstr\n  SET k 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' -> embstr\n  SET k 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' -> raw\n  SET k 'short' -> embstr\n  触发转换: APPEND 到 embstr 会先转 raw 再追加(embstr 只读紧凑)\n  长度44 -> embstr; 长度45 -> raw (44 来自 64B jemalloc - robj16 - sdshdr8(3B) - 1B)",
+  "code": "EMBSTR_LIMIT = 44\ndef encoding(val):\n    s = str(val)\n    if s.lstrip(\"-\").isdigit():\n        return \"int\"\n    if len(s.encode()) <= EMBSTR_LIMIT:\n        return \"embstr\"\n    return \"raw\"\n\nprint(\"String 编码转换 (OBJ_ENCODING):\")\nfor v in [123, \"hello\", \"x\" * 44, \"x\" * 45, \"short\"]:\n    print(f\"  SET k {v!r} -> {encoding(v)}\")\nprint(\"  触发转换: APPEND 到 embstr 会先转 raw 再追加(embstr 只读紧凑)\")\nprint(f\"  长度44 -> {encoding('x' * 44)}; 长度45 -> {encoding('x' * 45)} (44 来自 64B jemalloc - robj16 - sdshdr8(3B) - 1B)\")\n",
+  "_verified": true
+}

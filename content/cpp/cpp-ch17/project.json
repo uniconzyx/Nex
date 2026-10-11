@@ -1,0 +1,49 @@
+{
+  "meta": {
+    "chapter": "cpp-ch17",
+    "category": "system"
+  },
+  "items": [
+    {
+      "title": "实现一个编译期类型列表与 traits 工具箱",
+      "requirement_md": "设计并实现一个小型头-only 元编程工具箱（参考本章 type_traits / 变参 / 特化 / constexpr）：\n1. `TypeList<Ts...>`：编译期类型列表，提供 `Size`（类型数）、`At<I>`（取第 I 个类型）、`Contains<T>`（是否含某类型）等元函数；\n2. `has_member_size<T>`：用 SFINAE/decltype 探测表达式 `std::declval<T>().size()` 是否良构，得到 `value` 编译期 bool；\n3. `constexpr` 函数 `gcd(a, b)` 计算最大公约数，并用 `static_assert` 在编译期验证若干组输入；\n4. `print_all(Ts&&...)`：用折叠表达式 + `std::forward` 转发并打印任意数量参数；\n5. （C++20 可选）用 `concept Container = requires{ {t.size()} -> std::convertible_to<size_t>; }` 约束 `print_all` 仅接受容器。\n6. 写 `main` 验证上述能力，确保编译通过且输出符合预期。",
+      "tasks": [
+        {
+          "title": "实现 TypeList 元函数",
+          "verification": {
+            "type": "test",
+            "desc": "Size/At/Contains 在编译期得到正确结果；可用 static_assert 验证"
+          }
+        },
+        {
+          "title": "实现 SFINAE 探测 has_member_size",
+          "verification": {
+            "type": "test",
+            "desc": "对含 size() 的类型 value=true，反之 false"
+          }
+        },
+        {
+          "title": "实现 constexpr gcd + static_assert",
+          "verification": {
+            "type": "test",
+            "desc": "static_assert(gcd(12,18)==6) 等通过，证明编译期求值"
+          }
+        },
+        {
+          "title": "实现折叠+完美转发的 print_all",
+          "verification": {
+            "type": "test",
+            "desc": "转发后值类别保留（右值不被误当左值），输出正确"
+          }
+        },
+        {
+          "title": "（可选）concept 约束",
+          "verification": {
+            "type": "test",
+            "desc": "非容器类型调用 print_all 在编译期被 concept 拒绝"
+          }
+        }
+      ]
+    }
+  ]
+}

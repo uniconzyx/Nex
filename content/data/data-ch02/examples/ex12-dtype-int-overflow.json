@@ -1,0 +1,8 @@
+{
+  "title": "dtype 溢出：int8/uint8 回绕与 float64 上溢",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "int8 127 + 1 = -128\nuint8 255 + 1 = 0\nfloat64 overflow -> inf: True",
+  "code": "import numpy as np\na = np.array([127], dtype=np.int8)\na = a + 1\nprint(\"int8 127 + 1 =\", int(a[0]))\nu = np.array([255], dtype=np.uint8)\nu = u + 1\nprint(\"uint8 255 + 1 =\", int(u[0]))\nbig = np.float64(1.7e308) * 10\nprint(\"float64 overflow -> inf:\", np.isinf(big))"
+}

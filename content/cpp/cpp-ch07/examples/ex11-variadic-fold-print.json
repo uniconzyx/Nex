@@ -1,0 +1,8 @@
+{
+  "title": "折叠表达式链式打印（逗号运算符）",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "x=1 y=2.5\n",
+  "code": "#include <iostream>\ntemplate <typename... Ts>\nvoid print_all(Ts... ts) { (std::cout << ... << ts); std::cout << '\\n'; }\nint main() {\n    print_all(\"x=\", 1, \" y=\", 2.5);\n}\n"
+}

@@ -1,0 +1,9 @@
+{
+  "title": "哨兵主观下线 SDOWN：单哨兵心跳缺失判定",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== 哨兵主观下线 SDOWN 模拟 ===\n哨兵每秒向主节点 PING; down-after-milliseconds = 3 秒\n第 1 秒: 未收到 PONG, 连续缺失=1\n第 2 秒: 未收到 PONG, 连续缺失=2\n第 3 秒: 未收到 PONG, 连续缺失=3\n连续缺失>=3 -> 该哨兵主观判定主节点下线 SDOWN",
+  "code": "print(\"=== 哨兵主观下线 SDOWN 模拟 ===\")\nDOWN_AFTER = 3\nprint(\"哨兵每秒向主节点 PING; down-after-milliseconds = %d 秒\" % DOWN_AFTER)\nmiss = 0\nfor sec in range(1, 5):\n    miss += 1\n    print(\"第 %d 秒: 未收到 PONG, 连续缺失=%d\" % (sec, miss))\n    if miss >= DOWN_AFTER:\n        print(\"连续缺失>=%d -> 该哨兵主观判定主节点下线 SDOWN\" % DOWN_AFTER)\n        break\n",
+  "_verified": true
+}

@@ -1,0 +1,8 @@
+{
+  "title": "行优先 vs 列优先遍历矩阵：缓存行未命中数对比（确定性模型）",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "行优先未命中=65536 列优先未命中=1048576\n行优先更省缓存行: 1\n列优先/行优先 倍数=16\n校验和=2097152",
+  "code": "#include <cstdio>\n#include <cstdint>\n#include <vector>\n\nstruct Cache {\n    int nlines;\n    std::vector<long long> tag;\n    long long miss = 0;\n    explicit Cache(int n) : nlines(n), tag(n, -1) {}\n    void access(const void* p) {\n        long long t = (long long)((uintptr_t)p / 64);\n        int idx = (int)(t % nlines);\n        if (tag[idx] != t) { ++miss; tag[idx] = t; }\n    }\n    void reset() { for (auto& x : tag) x = -1; miss = 0; }\n};\n\nconst int M = 1024;\nstd::vector<int> mat((size_t)M * M, 1);     // 行优先存储的 M×M 矩阵\n\nint main() {\n    Cache c(256);\n    long long acc = 0;\n\n    // 行优先遍历：内层沿行方向连续推进 → 空间局部性最好\n    for (int i = 0; i < M; ++i)\n        for (int j = 0; j < M; ++j) {\n            c.access(&mat[(size_t)i * M + j]);\n            acc += mat[(size_t)i * M + j];\n        }\n    long long row_miss = c.miss;\n\n    c.reset();\n    // 列优先遍历：内层跨行跳（步长 M*4=4096 字节 = 64 行）→ 每次都换行\n    for (int j = 0; j < M; ++j)\n        for (int i = 0; i < M; ++i) {\n            c.access(&mat[(size_t)i * M + j]);\n            acc += mat[(size_t)i * M + j];\n        }\n    long long col_miss = c.miss;\n\n    printf(\"行优先未命中=%lld 列优先未命中=%lld\\n\", row_miss, col_miss);\n    printf(\"行优先更省缓存行: %d\\n\", (int)(row_miss < col_miss));\n    printf(\"列优先/行优先 倍数=%lld\\n\", col_miss / row_miss);\n    printf(\"校验和=%lld\\n\", acc);\n    return 0;\n}"
+}

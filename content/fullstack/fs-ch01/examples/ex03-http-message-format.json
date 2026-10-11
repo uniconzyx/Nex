@@ -1,0 +1,8 @@
+{
+  "title": "HTTP 报文结构：请求行、头部、空行与主体",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "== 请求行 ==\nmethod  = POST\ntarget  = /v1/users\nversion = HTTP/1.1\n== 头部 ==\nhost: api.example.com\ncontent-type: application/json\ncontent-length: 25\n== 主体 ==\nbody = {\"name\":\"cppcat\",\"age\":1}\nbody 字节数 = 25\n与 Content-Length 一致: true\n\n空行（CRLF CRLF）是头部与主体的分界符；解析器逐行读到空行即停止解析头部。",
+  "code": "const raw = [\n  'POST /v1/users HTTP/1.1',\n  'Host: api.example.com',\n  'Content-Type: application/json',\n  'Content-Length: 25',\n  '',\n  '{\"name\":\"cppcat\",\"age\":1}',\n].join('\\r\\n');\n\nconst sepAt = raw.indexOf('\\r\\n\\r\\n');\nconst head = raw.slice(0, sepAt);\nconst body = raw.slice(sepAt + 4);\nconst lines = head.split('\\r\\n');\nconst [requestLine, ...headerLines] = lines;\n\nconst m = requestLine.match(/^(\\S+)\\s+(\\S+)\\s+(HTTP\\/[\\d.]+)$/);\nconsole.log('== 请求行 ==');\nconsole.log('method  = ' + m[1]);\nconsole.log('target  = ' + m[2]);\nconsole.log('version = ' + m[3]);\n\nconsole.log('== 头部 ==');\nconst headers = new Map();\nfor (const l of headerLines) {\n  const i = l.indexOf(':');\n  headers.set(l.slice(0, i).toLowerCase(), l.slice(i + 2));\n}\nfor (const [k, v] of headers) console.log(k + ': ' + v);\n\nconsole.log('== 主体 ==');\nconst bytes = Buffer.byteLength(body);\nconsole.log('body = ' + body);\nconsole.log('body 字节数 = ' + bytes);\nconsole.log('与 Content-Length 一致: ' + (bytes === Number(headers.get('content-length'))));\nconsole.log('');\nconsole.log('空行（CRLF CRLF）是头部与主体的分界符；解析器逐行读到空行即停止解析头部。');"
+}

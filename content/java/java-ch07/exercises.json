@@ -1,0 +1,218 @@
+{
+  "meta": {
+    "chapter": "java-ch07",
+    "note": "8 题，基础题 6 + 算法题 2；LeetCode 题仅存元数据与链接，不搬运题面。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "关于线程的 start() 与 run()",
+      "content_md": "下面关于 `Thread.start()` 与 `Thread.run()` 的描述，**正确**的是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "直接调用 run() 也会启动一个新线程，只是不返回线程句柄"
+        },
+        {
+          "key": "B",
+          "text": "start() 会创建新线程并由新线程回调 run()；直接调用 run() 只是普通方法调用，仍在当前线程执行"
+        },
+        {
+          "key": "C",
+          "text": "同一个 Thread 对象可以多次调用 start() 反复重启线程"
+        },
+        {
+          "key": "D",
+          "text": "start() 与 run() 在字节码层面完全等价"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "start() 内部调用 native 的 start0() 创建内核线程（HotSpot 中 Java 线程与内核线程 1:1），由新线程回调 run()。直接调 run() 只是普通方法调用，线程名仍是调用者线程（如 main）。同一个 Thread 对象 start() 两次会抛 IllegalThreadStateException——线程结束后进入 TERMINATED，不可复活，想「重启」只能 new 一个新线程。",
+      "tags": [
+        "thread",
+        "start",
+        "run"
+      ],
+      "source": "book",
+      "source_ref": "《Java 并发编程实战》第 1 章 简介"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "关于 volatile 的语义边界",
+      "content_md": "下面关于 `volatile` 的描述，**正确**的是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "volatile 保证可见性与有序性，但不保证复合操作（如 count++）的原子性"
+        },
+        {
+          "key": "B",
+          "text": "volatile 等价于轻量级锁，可以替代 synchronized"
+        },
+        {
+          "key": "C",
+          "text": "volatile 字段的写不会被其他线程立即看到，因为仍在 CPU 缓存中"
+        },
+        {
+          "key": "D",
+          "text": "volatile 能保证 i++ 这样的自增操作在多线程下不丢失更新"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "A"
+        ]
+      },
+      "explanation": "volatile 提供两条语义：写立即刷回主存并使其他缓存行失效（可见性），以及在写前后插入 StoreLoad 屏障禁止重排序（有序性）。但它不提供互斥，因此 count++ 这种「读-加-写」复合操作依然会丢失更新。volatile 的两个典型正确用法是「一写多读的状态标志位」与「双重检查锁定的实例字段」。",
+      "tags": [
+        "volatile",
+        "jmm",
+        "visibility"
+      ],
+      "source": "book",
+      "source_ref": "《Java 并发编程实战》第 3 章 对象的共享"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "关于 ThreadPoolExecutor 的任务提交流程",
+      "content_md": "`ThreadPoolExecutor(corePoolSize=2, maximumPoolSize=4, workQueue=ArrayBlockingQueue(capacity=3))`，当 7 个任务瞬间提交且都长时间不结束，第 8 个任务提交时会发生什么？**正确**的描述是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "进入队列排队，因为线程池会优先排队而不是建线程"
+        },
+        {
+          "key": "B",
+          "text": "触发拒绝策略，因为此时已有 4 个线程在跑且队列已满 3 个任务"
+        },
+        {
+          "key": "C",
+          "text": "线程池扩容到 5 个线程执行"
+        },
+        {
+          "key": "D",
+          "text": "抛出 IllegalStateException"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "提交流程是四步判定：① 运行线程数 < corePoolSize → 建核心线程；② 否则入队；③ 队满且线程数 < maximumPoolSize → 建非核心线程；④ 否则拒绝。7 个任务后：核心 2 个在跑、队列 3 个、非核心又建 2 个（共 4 个线程在跑），资源用尽，第 8 个任务触发 AbortPolicy 抛 RejectedExecutionException。注意若队列换成无界的 LinkedBlockingQueue，第 2 步永远成功，maximumPoolSize 将形同虚设。",
+      "tags": [
+        "threadpool",
+        "reject"
+      ],
+      "source": "book",
+      "source_ref": "《Java 并发编程实战》第 8 章 线程池的使用"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "修复双重检查锁定单例（并发不安全）",
+      "content_md": "下面这个 DCL 单例在高并发下可能返回「非 null 但字段未初始化」的半成品对象，请指出问题并修复：\n\n```java\nclass Config {\n    private static Config inst;\n    private String name = \"default\";\n    static Config get() {\n        if (inst == null) {\n            synchronized (Config.class) {\n                if (inst == null) inst = new Config();\n            }\n        }\n        return inst;\n    }\n    String name() { return name; }\n}\n```",
+      "answer": {
+        "reference_code": "class Config {\n    private static volatile Config inst;   // 关键：加 volatile\n    private String name = \"default\";\n    static Config get() {\n        if (inst == null) {\n            synchronized (Config.class) {\n                if (inst == null) inst = new Config();\n            }\n        }\n        return inst;\n    }\n    String name() { return name; }\n}"
+      },
+      "explanation": "`new Config()` 会被编译为「分配内存 → 初始化对象 → 把引用赋给 inst」，其中初始化与引用赋值可能被重排序。线程 A 若停在「已分配内存、尚未初始化」时把引用写出去，线程 B 的第一次检查就会看到非 null，进而拿到字段还是默认值的半成品。给 `inst` 加 `volatile` 后，写前插入屏障禁止该重排序，从而保证「看到引用时对象已构造完成」。",
+      "tags": [
+        "dcl",
+        "volatile",
+        "singleton"
+      ],
+      "source": "self",
+      "source_ref": "java-ch07 concept 02 · JMM 与可见性"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "读代码写输出（synchronized 可重入与锁对象）",
+      "content_md": "写出下面程序的输出：\n\n```java\npublic class T {\n    static final Object L1 = new Object();\n    static final Object L2 = new Object();\n    static int n = 0;\n    static void a() {\n        synchronized (L1) { n++; b(); }\n    }\n    static void b() {\n        synchronized (L1) { n++; }      // 与 a() 同锁\n        synchronized (L2) { n++; }      // 不同锁\n    }\n    public static void main(String[] argv) {\n        a();\n        System.out.println(n);\n        System.out.println(Thread.holdsLock(L1));\n    }\n}\n```",
+      "answer": {
+        "output": "3\nfalse"
+      },
+      "explanation": "`a()` 持有 L1 时进入 `b()`，`b()` 再次获取同一把 L1 属于**可重入**（monitor 内部有重入计数），不会自锁；随后获取另一把 L2，正常推进。因此三次自增后 `n == 3`。`a()` 返回后所有锁已释放，主线程调用 `holdsLock(L1)` 返回 `false`（主线程从未持有 L1）。若把 `b()` 中第一段的 L1 换成一把新对象，仍然不会死锁——死锁只发生在「多线程交叉持有」的场景。",
+      "tags": [
+        "synchronized",
+        "reentrant"
+      ],
+      "source": "self",
+      "source_ref": "java-ch07 concept 02 · synchronized 三重语义"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "medium",
+      "external_url": "https://leetcode.cn/problems/print-in-order/",
+      "title": "LeetCode 1114 · 按序打印",
+      "content_md": "三个线程分别调用 `first()` / `second()` / `third()`，要求输出严格为 `firstsecondthird`，无论线程调度顺序如何。请用 JUC 同步原语实现（`CountDownLatch` 或 `Semaphore` 均可）。题面详见原题链接，本题不搬运题面。",
+      "answer": {
+        "reference_code": "import java.util.concurrent.*;\n\npublic class Main {\n    private final CountDownLatch l2 = new CountDownLatch(1);\n    private final CountDownLatch l3 = new CountDownLatch(1);\n\n    public void first(Runnable printFirst) throws InterruptedException {\n        printFirst.run();\n        l2.countDown();\n    }\n    public void second(Runnable printSecond) throws InterruptedException {\n        l2.await();\n        printSecond.run();\n        l3.countDown();\n    }\n    public void third(Runnable printThird) throws InterruptedException {\n        l3.await();\n        printThird.run();\n    }\n\n    public static void main(String[] a) throws Exception {\n        Main m = new Main();\n        Thread t1 = new Thread(() -> { try { m.first(() -> System.out.print(\"first\")); } catch (Exception e) {} });\n        Thread t2 = new Thread(() -> { try { m.second(() -> System.out.print(\"second\")); } catch (Exception e) {} });\n        Thread t3 = new Thread(() -> { try { m.third(() -> System.out.print(\"third\")); } catch (Exception e) {} });\n        t2.start(); t3.start(); t1.start();\n        t1.join(); t2.join(); t3.join();\n        System.out.println();\n    }\n}"
+      },
+      "explanation": "用两条 `CountDownLatch` 组成「链式闸门」：`first` 完成后放行 `second`，`second` 完成后放行 `third`。注意故意让 t2、t3 先启动，证明顺序由同步原语而非线程启动顺序决定。`CountDownLatch` 一次性、不可重置，正好匹配「三条线程各跑一次」的语义。",
+      "tags": [
+        "concurrency",
+        "countdownlatch"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 1114 (print-in-order)"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "medium",
+      "external_url": "https://leetcode.cn/problems/print-foobar-alternately/",
+      "title": "LeetCode 1115 · 交替打印 FooBar",
+      "content_md": "两个线程交替输出 `foo` 与 `bar`，共 n 次，结果必须是 `foobarfoobar...`。请用 `Semaphore` 或 `Condition` 实现。题面详见原题链接，本题不搬运题面。",
+      "answer": {
+        "reference_code": "import java.util.concurrent.*;\n\npublic class Main {\n    private final Semaphore fooGate = new Semaphore(1);\n    private final Semaphore barGate = new Semaphore(0);\n\n    public void foo(Runnable printFoo) throws InterruptedException {\n        for (int i = 0; i < 3; i++) {\n            fooGate.acquire();\n            printFoo.run();\n            barGate.release();\n        }\n    }\n    public void bar(Runnable printBar) throws InterruptedException {\n        for (int i = 0; i < 3; i++) {\n            barGate.acquire();\n            printBar.run();\n            fooGate.release();\n        }\n    }\n\n    public static void main(String[] a) throws Exception {\n        Main m = new Main();\n        Thread tf = new Thread(() -> { try { m.foo(() -> System.out.print(\"foo\")); } catch (Exception e) {} });\n        Thread tb = new Thread(() -> { try { m.bar(() -> System.out.print(\"bar\")); } catch (Exception e) {} });\n        tf.start(); tb.start(); tf.join(); tb.join();\n        System.out.println();\n    }\n}"
+      },
+      "explanation": "两个信号量互为「令牌」：`fooGate` 初值 1 让 foo 先跑，跑完 release `barGate`；bar 拿到令牌后执行再 release `fooGate`，形成乒乓。注意 `acquire()` 会抛受检的 `InterruptedException`，线程体里必须处理（不能吞，至少恢复中断标志）。",
+      "tags": [
+        "concurrency",
+        "semaphore"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 1115 (print-foobar-alternately)"
+    },
+    {
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "hard",
+      "title": "手写一个带监控与优雅关闭的定量线程池",
+      "content_md": "实现 `BoundedPool`：① 线程数固定为 `n`，任务队列容量为 `cap`；② 队列满时使用 `CallerRunsPolicy` 实现反压；③ 提供 `stats()` 返回「已完成任务数 / 队列长度 / 峰值线程数」；④ 提供 `shutdownAndAwait(timeoutSeconds)`：先 `shutdown()`，超时未结束则 `shutdownNow()` 并返回未执行的任务数。请把线程命名成 `bounded-pool-N` 以便排查。",
+      "answer": {
+        "reference_code": "import java.util.List;\nimport java.util.concurrent.*;\nimport java.util.concurrent.atomic.AtomicInteger;\n\npublic class BoundedPool {\n    private final ThreadPoolExecutor pool;\n\n    public BoundedPool(int n, int cap) {\n        AtomicInteger seq = new AtomicInteger(1);\n        ThreadFactory tf = r -> new Thread(r, \"bounded-pool-\" + seq.getAndIncrement());\n        this.pool = new ThreadPoolExecutor(n, n, 0L, TimeUnit.MILLISECONDS,\n                new ArrayBlockingQueue<>(cap), tf, new ThreadPoolExecutor.CallerRunsPolicy());\n    }\n\n    public void submit(Runnable task) { pool.execute(task); }\n\n    public String stats() {\n        return \"completed=\" + pool.getCompletedTaskCount()\n                + \", queued=\" + pool.getQueue().size()\n                + \", peakThreads=\" + pool.getLargestPoolSize();\n    }\n\n    public int shutdownAndAwait(long timeoutSeconds) throws InterruptedException {\n        pool.shutdown();\n        if (pool.awaitTermination(timeoutSeconds, TimeUnit.SECONDS)) return 0;\n        List<Runnable> dropped = pool.shutdownNow();\n        pool.awaitTermination(5, TimeUnit.SECONDS);\n        return dropped.size();\n    }\n\n    public static void main(String[] args) throws Exception {\n        BoundedPool bp = new BoundedPool(2, 4);\n        CountDownLatch go = new CountDownLatch(1);\n        for (int i = 0; i < 10; i++) bp.submit(() -> { try { go.await(); } catch (InterruptedException e) { Thread.currentThread().interrupt(); } });\n        System.out.println(\"before release: \" + bp.stats());\n        go.countDown();\n        System.out.println(\"dropped on shutdown: \" + bp.shutdownAndAwait(5));\n        System.out.println(\"after  release: \" + bp.stats());\n    }\n}"
+      },
+      "explanation": "要点：① 用有界 `ArrayBlockingQueue` 避免无界队列 OOM；② `CallerRunsPolicy` 把压力回灌给调用方（反压），因此上面 10 个任务里超出的部分会在 main 线程里执行，`peakThreads` 仍为 2；③ `shutdownAndAwait` 体现「温和 → 超时 → 强制」两段式关闭，并统计 `shutdownNow()` 返回的未执行任务；④ 线程命名是排查成本的杠杆。",
+      "tags": [
+        "threadpool",
+        "graceful-shutdown",
+        "monitoring"
+      ],
+      "source": "self",
+      "source_ref": "java-ch07 concept 03 · 线程池七参数与优雅关闭"
+    }
+  ]
+}

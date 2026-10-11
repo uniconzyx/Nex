@@ -1,0 +1,8 @@
+{
+  "title": "fstream 文本文件写读",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "line1\nline2\nline3\ncount=3",
+  "code": "#include <iostream>\n#include <fstream>\n#include <string>\nint main() {\n    {\n        std::ofstream out(\"demo_text.txt\");\n        out << \"line1\\nline2\\nline3\\n\";\n    }\n    std::ifstream in(\"demo_text.txt\");\n    std::string s; int count = 0;\n    while (std::getline(in, s)) { std::cout << s << '\\n'; ++count; }\n    std::cout << \"count=\" << count << '\\n';\n}"
+}

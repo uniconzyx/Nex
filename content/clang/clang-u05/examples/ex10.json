@@ -1,0 +1,8 @@
+{
+  "title": "gcc -E 预处理文本展开演示",
+  "code_lang": "bash",
+  "code_std": "bash",
+  "stdin": "",
+  "expected_output": "static const double pi2 = 3.14159 * 2;\nint main(void) {\n    int r = ((2 + 3)*(2 + 3));\n    return r;\n}",
+  "code": "# 演示 gcc -E 的预处理文本展开（头文件守卫只展开一次、宏被替换）\n# 源文件 u05ex10.c:\n#   #define PI 3.14159\n#   #define SQUARE(x) ((x)*(x))\n#   #include \"guard.h\"\n#   #include \"guard.h\"\n#   int main(void) { int r = SQUARE(2 + 3); return r; }\n# guard.h:\n#   #ifndef GUARD_H\n#   #define GUARD_H\n#   static const double pi2 = PI * 2;\n#   #endif\ngcc -E -P u05ex10.c"
+}

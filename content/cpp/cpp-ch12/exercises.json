@@ -1,0 +1,210 @@
+{
+  "meta": {
+    "chapter": "cpp-ch12",
+    "note": "7 题混合：基础题（auto/移动语义/范围 for/emplace 的语义与 Debug）≥4，平台算法题 2 道（LeetCode 146 / 380，仅存元数据与链接，不搬运题面）。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "auto 推导会保留什么",
+      "content_md": "对于 `int n = 0; int& r = n; const int c = 1;`，下列哪项正确？\n\nA. `auto a = r;` 之后 `a` 是 `int&`\nB. `auto b = c;` 之后 `b` 是 `const int`\nC. `auto& x = r;` 之后 `x` 是 `int&`（引用被保留）\nD. `decltype(auto) y = r;` 会丢失引用、得到 `int` 副本",
+      "options": [
+        {
+          "key": "A",
+          "text": "auto a = r; 之后 a 是 int&"
+        },
+        {
+          "key": "B",
+          "text": "auto b = c; 之后 b 是 const int"
+        },
+        {
+          "key": "C",
+          "text": "auto& x = r; 之后 x 是 int&（引用被保留）"
+        },
+        {
+          "key": "D",
+          "text": "decltype(auto) y = r; 会丢失引用、得到 int 副本"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "C"
+        ]
+      },
+      "explanation": "auto 按值推导会丢弃引用与顶层 const，所以 a/b 都是 int；auto& 保留引用，x 是 int&；decltype(auto) 用 decltype 规则，会完整保留引用（y 是 int&）。见 concept/01 与 ex02、ex03。",
+      "tags": [
+        "auto",
+        "推导"
+      ],
+      "source": "book",
+      "source_ref": "《Effective Modern C++》条款 1-2（Scott Meyers）"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "修复 auto 导致的意外拷贝",
+      "content_md": "下面代码意图「通过 `g` 修改全局的 `conf` 向量」，但 `g` 只改了副本。请改正（保留原语义，让 `g` 真实引用 `conf`）：\n\n```cpp\nstd::vector<int> conf = {1, 2, 3};\nvoid g() {\n    auto x = conf;   // 拿到了副本\n    x.push_back(99);\n}\n```",
+      "answer": {
+        "reference_code": "void g() {\n    auto& x = conf;     // 改成引用，绑定到 conf 本身\n    x.push_back(99);   // 现在会修改 conf\n}"
+      },
+      "explanation": "auto 按值推导得到 vector 的副本，push_back 只改副本。改成 auto&（或 vector<int>&）即可让其成为 conf 的别名。这是 auto 丢失引用的典型坑（见 pitfalls #1、ex02）。",
+      "tags": [
+        "auto",
+        "引用"
+      ],
+      "source": "self",
+      "source_ref": "cpp-ch12 自测"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "移动构造 noexcept 对 vector 扩容的影响",
+      "content_md": "容器 `M` 的移动构造标了 `noexcept`，容器 `C` 的移动构造**未**标 `noexcept`。各自 `reserve(1)` 后依次 `push_back(M(1..3))` 与 `push_back(C(1..3))`。扩容重分配时分别发生什么？请选择最贴切的描述。\n\nA. 两者都走拷贝，因为 push_back 永远优先拷贝\nB. M 走移动、C 退化拷贝（M 的 noexcept 让 vector 敢移动）\nC. 两者都走移动，noexcept 无关紧要\nD. C 走移动、M 退化拷贝",
+      "options": [
+        {
+          "key": "A",
+          "text": "两者都走拷贝"
+        },
+        {
+          "key": "B",
+          "text": "M 走移动、C 退化拷贝（noexcept 决定）"
+        },
+        {
+          "key": "C",
+          "text": "两者都走移动"
+        },
+        {
+          "key": "D",
+          "text": "C 走移动、M 退化拷贝"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "vector 扩容需保证强异常安全：只有移动构造 noexcept 才敢用移动，否则回退拷贝。因此 M 全程 move、C 退化为 copy（见 concept/02、ex05 实测输出差异巨大）。",
+      "tags": [
+        "noexcept",
+        "移动语义",
+        "vector"
+      ],
+      "source": "self",
+      "source_ref": "cpp-ch12 自测 / ex05"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "范围 for 中等价展开与迭代器失效",
+      "content_md": "关于范围 for，哪项正确？\n\nA. 范围 for 等价于每次判断都重新调用 `end()`\nB. `for (auto& x : v)` 中在循环体里调用 `v.push_back(...)` 总是安全的\nC. 范围 for 把整个 range 绑定到 `__range`（`auto&&`），`__end` 只在循环前求值一次\nD. 范围 for 只能用于数组，不能用于 `std::vector`",
+      "options": [
+        {
+          "key": "A",
+          "text": "每次判断都重新调用 end()"
+        },
+        {
+          "key": "B",
+          "text": "循环体里 push_back 总是安全的"
+        },
+        {
+          "key": "C",
+          "text": "range 绑定到 auto&&，__end 只求值一次"
+        },
+        {
+          "key": "D",
+          "text": "只能用于数组"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "C"
+        ]
+      },
+      "explanation": "范围 for 等价于 `auto&& __range = range; for (auto b=begin,e=end; b!=e; ++b)`，__end 只算一次。因此在循环内增删 vector 会令已持有的迭代器失效（UB）。删除应改用迭代器循环 + erase 返回值（见 concept/03、ex07）。",
+      "tags": [
+        "范围for",
+        "迭代器失效"
+      ],
+      "source": "book",
+      "source_ref": "《C++ Primer（第5版）》第 9 章 顺序容器"
+    },
+    {
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "用 emplace_back 与范围 for 统计词频",
+      "content_md": "给定一个 `std::vector<std::string>` 的单词列表，统计每个单词出现次数（用 `std::map` 或 `std::unordered_map`），并以「`word:count`」逐行输出（顺序不限）。要求：遍历用范围 for，插入计数用 `emplace`/`operator[]`，避免无谓拷贝。请写出 `count_words` 函数。",
+      "answer": {
+        "reference_code": "#include <iostream>\n#include <vector>\n#include <string>\n#include <map>\n#include <utility>\n\nstd::map<std::string, int> count_words(const std::vector<std::string>& words) {\n    std::map<std::string, int> freq;\n    for (const auto& w : words) {     // const auto& 避免拷贝单词\n        ++freq[w];                     // operator[] 找不到则原地构造 value=0，再自增\n    }\n    return freq;\n}\nint main() {\n    std::vector<std::string> v = {\"a\", \"b\", \"a\", \"c\", \"b\", \"a\"};\n    for (const auto& [w, c] : count_words(v)) std::cout << w << ':' << c << '\\n';\n}"
+      },
+      "explanation": "范围 for 用 const auto& 遍历；map::operator[] 在键不存在时原地构造（等价于 emplace），计数后返回引用自增；输出用结构化绑定 const auto& [w,c]。",
+      "tags": [
+        "emplace",
+        "范围for",
+        "map"
+      ],
+      "source": "self",
+      "source_ref": "cpp-ch12 自测 / ex09"
+    },
+    {
+      "type": "design",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "hard",
+      "title": "LeetCode 146 · LRU 缓存",
+      "content_md": "设计并实现一个满足 LRU（最近最少使用）淘汰策略的缓存，支持 O(1) 查询与更新。建议用 `std::list` 维护使用序 + `std::unordered_map<key, list::iterator>` 定位，移动/插入时利用现代 C++ 的移动语义与 `emplace`（题面详见 external_url，不在此复述）。",
+      "answer": {
+        "reference_code": "// 结构：list<pair<key,value>> 维护「最近使用在前」；unordered_map<key, list iterator> O(1) 定位。\n// get 命中：把节点 splice 到表头（O(1) 移动，无需拷贝）；put 超容量：erase 表尾并同步删 map。\n// 完整实现见 external_url 原题要求。",
+        "explanation": "核心是「哈希 O(1) 定位 + 双向链表维护冷热序」。list 的 splice 是移动节点（常数时间、不拷贝），正契合移动语义思想；用 emplace 原地构造节点减少分配。",
+        "tags": [
+          "设计",
+          "LRU",
+          "移动语义"
+        ],
+        "source": "leetcode",
+        "source_ref": "LeetCode 146（lru-cache）",
+        "external_url": "https://leetcode.cn/problems/lru-cache/",
+        "time_limit_ms": 2000,
+        "memory_limit_mb": 256
+      },
+      "external_url": "https://leetcode.cn/problems/lru-cache/",
+      "source_ref": "LeetCode 146（lru-cache）",
+      "source": "leetcode"
+    },
+    {
+      "type": "design",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "LeetCode 380 · 常数时间插入删除随机访问",
+      "content_md": "实现 `RandomizedSet`：支持平均 O(1) 的插入、删除、随机返回。建议用 `vector` 存元素 + `unordered_map<value, index>` 定位；删除时用「与末尾交换 + pop_back」配合移动语义，避免 O(n) 搬移（题面详见 external_url，不在此复述）。",
+      "answer": {
+        "reference_code": "// vector<T> vals 存元素，unordered_map<T,size_t> pos 记录下标。\n// 删除 x：idx=pos[x]; 与 vals.back() 交换; pop_back(); 更新 pos[vals[idx]]=idx; erase pos[x]。\n// 完整实现见 external_url 原题要求。",
+        "explanation": "「末尾交换 + pop_back」把删除从 O(n) 降到 O(1)；交换/构造元素时利用移动语义减少拷贝。emplace_back 用于插入新元素。",
+        "tags": [
+          "设计",
+          "vector",
+          "移动语义"
+        ],
+        "source": "leetcode",
+        "source_ref": "LeetCode 380（insert-delete-getrandom-o1）",
+        "external_url": "https://leetcode.cn/problems/insert-delete-getrandom-o1/",
+        "time_limit_ms": 2000,
+        "memory_limit_mb": 256
+      },
+      "external_url": "https://leetcode.cn/problems/insert-delete-getrandom-o1/",
+      "source_ref": "LeetCode 380（insert-delete-getrandom-o1）",
+      "source": "leetcode"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "title": "KMP：构造 next（公共前后缀长度）表",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "模式串: ababaca\n下标  : 0 1 2 3 4 5 6\n字符  : a b a b a c a\nnext  : 0 0 1 2 3 0 1",
+  "code": "#include <stdio.h>\n#include <string.h>\n\nint main(void) {\n    const char *p = \"ababaca\";\n    int m = (int)strlen(p), next[16];\n    next[0] = 0;\n    for (int i = 1, len = 0; i < m; ) {\n        if (p[i] == p[len])      next[i++] = ++len;   /* 前后缀可延伸 */\n        else if (len > 0)        len = next[len - 1]; /* 退到更短的公共前后缀 */\n        else                     next[i++] = 0;       /* 无公共前后缀 */\n    }\n    printf(\"模式串: %s\\n\", p);\n    printf(\"下标  :\");\n    for (int i = 0; i < m; i++) printf(\" %d\", i);\n    printf(\"\\n字符  :\");\n    for (int i = 0; i < m; i++) printf(\" %c\", p[i]);\n    printf(\"\\nnext  :\");\n    for (int i = 0; i < m; i++) printf(\" %d\", next[i]);\n    printf(\"\\n\");\n    return 0;\n}"
+}

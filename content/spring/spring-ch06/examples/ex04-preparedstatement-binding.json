@@ -1,0 +1,8 @@
+{
+  "title": "ex04-preparedstatement-binding",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "已绑定占位符数: 3\n绑定后SQL: INSERT INTO t_user(user_name, age, email) VALUES('alice', 30, 'a@x.com')\n顺序一致? True",
+  "code": "def bind(sql, params):\n    out = []\n    i = 0\n    for ch in sql:\n        if ch == \"?\":\n            out.append(repr(params[i])); i += 1\n        else:\n            out.append(ch)\n    return \"\".join(out), i\n\nsql = \"INSERT INTO t_user(user_name, age, email) VALUES(?, ?, ?)\"\nparams = [\"alice\", 30, \"a@x.com\"]\nbound, n = bind(sql, params)\nprint(\"已绑定占位符数:\", n)\nprint(\"绑定后SQL:\", bound)\nprint(\"顺序一致?\", n == len(params))\n"
+}

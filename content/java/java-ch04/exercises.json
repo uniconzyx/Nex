@@ -1,0 +1,210 @@
+{
+  "meta": {
+    "chapter": "java-ch04",
+    "note": "7 题，基础题 4 + 算法题 3；算法题来自 LeetCode 仅存元数据与链接，不搬运题面。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "关于 ArrayList 的底层实现与扩容",
+      "content_md": "关于 `ArrayList` 的实现，选出**正确**的描述。",
+      "options": [
+        {
+          "key": "A",
+          "text": "底层是双向链表，插入删除为 O(1)"
+        },
+        {
+          "key": "B",
+          "text": "底层是动态数组；默认构造首次 add 扩容到 10，之后容量不足时约以 1.5 倍扩容，随机访问为 O(1)"
+        },
+        {
+          "key": "C",
+          "text": "以 2 倍容量扩容，故随机访问是 O(n)"
+        },
+        {
+          "key": "D",
+          "text": "容量不足时原地扩展，不重新分配内存"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "ArrayList 封装 Object[] elementData，默认构造时数组为空（容量 0），首次 add 扩到 10，再满时 newCapacity = old + (old>>1) 即 1.5 倍；随机访问用下标 O(1)。扩容需要分配新数组并数组拷贝（Arrays.copyOf）。",
+      "tags": [
+        "collection",
+        "arraylist"
+      ],
+      "source": "book",
+      "source_ref": "《Java 核心技术 卷I》第 9 章 集合"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "关于 HashMap（Java 8+）的底层结构",
+      "content_md": "关于 `HashMap` 的实现，选出**正确**的描述。",
+      "options": [
+        {
+          "key": "A",
+          "text": "仅用数组存储，冲突后线性探测"
+        },
+        {
+          "key": "B",
+          "text": "数组 + 链表 + 红黑树；链表长度达到 8 且数组长度 ≥ 64 时树化为红黑树，退化为链表的阈值是 6"
+        },
+        {
+          "key": "C",
+          "text": "哈希冲突时新节点总是放在链表头部（头插法）"
+        },
+        {
+          "key": "D",
+          "text": "负载因子默认为 1.0"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "Java 8 节点是 Node（链表）或 TreeNode（红黑树）；当某桶链表长度 ≥ 8 且 table.length ≥ 64 时树化（否则优先扩容），长度 ≤ 6 时退化回链表。插入用尾插法（修复 1.7 头插的并发成环问题）。负载因子默认 0.75，是空间与冲突概率的折中。",
+      "tags": [
+        "collection",
+        "hashmap"
+      ],
+      "source": "book",
+      "source_ref": "《Java 核心技术 卷I》第 9 章 集合 / OpenJDK HashMap 源码"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "读代码写输出（迭代器 fail-fast）",
+      "content_md": "```java\nimport java.util.*;\npublic class Main {\n    public static void main(String[] args) {\n        List<String> list = new ArrayList<>(List.of(\"a\", \"b\", \"c\"));\n        try {\n            for (String s : list) {\n                if (s.equals(\"a\")) list.remove(s);\n            }\n            System.out.println(\"no exception, size=\" + list.size());\n        } catch (ConcurrentModificationException e) {\n            System.out.println(\"caught ConcurrentModificationException: \" + e.getClass().getSimpleName());\n        }\n    }\n}\n```",
+      "answer": {
+        "output": "caught ConcurrentModificationException: ConcurrentModificationException"
+      },
+      "explanation": "for-each 底层用 Iterator；结构性修改（remove）使 modCount++，而迭代器持有 expectedModCount，下次调用 next() 时检测到不一致即抛 ConcurrentModificationException（fail-fast）。正确写法是用 iterator.remove() 或 removeIf。",
+      "tags": [
+        "collection",
+        "fail-fast",
+        "iterator"
+      ],
+      "source": "book",
+      "source_ref": "CppMind java-ch04 concept 07 / examples/ex07-fail-fast.json"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "修复 HashSet 去重失效（缺失 hashCode）",
+      "content_md": "以下代码本应让两个逻辑相等的 `Point` 只保留一个，却打印 `size=2`。补全缺失的方法使其正确去重：\n\n```java\nimport java.util.*;\npublic class Main {\n    static class Point {\n        int x, y;\n        Point(int x, int y) { this.x = x; this.y = y; }\n        @Override public boolean equals(Object o) {\n            return o instanceof Point p && p.x == x && p.y == y;\n        }\n        // 缺失：hashCode\n    }\n    public static void main(String[] args) {\n        Set<Point> s = new HashSet<>();\n        s.add(new Point(1, 1));\n        s.add(new Point(1, 1));\n        System.out.println(\"size=\" + s.size());\n    }\n}\n```",
+      "answer": {
+        "reference_code": "import java.util.*;\npublic class Main {\n    static class Point {\n        int x, y;\n        Point(int x, int y) { this.x = x; this.y = y; }\n        @Override public boolean equals(Object o) {\n            return o instanceof Point p && p.x == x && p.y == y;\n        }\n        @Override public int hashCode() { return 31 * x + y; }\n    }\n    public static void main(String[] args) {\n        Set<Point> s = new HashSet<>();\n        s.add(new Point(1, 1));\n        s.add(new Point(1, 1));\n        System.out.println(\"size=\" + s.size());\n    }\n}"
+      },
+      "explanation": "HashSet 先按 hashCode 定位桶，再用 equals 去重。只重写 equals 不重写 hashCode，两个相等对象得到不同哈希码、落到不同桶，于是都被加入。补上基于相同字段的 hashCode 即可（详见 ch02 契约与 examples/ex08-generic-key-equals-hashcode.json）。",
+      "tags": [
+        "collection",
+        "hashset",
+        "equals",
+        "hashcode"
+      ],
+      "source": "self",
+      "source_ref": "CppMind java-ch04 concept 02 / examples/ex05-hashset-dedup.json"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "easy",
+      "title": "LeetCode 1 · 两数之和",
+      "content_md": "给定整数数组与目标和，返回两数下标使其和为目标。封装为可编译类并在 `main` 中自测。题面详见原题链接，本题不搬运题面。",
+      "answer": {
+        "reference_code": "import java.util.*;\npublic class Main {\n    public static int[] twoSum(int[] nums, int target) {\n        Map<Integer, Integer> idx = new HashMap<>();\n        for (int i = 0; i < nums.length; i++) {\n            if (idx.containsKey(target - nums[i])) return new int[]{idx.get(target - nums[i]), i};\n            idx.put(nums[i], i);\n        }\n        return new int[]{};\n    }\n    public static void main(String[] args) {\n        int[] r = twoSum(new int[]{2, 7, 11, 15}, 9);\n        System.out.println(r[0] + \",\" + r[1]);\n    }\n}"
+      },
+      "explanation": "用 HashMap 做一遍哈希：遍历时先查 complement 是否已出现，命中即返回；否则记录当前值与其下标。时间复杂度 O(n)。注意 HashMap 的 hashCode/equals 契约保证了键查找的正确性。",
+      "tags": [
+        "hashmap",
+        "array",
+        "two-pointer-alt"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 1（two-sum）",
+      "external_url": "https://leetcode.cn/problems/two-sum/",
+      "time_limit_ms": 2000,
+      "memory_limit_mb": 256,
+      "test_cases": [
+        {
+          "input": "nums=[2,7,11,15] target=9",
+          "expected_output": "0,1",
+          "is_sample": true
+        }
+      ]
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "LeetCode 49 · 字母异位词分组",
+      "content_md": "将字符串数组按字母异位词分组。封装为可编译类并在 `main` 中自测。题面详见原题链接，本题不搬运题面。",
+      "answer": {
+        "reference_code": "import java.util.*;\npublic class Main {\n    public static List<List<String>> groupAnagrams(String[] strs) {\n        Map<String, List<String>> m = new HashMap<>();\n        for (String s : strs) {\n            char[] c = s.toCharArray();\n            Arrays.sort(c);\n            String key = new String(c);\n            m.computeIfAbsent(key, k -> new ArrayList<>()).add(s);\n        }\n        List<List<String>> res = new ArrayList<>(m.values());\n        for (List<String> g : res) Collections.sort(g);\n        res.sort((a, b) -> a.get(0).compareTo(b.get(0)));\n        return res;\n    }\n    public static void main(String[] args) {\n        System.out.println(groupAnagrams(new String[]{\"eat\", \"tea\", \"tan\", \"ate\", \"nat\", \"bat\"}));\n    }\n}"
+      },
+      "explanation": "异位词的排序后字符串相同，可作为 HashMap 的键；用 computeIfAbsent 累积分组。注意为输出确定性，对各组与结果列表做了排序（HashMap 迭代顺序本身不确定）。",
+      "tags": [
+        "hashmap",
+        "string",
+        "sorting"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 49（group-anagrams）",
+      "external_url": "https://leetcode.cn/problems/group-anagrams/",
+      "time_limit_ms": 2000,
+      "memory_limit_mb": 256,
+      "test_cases": [
+        {
+          "input": "eat tea tan ate nat bat",
+          "expected_output": "[[bat], [ate, eat, tea], [nat, tan]]",
+          "is_sample": true
+        }
+      ]
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "LeetCode 347 · 前 K 个高频元素",
+      "content_md": "返回出现频率前 K 高的元素。封装为可编译类并在 `main` 中自测。题面详见原题链接，本题不搬运题面。",
+      "answer": {
+        "reference_code": "import java.util.*;\npublic class Main {\n    public static int[] topKFrequent(int[] nums, int k) {\n        Map<Integer, Integer> freq = new HashMap<>();\n        for (int n : nums) freq.put(n, freq.getOrDefault(n, 0) + 1);\n        List<int[]> list = new ArrayList<>();\n        for (Map.Entry<Integer, Integer> e : freq.entrySet()) list.add(new int[]{e.getKey(), e.getValue()});\n        list.sort((a, b) -> b[1] - a[1]);\n        int[] res = new int[k];\n        for (int i = 0; i < k; i++) res[i] = list.get(i)[0];\n        return res;\n    }\n    public static void main(String[] args) {\n        System.out.println(Arrays.toString(topKFrequent(new int[]{1, 1, 1, 2, 2, 3}, 2)));\n    }\n}"
+      },
+      "explanation": "先用 HashMap 统计词频，再按频率排序取前 K。HashMap 的计数正确性同样依赖 Integer 的 equals/hashCode 契约；本题示例频率各不相同，输出确定。",
+      "tags": [
+        "hashmap",
+        "heap",
+        "top-k"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 347（top-k-frequent-elements）",
+      "external_url": "https://leetcode.cn/problems/top-k-frequent-elements/",
+      "time_limit_ms": 2000,
+      "memory_limit_mb": 256,
+      "test_cases": [
+        {
+          "input": "nums=[1,1,1,2,2,3] k=2",
+          "expected_output": "[1, 2]",
+          "is_sample": true
+        }
+      ]
+    }
+  ]
+}

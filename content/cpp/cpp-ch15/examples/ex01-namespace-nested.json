@@ -1,0 +1,8 @@
+{
+  "title": "命名空间嵌套与 using 声明",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "1 2",
+  "code": "#include <iostream>\n\nnamespace outer {\n    namespace inner {\n        int a = 1;\n    }\n    int b = 2;\n}\n\nint main() {\n    using outer::inner::a;   // using 声明：只引入 a\n    std::cout << a << ' ' << outer::b;\n}"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "KV Cache 显存占用公式计算器（MHA vs GQA）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "配置: layers=32 heads=32 head_dim=128 dtype=fp16(2B)\n每 token 每层 KV 字节 = 16384\n每 token 全部层 KV 字节 = 524288\nseq=4096 batch=1  MHA 总 KV Cache = 2147483648 字节 = 2.00 GiB\nseq=4096 batch=1  GQA(8 KV头)  = 536870912 字节 = 0.50 GiB\n压缩比 MHA/GQA = 4.0x\nseq 翻倍到 8192 后 MHA = 4294967296 字节 = 4.00 GiB\nKV Cache 随 seq 线性增长: True\nKV Cache 随 batch 线性增长: True\n",
+  "code": "\"\"\"KV Cache 显存占用：公式化计算, 不依赖真实 GPU。\"\"\"\nGB = 1024 ** 3\nMB = 1024 ** 2\n\n\ndef kv_bytes(layers, kv_heads, head_dim, seq_len, batch, dtype_bytes):\n    # K 与 V 各一份, 形状皆为 [batch, kv_heads, seq_len, head_dim]\n    return 2 * layers * kv_heads * head_dim * seq_len * batch * dtype_bytes\n\n\ndef fmt(b):\n    return \"%d 字节 = %.2f GiB\" % (b, b / GB)\n\n\nlayers, heads, head_dim = 32, 32, 128   # Llama-2-7B 规模\nseq, batch, bpe = 4096, 1, 2            # fp16\n\nper_tok_per_layer = 2 * heads * head_dim * bpe\nper_tok = per_tok_per_layer * layers\ntotal_mha = kv_bytes(layers, heads, head_dim, seq, batch, bpe)\ntotal_gqa = kv_bytes(layers, 8, head_dim, seq, batch, bpe)   # GQA: 8 个 KV 头\n\nprint(\"配置: layers=%d heads=%d head_dim=%d dtype=fp16(2B)\" % (layers, heads, head_dim))\nprint(\"每 token 每层 KV 字节 = %d\" % per_tok_per_layer)\nprint(\"每 token 全部层 KV 字节 = %d\" % per_tok)\nprint(\"seq=%d batch=%d  MHA 总 KV Cache = %s\" % (seq, batch, fmt(total_mha)))\nprint(\"seq=%d batch=%d  GQA(8 KV头)  = %s\" % (seq, batch, fmt(total_gqa)))\nprint(\"压缩比 MHA/GQA = %.1fx\" % (total_mha / total_gqa))\nprint(\"seq 翻倍到 8192 后 MHA = %s\" % fmt(kv_bytes(layers, heads, head_dim, 8192, batch, bpe)))\nprint(\"KV Cache 随 seq 线性增长: True\")\nprint(\"KV Cache 随 batch 线性增长: True\")\n"
+}

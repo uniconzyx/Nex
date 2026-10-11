@@ -1,0 +1,16 @@
+{
+  "title": "分离编译：编译单元独立编译后再链接",
+  "code_lang": "bash",
+  "code_std": "bash5",
+  "stdin": "",
+  "expected_output": "$ gcc -c add.c -o add.o      # 只编译：产生目标文件，add 尚可未解析\n$ gcc -c main.c -o main.o    # 只编译：main.o 里 add 是未定义符号\n$ nm main.o                  # 注意 U add：欠账\n0000000000000000 b .bss\r\n0000000000000000 d .data\r\n0000000000000000 p .pdata\r\n0000000000000000 r .rdata\r\n0000000000000000 r .rdata$zzz\r\n0000000000000000 t .text\r\n0000000000000000 r .xdata\r\n                 U __main\r\n                 U __mingw_printf\r\n                 U add\r\n0000000000000000 T main\r\n$ gcc main.o add.o -o app    # 链接：把 U add 补上\n$ ./app\nadd(2, 3) = 5\r",
+  "code": "#!/bin/sh\n# 分离编译：编译单元独立编译后再链接\n# 期望输出见 expected_output（本机 MinGW 工具链真实执行捕获）\n\ncat > add.c << 'EOF'\nint add(int a, int b)\n{\n    return a + b;\n}\nEOF\n\ncat > main.c << 'EOF'\n#include <stdio.h>\n\nint add(int, int);\n\nint main(void)\n{\n    printf(\"add(2, 3) = %d\\n\", add(2, 3));\n    return 0;\n}\nEOF\n\ngcc -c add.c -o add.o      # 只编译：产生目标文件，add 尚可未解析\ngcc -c main.c -o main.o    # 只编译：main.o 里 add 是未定义符号\nnm main.o                  # 注意 U add：欠账\ngcc main.o add.o -o app    # 链接：把 U add 补上\n./app\n",
+  "_step_rc": [
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "_verify_note": "expected_output 为 Windows + MinGW-w64（gcc 15.2 / binutils 2.45）真实执行捕获；脚本中显示的是可移植命令形式（gcc/ar/nm/objdump/size），本机实际以 D:/mingw64/bin/ 下的同名工具驱动，二者等价。"
+}

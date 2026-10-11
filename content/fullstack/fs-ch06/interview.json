@@ -1,0 +1,97 @@
+{
+  "meta": {
+    "chapter": "fs-ch06"
+  },
+  "items": [
+    {
+      "question": "认证和鉴权有什么区别？Session 和 JWT 你怎么选？",
+      "answer_md": "**认证**回答「你是谁」，**鉴权**回答「你能做什么」。一次请求是一条链：认证（无/坏凭证 → 401）→ 授权（凭证有效但无权 → 403）→ 资源级校验（不是你的资源 → 403/404）→ handler（200）。注意 401 的真实含义是「未认证」且必须带 `WWW-Authenticate`，403 才是「已认证但禁止」。\n\n**Session vs JWT** 看三个维度：\n- 状态位置：Session 状态在服务端（浏览器只拿一个 SessionID）；JWT 状态在客户端（token 自包含）。\n- 可撤销性：Session **可即时撤销**（删服务端会话）；JWT **签发后到 exp 之前无法主动失效**。\n- 水平扩展：Session 多实例要共享存储（Redis）或粘性会话；JWT 验签即可，天然无状态扩展。\n\n**默认选型**：单体/强信任内部用 Session（简单、可撤销）；多端（Web + App + 小程序）、跨域、微服务/网关用 JWT。用 JWT 就要为「不可撤销」买单，缓解手段见下题。\n\n**存储位置**同样重要：凭证放 `HttpOnly` Cookie 抗 XSS 窃取但要处理 CSRF；放 `localStorage` 免 CSRF 但一次 XSS 就被读走。",
+      "follow_ups": [
+        "多实例部署下 Session 共享有哪些方案，各自的代价是什么？",
+        "如果必须用 JWT，你会怎么设计登出？",
+        "为什么说 OAuth2 不是认证协议？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "字节",
+        "阿里"
+      ]
+    },
+    {
+      "question": "讲一下 JWT 的结构。HS256 和 RS256 怎么选？",
+      "answer_md": "JWT 是 `base64url(header).base64url(payload).base64url(signature)` 三段，前两段是 **base64url 编码（不是加密）**，任何人解码就能读到内容——所以别往里塞敏感信息，要保密就用 JWE。\n\n**签名只对前两段的原始串**计算：`signature = HMAC-SHA256(secret, A + '.' + B)`。验证方必须用**原始 base64url 段**重建 signing input，而不是重新序列化 JSON，否则键序/空白的差异会让合法 token 验签失败。\n\n**HS256 vs RS256** 是信任模型问题：\n- HS256（对称）：一把密钥既签又验，实现简单、验签快。信任边界 = 所有持有密钥的实体，**无法区分签发者与验证者**。适合单体或强信任内部。\n- RS256（非对称）：私钥签发、公钥验签。验签方拿不到私钥，适合多方 / 第三方（如 OIDC 的 `id_token`）。代价是签名更慢、密钥管理（JWKS 轮转）更复杂。\n\n**实战教训**：多个服务共享同一把 HS256 密钥时，任意一个「只做验证」的服务被攻破，攻击者就能伪造管理员 token。这种场景应改用 RS256。\n\nHS256 摘要 256 位 = 32 字节，base64url 后 **43 个字符**。",
+      "follow_ups": [
+        "为什么 JWT 用 base64url 而不是标准 base64？",
+        "JWKS 和 kid 是干什么的？",
+        "如果 token 里需要传敏感数据怎么办？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "腾讯",
+        "美团"
+      ]
+    },
+    {
+      "question": "JWT 有哪些常见漏洞？alg:none 和算法混淆是怎么回事？",
+      "answer_md": "**常见漏洞**：① `alg:none`；② 算法混淆（RS256→HS256）；③ 密钥硬编码/弱密钥；④ 未校验 `exp`/`aud`/`iss`；⑤ 把敏感信息放 payload。\n\n**alg:none**：攻击者把 header 改成 `{\"alg\":\"none\"}`、签名段留空。任何「按 token 头里的 alg 选算法」或「alg 为 none 就放行」的实现直接被打穿。本章 ex05 实跑：朴素实现 `alg_none_naive_accepts=true`，安全实现 `alg-pinned-reject`。\n\n**算法混淆**：服务本用 RS256，公钥是公开的。攻击者把「公钥字符串」当 HMAC 密钥，自签一个 `alg=HS256` 的 token；验签器若照着 token 头的 alg 去走 HMAC，就会用公钥验签通过。ex05：`confusion_vulnerable_accepts=true`。\n\n**根因与修复**：安全决策参数（算法）被交给了不可信输入（token 头）。修复只有一条——**alg 由服务端写死或严格白名单**，并把密钥类型（共享密钥/公钥）与算法绑定。\n\n**校验清单**（上线前逐条过）：段数 == 3；alg ∈ 白名单；用原始串验签；常量时间比较（`timingSafeEqual`/`compare_digest`）；`exp` 未过期、`nbf` 已生效；`aud`/`iss` 匹配本站。ex06 实跑：`expired`/`nbf_future`/`aud_wrong`/`iss_wrong`/`missing_exp` 全部被拒。",
+      "follow_ups": [
+        "为什么验签要用常量时间比较？",
+        "aud 和 iss 不校验会有什么后果？",
+        "JWS 和 JWE 的区别？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "通用",
+        "字节",
+        "蚂蚁"
+      ]
+    },
+    {
+      "question": "JWT 无法主动失效，这个缺点怎么办？",
+      "answer_md": "这是无状态凭证的**定义性代价**：签发之后、过期之前，服务端无法单方面让它失效。用户点登出只是前端删 token，旧 token 复制出来照样能用。\n\n**缓解三件套**：\n1. **短 TTL access token**（5~15 分钟）——把「失效窗口」压小，成本为 0。\n2. **Refresh token 单次使用 + 轮换**——每次刷新签发新的 refresh 并作废旧的；一旦检测到旧 refresh 被重放，说明很可能被窃取，**吊销整个 family**。ex07 实跑：正常轮换 `ok=true`，重放旧 refresh → `reuse-detected-family-revoked`，连最新那条也失效。\n3. **`jti` 黑名单（内存/Redis）+ TTL**——只给「要求立即失效」的高价值 token 用（管理员强制下线、改密踢出、疑似泄露），因为黑名单把无状态重新变成有状态。TTL 取 token 剩余寿命，到期自动清理（ex08）。\n\n**第四种手段**是给用户加 `tokenVersion` 或做 key rotation，把「撤销某用户全部 token」变成一次版本自增，适合批量踢出而非单 token 撤销。\n\n**本质**：可验证性（本地计算）与可撤销性（全局状态）不可兼得；工程解法是**分层**——短 TTL 是可用性优先的主路径，黑名单是强一致的低频旁路。",
+      "follow_ups": [
+        "黑名单存 Redis 挂了怎么办？",
+        "TTL 设多短合适，怎么权衡？",
+        "改密码后如何让所有已签发的 token 失效？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "通用",
+        "阿里",
+        "美团"
+      ]
+    },
+    {
+      "question": "密码应该怎么存？为什么不能用 MD5/SHA1？",
+      "answer_md": "**绝不能用 MD5/SHA1/单轮 SHA256**：它们是快速哈希，GPU 每秒可算数十亿次，字典/彩虹表分钟级破解。\n\n**标准做法：加盐 + 慢哈希 + 可调成本。**\n- **加盐**：每用户随机唯一盐，随哈希一起存。盐不是密钥、不需要保密，作用是让相同密码产生不同哈希，击破预计算与「同密码可见」。\n- **慢哈希/内存硬**：PBKDF2（迭代 ≥ 10^5）、bcrypt（cost 10~12）、scrypt、argon2id（当前推荐）。它们把每次猜测的代价抬高若干数量级；scrypt/argon2 还是「内存硬」，用内存带宽约束并行度以抵抗 GPU/ASIC。\n- **成本可升级**：登录成功时若发现存储的 cost 低于当前目标，用新参数重算并更新哈希——这是这类算法的关键特性。\n\n本章 ex09 用标准库 `hashlib.pbkdf2_hmac` 演示（bcrypt/argon2 非标准库）：12 万次迭代；同密码不同盐 → 不同哈希；正确密码 `True`、错误密码 `False`。\n\n**校验必须常量时间**：朴素 `==` 短路比较的比较次数随「相同前缀长度」变化（ex10：`naive_prefix16_compares=17` vs `naive_allwrong_compares=1`），可被逐字节爆破签名/哈希。用 `hmac.compare_digest`（ex10：常量时间恒为 32 次）。\n\n**易混**：salt（每用户唯一、可公开）vs pepper（全局密钥、单独存放）。",
+      "follow_ups": [
+        "bcrypt 和 argon2 的核心区别是什么？",
+        "为什么要防止时序攻击？还有哪些场景要用常量时间比较？",
+        "密码重置流程要注意什么？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "腾讯",
+        "字节"
+      ]
+    },
+    {
+      "question": "鉴权中间件怎么写？RBAC 和 ABAC 怎么选？怎么防越权？",
+      "answer_md": "**链式职责**：`authenticate`（无/坏凭证 → 401，并把 `ctx.user` 挂上）→ `authorize(permission)`（已认证但无权 → 403）→ `resourceGuard`（不是你的资源 → 403/404）→ handler（200）。顺序不能错：先认证后授权，否则会「无凭证也返回 403」造成信息泄漏。ex11 实跑四种情形分别得到 401/401/403/200。\n\n**RBAC vs ABAC**：RBAC 把「主体→权限」压缩成「主体→角色→权限」，管理简单、可枚举可审计，代价是角色爆炸；ABAC 直接在属性（主体/资源/环境）上求值，细粒度、动态，代价是策略复杂、一致性难验证。工程上常混用：RBAC 定粗粒度角色，`own` 后缀把「资源归属」这一 ABAC 属性引进来。\n\n**把判定写成纯函数**（ex12 的 `can(actor, action, resource)`），这样权限逻辑可单元测试、可审计，而不是散落在各 handler 里。**默认拒绝**：未知角色、未知 action 一律 `false`。\n\n**防越权两类**：\n- **水平越权（IDOR/BOLA，OWASP API #1）**：接口级鉴权通过后仍要判断「这条记录是不是你的」。ex12：`editor_delete_others=false`、`editor_delete_own=true`。\n- **垂直越权**：普通用户触达管理员能力，靠角色-权限表 + 资源级校验拦住。\n\n加固技巧：对「无权访问且不想暴露存在性」的资源返回 **404 而非 403**，避免用状态码枚举资源是否存在。",
+      "follow_ups": [
+        "角色爆炸怎么缓解？",
+        "为什么越权比未授权登录更常见？",
+        "多租户系统里鉴权要额外注意什么？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "通用",
+        "字节",
+        "蚂蚁"
+      ]
+    }
+  ]
+}

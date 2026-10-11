@@ -1,0 +1,8 @@
+{
+  "title": "顺序表删除的搬移次数与头插的隐藏代价",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "删除下标 0：搬移 7 个元素\n删除下标 1：搬移 6 个元素\n删除下标 2：搬移 5 个元素\n删除下标 3：搬移 4 个元素\n删除下标 4：搬移 3 个元素\n删除下标 5：搬移 2 个元素\n删除下标 6：搬移 1 个元素\n删除下标 7：搬移 0 个元素\n删除合计搬移 = 28 次\n连续头插 8 次的累计搬移 = 28 次（≈ n^2/2，即 O(n^2)）\n结论：循环中头插会把线性算法退化成平方级",
+  "code": "#include <stdio.h>\n\nint main(void) {\n    int n = 8;\n    long del_total = 0;\n    for (int p = 0; p < n; p++) {\n        int shifts = n - 1 - p;          /* 删除下标 p，其后元素整体前移 */\n        del_total += shifts;\n        printf(\"删除下标 %d：搬移 %d 个元素\\n\", p, shifts);\n    }\n    printf(\"删除合计搬移 = %ld 次\\n\", del_total);\n\n    /* 头插 N 次的累计搬移：第 k 次头插要搬移已有的 k 个元素 */\n    long head_insert_total = 0;\n    for (int k = 0; k < n; k++) head_insert_total += k;\n    printf(\"连续头插 %d 次的累计搬移 = %ld 次（≈ n^2/2，即 O(n^2)）\\n\",\n           n, head_insert_total);\n    printf(\"结论：循环中头插会把线性算法退化成平方级\\n\");\n    return 0;\n}"
+}

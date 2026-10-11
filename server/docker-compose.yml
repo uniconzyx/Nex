@@ -1,0 +1,36 @@
+# CppMind 本地依赖编排：PostgreSQL + Redis
+# 用途：让 AI 助手（/api/v1/ai/*）与内容/进度等服务真正跑通（auth/配额/会话依赖 DB 与 Redis）
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: cppmind-postgres
+    environment:
+      POSTGRES_USER: cppmind
+      POSTGRES_PASSWORD: cppmind
+      POSTGRES_DB: cppmind
+    ports:
+      - "5432:5432"
+    volumes:
+      - cppmind-pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cppmind -d cppmind"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: cppmind-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - cppmind-redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  cppmind-pg:
+  cppmind-redis:

@@ -1,0 +1,106 @@
+{
+  "meta": {
+    "chapter": "tool-ch02",
+    "title": "Linux 进程、管道与 Shell 脚本 —— 高频追问",
+    "count": 6,
+    "note": "偏深度追问，考察底层机制与工程判断，非背诵型"
+  },
+  "items": [
+    {
+      "question": "僵尸进程和孤儿进程有什么区别？分别如何产生、如何回收？",
+      "answer_md": "**僵尸（Zombie）**：子进程 `exit()` 后，内核释放其地址空间与 fd，但**保留 task_struct 与退出码**，直到父进程 `wait()/waitpid()` 取走才删除。产生条件：**子先退出、父未 wait**。它**不占内存/CPU，只占一个 pid 槽**；`kill -9` 无效（已死）。回收：让父进程正确 wait，或杀掉父进程使其被 init 收养并立即回收。\n\n**孤儿（Orphan）**：父进程先于子退出。内核把子进程 reparent 到 **init（pid 1）**或最近的 subreaper，PPID 变 1，照常运行、正常回收。产生条件：**父先退出**。\n\n**对比结论**：\n| 维度 | 僵尸 | 孤儿 |\n|---|---|---|\n| 产生 | 子先退、父未 wait | 父先退 |\n| 资源 | 占 pid 槽 | 正常占用，无泄漏 |\n| 回收方 | 父进程（或父死后 init） | init/subreaper |\n| 危害 | 堆积耗尽 pid 上限 | 无 |\n\n**工程延伸**：容器里若主进程不是 init 系统（直接跑 `python app.py`），它不会 wait 子进程，子进程变僵尸且无人回收——解法是用 `tini`/`dumb-init` 当 PID 1。",
+      "follow_ups": [
+        "kill -9 为什么杀不死僵尸？（尸体已终止，信号只能发给存活进程）",
+        "容器里僵尸堆积的根因与解法（tini/dumb-init 当 PID 1）",
+        "waitpid 的 WNOHANG 有什么用？（非阻塞循环回收，避免父进程阻塞）"
+      ],
+      "difficulty": 3,
+      "company_tags": [
+        "字节跳动",
+        "阿里云",
+        "腾讯",
+        "美团"
+      ]
+    },
+    {
+      "question": "SIGTERM 和 SIGKILL 有什么区别？为什么 SIGKILL 不能被捕获？",
+      "answer_md": "**语义差异**：\n- **SIGTERM(15)**：`kill` 默认发送，默认行为 Term，但**可被捕获/忽略**——进程可注册 handler 优雅退出（flush、关连接、删 pidfile）。是「礼貌的请求」。\n- **SIGKILL(9)**：立即终止，**不可捕获、不可阻塞、不可忽略**，内核直接回收进程，跳过所有清理。\n\n**为什么 SIGKILL 不可捕获**：它是**操作系统的最终控制权**——内核/管理员必须能终止任何失控、死锁、卡在 D 状态的进程。如果允许进程忽略 SIGKILL，系统就失去了这个兜底不变量，可能陷入「无人能停的进程」。SIGSTOP 同理（作业控制需要「一定能停」）。\n\n**工程含义**：常规关停用 SIGTERM 给清理窗口（`systemctl stop`/`docker stop` 先 SIGTERM 再超时转 SIGKILL）；**只有确认进程已卡死才用 `kill -9`**，且之后需做一致性恢复（如 DB crash recovery）。把 SIGKILL 当首选会跳过 atexit/flush/释放锁，造成数据损坏。",
+      "follow_ups": [
+        "SIGINT 和 SIGTERM 的区别？（Ctrl-C 发给前台进程组 vs 管理员终止请求）",
+        "D 状态进程为什么连 SIGKILL 都杀不掉？（等内核关键区 IO 返回）",
+        "服务进程应如何写 SIGTERM handler 做优雅退出？（删 pidfile、关监听、等 inflight 请求）"
+      ],
+      "difficulty": 4,
+      "company_tags": [
+        "阿里云",
+        "腾讯",
+        "华为",
+        "滴滴"
+      ]
+    },
+    {
+      "question": "管道和重定向的本质是什么？请解释 2>&1 的 fd 机制。",
+      "answer_md": "**本质都是对 fd 表的操作**：fd 表是「小整数 → 打开文件描述」的数组，0=stdin/1=stdout/2=stderr。\n\n- **重定向 `> file`**：`open` 新 fd 后 `dup2(new, 1)`，让 fd 1 指向新 file description；\n- **管道 `a | b`**：内核建一对 pipe fd（读端 r、写端 w，共享内存环形缓冲），`a` 的 fd 1 `dup2` 到 w、`b` 的 fd 0 `dup2` 到 r——于是 `a` 写 stdout 即写管道、`b` 读 stdin 即从管道读。\n\n**`2>&1` 的机制**：它把 fd 2 **复制成 fd 1 当前指向的目标**（不是字面指向 fd 1）。所以**顺序敏感**：\n\n```\n> file 2>&1   : 先让 fd1->file，再让 fd2 复制(fd1目标)=> file   ✓ 都进 file\n2>&1 > file   : 先让 fd2 复制(fd1=终端)，再让 fd1->file => fd2 仍指向终端  ✗ stderr 漏出\n```\n\n**其他要点**：管道读端关闭时写端收 SIGPIPE 默认终止；管道缓冲满时写端阻塞（背压）；`tee` 是「一对多写」原语。",
+      "follow_ups": [
+        "a | b 时 b 提前退出，a 会怎样？（写端收 SIGPIPE 终止 / write 得 EPIPE）",
+        "为什么 cat file | grep x > file 会清空 file？（> 在管道建立前已 truncate）",
+        "dup2 为什么是原子的？（一步完成「关旧+指新」，避免竞态）"
+      ],
+      "difficulty": 4,
+      "company_tags": [
+        "美团",
+        "字节跳动",
+        "腾讯",
+        "百度"
+      ]
+    },
+    {
+      "question": "set -euo pipefail 各自解决什么问题？为什么光 set -e 不够？",
+      "answer_md": "- **`set -e`**：任一命令返回非零且未被显式测试时，脚本立即退出。防「错误被静默忽略后后续全错」。\n- **`set -u`**：引用未定义变量即报错退出，防 `rm -rf \"$DIR/\"` 中 DIR 为空退化成 `rm -rf /`。\n- **`set -o pipefail`**：管道整体退出码取**第一个非零段**而非末段，使 `curl ... | grep ok` 中 curl 失败也能被感知。\n\n**为什么光 `set -e` 不够**：\n1. `set -e` **拦不住管道中间段的失败**——默认只看末段（如 `false | true` 整体退出码 0）。必须 `pipefail` 配合。\n2. `set -e` 有**标准例外**：`if cmd`/`while cmd` 的条件、`&&`/`||` 链中非末位命令失败是「预期用于控制流程」，不触发退出。所以 `if mycmd; then ...` 里 mycmd 失败不会停脚本。\n\n**结论**：健壮脚本头永远 `set -euo pipefail`；需要「失败即停」的逻辑不要塞进条件，或显式 `|| exit 1`；调试管道用 `${PIPESTATUS[@]}`。",
+      "follow_ups": [
+        "set -e 下 if cmd; then 失败为什么不退出？（条件里的命令失败属预期）",
+        "echo $? 取到的是管道哪一段的退出码？（默认末段；pipefail 取首失败）",
+        "$@ 与 $* 在转发参数时有什么不同？（前者保留边界，后者拼成单串）"
+      ],
+      "difficulty": 3,
+      "company_tags": [
+        "腾讯",
+        "阿里云",
+        "字节跳动",
+        "携程"
+      ]
+    },
+    {
+      "question": "一个 Shell 脚本手动能跑、放进 cron 就报错 command not found，为什么？",
+      "answer_md": "**根因：cron 的环境极简且与交互 shell 完全不同**：\n- cron 启动的任务是**无控制终端、非登录、非交互**的会话，PATH 通常只有 `/usr/bin:/bin`，没有你交互 shell 里丰富的 PATH；\n- 不读取 `~/.bashrc`/`~/.profile`，所以别名、函数、扩展 PATH、HOME/LANG 等全部缺席；\n- 因此脚本里相对命令（如 `rsync`、`python3`）或依赖别名的写法在 cron 里找不到。\n\n**排查与修复**：\n1. 脚本开头显式 `export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin`；\n2. 命令一律写**绝对路径**（如 `/usr/bin/rsync`）；\n3. crontab 里设置 `PATH=` 与 `SHELL=`；\n4. 不要依赖别名——cron 不加载它们。\n\n**延伸**：需要守护/重启/依赖顺序/日志聚合的服务，应交给 **systemd**（unit 可设 `Environment=`、`Restart=`、`KillSignal=SIGTERM`、`TimeoutStopSec=`、`journald` 日志），比裸 cron 更鲁棒。",
+      "follow_ups": [
+        "systemd 相比 cron 还提供了什么？（依赖图、自愈重启、统一日志、优雅停止窗口）",
+        "为什么 cron 脚本里 export 的变量不影响父 shell？（环境只沿 fork 向下）",
+        "systemd 的 KillSignal=SIGTERM 起什么作用？（给应用清理窗口而非直接 SIGKILL）"
+      ],
+      "difficulty": 3,
+      "company_tags": [
+        "美团",
+        "阿里云",
+        "腾讯",
+        "百度"
+      ]
+    },
+    {
+      "question": "进程和线程的区别是什么？进程切换为什么比线程切换贵？",
+      "answer_md": "（408 操作系统核心考点，与本章进程模型呼应）\n\n**区别**：\n- **进程**是**资源分配**的基本单位：拥有独立地址空间、独立的 fd 表、信号处理；\n- **线程**是**调度**的基本单位：同一进程内的线程**共享地址空间与 fd 表**，但各自有独立栈、寄存器与程序计数器。\n\n**进程切换更贵的原因**：\n1. 进程切换要**切换页表** → 冲刷 TLB（Translation Lookaside Buffer），后续访存全 miss，开销大；\n2. 线程切换（同进程内）**不切换地址空间**，页表/TLB 保持不变，只保存恢复寄存器与栈；\n3. 此外进程切换还要切换「打开文件表/信号处理」等资源的视角（虽可共享内核全局结构，但地址空间隔离是主要成本）。\n\n**统一实现基底**：Linux 的线程本质是用 `clone()` 创建的「共享地址空间+共享 fd 表」的轻量进程——`fork` 与 `pthread_create` 只是 `clone` 标志位不同，这就是「进程 vs 线程」在数据结构上统一的根源。",
+      "follow_ups": [
+        "同一进程内线程共享哪些、各自独占哪些？（共享地址空间/fd，独占栈/寄存器）",
+        "为什么多进程模型比多线程更安全？（COW 隔离，一个崩不影响其他）",
+        "上下文切换具体要保存/恢复什么？（寄存器、页表、CPU 缓存）"
+      ],
+      "difficulty": 4,
+      "company_tags": [
+        "字节跳动",
+        "阿里云",
+        "腾讯",
+        "华为"
+      ]
+    }
+  ]
+}

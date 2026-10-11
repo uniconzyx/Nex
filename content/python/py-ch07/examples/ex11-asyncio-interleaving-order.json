@@ -1,0 +1,8 @@
+{
+  "title": "asyncio 协程的交错顺序是确定的",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "交错序列: ['start-A', 'start-B', 'start-C', 'end-A', 'end-B', 'end-C']\nA 最先启动: True\n启动顺序 == A,B,C: True\n结束顺序 == A,B,C: True",
+  "code": "import asyncio\n\n\n# asyncio 是单线程协作式调度：\n# 不遇到 await 就不会切换。sleep(0) 是「主动让出」的最小单位，\n# 所以交错顺序是**确定性**的。\n\nlog = []\n\n\nasync def worker(name):\n    log.append(\"start-\" + name)\n    await asyncio.sleep(0)          # 让出控制权\n    log.append(\"end-\" + name)\n\n\nasync def main():\n    await asyncio.gather(worker(\"A\"), worker(\"B\"), worker(\"C\"))\n\n\nasyncio.run(main())\nprint(\"交错序列:\", log)\nprint(\"A 最先启动:\", log[0] == \"start-A\")\nprint(\"启动顺序 == A,B,C:\", [x for x in log if x.startswith(\"start\")] ==\n      [\"start-A\", \"start-B\", \"start-C\"])\nprint(\"结束顺序 == A,B,C:\", [x for x in log if x.startswith(\"end\")] ==\n      [\"end-A\", \"end-B\", \"end-C\"])\n"
+}

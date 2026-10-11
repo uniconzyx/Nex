@@ -1,0 +1,70 @@
+# ===================== CppMind .gitignore =====================
+# 本文件确保密钥、本地环境、构建产物与发布二进制不进入仓库。
+
+# ---------- 密钥 / 环境变量（最高优先级，绝不入库）----------
+server/.env
+.env
+.env.*
+*.env
+
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.Python
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.idea/
+.vscode/
+
+# ---------- 构建产物 / 发布二进制 ----------
+build/
+dist/
+*.exe
+*.apk
+*.aab
+*.app
+release/
+dist_*/
+
+# ---------- 工具 / 临时 / 沙箱目录 ----------
+# 临时检索与注入脚本（含草稿，不应入库）
+scratch/
+# 工作区记忆（本机专属，跨机器无意义）
+.workbuddy/
+# 本机构建/缓存目录（曾出现）
+.exbuild/
+.tmp_node/
+
+# ---------- 内容校验中间产物 ----------
+content/_coverage.json
+content/_learning_lines.json
+
+# ---------- OS / 编辑器 ----------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------- Flutter / Dart ----------
+app/.dart_tool/
+app/build/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/android/.gradle/
+app/ios/Flutter/Flutter.framework/
+app/ios/Flutter/Flutter.podspec
+app/linux/build/
+app/macos/build/
+app/windows/build/
+app/web/build/
+*.iml
+
+# ---------- Docker / 运行时数据 ----------
+*.log
+pgdata/
+redisdata/
+miniodata/

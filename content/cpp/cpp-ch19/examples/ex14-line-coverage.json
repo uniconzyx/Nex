@@ -1,0 +1,12 @@
+{
+  "title": "极简行覆盖率统计器：可执行行识别 + 覆盖率与未覆盖行（两组用例对比）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "[源码] 总行=14 注释与空行=6 可执行行=8\n[可执行行号] [2, 3, 6, 7, 8, 11, 12, 13]\n[测试A] 覆盖=3/8 行覆盖率=37.5% 未覆盖行=[3, 8, 11, 12, 13]\n[测试B] 覆盖=5/8 行覆盖率=62.5% 未覆盖行=[3, 8, 13]\n[门槛 80%] 测试A=False 测试B=False\n[判定] 同一份源码换一套用例，覆盖率从 37.5% 提升到 62.5% -> 覆盖率是「用例质量」的镜像",
+  "code": "SRC = \"\"\"// 示例被测源码：行号从 1 开始\nint add(int a, int b) {\n    return a + b;\n}\n\nint div_int(int a, int b) {\n    if (b == 0) return -1;\n    return a / b;\n}\n\nint max3(int a, int b, int c) {\n    int m = a > b ? a : b;\n    return m > c ? m : c;\n}\n\"\"\"\n\nSKIP = (\"{\", \"}\", \"};\", \");\")\n\n\ndef executable_lines(text):\n    out = []\n    for no, raw in enumerate(text.splitlines(), 1):\n        s = raw.strip()\n        if not s:\n            continue\n        if s.startswith((\"//\", \"/*\", \"*\", \"#\")):\n            continue\n        if s in SKIP:\n            continue\n        out.append(no)\n    return out\n\n\ndef coverage(execd, text):\n    lv = executable_lines(text)\n    hit = [n for n in lv if n in execd]\n    miss = [n for n in lv if n not in execd]\n    pct = round(100.0 * len(hit) / len(lv), 1)\n    return pct, len(hit), len(lv), miss\n\n\nA = {1, 2, 5, 6, 7}                                   # 只测 add 与 div 的正常路径\nB = {1, 2, 5, 6, 7, 10, 11, 12}                       # 补上 b==0 分支与 max3\n\nlv = executable_lines(SRC)\nprint(\"[源码] 总行=%d 注释与空行=%d 可执行行=%d\" % (len(SRC.splitlines()), len(SRC.splitlines()) - len(lv), len(lv)))\nprint(\"[可执行行号] %s\" % lv)\nfor name, execd in ((\"测试A\", A), (\"测试B\", B)):\n    pct, hit, tot, miss = coverage(execd, SRC)\n    print(\"[%s] 覆盖=%d/%d 行覆盖率=%s%% 未覆盖行=%s\" % (name, hit, tot, pct, miss))\npa, _, _, _ = coverage(A, SRC)\npb, _, _, _ = coverage(B, SRC)\nprint(\"[门槛 80%%] 测试A=%s 测试B=%s\" % (pa >= 80.0, pb >= 80.0))\nprint(\"[判定] 同一份源码换一套用例，覆盖率从 %s%% 提升到 %s%% -> 覆盖率是「用例质量」的镜像\" % (pa, pb))\n",
+  "_verified": true,
+  "_step_rc": [
+    0
+  ]
+}

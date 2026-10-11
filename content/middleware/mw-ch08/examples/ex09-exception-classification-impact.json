@@ -1,0 +1,8 @@
+{
+  "title": "异常分类对下游无效压力的影响",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "瞬时故障 50 条 / 永久失败 30 条，重试上限 3\n\n策略                       总投递次数        其中可避免的         进 DLQ 条数    \n不做异常分类                   220          90             30          \n区分可重试/不可重试               130          0              30          \n\n节省投递 90 次（40.9%），且进 DLQ 的条数完全一致（30 = 30）。\n结论：异常分类不改变「最终有多少坏消息」，只把注定失败的重试砍掉，\n      从而降低下游无效压力、缩短批处理时间。",
+  "code": "# 异常分类的影响：把「永久失败」也反复重试，会放大多少注定失败的投递\nN_TRANSIENT = 50     # 瞬时故障条数（重试 1 次即恢复）\nN_PERMANENT = 30     # 永久失败条数（重试多少次都不行）\nMAX_RETRY = 3\n\n\ndef run(retry_permanent):\n    \"\"\"retry_permanent=True 表示不做异常分类，永久失败也一起重试。\"\"\"\n    attempts = N_TRANSIENT * 2                     # 瞬时故障：1 次失败 + 1 次重试成功\n    if retry_permanent:\n        attempts += N_PERMANENT * (MAX_RETRY + 1)  # 每条都用满重试\n        avoidable = N_PERMANENT * MAX_RETRY        # 明知无效、仍会发生的尝试\n    else:\n        attempts += N_PERMANENT * 1                # 直接判死，只尝试 1 次\n        avoidable = 0\n    return attempts, avoidable, N_PERMANENT\n\n\na, av_a, dlq_a = run(True)\nb, av_b, dlq_b = run(False)\n\nprint(\"瞬时故障 %d 条 / 永久失败 %d 条，重试上限 %d\" % (N_TRANSIENT, N_PERMANENT, MAX_RETRY))\nprint()\nprint(\"%-24s %-12s %-14s %-12s\" % (\"策略\", \"总投递次数\", \"其中可避免的\", \"进 DLQ 条数\"))\nprint(\"%-24s %-12d %-14d %-12d\" % (\"不做异常分类\", a, av_a, dlq_a))\nprint(\"%-24s %-12d %-14d %-12d\" % (\"区分可重试/不可重试\", b, av_b, dlq_b))\nsaved = a - b\nprint()\nprint(\"节省投递 %d 次（%.1f%%），且进 DLQ 的条数完全一致（%d = %d）。\"\n      % (saved, 100.0 * saved / a, dlq_a, dlq_b))\nprint(\"结论：异常分类不改变「最终有多少坏消息」，只把注定失败的重试砍掉，\")\nprint(\"      从而降低下游无效压力、缩短批处理时间。\")\n"
+}

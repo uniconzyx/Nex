@@ -1,0 +1,10 @@
+{
+  "title": "Flexbox 一维布局与完美居中",
+  "code_lang": "css",
+  "code_std": "css3",
+  "stdin": "",
+  "expected_output": "布局结果：\n- container 高度 300px，子元素在主轴与交叉轴双向居中（真正的「完美居中」）。\n- gap: 12px 只在子元素之间产生间距，无首尾留白副作用。\n- .grow 元素 flex: 1 占据剩余空间，等价于 flex-grow:1; flex-shrink:1; flex-basis:0%。\n说明：Flexbox 适合一维布局；二维（行列同时控制）应改用 Grid。",
+  "code": ".container {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  gap: 12px;\n  height: 300px;\n}\n.item { flex: 0 1 auto; }\n.grow { flex: 1; }\n\n.stack { display: flex; flex-direction: column; justify-content: flex-end; }",
+  "_verified": "false",
+  "_verify_note": "HTML/CSS 渲染行为，本地无浏览器环境，输出为按规范的推理说明"
+}

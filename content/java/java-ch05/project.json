@@ -1,0 +1,35 @@
+{
+  "meta": {
+    "chapter": "java-ch05",
+    "category": "basic"
+  },
+  "items": [
+    {
+      "title": "实现带异常链与资源安全的「银行账户转账」服务",
+      "requirement_md": "设计一个 `BankService`，综合运用本章知识：\n- 定义非受检自定义异常 `InsufficientBalanceException extends RuntimeException`，并在构造时通过 `initCause` 或构造器传入根因，形成异常链；\n- `transfer(Account from, Account to, long amount)` 中：金额校验（≤0 抛 `IllegalArgumentException`）、余额校验（不足抛 `InsufficientBalanceException`），并模拟「扣款成功但记账失败」时用 try-with-resources 管理一个 `AutoCloseable` 的日志/连接资源，确保资源异常被抑制而主异常不被吞；\n- 用泛型方法 `static <T> T requireNonNullOr(T v, Supplier<String> msg)` 做参数校验（体现泛型方法）；\n- 在 `public static void main` 中自测：正常转账、余额不足（观察异常链 getCause）、非法金额三种路径，并打印 suppressed 信息。",
+      "tasks": [
+        {
+          "title": "定义异常体系与异常链",
+          "verification": {
+            "type": "test",
+            "desc": "getCause 能追溯到根因"
+          }
+        },
+        {
+          "title": "用 try-with-resources 管理资源并验证 suppressed",
+          "verification": {
+            "type": "test",
+            "desc": "资源异常进入 suppressed，主异常不被掩盖"
+          }
+        },
+        {
+          "title": "实现泛型校验方法与三种自测路径",
+          "verification": {
+            "type": "test",
+            "desc": "受检/非受检路径清晰，泛型方法可用"
+          }
+        }
+      ]
+    }
+  ]
+}

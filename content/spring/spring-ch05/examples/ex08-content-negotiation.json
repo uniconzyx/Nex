@@ -1,0 +1,8 @@
+{
+  "title": "ex08-content-negotiation",
+  "code_lang": "java",
+  "code_std": "java23",
+  "stdin": "",
+  "expected_output": "JSON: {\"id\":\"7\",\"name\":\"alice\"}\nXML: <user><id>7</id><name>alice</name></user>",
+  "code": "import java.util.*;\npublic class Main {\n    static String render(String accept, Map<String,String> m){\n        boolean wantJson = accept.contains(\"application/json\");\n        StringBuilder sb=new StringBuilder();\n        if(wantJson){\n            sb.append(\"{\");\n            int i=0;\n            for(Map.Entry<String,String>e:m.entrySet()){\n                if(i++>0)sb.append(\",\");\n                sb.append(\"\\\"\").append(e.getKey()).append(\"\\\":\\\"\").append(e.getValue()).append(\"\\\"\");\n            }\n            sb.append(\"}\");\n        } else {\n            sb.append(\"<user>\");\n            for(Map.Entry<String,String>e:m.entrySet())\n                sb.append(\"<\").append(e.getKey()).append(\">\").append(e.getValue()).append(\"</\").append(e.getKey()).append(\">\");\n            sb.append(\"</user>\");\n        }\n        return (wantJson?\"JSON\":\"XML\")+\": \"+sb;\n    }\n    public static void main(String[] a){\n        Map<String,String> m=new LinkedHashMap<>();\n        m.put(\"id\",\"7\"); m.put(\"name\",\"alice\");\n        System.out.println(render(\"application/json\",m));\n        System.out.println(render(\"text/html,application/xml\",m));\n    }\n}"
+}

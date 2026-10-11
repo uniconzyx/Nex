@@ -1,0 +1,9 @@
+{
+  "title": "AOF 混合持久化：RDB 头 + AOF 增量尾",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "AOF 混合持久化(aof-use-rdb-preamble yes):\n  文件头: RDB 全量快照 {'a': 1, 'b': 2}\n  文件尾: AOF 增量 [('SET', 'c', 3), ('DEL', 'a', None)]\n  恢复结果: {'b': 2, 'c': 3}\n  优势: 兼具 RDB 快速加载 + AOF 低数据丢失",
+  "code": "def mix_persist(snapshot, incremental):\n    return {\"type\": \"RDB\", \"data\": snapshot, \"aof_tail\": incremental}\n\nsnapshot = {\"a\": 1, \"b\": 2}\nincremental = [(\"SET\", \"c\", 3), (\"DEL\", \"a\", None)]\nf = mix_persist(snapshot, incremental)\nprint(\"AOF 混合持久化(aof-use-rdb-preamble yes):\")\nprint(\"  文件头: RDB 全量快照\", f[\"data\"])\nprint(\"  文件尾: AOF 增量\", f[\"aof_tail\"])\n# 恢复: 先按 RDB 载入快照, 再重放 AOF 增量\nrestored = dict(f[\"data\"])\nfor op, k, v in f[\"aof_tail\"]:\n    if op == \"SET\":\n        restored[k] = v\n    else:\n        restored.pop(k, None)\nprint(\"  恢复结果:\", restored)\nprint(\"  优势: 兼具 RDB 快速加载 + AOF 低数据丢失\")\n",
+  "_verified": true
+}

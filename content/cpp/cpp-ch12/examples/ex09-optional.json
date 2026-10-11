@@ -1,0 +1,8 @@
+{
+  "title": "std::optional 表达「可能没有值」",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "\"42\" -> 解析成功: 42\n\"abc\" -> 解析失败，value_or 兜底: -1\n默认构造的 optional<string> has_value = false\n对比：返回指针要管所有权，抛异常有开销，optional 把「无值」写进类型系统",
+  "code": "#include <iostream>\n#include <optional>\n#include <string>\nusing namespace std;\n\noptional<int> parse_int(const string& s) {\n    try {\n        return stoi(s);\n    } catch (...) {\n        return nullopt;          // 明确表达「失败」而非返回 -1 之类的魔数\n    }\n}\n\nint main() {\n    for (const string s : {\"42\", \"abc\"}) {\n        auto r = parse_int(s);\n        if (r) {\n            cout << \"\\\"\" << s << \"\\\" -> 解析成功: \" << *r << \"\\n\";\n        } else {\n            cout << \"\\\"\" << s << \"\\\" -> 解析失败，value_or 兜底: \" << r.value_or(-1) << \"\\n\";\n        }\n    }\n    optional<string> o;\n    cout << boolalpha << \"默认构造的 optional<string> has_value = \" << o.has_value() << \"\\n\";\n    cout << \"对比：返回指针要管所有权，抛异常有开销，optional 把「无值」写进类型系统\\n\";\n}"
+}

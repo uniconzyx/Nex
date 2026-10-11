@@ -1,0 +1,133 @@
+{
+  "meta": {
+    "unit": "clang-u07",
+    "title": "多文件编译与链接",
+    "total": 6
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "《C 程序设计语言》第 4 章 / C99 6.2.2 链接属性",
+      "difficulty": "easy",
+      "title": "编译错误还是链接错误",
+      "content_md": "下面两个报错分别发生在哪个阶段，根因是什么？\n\n① `error: implicit declaration of function 'add'`\n② `undefined reference to 'add'`\n\nA. 都是链接错误\nB. ① 编译错误（缺声明）② 链接错误（缺定义）\nC. ① 链接错误（缺声明）② 编译错误（缺定义）\nD. 都是编译错误",
+      "answer": {
+        "correct": "B",
+        "explain": "① 由编译器报出：它在本翻译单元里看不到 `add` 的签名，无法生成正确的调用指令。加入声明（或包含头文件）即可。\n② 由链接器报出：编译已经通过（说明有声明），但把所有 `.o` 和库扫描完后，仍未找到 `add` 的定义 —— 可能是没编译 `util.c`、没把 `util.o` 加进链接命令、或 `add` 被写成了 `static`。\n\n关键区分：**编译器只管签名，链接器才管地址**。"
+      },
+      "explanation": "考察对「编译期/链接期职责边界」的理解，是本节最核心的一条线。",
+      "tags": [
+        "链接",
+        "编译",
+        "extern"
+      ]
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "C99 6.2.2 / C99 6.9.2 试探性定义",
+      "difficulty": "medium",
+      "title": "文件作用域 static 与块作用域 static",
+      "content_md": "下列关于 `static` 的说法，**正确**的是（多选）：\n\nA. 文件作用域的 `static int n;` 具有内部链接，其他翻译单元无法引用\nB. 块作用域的 `static int n;` 具有内部链接，跨函数共享\nC. 块作用域的 `static int n;` 具有静态存储期，但无链接\nD. 文件作用域的 `static` 函数无法被本翻译单元以外的代码调用",
+      "answer": {
+        "correct": "A、C、D",
+        "explain": "- A 对：文件作用域 `static` 的语义是**内部链接**。\n- B 错、C 对：块作用域 `static` 提供的是**静态存储期**（变量生存到程序结束，值在函数调用间保持），但**没有链接属性**（无链接），谈不上「跨函数共享」——别的函数连名字都看不见。\n- D 对：内部链接意味着符号不进入全局符号表，其他翻译单元无法链接到它。\n\n同一个关键字在两种作用域下有**两套完全不同的语义**，这是 C 语言的设计包袱，也是面试爱考的对比点。"
+      },
+      "explanation": "考察 static 的双重语义（内部链接 vs 静态存储期），极易混淆。",
+      "tags": [
+        "static",
+        "链接属性",
+        "作用域"
+      ]
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "教材：《C 专家编程》第 4 章 链接",
+      "difficulty": "medium",
+      "title": "修复头文件里的多重定义",
+      "content_md": "以下代码在 `gcc main.c other.c -o app` 时报 `multiple definition of 'counter'`，请指出根因并给出最小修复。\n\n```c\n/* config.h */\n#ifndef CONFIG_H\n#define CONFIG_H\nint counter = 0;      /* 第 4 行 */\n#endif\n```\n```c\n/* main.c */  #include \"config.h\"\nint main(void) { return counter; }\n```\n```c\n/* other.c */ #include \"config.h\"\nint bump(void) { return ++counter; }\n```",
+      "answer": {
+        "correct": "把定义移到某个 .c，头文件只留 extern 声明",
+        "explain": "包含守卫只防「同一翻译单元内的重复包含」，**无法阻止不同翻译单元各产生一个定义**。`int counter = 0;` 是**带初始化器的强定义**，两个 `.c` 各有一份 → 链接器按「强符号同名多于一个即报错」的规则报 `multiple definition`。\n\n最小修复：\n```c\n/* config.h */\nextern int counter;      /* 只声明 */\n/* config.c */\nint counter = 0;         /* 唯一的定义 */\n```\n补充：若写成不带初始化器的 `int counter;`，在旧式 common 符号语义下可能被合并（表现为「有时能跑」），但 GCC 10+ 默认 `-fno-common`，会直接报错。依赖 common 合并是**实现行为**，不应作为设计依据。"
+      },
+      "reference_code": "/* config.h */\n#ifndef CONFIG_H\n#define CONFIG_H\nextern int counter;\n#endif\n\n/* config.c */\n#include \"config.h\"\nint counter = 0;\n",
+      "explanation": "把「包含守卫的作用边界」和「强符号多重定义」两件事合起来考。",
+      "tags": [
+        "多重定义",
+        "头文件",
+        "extern"
+      ]
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "source": "leetcode",
+      "source_ref": "LeetCode 208. 实现 Trie (前缀树)",
+      "external_url": "https://leetcode.cn/problems/implement-trie-prefix-tree/",
+      "difficulty": "medium",
+      "title": "多文件工程：Trie 的接口与实现分离",
+      "content_md": "把「实现 Trie（前缀树）」拆成标准的三文件工程：`trie.h`（只放结构体声明与函数声明）、`trie.c`（实现，内部辅助函数一律 `static`）、`main.c`（只包含头文件并调用）。\n\n要求：\n1. `trie.h` 中**不得出现任何函数定义或变量定义**，且能被单独包含并通过编译。\n2. `trie.c` 的内部辅助函数使用 `static`，用 `nm trie.o` 验证它们是**小写 t**（内部链接）。\n3. 用 `gcc -c` 分别编译再链接，不得一步到位。\n\n题面见链接（本题仅要求把既有解法改造成分离编译的工程结构）。",
+      "answer": {
+        "explain": "要点在于**接口与实现分离**：\n- `trie.h` 用包含守卫 + `struct Trie;`（前置声明）+ 函数声明。若头文件里直接定义`struct Trie { ... }` 也可以（类型定义不产生符号），但内部的 `static` 辅助函数必须有外部链接的入口函数才能被 `main.c` 使用。\n- `nm trie.o` 应看到 `T trieCreate`、`T trieInsert`（大写的 T，外部链接）和 `t trieNodeNew`（小写 t，内部链接）。\n- 分离编译：`gcc -c trie.c -o trie.o && gcc -c main.c -o main.o && gcc main.o trie.o -o app`。"
+      },
+      "reference_code": "/* trie.h */\n#ifndef TRIE_H\n#define TRIE_H\nstruct Trie;\nstruct Trie *trieCreate(void);\nvoid trieInsert(struct Trie *obj, const char *word);\nint trieSearch(struct Trie *obj, const char *word);\nvoid trieFree(struct Trie *obj);\n#endif\n\n/* trie.c */\n#include \"trie.h\"\n#include <stdlib.h>\n#include <string.h>\n#define ALPHA 26\nstruct Trie { struct Trie *next[ALPHA]; int isEnd; };\nstatic struct Trie *trieNodeNew(void) {          /* 内部链接 */\n    struct Trie *n = calloc(1, sizeof *n);\n    return n;\n}\nstruct Trie *trieCreate(void) { return trieNodeNew(); }\nvoid trieInsert(struct Trie *obj, const char *word) {\n    for (; *word; ++word) {\n        int i = *word - 'a';\n        if (!obj->next[i]) obj->next[i] = trieNodeNew();\n        obj = obj->next[i];\n    }\n    obj->isEnd = 1;\n}\nint trieSearch(struct Trie *obj, const char *word) {\n    for (; *word; ++word) {\n        int i = *word - 'a';\n        if (!obj->next[i]) return 0;\n        obj = obj->next[i];\n    }\n    return obj->isEnd;\n}\nvoid trieFree(struct Trie *obj) {\n    int i;\n    if (!obj) return;\n    for (i = 0; i < ALPHA; ++i) trieFree(obj->next[i]);\n    free(obj);\n}\n\n/* main.c */\n#include \"trie.h\"\n#include <stdio.h>\nint main(void) {\n    struct Trie *t = trieCreate();\n    trieInsert(t, \"apple\");\n    printf(\"search apple = %d\\n\", trieSearch(t, \"apple\"));\n    printf(\"search app   = %d\\n\", trieSearch(t, \"app\"));\n    trieFree(t);\n    return 0;\n}\n",
+      "explanation": "把算法题改造成真实工程结构，训练接口/实现分离与 static 的使用纪律。",
+      "tags": [
+        "分离编译",
+        "static",
+        "接口设计"
+      ]
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "github",
+      "source": "github",
+      "source_ref": "TheAlgorithms/C · 并查集（Disjoint Set Union）实现",
+      "external_url": "https://github.com/TheAlgorithms/C/tree/master/misc",
+      "difficulty": "medium",
+      "title": "静态库：把并查集打包成 libdsu.a",
+      "content_md": "参考 GitHub 上的并查集实现（题面见链接），把并查集封装成**静态库**并使用：\n\n1. `dsu.c` 实现 `dsu_init` / `dsu_find`（路径压缩）/ `dsu_union`（按秩合并）。\n2. 用 `ar rcs libdsu.a dsu.o` 打包。\n3. `main.c` 通过 `-L. -ldsu` 链接，实现 10 个元素的两组合并与连通性查询。\n4. 用 `nm libdsu.a` 查看归档内各成员的符号；用 `size app.exe` 查看段占用。\n\n本题仅要求工程化封装，不要求新算法。",
+      "answer": {
+        "explain": "关键点：\n- `.a` 是 `.o` 的归档，**链接时按需抽取**：只有被引用的成员会进入可执行文件。\n- `-L.` 指定库搜索目录，`-ldsu` 对应 `libdsu.a`（**`lib` 前缀与 `.a` 后缀由链接器自动补全**，所以不要写成 `-llibdsu.a`）。\n- `nm libdsu.a` 会分成员输出符号；`nm app.exe` 则看不到内部静态符号（若实现里用了 static）。"
+      },
+      "reference_code": "/* dsu.h */\n#ifndef DSU_H\n#define DSU_H\nvoid dsu_init(int n);\nint  dsu_find(int x);\nint  dsu_union(int a, int b);\n#endif\n\n/* dsu.c */\n#include \"dsu.h\"\n#define MAXN 256\nstatic int parent[MAXN];      /* 内部链接：模块私有状态 */\nstatic int rank_[MAXN];\nvoid dsu_init(int n) {\n    int i; for (i = 0; i < n; ++i) { parent[i] = i; rank_[i] = 0; }\n}\nint dsu_find(int x) {                 /* 路径压缩 */\n    if (parent[x] != x) parent[x] = dsu_find(parent[x]);\n    return parent[x];\n}\nint dsu_union(int a, int b) {         /* 按秩合并 */\n    int ra = dsu_find(a), rb = dsu_find(b);\n    if (ra == rb) return 0;\n    if (rank_[ra] < rank_[rb]) { int t = ra; ra = rb; rb = t; }\n    parent[rb] = ra;\n    if (rank_[ra] == rank_[rb]) ++rank_[ra];\n    return 1;\n}\n\n/* main.c */\n#include \"dsu.h\"\n#include <stdio.h>\nint main(void) {\n    dsu_init(10);\n    dsu_union(0, 1); dsu_union(2, 3); dsu_union(1, 3);\n    printf(\"0-3 connected: %d\\n\", dsu_find(0) == dsu_find(3));\n    printf(\"0-5 connected: %d\\n\", dsu_find(0) == dsu_find(5));\n    return 0;\n}\n",
+      "explanation": "静态库打包 + 按需抽取 + 模块私有状态的 static 封装，是工程化必练。",
+      "tags": [
+        "静态库",
+        "ar",
+        "并查集"
+      ]
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "nowcoder",
+      "source": "nowcoder",
+      "source_ref": "牛客网 · 华为机试 HJ 系列（字符串处理类）",
+      "external_url": "https://www.nowcoder.com/exam/oj?tab=%E5%AD%97%E7%AC%A6%E4%B8%B2",
+      "difficulty": "medium",
+      "title": "动态库与 extern \"C\" 接口",
+      "content_md": "把一段字符串处理逻辑（如最长回文子串，参考牛客字符串专题，题面见链接）编译成**动态库**，并用 `extern \"C\"` 暴露纯 C 接口，供 C 主程序调用：\n\n1. 用 `g++` 编译 `libstr.dll`（`-shared`）。\n2. 头文件用 `#ifdef __cplusplus extern \"C\" { #endif` 包裹声明。\n3. 用 `nm -C` 对比加与不加 `extern \"C\"` 时符号名差异（`_Z...` vs 原名）。\n4. C 主程序用 `gcc` 编译并链接该动态库。\n\n本题的核心是**混编的符号契约**，算法本身可复用既有解法。",
+      "answer": {
+        "explain": "不加 `extern \"C\"` 时，C++ 编译器把 `int longestPalin(const char*)` 修饰成`_Z13longestPalinPKc`；C 主程序的 `U` 符号是裸名 `longestPalin`，两者对不上 → `undefined reference`。\n加 `extern \"C\"` 后符号名保持 `longestPalin`，链接成功。\n验证：`nm -C libstr.dll` 看导出符号，或 `nm main.o` 看 `U` 符号的名字形态。"
+      },
+      "reference_code": "/* str.h —— C/C++ 双用头 */\n#ifndef STR_H\n#define STR_H\n#ifdef __cplusplus\nextern \"C\" {\n#endif\nint longest_palindrome(const char *s, int n);\n#ifdef __cplusplus\n}\n#endif\n#endif\n\n/* str.cpp */\n#include \"str.h\"\n#include <string>\nint longest_palindrome(const char *s, int n) {\n    int best = 0;\n    for (int c = 0; c < n; ++c) {\n        for (int k = 0; c - k >= 0 && c + k < n && s[c-k] == s[c+k]; ++k)\n            if (2*k+1 > best) best = 2*k+1;\n        for (int k = 0; c - k >= 0 && c + 1 + k < n && s[c-k] == s[c+1+k]; ++k)\n            if (2*k+2 > best) best = 2*k+2;\n    }\n    return best;\n}\n\n/* main.c */\n#include \"str.h\"\n#include <stdio.h>\n#include <string.h>\nint main(void) {\n    const char *s = \"abaxyzzyxf\";\n    printf(\"longest = %d\\n\", longest_palindrome(s, (int)strlen(s)));\n    return 0;\n}\n",
+      "explanation": "extern \"C\" 是 C/C++ 混编的唯一桥梁，必须能用 nm 实证其效果。",
+      "tags": [
+        "extern C",
+        "动态库",
+        "name mangling"
+      ]
+    }
+  ]
+}

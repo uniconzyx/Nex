@@ -1,0 +1,8 @@
+{
+  "title": "ORDER BY DESC 配合 LIMIT 取前三高薪",
+  "code_lang": "sql",
+  "code_std": "mysql",
+  "stdin": "",
+  "expected_output": "Query OK, 0 rows affected\nQuery OK, 6 rows affected\nname|salary\nDave|9000.00\nBob|8000.00\nFrank|7000.00",
+  "code": "CREATE TABLE employee (emp_id INT PRIMARY KEY, name VARCHAR(20), dept_id INT, salary DECIMAL(10,2));\nINSERT INTO employee VALUES (1,'Alice',10,6000.00),(2,'Bob',20,8000.00),(3,'Carol',10,4500.00),(4,'Dave',20,9000.00),(5,'Eve',30,5000.00),(6,'Frank',20,7000.00);\nSELECT name, salary FROM employee ORDER BY salary DESC LIMIT 3;"
+}

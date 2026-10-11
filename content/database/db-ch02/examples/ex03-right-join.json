@@ -1,0 +1,9 @@
+{
+  "title": "RIGHT JOIN 保留右表全部行（含无匹配的右表行）",
+  "code_lang": "sql",
+  "code_std": "mysql8",
+  "stdin": "",
+  "expected_output": "Query OK, 0 rows affected\nQuery OK, 2 rows affected\nQuery OK, 3 rows affected\norder_id|cust_name\n101|Tom\n102|Tom\n103|NULL",
+  "code": "CREATE TABLE customer (cust_id INT PRIMARY KEY, cust_name VARCHAR(20));\nCREATE TABLE orders (order_id INT PRIMARY KEY, cust_id INT, amount DECIMAL(10,2));\nINSERT INTO customer VALUES (1,'Tom'),(2,'Jerry');\nINSERT INTO orders VALUES (101,1,200.00),(102,1,350.00),(103,99,999.00);\nSELECT o.order_id, c.cust_name FROM customer c RIGHT JOIN orders o ON c.cust_id = o.cust_id ORDER BY o.order_id;",
+  "_verified": false
+}

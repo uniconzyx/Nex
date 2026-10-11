@@ -1,0 +1,8 @@
+{
+  "title": "malloc 申请一维数组并读写",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "0 10 20 30 40",
+  "code": "#include <stdio.h>\n#include <stdlib.h>\n\nint main(void) {\n    size_t n = 5;\n    int *a = malloc(n * sizeof(int));\n    if (!a) { fprintf(stderr, \"malloc failed\\n\"); return 1; }\n\n    for (size_t i = 0; i < n; i++) a[i] = (int)(i * 10);\n    for (size_t i = 0; i < n; i++) printf(\"%d%c\", a[i], i + 1 == n ? '\\n' : ' ');\n\n    free(a);\n    a = NULL;                 /* 释放后置空 */\n    return 0;\n}"
+}

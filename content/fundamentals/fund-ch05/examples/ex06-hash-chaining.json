@@ -1,0 +1,8 @@
+{
+  "title": "哈希表：拉链法（链长与成功 ASL）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "桶  0: 链长=2\n桶  3: 链长=2\n桶  4: 链长=1\n桶  5: 链长=1\n桶  7: 链长=2\n桶  8: 链长=1\n拉链法 桶数=11 关键字数=9 查找成功ASL=1.333 最长链=2",
+  "code": "#include <stdio.h>\n\n#define P 11\n#define MAXN 64\n\ntypedef struct Node { int key; int next; } Node;\n\nNode pool[MAXN];\nint head[P];\nint pcnt = 0;\n\nint main(void) {\n    int i, kk, h0, probes;\n    int keys[] = {47, 7, 29, 11, 16, 92, 22, 8, 3};\n    int k = (int)(sizeof(keys) / sizeof(keys[0]));\n    int blen[P];\n    int tot_probe = 0, maxlen = 0;\n    double asl;\n    for (i = 0; i < P; i++) { head[i] = -1; blen[i] = 0; }\n    for (kk = 0; kk < k; kk++) {\n        h0 = keys[kk] % P;\n        probes = blen[h0] + 1;\n        blen[h0]++;\n        tot_probe += probes;\n        pool[pcnt].key = keys[kk];\n        pool[pcnt].next = head[h0];\n        head[h0] = pcnt;\n        pcnt++;\n    }\n    for (i = 0; i < P; i++) {\n        int c = 0;\n        int p = head[i];\n        while (p != -1) { c++; p = pool[p].next; }\n        if (c > maxlen) maxlen = c;\n        if (c > 0) printf(\"桶 %2d: 链长=%d\\n\", i, c);\n    }\n    asl = (double)tot_probe / (double)k;\n    printf(\"拉链法 桶数=%d 关键字数=%d 查找成功ASL=%.3f 最长链=%d\\n\", P, k, asl, maxlen);\n    return 0;\n}\n"
+}

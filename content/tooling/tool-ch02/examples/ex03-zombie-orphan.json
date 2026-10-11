@@ -1,0 +1,8 @@
+{
+  "title": "僵尸进程与孤儿进程的成因与回收",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "场景A：子进程先于父退出，父未 wait\n  child pid=501 state=Z(defunct)，占 pid 槽，等待父 wait()\n  parent pid=500 仍运行但未 wait -> child 保持僵尸\n  处理：parent 调用 wait() -> 回收 child 的 task_struct，pid=501 槽释放\n\n场景B：父进程先于子退出\n  oparent pid=502 退出 -> ochild pid=503 被 init(pid=1) 收养\n  ochild.ppid 由 502 变为 1，照常运行，不是丢失\n\n要点：僵尸占 pid 槽、kill -9 无效(已死)；孤儿被 init 收养、正常回收",
+  "code": "# 模拟僵尸进程与孤儿进程的成因与回收（确定性）\nimport itertools\n\nclass Proc:\n    _pid = itertools.count(500)\n    def __init__(self, name, ppid):\n        self.pid = next(Proc._pid)\n        self.name = name\n        self.ppid = ppid\n        self.state = \"R\"\n        self.exit_code = None\n\nprocs = {}\ndef spawn(parent, name):\n    p = Proc(name, parent.pid)\n    procs[p.pid] = p\n    return p\n\nparent = Proc(\"parent\", 1)\nchild = spawn(parent, \"child\")\n\nprint(\"场景A：子进程先于父退出，父未 wait\")\nchild.state = \"Z\"\nchild.exit_code = 0\nprint(f\"  child pid={child.pid} state=Z(defunct)，占 pid 槽，等待父 wait()\")\nprint(f\"  parent pid={parent.pid} 仍运行但未 wait -> child 保持僵尸\")\nprint(f\"  处理：parent 调用 wait() -> 回收 child 的 task_struct，pid={child.pid} 槽释放\")\nprint()\n\norphan_parent = Proc(\"oparent\", 1)\norphan_child = spawn(orphan_parent, \"ochild\")\norphan_parent.state = \"X\"   # 父已退出\norphan_child.ppid = 1      # 被 init 收养\nprint(\"场景B：父进程先于子退出\")\nprint(f\"  oparent pid={orphan_parent.pid} 退出 -> ochild pid={orphan_child.pid} 被 init(pid=1) 收养\")\nprint(f\"  ochild.ppid 由 {orphan_parent.pid} 变为 {orphan_child.ppid}，照常运行，不是丢失\")\nprint()\nprint(\"要点：僵尸占 pid 槽、kill -9 无效(已死)；孤儿被 init 收养、正常回收\")\n"
+}

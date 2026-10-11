@@ -1,0 +1,8 @@
+{
+  "title": "乘法溢出导致分配过小（安全陷阱演示）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "count = 4611686018427387905\ncount * sizeof(int) 回绕后 = 4\n期望值应约为 4 字节 —— 说明乘法已溢出\n正确防护：检测到溢出，拒绝分配",
+  "code": "#include <stdio.h>\n#include <stdlib.h>\n#include <stdint.h>\n\nint main(void) {\n    size_t count = (SIZE_MAX / 4) + 2;      /* 恶意大值 */\n    size_t bytes = count * sizeof(int);     /* 乘法回绕，结果远小于期望 */\n\n    printf(\"count = %zu\\n\", count);\n    printf(\"count * sizeof(int) 回绕后 = %zu\\n\", bytes);\n    printf(\"期望值应约为 %zu 字节 —— 说明乘法已溢出\\n\", count * 4);\n\n    if (count > SIZE_MAX / sizeof(int)) {\n        printf(\"正确防护：检测到溢出，拒绝分配\\n\");\n    }\n    return 0;\n}"
+}

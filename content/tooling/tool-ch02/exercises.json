@@ -1,0 +1,196 @@
+{
+  "meta": {
+    "chapter": "tool-ch02",
+    "title": "Linux 进程、管道与 Shell 脚本 —— 习题集",
+    "count": 8,
+    "note": "8 题，基础题 4 + 算法题 4（LeetCode Shell 题库，仅存元数据与链接，不含题面正文）"
+  },
+  "items": [
+    {
+      "id": "q1",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "僵尸进程与孤儿进程的成因与回收",
+      "content_md": "下列说法正确的是？（多选）\n\nA. 子进程先于父进程退出、父进程未调用 `wait()`，子进程会变成**僵尸（Z）**状态，残留 task_struct 占一个 pid 槽\nB. 僵尸进程可以通过 `kill -9` 杀掉，因为它还「活着」\nC. 父进程先于子进程退出时，子进程会被 **init（pid 1）** 或最近的 subreaper 收养，照常运行，不是「丢失」\nD. 孤儿进程无法被回收，会一直泄漏资源\n\n请选择并说明。",
+      "answer": {
+        "correct": "A、C",
+        "explain": "**A 正确**：子进程 `exit()` 后内核释放其地址空间与 fd，但保留 task_struct 与退出码，直到父进程 `wait()/waitpid()` 取走才彻底删除；未回收期间为 Z 状态，只占用一个 pid 编号，不占内存/CPU。\n\n**B 错误**：僵尸已经终止，`kill -9` 只能向存活进程发信号，对尸体无效。正确做法是让**它的父进程**正确 `wait`（或杀掉父进程，僵尸被 init 收养后随即回收）。\n\n**C 正确**：父进程退出后，内核把子进程 reparent 到 init/subreaper，PPID 变 1，调度与回收都正常——这是系统保证 pid 最终都被回收的不变式。\n\n**D 错误**：孤儿被 init 收养后会正常 `wait` 回收，**不会**残留；真正会堆积僵尸、耗尽 pid 的是「父进程长期不 wait」。\n\n记忆口诀：**僵尸占槽、kill -9 无效、找父进程；孤儿被收养、正常回收**。"
+      },
+      "explanation": "考僵尸/孤儿的发生条件与回收责任，是 408 与 SRE 面试高频。",
+      "tags": [
+        "Linux",
+        "进程",
+        "僵尸",
+        "孤儿",
+        "wait"
+      ],
+      "source": "self",
+      "source_ref": "《现代操作系统》第 2 章 · 进程状态；Linux man 7 credentials"
+    },
+    {
+      "id": "q2",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "SIGTERM 与 SIGKILL 的语义差异",
+      "content_md": "运维需要停止一个正在运行的服务进程。关于 `SIGTERM(15)` 与 `SIGKILL(9)`，下列说法正确的是？\n\nA. `kill PID`（不带参数）默认发送 SIGKILL，立即强制杀掉进程\nB. SIGTERM 可被进程捕获，进程可借机 flush 缓冲区、关连接、删 pidfile 后优雅退出\nC. SIGKILL 不可被捕获、阻塞或忽略，内核直接回收进程，跳过所有清理逻辑\nD. 数据库正在写 WAL 时，应优先用 SIGKILL 以保证「立刻停」\n\n请选择并说明。",
+      "answer": {
+        "correct": "B、C",
+        "explain": "**A 错误**：`kill PID` 默认发 **SIGTERM(15)** 而非 SIGKILL；真正「立即杀、不可拒绝」的是 `kill -9`（SIGKILL）。把 SIGTERM 当 SIGKILL 是新手最大误区。\n\n**B 正确**：SIGTERM 默认行为是 Term，但进程可以注册 handler **拦截**它，借机做清理再 `_exit()`。这也是 `systemctl stop`/`docker stop` 默认发 SIGTERM 并给超时窗口（90s/10s）再转 SIGKILL 的原因。\n\n**C 正确**：SIGKILL 与 SIGSTOP 是内核定义的**不可捕获/阻塞/忽略**信号——这是操作系统的最终控制权，保证任何失控进程都可被终止。代价是进程收不到任何清理机会。\n\n**D 错误**：数据库写 WAL 时若被 SIGKILL，会跳过 fsync/崩溃恢复标记，可能留下损坏的 WAL、锁未释放。应先 SIGTERM（让 DB 自己 crash recovery），确认卡死才 SIGKILL。\n\n结论：**SIGTERM 是礼貌请求，SIGKILL 是最后手段**。"
+      },
+      "explanation": "考信号默认行为与「为什么不该把 SIGKILL 当首选」。",
+      "tags": [
+        "Linux",
+        "信号",
+        "SIGTERM",
+        "SIGKILL"
+      ],
+      "source": "self",
+      "source_ref": "Linux man 7 signal；《UNIX 环境高级编程》第 10 章"
+    },
+    {
+      "id": "q3",
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "推断 2>&1 顺序对 fd 表的影响",
+      "content_md": "shell 要把「stdout 与 stderr 都写进 log.txt」。下面两条命令，哪一条能正确做到？请分别说明 fd 1、fd 2 最终指向的目标。\n\n```\ncmd1: 2>&1 > log.txt\ncmd2: > log.txt 2>&1\n```\n\n给出 cmd1 与 cmd2 各自的结果（stderr 最终去了哪里）。",
+      "answer": {
+        "correct": "cmd2 正确；cmd1 只有 stdout 进 log.txt，stderr 仍打到终端",
+        "explain": "重定向是**按顺序、对 fd 表即时生效**的，关键在于「`2>&1` 复制的是 fd 1 当前指向的目标」：\n\n**cmd1 `2>&1 > log.txt`**：\n1. `2>&1`：把 fd 2 复制成「fd 1 当前指向的目标」——此时 fd 1 还指向**终端**，所以 fd 2 → 终端；\n2. `> log.txt`：把 fd 1 指向 log.txt（fd 2 不受影响，仍指向终端）。\n→ 结果：stdout 进 log.txt，stderr 仍打到终端。**错误**。\n\n**cmd2 `> log.txt 2>&1`**：\n1. `> log.txt`：先把 fd 1 指向 log.txt；\n2. `2>&1`：把 fd 2 复制成「fd 1 当前指向的目标」= log.txt。\n→ 结果：stdout 与 stderr **都进 log.txt**。**正确**。\n\n记忆：**想「都重定向到同一处」，先重定向 1，再让 2 复制 1 的目标**；现代写法 `&> log.txt` 或 `cmd > log.txt 2>&1` 都等价且安全。"
+      },
+      "explanation": "考 fd 表视角下重定向的顺序敏感性，output 题经典陷阱。",
+      "tags": [
+        "Linux",
+        "重定向",
+        "fd",
+        "2>&1"
+      ],
+      "source": "self",
+      "source_ref": "《Linux 命令行大全》第 11 章 · 重定向"
+    },
+    {
+      "id": "q4",
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "用 Python 模拟 fork 后父子进程的内存独立性",
+      "content_md": "UNIX 里 `fork()` 复制父进程地址空间、`exec()` 替换映像。请用一段**可直接执行的 Python**模拟：\n「父进程持有一个字典变量；fork（此处用复制而非真实 fork 模拟写时复制）出子进程的独立副本；子进程修改自己的副本，父进程的副本不受影响」。\n\n要求：打印父、子各自的变量值，并断言二者相互独立。",
+      "answer": {
+        "correct": "见 reference_code（父 x=10、子 x=99，互不影响）",
+        "explain": "真实 `fork()` 后父子**写时复制（COW）**共享物理页，子进程写内存触发缺页复制出独立页，因此子改全局变量不会污染父进程——这正是多进程模型安全性的根基，也是「为什么进程间不能靠全局变量通信」。\n\n下面用「父字典 + 子的独立副本」模拟 COW 语义（Windows 无真实 fork，故以复制代替，突出「两份独立状态」这一核心事实）：",
+        "reference_code": "# 模拟 fork 后写时复制：父子地址空间独立\nparent_var = {\"x\": 10}\nchild_var = dict(parent_var)      # fork: 复制出子进程的独立副本（COW 语义）\nchild_var[\"x\"] = 99               # 子进程修改自己的副本\n\nprint(\"父进程 x =\", parent_var[\"x\"])\nprint(\"子进程 x =\", child_var[\"x\"])\nprint(\"结论：fork 后写时复制，子改内存不影响父；二者地址空间独立\")\n\nassert parent_var[\"x\"] == 10, \"父进程状态被破坏\"\nassert child_var[\"x\"] == 99, \"子进程状态错误\"\n"
+      },
+      "explanation": "用可执行 Python 落地 fork/exec 的 COW 语义，呼应 concept/01。",
+      "tags": [
+        "Linux",
+        "fork",
+        "COW",
+        "python"
+      ],
+      "source": "self",
+      "source_ref": "《UNIX 环境高级编程》第 8 章 · fork"
+    },
+    {
+      "id": "q5",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": 2,
+      "title": "统计单词出现频率（LeetCode 192）",
+      "content_md": "给定一个文本文件，每行可能含多个以空白分隔的单词（小写字母），统计每个单词出现次数，按**频次降序**输出，频次相同按**单词字典序升序**输出，每行「单词 空格 次数」。请用 Shell 管道实现。\n\n（题面详见 external_url，本库只存元数据与链接，不搬运题面正文。）",
+      "answer": {
+        "correct": "cat file.txt | tr -s ' ' '\\n' | sort | uniq -c | sort -k2,2 -k1,1nr | awk '{print $2, $1}'",
+        "explain": "分解职责（单一职责 + 管道组合）：\n1. `tr -s ' ' '\\n'`：压缩连续空格并转成换行，使「单词」变成「行」；\n2. `sort`：让相同单词相邻（`uniq -c` 要求输入已排序）；\n3. `uniq -c`：去重并前置计数；\n4. `sort -k2,2 -k1,1nr`：先按第 2 字段（单词）升序、再按第 1 字段（次数）数值反序；\n5. `awk '{print $2, $1}'`：交换成「单词 次数」。\n\n易错：`sort` 漏掉会让 `uniq -c` 计错；用 `sort -rn` 只保频次降序、同频顺序随机。",
+        "reference_code": "cat file.txt | tr -s ' ' '\\n' | sort | uniq -c | sort -k2,2 -k1,1nr | awk '{print $2, $1}'"
+      },
+      "explanation": "经典 Shell 管道题，考 uniq 的前置排序与多键排序。",
+      "tags": [
+        "shell",
+        "awk",
+        "sort",
+        "uniq",
+        "管道"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 192. Word Frequency",
+      "external_url": "https://leetcode.cn/problems/word-frequency/"
+    },
+    {
+      "id": "q6",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": 2,
+      "title": "筛选合法电话号码（LeetCode 193）",
+      "content_md": "给定文件，每行一个候选字符串，用**一行 Shell**输出符合「xxx-xxx-xxxx」或「(xxx) xxx-xxxx」格式的号码（x 为数字），且保持原行顺序。\n\n（题面详见 external_url，本库只存元数据与链接。）",
+      "answer": {
+        "correct": "grep -E '^([0-9]{3}-|\\([0-9]{3}\\) )[0-9]{3}-[0-9]{4}$' file.txt",
+        "explain": "`grep -E` 用 ERE：`{n}`、`()`、`|` 直接可用。\n- 格式一：`[0-9]{3}-[0-9]{3}-[0-9]{4}`\n- 格式二：`\\([0-9]{3}\\) [0-9]{3}-[0-9]{4}`（`\\(` `\\)` 是字面括号）\n- 合并：`^([0-9]{3}-|\\([0-9]{3}\\) )[0-9]{3}-[0-9]{4}$`\n\n关键是 `^` 与 `$` **成对**：只用 `^` 会匹配「前缀合法后面还有垃圾」的行。`[0-9]` 而非 `\\d`（`\\d` 是 PCRE 专有，在 `grep -E` 下不是数字）。`grep` 流逐行输出，保序。",
+        "reference_code": "grep -E '^([0-9]{3}-|\\([0-9]{3}\\) )[0-9]{3}-[0-9]{4}$' file.txt"
+      },
+      "explanation": "考 ERE 与 BRE 差异、锚点成对、及 \\d 方言陷阱。",
+      "tags": [
+        "shell",
+        "grep",
+        "正则",
+        "ERE"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 193. Valid Phone Numbers",
+      "external_url": "https://leetcode.cn/problems/valid-phone-numbers/"
+    },
+    {
+      "id": "q7",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": 2,
+      "title": "转置文件（LeetCode 194）",
+      "content_md": "给定一个文本文件，每行长度相同、由空格分隔成若干列，要求把**行转成列**（转置）输出，列之间以空格分隔。\n\n（题面详见 external_url，本库只存元数据与链接。）",
+      "answer": {
+        "correct": "awk '{ for (i=1; i<=NF; i++) a[i]=a[i] (NR==1?\"\":\" \") $i } END { for (i=1; i in a; i++) print a[i] }' file.txt",
+        "explain": "思路：用 awk 的关联数组按「列号」累加每一行的内容。\n- `NF` 是当前行字段数；`$i` 是第 i 个字段；\n- `a[i] = a[i] (NR==1?\"\":\" \") $i`：把第 i 列的内容拼起来，首行不加前导空格，之后加空格分隔；\n- `END` 里按列号顺序 `print a[i]` 输出每一「列」（原文件的第 i 行）。\n\n易错：列数未知时不能用固定循环上界，用 `i in a` 遍历；字段分隔默认是空白（连续空格视为一个分隔，恰符合要求）。",
+        "reference_code": "awk '{ for (i=1; i<=NF; i++) a[i]=a[i] (NR==1?\"\":\" \") $i } END { for (i=1; i in a; i++) print a[i] }' file.txt"
+      },
+      "explanation": "考 awk 关联数组做矩阵转置，是 Shell 里少见的二维处理。",
+      "tags": [
+        "shell",
+        "awk",
+        "转置"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 194. Transpose File",
+      "external_url": "https://leetcode.cn/problems/transpose-file/"
+    },
+    {
+      "id": "q8",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": 1,
+      "title": "输出文件的第十行（LeetCode 195）",
+      "content_md": "给定文本文件（行数 ≥10），用**一行 Shell**输出第十行。\n\n（题面详见 external_url，本库只存元数据与链接。）",
+      "answer": {
+        "correct": "sed -n '10p' file.txt",
+        "explain": "`sed -n '10p'`：`-n` 抑制默认自动打印，`10p` 只打印第 10 行。**`-n` 与 `p` 必须配对**——写成 `sed '10p'` 会把整文件打印一遍且第 10 行出现两次。\n\n变体：`awk 'NR==10' file.txt`（awk 的 `NR` 是当前行号）；`head -n 10 | tail -n 1` 也能用但在超大文件上多读。`cat file.txt | sed -n '10p'` 是多余的 cat（UUOC）。",
+        "reference_code": "sed -n '10p' file.txt"
+      },
+      "explanation": "考 sed 的 -n 与 p 配对、awk 的 NR。",
+      "tags": [
+        "shell",
+        "sed",
+        "awk",
+        "行处理"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 195. Tenth Line",
+      "external_url": "https://leetcode.cn/problems/tenth-line/"
+    }
+  ]
+}

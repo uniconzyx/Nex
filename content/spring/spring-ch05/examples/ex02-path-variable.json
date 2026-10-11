@@ -1,0 +1,8 @@
+{
+  "title": "ex02-path-variable",
+  "code_lang": "java",
+  "code_std": "java23",
+  "stdin": "",
+  "expected_output": "{id=42}\n{id=abc}\nnull\n{id=7, pid=99}",
+  "code": "import java.util.*;\npublic class Main {\n    static String extract(String template, String path){\n        String[] tp = template.split(\"/\");\n        String[] pp = path.split(\"/\");\n        if(tp.length!=pp.length) return null;\n        Map<String,String> vars=new LinkedHashMap<>();\n        for(int i=0;i<tp.length;i++){\n            if(tp[i].startsWith(\"{\")&&tp[i].endsWith(\"}\")){\n                vars.put(tp[i].substring(1,tp[i].length()-1), pp[i]);\n            } else if(!tp[i].equals(pp[i])){\n                return null;\n            }\n        }\n        return vars.isEmpty()?\"\" : vars.toString();\n    }\n    public static void main(String[] a){\n        System.out.println(extract(\"/users/{id}\",\"/users/42\"));\n        System.out.println(extract(\"/users/{id}\",\"/users/abc\"));\n        System.out.println(extract(\"/users/{id}\",\"/posts/42\"));\n        System.out.println(extract(\"/users/{id}/posts/{pid}\",\"/users/7/posts/99\"));\n    }\n}"
+}

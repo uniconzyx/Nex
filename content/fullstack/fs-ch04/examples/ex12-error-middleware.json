@@ -1,0 +1,8 @@
+{
+  "title": "错误处理中间件：四参数签名与 async 错误必须 next(err)",
+  "code_lang": "javascript",
+  "code_std": "node22",
+  "stdin": "",
+  "expected_output": "asyncError=ERR:async boom\ncaughtBy4arg=true\n",
+  "code": "const stack = [];\nfunction use(fn) { stack.push(fn); }\nfunction run(ctx, final) {\n  let i = 0;\n  function next(err) {\n    while (i < stack.length) {\n      const mw = stack[i];\n      if (err) {\n        if (mw.length === 4) { i++; mw(err, ctx, {}, next); return; }\n        i++; continue;\n      }\n      if (mw.length === 4) { i++; continue; }\n      i++;\n      try {\n        const r = mw(ctx, next);\n        if (r && typeof r.then === 'function') r.catch(e => next(e));\n      } catch (e) { next(e); }\n      return;\n    }\n    if (err) { ctx.log.push('UNHANDLED:' + err.message); return; }\n    final(ctx);\n  }\n  next();\n}\nuse(async (c, nx) => { await Promise.resolve(); throw new Error('async boom'); });\nuse((err, c, req, nx) => { c.log.push('ERR:' + err.message); });\nconst ctx = { log: [] };\nrun(ctx, c => c.log.push('final'));\n// async 错误经 .catch(next) 在微任务里传播；用 setImmediate（宏任务）等链路跑完再打印\nsetImmediate(() => {\n  console.log('asyncError=' + ctx.log.join(' | '));\n  console.log('caughtBy4arg=' + ctx.log.some(s => s.startsWith('ERR:')));\n});"
+}

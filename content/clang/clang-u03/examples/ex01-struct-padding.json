@@ -1,0 +1,8 @@
+{
+  "title": "结构体 sizeof 与填充验证（char-double-char）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "sizeof(Bad)=24\nsizeof(Good)=16\noffsetof Bad.d=8 Bad.b=16\n",
+  "code": "#include <stdio.h>\n#include <stddef.h>\n\nstruct Bad  { char a; double d; char b; };\nstruct Good { double d; char a; char b; };\n\nint main(void) {\n    printf(\"sizeof(Bad)=%zu\\n\", sizeof(struct Bad));\n    printf(\"sizeof(Good)=%zu\\n\", sizeof(struct Good));\n    printf(\"offsetof Bad.d=%zu Bad.b=%zu\\n\", offsetof(struct Bad, d), offsetof(struct Bad, b));\n    return 0;\n}"
+}

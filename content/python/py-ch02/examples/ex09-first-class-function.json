@@ -1,0 +1,8 @@
+{
+  "title": "一等公民函数：作为值/字典分发/回调",
+  "code_lang": "python",
+  "code_std": "python3.11",
+  "stdin": "",
+  "expected_output": "5\n6\n42",
+  "code": "def add(a, b):\n    return a + b\n\ndef mul(a, b):\n    return a * b\n\nops = {\"+\": add, \"*\": mul}\nprint(ops[\"+\"](2, 3))\nprint(ops[\"*\"](2, 3))\n\ndef apply(fn, x):\n    return fn(x)\nprint(apply(lambda v: v * 2, 21))"
+}

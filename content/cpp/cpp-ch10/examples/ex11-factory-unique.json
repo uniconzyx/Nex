@@ -1,0 +1,8 @@
+{
+  "title": "unique_ptr 作为工厂函数返回值（移动转移所有权，零成本）",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "Widget ctor\ngot widget\nWidget dtor",
+  "code": "#include <iostream>\n#include <memory>\nstruct Widget { Widget(){ std::cout << \"Widget ctor\\n\"; } ~Widget(){ std::cout << \"Widget dtor\\n\"; } };\nstd::unique_ptr<Widget> make_widget() { return std::make_unique<Widget>(); }  // 按值返回触发移动\nint main() {\n    auto w = make_widget();\n    std::cout << \"got widget\\n\";\n}                                       // w 离开作用域自动析构 Widget"
+}

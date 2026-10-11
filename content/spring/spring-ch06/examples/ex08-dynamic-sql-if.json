@@ -1,0 +1,8 @@
+{
+  "title": "ex08-dynamic-sql-if",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "动态SQL <if> 拼接:\nWHERE name = ? AND status = ?",
+  "code": "def build_where(conditions):\n    parts = [frag for frag, ok in conditions if ok]\n    return \"\" if not parts else \"WHERE \" + \" AND \".join(parts)\n\nconds = [(\"name = ?\", True), (\"age > ?\", False), (\"status = ?\", True)]\nprint(\"动态SQL <if> 拼接:\")\nprint(build_where(conds))\n"
+}

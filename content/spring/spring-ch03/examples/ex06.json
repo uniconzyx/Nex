@@ -1,0 +1,8 @@
+{
+  "title": "JDK 与 CGLIB 边界：无接口类 JDK 代理失败",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "JDK proxy needs interface: Plain is not an interface\n[jdk before]\nplain impl\n",
+  "code": "import java.lang.reflect.*;\n\n// 没有实现任何接口的类\nclass Plain { public String who() { return \"plain object\"; } }\ninterface IPlain { String who(); }\nclass PlainImpl implements IPlain { public String who() { return \"plain impl\"; } }\npublic class Main {\n    public static void main(String[] a) {\n        // JDK 动态代理【必须】基于接口；传一个 class（非接口）会抛 IllegalArgumentException\n        try {\n            Proxy.newProxyInstance(Plain.class.getClassLoader(),\n                new Class[]{Plain.class},\n                new InvocationHandler() {\n                    public Object invoke(Object p, Method m, Object[] args) throws Throwable {\n                        return m.invoke(new Plain(), args);\n                    }\n                });\n            System.out.println(\"JDK proxy on class: allowed (unexpected)\");\n        } catch (IllegalArgumentException e) {\n            System.out.println(\"JDK proxy needs interface: \" + e.getMessage());\n        }\n        // 有接口时 JDK 代理正常工作\n        IPlain p = (IPlain) Proxy.newProxyInstance(IPlain.class.getClassLoader(),\n            new Class[]{IPlain.class},\n            new InvocationHandler() {\n                public Object invoke(Object pr, Method m, Object[] args) throws Throwable {\n                    System.out.println(\"[jdk before]\");\n                    return m.invoke(new PlainImpl(), args);\n                }\n            });\n        System.out.println(p.who());\n    }\n}\n"
+}

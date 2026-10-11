@@ -1,0 +1,8 @@
+{
+  "title": "ex03-query-parse",
+  "code_lang": "java",
+  "code_std": "java23",
+  "stdin": "",
+  "expected_output": "page=[2, 3]\nsize=[10]\nsort=[name]",
+  "code": "import java.util.*;\npublic class Main {\n    static Map<String,List<String>> parse(String q){\n        Map<String,List<String>> m=new LinkedHashMap<>();\n        if(q==null||q.isEmpty())return m;\n        for(String kv: q.split(\"&\")){\n            String[] p=kv.split(\"=\",2);\n            m.computeIfAbsent(p[0],k->new ArrayList<>()).add(p.length>1?p[1]:\"\");\n        }\n        return m;\n    }\n    public static void main(String[] a){\n        Map<String,List<String>> m=parse(\"page=2&size=10&sort=name&page=3\");\n        for(Map.Entry<String,List<String>> e:m.entrySet())\n            System.out.println(e.getKey()+\"=\"+e.getValue());\n    }\n}"
+}

@@ -1,0 +1,9 @@
+{
+  "title": "RDB 触发条件：save m n 规则判定",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "t=0s 变更累计=0 -> 未达任何 save 规则\nt=120s 变更累计=5 -> 未达任何 save 规则\nt=300s 变更累计=5 -> 未达任何 save 规则\nt=305s 变更累计=13 -> 满足 save 规则, 触发 BGSAVE\nt=600s 变更累计=3 -> 未达任何 save 规则",
+  "code": "saves = [(900, 1), (300, 10), (60, 10000)]\nstate = {\"last_save_t\": 0, \"changes_since\": 0}\ndef check(t, change_delta):\n    state[\"changes_since\"] += change_delta\n    for sec, changes in saves:\n        if t - state[\"last_save_t\"] >= sec and state[\"changes_since\"] >= changes:\n            return True\n    return False\n\nevents = [(0, 0), (120, 5), (300, 0), (305, 8), (600, 3)]\nfor t, d in events:\n    triggered = check(t, d)\n    if triggered:\n        print(f\"t={t}s 变更累计={state['changes_since']} -> 满足 save 规则, 触发 BGSAVE\")\n        state[\"last_save_t\"] = t\n        state[\"changes_since\"] = 0\n    else:\n        print(f\"t={t}s 变更累计={state['changes_since']} -> 未达任何 save 规则\")\n",
+  "_verified": true
+}

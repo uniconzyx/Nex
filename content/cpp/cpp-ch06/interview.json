@@ -1,0 +1,40 @@
+{
+  "meta": { "chapter": "cpp-ch06" },
+  "items": [
+    {
+      "question": "虚函数表（vtable）存放在哪里？单继承下对象内存如何布局？",
+      "answer_md": "vtable 是一张**只读数据段（.rodata）里的函数指针数组**，由编译器为「至少有一个虚函数的类」生成一份（同类的所有对象共享）。每个该类的对象在构造时会被插入一个隐式成员 **vptr**（指向本类的 vtable），通常位于对象**起始地址**（实现相关，但这是主流布局）。单继承时，派生类对象内存 = [vptr][基类成员变量][派生类成员变量]，派生类自己的 vtable 在基类 vtable 基础上「覆盖」被重写的槽位、追加新增虚函数槽。调用 `ptr->f()` 被编译成：取 vptr → 按 f 的固定槽位偏移取出函数指针 → 间接调用（这步无法静态内联，除非编译器能证明 ptr 的静态类型）。",
+      "follow_ups": ["vptr 一定在对象最前面吗？为什么构造期间要多次改写 vptr？", "多重继承下有多个 vptr 吗？"],
+      "difficulty": "mid",
+      "company_tags": ["通用", "腾讯", "字节"]
+    },
+    {
+      "question": "多重继承下，this 指针为什么要调整（thunk）？",
+      "answer_md": "当一个类 `Der : B1, B2` 时，对象内存里 B1 子对象从偏移 0 开始，B2 子对象在后面某偏移处。若你持有 `B2* p = new Der`，则 p 指向的是「Der 内部的 B2 子对象」而非 Der 起始——即 `p` 的值 ≠ `(Der*)p` 的值，二者相差一个 `offsetToTop`。当通过 `B2*` 调用一个**在 Der 中重写、且属于 Der 接口**的虚函数时，进入函数前的 `this` 必须被修正回 Der 的完整对象首地址才能正确访问派生成员。编译器用两类手段：① 在 vtable 里为每个这种槽位存「this 调整量 + 真正函数指针」的 thunk（一小段修正 this 再跳转的代码）；② 也可用 vtable 负偏移处的 `offset_to_top` 在运行时计算。这就是为什么多继承的虚调用比单继承多一次（可能）的指针加减。",
+      "follow_ups": ["thunk 是什么？它如何影响调用开销与代码体积？", "虚继承如何进一步改变 this 调整？"],
+      "difficulty": "hard",
+      "company_tags": ["字节", "美团"]
+    },
+    {
+      "question": "为什么基类析构函数必须是 virtual？不写会怎样？",
+      "answer_md": "多态删除的语义是：`delete base_ptr` 时，必须调用「实际对象类型」的析构函数（从最派生类一路析构到基类），才能保证派生类拥有的资源被正确释放。析构函数若非 virtual，delete 表达式按**静态类型（基类）**调用 `~Base`，派生类析构不执行——派生部分申请的堆内存/句柄全部泄漏，且行为是**未定义**（实践中常表现为只释放了基类子对象那块内存）。只要类设计成「会被继承并通过基类指针删除」，析构就必须是 virtual；反之，若类明确不用于多态（如 `final` 类或仅作数据载体），非 virtual 析构反而更小、更安全（可加 `final` 阻止误继承）。",
+      "follow_ups": ["如果一个类有虚函数但析构非 virtual，继承它安全吗？", "std::unique_ptr<Base> 持有派生对象时，默认删除器依赖什么？"],
+      "difficulty": "mid",
+      "company_tags": ["通用", "阿里"]
+    },
+    {
+      "question": "虚函数有性能开销吗？体现在哪些方面？能否被优化掉？",
+      "answer_md": "有三处成本：① **时间**：每次虚调用是一次通过 vptr 的间接跳转，无法在调用点内联，且可能破坏分支预测/指令缓存局部性（间接跳转目标不固定）；② **空间**：每个多态类一份 vtable（.rodata 膨胀），每个对象多一个 vptr（典型 8 字节/对象），对象整体变大、缓存利用率下降；③ **可维护性/编译**：跨编译单元的虚调用削弱 LTO/内联。但现代编译器能做 **devirtualization**（当静态类型已知或经 profiling 确认目标唯一时，把它还原成直接调用乃至内联）；`-fstrict-vtable-pointers`、LTO、PGO 都能显著削减开销。**结论**：虚函数开销在绝大多数业务代码里可忽略，性能瓶颈几乎不在「一次间接调用」；真正在意时要靠 devirtualization 与把热点从运行期多态转译到编译期（模板）来解决，而非盲目去虚化。",
+      "follow_ups": ["CRTP 如何把运行期多态搬到编译期？它牺牲了什么？", "devirtualization 在哪些条件下会失败？"],
+      "difficulty": "hard",
+      "company_tags": ["字节", "NVIDIA"]
+    },
+    {
+      "question": "dynamic_cast 与 static_cast 向下转型怎么选？RTTI 的成本是什么？",
+      "answer_md": "`dynamic_cast` 依赖 **RTTI（运行时类型信息）**：它在运行时沿对象 vtable 里存放的 `type_info` 链做「类型是否派生自目标」的查表判断，失败时对指针返回 null、对引用抛 `std::bad_cast`。因此它**要求基类至少有一个虚函数**（否则无法获取类型信息）。成本是一次指向链条的遍历 + 比较，且会在二进制里保留 type_info 数据（体积开销）。`static_cast` 不做任何运行时检查，只是编译期的类型 reinterpret，由程序员保证安全——更快但危险。`reinterpret_cast` 则完全按位重解释，连继承关系都不校验。**选型**：类型关系在编译期确定且确信安全 → `static_cast`；需要「不确定就失败」的安全检查 → `dynamic_cast`；更优雅的替代往往是「用虚函数把行为上移」，彻底避免向下转型。",
+      "follow_ups": ["为什么 dynamic_cast 指针失败返回 null、引用却抛异常？", "禁用 RTTI（-fno-rtti）后还能用 dynamic_cast 吗？"],
+      "difficulty": "mid",
+      "company_tags": ["通用", "华为"]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "title": "WHERE 过滤与 ORDER BY 排序（高薪员工）",
+  "code_lang": "sql",
+  "code_std": "mysql",
+  "stdin": "",
+  "expected_output": "Query OK, 0 rows affected\nQuery OK, 6 rows affected\nemp_id|name|salary\n1|Alice|6000.00\n6|Frank|7000.00\n2|Bob|8000.00\n4|Dave|9000.00",
+  "code": "CREATE TABLE employee (emp_id INT PRIMARY KEY, name VARCHAR(20), dept_id INT, salary DECIMAL(10,2));\nINSERT INTO employee VALUES (1,'Alice',10,6000.00),(2,'Bob',20,8000.00),(3,'Carol',10,4500.00),(4,'Dave',20,9000.00),(5,'Eve',30,5000.00),(6,'Frank',20,7000.00);\nSELECT emp_id, name, salary FROM employee WHERE salary > 5000 ORDER BY salary;"
+}

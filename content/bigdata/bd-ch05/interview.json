@@ -1,0 +1,74 @@
+{
+  "meta": {
+    "chapter": "bd-ch05",
+    "note": "6 道面试题，覆盖 DataFrame/RDD 取舍、Catalyst 四阶段、谓词下推与列裁剪失效条件、Tungsten 与全阶段代码生成、AQE、广播 JOIN 与 Hive Metastore 集成。"
+  },
+  "items": [
+    {
+      "question": "Spark 为什么有了 RDD 还要引入 DataFrame？DataFrame 到底多给了 Spark 什么信息？",
+      "answer_md": "核心答案是**多给了两层信息，从而打开优化空间**：\n\n1. **Schema**（列名 + 类型）：Spark 知道数据有哪些列，才能做**列裁剪**——只读查询真正用到的列；\n2. **逻辑计划**（关系代数算子构成的语法树）：Spark 知道你**要什么**而不是**怎么算**，才能做等价重写——**谓词下推**、**常量折叠**、**JOIN 重排**、物理算子选择（广播 vs SortMerge）。\n\nRDD 的计算函数是一个**不透明闭包**（`lambda`），Spark 无法证明两个 lambda 等价，也就无法重写，只能忠实按你写的顺序执行。\n\n顺带三点：① DataFrame 建立在 RDD 之上，`df.rdd` 可取到底层 RDD，不是另起炉灶；② DataFrame 用 Tungsten 紧凑二进制表示，避免 JVM 对象头与装箱，GC 压力大幅下降；③ DataFrame 能吃到**全阶段代码生成**，RDD 不行。",
+      "follow_ups": [
+        "为什么 lambda 无法做等价重写？这与关系代数的等价律有什么关系？",
+        "DataFrame 和 Dataset 的区别是什么？PySpark 有 Dataset 吗？",
+        "什么场景下你会主动从 DataFrame 回退到 RDD？"
+      ],
+      "difficulty": "easy",
+      "company_tags": ["通用", "字节", "阿里", "美团"]
+    },
+    {
+      "question": "讲一下 Catalyst 优化器的完整流程，以及 AnalysisException 是哪一阶段抛的？",
+      "answer_md": "四个阶段 + 一个收尾：\n\n1. **解析（Parsing）**：ANTLR 做语法分析，生成**未解析**的语法树，此时列名与类型都还不知道；\n2. **分析（Analysis / Binding）**：查 Catalog（内存 Catalog 或 **Hive Metastore**）把列名、类型绑定上去，做类型检查；\n   **列不存在、类型不匹配**就在这一阶段抛 `AnalysisException`；\n3. **逻辑优化（Logical Optimization）**：按**规则批（Batch of Rule）**重写逻辑计划，跑到**不动点**或达到迭代上限（`spark.sql.optimizer.maxIterations`，默认 100）。代表规则：谓词下推、列裁剪、常量折叠、JOIN 重排、表达式简化；\n4. **物理计划（Physical Planning）**：把逻辑算子转成物理算子并按**代价**选择实现（`BroadcastHashJoin` / `ShuffleHashJoin` / `SortMergeJoin` / `BroadcastNestedLoopJoin`），并插入 `Exchange`（= Shuffle 边界）；\n5. **代码生成（Codegen）**：Whole-Stage Codegen 把算子链编译成一个循环。\n\n**记忆点**：逻辑优化是**规则驱动（RBO）**，物理计划选算子是**代价驱动（CBO）**——两者都在 Catalyst 里，但机制不同。",
+      "follow_ups": [
+        "规则批（Rule / Batch）为什么要用不动点？如何保证终止？",
+        "CBO 的输入是什么？统计信息不准会导致什么后果？",
+        "spark.sql.optimizer.maxIterations 是干什么用的？"
+      ],
+      "difficulty": "mid",
+      "company_tags": ["通用", "腾讯", "蚂蚁"]
+    },
+    {
+      "question": "谓词下推一定生效吗？什么情况下它不会下推？列裁剪又是什么时候失效？",
+      "answer_md": "**谓词下推的两条硬约束**（任一不满足就不推）：\n\n1. 谓词必须**确定性**——含 `rand()`、`current_timestamp()` 的谓词不下推。原因是下推会改变每行的**求值次数**与随机序列，破坏语义等价；\n2. 谓词引用的列必须在下方算子的**输出列**内——若 `Project` 已把该列投影掉，就推不下去。\n\n此外工程上常见的「推不动」：中间隔着 **UDF / Python 算子**等黑盒；对分区列做了函数变换（`substr(dt,1,7)='2026-01'`）使**分区裁剪**失效。\n\n**列裁剪失效**的典型场景：\n\n- `SELECT *`：需求集等于全属性集，裁剪无从下手；\n- 顶层用 `df.count()` 之外的宽输出，或中间视图 `SELECT *` 透传；\n- 数据源不支持列式读取（如普通文本 CSV 只能整行读出后再丢列）。\n\n**验证手段**：`df.explain(mode=\"formatted\")` 里看 `Scan` 后面列出的列（裁剪结果）与 `PushedFilters`（已下推到数据源的谓词）。",
+      "follow_ups": [
+        "分区裁剪和谓词下推是一回事吗？两者的层次差异在哪？",
+        "LEFT JOIN 的右表过滤条件写在 ON 后和 WHERE 后，语义有什么不同？",
+        "为什么说「下移到 Scan 之上」还不够，必须「融合进 Scan」才有大收益？"
+      ],
+      "difficulty": "mid",
+      "company_tags": ["通用", "字节", "滴滴"]
+    },
+    {
+      "question": "Tungsten 做了什么？全阶段代码生成（Whole-Stage Codegen）解决的又是什么问题？",
+      "answer_md": "**Tungsten**（内存与 CPU 层改造）三件事：\n\n1. **紧凑二进制表示 `UnsafeRow`**：8 字节 null 位图 + 每字段 8 字节定长区 + 8 字节对齐的变长区，字符串直接存 UTF-8 字节，**没有对象头、没有装箱**；\n2. **堆外内存管理**：用内存页（`MemoryBlock`，页号 + 偏移）管理堆外内存，绕过 JVM 对象分配与 GC；\n3. **缓存友好的计算**：按页批量处理，用 `Unsafe` 直接读写，提高 CPU 缓存命中率。\n\n实测口径：5 列 schema、100 万行，行式 JVM 对象布局每行 260 字节；Tungsten 紧凑布局每行 112 字节；再叠加列裁剪（只留 2 列）降到 40 字节——相对行式**省 6.5 倍**，且每行对象数从 5 降到 0。\n\n**Whole-Stage Codegen**（执行层改造）解决的是**火山模型**的固有开销：传统 `next()` 拉取模型下，每行每算子一次**虚函数调用**（无法内联）+ 一次**装箱**。Codegen 把一条算子链编译成一个 `while` 循环，谓词判断、取值、聚合全部内联，原生类型直接运算，虚调用与装箱都降到 **0**，且给 JVM JIT 更大的优化单元。\n\n**关键边界**：`Exchange`（Shuffle）会**切断**代码生成——这也是「减少 Shuffle」的另一重价值。",
+      "follow_ups": [
+        "为什么 Shuffle 会切断代码生成？",
+        "Whole-Stage Codegen 和向量化执行是什么关系？能叠加吗？",
+        "explain 里看到 DeserializeToObject 说明什么？"
+      ],
+      "difficulty": "mid",
+      "company_tags": ["通用", "阿里", "美团", "快手"]
+    },
+    {
+      "question": "AQE 是什么？它解决了什么问题？和「加盐处理倾斜」是一回事吗？",
+      "answer_md": "**AQE（Adaptive Query Execution，Spark 3.0 引入、3.2+ 默认开启）**的核心：优化器在编译期只能靠统计信息**猜**，而 Shuffle 之后能拿到**真实的分区大小**。于是把执行切成若干轮——执行到 Shuffle 边界 → 看真实统计 → **重优化剩余计划** → 继续执行。\n\n三大能力：\n\n1. **动态合并 Shuffle 分区**：按目标大小（`advisoryPartitionSizeInBytes`，默认 64MB）把大量小分区合并。**只合并相邻分区**，不做全局重排（否则要再走一次 Shuffle）；\n2. **动态切换 JOIN 策略**：运行时发现某侧真实大小远小于估计，就把 `SortMergeJoin` 换成 `BroadcastHashJoin`，当场消掉一次 Shuffle；\n3. **动态倾斜处理**：判定口径是「分区大小 > `skewedPartitionFactor`(默认 5) × 中位数 **且** > `skewedPartitionThresholdInBytes`(默认 256MB)」，把倾斜分区**拆分**成多个子分区，并让另一侧对应分区复制。\n\n**与加盐的区别**：AQE 是**引擎侧自动拆分倾斜分区并复制另一侧**；加盐是**用户侧 SQL 改写**（给 key 加随机前缀做两阶段聚合）。两者不是一回事，AQE 也救不了「Shuffle 之前就已经倾斜」的输入（map 端读取阶段的倾斜它感知不到）。",
+      "follow_ups": [
+        "为什么 AQE 只合并相邻分区？",
+        "Spark UI 里怎么确认看到的是 AQE 的最终计划？",
+        "升级到 Spark 3.x 后，旧的 shuffle.partitions=200 还要不要保留？"
+      ],
+      "difficulty": "mid",
+      "company_tags": ["通用", "字节", "腾讯", "字节"]
+    },
+    {
+      "question": "广播 JOIN 的触发条件是什么？为什么我明明是小表却没有走广播？",
+      "answer_md": "**三个前置条件**（缺一不可）：\n\n1. **等值连接**——非等值只能走 `BroadcastNestedLoopJoin`（广播 + 嵌套循环，代价 O(n×m)）；\n2. 小表**优化后计划的 `sizeInBytes`** ≤ `spark.sql.autoBroadcastJoinThreshold`（默认 10MB）；\n3. **统计信息存在**——没做过 `ANALYZE TABLE` 时 `sizeInBytes` 是缺省值（或巨大的估值），Spark 不敢广播。\n\n**常见「明明是小表却不广播」的原因**：\n\n- 表没 `ANALYZE TABLE`，统计缺失；\n- 统计过期（数据被大量过滤后统计没更新）；\n- 是**非等值**连接；\n- 阈值被调成 `-1`（那是**关闭**广播，不是强制广播）；\n- 广播发生在**广播侧被过滤之前**——注意 Spark 统计的是**优化后**计划的大小，先过滤再 join 通常就能变小。\n\n**解法**：`ANALYZE TABLE t COMPUTE STATISTICS`，或用 `/*+ BROADCAST(t) */` hint 强制。\n\n**陷阱**：广播表会**先在 Driver 端物化再分发到每个 Executor**，把阈值调到几百 MB 会导致 Driver OOM 或广播超时。\n\n**顺带**：Spark 通过 `spark.sql.catalogImplementation=hive` + `hive.metastore.uris` 连 **Hive Metastore** 只拿**元数据**（schema、分区、Location、SerDe、统计），数据仍按 Location 直读 HDFS/S3；分区是**登记制**，直接 `put` 文件到分区目录不会自动登记，需要 `MSCK REPAIR TABLE` / `ALTER TABLE ADD PARTITION` / `REFRESH TABLE`。",
+      "follow_ups": [
+        "sizeInBytes 和磁盘文件大小是一回事吗？",
+        "把 autoBroadcastJoinThreshold 调到 -1 会发生什么？",
+        "Spark 能读到 Hive 里新建的分区吗？需要做什么？"
+      ],
+      "difficulty": "hard",
+      "company_tags": ["通用", "阿里", "蚂蚁", "京东"]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "title": "ThreadLocal 事务上下文在线程池复用下串号",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "single thread: context correct: true\r\nsingle thread: after remove() context null: true\r\nthread-pool reuse leaks previous tx context: true\r",
+  "code": "import java.util.concurrent.ExecutorService;\nimport java.util.concurrent.Executors;\nimport java.util.concurrent.atomic.AtomicReference;\n\npublic class Main {\n    static final ThreadLocal<String> TX_CONTEXT = new ThreadLocal<>();\n\n    public static void main(String[] args) throws Exception {\n        // 单线程 + 正确清理：上下文正确\n        AtomicReference<Boolean> singleOk = new AtomicReference<>(false);\n        AtomicReference<Boolean> cleanAfterRemove = new AtomicReference<>(false);\n        Thread t = new Thread(() -> {\n            TX_CONTEXT.set(\"tx-A\");\n            singleOk.set(\"tx-A\".equals(TX_CONTEXT.get()));\n            TX_CONTEXT.remove();\n            cleanAfterRemove.set(TX_CONTEXT.get() == null);\n        });\n        t.start();\n        t.join();\n        System.out.println(\"single thread: context correct: \" + singleOk.get());\n        System.out.println(\"single thread: after remove() context null: \" + cleanAfterRemove.get());\n\n        // 线程池复用且不清理：第二个任务读到上一个任务的残留上下文\n        ExecutorService pool = Executors.newFixedThreadPool(1);\n        pool.submit(() -> TX_CONTEXT.set(\"tx-1\")).get();          // 不 remove\n        AtomicReference<String> seen = new AtomicReference<>();\n        pool.submit(() -> seen.set(TX_CONTEXT.get())).get();\n        System.out.println(\"thread-pool reuse leaks previous tx context: \"\n                + \"tx-1\".equals(seen.get()));\n        pool.shutdown();\n    }\n}"
+}

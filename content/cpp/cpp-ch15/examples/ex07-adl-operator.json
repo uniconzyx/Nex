@@ -1,0 +1,8 @@
+{
+  "title": "ADL 与运算符重载（operator<< 跟随类型）",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "Point(5,9)\n",
+  "code": "#include <iostream>\n\nnamespace geom {\n    struct Point { int x, y; };\n    std::ostream& operator<<(std::ostream& os, const Point& p) {\n        return os << \"Point(\" << p.x << ',' << p.y << ')';\n    }\n}\n\nint main() {\n    geom::Point p{5, 9};\n    std::cout << p << '\\n';   // ADL 把 geom::operator<< 拉入候选\n}"
+}

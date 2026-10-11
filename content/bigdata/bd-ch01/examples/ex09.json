@@ -1,0 +1,8 @@
+{
+  "title": "写入流水线复制（pipeline）：客户端只发一份",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "pipeline: client -> dn1 -> dn2 -> dn3\nclient_sent_once: PKT#01\nacks: ['dn1:received', 'dn2:received', 'dn3:received']\nall_ack_ok: True\nclient_transmitted_copies: 1",
+  "code": "\npipeline = [\"client\", \"dn1\", \"dn2\", \"dn3\"]\npacket = \"PKT#01\"\nacks = []\nfor node in pipeline[1:]:\n    acks.append(node + \":received\")\nprint(\"pipeline:\", \" -> \".join(pipeline))\nprint(\"client_sent_once:\", packet)\nprint(\"acks:\", acks)\nprint(\"all_ack_ok:\", len(acks) == len(pipeline) - 1)\nprint(\"client_transmitted_copies:\", 1)\n"
+}

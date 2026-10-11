@@ -1,0 +1,8 @@
+{
+  "title": "异常安全 RAII：异常路径下资源仍被确定性释放（基本保证）",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "open\nwork\nclose\nhandled: fail",
+  "code": "#include <iostream>\n#include <stdexcept>\n\nstruct File {\n    File()  { std::cout << \"open\\n\"; }\n    ~File() { std::cout << \"close\\n\"; }   // 无论正常/异常退出都会调用\n};\n\nint main() {\n    try {\n        File f;                  // RAII 资源\n        std::cout << \"work\\n\";\n        throw std::runtime_error(\"fail\");\n    } catch (const std::exception& e) {\n        std::cout << \"handled: \" << e.what() << '\\n';\n    }\n}"
+}

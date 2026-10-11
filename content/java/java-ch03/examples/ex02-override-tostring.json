@@ -1,0 +1,8 @@
+{
+  "title": "方法重写：自定义 toString",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "(1,2)",
+  "code": "public class E302 {\n    static class Point {\n        int x, y;\n        Point(int x, int y){ this.x=x; this.y=y; }\n        @Override public String toString(){ return \"(\" + x + \",\" + y + \")\"; }\n    }\n    public static void main(String[] args) {\n        System.out.println(new Point(1,2));\n    }\n}"
+}

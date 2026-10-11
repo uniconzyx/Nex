@@ -1,0 +1,97 @@
+{
+  "meta": { "chapter": "bd-ch03", "note": "基础题考察 Hive 表/分区/分桶/编译/JOIN 概念与易错口径；算法题来自刷题平台，仅存元数据与链接（合规红线）。" },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "关于 Hive 内部表与外部表 DROP 行为的描述，下列哪项正确？",
+      "content_md": "在 Hive 中，下列关于内部表（MANAGED）与外部表（EXTERNAL）`DROP TABLE` 行为的说法，哪一项正确？",
+      "options": [
+        { "key": "A", "text": "两者 DROP 时都会同时删除元数据与 HDFS 数据" },
+        { "key": "B", "text": "内部表 DROP 删除元数据+数据；外部表 DROP 只删元数据、保留 HDFS 数据" },
+        { "key": "C", "text": "两者 DROP 都只删除元数据，数据需手动清理" },
+        { "key": "D", "text": "外部表 DROP 删除数据比内部表更彻底" }
+      ],
+      "answer": { "correct": ["B"], "reference_code": "" },
+      "explanation": "内部表由 Hive 全托管，DROP 同时删元数据与数据；外部表仅由 Hive 记录元数据，DROP 只删元数据、保留 HDFS 数据。二者查询/写入语法一致，区别只在生命周期。外部表常用于对接外部系统、防止误删数据。",
+      "tags": ["内部表", "外部表", "DROP"],
+      "source": "self",
+      "source_ref": "《Hive 编程指南》第2、4章"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "判断下列查询能否触发分区裁剪",
+      "content_md": "表 `emp` 按天分区（`PARTITIONED BY (dt STRING)`），目录下有 `dt=2024-01-01`、`dt=2024-01-02`、`dt=2024-01-03` 三个分区。下列两条查询，哪条会触发分区裁剪（只扫描命中目录）？\n\n```sql\n-- Q1\nSELECT * FROM emp WHERE dt = '2024-01-02';\n-- Q2\nSELECT * FROM emp;\n```",
+      "answer": { "output": "Q1 会触发分区裁剪，仅扫描 dt=2024-01-02 一个目录；Q2 无分区过滤条件，扫描全部 3 个分区目录（全表扫描），不会裁剪。" },
+      "explanation": "分区列是目录名而非行内字段，只有对分区列做等值/范围过滤才能定位目录、跳过无关分区。Q2 不带任何过滤，必然全分区扫描。",
+      "tags": ["分区裁剪", "partition pruning"],
+      "source": "self",
+      "source_ref": "《Hive 编程指南》第4章"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "找出下列关于分桶的错误说法并改正",
+      "content_md": "某笔记写道：「分桶表和分区表是一回事，都是把数据切分；把分桶数从 4 改成 8 后，Hive 会自动把数据重新均匀分布到 8 个桶，查询会更均衡。」请指出错误并改正。",
+      "answer": { "correct": ["该说法错误"], "output": "① 分桶与分区不是一回事：分区是目录级（按列值切目录、用于裁剪），分桶是文件级（hash(col)%N 切文件、用于 JOIN 免 shuffle 与采样），二者正交。② 分桶用的是取模哈希而非一致性哈希，改桶数 N 会让几乎所有行重新分桶（需全量重写），不会“自动重新均衡”，所以桶数上线前就要估准。" },
+      "explanation": "两个错误点：混淆分区与分桶的层级与作用；误以为改桶数会自动重分布（取模哈希无平滑扩缩容）。分桶 JOIN 提速的前提是“同列+同桶数”。",
+      "tags": ["分桶", "哈希取模", "分区"],
+      "source": "book",
+      "source_ref": "《Hive 编程指南》第4章"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "Hive 在什么条件下会选择 MapJoin 而非 CommonJoin？",
+      "content_md": "在 Hive 执行一条两表 JOIN 时，优化器在什么情况下会选择 MapJoin（广播小表）而不是 Reduce 端的 CommonJoin（Shuffle Join）？",
+      "options": [
+        { "key": "A", "text": "只要两表都很大，就选 MapJoin 以避免 shuffle" },
+        { "key": "B", "text": "其中一张表足够小（默认 ≤ 约25MB）能放进 Map 端内存时，自动选 MapJoin" },
+        { "key": "C", "text": "MapJoin 永远比 CommonJoin 快，Hive 总是优先选它" },
+        { "key": "D", "text": "只有显式写 DISTINCT 时才会触发 MapJoin" }
+      ],
+      "answer": { "correct": ["B"], "reference_code": "" },
+      "explanation": "当一张表足够小（默认 ≤ 约25MB，由 hive.mapjoin.smalltable.filesize 控制）时，优化器把小表广播到各 Map 任务、大表在 Map 端直接关联，彻底消除 Shuffle。小表超限会 OOM 或退回 CommonJoin；MapJoin 并非永远最优。",
+      "tags": ["MapJoin", "CommonJoin", "JOIN 优化"],
+      "source": "self",
+      "source_ref": "《Hive 编程指南》第7章"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "前 K 个高频元素（词频聚合思想同源）",
+      "content_md": "题面与完整描述请见外部链接（合规：只存元数据+链接）。本题统计数组中出现频率最高的前 K 个元素，思想与「Hive 中按 key 分组聚合、统计词频 / 数据倾斜前的分组计数」同源：先分组计数，再按频率排序取前 K。",
+      "answer": { "reference_code": "见外部链接题解" },
+      "explanation": "分组计数本质是 map→group→reduce；可与 Hive GROUP BY 的 Reducer 聚合、以及倾斜场景的「先局部聚合再合并」类比理解。",
+      "tags": ["哈希", "计数", "堆", "TopK"],
+      "source": "leetcode",
+      "source_ref": "LeetCode 692 (top-k-frequent-words) / 347 (top-k-frequent-elements)",
+      "external_url": "https://leetcode.cn/problems/top-k-frequent-elements/"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "nowcoder",
+      "difficulty": "hard",
+      "title": "大数据倾斜下的两阶段聚合（加盐思想）",
+      "content_md": "题面与完整描述请见外部链接（合规：只存元数据+链接）。要求对存在极端热 key 的海量数据做分组求和：先给热 key 加随机/枚举后缀打散到多路做局部聚合（阶段一），再去掉后缀按原 key 合并（阶段二），思想与「Hive 数据倾斜的加盐 + 两阶段聚合」完全一致。",
+      "answer": { "reference_code": "见外部链接题解" },
+      "explanation": "加盐要求聚合函数可结合/可交换（sum/count/min/max）；两阶段结果与直接聚合一致，但把单 Reduce 长尾负载均摊到多路，是处理数据倾斜的通用手法。",
+      "tags": ["数据倾斜", "加盐", "两阶段聚合", "哈希"],
+      "source": "nowcoder",
+      "source_ref": "牛客网 大数据倾斜/两阶段聚合经典题",
+      "external_url": "https://www.nowcoder.com/practice"
+    }
+  ]
+}

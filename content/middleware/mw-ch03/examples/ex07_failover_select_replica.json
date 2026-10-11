@@ -1,0 +1,9 @@
+{
+  "title": "故障转移选主规则：priority -> offset -> runid",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== 故障转移选主规则模拟 ===\n候选从节点:\n  r1 priority=100 offset=5000 runid=zzz\n  r2 priority=100 offset=8000 runid=aaa\n  r3 priority=50 offset=6000 runid=mmm\n选主规则: replica-priority 最小 -> 复制 offset 最大 -> runid 字典序最小\n先比 priority: r3=50 最小 -> 直接当选 (offset/runid 不再参与比较)\n当选新主 = r3 (priority=50, offset=6000)",
+  "code": "print(\"=== 故障转移选主规则模拟 ===\")\nreplicas = [\n    {\"id\": \"r1\", \"priority\": 100, \"offset\": 5000, \"runid\": \"zzz\"},\n    {\"id\": \"r2\", \"priority\": 100, \"offset\": 8000, \"runid\": \"aaa\"},\n    {\"id\": \"r3\", \"priority\": 50,  \"offset\": 6000, \"runid\": \"mmm\"},\n]\nprint(\"候选从节点:\")\nfor r in replicas:\n    print(\"  %s priority=%d offset=%d runid=%s\" % (r[\"id\"], r[\"priority\"], r[\"offset\"], r[\"runid\"]))\nprint(\"选主规则: replica-priority 最小 -> 复制 offset 最大 -> runid 字典序最小\")\nbest = min(replicas, key=lambda r: (r[\"priority\"], -r[\"offset\"], r[\"runid\"]))\nprint(\"先比 priority: r3=50 最小 -> 直接当选 (offset/runid 不再参与比较)\")\nprint(\"当选新主 =\", best[\"id\"], \"(priority=%d, offset=%d)\" % (best[\"priority\"], best[\"offset\"]))\n",
+  "_verified": true
+}

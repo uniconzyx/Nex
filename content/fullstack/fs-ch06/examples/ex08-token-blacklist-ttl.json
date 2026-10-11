@@ -1,0 +1,8 @@
+{
+  "title": "Token 黑名单 / 主动撤销：内存 Map + TTL（虚拟时钟，输出确定）",
+  "code_lang": "javascript",
+  "code_std": "node22",
+  "stdin": "",
+  "expected_output": "before_revoke=false\nafter_revoke=true\nat_299s=true\nat_300s=false\nmap_size_after_ttl=0\nmap_size_two_active=2\nboth_expired_size=2\nblacklist_is_stateful=true\n",
+  "code": "// Token 黑名单 / 主动撤销：内存 Map + TTL（虚拟时钟，输出确定）\nconst revoked = new Map();   // jti -> revokedUntil(秒)\nlet now = 1700000000;\n\nfunction revoke(jti, ttlSec) { revoked.set(jti, now + ttlSec); }\nfunction isRevoked(jti) {\n  const until = revoked.get(jti);\n  if (until === undefined) return false;\n  if (now >= until) { revoked.delete(jti); return false; }   // TTL 到期自动清理\n  return true;\n}\nfunction advance(sec) { now += sec; }\n\nconsole.log('before_revoke=' + isRevoked('jti-100'));\nrevoke('jti-100', 300);\nconsole.log('after_revoke=' + isRevoked('jti-100'));\nadvance(299);\nconsole.log('at_299s=' + isRevoked('jti-100'));\nadvance(1);\nconsole.log('at_300s=' + isRevoked('jti-100'));\nconsole.log('map_size_after_ttl=' + revoked.size);\n\n// 撤销列表的规模控制：只保留\"仍在有效期内\"的 jti，天然自清理\nrevoke('jti-200', 60);\nrevoke('jti-201', 60);\nconsole.log('map_size_two_active=' + revoked.size);\nadvance(61);\nconsole.log('both_expired_size=' + revoked.size);\nconsole.log('blacklist_is_stateful=' + (isRevoked('jti-200') === false));\n"
+}

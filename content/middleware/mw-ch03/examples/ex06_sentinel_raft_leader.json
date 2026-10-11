@@ -1,0 +1,9 @@
+{
+  "title": "哨兵 Raft 式 leader 选举：epoch + 多数派",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== 哨兵 Raft 式 leader 选举模拟 ===\n哨兵集合 N=3, 当选需多数派票数 > N/2 = 2\n候选 S1 获得票数 = 3\nS1 获得多数派(2) -> 当选 leader, 执行故障转移\n最终 leader = S1",
+  "code": "print(\"=== 哨兵 Raft 式 leader 选举模拟 ===\")\nN = 3\nmajority = N // 2 + 1\nprint(\"哨兵集合 N=%d, 当选需多数派票数 > N/2 = %d\" % (N, majority))\ncandidates = [\"S1\", \"S2\", \"S3\"]\nvotes = {}\nleader = None\nfor c in candidates:\n    v = 1\n    for other in candidates:\n        if other == c:\n            continue\n        if other not in votes:\n            votes[other] = c\n            v += 1\n    print(\"候选 %s 获得票数 = %d\" % (c, v))\n    if v >= majority:\n        print(\"%s 获得多数派(%d) -> 当选 leader, 执行故障转移\" % (c, majority))\n        leader = c\n        break\nprint(\"最终 leader =\", leader)\n",
+  "_verified": true
+}

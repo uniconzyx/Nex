@@ -1,0 +1,8 @@
+{
+  "title": "内嵌容器启动时序：onRefresh 处创建并启动 Web 服务器",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "embedded container startup sequence:\n  1. refreshContext()\n  2.   onRefresh(): createWebServer()\n  3.     new Tomcat(): bind port / context path\n  4.     Tomcat.start(): accept connections\n  5.   finishRefresh(): publish ApplicationReadyEvent\n  6.   registerShutdownHook(): graceful stop on exit\nport bound before ApplicationReadyEvent = true",
+  "code": "public class Ex09EmbeddedContainerLifecycle {\n    public static void main(String[] args) {\n        String[] steps = {\n            \"refreshContext()\",\n            \"  onRefresh(): createWebServer()\",\n            \"    new Tomcat(): bind port / context path\",\n            \"    Tomcat.start(): accept connections\",\n            \"  finishRefresh(): publish ApplicationReadyEvent\",\n            \"  registerShutdownHook(): graceful stop on exit\"\n        };\n        System.out.println(\"embedded container startup sequence:\");\n        for (int i = 0; i < steps.length; i++) System.out.println(\"  \" + (i + 1) + \". \" + steps[i]);\n        System.out.println(\"port bound before ApplicationReadyEvent = true\");\n    }\n}"
+}

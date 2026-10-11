@@ -1,0 +1,9 @@
+{
+  "title": "SDS 动态字符串：长度前缀、预分配与二进制安全",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "init: len=2 alloc=2 free=0 bytes=[104, 105]\nafter append 'A': len=3 alloc=6 free=3 bytes=[104, 105, 65]\nafter append 10B: len=13 alloc=26 free=13 bytes=[104, 105, 65, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66]\nbinary-safe len (should be 3): 3\nc-string strlen would be: 1",
+  "code": "\nclass SDS:\n    def __init__(self, s):\n        self.buf = bytearray(s.encode(\"utf-8\", \"surrogatepass\"))\n        self.len = len(self.buf)\n        self.alloc = self.len\n    def _ensure(self, need):\n        if self.alloc >= need:\n            return\n        if self.len < 1024 * 1024:\n            newalloc = need * 2\n        else:\n            newalloc = self.alloc + 1024 * 1024\n        if newalloc < need:\n            newalloc = need\n        self.alloc = newalloc\n    def append(self, s):\n        b = s.encode(\"utf-8\", \"surrogatepass\")\n        self._ensure(self.len + len(b))\n        self.buf.extend(b)\n        self.len = len(self.buf)\n    def __repr__(self):\n        return \"len=%d alloc=%d free=%d bytes=%s\" % (self.len, self.alloc, self.alloc - self.len, list(self.buf))\n\ns = SDS(\"hi\")\nprint(\"init:\", s)\ns.append(\"A\")          # len 2 -> need 3 (<1MB) -> alloc = 6\nprint(\"after append 'A':\", s)\ns.append(\"B\" * 10)\nprint(\"after append 10B:\", s)\ns2 = SDS(\"a\\x00b\")     # 含 NUL，二进制安全\nprint(\"binary-safe len (should be 3):\", s2.len)\nprint(\"c-string strlen would be:\", len(s2.buf.split(b\"\\x00\")[0]))\n",
+  "_verified": true
+}

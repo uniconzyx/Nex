@@ -1,0 +1,113 @@
+{
+  "meta": {
+    "chapter": "db-ch02",
+    "note": "6 题，混合基础题（JOIN 算法/语义/NULL 陷阱/子查询改写）与算法题（LeetCode SQL 真题）；LeetCode 真题仅存元数据+链接，不存题面正文"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "difficulty": "mid",
+      "title": "关于 JOIN 执行算法，下列说法正确的是",
+      "content_md": "给定两表 `A`（10 万行，无连接索引）与 `B`（100 行，连接列有索引），以下说法哪项正确？",
+      "options": [
+        { "key": "A", "text": "Hash Join 只能用于非等值连接（如 a.x < b.y）" },
+        { "key": "B", "text": "Nested Loop Join 对外表每行都去内表逐行比对，复杂度约 O(|A|·|B|)；若内表连接列有索引，Index Nested Loop 复杂度降为约 O(|A|·log|B|)" },
+        { "key": "C", "text": "Block Nested Loop Join 是把整张内表常驻内存，永远比 Hash Join 快" },
+        { "key": "D", "text": "无论数据量如何，MySQL 永远优先选择 Merge Join" }
+      ],
+      "answer": { "correct": ["B"] },
+      "explanation": "Hash Join 仅支持等值连接（A 错）；BNL 是把驱动表一批行放进 join buffer 批量探测内表，减少的是对内表的扫描轮数，并非永远快于 Hash Join（C 错）；优化器按代价选型，并非永远 Merge Join（D 错）。Index Nested Loop（内表走索引）是 O(|A|·log|B|)，是带索引 NLJ 的准确复杂度（B 对）。",
+      "tags": ["join", "join-algorithm"],
+      "source": "self",
+      "source_ref": "《高性能 MySQL》第 6 章（关联查询优化）",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "output",
+      "difficulty": "easy",
+      "title": "读 LEFT JOIN 写输出",
+      "content_md": "执行下列语句后，`SELECT c.cust_name, o.amount FROM customer c LEFT JOIN orders o ON c.cust_id=o.cust_id ORDER BY c.cust_id;` 的输出是？\n\n```sql\nCREATE TABLE customer (cust_id INT PRIMARY KEY, cust_name VARCHAR(20));\nCREATE TABLE orders (order_id INT PRIMARY KEY, cust_id INT, amount DECIMAL(10,2));\nINSERT INTO customer VALUES (1,'Tom'),(2,'Jerry'),(3,'Lucy');\nINSERT INTO orders VALUES (101,1,200.00),(102,1,350.00);\nSELECT c.cust_name, o.amount FROM customer c LEFT JOIN orders o ON c.cust_id=o.cust_id ORDER BY c.cust_id;\n```",
+      "answer": {
+        "output": "cust_name|amount\nTom|200.00\nTom|350.00\nJerry|NULL\nLucy|NULL"
+      },
+      "explanation": "Tom 有 2 笔订单故两行；Jerry、Lucy 在 orders 中无匹配，左连接保留左表行、右表列补 NULL。",
+      "tags": ["left-join", "null"],
+      "source": "self",
+      "source_ref": "《MySQL 必知必会》第 13 章（左外连接）",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "fix_error",
+      "difficulty": "mid",
+      "title": "修复 NOT IN 的 NULL 陷阱",
+      "content_md": "目标是查出「没有下过任何订单」的客户，但下面语句在有 NULL 订单金额时会返回空集，请修复：\n\n```sql\nSELECT cust_name\nFROM customer\nWHERE cust_id NOT IN (SELECT cust_id FROM orders);\n```\n（orders.cust_id 可能为 NULL）",
+      "answer": {
+        "reference_code": "SELECT cust_name\nFROM customer c\nWHERE NOT EXISTS (\n  SELECT 1 FROM orders o WHERE o.cust_id = c.cust_id\n);"
+      },
+      "explanation": "当子查询含 NULL 时，`NOT IN (..., NULL)` 整体结果为 UNKNOWN，导致 0 行。改用 `NOT EXISTS` 只对“是否存在匹配行”求值，NULL 行只是不匹配，不受影响；等价写法还有 `LEFT JOIN orders ON ... WHERE orders.cust_id IS NULL`。",
+      "tags": ["subquery", "null", "not-in"],
+      "source": "self",
+      "source_ref": "《数据库系统概念》第 3 章（嵌套子查询与 NULL）",
+      "category": "基础题",
+      "platform": "self"
+    },
+    {
+      "type": "coding",
+      "difficulty": "mid",
+      "title": "把相关子查询改写为 JOIN 聚合",
+      "content_md": "下列查询对每个客户执行一次子查询（N+1），在客户量大时很慢，请改写成一次 `LEFT JOIN + GROUP BY` 的等价写法，输出客户名与订单数（无订单显示 0）：\n\n```sql\nSELECT c.cust_name,\n       (SELECT COUNT(*) FROM orders o WHERE o.cust_id = c.cust_id) AS cnt\nFROM customer c;\n```",
+      "answer": {
+        "reference_code": "SELECT c.cust_name, COUNT(o.order_id) AS cnt\nFROM customer c\nLEFT JOIN orders o ON o.cust_id = c.cust_id\nGROUP BY c.cust_id, c.cust_name\nORDER BY c.cust_id;"
+      },
+      "explanation": "把“逐行子查询计数”改成一次关联后按客户分组计数；LEFT JOIN 保证无订单客户也出现，COUNT(o.order_id) 对 NULL 计 0。",
+      "tags": ["subquery", "join", "group-by"],
+      "source": "self",
+      "source_ref": "《高性能 MySQL》第 6 章（用 JOIN 替代子查询）",
+      "test_cases": [
+        { "input": "customer(Tom,Jerry,Lucy); orders(101->Tom,102->Tom)", "expected_output": "cust_name|cnt\nTom|2\nJerry|0\nLucy|0", "is_sample": true }
+      ],
+      "category": "基础题",
+      "platform": "self"
+    },
+    {
+      "type": "coding",
+      "difficulty": "mid",
+      "title": "LeetCode 184 · 部门最高薪资（department-highest-salary）",
+      "content_md": "查出每个部门里**薪资最高**的员工（可能有并列第一）。需要同时返回部门名。提示：可用 `INNER JOIN` + 子查询（按部门求 MAX 薪资）或窗口函数 `DENSE_RANK()`。",
+      "answer": {
+        "reference_code": "SELECT d.name AS Department, e.name AS Employee, e.salary AS Salary\nFROM employee e\nJOIN department d ON d.id = e.department_id\nWHERE (e.department_id, e.salary) IN (\n  SELECT department_id, MAX(salary)\n  FROM employee\n  GROUP BY department_id\n);"
+      },
+      "explanation": "用「(部门, 最高薪资)」的集合做 IN 匹配，天然支持并列第一；也可用 `DENSE_RANK() OVER (PARTITION BY department_id ORDER BY salary DESC)` 后取 rank=1。",
+      "tags": ["join", "subquery", "window-function"],
+      "source": "leetcode",
+      "source_ref": "LeetCode 184（department-highest-salary）",
+      "external_url": "https://leetcode.cn/problems/department-highest-salary/",
+      "test_cases": [
+        { "input": "schema 与样例数据见 external_url", "expected_output": "见 external_url", "is_sample": true }
+      ],
+      "category": "算法题",
+      "platform": "leetcode"
+    },
+    {
+      "type": "coding",
+      "difficulty": "hard",
+      "title": "LeetCode 185 · 部门薪资前三高（department-top-three-salaries）",
+      "content_md": "查出每个部门**薪资排名前三高**的员工（并列同名次，如 1/1/3 或 1/2/3 都算前三）。建议用窗口函数或「自连接计数法」。",
+      "answer": {
+        "reference_code": "SELECT Department, Employee, Salary\nFROM (\n  SELECT d.name AS Department, e.name AS Employee, e.salary AS Salary,\n         DENSE_RANK() OVER (PARTITION BY e.department_id ORDER BY e.salary DESC) AS rk\n  FROM employee e\n  JOIN department d ON d.id = e.department_id\n) t\nWHERE rk <= 3;"
+      },
+      "explanation": "用 DENSE_RANK 按部门分区对薪资降序排名，取 ≤3 即含并列；自连接计数法为：同一部门比自己薪资高的人数 <3 即进前三，但并列处理不如窗口函数清晰。",
+      "tags": ["window-function", "join", "rank"],
+      "source": "leetcode",
+      "source_ref": "LeetCode 185（department-top-three-salaries）",
+      "external_url": "https://leetcode.cn/problems/department-top-three-salaries/",
+      "test_cases": [
+        { "input": "schema 与样例数据见 external_url", "expected_output": "见 external_url", "is_sample": true }
+      ],
+      "category": "算法题",
+      "platform": "leetcode"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "title": "函数定义与参数：位置/默认/*args/**kwargs",
+  "code_lang": "python",
+  "code_std": "python3.11",
+  "stdin": "",
+  "expected_output": "Hello, Alice!\nextra positional: ()\nextra keyword: {}\nHi, Bob!\nextra positional: (1, 2)\nextra keyword: {'city': 'NY', 'age': 30}",
+  "code": "def greet(name, greeting=\"Hello\", *args, **kwargs):\n    print(f\"{greeting}, {name}!\")\n    print(\"extra positional:\", args)\n    print(\"extra keyword:\", kwargs)\n\ngreet(\"Alice\")\ngreet(\"Bob\", \"Hi\", 1, 2, city=\"NY\", age=30)"
+}

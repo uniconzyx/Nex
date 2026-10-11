@@ -1,0 +1,8 @@
+{
+  "title": "通知嵌套顺序：@Around 包裹 @Before/@After",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "[Around] start\n  [Before] log\n    [Target] exec()\n  [After] cleanup\n[Around] end\n",
+  "code": "import java.lang.reflect.*;\nimport java.util.*;\n\ninterface Service { void exec(); }\nclass ServiceImpl implements Service { public void exec() { System.out.println(\"    [Target] exec()\"); } }\ninterface Advice { void before(); void after(); }\nclass ABefore implements Advice { public void before() { System.out.println(\"  [Before] log\"); } public void after() {} }\nclass AAfter implements Advice { public void before() {} public void after() { System.out.println(\"  [After] cleanup\"); } }\nclass ChainHandler implements InvocationHandler {\n    Object target; List<Advice> advices;\n    ChainHandler(Object t, List<Advice> l) { target = t; advices = l; }\n    public Object invoke(Object p, Method m, Object[] args) throws Throwable {\n        System.out.println(\"[Around] start\");\n        for (Advice ad : advices) ad.before();\n        Object r = m.invoke(target, args);\n        for (int i = advices.size() - 1; i >= 0; i--) advices.get(i).after();\n        System.out.println(\"[Around] end\");\n        return r;\n    }\n}\npublic class Main {\n    public static void main(String[] a) throws Exception {\n        List<Advice> l = new ArrayList<>();\n        l.add(new ABefore()); l.add(new AAfter());\n        Service proxy = (Service) Proxy.newProxyInstance(Service.class.getClassLoader(),\n            new Class[]{Service.class}, new ChainHandler(new ServiceImpl(), l));\n        proxy.exec();\n    }\n}\n"
+}

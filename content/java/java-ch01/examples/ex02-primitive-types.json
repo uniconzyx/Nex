@@ -1,0 +1,8 @@
+{
+  "title": "八种基本类型",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "1 2 3 4 5.5 6.6 A true\n",
+  "code": "public class Main {\n    public static void main(String[] args) {\n        byte b = 1;\n        short s = 2;\n        int i = 3;\n        long l = 4L;\n        float f = 5.5f;\n        double d = 6.6;\n        char c = 'A';\n        boolean flag = true;\n        System.out.println(b + \" \" + s + \" \" + i + \" \" + l + \" \" + f + \" \" + d + \" \" + c + \" \" + flag);\n    }\n}"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "equals/hashCode 契约：HashMap 查找依赖",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "good get: alice\nbad get: null",
+  "code": "import java.util.*;\npublic class E210 {\n    static class User {\n        int id;\n        User(int id) { this.id = id; }\n        @Override public boolean equals(Object o) {\n            return o instanceof User u && id == u.id;\n        }\n        @Override public int hashCode() { return id; }\n    }\n    static class BadUser {\n        int id;\n        BadUser(int id) { this.id = id; }\n        @Override public boolean equals(Object o) {\n            return o instanceof BadUser u && id == u.id;\n        }\n    }\n    public static void main(String[] args) {\n        Map<User, String> good = new HashMap<>();\n        good.put(new User(1), \"alice\");\n        System.out.println(\"good get: \" + good.get(new User(1)));\n        Map<BadUser, String> bad = new HashMap<>();\n        bad.put(new BadUser(1), \"bob\");\n        System.out.println(\"bad get: \" + bad.get(new BadUser(1)));\n    }\n}"
+}

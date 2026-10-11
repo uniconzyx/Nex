@@ -1,0 +1,8 @@
+{
+  "title": "类模板偏特化（Pair<T,T> 与指针）",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "two types\nsame type\n",
+  "code": "#include <iostream>\ntemplate <typename T, typename U>\nstruct Pair { static void tag() { std::cout << \"two types\\n\"; } };\ntemplate <typename T>\nstruct Pair<T, T> { static void tag() { std::cout << \"same type\\n\"; } };\nint main() {\n    Pair<int, double>::tag();\n    Pair<int, int>::tag();\n}\n"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "# 字符串化运算符（含二次展开技巧）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "STR(Hello World) = Hello World\nSTR(a+b)         = a + b\nVERSION 直接展开  = VERSION\nVERSION 二次展开  = 20260919 (用 TOSTR 让其先宏展开)",
+  "code": "#include <stdio.h>\n#define STR(x)  #x\n#define TOSTR(x) STR(x)\n#define VERSION 20260919\nint main(void) {\n    printf(\"STR(Hello World) = %s\\n\", STR(Hello World));\n    printf(\"STR(a+b)         = %s\\n\", STR(a + b));\n    printf(\"VERSION 直接展开  = %s\\n\", STR(VERSION));\n    printf(\"VERSION 二次展开  = %s (用 TOSTR 让其先宏展开)\\n\", TOSTR(VERSION));\n    return 0;\n}"
+}

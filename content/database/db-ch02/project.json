@@ -1,0 +1,23 @@
+{
+  "meta": { "chapter": "db-ch02", "category": "basic" },
+  "items": [
+    {
+      "title": "销售报表查询引擎：JOIN + 子查询 + 集合操作的综合运用",
+      "requirement_md": "基于一个电商最小库（用户、订单、订单明细、商品、地区），实现一套**报表查询**，必须覆盖本章全部知识点：多表 JOIN、标量子查询、IN/EXISTS 子查询、派生表、UNION/UNION ALL 集合操作。\n\n**数据表**：\n- `user(uid, name, city)`\n- `orders(oid, uid, status, amount, order_date)`\n- `order_item(oid, sku, qty, price)`\n- `product(sku, pname, category)`\n\n**必须实现的查询**：\n1. 每个城市的**下单用户数**与**总成交额**（`JOIN` + `GROUP BY`，用 `COUNT(DISTINCT uid)`）。\n2. 成交额**高于全站平均客单价**的订单（`标量子查询` 算平均）。\n3. 「近 30 天有下单」但「历史从未买过某品类」的用户（`LEFT JOIN ... IS NULL` / `NOT EXISTS` 反连接）。\n4. 把「已完成订单」与「已取消订单」用 `UNION ALL` 合并成一张流水表，再用派生表统计各自笔数。\n5. 用 `INTERSECT`（8.0.31+）或 `INNER JOIN` 改写，找出「既买过手机又买过配件」的用户。\n\n**进阶**：对 `orders.uid`、`order_item.oid`、`product.category` 建索引，用 `EXPLAIN` 对比「无索引 BNL」与「有索引 Index NLJ」的 `type`/`rows`/`Extra`，说明 JOIN 算法切换。",
+      "tasks": [
+        {
+          "title": "编写 DDL 建表并插入 ≥20 用户、≥50 订单、≥120 明细",
+          "verification": { "type": "test", "desc": "五张表创建成功；数据量达到基准；连接列无脏数据" }
+        },
+        {
+          "title": "实现 5 个必做查询，结果手工核对正确",
+          "verification": { "type": "test", "desc": "每个查询返回行数与数值与构造数据一致；反连接查询不漏掉 NULL 场景" }
+        },
+        {
+          "title": "用 EXPLAIN 验证 JOIN 算法并优化",
+          "verification": { "type": "manual", "desc": "记录建索引前后 type 从 ALL/BNL 变为 ref/eq_ref，说明「小表驱动大表 + 索引」为何生效" }
+        }
+      ]
+    }
+  ]
+}

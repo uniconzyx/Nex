@@ -1,0 +1,8 @@
+{
+  "title": "盒模型占位：外边距是否计入元素占位",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "content-box outer = 270\nborder-box  outer = 220\nborder-box  content = 150\n建议：全局 * { box-sizing: border-box }",
+  "code": "const w = 200, p = 20, b = 5, m = 10;\nconst contentBoxOuter = w + p * 2 + b * 2 + m * 2;\nconst borderBoxOuter = w + m * 2;\nconst borderBoxContent = w - p * 2 - b * 2;\nconsole.log('content-box outer =', contentBoxOuter);\nconsole.log('border-box  outer =', borderBoxOuter);\nconsole.log('border-box  content =', borderBoxContent);\nconsole.log('建议：全局 * { box-sizing: border-box }');"
+}

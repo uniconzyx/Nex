@@ -1,0 +1,8 @@
+{
+  "title": "指针算术",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "10 30",
+  "code": "#include <iostream>\n\nint main() {\n    int a[3] = {10, 20, 30};\n    int* p = a;\n    std::cout << *p << ' ' << *(p + 2);\n}"
+}

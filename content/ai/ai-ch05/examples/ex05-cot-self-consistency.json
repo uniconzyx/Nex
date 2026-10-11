@@ -1,0 +1,8 @@
+{
+  "title": "CoT 与自洽性投票：多数表决 vs 单次回答",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== 单次回答（不同采样路径）===\n  采到 P1 -> 答案 42 (对)\n  采到 P2 -> 答案 42 (对)\n  采到 P3 -> 答案 42 (对)\n  采到 P4 -> 答案 38 (错)\n  采到 P5 -> 答案 48 (错)\n  单次准确率 = 3/5 = 0.60\n\n=== 自洽性（多数表决）===\n  答案分布: {'38': 1, '42': 3, '48': 1}\n  多数答案 = 42 (得票 3/5 = 0.60)\n  与标准答案一致 = True\n\n结论: 多数表决把 R1/R2/R3 三张一致票聚起来，抵消了 R4/R5 两条错误路径\n      单次准确率 0.60 -> 投票后 True",
+  "code": "from collections import Counter\n\n# 固定的 5 条推理路径及其结论（构造好的确定性输入）\nPATHS = [\n    (\"P1\", \"先算单价再乘数量\", \"42\"),\n    (\"P2\", \"用总价除以数量得单价\", \"42\"),\n    (\"P3\", \"按比例放缩\", \"42\"),\n    (\"P4\", \"误把折扣当加价\", \"38\"),\n    (\"P5\", \"漏算了运费\", \"48\"),\n]\nGOLD = \"42\"\n\n\ndef single_shot(pick):\n    for pid, _, ans in PATHS:\n        if pid == pick:\n            return ans\n    return None\n\n\nprint(\"=== 单次回答（不同采样路径）===\")\nacc = 0\nfor pid, _, _ in PATHS:\n    a = single_shot(pid)\n    ok = (a == GOLD)\n    acc += ok\n    print(\"  采到 %s -> 答案 %s (%s)\" % (pid, a, \"对\" if ok else \"错\"))\nprint(\"  单次准确率 = %d/%d = %.2f\" % (acc, len(PATHS), acc / len(PATHS)))\n\nprint()\nprint(\"=== 自洽性（多数表决）===\")\ncnt = Counter(ans for _, _, ans in PATHS)\nprint(\"  答案分布: %s\" % dict(sorted(cnt.items())))\nbest, n_best = cnt.most_common(1)[0]\nprint(\"  多数答案 = %s (得票 %d/%d = %.2f)\" % (best, n_best, len(PATHS), n_best / len(PATHS)))\nprint(\"  与标准答案一致 = %s\" % (best == GOLD))\nprint()\nprint(\"结论: 多数表决把 R1/R2/R3 三张一致票聚起来，抵消了 R4/R5 两条错误路径\")\nprint(\"      单次准确率 %.2f -> 投票后 %s\" % (acc / len(PATHS), best == GOLD))"
+}

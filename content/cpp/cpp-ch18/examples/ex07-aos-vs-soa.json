@@ -1,0 +1,8 @@
+{
+  "title": "AoS vs SoA：用自写缓存模型对比内存访问的缓存行未命中数",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "AoS 未命中=256 SoA 未命中=64\nSoA 更省缓存行: 1\n每行可容纳粒子数 AoS=4 SoA=16",
+  "code": "#include <cstdio>\n#include <cstdint>\n#include <vector>\n\n// 极简直接映射缓存模型：256 行 × 64 字节。统计\"缓存行未命中\"次数。\n// 这是确定性模拟，与机器速度无关。\nstruct Cache {\n    int nlines;\n    std::vector<long long> tag;\n    long long miss = 0;\n    explicit Cache(int n) : nlines(n), tag(n, -1) {}\n    void access(const void* p) {\n        long long t = (long long)((uintptr_t)p / 64);\n        int idx = (int)(t % nlines);\n        if (tag[idx] != t) { ++miss; tag[idx] = t; }\n    }\n    void reset() { for (auto& x : tag) x = -1; miss = 0; }\n};\n\nstruct Particle { float x, y, z, w; };      // AoS：每个粒子 16 字节\nconst int N = 1024;\nParticle                aos[N];             // 数组结构体\nalignas(64) float soa_x[N], soa_y[N], soa_z[N], soa_w[N];   // 结构体数组\n\nint main() {\n    Cache c(256);\n\n    // AoS：只访问 x 场，却把 y/z/w 一起拉进缓存行 → 浪费带宽\n    for (int i = 0; i < N; ++i) c.access(&aos[i].x);\n    long long aos_miss = c.miss;\n\n    c.reset();\n    // SoA：x 场自身连续，同样访问量下命中的元素多得多\n    for (int i = 0; i < N; ++i) c.access(&soa_x[i]);\n    long long soa_miss = c.miss;\n\n    printf(\"AoS 未命中=%lld SoA 未命中=%lld\\n\", aos_miss, soa_miss);\n    printf(\"SoA 更省缓存行: %d\\n\", (int)(soa_miss < aos_miss));\n    printf(\"每行可容纳粒子数 AoS=%d SoA=%d\\n\",\n           (int)(64 / sizeof(Particle)), (int)(64 / sizeof(float)));\n    return 0;\n}"
+}

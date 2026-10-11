@@ -1,0 +1,65 @@
+{
+  "meta": {
+    "chapter": "data-ch02",
+    "title": "NumPy 进阶 —— 综合项目",
+    "category": "basic"
+  },
+  "items": [
+    {
+      "title": "向量化特征工程流水线：广播、随机化与性能剖析",
+      "requirement_md": "用 NumPy 实现一个端到端的小型特征工程流水线，**全程避免 Python 层显式循环**，并产出性能与内存剖析报告：\n\n1. **数据生成与探查**：用 `np.random.default_rng(seed)` 生成 `(N=1_000_000, D=16)` 的 float64 矩阵，打印 shape / dtype / flags（C/F 连续）/ nbytes；\n2. **标准化（广播）**：实现 z-score，用 `keepdims=True` 配合广播完成，验证标准化后每列均值≈0、标准差≈1（误差 < 1e-10）；\n3. **随机数据增强（新式 API）**：用同一个 `Generator` 实例做 dropout 掩码（按概率置零）与高斯噪声注入，验证两次增强可复现（固定 seed）；\n4. **批量矩阵运算（einsum）**：用 `np.einsum('bij,bjk->bik')` 完成一批 `16×16` 矩阵乘，并与循环实现对照（最大绝对误差 < 1e-10）；\n5. **滑动窗口（stride tricks）**：用 `sliding_window_view` 对一维信号取长度为 5 的窗口，计算窗口均值（零拷贝），对比手写 `as_strided` 的正确性；\n6. **性能与内存报告**：对比「Python 循环版」与「向量化版」在同一任务上的耗时（只输出布尔判据与加速比量级，不打印具体毫秒），并用「解释器开销 / cache 局部性 / SIMD」解释；用 `strides` 与 `np.shares_memory` 说明哪些结果是视图、哪些是拷贝；\n7. **dtype 安全**：把累加统计量用 `float32` 与 `float64` 各算一次，打印两者差异，论证关键累加必须用 float64。\n\n**进阶**：把第 4 步的 einsum 开启 `optimize=True`，对比关闭时的耗时（同样只输出布尔判据）。",
+      "tasks": [
+        {
+          "title": "生成数据并打印内存画像",
+          "verification": {
+            "type": "output",
+            "desc": "打印 shape/dtype/C_CONTIGUOUS/F_CONTIGUOUS/nbytes；能判断数组是否连续与内存占用。"
+          }
+        },
+        {
+          "title": "广播完成标准化并自检",
+          "verification": {
+            "type": "output",
+            "desc": "标准化后每列均值 |μ| < 1e-10、标准差与 1 的误差 < 1e-10；使用 keepdims=True。"
+          }
+        },
+        {
+          "title": "新式随机数 API 做可复现增强",
+          "verification": {
+            "type": "output",
+            "desc": "同一 Generator 实例两次增强结果一致（固定 seed）；说明全局 seed 与 Generator 的区别。"
+          }
+        },
+        {
+          "title": "einsum 批量矩阵乘并对照",
+          "verification": {
+            "type": "output",
+            "desc": "与循环实现最大绝对误差 < 1e-10；说明 einsum 下标标记含义。"
+          }
+        },
+        {
+          "title": "stride tricks 滑动窗口",
+          "verification": {
+            "type": "output",
+            "desc": "sliding_window_view 与手写 as_strided 结果一致，且为共享内存的视图（shares_memory 为 True）。"
+          }
+        },
+        {
+          "title": "性能与 dtype 安全报告",
+          "verification": {
+            "type": "benchmark",
+            "desc": "加速比以布尔判据给出（如 向量化快于循环 > 20 倍: True），不打印具体毫秒；float32 与 float64 累加差异被打印并论证。"
+          }
+        }
+      ],
+      "tags": [
+        "NumPy",
+        "广播",
+        "随机数",
+        "einsum",
+        "向量化",
+        "性能"
+      ]
+    }
+  ]
+}

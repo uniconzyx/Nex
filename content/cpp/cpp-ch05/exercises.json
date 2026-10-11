@@ -1,0 +1,159 @@
+{
+  "meta": {
+    "chapter": "cpp-ch05",
+    "note": "7 题，题型混合；含 LeetCode 707 / 牛客 BM101 真题映射（仅存元数据+链接，不存题面）"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "difficulty": "easy",
+      "title": "关于 const 成员函数，正确的是",
+      "content_md": "选择**正确**的描述。",
+      "options": [
+        {
+          "key": "A",
+          "text": "const 成员函数可以修改成员变量"
+        },
+        {
+          "key": "B",
+          "text": "const 对象只能调用 const 成员函数"
+        },
+        {
+          "key": "C",
+          "text": "成员函数加 const 只影响返回值类型"
+        },
+        {
+          "key": "D",
+          "text": "const 与非 const 版本不能构成重载"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "const 对象的状态不可改，只能调用承诺不改状态的 const 成员函数；const/非 const 成员函数可重载（按对象常量性区分）。",
+      "tags": [
+        "const-member",
+        "overload"
+      ],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 7 章 类",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "fix_error",
+      "difficulty": "mid",
+      "title": "修复拷贝赋值中的自赋值与泄漏",
+      "content_md": "以下拷贝赋值在自赋值时会先销毁共享内存、又未防自赋值，存在 UB 与泄漏。请修复（保留深拷贝语义）：\n\n```cpp\nclass Vec {\n  double* d_;\npublic:\n  Vec& operator=(const Vec& o) {\n    delete[] d_;\n    d_ = new double[/*n*/];\n    // 缺少自赋值保护\n    return *this;\n  }\n};\n```",
+      "answer": {
+        "reference_code": "Vec& operator=(const Vec& o) {\n  if (this == &o) return *this;   // 防自赋值\n  double* tmp = new double[/*n*/]; // 先分配\n  delete[] d_;                     // 再释放旧资源\n  d_ = tmp;\n  return *this;\n}"
+      },
+      "explanation": "先判自赋值；采用「先分配成功再释放旧资源」的拷贝并交换式写法，异常安全且避免悬垂。",
+      "tags": [
+        "rule-of-three",
+        "copy-assign"
+      ],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 13 章 拷贝控制",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "output",
+      "difficulty": "easy",
+      "title": "读代码写输出（构造/析构顺序）",
+      "content_md": "```cpp\n#include <iostream>\nstruct T { const char* s; T(const char* x):s(x){ std::cout << s << \"c \"; } ~T(){ std::cout << s << \"d \"; } };\nint main() { T a(\"A\"); { T b(\"B\"); } std::cout << \"e \"; }\n```",
+      "answer": {
+        "output": "Ac Bc Bd e Ad "
+      },
+      "explanation": "a 先构造；进入块 b 构造；块结束 b 析构；打印 e；main 结束 a 析构。",
+      "tags": [
+        "ctor",
+        "dtor",
+        "raii"
+      ],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 7 章 构造函数/析构函数",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "explain",
+      "difficulty": "mid",
+      "title": "什么情况下必须自定义拷贝控制（三法则）",
+      "content_md": "解释：为什么管理裸指针/资源的类必须自定义拷贝构造、拷贝赋值与析构？简述三法则与五法则。",
+      "answer": {
+        "reference_code": "当类手动管理资源（裸指针、文件句柄等）时，编译器生成的逐成员浅拷贝会让多个对象共享同一资源，析构时 double free。三法则：需要析构/拷贝构造/拷贝赋值之一，通常三者都要。C++11 后扩展为五法则（加移动构造与移动赋值）。"
+      },
+      "explanation": "核心是「资源管理职责」与「浅拷贝陷阱」；RAII 下析构负责释放，拷贝负责深拷贝或禁用以保持不变量。",
+      "tags": [
+        "rule-of-three",
+        "raii"
+      ],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 13 章 拷贝控制",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "coding",
+      "difficulty": "mid",
+      "title": "实现字符串包装类的拷贝构造",
+      "content_md": "实现 `MyStr` 的拷贝构造函数，使其与源对象各自拥有独立内存（深拷贝）。已给出构造函数与析构。",
+      "answer": {
+        "reference_code": "#include <iostream>\n#include <cstring>\nclass MyStr {\n  char* p_;\npublic:\n  MyStr(const char* s){ p_=new char[std::strlen(s)+1]; std::strcpy(p_,s); }\n  MyStr(const MyStr& o){ p_=new char[std::strlen(o.p_)+1]; std::strcpy(p_,o.p_); }\n  ~MyStr(){ delete[] p_; }\n  const char* c_str() const { return p_; }\n};\nint main(){ MyStr a(\"hi\"); MyStr b(a); std::cout << b.c_str(); }"
+      },
+      "explanation": "拷贝构造必须重新 new 一块内存并逐字节拷贝，否则与 a 共享 p_，析构时双重释放。",
+      "tags": [
+        "copy-ctor",
+        "deep-copy"
+      ],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 13 章 拷贝构造函数",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "design",
+      "difficulty": "hard",
+      "title": "LeetCode 707 · 设计链表",
+      "content_md": "设计单/双向链表数据结构，支持头部/尾部插入、按索引取值、按索引插入/删除等接口。请用类封装节点与链表（详见 external_url，不在此复述题面）。",
+      "answer": {
+        "reference_code": "class MyLinkedList {\n  struct Node { int val; Node* next; Node(int v):val(v),next(nullptr){} };\n  Node* head_ = nullptr; int sz_ = 0;\npublic:\n  int get(int i){ if(i<0||i>=sz_) return -1; Node* p=head_; while(i--) p=p->next; return p->val; }\n  void addAtHead(int v){ Node* n=new Node(v); n->next=head_; head_=n; ++sz_; }\n  void addAtTail(int v){ if(!head_){addAtHead(v);return;} Node* p=head_; while(p->next)p=p->next; p->next=new Node(v); ++sz_; }\n  void deleteAtIndex(int i){ /* 略：边界处理 + delete */ }\n  ~MyLinkedList(){ while(head_){ Node* t=head_->next; delete head_; head_=t; } }\n};"
+      },
+      "explanation": "用类封装节点与哨兵逻辑，注意索引越界返回 -1、增删时维护 size 与指针。",
+      "tags": [
+        "design",
+        "linked-list",
+        "class"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 707（design-linked-list）",
+      "external_url": "https://leetcode.cn/problems/design-linked-list/",
+      "category": "算法题",
+      "platform": "leetcode"
+    },
+    {
+      "type": "design",
+      "difficulty": "hard",
+      "title": "牛客 BM101 · 设计 LRU 缓存",
+      "content_md": "设计一个满足 LRU（最近最少使用）淘汰策略的缓存结构，支持 O(1) 查询与更新。建议用类封装哈希表 + 双向链表（详见 external_url，不在此复述题面）。",
+      "answer": {
+        "reference_code": "// 用类封装：unordered_map<key, list<Node>::iterator> + list 维护使用序\n// get 命中则把节点移到表头；put 超容量则删除表尾并同步删 map。\n// 具体实现见 external_url 原题要求。"
+      },
+      "explanation": "核心是「哈希 O(1) 定位 + 双向链表维护冷热序」，二者都需封装在同一类中，并保证迭代器在节点移动后仍然有效。",
+      "tags": [
+        "design",
+        "lru",
+        "class"
+      ],
+      "source": "nowcoder",
+      "source_ref": "牛客 BM101（设计 LRU 缓存）",
+      "external_url": "https://www.nowcoder.com/practice/e3769a7d9e294980a4a812ccb386de09",
+      "category": "算法题",
+      "platform": "nowcoder"
+    }
+  ]
+}

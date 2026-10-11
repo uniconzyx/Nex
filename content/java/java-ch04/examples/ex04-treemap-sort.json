@@ -1,0 +1,8 @@
+{
+  "title": "TreeMap 基于红黑树的排序与比较器",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "natural order keys: [apple, banana, cherry]\nreverse order keys: [cherry, banana, apple]",
+  "code": "import java.util.*;\n\npublic class Ex04TreeMapSort {\n    public static void main(String[] args) {\n        TreeMap<String, Integer> tm = new TreeMap<>();\n        String[] words = {\"banana\", \"apple\", \"cherry\"};\n        for (String w : words) tm.put(w, w.length());\n        System.out.println(\"natural order keys: \" + tm.keySet());\n        TreeMap<String, Integer> rev = new TreeMap<>(Comparator.reverseOrder());\n        for (String w : words) rev.put(w, w.length());\n        System.out.println(\"reverse order keys: \" + rev.keySet());\n    }\n}"
+}

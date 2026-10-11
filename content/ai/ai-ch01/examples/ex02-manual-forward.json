@@ -1,0 +1,8 @@
+{
+  "title": "手写两层全连接网络的前向传播（无框架）",
+  "code_lang": "python",
+  "code_std": "3.13",
+  "stdin": "",
+  "expected_output": "输入 X shape: (2, 3)\n\n第1层线性 z1 = X@W1 + b1,  shape: (2, 4)\n[[-0.3057 -0.3205  0.1379  0.2123]\n [-0.0394  0.0313  0.0012  0.0369]]\n\nReLU 激活后 h1, shape: (2, 4)\n[[0.     0.     0.1379 0.2123]\n [0.     0.0313 0.0012 0.0369]]\n  被置零的元素数: 3 / 8   <- ReLU 的稀疏性\n\n输出层 logits shape: (2, 2)\n[[ 0.0012  0.0178]\n [-0.0024  0.0015]]\n\n=== 为什么必须有激活函数 ===\n去掉 ReLU 后，两层等价于一层线性变换:\n  差异最大值 = 6.938893903907228e-18  (应≈0)\n  结论：线性变换的复合仍是线性变换，多层无激活 = 单层，表达能力不随深度增长。",
+  "code": "import numpy as np\n\nrng = np.random.default_rng(0)\n\ndef relu(x):\n    return np.maximum(0, x)\n\ndef linear(x, W, b):\n    return x @ W + b\n\n# 网络：input 3 -> hidden 4 -> output 2\nD, H, C = 3, 4, 2\nW1 = rng.normal(0, 0.1, (D, H))\nb1 = np.zeros(H)\nW2 = rng.normal(0, 0.1, (H, C))\nb2 = np.zeros(C)\n\nX = np.array([[1.0, 2.0, 3.0],\n              [-1.0, 0.5, 0.0]], dtype=np.float64)\n\nz1 = linear(X, W1, b1)\nh1 = relu(z1)\nlogits = linear(h1, W2, b2)\n\nprint(\"输入 X shape:\", X.shape)\nprint()\nprint(\"第1层线性 z1 = X@W1 + b1,  shape:\", z1.shape)\nprint(np.round(z1, 4))\nprint()\nprint(\"ReLU 激活后 h1, shape:\", h1.shape)\nprint(np.round(h1, 4))\nprint(\"  被置零的元素数:\", int((h1 == 0).sum()), \"/\", h1.size,\n      \"  <- ReLU 的稀疏性\")\nprint()\nprint(\"输出层 logits shape:\", logits.shape)\nprint(np.round(logits, 4))\nprint()\nprint(\"=== 为什么必须有激活函数 ===\")\n# 若去掉 relu，两层线性复合等价于一层\nW_combined = W1 @ W2\ndirect = X @ W_combined + (b1 @ W2 + b2)\nno_act = linear(linear(X, W1, b1), W2, b2)\nprint(\"去掉 ReLU 后，两层等价于一层线性变换:\")\nprint(\"  差异最大值 =\", float(np.max(np.abs(no_act - direct))), \" (应≈0)\")\nprint(\"  结论：线性变换的复合仍是线性变换，多层无激活 = 单层，表达能力不随深度增长。\")\n"
+}

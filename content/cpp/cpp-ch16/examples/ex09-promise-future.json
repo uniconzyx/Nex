@@ -1,0 +1,8 @@
+{
+  "title": "promise / future 在线程间传递值",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "value=100",
+  "code": "#include <iostream>\n#include <future>\n#include <thread>\n\nvoid producer(std::promise<int>& p) {\n    p.set_value(100);   // 把结果放入通道；若抛异常也会被 future 重抛\n}\n\nint main() {\n    std::promise<int> p;\n    std::future<int> f = p.get_future();\n    std::thread t(producer, std::ref(p));\n    t.join();\n    std::cout << \"value=\" << f.get();   // 阻塞取通道里的值\n}"
+}

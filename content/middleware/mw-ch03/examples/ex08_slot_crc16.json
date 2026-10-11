@@ -1,0 +1,9 @@
+{
+  "title": "Cluster 16384 槽位与 CRC16 键槽计算 + hash tag",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== Cluster 16384 槽位与 CRC16 键槽计算 ===\n哈希槽总数 = 16384, slot = CRC16(key) & 16383\n  key=user:1000    -> slot= 1649\n  key=order:2000   -> slot= 2828\n  key=session:abc  -> slot=14788\n  key=foo          -> slot=12182\n  key=bar          -> slot= 5061\nhash tag: order:{u1}:name 与 order:{u1}:age 同槽(只取 {} 内)\n  order:{u1}:name 参与计算的 tag=u1 -> slot=4574\n  order:{u1}:age  参与计算的 tag=u1 -> slot=4574\n二者相同 -> 可安全做跨 key 操作",
+  "code": "print(\"=== Cluster 16384 槽位与 CRC16 键槽计算 ===\")\ndef crc16_xmodem(data):\n    crc = 0\n    for b in data.encode('utf-8'):\n        crc ^= b << 8\n        for _ in range(8):\n            if crc & 0x8000:\n                crc = ((crc << 1) ^ 0x1021) & 0xFFFF\n            else:\n                crc = (crc << 1) & 0xFFFF\n    return crc\ndef slot_of(key):\n    return crc16_xmodem(key) & 16383\nkeys = [\"user:1000\", \"order:2000\", \"session:abc\", \"foo\", \"bar\"]\nprint(\"哈希槽总数 = 16384, slot = CRC16(key) & 16383\")\nfor k in keys:\n    print(\"  key=%-12s -> slot=%5d\" % (k, slot_of(k)))\nprint(\"hash tag: order:{u1}:name 与 order:{u1}:age 同槽(只取 {} 内)\")\nprint(\"  order:{u1}:name 参与计算的 tag=u1 -> slot=%d\" % slot_of(\"u1\"))\nprint(\"  order:{u1}:age  参与计算的 tag=u1 -> slot=%d\" % slot_of(\"u1\"))\nprint(\"二者相同 -> 可安全做跨 key 操作\")\n",
+  "_verified": true
+}

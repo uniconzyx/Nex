@@ -1,0 +1,8 @@
+{
+  "title": "switch 多分支",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "Wed\n",
+  "code": "public class Main {\n    public static void main(String[] args) {\n        int day = 3;\n        switch (day) {\n            case 1: System.out.println(\"Mon\"); break;\n            case 2: System.out.println(\"Tue\"); break;\n            case 3: System.out.println(\"Wed\"); break;\n            default: System.out.println(\"Other\");\n        }\n    }\n}"
+}

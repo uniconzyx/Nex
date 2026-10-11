@@ -1,0 +1,9 @@
+{
+  "title": "TYPE 与 OBJECT ENCODING：顶层类型 vs 底层编码",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "TYPE string | OBJECT ENCODING '123'    -> int\nTYPE string | OBJECT ENCODING 'hello'  -> embstr\nTYPE string | OBJECT ENCODING 'xxxxxxxx' -> raw\nTYPE 反映顶层对象类型, OBJECT ENCODING 反映底层编码(二者不同)",
+  "code": "\ndef enc(v):\n    try:\n        iv = int(v)\n        if str(iv) == v and -(2 ** 63) <= iv < 2 ** 63:\n            return \"int\"\n    except ValueError:\n        pass\n    return \"embstr\" if len(v.encode(\"utf-8\")) <= 44 else \"raw\"\n\nsamples = [\"123\", \"hello\", \"x\" * 50]\nfor v in samples:\n    print(\"TYPE string | OBJECT ENCODING %-8s -> %s\" % (repr(v[:8]), enc(v)))\nprint(\"TYPE 反映顶层对象类型, OBJECT ENCODING 反映底层编码(二者不同)\")\n",
+  "_verified": true
+}

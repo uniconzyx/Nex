@@ -1,0 +1,14 @@
+{
+  "meta": { "chapter": "cpp-ch12", "category": "basic" },
+  "items": [
+    {
+      "title": "实现一个支持移动语义的简易动态数组 Vec",
+      "requirement_md": "用 C++ 实现一个模板化的简易动态数组 `Vec<T>`，重点实践本章的移动语义、`noexcept`、范围 for 与 `emplace_back`：\n\n1. 提供构造（指定大小/初始值）、`size()`、`operator[]`、`push_back`（超容量按 2 倍扩容）。\n2. 实现**移动构造**与**移动赋值**，且**标 `noexcept`**；同时提供（或 `=default`）拷贝构造/拷贝赋值做深拷贝。\n3. 实现 `emplace_back(Args&&...)`：用 `std::forward` 在尾部预留内存**原地构造**元素，扩容时触发移动（因 noexcept 而走移动而非拷贝）。\n4. 为 `Vec` 提供 `begin()/end()`（或满足范围 for 的接口），并写一段范围 for 遍历 + 修改的演示。\n5. 自带单测：验证移动后源对象为空、深拷贝独立性、扩容时移动（非拷贝）发生。要求全部通过编译（c++17）且运行无泄漏（可用 `-fsanitize=address` 验证）。",
+      "tasks": [
+        { "title": "实现构造/析构与扩容", "verification": { "type": "test", "desc": "push_back 超过容量后数据完整、size 正确、容量翻倍" } },
+        { "title": "实现移动构造/赋值并标 noexcept", "verification": { "type": "test", "desc": "Vec a; Vec b=std::move(a); 后 a.size()==0 且 b 拥有原数据；用 noexcept 静态断言验证" } },
+        { "title": "实现 emplace_back 与 begin/end", "verification": { "type": "test", "desc": "emplace_back(args...) 原地构造、范围 for 可遍历并可改元素；ASan 无泄漏/无越界" } }
+      ]
+    }
+  ]
+}

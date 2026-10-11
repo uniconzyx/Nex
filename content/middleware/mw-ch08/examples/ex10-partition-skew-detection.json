@@ -1,0 +1,8 @@
+{
+  "title": "分区倾斜检测：变异系数与极差判定",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "场景             均值         极差         变异系数         判定          \n均匀             1010.0     70         0.021        拟合均匀        \n轻微倾斜           1016.7     800        0.263        存在倾斜        \n严重倾斜           966.7      4950       1.868        严重倾斜        \n单分区打满          1383.3     7980       2.139        严重倾斜        \n\n判定口径：\n  变异系数 CV = 标准差 / 均值（无量纲，可跨不同量级比较）\n  CV < 0.1 拟合均匀；CV > 0.5 说明 key 设计或分区器有问题\n\n注意：不能只看均值。各分区均值相近但单个分区 Lag 极高（如「单分区打满」），\n      均值会被稀释，必须同时看极差与最大值。",
+  "code": "# 分区倾斜检测：用各分区 Lag 的极差与变异系数判定\nimport math\n\nCASES = {\n    \"均匀\":      [1000, 1050, 980, 1020, 1010, 1000],\n    \"轻微倾斜\":  [1500, 1200, 1000, 900, 800, 700],\n    \"严重倾斜\":  [5000, 300, 200, 150, 100, 50],\n    \"单分区打满\": [8000, 100, 80, 60, 40, 20],\n}\n\n\ndef stats(lags):\n    n = len(lags)\n    mean = sum(lags) / n\n    var = sum((x - mean) ** 2 for x in lags) / n\n    sd = math.sqrt(var)\n    cv = sd / mean if mean else 0\n    return mean, max(lags) - min(lags), cv\n\n\nprint(\"%-14s %-10s %-10s %-12s %-12s\" % (\"场景\", \"均值\", \"极差\", \"变异系数\", \"判定\"))\nfor name, lags in CASES.items():\n    mean, rng, cv = stats(lags)\n    if cv < 0.1:\n        verdict = \"拟合均匀\"\n    elif cv < 0.5:\n        verdict = \"存在倾斜\"\n    else:\n        verdict = \"严重倾斜\"\n    print(\"%-14s %-10.1f %-10d %-12.3f %-12s\" % (name, mean, rng, cv, verdict))\n\nprint()\nprint(\"判定口径：\")\nprint(\"  变异系数 CV = 标准差 / 均值（无量纲，可跨不同量级比较）\")\nprint(\"  CV < 0.1 拟合均匀；CV > 0.5 说明 key 设计或分区器有问题\")\nprint()\nprint(\"注意：不能只看均值。各分区均值相近但单个分区 Lag 极高（如「单分区打满」），\")\nprint(\"      均值会被稀释，必须同时看极差与最大值。\")\n"
+}

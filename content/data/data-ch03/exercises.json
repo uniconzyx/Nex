@@ -1,0 +1,152 @@
+{
+  "meta": {
+    "chapter": "data-ch03",
+    "title": "Pandas 基础 —— 习题集",
+    "count": 6,
+    "note": "4 道基础题 + 2 道算法题（LeetCode 题仅存元数据与链接，不搬运题面）"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "自动对齐后的结果与 dtype",
+      "content_md": "执行下面的代码，`(a + b)` 的结果是什么？\n\n```python\na = pd.Series([1, 2], index=[\"x\", \"y\"])\nb = pd.Series([10], index=[\"y\"])\nprint((a + b).to_dict())\nprint((a + b).dtype)\n```",
+      "options": [
+        {
+          "key": "A",
+          "text": "`{'x': 1, 'y': 12}`，dtype 为 `int64`"
+        },
+        {
+          "key": "B",
+          "text": "`{'x': nan, 'y': 12.0}`，dtype 为 `float64`"
+        },
+        {
+          "key": "C",
+          "text": "`{'y': 12}`，dtype 为 `int64`（只保留交集）"
+        },
+        {
+          "key": "D",
+          "text": "抛 `ValueError`，因为索引长度不一致"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "Pandas 的加法**按标签对齐并取并集**：标签 `x` 只在 `a` 里有值，`b` 里没有，因此结果为 `NaN`；`y` 两边都有，得 `1 + 10 = 12`。由于出现了 `NaN`，而 `int64` 无法表示缺失，整列被提升为 **`float64`**，`12` 显示为 `12.0`。C 是 `join='inner'` 的语义，不是默认行为。",
+      "tags": [
+        "pandas",
+        "alignment",
+        "dtype",
+        "nan"
+      ],
+      "source": "self",
+      "source_ref": "data-ch03 concept 01 · 自动对齐：Pandas 的灵魂"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "修复链式赋值导致「改了没生效」",
+      "content_md": "下面的代码想「把 score 大于 60 的行的 passed 列设为 True」，但运行后 `df` 一点没变，还给出了 `SettingWithCopyWarning`。请指出原因并给出**两种**正确写法。\n\n```python\ndf = pd.DataFrame({\"score\": [50, 70, 90]})\ndf[df[\"score\"] > 60][\"passed\"] = True\nprint(df)          # 没有 passed 列！\n```",
+      "answer": {
+        "text": "**原因**：`df[df[\"score\"] > 60]` 先产生了一个**中间对象**，随后的 `[\"passed\"] = True` 作用在这个中间对象上，而不是原始的 `df`。这个中间对象是副本还是视图，在历史上由实现决定，Pandas 无法保证语义 —— 因此发出 `SettingWithCopyWarning`。\n\n**注意 Pandas 3.0 起 Copy-on-Write 是默认行为**，此时中间对象一定是独立的，链式赋值**必然**不会改到原表（行为反而变得可预测了）。\n\n**修法 A（想改原表）**：用 `.loc` 一步定位。\n\n```python\ndf.loc[df[\"score\"] > 60, \"passed\"] = True\n```\n\n**修法 B（不改原表，改副本）**：显式复制。\n\n```python\nsubset = df[df[\"score\"] > 60].copy()\nsubset[\"passed\"] = True\n```\n\n**选择依据**：问自己「**我到底想不想动原始 DataFrame**」。想动就用 `.loc`，不想动就先 `.copy()`。唯一没有明确语义的写法就是「先取子集再赋值」。"
+      },
+      "explanation": "考点是链式赋值的语义不确定性与 CoW 带来的行为变化（3.0 起链式赋值不再能改原表）。",
+      "tags": [
+        "pandas",
+        "chained-assignment",
+        "cow",
+        "loc"
+      ],
+      "source": "self",
+      "source_ref": "data-ch03 concept 03 · 链式赋值与 SettingWithCopyWarning"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "loc 与 iloc 的切片端点",
+      "content_md": "对 `s = pd.Series([1, 2, 3, 4, 5], index=list(\"abcde\"))`，\n\n```python\nprint(s.loc[\"b\":\"d\"].tolist())\nprint(s.iloc[1:3].tolist())\n```\n\n两行分别输出什么？",
+      "answer": {
+        "text": "```\n[2, 3, 4]\n[2, 3]\n```\n\n**关键差异**：\n- **`loc` 的切片是闭区间**（两端都包含），所以 `\"b\":\"d\"` 给出 `b, c, d` 三个元素；\n- **`iloc` 的切片是左闭右开**（与 Python 切片一致），所以 `1:3` 给出下标 1、2 两个元素。\n\n**为什么 `loc` 要闭区间**：它按**标签**切，而标签未必连续、未必有序，「开区间」在标签空间里没有自然定义（`\"d\"` 的「下一个」是什么？）。所以 Pandas 选择了更符合人类直觉的「包含两端」。"
+      },
+      "explanation": "这是 Pandas 最反直觉的一处设计，也是「多取一行」这类静默错误的常见来源。",
+      "tags": [
+        "pandas",
+        "loc",
+        "iloc",
+        "slicing"
+      ],
+      "source": "self",
+      "source_ref": "data-ch03 concept 03 · 三种取法的行为差异"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "hard",
+      "title": "缺失值处理对统计量的影响",
+      "content_md": "```python\nimport pandas as pd, numpy as np\ns = pd.Series([10.0, np.nan, 20.0, np.nan, 30.0])\nprint(s.mean(), s.count(), len(s))\n```\n\n(1) 输出什么？(2) 如果改成 `s.fillna(s.mean())` 后再算 `std()`，与**只用非空值**算 `std()` 相比会偏大还是偏小？为什么？",
+      "answer": {
+        "text": "**(1) 输出**：\n\n```\n20.0 3 5\n```\n\n- `mean()` **默认跳过缺失**（`skipna=True`），所以是 `(10+20+30)/3 = 20.0`，**分母是 3（非空个数）而不是 5**；\n- `count()` 返回**非空个数** = 3；\n- `len(s)` 返回**总行数** = 5。\n\n**(2) 填充后标准差会偏小。**\n\n原因：`fillna(s.mean())` 把两处缺失都替换成**同一个常数** 20.0。填充后的序列是 `[10, 20, 20, 20, 30]`，两个原本「分散」的位置被压到了均值上。\n\n形式化地看，若真实方差为 $\\sigma^2$、缺失比例为 $p$，用均值填充后的方差为：\n\n$$\\mathrm{Var}_{\\text{filled}} = (1-p)\\,\\sigma^2 < \\sigma^2$$\n\n**方差被按缺失比例系统性压缩**。这会进一步导致：相关性被低估、回归系数的标准误失真。\n\n**更严谨的做法**：用**训练集**的统计量填充（避免数据泄漏），或使用**多重插补**（产生多组填充值，最后用 Rubin 规则合并不确定性），或直接换用能原生处理缺失的模型（如 XGBoost）。"
+      },
+      "explanation": "考点是「聚合默认跳过缺失」与「填充会压缩方差」这两件容易被忽略但影响结论的事。",
+      "tags": [
+        "pandas",
+        "nan",
+        "fillna",
+        "variance"
+      ],
+      "source": "self",
+      "source_ref": "data-ch03 concept 04 · 缺失值的三种标记与处理"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "easy",
+      "title": "修改列（LeetCode 2884 · Modify Columns）",
+      "content_md": "见题目链接。这是一道 Pandas 专项编程题，要求对 DataFrame 的某一列做整体变换（乘以常数），正好练习**整列向量化赋值**的写法。",
+      "answer": {
+        "text": "核心是**整列向量化**：`df[\"salary\"] = df[\"salary\"] * 2`，不要写循环。\n\n注意两点：\n- 赋值时用 `df[\"col\"] = ...` 或 `df.loc[:, \"col\"] = ...`，**不要用链式赋值**；\n- 如果原列含缺失，乘法结果仍是缺失（`NaN * 2 = NaN`），类型会保持 `float64`。\n\n参考实现见题目链接。"
+      },
+      "explanation": "把本章的「列操作 + 避免链式赋值」落到代码上。**LeetCode 题面正文不搬运，仅存链接。**",
+      "tags": [
+        "pandas",
+        "dataframe",
+        "leetcode",
+        "vectorized"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 2884 (modify-columns)",
+      "external_url": "https://leetcode.cn/problems/modify-columns/"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "easy",
+      "title": "连接数据（LeetCode 2888 · Reshape Data: Concatenate）",
+      "content_md": "见题目链接。要求把两个结构相同的 DataFrame **纵向堆叠**，练习 `concat` 的轴参数与索引处理（`ignore_index`）——这正是概念 01「索引对齐」的直接应用场景。",
+      "answer": {
+        "text": "关键 API：`pd.concat([df1, df2], axis=0, ignore_index=True)`。\n\n要点：\n- `axis=0` 是**纵向堆叠**（行变多），`axis=1` 是**横向拼接**（列变多）；\n- **不加 `ignore_index=True` 会保留原索引**，于是出现重复标签 ——\n  这正是本章反复强调的坑：**重复索引在后续对齐时会产生行数膨胀**；\n- `concat` 是**按索引对齐**的（`axis=1` 时尤其明显），而 `append` 已在 Pandas 2.0 被移除，不要再使用。\n\n参考实现见题目链接。"
+      },
+      "explanation": "考点是 `concat` 的轴语义与 `ignore_index` 的必要性，直接呼应本章的索引对齐主线。**LeetCode 题面正文不搬运，仅存链接。**",
+      "tags": [
+        "pandas",
+        "concat",
+        "leetcode",
+        "index"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 2888 (reshape-data-concatenate)",
+      "external_url": "https://leetcode.cn/problems/reshape-data-concatenate/"
+    }
+  ]
+}

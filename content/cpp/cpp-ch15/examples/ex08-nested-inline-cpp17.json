@@ -1,0 +1,8 @@
+{
+  "title": "C++17 嵌套命名空间语法 + inline",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "A::B::C=99\n",
+  "code": "#include <iostream>\n\nnamespace A::B {            // C++17 嵌套写法\n    inline namespace C {\n        int val = 99;\n    }\n}\n\nint main() {\n    std::cout << \"A::B::C=\" << A::B::val << '\\n';  // inline 透明穿透\n}"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "服务端状态归一化：normalize / denormalize 与实体去重数量",
+  "code_lang": "javascript",
+  "code_std": "node18",
+  "stdin": "",
+  "expected_output": "raw_author_objects=3\nnormalized_user_count=2\nnormalized_post_count=3\ndedup_saved=1\nresult_ids=1,2,3\nroundtrip_equal=true\n",
+  "code": "// 服务端状态归一化：嵌套结构 -> 实体表 + id 索引；再还原\nconst raw = { posts: [\n  { id: 1, title: 'p1', author: { id: 9, name: 'ann' } },\n  { id: 2, title: 'p2', author: { id: 9, name: 'ann' } },\n  { id: 3, title: 'p3', author: { id: 7, name: 'bob' } },\n] };\n\nfunction normalize(data) {\n  const entities = { posts: {}, users: {} };\n  const result = [];\n  for (const p of data.posts) {\n    entities.posts[p.id] = { id: p.id, title: p.title, author: p.author.id };\n    entities.users[p.author.id] = { id: p.author.id, name: p.author.name };\n    result.push(p.id);\n  }\n  return { entities, result };\n}\nfunction denormalize(state, ids) {\n  return ids.map(id => {\n    const p = state.entities.posts[id];\n    const u = state.entities.users[p.author];\n    return { id: p.id, title: p.title, author: { id: u.id, name: u.name } };\n  });\n}\n\nconst norm = normalize(raw);\nconsole.log('raw_author_objects=' + raw.posts.length);\nconsole.log('normalized_user_count=' + Object.keys(norm.entities.users).length);\nconsole.log('normalized_post_count=' + Object.keys(norm.entities.posts).length);\nconsole.log('dedup_saved=' + (raw.posts.length - Object.keys(norm.entities.users).length));\nconsole.log('result_ids=' + norm.result.join(','));\nconst round = denormalize(norm, norm.result);\nconsole.log('roundtrip_equal=' + (JSON.stringify(round) === JSON.stringify(raw.posts)));\n"
+}

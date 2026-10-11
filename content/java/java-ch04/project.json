@@ -1,0 +1,35 @@
+{
+  "meta": {
+    "chapter": "java-ch04",
+    "category": "basic"
+  },
+  "items": [
+    {
+      "title": "实现不可变键值缓存 LRUCache（HashMap + 双向链表 + 泛型）",
+      "requirement_md": "用本章知识实现一个**泛型** LRU 缓存 `LRUCache<K, V>`：\n- 底层用 `HashMap<K, Node<K,V>>` 做 O(1) 查找，双向链表维护访问顺序（最近使用在前）；\n- 支持 `get(K)`、`put(K, V)`、`size()`；容量上限 `capacity`，超出时淘汰链表尾部（最久未用）；\n- 正确重写 `Node` 无所谓，但 `K` 作为键必须依赖 `equals/hashCode` 契约（用可变字段做键会踩坑，需文档说明键应不可变）；\n- 在 `public static void main` 中自测：构造容量 2 的缓存，put(1,a) put(2,b) get(1) put(3,c)，验证淘汰的是 2 而非 1，并打印最终键集合。\n要求全程使用本章知识点（HashMap 索引、双向链表、泛型、fail-fast 规避）。",
+      "tasks": [
+        {
+          "title": "设计 Node 双向链表与 HashMap 组合结构",
+          "verification": {
+            "type": "test",
+            "desc": "get/put 均为 O(1)，容量约束正确"
+          }
+        },
+        {
+          "title": "实现 get 的访问重排与 put 的淘汰逻辑",
+          "verification": {
+            "type": "test",
+            "desc": "LRU 淘汰顺序正确，get 命中后刷新位置"
+          }
+        },
+        {
+          "title": "泛型化并提供不可变键的使用说明",
+          "verification": {
+            "type": "test",
+            "desc": "类型安全，键选择符合 equals/hashCode 契约"
+          }
+        }
+      ]
+    }
+  ]
+}

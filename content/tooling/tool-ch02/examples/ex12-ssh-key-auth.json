@@ -1,0 +1,8 @@
+{
+  "title": "SSH 公钥登录 challenge-response 模拟",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "SSH 公钥登录 challenge-response 模拟：\n  服务端发送 challenge = random-challenge-2026\n  客户端用私钥对 challenge 签名 => signature = 1946609336\n  服务端用公钥验证签名 => 通过 = False\n\n要点：\n  全程私钥不出客户端，服务端只持公钥（非对称：证明拥有私钥无需泄露它）\n  known_hosts 首次信任(TOFU) 防中间人；私钥文件权限必须 <= 600 否则被拒\n  验证结果：登录失败",
+  "code": "# 模拟 SSH 公钥登录 challenge-response（用确定性 crc32 代替真实非对称签名）\nimport zlib\n\ndef sign(priv_material, challenge):\n    return zlib.crc32((priv_material + \"|\" + challenge).encode()) & 0xFFFFFFFF\n\ndef verify(pub_material, challenge, signature):\n    return sign(pub_material, challenge) == signature\n\npriv = \"client-private-key-material\"\npub = \"client-public-key-material\"   # 服务端持有\nchallenge = \"random-challenge-2026\"\nsig = sign(priv, challenge)\nok = verify(pub, challenge, sig)\n\nprint(\"SSH 公钥登录 challenge-response 模拟：\")\nprint(f\"  服务端发送 challenge = {challenge}\")\nprint(f\"  客户端用私钥对 challenge 签名 => signature = {sig}\")\nprint(f\"  服务端用公钥验证签名 => 通过 = {ok}\")\nprint()\nprint(\"要点：\")\nprint(\"  全程私钥不出客户端，服务端只持公钥（非对称：证明拥有私钥无需泄露它）\")\nprint(\"  known_hosts 首次信任(TOFU) 防中间人；私钥文件权限必须 <= 600 否则被拒\")\nprint(\"  验证结果：\" + (\"登录成功\" if ok else \"登录失败\"))\n"
+}

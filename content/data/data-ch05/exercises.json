@@ -1,0 +1,98 @@
+{
+  "meta": {
+    "chapter": "data-ch05",
+    "subject": "data",
+    "count": 8
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "data-ch05 concept 01",
+      "title": "采集时遇到 403，最合理的处置是",
+      "options": [
+        "立即重试 3 次",
+        "换 User-Agent 伪装成浏览器继续抓",
+        "记录并跳过：403 属客户端被拒绝，重试通常无效，绕过访问控制也不合规",
+        "改成 POST 重试"
+      ],
+      "answer": "C",
+      "explanation": "403 表示服务端拒绝该请求。重试无意义；伪装 UA 规避限制属于绕过技术措施。正确做法是记录并跳过，必要时联系站点申请接口权限。"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "data-ch05 concept 02",
+      "title": "关于 requests 的超时设置，正确的是",
+      "options": [
+        "requests 默认有超时，不必设",
+        "timeout=10 表示总耗时不超过 10 秒",
+        "timeout=(3.05, 10) 中第二个数是读取超时，指两次收到数据之间的最大间隔",
+        "超时只对 POST 生效"
+      ],
+      "answer": "C",
+      "explanation": "requests 默认无超时（会永久挂住）；传单个数字等于连接与读取都用该值；读取超时衡量的是数据到达的间隔而非总时长；超时对所有方法生效。"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "data-ch05 concept 03",
+      "title": "服务器声明 charset=gb2312 但实际发送 UTF-8 字节，直接使用 resp.text 会怎样",
+      "answer_md": "按声明编码解码会得到乱码（换行与标点错位、可能出现替换字符），且**不可逆**——错误解码后的字符串 encode 回去拿不到原字节。\n\n正确做法：\n1. 先取 `raw = resp.content`（原始字节，永不丢失）；\n2. 用 `charset_normalizer.from_bytes(raw).best()` 检测，或直接 `resp.encoding = \"utf-8\"` 显式覆盖；\n3. 再 `raw.decode(enc, errors=\"replace\")`。"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "data-ch05 concept 02 / pitfalls 3",
+      "title": "下面的重试配置会带来生产风险，请指出并修正",
+      "code": "retry = Retry(total=3, status_forcelist=(400, 403, 500), allowed_methods=None)\nadapter = HTTPAdapter(max_retries=retry)\nsession.mount('https://', adapter)\nresp = session.post(url, json=payload, timeout=5)",
+      "answer_md": "两处风险：\n\n1. **`status_forcelist` 含 400/403**：这两个是客户端错误，重试无意义且 403 重试可能加重风控。应只留 `(429, 500, 502, 503, 504)`。\n2. **`allowed_methods=None` 让 POST 也被重试**：POST 非幂等，重试可能重复下单/重复写入。应设 `allowed_methods=(\"GET\", \"HEAD\", \"PUT\", \"DELETE\")`，或给 POST 加幂等键。\n\n另外建议加 `backoff_factor` 与 `respect_retry_after_header=True`。"
+    },
+    {
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "data-ch05 concept 01",
+      "title": "实现状态码分类函数，返回处置动作（PARSE/SKIP/FOLLOW/BACKOFF_RETRY/RETRY/DROP）",
+      "answer_md": "```python\ndef action(code: int) -> str:\n    if code == 200: return \"PARSE\"\n    if code == 304: return \"SKIP\"          # 内容未变\n    if 300 <= code < 400: return \"FOLLOW\"\n    if code == 429: return \"BACKOFF_RETRY\" # 尊重 Retry-After\n    if 400 <= code < 500: return \"DROP\"    # 我方错误，重试无用\n    if 500 <= code < 600: return \"RETRY\"   # 服务端问题，退避重试\n    return \"UNKNOWN\"\n```\n要点：分类依据是**状态码首位**；429 虽然也是 4xx，但语义是\"稍后再来\"，必须单独处理。"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "source": "leetcode",
+      "source_ref": "LeetCode 1 / 两数之和（哈希去重思想同构）",
+      "external_url": "https://leetcode.cn/problems/two-sum/",
+      "title": "URL 去重的哈希思想（关联练习）",
+      "answer_md": "采集去重与「两数之和」共享同一核心：**用哈希把 O(n²) 的两两比较降为 O(n) 的一次遍历**。\n\n采集场景的映射：\n- 目标元素 → 规范化后的 URL；\n- 哈希表 → 已访问集合（`set`）；\n- 判重条件 → URL 完全相等。\n\n实现要点是**先规范化再入集合**，否则 `?a=1&b=2` 与 `?b=2&a=1` 会被当成两条。\n\n（题目仅提供链接与元数据，不搬运题面。）"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "nowcoder",
+      "source": "nowcoder",
+      "source_ref": "牛客网 / 二叉树层序遍历（BFS 同构）",
+      "external_url": "https://www.nowcoder.com/practice/search?q=%E5%B1%82%E5%BA%8F%E9%81%8D%E5%8E%86",
+      "title": "抓取队列的 BFS 与层序遍历的同构性",
+      "answer_md": "抓取调度就是一个**图的 BFS**：起始 URL 是根，页面里的链接是有向边，`visited` 是层序遍历里的已访问标记。\n\n三点对应关系：\n1. 队列（`deque.popleft`）→ 保证按发现顺序访问；\n2. 入队时判重而不是出队时判重 → 避免同一 URL 被多次入队（队列膨胀）；\n3. 分层（depth）→ 决定优先级与最大深度限制。\n\n（题目仅提供链接与元数据，不搬运题面。）"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "data-ch05 concept 04",
+      "title": "robots.txt 中同时有 Disallow: /private/ 与 Allow: /private/ok 时，/private/ok/a.html 允许吗",
+      "answer_md": "**允许**。判定规则是**最长匹配优先**（RFC 9309）：`Allow: /private/ok` 的匹配长度（11）大于 `Disallow: /private/`（9），因此 Allow 生效。\n\n易错点：\n- 这是**前缀匹配**而非目录匹配：`Disallow: /tmp` 同时禁止 `/tmp` 与 `/tmpabc`；\n- 长度相同时 Allow 优先；\n- 没有任何匹配时默认**允许**；\n- `robots.txt` 只约束爬虫抓取，**不授予内容使用权**。"
+    }
+  ]
+}

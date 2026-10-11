@@ -1,0 +1,8 @@
+{
+  "title": "ex01-xml-mapper-parse",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "namespace: com.demo.UserMapper\nselect id=selectById params=['id']\ninsert id=insertUser params=['name', 'age']",
+  "code": "import xml.etree.ElementTree as ET\nimport re\n\nXML = \"\"\"<mapper namespace=\"com.demo.UserMapper\">\n  <select id=\"selectById\" resultType=\"User\">\n    SELECT id, user_name, age FROM t_user WHERE id = #{id}\n  </select>\n  <insert id=\"insertUser\" useGeneratedKeys=\"true\" keyProperty=\"id\">\n    INSERT INTO t_user(user_name, age) VALUES(#{name}, #{age})\n  </insert>\n</mapper>\"\"\"\n\ntree = ET.fromstring(XML)\nprint(\"namespace:\", tree.get(\"namespace\"))\nfor stmt in tree:\n    if not isinstance(stmt.tag, str):\n        continue\n    text = \" \".join(stmt.text.split())\n    params = re.findall(r\"#\\{([^}]+)\\}\", text)\n    print(stmt.tag, \"id=\" + stmt.get(\"id\"), \"params=\" + str(params))\n"
+}

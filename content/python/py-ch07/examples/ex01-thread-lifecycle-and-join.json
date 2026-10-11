@@ -1,0 +1,8 @@
+{
+  "title": "线程的创建、join 与确定性顺序基线",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "T1 sum = 499500\nT2 sum = 1499500\nT3 sum = 2499500\n线程数 = 0\n主线程仍在: True\njoin 后子线程全部结束: True",
+  "code": "import threading\n\n# 结论先行：并发不等于乱序 —— 没有同步原语时，输出顺序本身就不可依赖。\n# 本示例用 join 建立确定性顺序，作为后续「竞态演示」的对照基线。\n\nresults = []\nlock = threading.Lock()\n\n\ndef work(name, begin, end):\n    total = sum(range(begin, end))\n    with lock:\n        results.append((name, total))\n\n\nthreads = [\n    threading.Thread(target=work, args=(\"T1\", 0, 1000)),\n    threading.Thread(target=work, args=(\"T2\", 1000, 2000)),\n    threading.Thread(target=work, args=(\"T3\", 2000, 3000)),\n]\n\nfor t in threads:\n    t.start()\nfor t in threads:\n    t.join()   # join 才能保证「线程已结束」，否则主线程可能先打印\n\n# 按名字排序输出，消除「谁先抢到 lock」带来的顺序不确定\nfor name, total in sorted(results):\n    print(\"%s sum = %d\" % (name, total))\n\nprint(\"线程数 =\", threading.active_count() - 1)\nprint(\"主线程仍在:\", threading.current_thread() is threading.main_thread())\nprint(\"join 后子线程全部结束:\", all(not t.is_alive() for t in threads))\n"
+}

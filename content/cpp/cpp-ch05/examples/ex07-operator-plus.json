@@ -1,0 +1,8 @@
+{
+  "title": "运算符重载：用 += 实现 +",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "11,22",
+  "code": "#include <iostream>\n\nstruct Vec {\n    double x = 0, y = 0;\n    Vec& operator+=(const Vec& o) { x += o.x; y += o.y; return *this; }\n};\n\nVec operator+(Vec a, const Vec& b) {   // 非成员；传值获得副本，复用 +=\n    a += b;\n    return a;\n}\n\nint main() {\n    Vec p{1, 2}, q{10, 20};\n    Vec r = p + q;\n    std::cout << r.x << ',' << r.y;\n}"
+}

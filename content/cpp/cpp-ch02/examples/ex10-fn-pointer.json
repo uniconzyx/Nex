@@ -1,0 +1,8 @@
+{
+  "title": "函数指针",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "-7",
+  "code": "#include <iostream>\n\nint neg(int x) { return -x; }\n\nint main() {\n    int (*fp)(int) = neg;\n    std::cout << fp(7);\n}"
+}

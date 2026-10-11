@@ -1,0 +1,8 @@
+{
+  "title": "einsum：批量矩阵乘与轴约简",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "batch shape = (2, 3, 3)\nmatches loop = True\nsum last axis matches = True",
+  "code": "import numpy as np\nX = np.arange(24, dtype=np.float64).reshape(2, 3, 4)\nY = np.arange(24, dtype=np.float64).reshape(2, 4, 3)\nZ = np.einsum('bij,bjk->bik', X, Y)\nprint(\"batch shape =\", Z.shape)\nref = np.stack([X[k] @ Y[k] for k in range(2)])\nprint(\"matches loop =\", np.allclose(Z, ref))\nS = np.einsum('bij->bi', X)\nprint(\"sum last axis matches =\", np.allclose(S, X.sum(axis=2)))"
+}

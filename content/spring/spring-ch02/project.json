@@ -1,0 +1,34 @@
+{
+  "meta": {
+    "chapter": "spring-ch02",
+    "category": "basic"
+  },
+  "items": [
+    {
+      "title": "迷你生命周期容器（纯 JDK 实现）",
+      "requirement_md": "不依赖任何框架，用纯 JDK 实现一个最小可用的生命周期容器，覆盖本章核心知识点：\n\n1. **注册与定义**：维护 `beanName -> BeanDefinition`（类名 + 作用域 + 依赖列表）的注册表。\n2. **实例化与填充**：反射 `newInstance` 实例化，再反射填充字段依赖（字段名即依赖 beanName）。\n3. **Aware 回调**：bean 若实现自定义 `BeanNameAware`/`BeanFactoryAware`，在填充后、初始化前回调。\n4. **BeanPostProcessor**：提供 BPP 接口，在初始化前后依次调用 `postBefore`/`postAfter`（AOP 可用其包装）。\n5. **初始化与销毁**：支持 `@PostConstruct`、自定义 `InitializingBean` 接口、`init-method` 三种初始化（固定顺序）；销毁支持 `@PreDestroy`/`DisposableBean`/`destroy-method`。\n6. **作用域**：实现 singleton（缓存同一实例）与 prototype（每次新建、不销毁）。\n7. **循环依赖**：用三级缓存（singletonObjects / earlySingletonObjects / singletonFactories）解决单例 Setter 注入的循环依赖，并验证构造器/prototype 循环依赖会失败。\n\n验收：编写 `Main` 演示——① 完整生命周期各阶段按序打印；② A↔B 循环依赖被正确装配且互为同一引用；③ singleton 与 prototype 的获取差异；④ `@Configuration` 风格（用子类覆盖 @Bean 方法）保证类内互调单例。",
+      "tasks": [
+        {
+          "title": "定义注解/接口与 BeanDefinition 注册表",
+          "verification": { "type": "test", "desc": "能注册 bean 定义并按下名/类型取回定义" }
+        },
+        {
+          "title": "实现反射实例化与字段依赖填充",
+          "verification": { "type": "test", "desc": "填充后依赖字段非 null，按名称命中" }
+        },
+        {
+          "title": "实现 Aware 回调与 BeanPostProcessor 前后置",
+          "verification": { "type": "test", "desc": "回调顺序为 Aware -> BPP before -> 初始化 -> BPP after" }
+        },
+        {
+          "title": "实现初始化/销毁三方式及 singleton/prototype 作用域",
+          "verification": { "type": "test", "desc": "初始化顺序 @PostConstruct->afterPropertiesSet->init-method；singleton 同实例、prototype 不同实例" }
+        },
+        {
+          "title": "实现三级缓存解决单例循环依赖 + CGLIB 风格单例代理",
+          "verification": { "type": "manual", "desc": "Main 演示 A.b 与 B.a 互为同一引用；构造器/prototype 循环依赖报异常；@Configuration 风格子类覆盖 @Bean 保证类内互调单例" }
+        }
+      ]
+    }
+  ]
+}

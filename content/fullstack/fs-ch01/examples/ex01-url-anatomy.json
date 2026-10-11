@@ -1,0 +1,8 @@
+{
+  "title": "URL 的解剖：协议、主机、端口、路径、查询与片段",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "原始 URL : https://api.example.com:8443/v1/users?page=2&size=10#bio\nprotocol : https:\nhost     : api.example.com:8443\nhostname : api.example.com\nport     : 8443\npathname : /v1/users\nsearch   : ?page=2&size=10\nhash     : #bio\norigin   : https://api.example.com:8443\nquery 项 : page=2, size=10\n\n相对解析 : /v1/orders?from=web  →  https://api.example.com/v1/orders?from=web\n默认端口 : https 省略 443（下面两者 origin 相同）\n  https://a.com  vs  https://a.com",
+  "code": "const raw = 'https://api.example.com:8443/v1/users?page=2&size=10#bio';\nconst u = new URL(raw);\nconsole.log('原始 URL : ' + raw);\nconsole.log('protocol : ' + u.protocol);\nconsole.log('host     : ' + u.host);\nconsole.log('hostname : ' + u.hostname);\nconsole.log('port     : ' + u.port);\nconsole.log('pathname : ' + u.pathname);\nconsole.log('search   : ' + u.search);\nconsole.log('hash     : ' + u.hash);\nconsole.log('origin   : ' + u.origin);\nconsole.log('query 项 : ' + [...u.searchParams].map(([k, v]) => k + '=' + v).join(', '));\nconsole.log('');\n// 相对 URL 基于 base 解析（浏览器里 fetch('/v1/x') 就是这样变成绝对地址的）\nconst rel = new URL('/v1/orders?from=web', 'https://api.example.com');\nconsole.log('相对解析 : /v1/orders?from=web  →  ' + rel.href);\nconsole.log('默认端口 : https 省略 443（下面两者 origin 相同）');\nconsole.log('  ' + new URL('https://a.com/x').origin + '  vs  ' + new URL('https://a.com:443/x').origin);"
+}

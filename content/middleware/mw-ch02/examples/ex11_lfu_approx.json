@@ -1,0 +1,9 @@
+{
+  "title": "近似 LFU 淘汰：按访问频次淘汰",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "近似 LFU 淘汰 (allkeys-lfu):\n  访问频率 a=6 b=1 c=1\n    淘汰低频 c\n    淘汰低频 b\n  最终 key: ['a', 'd', 'e']\n  LFU 用对数计数器+衰减, 近似统计访问频次, 防缓存污染优于 LRU",
+  "code": "import random\nclass LFUApprox:\n    def __init__(self, maxkeys):\n        self.data = {}\n        self.freq = {}\n        self.maxkeys = maxkeys\n    def put(self, k):\n        if k in self.data:\n            self.freq[k] += 1\n            return\n        if len(self.data) >= self.maxkeys:\n            sample = random.sample(list(self.data.keys()), min(5, len(self.data)))\n            victim = min(sample, key=lambda x: self.freq[x])\n            del self.data[victim]; del self.freq[victim]\n            print(f\"    淘汰低频 {victim}\")\n        self.data[k] = 1\n        self.freq[k] = 1\n\nrandom.seed(2)\nc = LFUApprox(maxkeys=3)\nfor k in [\"a\", \"b\", \"c\"]:\n    c.put(k)\nfor _ in range(5):\n    c.freq[\"a\"] += 1  # a 高频\nprint(\"近似 LFU 淘汰 (allkeys-lfu):\")\nprint(\"  访问频率 a=6 b=1 c=1\")\nc.put(\"d\")\nc.put(\"e\")\nprint(\"  最终 key:\", sorted(c.data.keys()))\nprint(\"  LFU 用对数计数器+衰减, 近似统计访问频次, 防缓存污染优于 LRU\")\n",
+  "_verified": true
+}

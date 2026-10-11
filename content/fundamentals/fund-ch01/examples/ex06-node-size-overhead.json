@@ -1,0 +1,8 @@
+{
+  "title": "链表节点的真实内存占用（结构体对齐与指针开销）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "sizeof(int)          = 4 字节\nsizeof(struct Node*) = 8 字节\nsizeof(struct Node)  = 16 字节  <- 数据4B + 指针8B + 对齐填充4B\n\n存 1000 个 int 的数组： 4000 字节\n存 1000 个 int 的链表： 16000 字节（仅节点本身）\n节点数组倍数 ≈ 4.0x；再叠加 malloc 元数据(每节点约16~32B)，实际可达 5~10x\n\n结论：内存密度低 → cache line 装不下几个节点 → 遍历更慢",
+  "code": "#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct Node { int data; struct Node *next; } Node;\n\nint main(void) {\n    printf(\"sizeof(int)          = %zu 字节\\n\", sizeof(int));\n    printf(\"sizeof(struct Node*) = %zu 字节\\n\", sizeof(Node *));\n    printf(\"sizeof(struct Node)  = %zu 字节  <- 数据4B + 指针8B + 对齐填充4B\\n\",\n           sizeof(Node));\n\n    int n = 1000;\n    printf(\"\\n存 %d 个 int 的数组： %zu 字节\\n\", n, (size_t)n * sizeof(int));\n    printf(\"存 %d 个 int 的链表： %zu 字节（仅节点本身）\\n\",\n           n, (size_t)n * sizeof(Node));\n    printf(\"节点数组倍数 ≈ %.1fx；再叠加 malloc 元数据(每节点约16~32B)，实际可达 5~10x\\n\",\n           (double)(n * sizeof(Node)) / (n * sizeof(int)));\n    printf(\"\\n结论：内存密度低 → cache line 装不下几个节点 → 遍历更慢\\n\");\n    return 0;\n}"
+}

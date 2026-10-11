@@ -1,0 +1,276 @@
+{
+  "schema_version": 1,
+  "subject": "data",
+  "title": "CppMind · 数据分析课程体系（NumPy / Pandas / 采集 / 建模）",
+  "note": "阶段7 技术栈扩展大纲。每章须齐备 7 类内容（见 _template 规范），由 server/scripts/validate_content.py 校验。resources 仅存元数据与链接，不存第三方题面/正文，符合合规红线。",
+  "groups": {
+    "D1": "NumPy",
+    "D2": "Pandas",
+    "D3": "采集与建模"
+  },
+  "chapters": [
+    {
+      "id": "data-ch01",
+      "order": 1,
+      "group": "D1",
+      "title": "NumPy 基础：ndarray 与向量化",
+      "summary": "为什么需要 ndarray（同构连续内存 + 向量化 vs Python list 的对象开销）；dtype 与内存布局（C/F order）；创建与形状变换（reshape/ravel/transpose/expand_dims）；索引与切片、视图 vs 拷贝（base 属性判断）；广播机制三条规则；向量化替代显式循环的性能实证；ufunc 与聚合（axis 语义）。",
+      "prerequisites": [],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "scikit-learn/scikit-learn",
+          "jakevdp/PythonDataScienceHandbook",
+          "pandas-dev/pandas",
+          "microsoft/Data-Science-For-Beginners"
+        ],
+        "github_stars": [
+          67487,
+          50114,
+          49928,
+          37525
+        ],
+        "github_notes": [
+          "经典机器学习库官方仓库：算法实现与最佳实践",
+          "《Python 数据科学手册》全书 Jupyter Notebook（NumPy/Pandas/Matplotlib）",
+          "Pandas 官方仓库：API 与内部机制权威来源",
+          "微软官方 10 周数据科学课程"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《利用 Python 进行数据分析》第4章",
+          "NumPy 官方 Quickstart"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      },
+      "soft_prerequisites": [
+        {
+          "id": "py-ch01",
+          "note": "Python 语法基础（若已掌握可跳过）"
+        }
+      ]
+    },
+    {
+      "id": "data-ch02",
+      "order": 2,
+      "group": "D1",
+      "title": "NumPy 进阶：广播、随机与性能",
+      "summary": "广播规则的逐步推导与常见踩坑（形状对齐、维度扩展）；花式索引与布尔索引、np.where/np.select；结构化数组与记录数组；新式随机数 API（Generator/BitGenerator）；stride 与内存视图、as_strided 的威力与危险；向量化技巧与内存占用权衡；numa/缓存友好的遍历顺序。",
+      "prerequisites": [
+        "data-ch01"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "scikit-learn/scikit-learn",
+          "jakevdp/PythonDataScienceHandbook",
+          "pandas-dev/pandas",
+          "microsoft/Data-Science-For-Beginners"
+        ],
+        "github_stars": [
+          67487,
+          50114,
+          49928,
+          37525
+        ],
+        "github_notes": [
+          "经典机器学习库官方仓库：算法实现与最佳实践",
+          "《Python 数据科学手册》全书 Jupyter Notebook（NumPy/Pandas/Matplotlib）",
+          "Pandas 官方仓库：API 与内部机制权威来源",
+          "微软官方 10 周数据科学课程"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《利用 Python 进行数据分析》第4章",
+          "NumPy 官方进阶文档"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "data-ch03",
+      "order": 3,
+      "group": "D2",
+      "title": "Pandas 基础：Series 与 DataFrame",
+      "summary": "Series/DataFrame 的索引语义与自动对齐（这是与 NumPy 最大的差异）；读写 CSV/Excel（编码、分隔符、chunksize 分块）；iloc（位置）vs loc（标签）vs 直接下标的行为差异；缺失值处理（NaN/NaT/NA 与 Nullable dtype）、dropna/fillna/interpolate；dtype 转换与内存占用优化（category/降位）。",
+      "prerequisites": [
+        "data-ch01"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "scikit-learn/scikit-learn",
+          "jakevdp/PythonDataScienceHandbook",
+          "pandas-dev/pandas",
+          "microsoft/Data-Science-For-Beginners"
+        ],
+        "github_stars": [
+          67487,
+          50114,
+          49928,
+          37525
+        ],
+        "github_notes": [
+          "经典机器学习库官方仓库：算法实现与最佳实践",
+          "《Python 数据科学手册》全书 Jupyter Notebook（NumPy/Pandas/Matplotlib）",
+          "Pandas 官方仓库：API 与内部机制权威来源",
+          "微软官方 10 周数据科学课程"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《利用 Python 进行数据分析》第5章",
+          "Pandas 官方 10 minutes"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "data-ch04",
+      "order": 4,
+      "group": "D2",
+      "title": "Pandas 进阶：分组聚合、合并与时间序列",
+      "summary": "groupby 的 split-apply-combine 心智模型；agg/transform/apply 的差异与选择；多表合并（merge/join/concat）与 SQL JOIN 的对照（inner/left/right/outer、on 与索引）；pivot_table 与 crosstab；时间序列（DatetimeIndex、resample 重采样、rolling 滑动窗口）；性能优化（向量化、query/eval、避免 apply）。",
+      "prerequisites": [
+        "data-ch03"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "scikit-learn/scikit-learn",
+          "jakevdp/PythonDataScienceHandbook",
+          "pandas-dev/pandas",
+          "microsoft/Data-Science-For-Beginners"
+        ],
+        "github_stars": [
+          67487,
+          50114,
+          49928,
+          37525
+        ],
+        "github_notes": [
+          "经典机器学习库官方仓库：算法实现与最佳实践",
+          "《Python 数据科学手册》全书 Jupyter Notebook（NumPy/Pandas/Matplotlib）",
+          "Pandas 官方仓库：API 与内部机制权威来源",
+          "微软官方 10 周数据科学课程"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《利用 Python 进行数据分析》第8、10、11章"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "data-ch05",
+      "order": 5,
+      "group": "D3",
+      "title": "数据采集：requests 与解析（含合规边界）",
+      "summary": "HTTP 在采集中的落地（请求方法、状态码、重定向、Session 与 Cookie）；requests 的参数/头/超时/重试/会话复用；解析方案对比（lxml+XPath 的性能、BeautifulSoup 的容错、正则的边界）；动态渲染页面的应对（优先找接口，其次才考虑浏览器内核）；编码与乱码排查；**合规红线：robots.txt、频率控制、版权与个人信息边界、不绕过技术措施**。",
+      "prerequisites": [],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "scikit-learn/scikit-learn",
+          "jakevdp/PythonDataScienceHandbook",
+          "pandas-dev/pandas",
+          "microsoft/Data-Science-For-Beginners"
+        ],
+        "github_stars": [
+          67487,
+          50114,
+          49928,
+          37525
+        ],
+        "github_notes": [
+          "经典机器学习库官方仓库：算法实现与最佳实践",
+          "《Python 数据科学手册》全书 Jupyter Notebook（NumPy/Pandas/Matplotlib）",
+          "Pandas 官方仓库：API 与内部机制权威来源",
+          "微软官方 10 周数据科学课程"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Python 网络爬虫实战》",
+          "requests 官方文档"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      },
+      "soft_prerequisites": [
+        {
+          "id": "py-ch01",
+          "note": "Python 语法基础（若已掌握可跳过）"
+        }
+      ]
+    },
+    {
+      "id": "data-ch06",
+      "order": 6,
+      "group": "D3",
+      "title": "数据分析与数学建模实战",
+      "summary": "数据清洗流程与质量检查清单；特征工程（缺失填充、异常检测、标准化/归一化、类别编码）；探索性分析（EDA）与可视化选型（分布/关系/时间/构成）；相关性分析与回归/分类的基本流程与评价指标；数学建模方法论（问题抽象、假设与符号、模型建立与求解、灵敏度分析、论文结构）；一个端到端案例。",
+      "prerequisites": [
+        "data-ch04",
+        "data-ch05"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "scikit-learn/scikit-learn",
+          "jakevdp/PythonDataScienceHandbook",
+          "pandas-dev/pandas",
+          "microsoft/Data-Science-For-Beginners"
+        ],
+        "github_stars": [
+          67487,
+          50114,
+          49928,
+          37525
+        ],
+        "github_notes": [
+          "经典机器学习库官方仓库：算法实现与最佳实践",
+          "《Python 数据科学手册》全书 Jupyter Notebook（NumPy/Pandas/Matplotlib）",
+          "Pandas 官方仓库：API 与内部机制权威来源",
+          "微软官方 10 周数据科学课程"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《利用 Python 进行数据分析》第7、9章",
+          "《数学建模算法与应用》"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    }
+  ],
+  "github_resources": [
+    {
+      "repo": "scikit-learn/scikit-learn",
+      "stars": 67487,
+      "url": "https://github.com/scikit-learn/scikit-learn",
+      "note": "经典机器学习库官方仓库：算法实现与最佳实践"
+    },
+    {
+      "repo": "jakevdp/PythonDataScienceHandbook",
+      "stars": 50114,
+      "url": "https://github.com/jakevdp/PythonDataScienceHandbook",
+      "note": "《Python 数据科学手册》全书 Jupyter Notebook（NumPy/Pandas/Matplotlib）"
+    },
+    {
+      "repo": "pandas-dev/pandas",
+      "stars": 49928,
+      "url": "https://github.com/pandas-dev/pandas",
+      "note": "Pandas 官方仓库：API 与内部机制权威来源"
+    },
+    {
+      "repo": "microsoft/Data-Science-For-Beginners",
+      "stars": 37525,
+      "url": "https://github.com/microsoft/Data-Science-For-Beginners",
+      "note": "微软官方 10 周数据科学课程"
+    }
+  ],
+  "resources_fetched_at": "2026-09-21"
+}

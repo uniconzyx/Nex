@@ -1,0 +1,15 @@
+{
+  "meta": { "chapter": "clang-u03", "category": "basic" },
+  "items": [
+    {
+      "title": "实现一个带内存布局断言的几何体库（Point/Rect）",
+      "requirement_md": "用结构体封装 2D 几何对象，强化对内存布局、对齐与拷贝语义的掌握。要求：\n\n1. 定义 `struct Point { double x, y; };` 与 `struct Rect { struct Point lo, hi; };`，并用 `_Static_assert(offsetof(Rect, hi) == sizeof(Point), \"布局假设\")` 固化布局。\n2. 提供值语义函数：`Point make_point(double, double);`、`Rect make_rect(Point, Point);`、`double rect_area(const Rect *);`，注意传参/返回用值还是指针的取舍（小对象值返回，只读访问用 `const *`）。\n3. 提供 `Rect rect_translate(Rect, double dx, double dy);` 返回平移后的新 Rect（值返回，体现拷贝语义）。\n4. 写一个最小单测 `main`，构造若干矩形并打印面积，验证平移正确性。\n5. 用 `gcc -std=c11 -Wall -Wextra` 编译零警告；若后续要落盘（对接 u04），结构体布局就是二进制契约。",
+      "tasks": [
+        { "title": "定义结构体与布局断言", "verification": { "type": "test", "desc": "_Static_assert 通过；offsetof 验证 Rect.hi 紧随 Point 之后" } },
+        { "title": "实现构造与面积函数", "verification": { "type": "test", "desc": "已知矩形面积等于预期；越界/退化矩形不崩溃" } },
+        { "title": "实现值返回平移", "verification": { "type": "test", "desc": "平移后原 Rect 不变，返回的新 Rect 坐标正确" } },
+        { "title": "编译零警告验证", "verification": { "type": "manual", "desc": "gcc -std=c11 -Wall -Wextra 无任何 warning" } }
+      ]
+    }
+  ]
+}

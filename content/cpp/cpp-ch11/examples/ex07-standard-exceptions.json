@@ -1,0 +1,8 @@
+{
+  "title": "标准异常体系：std::runtime_error 与 what()",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "division by zero",
+  "code": "#include <iostream>\n#include <stdexcept>\n#include <string>\n\nint safe_div(int a, int b) {\n    if (b == 0) throw std::runtime_error(\"division by zero\");\n    return a / b;\n}\n\nint main() {\n    try {\n        safe_div(1, 0);\n    } catch (const std::exception& e) {\n        std::cout << e.what() << '\\n';\n    }\n}"
+}

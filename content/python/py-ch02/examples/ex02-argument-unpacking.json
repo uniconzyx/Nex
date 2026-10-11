@@ -1,0 +1,8 @@
+{
+  "title": "参数解包：*序列 与 **字典 传入调用",
+  "code_lang": "python",
+  "code_std": "python3.11",
+  "stdin": "",
+  "expected_output": "6\n60\n1 2 3",
+  "code": "def add(a, b, c):\n    return a + b + c\n\nnums = [1, 2, 3]\nprint(add(*nums))\n\nd = {\"a\": 10, \"b\": 20, \"c\": 30}\nprint(add(**d))\n\ndef f(x, y, z):\n    print(x, y, z)\nf(*[1], *[2, 3])"
+}

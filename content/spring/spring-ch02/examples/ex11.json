@@ -1,0 +1,8 @@
+{
+  "title": "request 作用域模拟：同一请求内共享、跨请求新建",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "request1 same: true\nrequest2 != request1: true\ntotal instances: 2",
+  "code": "import java.util.*;\nimport java.util.function.*;\n\npublic class Main {\n    static class RequestScope {\n        Map<String, Object> current = new HashMap<>();\n        Object get(String name, Supplier<Object> f) { return current.computeIfAbsent(name, k -> f.get()); }\n        void endRequest() { current.clear(); }\n    }\n    static class Bean { static int n = 0; int id = ++n; }\n    public static void main(String[] args) {\n        RequestScope rs = new RequestScope();\n        Bean r1a = (Bean) rs.get(\"b\", Bean::new);\n        Bean r1b = (Bean) rs.get(\"b\", Bean::new);\n        System.out.println(\"request1 same: \" + (r1a == r1b));\n        rs.endRequest();\n        Bean r2 = (Bean) rs.get(\"b\", Bean::new);\n        System.out.println(\"request2 != request1: \" + (r2 != r1a));\n        System.out.println(\"total instances: \" + Bean.n);\n    }\n}\n"
+}

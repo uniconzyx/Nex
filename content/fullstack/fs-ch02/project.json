@@ -1,0 +1,15 @@
+{
+  "meta": { "chapter": "fs-ch02", "category": "basic" },
+  "items": [
+    {
+      "title": "语义化 + 响应式个人主页（含 BFC 与盒模型实践）",
+      "requirement_md": "用纯 HTML + CSS（不引框架）实现一个个人主页，要求：\n1. 结构用语义化地标（`header/nav/main/article/aside/footer`），并在 DevTools 无障碍面板核对 AXTree 的 role/name。\n2. 全局 `* { box-sizing: border-box; }`；给出一处使用 `content-box` 的对照，说明尺寸差异。\n3. 用 `display:flow-root` 或 `overflow:hidden` 解决一处浮动塌陷；并演示 BFC 阻断外边距折叠。\n4. 用 Flexbox 实现导航居中、用 Grid（`grid-template-areas`）实现「页头/侧栏/主区/页脚」圣杯布局。\n5. 用媒体查询在窄屏（≤600px）把双栏改为单栏，加 `viewport` 标签。\n6. 在代码注释里标注：哪些样式改动会触发 Reflow，哪些仅触发 Composite（仅供自查，不影响评分）。",
+      "tasks": [
+        { "title": "搭建语义化骨架", "verification": { "type": "manual", "desc": "DevTools Accessibility 面板可见 banner/navigation/main 等地标 role" } },
+        { "title": "盒模型与 BFC 实践", "verification": { "type": "manual", "desc": "对照 content-box 与 border-box 占位差异；浮动父容器高度正常" } },
+        { "title": "Flex + Grid 布局", "verification": { "type": "manual", "desc": "导航居中、圣杯布局在桌面端正确；窄屏单栏" } },
+        { "title": "响应式与 viewport", "verification": { "type": "test", "desc": "≤600px 断点下布局不出现横向滚动条" } }
+      ]
+    }
+  ]
+}

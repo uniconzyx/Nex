@@ -1,0 +1,9 @@
+{
+  "title": "最左前缀失效：只过滤非最左列 → 全表扫描 type=ALL",
+  "code_lang": "sql",
+  "code_std": "mysql8",
+  "stdin": "",
+  "expected_output": "Query OK, 0 rows affected\nQuery OK, 6 rows affected\nQuery OK, 0 rows affected\nid|select_type|table|type|possible_keys|key|key_len|ref|rows|Extra\n1|SIMPLE|emp|ALL|NULL|NULL|NULL|NULL|6|Using where",
+  "code": "CREATE TABLE emp (emp_id INT PRIMARY KEY, name VARCHAR(20), dept_id INT, salary DECIMAL(10,2));\nINSERT INTO emp VALUES (1,'Alice',10,6000.00),(2,'Bob',20,8000.00),(3,'Carol',10,4500.00),(4,'Dave',20,9000.00),(5,'Eve',30,5000.00),(6,'Frank',20,7000.00);\nCREATE INDEX idx_dept_sal ON emp(dept_id, salary);\nEXPLAIN SELECT * FROM emp WHERE salary > 8000.00;",
+  "_verified": false
+}

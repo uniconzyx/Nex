@@ -1,0 +1,266 @@
+{
+  "meta": {
+    "chapter": "mw-ch05",
+    "note": "Kafka 架构练习：基础题考察 commit log / 分区器 / ISR 与 acks / HW 语义 / rebalance / 零拷贝；算法题来自刷题平台或自命题（平台题仅存元数据+链接，不搬运题面）。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "Kafka 的「消息消费」与传统队列的本质差异",
+      "content_md": "关于 Kafka 的消息删除与消费进度，下列说法正确的是？\n\nA. 消费者 ack 一条消息后，Kafka 立刻删除它\nB. 消息的删除只由 retention（时间/大小）或 compaction 决定，与消费进度无关\nC. 一个分区同时只能有一个消费者组消费\nD. 消费者读取位置由 broker 统一维护，客户端无法指定",
+      "options": [
+        {
+          "key": "A",
+          "text": "ack 即删除"
+        },
+        {
+          "key": "B",
+          "text": "只由 retention/compaction 决定"
+        },
+        {
+          "key": "C",
+          "text": "分区同时只能一个组消费"
+        },
+        {
+          "key": "D",
+          "text": "位置由 broker 维护"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "Kafka 是「提交日志（commit log）」而非「队列」：消息写入后按 append-only 顺序持久化，只有当 retention.ms / retention.bytes 到期或触发 log compaction 时才被清理，与消费者是否读过无关。这正是「可重放」的根基——重置 offset 就能重读历史。C 错在多个消费者组各自维护独立进度、互不干扰；D 错在 offset 由客户端提交（broker 只存储 `__consumer_offsets` 这一特殊 topic 里的提交记录）。",
+      "tags": [
+        "kafka",
+        "commit-log",
+        "retention"
+      ],
+      "source": "self",
+      "source_ref": "mw-ch05 concept/01 提交日志与分区"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "acks 取值与耐久性边界",
+      "content_md": "某 topic 配置 `min.insync.replicas=2`、副本因子 3。关于 `acks` 的耐久性，下列说法正确的是？\n\nA. `acks=1` 表示 leader 与所有 follower 都落盘后才应答\nB. `acks=all` 等价于 `acks=-1`，表示 ISR 中所有副本都写入后才应答\nC. `acks=0` 表示 leader 落盘后即应答，不等待 follower\nD. `acks=all` 之后消息绝不丢失",
+      "options": [
+        {
+          "key": "A",
+          "text": "acks=1 等所有 follower"
+        },
+        {
+          "key": "B",
+          "text": "acks=all == acks=-1，等 ISR 全部"
+        },
+        {
+          "key": "C",
+          "text": "acks=0 是 leader 落盘即应答"
+        },
+        {
+          "key": "D",
+          "text": "acks=all 绝不丢"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "acks=0 是「发出即认为成功」，连 leader 是否收到都不保证；acks=1 只等 leader 本地落盘；acks=all（等价 acks=-1）等 **ISR 中全部副本**写入。注意 acks=all 的保证以「ISR 至少还有 min.insync.replicas 个副本」为前提：若 ISR 收缩到 1 个副本（其余被踢出同步），acks=all 会退化为 acks=1 的效果，所以 `min.insync.replicas` 必须与 acks=all 配合使用；且 unclean.leader.election 开启时仍可能因选到落后副本而丢数据。",
+      "tags": [
+        "kafka",
+        "acks",
+        "isr",
+        "durability"
+      ],
+      "source": "self",
+      "source_ref": "mw-ch05 concept/02 副本、ISR 与 Leader 选举"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "HW 与消费者可见范围",
+      "content_md": "某分区副本 LEO 分别为：leader=12、follower-A=12、follower-B=9，ISR = {leader, follower-A}（follower-B 已被踢出）。问：当前该分区的 HW 是多少？消费者最多能读到哪个 offset？\n\n请写出两个数字与依据。",
+      "options": [],
+      "answer": {
+        "correct": [],
+        "reference_code": "",
+        "output": "HW = 12；消费者可读 offset 0..11（即 < HW）。"
+      },
+      "explanation": "HW（High Watermark）= ISR 中所有副本都已复制到的最大 offset，即 min(ISR 各副本 LEO) = min(12, 12) = 12。被踢出 ISR 的 follower-B（LEO=9）不参与 HW 计算——这正是 ISR 存在的意义：只让「同步中的副本」决定可见性，避免消费者读到随时可能因 leader 切换而被截断的数据。消费者只能读 [LSO, HW)，所以可读 0..11，offset 12 以上的消息即便 leader 已落盘也不可见。",
+      "tags": [
+        "kafka",
+        "high-watermark",
+        "isr"
+      ],
+      "source": "self",
+      "source_ref": "mw-ch05 concept/02 副本、ISR 与 Leader 选举"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "分区数与顺序性、并行度的三方取舍",
+      "content_md": "一个 topic 有 3 个分区，消费者组起了 6 个消费者实例。下列说法正确的是？\n\nA. 6 个实例都能分到分区，吞吐提升 2 倍\nB. 只有 3 个实例能分到分区，其余 3 个空闲；单分区内消息有序、跨分区不保证\nC. 增加消费者实例数一定能提升吞吐\nD. 分区数可以随意减少以提升单分区吞吐",
+      "options": [
+        {
+          "key": "A",
+          "text": "6 个都分到分区"
+        },
+        {
+          "key": "B",
+          "text": "3 个干活 3 个空闲，分区内有序"
+        },
+        {
+          "key": "C",
+          "text": "加消费者必然提吞吐"
+        },
+        {
+          "key": "D",
+          "text": "分区可随意减少"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "一个分区在同一时刻只能被同组内的一个消费者消费，所以并行度上限 = min(分区数, 消费者数) = min(3, 6) = 3，多出的 3 个实例处于空闲（仅作为故障时的备位）。Kafka 只保证**单分区内**的顺序，跨分区无序；要保序必须让相关消息带同一个 key 落到同一分区。分区数只能增加不能减少（减少会破坏 key→分区 的稳定映射与已有数据归属），且增加分区同样会改变映射，导致同一 key 的历史与新消息分处不同分区。",
+      "tags": [
+        "kafka",
+        "partition",
+        "consumer-group",
+        "ordering"
+      ],
+      "source": "self",
+      "source_ref": "mw-ch05 concept/01 提交日志与分区；concept/04 消费者组"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "修复「重复消费」的提交时机错误",
+      "content_md": "以下伪代码在「处理后手动提交」的语义下做到了 at-least-once，但它有一个更严重的问题——写出问题所在并给出正确顺序。\n\n```python\nfor msg in consumer:\n    consumer.commit()          # ① 先提交\n    handle(msg)                # ② 再处理\n```",
+      "options": [],
+      "answer": {
+        "correct": [],
+        "reference_code": "for msg in consumer:\n    handle(msg)                # ① 先处理\n    consumer.commit()          # ② 再提交（成功后才推进 offset）\n",
+        "output": ""
+      },
+      "explanation": "先提交再处理属于 **at-most-once**（最多一次）：一旦 ② 之前或 ② 中途崩溃，offset 已经推进，消息永不重投——**丢消息**。正确顺序是先处理、成功后提交，得到 at-least-once（可能重复）。若要求 exactly-once，需配合幂等生产者（PID + sequence）或把 offset 与业务结果放在同一个事务里提交（Kafka 事务 / `sendOffsetsToTransaction`），或让下游按业务主键做幂等去重。",
+      "tags": [
+        "kafka",
+        "offset-commit",
+        "at-least-once",
+        "idempotent"
+      ],
+      "source": "self",
+      "source_ref": "mw-ch05 concept/04 消费者组与 offset"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "hard",
+      "title": "零拷贝的成立前提",
+      "content_md": "关于 Kafka 的零拷贝（`sendfile` / `FileChannel.transferTo`），下列说法正确的是？\n\nA. 零拷贝意味着数据完全不经内核，用户态直接收包\nB. 传统 read+write 经过 4 次上下文切换与 4 次拷贝，零拷贝减少为 2 次上下文切换、3 次拷贝（无 CPU 参与的 DMA 拷贝 2 次）\nC. 开启 SSL/TLS 加密后零拷贝依然完全生效\nD. 零拷贝要求消息必须先反序列化成对象",
+      "options": [
+        {
+          "key": "A",
+          "text": "数据完全不经内核"
+        },
+        {
+          "key": "B",
+          "text": "2 次切换、3 次拷贝"
+        },
+        {
+          "key": "C",
+          "text": "SSL 下完全生效"
+        },
+        {
+          "key": "D",
+          "text": "必须先反序列化"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "传统路径：read 把数据从磁盘 DMA 到内核页缓存、再从内核拷贝到用户缓冲（4 次切换 / 4 次拷贝）；sendfile 让数据「磁盘→页缓存→socket 缓冲→网卡」，内核页缓存到 socket 缓冲仍有 1 次 CPU 拷贝，共 2 次上下文切换、3 次拷贝（其中 2 次为 DMA）。前提是**数据不需要在用户态加工**——所以一旦开启 SSL/TLS（需在用户态加密）或做 broker 端格式转换/压缩变更，零拷贝就失效并退化为普通拷贝路径。",
+      "tags": [
+        "kafka",
+        "zero-copy",
+        "sendfile",
+        "page-cache"
+      ],
+      "source": "self",
+      "source_ref": "mw-ch05 concept/03 存储、日志段与零拷贝"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "medium",
+      "title": "设计循环队列（对应 Kafka 日志段的环形缓冲思想）",
+      "content_md": "Kafka 的日志写入与页缓存管理大量依赖「定长环形缓冲」的思想：容量固定、读写指针循环推进、通过 `(head + n) mod capacity` 定位。LeetCode 622「设计循环队列」正是这一数据结构的经典实现题。\n\n**本题仅提供平台链接与元数据，不在本 App 内搬运题面正文。** 请前往平台作答。",
+      "options": [],
+      "answer": {
+        "correct": [],
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "考点：用固定数组 + head/count（或 head/tail 加一个空位哨兵）实现 O(1) 的 enQueue / deQueue / Front / Rear / isEmpty / isFull。与 Kafka 的关联点：segment 文件写入位置、`log.index` 的稀疏索引槽位计算，本质都是「容量固定的环形/线性缓冲 + 取模定位」；理解哨兵空位法能顺带解释为什么日志段的 baseOffset 总是段大小的整数倍。",
+      "tags": [
+        "kafka",
+        "ring-buffer",
+        "design"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 622. Design Circular Queue",
+      "external_url": "https://leetcode.cn/problems/design-circular-queue/"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": "hard",
+      "title": "自命题：用 murmur2 实现分区器并评估分布均匀度",
+      "content_md": "实现 Kafka 默认分区器的核心逻辑，并对一组 key 评估分区分布的均匀度。\n\n**要求**：\n1. 实现 `murmur2(data: bytes) -> int`（32 位，与 Kafka `Utils.murmur2` 一致的算法，返回值按无符号 32 位处理）。\n2. 实现 `partition_of(key, num_partitions) = to_positive(murmur2(key)) % num_partitions`，其中 `to_positive(x) = x & 0x7fffffff`。\n3. 用 1000 个形如 `user-<i>` 的 key、分区数 6，统计各分区负载，输出实际分布与「理论均值 ± 偏差率」。\n4. **禁止使用 Python 内置 `hash()`**（`PYTHONHASHSEED` 随机化会导致结果不可复现）。\n5. 输出必须确定：同一份输入每次运行结果完全一致。",
+      "options": [],
+      "answer": {
+        "correct": [],
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "关键点：① murmur2 必须按 32 位无符号做乘加，中间结果要 `& 0xffffffff` 截断，否则 Python 大整数会算错；② 末尾的 `h ^= h >> 13; h *= m; h ^= h >> 15` 是 avalanche 混合，不能省；③ Kafka 用 `& 0x7fffffff` 而非 `abs()`，因为 `abs(-2^31)` 在 Java int 上仍是负数；④ 均匀度评估：理想每分区 166~167 条，偏差率在 ±10% 内说明分布良好——murmur2 的雪崩效应保证了这一点，而 CRC32 虽然也能用但分布略逊，直接取模字符串长度之类则会出现严重倾斜。",
+      "tags": [
+        "kafka",
+        "partitioner",
+        "murmur2",
+        "hash"
+      ],
+      "source": "self",
+      "source_ref": "mw-ch05 concept/01 提交日志与分区"
+    }
+  ]
+}

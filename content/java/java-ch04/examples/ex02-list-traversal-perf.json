@@ -1,0 +1,8 @@
+{
+  "title": "数组 vs 单向链表随机访问：用指针跳转次数替代墙钟时间的确定性对比",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "n=50000\narray       get(25000) = 25000   array lookups = 1\nlinked-list get(25000) = 25000   pointer hops = 25000\nconclusion: O(1) array access beats O(n) list access = true",
+  "code": "public class Ex02TraversalPerf {\n    // Use \"pointer hops\" instead of System.nanoTime(): the conclusion is\n    // machine-independent and fully reproducible.\n    static class Node { int val; Node next; Node(int v) { val = v; } }\n\n    static class SinglyLinkedList {\n        Node head, tail;\n        int size;\n        void add(int v) {\n            Node nd = new Node(v);\n            if (head == null) head = nd; else tail.next = nd;\n            tail = nd; size++;\n        }\n        int get(int i) {\n            Node p = head;\n            for (int k = 0; k < i; k++) p = p.next;   // i times pointer hops\n            return p.val;\n        }\n    }\n\n    public static void main(String[] args) {\n        final int n = 50000;\n        int[] arr = new int[n];\n        SinglyLinkedList ll = new SinglyLinkedList();\n        for (int i = 0; i < n; i++) { arr[i] = i; ll.add(i); }\n\n        int mid = n / 2;\n        System.out.println(\"n=\" + n);\n        System.out.println(\"array       get(\" + mid + \") = \" + arr[mid] + \"   array lookups = 1\");\n        System.out.println(\"linked-list get(\" + mid + \") = \" + ll.get(mid)\n                + \"   pointer hops = \" + mid);\n        System.out.println(\"conclusion: O(1) array access beats O(n) list access = \" + (mid > 1));\n    }\n}"
+}

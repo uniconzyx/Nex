@@ -1,0 +1,8 @@
+{
+  "title": "fread 的返回值与部分读写（分两次读取缓冲）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "first read got 3\nsecond read got 2\npos after=20\n",
+  "code": "#include <stdio.h>\nint main(void) {\n    FILE *w = fopen(\"p.bin\", \"wb\");\n    int data[5] = {1,2,3,4,5};\n    fwrite(data, sizeof(int), 5, w);\n    fclose(w);\n    FILE *r = fopen(\"p.bin\", \"rb\");\n    int buf[3];\n    size_t got = fread(buf, sizeof(int), 3, r);\n    printf(\"first read got %zu\\n\", got);\n    got = fread(buf, sizeof(int), 3, r);\n    printf(\"second read got %zu\\n\", got);\n    long pos = ftell(r);\n    printf(\"pos after=%ld\\n\", pos);\n    fclose(r);\n    return 0;\n}"
+}

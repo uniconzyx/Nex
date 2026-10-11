@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "chapter": "tool-ch05",
+    "category": "system",
+    "title": "Docker 基础：镜像、容器与 Dockerfile —— 综合项目",
+    "count": 1,
+    "note": "一个可离线运行的 Dockerfile 静态分析器，覆盖本章全部知识点且代码可独立运行（不依赖 docker 命令）"
+  },
+  "items": [
+    {
+      "title": "实现一个「Dockerfile 静态分析器」dockerfile-lite",
+      "requirement_md": "用纯 Python 3.13 标准库（`hashlib` / `re` / `json` / `pathlib`，**不调用任何 docker 命令**）实现 `dockerfile_lite.py`，对一份 Dockerfile 与其构建上下文做静态体检。要求覆盖本章全部知识点，且脚本本身要体现「真懂分层与缓存」。\n\n**功能要求**\n\n1. **Dockerfile 解析器**\n   - 处理 `#` 注释、`\\` 行续接、指令大小写归一，输出指令序列 `[(\"FROM\", arg), ...]`；\n   - 统计「会产生文件系统改动的指令」（`RUN`/`COPY`/`ADD`）与「仅改元数据的指令」，给出最终层数与 0 字节层的数量。\n\n2. **层体积与分层模型**\n   - 用 `sha256` 为每个 `RUN`/`COPY` 层计算内容摘要（模拟层 digest），演示「相同内容复用同一层」；\n   - 给定各层体积常量，估算最终镜像体积，并指出体积最大的那一层。\n\n3. **构建缓存模拟器（核心）**\n   - 输入两份构建上下文（`before` / `after` 的「路径 → 内容」字典），逐层判定命中/失效，输出**首个失效层序号**与**需重建的层数**；\n   - 必须实现「父层失效则其后全部失效」的链语义；\n   - 内置正反两组用例：依赖优先（正）与 `COPY . .` 反模式（反），对比两者是否需要重跑 `pip install`。\n\n4. **多阶段构建体积估算**\n   - 解析多个 `FROM ... AS <name>` 与 `COPY --from=<name>`；\n   - 计算最终镜像体积（= 最终阶段基础镜像 + 最终阶段自身各层 + 被 COPY 的产物），明确指出**中间阶段的层不计入**；\n   - 与「单阶段 + `RUN rm -rf`」的方案对比，输出降幅百分比，并说明为什么 `rm` 减不了体积（whiteout）。\n\n5. **反模式与安全基线检查器**\n   - 至少覆盖 6 条可判定规则：`apt-get update/install` 是否同 RUN、是否用 `latest`、是否以 root 运行、是否缺 `.dockerignore`、`ADD` 是否被滥用、是否清理包管理器缓存；\n   - 每条输出 PASS/FAIL 与整改建议，最后给出**合规率**。\n\n6. **`.dockerignore` 匹配器**\n   - 支持 `**`、`*`、`?`、目录规则（`build/`）与否定规则（`!keep.log`），语义为「最后一条命中的规则生效」；\n   - 输出被排除/保留的文件清单，并显式验证「`*.log` 不跨 `/`，子目录要写 `**/*.log`」这一易错点。\n\n7. **CMD / ENTRYPOINT 与 COPY / ADD 决策表**\n   - 纯函数实现组合规则（含 shell 形式忽略 CMD、`docker run` 尾部参数替换 CMD），至少 8 组用例；\n   - 规则表输出 COPY vs ADD 的推荐指令与理由。\n\n**提交物**：`dockerfile_lite.py`、`README.md`（说明每项机制对应的本章概念与实测数字）、`selftest.py`（一键跑全部断言）。\n\n**验收口径**：脚本在**没有安装 Docker 的机器**上也能跑通全部功能；所有输出必须确定（禁用 `hash(str)`、禁止输出耗时与内存地址）。\n\n**进阶**：把检查结果输出成 SARIF/JSON 报告接入 CI；或增加 overlayfs 的 copy-up / whiteout 模拟器，演示「`RUN rm -rf` 不瘦身」。",
+      "tasks": [
+        {
+          "title": "任务 1：Dockerfile 解析器与分层统计",
+          "verification": {
+            "type": "test",
+            "desc": "对含 # 注释与 \\ 续接的样例，解析出 12 条指令；正确区分 4 条文件系统改动指令与 8 条元数据指令。"
+          }
+        },
+        {
+          "title": "任务 2：层 digest 与体积估算",
+          "verification": {
+            "type": "test",
+            "desc": "用 sha256 复算层摘要，断言「相同内容同摘要、改动 1 字节后摘要变化」；指出体积最大的层。"
+          }
+        },
+        {
+          "title": "任务 3：构建缓存模拟器（正反两组）",
+          "verification": {
+            "type": "test",
+            "desc": "只改一行源码时，正例输出首个失效层 5、重建 2 层且不重跑 pip install；反例输出首个失效层 3、重建 3 层且必须重跑。"
+          }
+        },
+        {
+          "title": "任务 4：多阶段体积估算与降幅",
+          "verification": {
+            "type": "test",
+            "desc": "算出单阶段 1555.6MB 与多阶段 14.0MB，降幅 99.1%；并说明中间阶段层不入最终镜像。"
+          }
+        },
+        {
+          "title": "任务 5：反模式与安全基线检查",
+          "verification": {
+            "type": "test",
+            "desc": "6 条规则均给出 PASS/FAIL；反例合规率 16.7%、正例 100%，达标线 80%。"
+          }
+        },
+        {
+          "title": "任务 6：.dockerignore 匹配器与 CMD/ENTRYPOINT 决策表",
+          "verification": {
+            "type": "test",
+            "desc": "14 个样例文件中排除 8 个、保留 6 个，否定规则 !keep.log 生效；CMD/ENTRYPOINT 8 组用例的最终 argv 与 Docker 官方文档一致。"
+          }
+        }
+      ]
+    }
+  ]
+}

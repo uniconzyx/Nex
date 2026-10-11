@@ -1,0 +1,8 @@
+{
+  "title": "组件扫描：扫描 @Component 标注的类",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "scanned components: 2\n - UserService\n - OrderService",
+  "code": "import java.lang.annotation.*;\nimport java.util.*;\n\npublic class Ex04 {\n    @Retention(RetentionPolicy.RUNTIME)\n    @interface Component { String value() default \"\"; }\n\n    static class Scanner {\n        List<Class<?>> scan(List<Class<?>> all) {\n            List<Class<?>> found = new ArrayList<>();\n            for (Class<?> c : all) if (c.isAnnotationPresent(Component.class)) found.add(c);\n            return found;\n        }\n    }\n    @Component static class UserService {}\n    @Component static class OrderService {}\n    static class Helper {} // 不是组件\n    public static void main(String[] args) {\n        Scanner sc = new Scanner();\n        List<Class<?>> candidates = sc.scan(List.of(UserService.class, OrderService.class, Helper.class));\n        System.out.println(\"scanned components: \" + candidates.size());\n        for (Class<?> c : candidates) System.out.println(\" - \" + c.getSimpleName());\n    }\n}\n"
+}

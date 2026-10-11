@@ -1,0 +1,8 @@
+{
+  "title": "catch(...) 兜底捕获未被内层匹配的类型",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "caught unknown in outer",
+  "code": "#include <iostream>\n\nint main() {\n    try {\n        try {\n            throw 3.14;               // double\n        } catch (int) {              // 只匹配 int，不匹配 double\n            std::cout << \"int\\n\";\n        }\n        // double 未被内层捕获，向上传播\n    } catch (...) {                 // 外层兜底\n        std::cout << \"caught unknown in outer\\n\";\n    }\n}"
+}

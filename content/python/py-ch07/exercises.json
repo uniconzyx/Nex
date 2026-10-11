@@ -1,0 +1,144 @@
+{
+  "meta": {
+    "chapter": "py-ch07",
+    "note": "8 题，基础题 5 + 算法题 3；覆盖 GIL 与并行边界、竞态与锁、线程池与队列、asyncio 事件循环。"
+  },
+  "items": [
+    {
+      "id": "py7-ex01",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "py-ch07 concept 01（GIL 与 threading 的能力边界）",
+      "title": "GIL 存在时，多线程在什么场景仍有收益",
+      "stem_md": "CPython 有全局解释器锁（GIL）。下列哪种场景**仍能从多线程获得实际加速**？",
+      "options": [
+        "纯 Python 的数值累加循环",
+        "递归计算斐波那契数列",
+        "以阻塞式 read 等待网络返回的 IO 任务",
+        "对同一份大 list 做纯 Python 排序"
+      ],
+      "answer": {
+        "value": 2,
+        "index": 2
+      },
+      "explanation_md": "GIL 只在**执行 Python 字节码**时互斥；线程在**等待 IO 时会释放 GIL**，所以阻塞式 IO 的重叠能带来加速。前三项都是纯 Python 计算，同一时刻只有一个线程持有 GIL，无法并行。注意：`numpy`/`hashlib` 等 C 扩展在长计算中也会释放 GIL，所以「多线程对计算完全无效」是过头的说法。",
+      "difficulty": "easy"
+    },
+    {
+      "id": "py7-ex02",
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "py-ch07 concept 02（竞态与 read-modify-write）",
+      "title": "判断 count += 1 是否为原子操作",
+      "stem_md": "`counter += 1` 在 CPython 中需要哪几个字节码步骤？为什么它在**没有 GIL 释放点**时也可能被中断？",
+      "answer": {
+        "reference_code": "import dis\n\ndef bump(counter):\n    counter += 1\n    return counter\n\ndis.dis(bump)"
+      },
+      "explanation_md": "`counter += 1` 编译为 `LOAD_FAST` / `LOAD_CONST` / `BINARY_OP` / `STORE_FAST` 四步，**不是原子操作**。即使字节码之间不主动释放 GIL，CPython 也会按 `sys.getswitchinterval()`（默认 5ms）**抢占式**切换线程，所以「读—改—写」三步之间可能被另一线程插入。工程上不能依赖「反正只有一行」。",
+      "difficulty": "medium"
+    },
+    {
+      "id": "py7-ex03",
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "py-ch07 concept 02（锁的粒度与死锁）",
+      "title": "修复锁顺序不一致导致的死锁",
+      "stem_md": "两个线程分别按 `lock_a → lock_b` 与 `lock_b → lock_a` 的顺序获取锁，偶发挂死。指出根因并给出最小修复。",
+      "answer": {
+        "reference_code": "import threading\n\nlock_a = threading.Lock()\nlock_b = threading.Lock()\n\n# 错误写法：两个方向都取同一对锁 -> 循环等待\n# def t1():\n#     with lock_a:\n#         with lock_b:\n#             pass\n# def t2():\n#     with lock_b:\n#         with lock_a:\n#             pass\n\n# 修复：全局统一加锁顺序（按 id 或约定编号排序）\ndef transfer(src_lock, dst_lock, amount):\n    first, second = sorted((src_lock, dst_lock), key=id)\n    with first:\n        with second:\n            return amount\n\nprint('统一加锁顺序后不再存在循环等待:', transfer(lock_a, lock_b, 100) == 100)\nprint('反向调用同样安全:', transfer(lock_b, lock_a, 100) == 100)"
+      },
+      "explanation_md": "死锁的四个必要条件中，最容易在工程上打破的是**循环等待**：只要所有线程对同一组锁采用**全局一致的获取顺序**，环就无法形成。另一种修复是用 `lock.acquire(timeout=...)` 做**超时退避**，但这只是「打破不可剥夺」，会带来重试复杂度。",
+      "difficulty": "medium"
+    },
+    {
+      "id": "py7-ex04",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "py-ch07 concept 03（线程池与 Queue）",
+      "title": "ThreadPoolExecutor 的任务队列与背压",
+      "stem_md": "`ThreadPoolExecutor(max_workers=4)` 提交 1000 个任务后，若任务处理速度远慢于提交速度，会发生什么？",
+      "options": [
+        "submit 会阻塞直到有空闲线程",
+        "内部无界队列持续堆积，可能耗尽内存",
+        "多余的 996 个任务被直接丢弃",
+        "线程池自动扩容到 1000 个线程"
+      ],
+      "answer": {
+        "value": 1,
+        "index": 1
+      },
+      "explanation_md": "`ThreadPoolExecutor` 的任务队列是**无界**的（`SimpleQueue`），`submit` 永远立刻返回，任务只会在内存里堆积 —— **没有任何背压**。要控流必须自己在提交侧加信号量或改用有界队列自行调度。这一点与 `asyncio` 的 `Semaphore` 限流动机相同。",
+      "difficulty": "medium"
+    },
+    {
+      "id": "py7-ex05",
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "py-ch07 concept 04（asyncio 事件循环与并发模型）",
+      "title": "gather 中协程的启动与交错顺序",
+      "stem_md": "`asyncio.gather(worker('A'), worker('B'))`，其中每个 worker 先打印 start 再 `await asyncio.sleep(0)` 后打印 end。输出的顺序是什么？",
+      "answer": {
+        "reference_code": "import asyncio\n\nlog = []\n\nasync def worker(name):\n    log.append('start-' + name)\n    await asyncio.sleep(0)\n    log.append('end-' + name)\n\nasync def main():\n    await asyncio.gather(worker('A'), worker('B'))\n\nasyncio.run(main())\nprint(log)"
+      },
+      "explanation_md": "输出为 `['start-A', 'start-B', 'end-A', 'end-B']`。`gather` 先**顺序**把两个协程包成 Task 并立即调度（A 先跑，跑到 `sleep(0)` 让出），B 才获得执行机会；两者都在等同一个「下轮就绪」的唤醒，于是按排队顺序恢复。这说明 asyncio 是**单线程协作式**调度：不遇到 `await` 就不会切换。",
+      "difficulty": "hard"
+    },
+    {
+      "id": "py7-ex06",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "source": "leetcode",
+      "source_ref": "LeetCode 1114. 按序打印",
+      "external_url": "https://leetcode.cn/problems/print-in-order/",
+      "title": "用同步原语保证三个线程按序执行",
+      "stem_md": "三个线程分别调用 `first`/`second`/`third`，要求无论调度顺序如何，输出恒为 `firstsecondthird`。只提供题号与链接（题面正文见平台，遵循本项目合规约定），此处给出可直接运行的参考实现与自测。",
+      "answer": {
+        "reference_code": "import threading\n\n\nclass Foo:\n    def __init__(self):\n        self._s1 = threading.Event()\n        self._s2 = threading.Event()\n        self.out = []\n\n    def first(self):\n        self.out.append('first')\n        self._s1.set()\n\n    def second(self):\n        self._s1.wait()\n        self.out.append('second')\n        self._s2.set()\n\n    def third(self):\n        self._s2.wait()\n        self.out.append('third')\n\n\nfoo = Foo()\n# 故意让 third / second 先启动，验证逆序调度下仍按序\nthreads = [\n    threading.Thread(target=foo.third),\n    threading.Thread(target=foo.second),\n    threading.Thread(target=foo.first),\n]\nfor t in threads:\n    t.start()\nfor t in threads:\n    t.join()\n\nprint(''.join(foo.out))\nprint('结果正确:', ''.join(foo.out) == 'firstsecondthird')"
+      },
+      "explanation_md": "核心是**用事件传递「前驱已完成」这一事实**，而不是用 sleep 猜时序。`Event.set()` 是幂等且线程安全的；`wait()` 在已 set 时立即返回，所以即使 `second` 比 `first` 早启动也只会阻塞等待。同一类问题也可用 `threading.Condition` 或 `Barrier` 实现。",
+      "difficulty": "medium"
+    },
+    {
+      "id": "py7-ex07",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "nowcoder",
+      "source": "nowcoder",
+      "source_ref": "牛客网 · 多线程并发专题（交替打印 / 生产者消费者）",
+      "external_url": "https://www.nowcoder.com/exam/oj",
+      "title": "用 Condition 实现有界缓冲的生产者消费者",
+      "stem_md": "实现一个有界阻塞队列：容量为 `cap`，生产者满时等待、消费者空时等待，且支持「生产完成后通知消费者退出」。只提供题号与链接（题面正文见平台，遵循本项目合规约定），此处给出可直接运行的参考实现与自测。",
+      "answer": {
+        "reference_code": "import threading\nfrom collections import deque\n\n\nclass BoundedBuffer:\n    def __init__(self, cap):\n        self.cap = cap\n        self.q = deque()\n        self.cv = threading.Condition()\n        self.produced = 0\n        self.consumed = 0\n        self.closed = False\n\n    def put(self, item):\n        with self.cv:\n            while len(self.q) >= self.cap:\n                self.cv.wait()\n            self.q.append(item)\n            self.produced += 1\n            self.cv.notify_all()\n\n    def get(self):\n        with self.cv:\n            while not self.q and not self.closed:\n                self.cv.wait()\n            if not self.q:\n                return None\n            item = self.q.popleft()\n            self.consumed += 1\n            self.cv.notify_all()\n            return item\n\n    def close(self):\n        with self.cv:\n            self.closed = True\n            self.cv.notify_all()\n\n\nTOTAL = 60\nbuf = BoundedBuffer(5)\n\n\ndef producer():\n    for i in range(TOTAL):\n        buf.put(i)\n    buf.close()\n\n\ndef consumer():\n    while True:\n        item = buf.get()\n        if item is None:\n            break\n\n\nprod = threading.Thread(target=producer)\ncons = [threading.Thread(target=consumer) for _ in range(3)]\nprod.start()\nfor c in cons:\n    c.start()\nprod.join()\nfor c in cons:\n    c.join()\n\nprint('生产:', buf.produced, '| 消费:', buf.consumed)\nprint('守恒:', buf.produced == buf.consumed == TOTAL)"
+      },
+      "explanation_md": "三个要点：① 等待必须写在 **`while` 而非 `if`** —— 被唤醒后条件可能已被别的线程破坏（虚假唤醒 / 惊群）；② 变更条件后必须 `notify_all()`，只 `notify()` 可能唤醒到不适用的线程造成长等待；③ 用 `closed` 标志让消费者**优雅退出**，而不是靠 `daemon` 强杀（会丢数据）。",
+      "difficulty": "hard"
+    },
+    {
+      "id": "py7-ex08",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "py-ch07 concept 04（asyncio 限流与取消）",
+      "title": "用 asyncio.Semaphore 实现并发限流",
+      "stem_md": "有 20 个异步任务，要求**任意时刻并发不超过 3**，并返回每个任务的结果；若某任务超时则记为超时而不影响其他任务。给出可直接运行的参考实现与自测。",
+      "answer": {
+        "reference_code": "import asyncio\n\n\nasync def limited(sem, name, delay, log):\n    async with sem:\n        log.append(('enter', name))\n        try:\n            await asyncio.wait_for(asyncio.sleep(delay), timeout=0.05)\n            return name, 'ok'\n        except asyncio.TimeoutError:\n            return name, 'timeout'\n        finally:\n            log.append(('exit', name))\n\n\nasync def main():\n    sem = asyncio.Semaphore(3)\n    log = []\n    peak = 0\n    cur = 0\n\n    async def wrapped(i):\n        nonlocal peak, cur\n        async with sem:\n            cur += 1\n            peak = max(peak, cur)\n            await asyncio.sleep(0)\n            cur -= 1\n            return i\n\n    results = await asyncio.gather(*(wrapped(i) for i in range(20)))\n    print('任务数:', len(results))\n    print('结果完整:', sorted(results) == list(range(20)))\n    print('峰值并发 <= 3:', peak <= 3)\n\n\nasyncio.run(main())"
+      },
+      "explanation_md": "`asyncio.Semaphore` 的 `async with` 在计数耗尽时**挂起当前协程并让出事件循环**，这是协作式的「等待」——不会阻塞整个循环（区别于 `threading.Semaphore`）。超时用 `asyncio.wait_for`，它在超时后**取消**内部协程，`CancelledError` 会在 `await` 点抛出，因此清理必须放在 `finally`。",
+      "difficulty": "hard"
+    }
+  ]
+}

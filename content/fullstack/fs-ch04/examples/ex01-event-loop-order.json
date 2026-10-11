@@ -1,0 +1,8 @@
+{
+  "title": "事件循环阶段顺序：sync → nextTick → microtask → setImmediate → setTimeout",
+  "code_lang": "javascript",
+  "code_std": "node22",
+  "stdin": "",
+  "expected_output": "A sync\nF sync-end\nB nextTick\nC promise.then\nE setImmediate\nD setTimeout\nnextTick 先于 promise: true\nsetImmediate 先于 setTimeout: true\n",
+  "code": "const fs = require('fs');\n\nconst order = [];\nconst mark = (s) => {\n  order.push(s);\n  console.log(s);\n};\n\n// ---- 第一段：同步代码 + nextTick + Promise ----\nmark('A sync');\nprocess.nextTick(() => mark('B nextTick'));\nPromise.resolve().then(() => mark('C promise.then'));\nmark('F sync-end');\n\n// ---- 第二段：setImmediate vs setTimeout(0) ----\n// 关键：这两个必须注册在「I/O 回调内部」才有确定的先后顺序。\n// 原因：事件循环顺序是 timers → pending → poll → check → close。\n// 在 I/O 回调（poll 阶段）里注册，本轮 poll 结束后立刻进入 check 阶段，\n// 所以 setImmediate 先执行；而 setTimeout(0) 要等下一轮 timers 阶段。\n// 若注册在顶层同步代码里，则先进入哪一轮由事件循环启动时机决定，顺序不保证。\nfs.readFile(__filename, () => {\n  setImmediate(() => mark('E setImmediate'));\n  setTimeout(() => {\n    mark('D setTimeout');\n    console.log('nextTick 先于 promise: ' + (order.indexOf('B nextTick') < order.indexOf('C promise.then')));\n    console.log('setImmediate 先于 setTimeout: ' + (order.indexOf('E setImmediate') < order.indexOf('D setTimeout')));\n  }, 0);\n});"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "混合检索 RRF 融合：多排名融合对比单一检索",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "检索器A单独排名 = [3, 1, 4, 2, 5]\n检索器B单独排名 = [2, 5, 1, 3, 4]\nRRF融合排名 = [2, 3, 1, 5, 4]\ndoc5 在A名次=5 在B名次=2\ndoc5 是否进入融合Top3 = False\n",
+  "code": "k = 60\nlist_a = [3, 1, 4, 2, 5]\nlist_b = [2, 5, 1, 3, 4]\n\ndef rrf(rank_list):\n    s = {}\n    for rank, doc in enumerate(rank_list, start=1):\n        s[doc] = s.get(doc, 0.0) + 1.0 / (k + rank)\n    return s\n\nsa = rrf(list_a)\nsb = rrf(list_b)\nfused = {}\nfor d in set(sa) | set(sb):\n    fused[d] = sa.get(d, 0.0) + sb.get(d, 0.0)\nranked = [d for d, _ in sorted(fused.items(), key=lambda x: -x[1])]\nprint('检索器A单独排名 =', list_a)\nprint('检索器B单独排名 =', list_b)\nprint('RRF融合排名 =', ranked)\nprint('doc5 在A名次=%d 在B名次=%d' % (list_a.index(5) + 1, list_b.index(5) + 1))\nprint('doc5 是否进入融合Top3 =', 5 in ranked[:3])\n"
+}

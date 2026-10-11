@@ -1,0 +1,8 @@
+{
+  "title": "函数重载",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "9 6.25",
+  "code": "#include <iostream>\n\nint square(int x) { return x * x; }\ndouble square(double x) { return x * x; }\n\nint main() {\n    std::cout << square(3) << ' ' << square(2.5);\n}"
+}

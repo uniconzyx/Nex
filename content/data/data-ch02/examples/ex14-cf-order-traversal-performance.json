@@ -1,0 +1,8 @@
+{
+  "title": "C/F order 遍历缓存友好性（仅布尔判据）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "A C-contiguous = True\n行总和 == 列总和（数学相等）: True\n连续行遍历更快: True\n列跳跃遍历更慢(加速比>1.2): True\n说明：绝对耗时随机器波动，此处只给布尔判据保证可复现。",
+  "code": "import time\nimport numpy as np\nn = 3000\nA = np.random.default_rng(0).random((n, n))   # C contiguous\nt0 = time.perf_counter()\nr1 = [float(A[i].sum()) for i in range(n)]     # 按行（连续）\nt_row = time.perf_counter() - t0\nt0 = time.perf_counter()\nr2 = [float(A[:, j].sum()) for j in range(n)]  # 按列（跨行跳跃）\nt_col = time.perf_counter() - t0\ntotal_row = sum(r1)\ntotal_col = sum(r2)\nprint(\"A C-contiguous =\", bool(A.flags['C_CONTIGUOUS']))\nprint(\"行总和 == 列总和（数学相等）:\", np.isclose(total_row, total_col))\nprint(\"连续行遍历更快:\", t_row < t_col)\nprint(\"列跳跃遍历更慢(加速比>1.2):\", t_col / t_row > 1.2)\nprint(\"说明：绝对耗时随机器波动，此处只给布尔判据保证可复现。\")"
+}

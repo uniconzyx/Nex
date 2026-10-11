@@ -1,0 +1,8 @@
+{
+  "title": "池化输出尺寸公式验证（多组参数）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "输入 核 步长 填充 -> 池化输出尺寸\n  n=28 k=3 s=2 p=0 -> out=13\n  n=28 k=2 s=2 p=0 -> out=14\n  n=32 k=2 s=2 p=0 -> out=16\n  n=224 k=2 s=2 p=0 -> out=112\n  n=13 k=3 s=2 p=0 -> out=6\n  n=13 k=2 s=2 p=0 -> out=6\n  n=224 k=3 s=2 p=1 -> out=112\n  [校验] n=28 实际池化形状=(1, 1, 14, 14) 公式=14 一致=True\n  [校验] n=13 实际池化形状=(1, 1, 6, 6) 公式=6 一致=True\n  [校验] n=224 实际池化形状=(1, 1, 112, 112) 公式=112 一致=True\n",
+  "code": "\nimport numpy as np\ndef pool_out(n, k, s, p=0):\n    return (n + 2*p - k)//s + 1\ncases = [(28,3,2,0),(28,2,2,0),(32,2,2,0),(224,2,2,0),(13,3,2,0),(13,2,2,0),(224,3,2,1)]\nprint(\"输入 核 步长 填充 -> 池化输出尺寸\")\nfor n,k,s,p in cases:\n    print(f\"  n={n} k={k} s={s} p={p} -> out={pool_out(n,k,s,p)}\")\n# 交叉验证：实际 maxpool 形状\nfor n,k,s,p in [(28,2,2,0),(13,3,2,0),(224,2,2,0)]:\n    x=np.random.randn(1,1,n,n)\n    if p: x=np.pad(x,((0,0),(0,0),(p,p),(p,p)))\n    oh=(x.shape[2]-k)//s+1; ow=(x.shape[3]-k)//s+1\n    y=x[:,:, :oh*s:s, :ow*s:s][:,:,:, :k] if False else None\n    # 直接取不重叠窗口最大值\n    out=np.zeros((1,1,oh,ow))\n    for i in range(oh):\n        for j in range(ow):\n            out[0,0,i,j]=x[0,0,i*s:i*s+k, j*s:j*s+k].max()\n    print(f\"  [校验] n={n} 实际池化形状={out.shape} 公式={pool_out(n,k,s,p)} 一致={out.shape[2]==pool_out(n,k,s,p)}\")\n"
+}

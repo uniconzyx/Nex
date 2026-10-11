@@ -1,0 +1,8 @@
+{
+  "title": "单调栈：下一个更大元素",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "数组: 2 1 5 3 4\n每个元素的下一个更大元素:\n  a[0]=2 -> 5\n  a[1]=1 -> 5\n  a[2]=5 -> -1\n  a[3]=3 -> 4\n  a[4]=4 -> -1",
+  "code": "#include <stdio.h>\n\nint main(void) {\n    int a[] = {2, 1, 5, 3, 4};\n    int n = 5, stk[5], top = 0, nge[5];\n    for (int i = 0; i < n; i++) nge[i] = -1;\n    for (int i = 0; i < n; i++) {\n        /* 栈顶元素比当前小 -> 当前就是它的下一个更大元素，批量结算 */\n        while (top > 0 && a[stk[top - 1]] < a[i]) nge[stk[--top]] = a[i];\n        stk[top++] = i;                      /* 存下标，便于写回答案 */\n    }\n    printf(\"数组:\");\n    for (int i = 0; i < n; i++) printf(\" %d\", a[i]);\n    printf(\"\\n每个元素的下一个更大元素:\\n\");\n    for (int i = 0; i < n; i++)\n        printf(\"  a[%d]=%d -> %d\\n\", i, a[i], nge[i]);\n    return 0;\n}"
+}

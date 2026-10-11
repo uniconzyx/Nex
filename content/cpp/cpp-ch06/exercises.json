@@ -1,0 +1,121 @@
+{
+  "meta": {
+    "chapter": "cpp-ch06",
+    "note": "7 题，题型混合；含 LeetCode 208 / 牛客 BM65 真题映射（仅存元数据+链接，不存题面）"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "difficulty": "easy",
+      "title": "关于虚函数与动态绑定，正确的是",
+      "content_md": "选择**正确**的描述（可多选提示，答案单选）。",
+      "options": [
+        { "key": "A", "text": "虚函数调用一定比普通函数慢，应尽量避免使用多态" },
+        { "key": "B", "text": "通过基类指针/引用调用虚函数时，实际调用的函数由「指针/引用所指向对象的动态类型」决定" },
+        { "key": "C", "text": "把派生对象按值赋给基类变量，虚函数仍会动态绑定到派生版本" },
+        { "key": "D", "text": "构造函数中调用虚函数会动态绑定到最派生类的版本" }
+      ],
+      "answer": { "correct": ["B"] },
+      "explanation": "动态绑定的触发条件是「通过基类指针或引用 + 虚函数」；按值传递会对象切片（C 错）；构造/析构中虚调用静态绑定到当前层（D 错）；虚函数开销多数场景可忽略，且可被 devirtualization 优化（A 错）。",
+      "tags": ["virtual", "dynamic-binding"],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 15 章 面向对象程序设计",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "output",
+      "difficulty": "mid",
+      "title": "读代码写输出（构造顺序 + 虚函数）",
+      "content_md": "```cpp\n#include <iostream>\nstruct B { B(){ std::cout << \"Bc \"; } ~B(){ std::cout << \"Bd \"; } virtual void f() const { std::cout << \"Bf \"; } };\nstruct D : B { D(){ std::cout << \"Dc \"; } ~D(){ std::cout << \"Dd \"; } void f() const override { std::cout << \"Df \"; } };\nint main() { D d; B& r = d; r.f(); }\n```",
+      "answer": { "output": "Bc Dc Df Dd Bd " },
+      "explanation": "构造由内向外：先 B 后 D；r.f() 因 r 指向 D 且 f 为虚 → 调 D::f；析构由外向内：先 D 后 B。",
+      "tags": ["ctor-order", "virtual", "dtor"],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 15 章 基类/派生类",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "fix_error",
+      "difficulty": "mid",
+      "title": "修复「基类析构非 virtual」导致派生部分泄漏",
+      "content_md": "以下代码 `delete base_ptr` 时只调用 `~Base`，派生类申请的资源泄漏。请修复（最小改动）：\n\n```cpp\nstruct Base { ~Base() { /* 释放基类资源 */ } };\nstruct Derived : Base {\n  int* buf = new int[64];\n  ~Derived() { delete[] buf; }\n};\nint main() { Base* p = new Derived; delete p; }\n```",
+      "answer": {
+        "reference_code": "struct Base { virtual ~Base() = default; };   // 关键：析构 virtual\nstruct Derived : Base {\n  int* buf = new int[64];\n  ~Derived() override { delete[] buf; }   // 推荐显式 override\n};\nint main() { Base* p = new Derived; delete p; }  // 现在会先 ~Derived 再 ~Base"
+      },
+      "explanation": "被多态继承的基类必须把析构声明为 virtual；= default 即可让编译器生成正确版本，delete 时沿最派生类析构链完整释放。",
+      "tags": ["virtual-dtor", "leak", "polymorphism"],
+      "source": "self",
+      "source_ref": "《Effective C++》条款 07（为多态基类声明 virtual 析构函数）",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "choice",
+      "difficulty": "mid",
+      "title": "关于对象切片（slicing），错误的是",
+      "content_md": "选择**错误**的描述。",
+      "options": [
+        { "key": "A", "text": "把派生对象按值赋给基类变量，会丢弃派生类独有的成员" },
+        { "key": "B", "text": "切片后通过基类变量调用虚函数，只会调用基类版本" },
+        { "key": "C", "text": "用基类引用或指针传递派生对象不会发生切片" },
+        { "key": "D", "text": "把派生对象按值赋给基类变量，动态绑定仍然生效" }
+      ],
+      "answer": { "correct": ["D"] },
+      "explanation": "按值传递发生切片，得到的是纯基类子对象，虚调用静态绑定到基类（D 错）；引用/指针传递不切片（C 对）。",
+      "tags": ["slicing", "dynamic-binding"],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 15 章 容器与继承",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "coding",
+      "difficulty": "mid",
+      "title": "实现抽象基类 Animal 与派生类 Cat/Dog",
+      "content_md": "定义抽象基类 `Animal`，含纯虚函数 `sound()`（返回叫声字符串）与虚析构；派生 `Cat`/`Dog` 各自实现 `sound()`。用 `std::unique_ptr<Animal>` 持有对象并统一调用，输出各自叫声。",
+      "answer": {
+        "reference_code": "#include <iostream>\n#include <memory>\n#include <string>\nstruct Animal { virtual std::string sound() const = 0; virtual ~Animal() = default; };\nstruct Cat : Animal { std::string sound() const override { return \"meow\"; } };\nstruct Dog : Animal { std::string sound() const override { return \"woof\"; } };\nint main() {\n  std::unique_ptr<Animal> a = std::make_unique<Cat>();\n  std::unique_ptr<Animal> b = std::make_unique<Dog>();\n  std::cout << a->sound() << ' ' << b->sound();\n}"
+      },
+      "explanation": "纯虚函数使 Animal 成为抽象类（不可实例化）；`unique_ptr<Animal>` 承载多态并自动释放；override 显式标注覆盖。",
+      "tags": ["abstract-class", "pure-virtual", "smart-ptr"],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 15 章 抽象基类",
+      "category": "基础题",
+      "platform": "self"
+    },
+    {
+      "type": "design",
+      "difficulty": "hard",
+      "title": "LeetCode 208 · 实现 Trie（前缀树）",
+      "content_md": "设计一个支持 insert / search / startsWith 的 Trie（前缀树）数据结构。建议结合多态设计节点接口或把节点行为封装为类（详见 external_url，不在此复述题面）。",
+      "answer": {
+        "reference_code": "class Trie {\n  struct Node { bool end = false; std::array<std::unique_ptr<Node>, 26> next; };\n  std::unique_ptr<Node> root_ = std::make_unique<Node>();\npublic:\n  void insert(const std::string& w){ Node* p=root_.get(); for(char c:w){ int i=c-'a'; if(!p->next[i]) p->next[i]=std::make_unique<Node>(); p=p->next[i]; } p->end=true; }\n  bool search(const std::string& w) const { /* 走到底且 end==true */ return false; }\n  bool startsWith(const std::string& p) const { /* 仅走到前缀末尾 */ return false; }\n};"
+      },
+      "explanation": "节点可用 RAII（unique_ptr）管理子节点，避免裸指针泄漏；多叉分支用定长数组（26 字母）换取 O(1) 跳转。",
+      "tags": ["trie", "design", "polymorphism"],
+      "source": "leetcode",
+      "source_ref": "LeetCode 208（implement-trie-prefix-tree）",
+      "external_url": "https://leetcode.cn/problems/implement-trie-prefix-tree/",
+      "category": "算法题",
+      "platform": "leetcode"
+    },
+    {
+      "type": "design",
+      "difficulty": "hard",
+      "title": "牛客 BM65 · 最长公共子序列",
+      "content_md": "求两个字符串的最长公共子序列（LCS）长度。可借接口/策略类封装「比较与状态」以练习多态封装（详见 external_url，不在此复述题面）。",
+      "answer": {
+        "reference_code": "// 经典 DP：dp[i][j] = LCS(s1[0..i), s2[0..j))\n// 可将「状态转移」抽象为接口，由不同策略实现；此处核心是二维 DP + 滚动数组优化。\n// 具体实现见 external_url 原题要求。"
+      },
+      "explanation": "DP 转移是 O(n*m)；把状态比较封装为可替换策略，是本章「接口隔离变化」思想在算法题中的落地尝试。",
+      "tags": ["lcs", "dp", "design"],
+      "source": "nowcoder",
+      "source_ref": "牛客 BM65（最长公共子序列）",
+      "external_url": "https://www.nowcoder.com/practice/6d29638c85bb4ffd80c020fe4fda6057",
+      "category": "算法题",
+      "platform": "nowcoder"
+    }
+  ]
+}

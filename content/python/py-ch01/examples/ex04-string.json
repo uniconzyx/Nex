@@ -1,0 +1,8 @@
+{
+  "title": "字符串操作",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "HELLO\nh",
+  "code": "s = 'hello'\nprint(s.upper())\nprint(s[0])"
+}

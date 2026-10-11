@@ -1,0 +1,9 @@
+{
+  "title": "List 的 quicklist：大列表按 8KB 节点分段",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "elements=10000 total_bytes=40000 quicklist_nodes=5\nsmall list nodes: 1",
+  "code": "\nimport math\nLISTPACK_MAX = 8192  # 8KB 单节点上限\n\ndef quicklist(entries):\n    total = sum(len(e.encode(\"utf-8\")) for e in entries)\n    nodes = max(1, math.ceil(total / LISTPACK_MAX))\n    return nodes, total\n\nelems = [\"item\"] * 10000            # 4B * 10000 = 40000B\nn, total = quicklist(elems)\nprint(\"elements=%d total_bytes=%d quicklist_nodes=%d\" % (len(elems), total, n))\nprint(\"small list nodes:\", quicklist([\"a\", \"b\", \"c\"])[0])\n",
+  "_verified": true
+}

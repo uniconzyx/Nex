@@ -1,0 +1,8 @@
+{
+  "title": "加盐哈希（pbkdf2-hmac-sha256，固定盐）与恒定时间校验",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== 加盐哈希 (pbkdf2-hmac-sha256) 与校验 ===\r\n算法 = pbkdf2_hmac('sha256'), 迭代次数 = 100000 , 盐长度 = 26 字节\r\nhash('S3cret!') 前 40 位 = 40e0ed28cdb5761b33c206dac43c163baba86190\r\n同盐同密码两次派生结果相同 = True\r\n密码改一个字符结果完全不同 = True\r\n校验正确密码 = True\r\n校验错误密码 = False\r\n换盐后同密码哈希不同 = True\r\n登录校验(正确密码) = True\r\n登录校验(错误密码) = False\r\n用 hmac.compare_digest 而非 == : 比较耗时恒定, 防时序侧信道\r\n注意: 不可用内置 hash() 存密码, PYTHONHASHSEED 随机化导致跨进程不可复现\r",
+  "code": "import hashlib, hmac\n\nSALT = b\"CppMind-db-ch07-fixed-salt\"    # 教学用固定盐, 真实系统应每用户随机盐\nITERS = 100000\n\n\ndef derive(pwd, salt=SALT, iters=ITERS):\n    return hashlib.pbkdf2_hmac(\"sha256\", pwd.encode(\"utf-8\"), salt, iters).hex()\n\n\nprint(\"=== 加盐哈希 (pbkdf2-hmac-sha256) 与校验 ===\")\nprint(\"算法 = pbkdf2_hmac('sha256'), 迭代次数 =\", ITERS, \", 盐长度 =\", len(SALT), \"字节\")\n\nh_a = derive(\"S3cret!\")\nh_b = derive(\"S3cret!\")\nh_c = derive(\"S3cret?\")\nprint(\"hash('S3cret!') 前 40 位 =\", h_a[:40])\nprint(\"同盐同密码两次派生结果相同 =\", h_a == h_b)\nprint(\"密码改一个字符结果完全不同 =\", h_a != h_c)\n\nprint(\"校验正确密码 =\", hmac.compare_digest(derive(\"S3cret!\"), h_a))\nprint(\"校验错误密码 =\", hmac.compare_digest(derive(\"wrong\"), h_a))\n\nh_other_salt = derive(\"S3cret!\", b\"another-salt\")\nprint(\"换盐后同密码哈希不同 =\", h_other_salt != h_a)\n\nstored = {\"alice\": (SALT, h_a)}\nsalt, expect = stored[\"alice\"]\nprint(\"登录校验(正确密码) =\", hmac.compare_digest(derive(\"S3cret!\", salt), expect))\nprint(\"登录校验(错误密码) =\", hmac.compare_digest(derive(\"bad\", salt), expect))\nprint(\"用 hmac.compare_digest 而非 == : 比较耗时恒定, 防时序侧信道\")\nprint(\"注意: 不可用内置 hash() 存密码, PYTHONHASHSEED 随机化导致跨进程不可复现\")\n"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "三种遍历的递归实现（只差一行）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "前序: 1 2 4 5 3 6\n中序: 4 2 5 1 3 6\n后序: 4 5 2 6 3 1",
+  "code": "#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct Node { int v; struct Node *l, *r; } Node;\nstatic Node *mk(int v) { Node *n = malloc(sizeof(Node)); n->v = v; n->l = n->r = NULL; return n; }\n\nstatic void pre(Node *n)  { if (!n) return; printf(\" %d\", n->v); pre(n->l);  pre(n->r); }\nstatic void ino(Node *n)  { if (!n) return; ino(n->l);  printf(\" %d\", n->v); ino(n->r); }\nstatic void post(Node *n) { if (!n) return; post(n->l); post(n->r); printf(\" %d\", n->v); }\n\nint main(void) {\n    /*        A(1)\n            /     \\\n          B(2)    C(3)\n         /   \\       \\\n       D(4)  E(5)    F(6)   —— 这里用 1..6 代替字母 */\n    Node *a = mk(1), *b = mk(2), *c = mk(3), *d = mk(4), *e = mk(5), *f = mk(6);\n    a->l = b; a->r = c; b->l = d; b->r = e; c->r = f;\n    printf(\"前序:\"); pre(a);  printf(\"\\n\");\n    printf(\"中序:\"); ino(a);  printf(\"\\n\");\n    printf(\"后序:\"); post(a); printf(\"\\n\");\n    return 0;\n}"
+}

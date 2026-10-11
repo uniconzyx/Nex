@@ -1,0 +1,8 @@
+{
+  "title": "分组聚合与 HAVING 过滤",
+  "code_lang": "sql",
+  "code_std": "mysql",
+  "stdin": "",
+  "expected_output": "A 2 7500",
+  "code": "CREATE TABLE emp (id INT, dept VARCHAR(20), salary INT);\nINSERT INTO emp VALUES (1,'A',7000),(2,'A',8000),(3,'B',5000);\nSELECT dept, COUNT(*) AS cnt, AVG(salary) AS avg_sal\nFROM emp\nGROUP BY dept\nHAVING COUNT(*) >= 2;   -- HAVING 在分组后过滤组，可用聚合函数"
+}

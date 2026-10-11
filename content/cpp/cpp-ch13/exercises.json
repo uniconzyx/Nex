@@ -1,0 +1,102 @@
+{
+  "meta": {
+    "chapter": "cpp-ch13",
+    "note": "6 题：基础题 4（choice/fix_error/output/coding）+ 平台算法题 2（LeetCode 157/158 缓冲读，仅存元数据+链接，不存题面）"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "difficulty": "easy",
+      "title": "关于 sync_with_stdio 与流状态，正确的是",
+      "content_md": "选择**正确**的描述。",
+      "options": [
+        { "key": "A", "text": "std::ios::sync_with_stdio(false) 之后仍可安全混用 cin 与 scanf" },
+        { "key": "B", "text": "cin 提取失败后，若不 clear()，后续 cin 操作会继续失败" },
+        { "key": "C", "text": "good() 返回 true 代表一定还没读到文件末尾" },
+        { "key": "D", "text": "setw 是持久状态，设置一次对后续所有字段都生效" }
+      ],
+      "answer": { "correct": ["B"] },
+      "explanation": "sync_with_stdio(false) 解除 C++ 流与 C stdio 的同步，之后混用顺序无保证，故 A 错；failbit 置位后该流后续提取/插入均为 no-op，必须 clear() 才能恢复，B 对；到达 EOF 时 eof() 与 fail() 常同时为真，good() 为假，C 错；setw 只影响下一次字段，是一次性操纵符，D 错。",
+      "tags": ["sync-with-stdio", "stream-state"],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 8 章 IO 库",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "fix_error",
+      "difficulty": "mid",
+      "title": "修复读取失败后未恢复流的问题",
+      "content_md": "下面程序在用户输入非数字时会进入死循环（failbit 置位后 `cin >> x` 一直失败）。请修复，使其在读取失败后清状态并丢弃坏字符，然后继续提示。\n\n```cpp\nint x;\nwhile (true) {\n  if (!(std::cin >> x)) { /* 缺失恢复逻辑 */ continue; }\n  std::cout << x << '\\n';\n}\n```",
+      "answer": {
+        "reference_code": "int x;\nwhile (true) {\n  if (!(std::cin >> x)) {\n    if (std::cin.eof()) break;     // 真正到末尾则退出\n    std::cin.clear();              // 清掉 failbit\n    std::cin.ignore(1024, '\\n');   // 丢弃造成失败的整行坏字符\n    continue;\n  }\n  std::cout << x << '\\n';\n}"
+      },
+      "explanation": "失败时必须先 clear() 清状态位，再用 ignore() 跳过坏字符，否则下一次 >> 仍是 no-op 导致死循环；同时用 eof() 区分「真到末尾」与「格式错误」。",
+      "tags": ["stream-state", "clear", "ignore"],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 8 章 流状态",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "output",
+      "difficulty": "easy",
+      "title": "读代码写输出（浮点默认精度）",
+      "content_md": "```cpp\n#include <iostream>\nint main() {\n  double x = 0.123456789;\n  std::cout << x << '\\n';\n  std::cout << std::fixed << std::setprecision(3) << x << '\\n';\n}\n```",
+      "answer": { "output": "0.123457\n0.123" },
+      "explanation": "默认（非 fixed/scientific）下 setprecision 表示有效数字，默认 6 位，故 0.123456789 显示 0.123457（四舍五入）；fixed+setprecision(3) 表示小数点后 3 位，显示 0.123。",
+      "tags": ["formatting", "float-precision"],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 8 章 格式化",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "coding",
+      "difficulty": "mid",
+      "title": "用 stringstream 解析一行逗号分隔的数据",
+      "content_md": "给定一行形如 `名字,年龄,分数` 的字符串，用 `istringstream` + `getline(..., ',')` + `ignore()` 解析出 `name`(string)、`age`(int)、`score`(double)，并输出 `name age score`。",
+      "answer": {
+        "reference_code": "#include <iostream>\n#include <sstream>\n#include <string>\nint main() {\n  std::string line = \"alice,23,98.5\";\n  std::istringstream iss(line);\n  std::string name; int age; double score;\n  std::getline(iss, name, ',');\n  iss >> age; iss.ignore(); iss >> score;\n  std::cout << name << ' ' << age << ' ' << score << '\\n';\n}"
+      },
+      "explanation": "getline 第三参指定分隔符 ',' 切出名字；>> 读整数后必须 ignore() 跳过逗号，再 >> 读浮点；混用 >> 与 getline 时务必注意残留分隔符。",
+      "tags": ["stringstream", "csv-parse"],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 8 章 stringstream",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "design",
+      "difficulty": "mid",
+      "title": "LeetCode 157 · Read N Characters Given Read4",
+      "content_md": "实现带缓冲区的字符读取：给定只可调用一次的 `read4(char* buf)`（从文件读至多 4 字符），实现 `read(char* buf, int n)` 正好读入 n 个字符。重点在于维护跨调用的内部缓冲与指针（详见 external_url，不在此复述题面）。",
+      "answer": {
+        "reference_code": "// 维护一个 4 字节内部缓冲 buf4_、读入计数 i_ 与有效长度 n4_；\n// 每次 read 先从 buf4_ 吐出剩余字符，不够再调用 read4 补足，最后截断到 n。\n// 完整接口与样例见 external_url 原题。"
+      },
+      "explanation": "这是 IO 缓冲的经典模型：内核/文件以块（4）为单位供给，用户以任意 n 消费，必须用内部缓冲 + 双指针衔接，避免重复/丢失字符。",
+      "tags": ["buffered-io", "read4"],
+      "source": "leetcode",
+      "source_ref": "LeetCode 157（read-n-characters-given-read4）",
+      "external_url": "https://leetcode.cn/problems/read-n-characters-given-read4/",
+      "category": "算法题",
+      "platform": "leetcode"
+    },
+    {
+      "type": "design",
+      "difficulty": "hard",
+      "title": "LeetCode 158 · Read N Characters Given Read4 II（多次调用）",
+      "content_md": "在 157 基础上，`read` 会被多次调用，需保证跨调用的状态正确：已读但未消费的缓冲字符必须在下一次调用时先返回。注意处理 EOF 与不足 n 的情况（详见 external_url，不在此复述题面）。",
+      "answer": {
+        "reference_code": "// 用成员变量保存 buf4_、i_、n4_；read 先吐内部剩余再 read4 补充，\n// 当 read4 返回 0（EOF）且内部缓冲耗尽时停止，不得多读。\n// 完整接口与样例见 external_url 原题。"
+      },
+      "explanation": "多次调用场景把「缓冲区残留」从一次性问题变成状态持久问题，必须在类对象中保存读指针；EOF 后不得再调用 read4 制造多余字符。",
+      "tags": ["buffered-io", "read4", "stateful"],
+      "source": "leetcode",
+      "source_ref": "LeetCode 158（read-n-characters-given-read4-ii-call-multiple-times）",
+      "external_url": "https://leetcode.cn/problems/read-n-characters-given-read4-ii-call-multiple-times/",
+      "category": "算法题",
+      "platform": "leetcode"
+    }
+  ]
+}

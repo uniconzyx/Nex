@@ -1,0 +1,8 @@
+{
+  "title": "PurePath 语义：不折叠 `..`、`/` 运算符拼接与 parts 结构",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== POSIX 纯路径：不做规范化 ===\r\nstr        = /a/b/../c\r\nparts      = ('/', 'a', 'b', '..', 'c')\r\nname/parent= c / /a/b/..\r\nsuffixes   = ['.tar', '.gz']\r\nwith_suffix= a.txt\r\n\r\n=== / 运算符拼接（不是字符串相加）===\r\nbase / 'conf' / 'app.json' = /srv/app/conf/app.json\r\n字符串相加的陷阱           = /srv/appconf/app.json\r\n\r\n=== Windows 纯路径：分隔符自动归一 ===\r\nstr    = C:\\x\\..\\y\\z.txt\r\nparts  = ('C:\\\\', 'x', '..', 'y', 'z.txt')\r\ndrive  = 'C:' | anchor = 'C:\\\\'\r\n转 POSIX: C:\\x\\..\\y\\z.txt\r\n\r\n=== 结论 ===\r\nPurePath 只做语法处理: '..' 保留在 parts 中, 需要折叠必须显式 resolve() 或 normpath\r",
+  "code": "from pathlib import PurePosixPath, PureWindowsPath\n\nprint(\"=== POSIX 纯路径：不做规范化 ===\")\np = PurePosixPath('/a/b/../c')\nprint(\"str        =\", p)\nprint(\"parts      =\", p.parts)\nprint(\"name/parent=\", p.name, \"/\", p.parent)\nprint(\"suffixes   =\", PurePosixPath('archive.tar.gz').suffixes)\nprint(\"with_suffix=\", PurePosixPath('a.log').with_suffix('.txt'))\n\nprint()\nprint(\"=== / 运算符拼接（不是字符串相加）===\")\nbase = PurePosixPath('/srv/app')\nprint(\"base / 'conf' / 'app.json' =\", base / 'conf' / 'app.json')\nprint(\"字符串相加的陷阱           =\", '/srv/app' + 'conf/app.json')\n\nprint()\nprint(\"=== Windows 纯路径：分隔符自动归一 ===\")\nw = PureWindowsPath('C:/x/../y/z.txt')\nprint(\"str    =\", w)\nprint(\"parts  =\", w.parts)\nprint(\"drive  =\", repr(w.drive), \"| anchor =\", repr(w.anchor))\nprint(\"转 POSIX:\", PurePosixPath(str(w)))\n\nprint()\nprint(\"=== 结论 ===\")\nprint(\"PurePath 只做语法处理: '..' 保留在 parts 中, 需要折叠必须显式 resolve() 或 normpath\")\n"
+}

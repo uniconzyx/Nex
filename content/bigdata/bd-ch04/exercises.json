@@ -1,0 +1,232 @@
+{
+  "meta": {
+    "chapter": "bd-ch04",
+    "note": "8 题，基础题 6 + 算法题 2（LeetCode/牛客各 1）。覆盖 RDD 五大特性、惰性求值、窄/宽依赖、Stage 与 Task 计算、reduceByKey vs groupByKey、缓存与 checkpoint、数据倾斜。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "下列关于 RDD 五大特性的描述，正确的是？",
+      "content_md": "Spark 官方给出的 RDD 五大特性包括：一组分区列表、对每个分区的计算函数、对其他 RDD 的依赖列表、（键值 RDD 的）分区器、（每个分区的）首选位置。下列说法正确的是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "RDD 是可变数据集，transformation 会原地修改它"
+        },
+        {
+          "key": "B",
+          "text": "RDD 不可变，transformation 返回新 RDD；容错靠 lineage 重算而非副本"
+        },
+        {
+          "key": "C",
+          "text": "RDD 默认在内存中保留所有数据副本以实现容错"
+        },
+        {
+          "key": "D",
+          "text": "分区器是所有 RDD 都必须具备的特性"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "reference_code": ""
+      },
+      "explanation": "RDD 不可变，任何 transformation 返回新 RDD；容错依靠 lineage（依赖链）重算丢失分区，而不是数据副本（对比 HDFS）。分区器仅键值型 Shuffle RDD 有，非必选。",
+      "tags": [
+        "RDD",
+        "五大特性",
+        "不可变",
+        "lineage"
+      ],
+      "source": "self",
+      "source_ref": "《Spark 快速大数据分析》第 2 章"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "判断下列算子哪些是 transformation、哪些是 action",
+      "content_md": "下列算子中，哪些是 transformation（惰性、返回 RDD），哪些是 action（触发计算、不返回 RDD）？\n\n- `map`\n- `reduceByKey`\n- `collect`\n- `count`\n- `filter`\n- `saveAsTextFile`",
+      "answer": {
+        "output": "transformation：map、reduceByKey、filter（返回新 RDD，惰性，不触发计算）。action：collect、count、saveAsTextFile（触发实际计算，不返回 RDD）。判别法：返回值是否为 RDD。"
+      },
+      "explanation": "transformation 类型为 RDD→RDD 且惰性；action 触发计算并返回标量/集合/写外部。reduce 是 action，reduceByKey 是 transformation，二者易混。",
+      "tags": [
+        "transformation",
+        "action",
+        "惰性求值"
+      ],
+      "source": "self",
+      "source_ref": "《Spark 快速大数据分析》第 3 章"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "找出下列关于依赖模型的错误说法并改正",
+      "content_md": "某笔记写道：「`map`、`filter`、`reduceByKey`、`groupByKey` 都是窄依赖，因为它们都只是对数据做变换；宽依赖只发生在 `join` 的时候。reduceByKey 和 groupByKey 区别不大，随便用。」请指出错误并改正。",
+      "answer": {
+        "correct": [
+          "该说法错误"
+        ],
+        "output": "① `reduceByKey` 与 `groupByKey` 都是**宽依赖**（子分区依赖父的全部分区，触发 Shuffle），不是窄依赖；窄依赖只有 map/filter/union/mapPartitions 这类「子分区只依赖父一个分区」的算子。② 宽依赖不止 join：reduceByKey/groupByKey/distinct/sortBy/repartition 都会产生宽依赖。③ reduceByKey 与 groupByKey 区别巨大：reduceByKey 在 map 端预聚合，Shuffle 量≈不同 key 数；groupByKey 全量搬运记录，Shuffle 量大且易 OOM/倾斜，绝不能随便用。"
+      },
+      "explanation": "宽依赖的本质是「子分区依赖父全部分区」。聚合类算子几乎都是宽依赖；reduceByKey 的相对优势在于 map 端 combiner。",
+      "tags": [
+        "窄依赖",
+        "宽依赖",
+        "reduceByKey",
+        "groupByKey"
+      ],
+      "source": "self",
+      "source_ref": "《Spark 内核设计的艺术》第 4 章"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "一段 RDD 程序的 Stage 数与总 Task 数",
+      "content_md": "设 RDD 分区数 = 4。程序为：`sc.parallelize(...).map(...).filter(...).reduceByKey(...).map(...).collect()`。请问该 job 的 Stage 数与总 Task 数分别是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "Stage=1，Task=4"
+        },
+        {
+          "key": "B",
+          "text": "Stage=2，Task=8"
+        },
+        {
+          "key": "C",
+          "text": "Stage=2，Task=4"
+        },
+        {
+          "key": "D",
+          "text": "Stage=3，Task=12"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "reference_code": ""
+      },
+      "explanation": "reduceByKey 是宽依赖，把 DAG 切成 2 个 Stage（窄依赖链 map→filter 为一个，reduceByKey→map 为另一个）。每个 Stage 的 Task 数 = 末态分区数 = 4，总 Task = 4+4 = 8。",
+      "tags": [
+        "Stage",
+        "Task",
+        "宽依赖"
+      ],
+      "source": "self",
+      "source_ref": "《Spark 快速大数据分析》第 3 章"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "cache 与 checkpoint 的区别",
+      "content_md": "关于 `cache()`/`persist()` 与 `checkpoint()` 的区别，下列描述正确的是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "两者都会截断 lineage，故障后都从可靠存储恢复"
+        },
+        {
+          "key": "B",
+          "text": "cache 保留 lineage、缓存丢失靠重算；checkpoint 斩断 lineage、从可靠存储恢复"
+        },
+        {
+          "key": "C",
+          "text": "checkpoint 比 cache 更快，应优先用 checkpoint"
+        },
+        {
+          "key": "D",
+          "text": "cache 后任何 executor 失效都不会触发重算"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "reference_code": ""
+      },
+      "explanation": "cache/persist 物化结果但保留 lineage，缓存丢失（executor 失效/被挤出）仍沿 lineage 重算；checkpoint 写入可靠存储并置空父指针，斩断 lineage，恢复从文件读。checkpoint 有额外写入代价，故常在之前先 cache。",
+      "tags": [
+        "cache",
+        "persist",
+        "checkpoint",
+        "lineage"
+      ],
+      "source": "self",
+      "source_ref": "《Spark 快速大数据分析》第 7 章"
+    },
+    {
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "用 Python 从零模拟 reduceByKey（map 端预聚合 + 合并）",
+      "content_md": "不使用任何 Spark API，用纯 Python 实现一个极简 `reduceByKey`：先按 key 做 map 端本地聚合（预聚合），再把各分区的局部结果按 key 合并（combine），最终得到全局聚合结果。验证 `('a',2),('b',1),('a',3)` 得到 `{'a':5,'b':1}`。",
+      "answer": {
+        "reference_code": "def reduce_by_key(pairs):\n    # map 端本地预聚合：每个分区内先按 key 聚成局部结果\n    local = {}\n    for k, v in pairs:\n        local[k] = local.get(k, 0) + v\n    return local\n\ndef combine(locals):\n    # reduce 端合并各分区局部结果\n    out = {}\n    for loc in locals:\n        for k, v in loc.items():\n            out[k] = out.get(k, 0) + v\n    return out\n\npairs = [('a', 2), ('b', 1), ('a', 3)]\nlocal = reduce_by_key(pairs)          # 单分区预聚合\nresult = combine([local])             # 合并\nprint(result)                         # {'a': 5, 'b': 1}\n"
+      },
+      "explanation": "reduceByKey 的两段式（map 端预聚合 + reduce 端合并）正是它比 groupByKey 省 Shuffle 的原因：map 端已把同 key 多条记录压成一条局部聚合。",
+      "tags": [
+        "reduceByKey",
+        "预聚合",
+        "模拟"
+      ],
+      "source": "self",
+      "source_ref": "《Spark 内核设计的艺术》第 4 章"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "词频统计 Top-K（与 reduceByKey 同源）",
+      "content_md": "题面与完整描述请见外部链接（合规：只存元数据+链接）。统计文本中出现频率最高的前 K 个单词，思想与「RDD 中按 key 分组聚合、词频统计」完全同源：先分组计数（map→reduceByKey），再按频率排序取前 K。",
+      "answer": {
+        "reference_code": "见外部链接题解（合规：只存元数据与链接，不搬运题面正文）"
+      },
+      "explanation": "词频聚合本质是 map→group→reduce；可与 RDD 的 reduceByKey、以及倾斜场景的「先局部聚合再合并」类比理解。",
+      "tags": [
+        "词频",
+        "TopK",
+        "哈希",
+        "聚合"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 692 (top-k-frequent-words) / 347 (top-k-frequent-elements)",
+      "external_url": "https://leetcode.cn/problems/top-k-frequent-elements/"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "nowcoder",
+      "difficulty": "hard",
+      "title": "大数据倾斜下的两阶段聚合（加盐思想）",
+      "content_md": "题面与完整描述请见外部链接（合规：只存元数据+链接）。要求对存在极端热 key 的海量数据做分组求和：先给热 key 加随机/枚举后缀打散到多路做局部聚合（阶段一），再去掉后缀按原 key 合并（阶段二），思想与「Spark 数据倾斜的加盐 + 两阶段聚合」完全一致。",
+      "answer": {
+        "reference_code": "见外部链接题解（合规：只存元数据与链接，不搬运题面正文）"
+      },
+      "explanation": "加盐要求聚合函数可结合/可交换（sum/count/min/max）；两阶段结果与直接聚合一致，但把单 Reduce 长尾负载均摊到多路，是处理数据倾斜的通用手法。",
+      "tags": [
+        "数据倾斜",
+        "加盐",
+        "两阶段聚合"
+      ],
+      "source": "nowcoder",
+      "source_ref": "牛客网 大数据倾斜/两阶段聚合经典题",
+      "external_url": "https://www.nowcoder.com/practice"
+    }
+  ]
+}

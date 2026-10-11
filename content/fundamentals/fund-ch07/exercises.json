@@ -1,0 +1,231 @@
+{
+  "meta": {
+    "chapter": "fund-ch07",
+    "note": "8 题，基础题 6 + 算法题 2；LeetCode 题仅存元数据与链接，不搬运题面。408 计组「数据表示与运算」考点为主。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "补码的表示范围与 -128",
+      "content_md": "8 位补码整数能表示的数值范围是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "-127 ~ +127"
+        },
+        {
+          "key": "B",
+          "text": "-128 ~ +127"
+        },
+        {
+          "key": "C",
+          "text": "-128 ~ +128"
+        },
+        {
+          "key": "D",
+          "text": "-127 ~ +128"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "8 位补码范围是 $-2^{7} \\sim 2^{7}-1$，即 **-128 ~ +127**。关键点：`1000_0000` 在补码里被定义为 $-128$，**不是负零**；补码只有一个零（`0000_0000`），因此负数比正数多一个。A 是原码范围，C、D 都超出了可表示范围。",
+      "tags": [
+        "datarep",
+        "twos-complement",
+        "range"
+      ],
+      "source": "book",
+      "source_ref": "《计算机组成原理》唐朔飞 第 2 章 数据表示"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "补码求真值",
+      "content_md": "8 位补码 `1011_0110` 的真值是多少？（写出计算过程）",
+      "answer": {
+        "correct": [
+          "-74"
+        ]
+      },
+      "explanation": "符号位为 1，是负数。数值位 `011_0110` 取反得 `100_1001`，加 1 得 `100_1010` = 74，故真值为 **-74**。也可按位权展开互验：$-128 + 64 + 32 + 4 + 2 = -74$，两法一致。",
+      "tags": [
+        "datarep",
+        "twos-complement",
+        "value"
+      ],
+      "source": "self",
+      "source_ref": "408 统考 数据结构/计组 基础题型"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "medium",
+      "title": "溢出与进位的区别",
+      "content_md": "关于补码加法中的「进位」与「溢出」，下列说法正确的是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "最高位有进位就一定发生溢出"
+        },
+        {
+          "key": "B",
+          "text": "进位只影响无符号数结果的正确性，溢出只影响有符号数结果的正确性"
+        },
+        {
+          "key": "C",
+          "text": "两个负数相加结果为正，属于正溢出"
+        },
+        {
+          "key": "D",
+          "text": "两个异号数相加也可能溢出"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "**进位**是硬件的自然现象，只对无符号数有意义；**溢出**是结果超出有符号数可表示范围，只对有符号数有意义 —— B 正确。A 错：判溢出要用 $C_{n-1} \\oplus C_{n-2}$，只看最高位进位会把「有进位但结果正确」误判为溢出。C 错：两个负数相加得正数是**负溢出**。D 错：异号相加永不溢出（真值被夹在两操作数之间）。",
+      "tags": [
+        "overflow",
+        "carry",
+        "twos-complement"
+      ],
+      "source": "book",
+      "source_ref": "《计算机组成原理》唐朔飞 第 6 章 运算方法"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "medium",
+      "title": "IEEE 754 单精度字段与偏置",
+      "content_md": "关于 IEEE 754 单精度浮点数，下列说法**错误**的是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "阶码 8 位，采用偏置值为 127 的移码表示"
+        },
+        {
+          "key": "B",
+          "text": "尾数 23 位，规格化数的最高位 1 被隐含，实际有效位为 24 位"
+        },
+        {
+          "key": "C",
+          "text": "阶码全 0 且尾数非 0 表示非规格化数，其指数固定为 -126"
+        },
+        {
+          "key": "D",
+          "text": "阶码全 1 且尾数为 0 表示 0"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "D"
+        ]
+      },
+      "explanation": "阶码全 1 且尾数为 0 表示 **$\\pm\\infty$（无穷大）**，不是 0。0 的编码是**阶码全 0 且尾数全 0**（且 IEEE 754 保留了 $+0$ 与 $-0$ 两个零）。A、B、C 均正确：偏置 127（$2^{8-1}-1$）、隐含最高位 1 使有效位达 24、非规格化数指数固定为 $-126$（偏置减一）。",
+      "tags": [
+        "ieee754",
+        "float",
+        "bias"
+      ],
+      "source": "book",
+      "source_ref": "《计算机组成原理》唐朔飞 第 2 章 浮点数表示"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "修正浮点相等比较",
+      "content_md": "下面的函数用于判断两个双精度数是否「表示同一个量」，请指出错误并改正。\n\n```c\nint same(double a, double b) {\n    return a == b;\n}\n```",
+      "answer": {
+        "correct": [
+          "改用容差比较，例如返回 fabs(a-b) <= eps * fmax(fabs(a), fabs(b)) 形式"
+        ]
+      },
+      "explanation": "浮点数存在舍入误差，`0.1 + 0.2 == 0.3` 判为假。**直接用 `==` 比较浮点几乎总是错的**。正确做法是容差比较：绝对误差 `fabs(a-b) <= eps` 适合量级已知的场景；跨量级场景应用**相对误差** `fabs(a-b) <= eps * fmax(fabs(a), fabs(b))`，避免大数下绝对容差失效。另外若其中可能含 NaN，`==` 恒为假，应先用 `isnan()` 排除。涉及金额时应改用整数分或十进制类型，从根上消除二进制表示误差。",
+      "tags": [
+        "float",
+        "comparison",
+        "tolerance"
+      ],
+      "source": "self",
+      "source_ref": "工程实践 + 408 浮点误差考点"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "hard",
+      "title": "判溢出并给出正确结果",
+      "content_md": "在 8 位补码下计算 $x = 105$、$y = 65$ 的 $x + y$：写出两操作数的补码、相加过程，判断是否溢出，并说明硬件判据。",
+      "answer": {
+        "correct": [
+          "溢出（正溢出）"
+        ]
+      },
+      "explanation": "$[105]_补 = 0110\\_1001$，$[65]_补 = 0100\\_0001$。逐位相加：$0110\\_1001 + 0100\\_0001 = 1010\\_1010$（最高位进位丢弃）。结果 `1010_1010` 的符号位为 1，而两个操作数都是正数 —— **同号相加得异号，正溢出**。数学上 $105 + 65 = 170 > 127$，确实超出范围，CPU 不报异常，只是把结果写回并由 OF 标志置位。硬件判据（三选一即可）：① $C_7 \\oplus C_6 = 1$；② 同号相加得异号；③ 双符号位为 `01`。",
+      "tags": [
+        "overflow",
+        "twos-complement",
+        "arithmetic"
+      ],
+      "source": "self",
+      "source_ref": "408 统考 计组 运算方法题型"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "easy",
+      "title": "位 1 的个数（汉明重量）",
+      "content_md": "统计一个 32 位无符号整数的二进制表示中 1 的个数。可用「n & (n-1) 消掉最低位 1」的技巧把循环次数降到 1 的个数。",
+      "answer": {
+        "correct": [
+          "见外链题解"
+        ]
+      },
+      "explanation": "本题是位运算的基本功，直接对应本章「机器数按位表示」的知识：理解一个整数在机器里就是若干 bit，`n & (n-1)` 能清掉最低位的 1（因为减 1 会把最低位的 1 变成 0、其后的 0 全变成 1），循环次数等于 1 的个数而不是 32 次。另有 SWAR 分治写法，$O(1)$ 无分支。**本题只提供元数据与链接，题面正文请到原站查看**。",
+      "tags": [
+        "bit-manipulation",
+        "datarep"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 191. Number of 1 Bits（仅元数据）",
+      "external_url": "https://leetcode.cn/problems/number-of-1-bits/"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "medium",
+      "title": "不用加号实现加法（补码加法器）",
+      "content_md": "不使用 `+`、`-` 运算符，计算两个整数之和。提示：用「异或得到无进位和、与运算左移一位得到进位」，循环到进位为 0。",
+      "answer": {
+        "correct": [
+          "见外链题解"
+        ]
+      },
+      "explanation": "这题就是**手工实现补码加法器**：`a ^ b` 是**不带进位的和**（半加和），`(a & b) << 1` 是**进位**，两者相加即得完整结果 —— 与本章「补码把减法变成加法」的动机完全同源。在 C 里注意「与运算左移」可能触发**有符号左移 UB**，应先把操作数转成无符号再移位，最后转回有符号。**本题只提供元数据与链接，题面正文请到原站查看**。",
+      "tags": [
+        "bit-manipulation",
+        "twos-complement",
+        "adder"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 371. Sum of Two Integers（仅元数据）",
+      "external_url": "https://leetcode.cn/problems/sum-of-two-integers/"
+    }
+  ]
+}

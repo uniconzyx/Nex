@@ -1,0 +1,8 @@
+{
+  "title": "菱形继承与虚继承（仅一份共享基类）",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "42",
+  "code": "#include <iostream>\nstruct Top { int v = 10; };\nstruct Left : virtual Top {};    // 虚继承：共享同一份 Top\nstruct Right : virtual Top {};\nstruct Bottom : Left, Right {};  // 菱形：Bottom 内只有一份 Top 子对象\nint main() {\n    Bottom b;\n    b.v = 42;                    // 无二义性（仅一份 Top::v）\n    std::cout << b.v;\n}\n"
+}

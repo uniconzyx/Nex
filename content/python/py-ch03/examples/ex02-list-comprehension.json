@@ -1,0 +1,8 @@
+{
+  "title": "列表推导式：映射 + 过滤，嵌套扁平化",
+  "code_lang": "python",
+  "code_std": "python3.11",
+  "stdin": "",
+  "expected_output": "[1, 9, 25]\n[1, 2, 3, 4]",
+  "code": "nums = [1, 2, 3, 4, 5]\nsquares = [x * x for x in nums if x % 2 == 1]\nprint(squares)\nmatrix = [[1, 2], [3, 4]]\nflat = [v for row in matrix for v in row]\nprint(flat)"
+}

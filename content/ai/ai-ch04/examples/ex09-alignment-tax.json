@@ -1,0 +1,8 @@
+{
+  "title": "对齐税：微调前后各类能力得分对比",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "能力维度       微调前        微调后        变化\n通用问答       82         79         -3\n数学推理       61         88         +27\n代码生成       74         86         +12\n长文理解       70         66         -4\n指令跟随       68         91         +23\n\n微调前平均得分 = 71.00\n微调后平均得分 = 82.00\n目标任务(数学/代码/指令) 平均变化 = +20.67\n通用能力(问答/长文)   平均变化 = -3.50\n是否出现对齐税(通用能力下降): True\n\n结论: 指令微调会提升目标任务, 但可能以部分通用能力为代价\n      这正是 RLHF/DPO 等对齐手段与数据配比要权衡的核心",
+  "code": "\nimport numpy as np\ntasks = ['通用问答', '数学推理', '代码生成', '长文理解', '指令跟随']\nbase = np.array([82.0, 61.0, 74.0, 70.0, 68.0])\nafter = np.array([79.0, 88.0, 86.0, 66.0, 91.0])\ndiff = after - base\nprint('%-10s %-10s %-10s %s' % ('能力维度', '微调前', '微调后', '变化'))\nfor t, b, a, d in zip(tasks, base, after, diff):\n    print('%-10s %-10.0f %-10.0f %+.0f' % (t, b, a, d))\nprint()\nprint('微调前平均得分 = %.2f' % base.mean())\nprint('微调后平均得分 = %.2f' % after.mean())\nprint('目标任务(数学/代码/指令) 平均变化 = %+.2f' % diff[[1, 2, 4]].mean())\nprint('通用能力(问答/长文)   平均变化 = %+.2f' % diff[[0, 3]].mean())\nprint('是否出现对齐税(通用能力下降):', bool(diff[[0, 3]].mean() < 0))\nprint()\nprint('结论: 指令微调会提升目标任务, 但可能以部分通用能力为代价')\nprint('      这正是 RLHF/DPO 等对齐手段与数据配比要权衡的核心')\n"
+}

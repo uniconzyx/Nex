@@ -1,0 +1,8 @@
+{
+  "title": "dynamic_cast 向下转型成功",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "Derived\n",
+  "code": "#include <iostream>\nstruct Base { virtual ~Base() = default; };\nstruct Derived : Base { void hello() const { std::cout << \"Derived\\n\"; } };\nint main() {\n    Derived d;\n    Base* bp = &d;\n    if (Derived* dp = dynamic_cast<Derived*>(bp))   // 成功：bp 实际指向 Derived\n        dp->hello();\n}\n"
+}

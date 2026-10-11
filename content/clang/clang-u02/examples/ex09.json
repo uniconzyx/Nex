@@ -1,0 +1,8 @@
+{
+  "title": "动态结构体数组 + qsort 排序",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "1:alpha\n2:beta\n3:gamma\n4:delta",
+  "code": "#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct { int id; const char *name; } Item;\n\nint cmp_by_id(const void *a, const void *b) {\n    const Item *x = a, *y = b;\n    return (x->id > y->id) - (x->id < y->id);\n}\n\nint main(void) {\n    size_t n = 4;\n    Item *arr = malloc(n * sizeof(Item));\n    if (!arr) return 1;\n\n    arr[0] = (Item){3, \"gamma\"};\n    arr[1] = (Item){1, \"alpha\"};\n    arr[2] = (Item){4, \"delta\"};\n    arr[3] = (Item){2, \"beta\"};\n\n    qsort(arr, n, sizeof(Item), cmp_by_id);\n    for (size_t i = 0; i < n; i++) printf(\"%d:%s\\n\", arr[i].id, arr[i].name);\n\n    free(arr); arr = NULL;\n    return 0;\n}"
+}

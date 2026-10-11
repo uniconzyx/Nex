@@ -1,0 +1,194 @@
+{
+  "meta": {
+    "chapter": "tool-ch03",
+    "title": "Git 核心：对象模型与分支 —— 习题集",
+    "count": 8,
+    "note": "8 题，基础题 6 + 算法题 2（均为 self 平台；参考代码覆盖内容寻址 SHA 计算、Merkle DAG、merge-base LCA、内容去重，均可独立运行）"
+  },
+  "items": [
+    {
+      "id": "q1",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "Git 与 SVN 的核心差异",
+      "content_md": "关于 Git 与 SVN 的核心差异，下列说法正确的是？\n\nA. SVN 是分布式版本控制，每个开发者都有完整仓库；Git 是集中式\nB. Git 存储的是文件**快照（snapshot）**并以**内容寻址（SHA-1）**组织对象，SVN 主要存储文件**差异（delta）**\nC. Git 的「分支」只是一个指向 commit 的轻量指针（约 41 字节），SVN 的分支是目录拷贝，开销大\nD. Git 完全不需要任何服务器，因此无法做集中式协作\n\n请选择并说明。",
+      "answer": {
+        "correct": "B、C",
+        "explain": "**B 正确**：Git 的对象数据库以「类型+长度+内容」算出的 SHA-1 为键（内容寻址），每个提交保存文件快照；SVN 以版本号/路径寻址，主要存差异。\n\n**C 正确**：Git 分支只是 `.git/refs/heads/<name>` 里一个 41 字节的 commit SHA，创建/切换 O(1)；SVN 分支是目录拷贝，开销与文件数成正比。\n\n**A 错误**：正好相反——Git 分布式、SVN 集中式。\n\n**D 错误**：Git 虽可纯本地工作，但协作仍需一个共享远端（bare repo）；「无需中心服务器」是误解。"
+      },
+      "explanation": "考 Git 与 SVN 的根本区别（分布式/快照/内容寻址/分支指针），是考研与面试高频。",
+      "tags": [
+        "Git",
+        "版本控制",
+        "SVN",
+        "内容寻址"
+      ],
+      "source": "self",
+      "source_ref": "《Pro Git》第 1 章 · 起步；tool-ch03 concept/01"
+    },
+    {
+      "id": "q2",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "三区模型与 reset 三模式",
+      "content_md": "关于工作区/暂存区/版本库与 `git reset` 三模式，正确的是？\n\nA. `git commit` 会把「工作区所有改动」提交，无需 `git add`\nB. `git reset --hard HEAD~1` 会把 HEAD、暂存区、工作区全部回退到上一个提交，未提交的改动会丢失\nC. `git reset --soft HEAD~1` 只移动 HEAD，暂存区与工作区保持不变（改动仍 staged）\nD. `git reset --mixed`（默认）会移动 HEAD 并重置暂存区，但保留工作区改动\n\n请选择并说明。",
+      "answer": {
+        "correct": "B、C、D",
+        "explain": "**A 错误**：`commit` 只提交**暂存区（index）**，未 `git add` 的改动不会进提交。\n\n**B 正确**：`--hard` 三者全动，工作区未提交改动被直接丢弃（危险）。\n\n**C 正确**：`--soft` 只改 HEAD 引用，index 与工作树不动，改动仍「已暂存」。\n\n**D 正确**：`--mixed`（默认）回退指针并清空暂存区，改动退回工作区（未暂存）。"
+      },
+      "explanation": "考三区归属与 reset 三模式对三区的影响范围，是本章核心。",
+      "tags": [
+        "Git",
+        "三区",
+        "reset",
+        "暂存区"
+      ],
+      "source": "self",
+      "source_ref": "《Pro Git》第 2 章 · 基础；tool-ch03 concept/02、04"
+    },
+    {
+      "id": "q3",
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "推断 reset --soft 后的三区状态",
+      "content_md": "仓库只有一个提交 `c1`（含 `a.txt` 内容为 `1`）。执行序列：\n① 编辑 `a.txt` 内容为 `2`；② `git add a.txt`；③ `git reset --soft HEAD`。\n\n请回答：(1) HEAD 现在指向哪个提交？(2) `git status` 中 `a.txt` 属于哪种状态（未修改 / 已暂存待提交 / 工作区已改未暂存）？",
+      "answer": {
+        "correct": "HEAD 仍指向 c1；a.txt 处于「已暂存待提交（staged）」",
+        "explain": "`reset --soft HEAD` 因本就位于 c1，HEAD 不变（仍是 c1），且 `--soft` **不碰暂存区与工作区**——第②步的 `git add` 仍生效，所以 index 里 `a.txt` 相对 HEAD(c1) 是「已修改且已暂存」。`git status` 会显示 「Changes to be committed: modified: a.txt」。\n\n对比：`--mixed`（默认）会把 `a.txt` 退回到工作区（未暂存）；`--hard` 会把工作区也还原成 c1 的 `a.txt=1`。这就是三模式影响范围递增的直观体现。"
+      },
+      "explanation": "考 reset 三模式对三区的差异化影响，output 题经典陷阱。",
+      "tags": [
+        "Git",
+        "reset",
+        "三区",
+        "暂存区"
+      ],
+      "source": "self",
+      "source_ref": "tool-ch03 concept/04；examples/ex10"
+    },
+    {
+      "id": "q4",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "detached HEAD 与救援",
+      "content_md": "关于 detached HEAD，正确的是？\n\nA. `git checkout <commit-sha>` 会进入 detached HEAD，此时 HEAD 直接指向某个 commit 而非分支引用\nB. 在 detached HEAD 状态下提交的 commit 会立即被垃圾回收（GC）删除，无法找回\nC. 离开 detached 状态（切回分支）后，该状态下产生的提交若未被任何分支/标签引用，确实可能「丢失」，但可用 `git reflog` 找回\nD. 救援 detached 提交的正确做法之一是 `git checkout -b rescue <sha>` 为其创建分支\n\n请选择并说明。",
+      "answer": {
+        "correct": "A、C、D",
+        "explain": "**A 正确**：checkout 一个具体 SHA 时 HEAD 不再以 `ref: refs/heads/...` 形式存在，而是直接存 SHA。\n\n**B 错误**：提交仍在对象库，只是无分支引用；不会「立即」被 GC，且 reflog 默认保留 90 天。\n\n**C 正确**：离开后该游离提交无引用，最终可能 GC；但 `.git/logs/HEAD` 的 reflog 记录了它的 SHA，可据此找回。\n\n**D 正确**：`git checkout -b rescue <sha>`（或 `git branch rescue <sha>`）把游离提交收编成分支，避免丢失。"
+      },
+      "explanation": "考 detached HEAD 含义、reflog 救援网与收编手法。",
+      "tags": [
+        "Git",
+        "detached HEAD",
+        "reflog",
+        "救援"
+      ],
+      "source": "self",
+      "source_ref": "《Pro Git》第 3 章 · 分支基础；tool-ch03 concept/04"
+    },
+    {
+      "id": "q5",
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "用 Python 复算 blob SHA（验证内容寻址）",
+      "content_md": "Git 用 `sha1(b'blob ' + len(content) + b'\\0' + content)` 计算 blob 对象键。请写一段**可直接执行的 Python**，验证「相同内容 → 相同 SHA、不同内容 → 不同 SHA」，并打印一个示例 SHA。",
+      "answer": {
+        "correct": "见 reference_code（相同内容 SHA 相等、不同内容不相等）",
+        "explain": "内容寻址的精确定义：`SHA-1 = sha1('blob ' + str(len(bytes)) + '\\0' + bytes)`。注意前缀是类型名 + 空格 + 十进制长度 + 一个 NUL（\\0）字节，再接原始内容字节——长度不含 NUL。这与 `git hash-object` 的输出完全一致，是「相同内容永远同一 SHA、blob 不含文件名」的直接证明。",
+        "reference_code": "import hashlib\n\ndef blob_sha(text):\n    b = text.encode('utf-8')\n    return hashlib.sha1(b'blob ' + str(len(b)).encode() + b'\\x00' + b).hexdigest()\n\na = blob_sha('hello\\n')\nb = blob_sha('hello\\n')\nc = blob_sha('world\\n')\nprint('相同内容 SHA 相同:', a == b)\nprint('不同内容 SHA 不同:', a != c)\nprint('示例 SHA:', a)\nassert a == b and a != c\n"
+      },
+      "explanation": "用可执行 Python 落地内容寻址定义，呼应 concept/01 与 examples/ex01。",
+      "tags": [
+        "Git",
+        "内容寻址",
+        "SHA-1",
+        "hashlib",
+        "python"
+      ],
+      "source": "self",
+      "source_ref": "tool-ch03 concept/01；examples/ex01、ex02"
+    },
+    {
+      "id": "q6",
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "用 Python 模拟 commit→tree→blob 的 Merkle DAG",
+      "content_md": "请用一段**可直接执行的 Python** 模拟 Git 的对象链：给定文件内容与提交说明，依次计算 blob、tree、commit 的 SHA-1，并验证「改动任一底层字节会改变根 commit 的 SHA」（即 Merkle 结构的可验证性）。",
+      "answer": {
+        "correct": "见 reference_code（commit SHA 随内容变化而变化）",
+        "explain": "Merkle DAG 的本质：commit 对象引用 tree，tree 引用 blob，任一底层内容变化都会沿引用链向上改变根 commit 的 SHA。下面把「类型名 + 长度 + NUL + 内容」这套规则统一成一个 `obj_sha` 函数，分别套用在 blob/tree/commit 上，并对比「改内容前后的 commit SHA」证明结构可验证。",
+        "reference_code": "import hashlib\n\ndef obj_sha(obj_type, content):\n    b = content.encode('utf-8')\n    return hashlib.sha1(obj_type + b' ' + str(len(b)).encode() + b'\\x00' + b).hexdigest()\n\nblob = obj_sha(b'blob', 'file content')\ntree = obj_sha(b'tree', 'blob ' + blob + ' file.txt')\ncommit = obj_sha(b'commit', 'tree ' + tree + '\\nparent \\nmsg')\nprint('blob  :', blob[:7])\nprint('tree  :', tree[:7])\nprint('commit:', commit[:7])\nchanged = obj_sha(b'commit', 'tree ' + obj_sha(b'tree', 'blob ' + obj_sha(b'blob', 'CHANGED') + ' file.txt') + '\\nparent \\nmsg')\nprint('改内容后 commit 变化:', changed[:7] != commit[:7])\nassert changed[:7] != commit[:7]\n"
+      },
+      "explanation": "模拟 Merkle DAG 与 SHA 链，呼应 concept/01 博士生视角。",
+      "tags": [
+        "Git",
+        "Merkle",
+        "DAG",
+        "SHA-1",
+        "python"
+      ],
+      "source": "self",
+      "source_ref": "tool-ch03 concept/01；examples/ex03"
+    },
+    {
+      "id": "q7",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "模拟 merge-base：commit DAG 上的最近公共祖先（LCA）",
+      "content_md": "`git merge-base A B` 求两分支的**最近公共祖先**，是三方合并的基线。请写一段**可直接执行的 Python**：给定 `parents` 映射（node → 父节点列表）与两个起点，实现求最近公共祖先的算法，并用示例 DAG 验证。",
+      "answer": {
+        "correct": "见 reference_code（LCA 返回正确祖先）",
+        "explain": "commit DAG 是反向树（每个节点指向其 parent），求 merge-base 等价于求两节点在「祖先集合」上的最近公共祖先（LCA）。做法：先从 A 向上收集全部祖先集合；再从 B 向上 BFS，第一个落在 A 祖先集合里的节点即为最近公共祖先。这正是 Git 三方合并选取基线的算法核心。",
+        "reference_code": "from collections import deque\n\ndef ancestors(start, parents):\n    seen = set()\n    stack = [start]\n    while stack:\n        n = stack.pop()\n        if n in seen:\n            continue\n        seen.add(n)\n        stack.extend(parents.get(n, []))\n    return seen\n\ndef merge_base(a, b, parents):\n    anc_a = ancestors(a, parents)\n    q = deque([b])\n    visited = set()\n    while q:\n        n = q.popleft()\n        if n in visited:\n            continue\n        visited.add(n)\n        if n in anc_a:\n            return n\n        q.extend(parents.get(n, []))\n    return None\n\nparents = {1: [], 2: [1], 3: [1], 4: [2, 3]}\nprint('merge-base(2, 3) =', merge_base(2, 3, parents))\nprint('merge-base(4, 4) =', merge_base(4, 4, parents))\nassert merge_base(2, 3, parents) == 1\n"
+      },
+      "explanation": "实现 merge-base 算法，呼应 concept/03 与 examples/ex06。",
+      "tags": [
+        "Git",
+        "merge-base",
+        "LCA",
+        "DAG",
+        "算法"
+      ],
+      "source": "self",
+      "source_ref": "tool-ch03 concept/03；examples/ex06"
+    },
+    {
+      "id": "q8",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "内容寻址去重：统计唯一 blob 数",
+      "content_md": "Git 内容寻址的天然收益是「相同内容只存一份」。请写一段**可直接执行的 Python**：给定若干文件及其内容，用 blob SHA 计算**唯一 blob 数量**与去重率，并断言两个内容相同的文件只计一次。",
+      "answer": {
+        "correct": "见 reference_code（唯一 blob 数正确）",
+        "explain": "把每个文件内容算成 blob SHA，用集合去重即可得唯一对象数。这正是 Git 对象库「按内容去重」的最小模型：两个文件名不同但内容相同的文件，在 Git 里是同一个 blob 对象，只占一份存储。",
+        "reference_code": "import hashlib\n\ndef blob_sha(text):\n    b = text.encode('utf-8')\n    return hashlib.sha1(b'blob ' + str(len(b)).encode() + b'\\x00' + b).hexdigest()\n\ncontents = {'a.txt': 'x\\n', 'b.txt': 'x\\n', 'c.txt': 'y\\n', 'd.txt': 'z\\n'}\nfiles = list(contents.keys())\nunique = {blob_sha(contents[f]) for f in files}\nprint('文件数:', len(files), '唯一 blob 数:', len(unique))\nprint('去重率:', round(1 - len(unique) / len(files), 2))\nassert len(unique) == 3\n"
+      },
+      "explanation": "用集合去重模拟内容寻址收益，呼应 concept/01 与 examples/ex02。",
+      "tags": [
+        "Git",
+        "内容寻址",
+        "去重",
+        "hashlib",
+        "算法"
+      ],
+      "source": "self",
+      "source_ref": "tool-ch03 concept/01；examples/ex02"
+    }
+  ]
+}

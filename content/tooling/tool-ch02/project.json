@@ -1,0 +1,67 @@
+{
+  "meta": {
+    "chapter": "tool-ch02",
+    "category": "system",
+    "title": "Linux 进程、管道与 Shell 脚本 —— 综合项目",
+    "count": 1,
+    "note": "一个可交付的进程守护与优雅退出工具，覆盖本章全部知识点"
+  },
+  "items": [
+    {
+      "title": "实现一个「优雅退出的进程守护器」watchdog.sh",
+      "requirement_md": "用纯 Bash 实现 `watchdog.sh`，对一组子命令做**守护 + 优雅退出 + 日志**，要求覆盖本章全部知识点且脚本本身体现「健壮 Shell 编程」。\n\n**功能要求**：\n\n1. **守护与启动**\n   - 用法：`watchdog.sh start <cmd> [args...]` 以后台方式拉起 `<cmd>`，记录其 PID 到 `<cmd>.pid`；\n   - 用 `nohup ... &` 或 `setsid` 使其脱离终端 SIGHUP；`stop` 时读取 pidfile 向该进程发 **SIGTERM**，等待 `TimeoutStopSec`（默认 10s）后仍未退出再发 **SIGKILL**。\n\n2. **优雅退出（信号）**\n   - 守护进程捕获 **SIGTERM/SIGINT**，先停止拉起新子进程、向所有托管子进程转发 SIGTERM、等待其退出，再清理 pidfile 后 `_exit()`；\n   - 体现「SIGKILL 是最后手段，SIGTERM 给清理窗口」。\n\n3. **僵尸/孤儿防控**\n   - 守护进程持续 `wait` 回收退出的子进程（或用 `trap ... SIGCHLD` + `wait -n`），**不产生僵尸**；\n   - 说明：若守护进程自身退出，子进程应被 init 收养而非丢失。\n\n4. **日志与重定向（fd 视角）**\n   - 所有子进程 stdout/stderr 用 `>> app.log 2>&1` **正确重定向**（注意顺序），日志带时间戳；\n   - 提供 `status` 子命令打印各托管进程 PID、状态（R/S/Z）、CPU/内存（`ps` 指定格式、不用 `ps` 文本解析做判断）。\n\n5. **健壮 Shell**\n   - 开头 `set -euo pipefail`；变量加引号；进程创建用数组 `\"$@\"` 转发参数（避免词拆分）；\n   - 处理「cmd 未提供」「pidfile 已存在（已在运行）」「stop 时进程已死」等错误分支，输出到 stderr 但不崩溃。\n\n6. **可验证性**\n   - 提供 `make_test_env.sh` 造样本（一个会睡几秒后正常退出的 `sleeper`、一个捕获 SIGTERM 打印日志后退出的 `graceful`）；\n   - 用 `bats` 或朴素断言脚本验证：`start` 后 pidfile 存在、`stop` 后进程消失且无僵尸、日志含优雅退出记录、信号转发生效。\n\n**提交物**：`watchdog.sh`、`make_test_env.sh`、`test_watchdog.sh`、`README.md`（说明每项机制与修复建议）。\n\n**进阶**：支持 `restart`、多实例并发守护、用 `systemd` 单元封装（给出 `.service` 文件示例，体现 Restart=/KillSignal=/TimeoutStopSec=）。",
+      "tasks": [
+        {
+          "title": "任务 1：骨架、参数解析与 start/stop",
+          "verification": {
+            "type": "auto",
+            "desc": "start 后 pidfile 存在且进程在跑；stop 后进程消失、pidfile 被清。故意不传 cmd 应报错到 stderr 而非崩溃。"
+          }
+        },
+        {
+          "title": "任务 2：优雅退出（SIGTERM 转发 + 超时转 SIGKILL）",
+          "verification": {
+            "type": "auto",
+            "desc": "向守护发 SIGTERM，断言它向子进程转发 SIGTERM 并等待退出；人为制造超时（子进程忽略 SIGTERM）时，守护在 TimeoutStopSec 后发 SIGKILL。"
+          }
+        },
+        {
+          "title": "任务 3：僵尸/孤儿防控（持续 wait）",
+          "verification": {
+            "type": "auto",
+            "desc": "子进程正常退出后，`ps` 中不应出现 STAT=Z 的僵尸；用 `ps -l` 断言守护进程的子进程均被及时回收。"
+          }
+        },
+        {
+          "title": "任务 4：日志与 fd 重定向（2>&1 顺序）",
+          "verification": {
+            "type": "auto",
+            "desc": "子进程 stdout 与 stderr 都进入 app.log（验证 `> log 2>&1` 顺序正确）；日志含时间戳；`status` 用 `ps -eo pid=,stat=,comm=` 而非解析 `ps aux` 全文。"
+          }
+        },
+        {
+          "title": "任务 5：健壮性（set -euo pipefail + 引号 + 数组转发）",
+          "verification": {
+            "type": "auto",
+            "desc": "用含空格的命令参数 `start \"睡眠 5 秒\"` 验证 `\"$@\"` 转发不碎裂；在子命令未找到时 `set -e` 使脚本非零退出且清理 pidfile。"
+          }
+        },
+        {
+          "title": "任务 6（进阶）：systemd 封装与 restart",
+          "verification": {
+            "type": "manual",
+            "desc": "给出 `.service` 文件，含 Restart=on-failure、KillSignal=SIGTERM、TimeoutStopSec=30；说明多实例与 restart 语义。"
+          }
+        }
+      ],
+      "tags": [
+        "shell",
+        "Linux",
+        "进程守护",
+        "信号",
+        "systemd",
+        "健壮性"
+      ]
+    }
+  ]
+}

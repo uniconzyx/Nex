@@ -1,0 +1,8 @@
+{
+  "title": "unique_ptr 自定义删除器（编译期类型绑定，可内联）",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "alloc\nmydelete\nfree\nafter scope",
+  "code": "#include <iostream>\n#include <memory>\nstruct Buffer { int* p; Buffer(): p(new int[4]) { std::cout << \"alloc\\n\"; } ~Buffer(){ delete[] p; std::cout << \"free\\n\"; } };\nstruct MyDeleter { void operator()(Buffer* b) const { std::cout << \"mydelete\\n\"; delete b; } };\nint main() {\n    { std::unique_ptr<Buffer, MyDeleter> u(new Buffer(), MyDeleter()); }  // 作用域结束自动调用 MyDeleter\n    std::cout << \"after scope\";\n}"
+}

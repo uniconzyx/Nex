@@ -1,0 +1,16 @@
+{
+  "meta": { "chapter": "clang-u04", "category": "basic" },
+  "items": [
+    {
+      "title": "实现一个学生成绩的二进制文件存储与查询工具",
+      "requirement_md": "把 clang-u03 的「结构体」与本章「二进制文件 IO」结合起来，做一个小型持久化工具。要求：\n\n1. 定义 `struct Student { int id; char name[32]; double score; };`，并用 `_Static_assert(sizeof(struct Student) == 预期值, \"布局\")` 固化（注意对齐填充）。\n2. 提供 `append_student(const char *path, const struct Student *s)`：以 `\"ab\"` 二进制追加模式打开，**先判 NULL**，用 `fwrite(&s, sizeof *s, 1, fp)` 写入并检查返回值，`fclose` 并检查返回值。\n3. 提供 `query_by_id(const char *path, int id, struct Student *out)`：以 `\"rb\"` 打开，用 `fread(buf,1,sizeof,fp)` 逐条读，**依据 fread 返回值处理到 EOF 的短读**，返回是否找到。\n4. 提供 `update_score(const char *path, int id, double new_score)`：用 `\"r+b\"` + `fseek` 定位到匹配记录**原地修改**并 `fflush`。\n5. 全程**只用二进制模式**（绝不用文本模式写结构体），并提供 `main` 演示「新增→查询→改分→再查询」，用 `gcc -std=c11 -Wall -Wextra` 零警告。",
+      "tasks": [
+        { "title": "定义结构体与布局断言", "verification": { "type": "test", "desc": "_Static_assert 通过；sizeof 与手算对齐一致" } },
+        { "title": "实现追加与健壮错误处理", "verification": { "type": "test", "desc": "fopen 失败 perror 报因；写入条数正确；追加不破坏已有数据" } },
+        { "title": "实现按 id 查询（短读处理）", "verification": { "type": "test", "desc": "存在返回找到、不存在返回未找到；到 EOF 不越界" } },
+        { "title": "实现原地改分", "verification": { "type": "test", "desc": "r+b 定位修改后，重新读回该记录 score 已更新" } },
+        { "title": "编译零警告验证", "verification": { "type": "manual", "desc": "gcc -std=c11 -Wall -Wextra 无任何 warning" } }
+      ]
+    }
+  ]
+}

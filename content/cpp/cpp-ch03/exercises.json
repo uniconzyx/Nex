@@ -1,0 +1,119 @@
+{
+  "meta": {
+    "chapter": "cpp-ch03",
+    "note": "5 题，4 类题型混合；含 LeetCode 真题映射（仅元数据+链接）"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "difficulty": "easy",
+      "title": "关于数组与指针，正确的是",
+      "content_md": "选择**正确**的描述。",
+      "options": [
+        {
+          "key": "A",
+          "text": "数组作为函数参数时仍保留完整长度信息"
+        },
+        {
+          "key": "B",
+          "text": "a[i] 等价于 *(a + i)"
+        },
+        {
+          "key": "C",
+          "text": "string_view 拥有底层字符存储"
+        },
+        {
+          "key": "D",
+          "text": "std::string 的 c_str() 不保证以 \\0 结尾"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "数组传参退化为指针丢失长度；string_view 不拥有存储；c_str() 以 \\0 结尾。",
+      "tags": [
+        "array",
+        "pointer"
+      ],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 3 章 字符串、向量和数组",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "fix_error",
+      "difficulty": "easy",
+      "title": "修复越界访问",
+      "content_md": "以下循环越界（i <= n 多访问一位），请修复：\n\n```cpp\nvoid f(const std::string& s) {\n    for (size_t i = 0; i <= s.size(); ++i) std::cout << s[i];\n}\n```",
+      "answer": {
+        "reference_code": "void f(const std::string& s) {\n    for (size_t i = 0; i < s.size(); ++i) std::cout << s[i];\n}"
+      },
+      "explanation": "有效下标是 0..size()-1，用 < 而非 <=。",
+      "tags": [
+        "string",
+        "bounds"
+      ],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 3 章",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "output",
+      "difficulty": "mid",
+      "title": "读代码写输出",
+      "content_md": "```cpp\n#include <iostream>\n#include <string>\nint main() {\n    std::string s = \"hello\";\n    std::cout << s.find(\"llo\") << ' ' << s.substr(1, 3);\n}\n```",
+      "answer": {
+        "output": "2 ell"
+      },
+      "explanation": "find 返回首位置 2；substr(1,3) 取 \"ell\"。",
+      "tags": [
+        "string"
+      ],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 3 章",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "coding",
+      "difficulty": "easy",
+      "title": "LeetCode 344 · 反转字符串",
+      "content_md": "给定字符数组/字符串 s，原地反转。实现 `void reverseString(std::string& s)`。",
+      "answer": {
+        "reference_code": "#include <iostream>\n#include <string>\n#include <algorithm>\nvoid reverseString(std::string& s){std::reverse(s.begin(), s.end());}\nint main(){std::string s=\"hello\";reverseString(s);std::cout<<s;}"
+      },
+      "explanation": "双指针或 std::reverse 均可。",
+      "tags": [
+        "string",
+        "two-pointer"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 344（反转字符串）",
+      "external_url": "https://leetcode.cn/problems/reverse-string/",
+      "category": "算法题",
+      "platform": "leetcode"
+    },
+    {
+      "type": "coding",
+      "difficulty": "mid",
+      "title": "LeetCode 415 · 字符串相加",
+      "content_md": "给定两个非负整数字符串 num1、num2，返回其和的字符串（模拟竖式加法，不转整数）。",
+      "answer": {
+        "reference_code": "#include <iostream>\n#include <string>\n#include <algorithm>\nstd::string addStrings(std::string a, std::string b){\n  std::string r; int i=(int)a.size()-1, j=(int)b.size()-1, c=0;\n  while(i>=0||j>=0||c){int x=i>=0?a[i--]-'0':0;int y=j>=0?b[j--]-'0':0;int s=x+y+c;r+=char(s%10+'0');c=s/10;}\n  std::reverse(r.begin(),r.end());return r;\n}\nint main(){std::cout<<addStrings(\"11\",\"123\");}"
+      },
+      "explanation": "从末位逐位相加，注意进位与结果反转。",
+      "tags": [
+        "string",
+        "simulation"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 415（字符串相加）",
+      "external_url": "https://leetcode.cn/problems/add-strings/",
+      "category": "算法题",
+      "platform": "leetcode"
+    }
+  ]
+}

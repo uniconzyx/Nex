@@ -1,0 +1,8 @@
+{
+  "title": "NaN 传染与 nan-aware 聚合、掩码替代写法",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "a = [ 1. nan  3. nan  5.]\nsum()     = nan （NaN 会传染整个结果）\nnansum()  = 9.0\nmean()    = nan\nnanmean() = 3.0\nisnan 个数 = 2\n--- 掩码法等价写法 ---\na[~isnan].mean() = 3.0\n--- 二维按轴 ---\nb =\n[[ 1. nan]\n [ 3.  4.]]\nnanmean(axis=0) = [2. 4.]\nnanmean(axis=1) = [1.  3.5]\n--- 全为 NaN 时会告警并返回 nan ---\n结果 = nan | 触发告警数 = 1",
+  "code": "import warnings\nimport numpy as np\na = np.array([1.0, np.nan, 3.0, np.nan, 5.0])\nprint(\"a =\", a)\nprint(\"sum()     =\", a.sum(), \"（NaN 会传染整个结果）\")\nprint(\"nansum()  =\", np.nansum(a))\nprint(\"mean()    =\", a.mean())\nprint(\"nanmean() =\", np.nanmean(a))\nprint(\"isnan 个数 =\", int(np.isnan(a).sum()))\nprint(\"--- 掩码法等价写法 ---\")\nprint(\"a[~isnan].mean() =\", float(a[~np.isnan(a)].mean()))\nprint(\"--- 二维按轴 ---\")\nb = np.array([[1.0, np.nan], [3.0, 4.0]])\nprint(\"b =\")\nprint(b)\nprint(\"nanmean(axis=0) =\", np.nanmean(b, axis=0))\nprint(\"nanmean(axis=1) =\", np.nanmean(b, axis=1))\nprint(\"--- 全为 NaN 时会告警并返回 nan ---\")\nwith warnings.catch_warnings(record=True) as caught:\n    warnings.simplefilter(\"always\")\n    v = np.nanmean(np.array([np.nan, np.nan]))\n    print(\"结果 =\", v, \"| 触发告警数 =\", len(caught))\n"
+}

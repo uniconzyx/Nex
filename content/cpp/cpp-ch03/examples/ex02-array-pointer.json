@@ -1,0 +1,8 @@
+{
+  "title": "数组与指针关系",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "20 30",
+  "code": "#include <iostream>\n\nint main() {\n    int a[3] = {10, 20, 30};\n    std::cout << a[1] << ' ' << *(a + 2);\n}"
+}

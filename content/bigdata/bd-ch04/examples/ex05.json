@@ -1,0 +1,8 @@
+{
+  "title": "mapPartitions vs map：函数调用次数对比",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "记录数 = 12, 分区数 = 3\nmap: 逐元素调用 -> 函数调用 12 次\nmapPartitions: 逐分区调用 -> 函数调用 3 次\n调用次数比 map : mapPartitions = 12 : 3 = 4 : 1\n",
+  "code": "data = list(range(12))\npartitions = [data[0:4], data[4:8], data[8:12]]\nmap_calls = 0\ndef m(x):\n    global map_calls\n    map_calls += 1\n    return x * 2\nout_map = [m(x) for p in partitions for x in p]\nmp_calls = 0\ndef mp(it):\n    global mp_calls\n    mp_calls += 1\n    return [y * 2 for y in it]\nout_mp = [y for p in partitions for y in mp(p)]\nprint(f\"记录数 = {len(data)}, 分区数 = {len(partitions)}\")\nprint(f\"map: 逐元素调用 -> 函数调用 {map_calls} 次\")\nprint(f\"mapPartitions: 逐分区调用 -> 函数调用 {mp_calls} 次\")\nprint(f\"调用次数比 map : mapPartitions = {map_calls} : {mp_calls} = {map_calls // mp_calls} : 1\")\n"
+}

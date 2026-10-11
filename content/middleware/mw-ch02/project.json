@@ -1,0 +1,31 @@
+{
+  "meta": { "chapter": "mw-ch02", "category": "basic" },
+  "items": [
+    {
+      "title": "迷你 Redis 持久化与内存管理器",
+      "requirement_md": "用 Python 从零实现一个「迷你 Redis 持久化与内存管理器」教学 Demo，覆盖本章核心机制并能打印真实运行结果（参考本章 examples/）：\n\n1. **RDB 快照（fork + COW）**：模拟 BGSAVE——fork 出子进程拿到一致性快照视图，父进程后续写入不影响快照；量化 COW 复制的页数。\n2. **save m n 触发**：实现多规则（或关系）的 BGSAVE 自动触发判定。\n3. **AOF 追加与三策略**：模拟 always/everysec/no 的 fsync 行为，演示崩溃时各自丢失的数据量。\n4. **AOF 重写与混合持久化**：实现 rewrite（抵消冗余命令）与混合文件（RDB 头 + AOF 增量尾）的载入恢复。\n5. **过期删除**：实现惰性删除（访问时删）+ 定期采样删除（随机抽取 N 个删过期）。\n6. **内存淘汰**：实现近似 LRU 与近似 LFU（随机采样 5 个候选，淘汰最久未用/最低频），并统计 mem_fragmentation_ratio。\n\n要求每个模块都可运行并打印结构化状态，最终对比 RDB 与 AOF 在「恢复速度/丢失数据量」上的差异。",
+      "tasks": [
+        {
+          "title": "实现 RDB fork+COW 快照与 save m n 触发",
+          "verification": { "type": "test", "desc": "fork 后父进程写入不污染快照；save 规则任一满足即触发 BGSAVE 并重置计数" }
+        },
+        {
+          "title": "实现 AOF 三策略与 rewrite/混合持久化",
+          "verification": { "type": "test", "desc": "always 不丢、everysec 最多丢约1秒、no 丢失最多；rewrite 后命令数下降；混合文件能先载 RDB 再重放增量恢复" }
+        },
+        {
+          "title": "实现惰性+定期过期删除",
+          "verification": { "type": "test", "desc": "访问过期 key 返回 None 并计一次惰性删除；定期采样能在有限轮次内回收大部分过期 key" }
+        },
+        {
+          "title": "实现近似 LRU/LFU 与碎片率统计",
+          "verification": { "type": "manual", "desc": "内存满时随机采样 5 候选淘汰最久未用/最低频；打印 mem_fragmentation_ratio 并解释 >1.5 与 <1 的含义" }
+        },
+        {
+          "title": "编写示例脚本并实测输出",
+          "verification": { "type": "test", "desc": "所有示例用解释器实测，expected_output 与运行结果一致、无脏数据（Traceback/编码损坏）" }
+        }
+      ]
+    }
+  ]
+}

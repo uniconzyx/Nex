@@ -1,0 +1,51 @@
+{
+  "meta": {
+    "chapter": "data-ch04",
+    "title": "Pandas 进阶 —— 实战项目",
+    "count": 1,
+    "note": "一个「多表合并 + 月度重采样 + 透视报表」的端到端项目，全程确定性可复现。"
+  },
+  "items": [
+    {
+      "title": "电商多表合并与月度经营报表流水线",
+      "requirement_md": "*用 **Python（pandas 3.x，仅标准库 + pandas/numpy）** 写一条**确定性**的数据管道，把本章五条主线（分组 / 合并 / 时间序列 / 透视 / 性能）串成一个可验证的整体。*\n\n## 第一部分：造数据（固定随机种子）\n\n用 `np.random.default_rng(42)` 生成三张表，**全部确定性**：\n\n| 表 | 规模 | 列 |\n|---|---|---|\n| `users`（维度表） | 200 行 | `uid`(0~199，**唯一**)、`city`(5 个)、`reg_ts` |\n| `orders`（事实表） | 5000 行 | `oid`、`uid`、`amount`、`ts`(2026 全年随机日) |\n| `refund`（事实表） | 300 行 | `oid`、`refund_amount`（**故意让部分 `oid` 重复**） |\n\n## 第二部分：合并（本项目的核心考点）\n\n1. 用 `merge(..., validate=\"many_to_one\")` 把 `orders` 与 `users` 关联；\n2. 对 `refund` **先聚合成每个 `oid` 一条**（因为原始表 `oid` 重复），再按 `validate=\"one_to_one\"` 关联到订单表；\n3. **断言**合并后行数等于 `orders` 的原始行数，且没有意外的 `NaN`（在应有值的列上）；\n4. 在报告里写出：如果不做第 2 步的聚合，结果会膨胀成多少行（用代码算出来，不要手写数字）。\n\n## 第三部分：时间序列\n\n1. 把 `ts` 解析为 `datetime64`，`set_index` 后 `sort_index()`，并**断言** `index.is_monotonic_increasing`；\n2. 用 `resample(\"MS\")` 产出**月度**订单数与净收入（`amount - refund_amount`）；\n3. 计算月度**环比**与**滚动 3 个月均值**（`rolling(3, min_periods=1)`）；\n4. 明确指出最后一个月是否完整，若不完整在输出里标注。\n\n## 第四部分：透视报表\n\n产出一张 `city × month` 的净收入透视表（`fill_value=0`），并**验证**它与 `groupby([\"city\",\"month\"]).sum().unstack()` 的结果完全相等（用 `.equals()` 断言，打印布尔值）。\n\n## 第五部分：性能与交付\n\n1. 用 `apply` 与向量化两种写法各实现一遍「判断订单是否为促销订单」，**断言两者结果逐元素一致**，并输出**结构性判据**（如「`apply` 的 Python 层调用次数 == 行数」）；\n2. **禁止**把墙钟耗时写进输出（机器相关，不可复现）；\n3. 最终打印：合并行数校验、月度报表、透视表、性能判据四块结果。\n\n## 交付标准\n\n- 输出**完全确定**：同一份代码在任何机器上跑出的 stdout 完全一致；\n- 所有「结论性数字」都由代码**算出来**，不允许硬编码；\n- 每一处「应该成立的性质」都写成 `assert`，让违反契约时立刻失败。",
+      "tasks": [
+        {
+          "title": "造三张确定性表（users / orders / refund）",
+          "verification": {
+            "type": "test",
+            "desc": "固定种子 rng(42)；断言 users.uid 唯一；断言 refund.oid 存在重复"
+          }
+        },
+        {
+          "title": "多表合并并用 validate 声明基数关系",
+          "verification": {
+            "type": "test",
+            "desc": "断言合并后行数 == len(orders)；打印「不聚合 refund 时的膨胀行数」"
+          }
+        },
+        {
+          "title": "时间序列：月度重采样 + 环比 + 滚动均值",
+          "verification": {
+            "type": "test",
+            "desc": "断言索引单调；断言月份数 == 12；打印最后一个月是否完整"
+          }
+        },
+        {
+          "title": "透视表与 groupby+unstack 的等价性验证",
+          "verification": {
+            "type": "test",
+            "desc": "用 .equals() 断言两者相等并打印布尔值"
+          }
+        },
+        {
+          "title": "apply 与向量化的语义一致性 + 结构性性能判据",
+          "verification": {
+            "type": "test",
+            "desc": "断言两写法逐元素一致；输出调用次数判据；输出中不含任何耗时"
+          }
+        }
+      ]
+    }
+  ]
+}

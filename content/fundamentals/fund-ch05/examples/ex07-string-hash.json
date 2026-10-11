@@ -1,0 +1,8 @@
+{
+  "title": "字符串哈希：BKDR 与 DJB2",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "'apple'  BKDR=93029210 mod10007=4138  DJB2=253337143 mod10007=9938\n'banana'  BKDR=2898612069 mod10007=4463  DJB2=4086421542 mod10007=3050\n'cat'  BKDR=98262 mod10007=8199  DJB2=193488125 mod10007=2780\n'dog'  BKDR=99644 mod10007=9581  DJB2=193489663 mod10007=4318\n'apple'  BKDR=93029210 mod10007=4138  DJB2=253337143 mod10007=9938",
+  "code": "#include <stdio.h>\n#include <string.h>\n\nunsigned int bkdr(const char *s) {\n    unsigned int h = 0u;\n    int c;\n    while ((c = (unsigned char)*s++) != 0) {\n        h = h * 31u + (unsigned int)c;\n    }\n    return h;\n}\n\nunsigned int djb2(const char *s) {\n    unsigned int h = 5381u;\n    int c;\n    while ((c = (unsigned char)*s++) != 0) {\n        h = ((h << 5) + h) + (unsigned int)c;\n    }\n    return h;\n}\n\nint main(void) {\n    const char *ws[] = {\"apple\", \"banana\", \"cat\", \"dog\", \"apple\"};\n    int n = (int)(sizeof(ws) / sizeof(ws[0]));\n    int i;\n    for (i = 0; i < n; i++) {\n        unsigned int hb = bkdr(ws[i]);\n        unsigned int hd = djb2(ws[i]);\n        unsigned int modb = hb % 10007u;\n        unsigned int modd = hd % 10007u;\n        printf(\"'%s'  BKDR=%u mod10007=%u  DJB2=%u mod10007=%u\\n\", ws[i], hb, modb, hd, modd);\n    }\n    return 0;\n}\n"
+}

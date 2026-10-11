@@ -1,0 +1,8 @@
+{
+  "title": "多智能体循环检测：消息签名去重 + 阈值熔断",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "msg01 writer -> researcher  repeat=1\r\nmsg02 researcher -> writer  repeat=1\r\nmsg03 writer -> researcher  repeat=2\r\nmsg04 researcher -> writer  repeat=2\r\nmsg05 writer -> researcher  repeat=3\r\n  [熔断] 签名 writer->researcher:274603560 重复 3 次，判定为循环死锁，停止协作并升级给人\r\n处理消息数 = 5 / 总消息数 = 6\r\n熔断触发 = True\r\n熔断后剩余消息不再处理 = True\r\n",
+  "code": "\"\"\"ex08 多智能体消息传递的循环检测：签名去重 + 阈值熔断。\"\"\"\nimport zlib\n\n\ndef sig(a, b, content):\n    \"\"\"消息签名：用 zlib.crc32（确定性），禁止用 hash()。\"\"\"\n    return \"%s->%s:%d\" % (a, b, zlib.crc32(content.encode(\"utf-8\")))\n\n\nMESSAGES = [\n    (\"writer\", \"researcher\", \"请补充第三章的数据\"),\n    (\"researcher\", \"writer\", \"请先说明你需要哪些指标\"),\n    (\"writer\", \"researcher\", \"请补充第三章的数据\"),\n    (\"researcher\", \"writer\", \"请先说明你需要哪些指标\"),\n    (\"writer\", \"researcher\", \"请补充第三章的数据\"),\n    (\"researcher\", \"writer\", \"请先说明你需要哪些指标\"),\n]\n\nMAX_REPEAT = 2\n\nif __name__ == \"__main__\":\n    seen = {}\n    tripped_at = None\n    for i, (a, b, c) in enumerate(MESSAGES, start=1):\n        s = sig(a, b, c)\n        seen[s] = seen.get(s, 0) + 1\n        print(\"msg%02d %s -> %s  repeat=%d\" % (i, a, b, seen[s]))\n        if seen[s] > MAX_REPEAT:\n            tripped_at = i\n            print(\"  [熔断] 签名 %s 重复 %d 次，判定为循环死锁，停止协作并升级给人\"\n                  % (s, seen[s]))\n            break\n    print(\"处理消息数 = %d / 总消息数 = %d\" % (tripped_at, len(MESSAGES)))\n    print(\"熔断触发 = %s\" % (tripped_at is not None))\n    print(\"熔断后剩余消息不再处理 = %s\" % (tripped_at < len(MESSAGES)))\n"
+}

@@ -1,0 +1,213 @@
+{
+  "meta": {
+    "chapter": "fund-ch06",
+    "note": "排序练习：基础题考察八种排序的复杂度/稳定性/趟数、快排最坏与堆排建堆、外部排序 I/O；算法题来自刷题平台（仅存元数据+链接，不搬运题面）。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "八种内部排序的复杂度与稳定性",
+      "content_md": "下列关于内部排序的叙述中，正确的是？\n\nA. 快速排序的最坏时间复杂度是 O(n log n)，且是稳定排序\nB. 堆排序的建堆过程是 O(n log n)，排序阶段是 O(n log n)，空间复杂度 O(1)\nC. 归并排序最好/平均/最坏均为 O(n log n)，空间 O(n)，且是稳定排序\nD. 简单选择排序的时间复杂度与初始序列有关，基本有序时为 O(n)",
+      "options": [
+        {
+          "key": "A",
+          "text": "快排最坏 O(n log n) 且稳定"
+        },
+        {
+          "key": "B",
+          "text": "建堆 O(n log n)、空间 O(1)"
+        },
+        {
+          "key": "C",
+          "text": "归并三档均 O(n log n)、空间 O(n)、稳定"
+        },
+        {
+          "key": "D",
+          "text": "简单选择与初始序列有关"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "C"
+        ],
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "快排最坏 O(n²) 且不稳定；建堆是 O(n) 不是 O(n log n)（自底向上，越靠叶子下沉层数越少，级数收敛）；简单选择排序无论输入如何恒为 O(n²)，因为每趟都要扫完剩余区间找最小值，与初始序列无关。归并三档一致 O(n log n)、需 O(n) 辅助空间、稳定 —— 是唯一同时满足「O(n log n) + 稳定」的内部比较排序。",
+      "tags": [
+        "sort",
+        "complexity",
+        "stability"
+      ],
+      "source": "self",
+      "source_ref": "fund-ch06 concept/01 排序总览"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "快排最坏情况与优化",
+      "content_md": "对已按关键字递增有序的序列做快速排序，若每次取**首元素**为枢轴，则：\n\nA. 时间复杂度 O(n log n)，递归深度 O(log n)\nB. 时间复杂度 O(n²)，递归深度 O(n)\nC. 时间复杂度 O(n²)，但递归深度仍为 O(log n)\nD. 时间复杂度 O(n log n)，因为有序序列划分一定平衡",
+      "options": [
+        {
+          "key": "A",
+          "text": "O(n log n)，栈 O(log n)"
+        },
+        {
+          "key": "B",
+          "text": "O(n²)，栈 O(n)"
+        },
+        {
+          "key": "C",
+          "text": "O(n²)，栈仍 O(log n)"
+        },
+        {
+          "key": "D",
+          "text": "有序序列划分必然平衡"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "已有序且取首元素为枢轴时，每次划分结果为「左侧 0 个、右侧 n-1 个」，区间每次只缩小 1，比较总次数 (n-1)+(n-2)+…+1 = n(n-1)/2 = O(n²)，递归深度也退化为 O(n)（有爆栈风险）。优化：三数取中（首/中/尾的中位数）、随机化枢轴、小区间切插入排序；工程上用 introsort 在递归过深时切堆排，把最坏锁在 O(n log n)。",
+      "tags": [
+        "quicksort",
+        "worst-case",
+        "pivot"
+      ],
+      "source": "self",
+      "source_ref": "fund-ch06 concept/02 快排"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "hard",
+      "title": "外部排序的归并趟数与 I/O 次数",
+      "content_md": "设待排序文件共有 N = 100000 个记录，内存工作区可容纳 M = 1000 个记录，采用 k = 4 路平衡归并。\n\n请计算：\n1. 初始顺串个数 m；\n2. 归并趟数；\n3. 若每趟需把全部记录读一遍再写一遍，估算总 I/O 次数（以记录为单位）。\n\n并回答：增大 k 到 8 时，趟数与 I/O 如何变化？代价是什么？",
+      "answer": {
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "m = ⌈N/M⌉ = ⌈100000/1000⌉ = 100；趟数 = ⌈log_4 100⌉ = ⌈3.32⌉ = 4 趟；总 I/O ≈ 2 × 100000 × 4 = 800000 次记录读写。k=8 时趟数 = ⌈log_8 100⌉ = ⌈2.21⌉ = 3 趟，I/O ≈ 600000，下降 25%。代价：需要 8 个输入缓冲区（内存 O(k)），且 8 路选最小需要 7 次比较，必须用败者树降到 ⌈log₂ 8⌉ = 3 次，否则 CPU 成为新瓶颈。另可用置换-选择让顺串平均长度达 2M，减少 m 从而再降趟数。",
+      "tags": [
+        "external-sort",
+        "io",
+        "multiway-merge"
+      ],
+      "source": "self",
+      "source_ref": "fund-ch06 concept/03 外部排序"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "比较排序下界与非比较排序",
+      "content_md": "关于比较排序的下界与突破，下列叙述正确的是？\n\nA. 任何排序算法（包括计数、基数）在最坏情况下都至少需要 Ω(n log n) 次比较\nB. 决策树模型下，n 个元素有 n! 种排列，故树高至少 ⌈log₂(n!)⌉ = Ω(n log n)，这只约束**基于比较**的排序\nC. 基数排序基于比较，所以也受 Ω(n log n) 约束\nD. 计数排序的时间复杂度是 O(n log n)，与快排同级",
+      "options": [
+        {
+          "key": "A",
+          "text": "所有排序都受 Ω(n log n) 约束"
+        },
+        {
+          "key": "B",
+          "text": "下界只约束基于比较的排序"
+        },
+        {
+          "key": "C",
+          "text": "基数排序基于比较"
+        },
+        {
+          "key": "D",
+          "text": "计数排序是 O(n log n)"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "Ω(n log n) 的前提是「信息只能通过二元比较获得」，在这个模型下决策树叶子数 ≥ n!、高度 ≥ ⌈log₂ n!⌉。计数排序 O(n+k)、基数排序 O(d(n+r)) 不基于比较，而是利用关键字的取值范围/位数这一结构信息，因此在特定前提下可到 O(n)，代价是依赖关键字结构、需要额外空间、不再通用。",
+      "tags": [
+        "lower-bound",
+        "decision-tree",
+        "radix-sort"
+      ],
+      "source": "self",
+      "source_ref": "fund-ch06 concept/03 下界"
+    },
+    {
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "统计排序的比较次数与移动次数并验证稳定性",
+      "content_md": "用 C 语言实现插入排序与简单选择排序，对同一组**带原始下标标记的等值元素**排序（如 `{key, idx}` 结构体），要求：\n\n1. 分别统计两种排序的「比较次数」与「元素移动次数」；\n2. 排序后检查对于所有 key 相同的元素，其 idx 是否仍按升序排列 —— 若是则稳定，否则不稳定；\n3. 打印出「插入排序稳定 = 是 / 简单选择排序稳定 = 否」及各自的计数。\n\n注意：不要用墙钟时间作为判据。",
+      "answer": {
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "插入排序稳定：它只在「严格大于」时才后移，等值元素不跨越，故相对顺序保持。简单选择排序不稳定：它在剩余区间找到最小值后与区间首元素**跨距离交换**，可能把靠前的等值元素换到后面（如 [2a, 2b, 1] 第一轮把 1 与 2a 交换后变成 [1, 2b, 2a]）。验证稳定性的标准做法是给等值元素附加原始下标标记。",
+      "tags": [
+        "insertion-sort",
+        "selection-sort",
+        "stability"
+      ],
+      "source": "self",
+      "source_ref": "fund-ch06 examples/ex01 ex03"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "medium",
+      "title": "排序数组 / 数组中的第 K 个最大元素（平台题，仅元数据）",
+      "content_md": "请在平台提交「排序数组」与「数组中的第 K 个最大元素」两题。本章只登记元数据与链接，不搬运题面。\n\n能力点：前者对应快排/归并的工程实现；后者对应「堆排序思想在 Top-K 上的应用」——用大小为 K 的小顶堆可做到 O(n log K)。",
+      "answer": {
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "Top-K 不要用「全排序后取第 K 个」（O(n log n)），应维护大小为 K 的小顶堆：遍历时元素比堆顶大才替换并下滤，复杂度 O(n log K)、空间 O(K)。当 n 远大于 K 时这是数量级的差距，也是堆排序真正的工程主场。",
+      "tags": [
+        "sort",
+        "heap",
+        "top-k"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 912 排序数组 / 215 数组中的第K个最大元素",
+      "external_url": "https://leetcode.cn/problems/sort-an-array/"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "nowcoder",
+      "difficulty": "medium",
+      "title": "归并排序与逆序对计数（平台题，仅元数据）",
+      "content_md": "请在平台提交「数组中的逆序对」一题。本章只登记元数据与链接，不搬运题面。\n\n能力点：归并排序的合并阶段天然能统计逆序对——当右半部分的某个元素被先输出时，左半部分剩余元素个数就是新增的逆序对数量。",
+      "answer": {
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "归并排序求逆序对的关键：合并左右两个有序段时，若 `a[i] > a[j]`（右段元素更小被先取），则左段从 i 到 mid-1 的所有元素都与该右段元素构成逆序，一次性累加 `mid - i`。时间复杂度 O(n log n)，比暴力的 O(n²) 是一个数量级的提升；注意结果可能超过 int，要用 long long。",
+      "tags": [
+        "merge-sort",
+        "inversion",
+        "divide-conquer"
+      ],
+      "source": "nowcoder",
+      "source_ref": "牛客 JZ51 · 数组中的逆序对",
+      "external_url": "https://www.nowcoder.com/practice/96bd6684e04a44eb80e6a68efc0ec6c5"
+    }
+  ]
+}

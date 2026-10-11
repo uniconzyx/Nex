@@ -1,0 +1,20 @@
+{
+  "title": "链接顺序敏感性：被依赖的库必须靠后",
+  "code_lang": "bash",
+  "code_std": "bash5",
+  "stdin": "",
+  "expected_output": "$ gcc -c math.c -o math.o\n$ ar rcs libmath.a math.o\n$ gcc -c util.c -o util.o\n$ ar rcs libutil.a util.o\n$ gcc -c main.c -o main.o\n$ gcc main.o -L. -lmath -lutil -o app_bad   # 错误顺序：被依赖者在前\nD:/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/bin/ld.exe: ./libutil.a(util.o):util.c:(.text+0x14): undefined reference to `add'\r\ncollect2.exe: error: ld returned 1 exit status\n$ gcc main.o -L. -lutil -lmath -o app_ok    # 正确顺序：调用者在前\n$ ./app_ok\ntwice(21) = 42\r",
+  "code": "#!/bin/sh\n# 链接顺序敏感性：被依赖的库必须靠后\n# 期望输出见 expected_output（本机 MinGW 工具链真实执行捕获）\n\ncat > math.c << 'EOF'\nint add(int a, int b)\n{\n    return a + b;\n}\nEOF\n\ncat > util.c << 'EOF'\nint add(int, int);\n\nint twice(int x)      /* util 依赖 math 里的 add */\n{\n    return add(x, x);\n}\nEOF\n\ncat > main.c << 'EOF'\n#include <stdio.h>\n\nint twice(int);\n\nint main(void)\n{\n    printf(\"twice(21) = %d\\n\", twice(21));\n    return 0;\n}\nEOF\n\ngcc -c math.c -o math.o\nar rcs libmath.a math.o\ngcc -c util.c -o util.o\nar rcs libutil.a util.o\ngcc -c main.c -o main.o\ngcc main.o -L. -lmath -lutil -o app_bad   # 错误顺序：被依赖者在前\ngcc main.o -L. -lutil -lmath -o app_ok    # 正确顺序：调用者在前\n./app_ok\n",
+  "_step_rc": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "_verify_note": "expected_output 为 Windows + MinGW-w64（gcc 15.2 / binutils 2.45）真实执行捕获；脚本中显示的是可移植命令形式（gcc/ar/nm/objdump/size），本机实际以 D:/mingw64/bin/ 下的同名工具驱动，二者等价。",
+  "_expect_fail": true
+}

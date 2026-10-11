@@ -1,0 +1,8 @@
+{
+  "title": "多级指针：让函数修改调用方的指针",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "0 1 4 9 16 ",
+  "code": "#include <stdio.h>\n#include <stdlib.h>\n\nvoid alloc(int **out, size_t n) {\n    *out = malloc(n * sizeof(int));\n    for (size_t i = 0; i < n; i++) (*out)[i] = (int)(i * i);\n}\n\nint main(void) {\n    int *buf = NULL;\n    alloc(&buf, 5);\n    if (!buf) return 1;\n    for (size_t i = 0; i < 5; i++) printf(\"%d \", buf[i]);\n    printf(\"\\n\");\n    free(buf);\n    buf = NULL;\n    return 0;\n}"
+}

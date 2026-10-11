@@ -1,0 +1,8 @@
+{
+  "title": "启动恢复：由 DataNode 块报告重建块位置映射",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "block_reports: {'dn1': ['blk1', 'blk2', 'blk3'], 'dn2': ['blk1', 'blk4'], 'dn3': ['blk2', 'blk3', 'blk4']}\nblk1 -> ['dn1', 'dn2']\nblk2 -> ['dn1', 'dn3']\nblk3 -> ['dn1', 'dn3']\nblk4 -> ['dn2', 'dn3']\ntotal_blocks_known: 4",
+  "code": "\nreported = {\n    \"dn1\": [\"blk1\", \"blk2\", \"blk3\"],\n    \"dn2\": [\"blk1\", \"blk4\"],\n    \"dn3\": [\"blk2\", \"blk3\", \"blk4\"],\n}\nmapping = {}\nfor dn, blks in reported.items():\n    for b in blks:\n        mapping.setdefault(b, []).append(dn)\nprint(\"block_reports:\", reported)\nfor b in sorted(mapping):\n    print(b, \"->\", mapping[b])\nprint(\"total_blocks_known:\", len(mapping))\n"
+}

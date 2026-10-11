@@ -1,0 +1,61 @@
+{
+  "meta": {
+    "chapter": "clang-u01"
+  },
+  "items": [
+    {
+      "question": "指针和数组到底是不是一回事？",
+      "answer_md": "**不是。** C 标准里数组是独立类型。\n\n- 相同点：数组名在**大多数表达式**中退化为指向首元素的指针，所以 `a[i]` 与 `*(a+i)` 等价。\n- 不同点：\n  1. `sizeof(a)` 得整个数组大小，`sizeof(指针)` 恒为平台字长（64 位下 8）。\n  2. `&a` 的类型是 `T(*)[N]`，步长是整数组。\n  3. 数组名**不可赋值**，指针可以。\n  4. 数组有确定长度（是类型的一部分），退化成指针后长度丢失——这就是函数必须额外传 `n` 的根因。",
+      "follow_ups": [
+        "`a[i]` 是怎么被编译器翻译的？为什么 `i[a]` 也合法？",
+        "C99 的变长数组（VLA）和这个有什么关系？"
+      ],
+      "difficulty": "easy",
+      "company_tags": [
+        "通用",
+        "腾讯",
+        "字节"
+      ]
+    },
+    {
+      "question": "指针算术在底层是怎么实现的？`p + n` 到底加了什么？",
+      "answer_md": "编译器把 `p + n` 翻译为「地址 + n × sizeof(*p)」的字节偏移，即 `(char*)p + n * sizeof(*p)`。\n\n- 所以 `p+1` 前进的是**元素**不是字节。\n- `void*` 上的算术是**未定义**的（`sizeof(void)` 不存在），GCC 扩展按 1 处理但不可移植。\n- 指针相减得到的是**元素个数**（`ptrdiff_t`），要字节数必须先转 `char*`。\n- 越界指针运算、跨对象相减/比较都是 UB——编译器可以据此做激进优化，导致「看起来合理」的代码行为异常。",
+      "follow_ups": [
+        "为什么指针相减只允许同一数组内？",
+        "编译器如何利用「指针不越界」这一假设做优化？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "汇编/系统向"
+      ]
+    },
+    {
+      "question": "函数指针有什么实际用途？在 C 里怎么实现多态？",
+      "answer_md": "**用途**\n1. 回调：`qsort`/`bsearch` 的比较器。\n2. **虚表手工模拟**：把函数指针放进结构体，实现运行时分派——这是 C 里的「多态」。\n3. 跳转表/状态机：`handler_t table[]` 用下标分派，比 `switch` 更易扩展。\n4. 插件注册与 `dlsym` 动态加载。\n\n**C 实现多态的最小骨架**\n```c\ntypedef struct Shape {\n    double (*area)(const struct Shape *);\n} Shape;\ndouble shape_area(const Shape *s) { return s->area(s); }\n```\n每个具体类型把函数指针填成自己的实现，`shape_area` 就是「虚调用」。这正是 C++ 虚表、Linux 内核 `file_operations`、GTK 对象系统的底层套路。\n\n**注意**：C 没有 `this` 自动传递，必须显式传 `self` 指针。",
+      "follow_ups": [
+        "虚表放在对象里还是类型里？哪种更省内存？",
+        "函数指针调用能被内联吗？为什么？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "嵌入式",
+        "Linux"
+      ]
+    },
+    {
+      "question": "悬垂指针和内存泄漏哪个更危险？怎么系统性防护？",
+      "answer_md": "**危害维度不同，但悬垂（含 use-after-free / double free）更危险**：\n- 内存泄漏：只涨内存，不损坏数据，可观测可定位。\n- 悬垂：属于 UB，可能静默破坏数据或崩溃，且**可被利用为安全漏洞**（堆利用、控制流劫持）。\n\n**系统性防护**\n1. **所有权约定**：谁分配谁释放；释放后所有别名失效，置 `NULL`。\n2. **单一出口**：错误路径统一 `goto cleanup`，保证释放配对。\n3. **工具兜底**：CI 中启用 `-fsanitize=address,undefined`、valgrind，把 UB 变成可复现的报错。\n4. **接口设计**：只读参数加 `const`，缓冲区一律「指针 + 长度」成对传递。\n5. 需要更系统的保障时，迁移到带有所有权语义的语言/机制（C++ 智能指针、Rust 借用检查）。",
+      "follow_ups": [
+        "为什么 `free(p)` 之后 `p` 的值不变？",
+        "ASan 是怎么在常量时间发现 use-after-free 的？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "安全向",
+        "腾讯"
+      ]
+    }
+  ]
+}

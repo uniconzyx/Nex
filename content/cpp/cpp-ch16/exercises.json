@@ -1,0 +1,117 @@
+{
+  "meta": {
+    "chapter": "cpp-ch16",
+    "note": "7 题，题型混合；含 LeetCode 1114（按序打印）/ 1226（哲学家进餐）真题映射（仅存元数据+链接，不存题面）"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "关于 std::thread 与数据竞争，正确的是",
+      "content_md": "选择**正确**的描述。",
+      "options": [
+        { "key": "A", "text": "std::thread 析构时若仍 joinable 会自动后台运行" },
+        { "key": "B", "text": "没有同步原语的两个线程访问同一变量，读写顺序由编译器保证一致" },
+        { "key": "C", "text": "counter++ 在多线程下可能因读-改-写非原子而丢失更新" },
+        { "key": "D", "text": "volatile 能提供线程间的原子性与 happens-before" }
+      ],
+      "answer": { "correct": ["C"] },
+      "explanation": "counter++ 非原子；thread 析构仍 joinable 会 terminate；无同步即数据竞争（UB）；volatile 不提供同步语义。",
+      "tags": ["thread", "data-race"],
+      "source": "self",
+      "source_ref": "《C++ Concurrency in Action（第2版）》第 1-3 章"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "修复两把锁顺序不一致导致的死锁",
+      "content_md": "下面代码两线程以相反顺序加锁 m1/m2，可能死锁。请用 `std::scoped_lock`（或 `std::lock`）一次性安全获取两把锁来修复：\n\n```cpp\nstd::mutex m1, m2;\nvoid worker_a() { std::lock_guard<std::mutex> a(m1); std::lock_guard<std::mutex> b(m2); /* ... */ }\nvoid worker_b() { std::lock_guard<std::mutex> b(m2); std::lock_guard<std::mutex> a(m1); /* ... */ }\n```",
+      "answer": {
+        "reference_code": "std::mutex m1, m2;\nvoid worker() {\n  std::scoped_lock lk(m1, m2);   // 一次性锁两把，标准保证不死锁\n  // ...\n}"
+      },
+      "explanation": "scoped_lock/std::lock 内部用回退算法一次性获取多锁，从根上消除「循环等待」，无需程序员手动约定锁序。",
+      "tags": ["deadlock", "scoped-lock"],
+      "source": "self",
+      "source_ref": "《C++ Concurrency in Action（第2版）》第 3 章"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "读代码写输出（atomic 确定性总数）",
+      "content_md": "```cpp\n#include <iostream>\n#include <atomic>\n#include <thread>\n#include <vector>\nstd::atomic<int> c{0};\nint main() {\n  std::vector<std::thread> v;\n  for(int i=0;i<2;++i) v.emplace_back([]{ for(int k=0;k<500;++k) c.fetch_add(1); });\n  for(auto&t:v) t.join();\n  std::cout << \"c=\" << c.load();\n}\n```",
+      "answer": { "output": "c=1000" },
+      "explanation": "原子 fetch_add 保证总数不丢，2*500=1000 确定性。",
+      "tags": ["atomic", "output"],
+      "source": "self",
+      "source_ref": "《C++ Concurrency in Action（第2版）》第 5 章"
+    },
+    {
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "实现一个线程安全的计数器",
+      "content_md": "用 `std::mutex` + `std::lock_guard` 实现一个 `SafeCounter`，支持 `increment()`（线程安全自增）与 `get()`（取当前值）。启动 4 个线程各自增 2500 次，主线程 join 后输出总数应为 10000。",
+      "answer": {
+        "reference_code": "#include <iostream>\n#include <mutex>\n#include <thread>\n#include <vector>\nstruct SafeCounter {\n  std::mutex m; long v = 0;\n  void increment() { std::lock_guard<std::mutex> lk(m); ++v; }\n  long get() { std::lock_guard<std::mutex> lk(m); return v; }\n};\nint main() {\n  SafeCounter c;\n  std::vector<std::thread> ts;\n  for(int i=0;i<4;++i) ts.emplace_back([&]{ for(int k=0;k<2500;++k) c.increment(); });\n  for(auto&t:ts) t.join();\n  std::cout << c.get();\n}"
+      },
+      "explanation": "lock_guard 在作用域进出时自动加解锁，临界区受保护，总数确定性为 10000。",
+      "tags": ["mutex", "coding"],
+      "source": "self",
+      "source_ref": "《C++ Concurrency in Action（第2版）》第 3 章"
+    },
+    {
+      "type": "explain",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "volatile 与 std::atomic 的区别",
+      "content_md": "解释：为什么 C++ 里 `volatile` 不能用来做线程同步？`std::atomic` 提供了哪些 `volatile` 没有的保证？",
+      "answer": {
+        "reference_code": "volatile 只禁止编译器对变量的优化重排与寄存器缓存，不提供原子性、也不建立线程间 happens-before。atomic 保证操作不可分割（无撕裂）、无数据竞争，并可通过内存序建立同步关系。两者目的完全不同，切勿混用。"
+      },
+      "explanation": "核心是「volatile 管编译器优化，atomic 管并发正确性」；C++ 的 volatile 不等同于 Java 的 volatile。",
+      "tags": ["volatile", "atomic"],
+      "source": "self",
+      "source_ref": "《C++ Concurrency in Action（第2版）》第 5 章"
+    },
+    {
+      "type": "design",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "easy",
+      "title": "LeetCode 1114 · 按序打印",
+      "content_md": "三个线程分别打印 first / second / third，要求严格按 first→second→third 顺序各执行一次。请用互斥量或条件变量（或信号量）控制执行序（详见 external_url，不在此复述题面）。",
+      "answer": {
+        "reference_code": "// 思路：用两个 atomic<bool> 标志或 condition_variable 做「门闩」：\n// second 等待 first 完成；third 等待 second 完成。主线程 join 三个线程。\n// 具体实现见 external_url 原题要求。"
+      },
+      "explanation": "核心是「用同步原语把并行执行强制串成确定顺序」；条件变量需带谓词防虚假唤醒。",
+      "tags": ["condvar", "ordering", "leetcode"],
+      "source": "leetcode",
+      "source_ref": "LeetCode 1114（print-in-order）",
+      "external_url": "https://leetcode.cn/problems/print-in-order/"
+    },
+    {
+      "type": "design",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "LeetCode 1226 · 哲学家进餐",
+      "content_md": "5 位哲学家交替「思考」与「进餐」，每人需同时拿左右两根筷子。请用资源分级（给筷子编号、总是先拿小号再拿大号）或 std::lock 避免死锁（详见 external_url，不在此复述题面）。",
+      "answer": {
+        "reference_code": "// 思路：把 5 根筷子编号为 0..4；每位哲学家总是先锁编号小的筷子、再锁大的，\n// 破坏循环等待从而避免死锁；或用 std::scoped_lock 一次性取两根。\n// 具体实现见 external_url 原题要求。"
+      },
+      "explanation": "经典死锁案例；固定锁序 / 一次性取多锁是系统性避免死锁的标准解法。",
+      "tags": ["deadlock", "dining-philosophers", "leetcode"],
+      "source": "leetcode",
+      "source_ref": "LeetCode 1226（the-dining-philosophers）",
+      "external_url": "https://leetcode.cn/problems/the-dining-philosophers/"
+    }
+  ]
+}

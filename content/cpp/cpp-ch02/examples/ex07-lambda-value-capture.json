@@ -1,0 +1,8 @@
+{
+  "title": "lambda 值捕获",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "15",
+  "code": "#include <iostream>\n\nint main() {\n    int base = 10;\n    auto add = [base](int x) { return base + x; };\n    std::cout << add(5);\n}"
+}

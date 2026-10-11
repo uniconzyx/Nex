@@ -1,0 +1,43 @@
+{
+  "meta": { "chapter": "bd-ch03", "category": "basic" },
+  "items": [
+    {
+      "title": "从零用 Python 模拟一个迷你 Hive 内核（存储 / 编译 / 执行 / 调优）",
+      "requirement_md": "不使用任何 Hadoop/Hive 组件，用纯 Python 实现一个**单进程、内存态**的迷你 Hive 内核，覆盖本章核心机制，全部打印真实模拟结果：\n\n1. **内部表 vs 外部表**：模拟 Metastore + HDFS 注册表；`CREATE TABLE`（带/不带 EXTERNAL）、`LOAD DATA` 写入标记文件、`DROP TABLE`；验证内部表 DROP 删元数据+数据、外部表只删元数据保留数据。\n2. **分区与分区裁剪**：按分区列（如 dt）组织为目录（dict 键），`WHERE dt='...'` 只扫描命中分区，打印扫描的分区数与读出行数，对比全表扫描。\n3. **分桶与哈希取模**：用**确定性**哈希（勿用 Python 内置 `hash`，其随机化）实现 `bucket = hash(col) % N`，验证相同 key 必落同一桶，并说明分桶 JOIN 的「同列+同桶数」前提。\n4. **HQL 编译**：对一条 `SELECT ... FROM ... WHERE ... GROUP BY ...` 做词法→语法（AST）→逻辑计划→物理计划（Map→Shuffle→Reduce）的分层打印。\n5. **JOIN 策略选择**：给定两表大小，按阈值（默认 25MB）在 MapJoin（广播小表、消 shuffle）与 CommonJoin（按 key 哈希分区 shuffle）间选择并说明原因。\n6. **数据倾斜与加盐两阶段聚合**：构造热 key 占比极高的数据集，演示负载不均；再用加盐（枚举后缀）+ 两阶段聚合打散，打印倾斜前后各 Reducer 负载，并验证最终结果一致。\n7. **ORC/Parquet 列式存储 + 谓词下推**：对比行存（整行读出）与列存（列裁剪只物化选中列 + 谓词下推早过滤）的 I/O 字节数，打印节省比例。\n8. **动态分区**：演示 `INSERT OVERWRITE ... PARTITION(dt) SELECT ..., dt` 自动按 SELECT 末尾列的取值创建多个分区。\n\n要求代码可运行、输出可追溯，并附一段说明『本模拟与真实 Hive 的差异与简化假设』（如：真实 Hive 跑在 MR/Tez/Spark、数据在 HDFS、CBO 基于列统计等）。",
+      "tasks": [
+        {
+          "title": "实现内部/外部表与 DROP 行为",
+          "verification": { "type": "test", "desc": "DROP 内部表后数据与元数据均消失；DROP 外部表后数据仍在、仅元数据消失" }
+        },
+        {
+          "title": "实现分区裁剪并对比全表扫描",
+          "verification": { "type": "test", "desc": "带 dt 过滤只扫描 1 个分区；不带过滤扫描全部分区" }
+        },
+        {
+          "title": "实现确定性分桶哈希取模",
+          "verification": { "type": "test", "desc": "相同 key 多次计算 bucket 一致；N 个桶分布可展示" }
+        },
+        {
+          "title": "实现 HQL 编译分层打印",
+          "verification": { "type": "test", "desc": "AST / 逻辑计划 / 物理计划三层输出可区分且自洽" }
+        },
+        {
+          "title": "实现 JOIN 策略自动选择",
+          "verification": { "type": "test", "desc": "小表 <= 阈值选 MapJoin、否则 CommonJoin，原因说明清晰" }
+        },
+        {
+          "title": "构造倾斜并用加盐两阶段聚合缓解",
+          "verification": { "type": "test", "desc": "倾斜前后各 Reducer 负载可对比；两阶段聚合最终结果与非倾斜直聚一致" }
+        },
+        {
+          "title": "实现列存列裁剪 + 谓词下推 I/O 对比",
+          "verification": { "type": "test", "desc": "列存 I/O 字节 < 行存，且打印节省比例" }
+        },
+        {
+          "title": "实现动态分区自动建分区",
+          "verification": { "type": "manual", "desc": "按 SELECT 末尾列取值自动创建多个 PARTITION 并写入对应行" }
+        }
+      ]
+    }
+  ]
+}

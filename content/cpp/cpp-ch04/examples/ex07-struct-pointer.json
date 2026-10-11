@@ -1,0 +1,8 @@
+{
+  "title": "结构体指针与 ->",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "3 4",
+  "code": "#include <iostream>\n\nstruct Point { int x; int y; };\n\nint main() {\n    Point p{3, 4};\n    Point* q = &p;\n    std::cout << q->x << ' ' << q->y;\n}"
+}

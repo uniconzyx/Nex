@@ -1,0 +1,107 @@
+{
+  "meta": {
+    "chapter": "fs-ch02",
+    "note": "6 题：基础题 5（self/book）+ 算法题 1（LeetCode 344，仅存元数据+链接不抄题面）；覆盖盒模型/BFC/渲染管线/语义化。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "difficulty": "easy",
+      "title": "CSS 中 box-sizing 的默认值是什么？",
+      "content_md": "选择 `box-sizing` 的初始值（未显式设置时）。",
+      "options": [
+        { "key": "A", "text": "border-box" },
+        { "key": "B", "text": "content-box" },
+        { "key": "C", "text": "padding-box" },
+        { "key": "D", "text": "margin-box" }
+      ],
+      "answer": { "correct": ["B"] },
+      "explanation": "CSS 规范中 box-sizing 初始值为 content-box：width/height 仅含内容区，padding 与 border 额外撑大元素。",
+      "tags": ["box-model", "box-sizing"],
+      "source": "self",
+      "source_ref": "《CSS 权威指南（第4版）》第 8 章 box-sizing",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "choice",
+      "difficulty": "mid",
+      "title": "以下哪些做法会触发 BFC（块级格式化上下文）？",
+      "content_md": "多选思路（本题单选最干净的触发方式）：哪个声明**专门**用于建立 BFC 且无裁切/定位副作用？",
+      "options": [
+        { "key": "A", "text": "display: flow-root" },
+        { "key": "B", "text": "color: red" },
+        { "key": "C", "text": "font-size: 16px" },
+        { "key": "D", "text": "text-align: center" }
+      ],
+      "answer": { "correct": ["A"] },
+      "explanation": "display:flow-root 是语义上最纯粹的 BFC 触发方式，不会导致 overflow:hidden 的裁切或 absolute 的脱离文档流等副作用。",
+      "tags": ["bfc", "layout"],
+      "source": "self",
+      "source_ref": "MDN Web Docs · Block formatting context",
+      "category": "基础题",
+      "platform": "self"
+    },
+    {
+      "type": "output",
+      "difficulty": "easy",
+      "title": "盒模型尺寸计算（border-box）",
+      "content_md": "给定 `width:200px; padding:16px; border:2px; box-sizing:border-box`，求元素**总占位宽**与**内容区宽**（单位 px，margin 不计）。",
+      "answer": {
+        "output": "总占位宽=200，内容区宽=164"
+      },
+      "explanation": "border-box 下 width 含 content+padding+border，故总宽=200；内容区=200-16*2-2*2=164（与 examples/ex10 Node 实测一致）。",
+      "tags": ["box-model", "math"],
+      "source": "self",
+      "source_ref": "examples/ex10-js-box-sizing-math.json",
+      "category": "基础题",
+      "platform": "self"
+    },
+    {
+      "type": "fix_error",
+      "difficulty": "mid",
+      "title": "修复浮动导致的父容器高度塌陷",
+      "content_md": "以下父容器因子元素 `float:left` 而高度为 0、背景包不住。请修复（保留浮动效果）：\n\n```css\n.box { background: #eee; }\n.box > .col { float: left; width: 100px; }\n```",
+      "answer": {
+        "reference_code": ".box { background: #eee; display: flow-root; }  /* 或 overflow: hidden; */\n.box > .col { float: left; width: 100px; }"
+      },
+      "explanation": "给父容器建立 BFC（display:flow-root 最干净）即可包含浮动子元素高度，不再塌陷。",
+      "tags": ["bfc", "float", "clearfix"],
+      "source": "self",
+      "source_ref": "MDN Web Docs · float / 清除浮动",
+      "category": "基础题",
+      "platform": "self"
+    },
+    {
+      "type": "explain",
+      "difficulty": "mid",
+      "title": "简述浏览器关键渲染路径（CRP）的五个阶段",
+      "content_md": "解释：从 HTML/CSS/JS 到屏幕像素，浏览器主线程依次经历哪几个阶段？哪些是合成器线程做的？",
+      "answer": {
+        "reference_code": "DOM + CSSOM → Render Tree（样式计算）→ Layout(Reflow) → Paint(Raster) → Composite(GPU)。JS/Style/Layout/Paint 在主线程，Composite 在合成器线程，故 transform/opacity 动画即使主线程卡顿也能流畅。"
+      },
+      "explanation": "核心是流水线模型：任一阶段重做都会连带后续重做；优化即减少 Reflow、把动画放到合成层、批量读写避免 layout thrashing。",
+      "tags": ["rendering-pipeline", "crp"],
+      "source": "self",
+      "source_ref": "《CSS 权威指南》+ web.dev · Critical Rendering Path",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "design",
+      "difficulty": "easy",
+      "title": "LeetCode 344 · 反转字符串（算法素养补充）",
+      "content_md": "编写一个把字符数组原地反转的函数。本题作为前端算法素养补充，题面与约束以官方为准，详见 external_url，此处不复述题面。",
+      "answer": {
+        "reference_code": "function reverseString(s) {\n  let i = 0, j = s.length - 1;\n  while (i < j) { [s[i], s[j]] = [s[j], s[i]]; i++; j--; }\n  return s;\n}"
+      },
+      "explanation": "双指针原地交换，空间 O(1)。注意 LeetCode 传的是字符数组，需原地修改。",
+      "tags": ["algorithm", "two-pointer", "string"],
+      "source": "leetcode",
+      "source_ref": "LeetCode 344（reverse-string）",
+      "external_url": "https://leetcode.cn/problems/reverse-string/",
+      "category": "算法题",
+      "platform": "leetcode"
+    }
+  ]
+}

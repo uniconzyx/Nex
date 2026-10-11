@@ -1,0 +1,250 @@
+{
+  "meta": {
+    "chapter": "cpp-ch19",
+    "note": "8 题：基础题 6（choice/fix_error/output/coding）+ 算法题 2（github 参数化测试实战 + LeetCode 20 仅存元数据与链接，不搬运题面）"
+  },
+  "items": [
+    {
+      "id": "cpp-ch19-ex01",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "PUBLIC / PRIVATE / INTERFACE 的传播判定",
+      "content_md": "已知三个目标的关系如下（`core` 的公开头目录为 `core/include`）：\n\n```cmake\ncmake_minimum_required(VERSION 3.20)\nproject(demo LANGUAGES CXX)\n\nadd_library(core STATIC src/core.cpp)\ntarget_include_directories(core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)\n\nadd_library(math STATIC src/math.cpp)\ntarget_include_directories(math PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/math/include)\ntarget_link_libraries(math PRIVATE core)\n\nadd_executable(app src/main.cpp)\ntarget_link_libraries(app PRIVATE math)\n```\n\n问：`app` 的源文件里直接写 `#include \"core_api.h\"`（该头文件位于 `core/include`）会怎样？",
+      "options": [
+        {
+          "key": "A",
+          "text": "能编译通过：PRIVATE 只影响 core 自己，math 是 core 的使用者，使用要求照常传给 math，再由 math 传给 app"
+        },
+        {
+          "key": "B",
+          "text": "编译失败：math 以 PRIVATE 链接 core，使用要求不再向 math 的消费者传播，app 的 include 路径里没有 core/include"
+        },
+        {
+          "key": "C",
+          "text": "能编译通过：只要 install(EXPORT) 导出过 core，任何目标都能看到 core 的头文件"
+        },
+        {
+          "key": "D",
+          "text": "取决于 app 是不是 STATIC 库：可执行文件看不到，静态库能看到"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "output": "",
+        "reference_code": ""
+      },
+      "explanation": "`PRIVATE` 的含义是「依赖只对自己可见，不作为使用要求导出」。因此 `math` 的 `INTERFACE_INCLUDE_DIRECTORIES` 为空，`app` 链接 `math` 时不会继承到 `core/include`，直接包含必然报 `No such file or directory`。这正是 ex10 图 B 的结论：把 `PRIVATE` 改回 `PUBLIC`，`app` 才能看到。A 错在把 PRIVATE 理解成「只对 core 自己生效」，忽略了「不向消费者传播」这层；C 错在 `install(EXPORT)` 不创造可见性，它只是把已有的使用要求写进导出文件；D 错在可见性由依赖边的关键字决定，与目标类型无关。",
+      "tags": [
+        "cmake",
+        "usage-requirements",
+        "PUBLIC-PRIVATE-INTERFACE"
+      ],
+      "source": "self",
+      "source_ref": "cpp-ch19 示例 ex10-cmake-usage-requirements（图 B）",
+      "external_url": "",
+      "time_limit_ms": 0,
+      "memory_limit_mb": 0
+    },
+    {
+      "id": "cpp-ch19-ex02",
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "把目录级 CMakeLists 改写成现代 target-centric 写法",
+      "content_md": "下面这份 CMakeLists 在 ex09 的静态检查器里被判出 9 个问题（CM001–CM010 规则库）：\n\n```cmake\ninclude_directories(${CMAKE_SOURCE_DIR}/include)\nlink_libraries(pthread)\nset(CMAKE_CXX_FLAGS \"${CMAKE_CXX_FLAGS} -Wall\")\n\nadd_executable(app src/main.cpp)\ntarget_link_libraries(app core)\n\nadd_library(core STATIC src/core.cpp)\ntarget_include_directories(core include)\n```\n\n请改写为现代写法，要求：\n1. 不再出现任何目录级命令（`include_directories` / `link_libraries`）；\n2. 所有 `target_*` 命令都显式带 `PUBLIC` / `PRIVATE` / `INTERFACE` 关键字；\n3. 语言级别与告警都挂在目标上，且告警不外传；\n4. include 路径可重定位（不得用 `${CMAKE_SOURCE_DIR}`）。",
+      "answer": {
+        "correct": [],
+        "output": "",
+        "reference_code": "cmake_minimum_required(VERSION 3.20)\nproject(cppmind_demo LANGUAGES CXX)\n\n# ① 目录级命令 -> 目标级命令\nadd_library(core STATIC src/core.cpp)\ntarget_include_directories(core\n    PUBLIC  ${CMAKE_CURRENT_SOURCE_DIR}/include   # 出现在 core 的公开头里\n    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)      # 只给 core 自己用的实现头\ntarget_compile_features(core PUBLIC cxx_std_17)  # ② 语言级要求挂 target，不用全局 CMAKE_CXX_STANDARD\ntarget_compile_options(core PRIVATE -Wall -Wextra -Werror)  # ③ 告警不外传\n\nadd_executable(app src/main.cpp)\ntarget_link_libraries(app PRIVATE core)          # ④ 必须写关键字\nfind_package(Threads REQUIRED)                   # ⑤ pthread 用导入目标而非 link_libraries\ntarget_link_libraries(app PRIVATE Threads::Threads)\n"
+      },
+      "explanation": "四步改写对应四条规则：① `include_directories`/`link_libraries` 是目录级命令（CM001/CM002），include 与依赖都会泄漏给本目录全部目标 → 改成 `target_include_directories` / `target_link_libraries`；② 缺关键字（CM006/CM007）→ 显式写 `PUBLIC`/`PRIVATE`；③ `set(CMAKE_CXX_FLAGS ...)` 全局追加编译选项（CM004）→ 改成 `target_compile_options(core PRIVATE -Wall -Wextra -Werror)`，并且用 `target_compile_features(core PUBLIC cxx_std_17)` 表达语言级要求；④ `${CMAKE_SOURCE_DIR}` 拼绝对路径（CM008）→ 改成 `${CMAKE_CURRENT_SOURCE_DIR}`，保证 install/export 后可重定位。",
+      "tags": [
+        "cmake",
+        "target-centric",
+        "refactor"
+      ],
+      "source": "self",
+      "source_ref": "cpp-ch19 示例 ex09-cmake-static-lint（CM001–CM010）",
+      "external_url": "",
+      "time_limit_ms": 0,
+      "memory_limit_mb": 0
+    },
+    {
+      "id": "cpp-ch19-ex03",
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "自研测试框架：断言计数、失败定位与退出码语义",
+      "content_md": "下面是一个极简测试框架内核（本章 ex01 的精简版）。写出它运行后的**标准输出**全文，并说明进程的**退出码**是多少：\n\n```cpp\n#include <cstdio>\n\nstatic int checks = 0;\nstatic int failed = 0;\n\nstatic void check(bool ok, int line) {\n    ++checks;\n    if (!ok) { ++failed; std::printf(\"[ ASSERT ] 第%d行\\n\", line); }\n}\n\nint main() {\n    check(1 + 1 == 2, __LINE__);\n    check(2 * 3 == 5, __LINE__);\n    check(4 - 1 == 3, __LINE__);\n    std::printf(\"[SUMMARY] 断言=%d 失败断言=%d\\n\", checks, failed);\n    std::printf(\"[CI] 退出码=%d\\n\", failed ? 1 : 0);\n    return failed ? 1 : 0;\n}\n```",
+      "answer": {
+        "correct": [],
+        "output": "[ ASSERT ] 第13行\n[SUMMARY] 断言=3 失败断言=1\n[CI] 退出码=1",
+        "reference_code": "#include <cstdio>\n\nstatic int checks = 0;\nstatic int failed = 0;\n\nstatic void check(bool ok, int line) {\n    ++checks;\n    if (!ok) { ++failed; std::printf(\"[ ASSERT ] 第%d行\\n\", line); }\n}\n\nint main() {\n    check(1 + 1 == 2, __LINE__);\n    check(2 * 3 == 5, __LINE__);\n    check(4 - 1 == 3, __LINE__);\n    std::printf(\"[SUMMARY] 断言=%d 失败断言=%d\\n\", checks, failed);\n    std::printf(\"[CI] 退出码=%d\\n\", failed ? 1 : 0);\n    return failed ? 1 : 0;\n}\n"
+      },
+      "explanation": "三条断言依次执行：`1+1==2` 通过、`2*3==5` 失败（实为 6）、`4-1==3` 通过，所以 `checks=3`、`failed=1`。失败断言打印 `[ ASSERT ] 第13行`——行号来自断言宏里的 `__LINE__`，这是「失败定位」的全部秘密。最后 `main` 返回 `failed ? 1 : 0` = 1，**CI 只认这个退出码**：返回 0 会让流水线误判为通过，因此测试入口绝不能把返回值写死为 0。",
+      "tags": [
+        "unit-test",
+        "exit-code",
+        "assert"
+      ],
+      "source": "self",
+      "source_ref": "cpp-ch19 示例 ex01-mini-test-framework / ex02-test-framework-catch-bug",
+      "external_url": "",
+      "time_limit_ms": 0,
+      "memory_limit_mb": 0
+    },
+    {
+      "id": "cpp-ch19-ex04",
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "用依赖注入让限流器摆脱真实时间",
+      "content_md": "现有一个限流器直接调用 `steady_clock::now()` 取时间，导致测试必须 `sleep`，又慢又不稳。请完成改造：\n1. 抽出 `IClock` 抽象接口（`now_ms()`），提供 `FakeClock`（时间可 `advance`）与 `SystemClock` 两个实现；\n2. `RateLimiter` 通过构造函数接收 `const IClock&`，**不再自己取系统时间**；\n3. 容量为 3、窗口 1000ms 时，前 3 次 `allow()` 为 true、第 4/5 次为 false，时间前进 1000ms 后第 6 次重新为 true；\n4. 说明你用的是 stub（桩）还是 mock，为什么。",
+      "answer": {
+        "correct": [],
+        "output": "",
+        "reference_code": "#include <chrono>\n#include <iostream>\n\n// ① 抽象接口：被测代码只认识它，从不自己取系统时间\nstruct IClock {\n    virtual ~IClock() = default;\n    virtual long long now_ms() const = 0;\n};\n\nstruct FakeClock : IClock {          // 假实现：时间完全由测试驱动\n    long long t = 0;\n    long long now_ms() const override { return t; }\n    void advance(long long d) { t += d; }\n};\n\nstruct SystemClock : IClock {        // 真实现：生产环境注入\n    long long now_ms() const override {\n        using namespace std::chrono;\n        return duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count();\n    }\n};\n\n// ② 依赖注入：RateLimiter 只持有引用\nclass RateLimiter {\npublic:\n    RateLimiter(const IClock& clk, int capacity, long long window_ms)\n        : clk_(clk), cap_(capacity), win_(window_ms) {}\n\n    bool allow() {\n        long long now = clk_.now_ms();\n        if (start_ < 0 || now - start_ >= win_) { start_ = now; used_ = 0; }\n        if (used_ < cap_) { ++used_; return true; }\n        return false;\n    }\n\nprivate:\n    const IClock& clk_;\n    int cap_;\n    long long win_;\n    long long start_ = -1;\n    int used_ = 0;\n};\n\nstatic const char* B(bool v) { return v ? \"True\" : \"False\"; }\n\nint main() {\n    FakeClock fake;                       // ③ 测试注入：无需 sleep，毫秒级、结果稳定\n    RateLimiter rl(fake, 3, 1000);\n    for (int i = 1; i <= 5; ++i)\n        std::cout << \"t=\" << fake.now_ms() << \" 第\" << i << \"次 allow=\" << B(rl.allow()) << \"\\n\";\n    fake.advance(1000);                   // 一步跨到下一个窗口\n    std::cout << \"t=\" << fake.now_ms() << \" 第6次 allow=\" << B(rl.allow()) << \"\\n\";\n    return 0;\n}\n"
+      },
+      "explanation": "关键是「隐藏输入显式化」：原来 `now()` 是被测函数内部的隐藏输入，测试无法控制；注入之后它变成构造参数，于是窗口边界可以被精确构造（`advance(1000)` 一步跨窗，无需等待）。这里用的是 **stub（桩）** 而非 mock：`FakeClock` 只按测试需要**返回固定时刻**，并不校验「是否被调用了几次」；只有当你需要断言调用行为（如重试 3 次）时才需要 mock/spy。注意 `RateLimiter` 持有的是引用，调用方必须保证时钟的生命周期长于限流器。",
+      "tags": [
+        "dependency-injection",
+        "stub",
+        "testability"
+      ],
+      "source": "self",
+      "source_ref": "cpp-ch19 示例 ex06-dependency-injection-clock",
+      "external_url": "",
+      "time_limit_ms": 0,
+      "memory_limit_mb": 0
+    },
+    {
+      "id": "cpp-ch19-ex05",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "夹具隔离与静态状态泄漏",
+      "content_md": "某同学写了两个「看起来一样」的用例：\n\n写法甲（夹具）：\n```cpp\n// 夹具：每个用例一个全新实例\nstruct CounterFixture {\n    int value = -1;                       // 故意给个脏初值，验证 SetUp 一定被调用\n    void SetUp() { value = 0; }\n    void TearDown() {}\n};\n\n#define TEST_F(Fx, name)                                        \\\n    static void name(Fx& self);                                  \\\n    static mini::Registrar mini_freg_##name(#name, [] {           \\\n        Fx self; self.SetUp(); name(self); self.TearDown();       \\\n    });                                                           \\\n    static void name(Fx& self)\n\nTEST_F(CounterFixture, add_once)  { self.value += 5; CHECK_EQ(self.value, 5); }\nTEST_F(CounterFixture, add_twice) { self.value += 5; CHECK_EQ(self.value, 5); }\n```\n\n写法乙（静态状态）：\n```cpp\n// 反例：不用夹具，改用跨用例共享的静态状态\nTEST(shared_state_leak_demo) {\n    static int shared_total = 0;     // BUG 模式：静态状态会跨用例累积\n    shared_total += 5;\n    CHECK_EQ(shared_total, 5);       // 第一次执行通过\n    shared_total += 5;               // 模拟「第二个用例」接着跑\n    CHECK_EQ(shared_total, 5);       // 失败：实得 10\n}\n```\n\n关于这两种写法，正确的是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "甲中两个用例都会通过；乙中第二个断言失败，因为 static 变量的修改会跨用例保留"
+        },
+        {
+          "key": "B",
+          "text": "甲中 add_twice 会失败，因为夹具实例在用例之间共享"
+        },
+        {
+          "key": "C",
+          "text": "乙的问题只在于命名不规范，整包跑和单跑结果一致"
+        },
+        {
+          "key": "D",
+          "text": "两种写法等价，只要测试框架按用例名排序执行就没有区别"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "A"
+        ],
+        "output": "",
+        "reference_code": ""
+      },
+      "explanation": "`TEST_F` 宏在每次执行前构造一个**全新**的 `CounterFixture` 并调用 `SetUp()` 复位，所以两个用例各自从 0 开始、都通过（B 错）。乙的 `static int shared_total` 是**跨用例存活**的状态，第二次执行时读到的是上一次留下的值（10 而非 5），这就是典型的「单独跑通过、整包跑失败」（C 错）。这类假失败与执行顺序、用例名排序无关，只与「谁在用例之间活下来」有关（D 错）。排查顺序：静态/全局变量、单例、临时文件、环境变量、全局 locale。",
+      "tags": [
+        "fixture",
+        "test-isolation",
+        "static-state"
+      ],
+      "source": "self",
+      "source_ref": "cpp-ch19 示例 ex05-fixture-setup-teardown",
+      "external_url": "",
+      "time_limit_ms": 0,
+      "memory_limit_mb": 0
+    },
+    {
+      "id": "cpp-ch19-ex06",
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "修正一份跑不起来的 GitHub Actions workflow",
+      "content_md": "下面这份 workflow 在 ex13 的校验器里会报出多条问题（WF001–WF007）：\n\n```yaml\nname: ci\njobs:\n  build:\n    steps:\n      - uses: actions/checkout\n      - run: cmake -S . -B build\n  test:\n    needs: [bulid]\n    steps: []\n  deploy:\n    needs: [release]\n    steps:\n      - run: echo release\n```\n\n请修正它，要求：补全触发条件、固定 action 版本、修正悬空的 `needs` 引用、补全 `runs-on` 与 `steps`、给每个 job 加超时。",
+      "answer": {
+        "correct": [],
+        "output": "",
+        "reference_code": "name: ci\n\non:                     # WF001：缺 on 则 workflow 永远不会被触发\n  push:\n    branches: [main]\n  pull_request:\n\njobs:\n  build:\n    runs-on: ubuntu-latest            # WF003\n    timeout-minutes: 15               # WF007\n    steps:\n      - uses: actions/checkout@v4     # WF006：必须固定版本\n      - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release\n\n  test:\n    runs-on: ubuntu-latest\n    needs: [build]                    # WF005：名字必须真实存在（bulid -> build）\n    timeout-minutes: 15\n    steps:\n      - uses: actions/checkout@v4\n      - run: ctest --test-dir build --output-on-failure\n\n  deploy:\n    runs-on: ubuntu-latest\n    needs: [test]                     # 原来引用了不存在的 release\n    if: github.ref == 'refs/heads/main'\n    timeout-minutes: 10\n    steps:\n      - run: echo release\n"
+      },
+      "explanation": "四类问题逐一对应：① 缺 `on`（WF001）→ workflow 永远不会被触发；② 缺 `runs-on`（WF003）与 `steps` 为空（WF004）→ job 没地方跑、也没事可做；③ `needs: [bulid]` 是**错别字**导致的悬空引用（WF005）→ GitHub 直接拒绝该 workflow，`deploy` 的 `needs: [release]` 同理；④ `uses: actions/checkout` 未固定版本（WF006）→ 上游改动会静默改变你的流水线行为，应写 `@v4` 或提交 SHA；⑤ 缺 `timeout-minutes`（WF007）→ 挂死会占满 runner 的默认 360 分钟配额。",
+      "tags": [
+        "github-actions",
+        "ci",
+        "workflow-lint"
+      ],
+      "source": "self",
+      "source_ref": "cpp-ch19 示例 ex13-workflow-lint（WF001–WF007）",
+      "external_url": "",
+      "time_limit_ms": 0,
+      "memory_limit_mb": 0
+    },
+    {
+      "id": "cpp-ch19-ex07",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "github",
+      "difficulty": "mid",
+      "title": "为开源算法实现补一套参数化 + 边界值测试",
+      "content_md": "以 TheAlgorithms/C-Plus-Plus 里的查找类算法为对象（本章 `_manifest.json` 已收录该仓库），完成下列任务，**不要照抄仓库代码，自己写一份实现再测**：\n1. 实现 `binary_search_idx(const std::vector<int>&, int)`：找到返回下标，找不到返回 `-1`，   搜索区间统一写成**左闭右开** `[lo, hi)`，取中点用 `lo + (hi - lo) / 2` 防溢出；\n2. 先列等价类（命中/未命中）与边界点（首元素、末元素、小于最小值、大于最大值、中间不存在值、空容器），   **再**写用例；\n3. 用参数化方式组织用例（数据表 + 一份断言逻辑），输出 `[SUMMARY] 断言=N 失败断言=M` 并返回退出码；\n4. 把该测试接进 CTest：`enable_testing()` + `add_test(NAME search_tests COMMAND search_tests)`。",
+      "answer": {
+        "correct": [],
+        "output": "[SUMMARY] 断言=6 失败断言=0",
+        "reference_code": "#include <iostream>\n#include <vector>\n\n// 二分查找：返回下标，不存在返回 -1（搜索区间为左闭右开 [lo, hi)）\nint binary_search_idx(const std::vector<int>& a, int target) {\n    int lo = 0, hi = static_cast<int>(a.size());\n    while (lo < hi) {\n        int mid = lo + (hi - lo) / 2;          // 防溢出的取中点写法\n        if (a[mid] < target) lo = mid + 1;\n        else hi = mid;\n    }\n    return (lo < static_cast<int>(a.size()) && a[lo] == target) ? lo : -1;\n}\n\nstatic int checks = 0, failed = 0;\nstatic void eq(int got, int want, int line) {\n    ++checks;\n    if (got != want) {\n        ++failed;\n        std::cout << \"[ ASSERT ] 第\" << line << \"行 期望=\" << want << \" 实得=\" << got << \"\\n\";\n    }\n}\n\nint main() {\n    std::vector<int> a = {1, 3, 5, 7, 9};\n    // 边界值：首元素 / 末元素 / 小于最小 / 大于最大 / 中间不存在 / 空容器\n    eq(binary_search_idx(a, 1), 0, __LINE__);\n    eq(binary_search_idx(a, 9), 4, __LINE__);\n    eq(binary_search_idx(a, 0), -1, __LINE__);\n    eq(binary_search_idx(a, 10), -1, __LINE__);\n    eq(binary_search_idx(a, 4), -1, __LINE__);\n    std::vector<int> empty;\n    eq(binary_search_idx(empty, 1), -1, __LINE__);\n    std::cout << \"[SUMMARY] 断言=\" << checks << \" 失败断言=\" << failed << \"\\n\";\n    return failed ? 1 : 0;\n}\n"
+      },
+      "explanation": "二分查找的 bug 几乎全在边界：左闭右开区间下 `hi = a.size()`（不能是 `size()-1`），循环条件是 `lo < hi`（不能是 `lo <= hi`），更新是 `hi = mid`（不能是 `mid - 1`，否则死循环或漏解）。用例设计上，空容器是一个**独立等价类**，最容易被漏掉；「小于最小 / 大于最大 / 中间不存在」三个点覆盖未命中的三种情形。参数化让新增一组数据只改表、不改断言逻辑，这也是 ex04 的核心收益。",
+      "tags": [
+        "binary-search",
+        "boundary-value",
+        "parameterized-test",
+        "ctest"
+      ],
+      "source": "github",
+      "source_ref": "TheAlgorithms/C-Plus-Plus（search/ 目录，cpp-ch19 manifest 已收录 GitHub 资源）",
+      "external_url": "https://github.com/TheAlgorithms/C-Plus-Plus",
+      "time_limit_ms": 2000,
+      "memory_limit_mb": 256
+    },
+    {
+      "id": "cpp-ch19-ex08",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "easy",
+      "title": "LeetCode 20 · 用等价类与边界值驱动栈解法（仅元数据+链接）",
+      "content_md": "> 合规提示：本题**只保留元数据与链接，不搬运题面**。请在 LeetCode 打开下方链接阅读题面后作答。\n\n要求（本章视角）：\n1. 用栈实现括号合法性判定：左括号入栈对应的右括号，遇右括号时比对栈顶；\n2. 先列等价类：合法嵌套、合法并列、类型不匹配、顺序颠倒、多余左括号、多余右括号、**空串**；   再为每类取代表用例，用参数化方式组织；\n3. 输出 `[SUMMARY] 断言=N 失败断言=M`，失败断言数为 0 时返回 0，否则返回 1；\n4. 说明：为什么「空串」是一个必须单独列出的等价类？",
+      "answer": {
+        "correct": [],
+        "output": "[SUMMARY] 断言=7 失败断言=0",
+        "reference_code": "#include <iostream>\n#include <string>\n#include <vector>\n\n// 栈配对的经典解法（题面请在 LeetCode 打开链接阅读；此处只放解法与自测）\nbool is_valid(const std::string& s) {\n    std::vector<char> st;\n    for (char c : s) {\n        if (c == '(') st.push_back(')');\n        else if (c == '[') st.push_back(']');\n        else if (c == '{') st.push_back('}');\n        else {\n            if (st.empty() || st.back() != c) return false;\n            st.pop_back();\n        }\n    }\n    return st.empty();\n}\n\nstatic int checks = 0, failed = 0;\nstatic void eqv(bool got, bool want, const std::string& in, int line) {\n    ++checks;\n    if (got != want) {\n        ++failed;\n        std::cout << \"[ ASSERT ] 第\" << line << \"行 输入=\" << in\n                  << \" 期望=\" << want << \" 实得=\" << got << \"\\n\";\n    }\n}\n\nint main() {\n    // 等价类：合法嵌套 / 合法并列 / 类型不匹配 / 顺序颠倒 / 多余左括号 / 多余右括号 / 空串\n    eqv(is_valid(\"()\"), true, \"()\", __LINE__);\n    eqv(is_valid(\"()[]{}\"), true, \"()[]{}\", __LINE__);\n    eqv(is_valid(\"(]\"), false, \"(]\", __LINE__);\n    eqv(is_valid(\"([)]\"), false, \"([)]\", __LINE__);\n    eqv(is_valid(\"(\"), false, \"(\", __LINE__);\n    eqv(is_valid(\")\"), false, \")\", __LINE__);\n    eqv(is_valid(\"\"), true, \"\", __LINE__);      // 空串属于「合法」等价类，最易漏\n    std::cout << \"[SUMMARY] 断言=\" << checks << \" 失败断言=\" << failed << \"\\n\";\n    return failed ? 1 : 0;\n}\n"
+      },
+      "explanation": "判定逻辑：遇左括号压入**期望的右括号**，遇其它字符时要求栈非空且栈顶等于该字符，全部扫描完后栈必须为空（否则有多余左括号）。等价类划分上，「空串」是**边界等价类**：它不含任何字符，循环一次都不执行，直接落到 `return st.empty()` 上，与「非空合法串」走的是完全不同的路径——漏掉它就漏掉了循环零次的边界情形，这正是边界值分析要求「取 0 个元素」的原因。类型不匹配（`\"(]\"`）与顺序颠倒（`\"([)]\"`）是两个不同的等价类，不能互相替代。",
+      "tags": [
+        "stack",
+        "equivalence-class",
+        "parameterized-test",
+        "leetcode"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 20（valid-parentheses）",
+      "external_url": "https://leetcode.cn/problems/valid-parentheses/",
+      "time_limit_ms": 2000,
+      "memory_limit_mb": 256
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "title": "连续批处理 vs 静态批处理：吞吐计数模拟",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "请求数 = 12  批容量 = 4  总解码步(有效) = 60\n静态批处理 总步数 = 24  槽位利用率 = 62.5%\n连续批处理 总步数 = 18  槽位利用率 = 83.3%\n吞吐加速比(静态步数/连续步数) = 1.33\n连续批处理步数更少: True\n连续批处理利用率更高: True\n",
+  "code": "\"\"\"连续批处理(continuous batching) 与静态批处理的总步数对比。\n纯计数模拟, 不涉及真实时间。\"\"\"\n\nCAP = 4                       # 每批最多 4 个请求并行\nREQ_STEPS = [5, 3, 8, 2, 6, 4, 7, 3, 5, 9, 2, 6]   # 每个请求需解码的步数\n\n# --- 静态批处理: 满批后整批跑到最慢者结束 ---\nstatic_steps = 0\nstatic_useful = 0\nfor i in range(0, len(REQ_STEPS), CAP):\n    grp = REQ_STEPS[i:i + CAP]\n    static_steps += max(grp)\n    static_useful += sum(grp)\n\n# --- 连续批处理: 每步结束即补位, 直到队列清空 ---\nremaining = list(REQ_STEPS)\nrunning = []\ncont_steps = 0\nwhile remaining or running:\n    while remaining and len(running) < CAP:\n        running.append(remaining.pop(0))\n    running = [s - 1 for s in running]\n    running = [s for s in running if s > 0]\n    cont_steps += 1\n\nuseful = sum(REQ_STEPS)\nprint(\"请求数 = %d  批容量 = %d  总解码步(有效) = %d\" % (len(REQ_STEPS), CAP, useful))\nprint(\"静态批处理 总步数 = %d  槽位利用率 = %.1f%%\" % (static_steps, useful / (static_steps * CAP) * 100))\nprint(\"连续批处理 总步数 = %d  槽位利用率 = %.1f%%\" % (cont_steps, useful / (cont_steps * CAP) * 100))\nprint(\"吞吐加速比(静态步数/连续步数) = %.2f\" % (static_steps / cont_steps))\nprint(\"连续批处理步数更少:\", cont_steps < static_steps)\nprint(\"连续批处理利用率更高:\", (useful / (cont_steps * CAP)) > (useful / (static_steps * CAP)))\n"
+}

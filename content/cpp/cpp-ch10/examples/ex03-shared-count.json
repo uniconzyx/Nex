@@ -1,0 +1,8 @@
+{
+  "title": "shared_ptr 引用计数（use_count）变化",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "1\n2\n2\n1",
+  "code": "#include <iostream>\n#include <memory>\nint main() {\n    auto p = std::make_shared<int>(10);\n    std::cout << p.use_count() << '\\n';\n    auto q = p;                       // 拷贝：强引用计数 +1\n    std::cout << p.use_count() << '\\n';\n    std::cout << q.use_count() << '\\n';\n    q.reset();                        // 释放 q 的持有：强引用计数 -1\n    std::cout << p.use_count() << '\\n';\n}"
+}

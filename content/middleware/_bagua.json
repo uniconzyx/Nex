@@ -1,0 +1,219 @@
+{
+  "subject": "middleware",
+  "title": "中间件八股模块（Redis / Kafka）",
+  "note": "Redis 与 Kafka 面试高频八股题库。侧重底层数据结构、持久化与高可用机制、消息可靠性语义，生产环境踩坑点。",
+  "categories": [
+    {
+      "id": "redis-data",
+      "title": "Redis 数据结构与编码",
+      "items": [
+        {
+          "q": "Redis 为什么快？单线程为什么还能这么快？",
+          "a": "**要点**\n1. **纯内存操作**：内存随机访问比磁盘快 4–5 个数量级（纳秒 vs 毫秒）。\n2. **单线程免锁**：命令串行执行，无并发竞争、无上下文切换、无锁开销。注意「单线程」指的是**命令执行**单线程——6.0 起网络 IO 和部分删除（`UNLINK`）是多线程的。\n3. **IO 多路复用**：用 epoll 在一个线程里同时管理上万连接，等待数据时不让 CPU 空转。\n4. **高效数据结构**：SDS、跳表、压缩列表、整数集合，都是为「内存紧凑 + 局部性好」设计的。\n5. **协议简单**：RESP 协议解析成本低。\n6. **单线程的代价**：**慢命令会阻塞全局**。所以禁止在生产用 `KEYS *`、`FLUSHALL`，大 key 的 `DEL` 改用 `UNLINK`，复杂度 O(N) 的命令要评估。",
+          "tags": [
+            "Redis",
+            "性能",
+            "epoll"
+          ],
+          "difficulty": "easy",
+          "hot": 5,
+          "source_ref": "《Redis 设计与实现》第1章"
+        },
+        {
+          "q": "Redis 的 SDS 相比 C 原生字符串有什么优势？",
+          "a": "**要点**\n1. **O(1) 取长度**：SDS 头部有 `len` 字段，C 字符串要 `strlen` 遍历 O(N)。\n2. **二进制安全**：按 `len` 判断边界而非 `\\0`，所以能存图片、序列化数据等含空字节的内容。\n3. **杜绝缓冲区溢出**：拼接前检查 `free` 空间，不够就**自动扩容**。\n4. **内存预分配与惰性释放**：扩容时若 `len < 1MB` 则翻倍，否则多分配 1MB（`SDS_MAX_PREALLOC`）；缩短时不立即 `realloc`，保留空间备用——**减少内存重分配次数**。\n5. 头部有 5 种类型（`sdshdr5/8/16/32/64`），按长度选最小够用的头部，**节省内存**。\n6. 面试延伸：`APPEND` 的均摊复杂度是 O(1)，正是靠预分配。",
+          "tags": [
+            "Redis",
+            "SDS",
+            "数据结构"
+          ],
+          "difficulty": "mid",
+          "hot": 4,
+          "source_ref": "《Redis 设计与实现》第2章"
+        },
+        {
+          "q": "ZSet 为什么用跳表而不是红黑树？",
+          "a": "**要点**\n1. **范围查询友好**：跳表底层是有序链表，`ZRANGEBYSCORE` 只需定位起点再顺序遍历，**缓存局部性好**；红黑树范围查询要靠中序遍历，跳来跳去，**缓存不友好**。\n2. **实现与维护简单**：跳表插入/删除只需改局部指针，红黑树要处理旋转与变色，代码复杂度和 bug 面大得多。\n3. **易于实现 rank**：跳表每个节点记录跨度 `span`，`ZRANK` 可以 O(logN) 求出排名——红黑树要在节点上额外维护 `size` 字段才能做到。\n4. **并发友好**：跳表的局部修改更适合无锁化（虽然 Redis 单线程未用到，但 Java 的 `ConcurrentSkipListMap` 正是这个理由）。\n5. 代价：跳表指针多占内存（平均 1/(1-p) 个指针），Redis 用 `p=0.25` 平衡了内存与层高（层高期望 1.33）。",
+          "tags": [
+            "Redis",
+            "ZSet",
+            "跳表"
+          ],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《Redis 设计与实现》第5章"
+        },
+        {
+          "q": "Redis 各数据类型在不同规模下分别用什么底层编码？为什么这么设计？",
+          "a": "**要点**\n1. **String**：`int`（能转数字且 ≤ long）→ `embstr`（≤44 字节，一次分配，只读）→ `raw`（>44 字节，两次分配）。44 是因为 `redisObject`(16) + `sdshdr8`(3) + `'\\0'`(1) 恰好 64 字节**一个缓存行**。\n2. **List**：`listpack`（元素少且小）→ `quicklist`（元素多；3.2 起是「双向链表 + 每个节点一个 ziplist/listpack」；7.0 把 ziplist 全换成了 listpack）。\n3. **Hash**：`listpack` → `hashtable`（元素数 > 512 或单值 > 64 字节时转换）。\n4. **Set**：`intset`（全是整数且 ≤512）→ `listpack`（7.2 起小集合）→ `hashtable`。\n5. **ZSet**：`listpack` → `skiplist + dict` 双结构（>128 元素或单值 > 64 字节），dict 用来 O(1) 查 score，skiplist 用来排序与范围查询。\n6. **设计思想**：**小数据用紧凑连续内存（省内存、CPU 缓存友好）**，**大数据转成标准结构（保证 O(1)/O(logN)）**。转换阈值可通过 `hash-max-listpack-entries` 等参数调，但转换是**单向**的，转过去就不会退回来。",
+          "tags": [
+            "Redis",
+            "编码",
+            "内存优化"
+          ],
+          "difficulty": "hard",
+          "hot": 5,
+          "source_ref": "《Redis 设计与实现》第4-8章"
+        }
+      ]
+    },
+    {
+      "id": "redis-persist",
+      "title": "持久化与内存管理",
+      "items": [
+        {
+          "q": "RDB 和 AOF 有什么区别？生产上怎么选？",
+          "a": "**要点**\n1. **RDB**：某个时刻的**全量快照**（二进制、体积小、恢复快）。触发方式：`SAVE`（阻塞）、`BGSAVE`（fork 子进程，COW 写时复制）、以及 `save 900 1` 这类配置。缺点是**两次快照之间的数据会丢**。\n2. **AOF**：记录**每条写命令**（追加写），默认 `everysec` 刷盘——丢最多 1 秒。文件大、恢复慢，但**数据更完整**。重写（`BGREWRITEAOF`）用来压缩体积。\n3. **AOF 的三种刷盘策略**：`always`（每条 fsync，最安全最慢）、`everysec`（默认，兼顾）、`no`（交给 OS，最不可控）。\n4. **混合持久化（4.0+，推荐）**：AOF 重写时前半部分写 RDB 格式的全量数据，后半部分追加增量命令 → **恢复快 + 丢得少**，是 server 默认方向。\n5. **fork 的代价**：`BGSAVE`/`BGREWRITEAOF` 要 fork，内存越大 fork 越慢（页表拷贝），且 COW 期间写操作会额外占内存。所以单实例内存不宜过大（建议 ≤ 10–16G）。\n6. **选型建议**：缓存场景可只开 RDB（丢了能重建）；**有状态数据（如会话、计数）必须开 AOF + everysec**，且做**主从 + 定期备份**，不能只靠持久化兜底。",
+          "tags": [
+            "Redis",
+            "持久化",
+            "RDB",
+            "AOF"
+          ],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《Redis 设计与实现》第10章"
+        },
+        {
+          "q": "Redis 的过期键是怎么删除的？内存满了怎么办？",
+          "a": "**要点**\n1. **两种删除策略配合**：\n   - **惰性删除**：访问 key 时才检查是否过期，过期就删并返回 nil。CPU 友好，但**内存不友好**（冷 key 可能长期占着）。\n   - **定期删除**：每 100ms 随机抽查一批设了过期时间的 key，删掉过期的。**随机 + 限制时长**（默认 25% CPU 时间）避免阻塞主线程。\n2. 所以**内存里的过期 key 不一定会被及时回收**——这是「内存用量和 `dbsize` 对不上」的常见原因。\n3. **8 种内存淘汰策略（maxmemory-policy）**：\n   - `noeviction`（默认）：写满了直接报错，只允许读；\n   - `volatile-lru` / `volatile-lfu` / `volatile-random` / `volatile-ttl`：只淘汰**设了过期时间**的 key；\n   - `allkeys-lru` / `allkeys-lfu` / `allkeys-random`：从**所有** key 里淘汰。\n4. **LRU 是近似实现**：Redis 用「**随机采样 N（默认 5）个 key，淘汰其中最久未用的**」+ 24 位对象头记录访问时间戳，避免维护完整 LRU 链表的开销。Redis 4.0 加的 **LFU**（按访问频率）对「热点数据」场景更准。\n5. **实践**：纯缓存用 `allkeys-lru`；有持久数据混存时用 `volatile-lru` 保护无 TTL 的关键数据。**必须监控内存**，因为淘汰是「事后补救」而不是解决方案。",
+          "tags": [
+            "Redis",
+            "过期",
+            "淘汰策略",
+            "LRU"
+          ],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《Redis 设计与实现》第9章"
+        },
+        {
+          "q": "什么是大 key 和热 key？怎么发现和解决？",
+          "a": "**要点**\n1. **大 key**：单 key 的 value 过大（经验阈值：String > 10KB，集合类元素 > 5000）。危害：**网络阻塞**（一次传输几十 MB）、**慢命令阻塞主线程**、**删除时阻塞**、**COW 期间内存翻倍**、**集群下数据倾斜**。\n2. **发现手段**：`redis-cli --bigkeys`（采样扫描）、`MEMORY USAGE key`、`SCAN` + `STRLEN/LLEN/HLEN`、`RDB` 离线分析工具（如 `rdb-tools`）、云厂商的慢日志与 key 分析。\n3. **解决**：① **拆分**（hash 分桶成 `user:info:1`…`user:info:100`，大 list 拆成多个小 list）；② 大 value 压缩或改存对象存储，Redis 只存指针；③ 删除用 **`UNLINK`**（异步回收）或分批 `HSCAN + HDEL`；④ 读写用 `HGETALL` 换成 `HMGET` 按需取。\n4. **热 key**：某个 key 的 QPS 极高（如秒杀库存）。危害：**单分片 CPU 打满**，集群扩分片也无法分担。\n5. **热 key 解决**：① **本地缓存**（Caffeine）挡住绝大部分读；② **key 加随机后缀**打散到多分片（牺牲一致性换吞吐）；③ 读写分离、多副本只读；④ 提前预热 + 降级预案（限流、熔断）。",
+          "tags": [
+            "Redis",
+            "大 key",
+            "热 key",
+            "生产问题"
+          ],
+          "difficulty": "hard",
+          "hot": 5,
+          "source_ref": "《Redis 开发与运维》第10章"
+        }
+      ]
+    },
+    {
+      "id": "redis-ha",
+      "title": "高可用与缓存设计",
+      "items": [
+        {
+          "q": "Redis 主从复制的原理？为什么会有数据丢失？",
+          "a": "**要点**\n1. 首次同步（`PSYNC`）：从节点发 `PSYNC ? -1` → 主节点 `FULLRESYNC <runid> <offset>` + **RDB 全量** + 期间命令缓冲；从节点载入 RDB 后再补发缓冲。\n2. 断线重连：**增量同步**——主节点维护 `repl_backlog`（环形缓冲，默认 1MB），从节点带 `runid + offset` 回来，在 backlog 范围内就只补发缺失部分（`CONTINUE`）。超范围则退化为全量。\n3. **复制是异步的**——主节点写完就返回客户端，**不等从节点确认**。所以主节点宕机时，未同步到从节点的数据会**永久丢失**。\n4. 缓冲三件套：**输出缓冲（每个从节点一个）**、**复制积压缓冲（backlog，全局共享）**、AOF 缓冲。`client-output-buffer-limit replica` 超限会**强制断开从节点**。\n5. 缓解手段：`WAIT numreplicas timeout` 命令可同步等待 N 个副本确认（代价是延迟）；但 Redis 的主从**不保证强一致**，需要强一致得用 Redlock 之外的方案（如 Raft 系存储）。",
+          "tags": [
+            "Redis",
+            "主从复制",
+            "数据丢失"
+          ],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《Redis 设计与实现》第15章"
+        },
+        {
+          "q": "Sentinel 和 Cluster 分别解决什么问题？",
+          "a": "**要点**\n1. **Sentinel（哨兵）**：解决**主从的自动故障转移**。多个哨兵互相监控、主观下线（单个哨兵认为挂了）→ 客观下线（`quorum` 个哨兵认同）→ 选 leader 哨兵 → 从副本中选新主（优先级 > offset > runid）→ 其余副本 `REPLICAOF` 新主 → 通知客户端（**通过订阅 `__sentinel__:hello` 或 Sentinel API 感知**）。\n2. **Sentinel 的本质仍是单主**：容量受单机内存限制，**解决不了水平扩展**。至少 3 个哨兵（奇数）部署在不同机器上。\n3. **Cluster（集群）**：解决**水平扩展 + 高可用**。**16384 个哈希槽**分配到主节点（`CRC16(key) % 16384`），每个主节点带若干从节点。客户端根据 `MOVED`/`ASK` 重定向访问正确节点。\n4. **为什么是 16384 而不是 65536**：① 心跳包要携带槽位图，16384 bit = 2KB，65536 bit = 8KB，**带宽成本差 4 倍**；② Redis 作者权衡「节点数不太可能超过 1000」→ 16384 足够，且槽位图小利于 gossip 传播。\n5. **Cluster 的限制**：不支持多 key 跨槽操作（除非用 **hash tag `{}`** 强制同槽）、不支持多数据库（只有 db0）、事务与 Lua 受限。\n6. **选型**：数据量 < 单机内存 → 主从 + Sentinel；要扩展 → Cluster；但**Cluster 的运维复杂度高**，很多场景用「客户端分片（如 ShardedJedis）+ Sentinel」更简单。",
+          "tags": [
+            "Redis",
+            "Sentinel",
+            "Cluster",
+            "哈希槽"
+          ],
+          "difficulty": "hard",
+          "hot": 5,
+          "source_ref": "《Redis 开发与运维》第8章"
+        },
+        {
+          "q": "缓存穿透、击穿、雪崩分别是什么？怎么解决？",
+          "a": "**要点**\n1. **穿透**：查询**根本不存在的数据**，缓存永远不命中，请求全打到 DB（常见于恶意攻击用不存在的 ID 刷）。\n   - 解法：① **缓存空值**（设短 TTL，如 60s）；② **布隆过滤器**前置拦截；③ 参数校验（ID 格式、范围）在入口拒掉。\n2. **击穿**：**某个热点 key 过期瞬间**，大量并发请求同时打到 DB。\n   - 解法：① **互斥锁/分布式锁**（只放一个请求去查 DB，其余等待）；② **逻辑过期**（value 里存过期时间，过期后异步刷新，读始终命中）；③ 热点 key **永不过期** + 后台定时更新。\n3. **雪崩**：**大量 key 同时过期**或**缓存服务整体宕机**，DB 瞬间被打满。\n   - 解法：① TTL 加**随机抖动**（`base + random(0, 300s)`）；② **多级缓存**（本地 Caffeine + Redis）；③ 缓存**高可用**（主从/Cluster）；④ **限流 + 熔断降级**兜底；⑤ 提前**预热**。\n4. **记忆口诀**：穿透=不存在，击穿=一个热点，雪崩=一大片。三者都指向同一个根本原则——**不能让 DB 直接承受突发流量**。",
+          "tags": [
+            "缓存",
+            "穿透",
+            "击穿",
+            "雪崩"
+          ],
+          "difficulty": "easy",
+          "hot": 5,
+          "source_ref": "《Redis 开发与运维》第11章"
+        },
+        {
+          "q": "缓存和数据库的一致性怎么保证？先删缓存还是先更新数据库？",
+          "a": "**要点**\n1. **四种方案对比**：\n   - 先更新 DB、再更新缓存：**并发写时缓存可能是旧值**（两个写交叉，后写 DB 的先更新缓存）。\n   - 先删缓存、再更新 DB：删除后 DB 更新前，有**读请求会把旧值回填**（Cache-Aside 经典竞态）。\n   - **先更新 DB、再删缓存（Cache-Aside，最常用）**：不一致窗口只存在于「更新完成 → 删除完成」之间，约为一次网络往返，**极小**。\n   - **延迟双删**：删缓存 → 更新 DB → **延迟 N ms 再删一次**，覆盖回填窗口。延迟时间难定，且第二次删仍可能失败。\n2. **为什么是「删」而不是「更新」**：删除是**惰性**的（下次读才回填），能避免「更新了缓存但后续没人读」的浪费，也**避免了并发写的乱序覆盖**。\n3. **根本手段**：\n   - **给缓存设 TTL**：最终一致性兜底，是**必须的**；\n   - **binlog 订阅（Canal）+ MQ 异步删缓存**：把删除动作与业务解耦，可重试（**大厂主流**）；\n   - **关键读走 DB**：一致性要求高的数据（余额）不走缓存。\n4. **正确的心智模型**：缓存方案只能做到**最终一致**。要强一致，就不要用缓存，或用「**读穿透到主库 + 分布式锁**」的极重方案。",
+          "tags": [
+            "缓存",
+            "一致性",
+            "Cache-Aside"
+          ],
+          "difficulty": "hard",
+          "hot": 5,
+          "source_ref": "《Redis 开发与运维》第11章"
+        }
+      ]
+    },
+    {
+      "id": "kafka",
+      "title": "Kafka 架构与可靠性",
+      "items": [
+        {
+          "q": "Kafka 为什么吞吐量这么高？",
+          "a": "**要点**\n1. **顺序写磁盘**：每个 Partition 是**只追加的日志文件**，顺序写磁盘速度接近内存随机写（>600MB/s）。这是最根本的一条。\n2. **页缓存（Page Cache）**：数据先写 OS 页缓存，由内核异步刷盘。Kafka **不自己维护缓存**，省了 JVM 堆内存与 GC 压力。\n3. **零拷贝（sendfile）**：消费者读数据时走 `FileChannel.transferTo` → 内核直接把页缓存数据送到网卡，**省掉 2 次用户态/内核态拷贝**（传统 4 次 → 2 次）。注意：**开启 SSL/压缩时会退化为普通路径**。\n4. **批量 + 压缩**：生产者 `batch.size`/`linger.ms` 攒批，`compression.type`（lz4/zstd）压缩，消费者按批拉取。**消息条数被摊薄**，网络与 IO 的单位开销大幅降低。\n5. **分区并行**：一个 Topic 分成多个 Partition 分散在多台 Broker，生产/消费都能**水平扩展**。Partition 是 Kafka 的**并行基本单位**，且**只保证分区内有序**。\n6. **零拷贝 vs 顺序写的关系**：顺序写解决「写」的效率，零拷贝解决「读」的效率，两者共同支撑了高吞吐。",
+          "tags": [
+            "Kafka",
+            "性能",
+            "零拷贝"
+          ],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《深入理解 Kafka》第5章"
+        },
+        {
+          "q": "Kafka 如何保证消息不丢？",
+          "a": "**要点**按链路分三段，**每一段都可能丢**：\n1. **生产者 → Broker**：\n   - `acks=0`（发完就算，**可能丢**）、`acks=1`（Leader 写入即确认，**Leader 挂且副本未同步就丢**）、`acks=all`（ISR 全部确认，**最安全**）。\n   - 配合 `retries > 0` + `enable.idempotence=true`（幂等生产者，用 PID + SequenceNumber 去重）。\n   - 生产环境用 `acks=all` + `min.insync.replicas >= 2`。\n2. **Broker 内部**：\n   - 副本数 `replication.factor >= 3`；\n   - `min.insync.replicas=2`（保证 ISR 至少 2 个才接受写入成本）；\n   - `unclean.leader.election.enable=false`（**禁止非 ISR 副本当选 Leader**，否则会丢数据）；\n   - 刷盘策略：Kafka 默认靠**多副本**而不是 `fsync`。`log.flush.interval.messages` 调小更安全但严重降吞吐。\n3. **Broker → 消费者**：\n   - **关闭自动提交**（`enable.auto.commit=false`），业务处理成功后**手动提交 offset**；\n   - 严格场景用「**先处理、后提交**」，代价是可能重复消费 → 需要**消费端幂等**。\n4. **总结**：`acks=all` + `replication.factor=3` + `min.insync.replicas=2` + 手动提交，是「不丢」的标准配方。**不丢和「不重」是矛盾的**，工程上选择「至少一次 + 幂等消费」。",
+          "tags": [
+            "Kafka",
+            "可靠性",
+            "acks",
+            "ISR"
+          ],
+          "difficulty": "hard",
+          "hot": 5,
+          "source_ref": "《深入理解 Kafka》第6章"
+        },
+        {
+          "q": "什么是 ISR？什么情况会导致副本被踢出 ISR？",
+          "a": "**要点**\n1. **ISR（In-Sync Replicas）**：与 Leader **保持同步**的副本集合（**包含 Leader 自己**）。判断标准是副本的 LEO（Log End Offset）落后 Leader 不超过 `replica.lag.time.max.ms`（默认 30s）。\n2. **不是按消息条数判断**（早期版本用 `replica.lag.max.messages`，后废弃），而是按**时间**：只要副本在 30s 内追上过，就算同步。这解决了「流量高峰时误判」的问题。\n3. **HW 与 LEO**：\n   - **LEO（Log End Offset）**：每个副本自己的下一条待写位置；\n   - **HW（High Watermark）**：ISR 中**最小的 LEO**。消费者**只能读到 HW 之前**的消息——这是「已提交」的定义，保证 Leader 切换后数据不丢。\n4. **被踢出 ISR 的原因**：副本进程卡顿/GC 停顿、网络分区、磁盘 IO 打满导致复制跟不上、Broker 宕机。\n5. **ISR 收缩的风险**：ISR 缩到 1 时，若 `min.insync.replicas=1` 则退化到 `acks=1` 的语义，**可靠性下降**。所以必须配 `min.insync.replicas >= 2`，并且**监控 ISR 变化**（UnderReplicatedPartitions 指标）——频繁抖动说明集群有隐患。",
+          "tags": [
+            "Kafka",
+            "ISR",
+            "HW",
+            "LEO"
+          ],
+          "difficulty": "hard",
+          "hot": 5,
+          "source_ref": "《深入理解 Kafka》第6章"
+        },
+        {
+          "q": "Kafka 怎么保证消息顺序？怎么处理重复消费？",
+          "a": "**要点**\n1. **Kafka 只保证「单分区内有序」**，不保证 Topic 全局有序。\n2. **要顺序，就必须同 key 进同分区**：生产者指定 `key`（或自定义 `Partitioner`），Kafka 用 `hash(key) % numPartitions` 路由。所以「同一订单的事件」用 `orderId` 作 key 就能保证有序。\n3. **全局有序的代价**：只能把 Topic 设为 **1 个 Partition**，吞吐归零。所以「全局有序」的需求通常应该重新审视——大多数场景只需**业务维度有序**。\n4. **顺序性的破坏点**：① 生产端 `retries` 导致消息重排（`max.in.flight.requests.per.connection > 1` 且未开幂等）→ 开 `enable.idempotence=true` 可解决；② 消费端**多线程处理**同一分区（应用自己起了线程池）→ 顺序被打乱，需要按 key 分发到同一 worker。\n5. **重复消费的三个来源**：生产者重试、消费者 offset 提交晚于处理（崩溃后重读）、Rebalance 导致分区被重新分配。\n6. **重复消费的解法（最终手段一定是消费端幂等）**：\n   - **业务唯一键 + 数据库唯一索引**（最简单可靠）；\n   - **去重表 / Redis SETNX**（注意过期时间与原子性）；\n   - **状态机幂等**（只允许 `待支付 → 已支付`，重复消息直接拒绝）；\n   - Kafka **事务**（`transactional.id`）可做到「跨分区原子写」，但仅限 Kafka 内部，不能与外部 DB 组成分布式事务。",
+          "tags": [
+            "Kafka",
+            "顺序性",
+            "幂等",
+            "重复消费"
+          ],
+          "difficulty": "hard",
+          "hot": 5,
+          "source_ref": "《深入理解 Kafka》第7章"
+        }
+      ]
+    }
+  ]
+}

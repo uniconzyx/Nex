@@ -1,0 +1,8 @@
+{
+  "title": "工厂方法注册：模拟 @Bean 与 @Configuration",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "svc\nfactory produced: true",
+  "code": "public class Ex09 {\n    static class Config {\n        Service service() { return new Service(); }\n        Controller controller(Service s) { return new Controller(s); }\n    }\n    static class Service { String hi() { return \"svc\"; } }\n    static class Controller { private final Service s; Controller(Service s){this.s=s;} String h(){return s.hi();} }\n    public static void main(String[] args) {\n        // 配置类的方法即“工厂方法”，容器调用它们来产生 bean\n        Config cfg = new Config();\n        Service s = cfg.service();          // 等价 @Bean\n        Controller c = cfg.controller(s);   // 方法参数即依赖\n        System.out.println(c.h());\n        System.out.println(\"factory produced: \" + (c != null && s != null));\n    }\n}\n"
+}

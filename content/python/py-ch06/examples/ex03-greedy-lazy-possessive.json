@@ -1,0 +1,8 @@
+{
+  "title": "贪婪 / 非贪婪 / 占有量词（Python 3.11+）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== 贪婪 / 非贪婪 / 占有量词 ===\n贪婪   r'<.+>'     : ['<b>加粗</b><i>斜体</i>']\n非贪婪 r'<.+?>'    : ['<b>', '</b>', '<i>', '</i>']\n\n=== 占有量词（Python 3.11+）===\nPython 版本: 3.13.14\n支持 a++ : ['aaa']\n支持 \\d*+ : ['123b']\n\n=== 贪婪回溯 vs 占有量词的不回溯 ===\n贪婪   (a+)+$  : True\n占有   (a++)+$ : True\n两者在本例都匹配；差别在失败输入上的回溯量（见 ex06 的步数计数）。",
+  "code": "import re\n\nprint(\"=== 贪婪 / 非贪婪 / 占有量词 ===\")\nh = \"<b>加粗</b><i>斜体</i>\"\nprint(\"贪婪   r'<.+>'     :\", re.findall(r\"<.+>\", h))\nprint(\"非贪婪 r'<.+?>'    :\", re.findall(r\"<.+?>\", h))\n\nprint()\nprint(\"=== 占有量词（Python 3.11+）===\")\nimport sys\nprint(\"Python 版本:\", \".\".join(map(str, sys.version_info[:3])))\nprint(\"支持 a++ :\", re.findall(r\"a++\", \"aaa\"))\nprint(\"支持 \\\\d*+ :\", re.findall(r\"\\d*+b\", \"123b\"))\n\nprint()\nprint(\"=== 贪婪回溯 vs 占有量词的不回溯 ===\")\ntext = \"aaaa\"\nprint(\"贪婪   (a+)+$  :\", re.fullmatch(r\"(a+)+$\", text) is not None)\nprint(\"占有   (a++)+$ :\", re.fullmatch(r\"(a++)+$\", text) is not None)\nprint(\"两者在本例都匹配；差别在失败输入上的回溯量（见 ex06 的步数计数）。\")"
+}

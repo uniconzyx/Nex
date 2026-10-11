@@ -1,0 +1,8 @@
+{
+  "title": "all/allSettled/race/any 的 reject 行为",
+  "code_lang": "javascript",
+  "code_std": "node22",
+  "stdin": "",
+  "expected_output": "allSettled: fulfilled,rejected\nrace: fast\nany: ok\nall rejected: e1",
+  "code": "Promise.all([Promise.resolve(1), Promise.reject('e1')])\n  .then(function(){ console.log('all: resolved'); })\n  .catch(function(err){ console.log('all rejected:', err); });\nPromise.allSettled([Promise.resolve(1), Promise.reject('e2')])\n  .then(function(arr){ console.log('allSettled:', arr.map(function(r){ return r.status; }).join(',')); });\nPromise.race([Promise.resolve('fast'), new Promise(function(){})])\n  .then(function(v){ console.log('race:', v); });\nPromise.any([Promise.reject('e3'), Promise.resolve('ok')])\n  .then(function(v){ console.log('any:', v); })\n  .catch(function(e){ console.log('any agg:', e.errors); });"
+}

@@ -1,0 +1,9 @@
+{
+  "title": "SQL：游标 DECLARE/OPEN/FETCH/CLOSE 与 CONTINUE HANDLER FOR NOT FOUND",
+  "code_lang": "sql",
+  "code_std": "mysql",
+  "stdin": "",
+  "expected_output": "-- 期望结构要点(非实测):\n--   1) 声明顺序硬性: 局部变量 -> CONDITION -> CURSOR -> HANDLER\n--   2) FETCH 取空时 SQLSTATE=02000 触发 NOT FOUND handler\n--   3) CONTINUE 型 handler 触发后继续执行 -> 必须自己 IF done THEN LEAVE\n--   4) EXIT 型 handler 会直接退出当前 BEGIN...END 块, 不需要 done 标志\n--   5) 服务器端游标只读/只向前, 不支持 UPDATE ... WHERE CURRENT OF\n--   过程本身无结果集输出, 只有 'Query OK' 与受影响行数(需真实执行确认)",
+  "code": "-- ⚠️ 本机无 MySQL 凭证, 未实跑; 只作语法结构与声明顺序参考\nDELIMITER $$\nCREATE PROCEDURE p_raise_all(IN p_pct DECIMAL(5,2))\nBEGIN\n    -- DECLARE 强制顺序: 变量 -> 条件 -> 游标 -> 处理器\n    DECLARE v_id   BIGINT;\n    DECLARE v_sal  DECIMAL(10,2);\n    DECLARE v_done INT DEFAULT 0;\n    DECLARE cur_emp CURSOR FOR\n        SELECT id, salary FROM employee WHERE status = 1;\n    DECLARE CONTINUE HANDLER FOR NOT FOUND SET v_done = 1;\n\n    OPEN cur_emp;\n    read_loop: LOOP\n        FETCH cur_emp INTO v_id, v_sal;\n        IF v_done = 1 THEN LEAVE read_loop; END IF;   -- CONTINUE 型需自行退出\n        UPDATE employee SET salary = v_sal * (1 + p_pct / 100) WHERE id = v_id;\n    END LOOP;\n    CLOSE cur_emp;\nEND$$\nDELIMITER ;\n\n-- 集合操作等价写法(优先使用):\n-- UPDATE employee SET salary = salary * (1 + p_pct / 100) WHERE status = 1;",
+  "_verified": false
+}

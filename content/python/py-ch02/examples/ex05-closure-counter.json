@@ -1,0 +1,8 @@
+{
+  "title": "闭包：自由变量绑定与 nonlocal 改写",
+  "code_lang": "python",
+  "code_std": "python3.11",
+  "stdin": "",
+  "expected_output": "1 2 3\n1",
+  "code": "def make_counter():\n    count = 0\n    def inc():\n        nonlocal count\n        count += 1\n        return count\n    return inc\n\nc = make_counter()\nprint(c(), c(), c())\nd = make_counter()\nprint(d())"
+}

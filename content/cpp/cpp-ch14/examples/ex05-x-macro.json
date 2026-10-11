@@ -1,0 +1,8 @@
+{
+  "title": "X-Macro 生成枚举与字符串表",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "1 Blue",
+  "code": "#include <iostream>\n#define COLORS \\\n    X(Red, 1) \\\n    X(Green, 2) \\\n    X(Blue, 4)\nenum class Color {\n#define X(name, val) name = val,\n    COLORS\n#undef X\n};\nconst char* colorName(int v) {\n    switch (v) {\n#define X(name, val) case val: return #name;\n        COLORS\n#undef X\n        default: return \"Unknown\";\n    }\n}\nint main() {\n    std::cout << (int)Color::Red << ' ' << colorName(4) << '\\n';\n}"
+}

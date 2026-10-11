@@ -1,0 +1,8 @@
+{
+  "title": "缩放点积注意力（含因果掩码）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "缩放后 scores(前2位小数):\n[[-0.65 -0.49  0.47 -1.72]\n [-0.32 -1.14 -0.29 -1.22]\n [-1.24  1.08 -0.04  0.  ]\n [-0.67  0.99 -0.28 -0.37]]\n因果掩码后注意力权重(每行和应=1, 未来=0):\n[[1.    0.    0.    0.   ]\n [0.695 0.305 0.    0.   ]\n [0.069 0.703 0.228 0.   ]\n [0.11  0.579 0.162 0.148]]\n注意力权重行和: [1. 1. 1. 1.]\n输出形状: (1, 4, 8)\n未来位置权重严格为 0 -> True\n",
+  "code": "\nimport numpy as np\nnp.random.seed(7)\nQ = np.random.randn(1, 4, 8)\nK = np.random.randn(1, 4, 8)\nV = np.random.randn(1, 4, 8)\nd_k = 8\nscores = Q @ K.transpose(0,2,1) / np.sqrt(d_k)        # (1,4,4)\nT = scores.shape[-1]\nmask = np.triu(np.ones((T,T)), k=1).astype(bool)      # 未来位置\nscores_masked = np.where(mask, -1e9, scores)\nm = scores_masked.max(-1, keepdims=True)\ne = np.exp(scores_masked - m)\nattn = e / e.sum(-1, keepdims=True)\nout = attn @ V\nprint(\"缩放后 scores(前2位小数):\")\nprint(np.round(scores[0], 2))\nprint(\"因果掩码后注意力权重(每行和应=1, 未来=0):\")\nprint(np.round(attn[0], 3))\nprint(\"注意力权重行和:\", np.round(attn.sum(-1)[0], 6))\nprint(\"输出形状:\", out.shape)\nprint(\"未来位置权重严格为 0 ->\", bool(np.all(attn[0][np.triu(np.ones((T,T),dtype=bool),k=1)] == 0)))\n"
+}

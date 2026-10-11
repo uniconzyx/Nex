@@ -1,0 +1,8 @@
+{
+  "title": "auto / auto& / const auto& 的推导差异（is_same_v 实证）",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "auto a = cx        是 int ?        true\nauto& b = cx       是 const int& ? true\nconst auto& c = cx 是 const int& ? true\nauto d = rx        是 int ?        true\nauto& e = rx       是 int& ?       true",
+  "code": "#include <iostream>\n#include <type_traits>\nusing namespace std;\n\nint main() {\n    int x = 1;\n    const int cx = 2;\n    int& rx = x;\n    (void)x;\n\n    auto a = cx;              // const 被丢弃\n    auto& b = cx;             // 保留 const 与引用\n    const auto& c = cx;       // 显式 const 引用\n    auto d = rx;              // 引用被丢弃（发生拷贝）\n    auto& e = rx;             // 保留引用\n\n    cout << boolalpha;\n    cout << \"auto a = cx        是 int ?        \" << is_same_v<decltype(a), int> << \"\\n\";\n    cout << \"auto& b = cx       是 const int& ? \" << is_same_v<decltype(b), const int&> << \"\\n\";\n    cout << \"const auto& c = cx 是 const int& ? \" << is_same_v<decltype(c), const int&> << \"\\n\";\n    cout << \"auto d = rx        是 int ?        \" << is_same_v<decltype(d), int> << \"\\n\";\n    cout << \"auto& e = rx       是 int& ?       \" << is_same_v<decltype(e), int&> << \"\\n\";\n    (void)b; (void)c; (void)d; (void)e;\n}"
+}

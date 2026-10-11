@@ -1,0 +1,181 @@
+{
+  "subject": "tooling",
+  "title": "工程工具八股模块（Linux / Git / Docker）",
+  "note": "Linux、Git、Docker 面试与实战高频题。侧重底层机制（进程与 IO 模型、Git 对象模型、namespace/cgroup）与线上排障命令，是「工程素养」类问题的核心。",
+  "categories": [
+    {
+      "id": "linux",
+      "title": "Linux 系统与排障",
+      "items": [
+        {
+          "q": "硬链接和软链接有什么区别？",
+          "a": "**要点**\n1. **硬链接**：多个**目录项指向同一个 inode**。与源文件**共享 inode 与数据块**；删除任一名字只是减少**链接计数**，计数归零才真正释放数据。**不能跨文件系统**、**不能给目录建**（会破坏目录树的树形结构）。\n2. **软链接（符号链接）**：一个**独立文件**，内容是「目标路径字符串」，有自己的 inode。可跨文件系统、可指向目录。**目标被删后成为「断链」**（`ls` 显示红色闪烁）。\n3. **本质差异一句话**：硬链接是「**同一份数据的多个名字**」，软链接是「**一个指向名字的名字**」。\n4. **实践含义**：\n   - **软链接是路径级重定向**——移动目标文件会导致断链；硬链接不会（因为指向 inode）。\n   - **`ls -l` 第 2 列（链接计数）** 就是硬链接数，目录的计数至少为 2（`.` 与父目录中的条目）。\n   - **Docker 分层与快照**、**Git 的对象存储**底层都用类似 inode 引用计数的思路。\n5. **命令**：`ln src dst`（硬）、`ln -s src dst`（软）、`readlink`（看软链目标）、`stat`（看 inode 与硬链接数）。",
+          "tags": [
+            "Linux",
+            "文件系统",
+            "inode"
+          ],
+          "difficulty": "easy",
+          "hot": 5,
+          "source_ref": "《鸟哥的 Linux 私房菜》第5章"
+        },
+        {
+          "q": "僵尸进程和孤儿进程是什么？怎么处理僵尸进程？",
+          "a": "**要点**\n1. **僵尸进程（Zombie）**：子进程**已退出**，但父进程**还没调用 `wait/waitpid` 回收**其退出状态 → 子进程的 `task_struct`（PCB）**残留在内核**，占用 PID 与少量内存。状态为 `Z`。**它不占 CPU 与内存大头，但会耗尽 PID**。\n   - 处理：父进程**正确调用 wait**（或设 `SIGCHLD` 处理/`SA_NOCLDWAIT` 让内核自动回收）；父进程若已无法修改，**杀掉父进程**让僵尸被 `init(1)` 收养并回收。\n2. **孤儿进程（Orphan）**：父进程**先退出**，子进程还在跑 → 被 **`init`/`systemd`（PID 1）收养**，由它负责善后。**孤儿进程本身无害**（这不是问题，是正常机制）。\n3. **`wait` 与 `waitpid` 的区别**：`wait` 阻塞等**任意**子进程；`waitpid` 可**指定 PID** 且支持 **`WNOHANG` 非阻塞**——这是「**循环 + WNOHANG 回收所有已退出的子进程**」写法的由来。\n4. **为什么会有僵尸**：本质是「**父进程需要知道子进程的退出码**」这个设计决定的——内核必须保留退出状态直到父进程来取。\n5. **排查命令**：`ps aux | grep -w Z`、`ps -eo pid,ppid,stat,cmd | awk '$3 ~ /Z/'`，再顺着 PPID 找父进程。\n6. **延伸**：**`SIGCHLD` 是可靠信号但会合并**（多个子进程同时退出可能只收到一个信号）→ 所以处理函数里**必须用 `while (waitpid(-1, ..., WNOHANG) > 0)` 循环**，而不能只 wait 一次。",
+          "tags": [
+            "Linux",
+            "进程",
+            "僵尸进程",
+            "信号"
+          ],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《UNIX 环境高级编程》第8章"
+        },
+        {
+          "q": "Linux 的 IO 模型有哪几种？为什么说 Linux AIO 不成熟？",
+          "a": "**要点**\n1. **五种模型**：阻塞（BIO）、非阻塞（NIO）、**IO 多路复用**（select/poll/epoll）、**信号驱动**（SIGIO，少用）、**异步 IO（AIO）**。\n   - 区分标准：**「数据准备」与「数据拷贝」两个阶段谁阻塞**。前四种在「拷贝」阶段都阻塞，**只有 AIO 两阶段都不阻塞**。\n2. **`io_uring`（5.1+）才是 Linux 真正的现代异步 IO**：\n   - **共享内存环形队列**（SQ/CQ）——应用把请求写进提交队列，内核处理后写进完成队列，**几乎不需要系统调用**（可开 SQPOLL 让内核线程轮询）；\n   - 支持**几乎所有 IO 类型**（文件、网络、`fsync`、`accept`、`splice`），而老的 Linux AIO **只支持 O_DIRECT 的直接 IO**，**对带缓冲的文件 IO 实际是同步的**（会退化成阻塞）——这就是「Linux AIO 不成熟」的含义。\n3. **`mmap` 的取舍**：省掉了 `read` 的拷贝（用户直接读页缓存），但**缺页中断不可控**（延迟抖动）、**难以处理错误**（缺页时的 SIGBUS 无法优雅处理）、**文件截断会崩**。所以高性能服务常用「`read` + 大缓冲 + 批量」而不是 mmap。\n4. **零拷贝三件套**：`sendfile`（文件 → socket，内核内搬运）、`splice`（通过管道在任意两个 fd 间搬运）、`mmap+write`。**Kafka/Netty/Nginx 静态文件 都靠 sendfile**。\n5. **工程选型**：连接数少的阻塞 IO 最简单；**海量连接用 epoll**；**高吞吐磁盘 IO 用 io_uring**（如数据库、代理）。**别用老的 `libaio` 做文件读写**。",
+          "tags": [
+            "Linux",
+            "IO模型",
+            "io_uring",
+            "零拷贝"
+          ],
+          "difficulty": "hard",
+          "hot": 4,
+          "source_ref": "《Linux/UNIX 系统编程手册》第63章"
+        },
+        {
+          "q": "线上 CPU 飙高 / 内存泄漏 / 磁盘满，分别怎么排查？",
+          "a": "**要点**\n**CPU 飙高**：\n1. `top` 找高 CPU 进程 → `top -Hp <pid>` 找高 CPU **线程**（或 `ps -mp <pid> -o THREAD,tid`）；\n2. 线程 ID 转 16 进制 → **`jstack <pid> | grep -A20 <nid>`**（Java）看栈；C/C++ 用 **`perf top` / `gdb -p`** 或 `pstack <pid>`；\n3. 常见原因：**死循环 / 正则回溯 / 频繁 GC（`jstat -gcutil`）/ 锁自旋 / 大量系统调用**。\n\n**内存问题**：\n1. `free -h` 看整体（注意 **`available` 才是可用，`free` 小不代表有问题**——Linux 会用空闲内存做 page cache）；\n2. `top -o %MEM` 或 `ps aux --sort=-%mem | head` 找大户；\n3. `pmap -x <pid>` 看内存段；Java 看 `jmap -histo:live <pid>` / dump 后 `MAT` 分析；C/C++ 用 **valgrind / ASan / heaptrack**；\n4. 区分「**真的是泄漏**」还是「**缓存占用（page cache/slab）**」——`/proc/meminfo` 的 `Slab`/`Cached` 是关键；**RSS 不降通常是正常现象**。\n\n**磁盘满**：\n1. `df -h` 找哪个分区满；`du -sh /* | sort -h` 逐层下钻（**注意 `du` 与 `df` 不一致时是被删除但仍打开的文件占用**）；\n2. **`lsof | grep deleted`** 找回「已删除但被进程持有」的大文件 → **重启/让进程关闭 fd 才能释放**；\n3. `inode` 满（`df -i`）：小文件过多，需清理或调优。\n\n**通用工具链**：`iostat -x`（磁盘）、`vmstat`（上下文切换/swap）、`sar`（历史）、`ss -s`（连接数）、`strace`（系统调用）、**`perf`（CPU 火焰图）**、`bpftrace`（内核态可观测）。\n\n**方法论**：**先用 USE 法（Utilization / Saturation / Errors）定位瓶颈维度，再下钻到进程 → 线程 → 代码**，不要一上来就猜。",
+          "tags": [
+            "Linux",
+            "排障",
+            "性能",
+            "生产问题"
+          ],
+          "difficulty": "hard",
+          "hot": 5,
+          "source_ref": "《性能之巅》第2章"
+        },
+        {
+          "q": "Linux 内存是怎么管理的？OOM Killer 是什么？",
+          "a": "**要点**\n1. **内存的几个关键概念（`free -h` 必须能读懂）**：\n   - **total / used / free**：`free` 很小是**正常的**——Linux 会把空闲内存拿去做**页缓存（buff/cache）**，需要时立刻回收；\n   - **buff/cache**：块设备缓存 + 文件页缓存，**可回收**；\n   - **`available` 才是关键指标**——「在不触发 swap 的前提下还能给新进程用多少」，**排查内存问题只看它**。\n2. **虚拟内存到物理内存的映射**：每个进程有独立虚拟地址空间 → **页表**映射到物理页 → **MMU + TLB** 加速。**虚拟内存之和可以远超物理内存**（因为有 swap 与共享）。\n3. **Swap 的取舍**：\n   - **好处**：让内存超配、冷页换出；\n   - **代价**：**换页是磁盘 IO，性能断崖式下跌**；**服务进程被换出会导致延迟尖刺**；\n   - 生产建议：**数据库/中间件通常 `vm.swappiness` 调低（1–10）甚至禁用 swap**；`vmstat` 的 **`si/so`（换入换出速率）持续非零就是危险信号**。\n4. **OOM Killer 是什么**：当内存（含 swap）真的耗尽且**无法回收**时，内核的**最后手段**——按 **`oom_score`（基于 `oom_score_adj` + 内存占用量 + 运行时长等因素）选一个进程杀掉**，以保住系统不整体崩溃。\n   - **`dmesg`/`journalctl -k` 里能看到 `Out of memory: Killed process ...`**（这是排查「进程莫名消失」的第一手证据）；\n   - **`oom_score_adj`**（-1000 ~ 1000）可保护关键进程（**设 -1000 表示永不杀**）或优先牺牲某进程；\n   - **cgroup 级 OOM**：容器有内存上限（`memory.limit_in_bytes`）时，**超限杀容器内进程**（k8s 里表现为 `OOMKilled`，**退出码 137**）。\n5. **常见「内存泄漏」的误判**：\n   - **page cache 涨**（正常，可回收）≠ 泄漏；\n   - **slab 涨**（内核对象缓存）→ 看 `/proc/slabinfo`，dentry/inode 缓存是常见的「看起来像泄漏」；\n   - **真的泄漏**：RSS 单调增长且不回落 → `pmap -x`、`heap profiler`、`valgrind`/`ASan`、Java 用 `jmap` + MAT。\n6. **实践清单**：**监控 `available` 与 `oom_score` 事件、给关键服务设 cgroup 上限、容器里设 `resources.limits` 并配 JVM `-XX:MaxRAMPercentage`（否则 JVM 看不到 cgroup 限制会按宿主机内存算堆，直接 OOMKilled）。**",
+          "tags": [
+            "Linux",
+            "内存管理",
+            "OOM",
+            "cgroup"
+          ],
+          "difficulty": "hard",
+          "hot": 5,
+          "source_ref": "《性能之巅》第7章"
+        }
+      ]
+    },
+    {
+      "id": "git",
+      "title": "Git 原理与协作",
+      "items": [
+        {
+          "q": "Git 的对象模型是什么？为什么它能高效存储版本？",
+          "a": "**要点**\n1. **四种对象**（都存在 `.git/objects`，用 **SHA-1/SHA-256 内容寻址**）：\n   - **blob**：文件内容（**不含文件名**）；\n   - **tree**：目录（记录「文件名 → blob/tree 的 SHA」的映射）；\n   - **commit**：指向一个 tree + 父 commit + 作者/时间/说明；\n   - **tag**（注解标签）：指向一个 commit + 说明。\n2. **核心是「内容寻址」**：对象的 ID = 对其内容做 SHA 哈希。**内容相同则 ID 相同** → 天然去重，同一份文件在多个版本间只存一次（**即使改了文件名，blob 也不重复**）。\n3. **git 存的是快照而非 diff**：每次 commit 存**完整的目录树结构**。之所以不占空间，是因为**未改动的文件复用同一个 blob**——所以「快照模型」在存储上等价于「智能 diff 模型」。\n4. **分支只是一个 41 字节的文件**：`.git/refs/heads/main` 里就是一个 commit SHA。所以**建分支/切分支几乎零成本**（这就是 Git 敢于鼓励频繁分支的原因）。`HEAD` 指向当前分支。\n5. **打包压缩（packfile）**：对象多了以后 git 会把它们打包，**用 delta 压缩**（找相似对象存差异）——所以 `git gc` 之后仓库会明显变小。\n6. **面试延伸**：**为什么不能改历史提交的内容**——改了内容就改了 SHA，**它的所有后代 commit 的 SHA 都会连锁改变**（因为 commit 里记录父 SHA）→ 所以「改写历史」意味着**重写整条链**，这就是 rebase/amend 会改变 SHA 的根本原因，也是「**不要 rebase 已推送的公共分支**」的原因。",
+          "tags": [
+            "Git",
+            "对象模型",
+            "SHA",
+            "内容寻址"
+          ],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《Pro Git》第10章"
+        },
+        {
+          "q": "merge 和 rebase 有什么区别？团队里应该用哪个？",
+          "a": "**要点**\n1. **merge**：创建一个**合并提交（merge commit）**，**保留两条分支的完整历史与分叉结构**。历史是「**有向无环图（DAG）**」，真实但较乱（尤其频繁 merge 主干时）。\n2. **rebase**：把当前分支的提交**逐个「重放」**到目标分支顶端 → **得到线性的历史**。代价是**提交 SHA 全部改变**（是新提交，不是原提交）。\n3. **黄金法则**：**永远不要 rebase 已经推送到公共分支的提交**。因为别人基于旧 SHA 的工作会与你的新 SHA **「对不上」**，导致他们下次 pull 时出现**重复提交与冲突地狱**。\n4. **实践建议**：\n   - **个人功能分支**：`git pull --rebase`（或 `rebase` 到 main）让历史线性整洁，避免「merge 噪音」；\n   - **合入主干**：用 **`merge --no-ff`** 保留「这是一个功能」的边界（便于整体回滚），或用**平台侧的 Squash Merge**把功能压成一个提交；\n   - **主干绝对不 rebase**。\n5. **`rebase` 的交互模式（`-i`）是整理提交的利器**：`squash`（合并）、`reword`（改说明）、`edit`（改内容）、`drop`（删除）、**调整顺序**。发 PR 前把「wip/fix typo」等零碎提交**压成有意义的原子提交**，是专业习惯。\n6. **冲突处理差异**：merge **一次性解决所有冲突**；rebase **可能每个提交都要解决一次冲突**（因为你是在逐个重放）——这也是 rebase 在实践中更烦的原因。用 `git rerere` 可以让 git 记住冲突解法。",
+          "tags": [
+            "Git",
+            "merge",
+            "rebase",
+            "协作"
+          ],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《Pro Git》第3章"
+        },
+        {
+          "q": "reset、revert、checkout、restore 分别做什么？误操作怎么救？",
+          "a": "**要点**\n1. **`reset`（移动分支指针）** 三种模式：\n   - `--soft`：只移动 HEAD，**改动留在暂存区**（用于「撤销提交但保留改动」，最安全）；\n   - `--mixed`（默认）：移动 HEAD 并**重置暂存区**，改动留在工作区；\n   - `--hard`：**三者全重置，工作区改动直接丢弃**。**危险，会丢数据**。\n2. **`revert`（反向提交）**：生成一个**新提交**来抵消指定提交的改动。**不改变既有历史**——所以**适合已推送的公共分支**（reset 不行，因为会改写历史）。\n3. **`checkout` 在 Git 2.23 后被拆成两个更清晰的命令**：\n   - `git switch <branch>`：**切分支**（只管分支）；\n   - `git restore <file>`：**恢复工作区/暂存区文件**（只管文件）。\n   拆分的原因就是原 `checkout` **语义过载**（既管分支又管文件），极易误用。**`git restore --source=HEAD~3 -- file`** 可以从任意历史点恢复单个文件。\n4. **误操作救援（必须背）**：\n   - **`git reflog`**：记录 HEAD 的所有移动（**包括 reset 掉的提交**），默认保留 90 天 → **`git reset --hard <reflog 里的 SHA>`** 即可恢复。**这是最重要的救命命令**。\n   - 误删分支：`git branch <name> <reflog 里的 SHA>`。\n   - 已 commit 但想拆开：`git reset --soft HEAD~1` 后重新组织。\n   - 误 `--hard` 且有暂存过：`git fsck --lost-found` 找**悬空对象（dangling blob）**——但**没 add 过的文件找不回来**。\n5. **教训**：`--hard` 与 `clean -fdx` 是**唯二会真正丢数据的操作**，执行前**务必确认**；养成「**动手前先 `git status` + `git stash` 或提交**」的习惯。",
+          "tags": [
+            "Git",
+            "reset",
+            "revert",
+            "reflog",
+            "救援"
+          ],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《Pro Git》第2章/第7章"
+        }
+      ]
+    },
+    {
+      "id": "docker",
+      "title": "Docker 与容器",
+      "items": [
+        {
+          "q": "容器和虚拟机有什么区别？Docker 靠什么实现隔离？",
+          "a": "**要点**\n1. **本质区别**：**虚拟机虚拟化硬件**（Hypervisor + Guest OS，每个 VM 跑一个完整内核，GB 级、启动分钟级）；**容器虚拟化操作系统**（**共享宿主内核**，只隔离视图，MB 级、启动毫秒级）。\n2. **隔离靠两大内核机制**：\n   - **Namespace（视图隔离）**：`PID`（进程号独立）、`NET`（独立网络栈）、`MNT`（独立挂载点）、`UTS`（独立主机名）、`IPC`、`USER`（用户映射）、`CGROUP`。**每个 namespace 让进程「以为」自己独占系统**。\n   - **Cgroups（资源限制）**：限制 CPU（`cpu.shares`/`cfs_quota`）、内存（`memory.limit_in_bytes`，**超了触发 OOM Kill**）、IO、PID 数量。\n3. **「容器不是轻量虚拟机」**：容器就是**一组被 namespace 隔离 + cgroups 限制的普通进程**。`docker exec` 能进容器，本质是 `setns` 加入它的 namespace。\n4. **安全含义（面试重点）**：**共享内核意味着内核漏洞可能逃逸**。相比之下 VM 的隔离面是 Hypervisor（更小更硬）。所以**多租户/不可信负载应该用 VM 或 gVisor/Kata Containers（安全容器）**，容器更适合「自己信任的、同一组织的」负载。\n5. **容器的其他隔离缺口**：默认 `/proc` 部分暴露、`CAP_SYS_ADMIN` 过强、`docker.sock` 挂载等于给宿主 root。加固手段：**rootless 模式、只读根文件系统、drop capabilities、seccomp/AppArmor、user namespace 重映射**。\n6. **为什么比 VM 快**：**没有内核启动**，只是创建 namespace + 拉起进程 → 启动时间取决于应用本身（毫秒级）。",
+          "tags": [
+            "Docker",
+            "容器",
+            "namespace",
+            "cgroups"
+          ],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《Docker 深入浅出》第2章"
+        },
+        {
+          "q": "Docker 镜像的分层是怎么工作的？怎么写好的 Dockerfile？",
+          "a": "**要点**\n1. **镜像 = 只读层的堆叠**：Dockerfile 里**每条指令产生一层**（`RUN/COPY/ADD`），层用 **UnionFS（overlay2）** 叠加，**相同层可被多个镜像共享**（省磁盘与拉取带宽）。\n2. **容器启动 = 在只读层顶上再加一个可写层**（Copy-on-Write）。所以：**容器里改文件不会影响镜像**，删除容器**可写层的数据就丢了**（→ 需要 **volume** 持久化）。\n3. **缓存机制与优化（核心）**：**只要某层的输入未变，该层及之前的层直接复用缓存**。由此推出优化原则：\n   - **把变化频率低的指令放前面**（先 `COPY package.json` 再 `npm install`，最后 `COPY .`）——否则改一行代码就要重装依赖；\n   - **合并 RUN 并用 `&&` 串联 + 清理缓存**（`apt-get update && apt-get install -y ... && rm -rf /var/lib/apt/lists/*`）——**`rm` 必须在同一层**，否则删掉的文件仍存在于上一层（**体积不会减小**）；\n   - **用 `.dockerignore` 排除 `node_modules`/`.git`**，避免污染缓存与膨胀 build context。\n4. **多阶段构建（必会）**：\n   ```\n   FROM golang:1.22 AS builder\n   WORKDIR /src\n   COPY . .\n   RUN CGO_ENABLED=0 go build -o /out/app\n\n   FROM gcr.io/distroless/static\n   COPY --from=builder /out/app /app\n   ENTRYPOINT [\"/app\"]\n   ```\n   **编译工具链不进最终镜像** → 体积从 ~800MB 降到 ~10MB，**攻击面也大幅缩小**。Java 也常用「`mvn package` 阶段 + `jre` 运行阶段」。\n5. **其他实践**：**固定基础镜像版本**（别用 `latest`，构建不可复现）、**用非 root 用户运行**（`USER 1000`）、**`EXPOSE` 只是文档**（真正暴露靠 `-p`）、**用 `ENTRYPOINT` 而不是 `CMD` 做可执行体**（`CMD` 可被覆盖，`ENTRYPOINT` + `CMD` 组合更规范）、**健康检查 `HEALTHCHECK`**。\n6. **体积分析**：`docker history <image>` 能看到每层大小，是定位「哪一层把镜像撑大了」的第一手段。",
+          "tags": [
+            "Docker",
+            "镜像分层",
+            "Dockerfile",
+            "多阶段构建"
+          ],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《Docker 深入浅出》第3章"
+        },
+        {
+          "q": "Docker 的网络模式有哪些？容器之间怎么互相访问？",
+          "a": "**要点**\n1. **五种网络模式**：\n   - **bridge（默认）**：每容器接入默认 `docker0` 网桥，**通过 NAT 出网**，容器间可用 IP 互访（但 IP 不稳定）。**端口映射 `-p 8080:80` 就是在这层做 DNAT**。\n   - **host**：**与宿主共享网络栈**（无隔离，性能最好，无端口映射），端口直接占用宿主端口。\n   - **none**：只有 `lo`，完全隔离，用于自定义网络方案。\n   - **container:<id>**：**复用另一容器的网络命名空间**（k8s 的 Pod 本质就是这个）。\n   - **自定义 bridge 网络**：**推荐**——自带**内置 DNS**，可用**容器名互访**。\n2. **容器间访问的正确姿势**：**创建自定义网络，用服务名当主机名**：\n   ```bash\n   docker network create appnet\n   docker run -d --name db  --network appnet mysql:8\n   docker run -d --name api --network appnet myapi   # 代码里连 \"db:3306\"\n   ```\n   Compose 会自动建网络，`services` 名即 DNS 名。\n3. **`-p` 与 `-P` 与 `--expose` 的区别**：`-p` 显式映射（`宿主:容器`），`-P` 随机映射所有 `EXPOSE` 端口，`--expose` 只在**容器网络内**开放（不映射到宿主）。\n4. **端口映射的实现**：docker-proxy 进程 或 **iptables DNAT 规则**（`DOCKER` 链）。排查「端口映射不通」时：**先看 `iptables -t nat -L`、再看 `netstat`、最后确认应用是否监听了 `0.0.0.0` 而不是 `127.0.0.1`**——**应用只监听回环是容器端口不通的头号原因**。\n5. **性能取舍**：bridge 有 NAT 开销（用户态/内核转发），**host 模式性能最好但丧失隔离与端口灵活性**；k8s 里用 CNI 插件把 Pod 网络做成**扁平无 NAT**（每个 Pod 有独立 IP），兼顾性能与隔离。\n6. **常见排障**：**容器内 DNS 解析失败**（`/etc/resolv.conf` 与宿主 DNS 配置冲突）、**跨宿主通信**（需 overlay 网络或 k8s CNI）。",
+          "tags": [
+            "Docker",
+            "网络",
+            "bridge",
+            "DNS"
+          ],
+          "difficulty": "mid",
+          "hot": 4,
+          "source_ref": "《Docker 深入浅出》第5章"
+        },
+        {
+          "q": "Docker 的数据持久化怎么做？volume 和 bind mount 有什么区别？",
+          "a": "**要点**\n1. **容器可写层的三个致命问题**：① **容器删除后数据丢失**；② **可写层依赖存储驱动，性能明显低于宿主文件系统**（overlay2 的 CoW 复制开销）；③ **难以在容器间共享**。所以**状态必须外置**。\n2. **三种挂载方式对比**：\n   | 维度 | **volume** | **bind mount** | **tmpfs** |\n   |---|---|---|---|\n   | 管理方 | **Docker 管理**（`/var/lib/docker/volumes/`） | **用户指定宿主路径** | 内存 |\n   | 可移植性 | **高**（`-v name:/path`，路径无关） | **低**（依赖宿主目录结构） | 最低（不持久） |\n   | 性能 | 好（在 Linux 上就是宿主文件系统） | 好 | **最快**（内存） |\n   | 典型用途 | **数据库数据、需备份的状态** | **开发时代码热更新、配置注入** | 临时缓存、敏感数据 |\n   | 备份 | `docker run --rm -v vol:/data -v $PWD:/back alpine tar czf /back/x.tgz /data` | 直接备份宿主目录 | 无 |\n3. **为什么推荐 volume**：\n   - **与容器生命周期解耦**（`docker volume rm` 才删除）、**不依赖宿主绝对路径**（跨环境/跨平台一致）、**支持驱动扩展**（NFS、云盘、CSI）；\n   - **可以预置初始数据**（镜像里的目录内容会在**首次创建 volume 时被复制进去**——**这是初始化数据库的关键机制**）；\n   - 注意：**volume 一旦非空，镜像的初始内容就不会再覆盖它**（这解释了「改了镜像里的初始配置但没生效」这个高频困惑）。\n4. **bind mount 的高频陷阱**：\n   - **挂载会「遮蔽」镜像里的原目录内容**（宿主机目录为空 → 容器里看到空目录，与 volume 的「首次复制」行为**完全不同**）；\n   - **权限问题**：容器内非 root 用户与宿主 UID 不匹配 → 写入失败（解法：**匹配 UID/GID**、或用 `--user`）；\n   - **SELinux 环境需加 `:z`/`:Z` 标签**；\n   - 挂载 `~/.ssh`、`docker.sock` 等**等于给容器宿主权限**，安全风险极高。\n5. **Compose 中的写法**：**命名卷** `volumes: [dbdata:/var/lib/mysql]` + 顶层 `volumes: {dbdata:}`；**绑定挂载** `- ./src:/app/src`。**开发用 bind（热更新），生产用 volume（可靠）。**\n6. **关键认知**：**Kubernetes 的 PV/PVC 是把 volume 抽象推到集群级**——**Pod 会漂移，所以绝不能依赖宿主本地路径**，这就是云原生存储要额外抽象一层的根本原因。",
+          "tags": [
+            "Docker",
+            "数据卷",
+            "volume",
+            "bind mount"
+          ],
+          "difficulty": "mid",
+          "hot": 4,
+          "source_ref": "《Docker 深入浅出》第6章"
+        }
+      ]
+    }
+  ]
+}

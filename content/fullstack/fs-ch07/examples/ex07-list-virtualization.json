@@ -1,0 +1,8 @@
+{
+  "title": "列表虚拟化：给定滚动位置与行高算出渲染窗口（纯算法）",
+  "code_lang": "javascript",
+  "code_std": "node18",
+  "stdin": "",
+  "expected_output": "top=start=0 end=12 count=12 offsetY=0\nmid=start=98 end=112 count=14 offsetY=3920\nnear_bottom=start=997 end=1000 count=3 offsetY=39880\nclamped_top=start=0 end=10 count=10 offsetY=0\nvisible_rows=10\ntotal=1000\nwindow_never_exceeds_total=true\n",
+  "code": "// 列表虚拟化窗口计算：scrollTop + rowHeight + viewportHeight -> 渲染区间\nfunction windowRange(cfg) {\n  const { scrollTop, rowHeight, viewportHeight, total, overscan } = cfg;\n  const first = Math.floor(scrollTop / rowHeight);\n  const visible = Math.ceil(viewportHeight / rowHeight);\n  const start = Math.max(0, first - overscan);\n  const end = Math.min(total, first + visible + overscan);   // 半开区间 [start, end)\n  return { start, end, count: end - start, offsetY: start * rowHeight, visible };\n}\nfunction fmt(r) { return 'start=' + r.start + ' end=' + r.end + ' count=' + r.count + ' offsetY=' + r.offsetY; }\n\nconst cfg = { rowHeight: 40, viewportHeight: 400, total: 1000, overscan: 2 };\nconsole.log('top=' + fmt(windowRange({ ...cfg, scrollTop: 0 })));\nconsole.log('mid=' + fmt(windowRange({ ...cfg, scrollTop: 4000 })));\nconsole.log('near_bottom=' + fmt(windowRange({ ...cfg, scrollTop: 39960 })));\nconsole.log('clamped_top=' + fmt(windowRange({ ...cfg, scrollTop: -50 })));\nconsole.log('visible_rows=' + windowRange({ ...cfg, scrollTop: 0 }).visible);\nconsole.log('total=' + cfg.total);\nconsole.log('window_never_exceeds_total=' + (windowRange({ ...cfg, scrollTop: 39960 }).end <= cfg.total));\n"
+}

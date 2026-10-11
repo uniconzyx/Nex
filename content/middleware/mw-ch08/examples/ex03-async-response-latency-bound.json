@@ -1,0 +1,8 @@
+{
+  "title": "异步化的响应时间下界（关键路径计算）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== 同步实现：所有步骤都在请求内 ===\n  1. 校验参数\n  2. 写订单库\n  3. 扣库存\n  4. 调支付\n  5. 发通知\n  6. 更新画像\n  关键路径长度 = 6 步（全部串行阻塞用户请求）\n\n=== 异步实现：只保留强一致必需的步骤 ===\n  请求内（同步）:\n    1. 校验参数\n    2. 写订单库\n  后台（异步）:\n    1. 扣库存\n    2. 调支付\n    3. 发通知\n    4. 更新画像\n\n关键路径从 6 步降到 2 步，削减 4 步（67%）\n但下界不是 0：用户仍需等待 2 步强一致操作完成。\n若把这 2 步也异步化，用户会拿到「已受理」但可能最终失败的结果。",
+  "code": "# 异步化的响应时间下界：主流程耗时，而非 0\n# 用「关键路径上的串行步骤数」作为确定性判据。\n\nSYNC_STEPS = [\"校验参数\", \"写订单库\", \"扣库存\", \"调支付\", \"发通知\", \"更新画像\"]\nASYNC_SYNC_PART = [\"校验参数\", \"写订单库\"]\nASYNC_BG_PART = [\"扣库存\", \"调支付\", \"发通知\", \"更新画像\"]\n\nprint(\"=== 同步实现：所有步骤都在请求内 ===\")\nfor i, s in enumerate(SYNC_STEPS, 1):\n    print(\"  %d. %s\" % (i, s))\nprint(\"  关键路径长度 = %d 步（全部串行阻塞用户请求）\" % len(SYNC_STEPS))\n\nprint()\nprint(\"=== 异步实现：只保留强一致必需的步骤 ===\")\nprint(\"  请求内（同步）:\")\nfor i, s in enumerate(ASYNC_SYNC_PART, 1):\n    print(\"    %d. %s\" % (i, s))\nprint(\"  后台（异步）:\")\nfor i, s in enumerate(ASYNC_BG_PART, 1):\n    print(\"    %d. %s\" % (i, s))\n\ncut = len(SYNC_STEPS) - len(ASYNC_SYNC_PART)\nprint()\nprint(\"关键路径从 %d 步降到 %d 步，削减 %d 步（%.0f%%）\"\n      % (len(SYNC_STEPS), len(ASYNC_SYNC_PART), cut, 100.0 * cut / len(SYNC_STEPS)))\nprint(\"但下界不是 0：用户仍需等待 %d 步强一致操作完成。\" % len(ASYNC_SYNC_PART))\nprint(\"若把这 %d 步也异步化，用户会拿到「已受理」但可能最终失败的结果。\" % len(ASYNC_SYNC_PART))\n"
+}

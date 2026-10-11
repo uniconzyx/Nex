@@ -1,0 +1,8 @@
+{
+  "title": "属性闭包 X+ 计算：Armstrong 公理的不动点迭代",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== 属性闭包 X+ 计算 ===\nR = ABCDE\nF = A->B, A->C, CD->E, B->D\n\nX          X+           =R?     \nA          ABCDE        YES     \nB          BD           no      \nC          C            no      \nD          D            no      \nBD         BD           no      \nCD         CDE          no      \nAE         ABCDE        YES     \n\n判据: 若 X+ 含全部属性, 则 X 是超键(superkey)\nA+ = ABCDE 走到 E 的路径: A->B, A->C, B->D, 再 CD->E",
+  "code": "# 属性闭包 X+ 的真实计算（Armstrong 公理的自反/增广/传递三条推出的不动点迭代）\ndef closure(attrs, fds):\n    res = set(attrs)\n    changed = True\n    while changed:\n        changed = False\n        for lhs, rhs in fds:\n            if lhs <= res and not rhs <= res:\n                res |= rhs\n                changed = True\n    return res\n\n\ndef fmt(s):\n    return \"\".join(sorted(s)) or \"-\"\n\n\nprint(\"=== 属性闭包 X+ 计算 ===\")\nattrs = {\"A\", \"B\", \"C\", \"D\", \"E\"}\nfds = [\n    (frozenset(\"A\"), frozenset(\"B\")),\n    (frozenset(\"A\"), frozenset(\"C\")),\n    (frozenset(\"CD\"), frozenset(\"E\")),\n    (frozenset(\"B\"), frozenset(\"D\")),\n]\nprint(\"R = \" + fmt(attrs))\nprint(\"F = \" + \", \".join(\"%s->%s\" % (fmt(l), fmt(r)) for l, r in fds))\nprint()\nprint(\"%-10s %-12s %-8s\" % (\"X\", \"X+\", \"=R?\"))\nfor x in (\"A\", \"B\", \"C\", \"D\", \"BD\", \"CD\", \"AE\"):\n    cx = closure(frozenset(x), fds)\n    print(\"%-10s %-12s %-8s\" % (x, fmt(cx), \"YES\" if cx == attrs else \"no\"))\nprint()\nprint(\"判据: 若 X+ 含全部属性, 则 X 是超键(superkey)\")\nprint(\"A+ = ABCDE 走到 E 的路径: A->B, A->C, B->D, 再 CD->E\")\n"
+}

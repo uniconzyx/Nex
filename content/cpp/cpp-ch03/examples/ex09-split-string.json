@@ -1,0 +1,8 @@
+{
+  "title": "按逗号分割字符串",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "3",
+  "code": "#include <iostream>\n#include <string>\n#include <sstream>\n#include <vector>\n\nint main() {\n    std::string line = \"a,b,c\";\n    std::stringstream ss(line);\n    std::string tok;\n    int n = 0;\n    while (std::getline(ss, tok, ',')) n++;\n    std::cout << n;\n}"
+}

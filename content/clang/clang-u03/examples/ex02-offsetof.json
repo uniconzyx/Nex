@@ -1,0 +1,8 @@
+{
+  "title": "offsetof 打印成员偏移与整体大小",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "id   @ 0\nname @ 4\ngpa  @ 24\ngrade@ 32\nsizeof = 40\n",
+  "code": "#include <stdio.h>\n#include <stddef.h>\n\nstruct Student {\n    int id;\n    char name[16];\n    double gpa;\n    char grade;\n};\n\nint main(void) {\n    printf(\"id   @ %zu\\n\", offsetof(struct Student, id));\n    printf(\"name @ %zu\\n\", offsetof(struct Student, name));\n    printf(\"gpa  @ %zu\\n\", offsetof(struct Student, gpa));\n    printf(\"grade@ %zu\\n\", offsetof(struct Student, grade));\n    printf(\"sizeof = %zu\\n\", sizeof(struct Student));\n    return 0;\n}"
+}

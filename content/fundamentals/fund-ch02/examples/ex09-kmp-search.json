@@ -1,0 +1,8 @@
+{
+  "title": "KMP：匹配时主串指针不回退",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "主串: xxababacaxx\n模式: ababaca\n首次匹配位置: 2",
+  "code": "#include <stdio.h>\n#include <string.h>\n\nint main(void) {\n    const char *s = \"xxababacaxx\", *p = \"ababaca\";\n    int n = (int)strlen(s), m = (int)strlen(p), next[16];\n    next[0] = 0;\n    for (int i = 1, len = 0; i < m; ) {\n        if (p[i] == p[len]) next[i++] = ++len;\n        else if (len > 0)   len = next[len - 1];\n        else                next[i++] = 0;\n    }\n    int pos = -1, j = 0;\n    for (int i = 0; i < n; i++) {              /* i 只增不减 */\n        while (j > 0 && s[i] != p[j]) j = next[j - 1];\n        if (s[i] == p[j]) j++;\n        if (j == m) { pos = i - m + 1; break; }\n    }\n    printf(\"主串: %s\\n\", s);\n    printf(\"模式: %s\\n\", p);\n    printf(\"首次匹配位置: %d\\n\", pos);\n    return 0;\n}"
+}

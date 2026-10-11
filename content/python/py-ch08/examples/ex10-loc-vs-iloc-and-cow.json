@@ -1,0 +1,8 @@
+{
+  "title": "loc 与 iloc 的端点差异，以及 CoW 下的副本语义",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "s =\na    10\nb    20\nc    30\nd    40\ne    50\ndtype: int64\nloc['b':'d']  = {'b': 20, 'c': 30, 'd': 40} -> 按标签，闭区间\niloc[1:4]     = {'b': 20, 'c': 30, 'd': 40} -> 按下标，左闭右开\n--- DataFrame 上同样成立 ---\n   v\nx  1\ny  2\nz  3\nloc['x':'y'] =\n   v\nx  1\ny  2\niloc[0:2] =\n   v\nx  1\ny  2\n--- 布尔筛选得到的是副本（CoW 下改它不影响原表）---\nsub =\n   v\ny  2\nz  3\n改 sub 之后原 df :\n   v\nx  1\ny  2\nz  3\npandas 3.x 默认 Copy-on-Write : True",
+  "code": "import pandas as pd\ns = pd.Series([10, 20, 30, 40, 50], index=list(\"abcde\"))\nprint(\"s =\")\nprint(s)\nprint(\"loc['b':'d']  =\", s.loc[\"b\":\"d\"].to_dict(), \"-> 按标签，闭区间\")\nprint(\"iloc[1:4]     =\", s.iloc[1:4].to_dict(), \"-> 按下标，左闭右开\")\nprint(\"--- DataFrame 上同样成立 ---\")\ndf = pd.DataFrame({\"v\": [1, 2, 3]}, index=[\"x\", \"y\", \"z\"])\nprint(df)\nprint(\"loc['x':'y'] =\")\nprint(df.loc[\"x\":\"y\"])\nprint(\"iloc[0:2] =\")\nprint(df.iloc[0:2])\nprint(\"--- 布尔筛选得到的是副本（CoW 下改它不影响原表）---\")\nsub = df[df[\"v\"] > 1]\nprint(\"sub =\")\nprint(sub)\nsub[\"v\"] = 0\nprint(\"改 sub 之后原 df :\")\nprint(df)\nprint(\"pandas 3.x 默认 Copy-on-Write :\", pd.options.mode.copy_on_write)\n"
+}

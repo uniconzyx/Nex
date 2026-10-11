@@ -1,0 +1,8 @@
+{
+  "title": "ex11-method-matching-405",
+  "code_lang": "java",
+  "code_std": "java23",
+  "stdin": "",
+  "expected_output": "POST /users -> 200 OK\nGET /users -> 200 OK\nDELETE /users -> 405 Method Not Allowed\nPUT /users -> 405 Method Not Allowed",
+  "code": "import java.util.*;\npublic class Main {\n    static class Route{ String method; String path; Route(String m,String p){method=m;path=p;} }\n    public static void main(String[] a){\n        List<Route> routes=Arrays.asList(new Route(\"GET\",\"/users\"),new Route(\"POST\",\"/users\"));\n        String[][] reqs={{\"POST\",\"/users\"},{\"GET\",\"/users\"},{\"DELETE\",\"/users\"},{\"PUT\",\"/users\"}};\n        for(String[] r:reqs){\n            boolean pathMatch=false, methodMatch=false;\n            for(Route rt:routes){\n                if(rt.path.equals(r[1])){ pathMatch=true; if(rt.method.equals(r[0])) methodMatch=true; }\n            }\n            String status = methodMatch?\"200 OK\" : (pathMatch?\"405 Method Not Allowed\":\"404 Not Found\");\n            System.out.println(r[0]+\" \"+r[1]+\" -> \"+status);\n        }\n    }\n}"
+}

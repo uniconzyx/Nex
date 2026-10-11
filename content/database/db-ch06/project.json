@@ -1,0 +1,84 @@
+{
+  "meta": {
+    "chapter": "db-ch06",
+    "category": "system",
+    "note": "两个项目任务：① 电商订单库从 ER 到 BCNF 的完整设计与实测验证；② 学生选课系统的三种联系建模与 2NF 修复。均要求用 Python + sqlite3 实跑验证。"
+  },
+  "items": [
+    {
+      "title": "电商订单库：从 ER 图到 BCNF 的完整设计与实测验证",
+      "requirement_md": "给定一份存在冗余的电商宽表，完成「范式诊断 → 拆表设计 → 无损与保持依赖验证 → sqlite 实跑重建」的完整闭环，必须覆盖本章全部核心知识点。\n\n**起始宽表（有冗余）**\n\n```sql\nCREATE TABLE order_flat (\n  order_id      BIGINT,\n  user_id       BIGINT,\n  user_name     VARCHAR(64),\n  user_email    VARCHAR(128),\n  product_name  VARCHAR(64),\n  product_price DECIMAL(10,2),\n  qty           INT,\n  PRIMARY KEY (order_id, product_name)\n);\n```\n\n**业务规则（函数依赖）**\n- `order_id → user_id`\n- `user_id → user_name, user_email`\n- `product_name → product_price`\n- `(order_id, product_name) → qty`\n\n**必须完成的工作**\n1. **求候选键与主属性**：写出属性分类（L/R/N/LR）、闭包计算过程、全部候选键与主属性集合。\n2. **范式判定**：逐条说明哪些 FD 造成部分依赖（违反 2NF）、哪些造成传递依赖（违反 3NF）、哪些使 BCNF 不成立。\n3. **最小覆盖**：对上述 F 求最小覆盖，写出三步过程（右部单一化 / 去冗余 FD / 去左部冗余属性）。\n4. **拆表设计**：用 3NF 合成法给出分解 ρ，并补上必要的候选键分片；写出带主外键约束的 `CREATE TABLE`。\n5. **正确性验证**：\n   - 用**表格法**判定该分解（或其中任意二元子分解）的**无损连接性**；\n   - 逐条判定是否**保持依赖**，并对不保持的 FD 说明工程兜底方案。\n6. **sqlite 实跑**：建表、插入至少 3 个用户 × 3 个商品 × 4 个订单的样例数据，用 JOIN 还原出与宽表等价的完整信息，并断言「连接元组数 = 明细行数」。\n7. **更新异常对照**：实测「改一次用户名」在宽表方案与拆表方案下各需写多少行，并给出对账 SQL。\n8. **反范式评估**：若某列表页需要「订单 + 用户名」高频读取，用行操作计数判据计算盈亏平衡读写比，给出是否冗余的结论与同步方案。",
+      "tasks": [
+        {
+          "title": "候选键与范式诊断",
+          "verification": {
+            "type": "manual",
+            "desc": "能写出属性分类、闭包过程、候选键 (order_id, product_name) 与主属性集合；能逐条指出违反 2NF/3NF 的 FD 名称"
+          }
+        },
+        {
+          "title": "最小覆盖与 3NF 合成",
+          "verification": {
+            "type": "manual",
+            "desc": "三步最小覆盖过程完整（右部单一化→去冗余 FD→去左部冗余），合成结果含候选键分片"
+          }
+        },
+        {
+          "title": "无损连接与保持依赖判定",
+          "verification": {
+            "type": "manual",
+            "desc": "表格法（或二元判据）判定无损性并给出最终表；逐条 FD 判定保持依赖，指出是否有 FD 仅跨分片成立"
+          }
+        },
+        {
+          "title": "sqlite 实跑与信息还原",
+          "verification": {
+            "type": "test",
+            "desc": "拆表后 4 表 JOIN 的结果集与宽表信息逐行等价（行数一致、字段一致）；外部键约束能被违反时抛出 IntegrityError"
+          }
+        },
+        {
+          "title": "反范式评估",
+          "verification": {
+            "type": "manual",
+            "desc": "给出盈亏平衡读写比数值与本场景的 R/W 估计，结论明确；若选择冗余则列出同事务同步 + 对账 + 主副本三要素"
+          }
+        }
+      ]
+    },
+    {
+      "title": "学生选课系统：三种联系的建模与 2NF 修复",
+      "requirement_md": "设计并实测一个学生选课系统，覆盖 **1:1 / 1:N / M:N** 三种联系，并用 sqlite 验证约束真的生效。\n\n**必须完成的工作**\n1. **ER 建模**：画出实体（学生、班级、课程、教师、学籍档案）与联系，标注基数（1:1 / 1:N / M:N），并指出联系自身属性（如选课成绩、选课学期）的归属。\n2. **落表规则**：按基数规则给出建表语句 —— 1:1 用「外键兼主键」，1:N 在 **N 端**加外键，M:N 建中间表并设**复合主键**。\n3. **键设计**：对每张表写出超键集合、候选键集合与主键选择理由；给未选中的候选键补 `UNIQUE`。\n4. **违反 2NF 的反例与修复**：先写一个有缺陷的选课表 `SC(Sno, Cno, Grade, Cname)`（含 `Cno→Cname` 的部分依赖），说明它为什么违反 2NF 与 3NF；再用两个表修复它。\n5. **sqlite 实跑验证**（每项都要有真实输出）：\n   - 三表 JOIN 输出选课明细（含学生名、课程名、成绩）；\n   - 按课程 GROUP BY 输出选课人数，验证 M:N 两端基数；\n   - 尝试插入重复的 `(sid, cid)` → 应被复合主键拦截；\n   - 尝试插入指向不存在学生的选课记录 → 应被外键拦截；\n   - 尝试给同一学生插入第二条学籍档案 → 应被 1:1 的主键/唯一约束拦截。\n6. **范式打分**：用自己的判定器程序对每张表输出 2NF / 3NF / BCNF 判定结果，确认全部达标。",
+      "tasks": [
+        {
+          "title": "ER 建模与基数标注",
+          "verification": {
+            "type": "manual",
+            "desc": "三种联系均有实例；M:N 明确给出中间表；联系自身属性的归属正确"
+          }
+        },
+        {
+          "title": "建表与键设计",
+          "verification": {
+            "type": "manual",
+            "desc": "1:1 外键兼主键、1:N 外键在 N 端、M:N 复合主键；未选中的候选键均有 UNIQUE"
+          }
+        },
+        {
+          "title": "2NF 反例与修复",
+          "verification": {
+            "type": "manual",
+            "desc": "能指出 Cno→Cname 是相对候选键 (Sno,Cno) 的部分依赖，修复后分解满足 BCNF"
+          }
+        },
+        {
+          "title": "sqlite 约束实测",
+          "verification": {
+            "type": "test",
+            "desc": "重复选课、悬空外键、重复 1:1 档案三类非法写入均抛出 IntegrityError；三表 JOIN 行数 = 选课记录数"
+          }
+        }
+      ]
+    }
+  ]
+}

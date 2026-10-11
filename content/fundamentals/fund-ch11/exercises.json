@@ -1,0 +1,253 @@
+{
+  "meta": {
+    "chapter": "fund-ch11",
+    "note": "8 题，基础题 6 + 算法题 2；LeetCode 题仅存元数据与链接，不搬运题面。408 网络考点为主。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "OSI 与 TCP/IP 模型的层次差异",
+      "content_md": "关于 OSI 七层模型与 TCP/IP 四层模型，下列说法**正确**的是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "TCP/IP 的网际层对应 OSI 的网络层，TCP/IP 的应用层合并了 OSI 的会话层与表示层"
+        },
+        {
+          "key": "B",
+          "text": "TCP/IP 没有传输层"
+        },
+        {
+          "key": "C",
+          "text": "OSI 的表示层在 TCP/IP 中独立存在"
+        },
+        {
+          "key": "D",
+          "text": "APR 属于表示层"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "A"
+        ]
+      },
+      "explanation": "TCP/IP 四层 = 应用层 + 传输层 + 网际层 + 网络接口层。**应用层合并了 OSI 的会话层与表示层**（这是两者最大的差异）。网际层对应 OSI 的网络层。TCP/IP 明确有传输层（TCP/UDP），B 错；表示层在 TCP/IP 中**不独立存在**，C 错；ARP 是**网络层**协议（把 IP 解析为 MAC），D 错。",
+      "tags": [
+        "network",
+        "osi",
+        "tcpip",
+        "layer"
+      ],
+      "source": "book",
+      "source_ref": "《计算机网络》谢希仁 第 1 章 概述"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "medium",
+      "title": "以太网最小帧长",
+      "content_md": "以太网规定最小帧长为 64 字节（不含前导码），其根本原因是什么？",
+      "options": [
+        {
+          "key": "A",
+          "text": "为了保证数据字段至少能装下一个 IP 首部"
+        },
+        {
+          "key": "B",
+          "text": "为了在 CSMA/CD 下保证发送方在收到最远端冲突信号之前仍在发送，即 L ≥ 2τC"
+        },
+        {
+          "key": "C",
+          "text": "为了让交换机能够缓存整帧再转发"
+        },
+        {
+          "key": "D",
+          "text": "为了与令牌环网兼容"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "最小帧长的判据是**冲突检测的可行性**：发送方必须在「最远端信号往返」的时间 `2τ` 内持续发送，才能检测到冲突，于是 `L ≥ 2τC`。以太网取 `2τ = 51.2 μs`、`C = 10 Mbps` ⇒ `L ≥ 512 bit = 64 B`。这也是「提高带宽必须缩短网段」（或引入**载波延伸**）的原因。注意前导码是物理层同步序列，**不计入帧长**。",
+      "tags": [
+        "network",
+        "ethernet",
+        "csmacd",
+        "frame-length"
+      ],
+      "source": "book",
+      "source_ref": "《计算机网络》谢希仁 第 3 章 数据链路层"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "medium",
+      "title": "子网划分：可用主机数",
+      "content_md": "某主机地址为 `192.168.10.130/26`。该子网的**网络地址**、**广播地址**与**可用主机数**分别是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "192.168.10.0 / 192.168.10.255 / 254"
+        },
+        {
+          "key": "B",
+          "text": "192.168.10.128 / 192.168.10.191 / 62"
+        },
+        {
+          "key": "C",
+          "text": "192.168.10.128 / 192.168.10.255 / 126"
+        },
+        {
+          "key": "D",
+          "text": "192.168.10.130 / 192.168.10.191 / 64"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "主机位数 `h = 32 − 26 = 6`，块大小 `2^6 = 64`，因此子网按 64 分段：0~63、64~127、**128~191**、192~255。130 落在 **128~191**。**网络地址**（主机位全 0）= `192.168.10.128`；**广播地址**（主机位全 1）= `192.168.10.191`；**可用主机数** = `2^6 − 2 = 62`（减掉网络地址与广播地址）。注意网络地址**不等于**主机地址（D 错）。",
+      "tags": [
+        "network",
+        "ip",
+        "subnet",
+        "cidr"
+      ],
+      "source": "book",
+      "source_ref": "《计算机网络》谢希仁 第 4 章 网络层"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "medium",
+      "title": "ARP 的作用范围",
+      "content_md": "主机 A（`192.168.1.10/24`）要与 `10.2.3.4` 通信。关于 A 的 ARP 行为，下列说法**正确**的是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "A 广播 ARP 请求解析 10.2.3.4 的 MAC，路由器会转发该 ARP 请求"
+        },
+        {
+          "key": "B",
+          "text": "A 解析其网关（192.168.1.1）的 MAC，帧的目的 MAC 是网关的，而 IP 首部的目的 IP 仍是 10.2.3.4"
+        },
+        {
+          "key": "C",
+          "text": "A 直接把自己的 MAC 填为目的 MAC，因为路由由 IP 层负责"
+        },
+        {
+          "key": "D",
+          "text": "A 无需 ARP，因为目的不在同一网段"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "跨网段通信时，A **不会**去解析最终目的主机的 MAC（那在另一个广播域，ARP 根本到不了）。A 用**自己的掩码**判断目的地址不同网段，于是把数据报交给**网关**，因此**解析的是网关的 MAC**。此时：**帧的目的 MAC = 网关 MAC**，但**IP 首部的目的 IP 仍是最终目的主机 10.2.3.4**。**路由器不转发 ARP**（A 错）；C 会破坏链路层寻址；D 错，跨网段更需要 ARP（解析网关）。",
+      "tags": [
+        "network",
+        "arp",
+        "gateway",
+        "subnet"
+      ],
+      "source": "book",
+      "source_ref": "《计算机网络》谢希仁 第 4 章 ARP"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "修正 RTO 计算（Karn 算法）",
+      "content_md": "下面是 TCP 的 RTT 估计代码，其中的注释声称实现了 **Jacobson/Karels 与 Karn 算法**，但存在两处错误。请指出并给出修复后的完整代码。\n\n```python\nALPHA, BETA = 1/8, 1/4\n\ndef update(rtt_s, rtt_d, sample, retransmitted):\n    # bug 1: 系数反了\n    rtt_s = (1 - BETA) * rtt_s + BETA * sample\n    # bug 2: 重传样本也参与了采样（Karn）\n    rtt_d = (1 - BETA) * rtt_d + BETA * abs(sample - rtt_s)\n    rto = rtt_s + 2 * rtt_d\n    return rtt_s, rtt_d, rto\n```",
+      "answer": {
+        "text": "两处错误：① `rtt_s` 应使用 **α = 1/8**（不是 β = 1/4）；② 重传过的报文段**不能**用于 RTT 采样（Karn 算法），否则 ACK 归属不明会导致估计混乱；③ 另外 `RTO` 的系数应是 **4**（不是 2），即 `RTO = RTT_S + 4·RTT_D`。",
+        "code": "ALPHA, BETA = 1 / 8, 1 / 4\n\ndef update(rtt_s, rtt_d, sample, retransmitted):\n    \"\"\"Karn: a retransmitted segment must NOT be sampled.\"\"\"\n    if retransmitted:\n        return rtt_s, rtt_d, rtt_s + 4 * rtt_d   # 不采样，沿用旧估计\n    if rtt_s is None:                            # 第一次测量\n        return sample, sample / 2, sample + 4 * (sample / 2)\n    rtt_d = (1 - BETA) * rtt_d + BETA * abs(sample - rtt_s)\n    rtt_s = (1 - ALPHA) * rtt_s + ALPHA * sample\n    return rtt_s, rtt_d, rtt_s + 4 * rtt_d"
+      },
+      "explanation": "三个要点：① **平滑 RTT 用 α = 1/8**（`RTT_S ← (1−α)RTT_S + α·sample`），**偏差用 β = 1/4**（`RTT_D ← (1−β)RTT_D + β·|sample − RTT_S|`）——**两个系数不同，别混用**；② **Karn 算法**：重传报文段不采样，因为返回的 ACK 无法区分对应原发还是重传；③ **RTO = RTT_S + 4·RTT_D**，相当于「均值 + 4 倍平均绝对偏差」，把超时门限放在分布的上尾，既避免伪超时又能及时发现真丢包。实现上还要注意**首次测量**要单独初始化（`RTT_S = sample`、`RTT_D = sample/2`）。",
+      "tags": [
+        "network",
+        "tcp",
+        "rtt",
+        "karn",
+        "rto"
+      ],
+      "source": "self",
+      "source_ref": "fund-ch11 concept 04 · RTT 估计与 Karn 算法"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "拥塞窗口的演化判断",
+      "content_md": "某 TCP 连接初始 `cwnd = 1 MSS`、`ssthresh = 8 MSS`，采用 Reno 算法。在第 5 个 RTT 结束时检测到**三个重复 ACK**。请给出第 1~6 个 RTT 结束时的 `cwnd`（单位 MSS），并说明第 6 个 RTT 处于哪个阶段。",
+      "answer": {
+        "text": "第 1~5 个 RTT：1 → 2 → 4 → 8 → 9；第 5 个 RTT 结束发生三重复 ACK ⇒ `ssthresh = 9/2 ≈ 4`（按整数取下界可取 4），`cwnd = ssthresh`。所以第 6 个 RTT 结束时 `cwnd = 5`，处于**拥塞避免（快恢复之后）**阶段。"
+      },
+      "explanation": "推演过程：`cwnd=1 < 8` ⇒ **慢启动**（每 RTT 翻倍）：1 → 2 → 4，此时 `cwnd=4 < 8` 仍慢启动 → 8。到 8 时 `cwnd ≥ ssthresh` ⇒ 转 **拥塞避免**（每 RTT +1）：8 → 9。第 5 个 RTT 结束收到**三个重复 ACK** ⇒ `ssthresh = cwnd/2 = 4.5`，`cwnd = ssthresh`，**进入快恢复/拥塞避免**（**不回慢启动**）。第 6 个 RTT 线性 +1 ⇒ `cwnd = 5（或 5.5）`。**关键分界**：若是**超时**而非三重复 ACK，则 `cwnd = 1` 并回到慢启动，第 6 个 RTT 会是 2。题目按整数 MSS 计，ssthresh 取 4 时第 6 个 RTT 为 5。",
+      "tags": [
+        "network",
+        "tcp",
+        "congestion",
+        "reno",
+        "aimd"
+      ],
+      "source": "self",
+      "source_ref": "fund-ch11 concept 04 · 拥塞控制"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "实现 CIDR 最长前缀匹配",
+      "content_md": "实现一个路由查找函数：给定路由表（每条为 `(前缀, 前缀长度, 下一跳)`）与目的 IP 字符串，返回**最长前缀匹配**的下一跳；若无匹配返回 `None`。要求把 IP 地址与掩码都转成 32 位整数来比较（不依赖 `ipaddress` 库）。\n\n示例：路由表含 `0.0.0.0/0 → gw-default`、`192.168.0.0/16 → gw-16`、`192.168.10.0/24 → gw-24`、`192.168.10.128/25 → gw-25`；目的 `192.168.10.130` → 应返回 `gw-25`。",
+      "answer": {
+        "text": "把 IP 与前缀掩码都转成 32 位整数，用 `(ip >> (32-plen)) == (net >> (32-plen))` 或 `ip & mask == net & mask` 判断匹配，最后取 `plen` 最大的一条。",
+        "code": "def ip2int(s):\n    a, b, c, d = (int(x) for x in s.split(\".\"))\n    return (a << 24) | (b << 16) | (c << 8) | d\n\ndef matches(ip_int, net_int, plen):\n    if plen == 0:\n        return True\n    mask = ((1 << plen) - 1) << (32 - plen)\n    return (ip_int & mask) == (net_int & mask)\n\ndef longest_prefix_match(table, dst):\n    ip = ip2int(dst)\n    best = None\n    for prefix, plen, nexthop in table:\n        if matches(ip, ip2int(prefix), plen):\n            if best is None or plen > best[0]:\n                best = (plen, nexthop)\n    return best[1] if best else None\n\nif __name__ == \"__main__\":\n    table = [(\"0.0.0.0\", 0, \"gw-default\"),\n             (\"192.168.0.0\", 16, \"gw-16\"),\n             (\"192.168.10.0\", 24, \"gw-24\"),\n             (\"192.168.10.128\", 25, \"gw-25\")]\n    for dst in (\"192.168.10.130\", \"192.168.10.10\", \"192.168.5.5\", \"8.8.8.8\"):\n        print(f\"{dst} -> {longest_prefix_match(table, dst)}\")"
+      },
+      "explanation": "要点：① **用移位构造掩码**（`plen == 0` 特判，因为 `1 << 32` 在 Python 里不会溢出但会得到 4294967296，需要单独处理）；② 必须**遍历所有匹配项取最长**，不能「遇到第一个匹配就返回」；③ 实际路由器用 **TCAM** 或**压缩前缀树（LC-trie）** 做到 O(1)/O(log n)，本题的 O(n) 线性扫描只用于教学。**最长前缀匹配的语义**是「越具体的路由优先」，这同时实现了「默认路由兜底」与「路由聚合」。",
+      "tags": [
+        "network",
+        "routing",
+        "cidr",
+        "longest-prefix-match"
+      ],
+      "source": "self",
+      "source_ref": "fund-ch11 concept 03 · 最长前缀匹配"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "medium",
+      "title": "LRU 缓存（与 TCP 重传队列的淘汰同源）",
+      "content_md": "请你设计并实现一个满足 LRU（最近最少使用）缓存约束的数据结构：`get(key)` 返回值（不存在返回 −1），`put(key, value)` 插入或更新，容量超限时淘汰最久未使用的键。要求两操作均为 O(1)。\n\n（题面描述见链接，本条目只保留元数据与链接，不搬运题面正文。）",
+      "answer": {
+        "text": "哈希表 + 双向链表：哈希表 O(1) 定位节点，双向链表维护访问顺序（头部最新、尾部最旧）。命中后把节点移到头部；插入时先查重，超容量删除尾节点并同步从哈希表移除。"
+      },
+      "explanation": "LRU 在这里不是「网络协议」，而是**传输层工程实现的基础数据结构**：TCP 的**重传队列、接收缓冲区、SACK 块管理**都需要按「最近使用」淘汰；HTTP 缓存、DNS 缓存、路由缓存也同理。答题要点：① 用**哑节点**（dummy head/tail）消除边界判断；② **删除节点必须同时从哈希表移除**，否则内存泄漏（与 JVM 引用不清理同源）；③ 也可用 `LinkedHashMap(accessOrder=true)` 覆写 `removeEldestEntry` 实现，但面试要求手写以证明 O(1)。",
+      "tags": [
+        "leetcode",
+        "lru",
+        "hashmap",
+        "doubly-linked-list"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 146 (lru-cache)",
+      "external_url": "https://leetcode.cn/problems/lru-cache/"
+    }
+  ]
+}

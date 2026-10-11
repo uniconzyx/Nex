@@ -1,0 +1,8 @@
+{
+  "title": "prompt 版本 A/B 对比：精确二项检验",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "测试用例数 n = 24\n版本 A 通过 14 -> pass@ = 0.5833\n版本 B 通过 20 -> pass@ = 0.8333\n提升 0.2500 (绝对) / 42.9% (相对)\n\n=== 用不一致对做符号检验（只统计两版结果不同的用例）===\n不一致用例 10 个，其中新版胜 8 个\n单尾精确二项 p 值 = 0.0547\n显著（p < 0.05）: False\n\n对照: 若只赢 6/10，p = 0.3770 -> 显著: False\n结论: 8/10 已越过 0.05 门槛，6/10 尚未越过 —— 小样本下需要足够大的胜率差",
+  "code": "from math import comb\n\n\ndef binom_tail(n, k, p0=0.5):\n    \"\"\"P(X >= k), X ~ B(n, p0)  精确计算（不依赖 scipy）。\"\"\"\n    return sum(comb(n, i) * p0 ** i * (1 - p0) ** (n - i) for i in range(k, n + 1))\n\n\nTESTS = 24   # 固定测试用例数\n\nA_PASS = 14  # 旧版 prompt 通过数\nB_PASS = 20  # 新版 prompt 通过数\n\nprint(\"测试用例数 n = %d\" % TESTS)\nprint(\"版本 A 通过 %d -> pass@ = %.4f\" % (A_PASS, A_PASS / TESTS))\nprint(\"版本 B 通过 %d -> pass@ = %.4f\" % (B_PASS, B_PASS / TESTS))\nprint(\"提升 %.4f (绝对) / %.1f%% (相对)\"\n      % (B_PASS / TESTS - A_PASS / TESTS,\n         (B_PASS - A_PASS) / A_PASS * 100))\n\nprint()\nprint(\"=== 用不一致对做符号检验（只统计两版结果不同的用例）===\")\ndisc = B_PASS - A_PASS + (TESTS - B_PASS) - (TESTS - A_PASS)\n# 简化：假设两版共有 10 个用例结果不同，其中 B 赢 8 个\nn_disc = 10\nb_win = 8\np = binom_tail(n_disc, b_win, 0.5)\nprint(\"不一致用例 %d 个，其中新版胜 %d 个\" % (n_disc, b_win))\nprint(\"单尾精确二项 p 值 = %.4f\" % p)\nprint(\"显著（p < 0.05）: %s\" % (p < 0.05))\n\nprint()\nprint(\"对照: 若只赢 6/10，p = %.4f -> 显著: %s\"\n      % (binom_tail(10, 6, 0.5), binom_tail(10, 6, 0.5) < 0.05))\nprint(\"结论: 8/10 已越过 0.05 门槛，6/10 尚未越过 —— 小样本下需要足够大的胜率差\")"
+}

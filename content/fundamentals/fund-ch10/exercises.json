@@ -1,0 +1,256 @@
+{
+  "meta": {
+    "chapter": "fund-ch10",
+    "note": "8 题，基础题 6 + 算法题 2；LeetCode 题仅存元数据与链接，不搬运题面。408 存储管理/文件系统考点为主。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "内部碎片与外部碎片的对应关系",
+      "content_md": "下列分配方式与其产生的碎片类型，对应**正确**的是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "固定分区分配产生外部碎片，动态分区分配产生内部碎片"
+        },
+        {
+          "key": "B",
+          "text": "分页产生内部碎片，分段产生外部碎片"
+        },
+        {
+          "key": "C",
+          "text": "分页产生外部碎片，分段产生内部碎片"
+        },
+        {
+          "key": "D",
+          "text": "段页式既产生内部碎片又产生外部碎片"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "判据：**分配单位比需求大 ⇒ 内部碎片**（碎在块内部）；**空闲总量够但不连续 ⇒ 外部碎片**。固定分区大小固定 ⇒ 内部碎片；动态分区按需切分但留下不连续空洞 ⇒ 外部碎片；**分页最后一页填不满 ⇒ 内部碎片**；**分段长度可变、段间产生空洞 ⇒ 外部碎片**；段页式在段内分页，所以**只有内部碎片**（最后一页），不产生外部碎片。所以 A、C、D 均错。",
+      "tags": [
+        "os",
+        "memory",
+        "fragmentation",
+        "paging",
+        "segmentation"
+      ],
+      "source": "book",
+      "source_ref": "《计算机操作系统》汤小丹 第 4 章 内存管理"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "medium",
+      "title": "页表项数与页表大小",
+      "content_md": "某系统逻辑地址 32 位、页大小 4KB、页表项占 4B。采用**单级页表**时，页表大小是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "4 KB"
+        },
+        {
+          "key": "B",
+          "text": "1 MB"
+        },
+        {
+          "key": "C",
+          "text": "4 MB"
+        },
+        {
+          "key": "D",
+          "text": "与进程实际占用内存成正比，无法确定"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "C"
+        ]
+      },
+      "explanation": "页内偏移位数 = log2(4096) = **12** 位 ⇒ 页号位数 = 32 − 12 = **20** 位 ⇒ 页表项数 = 2^20 = **1M** 项 ⇒ 页表大小 = 1M × 4B = **4MB**。注意 D 的陷阱：**页表项数只由地址位数决定，与进程实际用多少内存无关**（进程小只是让多级页表的「实际常驻量」变小）。这正是要引入**多级页表按需分配**的原因。",
+      "tags": [
+        "os",
+        "paging",
+        "page-table",
+        "address-translation"
+      ],
+      "source": "book",
+      "source_ref": "《计算机操作系统》汤小丹 第 4 章 分页存储管理"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "medium",
+      "title": "Belady 异常的归属",
+      "content_md": "关于 Belady 异常，下列说法**正确**的是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "LRU 和 FIFO 都会出现 Belady 异常"
+        },
+        {
+          "key": "B",
+          "text": "只有 FIFO（以及 Clock 等非栈算法）会出现；LRU 与 OPT 是栈算法，不会出现"
+        },
+        {
+          "key": "C",
+          "text": "Belady 异常指「减少帧数反而缺页更少」，任何算法都可能出现"
+        },
+        {
+          "key": "D",
+          "text": "Belady 异常说明 FIFO 的实现有 bug"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "Belady 异常 = **帧数增加反而缺页数增加**（不是「减少帧数更好」，C 说反了）。成因是 FIFO **不满足栈算法性质**：m 帧的驻留页集合不一定是 m+1 帧驻留集合的子集。**LRU 与 OPT 满足栈性质，缺页数随帧数单调不增**，因此不会出现异常。经典例子：引用串 `1,2,3,4,1,2,5,1,2,3,4,5` 在 FIFO 下**3 帧 9 次 < 4 帧 10 次**。这是算法的固有性质，不是 bug（D 错）。",
+      "tags": [
+        "os",
+        "page-replacement",
+        "belady",
+        "lru",
+        "fifo"
+      ],
+      "source": "book",
+      "source_ref": "《计算机操作系统》汤小丹 第 4 章 页面置换算法"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "medium",
+      "title": "硬链接与软链接的删除语义",
+      "content_md": "文件 `/a/f.txt` 的链接计数为 2（另有硬链接 `/b/g.txt`），并存在软链接 `/c/s.txt` 指向 `/a/f.txt`。执行 `rm /a/f.txt` 后，下列说法**正确**的是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "数据块被释放，`/b/g.txt` 与 `/c/s.txt` 均失效"
+        },
+        {
+          "key": "B",
+          "text": "`/b/g.txt` 仍可正常读写，`/c/s.txt` 变成悬空链接"
+        },
+        {
+          "key": "C",
+          "text": "`/c/s.txt` 仍可正常读写，`/b/g.txt` 失效"
+        },
+        {
+          "key": "D",
+          "text": "两者都仍可正常读写，因为数据块还在"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "`rm` 本质是 `unlink`：把**该 inode 的 link count 减 1**。原计数 2 → 1，**仍大于 0，数据块不释放**，所以共享同一 inode 的硬链接 `/b/g.txt` 照常可读写。而**软链接是独立 inode，内容是目标路径字符串**，源文件名字被删除后解析失败 ⇒ **悬空（dangling）**，访问返回 `ENOENT`。补充：硬链接**不能跨文件系统、不能指向目录**；软链接两者都可以。",
+      "tags": [
+        "os",
+        "filesystem",
+        "inode",
+        "hardlink",
+        "symlink"
+      ],
+      "source": "book",
+      "source_ref": "《计算机操作系统》汤小丹 第 6 章 文件系统"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "修正位示图的字号/位号计算",
+      "content_md": "某文件系统用**位示图**管理空闲盘块，字长 32 位，**盘块号从 1 开始编号**。下面的函数本应「由盘块号求字号与位号」，但存在错误（编号起点处理不对）。请指出错误并给出修复后的完整代码。\n\n```c\nvoid bitmap_addr(int block_no, int *word, int *bit) {\n    *word = block_no / 32;\n    *bit  = block_no % 32;\n}\n```",
+      "answer": {
+        "text": "错误：盘块号从 **1** 开始时，必须先减 1 再取整除与取模，否则整体偏移一位（盘块号 1 会被算成字 0/位 1，正确应为字 0/位 0）。同时应补上反向换算 `block = word * 32 + bit + 1`，并做入参校验。",
+        "code": "#include <stdio.h>\n\n#define WORD_BITS 32\n#define BASE 1        /* 盘块号从 1 开始；若题目说从 0 开始就把这里改成 0 */\n\nvoid bitmap_addr(int block_no, int *word, int *bit) {\n    int idx = block_no - BASE;      /* 关键：先归一到 0 基 */\n    *word = idx / WORD_BITS;\n    *bit  = idx % WORD_BITS;\n}\n\nint bitmap_block(int word, int bit) {\n    return word * WORD_BITS + bit + BASE;\n}\n\nint main(void) {\n    for (int b = 1; b <= 33; b += 16) {\n        int w, o;\n        bitmap_addr(b, &w, &o);\n        printf(\"block %2d -> word=%d bit=%2d -> block %d (round trip ok: %s)\\n\",\n               b, w, o, bitmap_block(w, o), bitmap_block(w, o) == b ? \"true\" : \"false\");\n    }\n    printf(\"if numbering started at 0: block 1 -> word=0 bit=1\\n\");\n    return 0;\n}"
+      },
+      "explanation": "位示图题的**唯一陷阱就是编号起点**：盘块号从 1 开始则 `字号 = (块号−1)/L`、`位号 = (块号−1)%L`；从 0 开始则不带 −1。差一个 1 会让**整题皆错**。此外应同时给出反向公式 `块号 = 字号 × L + 位号 + 起点`，并用往返验证（round trip）自证。位示图的优势是**可位运算批量扫描**（一次读 32 位就能找到 32 个块的状态），代价是**元数据必须常驻内存**。",
+      "tags": [
+        "os",
+        "filesystem",
+        "bitmap",
+        "free-space"
+      ],
+      "source": "self",
+      "source_ref": "fund-ch10 concept 04 · 空闲空间管理"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "手算三种置换算法的缺页次数",
+      "content_md": "引用串为 `7,0,1,2,0,3,0,4,2,3,0,3,2,1,2,0,1,7,0,1`，可用帧数为 **3**，初始为空。请分别给出 **OPT**、**FIFO**、**LRU** 的缺页次数（只写三个数字，按 OPT/FIFO/LRU 顺序）。",
+      "answer": {
+        "text": "OPT = 9，FIFO = 15，LRU = 12"
+      },
+      "explanation": "这是操作系统教材的经典序列。逐项模拟：**FIFO** 按进入顺序淘汰，共 15 次缺页（前 3 次填满，之后频繁淘汰「最老」的页，运气很差）；**LRU** 按最近最少使用淘汰，共 12 次；**OPT** 淘汰将来最晚被用的页，共 9 次，是理论下界。顺序为 **OPT ≤ LRU ≤ FIFO**。注意这个不等式**不普遍成立**——FIFO/Clock 在特定序列上可能优于 LRU，因为 LRU 的前提假设（「最近用过的将来还会用」）在某些访问模式下不成立。",
+      "tags": [
+        "os",
+        "page-replacement",
+        "opt",
+        "fifo",
+        "lru"
+      ],
+      "source": "self",
+      "source_ref": "fund-ch10 concept 03 · 页面置换算法"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "实现 LRU 页面置换并统计缺页次数",
+      "content_md": "给定引用串 `pages`（数组）与可用帧数 `capacity`，实现 **LRU 页面置换算法**，返回**缺页次数**。要求命中时更新该页的「最近使用时间」；缺页且帧满时淘汰**最久未使用**的页。时间复杂度 O(n·capacity) 即可。\n\n示例：`pages = [7,0,1,2,0,3,0,4,2,3,0,3,2,1,2,0,1,7,0,1]`，`capacity = 3` → 缺页 12 次。",
+      "answer": {
+        "text": "用两个并行数组：frames 存页号、last 存该页最后一次被引用的时间戳。命中则只更新时间戳；缺页且已满则线性扫描 last 找最小值对应的帧作为受害者。",
+        "code": "#include <stdio.h>\n\nint lru_faults(const int *pages, int n, int capacity) {\n    int frame[64], last[64], used = 0, faults = 0;\n    for (int i = 0; i < n; i++) {\n        int hit = -1;\n        for (int j = 0; j < used; j++) if (frame[j] == pages[i]) { hit = j; break; }\n        if (hit >= 0) { last[hit] = i; continue; }      /* 命中：只刷新时间戳 */\n        faults++;\n        if (used < capacity) { frame[used] = pages[i]; last[used] = i; used++; }\n        else {\n            int victim = 0;\n            for (int j = 1; j < capacity; j++) if (last[j] < last[victim]) victim = j;\n            frame[victim] = pages[i]; last[victim] = i;\n        }\n    }\n    return faults;\n}\n\nint main(void) {\n    int pages[] = {7,0,1,2,0,3,0,4,2,3,0,3,2,1,2,0,1,7,0,1};\n    int n = 20;\n    for (int cap = 3; cap <= 5; cap++)\n        printf(\"capacity=%d -> faults=%d\\n\", cap, lru_faults(pages, n, cap));\n    return 0;\n}"
+      },
+      "explanation": "LRU 的关键是**「命中也要刷新时间戳」**——只更新缺页时的时间戳是常见错误，会让算法退化成 FIFO。时间戳用**引用序号**而非墙钟时间，既保证确定性又避免同毫秒歧义。答案里用 `used` 表示当前帧数，避免「未填满就淘汰」的错误。**复杂度优化**：工程实现会用哈希表 + 双向链表做到 O(1)（见下一题的 LRU 缓存），而缺页统计只需 O(n·capacity)。",
+      "tags": [
+        "os",
+        "page-replacement",
+        "lru",
+        "simulation"
+      ],
+      "source": "self",
+      "source_ref": "fund-ch10 concept 03 · 页面置换算法"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "hard",
+      "title": "LFU 缓存（最不经常使用淘汰）",
+      "content_md": "请你为**最不经常使用（LFU）**缓存算法设计并实现数据结构：`get(key)` 返回键的值（不存在返回 −1），`put(key, value)` 插入或更新。当缓存达到容量时，淘汰**使用频率最低**的键；若频率相同，淘汰**最久未使用**的那个。要求 `get` 与 `put` 的时间复杂度为 O(1)。\n\n（题面描述见链接，本条目只保留元数据与链接，不搬运题面正文。）",
+      "answer": {
+        "text": "两级结构：`key -> (value, freq)` 的哈希表，加 `freq -> 双向链表（该频率下的 key，按 LRU 排序）` 的哈希表，再用一个 `minFreq` 变量记录当前最小频率。`get` 后把 key 从旧频率链表摘下、挂到 freq+1 链表头，并维护 minFreq；`put` 容量满时从 minFreq 链表的尾部淘汰。两操作均 O(1)。"
+      },
+      "explanation": "LFU 是**页面置换算法在缓存层的对偶**：LRU（淘汰最久未用）对应「时间局部性」，LFU（淘汰最少使用）对应「频率局部性」。工程上纯 LFU 有**「历史包袱」问题**（曾经的热点长期占据缓存），因此实际系统多用 **W-TinyLFU**（Caffeine）、**TinyLFU + 计数衰减** 或 **Redis 的近似 LFU**（用 8 位计数器 + 概率递增 + 定期衰减）。答题时要点：**minFreq 必须正确维护**（插入新 key 时置 1；淘汰后若链表空则需要上移），这是本题最容易写错的地方。",
+      "tags": [
+        "leetcode",
+        "lfu",
+        "cache",
+        "doubly-linked-list",
+        "hashmap"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 460 (lfu-cache)",
+      "external_url": "https://leetcode.cn/problems/lfu-cache/"
+    }
+  ]
+}

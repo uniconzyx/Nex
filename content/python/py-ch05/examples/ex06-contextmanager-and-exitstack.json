@@ -1,0 +1,8 @@
+{
+  "title": "contextlib：生成器式上下文与 ExitStack",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "嵌套 with（先开后关，逆序释放）:\n> A\n> B\n> C\nbody\n< C\n< B\n< A\n\nExitStack（动态数量资源同样逆序释放）:\n> r1\n> r2\n> r3\nbody\n< r3\n< r2\n< r1\n\n要点: 无 @contextmanager 时 finally 里 yield 会吞掉上游异常; 加了就正确传播",
+  "code": "from contextlib import contextmanager, ExitStack\n\n\n@contextmanager\ndef step(name, box):\n    box.append(\"> \" + name)\n    try:\n        yield name\n    finally:\n        box.append(\"< \" + name)\n\n\nbox1 = []\nwith step(\"A\", box1):\n    with step(\"B\", box1):\n        with step(\"C\", box1):\n            box1.append(\"body\")\nprint(\"嵌套 with（先开后关，逆序释放）:\")\nprint(\"\\n\".join(box1))\nprint()\n\nbox2 = []\nwith ExitStack() as stack:\n    for n in (\"r1\", \"r2\", \"r3\"):\n        stack.enter_context(step(n, box2))\n    box2.append(\"body\")\nprint(\"ExitStack（动态数量资源同样逆序释放）:\")\nprint(\"\\n\".join(box2))\nprint()\nprint(\"要点: 无 @contextmanager 时 finally 里 yield 会吞掉上游异常; 加了就正确传播\")"
+}

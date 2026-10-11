@@ -1,0 +1,15 @@
+{
+  "meta": { "chapter": "cpp-ch09", "category": "basic" },
+  "items": [
+    {
+      "title": "用 STL 算法实现一个「数据集清洗与统计工具」",
+      "requirement_md": "从文本读取若干行记录（每行 `姓名,分数`），用**纯 STL 算法**（尽量少手写循环）完成：1) 用 `std::getline` + `std::stringstream` 解析；2) 用 `std::unordered_map` 统计每个姓名的平均分；3) 用 `std::vector` 收集 (姓名,平均分) 后，用 `std::sort`+lambda 按平均分降序、同分按姓名升序排序；4) 用 `std::stable_partition` 把「平均分 ≥ 阈值」的达标者排到前端；5) 用 `std::accumulate` 计算全体平均分；6) 用 C++20 `std::ranges`(`views::filter | transform | take`) 惰性输出 Top-K。要求：解析出错（缺字段/非数字）的记录用 `std::erase_if` 清洗掉；输出可读报告。",
+      "tasks": [
+        { "title": "解析与清洗（getline/stringstream/erase_if）", "verification": { "type": "test", "desc": "缺字段/非数字行被滤除，合法行全部入库" } },
+        { "title": "统计与排序（unordered_map/sort+lambda）", "verification": { "type": "test", "desc": "平均分计算正确；排序先按分降序、同分按姓名升序" } },
+        { "title": "分组与聚合（stable_partition/accumulate）", "verification": { "type": "manual", "desc": "达标者聚集在前端且组内顺序不变；全体平均分正确" } },
+        { "title": "惰性输出 Top-K（C++20 ranges 管道）", "verification": { "type": "manual", "desc": "用 views::filter|transform|take 输出前 K 名，且不分配中间容器" } }
+      ]
+    }
+  ]
+}

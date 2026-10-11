@@ -1,0 +1,37 @@
+{
+  "meta": { "chapter": "db-ch01" },
+  "items": [
+    {
+      "question": "WHERE 和 HAVING 都能过滤，什么时候必须用 HAVING？",
+      "answer_md": "`WHERE` 在**分组前**过滤行，不能使用聚合函数；`HAVING` 在**分组后**过滤组，可以使用聚合函数（如 `COUNT(*)`、`AVG()`）。\n\n所以「按部门统计人数，只保留人数 ≥2 的部门」必须写 `GROUP BY dept HAVING COUNT(*) >= 2`，不能写成 `WHERE COUNT(*) >= 2`。\n\n**性能提示**：能提前在 WHERE 中过滤的条件不要放到 HAVING——越早减少行数，分组代价越低。",
+      "follow_ups": [
+        "SQL 的执行顺序是怎样的？",
+        "为什么 `SELECT dept, COUNT(*) FROM emp WHERE salary > 5000 GROUP BY dept` 是合法的？"
+      ],
+      "difficulty": "easy",
+      "company_tags": ["通用"]
+    },
+    {
+      "question": "一张 500 万行的表，某个查询很慢，你会如何排查？",
+      "answer_md": "1. **定位慢 SQL**：开启慢查询日志（`slow_query_log`、`long_query_time`），用 `mysqldumpslow` / `pt-query-digest` 聚合分析 Top N。\n2. **看执行计划**：`EXPLAIN` 关注 `type`（尽量避免 ALL 全表扫）、`key`（是否用到预期索引）、`rows`（预估扫描行数）、`Extra`（`Using filesort`/`Using temporary` 需警惕）。\n3. **常见原因与对策**：\n   - 缺索引 → 为 WHERE/JOIN/ORDER BY 列建联合索引，遵循最左前缀；\n   - 索引失效 → 函数包裹列、隐式类型转换、左模糊 `LIKE '%x'`；\n   - 回表过多 → 用**覆盖索引**或只查需要的列（避免 `SELECT *`）；\n   - 深分页 → 延迟关联或游标分页（`WHERE id > last_id`）。\n4. **架构层**：读写分离、缓存、分库分表。",
+      "follow_ups": [
+        "EXPLAIN 中 type=ALL 一定意味着要加索引吗？",
+        "为什么有时加了索引优化器却不用？",
+        "深分页 `LIMIT 1000000, 20` 为什么慢，怎么优化？"
+      ],
+      "difficulty": "mid",
+      "company_tags": ["通用", "阿里", "字节"]
+    },
+    {
+      "question": "事务的隔离级别有哪些？InnoDB 默认哪个，如何解决幻读？",
+      "answer_md": "四种隔离级别（由低到高）：\n\n| 级别 | 脏读 | 不可重复读 | 幻读 |\n|---|---|---|---|\n| 读未提交 RU | 有 | 有 | 有 |\n| 读已提交 RC | 无 | 有 | 有 |\n| **可重复读 RR（InnoDB 默认）** | 无 | 无 | 基本无 |\n| 串行化 Serializable | 无 | 无 | 无 |\n\n- **脏读**：读到别人未提交的数据。\n- **不可重复读**：同事务内两次读同一行，值被改。\n- **幻读**：同事务内两次范围查询，行数被插入/删除改变。\n\n**InnoDB 在 RR 下的手段**：\n- 普通 `SELECT` 走 **MVCC 快照读**（undo log 版本链 + ReadView），保证可重复读；\n- 当前读（`SELECT ... FOR UPDATE`、`UPDATE`）用 **Next-Key Lock**（行锁 + 间隙锁）锁住范围，阻止插入，从而避免幻读。",
+      "follow_ups": [
+        "MVCC 中 RC 和 RR 生成 ReadView 的时机有何不同？",
+        "什么是当前读和快照读？",
+        "间隙锁会带来什么问题？"
+      ],
+      "difficulty": "hard",
+      "company_tags": ["通用", "腾讯", "美团"]
+    }
+  ]
+}

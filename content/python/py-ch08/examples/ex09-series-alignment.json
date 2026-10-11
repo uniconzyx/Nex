@@ -1,0 +1,8 @@
+{
+  "title": "Series 基础与按标签对齐（引入缺失就升 dtype）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "pandas 3.0.6\ns =\na    1\nb    2\nc    3\ndtype: int64\ndtype = int64 | index.name = None | values 类型 = ndarray\n--- 索引对齐（最容易踩的坑）---\nx = {'a': 1, 'b': 2}\ny = {'b': 10, 'c': 20}\nx + y 会先按标签取并集再对齐 :\na     NaN\nb    12.0\nc     NaN\ndtype: float64\n结果 dtype = float64 （出现缺失值后 int 升为 float）\n--- 换成 ndarray 就不对齐，按位置相加 ---\nx + np.array([100, 100]) = {'a': 101, 'b': 102}\n--- reindex 显式对齐 ---\nx.reindex(['a','b','c']) = {'a': 1.0, 'b': 2.0, 'c': nan}",
+  "code": "import pandas as pd\nimport numpy as np\nprint(\"pandas\", pd.__version__)\ns = pd.Series([1, 2, 3], index=[\"a\", \"b\", \"c\"])\nprint(\"s =\")\nprint(s)\nprint(\"dtype =\", s.dtype, \"| index.name =\", s.index.name, \"| values 类型 =\", type(s.values).__name__)\nprint(\"--- 索引对齐（最容易踩的坑）---\")\nx = pd.Series([1, 2], index=[\"a\", \"b\"])\ny = pd.Series([10, 20], index=[\"b\", \"c\"])\nprint(\"x =\", x.to_dict())\nprint(\"y =\", y.to_dict())\nprint(\"x + y 会先按标签取并集再对齐 :\")\nprint(x + y)\nprint(\"结果 dtype =\", (x + y).dtype, \"（出现缺失值后 int 升为 float）\")\nprint(\"--- 换成 ndarray 就不对齐，按位置相加 ---\")\nprint(\"x + np.array([100, 100]) =\", (x + np.array([100, 100])).to_dict())\nprint(\"--- reindex 显式对齐 ---\")\nprint(\"x.reindex(['a','b','c']) =\", x.reindex([\"a\", \"b\", \"c\"]).to_dict())\n"
+}

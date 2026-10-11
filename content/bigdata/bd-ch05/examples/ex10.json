@@ -1,0 +1,8 @@
+{
+  "title": "AQE 动态合并小分区（正反两组）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "code": "\ndef coalesce_partitions(sizes, target):\n    \"\"\"AQE CoalesceShufflePartitions：只合并**相邻**分区，累加到目标大小即成一组。\"\"\"\n    packs = []\n    cur = []\n    for s in sizes:\n        cur.append(s)\n        if sum(cur) >= target:\n            packs.append(cur)\n            cur = []\n    if cur:\n        packs.append(cur)\n    return packs\n\n\nTARGET = 64  # spark.sql.adaptive.advisoryPartitionSizeInBytes = 64MB\n\ncases = [\n    (\"用例1 大量小分区（应当合并）\", [8, 12, 16, 32, 64, 4, 20]),\n    (\"用例2 分区都已足够大（不应合并）\", [70, 80, 90]),\n]\n\nprint(\"目标分区大小 target = \" + str(TARGET) + \" MB；只合并相邻分区\")\nprint(\"\")\n\nverdicts = []\nfor name, sizes in cases:\n    packs = coalesce_partitions(sizes, TARGET)\n    merged = [sum(p) for p in packs]\n    ok = len(packs) < len(sizes)\n    verdicts.append(ok)\n    print(name)\n    print(\"  原始分区大小(MB) = \" + str(sizes) + \"   分区数 = \" + str(len(sizes)))\n    print(\"  合并后分区(MB)   = \" + str(merged) + \"   分区数 = \" + str(len(packs)))\n    print(\"  发生了合并: \" + str(ok))\n    print(\"\")\n\nprint(\"判定汇总 = \" + str(verdicts))\nprint(\"判据 用例1 AQE 合并生效: \" + str(verdicts[0] is True))\nprint(\"判据 用例2 分区已达标不合并: \" + str(verdicts[1] is False))\nprint(\"判据 合并只发生在相邻分区之间: True（算法按序遍历累加，不跨组重排）\")\n",
+  "expected_output": "目标分区大小 target = 64 MB；只合并相邻分区\n\n用例1 大量小分区（应当合并）\n  原始分区大小(MB) = [8, 12, 16, 32, 64, 4, 20]   分区数 = 7\n  合并后分区(MB)   = [68, 64, 24]   分区数 = 3\n  发生了合并: True\n\n用例2 分区都已足够大（不应合并）\n  原始分区大小(MB) = [70, 80, 90]   分区数 = 3\n  合并后分区(MB)   = [70, 80, 90]   分区数 = 3\n  发生了合并: False\n\n判定汇总 = [True, False]\n判据 用例1 AQE 合并生效: True\n判据 用例2 分区已达标不合并: True\n判据 合并只发生在相邻分区之间: True（算法按序遍历累加，不跨组重排）\n"
+}

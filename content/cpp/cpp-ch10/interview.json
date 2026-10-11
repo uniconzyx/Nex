@@ -1,0 +1,33 @@
+{
+  "meta": { "chapter": "cpp-ch10" },
+  "items": [
+    {
+      "question": "shared_ptr 的引用计数存在哪里？为什么会发生循环引用？weak_ptr 是如何打破循环的？",
+      "answer_md": "引用计数不在 `shared_ptr` 对象里，而在一个**独立的控制块（control block）**中，所有指向同一对象的 `shared_ptr`/`weak_ptr` 共享它。控制块里有**强引用计数（strong_count）**和**弱引用计数（weak_count）**，以及类型擦除后的删除器/分配器。\n\n**循环引用**：若 A、B 互相用 `shared_ptr` 持有对方，双方的强计数被彼此钉死在 ≥1，外部最后一个持有者离开后，强计数仍不为 0，析构永不触发 → 泄漏。引用计数（即便是原子的）本身无法识别不可达环。\n\n**weak_ptr 打破**：把环的一侧改为 `weak_ptr`——它指向同一控制块但**只增 weak_count、不增 strong_count**，因此不阻止对象析构。需要访问时先 `lock()` 原子地提升为 `shared_ptr`：对象还活着就拿到共享所有权，已死则得到空 `shared_ptr`。这样强计数能正常归零，析构发生，环被打破。",
+      "follow_ups": ["强引用计数归零和弱引用计数归零分别释放什么？", "为什么 weak_ptr::lock() 是线程安全的？", "追踪式 GC 与引用计数在循环处理上的本质区别？"],
+      "difficulty": "mid",
+      "company_tags": ["通用", "字节", "腾讯"]
+    },
+    {
+      "question": "unique_ptr 和 shared_ptr 在性能与内存上有何本质区别？什么时候该用哪个？",
+      "answer_md": "**unique_ptr**：独占所有权，不可拷贝只可移动。它只包装一个裸指针，默认删除器为空类型、经空基类优化后 `sizeof == sizeof(T*)`，**零额外内存**；删除调用在编译期确定、可被内联，**无堆分配、无原子操作**。适合工厂返回值、唯一拥有者、成员独占资源。\n\n**shared_ptr**：共享所有权。内部持有对象指针 + 控制块指针，控制块需一次**堆分配**（或与对象合并于 make_shared），每次拷贝/析构都要**原子递增/递减**强计数（总线锁指令，有可观测成本）。删除器被**类型擦除**，销毁时有一次间接调用。适合确实需要共享、生命周期跨作用域的场景。\n\n**原则**：能用 unique_ptr 就绝不用 shared_ptr；共享才是 shared_ptr 的正当理由，否则白付原子与分配代价。",
+      "follow_ups": ["为什么 shared_ptr 拷贝是 atomic 的？不共享同一对象时也要 atomic 吗？", "shared_ptr 传值 vs 传 const 引用各有什么代价？", "make_shared 相比 shared_ptr(new T) 少了哪次分配？"],
+      "difficulty": "mid",
+      "company_tags": ["美团", "阿里"]
+    },
+    {
+      "question": "enable_shared_from_this 是做什么的？为什么不能在构造函数里调用 shared_from_this()？",
+      "answer_md": "`std::enable_shared_from_this<T>` 在类 `T` 内嵌一个 `weak_ptr<T>` 成员。当**第一个** `shared_ptr<T>` 接管 `*this` 时，会把这个内嵌 `weak_ptr` 初始化指向自身（同一控制块）。之后在成员函数里调用 `shared_from_this()`，就能把它**安全地提升**为指向自身的 `shared_ptr`，从而拿到共享所有权而不制造第二个控制块（避免双重释放）。\n\n**构造期陷阱**：在构造函数体内，`*this` 还没有被任何 `shared_ptr` 接管，内嵌 `weak_ptr` 仍是空的。此时调用 `shared_from_this()` 标准规定是**未定义行为**（C++17 起实现通常直接抛 `std::bad_weak_ptr`）。原因很简单——构造函数里 `this` 尚不存在控制块，不可能凭空生成共享所有权。正确做法：只在已由 `shared_ptr` 管理的成员函数（如 `init()`、异步回调）中调用。",
+      "follow_ups": ["为什么 shared_ptr(this) 是错的、会双重释放？", "enable_shared_from_this 内嵌的 weak_ptr 何时被赋值？", "构造函数里需要『自引用』该怎么办？"],
+      "difficulty": "hard",
+      "company_tags": ["通用", "华为"]
+    },
+    {
+      "question": "make_shared 有什么优点和隐患？什么时候反而要用 shared_ptr(new T, deleter)？",
+      "answer_md": "**优点**：① 对象与控制块**一次分配**（shared_ptr(new T) 是两次），减少分配次数、提升缓存局部性；② 异常安全——避免 `f(shared_ptr(new T), g())` 因参数求值顺序导致 `new T` 已执行却未交给 shared_ptr 的泄漏。\n\n**隐患（make_shared 的代价）**：对象内存与控制块合并在同一块分配里，控制块的释放条件是 `strong_count==0 && weak_count==0`。只要还有 `weak_ptr` 存活，控制块不释放，**即便对象自身早已析构，整块（含对象内存）也无法回收**——对大对象 + 长寿命 weak_ptr 场景是隐性内存占用。\n\n**改用 shared_ptr(new T, deleter) 的场景**：① 需要对象析构后立刻回收其内存（对象很大、weak_ptr 可能长期存活）；② 构造可能抛异常、需要把对象分配与智能指针接管隔离；③ 需要指定自定义删除器且希望对象单独分配。",
+      "follow_ups": ["make_shared 与单独 new 的异常安全差异具体在哪？", "为什么 weak_ptr 存在会拖住对象内存？", "大对象 + 长寿命观察者该如何选型？"],
+      "difficulty": "hard",
+      "company_tags": ["腾讯", "字节"]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "title": "equals 默认比地址 vs 重写后比内容",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "Box equals: false\nNamed equals: true",
+  "code": "public class E209 {\n    static class Box {\n        int n;\n        Box(int n) { this.n = n; }\n    }\n    static class Named {\n        int n;\n        Named(int n) { this.n = n; }\n        @Override public boolean equals(Object o) {\n            if (this == o) return true;\n            if (!(o instanceof Named)) return false;\n            return n == ((Named) o).n;\n        }\n    }\n    public static void main(String[] args) {\n        Box a = new Box(1), b = new Box(1);\n        System.out.println(\"Box equals: \" + a.equals(b));\n        Named c = new Named(1), d = new Named(1);\n        System.out.println(\"Named equals: \" + c.equals(d));\n    }\n}"
+}

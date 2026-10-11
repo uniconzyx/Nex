@@ -1,0 +1,8 @@
+{
+  "title": "信号默认行为表与递送顺序",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "信号默认行为表（可捕获=可注册 handler 拦截）\n  SIGTERM   默认=Term  可捕获=True\n  SIGKILL   默认=Term  可捕获=False\n  SIGINT    默认=Term  可捕获=True\n  SIGHUP    默认=Term  可捕获=True\n  SIGSTOP   默认=Stop  可捕获=False\n  SIGSEGV   默认=Core  可捕获=True\n\n递送顺序模拟：SIGINT -> SIGTERM -> SIGKILL\n  SIGINT: handler 被调用（优雅处理）\n  SIGTERM: handler 被调用（优雅处理）\n  SIGKILL: 不可捕获，内核直接终止进程（handler 永不执行）\n\n  被捕获并处理的信号：['SIGINT', 'SIGTERM']\n  结论：SIGKILL/SIGSTOP 永远不可捕获，是操作系统最终控制权",
+  "code": "# 模拟信号默认行为表与递送顺序（确定性）\nDEFAULT = {\n    \"SIGTERM\": (\"Term\", True),\n    \"SIGKILL\": (\"Term\", False),\n    \"SIGINT\":  (\"Term\", True),\n    \"SIGHUP\":  (\"Term\", True),\n    \"SIGSTOP\": (\"Stop\", False),\n    \"SIGSEGV\": (\"Core\", True),\n}\nprint(\"信号默认行为表（可捕获=可注册 handler 拦截）\")\nfor sig, (act, catchable) in DEFAULT.items():\n    print(f\"  {sig:9s} 默认={act:5s} 可捕获={catchable}\")\nprint()\n\nhandlers_called = []\ndef handler(sig):\n    handlers_called.append(sig)\n\nprint(\"递送顺序模拟：SIGINT -> SIGTERM -> SIGKILL\")\nfor sig in [\"SIGINT\", \"SIGTERM\", \"SIGKILL\"]:\n    act, catchable = DEFAULT[sig]\n    if catchable:\n        handler(sig)\n        print(f\"  {sig}: handler 被调用（优雅处理）\")\n    else:\n        print(f\"  {sig}: 不可捕获，内核直接终止进程（handler 永不执行）\")\nprint()\nprint(f\"  被捕获并处理的信号：{handlers_called}\")\nprint(\"  结论：SIGKILL/SIGSTOP 永远不可捕获，是操作系统最终控制权\")\n"
+}

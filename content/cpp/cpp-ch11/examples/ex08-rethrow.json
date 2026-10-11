@@ -1,0 +1,8 @@
+{
+  "title": "重抛异常 throw; 保留原始动态类型贯穿多层",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "logged: orig\nfinal: orig",
+  "code": "#include <iostream>\n#include <stdexcept>\n\nvoid handler() {\n    try {\n        throw;                       // 重抛当前异常（保留类型，不切片）\n    } catch (const std::exception& e) {\n        std::cout << \"logged: \" << e.what() << '\\n';\n        throw;                      // 再次重抛给外层\n    }\n}\n\nint main() {\n    try {\n        try {\n            throw std::runtime_error(\"orig\");\n        } catch (const std::exception& e) {\n            handler();\n        }\n    } catch (const std::exception& e) {\n        std::cout << \"final: \" << e.what() << '\\n';\n    }\n}"
+}

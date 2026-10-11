@@ -1,0 +1,8 @@
+{
+  "title": "读取整数并翻倍",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "21",
+  "expected_output": "42",
+  "code": "#include <iostream>\n\nint main() {\n    int n; std::cin >> n;\n    std::cout << n * 2;\n}"
+}

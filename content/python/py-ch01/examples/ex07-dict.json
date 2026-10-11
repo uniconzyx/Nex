@@ -1,0 +1,8 @@
+{
+  "title": "字典 dict",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "{'a': 1, 'b': 2, 'c': 3}\n1",
+  "code": "d = {'a': 1, 'b': 2}\nd['c'] = 3\nprint(d)\nprint(d['a'])"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "sort：默认升序与自定义比较器（降序）",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "1 2 5 5 6 9 \n9 6 5 5 2 1 \n",
+  "code": "#include <iostream>\n#include <vector>\n#include <algorithm>\nint main() {\n    std::vector<int> v = {5, 2, 9, 1, 5, 6};\n    std::sort(v.begin(), v.end());\n    for (int x : v) std::cout << x << ' ';\n    std::cout << '\\n';\n    std::sort(v.begin(), v.end(), std::greater<int>());\n    for (int x : v) std::cout << x << ' ';\n    std::cout << '\\n';\n}\n"
+}

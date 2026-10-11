@@ -1,0 +1,101 @@
+{
+  "meta": {
+    "chapter": "tool-ch06",
+    "title": "Docker Compose 与部署实践 —— 高频追问",
+    "count": 6,
+    "note": "偏深度追问，考察底层机制与工程判断，非背诵型"
+  },
+  "items": [
+    {
+      "question": "`depends_on` 能保证依赖就绪吗？为什么 `condition: service_healthy` 才算数？",
+      "answer_md": "**不能。**\n\n- 短语法 `depends_on: [db]` 等价于 `condition: service_started`，只保证 db 的**容器进程已被创建**（PID 1 已 exec），不保证它能接受连接；\n- 「启动」是一个**事件**，「就绪」是一个**谓词**，两者之间隔着不可静态界定的初始化时间 `T_init`（initdb、跑迁移、预热缓存），可能 0.2 秒也可能 5 分钟；\n- `condition: service_healthy` 把就绪性提升为**可观测谓词**，编排器等到健康检查通过才放行。\n\n**生效前提**：被依赖的服务**必须自己定义了 `healthcheck`**，否则它永远进入不了 healthy 状态。\n\n**仍然不够**：编排层只保证「启动那一刻」就绪。运行期依赖重启、网络抖动仍会发生，所以应用侧必须有**连接重试 + 指数退避 + 抖动**。\n\n**补充**：Kubernetes 干脆没有 `depends_on` 的等价物——它假设依赖随时可能不可用，把就绪性建模成持续观测的 `readinessProbe`，由 Service 动态摘除未就绪的 Pod。",
+      "follow_ups": [
+        "写了 service_healthy 但忘了给 db 配 healthcheck 会怎样？（条件永远无法满足，卡住或失败）",
+        "healthcheck 失败一次就 unhealthy 吗？（不，要连续失败 retries 次，中间成功即清零）",
+        "start_period 是干什么的？（启动宽限期，期间失败不计入重试，救慢启动服务）"
+      ],
+      "difficulty": "easy",
+      "company_tags": [
+        "通用",
+        "字节",
+        "腾讯"
+      ]
+    },
+    {
+      "question": "容器退出码 137 是什么意思？怎么排查和预防？",
+      "answer_md": "**含义**：`137 = 128 + 9`，即进程被 **SIGKILL** 杀死。容器场景下最常见的原因是 **OOMKilled**——内存超过 cgroup 的 `memory.max` 硬上限，触发内核 OOM killer。\n\n**排查顺序**：\n1. `docker inspect <id>` 看 `State.OOMKilled` 字段是否为 true；\n2. `docker stats` 看内存用量曲线（关注 P99 而不是平均值）；\n3. 宿主 `dmesg | grep -i oom-kill` 看内核记录与被杀进程；\n4. 若 `OOMKilled=false` 却退出 137，多半是外部 `kill -9` 或宿主自身 OOM。\n\n**高频根因（不是配置问题，而是应用问题）**：应用没感知 cgroup。JVM 默认按**宿主内存**的 1/4 算最大堆（16 GiB 宿主 → 4 GiB 堆），而容器只有 512 MiB，于是**启动即被杀**。\n\n**预防**：\n- 开启容器感知：JVM `UseContainerSupport` + `MaxRAMPercentage`、Node `--max-old-space-size`、Go `GOMEMLIMIT`；\n- `limit` 要给堆之外的元空间、线程栈、直接内存、page cache 留 25%~50% 余量；\n- 上限值来自**压测峰值 × 安全系数**，不是拍脑袋。\n\n**对比**：CPU 超限是**节流**（变慢，不退出），内存超限是**杀死**（直接 137）。根源是 CPU 是**可压缩资源**、内存是**不可压缩资源**。",
+      "follow_ups": [
+        "CPU 超限会退出吗？（不会，被 CFS 节流，只是变慢）",
+        "为什么内存超限只能杀进程而不能让分配失败？（Linux 默认 overcommit，分配早已成功，物理页在缺页时才分配）",
+        "cgroup v2 相比 v1 有什么改进？（memory.low/high/max 三档 + memory.events 的 oom_kill 计数）"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "阿里",
+        "美团"
+      ]
+    },
+    {
+      "question": "Compose 环境变量的优先级是怎样的？`.env` 和 shell 谁优先？",
+      "answer_md": "按 Docker 官方文档，从高到低五级：\n\n1. **CLI**：`docker compose run -e VAR=v` / `--env`；\n2. **插值**：`environment` 或 `env_file` 的值来自 shell 或环境文件——其中 **shell（宿主 OS 环境）优先于 `.env`**；\n3. **`environment` 属性**的显式值；\n4. **`env_file` 属性**的显式值；\n5. **镜像里的 `ENV` 指令**（仅当上面都没有时才生效）。\n\n**最关键的一句话**：`.env` 与 shell **本身不会直接产生容器内的变量**——它们只是**插值来源**，作用于「解析 YAML 时」；必须配合 `environment` / `env_file` 属性才会真正进入容器（作用于「创建容器时」）。混淆这两个作用域是绝大多数环境变量问题的根源。\n\n**插值语法**（与 shell 参数展开同构）：\n- `${VAR:-default}`：未定义**或为空**取默认；\n- `${VAR-default}`：仅**未定义**取默认（为空时保留空串）；\n- `${VAR:?err}`：未定义或为空则**报错中止**；\n- `${VAR?err}`：仅未定义报错；\n- `$$`：字面量 `$`。\n\n**工程惯例**：镜像标签一律写 `app:${TAG:?必须指定 TAG}`，缺变量时立刻失败，而不是悄悄部署成空标签（等价于 `latest`，最危险）。\n\n排查利器：`docker compose config` 输出插值并合并后的**最终配置**。",
+      "follow_ups": [
+        "`.env` 里配了一堆值，容器里 env 看不到，为什么？（它只是插值来源，没配 environment/env_file）",
+        "`${VAR:-x}` 与 `${VAR-x}` 有什么区别？（空串是否算已定义）",
+        "多个 env_file 时谁优先？（列在后面的优先级更高）"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "字节",
+        "京东"
+      ]
+    },
+    {
+      "question": "生产环境为什么不能用 `latest` 标签？digest 又是什么？",
+      "answer_md": "**`latest` 是浮动指针**。它把「最新」这个**时间相关**的概念编码进了一个**要求确定性**的部署清单里：\n\n- **不可复现**：同一份 compose 文件今天和明天 `up` 出来的可能是两个版本；\n- **不可回滚**：出事后重新拉 `app:latest`，拿到的**还是新版本**，等于没回滚；\n- **不可审计**：看清单无法知道线上跑的究竟是哪个构建产物。\n\n**digest 是内容的密码学哈希**（内容寻址）。`app@sha256:...` 直接标识内容本身，标签只是一个可变的名字 → 内容的间接层。固定到 digest 等价于把部署目标从「名字」降级为「内容」，部署因此变成**幂等且可重放**的操作。\n\n**推荐策略**：\n- CI 构建时打**双标签**：`:<semver>`（人类可读）+ `:<git-sha>`（可溯源）；\n- 部署清单固定到 **digest**（最严格），或至少是不可变的语义化标签；\n- `latest` 只留给本地开发。\n\n**配套**：镜像签名（cosign/Notary）+ SBOM + push 后的漏洞扫描关卡，构成从「我构建了这个」到「我部署的就是那个」的完整信任链。",
+      "follow_ups": [
+        "tag 和 digest 的本质区别？（tag 是可变名字，digest 由内容唯一决定）",
+        "如果一定要用 tag，如何保证可回滚？（约定 tag 不可变，push 前校验 digest 是否已存在）",
+        "Harbor 相比 registry:2 多了什么？（RBAC、漏洞扫描、镜像签名、复制策略、UI）"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "腾讯",
+        "华为"
+      ]
+    },
+    {
+      "question": "容器日志默认存在哪里？为什么必须配轮转？怎么配？",
+      "answer_md": "**存在哪里**：默认驱动 `json-file` 把 stdout/stderr 以 JSON 行写入**宿主的** `/var/lib/docker/containers/<id>/<id>-json.log`——**不是**容器可写层，所以容器删掉之前它一直在涨。\n\n**为什么必须配轮转**：不配置时日志体积 = ∫速率 dt，与容器存活时间**线性**相关；典型表现是宿主 `/var/lib/docker` 悄悄涨到 100%，**所有容器一起挂**。\n\n**怎么配**：\n\n```yaml\nlogging:\n  driver: json-file\n  options:\n    max-size: 10m\n    max-file: \"3\"\n```\n\n单个容器的占用上限 = `max-size × max-file`。或改用 `local` 驱动（自带轮转 + 压缩）。\n\n**救急**：磁盘已满时 `truncate` 那个 json.log（`cat /dev/null > xxx.log`），**不要 `rm`**——写日志的进程仍持有 fd，删除后空间不会释放。\n\n**配套**：轮转的代价是**丢历史**，所以必须配合集中式采集（fluentd/filebeat/promtail → ES/Loki）。这正对应 12-Factor 第 XI 条：**日志是事件流，由平台采集，应用不落盘、不管轮转**。",
+      "follow_ups": [
+        "为什么 rm 掉日志文件磁盘空间没释放？（进程仍持有 fd，文件被删但 inode 未释放）",
+        "json-file 和 local 驱动有什么区别？（json-file 需手动轮转；local 自带轮转且压缩）",
+        "应用自己写文件日志有什么问题？（容器可写层随 rm 丢失、不受驱动管理、无法被采集）"
+      ],
+      "difficulty": "easy",
+      "company_tags": [
+        "通用",
+        "阿里",
+        "字节"
+      ]
+    },
+    {
+      "question": "从 docker compose 迁移到 Kubernetes，概念上怎么对应？最大的认知落差是什么？",
+      "answer_md": "**概念映射**：\n\n| compose | Kubernetes |\n|---|---|\n| service（无状态） | Deployment + Service |\n| service（有状态 + 命名卷） | StatefulSet + headless Service + PVC |\n| depends_on | **无直接等价物**（靠 initContainer / readiness 门控） |\n| healthcheck | livenessProbe + readinessProbe + startupProbe |\n| restart: always | restartPolicy: Always（由控制器**重建** Pod） |\n| 命名卷 | PersistentVolumeClaim |\n| environment（非敏感） | ConfigMap |\n| environment（敏感） | Secret |\n| ports | Service(NodePort/LoadBalancer) + Ingress |\n| mem_limit / cpus | resources.limits / resources.requests |\n\n**最大的认知落差是 `depends_on` 不存在**。K8s 假设依赖的可用性是**动态属性**，提供「启动顺序」只会给出「依赖已就绪」的错误保证，因此它把就绪性建模成**持续观测的端点**，由 Service 动态摘除未就绪的 Pod。\n\n**第二个落差是命令式 vs 声明式调和**：compose 的 `up` 是一次性执行；K8s 的控制器持续比较「期望状态」与「实际状态」并驱动后者趋近前者，因此具备**自愈**能力，代价是状态变更变成**最终一致**（不是瞬时的）。\n\n**迁移建议**：先让应用满足 12-Factor → compose 跑通单机 → `kompose convert` **只当草稿**（它会丢掉 depends_on、缺探针与 requests）→ 人工补齐 readiness/liveness、resources.requests、滚动更新策略 → 再接 CI/CD 与监控。",
+      "follow_ups": [
+        "Pod 和容器是什么关系？（Pod 是调度最小单位，可含多容器，共享网络与 UTS namespace，可用 localhost 互通）",
+        "livenessProbe 和 readinessProbe 的区别？（前者失败重启，后者失败摘流量）",
+        "requests 和 limits 的区别？（requests 是调度依据，limits 是运行时硬上限）"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "通用",
+        "字节",
+        "腾讯",
+        "美团"
+      ]
+    }
+  ]
+}

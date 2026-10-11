@@ -1,0 +1,309 @@
+{
+  "meta": {
+    "chapter": "bd-ch05",
+    "note": "8 题，基础题 6 + 算法题 2（LeetCode 1 + GitHub 实战 1）。覆盖 RDD/DataFrame/Dataset 取舍、Catalyst 四阶段、谓词下推与列裁剪、常量折叠、CBO JOIN 重排、AQE 与倾斜判定、广播 JOIN 触发条件、Tungsten 与全阶段代码生成。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "下列关于 RDD 与 DataFrame 差异的说法，错误的是？",
+      "content_md": "Spark 同时提供 RDD 与 DataFrame 两套 API。关于二者在「结构化信息与优化空间」上的差异，下列说法**错误**的是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "DataFrame 带 schema 与逻辑计划，Spark 因此能做谓词下推与列裁剪"
+        },
+        {
+          "key": "B",
+          "text": "RDD 的 lambda 对 Spark 是不透明黑盒，无法做语义等价的重写"
+        },
+        {
+          "key": "C",
+          "text": "DataFrame 底层不依赖 RDD，是独立实现的一套执行引擎"
+        },
+        {
+          "key": "D",
+          "text": "DataFrame 使用 Tungsten 紧凑二进制表示，减少对象头与装箱开销"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "C"
+        ],
+        "reference_code": ""
+      },
+      "explanation": "DataFrame 是**建立在 RDD 之上**的高层 API，`df.rdd` 可以取到底层 RDD；它并没有另起一套执行引擎，而是在 RDD 之上补了 schema 与逻辑计划两层信息，从而打开优化空间。A、B、D 均为标准表述。",
+      "tags": [
+        "DataFrame",
+        "RDD",
+        "Catalyst"
+      ],
+      "source": "self",
+      "source_ref": "《Spark 快速大数据分析》第 3 章；apache/spark sql/catalyst 模块",
+      "time_limit_ms": 60000,
+      "memory_limit_mb": 256
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "一条 SQL 在 Spark SQL 中的处理顺序是？",
+      "content_md": "Catalyst 优化器把一条 SQL 变成可执行代码要经过若干阶段。正确的顺序是？另外，`AnalysisException: Column 'xxx' cannot be resolved` 来自哪一阶段？",
+      "options": [
+        {
+          "key": "A",
+          "text": "解析 → 分析（绑定元数据）→ 逻辑优化 → 物理计划 → 代码生成；报错来自分析阶段"
+        },
+        {
+          "key": "B",
+          "text": "解析 → 逻辑优化 → 分析 → 物理计划 → 代码生成；报错来自逻辑优化阶段"
+        },
+        {
+          "key": "C",
+          "text": "解析 → 物理计划 → 逻辑优化 → 代码生成；报错来自物理计划阶段"
+        },
+        {
+          "key": "D",
+          "text": "分析 → 解析 → 逻辑优化 → 物理计划 → 代码生成；报错来自解析阶段"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "A"
+        ],
+        "reference_code": ""
+      },
+      "explanation": "顺序是：① 解析（ANTLR 生成未解析 AST）→ ② 分析（查 Catalog / Hive Metastore 绑定列名与类型，列不存在或类型不匹配就在这一步抛 `AnalysisException`）→ ③ 逻辑优化（规则批重写到不动点）→ ④ 物理计划（按代价选算子）→ ⑤ 代码生成。解析阶段只看语法，看不到列名是否存在。",
+      "tags": [
+        "Catalyst",
+        "AnalysisException",
+        "执行流程"
+      ],
+      "source": "self",
+      "source_ref": "《Spark SQL 内核剖析》第 2 章",
+      "time_limit_ms": 60000,
+      "memory_limit_mb": 256
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "下列哪种情况谓词下推不会生效？",
+      "content_md": "谓词下推（Predicate Pushdown）是 Catalyst 最重要的优化之一，但有明确的失效条件。下列哪种情况**不会**下推？",
+      "options": [
+        {
+          "key": "A",
+          "text": "谓词引用的列不在下方算子的输出列中"
+        },
+        {
+          "key": "B",
+          "text": "谓词是确定性表达式，且引用列可由下方算子提供"
+        },
+        {
+          "key": "C",
+          "text": "谓词作用在分区列上，且为「分区列 = 常量」的直接比较"
+        },
+        {
+          "key": "D",
+          "text": "谓词只引用左表的列，而它被写在 JOIN 之后"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "A"
+        ],
+        "reference_code": ""
+      },
+      "explanation": "两条硬约束：① 谓词必须**确定性**（含 `rand()`、`current_timestamp()` 的不下推，因为下推会改变每行求值次数）；② 谓词引用的列必须在下方算子输出列内——若 `Project` 已经把该列投影掉，就推不下去。B/C/D 都是可以下推的典型场景（C 还能进一步触发分区裁剪）。",
+      "tags": [
+        "谓词下推",
+        "确定性",
+        "分区裁剪"
+      ],
+      "source": "self",
+      "source_ref": "apache/spark sql/catalyst/optimizer/PushDownPredicates.scala",
+      "time_limit_ms": 60000,
+      "memory_limit_mb": 256
+    },
+    {
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "实现列裁剪：给定计划需求，计算各 Scan 实际读取的列",
+      "content_md": "已知查询：`SELECT u.city, sum(o.amount) FROM orders o JOIN users u ON o.uid = u.uid GROUP BY u.city`。\n\n表结构：`orders(id, uid, dept, amount, ts)`、`users(uid, city, age)`。\n\n请实现**自顶向下的列裁剪**：从根节点（聚合）真正需要的列出发，把需求逐层下推到 `Scan`，并输出每个 `Scan` 裁剪后实际读取的列与列数。要求输出中体现 orders 的扫描列由 5 列降为 2 列。",
+      "options": [],
+      "answer": {
+        "correct": [],
+        "output": "orders 裁剪前 5 列 -> 裁剪后 2 列: ['uid', 'amount']\nusers 裁剪前 3 列 -> 裁剪后 2 列: ['uid', 'city']\n判据 列数下降: True",
+        "reference_code": "def column_pruning():\n    orders_cols = [\"id\", \"uid\", \"dept\", \"amount\", \"ts\"]\n    users_cols = [\"uid\", \"city\", \"age\"]\n    agg_group = [\"city\"]\n    agg_funcs = [\"amount\"]\n    join_key = \"uid\"\n\n    # 根节点（聚合）真正需要的列\n    need = set(agg_group) | set(agg_funcs)\n    # JOIN 的两侧还各自需要连接键\n    keep_o = [c for c in orders_cols if c in (need | {join_key})]\n    keep_u = [c for c in users_cols if c in (need | {join_key})]\n    return orders_cols, keep_o, users_cols, keep_u\n\n\no_before, o_after, u_before, u_after = column_pruning()\nprint(\"orders 裁剪前\", len(o_before), \"列 -> 裁剪后\", len(o_after), \"列:\", o_after)\nprint(\"users 裁剪前\", len(u_before), \"列 -> 裁剪后\", len(u_after), \"列:\", u_after)\nprint(\"判据 列数下降:\", len(o_after) < len(o_before))"
+      },
+      "explanation": "列裁剪的核心是「需求自顶向下传播」：聚合只需要 `city` 与 `amount`，JOIN 额外需要 `uid`。于是 orders 只需 `uid, amount`（2 列，省掉 `id, dept, ts`），users 只需 `uid, city`（2 列，省掉 `age`）。注意 `SELECT *` 会让需求集等于全属性集，裁剪立即失效。",
+      "tags": [
+        "列裁剪",
+        "ColumnPruning",
+        "Catalyst"
+      ],
+      "source": "self",
+      "source_ref": "apache/spark sql/catalyst/optimizer/ColumnPruning.scala",
+      "time_limit_ms": 60000,
+      "memory_limit_mb": 256,
+      "test_cases": [
+        {
+          "input": "orders(id,uid,dept,amount,ts) JOIN users(uid,city,age) GROUP BY city, sum(amount)",
+          "expected_output": "orders 裁剪前 5 列 -> 裁剪后 2 列: ['uid', 'amount']\nusers 裁剪前 3 列 -> 裁剪后 2 列: ['uid', 'city']\n判据 列数下降: True",
+          "is_sample": true
+        }
+      ]
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "关于广播 JOIN 触发条件的正确表述是？",
+      "content_md": "广播 JOIN（BroadcastHashJoin）能消掉一次 Shuffle，但它有明确的触发条件与陷阱。下列表述正确的是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "只要小表的磁盘文件大小小于 10MB 就一定广播"
+        },
+        {
+          "key": "B",
+          "text": "必须是等值连接，且优化后计划的 sizeInBytes 不超过阈值，且统计信息存在"
+        },
+        {
+          "key": "C",
+          "text": "非等值连接同样可以走 BroadcastHashJoin"
+        },
+        {
+          "key": "D",
+          "text": "把 spark.sql.autoBroadcastJoinThreshold 调成 -1 会强制广播所有 JOIN"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "reference_code": ""
+      },
+      "explanation": "触发广播的三个前置条件：① **等值**连接（非等值只能走 BroadcastNestedLoopJoin，代价 O(n×m)）；② 小表**优化后计划的 `sizeInBytes`** ≤ `spark.sql.autoBroadcastJoinThreshold`（默认 10MB）；③ 该统计**存在**——表没做过 `ANALYZE TABLE` 时 sizeInBytes 为缺省值，就不广播。A 错在 Spark 看的是逻辑计划的统计大小而非磁盘文件大小；D 错在 -1 是**关闭**广播。",
+      "tags": [
+        "广播JOIN",
+        "autoBroadcastJoinThreshold",
+        "CBO"
+      ],
+      "source": "self",
+      "source_ref": "《Spark SQL 内核剖析》第 6 章；apache/spark JoinSelection.scala",
+      "time_limit_ms": 60000,
+      "memory_limit_mb": 256
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "关于 AQE 与倾斜判定，下列说法正确的是？",
+      "content_md": "Spark 3.2 起 AQE（Adaptive Query Execution）默认开启。关于它的三大能力与倾斜判定口径，下列说法正确的是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "AQE 在编译期根据统计信息合并分区，与运行时数据无关"
+        },
+        {
+          "key": "B",
+          "text": "倾斜分区的判定口径是「分区大小 > 5 × 中位数 且 > 256MB」"
+        },
+        {
+          "key": "C",
+          "text": "AQE 处理倾斜的手段是把倾斜分区整体丢弃以保证作业完成"
+        },
+        {
+          "key": "D",
+          "text": "AQE 默认关闭，必须手动设置 spark.sql.adaptive.enabled=true"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "reference_code": ""
+      },
+      "explanation": "AQE 的三大能力是：动态合并 Shuffle 小分区、动态把 SortMergeJoin 切换为 BroadcastHashJoin、动态拆分倾斜分区。倾斜判定口径正是「分区大小 > `skewedPartitionFactor`(默认 5) × 中位数 **且** > `skewedPartitionThresholdInBytes`(默认 256MB)」。A 错（AQE 用的是**运行时**真实统计）；C 错（是拆分并复制另一侧，不是丢弃，丢弃会丢数据）；D 错（3.2+ 默认开启）。",
+      "tags": [
+        "AQE",
+        "数据倾斜",
+        "自适应执行"
+      ],
+      "source": "book",
+      "source_ref": "《Spark SQL 内核剖析》第 9 章；Spark 官方 SQL Performance Tuning 文档",
+      "time_limit_ms": 60000,
+      "memory_limit_mb": 256
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "LeetCode 184：用「先聚合后连接」改写部门最高工资查询（SQL 优化视角）",
+      "content_md": "本题取自 LeetCode 数据库题库（题目正文请点击链接查看，此处只存元数据与链接）。\n\n**练习要求（优化视角）**：在求「每个部门工资最高的员工」这类查询时，对比两种写法的执行计划：\n\n1. 先 `JOIN` 两张表再 `WHERE salary = (SELECT max(...) ...)`；\n2. **先按部门聚合出 max(salary)，再与原表做等值 JOIN**。\n\n请用 `EXPLAIN` 观察两版计划中 `Exchange` 的个数与 `Join` 的类型差异，并说明为什么第 2 种写法通常更优（提示：聚合把数据量压到「部门数」级别后再连接）。\n\n请用 SQL 或 Python 伪代码写出第 2 种写法，并说明它在 Catalyst 下能吃到哪两条优化规则。",
+      "options": [],
+      "answer": {
+        "correct": [],
+        "output": "",
+        "reference_code": "-- 先聚合出每个部门的最高工资，再与原表等值 JOIN\nWITH dept_max AS (\n  SELECT departmentId, MAX(salary) AS max_salary\n  FROM Employee\n  GROUP BY departmentId\n)\nSELECT d.name AS Department, e.name AS Employee, e.salary AS Salary\nFROM dept_max m\nJOIN Employee e\n  ON e.departmentId = m.departmentId AND e.salary = m.max_salary\nJOIN Department d\n  ON d.id = m.departmentId;"
+      },
+      "explanation": "第 2 种写法的收益来自两点：① **聚合前置**——`GROUP BY departmentId` 把参与 JOIN 的数据量从「员工数」压到「部门数」，Shuffle 量与 JOIN 输入都大幅下降；② **维度表广播**——`Department` 是小表，`sizeInBytes` 低于阈值时 Catalyst 会选 `BroadcastHashJoin`，直接消掉一次 `Exchange`。用 `EXPLAIN` 对比可见第 1 种写法通常多出一个 `Exchange` 且 JOIN 两侧都是大表。",
+      "tags": [
+        "SQL优化",
+        "聚合前置",
+        "广播JOIN",
+        "LeetCode"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 184（department-highest-salary）",
+      "external_url": "https://leetcode.cn/problems/department-highest-salary/",
+      "time_limit_ms": 60000,
+      "memory_limit_mb": 256,
+      "test_cases": []
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "github",
+      "difficulty": "hard",
+      "title": "实现一个迷你 Catalyst：谓词下推 + 列裁剪两条规则",
+      "content_md": "参考 apache/spark 的 `sql/catalyst/optimizer` 模块，用 Python 实现一个**迷你 Catalyst 规则引擎**。\n\n给定逻辑计划（Python 字典树）：\n\n```text\nAggregate(group=[city], funcs=[amount])\n  Filter(pred=\"city='bj'\", refs=[city], det=True)\n    Join(key=uid)\n      Project([uid, amount]) -> Scan orders [id, uid, dept, amount, ts] rows=1000000\n      Project([uid, city])  -> Scan users  [uid, city, age]        rows=100000\n```\n\n要求实现两条规则并输出优化前后的对比：\n\n1. **谓词下推**：`Filter` 的 `refs` 只能由 users 侧提供，把它推到 users 的 `Project` 之下；\n2. **列裁剪**：需求自顶向下传播，`Filter` 引用列要计入子节点的 need，`Join` 的连接键要计入两侧 need。\n\n输出要求：orders 扫描列由 5 降为 2、users 扫描列由 3 降为 2，且用布尔判据证明两条规则都生效。",
+      "options": [],
+      "answer": {
+        "correct": [],
+        "output": "orders: 5 列 -> 2 列 ['uid', 'amount']\nusers: 3 列 -> 2 列 ['uid', 'city']\n谓词已下推到 users 侧: True\n列裁剪生效: True",
+        "reference_code": "def cols_out(n):\n    if n[\"op\"] in (\"Scan\", \"Project\"):\n        return set(n[\"cols\"])\n    s = set()\n    for c in n.get(\"children\", []):\n        s |= cols_out(c)\n    return s\n\n\ndef push_down(n):\n    kids = [push_down(c) for c in n.get(\"children\", [])]\n    m = dict(n)\n    m[\"children\"] = kids\n    if m[\"op\"] == \"Filter\" and kids and kids[0][\"op\"] == \"Join\":\n        j = kids[0]\n        for i, side in enumerate(j[\"children\"]):\n            if set(m[\"refs\"]) <= cols_out(side):\n                inner = dict(m)\n                inner[\"children\"] = [side]\n                nj = dict(j)\n                nj[\"children\"] = list(j[\"children\"])\n                nj[\"children\"][i] = inner\n                return nj\n    return m\n\n\ndef prune(n, need):\n    m = dict(n)\n    if n[\"op\"] == \"Scan\":\n        m[\"cols\"] = [c for c in n[\"cols\"] if c in need]\n        return m\n    if n[\"op\"] == \"Project\":\n        keep = [c for c in n[\"cols\"] if c in need]\n        m[\"cols\"] = keep\n        m[\"children\"] = [prune(n.get(\"children\", [])[0], set(keep))]\n        return m\n    if n[\"op\"] == \"Filter\":\n        m[\"children\"] = [prune(n.get(\"children\", [])[0], need | set(n[\"refs\"]))]\n        return m\n    if n[\"op\"] == \"Join\":\n        both = need | {n[\"key\"]}\n        m[\"children\"] = [prune(n.get(\"children\", [])[0], both), prune(n.get(\"children\", [])[1], both)]\n        return m\n    if n[\"op\"] == \"Aggregate\":\n        m[\"children\"] = [prune(n.get(\"children\", [])[0], set(n[\"group\"]) | set(n[\"funcs\"]))]\n        return m\n    m[\"children\"] = [prune(c, need) for c in n.get(\"children\", [])]\n    return m\n\n\ndef scans(n, acc=None):\n    if acc is None:\n        acc = []\n    if n[\"op\"] == \"Scan\":\n        acc.append(n)\n    for c in n.get(\"children\", []):\n        scans(c, acc)\n    return acc\n\n\nPLAN = {\n    \"op\": \"Aggregate\", \"group\": [\"city\"], \"funcs\": [\"amount\"],\n    \"children\": [{\n        \"op\": \"Filter\", \"pred\": \"city='bj'\", \"refs\": [\"city\"], \"det\": True,\n        \"children\": [{\n            \"op\": \"Join\", \"key\": \"uid\",\n            \"children\": [\n                {\"op\": \"Project\", \"cols\": [\"uid\", \"amount\"], \"children\": [\n                    {\"op\": \"Scan\", \"name\": \"orders\",\n                     \"cols\": [\"id\", \"uid\", \"dept\", \"amount\", \"ts\"], \"rows\": 1000000}]},\n                {\"op\": \"Project\", \"cols\": [\"uid\", \"city\"], \"children\": [\n                    {\"op\": \"Scan\", \"name\": \"users\",\n                     \"cols\": [\"uid\", \"city\", \"age\"], \"rows\": 100000}]},\n            ]}]}]}\n\nbefore = {s[\"name\"]: len(s[\"cols\"]) for s in scans(PLAN)}\npushed = push_down(PLAN)\noptimized = prune(pushed, {\"city\", \"amount\"})\nafter = {s[\"name\"]: s[\"cols\"] for s in scans(optimized)}\n\nprint(\"orders:\", before[\"orders\"], \"列 ->\", len(after[\"orders\"]), \"列\", after[\"orders\"])\nprint(\"users:\", before[\"users\"], \"列 ->\", len(after[\"users\"]), \"列\", after[\"users\"])\nprint(\"谓词已下推到 users 侧:\", pushed[\"children\"][0][\"children\"][1][\"op\"] == \"Filter\")\nprint(\"列裁剪生效:\", len(after[\"orders\"]) < before[\"orders\"] and len(after[\"users\"]) < before[\"users\"])"
+      },
+      "explanation": "两条规则的要点：① **谓词下推**只能推到 `refs` ⊆ 该侧 `cols_out` 的分支——本例只有 users 侧含 `city`，所以推到 users；如果谓词非确定（`det=False`）则一律不推。② **列裁剪**是自顶向下求属性交集，`Filter` 的引用列必须计入子节点 need（否则会把过滤列裁掉），`Join` 的连接键也要计入两侧 need。真实 Spark 中这两条规则都在 `Optimizer` 的 `Operator Optimization` 规则批里跑到不动点。",
+      "tags": [
+        "Catalyst",
+        "谓词下推",
+        "列裁剪",
+        "规则引擎"
+      ],
+      "source": "github",
+      "source_ref": "apache/spark — sql/catalyst/optimizer（PushDownPredicates / ColumnPruning）",
+      "external_url": "https://github.com/apache/spark/tree/master/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/optimizer",
+      "time_limit_ms": 120000,
+      "memory_limit_mb": 256,
+      "test_cases": [
+        {
+          "input": "Aggregate(city, amount) <- Filter(city='bj') <- Join(uid) <- [orders(5列), users(3列)]",
+          "expected_output": "orders: 5 列 -> 2 列 ['uid', 'amount']\nusers: 3 列 -> 2 列 ['uid', 'city']\n谓词已下推到 users 侧: True\n列裁剪生效: True",
+          "is_sample": true
+        }
+      ]
+    }
+  ]
+}

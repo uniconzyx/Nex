@@ -1,0 +1,222 @@
+{
+  "meta": {
+    "chapter": "db-ch07",
+    "note": "8 题：基础题覆盖备份路线取舍、binlog 格式与 PITR、备份链复原、注入修复、触发器审计、备份策略计算；算法题为自研「最小权限判定器」与 LeetCode SQL 真题（事件日志聚合），平台题仅存元数据与链接，不搬运题面正文。"
+  },
+  "items": [
+    {
+      "id": "db-ch07-ex01",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "《高性能 MySQL》第 10 章（备份与恢复），对应 concept/01 第一节",
+      "difficulty": "basic",
+      "title": "关于逻辑备份与物理备份的取舍，下列说法正确的是",
+      "content_md": "某业务库 800 GB，全部使用 InnoDB；业务要求 RTO 不超过 2 小时，并且偶发需要「只恢复其中一张表」。\n\n下面哪一项描述最准确？",
+      "options": [
+        {
+          "key": "A",
+          "text": "物理备份体积小、可跨版本恢复，因此应当只做物理备份"
+        },
+        {
+          "key": "B",
+          "text": "逻辑备份便于单表恢复与跨版本迁移，但大库恢复慢；RTO 紧张时应以物理备份为主，同时保留逻辑备份或 binlog 承担单表恢复与 PITR"
+        },
+        {
+          "key": "C",
+          "text": "只要备份命令退出码为 0，就说明备份可用于恢复，无需还原演练"
+        },
+        {
+          "key": "D",
+          "text": "物理备份必须停库（冷备），无法在线执行"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "A 错：物理备份是页/文件级二进制副本，体积大、与版本强相关，跨版本恢复能力差。C 错：退出码 0 只说明命令跑完，是否可恢复必须靠校验（表名集合/行数/校验和）与真实还原演练来证明。D 错：XtraBackup 属于热备路线，通过拷贝期间记录 LSN、拷完用 redo 前滚收敛到一致状态，不需要停库。B 描述了正确的工程取舍：大库 + 紧 RTO 以物理备份为主，逻辑备份/binlog 用于单表恢复与 PITR。",
+      "tags": [
+        "backup",
+        "logical-vs-physical",
+        "rto"
+      ]
+    },
+    {
+      "id": "db-ch07-ex02",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "《高性能 MySQL》第 10 章（二进制日志），对应 concept/02 第一节",
+      "difficulty": "mid",
+      "title": "用于时间点恢复（PITR）的 binlog，格式与配置应如何选择",
+      "content_md": "团队需要把 binlog 用于两件事：① 从库复制；② 误删之后把主库恢复到误操作前一秒。\n\n关于 `binlog_format` 与相关配置，下列说法正确的是",
+      "options": [
+        {
+          "key": "A",
+          "text": "用 STATEMENT 最省空间，且重放结果与原始执行结果一定相同，适合 PITR"
+        },
+        {
+          "key": "B",
+          "text": "用 ROW，重放结果确定、可精确到行；同时应显式配置 binlog_expire_logs_seconds（决定能回退多远）与 sync_binlog（决定故障时是否丢事件）"
+        },
+        {
+          "key": "C",
+          "text": "用 MIXED 可以在 STATEMENT 与 ROW 之间按表切换，从而同时获得两者的优点"
+        },
+        {
+          "key": "D",
+          "text": "格式无所谓，只要定期做全量备份就能恢复到任意时间点"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "A 错：STATEMENT 记录语句原文，遇到 NOW()、UUID()、RAND()、无 ORDER BY 的 LIMIT 等非确定性语句时，重放结果可能不同，会造成静默不一致。B 正确：ROW 记录行镜像，重放确定；同时日志保留期决定 PITR 的可回退范围，sync_binlog=1 才能在故障时不丢事件（对应 RPO=0 的诉求）。C 错：MIXED 是「按语句」而非按表切换，且仍需同时理解两种语义。D 错：只有全量备份无法恢复到任意时间点，必须依靠日志区间重放。",
+      "tags": [
+        "binlog",
+        "row-format",
+        "pitr"
+      ]
+    },
+    {
+      "id": "db-ch07-ex03",
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "对应 examples/ex05（全量 + 增量备份链复原）",
+      "difficulty": "mid",
+      "title": "写出备份链复原后的表状态与一致性判据",
+      "content_md": "某库做「全量 + 增量」备份链：\n\n```\n全量备份(T0)  : accounts = [(1,alice,1000), (2,bob,500)]\n增量1(2 条操作): INSERT (3,carol,200) ; UPDATE id=1 balance=800\n增量2(2 条操作): INSERT (4,dave,300)  ; DELETE id=2\n```\n\n线上库当前（已应用全链）状态为 `[(1,alice,800), (3,carol,200), (4,dave,300)]`。\n\n请写出：① 应用「全链」后的表状态；② 只恢复到「增量1」的表状态；③ 后者与线上库不一致时的缺失行 id。",
+      "answer": {
+        "output": "① 全链复原 = [(1,'alice',800), (3,'carol',200), (4,'dave',300)]，与线上库一致 = True\n② 只到增量1 = [(1,'alice',800), (2,'bob',500), (3,'carol',200)]，与线上库一致 = False\n③ 缺失行 id = [4]（同时多出已删除的 id=2）",
+        "reference_text": "复原 = 全量基线 + 按序应用增量链。只到增量1 时，增量2 的两条操作（新增 dave、删除 bob）都未应用，因此既缺 id=4、又多了已被删除的 id=2。判据用确定性量：行 id 集合 + 按主键有序拼接后的内容校验和。"
+      },
+      "explanation": "增量链是**有方向的折叠**：漏掉任意一环，恢复出来的就是「另一个时间点」的库，而不是「大致正确的库」。因此备份链的每一环都必须可校验（校验和 + 行数），并且定期做完整链的还原演练；链上任意一环损坏，其后所有状态都不可达。",
+      "tags": [
+        "backup-chain",
+        "incremental",
+        "restore-verify"
+      ]
+    },
+    {
+      "id": "db-ch07-ex04",
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "对应 concept/04 第一节与 examples/ex06（注入正反用例）",
+      "difficulty": "mid",
+      "title": "修复存在 SQL 注入的登录查询",
+      "content_md": "下面的登录查询把外部输入直接拼进 SQL：\n\n```python\ndef login(con, uname, pwd):\n    sql = \"SELECT id, role FROM users WHERE uname = '%s' AND pwd = '%s'\" % (uname, pwd)\n    return con.execute(sql).fetchall()\n```\n\n攻击者传入 `uname='x'`、`pwd=\"' OR '1'='1' --\"` 时，会返回全部用户（实测返回 3 行，包含 admin）。\n\n请修复该函数，并给出「动态排序字段」的正确处理方式。",
+      "answer": {
+        "reference_code": "ALLOWED_SORT = {\"id\": \"id\", \"name\": \"uname\"}\n\n\ndef login(con, uname, pwd):\n    # 结构写死, 参数只作为值参与绑定\n    return con.execute(\n        \"SELECT id, role FROM users WHERE uname = ? AND pwd = ?\",\n        (uname, pwd),\n    ).fetchall()\n\n\ndef list_users(con, sort_key):\n    # 标识符位置不能用占位符, 必须白名单映射\n    col = ALLOWED_SORT.get(sort_key, \"id\")\n    return con.execute(\"SELECT id, uname FROM users ORDER BY \" + col).fetchall()",
+        "output": "修复后传入同样的载荷：返回行数 = 0，越权读到全部用户 = False；users 表仍完好（行数 = 3）。"
+      },
+      "explanation": "参数化绑定把「SQL 结构」与「数据值」在协议层面分离：语句模板先被解析定型，参数在绑定阶段只作为值传入，因此引号与注释符不再具备语法意义，载荷只能被当成一个普通字符串去比较（返回 0 行）。但要注意参数化只覆盖「值」的位置：`ORDER BY ?`、表名、列名等**标识符位置**必须用白名单映射，否则要么报错，要么被逼回拼接从而重新引入注入。此外应配合最小权限（该账号不应有 DDL 权限）作为第三道防线，并在错误页不回显 SQL。",
+      "tags": [
+        "sql-injection",
+        "parameterized-query",
+        "whitelist"
+      ]
+    },
+    {
+      "id": "db-ch07-ex05",
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "对应 concept/04 第三节与 examples/ex11（审计触发器）",
+      "difficulty": "mid",
+      "title": "为核心表实现触发器审计日志",
+      "content_md": "为 `account(id, owner, balance)` 建立审计：任何 INSERT/UPDATE/DELETE 都要写入`audit_log(ts, actor, tbl, row_id, op, old_value, new_value)`。\n\n要求：\n1. 用 `AFTER INSERT/UPDATE/DELETE` 三个触发器实现，记录前后值；\n2. 触发器需要拿到「操作人」，而数据库触发器无法直接获取应用登录用户 —— 请设计一个上下文机制解决；\n3. 说明如何保证审计表**不可被业务账号篡改**。\n\n请给出实现，并说明 4 次业务写操作后 `audit_log` 应有几条记录。",
+      "answer": {
+        "reference_code": "-- 上下文: 应用在每次写业务表前先设置当前操作人\nCREATE TABLE session(user TEXT NOT NULL);\nINSERT INTO session(user) VALUES ('system');\n\nCREATE TRIGGER trg_account_au AFTER UPDATE ON account BEGIN\n  INSERT INTO audit_log(ts, actor, tbl, row_id, op, old_value, new_value)\n  VALUES ((SELECT now FROM clock), (SELECT user FROM session), 'account',\n          OLD.id, 'UPDATE',\n          OLD.owner || ':' || OLD.balance,\n          NEW.owner || ':' || NEW.balance);\nEND;",
+        "output": "audit_log 记录数 = 4（= 业务写操作次数），可追溯到 21:42 由 ops 执行的删除"
+      },
+      "explanation": "触发器运行在数据库内部，看不到应用层的登录身份，因此需要一个「会话上下文」把操作人带进来：可以用一张单行 `session` 表（应用每次写前更新），也可以用用户变量 `SET @actor = ...` 再在触发器里读 `@actor`。审计表不可篡改靠**权限隔离**：业务账号只被授予审计表的 INSERT，不给 UPDATE/DELETE；更严格的做法是把审计表放到独立库或独立实例，并对审计日志做外部归档/哈希链锚定。另需注意：触发器与业务写在同一事务中，因此业务回滚时审计也会回滚（好处是不会记录未生效的变更，代价是审计写失败会连带业务写失败）。教学与测试场景还应把「时间来源」做成可注入的逻辑时钟，以避免 `NOW()` 导致结果不可复现。",
+      "tags": [
+        "audit-log",
+        "trigger",
+        "separation-of-duties"
+      ]
+    },
+    {
+      "id": "db-ch07-ex06",
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "对应 concept/01 第二节与 examples/ex12（备份策略计算器）",
+      "difficulty": "mid",
+      "title": "由 RPO/RTO 反推备份频率与存储需求",
+      "content_md": "给定：\n\n```\nRPO = 15 分钟        RTO = 120 分钟\n保留期 = 14 天        最长增量链 = 8 份\n单份全量 = 200 GB     单份增量 = 5 GB\n还原一份全量 = 60 分钟  重放一份增量 = 4 分钟\n```\n\n请算出：① 每天增量备份次数；② 每天全量备份次数；③ 保留期内全量与增量的份数；④ 保留期存储需求；⑤ 最坏恢复耗时，并判断 RPO 与 RTO 是否满足。",
+      "answer": {
+        "output": "① 每天增量次数 = 1440 // 15 = 96\n② 每天全量次数 = 96 // 8 = 12\n③ 保留期内: 全量 = 12 * 14 = 168 份, 增量 = 96 * 14 = 1344 份\n④ 存储需求 = 168*200 + 1344*5 = 33600 + 6720 = 40320 GB\n⑤ 最坏恢复耗时 = 60 + 8*4 = 92 分钟\nRPO 满足 = True（增量间隔 15 分钟 = RPO）\nRTO 满足 = True（92 分钟 <= 120 分钟）"
+      },
+      "explanation": "推导链是固定的：**增量间隔 ≤ RPO**（保证最多丢一个增量窗口的数据），**全量间隔 = 最长可接受恢复链长度**（链越长 RTO 越大、坏了就越难复原，所以要周期性重置基线）。存储需求 = 保留期内的全量份数 × 全量体积 + 增量份数 × 增量体积。最坏恢复耗时 = 还原最近一份全量 + 重放整条链上的全部增量。注意 RPO 与 RTO 是两个不同维度的约束：RPO 约束数据丢失量，RTO 约束恢复时间，必须分别验证，不能用一个代替另一个。",
+      "tags": [
+        "rpo",
+        "rto",
+        "backup-strategy"
+      ]
+    },
+    {
+      "id": "db-ch07-ex07",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "自研算法题，对应 examples/ex07（最小权限判定器）",
+      "difficulty": "hard",
+      "title": "实现最小权限判定器（主机通配 + 表级通配 + 默认拒绝）",
+      "content_md": "给定授权表，每条为 `(用户, 主机, 动作, 库, 表, grant_option)`；其中主机与表字段支持 `%` 通配符（`%` 匹配任意长度字符），表字段取值 `*` 表示该库的全部表；动作字段取值 `ALL` 表示覆盖任意动作。\n\n授权表内容：\n\n```\n('app',      '10.0.0.5', 'SELECT', 'shop', 'orders',     0)\n('app',      '10.0.0.5', 'SELECT', 'shop', 'order_item', 0)\n('report',   '%',        'SELECT', 'shop', '*',          0)\n('ops',      '10.0.0.%', 'ALL',    'shop', '*',          1)\n('readonly', '10.0.0.7', 'SELECT', 'shop', '*',          0)\n```\n\n（第 6 列是 `grant_option`，本题不参与判定，仅用于说明授权表结构。）\n\n请实现 `decide(user, host, action, db, table) -> 是否允许`，并对下列 9 个请求给出判定：\n\n```\napp      10.0.0.5   SELECT  shop  orders\napp      10.0.0.5   DELETE  shop  orders\napp      10.0.0.5   SELECT  shop  customers\napp      10.0.0.9   SELECT  shop  orders\nreport   192.168.1.20 SELECT shop  orders\nreport   192.168.1.20 SELECT crm   customers\nops      10.0.0.42  DELETE  shop  orders\nops      10.0.1.9   DELETE  shop  orders\nreadonly 10.0.0.7   UPDATE  shop  orders\n```",
+      "answer": {
+        "reference_code": "import re\n\nGRANTS = [\n    (\"app\", \"10.0.0.5\", \"SELECT\", \"shop\", \"orders\", 0),\n    (\"app\", \"10.0.0.5\", \"SELECT\", \"shop\", \"order_item\", 0),\n    (\"report\", \"%\", \"SELECT\", \"shop\", \"*\", 0),\n    (\"ops\", \"10.0.0.%\", \"ALL\", \"shop\", \"*\", 1),\n    (\"readonly\", \"10.0.0.7\", \"SELECT\", \"shop\", \"*\", 0),\n]\n\n\ndef _pat(v):\n    return re.compile(\"^\" + re.escape(v).replace(\"%\", \".*\") + \"$\")\n\n\ndef decide(user, host, action, db, table):\n    for u, h, a, d, t, _ in GRANTS:\n        if u != user or d != db:\n            continue\n        if not _pat(h).match(host):\n            continue\n        if not (t == \"*\" or _pat(t).match(table)):\n            continue\n        if not (a == \"ALL\" or a == action):\n            continue\n        return True\n    return False    # 默认拒绝\n",
+        "output": "ALLOW, DENY, DENY, DENY, ALLOW, DENY, ALLOW, DENY, DENY\n统计: 允许 3 条 / 拒绝 6 条"
+      },
+      "explanation": "判定器是「五元组逐字段匹配 + 默认拒绝」的算法：用户与库要求精确相等；主机与表做 `%` 通配匹配（`*` 等价于该库的全部表）；动作要求精确相等或授权为 `ALL`。逐条推导：`app@10.0.0.5 SELECT shop.orders` 命中表级授权 → ALLOW；`app DELETE shop.orders` 无 DELETE 授权 → DENY；`app SELECT shop.customers` 无任何覆盖 customers 的授权 → DENY（表级授权**不会升格**成库级授权）；`app@10.0.0.9` 与授权主机不匹配 → DENY；`report` 的主机是 `%` 且表是 `*`，故任意主机读 shop 任意表 → ALLOW；但库为 `crm` 不匹配 → DENY；`ops@10.0.0.42` 命中 `10.0.0.%` 且动作 ALL → ALLOW；`ops@10.0.1.9` 网段不匹配 → DENY；`readonly` 只有 SELECT，请求 UPDATE → DENY。关键设计点：**默认拒绝**（未命中即拒绝）与**主机参与匹配**，这两条正是最小权限在算法层的体现。",
+      "tags": [
+        "least-privilege",
+        "wildcard-match",
+        "default-deny",
+        "authorization"
+      ]
+    },
+    {
+      "id": "db-ch07-ex08",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "source": "leetcode",
+      "source_ref": "LeetCode 1741（find-total-time-spent-by-each-employee）",
+      "external_url": "https://leetcode.cn/problems/find-total-time-spent-by-each-employee/",
+      "difficulty": "easy",
+      "title": "LeetCode 1741 · 每名员工花费的总时间（事件日志聚合）",
+      "content_md": "给定一张记录员工「进入/离开」事件的事件表，请按「员工 × 日期」聚合出每人每天停留的总时长。\n\n本题与本章的**审计日志**主题同构：审计表记录的是「谁在什么时刻做了什么」，而把事件流按主体与时间窗聚合，是审计分析（如在岗时长、操作频次异常检测）最常见的下游查询。请用聚合 + 分组完成。",
+      "answer": {
+        "reference_code": "SELECT event_day AS day, emp_id, SUM(out_time - in_time) AS total_time\nFROM Employees\nGROUP BY event_day, emp_id;",
+        "explanation": "事件流聚合的标准形态：`GROUP BY (维度1, 维度2)` + 对区间长度的 `SUM`。审计场景里同样的写法可用来统计「每个操作人在每个时间窗内的操作次数」，并与基线比较以发现异常（如非工作时段批量删除）。注意聚合键必须包含全部非聚合维度列，在 `ONLY_FULL_GROUP_BY` 开启时漏列会直接报错。"
+      },
+      "explanation": "与本章的呼应有两层：① 审计日志本质上就是一张事件表，「按主体 + 时间窗聚合」是它最典型的分析查询；② 审计表设计时若把操作人与时间做成独立列（而不是塞进一个字符串字段），下游聚合才不需要解析文本 —— 这是「审计表字段设计要为查询服务」的直接体现。",
+      "tags": [
+        "audit-log",
+        "group-by",
+        "event-stream"
+      ],
+      "test_cases": [
+        {
+          "input": "schema 与样例数据见 external_url",
+          "expected_output": "见 external_url",
+          "is_sample": true
+        }
+      ]
+    }
+  ]
+}

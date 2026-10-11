@@ -1,0 +1,8 @@
+{
+  "title": "im2col 卷积：与滑窗结果一致",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "滑窗输出形状: (1, 2, 3, 3)\nim2col 输出形状: (1, 2, 3, 3)\n两种方式最大绝对误差: 7.105427357601002e-15\n结论: 误差为 0 即两者等价 -> True\n",
+  "code": "\nimport numpy as np\nnp.random.seed(0)\nX = np.arange(1*1*4*4, dtype=np.float64).reshape(1,1,4,4)\nK = np.random.randn(2,1,2,2)\n\ndef conv2d_slide(x, k, stride=1):\n    N,Cin,H,W = x.shape\n    Cout,_,kh,kw = k.shape\n    oh=(H-kh)//stride+1; ow=(W-kw)//stride+1\n    out=np.zeros((N,Cout,oh,ow))\n    for n in range(N):\n        for c in range(Cout):\n            for i in range(oh):\n                for j in range(ow):\n                    p=x[n,0,i*stride:i*stride+kh, j*stride:j*stride+kw]\n                    out[n,c,i,j]=np.sum(p*k[c])\n    return out\n\ndef conv2d_im2col(x, k, stride=1):\n    N,Cin,H,W = x.shape\n    Cout,_,kh,kw = k.shape\n    oh=(H-kh)//stride+1; ow=(W-kw)//stride+1\n    cols=[]\n    for i in range(oh):\n        for j in range(ow):\n            cols.append(x[0,0,i*stride:i*stride+kh, j*stride:j*stride+kw].reshape(-1))\n    cols=np.stack(cols).T                      # (Cin*kh*kw, oh*ow)\n    Wcol=k.reshape(Cout,-1)\n    out=Wcol @ cols                            # (Cout, oh*ow)\n    return out.reshape(Cout, oh, ow)[None]\n\na = conv2d_slide(X, K)\nb = conv2d_im2col(X, K)\nprint(\"滑窗输出形状:\", a.shape)\nprint(\"im2col 输出形状:\", b.shape)\nprint(\"两种方式最大绝对误差:\", float(np.max(np.abs(a-b))))\nprint(\"结论: 误差为 0 即两者等价 ->\", bool(np.max(np.abs(a-b)) < 1e-12))\n"
+}

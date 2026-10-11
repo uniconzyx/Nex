@@ -1,0 +1,9 @@
+{
+  "title": "Set 编码切换：intset 与 hashtable",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "int set    -> intset\nmixed set  -> hashtable\nlarge ints -> hashtable",
+  "code": "\nSET_MAX_ENTRIES = 512\n\ndef set_encoding(items):\n    n = len(items)\n    if n == 0:\n        return \"intset\"\n    if all(isinstance(x, int) and -(2 ** 63) <= x < 2 ** 63 for x in items) and n <= SET_MAX_ENTRIES:\n        return \"intset\"\n    return \"hashtable\"\n\nints = list(range(10))\nmixed = [1, 2, \"x\"]\nbig = list(range(600))\nprint(\"int set    ->\", set_encoding(ints))\nprint(\"mixed set  ->\", set_encoding(mixed))\nprint(\"large ints ->\", set_encoding(big))\n",
+  "_verified": true
+}

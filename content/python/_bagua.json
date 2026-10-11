@@ -1,0 +1,137 @@
+{
+  "subject": "python",
+  "title": "Python 八股模块",
+  "note": "面试高频八股题库，按领域分类；答案标准化便于速记，与章节 interview.json 互补。合规：仅存要点与出处，不搬运第三方题面。",
+  "categories": [
+    {
+      "id": "lang",
+      "title": "语言基础",
+      "items": [
+        {
+          "q": "Python 的可变与不可变类型有哪些？有什么影响？",
+          "a": "- **不可变**：`int`、`float`、`bool`、`str`、`tuple`、`frozenset`、`bytes`。\n- **可变**：`list`、`dict`、`set`、`bytearray`，以及多数自定义对象。\n- 影响 1：**作为函数默认参数**——可变默认值会在函数定义时创建一次并被多次调用共享（经典坑 `def f(x=[])`）。\n- 影响 2：作为 `dict` 的 key / `set` 元素必须**可哈希**，故只能用不可变类型。\n- 影响 3：`a += b` 对 list 是**原地修改**（别名同步变化），对 int/str 是**重新绑定**。",
+          "tags": ["类型"],
+          "difficulty": "easy",
+          "hot": 5,
+          "source_ref": "《流畅的 Python》第 2 章"
+        },
+        {
+          "q": "深拷贝与浅拷贝的区别？",
+          "a": "- **赋值**：只增加引用，两变量指向同一对象。\n- **浅拷贝**（`copy.copy()`、`list()`、`dict()`、切片 `[:]`）：新建外层容器，但**内部元素仍是原对象的引用** → 修改嵌套对象会互相影响。\n- **深拷贝**（`copy.deepcopy()`）：递归复制所有层级，完全独立；慢，且需处理循环引用（`deepcopy` 用 memo 字典解决）。",
+          "tags": ["拷贝"],
+          "difficulty": "easy",
+          "hot": 5,
+          "source_ref": "《流畅的 Python》"
+        },
+        {
+          "q": "列表（list）与元组（tuple）的区别？何时用元组？",
+          "a": "- `list`：**可变**、长度可变，方法丰富（append/pop/sort），内存按需扩容（过分配）。\n- `tuple`：**不可变**，创建后不可增删改；更省内存、可哈希（能作 dict key / set 元素）、可安全共享。\n- 用途：元组适合**固定结构的记录**（坐标、RGB、数据库一行）、字典 key、函数多返回值；列表适合**同构可变序列**。\n- 注意：单元素元组必须写 `(1,)`，括号只是分组。",
+          "tags": ["类型"],
+          "difficulty": "easy",
+          "hot": 5,
+          "source_ref": "《流畅的 Python》第 2 章"
+        },
+        {
+          "q": "什么是 GIL？对并发有何影响？",
+          "a": "- **GIL（全局解释器锁）**：CPython 中保证同一时刻**只有一个线程执行 Python 字节码**的互斥锁（主要因 CPython 引用计数非线程安全）。\n- 影响：**CPU 密集型**多线程无法利用多核（甚至更慢）；**IO 密集型**多线程仍然有效（等待时释放 GIL）。\n- 规避：CPU 密集用**多进程**（`multiprocessing`）或 C 扩展（numpy/Numba 释放 GIL）；IO 密集用**多线程/协程**（`asyncio`）。",
+          "tags": ["并发", "GIL"],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《流畅的 Python》第 17 章"
+        },
+        {
+          "q": "迭代器和生成器是什么？有什么区别？",
+          "a": "- **迭代器**：实现 `__iter__()` 与 `__next__()` 的对象，一次性、惰性；耗尽后抛 `StopIteration`。\n- **生成器**：用 `yield` 的函数或生成器表达式；是迭代器的**语法糖**，自动维护状态，惰性求值、**节省内存**（不一次性构建完整列表）。\n- 区别：生成器更简洁；迭代器可自定义复杂逻辑。二者都**只能遍历一次**，需重复遍历要重新创建。\n- 典型：`(x*x for x in range(10))` 是生成器，几乎不占内存。",
+          "tags": ["迭代器", "生成器"],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《流畅的 Python》第 14 章"
+        },
+        {
+          "q": "*args 与 **kwargs 是什么？",
+          "a": "- `*args`：接收**任意数量的位置参数**，在函数内为元组 `tuple`。\n- `**kwargs`：接收**任意数量的关键字参数**，在函数内为字典 `dict`。\n- 顺序：普通参数 → 默认参数 → `*args` → 关键字-only → `**kwargs`。\n- 也可用在**调用端**解包：`f(*my_list)`、`f(**my_dict)`。\n- Python 3 可用 `*` 强制其后的参数必须以关键字传入。",
+          "tags": ["函数"],
+          "difficulty": "easy",
+          "hot": 4,
+          "source_ref": "《Python 编程：从入门到实践》"
+        }
+      ]
+    },
+    {
+      "id": "advanced",
+      "title": "进阶特性",
+      "items": [
+        {
+          "q": "装饰器的原理是什么？",
+          "a": "- 本质：一个**接受函数并返回函数**的高阶函数，`@decorator` 等价于 `f = decorator(f)`。\n- 典型结构：内层 `wrapper(*args, **kwargs)` 调用原函数并添加前置/后置逻辑。\n- **保留元信息**：用 `functools.wraps(func)` 装饰 wrapper，否则 `__name__`、`__doc__` 会被覆盖。\n- 用途：日志、计时、鉴权、缓存（`lru_cache`）、路由注册、重试。\n- 带参数的装饰器是「三层嵌套」：`@dec(arg)` → 返回真正的 decorator。",
+          "tags": ["装饰器"],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《流畅的 Python》第 7 章"
+        },
+        {
+          "q": "什么是闭包？有什么注意事项？",
+          "a": "- 闭包：内层函数引用了**外层函数的局部变量**，且外层函数已返回，该变量仍被保存（形成 cell）。\n- 条件：嵌套函数 + 引用外层变量 + 外层函数返回内层函数。\n- **经典坑**：循环中创建闭包捕获循环变量，因**后期绑定**，所有闭包共享最后一次的值 → 用默认参数 `lambda x=i: ...` 固化。\n- 修改外层变量需 `nonlocal`（不可变类型），可变类型可直接 mutate。",
+          "tags": ["闭包"],
+          "difficulty": "mid",
+          "hot": 4,
+          "source_ref": "《流畅的 Python》第 7 章"
+        },
+        {
+          "q": "__new__ 与 __init__ 的区别？",
+          "a": "- `__new__`：静态方法，负责**创建并返回实例**（分配内存），先被调用；通常返回 `super().__new__(cls)`。\n- `__init__`：实例方法，负责**初始化**已创建的实例（设置属性），不返回值。\n- 用途：`__new__` 用于**不可变类型子类化**（tuple/str）、**单例模式**、对象池；普通场景只需 `__init__`。\n- 若 `__new__` 不返回当前类实例，`__init__` 不会被调用。",
+          "tags": ["魔法方法"],
+          "difficulty": "mid",
+          "hot": 4,
+          "source_ref": "《流畅的 Python》"
+        },
+        {
+          "q": "with 语句与上下文管理器？",
+          "a": "- `with` 通过**上下文管理协议**保证资源正确释放（等价 try/finally）。\n- 实现：类实现 `__enter__()`（返回资源）与 `__exit__(exc_type, exc_val, exc_tb)`（清理；返回 True 可**吞掉异常**）。\n- 简化写法：`@contextlib.contextmanager` + `yield`。\n- 典型：文件读写、数据库连接、锁（`with lock:`）、临时目录。",
+          "tags": ["上下文管理器"],
+          "difficulty": "easy",
+          "hot": 4,
+          "source_ref": "《流畅的 Python》第 15 章"
+        },
+        {
+          "q": "Python 的内存管理与垃圾回收机制？",
+          "a": "- **引用计数**为主：对象维护 `ob_refcnt`，归零立即回收；优点实时，缺点无法解决**循环引用**。\n- **标记-清除** + **分代回收**为辅：`gc` 模块处理循环引用，对象分三代（新建/存活越久检查越少）。\n- 小整数（-5~256）与短字符串有**驻留缓存**（intern）。\n- 手动干预：`gc.collect()`、`weakref`（弱引用避免循环）、`del`。",
+          "tags": ["内存", "GC"],
+          "difficulty": "mid",
+          "hot": 4,
+          "source_ref": "《流畅的 Python》"
+        }
+      ]
+    },
+    {
+      "id": "concurrent",
+      "title": "并发与性能",
+      "items": [
+        {
+          "q": "多线程、多进程、协程如何选择？",
+          "a": "- **多进程**（`multiprocessing`）：绕过 GIL，**CPU 密集型**首选；开销大，进程间通信用 Queue/Pipe/共享内存。\n- **多线程**（`threading`）：受 GIL 限制，适合 **IO 密集型**（网络/文件）；共享内存方便但需加锁。\n- **协程**（`asyncio`）：单线程内 **IO 密集型高并发**（万级连接）；`await` 让出控制权，开销最小；但**阻塞调用会卡住整个循环**，需 await 或放入 `run_in_executor`。\n- 现代方案：`concurrent.futures` 的 `ProcessPoolExecutor`/`ThreadPoolExecutor` 统一接口。",
+          "tags": ["并发"],
+          "difficulty": "mid",
+          "hot": 5,
+          "source_ref": "《流畅的 Python》第 16-18 章"
+        },
+        {
+          "q": "dict 的底层实现？为什么查找是 O(1)？",
+          "a": "- CPython 的 dict 是**开放寻址的哈希表**（不是链地址法），数组存储 `hash|key|value` 条目。\n- 查找：计算 `hash(key)` → 定位槽位 → 冲突时按**探测序列**跳转（利用 hash 高位）。\n- 负载因子超过约 **2/3** 时**扩容翻倍**并重新散列。\n- 保证：Python 3.7+ dict **保持插入顺序**（靠额外的索引数组间接实现）。\n- 要求：key 必须**可哈希**（不可变类型或自定义 `__hash__`/`__eq__`）。",
+          "tags": ["dict", "数据结构"],
+          "difficulty": "hard",
+          "hot": 4,
+          "source_ref": "《流畅的 Python》第 3 章"
+        },
+        {
+          "q": "列表推导式与生成器表达式的区别？",
+          "a": "- **列表推导式** `[x*2 for x in r]`：立即求值，返回 list，**占用内存** = 元素数量。\n- **生成器表达式** `(x*2 for x in r)`：惰性，返回生成器，**几乎不占内存**，只能遍历一次。\n- 选择：结果需要**多次访问/索引用**列表；数据量大或只遍历一次用生成器，可配合 `sum()/any()/max()` 直接消费。",
+          "tags": ["语法糖"],
+          "difficulty": "easy",
+          "hot": 4,
+          "source_ref": "《流畅的 Python》第 14 章"
+        }
+      ]
+    }
+  ]
+}

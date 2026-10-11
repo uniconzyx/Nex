@@ -1,0 +1,9 @@
+{
+  "title": "Set 的 intset：整型范围触发编码升级（单向）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "add 1      encoding=16 upgraded=False items=[1]\nadd 2      encoding=16 upgraded=False items=[1, 2]\nadd 300    encoding=16 upgraded=False items=[1, 2, 300]\nadd 40000  encoding=32 upgraded=True items=[1, 2, 300, 40000]",
+  "code": "\nclass IntSet:\n    def __init__(self):\n        self.encoding = 16\n        self.items = []\n    def _fits(self, bits, v):\n        return -(2 ** (bits - 1)) <= v <= 2 ** (bits - 1) - 1\n    def add(self, v):\n        if self._fits(self.encoding, v):\n            self.items.append(v); self.items.sort(); return False\n        self.encoding = 32 if self._fits(32, v) else 64\n        self.items.append(v); self.items.sort(); return True\n\ns = IntSet()\nfor v in [1, 2, 300]:\n    up = s.add(v)\n    print(\"add %-6s encoding=%d upgraded=%s items=%s\" % (v, s.encoding, up, s.items))\nup = s.add(40000)   # 超过 int16 上限 -> 升级\nprint(\"add %-6s encoding=%d upgraded=%s items=%s\" % (40000, s.encoding, up, s.items))\n",
+  "_verified": true
+}

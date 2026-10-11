@@ -1,0 +1,8 @@
+{
+  "title": "LoRA 目标模块选择：参数量阶梯",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "d_model = 4096, rank = 8, 层数 = 32\n\n目标模块                   模块数      LoRA 参数量       占 7B 比例\n仅 q, v                 2        4194304        0.0599%\nq, k, v, o             4        8388608        0.1198%\nq, k, v, o + FFN       6        12582912       0.1798%\n\n结论: 从 qkvo 扩到 qkvo+FFN, 参数量变为 1.50 倍（+50%）\n      模块数 4 -> 6 是线性关系, 所以倍数 = 6/4 = 1.5, 并非翻倍\n      工程上常先只上 q,v, 收敛不稳或效果不够时再扩到 qkvo 甚至 FFN",
+  "code": "\nd = 4096\nr = 8\nn_layers = 32\nseven = 7.0e9\n\ndef lora_one():\n    return r * (d + d)\n\ncombos = [\n    ('仅 q, v', ['q', 'v']),\n    ('q, k, v, o', ['q', 'k', 'v', 'o']),\n    ('q, k, v, o + FFN', ['q', 'k', 'v', 'o', 'up', 'down']),\n]\nprint('d_model = %d, rank = %d, 层数 = %d' % (d, r, n_layers))\nprint()\nprint('%-22s %-8s %-14s %s' % ('目标模块', '模块数', 'LoRA 参数量', '占 7B 比例'))\nsizes = []\nfor name, mods in combos:\n    per = len(mods) * lora_one() * n_layers\n    sizes.append(per)\n    print('%-22s %-8d %-14d %.4f%%' % (name, len(mods), per, 100.0 * per / seven))\nprint()\nup = sizes[2] / sizes[1]\nprint('结论: 从 qkvo 扩到 qkvo+FFN, 参数量变为 %.2f 倍（+%.0f%%）' % (up, 100.0 * (up - 1)))\nprint('      模块数 4 -> 6 是线性关系, 所以倍数 = 6/4 = 1.5, 并非翻倍')\nprint('      工程上常先只上 q,v, 收敛不稳或效果不够时再扩到 qkvo 甚至 FFN')\n"
+}

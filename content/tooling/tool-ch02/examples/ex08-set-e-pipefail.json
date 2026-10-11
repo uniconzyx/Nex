@@ -1,0 +1,8 @@
+{
+  "title": "set -e 与 pipefail 的退出码语义",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "管道 false | true 的退出码：\n  pipefail 关闭（默认）: 整体退出码 = 0  （取末段 true=0，set -e 不拦截）\n  pipefail 开启        : 整体退出码 = 1   （取首失败 false=1，set -e 拦截）\n\nset -e 的例外：\n  if cmd; then ...; fi 中 cmd 失败属『预期用于控制流程』，不触发退出\n  a && b 中 a 失败不触发退出（b 不执行）\n\n结论：要管住管道失败必须 set -o pipefail；set -e 单独拦不住管道中间段失败",
+  "code": "# 模拟 set -e 与 pipefail 的退出码语义（确定性）\ndef pipeline(rcs, pipefail):\n    if pipefail:\n        nz = [c for c in rcs if c != 0]\n        return nz[0] if nz else 0\n    return rcs[-1]\n\nprint(\"管道 false | true 的退出码：\")\nprint(f\"  pipefail 关闭（默认）: 整体退出码 = {pipeline([1, 0], False)}  （取末段 true=0，set -e 不拦截）\")\nprint(f\"  pipefail 开启        : 整体退出码 = {pipeline([1, 0], True)}   （取首失败 false=1，set -e 拦截）\")\nprint()\nprint(\"set -e 的例外：\")\nprint(\"  if cmd; then ...; fi 中 cmd 失败属『预期用于控制流程』，不触发退出\")\nprint(\"  a && b 中 a 失败不触发退出（b 不执行）\")\nprint()\nprint(\"结论：要管住管道失败必须 set -o pipefail；set -e 单独拦不住管道中间段失败\")\n"
+}

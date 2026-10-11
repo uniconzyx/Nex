@@ -1,0 +1,8 @@
+{
+  "title": "变量与基本运算",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "30",
+  "code": "x = 10\ny = 20\nprint(x + y)"
+}

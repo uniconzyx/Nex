@@ -1,0 +1,8 @@
+{
+  "title": "流与背压：Writable.highWaterMark、write() 返回值 false 与 drain 事件",
+  "code_lang": "javascript",
+  "code_std": "node22",
+  "stdin": "",
+  "expected_output": "writes=10\nbackpressureTriggered=7\nbackpressureHappened=true\n",
+  "code": "const { Writable } = require('stream');\nconst sink = new Writable({\n  highWaterMark: 4,\n  write(chunk, enc, cb) { setImmediate(() => cb()); }\n});\nlet backpressure = 0;\nconst total = 10;\nfor (let i = 0; i < total; i++) {\n  const ok = sink.write(Buffer.from('x'));\n  if (!ok) backpressure++;\n}\nsink.end(() => {\n  console.log('writes=' + total);\n  console.log('backpressureTriggered=' + backpressure);\n  console.log('backpressureHappened=' + (backpressure > 0));\n});"
+}

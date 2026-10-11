@@ -1,0 +1,49 @@
+{
+  "meta": {
+    "chapter": "fs-ch01",
+    "category": "basic"
+  },
+  "items": [
+    {
+      "title": "手写最小 HTTP 服务端 + 客户端，观察两端报文",
+      "requirement_md": "使用 Node.js **原生 `http` 模块**（不引入 Express 等框架）实现一对最小服务端与客户端，目标是**亲眼看清楚 HTTP 报文在两端的样子**。\n\n**服务端要求**：\n1. 监听本地回环地址（端口用 0 让系统分配，避免冲突）；\n2. 打印它收到的**请求行**（方法、目标、版本）与关键请求头（`Host`、`Content-Type`、自定义头）；\n3. `POST /v1/users` → 返回 **201** + `Location` 头部 + JSON 主体；\n4. 请求体非法 JSON → **400**；缺 `name` 字段 → **422**；方法不对 → **405** + `Allow`。\n\n**客户端要求**：\n5. 发起一次 POST 请求（带自定义头），打印收到的**状态行**、响应头（`Content-Type`、`Location`）与响应体；\n6. 再次发起同样的请求，**打印你观察到的两端差异**（尤其注意：`Content-Length`/`Content-Type` 是谁加的、`Host` 头是谁加的）。\n\n**进阶（可选）**：把服务端的响应头改成 `Cache-Control: no-cache` + `ETag`，客户端第二次请求带上 `If-None-Match`，观察服务端返回 **304** 且**无主体**。\n\n**GitHub 参考仓库**：https://github.com/nodejs/node （`lib/http.js` 为标准库实现；本任务只用其公开 API，请阅读官方文档中 `http.createServer` / `http.request` 的说明）。",
+      "tasks": [
+        {
+          "title": "起一个本地 HTTP 服务端并打印收到的请求行与请求头",
+          "verification": {
+            "type": "test",
+            "desc": "运行后能看到 method / url / host / 自定义头，且端口不写死（listen 0）"
+          }
+        },
+        {
+          "title": "实现 POST /v1/users 的 201 + Location 语义",
+          "verification": {
+            "type": "test",
+            "desc": "客户端观察到 statusCode === 201 且响应头含 Location: /v1/users/<id>"
+          }
+        },
+        {
+          "title": "补齐 400 / 422 / 405 三类错误分支",
+          "verification": {
+            "type": "test",
+            "desc": "非法 JSON → 400；缺 name → 422；GET 该路径 → 405 且带 Allow 头"
+          }
+        },
+        {
+          "title": "客户端打印响应状态行与头部，并对比两次请求的差异",
+          "verification": {
+            "type": "manual",
+            "desc": "能说出 Host 头由客户端库自动添加、Content-Length 由发送方计算"
+          }
+        },
+        {
+          "title": "（进阶）加 ETag + If-None-Match，观察 304 无主体",
+          "verification": {
+            "type": "test",
+            "desc": "第二次请求命中 ETag 时返回 304，且 body 长度为 0"
+          }
+        }
+      ]
+    }
+  ]
+}

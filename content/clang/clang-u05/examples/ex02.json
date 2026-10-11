@@ -1,0 +1,8 @@
+{
+  "title": "宏参数多重求值带来的副作用",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "MAX(2,3) = 3\nMAX(i++, 2) = 2 (i 被求值两次后 = 1)",
+  "code": "#include <stdio.h>\n#define MAX(a, b) ((a) > (b) ? (a) : (b))\n\nint main(void) {\n    int x = 2, y = 3;\n    int m1 = MAX(x, y);\n    printf(\"MAX(2,3) = %d\\n\", m1);\n\n    int i = 0;\n    /* 参数 i++ 被求值两次：一次比较、一次返回 */\n    int m2 = MAX(i++, 2);\n    printf(\"MAX(i++, 2) = %d (i 被求值两次后 = %d)\\n\", m2, i);\n    return 0;\n}"
+}

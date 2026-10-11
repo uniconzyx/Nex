@@ -1,0 +1,8 @@
+{
+  "title": "ndarray 创建、dtype 推导与内存占用",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "numpy 2.5.3\na = [1 2 3] | dtype = int64\nb = [1. 2. 3.] | dtype = float64\nc =\n[[0 0 0]\n [0 0 0]] | dtype = int32\nd =\n[[0 1 2]\n [3 4 5]]\ne = [0.   0.25 0.5  0.75 1.  ]\n--- 内存占用 ---\na itemsize=8 nbytes=24 ndim=1 shape=(3,)\nb itemsize=8 nbytes=24 ndim=1 shape=(3,)\nc itemsize=4 nbytes=24 ndim=2 shape=(2, 3)\n--- 隐式 dtype 推导（宽度向上取齐）---\nint + float : float64\nbool + int  : int64\nint + str   : <U21",
+  "code": "import numpy as np\nprint(\"numpy\", np.__version__)\na = np.array([1, 2, 3])\nb = np.array([1.0, 2.0, 3.0])\nc = np.zeros((2, 3), dtype=np.int32)\nd = np.arange(6).reshape(2, 3)\ne = np.linspace(0, 1, 5)\nprint(\"a =\", a, \"| dtype =\", a.dtype)\nprint(\"b =\", b, \"| dtype =\", b.dtype)\nprint(\"c =\")\nprint(c, \"| dtype =\", c.dtype)\nprint(\"d =\")\nprint(d)\nprint(\"e =\", e)\nprint(\"--- 内存占用 ---\")\nfor name, arr in ((\"a\", a), (\"b\", b), (\"c\", c)):\n    print(\"%s itemsize=%d nbytes=%d ndim=%d shape=%s\"\n          % (name, arr.itemsize, arr.nbytes, arr.ndim, arr.shape))\nprint(\"--- 隐式 dtype 推导（宽度向上取齐）---\")\nprint(\"int + float :\", np.array([1, 2, 3.5]).dtype)\nprint(\"bool + int  :\", np.array([True, 1, 2]).dtype)\nprint(\"int + str   :\", np.array([1, \"2\"]).dtype)\n"
+}

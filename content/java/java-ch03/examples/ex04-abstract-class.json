@@ -1,0 +1,8 @@
+{
+  "title": "抽象类与抽象方法",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "a vehicle with 2 wheels",
+  "code": "public class E304 {\n    abstract static class Vehicle {\n        abstract int wheels();\n        void describe(){ System.out.println(\"a vehicle with \" + wheels() + \" wheels\"); }\n    }\n    static class Bike extends Vehicle {\n        @Override int wheels(){ return 2; }\n    }\n    public static void main(String[] args) {\n        Vehicle v = new Bike();\n        v.describe();\n    }\n}"
+}

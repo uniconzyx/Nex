@@ -1,0 +1,8 @@
+{
+  "title": "函数模板与普通函数重载决议",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "int:42\nT:3.14\nT:7\n",
+  "code": "#include <iostream>\ntemplate <typename T>\nvoid log(T v) { std::cout << \"T:\" << v << '\\n'; }\nvoid log(int v) { std::cout << \"int:\" << v << '\\n'; }\nint main() {\n    log(42);\n    log(3.14);\n    log<>(7);\n}\n"
+}

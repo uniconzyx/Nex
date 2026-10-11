@@ -1,0 +1,8 @@
+{
+  "title": "初始化三方式及顺序：@PostConstruct / InitializingBean / init-method",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "postConstruct;initializingBean;initMethod;",
+  "code": "import java.lang.annotation.*;\nimport java.lang.reflect.*;\n\npublic class Main {\n    @Retention(RetentionPolicy.RUNTIME)\n    @Target(ElementType.METHOD)\n    @interface PostConstruct {}\n\n    interface InitializingBean { void afterPropertiesSet(); }\n\n    static class Bean implements InitializingBean {\n        StringBuilder log = new StringBuilder();\n        @PostConstruct void init1() { log.append(\"postConstruct;\"); }\n        public void afterPropertiesSet() { log.append(\"initializingBean;\"); }\n        void customInit() { log.append(\"initMethod;\"); }\n        String log() { return log.toString(); }\n    }\n\n    public static void main(String[] args) throws Exception {\n        Bean b = new Bean();\n        for (Method m : Bean.class.getDeclaredMethods()) {\n            if (m.isAnnotationPresent(PostConstruct.class)) m.invoke(b);\n        }\n        b.afterPropertiesSet();\n        Bean.class.getDeclaredMethod(\"customInit\").invoke(b);\n        System.out.println(b.log());\n    }\n}\n"
+}

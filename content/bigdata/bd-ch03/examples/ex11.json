@@ -1,0 +1,8 @@
+{
+  "title": "窗口函数：部门工资 Top-N（ROW_NUMBER）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "各 dept 内按工资降序取前 2 名:\n  dept=eng: [9000, 8000]  (ROW_NUMBER 排名 1~2)\n  dept=hr: [5000, 4000]  (ROW_NUMBER 排名 1~2)\n  dept=sales: [8500, 8000]  (ROW_NUMBER 排名 1~2)\n\n等价 SQL: SELECT dept, sal, ROW_NUMBER() OVER(PARTITION BY dept ORDER BY sal DESC) rn FROM emp WHERE rn<=2\n窗口函数由 OVER 子句定义分区/排序, 不缩减行数(与 GROUP BY 不同), 常配合 rn<=N 做组内 TopN\n",
+  "code": "# 模拟 Hive 窗口函数: 每个部门工资 Top-2 (ROW_NUMBER() OVER(PARTITION BY dept ORDER BY sal DESC))\nfrom collections import defaultdict\n\nemp = [\n    (\"eng\", 6000), (\"eng\", 9000), (\"eng\", 7000), (\"eng\", 8000),\n    (\"sales\", 8000), (\"sales\", 3000), (\"sales\", 8500),\n    (\"hr\", 5000), (\"hr\", 4000),\n]\nby_dept = defaultdict(list)\nfor d, s in emp:\n    by_dept[d].append(s)\nprint(\"各 dept 内按工资降序取前 2 名:\")\nfor d in sorted(by_dept):\n    top = sorted(by_dept[d], reverse=True)[:2]\n    print(f\"  dept={d}: {top}  (ROW_NUMBER 排名 1~{len(top)})\")\nprint(\"\\n等价 SQL: SELECT dept, sal, ROW_NUMBER() OVER(PARTITION BY dept ORDER BY sal DESC) rn FROM emp WHERE rn<=2\")\nprint(\"窗口函数由 OVER 子句定义分区/排序, 不缩减行数(与 GROUP BY 不同), 常配合 rn<=N 做组内 TopN\")\n"
+}

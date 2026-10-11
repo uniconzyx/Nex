@@ -1,0 +1,43 @@
+{
+  "meta": {
+    "chapter": "py-ch02",
+    "subject": "python",
+    "note": "综合项目：用闭包 + 装饰器 + 作用域规则实现一个可观测的记忆化缓存，覆盖本章全部核心概念。"
+  },
+  "items": [
+    {
+      "title": "闭包驱动的记忆化缓存 memoize（带命中统计与 LRU 淘汰）",
+      "requirement_md": "用**闭包 + 装饰器**实现一个通用记忆化缓存，要求：\n\n1. **工厂函数** `make_memoize(maxsize=128)` 返回一个装饰器；被装饰函数的缓存与统计状态放在**闭包变量**里（不用全局变量、不用类属性），以此体会「闭包即轻量级对象」。\n2. 装饰器内部用 `functools.wraps` 保留原函数元信息；支持任意 `*args, **kwargs`（用参数元组做 key，需可哈希）。\n3. **命中统计**：闭包内维护 `hits / misses` 计数，并提供一个 `stats()` 函数通过闭包读取（注意：只读闭包变量可直接读，要**修改**计数必须用 `nonlocal`，这是本题的关键考点）。\n4. **LRU 淘汰**：`maxsize` 满时淘汰**最久未使用**的键（用 `collections.OrderedDict` + `move_to_end`），淘汰时记录 `evictions` 计数。\n5. 用它装饰一个递归 `fib(n)`，对比「无缓存」与「有缓存」在 n=35 时的耗时差（用 `time.perf_counter`）。\n6. **对比思考**：与标准库 `functools.lru_cache` 的差异（线程安全、C 实现、`cache_info()` 接口、Typed 参数区分）。\n\n**验收输出示例**（数值随机器变化，结构需一致）：\n```\nfib(35) = 9227465\ncached: hits=33 misses=36 evictions=0, elapsed=0.0000s\nplain : elapsed=1.9s\n```",
+      "tasks": [
+        {
+          "title": "用闭包工厂承载缓存状态（避免全局）",
+          "verification": {
+            "type": "test",
+            "desc": "装饰两个不同函数，二者缓存互不干扰；模块无全局变量承载状态"
+          }
+        },
+        {
+          "title": "nonlocal 正确修改 hits/misses 计数",
+          "verification": {
+            "type": "test",
+            "desc": "重复调用同一参数时 hits 递增、misses 不变；去掉 nonlocal 应抛 UnboundLocalError（作为反例验证理解）"
+          }
+        },
+        {
+          "title": "LRU 淘汰与 evictions 统计",
+          "verification": {
+            "type": "test",
+            "desc": "maxsize=2 时按 1,2,3 顺序调用，键 1 被淘汰且 evictions=1"
+          }
+        },
+        {
+          "title": "性能对比与 lru_cache 差异分析",
+          "verification": {
+            "type": "manual",
+            "desc": "fib(35) 有缓存显著快于无缓存；书面说明与 functools.lru_cache 的 3 点以上差异"
+          }
+        }
+      ]
+    }
+  ]
+}

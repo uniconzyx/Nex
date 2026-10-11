@@ -1,0 +1,8 @@
+{
+  "title": "GRU 门控公式数值演算",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "隐藏维度 H = 4\n更新门 z (sigmoid): [0.111 0.295 0.277 0.47 ]\n重置门 r (sigmoid): [0.515 0.531 0.471 0.509]\n候选隐态 n (tanh): [ 0.78  -0.987 -0.788  0.917]\n新隐态 h = (1-z)*h_prev + z*n: [ 0.12  -0.306 -0.134  0.306]\nz 接近 1 -> 保留旧隐态; z 接近 0 -> 用候选 n\n验证: 更新门区间正确 -> True\n",
+  "code": "\nimport numpy as np\nnp.random.seed(2)\ndef sigmoid(x): return 1.0/(1.0+np.exp(-x))\nH = 4\nW = {k: np.random.randn(H, 2*H)*0.5 for k in ['z','r','n']}\nb = {k: np.zeros(H) for k in ['z','r','n']}\nh_prev = np.random.randn(H)*0.1\nx = np.random.randn(H)\ncat = np.concatenate([h_prev, x])\nz = sigmoid(W['z'] @ cat + b['z'])\nr = sigmoid(W['r'] @ cat + b['r'])\nn = np.tanh(W['n'] @ np.concatenate([r*h_prev, x]) + b['n'])\nh = (1 - z) * h_prev + z * n\nprint(\"隐藏维度 H =\", H)\nprint(\"更新门 z (sigmoid):\", np.round(z,3))\nprint(\"重置门 r (sigmoid):\", np.round(r,3))\nprint(\"候选隐态 n (tanh):\", np.round(n,3))\nprint(\"新隐态 h = (1-z)*h_prev + z*n:\", np.round(h,3))\nprint(\"z 接近 1 -> 保留旧隐态; z 接近 0 -> 用候选 n\")\nprint(\"验证: 更新门区间正确 ->\", bool(z.max()<1 and z.min()>0))\n"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "多头注意力：拆头/合并维度变换",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "输入形状: (1, 6, 12)  头数: 3  每头维度 d_k: 4\n拆头后形状: (1, 3, 6, 4) (B, heads, T, d_k)\n合并回形状: (1, 6, 12)\n合并误差(应=0): 0.0\nd_model 必须被 heads 整除 -> d_k 为整数: True\n",
+  "code": "\nimport numpy as np\nnp.random.seed(3)\nB, T, E = 1, 6, 12\nheads = 3\nd_k = E // heads\nx = np.random.randn(B, T, E)\nprint(\"输入形状:\", x.shape, \" 头数:\", heads, \" 每头维度 d_k:\", d_k)\nxh = x.reshape(B, T, heads, d_k).transpose(0, 2, 1, 3)   # (B, heads, T, d_k)\nprint(\"拆头后形状:\", xh.shape, \"(B, heads, T, d_k)\")\nmerged = xh.transpose(0, 2, 1, 3).reshape(B, T, E)\nprint(\"合并回形状:\", merged.shape)\nprint(\"合并误差(应=0):\", float(np.max(np.abs(merged - x))))\nprint(\"d_model 必须被 heads 整除 -> d_k 为整数:\", bool(E % heads == 0))\n"
+}

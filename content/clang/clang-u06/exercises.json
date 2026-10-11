@@ -1,0 +1,154 @@
+{
+  "meta": {
+    "chapter_id": "clang-u06",
+    "title": "Makefile 与构建 · 练习",
+    "description": "覆盖编译四阶段产物、Makefile 依赖与时间戳、变量展开、自动变量、.PHONY 与增量构建正确性。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "GNU Make Manual §4.2 Types of Prerequisites / §9 How make Processes a Makefile",
+      "difficulty": "easy",
+      "title": "Make 判断「要不要重建」的唯一依据",
+      "content_md": "给出一条规则 `app: main.o util.o`。下列哪种情况 Make **不会**重新执行 recipe？\n\nA. `app` 文件不存在\nB. `main.o` 比 `app` 新\nC. `util.o` 的**内容**变了，但 mtime 没变\nD. `main.o` 的 mtime 比 `app` 早，但 `util.o` 比 `app` 新",
+      "answer": {
+        "correct": "C",
+        "explain": "Make **只比较 mtime**，从不读取内容。\n\n- A：目标不存在 → 必须重建。\n- B：存在比目标新的依赖 → 重建。\n- **C：内容变了但 mtime 没变 → Make 无从知晓，不会重建。** 这正是「内容哈希 vs 时间戳」这一设计分歧的根源——Bazel/Ninja 改用输入指纹正是为了消除这个盲区。\n- D：只要**任一**依赖比目标新就重建（不是全部依赖都更新才重建）。\n\n补充：mtime 相同（同一秒内修改）也视为「不新」，这是秒级精度带来的经典漏判。"
+      },
+      "explanation": "考察对「增量构建判据」这一根基性事实的掌握，是本节第一个必背点。",
+      "tags": [
+        "Makefile",
+        "增量构建",
+        "mtime"
+      ]
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "GNU Make Manual §4.6 Phony Targets",
+      "difficulty": "medium",
+      "title": "`make clean` 什么都不做，还返回成功",
+      "content_md": "某工程的 Makefile 末尾是：\n\n```makefile\nclean:\n\\trm -f app *.o\n```\n\n某天同事在工程根目录建了一个名为 `clean` 的**空文件**（可能是误操作，也可能是某个工具生成的）。此后 `make clean` 输出 `'clean' is up to date.` 并返回 0，旧的目标文件一直没被删掉。\n\n请指出根因并给出修复。",
+      "answer": {
+        "correct": "根因：`clean` 与真实文件同名，Make 按普通文件规则比较 mtime——文件 `clean` 存在且无依赖比它新，于是判定「已是最新」而跳过 recipe。\n\n修复：把动作型目标声明为伪目标。\n\n```makefile\n.PHONY: clean\nclean:\n\\trm -f app *.o\n```\n\n`.PHONY` 告诉 Make：这个目标不对应真实文件，**永不比较 mtime，永远执行 recipe**。",
+        "explain": "这类 bug 的危险性在于**静默**：返回码 0、输出看似正常，你以为清理过了。工程规范是——所有动作型目标（`clean` / `all` / `test` / `install` / `run` / `fmt`）一律进 `.PHONY`。"
+      },
+      "explanation": "考察 .PHONY 的必要性，属于「不写不会报错、写了才不出事」的典型工程约定。",
+      "tags": [
+        "Makefile",
+        ".PHONY",
+        "伪目标"
+      ]
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "GNU Make Manual §10.5.3 Automatic Variables",
+      "difficulty": "medium",
+      "title": "自动变量 `$@ $< $^ $?` 的展开结果",
+      "content_md": "已知目标 `app` 由 `main.o`、`util.o`、`log.o` 链接得到，且三者的 mtime 都晚于 `app`。A、B、C 三个自动变量在 recipe 中分别展开为什么？\n\n```makefile\napp: main.o util.o log.o\n\\t@echo \"A=$@\"\n\\t@echo \"B=$<\"\n\\t@echo \"C=$^\"\n```\n\nA. A=app  B=main.o  C=main.o util.o log.o\nB. A=main.o  B=app  C=main.o util.o log.o\nC. A=app  B=main.o util.o log.o  C=main.o\nD. A=app  B=log.o  C=main.o",
+      "answer": {
+        "correct": "A",
+        "explain": "- `$@` = **target** 名（不论几个依赖）→ `app`。\n- `$<` = **第一个**依赖 → `main.o`。这就是为什么链接规则里写 `$<` 会漏掉其他目标文件。\n- `$^` = **全部**依赖（已去重）→ `main.o util.o log.o`。链接必须用它。\n- 另外还有两个：`$?` = 比目标新的那些依赖（本题三个都新，所以也是三者）；`$*` = 模式规则中 `%` 匹配的主干部分。\n\n记住 `$<` 与 `$^` 的差别是**编译规则用 `$<`、链接规则用 `$^`**：编译一个 `.c` 只需要第一个依赖，链接需要全部 `.o`。"
+      },
+      "explanation": "自动变量是 Makefile 写错频率最高的地方，`$<` 与 `$^` 混用会直接表现为一批 undefined reference。",
+      "tags": [
+        "Makefile",
+        "自动变量",
+        "$@",
+        "$^"
+      ]
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "GNU Make Manual §6.2 The Two Flavors of Variables",
+      "difficulty": "medium",
+      "title": "`=` 与 `:=` 的求值时机",
+      "content_md": "```makefile\nA = $(B)\nB = 1\n\nC := $(D)\nD = 2\n\nall:\n\\t@echo \"A=[$(A)] C=[$(C)]\"\n```\n\n`make` 的输出是？\n\nA. `A=[1] C=[2]`\nB. `A=[1] C=[]`\nC. `A=[] C=[2]`\nD. `A=[] C=[]`",
+      "answer": {
+        "correct": "B",
+        "explain": "- `A = $(B)` 是**递归展开**：定义时不求值，**每次使用**才展开。`echo` 时 `B` 已是 `1` → `A=[1]`。\n- `C := $(D)` 是**立即展开**：定义那一刻就求值，此时 `D` 还没被赋值 → `C=[]`（空）。后面 `D = 2` 对 `C` 再无影响。\n\n**为什么推荐 `:=`？** 两个理由：\n1. **性能**：`=` 每次引用都重新展开。若右侧含 `$(shell ...)`，那个命令会被反复执行——`STAMP = $(shell date +%s)` 会得到一个「每次都不一样」的值，让构建不可复现。\n2. **可预测**：`=` 的最终值取决于「最后一次展开时」其他变量的状态，在大型工程里极易产生顺序敏感 bug。"
+      },
+      "explanation": "递归展开 vs 立即展开是 Makefile 里最反直觉的一处语义，也是 `$(shell)` 重复执行这类疑难问题的根因。",
+      "tags": [
+        "Makefile",
+        "变量展开",
+        "递归展开"
+      ]
+    },
+    {
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "GNU Make Manual §10.5 Defining and Redefining Pattern Rules",
+      "difficulty": "hard",
+      "title": "补全 Makefile：模式规则 + 自动依赖 + 双构建模式",
+      "content_md": "给定工程：`src/main.c`、`src/util.c`，头文件 `include/util.h` 被 `util.c` 包含。\n\n请写出一个 Makefile，满足：\n\n1. 产出可执行文件 `app`（均放在 `build/` 目录下，源码目录保持干净）。\n2. 用**模式规则**处理 `.c → .o`，不要逐个写死文件名。\n3. **改 `include/util.h` 后，`util.o` 必须被重新编译**（用 `-MMD -MP` 自动生成依赖）。\n4. 提供 `debug`（`-O0 -g`）与 `release`（`-O2 -DNDEBUG`）两套构建模式，默认 release。\n5. `clean` 必须删掉**全部**生成物（含 `.d` 依赖文件）。",
+      "answer": {
+        "correct": "```makefile\nCC      := gcc\nSRCS    := src/main.c src/util.c\nOBJS    := $(SRCS:src/%.c=build/%.o)\nDEPS    := $(OBJS:.o=.d)\nTARGET  := build/app\n\nifeq ($(MODE),debug)\n  CFLAGS := -std=c11 -O0 -g -Wall -Iinclude\nelse\n  CFLAGS := -std=c11 -O2 -DNDEBUG -Wall -Iinclude\nendif\n# -MMD 生成依赖、-MP 兜底删除的头文件；-fPIC 视需要\nCFLAGS  += -MMD -MP\n\n.PHONY: all debug release clean\n\nall: release\ndebug:\n\t$(MAKE) MODE=debug\nrelease:\n\t$(MAKE) MODE=release\n\n$(TARGET): $(OBJS)\n\t$(CC) $(CFLAGS) -o $@ $^\n\nbuild/%.o: src/%.c\n\t@mkdir -p build\n\t$(CC) $(CFLAGS) -c $< -o $@\n\n-include $(DEPS)\n\nclean:\n\t@rm -rf build\n```",
+        "explain": "关键点逐个说明：\n1. `$(SRCS:src/%.c=build/%.o)` 是**替换引用**，从源码列表推出目标列表，避免两份手写清单不同步。\n2. `%.o: %.c` 模式规则 + 自动变量 `$< $@`，新增 `.c` 只要进 `SRCS` 即可。\n3. `-MMD -MP` 让编译器在编译时**顺便产出 `.d`**，内容是 `build/util.o: src/util.c include/util.h`；末尾 `-include $(DEPS)` 把它读进来，于是「改头文件触发重编」被自动满足。`-include` 前面的减号表示「`.d` 不存在也不算错误」（首次构建正是如此）。\n4. 双模式不靠两套规则，而是**同一个 Makefile 按 `MODE` 选 `CFLAGS`**——recipe 只有一份，避免两套规则逐渐不同步。`debug`/`release` 通过 `$(MAKE) MODE=xxx` 递归调用自己。\n5. `clean` 直接 `rm -rf build`：既然中间产物都在 `build/`，目录级删除天然不会漏 `.d`。\n6. `-Iinclude` 不可省，否则 `#include \"util.h\"` 找不到。"
+      },
+      "explanation": "这是一道「工程化 Makefile」的合成题，覆盖替换引用、模式规则、自动依赖、双模式与目录隔离五个要点。",
+      "tags": [
+        "Makefile",
+        "模式规则",
+        "-MMD",
+        "工程化"
+      ]
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "source": "leetcode",
+      "source_ref": "LeetCode 210 · 课程表 II",
+      "external_url": "https://leetcode.cn/problems/course-schedule-ii/",
+      "difficulty": "medium",
+      "title": "课程表 II（拓扑排序 = Make 的依赖解析）",
+      "content_md": "给定 `numCourses` 与先修关系 `prerequisites[i] = [a, b]`（修 a 前须先修 b），返回一个可行的学习顺序；若存在环则返回空数组。\n\n请用邻接表 + 入度数组（Kahn 算法）实现。",
+      "answer": {
+        "correct": "```c\n#include <stdlib.h>\n\nint *findOrder(int numCourses, int **prerequisites, int prerequisitesSize,\n               int *prerequisitesColSize, int *returnSize)\n{\n    int *indeg = calloc((size_t)numCourses, sizeof(int));\n    /* 用 CSR（压缩稀疏行）存邻接表：head/next 数组 */\n    int *head = malloc(sizeof(int) * (size_t)numCourses);\n    int *next = malloc(sizeof(int) * (size_t)(prerequisitesSize ? prerequisitesSize : 1));\n    for (int i = 0; i < numCourses; i++) head[i] = -1;\n    for (int i = 0; i < prerequisitesSize; i++) {\n        int a = prerequisites[i][0], b = prerequisites[i][1];\n        indeg[a]++;\n        next[i] = head[b];\n        head[b] = i;\n    }\n    int *queue = malloc(sizeof(int) * (size_t)(numCourses ? numCourses : 1));\n    int front = 0, back = 0;\n    for (int i = 0; i < numCourses; i++) if (indeg[i] == 0) queue[back++] = i;\n    int *order = malloc(sizeof(int) * (size_t)(numCourses ? numCourses : 1));\n    int n = 0;\n    while (front < back) {\n        int u = queue[front++];\n        order[n++] = u;\n        for (int e = head[u]; e != -1; e = next[e]) {\n            int v = prerequisites[e][0];\n            if (--indeg[v] == 0) queue[back++] = v;\n        }\n    }\n    free(indeg); free(head); free(next); free(queue);\n    if (n != numCourses) { free(order); *returnSize = 0; return NULL; }\n    *returnSize = n;\n    return order;\n}\n```",
+        "explain": "**这道题与 Makefile 是同构的**：`prerequisites` 就是依赖图的边，`numCourses` 是节点数，返回的学习顺序就是一个**拓扑序**——正是 Make 在调度 recipe 时计算的东西。\n\nKahn 算法的要点：\n- 入度为 0 的节点即「所有依赖已就绪」，可以立刻执行——对应 Make 中「依赖都已是最新」的目标。\n- 每处理一个节点就把它指向的节点入度减 1，减到 0 时入队——对应「某个依赖被重建后，触发依赖它的目标重新求值」。\n- **若最终输出节点数 < 总数，说明剩下节点的入度都 > 0，即图中存在环**——对应 Make 报 `Circular dependency dropped`。\n\n复杂度：O(V + E)；每个节点、每条边各处理一次。"
+      },
+      "explanation": "把「Make 依赖解析」与「拓扑排序」显式对应起来，是本节最有价值的一次跨知识点连接。",
+      "tags": [
+        "拓扑排序",
+        "BFS",
+        "依赖图",
+        "Makefile"
+      ]
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "source": "leetcode",
+      "source_ref": "LeetCode 207 · 课程表",
+      "external_url": "https://leetcode.cn/problems/course-schedule/",
+      "difficulty": "medium",
+      "title": "课程表（判环：构建失败的最常见原因）",
+      "content_md": "给定 `numCourses` 与先修关系，判断能否修完全部课程（即依赖图是否无环）。\n\n请写出函数，返回布尔值。",
+      "answer": {
+        "correct": "```c\n#include <stdbool.h>\n#include <stdlib.h>\n\nbool canFinish(int numCourses, int **prerequisites, int prerequisitesSize,\n               int *prerequisitesColSize)\n{\n    int *indeg = calloc((size_t)numCourses, sizeof(int));\n    int *head = malloc(sizeof(int) * (size_t)numCourses);\n    int *next = malloc(sizeof(int) * (size_t)(prerequisitesSize ? prerequisitesSize : 1));\n    for (int i = 0; i < numCourses; i++) head[i] = -1;\n    for (int i = 0; i < prerequisitesSize; i++) {\n        indeg[prerequisites[i][0]]++;\n        next[i] = head[prerequisites[i][1]];\n        head[prerequisites[i][1]] = i;\n    }\n    int *queue = malloc(sizeof(int) * (size_t)(numCourses ? numCourses : 1));\n    int front = 0, back = 0;\n    for (int i = 0; i < numCourses; i++) if (indeg[i] == 0) queue[back++] = i;\n    int seen = 0;\n    while (front < back) {\n        int u = queue[front++];\n        seen++;\n        for (int e = head[u]; e != -1; e = next[e]) {\n            int v = prerequisites[e][0];\n            if (--indeg[v] == 0) queue[back++] = v;\n        }\n    }\n    free(indeg); free(head); free(next); free(queue);\n    return seen == numCourses;\n}\n```",
+        "explain": "与 210 同一骨架，只是把「输出序列」换成「计数是否等于 V」。\n\n工程对应关系值得牢记：\n- **依赖图有环 ⇒ 构建系统无法确定执行顺序** ⇒ Make 报 `Circular dependency dropped`。\n  现实中最常见的环是**头文件互相包含**（`a.h` 包含 `b.h`、`b.h` 又包含 `a.h`），靠 include guard 只能避免重复展开，不能消除语义上的环。\n- 另一个常见类型是**静态库循环依赖**（clang-u07 ex10）：这在链接层面是环，但 Make 的依赖图通常是无环的——两者要分清层次。\n\n结论：`seen == numCourses` 当且仅当图无环（DAG）。"
+      },
+      "explanation": "判环与拓扑排序是一体两面；这里刻意把它与构建系统的实际报错对应起来。",
+      "tags": [
+        "拓扑排序",
+        "判环",
+        "DAG"
+      ]
+    }
+  ]
+}

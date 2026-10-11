@@ -1,0 +1,8 @@
+{
+  "title": "事件循环顺序：同步→微任务→宏任务",
+  "code_lang": "javascript",
+  "code_std": "node22",
+  "stdin": "",
+  "expected_output": "1 sync\n2 sync in async\n7 sync end\n3 micro queueMicrotask\n4 micro then\n6 micro after await\n5 macro setTimeout",
+  "code": "console.log('1 sync');\nsetTimeout(function(){ console.log('5 macro setTimeout'); }, 0);\nqueueMicrotask(function(){ console.log('3 micro queueMicrotask'); });\nPromise.resolve().then(function(){ console.log('4 micro then'); });\n(async function(){\n  console.log('2 sync in async');\n  await null;\n  console.log('6 micro after await');\n})();\nconsole.log('7 sync end');"
+}

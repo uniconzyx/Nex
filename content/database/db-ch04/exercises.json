@@ -1,0 +1,215 @@
+{
+  "meta": {
+    "chapter": "db-ch04",
+    "note": "8 题：基础题覆盖 EXPLAIN 列语义、type 阶梯、索引失效修复、覆盖索引与深分页设计、统计信息偏差；算法题为 LeetCode SQL 真题（连续数字、窗口函数），仅存元数据+链接，不存题面正文"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "difficulty": "mid",
+      "title": "关于 EXPLAIN 的 rows 与 filtered 列，下列说法正确的是",
+      "content_md": "执行计划里这两列各自表示什么？",
+      "options": [
+        {
+          "key": "A",
+          "text": "rows 是实际返回的行数，filtered 是无用的装饰列"
+        },
+        {
+          "key": "B",
+          "text": "rows 是优化器根据统计信息估算的扫描行数；filtered 是存储引擎返回后经条件过滤剩下的百分比"
+        },
+        {
+          "key": "C",
+          "text": "rows 是磁盘 I/O 次数，filtered 是索引命中率"
+        },
+        {
+          "key": "D",
+          "text": "rows 与 filtered 都只在 EXPLAIN ANALYZE 中才有意义"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "rows 是「估算」而非实测，统计信息过时就会偏差很大；filtered 表示该访问路径过滤后剩余行占比，两者相乘才是最终参与 join 的估算行数。要实测必须用 EXPLAIN ANALYZE（MySQL 8.0.18+）。",
+      "tags": [
+        "explain",
+        "rows",
+        "statistics"
+      ],
+      "source": "self",
+      "source_ref": "《高性能 MySQL》第 6 章（查询性能优化 / EXPLAIN 输出列）",
+      "category": "基础题",
+      "platform": "self"
+    },
+    {
+      "type": "choice",
+      "difficulty": "basic",
+      "title": "下列 EXPLAIN type 取值中，性能最好的与最差的分别是",
+      "content_md": "从 const / ref / range / index / ALL 中选出最好与最差。",
+      "options": [
+        {
+          "key": "A",
+          "text": "最好 index，最差 ALL"
+        },
+        {
+          "key": "B",
+          "text": "最好 const，最差 ALL"
+        },
+        {
+          "key": "C",
+          "text": "最好 range，最差 index"
+        },
+        {
+          "key": "D",
+          "text": "最好 ref，最差 range"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "阶梯为 system > const > eq_ref > ref > range > index > ALL。const 表示通过主键/唯一索引等值定位到最多一行；ALL 是全表扫描。特别注意 index 虽然带「index」字样，其实是扫整棵索引树，通常仍属需优化项。",
+      "tags": [
+        "explain",
+        "type"
+      ],
+      "source": "self",
+      "source_ref": "《高性能 MySQL》第 6 章（访问类型），对应 examples/ex04",
+      "category": "基础题",
+      "platform": "self"
+    },
+    {
+      "type": "fix_error",
+      "difficulty": "mid",
+      "title": "修复索引失效：在索引列上套函数",
+      "content_md": "表 orders 上有普通索引 idx_created(created_at)。以下查询走不了索引，请改写它并说明原因：\n\n```sql\nSELECT COUNT(*) FROM orders WHERE YEAR(created_at) = 2026;\n```",
+      "answer": {
+        "reference_code": "SELECT COUNT(*) FROM orders\nWHERE created_at >= '2026-01-01'\n  AND created_at <  '2027-01-01';",
+        "explanation": "索引 idx_created 是对 created_at 列的值排序的；一旦外层套上 YEAR()，优化器面对的是函数结果而不是列值本身，无法用列的有序性做定位（除非 MySQL 8.0.13+ 建立了函数索引）。把左侧改写为「列本身与常量比较」的区间条件即可恢复索引范围扫描（range）。"
+      },
+      "explanation": "核心原则：索引列必须「裸奔」，任何函数、运算、隐式类型转换都会让它失去可定位性。改写后 type 由 ALL 变为 range。",
+      "tags": [
+        "index-invalidation",
+        "function-index"
+      ],
+      "source": "self",
+      "source_ref": "《高性能 MySQL》第 5 章（索引选择性 / 索引失效），对应 examples/ex09",
+      "category": "基础题",
+      "platform": "self"
+    },
+    {
+      "type": "output",
+      "difficulty": "mid",
+      "title": "读懂一份 EXPLAIN：哪张表是瓶颈",
+      "content_md": "给定执行计划片段：\n\n```\nid | table | type  | key       | rows  | filtered | Extra\n1  | o     | ALL   | NULL      | 98000 | 10.00    | Using where\n1  | u     | eq_ref| PRIMARY   | 1     | 100.00   | NULL\n```\n\n请指出瓶颈表、原因，以及可能的修复方向。",
+      "answer": {
+        "reference_text": "瓶颈表 = o（type=ALL 全表扫描，估算扫 98000 行，且无可用索引 key=NULL，filtered 仅 10% 说明大部分行被过滤掉）。u 表走主键 eq_ref 健康。修复方向：为 o 表的 WHERE 条件列与 join 关联列建立合适的索引（按等值/范围/排序列序），使 type 降到 ref/range。"
+      },
+      "explanation": "读 EXPLAIN 的顺序：先看 type（有无 ALL）、再看 key（是否 NULL）、然后看 rows（估算扫描量）与 filtered（过滤比）。ALL + key=NULL 是最典型的「缺索引」信号。",
+      "tags": [
+        "explain",
+        "tuning"
+      ],
+      "source": "self",
+      "source_ref": "《高性能 MySQL》第 6 章，对应 examples/ex04、examples/ex12",
+      "category": "基础题",
+      "platform": "self"
+    },
+    {
+      "type": "coding",
+      "difficulty": "mid",
+      "title": "为高频列表查询设计覆盖索引",
+      "content_md": "订单表 orders(order_id PK, user_id BIGINT, status TINYINT, amount DECIMAL, created_at DATETIME)，业务上最频繁的查询是：\n\n```sql\nSELECT order_id, amount FROM orders\nWHERE user_id = ? AND status = ?\nORDER BY created_at DESC\nLIMIT 20;\n```\n\n请给出联合索引定义，并说明列序理由，以及如何用 EXPLAIN 验证「不回表」。",
+      "answer": {
+        "reference_code": "ALTER TABLE orders\n  ADD INDEX idx_user_status_time_amount (user_id, status, created_at, amount);\n\n-- 验证\nEXPLAIN SELECT order_id, amount FROM orders\nWHERE user_id = 123 AND status = 1\nORDER BY created_at DESC LIMIT 20;\n-- 期望: type=ref, key=idx_user_status_time_amount,\n--       Extra 含 \"Using index\"(覆盖索引, 不回表) 且不含 \"Using filesort\"",
+        "explanation": "列序 = 等值列(user_id, status) + 排序列(created_at) + 覆盖列(amount, order_id 是主键自动含在二级索引里)。等值列放最左保证定位；created_at 紧随其后让 ORDER BY 直接由索引序满足（避免 filesort）；把 amount 带进索引即可让 SELECT 列表全部命中索引，形成覆盖索引。"
+      },
+      "explanation": "判据：Extra 中同时出现 Using index（不回表）且没有 Using filesort（无额外排序），即为理想计划。",
+      "tags": [
+        "covering-index",
+        "composite-index",
+        "order-by"
+      ],
+      "source": "self",
+      "source_ref": "《高性能 MySQL》第 5 章（覆盖索引、列序），对应 examples/ex08、examples/ex11",
+      "category": "基础题",
+      "platform": "self"
+    },
+    {
+      "type": "coding",
+      "difficulty": "mid",
+      "title": "优化深分页查询",
+      "content_md": "以下查询在深页时极慢（OFFSET 很大），请给出至少两种优化方案并比较：\n\n```sql\nSELECT id, title, created_at FROM articles\nORDER BY id LIMIT 10 OFFSET 999990;\n```",
+      "answer": {
+        "reference_code": "-- 方案一：延迟关联（先走覆盖索引取主键，再回表取列）\nSELECT a.id, a.title, a.created_at\nFROM articles a\nJOIN (SELECT id FROM articles ORDER BY id LIMIT 10 OFFSET 999990) t\n  ON a.id = t.id\nORDER BY a.id;\n\n-- 方案二：游标分页（记住上一页最后的主键）\nSELECT id, title, created_at FROM articles\nWHERE id > :last_seen_id\nORDER BY id LIMIT 10;",
+        "explanation": "朴素 LIMIT offset 必须先扫描并丢弃 offset 行（这里 999990 行）。延迟关联把「丢弃」阶段限制在只读索引页（覆盖索引不含宽列），只有最终 10 行才回表；游标分页则彻底避免丢弃，直接按主键 > last_id 定位，代价与页深无关。"
+      },
+      "explanation": "结论：游标分页 > 延迟关联 > 朴素 LIMIT（在深页场景下）。差异随 OFFSET 增大而放大，见 examples/ex07 的代价模型。",
+      "tags": [
+        "pagination",
+        "covering-index",
+        "tuning"
+      ],
+      "source": "self",
+      "source_ref": "《高性能 MySQL》第 6 章（优化 LIMIT 分页），对应 examples/ex07",
+      "category": "基础题",
+      "platform": "self"
+    },
+    {
+      "type": "coding",
+      "difficulty": "hard",
+      "title": "LeetCode 180 · 连续出现的数字（consecutive-numbers）",
+      "content_md": "找出在 logs 表里至少连续出现三次的数字。可用窗口函数（ROW_NUMBER 分组差分）或自连接三份表实现。",
+      "answer": {
+        "reference_code": "SELECT DISTINCT l1.num AS ConsecutiveNums\nFROM logs l1\nJOIN logs l2 ON l1.id = l2.id - 1 AND l1.num = l2.num\nJOIN logs l3 ON l2.id = l3.id - 2 AND l2.num = l3.num;"
+      },
+      "explanation": "自连接思路：三张表按 id 相邻且 num 相等。等价窗口函数写法：用 id - ROW_NUMBER() OVER (PARTITION BY num ORDER BY id) 得到分组键，同一组内 count>=3 的 num 即为答案。",
+      "tags": [
+        "window-function",
+        "self-join"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 180（consecutive-numbers）",
+      "external_url": "https://leetcode.cn/problems/consecutive-numbers/",
+      "test_cases": [
+        {
+          "input": "schema 与样例数据见 external_url",
+          "expected_output": "见 external_url",
+          "is_sample": true
+        }
+      ],
+      "category": "算法题",
+      "platform": "leetcode"
+    },
+    {
+      "type": "coding",
+      "difficulty": "hard",
+      "title": "LeetCode 1321 · 餐馆营业额变化增长（restaurant-growth）",
+      "content_md": "计算每天及之前 6 天的总营业额与「已营业至少 7 天的顾客」平均消费额。核心是滑动窗口 + 日期区间过滤，需要判断优化器能否用上 (visited_on) 上的索引。",
+      "answer": {
+        "reference_code": "SELECT visited_on,\n       SUM(amount) AS amount,\n       ROUND(SUM(amount) / 7, 2) AS average_amount\nFROM customer\nWHERE visited_on BETWEEN (SELECT MIN(visited_on) + INTERVAL 6 DAY FROM customer)\n                     AND (SELECT MAX(visited_on) FROM customer)\nGROUP BY visited_on\nORDER BY visited_on;"
+      },
+      "explanation": "先用子查询定出有效日期区间（至少已营业 7 天），再按日期聚合。把区间条件下推到 WHERE 而非 HAVING，可以让 (visited_on) 索引做 range 扫描而不是全表扫后过滤。",
+      "tags": [
+        "window-function",
+        "range-scan",
+        "date"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 1321（restaurant-growth）",
+      "external_url": "https://leetcode.cn/problems/restaurant-growth/",
+      "test_cases": [
+        {
+          "input": "schema 与样例数据见 external_url",
+          "expected_output": "见 external_url",
+          "is_sample": true
+        }
+      ],
+      "category": "算法题",
+      "platform": "leetcode"
+    }
+  ]
+}

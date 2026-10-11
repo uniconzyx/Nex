@@ -1,0 +1,318 @@
+{
+  "schema_version": 1,
+  "subject": "fullstack",
+  "title": "CppMind · 全栈开发课程体系",
+  "note": "阶段7 全栈开发学科资源整合大纲。★用户硬规则：全栈路线的学习资源必须从 GitHub 上获取，因此本 manifest 与各章的 resources.github 字段须填入真实、可访问的开源仓库链接；books 仅作少量补充，主体资源来自 GitHub。每章须齐备 7 类内容（见 _template 规范），由 server/scripts/validate_content.py 校验。resources 仅存元数据与链接，不存第三方题面/正文，符合合规红线。",
+  "groups": {
+    "L1": "前端基础",
+    "L2": "JS 核心",
+    "L3": "前端框架",
+    "L4": "后端与 Node",
+    "L5": "API 与数据",
+    "L6": "认证与部署",
+    "L7": "项目实战"
+  },
+  "chapters": [
+    {
+      "id": "fs-ch01",
+      "order": 1,
+      "group": "L1",
+      "title": "Web 工作原理：HTTP 协议与浏览器-服务器交互",
+      "summary": "一次网页请求的完整链路（URL 解析→DNS→TCP/TLS→HTTP→服务端→渲染）；HTTP 报文结构（请求行/状态行、头部、空行、主体）与方法的语义契约（安全性/幂等性）；状态码五类语义与高频码辨析（301/302/307、401/403、502/503/504）；内容协商与常用头部；强缓存 vs 协商缓存（Cache-Control / ETag / 304）；Cookie 安全属性（HttpOnly/Secure/SameSite）与 Session vs JWT 的状态外移方案；同源策略、CORS 预检与开发者工具 Network 面板定位。",
+      "prerequisites": [],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "donnemartin/system-design-primer",
+          "CyC2018/CS-Notes",
+          "nodejs/node",
+          "hoppscotch/hoppscotch"
+        ],
+        "github_stars": [
+          373461,
+          186392,
+          122410,
+          80581
+        ],
+        "github_notes": [
+          "系统设计入门：HTTP/API/缓存/CDN/负载均衡的工程视角（英文）",
+          "技术面试必备基础知识：计算机网络与 HTTP 专题的中文精华笔记",
+          "Node.js 运行时：lib/http.js 为标准库 HTTP 实现，本章示例即基于其公开 API",
+          "开源 API 调试工具：可直接观察请求头/响应头，配合本章 Network 面板学习"
+        ],
+        "github_fetched_at": "2026-10-07",
+        "books": [
+          "MDN Web Docs · HTTP 指南（GitHub: mdn/content，11028★，权威规范解读，随规范持续更新）"
+        ],
+        "leetcode": [
+          "https://leetcode.cn/problems/lru-cache/",
+          "https://leetcode.cn/problems/logger-rate-limiter/"
+        ],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "fs-ch02",
+      "order": 2,
+      "group": "L1",
+      "title": "前端基础：HTML 语义化与 CSS 盒模型/布局",
+      "summary": "HTML 语义化结构与可访问性（header/nav/main/article/section/footer 等）；浏览器渲染管线（解析→样式计算→布局→绘制→合成）；CSS 盒模型（content/padding/border/margin）与 box-sizing；BFC 与清除浮动/外边距塌陷；Flexbox / Grid 现代布局；响应式与媒体查询。",
+      "prerequisites": [
+        "fs-ch01"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "trekhleb/javascript-algorithms",
+          "Chalarangelo/30-seconds-of-code",
+          "yangshun/front-end-interview-handbook"
+        ],
+        "github_stars": [
+          196855,
+          129326,
+          44008
+        ],
+        "github_notes": [
+          "JavaScript 算法与数据结构，含英文详解",
+          "短小精悍的 JS/CSS/HTML 代码片段集，覆盖日常前端技巧",
+          "前端面试手册：HTML/CSS/JS/浏览器/性能"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《HTML & CSS 设计与构建网站》（Jon Duckett）",
+          "《CSS 权威指南（第4版）》第 1-8 章"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "fs-ch03",
+      "order": 3,
+      "group": "L2",
+      "title": "JavaScript 核心：类型、原型链、DOM 与事件、异步(Promise/async)",
+      "summary": "值与类型系统（原始类型/对象、typeof 与类型转换/隐式 coercion）；原型链与 class 语法糖、this 四种绑定；作用域与闭包、变量提升与 TDZ；V8 对象表示与隐藏类（shape/map）；事件循环（调用栈/宏任务/微任务）；DOM 树与事件流（捕获/目标/冒泡）、事件委托；HTTP 请求生命周期与前后端关系；Promise/async-await 与错误处理。",
+      "prerequisites": [
+        "fs-ch02"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "trekhleb/javascript-algorithms",
+          "Chalarangelo/30-seconds-of-code",
+          "yangshun/front-end-interview-handbook"
+        ],
+        "github_stars": [
+          196855,
+          129326,
+          44008
+        ],
+        "github_notes": [
+          "JavaScript 算法与数据结构，含英文详解",
+          "短小精悍的 JS/CSS/HTML 代码片段集，覆盖日常前端技巧",
+          "前端面试手册：HTML/CSS/JS/浏览器/性能"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《JavaScript 高级程序设计（第4版）》第 3-11 章",
+          "《你不知道的 JavaScript（上/中/下）》"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "fs-ch04",
+      "order": 4,
+      "group": "L4",
+      "title": "Node.js 与后端 API",
+      "summary": "Node 运行时与事件循环；CommonJS/ESM 模块；HTTP 服务；Express/Koa 路由与中间件；错误处理；环境变量与配置。",
+      "prerequisites": [
+        "fs-ch02"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "trekhleb/javascript-algorithms",
+          "Chalarangelo/30-seconds-of-code",
+          "yangshun/front-end-interview-handbook"
+        ],
+        "github_stars": [
+          196855,
+          129326,
+          44008
+        ],
+        "github_notes": [
+          "JavaScript 算法与数据结构，含英文详解",
+          "短小精悍的 JS/CSS/HTML 代码片段集，覆盖日常前端技巧",
+          "前端面试手册：HTML/CSS/JS/浏览器/性能"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Node.js 设计模式（第3版）》"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "fs-ch05",
+      "order": 5,
+      "group": "L5",
+      "title": "数据库与 REST API 设计",
+      "summary": "关系型与文档型数据库选型；SQL 基础与索引；ORM/ODM；RESTful 资源设计；请求校验与分页；API 文档（OpenAPI）。",
+      "prerequisites": [
+        "fs-ch04"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "trekhleb/javascript-algorithms",
+          "Chalarangelo/30-seconds-of-code",
+          "yangshun/front-end-interview-handbook"
+        ],
+        "github_stars": [
+          196855,
+          129326,
+          44008
+        ],
+        "github_notes": [
+          "JavaScript 算法与数据结构，含英文详解",
+          "短小精悍的 JS/CSS/HTML 代码片段集，覆盖日常前端技巧",
+          "前端面试手册：HTML/CSS/JS/浏览器/性能"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《REST API 设计与实践》"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "fs-ch06",
+      "order": 6,
+      "group": "L6",
+      "title": "用户认证 / JWT / 鉴权",
+      "summary": "会话与令牌机制；JWT 结构与签发校验；密码哈希（bcrypt）；中间件鉴权；OAuth2/第三方登录概览；CSRF/XSS 防护基础。",
+      "prerequisites": [
+        "fs-ch04",
+        "fs-ch05"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "trekhleb/javascript-algorithms",
+          "Chalarangelo/30-seconds-of-code",
+          "yangshun/front-end-interview-handbook"
+        ],
+        "github_stars": [
+          196855,
+          129326,
+          44008
+        ],
+        "github_notes": [
+          "JavaScript 算法与数据结构，含英文详解",
+          "短小精悍的 JS/CSS/HTML 代码片段集，覆盖日常前端技巧",
+          "前端面试手册：HTML/CSS/JS/浏览器/性能"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Web 安全深度剖析》"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "fs-ch07",
+      "order": 7,
+      "group": "L7",
+      "title": "全栈项目实战（GitHub 资源驱动）",
+      "summary": "综合运用前端框架 + Node 后端 + 数据库，完成一个完整全栈应用；组件/接口联调；状态管理与数据流转；以 GitHub 真实开源项目为参考范式。",
+      "prerequisites": [
+        "fs-ch03",
+        "fs-ch05"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "trekhleb/javascript-algorithms",
+          "Chalarangelo/30-seconds-of-code",
+          "yangshun/front-end-interview-handbook"
+        ],
+        "github_stars": [
+          196855,
+          129326,
+          44008
+        ],
+        "github_notes": [
+          "JavaScript 算法与数据结构，含英文详解",
+          "短小精悍的 JS/CSS/HTML 代码片段集，覆盖日常前端技巧",
+          "前端面试手册：HTML/CSS/JS/浏览器/性能"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《全栈开发实战》"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "fs-ch08",
+      "order": 8,
+      "group": "L6",
+      "title": "部署 / CI-CD / Docker",
+      "summary": "Linux 与 SSH 基础；Docker 镜像与容器；Docker Compose 编排；GitHub Actions 流水线；环境变量与日志；基础监控与回滚。",
+      "prerequisites": [
+        "fs-ch04"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "trekhleb/javascript-algorithms",
+          "Chalarangelo/30-seconds-of-code",
+          "yangshun/front-end-interview-handbook"
+        ],
+        "github_stars": [
+          196855,
+          129326,
+          44008
+        ],
+        "github_notes": [
+          "JavaScript 算法与数据结构，含英文详解",
+          "短小精悍的 JS/CSS/HTML 代码片段集，覆盖日常前端技巧",
+          "前端面试手册：HTML/CSS/JS/浏览器/性能"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Docker 深入浅出》"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    }
+  ],
+  "github_resources": [
+    {
+      "repo": "trekhleb/javascript-algorithms",
+      "stars": 196855,
+      "url": "https://github.com/trekhleb/javascript-algorithms",
+      "note": "JavaScript 算法与数据结构，含英文详解"
+    },
+    {
+      "repo": "Chalarangelo/30-seconds-of-code",
+      "stars": 129326,
+      "url": "https://github.com/Chalarangelo/30-seconds-of-code",
+      "note": "短小精悍的 JS/CSS/HTML 代码片段集，覆盖日常前端技巧"
+    },
+    {
+      "repo": "yangshun/front-end-interview-handbook",
+      "stars": 44008,
+      "url": "https://github.com/yangshun/front-end-interview-handbook",
+      "note": "前端面试手册：HTML/CSS/JS/浏览器/性能"
+    }
+  ],
+  "resources_fetched_at": "2026-09-21"
+}

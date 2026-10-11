@@ -1,0 +1,8 @@
+{
+  "title": "缓存失效策略：TTL + stale-while-revalidate，用整数逻辑时钟给出状态序列",
+  "code_lang": "javascript",
+  "code_std": "node18",
+  "stdin": "",
+  "expected_output": "t0_read_miss=miss\nt0_after_write=fresh\nt50=fresh\nt110=stale\nt110_value_served=v1\nt110_is_usable=true\nt310=expired\nt310_value=null\nrewrite_state=fresh\nrewrite_value=v2\n",
+  "code": "// TTL 缓存 + stale-while-revalidate：整数逻辑时钟驱动，输出可断言\nfunction createCache(ttlMs, swrMs) {\n  const store = new Map();\n  let now = 0;\n  return {\n    advance(ms) { now += ms; },\n    read(key) {\n      const e = store.get(key);\n      if (!e) return { value: null, state: 'miss' };\n      const age = now - e.at;\n      if (age <= ttlMs) return { value: e.value, state: 'fresh' };\n      if (age <= ttlMs + swrMs) return { value: e.value, state: 'stale' };  // 先给旧值，后台刷新\n      return { value: null, state: 'expired' };\n    },\n    write(key, value) { store.set(key, { value, at: now }); return value; },\n  };\n}\n\nconst c = createCache(100, 200);      // ttl=100ms, swr 窗口=200ms\nconsole.log('t0_read_miss=' + c.read('k').state);\nc.write('k', 'v1');\nconsole.log('t0_after_write=' + c.read('k').state);\nc.advance(50);\nconsole.log('t50=' + c.read('k').state);\nc.advance(60);                        // now=110, age=110 -> 超 ttl(100) 未超 ttl+swr(300)\nconsole.log('t110=' + c.read('k').state);\nconsole.log('t110_value_served=' + c.read('k').value);\nconsole.log('t110_is_usable=' + (c.read('k').value !== null));\nc.advance(200);                       // now=310, age=310 -> 超过 300\nconsole.log('t310=' + c.read('k').state);\nconsole.log('t310_value=' + c.read('k').value);\nc.write('k', 'v2');\nconsole.log('rewrite_state=' + c.read('k').state);\nconsole.log('rewrite_value=' + c.read('k').value);\n"
+}

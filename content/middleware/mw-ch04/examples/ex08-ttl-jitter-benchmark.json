@@ -1,0 +1,9 @@
+{
+  "title": "TTL 抖动幅度对失效峰值的影响（定量）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "key 数=2000, 基础 TTL=600s, 统计窗口=10s\n抖动幅度 -> 单一窗口内最大失效 key 数 / 占总 key 比例\n  jitter=   0s -> 峰值  2000 个 (100.00%)\n  jitter=  60s -> 峰值   342 个 (17.10%)\n  jitter= 120s -> 峰值   191 个 ( 9.55%)\n  jitter= 300s -> 峰值    80 个 ( 4.00%)\n  jitter= 600s -> 峰值    46 个 ( 2.30%)\n  jitter=1200s -> 峰值    27 个 ( 1.35%)\n\n理想摊平值 = 2000 / (1200/10) = 16.7 个\n规律: 抖动幅度越大，峰值越接近均匀摊平值；但 TTL 差异过大会导致数据新鲜度不一致\n工程取值: spread 通常取 base 的 10%~50%，兼顾摊平效果与新鲜度\n",
+  "code": "import random\n\ndef peak(n, base, jitter, seed=42, bucket=10):\n    rng = random.Random(seed)\n    hist = {}\n    for _ in range(n):\n        t = base + (rng.randint(0, jitter) if jitter else 0)\n        hist[t // bucket] = hist.get(t // bucket, 0) + 1\n    return max(hist.values())\n\nN, BASE = 2000, 600\nprint(\"key 数=%d, 基础 TTL=%ds, 统计窗口=%ds\" % (N, BASE, 10))\nprint(\"抖动幅度 -> 单一窗口内最大失效 key 数 / 占总 key 比例\")\nfor jitter in [0, 60, 120, 300, 600, 1200]:\n    p = peak(N, BASE, jitter)\n    print(\"  jitter=%4ds -> 峰值 %5d 个 (%5.2f%%)\" % (jitter, p, 100.0 * p / N))\n\nprint(\"\")\nprint(\"理想摊平值 = %d / (%d/%d) = %.1f 个\" % (N, 1200, 10, N / (1200 / 10)))\nprint(\"规律: 抖动幅度越大，峰值越接近均匀摊平值；但 TTL 差异过大会导致数据新鲜度不一致\")\nprint(\"工程取值: spread 通常取 base 的 10%~50%，兼顾摊平效果与新鲜度\")\n",
+  "_verified": true
+}

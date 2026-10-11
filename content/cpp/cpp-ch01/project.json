@@ -1,0 +1,14 @@
+{
+  "meta": { "chapter": "cpp-ch01", "category": "basic" },
+  "items": [
+    {
+      "title": "通讯录（控制台版）",
+      "requirement_md": "实现控制台通讯录：添加/删除/查找/列出联系人（姓名+电话）。用 std::vector + struct 组织数据，支持从文件读写持久化。",
+      "tasks": [
+        { "title": "定义 Contact 结构体与菜单循环", "verification": { "type": "manual", "desc": "菜单可正常进退" } },
+        { "title": "实现增删查列", "verification": { "type": "test", "desc": "覆盖空表/重复姓名/删除不存在项" } },
+        { "title": "文件持久化", "verification": { "type": "test", "desc": "重启程序数据仍在" } }
+      ]
+    }
+  ]
+}

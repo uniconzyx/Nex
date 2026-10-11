@@ -1,0 +1,49 @@
+{
+  "meta": { "chapter": "spring-ch02" },
+  "items": [
+    {
+      "question": "说一下 Spring Bean 的完整生命周期（从注册到销毁）。",
+      "answer_md": "单例 Bean 在容器启动/首次 getBean 时经历：\n1. **BeanDefinition 注册**：解析成定义存入 `beanDefinitionMap`；\n2. **实例化**：反射 `ctor.newInstance()` 得到半成品；\n3. **属性填充**：按注入方式把依赖 set 进字段/Setter；\n4. **Aware 回调**：BeanNameAware/BeanFactoryAware/ApplicationContextAware 等；\n5. **BPP 前置**：`postProcessBeforeInitialization`；\n6. **初始化**：`@PostConstruct` → `InitializingBean.afterPropertiesSet` → `init-method`；\n7. **BPP 后置**：`postProcessAfterInitialization`（AOP 代理常在此生成）；\n8. **就绪使用**：进 `singletonObjects` 一级缓存；\n9. **销毁**：`@PreDestroy` → `DisposableBean.destroy` → `destroy-method`。\n\n话术：先背 9 步，再点出「初始化三方式顺序、销毁三方式顺序、BPP 夹着初始化」三个关键点。",
+      "follow_ups": [
+        "为什么 @PostConstruct 比 afterPropertiesSet 早？",
+        "BPP 返回 null 会怎样？",
+        "prototype 的销毁回调会触发吗？"
+      ],
+      "difficulty": "mid",
+      "company_tags": ["通用", "字节", "阿里"]
+    },
+    {
+      "question": "Spring 怎么解决循环依赖？为什么用三级缓存而不是两级？",
+      "answer_md": "单例 + Setter/字段注入的循环依赖靠**三级缓存**解决：\n- 一级 `singletonObjects`（成品）；二级 `earlySingletonObjects`（早期引用）；三级 `singletonFactories`（ObjectFactory）。\n\n流程：实例化 A → 把 A 的早期引用工厂放三级 → 填充需 B → 建 B（同样暴露） → 填 B 需 A → 从三级取 A 早期引用（升二级）注入 B → B 完成进一级 → 回 A 注入成品 B。\n\n**为什么三级而非两级**：三级存的是 `getEarlyBeanReference` 工厂，把「是否提前生成 AOP 代理」推迟到「真正需要早期引用」时决定；若只有两级，无循环时也会提前生成代理，违背懒代理原则，且无法统一「早期引用是原始对象还是代理」。",
+      "follow_ups": [
+        "构造器注入的循环依赖为什么救不了？",
+        "prototype 循环依赖能解决吗？",
+        "加了 AOP 后早期引用返回的是代理还是原始对象？"
+      ],
+      "difficulty": "hard",
+      "company_tags": ["通用", "腾讯", "美团"]
+    },
+    {
+      "question": "singleton 里注入 prototype，每次拿到的是新实例吗？怎么解决？",
+      "answer_md": "**不是**。容器只在「单例创建时」注入一次 prototype，之后单例长期持有同一引用，后续 `getBean` 不会重注。\n\n修复方式：\n- `ObjectProvider`：`@Autowired ObjectProvider<Proto> p;`，用时 `p.getObject()` 每次取新；\n- `@Lookup` 方法（`protected abstract Proto proto();`，CGLIB 重写返回 `getBean`）；\n- 或把「取 prototype」建模为函数而非字段。\n\n根因：依赖注入发生在单例创建期（只一次），prototype 的「每次新建」仅作用于「主动 getBean/provider 取」这条路径。",
+      "follow_ups": [
+        "ObjectProvider 和 @Lookup 的实现差异？",
+        "prototype 注入 singleton 的单例本身还是单例吗？",
+        "request/session 作用域也依赖这种机制吗？"
+      ],
+      "difficulty": "mid",
+      "company_tags": ["通用", "京东", "拼多多"]
+    },
+    {
+      "question": "@Configuration 和 @Component 里的 @Bean 有什么区别？为什么 @Configuration 要用 CGLIB 代理？",
+      "answer_md": "**@Configuration 被 CGLIB 增强**：Spring 生成其子类并重写每个 `@Bean` 方法，方法体先查容器单例缓存、命中返回、未命中才 `super.xxx()` 真正创建。这样类内 `@Bean` 互调（如 `audit()` 调 `service()`）也走容器缓存，保证单例共享。\n\n**@Component 不增强**：`@Bean` 互调是普通方法调用，每次 `new`，单例变多例、状态不一致。\n\n为什么必须代理而非反射：配置类可能有多个 @Bean 互相依赖，只有「每次进入 @Bean 方法都先过容器」才能统一单例；反射无法拦截方法内部互调，唯有字节码重写（CGLIB）或接口代理能做到。注意 @Configuration 类与方法不能是 `final`。",
+      "follow_ups": [
+        "@Configuration 类能用 JDK 动态代理吗？",
+        "final 方法会怎样？",
+        "Full @Configuration 与 Lite @Bean 模式是什么？"
+      ],
+      "difficulty": "hard",
+      "company_tags": ["通用", "阿里", "字节"]
+    }
+  ]
+}

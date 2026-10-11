@@ -1,0 +1,42 @@
+{
+  "meta": {
+    "chapter": "spring-ch01",
+    "category": "basic"
+  },
+  "items": [
+    {
+      "title": "迷你 IoC 容器（纯 JDK 实现）",
+      "requirement_md": "不依赖任何框架，用纯 JDK 实现一个最小可用的 IoC 容器，覆盖本章核心知识点：\n\n1. **注册与获取**：维护 `beanName -> BeanDefinition` 的注册表，支持按名称/类型获取单例。\n2. **组件扫描**：扫描指定包下带 `@Component` 的类并自动注册（可用 RUNTIME 保留的自定义注解）。\n3. **依赖注入**：支持构造器注入与字段注入（用反射把依赖填入），多候选时用 `@Qualifier` 按名称解析。\n4. **作用域**：至少支持 `singleton`（缓存同一实例）；可选实现 `prototype`（每次新建）。\n5. **循环依赖**：尝试用三级缓存（singletonObjects / earlySingletonObjects / singletonFactories）解决单例 Setter 注入的循环依赖，并验证构造器循环依赖会失败。\n\n验收：编写一个 `Main` 演示 A↔B 循环依赖被正确装配、单例共享同一实例、字段注入生效。",
+      "tasks": [
+        {
+          "title": "定义注解与 BeanDefinition 注册表",
+          "verification": {
+            "type": "test",
+            "desc": "能注册 bean 定义并按下名/类型取回定义"
+          }
+        },
+        {
+          "title": "实现组件扫描（ClassPath 扫描 + 注解过滤）",
+          "verification": {
+            "type": "test",
+            "desc": "扫描后指定包下的 @Component 类全部进入注册表"
+          }
+        },
+        {
+          "title": "实现构造器/字段反射注入与 @Qualifier 解析",
+          "verification": {
+            "type": "test",
+            "desc": "注入后字段非 null，多候选按名称命中"
+          }
+        },
+        {
+          "title": "实现 singleton 缓存与三级缓存解决循环依赖",
+          "verification": {
+            "type": "manual",
+            "desc": "Main 演示 A.b 与 B.a 互为同一引用且均为成品；构造器循环依赖报 BeanCurrentlyInCreationException"
+          }
+        }
+      ]
+    }
+  ]
+}

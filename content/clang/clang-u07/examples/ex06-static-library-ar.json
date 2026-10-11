@@ -1,0 +1,18 @@
+{
+  "title": "静态库：ar 打包目标文件，链接时按需抽取",
+  "code_lang": "bash",
+  "code_std": "bash5",
+  "stdin": "",
+  "expected_output": "$ gcc -c add.c -o add.o\n$ gcc -c mul.c -o mul.o\n$ ar rcs libmath.a add.o mul.o   # r=插入 c=创建 s=建索引\n$ nm libmath.a                   # 归档内每个成员的符号\n\r\nadd.o:\r\n0000000000000000 b .bss\r\n0000000000000000 d .data\r\n0000000000000000 p .pdata\r\n0000000000000000 r .rdata$zzz\r\n0000000000000000 t .text\r\n0000000000000000 r .xdata\r\n0000000000000000 T add\r\n\r\nmul.o:\r\n0000000000000000 b .bss\r\n0000000000000000 d .data\r\n0000000000000000 p .pdata\r\n0000000000000000 r .rdata$zzz\r\n0000000000000000 t .text\r\n0000000000000000 r .xdata\r\n0000000000000000 T mul\r\n$ gcc -c main.c -o main.o\n$ gcc main.o -L. -lmath -o app   # -L. 库目录，-lmath -> libmath.a\n$ ./app\nadd(3, 4) = 7\r\nmul(3, 4) = 12\r",
+  "code": "#!/bin/sh\n# 静态库：ar 打包目标文件，链接时按需抽取\n# 期望输出见 expected_output（本机 MinGW 工具链真实执行捕获）\n\ncat > add.c << 'EOF'\nint add(int a, int b)\n{\n    return a + b;\n}\nEOF\n\ncat > mul.c << 'EOF'\nint mul(int a, int b)\n{\n    return a * b;\n}\nEOF\n\ncat > main.c << 'EOF'\n#include <stdio.h>\n\nint add(int, int);\nint mul(int, int);\n\nint main(void)\n{\n    printf(\"add(3, 4) = %d\\n\", add(3, 4));\n    printf(\"mul(3, 4) = %d\\n\", mul(3, 4));\n    return 0;\n}\nEOF\n\ngcc -c add.c -o add.o\ngcc -c mul.c -o mul.o\nar rcs libmath.a add.o mul.o   # r=插入 c=创建 s=建索引\nnm libmath.a                   # 归档内每个成员的符号\ngcc -c main.c -o main.o\ngcc main.o -L. -lmath -o app   # -L. 库目录，-lmath -> libmath.a\n./app\n",
+  "_step_rc": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "_verify_note": "expected_output 为 Windows + MinGW-w64（gcc 15.2 / binutils 2.45）真实执行捕获；脚本中显示的是可移植命令形式（gcc/ar/nm/objdump/size），本机实际以 D:/mingw64/bin/ 下的同名工具驱动，二者等价。"
+}

@@ -1,0 +1,9 @@
+{
+  "title": "RDB 快照：fork + 写时复制(COW) 模拟",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "BGSAVE 触发，fork 子进程生成 RDB 快照\n快照内容: {'k0': 0, 'k1': 1, 'k2': 2, 'k3': 3, 'k4': 4}\n父进程新增/修改后当前数据: {'k0': 999, 'k1': 1, 'k2': 2, 'k3': 3, 'k4': 4, 'k6': 6}\n快照内容(未被父进程写入影响): {'k0': 0, 'k1': 1, 'k2': 2, 'k3': 3, 'k4': 4}\nCOW 收益: 仅被修改的页在父进程侧复制, 未改页父子共享, fork 开销=O(页表)",
+  "code": "class KV:\n    def __init__(self):\n        self.data = {f\"k{i}\": i for i in range(5)}\n    def fork_snapshot(self):\n        # 模拟 COW：子进程拿到 fork 时刻的只读视图（浅拷贝共享页）\n        return dict(self.data)\n\ndb = KV()\nprint(\"BGSAVE 触发，fork 子进程生成 RDB 快照\")\nsnapshot = db.fork_snapshot()\nprint(\"快照内容:\", snapshot)\n# 主进程继续服务写入，COW 让子进程视图不受影响\ndb.data[\"k0\"] = 999\ndb.data[\"k6\"] = 6\nprint(\"父进程新增/修改后当前数据:\", db.data)\nprint(\"快照内容(未被父进程写入影响):\", snapshot)\nprint(\"COW 收益: 仅被修改的页在父进程侧复制, 未改页父子共享, fork 开销=O(页表)\")\n",
+  "_verified": true
+}

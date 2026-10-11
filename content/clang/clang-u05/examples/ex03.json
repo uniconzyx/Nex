@@ -1,0 +1,8 @@
+{
+  "title": "多语句宏必须用 do-while(0) 包裹",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "=== LOG_BAD：期望循环 3 次各打印 A、B，但实际 B 只打印一次 ===\nA:0\nA:1\nA:2\nB:3\n=== LOG_OK：do-while(0) 让宏成为单语句，循环行为正确 ===\nA:0\nB:0\nA:1\nB:1\nA:2\nB:2",
+  "code": "#include <stdio.h>\n/* 坏宏：多条语句直接拼，没有用 do-while(0) 包裹 */\n#define LOG_BAD(x)  printf(\"A:%d\\n\", x); printf(\"B:%d\\n\", x)\n/* 好宏：用 do-while(0) 包裹成单一语句 */\n#define LOG_OK(x)  do { printf(\"A:%d\\n\", x); printf(\"B:%d\\n\", x); } while (0)\n\nint main(void) {\n    int n = 3, k;\n    printf(\"=== LOG_BAD：期望循环 3 次各打印 A、B，但实际 B 只打印一次 ===\\n\");\n    for (k = 0; k < n; k++)\n        LOG_BAD(k);          /* 展开：printf(A); printf(B);  —— for 只管第一句 */\n    printf(\"=== LOG_OK：do-while(0) 让宏成为单语句，循环行为正确 ===\\n\");\n    for (k = 0; k < n; k++)\n        LOG_OK(k);\n    return 0;\n}"
+}

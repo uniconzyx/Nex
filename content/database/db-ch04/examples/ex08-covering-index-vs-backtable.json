@@ -1,0 +1,8 @@
+{
+  "title": "覆盖索引 vs 回表的页访问量对比",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== 回表 vs 覆盖索引 (命中 200 行) ===\n\n访问路径                                       页访问数         说明\n二级索引取主键 -> 回表聚簇取整行                         201          1 次索引页 + 每行 1 次聚簇页(随机 IO), 即经典「回表」\n覆盖索引 idx(user_id,order_id,amount)          2            只读索引页, 不回表\n\n覆盖索引页数 = 2, 回表页数 = 201\n页访问下降 = 100.5 倍\n\n=== 关键指标 ===\n覆盖索引每页条目数 = 682\n二级索引每页条目数 = 1024\nExtra 出现 Using index = 覆盖索引生效(不回表)\nExtra 出现 Using index condition = 索引下推(ICP), 仍可能回表",
+  "code": "PAGE = 16 * 1024\nKEY = 8\nPTR = 6\nHIT = 200          # 命中行数\n\n# 二级索引页: 存 (user_id, 主键)\nsec_entry = KEY + KEY\nsec_per_page = PAGE // sec_entry\n# 覆盖索引页: 存 (user_id, order_id, amount)\ncov_entry = KEY + KEY + 8\ncov_per_page = PAGE // cov_entry\n\nimport math\n\nprint(\"=== 回表 vs 覆盖索引 (命中 %d 行) ===\" % HIT)\nprint()\nprint(\"%-42s %-12s %s\" % (\"访问路径\", \"页访问数\", \"说明\"))\nprint(\"%-42s %-12d %s\" % (\"二级索引取主键 -> 回表聚簇取整行\",\n                           1 + HIT, \"1 次索引页 + 每行 1 次聚簇页(随机 IO), 即经典「回表」\"))\nprint(\"%-42s %-12d %s\" % (\"覆盖索引 idx(user_id,order_id,amount)\",\n                           math.ceil(HIT / cov_per_page) + 1, \"只读索引页, 不回表\"))\nprint()\ncov_pages = math.ceil(HIT / cov_per_page) + 1\nbacktable_pages = 1 + HIT\nprint(\"覆盖索引页数 = %d, 回表页数 = %d\" % (cov_pages, backtable_pages))\nprint(\"页访问下降 = %.1f 倍\" % (backtable_pages / cov_pages))\nprint()\nprint(\"=== 关键指标 ===\")\nprint(\"覆盖索引每页条目数 = %d\" % cov_per_page)\nprint(\"二级索引每页条目数 = %d\" % sec_per_page)\nprint(\"Extra 出现 Using index = 覆盖索引生效(不回表)\")\nprint(\"Extra 出现 Using index condition = 索引下推(ICP), 仍可能回表\")"
+}

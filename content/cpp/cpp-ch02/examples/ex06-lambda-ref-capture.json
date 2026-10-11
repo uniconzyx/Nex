@@ -1,0 +1,8 @@
+{
+  "title": "lambda 引用捕获求和",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "6",
+  "code": "#include <iostream>\n#include <vector>\n\nint main() {\n    std::vector<int> v{1, 2, 3};\n    int s = 0;\n    auto f = [&s](int x) { s += x; };\n    for (int x : v) f(x);\n    std::cout << s;\n}"
+}

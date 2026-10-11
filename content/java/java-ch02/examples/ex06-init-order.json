@@ -1,0 +1,8 @@
+{
+  "title": "初始化顺序：静态块→实例块/字段→构造器",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "static block\nstatic field init\n--- new E206 ---\ninstance block\ninstance field init\nconstructor\n--- new E206 again ---\ninstance block\ninstance field init\nconstructor",
+  "code": "public class E206 {\n    static { System.out.println(\"static block\"); }\n    { System.out.println(\"instance block\"); }\n    int field = initField();\n    static int sField = initSField();\n    static int initSField() { System.out.println(\"static field init\"); return 1; }\n    int initField() { System.out.println(\"instance field init\"); return 2; }\n    E206() { System.out.println(\"constructor\"); }\n    public static void main(String[] args) {\n        System.out.println(\"--- new E206 ---\");\n        new E206();\n        System.out.println(\"--- new E206 again ---\");\n        new E206();\n    }\n}"
+}

@@ -1,0 +1,65 @@
+{
+  "meta": {
+    "chapter": "spring-ch01"
+  },
+  "items": [
+    {
+      "question": "Spring 是怎么解决循环依赖的？为什么用三级缓存而不是两级？",
+      "answer_md": "Spring 用**三级缓存**解决单例 + Setter/字段注入的循环依赖：\n- 一级 `singletonObjects`：成品单例；\n- 二级 `earlySingletonObjects`：早期暴露的半成品引用；\n- 三级 `singletonFactories`：能产出早期引用的 ObjectFactory。\n\n流程：实例化 A（仅 new）→ 把 A 的早期引用工厂放进三级缓存 → 填充 A 需要 B → 创建 B 同样暴露 → 填充 B 需要 A → 从三级缓存拿 A 的早期引用（升到二级）注入 B → B 完成进一级 → 回到 A 注入成品 B。\n\n**为什么三级而非两级**：三级缓存存的是 `getEarlyBeanReference` 工厂，能在「真正需要早期引用」时才决定返回原始对象还是 AOP 代理，把「是否提前代理」的时机推迟；若只有两级，无循环时也会提前生成代理，违背懒代理原则。",
+      "follow_ups": [
+        "构造器注入的循环依赖为什么救不了？",
+        "prototype 作用域的循环依赖能解决吗？为什么？",
+        "加了 AOP 后早期引用返回的是代理还是原始对象？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "通用",
+        "字节",
+        "阿里"
+      ]
+    },
+    {
+      "question": "构造器注入、Setter 注入、字段注入你怎么选？",
+      "answer_md": "**强制/必填依赖用构造器注入**：依赖可声明为 `final`，对象构造即完整、不可变、线程安全，且单测可直接传 mock，循环依赖会早失败。\n**可选依赖用 Setter 注入**：允许构造后变更。\n**字段注入（@Autowired 标字段）不推荐**：写在私有字段上，单测必须起容器或反射才能注入，且无法声明 final，可测试性与不可变性最差。\n\n结论：Spring 官方推荐「构造器注入为主，Setter 为辅」。",
+      "follow_ups": [
+        "字段注入到底有什么具体危害？",
+        "为什么字段注入的循环依赖能被悄悄解决，反而更危险？",
+        "@RequiredArgsConstructor(Lombok) 算哪种注入？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "腾讯",
+        "美团"
+      ]
+    },
+    {
+      "question": "BeanFactory 和 ApplicationContext 有什么区别？",
+      "answer_md": "三点：\n1. **继承关系**：`ApplicationContext` 是 `BeanFactory` 的超集（继承并扩展多个子接口）。\n2. **实例化时机**：`BeanFactory` **懒加载**（首次 getBean 才创建）；`ApplicationContext` 在 `refresh()` 时**预实例化**所有非懒加载单例（fail-fast，更早暴露装配错误）。\n3. **能力边界**：`ApplicationContext` 额外提供国际化（MessageSource）、事件发布（ApplicationEvent）、Environment/Profile、AOP 基础设施等。\n\n易错：运行期两者单例获取都是 Map 查找，没有快慢之分。",
+      "follow_ups": [
+        "为什么生产几乎都用 ApplicationContext？",
+        "XmlBeanFactory 现在还能用吗？",
+        "预实例化对启动时间和内存的影响？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "京东"
+      ]
+    },
+    {
+      "question": "一个接口有两个实现，怎么注入指定的那个？",
+      "answer_md": "byType 找到多个候选时，需要 tie-breaker：\n- **@Qualifier(\"name\")**：按 bean 名称精确指定（优先级最高）；\n- **@Primary**：在默认实现上标，作为多候选时的首选；\n- **字段名兜底**：注入点字段名等于目标 bean 名时按 byName 命中。\n\n若都不指定会抛 `NoUniqueBeanDefinitionException`。注意 @Qualifier 是按**名称**匹配，不是按类型过滤。",
+      "follow_ups": [
+        "@Primary 和 @Qualifier 谁优先级高？",
+        "为什么同类型多 bean 不指定会抛异常？",
+        "@Resource 和 @Autowired 在解析顺序上有何不同？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "拼多多"
+      ]
+    }
+  ]
+}

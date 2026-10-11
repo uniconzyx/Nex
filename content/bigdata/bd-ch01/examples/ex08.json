@@ -1,0 +1,8 @@
+{
+  "title": "心跳超时与欠副本块的自动复制恢复",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "dead_node: dn3\nunder_replicated_before: {'blk2': ['dn1', 'dn2']}\nreplication_actions: [('blk1', ['dn4']), ('blk2', ['dn4']), ('blk3', ['dn1'])]\nblk1 replicas: ['dn1', 'dn2', 'dn4'] count: 3\nblk2 replicas: ['dn1', 'dn2', 'dn4'] count: 3\nblk3 replicas: ['dn2', 'dn4', 'dn1'] count: 3",
+  "code": "\nblocks = {\n    \"blk1\": [\"dn1\", \"dn2\", \"dn3\"],\n    \"blk2\": [\"dn1\", \"dn2\"],\n    \"blk3\": [\"dn2\", \"dn3\", \"dn4\"],\n}\nalive = {\"dn1\", \"dn2\", \"dn4\"}   # dn3 心跳超时判死\nREP = 3\ndef rereplicate(blocks, alive, rep):\n    actions = []\n    for blk, dns in blocks.items():\n        live = [d for d in dns if d in alive]\n        if len(live) < rep:\n            need = rep - len(live)\n            cands = [d for d in alive if d not in live]\n            actions.append((blk, cands[:need]))\n            blocks[blk] = live + cands[:need]\n    return actions\nprint(\"dead_node: dn3\")\nprint(\"under_replicated_before:\", {b: blocks[b] for b in blocks if len(blocks[b]) < REP})\nacts = rereplicate(blocks, alive, REP)\nprint(\"replication_actions:\", acts)\nfor b in sorted(blocks):\n    print(b, \"replicas:\", blocks[b], \"count:\", len(blocks[b]))\n"
+}

@@ -1,0 +1,83 @@
+{
+  "meta": {
+    "chapter": "fs-ch08",
+    "category": "system"
+  },
+  "items": [
+    {
+      "title": "自包含部署流水线：Dockerfile 静态审计 + 分层缓存模拟 + Compose 启动序 + CI DAG 调度器",
+      "requirement_md": "只用语言标准库实现一套「上线前自检」工具，全部离线自包含（不装 npm/pip 包、不联网、本机无 Docker 也能跑），把本章四个核心考点打通：\n\n1. **Dockerfile 静态审计**：解析 Dockerfile（按 `FROM` 切分阶段），输出问题清单：`latest`/无 tag 的基础镜像、`apt-get update` 与 `install` 不在同一 RUN、使用 `ADD`、多阶段却无 `--from=`、`COPY . .` 早于依赖安装、最终阶段以 root 运行、无 `HEALTHCHECK`、缺 `.dockerignore`。要求对一份「坏」与一份「好」的 Dockerfile 各输出一遍，好的必须 `issues=0`。\n2. **分层与构建缓存模拟**：把每条指令建成「父层哈希 + 指令文本 + 该指令依赖的上下文内容哈希」的链，给定文件内容映射，输出「改某个文件后缓存命中层数与重建层数」，并用两组指令顺序（依赖优先 vs `COPY . .` 优先）做对照，断言「重建层数 = 失效点之后的层数」这一前缀链性质。哈希用 `zlib.crc32`（不要用 Python 的 `hash()`，它受 `PYTHONHASHSEED` 影响）。\n3. **Compose 启动顺序求解**：输入 `{服务: [(依赖, condition)]}`，按 `service_healthy` / `service_started` / `service_completed_successfully` 分层输出启动 wave；对环形依赖必须给出明确的循环路径报错而不是死等。\n4. **CI 流水线 DAG 调度**：输入 job 的依赖与工时，输出拓扑顺序、每个 job 的最早开始/结束时间、makespan、关键路径与最大并行度；断言「makespan = 关键路径长度」且「makespan ≥ 任何单条依赖链长度」。\n\n**约束与验收**：输出必须**确定性**——不得出现墙钟耗时、内存地址、随机哈希；拓扑排序打破平局统一取名称字典序。所有判据以布尔量输出（如 `cache_is_prefix_chain=True`、`makespan_equals_critical_path=True`），脚本退出码非 0 表示自检失败，可直接接入 CI。",
+      "tasks": [
+        {
+          "title": "实现 Dockerfile 解析与规则审计",
+          "verification": {
+            "type": "test",
+            "desc": "坏 Dockerfile 报出 ≥6 类问题（含 latest tag、apt 拆 RUN、ADD、COPY 先于依赖安装、缺 --from、最终阶段 root、缺 .dockerignore），好 Dockerfile 输出 issues=0"
+          }
+        },
+        {
+          "title": "实现分层哈希与缓存重建计数",
+          "verification": {
+            "type": "test",
+            "desc": "改一行源码时依赖优先顺序重建 2 层且依赖安装层命中缓存，COPY 优先顺序重建 3 层且依赖安装层被重跑；`cache_is_prefix_chain=True`"
+          }
+        },
+        {
+          "title": "实现 Compose 依赖分层与环检测",
+          "verification": {
+            "type": "test",
+            "desc": "正常图输出 wave0={db,cache}、wave1={api,worker}、wave2={gateway}；环形图输出非空 error 且包含全部环上服务名，绝不进入死循环"
+          }
+        },
+        {
+          "title": "实现 CI DAG 调度与关键路径",
+          "verification": {
+            "type": "test",
+            "desc": "输出拓扑序、每 job 的 start/finish、makespan 与关键路径，且断言 makespan 等于关键路径长度、大于等于任一依赖链长度"
+          }
+        },
+        {
+          "title": "确定性自检与退出码",
+          "verification": {
+            "type": "test",
+            "desc": "连续两次运行输出逐字节一致；输出中不含毫秒/纳秒耗时与内存地址；所有判据为布尔量；存在失败判据时退出码非 0"
+          }
+        }
+      ]
+    },
+    {
+      "title": "发布与回滚守护：金丝雀分桶 + 回滚判定 + 探针状态机 + 12-Factor 配置审计",
+      "requirement_md": "实现一套「发布期安全网」的计算与判定模块，全部离线自包含、输出确定性（用整数时钟与整数比例，不读墙钟、不用浮点累积）：\n\n1. **金丝雀流量分桶**：用 `crc32(user) % 100` 做稳定分桶，给定权重序列（如 5/25/50/100）输出每个权重下命中新版本的用户数与占比，并断言权重单调递增时命中集合**嵌套**（`S(5) ⊆ S(25) ⊆ S(50) ⊆ S(100)`）。同时给出蓝绿策略的对照（权重 0 → 100 的原子切换）。\n2. **发布中止与回滚判定**：给定逐窗口的 `(请求数, 错误数, P95)`，按「最小样本量 + 整数阈值（permille）+ 连续 N 窗口越界」判定是否回滚；必须能区分三种情形：健康稳定（不回滚）、单点尖峰（不回滚）、持续劣化（在越界窗口回滚）、样本不足（跳过不下结论）。\n3. **健康探针状态机**：实现 `failureThreshold` / `successThreshold` 不对称阈值的滞回状态机，输出每次状态切换的 tick；断言抖动序列永不触发、恢复必须连续成功 `successThreshold` 次。\n4. **12-Factor 配置审计**：输入配置项来源清单（`env` / `file` / `hardcoded`），输出违规清单与合规得分；命中 `password/secret/token/api_key` 等关键词的硬编码项升级为 critical，并断言 `env` 来源永不违规。\n\n**约束与验收**：所有时间用整数 tick 表达，所有比例用整数（permille）或明确 round 到 2 位小数，确保输出可逐字节复现。判据全部为布尔量或计数（如 `canary_is_progressive=True`、`rolling_back_at_window=1`、`critical=2`），便于写成单元测试。",
+      "tasks": [
+        {
+          "title": "实现稳定哈希分桶与嵌套性断言",
+          "verification": {
+            "type": "test",
+            "desc": "固定用户集合下，权重 5/25/50/100 的命中数为 107/510/1007/2000（2000 用户）；断言集合嵌套为 True、分桶结果两次运行一致"
+          }
+        },
+        {
+          "title": "实现回滚判定与四情形覆盖",
+          "verification": {
+            "type": "test",
+            "desc": "健康稳定/单点尖峰/样本不足三类均不回滚，持续劣化在连续第 2 个越界窗口触发回滚并给出窗口下标"
+          }
+        },
+        {
+          "title": "实现滞回探针状态机",
+          "verification": {
+            "type": "test",
+            "desc": "降级发生在连续失败第 failureThreshold 次（tick=failureThreshold-1），恢复需连续成功 successThreshold 次，抖动序列终态仍为健康"
+          }
+        },
+        {
+          "title": "实现 12-Factor 配置审计",
+          "verification": {
+            "type": "test",
+            "desc": "8 项输入中输出 3 项违规（其中 2 项 critical），合规得分 62.5%；断言 env 来源零违规、外部文件来源不算违规"
+          }
+        }
+      ]
+    }
+  ]
+}

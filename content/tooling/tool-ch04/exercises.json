@@ -1,0 +1,151 @@
+{
+  "meta": {
+    "chapter": "tool-ch04",
+    "title": "Git 协作：分支策略与冲突处理 —— 习题集",
+    "count": 8,
+    "note": "8 题，基础题 6 + 算法题 2；参考代码覆盖 stash 栈、提交信息校验器、merge-base LCA、三方合并，均可独立运行并有断言"
+  },
+  "items": [
+    {
+      "id": "q1",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "fetch / pull / push 各自动了什么",
+      "content_md": "关于 Git 远端协作的三类引用与三条命令，下列说法正确的是？\n\nA. `git fetch` 会把远端的新提交合并进当前分支\nB. `git fetch` 只更新远端跟踪引用 `refs/remotes/origin/*`，不碰本地分支与工作区\nC. `git pull` = `git fetch` +（`git merge` 或 `git rebase`），默认行为由 `pull.rebase` 决定\nD. `git pull --rebase` 会改写本地尚未推送的提交 SHA，使历史保持线性\n\n请选择全部正确项并说明理由。",
+      "answer": {
+        "correct": "B、C、D",
+        "explain": "**A 错误**：`fetch` 只搬运对象并更新远端跟踪引用，不做任何整合；正因为如此它是「随时可安全执行」的只读感知命令。\n\n**B 正确**：这正是 `fetch` 的定义——它更新 `refs/remotes/origin/*` 这份「上次通信时远端状态的快照」，既不碰 `refs/heads/*` 也不碰工作区。\n\n**C 正确**：`pull` 的分解式就是 `fetch` + 一次整合，`merge`（默认，非快进时产生 merge commit）或 `rebase`（`pull.rebase=true`）。\n\n**D 正确**：rebase 的本质是把本地提交「重放」到上游之上，原提交作废、新提交 SHA 不同，因而历史是线性的——代价是不能用于已共享的提交。"
+      },
+      "explanation": "考三类引用与 pull 的真实分解式，是本章最基础的考点，也是 tools/DevOps 面试开场题。",
+      "tags": ["Git", "fetch", "pull", "远端跟踪引用"],
+      "source": "self",
+      "source_ref": "《Pro Git》第 3 章 · 分布式 Git；tool-ch04 concept/01"
+    },
+    {
+      "id": "q2",
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "推断 pull 之后的快照 与 ahead/behind",
+      "content_md": "仓库状态如下（字母为提交）：\n\n```text\norigin/main:  X -> A -> B -> C\n你的 main  :  X -> A -> D\n```\n\n此时 `refs/remotes/origin/main` 指向 **A**（你上次 fetch 的位置），远端真实引用指向 **C**。\n依次执行：① `git fetch`；② `git pull --rebase`；③ `git log --oneline main..origin/main`。\n\n请回答：\n\n1. 第①步之后 `refs/remotes/origin/main` 与本地 `main` 分别指向哪个提交？\n2. 第②步之后本地 `main` 的最终形态（用字母 + 「是否改写 D」说明）？\n3. 第③步会输出什么（用 X/A/B/C/D 说明哪些提交）？",
+      "answer": {
+        "correct": "① origin/main -> C，本地 main 仍为 D；② main 形态为 X -> A -> B -> C -> D'（D 被改写为新的 D'，SHA 变化）；③ 输出为空",
+        "explain": "**①**：`fetch` 只把远端跟踪引用推进到远端真实位置 C，本地分支 `main` 不动，仍指向 D。\n\n**②**：`pull --rebase` 先 fetch，再把「本地独有提交」D 重放到新的 `origin/main`（即 C）之上，产生内容等价但 SHA 不同的新提交 **D'**；原 D 不再可达。这就是 rebase 改写 SHA 的含义。\n\n**③**：`main..origin/main` 表示「在 origin/main 上但不在 main 上的提交」。重放后 main 已经包含 C（作为 D' 的祖先之一），因此该范围为空——这是在确认「我已完全跟上远端」。反过来说，若执行前查该范围，应看到 B、C 两个落后提交。"
+      },
+      "explanation": "考 fetch 与 pull --rebase 对三类引用的差异化影响，以及 `A..B` 左右集合差（ahead/behind）的口径。",
+      "tags": ["Git", "pull --rebase", "ahead/behind", "集合差"],
+      "source": "self",
+      "source_ref": "tool-ch04 concept/01；examples/ex01"
+    },
+    {
+      "id": "q3",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "push 被拒、强推与共享分支回滚",
+      "content_md": "关于 `push` 被拒绝与强行推送，下列说法正确的是？\n\nA. push 被拒最常见的原因是 non-fast-forward：远端引用当前值不是你本地 tip 的祖先\nB. `git push --force` 一定会先把别人的提交合并进来，因此不会丢东西\nC. `--force-with-lease` 会校验「远端引用 == 我本地记录的 origin/main」，不一致则拒绝（stale info）\nD. 对已经发布的共享分支做回滚，正确做法是 `git revert` 追加反向提交，而不是 `reset --hard` + 强推\n\n请选择全部正确项。",
+      "answer": {
+        "correct": "A、C、D",
+        "explain": "**A 正确**：Git 要求 push 是纯快进写入；一旦远端出现你没整合的提交就拒绝，这是防止静默覆盖的保护机制。\n\n**B 错误**：`--force` 没有任何校验，是无条件覆盖引用，队友未整合的提交会被静默丢弃（`examples/ex10` 的场景 1 演示了丢失两个修复）。\n\n**C 正确**：lease（租约）就是本地那份远端跟踪引用，等价于一次 CAS 乐观并发控制；不一致时返回 stale info 并保持远端不变。\n\n**D 正确**：`revert` 只追加历史、不改写 SHA，所有协作者 pull 后状态一致；`reset --hard` + 强推会改写共享历史。\n\n补充：即便 `--force-with-lease`，共享分支仍不建议强推——它只保证「不覆盖我没看过的提交」，仍然改写历史。"
+      },
+      "explanation": "考 push 的安全边界与共享分支回滚标准做法，是本章最常考的安全题。",
+      "tags": ["Git", "push", "force-with-lease", "revert"],
+      "source": "self",
+      "source_ref": "《Pro Git》第 3 章；tool-ch04 concept/01；examples/ex10"
+    },
+    {
+      "id": "q4",
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "修正一段有四处错误的冲突处理流程",
+      "content_md": "下面是某同学处理 `git merge feature` 冲突的流程，逐项指出错误并给出正确写法：\n\n```bash\n# 1. 冲突后直接选择自己这一侧整段\n$ git checkout --ours  config/app.conf\n\n# 2. 删除多余文件后直接提交\n$ git commit -m \"fix conflict\"\n\n# 3. 发现合错了，回退这次 merge\n$ git reset --hard HEAD~1 && git push --force\n\n# 4. 之后每次 rebase 有冲突时都用\n$ git checkout --ours <file>    # 认为 ours 永远是自己\n```",
+      "answer": {
+        "correct": "① 用 `--ours` 整段丢弃对方改动（应手工合并或开 diff3 风格）；② 冲突解决后必须 `git add <file>` 再 commit；③ 已 push 的 merge 应 `git revert -m 1 <sha>`，禁止 reset+强推共享分支；④ rebase 下 ours/theirs 语义颠倒，不能按分支名理解",
+        "explain": "**第 1 处**：`git checkout --ours <file>` 是把冲突区**整段替换为 HEAD 侧**，等于丢弃对方改动，只在明确知道单边正确时才可用；正确做法是打开编辑器合并两侧语义，或先 `git config merge.conflictStyle diff3` 让 Git 显示共同祖先那一行，再手工编辑。\n\n**第 2 处**：冲突文件处于 Unmerged 状态（index 里有 stage 1/2/3），不 `git add` 把结果归一化到 stage 0 就无法 commit。正确写法：编辑 → `git add config/app.conf` → `git merge --continue`。提交前还要 grep 一遍残留的 `<<<<<<<` 标记。\n\n**第 3 处**：已经 push 出去的 merge 不能用 `reset --hard` + 强推回滚——那会改写共享历史。正确写法：`git revert -m 1 <merge-sha>` 追加一个反向提交。\n\n**第 4 处**：rebase 是把**你的提交**重放到上游之上，此时 ours = 上游（正在写的基准），theirs = 你自己的提交，与 merge 恰好相反。不要靠 ours/theirs 记忆，直接看冲突内容或用 `git checkout --conflict=diff3 <file>`。"
+      },
+      "explanation": "把「冲突解决流程 + rebase 语义颠倒 + 共享分支回滚」三个高频坑放进同一道改错题，贴合真实事故复盘。",
+      "tags": ["Git", "冲突解决", "ours/theirs", "revert", "rebase"],
+      "source": "self",
+      "source_ref": "tool-ch04 concept/02；examples/ex04、ex05"
+    },
+    {
+      "id": "q5",
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "用 Python 模拟 stash 的 LIFO 栈语义",
+      "content_md": "请写一段**可直接执行的 Python**，实现一个极简 `git stash` 栈：支持 `push` / `pop` / `list`（`stash@{0}` 为最近压入的一条），并用两次压栈验证取出顺序是 LIFO（后进先出）而非 FIFO。要求带断言验证结果。",
+      "answer": {
+        "correct": "见 reference_code（两次 pop 按 LIFO 顺序取出，断言通过）",
+        "explain": "`git stash` 的存储结构是**栈**而不是队列：每次 `stash push` 把当前「工作区 + 暂存区」的快照压到栈顶，`stash@{0}` 永远指向最近压入的那条。因此连续两次 push（A 然后 B）之后，第一次 `pop` 拿到的必然是 **B**。理解这一点才能解释为什么 `git stash apply stash@{1}` 取到的是更早的那一份，以及为什么不建议把 stash 当成长期半成品仓库（没有命名空间、只有倒序索引）。",
+        "reference_code": "# 极简 git stash：本质是 LIFO 栈\nclass StashStack:\n    def __init__(self):\n        self.items = []\n\n    def push(self, message):\n        self.items.append(message)\n        return len(self.items)\n\n    def pop(self):\n        return self.items.pop() if self.items else None\n\n    def listing(self):\n        return ['stash@{%d} %s' % (i, m) for i, m in enumerate(reversed(self.items))]\n\n\ns = StashStack()\ns.push('wip: feature A')\ns.push('wip: feature B')\nprint('stash list:', s.listing())\nprint('pop 1 ->', s.pop())\nprint('pop 2 ->', s.pop())\nprint('栈空:', s.listing() == [])\nassert s.pop() is None\n\n# 验证 LIFO：B 后压入，必须先出\ns2 = StashStack()\ns2.push('A')\ns2.push('B')\norder = [s2.pop(), s2.pop()]\nprint('取出顺序:', order)\nassert order == ['B', 'A'], 'stash 必须是 LIFO'\nprint('LIFO 语义验证通过: True')\n"
+      },
+      "explanation": "用可执行代码落地 stash 的栈语义，呼应 concept/03 与 examples/ex08。",
+      "tags": ["Git", "stash", "LIFO", "python"],
+      "source": "self",
+      "source_ref": "tool-ch04 concept/03；examples/ex08"
+    },
+    {
+      "id": "q6",
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "实现 Conventional Commits 提交信息校验器",
+      "content_md": "请用**可直接执行的 Python + 正则**实现一个 Conventional Commits 首行校验器：`<type>[optional scope][!]: <description>`，其中 type ∈ {feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert}。要求至少包含两组正例、两组反例（缺类型 / 缺冒号后空格），并说明 `!` 或 `BREAKING CHANGE` footer 对应的语义化版本位。",
+      "answer": {
+        "correct": "见 reference_code（4 条用例判定全部符合预期，断言通过）",
+        "explain": "校验器的核心是一条受控词表 + 可选 scope + 可选 `!` + 冒号空格约束的正则：`^(feat|fix|...)(?:\\(scope\\))?(!)?: .+$`。两侧的差别在于：type 必须是受控词表（机器可读历史的基础），description 前必须有且只有一个空格。版本推导规则：fix → PATCH，feat → MINOR，出现 `!` 或 body 里的 `BREAKING CHANGE: ` footer → MAJOR；这也是 semantic-release 自动生成 CHANGELOG 的依据。",
+        "reference_code": "import re\n\nTYPES = ('feat', 'fix', 'docs', 'style', 'refactor', 'perf', 'test', 'build', 'ci', 'chore', 'revert')\nHEADER = re.compile(r'^(?P<type>' + '|'.join(TYPES) + r')' + r'(?:\\((?P<scope>[A-Za-z0-9._/-]+)\\))?' + r'(?P<breaking>!)?: (?P<desc>.+)$')\n\n\ndef bump(message):\n    m = HEADER.match(message.splitlines()[0])\n    if not m:\n        return '非法'\n    if m.group('breaking') or re.search(r'^BREAKING[ -]CHANGE: ', message, re.M):\n        return 'MAJOR'\n    return 'MINOR' if m.group('type') == 'feat' else 'PATCH'\n\n\nfor msg in ['feat(api): add retry', 'fix: handle null pointer',\n            'feat(api):add retry', 'add retry', 'Feature: new api']:\n    ok = bool(HEADER.match(msg))\n    print('%-32s 合法=%s  版本位=%s' % (msg, ok, bump(msg)))\n\nassert HEADER.match('feat(api): add retry')\nassert HEADER.match('fix: handle null pointer')\nassert HEADER.match('feat(api):add retry') is None      # 冒号后必须有空格\nassert HEADER.match('add retry') is None                # 缺 type\nassert HEADER.match('Feature: new api') is None         # 大小写不在词表\nassert bump('feat!: drop v1 api') == 'MAJOR'\nassert bump('feat(ui): new button') == 'MINOR'\nassert bump('fix(core): off by one') == 'PATCH'\nprint('全部断言通过: True')\n"
+      },
+      "explanation": "把提交规范变成可执行判据，呼应 concept/04 与 examples/ex11。",
+      "tags": ["Git", "Conventional Commits", "正则", "SemVer"],
+      "source": "self",
+      "source_ref": "conventionalcommits.org v1.0.0；tool-ch04 concept/04；examples/ex11"
+    },
+    {
+      "id": "q7",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "合并基线：commit DAG 上的 merge-base（最近公共祖先）",
+      "content_md": "三方合并需要基线 `merge-base(ours, theirs)`。给定 DAG 的 `parents` 映射（节点 → 父节点列表），请写**可直接执行的 Python**：\n\n1. 求任意两节点的 merge-base（要求能够处理存在多个极大共同祖先的 criss-cross 历史，用 `merge_base_all` 返回全部）；\n2. 用给定 DAG 验证 `merge_base('B','C') == 'A'`，并给出 criss-cross 情形下 `merge_base_all` 的结果。\n\n说明你用什么遍历保证「最近」而不是「任意」共同祖先。",
+      "answer": {
+        "correct": "见 reference_code（单基点返回 A；criss-cross 返回两个并列基点，断言通过）",
+        "explain": "commit 图是「每个节点指向其 parent」的反向 DAG，merge-base 等价于两节点的最近公共祖先（LCA）。做法是：先 DFS/BFS 收集一侧的全部祖先集合；再从另一侧做 **BFS 分层扩展**，第一个落入该祖先集合的节点即为「最近」公共祖先——BFS 的层次单调性保证了这一点，而 DFS 只能保证找到一个共同祖先、不能保证最近。`merge-base --all` 要求的是**极大**共同祖先：其任何子节点都不再同时属于两侧的祖先集合；criss-cross 历史会出现两个并列基点，此时 Git 的 recursive 策略会先把它们合成一个虚拟 base 再三方合并。",
+        "reference_code": "from collections import deque\n\n\ndef ancestors(start, parents):\n    seen, stack = set(), [start]\n    while stack:\n        n = stack.pop()\n        if n in seen:\n            continue\n        seen.add(n)\n        stack.extend(parents.get(n, []))\n    return seen\n\n\ndef merge_base(a, b, parents):\n    anc_a = ancestors(a, parents)\n    q, seen = deque([b]), set()\n    while q:\n        n = q.popleft()\n        if n in seen:\n            continue\n        seen.add(n)\n        if n in anc_a:\n            return n\n        q.extend(parents.get(n, []))\n    return None\n\n\ndef merge_base_all(a, b, parents):\n    anc_a, anc_b = ancestors(a, parents), ancestors(b, parents)\n    common = anc_a & anc_b\n    children = {c: [n for n, ps in parents.items() if c in ps] for c in parents}\n    return sorted(c for c in common if not any(ch in common for ch in children.get(c, [])))\n\n\nsimple = {'X': [], 'A': ['X'], 'B': ['A'], 'C': ['A'], 'M': ['B', 'C']}\nprint('merge_base(B,C) =', merge_base('B', 'C', simple))\nprint('merge_base --all (B,C) =', merge_base_all('B', 'C', simple))\n\ncriss = {'X': [], 'A': ['X'], 'B': ['X'], 'M1': ['A', 'B'], 'M2': ['A', 'B']}\nprint('criss-cross merge_base(M1,M2) =', merge_base('M1', 'M2', criss))\nprint('criss-cross merge_base --all =', merge_base_all('M1', 'M2', criss))\n\nassert merge_base('B', 'C', simple) == 'A'\nassert merge_base_all('B', 'C', simple) == ['A']\nassert merge_base_all('M1', 'M2', criss) == ['A', 'B']\nprint('全部断言通过: True')\n"
+      },
+      "explanation": "把 merge-base 还原成图论算法题，呼应 concept/02 的合并基线与 examples/ex02。",
+      "tags": ["Git", "merge-base", "LCA", "DAG", "BFS", "算法"],
+      "source": "self",
+      "source_ref": "tool-ch04 concept/02；examples/ex02"
+    },
+    {
+      "id": "q8",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "github",
+      "difficulty": "hard",
+      "title": "三方合并算法：自动合并与冲突判定的正反对照",
+      "content_md": "请写**可直接执行的 Python**（可用标准库 `difflib`），基于行级 diff 实现三方合并 `merge3(base, ours, theirs)`：\n\n1. 两侧改动落在**不同区域**时应当自动合并；\n2. 两侧改动同一区域且结果**不同**时必须产出 `<<<<<<<` / `=======` / `>>>>>>>` 标记；\n3. 两侧改动同一区域但结果**完全相同**时不得判冲突。\n\n用至少三组用例验证（不同区域自动合并、同行异值冲突、同行同值不冲突），并对结果加断言。",
+      "answer": {
+        "correct": "见 reference_code（区域分离自动合并、同行异值报冲突、同行同值不冲突，断言通过）",
+        "explain": "三方合并先分别用 LCS（`difflib.SequenceMatcher`）求出 `base→ours` 与 `base→theirs` 的改动 hunk（每条记录它落在 base 上的区间），再把两侧 hunk 按 base 区间**聚类**：区间重叠的算同一区域。于是判据变得纯粹——同一区域里只有一侧有改动就采纳；两侧都有且结果字符串相同就只采纳一次；两侧都有且不同就写冲突标记。这个实现解释了冲突的充要条件「相对共同祖先，两侧改了同一区域且结果不同」，也解释了为什么「改同一个文件」既不充分也不必要。",
+        "reference_code": "import difflib\n\n\ndef hunks(base, side):\n    sm = difflib.SequenceMatcher(a=base, b=side, autojunk=False)\n    return [(i1, i2, side[j1:j2]) for tag, i1, i2, j1, j2 in sm.get_opcodes() if tag != 'equal']\n\n\ndef merge3(base, ours, theirs):\n    tag_list = [('ours',) + h for h in hunks(base, ours)] + [('theirs',) + h for h in hunks(base, theirs)]\n    tag_list.sort(key=lambda t: (t[1], t[2]))\n    out, pos, i, conflicts = [], 0, 0, 0\n    while i < len(tag_list):\n        j, end = i, tag_list[i][2]\n        while j + 1 < len(tag_list) and tag_list[j + 1][1] <= end:\n            j += 1\n            end = max(end, tag_list[j][2])\n        cluster = tag_list[i:j + 1]\n        out.extend(base[pos:min(cluster[0][1], len(base))])\n        groups = {}\n        for c in cluster:\n            groups.setdefault(c[0], []).extend(c[3])\n        if len(groups) > 1:\n            if len({tuple(v) for v in groups.values()}) == 1:\n                out.extend(next(iter(groups.values())))\n            else:\n                conflicts += 1\n                out.append('<<<<<<< HEAD')\n                out.extend(groups.get('ours', []))\n                out.append('=======')\n                out.extend(groups.get('theirs', []))\n                out.append('>>>>>>> theirs')\n        else:\n            for c in cluster:\n                out.extend(c[3])\n        pos = max(pos, end)\n        i = j + 1\n    out.extend(base[pos:])\n    return out, conflicts\n\n\nbase = ['timeout = 30', 'retries = 3', 'mode = safe']\nclean, c1 = merge3(base,\n                   ['timeout = 60', 'retries = 3', 'mode = safe'],\n                   ['timeout = 30', 'retries = 3', 'mode = fast'])\nconflict, c2 = merge3(base,\n                      ['timeout = 60', 'retries = 3', 'mode = safe'],\n                      ['timeout = 90', 'retries = 3', 'mode = safe'])\nsame, c3 = merge3(base,\n                  ['timeout = 60', 'retries = 3', 'mode = safe'],\n                  ['timeout = 60', 'retries = 3', 'mode = safe'])\nprint('不同区域自动合并:', clean, '冲突数', c1)\nprint('同行异值:', conflict, '冲突数', c2)\nprint('同行同值:', same, '冲突数', c3)\nassert c1 == 0 and c2 == 1 and c3 == 0\nassert clean == ['timeout = 60', 'retries = 3', 'mode = fast']\nassert '<<<<<<< HEAD' in conflict and '>>>>>>> theirs' in conflict\nprint('全部断言通过: True')\n"
+      },
+      "explanation": "把 Git 的合并内核还原成可实现、可验证的算法题，呼应 concept/02 与 examples/ex03、ex04。",
+      "tags": ["Git", "三方合并", "LCS", "difflib", "冲突判定", "算法"],
+      "source": "github",
+      "source_ref": "bregman-arie/devops-exercises · Git 合并与冲突练习",
+      "external_url": "https://github.com/bregman-arie/devops-exercises"
+    }
+  ]
+}

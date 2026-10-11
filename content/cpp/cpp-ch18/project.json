@@ -1,0 +1,49 @@
+{
+  "meta": {
+    "chapter": "cpp-ch18",
+    "category": "system"
+  },
+  "items": [
+    {
+      "title": "缓存友好 + 伪共享免疫的粒子更新内核",
+      "requirement_md": "实现一个小型「粒子系统内核」，把本章的**布局优化**与**伪共享消除**落到代码里，并用**确定性判据**（非耗时）证明改进：\n\n1. **实测布局**：定义 `struct Particle { float x, y, z, w; };` 与 `struct Heavy { char tag; double value; int id; };`，用 `sizeof`/`alignof`/`offsetof` 打印并计算填充；对 `Heavy` 给出**字段重排后**的版本，证明 `sizeof` 变小。\n2. **AoS → SoA**：实现 `update_aos` 与 `update_soa`（只更新 x 分量）。用自写**直接映射缓存模型**统计二者的缓存行未命中数，输出布尔判据「SoA 更省缓存行」。\n3. **矩阵遍历**：实现行优先与列优先两种双重循环，用同一缓存模型统计未命中数，输出布尔判据与倍数（确定性）。\n4. **伪共享免疫**：用多线程各自累加**不同**计数器。先给出「同一缓存行」版本（`Packed`），再给出 `alignas(64)` + 填充后的版本（`Padded`）。用**地址判据**（是否同行）+ 缓存行迁移**计数模型**输出对比（正反两组）。\n5. **ABI 边界**：把对外接口写成 `extern \"C\"` 的 POD 结构 + 函数，并用 `is_standard_layout` / `is_trivially_copyable` 断言其 ABI 安全。\n6. **禁止项**：全程**不得**用墙钟时间（`chrono`/`clock`）作为任何结论依据；必须在注释中说明「性能结论使用确定性判据」。\n\n最终交付一个可编译运行的单文件，stdout 打印全部判据（布尔/计数）。",
+      "tasks": [
+        {
+          "title": "实测布局：sizeof/alignof/offsetof 与字段重排",
+          "verification": {
+            "type": "test",
+            "desc": "打印重排前后 sizeof，且重排后更小（布尔为 True）；偏移与 sizeof 自洽"
+          }
+        },
+        {
+          "title": "AoS → SoA 并用缓存模型对比未命中数",
+          "verification": {
+            "type": "test",
+            "desc": "输出两者 miss 计数与「SoA 更省缓存行」布尔判据；SoA 计数严格更小"
+          }
+        },
+        {
+          "title": "行优先 vs 列优先遍历的未命中计数",
+          "verification": {
+            "type": "test",
+            "desc": "行优先 miss 明显小于列优先（倍数 > 1），输出确定性计数"
+          }
+        },
+        {
+          "title": "伪共享正反两组：地址判据 + 迁移计数",
+          "verification": {
+            "type": "test",
+            "desc": "Packed 同行判据为 1 且迁移计数≈迭代数；Padded 同行判据为 0 且迁移计数≈2"
+          }
+        },
+        {
+          "title": "ABI 边界：extern \"C\" POD 接口 + 类型断言",
+          "verification": {
+            "type": "test",
+            "desc": "is_standard_layout 与 is_trivially_copyable 均为 true，C 函数调用结果正确"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "title": "this() 调用同类其它构造器（链式）",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "1 12",
+  "code": "public class E204 {\n    int x, y;\n    E204() { this(1, 1); }\n    E204(int x, int y) { this.x = x; this.y = y; }\n    int area() { return x * y; }\n    public static void main(String[] args) {\n        E204 a = new E204();\n        E204 b = new E204(3, 4);\n        System.out.println(a.area() + \" \" + b.area());\n    }\n}"
+}

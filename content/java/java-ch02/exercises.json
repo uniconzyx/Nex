@@ -1,0 +1,129 @@
+{
+  "meta": {
+    "chapter": "java-ch02",
+    "note": "7 题，含选择题/输出题/改错题/编程题；算法题来自 LeetCode 仅存元数据+链接，不搬运题面。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "关于 Java 对象内存布局与参数传递，正确的是",
+      "content_md": "选择**正确**的描述。",
+      "options": [
+        { "key": "A", "text": "对象字段直接存储在局部变量所在的栈帧中" },
+        { "key": "B", "text": "Java 对象参数传递是引用传递，方法内重指形参会影响调用方" },
+        { "key": "C", "text": "Java 只有值传递：对象参数传递的是引用的副本，方法内重指形参不影响调用方，但修改对象状态可见" },
+        { "key": "D", "text": "this 是可在方法内做指针运算的地址" }
+      ],
+      "answer": { "correct": ["C"] },
+      "explanation": "对象在堆上，局部变量只存引用；Java 严格值传递，对象参数传的是引用副本，故方法内重指形参不影响调用方，但改对象状态可见；this 是引用不可运算。",
+      "tags": ["object-model", "pass-by-value"],
+      "source": "book",
+      "source_ref": "《Java 核心技术 卷I》第 4 章 对象与类"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "读代码写输出（this() 链式构造）",
+      "content_md": "```java\npublic class Main {\n    int a, b;\n    Main() { this(0, 0); }\n    Main(int a, int b) { this.a = a; this.b = b; }\n    int sum() { return a + b; }\n    public static void main(String[] args) {\n        System.out.println(new Main().sum());\n        System.out.println(new Main(2, 5).sum());\n    }\n}\n```",
+      "answer": { "output": "0\n7" },
+      "explanation": "无参构造委托 this(0,0) 得 0；有参构造给 2 和 5，sum=7。",
+      "tags": ["constructor", "this"],
+      "source": "book",
+      "source_ref": "《Java 核心技术 卷I》第 4 章 构造器"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "修复散列集合查找失败的 equals/hashCode 缺失",
+      "content_md": "以下代码本应从 `HashMap` 中按新对象取到值，却打印 `null`。请补全缺失的方法使其正常工作：\n\n```java\nimport java.util.*;\npublic class Main {\n    static class User {\n        int id;\n        User(int id) { this.id = id; }\n        @Override public boolean equals(Object o) {\n            return o instanceof User u && id == u.id;\n        }\n        // 缺失：hashCode\n    }\n    public static void main(String[] args) {\n        Map<User, String> m = new HashMap<>();\n        m.put(new User(1), \"alice\");\n        System.out.println(m.get(new User(1)));\n    }\n}\n```",
+      "answer": {
+        "reference_code": "import java.util.*;\npublic class Main {\n    static class User {\n        int id;\n        User(int id) { this.id = id; }\n        @Override public boolean equals(Object o) {\n            return o instanceof User u && id == u.id;\n        }\n        @Override public int hashCode() { return id; }\n    }\n    public static void main(String[] args) {\n        Map<User, String> m = new HashMap<>();\n        m.put(new User(1), \"alice\");\n        System.out.println(m.get(new User(1)));\n    }\n}"
+      },
+      "explanation": "只重写 equals 不重写 hashCode，两个相等对象哈希码不同落到不同桶，get 找不到。补上 hashCode 即可。",
+      "tags": ["equals", "hashcode"],
+      "source": "self",
+      "source_ref": "CppMind java-ch02 concept 04"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "读代码写输出（初始化顺序）",
+      "content_md": "```java\npublic class Main {\n    int x = initX();\n    { System.out.println(\"instance block\"); }\n    int initX() { System.out.println(\"field init\"); return 5; }\n    Main() { System.out.println(\"ctor\"); }\n    public static void main(String[] args) { new Main(); }\n}\n```",
+      "answer": { "output": "field init\ninstance block\nctor" },
+      "explanation": "实例字段与实例块按文本顺序执行：先 field init，再 instance block，最后构造器体 ctor。",
+      "tags": ["init-order"],
+      "source": "book",
+      "source_ref": "《Java 核心技术 卷I》第 4 章 对象初始化"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "关于 equals 与 hashCode 契约，正确的是",
+      "content_md": "选择**正确**的描述。",
+      "options": [
+        { "key": "A", "text": "只重写 equals 不重写 hashCode 不影响 HashMap 使用" },
+        { "key": "B", "text": "相等的对象必须有相等的 hashCode；但 hashCode 相等的两个对象不一定 equals" },
+        { "key": "C", "text": "hashCode 相等则 equals 一定为 true" },
+        { "key": "D", "text": "重写了 equals 后无需关心 hashCode" }
+      ],
+      "answer": { "correct": ["B"] },
+      "explanation": "契约只要求相等⇒同码，不要求同码⇒相等（允许哈希冲突）；只重写 equals 会让 HashMap 找不到相等对象。",
+      "tags": ["equals", "hashcode"],
+      "source": "book",
+      "source_ref": "《Effective Java》第 11 条 重写 equals 时总要重写 hashCode"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "LeetCode 208 · 实现 Trie（前缀树）",
+      "content_md": "设计一个 `Trie` 类，支持 `insert(String word)`、`search(String word)`、`startsWith(String prefix)` 三个操作；封装为类并在 `main` 中自测。题面详见原题链接，本题不搬运题面。",
+      "answer": {
+        "reference_code": "public class Trie {\n    private static class Node {\n        boolean end = false;\n        Node[] children = new Node[26];\n    }\n    private final Node root = new Node();\n    public void insert(String w) {\n        Node cur = root;\n        for (char c : w.toCharArray()) {\n            int i = c - 'a';\n            if (cur.children[i] == null) cur.children[i] = new Node();\n            cur = cur.children[i];\n        }\n        cur.end = true;\n    }\n    public boolean search(String w) {\n        Node n = find(w);\n        return n != null && n.end;\n    }\n    public boolean startsWith(String p) { return find(p) != null; }\n    private Node find(String s) {\n        Node cur = root;\n        for (char c : s.toCharArray()) {\n            int i = c - 'a';\n            if (cur.children[i] == null) return null;\n            cur = cur.children[i];\n        }\n        return cur;\n    }\n    public static void main(String[] args) {\n        Trie t = new Trie();\n        t.insert(\"apple\");\n        System.out.println(t.search(\"apple\"));\n        System.out.println(t.startsWith(\"app\"));\n        System.out.println(t.search(\"app\"));\n    }\n}"
+      },
+      "explanation": "用 26 叉树节点表示前缀树，insert 逐字符下钻建节点，search 要求末节点 end 标记，startsWith 只需路径存在。",
+      "tags": ["design", "trie"],
+      "source": "leetcode",
+      "source_ref": "LeetCode 208（implement-trie-prefix-tree）",
+      "external_url": "https://leetcode.cn/problems/implement-trie-prefix-tree/",
+      "time_limit_ms": 2000,
+      "memory_limit_mb": 256,
+      "test_cases": [
+        { "input": "insert apple; search apple; startsWith app; search app", "expected_output": "true\ntrue\nfalse", "is_sample": true }
+      ]
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "LeetCode 707 · 设计链表",
+      "content_md": "设计链表 `MyLinkedList`，支持 `get(index)`、`addAtHead`、`addAtTail`、`addAtIndex`、`deleteAtIndex`；封装为类并在 `main` 中自测。题面详见原题链接，本题不搬运题面。",
+      "answer": {
+        "reference_code": "public class Main {\n    static class ListNode { int val; ListNode next; ListNode(int v){ val = v; } }\n    static class MyLinkedList {\n        private ListNode head; private int size;\n        public void addAtHead(int v){ ListNode n = new ListNode(v); n.next = head; head = n; size++; }\n        public int get(int i){\n            if (i < 0 || i >= size) return -1;\n            ListNode c = head; for (int k=0;k<i;k++) c = c.next; return c.val;\n        }\n        public void addAtTail(int v){ if (head==null){addAtHead(v);return;} ListNode c=head; while(c.next!=null)c=c.next; c.next=new ListNode(v); size++; }\n        public void addAtIndex(int i,int v){\n            if (i>size) return; if (i==0){addAtHead(v);return;} if (i==size){addAtTail(v);return;}\n            ListNode c=head; for(int k=0;k<i-1;k++)c=c.next;\n            ListNode n=new ListNode(v); n.next=c.next; c.next=n; size++;\n        }\n        public void deleteAtIndex(int i){\n            if (i<0||i>=size) return;\n            if (i==0){head=head.next; size--; return;}\n            ListNode c=head; for(int k=0;k<i-1;k++)c=c.next;\n            c.next=c.next.next; size--;\n        }\n    }\n    public static void main(String[] args){\n        MyLinkedList l=new MyLinkedList();\n        l.addAtHead(1); l.addAtTail(3); l.addAtIndex(1,2);\n        System.out.println(l.get(1)); System.out.println(l.get(0)); System.out.println(l.get(2));\n    }\n}"
+      },
+      "explanation": "用单链表节点类实现，维护 size 与头指针；注意索引边界与空链表情况。",
+      "tags": ["design", "linked-list"],
+      "source": "leetcode",
+      "source_ref": "LeetCode 707（design-linked-list）",
+      "external_url": "https://leetcode.cn/problems/design-linked-list/",
+      "time_limit_ms": 2000,
+      "memory_limit_mb": 256,
+      "test_cases": [
+        { "input": "addAtHead 1; addAtTail 3; addAtIndex 1,2; get 1/0/2", "expected_output": "2\n1\n3", "is_sample": true }
+      ]
+    }
+  ]
+}

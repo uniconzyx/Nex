@@ -1,0 +1,8 @@
+{
+  "title": "拷贝赋值：自赋值保护",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "self 9",
+  "code": "#include <iostream>\n\nclass Num {\n    int v_;\npublic:\n    Num(int v = 0) : v_(v) {}\n    Num& operator=(const Num& o) {\n        if (this == &o) {              // 自赋值保护：不保护会在释放旧资源后悬空\n            std::cout << \"self \";\n            return *this;\n        }\n        v_ = o.v_;\n        return *this;                  // 返回引用以支持链式赋值\n    }\n    int get() const { return v_; }\n};\n\nint main() {\n    Num a(5);\n    a = a;                 // 自赋值\n    Num b(9);\n    a = b;\n    std::cout << a.get();\n}"
+}

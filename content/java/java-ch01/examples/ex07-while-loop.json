@@ -1,0 +1,8 @@
+{
+  "title": "while 循环求阶乘",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "120\n",
+  "code": "public class Main {\n    public static void main(String[] args) {\n        int n = 5, fact = 1;\n        while (n > 0) {\n            fact *= n;\n            n--;\n        }\n        System.out.println(fact);\n    }\n}"
+}

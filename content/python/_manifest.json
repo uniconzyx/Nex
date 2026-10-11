@@ -1,0 +1,319 @@
+{
+  "schema_version": 1,
+  "subject": "python",
+  "title": "CppMind · Python 课程体系",
+  "note": "阶段7 资源整合大纲。每章须齐备 7 类内容（见 _template 规范），由 server/scripts/validate_content.py 校验。resources 仅存元数据与链接，不存第三方题面/正文，符合合规红线。",
+  "groups": {
+    "L1": "语法基础",
+    "L2": "函数与装饰器",
+    "L3": "面向对象",
+    "L4": "标准库",
+    "L5": "文件与文本",
+    "L6": "并发",
+    "L7": "数据分析"
+  },
+  "chapters": [
+    {
+      "id": "py-ch01",
+      "order": 1,
+      "group": "L1",
+      "title": "语法与数据类型：变量/流程控制/字符串/列表/字典/元组/集合/推导式",
+      "summary": "Python 动态类型与变量语义；条件/循环流程控制；不可变字符串与切片；可变容器 list/dict/tuple/set；列表推导式；基础可运行示例。",
+      "prerequisites": [],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "TheAlgorithms/Python",
+          "jackfrued/Python-100-Days",
+          "microsoft/ML-For-Beginners"
+        ],
+        "github_stars": [
+          225266,
+          187118,
+          91310
+        ],
+        "github_notes": [
+          "Python 实现的全部经典算法，含详细注释",
+          "Python 100 天从新手到大师（中文系统教程）",
+          "微软官方 12 周机器学习入门课程，含 26 课与测验"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Python 编程：从入门到实践》第 2-4 章 变量/列表/字典",
+          "《流畅的Python》第 1-2 章 数据模型/序列"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "py-ch02",
+      "order": 2,
+      "group": "L2",
+      "title": "函数与作用域：def、参数解包、lambda、闭包、命名空间",
+      "summary": "函数定义与参数解包（*args/**kwargs、序列/字典解包传入）；LEGB 作用域链与命名空间；lambda 表达式与一等公民函数；闭包的自由变量绑定与延迟绑定陷阱；global/nonlocal；可变默认参数陷阱；装饰器原理（基于闭包）。CPython 层面：对象模型、引用计数、作用域实现。",
+      "prerequisites": [
+        "py-ch01"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "TheAlgorithms/Python",
+          "jackfrued/Python-100-Days",
+          "microsoft/ML-For-Beginners"
+        ],
+        "github_stars": [
+          225266,
+          187118,
+          91310
+        ],
+        "github_notes": [
+          "Python 实现的全部经典算法，含详细注释",
+          "Python 100 天从新手到大师（中文系统教程）",
+          "微软官方 12 周机器学习入门课程，含 26 课与测验"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Python 编程：从入门到实践》第 8 章 函数",
+          "《流畅的Python》第 5 章 一等函数",
+          "《流畅的Python》第 7 章 函数装饰器"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "py-ch03",
+      "order": 3,
+      "group": "L1",
+      "title": "内置数据结构：list/tuple/dict/set 与推导式、深浅拷贝",
+      "summary": "list 动态数组（扩容/切片/copy）；tuple 不可变语义与含可变元素；dict 哈希表（哈希、开放寻址、3.7+ 紧凑化与插入序）；set 集合运算；列表/字典/集合推导式；生成器表达式与惰性；浅拷贝 vs 深拷贝与对象图。CPython 层面：对象模型、引用计数、容器底层实现，并与 C++/Java 集合对比。",
+      "prerequisites": [
+        "py-ch01"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "TheAlgorithms/Python",
+          "jackfrued/Python-100-Days",
+          "microsoft/ML-For-Beginners"
+        ],
+        "github_stars": [
+          225266,
+          187118,
+          91310
+        ],
+        "github_notes": [
+          "Python 实现的全部经典算法，含详细注释",
+          "Python 100 天从新手到大师（中文系统教程）",
+          "微软官方 12 周机器学习入门课程，含 26 课与测验"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《流畅的Python》第 2 章 序列构成的数组",
+          "《流畅的Python》第 3 章 字典和集合",
+          "《Python 编程：从入门到实践》第 3 章 列表/字典"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "py-ch04",
+      "order": 4,
+      "group": "L4",
+      "title": "标准库：os/sys/re/datetime/json",
+      "summary": "os 与路径操作；sys .argv 与解释器；re 正则；datetime 时间处理；json 序列化；常用内建模块协同。",
+      "prerequisites": [
+        "py-ch01"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "TheAlgorithms/Python",
+          "jackfrued/Python-100-Days",
+          "microsoft/ML-For-Beginners"
+        ],
+        "github_stars": [
+          225266,
+          187118,
+          91310
+        ],
+        "github_notes": [
+          "Python 实现的全部经典算法，含详细注释",
+          "Python 100 天从新手到大师（中文系统教程）",
+          "微软官方 12 周机器学习入门课程，含 26 课与测验"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Python 编程：从入门到实践》第 10 章 文件与异常",
+          "《流畅的Python》第 3 章 字典和集合"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "py-ch05",
+      "order": 5,
+      "group": "L5",
+      "title": "文件与 IO：读写/上下文管理器/序列化",
+      "summary": "文本与二进制文件读写；with 上下文管理器与 __enter__/__exit__；csv/json 文件；路径库 pathlib；缓冲与编码。",
+      "prerequisites": [
+        "py-ch01"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "TheAlgorithms/Python",
+          "jackfrued/Python-100-Days",
+          "microsoft/ML-For-Beginners"
+        ],
+        "github_stars": [
+          225266,
+          187118,
+          91310
+        ],
+        "github_notes": [
+          "Python 实现的全部经典算法，含详细注释",
+          "Python 100 天从新手到大师（中文系统教程）",
+          "微软官方 12 周机器学习入门课程，含 26 课与测验"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Python 编程：从入门到实践》第 10 章 文件",
+          "《流畅的Python》第 12 章 文件"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "py-ch06",
+      "order": 6,
+      "group": "L5",
+      "title": "正则与文本处理：re/分组/替换",
+      "summary": "re 编译与匹配；分组与命名组；贪婪/非贪婪；sub 替换；文本清洗与解析；与 str 方法取舍。",
+      "prerequisites": [
+        "py-ch04"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "TheAlgorithms/Python",
+          "jackfrued/Python-100-Days",
+          "microsoft/ML-For-Beginners"
+        ],
+        "github_stars": [
+          225266,
+          187118,
+          91310
+        ],
+        "github_notes": [
+          "Python 实现的全部经典算法，含详细注释",
+          "Python 100 天从新手到大师（中文系统教程）",
+          "微软官方 12 周机器学习入门课程，含 26 课与测验"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Python 编程：从入门到实践》第 10 章",
+          "《流畅的Python》第 3 章"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "py-ch07",
+      "order": 7,
+      "group": "L6",
+      "title": "并发：threading/asyncio",
+      "summary": "GIL 与多线程边界；threading 与锁；queue 线程安全；asyncio 协程与事件循环；同步原语与并发模型取舍。",
+      "prerequisites": [
+        "py-ch02"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "TheAlgorithms/Python",
+          "jackfrued/Python-100-Days",
+          "microsoft/ML-For-Beginners"
+        ],
+        "github_stars": [
+          225266,
+          187118,
+          91310
+        ],
+        "github_notes": [
+          "Python 实现的全部经典算法，含详细注释",
+          "Python 100 天从新手到大师（中文系统教程）",
+          "微软官方 12 周机器学习入门课程，含 26 课与测验"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《流畅的Python》第 18 章 并发",
+          "《Python 并发编程实战》"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "py-ch08",
+      "order": 8,
+      "group": "L7",
+      "title": "数据分析：numpy/pandas 入门",
+      "summary": "ndarray 数组与向量化；切片与广播；pandas Series/DataFrame；读写 CSV；分组聚合与基础统计；与列表推导的衔接。",
+      "prerequisites": [
+        "py-ch01",
+        "py-ch05"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "TheAlgorithms/Python",
+          "jackfrued/Python-100-Days",
+          "microsoft/ML-For-Beginners"
+        ],
+        "github_stars": [
+          225266,
+          187118,
+          91310
+        ],
+        "github_notes": [
+          "Python 实现的全部经典算法，含详细注释",
+          "Python 100 天从新手到大师（中文系统教程）",
+          "微软官方 12 周机器学习入门课程，含 26 课与测验"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Python 编程：从入门到实践》第 15 章 数据可视化",
+          "《利用 Python 进行数据分析》Wes McKinney"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    }
+  ],
+  "github_resources": [
+    {
+      "repo": "TheAlgorithms/Python",
+      "stars": 225266,
+      "url": "https://github.com/TheAlgorithms/Python",
+      "note": "Python 实现的全部经典算法，含详细注释"
+    },
+    {
+      "repo": "jackfrued/Python-100-Days",
+      "stars": 187118,
+      "url": "https://github.com/jackfrued/Python-100-Days",
+      "note": "Python 100 天从新手到大师（中文系统教程）"
+    },
+    {
+      "repo": "microsoft/ML-For-Beginners",
+      "stars": 91310,
+      "url": "https://github.com/microsoft/ML-For-Beginners",
+      "note": "微软官方 12 周机器学习入门课程，含 26 课与测验"
+    }
+  ],
+  "resources_fetched_at": "2026-09-21"
+}

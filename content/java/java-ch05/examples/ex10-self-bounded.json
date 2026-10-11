@@ -1,0 +1,8 @@
+{
+  "title": "自限定类型（Self-Bounded Generic）与 fluent API",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "Concrete.special()\nself-bounded fluent ok",
+  "code": "public class Ex10SelfBounded {\n    static abstract class SelfBounded<T extends SelfBounded<T>> {\n        abstract T self();\n        T copy() { return self(); }\n    }\n    static class Concrete extends SelfBounded<Concrete> {\n        Concrete self() { return this; }\n        void special() { System.out.println(\"Concrete.special()\"); }\n    }\n    public static void main(String[] args) {\n        Concrete c = new Concrete();\n        c.copy().special();\n        System.out.println(\"self-bounded fluent ok\");\n    }\n}"
+}

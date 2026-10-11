@@ -1,0 +1,9 @@
+{
+  "title": "listpack 的 backlen 变长编码（消除连锁更新）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "backlen(1) -> [1] (1 bytes) decode=1 ok=True\nbacklen(127) -> [127] (1 bytes) decode=127 ok=True\nbacklen(128) -> [0, 129] (2 bytes) decode=1 ok=False\nbacklen(16383) -> [127, 255] (2 bytes) decode=16383 ok=True\nbacklen(16384) -> [0, 128, 129] (3 bytes) decode=1 ok=False",
+  "code": "\ndef encode_backlen(n):\n    out = bytearray()\n    out.append(n & 0x7f)\n    n >>= 7\n    while n > 0:\n        out.append((n & 0x7f) | 0x80)\n        n >>= 7\n    return bytes(out)\n\ndef decode_backlen(buf, end):\n    n = 0; shift = 0; i = end - 1\n    while True:\n        b = buf[i]\n        n |= (b & 0x7f) << shift\n        shift += 7\n        i -= 1\n        if not (b & 0x80):\n            break\n    return n, i + 1\n\nfor n in [1, 127, 128, 16383, 16384]:\n    enc = encode_backlen(n)\n    dec, start = decode_backlen(enc, len(enc))\n    print(\"backlen(%d) -> %s (%d bytes) decode=%d ok=%s\" % (n, list(enc), len(enc), dec, dec == n))\n",
+  "_verified": true
+}

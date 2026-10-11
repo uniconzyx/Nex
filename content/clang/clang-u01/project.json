@@ -1,0 +1,42 @@
+{
+  "meta": {
+    "chapter": "clang-u01",
+    "category": "basic"
+  },
+  "items": [
+    {
+      "title": "实现一个带边界的动态整型数组（含越界检测）",
+      "requirement_md": "用纯指针操作实现一个动态整型数组库，体会地址运算与所有权约定。要求：\n\n1. 提供 `arr_create(n)`、`arr_destroy(a)`、`arr_get(a, i)`、`arr_set(a, i, v)`、`arr_len(a)`。\n2. 结构体内部用 `int *data; size_t len;` 保存（**不许用变长数组**）。\n3. 所有按下标访问的接口必须做**边界检查**，越界时打印诊断并返回错误码，不得越界读写。\n4. 提供 `arr_for_each(a, fn)`，用**函数指针**做回调遍历。\n5. 用 `arr_destroy` 释放后把内部指针置 `NULL`，并用 ASan 验证无泄漏、无越界。",
+      "tasks": [
+        {
+          "title": "定义结构体与创建/销毁",
+          "verification": {
+            "type": "test",
+            "desc": "创建后 len 正确；destroy 后 ASan 报告 0 泄漏"
+          }
+        },
+        {
+          "title": "实现边界检查的 get/set",
+          "verification": {
+            "type": "test",
+            "desc": "对 i = len 与 i = (size_t)-1 返回错误码且不崩溃"
+          }
+        },
+        {
+          "title": "用函数指针实现 for_each",
+          "verification": {
+            "type": "test",
+            "desc": "传入求和回调，结果等于预期总和"
+          }
+        },
+        {
+          "title": "ASan 全量验证",
+          "verification": {
+            "type": "test",
+            "desc": "`gcc -fsanitize=address,undefined` 编译运行无任何 sanitizer 报错"
+          }
+        }
+      ]
+    }
+  ]
+}

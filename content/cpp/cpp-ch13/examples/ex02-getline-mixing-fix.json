@@ -1,0 +1,8 @@
+{
+  "title": "getline 与 >> 混用的换行修复",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "7\nAlice Smith",
+  "expected_output": "n=7 name=[Alice Smith]",
+  "code": "#include <iostream>\n#include <string>\nint main() {\n    int n;\n    std::string name;\n    std::cin >> n;\n    std::cin.ignore();            // 修复：吃掉残留的换行\n    std::getline(std::cin, name);\n    std::cout << \"n=\" << n << \" name=[\" << name << \"]\\n\";\n}"
+}

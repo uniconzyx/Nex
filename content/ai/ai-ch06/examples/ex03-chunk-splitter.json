@@ -1,0 +1,8 @@
+{
+  "title": "chunk 切分器：无重叠 / 固定重叠 / 句边界三策略",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "== 策略A: 固定长度12 无重叠 ==\nchunk start=0 end=12 len=12\nchunk start=12 end=24 len=12\nchunk start=24 end=36 len=12\nchunk start=36 end=40 len=4\n== 策略B: 固定长度12 重叠4 ==\nchunk start=0 end=12 len=12 overlap=0\nchunk start=8 end=20 len=12 overlap=4\nchunk start=16 end=28 len=12 overlap=4\nchunk start=24 end=36 len=12 overlap=4\nchunk start=32 end=40 len=8 overlap=4\n== 策略C: 按句边界 每块最多3句 ==\nchunk len=15 sents=3\nchunk len=15 sents=3\nchunk len=10 sents=2\n",
+  "code": "text = '句一内容。句二内容。句三内容。句四内容。句五内容。句六内容。句七内容。句八内容。'\n\nprint('== 策略A: 固定长度12 无重叠 ==')\nsize = 12\npos = 0\nwhile pos < len(text):\n    end = min(pos + size, len(text))\n    print('chunk start=%d end=%d len=%d' % (pos, end, end - pos))\n    pos = end\n\nprint('== 策略B: 固定长度12 重叠4 ==')\nsize, overlap = 12, 4\npos = 0\nprev_end = 0\nfirst = True\nwhile pos < len(text):\n    end = min(pos + size, len(text))\n    ov = (prev_end - pos) if not first else 0\n    print('chunk start=%d end=%d len=%d overlap=%d' % (pos, end, end - pos, ov))\n    if end == len(text):\n        break\n    prev_end = end\n    pos = end - overlap\n    first = False\n\nprint('== 策略C: 按句边界 每块最多3句 ==')\nsents = [s + '。' for s in text.split('。') if s]\nchunk = ''\ncnt = 0\nfor s in sents:\n    if cnt == 3:\n        print('chunk len=%d sents=3' % len(chunk))\n        chunk = ''\n        cnt = 0\n    chunk += s\n    cnt += 1\nif chunk:\n    print('chunk len=%d sents=%d' % (len(chunk), cnt))\n"
+}

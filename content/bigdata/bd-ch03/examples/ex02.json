@@ -1,0 +1,8 @@
+{
+  "title": "分区表的分区裁剪（partition pruning）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "分区表 emp_dt 共有分区: ['2024-01-01', '2024-01-02', '2024-01-03']\n查询 SELECT * FROM emp_dt (无分区过滤): 扫描 3 个分区 = ['2024-01-01', '2024-01-02', '2024-01-03'], 读出 6 行\n查询 ... WHERE dt='2024-01-02': 仅扫描 1 个分区 = ['2024-01-02'], 读出 3 行\n分区裁剪收益: 少扫描 2 个分区, I/O 按分区目录直接跳过, 不读无关数据\n",
+  "code": "# 模拟分区表的分区裁剪 (partition pruning)\npartitions = {\n    \"2024-01-01\": [(\"a\", 1), (\"b\", 2)],\n    \"2024-01-02\": [(\"c\", 3), (\"d\", 4), (\"e\", 5)],\n    \"2024-01-03\": [(\"f\", 6)],\n}\n\ndef scan_all():\n    rows = []\n    scanned = list(partitions.keys())\n    for p in scanned:\n        rows += partitions[p]\n    return scanned, rows\n\ndef scan_pruned(target_dt):\n    if target_dt in partitions:\n        return [target_dt], partitions[target_dt]\n    return [], []\n\nprint(\"分区表 emp_dt 共有分区:\", list(partitions.keys()))\n# 未裁剪: 全表扫描\nsc, rows = scan_all()\nprint(f\"查询 SELECT * FROM emp_dt (无分区过滤): 扫描 {len(sc)} 个分区 = {sc}, 读出 {len(rows)} 行\")\n# 裁剪: 按 dt 过滤\nsc2, rows2 = scan_pruned(\"2024-01-02\")\nprint(f\"查询 ... WHERE dt='2024-01-02': 仅扫描 {len(sc2)} 个分区 = {sc2}, 读出 {len(rows2)} 行\")\nprint(\"分区裁剪收益: 少扫描\", len(sc) - len(sc2), \"个分区, I/O 按分区目录直接跳过, 不读无关数据\")\n"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "评测集回放：准确率与格式合规率聚合",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "评测样本数 = 8\n精确匹配准确率 = 0.5000 (4/8)\n格式合规率 = 0.8750 (7/8)\n结构化(JSON)期望样本数 = 2  JSON 可解析率 = 0.5000\n准确率 < 格式合规率: True\n两指标须在 Trace 中分开上报: True\n",
+  "code": "\"\"\"影子/回放评测: 对固定评测集聚合同类指标。\"\"\"\nimport json\nimport re\n\n# (标准答案, 模型输出)\nCASES = [\n    (\"42\", \"42\"),\n    (\"北京\", \"北京\"),\n    (\"-7\", \"答案是 -7。\"),\n    (\"3.14\", \"3.140\"),\n    (\"Paris\", \"paris\"),\n    ('{\"ok\": true}', '{\"ok\": true}'),\n    ('{\"n\": 5}', \"n = 5\"),\n    (\"红色\", \"蓝色\"),\n]\n\ndef normalize(s):\n    return s.strip().strip(\"。.!！\").strip()\n\ndef gold_is_json(g):\n    return g.strip().startswith((\"{\", \"[\"))\n\ndef parse_ok(s):\n    try:\n        json.loads(s)\n        return True\n    except Exception:\n        return False\n\nexact = 0\ncompliant = 0\nfor gold, out in CASES:\n    if normalize(gold).lower() == normalize(out).lower():\n        exact += 1\n    if gold_is_json(gold):\n        # 期望结构化输出: 合规 = 输出本身可被 JSON 解析\n        ok = parse_ok(out)\n    else:\n        # 期望短文本: 合规 = 不含额外解释性句子(长度接近标准答案)\n        ok = len(normalize(out)) <= len(normalize(gold)) + 6\n    compliant += ok\n\nn = len(CASES)\njson_cases = [c for c in CASES if gold_is_json(c[0])]\njson_ok = sum(1 for g, o in json_cases if parse_ok(o))\nprint(\"评测样本数 = %d\" % n)\nprint(\"精确匹配准确率 = %.4f (%d/%d)\" % (exact / n, exact, n))\nprint(\"格式合规率 = %.4f (%d/%d)\" % (compliant / n, compliant, n))\nprint(\"结构化(JSON)期望样本数 = %d  JSON 可解析率 = %.4f\"\n      % (len(json_cases), json_ok / len(json_cases)))\nprint(\"准确率 < 格式合规率:\", (exact / n) < (compliant / n))\nprint(\"两指标须在 Trace 中分开上报: True\")\n"
+}

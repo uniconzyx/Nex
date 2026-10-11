@@ -1,0 +1,8 @@
+{
+  "title": "单头自注意力完整数值演算（含因果掩码）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "scores shape: (5, 5)\ncausal mask 上三角(未来)数: 10\nA 每行和(应=1): [1. 1. 1. 1. 1.]\nA[0] 只看位置0: [1. 0. 0. 0. 0.]\nA[2] 后两位(应=0): [0. 0.]\nout shape: (5, 4)\nout[0]: [-0.7518 -1.1572  0.5513 -1.1966]\n",
+  "code": "import numpy as np\nrng = np.random.default_rng(42)\nd = 4\nT = 5\nx = rng.standard_normal((T, d)).astype(np.float64)\nWq = rng.standard_normal((d, d))\nWk = rng.standard_normal((d, d))\nWv = rng.standard_normal((d, d))\nQ = x @ Wq\nK = x @ Wk\nV = x @ Wv\nscores = Q @ K.T / np.sqrt(d)\nmask = np.triu(np.ones((T, T), dtype=bool), k=1)\nmasked = np.where(mask, -np.inf, scores)\ndef softmax(z):\n    m = np.max(z, axis=-1, keepdims=True)\n    e = np.exp(z - m)\n    return e / e.sum(axis=-1, keepdims=True)\nA = softmax(masked)\nout = A @ V\nprint(\"scores shape:\", scores.shape)\nprint(\"causal mask 上三角(未来)数:\", int(mask.sum()))\nprint(\"A 每行和(应=1):\", np.round(A.sum(axis=1), 6))\nprint(\"A[0] 只看位置0:\", np.round(A[0], 6))\nprint(\"A[2] 后两位(应=0):\", np.round(A[2, 3:], 6))\nprint(\"out shape:\", out.shape)\nprint(\"out[0]:\", np.round(out[0], 4))\n"
+}

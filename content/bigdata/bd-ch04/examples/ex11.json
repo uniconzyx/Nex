@@ -1,0 +1,8 @@
+{
+  "title": "并行度（分区数）对 Stage 内 Task 数的影响",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "分区数(并行度)= 2 -> 每 Stage 2 个 Task, 共 3 Stage, 总 Task 数 = 6\n分区数(并行度)= 4 -> 每 Stage 4 个 Task, 共 3 Stage, 总 Task 数 = 12\n分区数(并行度)= 8 -> 每 Stage 8 个 Task, 共 3 Stage, 总 Task 数 = 24\n分区数(并行度)=16 -> 每 Stage 16 个 Task, 共 3 Stage, 总 Task 数 = 48\n结论: 总 Task 数 = Stage 数 x 分区数; 提高并行度线性增加并发 Task 数\n",
+  "code": "stages = 3\nfor parts in [2, 4, 8, 16]:\n    tasks = stages * parts\n    print(f\"分区数(并行度)={parts:2d} -> 每 Stage {parts} 个 Task, 共 {stages} Stage, 总 Task 数 = {tasks}\")\nprint(\"结论: 总 Task 数 = Stage 数 x 分区数; 提高并行度线性增加并发 Task 数\")\n"
+}

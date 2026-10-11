@@ -1,0 +1,9 @@
+{
+  "title": "INTERSECT / EXCEPT 集合交与差（MySQL 8.0.31+ 原生支持）",
+  "code_lang": "sql",
+  "code_std": "mysql8",
+  "stdin": "",
+  "expected_output": "Query OK, 0 rows affected\nQuery OK, 0 rows affected\nQuery OK, 3 rows affected\nQuery OK, 3 rows affected\nx\nb\nc\nx\na",
+  "code": "CREATE TABLE t_a (x CHAR(1));\nCREATE TABLE t_b (x CHAR(1));\nINSERT INTO t_a VALUES ('a'),('b'),('c');\nINSERT INTO t_b VALUES ('b'),('c'),('d');\nSELECT x FROM t_a INTERSECT SELECT x FROM t_b ORDER BY x;\nSELECT x FROM t_a EXCEPT SELECT x FROM t_b ORDER BY x;",
+  "_verified": false
+}

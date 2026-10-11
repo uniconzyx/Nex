@@ -1,0 +1,8 @@
+{
+  "title": "窄依赖 vs 宽依赖（是否 Shuffle）判定",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "map          -> 窄依赖 无Shuffle\nfilter       -> 窄依赖 无Shuffle\nmapValues    -> 窄依赖 无Shuffle\nunion        -> 窄依赖 无Shuffle\nreduceByKey  -> 宽依赖 需Shuffle\ngroupByKey   -> 宽依赖 需Shuffle\njoin         -> 宽依赖 需Shuffle\nsample       -> 窄依赖 无Shuffle\n结论: 8 个算子中有 5 个窄依赖, 3 个宽依赖; 宽依赖是唯一触发 Shuffle 的来源\n",
+  "code": "def dep_type(op):\n    wide = {\"reduceByKey\", \"groupByKey\", \"join\", \"distinct\", \"sortBy\", \"repartition\"}\n    return \"宽依赖 需Shuffle\" if op in wide else \"窄依赖 无Shuffle\"\n\nops = [\"map\", \"filter\", \"mapValues\", \"union\", \"reduceByKey\", \"groupByKey\", \"join\", \"sample\"]\nfor o in ops:\n    print(f\"{o:12s} -> {dep_type(o)}\")\nnarrow = sum(1 for o in ops if \"窄\" in dep_type(o))\nwide = len(ops) - narrow\nprint(f\"结论: {len(ops)} 个算子中有 {narrow} 个窄依赖, {wide} 个宽依赖; 宽依赖是唯一触发 Shuffle 的来源\")\n"
+}

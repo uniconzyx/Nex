@@ -1,0 +1,8 @@
+{
+  "title": "noexcept 如何决定 vector 扩容时用移动还是拷贝",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "is_nothrow_move_constructible<NoNoexcept>   = false\nis_nothrow_move_constructible<WithNoexcept> = true\n\nvector 扩容要保证强异常安全，内部用 move_if_noexcept 判定：\n  NoNoexcept   的移动可能抛异常 -> 退化为拷贝构造（慢但安全）\n  WithNoexcept 的移动保证不抛   -> 真正使用移动构造（快）\n所以：自定义移动构造请一律标 noexcept，否则性能白给",
+  "code": "#include <iostream>\n#include <type_traits>\nusing namespace std;\n\nstruct NoNoexcept {\n    int v;\n    explicit NoNoexcept(int x) : v(x) {}\n    NoNoexcept(const NoNoexcept& o) : v(o.v) {}\n    NoNoexcept(NoNoexcept&& o) : v(o.v) {}          // 未标 noexcept\n};\n\nstruct WithNoexcept {\n    int v;\n    explicit WithNoexcept(int x) : v(x) {}\n    WithNoexcept(const WithNoexcept& o) : v(o.v) {}\n    WithNoexcept(WithNoexcept&& o) noexcept : v(o.v) {}\n};\n\nint main() {\n    cout << boolalpha;\n    cout << \"is_nothrow_move_constructible<NoNoexcept>   = \"\n         << is_nothrow_move_constructible_v<NoNoexcept> << \"\\n\";\n    cout << \"is_nothrow_move_constructible<WithNoexcept> = \"\n         << is_nothrow_move_constructible_v<WithNoexcept> << \"\\n\";\n    cout << \"\\nvector 扩容要保证强异常安全，内部用 move_if_noexcept 判定：\\n\";\n    cout << \"  NoNoexcept   的移动可能抛异常 -> 退化为拷贝构造（慢但安全）\\n\";\n    cout << \"  WithNoexcept 的移动保证不抛   -> 真正使用移动构造（快）\\n\";\n    cout << \"所以：自定义移动构造请一律标 noexcept，否则性能白给\\n\";\n}"
+}

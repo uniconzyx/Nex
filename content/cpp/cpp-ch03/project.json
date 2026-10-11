@@ -1,0 +1,14 @@
+{
+  "meta": { "chapter": "cpp-ch03", "category": "basic" },
+  "items": [
+    {
+      "title": "单词频率统计器",
+      "requirement_md": "读取一段英文文本（字符串或文件），按空白/标点分割成单词，统计每个单词出现次数并排序输出 Top-K。练习 std::string 解析、std::string_view 切片与 std::map 计数；处理大小写与标点。",
+      "tasks": [
+        { "title": "实现分词（用 string_view 切片）", "verification": { "type": "test", "desc": "覆盖标点/连续空格/大小写归一" } },
+        { "title": "用 map 计数并排序 Top-K", "verification": { "type": "test", "desc": "同一文本结果稳定可复现" } },
+        { "title": "从文件读取（进阶）", "verification": { "type": "manual", "desc": "读入文件并输出统计" } }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "title": "位域读写与底层字节观察",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "ready=1 mode=5 prio=9\nraw bytes: 9B 00\n",
+  "code": "#include <stdio.h>\n\nstruct Flags {\n    unsigned int ready : 1;\n    unsigned int mode  : 3;\n    unsigned int prio  : 4;\n};\n\nint main(void) {\n    struct Flags f = {0};\n    f.ready = 1;\n    f.mode  = 5;\n    f.prio  = 9;\n    printf(\"ready=%u mode=%u prio=%u\\n\", f.ready, f.mode, f.prio);\n    printf(\"raw bytes: %02X %02X\\n\", (unsigned)((unsigned char*)&f)[0], (unsigned)((unsigned char*)&f)[1]);\n    return 0;\n}"
+}

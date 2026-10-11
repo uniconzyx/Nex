@@ -1,0 +1,9 @@
+{
+  "title": "哨兵客观下线 ODOWN：quorum 投票累计",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== 哨兵客观下线 ODOWN (quorum 投票) 模拟 ===\n各哨兵独立探测: {'S1': 'SDOWN', 'S2': 'SDOWN', 'S3': 'alive'}\n收到确认下线的哨兵数 (含自身) = 2\nvotes(2) >= quorum(2) -> 主节点客观下线 ODOWN, 启动故障转移",
+  "code": "print(\"=== 哨兵客观下线 ODOWN (quorum 投票) 模拟 ===\")\nsentinels = [\"S1\", \"S2\", \"S3\"]\nquorum = 2\nsdown = {\"S1\": True, \"S2\": True, \"S3\": False}\nprint(\"各哨兵独立探测:\", {k: ('SDOWN' if v else 'alive') for k, v in sdown.items()})\nvotes = sum(1 for s in sentinels if sdown[s])\nprint(\"收到确认下线的哨兵数 (含自身) =\", votes)\nif votes >= quorum:\n    print(\"votes(%d) >= quorum(%d) -> 主节点客观下线 ODOWN, 启动故障转移\" % (votes, quorum))\nelse:\n    print(\"votes(%d) < quorum(%d) -> 未达 ODOWN\" % (votes, quorum))\n",
+  "_verified": true
+}

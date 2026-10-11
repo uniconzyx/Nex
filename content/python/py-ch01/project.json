@@ -1,0 +1,14 @@
+{
+  "meta": { "chapter": "py-ch01", "category": "basic" },
+  "items": [
+    {
+      "title": "命令行词频统计小工具",
+      "requirement_md": "读取一段文本（来自标准输入或字符串常量），完成：1) 去除标点并转小写；2) 用 `dict` 统计每个单词出现次数；3) 用列表推导式筛出出现次数 ≥ 2 的单词；4) 按出现次数降序打印前 10 个「单词:次数」。要求全程使用本章容器与推导式，不引入第三方库，并在 `if __name__ == '__main__':` 下运行。",
+      "tasks": [
+        { "title": "清洗与分词（字符串/列表）", "verification": { "type": "test", "desc": "标点被去除、大小写统一，单词切分正确" } },
+        { "title": "用 dict 统计词频", "verification": { "type": "test", "desc": "统计结果与手工计数一致" } },
+        { "title": "列表推导式筛选并排序输出", "verification": { "type": "manual", "desc": "仅输出次数≥2 的词，按次数降序，前 10 条" } }
+      ]
+    }
+  ]
+}

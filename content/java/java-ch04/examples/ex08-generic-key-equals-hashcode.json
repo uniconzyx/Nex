@@ -1,0 +1,8 @@
+{
+  "title": "泛型集合与自定义键：equals/hashCode 契约缺失的危害",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "bad get(new BadKey(1))=null\ngood get(new GoodKey(1))=x",
+  "code": "import java.util.*;\n\npublic class Ex08GenericEqualsHashCode {\n    static class BadKey {\n        int id;\n        BadKey(int id) { this.id = id; }\n        @Override public boolean equals(Object o) { return o instanceof BadKey b && b.id == id; }\n    }\n    static class GoodKey {\n        int id;\n        GoodKey(int id) { this.id = id; }\n        @Override public boolean equals(Object o) { return o instanceof GoodKey g && g.id == id; }\n        @Override public int hashCode() { return id; }\n    }\n    public static void main(String[] args) {\n        Map<BadKey, String> bad = new HashMap<>();\n        bad.put(new BadKey(1), \"x\");\n        Map<GoodKey, String> good = new HashMap<>();\n        good.put(new GoodKey(1), \"x\");\n        System.out.println(\"bad get(new BadKey(1))=\" + bad.get(new BadKey(1)));\n        System.out.println(\"good get(new GoodKey(1))=\" + good.get(new GoodKey(1)));\n    }\n}"
+}

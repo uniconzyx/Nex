@@ -1,0 +1,8 @@
+{
+  "title": "match / search / fullmatch 的起点与终点差异（含 IPv4 校验）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== match / search / fullmatch 的起点与终点 ===\nmatch    : None\nsearch   : 123\nfullmatch: None\nsearch+锚: abc123xyz\n\n=== IPv4 校验：三种写法的差异 ===\n输入               search     fullmatch \n'192.168.1.1'    True       True      \n'192.168.1.1 '   True       False     \n' 192.168.1.1'   True       False     \n'1.2.3'          False      False     \n'1.2.3.4.5'      True       False     \n\n结论：search 放过了带空格与多余段的串；校验格式必须用 fullmatch。",
+  "code": "import re\n\nprint(\"=== match / search / fullmatch 的起点与终点 ===\")\ns = \"abc123xyz\"\nprint(\"match    :\", re.match(r\"\\d+\", s))        # 只从开头试 -> None\nprint(\"search   :\", re.search(r\"\\d+\", s).group())\nprint(\"fullmatch:\", re.fullmatch(r\"\\d+\", s))     # 要求整串 -> None\nprint(\"search+锚:\", re.fullmatch(r\"abc\\d+xyz\", s).group())\n\nprint()\nprint(\"=== IPv4 校验：三种写法的差异 ===\")\ndef by_search(text):\n    return re.search(r\"(\\d{1,3}\\.){3}\\d{1,3}\", text) is not None\ndef by_fullmatch(text):\n    return re.fullmatch(r\"(\\d{1,3}\\.){3}\\d{1,3}\", text) is not None\n\ncases = [\"192.168.1.1\", \"192.168.1.1 \", \" 192.168.1.1\", \"1.2.3\", \"1.2.3.4.5\"]\nprint(\"%-16s %-10s %-10s\" % (\"输入\", \"search\", \"fullmatch\"))\nfor c in cases:\n    print(\"%-16r %-10s %-10s\" % (c, by_search(c), by_fullmatch(c)))\nprint()\nprint(\"结论：search 放过了带空格与多余段的串；校验格式必须用 fullmatch。\")"
+}

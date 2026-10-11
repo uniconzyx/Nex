@@ -1,0 +1,83 @@
+{
+  "meta": {
+    "chapter": "fs-ch01"
+  },
+  "items": [
+    {
+      "question": "在浏览器地址栏输入 URL 到页面展示，中间发生了什么？请尽量完整。",
+      "answer_md": "按层次拆开答（**分层归因**是这道题真正的考点）：\n\n1. **URL 解析**：拆出协议/主机/端口/路径/查询/片段。\n2. **DNS 解析**：浏览器 DNS 缓存 → 系统缓存/hosts → 本地 DNS 服务器（递归查询：根 → 顶级域 → 权威）→ 得到 IP。\n3. **建立连接**：TCP 三次握手（1 RTT）；HTTPS 再做 TLS 握手（TLS 1.3 约 1 RTT，会话恢复可 0-RTT）并校验证书链。\n4. **发送请求**：组装请求行 + 头部 + 主体（若有），经代理/网关转发。\n5. **服务端处理**：路由 → 中间件（认证、限流）→ 业务逻辑 → 数据库/缓存 → 生成响应。\n6. **返回响应**：状态行 + 头部（含缓存指令）+ 主体；可能经 CDN 缓存。\n7. **浏览器渲染**：解析 HTML → DOM，解析 CSS → CSSOM，合成渲染树 → 布局（Layout）→ 绘制（Paint）→ 合成（Composite）；其间 JS 在主线程执行并可能阻塞渲染。\n\n**加分点**：说出各段的耗时量级与优化手段——DNS/TLS 靠 `dns-prefetch`/`preconnect`/HTTP2 多路复用摊薄；业务靠缓存与索引；渲染靠减少 DOM 与重排。",
+      "follow_ups": [
+        "为什么 TCP 握手是三次而不是两次？",
+        "HTTP/2 的队头阻塞和 HTTP/1.1 的队头阻塞有什么区别？HTTP/3 怎么解决？",
+        "DNS 用 UDP 还是 TCP？什么时候用 TCP？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "字节",
+        "腾讯",
+        "阿里"
+      ]
+    },
+    {
+      "question": "HTTP 方法里哪些是幂等的？为什么幂等性在工程上如此重要？",
+      "answer_md": "**幂等**：GET、HEAD、OPTIONS、PUT、DELETE 幂等；**POST 不幂等**（PATCH 语义上不保证）。\n**安全**（不改状态）：GET、HEAD、OPTIONS；PUT/POST/PATCH/DELETE 都不安全。\n\n**为什么重要**：\n1. **自动重试**：网络层/客户端在超时后是否可安全重发，取决于幂等性；对非幂等操作盲目重试会重复产生副作用（重复下单、重复扣款）。\n2. **预取与爬虫**：浏览器预取、搜索引擎爬虫会主动访问 GET 链接——把写操作放在 GET 上会被意外触发。\n3. **缓存**：缓存代理只缓存/复用安全的请求结果。\n\n**工程做法**：非幂等接口（尤其是支付/下单）引入**幂等键**（客户端生成唯一 ID，服务端去重并返回同一结果），使 POST 在业务层变得可重试。",
+      "follow_ups": [
+        "PATCH 为什么通常不被认为幂等？举例说明。",
+        "幂等键应该由客户端还是服务端生成？为什么？",
+        "PUT 和 POST 都能创建资源，怎么选？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "阿里",
+        "美团"
+      ]
+    },
+    {
+      "question": "强缓存和协商缓存的区别？Cache-Control 常用指令有哪些？",
+      "answer_md": "**强缓存（不发请求）**：`Cache-Control: max-age=N` / `Expires`。在新鲜期内浏览器**直接用本地副本**，连请求都不发（Network 面板显示 `(from disk cache)`）。\n**协商缓存（发请求校验）**：`ETag` + `If-None-Match`，或 `Last-Modified` + `If-Modified-Since`。服务端判断未变更时回 **304 Not Modified**（**无主体**），浏览器复用副本。\n\n**常用指令**：\n- `no-store`：完全不存储（敏感数据）；\n- `no-cache`：可缓存但**每次必须校验**（不是「不缓存」）；\n- `private` / `public`：只允许浏览器私有缓存 / 允许 CDN 等共享缓存；\n- `max-age=N` / `s-maxage=N`：新鲜期（后者针对共享缓存）；\n- `immutable`：新鲜期内不校验（配合指纹文件名）。\n\n**优先级**：`Cache-Control` > `Expires`；`ETag`(`If-None-Match`) > `Last-Modified`(`If-Modified-Since`)。\n**为什么 ETag 更好**：Last-Modified 精度只到秒，且「文件没变但时间戳变了」会误判。",
+      "follow_ups": [
+        "ETag 一般怎么生成？强 ETag 和弱 ETag（W/）有什么区别？",
+        "Vary 头部解决什么问题？不写会怎样？",
+        "为什么前端静态资源要用「内容哈希文件名 + 长强缓存」？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "腾讯",
+        "百度"
+      ]
+    },
+    {
+      "question": "Cookie、Session、JWT(Token) 有什么区别？各自的安全属性怎么配？",
+      "answer_md": "**Cookie**：浏览器存储的小段数据，**每次同域请求自动携带**。可设 `HttpOnly`（防 XSS 读取）、`Secure`（只走 HTTPS）、`SameSite`（防 CSRF）。\n**Session**：会话状态存在**服务端**（内存/Redis），Cookie 里只放会话 ID。优点是**可即时撤销**；缺点是横向扩展需共享存储。\n**JWT / Token**：状态以**自包含令牌**形式存于客户端，通常放 `Authorization: Bearer <token>`。优点是**无状态、易水平扩展**；缺点是**难以即时撤销**（需黑名单或「短过期 + refresh token」）。\n\n**安全要点**：\n1. Cookie 必须配 `HttpOnly` + `Secure` + `SameSite`（三者分别防 XSS 窃取、明文窃听、CSRF）；\n2. `localStorage` 存 token 便利但**易被 XSS 窃取**；`HttpOnly` Cookie 免疫 XSS 读取但要处理 CSRF；\n3. JWT 的载荷只是 **Base64 编码而非加密**，**绝不能放密码等敏感信息**；\n4. `SameSite=None` 时必须同时 `Secure`，否则 Cookie 会被浏览器丢弃。",
+      "follow_ups": [
+        "JWT 怎么实现「登出」？黑名单方案有什么代价？",
+        "为什么要用 refresh token？access token 的有效期设多长合适？",
+        "CSRF 攻击的原理是什么？SameSite=Lax 能防住哪些场景？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "通用",
+        "字节",
+        "阿里"
+      ]
+    },
+    {
+      "question": "跨域是怎么回事？CORS 预检请求什么时候触发？为什么前端解决不了跨域？",
+      "answer_md": "**跨域**：浏览器出于安全实施**同源策略**（同源 = 协议 + 域名 + 端口三者完全相同）。跨源请求**可以发出**，但**响应会被浏览器拦截**，除非服务端通过 CORS 响应头明确授权。\n\n**是否触发预检（OPTIONS）**：\n- **简单请求**（方法 ∈ {GET, HEAD, POST}，且头部仅在安全列表内，`Content-Type` 仅限 `application/x-www-form-urlencoded`/`multipart/form-data`/`text/plain`）→ **不预检**，直接发送；\n- 否则 → **先发 OPTIONS 预检**，服务端需回 `Access-Control-Allow-Origin/Methods/Headers`（带凭证时还需 `Allow-Credentials: true` 且 Origin 不能为 `*`）。\n\n**为什么前端解决不了**：CORS 是**响应头**机制——授权信息由**服务端**返回，浏览器读取后决定是否放行。前端加任何请求头都无法改变服务端的响应头，因此只能在**服务端/网关**配置，或开发期用**代理**把跨域变成同源。\n\n**加分点**：`Access-Control-Allow-Origin: *` 与携带凭证**互斥**（规范禁止）；预检结果可用 `Access-Control-Max-Age` 缓存以减少 OPTIONS 往返。",
+      "follow_ups": [
+        "带 Cookie 的跨域请求要注意什么？",
+        "JSONP 和 CORS 的区别？为什么 JSONP 只能 GET？",
+        "为什么说 HTTP/2 之后「域名分片」变成了反模式？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "通用",
+        "腾讯",
+        "字节"
+      ]
+    }
+  ]
+}

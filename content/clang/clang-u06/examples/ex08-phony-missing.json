@@ -1,0 +1,17 @@
+{
+  "title": "同名文件让 `make clean` 静默跳过：.PHONY 的必要性",
+  "code_lang": "bash",
+  "code_std": "bash5",
+  "stdin": "",
+  "expected_output": "$ mingw32-make\nD:/mingw64/bin/gcc.exe -std=c11 -O2 -c main.c -o main.o\r\nD:/mingw64/bin/gcc.exe -std=c11 -O2 -c util.c -o util.o\r\nD:/mingw64/bin/gcc.exe -std=c11 -O2 -o app.exe main.o util.o\r\n$ ls *.o app.exe 2>/dev/null || true\napp.exe\nmain.o\nutil.o\n$ touch clean             # 制造一个与目标同名的文件\n$ mingw32-make clean       # 被静默跳过：返回 0，但什么都没删\nmingw32-make: 'clean' is up to date.\r\n$ ls *.o app.exe          # 产物都还在！\napp.exe\nmain.o\nutil.o\n$ printf '.PHONY: clean\\n' >> Makefile   # 补上 .PHONY\n.PHONY: clean",
+  "code": "#!/bin/sh\n# 同名文件让 `make clean` 静默跳过：.PHONY 的必要性\n# 期望输出见 expected_output（本机 MinGW 工具链 + GNU Make 真实执行捕获）\n\ncat > Makefile << 'EOF'\nCC := D:/mingw64/bin/gcc.exe\nCFLAGS := -std=c11 -O2\nTARGET := app.exe\nOBJS := main.o util.o\n\n$(TARGET): $(OBJS)\n\t$(CC) $(CFLAGS) -o $@ $^\n\n%.o: %.c\n\t$(CC) $(CFLAGS) -c $< -o $@\n\nclean:\n\t@rm -f $(TARGET) $(OBJS)\nEOF\n\ncat > main.c << 'EOF'\n#include <stdio.h>\n#include \"util.h\"\n\nint main(void)\n{\n    printf(\"add(2, 3) = %d\\n\", add(2, 3));\n    return 0;\n}\nEOF\n\ncat > util.c << 'EOF'\n#include \"util.h\"\n\nint add(int a, int b)\n{\n    return a + b;\n}\nEOF\n\ncat > util.h << 'EOF'\nint add(int a, int b);\nEOF\n\nmingw32-make\nls *.o app.exe 2>/dev/null || true\ntouch clean             # 制造一个与目标同名的文件\nmingw32-make clean       # 被静默跳过：返回 0，但什么都没删\nls *.o app.exe          # 产物都还在！\nprintf '.PHONY: clean\\n' >> Makefile   # 补上 .PHONY\n",
+  "_step_rc": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "_verify_note": "expected_output 为 Windows + MinGW-w64 上 GNU Make 4.4.1 真实执行捕获。注意最后一步是**往 Makefile 追加 `.PHONY: clean`** 的演示（脚本里以 `printf ... >> Makefile` 表达），追加后重新执行 `make clean` 即可看到行为恢复。本例的要点是前半段：缺失 .PHONY 时 `make clean` **返回 0 却什么都没做**——最恶劣的一类静默 bug。"
+}

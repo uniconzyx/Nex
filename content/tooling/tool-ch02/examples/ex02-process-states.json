@@ -1,0 +1,8 @@
+{
+  "title": "进程状态机：单进程一生的状态转移",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "进程状态机模拟（单个进程一生）\n  init        -> R(新建/就绪)\n  R(新建/就绪)                     -> R(运行)\n  R(运行)                        -> S(可中断睡眠:等待IO)\n  S(可中断睡眠:等待IO)                -> R(运行:IO完成)\n  R(运行:IO完成)                   -> D(不可中断睡眠:等待磁盘)\n  D(不可中断睡眠:等待磁盘)               -> R(运行:磁盘完成)\n  R(运行:磁盘完成)                   -> Z(僵尸:已exit,父未wait)\n  Z(僵尸:已exit,父未wait)           -> (回收:父wait->task_struct释放)\n\n要点：\n  S 与 D 都不在 runqueue；D 不可被信号(含SIGKILL)中断，只能等底层IO返回\n  Z 只保留 task_struct+退出码，占一个 pid 槽，直到父 wait() 回收\n  状态字母集合 = {R, S, D, Z, T}，本例未出现 T(停止)",
+  "code": "# 模拟进程状态机：单个进程一生的状态转移（确定性）\nseq = [\n    \"R(新建/就绪)\",\n    \"R(运行)\",\n    \"S(可中断睡眠:等待IO)\",\n    \"R(运行:IO完成)\",\n    \"D(不可中断睡眠:等待磁盘)\",\n    \"R(运行:磁盘完成)\",\n    \"Z(僵尸:已exit,父未wait)\",\n    \"(回收:父wait->task_struct释放)\",\n]\nprint(\"进程状态机模拟（单个进程一生）\")\nprev = None\nfor s in seq:\n    if prev is None:\n        print(f\"  init        -> {s}\")\n    else:\n        print(f\"  {prev:<28s} -> {s}\")\n    prev = s\nprint()\nprint(\"要点：\")\nprint(\"  S 与 D 都不在 runqueue；D 不可被信号(含SIGKILL)中断，只能等底层IO返回\")\nprint(\"  Z 只保留 task_struct+退出码，占一个 pid 槽，直到父 wait() 回收\")\nprint(\"  状态字母集合 = {R, S, D, Z, T}，本例未出现 T(停止)\")\n"
+}

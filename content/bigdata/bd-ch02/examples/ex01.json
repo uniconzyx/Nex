@@ -1,0 +1,8 @@
+{
+  "title": "Map 阶段：文本 -> (word, 1) 中间 kv 流",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "hello\t1\nworld\t1\nhello\t1\nworld\t1\nof\t1\nbigdata\t1\nhello\t1\nbigdata\t1\nworld\t1\n--total kv pairs: 9",
+  "code": "\ndef mapper(line):\n    for w in line.split():\n        yield (w.lower(), 1)\n\ndocs = [\"Hello world hello\", \"world of BigData\", \"hello bigdata world\"]\nkv = []\nfor line in docs:\n    for k, v in mapper(line):\n        kv.append((k, v))\nfor k, v in kv:\n    print(f\"{k}\t{v}\")\nprint(f\"--total kv pairs: {len(kv)}\")\n"
+}

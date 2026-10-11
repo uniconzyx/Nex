@@ -1,0 +1,28 @@
+{
+  "meta": {
+    "format": "cppmind-external-v1",
+    "source": "nowcoder",
+    "generated_at": "2026-09-19T03:00:00Z",
+    "note": "牛客面试 TOP101 离线映射样例（方案 B）。只存元数据 + 链接，不存题面正文。"
+  },
+  "items": [
+    {
+      "external_id": "nowcoder:BM1",
+      "title": "Reverse Linked List",
+      "title_cn": "反转链表",
+      "difficulty": "easy",
+      "tags": ["linked-list"],
+      "url": "https://www.nowcoder.com/practice/75e878df47f24fdc9dc3e400ec6058ca",
+      "mapped_chapters": ["cpp-ch08", "cpp-ch17"]
+    },
+    {
+      "external_id": "nowcoder:BM22",
+      "title": "Merge Two Sorted Arrays",
+      "title_cn": "合并两个有序数组",
+      "difficulty": "easy",
+      "tags": ["array", "two-pointers"],
+      "url": "https://www.nowcoder.com/practice/89865d4375634fc484f3a24b7fe65665",
+      "mapped_chapters": ["cpp-ch01", "cpp-ch08"]
+    }
+  ]
+}

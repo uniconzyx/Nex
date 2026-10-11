@@ -1,0 +1,8 @@
+{
+  "title": "== / === / Object.is 的相等性差异",
+  "code_lang": "javascript",
+  "code_std": "node22",
+  "stdin": "",
+  "expected_output": "1 == \"1\": true\n1 === \"1\": false\nnull == undefined: true\nnull === undefined: false\nNaN === NaN: false\nObject.is(NaN, NaN): true\n+0 === -0: true\nObject.is(+0, -0): false\n[] == false: true",
+  "code": "console.log('1 == \"1\":', 1 == '1');\nconsole.log('1 === \"1\":', 1 === '1');\nconsole.log('null == undefined:', null == undefined);\nconsole.log('null === undefined:', null === undefined);\nconsole.log('NaN === NaN:', NaN === NaN);\nconsole.log('Object.is(NaN, NaN):', Object.is(NaN, NaN));\nconsole.log('+0 === -0:', +0 === -0);\nconsole.log('Object.is(+0, -0):', Object.is(+0, -0));\nconsole.log('[] == false:', [] == false);"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "inline namespace 版本切换",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "v2 v1\n",
+  "code": "#include <iostream>\n\nnamespace mylib {\n    inline namespace v2 { const char* who() { return \"v2\"; } }\n    namespace v1       { const char* who() { return \"v1\"; } }\n}\n\nint main() {\n    std::cout << mylib::who() << ' ' << mylib::v1::who() << '\\n';\n}"
+}

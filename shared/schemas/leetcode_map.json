@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "format": "cppmind-leetcode-map-v1",
+    "note": "章节 → LeetCode 题目 slug 映射。同步服务仅拉取元数据（题号/标题/难度/标签），不存题面正文，点击跳原站。阶段 7 定稿全量映射。",
+    "updated_at": "2026-09-21"
+  },
+  "mappings": [
+    { "slug": "two-sum", "mapped_chapters": ["cpp-ch01", "cpp-ch08"] },
+    { "slug": "reverse-linked-list", "mapped_chapters": ["cpp-ch01", "cpp-ch08"] },
+    { "slug": "valid-parentheses", "mapped_chapters": ["cpp-ch05", "cpp-ch08"] },
+    { "slug": "implement-queue-using-stacks", "mapped_chapters": ["cpp-ch05", "cpp-ch08"] },
+    { "slug": "binary-tree-inorder-traversal", "mapped_chapters": ["cpp-ch08"] },
+    { "slug": "merge-two-sorted-lists", "mapped_chapters": ["cpp-ch08", "cpp-ch17"] },
+    { "slug": "lru-cache", "mapped_chapters": ["cpp-ch05", "cpp-ch08", "cpp-ch17"] },
+    { "slug": "producer-consumer-problem", "mapped_chapters": ["cpp-ch07"] },
+    { "slug": "design-tinyurl", "mapped_chapters": ["cpp-ch09", "cpp-ch17"] }
+  ],
+  "language_paths": {
+    "note": "各语言真实 LeetCode 题目 slug（用于『注明学习内容 + 真题依据』）。仅存 slug 与题号，不存题面。",
+    "cpp": ["two-sum", "reverse-linked-list", "valid-parentheses", "lru-cache", "merge-two-sorted-lists"],
+    "java": ["two-sum", "binary-tree-inorder-traversal", "implement-queue-using-stacks", "valid-anagram", "climbing-stairs"],
+    "python": ["two-sum", "implement-queue-using-stacks", "climbing-stairs", "valid-anagram", "maximum-subarray"],
+    "mysql": ["combine-two-tables", "second-highest-salary", "rank-scores", "consecutive-numbers", "department-highest-salary"]
+  }
+}

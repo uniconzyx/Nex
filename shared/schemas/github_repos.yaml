@@ -1,0 +1,64 @@
+# 章节 / 学科 → GitHub 仓库映射（阶段 7 定稿全量清单，此处为 MVP 种子）
+# 格式：{ chapter_code: [owner/repo, ...] }
+# 同步服务每日拉取元数据（描述/star/许可证/topics），只存元数据 + 链接。
+# 合规红线：不搬运题面正文，仅存引用。
+
+# ===== C/C++（按原 20 章章节） =====
+cpp-ch00: # 工具链与环境
+  - labex-labs/cpp-practice-projects
+cpp-ch01: # C++ 基础语法
+  - changkun/modern-cpp-tutorial
+cpp-ch03: # 内存与对象模型
+  - rigtorp/awesome-modern-cpp
+cpp-ch05: # STL 标准库
+  - Alinshans/MyTinySTL
+cpp-ch06: # 模板与泛型编程
+  - nlohmann/json
+cpp-ch07: # 并发与异步
+  - progschj/ThreadPool
+cpp-ch10: # 工程化
+  - yhirose/cpp-httplib
+cpp-ch13: # C++ 深度学习生态
+  - microsoft/onnxruntime
+  - pytorch/pytorch
+cpp-ch14: # 深度学习 C++ 学习路径
+  - ggml-org/llama.cpp
+cpp-ch15: # 项目实战
+  - taylorconor/tinytetris
+
+# ===== Java 学习内容（阶段5 多学科扩展） =====
+java-collection: # 集合框架
+  - iluwatar/java-design-patterns
+java-concurrent: # 并发
+  - Snailclimb/JavaGuide
+java-jvm: # JVM 与调优
+  - JessicaSachs/modern-java
+java-projects: # 项目实战
+  - macrozheng/spring-boot-learning
+
+# ===== Python 学习内容（阶段5 多学科扩展） =====
+python-basics: # 语法 / 推导式 / 函数式
+  - vinta/awesome-python
+python-algo: # 数据结构与算法（LeetCode Python）
+  - TheAlgorithms/Python
+python-web: # Web 后端
+  - tiangolo/fastapi
+
+# ===== MySQL / 数据库学习内容（阶段5 多学科扩展） =====
+db-sql: # SQL 查询 / 聚合
+  - daniellemurray/mysql-cheat-sheet
+db-innodb: # 事务 / 索引 / 隔离级别
+  - digitalocean/mysql-resources
+db-projects: # 项目实战（连接池 / ORM）
+  - brettwooldridge/HikariCP
+
+# ===== 全栈开发路线（资源从 GitHub 获取，阶段5 强制） =====
+fullstack-roadmap: # 路线总览
+  - jwasham/coding-interview-university
+  - kamranahmedse/developer-roadmap
+fullstack-frontend: # 前端清单
+  - thedaviddias/Front-End-Checklist
+fullstack-backend: # 后端脚手架（FastAPI 全栈）
+  - tiangolo/full-stack-fastapi-template
+fullstack-projects: # 实战项目
+  - bradtraversy/vanillawebprojects

@@ -1,0 +1,8 @@
+{
+  "title": "ftell 求文件大小（SEEK_END 定位）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "file size = 28 bytes\n",
+  "code": "#include <stdio.h>\nint main(void) {\n    FILE *w = fopen(\"sz.bin\", \"wb\");\n    int x = 12345;\n    for (int i = 0; i < 7; i++) fwrite(&x, sizeof(int), 1, w);\n    fclose(w);\n    FILE *r = fopen(\"sz.bin\", \"rb\");\n    fseek(r, 0L, SEEK_END);\n    long sz = ftell(r);\n    printf(\"file size = %ld bytes\\n\", sz);\n    fseek(r, 0L, SEEK_SET);\n    fclose(r);\n    return 0;\n}"
+}

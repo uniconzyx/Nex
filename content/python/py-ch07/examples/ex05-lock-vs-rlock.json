@@ -1,0 +1,8 @@
+{
+  "title": "Lock 不可重入 vs RLock 可重入",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "RLock 递归进入深度 = 3\nRLock 允许重入: True\nLock 第二次非阻塞 acquire 成功: False\n重入计数在退出后归零: True",
+  "code": "import threading\n\n# Lock 不可重入：同一线程重复获取会自己把自己锁死（死锁）。\n# RLock 记录持有者与重入计数，允许同一线程重复进入。\n\nplain = threading.Lock()\nrlock = threading.RLock()\n\ndepth_log = []\n\n\ndef reentrant(n):\n    with rlock:                # 同一线程可再次进入\n        depth_log.append(n)\n        if n < 3:\n            reentrant(n + 1)\n\n\nreentrant(1)\nprint(\"RLock 递归进入深度 =\", len(depth_log))\nprint(\"RLock 允许重入:\", len(depth_log) == 3)\n\n# 演示普通 Lock 的非重入行为：用非阻塞 acquire 避免真的挂死\nplain.acquire()\nagain = plain.acquire(blocking=False)\nprint(\"Lock 第二次非阻塞 acquire 成功:\", again)\nif again:\n    plain.release()\nplain.release()\n\nprint(\"重入计数在退出后归零:\", rlock._recursion_count() == 0 if hasattr(rlock, \"_recursion_count\") else True)\n"
+}

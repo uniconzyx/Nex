@@ -1,0 +1,8 @@
+{
+  "title": "ex01-router-basic",
+  "code_lang": "java",
+  "code_std": "java23",
+  "stdin": "",
+  "expected_output": "GET /users -> 200 OK [list 2 users]\nPOST /users -> 201 Created [id=3]\nDELETE /users -> 404 Not Found",
+  "code": "import java.util.*;\npublic class Main {\n    interface Handler { String handle(String body); }\n    public static void main(String[] a){\n        Map<String,Handler> routes = new LinkedHashMap<>();\n        routes.put(\"GET /users\", (b)->\"200 OK [list 2 users]\");\n        routes.put(\"POST /users\", (b)->\"201 Created [id=3]\");\n        String[] reqs = {\"GET /users\",\"POST /users\",\"DELETE /users\"};\n        for(String r: reqs){\n            Handler h = routes.get(r);\n            System.out.println(r + \" -> \" + (h==null ? \"404 Not Found\" : h.handle(\"\")));\n        }\n    }\n}"
+}

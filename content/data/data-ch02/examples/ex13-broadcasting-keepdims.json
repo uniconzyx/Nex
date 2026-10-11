@@ -1,0 +1,8 @@
+{
+  "title": "广播与 keepdims：去中心化无手工升维",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "mean shape = (1, 5)\ncentered shape = (100, 5)\ncentered col means ~0 = True\nmanual broadcast works = True",
+  "code": "import numpy as np\nx = np.random.default_rng(0).normal(size=(100, 5))\nmean = x.mean(axis=0, keepdims=True)\nprint(\"mean shape =\", mean.shape)\ncentered = x - mean\nprint(\"centered shape =\", centered.shape)\nprint(\"centered col means ~0 =\", np.allclose(centered.mean(axis=0), 0, atol=1e-10))\nmean2 = x.mean(axis=0)\nprint(\"manual broadcast works =\", x.shape[1] == mean2.shape[0])"
+}

@@ -1,0 +1,334 @@
+{
+  "schema_version": 1,
+  "subject": "middleware",
+  "title": "CppMind · 中间件课程体系（Redis / Kafka）",
+  "note": "阶段7 技术栈扩展大纲。每章须齐备 7 类内容（见 _template 规范），由 server/scripts/validate_content.py 校验。resources 仅存元数据与链接，不存第三方题面/正文，符合合规红线。",
+  "groups": {
+    "M1": "Redis 原理",
+    "M2": "缓存工程",
+    "M3": "Kafka 与消息可靠性"
+  },
+  "chapters": [
+    {
+      "id": "mw-ch01",
+      "order": 1,
+      "group": "M1",
+      "title": "Redis 数据结构与底层编码",
+      "summary": "String/List/Hash/Set/ZSet 与 Bitmap/HyperLogLog/GEO/Stream 的场景；SDS 与 C 字符串的差异（长度前缀、二进制安全、预分配）；ziplist/listpack/quicklist/intset/skiplist 的编码转换阈值；单线程模型 + IO 多路复用为什么够快。",
+      "prerequisites": [],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "Snailclimb/JavaGuide",
+          "doocs/advanced-java",
+          "redis/redis",
+          "apache/kafka"
+        ],
+        "github_stars": [
+          159056,
+          79141,
+          76640,
+          33917
+        ],
+        "github_notes": [
+          "含 Redis 与消息队列的高频面试知识",
+          "高并发与分布式：缓存、消息队列、分库分表专题",
+          "Redis 官方源码仓库：数据结构与命令实现的权威来源",
+          "Apache Kafka 官方仓库：架构与协议实现"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Redis 设计与实现》第1-2章",
+          "《Redis 深度历险》"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "mw-ch02",
+      "order": 2,
+      "group": "M1",
+      "title": "Redis 持久化与内存管理",
+      "summary": "RDB 的 fork + 写时复制与快照时机；AOF 的 appendfsync 三策略与重写机制；混合持久化；过期键的惰性删除与定期删除；八种内存淘汰策略与 maxmemory 的选型；内存碎片与 big key 排查。",
+      "prerequisites": [
+        "mw-ch01"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "Snailclimb/JavaGuide",
+          "doocs/advanced-java",
+          "redis/redis",
+          "apache/kafka"
+        ],
+        "github_stars": [
+          159056,
+          79141,
+          76640,
+          33917
+        ],
+        "github_notes": [
+          "含 Redis 与消息队列的高频面试知识",
+          "高并发与分布式：缓存、消息队列、分库分表专题",
+          "Redis 官方源码仓库：数据结构与命令实现的权威来源",
+          "Apache Kafka 官方仓库：架构与协议实现"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Redis 设计与实现》第4-5章"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "mw-ch03",
+      "order": 3,
+      "group": "M1",
+      "title": "Redis 高可用：主从、哨兵与 Cluster",
+      "summary": "主从复制的全量同步与增量同步（psync、repl_backlog）；哨兵的主观/客观下线与 Raft 选主、故障转移流程；Cluster 的 16384 槽位、CRC16 分片与 MOVED/ASK 重定向；集群下的多 key 操作限制；脑裂与 CAP 取舍。",
+      "prerequisites": [
+        "mw-ch02"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "Snailclimb/JavaGuide",
+          "doocs/advanced-java",
+          "redis/redis",
+          "apache/kafka"
+        ],
+        "github_stars": [
+          159056,
+          79141,
+          76640,
+          33917
+        ],
+        "github_notes": [
+          "含 Redis 与消息队列的高频面试知识",
+          "高并发与分布式：缓存、消息队列、分库分表专题",
+          "Redis 官方源码仓库：数据结构与命令实现的权威来源",
+          "Apache Kafka 官方仓库：架构与协议实现"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Redis 设计与实现》第3章"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "mw-ch04",
+      "order": 4,
+      "group": "M2",
+      "title": "缓存设计与三大经典问题",
+      "summary": "缓存穿透（布隆过滤器、空值缓存）、击穿（互斥重建、逻辑过期）、雪崩（TTL 打散、多级缓存、熔断降级）；缓存与数据库一致性（Cache Aside 先更新库再删缓存、延迟双删、binlog 订阅）；分布式锁的演进（SETNX → Redlock 争议 → Redisson 看门狗）与锁超时问题。",
+      "prerequisites": [
+        "mw-ch01"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "Snailclimb/JavaGuide",
+          "doocs/advanced-java",
+          "redis/redis",
+          "apache/kafka"
+        ],
+        "github_stars": [
+          159056,
+          79141,
+          76640,
+          33917
+        ],
+        "github_notes": [
+          "含 Redis 与消息队列的高频面试知识",
+          "高并发与分布式：缓存、消息队列、分库分表专题",
+          "Redis 官方源码仓库：数据结构与命令实现的权威来源",
+          "Apache Kafka 官方仓库：架构与协议实现"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Redis 深度历险》缓存篇"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "mw-ch05",
+      "order": 5,
+      "group": "M3",
+      "title": "Kafka 架构：Topic、Partition 与 Replica",
+      "summary": "把消息队列抽象成分布式提交日志；分区数与并行度的关系；副本与 ISR 集合、Leader 选举与 HW/LEO；顺序性只在分区内成立；日志段、稀疏索引与零拷贝读取；与 RabbitMQ 等传统 MQ 的模型差异。",
+      "prerequisites": [],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "Snailclimb/JavaGuide",
+          "doocs/advanced-java",
+          "redis/redis",
+          "apache/kafka"
+        ],
+        "github_stars": [
+          159056,
+          79141,
+          76640,
+          33917
+        ],
+        "github_notes": [
+          "含 Redis 与消息队列的高频面试知识",
+          "高并发与分布式：缓存、消息队列、分库分表专题",
+          "Redis 官方源码仓库：数据结构与命令实现的权威来源",
+          "Apache Kafka 官方仓库：架构与协议实现"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Kafka 权威指南》第1-4章",
+          "《深入理解 Kafka》"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "mw-ch06",
+      "order": 6,
+      "group": "M3",
+      "title": "Kafka 生产者与消费者机制",
+      "summary": "生产者分区策略与 acks=0/1/all 的可靠性权衡；幂等生产者（PID + 序列号）与生产者事务；消费者组的 rebalance 协议与触发条件；位移提交（自动 vs 手动、同步 vs 异步）与重复消费；__consumer_offsets 位移主题。",
+      "prerequisites": [
+        "mw-ch05"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "Snailclimb/JavaGuide",
+          "doocs/advanced-java",
+          "redis/redis",
+          "apache/kafka"
+        ],
+        "github_stars": [
+          159056,
+          79141,
+          76640,
+          33917
+        ],
+        "github_notes": [
+          "含 Redis 与消息队列的高频面试知识",
+          "高并发与分布式：缓存、消息队列、分库分表专题",
+          "Redis 官方源码仓库：数据结构与命令实现的权威来源",
+          "Apache Kafka 官方仓库：架构与协议实现"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Kafka 权威指南》第5-6章"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "mw-ch07",
+      "order": 7,
+      "group": "M3",
+      "title": "消息可靠性：不丢、不重、有序",
+      "summary": "消息丢失的三个环节（生产端/存储端/消费端）与逐项对策；重复消费的本质（at-least-once）与业务幂等设计（唯一键、去重表、状态机）；顺序消息的实现约束与代价；事务消息与 exactly-once 的真实成本；死信队列与重试策略。",
+      "prerequisites": [
+        "mw-ch06"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "Snailclimb/JavaGuide",
+          "doocs/advanced-java",
+          "redis/redis",
+          "apache/kafka"
+        ],
+        "github_stars": [
+          159056,
+          79141,
+          76640,
+          33917
+        ],
+        "github_notes": [
+          "含 Redis 与消息队列的高频面试知识",
+          "高并发与分布式：缓存、消息队列、分库分表专题",
+          "Redis 官方源码仓库：数据结构与命令实现的权威来源",
+          "Apache Kafka 官方仓库：架构与协议实现"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《深入理解 Kafka》可靠性章节"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "mw-ch08",
+      "order": 8,
+      "group": "M3",
+      "title": "消息队列选型与工程实践",
+      "summary": "削峰填谷、系统解耦、异步化的收益与代价；Kafka / RabbitMQ / RocketMQ / Pulsar 的多维对比（吞吐、延迟、顺序、事务、运维成本）；消息积压的排查与扩容手段；死信与补偿链路；与 Redis Stream、数据库轮询的边界。",
+      "prerequisites": [
+        "mw-ch07"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "Snailclimb/JavaGuide",
+          "doocs/advanced-java",
+          "redis/redis",
+          "apache/kafka"
+        ],
+        "github_stars": [
+          159056,
+          79141,
+          76640,
+          33917
+        ],
+        "github_notes": [
+          "含 Redis 与消息队列的高频面试知识",
+          "高并发与分布式：缓存、消息队列、分库分表专题",
+          "Redis 官方源码仓库：数据结构与命令实现的权威来源",
+          "Apache Kafka 官方仓库：架构与协议实现"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Kafka 权威指南》第11章"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    }
+  ],
+  "github_resources": [
+    {
+      "repo": "Snailclimb/JavaGuide",
+      "stars": 159056,
+      "url": "https://github.com/Snailclimb/JavaGuide",
+      "note": "含 Redis 与消息队列的高频面试知识"
+    },
+    {
+      "repo": "doocs/advanced-java",
+      "stars": 79141,
+      "url": "https://github.com/doocs/advanced-java",
+      "note": "高并发与分布式：缓存、消息队列、分库分表专题"
+    },
+    {
+      "repo": "redis/redis",
+      "stars": 76640,
+      "url": "https://github.com/redis/redis",
+      "note": "Redis 官方源码仓库：数据结构与命令实现的权威来源"
+    },
+    {
+      "repo": "apache/kafka",
+      "stars": 33917,
+      "url": "https://github.com/apache/kafka",
+      "note": "Apache Kafka 官方仓库：架构与协议实现"
+    }
+  ],
+  "resources_fetched_at": "2026-09-21"
+}

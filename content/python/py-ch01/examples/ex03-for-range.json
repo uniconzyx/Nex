@@ -1,0 +1,8 @@
+{
+  "title": "for 循环与 range",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "0\n1\n2",
+  "code": "for i in range(3):\n    print(i)"
+}

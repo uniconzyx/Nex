@@ -1,0 +1,8 @@
+{
+  "title": "YARN 状态机：Application 与 Container 的状态转移",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "Application state machine:\nNEW -> NEW_SAVING -> SUBMITTED -> ACCEPTED -> RUNNING -> FINISHED\nContainer state machine:\nNEW -> LOCALIZING -> LOCALIZED -> RUNNING -> COMPLETED\nillegal transition example: RUNNING -> NEW is rejected by RM state machine",
+  "code": "\napp_fsm = [\"NEW\",\"NEW_SAVING\",\"SUBMITTED\",\"ACCEPTED\",\"RUNNING\",\"FINISHED\"]\ncontainer_fsm = [\"NEW\",\"LOCALIZING\",\"LOCALIZED\",\"RUNNING\",\"COMPLETED\"]\nprint(\"Application state machine:\")\nprint(\" -> \".join(app_fsm))\nprint(\"Container state machine:\")\nprint(\" -> \".join(container_fsm))\nprint(\"illegal transition example: RUNNING -> NEW is rejected by RM state machine\")\n"
+}

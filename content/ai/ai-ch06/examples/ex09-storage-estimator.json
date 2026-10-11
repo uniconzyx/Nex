@@ -1,0 +1,8 @@
+{
+  "title": "embedding 存储估算器：不同维度的确定性字节数",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "维度对比 (文档数=1000000, float32):\ndim=384  向量=1536.0 MB  索引=8.0 MB  合计=1544.0 MB\ndim=768  向量=3072.0 MB  索引=8.0 MB  合计=3080.0 MB\ndim=1536  向量=6144.0 MB  索引=8.0 MB  合计=6152.0 MB\n",
+  "code": "def estimate(doc_count, dim, dtype_bytes, index_overhead_per_doc=8):\n    vec_bytes = doc_count * dim * dtype_bytes\n    idx_bytes = doc_count * index_overhead_per_doc\n    return vec_bytes, idx_bytes, vec_bytes + idx_bytes\n\nprint('维度对比 (文档数=1000000, float32):')\nfor dim in (384, 768, 1536):\n    vb, ib, tot = estimate(1000000, dim, 4)\n    print('dim=%d  向量=%.1f MB  索引=%.1f MB  合计=%.1f MB' % (\n        dim, vb / 1e6, ib / 1e6, tot / 1e6))\n"
+}

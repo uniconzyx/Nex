@@ -1,0 +1,8 @@
+{
+  "title": "浮点格式化：默认精度、fixed 与有效数字",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "default: 3.14159\nfixed2: 3.14\nsig4: 3.142",
+  "code": "#include <iostream>\n#include <iomanip>\nint main() {\n    double pi = 3.14159265358979;\n    std::cout << \"default: \" << pi << '\\n';\n    std::cout << \"fixed2: \" << std::fixed << std::setprecision(2) << pi << '\\n';\n    std::cout << std::defaultfloat << \"sig4: \" << std::setprecision(4) << pi << '\\n';\n}"
+}

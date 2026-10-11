@@ -1,0 +1,8 @@
+{
+  "title": "async + future 取结果（显式 launch::async）",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "answer=42",
+  "code": "#include <iostream>\n#include <future>\n\nint main() {\n    auto f = std::async(std::launch::async, []{ return 6 * 7; });\n    std::cout << \"answer=\" << f.get();   // 阻塞取结果；异常也会在此重抛\n}"
+}

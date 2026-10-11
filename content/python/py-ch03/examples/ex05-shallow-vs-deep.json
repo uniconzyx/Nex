@@ -1,0 +1,8 @@
+{
+  "title": "浅拷贝 vs 深拷贝：嵌套对象是否共享",
+  "code_lang": "python",
+  "code_std": "python3.11",
+  "stdin": "",
+  "expected_output": "after shallow, a: [1, [2, 3, 99], 4]\nafter deep, a: [1, [2, 3, 99], 4]",
+  "code": "import copy\na = [1, [2, 3], 4]\nb = copy.copy(a)          # 浅拷贝：外层新列表，内层共享\nb[1].append(99)\nprint(\"after shallow, a:\", a)\nb2 = copy.deepcopy(a)     # 深拷贝：内层也独立\nb2[1].append(100)\nprint(\"after deep, a:\", a)"
+}

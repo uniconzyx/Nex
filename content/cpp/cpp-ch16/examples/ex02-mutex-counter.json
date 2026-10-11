@@ -1,0 +1,8 @@
+{
+  "title": "mutex + lock_guard 保护共享计数（确定性总数）",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "total=10000",
+  "code": "#include <iostream>\n#include <mutex>\n#include <thread>\n#include <vector>\n\nlong total = 0;\nstd::mutex m;\n\nvoid work() {\n    for (int k = 0; k < 2500; ++k) {\n        std::lock_guard<std::mutex> lk(m);   // RAII 加锁，作用域结束自动解锁\n        ++total;\n    }\n}\n\nint main() {\n    std::vector<std::thread> ts;\n    for (int i = 0; i < 4; ++i) ts.emplace_back(work);\n    for (auto& t : ts) t.join();\n    std::cout << \"total=\" << total;   // 4*2500=10000，确定性\n}"
+}

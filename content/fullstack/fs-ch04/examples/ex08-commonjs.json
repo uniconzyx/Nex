@@ -1,0 +1,8 @@
+{
+  "title": "CommonJS 语义：exports 别名、module.exports 重赋值与 require 缓存",
+  "code_lang": "javascript",
+  "code_std": "node22",
+  "stdin": "",
+  "expected_output": "exportsAliasFoo=42\nmoduleExportsBar=7\nsameRef=false\ncacheHit=true\n",
+  "code": "const moduleObj = { exports: {} };\nconst exportsAlias = moduleObj.exports;\nexportsAlias.foo = 42;\nmoduleObj.exports = { bar: 7 };\nconsole.log('exportsAliasFoo=' + exportsAlias.foo);\nconsole.log('moduleExportsBar=' + moduleObj.exports.bar);\nconsole.log('sameRef=' + (exportsAlias === moduleObj.exports));\n\nconst cache = {};\nfunction requireOnce(id, factory) {\n  if (cache[id]) return cache[id];\n  const m = { exports: {} };\n  factory(m.exports, m);\n  cache[id] = m.exports;\n  return m.exports;\n}\nconst a = requireOnce('mod', (exp) => { exp.v = 1; });\nconst b = requireOnce('mod', (exp) => { exp.v = 1; });\nconsole.log('cacheHit=' + (a === b));"
+}

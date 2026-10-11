@@ -1,0 +1,8 @@
+{
+  "title": "显式指定模板实参与显式实例化",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "3 4",
+  "code": "#include <iostream>\ntemplate <typename T>\nT add(T a, T b) { return a + b; }\ntemplate int add<int>(int, int);   // 显式实例化\nint main() {\n    std::cout << add(1, 2) << ' ' << add<double>(1.5, 2.5);\n}\n"
+}

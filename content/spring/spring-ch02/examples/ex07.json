@@ -1,0 +1,8 @@
+{
+  "title": "销毁三方式及顺序：@PreDestroy / DisposableBean / destroy-method",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "preDestroy;disposableBean;destroyMethod;",
+  "code": "import java.lang.annotation.*;\nimport java.lang.reflect.*;\n\npublic class Main {\n    @Retention(RetentionPolicy.RUNTIME) @Target(ElementType.METHOD) @interface PreDestroy {}\n    interface DisposableBean { void destroy(); }\n\n    static class Bean implements DisposableBean {\n        StringBuilder seq = new StringBuilder();\n        @PreDestroy void pd() { seq.append(\"preDestroy;\"); }\n        public void destroy() { seq.append(\"disposableBean;\"); }\n        void destroyMethod() { seq.append(\"destroyMethod;\"); }\n        String seq() { return seq.toString(); }\n    }\n\n    public static void main(String[] args) throws Exception {\n        Bean b = new Bean();\n        for (Method m : Bean.class.getDeclaredMethods()) if (m.isAnnotationPresent(PreDestroy.class)) m.invoke(b);\n        b.destroy();\n        Bean.class.getDeclaredMethod(\"destroyMethod\").invoke(b);\n        System.out.println(b.seq());\n    }\n}\n"
+}

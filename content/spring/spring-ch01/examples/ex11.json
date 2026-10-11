@@ -1,0 +1,8 @@
+{
+  "title": "生命周期回调：init / use / destroy",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "[init] bean initialized\n[use] bean working\n[destroy] bean cleaned up",
+  "code": "public class Ex11 {\n    static class Bean {\n        void init() { System.out.println(\"[init] bean initialized\"); }\n        void destroy() { System.out.println(\"[destroy] bean cleaned up\"); }\n        void use() { System.out.println(\"[use] bean working\"); }\n    }\n    public static void main(String[] args) {\n        Bean b = new Bean();\n        // 容器在实例化后回调 init，关闭时回调 destroy\n        b.init();\n        b.use();\n        b.destroy();\n    }\n}\n"
+}

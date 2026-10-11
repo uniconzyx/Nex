@@ -1,0 +1,8 @@
+{
+  "title": "ex11-l1-l2-cache",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "s1 第一次: ('DB', 'row:u1')\ns1 第二次(同session): ('L1', 'row:u1')\ns2 第一次(新session): ('L2', 'row:u1')\ns3 第一次: ('DB', 'row:u2')",
+  "code": "class Session:\n    def __init__(self, l2):\n        self.l2 = l2\n        self.l1 = {}\n    def query(self, key):\n        if key in self.l1:\n            return (\"L1\", self.l1[key])\n        if key in self.l2:\n            v = self.l2[key]\n            self.l1[key] = v\n            return (\"L2\", v)\n        v = \"row:\" + key\n        self.l1[key] = v\n        self.l2[key] = v\n        return (\"DB\", v)\n\nl2 = {}\ns1 = Session(l2)\nprint(\"s1 第一次:\", s1.query(\"u1\"))\nprint(\"s1 第二次(同session):\", s1.query(\"u1\"))\ns2 = Session(l2)\nprint(\"s2 第一次(新session):\", s2.query(\"u1\"))\ns3 = Session(l2)\nprint(\"s3 第一次:\", s3.query(\"u2\"))\n"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "函数指针与回调：qsort 排序",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "1 2 3 5 7 8 9",
+  "code": "#include <stdio.h>\n#include <stdlib.h>\n\nint cmp_asc(const void *a, const void *b) {\n    int x = *(const int *)a, y = *(const int *)b;\n    return (x > y) - (x < y);       /* 避免相减溢出 */\n}\n\nint main(void) {\n    int a[7] = {5, 2, 8, 1, 9, 3, 7};\n    qsort(a, 7, sizeof(int), cmp_asc);\n    for (int i = 0; i < 7; i++) printf(\"%d%c\", a[i], i == 6 ? '\\n' : ' ');\n    return 0;\n}"
+}

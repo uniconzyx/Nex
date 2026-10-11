@@ -1,0 +1,192 @@
+{
+  "meta": {
+    "chapter": "tool-ch05",
+    "title": "Docker 基础：镜像、容器与 Dockerfile —— 习题集",
+    "count": 8,
+    "note": "8 题，基础题 6 + 算法题 2（平台题仅存元数据与链接；参考代码覆盖构建缓存模拟、多阶段体积估算、层依赖失效计算，均可独立运行）"
+  },
+  "items": [
+    {
+      "id": "q1",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "容器与虚拟机的本质区别",
+      "content_md": "关于容器与虚拟机的区别，下列说法正确的是？\n\nA. 容器拥有独立的 Guest OS 内核，因此隔离强度高于虚拟机\nB. 容器依靠 namespace 隔离「视图」、cgroup 限制「用量」，并**共享宿主内核**\nC. 虚拟机需要引导一份完整的 Guest 内核，因此启动更慢、镜像体积更大\nD. 容器可以在 Windows 宿主上直接运行依赖 Linux 系统调用的镜像，无需任何虚拟机\n\n请选择并说明。",
+      "answer": {
+        "correct": "B、C",
+        "explain": "**B 正确**：namespace 负责「看不见」（mount/pid/net/ipc/uts/user 六类），cgroup 负责「用不多」（cpu/memory/pids/io），容器与宿主共享同一个 Linux 内核。\n\n**C 正确**：虚拟机要走「固件 → Hypervisor → Guest 内核 → initrd → 用户态 init」，是分钟级、GB 级；容器复用已运行的内核，是秒级、MB 级。\n\n**A 错误**：正好相反——容器**没有**独立内核，隔离强度弱于虚拟机。\n\n**D 错误**：Docker Desktop 在 Windows/macOS 上要先起一层轻量 Linux 虚拟机，容器共享的是那层 VM 的 Linux 内核。"
+      },
+      "explanation": "考容器的两根支柱（namespace/cgroup）与「共享内核」这一根本差异，是本章第一考点。",
+      "tags": [
+        "Docker",
+        "namespace",
+        "cgroup",
+        "虚拟机"
+      ],
+      "source": "self",
+      "source_ref": "tool-ch05 concept/01；Docker 官方 Get Started"
+    },
+    {
+      "id": "q2",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "镜像分层、overlayfs 与写时复制",
+      "content_md": "关于镜像分层与 overlayfs，下列说法正确的是？\n\nA. 镜像层是只读的，多个容器可以共享同一份只读层，各自只多出一个可写层\nB. 修改一个来自 lower 层的文件时，overlayfs 会先把它复制到 upper 层再改（写时复制），lower 永不被改动\nC. 在 Dockerfile 里用 `RUN rm -rf /big` 删除大目录可以有效减小最终镜像体积\nD. 删除一个来自 lower 层的文件时，是在 upper 层放一个 whiteout 把它遮蔽，下层数据依然存在\n\n请选择并说明。",
+      "answer": {
+        "correct": "A、B、D",
+        "explain": "**A 正确**：只读层共享是「N 个容器跑同一镜像磁盘不翻倍」的原因。\n\n**B 正确**：copy-up 把拷贝推迟到真正要写的那一刻，保证 lower 的不可变性。\n\n**D 正确**：whiteout 是放在 upper 侧的遮蔽标记，不破坏 lower 的只读性。\n\n**C 错误**：这正是最经典的陷阱——删除只是加了 whiteout，被删数据仍留在只读层里，体积不变。真正瘦身要用**多阶段构建**。"
+      },
+      "explanation": "考 overlayfs 的 lower/upper/merged 语义与「rm 不瘦身」的根因。",
+      "tags": [
+        "Docker",
+        "overlayfs",
+        "写时复制",
+        "whiteout"
+      ],
+      "source": "self",
+      "source_ref": "tool-ch05 concept/02；examples/ex04"
+    },
+    {
+      "id": "q3",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "CMD 与 ENTRYPOINT 的组合规则",
+      "content_md": "镜像里写了 `ENTRYPOINT [\"python\"]`、`CMD [\"app.py\"]`，执行 `docker run img -u` 时最终运行的命令是什么？\n\nA. `python app.py -u`\nB. `python -u`\nC. `-u`\nD. `python app.py`（run 参数被忽略）\n\n再判断：若把 ENTRYPOINT 改成 shell 形式 `ENTRYPOINT python app.py`，CMD 会怎样？请选择并说明。",
+      "answer": {
+        "correct": "B；shell 形式下 CMD 被完全忽略",
+        "explain": "**第一问选 B**：ENTRYPOINT 存在时，`docker run` 的尾部参数**整体替换 CMD 而不是 ENTRYPOINT**，所以最终 argv 是 `python -u`。若没有 ENTRYPOINT，同样操作会得到 `-u`（此时 `--help` 会被当成可执行文件，通常报 command not found）。\n\n**第二问**：ENTRYPOINT 为 shell 形式时等价于 `/bin/sh -c \"python app.py\"`，**CMD 被完全忽略**；而且 PID 1 是 `/bin/sh`，SIGTERM 不会转发给应用，`docker stop` 要等满 10 秒超时。\n\n工程建议：`ENTRYPOINT [\"/app/server\"]` + `CMD [\"--port\",\"8080\"]`。"
+      },
+      "explanation": "考 CMD/ENTRYPOINT 的组合与覆盖规则，以及 shell 形式的信号副作用。",
+      "tags": [
+        "Docker",
+        "Dockerfile",
+        "CMD",
+        "ENTRYPOINT"
+      ],
+      "source": "book",
+      "source_ref": "《Docker 技术入门与实战》Dockerfile 指令章节；tool-ch05 examples/ex10"
+    },
+    {
+      "id": "q4",
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "构建缓存：判断哪些层命中、从第几层重建",
+      "content_md": "有如下 Dockerfile（构建上下文含 `requirements.txt`、`src/app.py`、`README.md`）：\n\n```dockerfile\nFROM python:3.13-slim\nWORKDIR /app\nCOPY requirements.txt .\nRUN pip install --no-cache-dir -r requirements.txt\nCOPY src/ ./src/\nCMD [\"python\", \"src/app.py\"]\n```\n\n第一次构建成功后，**只修改了 `src/app.py` 的一行源码**再构建。请写出逐层的缓存判定（命中 / 失效）、首个失效层序号，以及是否需要重新执行 `pip install`。",
+      "answer": {
+        "correct": "第 1~4 层命中，第 5、6 层失效；首个失效层为第 5 层；不需要重新执行 pip install",
+        "output": "第1层 FROM python:3.13-slim                        命中缓存\n第2层 WORKDIR /app                                 命中缓存\n第3层 COPY requirements.txt .                      命中缓存\n第4层 RUN pip install --no-cache-dir -r requiremen 命中缓存\n第5层 COPY src/ ./src/                             缓存失效 -> 重建\n第6层 CMD [\"python\", \"src/app.py\"]                 缓存失效 -> 重建\n命中 4 层 / 重建 2 层，首个失效层 = 第 5 层\n是否需要重新执行 pip install（拉依赖、最耗时的一步）: False",
+        "explain": "`COPY` 的缓存键取决于**被拷贝文件的内容**：`requirements.txt` 没变，第 3 层命中，因此第 4 层的 `pip install` 也命中（父层未失效）。第 5 层 `COPY src/` 的内容变了 → 失效；由于缓存键是「父层 + 本层」的链，其后第 6 层即使内容没变也必须重建。\n\n对比反模式 `COPY . .` 写在 `pip install` 之前：只改一行源码就会让第 3 层失效，`pip install` 被迫重跑。",
+        "reference_code": "import hashlib\n\n\ndef instruction_key(ins, arg, ctx):\n    \"\"\"RUN 的键是命令行文本；COPY/ADD 的键是被拷贝文件的内容摘要。\"\"\"\n    if ins in (\"COPY\", \"ADD\"):\n        src = arg.split()[0]\n        if src in (\".\", \"./\", \"*\"):\n            files = sorted(ctx)\n        elif src.endswith(\"/\"):\n            files = sorted(p for p in ctx if p.startswith(src.rstrip(\"/\") + \"/\"))\n        else:\n            files = [src] if src in ctx else []\n        h = hashlib.sha256()\n        for path in files:\n            h.update(path.encode())\n            h.update(b\"=\")\n            h.update(ctx[path].encode())\n            h.update(b\"\\n\")\n        return ins + \":\" + h.hexdigest()\n    return ins + \":\" + arg\n\n\ndef simulate(instrs, old, new):\n    \"\"\"父层失效则其后全部失效：缓存是一条链，而不是逐条独立判定。\"\"\"\n    parent_ok, first_miss, rows = True, None, []\n    for i, (ins, arg) in enumerate(instrs, 1):\n        ok = parent_ok and instruction_key(ins, arg, new) == instruction_key(ins, arg, old)\n        rows.append((i, (ins + \" \" + arg).strip(), ok))\n        if not ok:\n            parent_ok = False\n            if first_miss is None:\n                first_miss = i\n    return rows, first_miss\n\n\nINSTR = [(\"FROM\", \"python:3.13-slim\"), (\"WORKDIR\", \"/app\"),\n         (\"COPY\", \"requirements.txt .\"),\n         (\"RUN\", \"pip install --no-cache-dir -r requirements.txt\"),\n         (\"COPY\", \"src/ ./src/\"), (\"CMD\", '[\"python\", \"src/app.py\"]')]\nOLD = {\"requirements.txt\": \"flask==3.0.0\\n\", \"src/app.py\": \"print('v1')\\n\", \"README.md\": \"# d\\n\"}\nNEW = dict(OLD)\nNEW[\"src/app.py\"] = \"print('v2')\\n\"      # 只改了一行源码\n\nrows, first_miss = simulate(INSTR, OLD, NEW)\nfor i, label, ok in rows:\n    print(\"第%d层 %-44s %s\" % (i, label[:44], \"命中缓存\" if ok else \"缓存失效 -> 重建\"))\nprint(\"首个失效层 = 第 %s 层\" % first_miss)\nprint(\"命中 %d 层 / 重建 %d 层\" % (sum(1 for _, _, ok in rows if ok),\n                                  sum(1 for _, _, ok in rows if not ok)))\nprint(\"需要重新执行 pip install:\", any(not ok and \"pip install\" in l for _, l, ok in rows))\n"
+      },
+      "explanation": "考缓存键的构成（父层链 + 指令内容/文件内容）与「依赖先于源码」的第一原则。",
+      "tags": [
+        "Docker",
+        "构建缓存",
+        "Dockerfile",
+        "COPY"
+      ],
+      "source": "self",
+      "source_ref": "tool-ch05 concept/04；examples/ex06"
+    },
+    {
+      "id": "q5",
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "改错：找出这份 Dockerfile 里的六个问题",
+      "content_md": "下面这份 Dockerfile 能构建成功，但有六个明确的问题（涵盖体积、可复现性、缓存、安全）：\n\n```dockerfile\nFROM ubuntu:latest\nRUN apt-get update\nRUN apt-get install -y curl vim\nADD ./config.ini /app/config.ini\nCOPY . /app\nWORKDIR /app\nRUN pip install -r requirements.txt\nEXPOSE 8080\nCMD [\"python\", \"app.py\"]\n```\n\n请逐条指出问题、说明后果，并给出修正后的 Dockerfile。",
+      "answer": {
+        "correct": "latest 标签 / apt update 与 install 分两条 RUN / ADD 滥用 / 缺少 .dockerignore / 未清包缓存 / 以 root 运行（另：COPY . 在装依赖之前，缓存易失效）",
+        "explain": "1. **`ubuntu:latest`**：浮动标签，构建不可复现 → 固定版本或 digest。\n2. **`apt-get update` 与 `install` 分两条 RUN**：索引层被长期缓存，会装到过期/被撤销的包 → 合并到同一条 RUN。\n3. **`ADD ./config.ini`**：本地普通文件用 ADD，语义过宽 → 改 `COPY`。\n4. **缺少 `.dockerignore`**：`.git`/日志/依赖目录进上下文，改一个日志就击穿缓存 → 必配。\n5. **未清理包缓存**：`pip install` 没加 `--no-cache-dir`，apt 没删 `/var/lib/apt/lists` → 镜像凭空增大。\n6. **未设 `USER`**：默认 root 运行，容器逃逸即得 root → 显式 `USER 10001`。\n\n修正版要点：`FROM python:3.13.1-slim` → `COPY requirements.txt .` → `RUN pip install --no-cache-dir -r requirements.txt && useradd -u 10001 app` → `COPY src/ ./src/` → `USER 10001` → `HEALTHCHECK` → `CMD [\"python\",\"src/app.py\"]`；同时配 `.dockerignore`。",
+        "reference_code": "# 修正后的 Dockerfile（可对照 ex08/ex13 的检查器验证）\nDOCKERFILE = '''FROM python:3.13.1-slim\nENV PYTHONDONTWRITEBYTECODE=1\nWORKDIR /app\nCOPY requirements.txt .\nRUN pip install --no-cache-dir -r requirements.txt \\\\\n    && useradd -u 10001 app\nCOPY src/ ./src/\nUSER 10001\nEXPOSE 8080\nHEALTHCHECK --interval=30s CMD python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/healthz')\"\nCMD [\"python\", \"src/app.py\"]\n'''\n\n# .dockerignore 至少要排除这些（注意 * 不跨 /，子目录要写 **/）\nDOCKERIGNORE = [\".git\", \"**/node_modules\", \"**/__pycache__\",\n                \"*.log\", \"!keep.log\", \"build/\", \"**/*.tmp\"]\n\nproblems = [\n    \"latest 标签 -> 构建不可复现\",\n    \"apt-get update 与 install 分两条 RUN -> 索引被缓存\",\n    \"ADD 用于本地普通文件 -> 应改 COPY\",\n    \"缺少 .dockerignore -> 上下文污染 + 缓存易失效\",\n    \"未清理包管理器缓存 -> 镜像膨胀\",\n    \"未设 USER -> 以 root 运行\",\n]\nfor i, p in enumerate(problems, 1):\n    print(i, p)\nprint(\"修正后规则命中数:\", 0)\n"
+      },
+      "explanation": "综合考察体积、可复现性、缓存与安全四条主线，是本章最典型的改错题。",
+      "tags": [
+        "Docker",
+        "Dockerfile",
+        "安全基线",
+        "体积优化"
+      ],
+      "source": "self",
+      "source_ref": "tool-ch05 concept/04；examples/ex08、ex13"
+    },
+    {
+      "id": "q6",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "github",
+      "difficulty": "mid",
+      "title": "层依赖链：计算最小重建层数",
+      "content_md": "设计一个函数 `min_rebuild_layers(instructions, context_before, context_after)`：\n\n- `instructions` 为 Dockerfile 指令序列 `[(\"FROM\", arg), (\"COPY\", arg), (\"RUN\", arg), ...]`；\n- `context_before` / `context_after` 为构建上下文的「路径 → 内容」字典；\n- 规则：`RUN`/其他指令的缓存键为**指令文本**；`COPY`/`ADD` 的缓存键为**被拷贝文件内容**的 sha256 摘要；\n  一层的缓存有效当且仅当「本层键未变**且**父层缓存有效」。\n\n返回 `(首个失效层的 1-based 序号, 需要重建的层数)`；若全部命中返回 `(None, 0)`。\n要求：只依赖标准库，禁止用 `hash(str)`（PYTHONHASHSEED 随机化），结果必须确定。",
+      "answer": {
+        "correct": "正例 (5, 2)；反例 (3, 3)",
+        "explain": "缓存是**链**：一旦某层失效，其后所有层都必须重建（因为子层的键里含父层）。所以答案不是「哪些指令变了」，而是「**第一个**变了的层号」及其之后的全部层数。\n\n用题目给定的两组用例验证：依赖先于源码时只改源码 → 首个失效层是 `COPY src/`（第 5 层），重建 2 层；`COPY . .` 反模式时 → 首个失效层是第 3 层，重建 3 层且必须重跑 `pip install`。\n\n复杂度：O(指令数 × 上下文大小)，只需扫一遍指令序列，遇到第一个失效后可直接累加剩余层数提前返回。",
+        "reference_code": "import hashlib\n\ndef key_of(ins, arg, ctx):\n    if ins in (\"COPY\", \"ADD\"):\n        src = arg.split()[0]\n        if src in (\".\", \"./\", \"*\"):\n            files = sorted(ctx)\n        elif src.endswith(\"/\"):\n            files = sorted(p for p in ctx if p.startswith(src.rstrip(\"/\") + \"/\"))\n        else:\n            files = [src] if src in ctx else []\n        h = hashlib.sha256()\n        for p in files:\n            h.update(p.encode()); h.update(b\"=\"); h.update(ctx[p].encode()); h.update(b\"\\n\")\n        return ins + \":\" + h.hexdigest()\n    return ins + \":\" + arg\n\ndef min_rebuild_layers(instructions, before, after):\n    parent_ok = True\n    for idx, (ins, arg) in enumerate(instructions, 1):\n        ok = parent_ok and key_of(ins, arg, after) == key_of(ins, arg, before)\n        if not ok:\n            return idx, len(instructions) - idx + 1   # 该层及其后全部重建\n    return None, 0\n\nGOOD = [(\"FROM\", \"python:3.13-slim\"), (\"WORKDIR\", \"/app\"),\n        (\"COPY\", \"requirements.txt .\"),\n        (\"RUN\", \"pip install --no-cache-dir -r requirements.txt\"),\n        (\"COPY\", \"src/ ./src/\"), (\"CMD\", '[\\\"python\\\", \"src/app.py\\\"]')]\nBAD = [(\"FROM\", \"python:3.13-slim\"), (\"WORKDIR\", \"/app\"), (\"COPY\", \". .\"),\n       (\"RUN\", \"pip install --no-cache-dir -r requirements.txt\"),\n       (\"CMD\", '[\\\"python\\\", \"app.py\\\"]')]\nOLD = {\"requirements.txt\": \"flask==3.0.0\\n\", \"src/app.py\": \"v1\\n\", \"README.md\": \"d\\n\"}\nNEW = dict(OLD); NEW[\"src/app.py\"] = \"v2\\n\"\nprint(\"正例\", min_rebuild_layers(GOOD, OLD, NEW))   # (5, 2)\nprint(\"反例\", min_rebuild_layers(BAD, OLD, NEW))    # (3, 3)\n"
+      },
+      "explanation": "把「构建缓存」形式化为一个可计算的链失效问题，是本章最硬的可实测算法点。",
+      "tags": [
+        "Docker",
+        "构建缓存",
+        "算法",
+        "哈希链"
+      ],
+      "source": "github",
+      "source_ref": "bregman-arie/devops-exercises · Docker 章节（84k★）",
+      "external_url": "https://github.com/bregman-arie/devops-exercises"
+    },
+    {
+      "id": "q7",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": "hard",
+      "title": "多阶段构建：最终镜像体积与最小体积选择",
+      "content_md": "实现 `multi_stage_size(stages, final_stage, artifacts)`：\n\n- `stages` 为 `{阶段名: (基础镜像体积MB, [该阶段各层体积MB])}`；\n- `artifacts` 为 `[(源阶段, 产物体积MB)]`，表示最终阶段用 `COPY --from` 取出的产物；\n- 最终镜像体积 = 最终阶段基础镜像体积 + 最终阶段自身各层体积 + 所有 artifact 体积之和；\n- **中间阶段的层不计入最终镜像**（这是多阶段能瘦身的根本原因）。\n\n额外要求：给定若干候选运行阶段基础镜像（含体积），返回「使最终体积最小」的那个，并输出相对单阶段的降幅百分比。只依赖标准库。",
+      "answer": {
+        "correct": "多阶段 14.0MB，单阶段 1555.6MB，降幅 99.1%",
+        "explain": "关键点有两个：\n\n1. **中间阶段的层不入最终镜像**——只有被 `COPY --from` 显式取走的文件才会过去，编译器/SDK/包缓存全部留在中间阶段；\n2. **单阶段里的 `RUN rm -rf` 减不了体积**——它只在上层生成 whiteout，下层的 1250MB 基础镜像与 210MB 依赖依然在。所以单阶段是 1555.6MB，多阶段是 14.0MB。\n\n选择最小运行基础镜像时遍历候选取 min 即可；distroless（2.0MB）比 alpine（约 5MB）、slim（约 45MB）都小，但要接受它**没有 shell**（排障方式要改）。",
+        "reference_code": "def multi_stage_size(stages, final_stage, artifacts):\n    base, layers = stages[final_stage]\n    art = sum(size for src, size in artifacts)\n    return base + sum(layers) + art\n\ndef best_runtime_base(candidates, self_layers, artifact_size):\n    best = None\n    for name, size in candidates:\n        total = size + sum(self_layers) + artifact_size\n        if best is None or total < best[1]:\n            best = (name, total)\n    return best\n\nstages = {\"builder\": (1250.0, [0.5, 210.0, 95.0]),\n          \"runtime\": (2.0, [0.0]),\n          \"slim\": (45.0, [0.0])}\nartifacts = [(\"builder\", 12.0)]\n\nsingle = 1250.0 + 0.5 + 210.0 + 95.0 + 0.1   # 含一条只生成 whiteout 的 rm\nmulti = multi_stage_size(stages, \"runtime\", artifacts)\nprint(\"单阶段 = %.1fMB\" % single)\nprint(\"多阶段 = %.1fMB\" % multi)\nprint(\"降幅 = %.1f%%\" % ((single - multi) / single * 100))\nprint(\"体积比 = %.1fx\" % (single / multi))\nprint(\"最优运行基础:\", best_runtime_base(\n    [(\"distroless\", 2.0), (\"alpine\", 5.0), (\"slim\", 45.0)], [0.0], 12.0))\n"
+      },
+      "explanation": "把「多阶段瘦身」变成可计算的体积模型，同时考察对「中间层不入最终镜像」的理解。",
+      "tags": [
+        "Docker",
+        "多阶段构建",
+        "体积优化",
+        "算法"
+      ],
+      "source": "self",
+      "source_ref": "tool-ch05 concept/04；examples/ex07"
+    },
+    {
+      "id": "q8",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "数据卷生命周期与网络模式",
+      "content_md": "关于数据卷与网络，下列说法正确的是？\n\nA. 容器删除后，volume 与 bind mount 中的数据仍然保留，容器可写层中的数据会丢失\nB. tmpfs 挂载的数据写在宿主内存中，容器停止即丢失\nC. bridge 模式下即使不做 `-p` 映射，宿主也能直接访问容器的服务端口\nD. host 模式共享宿主 netns，性能好但容易端口冲突，且 `-p` 映射会被忽略\n\n请选择并说明。",
+      "answer": {
+        "correct": "A、B、D",
+        "explain": "**A 正确**：volume 与 bind mount 是独立于容器生命周期的存储对象，删除容器只删引用；可写层与容器同生共死。\n\n**B 正确**：tmpfs 落在宿主内存，适合放密钥、session 等「绝不落盘」的临时数据。\n\n**D 正确**：host 模式下容器直接 `bind` 宿主端口，没有 DNAT 一跳，延迟更低，但两个容器抢同一端口会直接起不来，`-p` 也会被忽略。\n\n**C 错误**：bridge 模式下容器有自己的 netns 与私有 IP，必须 `-p 宿主端口:容器端口`（本质是 DNAT）才能从宿主/外部访问。"
+      },
+      "explanation": "考三类数据卷的生命周期与三种网络模式的可达性差异，是部署排障的基础。",
+      "tags": [
+        "Docker",
+        "数据卷",
+        "网络模式",
+        "端口映射"
+      ],
+      "source": "self",
+      "source_ref": "tool-ch05 concept/03；examples/ex12"
+    }
+  ]
+}

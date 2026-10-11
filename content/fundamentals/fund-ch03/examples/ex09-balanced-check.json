@@ -1,0 +1,8 @@
+{
+  "title": "O(N) 判平衡（返回值打包两种信息）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "树 1 是否平衡: 是\n树 2 是否平衡: 否",
+  "code": "#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct Node { int v; struct Node *l, *r; } Node;\nstatic Node *mk(int v) { Node *n = malloc(sizeof(Node)); n->v = v; n->l = n->r = NULL; return n; }\n\n/* 返回子树高度；发现不平衡返回 -1（哨兵短路）。\n   返回值同时携带「高度」与「是否平衡」两种信息 —— 树形 DP 通用技巧。 */\nstatic int check(Node *n) {\n    if (!n) return 0;\n    int lh = check(n->l);\n    if (lh == -1) return -1;\n    int rh = check(n->r);\n    if (rh == -1) return -1;\n    int d = lh - rh;\n    if (d > 1 || d < -1) return -1;\n    return 1 + (lh > rh ? lh : rh);\n}\n\nint main(void) {\n    /* 平衡树 */\n    Node *a = mk(1), *b = mk(2), *c = mk(3), *d = mk(4), *e = mk(5);\n    a->l = b; a->r = c; b->l = d; b->r = e;\n    printf(\"树 1 是否平衡: %s\\n\", check(a) != -1 ? \"是\" : \"否\");\n\n    /* 左斜链（高度差 3） */\n    Node *x = mk(1), *y = mk(2), *z = mk(3), *w = mk(4);\n    x->l = y; y->l = z; z->l = w;\n    printf(\"树 2 是否平衡: %s\\n\", check(x) != -1 ? \"是\" : \"否\");\n    return 0;\n}"
+}

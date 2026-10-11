@@ -1,0 +1,8 @@
+{
+  "title": "多接口 default 方法冲突解决",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "A.foo\nB.foo\nC.foo",
+  "code": "public class E306 {\n    interface A { default void foo(){ System.out.println(\"A.foo\"); } }\n    interface B { default void foo(){ System.out.println(\"B.foo\"); } }\n    static class C implements A, B {\n        public void foo(){ A.super.foo(); B.super.foo(); System.out.println(\"C.foo\"); }\n    }\n    public static void main(String[] args) {\n        new C().foo();\n    }\n}"
+}

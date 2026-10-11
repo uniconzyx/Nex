@@ -1,0 +1,8 @@
+{
+  "title": "矩阵乘、einsum 的典型写法与 np.ptp",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "A =\n[[0 7 6 4]\n [4 8 0 6]\n [2 0 5 9]]\nB =\n[[7 7]\n [7 7]\n [5 1]\n [8 4]]\nA @ B =\n[[111  71]\n [132 108]\n [111  55]]\neinsum 与 @ 结果一致 : True\n--- einsum 的几种典型写法 ---\n矩阵迹 einsum('ii->')  = 12\n平方和 einsum('ij,ij->') = 327\n外积   einsum('i,j->ij') =\n[[10 20]\n [20 40]]\n转置   einsum('ij->ji') 与 .T 一致 : True\n--- ptp 极差 ---\nnp.ptp(x) = 8 | x.max()-x.min() = 8",
+  "code": "import numpy as np\nrng = np.random.default_rng(42)\nA = rng.integers(0, 10, size=(3, 4))\nB = rng.integers(0, 10, size=(4, 2))\nprint(\"A =\")\nprint(A)\nprint(\"B =\")\nprint(B)\nprod = A @ B\nprint(\"A @ B =\")\nprint(prod)\nprint(\"einsum 与 @ 结果一致 :\", np.array_equal(prod, np.einsum(\"ij,jk->ik\", A, B)))\nprint(\"--- einsum 的几种典型写法 ---\")\neye = np.eye(4) * 3\nprint(\"矩阵迹 einsum('ii->')  =\", int(np.einsum(\"ii->\", eye)))\nprint(\"平方和 einsum('ij,ij->') =\", int(np.einsum(\"ij,ij->\", A, A)))\nprint(\"外积   einsum('i,j->ij') =\")\nprint(np.einsum(\"i,j->ij\", np.array([1, 2]), np.array([10, 20])))\nprint(\"转置   einsum('ij->ji') 与 .T 一致 :\",\n      np.array_equal(np.einsum(\"ij->ji\", A), A.T))\nprint(\"--- ptp 极差 ---\")\nx = np.array([3, 1, 7, 2, 9])\nprint(\"np.ptp(x) =\", int(np.ptp(x)), \"| x.max()-x.min() =\", int(x.max() - x.min()))\n"
+}

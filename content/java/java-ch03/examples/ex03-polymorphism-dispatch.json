@@ -1,0 +1,8 @@
+{
+  "title": "多态动态分派：父类引用调用子类实现",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "3.1416\n4.0000",
+  "code": "public class E303 {\n    static abstract class Shape {\n        abstract double area();\n    }\n    static class Circle extends Shape {\n        double r;\n        Circle(double r){ this.r = r; }\n        @Override double area(){ return Math.PI * r * r; }\n    }\n    static class Square extends Shape {\n        double s;\n        Square(double s){ this.s = s; }\n        @Override double area(){ return s * s; }\n    }\n    public static void main(String[] args) {\n        Shape[] shapes = { new Circle(1.0), new Square(2.0) };\n        for (Shape s : shapes) {\n            System.out.printf(\"%.4f%n\", s.area());\n        }\n    }\n}"
+}

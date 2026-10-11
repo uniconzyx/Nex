@@ -1,0 +1,14 @@
+{
+  "title": "recipe 必须 Tab 开头：空格缩进触发 missing separator",
+  "code_lang": "bash",
+  "code_std": "bash5",
+  "stdin": "",
+  "expected_output": "$ cat -A Makefile | head -4      # ^I 表示 Tab；这里是空格，所以会失败\nCC := D:/mingw64/bin/gcc.exe$\nCFLAGS := -std=c11 -O2$\napp.exe: main.c util.c$\n    $(CC) $(CFLAGS) -o app.exe main.c util.c$\n$\nclean:$\n    @rm -f app.exe$\n$ mingw32-make                   # 预期报 missing separator\nMakefile:4: *** missing separator.  Stop.\r",
+  "code": "#!/bin/sh\n# recipe 必须 Tab 开头：空格缩进触发 missing separator\n# 期望输出见 expected_output（本机 MinGW 工具链 + GNU Make 真实执行捕获）\n\ncat > Makefile << 'EOF'\nCC := D:/mingw64/bin/gcc.exe\nCFLAGS := -std=c11 -O2\napp.exe: main.c util.c\n    $(CC) $(CFLAGS) -o app.exe main.c util.c\n\nclean:\n    @rm -f app.exe\nEOF\n\ncat > main.c << 'EOF'\n#include <stdio.h>\n#include \"util.h\"\n\nint main(void)\n{\n    printf(\"add(2, 3) = %d\\n\", add(2, 3));\n    return 0;\n}\nEOF\n\ncat > util.c << 'EOF'\n#include \"util.h\"\n\nint add(int a, int b)\n{\n    return a + b;\n}\nEOF\n\ncat > util.h << 'EOF'\nint add(int a, int b);\nEOF\n\ncat -A Makefile | head -4      # ^I 表示 Tab；这里是空格，所以会失败\nmingw32-make                   # 预期报 missing separator\n",
+  "_step_rc": [
+    0,
+    2
+  ],
+  "_verify_note": "expected_output 为 Windows + MinGW-w64 上 GNU Make 4.4.1 真实执行捕获。本例**故意演示报错**：recipe 用 4 个空格缩进，Make 的词法规则要求必须是 Tab，于是报 `*** missing separator. Stop.`。注意报错行号指向第一条 recipe 行。用 `cat -A` 可以看到 Tab 显示为 `^I`、空格显示为空白——这是排查该问题的标准手法。",
+  "_expect_fail": true
+}

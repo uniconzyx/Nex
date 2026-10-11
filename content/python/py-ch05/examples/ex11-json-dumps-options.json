@@ -1,0 +1,8 @@
+{
+  "title": "JSON 序列化选项：ensure_ascii / 缩进 / 分隔符",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "默认            : {\"b\": 1, \"a\": [1, 2], \"cn\": \"\\u4e2d\"}\nensure_ascii=F  : {\"b\": 1, \"a\": [1, 2], \"cn\": \"中\"}\nsort_keys=T     : {\"a\": [1, 2], \"b\": 1, \"cn\": \"\\u4e2d\"}\n紧凑分隔符      : {\"b\":1,\"a\":[1,2],\"cn\":\"\\u4e2d\"}\n\nindent=2 可读版:\n{\n  \"b\": 1,\n  \"a\": [\n    1,\n    2\n  ],\n  \"cn\": \"中\"\n}\n\n往返后中文仍是  : 中\n默认写法的字节数 = 37\n不转义的字节数   = 34\n\n要点: ensure_ascii 只影响字节占用与可读性，不影响往返正确性",
+  "code": "import json\n\nobj = {\"b\": 1, \"a\": [1, 2], \"cn\": \"中\"}\n\nprint(\"默认            :\", json.dumps(obj))\nprint(\"ensure_ascii=F  :\", json.dumps(obj, ensure_ascii=False))\nprint(\"sort_keys=T     :\", json.dumps(obj, sort_keys=True))\nprint(\"紧凑分隔符      :\", json.dumps(obj, separators=(\",\", \":\")))\nprint()\n\nprint(\"indent=2 可读版:\")\nprint(json.dumps(obj, ensure_ascii=False, indent=2))\nprint()\n\nprint(\"往返后中文仍是  :\", json.loads(json.dumps(obj, ensure_ascii=False))[\"cn\"])\nprint(\"默认写法的字节数 =\", len(json.dumps(obj).encode(\"utf-8\")))\nprint(\"不转义的字节数   =\", len(json.dumps(obj, ensure_ascii=False).encode(\"utf-8\")))\nprint()\nprint(\"要点: ensure_ascii 只影响字节占用与可读性，不影响往返正确性\")"
+}

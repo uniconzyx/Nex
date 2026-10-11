@@ -1,0 +1,8 @@
+{
+  "title": "读取就近与短路读（short-circuit read）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "reader_rack: rack1\nblock_locations: [('dn1', 'rack1'), ('dn2', 'rack2'), ('dn3', 'rack3')]\nchosen_replica: dn1\nshort_circuit_possible: True",
+  "code": "\nREADER_RACK = \"rack1\"\nBLOCK_LOC = {\"blkA\": [(\"dn1\", \"rack1\"), (\"dn2\", \"rack2\"), (\"dn3\", \"rack3\")]}\ndef pick(reader_rack, locs):\n    same = [d for d, r in locs if r == reader_rack]\n    return same[0] if same else locs[0][0]\nchosen = pick(READER_RACK, BLOCK_LOC[\"blkA\"])\nprint(\"reader_rack:\", READER_RACK)\nprint(\"block_locations:\", BLOCK_LOC[\"blkA\"])\nprint(\"chosen_replica:\", chosen)\nprint(\"short_circuit_possible:\", chosen == \"dn1\")\n"
+}

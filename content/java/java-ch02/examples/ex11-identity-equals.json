@@ -1,0 +1,8 @@
+{
+  "title": "== 比地址，equals 比内容",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "a==b: false\na.equals(b): true\na==c: true",
+  "code": "public class E211 {\n    static class P {\n        int x;\n        P(int x){ this.x = x; }\n        @Override public boolean equals(Object o){ return o instanceof P p && x == p.x; }\n    }\n    public static void main(String[] args) {\n        P a = new P(1);\n        P b = new P(1);\n        System.out.println(\"a==b: \" + (a == b));\n        System.out.println(\"a.equals(b): \" + a.equals(b));\n        P c = a;\n        System.out.println(\"a==c: \" + (a == c));\n    }\n}"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "退化陷阱：函数内 sizeof 拿不到数组长度",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "main  内 sizeof(a) = 20\n函数内 sizeof(a) = 8 (已退化为指针)",
+  "code": "#include <stdio.h>\n\nvoid f(int a[5]) {\n    printf(\"函数内 sizeof(a) = %zu (已退化为指针)\\n\", sizeof(a));\n}\n\nint main(void) {\n    int a[5];\n    printf(\"main  内 sizeof(a) = %zu\\n\", sizeof(a));\n    f(a);\n    return 0;\n}"
+}

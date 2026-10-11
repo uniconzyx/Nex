@@ -1,0 +1,8 @@
+{
+  "title": "weak_ptr 提升（lock）与安全观察",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "0\n99\n1\n1",
+  "code": "#include <iostream>\n#include <memory>\nint main() {\n    auto sp = std::make_shared<int>(99);\n    std::weak_ptr<int> wp = sp;\n    std::cout << wp.expired() << '\\n';           // 还活着 → 0\n    if (auto lk = wp.lock()) std::cout << *lk << '\\n';\n    sp.reset();                                   // 对象被销毁\n    std::cout << wp.expired() << '\\n';           // 已死 → 1\n    std::cout << (wp.lock() == nullptr);         // lock 返回空\n}"
+}

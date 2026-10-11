@@ -1,0 +1,91 @@
+{
+  "meta": {
+    "chapter": "spring-ch05"
+  },
+  "items": [
+    {
+      "question": "@RestController 和 @Controller 的区别？什么时候用哪个？",
+      "answer_md": "`@RestController` = `@Controller` + `@ResponseBody`。前者每个方法默认把返回值交给 `HttpMessageConverter` 直接写响应体（适合 JSON API）；后者默认把返回值交给 `ViewResolver` 解析为视图名（适合服务端渲染页面），若想返回数据需在方法上加 `@ResponseBody`。\n\n路由能力二者相同，都来自 `@RequestMapping` 系列。选型：**前后端分离 / 提供 API 用 `@RestController`；传统模板页用 `@Controller`**。",
+      "follow_ups": [
+        "@ResponseBody 在底层是怎么生效的？",
+        "一个类里能部分方法返回视图、部分返回 JSON 吗？"
+      ],
+      "difficulty": "easy",
+      "company_tags": [
+        "通用",
+        "阿里",
+        "字节"
+      ]
+    },
+    {
+      "question": "@RequestParam、@PathVariable、@RequestBody 的区别与适用场景？",
+      "answer_md": "三者吃不同的请求位置：\n- `@RequestParam`：查询串或表单字段（`?page=2&size=10`），默认 `required=true`；\n- `@PathVariable`：路径模板变量（`/users/{id}` 里的 `id`）；\n- `@RequestBody`：整个请求体（通常 JSON），由消息转换器反序列化。\n\n**位置决定注解**，混淆会导致收不到值或 400。注意 `@RequestBody` 只能读一次、GET 不应带它。",
+      "follow_ups": [
+        "@RequestBody 在拦截器读过流后为什么收空？",
+        "同名多值怎么用 List 接收？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "美团",
+        "腾讯"
+      ]
+    },
+    {
+      "question": "Spring MVC 处理一个请求的整体流程是怎样的？",
+      "answer_md": "核心在 `DispatcherServlet`：\n1. 收到请求，由 `HandlerMapping`（实际是 `RequestMappingHandlerMapping`）按「请求条件」找到 `HandlerMethod`；\n2. `HandlerAdapter` 调用目标方法，期间 `HttpMessageConverter` 完成 `@RequestBody` 反序列化、`@ResponseBody` 序列化；\n3. 若声明了 `@Valid`，校验引擎在绑定后执行；\n4. 方法抛异常时由 `HandlerExceptionResolver`（含 `@ControllerAdvice`）统一处理；\n5. 最终经视图解析或直接写响应体返回。\n\n关键点：路由匹配、参数绑定、校验、异常处理是四个独立又串接的阶段。",
+      "follow_ups": [
+        "HandlerMapping 和 HandlerAdapter 各自负责什么？",
+        "拦截器 Interceptor 在流程的哪一步执行？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "字节",
+        "京东"
+      ]
+    },
+    {
+      "question": "Bean Validation 是怎么工作的？为什么有时「加了注解却不生效」？",
+      "answer_md": "约束注解（如 `@NotNull`）是**元数据**，逻辑在 `ConstraintValidator<A,T>` 实现里。校验引擎通过反射读取字段注解并调用对应验证器，把 `ConstraintViolation` 收集进 `Set`（`validate()` 收集**全部**违反项）。\n\n**不生效的根因**：校验必须显式触发——Controller 方法参数前缺 `@Valid`（或类上缺 `@Validated`），引擎不会执行。分组校验还要「字段的 `groups` 与方法声明的组」两边一致，否则该约束不跑。",
+      "follow_ups": [
+        "@Valid 和 @Validated 的区别？",
+        "怎么收集所有校验错误一次性返回？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "阿里",
+        "百度"
+      ]
+    },
+    {
+      "question": "如何做全局异常处理？@ControllerAdvice 有什么边界？",
+      "answer_md": "用 `@ControllerAdvice` + `@ExceptionHandler(异常类型.class)`，把异常类型映射到状态码与统一错误体（如 `NotFoundException → 404`）。未匹配的运行时异常兜底 500。\n\n**边界**：它只覆盖 **Controller 层**；`Filter`/`Interceptor` 抛出的异常不走它（需额外兜底，如 `HandlerExceptionResolver` 或过滤器内就地写响应）。同时绝不要用 200 包错误体。",
+      "follow_ups": [
+        "Filter 里的鉴权异常怎么处理？",
+        "@ControllerAdvice 和 AOP @AfterThrowing 有什么区别？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "腾讯",
+        "拼多多"
+      ]
+    },
+    {
+      "question": "如何保证接口幂等？REST 里哪些方法是幂等的？",
+      "answer_md": "幂等 = 多次相同请求产生相同副作用终态。REST 中 **GET、PUT、DELETE 幂等；POST 不幂等**（GET 还安全）。\n\n**保证 POST 幂等**的常用手段：唯一请求号 / 资源版本号 / 去重表（数据库唯一索引）。创建类接口能用 PUT 表达「创建或更新」则天然幂等。支付、下单等必须做幂等，否则网络重试会重复扣款。",
+      "follow_ups": [
+        "PUT 和 PATCH 的幂等性差异？",
+        "用数据库唯一索引如何实现去重？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "通用",
+        "蚂蚁",
+        "字节"
+      ]
+    }
+  ]
+}

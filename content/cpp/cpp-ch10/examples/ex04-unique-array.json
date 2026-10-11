@@ -1,0 +1,8 @@
+{
+  "title": "unique_ptr<T[]> 管理数组（delete[] 而非 delete）",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "1 2 3",
+  "code": "#include <iostream>\n#include <memory>\nint main() {\n    std::unique_ptr<int[]> a = std::make_unique<int[]>(3);  // 删除器自动为 delete[]\n    a[0]=1; a[1]=2; a[2]=3;\n    for (int i=0;i<3;++i) std::cout << a[i] << ' ';\n    std::cout << '\\n';\n}"
+}

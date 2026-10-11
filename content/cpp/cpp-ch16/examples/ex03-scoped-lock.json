@@ -1,0 +1,8 @@
+{
+  "title": "scoped_lock 一次性安全锁两把（避免死锁）",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "no deadlock",
+  "code": "#include <iostream>\n#include <mutex>\n#include <thread>\n\nstd::mutex m1, m2;\n\nvoid worker() {\n    std::scoped_lock lk(m1, m2);   // 一次性锁两把，标准保证不死锁\n    (void)m1; (void)m2;\n}\n\nint main() {\n    std::thread a(worker), b(worker);\n    a.join(); b.join();\n    std::cout << \"no deadlock\";\n}"
+}

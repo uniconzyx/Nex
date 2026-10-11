@@ -1,0 +1,9 @@
+{
+  "title": "REPLCONF ACK 心跳上报 offset 与 lag 计算",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== REPLCONF ACK 心跳与 lag 模拟 ===\nt=0 主从一致 master_offset=slave_offset=100\nt=1 主节点写入5条命令, master_offset = 105\nt=1 从节点 REPLCONF ACK 上报 slave_offset = 103\n主节点计算复制滞后 lag = master_offset - slave_offset = 2\n判定: lag=2 (落后, 摘出读池)\nt=2 从节点 REPLCONF ACK 上报 slave_offset = 105\nlag = 0 -> 追平",
+  "code": "print(\"=== REPLCONF ACK 心跳与 lag 模拟 ===\")\nmaster_offset = 100\nslave_offset = 100\nprint(\"t=0 主从一致 master_offset=slave_offset=100\")\nfor i in range(5):\n    master_offset += 1\nprint(\"t=1 主节点写入5条命令, master_offset =\", master_offset)\nslave_offset += 3\nprint(\"t=1 从节点 REPLCONF ACK 上报 slave_offset =\", slave_offset)\nlag = master_offset - slave_offset\nprint(\"主节点计算复制滞后 lag = master_offset - slave_offset =\", lag)\nprint(\"判定: lag=%d (%s)\" % (lag, \"正常\" if lag <= 1 else \"落后, 摘出读池\"))\nslave_offset = master_offset\nprint(\"t=2 从节点 REPLCONF ACK 上报 slave_offset =\", slave_offset)\nprint(\"lag =\", master_offset - slave_offset, \"-> 追平\")\n",
+  "_verified": true
+}

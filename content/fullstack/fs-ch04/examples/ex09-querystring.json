@@ -1,0 +1,8 @@
+{
+  "title": "查询串解析：URLSearchParams 与重复键",
+  "code_lang": "javascript",
+  "code_std": "node22",
+  "stdin": "",
+  "expected_output": "page=2\nsize=10\ntags=[\"a\",\"b\"]\nhasTag=true\nmanualPage=2\n",
+  "code": "const { URL } = require('url');\nconst u = new URL('http://x/api/items?page=2&size=10&tag=a&tag=b');\nconst params = u.searchParams;\nconsole.log('page=' + params.get('page'));\nconsole.log('size=' + params.get('size'));\nconsole.log('tags=' + JSON.stringify(params.getAll('tag')));\nconsole.log('hasTag=' + params.has('tag'));\nconst qs = u.search.slice(1);\nconst map = {};\nfor (const pair of qs.split('&')) { const kv = pair.split('='); map[kv[0]] = kv[1]; }\nconsole.log('manualPage=' + map['page']);"
+}

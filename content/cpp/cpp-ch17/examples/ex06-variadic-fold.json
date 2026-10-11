@@ -1,0 +1,8 @@
+{
+  "title": "变参模板与折叠表达式（求和）",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "10",
+  "code": "#include <iostream>\n\ntemplate <typename... Ts>\nauto sum(Ts... ts) {\n    return (ts + ... + 0);\n}\n\nint main() {\n    int s = sum(1, 2, 3, 4);\n    std::cout << s;\n}"
+}

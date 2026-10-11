@@ -1,0 +1,8 @@
+{
+  "title": "alignas 强制对齐与 alignof 验证",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "CacheLine sizeof=64 alignof=64\nVec4      sizeof=16 alignof=16\nNatural   sizeof=1 alignof=1\n对象地址 64 对齐: 1\n对齐被抬高: 1",
+  "code": "#include <cstdio>\n#include <cstdint>\n\n// 强制按缓存行（64 字节）对齐：数组里每个元素都独占一行\nstruct alignas(64) CacheLine { long long v; };\n// 强制 16 字节对齐：SIMD 友好\nstruct alignas(16) Vec4 { float x, y, z, w; };\n// 不加约束：按最大成员自然对齐\nstruct Natural { char c; };\n\nint main() {\n    printf(\"CacheLine sizeof=%zu alignof=%zu\\n\", sizeof(CacheLine), alignof(CacheLine));\n    printf(\"Vec4      sizeof=%zu alignof=%zu\\n\", sizeof(Vec4), alignof(Vec4));\n    printf(\"Natural   sizeof=%zu alignof=%zu\\n\", sizeof(Natural), alignof(Natural));\n\n    CacheLine obj;\n    printf(\"对象地址 64 对齐: %d\\n\", (int)(((uintptr_t)&obj) % 64 == 0));\n    printf(\"对齐被抬高: %d\\n\", (int)(alignof(CacheLine) > alignof(Natural)));\n    return 0;\n}"
+}

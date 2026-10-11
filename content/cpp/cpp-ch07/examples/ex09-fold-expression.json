@@ -1,0 +1,8 @@
+{
+  "title": "C++17 折叠表达式求和",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "10 4",
+  "code": "#include <iostream>\ntemplate <typename... Ts>\nauto sum(Ts... ts) { return (ts + ...); }\nint main() {\n    std::cout << sum(1, 2, 3, 4) << ' ' << sum(1.5, 2.5);\n}\n"
+}

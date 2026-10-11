@@ -1,0 +1,8 @@
+{
+  "title": "LoRA 参数量：rank 与占比的定量关系",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "单个 4096x4096 注意力投影矩阵的全参数量 = 16777216\n\nrank     LoRA 参数量       占单矩阵比例           32 层 x 4 矩阵占 7B\n4        32768          0.1953%          0.0599%\n8        65536          0.3906%          0.1198%\n16       131072         0.7812%          0.2397%\n32       262144         1.5625%          0.4793%\n64       524288         3.1250%          0.9587%\n\n说明: LoRA 只训练低秩增量 B@A, 参数量 = rank x (d_in + d_out), 随 rank 线性增长\n      相对全参是千分位量级, 这也是它省显存的根本原因",
+  "code": "\nimport numpy as np\nd = 4096\nfull = d * d\nprint('单个 %dx%d 注意力投影矩阵的全参数量 = %d' % (d, d, full))\nprint()\nprint('%-8s %-14s %-16s %s' % ('rank', 'LoRA 参数量', '占单矩阵比例', '32 层 x 4 矩阵占 7B'))\nseven = 7e9\nfor r in (4, 8, 16, 32, 64):\n    lora = r * (d + d)\n    total = 32 * 4 * lora\n    print('%-8d %-14d %-16s %.4f%%' % (r, lora, '%.4f%%' % (100.0 * lora / full), 100.0 * total / seven))\nprint()\nprint('说明: LoRA 只训练低秩增量 B@A, 参数量 = rank x (d_in + d_out), 随 rank 线性增长')\nprint('      相对全参是千分位量级, 这也是它省显存的根本原因')\n"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "命名空间别名",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "10\n",
+  "code": "#include <iostream>\n\nnamespace very_long_library_name {\n    namespace detail {\n        int compute() { return 10; }\n    }\n}\n\nnamespace vll = very_long_library_name;   // 别名\n\nint main() {\n    std::cout << vll::detail::compute() << '\\n';\n}"
+}

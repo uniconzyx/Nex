@@ -1,0 +1,10 @@
+{
+  "title": "BFC（块级格式化上下文）触发条件与效果",
+  "code_lang": "css",
+  "code_std": "css3",
+  "stdin": "",
+  "expected_output": "BFC 的三个核心效果：\n1. 内部浮动元素也参与父元素高度计算 -> 解决「浮动塌陷」。\n2. 相邻 BFC 之间的外边距不折叠 -> 解决「margin 穿透/折叠」。\n3. BFC 区域不与外部浮动元素重叠 -> 实现自适应两栏。\n说明：优先用 display: flow-root（语义明确，无 overflow:hidden 裁剪阴影/下拉菜单的副作用）。",
+  "code": "/* 触发 BFC 的常见方式 */\n.bfc-1 { overflow: hidden; }\n.bfc-2 { display: flow-root; }\n.bfc-3 { float: left; }\n.bfc-4 { position: absolute; }\n.bfc-5 { display: inline-block; }\n.bfc-6 { contain: layout; }\n\n/* 经典应用：清除浮动塌陷 */\n.parent { display: flow-root; }\n.child  { float: left; width: 50%; }",
+  "_verified": "false",
+  "_verify_note": "HTML/CSS 渲染行为，本地无浏览器环境，输出为按规范的推理说明"
+}

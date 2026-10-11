@@ -1,0 +1,8 @@
+{
+  "title": "条件编译开关 #if / #ifdef / defined",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "编译目标：Linux\n特性 X 已启用\n特性 X 生效（未禁用）\n调试构建：断言与日志开启",
+  "code": "#include <stdio.h>\n#define PLATFORM_LINUX 0\n#define PLATFORM_WIN  1\n#define PLATFORM      PLATFORM_LINUX\n#define HAVE_FEATURE_X 1\nint main(void) {\n#if PLATFORM == PLATFORM_LINUX\n    printf(\"编译目标：Linux\\n\");\n#elif PLATFORM == PLATFORM_WIN\n    printf(\"编译目标：Windows\\n\");\n#else\n    printf(\"编译目标：未知\\n\");\n#endif\n\n#ifdef HAVE_FEATURE_X\n    printf(\"特性 X 已启用\\n\");\n#endif\n\n#if defined(HAVE_FEATURE_X) && !defined(DISABLE_X)\n    printf(\"特性 X 生效（未禁用）\\n\");\n#endif\n\n#ifndef RELEASE\n    printf(\"调试构建：断言与日志开启\\n\");\n#endif\n    return 0;\n}"
+}

@@ -1,0 +1,42 @@
+{
+  "meta": {
+    "chapter": "db-ch04",
+    "category": "system"
+  },
+  "items": [
+    {
+      "title": "电商订单库的慢查询治理与索引优化实战",
+      "requirement_md": "给定一个存在性能问题的订单库，完成一次完整的「发现 → 诊断 → 优化 → 验证」闭环，必须覆盖本章全部知识点。\n\n**表结构**\n- orders(order_id PK, user_id BIGINT, status TINYINT, amount DECIMAL(10,2), created_at DATETIME)\n- order_item(id PK, order_id, sku VARCHAR(32), qty INT, price DECIMAL(10,2))\n- users(id PK, city VARCHAR(32), nickname VARCHAR(64))\n\n**待治理的三条慢查询**\n1. `SELECT * FROM orders WHERE user_id = ? AND status = ? ORDER BY created_at DESC LIMIT 20;`（用户订单列表）\n2. `SELECT * FROM orders WHERE YEAR(created_at) = 2026;`（年度报表）\n3. `SELECT o.*, u.nickname FROM orders o JOIN users u ON o.user_id = u.id ORDER BY o.created_at LIMIT 10 OFFSET 500000;`（运营后台深分页）\n\n**必须完成的工作**\n1. **诊断**：对三条 SQL 各写一份 `EXPLAIN` 并逐列解读（type / key / rows / filtered / Extra），指出瓶颈表与瓶颈原因。\n2. **索引设计**：为每条查询设计索引，写清列序理由（等值 / 范围 / 排序 / 覆盖的取舍）。\n3. **SQL 改写**：修复第 2 条的索引失效、第 3 条的深分页。\n4. **验证**：给出优化后的 `EXPLAIN` 预期（type 应从 ALL 降为 ref/range，Extra 应出现 Using index、不再出现 Using filesort）。\n5. **写放大评估**：说明新增三个索引后对 INSERT/UPDATE 的写入代价，并给出「是否需要全部保留」的判断。",
+      "tasks": [
+        {
+          "title": "基线诊断",
+          "verification": {
+            "type": "manual",
+            "desc": "产出三份 EXPLAIN 解读表，能准确指出 ALL / key=NULL / Using filesort 三类信号"
+          }
+        },
+        {
+          "title": "索引设计与 SQL 改写",
+          "verification": {
+            "type": "manual",
+            "desc": "每条查询给出索引 DDL 与改写后 SQL，列序理由符合「等值→范围→排序→覆盖」"
+          }
+        },
+        {
+          "title": "优化前后对比验证",
+          "verification": {
+            "type": "test",
+            "desc": "优化后 EXPLAIN 的 type 不含 ALL/index，Extra 含 Using index 且不含 Using filesort"
+          }
+        },
+        {
+          "title": "统计信息与写放大评估",
+          "verification": {
+            "type": "manual",
+            "desc": "说明 ANALYZE 时机与三索引的写入代价，给出保留/合并决策"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "title": "CSV 引号转义往返：逗号/引号/换行",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "csv.writer 产出（repr）:\n'id,note\\r\\n1,\"a,b\"\\r\\n2,\"say \"\"hi\"\"\"\\r\\n3,\"line1\\nline2\"\\r\\n'\n\n往返后与原始相等 : True\n含逗号的字段读回 : 'a,b'\n含引号的字段读回 : 'say \"hi\"'\n含换行的字段读回 : 'line1\\nline2'\n\n手工拼串（不转义）后解析:\n   ['1', 'a', 'b']\n  原本 2 列变成了 3 列 —— 这就是必须用 csv 模块的理由",
+  "code": "import csv\nimport io\n\nrows = [\n    [\"id\", \"note\"],\n    [\"1\", \"a,b\"],\n    [\"2\", 'say \"hi\"'],\n    [\"3\", \"line1\\nline2\"],\n]\n\nbuf = io.StringIO()\ncsv.writer(buf).writerows(rows)\ntext = buf.getvalue()\n\nprint(\"csv.writer 产出（repr）:\")\nprint(repr(text))\nprint()\n\nback = list(csv.reader(io.StringIO(text)))\nprint(\"往返后与原始相等 :\", back == rows)\nprint(\"含逗号的字段读回 :\", repr(back[1][1]))\nprint(\"含引号的字段读回 :\", repr(back[2][1]))\nprint(\"含换行的字段读回 :\", repr(back[3][1]))\nprint()\n\nhand = \"id,note\\n1,a,b\\n\"\nprint(\"手工拼串（不转义）后解析:\")\nprint(\"  \", list(csv.reader(io.StringIO(hand)))[1])\nprint(\"  原本 2 列变成了 3 列 —— 这就是必须用 csv 模块的理由\")"
+}

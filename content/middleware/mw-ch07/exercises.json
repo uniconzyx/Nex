@@ -1,0 +1,176 @@
+{
+  "meta": {
+    "chapter_id": "mw-ch07",
+    "subject": "middleware",
+    "title": "消息可靠性：不丢、不重、有序",
+    "count": 8
+  },
+  "items": [
+    {
+      "id": "mw7-ex01",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "mw-ch07 §一 ①生产端",
+      "difficulty": "基础",
+      "title": "acks=all 与 min.insync.replicas 的联合语义",
+      "stem_md": "下面关于 `acks=all` 的说法，哪一项**正确**？",
+      "options": [
+        "acks=all 表示消息已被所有副本持久化，绝对不会丢",
+        "acks=all 表示消息已被当前 ISR 全体接受；若 min.insync.replicas=1，ISR 缩到 1 时它等价于 acks=1",
+        "acks=all 只在副本数为 2 时有意义",
+        "acks=all 会自动把 min.insync.replicas 设为副本因子"
+      ],
+      "answer": {
+        "correct": [
+          1
+        ],
+        "reference_code": "",
+        "output": "acks=all 的强度 = min(ISR 实际大小, min.insync.replicas)；min.insync.replicas=1 时它会退化成 acks=1。"
+      },
+      "explanation_md": "`acks=all` 保证的是「当前 ISR 全体接受」，而 ISR 是会缩容的动态集合。要使它有意义，必须同时设置 `min.insync.replicas >= 2`，否则 ISR 缩到 1 个副本时仍接受写入，该副本一挂就丢。"
+    },
+    {
+      "id": "mw7-ex02",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "mw-ch07 §三 ②顺序被打破的四个位置",
+      "difficulty": "中等",
+      "title": "什么情况下生产者重试会导致分区内乱序",
+      "stem_md": "关于生产者重试导致的乱序，下列哪一项**正确**？",
+      "options": [
+        "只要设置了 retries，重试就不会导致乱序",
+        "max.in.flight.requests.per.connection>1 且未开启幂等时，重试的旧消息可能排在新消息之后落盘",
+        "开启幂等后必须把 max.in.flight 设为 1 才能保序",
+        "乱序只可能发生在多分区场景，单分区绝不会乱序"
+      ],
+      "answer": {
+        "correct": [
+          1
+        ],
+        "reference_code": "",
+        "output": "in.flight>1 且未开幂等 -> 重试乱序；开启幂等后 Kafka 用 (PID, partition, seq) 保证有序，允许 in.flight<=5。"
+      },
+      "explanation_md": "单分区在**无故障**时天然有序，但重试会让 broker 的接收顺序与发送顺序不一致。开启 `enable.idempotence=true` 后 broker 按序列号校验、缓存乱序消息并丢弃重复序列号，从而在允许 `max.in.flight<=5` 的同时保住分区内有序（示例 x05 实测）。"
+    },
+    {
+      "id": "mw7-ex03",
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "mw-ch07 §一 ③消费端",
+      "difficulty": "中等",
+      "title": "修正消费者位移提交顺序",
+      "stem_md": "下面是消费者主循环，存在**丢失消息**的风险。请指出问题并给出正确写法。\n\n```java\nwhile (true) {\n    ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(500));\n    consumer.commitSync();            // (A)\n    for (ConsumerRecord<String, String> r : records) {\n        handle(r);                    // (B) 可能抛异常\n    }\n}\n```",
+      "answer": {
+        "correct": [],
+        "reference_code": "while (true) {\n    ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(500));\n    for (ConsumerRecord<String, String> r : records) {\n        handle(r);                    // 先处理，失败则抛出不提交位移\n    }\n    consumer.commitSync();            // 全部处理成功后再提交\n}",
+        "output": "(A) 在 (B) 之前执行 -> 这是 at-most-once：处理失败时消息已被跳过，永久丢失。位移提交必须严格晚于处理成功。"
+      },
+      "explanation_md": "位移提交时机决定了交付语义：**先提交后处理 = at-most-once（可能丢）**，**先处理后提交 = at-least-once（可能重）**。示例 x03 用崩溃点枚举量化了两种写法的窗口。",
+      "options": []
+    },
+    {
+      "id": "mw7-ex04",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "mw-ch07 §二 ②幂等设计三件套",
+      "difficulty": "中等",
+      "title": "幂等落库的正确写法",
+      "stem_md": "要在订单表上实现幂等落库（`order_no` 有唯一索引），下面哪种写法在**并发重复投递**下是正确的？",
+      "options": [
+        "先 SELECT 判断订单是否存在，不存在再 INSERT",
+        "INSERT ... ON CONFLICT (order_no) DO NOTHING，并检查影响行数",
+        "捕获唯一键冲突异常后直接忽略",
+        "REPLACE INTO orders (...) VALUES (...)"
+      ],
+      "answer": {
+        "correct": [
+          1
+        ],
+        "reference_code": "",
+        "output": "唯一索引 + ON CONFLICT 把原子性下沉到存储引擎；先查后写存在 TOCTOU 竞态；REPLACE INTO 是删除+插入，会丢字段。"
+      },
+      "explanation_md": "「先查后写」在并发下必然存在双写窗口（示例 x02 实测 3 个并发请求全部写入）。`REPLACE INTO` 语义是**删除 + 插入**，会把未指定字段置为默认值并可能触发级联。仅「忽略异常」也不够——需要区分重复消息与真实业务冲突。"
+    },
+    {
+      "id": "mw7-ex05",
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "mw-ch07 §四 ②重试策略",
+      "difficulty": "中等",
+      "title": "重试风暴的判据为什么不能用耗时",
+      "stem_md": "示例 x07 对比了三种重试策略的请求量。请说明：\n1. 为什么「重试次数越多越可靠」是错误的？\n2. 该示例用什么作为量化判据？为什么不用耗时？",
+      "answer": {
+        "correct": [],
+        "reference_code": "python3 content/middleware/mw-ch07/examples/ex07-retry-storm-backoff-comparison.json",
+        "output": "无退避策略的峰值请求量是基线的若干倍且逐轮翻倍；指数退避+抖动+上限把峰值压回常数倍，累计请求量显著下降。"
+      },
+      "explanation_md": "重试相当于提高到达率 λ：当 λ 逼近服务率 μ 时排队长度发散，形成**重试风暴**。必须配**退避（含抖动）+ 次数上限 + 重试预算/熔断**。判据用「请求计数」而非耗时，因为计数是确定性量（任何机器上一致），而耗时依赖机器负载，写进 `expected_output` 会导致复验失败。",
+      "options": []
+    },
+    {
+      "id": "mw7-ex06",
+      "type": "output",
+      "category": "算法题",
+      "platform": "leetcode",
+      "source": "leetcode",
+      "source_ref": "LeetCode 1188 · Design Bounded Blocking Queue（有界阻塞队列，对应生产端背压）",
+      "external_url": "https://leetcode.cn/problems/design-bounded-blocking-queue/",
+      "difficulty": "中等",
+      "title": "设计有界阻塞队列（生产端背压的有界缓冲）",
+      "stem_md": "仅在**平台**作答（本题只保留元数据与链接，不含题面正文）。\n\n关联点：消息中间件的生产端之所以需要背压，本质上是因为缓冲区**有界**——无界缓冲只能把压力转移到内存直至 OOM。请在平台完成实现，并思考：该队列的容量与 Kafka 生产端的 `buffer.memory` 在语义上是否等价？",
+      "answer": {
+        "correct": [],
+        "reference_code": "",
+        "output": "见平台用例。"
+      },
+      "explanation_md": "背压（backpressure）是可靠性的前置条件：只有**有界缓冲**才能让「下游变慢」及时传导到上游，而不是被缓冲区吸收成内存增长。这与 Kafka 生产端 `buffer.memory` 打满后 `send()` 阻塞（或抛 `TimeoutException`）是同一机制。",
+      "options": []
+    },
+    {
+      "id": "mw7-ex07",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "mw-ch07 §二 ②幂等设计三件套 + §四 ②重试策略",
+      "difficulty": "进阶",
+      "title": "实现带退避的重试执行器（异常分类 + 幂等短路）",
+      "stem_md": "实现 `retry(fn, *, max_attempts, base, is_retryable, is_done)`：\n- `is_done()` 为 True 时直接返回 `('absorbed', waited)`，表示该操作已被幂等吸收，不再执行；\n- `is_retryable(exc)` 为 False 时**立即**抛出，不重试；\n- 否则按指数退避重试，累计退避量记入 `waited`，超过 `max_attempts` 后抛出最后一次异常。\n\n返回 `(结果, 累计退避量)`。要求：**不要真的 sleep**，用退避量作为判据使输出可复现。",
+      "answer": {
+        "correct": [],
+        "reference_code": "def retry(fn, *, max_attempts, base=1, is_retryable=lambda e: True, is_done=lambda: False):\n    waited = 0\n    for attempt in range(1, max_attempts + 1):\n        if is_done():\n            return \"absorbed\", waited\n        try:\n            return fn(), waited\n        except Exception as exc:\n            if not is_retryable(exc):\n                raise\n            if attempt == max_attempts:\n                raise\n            waited += base * (2 ** (attempt - 1))   # 指数退避\n    raise RuntimeError(\"unreachable\")",
+        "output": "不可重试异常: 立即抛出, waited = 0；可重试异常: waited = base*(2^n - 1)；is_done() 为真时直接返回 absorbed, waited 不再增长。"
+      },
+      "explanation_md": "三个要点：① **异常必须分类**，不可重试的立即失败（否则制造重试风暴）；② 退避要**指数增长**并有上限；③ 幂等短路要放在重试之前，避免对已处理的操作重复施加副作用。生产环境还需在退避量上加**抖动**，并交给调度器而不是 `sleep` 阻塞线程。",
+      "options": []
+    },
+    {
+      "id": "mw7-ex08",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "mw-ch07 §一 ③消费端 + §四 ③死信队列",
+      "difficulty": "进阶",
+      "title": "模拟消费循环：位移提交 + 重试上限 + 死信隔离",
+      "stem_md": "实现 `consume(msgs, *, max_retry, fail_kinds)`：顺序消费消息，遇到 `fail_kinds` 中的消息时累计重试次数，超过 `max_retry` 则移入死信队列并**继续前进**。\n\n返回 `(processed, dlq, blocked_normal)`，其中 `blocked_normal` 表示「若不允许跳过（坏消息原地重试）会被阻塞的正常消息条数」。",
+      "answer": {
+        "correct": [],
+        "reference_code": "def consume(msgs, *, max_retry=2, fail_kinds=('bad',)):\n    processed, dlq, retry = [], [], {}\n    i = 0\n    while i < len(msgs):\n        name, kind = msgs[i]\n        if kind not in fail_kinds:\n            processed.append(name)\n            i += 1\n            continue\n        retry[name] = retry.get(name, 0) + 1\n        if retry[name] > max_retry:\n            dlq.append(name)\n            i += 1\n    first_bad = next((p for p, (_, k) in enumerate(msgs) if k in fail_kinds), len(msgs))\n    blocked = sum(1 for _, k in msgs[first_bad:] if k not in fail_kinds)\n    return processed, dlq, blocked",
+        "output": "processed 为正常消息序列；dlq 为超限消息；blocked 为「不允许跳过时被阻塞的正常消息条数」。"
+      },
+      "explanation_md": "核心是**必须能跳过**：位移不能停在坏消息上，否则整条链路被一条脏数据拖死。代价是**同 key 的因果顺序可能被打破**（示例 x08 量化：死信隔离下未处理消息数 0，但同 key 顺序倒置 = 1；原地重试则倒置 0 却让整分区停摆），因此强顺序业务要谨慎使用死信队列，并配合告警 + 重放工具形成闭环。",
+      "options": []
+    }
+  ]
+}

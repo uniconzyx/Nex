@@ -1,0 +1,56 @@
+{
+  "meta": {
+    "chapter": "spring-ch08",
+    "category": "system"
+  },
+  "items": [
+    {
+      "title": "实现迷你事务框架 MiniTx：复刻 @Transactional 语义与失效场景",
+      "requirement_md": "用**纯 Java**（单文件、静态嵌套类、输出一律 ASCII）从零实现一个迷你声明式事务框架，把本章的抽象概念落到可调试、可断言的代码上，并复现全部关键失效场景与传播行为。\n\n**功能要求**\n1. **注解与拦截器**：自定义 `@Tx` 注解（含 `propagation` / `rollbackFor` / `readOnly` / `timeout` 属性）与基于 JDK 动态代理的拦截器，实现「进入方法 begin、正常返回 commit、抛异常按规则 rollback」；\n2. **事务管理器**：维护事务栈/挂起栈 + 保存点，支持 7 种传播行为：`REQUIRED / REQUIRES_NEW / NESTED / SUPPORTS / NOT_SUPPORTED / MANDATORY / NEVER`；\n3. **回滚规则**：默认只对 `RuntimeException`/`Error` 回滚，支持 `rollbackFor`/`noRollbackFor` 覆盖；\n4. **失效场景开关**：能分别构造并断言「自调用不走代理」「非 public 方法不增强」「异常被吞不回滚」「checked 异常不回滚」；\n5. **ThreadLocal 上下文**：用 ThreadLocal 保存当前事务，演示单线程正确、线程池复用串号（布尔判据）；\n6. **分层与转换**：实现 Entity / DTO / VO 三类型与 `toEntity` / `toVO` 转换（含手机号脱敏），断言 VO 不含敏感字段；\n7. **2PC 模拟**：实现协调者 + 3 参与者的两阶段提交，模拟协调者崩溃导致参与者阻塞，并实现「按决定日志重发」的恢复收敛。\n\n**验收标准**\n- 全部行为用**布尔判据 / 计数**断言输出（禁止墙钟耗时与地址等机器相关量）；\n- 至少覆盖 12 个可运行示例（对应 examples/ 的 12 个 Java 示例）与本项目的 7 项功能；\n- 关键断言须与 examples/ 的实测输出一致（如 REQUIRED 外层回滚 → 内层也没了；REQUIRES_NEW 外层回滚 → 内层仍在）。",
+      "tasks": [
+        {
+          "title": "实现 @Tx 注解与 JDK 动态代理拦截器",
+          "verification": {
+            "type": "test",
+            "desc": "断言：经代理调用标注 @Tx 的 public 方法时拦截器触发（true）；同类 this.method() 自调用时拦截器不触发（false）"
+          }
+        },
+        {
+          "title": "实现事务管理器与 7 种传播行为",
+          "verification": {
+            "type": "test",
+            "desc": "断言：REQUIRED 内层与外层是同一事务且一起回滚；REQUIRES_NEW 内层独立提交、外层回滚不影响内层；NESTED 内层回滚到保存点后外层仍可提交；MANDATORY 无外层抛异常、NEVER 有外层抛异常"
+          }
+        },
+        {
+          "title": "实现回滚规则（rollbackFor / noRollbackFor）",
+          "verification": {
+            "type": "test",
+            "desc": "断言：默认口径下 RuntimeException → 回滚（db 为空）、checked 异常 → 不回滚（数据保留）；声明 rollbackFor=Exception 后 checked 异常也回滚"
+          }
+        },
+        {
+          "title": "复现四类失效场景",
+          "verification": {
+            "type": "test",
+            "desc": "断言：自调用不增强；非 public 方法不出现在代理接口上；异常被吞后事务提交；checked 异常默认不回滚——四项均为布尔输出"
+          }
+        },
+        {
+          "title": "实现 ThreadLocal 上下文与线程池串号演示",
+          "verification": {
+            "type": "test",
+            "desc": "断言：单线程设置后读取一致、remove 后为空；固定大小线程池复用且不清理时，后一任务读到前一任务残留上下文（串号 = true）"
+          }
+        },
+        {
+          "title": "实现 Entity/DTO/VO 转换与 2PC 模拟",
+          "verification": {
+            "type": "test",
+            "desc": "断言：DTO→Entity→VO 后手机号脱敏为 3 位+****+4 位，且 VO 不含任何 password 字段；2PC 协调者崩溃后个别参与者阻塞、状态不一致 = true，按决定日志重发后全部提交 = true"
+          }
+        }
+      ]
+    }
+  ]
+}

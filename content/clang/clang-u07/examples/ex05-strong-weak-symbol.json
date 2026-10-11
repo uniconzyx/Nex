@@ -1,0 +1,17 @@
+{
+  "title": "强符号覆盖弱符号：可替换的默认实现",
+  "code_lang": "bash",
+  "code_std": "bash5",
+  "stdin": "",
+  "expected_output": "$ gcc -c lib_default.c -o lib_default.o\n$ nm lib_default.o     # config_value 显示为 W/V：弱符号\n0000000000000000 b .bss\r\n0000000000000000 d .data\r\n0000000000000000 p .pdata\r\n0000000000000000 r .rdata$zzz\r\n0000000000000000 t .text\r\n0000000000000000 B .weak.config_value.get_config\r\n0000000000000000 r .xdata\r\n                 w config_value\r\n0000000000000000 T get_config\r\n$ gcc -c user.c -o user.o\n$ gcc -c main.c -o main.o\n$ gcc main.o user.o lib_default.o -o app   # 强符号胜出\n$ ./app\nconfig = 42\r",
+  "code": "#!/bin/sh\n# 强符号覆盖弱符号：可替换的默认实现\n# 期望输出见 expected_output（本机 MinGW 工具链真实执行捕获）\n\ncat > lib_default.c << 'EOF'\n__attribute__((weak)) int config_value = 0;   /* 弱符号：可被覆盖的默认值 */\n\nint get_config(void)\n{\n    return config_value;\n}\nEOF\n\ncat > user.c << 'EOF'\nint config_value = 42;      /* 强符号：覆盖库里的弱定义 */\nEOF\n\ncat > main.c << 'EOF'\n#include <stdio.h>\n\nint get_config(void);\n\nint main(void)\n{\n    printf(\"config = %d\\n\", get_config());\n    return 0;\n}\nEOF\n\ngcc -c lib_default.c -o lib_default.o\nnm lib_default.o     # config_value 显示为 W/V：弱符号\ngcc -c user.c -o user.o\ngcc -c main.c -o main.o\ngcc main.o user.o lib_default.o -o app   # 强符号胜出\n./app\n",
+  "_step_rc": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "_verify_note": "expected_output 为 Windows + MinGW-w64（gcc 15.2 / binutils 2.45）真实执行捕获；脚本中显示的是可移植命令形式（gcc/ar/nm/objdump/size），本机实际以 D:/mingw64/bin/ 下的同名工具驱动，二者等价。"
+}

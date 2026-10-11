@@ -1,0 +1,8 @@
+{
+  "title": "用延迟 Provider 打破构造期循环依赖",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "a.getB() non-null? true\nb.a == a? true\na.getB().a == a? true",
+  "code": "import java.util.function.*;\n\npublic class Ex08 {\n    static class A {\n        private final Supplier<B> bSupplier;\n        A(Supplier<B> s) { this.bSupplier = s; }\n        B getB() { return bSupplier.get(); }\n    }\n    static class B { final A a; B(A a) { this.a = a; } }\n    public static void main(String[] args) {\n        final B[] bRef = new B[1];\n        A a = new A(() -> bRef[0]);   // 延迟到使用时才取 b\n        B b = new B(a);\n        bRef[0] = b;                  // 注入 b 的引用\n        System.out.println(\"a.getB() non-null? \" + (a.getB() != null));\n        System.out.println(\"b.a == a? \" + (b.a == a));\n        System.out.println(\"a.getB().a == a? \" + (a.getB().a == a));\n    }\n}\n"
+}

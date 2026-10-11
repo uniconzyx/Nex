@@ -1,0 +1,8 @@
+{
+  "title": "广播的内存零拷贝本质与物化爆炸",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "apparent nbytes = 32000000\nreal data nbytes = 32\nstride dim0 == 0 : True\nshares_memory(base, big) : True\nmaterialized nbytes = 32000000\nwriteable of broadcast view : False",
+  "code": "import numpy as np\nbase = np.arange(4, dtype=np.float64)          # 32 字节\nbig = np.broadcast_to(base, (1_000_000, 4))    # 零拷贝视图\nprint(\"apparent nbytes =\", big.nbytes)         # 逻辑大\nprint(\"real data nbytes =\", base.nbytes)       # 物理小\nprint(\"stride dim0 == 0 :\", big.strides[0] == 0)\nprint(\"shares_memory(base, big) :\", np.shares_memory(base, big))\nmat = np.array(big)                            # 物化 -> 真分配\nprint(\"materialized nbytes =\", mat.nbytes)\nprint(\"writeable of broadcast view :\", big.flags.writeable)"
+}

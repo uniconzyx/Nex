@@ -1,0 +1,8 @@
+{
+  "title": "迭代器 fail-fast 与 ConcurrentModificationException（modCount）",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "caught ConcurrentModificationException: ConcurrentModificationException",
+  "code": "import java.util.*;\n\npublic class Ex07FailFast {\n    public static void main(String[] args) {\n        List<String> list = new ArrayList<>(List.of(\"a\", \"b\", \"c\"));\n        try {\n            for (String s : list) {\n                if (s.equals(\"a\")) list.remove(s);\n            }\n            System.out.println(\"no exception, size=\" + list.size());\n        } catch (ConcurrentModificationException e) {\n            System.out.println(\"caught ConcurrentModificationException: \" + e.getClass().getSimpleName());\n        }\n    }\n}"
+}

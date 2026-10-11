@@ -1,0 +1,8 @@
+{
+  "title": "worker_threads 卸载 CPU 密集任务：主线程与 worker 结果一致",
+  "code_lang": "javascript",
+  "code_std": "node22",
+  "stdin": "",
+  "expected_output": "mainResult=2666668666670699500\nworkerResult=2666668666670699500\nsameResult=true\nusedWorkerThread=true\n",
+  "code": "const { Worker, isMainThread, parentPort, workerData } = require('worker_threads');\nconst N = 2000000;\nfunction cpu(n) { let acc = 0; for (let i = 1; i <= n; i++) acc += i * i; return acc; }\nif (isMainThread) {\n  const mainResult = cpu(N);\n  console.log('mainResult=' + mainResult);\n  const w = new Worker(\n    \"const { parentPort, workerData } = require('worker_threads');\" +\n    \"let acc = 0; for (let i = 1; i <= workerData.n; i++) acc += i * i;\" +\n    \"parentPort.postMessage({ result: acc, thread: 'worker' });\",\n    { eval: true, workerData: { n: N } }\n  );\n  w.on('message', msg => {\n    console.log('workerResult=' + msg.result);\n    console.log('sameResult=' + (msg.result === mainResult));\n    console.log('usedWorkerThread=' + (msg.thread === 'worker'));\n  });\n}"
+}

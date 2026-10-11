@@ -1,0 +1,8 @@
+{
+  "title": "线程池 Future 的异常传播与 map 顺序",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "成功任务数: 9\n失败任务数: 1\n失败任务编号: [7]\nmap 保持提交顺序: True",
+  "code": "import threading\nfrom concurrent.futures import ThreadPoolExecutor, as_completed\n\n\n# ThreadPoolExecutor：submit 立刻返回 Future，\n# 任务内异常被 Future 捕获并在 .result() 时**重新抛出**。\n# 不调 result 就永远看不到错误 —— 最常见的坑。\n\ndef square(n):\n    if n == 7:\n        raise ValueError(\"模拟任务 %d 失败\" % n)\n    return n * n\n\n\nok = []\nfailed = []\n\nwith ThreadPoolExecutor(max_workers=4) as pool:\n    futures = {pool.submit(square, i): i for i in range(10)}\n    for fut in as_completed(futures):          # 按完成顺序取\n        n = futures[fut]\n        try:\n            ok.append((n, fut.result()))       # 异常在此重新抛出\n        except ValueError as e:\n            failed.append((n, str(e)))\n\nprint(\"成功任务数:\", len(ok))\nprint(\"失败任务数:\", len(failed))\nprint(\"失败任务编号:\", [n for n, _ in failed])\n\n# map：按提交顺序返回，且是惰性的\nwith ThreadPoolExecutor(max_workers=3) as pool:\n    vals = list(pool.map(lambda x: x * 2, [3, 1, 2]))\nprint(\"map 保持提交顺序:\", vals == [6, 2, 4])\n"
+}

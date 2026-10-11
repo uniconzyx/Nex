@@ -1,0 +1,9 @@
+{
+  "title": "当前读：SELECT ... FOR UPDATE 读取最新已提交版本并加锁",
+  "code_lang": "sql",
+  "code_std": "mysql8",
+  "stdin": "",
+  "expected_output": "Query OK, 0 rows affected\nQuery OK, 2 rows affected\nQuery OK, 0 rows affected\nid|bal\n1|100",
+  "code": "CREATE TABLE account (id INT PRIMARY KEY, bal INT);\nINSERT INTO account VALUES (1,100),(2,50);\nBEGIN;\nSELECT * FROM account WHERE id = 1 FOR UPDATE;",
+  "_verified": false
+}

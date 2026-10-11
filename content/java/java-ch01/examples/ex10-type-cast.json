@@ -1,0 +1,8 @@
+{
+  "title": "类型转换与强制转换",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "2.5 2\n",
+  "code": "public class Main {\n    public static void main(String[] args) {\n        double d = 10.0 / 4;\n        int i = (int) d;\n        System.out.println(d + \" \" + i);\n    }\n}"
+}

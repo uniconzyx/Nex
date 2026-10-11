@@ -1,0 +1,216 @@
+{
+  "meta": {
+    "chapter": "fund-ch08",
+    "note": "8 题，基础题 6 + 算法题 2；LeetCode 题仅存元数据与链接，不搬运题面。408 计组「存储系统 + CPU」考点为主。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "Cache 的组数与相联度",
+      "content_md": "某 Cache 容量 64 KB，块大小 64 B，采用 4 路组相联。该 Cache 共有多少**组**？",
+      "options": [
+        {
+          "key": "A",
+          "text": "1024 组"
+        },
+        {
+          "key": "B",
+          "text": "256 组"
+        },
+        {
+          "key": "C",
+          "text": "64 组"
+        },
+        {
+          "key": "D",
+          "text": "4096 组"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "总行数 = 64KB / 64B = 1024 行；组数 S = 行数 / k = 1024 / 4 = **256 组**。**组数不等于行数**，这是本题的核心考点。A 给的是行数（最常见误答），index 位应为 log2(256) = 8 位。",
+      "tags": [
+        "cache",
+        "associativity",
+        "sets"
+      ],
+      "source": "book",
+      "source_ref": "《计算机组成原理》唐朔飞 第 4 章 Cache"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "地址位段划分",
+      "content_md": "32 位地址、Cache 容量 64 KB、块 64 B、4 路组相联。求 tag / index / offset 各占多少位，并自检。",
+      "answer": {
+        "correct": [
+          "tag=18, index=8, offset=6"
+        ]
+      },
+      "explanation": "① offset：块 64 B → log2(64) = **6** 位；② 组数 S = 64KB / (64B × 4) = 2^16 / 2^(6+2) = 2^8 → index = **8** 位；③ tag = 32 − 6 − 8 = **18** 位。**自检：18 + 8 + 6 = 32，等于地址总位数，通过。**三数之和必须严格等于地址位数，否则必有一处算错 —— 这是免费的答案自检手段。",
+      "tags": [
+        "cache",
+        "address",
+        "tag-index-offset"
+      ],
+      "source": "self",
+      "source_ref": "408 统考 计组 Cache 计算题型"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "medium",
+      "title": "三类缺失与全相联",
+      "content_md": "关于 Cache 的三类缺失（3C），下列说法正确的是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "全相联 Cache 不存在容量缺失"
+        },
+        {
+          "key": "B",
+          "text": "冲突缺失只在非全相联的 Cache 中存在"
+        },
+        {
+          "key": "C",
+          "text": "强制缺失可以通过提高相联度完全消除"
+        },
+        {
+          "key": "D",
+          "text": "增大块大小一定能降低缺失率"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "**B 正确**：冲突缺失的成因是「多个块映射到同一组而互相挤出」，全相联下任何块都能落在任意行，映射冲突不存在，因此**全相联没有冲突缺失**。A 错：全相联仍受总容量限制，工作集超过容量一样发生**容量缺失**。C 错：**强制缺失是「某块第一次被访问必然缺失」**，任何硬件结构都无法消除，只能靠预取等手段降低其影响。D 错：块变大提升空间局部性，但也会减少块数、搬入更多无用数据，缺失率随块大小是**先降后升**的非单调曲线，不是「一定降低」。",
+      "tags": [
+        "cache",
+        "3c",
+        "conflict-miss"
+      ],
+      "source": "book",
+      "source_ref": "《计算机组成原理》唐朔飞 第 4 章 Cache 缺失"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "hard",
+      "title": "AMAT 多级递推",
+      "content_md": "L1 命中时间 1 周期、局部命中率 95%；L2 命中时间 10 周期、局部命中率 80%；主存 200 周期。求 L1 的平均访存时间（AMAT），并写出所用公式。",
+      "answer": {
+        "correct": [
+          "3.5 周期"
+        ]
+      },
+      "explanation": "按口径「缺失代价 = 下一级的 AMAT（下一级的命中时间已包含其中）」：\nAMAT_L2 = 10 + (1 − 0.8) × 200 = 10 + 40 = 50 周期；\nAMAT_L1 = 1 + (1 − 0.95) × 50 = 1 + 2.5 = **3.5 周期**。\n**口径提醒**：若题目规定「缺失代价是纯额外开销、不含下一级的命中时间」，写法则变成 1 + 0.05 × (10 + 0.2 × 200)，结果同样是 3.5；但若把 10 当作纯额外开销，两种口径会给出不同数字。**答题时先把采用的公式写在卷面上**，这是避免口径失分的关键。",
+      "tags": [
+        "amat",
+        "cache",
+        "hierarchy"
+      ],
+      "source": "self",
+      "source_ref": "408 统考 计组 AMAT 计算题型"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "修正流水线加速比的说法",
+      "content_md": "下面这段结论有两处错误，请指出并改正：\n\n「5 段流水线的加速比就是 5；另外流水线提高了 CPU 的主频，所以单条指令的执行时间也变短了。」",
+      "answer": {
+        "correct": [
+          "加速比不是 5，应为 nk/(k+n−1)；流水线不改变主频，也不缩短单条指令的延迟"
+        ]
+      },
+      "explanation": "错误 1：**加速比不等于段数**。n 条指令在 k 段流水线上共需 k + n − 1 个周期，而非流水线需 nk 个周期，故 S = nk / (k + n − 1) < k，只有 n → ∞ 时才趋于 k。5 段、5 条指令时 S = 25/9 ≈ 2.78，远小于 5。\n错误 2：**流水线不改变主频**，它提高的是**吞吐率**（每周期完成更多指令）。事实上**单条指令的延迟反而变长**（要多经过几个流水寄存器的建立时间），深流水线还会因每级开销占比上升而**降低**主频。\n正确表述：流水线用「空间换时间」，把多条指令的执行重叠起来提高吞吐，而不是降低单条指令的延迟。",
+      "tags": [
+        "pipeline",
+        "speedup",
+        "throughput"
+      ],
+      "source": "self",
+      "source_ref": "408 统考 计组 流水线概念题型"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "hard",
+      "title": "数据冒险停顿周期",
+      "content_md": "5 段流水线（IF/ID/EX/MEM/WB），支持旁路转发。判断下列代码需要插入几个停顿周期，并说明原因：\n\n```\nadd r1, r2, r3\nsub r4, r1, r5\nlw  r6, 0(r7)\nand r8, r6, r1\n```",
+      "answer": {
+        "correct": [
+          "1 个停顿周期（插在 lw 与 and 之间）"
+        ]
+      },
+      "explanation": "逐条分析：\n1. `sub r4, r1, r5` 依赖 `add` 的 r1，属于 ALU 结果的 RAW。`add` 的结果在 **EX 段末尾**就已产生，而 `sub` 的 EX 段开始时间恰好晚一拍，**旁路转发可以解决，0 停顿**。\n2. `lw r6, 0(r7)` 与前面的指令无数据依赖，0 停顿。\n3. `and r8, r6, r1` 依赖 `lw` 的 r6 —— 这是 **load-use 冒险**：`lw` 的数据要到 **MEM 段末尾**才拿到，而 `and` 在 EX 段开头就需要它，时序上晚一拍，**必须插入 1 个停顿周期**，旁路无法弥补。\n结论：**共 1 个停顿周期**。若题目改为「不支持旁路」，上述每一处相邻 RAW 都要停顿，通常每次 2 拍（视写回时机而定）。**答题务必画时空图逐格核对。**",
+      "tags": [
+        "pipeline",
+        "data-hazard",
+        "load-use",
+        "forwarding"
+      ],
+      "source": "self",
+      "source_ref": "408 统考 计组 流水线冒险题型"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "medium",
+      "title": "LRU 缓存机制",
+      "content_md": "设计一个 LRU（最近最少使用）缓存，支持 O(1) 的 get 与 put；容量满时淘汰最久未使用的键。",
+      "answer": {
+        "correct": [
+          "见外链题解"
+        ]
+      },
+      "explanation": "本题与本章「Cache 替换算法」完全同源：**LRU 需要 O(1) 定位 + O(1) 维护使用顺序**，所以标准解法是**哈希表 + 双向链表** —— 哈希表负责定位（对应硬件里的 CAM 并行比较），双向链表负责把刚访问的节点移到表头、淘汰表尾（对应硬件里的 LRU 栈）。\n这正是课堂上「LRU 硬件实现代价高」背后的工程含义：链表操作在硬件里需要多级比较与状态位，所以真实 CPU 用**近似 LRU**（如树形伪 LRU）来换取可接受的面积与延迟。\n**本题只提供元数据与链接，题面正文请到原站查看。**",
+      "tags": [
+        "lru",
+        "cache",
+        "design",
+        "linked-list"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 146. LRU Cache（仅元数据）",
+      "external_url": "https://leetcode.cn/problems/lru-cache/"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "medium",
+      "title": "矩阵置零（缓存不友好访问的代价）",
+      "content_md": "给定一个矩阵，若某个元素为 0，则把它所在的行与列全部置零。要求**原地**完成。",
+      "answer": {
+        "correct": [
+          "见外链题解"
+        ]
+      },
+      "explanation": "从**缓存视角**看这题特别有教学价值：朴素做法反复按列扫描矩阵，而 C/C++ 是行主序存储，**按列访问破坏空间局部性**，每读一个元素就可能触发一次 Cache 缺失。\n最优解法（用第一行/第一列存标记位）不仅把额外空间降到 O(1)，也让两次遍历都保持**顺序访存**，缓存友好。\n对照本章结论：**同一个算法、同样的渐进复杂度，访存模式不同可以差数倍性能** ——这正是「数据布局优先于算法微调」的具体体现。\n**本题只提供元数据与链接，题面正文请到原站查看。**",
+      "tags": [
+        "matrix",
+        "cache-locality",
+        "in-place"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 73. Set Matrix Zeroes（仅元数据）",
+      "external_url": "https://leetcode.cn/problems/set-matrix-zeroes/"
+    }
+  ]
+}

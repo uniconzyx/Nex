@@ -1,0 +1,8 @@
+{
+  "title": "读文件遇 EOF 的正确循环",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "sum=15 eof=1",
+  "code": "#include <iostream>\n#include <fstream>\nint main() {\n    {\n        std::ofstream out(\"nums.txt\");\n        out << \"1 2 3 4 5\\n\";\n    }\n    std::ifstream in(\"nums.txt\");\n    int x, sum = 0;\n    while (in >> x) sum += x;        // 正确：提取成功才累加\n    std::cout << \"sum=\" << sum << \" eof=\" << in.eof() << '\\n';\n}"
+}

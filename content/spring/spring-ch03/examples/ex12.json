@@ -1,0 +1,8 @@
+{
+  "title": "final 方法无法被 CGLIB 代理（子类覆写限制）",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "open():\n  [advice]\n  [advice]\n  open (can be advised)\nsealed():\n  sealed (cannot be advised)\n",
+  "code": "// 模拟 CGLIB：子类重写可织入；final 方法无法被重写 → 无法织入通知\nclass FinalTarget {\n    public final String sealed() { return \"sealed (cannot be advised)\"; }\n    public String open() { return \"open (can be advised)\"; }\n}\nclass FinalTarget_Enhancer extends FinalTarget {\n    private Runnable advice;\n    FinalTarget_Enhancer(Runnable r) { advice = r; }\n    // sealed() 是 final，无法在此重写，因此不会有通知\n    @Override public String open() { advice.run(); String r = super.open(); advice.run(); return r; }\n}\npublic class Main {\n    public static void main(String[] a) {\n        Runnable adv = () -> System.out.println(\"  [advice]\");\n        FinalTarget proxy = new FinalTarget_Enhancer(adv);\n        System.out.println(\"open():\");\n        System.out.println(\"  \" + proxy.open());\n        System.out.println(\"sealed():\");\n        System.out.println(\"  \" + proxy.sealed());\n    }\n}\n"
+}

@@ -1,0 +1,210 @@
+{
+  "meta": {
+    "chapter": "fs-ch08",
+    "note": "8 题：基础题 6（self）+ 算法题 2（github 1 / leetcode 1，仅存元数据与链接，不搬运题面）；覆盖镜像分层缓存、12-Factor 配置外置、探针判定、Dockerfile 修复、Compose 依赖拓扑排序、健康检查状态机、Kahn 拓扑排序与课程表拓扑序。"
+  },
+  "items": [
+    {
+      "id": "fs-ch08-ex01",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/02 · 镜像分层与构建缓存（examples/ex02-layer-cache-sim.json）",
+      "difficulty": "mid",
+      "title": "改一行源码会重建几层：deps-first 与 COPY . . 反模式对照",
+      "content_md": "Dockerfile A 的顺序是 `FROM` → `WORKDIR` → `COPY package.json package-lock.json ./` → `RUN npm ci` → `COPY . .` → `RUN npm run build`（共 6 层）；Dockerfile B 把 `COPY . .` 提前到 `RUN npm ci` 之前（共 5 层）。现在只修改 `src/app.js` 一行并重新构建（不改 `package.json`）。下列说法哪一项与本章实跑结果一致？",
+      "options": [
+        {
+          "key": "A",
+          "text": "A 重建 2 层且 npm ci 层命中缓存；B 重建 3 层且 npm ci 层被迫重跑"
+        },
+        {
+          "key": "B",
+          "text": "A 重建 3 层；B 重建 2 层"
+        },
+        {
+          "key": "C",
+          "text": "两者都只重建 1 层（只有 COPY . . 那一层失效）"
+        },
+        {
+          "key": "D",
+          "text": "两者都会让全部层重建，因为构建缓存按整份上下文哈希"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "A"
+        ]
+      },
+      "explanation": "构建缓存是前缀链：某层失效则其后全部重建，因此「失效点之后的层数」就是重建层数。ex02 实测：A 的 `COPY . .` 是第 5 层，命中前 4 层、重建 2 层，且 `npm_ci_layer_rebuild=False`；B 的 `COPY . .` 是第 3 层，后面还有两条 RUN，命中 2 层、重建 3 层，且 `npm_ci_layer_rebuild=True`（最贵的依赖安装被反复触发）。缓存键是「父层哈希 + 指令 + 该指令用到的上下文内容」，不是整份上下文的哈希，所以 D 错。",
+      "tags": [
+        "docker",
+        "layer-cache",
+        "dockerfile"
+      ]
+    },
+    {
+      "id": "fs-ch08-ex02",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/03 · 12-Factor 与配置外置（examples/ex11-12factor-audit.json）",
+      "difficulty": "easy",
+      "title": "12-Factor 视角下哪种做法违规",
+      "content_md": "按 12-Factor 的「配置」因子，下列哪种做法属于**违规**（而不是「可接受但可改进」）？",
+      "options": [
+        {
+          "key": "A",
+          "text": "把 LOG_LEVEL 放在外部配置文件 config/default.json，由代码读取"
+        },
+        {
+          "key": "B",
+          "text": "把数据库连接串从环境变量 process.env.DATABASE_URL 读取"
+        },
+        {
+          "key": "C",
+          "text": "把 STRIPE_SECRET_KEY 直接写在 src/pay.js 源码里"
+        },
+        {
+          "key": "D",
+          "text": "把特性开关 FEATURE_NEW_UI 从环境变量读取"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "C"
+        ]
+      },
+      "explanation": "12-Factor 的「配置」指会因部署环境而不同的东西，必须与代码分离。环境变量是推荐形态（B、D 合规）；外部配置文件属于「已外置但不如环境变量」（A 记 `ok_externalized_but_prefer_env`，可接受）；写死在源码里是违规，若该项还是密钥则升级为 critical——因为密钥会随 Git 历史永久存在，且轮换前一直有效。ex11 对 C 这类项输出 `VIOLATION_CRITICAL_HARDCODED_SECRET`，最终 `compliant=5 violations=3 critical=2`。",
+      "tags": [
+        "12factor",
+        "config",
+        "secret"
+      ]
+    },
+    {
+      "id": "fs-ch08-ex03",
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/04 · 探针判定（examples/ex08-health-probe.json）",
+      "difficulty": "easy",
+      "title": "读探针时间线，写出状态切换时刻与终态",
+      "content_md": "某容器配置 `failureThreshold=3`、`successThreshold=2`，探针序列（t 从 0 开始，1 表示成功）为 `0000111`，初始状态为 healthy。本章 ex08 实跑给出的时间线为：\n```\nt=0 probe=0 consec_fail=1 state=healthy\nt=1 probe=0 consec_fail=2 state=healthy\nt=2 probe=0 consec_fail=3 state=unhealthy\nt=3 probe=0 consec_fail=4 state=unhealthy\nt=4 probe=1 consec_fail=0 consec_ok=1 state=unhealthy\nt=5 probe=1 consec_fail=0 consec_ok=2 state=healthy\nt=6 probe=1 consec_fail=0 consec_ok=3 state=healthy\n```\n请写出：① 判定 unhealthy 的 tick；② 判定恢复的 tick；③ 终态；④ 恢复为什么不在 t=4 发生。",
+      "answer": {
+        "output": "trip_tick=2\nrecover_tick=5\nfinal_state=healthy\nrecover_requires_consecutive_successes=2 (t=4 只有 1 次连续成功，未达 successThreshold=2)"
+      },
+      "explanation": "判定采用不对称阈值的滞回状态机：连续失败达到 failureThreshold 才降级（t=2 恰好第 3 次失败，索引从 0 起），连续成功达到 successThreshold 才恢复（t=5 是第 2 次连续成功）。t=4 只有 1 次连续成功，不足 2 次，因此仍为 unhealthy。ex08 的 `trip_at_failure_threshold=True`、`single_success_not_enough=True` 即对应这两条判据。",
+      "tags": [
+        "probe",
+        "health-check",
+        "state-machine"
+      ]
+    },
+    {
+      "id": "fs-ch08-ex04",
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/02 · Dockerfile 最佳实践（examples/ex01-dockerfile-lint.json）",
+      "difficulty": "mid",
+      "title": "修复一个有 8 处问题的 Dockerfile",
+      "content_md": "下面的 Dockerfile 被本章 ex01 的检查器报出 8 个问题，请逐条修复并说明依据（要求最终检查器输出 issues=0）。\n```\nFROM node:latest\nWORKDIR /app\nRUN apt-get update\nRUN apt-get install -y curl git\nADD ./app.tar.gz /app\nCOPY . .\nRUN npm install\nEXPOSE 3000\nCMD [\"node\", \"server.js\"]\n```",
+      "answer": {
+        "reference_code": "# 修复后的 Dockerfile（对应 ex01 的 good 基准，检查器输出 issues=0）\nFROM node:22.11-bookworm AS build\nWORKDIR /app\nCOPY package.json package-lock.json ./\nRUN apt-get update && apt-get install -y --no-install-recommends curl git \\\n && rm -rf /var/lib/apt/lists/*\nRUN npm ci\nCOPY . .\nRUN npm run build\n\nFROM node:22.11-bookworm-slim AS runtime\nWORKDIR /app\nENV NODE_ENV=production\nCOPY --from=build /app/dist ./dist\nCOPY --from=build /app/node_modules ./node_modules\nUSER node\nEXPOSE 3000\nHEALTHCHECK --interval=30s --timeout=3s CMD wget -qO- http://127.0.0.1:3000/healthz || exit 1\nCMD [\"node\", \"dist/server.js\"]\n\n# 依赖顺序：COPY 清单 -> 装依赖 -> COPY 源码；并另建 .dockerignore 排除 node_modules/.git/dist/*.log"
+      },
+      "explanation": "8 个问题与修复：① `node:latest` → 固定 `node:22.11-bookworm`；② `apt-get update` 与 `install` 拆成两条 RUN → 合并进同一条并在末尾清理 `/var/lib/apt/lists/*`；③ 用 `ADD` → 改 `COPY`（除非需要自动解压 tar）；④ `COPY . .` 在 `RUN npm install` 之前 → 改为先 COPY 清单文件再装依赖（ex02 实测重建层数 3→2）；⑤ 单阶段构建 → 改多阶段并用 `COPY --from=build`；⑥ 无 `USER` 即以 root 运行 → `USER node`；⑦ 无 `HEALTHCHECK` → 补一条；⑧ 缺 `.dockerignore` → 新建并排除 `node_modules`、`.git`、`dist`、`**/*.log`。",
+      "tags": [
+        "dockerfile",
+        "best-practice",
+        "multi-stage"
+      ]
+    },
+    {
+      "id": "fs-ch08-ex05",
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/03 · Compose 服务依赖（examples/ex07-compose-startup-order.json）",
+      "difficulty": "mid",
+      "title": "实现 Compose 服务依赖的分层启动顺序求解",
+      "content_md": "实现 `start_order(services)`：入参是 `{服务名: [依赖服务名, ...]}`，返回 `(waves, error)`，其中 `waves` 是按「同层可并发启动」分组的列表（每层内按名称字典序），`error` 在存在循环依赖时为非空字符串。要求对正常图与环形图各给一组结果，并打印判断量。",
+      "answer": {
+        "reference_code": "def start_order(services):\n    deps = {n: list(d) for n, d in services.items()}\n    waves, done = [], set()\n    while len(done) < len(services):\n        wave = sorted(n for n in services\n                      if n not in done and all(d in done for d in deps[n]))\n        if not wave:\n            return waves, \"circular:\" + \",\".join(sorted(n for n in services if n not in done))\n        waves.append(wave)\n        done.update(wave)\n    return waves, None\n\nservices = {\"db\": [], \"cache\": [],\n            \"api\": [\"db\", \"cache\"], \"worker\": [\"db\"], \"gateway\": [\"api\"]}\nwaves, err = start_order(services)\nfor i, w in enumerate(waves):\n    print(\"wave%d=%s\" % (i, \",\".join(w)))\nprint(\"err=%s\" % err)\nprint(\"waves=%d\" % len(waves))\n\ncyclic = {\"a\": [\"b\"], \"b\": [\"c\"], \"c\": [\"a\"]}\nprint(\"cycle_err=%s\" % start_order(cyclic)[1])\nprint(\"cycle_detected=%s\" % (start_order(cyclic)[1] is not None))\n"
+      },
+      "explanation": "每轮收集「所有依赖都已在 done 中」的服务作为一层，层内可并发启动；若某一轮收集不到任何服务而仍有未完成项，说明剩余子图无入度为零的顶点，即存在环——这正是 Kahn 拓扑排序的环判定。分层而非线性顺序是有意义的：层数等于最短启动批次（= 最长依赖链长度），同层服务可并行以缩短启动时间。ex07 实测：wave0=`cache,db`、wave1=`api,worker`、wave2=`gateway`，环图报 `circular_dependency:a,b,c`。",
+      "tags": [
+        "topological-sort",
+        "compose",
+        "dag"
+      ]
+    },
+    {
+      "id": "fs-ch08-ex06",
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "concept/04 · 探针与告警（examples/ex08-health-probe.json）",
+      "difficulty": "mid",
+      "title": "实现健康检查的滞回状态机",
+      "content_md": "实现 `probe_events(probes, failure_threshold, success_threshold)`：按整数 tick 依次消费布尔探针序列，返回 `(final_state, events)`，`events` 是在哪些 tick 发生了状态切换。要求演示三组：① 连续失败 3 次后降级；② 抖动序列（成功失败交替）永不触发；③ 恢复需要连续 2 次成功，单次成功不算。",
+      "answer": {
+        "reference_code": "def probe_events(probes, failure_threshold, success_threshold):\n    state, fails, oks, events = \"healthy\", 0, 0, []\n    for i, ok in enumerate(probes):\n        if ok:\n            fails, oks = 0, oks + 1\n            if state == \"unhealthy\" and oks >= success_threshold:\n                state = \"healthy\"\n                events.append((i, \"healthy\"))\n        else:\n            oks, fails = 0, fails + 1\n            if state == \"healthy\" and fails >= failure_threshold:\n                state = \"unhealthy\"\n                events.append((i, \"unhealthy\"))\n    return state, events\n\nprint(\"trip=%s\" % probe_events([False, False, False, False, True, True], 3, 2)[1])\nprint(\"flap_final=%s\" % probe_events([True, False, True, False, True], 3, 2)[0])\nprint(\"single_ok_not_enough=%s\" % (probe_events([False, False, False, True], 3, 2)[0] == \"unhealthy\"))\nprint(\"recover=%s\" % probe_events([False, False, False, True, True], 3, 2)[1])\n"
+      },
+      "explanation": "两个方向的阈值必须不对称（降级看连续失败、恢复看连续成功），任何一次反向探针都重置对应计数器——这就是滞回（hysteresis），作用是让抖动序列无法把状态推过阈值，避免反复重启与摘挂流量。注意 tick 从 0 开始：`[False,False,False]` 的降级发生在 t=2。ex08 实测 `trip_at_failure_threshold=True`、`flapping_never_trips=True`、`single_success_not_enough=True`。",
+      "tags": [
+        "health-check",
+        "probe",
+        "hysteresis"
+      ]
+    },
+    {
+      "id": "fs-ch08-ex07",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "github",
+      "source": "github",
+      "source_ref": "trekhleb/javascript-algorithms · src/algorithms/graph/topological-sorting（Kahn 入度法）",
+      "external_url": "https://github.com/trekhleb/javascript-algorithms",
+      "difficulty": "mid",
+      "title": "GitHub 算法补充 · Kahn 拓扑排序与环检测",
+      "content_md": "实现拓扑排序（Kahn 入度法）：给定 `{节点: [依赖节点, ...]}`，输出一个线性序（打破平局时取字典序最小者）以及是否存在环。该算法是本章 CI 流水线 `needs:` 依赖图与 Compose `depends_on` 启动序的底层工具。题面与实现参考见 external_url，此处不复述第三方题面正文。",
+      "answer": {
+        "reference_code": "// Kahn：反复取入度为 0 的顶点，删除其出边；取不满则存在环\nfunction topoSort(graph) {\n  const nodes = Object.keys(graph);\n  const indeg = new Map(nodes.map(n => [n, 0]));\n  const succ = new Map(nodes.map(n => [n, []]));\n  for (const n of nodes) {\n    for (const d of graph[n]) {\n      if (!indeg.has(d)) continue;\n      indeg.set(n, indeg.get(n) + 1);\n      succ.get(d).push(n);\n    }\n  }\n  const ready = nodes.filter(n => indeg.get(n) === 0).sort();\n  const order = [];\n  while (ready.length) {\n    const n = ready.shift();\n    order.push(n);\n    for (const m of succ.get(n)) {\n      indeg.set(m, indeg.get(m) - 1);\n      if (indeg.get(m) === 0) { ready.push(m); ready.sort(); }\n    }\n  }\n  return { order, acyclic: order.length === nodes.length };\n}\n\nconst graph = { lint: [], build: ['lint'], test: ['build'], e2e: ['build'], deploy: ['test', 'e2e'] };\nconsole.log('order=' + topoSort(graph).order.join(','));\nconsole.log('acyclic=' + topoSort(graph).acyclic);\nconsole.log('cycle_detected=' + (topoSort({ a: ['b'], b: ['a'] }).acyclic === false));\n"
+      },
+      "explanation": "Kahn 算法先把入度为 0 的顶点入队（这里按字典序排序以保证输出确定），每次取出一个顶点追加到结果并把它指向的后继入度减一，减到 0 的后继入队。若最终生成的顶点数少于总数，说明剩下的顶点互相成环（不存在入度 0 的顶点），据此可判定环存在。时间复杂度 O(V+E)。ex05 与 ex07 的依赖求解都是它的应用形态。",
+      "tags": [
+        "graph",
+        "topological-sort",
+        "kahn"
+      ]
+    },
+    {
+      "id": "fs-ch08-ex08",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "source": "leetcode",
+      "source_ref": "LeetCode 210（course-schedule-ii）",
+      "external_url": "https://leetcode.cn/problems/course-schedule-ii/",
+      "difficulty": "mid",
+      "title": "LeetCode 210 · 课程表 II（拓扑序，算法素养补充）",
+      "content_md": "给定课程数与先修关系，返回一种可行的学习顺序；若无法完成全部课程则返回空序列。题面与约束以官方为准，详见 external_url，此处不复述题面正文。",
+      "answer": {
+        "reference_code": "from collections import deque\n\n\ndef find_order(n, prerequisites):\n    succ = [[] for _ in range(n)]\n    indeg = [0] * n\n    for a, b in prerequisites:      # 先修 b -> 课程 a\n        succ[b].append(a)\n        indeg[a] += 1\n    q = deque(i for i in range(n) if indeg[i] == 0)\n    order = []\n    while q:\n        x = q.popleft()\n        order.append(x)\n        for y in succ[x]:\n            indeg[y] -= 1\n            if indeg[y] == 0:\n                q.append(y)\n    return order if len(order) == n else []\n\n\nprint(\"order=%s\" % find_order(4, [[1, 0], [2, 0], [3, 1], [3, 2]]))\nprint(\"empty_on_cycle=%s\" % (find_order(2, [[1, 0], [0, 1]]) == []))\nprint(\"no_prereq=%s\" % find_order(3, []))\n"
+      },
+      "explanation": "与 ex07 完全同构：先统计入度，把入度为 0 的节点入队，逐个出队并递减后继入度，最后判断产出数量是否等于 n——少于 n 即存在环、无可行顺序。时间复杂度 O(V+E)，空间 O(V+E)。工程上这就是 CI 的 `needs:` 依赖图与 Compose 启动序的判定算法。",
+      "tags": [
+        "graph",
+        "topological-sort",
+        "bfs"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "title": "sqlite SAVEPOINT：实现 NESTED 保存点语义",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "inside savepoint rows = [1, 2]\r\nafter rollback to savepoint rows = [1]\r\nafter commit rows = [1, 3]\r\nnested rollback kept outer row 1: True\r",
+  "code": "import sqlite3\n\ncon = sqlite3.connect(\":memory:\")\ncur = con.cursor()\ncur.execute(\"CREATE TABLE t(id INTEGER PRIMARY KEY, v TEXT)\")\n\n\ndef rows():\n    return [r[0] for r in cur.execute(\"SELECT id FROM t ORDER BY id\")]\n\n\ncur.execute(\"INSERT INTO t(id,v) VALUES(1,'A')\")\ncur.execute(\"SAVEPOINT sp1\")\ncur.execute(\"INSERT INTO t(id,v) VALUES(2,'B')\")\nprint(\"inside savepoint rows =\", rows())\ncur.execute(\"ROLLBACK TO sp1\")\ncur.execute(\"RELEASE sp1\")\nprint(\"after rollback to savepoint rows =\", rows())\ncur.execute(\"INSERT INTO t(id,v) VALUES(3,'C')\")\ncon.commit()\nprint(\"after commit rows =\", rows())\nprint(\"nested rollback kept outer row 1:\", rows() == [1, 3])\ncon.close()\n"
+}

@@ -1,0 +1,104 @@
+{
+  "meta": {
+    "chapter": "spring-ch02",
+    "note": "基础题考察生命周期顺序/作用域语义/配置类代理；算法题考察依赖图环检测（与循环依赖同构）与迷你容器实现。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "Bean 初始化三方式的调用顺序",
+      "content_md": "关于 `@PostConstruct`、`InitializingBean.afterPropertiesSet()`、`init-method` 的初始化顺序，正确的是？",
+      "options": [
+        { "key": "A", "text": "afterPropertiesSet -> @PostConstruct -> init-method" },
+        { "key": "B", "text": "@PostConstruct -> afterPropertiesSet -> init-method" },
+        { "key": "C", "text": "init-method -> @PostConstruct -> afterPropertiesSet" },
+        { "key": "D", "text": "三者顺序由配置决定，没有固定先后" }
+      ],
+      "answer": { "correct": ["B"], "output": "" },
+      "explanation": "固定顺序：@PostConstruct（BPP 前置阶段）最早，其次 InitializingBean.afterPropertiesSet（invokeInitMethods），最后 init-method（反射调用）。",
+      "tags": ["lifecycle", "init"],
+      "source": "self",
+      "source_ref": "本章自命题 / 《Spring 实战（第6版）》第2-3章"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "初始化顺序输出判定",
+      "content_md": "某 bean 同时标注了三种初始化钩子，依次打印 postConstruct / initializingBean / initMethod。下列输出哪个正确？\n```text\npostConstruct;initializingBean;initMethod;\n```",
+      "answer": { "correct": [], "output": "postConstruct;initializingBean;initMethod;" },
+      "explanation": "与生命周期顺序一致：注解最早、接口其次、配置约定最晚。",
+      "tags": ["lifecycle", "order"],
+      "source": "self",
+      "source_ref": "本章自命题 / 示例 ex05"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "singleton 与 prototype 的作用域语义",
+      "content_md": "关于 Spring 作用域，下列说法准确的是？",
+      "options": [
+        { "key": "A", "text": "prototype 每次 getBean 新建且容器负责其销毁" },
+        { "key": "B", "text": "singleton 是默认作用域，容器内唯一实例，容器关闭才销毁" },
+        { "key": "C", "text": "request 作用域跨请求共享同一实例" },
+        { "key": "D", "text": "prototype 注入 singleton 后每次使用都拿到新实例" }
+      ],
+      "answer": { "correct": ["B"], "output": "" },
+      "explanation": "singleton 为默认、唯一、容器管销毁；prototype 不缓存不销毁；request 同一请求内共享；prototype 注入 singleton 只在创建时注入一次，之后不变。",
+      "tags": ["scope", "singleton", "prototype"],
+      "source": "book",
+      "source_ref": "《Spring 实战（第6版）》第3章"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "修复 @Configuration 误写为 @Component 导致多例",
+      "content_md": "下面配置类漏标 `@Configuration`，类内 `@Bean` 互调会每次新建，破坏单例。请修正。\n```java\n@Component\npublic class AppConfig {\n    @Bean public Service service(){ return new Service(); }\n    @Bean public Audit audit(){ return new Audit(service()); }\n}\n```",
+      "answer": {
+        "correct": [],
+        "output": "",
+        "reference_code": "@Configuration\npublic class AppConfig {\n    @Bean public Service service(){ return new Service(); }\n    @Bean public Audit audit(){ return new Audit(service()); }\n}"
+      },
+      "explanation": "标 @Configuration 后 CGLIB 增强子类，覆盖 @Bean 方法使其先查容器单例缓存；类内 audit() 调 service() 也走缓存，保证单例。",
+      "tags": ["configuration", "cglib", "scope"],
+      "source": "self",
+      "source_ref": "本章自命题 / 示例 ex10"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "课程表（依赖图环检测，与单例循环依赖同构）",
+      "content_md": "给定课程先修依赖 prerequisites，判断能否完成所有课程。等价于检测有向图是否存在环——与「Spring 单例循环依赖能否被三级缓存解决」是同一建模：能拓扑排序则无环（可装配），有环则失败（prototype/构造器循环依赖）。",
+      "answer": { "correct": [], "output": "", "reference_code": "拓扑排序（Kahn 或 DFS 三色标记）检测有向图环" },
+      "explanation": "把依赖建成有向图，能拓扑排序则无环（可完成）；有环则无法完成，类比构造器/prototype 循环依赖必然失败，而单例+Setter 循环依赖因早期引用被解决。",
+      "tags": ["graph", "topo", "circular"],
+      "source": "leetcode",
+      "source_ref": "LeetCode 207（course-schedule）",
+      "external_url": "https://leetcode.cn/problems/course-schedule/"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "github",
+      "difficulty": "hard",
+      "title": "从零实现迷你生命周期容器（三级缓存）",
+      "content_md": "参考 Spring 思路，用纯 JDK 实现迷你容器：BeanDefinition 注册、反射实例化、字段填充、Aware 回调、BeanPostProcessor 前后置、初始化与销毁方法，并用三级缓存解决单例循环依赖。",
+      "answer": { "correct": [], "output": "", "reference_code": "见参考仓库的最小实现思路（singletonObjects/earlySingletonObjects/singletonFactories 三层 + ObjectFactory）" },
+      "explanation": "综合考察生命周期各阶段、反射字段注入、早期引用暴露与三级缓存层级，是本章知识的工程落地。",
+      "tags": ["lifecycle", "reflection", "cache"],
+      "source": "github",
+      "source_ref": "spring-projects/spring-framework（参考实现）",
+      "external_url": "https://github.com/spring-projects/spring-framework"
+    }
+  ]
+}

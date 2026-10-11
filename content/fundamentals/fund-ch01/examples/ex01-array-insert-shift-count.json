@@ -1,0 +1,8 @@
+{
+  "title": "顺序表插入的搬移次数（确定性计数）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "在下标 0 插入：搬移 8 个元素\n在下标 1 插入：搬移 7 个元素\n在下标 2 插入：搬移 6 个元素\n在下标 3 插入：搬移 5 个元素\n在下标 4 插入：搬移 4 个元素\n在下标 5 插入：搬移 3 个元素\n在下标 6 插入：搬移 2 个元素\n在下标 7 插入：搬移 1 个元素\n在下标 8 插入：搬移 0 个元素\n合计搬移 = 36 次（n = 8）\n平均每次插入搬移 = 4.0 个（约为 n/2）\n结论：头插最坏 O(n)，尾插 O(1)，平均 O(n)",
+  "code": "#include <stdio.h>\n\n/* 计算长度为 n 的顺序表，在每一个可能位置插入时的搬移次数。\n * 在下标 p 插入，需要把 p..n-1 的元素整体后移一位 → 搬移 n - p 个。 */\nint main(void) {\n    int n = 8;\n    long total = 0;\n    for (int p = 0; p <= n; p++) {\n        int shifts = n - p;\n        total += shifts;\n        printf(\"在下标 %d 插入：搬移 %d 个元素\\n\", p, shifts);\n    }\n    printf(\"合计搬移 = %ld 次（n = %d）\\n\", total, n);\n    printf(\"平均每次插入搬移 = %.1f 个（约为 n/2）\\n\", (double)total / (n + 1));\n    printf(\"结论：头插最坏 O(n)，尾插 O(1)，平均 O(n)\\n\");\n    return 0;\n}"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "Promise then 链与回调调度顺序",
+  "code_lang": "javascript",
+  "code_std": "node22",
+  "stdin": "",
+  "expected_output": "separate: 2\nchained: 2\nfinal: 20",
+  "code": "Promise.resolve(1)\n  .then(function(v){ return v + 1; })\n  .then(function(v){ console.log('chained:', v); return v * 10; })\n  .then(function(v){ console.log('final:', v); });\nPromise.resolve(2).then(function(v){ console.log('separate:', v); });"
+}

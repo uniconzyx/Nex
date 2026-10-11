@@ -1,0 +1,8 @@
+{
+  "title": "reduceByKey 与 groupByKey 的 shuffle 数据量对比",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "记录总数 = 12, 不同 key 数 = 6\ngroupByKey 全量搬运: shuffle 记录数 = 12\nreduceByKey map端预聚合后搬运: shuffle 记录数 = 6\nreduceByKey 减少 shuffle 量 = 6 条 (约 50%)\n",
+  "code": "from collections import Counter\ndef dhash(s):\n    h = 0\n    for c in s:\n        h = (h * 31 + ord(c)) & 0xFFFFFFFF\n    return h\nkeys = [\"a\", \"a\", \"a\", \"b\", \"b\", \"c\", \"d\", \"d\", \"d\", \"d\", \"e\", \"f\"]\nnum_reduce = 4\ngbk_shuffle = len(keys)\ncnt = Counter(keys)\nrbk_shuffle = len(cnt)\nprint(f\"记录总数 = {len(keys)}, 不同 key 数 = {len(cnt)}\")\nprint(f\"groupByKey 全量搬运: shuffle 记录数 = {gbk_shuffle}\")\nprint(f\"reduceByKey map端预聚合后搬运: shuffle 记录数 = {rbk_shuffle}\")\nsaved = gbk_shuffle - rbk_shuffle\nprint(f\"reduceByKey 减少 shuffle 量 = {saved} 条 (约 {100 * saved // gbk_shuffle}%)\")\n"
+}

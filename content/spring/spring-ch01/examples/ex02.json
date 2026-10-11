@@ -1,0 +1,8 @@
+{
+  "title": "反射字段注入：模拟 @Autowired",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "data\ninjected? true",
+  "code": "import java.lang.reflect.*;\nimport java.lang.annotation.*;\nimport java.util.*;\n\npublic class Ex02 {\n    @Retention(RetentionPolicy.RUNTIME)\n    @interface Autowired {}\n\n    static class Repo { String find() { return \"data\"; } }\n    static class Service {\n        @Autowired Repo repo;\n        String work() { return repo.find(); }\n    }\n    public static void main(String[] args) throws Exception {\n        Repo repo = new Repo();\n        Service svc = new Service();\n        // 容器通过反射把 repo 注入到 svc 的 @Autowired 字段\n        for (Field f : svc.getClass().getDeclaredFields()) {\n            if (f.isAnnotationPresent(Autowired.class)) {\n                f.setAccessible(true);\n                f.set(svc, repo);\n            }\n        }\n        System.out.println(svc.work());\n        System.out.println(\"injected? \" + (svc.repo != null));\n    }\n}\n"
+}

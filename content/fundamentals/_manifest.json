@@ -1,0 +1,444 @@
+{
+  "schema_version": 1,
+  "subject": "fundamentals",
+  "title": "CppMind · 计算机基础课程体系（408 四大件）",
+  "note": "阶段7 技术栈扩展大纲。每章须齐备 7 类内容（见 _template 规范），由 server/scripts/validate_content.py 校验。resources 仅存元数据与链接，不存第三方题面/正文，符合合规红线。",
+  "groups": {
+    "F1": "数据结构",
+    "F2": "算法与复杂度",
+    "F3": "计算机组成原理",
+    "F4": "操作系统",
+    "F5": "计算机网络"
+  },
+  "chapters": [
+    {
+      "id": "fund-ch01",
+      "order": 1,
+      "group": "F1",
+      "title": "数据结构：线性表与链表",
+      "summary": "顺序表与链表的内存布局差异与复杂度对比；单链表/双链表/循环链表/静态链表；头结点与哨兵的作用；链表高频操作（反转、找中点、判环、相交、合并）；链表为何对缓存不友好。",
+      "prerequisites": [],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "donnemartin/system-design-primer",
+          "jwasham/coding-interview-university",
+          "CyC2018/CS-Notes"
+        ],
+        "github_stars": [
+          373461,
+          362479,
+          186393
+        ],
+        "github_notes": [
+          "系统设计入门：性能、一致性、可用性与面试题（408 之上的系统视野）",
+          "完整的计算机科学自学计划：数据结构、算法、OS、网络全覆盖",
+          "中文技术面试必备：操作系统、计算机网络、组成原理、算法、数据库"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《数据结构（C 语言版）》严蔚敏 第2章",
+          "《算法（第4版）》第1章"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "fund-ch02",
+      "order": 2,
+      "group": "F1",
+      "title": "栈、队列与串",
+      "summary": "顺序栈与链栈、共享栈；循环队列的判空判满（牺牲单元法 vs 计数法）；栈的典型应用（表达式求值、递归与调用栈、括号匹配、DFS）；双端队列；串的模式匹配（BF 与 KMP 的 next 数组推导）。",
+      "prerequisites": [
+        "fund-ch01"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "donnemartin/system-design-primer",
+          "jwasham/coding-interview-university",
+          "CyC2018/CS-Notes"
+        ],
+        "github_stars": [
+          373461,
+          362479,
+          186393
+        ],
+        "github_notes": [
+          "系统设计入门：性能、一致性、可用性与面试题（408 之上的系统视野）",
+          "完整的计算机科学自学计划：数据结构、算法、OS、网络全覆盖",
+          "中文技术面试必备：操作系统、计算机网络、组成原理、算法、数据库"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《数据结构（C 语言版）》第3-4章"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "fund-ch03",
+      "order": 3,
+      "group": "F1",
+      "title": "树与二叉树",
+      "summary": "二叉树的顺序/链式存储与四种遍历（含非递归与 Morris）；线索二叉树；哈夫曼树与编码；二叉排序树与平衡树（AVL 旋转、红黑树五条性质）；B 树与 B+ 树的结构差异及磁盘 IO 视角；堆与优先队列。",
+      "prerequisites": [
+        "fund-ch02"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "donnemartin/system-design-primer",
+          "jwasham/coding-interview-university",
+          "CyC2018/CS-Notes"
+        ],
+        "github_stars": [
+          373461,
+          362479,
+          186393
+        ],
+        "github_notes": [
+          "系统设计入门：性能、一致性、可用性与面试题（408 之上的系统视野）",
+          "完整的计算机科学自学计划：数据结构、算法、OS、网络全覆盖",
+          "中文技术面试必备：操作系统、计算机网络、组成原理、算法、数据库"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《数据结构（C 语言版）》第6章",
+          "《算法导论》第6、13章"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "fund-ch04",
+      "order": 4,
+      "group": "F1",
+      "title": "图",
+      "summary": "邻接矩阵 vs 邻接表 vs 十字链表的取舍；DFS/BFS 与复杂度分析；最小生成树（Prim 与 Kruskal 的适用场景）；最短路径（Dijkstra 的贪心正确性、Floyd 的动态规划、Bellman-Ford 与负权）；拓扑排序与关键路径；并查集与路径压缩。",
+      "prerequisites": [
+        "fund-ch03"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "donnemartin/system-design-primer",
+          "jwasham/coding-interview-university",
+          "CyC2018/CS-Notes"
+        ],
+        "github_stars": [
+          373461,
+          362479,
+          186393
+        ],
+        "github_notes": [
+          "系统设计入门：性能、一致性、可用性与面试题（408 之上的系统视野）",
+          "完整的计算机科学自学计划：数据结构、算法、OS、网络全覆盖",
+          "中文技术面试必备：操作系统、计算机网络、组成原理、算法、数据库"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《数据结构（C 语言版）》第7章"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "fund-ch05",
+      "order": 5,
+      "group": "F1",
+      "title": "查找与哈希",
+      "summary": "顺序/折半/分块查找的 ASL 计算；B 树与 B+ 树的查找过程；哈希函数的构造方法；冲突处理（开放寻址的线性/二次探测与再哈希、链地址法与拉链升级）；装填因子的影响与扩容；一致性哈希与虚拟节点。",
+      "prerequisites": [
+        "fund-ch03"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "donnemartin/system-design-primer",
+          "jwasham/coding-interview-university",
+          "CyC2018/CS-Notes"
+        ],
+        "github_stars": [
+          373461,
+          362479,
+          186393
+        ],
+        "github_notes": [
+          "系统设计入门：性能、一致性、可用性与面试题（408 之上的系统视野）",
+          "完整的计算机科学自学计划：数据结构、算法、OS、网络全覆盖",
+          "中文技术面试必备：操作系统、计算机网络、组成原理、算法、数据库"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《数据结构（C 语言版）》第8章"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "fund-ch06",
+      "order": 6,
+      "group": "F2",
+      "title": "排序算法与复杂度分析",
+      "summary": "八大排序的原理、时间复杂度、空间复杂度与稳定性对照表；快排的分区实现与最坏情况、随机化与三数取中；堆排序的建堆与下沉；归并与外部排序；非比较排序（计数/基数/桶）的适用条件；渐进记号与摊还分析、主定理入门。",
+      "prerequisites": [
+        "fund-ch01",
+        "fund-ch05"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "donnemartin/system-design-primer",
+          "jwasham/coding-interview-university",
+          "CyC2018/CS-Notes"
+        ],
+        "github_stars": [
+          373461,
+          362479,
+          186393
+        ],
+        "github_notes": [
+          "系统设计入门：性能、一致性、可用性与面试题（408 之上的系统视野）",
+          "完整的计算机科学自学计划：数据结构、算法、OS、网络全覆盖",
+          "中文技术面试必备：操作系统、计算机网络、组成原理、算法、数据库"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《算法导论》第2、7、8章"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "fund-ch07",
+      "order": 7,
+      "group": "F3",
+      "title": "计算机组成原理：数据表示与运算",
+      "summary": "原码/反码/补码的转换与溢出判定；定点数与浮点数（IEEE 754 的符号/阶码/尾数的位数分配、规格化、非规格化与特殊值）；浮点加减的对阶与舍入、精度丢失的根源；校验码（奇偶校验、海明码纠错原理、CRC）。",
+      "prerequisites": [],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "donnemartin/system-design-primer",
+          "jwasham/coding-interview-university",
+          "CyC2018/CS-Notes"
+        ],
+        "github_stars": [
+          373461,
+          362479,
+          186393
+        ],
+        "github_notes": [
+          "系统设计入门：性能、一致性、可用性与面试题（408 之上的系统视野）",
+          "完整的计算机科学自学计划：数据结构、算法、OS、网络全覆盖",
+          "中文技术面试必备：操作系统、计算机网络、组成原理、算法、数据库"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《计算机组成原理》唐朔飞 第2章",
+          "《深入理解计算机系统》第2章"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "fund-ch08",
+      "order": 8,
+      "group": "F3",
+      "title": "计组：存储系统与 CPU",
+      "summary": "存储层次与局部性原理；Cache 的三种映射方式、替换算法与写策略（写回/写直达）、平均访存时间计算；虚拟内存、页表与 TLB 的协同；指令周期与数据通路；流水线的理想加速比与三类冒险（结构/数据/控制）及旁路、分支预测；CISC 与 RISC 的取舍。",
+      "prerequisites": [
+        "fund-ch07"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "donnemartin/system-design-primer",
+          "jwasham/coding-interview-university",
+          "CyC2018/CS-Notes"
+        ],
+        "github_stars": [
+          373461,
+          362479,
+          186393
+        ],
+        "github_notes": [
+          "系统设计入门：性能、一致性、可用性与面试题（408 之上的系统视野）",
+          "完整的计算机科学自学计划：数据结构、算法、OS、网络全覆盖",
+          "中文技术面试必备：操作系统、计算机网络、组成原理、算法、数据库"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《计算机组成原理》唐朔飞 第4-6章",
+          "《深入理解计算机系统》第5-6章"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "fund-ch09",
+      "order": 9,
+      "group": "F4",
+      "title": "操作系统：进程、线程与调度",
+      "summary": "进程与线程的本质差异（资源分配 vs 调度单位）与共享内容；PCB 与上下文切换的开销来源；调度算法（FCFS/SJF/HRRN/时间片轮转/多级反馈队列）与周转时间的计算；同步互斥机制（临界区、信号量 PV、管程）与生产者消费者/读者写者/哲学家进餐；死锁四条件、预防/避免（银行家算法）/检测；IPC 与管道。",
+      "prerequisites": [],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "donnemartin/system-design-primer",
+          "jwasham/coding-interview-university",
+          "CyC2018/CS-Notes"
+        ],
+        "github_stars": [
+          373461,
+          362479,
+          186393
+        ],
+        "github_notes": [
+          "系统设计入门：性能、一致性、可用性与面试题（408 之上的系统视野）",
+          "完整的计算机科学自学计划：数据结构、算法、OS、网络全覆盖",
+          "中文技术面试必备：操作系统、计算机网络、组成原理、算法、数据库"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《计算机操作系统》汤小丹 第2-3章",
+          "《现代操作系统》"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "fund-ch10",
+      "order": 10,
+      "group": "F4",
+      "title": "操作系统：内存管理、文件与 IO",
+      "summary": "连续分配与外部碎片；分页/分段/段页式与地址转换；页面置换算法（OPT/FIFO/LRU/Clock）与缺页率计算、Belady 异常；抖动与工作集模型；文件系统（inode、目录结构、硬链接 vs 软链接、空闲空间管理、日志式文件系统）；磁盘调度算法；五种 IO 模型与零拷贝。",
+      "prerequisites": [
+        "fund-ch09"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "donnemartin/system-design-primer",
+          "jwasham/coding-interview-university",
+          "CyC2018/CS-Notes"
+        ],
+        "github_stars": [
+          373461,
+          362479,
+          186393
+        ],
+        "github_notes": [
+          "系统设计入门：性能、一致性、可用性与面试题（408 之上的系统视野）",
+          "完整的计算机科学自学计划：数据结构、算法、OS、网络全覆盖",
+          "中文技术面试必备：操作系统、计算机网络、组成原理、算法、数据库"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《计算机操作系统》汤小丹 第4-6章"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "fund-ch11",
+      "order": 11,
+      "group": "F5",
+      "title": "计算机网络：分层模型与 TCP/IP",
+      "summary": "OSI 七层与 TCP/IP 四层的对应与封装/分用过程；数据链路层的成帧、差错控制与以太网帧、交换机自学习；网络层的 IP 编址与子网划分/CIDR、ARP 解析、ICMP、路由算法与协议；TCP 的三次握手/四次挥手与状态机、可靠传输（序号确认重传）、流量控制（滑动窗口）与拥塞控制（慢启动/拥塞避免/快重传快恢复）；UDP 与 QUIC。",
+      "prerequisites": [],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "donnemartin/system-design-primer",
+          "jwasham/coding-interview-university",
+          "CyC2018/CS-Notes"
+        ],
+        "github_stars": [
+          373461,
+          362479,
+          186393
+        ],
+        "github_notes": [
+          "系统设计入门：性能、一致性、可用性与面试题（408 之上的系统视野）",
+          "完整的计算机科学自学计划：数据结构、算法、OS、网络全覆盖",
+          "中文技术面试必备：操作系统、计算机网络、组成原理、算法、数据库"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《计算机网络》谢希仁 第1-5章",
+          "《TCP/IP 详解 卷1》"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "fund-ch12",
+      "order": 12,
+      "group": "F5",
+      "title": "计算机网络：应用层与链路排查",
+      "summary": "HTTP/1.1 到 HTTP/2（多路复用、头部压缩）到 HTTP/3（QUIC、无队头阻塞）的演进动机；HTTPS 与 TLS 握手（对称/非对称混合、证书链、前向安全）；DNS 递归与迭代解析、缓存层级；从输入 URL 到页面渲染的完整链路（高频面试题）；Cookie/Session/Token 与跨域；常用排查命令（ping/traceroute/netstat/tcpdump/curl）。",
+      "prerequisites": [
+        "fund-ch11"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "donnemartin/system-design-primer",
+          "jwasham/coding-interview-university",
+          "CyC2018/CS-Notes"
+        ],
+        "github_stars": [
+          373461,
+          362479,
+          186393
+        ],
+        "github_notes": [
+          "系统设计入门：性能、一致性、可用性与面试题（408 之上的系统视野）",
+          "完整的计算机科学自学计划：数据结构、算法、OS、网络全覆盖",
+          "中文技术面试必备：操作系统、计算机网络、组成原理、算法、数据库"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《计算机网络》谢希仁 第6章",
+          "《图解 HTTP》"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    }
+  ],
+  "github_resources": [
+    {
+      "repo": "donnemartin/system-design-primer",
+      "stars": 373461,
+      "url": "https://github.com/donnemartin/system-design-primer",
+      "note": "系统设计入门：性能、一致性、可用性与面试题（408 之上的系统视野）"
+    },
+    {
+      "repo": "jwasham/coding-interview-university",
+      "stars": 362479,
+      "url": "https://github.com/jwasham/coding-interview-university",
+      "note": "完整的计算机科学自学计划：数据结构、算法、OS、网络全覆盖"
+    },
+    {
+      "repo": "CyC2018/CS-Notes",
+      "stars": 186393,
+      "url": "https://github.com/CyC2018/CS-Notes",
+      "note": "中文技术面试必备：操作系统、计算机网络、组成原理、算法、数据库"
+    }
+  ],
+  "resources_fetched_at": "2026-09-21"
+}

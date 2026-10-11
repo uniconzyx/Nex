@@ -1,0 +1,320 @@
+{
+  "schema_version": 1,
+  "subject": "database",
+  "title": "CppMind · 数据库（MySQL）课程体系",
+  "note": "阶段7 资源整合大纲。每章须齐备 7 类内容（goals.md / concept/*.md / pitfalls.md / exercises.json / examples/*.json / interview.json / project.json，详见 _template 规范），由 server/scripts/validate_content.py 校验。resources 仅存元数据与链接（书籍/仓库/题号/URL），不存第三方题面与正文，符合合规红线。本学科不写 clang_module（数据库无 C 语言并列模块）。",
+  "groups": {
+    "L1": "SQL 基础",
+    "L2": "约束与索引",
+    "L3": "事务与优化",
+    "L4": "编程对象",
+    "L5": "建模",
+    "L6": "运维安全",
+    "L7": "高可用架构"
+  },
+  "chapters": [
+    {
+      "id": "db-ch01",
+      "order": 1,
+      "group": "L1",
+      "title": "关系模型与 SQL 基础（DDL/DML/SELECT/JOIN/聚合/分组）",
+      "summary": "关系模型基本概念（表/行/列/主键/外键）；DDL 建表改表删表；DML 增删改；SELECT 查询、WHERE 过滤、ORDER BY、LIMIT；INNER/LEFT/RIGHT JOIN；聚合函数与 GROUP BY、HAVING 分组过滤；子查询与 DISTINCT。",
+      "prerequisites": [],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "Snailclimb/JavaGuide",
+          "macrozheng/mall",
+          "doocs/advanced-java"
+        ],
+        "github_stars": [
+          159056,
+          84863,
+          79141
+        ],
+        "github_notes": [
+          "含 MySQL 索引、事务、锁与调优的系统讲解",
+          "真实业务库表设计范例与 SQL 实践",
+          "含分库分表、读写分离与分布式事务"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《MySQL 必知必会》第 1-17 章（基础 SQL 与联结）",
+          "《高性能 MySQL》第 4 章（Schema 与数据类型）",
+          "《数据库系统概念》第 2-3 章（关系模型与 SQL）"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "db-ch02",
+      "order": 2,
+      "group": "L2",
+      "title": "表连接与子查询：JOIN、子查询、集合操作",
+      "summary": "JOIN 执行算法（Nested Loop / Block Nested Loop / Hash Join / Merge Join）与驱动表选择；INNER/LEFT/RIGHT/CROSS/SELF JOIN 与 NULL 语义；子查询（标量子查询、列/行/表子查询、相关与非相关、派生表）及 MySQL 优化（物化、semi-join、anti-join、IN vs EXISTS 取舍）；集合操作 UNION/UNION ALL/INTERSECT/EXCEPT 与去重排序开销；范式与反范式的权衡（为减少 JOIN 代价而引入冗余的反范式设计）。",
+      "prerequisites": [
+        "db-ch01"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "Snailclimb/JavaGuide",
+          "macrozheng/mall",
+          "doocs/advanced-java"
+        ],
+        "github_stars": [
+          159056,
+          84863,
+          79141
+        ],
+        "github_notes": [
+          "含 MySQL 索引、事务、锁与调优的系统讲解",
+          "真实业务库表设计范例与 SQL 实践",
+          "含分库分表、读写分离与分布式事务"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《MySQL 必知必会》第 21 章（创建和操作表）/ 第 22 章（视图）",
+          "《高性能 MySQL》第 5 章（索引）",
+          "《数据库系统概念》第 8 章（SQL 中的完整性约束）"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "db-ch03",
+      "order": 3,
+      "group": "L3",
+      "title": "索引与事务：B+树索引、ACID、隔离级别",
+      "summary": "InnoDB B+树索引结构（聚簇/二级索引、页 16KB、树高、根到叶查询路径、页分裂与合并）；回表与覆盖索引、最左前缀原则、索引下推 ICP；事务 ACID（redo log / undo log / double write buffer 的分工）；四种隔离级别与脏读/不可重复读/幻读；MVCC 版本链（DB_TRX_ID、DB_ROLL_PTR、undo log）与 ReadView、当前读 vs 快照读；Next-Key Lock（记录锁 + 间隙锁）解决幻读；死锁检测与长事务危害。",
+      "prerequisites": [
+        "db-ch01",
+        "db-ch02"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "Snailclimb/JavaGuide",
+          "macrozheng/mall",
+          "doocs/advanced-java"
+        ],
+        "github_stars": [
+          159056,
+          84863,
+          79141
+        ],
+        "github_notes": [
+          "含 MySQL 索引、事务、锁与调优的系统讲解",
+          "真实业务库表设计范例与 SQL 实践",
+          "含分库分表、读写分离与分布式事务"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《高性能 MySQL》第 1 章（MySQL 架构与事务）",
+          "《数据库系统概念》第 14-15 章（事务/并发控制）"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "db-ch04",
+      "order": 4,
+      "group": "L3",
+      "title": "查询优化与执行计划（EXPLAIN）",
+      "summary": "EXPLAIN 输出解读（type/key/rows/Extra）；索引失效场景；覆盖扫描与文件排序；慢查询日志与 profiling；执行计划优化思路。",
+      "prerequisites": [
+        "db-ch02"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "Snailclimb/JavaGuide",
+          "macrozheng/mall",
+          "doocs/advanced-java"
+        ],
+        "github_stars": [
+          159056,
+          84863,
+          79141
+        ],
+        "github_notes": [
+          "含 MySQL 索引、事务、锁与调优的系统讲解",
+          "真实业务库表设计范例与 SQL 实践",
+          "含分库分表、读写分离与分布式事务"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《高性能 MySQL》第 6 章（查询性能优化）",
+          "《数据库系统概念》第 13 章（查询处理）"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "db-ch05",
+      "order": 5,
+      "group": "L4",
+      "title": "存储过程 / 触发器 / 自定义函数",
+      "summary": "存储过程与函数定义、DELIMITER、参数模式；触发器 BEFORE/AFTER 与 NEW/OLD；游标；与应用程序端逻辑的职责边界。",
+      "prerequisites": [
+        "db-ch01"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "Snailclimb/JavaGuide",
+          "macrozheng/mall",
+          "doocs/advanced-java"
+        ],
+        "github_stars": [
+          159056,
+          84863,
+          79141
+        ],
+        "github_notes": [
+          "含 MySQL 索引、事务、锁与调优的系统讲解",
+          "真实业务库表设计范例与 SQL 实践",
+          "含分库分表、读写分离与分布式事务"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《MySQL 必知必会》第 23-25 章（存储过程/游标/触发器）",
+          "《数据库系统概念》第 4 章（SQL 过程扩展）"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "db-ch06",
+      "order": 6,
+      "group": "L5",
+      "title": "范式与数据库建模",
+      "summary": "第一/二/三范式与 BCNF；函数依赖与候选键；反范式与冗余权衡；ER 建模与表设计；实体/关系映射。",
+      "prerequisites": [
+        "db-ch01"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "Snailclimb/JavaGuide",
+          "macrozheng/mall",
+          "doocs/advanced-java"
+        ],
+        "github_stars": [
+          159056,
+          84863,
+          79141
+        ],
+        "github_notes": [
+          "含 MySQL 索引、事务、锁与调优的系统讲解",
+          "真实业务库表设计范例与 SQL 实践",
+          "含分库分表、读写分离与分布式事务"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《数据库系统概念》第 7-8 章（数据库设计/规范化）",
+          "《高性能 MySQL》附录（Schema 设计）"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "db-ch07",
+      "order": 7,
+      "group": "L6",
+      "title": "备份恢复与权限安全",
+      "summary": "逻辑备份（mysqldump）与物理备份；binlog 与时间点恢复；用户与权限 GRANT/REVOKE；SQL 注入防范；敏感数据脱敏。",
+      "prerequisites": [
+        "db-ch01"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "Snailclimb/JavaGuide",
+          "macrozheng/mall",
+          "doocs/advanced-java"
+        ],
+        "github_stars": [
+          159056,
+          84863,
+          79141
+        ],
+        "github_notes": [
+          "含 MySQL 索引、事务、锁与调优的系统讲解",
+          "真实业务库表设计范例与 SQL 实践",
+          "含分库分表、读写分离与分布式事务"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《高性能 MySQL》第 10 章（备份与恢复）",
+          "《数据库系统概念》第 16 章（授权）"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "db-ch08",
+      "order": 8,
+      "group": "L7",
+      "title": "高可用 / 主从复制 / 分库分表",
+      "summary": "主从复制原理与延迟；读写分离；基于 Vitess 的分片（分库分表）；高可用架构与故障切换；数据一致性保障。",
+      "prerequisites": [
+        "db-ch03",
+        "db-ch07"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "Snailclimb/JavaGuide",
+          "macrozheng/mall",
+          "doocs/advanced-java"
+        ],
+        "github_stars": [
+          159056,
+          84863,
+          79141
+        ],
+        "github_notes": [
+          "含 MySQL 索引、事务、锁与调优的系统讲解",
+          "真实业务库表设计范例与 SQL 实践",
+          "含分库分表、读写分离与分布式事务"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《高性能 MySQL》第 9 章（复制）/ 第 11 章（高可用）",
+          "《数据库系统概念》第 18 章（分布式数据库）"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    }
+  ],
+  "github_resources": [
+    {
+      "repo": "Snailclimb/JavaGuide",
+      "stars": 159056,
+      "url": "https://github.com/Snailclimb/JavaGuide",
+      "note": "含 MySQL 索引、事务、锁与调优的系统讲解"
+    },
+    {
+      "repo": "macrozheng/mall",
+      "stars": 84863,
+      "url": "https://github.com/macrozheng/mall",
+      "note": "真实业务库表设计范例与 SQL 实践"
+    },
+    {
+      "repo": "doocs/advanced-java",
+      "stars": 79141,
+      "url": "https://github.com/doocs/advanced-java",
+      "note": "含分库分表、读写分离与分布式事务"
+    }
+  ],
+  "resources_fetched_at": "2026-09-21"
+}

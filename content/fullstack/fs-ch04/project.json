@@ -1,0 +1,35 @@
+{
+  "meta": {
+    "chapter": "fs-ch04",
+    "category": "basic"
+  },
+  "items": [
+    {
+      "title": "用 Node 内置 http 手写迷你 REST API（items CRUD）",
+      "requirement_md": "不依赖任何第三方框架（express 等不可用），仅用 Node 内置 `http` / `url` / `stream`，实现一个 items 资源的迷你 REST API，覆盖本章核心考点：\n1. **路由表**：方法 + 路径匹配，支持路径变量 `/items/:id`（正则捕获）。\n2. **请求体**：累积 `req` 的 data/end 事件，JSON.parse 并 try/catch（失败返回 400），限制 body 大小。\n3. **状态码语义**：200 列表/详情、201 创建、400 坏 JSON、404 未找到/无路由、500 内部错误。\n4. **中间件式错误处理**：用四参数错误中间件统一收口（含 async 错误的 next(err) 传递）。\n5. **背压意识**：若返回大列表，用流/分块并注意 write() 返回值。\n把以上写成可在 Node 22 直接 `node server.js` 运行的最小可验证脚本，并用内置 `http.request` 发真实请求（listen(0) 取随机端口）打印各接口响应做断言；输出中不得出现端口号。",
+      "tasks": [
+        {
+          "title": "实现路由与路径变量",
+          "verification": {
+            "type": "test",
+            "desc": "GET /items 返回 200 + 数组；GET /items/2 提取 params.id='2' 返回对应项；GET /items/999 返回 404"
+          }
+        },
+        {
+          "title": "实现 POST 创建与状态码",
+          "verification": {
+            "type": "test",
+            "desc": "POST /items 带 JSON body 返回 201 且新增项；非法 JSON 返回 400"
+          }
+        },
+        {
+          "title": "四参数错误中间件收口",
+          "verification": {
+            "type": "test",
+            "desc": "任意抛错经四参数错误中间件返回 500，且 async 错误通过 next(err) 也能被捕获（不出现 unhandledRejection）"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "title": "ex06-camel-case-mapping",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "驼峰映射开启:\n  user_id -> userId\n  user_name -> userName\n  is_vip -> isVip\n  create_time -> createTime",
+  "code": "def to_camel(s):\n    parts = s.split(\"_\")\n    return parts[0] + \"\".join(p.capitalize() for p in parts[1:])\n\ncols = [\"user_id\", \"user_name\", \"is_vip\", \"create_time\"]\nprint(\"驼峰映射开启:\")\nfor c in cols:\n    print(\"  \" + c + \" -> \" + to_camel(c))\n"
+}

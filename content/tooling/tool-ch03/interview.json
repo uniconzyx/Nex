@@ -1,0 +1,106 @@
+{
+  "meta": {
+    "chapter": "tool-ch03",
+    "title": "Git 核心：对象模型与分支 —— 高频追问",
+    "count": 6,
+    "note": "偏深度追问，考察底层模型与工程判断，非背诵型"
+  },
+  "items": [
+    {
+      "question": "Git 与 SVN 的核心区别是什么？为什么 Git 分支比 SVN 轻量？",
+      "answer_md": "**分布式 vs 集中式**：Git 每个克隆都是完整仓库（含全部历史与对象库），离线可提交、无单点依赖；SVN 是集中式，历史在服务端，提交需联网。\n\n**存储模型**：Git 存储**文件快照**并以**内容寻址（SHA-1）**组织对象（blob/tree/commit/tag）；SVN 主要存储**文件差异（delta）**并基于版本号/路径寻址。\n\n**分支轻量的原因**：Git 分支只是 `.git/refs/heads/<name>` 里一个指向 commit 的 41 字节指针，创建/切换 O(1)；SVN 分支是**目录拷贝**，开销与文件数成正比。同理合并：Git 快进只是移动指针，SVN 合并要逐版本比对差异。\n\n**补充**：Git 的对象不可变且由 SHA 校验，具有一定完整性保护；但「无需任何服务器」是误解——协作时仍需一个共享远端（bare repo）。",
+      "follow_ups": [
+        "Git 的快照存储会不会让仓库体积爆炸？（不会，相同内容只存一份 + packfile delta 压缩）",
+        "为什么说 Git 的提交是内容寻址的？（SHA-1 = sha1(类型+长度+内容)，内容定则哈希定）",
+        "集中式在哪些场景仍有优势？（权限/审计集中、超大单体仓库的部分检出）"
+      ],
+      "difficulty": 3,
+      "company_tags": [
+        "字节跳动",
+        "阿里云",
+        "腾讯",
+        "美团"
+      ]
+    },
+    {
+      "question": "请解释 Git 的工作区、暂存区、版本库三区模型，以及 add/commit 在做什么。",
+      "answer_md": "**三区定义**：\n- **工作区（working tree）**：你直接编辑的目录文件；\n- **暂存区（index / stage）**：下一次 commit 的候选清单，本质是（path → blob SHA）的映射草稿；\n- **版本库（repository）**：对象数据库（`.git/objects`）+ 引用（`.git/refs`、HEAD），即已固化的历史。\n\n**命令语义**：\n- `git add <file>`：把工作区改动计算成 blob 并写入 index（更新候选清单）；\n- `git commit`：把当前 index **序列化成 tree 对象**，再创建指向它的 commit 对象，移动 HEAD 与当前分支引用；\n- 因此 `git commit` 只提交 index，**不提交**工作区未 `add` 的改动。\n\n**看清三区的三件套**：`git status`（工作区 vs index）、`git diff`（工作区 vs index）、`git diff --cached`（index vs HEAD）。",
+      "follow_ups": [
+        "为什么要有暂存区这一层？（允许把一次大的改动拆成多个逻辑提交）",
+        "git commit -a 和 git add -A 有什么区别？（前者只自动暂存已 tracked 文件，后者含新文件）",
+        "index 在 commit 时如何变成 tree 对象？（逐目录把 path→blob/tree 映射序列化成 tree）"
+      ],
+      "difficulty": 3,
+      "company_tags": [
+        "腾讯",
+        "阿里云",
+        "字节跳动",
+        "百度"
+      ]
+    },
+    {
+      "question": "Git 分支为什么这么轻量？分支和 commit 到底是什么关系？",
+      "answer_md": "**本质**：Git 的分支只是一个**指向某个 commit 的轻量引用文件**（`.git/refs/heads/<name>`，内容是一行 41 字节的 SHA）。它不拷贝任何数据。\n\n**与 commit 的关系**：commit 是 DAG 中的节点；分支 = 指向某个节点的**指针**。N 个分支 = N 个指针指向 DAG 中不同（或相同）的节点，彼此独立、开销极小。\n\n**HEAD 的角色**：HEAD 是「当前所在位置」的符号引用，正常时 `ref: refs/heads/main`，即「我现在在 main 这个指针所指向的 commit 上」；切分支本质是改 HEAD 的指向，并把工作树更新成目标 commit 的 tree。\n\n**推论**：删除一个分支只是删除一个指针文件，其指向的 commit 对象仍在对象库，直到无任何引用且被 GC。",
+      "follow_ups": [
+        "为什么删除分支不会立刻删除提交？（引用删除后对象变不可达，GC 才回收）",
+        "HEAD 与分支引用解引用的过程是怎样的？（HEAD -> refs/heads/X -> SHA）",
+        "tag 和分支在实现上有什么异同？（都是引用，但 tag 通常不移动）"
+      ],
+      "difficulty": 3,
+      "company_tags": [
+        "美团",
+        "字节跳动",
+        "腾讯",
+        "华为"
+      ]
+    },
+    {
+      "question": "快进合并和三方合并（非快进）有什么区别？rebase 和 merge 怎么选？",
+      "answer_md": "**快进合并（fast-forward）**：当目标分支的顶端是源分支顶端的**祖先**时，`git merge` 默认只把目标指针直接移到源顶端，**不产生新提交**——历史是一条直线。\n\n**三方合并（three-way / 非快进）**：当两边各自有新提交（分叉）时，Git 以**共同祖先 merge-base** 为基线，生成一个新的**合并提交**，它有**两个 parent**，把分叉重新汇合。\n\n**rebase vs merge 取舍**：\n- `merge`：保留真实的分叉/合并拓扑，**不改写历史**，适合共享主干；`--no-ff` 可强制保留合并提交便于追溯。\n- `rebase`：把本地提交「重放」到目标顶端，得到**线性历史**（log/bisect 更干净），但**改写提交 SHA**——因此**绝不对已 push/共享的分支 rebase**，否则会制造分叉灾难。\n\n经验法则：本地整理用 rebase，共享主线用 merge。",
+      "follow_ups": [
+        "merge commit 有几个 parent？章鱼合并呢？（分叉合并 2 个，章鱼合并 >2 个）",
+        "rebase 改写历史为什么危险？（旧 SHA 被新 SHA 取代，他人引用变孤儿）",
+        "git pull --rebase 和默认 pull 的历史形态有何不同？（线性 vs 产生合并提交）"
+      ],
+      "difficulty": 4,
+      "company_tags": [
+        "阿里云",
+        "腾讯",
+        "字节跳动",
+        "携程"
+      ]
+    },
+    {
+      "question": "git reset 的 --soft / --mixed / --hard 有什么区别？分别影响哪几区？",
+      "answer_md": "三者都**移动 HEAD**（及当前分支引用）到目标提交，区别在于**是否顺带重置 index 与工作树**：\n\n| 模式 | HEAD | 暂存区(index) | 工作区 |\n|---|---|---|---|\n| `--soft` | 动 | 不动 | 不动 |\n| `--mixed`（默认） | 动 | 重置（=目标 tree） | 不动 |\n| `--hard` | 动 | 重置 | 重置（丢弃未提交改动） |\n\n- **--soft**：只改引用，改动仍「已暂存」待提交——适合「把多个提交合并成一个」前回退指针。\n- **--mixed**：回退指针并清空暂存区，改动退回工作区（未暂存）——最常用、最安全。\n- **--hard**：三者全动，**工作区未提交改动直接丢失**——危险，仅在你确定要彻底回到目标状态时使用。\n\n**与 checkout/restore/revert 的区别**：`checkout -- file`/`restore` 只恢复文件、不动 HEAD；`revert` 生成**反向提交**抵消某次改动、不改写历史，是回滚已 push 提交的正确手段。",
+      "follow_ups": [
+        "reset --hard 误删了未提交改动，还能找回吗？（若曾 commit 过可用 reflog；纯未提交且未 stash 则难）",
+        "reset 和 revert 回滚已 push 提交，哪个安全？（revert，不改写共享历史）",
+        "git reset HEAD <file> 默认是什么模式？（--mixed，只把该文件移出暂存区）"
+      ],
+      "difficulty": 4,
+      "company_tags": [
+        "腾讯",
+        "阿里云",
+        "字节跳动",
+        "滴滴"
+      ]
+    },
+    {
+      "question": "什么是 detached HEAD？误操作后如何用 reflog 找回丢失的提交？",
+      "answer_md": "**detached HEAD**：当你 `git checkout <commit-sha>`（而非分支名）时，HEAD 直接存一个 commit SHA 而不是 `ref: refs/heads/...`，即「HEAD 脱离分支、直接指向某个提交」。此时新提交**不属于任何分支**。\n\n**为什么会「丢失」**：离开 detached 状态切回分支后，该游离提交没有分支/标签引用，最终会被 GC 回收。\n\n**用 reflog 救援**：reflog（`.git/logs/HEAD`）是**本地 append-only 的 HEAD 移动流水**，记录每次 `commit/checkout/reset/merge` 及其前后 SHA。`git reflog` 找到旧 SHA 后：\n- `git branch rescue <sha>` 为其创建分支收编；或\n- `git reset --hard <sha>` 直接回到该提交。\n\n**注意**：reflog **只存本地、不随 push 共享**，且默认 90 天后过期；换机器/新克隆拿不到，所以它是对「本机误操作」的最后安全网，而非跨机备份。",
+      "follow_ups": [
+        "为什么 reflog 不随 push 共享？（它是纯本地流水，非对象库的一部分）",
+        "detached 下的提交多久会被 GC？（无引用后默认 gc.reflogExpire/pruneExpire 控制，常 90 天）",
+        "除了 reflog，还有什么能防止游离提交丢失？（及时 git branch 收编，或打 tag）"
+      ],
+      "difficulty": 4,
+      "company_tags": [
+        "美团",
+        "阿里云",
+        "腾讯",
+        "华为"
+      ]
+    }
+  ]
+}

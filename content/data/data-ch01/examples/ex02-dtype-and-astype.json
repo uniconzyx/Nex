@@ -1,0 +1,8 @@
+{
+  "title": "dtype、itemsize 与 astype 的拷贝语义",
+  "code_lang": "python",
+  "code_std": "3.13",
+  "stdin": "",
+  "expected_output": "int8     itemsize=1 字节  1000 元素占  1000 字节\nint32    itemsize=4 字节  1000 元素占  4000 字节\nint64    itemsize=8 字节  1000 元素占  8000 字节\nfloat32  itemsize=4 字节  1000 元素占  4000 字节\nfloat64  itemsize=8 字节  1000 元素占  8000 字节\n\n原数组 dtype: int64  itemsize: 8\nastype 后 dtype: float64\nastype 是否共享内存: False （False = 产生了拷贝）\nview 成 int8 后: [1 0 0 0 0 0 0 0 2 0 0 0 0 0 0 0 3 0 0 0 0 0 0 0]  共享内存: True\n  同一块内存按 8 位切分 -> 3 个 int64 变成 24 个 int8（小端序）\n\nint16 存 300/400: [300 400]  正确\n强转 int8: [  44 -112]  <- 静默溢出，无警告！\n结论：向下转换 dtype 会静默截断，这是数据科学的真实事故源。",
+  "code": "import numpy as np\n\nfor dt in [np.int8, np.int32, np.int64, np.float32, np.float64]:\n    a = np.zeros(1000, dtype=dt)\n    print(f\"{np.dtype(dt).name:8s} itemsize={a.itemsize} 字节  1000 元素占 {a.nbytes:5d} 字节\")\n\nprint()\na = np.array([1, 2, 3], dtype=np.int64)\nprint(\"原数组 dtype:\", a.dtype, \" itemsize:\", a.itemsize)\n\nb = a.astype(np.float64)\nprint(\"astype 后 dtype:\", b.dtype)\nprint(\"astype 是否共享内存:\", np.shares_memory(a, b), \"（False = 产生了拷贝）\")\n\nc = a.view(np.int8)\nprint(\"view 成 int8 后:\", c, \" 共享内存:\", np.shares_memory(a, c))\nprint(\"  同一块内存按 8 位切分 -> 3 个 int64 变成 24 个 int8（小端序）\")\n\nprint()\n# 溢出：dtype 选错的真实代价\nx = np.array([300, 400], dtype=np.int16)\nprint(\"int16 存 300/400:\", x, \" 正确\")\ny = x.astype(np.int8)\nprint(\"强转 int8:\", y, \" <- 静默溢出，无警告！\")\nprint(\"结论：向下转换 dtype 会静默截断，这是数据科学的真实事故源。\")\n"
+}

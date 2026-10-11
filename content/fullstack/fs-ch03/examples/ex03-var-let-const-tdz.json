@@ -1,0 +1,8 @@
+{
+  "title": "var 提升、let/const 的 TDZ 与 const",
+  "code_lang": "javascript",
+  "code_std": "node22",
+  "stdin": "",
+  "expected_output": "var hoisted a = undefined\nTDZ let b -> ReferenceError\nafter init b = 2\nconst c = 3",
+  "code": "console.log('var hoisted a =', a);\nvar a = 1;\ntry {\n  console.log('access b before init:', b);\n} catch (e) {\n  console.log('TDZ let b ->', e.constructor.name);\n}\nlet b = 2;\nconsole.log('after init b =', b);\nconst c = 3;\nconsole.log('const c =', c);"
+}

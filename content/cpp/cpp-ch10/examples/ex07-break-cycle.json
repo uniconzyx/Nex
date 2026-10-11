@@ -1,0 +1,8 @@
+{
+  "title": "weak_ptr 打破循环引用（析构正常触发）",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "count a=1 b=2\n~A\n~B",
+  "code": "#include <iostream>\n#include <memory>\nstruct A; struct B;\nstruct A { std::shared_ptr<B> b; ~A(){ std::cout << \"~A\\n\"; } };\nstruct B { std::weak_ptr<A>   a; ~B(){ std::cout << \"~B\\n\"; } };   // 弱引用：不增强计数\nint main() {\n    auto a = std::make_shared<A>();\n    auto b = std::make_shared<B>();\n    a->b = b; b->a = a;                  // 仅 A 强持有 B，B 弱观察 A → 环被打破\n    std::cout << \"count a=\" << a.use_count() << \" b=\" << b.use_count() << '\\n';\n}                                        // 作用域结束：~A ~B 都会打印"
+}

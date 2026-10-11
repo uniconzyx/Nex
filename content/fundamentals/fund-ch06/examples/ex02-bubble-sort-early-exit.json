@@ -1,0 +1,9 @@
+{
+  "title": "冒泡排序：提前退出标志与基本有序时的 O(n)",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "第 1 趟无交换，提前退出\n--- 已有序序列 (n=6) ---\n比较次数 = 5, 交换次数 = 0\n最好情况: 只需一趟 n-1 = 5 次比较即退出 -> O(n)\n\n--- 逆序序列 (n=6) ---\n比较次数 = 15, 交换次数 = 15\n最坏情况: 比较 n(n-1)/2 = 15 次, 交换同样多 -> O(n^2)\n排序结果: 1 2 3 4 5 6\n",
+  "code": "#include <stdio.h>\n\ntypedef struct { int key; int idx; } Elem;\n\nstatic long cmp_count = 0, swap_count = 0;\n\nvoid bubble_sort(Elem a[], int n) {\n    for (int i = 0; i < n - 1; i++) {\n        int swapped = 0;\n        for (int j = 0; j < n - 1 - i; j++) {\n            cmp_count++;\n            if (a[j].key > a[j + 1].key) {\n                Elem t = a[j]; a[j] = a[j + 1]; a[j + 1] = t;\n                swap_count++;\n                swapped = 1;\n            }\n        }\n        if (!swapped) { printf(\"第 %d 趟无交换，提前退出\\n\", i + 1); break; }\n    }\n}\n\nint main(void) {\n    Elem sorted[] = {{1,0},{2,1},{3,2},{4,3},{5,4},{6,5}};\n    int n1 = (int)(sizeof(sorted) / sizeof(sorted[0]));\n    cmp_count = swap_count = 0;\n    bubble_sort(sorted, n1);\n    printf(\"--- 已有序序列 (n=%d) ---\\n\", n1);\n    printf(\"比较次数 = %ld, 交换次数 = %ld\\n\", cmp_count, swap_count);\n    printf(\"最好情况: 只需一趟 n-1 = %d 次比较即退出 -> O(n)\\n\", n1 - 1);\n\n    Elem rev[] = {{6,0},{5,1},{4,2},{3,3},{2,4},{1,5}};\n    int n2 = (int)(sizeof(rev) / sizeof(rev[0]));\n    cmp_count = swap_count = 0;\n    bubble_sort(rev, n2);\n    printf(\"\\n--- 逆序序列 (n=%d) ---\\n\", n2);\n    printf(\"比较次数 = %ld, 交换次数 = %ld\\n\", cmp_count, swap_count);\n    printf(\"最坏情况: 比较 n(n-1)/2 = %d 次, 交换同样多 -> O(n^2)\\n\", n2 * (n2 - 1) / 2);\n    printf(\"排序结果:\");\n    for (int i = 0; i < n2; i++) printf(\" %d\", rev[i].key);\n    printf(\"\\n\");\n    return 0;\n}\n",
+  "_verified": true
+}

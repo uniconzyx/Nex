@@ -1,0 +1,144 @@
+{
+  "meta": {
+    "chapter": "py-ch06",
+    "note": "8 题，基础题 5 + 算法题 3；覆盖 re 入口函数、分组、断言、替换、回溯与控制流。"
+  },
+  "items": [
+    {
+      "id": "py6-ex01",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "py-ch06 concept 01（re 的四个入口与匹配语义）",
+      "title": "re.match 与 re.fullmatch 的行为差异",
+      "stem_md": "给定模式 `r\"\\d+\"`，对字符串 `\"abc123\"` 调用 `re.match` 与 `re.fullmatch`，结果分别是什么？",
+      "options": [
+        "都是 None",
+        "match 返回匹配对象，fullmatch 返回 None",
+        "match 返回 None，fullmatch 返回匹配对象",
+        "两个都返回匹配对象"
+      ],
+      "answer": {
+        "value": 0,
+        "index": 0
+      },
+      "explanation_md": "`match` 只从字符串**开头**尝试，`abc` 不以数字开头，所以直接返回 `None`；`fullmatch` 还要求**整串**匹配，同样不满足。若换成 `re.search(r\"\\d+\", \"abc123\")` 才会命中 `123`。",
+      "difficulty": "easy"
+    },
+    {
+      "id": "py6-ex02",
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "py-ch06 concept 02（分组与反向引用）",
+      "title": "写出 findall 在含分组时的返回结果",
+      "stem_md": "`re.findall(r\"(\\w)=(\\d+)\", \"a=1 b=22\")` 的结果是什么？",
+      "answer": {
+        "value": "[('a', '1'), ('b', '22')]"
+      },
+      "explanation_md": "`findall` 在模式含**多个**分组时返回**元组列表**：每个元组是一个匹配的各分组内容。若含 1 个分组返回字符串列表；若不含分组则返回整个匹配串的列表。",
+      "difficulty": "easy"
+    },
+    {
+      "id": "py6-ex03",
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "py-ch06 concept 02（元字符与转义）",
+      "title": "修复「动态拼装模式」导致的误匹配",
+      "stem_md": "下面代码想统计 `key` 出现的次数，但结果偏大。指出原因并给出修法。\n\n```python\nimport re\nkey = \"a.b\"\nprint(len(re.findall(key, \"a.b axb a-b\")))\n```",
+      "answer": {
+        "reference_code": "import re\nkey = \"a.b\"\nprint(\"错误版本 :\", len(re.findall(key, \"a.b axb a-b\")))\nfixed = re.escape(key)\nprint(\"修好后   :\", len(re.findall(fixed, \"a.b axb a-b\")))\nprint(\"转义结果 :\", fixed)\n"
+      },
+      "explanation_md": "原模式里 `.` 是**元字符**（匹配任意字符），于是 `axb`、`a-b` 都被算进来。动态拼装模式时字面量部分必须 `re.escape()`，得到 `a\\.b`，只匹配真实点号。",
+      "difficulty": "medium"
+    },
+    {
+      "id": "py6-ex04",
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "py-ch06 concept 04（sub / split / 文本清洗）",
+      "title": "写出 sub 使用编号组模板的结果",
+      "stem_md": "`re.sub(r\"(\\d{4})-(\\d{2})-(\\d{2})\", r\"\\3/\\2/\\1\", \"2026-10-08\")` 的结果是什么？",
+      "answer": {
+        "value": "08/10/2026"
+      },
+      "explanation_md": "模板里 `\\1` `\\2` `\\3` 分别引用第 1、2、3 个捕获组。原串组内容为 `2026`、`10`、`08`，按 `\\3/\\2/\\1` 重排后为 `08/10/2026`。命名组等价写法是 `\\g<d>.\\g<m>.\\g<y>`。",
+      "difficulty": "easy"
+    },
+    {
+      "id": "py6-ex05",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "py-ch06 concept 03（断言与定宽限制）",
+      "title": "后行断言的长度约束",
+      "stem_md": "下列哪个正则可以被成功编译？",
+      "options": [
+        "`(?<=a+)b`",
+        "`(?<=a*)b`",
+        "`(?<=aa)b`",
+        "`(?<=a{1,3})b`"
+      ],
+      "answer": {
+        "value": 2,
+        "index": 2
+      },
+      "explanation_md": "Python 的 `re` 要求后行断言（lookbehind）**定宽**：`a+`、`a*`、`a{1,3}` 都是变长，编译即报 `look-behind requires fixed-width pattern`。只有 `(?<=aa)` 这类固定长度可用。若确实需要变长，改用分组捕获：`re.findall(r\"a+(b)\", s)`。",
+      "difficulty": "medium"
+    },
+    {
+      "id": "py6-ex06",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "source": "leetcode",
+      "source_ref": "LeetCode 10. 正则表达式匹配",
+      "external_url": "https://leetcode.cn/problems/regular-expression-matching/",
+      "title": "实现支持 . 与 * 的正则匹配（DP）",
+      "stem_md": "实现一个函数 `is_match(s, p)`，支持 `.` 匹配任意单字符、`*` 匹配零个或多个前一个元素，要求**整串**匹配。\n\n只提供题号与链接（题面正文见平台，遵循本项目合规约定），请自行在平台完成。这里给出可直接运行的参考实现与自测。",
+      "answer": {
+        "reference_code": "def is_match(s, p):\n    n, m = len(s), len(p)\n    dp = [[False] * (m + 1) for _ in range(n + 1)]\n    dp[0][0] = True\n    for j in range(2, m + 1):\n        if p[j - 1] == '*':\n            dp[0][j] = dp[0][j - 2]\n    for i in range(1, n + 1):\n        for j in range(1, m + 1):\n            if p[j - 1] == '*':\n                dp[i][j] = dp[i][j - 2]\n                if p[j - 2] == '.' or p[j - 2] == s[i - 1]:\n                    dp[i][j] = dp[i][j] or dp[i - 1][j]\n            elif p[j - 1] == '.' or p[j - 1] == s[i - 1]:\n                dp[i][j] = dp[i - 1][j - 1]\n    return dp[n][m]\n\ncases = [\n    (\"aa\", \"a\", False),\n    (\"aa\", \"a*\", True),\n    (\"ab\", \".*\", True),\n    (\"aab\", \"c*a*b\", True),\n    (\"mississippi\", \"mis*is*p*.\", False),\n]\nfor s, p, want in cases:\n    got = is_match(s, p)\n    print(\"%-14s %-12s -> %-6s expect %-6s %s\"\n          % (repr(s), repr(p), got, want, \"OK\" if got == want else \"FAIL\"))\n"
+      },
+      "explanation_md": "用 `dp[i][j]` 表示 `s[:i]` 与 `p[:j]` 是否匹配。关键是 `*` 的两种转移：**匹配 0 次**（`dp[i][j-2]`）与**再匹配一次**（`dp[i-1][j]`，前提是当前字符匹配 `p[j-2]`）。时间复杂度 O(n·m)，空间 O(n·m)。",
+      "difficulty": "hard"
+    },
+    {
+      "id": "py6-ex07",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "nowcoder",
+      "source": "nowcoder",
+      "source_ref": "牛客网 · 字符串处理专题（正则改写）",
+      "external_url": "https://www.nowcoder.com/exam/oj",
+      "title": "把连续空白压缩为单个空格并去首尾",
+      "stem_md": "实现 `squash(text)`：把任意长度的空白（含制表符）压缩成一个半角空格，并去掉首尾空白。\n\n只提供题目入口链接（题面正文见平台），此处给出可直接运行的参考实现与自测。",
+      "answer": {
+        "reference_code": "import re\n\n_WS = re.compile(r\"\\s+\")\n\ndef squash(text):\n    return _WS.sub(\" \", text).strip()\n\ncases = [\n    (\"  a   b \", \"a b\"),\n    (\"a\\t\\tb\\n\", \"a b\"),\n    (\"   \", \"\"),\n    (\"a b\", \"a b\"),\n]\nfor src, want in cases:\n    got = squash(src)\n    print(\"%-14r -> %-8r expect %-8r %s\"\n          % (src, got, want, \"OK\" if got == want else \"FAIL\"))\n"
+      },
+      "explanation_md": "`\\s+` 匹配连续空白（含 `\\t`、`\\n`），`sub(\" \", ...)` 压成单空格，`strip()` 去掉首尾。核心优化点是**把模式编译一次并复用**，避免在循环里反复走 `re` 的缓存查找。",
+      "difficulty": "easy"
+    },
+    {
+      "id": "py6-ex08",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "py-ch06 concept 03（回溯与占有量词）",
+      "title": "用占有量词消除回溯风险",
+      "stem_md": "下面模式在恶意输入上会严重回溯。请写一个函数 `safe_scan(text)`，把每个 `<tag>` 内容取出，并保证在超长无闭合尖括号的输入上**线性完成**（不得修改语义）。给出可直接运行的对比实现。",
+      "answer": {
+        "reference_code": "import re\n\nrisky = re.compile(r\"<.+>\")\nsafe = re.compile(r\"<[^>]++>\")\n\ndef safe_scan(text):\n    return safe.findall(text)\n\nsample = \"<a><bc><def>\"\nprint(\"risky :\", risky.findall(sample))\nprint(\"safe  :\", safe_scan(sample))\nprint(\"一致  :\", risky.findall(sample) == safe_scan(sample))\n\nevil = \"<\" + \"a\" * 100000\ngot = safe_scan(evil)\nprint(\"恶意输入长度 :\", len(evil))\nprint(\"匹配结果     :\", got, \"<- 空列表，且无需回溯\")\n"
+      },
+      "explanation_md": "把 `.` 换成**否定字符类** `[^>]`，再用占有量词 `++` 禁止回吐，等价于「不允许跨过 `>`」。这样引擎不会在失败时尝试所有切分方式，把最坏情况从指数级降为线性。这是「回溯炸弹」的标准工程解法。",
+      "difficulty": "medium"
+    }
+  ]
+}

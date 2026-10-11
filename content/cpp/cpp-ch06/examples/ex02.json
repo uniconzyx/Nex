@@ -1,0 +1,8 @@
+{
+  "title": "派生类构造顺序（由内向外）",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "Base Mid Derived\n",
+  "code": "#include <iostream>\nstruct Base { Base() { std::cout << \"Base \"; } };\nstruct Mid : Base { Mid() { std::cout << \"Mid \"; } };\nstruct Derived : Mid { Derived() { std::cout << \"Derived\\n\"; } };\nint main() { Derived d; }\n"
+}

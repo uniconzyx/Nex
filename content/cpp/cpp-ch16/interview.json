@@ -1,0 +1,33 @@
+{
+  "meta": { "chapter": "cpp-ch16" },
+  "items": [
+    {
+      "question": "内存序 relaxed 和 seq_cst 差在哪？什么时候该用 relaxed？",
+      "answer_md": "**seq_cst（默认）**：对所有原子操作建立**单一全局顺序**，最强、最易推理，但可能插入内存屏障、刷 store buffer，开销最高。\n\n**relaxed**：只保证**单个原子变量自身的原子性**，**不保证**跨变量的顺序与跨线程的可见性顺序——适合「纯计数器/统计」，不能用来同步其他内存。\n\n**acquire/release**：介于两者之间，建立**成对的同步关系**（release 前的写对 acquire 后可见），是构建无锁结构（自旋锁、无锁队列）的基础。\n\n**何时用 relaxed**：当你只关心「这个计数器最终对不对」、不依赖它去同步别的变量时。一旦原子变量要承担「发布其他数据」的角色，就必须升级到 acq/rel 或 seq_cst，否则会出现「计数涨了但关联数据没同步」的隐蔽 bug。",
+      "follow_ups": ["为什么 relaxed 计数器结果仍然确定，但关联数据会不一致？", "CAS（compare_exchange）通常配合哪种内存序？"],
+      "difficulty": "hard",
+      "company_tags": ["通用", "字节", "英伟达"]
+    },
+    {
+      "question": "死锁怎么系统性地避免？给出具体手段。",
+      "answer_md": "死锁需同时满足四条件：互斥、持有并等待、不可剥夺、循环等待。破坏任一即可避免，工程上最常用：\n\n1. **固定锁序**：所有线程按同一顺序获取多把锁，破坏循环等待（如给锁编号，总是先小后大）。\n2. **一次性取多锁**：用 `std::lock(m1,m2)` 或 `std::scoped_lock`，标准内部回退算法保证不死锁。\n3. **超时获取**：`try_lock_for`，拿不到就释放已持有的、退避重试，避免无限等待。\n4. **缩小临界区 / 减少锁粒度**，降低同时持多锁的概率。\n\n真正复杂的系统通常用「锁层级（lock hierarchy）」在静态分析/运行时断言锁序。",
+      "follow_ups": ["std::lock 内部如何做到不死锁？", "哲学家进餐问题除了锁序还有什么解法（如仲裁者）？"],
+      "difficulty": "mid",
+      "company_tags": ["腾讯", "阿里"]
+    },
+    {
+      "question": "std::async 的默认启动策略有什么坑？为什么强调显式 std::launch::async？",
+      "answer_md": "`std::async(f)` 默认策略是 `std::launch::async | std::launch::deferred`，由实现**自行选择**。实现可能选 `deferred`：此时任务**不在新线程跑**，而是等到你 `get()` 时**在调用线程同步执行**——于是「本想并行加速」的代码实际是串行的，且若调用线程自己也被阻塞，还可能和预期完全相反。\n\n**强调显式 `std::launch::async`** 才能确保「真开新线程并行」。另外注意 `future::get()` 只能调一次且会阻塞；工作线程抛的异常会被存进 future，在 `get()` 时重抛——这是 async 比 raw thread 安全的地方。",
+      "follow_ups": ["deferred 策略在什么场景下反而有用？", "async 返回 future 的生命周期与任务线程如何绑定？"],
+      "difficulty": "mid",
+      "company_tags": ["美团", "通用"]
+    },
+    {
+      "question": "条件变量的虚假唤醒是什么？为什么必须带谓词？",
+      "answer_md": "**虚假唤醒**：即使没有线程调用 `notify_*`，等待的线程也可能被系统/实现唤醒（pthread 规范允许）。若只写 `cv.wait(lk);` 醒来后不验证条件就继续，就会在「条件其实还没成立」时错误推进。\n\n**必须带谓词**：`cv.wait(lk, pred)` 内部等价 `while(!pred) wait(lk);`——每次唤醒都重新检查条件，把「虚假唤醒」和「被 notify 但条件仍假」一并挡在门外。谓词必须受同一把 mutex 保护，确保检查与状态修改互斥。",
+      "follow_ups": ["notify_one 和 notify_all 分别在什么场景用？", "为什么修改谓词与 notify 要放在同一把锁下？"],
+      "difficulty": "mid",
+      "company_tags": ["通用", "百度"]
+    }
+  ]
+}

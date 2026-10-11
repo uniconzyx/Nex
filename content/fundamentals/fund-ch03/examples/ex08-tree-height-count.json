@@ -1,0 +1,8 @@
+{
+  "title": "树高、节点数与叶子数（后序递归）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "节点数 = 6\n树高   = 3\n叶子数 = 3\n说明: 三者都是后序遍历，先算子树再在根处合并",
+  "code": "#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct Node { int v; struct Node *l, *r; } Node;\nstatic Node *mk(int v) { Node *n = malloc(sizeof(Node)); n->v = v; n->l = n->r = NULL; return n; }\n\nstatic int height(Node *n) { return n ? 1 + (height(n->l) > height(n->r) ? height(n->l) : height(n->r)) : 0; }\nstatic int count(Node *n)  { return n ? 1 + count(n->l) + count(n->r) : 0; }\nstatic int leaves(Node *n) {\n    if (!n) return 0;\n    if (!n->l && !n->r) return 1;\n    return leaves(n->l) + leaves(n->r);\n}\n\nint main(void) {\n    Node *a = mk(1), *b = mk(2), *c = mk(3), *d = mk(4), *e = mk(5), *f = mk(6);\n    a->l = b; a->r = c; b->l = d; b->r = e; c->r = f;\n    printf(\"节点数 = %d\\n\", count(a));\n    printf(\"树高   = %d\\n\", height(a));\n    printf(\"叶子数 = %d\\n\", leaves(a));\n    printf(\"说明: 三者都是后序遍历，先算子树再在根处合并\\n\");\n    return 0;\n}"
+}

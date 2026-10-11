@@ -1,0 +1,8 @@
+{
+  "title": "padding=same/valid 卷积尺寸公式",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "n    k  s | valid  same\n    32  3 1 |    30    32\n    32  3 2 |    15    16\n   224  3 2 |   111   112\n   224  7 2 |   109   112\n    13  3 1 |    11    13\n   225  3 2 |   112   113\n说明: same=ceil(n/s); 当 n 不能整除 s 时 same != valid（如 225/2: valid=112 same=113）\n225 整除校验: valid= 112  same= 113\n",
+  "code": "\nimport math\ndef out_valid(n,k,s,p=0):\n    return (n + 2*p - k)//s + 1\ndef out_same(n,s):\n    return math.ceil(n/s)\ncases=[(32,3,1),(32,3,2),(224,3,2),(224,7,2),(13,3,1),(225,3,2)]\nprint(\"n    k  s | valid  same\")\nfor n,k,s in cases:\n    v=out_valid(n,k,s); sm=out_same(n,s)\n    print(f\"  {n:4d} {k:2d} {s:1d} | {v:5d}  {sm:4d}\")\nprint(\"说明: same=ceil(n/s); 当 n 不能整除 s 时 same != valid（如 225/2: valid=112 same=113）\")\nprint(\"225 整除校验: valid=\", out_valid(225,3,2), \" same=\", out_same(225,2))\n"
+}

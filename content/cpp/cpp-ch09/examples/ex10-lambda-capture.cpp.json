@@ -1,0 +1,8 @@
+{
+  "title": "lambda 捕获：按值/按引用捕获与 mutable",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "3 6 9 \nsum(ref capture) = 6\n1 2 3\n外部 n 仍为 0\n",
+  "code": "#include <iostream>\n#include <vector>\n#include <algorithm>\nint main() {\n    int factor = 3;\n    std::vector<int> v = {1,2,3};\n    std::vector<int> a(v.size());\n    std::transform(v.begin(), v.end(), a.begin(), [factor](int x){ return x * factor; });\n    for (int x : a) std::cout << x << ' ';\n    std::cout << '\\n';\n    int total = 0;\n    std::for_each(v.begin(), v.end(), [&total](int x){ total += x; });\n    std::cout << \"sum(ref capture) = \" << total << '\\n';\n    int n = 0;\n    auto f = [n]() mutable { return ++n; };\n    std::cout << f() << ' ' << f() << ' ' << f() << '\\n';\n    std::cout << \"外部 n 仍为 \" << n << '\\n';\n}\n"
+}

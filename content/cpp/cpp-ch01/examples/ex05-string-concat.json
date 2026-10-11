@@ -1,0 +1,8 @@
+{
+  "title": "std::string 拼接",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "Hello Cpp",
+  "code": "#include <iostream>\n#include <string>\n\nint main() {\n    std::string a = \"Hello\";\n    std::string b = \"Cpp\";\n    std::string c = a + \" \" + b;\n    std::cout << c;\n}"
+}

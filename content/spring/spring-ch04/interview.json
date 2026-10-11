@@ -1,0 +1,62 @@
+{
+  "meta": {
+    "chapter": "spring-ch04"
+  },
+  "items": [
+    {
+      "question": "SpringBoot 自动配置的原理是什么？",
+      "answer_md": "四步：① `@SpringBootApplication` 内含 `@EnableAutoConfiguration`；② 它 `@Import` 了 `AutoConfigurationImportSelector`；③ 该 Selector 通过 SPI 读取候选清单（2.7 前是 `META-INF/spring.factories` 的 `EnableAutoConfiguration` 键，2.7+/3.x 是 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`，每行一个类名）；④ 对候选逐个做 `@Conditional` 条件过滤，通过者注册为 BeanDefinition。\n\n整个过程发生在 `refresh()` 的 `invokeBeanFactoryPostProcessors` 阶段，即 **Bean 定义期**而非实例化期。",
+      "follow_ups": [
+        "为什么 3.x 要弃用 spring.factories 承载自动配置？",
+        "自动配置类为什么要用 @AutoConfigureAfter 声明顺序？",
+        "如果两个自动配置互相依赖会怎样？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "阿里",
+        "字节"
+      ]
+    },
+    {
+      "question": "@ConditionalOnMissingBean 为什么只在自动配置类里可靠？",
+      "answer_md": "它判定的是「**此刻容器里是否已有该 Bean 的定义**」，而这一结论完全取决于评估顺序。\n\nSpring Boot 的约定是：用户配置类先处理，自动配置类最后处理（由 `AutoConfigurationGroup` + `@AutoConfigureOrder` 保证）。因此只有在自动配置类里，「用户已定义的 Bean」才一定已经在容器中，`@ConditionalOnMissingBean` 才能正确回落。\n\n在用户自己的 `@Configuration` 里使用它，顺序不确定 → 结论不确定，属于误用。需要控制顺序时应显式使用 `@AutoConfigureBefore/After`。",
+      "follow_ups": [
+        "条件求值发生在 Bean 生命周期哪个阶段？",
+        "它能否感知到通过 @Bean 方法注册但尚未实例化的 Bean？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "美团"
+      ]
+    },
+    {
+      "question": "如何自定义一个 starter？为什么官方推荐拆成两个模块？",
+      "answer_md": "**步骤**：\n1. 建 `xxx-spring-boot-autoconfigure`：写 `XxxAutoConfiguration`，标注 `@Configuration` + 条件注解（`@ConditionalOnClass`、`@ConditionalOnMissingBean`）；\n2. 在 `src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` 里逐行登记该类全限定名（**没有这一步就不叫自动配置**）；\n3. 建 `xxx-spring-boot-starter`：只做依赖聚合，依赖 `autoconfigure` 模块与具体实现库；\n4. 命名第三方用 `xxx-spring-boot-starter`（自己名字在前），与官方 `spring-boot-starter-xxx` 区分。\n\n**拆两模块的原因**：`autoconfigure` 模块把 `spring-boot-autoconfigure` 依赖标为 `optional`，使其不被传递给使用方；`starter` 模块不含代码，纯粹聚合。若合成一个模块，自动配置类会暴露在被扫描的包路径下，破坏「自动配置只由 SPI 驱动」的边界。",
+      "follow_ups": [
+        "spring-boot-autoconfigure 为什么标 optional？",
+        "starter 里如果不加 @ConditionalOnMissingBean 会有什么后果？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "通用",
+        "腾讯",
+        "京东"
+      ]
+    },
+    {
+      "question": "SpringBoot 配置的优先级顺序是怎样的？",
+      "answer_md": "从高到低（同一层级内 profile 专属覆盖通用）：\n1. 命令行参数 `--key=value`\n2. `SPRING_APPLICATION_JSON`\n3. ServletConfig / ServletContext 参数\n4. JNDI\n5. Java System properties（`-Dkey=value`）\n6. 操作系统环境变量\n7. jar 包外 `application-{profile}.properties`\n8. jar 包内 `application-{profile}.properties`\n9. jar 包外 `application.properties`\n10. jar 包内 `application.properties`\n\n**最反直觉的一条**：jar 包外的无 profile 配置（第 9）优先于 jar 包内的带 profile 配置（第 8）。这正是「外置配置覆盖内置配置」运维能力的实现方式，也是「本地正常、线上异常」的常见根因。",
+      "follow_ups": [
+        "为什么要设计成位置优先于 profile？",
+        "spring.config.location 与 spring.config.additional-location 的区别？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "运维"
+      ]
+    }
+  ]
+}

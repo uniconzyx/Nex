@@ -1,0 +1,9 @@
+{
+  "title": "内存碎片率 mem_fragmentation_ratio",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "内存碎片率 mem_fragmentation_ratio = used_memory_rss / used_memory\n  健康: used_memory=100MB rss=110MB ratio=1.10\n  碎片严重(>1.5): used_memory=100MB rss=200MB ratio=2.00\n  小于1(换出swap): used_memory=200MB rss=100MB ratio=0.50\n  ratio>1.5 -> 碎片多, 可启用 activedefrag 或重启; ratio<1 -> 内存被 OS 换页, 性能骤降",
+  "code": "def frag_ratio(used_memory, rss):\n    return rss / used_memory\n\nprint(\"内存碎片率 mem_fragmentation_ratio = used_memory_rss / used_memory\")\ncases = [(\"健康\", 100, 110), (\"碎片严重(>1.5)\", 100, 200), (\"小于1(换出swap)\", 200, 100)]\nfor name, u, r in cases:\n    print(f\"  {name}: used_memory={u}MB rss={r}MB ratio={frag_ratio(u, r):.2f}\")\nprint(\"  ratio>1.5 -> 碎片多, 可启用 activedefrag 或重启; ratio<1 -> 内存被 OS 换页, 性能骤降\")\n",
+  "_verified": true
+}

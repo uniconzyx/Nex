@@ -1,0 +1,14 @@
+{
+  "meta": { "chapter": "java-ch03", "category": "basic" },
+  "items": [
+    {
+      "title": "图形系统：抽象类 Shape + 多态 + 接口",
+      "requirement_md": "用继承与多态设计一个图形系统，综合本章知识点：\n- 定义抽象类 `Shape`，含抽象方法 `double area()` 与 `double perimeter()`，以及一个具体方法 `describe()` 打印图形类型与面积；\n- 派生 `Circle`（字段 `radius`）与 `Rectangle`（字段 `width`、`height`），各自实现抽象方法；\n- 定义接口 `Resizable`（方法 `void resize(double factor)`）与 `Colorable`（方法 `String color()`），让 `Circle`/`Rectangle` 按需实现；\n- 在 `main` 中构造 `Circle` 与 `Rectangle` 放入 `Shape[]` 数组，用**多态**统一遍历计算并打印每个图形的面积与周长；演示 `instanceof` + 向下转型调用 `Resizable.resize`；\n- 全程使用 `extends`/`implements`/`@Override`/`super`/多态，禁止用 if 判断具体类型来分支处理。",
+      "tasks": [
+        { "title": "定义抽象类 Shape 与两个子类", "verification": { "type": "test", "desc": "area/perimeter 计算正确，describe 可调用" } },
+        { "title": "实现 Resizable / Colorable 接口", "verification": { "type": "test", "desc": "resize 改变尺寸、color 返回颜色，且可经接口引用调用" } },
+        { "title": "多态数组统一遍历 + 向下转型演示", "verification": { "type": "manual", "desc": "Shape[] 遍历输出每个图形面积周长，对 Resizable 实例正确 resize" } }
+      ]
+    }
+  ]
+}

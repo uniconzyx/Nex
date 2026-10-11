@@ -1,0 +1,8 @@
+{
+  "title": "BOM 是 3 个真实字节：utf-8 vs utf-8-sig",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "前 3 字节      = efbbbf\n文件字节数     = 9\n\n用 utf-8 读（不剥 BOM）:\n  首字符 = '\\ufeff' | 码点 = U+FEFF\n  字符串长度 = 3\n\n用 utf-8-sig 读:\n  内容 = '中文'\n  字符串长度 = 2\n\n要点: BOM 是 3 个真实字节 U+FEFF; 当成内容会污染 JSON 解析、首字段名比较",
+  "code": "from pathlib import Path\n\np = Path(\"bom.txt\")\np.write_text(\"中文\", encoding=\"utf-8-sig\")\n\nraw = p.read_bytes()\nprint(\"前 3 字节      =\", raw[:3].hex())\nprint(\"文件字节数     =\", len(raw))\nprint()\n\nprint(\"用 utf-8 读（不剥 BOM）:\")\nfirst = p.read_text(encoding=\"utf-8\")[0]\nprint(\"  首字符 =\", repr(first), \"| 码点 = U+%04X\" % ord(first))\nprint(\"  字符串长度 =\", len(p.read_text(encoding=\"utf-8\")))\nprint()\nprint(\"用 utf-8-sig 读:\")\nprint(\"  内容 =\", repr(p.read_text(encoding=\"utf-8-sig\")))\nprint(\"  字符串长度 =\", len(p.read_text(encoding=\"utf-8-sig\")))\nprint()\nprint(\"要点: BOM 是 3 个真实字节 U+FEFF; 当成内容会污染 JSON 解析、首字段名比较\")"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "可变默认参数惯用法：None 哨兵惰性初始化",
+  "code_lang": "python",
+  "code_std": "python3.11",
+  "stdin": "",
+  "expected_output": "[1]\n[2]\n[0, 3]",
+  "code": "def collect(x, buf=None):\n    if buf is None:\n        buf = []\n    buf.append(x)\n    return buf\n\nprint(collect(1))\nprint(collect(2))\nprint(collect(3, [0]))"
+}

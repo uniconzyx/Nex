@@ -1,0 +1,8 @@
+{
+  "title": "字节序判断（查最低地址字节）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "little-endian\nbytes: 04 03 02 01\n",
+  "code": "#include <stdio.h>\n\nint main(void) {\n    unsigned int x = 0x01020304;\n    unsigned char *p = (unsigned char*)&x;\n    if (p[0] == 0x04) printf(\"little-endian\\n\");\n    else if (p[0] == 0x01) printf(\"big-endian\\n\");\n    else printf(\"unknown\\n\");\n    printf(\"bytes: %02X %02X %02X %02X\\n\", p[0], p[1], p[2], p[3]);\n    return 0;\n}"
+}

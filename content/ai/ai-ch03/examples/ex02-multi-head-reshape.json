@@ -1,0 +1,8 @@
+{
+  "title": "多头注意力拆头/合并维度变换逐项验证",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "head_dim: 4\nQ: (6, 8) -> Qh: (6, 2, 4) -> Qht: (2, 6, 4)\n拆头等价性(逐元素): True\n合并等价性(逐元素): True\n合并后 shape: (6, 8)\n",
+  "code": "import numpy as np\nrng = np.random.default_rng(42)\nT, d_model, n_heads = 6, 8, 2\nx = rng.standard_normal((T, d_model))\nWq = rng.standard_normal((d_model, d_model))\nQ = x @ Wq\nhead_dim = d_model // n_heads\nQh = Q.reshape(T, n_heads, head_dim)\nQht = Qh.transpose(1, 0, 2)\nprint(\"head_dim:\", head_dim)\nprint(\"Q:\", Q.shape, \"-> Qh:\", Qh.shape, \"-> Qht:\", Qht.shape)\nok = True\nfor h in range(n_heads):\n    for t in range(T):\n        if not np.allclose(Qht[h, t], Q[t, h * head_dim:(h + 1) * head_dim]):\n            ok = False\nprint(\"拆头等价性(逐元素):\", ok)\nOh = rng.standard_normal((n_heads, T, head_dim))\nOht = Oh.transpose(1, 0, 2).reshape(T, d_model)\nok2 = True\nfor h in range(n_heads):\n    if not np.allclose(Oht[:, h * head_dim:(h + 1) * head_dim], Oh[h]):\n        ok2 = False\nprint(\"合并等价性(逐元素):\", ok2)\nprint(\"合并后 shape:\", Oht.shape)\n"
+}

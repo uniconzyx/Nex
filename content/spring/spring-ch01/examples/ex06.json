@@ -1,0 +1,8 @@
+{
+  "title": "singleton 与 prototype 作用域差异",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "singleton same instance? true\nsingleton shared state: 10\nprototype same instance? false\nprototype independent state: 0",
+  "code": "public class Ex06 {\n    static class Counter { int n; }\n    static class SingletonFactory {\n        private final Counter single = new Counter(); // 只建一次\n        Counter get() { return single; }\n    }\n    static class PrototypeFactory {\n        Counter get() { return new Counter(); } // 每次新建\n    }\n    public static void main(String[] args) {\n        SingletonFactory sf = new SingletonFactory();\n        Counter a = sf.get(); Counter b = sf.get();\n        a.n = 10;\n        System.out.println(\"singleton same instance? \" + (a == b));\n        System.out.println(\"singleton shared state: \" + b.n);\n\n        PrototypeFactory pf = new PrototypeFactory();\n        Counter c = pf.get(); Counter d = pf.get();\n        c.n = 5;\n        System.out.println(\"prototype same instance? \" + (c == d));\n        System.out.println(\"prototype independent state: \" + d.n);\n    }\n}\n"
+}

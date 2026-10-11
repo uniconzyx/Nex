@@ -1,0 +1,154 @@
+{
+  "meta": {
+    "chapter": "java-ch01",
+    "note": "6 题，4 类题型混合（choice/output/fix_error/coding）；含 LeetCode 与牛客真题映射，仅存元数据+链接，不存题面。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "difficulty": "easy",
+      "title": "关于 Java 八种基本类型，正确的是",
+      "content_md": "选择**正确**的描述。",
+      "options": [
+        {
+          "key": "A",
+          "text": "String 是 Java 的基本类型之一"
+        },
+        {
+          "key": "B",
+          "text": "long 类型字面量必须加后缀 L（或小写 l）"
+        },
+        {
+          "key": "C",
+          "text": "boolean 类型可以用 0 和 1 表示真假"
+        },
+        {
+          "key": "D",
+          "text": "char 类型占用 1 个字节"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "基本类型只有八种，String 是引用类型；boolean 只有 true/false；char 占 2 字节（UTF-16）；long 字面量必须加 L。",
+      "tags": [
+        "primitive-types"
+      ],
+      "source": "self",
+      "source_ref": "《Java 核心技术 卷I》第 3 章 基本程序设计结构",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "output",
+      "difficulty": "easy",
+      "title": "读代码写输出",
+      "content_md": "```java\npublic class Main {\n    public static void main(String[] args) {\n        int a = 10, b = 3;\n        System.out.println(a / b);\n        System.out.println(a % b);\n    }\n}\n```",
+      "answer": {
+        "output": "3\n1"
+      },
+      "explanation": "整数除法截断取整得 3；取模运算得 1。",
+      "tags": [
+        "operators",
+        "output"
+      ],
+      "source": "self",
+      "source_ref": "《Java 核心技术 卷I》第 3 章 运算符",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "fix_error",
+      "difficulty": "easy",
+      "title": "修复不兼容类型错误",
+      "content_md": "以下代码编译失败（不兼容的类型），请修复：\n\n```java\npublic class Main {\n    public static void main(String[] args) {\n        int x = 10L;\n        System.out.println(x);\n    }\n}\n```",
+      "answer": {
+        "reference_code": "public class Main {\n    public static void main(String[] args) {\n        long x = 10L;\n        System.out.println(x);\n    }\n}"
+      },
+      "explanation": "10L 是 long 字面量，不能直接赋给 int；应将变量声明为 long，或强制转换为 int。",
+      "tags": [
+        "type-cast"
+      ],
+      "source": "self",
+      "source_ref": "《Java 核心技术 卷I》第 3 章 类型转换",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "coding",
+      "difficulty": "easy",
+      "title": "LeetCode 1 · 两数之和",
+      "content_md": "实现静态方法 `int[] twoSum(int[] nums, int target)`，返回和为 target 的两个元素下标。封装为静态方法并在 main 中自测。",
+      "answer": {
+        "reference_code": "public class Main {\n    public static int[] twoSum(int[] nums, int target) {\n        for (int i = 0; i < nums.length; i++) {\n            for (int j = i + 1; j < nums.length; j++) {\n                if (nums[i] + nums[j] == target) {\n                    return new int[]{i, j};\n                }\n            }\n        }\n        return new int[]{};\n    }\n    public static void main(String[] args) {\n        int[] r = twoSum(new int[]{2, 7, 11, 15}, 9);\n        System.out.println(r[0] + \" \" + r[1]);\n    }\n}"
+      },
+      "explanation": "经典双重循环解法；可优化为哈希表一次遍历。",
+      "tags": [
+        "array",
+        "coding"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 1（two-sum）",
+      "external_url": "https://leetcode.cn/problems/two-sum/",
+      "time_limit_ms": 2000,
+      "memory_limit_mb": 256,
+      "test_cases": [
+        {
+          "input": "nums=[2,7,11,15], target=9",
+          "expected_output": "0 1",
+          "is_sample": true
+        }
+      ],
+      "category": "算法题",
+      "platform": "leetcode"
+    },
+    {
+      "type": "coding",
+      "difficulty": "mid",
+      "title": "牛客 BM83 · 字符串变形",
+      "content_md": "实现静态方法 `String transform(String s)`：对字符串做单词级与字符级翻转变换。封装为静态方法并在 main 中自测。详见原题链接，本题不搬运题面。",
+      "answer": {
+        "reference_code": "public class Main {\n    public static String transform(String s) {\n        String[] words = s.split(\" \");\n        for (int i = 0; i < words.length; i++) {\n            words[i] = new StringBuilder(words[i]).reverse().toString();\n        }\n        int lo = 0, hi = words.length - 1;\n        while (lo < hi) {\n            String t = words[lo]; words[lo] = words[hi]; words[hi] = t;\n            lo++; hi--;\n        }\n        return String.join(\" \", words);\n    }\n    public static void main(String[] args) {\n        System.out.println(transform(\"this is nowcoder\"));\n    }\n}"
+      },
+      "explanation": "先逐单词反转字符，再反转单词顺序；可用 StringBuilder.reverse 与双指针。",
+      "tags": [
+        "string",
+        "coding"
+      ],
+      "source": "nowcoder",
+      "source_ref": "牛客 BM83（字符串变形）",
+      "external_url": "https://www.nowcoder.com/practice/3194a4f4cf814f63919d079691d9dac8",
+      "time_limit_ms": 2000,
+      "memory_limit_mb": 256,
+      "test_cases": [
+        {
+          "input": "this is nowcoder",
+          "expected_output": "redocon si siht",
+          "is_sample": true
+        }
+      ],
+      "category": "算法题",
+      "platform": "nowcoder"
+    },
+    {
+      "type": "output",
+      "difficulty": "mid",
+      "title": "读代码写输出（switch 穿透）",
+      "content_md": "```java\npublic class Main {\n    public static void main(String[] args) {\n        int x = 1;\n        switch (x) {\n            case 1: System.out.println(\"one\");\n            case 2: System.out.println(\"two\"); break;\n            default: System.out.println(\"other\");\n        }\n    }\n}\n```",
+      "answer": {
+        "output": "one\ntwo"
+      },
+      "explanation": "case 1 后缺 break，发生穿透继续执行 case 2 打印 two，遇 break 才结束。",
+      "tags": [
+        "switch",
+        "output"
+      ],
+      "source": "self",
+      "source_ref": "《Java 核心技术 卷I》第 3 章 控制流程",
+      "category": "基础题",
+      "platform": "book"
+    }
+  ]
+}

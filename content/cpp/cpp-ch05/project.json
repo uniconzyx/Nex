@@ -1,0 +1,14 @@
+{
+  "meta": { "chapter": "cpp-ch05", "category": "basic" },
+  "items": [
+    {
+      "title": "实现一个满足 Rule of Three 的动态数组类 Vec",
+      "requirement_md": "用类封装一块 `double` 动态数组，提供：构造（指定大小）、`size()`、下标访问 `operator[]`、`push_back`（超容量时按 2 倍扩容）、拷贝构造（深拷贝）、拷贝赋值（防自赋值/异常安全）、析构（释放内存）。要求自带简单单测验证深拷贝独立性（两对象互不影响）。",
+      "tasks": [
+        { "title": "实现构造/析构与扩容", "verification": { "type": "test", "desc": "push_back 超过容量后数据完整、size 正确" } },
+        { "title": "实现拷贝构造与拷贝赋值", "verification": { "type": "test", "desc": "深拷贝：修改副本不影响原对象；a=a 自赋值安全" } },
+        { "title": "实现 operator[] 与 const 重载", "verification": { "type": "manual", "desc": "const 对象调用 const 版本，越界可抛异常" } }
+      ]
+    }
+  ]
+}

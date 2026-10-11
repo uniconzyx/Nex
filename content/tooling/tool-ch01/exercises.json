@@ -1,0 +1,140 @@
+{
+  "meta": {
+    "chapter": "tool-ch01",
+    "title": "Linux 基础：文件系统与权限 —— 习题集",
+    "count": 6,
+    "note": "3 道基础题 + 3 道算法题（LeetCode Shell 题库，仅存元数据与链接，不含题面正文）"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "目录权限 rwx 的语义：删除文件看的是谁的权限",
+      "content_md": "环境：目录 `d` 权限 `drwxr-x---`，属主 alice，属组 devs；其下文件 `d/f.txt` 权限 `-rw-r-----`，属主 alice，属组 devs。\n\n- **bob**：既不是 alice，也不属于 devs\n- **carol**：属于 devs（但不是 alice）\n\n下列判断正确的是？\n\nA. alice 可以 `ls d` 列出目录中的文件名\nB. bob 可以 `cd d` 进入该目录\nC. carol 可以 `cat d/f.txt` 读到文件内容\nD. carol 可以 `rm d/f.txt` 删除该文件",
+      "answer": {
+        "correct": "A、C",
+        "explain": "先逐位拆解两个对象的权限，再逐个判断：\n\n**目录 `d`：`drwxr-x---`** → 属主 `rwx`、属组 `r-x`、其他 `---`。\n**文件 `f.txt`：`-rw-r-----`** → 属主 `rw-`、属组 `r--`、其他 `---`。\n\n- **A 对**：`ls d` 需要目录的 `r`（读目录的数据块 = 列出名字表）。alice 是属主，属主位含 `r` → 成功。\n- **B 错**：`cd` 需要目录的 `x`（穿越资格）。bob 命中「其他」分组，权限 `---`，无 `x` → 失败。注意一个常被忽略的点：**即使 `f.txt` 是 `644`，只要目录缺 `x`，bob 连一步都走不进去** —— 路径上每一层目录都必须有 `x`。\n- **C 对**：需要两个条件同时满足。① 穿越目录：carol 属 devs，目录属组位 `r-x` 含 `x` → 可穿越；② 读文件：文件属组位 `r--` 含 `r` → 可读。两个条件都成立 → 成功。（对比 B 和 C：同一个 `x` 位，bob 拿不到是因为他落在「其他」组，carol 拿得到是因为她命中「属组」。**这说明「我明明给权限了为什么还拒绝」通常是把权限位加错了分组。**）\n- **D 错**：这是本题的核心考点。**删除文件靠的是「文件所在目录」的 `w` + `x`，与被删文件自身的权限无关。**因为 `rm` 本质是 `unlink()` —— 在目录里删掉一条 `名字 → inode` 记录，这是对**目录**的写操作。carol 对目录 `d` 的属组权限是 `r-x`，**没有 `w`** → 不能删除。\n\n**反向验证 D 的结论**：若把目录改成 `drwxrwx---`（属组含 w），则 carol 就能删掉 `f.txt`，**即使把 `f.txt` 设成 `-r--r--r--`（只读）也不影响**。这就是「只读文件仍可被删除」这一反直觉现象的完整解释。"
+      },
+      "explanation": "把「目录 rwx 的三重语义」「判定短路」与「删除看目录权限」三个考点合并成一道题。",
+      "tags": [
+        "Linux",
+        "权限",
+        "目录",
+        "chmod"
+      ],
+      "source": "self",
+      "source_ref": "《鸟哥的 Linux 私房菜》第 5 章 · 文件权限"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "由 umask 推断新建文件与目录的权限",
+      "content_md": "在 `umask 027` 的环境下，新建的普通文件与新建的目录权限分别是多少？请给出八进制与符号两种表示，并说明为什么文件的上限是 `666` 而不是 `777`。",
+      "answer": {
+        "correct": "文件 640（-rw-r-----）；目录 750（drwxr-x---）",
+        "explain": "核心公式：**实际权限 = 请求权限 & ~umask**。\n\numask `027` = `000 010 111`，取反得 -> `111 101 000`。\n\n- **文件**：请求权限上限 `666` = `110 110 110`\n  `110110110 & 111101000` = `110100000` = **640**（`-rw-r-----`）\n  属主 rw、属组 r、其他无。\n- **目录**：请求权限上限 `777` = `111 111 111`\n  `111111111 & 111101000` = `111101000` = **750**（`drwxr-x---`）\n\n**为什么文件上限是 666**：内核在 `open()` 时对新建普通文件**强制屏蔽执行位**（`mode & ~S_IXUSR...` 的效果）。理由是安全默认值：新建的文件内容是数据（日志、下载物、用户上传），不应天然可执行。需要执行必须**显式** `chmod +x` —— 这把「可执行」变成一个明确的授权动作，而不是默认状态。\n\n**工程含义**：`027` 的 umask 意味着同组可读、其他人完全隔离，适合团队共享但对外保密的场景。对比 `022`（同组与其他人都可读，适合开源协作）、`077`（连同组都不可读，**处理凭据时必须用**）。"
+      },
+      "explanation": "umask 是权限的「默认值生成器」，必须能用位运算手算。",
+      "tags": [
+        "Linux",
+        "umask",
+        "权限计算"
+      ],
+      "source": "self",
+      "source_ref": "《鸟哥的 Linux 私房菜》第 5 章 · umask 与权限掩码"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "找出批量删除脚本中的两处安全隐患",
+      "content_md": "下面的脚本用来清理 `/var/log` 下 7 天前的日志，请指出**两处**会导致误删或崩溃的问题，并给出修正版：\n\n```bash\n#!/bin/bash\ncd /var/log\nFILES=`find . -name \"*.log\" -mtime +7`\nfor f in $FILES; do\n  rm -f $f\ndone\n```",
+      "answer": {
+        "correct": "问题一：`$FILES` 未加引号 + 命令替换按空白拆分 → 文件名含空格/换行时破坏；问题二：`rm -f $f` 未加引号且变量可能为空/以 `-` 开头；另有隐患三：没有任何干跑确认，直接删。",
+        "explain": "**问题一：命令替换 + 词拆分（word splitting）**\n`FILES=`find ...`` 把结果压成一个字符串，`for f in $FILES` 再按 `IFS`（空白）拆开。POSIX 文件名允许包含空格与换行，于是 `a b.log` 会被拆成两个「文件名」，`rm -f a` 和 `rm -f b.log` —— **删掉了不该删的东西**。\n\n**问题二：`$f` 未加引号**\n即使拆分正确，`rm -f $f` 中的 `$f` 也会再次经历词拆分与**路径展开（globbing）**。若文件名含 `*` 或 `?`，会被 shell 展开成一批文件传给 `rm`。若文件名以 `-` 开头（如 `-rf.log`），会被 `rm` 当成**选项**解析 —— 这是最危险的变体。\n\n**问题三（隐性但最重要）：没有干跑确认**\n任何批量删除都应先 `-print` 看清单，确认无误再执行。这不是谨慎，是纪律。\n\n**修正版（推荐）**：\n```bash\n#!/bin/bash\nset -euo pipefail              # 未定义变量报错、管道失败即退出\n\nlogdir=/var/log\nfind \"$logdir\" -maxdepth 1 -type f -name '*.log' -mtime +7 -print\n# ↑ 先干跑确认清单，人工核对后再把 -print 换成 -delete\n# find \"$logdir\" -maxdepth 1 -type f -name '*.log' -mtime +7 -delete\n```\n\n**为什么推荐 `find -delete` 而非 `| xargs rm`**：\n- `find -delete` 在 find 内部逐条删除，**不经过 shell 词拆分**，天然免疫空格/换行问题；\n- 若必须用管道，用 **NUL 分隔**：`find ... -print0 | xargs -0 rm -f`（NUL 是文件名字符集里唯一不会出现的字节）；\n- 若必须用 for 循环，写成 `for f in \"$logdir\"/*.log; do [ -e \"$f\" ] || continue; rm -f -- \"$f\"; done`：加引号、用 `--` 终止选项解析、用 `[ -e ]` 处理 glob 无匹配的情况。"
+      },
+      "explanation": "词拆分与 globbing 是 shell 脚本里最高频的误删来源，必须能识别。",
+      "tags": [
+        "shell",
+        "find",
+        "xargs",
+        "安全",
+        "词拆分"
+      ],
+      "source": "self",
+      "source_ref": "《Shell 脚本学习指南》第 7 章 · 引用与展开"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": 2,
+      "title": "统计文件中单词的出现频率（LeetCode 192）",
+      "content_md": "给定一个文本文件 `words.txt`，每行可能包含多个以空白分隔的单词（小写字母），要求统计每个单词出现的次数，按**频次降序**输出，频次相同的按**单词字典序升序**输出，每行格式为「单词 空格 次数」。请用 Shell（`grep`/`sed`/`awk`/`sort` 管道）实现。",
+      "answer": {
+        "correct": "cat words.txt | tr -s ' ' '\\n' | sort | uniq -c | sort -k2,2 -k1,1nr | awk '{print $2, $1}'",
+        "explain": "分解每一步的职责（这正是「单一职责 + 管道组合」的体现）：\n\n1. `tr -s ' ' '\\n'`：把连续空格压缩（`-s`）并转成换行，使「单词」变成「行」—— 这是关键一步，因为后续工具都以「行」为处理单位。\n2. `sort`：同一单词排到相邻位置（`uniq -c` **要求输入已排序**，否则相同项不相邻时会重复计数 —— 常见坑）。\n3. `uniq -c`：去重并前置计数（输出形如 `  3 apple`）。\n4. `sort -k2,2 -k1,1nr`：**多键排序**。`-k2,2` 先按第 2 字段（单词）升序，`-k1,1nr` 再按第 1 字段（次数）**数值（n）反序（r）**。注意 `-k1,1nr` 里的 `,1` 限定了「只按第 1 个字段」，若写成 `-k1nr` 在某些实现下会把从第 1 字段到行尾整体作为键，导致结果不符。\n5. `awk '{print $2, $1}'`：交换字段顺序，变成「单词 次数」。\n\n**容易踩的坑**：\n- 漏掉 `sort | uniq -c` 之前的 `sort` → 相邻性不满足，计数错误；\n- 用 `sort -rn` 代替多键排序 → 只保证频次降序，同频次单词顺序随机；\n- 忘记 `-s` 导致连续空格产生空行，被计成一个「空单词」。\n\n**进阶思考**：本需求其实 `awk` 可以一次完成（`{for(i=1;i<=NF;i++) c[$i]++} END {for(w in c) print w, c[w]}`），但 `awk` 的 `for (w in c)` **遍历顺序是不确定的**，仍需管道 `sort` 才能保证输出稳定。纯 awk 写法的优势是**一遍扫描**（省掉排序的磁盘临时文件），适合超大文件。"
+      },
+      "explanation": "经典 Shell 管道题，考 uniq 的前置排序要求与多键排序。",
+      "tags": [
+        "shell",
+        "awk",
+        "sort",
+        "uniq",
+        "管道"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 192. Word Frequency",
+      "external_url": "https://leetcode.cn/problems/word-frequency/"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": 2,
+      "title": "筛选合法电话号码（LeetCode 193）",
+      "content_md": "给定 `file.txt`，每行一个候选字符串，要求用**一行 Shell 命令**输出所有符合「xxx-xxx-xxxx」或「(xxx) xxx-xxxx」格式的号码（x 为数字），且不改变原始行顺序。",
+      "answer": {
+        "correct": "grep -E '^([0-9]{3}-|\\([0-9]{3}\\) )[0-9]{3}-[0-9]{4}$' file.txt",
+        "explain": "**为什么必须用 `grep -E`**：`{n}` 量词与 `|` 分支、`()` 分组在 **BRE 里都需要转义**（`\\{3\\}`、`\\|`、`\\(`），而 **ERE 里直接可用**。所以现代写法统一加 `-E`。\n\n**两种格式的构造**：\n- 格式一 `xxx-xxx-xxxx`：`[0-9]{3}-[0-9]{3}-[0-9]{4}`\n- 格式二 `(xxx) xxx-xxxx`：`\\([0-9]{3}\\) [0-9]{3}-[0-9]{4}`（注意括号是**字面量**，需转义；后面有一个空格）\n- 合并用分支 `|`，共享后半段：`^([0-9]{3}-|\\([0-9]{3}\\) )[0-9]{3}-[0-9]{4}$`\n\n**两个关键细节**：\n1. **锚点 `^` 与 `$` 必须成对使用**。只用 `^` 会匹配「前缀合法但后面还有垃圾字符」的行（如 `987-123-4567xyz`），这是本题最常见的错误答案。\n2. `[0-9]` 而非 `\\d`：`\\d` 是 PCRE 专有语法，在 `grep -E` 下**不是数字**（GNU grep 可能退化为字面量 `d`），这是「看似正确但结果错」的典型陷阱。若坚持用 `\\d` 必须 `grep -P`。\n\n**保持原行顺序**：`grep` 天然流式逐行输出，不改变顺序 —— 相比 `sort` 更符合「筛选」语义。"
+      },
+      "explanation": "考 ERE 与 BRE 的差异、锚点成对使用、以及 \\d 的方言陷阱。",
+      "tags": [
+        "shell",
+        "grep",
+        "正则",
+        "ERE"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 193. Valid Phone Numbers",
+      "external_url": "https://leetcode.cn/problems/valid-phone-numbers/"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": 1,
+      "title": "输出文件的第十行（LeetCode 195）",
+      "content_md": "给定一个文本文件 `file.txt`（行数保证 ≥10），用**一行 Shell 命令**输出文件的第十行。请给出至少两种实现，并说明各自的适用性与限制。",
+      "answer": {
+        "correct": "sed -n '10p' file.txt",
+        "explain": "**实现一（推荐，POSIX 可移植）**：\n```bash\nsed -n '10p' file.txt\n```\n`-n` 抑制默认的自动打印，`10p` 只打印第 10 行。**`-n` 与 `p` 必须配对** —— 写成 `sed '10p'` 会把整个文件打印一遍且第 10 行出现两次，这是 sed 最经典的困惑点。\n\n**实现二（更常出现在排障中）**：\n```bash\nawk 'NR==10' file.txt\n```\n`NR`（Number of Record）是 awk 的当前行号内建变量。`NR==10` 为真时执行默认动作（打印 `$0`）。\n\n**实现三（有陷阱，不建议）**：\n```bash\nhead -n 10 file.txt | tail -n 1\n```\n能work，但**在超大文件上会多读**（不过 `head` 读满 10 行即发 SIGPIPE 终止，实际开销很小）。更严重的问题是 `head -n 10` 与 `head -10` 在某些古老实现下语义不同（前者 POSIX，后者是历史简写）。\n\n**为什么不该用 `cat file.txt | sed -n '10p'`**：多余的 `cat` 创建了一个额外进程与一条管道，属于**无用的 cat（UUOC, Useless Use Of Cat）**。正确习惯是把文件作为参数交给命令，让命令自己决定读取策略（sed 读到第 10 行后若不需要后续内容还能提前退出）。\n\n**延伸**：若文件不足 10 行，`sed -n '10p'` 与 `awk 'NR==10'` 都输出**空**（退出码仍为 0），若需要「不足 10 行则报错」必须显式判断 `[ \"$(wc -l < file.txt)\" -ge 10 ]`。"
+      },
+      "explanation": "考 sed 的 -n 与 p 配对、awk 的 NR、以及 UUOC 反模式。",
+      "tags": [
+        "shell",
+        "sed",
+        "awk",
+        "行处理"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 195. Tenth Line",
+      "external_url": "https://leetcode.cn/problems/tenth-line/"
+    }
+  ]
+}

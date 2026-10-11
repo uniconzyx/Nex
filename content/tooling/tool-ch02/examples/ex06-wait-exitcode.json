@@ -1,0 +1,8 @@
+{
+  "title": "waitpid 退出状态编码解析",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "子进程 exit(3) 后，父 wait() 得到的 status 编码：\n  status = 3 << 8 = 768\n  WEXITSTATUS(status) = 3   （高8位=退出码）\n  WIFSIGNALED(status) = False   （低7位=0 表示正常退出）\n\n子进程被 SIGKILL(9) 杀死：status = 9\n  WIFSIGNALED(status) = True   WTERMSIG = 9\n\n结论：wait 的 16 位 status 中高8位退出码、低7位信号号；\nexit(3) 与 被信号9杀死 的 status 编码完全不同，需分别解析",
+  "code": "# 模拟 waitpid 返回的子进程退出状态编码（确定性）\ndef WEXITSTATUS(status):\n    return (status >> 8) & 0xFF\ndef WIFSIGNALED(status):\n    return (status & 0x7F) != 0\ndef WTERMSIG(status):\n    return status & 0x7F\n\nchild_exit_code = 3\nstatus = child_exit_code << 8   # 父 wait 得到的 status\nprint(\"子进程 exit(3) 后，父 wait() 得到的 status 编码：\")\nprint(f\"  status = {child_exit_code} << 8 = {status}\")\nprint(f\"  WEXITSTATUS(status) = {WEXITSTATUS(status)}   （高8位=退出码）\")\nprint(f\"  WIFSIGNALED(status) = {WIFSIGNALED(status)}   （低7位=0 表示正常退出）\")\nprint()\n\nsig = 9\nstatus2 = sig   # 低7位=信号号\nprint(f\"子进程被 SIGKILL(9) 杀死：status = {status2}\")\nprint(f\"  WIFSIGNALED(status) = {WIFSIGNALED(status2)}   WTERMSIG = {WTERMSIG(status2)}\")\nprint()\nprint(\"结论：wait 的 16 位 status 中高8位退出码、低7位信号号；\")\nprint(\"exit(3) 与 被信号9杀死 的 status 编码完全不同，需分别解析\")\n"
+}

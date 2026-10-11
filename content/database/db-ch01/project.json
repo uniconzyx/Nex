@@ -1,0 +1,27 @@
+{
+  "meta": { "chapter": "db-ch01", "category": "basic" },
+  "items": [
+    {
+      "title": "迷你学生选课数据库：从建模到查询优化",
+      "requirement_md": "设计并实现一个**学生选课系统**的最小可用数据库，覆盖本章 DDL/DML/查询/聚合/连接 全部知识点。\n\n**数据表**：\n- `student(id, name, grade)` 学生\n- `course(id, title, credit)` 课程\n- `enroll(sid, cid, score)` 选课记录（联合主键 `sid+cid`）\n\n**必须完成的查询**：\n1. 查询每门课的**选课人数**与**平均分**（`GROUP BY` + 聚合）。\n2. 查询**平均分 ≥ 80** 的课程（`HAVING`）。\n3. 查询选修了「数据库」的**学生姓名与成绩**（`JOIN`）。\n4. 查询**没有选任何课**的学生（`LEFT JOIN ... IS NULL` 或 `NOT EXISTS`）。\n5. 查询每个学生的**总学分**（`JOIN` + `SUM`）。\n\n**进阶**：对 `enroll(sid, cid)` 建索引，用 `EXPLAIN` 对比建索引前后 `type` 与 `rows` 的变化并截图记录。",
+      "tasks": [
+        {
+          "title": "编写 DDL 建表（含主键、外键、NOT NULL、UNIQUE 约束）",
+          "verification": { "type": "test", "desc": "三张表创建成功；插入违反外键/唯一约束的数据应报错" }
+        },
+        {
+          "title": "插入不少于 10 名学生、5 门课程、30 条选课记录",
+          "verification": { "type": "test", "desc": "`SELECT COUNT(*)` 校验行数符合预期" }
+        },
+        {
+          "title": "实现 5 个必做查询，结果手工核对正确",
+          "verification": { "type": "test", "desc": "每个查询返回结果与预期数据一致，尤其是「未选课学生」不为 NULL 误判" }
+        },
+        {
+          "title": "建立索引并用 EXPLAIN 对比优化前后",
+          "verification": { "type": "manual", "desc": "记录建索引前后 type/rows 变化，能说明索引为何生效" }
+        }
+      ]
+    }
+  ]
+}

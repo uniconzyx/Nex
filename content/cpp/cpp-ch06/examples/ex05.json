@@ -1,0 +1,8 @@
+{
+  "title": "纯虚函数与抽象类（不可实例化）",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "9",
+  "code": "#include <iostream>\nstruct Shape {                                  // 抽象类（含纯虚函数）\n    virtual double area() const = 0;\n    virtual ~Shape() = default;\n};\nstruct Square : Shape {\n    double s;\n    explicit Square(double x) : s(x) {}\n    double area() const override { return s * s; }\n};\nint main() {\n    // Shape sh;          // 编译错误：不能实例化抽象类\n    Square sq(3);\n    Shape& r = sq;        // 通过抽象基类接口操作\n    std::cout << r.area();\n}\n"
+}

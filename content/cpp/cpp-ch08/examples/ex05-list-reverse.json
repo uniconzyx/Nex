@@ -1,0 +1,8 @@
+{
+  "title": "list 反转：节点式双向链表原地 reverse",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "5 4 3 2 1 \n",
+  "code": "#include <iostream>\n#include <list>\nint main() {\n    std::list<int> l = {1, 2, 3, 4, 5};\n    l.reverse();\n    for (int x : l) std::cout << x << ' ';\n    std::cout << '\\n';\n}\n"
+}

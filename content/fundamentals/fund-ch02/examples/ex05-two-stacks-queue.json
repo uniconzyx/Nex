@@ -1,0 +1,8 @@
+{
+  "title": "用两个栈实现队列",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "入队 1 2 3 4\n出队 -> 1\n入队 5，剩余依次出队: 2 3 4 5",
+  "code": "#include <stdio.h>\n\n#define N 64\nstatic int in[N], out[N];\nstatic int ti = 0, to = 0;\n\nstatic void push(int v) { in[ti++] = v; }\nstatic int pop(void) {\n    if (to == 0)                       /* 出栈为空时，把入栈整体倒入 */\n        while (ti > 0) out[to++] = in[--ti];\n    return out[--to];\n}\nstatic int empty(void) { return ti == 0 && to == 0; }\n\nint main(void) {\n    for (int i = 1; i <= 4; i++) push(i);\n    printf(\"入队 1 2 3 4\\n\");\n    printf(\"出队 -> %d\\n\", pop());\n    push(5);\n    printf(\"入队 5，剩余依次出队:\");\n    while (!empty()) printf(\" %d\", pop());\n    printf(\"\\n\");\n    return 0;\n}"
+}

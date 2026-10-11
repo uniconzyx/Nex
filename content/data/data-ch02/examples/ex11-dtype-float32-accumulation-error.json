@@ -1,0 +1,8 @@
+{
+  "title": "float32 累加的舍入误差（naive 顺序累加越过精确整数上限 2^24）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "float32(1e8) + 1 == float32(1e8): True\nnaive float32 累加 5000 万次 1.0 = 16777216.0\n精确值 = 50000000.0\n相对误差 = 0.6645\n误差显著(>0.1): True",
+  "code": "import numpy as np\n# 精度演示：float32 在大数附近加小数会丢精度（1 被吞掉）\nbig32 = np.float32(1e8)\nprint(\"float32(1e8) + 1 == float32(1e8):\", bool(big32 + np.float32(1) == big32))\n# 累加演示：naive 顺序 float32 累加 5000 万个 1.0，越过精确整数上限 2^24 后丢精度\nn = 50_000_000\narr = np.ones(n, dtype=np.float32)\ns = np.float32(0.0)\nfor x in arr:\n    s += x\nprint(\"naive float32 累加 5000 万次 1.0 =\", float(s))\nprint(\"精确值 =\", float(n))\nprint(\"相对误差 =\", round(abs(float(s) - n) / n, 4))\nprint(\"误差显著(>0.1):\", abs(float(s) - n) / n > 0.1)"
+}

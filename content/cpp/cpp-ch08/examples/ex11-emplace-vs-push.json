@@ -1,0 +1,8 @@
+{
+  "title": "emplace_back 就地构造 vs push_back 移动构造",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "ctor a\nmove a\nctor b\ndone\n",
+  "code": "#include <iostream>\n#include <vector>\n#include <string>\nstruct Tracer {\n    std::string s;\n    Tracer(const char* p) : s(p) { std::cout << \"ctor \" << s << '\\n'; }\n    Tracer(const Tracer& o) : s(o.s) { std::cout << \"copy \" << s << '\\n'; }\n    Tracer(Tracer&& o) noexcept : s(std::move(o.s)) { std::cout << \"move \" << s << '\\n'; }\n};\nint main() {\n    std::vector<Tracer> v;\n    v.reserve(2);\n    v.push_back(Tracer(\"a\"));   // 先构造临时对象，再移动进容器\n    v.emplace_back(\"b\");        // 在容器内就地构造，省一次移动\n    std::cout << \"done\\n\";\n}\n"
+}

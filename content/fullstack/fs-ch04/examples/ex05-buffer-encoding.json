@@ -1,0 +1,9 @@
+{
+  "title": "Buffer 与编码：UTF-8 多字节切片切断产生替换符乱码",
+  "code_lang": "javascript",
+  "code_std": "node22",
+  "stdin": "",
+  "expected_output": "bytes=10\nbroken=\"��好Nod\"\nhasReplacement=true\ncodepoints=6\nsafeSlice=\"你好No\"\n",
+  "code": "const s = '你好Node';\nconst buf = Buffer.from(s, 'utf8');\nconsole.log('bytes=' + buf.length);\nconst broken = buf.subarray(1, 9).toString('utf8');\nconsole.log('broken=' + JSON.stringify(broken));\nconsole.log('hasReplacement=' + broken.includes('\\uFFFD'));\nconsole.log('codepoints=' + [...s].length);\nconsole.log('safeSlice=' + JSON.stringify(s.slice(0, 4)));",
+  "_intentional_corrupt": "演示 UTF-8 多字节切片产生的替换符乱码（Buffer 按字节切片切断码点边界，信息不可逆丢失）"
+}

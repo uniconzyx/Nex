@@ -1,0 +1,83 @@
+{
+  "meta": {
+    "chapter": "fs-ch05",
+    "category": "system"
+  },
+  "items": [
+    {
+      "title": "自包含 REST API：SQLite 数据层 + 游标分页 + 幂等创建 + Problem Details",
+      "requirement_md": "只用 Node 内置能力（`node:http`、`node:sqlite`）实现一个 articles 资源的 REST API，把本章五个核心考点打通，并且脚本必须自包含可跑（不起外部依赖、不联网、不发 npm 包）：\n\n1. **数据层与索引**：用 `node:sqlite` 建表 `articles(id, slug, title, status, score, created_at)`，对高频查询建复合索引；用 `EXPLAIN QUERY PLAN` 断言关键查询走了索引（`SEARCH ... USING INDEX`），并记录「加索引前是 SCAN、加索引后是 SEARCH」的前后对比。\n2. **游标分页**：`GET /articles?limit=&cursor=` 用 keyset 分页，游标编码 `(score, id)` 完整排序键（base64 + 版本号前缀），并验证「翻页过程中插入一条高分记录不会造成重复或遗漏」。同时保留 `GET /articles?offset=` 作为对照，说明二者差异。\n3. **幂等创建**：`POST /articles` 支持 `Idempotency-Key` 头，同一键重复提交只产生一条记录并回放缓存响应；同键换载荷返回 422；无键时不做去重（语义上仍是 POST）。\n4. **请求校验与错误契约**：三层防线（415 媒体类型 / 413 体积 / 400 语法 / 422 schema），所有错误响应统一为 RFC 9457 `application/problem+json`，字段级错误用 JSON Pointer。\n5. **契约导出**：从路由表导出 OpenAPI 3.1 文档 JSON，并做自检：`operationId` 唯一、路径参数 `required: true`、每个操作至少一个 2xx、所有 4xx 使用 `application/problem+json`、所有 `$ref` 可解析。\n\n验收方式是脚本自测：用内置 `fetch` 对 `listen(0)` 起的随机端口发真实请求，打印每条请求的方法、路径、状态码与媒体类型；所有判据（是否走索引、是否重复行、幂等是否生效、契约自检）都以布尔量输出。**输出中不得出现端口号与墙钟耗时**。",
+      "tasks": [
+        {
+          "title": "建表、建索引并用查询计划验证",
+          "verification": {
+            "type": "test",
+            "desc": "EXPLAIN QUERY PLAN 输出在加索引前为 SCAN、加索引后出现 SEARCH ... USING INDEX；对非覆盖查询输出 uses_covering_index=false，对覆盖查询输出 true"
+          }
+        },
+        {
+          "title": "实现游标分页并与 offset 对照",
+          "verification": {
+            "type": "test",
+            "desc": "翻页中途插入高分记录后，游标分页第二页结果与插入前完全一致（cursor_stable=true），offset 分页出现与第一页重复的行（offset_repeats=true）"
+          }
+        },
+        {
+          "title": "实现 Idempotency-Key 幂等创建",
+          "verification": {
+            "type": "test",
+            "desc": "同一键连发 3 次 POST 只新增 1 条记录且三次返回同一 id；同键换载荷返回 422；无键时两次 POST 新增 2 条记录"
+          }
+        },
+        {
+          "title": "统一 Problem Details 错误契约",
+          "verification": {
+            "type": "test",
+            "desc": "非法 JSON 返回 400、schema 不过返回 422、媒体类型不对返回 415，三者响应 Content-Type 均为 application/problem+json 且含 type/title/status/detail/instance 五个核心成员"
+          }
+        },
+        {
+          "title": "导出 OpenAPI 3.1 并通过契约自检",
+          "verification": {
+            "type": "test",
+            "desc": "导出的文档满足：operationId 唯一、路径参数 required 为 true、每个操作至少一个 2xx、所有 4xx 指向 problem+json、所有 $ref 可解析（五项断言全为 true）"
+          }
+        }
+      ]
+    },
+    {
+      "title": "契约与实现一致性校验器（Design-First 的 CI 关卡）",
+      "requirement_md": "实现一个可独立运行的校验脚本，输入是「OpenAPI 3.1 文档对象」与「服务端路由表」，输出一致性报告。这是把本章第一节的契约优先落到实处的最小工具，也是可以把第三方开源仓库（如 trekhleb/javascript-algorithms 中的二分下界实现）垫在底层的算法练习场：\n\n1. **双向比对**：文档里每个 `operationId` 必须在路由表里找到实现（缺失 → 报「文档超前于实现」）；路由表里每个路由必须在文档里有对应 operation（缺失 → 报「实现未纳入文档」）。\n2. **结构断言**：`operationId` 全局唯一；路径参数 `required: true`；每个操作至少一个 2xx；所有 4xx/5xx 响应使用 `application/problem+json` 且 `$ref` 可解析；每个查询参数声明了 type 与边界。\n3. **示例校验**：为每个请求体 schema 生成一组合法与一组非法样例，断言「合法全过、非法全拒」，非法样例必须能给出字段级 JSON Pointer。\n4. **算法子任务**：实现 `lowerBound` 与标准二分，用它们在校验器的「路由表按路径字典序查找最近前缀匹配」中做定位，并断言两者在随机化固定种子的输入上结果一致（固定种子保证可重现）。\n\n产出要求：校验脚本可 `node check.js` 直接运行，输出每个断言的名称与布尔结果，退出码非 0 表示存在不一致（便于接入 CI）。",
+      "tasks": [
+        {
+          "title": "实现双向 operationId 比对",
+          "verification": {
+            "type": "test",
+            "desc": "构造一份缺一个 operation 的文档与一份多一个路由的实现，脚本分别输出「文档超前于实现」与「实现未纳入文档」，退出码非 0"
+          }
+        },
+        {
+          "title": "实现结构断言集合",
+          "verification": {
+            "type": "test",
+            "desc": "五个结构断言（operationId 唯一 / 路径参数必填 / 有 2xx / 4xx 用 problem+json / $ref 可解析）在正确文档上全为 true，在故意破坏其中一项的文档上对应断言为 false"
+          }
+        },
+        {
+          "title": "样例生成与字段级错误定位",
+          "verification": {
+            "type": "test",
+            "desc": "每个请求体 schema 至少 1 组合法样例通过、1 组非法样例被拒，且非法样例输出的错误项包含 JSON Pointer 路径"
+          }
+        },
+        {
+          "title": "用二分定位实现前缀匹配并验证等价性",
+          "verification": {
+            "type": "test",
+            "desc": "固定随机种子生成 200 组测试数据，lowerBound 与标准二分在全部用例上结果等价（等价断言为 true），输出仅为布尔量与计数"
+          }
+        }
+      ]
+    }
+  ]
+}

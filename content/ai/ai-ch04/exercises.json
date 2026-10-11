@@ -1,0 +1,166 @@
+{
+  "meta": {
+    "chapter": "ai-ch04",
+    "title": "高效微调与对齐：LoRA、RLHF 与 DPO —— 习题集",
+    "count": 8,
+    "note": "8 题，基础题 4 + 算法题 4（含 GitHub 实践题 1），仅存元数据与链接不复述题面"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "LoRA 的参数量与 rank 的关系",
+      "content_md": "对一个 d_in x d_out 的线性层施加 rank 为 r 的 LoRA，其可训练参数量约为多少？\n\nA. d_in x d_out\nB. r x d_in x d_out\nC. r x (d_in + d_out)\nD. (d_in + d_out) / r",
+      "answer": {
+        "correct": "C",
+        "explain": "LoRA 用 B(d_out x r) @ A(r x d_in) 近似增量，参数量 = r*d_out + r*d_in = r*(d_in+d_out)，与 rank 线性相关。原始权重冻结不训练。"
+      },
+      "explanation": "参数量随 rank 线性增长，而 rank 越小压得越狠；这解释了为什么 LoRA 在大模型上只需千分之几的参数。",
+      "tags": [
+        "LoRA",
+        "参数量",
+        "PEFT"
+      ],
+      "source": "self",
+      "source_ref": "《LoRA: Low-Rank Adaptation of Large Language Models》§4 · 低秩分解"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "RLHF 与 DPO 的流程差异",
+      "content_md": "关于 RLHF（PPO）与 DPO 的对比，下列哪项描述**错误**？\n\nA. RLHF 需要单独训练奖励模型，DPO 不需要\nB. RLHF 需要 critic（价值网络），DPO 不需要\nC. RLHF 是在线采样训练，DPO 使用离线偏好数据\nD. DPO 与 RLHF 完全等价，任何数据下效果都一样",
+      "answer": {
+        "correct": "D",
+        "explain": "DPO 从 RLHF 的目标出发推导出闭式解，在「奖励函数只由策略与参考策略的对数比表示」这一假设下等价；但实际中数据分布、在线探索能力不同，效果并不必然相同。A/B/C 都是真实差异。"
+      },
+      "explanation": "DPO 用更少组件达到相近目标，但缺少在线探索；两者是取舍关系而非完全等价。",
+      "tags": [
+        "RLHF",
+        "DPO",
+        "对齐"
+      ],
+      "source": "self",
+      "source_ref": "《Direct Preference Optimization》§4 · 从 RLHF 到 DPO 的推导"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "PPO 裁剪目标的数值判定",
+      "content_md": "设 clip epsilon = 0.2，某动作的优势 A = +1.0、概率比 ratio = 1.3。请计算：\n\n1. 未裁剪目标 ratio * A 的值；\n2. 裁剪后目标的值；\n3. 该样本的目标最终取多少，为什么？\n\n（请写出数值与判断依据）",
+      "answer": {
+        "explain": "未裁剪 = 1.3 * 1.0 = 1.3；比率被 [0.8, 1.2] 截断为 1.2，裁剪后 = 1.2 * 1.0 = 1.2；目标 = min(1.3, 1.2) = 1.2。因为 A > 0，PPO 不希望单次把好动作概率抬升过多，故取较小的 1.2。"
+      },
+      "explanation": "裁剪是 PPO 限制策略更新幅度的核心机制：A>0 时封顶、A<0 时保底。",
+      "tags": [
+        "PPO",
+        "clip",
+        "策略梯度"
+      ],
+      "source": "self",
+      "source_ref": "《Proximal Policy Optimization Algorithms》§3 · clipped surrogate objective"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "修好这个不收敛的 LoRA 初始化",
+      "content_md": "下面这段 LoRA 初始化的写法会让训练在第一步就把预训练能力破坏掉。请指出问题并改正：\n\n```python\nimport numpy as np\nrng = np.random.default_rng(0)\nA = rng.normal(0, 0.02, size=(r, d_in))\nB = rng.normal(0, 0.02, size=(d_out, r))\n```\n\n提示：思考「训练起点时增量 ΔW = B@A 应该是多少」。",
+      "answer": {
+        "explain": "LoRA 的标准初始化是 A 高斯随机、**B 全零**，这样 B@A = 0，训练从预训练状态无损出发。原写法把 B 也随机初始化，初始 ΔW 是随机大扰动，会立刻破坏主干能力、表现为 loss 暴涨或震荡。修正：`B = np.zeros((d_out, r))`。"
+      },
+      "explanation": "「A 随机、B 置零」是 LoRA 论文明确的设计；漏掉这一步是最常见的复现事故。",
+      "tags": [
+        "LoRA",
+        "初始化",
+        "复现"
+      ],
+      "source": "self",
+      "source_ref": "《LoRA》§4.1 · 初始化策略"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "实现 LoRA 层的量化前向与参数量统计",
+      "content_md": "只用 NumPy 实现一个 LoRA 包装层：\n\n1. 原权重 W 形状 (d_out, d_in)，冻结不训练；\n2. 低秩增量 B(d_out, r) @ A(r, d_in)，缩放系数 alpha / r；\n3. 前向 output = x @ (W + scale * B @ A).T；\n4. 函数 `lora_param_count(d_in, d_out, r)` 返回可训练参数量。\n\n要求验证：B 全零时前向输出与仅用 W 完全一致。",
+      "answer": {
+        "reference_code": "import numpy as np\n\n\ndef lora_param_count(d_in, d_out, r):\n    return r * (d_in + d_out)\n\n\nclass LoRALinear:\n    def __init__(self, d_in, d_out, r, alpha, seed=0):\n        rng = np.random.default_rng(seed)\n        self.W = rng.normal(0, 0.02, size=(d_out, d_in))\n        self.A = rng.normal(0, 0.02, size=(r, d_in))\n        self.B = np.zeros((d_out, r))\n        self.scale = alpha / float(r)\n\n    def forward(self, x):\n        delta = self.scale * (self.B @ self.A)\n        return x @ (self.W + delta).T\n\n\nlayer = LoRALinear(8, 6, 2, alpha=16)\nx = np.ones((3, 8))\nbase = x @ layer.W.T\nout = layer.forward(x)\nassert np.allclose(base, out)\nassert lora_param_count(8, 6, 2) == 28\nprint('base == lora_out:', bool(np.allclose(base, out)))\nprint('trainable params:', lora_param_count(8, 6, 2))\n"
+      },
+      "explanation": "关键是 B 置零保证初始等价，以及参数量 = r*(d_in+d_out)。",
+      "tags": [
+        "LoRA",
+        "实现",
+        "参数量"
+      ],
+      "source": "self",
+      "source_ref": "《LoRA》§4 · 低秩适配层定义"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 5,
+      "title": "实现 DPO 损失与其数值梯度校验",
+      "content_md": "实现 DPO 损失并用中心差分校验梯度符号：\n\n损失 L = -log sigmoid( beta * [ (logp_pi_c - logp_ref_c) - (logp_pi_r - logp_ref_r) ] )\n\n1. 写函数 `dpo_loss(logp_pi_c, logp_pi_r)`，参考对数概率用固定值；\n2. 用 h=1e-4 的中心差分分别求 dL/d(logp_pi_c) 与 dL/d(logp_pi_r)；\n3. 断言前者 < 0、后者 > 0。",
+      "answer": {
+        "reference_code": "import math\n\nLOG_REF_C = -1.5\nLOG_REF_R = -1.6\nBETA = 0.1\n\n\ndef dpo_loss(logp_pi_c, logp_pi_r):\n    margin = BETA * ((logp_pi_c - LOG_REF_C) - (logp_pi_r - LOG_REF_R))\n    return -math.log(1.0 / (1.0 + math.exp(-margin)))\n\n\ndef num_grad(f, x, h=1e-4):\n    return (f(x + h) - f(x - h)) / (2 * h)\n\n\nlc, lr = -1.2, -2.0\ng_c = num_grad(lambda v: dpo_loss(v, lr), lc)\ng_r = num_grad(lambda v: dpo_loss(lc, v), lr)\nassert g_c < 0 and g_r > 0\nprint('dL/dlogp_chosen =', round(g_c, 6))\nprint('dL/dlogp_rejected =', round(g_r, 6))\n"
+      },
+      "explanation": "梯度方向直接反映 DPO 的训练语义：抬高 chosen、压低 rejected。",
+      "tags": [
+        "DPO",
+        "梯度",
+        "数值校验"
+      ],
+      "source": "self",
+      "source_ref": "《DPO》§4 · 损失函数的梯度分析"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "用截断 SVD 选择 LoRA 的 rank",
+      "content_md": "写一个函数，对给定矩阵做截断 SVD，返回：\n\n1. 各 rank k 下的相对重构误差 ||W - W_k||_F / ||W||_F；\n2. 使相对误差首次小于阈值 tol 的最小 rank。\n\n用低秩构造矩阵（真实秩 8）验证：阈值 0.01 时应返回 8 附近。",
+      "answer": {
+        "reference_code": "import numpy as np\n\n\ndef truncation_curve(W, ks):\n    U, S, Vt = np.linalg.svd(W, full_matrices=False)\n    base = np.linalg.norm(W)\n    out = []\n    for k in ks:\n        Wk = U[:, :k] @ np.diag(S[:k]) @ Vt[:k, :]\n        out.append((k, float(np.linalg.norm(W - Wk) / base)))\n    return out\n\n\nrng = np.random.default_rng(42)\nW = rng.normal(size=(64, 8)) @ rng.normal(size=(8, 64)) + 0.01 * rng.normal(size=(64, 64))\ncurve = truncation_curve(W, [1, 2, 4, 8, 16, 32, 64])\ntol = 0.01\nk_min = next(k for k, e in curve if e < tol)\nprint('curve:', [(k, round(e, 6)) for k, e in curve])\nprint('min rank for tol=0.01:', k_min)\nassert k_min <= 10\n"
+      },
+      "explanation": "Eckart-Young 定理保证截断 SVD 是最优低秩近似，误差随 rank 单调下降。",
+      "tags": [
+        "SVD",
+        "低秩",
+        "rank"
+      ],
+      "source": "self",
+      "source_ref": "《LoRA》§7.2 · 低秩子空间的有效维度"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "github",
+      "difficulty": 4,
+      "title": "用 PEFT 库实践一次 LoRA 微调",
+      "content_md": "在真实工程中一般直接使用社区库而非手写。请在本地跑通 HuggingFace PEFT 的最小 LoRA 微调流程：\n\n1. 配置 `LoraConfig`（指定 target_modules、r、lora_alpha、lora_dropout）；\n2. 用 `get_peft_model` 包装基座模型；\n3. 打印可训练参数量与总参数量之比；\n4. 微调后用 `merge_and_unload()` 合并回基座权重并验证输出一致。\n\n题面与解答请见仓库文档，此处仅提供入口链接。",
+      "answer": {
+        "explanation": "工程实践题：重点是把「手写原理」与「库用法」对上，并理解 target_modules 与 alpha/r 的实际含义。注意合并前后输出一致性验证。",
+        "external_note": "入口：huggingface/peft 官方仓库与 LoRA 示例文档"
+      },
+      "explanation": "从原理到工程库的映射能力是 AI 岗的核心考察点。",
+      "tags": [
+        "PEFT",
+        "工程实践",
+        "LoRA"
+      ],
+      "source": "github",
+      "source_ref": "huggingface/peft · LoRA 快速上手示例",
+      "external_url": "https://github.com/huggingface/peft"
+    }
+  ]
+}

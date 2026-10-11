@@ -1,0 +1,100 @@
+{
+  "meta": {
+    "chapter": "db-ch04"
+  },
+  "items": [
+    {
+      "question": "EXPLAIN 输出里你最关注哪几列？给出你的排查顺序。",
+      "answer_md": "**排查顺序（从信号最强到最弱）**：\n\n1. **type**：出现 `ALL` 就是全表扫描，第一优先级；`index` 是扫整棵索引树，也算需优化。理想是 `const / eq_ref / ref / range`。\n2. **key**：为 `NULL` 说明该表压根没用上索引（可能没建，也可能被函数/隐式转换废掉了）。\n3. **possible_keys 有值但 key=NULL**：典型「有索引却不用」，去查 `WHERE`、`LIKE '%x'`、隐式类型转换、最左前缀。\n4. **rows × filtered**：估算的扫描量与过滤比；两者相乘才是真正参与后续 join 的行数。\n5. **Extra**：`Using filesort`（额外排序）、`Using temporary`（临时表，常见于无索引的 GROUP BY）、`Using index`（覆盖索引，好信号）、`Using index condition`（ICP，仍可能回表）。\n\n**判断前提**：`rows` 是估算值，统计信息不准时会偏差一个数量级，所以怀疑时应 `ANALYZE TABLE` 或改用 `EXPLAIN ANALYZE` 看实测行数。",
+      "follow_ups": [
+        "rows 估算和真实差距很大时怎么排查？",
+        "Using index condition 和 Using index 有什么区别？",
+        "EXPLAIN 和 EXPLAIN ANALYZE 的区别是什么？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "阿里",
+        "美团"
+      ]
+    },
+    {
+      "question": "什么情况下明明建了索引，优化器却不用它？",
+      "answer_md": "常见六类，本质都是「破坏了索引列的可定位性」：\n\n1. **索引列被函数/运算包裹**：`WHERE YEAR(created_at)=2026`、`WHERE id+1=5`。改成区间条件 `created_at >= '2026-01-01' AND < '2027-01-01'`。\n2. **隐式类型转换**：`user_id` 是 `INT` 却写 `= '123'`，MySQL 会对列做 `CAST`，等价于套了函数。传入正确类型即可。\n3. **违反最左前缀**：联合索引 `(a,b,c)`，查询只带 `b=2` 或 `a=1 AND c=3`（跳过 b）都用不上定位能力。\n4. **LIKE 前导百分号**：`LIKE '%abc'` 无法利用有序性；`LIKE 'abc%'` 可以。\n5. **OR 连接**：`WHERE a=1 OR b=2`，只有当两侧都有索引、优化器选择 `index_merge` 时才可能生效，否则退化为全表扫。拆成 `UNION` 更稳。\n6. **选择性太差**：如 `status != 1` 或某列只有 2 个值，优化器一算「走索引+回表」比顺序全扫更贵，索性放弃索引。\n\n**附加原因**：统计信息过时导致代价估算错误，也会让优化器「理性地」选错；此时 `ANALYZE TABLE` 可能立刻改变计划。",
+      "follow_ups": [
+        "为什么选择性差的列做索引反而更慢？",
+        "函数索引（MySQL 8.0.13+）能解决第 1 类问题吗？",
+        "隐式类型转换具体发生在哪一侧？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "字节",
+        "腾讯"
+      ]
+    },
+    {
+      "question": "什么是回表？覆盖索引为什么能避免回表？",
+      "answer_md": "**回表**：InnoDB 的二级索引叶子节点存的是「索引列 + 主键值」，不存整行。当查询需要的列不在二级索引里时，必须拿主键再去聚簇索引（主键索引）查一次拿完整行 —— 这就是回表。若命中 N 行，就是 N 次随机 I/O。\n\n**覆盖索引**：把查询涉及的所有列都放进索引，使索引本身就能回答查询，无需回表。\n\n```sql\n-- 查询: SELECT order_id, amount FROM orders WHERE user_id = ?\n-- 索引: (user_id, order_id, amount)  ← 覆盖索引\n```\n\n**判定**：`EXPLAIN` 的 `Extra` 出现 `Using index` 即为覆盖索引生效。\n\n**代价权衡**：索引列越多索引越大、写入越慢，不能为了覆盖把所有列都塞进去；只覆盖高频查询的 SELECT 列表即可。另外要注意 `Using index condition`（ICP）不是覆盖索引 —— 它只是把过滤下推到存储引擎，仍可能回表。",
+      "follow_ups": [
+        "为什么 order_id 是主键却也能算进覆盖列？",
+        "覆盖索引对写入性能有什么代价？",
+        "如何用 EXPLAIN 区分 Using index 和 Using where？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "阿里",
+        "百度"
+      ]
+    },
+    {
+      "question": "联合索引的列序怎么定？为什么范围条件之后的列会失效？",
+      "answer_md": "**定序三原则**：\n\n1. **等值条件列放最左，选择性高的排前面**（过滤性越强越先缩小范围）。\n2. **范围条件列必须排在等值列之后**。\n3. **ORDER BY 的列尽量紧随等值列**，让索引天然有序，避免 `Using filesort`。\n\n**范围之后为何失效**：B+树整体按「(a,b,c) 字典序」排序。当 `a` 是等值 `a=1` 时，子区间内 `b` 有序，`b` 上还能继续定位；但一旦 `b > 2` 是范围，落在该范围内的行「`c` 是无序的」（因为 `b` 在变），存储引擎只能扫完整个 `b>2` 的区间再逐行过滤 `c`。所以 `c` 只能用于**覆盖/索引下推过滤**，不能用于**定位**。\n\n**典型写法**：`WHERE a=1 AND b>2 AND c=3` → 索引 `(a,b,c)` 只能定位到 `a,b`，`c` 退化为 `Using index condition`。\n\n**冲突时取舍**：若范围列与排序列冲突（如 `WHERE a=1 AND b>2 ORDER BY c`），只能让其中一个走索引，另一个走 filesort，需按 QPS 与数据分布取舍。",
+      "follow_ups": [
+        "如果查询是 WHERE a=1 ORDER BY b，索引 (a,b) 能否避免 filesort？",
+        "为什么 WHERE a>1 ORDER BY b 用 (a,b) 仍会 filesort？",
+        "索引下推（ICP）具体省了什么？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "通用",
+        "阿里",
+        "字节",
+        "美团"
+      ]
+    },
+    {
+      "question": "深分页 LIMIT 1000000, 10 为什么慢？怎么优化？",
+      "answer_md": "**为什么慢**：`LIMIT offset, n` 的语义是「先扫描并**丢弃** offset 行，再返回 n 行」。所以 `OFFSET 1000000` 意味着引擎要取出 1000010 行（还常常包括回表），只为返回最后 10 行。代价与 offset 线性增长，越翻越慢。\n\n**优化方案（按推荐度）**：\n\n1. **游标分页（keyset pagination）**：`WHERE id > :last_id ORDER BY id LIMIT 10`。用上一页最后的主键做锚点，直接 B+树定位，代价与页深无关。缺点是不能随机跳页。\n2. **延迟关联（deferred join）**：先用覆盖索引子查询取主键（只读索引页、不回表），再 join 回表取那 10 行的宽列。把「丢弃」的成本限制在窄索引上。\n3. **业务层限制最大页深**：搜索引擎式产品（如 Google）通常只让翻前几十页 —— 从产品层面消灭这个需求。\n\n**注意**：`ORDER BY` 列必须有索引，否则排序本身就会全表排序，任何分页优化都失效。",
+      "follow_ups": [
+        "游标分页在「按非唯一列排序」时怎么做？",
+        "延迟关联的子查询为什么能只读索引页？",
+        "覆盖索引和延迟关联能否叠加使用？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "阿里",
+        "美团",
+        "快手"
+      ]
+    },
+    {
+      "question": "优化器为什么有时会「选错」执行计划？",
+      "answer_md": "优化器是**基于代价（CBO）+ 统计信息**做选择，不是「看真相」。选错通常来自三类原因：\n\n1. **统计信息不准**：`rows` 是采样估算值，数据分布倾斜或大量增删后未及时 `ANALYZE`，估算行数可能差一个数量级。选择率一错，`nested loop` 与 `hash join` 的代价比较就翻了。\n2. **代价模型与实际不符**：优化器假设「数据在磁盘上均匀分布」「索引页常驻缓存」，而实际可能有热点、SSD、或 buffer pool 命中率极高/极低。\n3. **相关性被忽略**：优化器默认多列条件相互独立，若 `city='BJ'` 与 `district='HD'` 强相关，估算会严重偏高。\n\n**应对**：\n- `ANALYZE TABLE` 刷新统计；对倾斜列建**直方图**（`ANALYZE TABLE t UPDATE HISTOGRAM ON col`）。\n- 用 `EXPLAIN ANALYZE` 看实测 vs 估算的差距，定位偏差表。\n- 极端场景才用 `FORCE INDEX` / `STRAIGHT_JOIN` 显式干预 —— 它是把优化器的手脚绑住，将来数据分布一变就可能反噬。",
+      "follow_ups": [
+        "直方图能解决什么问题？",
+        "FORCE INDEX 有什么副作用？",
+        "为什么说「多列条件独立假设」会导致高估？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "通用",
+        "阿里",
+        "腾讯",
+        "字节"
+      ]
+    }
+  ]
+}

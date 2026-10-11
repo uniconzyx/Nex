@@ -1,0 +1,258 @@
+{
+  "meta": {
+    "chapter": "cpp-ch20",
+    "note": "8 题：基础题 6（choice/fix_error）+ 算法题 2（LeetCode 146 仅存元数据与链接，不搬运题面；线程池 submit 为自命题 coding）"
+  },
+  "items": [
+    {
+      "id": "cpp20-q1",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "对 std::vector 调用 reserve(n) 之后，下列哪项一定成立？",
+      "content_md": "已知 `std::vector<int> v; v.reserve(100);`，随后 `auto* p = v.data();` 并执行若干次 `push_back`。关于 `p` 与 `capacity`，哪项正确？",
+      "options": [
+        "A. `capacity()` 一定 >= 100，且 `p` 指向的地址在整个过程中一定不变",
+        "B. `capacity()` 一定 >= 100，但 `p` 在触发扩容后成为悬空指针",
+        "C. `capacity()` 可能为 0，`p` 始终有效",
+        "D. `reserve` 会清空已有元素，因此 `p` 指向空"
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "output": "",
+        "reference_code": ""
+      },
+      "explanation": "`reserve(n)` 只保证 `capacity()>=n`，不保证地址不变；一旦 `size` 超过已分配容量触发扩容，`data()` 指向的旧内存被释放，`p` 悬空。对应 ex01。",
+      "tags": [
+        "vector",
+        "reserve",
+        "迭代器失效"
+      ],
+      "source": "self",
+      "source_ref": "cpp-ch20 综合项目一（迷你 vector 容量倍增，ex01）",
+      "external_url": "",
+      "time_limit_ms": 0,
+      "memory_limit_mb": 0
+    },
+    {
+      "id": "cpp20-q2",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "两个对象互相持有对方的 std::shared_ptr，会导致什么？",
+      "content_md": "对象 A 持有 `shared_ptr<B>`，对象 B 持有 `shared_ptr<A>`，二者无其他外部引用。",
+      "options": [
+        "A. 程序结束自动回收，无影响",
+        "B. 控制块引用计数永不为 0，析构永不触发，内存泄漏",
+        "C. 其中一方会先析构，另一方随后析构",
+        "D. 编译器会报循环引用错误，无法编译"
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "output": "",
+        "reference_code": ""
+      },
+      "explanation": "循环引用使双方 use_count 都 >=1，控制块引用计数无法归零，析构不被调用，内存泄漏。打破手段是改用 `weak_ptr`。对应 ex04。",
+      "tags": [
+        "shared_ptr",
+        "循环引用",
+        "weak_ptr"
+      ],
+      "source": "self",
+      "source_ref": "cpp-ch20 综合项目一（shared_ptr 循环引用，ex04）",
+      "external_url": "",
+      "time_limit_ms": 0,
+      "memory_limit_mb": 0
+    },
+    {
+      "id": "cpp20-q3",
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "修复 shared_ptr 循环引用导致的内存泄漏",
+      "content_md": "下列代码存在循环引用，请指出如何修改使其能正确析构。\n```cpp\nstruct B; struct A { std::shared_ptr<B> b; ~A(){} };\nstruct B { std::shared_ptr<A> a; ~B(){} };\nauto a = std::make_shared<A>(); auto b = std::make_shared<B>();\na->b = b; b->a = a;\n```",
+      "options": [
+        "A. 把 A 的 `b` 成员改成 `std::weak_ptr<B>`",
+        "B. 把 B 的 `a` 成员改成 `std::weak_ptr<A>`",
+        "C. 环上任意一方改成 `std::weak_ptr` 即可打破",
+        "D. 在析构里手动 `reset`"
+      ],
+      "answer": {
+        "correct": [
+          "C"
+        ],
+        "output": "",
+        "reference_code": ""
+      },
+      "explanation": "只要环上有一方改成 `weak_ptr`（只观察、不增加强引用），环即被打破，控制块引用计数可归零。选项 C 描述最准确。对应 ex04。",
+      "tags": [
+        "shared_ptr",
+        "weak_ptr",
+        "循环引用"
+      ],
+      "source": "self",
+      "source_ref": "cpp-ch20 综合项目一（weak_ptr 破环，ex04）",
+      "external_url": "",
+      "time_limit_ms": 0,
+      "memory_limit_mb": 0
+    },
+    {
+      "id": "cpp20-q4",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "关于返回局部对象，下列哪种写法最推荐？",
+      "content_md": "函数需要返回一个局部构造的大对象 `obj`。",
+      "options": [
+        "A. `return std::move(obj);`",
+        "B. `return obj;`",
+        "C. `return std::forward<decltype(obj)>(obj);`",
+        "D. 先把 obj 存入 static 再返回引用"
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "output": "",
+        "reference_code": ""
+      },
+      "explanation": "`return obj;`（有名局部对象）允许 NRVO/复制消除，编译器可在调用方栈帧直接构造；`return std::move(obj)` 反而强制移动构造、丧失 NRVO。对应 ex10。",
+      "tags": [
+        "RVO",
+        "移动语义",
+        "NRVO"
+      ],
+      "source": "self",
+      "source_ref": "cpp-ch20 面试冲刺（RVO / 移动消除，ex10）",
+      "external_url": "",
+      "time_limit_ms": 0,
+      "memory_limit_mb": 0
+    },
+    {
+      "id": "cpp20-q5",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "基类析构函数非 virtual 时，经基类指针 delete 派生对象会发生什么？",
+      "content_md": "```cpp\nstruct Base { ~Base(){} };\nstruct Derived : Base { int* p = new int[1024]; ~Derived(){ delete[] p; } };\nBase* b = new Derived(); delete b;\n```",
+      "options": [
+        "A. 先调 Derived 析构再调 Base 析构，资源正常释放",
+        "B. 只调 Base 析构，Derived 的 `p` 泄漏",
+        "C. 编译错误",
+        "D. 运行期抛出异常"
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "output": "",
+        "reference_code": ""
+      },
+      "explanation": "非 virtual 析构经基类指针 delete 只调静态类型（Base）的析构，Derived 部分不被析构，`p` 泄漏。类若会被继承并经基类指针释放，析构必须 virtual。对应 ex11。",
+      "tags": [
+        "虚析构",
+        "对象模型",
+        "内存泄漏"
+      ],
+      "source": "self",
+      "source_ref": "cpp-ch20 面试冲刺（虚函数表与对象模型，ex11）",
+      "external_url": "",
+      "time_limit_ms": 0,
+      "memory_limit_mb": 0
+    },
+    {
+      "id": "cpp20-q6",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "在 for 循环里对 vector 持续 push_back，同时持有元素指针，风险是？",
+      "content_md": "`std::vector<int> v; int* p = &v[0]; for(...) v.push_back(x);` 然后使用 `*p`。",
+      "options": [
+        "A. 无风险，vector 保证不搬移",
+        "B. 扩容后 p 悬空，使用即未定义行为",
+        "C. 只会在 debug 模式崩溃",
+        "D. p 会自动跟随 vector 重分配"
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "output": "",
+        "reference_code": ""
+      },
+      "explanation": "vector 扩容时整体搬移到新内存，旧 `&v[0]` 指向的内存被释放，p 悬空。这正是 ex12 演示的迭代器/引用失效。",
+      "tags": [
+        "vector",
+        "迭代器失效",
+        "扩容"
+      ],
+      "source": "self",
+      "source_ref": "cpp-ch20 综合项目一（迭代器失效，ex12）",
+      "external_url": "",
+      "time_limit_ms": 0,
+      "memory_limit_mb": 0
+    },
+    {
+      "id": "cpp20-q7",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "medium",
+      "title": "LRU Cache（仅存元数据与链接，不搬运题面）",
+      "content_md": "设计并实现一个满足 LRU（最近最少使用）约束的缓存：get 与 put 均摊 O(1)。\n（题面详见 LeetCode 原题，本项目按合规红线**只存元数据与链接**，不搬运题面正文。）",
+      "options": [],
+      "answer": {
+        "correct": [],
+        "output": "",
+        "reference_code": "struct Node { int key, val; Node *prev, *next; };\nclass LRUCache {\n  int cap; std::unordered_map<int, Node*> m;\n  Node head, tail;\n  void touch(Node* n){ /* 摘除并移到 tail 前 */ }\npublic:\n  LRUCache(int c): cap(c){ head.next=&tail; tail.prev=&head; }\n  int get(int k){ auto it=m.find(k); if(it==m.end()) return -1; touch(it->second); return it->second->val; }\n  void put(int k,int v){ /* find/touch/满则删 head.next/新节点插 tail 前 */ }\n};"
+      },
+      "explanation": "用 list（或手写双向链表）维护使用顺序 + unordered_map 存 key->节点指针，get/put 均摊 O(1)。map 用 find 而非 [] 避免误插入。对应 ex13。",
+      "tags": [
+        "LRU",
+        "哈希",
+        "双向链表"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 146 · LRU Cache",
+      "external_url": "https://leetcode.com/problems/lru-cache/",
+      "time_limit_ms": 0,
+      "memory_limit_mb": 0
+    },
+    {
+      "id": "cpp20-q8",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "实现一个支持优雅关闭的线程池 submit",
+      "content_md": "实现一个固定 N 个工作线程的线程池：`submit(F)` 提交任务并返回 `std::future`；\n提供 `shutdown()` 优雅关闭——先置停止标志、唤醒所有线程、再 join，保证在飞任务跑完。",
+      "options": [],
+      "answer": {
+        "correct": [],
+        "output": "",
+        "reference_code": "#include <queue><thread><mutex><condition_variable><functional><future>\nclass ThreadPool {\n  std::queue<std::function<void()>> q; std::mutex m; std::condition_variable cv;\n  std::vector<std::thread> ws; bool stop=false;\npublic:\n  ThreadPool(size_t n){ for(size_t i=0;i<n;++i) ws.emplace_back([this]{\n    for(;;){ std::function<void()> f; { std::unique_lock<std::mutex> lk(m);\n      cv.wait(lk,[&]{ return stop || !q.empty(); });\n      if(stop && q.empty()) return; f=std::move(q.front()); q.pop(); }\n      f(); } }); }\n  template<class F> auto submit(F&& f){ auto p=std::make_shared<std::packaged_task<decltype(f())()>>(std::forward<F>(f));\n    auto r=p->get_future(); { std::lock_guard<std::mutex> lk(m); q.push([p]{ (*p)(); }); } cv.notify_one(); return r; }\n  void shutdown(){ { std::lock_guard<std::mutex> lk(m); stop=true; } cv.notify_all(); for(auto&t:ws) t.join(); }\n};"
+      },
+      "explanation": "任务队列用 mutex+condvar 保护；cv.wait 用 while 语义（谓词）防虚假唤醒；shutdown 先置 stop 再 notify_all 再 join，在飞任务自然跑完。对应 ex06。",
+      "tags": [
+        "线程池",
+        "条件变量",
+        "优雅关闭"
+      ],
+      "source": "self",
+      "source_ref": "cpp-ch20 综合项目二（线程池优雅关闭，ex06）",
+      "external_url": "",
+      "time_limit_ms": 0,
+      "memory_limit_mb": 0
+    }
+  ]
+}

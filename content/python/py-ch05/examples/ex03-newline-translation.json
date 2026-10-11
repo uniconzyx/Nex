@@ -1,0 +1,8 @@
+{
+  "title": "换行符翻译：newline=None / '' / '\\n'",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "文件原始字节 = 610d0a620a630d64\n\nnewline=None (默认, 通用换行) -> 'a\\nb\\nc\\nd'\nnewline=''  (不转换)        -> 'a\\r\\nb\\nc\\rd'\nnewline='\\n' (仅按 \\n 断行) -> 'a\\r\\nb\\nc\\rd'\n\n默认模式迭代行数 = 4\nnewline='' 迭代行数 = 4\n\n要点: 读 csv 必须 newline='' ，否则字段内的换行会被先行处理掉",
+  "code": "from pathlib import Path\n\np = Path(\"nl.txt\")\np.write_bytes(b\"a\\r\\nb\\nc\\rd\")\nprint(\"文件原始字节 =\", p.read_bytes().hex())\nprint()\n\nwith open(p, \"r\", encoding=\"utf-8\") as f:\n    print(\"newline=None (默认, 通用换行) ->\", repr(f.read()))\n\nwith open(p, \"r\", encoding=\"utf-8\", newline=\"\") as f:\n    print(\"newline=''  (不转换)        ->\", repr(f.read()))\n\nwith open(p, \"r\", encoding=\"utf-8\", newline=\"\\n\") as f:\n    print(\"newline='\\\\n' (仅按 \\\\n 断行) ->\", repr(f.read()))\nprint()\n\nwith open(p, \"r\", encoding=\"utf-8\") as f:\n    print(\"默认模式迭代行数 =\", len(f.readlines()))\nwith open(p, \"r\", encoding=\"utf-8\", newline=\"\") as f:\n    print(\"newline='' 迭代行数 =\", len(f.readlines()))\nprint()\nprint(\"要点: 读 csv 必须 newline='' ，否则字段内的换行会被先行处理掉\")"
+}

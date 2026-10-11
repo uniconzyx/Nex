@@ -1,0 +1,8 @@
+{
+  "title": "JDK 动态代理：前置通知（InvocationHandler）",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "[before] calling login\nwelcome alice\n",
+  "code": "import java.lang.reflect.*;\n\ninterface UserService { String login(String u); }\nclass UserServiceImpl implements UserService {\n    public String login(String u) { return \"welcome \" + u; }\n}\nclass BeforeHandler implements InvocationHandler {\n    private Object target;\n    BeforeHandler(Object t) { target = t; }\n    public Object invoke(Object proxy, Method m, Object[] args) throws Throwable {\n        System.out.println(\"[before] calling \" + m.getName());\n        return m.invoke(target, args);\n    }\n}\npublic class Main {\n    public static void main(String[] a) throws Exception {\n        UserService real = new UserServiceImpl();\n        UserService proxy = (UserService) Proxy.newProxyInstance(\n            UserService.class.getClassLoader(),\n            new Class[]{UserService.class},\n            new BeforeHandler(real));\n        System.out.println(proxy.login(\"alice\"));\n    }\n}\n"
+}

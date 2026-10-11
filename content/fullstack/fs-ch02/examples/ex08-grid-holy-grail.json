@@ -1,0 +1,10 @@
+{
+  "title": "Grid 二维布局：圣杯（Header/两侧栏/Main/Footer）",
+  "code_lang": "css",
+  "code_std": "css3",
+  "stdin": "",
+  "expected_output": "布局结果：\n- 三列：左右侧栏固定 200px，中间 1fr 自适应剩余空间。\n- 1fr 表示「剩余可用空间的一份」，是 Grid 的核心弹性单位。\n- 媒体查询在 <=768px 改为单列堆叠，无需改 DOM 顺序（Grid 布局与源码顺序解耦）。\n说明：源码顺序仍影响可访问性与 SEO，重要内容应尽量靠前。",
+  "code": ".page {\n  display: grid;\n  grid-template-columns: 200px 1fr 200px;\n  grid-template-rows: auto 1fr auto;\n  grid-template-areas:\n    \"header header header\"\n    \"left   main   right\"\n    \"footer footer footer\";\n  gap: 12px;\n  min-height: 100vh;\n}\n.header { grid-area: header; }\n.left   { grid-area: left; }\n.main   { grid-area: main; }\n.right  { grid-area: right; }\n.footer { grid-area: footer; }\n\n@media (max-width: 768px) {\n  .page {\n    grid-template-columns: 1fr;\n    grid-template-areas: \"header\" \"main\" \"left\" \"right\" \"footer\";\n  }\n}",
+  "_verified": "false",
+  "_verify_note": "HTML/CSS 渲染行为，本地无浏览器环境，输出为按规范的推理说明"
+}

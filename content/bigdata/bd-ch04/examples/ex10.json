@@ -1,0 +1,8 @@
+{
+  "title": "数据倾斜：key 分布不均导致各分区负载失衡",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "总记录 = 100, 不同 key = 5\n各 Reducer 负载(记录数) = [5, 85, 5, 5]\n最大分区负载 = 85, 最小 = 5, 倾斜比 ≈ 17 : 1\n结论: 单个热 key 占据绝大多数记录, 造成数据倾斜(某 reducer 长尾)\n",
+  "code": "from collections import Counter\ndef dhash(s):\n    h = 0\n    for c in s:\n        h = (h * 31 + ord(c)) & 0xFFFFFFFF\n    return h\ndata = [\"hot\"] * 80 + [\"a\"] * 5 + [\"b\"] * 5 + [\"c\"] * 5 + [\"d\"] * 5\ncnt = Counter(data)\nnum_reduce = 4\nload = [0] * num_reduce\nfor k, v in cnt.items():\n    load[dhash(k) % num_reduce] += v\nmx = max(load)\nmn = min(load)\nprint(f\"总记录 = {len(data)}, 不同 key = {len(cnt)}\")\nprint(f\"各 Reducer 负载(记录数) = {load}\")\nprint(f\"最大分区负载 = {mx}, 最小 = {mn}, 倾斜比 ≈ {mx // mn} : 1\")\nprint(\"结论: 单个热 key 占据绝大多数记录, 造成数据倾斜(某 reducer 长尾)\")\n"
+}

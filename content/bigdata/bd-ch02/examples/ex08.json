@@ -1,0 +1,8 @@
+{
+  "title": "数据倾斜：热 key 打散（salting）前后负载对比",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "before salting, reducer loads: [5, 95]\nskew ratio (max/mean): 1.90\nafter salting, reducer loads: [56, 44]\nskew ratio (max/mean): 1.12",
+  "code": "\nimport random\nrandom.seed(7)\ndocs = ([\"vip_user\"]*90) + [\"normal_a\"]*5 + [\"normal_b\"]*5\nR = 2\ndef mh(key, n):\n    h = 0\n    for ch in key:\n        h = (h * 31 + ord(ch)) & 0x7fffffff\n    return h % n\nloads = [0]*R\nfor d in docs:\n    loads[mh(d, R)] += 1\nprint(\"before salting, reducer loads:\", loads)\nprint(f\"skew ratio (max/mean): {max(loads)/(sum(loads)/R):.2f}\")\nS = 4\nloads2 = [0]*R\nfor d in docs:\n    salted = f\"vip_user_{random.randint(0, S-1)}\" if d == \"vip_user\" else d\n    loads2[mh(salted, R)] += 1\nprint(\"after salting, reducer loads:\", loads2)\nprint(f\"skew ratio (max/mean): {max(loads2)/(sum(loads2)/R):.2f}\")\n"
+}

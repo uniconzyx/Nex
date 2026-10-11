@@ -1,0 +1,8 @@
+{
+  "title": "B+ 树叶子链表与内部索引示意",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "有序数据: 5,13,19,21,37,56,64,75,80,88\n\n--- B+ 树叶子层（每叶最多3个，叶间链表串联）---\n叶子0: [5,13,19] ->\n叶子1: [21,37,56] ->\n叶子2: [64,75,80] ->\n叶子3: [88]\n\n--- 内部索引（取每叶最大关键字，副本）---\n索引项0: 19\n索引项1: 56\n索引项2: 80\n索引项3: 88\n\nB+ 树特点：所有关键字都在叶子层且有序链表串联，支持范围扫描；内部节点仅索引。",
+  "code": "#include <stdio.h>\n\nint main(void) {\n    int data[] = {5, 13, 19, 21, 37, 56, 64, 75, 80, 88};\n    int n = (int)(sizeof(data) / sizeof(data[0]));\n    int order = 3;\n    int i, start, end, leaf_count, idx;\n    printf(\"有序数据: \");\n    for (i = 0; i < n; i++) { if (i) printf(\",\"); printf(\"%d\", data[i]); }\n    printf(\"\\n\\n--- B+ 树叶子层（每叶最多%d个，叶间链表串联）---\\n\", order);\n    leaf_count = 0;\n    start = 0;\n    while (start < n) {\n        end = start + order;\n        if (end > n) end = n;\n        printf(\"叶子%d: [\", leaf_count);\n        for (i = start; i < end; i++) { if (i > start) printf(\",\"); printf(\"%d\", data[i]); }\n        printf(\"]\");\n        if (end < n) printf(\" ->\");\n        printf(\"\\n\");\n        leaf_count++;\n        start = end;\n    }\n    printf(\"\\n--- 内部索引（取每叶最大关键字，副本）---\\n\");\n    start = 0; idx = 0;\n    while (start < n) {\n        end = start + order;\n        if (end > n) end = n;\n        printf(\"索引项%d: %d\\n\", idx, data[end - 1]);\n        idx++;\n        start = end;\n    }\n    printf(\"\\nB+ 树特点：所有关键字都在叶子层且有序链表串联，支持范围扫描；内部节点仅索引。\\n\");\n    return 0;\n}\n"
+}

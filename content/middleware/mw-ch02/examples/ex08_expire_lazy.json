@@ -1,0 +1,9 @@
+{
+  "title": "过期键删除：惰性删除(lazy expiration)",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "惰性删除(lazy expiration):\n  访问已过期 key 'a' -> None\n  访问未过期 key 'b' -> y\n  惰性删除次数: 1 (过期键在访问时才删除, 不耗 CPU 直到被访问)",
+  "code": "import time\nclass DB:\n    def __init__(self):\n        self.kv = {}\n        self.expire = {}\n        self.lazy_deleted = 0\n    def set(self, k, v, ttl):\n        self.kv[k] = v\n        self.expire[k] = time.time() + ttl\n    def get(self, k, now):\n        if k in self.expire and self.expire[k] <= now:\n            del self.kv[k]; del self.expire[k]; self.lazy_deleted += 1\n            return None\n        return self.kv.get(k)\n\ndb = DB()\ndb.set(\"a\", \"x\", -1)  # 已过期\ndb.set(\"b\", \"y\", 100)\nnow = time.time()\nprint(\"惰性删除(lazy expiration):\")\nprint(\"  访问已过期 key 'a' ->\", db.get(\"a\", now))\nprint(\"  访问未过期 key 'b' ->\", db.get(\"b\", now))\nprint(\"  惰性删除次数:\", db.lazy_deleted, \"(过期键在访问时才删除, 不耗 CPU 直到被访问)\")\n",
+  "_verified": true
+}

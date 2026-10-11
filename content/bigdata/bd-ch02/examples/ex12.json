@@ -1,0 +1,8 @@
+{
+  "title": "ApplicationMaster 通过心跳向 RM 循环申请容器",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "round 1: RM granted 5 containers, total launched=5, avail mem=6 cores=11\nall 5 tasks launched in 1 heartbeat rounds",
+  "code": "\navail = {\"mem\": 16, \"cores\": 16}\nneed = {\"mem\": 2, \"cores\": 1, \"count\": 5}\nlaunched = 0\nrounds = 0\nwhile launched < need[\"count\"] and rounds < 10:\n    rounds += 1\n    remaining = need[\"count\"] - launched\n    grant = 0\n    for _ in range(remaining):\n        if avail[\"mem\"] >= need[\"mem\"] and avail[\"cores\"] >= need[\"cores\"]:\n            avail[\"mem\"] -= need[\"mem\"]\n            avail[\"cores\"] -= need[\"cores\"]\n            grant += 1\n    if grant == 0:\n        print(f\"round {rounds}: no resources, AM waits\")\n        break\n    launched += grant\n    print(f\"round {rounds}: RM granted {grant} containers, total launched={launched}, avail mem={avail['mem']} cores={avail['cores']}\")\nprint(f\"all {need['count']} tasks launched in {rounds} heartbeat rounds\")\n"
+}

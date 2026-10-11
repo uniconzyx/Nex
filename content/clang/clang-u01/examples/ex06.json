@@ -1,0 +1,8 @@
+{
+  "title": "指针数组 vs 数组指针",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "arr[0..2] = 1 2 3\nsizeof(arr) = 24 (3 个指针)\npar[1][2] = 6\n(char*)(par+1)-(char*)par = 12 (一整行字节数)",
+  "code": "#include <stdio.h>\n\nint main(void) {\n    int x = 1, y = 2, z = 3;\n    int *arr[3];            /* 指针数组：3 个 int* */\n    arr[0] = &x; arr[1] = &y; arr[2] = &z;\n    printf(\"arr[0..2] = %d %d %d\\n\", *arr[0], *arr[1], *arr[2]);\n    printf(\"sizeof(arr) = %zu (3 个指针)\\n\", sizeof(arr));\n\n    int m[2][3] = {{1, 2, 3}, {4, 5, 6}};\n    int (*par)[3] = m;      /* 数组指针：指向一行 */\n    printf(\"par[1][2] = %d\\n\", par[1][2]);\n    printf(\"(char*)(par+1)-(char*)par = %td (一整行字节数)\\n\",\n           (char *)(par + 1) - (char *)par);\n    return 0;\n}"
+}

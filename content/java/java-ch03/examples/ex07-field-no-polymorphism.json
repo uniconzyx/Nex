@@ -1,0 +1,8 @@
+{
+  "title": "字段没有多态：字段隐藏（hide）",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "Derived.n=2\nBase ref .n=1",
+  "code": "public class E307 {\n    static class Base { int n = 1; }\n    static class Derived extends Base { int n = 2; }\n    public static void main(String[] args) {\n        Derived d = new Derived();\n        Base b = d;\n        System.out.println(\"Derived.n=\" + d.n);\n        System.out.println(\"Base ref .n=\" + b.n);\n    }\n}"
+}

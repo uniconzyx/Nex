@@ -1,0 +1,8 @@
+{
+  "title": "引用传参交换",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "2 1",
+  "code": "#include <iostream>\n\nvoid swap(int& a, int& b) { int t = a; a = b; b = t; }\n\nint main() {\n    int x = 1, y = 2;\n    swap(x, y);\n    std::cout << x << ' ' << y;\n}"
+}

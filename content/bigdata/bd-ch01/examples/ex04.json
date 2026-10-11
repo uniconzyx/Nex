@@ -1,0 +1,8 @@
+{
+  "title": "块大小与寻址：NameNode 元数据量估算",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "size=1MB blocks=1 namenode_meta_bytes=150\nsize=128MB blocks=1 namenode_meta_bytes=150\nsize=300MB blocks=3 namenode_meta_bytes=450\nsize=1024MB blocks=8 namenode_meta_bytes=1200",
+  "code": "\nBLOCK = 128 * 1024 * 1024\nMETA = 150  # 每文件/块约 150 字节元数据\ndef analyze(size_mb):\n    nb = (size_mb * 1024 * 1024 + BLOCK - 1) // BLOCK\n    return nb, nb * META\nfor size_mb in [1, 128, 300, 1024]:\n    nb, meta = analyze(size_mb)\n    print(\"size={0}MB blocks={1} namenode_meta_bytes={2}\".format(size_mb, nb, meta))\n"
+}

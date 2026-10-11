@@ -1,0 +1,10 @@
+{
+  "title": "语义化页面骨架：header/nav/main/article/aside/footer",
+  "code_lang": "html",
+  "code_std": "html5",
+  "stdin": "",
+  "expected_output": "可访问性树（简化）：\n- document\n  - banner (header)\n  - navigation (nav, 名称=主导航)\n  - main\n    - article (标题=文章标题)\n  - complementary (aside, 名称=相关链接)\n  - contentinfo (footer)\n说明：header/nav/main/article/aside/footer 让屏幕阅读器与搜索引擎直接得到 landmark；若全用 div 则无 landmark，需额外 role 属性补齐。",
+  "code": "<!DOCTYPE html>\n<html lang=\"zh-CN\">\n<head><meta charset=\"utf-8\"><title>文章页</title></head>\n<body>\n  <header><h1>站点标题</h1></header>\n  <nav aria-label=\"主导航\"><ul><li><a href=\"/\">首页</a></li></ul></nav>\n  <main>\n    <article><h2>文章标题</h2><p>正文段落。</p></article>\n  </main>\n  <aside aria-label=\"相关链接\"><h2>相关</h2></aside>\n  <footer><p>版权信息</p></footer>\n</body>\n</html>",
+  "_verified": "false",
+  "_verify_note": "HTML/CSS 渲染行为，本地无浏览器环境，输出为按规范的推理说明"
+}

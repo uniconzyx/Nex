@@ -1,0 +1,8 @@
+{
+  "title": "f-string 与切片",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "Hi Python\nPy",
+  "code": "name = 'Python'\nprint(f'Hi {name}')\nprint(name[0:2])"
+}

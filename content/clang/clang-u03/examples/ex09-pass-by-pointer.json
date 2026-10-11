@@ -1,0 +1,8 @@
+{
+  "title": "传结构体指针修改原对象（vs 传值只改副本）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "before: (1.0, 2.0)\nafter:  (4.0, 6.0)\n",
+  "code": "#include <stdio.h>\n\nstruct Vec2 { double x; double y; };\n\nvoid translate(struct Vec2 *v, double dx, double dy) {\n    v->x += dx;\n    v->y += dy;\n}\n\nint main(void) {\n    struct Vec2 p = {1.0, 2.0};\n    printf(\"before: (%.1f, %.1f)\\n\", p.x, p.y);\n    translate(&p, 3.0, 4.0);\n    printf(\"after:  (%.1f, %.1f)\\n\", p.x, p.y);\n    return 0;\n}"
+}

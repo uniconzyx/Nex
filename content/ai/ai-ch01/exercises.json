@@ -1,0 +1,132 @@
+{
+  "meta": {
+    "chapter": "ai-ch01",
+    "title": "深度学习基础 —— 习题集",
+    "count": 6,
+    "note": "3 道基础题 + 3 道算法/实践题（平台题仅存元数据与链接，不复述题面）"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "反向模式 AD 为什么比前向模式快",
+      "content_md": "一个有 P 个参数、损失为**标量**的模型。前向模式自动微分与反向模式自动微分，各自求全部参数梯度需要多少次前向传播量级的计算？\n\nA. 前向模式 O(P)，反向模式 O(1)\nB. 前向模式 O(1)，反向模式 O(P)\nC. 两者都是 O(P)\nD. 两者都是 O(1)",
+      "answer": {
+        "correct": "A",
+        "explain": "前向模式（JVP）一次前向只能求**一个输入方向**的导数，要对 P 个参数全部求导需 P 次；反向模式（VJP）一次反向就能得到**一个标量输出对所有输入**的导数，因损失是标量，一次反向即可，总代价约 2 倍前向。\n\n这就是训练十亿参数模型在数学上可行的根本原因 —— 也是反向传播真正的精髓（不是链式法则本身，而是**计算方向的选择**）。"
+      },
+      "explanation": "JVP 与 VJP 的代价对比是理解反向传播的关键。",
+      "tags": [
+        "自动微分",
+        "反向传播",
+        "VJP"
+      ],
+      "source": "self",
+      "source_ref": "《Deep Learning》（Goodfellow）第6章 · 反向传播"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "训练循环里漏掉的三件事",
+      "content_md": "下面训练循环能跑通、loss 也在下降，但最终模型效果很差。指出所有问题：\n\n```python\nfor epoch in range(epochs):\n    for x, y in loader:\n        loss = criterion(model(x), y)\n        loss.backward()\n        opt.step()\n    val_loss = evaluate(model, val_loader)   # 直接评估\n```",
+      "answer": {
+        "reference_code": "for epoch in range(epochs):\n    model.train()\n    for x, y in loader:\n        opt.zero_grad()          # ① 必须清空，否则梯度跨 batch 累加\n        loss = criterion(model(x), y)\n        loss.backward()\n        opt.step()\n    model.eval()                 # ② 关闭 Dropout、冻结 BN 统计量\n    with torch.no_grad():        # ③ 不建图，省显存\n        val_loss = evaluate(model, val_loader)",
+        "explain": "三处错误都不会抛异常，只会静默给错结果：\n① 梯度默认累加，不清空会让每个 batch 混入历史梯度，等效学习率失真；\n② 不切 eval，Dropout 继续随机置零、BN 继续更新 running 统计量，验证指标偏低且抖动；\n③ 评估时建图会保留全部中间激活，显存占用可能是推理的数倍。"
+      },
+      "explanation": "训练循环的三处静默错误是新手最常踩也最难自查的坑。",
+      "tags": [
+        "训练循环",
+        "PyTorch",
+        "工程实践"
+      ],
+      "source": "self",
+      "source_ref": "PyTorch 官方教程 · Training a Classifier"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "为什么深层 sigmoid 网络会梯度消失",
+      "content_md": "一个 10 层全连接网络，每层用 sigmoid 激活、权重用标准正态随机初始化。定性说明：第 1 层的梯度大约是多少？为什么？给出定量上界。",
+      "answer": {
+        "explain": "**定量上界**：sigmoid 的导数 σ'(x) = σ(x)(1−σ(x))，**最大值只有 0.25**（在 x = 0 处取到）。链式法则下第 1 层的梯度是各层雅可比的连乘，因此 |∂L/∂W₁| ≤ 0.25^10 ≈ 9.5e-7 —— **梯度早已归零**。\n\n**本质**：不是「梯度变小」这么含糊，而是**雅可比连乘的谱半径 ρ < 1 导致指数级衰减**。\n\n**对策及各自修复的东西**：\n- ReLU 类激活：正区间导数恒为 1，去掉连乘的衰减因子；\n- He/Xavier 初始化：让每层输出方差保持 ~1，使初始 ρ ≈ 1；\n- 残差连接：引入恒等通路，J = I + 小扰动，ρ 天然接近 1；\n- BatchNorm/LayerNorm：强行把分布拉回零均值单位方差，稳定 ρ；\n- 梯度裁剪：**只治爆炸，不治消失**。"
+      },
+      "explanation": "从谱半径角度理解消失，比「梯度变小」精确得多。",
+      "tags": [
+        "梯度消失",
+        "激活函数",
+        "初始化"
+      ],
+      "source": "self",
+      "source_ref": "《Deep Learning》第8章 · 深度模型中的优化"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "github",
+      "difficulty": 4,
+      "title": "手写 autograd 并用数值梯度校验",
+      "content_md": "参照社区最精简的 autograd 实现，只用 NumPy 写出 Tensor 类（支持 add/mul/matmul/ReLU），实现拓扑排序反向传播，并用中心差分法做梯度校验（相对误差应 < 1e-5）。",
+      "answer": {
+        "reference_code": "# 数值梯度校验（中心差分，精度 O(h^2)）\nfor i in range(theta.size):\n    old = theta[i]\n    theta[i] = old + h;   f_plus  = loss(theta)\n    theta[i] = old - h;   f_minus = loss(theta)\n    theta[i] = old\n    num_grad[i] = (f_plus - f_minus) / (2 * h)\n    # 相对误差：|num - ana| / max(1, |num| + |ana|)",
+        "explain": "梯度校验是手写 autograd 的**唯一可靠验证手段**。三个要点：\n① 必须用中心差分（前向差分精度仅 O(h)）；\n② 用**相对误差**而非绝对误差做判据；\n③ 关闭 Dropout 等随机性后再校验，否则数值梯度无意义。"
+      },
+      "explanation": "数值梯度校验是调试自定义层的必备手段。",
+      "tags": [
+        "自动微分",
+        "梯度校验",
+        "NumPy"
+      ],
+      "source": "github",
+      "source_ref": "karpathy/micrograd · 手写 autograd 极简实现",
+      "external_url": "https://github.com/karpathy/micrograd"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "github",
+      "difficulty": 4,
+      "title": "从零实现一个字符级语言模型",
+      "content_md": "参照社区知名的 nanoGPT 思路，用 NumPy 或 PyTorch 实现一个字符级 GPT：包含 token/位置嵌入、自注意力掩码、多层 Transformer block、交叉熵损失与 AdamW 优化，在 TinyShakespeare 级别的小语料上训练并输出采样文本。",
+      "answer": {
+        "reference_code": "# 关键：因果掩码（causal mask）保证位置 i 只能看到 0..i\nmask = np.triu(np.ones((T, T)), k=1).astype(bool)\nattn = np.where(mask, -np.inf, scores)\nattn = softmax(attn / np.sqrt(d_k))",
+        "explain": "自回归语言模型的核心是**因果掩码**：训练时并行计算所有位置，但通过掩码让第 i 个位置看不到未来，从而等价于串行生成。这是 Transformer 能并行训练自回归模型的关键技巧。"
+      },
+      "explanation": "因果掩码是自回归 Transformer 的必备组件。",
+      "tags": [
+        "Transformer",
+        "语言模型",
+        "实践"
+      ],
+      "source": "github",
+      "source_ref": "karpathy/nanoGPT · 极简 GPT 实现",
+      "external_url": "https://github.com/karpathy/nanoGPT"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "github",
+      "difficulty": 3,
+      "title": "用预训练 transformers 微调一个文本分类器",
+      "content_md": "使用业界标准的 transformers 库加载预训练模型，在自己的小数据集上做微调，实现 Accelerate/Trainer 训练循环、评估指标与推理导出。",
+      "answer": {
+        "reference_code": "from transformers import AutoModelForSequenceClassification, Trainer\nmodel = AutoModelForSequenceClassification.from_pretrained(ckpt, num_labels=2)\ntrainer = Trainer(model=model, args=args, train_dataset=ds, eval_dataset=val)\ntrainer.train()",
+        "explain": "现代 NLP 的范式是「预训练 + 微调」而非从零训练。要点：\n① 微调学习率应比预训练小 1~2 个数量级（典型 2e-5）；\n② 加 warmup + 线性/余弦衰减；\n③ 分类头是随机初始化的，需要更多步数收敛。"
+      },
+      "explanation": "预训练+微调是现代 NLP 的默认范式。",
+      "tags": [
+        "微调",
+        "Transformers",
+        "NLP"
+      ],
+      "source": "github",
+      "source_ref": "huggingface/transformers · 事实标准库",
+      "external_url": "https://github.com/huggingface/transformers"
+    }
+  ]
+}

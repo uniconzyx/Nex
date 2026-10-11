@@ -1,0 +1,8 @@
+{
+  "title": "GIL 与工作量守恒：为什么纯计算多线程不加速",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "solo 结果 = 2666646666700000\n工作单元守恒(每线程结果与 solo 相同): True\n完成任务的线程数 = 5\nGIL 结论: 字节码级互斥 -> 纯 Python 计算多线程不加速;\n          但 IO 等待 / C 扩展计算会释放 GIL -> 那些场景多线程有效",
+  "code": "import threading\n\n\n# 结论先行：GIL 保证同一时刻只有一条线程执行 Python 字节码，\n# 因此 CPU 密集任务用多线程**不会**获得并行加速。\n# 但耗时不可复现，所以这里用「工作量守恒」这一确定性判据。\n\nUNIT = 200000\nresults = {}\n\n\ndef cpu_work(name, n):\n    s = 0\n    for i in range(n):\n        s += i * i\n    results[name] = s\n\n\n# 基准：单线程跑一遍\nsolo = threading.Thread(target=cpu_work, args=(\"solo\", UNIT))\nsolo.start()\nsolo.join()\n\n# 4 条线程各跑同样多的工作量\nworkers = [threading.Thread(target=cpu_work, args=(\"w%d\" % i, UNIT)) for i in range(4)]\nfor t in workers:\n    t.start()\nfor t in workers:\n    t.join()\n\nprint(\"solo 结果 =\", results[\"solo\"])\nprint(\"工作单元守恒(每线程结果与 solo 相同):\",\n      all(results[k] == results[\"solo\"] for k in results))\nprint(\"完成任务的线程数 =\", len(results))\nprint(\"GIL 结论: 字节码级互斥 -> 纯 Python 计算多线程不加速;\")\nprint(\"          但 IO 等待 / C 扩展计算会释放 GIL -> 那些场景多线程有效\")\n"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "enable_shared_from_this 安全获取自引用",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "2\n~Node",
+  "code": "#include <iostream>\n#include <memory>\nstruct Node : std::enable_shared_from_this<Node> {\n    void f() {\n        auto self = shared_from_this();   // 安全地获取指向自身的 shared_ptr（不造第二个控制块）\n        std::cout << self.use_count() << '\\n';\n    }\n    ~Node(){ std::cout << \"~Node\\n\"; }\n};\nint main() {\n    auto p = std::make_shared<Node>();\n    p->f();                                // 已交由 shared_ptr 管理，调用合法\n}"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "fseek 定位修改二进制记录（原地更新第 2 条）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "id=1 score=10\nid=2 score=99\nid=3 score=30\n",
+  "code": "#include <stdio.h>\nstruct Rec { int id; int score; };\nint main(void) {\n    struct Rec a[3] = {{1,10},{2,20},{3,30}};\n    FILE *w = fopen(\"r.dat\", \"wb\");\n    fwrite(a, sizeof(struct Rec), 3, w);\n    fclose(w);\n    FILE *u = fopen(\"r.dat\", \"r+b\");\n    struct Rec upd = {2, 99};\n    fseek(u, 1L * sizeof(struct Rec), SEEK_SET);   /* 跳到第 2 条 */\n    fwrite(&upd, sizeof(struct Rec), 1, u);\n    fflush(u);\n    fseek(u, 0L, SEEK_SET);\n    struct Rec b[3];\n    fread(b, sizeof(struct Rec), 3, u);\n    fclose(u);\n    for (int i = 0; i < 3; i++) printf(\"id=%d score=%d\\n\", b[i].id, b[i].score);\n    return 0;\n}"
+}

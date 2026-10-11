@@ -1,0 +1,33 @@
+{
+  "meta": { "chapter": "cpp-ch08" },
+  "items": [
+    {
+      "question": "vector 的扩容机制是怎样的？push_back 为什么是摊还 O(1)？",
+      "answer_md": "vector 用三指针（start/finish/end_of_storage）维护连续内存，`size` 与 `capacity` 解耦。当 `push_back` 发现 `finish == end_of_storage` 时触发扩容：通常按约 2 倍分配新块（实现相关，主流是 2×，MSVC 旧版 1.5×），把旧元素移动/拷贝过去，释放旧块。摊还 O(1) 来自等比数列：第 i 次扩容搬运约 `C_{i-1}` 个元素，n 次 `push_back` 总搬运量 < 2n，均摊每次 O(1)。`reserve(n)` 可一次性把 capacity 提到 n，避免反复扩容（也避免扩容导致的迭代器失效）。",
+      "follow_ups": ["扩容后迭代器/引用/指针为何失效？", "vector 与 Java ArrayList 扩容因子差多少？", "shrink_to_fit 会真释放内存吗？"],
+      "difficulty": "mid",
+      "company_tags": ["通用", "腾讯", "字节"]
+    },
+    {
+      "question": "map / set 与 unordered_map / unordered_set 的区别？分别什么时候用？",
+      "answer_md": "有序关联容器（map/set）底层是**红黑树**（自平衡 BST），元素按 key 有序，查找/插入/删除均 O(log n)，支持 `lower_bound`、范围查询、前驱后继；迭代器是双向迭代器。无序关联容器（unordered_*）底层是**哈希表**（桶+链地址法），平均 O(1) 点查，最坏 O(n)（哈希碰撞），迭代器是前向迭代器，遍历顺序不可预期。\n\n选型：**需要有序 / 范围查询 / 按序输出 → map/set**；**只点查去重、不关心顺序、追求平均 O(1) → unordered_***。注意 unordered 的复杂度依赖哈希质量与负载因子。",
+      "follow_ups": ["unordered_map 最坏为什么是 O(n)？", "rehash 时迭代器/引用是否失效？", "负载因子 max_load_factor 默认是多少？"],
+      "difficulty": "mid",
+      "company_tags": ["通用", "阿里", "美团"]
+    },
+    {
+      "question": "什么操作会导致迭代器失效？vector / list / map 各有什么不同？",
+      "answer_md": "**vector**：`insert`/`push_back`（扩容时）使所有迭代器/引用/指针失效；`erase(pos)` 使 pos 及之后失效；`reserve`/`resize` 触发扩容同理。**list**：插入/删除**不使其他迭代器、引用失效**（仅被删节点的失效），这是 list 相对 vector 的最大优势；迭代器是双向的。**map/set（红黑树）**：插入不使任何迭代器失效；`erase(pos)` 仅使 pos 失效，其他仍有效；C++11 起 `erase` 返回下一迭代器。通用安全写法：`it = c.erase(it)`。",
+      "follow_ups": ["range-for 里 push_back 为什么危险？", "unordered_map rehash 后引用为何仍有效？", "erase 循环的正确写法？"],
+      "difficulty": "mid",
+      "company_tags": ["字节", "拼多多", "通用"]
+    },
+    {
+      "question": "为什么 list 的 O(1) 插入在实际遍历场景常常比 vector 慢？",
+      "answer_md": "因为 list 节点在堆上分散分配，内存不连续，顺序遍历时 CPU 缓存几乎每次都 miss（prefetcher 无法预测下一节点地址），且无法向量化；而 vector 连续内存一次缓存行喂饱多个元素。即便 list 插入/删除是指针级 O(1)，其顺序遍历常慢于 vector 的 O(n) 搬移数倍。结论：除非频繁在中部插入删除且持有迭代器不希望失效，否则默认选 vector；这是「算法复杂度 ≠ 实测性能」的典型。",
+      "follow_ups": ["list::sort 为什么不能用 std::sort？", "何时真正该用 list？", "deque 的缓存特性如何？"],
+      "difficulty": "hard",
+      "company_tags": ["字节", "腾讯"]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "title": "HashMap 的 put/get 与哈希冲突（同码不同键）",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "put(k1)= null\nput(k2) old= null\nsize=2\nget(k1)= a\nget(k2)= b",
+  "code": "import java.util.*;\n\npublic class Ex03HashMapPutGet {\n    static class Key {\n        final int v;\n        Key(int v) { this.v = v; }\n        @Override public boolean equals(Object o) { return o instanceof Key k && k.v == v; }\n        @Override public int hashCode() { return 1; }\n    }\n    public static void main(String[] args) {\n        Map<Key, String> m = new HashMap<>();\n        System.out.println(\"put(k1)= \" + m.put(new Key(1), \"a\"));\n        System.out.println(\"put(k2) old= \" + m.put(new Key(2), \"b\"));\n        System.out.println(\"size=\" + m.size());\n        System.out.println(\"get(k1)= \" + m.get(new Key(1)));\n        System.out.println(\"get(k2)= \" + m.get(new Key(2)));\n    }\n}"
+}

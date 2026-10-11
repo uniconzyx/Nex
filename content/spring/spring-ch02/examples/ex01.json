@@ -1,0 +1,8 @@
+{
+  "title": "BeanDefinition 注册与反射实例化（容器骨架）",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "registered beans: 1\ninstantiated: true\nbean class: UserService",
+  "code": "import java.util.*;\n\npublic class Main {\n    static class BeanDefinition {\n        String beanName;\n        String className;\n        String scope = \"singleton\";\n        BeanDefinition(String n, String c) { beanName = n; className = c; }\n    }\n\n    static class UserService { UserService() {} String hi() { return \"hi\"; } }\n\n    public static void main(String[] args) throws Exception {\n        Map<String, BeanDefinition> registry = new HashMap<>();\n        registry.put(\"userService\", new BeanDefinition(\"userService\", \"Main$UserService\"));\n        System.out.println(\"registered beans: \" + registry.size());\n        BeanDefinition bd = registry.get(\"userService\");\n        Class<?> cls = Class.forName(bd.className);\n        Object bean = cls.getDeclaredConstructor().newInstance();\n        System.out.println(\"instantiated: \" + (bean != null));\n        System.out.println(\"bean class: \" + bean.getClass().getSimpleName());\n    }\n}\n"
+}

@@ -1,0 +1,94 @@
+{
+  "meta": {
+    "chapter": "spring-ch08"
+  },
+  "items": [
+    {
+      "question": "`@Transactional` 在哪些情况下会失效？",
+      "answer_md": "分两大分支回答最清晰：\n\n**一、代理没生效（拦截器根本没跑）**\n1. 同类自调用 `this.method()`——不经过代理（examples/ex01 实测拦截 = false）；\n2. 非 public（private/package-private）方法——代理不增强（examples/ex08）；\n3. 对象不是 Spring 管理的 Bean（自己 `new` 的，或未被扫描）；\n4. 数据库引擎不支持事务（如 MyISAM）。\n\n**二、代理跑了，但规则不回滚**\n5. 异常被 catch 吞掉、方法正常返回（examples/ex07 实测：吞掉后提交 = true）；\n6. checked 异常默认不回滚（examples/ex06 实测 = false）；\n7. 跨线程/异步——上下文随线程丢失（examples/ex09）；\n8. 传播行为用错（误用 `NOT_SUPPORTED` / `NEVER` / 自调用 SUPPORTS）。\n\n修法：拆 Bean / 自注入 / `AopContext.currentProxy()`；`rollbackFor = Exception.class`；异常上抛或手动 `setRollbackOnly()`。",
+      "follow_ups": [
+        "为什么同类自调用会失效？底层是什么机制？",
+        "`AopContext.currentProxy()` 需要什么前提配置？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "阿里",
+        "字节",
+        "美团"
+      ]
+    },
+    {
+      "question": "`REQUIRED`、`REQUIRES_NEW`、`NESTED` 有什么区别？内层回滚，外层会怎样？",
+      "answer_md": "- `REQUIRED`（默认）：有外层就加入，内外**共用一个事务**；内层异常把整个事务标记 rollback-only，最终一起回滚。\n- `REQUIRES_NEW`：**挂起**外层、新开独立事务（新连接）；内层提交后外层回滚**不影响**内层（examples/ex03 实测 db 保留 `insert:item`）。\n- `NESTED`：在外层事务内建**保存点**（同一条连接）；内层回滚只回退到保存点，外层仍可提交（examples/ex04）；但**外层回滚会连带内层**。\n\n一句话：要「外层死内层活」必须 `REQUIRES_NEW`；要「内层死外层活」用 `NESTED`。",
+      "follow_ups": [
+        "`NESTED` 底层靠什么实现？依赖数据库什么能力？",
+        "`REQUIRES_NEW` 在高并发下有什么风险？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "通用",
+        "腾讯",
+        "蚂蚁",
+        "京东"
+      ]
+    },
+    {
+      "question": "为什么 `@Transactional` 默认只对 RuntimeException 回滚？checked 异常怎么办？",
+      "answer_md": "默认口径来自 `TransactionAspectSupport#rollbackOn(Throwable)`：只对 `RuntimeException` 与 `Error` 返回 true；checked 异常默认不回滚（examples/ex06 实测 = false）。\n\n设计动机：Spring 认为「未受检异常」代表**不可预期的系统错误**，应当回滚；而 checked 异常是**可预期的业务分支**，交回开发者自行决定。\n\n需要 checked 异常也回滚时：`@Transactional(rollbackFor = Exception.class)`；只想少数异常回滚可用 `rollbackFor = {BizException.class}`；想排除某些异常用 `noRollbackFor`。",
+      "follow_ups": [
+        "如果 checked 异常被 catch 后没抛出，事务会回滚吗？",
+        "`rollbackFor` 写 `Exception` 和写 `Throwable` 有区别吗？"
+      ],
+      "difficulty": "easy",
+      "company_tags": [
+        "通用",
+        "百度",
+        "拼多多"
+      ]
+    },
+    {
+      "question": "Spring 的隔离级别和数据库隔离级别是什么关系？MySQL REPEATABLE READ 下还会有幻读吗？",
+      "answer_md": "Spring 的 `Isolation` 枚举只是对 JDBC `Connection.TRANSACTION_*` 常量的封装，最终由**数据库**实现语义；`Isolation.DEFAULT` 表示用数据库默认值（MySQL 默认 REPEATABLE READ，Oracle 默认 READ COMMITTED）。\n\n标准 SQL 语义下（examples/ex10 实测矩阵）：RU 三种现象都可能；RC 可能不可重复读与幻读；RR 可能幻读；SERIALIZABLE 都禁止。\n\n但 MySQL InnoDB 的 REPEATABLE READ 通过 **MVCC + next-key lock（间隙锁）** 在多数场景抑制了幻读，因此实践上「MySQL 的 RR 比标准 RR 更强」，只是仍不能说等价于 SERIALIZABLE（范围锁的行为与串行化执行仍有差距）。",
+      "follow_ups": [
+        "InnoDB 是怎么用 next-key lock 抑制幻读的？",
+        "什么时候应该显式把隔离级别调到 READ COMMITTED？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "阿里",
+        "滴滴"
+      ]
+    },
+    {
+      "question": "Spring 事务底层为什么能保证同一线程用同一条连接？跨线程为什么会失效？",
+      "answer_md": "靠 `TransactionSynchronizationManager`：它内部持有\n`ThreadLocal<Map<Object, Object>> resources`，key 是 `DataSource`，value 是 `ConnectionHolder`（包装同一条 `Connection` 与事务状态）。拦截器 `begin` 时绑定、`commit/rollback` 的 `finally` 里解绑，于是同一线程内 Service→Mapper 多层调用都拿到同一条连接。\n\n跨线程（`new Thread` / 线程池 / `@Async` / `CompletableFuture`）时，新线程看不到原线程的 ThreadLocal，于是**脱离事务**：要么读到 autocommit 的裸连接、要么另开事务。线程池复用还会让「任务级上下文」串号（examples/ex09 实测 = true），且不清理会内存泄漏。\n\n修法：写操作留在事务线程；副作用放 `afterCommit`；必须跨线程传递上下文时用 `TransmittableThreadLocal`。",
+      "follow_ups": [
+        "`InheritableThreadLocal` 为什么解决不了线程池传递？",
+        "`afterCommit` 和 `afterCompletion` 有什么区别？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "通用",
+        "字节",
+        "蚂蚁"
+      ]
+    },
+    {
+      "question": "分布式事务有哪些方案？2PC 的缺点是什么？Seata AT 属于哪一类？",
+      "answer_md": "常用方案：**2PC/XA**、**TCC**、**Saga**、**本地消息表**、**Seata AT**。\n\n- 2PC/XA：协调者 + 参与者，两个阶段（准备投票 / 提交），强一致但**同步阻塞、协调者单点、长事务持锁**；协调者在发完部分 COMMIT 后崩溃会导致参与者一直持锁阻塞、系统处于不一致中间态（examples/ex15 实测：P3 阻塞、inconsistent = True）。\n- TCC：业务层三方法 Try/Confirm/Cancel，最终一致；要处理**空回滚**与**悬挂**，且所有补偿必须幂等。\n- Saga：一串本地事务 + 失败补偿，无隔离性，靠幂等补偿收敛。\n- 本地消息表：本地事务内写消息表，异步投递 + 幂等消费，侵入小、易对账。\n- Seata AT：代理 SQL、记录前后镜像 `undo_log`，加**全局锁**做两阶段，自动生成反向 SQL 补偿；本质仍是「两阶段 + 补偿」，是**近似强一致的最终一致方案**。\n\n选择原则：能单库就别分布式；跨库优先本地消息表 + 幂等；对一致性要求高且有 TC 运维能力时用 Seata。",
+      "follow_ups": [
+        "TCC 的空回滚和悬挂分别是什么？怎么防？",
+        "为什么说 3PC 也没彻底解决 2PC 的一致性问题？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "通用",
+        "阿里",
+        "美团",
+        "京东"
+      ]
+    }
+  ]
+}

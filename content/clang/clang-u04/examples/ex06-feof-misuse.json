@@ -1,0 +1,8 @@
+{
+  "title": "feof 的误用与正确循环条件",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "chars read=3 feof=1\n",
+  "code": "#include <stdio.h>\nint main(void) {\n    FILE *w = fopen(\"e.txt\", \"w\");\n    fputs(\"AB\\n\", w);\n    fclose(w);\n    FILE *r = fopen(\"e.txt\", \"r\");\n    int c; int count = 0;\n    /* 正确：以「读取失败」为循环终止条件，而不是以 feof() 判断 */\n    while ((c = fgetc(r)) != EOF) { count++; }\n    /* feof 只在「一次读操作越过文件尾」之后才为真 */\n    printf(\"chars read=%d feof=%d\\n\", count, feof(r) ? 1 : 0);\n    fclose(r);\n    return 0;\n}"
+}

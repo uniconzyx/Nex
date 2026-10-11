@@ -1,0 +1,8 @@
+{
+  "title": "受检异常 vs 非受检异常：调用方契约差异",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "caught checked: IOException\ncaught unchecked: IllegalArgumentException",
+  "code": "import java.io.*;\n\npublic class Ex01CheckedVsUnchecked {\n    static void readFile() throws IOException {\n        throw new IOException(\"disk read error\");\n    }\n    static void parse() {\n        throw new IllegalArgumentException(\"bad argument\");\n    }\n    public static void main(String[] args) {\n        try {\n            readFile();\n        } catch (IOException e) {\n            System.out.println(\"caught checked: \" + e.getClass().getSimpleName());\n        }\n        try {\n            parse();\n        } catch (IllegalArgumentException e) {\n            System.out.println(\"caught unchecked: \" + e.getClass().getSimpleName());\n        }\n    }\n}"
+}

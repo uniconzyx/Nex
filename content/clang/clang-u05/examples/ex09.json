@@ -1,0 +1,8 @@
+{
+  "title": "_Static_assert 编译期断言（C11）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "所有编译期断言通过，int 为 4 字节",
+  "code": "#include <stdio.h>\n#include <stdint.h>\n#include <limits.h>\n_Static_assert(sizeof(int) == 4, \"int 必须是 4 字节\");\n_Static_assert(CHAR_BIT == 8, \"一个字节必须是 8 位\");\n#define BUFSZ 16\n_Static_assert(BUFSZ >= 8, \"缓冲区太小\");\nint main(void) {\n    printf(\"所有编译期断言通过，int 为 %zu 字节\\n\", sizeof(int));\n    return 0;\n}"
+}

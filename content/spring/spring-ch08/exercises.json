@@ -1,0 +1,306 @@
+{
+  "meta": {
+    "chapter": "spring-ch08",
+    "note": "8 题，基础题 6 + 算法题 2（其中 1 题来自 LeetCode，仅存元数据与链接，不搬运题面正文）"
+  },
+  "items": [
+    {
+      "id": "ex1",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "REQUIRED 与 REQUIRES_NEW 的嵌套行为",
+      "content_md": "外层方法标注 `@Transactional`（默认 REQUIRED），它调用内层方法也标注 `@Transactional(propagation = REQUIRES_NEW)`。内层成功提交后，外层抛出 RuntimeException。最终数据库里内层写入的数据会怎样？",
+      "options": [
+        {
+          "key": "A",
+          "text": "内层数据被外层回滚一起撤销"
+        },
+        {
+          "key": "B",
+          "text": "内层数据保留（它已在自己的独立事务中提交，外层回滚不影响它）"
+        },
+        {
+          "key": "C",
+          "text": "内外层都提交成功"
+        },
+        {
+          "key": "D",
+          "text": "取决于数据库隔离级别，无法确定"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "REQUIRES_NEW 会挂起外层事务并新建一个独立事务，内层提交后即持久化；外层随后回滚只撤销外层自己的改动，不会影响已提交的内层事务。参考 examples/ex03 实测输出 `db after outer rollback: [insert:item]`。",
+      "tags": [
+        "propagation",
+        "requires_new"
+      ],
+      "source": "self",
+      "source_ref": "《Spring 实战（第6版）》第6章 / Spring Framework Propagation 文档"
+    },
+    {
+      "id": "ex2",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "@Transactional 默认回滚哪些异常",
+      "content_md": "一个标注 `@Transactional`（未指定 rollbackFor）的方法内部抛出了 `java.io.IOException`（checked 异常），且该异常一路向外抛出。事务会回滚吗？",
+      "options": [
+        {
+          "key": "A",
+          "text": "会回滚，任何异常都回滚"
+        },
+        {
+          "key": "B",
+          "text": "不会回滚，方法已提交的部分会保留"
+        },
+        {
+          "key": "C",
+          "text": "由数据库隔离级别决定"
+        },
+        {
+          "key": "D",
+          "text": "只有 Error 才回滚，Exception 一律不回滚"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "Spring 事务默认的 rollbackFor 口径是「RuntimeException 或 Error」；checked 异常默认**不**触发回滚。需要 checked 异常也回滚时必须显式写 `rollbackFor = Exception.class`。参考 examples/ex06 实测：checked 异常回滚 = false。",
+      "tags": [
+        "rollback",
+        "checked-exception"
+      ],
+      "source": "self",
+      "source_ref": "《Spring 实战（第6版）》第6章"
+    },
+    {
+      "id": "ex3",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "同类自调用为什么事务失效",
+      "content_md": "同一个 Service 类中，`public void a()` 内部直接调用本类的 `this.b()`，而 `b()` 标注了 `@Transactional`。通过 Spring 注入的该 Service Bean 调用 `a()`，`b()` 的事务会生效吗？",
+      "options": [
+        {
+          "key": "A",
+          "text": "会生效，只要方法被注解就生效"
+        },
+        {
+          "key": "B",
+          "text": "不会生效，因为 `this.b()` 是目标对象内部的直接调用，没有经过事务代理"
+        },
+        {
+          "key": "C",
+          "text": "会生效，但只在 CGLIB 代理下生效"
+        },
+        {
+          "key": "D",
+          "text": "会生效，但只在 JDK 动态代理下生效"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "Spring 事务基于运行时代理，只有「从代理对象进入」的调用才会被拦截；`this.b()` 是同对象内部的直接调用，不产生新的调用边，拦截器不触发。参考 examples/ex01：自调用拦截 = false，经代理直接调用 = true。修复：拆 Bean / 自注入 / `AopContext.currentProxy()`。",
+      "tags": [
+        "self-invocation",
+        "aop-proxy"
+      ],
+      "source": "self",
+      "source_ref": "《Spring 实战（第6版）》第6章 / Spring AOP 文档"
+    },
+    {
+      "id": "ex4",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "隔离级别与读现象",
+      "content_md": "在标准 SQL 语义下，下列哪种隔离级别**既能避免脏读、又能避免不可重复读**，但仍可能出现幻读？",
+      "options": [
+        {
+          "key": "A",
+          "text": "READ UNCOMMITTED（读未提交）"
+        },
+        {
+          "key": "B",
+          "text": "READ COMMITTED（读已提交）"
+        },
+        {
+          "key": "C",
+          "text": "REPEATABLE READ（可重复读）"
+        },
+        {
+          "key": "D",
+          "text": "SERIALIZABLE（可串行化）"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "C"
+        ]
+      },
+      "explanation": "标准语义下：RU 允许三种现象；RC 允许不可重复读与幻读；RR 只允许幻读；SERIALIZABLE 三种都禁止。参考 examples/ex10 实测矩阵。注意 MySQL InnoDB 的 RR 借 next-key lock 在多数场景抑制了幻读，属数据库实现层面的加强。",
+      "tags": [
+        "isolation",
+        "phantom-read"
+      ],
+      "source": "self",
+      "source_ref": "《数据库系统概论》事务隔离级别 / Spring Framework Isolation 文档"
+    },
+    {
+      "id": "ex5",
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "修正「线程池里事务上下文串号/丢失」",
+      "content_md": "某 Service 在 `@Transactional` 方法内把写入任务提交到线程池执行，结果「主事务回滚了、子任务写入却已提交」，并且线程池复用后不同请求的事务上下文互相串号。下列改法中，哪个是**根因层面**的正确修法？",
+      "options": [
+        {
+          "key": "A",
+          "text": "把线程池线程数调大，减少复用"
+        },
+        {
+          "key": "B",
+          "text": "把需要入库的写操作留在事务线程内同步完成；副作用改用 `TransactionSynchronization#afterCommit`，并在线程池任务 `finally` 里清理 ThreadLocal"
+        },
+        {
+          "key": "C",
+          "text": "把 `@Transactional` 加到线程池的 Runnable 上"
+        },
+        {
+          "key": "D",
+          "text": "用 `InheritableThreadLocal` 替代 ThreadLocal"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "reference_code": "// 事务线程内完成写入；提交后再触发副作用\n@Transactional\npublic void placeOrder(OrderDTO dto) {\n    orderMapper.insert(toEntity(dto));\n    TransactionSynchronizationManager.registerSynchronization(\n        new TransactionSynchronization() {\n            @Override public void afterCommit() { notifier.send(dto); }\n        });\n}"
+      },
+      "explanation": "事务上下文是 ThreadLocal 绑定的，跨线程必然脱离（examples/ex09 实测：线程池复用不清理 → 串号 = true）。调大线程数只是降低复用概率，治标不治本；`InheritableThreadLocal` 只对新建子线程生效，对线程池复用无效；把注解加到 Runnable 上则另开事务、仍不属于主事务。根因修法是「写操作不跨线程 + 副作用放 afterCommit + 清理 ThreadLocal」。",
+      "tags": [
+        "threadlocal",
+        "async",
+        "transaction-sync"
+      ],
+      "source": "self",
+      "source_ref": "《Spring 实战（第6版）》第6章 / TransactionSynchronization 文档"
+    },
+    {
+      "id": "ex6",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "DTO / VO / Entity 的职责",
+      "content_md": "关于分层架构中 DTO、VO、Entity 的职责，下列说法正确的是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "Entity 与表一一对应，可直接作为接口出参返回给前端"
+        },
+        {
+          "key": "B",
+          "text": "DTO 用于层间传输/入参，VO 用于返回前端并做脱敏裁剪，Entity 对应数据库表；转换通常放在 Service 层"
+        },
+        {
+          "key": "C",
+          "text": "VO 应该包含全部字段以便前端自由选择"
+        },
+        {
+          "key": "D",
+          "text": "DTO 与 VO 是同义词，可以互相替代"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "Entity 对应表、可含敏感字段（password）；DTO 承接入参（只含可写字段）；VO 做脱敏裁剪后返回前端。转换放 Service 层。把 Entity 当出参会泄漏敏感字段，把 Entity 当入参会引发过度绑定与越权。参考 examples/ex14 实测：VO 不含 password 字段。",
+      "tags": [
+        "layering",
+        "dto-vo-entity"
+      ],
+      "source": "self",
+      "source_ref": "《阿里巴巴 Java 开发手册》分层领域模型规约"
+    },
+    {
+      "id": "ex7",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "实现支持 SAVEPOINT 的事务日志",
+      "content_md": "实现一个最小事务日志 `TxJournal`，支持：`write(x)` 追加待提交写；`savepoint()` 记录保存点；`rollback_to()` 回滚到最近保存点（丢弃其后的待提交写）；`commit()` 把待提交写合并进 `db`；`rollback()` 丢弃全部待提交写。要求 `rollback_to` 为 O(k)（k 为被撤销的写数）。用下列序列验证，输出最终 `db`。",
+      "options": [],
+      "answer": {
+        "reference_code": "class TxJournal:\n    def __init__(self):\n        self.db = []\n        self.buf = []\n        self.marks = []\n\n    def write(self, x):\n        self.buf.append(x)\n\n    def savepoint(self):\n        self.marks.append(len(self.buf))\n\n    def rollback_to(self):\n        mark = self.marks.pop()\n        del self.buf[mark:]\n\n    def commit(self):\n        self.db.extend(self.buf)\n        self.buf = []\n        self.marks = []\n\n    def rollback(self):\n        self.buf = []\n        self.marks = []\n\n\nif __name__ == \"__main__\":\n    j = TxJournal()\n    j.write(\"A\")\n    j.savepoint()\n    j.write(\"B\")\n    j.rollback_to()\n    j.write(\"C\")\n    j.commit()\n    print(\"db =\", j.db)\n"
+      },
+      "explanation": "保存点记录的是「待提交缓冲区当前长度」，回滚到保存点即把缓冲区截断到该长度。序列 A → savepoint → B → rollback_to（撤销 B）→ C → commit，最终 db = ['A', 'C']。这正是 NESTED 传播行为在数据库保存点上的语义（见 examples/ex04 与 ex13）。",
+      "tags": [
+        "savepoint",
+        "transaction",
+        "nested"
+      ],
+      "source": "self",
+      "source_ref": "SQL:1999 SAVEPOINT 语义 / Spring NESTED 传播行为"
+    },
+    {
+      "id": "ex8",
+      "type": "choice",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "medium",
+      "title": "LeetCode 1226 The Dining Philosophers（锁顺序与死锁）",
+      "content_md": "本题为 LeetCode 原题，本条目仅存元数据与链接，不搬运题面正文。它考查「多线程争用共享资源时如何避免死锁」，与数据库事务中的**加锁顺序**问题同源：若各事务按不同顺序申请行锁/表锁，就可能形成循环等待而死锁。下列哪种策略能从根因上避免循环等待？",
+      "options": [
+        {
+          "key": "A",
+          "text": "给所有资源定义全局统一的加锁顺序（或让其中一个参与者反向加锁），打破循环等待"
+        },
+        {
+          "key": "B",
+          "text": "把锁的粒度调到最小，永远不释放"
+        },
+        {
+          "key": "C",
+          "text": "用忙等（自旋）替代阻塞，死锁就会消失"
+        },
+        {
+          "key": "D",
+          "text": "只要 CPU 核数足够多，死锁不会发生"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "A"
+        ]
+      },
+      "explanation": "死锁的四个必要条件之一是「循环等待」，破坏它最直接的办法就是让所有参与者按**同一全局顺序**获取资源（或让其中一个反向/降级）。数据库侧同理：统一 UPDATE 的行顺序、或按主键升序批量加锁，可显著降低死锁。详见原题链接，题面不在此搬运。",
+      "tags": [
+        "deadlock",
+        "lock-ordering",
+        "concurrency"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 1226 The Dining Philosophers",
+      "external_url": "https://leetcode.cn/problems/the-dining-philosophers/"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "meta": {
+    "chapter": "py-ch05",
+    "count": 1
+  },
+  "items": [
+    {
+      "title": "日志分析 CLI：流式读取 + 多格式导出",
+      "requirement_md": "实现一个命令行工具 `logstat.py`，对给定日志文件做流式统计并导出结果。\n\n## 输入\n一个 JSON Lines 日志文件，每行形如\n`{\"ts\": \"2026-10-08T12:00:00\", \"level\": \"ERROR\", \"msg\": \"...\", \"latency\": 12}`\n\n## 要求\n1. 逐行流式读取，内存占用不随文件大小增长（禁止 `read()` 全文）。\n2. 编码健壮：遇到坏字节不能崩（`errors='replace'`），并统计「被替换过的行数」。\n3. 处理：按 `level` 分组计数；对 `latency` 求 min/max/mean；找出延迟最高的 5 条（top-K）。\n4. 输出：\n   - 终端打印可读摘要\n   - `report.csv`（UTF-8，`newline=''`，两列 `level,count`）\n   - `summary.json`（`ensure_ascii=False`、`indent=2`，含总行数与坏行数）\n5. 用 `argparse` 接收 `--input` / `--outdir`，缺参时给出清晰用法。\n6. 写出用「临时文件 + `os.replace`」保证原子性，避免半截文件。",
+      "tasks": [
+        {
+          "title": "流式读取与坏字节统计",
+          "verification": {
+            "type": "test",
+            "desc": "构造含 1 行坏字节的 JSONL，程序不抛异常，且坏行计数为 1；用 1 GB 合成文件运行，峰值内存增量 < 50 MB。"
+          }
+        },
+        {
+          "title": "分组统计与 top-K",
+          "verification": {
+            "type": "test",
+            "desc": "对固定样本，level 分组计数与手工计算一致；top-5 按 latency 降序且不重复。"
+          }
+        },
+        {
+          "title": "多格式导出与往返校验",
+          "verification": {
+            "type": "test",
+            "desc": "`report.csv` 能被 `csv.DictReader` 读回且数值等于内存中的统计结果；`summary.json` 能被 `json.load` 还原，中文不转义。"
+          }
+        },
+        {
+          "title": "原子写与 CLI 健壮性",
+          "verification": {
+            "type": "manual",
+            "desc": "运行中杀掉进程，目标文件要么是旧内容、要么是完整新内容，绝不出现半截 JSON；缺 `--input` 时退出码非 0 且打印用法。"
+          }
+        }
+      ]
+    }
+  ]
+}

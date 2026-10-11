@@ -1,0 +1,8 @@
+{
+  "title": "re.compile 缓存、flags 复用与内联 (?i)",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== compile 缓存：同一模式字符串复用同一对象 ===\n两次 compile 是同一对象 : True\n\n=== flags 不同则不是同一对象 ===\n默认 vs re.ASCII 同一对象 : False\n\n=== 缓存上限与 purge ===\n填充 600 个模式后，p1 是否仍在缓存中 : False\npurge() 之后同一模式还是同一对象吗 : False\n\n=== 内联 flags 写法 (?i) 只影响其后 ===\n全局 re.I      : ['ABC', 'abc']\n内联 (?i)abc   : ['ABC', 'abc']\n局部 ((?i)ABC)abc: ['ABC', 'abc']\n\n工程结论：热点路径显式 compile 一次并复用，避免每次调用都做缓存查找；\n          模式由用户输入拼装时必须 re.escape()，并考虑用 re.ASCII 约束 \\w 的语义。",
+  "code": "import re\n\nprint(\"=== compile 缓存：同一模式字符串复用同一对象 ===\")\np1 = re.compile(r\"\\d+\")\np2 = re.compile(r\"\\d+\")\nprint(\"两次 compile 是同一对象 :\", p1 is p2)\n\nprint()\nprint(\"=== flags 不同则不是同一对象 ===\")\np3 = re.compile(r\"\\d+\", re.ASCII)\nprint(\"默认 vs re.ASCII 同一对象 :\", p1 is p3)\n\nprint()\nprint(\"=== 缓存上限与 purge ===\")\nfor i in range(600):\n    re.compile(r\"pat_%d\" % i)\nprint(\"填充 600 个模式后，p1 是否仍在缓存中 :\", re.compile(r\"\\d+\") is p1)\nre.purge()\nprint(\"purge() 之后同一模式还是同一对象吗 :\", re.compile(r\"\\d+\") is p1)\n\nprint()\nprint(\"=== 内联 flags 写法 (?i) 只影响其后 ===\")\ns = \"ABC abc\"\nprint(\"全局 re.I      :\", re.findall(r\"abc\", s, re.I))\nprint(\"内联 (?i)abc   :\", re.findall(r\"(?i)abc\", s))\nprint(\"局部 ((?i)ABC)abc:\", re.findall(r\"(?i)abc|ABC\", s))\nprint()\nprint(\"工程结论：热点路径显式 compile 一次并复用，避免每次调用都做缓存查找；\")\nprint(\"          模式由用户输入拼装时必须 re.escape()，并考虑用 re.ASCII 约束 \\\\w 的语义。\")"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "Stage 划分（以宽依赖为界）与 Task 数计算",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "Stage 划分（每个宽依赖/Action 切断一次）:\n  Stage1: ['A', 'B', 'C']\n  Stage2: ['D', 'E']\nStage 数 = 2\n每个 Stage 内 Task 数 = 分区数 = 4; 总 Task 数 = 8\n",
+  "code": "edges = [(\"A\", \"map\", \"窄\"), (\"B\", \"filter\", \"窄\"), (\"C\", \"reduceByKey\", \"宽\"), (\"D\", \"map\", \"窄\"), (\"E\", \"collect\", \"Action\")]\nstages = []\ncur = []\nfor name, op, kind in edges:\n    cur.append(name)\n    if kind == \"宽\":\n        stages.append(cur)\n        cur = []\nif cur:\n    stages.append(cur)\nprint(\"Stage 划分（每个宽依赖/Action 切断一次）:\")\nfor i, s in enumerate(stages):\n    print(f\"  Stage{i+1}: {s}\")\nprint(\"Stage 数 =\", len(stages))\npartitions = 4\nprint(f\"每个 Stage 内 Task 数 = 分区数 = {partitions}; 总 Task 数 = {len(stages) * partitions}\")\n"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "override 覆盖与 final 禁止覆盖",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "Derived::f Base::g \n",
+  "code": "#include <iostream>\nstruct Base {\n    virtual void f() { std::cout << \"Base::f \"; }\n    virtual void g() final { std::cout << \"Base::g \"; }   // final：禁止派生覆盖\n};\nstruct Derived : Base {\n    void f() override { std::cout << \"Derived::f \"; }     // 覆盖 f\n    // void g() override;  // 错误：Base::g 是 final，不能覆盖\n};\nint main() {\n    Derived d;\n    Base& b = d;\n    b.f(); b.g();\n    std::cout << '\\n';\n}\n"
+}

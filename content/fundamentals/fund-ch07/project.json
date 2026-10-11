@@ -1,0 +1,56 @@
+{
+  "meta": {
+    "chapter": "fund-ch07",
+    "note": "1 个项目；可用 C 或 Python 实现，覆盖字节序、浮点位级、类型转换三类问题"
+  },
+  "items": [
+    {
+      "title": "实现一个「数据表示工具箱」并做位级对拍",
+      "requirement_md": "用 C 实现一个命令行工具箱，把本章知识落成可复用的代码，并写一组对拍测试证明它与参考实现一致。\n\n### 功能要求\n1. **机器数转换**：输入一个 8/16/32 位整数，输出它在原码/反码/补码/移码下的位模式（原码不可表示时输出 `--`）。\n2. **补码运算器**：实现 8 位与 16 位补码加法，输出结果、进位、以及三种溢出判据的结论（异或 / 符号 / 双符号位）。\n3. **IEEE 754 拆解器**：输入任意 `float`/`double`，输出 S/E/M 字段、真阶码、NaN/Inf/denormal 类型判定，并输出可精确还原的十六进制浮点（`%a`）。\n4. **字节序转换**：手写 `htonl`/`ntohl`/`htons`，并提供一个 `pack_u32_be(uint8_t out[4], uint32_t v)` 把整数按大端写入缓冲区，再写 `unpack_u32_be` 反向解析。\n5. **安全算术**：提供 `sat_add`（饱和加）、`checked_add`（返回状态码 + 结果，不触发 UB）、`mul_div_round`（先乘后除以避免整除丢精度）。\n\n### 工程要求\n- 全程使用无符号类型做位运算，有符号左移一律避免；\n- 编译通过 `-Wall -Wextra -Wconversion -Wsign-conversion`，**零警告**；\n- 用 `-fsanitize=undefined,address` 跑一遍测试，不允许有 UB 报告。",
+      "tasks": [
+        {
+          "title": "搭建骨架与构建脚本",
+          "verification": {
+            "type": "test",
+            "desc": "`make` 一条命令产出可执行文件，且编译零警告"
+          }
+        },
+        {
+          "title": "实现机器数转换并输出位模式表",
+          "verification": {
+            "type": "test",
+            "desc": "对 -128/-127/-1/0/1/127 的输出与教材表格逐行一致"
+          }
+        },
+        {
+          "title": "实现补码运算器与三种溢出判据",
+          "verification": {
+            "type": "test",
+            "desc": "105+65 报 POS-OVERFLOW，-105-65 报 NEG-OVERFLOW，100+(-40) 报 ok"
+          }
+        },
+        {
+          "title": "实现 IEEE 754 拆解器",
+          "verification": {
+            "type": "test",
+            "desc": "1.0f 输出 E=127 e=0；0.1f 输出 M=0x4CCCCD（或等价位模式）"
+          }
+        },
+        {
+          "title": "实现字节序工具并与标准库对拍",
+          "verification": {
+            "type": "test",
+            "desc": "my_htonl 与系统 htonl 在 10^6 个随机输入上结果完全相同"
+          }
+        },
+        {
+          "title": "实现安全算术并跑 sanitizer",
+          "verification": {
+            "type": "test",
+            "desc": "`-fsanitize=undefined,address` 下全部用例无 UB 报告，sat_add 在边界返回 INT_MAX/INT_MIN"
+          }
+        }
+      ]
+    }
+  ]
+}

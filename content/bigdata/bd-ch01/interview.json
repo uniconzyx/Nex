@@ -1,0 +1,49 @@
+{
+  "meta": { "chapter": "bd-ch01" },
+  "items": [
+    {
+      "question": "HDFS 的 NameNode 存什么、不存什么？块到 DataNode 的映射在哪里？",
+      "answer_md": "NameNode 只存**元数据**：命名空间（目录树）、文件到块的映射、以及运行时「块 → DataNode 列表」的映射。\n\n**不存**文件真实数据，数据在 DataNode 的本地磁盘。关键易错点：**块到 DataNode 的映射并不持久化在 fsimage 中**，而是 NameNode 启动后由各个 DataNode 的『块报告（block report）』动态重建。\n\n由此推出两个结论：① 刚启动时块报告没收齐，集群进入**安全模式**只读不写；② NameNode 是内存瓶颈型组件，文件/块数决定其堆内存压力，小文件是大敌。",
+      "follow_ups": [
+        "NameNode 内存大约怎么估算（每文件/块约多少字节）？",
+        "HA 架构下 Standby 如何实时拿到最新 edits？",
+        "如果所有 DataNode 都起来了但块报告很慢，安全模式会怎样？"
+      ],
+      "difficulty": "mid",
+      "company_tags": ["通用", "阿里", "字节"]
+    },
+    {
+      "question": "HDFS 默认三副本的放置策略是什么？为什么这样设计而不是三副本全放不同机架？",
+      "answer_md": "经典策略：**第 1 副本放在客户端所在节点（或随机）；第 2 副本放在不同机架的节点；第 3 副本放在与第 2 副本同机架的另一节点**。\n\n设计权衡：① **容灾**——任意单机架故障都不会丢数据（第 2 副本已跨机架）；② **写带宽**——跨机架传输只发生 1 次（第1→第2），第2→第3 在同机架内，把写放大压到最低。若三副本全放不同机架，每次写都要 2 次跨机架传输，客户端/网络出口压力大。\n\n前提：必须正确配置**机架感知（rack awareness）**，否则所有节点被当作 /default-rack，副本形同同机架，容灾失效。",
+      "follow_ups": [
+        "机架感知怎么配置？没配会怎样？",
+        "副本因子设为 1 或 5 分别在什么场景合理？",
+        "纠删码（Erasure Coding）与 3 副本的取舍？"
+      ],
+      "difficulty": "mid",
+      "company_tags": ["通用", "腾讯", "美团"]
+    },
+    {
+      "question": "Secondary NameNode 是 NameNode 的热备吗？fsimage 和 edits 分别是什么，checkpoint 做什么？",
+      "answer_md": "**不是热备**，这是最高频误区。Secondary NameNode 只负责 **checkpoint**：周期性把『旧 fsimage + 新 edits』合并成新 fsimage，防止 edits 日志无限增长、启动重放过慢。NameNode 真正宕机时它**不能接管**。\n\n- **fsimage**：命名空间的全量快照（持久化）。\n- **edits**：对命名空间的增量操作日志（顺序追加，写快）。\n- **checkpoint**：计算 `新fsimage = apply(旧fsimage, edits)`，是 WAL + 快照范式，与数据库检查点、LSM compaction 同源。\n\n真正的热备是 HA（Active/Standby + QJM 同步 edits + ZKFC 自动切换）。",
+      "follow_ups": [
+        "崩溃恢复时 NameNode 怎么做？",
+        "Standby NameNode 在 HA 里承担 checkpoint 角色吗？",
+        "edits 丢了会导致什么后果？"
+      ],
+      "difficulty": "mid",
+      "company_tags": ["通用", "京东", "字节"]
+    },
+    {
+      "question": "HDFS 写文件的流程是怎样的？为什么用流水线（pipeline）复制？",
+      "answer_md": "写流程：① 客户端把数据切成 packet（默认 64KB）；② 向 NameNode 申请分配目标 DataNode 列表（按副本策略）；③ 数据沿 `客户端→dn1→dn2→dn3` 的**流水线**依次推送，每个节点落盘后转发下游，ACK 沿原路回传；④ 整块写完后客户端通知 NameNode 提交，块才对读者可见（原子可见性）。\n\n为什么流水线：客户端**只发一份**数据，由 DataNode 链依次转发，把客户端的写放大从 O(r) 降到 O(1)，避免客户端上行带宽成为瓶颈；同时节点失效时可被剔除并由 NameNode 另选节点补足副本，保证最终副本数达标才返回成功。",
+      "follow_ups": [
+        "写入过程中某个 DataNode 挂了会怎样？",
+        "为什么正在写入的块对读者不可见？",
+        "packet 大小、副本数对吞吐的影响？"
+      ],
+      "difficulty": "hard",
+      "company_tags": ["通用", "阿里", "百度"]
+    }
+  ]
+}

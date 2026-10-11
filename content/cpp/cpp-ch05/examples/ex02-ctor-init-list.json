@@ -1,0 +1,8 @@
+{
+  "title": "构造函数与初始化列表",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "15",
+  "code": "#include <iostream>\n\nclass Rect {\n    double w_, h_;\npublic:\n    Rect(double w, double h) : w_(w), h_(h) {}\n    double area() const { return w_ * h_; }\n};\n\nint main() {\n    Rect r(3, 5);\n    std::cout << r.area();\n}"
+}

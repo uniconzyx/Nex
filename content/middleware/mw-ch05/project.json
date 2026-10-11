@@ -1,0 +1,22 @@
+{
+  "meta": {
+    "chapter": "mw-ch05",
+    "note": "用纯 Python 从零实现可量化的 Kafka 核心机制模拟器。"
+  },
+  "items": [
+    {
+      "title": "从零实现「分区日志 + 副本同步」模拟器",
+      "requirement_md": "用纯 Python（不依赖 Kafka）实现一个可量化的 Kafka 核心机制实验台。**所有输出必须是确定性数字**（固定输入、禁止墙钟时间、禁止 `hash()`）。\n\n1. **分区日志（PartitionLog）**：append-only 追加，维护 `baseOffset`、`LEO`、`LSO`、`HW`；支持按 offset 读取与 `[start, end)` 范围扫描。\n2. **分区器（Partitioner）**：实现 murmur2（32 位无符号，中间量 `& 0xffffffff`），`partition_of = (h & 0x7fffffff) % n`；用 1000 个 key、6 个分区统计分布偏差率（目标 ±10% 内）。\n3. **副本同步（ReplicaSet）**：N 个 follower 按 `replica.lag.time.max.ms` 等效的「落后条数阈值」判定是否留在 ISR；逐条写入时打印 **LEO / Follower LEO / HW** 的推进表，并验证 `HW == min(ISR 各副本 LEO)`。\n4. **acks 耐久性对比**：模拟「leader 崩溃」在两种时机（落盘前 / 落盘后但 follower 未同步），输出 `acks=0/1/all` 三者在每种时机下的**丢失条数**，并给出结论表。\n5. **消费者组分配**：实现 range 与 round-robin 两种策略；对「分区数 × 消费者数」的若干组合，输出每个消费者分到的分区数与**空闲消费者数**。\n6. **日志段与稀疏索引**：把 N 条消息切成多个固定大小的 segment，每个 segment 建稀疏索引（每 K 条一个 entry）；实现 `locate(offset) -> (segment, index_slot, 需顺序扫描条数)`，并统计最坏扫描条数。\n7. **offset 提交时机对比**：模拟 commit-first 与 process-first 在「第 i 条后崩溃」时的结果（丢失 vs 重复），输出对照表。\n8. 汇总一份 `report.md`：每个机制的实测数字 + 一句话结论（结论必须由数字推导，不得硬编码）。",
+      "tasks": [
+        "实现 murmur2 并验证与 Kafka Utils.murmur2 的算法一致性（用已知输入的期望值做断言）",
+        "实现 PartitionLog：baseOffset / LEO / LSO / HW 的语义与推进规则",
+        "实现 ReplicaSet：ISR 判定、HW 计算、leader 崩溃后的新 leader 选举（ISR 优先、LEO 最大）",
+        "实现 acks=0/1/all 的耐久性模拟器，输出两种崩溃时机下的丢失条数对照表",
+        "实现消费者组 range / round-robin 分配与空闲消费者统计",
+        "实现 segment 切分与稀疏索引 locate()，统计最坏顺序扫描条数",
+        "实现 offset 提交时机对比（commit-first 丢数据 / process-first 重复消费）",
+        "汇总 report.md：全部为实测数字 + 由数据推导的结论"
+      ]
+    }
+  ]
+}

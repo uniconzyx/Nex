@@ -1,0 +1,50 @@
+{
+  "meta": {
+    "chapter": "py-ch03",
+    "subject": "python",
+    "note": "综合项目：流式词频统计与 Top-K 管道，覆盖 dict 计数 / set 停用词 / 推导式 / 生成器惰性读取 / 深浅拷贝。"
+  },
+  "items": [
+    {
+      "title": "流式词频统计与 Top-K 管道（可处理大文件）",
+      "requirement_md": "实现一个**可处理大文件**的文本词频统计工具，要求：\n\n1. **流式读取**：用**生成器**逐行 yield（不要 `read().split()` 一次性载入），保证内存占用与文件大小无关（O(1) 而非 O(n)）。\n2. **清洗分词**：转小写、用正则或 `str.translate` 去标点，产出单词生成器（管道式：行生成 → 词生成）。\n3. **停用词过滤**：用 `set` 保存停用词（`{'the','a','of','and',...}`），过滤时利用 `in set` 的 O(1)；对比一次「用 list 存停用词」的耗时差异并给出结论。\n4. **计数**：用 `dict.get(k, 0) + 1` 或 `collections.Counter` 统计词频（对比两种写法的性能与可读性）。\n5. **Top-K**：用 `heapq.nlargest(k, counter.items(), key=lambda x: x[1])` 取前 K（说明为何比 `sorted(...)[:k]` 在大 n 小 k 时更优：O(n log k) vs O(n log n)）。\n6. **保序去重**：额外提供「按首次出现顺序输出 Top-K」的模式（提示：`dict.fromkeys` 保序 + set 判断，呼应 3.7+ 字典有序特性）。\n7. **拷贝语义验证**：构造一个含嵌套列表的配置对象（如 `{'stopwords': [...], 'options': {...}}`），演示浅拷贝导致的共享修改问题，并用 `deepcopy` 修复，写进项目 README 说明。\n\n**验收输出示例**：\n```\ntotal words: 12345, unique: 2341\nelapsed: 0.42s, peak memory ~ 2MB (streaming)\nTop-5: [('python', 89), ('data', 76), ('list', 54), ('dict', 51), ('set', 40)]\nstopwords as set: 0.05s | as list: 1.83s   (差距约 36x)\n```",
+      "tasks": [
+        {
+          "title": "生成器流式管道（行 → 词）",
+          "verification": {
+            "type": "test",
+            "desc": "处理 100MB 文本时内存占用不随文件增长（用 tracemalloc 或任务管理器观察，应稳定在数 MB）"
+          }
+        },
+        {
+          "title": "set vs list 停用词性能对比",
+          "verification": {
+            "type": "test",
+            "desc": "同一语料下 set 版本显著快于 list 版本，并在文档中给出倍数与复杂度解释（O(1) vs O(n)）"
+          }
+        },
+        {
+          "title": "dict / Counter 计数与 heapq.nlargest Top-K",
+          "verification": {
+            "type": "test",
+            "desc": "Top-K 结果与手工排序一致；说明 nlargest 在 n>>k 时的复杂度优势"
+          }
+        },
+        {
+          "title": "保序 Top-K（dict.fromkeys + set）",
+          "verification": {
+            "type": "manual",
+            "desc": "输出按单词首次出现顺序排列，且与频次降序版本结果集合一致"
+          }
+        },
+        {
+          "title": "深浅拷贝语义验证",
+          "verification": {
+            "type": "test",
+            "desc": "演示浅拷贝配置对象后修改 stopwords 影响原对象；deepcopy 后互不影响，并写入说明文档"
+          }
+        }
+      ]
+    }
+  ]
+}

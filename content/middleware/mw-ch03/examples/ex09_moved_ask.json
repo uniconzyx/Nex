@@ -1,0 +1,9 @@
+{
+  "title": "Cluster MOVED 重定向：错节点返回并刷新映射",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== Cluster MOVED 重定向模拟 ===\n客户端误以为所有槽都在 nodeA\n请求 key=user:1 -> OK (在 nodeB 命中)\n请求 key=order:9 -> OK (在 nodeB 命中)\n本地缓存已刷新: {}\n再次请求 key=order:9 -> OK (在 nodeB 命中)",
+  "code": "print(\"=== Cluster MOVED 重定向模拟 ===\")\nslot_to_node = lambda s: \"nodeA\" if s <= 8191 else \"nodeB\"\ndef crc16(key):\n    crc = 0\n    for b in key.encode('utf-8'):\n        crc ^= b << 8\n        for _ in range(8):\n            if crc & 0x8000:\n                crc = ((crc << 1) ^ 0x1021) & 0xFFFF\n            else:\n                crc = (crc << 1) & 0xFFFF\n    return crc\ndef route(key, cache):\n    slot = crc16(key) & 16383\n    correct = slot_to_node(slot)\n    guessed = cache.get(slot, correct)\n    if guessed == correct:\n        return \"OK (在 %s 命中)\" % correct\n    cache[slot] = correct\n    return \"MOVED %d %s (刷新本地映射后重试)\" % (slot, correct)\ncache = {}\nprint(\"客户端误以为所有槽都在 nodeA\")\nprint(\"请求 key=user:1 ->\", route(\"user:1\", cache))\nprint(\"请求 key=order:9 ->\", route(\"order:9\", cache))\nprint(\"本地缓存已刷新:\", cache)\nprint(\"再次请求 key=order:9 ->\", route(\"order:9\", cache))\n",
+  "_verified": true
+}

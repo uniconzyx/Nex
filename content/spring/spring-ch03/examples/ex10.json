@@ -1,0 +1,8 @@
+{
+  "title": "迷你 AOP 容器：按切点过滤织入",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "[AOP] before deposit\n  deposit 100\n[AOP] after deposit\n[AOP] before withdraw\n  withdraw 30\n[AOP] after withdraw\ninfo -> account\n",
+  "code": "import java.lang.reflect.*;\nimport java.util.*;\n\ninterface Account { void deposit(int x); void withdraw(int x); String info(); }\nclass AccountImpl implements Account {\n    public void deposit(int x) { System.out.println(\"  deposit \" + x); }\n    public void withdraw(int x) { System.out.println(\"  withdraw \" + x); }\n    public String info() { return \"account\"; }\n}\nclass AopHandler implements InvocationHandler {\n    Object target; Set<String> matched;\n    AopHandler(Object t, Set<String> m) { target = t; matched = m; }\n    public Object invoke(Object p, Method m, Object[] args) throws Throwable {\n        if (matched.contains(m.getName())) {\n            System.out.println(\"[AOP] before \" + m.getName());\n            Object r = m.invoke(target, args);\n            System.out.println(\"[AOP] after \" + m.getName());\n            return r;\n        }\n        return m.invoke(target, args);\n    }\n}\npublic class Main {\n    public static void main(String[] a) throws Exception {\n        // 切点：只对事务方法 deposit/withdraw 织入，info 不过滤\n        Set<String> pc = new HashSet<>(Arrays.asList(\"deposit\", \"withdraw\"));\n        Account proxy = (Account) Proxy.newProxyInstance(Account.class.getClassLoader(),\n            new Class[]{Account.class}, new AopHandler(new AccountImpl(), pc));\n        proxy.deposit(100);\n        proxy.withdraw(30);\n        System.out.println(\"info -> \" + proxy.info());\n    }\n}\n"
+}

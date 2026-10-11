@@ -1,0 +1,8 @@
+{
+  "title": "noexcept 函数声明与调用（契约：不抛异常）",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "noexcept f\nok",
+  "code": "#include <iostream>\n\nvoid f() noexcept { std::cout << \"noexcept f\\n\"; }\n\nint main() {\n    f();\n    std::cout << \"ok\\n\";\n}"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "finally 与 return 的执行顺序陷阱",
+  "code_lang": "java",
+  "code_std": "java17",
+  "stdin": "",
+  "expected_output": "tricky()=2\nwithValue()=10",
+  "code": "public class Ex03FinallyReturn {\n    static int tricky() {\n        try {\n            return 1;\n        } finally {\n            return 2;\n        }\n    }\n    static int withValue() {\n        int x = 10;\n        try {\n            return x;\n        } finally {\n            x = 20;\n        }\n    }\n    public static void main(String[] args) {\n        System.out.println(\"tricky()=\" + tricky());\n        System.out.println(\"withValue()=\" + withValue());\n    }\n}"
+}

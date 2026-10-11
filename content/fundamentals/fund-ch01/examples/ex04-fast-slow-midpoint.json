@@ -1,0 +1,8 @@
+{
+  "title": "快慢指针找链表中点（奇偶两种情况）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "长度 6 的中点是 4（中间偏右）\n长度 5 的中点是 3（正中间）\n说明：循环条件 while (fast && fast->next) 决定偶数时取右中点",
+  "code": "#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct Node { int data; struct Node *next; } Node;\n\nNode *build(int *a, int n) {\n    Node *head = NULL, *tail = NULL;\n    for (int i = 0; i < n; i++) {\n        Node *nd = malloc(sizeof(Node));\n        nd->data = a[i]; nd->next = NULL;\n        if (!head) head = tail = nd;\n        else { tail->next = nd; tail = nd; }\n    }\n    return head;\n}\n\n/* 偶数长度时返回中间偏右 */\nNode *midpoint(Node *head) {\n    Node *slow = head, *fast = head;\n    while (fast && fast->next) { slow = slow->next; fast = fast->next->next; }\n    return slow;\n}\n\nint main(void) {\n    int a[] = {1, 2, 3, 4, 5, 6};        /* 偶数个 */\n    int b[] = {1, 2, 3, 4, 5};           /* 奇数个 */\n    Node *la = build(a, 6), *lb = build(b, 5);\n    printf(\"长度 6 的中点是 %d（中间偏右）\\n\", midpoint(la)->data);\n    printf(\"长度 5 的中点是 %d（正中间）\\n\", midpoint(lb)->data);\n    printf(\"说明：循环条件 while (fast && fast->next) 决定偶数时取右中点\\n\");\n    return 0;\n}"
+}

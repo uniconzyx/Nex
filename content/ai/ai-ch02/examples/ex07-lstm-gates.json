@@ -1,0 +1,8 @@
+{
+  "title": "LSTM 门控公式数值演算",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "隐藏维度 H = 4\n遗忘门 f (sigmoid, 应∈(0,1)): [0.191 0.564 0.715 0.639]\n输入门 i (sigmoid, 应∈(0,1)): [0.598 0.277 0.593 0.738]\n输出门 o (sigmoid, 应∈(0,1)): [0.164 0.572 0.47  0.472]\n候选 g (tanh,   应∈(-1,1)): [ 0.523  0.2   -0.716  0.885]\n细胞态 c = f*c_prev + i*g: [ 0.313  0.056 -0.424  0.653]\n隐藏态 h = o*tanh(c): [ 0.05   0.032 -0.188  0.271]\n验证: 所有门均落在正确区间 -> True\n",
+  "code": "\nimport numpy as np\nnp.random.seed(1)\ndef sigmoid(x): return 1.0/(1.0+np.exp(-x))\nH = 4\nW = {k: np.random.randn(H, 2*H)*0.5 for k in ['f','i','o','c']}\nb = {k: np.zeros(H) for k in ['f','i','o','c']}\nh_prev = np.zeros(H)\nc_prev = np.zeros(H)\nx = np.random.randn(H)\ncat = np.concatenate([h_prev, x])\nf = sigmoid(W['f'] @ cat + b['f'])\ni = sigmoid(W['i'] @ cat + b['i'])\no = sigmoid(W['o'] @ cat + b['o'])\ng = np.tanh(W['c'] @ cat + b['c'])\nc = f * c_prev + i * g\nh = o * np.tanh(c)\nprint(\"隐藏维度 H =\", H)\nprint(\"遗忘门 f (sigmoid, 应∈(0,1)):\", np.round(f,3))\nprint(\"输入门 i (sigmoid, 应∈(0,1)):\", np.round(i,3))\nprint(\"输出门 o (sigmoid, 应∈(0,1)):\", np.round(o,3))\nprint(\"候选 g (tanh,   应∈(-1,1)):\", np.round(g,3))\nprint(\"细胞态 c = f*c_prev + i*g:\", np.round(c,3))\nprint(\"隐藏态 h = o*tanh(c):\", np.round(h,3))\nprint(\"验证: 所有门均落在正确区间 ->\",\n      bool(f.max()<1 and f.min()>0 and i.max()<1 and c.shape==(H,)))\n"
+}

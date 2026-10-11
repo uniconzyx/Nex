@@ -1,0 +1,8 @@
+{
+  "title": "Token 预算与成本计算器（含缓存折扣与月度估算）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "system token = 625  user token = 19  输出 token = 320\n缓存命中 = True  输入单价 = 0.750 美元/1M\n单请求成本 = 0.004323 美元\n单请求成本(无缓存) = 0.005772 美元\nQPS=5 月度成本 = 56026.08 美元\n输出单价比输入贵 4 倍\n砍掉一半 system prompt 后单请求成本 = 0.004088 美元\n缓存命中降低成本: True\n",
+  "code": "\"\"\"按字符近似分词, 计算单次请求与月度成本。\"\"\"\nimport math\n\ndef approx_tokens(text):\n    # 混合近似: 中日韩字符 1 token/字, 其余 1 token/4 字符\n    cjk = sum(1 for c in text if '\\u4e00' <= c <= '\\u9fff')\n    other = len(text) - cjk\n    return cjk + math.ceil(other / 4)\n\nPRICE_IN = 3.0     # 美元 / 1M 输入 token\nPRICE_OUT = 12.0   # 美元 / 1M 输出 token\nCACHE_DISCOUNT = 0.25   # 命中前缀缓存后的输入单价比例\n\nsystem_prompt = \"你是一个严谨的技术文档助手, 只依据给定资料回答, 不确定就说不知道。\" * 20\nuser_query = \"请解释 PagedAttention 如何降低 KV Cache 的显存碎片。\"\nCACHE_HIT = True\n\nt_sys = approx_tokens(system_prompt)\nt_usr = approx_tokens(user_query)\nt_out = 320\nin_price = PRICE_IN * (CACHE_DISCOUNT if CACHE_HIT else 1.0)\ncost = (t_sys + t_usr) / 1e6 * in_price + t_out / 1e6 * PRICE_OUT\n\nQPS = 5\nmonthly = cost * QPS * 3600 * 24 * 30\n\nprint(\"system token = %d  user token = %d  输出 token = %d\" % (t_sys, t_usr, t_out))\nprint(\"缓存命中 = %s  输入单价 = %.3f 美元/1M\" % (CACHE_HIT, in_price))\nprint(\"单请求成本 = %.6f 美元\" % cost)\nprint(\"单请求成本(无缓存) = %.6f 美元\" % ((t_sys + t_usr) / 1e6 * PRICE_IN + t_out / 1e6 * PRICE_OUT))\nprint(\"QPS=%d 月度成本 = %.2f 美元\" % (QPS, monthly))\nprint(\"输出单价比输入贵 %d 倍\" % (PRICE_OUT / PRICE_IN))\nprint(\"砍掉一半 system prompt 后单请求成本 = %.6f 美元\"\n      % ((t_sys // 2 + t_usr) / 1e6 * in_price + t_out / 1e6 * PRICE_OUT))\nprint(\"缓存命中降低成本:\", cost < ((t_sys + t_usr) / 1e6 * PRICE_IN + t_out / 1e6 * PRICE_OUT))\n"
+}

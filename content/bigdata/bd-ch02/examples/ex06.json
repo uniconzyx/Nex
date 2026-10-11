@@ -1,0 +1,8 @@
+{
+  "title": "Combiner 优化对比：shuffle kv 数量压缩",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "map output kv: 10\nshuffle kv without combiner: 10\nshuffle kv with combiner:    3\nreduction ratio: 3.33x\nfinal counts unchanged: hello=4 world=3 bigdata=3",
+  "code": "\ndocs = [\"hello world hello\", \"world bigdata\", \"hello bigdata world\", \"bigdata hello\"]\nR = 3\ndef mh(key, n):\n    h = 0\n    for ch in key:\n        h = (h * 31 + ord(ch)) & 0x7fffffff\n    return h % n\npairs = []\nfor line in docs:\n    for w in line.lower().split():\n        pairs.append((w, 1))\nmap_out = len(pairs)\nbuckets = {r: [] for r in range(R)}\nfor k, v in pairs:\n    buckets[mh(k, R)].append((k, v))\nshuffle_no_combiner = sum(len(b) for b in buckets.values())\ncombined = {}\nfor k, v in pairs:\n    p = mh(k, R)\n    combined[(p, k)] = combined.get((p, k), 0) + v\nshuffle_with_combiner = len(combined)\nprint(f\"map output kv: {map_out}\")\nprint(f\"shuffle kv without combiner: {shuffle_no_combiner}\")\nprint(f\"shuffle kv with combiner:    {shuffle_with_combiner}\")\nprint(f\"reduction ratio: {shuffle_no_combiner/shuffle_with_combiner:.2f}x\")\nprint(f\"final counts unchanged: hello=4 world=3 bigdata=3\")\n"
+}

@@ -1,0 +1,390 @@
+{
+  "schema_version": 1,
+  "subject": "java",
+  "title": "CppMind · Java 课程体系",
+  "note": "阶段7 资源整合大纲（Java 学科补齐）。每章须齐备 7 类内容（goals.md / concept/ / pitfalls.md / exercises.json / examples/ / interview.json / project.json，详见 content/_template/README.md），由 server/scripts/validate_content.py 校验。resources 仅存元数据与链接，不存第三方题面/正文：books 仅记书名与章节，github 仅记仓库链接，leetcode/nowcoder 仅记题号与链接（真题依据），符合合规红线。java-ch02 / java-ch03 为本阶段补齐章节（类与对象、继承与多态），status 完成后置为 complete。",
+  "groups": {
+    "L1": "Java 基础",
+    "L2": "面向对象",
+    "L3": "集合与泛型",
+    "L4": "异常与 IO",
+    "L5": "并发",
+    "L6": "JVM 与工程",
+    "L7": "框架与面试"
+  },
+  "chapters": [
+    {
+      "id": "java-ch01",
+      "order": 1,
+      "group": "L1",
+      "title": "环境与基础语法：JDK、变量、八种基本类型、运算符、流程控制、数组",
+      "summary": "安装配置 JDK 与开发环境；第一个 Java 程序与 main 方法签名；变量与常量；八种基本类型（byte/short/int/long/float/double/char/boolean）与字面量；运算符与表达式；流程控制（if/switch/for/while）；一维数组与遍历。",
+      "prerequisites": [],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "Snailclimb/JavaGuide",
+          "macrozheng/mall",
+          "doocs/advanced-java",
+          "eugenp/tutorials"
+        ],
+        "github_stars": [
+          159056,
+          84863,
+          79141,
+          37326
+        ],
+        "github_notes": [
+          "Java 面试与后端通用指南：计算机基础、数据库、分布式、高并发、系统设计",
+          "SpringBoot + MyBatis 电商实战项目，含 Docker 部署，工程范例",
+          "互联网 Java 工程师进阶知识：高并发、分布式、微服务",
+          "Spring 官方生态的系统化代码教程仓库"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Java 核心技术 卷I》第 3 章 Java 基本的程序设计结构",
+          "《Effective Java》第 2 条 遇多个构造器参数考虑用构建器（类型设计进阶）"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "java-ch02",
+      "order": 2,
+      "group": "L2",
+      "title": "类与对象：封装、构造器、this",
+      "summary": "JVM 对象模型：对象头（Mark Word / Klass Pointer）、实例数据布局与对齐填充；引用与对象、值传递语义（对象参数传递的是引用的副本）；封装本质与访问控制（private/protected/public）、getter/setter 与不变式；构造器重载、this 指代与 this() 链式调用、初始化顺序；equals 与 hashCode 契约；record 自动封装。",
+      "prerequisites": [
+        "java-ch01"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "Snailclimb/JavaGuide",
+          "macrozheng/mall",
+          "doocs/advanced-java",
+          "eugenp/tutorials"
+        ],
+        "github_stars": [
+          159056,
+          84863,
+          79141,
+          37326
+        ],
+        "github_notes": [
+          "Java 面试与后端通用指南：计算机基础、数据库、分布式、高并发、系统设计",
+          "SpringBoot + MyBatis 电商实战项目，含 Docker 部署，工程范例",
+          "互联网 Java 工程师进阶知识：高并发、分布式、微服务",
+          "Spring 官方生态的系统化代码教程仓库"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Java 核心技术 卷I》第 4 章 对象与类",
+          "《Effective Java》第 15-17 条 类与接口的设计（最小化可变性、复合优先于继承）"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "java-ch03",
+      "order": 3,
+      "group": "L2",
+      "title": "继承与多态：extends、方法重写、抽象类与接口",
+      "summary": "继承的 is-a 本质、super 指代父类、单继承限制、构造器链；方法重写（override）与重载（overload）的区别；JVM 多态机制：invokevirtual 动态分派、方法表（vtable）、字段无多态（字段隐藏）、静态绑定 vs 动态绑定；抽象类（abstract）与接口（interface，含 default 方法）的语义与字节码差异（invokevirtual vs invokeinterface）；向上/向下转型与 instanceof；final 与 Object 基类核心方法。",
+      "prerequisites": [
+        "java-ch02"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "Snailclimb/JavaGuide",
+          "macrozheng/mall",
+          "doocs/advanced-java",
+          "eugenp/tutorials"
+        ],
+        "github_stars": [
+          159056,
+          84863,
+          79141,
+          37326
+        ],
+        "github_notes": [
+          "Java 面试与后端通用指南：计算机基础、数据库、分布式、高并发、系统设计",
+          "SpringBoot + MyBatis 电商实战项目，含 Docker 部署，工程范例",
+          "互联网 Java 工程师进阶知识：高并发、分布式、微服务",
+          "Spring 官方生态的系统化代码教程仓库"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Java 核心技术 卷I》第 5-6 章 继承 / 接口",
+          "《Effective Java》第 18-21 条 组合优于继承、接口设计、子类型化"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "java-ch04",
+      "order": 4,
+      "group": "L3",
+      "title": "集合框架：List、Set、Map、Queue 与泛型集合",
+      "summary": "Collection 体系；List（ArrayList/LinkedList）；Set（HashSet/TreeSet）；Map（HashMap/TreeMap）；Queue/Deque；迭代器与 for-each；泛型集合与类型安全；Collections 工具类。",
+      "prerequisites": [
+        "java-ch02",
+        "java-ch03"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "Snailclimb/JavaGuide",
+          "macrozheng/mall",
+          "doocs/advanced-java",
+          "eugenp/tutorials"
+        ],
+        "github_stars": [
+          159056,
+          84863,
+          79141,
+          37326
+        ],
+        "github_notes": [
+          "Java 面试与后端通用指南：计算机基础、数据库、分布式、高并发、系统设计",
+          "SpringBoot + MyBatis 电商实战项目，含 Docker 部署，工程范例",
+          "互联网 Java 工程师进阶知识：高并发、分布式、微服务",
+          "Spring 官方生态的系统化代码教程仓库"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Java 核心技术 卷I》第 9 章 集合",
+          "《Effective Java》第 33 条 用 EnumMap 代替序数索引等集合建议"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "java-ch05",
+      "order": 5,
+      "group": "L4",
+      "title": "异常体系与泛型进阶",
+      "summary": "Throwable 体系（Error/Exception）；受检与非受检异常；try/catch/finally 与 try-with-resources；自定义异常；泛型类/方法、通配符 ? extends/super、类型擦除与边界。",
+      "prerequisites": [
+        "java-ch02",
+        "java-ch03"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "Snailclimb/JavaGuide",
+          "macrozheng/mall",
+          "doocs/advanced-java",
+          "eugenp/tutorials"
+        ],
+        "github_stars": [
+          159056,
+          84863,
+          79141,
+          37326
+        ],
+        "github_notes": [
+          "Java 面试与后端通用指南：计算机基础、数据库、分布式、高并发、系统设计",
+          "SpringBoot + MyBatis 电商实战项目，含 Docker 部署，工程范例",
+          "互联网 Java 工程师进阶知识：高并发、分布式、微服务",
+          "Spring 官方生态的系统化代码教程仓库"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Java 核心技术 卷I》第 7 章 异常 / 第 8 章 泛型程序设计",
+          "《Effective Java》第 10 章 异常 / 第 5 章 泛型"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "java-ch06",
+      "order": 6,
+      "group": "L4",
+      "title": "IO 与 NIO",
+      "summary": "字节流 InputStream/OutputStream 与字符流 Reader/Writer；文件读写 File/Files；缓冲流与序列化；NIO 的 Channel/Buffer/Selector；Path 与 Files API。",
+      "prerequisites": [
+        "java-ch01"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "Snailclimb/JavaGuide",
+          "macrozheng/mall",
+          "doocs/advanced-java",
+          "eugenp/tutorials"
+        ],
+        "github_stars": [
+          159056,
+          84863,
+          79141,
+          37326
+        ],
+        "github_notes": [
+          "Java 面试与后端通用指南：计算机基础、数据库、分布式、高并发、系统设计",
+          "SpringBoot + MyBatis 电商实战项目，含 Docker 部署，工程范例",
+          "互联网 Java 工程师进阶知识：高并发、分布式、微服务",
+          "Spring 官方生态的系统化代码教程仓库"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Java 核心技术 卷II》第 1-2 章 流与文件 / NIO",
+          "《Effective Java》第 11 条 Serializable 谨慎实现"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "java-ch07",
+      "order": 7,
+      "group": "L5",
+      "title": "并发：Thread、线程池与 JUC 并发容器",
+      "summary": "Thread/Runnable、线程状态与调度；synchronized 与 volatile；锁 Lock/ReentrantLock；线程池 ExecutorService；JUC 并发容器（ConcurrentHashMap 等）；原子类与并发工具。",
+      "prerequisites": [
+        "java-ch02",
+        "java-ch03"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "Snailclimb/JavaGuide",
+          "macrozheng/mall",
+          "doocs/advanced-java",
+          "eugenp/tutorials"
+        ],
+        "github_stars": [
+          159056,
+          84863,
+          79141,
+          37326
+        ],
+        "github_notes": [
+          "Java 面试与后端通用指南：计算机基础、数据库、分布式、高并发、系统设计",
+          "SpringBoot + MyBatis 电商实战项目，含 Docker 部署，工程范例",
+          "互联网 Java 工程师进阶知识：高并发、分布式、微服务",
+          "Spring 官方生态的系统化代码教程仓库"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Java 并发编程实战》（Brian Goetz）",
+          "《Java 核心技术 卷II》第 5 章 并发"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "java-ch08",
+      "order": 8,
+      "group": "L6",
+      "title": "JVM 与内存模型、GC、类加载",
+      "summary": "JVM 内存区域（堆/栈/方法区）；Java 内存模型 JMM 与 happens-before；垃圾回收算法与收集器；类加载机制与双亲委派；字节码与运行时数据。",
+      "prerequisites": [
+        "java-ch02",
+        "java-ch03",
+        "java-ch07"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "Snailclimb/JavaGuide",
+          "macrozheng/mall",
+          "doocs/advanced-java",
+          "eugenp/tutorials"
+        ],
+        "github_stars": [
+          159056,
+          84863,
+          79141,
+          37326
+        ],
+        "github_notes": [
+          "Java 面试与后端通用指南：计算机基础、数据库、分布式、高并发、系统设计",
+          "SpringBoot + MyBatis 电商实战项目，含 Docker 部署，工程范例",
+          "互联网 Java 工程师进阶知识：高并发、分布式、微服务",
+          "Spring 官方生态的系统化代码教程仓库"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《深入理解 Java 虚拟机》（周志明）",
+          "《Java 核心技术 卷II》第 9 章 虚拟机"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    },
+    {
+      "id": "java-ch09",
+      "order": 9,
+      "group": "L7",
+      "title": "工程与框架：Maven 与 Spring Boot 入门",
+      "summary": "Maven 依赖与构建生命周期；Spring Boot 自动配置与起步依赖；REST 控制器与依赖注入；工程分层与测试；从零搭建一个可运行 Web 服务。",
+      "prerequisites": [
+        "java-ch04",
+        "java-ch06"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "Snailclimb/JavaGuide",
+          "macrozheng/mall",
+          "doocs/advanced-java",
+          "eugenp/tutorials"
+        ],
+        "github_stars": [
+          159056,
+          84863,
+          79141,
+          37326
+        ],
+        "github_notes": [
+          "Java 面试与后端通用指南：计算机基础、数据库、分布式、高并发、系统设计",
+          "SpringBoot + MyBatis 电商实战项目，含 Docker 部署，工程范例",
+          "互联网 Java 工程师进阶知识：高并发、分布式、微服务",
+          "Spring 官方生态的系统化代码教程仓库"
+        ],
+        "github_fetched_at": "2026-09-21",
+        "books": [
+          "《Spring 实战》（Craig Walls）",
+          "《Effective Java》工程与 API 设计相关条款"
+        ],
+        "leetcode": [],
+        "nowcoder": []
+      }
+    }
+  ],
+  "github_resources": [
+    {
+      "repo": "Snailclimb/JavaGuide",
+      "stars": 159056,
+      "url": "https://github.com/Snailclimb/JavaGuide",
+      "note": "Java 面试与后端通用指南：计算机基础、数据库、分布式、高并发、系统设计"
+    },
+    {
+      "repo": "macrozheng/mall",
+      "stars": 84863,
+      "url": "https://github.com/macrozheng/mall",
+      "note": "SpringBoot + MyBatis 电商实战项目，含 Docker 部署，工程范例"
+    },
+    {
+      "repo": "doocs/advanced-java",
+      "stars": 79141,
+      "url": "https://github.com/doocs/advanced-java",
+      "note": "互联网 Java 工程师进阶知识：高并发、分布式、微服务"
+    },
+    {
+      "repo": "eugenp/tutorials",
+      "stars": 37326,
+      "url": "https://github.com/eugenp/tutorials",
+      "note": "Spring 官方生态的系统化代码教程仓库"
+    }
+  ],
+  "resources_fetched_at": "2026-09-21"
+}

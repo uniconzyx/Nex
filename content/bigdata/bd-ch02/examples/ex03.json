@@ -1,0 +1,8 @@
+{
+  "title": "Shuffle 排序：按 (partition, key) 两级排序",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "partition 0: [('of', 1), ('world', 1), ('world', 1), ('world', 1)]\npartition 1: [('bigdata', 1), ('bigdata', 1), ('hello', 1), ('hello', 1), ('hello', 1)]\npartition 2: []",
+  "code": "\ndef myhash(key, n):\n    h = 0\n    for ch in key:\n        h = (h * 31 + ord(ch)) & 0x7fffffff\n    return h % n\n\npairs = [(\"world\",1),(\"hello\",1),(\"bigdata\",1),(\"hello\",1),(\"world\",1),(\"bigdata\",1),(\"hello\",1),(\"of\",1),(\"world\",1)]\nR = 3\nbuckets = {r: [] for r in range(R)}\nfor k, v in pairs:\n    buckets[myhash(k, R)].append((k, v))\nfor r in range(R):\n    buckets[r].sort(key=lambda x: x[0])\n    print(f\"partition {r}: {buckets[r]}\")\n"
+}

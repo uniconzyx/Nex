@@ -1,0 +1,9 @@
+{
+  "title": "SQL：CREATE PROCEDURE 定义与 CALL 调用（含 IN/OUT/INOUT 三种参数模式）",
+  "code_lang": "sql",
+  "code_std": "mysql",
+  "stdin": "",
+  "expected_output": "-- 期望执行形态(非实测):\n--   CALL 语句本身不返回结果集, 只产生 'Query OK, 0 rows affected'\n--   SELECT 结果集表头: final_amount | counter_value\n--   行数据(85.00 / 6)需在真实 MySQL 上执行后确认, 此处不编造\n-- 语法结构要点:\n--   1) 复合体 BEGIN...END 必须落在 DELIMITER $$ ... $$ 之间\n--   2) IN 为默认模式; OUT 形参入口为 NULL; INOUT 保留初值\n--   3) 过程体结束后务必 DELIMITER ; 恢复, 否则后续语句都要用 $$ 收尾",
+  "code": "-- ⚠️ 本机无 MySQL 凭证, 未实跑; expected_output 只给出语法结构要点与结果集表头形态\n-- 参数模式: IN 只读传入 / OUT 入口置 NULL 由过程写回 / INOUT 读初值并写回\nDELIMITER $$                                   -- 客户端指令: 结束符临时改为 $$\nCREATE PROCEDURE p_discount(\n    IN    p_amount  DECIMAL(10,2),\n    IN    p_rate    DECIMAL(5,4),\n    OUT   p_final   DECIMAL(10,2),\n    INOUT p_counter INT\n)\nBEGIN\n    SET p_final   = p_amount * (1 - p_rate);   -- OUT: 写回\n    SET p_counter = p_counter + 1;             -- INOUT: 读初值后写回\nEND$$\nDELIMITER ;                                    -- 恢复默认结束符\n\n-- 调用: OUT/INOUT 的实参必须是用户变量\nSET @cnt = 5;\nCALL p_discount(100.00, 0.1500, @final, @cnt);\nSELECT @final AS final_amount, @cnt AS counter_value;",
+  "_verified": false
+}

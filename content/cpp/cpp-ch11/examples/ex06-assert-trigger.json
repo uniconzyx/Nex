@@ -1,0 +1,8 @@
+{
+  "title": "assert 触发：Debug 构建下条件为假即 abort（Release 下被剔除）",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "before assert",
+  "code": "#include <iostream>\n#include <cassert>\n\nint main() {\n    int x = -1;\n    std::cout << \"before assert\\n\";\n    assert(x >= 0);            // 未定义 NDEBUG 时：条件为假 → 打印诊断并 abort\n    std::cout << \"after assert (unreachable)\\n\";\n}"
+}

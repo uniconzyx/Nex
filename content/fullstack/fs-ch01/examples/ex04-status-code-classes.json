@@ -1,0 +1,8 @@
+{
+  "title": "状态码的五类语义与可重试判定",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "状态码 | 类别 | 可重试\n200 → 成功（Success） | 可重试: 否\n201 → 成功（Success） | 可重试: 否\n204 → 成功（Success） | 可重试: 否\n301 → 重定向（Redirection） | 可重试: 否\n302 → 重定向（Redirection） | 可重试: 否\n304 → 重定向（Redirection） | 可重试: 否\n400 → 客户端错误（Client Error） | 可重试: 否\n401 → 客户端错误（Client Error） | 可重试: 否\n403 → 客户端错误（Client Error） | 可重试: 否\n404 → 客户端错误（Client Error） | 可重试: 否\n429 → 客户端错误（Client Error） | 可重试: 是\n500 → 服务端错误（Server Error） | 可重试: 是\n502 → 服务端错误（Server Error） | 可重试: 是\n503 → 服务端错误（Server Error） | 可重试: 是\n504 → 服务端错误（Server Error） | 可重试: 是\n\n要点：状态码首位定类（1信息/2成功/3重定向/4客户端错/5服务端错）。\n      4xx 是「调用方的问题」，重试无意义（除 408/429）；5xx 是「服务端的问题」，幂等时可重试。\n      监控告警通常只看 5xx —— 所以把错误塞进 200 会让告警失效。",
+  "code": "const CODES = [200, 201, 204, 301, 302, 304, 400, 401, 403, 404, 429, 500, 502, 503, 504];\n\nconst CLASSES = {\n  1: '信息（Informational）',\n  2: '成功（Success）',\n  3: '重定向（Redirection）',\n  4: '客户端错误（Client Error）',\n  5: '服务端错误（Server Error）',\n};\n\n// 可重试规则：408(请求超时) / 429(限流) / 5xx(服务端问题)；其余 4xx 重试无意义\nconst canRetry = (code) => code === 408 || code === 429 || code >= 500;\n\nconsole.log('状态码 | 类别 | 可重试');\nfor (const c of CODES) {\n  console.log(c + ' → ' + CLASSES[Math.floor(c / 100)] + ' | 可重试: ' + (canRetry(c) ? '是' : '否'));\n}\nconsole.log('');\nconsole.log('要点：状态码首位定类（1信息/2成功/3重定向/4客户端错/5服务端错）。');\nconsole.log('      4xx 是「调用方的问题」，重试无意义（除 408/429）；5xx 是「服务端的问题」，幂等时可重试。');\nconsole.log('      监控告警通常只看 5xx —— 所以把错误塞进 200 会让告警失效。');"
+}

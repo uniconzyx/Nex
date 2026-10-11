@@ -1,0 +1,8 @@
+{
+  "title": "类模板：泛型栈 Stack<T>",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "top=3 size=3\nafter pop top=2",
+  "code": "#include <iostream>\n#include <vector>\ntemplate <typename T>\nclass Stack {\n    std::vector<T> v_;\npublic:\n    void push(const T& x) { v_.push_back(x); }\n    void pop() { v_.pop_back(); }\n    T top() const { return v_.back(); }\n    bool empty() const { return v_.empty(); }\n};\nint main() {\n    Stack<int> s;\n    s.push(1); s.push(2); s.push(3);\n    std::cout << \"top=\" << s.top() << \" size=3\\n\";\n    s.pop();\n    std::cout << \"after pop top=\" << s.top();\n}\n"
+}

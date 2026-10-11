@@ -1,0 +1,8 @@
+{
+  "title": "noexcept 函数内抛异常 → std::terminate（进程直接终止）",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "calling noexcept that throws",
+  "code": "#include <iostream>\n\nvoid boom() noexcept {\n    throw 1;   // 违反 noexcept 契约 → 调用 std::terminate\n}\n\nint main() {\n    std::cout << \"calling noexcept that throws\\n\";\n    boom();    // 此处之后不再执行\n    std::cout << \"never reached\\n\";\n}"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "stride tricks：滑动窗口零拷贝视图",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "window shape = (8, 3)\nis view (shares_memory) = True\nfirst window = [0, 1, 2]\nwindow sums (first 4) = [3, 6, 9, 12]",
+  "code": "import numpy as np\nfrom numpy.lib.stride_tricks import sliding_window_view\nv = np.arange(10, dtype=np.int64)\nw = sliding_window_view(v, 3)\nprint(\"window shape =\", w.shape)\nprint(\"is view (shares_memory) =\", np.shares_memory(v, w))\nprint(\"first window =\", w[0].tolist())\nprint(\"window sums (first 4) =\", w.sum(axis=1)[:4].tolist())"
+}

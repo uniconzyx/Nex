@@ -1,0 +1,102 @@
+{
+  "meta": {
+    "chapter": "java-ch08",
+    "note": "6 条面经，覆盖运行时数据区、GC 选型与调优、类加载与双亲委派、线上排查。"
+  },
+  "items": [
+    {
+      "question": "请讲一下 JVM 的运行时数据区，哪些是线程私有的？",
+      "answer_md": "五块：**程序计数器、虚拟机栈、本地方法栈**是线程私有；**堆、方法区（JDK 8+ 元空间）**是线程共享。\n\n- **程序计数器**：当前线程执行的字节码行号，执行 native 方法时为 undefined。它是唯一不抛 OOM 的区域。\n- **虚拟机栈**：存放栈帧（局部变量表、操作数栈、动态链接、方法返回地址），深度超限抛 `StackOverflowError`。\n- **堆**：对象实例与数组，分代管理（Eden / S0 / S1 / Old），OOM 主战场。\n- **方法区**：类元信息、运行时常量池、静态变量；JDK 8 起永久代被**元空间**取代，改用**本地内存**，因此 `Metaspace` OOM 不再受 `-Xmx` 影响。",
+      "follow_ups": [
+        "JDK 7 与 JDK 8 的字符串常量池分别在哪？",
+        "永久代为什么被元空间取代？（提示：`PermSize` 难调、Full GC 时回收、与 JRockit 合并）",
+        "`StackOverflowError` 与 `OutOfMemoryError` 在栈上的区别是什么？"
+      ],
+      "difficulty": "easy",
+      "company_tags": [
+        "阿里",
+        "腾讯",
+        "字节",
+        "美团"
+      ]
+    },
+    {
+      "question": "对象在堆上的分配过程是怎样的？逃逸分析起什么作用？",
+      "answer_md": "正常路径：**TLAB 优先**（线程本地分配缓冲，堆内私有，无锁）→ TLAB 不够则在 **Eden 用 CAS 分配** → Eden 满触发 **Minor GC** → 存活对象进 Survivor 并累加年龄 → 年龄达 `MaxTenuringThreshold`（默认 15）或**同龄对象超过 Survivor 一半**（动态年龄判定）则**晋升老年代**。大对象可由 `-XX:PretenureSizeThreshold` 直接进老年代。\n\n**逃逸分析**由 JIT 在 C2 阶段做：若对象不逃逸，可**标量替换**（拆成局部变量）、**栈上分配**（随栈帧消亡）、**锁消除**。收益是减轻 GC 压力，但它是**优化而非规范**，`-XX:-DoEscapeAnalysis` 可关闭。",
+      "follow_ups": [
+        "TLAB 解决了什么问题？（多线程在 Eden 分配的竞争）",
+        "为什么 `hashCode()` 被调用过的对象更难被标量替换？",
+        "什么情况下对象会「过早晋升」，有什么危害？"
+      ],
+      "difficulty": "medium",
+      "company_tags": [
+        "字节",
+        "蚂蚁",
+        "华为"
+      ]
+    },
+    {
+      "question": "你线上用的什么收集器？怎么选的？参数怎么配？",
+      "answer_md": "默认 **G1**（JDK 9+）。选型看两端：**吞吐量**（离线批处理 → Parallel）与**停顿时间**（在线低延迟 → G1 / ZGC）。\n\n堆 > 16G 或要求停顿 < 10ms 时上 **ZGC**（染色指针 + 读屏障，停顿与堆大小无关）。\n\n一套可抄的基线：`-Xms` 与 `-Xmx` 设为相同（避免运行期伸缩引发 STW 抖动）；`-XX:MaxGCPauseMillis=200`（软目标，G1 靠调整新生代大小与混合回收 Region 数逼近）；**不要设 `-Xmn` 和 `SurvivorRatio`**（会削弱 G1 自适应）；必开 `-XX:+HeapDumpOnOutOfMemoryError`；必开 GC 日志 `-Xlog:gc*:file=...:time,uptime,level,tags:filecount=10,filesize=50M`。",
+      "follow_ups": [
+        "`MaxGCPauseMillis` 设得过小会发生什么？（新生代过小 → Young GC 频率暴涨 → 吞吐骤降）",
+        "G1 的 Mixed GC 触发条件是什么？（`-XX:InitiatingHeapOccupancyPercent`）",
+        "CMS 的 Concurrent Mode Failure 是怎么发生的？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "阿里",
+        "美团",
+        "滴滴",
+        "京东"
+      ]
+    },
+    {
+      "question": "线上 CPU 飙高 / 内存持续增长，你的排查顺序是什么？",
+      "answer_md": "**先分层再深入，别一上来 dump。**\n\n1. `jps -l` 找 pid。\n2. CPU 高：`top -Hp <pid>` 找最耗 CPU 的线程 → `printf '%x\\n' <tid>` 转十六进制 → `jstack <pid> | grep -A 20 <hex>` 看栈（常见：GC 线程、正则回溯、死循环）。\n3. 内存高：`jcmd <pid> GC.heap_info` 看各代占用 → `jstat -gcutil <pid> 1000` 看 GC 频率与耗时 → **Full GC 后仍高** 才是真泄漏。\n4. 定位对象：`jmap -histo:live <pid> | head -30`（**注意会触发 Full GC**），低峰期再 `jmap -dump:live` 给 MAT 看**支配树**与 **Path to GC Roots**。\n5. 热部署/动态代理场景额外看 **ClassLoader 的 retained heap**。\n\nArthas 便捷替代：`dashboard`、`thread -n 5`、`trace Class method`、`heapdump`、`sc -d Class`。",
+      "follow_ups": [
+        "为什么 `jmap -histo:live` 会触发 Full GC？",
+        "容器里被 OOMKilled 和 Java 抛 OutOfMemoryError 有什么区别？",
+        "怎么确认一个类是否来自预期的 jar？（`sc -d` / `Class.getProtectionDomain()`）"
+      ],
+      "difficulty": "medium",
+      "company_tags": [
+        "阿里",
+        "腾讯",
+        "字节",
+        "快手"
+      ]
+    },
+    {
+      "question": "说说双亲委派模型，以及它是怎么被「打破」的？",
+      "answer_md": "**模型**：收到类加载请求先委派给父加载器，父加载器无法完成才自己加载。加载器链为 `Bootstrap → Platform → Application → 自定义`。\n\n**价值**：① 安全，核心类库不会被自定义类覆盖（你自己写 `java.lang.String` 也用不上）；② 避免重复加载。**类身份 = 类加载器 + 全限定名**，所以同一个 class 文件被两个加载器加载得到的是**不同的 `Class` 对象**。\n\n**三次打破**：\n1. JDK 1.2 兼容老代码——重写 `loadClass()` 不调 `super`；\n2. **SPI**（JDBC / JNDI / `ServiceLoader`）——接口在核心库、实现在应用库，用**线程上下文类加载器**做反向委派；\n3. **热部署 / OSGi / Tomcat**——每个 WebApp 一个加载器，Tomcat 甚至**先自己后委派**以实现应用隔离。",
+      "follow_ups": [
+        "`Class.forName` 与 `ClassLoader.loadClass` 的区别？",
+        "Tomcat 的类加载顺序与双亲委派有什么不同？",
+        "热部署反复重启后 Metaspace 上涨，根因是什么？"
+      ],
+      "difficulty": "medium",
+      "company_tags": [
+        "阿里",
+        "美团",
+        "华为",
+        "携程"
+      ]
+    },
+    {
+      "question": "什么情况会导致 Metaspace OOM？怎么排查？",
+      "answer_md": "Metaspace 存放**类元数据**，它的 OOM 意味着**类被持续加载而不卸载**。根因通常是：\n\n1. **动态代理大量生成**：CGLIB / 字节码增强（`Enhancer.create`）每次调用都可能生成新类，若没有缓存就会无限增长。\n2. **热部署反复重启**：每次重启产生新 `ClassLoader`，旧的若无法回收，其加载的所有类连同元数据都留着。\n3. **`ThreadLocal` / 静态缓存持有 `ClassLoader`**：阻止类卸载，是热部署场景的隐形杀手。\n\n排查：`jcmd <pid> VM.metaspace` 看已加载类数与分块；`jcmd <pid> GC.class_stats`；MAT 里看 **`ClassLoader` 的 retained heap**。修法是**缓存代理类**、**清理静态引用与 `ThreadLocal`**，并设置 `-XX:MaxMetaspaceSize` 让问题**尽早暴露而不是吃光机器内存**。",
+      "follow_ups": [
+        "为什么设置 `MaxMetaspaceSize` 反而是好事？",
+        "类被卸载的三个条件是什么？",
+        "`-XX:+CMSClassUnloadingEnabled` 解决的是什么问题？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "字节",
+        "蚂蚁",
+        "拼多多"
+      ]
+    }
+  ]
+}

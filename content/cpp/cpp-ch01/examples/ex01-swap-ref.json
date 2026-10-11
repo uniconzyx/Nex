@@ -1,0 +1,8 @@
+{
+  "title": "引用交换两个数",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "a=2 b=1",
+  "code": "#include <iostream>\n\nvoid swap_ref(int& x, int& y) {\n    int t = x; x = y; y = t;\n}\n\nint main() {\n    int a = 1, b = 2;\n    swap_ref(a, b);\n    std::cout << \"a=\" << a << \" b=\" << b;\n}\n"
+}

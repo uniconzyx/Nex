@@ -1,0 +1,8 @@
+{
+  "title": "vector insert 返回新迭代器：避免插入导致的迭代器失效",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "9\n1923\n",
+  "code": "#include <iostream>\n#include <vector>\nint main() {\n    std::vector<int> v = {1, 2, 3};\n    auto it = v.insert(v.begin() + 1, 9);  // 返回指向新插入元素的迭代器\n    std::cout << *it << '\\n';\n    std::cout << v[0] << v[1] << v[2] << v[3] << '\\n';\n}\n"
+}

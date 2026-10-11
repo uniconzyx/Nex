@@ -1,0 +1,49 @@
+{
+  "meta": { "chapter": "mw-ch01" },
+  "items": [
+    {
+      "question": "Redis 的 String 为什么有 int、embstr、raw 三种编码？44 字节的分界是怎么来的？",
+      "answer_md": "Redis 按内容与长度选编码以省内存：\n- 可表示为 long 的整数 → `int`（数值直接存进 redisObject.ptr，不另开 buf）；\n- 长度 ≤44 的非整数短串 → `embstr`（robj 与 sds 一次性分配，只读紧凑）；\n- 其余 → `raw`（两次分配，可修改）。\n\n44 字节来自 64B jemalloc 最小块：64 - robj(16) - sdshdr8(3) - \\0(1) = 44，使「对象头+头部+数据+\\0」恰好落在单块 64B 内，缓存友好。embstr 改值会先转 raw。",
+      "follow_ups": [
+        "embstr 能原地修改吗？为什么？",
+        "SET k 123 后 APPEND k 'x'，OBJECT ENCODING 如何变化？",
+        "为什么 embstr 是只读设计？"
+      ],
+      "difficulty": "mid",
+      "company_tags": ["通用", "字节", "阿里"]
+    },
+    {
+      "question": "ZSet 为什么用跳表而不是红黑树？底层还配了什么结构？",
+      "answer_md": "ZSet 在元素较多时用「skiplist + dict」双结构：\n- 跳表按 score 排序，支持 `ZRANGEBYSCORE` 等范围查询，查找 O(log n)，实现简单、范围遍历自然；每层以 1/4 概率晋升，最大 32 层。\n- dict 按 member 查 score，O(1)（如 ZSCORE），与跳表共享同一份 member/score 对象，避免重复存储。\n\n相比红黑树，跳表范围查询/中序遍历更直接，且可调 p 与层高。小数据（≤128 元素且 member≤64B）则用 listpack 紧凑编码。",
+      "follow_ups": [
+        "跳表层数怎么决定？期望层数是多少？",
+        "listpack 与 skiplist 的转换条件？",
+        "为什么 dict 和跳表要共享对象而不是各存一份？"
+      ],
+      "difficulty": "mid",
+      "company_tags": ["通用", "腾讯", "美团"]
+    },
+    {
+      "question": "说一下 Redis 的 dict 渐进式 rehash 过程，为什么这样设计？",
+      "answer_md": "dict 用 ht[0]/ht[1] 两张表。负载因子 ≥1（或 ≥5 强制）扩容、<0.1 缩容，size 取 2 的幂以便位运算取模。\n\n渐进式 rehash：用 `rehashidx` 记录进度，不在一次命令里搬完，而是分散到每次增删改查及 serverCron（连搬 100 桶/1ms 上限）。迁移期间：新增 key 只写 ht[1]，查找要查两张表，ht[0] 只减不增，搬完把 ht[1] 换成 ht[0] 并清空。\n\n目的：单线程模型下避免一次性 rehash 造成长尾延迟；BGSAVE/BGREWRITEAOF 期间暂停 rehash 以减少 COW 页放大。",
+      "follow_ups": [
+        "rehash 期间新写入落在哪张表？",
+        "缩容的触发条件是什么？",
+        "为什么哈希表大小取 2 的幂？"
+      ],
+      "difficulty": "hard",
+      "company_tags": ["通用", "拼多多", "京东"]
+    },
+    {
+      "question": "ziplist 有什么缺陷？Redis 7 用什么替代它，解决了什么问题？",
+      "answer_md": "ziplist 用「前一 entry 长度」字段（1B 或 5B）定位前驱。当某个 entry 长度从 <254 变 ≥254 时，其「前驱长度」从 1B 进位到 5B，可能导致后续连续 entry 的该字段接连进位，引发**连锁更新（cascade update）**，最坏 O(n²) 重编码。\n\nRedis 7 用 **listpack** 替代：改为「记录本 entry 自身长度」并从后向前遍历，删除对前驱长度的依赖，从根本上消除连锁更新，同时保留紧凑存储。",
+      "follow_ups": [
+        "连锁更新的触发条件是什么？",
+        "listpack 如何从后向前解析？",
+        "quicklist 与 listpack 的关系？"
+      ],
+      "difficulty": "hard",
+      "company_tags": ["通用", "阿里", "百度"]
+    }
+  ]
+}

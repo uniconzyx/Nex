@@ -1,0 +1,9 @@
+{
+  "title": "SHOW INDEX：查看索引列顺序（最左前缀的列序 Seq_in_index）",
+  "code_lang": "sql",
+  "code_std": "mysql8",
+  "stdin": "",
+  "expected_output": "Query OK, 0 rows affected\nQuery OK, 6 rows affected\nQuery OK, 0 rows affected\nTable|Non_unique|Key_name|Seq_in_index|Column_name|Index_type\nemp|0|PRIMARY|1|emp_id|BTREE\nemp|1|idx_dept_sal|1|dept_id|BTREE\nemp|1|idx_dept_sal|2|salary|BTREE",
+  "code": "CREATE TABLE emp (emp_id INT PRIMARY KEY, name VARCHAR(20), dept_id INT, salary DECIMAL(10,2));\nINSERT INTO emp VALUES (1,'Alice',10,6000.00),(2,'Bob',20,8000.00),(3,'Carol',10,4500.00),(4,'Dave',20,9000.00),(5,'Eve',30,5000.00),(6,'Frank',20,7000.00);\nCREATE INDEX idx_dept_sal ON emp(dept_id, salary);\nSHOW INDEX FROM emp;",
+  "_verified": false
+}

@@ -1,0 +1,8 @@
+{
+  "title": "LEGB 作用域链：Local->Enclosing->Global->Builtin",
+  "code_lang": "python",
+  "code_std": "python3.11",
+  "stdin": "",
+  "expected_output": "local reads: enclosing-x\nenclosing reads: enclosing-x\nglobal reads: global-x\nbuiltin max: 7",
+  "code": "x = \"global-x\"\n\ndef enclosing():\n    x = \"enclosing-x\"\n    def local():\n        # 未重新绑定 x，按 LEGB 向上找到 enclosing-x\n        print(\"local reads:\", x)\n    local()\n    print(\"enclosing reads:\", x)\n\nenclosing()\nprint(\"global reads:\", x)\n\ndef use_builtin():\n    # 'max' 不在局部/闭包/全局，回退到 builtin 命名空间\n    print(\"builtin max:\", max(3, 7, 2))\nuse_builtin()"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "packaged_task 包装任务并经 future 取结果",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "result=123",
+  "code": "#include <iostream>\n#include <future>\n#include <thread>\n\nint compute() { return 120 + 3; }\n\nint main() {\n    std::packaged_task<int()> task(compute);\n    std::future<int> f = task.get_future();\n    std::thread t(std::move(task));   // packaged_task 可移动进线程\n    t.join();\n    std::cout << \"result=\" << f.get();   // 经 future 取任务返回值\n}"
+}

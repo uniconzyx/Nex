@@ -1,0 +1,9 @@
+{
+  "title": "插入排序：比较/移动次数统计与稳定性验证",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "原始序列 (key,idx): (5,0) (2,1) (4,2) (6,3) (1,4) (3,5) (2,6) (5,7) (4,8) (1,9)\n排序结果 (key,idx): (1,4) (1,9) (2,1) (2,6) (3,5) (4,2) (4,8) (5,0) (5,7) (6,3)\n比较次数 = 32\n移动次数 = 43\n是否稳定 = 是\n原因: 插入排序只在严格大于时后移，等值元素不发生跨越 -> 稳定\n",
+  "code": "#include <stdio.h>\n\ntypedef struct { int key; int idx; } Elem;\n\nstatic long cmp_count = 0, move_count = 0;\n\nvoid insertion_sort(Elem a[], int n) {\n    for (int i = 1; i < n; i++) {\n        Elem x = a[i];\n        move_count++;              /* 取出待插入元素 */\n        int j = i - 1;\n        while (j >= 0) {\n            cmp_count++;           /* 一次关键字比较 */\n            if (a[j].key > x.key) {\n                a[j + 1] = a[j];\n                move_count++;\n                j--;\n            } else {\n                break;\n            }\n        }\n        a[j + 1] = x;\n        move_count++;\n    }\n}\n\n/* 稳定性：对所有 key 相同的元素，检查 idx 是否仍按升序排列 */\nint is_stable(const Elem a[], int n) {\n    for (int i = 0; i + 1 < n; i++) {\n        if (a[i].key == a[i + 1].key && a[i].idx > a[i + 1].idx) return 0;\n    }\n    return 1;\n}\n\nint main(void) {\n    Elem a[] = {{5,0},{2,1},{4,2},{6,3},{1,4},{3,5},{2,6},{5,7},{4,8},{1,9}};\n    int n = (int)(sizeof(a) / sizeof(a[0]));\n\n    printf(\"原始序列 (key,idx):\");\n    for (int i = 0; i < n; i++) printf(\" (%d,%d)\", a[i].key, a[i].idx);\n    printf(\"\\n\");\n\n    insertion_sort(a, n);\n\n    printf(\"排序结果 (key,idx):\");\n    for (int i = 0; i < n; i++) printf(\" (%d,%d)\", a[i].key, a[i].idx);\n    printf(\"\\n\");\n\n    printf(\"比较次数 = %ld\\n\", cmp_count);\n    printf(\"移动次数 = %ld\\n\", move_count);\n    printf(\"是否稳定 = %s\\n\", is_stable(a, n) ? \"是\" : \"否\");\n    printf(\"原因: 插入排序只在严格大于时后移，等值元素不发生跨越 -> 稳定\\n\");\n    return 0;\n}\n",
+  "_verified": true
+}

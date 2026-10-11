@@ -1,0 +1,122 @@
+{
+  "meta": {
+    "chapter": "mw-ch01",
+    "note": "Redis 数据结构与底层编码练习：基础题考察编码判定/阈值/概念，算法题来自刷题平台（仅存元数据+链接，不搬运题面）。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "SDS 相比 C 字符串的核心优势",
+      "content_md": "关于 Redis 的 SDS（简单动态字符串），下列说法正确的是？\n\nA. SDS 以 `\\0` 结尾，因此实现二进制安全\nB. 获取字符串长度需要 O(n) 扫描\nC. SDS 用 `len` 字段记录长度，获取长度 O(1) 且二进制安全\nD. SDS 不支持预分配，每次修改都重新分配内存",
+      "options": [
+        { "key": "A", "text": "SDS 以 \\0 结尾，因此实现二进制安全" },
+        { "key": "B", "text": "获取字符串长度需要 O(n) 扫描" },
+        { "key": "C", "text": "SDS 用 len 字段记录长度，获取长度 O(1) 且二进制安全" },
+        { "key": "D", "text": "SDS 不支持预分配，每次修改都重新分配内存" }
+      ],
+      "answer": {
+        "correct": ["C"],
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "SDS 的二进制安全来自 len 字段（按字节数解析），而非 \\0 结尾；\\0 仅为兼容 C 函数。获取长度 O(1)；SDS 通过预分配与惰性释放减少重分配次数。",
+      "tags": ["sds", "string"],
+      "source": "self",
+      "source_ref": "mw-ch01 §1 SDS"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "给定 SET 后 OBJECT ENCODING 的结果",
+      "content_md": "依次执行：\n```\nSET k1 123\nSET k2 hello_world_12345678901234567890\nOBJECT ENCODING k1\nOBJECT ENCODING k2\n```\n其中 k2 的 value 长度为 30（≤44）。写出两条 OBJECT ENCODING 的输出。",
+      "options": [],
+      "answer": {
+        "correct": [],
+        "output": "int\nembstr"
+      },
+      "explanation": "整数可表示为 long → int 编码；长度 ≤44 的非整数短串 → embstr。均为紧凑编码。",
+      "tags": ["string", "encoding"],
+      "source": "self",
+      "source_ref": "mw-ch01 §1 String 编码"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "修正关于渐进式 rehash 的错误表述",
+      "content_md": "某文档写道：「Redis 在扩容时会立刻把 ht[0] 的所有 entry 一次性搬移到 ht[1]，期间新写入仍落在 ht[0]。」\n\n请指出错误并给出正确表述。",
+      "options": [],
+      "answer": {
+        "correct": [],
+        "output": "错误：不是一次性搬迁，也不是写入 ht[0]。正确：渐进式 rehash 用 rehashidx 记录进度，每次命令/定时任务搬一个桶；迁移期间新增 key 只写 ht[1]，查找需查 ht[0] 与 ht[1] 两张表，ht[0] 只减不增直至搬空后互换。",
+        "reference_code": ""
+      },
+      "explanation": "渐进式 rehash 的核心是「分散搬运 + 迁移中写 ht[1]」，避免单线程一次性 rehash 导致的长尾延迟。",
+      "tags": ["dict", "rehash"],
+      "source": "self",
+      "source_ref": "mw-ch01 §4 dict rehash"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "LRU 缓存（LeetCode 146）",
+      "content_md": "设计并实现一个满足 LRU(最近最少使用) 约束的数据结构：get/put 均 O(1)。详见原题，本题仅存元数据与链接，不搬运题面。",
+      "options": [],
+      "answer": {
+        "correct": [],
+        "output": "",
+        "reference_code": ""
+      },
+      "explanation": "经典题：哈希表 + 双向链表（或 Python OrderedDict）实现 O(1) get/put；与本章 dict 双结构思想相通。",
+      "tags": ["lru", "dict", "linkedlist"],
+      "source": "leetcode",
+      "source_ref": "LeetCode 146（lru-cache）",
+      "external_url": "https://leetcode.cn/problems/lru-cache/"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "nowcoder",
+      "difficulty": "mid",
+      "title": "设计 LRU 缓存结构（牛客 NC93）",
+      "content_md": "设计 LRU 缓存，支持 set/get，容量满时淘汰最久未使用。详见原题，本题仅存元数据与链接，不搬运题面。",
+      "options": [],
+      "answer": {
+        "correct": [],
+        "output": "",
+        "reference_code": ""
+      },
+      "explanation": "与 LeetCode 146 同构，考查哈希表 + 双向链表；注意牛客输入输出为函数调用式。",
+      "tags": ["lru", "dict"],
+      "source": "nowcoder",
+      "source_ref": "牛客 NC93（设计LRU缓存结构）",
+      "external_url": "https://www.nowcoder.com/practice/e3769a264aa14b18b1ffa9d1e553db16"
+    },
+    {
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "实现 intset 升级判定",
+      "content_md": "给定当前 intset 的 encoding 位宽（16/32/64）与一个待插入整数，判断是否需要升级（upgrade）以及升级后的目标位宽。写出判定函数并给出示例输出。",
+      "options": [],
+      "answer": {
+        "correct": [],
+        "output": "",
+        "reference_code": "def need_upgrade(cur_bits, val):\n    lo, hi = -(2**(cur_bits-1)), 2**(cur_bits-1)-1\n    if lo <= val <= hi:\n        return cur_bits, False\n    if -2**31 <= val <= 2**31-1:\n        return 32, True\n    return 64, True"
+      },
+      "explanation": "intset 升级按数值范围判断：超出当前位宽表示范围就必须升到能容纳的最小位宽（32 或 64），且升级单向不回退。",
+      "tags": ["intset", "set", "encoding"],
+      "source": "self",
+      "source_ref": "mw-ch01 §3 Set intset"
+    }
+  ]
+}

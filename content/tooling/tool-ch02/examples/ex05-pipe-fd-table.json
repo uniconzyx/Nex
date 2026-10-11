@@ -1,0 +1,8 @@
+{
+  "title": "管道与重定向的 fd 表与 2>&1 顺序",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "ls | wc -l 的 fd 表（管道两端是内核共享的环形缓冲）\n  ls  : fd0=终端   fd1=pipe写端   fd2=终端\n  wc  : fd0=pipe读端   fd1=终端   fd2=终端\n\n建立过程：\n  1) pipe() 创建一对 fd：读端 r、写端 w\n  2) ls 的 fd1 dup2 到 w；wc 的 fd0 dup2 到 r\n  3) exec 后 ls 写 stdout 即写管道，wc 读 stdin 即从管道读\n\n2>&1 顺序演示：\n  >file 2>&1 : 先把 fd1->file，再让 fd2 复制(fd1当前目标)=> file   （正确：都进file）\n  2>&1 >file : 先把 fd2 复制(fd1=终端)，再让 fd1->file => fd2 仍指向终端（错误：stderr漏到终端）\n\n结论：2>&1 是『复制 fd2 到 fd1 当前指向的目标』，顺序决定结果",
+  "code": "# 模拟管道与重定向的 fd 表（确定性）\nprint(\"ls | wc -l 的 fd 表（管道两端是内核共享的环形缓冲）\")\nprint(\"  ls  : fd0=终端   fd1=pipe写端   fd2=终端\")\nprint(\"  wc  : fd0=pipe读端   fd1=终端   fd2=终端\")\nprint()\nprint(\"建立过程：\")\nprint(\"  1) pipe() 创建一对 fd：读端 r、写端 w\")\nprint(\"  2) ls 的 fd1 dup2 到 w；wc 的 fd0 dup2 到 r\")\nprint(\"  3) exec 后 ls 写 stdout 即写管道，wc 读 stdin 即从管道读\")\nprint()\nprint(\"2>&1 顺序演示：\")\nprint(\"  >file 2>&1 : 先把 fd1->file，再让 fd2 复制(fd1当前目标)=> file   （正确：都进file）\")\nprint(\"  2>&1 >file : 先把 fd2 复制(fd1=终端)，再让 fd1->file => fd2 仍指向终端（错误：stderr漏到终端）\")\nprint()\nprint(\"结论：2>&1 是『复制 fd2 到 fd1 当前指向的目标』，顺序决定结果\")\n"
+}

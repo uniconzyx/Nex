@@ -1,0 +1,8 @@
+{
+  "title": "Semaphore 限流并统计峰值并发",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "信号量容量 = 2\n峰值并发   = 2\n完成数     = 8\n限流生效(峰值<=容量): True\n全部完成(未丢任务): True",
+  "code": "import threading\nimport time\n\n# Semaphore(2) 限制「同时进入临界区」的线程数，\n# 与 Lock 的区别：Lock 容量恒为 1，Semaphore 容量任意。\n\nCAP = 2\nWORKERS = 8\nsem = threading.Semaphore(CAP)\nguard = threading.Lock()\nactive = 0\npeak = 0\nfinished = 0\n\n\ndef task():\n    global active, peak, finished\n    with sem:\n        with guard:\n            active += 1\n            if active > peak:\n                peak = active\n        time.sleep(0.01)        # 模拟一段被限流保护的 IO\n        with guard:\n            active -= 1\n            finished += 1\n\n\nts = [threading.Thread(target=task) for _ in range(WORKERS)]\nfor t in ts:\n    t.start()\nfor t in ts:\n    t.join()\n\nprint(\"信号量容量 =\", CAP)\nprint(\"峰值并发   =\", peak)\nprint(\"完成数     =\", finished)\nprint(\"限流生效(峰值<=容量):\", peak <= CAP)\nprint(\"全部完成(未丢任务):\", finished == WORKERS)\n"
+}

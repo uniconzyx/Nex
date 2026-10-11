@@ -1,0 +1,8 @@
+{
+  "title": "TTFT / TPOT 两阶段延迟分解模型（输出各阶段占比）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "模型: P=7.0B fp16  有效算力=100 TFLOPS  带宽=2.0 TB/s\nprompt=2048 输出=100\nTPOT = 14.00 ms/token\nprefill 计算 = 286.72 ms\n队列等待 = 20.00 ms\nTTFT = 320.72 ms\n端到端总时延 = 1706.72 ms\nTTFT 中 prefill 占比 = 89.4%\n总时延中 decode 占比 = 82.0%\nprompt 长度翻倍 → prefill 亦翻倍: True\nTPOT 与输出长度无关(逐 token 均摊): True\n",
+  "code": "\"\"\"Prefill 决定 TTFT、Decode 决定 TPOT 的参数化延迟模型。\n只输出分解与占比, 不输出墙钟时间。\"\"\"\nP = 7.0e9          # 参数量\nBPE = 2            # fp16 每权重字节\nFLOPS = 100e12     # 有效算力 100 TFLOPS (prefill 计算受限)\nBW = 2.0e12        # 显存带宽 2 TB/s (decode 带宽受限)\n\nprompt_tokens = 2048\nout_tokens = 100\nqueue_ms = 20.0\n\nprefill_ms = 2 * P * prompt_tokens / FLOPS * 1e3          # 2*P*S 浮点运算\ntpot_ms = 2 * P * BPE / BW * 1e3                          # 每步需读完所有权重\ndecode_ms = tpot_ms * out_tokens\nttft_ms = queue_ms + prefill_ms + tpot_ms                 # 首 token 含 1 步 decode\n\nprint(\"模型: P=%.1fB fp16  有效算力=%.0f TFLOPS  带宽=%.1f TB/s\" % (P / 1e9, FLOPS / 1e12, BW / 1e12))\nprint(\"prompt=%d 输出=%d\" % (prompt_tokens, out_tokens))\nprint(\"TPOT = %.2f ms/token\" % tpot_ms)\nprint(\"prefill 计算 = %.2f ms\" % prefill_ms)\nprint(\"队列等待 = %.2f ms\" % queue_ms)\nprint(\"TTFT = %.2f ms\" % ttft_ms)\nprint(\"端到端总时延 = %.2f ms\" % (ttft_ms + decode_ms - tpot_ms))\nprint(\"TTFT 中 prefill 占比 = %.1f%%\" % (prefill_ms / ttft_ms * 100))\nprint(\"总时延中 decode 占比 = %.1f%%\" % (decode_ms / (ttft_ms + decode_ms - tpot_ms) * 100))\nprint(\"prompt 长度翻倍 → prefill 亦翻倍:\", abs((2 * P * 2 * prompt_tokens / FLOPS * 1e3) / prefill_ms - 2.0) < 1e-9)\nprint(\"TPOT 与输出长度无关(逐 token 均摊):\", True)\n"
+}

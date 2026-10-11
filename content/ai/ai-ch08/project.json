@@ -1,0 +1,72 @@
+{
+  "meta": {
+    "chapter": "ai-ch08",
+    "category": "system",
+    "title": "LLM 应用工程：推理优化、评测、可观测性与安全 —— 综合项目",
+    "count": 1
+  },
+  "items": [
+    {
+      "title": "搭一个可复现的 LLM 应用工程离线沙盘（推理-成本-评测-安全闭环）",
+      "requirement_md": "只用标准库 + NumPy（**不需要**真实 GPU / 真实模型 / 真实 API），把本章的推理、成本、评测、安全四条链路做成一个可复现的离线沙盘。所有定量结论必须来自实测数字，性能类只输出布尔判据或计数，禁止机器相关量（墙钟时间/显存读数）。\n\n1. **显存账本**：实现 KV Cache 估算器（2·L·H_kv·d·S·B·bytes），对比 MHA/GQA 与 fp16/int8 精度下的显存，并给出「给定显存能放下的最大 batch」（复现 ex01）。\n2. **延迟分解**：用参数量 P、有效算力 F、带宽 BW、prompt/输出长度参数化建模，输出 TTFT 与 TPOT 的分解占比，并验证 prompt 翻倍→prefill 翻倍、TPOT 与输出长度无关（复现 ex03）。\n3. **调度对照**：实现静态批处理与连续批处理两种调度器的计数模拟，输出总步数、槽位利用率与吞吐加速比（复现 ex04）。\n4. **投机解码**：用固定种子模拟逐位接受过程，实测逐位接受率、平均每轮产出 token、全接受占比，并与理论 Σα^i、α^k 对照（复现 ex05）。\n5. **量化评估**：对同一批确定性权重做 fp16/int8/NF4 三种量化，报告最大绝对误差、平均绝对误差与高分位相对误差，得出「均值好看但长尾翻车」的结论（复现 ex02）。\n6. **成本模型**：实现 token 估算（CJK 按字、其余按 4 字符近似）+ 输入/输出分价 + 前缀缓存折扣，输出单请求与月度成本，并做「砍一半 system prompt」的对照（复现 ex09）。\n7. **评测闭环**：对固定评测集做离线回放，聚合精确匹配准确率与格式合规率两条指标；实现两比例 z 检验判断 A/B 显著性（含显著与不显著两组）与 LLM-as-Judge 的 Cohen's Kappa（复现 ex10/ex12/ex07）。\n8. **安全与合规**：实现提示注入规则扫描（正反两组用例）+ PII 正则脱敏（正反两组用例），并输出「拦截率 / 误伤率 / 脱敏命中」的统计（复现 ex08/ex11）。\n\n**进阶**：把 1~8 的指标写成一份 JSON 报告（含各指标实测值与门禁判据），模拟「上线门禁」：准确率不降、格式合规率不降、P95 延迟与单请求成本不升，四项同时满足才输出 PASS。\n\n**资源参考**：langgenius/dify（Trace/评测/成本面板）、langchain-ai/langchain（回调与 tracing）、huggingface/transformers（量化配置）、firecrawl/firecrawl（间接注入的不可信数据源）、tensorflow/tensorflow（推理工程）。",
+      "tasks": [
+        {
+          "title": "KV Cache 估算器与最大 batch 反解",
+          "verification": {
+            "type": "output",
+            "desc": "输出 MHA/GQA、fp16/int8 四组显存字节数与 GiB；GQA 相对 MHA 压缩比为 4.0x；给定显存反解的最大 batch 为正整数且与公式一致（复现 ex01）。"
+          }
+        },
+        {
+          "title": "TTFT/TPOT 参数化延迟分解",
+          "verification": {
+            "type": "output",
+            "desc": "打印 TPOT(ms)、prefill(ms)、TTFT(ms) 与各阶段占比；布尔判据「prompt 翻倍→prefill 翻倍」为 True（复现 ex03）。"
+          }
+        },
+        {
+          "title": "静态批 vs 连续批调度计数对照",
+          "verification": {
+            "type": "output",
+            "desc": "输出两种调度的总步数、槽位利用率与加速比；连续批步数更少、利用率更高两个布尔判据为 True（复现 ex04）。"
+          }
+        },
+        {
+          "title": "投机解码与量化精度实测",
+          "verification": {
+            "type": "output",
+            "desc": "逐位接受率均在 α±0.01 内、平均产出与 Σα^i 偏差<0.02 为 True；量化输出 fp16/int8/NF4 三组的最大与平均误差，NF4 最大绝对误差 > int8 为 True（复现 ex05/ex02）。"
+          }
+        },
+        {
+          "title": "成本模型与优化顺序演示",
+          "verification": {
+            "type": "output",
+            "desc": "输出单请求成本、无缓存对照成本与月度成本；「缓存命中降低成本」「砍一半 system prompt 降低成本」为 True（复现 ex09）。"
+          }
+        },
+        {
+          "title": "评测指标聚合与显著性判断",
+          "verification": {
+            "type": "output",
+            "desc": "输出精确匹配准确率与格式合规率（二者分开）；z 检验输出显著场景 p<0.05 为 True、不显著场景为 False；Kappa 输出具体数值并给出是否达 0.61 的判据（复现 ex10/ex12/ex07）。"
+          }
+        },
+        {
+          "title": "安全净化与 PII 脱敏正反用例",
+          "verification": {
+            "type": "output",
+            "desc": "注入扫描 8/8 用例判定正确为 True；PII 正例全部命中、反例全部未误伤为 True（复现 ex08/ex11）。"
+          }
+        },
+        {
+          "title": "上线门禁 JSON 报告",
+          "verification": {
+            "type": "output",
+            "desc": "产出含各指标实测值与门禁布尔项的 JSON；四项门禁同时满足时输出 PASS，任一不满足输出 FAIL 并列出原因。"
+          }
+        }
+      ]
+    }
+  ]
+}

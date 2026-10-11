@@ -1,0 +1,8 @@
+{
+  "title": "typeid 运行时判别真实类型",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "Derived\nnotBase",
+  "code": "#include <iostream>\n#include <typeinfo>\nstruct Base { virtual ~Base() = default; };\nstruct Derived : Base {};\nint main() {\n    Derived d;\n    Base& b = d;\n    std::cout << (typeid(b) == typeid(Derived) ? \"Derived\" : \"Base\") << '\\n';\n    std::cout << (typeid(b) == typeid(Base) ? \"Base\" : \"notBase\");\n}\n"
+}

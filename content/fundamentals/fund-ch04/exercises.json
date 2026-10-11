@@ -1,0 +1,134 @@
+{
+  "meta": {
+    "chapter": "fund-ch04",
+    "title": "图 —— 习题集",
+    "count": 6,
+    "note": "3 道基础题 + 3 道算法题（平台题仅存元数据与链接）"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "稀疏图该选哪种存储结构",
+      "content_md": "一个有 10^5 个顶点、2×10^5 条边的稀疏图，需要反复做「遍历某点的所有出边」。下列哪种存储结构最合适？\n\nA. 邻接矩阵（int）\nB. 邻接矩阵（bit 位图）\nC. 邻接表\nD. 十字链表",
+      "answer": {
+        "correct": "C",
+        "explain": "邻接矩阵需要 Θ(V²) 空间，V=10^5 时即便压缩成 1 bit 也要约 1.25 GB，直接 MLE；且遍历出边要扫整行 O(V)，总遍历退化为 O(V²) 而非 O(V+E)。十字链表虽然空间也是 Θ(V+E)，但它解决的是「同时高频需要入边与出边」的问题，本题只需要出边，用它是过度设计。邻接表空间 Θ(V+E)、遍历出边 O(deg)、总遍历 O(V+E)，是默认答案。"
+      },
+      "explanation": "存储结构选择的两个判据：边的稠密程度、是否需要反向遍历。",
+      "tags": [
+        "图",
+        "存储结构",
+        "复杂度"
+      ],
+      "source": "self",
+      "source_ref": "《数据结构（严蔚敏）》第7章 · 图的存储结构"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "Floyd 循环顺序写错",
+      "content_md": "下面的 Floyd 求任意两点最短路的代码在多数用例上能跑，但结果是错的。请指出问题并给出正确写法。\n\n```c\nfor (int i = 0; i < n; i++)\n    for (int j = 0; j < n; j++)\n        for (int k = 0; k < n; k++)\n            d[i][j] = min(d[i][j], d[i][k] + d[k][j]);\n```",
+      "answer": {
+        "reference_code": "for (int k = 0; k < n; k++)          /* k 必须在最外层 */\n    for (int i = 0; i < n; i++)\n        for (int j = 0; j < n; j++)\n            d[i][j] = min(d[i][j], d[i][k] + d[k][j]);",
+        "explain": "Floyd 的状态定义是「d_k[i][j] = 只允许经过前 k 个顶点做中转时的最短路」，k 是**阶段变量**，必须放在最外层才能保证每次转移用到的是上一阶段 d_{k-1} 的值。把 k 放内层会把阶段打乱：同一轮 i,j 循环中 d[i][k]、d[k][j] 可能已被本轮更新过，相当于提前用了「尚未允许的更大中转集合」，结果不再是最短路。修正后复杂度不变（O(V³)），但语义正确。"
+      },
+      "explanation": "Floyd 本质是区间 DP / 阶段 DP，k 是阶段变量。",
+      "tags": [
+        "图",
+        "最短路",
+        "Floyd",
+        "动态规划"
+      ],
+      "source": "self",
+      "source_ref": "《算法导论》第25章 · 全源最短路径"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "Kruskal 的选边过程与总权重",
+      "content_md": "无向带权图 5 个顶点，边为：(0-1, 4)、(0-2, 3)、(1-2, 1)、(1-3, 2)、(2-3, 4)、(3-4, 2)、(2-4, 5)。\n\n按 Kruskal 算法（边按权升序，用并查集判环），问：被**舍弃**的边有哪些？最小生成树总权重是多少？",
+      "answer": {
+        "explain": "按权升序：1(1-2) → 选中；2(1-3) → 选中；2(3-4) → 选中；3(0-2) → 选中（此时已有 4 条边 = V-1，树已形成）；4(0-1) → 0 与 1 已通过 0-2-1 连通，成环，舍弃；4(2-3) → 已连通，舍弃；5(2-4) → 已连通，舍弃。\n\n被舍弃的边：**(0-1, 4)、(2-3, 4)、(2-4, 5)**。\n最小生成树总权重 = 1 + 2 + 2 + 3 = **8**。\n\n注意：最小生成树的**总权重唯一**（都是 8），但**树的形态不一定唯一**——当存在权重相同的边时，取舍顺序不同会得到不同的树。本题用 Prim 从 0 出发得到 (0-2,3)、(2-1,1)、(1-3,2)、(3-4,2)，总权重同样是 8。"
+      },
+      "explanation": "Kruskal 依据 cycle 性质：成环时该边正是环上权最大者，必不属于某棵 MST。",
+      "tags": [
+        "图",
+        "最小生成树",
+        "Kruskal",
+        "并查集"
+      ],
+      "source": "self",
+      "source_ref": "《数据结构（严蔚敏）》第7章 · 最小生成树"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": 3,
+      "title": "课程表（拓扑排序判环）",
+      "content_md": "课程依赖关系构成有向图，判断能否完成所有课程（即图中是否存在环）。用 Kahn 入度法实现。",
+      "answer": {
+        "reference_code": "bool canFinish(int numCourses, int** prereq, int n) {\n    int indeg[N] = {0};\n    for (int i = 0; i < n; i++) indeg[prereq[i][0]]++;\n    /* 入度为 0 者入队，逐个输出并递减后继入度 */\n    /* 最后若输出点数 < numCourses 则有环 */\n}",
+        "explain": "Kahn 算法的优势在于能天然判环（输出数 < V），且同一层的点可并行处理。"
+      },
+      "explanation": "拓扑排序的经典应用：依赖解析、编译顺序、任务调度。",
+      "tags": [
+        "图",
+        "拓扑排序",
+        "判环"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 207 · 课程表",
+      "external_url": "https://leetcode.cn/problems/course-schedule/"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": 3,
+      "title": "网络延迟时间（单源最短路）",
+      "content_md": "给定有向带权图（权为正的传输时延）与起点，求信号到达所有节点的最短时间；若有节点不可达返回 -1。",
+      "answer": {
+        "reference_code": "# 非负权 → Dijkstra；稠密图用朴素 O(V²)，稀疏图用堆优化 O((V+E)logV)",
+        "explain": "因为是「单源 + 非负权 + 求最大值」，Dijkstra 正好；答案取 dist 数组的最大值。"
+      },
+      "explanation": "Dijkstra 适合单源非负权；题目问「最晚到达时间」= max(dist)。",
+      "tags": [
+        "图",
+        "最短路",
+        "Dijkstra"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 743 · 网络延迟时间",
+      "external_url": "https://leetcode.cn/problems/network-delay-time/"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": 3,
+      "title": "以图判树（并查集 / 连通性）",
+      "content_md": "给定无向图的 n 个节点与边列表，判断它是否是一棵树：要求恰好 n-1 条边且全图连通、无环。",
+      "answer": {
+        "reference_code": "/* 条件1: 边数 == n-1；条件2: 并查集合并过程中从不出现「两端已同集」 */\n/* 两条同时满足才是树：仅有条件1可能是「有环 + 有孤立点」 */",
+        "explain": "并查集在合并时若发现两端已同集，说明这条边会成环 —— 正是 Kruskal 的判据。"
+      },
+      "explanation": "树 = 连通 + 无环，等价于「n-1 条边且合并过程从不成环」。",
+      "tags": [
+        "图",
+        "并查集",
+        "判环"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 261 · 以图判树",
+      "external_url": "https://leetcode.cn/problems/graph-valid-tree/"
+    }
+  ]
+}

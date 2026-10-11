@@ -1,0 +1,53 @@
+{
+  "meta": {
+    "chapter": "py-ch02",
+    "subject": "python",
+    "note": "偏深度追问，与学科级 _bagua.json（速记向）互补。答案要落到机制层：__defaults__ / cell 变量 / 字节码 / CPython 实现。"
+  },
+  "items": [
+    {
+      "question": "为什么 `def f(x, lst=[])` 会在多次调用间共享同一个列表？从 CPython 对象模型说明，并给出查看证据的方式。",
+      "answer_md": "因为**默认参数在 `def` 语句执行时求值一次**，结果存进函数对象的 `__defaults__`（元组）。后续每次调用只是把 `__defaults__` 里的那个对象绑定到形参，不会重新求值。\n\n- 证据：`f.__defaults__` 可见同一个 list 对象；`id(f.__defaults__[0])` 在多次调用后不变；`f.__defaults__[0] is f.__defaults__[0]` 恒为 True。\n- 不可变默认（如 `None`、`int`、`str`）共享无害，因为「修改」是重新绑定名字而非改对象；**可变对象（list/dict/set）被原地修改**才会累积。\n- 修复：`def f(x, lst=None): lst = [] if lst is None else lst`（None 哨兵，惰性初始化）。\n- 反例提醒：用 `lst or []` 不严谨——会把调用方传入的空列表/空 dict 也替换掉，改变了「显式传空容器」的语义。\n\n本质是「求值时机」问题：默认值是**定义期**求值，函数体是**调用期**求值。",
+      "follow_ups": [
+        "如果默认值写成 `def f(x, t=time.time())`，时间戳会在什么时候固定？",
+        "为什么 `lst or []` 与 `lst if lst is not None else []` 不等价？",
+        "类属性作为可变默认值（如类变量 list）有什么类似陷阱？"
+      ],
+      "difficulty": "mid",
+      "company_tags": ["通用", "字节", "阿里"]
+    },
+    {
+      "question": "闭包捕获的是「值」还是「变量」？为什么 `[lambda: i for i in range(3)]` 全返回 2？如何用 `__closure__` 证明？",
+      "answer_md": "捕获的是**变量本身**（更准确说是 cell 对象），不是当时的值——这叫**延迟绑定（late binding）**。\n\n- 机制：推导式里的 `i` 是同一个局部名字，三个 lambda 的自由变量都指向同一个 cell。lambda 体在**调用时**才去 cell 里取值，而那时循环已结束、`i` 停在 2。\n- 证明：`funcs[0].__closure__` 返回 cell 元组，`funcs[0].__closure__[0].cell_contents` 可看到当前值；三个函数的 cell 是同一个对象（`funcs[0].__closure__[0] is funcs[1].__closure__[0]` 为 True）。\n- 修复：① 默认参数固化 `lambda i=i: i`（默认参数在 def 时求值，把当时值绑到函数对象）；② 工厂函数 `def make(n): return lambda: n`（每次调用 make 产生新作用域，各自捕获不同的 n）。\n- 字节码视角：自由变量引用走 `LOAD_DEREF`（从 cell 取），局部变量走 `LOAD_FAST`——这也是闭包变量访问略慢于局部变量的原因。\n\n对比：C++ lambda 用 `[=]`/`[&]` 显式声明捕获方式，Python 一律按引用捕获，因此这个坑在 Python 里更隐蔽。",
+      "follow_ups": [
+        "为什么循环变量在 Python 里不每次迭代新建作用域？（与 for 不引入新作用域有关）",
+        "生成器表达式 `(lambda: i for i in range(3))` 的行为有何不同？",
+        "`nonlocal` 写闭包变量与只读闭包变量在实现上差在哪？"
+      ],
+      "difficulty": "mid",
+      "company_tags": ["通用", "腾讯", "美团"]
+    },
+    {
+      "question": "装饰器 `@deco` 在语法层面做了什么？叠放多个装饰器时执行顺序如何？为什么必须加 `functools.wraps`？",
+      "answer_md": "**语法层**：`@deco` 等价于 `f = deco(f)`——在 `def` 产生函数对象后立即把名字重新绑定到 `deco` 的返回值。装饰器本身是**接受函数、返回函数**的高阶函数。\n\n- **叠放顺序**：\n  ```python\n  @a\n  @b\n  def f(): ...\n  ```\n  等价于 `f = a(b(f))`——**离 def 最近的先执行**（b 先包装 f，再由 a 包装结果）。执行顺序自下而上，调用顺序自上而下（先经过 a 再到 b）。\n- **`wraps` 的必要性**：wrapper 是个新函数对象，会覆盖 `__name__/__doc__/__module__/__qualname__`，`inspect.signature` 也只会看到 `(*args, **kwargs)`。后果：日志与 APM 打出的函数名全是 wrapper、文档工具失效、按签名做依赖注入/参数校验的框架出错。`@wraps(f)` 复制这些属性并设置 `__wrapped__ = f`，使 `inspect.signature` 能穿透到原函数。\n- **带参装饰器**是三层：`deco(arg)` 返回真正的 decorator，即 `f = deco(arg)(f)`。\n- 性能：每次调用多一层 Python 函数调用开销；热路径要权衡（必要时内联或用 C 扩展）。\n\n理解它只需记住一句话：**装饰器是运行期的名字重绑定，不是编译期的语法糖改写。**",
+      "follow_ups": [
+        "如何写一个既能 `@deco` 又能 `@deco()` 的装饰器？",
+        "装饰器会影响递归函数吗？（每次递归都经过 wrapper）",
+        "类装饰器与函数装饰器的区别？用类实现 `__call__` 装饰器有何优势？"
+      ],
+      "difficulty": "mid",
+      "company_tags": ["通用", "字节", "快手"]
+    },
+    {
+      "question": "`global` 与 `nonlocal` 有何区别？为什么在函数里 `print(x)` 后再 `x = 1` 会抛 `UnboundLocalError`？",
+      "answer_md": "**区别**：`global` 声明名字属于**模块（全局）作用域**；`nonlocal` 声明名字属于**外层函数（闭包）作用域**，且该名字必须已在外层绑定过（否则 SyntaxError）。两者都只影响「赋值绑定到哪一层」，不影响读取。\n\n- **UnboundLocalError 根因**：Python 的**作用域在编译期决定**。只要函数体内**任何位置**出现对某名字的赋值（且无 global/nonlocal 声明），编译器就把它标记为局部变量，放进 `co_varnames`，读取走 `LOAD_FAST`。于是 `print(x)` 执行时局部变量 x 尚未绑定 → 报错。\n  ```python\n  x = 10\n  def f():\n      print(x)   # UnboundLocalError\n      x = 1      # 这行让 x 在编译期被判为局部\n  ```\n- 验证：`f.__code__.co_varnames` 含 'x'，`co_names` 里没有（不会被当全局查）。\n- 修复：只读就不要赋值；要改全局用 `global x`；要改闭包外层用 `nonlocal x`。\n- 设计取舍：编译期决定作用域换来**局部变量访问极快**（LOAD_FAST 按索引取数组，无需字典查找），这是 CPython 用「静态作用域判定 + 动态绑定」换性能的典型例子。\n\n对比：JS 的 `var` 提升（hoisting）与 Python 的编译期作用域判定，都说明「变量可见性」是语言实现层的设计，不是书写顺序问题。",
+      "follow_ups": [
+        "类作用域为什么不参与 LEGB 的闭包链？（类体内定义的方法看不到类变量作为闭包）",
+        "如何用 `dis` 模块观察 LOAD_FAST / LOAD_GLOBAL / LOAD_DEREF 的差异？",
+        "为什么 `nonlocal` 不能绑定到模块级名字？"
+      ],
+      "difficulty": "hard",
+      "company_tags": ["通用", "阿里", "字节"]
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "title": "name mangling 与 extern \"C\"：用 nm 实证符号名差异",
+  "code_lang": "bash",
+  "code_std": "bash5",
+  "stdin": "",
+  "expected_output": "$ g++ -c str.cpp -o str.o\n$ nm str.o        # 注意 _ZN4demo3addEii、_Z10overloadedi/dd 等被修饰的名字\n0000000000000000 b .bss\r\n0000000000000000 d .data\r\n0000000000000000 p .pdata\r\n0000000000000000 r .rdata\r\n0000000000000000 r .rdata$zzz\r\n0000000000000000 t .text\r\n0000000000000000 r .xdata\r\n                 U __main\r\n                 U __mingw_printf\r\n0000000000000041 T _Z10overloadedd\r\n0000000000000035 T _Z10overloadedi\r\n0000000000000000 T _ZN4demo3addEii\r\n0000000000000014 T c_add\r\n0000000000000051 T main\r\n$ nm -C str.o     # -C 反修饰，显示人类可读签名\n0000000000000000 b .bss\r\n0000000000000000 d .data\r\n0000000000000000 p .pdata\r\n0000000000000000 r .rdata\r\n0000000000000000 r .rdata$zzz\r\n0000000000000000 t .text\r\n0000000000000000 r .xdata\r\n                 U __main\r\n                 U __mingw_printf\r\n0000000000000041 T overloaded(double)\r\n0000000000000035 T overloaded(int)\r\n0000000000000000 T demo::add(int, int)\r\n0000000000000014 T c_add\r\n0000000000000051 T main\r",
+  "code": "#!/bin/sh\n# name mangling 与 extern \"C\"：用 nm 实证符号名差异\n# 期望输出见 expected_output（本机 MinGW 工具链真实执行捕获）\n\ncat > str.cpp << 'EOF'\n#include <cstdio>\n\nnamespace demo {\n    int add(int a, int b) { return a + b; }\n}\n\nextern \"C\" int c_add(int a, int b)     /* 按 C 规则生成符号名：不做修饰 */\n{\n    return demo::add(a, b);\n}\n\nint overloaded(int x) { return x; }         /* C++ 重载，必然被修饰 */\ndouble overloaded(double x) { return x; }\n\nint main(void)\n{\n    printf(\"c_add(2, 3) = %d\\n\", c_add(2, 3));\n    return 0;\n}\nEOF\n\ng++ -c str.cpp -o str.o\nnm str.o        # 注意 _ZN4demo3addEii、_Z10overloadedi/dd 等被修饰的名字\nnm -C str.o     # -C 反修饰，显示人类可读签名\n",
+  "_step_rc": [
+    0,
+    0,
+    0
+  ],
+  "_verify_note": "expected_output 为 Windows + MinGW-w64（gcc 15.2 / binutils 2.45）真实执行捕获；脚本中显示的是可移植命令形式（gcc/ar/nm/objdump/size），本机实际以 D:/mingw64/bin/ 下的同名工具驱动，二者等价。"
+}

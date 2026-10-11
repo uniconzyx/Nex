@@ -1,0 +1,128 @@
+{
+  "meta": {
+    "subject": "fundamentals",
+    "chapter": "fund-ch02",
+    "title": "栈、队列与串 · 习题集",
+    "note": "3 道基础题（栈/队列模型与复杂度）+ 3 道算法题（来自 LeetCode，仅存元数据与链接，不存题面正文）。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "循环队列的判满条件",
+      "content_md": "循环队列容量为 `cap`，采用「牺牲一个空位」的方案区分空与满。设队首下标为 `front`、队尾（下一个可写入位置）下标为 `rear`，则**队列已满**的条件是？\n\nA. `front == rear`\nB. `(rear + 1) % cap == front`\nC. `rear == cap - 1`\nD. `(front + 1) % cap == rear`",
+      "answer": {
+        "choice": "B"
+      },
+      "explanation": "空的条件是 `front == rear`（两者重合且无元素）。若满也用同一条件就无法区分，所以让队尾**永远不追上**队首：写入 `cap-1` 个元素后 `(rear+1)%cap == front`，此时判满。代价是最多只能存 `cap-1` 个元素。选项 D 是「只剩一个空位」的镜像写法，方向反了——判满看的是 rear 追 front，不是 front 追 rear。",
+      "tags": [
+        "循环队列",
+        "判空判满",
+        "环形缓冲"
+      ],
+      "source": "self",
+      "source_ref": "《数据结构（C 语言版）》第3章"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "找出数组队列的「假溢出」缺陷",
+      "content_md": "下面的数组队列在反复入队出队后会错误地报告「队列已满」。指出缺陷并给出最小修改。\n\n```c\n#define CAP 8\nint data[CAP];\nint front = 0, rear = 0;\n\nvoid enqueue(int x) {\n    if (rear == CAP) { puts(\"FULL\"); return; }\n    data[rear++] = x;\n}\nint dequeue(int *out) {\n    if (front == rear) return 0;\n    *out = data[front++];\n    return 1;\n}\n```",
+      "answer": {
+        "reference_code": "#define CAP 8\nint data[CAP];\nint front = 0, rear = 0, size = 0;\n\nint is_full(void)  { return size == CAP; }\nint is_empty(void) { return size == 0; }\n\nvoid enqueue(int x) {\n    if (is_full()) { puts(\"FULL\"); return; }\n    data[rear] = x;\n    rear = (rear + 1) % CAP;   /* 环形推进 */\n    size++;\n}\nint dequeue(int *out) {\n    if (is_empty()) return 0;\n    *out = data[front];\n    front = (front + 1) % CAP; /* 环形推进 */\n    size--;\n    return 1;\n}"
+      },
+      "explanation": "缺陷是**假溢出**：`front` 和 `rear` 只会单调递增，出队释放的前端空间永远无法复用，`rear` 撞到 `CAP` 就误判满。修法有两处：① 两个下标都改成环形推进 `(x+1)%CAP`；② 因为环形推进后 `front == rear` 同时表示空和满，需引入 `size` 计数（或改用「牺牲一个空位」的判满表达式）。生产代码更常用 `size`，容量利用率 100%。",
+      "tags": [
+        "队列",
+        "假溢出",
+        "循环队列",
+        "修错"
+      ],
+      "source": "self",
+      "source_ref": "《数据结构（C 语言版）》第3章"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "读出单调栈的输出",
+      "content_md": "下面代码用单调栈求每个元素的「下一个更大元素」。给定 `a = {2, 1, 5, 3, 4}`，程序输出的五行 `-> n` 依次是什么？\n\n```c\nint a[] = {2, 1, 5, 3, 4};\nint n = 5, stk[5], top = 0, nge[5];\nfor (int i = 0; i < n; i++) nge[i] = -1;\nfor (int i = 0; i < n; i++) {\n    while (top > 0 && a[stk[top-1]] < a[i]) nge[stk[--top]] = a[i];\n    stk[top++] = i;\n}\nfor (int i = 0; i < n; i++) printf(\"a[%d]=%d -> %d\\n\", i, a[i], nge[i]);\n```",
+      "answer": {
+        "expected_output": "a[0]=2 -> 5\na[1]=1 -> 5\na[2]=5 -> -1\na[3]=3 -> 4\na[4]=4 -> -1"
+      },
+      "explanation": "逐步推演：`i=0`（2）入栈；`i=1`（1）比栈顶 2 小，入栈 → 栈 [2,1]；`i=2`（5）大于 1 和 2，连续出栈并结算 `nge[1]=5`、`nge[0]=5`，5 入栈；`i=3`（3）小于 5 入栈；`i=4`（4）大于 3，结算 `nge[3]=4`，4 入栈 → 栈 [5,4]。扫描结束，栈中 5、4 没有更大元素保持 `-1`。**注意栈里存的是下标**，否则无法把答案写回 `nge` 的正确位置。",
+      "tags": [
+        "单调栈",
+        "下一个更大元素",
+        "推演"
+      ],
+      "source": "self",
+      "source_ref": "《数据结构（C 语言版）》第3章"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "easy",
+      "title": "有效的括号",
+      "content_md": "给定一个只包含 `()`、`[]`、`{}` 的字符串，判断括号是否有效（同类型左右匹配、且嵌套顺序正确）。",
+      "external_url": "https://leetcode.cn/problems/valid-parentheses/",
+      "answer": {
+        "reference_code": "int isValid(const char *s) {\n    char st[10000]; int top = 0;\n    for (int i = 0; s[i]; i++) {\n        char c = s[i];\n        if (c=='('||c=='['||c=='{') st[top++] = c;\n        else {\n            if (top == 0) return 0;\n            char o = st[--top];\n            if ((c==')'&&o!='(')||(c==']'&&o!='[')||(c=='}'&&o!='{')) return 0;\n        }\n    }\n    return top == 0;\n}"
+      },
+      "explanation": "**为什么用栈**：括号嵌套是典型的「后开先闭」结构，与栈的 LIFO 完全同构。遇到开括号入栈，遇到闭括号必须与**栈顶**（最近未闭合的）同类型，否则无效。最后栈必须为空。时间 O(N)、空间 O(N)。关键边界：闭括号出现时栈空（如输入只有右括号）、以及扫描完栈仍非空（如输入只有左括号）。",
+      "tags": [
+        "栈",
+        "括号匹配",
+        "LeetCode 20"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 20 · 有效的括号"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "medium",
+      "title": "每日温度",
+      "content_md": "给定每日温度数组，返回一个数组，其中第 i 个元素表示「从第 i 天起，需要等待多少天才会出现更高温度」，若之后都不会更高则为 0。",
+      "external_url": "https://leetcode.cn/problems/daily-temperatures/",
+      "answer": {
+        "reference_code": "int* dailyTemperatures(int* t, int n, int* returnSize) {\n    int *res = calloc(n, sizeof(int));\n    int *stk = malloc(n * sizeof(int));\n    int top = 0;\n    for (int i = 0; i < n; i++) {\n        while (top > 0 && t[stk[top-1]] < t[i]) {\n            int j = stk[--top];\n            res[j] = i - j;          /* 天数差 */\n        }\n        stk[top++] = i;\n    }\n    free(stk);\n    *returnSize = n;\n    return res;\n}"
+      },
+      "explanation": "这是「下一个更大元素」的距离版本，直接套单调栈模板：栈内保持温度递减，遇到更高温度就批量结算 `i - j` 作为等待天数。**为什么必须是 O(N)**：每个下标入栈一次、出栈至多一次，while 总次数摊还 O(N)。若用双重循环暴力，最坏（温度递增）是 O(N²)，在 N=10⁵ 的数据规模下必然超时。",
+      "tags": [
+        "单调栈",
+        "下一个更大元素",
+        "LeetCode 739"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 739 · 每日温度"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "hard",
+      "title": "滑动窗口最大值",
+      "content_md": "给定整数数组和窗口大小 k，窗口从最左端滑动到最右端，返回每个窗口中的最大值。",
+      "external_url": "https://leetcode.cn/problems/sliding-window-maximum/",
+      "answer": {
+        "reference_code": "int* maxSlidingWindow(int* a, int n, int k, int* returnSize) {\n    int *res = malloc((n - k + 1) * sizeof(int));\n    int *q = malloc(n * sizeof(int));\n    int head = 0, tail = 0, m = 0;\n    for (int i = 0; i < n; i++) {\n        while (tail > head && a[q[tail-1]] <= a[i]) tail--;  /* 队尾淘汰更小者 */\n        q[tail++] = i;\n        if (q[head] <= i - k) head++;                        /* 队首过期 */\n        if (i >= k - 1) res[m++] = a[q[head]];\n    }\n    free(q);\n    *returnSize = m;\n    return res;\n}"
+      },
+      "explanation": "用**单调队列**（存下标、值递减）。三个关键动作：① 队尾淘汰——一个更晚且不小于当前元素的旧元素，永远不可能再成为任何窗口的最大值，直接丢弃；② 队首过期——下标 `<= i-k` 已滑出窗口；③ 队首选答案。若用大顶堆，插入删除是 O(N log k)，且「过期元素」不能在堆顶直接删除，需要惰性删除；单调队列是严格的 **O(N)**。",
+      "tags": [
+        "单调队列",
+        "滑动窗口",
+        "LeetCode 239"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 239 · 滑动窗口最大值"
+    }
+  ]
+}

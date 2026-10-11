@@ -1,0 +1,8 @@
+{
+  "title": "accumulate：求和、自定义归约与字符串拼接",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "sum = 15\nsum*2 = 30\njoin = abc\n",
+  "code": "#include <iostream>\n#include <vector>\n#include <numeric>\n#include <string>\nint main() {\n    std::vector<int> v = {1,2,3,4,5};\n    std::cout << \"sum = \" << std::accumulate(v.begin(), v.end(), 0) << '\\n';\n    std::cout << \"sum*2 = \" << std::accumulate(v.begin(), v.end(), 0, [](int s, int x){ return s + x * 2; }) << '\\n';\n    std::vector<std::string> w = {\"a\",\"b\",\"c\"};\n    std::string s = std::accumulate(w.begin(), w.end(), std::string(\"\"));\n    std::cout << \"join = \" << s << '\\n';\n}\n"
+}

@@ -1,0 +1,9 @@
+{
+  "title": "SQL：CREATE TRIGGER 的 BEFORE/AFTER 与 NEW/OLD 行镜像（含 CHECK 式校验）",
+  "code_lang": "sql",
+  "code_std": "mysql",
+  "stdin": "",
+  "expected_output": "-- 期望结构要点(非实测):\n--   1) FOR EACH ROW 是行级触发器; 一条影响 N 行的 UPDATE -> 触发器执行 N 次\n--   2) BEFORE UPDATE 中 NEW 可写(SET NEW.col = ...), AFTER 中改写无效\n--   3) NEW/OLD 可用性矩阵: INSERT 只有 NEW; UPDATE 两者都有; DELETE 只有 OLD\n--   4) MySQL 限制: 触发器内不得对本表 INSERT/UPDATE/DELETE, 否则 ERROR 1442\n--   审计表 salary_audit 的期望列: emp_id | old_salary | new_salary | op\n--   行数据需在真实 MySQL 上执行后确认, 此处不编造",
+  "code": "-- ⚠️ 本机无 MySQL 凭证, 未实跑; 只作语法与写法参考\nDELIMITER $$\n-- BEFORE UPDATE: 可读写 NEW, 用于规范化即将写入的值\nCREATE TRIGGER trg_emp_bu\nBEFORE UPDATE ON employee\nFOR EACH ROW\nBEGIN\n    IF NEW.salary < 0 THEN\n        SET NEW.salary = 0;                 -- 只有 BEFORE 能改写 NEW\n    END IF;\nEND$$\n\n-- AFTER UPDATE: 只读 NEW/OLD, 用于审计与联动\nCREATE TRIGGER trg_emp_au\nAFTER UPDATE ON employee\nFOR EACH ROW\nBEGIN\n    IF NEW.salary <> OLD.salary THEN\n        INSERT INTO salary_audit(emp_id, old_salary, new_salary, op)\n        VALUES (OLD.id, OLD.salary, NEW.salary, 'UPDATE');\n    END IF;\nEND$$\nDELIMITER ;",
+  "_verified": false
+}

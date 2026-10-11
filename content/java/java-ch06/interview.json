@@ -1,0 +1,99 @@
+{
+  "meta": {
+    "chapter": "java-ch06"
+  },
+  "items": [
+    {
+      "question": "BIO、NIO、AIO 的区别？NIO 的「非阻塞」到底体现在哪一步？",
+      "answer_md": "一次网络读要分两个阶段：①等数据准备好（从网卡到内核缓冲区）；②把数据从内核缓冲区拷贝到用户态。\n\n- **BIO**：两阶段都阻塞，一个连接一个线程。\n- **NIO**：阶段①非阻塞（`configureBlocking(false)` 立即返回，靠 `Selector` 在多个连接上等待），阶段②仍会阻塞（真正的 `read()` 等待拷贝完成）。\n- **AIO**：两阶段都由内核完成，完成后回调通知，`Future`/`CompletionHandler`。\n\n所以准确说法是：NIO 只解决了「等」的问题，没解决「拷」的问题；只有 AIO 才是全异步。Linux 上 AIO 长期不成熟（`io_uring` 才有实质改善），所以 Java 生态实际被 Netty（多路复用）主导；JDK 21 的虚拟线程用「让阻塞廉价」这条另一条路解决了同样的问题。",
+      "follow_ups": [
+        "Selector 的底层在 Linux 上是什么？它和 select/poll 的复杂度差别在哪？",
+        "为什么 FileChannel 不能注册到 Selector？",
+        "虚拟线程和 NIO 是替代关系吗？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "通用",
+        "阿里",
+        "字节",
+        "美团"
+      ]
+    },
+    {
+      "question": "ByteBuffer 的 flip、clear、compact 三者区别？为什么忘写 flip 会读到 0 字节？",
+      "answer_md": "三个方法操作的都是 `position`/`limit` 两个游标：\n\n- `flip()`：`limit = position; position = 0` —— 写模式切读模式。\n- `clear()`：`position = 0; limit = capacity` —— 整块作废，重新写。**不清数据**。\n- `compact()`：把 `[position, limit)` 的未读部分搬到数组开头，`position = 剩余长度`，`limit = capacity` —— 保留未读、继续写。\n\n忘写 `flip()` 的后果：position 停在写入末尾。若此后 `ch.write(buf)`，会从 position 写到 limit（可能写出未初始化的垃圾）；若 position 恰好等于 limit（capacity 等于写入长度），则写入 0 字节 —— 这就是「数据凭空消失」的经典现象。\n\n选型记忆法：数据全处理完用 `clear()`，只处理一半要接续用 `compact()`。",
+      "follow_ups": [
+        "rewind 和 flip 有什么不同？",
+        "直接缓冲和堆缓冲怎么选？MappedByteBuffer 的释放有什么坑？",
+        "Buffer 是线程安全的吗？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "腾讯",
+        "字节"
+      ]
+    },
+    {
+      "question": "Selector 的事件循环怎么写？最容易出错的地方是什么？",
+      "answer_md": "标准结构：\n\n```java\nwhile (running) {\n    selector.select();\n    Iterator<SelectionKey> it = selector.selectedKeys().iterator();\n    while (it.hasNext()) {\n        SelectionKey k = it.next();\n        it.remove();          // 关键\n        if (k.isAcceptable()) { ... }\n        else if (k.isReadable()) { ... }\n    }\n}\n```\n\n三个高频错误：\n1. **忘记 `it.remove()`** —— 就绪集合不会自动清空，同一事件被反复处理，表现为「消息被重复回显」；\n2. **无条件注册 `OP_WRITE`** —— 写事件几乎总是就绪，`select()` 立即返回形成忙等，CPU 打满。正确做法是写不进去时才注册、写完立刻 `cancel`；\n3. **在事件循环里做阻塞操作**（JDBC、同步 HTTP 调用）—— 一条连接卡住会拖停整个 Selector。Netty 的规矩「不要在 EventLoop 里做阻塞操作」就是这个原因。",
+      "follow_ups": [
+        "OP_WRITE 就绪是否意味着数据一定写得完？",
+        "Selector 空轮询（select 返回 0 却不阻塞）是什么问题？",
+        "为什么 Netty 用多 Selector（boss/worker 两组）？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "字节",
+        "阿里",
+        "华为"
+      ]
+    },
+    {
+      "question": "Java 序列化有什么安全问题？为什么现在不推荐用它做跨进程/跨系统通信？",
+      "answer_md": "`ObjectInputStream.readObject()` 会**实例化输入流里出现的任意可加载类**，并调用其 `readObject`/`readResolve` 等方法。攻击者可以构造 gadget chain（把多个已存在的类串起来）触发任意代码执行，这就是历史上大量 Java 反序列化 RCE 的根因（Apache Commons Collections 那条链最著名）。\n\n根因在于「**类型由数据决定**」：流里带着类名，接收方照单反序列化。这是数据即代码的反模式。\n\n防护与替代：\n- 不可信来源**禁止**使用原生反序列化；\n- 必须用时加白名单（JDK 9+ 的 `ObjectInputFilter`，或重写 `resolveClass` 校验类）；\n- 跨系统交换改用 JSON / Protobuf / Avro —— 这些格式的 schema 由接收方预先持有，流里只有字段号与值，类型不由数据决定。\n\n其他坑：`serialVersionUID` 不显式声明时随字段变化，跨版本必抛 `InvalidClassException`；反序列化**不调用构造器**，类不变量失去强制点，必须在 `readObject` 里手工校验。",
+      "follow_ups": [
+        "transient 关键字的作用与常见误用？",
+        "readObject 里应该做什么校验？",
+        "为什么反序列化不调用构造器？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "通用",
+        "阿里",
+        "腾讯",
+        "安全岗"
+      ]
+    },
+    {
+      "question": "为什么说「只做 normalize() 不能防目录穿越」？正确做法是什么？",
+      "answer_md": "`Path.normalize()` 是**纯语法**操作：它只消掉 `.` 与 `..`，不访问文件系统、不解析符号链接、不检查存在性。\n\n所以 `/data/uploads/../../etc/passwd` 会被 normalize 成 `/etc/passwd`，此时 `startsWith(\"/data/uploads\")` 返回 false —— 看起来能拦住；\n但如果攻击者事先在 `/data/uploads` 下创建一个指向 `/etc` 的软链接 `link`，那么 `resolve(\"link/passwd\")` 语法上确实在 `/data/uploads` 之内，normalize 后仍然通过校验，实际却访问到了 `/etc/passwd`。\n\n正确做法是**规范化到真实路径**再校验：\n\n```java\nPath base = Path.of(\"/data/uploads\").toRealPath();\nPath target = base.resolve(userInput).normalize().toRealPath();\nif (!target.startsWith(base)) throw new SecurityException(\"path traversal\");\n```\n\n`toRealPath()` 会解析软链接并可抛 `IOException`（不存在时），所以通常需要配合 `Files.exists` 或改用 `NOFOLLOW_LINKS` 策略。",
+      "follow_ups": [
+        "getAbsolutePath 和 getCanonicalPath 有什么区别？",
+        "toRealPath 遇到软链接成环会怎样？",
+        "还有哪些常见的上传目录攻击面？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "安全岗",
+        "阿里",
+        "字节"
+      ]
+    },
+    {
+      "question": "文件锁 FileLock 有哪些限制？为什么同一个 JVM 内第二次加锁会失败？",
+      "answer_md": "`FileChannel.lock()` / `tryLock()` 的语义要点：\n\n1. **锁是 JVM 进程级而非线程级的**（在多数平台上是 `fcntl` 记录锁）。同一 JVM 内对同一文件的**重叠区域**再次加锁，会直接抛 `OverlappingFileLockException` —— 它不会阻塞等待，因为 JVM 自己就知道这两把锁冲突。跨进程时才会真正阻塞（`lock()`）或返回 null（`tryLock()`）。\n2. 锁**不保证跨平台语义一致**：Windows 上是强制锁，Linux 上传统上是**建议锁（advisory）**，即不检查锁的进程照样能读写。所以文件锁不能当安全边界用。\n3. 锁的释放：`lock.close()`、channel 关闭、JVM 退出都会释放。若 channel 关闭，之前获得的 lock 自动失效（`isValid()` 变 false）。\n\n相比之下，`Files.move(..., ATOMIC_MOVE)` 是在同文件系统内做原子替换（底层是 `rename(2)`），是「配置文件/日志切分」场景更可靠的手段，但跨文件系统会抛 `AtomicMoveNotSupportedException`。",
+      "follow_ups": [
+        "为什么 ATOMIC_MOVE 跨文件系统会失败？",
+        "NFS 上的文件锁有什么额外问题？",
+        "如何实现「多进程安全写同一个文件」？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "字节",
+        "美团",
+        "通用"
+      ]
+    }
+  ]
+}

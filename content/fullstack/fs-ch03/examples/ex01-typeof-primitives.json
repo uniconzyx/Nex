@@ -1,0 +1,8 @@
+{
+  "title": "typeof 对 7 种原始类型与对象/函数的结果",
+  "code_lang": "javascript",
+  "code_std": "node22",
+  "stdin": "",
+  "expected_output": "number => number\nstring => string\nboolean => boolean\nnull => object\nundefined => undefined\nsymbol => symbol\nbigint => bigint\nobject => object\narray => object\nfunction => function",
+  "code": "const samples = [\n  ['number', 1],\n  ['string', 'a'],\n  ['boolean', true],\n  ['null', null],\n  ['undefined', undefined],\n  ['symbol', Symbol('s')],\n  ['bigint', 10n],\n  ['object', {}],\n  ['array', []],\n  ['function', function(){}],\n];\nfor (const [name, v] of samples) {\n  console.log(name, '=>', typeof v);\n}"
+}

@@ -1,0 +1,49 @@
+{
+  "meta": { "chapter": "mw-ch02" },
+  "items": [
+    {
+      "question": "RDB 和 AOF 的区别是什么？生产环境一般怎么选？",
+      "answer_md": "**RDB**：二进制全量快照，文件小、恢复快，但两次快照间崩溃会丢数据；生成靠 `BGSAVE` 的 fork + 写时复制，开销为 O(页表)。\n**AOF**：写命令日志，可配置 `always`(不丢)/`everysec`(丢约1秒,默认)/`no`(不可控)；恢复靠重放，更耐久但文件大、恢复慢；靠 rewrite 压缩。\n\n生产建议：两者**同时开启**——用 AOF 保证耐久（默认 everysec + 混合持久化），RDB 用于快速备份/主从全量同步/冷备。纯缓存且可重建数据时也可只用 RDB。",
+      "follow_ups": [
+        "BGSAVE 的 fork 为什么可能阻塞主线程？COW 期间内存为什么可能翻倍？",
+        "AOF 重写期间磁盘要预留多少空间？为什么？",
+        "混合持久化（aof-use-rdb-preamble）的加载流程是什么？"
+      ],
+      "difficulty": "mid",
+      "company_tags": ["通用", "字节", "阿里"]
+    },
+    {
+      "question": "Redis 的内存淘汰策略有哪些？为什么用近似 LRU 而不是严格 LRU？",
+      "answer_md": "八种：`noeviction`(默认写满报错)、`allkeys-lru`/`volatile-lru`、`allkeys-lfu`/`volatile-lfu`、`allkeys-random`/`volatile-random`、`volatile-ttl`；`allkeys-*` 对所有 key，`volatile-*` 仅对带 TTL 的 key 生效。\n\n**近似而非严格 LRU**：严格 LRU 需维护全局访问时序链表，每次访问改链表、淘汰取表尾，单线程下维护开销大且占用额外指针内存；Redis 随机采样 `maxmemory-samples`(默认5) 个候选、从中挑最久未用淘汰，命中率与严格 LRU 仅差约 1%~2%，却几乎零维护成本。LFU 则用对数计数器+衰减近似访问频次，更能抵抗缓存污染。",
+      "follow_ups": [
+        "maxmemory-samples 调大有什么影响？",
+        "volatile-lru 和 allkeys-lru 在业务上怎么选？",
+        "mem_fragmentation_ratio < 1 说明什么危险？"
+      ],
+      "difficulty": "hard",
+      "company_tags": ["通用", "腾讯", "美团"]
+    },
+    {
+      "question": "Redis 的 key 过期了会立刻删除吗？过期删除和内存淘汰是什么关系？",
+      "answer_md": "**不会立刻删除**。采用惰性删除（访问时检查并删除）+ 定期删除（serverCron 每秒约 10 次，随机采样带 TTL 的 key 删过期的，过期比例超 25% 则继续本轮直到超时上限）配合：惰性省 CPU、定期保回收。\n\n**与淘汰的关系**：过期删除针对「带 TTL 且到期」的 key；内存淘汰（maxmemory-policy）针对「内存达到 maxmemory 再写入」时按策略选 key 淘汰，两者触发条件不同、作用互补。注意过期删除不生成 del 命令，主从靠主节点传播 del 同步；大批 key 集中过期应给 TTL 加随机抖动避免集中过期与内存突增。",
+      "follow_ups": [
+        "定期删除为什么抽样而不是全量扫描？",
+        "大量 key 同时过期但无人访问会怎样？怎么避免？",
+        "volatile-ttl 淘汰和过期删除有什么联系？"
+      ],
+      "difficulty": "mid",
+      "company_tags": ["通用", "拼多多", "京东"]
+    },
+    {
+      "question": "AOF 重写（rewrite）是什么？为什么能缩小体积？混合持久化解决了什么问题？",
+      "answer_md": "**重写**：fork 子进程读取当前内存，直接生成“能重建现状的最小命令集”（如把 100 次 INCR 压成最终 SET、丢弃已过期/已删除的冗余命令），写入新 AOF，再把重写期间的增量写命令追加其后，最后原子 rename 替换旧文件。\n\n**体积缩小**：命令日志从 O(操作数) 降到 O(当前数据量)。\n\n**混合持久化**：Redis 4+ 支持 `aof-use-rdb-preamble yes`——重写文件以 RDB 全量快照开头 + AOF 增量结尾。恢复时先按 RDB 头快速载入全量，再重放尾部增量，比纯 AOF 重放快得多，且丢失数据更少。",
+      "follow_ups": [
+        "重写期间旧 AOF 还在增长吗？磁盘要预留多少？",
+        "重写和 BGSAVE 的 fork+COW 有什么关系？",
+        "AOF 文件末尾因崩溃截断会怎样？"
+      ],
+      "difficulty": "hard",
+      "company_tags": ["通用", "阿里", "百度"]
+    }
+  ]
+}

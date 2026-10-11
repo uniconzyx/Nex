@@ -1,0 +1,8 @@
+{
+  "title": "CSV：方言探测与 DictReader/DictWriter",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "探测分隔符 = '|'\n探测引号符 = '\"'\n是否含表头 = True\n\n   {'id': '1', 'name': 'tom', 'city': 'bj'}\n   {'id': '2', 'name': 'amy', 'city': 'sh'}\n\nDictWriter 产出（city 不在 fieldnames，被 ignore 丢弃）:\n'id,name\\r\\n3,jo\\r\\n'\n\n若 extrasaction 用默认值 raise，这里会抛 ValueError —— 线上常因多一列直接崩",
+  "code": "import csv\nimport io\n\nsample = \"id|name|city\\n1|tom|bj\\n2|amy|sh\\n\"\n\ndialect = csv.Sniffer().sniff(sample, delimiters=\",;|\\t\")\nprint(\"探测分隔符 =\", repr(dialect.delimiter))\nprint(\"探测引号符 =\", repr(dialect.quotechar))\nprint(\"是否含表头 =\", csv.Sniffer().has_header(sample))\nprint()\n\nrows = list(csv.DictReader(io.StringIO(sample), dialect=dialect))\nfor r in rows:\n    print(\"  \", dict(r))\nprint()\n\nout = io.StringIO()\nwriter = csv.DictWriter(out, fieldnames=[\"id\", \"name\"], extrasaction=\"ignore\")\nwriter.writeheader()\nwriter.writerow({\"id\": \"3\", \"name\": \"jo\", \"city\": \"gz\"})\nprint(\"DictWriter 产出（city 不在 fieldnames，被 ignore 丢弃）:\")\nprint(repr(out.getvalue()))\nprint()\nprint(\"若 extrasaction 用默认值 raise，这里会抛 ValueError —— 线上常因多一列直接崩\")"
+}

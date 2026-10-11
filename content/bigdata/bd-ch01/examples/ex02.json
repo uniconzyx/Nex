@@ -1,0 +1,8 @@
+{
+  "title": "DataNode 块存储与校验和防静默损坏",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "datanode: dn1\nstored_blocks: ['blk_A']\nread_status: OK\nread_data: hello-hdfs\nafter_tamper_status: CORRUPT",
+  "code": "\nimport hashlib\nclass DataNode:\n    def __init__(self, name):\n        self.name = name\n        self.store = {}\n    def put_block(self, blk, data):\n        cs = hashlib.md5(data).hexdigest()\n        self.store[blk] = (data, cs)\n    def read_block(self, blk):\n        data, cs = self.store[blk]\n        if hashlib.md5(data).hexdigest() != cs:\n            return None, \"CORRUPT\"\n        return data, \"OK\"\ndn = DataNode(\"dn1\")\ndn.put_block(\"blk_A\", b\"hello-hdfs\")\ndata, status = dn.read_block(\"blk_A\")\nprint(\"datanode:\", dn.name)\nprint(\"stored_blocks:\", list(dn.store.keys()))\nprint(\"read_status:\", status)\nprint(\"read_data:\", data.decode())\ndn.store[\"blk_A\"] = (b\"hello-hdfs\", \"deadbeef\")\n_, bad = dn.read_block(\"blk_A\")\nprint(\"after_tamper_status:\", bad)\n"
+}

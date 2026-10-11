@@ -1,0 +1,134 @@
+{
+  "meta": {
+    "chapter": "db-ch01",
+    "note": "5 题，4 类题型混合（choice/fix_error/output/coding）；LeetCode 真题仅存元数据+链接，不存题面正文"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "difficulty": "easy",
+      "title": "关于 INNER JOIN 与 LEFT JOIN 的描述，正确的是",
+      "content_md": "给定 `employee`（emp_id, dept_id）与 `department`（dept_id, dept_name），选择**正确**的描述。",
+      "options": [
+        {
+          "key": "A",
+          "text": "LEFT JOIN 只返回两表都能匹配上的行"
+        },
+        {
+          "key": "B",
+          "text": "INNER JOIN 只返回两表都能匹配上的行；LEFT JOIN 还会保留左表中无匹配的行（右表列补 NULL）"
+        },
+        {
+          "key": "C",
+          "text": "LEFT JOIN 与 RIGHT JOIN 在交换两表顺序后结果一定相同"
+        },
+        {
+          "key": "D",
+          "text": "JOIN 默认是 LEFT JOIN"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "INNER JOIN 取交集；LEFT JOIN 以左表为基准保留全部左表行，右表无匹配补 NULL；JOIN 默认是 INNER JOIN。",
+      "tags": [
+        "join",
+        "sql-basic"
+      ],
+      "source": "self",
+      "source_ref": "《MySQL 必知必会》第 12-13 章（联结）",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "fix_error",
+      "difficulty": "easy",
+      "title": "修复 ONLY_FULL_GROUP_BY 报错",
+      "content_md": "以下查询在 MySQL 5.7+ 开启 `ONLY_FULL_GROUP_BY` 时直接报错，请修复：\n\n```sql\nSELECT dept_id, name, COUNT(*) AS cnt\nFROM employee\nGROUP BY dept_id;\n```",
+      "answer": {
+        "reference_code": "SELECT dept_id, GROUP_CONCAT(name) AS names, COUNT(*) AS cnt\nFROM employee\nGROUP BY dept_id;"
+      },
+      "explanation": "`name` 既不在 GROUP BY 也非聚合函数会触发 ONLY_FULL_GROUP_BY。要么把 name 加入 GROUP BY（若按 部门+姓名 分组），要么对 name 做聚合（如 GROUP_CONCAT 拼成一行）。",
+      "tags": [
+        "group-by",
+        "sql-mode"
+      ],
+      "source": "self",
+      "source_ref": "《高性能 MySQL》第 6 章（GROUP BY 与 SQL 模式）",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "output",
+      "difficulty": "mid",
+      "title": "读 SQL 写输出",
+      "content_md": "执行下列语句后，`SELECT id, val FROM t WHERE val >= 8 ORDER BY val DESC;` 的输出是？\n\n```sql\nCREATE TABLE t (id INT, val INT);\nINSERT INTO t VALUES (1,10),(2,5),(3,8);\nSELECT id, val FROM t WHERE val >= 8 ORDER BY val DESC;\n```",
+      "answer": {
+        "output": "id|val\n1|10\n3|8"
+      },
+      "explanation": "val>=8 命中 (1,10) 与 (3,8)，按 val 降序为 10、8，对应 id 1、3。",
+      "tags": [
+        "where",
+        "order-by"
+      ],
+      "source": "self",
+      "source_ref": "《MySQL 必知必会》第 4-5 章（排序与过滤）",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "coding",
+      "difficulty": "easy",
+      "title": "查询高薪员工",
+      "content_md": "在 `employee`（emp_id, name, dept_id, salary）表中，写出 SQL 查询薪资大于 5000 的员工姓名与薪资，按薪资从高到低排序。",
+      "answer": {
+        "reference_code": "SELECT name, salary\nFROM employee\nWHERE salary > 5000\nORDER BY salary DESC;"
+      },
+      "explanation": "WHERE 单行过滤 + ORDER BY 排序；注意 salary 为数值比较，不要加引号。",
+      "tags": [
+        "select",
+        "where",
+        "order-by"
+      ],
+      "source": "self",
+      "source_ref": "《MySQL 必知必会》第 4-5 章",
+      "test_cases": [
+        {
+          "input": "employee 示例数据：(1,Alice,6000),(2,Bob,8000),(3,Carol,4000)",
+          "expected_output": "name|salary\nBob|8000\nAlice|6000",
+          "is_sample": true
+        }
+      ],
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "coding",
+      "difficulty": "mid",
+      "title": "LeetCode 175 · 组合两张表（combine-two-tables）",
+      "content_md": "基于 Person 与 Address 两张表，查出每个人的FirstName、LastName、City、State；没有地址的人也要出现（地址字段为 NULL）。用 LEFT JOIN 实现。",
+      "answer": {
+        "reference_code": "SELECT p.FirstName, p.LastName, a.City, a.State\nFROM Person p\nLEFT JOIN Address a ON p.PersonId = a.PersonId;"
+      },
+      "explanation": "题目要求即使没有地址也要保留人员，因此必须以 Person 为左表做 LEFT JOIN；这是联结语义的经典题。",
+      "tags": [
+        "join",
+        "left-join"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 175（combine-two-tables）",
+      "external_url": "https://leetcode.cn/problems/combine-two-tables/",
+      "test_cases": [
+        {
+          "input": "schema 与样例数据见 external_url",
+          "expected_output": "见 external_url（Person LEFT JOIN Address 结果）",
+          "is_sample": true
+        }
+      ],
+      "category": "算法题",
+      "platform": "leetcode"
+    }
+  ]
+}

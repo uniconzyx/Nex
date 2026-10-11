@@ -1,0 +1,8 @@
+{
+  "title": "EventEmitter：on / once 与 error 事件处理",
+  "code_lang": "javascript",
+  "code_std": "node22",
+  "stdin": "",
+  "expected_output": "on:1 | on:2 | once:tick | caught:boom\nonceFiredOnce=true\n",
+  "code": "const { EventEmitter } = require('events');\nconst ee = new EventEmitter();\nconst log = [];\nee.on('data', x => log.push('on:' + x));\nee.once('tick', () => log.push('once:tick'));\nee.emit('data', 1);\nee.emit('data', 2);\nee.emit('tick');\nee.emit('tick');\nee.on('error', e => log.push('caught:' + e.message));\nee.emit('error', new Error('boom'));\nconsole.log(log.join(' | '));\nconsole.log('onceFiredOnce=' + (log.filter(s => s === 'once:tick').length === 1));"
+}

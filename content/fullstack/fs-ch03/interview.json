@@ -1,0 +1,91 @@
+{
+  "meta": {
+    "chapter": "fs-ch03"
+  },
+  "items": [
+    {
+      "question": "讲讲 JavaScript 的事件循环，宏任务和微任务的执行顺序是怎样的？给一段代码你能写出输出吗？",
+      "answer_md": "JS 单线程，靠事件循环调度。每轮：先执行完当前调用栈的同步代码，然后**一次性清空整个微任务队列**（Promise.then/queueMicrotask/await 续体，含清空中新加入的），再取一个宏任务（setTimeout/I/O/渲染）执行，循环往复。结论：**同步 > 所有微任务 > 一个宏任务**。所以 `Promise.then` 永远早于 `setTimeout(fn,0)`；连续 `queueMicrotask` 会在下一轮宏任务前全部跑完。给代码时按「同步→微→宏」逐行排即可。",
+      "follow_ups": [
+        "await 后面那段代码是宏任务还是微任务？",
+        "Node 的 process.nextTick 和微任务谁先？",
+        "微任务饥饿（microtask starvation）是什么？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "通用",
+        "字节",
+        "腾讯"
+      ]
+    },
+    {
+      "question": "原型链是什么？属性查找和 instanceof 是怎么工作的？",
+      "answer_md": "每个对象有内部原型 `[[Prototype]]`（用 Object.getPrototypeOf 读取），形成一条链。`obj.x` 先查自身自有属性，没有就沿原型链向上，直到 null。这就是「基于原型」的继承。`instanceof` 沿左侧对象的原型链查找能否到达右侧构造函数的 prototype。`class` 只是语法糖，底层仍是把 `Sub.prototype` 的 `[[Prototype]]` 指向 `Base.prototype`。方法应放在原型上共享，避免每实例拷贝。",
+      "follow_ups": [
+        "prototype 和 __proto__ 的区别？",
+        "手写 new / 手写 instanceof？",
+        "为什么继承后要补 constructor？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "美团"
+      ]
+    },
+    {
+      "question": "this 的绑定规则有哪些？箭头函数为什么特殊？",
+      "answer_md": "五条：默认（独立调用，非严格是全局、严格是 undefined）、隐式（obj.fn()，this=obj）、显式（call/apply/bind 指定）、new（this=新对象）、箭头（没有自己的 this，取外层词法 this，且优先级最高不可被改写）。优先级（非箭头）：new > 显式 > 隐式 > 默认。箭头函数常用于回调以捕获外层 this，避免 that/self hack；但对象方法需要 this 归对象时别用箭头。",
+      "follow_ups": [
+        "方法被当作回调传入时 this 为什么丢了？怎么修？",
+        "call/apply/bind 的区别？",
+        "在 React 类组件里 this 常怎么丢？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "字节"
+      ]
+    },
+    {
+      "question": "闭包是什么？有什么用，有什么坑？",
+      "answer_md": "闭包是函数与其定义时词法环境的绑定，内层函数即使在外层返回后仍能访问外层变量。用途：私有状态、工厂函数、回调携带上下文。代价：外层变量无法被 GC，持有大对象会内存泄漏；SPA 卸载组件要解绑事件、清空引用。经典题：循环里 var 闭包共享同一变量，用 let 或 bind 固化。",
+      "follow_ups": [
+        "手写 once / 防抖 / 节流？",
+        "闭包为什么会导致内存泄漏？",
+        "模块模式（module pattern）如何利用闭包？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "阿里"
+      ]
+    },
+    {
+      "question": "== 和 === 有什么区别？Object.is 又是什么？",
+      "answer_md": "`==` 会做隐式类型转换（coercion）后再比较，容易出坑（`0==''`、`[]==false` 都为真）；`===` 不转换，类型不同直接 false，工程默认用它。`Object.is(a,b)` 与 `===` 基本一致，但两个特例不同：`Object.is(NaN,NaN)===true`，且 `Object.is(+0,-0)===false`。判断 NaN 用 `Number.isNaN` 更稳妥。",
+      "follow_ups": [
+        "null == undefined 为什么是 true？",
+        "为什么不用全局 isNaN？",
+        "[] == ![] 的结果与原因？"
+      ],
+      "difficulty": "easy",
+      "company_tags": [
+        "通用"
+      ]
+    },
+    {
+      "question": "Promise.all / allSettled / race / any 有什么区别？各自的 reject 行为？",
+      "answer_md": "`all`：全部 fulfilled 才是 fulfilled（值数组），**任一 rejected 立即 reject**。`allSettled`：**永远 fulfilled**，结果是每个的 `{status,value|reason}`，用于不关心成败。`race`：**第一个落定**（成败都算）即采用。`any`：**第一个 fulfilled** 即采用，全部 rejected 才 reject（AggregateError）。选哪个取决于「要不要部分失败也继续、取最快还是取全部成功」。",
+      "follow_ups": [
+        "all 里某个 Promise 永远 pending 会怎样？",
+        "any 和 race 的关键区别？",
+        "如何给 all 里的每个请求加超时？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "腾讯"
+      ]
+    }
+  ]
+}

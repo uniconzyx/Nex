@@ -1,0 +1,172 @@
+{
+  "meta": {
+    "chapter": "mw-ch02",
+    "note": "Redis 持久化与内存管理练习：基础题考察 RDB/AOF/过期/淘汰概念与判定，算法题来自刷题平台（仅存元数据+链接，不搬运题面）。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "RDB 的 BGSAVE 为什么用 fork + 写时复制",
+      "content_md": "关于 Redis 的 RDB 快照与 `BGSAVE`，下列说法正确的是？\n\nA. `BGSAVE` 在主线程直接全量拷贝内存，生成快照\nB. `BGSAVE` 通过 `fork` 子进程 + 写时复制(COW) 生成快照，仅被修改的页才复制\nC. COW 保证了 RDB 不丢数据，两次快照之间宕机也能恢复\nD. `SAVE` 和 `BGSAVE` 都会阻塞主线程",
+      "options": [
+        {
+          "key": "A",
+          "text": "BGSAVE 在主线程直接全量拷贝内存"
+        },
+        {
+          "key": "B",
+          "text": "BGSAVE 用 fork + COW，仅修改页才复制"
+        },
+        {
+          "key": "C",
+          "text": "COW 保证 RDB 不丢数据"
+        },
+        {
+          "key": "D",
+          "text": "SAVE 与 BGSAVE 都阻塞主线程"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "BGSAVE fork 子进程，父子共享页、写时复制仅复制被修改页，开销为 O(页表) 而非 O(数据量)；COW 只是降低快照成本，RDB 仍是点快照，间隔数据会丢失；SAVE 阻塞、BGSAVE 不阻塞主线程。",
+      "tags": [
+        "rdb",
+        "fork",
+        "cow"
+      ],
+      "source": "self",
+      "source_ref": "mw-ch02 §1 RDB fork+COW"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "appendfsync 三策略的耐久性与性能排序",
+      "content_md": "请按「耐久性从强到弱」与「吞吐从高到低」分别排序：`always` / `everysec` / `no`（默认策略）。",
+      "options": [],
+      "answer": {
+        "correct": [],
+        "output": "耐久性: always > everysec > no\n吞吐: no > everysec > always"
+      },
+      "explanation": "always 每条命令 fsync 最安全最慢；everysec 每秒 fsync 默认，最多丢约 1 秒；no 只写缓冲由 OS 刷盘最快最不安全。两个排序恰好相反。",
+      "tags": [
+        "aof",
+        "appendfsync"
+      ],
+      "source": "self",
+      "source_ref": "mw-ch02 §2 AOF fsync 三策略"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "修正关于 save m n 的错误表述",
+      "content_md": "某文档写道：「`save 900 1`、`save 300 10`、`save 60 10000` 三条规则必须**同时满足**才会触发 BGSAVE，触发后每条规则各自存一份快照。」\n\n请指出错误并给出正确表述。",
+      "options": [],
+      "answer": {
+        "correct": [],
+        "output": "错误：三条规则不是“且”而是“或”关系，任一满足即触发；且只会生成一份 RDB 快照（触发后重置 dirty 计数与 lastsave 时间戳），不是每条规则各存一份。正确：m 秒内发生至少 n 次修改即触发一次 BGSAVE。"
+      },
+      "reference_code": "",
+      "source": "self",
+      "source_ref": "mw-ch02 §2 RDB 触发条件（save m n 语义）"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "LRU 缓存（LeetCode 146）",
+      "content_md": "设计并实现一个满足 LRU(最近最少使用) 约束的数据结构：get/put 均 O(1)。详见原题，本题仅存元数据与链接，不搬运题面。",
+      "options": [],
+      "answer": {
+        "correct": [],
+        "output": "",
+        "reference_code": ""
+      },
+      "explanation": "经典题：哈希表 + 双向链表（或 Python OrderedDict）实现 O(1) get/put；与本章「近似 LRU」思想相通——Redis 用随机采样近似以降低维护开销，本题则要求严格 LRU。",
+      "tags": [
+        "lru",
+        "linkedlist",
+        "hash"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 146（lru-cache）",
+      "external_url": "https://leetcode.cn/problems/lru-cache/"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "hard",
+      "title": "LFU 缓存（LeetCode 460）",
+      "content_md": "设计并实现 LFU(最不经常使用) 缓存，get/put 均 O(1)，按访问频次淘汰最低频者，频次相同淘汰最久未用。详见原题，仅存元数据与链接。",
+      "options": [],
+      "answer": {
+        "correct": [],
+        "output": "",
+        "reference_code": ""
+      },
+      "explanation": "与本章「近似 LFU」对应：LeetCode 要求严格 O(1) LFU（频率桶 + 双向链表 + 最小频链表头），而 Redis 用「对数计数器 + 衰减 + 随机采样」近似以省开销。",
+      "tags": [
+        "lfu",
+        "hash",
+        "linkedlist"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 460（lfu-cache）",
+      "external_url": "https://leetcode.cn/problems/lfu-cache/"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "mem_fragmentation_ratio 的含义与异常处置",
+      "content_md": "关于 `mem_fragmentation_ratio = used_memory_rss / used_memory`，下列说法正确的是？\n\nA. 比值越小于 1 说明碎片越少、越健康\nB. 比值 > 1.5 表示内存碎片严重，可考虑 activedefrag 或重启\nC. 比值 < 1 说明内存充足、无碎片\nD. 该比值只反映逻辑内存，与 OS 无关",
+      "options": [
+        {
+          "key": "A",
+          "text": "比值越小于 1 越健康"
+        },
+        {
+          "key": "B",
+          "text": "比值>1.5 碎片严重，可 activedefrag/重启"
+        },
+        {
+          "key": "C",
+          "text": "比值<1 说明内存充足无碎片"
+        },
+        {
+          "key": "D",
+          "text": "只反映逻辑内存，与 OS 无关"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "reference_code": "",
+        "output": ""
+      },
+      "explanation": "ratio>1.5 表示碎片多（正常略大于 1）；ratio<1 说明 rss 小于逻辑内存，是部分内存被 OS 换页到 swap 的危险信号，性能会骤降，绝非健康。",
+      "tags": [
+        "memory",
+        "fragmentation",
+        "maxmemory"
+      ],
+      "source": "self",
+      "source_ref": "mw-ch02 §3 碎片率"
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "meta": {
+    "unit": "clang-u07",
+    "title": "多文件编译与链接"
+  },
+  "items": [
+    {
+      "title": "把单文件 Trie 程序拆成多模块工程并产出静态库 + 动态库两种形态",
+      "requirement_md": "目标：完整体验「多翻译单元 → 静态库 / 动态库两种分发形态」的全过程，并能用 `nm`/`size`/`objdump` 证明每一步发生的事。\n\n**工程结构**\n```\ndemo/\n├── include/trie.h        # 公开接口（含包含守卫，可被单独包含）\n├── src/trie.c            # 实现；内部辅助函数一律 static\n├── src/main.c            # 只包含头文件并调用\n└── Makefile              # 由 clang-u06 的知识编写\n```\n\n**功能要求**\n1. `trie.h` 自包含：能被 `gcc -fsyntax-only -Iinclude include/trie.h` 单独通过。\n2. 实现 `trieCreate/Insert/Search/StartsWith/Free` 五个接口（参考 LeetCode 208/211 语义）。\n3. 内部节点构造函数用 `static`，用 `nm src/trie.o` 证明它是小写 `t`。\n4. 分别产出 `libtrie.a`（静态）与 `libtrie.dll`（动态），同一份源码两种构建。\n5. 两种形态各链接一个测试程序，输出一致。\n6. 用 `size` 对比两种可执行文件的段占用，并解释差异来源。\n7. 故意制造一次 `multiple definition`（把 `int trie_count = 0;` 放进头文件），记录报错原文，再修复。\n\n**交付物**：源码工程 + `README.md`（含 `nm`/`size` 的真实输出截图或文本 + 三个问题的回答：① 静态库为什么体积更大？② `multiple definition` 的根因是什么？③ 为什么 `trieNodeNew` 在 `nm` 里是小写？）",
+      "tasks": [
+        {
+          "title": "T1 目录骨架与自包含头文件",
+          "verification": {
+            "type": "command",
+            "desc": "`gcc -fsyntax-only -Iinclude -x c include/trie.h` 退出码为 0（头文件可被单独包含）"
+          }
+        },
+        {
+          "title": "T2 分离编译",
+          "verification": {
+            "type": "command",
+            "desc": "分别执行 `gcc -c src/trie.c -o trie.o`、`gcc -c src/main.c -o main.o`、`gcc main.o trie.o -o app_static`，程序输出与预期一致"
+          }
+        },
+        {
+          "title": "T3 内部链接验证",
+          "verification": {
+            "type": "output",
+            "desc": "`nm trie.o` 中 trieNodeNew 前的字母为小写 t，且 trieCreate 为大写 T"
+          }
+        },
+        {
+          "title": "T4 静态库",
+          "verification": {
+            "type": "command",
+            "desc": "`ar rcs libtrie.a trie.o` 后用 `nm libtrie.a` 可见归档成员符号；`gcc main.o -L. -ltrie -o app_static` 链接成功且可运行"
+          }
+        },
+        {
+          "title": "T5 动态库",
+          "verification": {
+            "type": "command",
+            "desc": "`gcc -shared -fPIC -o trie.dll trie.c`（Linux 下 `-shared -fPIC -o libtrie.so`）后链接测试程序并通过 `nm -D` / `objdump -p` 看到导出与导入符号"
+          }
+        },
+        {
+          "title": "T6 体积对比与解释",
+          "verification": {
+            "type": "output",
+            "desc": "`size app_static` 与 `size app_dynamic` 的 text 段差异，且 README 中给出「静态库把代码复制进可执行文件」的正确解释"
+          }
+        },
+        {
+          "title": "T7 复现并修复 multiple definition",
+          "verification": {
+            "type": "output",
+            "desc": "README 记录真实的 `multiple definition of 'trie_count'` 报错原文，并给出「头文件 extern 声明 + 单一 .c 定义」的修复"
+          }
+        }
+      ]
+    }
+  ]
+}

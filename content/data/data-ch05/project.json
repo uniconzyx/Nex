@@ -1,0 +1,64 @@
+{
+  "meta": {
+    "chapter": "data-ch05",
+    "subject": "data",
+    "count": 1
+  },
+  "items": [
+    {
+      "title": "合规商品采集器：从列表页到结构化数据集",
+      "requirement_md": "实现一个**守规矩**的商品采集器（用本地 HTML 夹具代替真实站点，避免依赖网络与合规风险）：\n\n1. 采集前先取并解析 `robots.txt`，不通过的路径直接跳过；\n2. 按域名独立限速（令牌桶），遵守 `Crawl-delay`；\n3. 用 BFS 遍历列表页 → 详情页，去重键为**规范化 URL**（去 `#fragment`、参数排序、剔除 `utm_*`）；\n4. 抽取字段：标题、价格、链接、店铺名、销量；**白名单字段**之外一律丢弃；\n5. 原始响应落盘（`content` 字节 + 状态码 + 最终 URL），解析与抓取分离；\n6. 抽完打印条数校验，与页面元素数比对，不一致时告警；\n7. 全部输出确定性：不依赖网络、不记录耗时、不打印内存地址。",
+      "tasks": [
+        {
+          "title": "实现 URL 规范化与去重集合",
+          "verification": {
+            "type": "test",
+            "desc": "同一资源的不同写法（大小写 host、参数顺序、utm 参数）归一为同一键"
+          }
+        },
+        {
+          "title": "实现 robots.txt 判定门禁",
+          "verification": {
+            "type": "test",
+            "desc": "含 Allow 覆盖 Disallow 的最长匹配用例，以及前缀匹配（/tmp 命中 /tmpabc）用例"
+          }
+        },
+        {
+          "title": "实现令牌桶限速",
+          "verification": {
+            "type": "test",
+            "desc": "虚拟时间下固定脚本输出确定的通过/拒绝序列"
+          }
+        },
+        {
+          "title": "实现 BFS 调度与相对链接解析",
+          "verification": {
+            "type": "test",
+            "desc": "跨站链接不入队；已访问 URL 不重复入队；../ 正确解析"
+          }
+        },
+        {
+          "title": "实现解析层：lxml 抽取列表与详情字段",
+          "verification": {
+            "type": "test",
+            "desc": "缺字段的行补 None 而非跳过；抽取条数与页面元素数一致"
+          }
+        },
+        {
+          "title": "实现合规守卫：白名单裁剪 + 敏感字段拒绝",
+          "verification": {
+            "type": "manual",
+            "desc": "命中 phone/id_card 等字段时抛错并记录，不落盘"
+          }
+        },
+        {
+          "title": "编写质量校验：条数、缺失率、字段类型",
+          "verification": {
+            "type": "test",
+            "desc": "条数不一致时告警并保留失败样本供排查"
+          }
+        }
+      ]
+    }
+  ]
+}

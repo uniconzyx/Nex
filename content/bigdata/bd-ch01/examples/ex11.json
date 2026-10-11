@@ -1,0 +1,8 @@
+{
+  "title": "小文件问题：NameNode 元数据开销对比",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "1GB as one big file -> blocks: 8 meta_bytes: 1200\n1GB as 1KB files   -> files: 1048576 meta_bytes: 157286400\nmeta_overhead_ratio: 131072.0",
+  "code": "\nBLOCK = 128 * 1024 * 1024\nMETA = 150\ntotal = 1024 * 1024 * 1024   # 1 GB\nbig_blocks = (total + BLOCK - 1) // BLOCK\nsmall_files = total // 1024   # 1KB 小文件\nprint(\"1GB as one big file -> blocks:\", big_blocks, \"meta_bytes:\", big_blocks * META)\nprint(\"1GB as 1KB files   -> files:\", small_files, \"meta_bytes:\", small_files * META)\nprint(\"meta_overhead_ratio:\", round((small_files * META) / (big_blocks * META), 1))\n"
+}

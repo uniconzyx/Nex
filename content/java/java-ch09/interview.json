@@ -1,0 +1,102 @@
+{
+  "meta": {
+    "chapter": "java-ch09",
+    "note": "6 条面经，覆盖 Maven 依赖与生命周期、Spring Boot 自动配置、依赖注入、事务与测试。"
+  },
+  "items": [
+    {
+      "question": "Maven 依赖冲突是怎么产生的？你会怎么排查和解决？",
+      "answer_md": "**产生**：传递依赖让同一个 `artifactId` 以不同版本进入依赖图，Maven 必须裁剪出一个。**调解规则（顺序不可颠倒）**：① 最近优先——路径最短者胜；② 同长度时**先声明者胜**。\n\n**排查**：`mvn dependency:tree -Dverbose` 看 `omitted for conflict with X` / `omitted for duplicate`；只关心某坐标就加 `-Dincludes=groupId:artifactId`。\n\n**解决（按推荐度）**：\n1. 在 `<dependencyManagement>` 里**钉死版本**——全局生效、最稳，也是 Spring Boot BOM 的做法；\n2. 在引入坏支路的依赖上加 `<exclusions>` **剪掉**；\n3. 直接在 `<dependencies>` 里声明该坐标并把层级提到最浅（能压过深层的）。\n\n**为什么不要用「改 pom 顺序」解决**？因为这条规则只在**同深度**时生效，稍一调整依赖结构就会失效，属于脆弱修法。",
+      "follow_ups": [
+        "`dependencyManagement` 与 `<dependencies>` 的区别是什么？",
+        "`optional=true` 的依赖会不会传递？",
+        "BOM 是怎么被导入的？"
+      ],
+      "difficulty": "medium",
+      "company_tags": [
+        "阿里",
+        "美团",
+        "字节",
+        "快手"
+      ]
+    },
+    {
+      "question": "讲讲 Maven 的生命周期。phase 和 goal 是什么关系？",
+      "answer_md": "Maven 有**三条相互独立**的生命周期：`clean`、`default`（构建）、`site`。\n\n- `default` 主要 phase：`validate → compile → test → package → verify → install → deploy`。\n- **执行某 phase 会连带执行它前面的所有 phase**，所以 `mvn package` 自动跑完编译与测试。\n- **phase 是阶段（无实现，有序），goal 是插件提供的执行单元（有实现）**，二者是**绑定关系**：`compile` → `compiler:compile`，`test` → `surefire:test`，`package` → `jar:jar`。\n- `mvn dependency:tree` 是**直接执行 goal**，不走生命周期，所以不会触发编译。\n- 多模块按**模块依赖的拓扑序**构建；出现环会报 `cyclic reference`。\n\n**引申**：`clean` 不属于 default，所以 `mvn install` **不会**自动清理 `target/`——CI 里统一用 `mvn clean install` 就是为了避免增量判断失效导致的「本地能跑、CI 挂」。",
+      "follow_ups": [
+        "`install` 和 `deploy` 有什么区别？",
+        "`mvn -pl 模块 -am` 是干什么的？",
+        "surefire 与 failsafe 的分工？"
+      ],
+      "difficulty": "medium",
+      "company_tags": [
+        "腾讯",
+        "百度",
+        "京东"
+      ]
+    },
+    {
+      "question": "Spring Boot 自动配置的原理是什么？为什么用户自己定义的 Bean 能覆盖它？",
+      "answer_md": "**链路**：`@SpringBootApplication` 内含 `@EnableAutoConfiguration` → 它 `@Import(AutoConfigurationImportSelector.class)` → 该 selector 读取 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`（Spring Boot 2.7 之前是 `spring.factories` 的 `EnableAutoConfiguration` 键）→ 得到**候选自动配置类列表** → 逐个用 `@ConditionalOnXxx` 筛选后注册。\n\n**关键条件注解**：`@ConditionalOnClass`（classpath 有才生效）、**`@ConditionalOnMissingBean`（容器里没有才生效）**、`@ConditionalOnProperty`、`@ConditionalOnWebApplication`。\n\n**为什么用户 Bean 能覆盖**：正因为自动配置类普遍标了 `@ConditionalOnMissingBean`——你注册了自己的 `DataSource`，这个条件不成立，自动配置**主动退让**。所以自动配置的语义是**默认值**而非强制值，这就是「约定优于配置，且可覆盖」的实现。\n\n**注意**：`AutoConfigurationImportSelector` 是 `DeferredImportSelector`，**必须最后处理**——否则它观察不到用户已注册的 Bean。",
+      "follow_ups": [
+        "`spring.factories` 和 `AutoConfiguration.imports` 有什么区别？",
+        "怎么写一个自己的 starter？",
+        "`@Configuration` 的 `proxyBeanMethods` 是什么？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "字节",
+        "阿里",
+        "美团",
+        "拼多多"
+      ]
+    },
+    {
+      "question": "依赖注入有哪几种方式？你推荐哪种，为什么？",
+      "answer_md": "**三种**：\n\n| 方式 | 写法 | 优点 | 缺点 |\n|---|---|---|---|\n| 构造器 | `Ctor(X x){this.x=x;}` | 依赖可 `final`、**缺依赖启动即失败**、单测可直接 `new` | 参数多时略长 |\n| setter | `void setX(X x)` | 可重配、适合可选依赖 | 可能**半初始化** |\n| 字段 | `@Autowired private X x;` | 最短 | 不可 final、**容器外 `new` 出来字段全 null**、**掩盖循环依赖**、单测只能反射或起上下文 |\n\n**推荐构造器注入**。理由：① 依赖声明为 `final`，保证**对象一旦构造完成就处于合法状态**（不存在半初始化）；② 缺依赖时**启动即失败**，而不是运行到某行才 NPE；③ 单测**不需要容器**，直接 `new Service(mockRepo)`。\n\n**注**：`@Autowired` 默认 **byType**，同类型多个时按 `@Qualifier`/字段名匹配；`@Resource` 默认 **byName**——这组差异常考。",
+      "follow_ups": [
+        "`@Autowired` 和 `@Resource` 的区别？",
+        "循环依赖怎么解决？",
+        "单例 Bean 里放可变字段会怎样？"
+      ],
+      "difficulty": "medium",
+      "company_tags": [
+        "阿里",
+        "美团",
+        "网易",
+        "华为"
+      ]
+    },
+    {
+      "question": "@Transactional 在哪些情况下会失效？",
+      "answer_md": "五类，按出现频率排：\n\n1. **同类内部自调用**——`this.methodB()` 不经 AOP 代理，注解不生效（**最常见**）。\n2. **方法不是 `public`**——默认代理策略不织入非 public。\n3. **异常被吞或类型不匹配**——默认**只对 `RuntimeException` / `Error` 回滚**，受检异常需 `rollbackFor = Exception.class`。\n4. **多线程**——事务上下文绑在 `ThreadLocal`，子线程不在同一事务里。\n5. **Bean 不受容器管理**——自己 `new` 出来的对象没有代理。\n\n**边界该放哪一层**：**service 层**。controller 不该管（一次请求可能调多个 service），repository 也不该管（无法覆盖多表操作）。\n\n**常用传播行为**：`REQUIRED`（默认，加入当前事务）、`REQUIRES_NEW`（挂起当前、新开事务，适合写审计日志）、`NESTED`（保存点回滚）。\n\n**性能细节**：查询方法加 `@Transactional(readOnly = true)` 可让部分 ORM 跳过脏检查。",
+      "follow_ups": [
+        "`REQUIRED` 与 `REQUIRES_NEW` 的区别？",
+        "为什么自调用不走代理？",
+        "事务和 AOP 的关系？"
+      ],
+      "difficulty": "medium",
+      "company_tags": [
+        "阿里",
+        "美团",
+        "京东",
+        "滴滴"
+      ]
+    },
+    {
+      "question": "Spring Boot 项目里你怎么组织测试？单元测试和集成测试的边界在哪？",
+      "answer_md": "按**测试金字塔**分三层：\n\n| 层次 | 注解/工具 | 覆盖范围 | 启动代价 | 适用 |\n|---|---|---|---|---|\n| 单元测试 | JUnit + Mockito，**不起容器** | 单个类 | 毫秒 | service 业务规则（占大头） |\n| 切片测试 | `@WebMvcTest` / `@DataJpaTest` | 一层 | 秒 | 参数绑定、JSON 序列化、SQL 正确性 |\n| 集成测试 | `@SpringBootTest` | 全链路 | 秒~分钟 | 关键路径、事务、外部依赖联通 |\n\n**命名约定**：`surefire` 跑 `*Test`（绑定 `test` phase），`failsafe` 跑 `*IT`（绑定 `verify` phase）。**把集成测试命名成 `*Test` 会让 `mvn test` 从秒级变分钟级**——这是 CI 提速最常见的抓手。\n\n**Mock 的本质**是「用替身替换协作对象」，把数据库/HTTP 切断，让**被测行为成为唯一变量**：`when(repo.findById(1)).thenReturn(u)`。\n\n**边界判据**：需要验证「**我的逻辑对不对**」写单元测试；需要验证「**我的配置和外部约定对不对**」写集成测试。只测后者会导致 CI 慢到没人跑，只测前者会漏掉「配置写错、SQL 方言不兼容」这类问题。",
+      "follow_ups": [
+        "`@MockBean` 和 `@Mock` 的区别？",
+        "怎么在不启动容器的情况下测 controller？",
+        "测试数据怎么隔离？"
+      ],
+      "difficulty": "medium",
+      "company_tags": [
+        "腾讯",
+        "字节",
+        "小米"
+      ]
+    }
+  ]
+}

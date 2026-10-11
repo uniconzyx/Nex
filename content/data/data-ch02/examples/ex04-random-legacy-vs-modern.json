@@ -1,0 +1,8 @@
+{
+  "title": "新旧随机数 API：全局态 vs 封装流",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "legacy reproducible = True\nmodern equal stream = True\ndifferent seed differ = True",
+  "code": "import numpy as np\n# 旧式：全局可变状态\nnp.random.seed(0)\nlegacy1 = np.random.randn(3)\nnp.random.seed(0)\nlegacy2 = np.random.randn(3)\nprint(\"legacy reproducible =\", np.allclose(legacy1, legacy2))\n# 新式：封装 Generator\ng1 = np.random.default_rng(7)\ng2 = np.random.default_rng(7)\nprint(\"modern equal stream =\", np.array_equal(g1.standard_normal(3), g2.standard_normal(3)))\ng3 = np.random.default_rng(1)\ng4 = np.random.default_rng(2)\nprint(\"different seed differ =\", not np.array_equal(g3.standard_normal(3), g4.standard_normal(3)))"
+}

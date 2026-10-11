@@ -1,0 +1,8 @@
+{
+  "title": "ex10-dynamic-sql-choose-set",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "choose 选中: name = ?\nset 片段: SET user_name = ?, email = ?",
+  "code": "def choose(branches):\n    for label, ok in branches:\n        if ok:\n            return label\n    return \"1=1\"\n\nbranch = choose([(\"id = ?\", False), (\"name = ?\", True), (\"1=1\", False)])\nprint(\"choose 选中:\", branch)\n\nfields = [(\"user_name\", \"bob\"), (\"age\", None), (\"email\", \"e@x.com\")]\nsets = [k + \" = ?\" for k, v in fields if v is not None]\nprint(\"set 片段:\", \"SET \" + \", \".join(sets))\n"
+}

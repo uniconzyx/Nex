@@ -1,0 +1,8 @@
+{
+  "title": "std::string_view 零拷贝子串",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "ell",
+  "code": "#include <iostream>\n#include <string>\n#include <string_view>\n\nint main() {\n    std::string s = \"hello\";\n    std::string_view v(s);\n    std::cout << v.substr(1, 3);\n}"
+}

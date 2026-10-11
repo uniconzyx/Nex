@@ -1,0 +1,8 @@
+{
+  "title": "list 是动态数组：原地扩容，对象身份稳定",
+  "code_lang": "python",
+  "code_std": "python3.11",
+  "stdin": "",
+  "expected_output": "[0, 1, 2, 3, 4]\nsame object after append: True\nlist 按需 over-allocation 扩容，append 不创建新对象",
+  "code": "xs = []\nfor n in range(5):\n    xs.append(n)\nprint(xs)\n\na = []\nbefore = id(a)\na.append(1)\nprint(\"same object after append:\", id(a) == before)\nprint(\"list 按需 over-allocation 扩容，append 不创建新对象\")"
+}

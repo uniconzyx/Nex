@@ -1,0 +1,8 @@
+{
+  "title": "成员重排减少填充（char-int-char-short vs int-short-char-char）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "Misordered: 12\nReordered:  8\n",
+  "code": "#include <stdio.h>\n\nstruct Misordered { char c1; int i; char c2; short s; };\nstruct Reordered  { int i; short s; char c1; char c2; };\n\nint main(void) {\n    printf(\"Misordered: %zu\\n\", sizeof(struct Misordered));\n    printf(\"Reordered:  %zu\\n\", sizeof(struct Reordered));\n    return 0;\n}"
+}

@@ -1,0 +1,10 @@
+{
+  "title": "标题层级与文档大纲（h1-h6 不可跳级）",
+  "code_lang": "html",
+  "code_std": "html5",
+  "stdin": "",
+  "expected_output": "文档大纲：\n1. 站点名 (h1)\n   1.1 章节一 (h2)\n       1.1.1 小节 1.1 (h3)\n       1.1.2 小节 1.2 (h3)\n   1.2 章节二 (h2)\n说明：h 标签表达层级而非字号；需要大号文字用 CSS，不可用 h1 代替。跳级（h2 直接到 h4）会让辅助技术的大纲断裂。",
+  "code": "<!DOCTYPE html>\n<html lang=\"zh-CN\">\n<body>\n  <h1>站点名</h1>\n  <section>\n    <h2>章节一</h2>\n    <h3>小节 1.1</h3>\n    <h3>小节 1.2</h3>\n  </section>\n  <section>\n    <h2>章节二</h2>\n  </section>\n</body>\n</html>",
+  "_verified": "false",
+  "_verify_note": "HTML/CSS 渲染行为，本地无浏览器环境，输出为按规范的推理说明"
+}

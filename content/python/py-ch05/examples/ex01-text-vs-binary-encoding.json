@@ -1,0 +1,8 @@
+{
+  "title": "文本模式 vs 二进制模式：字符数与字节数",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "字符数          = 5\nutf-8 字节数    = 9\ngbk   字节数    = 7\n逐字符 utf-8 字节数 = [3, 3, 1, 1, 1]\n\n对齐切片（按字符边界切）:\n  b[0:3]  = e4b8ad -> '中'\n  b[3:6]  = e69687 -> '文'\n\n错位切片（字节下标落在多字节字符中间）:\n  b[1:4] = b8ade6 -> UnicodeDecodeError: invalid start byte\n  b[2:6] = ade69687 -> UnicodeDecodeError: invalid start byte\n\n结论: 文本文件必须整体读写或按「字符数」定位; 按字节偏移切会截断多字节字符",
+  "code": "s = \"中文abc\"\nb = s.encode(\"utf-8\")\n\nprint(\"字符数          =\", len(s))\nprint(\"utf-8 字节数    =\", len(b))\nprint(\"gbk   字节数    =\", len(s.encode(\"gbk\")))\nprint(\"逐字符 utf-8 字节数 =\", [len(c.encode(\"utf-8\")) for c in s])\nprint()\n\nprint(\"对齐切片（按字符边界切）:\")\nprint(\"  b[0:3]  =\", b[0:3].hex(), \"->\", repr(b[0:3].decode(\"utf-8\")))\nprint(\"  b[3:6]  =\", b[3:6].hex(), \"->\", repr(b[3:6].decode(\"utf-8\")))\nprint()\n\nprint(\"错位切片（字节下标落在多字节字符中间）:\")\nfor lo, hi in ((1, 4), (2, 6)):\n    try:\n        print(\"  b[%d:%d].decode() = %r\" % (lo, hi, b[lo:hi].decode(\"utf-8\")))\n    except UnicodeDecodeError as e:\n        print(\"  b[%d:%d] = %s -> UnicodeDecodeError: %s\"\n              % (lo, hi, b[lo:hi].hex(), e.reason))\nprint()\nprint(\"结论: 文本文件必须整体读写或按「字符数」定位; 按字节偏移切会截断多字节字符\")"
+}

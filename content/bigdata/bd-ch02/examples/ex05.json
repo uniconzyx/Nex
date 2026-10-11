@@ -1,0 +1,8 @@
+{
+  "title": "Reduce 聚合：按 key 把 [1,1,...] 求和",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "bigdata\t2\nhello\t3\nof\t1\nworld\t3",
+  "code": "\nshuffled = {\n    \"hello\": [1,1,1],\n    \"world\": [1,1,1],\n    \"bigdata\": [1,1],\n    \"of\": [1],\n}\nfor k in sorted(shuffled):\n    s = sum(shuffled[k])\n    print(f\"{k}\t{s}\")\n"
+}

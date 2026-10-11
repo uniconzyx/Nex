@@ -1,0 +1,8 @@
+{
+  "title": "xargs 与 find -exec 的操作计数差异",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "处理 1000 个文件，各写法创建的进程数：\n  find -exec cmd {} \\;        : 1000 进程\n  find -exec cmd {} +         : 20 进程\n  find -print0 | xargs -0 cmd : 20 进程\n\n  批量相比逐文件：进程数降到 1/50，约 50x 更少进程创建\n\n结论：-exec \\; 最慢；-exec + / xargs 批量，进程数约 ceil(N/每批上限)；\n含空格文件名必须用 -print0 | xargs -0（NUL 分隔）",
+  "code": "# 模拟 xargs / find -exec 的操作计数差异（确定性）\nN = 1000\nARG_MAX_BATCH = 50   # 每批上限（示意）\n\nexec_semicolon = N\nexec_plus = (N + ARG_MAX_BATCH - 1) // ARG_MAX_BATCH\nxargs_default = exec_plus\n\nprint(f\"处理 {N} 个文件，各写法创建的进程数：\")\nprint(\"  find -exec cmd {} \\;        : \" + str(exec_semicolon) + \" 进程\")\nprint(\"  find -exec cmd {} +         : \" + str(exec_plus) + \" 进程\")\nprint(\"  find -print0 | xargs -0 cmd : \" + str(xargs_default) + \" 进程\")\nprint()\nspeedup = exec_semicolon / exec_plus\nprint(f\"  批量相比逐文件：进程数降到 1/{ARG_MAX_BATCH}，约 {speedup:.0f}x 更少进程创建\")\nprint()\nprint(\"结论：-exec \\\\; 最慢；-exec + / xargs 批量，进程数约 ceil(N/每批上限)；\")\nprint(\"含空格文件名必须用 -print0 | xargs -0（NUL 分隔）\")\n"
+}

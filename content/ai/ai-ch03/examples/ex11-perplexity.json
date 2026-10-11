@@ -1,0 +1,8 @@
+{
+  "title": "困惑度 PPL 与交叉熵 CE 的换算验证",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "CE(按真实分布): 0.9163\nPPL = exp(CE): 2.5\nPPL == 1/q_true: 2.5\nPPL 等于真实概率倒数: True\n均匀预测 CE: 1.6094  PPL: 5.0  应=5: True\n",
+  "code": "import numpy as np\nrng = np.random.default_rng(42)\np_true = np.array([1.0, 0, 0, 0, 0])\nq = np.array([0.4, 0.3, 0.2, 0.07, 0.03])\nce = -np.sum(p_true * np.log(q + 1e-12))\nppl = np.exp(ce)\nprint(\"CE(按真实分布):\", round(float(ce), 4))\nprint(\"PPL = exp(CE):\", round(float(ppl), 4))\nprint(\"PPL == 1/q_true:\", round(float(1.0 / q[0]), 4))\nprint(\"PPL 等于真实概率倒数:\", bool(abs(ppl - 1.0 / q[0]) < 1e-9))\nqv = np.ones(5) / 5\ncev = -np.log(1.0 / 5)\nprint(\"均匀预测 CE:\", round(float(cev), 4), \" PPL:\", round(float(np.exp(cev)), 4), \" 应=5:\", round(float(np.exp(cev)), 4) == 5.0)\n"
+}

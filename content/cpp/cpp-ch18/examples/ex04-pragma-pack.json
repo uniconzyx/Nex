@@ -1,0 +1,8 @@
+{
+  "title": "#pragma pack(1) 与协议/二进制布局（实测 sizeof 变化）",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "packed sizeof=13 native sizeof=16\npacked offsets type=0 len=1 value=5\n紧凑布局(1+4+8): 1",
+  "code": "#include <cstdio>\n#include <cstddef>\n\n#pragma pack(push, 1)          // 关闭填充：成员紧挨着排\nstruct WireMsg { char type; int len; double value; };\n#pragma pack(pop)              // 恢复默认对齐\n\nstruct NativeMsg { char type; int len; double value; };\n\nint main() {\n    printf(\"packed sizeof=%zu native sizeof=%zu\\n\",\n           sizeof(WireMsg), sizeof(NativeMsg));\n    printf(\"packed offsets type=%zu len=%zu value=%zu\\n\",\n           offsetof(WireMsg, type), offsetof(WireMsg, len), offsetof(WireMsg, value));\n    printf(\"紧凑布局(1+4+8): %d\\n\", (int)(sizeof(WireMsg) == 13));\n    // 注意：pack 用于按字节对齐的网络/磁盘协议；直接对 Packed 取成员地址可能未对齐\n    return 0;\n}"
+}

@@ -1,0 +1,14 @@
+{
+  "meta": { "chapter": "cpp-ch15", "category": "system" },
+  "items": [
+    {
+      "title": "用命名空间与模块化组织一个多模块工具库",
+      "requirement_md": "设计并实现一个名为 `toolbox` 的库，分三层：`core`（基础类型/错误码）、`algo`（算法工具）、`io`（读写辅助）。要求：\n1. 用命名空间分层，对外统一以 `toolbox::` 访问；\n2. 用 `inline namespace v1` 作为默认版本，保留一个 `v0` 旧接口可显式调用，演示版本化；\n3. 内部实现放在匿名命名空间或私有命名空间，不污染外部；\n4. 写一个 `main.cpp` 演示：跨层调用、版本切换、内部符号不可见；\n5. （加分）把其中一个子模块改写成 C++20 `export module toolbox.algo;`，对比头文件方式。",
+      "tasks": [
+        { "title": "分层命名空间与 inline 版本", "verification": { "type": "test", "desc": "toolbox::xxx 默认命中 v1；toolbox::v0::xxx 仍可调用" } },
+        { "title": "内部实现私有化", "verification": { "type": "manual", "desc": "内部辅助符号在库外不可访问（编译期不可见）" } },
+        { "title": "（加分）模块迁移", "verification": { "type": "manual", "desc": "algo 子模块可用 import toolbox.algo; 替代 #include，且宏不泄漏" } }
+      ]
+    }
+  ]
+}

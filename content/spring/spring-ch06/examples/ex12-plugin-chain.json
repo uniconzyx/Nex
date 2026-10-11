@@ -1,0 +1,8 @@
+{
+  "title": "ex12-plugin-chain",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "  [before] 日志\n  [before] 分页\n  [before] 权限\n  [target] 执行 SQL\n  [after ] 权限\n  [after ] 分页\n  [after ] 日志",
+  "code": "class Plugin:\n    def __init__(self, name):\n        self.name = name\n    def intercept(self, chain):\n        print(\"  [before] \" + self.name)\n        r = chain.proceed()\n        print(\"  [after ] \" + self.name)\n        return r\n\nclass Chain:\n    def __init__(self, plugins):\n        self.plugins = plugins\n        self.idx = 0\n    def proceed(self):\n        if self.idx < len(self.plugins):\n            p = self.plugins[self.idx]; self.idx += 1\n            return p.intercept(self)\n        print(\"  [target] 执行 SQL\")\n        return \"result\"\n\nChain([Plugin(\"日志\"), Plugin(\"分页\"), Plugin(\"权限\")]).proceed()\n"
+}

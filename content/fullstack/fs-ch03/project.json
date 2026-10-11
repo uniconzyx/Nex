@@ -1,0 +1,35 @@
+{
+  "meta": {
+    "chapter": "fs-ch03",
+    "category": "basic"
+  },
+  "items": [
+    {
+      "title": "类型侦探 + 事件委托小练习（可纯 Node/Python 验证）",
+      "requirement_md": "用 JavaScript 实现一个「类型侦探」与「事件委托」两个小模块，覆盖本章核心考点：\n1. `isPlainObject(x)`：正确区分 `null` 与对象、对象与数组函数（用 `typeof` + `Array.isArray` + `null` 特判，禁用 `__proto__` 比较）。\n2. `safeEqual(a, b)`：用 `Object.is` 实现，并额外返回 `(a, b)` 是否为同值（含 NaN、`±0` 处理）的布尔。\n3. `debounce(fn, delay)`：见 exercises，保留 this 与参数。\n4. `createEventBus()`：用 Python 或 JS 模拟 DOM 事件流的**捕获→目标→冒泡**三阶段，并实现一个**事件委托**：在父节点上监听，仅当目标 `tag === 'li'` 时处理（可参考 examples 的 Python 模拟）。\n把以上写成可在 Node 运行（或 Python 模拟）的最小可验证脚本，并以 `console.log`/`print` 输出断言结果。",
+      "tasks": [
+        {
+          "title": "实现类型侦探",
+          "verification": {
+            "type": "test",
+            "desc": "isPlainObject(null)=false、isPlainObject({})=true、isPlainObject([])=false；safeEqual(NaN,NaN)=true、safeEqual(+0,-0)=false"
+          }
+        },
+        {
+          "title": "实现防抖",
+          "verification": {
+            "type": "test",
+            "desc": "连续调用只在静默 delay 后执行一次，且 this 与参数正确"
+          }
+        },
+        {
+          "title": "事件流模拟与委托",
+          "verification": {
+            "type": "manual",
+            "desc": "捕获→目标→冒泡顺序正确；父节点委托仅处理 li 目标，stopPropagation 能阻断后续阶段"
+          }
+        }
+      ]
+    }
+  ]
+}

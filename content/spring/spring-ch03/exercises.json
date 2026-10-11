@@ -1,0 +1,104 @@
+{
+  "meta": {
+    "chapter": "spring-ch03",
+    "note": "基础题考察 JDK/CGLIB 原理、通知顺序、this/target、自调用失效；算法题考察责任链/代理容器的工程实现与装饰器式增强（仅存元数据+链接，符合合规红线）。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "JDK 动态代理的实现前提",
+      "content_md": "关于 JDK 动态代理 `Proxy.newProxyInstance`，下列说法正确的是？",
+      "options": [
+        { "key": "A", "text": "可以代理任意普通类（无需接口）" },
+        { "key": "B", "text": "必须传入接口数组，生成的代理类实现这些接口" },
+        { "key": "C", "text": "生成的代理类 extends 业务类以重写方法" },
+        { "key": "D", "text": "InvocationHandler.invoke 的第一个参数是被代理的真实对象" }
+      ],
+      "answer": { "correct": ["B"], "output": "" },
+      "explanation": "JDK 动态代理要求传入接口数组，生成的 $Proxy 实现这些接口；因已 extends Proxy 受单继承限制，无法再继承业务类；invoke 第一个参数是代理对象而非 target。",
+      "tags": ["jdk-proxy", "interface"],
+      "source": "self",
+      "source_ref": "本章自命题 / 示例 ex01、ex06"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "通知嵌套执行顺序输出",
+      "content_md": "某切点同时配置 @Around、@Before、目标方法、@After、@AfterReturning。下列输出哪个符合 Spring 执行顺序？\n```text\n[Around] start\n  [Before] before method\n    [Target] businessMethod()\n  [After] after method (always)\n  [AfterReturning] method returned normally\n[Around] end\n```",
+      "answer": { "correct": [], "output": "[Around] start\n  [Before] before method\n    [Target] businessMethod()\n  [After] after method (always)\n  [AfterReturning] method returned normally\n[Around] end" },
+      "explanation": "顺序为 Around 进入 → Before → 目标 → After(始终) → AfterReturning(正常) → Around 退出；@After 像 finally 无论成败都执行。",
+      "tags": ["advice-order", "around", "after"],
+      "source": "self",
+      "source_ref": "本章自命题 / 示例 ex04、ex11"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "CGLIB 代理的限制",
+      "content_md": "关于 CGLIB 子类代理，下列说法准确的是？",
+      "options": [
+        { "key": "A", "text": "CGLIB 通过实现接口生成代理，与 JDK 动态代理原理相同" },
+        { "key": "B", "text": "CGLIB 无法代理 final 类与 final/private 方法（无法继承/重写）" },
+        { "key": "C", "text": "CGLIB 代理的目标类必须实现至少一个接口" },
+        { "key": "D", "text": "CGLIB 生成的代理类调用目标方法时走反射 method.invoke" }
+      ],
+      "answer": { "correct": ["B"], "output": "" },
+      "explanation": "CGLIB 通过继承目标类、重写方法实现；final 类不可继承、final/private 方法不可重写，故无法代理；它不要求接口，且方法为直接调用（非反射）。",
+      "tags": ["cglib", "final", "boundary"],
+      "source": "book",
+      "source_ref": "《Spring 实战（第6版）》第4章"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "修复同类自调用导致事务失效",
+      "content_md": "下面 `OrderService` 的 `create()` 内部 `this.pay()` 调用使 `pay()` 上的 `@Transactional` 不生效（自调用绕过代理）。请修正。\n```java\n@Service\npublic class OrderService {\n    @Transactional public void create() { this.pay(); }\n    @Transactional public void pay() { /* 扣款 */ }\n}\n```",
+      "answer": {
+        "correct": [],
+        "output": "",
+        "reference_code": "@Service\npublic class OrderService {\n    @Autowired OrderService self; // 自注入拿到代理\n    @Transactional public void create() { self.pay(); }\n    @Transactional public void pay() { /* 扣款 */ }\n}\n// 或更优：把 pay() 抽到独立的 PaymentService 注入调用"
+      },
+      "explanation": "自调用走 this（真实对象）绕过代理，事务不生效；用自注入/拆分 Bean 让调用经过代理即可恢复增强。",
+      "tags": ["self-invocation", "transaction", "proxy"],
+      "source": "self",
+      "source_ref": "本章自命题 / 示例 ex09"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "github",
+      "difficulty": "hard",
+      "title": "从零实现迷你 AOP 容器（JDK 代理 + 责任链）",
+      "content_md": "参考 Spring 思路，用纯 JDK 实现迷你 AOP：定义 Advice 接口（before/after），用 JDK 动态代理 + InvocationHandler 把多个 Advice 串成责任链，支持按方法名（简化切点）过滤是否织入。等价于把「拦截器链」工程化落地。",
+      "answer": { "correct": [], "output": "", "reference_code": "见参考仓库的最小实现（Proxy + InvocationHandler + List<Advice> 责任链 + 切点过滤）" },
+      "explanation": "综合考察 JDK 代理、反射委派、责任链顺序与切点匹配，是本章知识的工程落地。",
+      "tags": ["aop", "chain", "proxy"],
+      "source": "github",
+      "source_ref": "spring-projects/spring-framework（参考实现）",
+      "external_url": "https://github.com/spring-projects/spring-framework"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "mid",
+      "title": "最小栈（装饰器式增强：在基础结构上叠加行为，与代理/Advice 思想同构）",
+      "content_md": "设计一个支持 push/pop/top 且在常数时间取最小值的栈。其「在基础栈上叠加 min 追踪」的结构，与 AOP 在目标对象上叠加通知（Advice）是同一「装饰/代理增强」思想。",
+      "answer": { "correct": [], "output": "", "reference_code": "维护辅助最小栈（或每元素携带当前最小值），push/pop 同步维护" },
+      "explanation": "装饰器/代理增强思想：基础结构只管存取，附加行为（min 追踪 / 日志 / 事务）在外层透明叠加；与本章 Advice 包裹目标方法的模式同构。",
+      "tags": ["decorator", "stack", "proxy-analogy"],
+      "source": "leetcode",
+      "source_ref": "LeetCode 155（min-stack）",
+      "external_url": "https://leetcode.cn/problems/min-stack/"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "title": "setw/setfill 对齐表格输出",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "Item---------Qty\napple---------12\nbanana---------5",
+  "code": "#include <iostream>\n#include <iomanip>\nint main() {\n    std::cout << std::left << std::setfill('-') << std::setw(10) << \"Item\" << std::right << std::setw(6) << \"Qty\" << '\\n';\n    std::cout << std::left << std::setw(10) << \"apple\" << std::right << std::setw(6) << 12 << '\\n';\n    std::cout << std::left << std::setw(10) << \"banana\" << std::right << std::setw(6) << 5 << '\\n';\n}"
+}

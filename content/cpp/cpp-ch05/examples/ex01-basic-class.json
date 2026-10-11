@@ -1,0 +1,8 @@
+{
+  "title": "基本类定义与成员访问",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "3 25",
+  "code": "#include <iostream>\n\nclass Point {\npublic:\n    double x = 0, y = 0;\n    double norm2() const { return x * x + y * y; }\n};\n\nint main() {\n    Point p{3, 4};\n    std::cout << p.x << ' ' << p.norm2();\n}"
+}

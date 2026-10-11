@@ -1,0 +1,8 @@
+{
+  "title": "递归深度探测：为什么深度不可控时必须改显式栈",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "递归 1000 层：max_depth = 1000\n每个栈帧含返回地址+保存寄存器+局部变量，约几十到几百字节\nLinux 默认栈 8MB 约可支撑几万层；Windows 默认约 1MB，更浅\n深度由用户输入决定时，必须改显式栈（堆上，可判空可限深）",
+  "code": "#include <stdio.h>\n\nstatic int depth = 0, max_depth = 0;\n\nstatic void recurse(int limit) {\n    depth++;\n    if (depth > max_depth) max_depth = depth;\n    if (depth < limit) recurse(limit);\n    depth--;\n}\n\nint main(void) {\n    recurse(1000);\n    printf(\"递归 1000 层：max_depth = %d\\n\", max_depth);\n    printf(\"每个栈帧含返回地址+保存寄存器+局部变量，约几十到几百字节\\n\");\n    printf(\"Linux 默认栈 8MB 约可支撑几万层；Windows 默认约 1MB，更浅\\n\");\n    printf(\"深度由用户输入决定时，必须改显式栈（堆上，可判空可限深）\\n\");\n    return 0;\n}"
+}

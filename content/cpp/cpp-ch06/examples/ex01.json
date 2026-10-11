@@ -1,0 +1,8 @@
+{
+  "title": "公有/保护/私有继承下的成员可见性",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "1 2 3",
+  "code": "#include <iostream>\nclass Base {\npublic:    int x = 1;\nprotected: int y = 2;\nprivate:   int z = 3;   // 派生类不可访问\n};\nclass Derived : public Base {\npublic:\n    int getX() const { return x; }\n    int getY() const { return y; }\n    int sum() const { return x + y; }   // OK：public/protected 可见，private(z) 不可见\n};\nint main() {\n    Derived d;\n    std::cout << d.getX() << ' ' << d.getY() << ' ' << d.sum();\n}\n"
+}

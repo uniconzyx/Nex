@@ -1,0 +1,8 @@
+{
+  "title": "ex07-crud-sql-gen",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "INSERT INTO t_user(user_name, age) VALUES(?, ?)\nSELECT * FROM t_user WHERE id = ?\nUPDATE t_user SET user_name = ?, age = ? WHERE id = ?\nDELETE FROM t_user WHERE id = ?",
+  "code": "def gen_insert(table, fields):\n    return \"INSERT INTO \" + table + \"(\" + \", \".join(fields) + \") VALUES(\" + \", \".join(\"?\" for _ in fields) + \")\"\n\ndef gen_select(table, pk):\n    return \"SELECT * FROM \" + table + \" WHERE \" + pk + \" = ?\"\n\ndef gen_update(table, fields, pk):\n    return \"UPDATE \" + table + \" SET \" + \", \".join(f + \" = ?\" for f in fields) + \" WHERE \" + pk + \" = ?\"\n\ndef gen_delete(table, pk):\n    return \"DELETE FROM \" + table + \" WHERE \" + pk + \" = ?\"\n\nfields = [\"user_name\", \"age\"]\nprint(gen_insert(\"t_user\", fields))\nprint(gen_select(\"t_user\", \"id\"))\nprint(gen_update(\"t_user\", fields, \"id\"))\nprint(gen_delete(\"t_user\", \"id\"))\n"
+}

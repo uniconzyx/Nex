@@ -1,0 +1,8 @@
+{
+  "title": "深拷贝切断对象图：共享子对象不再共享",
+  "code_lang": "python",
+  "code_std": "python3.11",
+  "stdin": "",
+  "expected_output": "shallow copy b sees: {'owner': 'x', 'v': 1}\ndeep copy c independent: {'owner': 'x', 'v': 2} {'owner': 'x', 'v': 1}",
+  "code": "import copy\nshared = {\"owner\": \"x\"}\na = [shared, shared]\nb = copy.copy(a)          # 浅拷贝：两个元素仍指向同一 shared\nc = copy.deepcopy(a)      # 深拷贝：shared 也被复制\na[0][\"v\"] = 1\nprint(\"shallow copy b sees:\", b[0])\nc[0][\"v\"] = 2\nprint(\"deep copy c independent:\", c[0], a[0])"
+}

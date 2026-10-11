@@ -1,0 +1,8 @@
+{
+  "title": "模块接口/实现分离思想（单 TU 模拟）",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "5\n",
+  "code": "#include <iostream>\n\nnamespace math_impl {                 // 模拟「模块内部」：不导出\n    int slow_add(int a, int b) { return a + b; }\n}\n\nnamespace math {                     // 模拟「模块接口」：导出的符号\n    int add(int a, int b) { return math_impl::slow_add(a, b); }\n}\n\nint main() {\n    std::cout << math::add(2, 3) << '\\n';\n}"
+}

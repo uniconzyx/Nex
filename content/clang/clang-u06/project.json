@@ -1,0 +1,56 @@
+{
+  "meta": {
+    "chapter_id": "clang-u06",
+    "title": "Makefile 与构建 · 综合项目"
+  },
+  "items": [
+    {
+      "title": "用 Makefile 组织多文件 C 工程：双构建模式 + 自动依赖 + 可验证的增量正确性",
+      "requirement_md": "目标：交付一个**能自证正确性**的构建系统。重点不是功能多，而是「增量构建是正确的」这件事可以被**验证**。\n\n**工程结构**\n```\nproj/\n├── include/app.h        # 公开接口（含包含守卫）\n├── src/main.c\n├── src/util.c\n├── src/log.c\n├── Makefile\n└── build/               # 所有中间产物与最终产物都落在这里\n```\n\n**要求**\n1. **目录隔离**：源码目录保持干净，全部产物在 `build/` 下（含 `.o` 与 `.d`）。\n2. **模式规则**：`.c → .o` 用 `%.o: %.c`，新增源文件只需改一处 `SRCS`。\n3. **自动依赖**：`-MMD -MP` + `-include $(DEPS)`；**必须能通过实验证明**「只改 `include/app.h`，只有包含它的 `.o` 被重编」。\n4. **双构建模式**：`make debug`（`-O0 -g`）与 `make release`（`-O2 -DNDEBUG`，默认）；两模式共用一份 recipe，只靠变量切换 `CFLAGS`。\n5. **`.PHONY` 完整**：`all` / `debug` / `release` / `clean` / `run` / `status` 全部声明。\n6. **`status` 目标**：用 `$(wildcard)` 打印当前产物清单，供增量实验取证。\n7. **`clean` 彻底**：`rm -rf build`，不留任何中间产物。",
+      "tasks": [
+        {
+          "title": "T1 搭出工程骨架与模式规则",
+          "verification": {
+            "type": "output",
+            "desc": "`make` 一次成功；`build/` 下同时出现 `main.o util.o log.o app`；源码目录内无任何新增文件。"
+          }
+        },
+        {
+          "title": "T2 验证增量构建的正确性（本项目的核心任务）",
+          "verification": {
+            "type": "output",
+            "desc": "① 用 `make status` 记录产物；② 只 `touch include/app.h`；③ 再次 `make`，观察哪些 `.o` 被重编——必须**只重编包含该头文件的翻译单元**，并把两次 `make` 的实际输出粘贴进 README 作为证据。"
+          }
+        },
+        {
+          "title": "T3 对照实验：拿掉 -MMD 看会发生什么",
+          "verification": {
+            "type": "output",
+            "desc": "临时移除 `-MMD -MP` 与 `-include`，重做 T2 的实验，记录「改头文件后 make 判定 up to date」的证据，并解释为什么链接仍然成功、程序行为却是旧的。这是本项目最需要亲手复现一次的静默错误。"
+          }
+        },
+        {
+          "title": "T4 触发并修复 missing separator",
+          "verification": {
+            "type": "output",
+            "desc": "把某条 recipe 的 Tab 改成 4 个空格，记录 `missing separator` 的完整报错原文（含行号），然后用 `cat -A` 证明 Tab 显示为 `^I`。"
+          }
+        },
+        {
+          "title": "T5 验证 .PHONY 的必要性",
+          "verification": {
+            "type": "output",
+            "desc": "`touch clean` 建一个同名文件，执行 `make clean` 记录「被跳过」的现象；补上 `.PHONY: clean` 后再次执行，证明行为恢复。最后删掉那个多余文件。"
+          }
+        },
+        {
+          "title": "T6 并行构建与规模提升",
+          "verification": {
+            "type": "output",
+            "desc": "把源文件扩到 10 个以上，用 `make -j` 与 `make -j1` 各构建一次，用 `time`（或 shell 计时）对比耗时，并确认两者产物一致（可比较 `size` 输出与运行结果）。若发现并行下偶发失败，记录并定位是哪条依赖缺失。"
+          }
+        }
+      ]
+    }
+  ]
+}

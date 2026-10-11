@@ -1,0 +1,8 @@
+{
+  "title": "取地址与解引用",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "42",
+  "code": "#include <iostream>\n\nint main() {\n    int x = 42;\n    int* p = &x;\n    std::cout << *p;\n}"
+}

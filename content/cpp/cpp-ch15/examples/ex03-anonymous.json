@@ -1,0 +1,8 @@
+{
+  "title": "匿名命名空间（内部链接）",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "secret=7\n",
+  "code": "#include <iostream>\n\nnamespace {\n    int secret = 7;        // 内部链接：仅本翻译单元可见\n}\n\nint main() {\n    std::cout << \"secret=\" << secret << '\\n';\n}"
+}

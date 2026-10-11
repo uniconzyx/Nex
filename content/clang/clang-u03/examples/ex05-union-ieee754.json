@@ -1,0 +1,8 @@
+{
+  "title": "用 memcpy 观察 IEEE 754 位模式（避开 union 活性成员 UB）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "float 1.0 -> 0x3F800000\ndouble -2.0 -> 0xC000000000000000\n",
+  "code": "#include <stdio.h>\n#include <string.h>\n#include <stdint.h>\n\nint main(void) {\n    float f = 1.0f;\n    uint32_t bits;\n    memcpy(&bits, &f, sizeof bits);\n    printf(\"float 1.0 -> 0x%08X\\n\", bits);\n    double d = -2.0;\n    uint64_t dbits;\n    memcpy(&dbits, &d, sizeof dbits);\n    printf(\"double -2.0 -> 0x%016llX\\n\", (unsigned long long)dbits);\n    return 0;\n}"
+}

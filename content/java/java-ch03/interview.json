@@ -1,0 +1,40 @@
+{
+  "meta": { "chapter": "java-ch03" },
+  "items": [
+    {
+      "question": "讲讲 Java 多态的实现原理。invokevirtual 是怎么做动态分派的？",
+      "answer_md": "Java 多态靠实例方法的动态分派实现。编译器把 `obj.method()` 编译成 `invokevirtual`，只记录方法描述符；运行期 JVM 从对象头的 Klass Pointer 取出对象真实类型，在其 vtable（方法表）里按签名查槽位，调用实际类型的实现。因此绑定发生在运行期、依据接收者实际类型，而非变量声明类型（晚绑定）。静态方法、私有方法、构造器、super 调用、final 方法则是静态绑定，直接定位。字段访问 getfield/putfield 按静态类型，不存在分派。",
+      "follow_ups": ["vtable 是什么时候构建的？", "为什么 final 方法更快？", "字段为什么没有多态？"],
+      "difficulty": "hard",
+      "company_tags": ["通用", "阿里", "字节", "腾讯"]
+    },
+    {
+      "question": "接口和抽象类有什么区别？什么时候用接口，什么时候用抽象类？（可从字节码角度说）",
+      "answer_md": "语义上：抽象类表达 is-a 的共享基类，可含实例字段、构造器、具体与抽象方法；接口表达 capability 契约，字段是 public static final 常量、无构造器、Java8+ 有 default/static 方法。字节码上：抽象类方法调用是 invokevirtual（走 vtable），接口方法调用是 invokeinterface（走 itable 查找），后者多一步接口表定位。工程上：要复用状态+行为、子类型紧密相关用抽象类；要定义能力让很多不相关类实现、需要多实现用接口。经典模式是\"接口 + 薄抽象基类\"。",
+      "follow_ups": ["default 方法冲突怎么解决？", "为什么类只能单继承接口可以多实现？", "接口里的 static 方法能被实现类继承吗？"],
+      "difficulty": "mid",
+      "company_tags": ["通用", "美团", "京东"]
+    },
+    {
+      "question": "方法重写要满足哪些约束？为什么不能降低访问权限？",
+      "answer_md": "重写要求方法签名相同（相同名称、参数列表），返回类型可协变（子类返回子类类型），抛出的受检异常不大于父类（可更少或没有），访问权限不小于父类（不能 public→protected）。不能降低访问权限是因为 Liskov 替换：父类对象可被任意调用方以 public 调用，若子类缩成 protected，则把子类当父类用的代码会编译/运行失败，破坏契约。",
+      "follow_ups": ["协变返回类型是什么？", "为什么 throws 不能更宽？", "@Override 注解有什么用？"],
+      "difficulty": "mid",
+      "company_tags": ["通用", "百度"]
+    },
+    {
+      "question": "为什么 Java 是单继承？接口为什么可以多实现？default 方法会不会导致菱形问题？",
+      "answer_md": "类携带状态（实例字段），若允许多继承，同一份基类状态会在继承图中出现多次（菱形歧义：字段该有几份、名字冲突如何解）。Java 只允许单继承类以彻底规避。接口传统上无状态（Java8 前只有抽象方法），多实现只是多份契约，安全；Java 引入 default 方法后重新带入\"行为继承\"，因此规定：类实现多个接口且有同签名 default 方法时**编译报错**，必须显式重写并用 X.super.method() 指定，把歧义解决上推到编译期，避免 C++ 式隐式规则。",
+      "follow_ups": ["default 方法能访问实例字段吗？", "抽象类能被实例化吗？", "组合相比继承有什么优势？"],
+      "difficulty": "mid",
+      "company_tags": ["通用", "蚂蚁"]
+    },
+    {
+      "question": "字段有没有多态？向上转型后访问字段看到的是哪个？",
+      "answer_md": "没有。字段不参与动态分派，访问按编译期静态类型解析。例如 `Base b = new Derived(); b.x` 取的是 Base 里的 x，即使 Derived 隐藏了同名 x。这与方法重写（运行期按实际类型）完全不同。若需要\"多态\"行为，应定义 getter/方法而非依赖字段。",
+      "follow_ups": ["隐藏（hide）和重写（override）有什么本质区别？", "如何避免字段隐藏造成的困惑？"],
+      "difficulty": "easy",
+      "company_tags": ["通用", "网易"]
+    }
+  ]
+}

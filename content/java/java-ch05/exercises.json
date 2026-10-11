@@ -1,0 +1,228 @@
+{
+  "meta": {
+    "chapter": "java-ch05",
+    "note": "7 题，基础题 6 + 算法题 1；算法题来自 LeetCode 仅存元数据与链接，不搬运题面。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "关于 Java 异常体系（受检/非受检）",
+      "content_md": "关于 Java 异常体系，选出**正确**的描述。",
+      "options": [
+        {
+          "key": "A",
+          "text": "所有 Exception 都是受检异常，必须 try/catch 或 throws"
+        },
+        {
+          "key": "B",
+          "text": "Error 与 RuntimeException 及其子类是非受检异常；其余 Exception 是受检异常"
+        },
+        {
+          "key": "C",
+          "text": "非受检异常也必须用 throws 声明"
+        },
+        {
+          "key": "D",
+          "text": "受检异常在运行时才被检查"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "Throwable 分两支：Error（严重系统错误，非受检）与 Exception。Exception 中 RuntimeException 及其子类（如 NPE、IllegalArgumentException）是非受检的；其余 Exception（如 IOException）是受检的，编译器强制调用方处理。受检检查在编译期完成。",
+      "tags": [
+        "exception",
+        "checked"
+      ],
+      "source": "book",
+      "source_ref": "《Java 核心技术 卷I》第 7 章 异常"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "关于泛型类型擦除",
+      "content_md": "关于 Java 泛型擦除，选出**正确**的描述。",
+      "options": [
+        {
+          "key": "A",
+          "text": "运行时 List<String> 与 List<Integer> 是不同 Class 对象"
+        },
+        {
+          "key": "B",
+          "text": "泛型信息在运行时完整保留，可用反射获取类型参数"
+        },
+        {
+          "key": "C",
+          "text": "编译后泛型类型参数被擦除为边界（默认 Object），二者运行时是同一 Class 对象"
+        },
+        {
+          "key": "D",
+          "text": "可以安全创建泛型数组 new T[10]"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "C"
+        ]
+      },
+      "explanation": "Java 泛型是编译期语法糖（擦拭法），运行时类型参数被擦除为上限（无界时 Object）。故 List<String>.getClass() == List<Integer>.getClass()。因此不能 new T[]、不能 instanceof T、不能重载仅泛型不同的方法。",
+      "tags": [
+        "generics",
+        "erasure"
+      ],
+      "source": "book",
+      "source_ref": "《Java 核心技术 卷I》第 8 章 泛型程序设计"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "读代码写输出（finally 与 return）",
+      "content_md": "```java\npublic class Main {\n    static int f() { try { return 1; } finally { return 2; } }\n    public static void main(String[] args) { System.out.println(f()); }\n}\n```",
+      "answer": {
+        "output": "2"
+      },
+      "explanation": "finally 块在方法返回前必然执行；当 try 与 finally 都有 return 时，finally 的 return 会覆盖 try 的返回值（字节码层面 try 的返回值先暂存到局部变量，finally 的 return 重新设置返回值）。应避免在 finally 中 return。",
+      "tags": [
+        "exception",
+        "finally"
+      ],
+      "source": "book",
+      "source_ref": "CppMind java-ch05 concept 03 / examples/ex03-finally-return.json"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "修复泛型方法参数导致的编译错误（PECS 缺失）",
+      "content_md": "以下代码无法通过编译：`List<Integer>` 不能赋值给 `List<Number>`。请修改方法签名使其能接受任意 Number 子类型的列表：\n\n```java\nimport java.util.*;\npublic class Main {\n    static void printAll(List<Number> l) {\n        for (Number n : l) System.out.print(n + \" \");\n    }\n    public static void main(String[] args) {\n        List<Integer> ints = List.of(1, 2, 3);\n        printAll(ints); // 编译错误\n    }\n}\n```",
+      "answer": {
+        "reference_code": "import java.util.*;\npublic class Main {\n    static void printAll(List<? extends Number> l) {\n        for (Number n : l) System.out.print(n + \" \");\n    }\n    public static void main(String[] args) {\n        List<Integer> ints = List.of(1, 2, 3);\n        printAll(ints);\n    }\n}"
+      },
+      "explanation": "泛型不可协变：`List<Integer>` 不是 `List<Number>` 的子类型。用上界通配符 `List<? extends Number>`（PECS 中的生产者 extends）即可安全读取 Number。若要写入则应使用 `List<? super Integer>`。",
+      "tags": [
+        "generics",
+        "pecs",
+        "wildcard"
+      ],
+      "source": "self",
+      "source_ref": "CppMind java-ch05 concept 05 / examples/ex05-pecs.json"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "difficulty": "easy",
+      "title": "LeetCode 20 · 有效的括号",
+      "content_md": "判断字符串中的括号是否匹配。封装为可编译类并在 `main` 中自测。题面详见原题链接，本题不搬运题面。",
+      "answer": {
+        "reference_code": "import java.util.*;\npublic class Main {\n    public static boolean isValid(String s) {\n        Map<Character, Character> closeToOpen = Map.of(')', '(', ']', '[', '}', '{');\n        Deque<Character> st = new ArrayDeque<>();\n        for (char c : s.toCharArray()) {\n            if (closeToOpen.containsKey(c)) {\n                if (st.isEmpty() || st.pop() != closeToOpen.get(c)) return false;\n            } else {\n                st.push(c);\n            }\n        }\n        return st.isEmpty();\n    }\n    public static void main(String[] args) {\n        System.out.println(isValid(\"()[]{}\"));\n        System.out.println(isValid(\"(]\"));\n    }\n}"
+      },
+      "explanation": "用 ArrayDeque 作栈：遇左括号入栈，遇右括号检查栈顶是否匹配。这里同时用到集合框架（Deque）与异常无关但属本章工程实践。注意 Map.of 创建不可变映射。",
+      "tags": [
+        "stack",
+        "string",
+        "deque"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 20（valid-parentheses）",
+      "external_url": "https://leetcode.cn/problems/valid-parentheses/",
+      "time_limit_ms": 2000,
+      "memory_limit_mb": 256,
+      "test_cases": [
+        {
+          "input": "()[]{} / (]",
+          "expected_output": "true\nfalse",
+          "is_sample": true
+        }
+      ]
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "关于 try-with-resources 与异常抑制",
+      "content_md": "关于 `try-with-resources`，选出**正确**的描述。",
+      "options": [
+        {
+          "key": "A",
+          "text": "资源必须实现 Closeable"
+        },
+        {
+          "key": "B",
+          "text": "资源在 try 块结束后按声明顺序关闭"
+        },
+        {
+          "key": "C",
+          "text": "资源必须实现 AutoCloseable，按声明逆序关闭；若 try 与 close 都抛异常，原异常优先、close 的异常进入 suppressed"
+        },
+        {
+          "key": "D",
+          "text": "try-with-resources 不支持同时声明多个资源"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "C"
+        ]
+      },
+      "explanation": "资源需实现 AutoCloseable（Closeable 是其子接口）。多个资源按声明逆序关闭，确保后开的先关。若主体异常与 close 异常同时发生，主体的异常被抛出，close 产生的异常通过 Throwable.getSuppressed() 保留，避免丢失。",
+      "tags": [
+        "exception",
+        "try-with-resources",
+        "autocloseable"
+      ],
+      "source": "book",
+      "source_ref": "CppMind java-ch05 concept 02 / examples/ex02-try-with-resources.json"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "hard",
+      "title": "关于泛型擦除与桥接方法（bridge method）",
+      "content_md": "关于泛型擦除与桥接方法，选出**正确**的描述。",
+      "options": [
+        {
+          "key": "A",
+          "text": "子类重写泛型父类的泛型方法不会产生额外方法"
+        },
+        {
+          "key": "B",
+          "text": "为保持多态（覆盖协变），编译器会生成桥接方法，其参数类型为擦除后的边界（如 Object），并标记为 synthetic/bridge"
+        },
+        {
+          "key": "C",
+          "text": "桥接方法能被普通 Java 代码直接调用"
+        },
+        {
+          "key": "D",
+          "text": "桥接方法只在接口中出现"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "泛型父类 Node<T> 的 setData(T) 擦除为 setData(Object)；子类 IntNode 的 setData(Integer) 与擦除后的签名不同，无法构成覆盖。编译器生成桥接方法 setData(Object)（内部转发到 setData(Integer)）以维持多态。桥接方法可被反射看到但普通代码无法直接引用。详见 examples/ex09-bridge-method.json。",
+      "tags": [
+        "generics",
+        "bridge-method",
+        "erasure"
+      ],
+      "source": "book",
+      "source_ref": "《Java 核心技术 卷I》第 8 章 泛型 / 字节码层面"
+    }
+  ]
+}

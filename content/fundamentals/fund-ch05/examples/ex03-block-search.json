@@ -1,0 +1,8 @@
+{
+  "title": "分块查找（索引顺序表）与 ASL 近似",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "分块查找  n=18  分块数=3  key=38\n索引比较次数=2  命中块起点=6  找到=是  位置=9\n近似 ASL(成功)=(s+1)/2+(b+1)/2=5.50  （s=块数=3, 块长 b=6）",
+  "code": "#include <stdio.h>\n\nint main(void) {\n    int a[] = {22, 12, 13, 8, 9, 20, 33, 42, 44, 38, 24, 48, 60, 58, 74, 49, 86, 53};\n    int idx_max[] = {22, 48, 86};\n    int idx_start[] = {0, 6, 12};\n    int blocks = 3;\n    int key = 38;\n    int b = 0;\n    int cmp_idx = 0, start = 0, end = 0;\n    int found = 0, pos = -1;\n    int i;\n    int n = (int)(sizeof(a) / sizeof(a[0]));\n    double asl_succ;\n    const char *res;\n    for (b = 0; b < blocks; b++) {\n        if (key <= idx_max[b]) break;\n    }\n    cmp_idx = b + 1;\n    start = idx_start[b];\n    end = (b + 1 < blocks) ? idx_start[b + 1] : n;\n    for (i = start; i < end; i++) {\n        if (a[i] == key) { found = 1; pos = i; break; }\n    }\n    asl_succ = (double)(blocks + 1) / 2.0 + (double)(n / blocks + 1) / 2.0;\n    res = found ? \"是\" : \"否\";\n    printf(\"分块查找  n=%d  分块数=%d  key=%d\\n\", n, blocks, key);\n    printf(\"索引比较次数=%d  命中块起点=%d  找到=%s  位置=%d\\n\", cmp_idx, start, res, pos);\n    printf(\"近似 ASL(成功)=(s+1)/2+(b+1)/2=%.2f  （s=块数=%d, 块长 b=%d）\\n\", asl_succ, blocks, n / blocks);\n    return 0;\n}\n"
+}

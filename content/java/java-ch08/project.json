@@ -1,0 +1,56 @@
+{
+  "meta": {
+    "chapter": "java-ch08",
+    "note": "1 个工程化项目：为高并发服务制定 JVM 参数与内存问题排查预案。"
+  },
+  "items": [
+    {
+      "title": "订单服务的 JVM 参数基线与内存故障预案",
+      "requirement_md": "假设你负责一个 **4 核 8G 容器**中的订单查询服务（SpringBoot，JDK 21，G1，峰值 QPS 3000，P99 目标 200ms）。服务历史上有过两次事故：一次是容器被 **OOMKilled**（日志干净）；一次是 **Metaspace 持续增长**后 JVM 抛 OOM。请产出一份可落地的方案：\n\n1. **一套完整启动参数**（堆、元空间、GC、日志、堆转储），并对**每一个参数给出理由**；\n2. **容器内存预算表**：说明 8G 容器里堆、元空间、直接内存、线程栈、JVM 自身各占多少，并算出为什么 `-Xmx` 不能设成 7G；\n3. **两次事故的根因假设与验证步骤**，各给出至少 3 条排查命令；\n4. **一套监控告警项**（指标 + 阈值 + 触发后动作）。",
+      "tasks": [
+        {
+          "title": "写出启动参数并逐条注解",
+          "verification": {
+            "type": "manual",
+            "desc": "参数需覆盖 -Xms/-Xmx 相等、MaxMetaspaceSize、UseG1GC、MaxGCPauseMillis、HeapDumpOnOutOfMemoryError+HeapDumpPath、-Xlog:gc* 滚动日志；理由需说明「为何不设 -Xmn」「为何 Xms=Xmx」"
+          }
+        },
+        {
+          "title": "完成容器内存预算表",
+          "verification": {
+            "type": "manual",
+            "desc": "至少含堆、Metaspace、DirectMemory、线程栈（线程数×Xss）、Code Cache、JVM 自身开销；结论需说明堆应留出 ≥ 2G 给非堆，故 8G 容器建议 -Xmx5g 左右"
+          }
+        },
+        {
+          "title": "写出 OOMKilled 事故的排查路径",
+          "verification": {
+            "type": "manual",
+            "desc": "需区分「内核 SIGKILL」与「Java OutOfMemoryError」：前者无 Java 日志，须查 cgroup 限额、容器 RSS、`dmesg`/`kubectl describe` 的 OOMKilled 事件；并给出 -XX:MaxDirectMemorySize、线程数上限、Metaspace 上限的核定方法"
+          }
+        },
+        {
+          "title": "写出 Metaspace OOM 事故的排查路径",
+          "verification": {
+            "type": "manual",
+            "desc": "需包含 `jcmd <pid> VM.metaspace`、`jstat -gcutil`、`jmap -histo:live`、MAT 看 ClassLoader retained heap；根因假设需覆盖动态代理未缓存、ThreadLocal/静态缓存持有 ClassLoader、热部署"
+          }
+        },
+        {
+          "title": "设计监控告警项",
+          "verification": {
+            "type": "manual",
+            "desc": "至少含：Full GC 次数/耗时、老年代使用率、Metaspace 使用量、容器 RSS、线程数、P99；每项给出阈值与触发动作（如 dump 堆、摘流量、扩容）"
+          }
+        },
+        {
+          "title": "压测验证参数有效性",
+          "verification": {
+            "type": "test",
+            "desc": "用 JMeter/wrk 压到峰值 QPS，采集 GC 日志，确认 Full GC 次数为 0 且 P99 < 200ms；若不达标需调整参数并说明取舍"
+          }
+        }
+      ]
+    }
+  ]
+}

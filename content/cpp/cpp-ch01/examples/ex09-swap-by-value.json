@@ -1,0 +1,8 @@
+{
+  "title": "值传递交换不影响调用者",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "1 2",
+  "code": "#include <iostream>\n\nvoid swap_val(int x, int y) { int t = x; x = y; y = t; }\n\nint main() {\n    int a = 1, b = 2;\n    swap_val(a, b);\n    std::cout << a << ' ' << b;\n}"
+}

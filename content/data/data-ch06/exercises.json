@@ -1,0 +1,98 @@
+{
+  "meta": {
+    "chapter": "data-ch06",
+    "subject": "data",
+    "count": 8
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "data-ch06 concept 01",
+      "title": "关于缺失值机制，正确的是",
+      "options": [
+        "MNAR 可以通过数据内部检验识别",
+        "MCAR 下删除行不会引入偏差，只损失样本量",
+        "MAR 意味着缺失与任何变量都无关",
+        "三种机制下填充策略应当完全一致"
+      ],
+      "answer": "B",
+      "explanation": "MCAR（完全随机缺失）下删除只损失样本量、不引入偏差；MAR 是缺失与其他**已观测变量**有关；MNAR 无法用数据自证，只能靠业务判断。填充策略必须随机制调整。"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "data-ch06 concept 02",
+      "title": "下列哪个模型不必须做特征缩放",
+      "options": [
+        "KNN",
+        "SVM",
+        "决策树",
+        "PCA"
+      ],
+      "answer": "C",
+      "explanation": "决策树的分裂只依赖**单个特征上的样本排序**，对单调变换不变，因此缩放不改变分裂结果。KNN/SVM/PCA 都基于距离或内积，量纲会被大尺度特征支配，必须缩放。"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "data-ch06 concept 04",
+      "title": "某二分类任务正类占 1%，模型把所有样本判为负类，准确率、召回率、F1 分别是多少",
+      "answer_md": "设总样本 $n=1000$，正类 10 个，负类 990 个。全判负类：\n\n- $TP=0$，$FN=10$，$FP=0$，$TN=990$\n- 准确率 $=(TP+TN)/n=990/1000=\\mathbf{0.99}$\n- 召回率 $=TP/(TP+FN)=0/10=\\mathbf{0}$\n- 精确率 $=TP/(TP+FP)=0/0$ → 未定义（无正预测），实践约定为 0\n- $F1=2PR/(P+R)=0$\n\n结论：**准确率 99% 但模型毫无价值**。不平衡场景应看召回率 / F1 / PR-AUC。"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "data-ch06 concept 02 / pitfalls 10",
+      "title": "下面的特征工程流程存在数据泄漏，请指出并修正",
+      "code": "mu = X.mean(axis=0)\nsd = X.std(axis=0)\nX_scaled = (X - mu) / sd\nX_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.3)\nmodel.fit(X_train, y_train)",
+      "answer_md": "**泄漏点**：标准化参数 $\\mu,\\sigma$ 是用**全量数据**（含测试集）计算的，测试集的分布信息泄漏进了训练流程，导致评估指标被系统性高估。\n\n**正确顺序**：先划分，再 fit 缩放器；`fit` 只用训练集，`transform` 分别作用于训练集与测试集。\n\n```python\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)\nmu = X_train.mean(axis=0)          # 只用训练集\nsd = X_train.std(axis=0)\nX_train = (X_train - mu) / sd\nX_test  = (X_test - mu) / sd       # 用训练集的 mu/sd\n```\n\n同理适用于缺失值填充、特征选择、目标编码——**一切 `fit` 都只能在训练集上发生**。"
+    },
+    {
+      "type": "coding",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "data-ch06 concept 03",
+      "title": "手写 IQR 异常检测函数，返回上下界与异常掩码",
+      "answer_md": "```python\nimport pandas as pd\n\ndef iqr_outliers(s: pd.Series, k: float = 1.5):\n    q1, q3 = s.quantile(0.25), s.quantile(0.75)\n    iqr = q3 - q1\n    lo, hi = q1 - k * iqr, q3 + k * iqr\n    return lo, hi, (s < lo) | (s > hi)\n```\n\n要点：\n1. $k=1.5$ 是 Tukey 的经验选择，正态下越界概率约 **0.7%**（等价于 $|z|\\approx2.7$）；\n2. IQR 用分位数替代均值/标准差，因此**对偏态与异常值稳健**，这是它优于 Z-score 的原因；\n3. 返回**上下界**而不只是掩码，便于后续做截断或写入报告。"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "leetcode",
+      "source": "leetcode",
+      "source_ref": "LeetCode 53 / 最大子数组和（异常区间检测的 DP 同构）",
+      "external_url": "https://leetcode.cn/problems/maximum-subarray/",
+      "title": "异常区间的最大和检测（关联练习）",
+      "answer_md": "时间序列的**异常区间检测**与「最大子数组和」共享同一个 DP 骨架：\n\n- 把「偏离基线的程度」（如 $x_t-\\bar x$）当作数组元素；\n- 求最大子数组和 → 找到偏离最严重的**连续区间**；\n- 求最小子数组和 → 找到最负向偏离的区间（如系统故障期）。\n\n与「逐点异常检测」（Z-score/IQR）的区别在于：区间方法能识别**持续性的整体偏移**，而逐点方法会把每一点都判为轻度异常从而淹没信号。\n\n（题目仅提供链接与元数据，不搬运题面。）"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "nowcoder",
+      "source": "nowcoder",
+      "source_ref": "牛客网 / 第 K 大与分位数计算",
+      "external_url": "https://www.nowcoder.com/practice/search?q=%E7%AC%ACk%E5%A4%A7",
+      "title": "分位数的高效计算（关联练习）",
+      "answer_md": "分位数是 IQR 异常检测与箱线图的基础，其计算与「第 K 大」同源：\n\n- 排序后取对应位置 → $O(n\\log n)$；\n- 快速选择（quickselect）→ 期望 $O(n)$；\n- 数据流场景用 P² 算法或 t-digest 做近似分位数，单遍 $O(1)$ 空间。\n\n采集/清洗管道常需要流式分位数（内存放不下全量数据），此时**近似算法是唯一选择**——这类「精度换资源」的取舍是数据工程的常态。\n\n（题目仅提供链接与元数据，不搬运题面。）"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "source": "self",
+      "source_ref": "data-ch06 concept 04",
+      "title": "为什么最小化 MAE 得到的是中位数，最小化 RMSE 得到的是均值",
+      "answer_md": "两者对应**不同的损失函数**，其最优常数预测不同：\n\n- **MAE**：$L(c)=\\frac1n\\sum\\lvert y_i-c\\rvert$，对 $c$ 求导得符号项之和为 0，即**正负偏差个数相等** → $c$ 为**中位数**。\n- **MSE/RMSE**：$L(c)=\\frac1n\\sum(y_i-c)^2$，求导得 $\\frac{2}{n}\\sum(y_i-c)=0$ → $c=\\bar y$，即**均值**。\n\n推论（工程含义）：\n1. 右偏目标（金额、时长）下，**用 MAE 优化的模型会偏向低估**（更接近中位数）；\n2. 指标选择即**目标函数选择**，也就决定了你在预测**哪个条件统计量**；\n3. 业务上要「平均消耗」就用 RMSE 系，要「典型值」就用 MAE 系——两者不可混报。"
+    }
+  ]
+}

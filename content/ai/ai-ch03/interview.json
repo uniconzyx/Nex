@@ -1,0 +1,99 @@
+{
+  "meta": {
+    "chapter": "ai-ch03",
+    "title": "Transformer 与大语言模型原理 —— 深度追问",
+    "count": 6
+  },
+  "items": [
+    {
+      "question": "自注意力相比 RNN/LSTM 最大的优势是什么？为什么它能并行训练？",
+      "answer_md": "**并行**：RNN 必须按时间步串行展开，第 t 步依赖第 t−1 步隐状态，无法并行；自注意力对序列所有位置**同时**做 QK^T，整层是一个大矩阵乘，可在 GPU 上完全并行。\n\n**长程依赖**：RNN 的长程梯度要沿时间链连乘，易消失/爆炸；自注意力任意两位置的距离是 O(1)（一步点积），天然不惧长程。\n\n**代价**：自注意力是 O(n²)（存 QK^T），RNN 是 O(n)；所以长序列下注意力反而吃显存与算力，这也是 FlashAttention/MQA 的由来。\n\n**补充**：纯自注意力置换等变，需要位置编码才能感知顺序——这是它相对 RNN 多出来的一件事。",
+      "follow_ups": [
+        "O(n²) 在推理时到底卡在算力还是带宽？",
+        "位置编码为什么是必须的？",
+        "MQA/GQA 怎么把 O(n²) 的显存压下来？"
+      ],
+      "difficulty": 4,
+      "company_tags": [
+        "字节跳动",
+        "阿里巴巴",
+        "腾讯"
+      ]
+    },
+    {
+      "question": "为什么 Transformer 需要位置编码？RoPE 的相对位置性质怎么形式化证明？",
+      "answer_md": "**为什么需要**：纯自注意力对输入置换等变——打乱词序输出同步重排但数值不变，模型对「猫追狗」与「狗追猫」一视同仁。位置信息必须被显式注入 token 表示。\n\n**RoPE 性质**：RoPE 用旋转矩阵 R_pos 把位置编码进 Q、K 的方向。设 R_m 为位置 m 的旋转，则\n$$(R_m q)^\\top (R_n k)=q^\\top R_m^\\top R_n k = q^\\top R_{n-m} k$$\n即旋转后内积只依赖**相对距离 n−m**，与绝对位置无关。\n\n**意义**：注意力分数天然是相对位置的函数，无需额外相对位置偏置；且训练长度内学的是旋转关系，外推只需调 base 频率（NTK-aware），这是 LLaMA 等长上下文方案的基础。",
+      "follow_ups": [
+        "正弦式位置编码外推差在哪？",
+        "ALiBi 和 RoPE 路线有何不同？",
+        "NTK-aware 缩放具体改了什么？"
+      ],
+      "difficulty": 4,
+      "company_tags": [
+        "智谱",
+        "月之暗面",
+        "商汤"
+      ]
+    },
+    {
+      "question": "多头注意力的参数量是多少？和头数有什么关系？",
+      "answer_md": "每个 head 内 Q/K/V 投影在 d_k=d_model/h 子空间，但**四个投影（Q/K/V/O）的矩阵都是 d_model×d_model**（输出投影把 h 个 head 拼回 d_model）。所以每层注意力参数量 = 4·d_model²，**与头数 h 无关**。\n\n头数只决定每个头的子空间维度 d_k=d_model/h，改变的是「并行关系的丰富度」而非参数容量。常见误算：以为头数翻倍参数量翻倍——错，翻倍 d_model 才翻倍参数。\n\nKV Cache 例外：MQA/GQA 让 KV 头数少于 Q 头数，省的是推理显存，不影响训练参数量。",
+      "follow_ups": [
+        "为什么 d_k 要除以 √d_k 缩放？",
+        "MQA/GQA 省的是参数还是显存？",
+        "FFN 在总参数里占多大比例？"
+      ],
+      "difficulty": 3,
+      "company_tags": [
+        "美团",
+        "百度",
+        "拼多多"
+      ]
+    },
+    {
+      "question": "KV Cache 是什么？为什么 decode 阶段是 memory-bound 而不是 compute-bound？",
+      "answer_md": "**KV Cache**：自回归生成时，每步的 K、V 由历史 token 算得且被后续所有步复用，于是把它们缓存下来，避免重复计算。容量 = layers×kv_heads×head_dim×2×dtype×seq_len×batch。\n\n**为什么 decode 是 memory-bound**：prefill 阶段一次算 T 个 token，是大矩阵乘，算力吃满（compute-bound）；decode 阶段每步只新增 1 个 query，却要读**全部**历史 KV 才能算一次注意力——计算量极小，瓶颈在把 KV 从显存搬进计算单元（HBM 带宽），即 memory-bound。\n\n**工程对策**：MQA/GQA 减少 KV 头数砍显存；FlashAttention 分块+重算降访存；PagedAttention 做 KV 分页管理。",
+      "follow_ups": [
+        "怎么估算一个 7B 模型 32K 上下文的 KV 显存？",
+        "FlashAttention 是怎么降显存峰值的？",
+        "连续批处理（continuous batching）解决什么问题？"
+      ],
+      "difficulty": 4,
+      "company_tags": [
+        "字节跳动",
+        "腾讯",
+        "阿里云"
+      ]
+    },
+    {
+      "question": "temperature / top-k / top-p 分别怎么影响生成？它们会不会改变 argmax？",
+      "answer_md": "**temperature**：把 logits 除以 T 再做 softmax，p_i=exp(z_i/T)/Σexp(z_j/T)。T→0 趋 argmax（确定），T→∞ 趋均匀（最随机）。它是**单调尺度变换**，不改变 argmax 的相对次序，只改变分布锐度。\n\n**top-k**：只在概率最高的 k 个 token 里重归一化后采样，截断长尾。\n\n**top-p（核采样）**：按累积概率从高到低取，直到覆盖 p 比例，再在该集合内重归一化采样；自适应候选集大小。\n\n**会不会改 argmax**：三者都是对分布的单调/截断操作，argmax 的 token 不变（除非被 top-k/p 截断掉）；低温只是压低长尾，不会让次优反超最优。",
+      "follow_ups": [
+        "top-k 和 top-p 先作用哪个结果不同吗？",
+        "重复惩罚（repetition penalty）怎么实现？",
+        "为什么代码生成常用低温而聊天用 0.7？"
+      ],
+      "difficulty": 3,
+      "company_tags": [
+        "月之暗面",
+        "智谱",
+        "MiniMax"
+      ]
+    },
+    {
+      "question": "Scaling Law 是什么？Chinchilla 最优结论怎么推翻早期大模型做法？",
+      "answer_md": "**Scaling Law（Kaplan et al.）**：测试损失随规模幂律下降——L(N)∝N^{−α}（参数量）、L(D)∝D^{−β}（数据量）、L(C)∝C^{−γ}（算力），三者共同决定最终损失，存在可预测的缩放曲线。\n\n**Chinchilla（Hoffmann et al.）**：在固定算力预算下，早期「大模型 + 相对少数据」是错的；最优做法是**模型参数量与训练 token 约 1:20**（data≈20×params）。例如 70B 模型应配约 1.4T token，而非早期 Gopher 的 300B。\n\n**影响**：它重新定义了「多大模型配多少数据」，指出很多大模型其实「训练不足」（欠拟合 data），要么加数据要么缩小模型。后续研究进一步细化了「计算最优」的拐点。",
+      "follow_ups": [
+        "Scaling Law 在数据/算力到达拐点后会失效吗？",
+        "为什么会出现「涌现能力」的争论？",
+        "推理侧有没有类似的 scaling 规律？"
+      ],
+      "difficulty": 4,
+      "company_tags": [
+        "DeepSeek",
+        "阿里通义",
+        "阶跃星辰"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "meta": {
+    "chapter": "bd-ch04"
+  },
+  "items": [
+    {
+      "question": "Spark 为什么比 MapReduce 快？RDD 的五大特性是什么？",
+      "answer_md": "**快的三点核心**：① **内存计算**——中间结果默认留内存而非落 HDFS，省掉 MR 每步写盘/读盘的 I/O；② **DAG 调度**——把一串算子优化成一个 DAG，多个 map 阶段 pipeline 进同一个 Stage，减少落盘与任务启动；③ **惰性求值**——transformation 只记录、action 才触发，Spark 能对整条计划做全局优化（算子融合、谓词下推到 Scan）。\n\n**RDD 五大特性**：① 分区列表（并行度单元）；② 对每个分区的计算函数；③ 依赖其他 RDD 的列表（lineage）；④（键值 RDD）分区器；⑤ 每个分区的首选位置（移动计算而非数据）。RDD 不可变，容错靠 lineage 重算而非副本。",
+      "follow_ups": [
+        "RDD 容错和 HDFS 副本容错有什么本质区别？",
+        "为什么说 lineage 重算要求 transformation 是确定性的？",
+        "DAG 调度相比 MR 的「一个 job 一串 map-reduce」优势在哪？"
+      ],
+      "difficulty": "easy",
+      "company_tags": [
+        "通用",
+        "阿里",
+        "美团"
+      ]
+    },
+    {
+      "question": "什么是惰性求值？Transformation 和 Action 有什么区别？",
+      "answer_md": "**惰性求值**：transformation（`map`/`filter`/`reduceByKey` 等）只往 lineage 追加一个「要做什么」的节点、**不立即执行**；只有 action（`collect`/`count`/`saveAsTextFile`/`take` 等）出现才真正沿 DAG 计算。好处是 Spark 能拿到**完整计划**做全局优化（算子融合、合并 Stage、削减中间物化）。\n\n**判别**：返回值是否为 RDD——transformation 返回新 RDD（惰性），action 返回标量/集合/写外部（触发计算）。易混：`reduce` 是 action、`reduceByKey` 是 transformation。",
+      "follow_ups": [
+        "给一段代码问「实际触发了几次计算」怎么答？",
+        "为什么反复对未缓存 RDD 调 action 会重复重算？",
+        "toDebugString 和 collect 在调试上的取舍？"
+      ],
+      "difficulty": "easy",
+      "company_tags": [
+        "通用",
+        "字节",
+        "腾讯"
+      ]
+    },
+    {
+      "question": "窄依赖和宽依赖的区别？哪些算子产生宽依赖？Stage 怎么划分、Task 数怎么算？",
+      "answer_md": "**窄依赖**：子 RDD 每个分区只依赖父 RDD **至多一个**分区（map/filter/union/mapPartitions/coalesce 默认）——可 pipeline 同 Stage、零网络。**宽依赖**：子分区依赖父**全部**分区，必然 **Shuffle**（reduceByKey/groupByKey/join 非广播/distinct/sortBy/repartition）。\n\n**Stage 划分**：以**宽依赖和最终的 action 为边界**切分 DAG，一个 Stage 内全是窄依赖可流水线。**Task 数**：每个 Stage 内的 Task 数 = 该 Stage **末态 RDD 的分区数**；总 Task 数 = 各 Stage 末态分区数之和。例：`map.filter.reduceByKey.map.collect`（分区=p）→ Stage=2，Task=2p。",
+      "follow_ups": [
+        "为什么宽依赖无法和前面的窄依赖 pipeline 在一起？",
+        "Task 数和分区数、Stage 数的关系？",
+        "怎么从代码快速判断 Stage 数？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "腾讯",
+        "拼多多"
+      ]
+    },
+    {
+      "question": "reduceByKey 和 groupByKey 哪个好？为什么？",
+      "answer_md": "**reduceByKey 更优**，因为它在 **map 端先做本地预聚合（combiner）**，只把「key→局部聚合值」搬过网络；**groupByKey 把全量记录原样搬运**到 reduce 端再聚合。Shuffle 量：reduceByKey ≈ 不同 key 数，groupByKey = 总记录数——差一个数量级，且 groupByKey 在 reduce 端把同 key 全量记录拉进内存，极易 OOM 与倾斜。\n\n**前提**：聚合函数必须**可结合/可交换**（sum/count/min/max）。不可结合的（如取每组 Top-N）用 `aggregateByKey` 在分区内先维护一个可控大小的堆。上线铁律：聚合优先 reduceByKey/aggregateByKey，杜绝 groupByKey。",
+      "follow_ups": [
+        "groupByKey 为什么容易 OOM？",
+        "什么场景 reduceByKey 不能替代 groupByKey？",
+        "aggregateByKey 相对 reduceByKey 多了什么能力？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "百度",
+        "京东"
+      ]
+    },
+    {
+      "question": "cache/persist 和 checkpoint 有什么区别？怎么选？",
+      "answer_md": "**cache/persist**：把 RDD 结果**物化到内存/磁盘，但保留 lineage**；后续多个 action 直接命中缓存，不重算整条血缘；缓存丢失（executor 失效/LRU 挤出）仍沿 lineage 重算。\n\n**checkpoint**：把 RDD 写入**可靠存储（HDFS 等）并截断 lineage**（父指针置空）；故障恢复从文件读，不再回溯源头；代价是一次额外写入。\n\n**取舍**：同一 RDD 被多个 action 复用 → cache；lineage 超长、重算代价高、要斩断依赖链防 Driver OOM → checkpoint；**checkpoint 前通常先 cache**，避免 checkpoint 触发一次多余的全量重算。二者互补，不互相替代。",
+      "follow_ups": [
+        "为什么 checkpoint 前要先 cache？",
+        "cache 后 executor 挂了还会重算吗？",
+        "哪些场景必须用 checkpoint 而不能只 cache？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用",
+        "快手",
+        "阿里"
+      ]
+    },
+    {
+      "question": "什么是数据倾斜？怎么识别和解决？",
+      "answer_md": "**数据倾斜**：少数 key 的数据量碾压其余（幂律分布），导致个别 Reducer/分区负载极高、长尾卡 99%，其余早已完成。\n\n**识别**：Spark UI 看各 Task 的 shuffle read 极度不均；counters 里某 Reduce 输入远超均值；某热 key（热用户/空值/某省份）占比异常。先定位热 key 再动手，别盲调。\n\n**解决（按优先级）**：① 小表侧 `broadcast()` 走 BroadcastHashJoin 消 join 的 shuffle；② 大表自身热 key 用**加盐 + 两阶段聚合**（枚举后缀打散→局部聚合→去后缀合并），要求聚合可结合；③ 自定义 Partitioner 把热 key 路由到专属分区；④ 空值 `nvl(col, rand())` 打散或单独过滤。**注意**：加大 Reduce 数治标不治本（热 key 仍压同一 Reduce）。",
+      "follow_ups": [
+        "为什么加大 Reduce 数解决不了倾斜？",
+        "加盐后怎么保证最终结果和直接聚合一致？",
+        "BroadcastHashJoin 为什么能消灭 join 的 shuffle？"
+      ],
+      "difficulty": "hard",
+      "company_tags": [
+        "通用",
+        "腾讯",
+        "拼多多",
+        "快手"
+      ]
+    }
+  ]
+}

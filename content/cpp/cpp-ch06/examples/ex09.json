@@ -1,0 +1,8 @@
+{
+  "title": "多重继承：合并多基类接口",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "A::fa B::fb C::fc\n",
+  "code": "#include <iostream>\nstruct A { void fa() const { std::cout << \"A::fa \"; } };\nstruct B { void fb() const { std::cout << \"B::fb \"; } };\nstruct C : A, B { void fc() const { std::cout << \"C::fc\\n\"; } };\nint main() {\n    C c;\n    c.fa(); c.fb(); c.fc();   // 多重继承：A 与 B 的接口都可用\n}\n"
+}

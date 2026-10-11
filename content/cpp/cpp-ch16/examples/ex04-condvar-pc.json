@@ -1,0 +1,8 @@
+{
+  "title": "条件变量生产者-消费者（带谓词，确定性汇总）",
+  "code_lang": "cpp",
+  "code_std": "c++17",
+  "stdin": "",
+  "expected_output": "consumed=5",
+  "code": "#include <iostream>\n#include <mutex>\n#include <condition_variable>\n#include <queue>\n#include <thread>\n\nstd::mutex m;\nstd::condition_variable cv;\nstd::queue<int> q;\nbool done = false;\nint consumed = 0;\n\nvoid consumer() {\n    while (true) {\n        std::unique_lock<std::mutex> lk(m);\n        cv.wait(lk, []{ return !q.empty() || done; });   // 谓词：防虚假唤醒\n        while (!q.empty()) { q.pop(); ++consumed; }\n        if (done && q.empty()) break;\n    }\n}\n\nint main() {\n    std::thread c(consumer);\n    {\n        std::lock_guard<std::mutex> lk(m);\n        for (int i = 0; i < 5; ++i) q.push(i);\n    }\n    cv.notify_all();\n    {\n        std::lock_guard<std::mutex> lk(m);\n        done = true;\n    }\n    cv.notify_all();\n    c.join();\n    std::cout << \"consumed=\" << consumed;   // 5，确定性\n}"
+}

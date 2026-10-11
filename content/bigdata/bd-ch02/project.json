@@ -1,0 +1,35 @@
+{
+  "meta": { "chapter": "bd-ch02", "category": "basic" },
+  "items": [
+    {
+      "title": "从零用 Python 模拟一个迷你 MapReduce + YARN 调度内核",
+      "requirement_md": "不使用任何 Hadoop 组件，用纯 Python 实现一个**单进程、内存态**的迷你 MapReduce 与 YARN 调度内核，覆盖本章核心机制：\n\n1. **Map 阶段**：把输入文档切成 token，输出 `(word, 1)` 形式的中间 kv 对，并打印原始 kv 流。\n2. **Partitioner**：用 `hash(key) % R` 决定每个 key 去哪个 reducer（R 可配置），验证「相同 key 必进同一 reducer」这一正确性不变量。\n3. **Shuffle 的排序与溢写**：Map 输出先进「内存环形缓冲区」，达到容量阈值后**溢写**到本地（排序：先 partition 再 key），最后把所有 spill **多路归并**成一个有序大文件；打印每次 spill 与最终归并结果。\n4. **Reduce 聚合**：按 key 分组，把 `[1,1,...]` 求和，输出最终 `(word, count)`。\n5. **Combiner 优化对比**：分别统计「不带 Combiner」与「带 Combiner」时需要跨网络 shuffle 的 kv 数量，打印压缩比，验证 Combiner 不丢信息（最终结果一致）。\n6. **YARN 三角色与容器分配**：模拟 ResourceManager / NodeManager / ApplicationMaster 的角色分工；AM 通过心跳向 RM 申请容器，RM 在 NM 上按资源（mem/cores）贪心分配，并打印每轮分配与各 NM 余量。\n7. **三种调度器对比**：实现 FIFO / Capacity / Fair 三种调度器，给定一组作业需求，打印各自的首轮资源分配结果并比较公平性与隔离性。\n8. **数据倾斜与加盐缓解**：构造一个「热 key 占比极高」的数据集，演示倾斜导致的 reducer 负载不均，再用加盐（salting）把热 key 打散到多 reducer，打印倾斜前后负载分布。\n\n要求代码可运行、输出可追溯，并附一段说明『本模拟与真实 Hadoop 的差异与简化假设』。",
+      "tasks": [
+        {
+          "title": "实现 Map 与 Partitioner，验证 key 路由不变量",
+          "verification": { "type": "test", "desc": "给定文档，打印 (word,1) 流；对 R=3 验证相同 word 的 partition 编号一致" }
+        },
+        {
+          "title": "实现 Shuffle 的排序、溢写与多路归并",
+          "verification": { "type": "test", "desc": "设缓冲区容量为 3 触发多次 spill，最终归并结果按 (partition,key) 有序" }
+        },
+        {
+          "title": "实现 Reduce 聚合与 Combiner 对比",
+          "verification": { "type": "test", "desc": "输出最终词频；带/不带 Combiner 的最终聚合结果一致，且 shuffle kv 数量下降" }
+        },
+        {
+          "title": "模拟 YARN RM/NM/AM 容器分配循环",
+          "verification": { "type": "test", "desc": "AM 多轮心跳申请容器，RM 在 NM 上分配，打印每轮已分配数与 NM 余量" }
+        },
+        {
+          "title": "实现三种调度器并比较分配结果",
+          "verification": { "type": "test", "desc": "FIFO 顺序占用、Capacity 按队列保底、Fair 按饥饿度分配，三者输出可区分" }
+        },
+        {
+          "title": "构造数据倾斜并用加盐缓解",
+          "verification": { "type": "manual", "desc": "热 key 使某 reducer 负载显著高于均值；加盐后各 reducer 负载趋于均衡" }
+        }
+      ]
+    }
+  ]
+}

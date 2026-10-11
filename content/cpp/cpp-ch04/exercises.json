@@ -1,0 +1,120 @@
+{
+  "meta": {
+    "chapter": "cpp-ch04",
+    "note": "5 题，4 类题型混合；含 LeetCode/牛客 真题映射（仅元数据+链接）"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "difficulty": "easy",
+      "title": "关于指针与内存，正确的是",
+      "content_md": "选择**正确**的描述。",
+      "options": [
+        {
+          "key": "A",
+          "text": "new int[3] 必须用 delete 释放"
+        },
+        {
+          "key": "B",
+          "text": "delete 后的指针应立即置 nullptr 更安全，且最好用智能指针消除手动管理"
+        },
+        {
+          "key": "C",
+          "text": "返回局部变量的地址是安全的"
+        },
+        {
+          "key": "D",
+          "text": "未初始化的裸指针默认指向 0"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "new[] 配 delete[]；返回局部地址悬垂；未初始化指针指向随机地址。",
+      "tags": [
+        "pointer",
+        "memory"
+      ],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 12 章 动态内存",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "fix_error",
+      "difficulty": "easy",
+      "title": "修复内存泄漏",
+      "content_md": "以下函数申请了堆内存却未释放，请修复（提示：用智能指针或配对 delete）：\n\n```cpp\nint* make() { int* p = new int(5); return p; }\n// 调用方：int* q = make(); /* 用了但忘了 delete */\n```",
+      "answer": {
+        "reference_code": "#include <memory>\nstd::unique_ptr<int> make() { return std::make_unique<int>(5); }"
+      },
+      "explanation": "用 unique_ptr 把所有权交还调用方，离开作用域自动释放，杜绝泄漏。",
+      "tags": [
+        "memory",
+        "smart-ptr"
+      ],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 12 章",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "output",
+      "difficulty": "mid",
+      "title": "读代码写输出",
+      "content_md": "```cpp\n#include <iostream>\nint main() {\n    int a[3] = {10, 20, 30};\n    int* p = a;\n    std::cout << *p << ' ' << *(p + 2);\n}\n```",
+      "answer": {
+        "output": "10 30"
+      },
+      "explanation": "p 指向首元素，p+2 指向第三个元素。",
+      "tags": [
+        "pointer"
+      ],
+      "source": "self",
+      "source_ref": "《C++ Primer（第5版）》第 4 章 表达式",
+      "category": "基础题",
+      "platform": "book"
+    },
+    {
+      "type": "coding",
+      "difficulty": "mid",
+      "title": "LeetCode 206 · 反转链表",
+      "content_md": "给定单链表头节点，反转链表并返回新头。用指针操作（迭代或递归）实现 `ListNode* reverseList(ListNode* head)`。",
+      "answer": {
+        "reference_code": "#include <iostream>\nstruct ListNode { int val; ListNode* next; ListNode(int v):val(v),next(nullptr){} };\nListNode* reverseList(ListNode* head){\n  ListNode* prev=nullptr; ListNode* cur=head;\n  while(cur){ ListNode* nxt=cur->next; cur->next=prev; prev=cur; cur=nxt; }\n  return prev;\n}\nint main(){ ListNode a(1),b(2),c(3); a.next=&b; b.next=&c;\n  ListNode* h=reverseList(&a); std::cout<<h->val; }"
+      },
+      "explanation": "经典三指针迭代，考察指针改向。",
+      "tags": [
+        "linked-list",
+        "pointer"
+      ],
+      "source": "leetcode",
+      "source_ref": "LeetCode 206（反转链表）",
+      "external_url": "https://leetcode.cn/problems/reverse-linked-list/",
+      "category": "算法题",
+      "platform": "leetcode"
+    },
+    {
+      "type": "coding",
+      "difficulty": "mid",
+      "title": "牛客 BM1 · 反转链表",
+      "content_md": "反转一个单链表。与 LeetCode 206 同义，按牛客 BM1 题型实现。指针操作，注意边界（空链表/单节点）。",
+      "answer": {
+        "reference_code": "#include <iostream>\nstruct ListNode { int val; ListNode* next; ListNode(int v):val(v),next(nullptr){} };\nListNode* reverseList(ListNode* head){\n  ListNode* prev=nullptr; ListNode* cur=head;\n  while(cur){ ListNode* nxt=cur->next; cur->next=prev; prev=cur; cur=nxt; }\n  return prev;\n}\nint main(){ ListNode a(1),b(2); a.next=&b; std::cout<<reverseList(&a)->val; }"
+      },
+      "explanation": "牛客 TOP101 高频题，指针改向是面试必考。",
+      "tags": [
+        "linked-list",
+        "pointer",
+        "nowcoder"
+      ],
+      "source": "nowcoder",
+      "source_ref": "牛客 TOP101 BM1（反转链表）",
+      "external_url": "https://www.nowcoder.com/practice/75e878df47f24fdc9dc3e400ec6050e4",
+      "category": "算法题",
+      "platform": "nowcoder"
+    }
+  ]
+}

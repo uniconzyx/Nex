@@ -1,0 +1,8 @@
+{
+  "title": "作用域闭包与循环 var 经典坑（let 修复）",
+  "code_lang": "javascript",
+  "code_std": "node22",
+  "stdin": "",
+  "expected_output": "var loop: 3,3,3\nlet loop: 0,1,2\nclosure counter: 1 2 3",
+  "code": "var fs = [];\nfor (var i = 0; i < 3; i++) { fs.push(function(){ return i; }); }\nconsole.log('var loop:', fs.map(function(f){ return f(); }).join(','));\nvar gs = [];\nfor (let j = 0; j < 3; j++) { gs.push(function(){ return j; }); }\nconsole.log('let loop:', gs.map(function(g){ return g(); }).join(','));\nfunction counter() { let n = 0; return function(){ return ++n; }; }\nvar c1 = counter();\nconsole.log('closure counter:', c1(), c1(), c1());"
+}

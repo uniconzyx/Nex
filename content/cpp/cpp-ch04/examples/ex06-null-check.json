@@ -1,0 +1,8 @@
+{
+  "title": "空指针检查",
+  "code_lang": "cpp",
+  "code_std": "cpp17",
+  "stdin": "",
+  "expected_output": "null",
+  "code": "#include <iostream>\n\nint main() {\n    int* p = nullptr;\n    if (p) std::cout << \"has\";\n    else std::cout << \"null\";\n}"
+}

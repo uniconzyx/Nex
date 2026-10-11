@@ -1,0 +1,8 @@
+{
+  "title": "B+ 树扇出、树高与等值查询 I/O 次数",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== InnoDB B+ 树扇出与树高 ===\n页大小            = 16384 B\n非叶子扇出(指针数) = 1170\n叶子每页行数       = 81\n\n行数             叶子页数       树高         等值查询IO      \n1000           13         2          2           \n100000         1235       3          3           \n10000000       123457     3          3           \n1000000000     12345680   4          4           \n\n结论: 亿级数据树高也只有 4 层, 等值查询最多 4 次磁盘 IO\n      每次 IO 读一整页(含上千个键) -> 页利用率远高于二叉/红黑树",
+  "code": "import math\n\nPAGE = 16 * 1024      # InnoDB 页大小\nKEY = 8               # bigint 主键\nPTR = 6               # 页指针\nROW = 200             # 行平均大小(含主键/事务ID/回滚指针)\n\nleaf_fanout = PAGE // (KEY + PTR)      # 非叶子节点每页指针数 = 扇出\nleaf_capacity = PAGE // ROW            # 叶子节点每页行数\n\ndef tree_height(rows):\n    \"\"\"叶子页数 L，再按扇出逐层上收，总高度 = 非叶子层数 + 1。\"\"\"\n    leaves = -(-rows // leaf_capacity)     # ceil 除法\n    levels = 0\n    cap = 1\n    while cap < leaves:\n        cap *= leaf_fanout\n        levels += 1\n    return levels + 1, leaves\n\nprint(\"=== InnoDB B+ 树扇出与树高 ===\")\nprint(\"页大小            = %d B\" % PAGE)\nprint(\"非叶子扇出(指针数) = %d\" % leaf_fanout)\nprint(\"叶子每页行数       = %d\" % leaf_capacity)\nprint()\nprint(\"%-14s %-10s %-10s %-12s\" % (\"行数\", \"叶子页数\", \"树高\", \"等值查询IO\"))\nrows_list = (1000, 100000, 10000000, 1000000000)\nlast = None\nfor rows in rows_list:\n    h, leaves = tree_height(rows)\n    print(\"%-14d %-10d %-10d %-12d\" % (rows, leaves, h, h))\n    last = h\nprint()\nprint(\"结论: 亿级数据树高也只有 %d 层, 等值查询最多 %d 次磁盘 IO\" % (last, last))\nprint(\"      每次 IO 读一整页(含上千个键) -> 页利用率远高于二叉/红黑树\")"
+}
