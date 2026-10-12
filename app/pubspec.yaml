@@ -27,6 +27,8 @@ dependencies:
   # 内容渲染
   flutter_markdown: ^0.7.3
   url_launcher: ^6.2.5
+  # CppCat 音效（sound_service.dart 使用 AudioPlayer / ReleaseMode / AssetSource / AudioCache）
+  audioplayers: ^6.1.0
 
 dev_dependencies:
   flutter_test:
