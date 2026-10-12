@@ -71,3 +71,5 @@ miniodata/
 
 # 交付暂存（本地 APK/EXE 暂存，不入库）
 dist-release/
+deploy/launcher/build-new/
+deploy/launcher/dist-new/
