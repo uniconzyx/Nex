@@ -25,7 +25,7 @@ import webbrowser
 from pathlib import Path
 from urllib.request import urlopen
 
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 HEALTH_URLS = ["http://localhost:8000/health", "http://localhost/health"]
 HEALTH_TIMEOUT_S = 180
 
@@ -126,8 +126,24 @@ def main() -> int:
         return 3
 
     log(f"检测到 {name}，正在启动服务（首次构建镜像可能较慢）...")
-    up = ["up", "-d"] + ([] if args.dry_run else [])
-    rc = stream_compose(compose + up + ["-f", str(compose_file)], root / "deploy")
+
+    # 预检 daemon：未启动 Docker Desktop 时给出明确指引（compose up 的原始报错很难懂）
+    probe = subprocess.run(
+        ["docker", "info", "--format", "{{.ServerVersion}}"],
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+    )
+    if probe.returncode != 0:
+        log("Docker 守护进程未运行（Docker Desktop 未启动）。")
+        log("请先启动 Docker Desktop，等托盘图标变为 running 后，重新运行本程序。")
+        if preview.exists() and not args.no_browser:
+            log("（先打开产品演示页，但对话/测验等需后端的功能不可用）")
+            webbrowser.open(preview.as_uri())
+        input("按回车退出...")
+        return 4
+
+    # -f 是 compose 的全局参数，必须位于子命令 up 之前
+    up = ["-f", str(compose_file), "up", "-d"]
+    rc = stream_compose(compose + up, root / "deploy")
     if rc != 0:
         log(f"docker compose up 返回非零退出码 {rc}，请检查 Docker Desktop 是否正常运行。")
         input("按回车退出...")
