@@ -273,7 +273,7 @@ class _BankDetailPageState extends State<BankDetailPage> {
         const SizedBox(height: 6),
         Text("解析：${q.explanation}", style: const TextStyle(fontSize: 12.5, height: 1.6, color: const Color(0xFF64748B))),
         const SizedBox(height: 10),
-        const CatBubble(text: "做错了也别灰心，看看解析里「为什么」，下次就能举一反三喵~", mood: _correct ? CatMood.celebrate : CatMood.comfort),
+        CatBubble(text: "做错了也别灰心，看看解析里「为什么」，下次就能举一反三喵~", mood: _correct ? CatMood.celebrate : CatMood.comfort),
       ]),
     );
   }

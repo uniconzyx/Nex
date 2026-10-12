@@ -78,7 +78,7 @@ class ProfilePage extends ConsumerWidget {
             const SizedBox(height: 8),
             Wrap(spacing: 10, runSpacing: 10, children: [
               _Badge(Icons.emoji_events_rounded, "首题 AC", AppColors.amber),
-              _Badge(Icons.thread_rounded, "并发入门", AppColors.blue),
+              _Badge(Icons.sync_rounded, "并发入门", AppColors.blue),
               _Badge(Icons.pets_rounded, "猫之友", AppColors.cyan),
               _Badge(Icons.local_fire_department_rounded, "连续 7 天", AppColors.red),
             ]),
@@ -93,7 +93,7 @@ class ProfilePage extends ConsumerWidget {
                 ),
                 SwitchListTile(
                   title: const Text("减少动效"),
-                  secondary: const Icon(Icons.reduced_motion_rounded, color: AppColors.blue),
+                  secondary: const Icon(Icons.motion_photos_off_rounded, color: AppColors.blue),
                   subtitle: const Text("关闭猫咪动画与转场"),
                   value: s.reduceMotion,
                   onChanged: (v) => ref.read(settingsProvider.notifier).setReduceMotion(v),

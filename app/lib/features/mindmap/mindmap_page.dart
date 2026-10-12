@@ -29,7 +29,7 @@ class _MindmapPageState extends ConsumerState<MindmapPage> {
     try {
       final data = await ref.read(apiClientProvider).get("/mindmap?chapter_id=1");
       final items = (data is Map ? data["nodes"] : data) as List? ?? [];
-      setState(() => _nodes = items.map((e) => _Node.fromJson(e as Map)).toList());
+      setState(() => _nodes = items.map((e) => _Node.fromJson(e as Map<String, dynamic>)).toList());
     } catch (_) {
       // 占位：第 1 章知识树
       _nodes = [
@@ -122,7 +122,8 @@ class _Node {
       );
   final int id, parentId;
   final String label;
-  final double x, y, state;
+  final double x, y;
+  final String state;
 }
 
 class _MindmapPainter extends CustomPainter {

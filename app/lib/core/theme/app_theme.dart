@@ -55,7 +55,7 @@ class AppTheme {
         bodyMedium: TextStyle(fontSize: 13, height: 1.65, color: ink),
         bodySmall: TextStyle(fontSize: 11, height: 1.5, color: sub),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: card,
         elevation: 0,
         margin: const EdgeInsets.only(bottom: 12),

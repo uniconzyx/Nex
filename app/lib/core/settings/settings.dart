@@ -69,6 +69,11 @@ class SettingsNotifier extends Notifier<SettingsState> {
     state = state.copyWith(fontScale: v.clamp(0.85, 1.3));
     (await SharedPreferences.getInstance()).setDouble(_kFont, state.fontScale);
   }
+
+  Future<void> setSoundEnabled(bool v) async {
+    state = state.copyWith(soundEnabled: v);
+    (await SharedPreferences.getInstance()).setBool(_kSound, v);
+  }
 }
 
 final settingsProvider = NotifierProvider<SettingsNotifier, SettingsState>(SettingsNotifier.new);

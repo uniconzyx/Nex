@@ -17,6 +17,7 @@ import "../../features/mindmap/mindmap_page.dart";
 import "../../features/profile/profile_page.dart";
 import "../../features/projects/projects_page.dart";
 import "../../features/resources/resources_page.dart";
+import "../../features/splash/splash_page.dart";
 import "../../features/wrongbook/wrongbook_page.dart";
 
 /// 路由表（PRD §6 页面清单移动端子集）。

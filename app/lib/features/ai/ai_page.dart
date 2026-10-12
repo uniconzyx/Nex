@@ -1,3 +1,4 @@
+import "dart:async";
 import "dart:convert";
 
 import "package:dio/dio.dart";
@@ -6,6 +7,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
 
 import "../../core/api/api_client.dart";
+import "../../core/audio/sound_service.dart";
 import "../../core/theme/app_colors.dart";
 import "../../widgets/cpp_cat.dart";
 
@@ -93,7 +95,7 @@ class _AiPageState extends ConsumerState<AiPage> {
       final body = rs.data;
       if (body == null) throw Exception("empty stream");
       var acc = "";
-      await for (final chunk in body.stream.transform(utf8.decoder)) {
+      await for (final chunk in body.stream.cast<List<int>>().transform(utf8.decoder)) {
         _sseBuffer += chunk;
         // 按 SSE 事件边界（\n\n）切分
         var idx = _sseBuffer.indexOf("\n\n");
