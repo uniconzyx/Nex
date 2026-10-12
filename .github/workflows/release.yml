@@ -99,11 +99,11 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          name: CppMind ${{ github.ref_name }}
+          name: Nex ${{ github.ref_name }}
           tag_name: ${{ github.ref_name }}
           generate_release_notes: true
           files: |
             artifacts/app-release-apk/app-release.apk
-            artifacts/cppmind-launcher-exe/CppMind-Launcher.exe
+            artifacts/nex-launcher-exe/Nex-Launcher.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
