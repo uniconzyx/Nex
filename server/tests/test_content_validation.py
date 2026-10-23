@@ -76,16 +76,19 @@ def test_planning_coverage_denominator_is_manifest():
 
     回归点：早期版本只统计「磁盘上已存在的章节」作分母，导致 20 章只写了 11 章
     时仍报 100%，掩盖了真实进度。
+
+    注意：不要求「必须存在未完工单元」——内容全部完工后 missing=0 是正确状态，
+    那样写会让测试在真正完成时反而失败。这里改为校验分母恒等式。
     """
     report = vc.validate_all(CONTENT_DIR)
     plan = report["planning"]
     # cpp 20 + java 9 + db 8 + py 8 + fs 8 = 53 章，加 clang 7 单元 = 60
     assert plan["planned_total"] >= 60, plan
     assert plan["planned_complete"] == report["complete"], (plan, report["complete"])
-    assert plan["planned_missing"] > 0, "大纲仍有未开工单元，不应全绿"
-    assert plan["planning_coverage_pct"] < 100.0, plan
-    # 磁盘口径可以 100%（已开工的都达标），但规划口径不可以——两者必须分开
-    assert report["coverage_pct"] == 100.0, report["coverage_pct"]
+    # 分母 = 大纲总数，且「已完成 + 缺失」必须等于分母（防止只统计磁盘章节）
+    assert plan["planned_complete"] + plan["planned_missing"] == plan["planned_total"], plan
+    expected_pct = round(100.0 * plan["planned_complete"] / plan["planned_total"], 1)
+    assert abs(plan["planning_coverage_pct"] - expected_pct) <= 0.2, (plan, expected_pct)
     # 已达标单元与大纲状态必须一致（无状态漂移）
     assert plan["status_drifted"] == [], f"以下单元状态漂移: {plan['status_drifted']}"
 

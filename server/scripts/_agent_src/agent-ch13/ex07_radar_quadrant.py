@@ -1,0 +1,83 @@
+# title: 技术雷达：四维打分映射四象限与版本迁移轨迹
+# 维度与权重（经验判断）：benchmark 口径 0.25 / 工程成熟度 0.25 / 社区活跃度 0.20 /
+# 替代方案劣势 0.30。阈值：>=4.0 Adopt，>=3.0 Trial，>=2.0 Assess，否则 Hold。
+
+W = {"bench": 0.25, "eng": 0.25, "comm": 0.20, "alt": 0.30}
+
+
+def pad(s, w):
+    return s + " " * max(1, w - sum(2 if ord(c) > 127 else 1 for c in s))
+
+
+def radar(bench, eng, comm, alt):
+    total = W["bench"] * bench + W["eng"] * eng + W["comm"] * comm + W["alt"] * alt
+    if total >= 4.0:
+        return total, "Adopt"
+    if total >= 3.0:
+        return total, "Trial"
+    if total >= 2.0:
+        return total, "Assess"
+    return total, "Hold"
+
+
+# 8 个技术项当前打分（0-5，教学构造值）
+ITEMS = [
+    ("推理引擎X",   5, 5, 5, 1),   # 基准好、生态全，但对现有栈无增量
+    ("训练框架Y",   3, 4, 4, 4),   # 口径存疑但补上缺口
+    ("向量库Z",     5, 4, 5, 4),
+    ("评测工具W",   4, 4, 4, 3),
+    ("新注意力变体", 2, 2, 3, 3),
+    ("某可视化库",  2, 5, 4, 1),
+    ("旧版调度器",  2, 2, 1, 0),   # 已被全面取代
+    ("实验跟踪V",   4, 3, 3, 3),
+]
+
+print("== 1) 当前雷达：四维打分 -> 象限 ==")
+print(f"{pad('技术项', 14)}{'口径':>4}{'成熟':>4}{'社区':>4}{'增量':>4}{'总分':>7}  象限")
+quads = {}
+for name, b, e, c, a in ITEMS:
+    t, q = radar(b, e, c, a)
+    quads.setdefault(q, []).append((name, t))
+    print(f"{pad(name, 14)}{b:>4}{e:>4}{c:>4}{a:>4}{t:>7.2f}  {q}")
+
+print("\n== 2) ASCII 雷达图（外环 = 观察，内环 = 默认）==")
+W_BOX = 42
+print("              ┌" + "─" * W_BOX + "┐")
+print("              │  Adopt" + " " * (W_BOX - 6) + "│")
+adopt = "、".join(n for n, _ in quads.get("Adopt", [])) or "（空）"
+trial = "、".join(n for n, _ in quads.get("Trial", [])) or "（空）"
+assess = "、".join(n for n, _ in quads.get("Assess", [])) or "（空）"
+hold = "、".join(n for n, _ in quads.get("Hold", [])) or "（空）"
+print(f"              │    {pad(adopt, W_BOX - 4)}│")
+print("              │  Trial" + " " * (W_BOX - 6) + "│")
+print(f"              │    {pad(trial, W_BOX - 4)}│")
+print("              │ Assess" + " " * (W_BOX - 7) + "│")
+print(f"              │    {pad(assess, W_BOX - 4)}│")
+print("              └" + "─" * W_BOX + "┘")
+print(f"              Hold（禁区，不入环）: {hold}")
+
+print("\n== 3) 版本迁移轨迹（每季度复查，分数变化触发迁移）==")
+TRAJECTORY = [
+    ("训练框架Y", [("v0.9", (2, 2, 2, 2)), ("v1.2", (3, 4, 4, 4)), ("v2.0", (4, 4, 4, 4))]),
+    ("推理引擎X", [("v1.0", (5, 5, 5, 1)), ("v1.5", (5, 5, 5, 2)), ("v2.0", (5, 5, 5, 2))]),
+    ("旧版调度器", [("v1.0", (3, 3, 3, 3)), ("v1.2", (2, 2, 2, 1)), ("v2.0", (2, 2, 1, 0))]),
+]
+for name, versions in TRAJECTORY:
+    print(f"  {name}:")
+    prev = None
+    for ver, scores in versions:
+        t, q = radar(*scores)
+        move = "" if prev is None else f"  ({prev} -> {q})"
+        print(f"    {ver}: 总分 {t:.2f} -> {q}{move}")
+        prev = q
+
+print("\n== 4) 迁移规则表（必须覆盖失败分支）==")
+RULES = {("Assess", "复现增量成立"): "Trial", ("Assess", "复现增量不成立"): "Hold",
+         ("Trial", "试点达标"): "Adopt", ("Trial", "试点不达标"): "Hold",
+         ("Trial", "试点超时无结论"): "Assess"}
+for (q, trig), nq in RULES.items():
+    print(f"  {q:6s} + {trig:12s} -> {nq}")
+print("  只写「达标 -> 升级」的雷达，两个季度内就会退化成营销截图")
+
+print("\n结论：雷达把「用什么技术」变成打分 + 迁移规则的状态机，每一项都必须落在四象限之一且带依据，")
+print("读法：1. 「替代方案劣势」权重最高（0.30）——雷达不是选美，是「换了它我得到什么」的账本，推理引擎X 前三项满分仍只到 Trial；2. 迁移靠证据链：Assess->Trial 的硬证据是「复现增量在自有数据上成立」，不是「论文说很好」；3. 失败分支必须显式：试点超时无结论回退 Assess，「没产生证据」不等于「证据为负」；4. 条目控制在 20-30 条，每加一条 Adopt/Trial 就合并或 Hold 一条旧的——雷达容量是注意力预算。")

@@ -1,10 +1,12 @@
 from fastapi import FastAPI, Request
+from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from app.api.v1.router import api_router
 from app.core.config import settings
-from app.core.responses import AppError, error_response, ok
+from app.core.responses import PARAM_ERROR, AppError, error_response, ok
 
 
 def create_app() -> FastAPI:
@@ -21,6 +23,15 @@ def create_app() -> FastAPI:
     @app.exception_handler(AppError)
     async def app_error_handler(request: Request, exc: AppError):
         return error_response(exc.code, exc.message, exc.http_status, exc.data)
+
+    # FastAPI 默认的 422 是 {"detail": [...]}，与本项目统一响应包不一致。
+    # 统一成 {code, message, data, traceId}，客户端只写一套错误处理。
+    @app.exception_handler(RequestValidationError)
+    async def validation_error_handler(request: Request, exc: RequestValidationError):
+        return error_response(
+            PARAM_ERROR, "请求参数校验失败", 400,
+            {"errors": jsonable_encoder(exc.errors())},
+        )
 
     @app.get("/health")
     async def health():

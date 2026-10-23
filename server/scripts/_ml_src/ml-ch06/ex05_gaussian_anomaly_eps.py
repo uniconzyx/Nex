@@ -1,0 +1,78 @@
+# title: 高斯密度估计与阈值 ε：F1 曲线怎么选
+# 一维异常检测全流程：训练集只含正常点 → 拟合 N(μ,σ²) → 在验证集上扫 ε 最大化 F1
+# → 在测试集上验收。同时把正常点与异常点的 log p(x) 分布画成字符直方图。
+import numpy as np
+
+rng = np.random.default_rng(21)
+X_tr = rng.normal(0.0, 1.0, 300)                       # 训练集：以正常样本为主
+
+
+def make_eval(rng, n_normal=150, n_anom=15):
+    x = np.r_[rng.normal(0.0, 1.0, n_normal), rng.normal(3.0, 0.9, n_anom)]
+    y = np.r_[np.zeros(n_normal, int), np.ones(n_anom, int)]
+    return x, y
+
+
+Xv, yv = make_eval(rng)
+Xt, yt = make_eval(rng)
+
+mu, var = float(X_tr.mean()), float(X_tr.var())       # MLE（除以 n）
+
+
+def pdf(x):
+    return np.exp(-0.5 * (x - mu) ** 2 / var) / np.sqrt(2 * np.pi * var)
+
+
+def f1_at(x, y, eps):
+    pred = pdf(x) < eps
+    tp = int((pred & (y == 1)).sum())
+    fp = int((pred & (y == 0)).sum())
+    fn = int((~pred & (y == 1)).sum())
+    prec = tp / (tp + fp) if tp + fp else 0.0
+    rec = tp / (tp + fn) if tp + fn else 0.0
+    return (2 * prec * rec / (prec + rec) if prec + rec else 0.0), prec, rec, int(pred.sum())
+
+
+print(f"训练集 n={len(X_tr)}（纯正常点）→ MLE：μ={mu:.4f}，σ²={var:.4f}")
+print(f"验证/测试集：各 150 正常 + 15 异常（异常 ~ N(3.0,0.9)，与正常尾部有重叠，占 10%）\n")
+print(f"{'ε':>10}{'验证F1':>9}{'精确率':>9}{'召回率':>9}{'报异常数':>9}")
+eps_grid = np.logspace(-7, 0, 13)
+curve = []
+for eps in eps_grid:
+    f1, prec, rec, nflag = f1_at(Xv, yv, eps)
+    curve.append(f1)
+    print(f"{eps:>10.1e}{f1:>9.3f}{prec:>9.3f}{rec:>9.3f}{nflag:>9}")
+
+best_i = int(np.argmax(curve))
+eps_star = float(eps_grid[best_i])
+f1t, pt, rt, nt = f1_at(Xt, yt, eps_star)
+f1v, pv, rv, nv = f1_at(Xv, yv, eps_star)
+print(f"\n验证集最优 ε*={eps_star:.2e}（F1={f1v:.3f}）→ 测试集：F1={f1t:.3f}，"
+      f"精确率={pt:.3f}，召回率={rt:.3f}，报异常 {nt}/165（真异常 15）")
+
+# F1-ε 字符曲线（横轴 ε 对数递增，纵轴 F1）
+print("\nF1 随 ε 的变化（横轴：ε 从 1e-7 到 1e0；'#' 高度=F1）：")
+for lvl in range(10, -1, -1):
+    row = "".join("#" if c >= lvl / 10 - 1e-9 else " " for c in curve)
+    print(f"  {lvl / 10:>4.1f} |{row}")
+
+# log10 p(x) 的字符直方图：正常 vs 异常
+print("\nlog10 p(x) 分布（验证集；'N'=正常点，'A'=异常点，每格 0.5）：")
+bins = np.arange(-8.0, 0.6, 0.5)
+hn, _ = np.histogram(np.log10(pdf(Xv[yv == 0])), bins=bins)
+ha, _ = np.histogram(np.log10(pdf(Xv[yv == 1])), bins=bins)
+for lo, cn, ca in zip(bins[:-1], hn, ha):
+    print(f"  {lo:>5.1f} |{'N' * cn:<40}|{'A' * ca}")
+print(f"  阈值 ε*={eps_star:.1e} 对应 log10 p = {np.log10(eps_star):.2f}")
+
+print("\n结论：")
+print(f"1. 读法：F1-ε 单峰，峰顶 ε*≈{eps_star:.0e}；ε 再小只捞最极端的异常（精确率 1.0、召回不足），")
+print("   ε 再大召回拉满但精确率崩到 0.72 以下；")
+print(f"   测试集 F1={f1t:.3f} 对验证集 {f1v:.3f}，差距来自两边都只有 15 个异常点的采样波动——")
+print("   小样本下 F1 本身就是个噪声很大的估计量。")
+print("2. 机理：p(x) 是概率密度不是概率，ε 切的是分布尾部；本例异常与正常尾部有重叠")
+print("   （直方图 log10 p ≈ -2 一格里 N 与 A 共存），不存在『免费』的完美阈值——")
+print("   权衡不是调参调出来的，是两类密度函数本身交叠出来的。")
+print("3. 工程：① 训练集必须几乎全是正常点，否则 μ/σ 被污染、阈值整体失真；")
+print("   ② ε 只能用独立验证集选，用训练集选等于让被拟合的数据自己监考；")
+print("   ③ 高维时把一元高斯换成多元高斯——协方差结构决定什么是『尾』（下一个示例）。")

@@ -47,15 +47,21 @@ def _ai_quota(plan: Plan) -> int:
 async def _remaining_quota(db: AsyncSession, user_id: int) -> int:
     from datetime import UTC, datetime
 
-    from app.core.redis_client import get_redis
+    from app.core.redis_client import mark_down, try_redis
 
     profile = (
         await db.execute(select(UserProfile).where(UserProfile.user_id == user_id))
     ).scalar_one_or_none()
     limit = _ai_quota(profile.plan if profile else Plan.free)
-    r = get_redis()
+    r = await try_redis()
+    if r is None:
+        return limit  # 无 Redis：本机不限量
     today = datetime.now(UTC).strftime("%Y%m%d")
-    used = int(await r.get(f"quota:ai:{user_id}:{today}") or 0)
+    try:
+        used = int(await r.get(f"quota:ai:{user_id}:{today}") or 0)
+    except Exception as exc:  # noqa: BLE001 - 读配额失败不该让整页 500
+        mark_down(exc)
+        return limit
     return max(limit - used, 0)
 
 

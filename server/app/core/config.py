@@ -49,7 +49,11 @@ class Settings(BaseSettings):
     shared_dir: str = "../shared"
     content_dir: str = "../content"
 
-    cors_origins: str = "http://localhost:3000"
+    cors_origins: str = (
+        "http://localhost:3000,"
+        "http://localhost:1420,http://127.0.0.1:1420,"
+        "tauri://localhost,http://tauri.localhost"
+    )
 
     @property
     def cors_origin_list(self) -> list[str]:

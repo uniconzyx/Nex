@@ -18,17 +18,19 @@ from app.models.enums import (
 )
 from app.models.progress import (
     Achievement,
+    Checkin,
     DailyTask,
     Note,
     Progress,
     StudyPlan,
+    StudyState,
     UserAchievement,
     WrongQuestion,
 )
 from app.models.submission import Submission
 from app.models.user import User
 from app.schemas.ai import PlanGenerateIn
-from app.schemas.content import FavoriteIn, NoteIn
+from app.schemas.content import FavoriteIn, NoteIn, StudyStateIn
 from app.schemas.judge import RedoIn
 from app.models.resource import Favorite
 
@@ -290,3 +292,75 @@ async def remove_favorite(
         await db.delete(fav)
         await db.commit()
     return ok(message="已取消收藏")
+
+
+# ── 本机体验快照同步 ────────────────────────────────────────────────────
+# 语义：客户端（localStorage）是事实源，服务端只做镜像与跨设备汇总。
+# 上传是整行覆盖 + 打卡并集，因此重复上传同一份快照是幂等的。
+
+
+def _state_payload(st: StudyState | None, checkins: list[date]) -> dict:
+    return {
+        "done_chapters": list(st.done_chapters or []) if st else [],
+        "done_projects": list(st.done_projects or []) if st else [],
+        "checkins": [d.isoformat() for d in sorted(checkins)],
+        "coins": st.coins if st else 0,
+        "outfit": st.outfit if st else "default",
+        "theme": st.theme if st else "light",
+        "client_rev": st.client_rev if st else 0,
+        "updated_at": st.updated_at.isoformat() if st and st.updated_at else None,
+    }
+
+
+async def _load_state(db: AsyncSession, user_id: int) -> tuple[StudyState | None, list[date]]:
+    st = (
+        await db.execute(select(StudyState).where(StudyState.user_id == user_id))
+    ).scalar_one_or_none()
+    days = (
+        await db.execute(select(Checkin.day).where(Checkin.user_id == user_id).order_by(Checkin.day))
+    ).scalars().all()
+    return st, list(days)
+
+
+@router.get("/progress/state")
+async def get_state(user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    st, days = await _load_state(db, user.id)
+    return ok(_state_payload(st, days))
+
+
+@router.put("/progress/state")
+async def put_state(
+    body: StudyStateIn,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    st, _ = await _load_state(db, user.id)
+    if st is None:
+        st = StudyState(user_id=user.id)
+        db.add(st)
+
+    # 集合类字段取并集：换设备时旧记录不该被新设备的空列表抹掉
+    st.done_chapters = sorted(set(st.done_chapters or []) | set(body.done_chapters))
+    st.done_projects = sorted(set(st.done_projects or []) | set(body.done_projects))
+    st.coins = max(st.coins or 0, body.coins)
+    st.outfit = body.outfit or st.outfit
+    st.theme = body.theme or st.theme
+    st.client_rev = max(st.client_rev or 0, body.client_rev)
+
+    existing = {
+        d for d in (
+            await db.execute(select(Checkin.day).where(Checkin.user_id == user.id))
+        ).scalars().all()
+    }
+    for raw in body.checkins:
+        try:
+            day = date.fromisoformat(raw)
+        except ValueError:
+            continue  # 脏日期跳过，不影响整批
+        if day not in existing:
+            db.add(Checkin(user_id=user.id, day=day))
+            existing.add(day)
+
+    await db.commit()
+    st2, days = await _load_state(db, user.id)
+    return ok(_state_payload(st2, days), "已同步")

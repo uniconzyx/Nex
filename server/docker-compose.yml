@@ -4,6 +4,9 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: cppmind-postgres
+    # Docker 引擎（随 Docker Desktop 启动）一起来就自动拉起容器，
+    # 不用每次敲 docker compose up。unless-stopped 表示手动 stop 后不会被自动唤醒。
+    restart: unless-stopped
     environment:
       POSTGRES_USER: cppmind
       POSTGRES_PASSWORD: cppmind
@@ -21,6 +24,7 @@ services:
   redis:
     image: redis:7-alpine
     container_name: cppmind-redis
+    restart: unless-stopped
     ports:
       - "6379:6379"
     volumes:

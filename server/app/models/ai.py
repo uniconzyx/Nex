@@ -1,11 +1,10 @@
 from sqlalchemy import BigInteger, Enum, ForeignKey, Integer, String, Text
-from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
 from app.models.common import IDMixin, TimestampMixin
 from app.models.enums import AIMode, MessageRole
-
+from app.models.types import JSONType
 
 class AIConversation(IDMixin, TimestampMixin, Base):
     __tablename__ = "ai_conversations"
@@ -14,10 +13,9 @@ class AIConversation(IDMixin, TimestampMixin, Base):
     mode: Mapped[AIMode] = mapped_column(Enum(AIMode, name="ai_mode"))
     chapter_id: Mapped[int | None] = mapped_column(BigInteger, ForeignKey("chapters.id"), nullable=True)
     title: Mapped[str] = mapped_column(String(200), default="新对话")
-    context_snapshot: Mapped[dict] = mapped_column(JSONB, default=dict)  # 章节/代码/错题/进度快照
+    context_snapshot: Mapped[dict] = mapped_column(JSONType, default=dict)  # 章节/代码/错题/进度快照
 
     messages: Mapped[list["AIMessage"]] = relationship(back_populates="conversation")
-
 
 class AIMessage(IDMixin, TimestampMixin, Base):
     __tablename__ = "ai_messages"

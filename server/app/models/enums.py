@@ -128,6 +128,36 @@ class ProjectCategory(str, Enum):
     dl = "dl"
 
 
+class CareerTrack(str, Enum):
+    """就业级项目库的学科维度，取值与 content/ 下的学科目录一一对应。"""
+
+    cpp = "cpp"
+    clang = "clang"
+    java = "java"
+    spring = "spring"
+    python = "python"
+    fullstack = "fullstack"
+    database = "database"
+    middleware = "middleware"
+    ai = "ai"
+    bigdata = "bigdata"
+    data = "data"
+    fundamentals = "fundamentals"
+    tooling = "tooling"
+
+
+class ProjectTier(str, Enum):
+    """项目在能力阶梯上的位置，从入门到可写进简历。
+
+    t1 能跑起来 / t2 能独立写 / t3 能讲清原理 / t4 能写进简历。
+    """
+
+    t1 = "t1"
+    t2 = "t2"
+    t3 = "t3"
+    t4 = "t4"
+
+
 class AIMode(str, Enum):
     socratic = "socratic"
     diagnose = "diagnose"
@@ -181,3 +211,16 @@ class DLFramework(str, Enum):
     libtorch = "libtorch"
     llama_cpp = "llama_cpp"
     triton = "triton"
+
+
+class GuideKind(str, Enum):
+    """考研/学习指南条目的形态。
+
+    note       = 原文笔记（这里只做索引与要点提炼，正文留在 GitHub）
+    experience = 经验贴（按原文观点改写成可扫读要点）
+    external   = 外部链接（幕布等第三方文档，不可内联）
+    """
+
+    note = "note"
+    experience = "experience"
+    external = "external"

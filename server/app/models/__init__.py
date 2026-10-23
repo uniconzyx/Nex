@@ -1,4 +1,10 @@
 from app.models.ai import AIConversation, AIMessage  # noqa: F401
+from app.models.career import (  # noqa: F401
+    CareerProject,
+    CareerProjectStep,
+    CareerRoute,
+    CareerStepProgress,
+)
 from app.models.content import (  # noqa: F401
     Chapter,
     Course,
@@ -15,6 +21,7 @@ from app.models.exercise import (  # noqa: F401
     exercise_tags,
     interview_question_tags,
 )
+from app.models.guide import GuideItem, GuideSource  # noqa: F401
 from app.models.progress import (  # noqa: F401
     Achievement,
     DailyTask,

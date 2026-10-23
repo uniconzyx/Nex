@@ -1,13 +1,12 @@
 from datetime import datetime
 
 from sqlalchemy import BigInteger, Boolean, DateTime, Enum, ForeignKey, Integer, Numeric, SmallInteger, String, Text
-from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
 from app.models.common import IDMixin, TimestampMixin
 from app.models.enums import CodeLang, CodeStd, DLFramework, DLModuleType, LessonType
-
+from app.models.types import JSONType
 
 class Course(IDMixin, TimestampMixin, Base):
     __tablename__ = "courses"
@@ -19,7 +18,6 @@ class Course(IDMixin, TimestampMixin, Base):
 
     chapters: Mapped[list["Chapter"]] = relationship(back_populates="course")
 
-
 class Chapter(IDMixin, TimestampMixin, Base):
     __tablename__ = "chapters"
 
@@ -27,13 +25,12 @@ class Chapter(IDMixin, TimestampMixin, Base):
     idx: Mapped[int] = mapped_column(Integer)  # 0-19 / 0-6
     code: Mapped[str] = mapped_column(String(20), unique=True, index=True)  # cpp-ch03
     title: Mapped[str] = mapped_column(String(100))
-    goals: Mapped[list] = mapped_column(JSONB, default=list)  # 学习目标数组
+    goals: Mapped[list] = mapped_column(JSONType, default=list)  # 学习目标数组
     estimated_minutes: Mapped[int] = mapped_column(Integer, default=60)
     is_free: Mapped[bool] = mapped_column(Boolean, default=False)  # 游客可浏览
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     course: Mapped[Course] = relationship(back_populates="chapters")
-
 
 class Lesson(IDMixin, TimestampMixin, Base):
     """概念讲解 / 避坑指南 / 可运行代码示例（type=example）统一载体。"""
@@ -55,7 +52,6 @@ class Lesson(IDMixin, TimestampMixin, Base):
     sort: Mapped[int] = mapped_column(Integer, default=0)
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
-
 class KnowledgePoint(IDMixin, TimestampMixin, Base):
     __tablename__ = "knowledge_points"
 
@@ -64,7 +60,6 @@ class KnowledgePoint(IDMixin, TimestampMixin, Base):
     summary: Mapped[str] = mapped_column(Text, default="")
     difficulty: Mapped[int] = mapped_column(SmallInteger, default=1)  # 1-5
     sort: Mapped[int] = mapped_column(Integer, default=0)
-
 
 class MindMapNode(IDMixin, TimestampMixin, Base):
     __tablename__ = "mind_map_nodes"
@@ -83,7 +78,6 @@ class MindMapNode(IDMixin, TimestampMixin, Base):
     pos_y: Mapped[float] = mapped_column(Numeric(10, 2), default=0)
     sort: Mapped[int] = mapped_column(Integer, default=0)
     # 注意：节点四态（mastered/learning/unlearned/weak）不落库，由 progress 推导
-
 
 class DeepLearningModule(IDMixin, TimestampMixin, Base):
     """第 12-14 章的 DL 扩展表（chapter_id 唯一），正文仍走 lessons。"""

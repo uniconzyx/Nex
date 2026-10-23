@@ -10,6 +10,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from sqlalchemy import select  # noqa: E402
+
 from app.db import Base, engine, SessionLocal  # noqa: E402
 import app.models  # noqa: F401, E402  确保所有模型注册到 metadata
 from app.models.content import Chapter, Course  # noqa: E402
@@ -37,21 +39,40 @@ async def main() -> None:
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     async with SessionLocal() as db:
-        cpp = Course(code="cpp", title="C++ 思维导图主线", sort=0)
-        clang = Course(code="clang", title="C 语言单独模块", sort=1)
-        db.add_all([cpp, clang])
-        await db.flush()
+        # 幂等：按自然键 upsert，重复执行只会补齐缺失项，不会撞 unique 约束。
+        async def course(code: str, title: str, sort: int) -> Course:
+            row = (await db.execute(select(Course).where(Course.code == code))).scalar_one_or_none()
+            if row is None:
+                row = Course(code=code, title=title, sort=sort)
+                db.add(row)
+                await db.flush()
+            return row
+
+        cpp = await course("cpp", "C++ 思维导图主线", 0)
+        clang = await course("clang", "C 语言单独模块", 1)
+
+        existing_ch = set(
+            (await db.execute(select(Chapter.code))).scalars().all()
+        )
         for i, title in enumerate(CPP_CHAPTERS):
-            db.add(Chapter(
-                course_id=cpp.id, idx=i, code=f"cpp-ch{i:02d}", title=title,
-                goals=[], is_free=i < 3,  # 前 3 章游客可体验
-            ))
+            code = f"cpp-ch{i:02d}"
+            if code in existing_ch:
+                continue
+            db.add(Chapter(course_id=cpp.id, idx=i, code=code, title=title,
+                           goals=[], is_free=i < 3))  # 前 3 章游客可体验
         for i, title in enumerate(CLANG_UNITS):
-            db.add(Chapter(
-                course_id=clang.id, idx=i, code=f"clang-ch{i:02d}", title=f"C 语言 · {title}",
-                goals=[], is_free=i == 0,
-            ))
+            code = f"clang-ch{i:02d}"
+            if code in existing_ch:
+                continue
+            db.add(Chapter(course_id=clang.id, idx=i, code=code, title=f"C 语言 · {title}",
+                           goals=[], is_free=i == 0))
+
+        existing_ach = set(
+            (await db.execute(select(Achievement.code))).scalars().all()
+        )
         for code, title, desc, icon in ACHIEVEMENTS:
+            if code in existing_ach:
+                continue
             db.add(Achievement(code=code, title=title, description=desc, icon=icon))
         await db.commit()
     print(f"OK: courses=2, chapters={len(CPP_CHAPTERS) + len(CLANG_UNITS)}, achievements={len(ACHIEVEMENTS)}")

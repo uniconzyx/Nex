@@ -1,0 +1,70 @@
+# title: 复现工时账本：成本估算、ROI 排序与止损规则模拟
+# 工程账本：成本 = 读论文（三遍时间）+ 环境搭建 + 数据准备 + 实验运行 + 归因（=50% 预算）；
+# 收益 = 相关度 × 学习价值 × 杠杆（各 0-1）；ROI = 收益 / 成本(小时)。数值为教学构造。
+
+PASS_HOURS = {1: 10 / 60, 2: 40 / 60, 3: 160 / 60}   # 三遍读法折算小时
+
+
+def pad(s, w):
+    return s + " " * max(1, w - sum(2 if ord(c) > 127 else 1 for c in s))
+
+
+def estimate_cost(passes, env_cx, data_scale, run_min):
+    """env_cx: 依赖复杂度 1-3；data_scale: 数据规模等级 1-5；run_min: 实验运行分钟。"""
+    read = PASS_HOURS[passes]
+    env = 1.5 + 0.5 * env_cx
+    data = 0.5 + 0.2 * data_scale
+    run = run_min / 60
+    return {"读论文": read, "环境": env, "数据": data, "运行": run,
+            "合计": read + env + data + run}
+
+
+def benefit(rel, learn, leverage):
+    return rel * learn * leverage
+
+
+# 三篇候选论文的估算参数（教学构造）
+CANDIDATES = [
+    # (论文, 三遍遍数, 依赖复杂度, 数据规模, 运行分钟, 相关度, 学习价值, 杠杆)
+    ("论文A：与手头延迟问题直接相关，有代码", 3, 1, 2, 30, 0.9, 0.8, 0.9),
+    ("论文B：方向热但与我们无关，无代码",     2, 3, 5, 120, 0.2, 0.5, 0.2),
+    ("论文C：相邻方向，数据难拿",             2, 2, 4, 60, 0.5, 0.7, 0.4),
+]
+
+print("== 1) 成本与收益估算 ==")
+print(f"{pad('论文', 34)}{'读论':>5}{'环境':>5}{'数据':>5}{'运行':>5}{'合计h':>7}"
+      f"{'收益':>6}{'ROI':>8}")
+rows = []
+for name, passes, cx, scale, run, rel, learn, lev in CANDIDATES:
+    c = estimate_cost(passes, cx, scale, run)
+    b = benefit(rel, learn, lev)
+    roi = b / c["合计"]
+    rows.append((name, c, b, roi, passes))
+    print(f"{pad(name, 34)}{c['读论文']:>5.2f}{c['环境']:>5.2f}{c['数据']:>5.2f}"
+          f"{c['运行']:>5.2f}{c['合计']:>7.2f}{b:>6.3f}{roi:>8.4f}")
+
+print("\n== 2) 按 ROI 排序的启动建议 ==")
+for name, c, b, roi, passes in sorted(rows, key=lambda r: -r[3]):
+    advice = "启动复现" if roi >= 0.05 else ("精读即可" if roi >= 0.02 else "只记卡片")
+    print(f"  ROI {roi:.4f} -> {advice}: {name}")
+
+print("\n== 3) 止损规则模拟（对 ROI 最高的论文A）==")
+name, c, b, roi, _ = rows[0]
+cap = 0.5 * c["合计"]
+spent_attr = 3.4          # 归因阶段已耗（小时）
+gap = 2.8                # 与原文的指标差距（个点）
+print(f"  论文A 总预算 {c['合计']:.2f}h，归因上限 = 50% = {cap:.2f}h")
+print(f"  已耗归因工时 {spent_attr:.1f}h，当前差距 {gap:.1f} 个点")
+if spent_attr > cap and gap > 2.0:
+    print(f"  -> 触发止损：降级为「部分复现」，归档已验证部分 + 存疑清单（这也是交付物）")
+else:
+    print(f"  -> 未触发：继续归因")
+
+print("\n== 4) 预算敏感性：运行时间翻倍对各候选 ROI 的影响 ==")
+for name, passes, cx, scale, run, rel, learn, lev in CANDIDATES:
+    c2 = estimate_cost(passes, cx, scale, run * 2)
+    b = benefit(rel, learn, lev)
+    print(f"  {pad(name, 34)} ROI {b / c2['合计']:.4f}（原 {b / estimate_cost(passes, cx, scale, run)['合计']:.4f}）")
+
+print("\n结论：复现是投资不是信仰——成本五段账（读/环境/数据/运行/归因），收益三维乘（相关/学习/杠杆），")
+print("读法：1. ROI 排序决定启动顺序，低于阈值的候选降级为「精读/只记卡片」，把时间让给高分项；2. 归因预算默认占总预算 50%，超支且差距仍 > 2 个点即止损——「部分复现 + 差异记录」满足 tech_load 的验收口径；3. 运行时间是账本里最容易被低估的一项（论文不说自己烧了多少卡），估算时按「原文配置 × 你的硬件折扣」反推；4. 所有参数为教学构造，真实估算应按自己的阅读速度与硬件校准一次，之后只改相对值。")

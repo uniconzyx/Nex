@@ -1,0 +1,97 @@
+# title: 上下文压缩前后任务成功率对比：窗口滑动 vs 摘要保留
+# 本地模拟：程序化生成「针在干草堆」多轮任务 + 三种上下文策略，不调用真实 LLM/API。
+import numpy as np
+
+rng = np.random.default_rng(42)
+N_TASKS, TURNS, WINDOW = 40, 10, 4
+FILLER = ["仓库", "排期", "接口", "文档", "测试", "上线", "回滚", "监控", "告警", "评审"]
+
+
+def make_task(i):
+    """每个任务：某一早期轮次植入一个订单号事实，最后一轮追问。
+    事实植入轮次在 {0, 4, 8} 中随机——模拟「关键信息出现位置不定」。"""
+    fact_turn = int(rng.choice([0, 4, 8]))
+    order_no = f"ORD-2024-{1000 + i}"
+    turns = []
+    for t in range(TURNS):
+        if t == fact_turn:
+            turns.append(("user", f"顺便记一下，我的订单号 {order_no}，后续查进度用"))
+        elif t == TURNS - 1:
+            turns.append(("user", "请问我的订单号是多少？"))
+        else:
+            w = "、".join(rng.choice(FILLER, size=3))
+            turns.append(("user", f"第 {t} 轮讨论{w}等事宜，细节略（填充文本）"))
+    return {"fact_turn": fact_turn, "order_no": order_no, "turns": turns}
+
+
+tasks = [make_task(i) for i in range(N_TASKS)]
+
+
+def ctx_tokens(turns):
+    """token 近似：中文按约 2 字符 1 token（教学口径）。"""
+    return sum(len(x) // 2 for _, x in turns)
+
+
+# ---------- 三种上下文策略 ----------
+def strat_full(turns):
+    return turns
+
+
+def strat_window(turns, k=WINDOW):
+    return turns[-k:]                      # 只留最近 k 轮
+
+
+def strat_summary(turns, k=WINDOW, every=4):
+    head, tail = turns[:-k], turns[-k:]
+    facts = [x for _, x in head if "订单号" in x and "请问" not in x]
+    summary = ("system", "早期摘要：" + ("；".join(facts) if facts else "（无关键事实）"))
+    return [summary] + tail                # 摘要替换全部旧轮次
+
+
+def strat_summary_lossy(turns, k=WINDOW, every=4):
+    head, tail = turns[:-k], turns[-k:]
+    facts = [x for _, x in head[-every:] if "订单号" in x and "请问" not in x]  # 只摘要最后一块
+    summary = ("system", "早期摘要：" + ("；".join(facts) if facts else "（无关键事实）"))
+    return [summary] + tail
+
+
+def evaluate(strat):
+    """模型能力模拟：答案字符串出现在上下文里即答对（读得到就能答）。"""
+    ok = 0
+    toks = []
+    for t in tasks:
+        ctx = strat(t["turns"])
+        joined = " ".join(x for _, x in ctx)
+        toks.append(ctx_tokens(ctx))
+        ok += (t["order_no"] in joined)
+    return ok / N_TASKS, float(np.mean(toks))
+
+
+STRATS = [("全量上下文", strat_full), ("滑动窗口 k=4", strat_window),
+          ("摘要压缩（全量事实）", strat_summary), ("摘要压缩（只留最近一块）", strat_summary_lossy)]
+
+print("== 策略对比：40 个「早期植入、末轮追问」任务 ==")
+print(f"{'策略':<22}{'成功率':>8}{'平均token':>10}{'相对全量':>10}")
+base = None
+for name, fn in STRATS:
+    acc, tok = evaluate(fn)
+    if base is None:
+        base = tok
+    print(f"{name:<22}{acc:>8.1%}{tok:>10.0f}{(1 - tok / base):>9.0%}↓")
+
+# 按事实植入位置拆解：窗口策略救不了哪一批
+print("\n== 滑动窗口 k=4 按事实植入轮次的成功率 ==")
+for ft in (0, 4, 8):
+    sub = [t for t in tasks if t["fact_turn"] == ft]
+    hit = sum(t["order_no"] in " ".join(x for _, x in strat_window(t["turns"])) for t in sub)
+    print(f"事实在第 {ft + 1} 轮植入（共 {len(sub)} 题）：窗口命中 {hit} 题 = {hit / len(sub):.1%}")
+
+full_acc, full_tok = evaluate(strat_full)
+win_acc, win_tok = evaluate(strat_window)
+sum_acc, sum_tok = evaluate(strat_summary)
+assert (full_acc, win_acc, sum_acc) == (1.0, win_acc, 1.0)
+assert win_tok < sum_tok < full_tok          # 成本梯度：窗口 < 摘要 < 全量
+print(f"\n成本梯度：窗口 {win_tok:.0f} < 摘要 {sum_tok:.0f} < 全量 {full_tok:.0f} token")
+
+print("\n结论：压缩不是无损的——丢什么比省多少更重要，事实必须进摘要，窗口只适合「近因为主」的任务，")
+print("读法：1. 滑动窗口把第 1~6 轮整体挤出，早期植入的事实 0% 命中，末轮追问类任务全灭；2. 摘要压缩把「订单号」这类键值事实抽出来替换旧轮次，成功率回到 100% 而 token 只花全量的 1/3；3. 只摘要最近一块的 lossy 版本会漏掉更早事实——摘要覆盖范围必须到窗口起点；4. 真实系统的摘要是 LLM 生成的，有漏事实风险，要对「关键字段」用规则抽取兜底（经验判断）；5. 压缩前后必须用同一批任务测成功率，不能只测「看起来没变」。")

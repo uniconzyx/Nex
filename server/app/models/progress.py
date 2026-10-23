@@ -1,7 +1,6 @@
 from datetime import date, datetime
 
 from sqlalchemy import BigInteger, Date, DateTime, Enum, ForeignKey, Integer, SmallInteger, String, Text, UniqueConstraint
-from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db import Base
@@ -15,6 +14,7 @@ from app.models.enums import (
     TaskStatus,
     TaskTarget,
 )
+from app.models.types import JSONType
 
 
 class Progress(TimestampMixin, Base):
@@ -30,6 +30,44 @@ class Progress(TimestampMixin, Base):
     last_studied_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
+class StudyState(TimestampMixin, Base):
+    """本机体验快照（与前端 localStorage["kaimao.progress.v1"] 对齐）。
+
+    为什么单独建表而不是塞进 progress：
+      progress 是"知识点掌握度"，粒度到 kp，服务于导图四态与复习调度；
+      前端记的是"章节是否点过已掌握 / 项目是否通关 / 每天是否打卡"，
+      是体验层的事实，不是学习效果评估。两者混在一张表里，之后接入
+      间隔复习会把语义搅乱。
+
+    同步策略：本机是事实源，这里存的是**最近一次上传的快照**（整行覆盖），
+    拉取时客户端按 (章节 ∪ 项目) 取并集合并，因此不会因为换设备丢掉进度。
+    """
+
+    __tablename__ = "study_state"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("users.id", ondelete="CASCADE"), unique=True, index=True
+    )
+    done_chapters: Mapped[list] = mapped_column(JSONType, default=list)
+    done_projects: Mapped[list] = mapped_column(JSONType, default=list)
+    coins: Mapped[int] = mapped_column(Integer, default=0)
+    outfit: Mapped[str] = mapped_column(String(40), default="default")
+    theme: Mapped[str] = mapped_column(String(10), default="light")
+    client_rev: Mapped[int] = mapped_column(Integer, default=0)  # 客户端自增版本，便于排查冲突
+
+
+class Checkin(TimestampMixin, Base):
+    """打卡记录。单独一张表而不是 JSON 数组，是为了以后按日期范围统计/排行。"""
+
+    __tablename__ = "checkins"
+    __table_args__ = (UniqueConstraint("user_id", "day", name="uq_checkin_user_day"),)
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    day: Mapped[date] = mapped_column(Date, index=True)
+
+
 class Note(IDMixin, TimestampMixin, Base):
     __tablename__ = "notes"
 
@@ -37,7 +75,6 @@ class Note(IDMixin, TimestampMixin, Base):
     target_type: Mapped[NoteTarget] = mapped_column(Enum(NoteTarget, name="note_target"))
     target_id: Mapped[int] = mapped_column(BigInteger)
     content_md: Mapped[str] = mapped_column(Text, default="")
-
 
 class WrongQuestion(TimestampMixin, Base):
     __tablename__ = "wrong_questions"
@@ -54,7 +91,6 @@ class WrongQuestion(TimestampMixin, Base):
     next_review_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     last_result: Mapped[str] = mapped_column(String(10), default="wrong")  # wrong / right
 
-
 class StudyPlan(IDMixin, TimestampMixin, Base):
     __tablename__ = "study_plans"
 
@@ -66,9 +102,8 @@ class StudyPlan(IDMixin, TimestampMixin, Base):
     generated_by: Mapped[PlanGenerator] = mapped_column(
         Enum(PlanGenerator, name="plan_generator"), default=PlanGenerator.ai
     )
-    config: Mapped[dict] = mapped_column(JSONB, default=dict)
+    config: Mapped[dict] = mapped_column(JSONType, default=dict)
     status: Mapped[PlanStatus] = mapped_column(Enum(PlanStatus, name="plan_status"), default=PlanStatus.active)
-
 
 class DailyTask(IDMixin, TimestampMixin, Base):
     __tablename__ = "daily_tasks"
@@ -84,7 +119,6 @@ class DailyTask(IDMixin, TimestampMixin, Base):
     status: Mapped[TaskStatus] = mapped_column(Enum(TaskStatus, name="task_status"), default=TaskStatus.pending)
     done_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
-
 class Achievement(IDMixin, TimestampMixin, Base):
     __tablename__ = "achievements"
 
@@ -92,8 +126,7 @@ class Achievement(IDMixin, TimestampMixin, Base):
     title: Mapped[str] = mapped_column(String(100))
     description: Mapped[str] = mapped_column(Text, default="")
     icon: Mapped[str] = mapped_column(String(100), default="")
-    condition: Mapped[dict] = mapped_column(JSONB, default=dict)
-
+    condition: Mapped[dict] = mapped_column(JSONType, default=dict)
 
 class UserAchievement(TimestampMixin, Base):
     __tablename__ = "user_achievements"

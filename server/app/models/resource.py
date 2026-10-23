@@ -1,7 +1,6 @@
 from datetime import datetime
 
 from sqlalchemy import BigInteger, Column, DateTime, Enum, ForeignKey, Integer, String, Table, Text, UniqueConstraint
-from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db import Base
@@ -14,6 +13,7 @@ from app.models.enums import (
     SyncMode,
     SyncStatus,
 )
+from app.models.types import JSONType
 
 resource_chapters = Table(
     "resource_chapters",
@@ -21,7 +21,6 @@ resource_chapters = Table(
     Column("resource_id", BigInteger, ForeignKey("resources.id", ondelete="CASCADE"), primary_key=True),
     Column("chapter_id", BigInteger, ForeignKey("chapters.id", ondelete="CASCADE"), primary_key=True),
 )
-
 
 class Resource(IDMixin, TimestampMixin, Base):
     """外部资源引用（GitHub/LeetCode/牛客/文档）。合规红线：只存元数据 + 链接，不存正文。"""
@@ -41,9 +40,8 @@ class Resource(IDMixin, TimestampMixin, Base):
     )
     stars: Mapped[int | None] = mapped_column(Integer, nullable=True)
     license: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    extra: Mapped[dict] = mapped_column(JSONB, default=dict)  # tags、面经公司等非标字段
+    extra: Mapped[dict] = mapped_column(JSONType, default=dict)  # tags、面经公司等非标字段
     last_synced_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-
 
 class SyncJob(IDMixin, TimestampMixin, Base):
     __tablename__ = "sync_jobs"
@@ -51,11 +49,10 @@ class SyncJob(IDMixin, TimestampMixin, Base):
     source: Mapped[ResourceSource] = mapped_column(Enum(ResourceSource, name="sync_source"))
     status: Mapped[SyncStatus] = mapped_column(Enum(SyncStatus, name="sync_status"), default=SyncStatus.running)
     mode: Mapped[SyncMode] = mapped_column(Enum(SyncMode, name="sync_mode"), default=SyncMode.incremental)
-    stats: Mapped[dict] = mapped_column(JSONB, default=dict)  # created/updated/failed
+    stats: Mapped[dict] = mapped_column(JSONType, default=dict)  # created/updated/failed
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-
 
 class Favorite(TimestampMixin, Base):
     __tablename__ = "favorites"

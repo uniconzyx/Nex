@@ -1,0 +1,83 @@
+# title: JD 关键词反推：四维权重、覆盖率、证据率与差距清单
+import numpy as np
+
+# 一份原创的教学用 JD 文本（非任何真实公司招聘信息）
+JD_TEXT = """
+岗位职责：
+1. 负责 Agent 相关应用的工程落地，基于 LangChain 或自研编排框架搭建业务链路；
+2. 建设 RAG 检索与知识库问答能力，持续优化召回与答案质量；
+3. 构建评测集与回归流程，对线上效果做数据驱动的迭代；
+4. 参与高并发场景下的服务设计与性能优化，保障稳定性；
+5. 与产品、业务团队紧密协作，推动 AI 能力落地。
+
+任职要求：
+1. 熟悉 Python，掌握 RAG、Prompt 工程，了解 vLLM 等推理加速方案；
+2. 有 A/B 实验与数据分析经验，能定义并追踪业务指标；
+3. 具备良好的跨团队沟通能力，有 Owner 意识；
+4. 有微调或模型部署经验者优先。
+"""
+
+KEYMAP = {  # 关键词 → (主映射维度, 次映射维度)；主 1.0 次 0.5（经验判断）
+    "LangChain": ("工程", "模型"), "Python": ("工程", "模型"),
+    "RAG": ("模型", "工程"), "vLLM": ("模型", "工程"),
+    "微调": ("模型", "工程"), "Prompt": ("模型", "产品"),
+    "评测集": ("工程", "产品"), "高并发": ("工程", "业务"),
+    "A/B": ("产品", "工程"), "跨团队": ("业务", "产品"),
+}
+WATCH = ["Owner", "推动", "稳定性", "数据分析"]  # 映射表外但高信号的软技能词
+DIMS = ["工程", "模型", "产品", "业务"]
+
+# 我的证据：每条产物标注它证明的维度
+MY_ARTIFACTS = [("工单问答上线记录", "工程"), ("50 条评估报告", "工程"),
+                ("检索对比实验", "模型"), ("需求文档两份", "产品"),
+                ("指标周报模板", "产品"), ("客户访谈记录", "业务")]
+ARTS = {d: sum(1 for _, dd in MY_ARTIFACTS if dd == d) for d in DIMS}
+
+
+def pad(s, w):
+    return s + " " * max(1, w - sum(2 if ord(c) > 127 else 1 for c in s))
+
+
+counts = {k: JD_TEXT.count(k) for k in KEYMAP}
+unmatched = [w for w in WATCH if w in JD_TEXT]
+print("== 1) JD 关键词计数（在原文中出现次数）==")
+print("   " + "  ".join(f"{k}×{v}" for k, v in counts.items() if v))
+print(f"   映射表外的高信号词（进人工清单，不静默丢弃）: {unmatched}")
+
+w = dict.fromkeys(DIMS, 0.0)
+for k, n in counts.items():
+    p, s = KEYMAP[k]
+    w[p] += 1.0 * n
+    w[s] += 0.5 * n
+tot = sum(w.values())
+jd_w = {d: w[d] / tot for d in DIMS}
+
+n_art = len(MY_ARTIFACTS)
+mine = {d: ARTS[d] / n_art for d in DIMS}
+coverage = sum(min(jd_w[d], mine[d]) for d in DIMS)
+evidence = sum(jd_w[d] for d in DIMS if ARTS[d] >= 2)
+
+print("\n== 2) 四维对照：JD 权重 vs 我的证据分布 ==")
+print(f"{pad('维度', 5)}{'JD权重':>8}{'我的证据':>8}{'差距':>8}{'产物数':>6}  状态")
+gaps = sorted(((d, jd_w[d] - mine[d]) for d in DIMS), key=lambda x: x[1])
+for d, g in gaps:
+    state = "短板（优先补）" if g > 0.05 else ("过量（减配）" if g < -0.05 else "匹配")
+    print(f"{pad(d, 5)}{jd_w[d]:>8.1%}{mine[d]:>8.1%}{g:>+8.1%}{ARTS[d]:>6}  {state}")
+
+print("\n== 3) 覆盖率与证据率 ==")
+print(f"   覆盖率 = Σ min(JD权重, 我的证据) = {coverage:.1%}"
+      f"（JD 的权重分布被我的证据分布盖住的比例）")
+print(f"   证据率 = 产物数≥2 的维度占 JD 权重 = {evidence:.1%}"
+      f"（这些维度才经得起追问）")
+print(f"   Top-3 补齐优先级: {[d for d, _ in gaps[:3]]}")
+
+top2 = sorted(jd_w.items(), key=lambda kv: -kv[1])[:2]
+print("\n== 4) 准备时间配比建议 ==")
+for d, v in top2:
+    print(f"   {pad(d, 4)} JD 权重 {v:.1%} → 面试准备时间占比建议 ≥ {v:.0%}")
+print(f"   两个维度合计 {sum(v for _, v in top2):.1%} —— 资源集中在这里，不要四维平均用力")
+
+worst_dim, worst_gap = gaps[0]
+print(f"\n结论：本 JD 的最大缺口是{worst_dim}（JD {jd_w[worst_dim]:.1%} vs 我的证据 "
+      f"{mine[worst_dim]:.1%}），且证据率只有 {evidence:.1%}——先补表达再补能力")
+print("读法：1. 覆盖率低是努力问题（按月补），证据率低是表达问题（一个周末把已有项目按 STAR-R 洗一遍）；2. 差距为负且绝对值大 = 我的证据配比错位（产品维过量），讲述时间被挤占；3. 映射表外的高信号词（Owner/推动）不进权重，但必须人工过目——软技能词常是一票否决项；4. 关键词计数用字符串匹配，同义词（LLM/大模型）需人工合并，这是规则法的已知边界。")

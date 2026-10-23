@@ -1,13 +1,12 @@
 from datetime import datetime
 
 from sqlalchemy import BigInteger, DateTime, Enum, ForeignKey, Integer, String, Text, UniqueConstraint
-from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
 from app.models.common import IDMixin, TimestampMixin
 from app.models.enums import Difficulty, ProjectCategory
-
+from app.models.types import JSONType, PROJECT_DIFFICULTY
 
 class Project(IDMixin, TimestampMixin, Base):
     __tablename__ = "projects"
@@ -20,12 +19,11 @@ class Project(IDMixin, TimestampMixin, Base):
     deploy_md: Mapped[str] = mapped_column(Text, default="")
     interview_md: Mapped[str] = mapped_column(Text, default="")  # 面试问法
     template_url: Mapped[str | None] = mapped_column(String(512), nullable=True)  # MinIO tar 包
-    difficulty: Mapped[Difficulty] = mapped_column(Enum(Difficulty, name="project_difficulty"), default=Difficulty.mid)
+    difficulty: Mapped[Difficulty] = mapped_column(PROJECT_DIFFICULTY, default=Difficulty.mid)
     sort: Mapped[int] = mapped_column(Integer, default=0)
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     tasks: Mapped[list["ProjectTask"]] = relationship(back_populates="project")
-
 
 class ProjectTask(IDMixin, TimestampMixin, Base):
     __tablename__ = "project_tasks"
@@ -36,10 +34,9 @@ class ProjectTask(IDMixin, TimestampMixin, Base):
     title: Mapped[str] = mapped_column(String(200))
     description: Mapped[str] = mapped_column(Text, default="")
     order_no: Mapped[int] = mapped_column(Integer, default=0)
-    verification: Mapped[dict] = mapped_column(JSONB, default=dict)  # 步骤验收/测试说明
+    verification: Mapped[dict] = mapped_column(JSONType, default=dict)  # 步骤验收/测试说明
 
     project: Mapped[Project] = relationship(back_populates="tasks")
-
 
 class ProjectTaskProgress(TimestampMixin, Base):
     __tablename__ = "project_task_progress"

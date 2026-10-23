@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 
@@ -56,6 +58,8 @@ class InsightOut(BaseModel):
 
 
 class PlanGenerateIn(BaseModel):
-    direction: str  # exam / job / dl
+    # 与 models/enums.py 的 Direction 保持一致；用 Literal 让非法值在 422 阶段
+    # 就被拦住，而不是等 `Direction(body.direction)` 抛 ValueError 变成 500。
+    direction: Literal["exam", "job", "dl"]
     weekly_hours: int = Field(default=7, ge=1, le=80)
     weeks: int = Field(default=12, ge=1, le=52)

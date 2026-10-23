@@ -49,6 +49,23 @@ content/_learning_lines.json
 Thumbs.db
 desktop.ini
 
+# ---------- 前端（Tauri v2 + Vite + React/TS） ----------
+frontend/node_modules/
+frontend/.vite/
+frontend/npm-debug.log*
+frontend/yarn-error.log*
+# package-lock.json **要入库**（锁定依赖版本，保证 CI/协作可复现）
+
+# ---------- Tauri v2 本机构建产物 ----------
+src-tauri/target/
+src-tauri/gen/android/app/build/
+src-tauri/gen/android/build/
+src-tauri/gen/android/app/src/main/libs/
+src-tauri/gen/android/.gradle/
+src-tauri/gen/android/local.properties
+*.keystore
+*.jks
+
 # ---------- Flutter / Dart ----------
 app/.dart_tool/
 app/build/
@@ -73,3 +90,6 @@ miniodata/
 dist-release/
 deploy/launcher/build-new/
 deploy/launcher/dist-new/
+
+# ---------- 前端验收截图（shot.mjs 产出，本地看，不入库）----------
+frontend/.shots/

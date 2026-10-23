@@ -1,0 +1,996 @@
+{
+  "fetched_at": "2026-10-21",
+  "source": "GitHub REST API /repos/{owner}/{repo}",
+  "chapters": {
+    "agent-ch01": [
+      "microsoft/AI-For-Beginners",
+      "Hannibal046/Awesome-LLM",
+      "datawhalechina/self-llm",
+      "eugeneyan/applied-ml"
+    ],
+    "agent-ch02": [
+      "dair-ai/Prompt-Engineering-Guide",
+      "openai/openai-cookbook",
+      "anthropics/claude-cookbooks",
+      "microsoft/promptflow"
+    ],
+    "agent-ch03": [
+      "deepseek-ai/DeepSeek-V3",
+      "deepseek-ai/DeepSeek-R1",
+      "deepseek-ai/awesome-deepseek-integration",
+      "ollama/ollama"
+    ],
+    "agent-ch04": [
+      "eugeneyan/applied-ml",
+      "Azure-Samples/azure-search-openai-demo",
+      "GokuMohandas/Made-With-ML",
+      "microsoft/AI-For-Beginners"
+    ],
+    "agent-ch05": [
+      "langchain-ai/langchain",
+      "run-llama/llama_index",
+      "infiniflow/ragflow",
+      "HKUDS/LightRAG"
+    ],
+    "agent-ch06": [
+      "vllm-project/vllm",
+      "sgl-project/sglang",
+      "ggml-org/llama.cpp",
+      "ollama/ollama"
+    ],
+    "agent-ch07": [
+      "huggingface/peft",
+      "hiyouga/LLaMA-Factory",
+      "unslothai/unsloth",
+      "huggingface/trl"
+    ],
+    "agent-ch08": [
+      "karpathy/nanoGPT",
+      "karpathy/build-nanogpt",
+      "huggingface/transformers",
+      "jingyaogong/minimind"
+    ],
+    "agent-ch09": [
+      "huggingface/diffusers",
+      "openai/CLIP",
+      "AUTOMATIC1111/stable-diffusion-webui",
+      "QwenLM/Qwen3-VL"
+    ],
+    "agent-ch10": [
+      "openai/evals",
+      "EleutherAI/lm-evaluation-harness",
+      "explodinggradients/ragas",
+      "microsoft/AI-For-Beginners"
+    ],
+    "agent-ch11": [
+      "langchain-ai/langgraph",
+      "microsoft/autogen",
+      "crewAIInc/crewAI",
+      "openai/openai-agents-python",
+      "modelcontextprotocol/python-sdk",
+      "FoundationAgents/MetaGPT"
+    ],
+    "agent-ch12": [
+      "langgenius/dify",
+      "n8n-io/n8n",
+      "Azure-Samples/azure-search-openai-demo",
+      "microsoft/AI-For-Beginners"
+    ],
+    "agent-ch13": [
+      "mli/paper-reading",
+      "dair-ai/ML-Papers-of-the-Week",
+      "Hannibal046/Awesome-LLM"
+    ],
+    "agent-ch14": [
+      "donnemartin/system-design-primer",
+      "yangshun/tech-interview-handbook",
+      "alirezadir/Machine-Learning-Interviews",
+      "chiphuyen/ml-interviews-book"
+    ],
+    "agent-ch15": [
+      "datawhalechina/llm-universe",
+      "datawhalechina/happy-llm",
+      "langchain-ai/langgraph",
+      "langgenius/dify"
+    ],
+    "agent-ch16": [
+      "alirezadir/Machine-Learning-Interviews",
+      "chiphuyen/ml-interviews-book",
+      "GokuMohandas/Made-With-ML",
+      "donnemartin/system-design-primer"
+    ]
+  },
+  "repos": {
+    "microsoft/AI-For-Beginners": {
+      "repo": "microsoft/AI-For-Beginners",
+      "ok": true,
+      "stars": 70073,
+      "license": "MIT",
+      "pushed_at": "2026-09-16",
+      "archived": false,
+      "description": "12 Weeks, 24 Lessons, AI for All!",
+      "topics": [
+        "ai",
+        "artificial-intelligence",
+        "cnn",
+        "computer-vision",
+        "deep-learning",
+        "gan"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "Hannibal046/Awesome-LLM": {
+      "repo": "Hannibal046/Awesome-LLM",
+      "ok": true,
+      "stars": 27445,
+      "license": "CC0-1.0",
+      "pushed_at": "2025-07-31",
+      "archived": false,
+      "description": "Awesome-LLM: a curated list of Large Language Model",
+      "topics": [],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "datawhalechina/self-llm": {
+      "repo": "datawhalechina/self-llm",
+      "ok": true,
+      "stars": 32547,
+      "license": "Apache-2.0",
+      "pushed_at": "2026-09-12",
+      "archived": false,
+      "description": "《开源大模型食用指南》针对中国宝宝量身打造的基于Linux环境快速微调（全参数/Lora）、部署国内外开源大模型（LLM）/多模态大模型（MLLM）教程",
+      "topics": [
+        "chatglm",
+        "chatglm3",
+        "gemma-2b-it",
+        "glm-4",
+        "internlm2",
+        "llama3"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "eugeneyan/applied-ml": {
+      "repo": "eugeneyan/applied-ml",
+      "ok": true,
+      "stars": 30666,
+      "license": "MIT",
+      "pushed_at": "2024-07-18",
+      "archived": false,
+      "description": "📚 Papers & tech blogs by companies sharing their work on data science & machine learning in production.",
+      "topics": [
+        "applied-data-science",
+        "applied-machine-learning",
+        "computer-vision",
+        "data-discovery",
+        "data-engineering",
+        "data-quality"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "dair-ai/Prompt-Engineering-Guide": {
+      "repo": "dair-ai/Prompt-Engineering-Guide",
+      "ok": true,
+      "stars": 79402,
+      "license": "MIT",
+      "pushed_at": "2026-03-11",
+      "archived": false,
+      "description": "🐙 Guides, papers, lessons, notebooks and resources for prompt engineering, context engineering, RAG, and AI Agents.",
+      "topics": [
+        "agent",
+        "agents",
+        "ai-agents",
+        "chatgpt",
+        "deep-learning",
+        "generative-ai"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "openai/openai-cookbook": {
+      "repo": "openai/openai-cookbook",
+      "ok": true,
+      "stars": 76730,
+      "license": "MIT",
+      "pushed_at": "2026-10-21",
+      "archived": false,
+      "description": "Examples and guides for using the OpenAI API",
+      "topics": [
+        "chatgpt",
+        "gpt-4",
+        "openai",
+        "openai-api"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "anthropics/anthropic-cookbook": {
+      "repo": "anthropics/anthropic-cookbook",
+      "ok": false,
+      "error": "Moved Permanently",
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "microsoft/promptflow": {
+      "repo": "microsoft/promptflow",
+      "ok": true,
+      "stars": 11253,
+      "license": "MIT",
+      "pushed_at": "2026-10-20",
+      "archived": false,
+      "description": "Build high-quality LLM apps - from prototyping, testing to production deployment and monitoring.",
+      "topics": [
+        "ai",
+        "ai-application-development",
+        "ai-applications",
+        "chatgpt",
+        "gpt",
+        "llm"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "deepseek-ai/DeepSeek-V3": {
+      "repo": "deepseek-ai/DeepSeek-V3",
+      "ok": true,
+      "stars": 104539,
+      "license": "MIT",
+      "pushed_at": "2025-08-28",
+      "archived": false,
+      "description": "",
+      "topics": [],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "deepseek-ai/DeepSeek-R1": {
+      "repo": "deepseek-ai/DeepSeek-R1",
+      "ok": true,
+      "stars": 91920,
+      "license": "MIT",
+      "pushed_at": "2025-06-27",
+      "archived": false,
+      "description": "",
+      "topics": [],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "deepseek-ai/awesome-deepseek-integration": {
+      "repo": "deepseek-ai/awesome-deepseek-integration",
+      "ok": true,
+      "stars": 39457,
+      "license": "CC0-1.0",
+      "pushed_at": "2026-02-23",
+      "archived": false,
+      "description": "Integrate the DeepSeek API into popular software",
+      "topics": [
+        "awesome",
+        "deepseek"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "ollama/ollama": {
+      "repo": "ollama/ollama",
+      "ok": true,
+      "stars": 184126,
+      "license": "MIT",
+      "pushed_at": "2026-10-21",
+      "archived": false,
+      "description": "Get up and running with Kimi, GLM, MiniMax, DeepSeek, gpt-oss, Qwen, Gemma and other models.",
+      "topics": [
+        "deepseek",
+        "gemma",
+        "gemma3",
+        "glm",
+        "go",
+        "golang"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "pair-code/people-and-ai-guide": {
+      "repo": "pair-code/people-and-ai-guide",
+      "ok": false,
+      "error": "Not Found",
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "microsoft/HAX": {
+      "repo": "microsoft/HAX",
+      "ok": false,
+      "error": "Not Found",
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "Azure-Samples/azure-search-openai-demo": {
+      "repo": "Azure-Samples/azure-search-openai-demo",
+      "ok": true,
+      "stars": 7787,
+      "license": "MIT",
+      "pushed_at": "2026-10-20",
+      "archived": false,
+      "description": "A sample app for the Retrieval-Augmented Generation pattern running in Azure, using Azure AI Search for retrieval and Azure OpenAI large language models  to power ChatGPT-style and Q&A experiences.",
+      "topics": [
+        "ai-azd-templates",
+        "azd-templates",
+        "azure",
+        "azure-ai-search",
+        "azurecognitivesearch",
+        "azureopenai"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "GokuMohandas/Made-With-ML": {
+      "repo": "GokuMohandas/Made-With-ML",
+      "ok": true,
+      "stars": 49787,
+      "license": "MIT",
+      "pushed_at": "2026-03-04",
+      "archived": false,
+      "description": "Learn how to develop, deploy and iterate on production-grade ML applications.",
+      "topics": [
+        "data-engineering",
+        "data-quality",
+        "data-science",
+        "deep-learning",
+        "distributed-ml",
+        "distributed-training"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "langchain-ai/langchain": {
+      "repo": "langchain-ai/langchain",
+      "ok": true,
+      "stars": 148187,
+      "license": "MIT",
+      "pushed_at": "2026-10-21",
+      "archived": false,
+      "description": "The agent engineering platform.",
+      "topics": [
+        "agents",
+        "ai",
+        "ai-agents",
+        "anthropic",
+        "chatgpt",
+        "deepagents"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "run-llama/llama_index": {
+      "repo": "run-llama/llama_index",
+      "ok": true,
+      "stars": 52595,
+      "license": "MIT",
+      "pushed_at": "2026-10-21",
+      "archived": false,
+      "description": "LlamaIndex is the document processing platform for AI",
+      "topics": [
+        "agents",
+        "application",
+        "data",
+        "fine-tuning",
+        "framework",
+        "llamaindex"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "infiniflow/ragflow": {
+      "repo": "infiniflow/ragflow",
+      "ok": true,
+      "stars": 92592,
+      "license": "Apache-2.0",
+      "pushed_at": "2026-10-21",
+      "archived": false,
+      "description": "RAGFlow is a leading open-source Retrieval-Augmented Generation (RAG) engine that fuses cutting-edge RAG with Agent capabilities to create a superior context layer for LLMs",
+      "topics": [
+        "agent-harness",
+        "agentic-ai",
+        "agentic-nagive",
+        "agentic-retrieval",
+        "agentic-search",
+        "ai"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "HKUDS/LightRAG": {
+      "repo": "HKUDS/LightRAG",
+      "ok": true,
+      "stars": 40252,
+      "license": "MIT",
+      "pushed_at": "2026-10-20",
+      "archived": false,
+      "description": "[EMNLP2025] LightRAG: Simple and Fast Retrieval-Augmented Generation",
+      "topics": [
+        "docling",
+        "genai",
+        "gpt",
+        "graphrag",
+        "knowledge-graph",
+        "large-language-models"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "vllm-project/vllm": {
+      "repo": "vllm-project/vllm",
+      "ok": true,
+      "stars": 94640,
+      "license": "Apache-2.0",
+      "pushed_at": "2026-10-21",
+      "archived": false,
+      "description": "A high-throughput and memory-efficient inference and serving engine for LLMs",
+      "topics": [
+        "amd",
+        "blackwell",
+        "cuda",
+        "deepseek",
+        "deepseek-v3",
+        "gpt"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "sgl-project/sglang": {
+      "repo": "sgl-project/sglang",
+      "ok": true,
+      "stars": 37561,
+      "license": "Apache-2.0",
+      "pushed_at": "2026-10-21",
+      "archived": false,
+      "description": "SGLang is a high-performance serving framework for large language models and multimodal models.",
+      "topics": [
+        "attention",
+        "blackwell",
+        "cuda",
+        "deepseek",
+        "diffusion",
+        "glm"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "ggml-org/llama.cpp": {
+      "repo": "ggml-org/llama.cpp",
+      "ok": true,
+      "stars": 131891,
+      "license": "MIT",
+      "pushed_at": "2026-10-21",
+      "archived": false,
+      "description": "LLM inference in C/C++",
+      "topics": [
+        "ggml"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "huggingface/peft": {
+      "repo": "huggingface/peft",
+      "ok": true,
+      "stars": 21817,
+      "license": "Apache-2.0",
+      "pushed_at": "2026-10-21",
+      "archived": false,
+      "description": "🤗 PEFT: State-of-the-art Parameter-Efficient Fine-Tuning.",
+      "topics": [
+        "adapter",
+        "diffusion",
+        "fine-tuning",
+        "llm",
+        "lora",
+        "parameter-efficient-learning"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "hiyouga/LLaMA-Factory": {
+      "repo": "hiyouga/LLaMA-Factory",
+      "ok": true,
+      "stars": 76000,
+      "license": null,
+      "pushed_at": "",
+      "archived": false,
+      "description": "",
+      "topics": [],
+      "approx": true,
+      "stars_source": "shields_io"
+    },
+    "unslothai/unsloth": {
+      "repo": "unslothai/unsloth",
+      "ok": true,
+      "stars": 78352,
+      "license": "Apache-2.0",
+      "pushed_at": "2026-10-21",
+      "archived": false,
+      "description": "Local UI to run and train LLMs and diffusion models. Supports GGUF, MLX, Qwen3.8, DeepSeek-V4, MiniMax-H3, Gemma 4, FLUX and more.",
+      "topics": [
+        "agent",
+        "ai",
+        "chatgpt",
+        "deepseek",
+        "fine-tuning",
+        "gemma"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "huggingface/trl": {
+      "repo": "huggingface/trl",
+      "ok": true,
+      "stars": 19561,
+      "license": "Apache-2.0",
+      "pushed_at": "2026-10-21",
+      "archived": false,
+      "description": "Train transformer language models with reinforcement learning.",
+      "topics": [],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "karpathy/nanoGPT": {
+      "repo": "karpathy/nanoGPT",
+      "ok": true,
+      "stars": 63967,
+      "license": "MIT",
+      "pushed_at": "2025-11-12",
+      "archived": false,
+      "description": "The simplest, fastest repository for training/finetuning medium-sized GPTs.",
+      "topics": [],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "karpathy/build-nanogpt": {
+      "repo": "karpathy/build-nanogpt",
+      "ok": true,
+      "stars": 5577,
+      "license": null,
+      "pushed_at": "2024-08-13",
+      "archived": false,
+      "description": "Video+code lecture on building nanoGPT from scratch",
+      "topics": [],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "huggingface/transformers": {
+      "repo": "huggingface/transformers",
+      "ok": true,
+      "stars": 167942,
+      "license": "Apache-2.0",
+      "pushed_at": "2026-10-21",
+      "archived": false,
+      "description": "🤗 Transformers: the model-definition framework for state-of-the-art machine learning models in text, vision, audio, and multimodal models, for both inference and training.",
+      "topics": [
+        "audio",
+        "deep-learning",
+        "deepseek",
+        "gemma",
+        "glm",
+        "hacktoberfest"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "jingyaogong/minimind": {
+      "repo": "jingyaogong/minimind",
+      "ok": true,
+      "stars": 64067,
+      "license": "Apache-2.0",
+      "pushed_at": "2026-09-22",
+      "archived": false,
+      "description": "🧠 Train a 64M-parameter LLM from scratch in just 2h!",
+      "topics": [
+        "artificial-intelligence",
+        "large-language-model"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "huggingface/diffusers": {
+      "repo": "huggingface/diffusers",
+      "ok": true,
+      "stars": 34772,
+      "license": "Apache-2.0",
+      "pushed_at": "2026-10-21",
+      "archived": false,
+      "description": "🤗 Diffusers: State-of-the-art diffusion models for image, video, and audio generation in PyTorch.",
+      "topics": [
+        "deep-learning",
+        "diffusion",
+        "flux",
+        "image-generation",
+        "image2image",
+        "image2video"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "openai/CLIP": {
+      "repo": "openai/CLIP",
+      "ok": true,
+      "stars": 34501,
+      "license": "MIT",
+      "pushed_at": "2026-03-25",
+      "archived": false,
+      "description": "CLIP (Contrastive Language-Image Pretraining),  Predict the most relevant text snippet given an image",
+      "topics": [
+        "deep-learning",
+        "machine-learning"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "AUTOMATIC1111/stable-diffusion-webui": {
+      "repo": "AUTOMATIC1111/stable-diffusion-webui",
+      "ok": true,
+      "stars": 165088,
+      "license": "AGPL-3.0",
+      "pushed_at": "2026-03-02",
+      "archived": false,
+      "description": "Stable Diffusion web UI",
+      "topics": [
+        "ai",
+        "ai-art",
+        "deep-learning",
+        "diffusion",
+        "gradio",
+        "image-generation"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "QwenLM/Qwen2.5-VL": {
+      "repo": "QwenLM/Qwen2.5-VL",
+      "ok": false,
+      "error": "Moved Permanently",
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "openai/evals": {
+      "repo": "openai/evals",
+      "ok": true,
+      "stars": 19623,
+      "license": "NOASSERTION",
+      "pushed_at": "2026-04-14",
+      "archived": false,
+      "description": "Evals is a framework for evaluating LLMs and LLM systems, and an open-source registry of benchmarks.",
+      "topics": [],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "EleutherAI/lm-evaluation-harness": {
+      "repo": "EleutherAI/lm-evaluation-harness",
+      "ok": true,
+      "stars": 14285,
+      "license": "MIT",
+      "pushed_at": "2026-09-14",
+      "archived": false,
+      "description": "A framework for few-shot evaluation of language models.",
+      "topics": [
+        "evaluation-framework",
+        "language-model",
+        "transformer"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "explodinggradients/ragas": {
+      "repo": "explodinggradients/ragas",
+      "ok": true,
+      "stars": 16000,
+      "license": null,
+      "pushed_at": "",
+      "archived": false,
+      "description": "",
+      "topics": [],
+      "approx": true,
+      "stars_source": "shields_io"
+    },
+    "langchain-ai/langgraph": {
+      "repo": "langchain-ai/langgraph",
+      "ok": true,
+      "stars": 43638,
+      "license": "MIT",
+      "pushed_at": "2026-10-21",
+      "archived": false,
+      "description": "Build resilient agents.",
+      "topics": [
+        "agents",
+        "ai",
+        "ai-agents",
+        "chatgpt",
+        "deepagents",
+        "enterprise"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "microsoft/autogen": {
+      "repo": "microsoft/autogen",
+      "ok": true,
+      "stars": 61505,
+      "license": "CC-BY-4.0",
+      "pushed_at": "2026-10-16",
+      "archived": false,
+      "description": "A programming framework for agentic AI",
+      "topics": [
+        "agentic",
+        "agentic-agi",
+        "agents",
+        "ai",
+        "autogen",
+        "autogen-ecosystem"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "crewAIInc/crewAI": {
+      "repo": "crewAIInc/crewAI",
+      "ok": true,
+      "stars": 59947,
+      "license": "MIT",
+      "pushed_at": "2026-10-21",
+      "archived": false,
+      "description": "Framework for orchestrating role-playing, autonomous AI agents. By fostering collaborative intelligence, CrewAI empowers agents to work together seamlessly, tackling complex tasks.",
+      "topics": [
+        "agents",
+        "ai",
+        "ai-agents",
+        "aiagentframework",
+        "llms"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "openai/openai-agents-python": {
+      "repo": "openai/openai-agents-python",
+      "ok": true,
+      "stars": 30195,
+      "license": "MIT",
+      "pushed_at": "2026-10-20",
+      "archived": false,
+      "description": "A lightweight, powerful framework for multi-agent workflows",
+      "topics": [
+        "agents",
+        "ai",
+        "framework",
+        "harness",
+        "llm",
+        "openai"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "modelcontextprotocol/python-sdk": {
+      "repo": "modelcontextprotocol/python-sdk",
+      "ok": true,
+      "stars": 24629,
+      "license": "MIT",
+      "pushed_at": "2026-10-17",
+      "archived": false,
+      "description": "The official Python SDK for Model Context Protocol servers and clients",
+      "topics": [
+        "mcp",
+        "mcp-client",
+        "mcp-server",
+        "python"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "geekan/MetaGPT": {
+      "repo": "geekan/MetaGPT",
+      "ok": false,
+      "error": "Moved Permanently",
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "langgenius/dify": {
+      "repo": "langgenius/dify",
+      "ok": true,
+      "stars": 159119,
+      "license": "NOASSERTION",
+      "pushed_at": "2026-10-21",
+      "archived": false,
+      "description": "Build Agentic workflows, RAG pipelines, with rich AI model and tool support on one collaborative workspace. Deploy on cloud, VPC, or self-hosted, so teams move from prototype to production without rebuilding the stack.",
+      "topics": [
+        "agent",
+        "agentic-ai",
+        "agentic-framework",
+        "agentic-workflow",
+        "ai",
+        "automation"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "n8n-io/n8n": {
+      "repo": "n8n-io/n8n",
+      "ok": true,
+      "stars": 208204,
+      "license": "NOASSERTION",
+      "pushed_at": "2026-10-21",
+      "archived": false,
+      "description": "Fair-code workflow automation platform with native AI capabilities. Combine visual building with custom code, self-host or cloud, 400+ integrations.",
+      "topics": [
+        "ai",
+        "apis",
+        "automation",
+        "cli",
+        "data-flow",
+        "development"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "mli/paper-reading": {
+      "repo": "mli/paper-reading",
+      "ok": true,
+      "stars": 33996,
+      "license": "Apache-2.0",
+      "pushed_at": "2025-03-22",
+      "archived": false,
+      "description": "深度学习经典、新论文逐段精读",
+      "topics": [
+        "deep-learning",
+        "paper",
+        "reading-list"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "dair-ai/ML-Papers-of-the-Week": {
+      "repo": "dair-ai/ML-Papers-of-the-Week",
+      "ok": true,
+      "stars": 13000,
+      "license": null,
+      "pushed_at": "",
+      "archived": false,
+      "description": "",
+      "topics": [],
+      "approx": true,
+      "stars_source": "shields_io"
+    },
+    "kamranahmedse/developer-roadmap": {
+      "repo": "kamranahmedse/developer-roadmap",
+      "ok": false,
+      "error": "Moved Permanently",
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "donnemartin/system-design-primer": {
+      "repo": "donnemartin/system-design-primer",
+      "ok": true,
+      "stars": 374985,
+      "license": "NOASSERTION",
+      "pushed_at": "2026-09-15",
+      "archived": false,
+      "description": "Learn how to design large-scale systems. Prep for the system design interview.  Includes Anki flashcards.",
+      "topics": [
+        "design",
+        "design-patterns",
+        "design-system",
+        "development",
+        "interview",
+        "interview-practice"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "yangshun/tech-interview-handbook": {
+      "repo": "yangshun/tech-interview-handbook",
+      "ok": true,
+      "stars": 143087,
+      "license": "MIT",
+      "pushed_at": "2026-08-07",
+      "archived": false,
+      "description": "Curated coding interview preparation materials for busy software engineers",
+      "topics": [
+        "algorithm",
+        "algorithm-interview",
+        "algorithm-interview-questions",
+        "algorithms",
+        "behavioral-interviews",
+        "coding-interviews"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "alirezadir/Machine-Learning-Interviews": {
+      "repo": "alirezadir/Machine-Learning-Interviews",
+      "ok": true,
+      "stars": 9900,
+      "license": null,
+      "pushed_at": "",
+      "archived": false,
+      "description": "",
+      "topics": [],
+      "approx": true,
+      "stars_source": "shields_io"
+    },
+    "datawhalechina/llm-universe": {
+      "repo": "datawhalechina/llm-universe",
+      "ok": true,
+      "stars": 14178,
+      "license": null,
+      "pushed_at": "2026-08-27",
+      "archived": false,
+      "description": "本项目是一个面向小白开发者的大模型应用开发教程，在线阅读地址：https://datawhalechina.github.io/llm-universe/",
+      "topics": [
+        "langchain",
+        "rag"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "datawhalechina/happy-llm": {
+      "repo": "datawhalechina/happy-llm",
+      "ok": true,
+      "stars": 34489,
+      "license": "NOASSERTION",
+      "pushed_at": "2026-08-08",
+      "archived": false,
+      "description": "📚 从零开始构建大模型",
+      "topics": [
+        "agent",
+        "llm",
+        "rag"
+      ],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "chiphuyen/ml-interviews-book": {
+      "repo": "chiphuyen/ml-interviews-book",
+      "ok": true,
+      "stars": 4788,
+      "license": null,
+      "pushed_at": "2025-03-21",
+      "archived": false,
+      "description": "https://huyenchip.com/ml-interviews-book/",
+      "topics": [],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "anthropics/claude-cookbooks": {
+      "repo": "anthropics/claude-cookbooks",
+      "ok": true,
+      "stars": 53639,
+      "license": "MIT",
+      "pushed_at": "",
+      "archived": false,
+      "description": "",
+      "topics": [],
+      "approx": false,
+      "stars_source": "github_api"
+    },
+    "FoundationAgents/MetaGPT": {
+      "repo": "FoundationAgents/MetaGPT",
+      "ok": true,
+      "stars": 71000,
+      "license": null,
+      "pushed_at": "",
+      "archived": false,
+      "description": "",
+      "topics": [],
+      "approx": true,
+      "stars_source": "shields_io"
+    },
+    "QwenLM/Qwen3-VL": {
+      "repo": "QwenLM/Qwen3-VL",
+      "ok": true,
+      "stars": 20000,
+      "license": null,
+      "pushed_at": "",
+      "archived": false,
+      "description": "",
+      "topics": [],
+      "approx": true,
+      "stars_source": "shields_io"
+    }
+  },
+  "note": "stars 为 GitHub REST API 实测（2026-10-21）；approx=true 者为 shields.io 徽章千位近似，展示时加 ≈。"
+}
