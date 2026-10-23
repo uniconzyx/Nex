@@ -1,0 +1,519 @@
+{
+ "track": "ai",
+ "items": [
+  {
+   "slug": "ai-openai-cookbook",
+   "track": "ai",
+   "tier": "t1",
+   "hours": 8,
+   "level": "easy",
+   "title": "OpenAI Cookbook · 提示词与工具调用范式",
+   "repo": "openai/openai-cookbook",
+   "summary": "官方示例合集，覆盖结构化输出、函数调用、RAG、评测。它的价值是给你一套「业界现在怎么写」的基准，避免自创无效套路。",
+   "stack": [
+    "Python",
+    "Chat Completions",
+    "Function Calling",
+    "结构化输出",
+    "Embedding"
+   ],
+   "learn": [
+    "结构化输出（JSON Schema）如何约束模型返回",
+    "Function Calling 的请求与回包结构",
+    "Few-shot 与指令微调的适用边界",
+    "Embedding + 余弦相似度做语义检索",
+    "如何给提示词写回归测试"
+   ],
+   "career": "AI 应用岗的日常。能拿出可复现的提示词评测，比「我觉得这样写好」有说服力。",
+   "steps": [
+    "跑通 3 个示例（结构化输出、函数调用、RAG）",
+    "把其中一个改成自己的业务场景",
+    "给提示词建 10 条测试用例并记录通过率",
+    "对比改提示词前后的通过率变化",
+    "写 README：提示词版本表 + 评测结果"
+   ],
+   "accept": [
+    "结构化输出能稳定返回合法 JSON",
+    "函数调用能正确触发并处理回包",
+    "有 10 条以上用例的通过率数据"
+   ],
+   "interview": [
+    "如何让模型稳定输出 JSON",
+    "Function Calling 与 ReAct 的关系",
+    "提示词工程怎么做出可验证的改进"
+   ]
+  },
+  {
+   "slug": "ai-transformers",
+   "track": "ai",
+   "tier": "t1",
+   "hours": 8,
+   "level": "easy",
+   "title": "Transformers · 模型定义与推理入口",
+   "repo": "huggingface/transformers",
+   "summary": "HuggingFace 的模型框架，几乎所有开源模型的统一入口。t1 阶段不求读懂架构，只要能用 pipeline 跑通「加载—推理—后处理」全链路。",
+   "stack": [
+    "PyTorch",
+    "pipeline",
+    "Tokenizer",
+    "AutoModel"
+   ],
+   "learn": [
+    "pipeline 背后做了哪几件事",
+    "Tokenizer 的分词与特殊 token",
+    "AutoModel 如何按配置加载不同架构",
+    "batch 推理与显存占用的关系",
+    "半精度（fp16/bf16）对速度与精度的影响"
+   ],
+   "career": "AI 应用岗的第一块基石。能把推理链路跑通并解释每一步，才算入门。",
+   "steps": [
+    "用 pipeline 跑通文本分类与文本生成两个任务",
+    "拆开 pipeline，手动做 tokenize → forward → decode",
+    "对比 batch=1 与 batch=8 的吞吐",
+    "切 fp16 再测一次速度与显存",
+    "写 README：推理链路图 + 三组性能数据"
+   ],
+   "accept": [
+    "能手工复现 pipeline 的三步而不只是调一行",
+    "有 batch 与精度变化的实测数据",
+    "能说清 tokenizer 输出里每个字段的含义"
+   ],
+   "interview": [
+    "Tokenizer 的 vocab 与 embedding 层的关系",
+    "batching 为什么会提升吞吐但增加延迟",
+    "fp16 什么时候会掉精度"
+   ]
+  },
+  {
+   "slug": "ai-autogen",
+   "track": "ai",
+   "tier": "t2",
+   "hours": 20,
+   "level": "mid",
+   "title": "AutoGen · 多智能体协作框架",
+   "repo": "microsoft/autogen",
+   "summary": "微软的多智能体框架，用对话驱动多个 Agent 分工协作，支持工具调用、代码执行与人机协同。",
+   "stack": [
+    "Python",
+    "Multi-Agent",
+    "Tool Use",
+    "Code Execution",
+    "LLM"
+   ],
+   "learn": [
+    "多 Agent 的角色划分与消息协议",
+    "群聊调度与终止条件",
+    "代码执行沙箱的安全边界",
+    "人机协同的介入点",
+    "成本与轮次的控制"
+   ],
+   "career": "Agent 方向进阶项目。能设计一个多角色协作流程，比单 Agent Demo 更有深度。",
+   "steps": [
+    "跑通官方 two-agent 示例",
+    "设计一个三角色流程：需求 → 编码 → 评审",
+    "加代码执行与结果回传",
+    "设置终止条件与最大轮次",
+    "统计 token 成本并优化"
+   ],
+   "accept": [
+    "多角色流程可自动跑完并产出结果",
+    "有终止条件防止无限对话",
+    "成本有前后对比",
+    "失败案例有归因"
+   ],
+   "interview": [
+    "多 Agent 相比单 Agent 的收益与代价",
+    "如何防止 Agent 之间互相甩锅",
+    "代码执行的安全隔离方案"
+   ]
+  },
+  {
+   "slug": "ai-dify",
+   "track": "ai",
+   "tier": "t2",
+   "hours": 20,
+   "level": "mid",
+   "title": "Dify · 开源 LLM 应用平台",
+   "repo": "langgenius/dify",
+   "summary": "15.8 万星的 LLM 应用平台：可视化编排工作流、RAG 知识库、Agent 与模型管理，可直接部署成内部 AI 中台。",
+   "stack": [
+    "Python",
+    "Next.js",
+    "RAG",
+    "Workflow",
+    "Agent",
+    "Docker"
+   ],
+   "learn": [
+    "可视化工作流的节点抽象",
+    "知识库切分与召回策略",
+    "多模型接入与路由",
+    "应用发布与 API 化",
+    "多租户与权限"
+   ],
+   "career": "企业落地 AI 的主流选择。会部署 + 二次开发，能直接对接「AI 中台」类岗位。",
+   "steps": [
+    "docker compose 部署并初始化",
+    "建一个知识库并上传文档",
+    "用工作流编排一个客服机器人",
+    "发布为 API 并接入自己的前端",
+    "改一处源码，加自定义节点"
+   ],
+   "accept": [
+    "平台可正常部署并创建应用",
+    "知识库问答命中率可测",
+    "API 可被外部调用",
+    "自定义节点可运行"
+   ],
+   "interview": [
+    "工作流编排与 Agent 的适用边界",
+    "知识库召回率如何提升",
+    "多租户数据隔离方案"
+   ]
+  },
+  {
+   "slug": "ai-langchain",
+   "track": "ai",
+   "tier": "t2",
+   "hours": 20,
+   "level": "mid",
+   "title": "LangChain · LLM 应用编排框架",
+   "repo": "langchain-ai/langchain",
+   "summary": "14.8 万星的 LLM 应用框架。把模型、提示词、工具、检索、记忆抽象成可组合组件，是 Agent 开发的事实标准之一。",
+   "stack": [
+    "Python",
+    "LLM",
+    "RAG",
+    "Agent",
+    "Tool Calling"
+   ],
+   "learn": [
+    "Chain 与 Runnable 的组合方式",
+    "工具调用与 Agent 决策循环",
+    "RAG 的切分、检索与重排",
+    "对话记忆的存储与压缩",
+    "流式输出与回调"
+   ],
+   "career": "AI 应用开发岗的通用技能。能独立搭一个 RAG + Agent 应用，是最低门槛的作品。",
+   "steps": [
+    "接一个模型，跑通最简 Chain",
+    "做一个文档问答：切分 + 向量库 + 检索",
+    "加工具调用，让模型能查库/算数",
+    "接入流式输出与多轮记忆",
+    "评测：构造 30 条问题测准确率"
+   ],
+   "accept": [
+    "RAG 问答在自测集上准确率 > 70%",
+    "Agent 能正确选择工具",
+    "流式输出首字延迟可测",
+    "有失败案例分析"
+   ],
+   "interview": [
+    "RAG 效果差时的排查顺序",
+    "Agent 如何避免死循环",
+    "上下文超长时的压缩策略"
+   ]
+  },
+  {
+   "slug": "ai-ollama",
+   "track": "ai",
+   "tier": "t2",
+   "hours": 20,
+   "level": "mid",
+   "title": "Ollama · 本地模型部署与服务化",
+   "repo": "ollama/ollama",
+   "summary": "一条命令拉起本地大模型并暴露 API。适合把「模型能跑」变成「服务能用」：量化、并发、显存管理都会在这里第一次撞上。",
+   "stack": [
+    "Go",
+    "llama.cpp",
+    "GGUF 量化",
+    "REST API",
+    "Modelfile"
+   ],
+   "learn": [
+    "GGUF 量化等级（Q4/Q5/Q8）对质量与体积的影响",
+    "Modelfile 如何定义系统提示与参数",
+    "并发请求下的显存与排队行为",
+    "流式响应的实现方式",
+    "本地部署相比 API 调用的成本边界"
+   ],
+   "career": "私有化部署需求越来越多。能讲清量化取舍与显存估算，是落地能力。",
+   "steps": [
+    "拉起一个 7B 模型，用 curl 调通生成接口",
+    "换 Q4 与 Q8 两个量化版本，对比质量与速度",
+    "写一个 Modelfile 定制系统提示与温度",
+    "压 5 个并发，记录排队与显存峰值",
+    "写 README：量化对比表 + 显存估算公式"
+   ],
+   "accept": [
+    "能根据参数量与量化等级估算显存占用",
+    "有 Q4/Q8 的速度与质量对比",
+    "并发压测下服务不崩且能说明排队策略"
+   ],
+   "interview": [
+    "量化为什么能降显存，代价是什么",
+    "本地部署与云 API 的成本分界点在哪",
+    "并发推理时 KV cache 怎么占内存"
+   ]
+  },
+  {
+   "slug": "ai-llama-cpp",
+   "track": "ai",
+   "tier": "t3",
+   "hours": 45,
+   "level": "hard",
+   "title": "llama.cpp · 纯 C/C++ 的推理内核",
+   "repo": "ggml-org/llama.cpp",
+   "summary": "不依赖 PyTorch 的推理实现，靠 ggml 自己做张量计算与量化。是理解「推理引擎到底在算什么」最透明的样本。",
+   "stack": [
+    "C/C++",
+    "ggml",
+    "GGUF",
+    "量化（Q4_K 等）",
+    "CPU/GPU 后端"
+   ],
+   "learn": [
+    "ggml 的计算图与内存规划",
+    "量化 block 的存储格式与反量化开销",
+    "KV cache 的布局与增长",
+    "CPU、CUDA、Metal 后端的调度差异",
+    "batch 与线程数对吞吐的影响"
+   ],
+   "career": "端侧推理与嵌入式 AI 方向的高价值项目。能讲清量化的数据格式，是非常硬的技术细节。",
+   "steps": [
+    "编译并跑通一个量化模型",
+    "用不同量化等级测速度与困惑度",
+    "调线程数，画吞吐曲线",
+    "读量化相关代码，画 block 的位布局",
+    "写 README：量化格式图 + 性能对比表"
+   ],
+   "accept": [
+    "有 Q4/Q5/Q8 的速度与困惑度数据",
+    "能说清量化 block 里 scale 与 zero point 的作用",
+    "线程数超过物理核数后吞吐不再上升（有数据）",
+    "能解释 KV cache 随上下文增长的内存曲线"
+   ],
+   "interview": [
+    "量化为什么能减少内存带宽压力",
+    "端侧推理的主要瓶颈是什么",
+    "KV cache 为什么随序列长度线性增长"
+   ]
+  },
+  {
+   "slug": "ai-llama-index",
+   "track": "ai",
+   "tier": "t3",
+   "hours": 45,
+   "level": "hard",
+   "title": "LlamaIndex · RAG 的数据层与检索策略",
+   "repo": "run-llama/llama_index",
+   "summary": "专注 RAG 的数据框架：切分、索引、检索、重排、拼装上下文。能把「RAG 效果不好」拆成可定位的环节。",
+   "stack": [
+    "Python",
+    "向量索引",
+    "混合检索",
+    "重排",
+    "上下文拼装"
+   ],
+   "learn": [
+    "chunk 策略（定长/语义/层级）对召回的影响",
+    "向量检索与关键词检索的互补性",
+    "rerank 在链路中的位置与代价",
+    "多路召回融合的打分方式",
+    "上下文窗口与信息密度的平衡"
+   ],
+   "career": "RAG 是当前 AI 应用最主流的落地形态。能把效果问题拆到具体环节，是工程能力的核心体现。",
+   "steps": [
+    "用一份 100 页文档建索引，跑通问答",
+    "对比 3 种 chunk 策略的召回命中率",
+    "加入 rerank，测命中率与延迟变化",
+    "做混合检索（向量+BM25）并对比",
+    "写 README：检索链路图 + 各策略指标表"
+   ],
+   "accept": [
+    "有可复现的召回命中率评测集",
+    "能定位一次失败是切分问题还是检索问题",
+    "rerank 的收益与延迟代价有量化",
+    "能说清什么情况下 RAG 不如微调"
+   ],
+   "interview": [
+    "chunk 大小怎么定",
+    "向量检索为什么会漏掉精确匹配",
+    "RAG 与长上下文方案怎么选"
+   ]
+  },
+  {
+   "slug": "ai-vllm",
+   "track": "ai",
+   "tier": "t3",
+   "hours": 45,
+   "level": "hard",
+   "title": "vLLM · PagedAttention 与推理吞吐",
+   "repo": "vllm-project/vllm",
+   "summary": "当前最主流的推理引擎，核心创新是 PagedAttention——把 KV cache 按页管理，大幅提升显存利用率与吞吐。",
+   "stack": [
+    "PyTorch",
+    "PagedAttention",
+    "连续批处理",
+    "KV Cache",
+    "张量并行"
+   ],
+   "learn": [
+    "PagedAttention 如何解决 KV cache 碎片",
+    "连续批处理（continuous batching）的收益来源",
+    "显存占用与最大并发序列数的关系",
+    "张量并行在多卡上的切分方式",
+    "吞吐与延迟的权衡曲线"
+   ],
+   "career": "推理部署岗的核心技能。能讲清 PagedAttention，直接对上大模型工程岗的高频题。",
+   "steps": [
+    "部署一个模型，跑通 OpenAI 兼容接口",
+    "调 max_num_seqs 与 gpu_memory_utilization，测吞吐变化",
+    "对比 vLLM 与朴素 HF 推理的吞吐",
+    "画并发—吞吐—P99 三条曲线",
+    "写 README：PagedAttention 图解 + 调参结论"
+   ],
+   "accept": [
+    "有与 HF 原生推理的吞吐对比数据",
+    "能说清 gpu_memory_utilization 调高会有什么风险",
+    "能画出并发与 P99 的关系曲线",
+    "能解释连续批处理为什么提升 GPU 利用率"
+   ],
+   "interview": [
+    "PagedAttention 相比连续分配的改进",
+    "推理服务的吞吐和延迟怎么同时优化",
+    "KV cache 显存怎么估算"
+   ]
+  },
+  {
+   "slug": "ai-open-webui",
+   "track": "ai",
+   "tier": "t4",
+   "hours": 90,
+   "level": "hard",
+   "title": "Open WebUI · 自托管 AI 平台的完整形态",
+   "repo": "open-webui/open-webui",
+   "summary": "可自托管的 AI 对话平台，含多模型路由、RAG、知识库、权限、插件。是「把模型封装成产品」的完整参考实现。",
+   "stack": [
+    "Svelte",
+    "FastAPI",
+    "RAG",
+    "多模型路由",
+    "RBAC",
+    "插件系统"
+   ],
+   "learn": [
+    "多模型统一接入的抽象层设计",
+    "知识库与对话上下文的隔离",
+    "用户权限与模型访问控制",
+    "插件（Pipeline/Function）的扩展点",
+    "流式输出与前端状态同步"
+   ],
+   "career": "AI 产品工程岗的旗舰项目。能把「模型 + 知识库 + 权限 + 插件」整合起来，说明具备落地能力。",
+   "steps": [
+    "部署并接入本地 Ollama 与一个云 API",
+    "建知识库，验证 RAG 回答引用了文档",
+    "配两个角色，验证模型访问权限隔离",
+    "写一个插件（如敏感词过滤）并挂载",
+    "写 README：架构图 + 权限矩阵"
+   ],
+   "accept": [
+    "多模型可在同一会话中路由切换",
+    "普通用户无法访问受限模型",
+    "RAG 回答能给出引用来源",
+    "插件启停不影响主流程"
+   ],
+   "interview": [
+    "多模型路由该按什么维度决策",
+    "知识库权限如何做到行级隔离",
+    "AI 产品的流式体验怎么保证"
+   ]
+  },
+  {
+   "slug": "openhands-agent-runtime",
+   "track": "ai",
+   "tier": "t4",
+   "hours": 95,
+   "level": "hard",
+   "title": "OpenHands · Agent 运行时与沙箱的设计取舍",
+   "repo": "OpenHands/OpenHands",
+   "summary": "一个能真正跑命令、改文件、开浏览器的编码 Agent。难点全在工程：动作怎么在沙箱里安全执行、上下文超长怎么裁剪、失败怎么回滚、并发会话怎么隔离。看完它你会明白 Agent 产品的差距主要在运行时而不在提示词。",
+   "stack": [
+    "Agent Runtime",
+    "Docker 沙箱",
+    "Event Stream",
+    "工具调用",
+    "上下文管理"
+   ],
+   "learn": [
+    "事件流（event stream）驱动的 agent 循环与状态恢复",
+    "沙箱内执行动作的权限边界与逃逸风险",
+    "观察（observation）截断策略对上下文窗口的影响",
+    "多轮工具调用失败后的重试与回滚设计",
+    "并发会话的资源配额与隔离方式"
+   ],
+   "career": "Agent 工程岗的核心考察点：能不能把不可靠的模型输出包装成可靠的系统。",
+   "steps": [
+    "本地跑起来，用一个真实小需求（改 bug + 跑测试）走完整流程",
+    "记录一次任务的完整事件流，画出状态机",
+    "人为让工具调用失败，观察重试与恢复行为",
+    "把观察截断阈值调小，测任务成功率变化",
+    "给沙箱加一条资源限制（CPU/内存/时长），验证不会拖垮宿主",
+    "写报告：运行时设计的三个关键选择与代价"
+   ],
+   "accept": [
+    "能在本地完成一个端到端编码任务并留下事件流",
+    "失败恢复路径有实际触发记录",
+    "资源限制能拦住一次故意的死循环"
+   ],
+   "interview": [
+    "Agent 执行危险命令时你怎么保证安全",
+    "上下文超限时你会优先丢什么",
+    "怎么评估一个 Agent 系统的好坏"
+   ]
+  },
+  {
+   "slug": "ragflow-prod",
+   "track": "ai",
+   "tier": "t4",
+   "hours": 90,
+   "level": "hard",
+   "title": "RAGFlow · 把 RAG 从 demo 做成能交付的系统",
+   "repo": "infiniflow/ragflow",
+   "summary": "RAG 的失败大多不在模型，而在文档解析和召回：PDF 双栏被读成乱码、表格丢失、切片切断语义。RAGFlow 用 DeepDoc 做版面分析，再叠加混合检索与重排。这个项目要你拿一份真实文档集，把召回率从能用抬到可交付。",
+   "stack": [
+    "DeepDoc",
+    "混合检索",
+    "Rerank",
+    "向量库",
+    "评测集"
+   ],
+   "learn": [
+    "版面分析（layout）如何识别标题、表格、双栏并保持阅读顺序",
+    "按语义结构切片与按固定长度切片对召回的影响",
+    "BM25 稀疏检索与向量检索的互补性，以及融合权重怎么调",
+    "Rerank 在候选集上的收益与延迟成本",
+    "用标注集算 hit rate / MRR 而不是靠感觉判断好坏"
+   ],
+   "career": "AI 应用岗最容易被追问的就是「你的 RAG 效果怎么证明」，有评测集和消融实验的人立刻区分开。",
+   "steps": [
+    "部署 RAGFlow，导入 200 页真实 PDF（含表格与双栏）",
+    "人工标注 50 条问答对，建立评测基线",
+    "对比三种切片策略的 hit rate 与 MRR",
+    "开/关 rerank 与混合检索，做四组消融",
+    "针对失败样本定位：解析错、切片错、还是召回错",
+    "写交付文档：数据集、指标、消融表、已知缺陷"
+   ],
+   "accept": [
+    "有 50 条以上标注集且指标可复现",
+    "四组消融有明确数字结论",
+    "失败样本被归因到具体环节而非「模型不行」"
+   ],
+   "interview": [
+    "RAG 效果不好时你的排查顺序是什么",
+    "为什么要做 rerank，直接提高召回数量不行吗",
+    "长文档切片粒度怎么定"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,133 @@
+{
+  "meta": {
+    "chapter": "agent-ch03",
+    "title": "模型接入与 DeepSeek 实操 —— 习题集",
+    "count": 6,
+    "note": "3 道概念题（错误码、缓存、重试边界）+ 3 道算法实践题（令牌桶、退避数值、成本诊断），全部为原创题干。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "401、429、503 应该用同一套重试策略吗",
+      "content_md": "某客户端把所有非 2xx 响应都按「重试 3 次、固定间隔 200ms」处理。下列哪种改法最合理？\n\nA. 三类错误都重试 3 次，但把间隔改成指数退避\nB. 401 快速失败并告警；429 读取 `Retry-After` 后等待；503 有限次退避并触发熔断\nC. 400 也重试 2 次，因为可能是网络抖动导致参数丢失\nD. 所有错误都降级到本地 Ollama，保证有返回",
+      "answer": {
+        "correct": "B",
+        "explain": "错误处理的第一步不是「重试几次」，而是「这个错误重试会不会变对」。401 是密钥/权限问题，重试只会把 300ms 的失败拖成数秒，并持续消耗配额；400 是请求本身不合法，重试不会让参数变对；429 是限流，服务端通常通过 `Retry-After` 告诉你等多久，盲目指数退避可能等得太短继续撞墙；503 是过载/暂时不可用，适合有限次退避，并在连续失败后熔断，避免把下游打得更惨。D 的问题是把「降级」当成万能兜底：鉴权失败时本地模型可能根本不该处理这类数据，而且静默降级会让用户以为一切正常。"
+      },
+      "explanation": "考点：可重试性由错误语义决定，不由 HTTP 状态码的「是不是 5xx」单独决定。",
+      "tags": [
+        "错误码",
+        "重试",
+        "熔断",
+        "降级"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/01 第 3 节；示例 ex04"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "哪次改动会让前缀缓存命中率从 85% 掉到接近 0",
+      "content_md": "某客服系统 85% 的请求命中前缀缓存。上线一次改动后，命中率跌到 1% 以下，但请求总量和输出长度都没变。最可能的原因是：\n\nA. 把 few-shot 示例从 4 条精简为 2 条\nB. 在 system prompt 的第一行加入 `当前时间：{now}`\nC. 把用户问题从平均 100 字扩展到 300 字\nD. 把 `max_tokens` 从 800 调到 400",
+      "answer": {
+        "correct": "B",
+        "explain": "前缀缓存要求从第一个 token 开始逐字节匹配。时间每秒都在变，等于每次请求的前缀都不同，缓存永远无法命中，整段系统提示都按未命中计费。A 会改变前缀内容，但只在发布那一刻变一次，之后仍然稳定命中；C 改的是**末尾**的用户消息，不影响前缀；D 只影响输出预算，与前缀无关。正确做法是把动态字段（时间、用户名、会话 ID）移到用户消息或提示词末尾，保持「稳定前缀 + 变化后缀」的结构。"
+      },
+      "explanation": "考点：缓存命中的条件是前缀逐字节稳定，不是「语义相同」。",
+      "tags": [
+        "前缀缓存",
+        "成本",
+        "提示词结构"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/02 第 2 节；示例 ex07"
+    },
+    {
+      "type": "judge",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "把 max_retries 调大是否总能提高成功率",
+      "content_md": "判断：重试次数越多，请求最终成功率越高，所以生产环境应尽量把 `max_retries` 调大。（对/错，并说明原因）",
+      "answer": {
+        "correct": "错",
+        "explain": "在「每次尝试独立、单次成功率 p 固定」的假设下，n 次尝试的成功率是 `1-(1-p)^n`，确实随 n 上升。但真实故障是**相关的**：过载时所有请求一起失败，重试并不会独立地「再抽一次」；相反，大量客户端同时重试会形成重试风暴，让下游更难恢复。其次，重试有明确代价：P95 延迟被放大（示例 ex02 中 6 次尝试把 P95 从 1.05s 拉到 3.25s）、配额被重复消耗、非幂等写操作可能重复执行。正确做法是「分类 + 幂等 + 有上限的退避 + 熔断」，而不是单纯调大次数；当失败率超过阈值时，快速失败比继续重试更有价值。"
+      },
+      "explanation": "考点：重试收益的独立性假设，以及重试与熔断的分工。",
+      "tags": [
+        "重试",
+        "幂等",
+        "尾部延迟",
+        "熔断"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/01 第 3、5 节；示例 ex02、ex08"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "实现令牌桶并验证突发容量与稳态速率",
+      "content_md": "实现一个令牌桶限流器 `TokenBucket(capacity, rate)`，提供 `allow(now_ms)`：\n1. 按距上次调用的时间差补充令牌，补充量不超过容量；\n2. 令牌足够则扣 1 放行，否则拒绝；\n3. 用「t=0 到达 12 个请求，之后 4 秒每秒 3 个」的序列验证：`capacity=10, rate=5` 时应放行 22、拒绝 2；`capacity=1` 时稳态每秒也会丢 2 个；\n4. 输出每种配置的放行数、拒绝数与长期利用率。",
+      "answer": {
+        "reference_code": "class TokenBucket:\n    def __init__(self, cap, rate):\n        self.cap, self.rate = float(cap), float(rate)\n        self.tokens, self.last = float(cap), 0.0\n        self.ok = self.no = 0\n\n    def allow(self, now_ms):\n        dt = max(0.0, (now_ms - self.last) / 1000.0)\n        self.tokens = min(self.cap, self.tokens + dt * self.rate)\n        self.last = now_ms\n        if self.tokens >= 1.0:\n            self.tokens -= 1.0; self.ok += 1; return True\n        self.no += 1; return False\n\nfor cap in (10, 1):\n    b = TokenBucket(cap, 5)\n    seq = [0.0] * 12 + [s * 1000.0 for s in range(1, 5) for _ in range(3)]\n    for t in seq:\n        b.allow(t)\n    print(f\"C={cap}: 放行 {b.ok}, 拒绝 {b.no}, 利用率 {b.ok/(cap+20):.1%}\")",
+        "explain": "关键在补充顺序：先按时间差补令牌（并 clamp 到容量），再判断是否够 1 个。若先判断再补充，`capacity=1` 时稳态会全部拒绝。第二个坑是 `capacity` 不是「额外速率」：它只吸收突发，`C/r` 是可承受的突发时长。示例里 `C=10, r=5` 能吸收 2 秒的突发；`C=1` 时即使 `r=5`，每秒 3 个请求同时到达也只会放行 1 个，因为桶容量小于到达批次。"
+      },
+      "explanation": "令牌桶的两个参数分别控制突发与稳态，容量不足会持续丢包。",
+      "tags": [
+        "令牌桶",
+        "限流",
+        "突发流量"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/01 第 4 节；示例 ex01"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "用递推精确计算指数退避的期望等待与成功率",
+      "content_md": "设单次尝试失败概率 `q=0.6`，最多 `n=4` 次尝试，首次退避 `base=0.2s`，指数退避为 `base·2^(k-1)`，full jitter 为 `U(0, base·2^(k-1))`。\n1. 用递推（不要蒙特卡洛）计算两种策略的成功率、期望尝试次数、期望累计等待；\n2. 验证 full jitter 下第 k 次等待的期望是 `base·2^(k-1)/2`；\n3. 输出两种策略的「最坏累计等待」与「期望累计等待」，解释抖动为什么不改变单请求成功率与最坏等待，却能把同一时刻的重试打散。",
+      "answer": {
+        "reference_code": "q, n, base = 0.6, 4, 0.2\nfor policy in (\"exp\", \"jitter\"):\n    alive, exp_att, exp_wait, worst = 1.0, 0.0, 0.0, 0.0\n    for k in range(1, n + 1):\n        p = alive * (1 - q)\n        exp_att += k * p\n        if k < n:\n            upper = base * 2 ** (k - 1)\n            w = upper * (0.5 if policy == \"jitter\" else 1.0)\n            exp_wait += alive * q * w\n            worst += upper\n        alive *= q\n    print(f\"{policy}: 成功率 {1-alive:.3f}, 期望尝试 {exp_att:.3f}, \"\n          f\"期望等待 {exp_wait:.3f}s, 最坏等待 {worst:.1f}s\")\nprint(\"jitter 第 k 次期望等待 =\", [base*2**(k-1)/2 for k in range(1, 4)])",
+        "explain": "递推的核心是 `alive`（前 k-1 次都失败的概率）与「恰好第 k 次成功」`alive*(1-q)`。成功率只依赖尝试次数，所以 exp 与 jitter 完全相同；抖动的收益在**同时刻碰撞**与尾部分布，不在单请求成功率，也不降低最坏等待（上限仍是各次 `base·2^(k-1)`）。期望等待按「到达该次尝试的概率 × 该次等待」累加，注意 `alive*q` 才是失败后进入下一次退避的概率。"
+      },
+      "explanation": "区分「成功率」与「尾部延迟」：抖动优化后者，不改变前者。",
+      "tags": [
+        "指数退避",
+        "抖动",
+        "期望值",
+        "递推"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/01 第 3 节；示例 ex02"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 5,
+      "title": "从请求日志定位成本上涨的真实原因",
+      "content_md": "给定两周的请求日志（字段：`week, feature, prompt_tokens, cached_tokens, completion_tokens, unit_in, unit_cache, unit_out`），完成一次成本归因：\n1. 按 feature 聚合两周的请求数、单请求成本、缓存命中率；\n2. 把总成本变化拆成三部分：**请求量变化**、**缓存命中率变化**、**输出长度变化**（其余归为残差）；\n3. 指出贡献最大的 feature，并判断应该先修缓存还是先压输出；\n4. 说明为什么不能只看「总 token 数」判断成本是否健康。",
+      "answer": {
+        "reference_code": "def cost(r):\n    miss = r[\"prompt_tokens\"] - r[\"cached_tokens\"]\n    return (miss*r[\"unit_in\"] + r[\"cached_tokens\"]*r[\"unit_cache\"]\n            + r[\"completion_tokens\"]*r[\"unit_out\"]) / 1e6\n\nfor feat in {r[\"feature\"] for r in logs}:\n    a = [r for r in logs if r[\"feature\"] == feat and r[\"week\"] == 1]\n    b = [r for r in logs if r[\"feature\"] == feat and r[\"week\"] == 2]\n    n1, n2 = len(a), len(b)\n    c1, c2 = sum(map(cost, a)), sum(map(cost, b))\n    hit1 = sum(r[\"cached_tokens\"] for r in a) / max(1, sum(r[\"prompt_tokens\"] for r in a))\n    hit2 = sum(r[\"cached_tokens\"] for r in b) / max(1, sum(r[\"prompt_tokens\"] for r in b))\n    out1 = sum(r[\"completion_tokens\"] for r in a) / max(1, n1)\n    out2 = sum(r[\"completion_tokens\"] for r in b) / max(1, n2)\n    print(f\"{feat}: n {n1}->{n2}, 单请求 {c1/n1:.5f}->{c2/n2:.5f}, \"\n          f\"命中 {hit1:.1%}->{hit2:.1%}, 输出 {out1:.0f}->{out2:.0f}\")",
+        "explain": "归因的顺序很重要：先固定其他变量，再单独替换一个。比如「量变化」用 `n2 × 旧单请求成本 - n1 × 旧单请求成本`；「命中率变化」在量不变的前提下替换命中率；「输出变化」再替换输出。三者相加不等于总变化的部分就是交互项/残差。只看总 token 会把「缓存命中下降（贵 token 变多）」误判成「请求变多」，从而做出错误的扩容或限流决策。"
+      },
+      "explanation": "成本诊断要做因子分解，不能把「总量上涨」当成单一原因。",
+      "tags": [
+        "成本归因",
+        "缓存命中",
+        "日志分析"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/02 第 4 节；示例 ex07、ex10"
+    }
+  ]
+}

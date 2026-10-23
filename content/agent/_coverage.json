@@ -1,0 +1,308 @@
+{
+  "total_chapters": 0,
+  "complete": 0,
+  "incomplete": 0,
+  "coverage_pct": 0.0,
+  "planning": {
+    "planned_total": 0,
+    "planned_complete": 0,
+    "planned_missing": 0,
+    "planning_coverage_pct": 0.0,
+    "declared_complete": 0,
+    "status_drifted": [],
+    "missing_units": [],
+    "units": []
+  },
+  "orphan_dirs": [
+    {
+      "subject": "agent-ch01",
+      "id": "concept",
+      "files": 3,
+      "kind": "orphan",
+      "detail": [
+        "01-industry-value-chain.md",
+        "02-job-map-and-skills.md",
+        "03-tech-literacy.md"
+      ]
+    },
+    {
+      "subject": "agent-ch01",
+      "id": "examples",
+      "files": 10,
+      "kind": "orphan",
+      "detail": [
+        "ex01-value_chain_margin.json",
+        "ex02-jd_keyword_cooccurrence.json",
+        "ex03-job_match_cosine.json",
+        "ex04-capability_gap.json",
+        "ex05-ai_fit_classifier.json",
+        "ex06-project_roi.json"
+      ]
+    },
+    {
+      "subject": "agent-ch02",
+      "id": "concept",
+      "files": 3,
+      "kind": "orphan",
+      "detail": [
+        "01-prompt-as-interface.md",
+        "02-structured-output.md",
+        "03-injection-and-safety.md"
+      ]
+    },
+    {
+      "subject": "agent-ch02",
+      "id": "examples",
+      "files": 10,
+      "kind": "orphan",
+      "detail": [
+        "ex01-template_validation.json",
+        "ex02-fewshot_returns.json",
+        "ex03-cot_tradeoff.json",
+        "ex04-json_schema_check.json",
+        "ex05-repair_loop.json",
+        "ex06-stream_json.json"
+      ]
+    },
+    {
+      "subject": "agent-ch03",
+      "id": "concept",
+      "files": 3,
+      "kind": "orphan",
+      "detail": [
+        "01-api-integration.md",
+        "02-context-and-cost.md",
+        "03-local-vs-cloud.md"
+      ]
+    },
+    {
+      "subject": "agent-ch03",
+      "id": "examples",
+      "files": 10,
+      "kind": "orphan",
+      "detail": [
+        "ex01-token_bucket.json",
+        "ex02-exponential_backoff.json",
+        "ex03-sse_parser.json",
+        "ex04-error_taxonomy.json",
+        "ex05-context_truncation.json",
+        "ex06-token_estimator.json"
+      ]
+    },
+    {
+      "subject": "agent-ch04",
+      "id": "concept",
+      "files": 2,
+      "kind": "orphan",
+      "detail": [
+        "01-user-story-and-scope.md",
+        "02-ai-product-canvas.md"
+      ]
+    },
+    {
+      "subject": "agent-ch04",
+      "id": "examples",
+      "files": 10,
+      "kind": "orphan",
+      "detail": [
+        "ex01-story_scorer.json",
+        "ex02-ai_fit_ladder.json",
+        "ex03-capability_matrix.json",
+        "ex04-fmea.json",
+        "ex05-handoff_economics.json",
+        "ex06-unit_economics.json"
+      ]
+    },
+    {
+      "subject": "agent-ch05",
+      "id": "examples",
+      "files": 10,
+      "kind": "orphan",
+      "detail": [
+        "ex01-chunking_recall.json",
+        "ex02-parent_child.json",
+        "ex03-bm25_zh.json",
+        "ex04-tfidf_cosine.json",
+        "ex05-rrf_fusion.json",
+        "ex06-rerank_sim.json"
+      ]
+    },
+    {
+      "subject": "agent-ch06",
+      "id": "concept",
+      "files": 3,
+      "kind": "orphan",
+      "detail": [
+        "01-vram-ledger.md",
+        "02-inference-scheduling.md",
+        "03-deployment-engineering.md"
+      ]
+    },
+    {
+      "subject": "agent-ch06",
+      "id": "examples",
+      "files": 10,
+      "kind": "orphan",
+      "detail": [
+        "ex01-vram_ledger.json",
+        "ex02-kv_growth.json",
+        "ex03-quant_tradeoff.json",
+        "ex04-continuous_batching.json",
+        "ex05-paged_fragmentation.json",
+        "ex06-queueing_model.json"
+      ]
+    },
+    {
+      "subject": "agent-ch07",
+      "id": "concept",
+      "files": 3,
+      "kind": "orphan",
+      "detail": [
+        "01-decision.md",
+        "02-method.md",
+        "03-data-engineering.md"
+      ]
+    },
+    {
+      "subject": "agent-ch07",
+      "id": "examples",
+      "files": 10,
+      "kind": "orphan",
+      "detail": [
+        "ex01-svd_lowrank.json",
+        "ex02-lora_param_calculator.json",
+        "ex03-qlora_memory_ledger.json",
+        "ex04-minhash_dedup.json",
+        "ex05-data_mix.json",
+        "ex06-loss_mask.json"
+      ]
+    },
+    {
+      "subject": "agent-ch08",
+      "id": "concept",
+      "files": 3,
+      "kind": "orphan",
+      "detail": [
+        "01-attention.md",
+        "02-position-norm.md",
+        "03-params-inference.md"
+      ]
+    },
+    {
+      "subject": "agent-ch08",
+      "id": "examples",
+      "files": 10,
+      "kind": "orphan",
+      "detail": [
+        "ex01-single_head_attention.json",
+        "ex02-multi_head.json",
+        "ex03-causal_mask.json",
+        "ex04-positional.json",
+        "ex05-param_count.json",
+        "ex06-ffn_memory.json"
+      ]
+    }
+  ],
+  "thresholds": {
+    "goals": 1,
+    "concept": 3,
+    "pitfalls": 3,
+    "exercises": 5,
+    "examples": 10,
+    "interview": 3,
+    "project": 1
+  },
+  "tri_view": {
+    "concept_files": 0,
+    "tri_view_complete": 0,
+    "canonical_complete": 0,
+    "marker_drift": [],
+    "coverage_pct": 0.0,
+    "chapters_pending": []
+  },
+  "bagua": [
+    {
+      "subject": "agent-ch01",
+      "exists": false,
+      "categories": 0,
+      "items": 0,
+      "ok": false,
+      "issues": [
+        "缺少八股模块 _bagua.json"
+      ]
+    },
+    {
+      "subject": "agent-ch02",
+      "exists": false,
+      "categories": 0,
+      "items": 0,
+      "ok": false,
+      "issues": [
+        "缺少八股模块 _bagua.json"
+      ]
+    },
+    {
+      "subject": "agent-ch03",
+      "exists": false,
+      "categories": 0,
+      "items": 0,
+      "ok": false,
+      "issues": [
+        "缺少八股模块 _bagua.json"
+      ]
+    },
+    {
+      "subject": "agent-ch04",
+      "exists": false,
+      "categories": 0,
+      "items": 0,
+      "ok": false,
+      "issues": [
+        "缺少八股模块 _bagua.json"
+      ]
+    },
+    {
+      "subject": "agent-ch05",
+      "exists": false,
+      "categories": 0,
+      "items": 0,
+      "ok": false,
+      "issues": [
+        "缺少八股模块 _bagua.json"
+      ]
+    },
+    {
+      "subject": "agent-ch06",
+      "exists": false,
+      "categories": 0,
+      "items": 0,
+      "ok": false,
+      "issues": [
+        "缺少八股模块 _bagua.json"
+      ]
+    },
+    {
+      "subject": "agent-ch07",
+      "exists": false,
+      "categories": 0,
+      "items": 0,
+      "ok": false,
+      "issues": [
+        "缺少八股模块 _bagua.json"
+      ]
+    },
+    {
+      "subject": "agent-ch08",
+      "exists": false,
+      "categories": 0,
+      "items": 0,
+      "ok": false,
+      "issues": [
+        "缺少八股模块 _bagua.json"
+      ]
+    }
+  ],
+  "bagua_ok": 0,
+  "bagua_total": 8,
+  "chapters": []
+}

@@ -1,0 +1,8 @@
+{
+  "title": "样本复杂度：泛化 gap 按 1/√m 收缩",
+  "code_lang": "python",
+  "code_std": "3.13",
+  "stdin": "",
+  "expected_output": "    样本量m     训练MSE     测试MSE      gap   gap·√m\n      20    0.0472    0.1308   0.0837     0.37\n      40    0.0562    0.0773   0.0212     0.13\n      80    0.0580    0.0685   0.0105     0.09\n     160    0.0611    0.0663   0.0052     0.07\n     320    0.0617    0.0649   0.0032     0.06\n     640    0.0626    0.0644   0.0018     0.05\n    1280    0.0623    0.0641   0.0018     0.06\n\n读法：gap·√m 近似为常数 → gap ∝ 1/√m（与 VC/Rademacher 界同阶）。\n工程含义：数据翻 4 倍，gap 才减半。所以「离线上不去」时先判断是 gap 问题（加数据）\n还是偏差问题（训练误差本身就高，加数据无效，得换模型/加特征）。\n",
+  "code": "# 固定模型容量（5 次多项式），只改样本量，看训练-测试误差间距怎么变。\nimport numpy as np\n\nrng = np.random.default_rng(13)\nf = lambda x: np.sin(2 * np.pi * x)\nDEG, REPS = 5, 40\nx_pool = rng.uniform(0, 1, 20000)\ny_pool = f(x_pool) + rng.normal(0, 0.25, x_pool.size)\nx_te, y_te = x_pool[:5000], y_pool[:5000]\n\nprint(f\"{'样本量m':>8} {'训练MSE':>9} {'测试MSE':>9} {'gap':>8} {'gap·√m':>8}\")\nfor m in (20, 40, 80, 160, 320, 640, 1280):\n    trs, tes = [], []\n    for _ in range(REPS):\n        idx = rng.choice(x_pool.size, m, replace=False)\n        w = np.polyfit(x_pool[idx], y_pool[idx], DEG)\n        trs.append(np.mean((np.polyval(w, x_pool[idx]) - y_pool[idx]) ** 2))\n        tes.append(np.mean((np.polyval(w, x_te) - y_te) ** 2))\n    tr, te = np.mean(trs), np.mean(tes)\n    gap = te - tr\n    print(f\"{m:>8} {tr:>9.4f} {te:>9.4f} {gap:>8.4f} {gap*np.sqrt(m):>8.2f}\")\n\nprint(\"\\n读法：gap·√m 近似为常数 → gap ∝ 1/√m（与 VC/Rademacher 界同阶）。\")\nprint(\"工程含义：数据翻 4 倍，gap 才减半。所以「离线上不去」时先判断是 gap 问题（加数据）\")\nprint(\"还是偏差问题（训练误差本身就高，加数据无效，得换模型/加特征）。\")\n"
+}

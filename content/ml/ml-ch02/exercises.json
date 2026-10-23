@@ -1,0 +1,106 @@
+{
+  "meta": {
+    "chapter": "ml-ch02",
+    "title": "线性模型：最小二乘、正则化与逻辑回归 —— 习题集",
+    "count": 6,
+    "note": "3 道概念题（最小二乘的统计前提 / 共线性 / L1 vs L2）+ 3 道算法实践题（手写坐标下降 Lasso、岭回归谱滤波数值验证、类别不平衡阈值诊断），全部为原创题干。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "最小二乘与极大似然等价的前提",
+      "content_md": "在线性模型 `y = Xw + ε` 下，最小二乘解 `argmin ‖y − Xw‖²` 等价于高斯噪声假设下的极大似然估计（MLE）。下列说法准确的是：\n\nA. 只要误差 ε 是任意分布，最小二乘就是 MLE\nB. 只有当 ε 服从零均值**高斯同方差**分布时，最小二乘才与 MLE 等价\nC. 只要误差零均值，最小二乘就是 MLE，与分布形状无关\nD. 最小二乘永远等于伯努利 MLE",
+      "answer": {
+        "correct": "B",
+        "explain": "最小二乘 = 高斯同方差噪声下的 MLE：当 `ε ~ N(0, σ²I)` 时，对数似然关于 w 最大化等价于最小化 `‖y − Xw‖²`。\n\nA 错：非高斯噪声下 MLE 一般不再是最小二乘（如伯努利→逻辑回归的交叉熵）；C 错：零均值只是必要条件，分布形状决定损失形式（高斯→平方，拉普拉斯→绝对值）；D 错：伯努利对应逻辑回归，与最小二乘完全不同。\n\n这也提醒我们：平方损失并非「无前提」，它的统计前提是**高斯同方差噪声**——遇到重尾离群或异方差，应换稳健损失或加权最小二乘。"
+      },
+      "explanation": "区分「最小二乘的几何本质」与「它的统计前提」。",
+      "tags": ["最小二乘", "MLE", "高斯噪声"],
+      "source": "self",
+      "source_ref": "《The Elements of Statistical Learning》第3章"
+    },
+    {
+      "type": "judge",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "多重共线性只会让预测变差，不影响系数解释",
+      "content_md": "判断：多重共线性（特征高度相关）会使回归系数的方差爆炸、符号不稳定，但只要目的是「预测」而非「解释」，共线性就完全无害，可以完全不管。（对/错，并说明原因）",
+      "answer": {
+        "correct": "错",
+        "explain": "前半句对：共线性使 `(XᵀX)⁻¹` 在小奇异值方向被 `1/σ_min` 放大，系数方差爆炸、符号随样本抖动，但**整体预测**可能尚可（共线性压的是「解释性」不是「预测」）。\n\n但「完全不管」错：① 若目标含解释/归因，系数不可信必须先处理（VIF、删特征、岭回归）；② 即使纯预测，共线性也意味着 `κ` 极大，**数值不稳定**（小扰动让预测方差变大），且若测试分布的特征相关性变化，泛化会崩；③ 它还会放大对离群点的敏感度。\n\n正确态度：纯预测场景可保留但要知道系数无意义；凡要解释就必须先处理共线性。"
+      },
+      "explanation": "共线性的危害边界是常考题：伤解释不伤预测，但数值稳定性仍受累。",
+      "tags": ["多重共线性", "VIF", "方差膨胀"],
+      "source": "self",
+      "source_ref": "《机器学习》周志华 第3章"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "L1 与 L2 正则化的本质区别",
+      "content_md": "关于 L1（Lasso）和 L2（岭）正则化，下列哪项是它们在性质和解释上的关键区别：\n\nA. L2 能产生稀疏解（大量系数精确为 0），L1 只能收缩系数\nB. L1 的约束域是菱形、在尖角处与等高线相切，使大量系数精确为 0，且对应拉普拉斯先验；L2 约束域是圆，只收缩不置零，对应高斯先验\nC. L1 有闭式解，L2 必须迭代求解\nD. L1 与 L2 在相关特征上的表现完全相同",
+      "answer": {
+        "correct": "B",
+        "explain": "B 准确：L1 约束域 `‖w‖₁≤t` 是菱形，尖角落在坐标轴上，等高线更可能切到尖角 → 系数精确为零（稀疏）；L2 约束域是圆，最优解一般不在轴上 → 只收缩不置零。贝叶斯视角：L1=拉普拉斯先验（0 处尖峰），L2=高斯先验。\n\nA 反过来错了；C 错：是**岭回归有闭式解** `(XᵀX+λI)⁻¹Xᵀy`，Lasso 因 L1 不可导需坐标下降/近端梯度；D 错：相关特征上 Lasso 随机选一个、弹性网整组选，表现明显不同。"
+      },
+      "explanation": "L1 vs L2 的几何与贝叶斯解释是面试高频。",
+      "tags": ["L1", "L2", "稀疏", "正则化"],
+      "source": "self",
+      "source_ref": "《The Elements of Statistical Learning》第3章"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "手写坐标下降实现 Lasso（软阈值）",
+      "content_md": "不调用 sklearn，仅用 numpy 实现 Lasso 的**坐标下降**求解器：\n1. 实现软阈值算子 `S(z, λ) = sign(z)·max(|z|−λ, 0)`；\n2. 逐坐标更新 `wⱼ ← S( Xⱼᵀr / (XⱼᵀXⱼ), λ/2 )`，其中 `r` 为不含第 j 维的残差 `y − Σ_{k≠ⱼ} Xₖwₖ`；\n3. 重复若干轮直到系数变化小于容差；\n4. 在一个已知稀疏真值 `w_true`（如 `[3,−2,0,0,0]`）的合成数据上验证：估计出的系数应把无关维压到 0（对比普通最小二乘系数非零）。\n\n打印 λ 取不同值时的非零系数个数与系数向量。",
+      "answer": {
+        "reference_code": "import numpy as np\ndef soft(z, t): return np.sign(z)*np.maximum(np.abs(z)-t, 0)\nrng = np.random.default_rng(0)\nn, d = 100, 5; X = rng.normal(size=(n, d))\nw_true = np.array([3.0, -2.0, 0, 0, 0]); y = X@w_true + rng.normal(0, 0.1, n)\nfor lam in (0.0, 0.5, 2.0):\n    w = np.zeros(d); r = y.copy()\n    for _ in range(200):\n        w_old = w.copy()\n        for j in range(d):\n            r += X[:, j]*w[j]; w[j] = soft(X[:, j]@r, lam)/(X[:, j]@X[:, j]); r -= X[:, j]*w[j]\n        if np.max(np.abs(w-w_old)) < 1e-6: break\n    print(f\"λ={lam:>4}: 非零={int((np.abs(w)>1e-3).sum())} w={np.round(w,2)}\")",
+        "explain": "坐标下降利用「Lasso 关于单变量分段二次」的性质：固定其余维，第 j 维的最优解是软阈值。残差 `r` 的增量更新（先加回旧值再减新值）避免每步重算 `y−Xw`，是工程关键。\n\n预期：`λ=0` 退化为最小二乘，无关维系数非零（且因噪声不完全为 0）；`λ` 增大后无关维被压成 0，得到稀疏解。坑：① 未标准化时软阈值受特征尺度影响（大方差特征被罚得轻），应先标准化；② 收敛判据要用系数变化而非 loss；③ 相关特征上 Lasso 会随机保留组内一个（见 elastic net 修复）。这题练的是「把 L1 的不可导用坐标下降拆开」的核心手法。"
+      },
+      "explanation": "手写 Lasso 坐标下降，把不可导的 L1 用软阈值拆开。",
+      "tags": ["Lasso", "坐标下降", "软阈值"],
+      "source": "self",
+      "source_ref": "《The Elements of Statistical Learning》第3章 3.4.2（Lasso）"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "数值验证岭回归的「谱滤波」视角",
+      "content_md": "用 SVD 直接验证岭回归沿小奇异值方向收缩更强（谱滤波）：\n1. 构造一个含共线性、条件数 κ 较大的 `X`，算出其奇异值 `σᵢ`；\n2. 对每个 λ 用 SVD 公式 `w(λ) = V·diag(σᵢ/(σᵢ²+λ))·Uᵀy` 计算岭回归解；\n3. 计算「每个奇异值方向的理论收缩因子 `gᵢ = σᵢ²/(σᵢ²+λ)`」与「系数在该方向的实测分量比 `|w(λ)_vi| / |w(0)_vi|`」，二者应一致；\n4. 输出 λ 增大时「最大/最小奇异值方向的收缩因子」对比，证明小方向收缩更强，并给出测试误差随 λ 的 U 形。",
+      "answer": {
+        "reference_code": "import numpy as np\nrng = np.random.default_rng(1); n, d = 80, 10\nX = rng.normal(size=(n, d)); X[:, 5:] = X[:, :5]@rng.normal(size=(5,5)) + rng.normal(0,0.05,(n,5))\nw0 = np.array([2.0,-1.5,1.0,0,0,0,0,0,0,0.]); y = X@w0 + rng.normal(0,0.3,n)\nU,S,Vt = np.linalg.svd(X, full_matrices=False)\nfor lam in (0.0, 1.0, 10.0, 100.0):\n    w = Vt.T @ np.diag(S/(S**2+lam)) @ U.T @ y\n    g = S**2/(S**2+lam)\n    print(f\"λ={lam:>5}: g_max={g.max():.3f} g_min={g.min():.3f} ratio最大/最小方向收缩={g.max()/g.min():.1f}\")",
+        "explain": "谱滤波视角把岭回归解写成 `w(λ)=Σᵢ vᵢ·(σᵢ/(σᵢ²+λ))·(uᵢᵀy)`：每个主方向 vᵢ 上的系数被乘以 `gᵢ=σᵢ²/(σᵢ²+λ)`。大 σᵢ 方向 gᵢ≈1（保留），小 σᵢ 方向 gᵢ≈σᵢ²/λ（滤掉）。\n\n预期：λ=0 时 gᵢ=1（最小二乘，共线性使小方向系数爆炸）；λ 增大后 `g_min` 迅速趋 0、`g_max` 几乎不动，方向收缩比急剧拉大——数值上复现了「小方向被滤、噪声被压」。这同时解释了为何 `κ(XᵀX+λI)=(σ_max²+λ)/(σ_min²+λ)` 随 λ 下降，岭回归一边降方差一边降条件数。坑：验证实测分量比时要在**正交基 vᵢ 上**投影，不能直接比 w 的逐元素。"
+      },
+      "explanation": "用 SVD 把「谱滤波」从口号变成可核验的数值事实。",
+      "tags": ["岭回归", "谱滤波", "SVD", "条件数"],
+      "source": "self",
+      "source_ref": "《The Elements of Statistical Learning》第3章 岭回归的 SVD 推导"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 5,
+      "title": "类别不平衡下阈值与权重的诊断实验",
+      "content_md": "构造一个 1% 正例的严重不平衡二分类数据（线性可分性较弱），用**无正则逻辑回归**训练，做诊断实验：\n1. 报告默认阈值 0.5 下的 accuracy、precision、recall、F1；\n2. 扫描阈值 `t ∈ {0.5, 0.3, 0.1, 0.05}`，输出各阈值的 P/R/F1，说明降低阈值如何提高召回；\n3. 用 `class_weight`（等价于对少数类加权/重复样本）重新训练，对比在同阈值下的 P/R 变化；\n4. 同时打印 ROC-AUC 与 PR-AUC，说明不平衡下为什么 ROC 会「虚高」而 PR 更诚实。",
+      "answer": {
+        "reference_code": "import numpy as np\nrng = np.random.default_rng(2); n=2000\nd = rng.normal(size=(n,4)); y = (rng.random(n) < 0.01).astype(int)\nidx = np.where(y==1)[0]\nd[y==1] += 0.8   # 弱可分\ndef sig(z): z=np.clip(z,-30,30); return 1/(1+np.exp(-z))\nw = np.zeros(4);\nfor _ in range(3000): p=sig(d@w); w += 0.05*d.T@(y-p)\nfor t in (0.5,0.3,0.1,0.05):\n    pred=(p>=t).astype(int); tp=(pred*y).sum(); fp=(pred*(1-y)).sum(); fn=((1-pred)*y).sum()\n    P=tp/(tp+fp+1e-9); R=tp/(tp+fn+1e-9); F=2*P*R/(P+R+1e-9)\n    print(f\"t={t}: acc={((pred==y).mean()):.3f} P={P:.3f} R={R:.3f} F1={F:.3f}\")",
+        "explain": "不平衡下默认 0.5 阈值几乎把全部判为负，accuracy 虚高（≈99%）但 recall≈0。降低阈值 `t`：更多样本判为正 → recall 升、precision 降，F1 在中间某点最优——这是调阈值的真实工作流。\n\nclass_weight 等价于对少数类样本**重复/加权**（损失里正样本权重大），从训练根源抬升正例得分分布，使同一阈值下 recall 更高。坑：① 不要用 `1/(1+exp(-z))` 裸 sigmoid（|z| 大时溢出），要 clip 或用 `np.expit`；② ROC-AUC 对不平衡鲁棒但会虚高（横轴 FPR 分母大），PR-AUC 直接暴露查准率随召回崩塌，判断更诚实；③ 这里为演示用手写 GD，真实工程用 `class_weight='balanced'` 即可。"
+      },
+      "explanation": "不平衡场景的诊断：阈值、权重、ROC vs PR 三件套。",
+      "tags": ["逻辑回归", "类别不平衡", "阈值", "PR曲线"],
+      "source": "self",
+      "source_ref": "《机器学习》周志华 第3章；sklearn class_weight 文档"
+    }
+  ]
+}

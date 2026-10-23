@@ -1,0 +1,106 @@
+{
+  "meta": {
+    "chapter": "ml-ch05",
+    "title": "决策树与集成学习 —— 习题集",
+    "count": 6,
+    "note": "3 道基础题（增益率动机/Bagging 方差极限/XGBoost 正则分工）+ 3 道算法实践题（手写三口径分裂准则、数值验证方差公式、单树-Bagging-RF-GBDT 诊断对比），全部为原创题干。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "增益率惩罚的到底是什么",
+      "content_md": "Quinlan 在 C4.5 中用「增益率」替代「信息增益」作为分裂准则，主要动机是：\n\nA. 信息增益的计算复杂度太高\nB. 信息增益对取值数目多的特征有系统性偏好，增益率用属性固有值 IV 做惩罚\nC. 信息增益在数学上不满足非负性\nD. 增益率能保证找到全局最优树",
+      "answer": {
+        "correct": "B",
+        "explain": "信息增益 `Gain(D,A) = H(D) − H(D|A)` 只衡量纯度提升，不惩罚「把样本切得更碎」：取值数 K 越大，`H(D|A)` 越容易趋小，Gain 越容易虚高。增益率 `GainRatio = Gain/IV`，其中 `IV = −Σ_v (|D^v|/|D|) log(|D^v|/|D|)` 随取值数单调上升，等价于对「切得碎」征税。\n\n本章 ex01 在 14 样本天气数据上实测：outlook 的 Gain=0.2467 最大，但 IV=1.5774 也最大，增益率被压到 0.1564，与 humidity 的 0.1518 几乎打平——排序未变但差距从 1.63 倍缩到 1.03 倍，这正是 IV 惩罚的直接体现。\n\nA 错：两者计算量同级；C 错：信息增益恒非负（条件熵不超过熵）；D 错：贪心分裂本身就不保证全局最优，换准则不改变这一点。"
+      },
+      "explanation": "区分「纯度提升」与「切分代价」两个正交维度。",
+      "tags": ["信息增益", "增益率", "IV"],
+      "source": "self",
+      "source_ref": "《机器学习》周志华 第4章"
+    },
+    {
+      "type": "judge",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "Bagging 后方差的极限",
+      "content_md": "判断：B 个预测器两两相关系数为 ρ、各自方差为 σ²，对它们的预测取简单平均。当 B→∞ 时，平均预测的方差趋于 ρσ²。（对/错，并给出推导）",
+      "answer": {
+        "correct": "对",
+        "explain": "设第 i 个预测器的方差 `Var(f_i)=σ²`、`Cov(f_i,f_j)=ρσ²`（i≠j）。平均预测器 `f̄ = (1/B)Σ f_i` 的方差：\n`Var(f̄) = (1/B²)[Bσ² + B(B−1)ρσ²] = ρσ² + (1−ρ)σ²/B`。\n令 B→∞，第二项消失，余下 `ρσ²`——即「相关的那部分方差平均不掉，独立的那部分按 1/B 衰减」。\n\n这正是随机森林的命门：ex06 实测 ρ=0.9 时 100 棵树只把方差从 1 压到 0.901，接近理论值 0.9010；ρ=0 时 B=100 方差 0.0100，与理论 0.0100 吻合。所以「多训几棵树」救不了强相关，降 ρ（特征子采样）才是要害——但降 ρ 有代价（单树偏差上升），这也是 mtry 呈 U 形的原因。"
+      },
+      "explanation": "Bagging 有效性的核心公式，必考推导。",
+      "tags": ["Bagging", "方差", "相关系数"],
+      "source": "self",
+      "source_ref": "《The Elements of Statistical Learning》第8章"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "XGBoost 中 λ 与 γ 的分工",
+      "content_md": "关于 XGBoost 目标函数 `L = Σᵢ [gᵢf(xᵢ) + ½hᵢf²(xᵢ)] + ½λΣⱼwⱼ² + γT` 中的正则项，下列说法正确的是：\n\nA. λ 只决定是否分裂，γ 只决定叶值大小\nB. λ 和 γ 都出现在叶权 w* 的分母里，作用相同\nC. λ 进入叶权 `w* = −G/(H+λ)` 与分裂增益的分母，对所有叶值收缩；γ 只作为分裂门槛（Gain − γ > 0）参与决策，不改变已选定的叶值\nD. λ 对每棵树的收缩量相同，与叶子的 G、H 无关",
+      "answer": {
+        "correct": "C",
+        "explain": "二阶泰勒后目标对 w 求驻点：`w* = −G/(H+λ)`，叶子对损失的贡献 `−G²/(2(H+λ))`。因此 λ 出现在**分母**：H 小（样本少/曲率小）的叶子被压得越狠，且 λ 对每个叶子的收缩量不同（依赖该叶的 H）。\n\nγ 则是「新增一个叶子必须赚回的最小增益」，只在比较候选切分时做阈值 `Gain − γ > 0`，不进入任何叶值公式。ex09 实测：λ 从 0 到 20 时最优切分增益从 2.8602 单调降到 0.1090（λ 同时改变分裂排序）；γ 从 0 到 0.20 时同一切分的 Gain−γ 都仍>0（γ 只卡分裂决策）。\n\nA 把两者分工说反了；B 错：γ 不在 w* 里；D 错：收缩量依赖 H。"
+      },
+      "explanation": "正则项在公式里的精确位置，是 XGBoost 理解的分水岭。",
+      "tags": ["XGBoost", "正则化", "分裂增益"],
+      "source": "self",
+      "source_ref": "Chen & Guestlin, XGBoost, KDD 2016"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "手写三口径分裂准则并复现 ex01 的数字",
+      "content_md": "只用 NumPy 实现决策树的「分裂准则模块」：\n1. 实现 `entropy(y)`、`gini(y)`、条件熵/条件基尼（按特征分组后按样本数加权）、`IV(A)`；\n2. 给定 14 样本天气数据（outlook/temp/humidity/wind ∈ {离散取值}，标签 0/1），对每个特征输出 `Gain`、`GainRatio`、`Gini(D|A)` 三列；\n3. 验证：outlook 的 Gain 最大但 GainRatio 被压到 0.1564 附近，与 humidity（0.1518）几乎打平；\n4. 用一句话打印结论：三口径的特征排序何时一致、何时分歧。",
+      "answer": {
+        "reference_code": "import numpy as np\ndef ent(y):\n    p=np.bincount(y)/len(y); return -(p[p>0]*np.log2(p[p>0])).sum()\ndef gini(y):\n    p=np.bincount(y)/len(y); return 1-(p**2).sum()\ndef cond(f,y,fn):\n    return sum((m:=f==v).sum()/len(y)*fn(y[m]) for v in np.unique(f))\n# f: (n,) 离散特征, y: (n,) 0/1\nH0=ent(y); IV={a:-(np.bincount(f)/len(y)*np.log2(np.bincount(f)/len(y))).sum() for a in F}\nGain={a:H0-cond(f,y,ent) for a,f in F.items()}\nGR={a:Gain[a]/IV[a] for a in F}\nfor a in F: print(f'{a:8s} Gain={Gain[a]:.4f} IV={IV[a]:.4f} GR={GR[a]:.4f} Gini={cond(F[a],y,gini):.4f}')",
+        "explain": "关键点一：条件熵/条件基尼必须**按分支样本数加权**（`|D^v|/|D| · H(D^v)`），不是简单平均——这是最常见的错。关键点二：`IV` 用同样的分支比例算 `−Σ p log p`，取值数越多 IV 越大，增益率因此自动惩罚多取值特征。\n\n坑：空分支（某取值在样本中不出现）要跳过，否则 `0·log 0` 出 NaN；用 `p[p>0]` 掩码天然处理。验证口径：outlook 的 Gain 应≈0.2467、IV≈1.5774、GR≈0.1564，humidity 的 GR≈0.1518——对不上说明加权口径写错了。\n\n结论行示例：「三口径在取值数接近时排序一致；当某特征取值显著更多时 Gain 偏它、GR 把它拉回来，基尼因曲率差异在小样本分支可能给出第三种排序（ex02）」。"
+      },
+      "explanation": "把分裂准则从公式落到可运行代码，口径错一位数字全错。",
+      "tags": ["信息增益", "增益率", "基尼", "手写算法"],
+      "source": "self",
+      "source_ref": "《机器学习》周志华 第4章"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "数值验证 Bagging 方差公式 ρσ²+(1−ρ)σ²/B",
+      "content_md": "用受控合成数据验证方差缩减公式：\n1. 构造 B=200 个预测器：每个 `f_i = √ρ·Z + √(1−ρ)·ε_i`，其中 `Z~N(0,1)` 为共享噪声、`ε_i~N(0,1)` 为独立噪声，于是 `Var(f_i)=1`、两两相关恰为 ρ；\n2. 取前 B 个平均（B=1/10/100），重复 500 次估计平均方差；\n3. 与理论值 `ρ + (1−ρ)/B` 对比，要求相对误差 <5%；\n4. 扫描 ρ∈{0,0.3,0.6,0.9} 打印对照表，并回答：ρ=0.9 时 B=100 的方差是多少，这解释了随机森林的什么局限？",
+      "answer": {
+        "reference_code": "import numpy as np\nrng=np.random.default_rng(42)\nR=500; reps=200\nfor rho in (0,.3,.6,.9):\n    row=[]\n    for B in (1,10,100):\n        vs=[]\n        for _ in range(R):\n            Z=rng.standard_normal(reps); E=rng.standard_normal((reps,B))\n            f=np.sqrt(rho)*Z[:,None]+np.sqrt(1-rho)*E\n            vs.append(f.mean(1).var())\n        row.append(np.mean(vs))\n    theo=rho+(1-rho)/100\n    print(f'rho={rho:.1f} B1={row[0]:.4f} B10={row[1]:.4f} B100={row[2]:.4f} theo100={theo:.4f} err={abs(row[2]-theo)/theo:.3%}')",
+        "explain": "构造要点：`√ρ·Z + √(1−ρ)·ε` 的方差是 `ρ+(1−ρ)=1`，协方差只有共享项 `ρ`——受控相关是验证一切方差公式的前提。\n\n坑：重复实验要用**新采样的 Z 和 ε**，复用同一组噪声会把「平均方差」低估（样本间不独立了）；500 次重复才能把估计本身的标准差压到 1% 以下，否则 5% 的验收口径过不去。\n\n读数：ρ=0.9、B=100 时方差≈0.901，即 100 个模型只消掉 10% 的方差——随机森林的树数不是万能药，当树间强相关（同一批强相关特征、同一套数据）时收益饱和，必须靠特征子采样降 ρ，而降 ρ 又抬单树偏差，这就是 mtry 的 U 形曲线。"
+      },
+      "explanation": "用受控噪声结构把理论公式钉在实测数字上。",
+      "tags": ["Bagging", "方差公式", "数值验证"],
+      "source": "self",
+      "source_ref": "《The Elements of Statistical Learning》第8章"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 5,
+      "title": "诊断实验：单树 vs Bagging vs 随机森林 vs GBDT",
+      "content_md": "在同一个合成回归数据（n=300、d=10、5 个特征共线成组、标签含噪声）上做诊断对比：\n1. 训练四个模型：单棵深树（depth=8）、Bagging（50 棵 depth=8）、随机森林（50 棵 depth=5，mtry∈{2,5,10}）、GBDT（depth=3，η=0.1，早停）；\n2. 打印每个模型的训练 MSE 与测试 MSE，并计算「间距 = 测试 − 训练」；\n3. 用偏差-方差口径写三行诊断：谁训练 MSE 最高（高偏差信号）、谁间距最大（高方差信号）、哪种组合两害最小；\n4. 额外验证：打印随机森林在 mtry=2 时的树间平均相关系数，与方差公式对照解释「为什么它仍可能输给 mtry=10」。",
+      "answer": {
+        "reference_code": "import numpy as np\nrng=np.random.default_rng(5)\nX=rng.normal(size=(300,10)); X[:,5:]=X[:,:5]+rng.normal(0,.1,(300,5))\ny=X[:,:3]@np.array([2.,-1.,.5])+rng.normal(0,1,300)\nXte,yte=X[:60],y[:60]  # 演示切分，实际应留出\ndef mse(p,t): return ((p-t)**2).mean()\n# 单树\nclass N:\n    def __init__(s,d=8,fr=1.0): s.d=d; s.fr=fr\n    def fit(s,X,y,seed=0):\n        s.r=np.random.default_rng(seed); s.t=s.build(X,y,0); return s\n    def build(s,X,y,dep):\n        if dep>=s.d or len(y)<4: return y.mean()\n        cols=s.r.choice(X.shape[1],max(1,int(X.shape[1]*s.fr)),replace=False)\n        best=None\n        for j in cols:\n            for t in np.unique(X[:,j])[:-1]:\n                m=X[:,j]<=t; sl=[y[m],y[~m]]\n                g=sum(((v-v.mean())**2).sum() for v in sl)\n                if best is None or g<best[0]: best=(g,j,t)\n        _,j,t=best; m=X[:,j]<=t\n        return (j,t,s.build(X[m],y[m],dep+1),s.build(X[~m],y[~m],dep+1))\n    def pred(s,x):\n        while isinstance(s.t,tuple):\n            j,t,l,r=s.t; s.t=l if x[j]<=t else r\n        return s.t",
+        "explain": "诊断逻辑比模型本身重要：单棵深树训练 MSE 会接近 0 但测试 MSE 高且间距最大——高方差；GBDT 用 depth=3 的浅树做加法拟合，训练 MSE 下不去多少但测试 MSE 最低——它降的是偏差；随机森林夹在中间，训练 MSE 介于两者之间。\n\n坑：共线组（X[:,5:]=X[:,:5]+噪声）是关键设定——mtry=2 时两棵树很可能抽到同一个潜在因子的不同副本，树间相关 ρ 降幅有限（ex06 实测 ρ 只从 0.776 降到 0.747），按 `ρσ²+(1−ρ)σ²/B` 算集成方差改善有限，反而单树因特征变少偏差上升，于是 mtry=2 可能输给 mtry=10。这就是「降 ρ 有用但不保证降测试误差」的完整证据链。\n\n验收口径：四模型的测试 MSE 排序应大致为 GBDT < 随机森林(mtry≈5~10) < 单树，且 Bagging 的测试 MSE 明显低于单树；若随机森林 mtry=2 反超 mtry=10，先查共线组是否构造成功。"
+      },
+      "explanation": "一个实验同时暴露四种模型的偏差-方差签名。",
+      "tags": ["偏差方差", "诊断实验", "随机森林", "GBDT"],
+      "source": "self",
+      "source_ref": "《The Elements of Statistical Learning》第10章"
+    }
+  ]
+}

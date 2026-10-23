@@ -1,0 +1,106 @@
+{
+  "meta": {
+    "chapter": "ml-ch08",
+    "title": "强化学习：MDP 与 Q-learning —— 习题集",
+    "count": 6,
+    "note": "3 道基础题（MDP 定义/Bellman 最优方程/on-off-policy 分野）+ 3 道算法实践题（手写价值迭代、Bellman 残差收敛实测、ε 衰减诊断实验），全部为原创题干。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "下列哪一组元素不构成 MDP 五元组",
+      "content_md": "一个（折扣的、有限的）马尔可夫决策过程标准地由五元组定义。下列哪一组里**混进了不属于五元组的元素**：\n\nA. 状态空间 S、动作空间 A、转移核 P、奖励函数 R、折扣因子 γ\nB. 状态空间 S、动作空间 A、策略 π、奖励函数 R、折扣因子 γ\nC. 状态空间 S、动作空间 A、转移核 P、即时奖励 R、折扣因子 γ\nD. 状态空间 S、动作空间 A、转移核 P(s'|s,a)、奖励函数 R(s,a)、折扣因子 γ",
+      "answer": {
+        "correct": "B",
+        "explain": "MDP 五元组是 `(S, A, P, R, γ)`：状态空间、动作空间、转移核、奖励函数、折扣因子。**策略 π 是「解」而不是「问题描述」**——给定 MDP 后，智能体要学的正是 π，把 π 放进五元组是把环境与决策者混为一谈。\n\nA/C/D 是同一五元组的三种写法差异（R 写成 R(s) / R(s,a) / R(s,a,s') 都是合法变体），只有 B 换掉了 P 这个真正描述环境动力学的元素。"
+      },
+      "explanation": "区分「环境（MDP）」与「决策者（策略）」是 RL 形式化的第一课。",
+      "tags": ["MDP", "五元组", "策略"],
+      "source": "self",
+      "source_ref": "Sutton & Barto《Reinforcement Learning: An Introduction》第3章"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "Bellman 期望方程与最优方程的唯一结构差别",
+      "content_md": "对比下面两个方程：\n\n```\n(1) V^π(s) = Σ_a π(a|s) [ R(s,a) + γ Σ_{s'} P(s'|s,a) V^π(s') ]\n(2) V*(s) = max_a [ R(s,a) + γ Σ_{s'} P(s'|s,a) V*(s') ]\n```\n\n关于两者的差别与后果，下列说法**正确**的是：\n\nA. 两者都是线性方程，差别只在右端系数\nB. (1) 是线性算子（可解线性方程组），(2) 因 max 非线性、一般只能迭代\nC. (2) 比 (1) 更容易解析求解，因为 max 消掉了对策略的依赖\nD. 两个方程的解都可能不唯一，需要额外条件挑选",
+      "answer": {
+        "correct": "B",
+        "explain": "给定 π 后期望方程的算子是线性的：`V^π = (I − γP^π)^{-1} r^π`，形式上可解线性方程组（|S| 大时不现实）。\n\n最优方程右端的 `max_a` 使算子 `T` **非线性**——max 不满足线性性质，方程没有矩阵形式，只能靠迭代。但注意：`T` 是 γ-压缩的（`‖Tf−Tg‖∞ ≤ γ‖f−g‖∞`），Banach 不动点定理保证迭代收敛到**唯一**的 `V*`。所以 C、D 都错：非线性不等于多解，(2) 的解唯一且必须靠迭代。"
+      },
+      "explanation": "「一个 max 让问题从线性代数变成泛函分析」是本章核心认知。",
+      "tags": ["Bellman方程", "压缩映射", "非线性"],
+      "source": "self",
+      "source_ref": "Sutton & Barto 第3章 3.6/3.8 节；Puterman《Markov Decision Processes》"
+    },
+    {
+      "type": "judge",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "SARSA 与 Q-learning 的 target 与「学到什么」",
+      "content_md": "判断正误并说明理由：在同一个 ε-greedy 行为策略下持续训练，SARSA 收敛到 `Q^π`（当前策略的价值），Q-learning 收敛到 `Q*`（最优策略的价值）；造成这一差别的唯一原因是两者 target 中「下一个动作 a'」的来源不同——SARSA 用采样得到的实际动作，Q-learning 用 `max` 假设的最优动作。（对/错）",
+      "answer": {
+        "correct": "对",
+        "explain": "target 差异是 on/off-policy 分野的全部来源：\n\n- SARSA：`target = r + γQ(s', a')`，其中 `a' ~ π(·|s')` 是**实际走的那一步**。它在估计「按 π（含探索噪声）一直走下去」的价值，所以收敛到 `Q^π`——目标策略与行为策略是同一个，故 on-policy。\n- Q-learning：`target = r + γ max_{a'} Q(s', a')`，假设从 `s'` 起永远选表中最大值。target 不依赖产生数据的行为策略，所以直接逼近 `Q*`——目标策略（贪心）与行为策略（ε-greedy）分离，故 off-policy。\n\n两个常见推论也由此而来：SARSA 会把「自己探索时可能踩的坑」计入价值，学到的路线偏保守；Q-learning 只看最好动作，最优路线可以贴边。表格型下两者都有收敛保证（需每对 `(s,a)` 被充分访问）。"
+      },
+      "explanation": "on/off-policy 的判据：target 是否依赖行为策略。",
+      "tags": ["SARSA", "Q-learning", "on-policy", "off-policy"],
+      "source": "self",
+      "source_ref": "Sutton & Barto 第6章 6.4/6.5 节"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "手写价值迭代并对照策略迭代",
+      "content_md": "在一个给定的有限 MDP（`P` 为 `nS × nA × nS` 张量、`R` 为 `nS × nA` 矩阵、γ 已知）上，只用 NumPy：\n1. 实现**价值迭代**：`V_{k+1}(s) = max_a [ R(s,a) + γ Σ_{s'} P(s,a,s') V_k(s') ]`，用无穷范数 `max|V_{k+1} − V_k| < 1e-8` 判收敛，打印收敛轮数；\n2. 从 V* 导出贪心策略并打印（每个状态一个箭头字符）；\n3. 实现**策略迭代**（完整策略评估 + 贪心改进），打印策略更替轮数，与价值迭代的 V* 比较 `max|ΔV|`（应 < 1e-6）；\n4. 分别取 γ=0.5 与 γ=0.99 各跑一遍，对比收敛轮数，并解释差异。",
+      "answer": {
+        "reference_code": "import numpy as np\n\n# 4 状态走廊：动作 0=左, 1=右；右端 s3 有奖励 1 并终止\nnS, nA, gamma = 4, 2, 0.9\nP = np.zeros((nS, nA, nS)); R = np.zeros((nS, nA))\nfor s in range(nS - 1):\n    for a in range(nA):\n        ns = min(max(s + (1 if a else -1), 0), nS - 1)\n        P[s, a, ns] = 1.0\n        R[s, a] = -0.01 if s != nS - 2 else 1.0   # 终点前一格奖励 1\n\ndef value_iteration(gamma, theta=1e-8, max_iter=10000):\n    V = np.zeros(nS)\n    for k in range(1, max_iter + 1):\n        Q = R + gamma * (P @ V)          # nS×nA：一步 lookahead\n        V_new = Q.max(axis=1)\n        if np.abs(V_new - V).max() < theta:\n            return V_new, k\n        V = V_new\n    return V, max_iter\n\ndef greedy_policy(V, gamma):\n    Q = R + gamma * (P @ V)\n    return Q.argmax(axis=1)\n\nfor gamma in (0.5, 0.99):\n    V, iters = value_iteration(gamma)\n    pi = greedy_policy(V, gamma)\n    print(f\"gamma={gamma}: iters={iters}  V*={np.round(V, 4)}  pi={pi}\")\n\n# 策略迭代\nV = np.zeros(nS); pi = np.zeros(nS, dtype=int)\nfor round_ in range(1, 50):\n    Ppi = P[np.arange(nS), pi]                 # nS×nS，按当前策略取转移\n    V = np.linalg.solve(np.eye(nS) - gamma * Ppi, R[np.arange(nS), pi])   # 精确评估\n    Q = R + gamma * (P @ V)\n    new_pi = Q.argmax(axis=1)\n    if (new_pi == pi).all():\n        print(f\"policy iteration converged in {round_} rounds, max|ΔV| vs VI = \"\n              f\"{np.abs(V - value_iteration(0.9)[0]).max():.2e}\")\n        break\n    pi = new_pi",
+        "explain": "核心手法：一步 lookahead 写成矩阵形式 `Q = R + γ(P @ V)`，`P @ V` 一次性算完所有 `(s,a)` 的期望后继价值，比三重循环快两个量级。\n\n收敛轮数差异来自压缩因子：误差每轮乘 γ，γ=0.5 时几十轮内压到 1e-8；γ=0.99 需要约 `log(1e-8)/log(0.99) ≈ 1800` 轮——**γ 决定视野的同时也决定 DP 收敛速度**。\n\n策略迭代的评估步用 `(I − γP^π)V = r^π` 精确解（而非近似扫描），因此外层通常个位数轮收敛；最后与价值迭代的 V* 对照验证「同一个 MDP、两条路径、同一个答案」。"
+      },
+      "explanation": "把「压缩性决定收敛轮数」和「策略迭代 vs 价值迭代」用实验坐实。",
+      "tags": ["价值迭代", "策略迭代", "动态规划", "NumPy"],
+      "source": "self",
+      "source_ref": "Sutton & Barto 第4章；David Silver RL 讲义 Lecture 3"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 5,
+      "title": "实测 Bellman 最优性算子的压缩性",
+      "content_md": "任选一个小 MDP（如 5×5 GridWorld，γ=0.9，含障碍格），设计实验验证本章的理论命题：\n1. 构造两个不同的价值函数 `f`、`g`（如随机值、常数、V* 的扰动）；\n2. 计算 `d = ‖f − g‖∞` 与 `d' = ‖Tf − Tg‖∞`（T 为 Bellman 最优性算子），验证 `d' ≤ γ·d`，打印比值 `d'/d` 与理论上界 γ；\n3. 从随机初值出发跑价值迭代，记录每轮残差 `Δ_k = ‖V_{k+1} − V_k‖∞`，验证 `Δ_{k+1}/Δ_k ≤ γ`（压缩率），并拟合双对数斜率；\n4. 回答：若把 γ 改成 1，第 2、3 步的结论分别会怎样？",
+      "answer": {
+        "reference_code": "import numpy as np\nrng = np.random.default_rng(7)\n\n# 5x5 GridWorld：动作 0-3 上下左右，撞墙/障碍不动，右下角 +1 终止，每步 -0.01\nN = 5\nS = [(i, j) for i in range(N) for j in range(N)]\nidx = {s: k for k, s in enumerate(S)}\nGOAL, BLOCK = (4, 4), (2, 2)\nA = [(-1, 0), (1, 0), (0, -1), (0, 1)]\n\ndef step(s, a):\n    if s == GOAL: return GOAL\n    ns = (s[0] + A[a][0], s[1] + A[a][1])\n    if not (0 <= ns[0] < N and 0 <= ns[1] < N) or ns == BLOCK: ns = s\n    return ns\n\nnS = len(S)\nP = np.zeros((nS, 4, nS)); R = np.full((nS, 4), -0.01)\nfor s in S:\n    for a in range(4):\n        ns = step(s, a)\n        P[idx[s], a, idx[ns]] = 1.0\n        if s != GOAL and ns == GOAL: R[idx[s], a] = 1.0\ngamma = 0.9\n\n# 1-2. 压缩性：‖Tf − Tg‖∞ ≤ γ‖f − g‖∞\nf = rng.normal(0, 1, nS); g = rng.normal(0, 1, nS)\nT = lambda V: (R + gamma * (P @ V)).max(axis=1)\nd, d1 = np.abs(f - g).max(), np.abs(T(f) - T(g)).max()\nprint(f\"||f-g||={d:.4f}  ||Tf-Tg||={d1:.4f}  ratio={d1/d:.4f} <= gamma={gamma}\")\n\n# 3. 迭代残差的压缩率\nV = rng.normal(0, 1, nS)\nres = []\nfor k in range(60):\n    Vn = T(V)\n    res.append(np.abs(Vn - V).max()); V = Vn\nratios = np.array(res[1:]) / np.array(res[:-1])\nprint(f\"residual ratios (first 10): {np.round(ratios[:10], 4)}\")\nprint(f\"all ratios <= gamma: {bool((ratios <= gamma + 1e-12).all())}\")",
+        "explain": "第 2 步就是概念/02 里那条证明的数值版：`|max_a u_a − max_a v_a| ≤ max_a |u_a − v_a|`，把 u、v 取成 `R + γΣPf`、`R + γΣPg`，比值应当稳定 ≤ γ；若出现 > γ 的样本，一定是算子写错（比如把 max 写成了 mean，或 γ 乘错了位置）。\n\n第 3 步验证「误差按 γ^k 线性收缩」：残差比应逐个 ≤ γ 并趋于 γ（前期受初值非齐次项影响可能更小）。双对数斜率 ≈ 0 是**几何收敛**的标志，别和监督学习里 O(1/k) 的代数收敛混为一谈。\n\n第 4 问：γ=1 时压缩系数变成 1，`d' ≤ d` 仍成立但**不再收缩**——周期任务（本例已有 +1 终止，勉强有限）若存在每步正奖励的环，价值级数不收敛，T 可能没有不动点，迭代震荡或发散。这正是「γ 必须 < 1」的数值含义。"
+      },
+      "explanation": "把 γ-压缩从一行证明变成可复现的数值证据。",
+      "tags": ["Bellman算子", "压缩映射", "价值迭代", "数值实验"],
+      "source": "self",
+      "source_ref": "Sutton & Barto 第4章 4.4 节；Puterman 第6章压缩映射理论"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "ε-greedy 衰减诊断实验",
+      "content_md": "在同一个 CliffWalking 风格环境（4×12，底部一行悬崖，走到目标 +1，掉下悬崖 −100 并回到起点）上实现表格 Q-learning，并设计三组 ε 调度对照：\n1. **固定 ε=1.0**（永远随机）；\n2. **固定 ε=0.1**；\n3. **线性衰减 ε：1.0 → 0.05**（如前 60% 回合线性衰减，之后保持）。\n\n要求：每组训练 3000 回合、α=0.1、γ=0.99，打印（a）每 500 回合的平均回报；（b）训练结束时 **Q 表中非零项占比**；（c）训练结束后**关掉 ε 用纯贪心策略评估 100 回合**的平均回报。\n\n根据三组输出回答：哪组「训练回报」与「贪心评估回报」差距最大？为什么？ε 不衰减（第 1 组）时曲线呈现什么形态、根因是什么？",
+      "answer": {
+        "reference_code": "import numpy as np\nrng = np.random.default_rng(42)\n\nH, W = 4, 12\nSTART, GOAL = (3, 0), (3, 11)\nCLIFF = [(3, j) for j in range(1, 11)]\nA = [(-1, 0), (1, 0), (0, -1), (0, 1)]\nnS, nA = H * W, 4\n\ndef to_idx(s): return s[0] * W + s[1]\n\ndef reset(): return START\n\ndef step(s, a):\n    ns = (min(max(s[0] + A[a][0], 0), H - 1), min(max(s[1] + A[a][1], 0), W - 1))\n    if ns in CLIFF: return START, -100.0, False\n    if ns == GOAL:   return GOAL, 1.0, True\n    return ns, -1.0, False\n\ndef train(eps_mode, episodes=3000, alpha=0.1, gamma=0.99):\n    Q = np.zeros((nS, nA))\n    rets = []\n    for ep in range(episodes):\n        if eps_mode == \"const1\":   eps = 1.0\n        elif eps_mode == \"const\":  eps = 0.1\n        else:                       eps = max(0.05, 1.0 - 0.95 * ep / (0.6 * episodes))\n        s, G, done = reset(), 0.0, False\n        while not done:\n            si = to_idx(s)\n            a = rng.integers(nA) if rng.random() < eps else int(Q[si].argmax())\n            ns, r, done = step(s, a)\n            nsi = to_idx(ns)\n            target = r if done else r + gamma * Q[nsi].max()\n            Q[si, a] += alpha * (target - Q[si, a])\n            s, G = ns, G + r\n        rets.append(G)\n    # 纯贪心评估（eps=0）\n    eval_rets = []\n    for _ in range(100):\n        s, G, done = reset(), 0.0, False\n        while not done:\n            a = int(Q[to_idx(s)].argmax())\n            s, r, done = step(s, a)\n            G += r\n        eval_rets.append(G)\n    print(f\"eps={eps_mode:8s} last500={np.mean(rets[-500:]):8.1f}  \"\n          f\"nonzero={(Q != 0).mean()*100:5.1f}%  greedy_eval={np.mean(eval_rets):8.1f}\")\n\nfor mode in (\"const1\", \"const\", \"decay\"):\n    train(mode)",
+        "explain": "预期形态：**const1（ε=1.0）训练回报≈ −3000 量级**——每步都在随机乱走，平均 12 步内必然踩崖，回报约 `12×(−1) + (−100) ≈ −112`/回合，曲线是一条平躺的噪声带；`nonzero` 接近 100%（所有格子都被随机踩过）但 Q 值是「随机策略的价值」，不是最优策略的价值。**const（ε=0.1）**收敛到一条「离悬崖一格的安全路线」，贪心评估尚可但次优；**decay** 收敛到贴崖最优路线，训练回报与贪心评估都最高。\n\n「训练回报 vs 贪心评估差距最大」的是 const1 与 const 组：前者训练回报里 10% 的随机动作是纯噪声，后者把「沿安全线走」训进了 Q——而 Q 描述的是含探索的行为策略。**关掉 ε 评估，才是策略的真实水平**（对应 pitfalls 第 5 条）。\n\nε 不衰减的根因：随机动作使 `(s,a)` 样本永远无法稳定复现最优序列，且 target 里 `max` 估计的 `Q*` 与行为策略 `Q^π` 长期不一致——曲线「在学但不收敛到最优」。诊断三板斧：ε 曲线（确认真的在衰减）、nonzero 覆盖率（确认状态被访问够）、关 ε 评估（确认学的是 Q* 不是 Q^π）。"
+      },
+      "explanation": "把「探索-利用调度 + 评估协议」从口号变成可对照的实验结论。",
+      "tags": ["Q-learning", "ε-greedy", "探索利用", "评估协议"],
+      "source": "self",
+      "source_ref": "Sutton & Barto 第6章；Gymnasium CliffWalking 环境设定"
+    }
+  ]
+}

@@ -1,0 +1,133 @@
+{
+  "meta": {
+    "chapter": "agent-ch08",
+    "title": "Transformer 核心机理：能白板推一遍才算懂 —— 习题集",
+    "count": 6,
+    "note": "3 道概念题（缩放、KV 结构、因果 mask 顺序）+ 3 道算法实践题（手写注意力、KV 显存账本、loss 曲线诊断），全部为原创题干。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "缩放因子 √d_k 到底在解决什么问题",
+      "content_md": "在缩放点积注意力 `softmax(QKᵀ/√d_k)V` 中，除以 √d_k 的主要作用是什么？\n\nA. 让注意力权重更集中在最相似的 Token 上，从而提升准确率\nB. 把点积的方差从约 d_k 拉回到约 1，防止高维下 softmax 进入饱和区、梯度消失\nC. 保证每行注意力权重之和恰好等于 1\nD. 减少 Q/K/V 投影矩阵的参数量",
+      "answer": {
+        "correct": "B",
+        "explain": "假设 Q、K 各分量独立、均值 0、方差 1，单个点积 `Q·K` 的方差约为 d_k。当 d_k 很大（如 64、128）时，softmax 的输入被推到很远的饱和区，`e^x` 巨大且梯度趋近 0，注意力层几乎学不动，训练初期 loss 不降。除以 √d_k 把方差拉回 1，使 softmax 工作在非饱和区。A 错：缩放不改变「谁最相似」的排序，只影响分布的尖锐程度，不是为提升准确率；C 错：行和为 1 由 softmax 本身保证，与是否缩放无关；D 错：缩放是推理期的数值操作，不减少任何参数。"
+      },
+      "explanation": "考点：缩放因子是稳定性手段而非准确性修正，根因是高维点积方差爆炸。",
+      "tags": [
+        "注意力",
+        "缩放",
+        "梯度消失"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/01 第 2 节；示例 ex01"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "GQA 相比 MHA 为什么更省显存",
+      "content_md": "某模型用 MHA 时 32k 上下文单条请求 KV Cache 约 16GB，改用 GQA（h_g=8，原 h=32）后显存大幅下降。下降主要来自哪一项？\n\nA. GQA 把注意力头数从 32 减到 8，计算量变小\nB. GQA 让多个 Query 头共享同一套 K/V，每 Token 缓存的 KV 头数从 h 降到 h_g\nC. GQA 把词表嵌入也压缩了\nD. GQA 把 FFN 的 d_ff 减小了",
+      "answer": {
+        "correct": "B",
+        "explain": "KV Cache 显存正比于「每 Token 缓存的 KV 头数」。MHA 中每个 Query 头都有独立的一套 K/V，共 h 套；GQA 中每 g 个 Query 头共享一套 K/V，只缓存 h_g = h/g 套，显存按 h_g/h 比例下降（本题中 8/32 = 1/4）。A 错：GQA 的 Query 头数仍是 h=32，计算量基本不变，变的只是 K/V 的复用；C、D 错：GQA 只改 K/V 的复用方式，与词表嵌入、FFN 维度无关。注意 GQA 省的是推理时的 KV Cache，不是模型权重参数。"
+      },
+      "explanation": "考点：KV Cache 显存随缓存的 KV 头数线性增长，GQA/MQA 通过共享 K/V 削减它。",
+      "tags": [
+        "KV Cache",
+        "GQA",
+        "显存"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/03 第 3 节；示例 ex08"
+    },
+    {
+      "type": "judge",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "因果 mask 加在 softmax 之后也可以，只要最后把未来权重清零",
+      "content_md": "判断：自回归注意力的因果 mask 既可以在 softmax 之前加（把未来分数置 -∞），也可以在 softmax 之后加（把未来位置的权重直接置 0），两种做法等价。（对/错，并说明原因）",
+      "answer": {
+        "correct": "错",
+        "explain": "两种做法不等价。softmax 之后清零，归一化的分母已经在「包含未来 token」的前提下算好了；再把未来权重置 0，前缀 token 的输出被未来 token 拉偏，因为分母里曾经有它们的贡献。正确的做法是在 softmax **之前**把未来位置的分数置 -∞，使这些位置在归一化前就被排除，分母只包含允许的 token，前缀输出才与未来内容无关。判据（示例 ex03）：遮掉未来 token 后，前缀的输出应当完全不变；若变化就说明 mask 加晚了，存在数据泄漏风险。"
+      },
+      "explanation": "考点：因果 mask 必须在 softmax 前注入，否则归一化被破坏、前缀被未来污染。",
+      "tags": [
+        "因果 mask",
+        "自回归",
+        "softmax"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/01 第 4 节；示例 ex03"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "手写带因果 mask 的单头缩放点积注意力并验证行和=1",
+      "content_md": "实现 `causal_attention(Q, K, V)`，要求：\n1. 计算分数 `Q@K.T / sqrt(d_k)`，数值稳定（减每行最大值）；\n2. 因果 mask：用上三角 `-inf` 在 softmax **之前**屏蔽未来位置；\n3. softmax 后每行权重和应为 1；\n4. 返回 `(output, weights)`，并用断言验证：(a) 权重行和=1；(b) 未来位置权重=0；(c) 把第 3 个 token 之后的内容全换掉，前 3 个 token 的输出不变。\n输入形状 Q,K,V 均为 (n, d_k)，n=5。",
+      "answer": {
+        "reference_code": "import numpy as np\ndef causal_attention(Q, K, V):\n    n, d = Q.shape\n    s = Q @ K.T / np.sqrt(d)\n    mask = np.triu(np.ones((n, n)), k=1).astype(bool)\n    s = np.where(mask, -np.inf, s)          # softmax 之前加 mask\n    s -= s.max(-1, keepdims=True)           # 稳定\n    w = np.exp(s); w /= w.sum(-1, keepdims=True)\n    return w @ V, w\n\nQ = np.random.randn(5, 8); K = np.random.randn(5, 8); V = np.random.randn(5, 8)\nout, w = causal_attention(Q, K, V)\nassert np.allclose(w.sum(-1), 1.0)          # (a)\nassert np.all(w[np.triu(np.ones((5,5),dtype=bool),1)] == 0)  # (b)\nV2 = V.copy(); V2[3:] = np.random.randn(2, 8)\nout2, _ = causal_attention(Q, K, V2)\nassert np.allclose(out[:3], out2[:3])       # (c) 前缀不变\nprint(\"ok, out shape\", out.shape)",
+        "explain": "坑一：mask 必须在减最大值和 exp 之前注入；若先 softmax 再清零，分母已含未来 token，前缀被污染，(c) 断言会失败。坑二：减行最大值要在 mask 之后还是之前都行，但 `-inf` 参与 `max` 会出问题——所以先 `np.where` 把未来置 `-inf`，再减 `max`（此时每行的 max 来自允许位置）。坑三：权重行和=1 由 softmax 保证，但只有未来全被屏蔽成 `-inf→exp=0` 时，已允许位置的权重才会正确归一。三个断言分别覆盖了「归一化、因果性、一致性」三条性质。"
+      },
+      "explanation": "手写核心逻辑：因果注意力三性质（归一化/因果/前缀一致性）的 numpy 验证。",
+      "tags": [
+        "注意力",
+        "因果 mask",
+        "numpy"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/01 第 1、4 节；示例 ex01、ex03"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "算 KV Cache 显存账本并对比 MHA/GQA/MQA",
+      "content_md": "实现 `kv_gb(seq, batch, L, d, h_kv, dtype=2)`，返回 KV Cache 占用 GB（公式 `L·h_kv·d·2·seq·batch·dtype / 1024^3`，K 和 V 各一套）。\n1. 对配置 `L=32, d=128, seq=32768, batch=1` 分别计算 MHA(h_kv=32)、GQA(h_kv=8)、MQA(h_kv=1) 的 GB；\n2. 验证 MQA 相对 MHA 省下的比例恰好是 1/32；\n3. 输出一张「结构 / 显存 / 相对 MHA」的小表。\n4. 额外验证：把 seq 从 2k 提到 32k（16 倍），MHA 显存是否也约 16 倍——说明长上下文贵的来源。",
+      "answer": {
+        "reference_code": "def kv_gb(seq, batch, L, d, h_kv, dtype=2):\n    b = L * h_kv * d * 2 * seq * batch * dtype\n    return b / 1024**3\n\ncfg = dict(seq=32768, batch=1, L=32, d=128)\nfor name, h in [(\"MHA\",32),(\"GQA\",8),(\"MQA\",1)]:\n    g = kv_gb(h_kv=h, **cfg)\n    print(f\"{name}: {g:.2f} GB  相对MHA {g/kv_gb(h_kv=32,**cfg):.3f}\")\n# MQA 相对 MHA = 1/32；seq 2k->32k：kv_gb 比例 = 32768/2048 = 16 倍",
+        "explain": "这道题练的是「把贵落到数字」。KV Cache 显存 = 层数 × 缓存的 KV 头数 × 每头维度 × 2（K、V 各一）× 序列 × 批量 × 字节数。MHA 缓存 h 套，MQA 只缓存 1 套，比例严格等于 h_kv 之比（1/32），与序列无关。长上下文贵的根因就在 `× seq` 这一项：序列涨 16 倍，显存约涨 16 倍，再叠加上「长上下文常常 batch 也更大」，会涨一个数量级以上——这正是为什么长上下文服务必须上 GQA/MQA 或量化 KV，而不是无脑堆显存。"
+      },
+      "explanation": "数值/边界验证：KV 显存账本与三种 KV 结构的定量对比。",
+      "tags": [
+        "KV Cache",
+        "显存",
+        "MHA",
+        "GQA",
+        "MQA"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/03 第 3 节；示例 ex08"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 5,
+      "title": "从 train/val loss 曲线诊断过拟合与最佳停止点",
+      "content_md": "给定训练日志 `steps`（等间隔）、`train_loss`、`val_loss` 三个等长列表（模拟一次 nanoGPT 风格训练）。\n1. 找出 val_loss 最低的 step（最佳早停点）；\n2. 判断阶段：在最佳点之前是「欠拟合/健康下降」，之后是「过拟合」（val 回升）；\n3. 计算「过拟合幅度」= 最佳点之后 val_loss 的最大回升比例；\n4. 输出结论字符串，形如「最佳早停 step=K，之后 val 回升 X%，建议在此附近停止」。\n不允许调用 sklearn，纯 numpy。",
+      "answer": {
+        "reference_code": "import numpy as np\ndef diagnose(steps, train_loss, val_loss):\n    tr, vl = np.asarray(train_loss), np.asarray(val_loss)\n    k = int(np.argmin(vl))                     # val 最低点\n    best, after = vl[k], vl[k+1:]\n    overfit = 0.0 if after.size == 0 else float((after.max() - best) / best)\n    verdict = \"欠拟合/健康下降\" if k == len(vl)-1 else \"已过拟合\"\n    return (f\"最佳早停 step={steps[k]}，val 最低 {best:.3f}，\"\n            f\"之后 val 回升 {overfit*100:.1f}%，{verdict}，建议在此附近停止\")\n\nprint(diagnose([100,200,300,400,500],\n               [4.2,3.1,2.6,2.4,2.35],\n               [4.3,3.3,2.9,3.1,3.4]))",
+        "explain": "诊断逻辑：train_loss 持续下降说明模型还在学；val_loss 最低点之前是健康区，之后 val 不降反升就是过拟合信号——此时继续训只会让模型「背训练集」。最佳早停点取 `argmin(val_loss)`。过拟合幅度用「最低点之后 val 的最大回升 / 最低点」表达，比单次差值更稳（避免尾段噪声误导）。这道题对应交付物二「能解释 loss 曲线」：能指出收敛点、val 最低点与过拟合拐点，比只会说「loss 降了」值钱得多。注意 train 和 val 必须同时看，单看 train 下降会误以为越训越好。"
+      },
+      "explanation": "诊断/对比实验：从 loss 曲线定位早停点与过拟合阶段。",
+      "tags": [
+        "loss 曲线",
+        "过拟合",
+        "早停",
+        "训练诊断"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/03 第 4 节；交付物二、示例 ex10"
+    }
+  ]
+}

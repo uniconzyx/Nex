@@ -1,0 +1,59 @@
+{
+  "total_chapters": 0,
+  "complete": 0,
+  "incomplete": 0,
+  "coverage_pct": 0.0,
+  "planning": {
+    "planned_total": 0,
+    "planned_complete": 0,
+    "planned_missing": 0,
+    "planning_coverage_pct": 0.0,
+    "declared_complete": 0,
+    "status_drifted": [],
+    "missing_units": [],
+    "units": []
+  },
+  "orphan_dirs": [],
+  "thresholds": {
+    "goals": 1,
+    "concept": 3,
+    "pitfalls": 3,
+    "exercises": 5,
+    "examples": 10,
+    "interview": 3,
+    "project": 1
+  },
+  "tri_view": {
+    "concept_files": 0,
+    "tri_view_complete": 0,
+    "canonical_complete": 0,
+    "marker_drift": [],
+    "coverage_pct": 0.0,
+    "chapters_pending": []
+  },
+  "bagua": [
+    {
+      "subject": "concept",
+      "exists": false,
+      "categories": 0,
+      "items": 0,
+      "ok": false,
+      "issues": [
+        "缺少八股模块 _bagua.json"
+      ]
+    },
+    {
+      "subject": "examples",
+      "exists": false,
+      "categories": 0,
+      "items": 0,
+      "ok": false,
+      "issues": [
+        "缺少八股模块 _bagua.json"
+      ]
+    }
+  ],
+  "bagua_ok": 0,
+  "bagua_total": 2,
+  "chapters": []
+}

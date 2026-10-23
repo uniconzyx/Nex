@@ -1,0 +1,131 @@
+{
+  "meta": {
+    "chapter": "agent-ch12",
+    "title": "商业化与行业解决方案：从 demo 到能签单 —— 习题集",
+    "count": 6,
+    "note": "3 道概念题（计费模式风险转移、兜底成本漏记、SLA 与 credit 机制）+ 3 道算法实践题（四元成本模型与报价下限、计费模式毛利曲线与盈亏平衡、POC 验收可测性检查与竞品矩阵权重敏感性），全部为原创题干。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "同一客服 Agent 客户，用量从 3 万涨到 6 万任务/月时，哪种计费模式下提供方最受伤",
+      "content_md": "某客服 Agent 月固定成本 ¥20,000、单任务边际成本 ¥0.5。客户实际用量 30,000 任务/月时，三种计费模式收入均为 ¥45,000：按席位 30 席×¥1,500/月、按调用 ¥1.5/任务、按效果 60% 自动解决率×¥2.5/自动解决。用量翻倍到 60,000 后，下列哪项描述正确？\n\nA. 按席位收入不变、成本 +¥15,000，提供方毛利由 +¥10,000 转 −¥5,000，风险最大\nB. 按调用收入不变，客户为控预算会减少使用，提供方收入下降\nC. 按效果模式下自动解决数必然同步翻倍，提供方毛利线性改善\nD. 三种模式风险相同，因为边际成本一样",
+      "answer": {
+        "correct": "A",
+        "explain": "按席位模式收入 S×p 与用量脱钩，成本 C_fix + Q×c_var 随真实用量线性增长：6 万任务时成本 = 20000+0.5×60000 = ¥50,000，收入仍 ¥45,000，毛利由 3 万时的 +¥10,000（45000−20000−15000）转为 −¥5,000——席位模式把用量不确定性风险整体转移给了提供方（concept/01 §1）。B 错：按调用收入随 Q 同步增长（¥1.5×6万=¥90,000），客户控预算影响的是需求量本身，不是同用量下的收入；C 错：自动解决数是否同步翻倍取决于新流量的难度结构（解决率可能从 60% 降到 53%），这正是效果模式归因扯皮的来源，不能假定线性；D 错：三种模式收入曲线形状不同，风险分配方向相反——按席位提供方担用量风险、按调用客户担预算风险、按效果双方共担归因风险。"
+      },
+      "explanation": "考点：三种计费模式的收入-成本曲线形状与风险转移方向。",
+      "tags": [
+        "计费模式",
+        "毛利",
+        "风险转移"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/01 第 1 节；示例 ex02"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "四元成本模型里漏记哪一项，最容易在规模化后由盈转亏",
+      "content_md": "某团队做客服 Agent 报价：token ¥0.03/任务、卡时分摊 ¥0.012、向量库 ¥0.004，按 70% 目标毛利报 ¥0.15/任务，客户年框签走。上线后真实兜底率 40%、人工 5 分钟/单、时薪 ¥60。以下哪项判断正确？\n\nA. 兜底成本约 ¥2.0/任务，是漏记的最大成本项，实际毛利为负\nB. 漏记的是卡时，应该把 GPU 利用率从 30% 提到 80% 来弥补\nC. token 费随用量线性增长，才是最大的成本风险，应该先优化上下文\nD. 只要把报价从 ¥0.15 提到 ¥0.30 就能覆盖兜底成本，无需改系统",
+      "answer": {
+        "correct": "A",
+        "explain": "兜底成本 = 兜底率 × 人工单价 = 0.4 × (5/60 × 60) = ¥2.0/任务，是前三项合计（¥0.046）的 40 多倍——漏记它等于把最大成本项设为 0（concept/02 §1）。实际单任务成本约 ¥2.05，报价 ¥0.15 连成本的 8% 都不到，毛利深度为负。B 错：卡时利用率优化最多省 ¥0.009，量级上救不了全局；C 错：token 费在此场景是可优化的小头，优先级低于兜底率；D 错：¥0.30 仍远低于 ¥2.05 的成本，且不提兜底率的前提下单纯涨价只是把亏损转移成丢客户——正确修法是压兜底率（提质量）+ 兜底成本进报价模型 + 合同里兜底率超阈值重新议价。"
+      },
+      "explanation": "考点：单任务成本四元组中人工兜底的量级与漏记后果。",
+      "tags": [
+        "单位经济",
+        "人工兜底",
+        "报价下限"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/02 第 1 节；示例 ex01、ex04"
+    },
+    {
+      "type": "judge",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "SLA 承诺得越高越好，99.99% 可用性是体现技术实力的最佳方式",
+      "content_md": "判断：对 toB 客户，SLA 中承诺的可用性越高（如从 99.9% 提到 99.99%）越能体现技术实力，客户越满意，提供方也应尽量往高承诺。（对/错，并说明原因）",
+      "answer": {
+        "correct": "错",
+        "explain": "SLA 的本质是给不确定性定价，不是技术实力的广告。承诺 99.99% 意味着月停机 ≤ 4.3 分钟，任何依赖组件（模型 API、检索服务、客户自身网络）的一次抖动都可能击穿；一旦违约就要付 service credit，高承诺 = 卖出更高行权价的看跌期权，风险敞口随承诺指数上升。对客户真正的价值是「可预期的保障 + 违约有补偿」，而不是一个好看的数字。正确做法：按历史可用率数据分阶段承诺（试点期 99.5% 起步，稳定后升级），配套分层 SLA（可用性/延迟/质量分别承诺）与降级预案，用 credit 上限封顶风险；比高承诺更重要的是降级预案有没有演练过。"
+      },
+      "explanation": "考点：SLA 的风险定价属性、credit 机制与分层承诺。",
+      "tags": [
+        "SLA",
+        "service credit",
+        "降级预案"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/03 第 2 节；示例 ex07"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "实现单任务四元成本模型与报价下限计算器",
+      "content_md": "实现 `task_cost(tok_in, tok_out, p_in, p_out, gpu_share, vec_share, fallback_rate, human_cost)`：\n1. 分别算出 token 费（`tok_in*p_in + tok_out*p_out`）、卡时分摊、向量库、人工兜底（`fallback_rate*human_cost`）四项，返回 dict；\n2. 实现 `price_floor(cost, margin)`：给定目标毛利率，输出报价下限 `cost/(1-margin)`；\n3. 用参数 `tok_in=3000, tok_out=400, p_in=0.008/1000, p_out=0.024/1000, gpu_share=0.012, vec_share=0.004, fallback_rate=0.4, human_cost=5.0` 计算并打印小表；\n4. 打印兜底项占四元合计的比例，并给出一句话结论。\n纯标准库，不联网。",
+      "answer": {
+        "reference_code": "def task_cost(tok_in, tok_out, p_in, p_out, gpu_share, vec_share,\n              fallback_rate, human_cost):\n    tok = tok_in * p_in + tok_out * p_out\n    fb = fallback_rate * human_cost\n    return {\"token\": tok, \"gpu\": gpu_share, \"vector\": vec_share,\n            \"fallback\": fb, \"total\": tok + gpu_share + vec_share + fb}\n\ndef price_floor(cost, margin):\n    return cost / (1 - margin)\n\nc = task_cost(3000, 400, 0.008/1000, 0.024/1000, 0.012, 0.004, 0.4, 5.0)\nfor k, v in c.items():\n    print(f\"{k:>9}: ¥{v:.3f}\")\nprint(f\"兜底占比 = {c['fallback']/c['total']:.1%}\")\nprint(f\"报价下限(毛利率70%) = ¥{price_floor(c['total'], 0.70):.2f}\")",
+        "explain": "这道题把成本模型落成代码。坑一：token 单价是「每千 token」价，p_in=0.008/1000 别忘记除 1000，否则成本大三个数量级；坑二：人工兜底是 `fallback_rate × human_cost`，human_cost 是「单次人工处理全价」（5 分钟 × 时薪折算），不是时薪本身；坑三：报价下限用 `cost/(1−margin)` 不是 `cost×(1+margin)`——前者保的是「收入里的成本占比」，后者会把 70% 毛利报成 2.3 倍价还自以为只加了 70%。输出必须包含兜底占比：这个场景下兜底约占 97%，一眼就能看出「Demo 阶段漏记它有多致命」。"
+      },
+      "explanation": "数值/边界验证：四元成本模型的完整实现与报价下限公式的正确形式。",
+      "tags": [
+        "成本模型",
+        "报价下限",
+        "兜底成本"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/02 第 1 节；示例 ex01"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "三种计费模式毛利曲线与盈亏平衡用量对比实验",
+      "content_md": "给定 `c_fix=20000`、`c_var=0.5`、三模式收入函数：席位 `30*1500`（恒定）、调用 `q*1.5`、效果 `0.6*q*2.5`。实现 `margin_curve(mode, qs)` 输出每种模式在 `q ∈ [1万, 3万, 5万, 6万, 9万]` 下的毛利表，并：\n1. 求每种模式的盈亏平衡用量 `q* = c_fix/(p_eff-c_var)`（效果模式用有效单价 `0.6*2.5`）；\n2. 标出「席位模式毛利转负」的用量点；\n3. 打印一句话结论：三模式曲线在哪个区间交叉、对签单决策的含义。\n纯标准库，不联网。",
+      "answer": {
+        "reference_code": "def margin(q, rev_fn, c_fix=20000.0, c_var=0.5):\n    return rev_fn(q) - c_fix - c_var * q\n\nmodes = {\"席位\": (lambda q: 30*1500, None),\n         \"调用\": (lambda q: q*1.5, 1.5),\n         \"效果\": (lambda q: 0.6*q*2.5, 0.6*2.5)}\nqs = [10000, 30000, 50000, 60000, 90000]\nfor name, (f, p) in modes.items():\n    print(name, [f\"{q//1000}k:{margin(q, f):+,.0f}\" for q in qs])\n    if p:\n        print(f\"  盈亏平衡 q* = {20000/(p-0.5):,.0f}\")\n# 席位模式：3万时 +10,000，5万时 0，6万时 -5,000 → 转负点即 5万\n# 调用模式：盈亏平衡 q* = 20,000；效果模式：q* = 20,000",
+        "explain": "坑一：席位模式的收入函数与 q 无关，盈亏平衡公式不适用，只能扫描找转负点（解 `30*1500 = 20000+0.5q` 得 q=50,000，超过即亏）；坑二：效果模式的有效单价是「每任务收入」= 自动解决率 × 单解决价 = 0.6×2.5 = ¥1.5，盈亏平衡要用 `20000/(1.5-0.5)=20,000`，直接用 ¥2.5 会高估一倍；坑三：打印带符号格式化（`+,.0f`）让正负毛利一眼可辨，别输出一列无符号数字让人自己找零线。结论要落在决策上：客户预期用量 > 5 万/月时，席位模式在数学上不可持续，必须换模式或加阶梯条款；调用与效果在简单模型里重合，差别在效果模式的解决率会随流量难度下滑（ex02 的细化）。"
+      },
+      "explanation": "数值实验：三模式毛利曲线扫描、盈亏平衡计算与转负点定位。",
+      "tags": [
+        "计费模式",
+        "盈亏平衡",
+        "毛利曲线"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/01 第 1 节；示例 ex02、ex03"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "POC 验收指标可测性检查与竞品矩阵权重敏感性分析",
+      "content_md": "实现两个函数：\n1. `poc_check(items)`：每条验收指标必须含 `dataset / metric_rule / threshold / retest_cycle` 四要素，缺任一即判「不可验收」，返回不合格指标名列表；\n2. `matrix_rank(scores, weights)`：`scores={方案: [五维分]}`、`weights=[五维权重]`（和必须为 1），返回按加权总分降序的 `[(score, name)]`；\n3. 验证：构造 3 条指标（其中 1 条缺 threshold 与 retest_cycle）；用两套权重（数据敏感型 `[0.15,0.35,0.20,0.10,0.20]` / 速度优先型 `[0.15,0.15,0.20,0.30,0.20]`）对 4 个方案打分，打印两套排序并给出翻转结论。\n纯标准库，不联网。",
+      "answer": {
+        "reference_code": "def poc_check(items):\n    need = [\"dataset\", \"metric_rule\", \"threshold\", \"retest_cycle\"]\n    return [i[\"name\"] for i in items if any(not i.get(k) for k in need)]\n\ndef matrix_rank(scores, weights):\n    assert abs(sum(weights) - 1) < 1e-6, \"权重和必须为 1\"\n    return sorted(((sum(w*s for w, s in zip(weights, v)), k)\n                   for k, v in scores.items()), reverse=True)\n\nitems = [{\"name\": \"自动解决率\", \"dataset\": \"500条\", \"metric_rule\": \"无需人工关闭\",\n          \"threshold\": \">=60%\", \"retest_cycle\": \"月度\"},\n         {\"name\": \"误答率\", \"dataset\": \"\", \"metric_rule\": \"业务方判定\",\n          \"threshold\": \"\", \"retest_cycle\": \"\"}]\nprint(\"不可验收:\", poc_check(items))\n\nSC = {\"自建\": [3,5,3,1,5], \"Dify\": [4,3,4,4,3], \"n8n\": [5,3,4,4,3], \"云API\": [4,1,5,5,1]}\nW1 = [0.15,0.35,0.20,0.10,0.20]\nW2 = [0.15,0.15,0.20,0.30,0.20]\nprint(\"W1:\", matrix_rank(SC, W1)[:2])\nprint(\"W2:\", matrix_rank(SC, W2)[:2])\n# 不可验收: ['误答率']\n# W1: [(3.9, '自建'), (3.6, 'n8n')]\n# W2: [(3.8, 'n8n'), (3.65, 'Dify')]",
+        "explain": "坑一：可测性检查必须四要素全查，`not i.get(k)` 同时覆盖缺键与空串两种「没写」；坑二：权重和断言 `abs(sum-1)<1e-6` 不能省——权重和不为 1 时「总分」不可比，是方案书里最常见的隐性错误；坑三：两套权重的结论会翻转（W1 自建第一、W2 n8n 第一），所以矩阵必须附翻转条件「数据可控权重降到约 0.235 以下（其余四维按原比例归一化）时推荐切换」，而不是只报一个总分第一。这道题对应交付物三：竞品对比矩阵的价值在权重敏感性，不在总分。"
+      },
+      "explanation": "诊断/对比实验：验收指标可测性自检与加权矩阵的权重敏感性。",
+      "tags": [
+        "POC 验收",
+        "可测性",
+        "竞品矩阵",
+        "权重敏感性"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/03 第 1、3 节；示例 ex08、ex09"
+    }
+  ]
+}

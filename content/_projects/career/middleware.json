@@ -1,0 +1,347 @@
+{
+ "track": "middleware",
+ "items": [
+  {
+   "slug": "mw-etcd",
+   "track": "middleware",
+   "tier": "t1",
+   "hours": 8,
+   "level": "easy",
+   "title": "etcd · 云原生时代的协调与配置",
+   "repo": "etcd-io/etcd",
+   "summary": "Kubernetes 的元数据存储，Raft + MVCC 的键值库。体量比 ZooKeeper 小、API 更现代，是理解 Raft 落地的最好入口。",
+   "stack": [
+    "Go",
+    "Raft",
+    "MVCC",
+    "gRPC",
+    "Lease"
+   ],
+   "learn": [
+    "Raft 日志复制与 etcd 的写入路径",
+    "MVCC 版本号与历史查询",
+    "Lease 与租约续期实现服务注册",
+    "Watch 的事件流语义",
+    "集群扩缩容与快照"
+   ],
+   "career": "云原生与基础架构岗的必备技能。K8s 生态几乎所有组件都依赖 etcd，能讲清写入路径很占优。",
+   "steps": [
+    "起三节点集群，用 etcdctl 做 put/get/watch",
+    "用 Lease 实现一个带 TTL 的服务注册",
+    "kill leader，观察重新选举与写入恢复时间",
+    "读写入路径文档，画一次 put 的流程图",
+    "写 README：Raft 写入路径图 + 选主耗时记录"
+   ],
+   "accept": [
+    "leader 故障后集群在秒级恢复写入",
+    "Lease 过期后 key 自动删除",
+    "能画出一次 put 经过 Raft 的完整路径",
+    "watch 能收到连续事件且不丢"
+   ],
+   "interview": [
+    "etcd 为什么比 ZooKeeper 更适合云原生",
+    "Raft 的日志压缩（快照）解决什么问题",
+    "watch 断连后如何保证不丢事件"
+   ]
+  },
+  {
+   "slug": "mw-zookeeper",
+   "track": "middleware",
+   "tier": "t1",
+   "hours": 8,
+   "level": "easy",
+   "title": "ZooKeeper · 分布式协调的起点",
+   "repo": "apache/zookeeper",
+   "summary": "分布式系统的「老牌协调者」：选主、配置管理、分布式锁都靠它。虽然新系统多用 etcd，但 ZAB 与临时节点的思想仍是面试常客。",
+   "stack": [
+    "Java",
+    "ZAB 协议",
+    "临时节点",
+    "Watch 机制"
+   ],
+   "learn": [
+    "Znode 的四种类型与临时节点的会话绑定",
+    "Watch 的一次性触发与惊群问题",
+    "ZAB 协议与 Raft 的异同",
+    "用临时顺序节点实现分布式锁",
+    "集群角色（leader/follower/observer）"
+   ],
+   "career": "中间件与分布式岗的基础知识。能讲清临时节点做锁的原理，比只会调 Curator 更有说服力。",
+   "steps": [
+    "起三节点集群，用 zkCli 建节点并观察同步",
+    "用临时顺序节点实现一把分布式锁",
+    "模拟会话断开，验证临时节点自动消失",
+    "对比 Watch 与轮询的开销",
+    "写 README：ZAB 与 Raft 对比 + 锁实现说明"
+   ],
+   "accept": [
+    "会话断开后临时节点在预期时间内消失",
+    "分布式锁在并发下不出现双持有",
+    "能说清 ZAB 与 Raft 的关键差异"
+   ],
+   "interview": [
+    "临时节点为什么能实现分布式锁",
+    "Watch 为什么是一次性的",
+    "ZooKeeper 与 etcd 怎么选"
+   ]
+  },
+  {
+   "slug": "middleware-nacos",
+   "track": "middleware",
+   "tier": "t2",
+   "hours": 20,
+   "level": "mid",
+   "title": "Nacos · 注册中心与配置中心",
+   "repo": "alibaba/nacos",
+   "summary": "服务发现与动态配置的一体化组件，支持 AP / CP 切换、长轮询推送与灰度配置，是微服务基础设施入门首选。",
+   "stack": [
+    "Java",
+    "服务注册",
+    "配置中心",
+    "长轮询",
+    "Raft / Distro"
+   ],
+   "learn": [
+    "服务注册与健康检查机制",
+    "配置长轮询如何做到准实时",
+    "AP 与 CP 模式的取舍",
+    "命名空间与灰度隔离",
+    "集群部署与数据一致性"
+   ],
+   "career": "微服务岗的基础设施常识。能讲清注册中心原理，比只会写 yml 更有深度。",
+   "steps": [
+    "单机起 Nacos，注册两个服务",
+    "用配置中心做一次不停机变更",
+    "读长轮询实现，画出推送时序",
+    "搭三节点集群，观察选举",
+    "做一次配置灰度发布"
+   ],
+   "accept": [
+    "服务可注册发现并健康检查",
+    "配置变更秒级生效",
+    "集群宕一节点仍可用",
+    "能画清长轮询时序"
+   ],
+   "interview": [
+    "Nacos 与 Eureka 的差异",
+    "长轮询相比心跳推送的优势",
+    "配置中心如何防止误发布"
+   ]
+  },
+  {
+   "slug": "mw-dragonfly",
+   "track": "middleware",
+   "tier": "t2",
+   "hours": 20,
+   "level": "mid",
+   "title": "Dragonfly · 兼容 Redis 的多线程内存库",
+   "repo": "dragonflydb/dragonfly",
+   "summary": "兼容 Redis 协议但用多线程 + 分片重写了内核，单机吞吐显著更高。适合用来理解「单线程模型的天花板在哪里」。",
+   "stack": [
+    "C++",
+    "Redis 协议",
+    "多线程分片",
+    "无锁数据结构"
+   ],
+   "learn": [
+    "Redis 单线程模型的瓶颈点",
+    "分片式多线程如何保证命令原子性",
+    "内存分配器（jemalloc/mimalloc）的差异",
+    "与 Redis 协议的兼容边界",
+    "持久化与快照的实现差异"
+   ],
+   "career": "缓存方向进阶的加分项。能讲清多线程分片相比单线程的收益与代价，属于有判断力的表现。",
+   "steps": [
+    "用 Docker 起实例，用 redis-benchmark 压测",
+    "同机器跑 Redis 做对照，记录 QPS",
+    "测多 key 事务（MULTI/EXEC）的兼容性",
+    "读分片设计文档，画线程与 key 的映射",
+    "写 README：双引擎压测对比 + 兼容性清单"
+   ],
+   "accept": [
+    "有与 Redis 同条件压测的 QPS/P99 对比",
+    "能列出至少 3 处协议或语义不兼容点",
+    "能说清多线程下如何保证单 key 原子性"
+   ],
+   "interview": [
+    "Redis 单线程为什么还这么快",
+    "多线程缓存如何保证命令原子性",
+    "缓存选型该看哪些指标"
+   ]
+  },
+  {
+   "slug": "middleware-kafka",
+   "track": "middleware",
+   "tier": "t3",
+   "hours": 45,
+   "level": "hard",
+   "title": "Kafka · 分布式消息与流平台",
+   "repo": "apache/kafka",
+   "summary": "高吞吐分布式日志系统。分区、副本、ISR、零拷贝与 Exactly-Once 语义，是消息中间件的标杆实现。",
+   "stack": [
+    "Java",
+    "Scala",
+    "分区副本",
+    "ISR",
+    "零拷贝",
+    "Exactly-Once"
+   ],
+   "learn": [
+    "分区与消费组的分工模型",
+    "ISR 与 acks 对可靠性的影响",
+    "零拷贝与顺序写的性能来源",
+    "位移提交与重复消费",
+    "事务消息与 Exactly-Once"
+   ],
+   "career": "后端岗高频考点，也是大数据链路的入口。能讲清 ISR 与 acks，面试通过率明显提升。",
+   "steps": [
+    "docker 起单机 KRaft 集群",
+    "写生产者 / 消费者，验证分区与顺序",
+    "改 acks 与 min.insync.replicas 做可靠性对比",
+    "模拟消费者宕机，观察重复消费",
+    "用事务实现一次端到端精确一次"
+   ],
+   "accept": [
+    "能演示分区顺序与消费组再平衡",
+    "可靠性对比有数据",
+    "重复消费可复现并可解决",
+    "事务场景验证通过"
+   ],
+   "interview": [
+    "ISR 收缩与扩张的触发条件",
+    "acks=all 仍可能丢消息的场景",
+    "如何保证顺序消费"
+   ]
+  },
+  {
+   "slug": "middleware-rocketmq",
+   "track": "middleware",
+   "tier": "t3",
+   "hours": 45,
+   "level": "hard",
+   "title": "RocketMQ · 事务与延时消息",
+   "repo": "apache/rocketmq",
+   "summary": "阿里开源的消息中间件，强项在事务消息、顺序消息与延时消息，NameServer 架构轻量易运维。",
+   "stack": [
+    "Java",
+    "NameServer",
+    "事务消息",
+    "顺序消息",
+    "延时消息"
+   ],
+   "learn": [
+    "NameServer 与 Broker 的路由发现",
+    "事务消息的半消息与回查",
+    "顺序消息的队列选择",
+    "延时消息的时间轮",
+    "消息堆积的排查思路"
+   ],
+   "career": "电商 / 交易场景必备。事务消息是「分布式一致性」面试题的实战答案。",
+   "steps": [
+    "起 NameServer + Broker + 控制台",
+    "跑通普通消息与顺序消息",
+    "实现事务消息：下单 + 扣库存",
+    "配置延时消息做超时关单",
+    "制造堆积并演练排查"
+   ],
+   "accept": [
+    "事务消息在半消息失败时可回查",
+    "顺序消息在单队列内严格有序",
+    "延时消息按预期触发",
+    "有堆积排查的操作记录"
+   ],
+   "interview": [
+    "事务消息如何做到最终一致",
+    "顺序消息与并发的冲突怎么解",
+    "消息堆积的定位步骤"
+   ]
+  },
+  {
+   "slug": "mw-envoy",
+   "track": "middleware",
+   "tier": "t4",
+   "hours": 90,
+   "level": "hard",
+   "title": "Envoy · 服务网格的数据平面",
+   "repo": "envoyproxy/envoy",
+   "summary": "云原生服务网格的事实标准数据平面，负责流量代理、负载均衡、熔断、可观测。读它能理解「sidecar 到底在做什么」。",
+   "stack": [
+    "C++",
+    "xDS 协议",
+    "HTTP/2",
+    "负载均衡",
+    "熔断",
+    "可观测"
+   ],
+   "learn": [
+    "xDS 动态配置的下发流程",
+    "监听器 / 集群 / 路由的配置模型",
+    "连接池与熔断阈值的关系",
+    "mTLS 与证书轮换",
+    "访问日志与分布式追踪的接入点"
+   ],
+   "career": "云原生与基础架构方向的高价值项目。能讲清 xDS 与熔断，是 SRE/平台岗的硬指标。",
+   "steps": [
+    "用静态配置起一个代理，转发到本地服务",
+    "改造成 xDS 动态配置（可用控制平面或文件）",
+    "配置熔断阈值，压测触发并观察行为",
+    "开启访问日志，接入一次追踪",
+    "写 README：xDS 下发时序 + 熔断验证记录"
+   ],
+   "accept": [
+    "配置动态下发后无需重启即生效",
+    "熔断触发时返回符合预期的状态码",
+    "能画出请求经过 listener/filter/route/cluster 的路径",
+    "有日志或追踪数据佐证"
+   ],
+   "interview": [
+    "sidecar 模式相比 SDK 模式的优劣",
+    "xDS 如何做到配置不中断生效",
+    "服务网格在什么规模下才值得引入"
+   ]
+  },
+  {
+   "slug": "mw-seaweedfs",
+   "track": "middleware",
+   "tier": "t4",
+   "hours": 90,
+   "level": "hard",
+   "title": "SeaweedFS · 分布式对象存储",
+   "repo": "seaweedfs/seaweedfs",
+   "summary": "用 Go 写的对象存储，核心是「中心元数据 + 数据分片」的取舍。相比 Ceph 轻量得多，适合完整跑通一套存储链路。",
+   "stack": [
+    "Go",
+    "对象存储",
+    "纠删码",
+    "元数据分片",
+    "S3 兼容"
+   ],
+   "learn": [
+    "volume server 与 master 的职责划分",
+    "小文件合并存储（needle）如何省 inode",
+    "纠删码与多副本的成本差异",
+    "S3 兼容层的实现边界",
+    "元数据分片的扩展性"
+   ],
+   "career": "存储与基础架构方向的高门槛项目。能讲清小文件合并与纠删码，直接对上对象存储岗考点。",
+   "steps": [
+    "起 master + 两个 volume server，上传下载文件",
+    "开启 S3 兼容接口，用 aws-cli 验证",
+    "kill 一个 volume server，观察副本恢复",
+    "测 10 万小文件的上传吞吐与磁盘占用",
+    "写 README：架构图 + 小文件合并收益数据"
+   ],
+   "accept": [
+    "节点故障后数据仍可读",
+    "S3 接口能完成基本 CRUD",
+    "有小文件数量级压测数据",
+    "能说清纠删码相比三副本省了多少空间"
+   ],
+   "interview": [
+    "对象存储与文件系统的核心差异",
+    "小文件为什么是存储难题",
+    "纠删码的修复代价在哪里"
+   ]
+  }
+ ]
+}

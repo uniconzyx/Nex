@@ -1,0 +1,141 @@
+{
+  "id": "english-e1-mock-03",
+  "exam": "english",
+  "kind": "mock",
+  "subject": "e1",
+  "title": "英语（一） · 阅读精读专项（3）",
+  "duration": 50,
+  "totalScore": 30,
+  "disclaimer": "本卷为按题型结构自编的专项练习卷，题目与解析均为原创，不是真题还原；考点年份为历年命题的归纳性标注，请以当年考试大纲为准。",
+  "blueprint": [
+    {
+      "subject": "e1",
+      "name": "英语（一）",
+      "score": 30
+    }
+  ],
+  "sections": [
+    {
+      "no": 1,
+      "name": "阅读理解",
+      "type": "choice",
+      "range": "1~3 题",
+      "score": 6,
+      "perScore": 2,
+      "note": "每题 2 分。阅读所给文章，从四个选项中选出最佳答案。",
+      "passage": {
+        "id": "e1-p3",
+        "title": "The reproducibility problem in science",
+        "text": "Science advances by repetition: a result becomes knowledge when other laboratories obtain it too. In several fields, however, large replication projects have found that a substantial share of published findings cannot be reproduced. The causes are mundane rather than scandalous. Samples are small, analysis choices are flexible, and journals reward novelty over confirmation. A researcher who tries twenty statistical models and reports the one that worked is not lying, but the reported result is no longer an unbiased estimate. Reformers propose three remedies: register the analysis plan before collecting data, publish negative results, and fund replication as a normal part of research rather than as a curiosity."
+      },
+      "items": [
+        "q-e1-e1-p3-q1",
+        "q-e1-e1-p3-q2",
+        "q-e1-e1-p3-q3"
+      ]
+    },
+    {
+      "no": 2,
+      "name": "翻译",
+      "type": "calc",
+      "range": "4 题",
+      "score": 12,
+      "note": "本题 12 分。把划线句子译成汉语，要求准确、通顺。",
+      "items": [
+        {
+          "id": "q-e1-e1-p3-tr",
+          "topic": "e1-translation",
+          "knowledge": "e1-translation-k1",
+          "type": "calc",
+          "diff": 3,
+          "stem": "A researcher who tries twenty statistical models and reports the one that worked is not lying, but the reported result is no longer an unbiased estimate.",
+          "answer": {
+            "text": "一位尝试二十种统计模型、只报告其中奏效那一种的研究者并没有撒谎，但其所报告的结果已不再是无偏估计。"
+          },
+          "explain": {
+            "right": "先切分意群定主干，再按汉语习惯重排语序，最后检查术语与指代是否统一。",
+            "wrong": "常见错误：who 引导的定语从句较长，拆成「一位……的研究者」；the one that worked 译「其中奏效的那一种」；not lying 与 no longer 构成对比，译文要保留这层转折。",
+            "link": "e1-translation-k1"
+          },
+          "walkthrough": {
+            "framework": {
+              "title": "长难句拆分与重组",
+              "pattern": "e1-translation-p1",
+              "steps": [
+                "找主句的谓语动词（排除从句谓语）",
+                "识别从句类型：that/which/who 定语，that 宾语，if/whether 状语",
+                "逐段直译，标注每段修饰谁",
+                "按汉语习惯重排：状语前置、定语前置、被动转主动",
+                "通读检查是否漏译插入语"
+              ],
+              "trap": "把定语从句译成独立句，逻辑关系断裂"
+            },
+            "approach": "先切分意群定主干，再按汉语习惯重排语序，最后检查术语与指代是否统一。",
+            "points": [
+              {
+                "id": "e1-translation-k1",
+                "note": "按引导词、介词短语、分词结构切意群，先定主谓宾。",
+                "title": "长难句切分",
+                "core": "按引导词、介词短语、分词结构切意群，先定主谓宾。",
+                "pitfall": "who 引导的定语从句较长，拆成「一位……的研究者」；the one that worked 译「其中奏效的那一种」；not lying 与 no longer 构成对比，译文要保留这层转折。"
+              }
+            ],
+            "solution": "参考译文：一位尝试二十种统计模型、只报告其中奏效那一种的研究者并没有撒谎，但其所报告的结果已不再是无偏估计。\n得分点：who 引导的定语从句较长，拆成「一位……的研究者」；the one that worked 译「其中奏效的那一种」；not lying 与 no longer 构成对比，译文要保留这层转折。\n检查清单：主干是否译出、修饰是否归位、指代是否还原。"
+          },
+          "score": 12
+        }
+      ]
+    },
+    {
+      "no": 3,
+      "name": "写作",
+      "type": "design",
+      "range": "5 题",
+      "score": 12,
+      "note": "本题 12 分。按题目要求写一篇短文。",
+      "items": [
+        {
+          "id": "q-e1-e1-p3-wr",
+          "topic": "e1-writing",
+          "knowledge": "e1-writing-k2",
+          "type": "design",
+          "diff": 3,
+          "stem": "Write an essay of about 160 words on the following topic: many published scientific findings cannot be reproduced. Discuss the causes and propose how the research system should respond.",
+          "answer": {
+            "text": "The credibility of science rests on results that others can reproduce, yet large replication projects suggest that many published findings fail this test. The explanation is rarely fraud. Small samples, flexible analysis, and journals that reward novelty all push toward fragile results. Three reforms follow naturally. Researchers should register their analysis plan before collecting data, so that the reported model is not chosen after the fact. Journals should publish negative results, which currently disappear and force others to repeat the same dead ends. Funders should treat replication as ordinary research rather than as an admission of failure. None of these changes is dramatic, but together they restore the repetition on which science depends."
+          },
+          "explain": {
+            "right": "先定三段骨架（描述—分析—结论），再把题目给出的信息逐条落进段落，最后检查字数与衔接词。",
+            "wrong": "常见错误：把原因全部归为「学者造假」，与原文 mundane rather than scandalous 的定性冲突；或只列改革不解释原因。",
+            "link": "e1-writing-k2"
+          },
+          "walkthrough": {
+            "framework": {
+              "title": "图画作文",
+              "pattern": "e1-writing-p2",
+              "steps": [
+                "首段：一句点图（As is vividly depicted…），再写 2 句细节",
+                "二段：一句点寓意，再展开因果或举例",
+                "三段：一句总结 + 一句建议/展望",
+                "用具体名词替换万能词（people→students/employees）"
+              ],
+              "trap": "只描述图画不解释寓意，二段空洞"
+            },
+            "approach": "先定三段骨架（描述—分析—结论），再把题目给出的信息逐条落进段落，最后检查字数与衔接词。",
+            "points": [
+              {
+                "id": "e1-writing-k2",
+                "note": "观点句 + 解释 + 例证 + 小结，四句一段。",
+                "title": "议论段展开",
+                "core": "观点句 + 解释 + 例证 + 小结，四句一段。",
+                "pitfall": "把原因全部归为「学者造假」，与原文 mundane rather than scandalous 的定性冲突；或只列改革不解释原因。"
+              }
+            ],
+            "solution": "The credibility of science rests on results that others can reproduce, yet large replication projects suggest that many published findings fail this test. The explanation is rarely fraud. Small samples, flexible analysis, and journals that reward novelty all push toward fragile results. Three reforms follow naturally. Researchers should register their analysis plan before collecting data, so that the reported model is not chosen after the fact. Journals should publish negative results, which currently disappear and force others to repeat the same dead ends. Funders should treat replication as ordinary research rather than as an admission of failure. None of these changes is dramatic, but together they restore the repetition on which science depends."
+          },
+          "score": 12
+        }
+      ]
+    }
+  ]
+}

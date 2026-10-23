@@ -1,0 +1,391 @@
+{
+ "track": "spring",
+ "items": [
+  {
+   "slug": "spring-gs-boot",
+   "track": "spring",
+   "tier": "t1",
+   "hours": 8,
+   "level": "easy",
+   "title": "Spring Guides · 官方最小可运行示例集",
+   "repo": "spring-guides/gs-spring-boot",
+   "summary": "官方 Getting Started 指南，每个示例只做一件事且能直接跑。适合快速验证「某个能力到底怎么接」，比翻文档快。",
+   "stack": [
+    "Spring Boot",
+    "Maven",
+    "REST",
+    "Actuator"
+   ],
+   "learn": [
+    "起步依赖（starter）到底带进来了什么",
+    "application.properties 的常见配置项",
+    "Actuator 暴露的健康检查与指标端点",
+    "可执行 jar 的打包结构与运行方式",
+    "测试切片（@WebMvcTest / @DataJpaTest）的用途"
+   ],
+   "career": "打基础最省时间的一条路。面试问「你怎么学的 Spring」，能说出跑过哪些官方 guide 很加分。",
+   "steps": [
+    "跑通基础示例，用 curl 调通 REST 接口",
+    "打开 Actuator，检查 health 与 metrics",
+    "改端口、改上下文路径，验证配置生效",
+    "打包成可执行 jar 并独立运行",
+    "写 README：starter 依赖展开清单"
+   ],
+   "accept": [
+    "能说清 spring-boot-starter-web 引入了哪些关键依赖",
+    "Actuator 端点可访问且有数据",
+    "可执行 jar 脱离 IDE 能正常启动"
+   ],
+   "interview": [
+    "starter 机制的实现原理",
+    "Actuator 在生产环境该暴露哪些端点",
+    "内嵌容器与外部容器的取舍"
+   ]
+  },
+  {
+   "slug": "spring-petclinic",
+   "track": "spring",
+   "tier": "t1",
+   "hours": 8,
+   "level": "easy",
+   "title": "Spring PetClinic · 官方示例的标准骨架",
+   "repo": "spring-projects/spring-petclinic",
+   "summary": "Spring 官方维护的示例应用，代码量小但分层、校验、模板、测试、持久化全部规范。是「一个正经 Spring 项目长什么样」的基准线。",
+   "stack": [
+    "Spring Boot",
+    "Spring MVC",
+    "Thymeleaf",
+    "JPA",
+    "JUnit"
+   ],
+   "learn": [
+    "官方推荐的分层与包结构",
+    "Controller 的参数绑定与校验注解",
+    "JPA 实体关系与仓储接口的写法",
+    "MockMvc 做 Web 层测试的方式",
+    "配置外置与多环境切换"
+   ],
+   "career": "面试官问「你项目怎么分层」，拿官方骨架作参照比说「我觉得应该这样」有说服力。",
+   "steps": [
+    "跑通应用，走一遍新增宠物、查询主人流程",
+    "读 controller 层，画出请求到视图的路径",
+    "给某个接口补参数校验与错误提示",
+    "用 MockMvc 补一个 Web 层测试",
+    "写 README：包结构说明 + 一次请求的完整链路"
+   ],
+   "accept": [
+    "能画出一次请求从 DispatcherServlet 到视图的路径",
+    "新增校验失败时返回可读错误",
+    "MockMvc 测试可独立运行通过"
+   ],
+   "interview": [
+    "Spring MVC 的请求处理流程",
+    "分层架构里 DTO 与实体的边界",
+    "参数校验该放在哪一层"
+   ]
+  },
+  {
+   "slug": "spring-boot",
+   "track": "spring",
+   "tier": "t2",
+   "hours": 20,
+   "level": "mid",
+   "title": "Spring Boot · 自动配置与 Starter 机制",
+   "repo": "spring-projects/spring-boot",
+   "summary": "Java 后端的默认底座。核心价值在自动配置的条件装配、starter 依赖管理与内嵌容器启动流程。",
+   "stack": [
+    "Spring Boot",
+    "Spring",
+    "AutoConfiguration",
+    "Tomcat",
+    "Actuator"
+   ],
+   "learn": [
+    "@Conditional 系列注解的装配时机",
+    "spring.factories / AutoConfiguration.imports 加载链",
+    "内嵌容器的启动与生命周期",
+    "配置绑定与优先级",
+    "Actuator 指标如何接入监控"
+   ],
+   "career": "几乎所有 Java 岗都要求「熟悉 Spring Boot 原理」，能讲自动配置链路就能与只会用的候选人拉开差距。",
+   "steps": [
+    "写一个自定义 starter，封装一个工具能力",
+    "打断点跟一遍自动配置的加载顺序",
+    "用 Actuator 暴露指标并接 Prometheus",
+    "改内嵌 Tomcat 参数做压测对比",
+    "整理一张启动流程图"
+   ],
+   "accept": [
+    "自定义 starter 可被其他工程零配置引入",
+    "能列出自动配置的完整加载链路",
+    "Actuator 指标能在 Grafana 展示",
+    "压测前后参数有数据对比"
+   ],
+   "interview": [
+    "自动配置如何做到按需生效",
+    "starter 与普通依赖的本质差别",
+    "Bean 生命周期与循环依赖的处理"
+   ]
+  },
+  {
+   "slug": "spring-security",
+   "track": "spring",
+   "tier": "t2",
+   "hours": 20,
+   "level": "mid",
+   "title": "Spring Security · 认证授权过滤器链",
+   "repo": "spring-projects/spring-security",
+   "summary": "企业级安全底座。过滤器链、AuthenticationProvider、OAuth2 与 JWT 集成，是权限模块的标准实现参考。",
+   "stack": [
+    "Spring Security",
+    "OAuth2",
+    "JWT",
+    "RBAC",
+    "Servlet Filter"
+   ],
+   "learn": [
+    "过滤器链的装配顺序与作用",
+    "认证与授权的职责边界",
+    "JWT 无状态会话的利弊",
+    "RBAC 与数据权限的落地",
+    "CSRF / CORS 的正确配置"
+   ],
+   "career": "几乎所有后台系统都要权限模块。能独立设计一套 RBAC + JWT，是后端岗的硬需求。",
+   "steps": [
+    "搭一个最小登录 + JWT 签发工程",
+    "加 RBAC：用户 - 角色 - 权限三级",
+    "配置方法级鉴权与方法参数校验",
+    "接入 OAuth2 第三方登录",
+    "做一次越权测试并修复"
+   ],
+   "accept": [
+    "登录、刷新、登出全链路可用",
+    "越权访问返回 403 且有审计日志",
+    "能画出过滤器链顺序",
+    "有安全测试用例覆盖"
+   ],
+   "interview": [
+    "JWT 如何做到主动失效",
+    "过滤器与拦截器的执行顺序",
+    "水平越权与垂直越权的防护"
+   ]
+  },
+  {
+   "slug": "spring-springall",
+   "track": "spring",
+   "tier": "t2",
+   "hours": 20,
+   "level": "mid",
+   "title": "SpringAll · 循序渐进的 Spring 全家桶",
+   "repo": "wuyouzhuguli/SpringAll",
+   "summary": "从 Spring Boot 基础一路写到 Shiro、Batch、Security、Cloud 的中文系列教程，每篇配可运行代码。适合当「按需补课」的索引。",
+   "stack": [
+    "Spring Boot",
+    "Spring Cloud",
+    "Shiro",
+    "Spring Batch",
+    "Security"
+   ],
+   "learn": [
+    "从单体到微服务的拆分动机与代价",
+    "Shiro 与 Spring Security 的选型差异",
+    "Spring Batch 的分片与失败重试",
+    "配置中心的接入与动态刷新",
+    "网关在微服务里的职责边界"
+   ],
+   "career": "面试常问「你了解 Spring Cloud 哪些组件」。这一系列能让你从「听过名字」到「跑过一遍」。",
+   "steps": [
+    "选 3 个专题跑通（如 Security、Batch、Gateway）",
+    "把其中一个专题改造成自己的小场景",
+    "记录每个组件解决的问题与引入的新复杂度",
+    "整理一张 Spring 生态组件职责表",
+    "写 README：组件选型决策树"
+   ],
+   "accept": [
+    "能说清至少 3 个组件解决的具体问题",
+    "改造后的示例可独立运行",
+    "能指出引入某组件后新增的运维成本"
+   ],
+   "interview": [
+    "Spring Cloud 各组件的职责划分",
+    "网关与 Nginx 的分工",
+    "微服务拆分过细会带来什么问题"
+   ]
+  },
+  {
+   "slug": "spring-cloud-alibaba",
+   "track": "spring",
+   "tier": "t3",
+   "hours": 45,
+   "level": "hard",
+   "title": "Spring Cloud Alibaba · 国内微服务主流组合",
+   "repo": "alibaba/spring-cloud-alibaba",
+   "summary": "Nacos + Sentinel + Seata + RocketMQ 的一站式整合。国内中厂微服务的事实标准组合，读懂它能直接对上大多数 JD 的技术栈。",
+   "stack": [
+    "Spring Cloud",
+    "Nacos",
+    "Sentinel",
+    "Seata",
+    "RocketMQ"
+   ],
+   "learn": [
+    "Nacos 作为注册中心与配置中心的双重角色",
+    "Sentinel 在网关与服务两层做限流的差异",
+    "Seata 的 AT 模式如何做到自动回滚",
+    "RocketMQ 事务消息与本地事务表的一致性方案",
+    "服务降级与线程隔离的配置粒度"
+   ],
+   "career": "Java 后端岗位的高匹配项目。JD 里写「熟悉 Spring Cloud Alibaba」的，这个项目直接对上。",
+   "steps": [
+    "搭三服务（订单/库存/账户）+ Nacos 注册中心",
+    "用 Seata 跑通一个跨服务事务的成功与回滚",
+    "在网关层与服务层分别配置限流并验证",
+    "用 RocketMQ 事务消息实现最终一致性",
+    "写 README：微服务拓扑图 + 事务方案对比"
+   ],
+   "accept": [
+    "跨服务事务能正确回滚且无脏数据",
+    "网关限流与服务限流的生效位置可区分",
+    "能说清 AT 模式的全局锁与脏读风险",
+    "有拓扑图说明调用与依赖关系"
+   ],
+   "interview": [
+    "Seata AT 模式的执行流程与隔离级别",
+    "事务消息如何保证不丢不重",
+    "注册中心选 Nacos 还是 Eureka/ZK"
+   ]
+  },
+  {
+   "slug": "spring-framework",
+   "track": "spring",
+   "tier": "t3",
+   "hours": 45,
+   "level": "hard",
+   "title": "Spring Framework · IoC 与 AOP 内核",
+   "repo": "spring-projects/spring-framework",
+   "summary": "6 万星的核心框架源码。Bean 生命周期、循环依赖三级缓存、AOP 代理与事务传播，是 Java 面试的深水区。",
+   "stack": [
+    "Java",
+    "IoC",
+    "AOP",
+    "动态代理",
+    "事务"
+   ],
+   "learn": [
+    "BeanDefinition 的注册与实例化流程",
+    "三级缓存如何解决循环依赖",
+    "JDK 代理与 CGLIB 的选择",
+    "事务传播行为与失效场景",
+    "事件机制与扩展点"
+   ],
+   "career": "中高级 Java 岗的分水岭。能讲清循环依赖与事务失效，面试评价会明显不同。",
+   "steps": [
+    "手写一个 200 行的迷你 IoC 容器",
+    "用调试器跟 refresh() 的 12 个步骤",
+    "构造循环依赖场景，观察三级缓存",
+    "复现事务失效的 5 种场景并修复",
+    "写一篇源码笔记"
+   ],
+   "accept": [
+    "迷你容器支持注解注入与单例",
+    "能画出 refresh() 主流程",
+    "5 种事务失效场景均可复现并解释",
+    "笔记含关键源码行号"
+   ],
+   "interview": [
+    "三级缓存为什么不能只用两级",
+    "同类方法调用为什么事务失效",
+    "AOP 代理在什么情况下不生效"
+   ]
+  },
+  {
+   "slug": "spring-shenyu",
+   "track": "spring",
+   "tier": "t4",
+   "hours": 90,
+   "level": "hard",
+   "title": "ShenYu · 高性能 API 网关",
+   "repo": "apache/shenyu",
+   "summary": "Apache 微服务网关，支持 HTTP/RPC/WebSocket 多协议、插件化限流鉴权、灰度分流。读它能把「网关到底做了什么」讲成一条条可验证的机制。",
+   "stack": [
+    "Java",
+    "WebFlux",
+    "插件化",
+    "限流",
+    "灰度发布",
+    "多协议代理"
+   ],
+   "learn": [
+    "响应式网关（WebFlux）相比阻塞式网关的吞吐优势",
+    "插件链的加载顺序与责任链设计",
+    "多协议代理的抽象方式",
+    "灰度分流基于什么维度（header/权重/用户）",
+    "网关层的限流、熔断、鉴权如何协同"
+   ],
+   "career": "基础架构与网关方向的高价值项目。能讲清插件链与响应式模型，是中高级岗的区分点。",
+   "steps": [
+    "部署 admin + gateway，接入一个后端服务",
+    "写一个自定义插件（如请求头注入）并挂到链上",
+    "配置按 header 的灰度分流并验证",
+    "与 Nginx 做同场景压测对比（QPS/P99）",
+    "写 README：插件链执行顺序图 + 压测报告"
+   ],
+   "accept": [
+    "自定义插件可插拔且不影响其他插件",
+    "灰度规则能精确命中目标流量",
+    "有与 Nginx 的横向压测数据",
+    "能说清网关不该承担哪些职责"
+   ],
+   "interview": [
+    "响应式网关为什么比阻塞式更能扛并发",
+    "网关做鉴权与业务服务做鉴权怎么分工",
+    "插件链设计如何避免互相影响"
+   ]
+  },
+  {
+   "slug": "yudao-cloud-microservices",
+   "track": "spring",
+   "tier": "t4",
+   "hours": 85,
+   "level": "hard",
+   "title": "yudao-cloud · 一套能跑的企业级微服务底座",
+   "repo": "YunaiV/yudao-cloud",
+   "summary": "基于 Spring Cloud Alibaba 的多模块微服务框架，自带 Nacos 注册配置、Gateway 网关、Sentinel 限流、Seata 分布式事务、多租户与数据权限。它不是玩具工程，是能直接对照公司内部架构看的那类仓库——难点在于「为什么这么分层」而不是「怎么跑起来」。",
+   "stack": [
+    "Spring Cloud Alibaba",
+    "Nacos",
+    "Gateway",
+    "Sentinel",
+    "Seata",
+    "MyBatis-Plus"
+   ],
+   "learn": [
+    "多模块（api / biz / framework）分层如何避免循环依赖",
+    "Nacos 配置变更如何在不重启的情况下热更新到 Bean",
+    "Gateway 的过滤器链顺序，以及鉴权应该挂在第几环",
+    "Seata AT 模式的全局锁与回滚日志带来的写放大",
+    "多租户在 MyBatis 拦截器层的注入点与漏租风险",
+    "Sentinel 的流控与熔断在真实调用链上的触发条件"
+   ],
+   "career": "「用过 Spring Cloud」和「能改微服务底座」差着一整个职级，这套东西能直接对上 Java 后端的中高级面试。",
+   "steps": [
+    "把 Nacos / Redis / MySQL 拉起来，跑通全部服务并画出调用拓扑",
+    "挑一条下单链路，用 traceId 串起网关到落库的完整日志",
+    "给一个接口加 Sentinel 流控规则，压测到触发并观察降级行为",
+    "构造一次跨服务事务失败，验证 Seata 回滚与补偿",
+    "给某模块加一个数据权限维度，跑通并写清侵入点",
+    "做一轮压测（单机 4C8G），输出 QPS / P99 / 资源水位报告"
+   ],
+   "accept": [
+    "全部服务能在一台机器上起齐并有拓扑图",
+    "一次分布式事务失败能被完整回滚并可复现",
+    "压测报告能指出第一个瓶颈在哪个组件"
+   ],
+   "interview": [
+    "微服务拆分粒度过细会带来什么问题",
+    "Seata AT 模式和 TCC 各自适合什么业务",
+    "网关做鉴权与每个服务自己做鉴权，怎么权衡"
+   ]
+  }
+ ]
+}

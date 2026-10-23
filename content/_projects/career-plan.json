@@ -1,0 +1,139 @@
+{
+ "version": 2,
+ "note": "就业级项目库的分层与判定规则。tier 决定项目在能力阶梯上的位置，route 决定某个岗位方向需要哪些学科、哪些梯度的项目，graduation 给出「可实习」的量化门槛。项目本体见 career-projects.json，本文件不重复项目内容。",
+ "tiers": [
+  {
+   "key": "t1",
+   "name": "入门 · 能跑起来",
+   "hours": "4-12h",
+   "goal": "把仓库跑通，看懂主流程，能改小功能",
+   "evidence": ["本地跑通并截图", "手画主流程图", "改一处小功能并说明影响面"],
+   "common_fail": "只 clone 没跑通，或跑通但说不清一条请求怎么走完全程"
+  },
+  {
+   "key": "t2",
+   "name": "进阶 · 能独立写",
+   "hours": "12-30h",
+   "goal": "脱离教程从零实现同构小系统，或用现成库搭出可用服务",
+   "evidence": ["可运行的最小实现", "至少 3 个自测用例", "README 写清设计与取舍"],
+   "common_fail": "全程跟着视频敲，换个需求就不会动"
+  },
+  {
+   "key": "t3",
+   "name": "核心 · 能讲清原理",
+   "hours": "30-60h",
+   "goal": "读源码画出关键链路，做改造或性能实验，能回答「为什么这么设计」",
+   "evidence": ["架构图 + 时序图", "一次真实改造（PR 级 diff）", "压测/对比数据表"],
+   "common_fail": "能背结论但拿不出自己产生的数据"
+  },
+  {
+   "key": "t4",
+   "name": "门槛 · 能写进简历",
+   "hours": "60-120h",
+   "goal": "生产级复杂度，有可量化结果，经得起面试官连问 30 分钟",
+   "evidence": ["可复现的量化指标（QPS/P99/准确率/成本）", "明确的个人贡献边界", "踩坑与权衡记录"],
+   "common_fail": "项目是跟着做的，一问「你改了什么」就露馅"
+  }
+ ],
+ "track_blueprint": {
+  "clang": {"label": "C 语言", "role": "语言基本功与系统编程底子", "t1": 2, "t2": 3, "t3": 2, "t4": 1},
+  "cpp": {"label": "C / C++", "role": "高性能后端、基础架构、嵌入式", "t1": 2, "t2": 3, "t3": 3, "t4": 3},
+  "java": {"label": "Java", "role": "业务后端、中间件、大数据生态", "t1": 3, "t2": 3, "t3": 2, "t4": 2},
+  "spring": {"label": "Spring 生态", "role": "企业级后端开发主战场", "t1": 2, "t2": 3, "t3": 2, "t4": 2},
+  "python": {"label": "Python", "role": "脚本、服务端、AI 工程化", "t1": 2, "t2": 3, "t3": 2, "t4": 2},
+  "fullstack": {"label": "全栈开发", "role": "前端 + BFF + 部署闭环", "t1": 2, "t2": 3, "t3": 3, "t4": 2},
+  "database": {"label": "数据库", "role": "SQL 能力、存储引擎、查询优化", "t1": 2, "t2": 2, "t3": 2, "t4": 2},
+  "middleware": {"label": "中间件", "role": "消息队列、缓存、注册中心、网关", "t1": 2, "t2": 2, "t3": 2, "t4": 2},
+  "ai": {"label": "AI / Agent 开发", "role": "模型应用、RAG、推理部署", "t1": 2, "t2": 3, "t3": 3, "t4": 3},
+  "bigdata": {"label": "大数据", "role": "离线/实时数仓、湖仓一体", "t1": 2, "t2": 2, "t3": 2, "t4": 2},
+  "data": {"label": "数据分析", "role": "取数、清洗、指标体系、可视化", "t1": 2, "t2": 3, "t3": 2, "t4": 1},
+  "fundamentals": {"label": "计算机基础", "role": "算法、操作系统、网络、系统设计", "t1": 2, "t2": 2, "t3": 2, "t4": 0},
+  "tooling": {"label": "工具链", "role": "Git、CI、容器、自动化", "t1": 2, "t2": 2, "t3": 1, "t4": 0}
+ },
+ "graduation": {
+  "track_pass": {
+   "rule": "该学科全部 t1 + t2 完成，且至少 1 个 t3 通过验收",
+   "meaning": "这一科能上手干活，但还不足以撑起简历"
+  },
+  "track_strong": {
+   "rule": "track_pass 且至少 1 个 t4（t4 缺失的学科用 2 个 t3 替代）",
+   "meaning": "这一科有可讲深的项目，能进技术面"
+  },
+  "hirable": {
+   "rule": "某条 route 要求的全部学科达到 track_strong，且全路线至少 2 个 t4 项目带可复现量化数据，且所有 accept 清单逐条自查通过",
+   "meaning": "达到可投实习的门槛，简历有 2-3 个项目能撑 30 分钟深聊"
+  },
+  "estimate": {
+   "rule": "工时按 tier 中位数估算：t1=8h、t2=20h、t3=45h、t4=90h",
+   "note": "这是「做完并产出证据」的净工时，不含看视频和查资料的时间"
+  }
+ },
+ "routes": [
+  {
+   "key": "cpp-backend",
+   "title": "C++ 后端 / 基础架构",
+   "summary": "面向 C++ 服务端、存储、RPC、基础架构方向。核心是把网络模型、内存管理、并发与性能数据讲透。",
+   "tracks": {"clang": ["t1", "t2"], "cpp": ["t1", "t2", "t3", "t4"], "middleware": ["t1", "t2"], "database": ["t1", "t2"], "fundamentals": ["t1", "t2"], "tooling": ["t1"]},
+   "t4_required": 2,
+   "projects": 18,
+   "hours": 560,
+   "deliverables": ["一个高并发服务端 + 压测报告（QPS/P99/内存曲线）", "一份源码级笔记（选 epoll 或存储引擎）", "一段可复现的性能优化对比"],
+   "interview_bar": ["epoll ET/LT 与惊群", "内存池与对象生命周期", "一次真实的内存/CPU 优化过程", "无锁或低锁并发的取舍"]
+  },
+  {
+   "key": "java-backend",
+   "title": "Java 业务后端",
+   "summary": "面向电商、金融、SaaS 的业务后端。核心是 Spring 生态熟练度 + 数据库设计 + 中间件使用与故障处理。",
+   "tracks": {"java": ["t1", "t2", "t3", "t4"], "spring": ["t1", "t2", "t3", "t4"], "database": ["t1", "t2", "t3"], "middleware": ["t1", "t2"], "fundamentals": ["t1", "t2"], "tooling": ["t1"]},
+   "t4_required": 2,
+   "projects": 22,
+   "hours": 620,
+   "deliverables": ["一个带权限/订单/支付沙箱的业务系统", "慢 SQL 治理与索引优化记录", "一次缓存击穿或消息积压的排查复盘"],
+   "interview_bar": ["Spring Bean 生命周期与循环依赖", "事务传播与失效场景", "索引失效与执行计划", "幂等与分布式锁"]
+  },
+  {
+   "key": "fullstack",
+   "title": "全栈 / 前端偏后端",
+   "summary": "面向中小团队全栈岗。核心是能独立把需求做成上线的产品，含鉴权、部署、监控。",
+   "tracks": {"fullstack": ["t1", "t2", "t3", "t4"], "python": ["t1", "t2"], "database": ["t1", "t2"], "tooling": ["t1", "t2"]},
+   "t4_required": 2,
+   "projects": 14,
+   "hours": 430,
+   "deliverables": ["一个真实可访问的全栈应用（含登录、支付或第三方集成）", "Lighthouse/Core Web Vitals 优化前后对比", "CI/CD 流水线 + 一键部署"],
+   "interview_bar": ["首屏性能优化路径", "鉴权方案取舍（Session/JWT/OAuth）", "SSR 与 CSR 的边界", "一次线上故障定位"]
+  },
+  {
+   "key": "ai-agent",
+   "title": "AI 应用 / Agent 开发",
+   "summary": "面向大模型应用落地。核心是 RAG 效果调优、Agent 编排、推理成本与延迟控制。",
+   "tracks": {"ai": ["t1", "t2", "t3", "t4"], "python": ["t1", "t2", "t3"], "data": ["t1", "t2"], "database": ["t1", "t2"]},
+   "t4_required": 2,
+   "projects": 16,
+   "hours": 500,
+   "deliverables": ["一个 RAG 或 Agent 应用 + 评测集与指标", "推理延迟/成本优化对比", "提示词与工具调用的失败案例分析"],
+   "interview_bar": ["向量检索召回率怎么量", "chunk 策略与上下文窗口取舍", "Agent 工具调用失败怎么兜底", "幻觉的工程化抑制手段"]
+  },
+  {
+   "key": "data-analyst",
+   "title": "数据分析",
+   "summary": "面向业务分析、增长、BI。核心是取数准确、指标定义清楚、结论能落地。",
+   "tracks": {"data": ["t1", "t2", "t3", "t4"], "python": ["t1", "t2"], "database": ["t1", "t2"], "bigdata": ["t1"]},
+   "t4_required": 1,
+   "projects": 12,
+   "hours": 340,
+   "deliverables": ["一份端到端分析报告（问题→口径→结论→建议）", "一套自动化取数/看板", "一次 A/B 实验设计与显著性判断"],
+   "interview_bar": ["指标口径与漏斗拆解", "辛普森悖论", "SQL 窗口函数实战", "如何证明结论不是噪声"]
+  },
+  {
+   "key": "bigdata",
+   "title": "大数据开发",
+   "summary": "面向数仓、实时计算、湖仓。核心是 Spark/Flink 任务调优与数据链路稳定性。",
+   "tracks": {"bigdata": ["t1", "t2", "t3", "t4"], "java": ["t1", "t2"], "database": ["t1", "t2"], "middleware": ["t1", "t2"], "python": ["t1"]},
+   "t4_required": 2,
+   "projects": 15,
+   "hours": 480,
+   "deliverables": ["一条离线+实时双链路数仓", "一次数据倾斜或反压调优记录", "数据质量校验与血缘说明"],
+   "interview_bar": ["shuffle 与数据倾斜处理", "Flink 反压定位", "Exactly-once 的实现边界", "小文件与 compaction"]
+  }
+ ]
+}

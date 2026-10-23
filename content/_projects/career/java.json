@@ -1,0 +1,436 @@
+{
+ "track": "java",
+ "items": [
+  {
+   "slug": "java-algorithms",
+   "track": "java",
+   "tier": "t1",
+   "hours": 8,
+   "level": "easy",
+   "title": "TheAlgorithms/Java · 用 Java 重写一遍经典算法",
+   "repo": "TheAlgorithms/Java",
+   "summary": "几百个算法的 Java 实现，每个类独立可跑。真正的收益不是算法本身，而是看同一道题里泛型、集合框架、Stream 是怎么被用出来的。",
+   "stack": [
+    "Java 17",
+    "集合框架",
+    "泛型",
+    "Stream API"
+   ],
+   "learn": [
+    "ArrayList / LinkedList / HashMap 的实际复杂度",
+    "泛型方法如何避免为每种类型重复实现",
+    "Stream 与显式循环在可读性和性能上的取舍",
+    "自动装箱在热点路径上的隐性开销",
+    "递归与迭代在 JVM 栈上的差异"
+   ],
+   "career": "补掉「会语法但集合框架用不利索」的短板。Java 一面几乎必问集合复杂度与适用场景。",
+   "steps": [
+    "挑 10 个已学算法，读实现并与自己写法对比",
+    "单独编译其中一个类并写 main 验证",
+    "把某个 Stream 实现改成显式循环，对比可读性与耗时",
+    "用 JMH 微基准测一个热点方法的吞吐",
+    "写 README：算法与集合选型对照表"
+   ],
+   "accept": [
+    "能说清 5 个以上集合的复杂度与适用场景",
+    "有 JMH 跑出的真实数据而非臆测",
+    "能解释一处自动装箱带来的开销"
+   ],
+   "interview": [
+    "HashMap 的扩容与红黑树转换条件",
+    "ArrayList 与 LinkedList 在真实场景中怎么选",
+    "Stream 并行流在什么情况下会变慢"
+   ]
+  },
+  {
+   "slug": "java-design-patterns",
+   "track": "java",
+   "tier": "t1",
+   "hours": 8,
+   "level": "easy",
+   "title": "java-design-patterns · 23 种设计模式实战",
+   "repo": "iluwatar/java-design-patterns",
+   "summary": "9.4 万星的设计模式大全，每个模式都给可运行示例与适用场景说明，是重构与代码评审的对照表。",
+   "stack": [
+    "Java",
+    "OOP",
+    "设计模式",
+    "SOLID",
+    "单元测试"
+   ],
+   "learn": [
+    "创建型 / 结构型 / 行为型的边界",
+    "策略与工厂如何消除 if-else 地狱",
+    "装饰器与代理的差异",
+    "观察者在事件系统中的应用",
+    "如何避免过度设计"
+   ],
+   "career": "面试问「你项目里用过什么设计模式」时，能给出真实落点而不是背名词。",
+   "steps": [
+    "按分类通读，挑 8 个高频模式精读",
+    "在自己的项目里找出 3 处可重构点",
+    "用策略模式替换一段 if-else 并补测试",
+    "记录重构前后的圈复杂度变化",
+    "整理一张「场景 → 模式」速查表"
+   ],
+   "accept": [
+    "至少完成 3 处真实重构",
+    "重构后单测全绿且复杂度下降",
+    "能说清每种模式的代价",
+    "速查表可覆盖 15 个以上场景"
+   ],
+   "interview": [
+    "策略模式与简单工厂如何配合",
+    "装饰器与代理在语义上的区别",
+    "什么时候不该用设计模式"
+   ]
+  },
+  {
+   "slug": "java-javaguide",
+   "track": "java",
+   "tier": "t1",
+   "hours": 8,
+   "level": "easy",
+   "title": "JavaGuide · Java 体系与面试八股",
+   "repo": "Snailclimb/JavaGuide",
+   "summary": "15.9 万星的 Java 知识体系与面试题库，覆盖集合、并发、JVM、MySQL、Redis、消息队列与系统设计。",
+   "stack": [
+    "Java",
+    "JVM",
+    "并发编程",
+    "MySQL",
+    "Redis",
+    "系统设计"
+   ],
+   "learn": [
+    "HashMap 扩容与红黑树转换",
+    "JMM、volatile、AQS 与锁升级",
+    "JVM 内存分区与 GC 算法",
+    "索引失效场景与执行计划",
+    "分布式事务与幂等设计"
+   ],
+   "career": "八股不是背答案，而是把散点连成网。配合任一实战项目使用，面试通过率提升最直接。",
+   "steps": [
+    "按模块列一张自测表，标出不会的项",
+    "每个模块挑 3 个高频题，写成「结论 + 原理 + 场景」三段式",
+    "对照 JVM 章节，用 jstat / jmap 实测一次 GC",
+    "对照 MySQL 章节，用 EXPLAIN 验证索引失效",
+    "模拟面试：限时口述 20 题并录音复盘"
+   ],
+   "accept": [
+    "自测表覆盖率 100%，薄弱项有二次复习记录",
+    "能对 20 个高频题给出结构化回答",
+    "至少有 3 个结论被实测数据验证",
+    "录音复盘能指出自己表达不清的点"
+   ],
+   "interview": [
+    "HashMap 为什么线程不安全，ConcurrentHashMap 怎么解决",
+    "G1 与 CMS 的适用场景差异",
+    "索引失效的典型场景与排查顺序"
+   ]
+  },
+  {
+   "slug": "java-eladmin",
+   "track": "java",
+   "tier": "t2",
+   "hours": 20,
+   "level": "mid",
+   "title": "eladmin · 后台管理系统全栈模板",
+   "repo": "elunez/eladmin",
+   "summary": "Spring Boot + JPA + Spring Security + Vue 的完整后台管理系统，含 RBAC 权限、菜单动态路由、代码生成。是「实习第一周就能上手改需求」的那类项目。",
+   "stack": [
+    "Spring Boot",
+    "JPA",
+    "Spring Security",
+    "RBAC",
+    "Vue"
+   ],
+   "learn": [
+    "RBAC 表结构设计（用户-角色-权限-菜单）",
+    "JWT 认证与 Spring Security 过滤器链的整合",
+    "动态菜单与前端路由权限的配合",
+    "JPA 关联映射与 N+1 查询问题",
+    "代码生成器如何减少重复 CRUD"
+   ],
+   "career": "后台管理系统是实习期最常见的第一个任务。能独立加一个带权限的模块，等于直接具备上手能力。",
+   "steps": [
+    "部署前后端并登录，梳理菜单与角色关系",
+    "新增一个业务模块（含表、接口、菜单、权限点）",
+    "用不同角色登录，验证权限边界",
+    "用 show-sql 观察 N+1 查询并优化",
+    "写 README：RBAC 表结构图 + 新增模块步骤"
+   ],
+   "accept": [
+    "新模块在低权限角色下不可见也不可调用",
+    "能画出 RBAC 四张表的关系",
+    "N+1 查询优化前后 SQL 条数有对比",
+    "能说清 JWT 过期与刷新怎么处理"
+   ],
+   "interview": [
+    "RBAC 与 ABAC 的适用场景差异",
+    "JWT 相比 Session 的优缺点",
+    "JPA 的懒加载在什么情况下会抛异常"
+   ]
+  },
+  {
+   "slug": "java-mall",
+   "track": "java",
+   "tier": "t2",
+   "hours": 20,
+   "level": "mid",
+   "title": "mall · Spring Boot 电商全栈系统",
+   "repo": "macrozheng/mall",
+   "summary": "8.4 万星的电商实战：后台管理 + 前台商城，覆盖商品、订单、购物车、优惠券、权限，配 ES 搜索与 Redis 缓存。",
+   "stack": [
+    "Spring Boot",
+    "MyBatis",
+    "MySQL",
+    "Redis",
+    "Elasticsearch",
+    "Docker"
+   ],
+   "learn": [
+    "电商领域模型：SPU / SKU 与库存扣减",
+    "订单状态机与超时关单",
+    "JWT + Spring Security 的权限链路",
+    "缓存穿透 / 击穿 / 雪崩的工程解法",
+    "分页、搜索与复杂查询的 SQL 组织"
+   ],
+   "career": "Java 后端最主流的简历项目。能讲清库存与订单一致性，足以支撑一面到二面。",
+   "steps": [
+    "docker-compose 起 MySQL / Redis / ES，导入 SQL",
+    "跑通后台登录 → 商品上架 → 前台下单全链路",
+    "读订单模块，画出下单时序与库存扣减",
+    "压测下单接口，观察 Redis 缓存命中率",
+    "加一个功能：订单超时自动取消（延迟队列）"
+   ],
+   "accept": [
+    "本地全链路可下单并生成订单",
+    "能讲清超卖如何避免（乐观锁 / 分布式锁）",
+    "新增功能有可复现的测试步骤",
+    "压测报告含 TPS 与缓存命中率"
+   ],
+   "interview": [
+    "库存扣减如何防止超卖",
+    "订单超时关单的三种实现与取舍",
+    "缓存与数据库一致性方案"
+   ]
+  },
+  {
+   "slug": "java-spring-boot-demo",
+   "track": "java",
+   "tier": "t2",
+   "hours": 20,
+   "level": "mid",
+   "title": "spring-boot-demo · 40+ 个可运行特性示例",
+   "repo": "xkcoding/spring-boot-demo",
+   "summary": "把 Spring Boot 生态里绝大多数常用能力做成了独立可跑的 demo：缓存、消息、任务、安全、ORM、限流。最适合当「要用什么就去翻哪一模块」的手册。",
+   "stack": [
+    "Spring Boot 2.x",
+    "MyBatis-Plus",
+    "Redis",
+    "RabbitMQ",
+    "Spring Security"
+   ],
+   "learn": [
+    "自动配置的生效条件与如何覆盖默认值",
+    "分层结构（controller/service/mapper）的职责边界",
+    "统一异常处理与统一响应体的实现位置",
+    "缓存注解与 Redis 序列化方式的坑",
+    "多环境配置（dev/test/prod）的隔离方式"
+   ],
+   "career": "Java 后端岗最常见的实习要求是「熟悉 Spring Boot 全家桶」。这一仓库能把「听说过」变成「跑通过」。",
+   "steps": [
+    "选 5 个模块跑通（缓存、消息、定时任务、安全、限流）",
+    "把其中一个模块改造成自己的小接口（含参数校验）",
+    "接入统一异常处理，验证错误码与日志",
+    "配置 dev/prod 两套 profile 并切换验证",
+    "写 README：5 个模块的接入清单 + 踩坑记录"
+   ],
+   "accept": [
+    "5 个模块本地可运行且能演示效果",
+    "自定义接口有参数校验与统一错误返回",
+    "能说清自动配置在什么条件下生效",
+    "profile 切换后连接的是不同数据源"
+   ],
+   "interview": [
+    "Spring Boot 自动配置的实现原理",
+    "Bean 的生命周期与循环依赖怎么解决",
+    "@Transactional 在什么情况下会失效"
+   ]
+  },
+  {
+   "slug": "java-apollo",
+   "track": "java",
+   "tier": "t3",
+   "hours": 45,
+   "level": "hard",
+   "title": "Apollo · 配置中心与动态生效",
+   "repo": "apolloconfig/apollo",
+   "summary": "携程开源的配置中心，解决「改一个配置要重启全部实例」的问题。含灰度发布、权限、审计、客户端长轮询，是理解分布式配置管理的标准样本。",
+   "stack": [
+    "Java",
+    "Spring Boot",
+    "长轮询",
+    "灰度发布",
+    "MySQL"
+   ],
+   "learn": [
+    "客户端长轮询（long polling）如何做到秒级生效",
+    "配置的灰度发布与回滚机制",
+    "多环境、多集群、多 namespace 的隔离模型",
+    "配置变更的审计与权限控制",
+    "配置中心不可用时的本地兜底策略"
+   ],
+   "career": "中间件与基础架构岗的高频考点。能讲长轮询，比只会用 @Value 强很多。",
+   "steps": [
+    "本地部署 Apollo（含 MySQL 与 Portal）",
+    "接入一个 Spring Boot 应用，改配置验证不重启生效",
+    "配置灰度规则，只对指定实例生效",
+    "断网模拟配置中心不可用，验证本地缓存兜底",
+    "写 README：长轮询时序图 + 灰度验证记录"
+   ],
+   "accept": [
+    "配置修改后 5 秒内在客户端生效",
+    "灰度发布只影响目标实例",
+    "配置中心宕机时应用仍能启动",
+    "能说清长轮询相比短轮询省在哪里"
+   ],
+   "interview": [
+    "长轮询与 WebSocket、短轮询的对比",
+    "配置中心挂了服务怎么办",
+    "配置变更如何避免全量同时生效引发雪崩"
+   ]
+  },
+  {
+   "slug": "java-sentinel",
+   "track": "java",
+   "tier": "t3",
+   "hours": 45,
+   "level": "hard",
+   "title": "Sentinel · 流量治理与熔断降级",
+   "repo": "alibaba/Sentinel",
+   "summary": "阿里开源的流量防护组件，覆盖限流、熔断、热点参数、系统自适应保护。读它能把「高并发下怎么不被打垮」从概念变成可配置、可观测的机制。",
+   "stack": [
+    "Java",
+    "滑动窗口",
+    "令牌桶",
+    "熔断器",
+    "Sentinel Dashboard"
+   ],
+   "learn": [
+    "滑动窗口统计与令牌桶/漏桶的差异",
+    "熔断器的三态转换与半开探测",
+    "热点参数限流的实现方式",
+    "系统自适应保护的负载指标",
+    "规则持久化到 Nacos 的接入方式"
+   ],
+   "career": "高并发场景的必备知识。能说清滑动窗口与熔断半开状态，面试里明显高于只会写 @SentinelResource 的人。",
+   "steps": [
+    "接入 Dashboard，给一个接口配置 QPS 限流",
+    "用 JMeter 打流量，观察限流与降级行为",
+    "配置熔断规则，人为制造慢调用触发熔断",
+    "把规则持久化到 Nacos，重启验证规则不丢",
+    "写 README：限流算法对比 + 熔断状态机图"
+   ],
+   "accept": [
+    "限流触发时返回可预期的错误而非雪崩",
+    "能复现熔断的打开→半开→关闭全过程",
+    "规则重启后仍然生效",
+    "有压测数据说明限流阈值是否合理"
+   ],
+   "interview": [
+    "滑动窗口相比固定窗口解决了什么",
+    "熔断和降级的区别",
+    "限流阈值怎么定，定错了会怎样"
+   ]
+  },
+  {
+   "slug": "java-dubbo",
+   "track": "java",
+   "tier": "t4",
+   "hours": 90,
+   "level": "hard",
+   "title": "Dubbo · 服务治理与 RPC 内核",
+   "repo": "apache/dubbo",
+   "summary": "Java 生态最成熟的 RPC 框架，覆盖协议、序列化、负载均衡、集群容错、服务发现。读懂一条调用链，等于把微服务的通信层打通了。",
+   "stack": [
+    "Java",
+    "Netty",
+    "SPI 扩展",
+    "负载均衡",
+    "服务发现",
+    "熔断"
+   ],
+   "learn": [
+    "SPI 扩展机制如何实现「可替换的每个环节」",
+    "一次 RPC 从代理到序列化再到网络发送的完整链路",
+    "集群容错策略（failover/failfast/forking）的差异",
+    "负载均衡算法与一致性哈希",
+    "服务暴露与引用在注册中心的生命周期"
+   ],
+   "career": "Java 后端中高级岗的核心项目。能画出 Dubbo 调用链并说清 SPI，技术面基本不会被问倒。",
+   "steps": [
+    "本地起注册中心（Nacos/ZK）+ 两个服务，跑通调用",
+    "打断点跟一次完整调用链，画时序图",
+    "替换一个 SPI 扩展（如负载均衡策略）验证生效",
+    "模拟 provider 超时，观察 failover 重试行为",
+    "写 README：调用链时序图 + SPI 扩展示例"
+   ],
+   "accept": [
+    "能画出 provider 暴露与 consumer 引用的完整流程",
+    "自定义 SPI 扩展生效且有测试",
+    "能复现一次 failover 重试并说明重试次数的风险",
+    "能说清 Dubbo 协议相比 HTTP 的取舍"
+   ],
+   "interview": [
+    "Dubbo SPI 相比 JDK SPI 的改进",
+    "RPC 重试为什么会引发幂等问题",
+    "服务摘除时如何避免流量打到已下线实例"
+   ]
+  },
+  {
+   "slug": "java-shardingsphere",
+   "track": "java",
+   "tier": "t4",
+   "hours": 90,
+   "level": "hard",
+   "title": "ShardingSphere · 分库分表与数据分片",
+   "repo": "apache/shardingsphere",
+   "summary": "把单库单表拆成多库多表的中间件，覆盖分片路由、读写分离、分布式事务、数据加密。是「数据量涨到千万级之后怎么办」的标准答案。",
+   "stack": [
+    "Java",
+    "分片路由",
+    "读写分离",
+    "分布式事务",
+    "SQL 解析"
+   ],
+   "learn": [
+    "分片键选择与路由算法（取模/范围/一致性哈希）",
+    "跨库 JOIN 与聚合的改写策略",
+    "分布式事务（XA / TCC / SAGA）的边界",
+    "读写分离下的主从延迟问题",
+    "SQL 解析器如何识别需要改写的语句"
+   ],
+   "career": "中高级后端的分水岭。能讲清分片键选择与跨库查询代价，远超「会配 YAML」的水平。",
+   "steps": [
+    "用 ShardingSphere-JDBC 把一个单表拆成 4 库 8 表",
+    "灌入百万级数据，对比拆分前后的查询耗时",
+    "执行一次跨分片聚合查询，观察执行计划改写",
+    "开启读写分离，验证主从延迟下的读一致性",
+    "写 README：分片方案对比 + 跨库查询代价分析"
+   ],
+   "accept": [
+    "百万级数据下分片查询有明显性能收益",
+    "能说清跨分片 JOIN 为什么昂贵",
+    "能指出当前分片键在什么查询下会全路由",
+    "有主从延迟的观测数据"
+   ],
+   "interview": [
+    "分片键怎么选，选错了有什么后果",
+    "跨库分页为什么难，有哪些解法",
+    "分布式事务在什么业务下可以不用"
+   ]
+  }
+ ]
+}

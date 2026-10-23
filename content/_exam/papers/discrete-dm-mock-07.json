@@ -1,0 +1,137 @@
+{
+  "id": "discrete-dm-mock-07",
+  "exam": "discrete",
+  "kind": "mock",
+  "subject": "dm",
+  "title": "离散数学 · 专项模拟卷（7）",
+  "duration": 40,
+  "totalScore": 30,
+  "disclaimer": "本卷为按题型结构自编的专项练习卷，题目与解析均为原创，不是真题还原；考点年份为历年命题的归纳性标注，请以当年考试大纲为准。",
+  "blueprint": [
+    {
+      "subject": "dm",
+      "name": "离散数学",
+      "score": 30
+    }
+  ],
+  "sections": [
+    {
+      "no": 1,
+      "name": "单项选择题",
+      "type": "choice",
+      "range": "1~3 题",
+      "score": 15,
+      "perScore": 5,
+      "note": "每题 5 分，共 15 分。只有一个选项符合题目要求。",
+      "items": [
+        "q-dm-c19",
+        "q-dm-c20",
+        "q-dm-c21"
+      ]
+    },
+    {
+      "no": 2,
+      "name": "填空题",
+      "type": "blank",
+      "range": "4 题",
+      "score": 5,
+      "note": "本题 5 分，直接写结果。",
+      "items": [
+        {
+          "id": "q-dm-b07",
+          "topic": "dm-combinatorics",
+          "knowledge": "dm-combinatorics-k3",
+          "type": "blank",
+          "diff": 3,
+          "stem": "数列满足 a₁ = 1，aₙ = 2aₙ₋₁ + 1，则 a₅ = ______。",
+          "answer": {
+            "text": "31"
+          },
+          "explain": {
+            "right": "递推式中既有 2 倍项又有常数项，逐项迭代算出 a₂ 到 a₅，再用通项复核。",
+            "wrong": "常见错误：把递推写成 aₙ = 2aₙ₋₁，漏掉常数 1。",
+            "link": "dm-combinatorics-k3"
+          },
+          "walkthrough": {
+            "framework": {
+              "title": "递推关系",
+              "pattern": "dm-combinatorics-p3",
+              "steps": [
+                "写出前几项找规律",
+                "一阶线性 a_n = pa_{n−1}+q 用待定常数法或迭代",
+                "二阶线性写特征方程，按根的情况写通解",
+                "用初值定常数",
+                "最后用归纳法验证通项"
+              ],
+              "trap": "特征方程符号写错"
+            },
+            "approach": "递推式中既有 2 倍项又有常数项，逐项迭代算出 a₂ 到 a₅，再用通项复核。",
+            "points": [
+              {
+                "id": "dm-combinatorics-k3",
+                "note": "一阶线性用迭代或待定常数，二阶线性写特征方程。",
+                "title": "递推关系",
+                "core": "一阶线性用迭代或待定常数，二阶线性写特征方程。",
+                "pitfall": "把递推写成 aₙ = 2aₙ₋₁，漏掉常数 1。"
+              }
+            ],
+            "solution": "a₂ = 2×1+1 = 3；a₃ = 2×3+1 = 7；a₄ = 2×7+1 = 15；a₅ = 2×15+1 = 31。通项为 aₙ = 2ⁿ−1，代 n=5 得 31，与迭代一致。"
+          },
+          "score": 5
+        }
+      ]
+    },
+    {
+      "no": 3,
+      "name": "解答题",
+      "type": "calc",
+      "range": "5 题",
+      "score": 10,
+      "note": "本题 10 分，写出必要的推导过程。",
+      "items": [
+        {
+          "id": "q-dm-k07",
+          "topic": "dm-algebra",
+          "knowledge": "dm-algebra-k1",
+          "type": "calc",
+          "diff": 3,
+          "stem": "设 G 是群，且对任意 a,b ∈ G 有 (ab)² = a²b²，证明 G 是交换群。",
+          "answer": {
+            "text": "由 (ab)² = a²b² 得 abab = aabb。\n在等式两边左乘 a⁻¹：a⁻¹(abab) = a⁻¹(aabb)，得 bab = abb。\n再在两边右乘 b⁻¹：bab·b⁻¹ = abb·b⁻¹，得 ba = ab。\n由于 a,b 任意，故 G 中任意两元素可交换，G 是交换群。\n关键：群中消去律成立（左乘逆元、右乘逆元），但必须先确认逆元存在，这正是群的定义。"
+          },
+          "explain": {
+            "right": "把 (ab)² 展开成 abab，与 a²b² = aabb 比较，再用群的消去律。",
+            "wrong": "常见错误：直接两边「开方」得到 ab=ba，跳过了消去律的使用条件。",
+            "link": "dm-algebra-k1"
+          },
+          "walkthrough": {
+            "framework": {
+              "title": "群的定义与判定",
+              "pattern": "dm-algebra-p1",
+              "steps": [
+                "先查封闭性，再查结合律",
+                "找单位元：解 a·e=a 对一切 a 成立",
+                "对每个元素找逆元",
+                "四条全满足才是群；缺一即不是",
+                "元素 a 的阶是使 a^k=e 的最小正整数 k"
+              ],
+              "trap": "把「有单位元」当成「有逆元」"
+            },
+            "approach": "把 (ab)² 展开成 abab，与 a²b² = aabb 比较，再用群的消去律。",
+            "points": [
+              {
+                "id": "dm-algebra-k1",
+                "note": "群 = 封闭 + 结合 + 单位元 + 逆元；有限群元素阶整除群阶。",
+                "title": "群的定义与性质",
+                "core": "群 = 封闭 + 结合 + 单位元 + 逆元；有限群元素阶整除群阶。",
+                "pitfall": "直接两边「开方」得到 ab=ba，跳过了消去律的使用条件。"
+              }
+            ],
+            "solution": "由 (ab)² = a²b² 得 abab = aabb。\n在等式两边左乘 a⁻¹：a⁻¹(abab) = a⁻¹(aabb)，得 bab = abb。\n再在两边右乘 b⁻¹：bab·b⁻¹ = abb·b⁻¹，得 ba = ab。\n由于 a,b 任意，故 G 中任意两元素可交换，G 是交换群。\n关键：群中消去律成立（左乘逆元、右乘逆元），但必须先确认逆元存在，这正是群的定义。"
+          },
+          "score": 10
+        }
+      ]
+    }
+  ]
+}

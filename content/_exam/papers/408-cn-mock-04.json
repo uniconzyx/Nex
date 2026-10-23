@@ -1,0 +1,110 @@
+{
+  "id": "408-cn-mock-04",
+  "exam": "408",
+  "kind": "mock",
+  "subject": "cn",
+  "title": "408 计算机网络 · 专项模拟卷（4）",
+  "duration": 30,
+  "totalScore": 17,
+  "disclaimer": "本卷按 408 该科目的题型结构自编组卷，题目与答案均为原创，不是真题还原；考点年份为历年命题的归纳性标注，请以当年考试大纲为准。",
+  "blueprint": [
+    {
+      "subject": "cn",
+      "name": "计算机网络",
+      "score": 17,
+      "choice": 10,
+      "analysis": 7
+    }
+  ],
+  "sections": [
+    {
+      "no": 1,
+      "name": "单项选择题",
+      "type": "choice",
+      "range": "1~5 题",
+      "score": 10,
+      "perScore": 2,
+      "note": "每题 2 分。下列每题给出的四个选项中，只有一个符合题目要求。",
+      "items": [
+        "q-cn-transport-k3-01",
+        "q-cn-arch-k3-02",
+        "q-cn-link-k5-01",
+        "q-cn-network-k4-01",
+        "q-cn-transport-k4-01"
+      ]
+    },
+    {
+      "no": 2,
+      "name": "综合应用题",
+      "type": "design",
+      "range": "6~6 题",
+      "score": 7,
+      "note": "按题目要求作答，写出设计思想、关键代码与复杂度分析。",
+      "items": [
+        {
+          "id": "q-cn-design-05",
+          "topic": "cn-transport",
+          "knowledge": "cn-transport-k4",
+          "type": "design",
+          "diff": 5,
+          "stem": "TCP 客户端初始序号 ISN = 1000，服务端 ISN = 5000，连接建立时 ssthresh = 16（单位：报文段，1 报文段 = 1 MSS，cwnd 初值 = 1）。握手完成后客户端发送 500 B 数据（序号 1001~1500），服务端发送 400 B 数据（序号 5001~5400），随后客户端先发起连接释放。传输期间第 1~8 个传输轮次（每轮 = 1 个 RTT）正常增长，第 9 轮发生超时重传，第 10~12 轮继续传输。请回答：(1) 写出三次握手与四次挥手的报文序列，标出每个报文的 seq 与 ack；(2) 列出第 1~12 轮每轮结束时的 cwnd 与 ssthresh（慢开始持续到 cwnd 达到 ssthresh，之后转入拥塞避免每轮 +1）；(3) 若接收方通告的接收窗口 rwnd = 10 个报文段，发送窗口如何确定？当 rwnd = 0 时发送方应采取什么措施？",
+          "ask": [
+            "写出三次握手与四次挥手的报文序列，并给出 seq 与 ack 的推导",
+            "以表格形式给出第 1~12 轮每轮结束时的 cwnd 与 ssthresh",
+            "说明发送窗口与 cwnd、rwnd 的关系，以及零窗口的处理方法"
+          ],
+          "answer": {
+            "text": "握手：SYN(seq=1000) → SYN+ACK(seq=5000, ack=1001) → ACK(seq=1001, ack=5001)；挥手：FIN(1501,5401) → ACK(5401,1502) → FIN(5401,1502) → ACK(1502,5402)。第 1~12 轮 cwnd 依次为 2,4,8,16,17,18,19,20,1,2,4,8；第 9 轮超时后 ssthresh=10。发送窗口 = min(cwnd, rwnd)；rwnd=0 时停止发送并启动坚持定时器。"
+          },
+          "walkthrough": {
+            "framework": {
+              "title": "TCP 连接管理、序号推导与拥塞窗口演化",
+              "pattern": "cn-transport-p1",
+              "steps": [
+                "序号规则：SYN 与 FIN 各占 1 个序号；数据段 seq = 数据首字节编号，ack = 期望收到的下一个字节",
+                "握手：SYN(seq=x) → SYN+ACK(seq=y, ack=x+1) → ACK(seq=x+1, ack=y+1)",
+                "挥手：FIN → ACK → FIN → ACK；FIN 的 seq = 该方向已发最后一个字节 + 1，之后进入 TIME_WAIT 等 2MSL",
+                "cwnd 演化画表跟踪：慢开始每轮翻倍，达到 ssthresh 后转拥塞避免每轮 +1",
+                "超时：ssthresh = cwnd/2，cwnd = 1 回慢开始；3 个重复 ACK：cwnd = ssthresh（快恢复，不回 1）"
+              ],
+              "trap": "超时把 cwnd 打回 1，三重复 ACK 只降到 ssthresh——两种事件的处理差别是本题型唯一关键区别；确认号是「期望的下一个字节」，不是「已收到的最后一个字节」。"
+            },
+            "approach": "先按「SYN/FIN 各占一个序号」把握手与数据段的序号接龙推出来；再列表跟踪 cwnd：前 4 轮慢开始翻倍到 16，第 5~8 轮拥塞避免 +1 到 20，第 9 轮超时砍半回 1，最后三轮再翻倍到 8。",
+            "points": [
+              {
+                "id": "cn-transport-k2",
+                "title": "TCP 连接管理（三次握手 / 四次挥手）",
+                "core": "SYN 与 FIN 各占一个序号；TIME_WAIT 等 2MSL。",
+                "note": "SYN 与 FIN 各占一个序号；TIME_WAIT 等 2MSL。",
+                "pitfall": "握手三次、挥手四次；本题要求写出每一步的 seq 与 ack 数值。"
+              },
+              {
+                "id": "cn-transport-k3",
+                "title": "TCP 序号与确认号推导",
+                "core": "下一段 seq=上一段 seq+数据长度；确认号=期望收到的下一个字节。",
+                "note": "下一段 seq=上一段 seq+数据长度；确认号=期望收到的下一个字节。",
+                "pitfall": "客户端数据 1001~1500、服务端数据 5001~5400，据此推导两个 FIN 的 seq 与各 ack。"
+              },
+              {
+                "id": "cn-transport-k4",
+                "title": "拥塞控制四阶段",
+                "core": "慢开始（翻倍）→ 拥塞避免（+1）；超时 ssthresh=cwnd/2 且 cwnd=1；快重传后 cwnd=ssthresh。",
+                "note": "慢开始（翻倍）→ 拥塞避免（+1）；超时 ssthresh=cwnd/2 且 cwnd=1；快重传后 cwnd=ssthresh。",
+                "pitfall": "第 1~4 轮翻倍至 ssthresh=16，第 5~8 轮 +1 到 20，第 9 轮超时 ssthresh 变 10、cwnd 回 1，第 10~12 轮再翻倍到 8。"
+              },
+              {
+                "id": "cn-transport-k5",
+                "title": "流量控制与零窗口",
+                "core": "接收方用窗口字段通告可收量；零窗口时发送方启动坚持定时器。",
+                "note": "接收方用窗口字段通告可收量；零窗口时发送方启动坚持定时器。",
+                "pitfall": "发送窗口 = min(cwnd, rwnd)；rwnd=0 时靠坚持定时器发探测报文，防止零窗口通告丢失导致死锁。"
+              }
+            ],
+            "solution": "(1) 报文序列：\n三次握手（客户端 ISN x=1000，服务端 ISN y=5000）：\n· ① SYN：seq = 1000（SYN 占 1 个序号）\n· ② SYN+ACK：seq = 5000，ack = 1001（= x+1）\n· ③ ACK：seq = 1001，ack = 5001（= y+1）\n数据传输：客户端从 seq 1001 起共 500 B（1001~1500）；服务端从 seq 5001 起共 400 B（5001~5400）。\n四次挥手（客户端先关闭）：\n· ④ FIN：seq = 1501，ack = 5401（客户端数据末字节 1500 + 1；确认已收到服务端至 5400）\n· ⑤ ACK：seq = 5401，ack = 1502（FIN 也占 1 个序号，故 ack = 1500+1+1）\n· ⑥ FIN：seq = 5401，ack = 1502\n· ⑦ ACK：seq = 1502，ack = 5402；客户端进入 TIME_WAIT，等待 2MSL 后释放连接。\n(2) cwnd / ssthresh 演化（每轮 = 1 RTT，轮末结算）：\n轮次 1：慢开始翻倍 → cwnd=2，ssthresh=16\n轮次 2：慢开始翻倍 → cwnd=4，ssthresh=16\n轮次 3：慢开始翻倍 → cwnd=8，ssthresh=16\n轮次 4：达到阈值 → cwnd=16，ssthresh=16\n轮次 5：拥塞避免 +1 → cwnd=17，ssthresh=16\n轮次 6：拥塞避免 +1 → cwnd=18，ssthresh=16\n轮次 7：拥塞避免 +1 → cwnd=19，ssthresh=16\n轮次 8：拥塞避免 +1 → cwnd=20，ssthresh=16\n轮次 9：超时 → ssthresh=10（=20/2），cwnd=1，回到慢开始\n轮次 10：慢开始翻倍 → cwnd=2，ssthresh=10\n轮次 11：慢开始翻倍 → cwnd=4，ssthresh=10\n轮次 12：慢开始翻倍 → cwnd=8，ssthresh=10\n(3) 发送窗口 = min(cwnd, rwnd)。第 12 轮末 cwnd=8、rwnd=10，故发送窗口 = 8；若 cwnd 继续涨到 12 而 rwnd 仍为 10，则发送窗口被压到 10——rwnd 是接收能力给出的硬上限，cwnd 是网络允许量，实际发送窗口取二者较小值。\nrwnd = 0 时：发送方停止发送数据，同时启动坚持定时器，周期性发送携带 1 B 数据的探测报文段询问窗口；这是为了防止「零窗口通告丢失」造成双方死锁——解决死锁靠坚持定时器，不是靠普通重传。\n易错点：① 超时与三重复 ACK 的处理规则写反；② ack 写成「最后一个收到的字节」；③ 挥手时漏掉 FIN 占 1 个序号；④ 认为发送窗口 = cwnd + rwnd（应为取小）。"
+          },
+          "score": 7
+        }
+      ]
+    }
+  ]
+}

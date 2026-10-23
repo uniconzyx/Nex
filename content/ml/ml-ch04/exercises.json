@@ -1,0 +1,106 @@
+{
+  "meta": {
+    "chapter": "ml-ch04",
+    "title": "应用机器学习：评估、偏差方差与误差分析 —— 习题集",
+    "count": 6,
+    "note": "3 道概念题（切分策略/泄漏识别/指标口径）+ 3 道算法实践题（手写切分器、二项标准误数值验证、学习曲线诊断实验），全部为原创题干。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "同一患者多条病历数据，应该用哪种交叉验证切分",
+      "content_md": "一个疾病预测数据集里，同一患者因多次就诊产生多条病历记录，每条记录有若干生理指标与标签。要让交叉验证的分数反映「对**没见过的患者**的预测能力」，正确的切分方式是：\n\nA. 普通 K 折（把全部记录打乱后均分）\nB. 分层 K 折（保证每折正例比例相同）\nC. 分组 K 折（同一患者的所有记录进入同一折）\nD. 留一法（每次留一条记录做验证）",
+      "answer": {
+        "correct": "C",
+        "explain": "评估目标是「泛化到新患者」，所以**患者**才是抽样单元。分组 K 折（GroupKFold）把同一患者的全部记录关在同一折，测试折里的患者在训练折从未出现，分数才对应新实体上的表现。\n\nA 错：打乱后同一患者的记录必然分居训练与测试两侧，模型可以靠「认出这个患者」拿分（分组泄漏），分数虚高且与上线表现脱节。B 错：分层只保证类别比例，不解决组结构问题——分层与分组不互斥，正确做法是分层**分组** K 折。D 错：留一法是按记录划分，泄漏比 A 更严重（测试记录的「邻居」几乎全是同患者），且计算代价最高。\n\n推论：时间序列同理要按时间分组（前向验证），「样本行独立」这个前提在真实数据里很少天然成立，切分前先问「我的抽样单元是什么」。"
+      },
+      "explanation": "切分单元必须与评估目标的泛化单元一致。",
+      "tags": ["交叉验证", "分组泄漏", "GroupKFold"],
+      "source": "self",
+      "source_ref": "《The Elements of Statistical Learning》第7章 模型评估与选择"
+    },
+    {
+      "type": "judge",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "时间序列上随机 K 折的分数是无偏的泛化估计吗",
+      "content_md": "判断：对按时间排列的交易数据做「是否欺诈」预测，用随机 K 折交叉验证得到的分数，是模型上线后表现的**无偏**估计。（对/错，并说明原因）",
+      "answer": {
+        "correct": "错",
+        "explain": "错。随机 K 折把不同时间点的记录混在一起切分，测试点的**过去与未来都出现在训练集里**，模型只需在已知区间内插值；而上线后是「用过去预测未来」的外推问题，难度完全不同。因此随机 CV 系统性**低估**上线误差（示例 ex04 实测前向误差可达随机 CV 的数倍）。\n\n更严重的变体是**时间穿越**：若特征包含「截至本周末的滑窗统计」「全量数据拟合的目标编码」，这些特征在训练时点的真实世界里还不存在，等于把未来信息泄露给训练。\n\n正确做法：用 TimeSeriesSplit / 滚动前向验证，训练窗口只含测试块之前的数据；依赖历史的特征在每个训练窗口内重算。只有当数据本身没有时间依赖（同一时刻的独立观测）时，随机 K 折才成立。"
+      },
+      "explanation": "外推与插值是两种不同的任务，切分方式决定了你在评估哪一个。",
+      "tags": ["时间序列", "前向验证", "泄漏"],
+      "source": "self",
+      "source_ref": "《Designing Machine Learning Systems》第8章 数据分布偏移"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "AUC 的概率含义与它不能回答的问题",
+      "content_md": "关于 ROC-AUC，下列说法**正确**的是：\n\nA. AUC=0.9 表示模型输出的 0.9 可以当作「90% 会发生」的概率使用\nB. AUC 等于「正例中随机抽一个、负例中随机抽一个，模型给正例打分更高的概率」\nC. AUC 高说明模型在实际使用的那个阈值下表现一定好\nD. 正例只占 1% 时，AUC 会比 PR-AUC 更真实地反映模型对少数类的识别能力",
+      "answer": {
+        "correct": "B",
+        "explain": "B 是 AUC 的 Mann-Whitney 解释：`AUC = P(score_pos > score_neg)`，对随机一对正负例，正例排在前面的概率。\n\nA 错：AUC 只依赖分数的**排序**，与概率的绝对数值无关——把所有分数乘 2，AUC 不变，但阈值 0.5 的行为全变。概率可不可信要看**校准**（可靠性图），这是与 AUC 正交的另一个维度。C 错：AUC 是「平均掉所有阈值」的表现；若实际阈值恰好落在 ROC 曲线的陡坡上，该处 TPR/FPR 可能远差于 AUC 的暗示。D 错：正例极稀有时 ROC 的横轴 FPR 被海量负例稀释，AUC 反而**虚高**（0.95 与「一个都没抓到」可以并存）；此时 PR-AUC/AP 的基线是正例率，更诚实。"
+      },
+      "explanation": "AUC 是排序指标，不是概率指标，也不是阈值处的指标。",
+      "tags": ["AUC", "ROC", "概率校准", "不平衡"],
+      "source": "self",
+      "source_ref": "《机器学习》周志华 第2章 性能度量"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "手写三种切分器：分层 K 折、分组 K 折、前向验证",
+      "content_md": "不用 `sklearn`，只用 NumPy 手写三个切分生成器（每次调用 yield (train_idx, test_idx)），并自检约束：\n1. `stratified_kfold(y, K)`：每折正例率与总体正例率之差 < 2 个百分点；任意索引不跨折；\n2. `group_kfold(groups, K)`：同一 group 的所有索引必须落在同一折；\n3. `forward_validation(n, n_blocks)`：第 b 块的训练集必须是 `[0, b·block)`，测试集是第 b 块，且块索引严格递增；\n4. 在一份 600 条、2% 正例、带 50 个组 ID 的合成数据上各跑一遍，打印每折的样本数/正例数/组数自检结果。\n\n要求固定种子 `np.random.default_rng(42)`。",
+      "answer": {
+        "reference_code": "import numpy as np\nrng = np.random.default_rng(42)\ndef stratified_kfold(y, K):                # 每类各自打乱后均分\n    folds = [[] for _ in range(K)]\n    for cls in np.unique(y):\n        for i, chunk in enumerate(np.array_split(rng.permutation(np.where(y == cls)[0]), K)):\n            folds[i].extend(chunk.tolist())\n    idx = np.arange(len(y))\n    for f in folds:\n        te = np.array(sorted(f)); yield np.setdiff1d(idx, te), te\ndef group_kfold(groups, K):                # 整组进同一折\n    ug = rng.permutation(np.unique(groups))\n    idx = np.arange(len(groups))\n    for i in range(K):\n        te = np.where(np.isin(groups, ug[i::K]))[0]\n        yield np.setdiff1d(idx, te), te\ndef forward_validation(n, K):              # 训练索引上界 < 测试索引下界\n    block = n // K\n    for b in range(1, K):\n        yield np.arange(0, b * block), np.arange(b * block, (b + 1) * block)",
+        "explain": "三个生成器各自守住一条约束：**分层守类别比例**（按类内打乱后均分，每折正例率的二项方差被控制住）、**分组守组不跨折**（对组 ID 排列后按 `i::K` 取组，测试组的成员在训练折零出现）、**前向验证守时间顺序**（训练索引上界恒小于测试索引下界，外推才是真的外推）。\n\n常见坑：① `np.array_split` 允许折长不齐，自检时不要假设每折等长；② 分层实现里两类都要 shuffle，只打乱一类会让另一类的折分布退化；③ 分组 K 折自检必须用 `set(te组) ∩ set(tr组) == ∅`，而不是抽查几条记录；④ 前向验证第一块没有历史数据，从 `b=1` 开始评估，且 `n` 不整除 `n_blocks` 时余量归入最后一块。\n\n验收时打印「每折正例率 − 总体正例率」「跨折组数」「训练索引最大值 < 测试索引最小值」三项布尔值，全为 True 才算通过。"
+      },
+      "explanation": "切分器是评估的地基，约束必须可自检而不是靠信任。",
+      "tags": ["交叉验证", "分层", "分组", "时间序列", "NumPy"],
+      "source": "self",
+      "source_ref": "《The Elements of Statistical Learning》第7章 交叉验证"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "数值验证：小测试集上误差波动的二项标准误",
+      "content_md": "用重复抽样实验验证「测试集大小为 k、真实错误率 p 时，误差估计的标准差 ≈ √(p(1−p)/k)」：\n1. 构造 N=3000 的二分类数据，训练一个固定模型（如带正则的逻辑回归，固定种子）；\n2. 从留出的测试池中重复抽样 B=200 个大小为 k 的测试集（k 取 10/30/100/300）；\n3. 对每个 k，估计误差均值和经验标准差；\n4. 与二项公式 `√(p̄(1−p̄)/k)` 对照，打印「实测/理论」比值；\n5. 回答：两个模型在 k=30 上相差 4 个百分点，能判定谁更好吗？需要多大 k 才能分辨 2 个百分点的差异？\n\n要求固定种子，输出可复现。",
+      "answer": {
+        "reference_code": "import numpy as np\nrng = np.random.default_rng(11)\n# 训练固定模型（略：逻辑回归 + L2，500 步 GD）\n# B = 200, sizes = (10, 30, 100, 300)，每轮重抽测试集记录误差\nfor k in sizes:\n    e = np.array([np.mean(predict(w, X[te]) != y[te])\n                  for te in (rng.choice(pool, k, replace=False) for _ in range(B)])\n    p, sd = e.mean(), e.std(ddof=1)\n    theo = np.sqrt(p * (1 - p) / k)          # 二项标准误\n    print(f\"k={k:>4}  p={p:.3f}  实测sd={sd:.3f}  理论={theo:.3f}  比值={sd/theo:.2f}\")",
+        "explain": "预期「实测/理论」比值在 1.0 附近（k 略小时因重抽相关性略高，属正常）。结论：k=30 时标准差约 `√(0.1·0.9/30) ≈ 0.055`，4 个百分点远小于一个标准差，**无法判定**；经验法则是两模型差异要超过约 `√2` 倍各自标准误（双样本 t 量级）。要分辨 2 个百分点，需 `k ≈ 0.1·0.9/0.01² · 2 ≈ 1800`（取 `√2` 安全系数）——这就是「小验证集上比模型是在排名运气」的定量版本。\n\n常见坑：① 抽样必须**有放回还是无放回**要写明（无放回时有限总体校正因子 `√((N−k)/(N−1))` 会略降标准差）；② 每轮必须重训模型之外的流程全部固定，只变测试集；③ 用 `ddof=1`；④ 若实测标准差明显大于理论值，说明模型或数据本身还有未受控的变异源（模型没固定/测试池与训练池不同源），先查这个再谈公式。"
+      },
+      "explanation": "把「多少差异才算真差异」变成可计算的数字。",
+      "tags": ["统计显著性", "二项分布", "模型比较"],
+      "source": "self",
+      "source_ref": "《The Elements of Statistical Learning》第7章 交叉验证的方差"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 5,
+      "title": "诊断实验：用学习曲线分辨偏差与方差",
+      "content_md": "构造一个回归任务 `y = sin(2πx) + ε`（σ=0.2），固定 400 条验证集，对两个模型档位做诊断实验：\n1. 低容量（1 次多项式）与高容量（12 次多项式）各扫训练量 n ∈ {20, 40, 80, 160, 320}，每档重复 20 次取均值；\n2. 打印每档的训练 MSE、验证 MSE 与 gap；\n3. 按 gap 随 n 的变化趋势给出诊断结论（高偏差 / 高方差），并指出哪一档「加数据有效」；\n4. 验证：对高偏差档，把 n 从 20 加到 320，验证 MSE 下降幅度应 < 5%；对高方差档，gap 应明显收窄；\n5. 输出一份「诊断 → 处方」表：每档给出该加数据、加容量还是加正则。\n\n要求固定种子，阈值判据写进代码而不是靠眼看。",
+      "answer": {
+        "reference_code": "import numpy as np\nrng = np.random.default_rng(15)\nf = lambda x: np.sin(2 * np.pi * x)\nXv = np.linspace(0.05, 0.95, 400)\nyv = f(Xv) + rng.normal(0, 0.2, 400)\nfor deg in (1, 12):\n    rows = []\n    for n in (20, 40, 80, 160, 320):\n        trs, vas = [], []\n        for _ in range(20):\n            x = rng.uniform(0, 1, n)\n            y = f(x) + rng.normal(0, 0.2, n)\n            c = np.polyfit(x, y, deg)\n            trs.append(np.mean((np.polyval(c, x) - y) ** 2))\n            vas.append(np.mean((np.polyval(c, Xv) - yv) ** 2))\n        rows.append((n, np.mean(trs), np.mean(vas)))\n    tr0, tr1 = rows[0][1], rows[-1][1]\n    drop = (rows[0][2] - rows[-1][2]) / rows[0][2]\n    print(f\"deg={deg}: 验证MSE降幅={drop:.1%},  gap收窄={rows[-1][2]-rows[-1][1] < rows[0][2]-rows[0][1]}\")",
+        "explain": "判据要写成布尔量：**高偏差档**的特征是「训练≈验证、两者都停在噪声水平 σ²=0.04 附近、加数据降幅 <5%」——`drop` 小且 gap 始终很小；**高方差档**的特征是「小样本时 gap 巨大、n 增大后 gap 收窄、验证 MSE 持续下降」。处方分别是：高偏差 → 加容量/加特征/减正则（加数据无效，因为主导项是与 m 无关的 bias²）；高方差 → 加数据/加正则/早停（variance 按 O(1/m) 收缩，数据是瓶颈）。\n\n常见坑：① 每档必须重复抽样取均值，单次实验的噪声足以颠倒结论；② 验证集要**固定**（一次生成全程复用），否则同时变了两个变量；③ 「降幅 <5%」这类阈值要打印出来让人复核，不要只给结论；④ 诊断表要包含「无效动作」一列（高偏差档写「加数据无效」），防止读者把处方当成调参菜单乱试。"
+      },
+      "explanation": "学习曲线是「诊断」工具，输出必须是可判定的结论而不是一张图。",
+      "tags": ["学习曲线", "偏差-方差", "诊断", "多项式回归"],
+      "source": "self",
+      "source_ref": "《机器学习》周志华 第2章 评估方法"
+    }
+  ]
+}

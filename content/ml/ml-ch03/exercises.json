@@ -1,0 +1,106 @@
+{
+  "meta": {
+    "chapter": "ml-ch03",
+    "title": "神经网络：推理、训练与多分类 —— 习题集",
+    "count": 6,
+    "note": "3 道概念题（非线性的作用 / softmax 数值稳定 / 输出层与损失匹配）+ 3 道算法实践题（手写两层反向传播、softmax 梯度数值校验、学习率诊断实验），全部为原创题干。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "哪种改动真正引入了非线性",
+      "content_md": "一个两层全连接网络，隐藏层与输出层都不带激活函数。以下哪种改动会让它的假设空间**不再等价于单层线性模型**？\n\nA. 把所有权重初始化为 0\nB. 在隐藏层后加一个 ReLU\nC. 把偏置 b 全部设为 0\nD. 把隐藏层宽度从 16 增加到 1024",
+      "answer": {
+        "correct": "B",
+        "explain": "两层无激活时，`y = W₂(W₁x+b₁)+b₂ = (W₂W₁)x + (W₂b₁+b₂)`，仍是仿射函数；宽度、初始化、偏置都不改变「仿射复合仍是仿射」这一事实。\n\nA 错：全零初始化只会让所有神经元对称、梯度相同，模型仍是线性的；C 错：去掉偏置只是把边界强制过原点，仍是线性；D 错：加宽只是把同一个线性函数用更多参数分解，表达能力不变。\n\nB 对：ReLU 是逐元素非线性，`W₂·ReLU(W₁x+b₁)+b₂` 不能再合并成一个矩阵，假设空间才从线性扩展到分段线性。这也是「深度」有意义的前提。"
+      },
+      "explanation": "考「仿射复合仍是仿射」这一证明，以及非线性来自哪里。",
+      "tags": ["非线性", "激活函数", "MLP"],
+      "source": "self",
+      "source_ref": "《机器学习》周志华 第5章 5.2 节"
+    },
+    {
+      "type": "judge",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "softmax 前减最大值会改变输出概率",
+      "content_md": "判断：为了实现数值稳定，在 softmax 之前减去 logits 的最大值，会改变最终的概率分布，因此只能在推理时使用，训练时必须用原始 logits。（对/错，并说明原因）",
+      "answer": {
+        "correct": "错",
+        "explain": "softmax 对 logits 的**整体平移不变**：对任意常数 c，\n\n`exp(z_k−c)/Σⱼexp(zⱼ−c) = exp(z_k)e^{−c} / (Σⱼexp(zⱼ)e^{−c}) = exp(z_k)/Σⱼexp(zⱼ)`。\n\n减最大值只是选了 `c=max(z)`，把最大的指数变成 0，其余 ≤0，从而避免 `exp(1000)=inf` 导致的 `inf/inf=nan`。它不改变任何概率值，训练和推理都必须这么做。\n\n反过来说，如果不减，训练时一旦某个 logit 变大就会产生 nan，梯度污染全部参数；这不是「训练用原始、推理用稳定」能分开处理的问题。"
+      },
+      "explanation": "考 softmax 的平移不变性与数值稳定的原理。",
+      "tags": ["softmax", "数值稳定", "log-sum-exp"],
+      "source": "self",
+      "source_ref": "《深度学习》Goodfellow 第6章 6.2 节"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "输出层与损失的匹配",
+      "content_md": "关于输出层激活与损失函数的配对，下列哪一项是**错误**的？\n\nA. 回归任务：输出层用恒等（linear），损失用 MSE 或 MAE\nB. 二分类：输出层用 sigmoid，损失用二元交叉熵\nC. 多分类互斥任务：输出层用 softmax，损失用分类交叉熵\nD. 回归任务：输出层用 sigmoid，损失用 MSE，可以把预测压到 0~1 更稳定",
+      "answer": {
+        "correct": "D",
+        "explain": "D 错：sigmoid 的值域是 (0,1)，套在回归输出层等于给预测加了硬截断。房价、销量、温度这类目标一旦超出 0~1，模型永远预测不到，训练 loss 会停在一个明显的下界上；这不是「更稳定」，而是人为限制了假设空间。\n\nA/B/C 都是标准配对：回归用恒等输出 + 平方/绝对损失；二分类用 sigmoid + 二元交叉熵（伯努利 MLE）；多分类用 softmax + 分类交叉熵（多项式 MLE）。\n\n补充：多标签分类要对每个标签独立用 sigmoid，而不是 softmax，因为 softmax 强制各类互斥、概率和为 1，无法表达「同时属于多个类」。"
+      },
+      "explanation": "考输出层、损失、标签形状三者必须作为一组匹配。",
+      "tags": ["输出层", "交叉熵", "任务匹配"],
+      "source": "self",
+      "source_ref": "《深度学习》Goodfellow 第6章；吴恩达课程二 W1"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "手写两层 MLP 的前向与反向传播",
+      "content_md": "只用 NumPy 实现一个两层 MLP（输入 2 维、隐藏层 4 个 tanh、输出 1 个 sigmoid），在 XOR 的四个样本上训练：\n1. 实现前向 `Z₁=XW₁+b₁, A₁=tanh(Z₁), p=σ(A₁W₂+b₂)`，并缓存 `X、A₁、W₂`；\n2. 实现反向 `dZ₂=(p−y)/m, dW₂=A₁ᵀdZ₂, db₂=sum(dZ₂), dA₁=dZ₂W₂ᵀ, dZ₁=dA₁⊙(1−A₁²), dW₁=XᵀdZ₁, db₁=sum(dZ₁)`；\n3. 用全批量梯度下降训练到 loss < 0.01，打印四个样本的预测概率与准确率；\n4. 打印每个梯度矩阵的形状，确认 `dW₁` 与 `W₁` 同形、`db₁` 长度为隐藏层宽度。\n\n不允许调用任何自动微分库。",
+      "answer": {
+        "reference_code": "def backward(P, X, y):\n    W1,b1,W2,b2 = P\n    p,(X_,a1,W2_) = forward(P, X)\n    m = len(X); dz2 = (p-y)/m\n    dW2 = a1.T@dz2; db2 = dz2.sum(0)\n    da1 = dz2@W2_.T; dz1 = da1*(1-a1**2)\n    dW1 = X_.T@dz1; db1 = dz1.sum(0)\n    return [dW1,db1,dW2,db2]\nfor t in range(5000):\n    g = backward(P, X, y)\n    P = [w - 0.5*gi for w,gi in zip(P,g)]",
+        "explain": "关键顺序是「输出层误差 → 乘 W₂ᵀ 传回 → 乘激活导数 → 算 W₁ 梯度」。`dZ₂=(p−y)/m` 来自 sigmoid+BCE 的化简，分母 m 是样本数，漏掉它会让梯度大 m 倍、学习率实际被放大。\n\n形状检查：`dW₂` 应为 `(4,1)`、`db₂` 为 `(1,)`、`dW₁` 为 `(2,4)`、`db₁` 为 `(4,)`；任何一项对不上，先查转置。\n\n常见坑：① 用 `a1` 的 dropout 后值算 tanh 导数（本例无 dropout，但实际项目常见）；② 忘记 `sum(axis=0)` 导致偏置形状变成 `(m,)`，广播后静默算错；③ 用 MSE 代替 BCE，梯度里多出 `p(1−p)`，XOR 收敛很慢。预期结果：四个样本概率分别趋近 0、1、1、0，准确率 1.0。"
+      },
+      "explanation": "把手推的两层反向传播落成可运行代码，并强制检查形状。",
+      "tags": ["反向传播", "MLP", "XOR", "NumPy"],
+      "source": "self",
+      "source_ref": "《深度学习》Goodfellow 第6章 6.5 节；吴恩达课程二 W2"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "数值梯度校验 softmax 交叉熵的解析梯度",
+      "content_md": "不调用自动微分，验证「softmax + 交叉熵对 logits 的梯度等于 p−y」：\n1. 随机生成 5 个 logits 与一个 one-hot 标签，实现数值稳定的 softmax；\n2. 实现交叉熵 `CE = logsumexp(z) − z_y`，并写出解析梯度 `p − onehot`；\n3. 用中心差分逐个扰动 5 个 logit，计算数值梯度，与解析梯度比较；\n4. 输出每个分量的解析值、数值值与相对误差，最大相对误差应 < 1e−6；\n5. 额外验证：把所有 logits 加 1000 后，softmax 与梯度是否保持不变。",
+      "answer": {
+        "reference_code": "def ce(z, k):\n    m = z.max(); return m + np.log(np.exp(z-m).sum()) - z[k]\ng = softmax(z) - onehot\ngn = np.zeros_like(z)\nfor i in range(len(z)):\n    zp = z.copy(); zp[i] += eps\n    zm = z.copy(); zm[i] -= eps\n    gn[i] = (ce(zp,k)-ce(zm,k))/(2*eps)\nprint(np.abs(g-gn).max(), np.abs(g).max())",
+        "explain": "解析梯度 `p−y` 的推导：`∂CE/∂z_j = p_j − 1[j=y]`。这是 softmax 的雅可比 `diag(p)−ppᵀ` 与 CE 导数 `−onehot/p` 相乘后的化简，结果异常干净。\n\n数值校验的要点：① 用 float64；② ε 取 1e−5 左右，太大有截断误差、太小有舍入误差；③ 相对误差分母加 1e−12 防除零；④ 校验前不要加随机性（dropout）。预期最大相对误差在 1e−9 量级。\n\n坑：直接把 `-log(softmax(z)[k])` 写进损失函数，在 logits 很大时会得到 `inf`，中心差分立刻失效；应使用 log-sum-exp 形式。平移不变性验证能同时说明「减最大值不改变结果」。"
+      },
+      "explanation": "把 softmax 梯度从公式变成可核验的数值事实，并覆盖数值稳定。",
+      "tags": ["softmax", "交叉熵", "梯度校验", "数值微分"],
+      "source": "self",
+      "source_ref": "《深度学习》Goodfellow 第6章；CS231n 反向传播笔记"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 5,
+      "title": "学习率诊断：同一模型上的过大与过小",
+      "content_md": "构造一个非线性回归任务（如 `y=sin(2x₁)+cos(2x₂)`），用 2-24-1 的 tanh 网络做全批量梯度下降：\n1. 固定初始化与数据，分别取学习率 `1e−3、1e−2、5e−2、2e−1、5e−1`；\n2. 记录第 20、100、200、400 步的训练损失与最终验证损失；\n3. 标记每个学习率的状态：发散（出现 inf/nan 或损失 > 1e6）、几乎没学（400 步仍高于 0.2）、正常收敛；\n4. 画出（字符表格即可）损失随学习率变化的 U 形，给出你选择学习率的依据；\n5. 解释为什么「发散」时不应先去改网络结构。",
+      "answer": {
+        "reference_code": "for lr in (1e-3,1e-2,5e-2,2e-1,5e-1):\n    P = init()\n    for t in range(400):\n        g = backward(P, X, y)\n        P = [w - lr*gi for w,gi in zip(P,g)]\n        if not np.all(np.isfinite(P[2])):\n            print(lr, 'diverged'); break\n    print(lr, loss(P))",
+        "explain": "预期形态：`1e−3` 在 400 步内仍在高位（几乎没学）；`1e−2` 缓慢下降；`5e−2` 下降最快并稳定；`2e−1` 前期快但后期在最优附近震荡，验证损失略高；`5e−1` 在几十步内溢出为 inf。\n\n机理：梯度下降的稳定上界约为 `2/L`（L 是损失曲面的 Lipschitz 常数/最大曲率）。学习率超过它，参数会跨过谷底、在两侧放大，最终指数发散。深层网络与无归一化的网络 L 更大，容忍的学习率更小。\n\n坑：① 发散后继续跑会得到 nan，后续所有对比都无效；要在每一步检查 `isfinite`。② 不同学习率必须用同一初始化与同一数据，否则对比不成立。③ 不要用训练损失单独选学习率，最终要看验证损失；训练损失最低的 lr 可能已经过拟合。"
+      },
+      "explanation": "用受控实验把「学习率过大/过小」的现象、判据与机理连起来。",
+      "tags": ["学习率", "训练诊断", "梯度下降", "发散"],
+      "source": "self",
+      "source_ref": "《深度学习》Goodfellow 第8章 8.3 节；吴恩达课程二 W2"
+    }
+  ]
+}

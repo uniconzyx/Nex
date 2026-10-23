@@ -1,0 +1,391 @@
+{
+ "track": "python",
+ "items": [
+  {
+   "slug": "python-100-days",
+   "track": "python",
+   "tier": "t1",
+   "hours": 8,
+   "level": "easy",
+   "title": "Python-100-Days · 100 天完整学习路径",
+   "repo": "jackfrued/Python-100-Days",
+   "summary": "18.7 万星的系统教程，从语法、数据结构到 Web、爬虫、数据分析与机器学习，每阶段都有可运行代码与项目。",
+   "stack": [
+    "Python",
+    "Jupyter",
+    "Web 开发",
+    "爬虫",
+    "数据分析"
+   ],
+   "learn": [
+    "语言基础到工程化的完整路径",
+    "面向对象与常见设计惯用法",
+    "数据库与 ORM 的使用",
+    "爬虫与反爬的基本应对",
+    "数据分析与可视化的入门"
+   ],
+   "career": "零基础转 Python 的最短路径。按天打卡产出代码，比看视频更有说服力。",
+   "steps": [
+    "按天建立打卡表，完成 30 天基础",
+    "每天代码提交到自己的仓库",
+    "第 40—60 天完成一个 Web 小项目",
+    "第 70—80 天完成一个爬虫 + 可视化",
+    "整理成一份学习复盘"
+   ],
+   "accept": [
+    "累计代码提交 ≥ 60 天",
+    "至少 2 个可运行项目",
+    "能独立调试常见异常",
+    "复盘含时间投入与产出清单"
+   ],
+   "interview": [
+    "Python 的 GIL 对并发的影响",
+    "列表与生成器的内存差异",
+    "装饰器的实现与常见用途"
+   ]
+  },
+  {
+   "slug": "python-algorithms",
+   "track": "python",
+   "tier": "t1",
+   "hours": 8,
+   "level": "easy",
+   "title": "TheAlgorithms/Python · Pythonic 的算法实现",
+   "repo": "TheAlgorithms/Python",
+   "summary": "两百多个算法的 Python 实现。价值在于看 Python 怎么写才「像 Python」——推导式、生成器、内置函数，而不是把 Java 代码翻译成 Python。",
+   "stack": [
+    "Python 3",
+    "生成器",
+    "推导式",
+    "类型注解"
+   ],
+   "learn": [
+    "列表推导式与显式循环在可读性与性能上的差异",
+    "生成器与迭代器如何节省内存",
+    "内置函数（sorted/map/zip）替代手写循环的场景",
+    "可变默认参数、浅拷贝等常见陷阱",
+    "类型注解在无运行时校验时的实际作用"
+   ],
+   "career": "Python 岗一面常考「Pythonic 写法」。能把生成器与推导式用对，是语言熟练度的直接证据。",
+   "steps": [
+    "挑 10 个算法读实现，标出用到的 Python 特性",
+    "把一个显式循环改成生成器版本并测内存",
+    "用 timeit 对比推导式与循环的耗时",
+    "给一个模块补类型注解并用 mypy 检查",
+    "写 README：Pythonic 写法对照表"
+   ],
+   "accept": [
+    "能说清生成器与列表在内存上的差异",
+    "有 timeit 实测数据",
+    "mypy 检查通过或能解释每一处豁免"
+   ],
+   "interview": [
+    "生成器与迭代器的区别",
+    "可变默认参数为什么会出问题",
+    "GIL 对 CPU 密集任务的影响"
+   ]
+  },
+  {
+   "slug": "python-fastapi",
+   "track": "python",
+   "tier": "t2",
+   "hours": 20,
+   "level": "mid",
+   "title": "FastAPI · 类型驱动的现代 Python 服务",
+   "repo": "fastapi/fastapi",
+   "summary": "10.3 万星的 Python Web 框架。以类型注解驱动校验、序列化与 OpenAPI 文档，是当前 Python 后端的主流选择。",
+   "stack": [
+    "Python",
+    "FastAPI",
+    "Pydantic",
+    "Starlette",
+    "OpenAPI"
+   ],
+   "learn": [
+    "依赖注入系统的实现与复用",
+    "Pydantic 校验与序列化流程",
+    "异步路由与同步阻塞的边界",
+    "中间件与异常处理",
+    "自动生成 OpenAPI 的机制"
+   ],
+   "career": "Python 后端 / AI 应用岗的默认框架。能讲清依赖注入与异步边界，是区别于脚本选手的关键。",
+   "steps": [
+    "写一个带 JWT 鉴权的 CRUD 服务",
+    "用 Depends 抽出分页、鉴权、DB 会话",
+    "接一个耗时任务，对比同步与异步的吞吐",
+    "加自定义异常处理器统一错误码",
+    "用 OpenAPI 生成前端 SDK"
+   ],
+   "accept": [
+    "CRUD + 鉴权全链路可用",
+    "接口文档自动生成且可调试",
+    "同步阻塞接口的实测吞吐有对比数据",
+    "错误响应格式统一"
+   ],
+   "interview": [
+    "FastAPI 的依赖注入与 Flask 的区别",
+    "异步路由里调用阻塞库会怎样",
+    "如何做请求级事务管理"
+   ]
+  },
+  {
+   "slug": "python-flask",
+   "track": "python",
+   "tier": "t2",
+   "hours": 20,
+   "level": "mid",
+   "title": "Flask · 从零搭一个可交付的 Web 服务",
+   "repo": "pallets/flask",
+   "summary": "轻量 Web 框架，没有自动魔法，路由、请求上下文、蓝图、扩展全靠自己组装。适合真正理解「Web 框架到底做了什么」。",
+   "stack": [
+    "Flask",
+    "蓝本",
+    "请求上下文",
+    "SQLAlchemy",
+    "Jinja2"
+   ],
+   "learn": [
+    "WSGI 与请求上下文的生命周期",
+    "蓝图如何拆分模块而不互相污染",
+    "应用工厂模式与配置注入",
+    "ORM 会话管理与事务边界",
+    "错误处理与日志的接入位置"
+   ],
+   "career": "Flask 是很多 Python 后端岗的实际技术栈。能手写应用工厂 + 蓝图，说明不是只会堆路由。",
+   "steps": [
+    "用应用工厂 + 蓝图重写一个单文件 demo",
+    "接入 SQLAlchemy，实现一个带分页的列表接口",
+    "加统一错误处理与请求日志",
+    "写 3 个 pytest 用例覆盖正常与异常分支",
+    "写 README：请求生命周期图 + 目录结构说明"
+   ],
+   "accept": [
+    "多蓝图共存且路由不冲突",
+    "分页接口有边界处理（空页、超页）",
+    "pytest 全部通过且覆盖异常分支",
+    "能说清请求上下文在什么时候销毁"
+   ],
+   "interview": [
+    "Flask 的应用上下文与请求上下文区别",
+    "WSGI 与 ASGI 的差异",
+    "为什么推荐应用工厂模式"
+   ]
+  },
+  {
+   "slug": "python-fullstack-template",
+   "track": "python",
+   "tier": "t2",
+   "hours": 20,
+   "level": "mid",
+   "title": "full-stack-fastapi-template · 生产级全栈模板",
+   "repo": "fastapi/full-stack-fastapi-template",
+   "summary": "官方维护的全栈脚手架：FastAPI + SQLModel + PostgreSQL + React + Docker，自带 CI、测试与部署脚本。",
+   "stack": [
+    "FastAPI",
+    "SQLModel",
+    "PostgreSQL",
+    "React",
+    "Docker",
+    "Playwright"
+   ],
+   "learn": [
+    "分层结构与依赖组织",
+    "Alembic 迁移与模型演进",
+    "前后端类型共享",
+    "容器化与一键部署",
+    "E2E 测试与 CI 流水线"
+   ],
+   "career": "直接可复用的工程骨架。能独立部署一套带测试与 CI 的全栈服务，是「能上手干活」的证明。",
+   "steps": [
+    "按 README 一键起本地全栈环境",
+    "跑通注册登录与 CRUD",
+    "改一处模型，走完迁移流程",
+    "接入 CI，让测试在 PR 上自动跑",
+    "部署到一台云主机并配好域名"
+   ],
+   "accept": [
+    "本地一键启动，前端可正常调用",
+    "迁移可正向执行与回滚",
+    "CI 全绿且覆盖前后端测试",
+    "线上环境可访问且有健康检查"
+   ],
+   "interview": [
+    "Alembic 迁移如何保证不锁表",
+    "前后端类型如何保持一致",
+    "容器化部署的关键配置项"
+   ]
+  },
+  {
+   "slug": "python-pydantic",
+   "track": "python",
+   "tier": "t3",
+   "hours": 45,
+   "level": "hard",
+   "title": "Pydantic · 类型驱动的数据校验内核",
+   "repo": "pydantic/pydantic",
+   "summary": "FastAPI 的数据校验底座，用类型注解生成校验逻辑。读它能把「运行时类型检查」这件事从「会用」推进到「知道代价」。",
+   "stack": [
+    "Python",
+    "类型注解",
+    "Rust 核心",
+    "序列化",
+    "校验器"
+   ],
+   "learn": [
+    "类型注解如何被转成校验器",
+    "v2 用 Rust 重写核心带来的性能变化",
+    "validator / field_validator 的执行顺序",
+    "模型嵌套与递归模型的校验",
+    "严格模式与宽松模式的取舍"
+   ],
+   "career": "Python 服务端与 AI 工程岗的高频依赖。能讲清校验开销与序列化边界，比只会写 BaseModel 强一个层次。",
+   "steps": [
+    "定义一套嵌套模型，覆盖列表、可选、联合类型",
+    "写自定义校验器处理业务规则",
+    "用 benchmark 对比 v1 与 v2 的校验耗时",
+    "接入 FastAPI，观察校验错误如何转成 422 响应",
+    "写 README：校验执行顺序图 + 性能对比"
+   ],
+   "accept": [
+    "嵌套与联合类型校验行为符合预期",
+    "自定义校验器的触发顺序可验证",
+    "有 v1/v2 性能对比数据",
+    "能说清 422 响应的错误结构怎么来的"
+   ],
+   "interview": [
+    "运行时校验相比静态类型检查的价值与代价",
+    "Pydantic v2 为什么用 Rust 重写核心",
+    "数据校验该放在接口层还是领域层"
+   ]
+  },
+  {
+   "slug": "python-requests",
+   "track": "python",
+   "tier": "t3",
+   "hours": 45,
+   "level": "hard",
+   "title": "Requests · HTTP 客户端的设计范本",
+   "repo": "psf/requests",
+   "summary": "被无数项目依赖的 HTTP 库。它的价值不在 API 好用，而在「会话、连接池、重试、编码」这些工程问题是怎么被优雅解决的。",
+   "stack": [
+    "Python",
+    "urllib3",
+    "连接池",
+    "Session",
+    "编码协商"
+   ],
+   "learn": [
+    "Session 如何复用连接与 Cookie",
+    "连接池大小与超时设置对稳定性的影响",
+    "重试策略与幂等性的关系",
+    "字符编码推断的优先级链",
+    "流式下载与内存占用的控制"
+   ],
+   "career": "任何需要调第三方接口的岗位都用得上。能讲连接池与重试，说明踩过真实的生产坑。",
+   "steps": [
+    "用 Session 复用连接，对比不复用的耗时",
+    "配置超时与重试，模拟弱网验证行为",
+    "流式下载一个大文件，测内存峰值",
+    "构造编码异常的响应，观察推断结果",
+    "写 README：连接复用与重试策略说明"
+   ],
+   "accept": [
+    "连接复用相比每次新建有量化耗时差异",
+    "超时与重试配置在弱网下按预期生效",
+    "大文件下载内存不随体积线性增长",
+    "能说清为什么默认不重试 POST"
+   ],
+   "interview": [
+    "连接池耗尽会发生什么",
+    "重试为什么必须配合幂等",
+    "超时该设多少，怎么分层设置"
+   ]
+  },
+  {
+   "slug": "python-celery",
+   "track": "python",
+   "tier": "t4",
+   "hours": 90,
+   "level": "hard",
+   "title": "Celery · 分布式异步任务队列",
+   "repo": "celery/celery",
+   "summary": "Python 生态最常用的异步任务框架。覆盖任务路由、重试、定时、并发模型与结果后端，是「把慢操作挪出请求链路」的标准解法。",
+   "stack": [
+    "Celery",
+    "RabbitMQ/Redis",
+    "任务路由",
+    "重试与幂等",
+    "Beat 定时"
+   ],
+   "learn": [
+    "broker 与 result backend 的职责分离",
+    "任务路由与队列优先级",
+    "acks_late 与任务丢失/重复的取舍",
+    "prefork / gevent / threads 三种并发模型",
+    "Beat 定时任务与分布式锁防重复执行"
+   ],
+   "career": "后端岗常问「异步任务怎么做」。能讲清 acks_late 与重复执行的取舍，是真实生产经验的信号。",
+   "steps": [
+    "搭 RabbitMQ + worker，跑通一个异步任务",
+    "配置重试与超时，制造失败验证行为",
+    "用 acks_late 复现「worker 崩溃导致任务重投」",
+    "配置 Beat 定时任务并用锁避免多实例重复",
+    "写 README：任务生命周期图 + 并发模型对比"
+   ],
+   "accept": [
+    "任务失败能按配置重试且不无限循环",
+    "worker 崩溃后任务不丢（或明确说明会丢）",
+    "多实例下定时任务只执行一次",
+    "能说清哪种并发模型适合 IO 密集任务"
+   ],
+   "interview": [
+    "消息队列的 at-least-once 与 exactly-once 边界",
+    "异步任务的幂等怎么设计",
+    "Beat 多实例为什么会重复执行"
+   ]
+  },
+  {
+   "slug": "yt-dlp-extractors",
+   "track": "python",
+   "tier": "t4",
+   "hours": 70,
+   "level": "hard",
+   "title": "yt-dlp · 千站适配器的工程组织方式",
+   "repo": "yt-dlp/yt-dlp",
+   "summary": "支撑上千个站点的下载器，核心不是「下载」而是「适配器体系」：每个站点一个 Extractor 类，统一的 info dict 契约，失败就降级到通用提取器。它的插件加载、格式选择、分片并发下载，是大型 Python CLI 项目的最佳样本。",
+   "stack": [
+    "Python",
+    "Extractor 插件",
+    "ffmpeg",
+    "分片下载",
+    "CLI 解析"
+   ],
+   "learn": [
+    "Extractor 基类的契约：_VALID_URL 与 info dict 的必填字段",
+    "插件发现机制如何在运行时不改主仓就接入新站点",
+    "格式选择表达式（-f）的解析与优先级合并",
+    "分片并发下载的限速、重试与断点续传",
+    "为什么它用同步 IO 也能跑满带宽（多线程 + 外部进程）"
+   ],
+   "career": "会写爬虫的人多，能维护「爬虫框架」的人少。这个项目练的是扩展性设计，面试聊架构时非常吃香。",
+   "steps": [
+    "读 5 个不同站点的 Extractor，总结它们的公共骨架",
+    "为一个小众站点写一个新 Extractor，走完 _VALID_URL 到输出",
+    "给自己写的 Extractor 补测试（录制响应，离线跑）",
+    "用 -f 表达式做格式筛选，验证选择结果符合预期",
+    "把下载改成限速 + 重试，测不同分片数下的吞吐",
+    "提一个上游可接受的小 PR（站点适配或文档）"
+   ],
+   "accept": [
+    "自写 Extractor 能离线单测通过",
+    "分片数-吞吐曲线是自己跑出来的",
+    "PR 通过 CI 或进入 review"
+   ],
+   "interview": [
+    "爬虫框架怎么设计才能让新增站点不改主代码",
+    "同步多线程和内建异步，在这个场景谁更合适",
+    "站点改版导致解析失效，你怎么快速发现"
+   ]
+  }
+ ]
+}

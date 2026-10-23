@@ -1,0 +1,350 @@
+{
+ "track": "bigdata",
+ "items": [
+  {
+   "slug": "bigdata-notes",
+   "track": "bigdata",
+   "tier": "t1",
+   "hours": 10,
+   "level": "easy",
+   "title": "BigData-Notes · 大数据全家桶的第一张地图",
+   "repo": "heibaiying/BigData-Notes",
+   "summary": "Hadoop / Hive / Spark / Flink / HBase / Kafka 的成套中文笔记，每个组件都带可跑的示例代码和集群搭建步骤。它的价值不是教你写代码，而是让你在三天内建立「一个数据从产生的落盘要经过哪些组件」的坐标系。",
+   "stack": [
+    "Hadoop",
+    "Hive",
+    "Spark",
+    "Flink",
+    "Kafka",
+    "HBase"
+   ],
+   "learn": [
+    "HDFS 的 block 切分、副本放置策略与 NameNode 的元数据组织",
+    "YARN 的 ResourceManager / NodeManager / Container 三级资源分配",
+    "Hive 如何把 SQL 翻译成 MapReduce 或 Tez 任务，分区与分桶对扫描量的影响",
+    "Kafka 的分区、副本、ISR 与消费者位移提交语义",
+    "Spark 的窄依赖 / 宽依赖如何决定 DAG 的 stage 边界"
+   ],
+   "career": "面试官问「介绍一下你们的数据链路」时，能按 采集→存储→计算→服务 讲出每一层选型和理由，而不是只报组件名。",
+   "steps": [
+    "按笔记用 Docker Compose 拉起 Hadoop 单机伪分布式，跑通 WordCount",
+    "建一张分区表，导入 100 万行样本，对比分区前后 SELECT 的扫描字节数",
+    "在 Kafka 里发 10 万条消息，用两个消费者组观察 rebalance 日志",
+    "画一张自己版本的组件关系图，标注每一跳的数据格式",
+    "写一页 README：为什么实时链路选 Flink 而不是 Spark Streaming"
+   ],
+   "accept": [
+    "能不上网画出 HDFS 写文件的完整流程（含 pipeline 与 ack）",
+    "能解释 Hive 分区键为什么不能是高基数字段",
+    "有一份自己跑出来的扫描量对比数据"
+   ],
+   "interview": [
+    "HDFS 为什么不适合存大量小文件，业界怎么解决",
+    "YARN 的调度器 FIFO / Capacity / Fair 各自适合什么场景",
+    "Kafka 如何保证 exactly-once，代价是什么"
+   ]
+  },
+  {
+   "slug": "de-cookbook",
+   "track": "bigdata",
+   "tier": "t1",
+   "hours": 8,
+   "level": "easy",
+   "title": "Data Engineering Cookbook · 数据工程的取舍清单",
+   "repo": "andkret/Cookbook",
+   "summary": "一份不写代码的工程手册，把数据工程的六层能力拆成决策树：数据从哪来、放哪、怎么算、怎么调度、怎么保证质量、怎么治理。适合在做第一个数仓项目之前先读一遍，避免用错工具三个月。",
+   "stack": [
+    "数据建模",
+    "ETL/ELT",
+    "调度",
+    "数据质量",
+    "元数据"
+   ],
+   "learn": [
+    "批处理与流处理的边界：什么时候必须上流，什么时候批就够",
+    "维度建模里星型 / 雪花 / Data Vault 的适用条件",
+    "全量覆盖、增量追加、CDC 三种同步方式的一致性差异",
+    "调度系统的依赖表达：时间依赖与数据依赖混用会出什么问题",
+    "数据质量校验该放在哪一层：入湖前、加工中、还是出仓后"
+   ],
+   "career": "让你在需求评审时能反问「这个指标的口径和刷新时效是什么」，这是数据岗和 CRUD 岗最明显的分水岭。",
+   "steps": [
+    "选一个自己熟悉的业务（比如课程学习记录），列出全部实体与事实表",
+    "为每张表标注：数据源、更新频率、主键、分区键、保留周期",
+    "画出 ODS → DWD → DWS → ADS 四层的表依赖图",
+    "给其中 3 个核心指标写口径文档（含分子分母与过滤条件）",
+    "做一份工具选型对比表，每个选择写清「不选另一个的理由」"
+   ],
+   "accept": [
+    "有一张能给别人讲清的四层建模图",
+    "3 个指标的口径文档能让第二个人复现出同样的数字",
+    "能说清自己方案里最脆弱的一环在哪"
+   ],
+   "interview": [
+    "为什么要有 DWD 层，直接从 ODS 出指标不行吗",
+    "缓慢变化维 Type1 / Type2 怎么选",
+    "数据倾斜在 join 阶段怎么发现、怎么处理"
+   ]
+  },
+  {
+   "slug": "beam-unified",
+   "track": "bigdata",
+   "tier": "t2",
+   "hours": 26,
+   "level": "mid",
+   "title": "Apache Beam · 一套代码同时跑批与流",
+   "repo": "apache/beam",
+   "summary": "Beam 把「算什么」和「在哪跑」彻底解耦：同一份 Pipeline 换一个 Runner 就从 DirectRunner 跑到 FlinkRunner。写三个 pipeline 之后，你会真正理解窗口、水位线、触发器这套流处理语义，而不只是会调 Flink API。",
+   "stack": [
+    "Python SDK",
+    "PCollection",
+    "Windowing",
+    "Watermark",
+    "Flink Runner"
+   ],
+   "learn": [
+    "PCollection 的不可变性与 PTransform 的延迟执行模型",
+    "事件时间 / 处理时间 / 摄入时间的区别，以及水位线为什么只是「估计」",
+    "固定窗口、滑动窗口、会话窗口在乱序数据下的输出差异",
+    "触发器（early / late / accumulation）如何控制迟到数据的补偿输出",
+    "GroupByKey 与 CombinePerKey 在 shuffle 成本上的差距"
+   ],
+   "career": "流处理语义是数据岗的高频深水区，能讲清「迟到数据怎么办」的人明显少，这一条足够撑起一场技术面。",
+   "steps": [
+    "用 DirectRunner 跑通 WordCount，再切 FlinkRunner 不改业务代码",
+    "构造带 5 分钟乱序的模拟事件流，观察不同 allowed_lateness 的输出",
+    "写一个会话窗口统计，对比固定窗口的结果差异并解释原因",
+    "把 GroupByKey 改成 CombinePerKey，记录 shuffle 数据量变化",
+    "在 Flink 上跑一次，对比两个 Runner 的吞吐与延迟"
+   ],
+   "accept": [
+    "同一 pipeline 至少在两个 Runner 上跑出结果",
+    "有一份乱序数据下窗口输出的对比表",
+    "能解释一次重复输出的成因并给出修正"
+   ],
+   "interview": [
+    "水位线能不能保证不丢数据，为什么",
+    "Allowed lateness 与触发器重复输出怎么配合使用",
+    "流式 join 两边的窗口对不齐时会怎样"
+   ]
+  },
+  {
+   "slug": "bigdata-szt",
+   "track": "bigdata",
+   "tier": "t2",
+   "hours": 20,
+   "level": "mid",
+   "title": "SZT-bigdata · 地铁客流分析实战",
+   "repo": "geekyouth/SZT-bigdata",
+   "summary": "深圳地铁客流大数据项目，覆盖数据采集、清洗、离线与实时分析，是把组件串成完整链路的实战样本。",
+   "stack": [
+    "Scala",
+    "Spark",
+    "Flink",
+    "Kafka",
+    "HBase",
+    "可视化"
+   ],
+   "learn": [
+    "从采集到展示的全链路搭建",
+    "离线数仓的分层建模",
+    "实时指标的流式计算",
+    "海量数据的存储选型",
+    "指标口径与可视化"
+   ],
+   "career": "简历上「做过完整大数据链路」比「会用 Spark」有说服力得多。",
+   "steps": [
+    "按 README 搭建环境与依赖组件",
+    "跑通离线分析，产出客流指标",
+    "接 Kafka 做实时客流统计",
+    "做一张可视化大屏",
+    "整理指标口径文档"
+   ],
+   "accept": [
+    "离线指标结果可复现",
+    "实时链路延迟可测",
+    "大屏可展示核心指标",
+    "指标口径有书面定义"
+   ],
+   "interview": [
+    "离线与实时链路的取舍",
+    "客流指标的建模思路",
+    "海量小文件的处理"
+   ]
+  },
+  {
+   "slug": "bigdata-flink",
+   "track": "bigdata",
+   "tier": "t3",
+   "hours": 45,
+   "level": "hard",
+   "title": "Flink · 有状态流处理",
+   "repo": "apache/flink",
+   "summary": "流批一体的计算引擎。事件时间、水位线、状态后端与 Checkpoint，构成实时数仓的核心能力。",
+   "stack": [
+    "Java",
+    "流处理",
+    "事件时间",
+    "Watermark",
+    "Checkpoint"
+   ],
+   "learn": [
+    "事件时间与处理时间的差异",
+    "Watermark 如何界定乱序边界",
+    "状态后端与状态大小控制",
+    "Checkpoint / Savepoint 机制",
+    "Exactly-Once 的端到端保证"
+   ],
+   "career": "实时数仓 / 风控岗位的硬技能。能讲清 Watermark 与状态，明显区别于只会写 SQL 的候选人。",
+   "steps": [
+    "本地起 Flink，跑通 socket 实时 WordCount",
+    "改事件时间 + Watermark 处理乱序",
+    "加 Keyed State 做去重",
+    "开启 Checkpoint 并模拟故障恢复",
+    "接 Kafka 做端到端 Exactly-Once"
+   ],
+   "accept": [
+    "乱序数据窗口结果正确",
+    "故障恢复后状态不丢不重",
+    "能画出 Checkpoint 流程",
+    "端到端语义验证通过"
+   ],
+   "interview": [
+    "Watermark 迟到数据如何处理",
+    "Checkpoint 与 Savepoint 的差异",
+    "状态大了怎么办"
+   ]
+  },
+  {
+   "slug": "bigdata-spark",
+   "track": "bigdata",
+   "tier": "t3",
+   "hours": 45,
+   "level": "hard",
+   "title": "Spark · 内存计算引擎",
+   "repo": "apache/spark",
+   "summary": "大数据批处理的事实标准。RDD / DataFrame、Catalyst 优化器、Shuffle 与内存管理，是数仓与特征工程的地基。",
+   "stack": [
+    "Scala",
+    "RDD",
+    "DataFrame",
+    "Catalyst",
+    "Shuffle"
+   ],
+   "learn": [
+    "RDD 的血缘与惰性求值",
+    "宽依赖与窄依赖对 Shuffle 的影响",
+    "Catalyst 优化与谓词下推",
+    "数据倾斜的定位与处理",
+    "内存管理与序列化"
+   ],
+   "career": "大数据岗必备。能讲清 Shuffle 与数据倾斜，是初级与中级的核心分界。",
+   "steps": [
+    "本地跑 WordCount 与 DataFrame 作业",
+    "用 explain 看物理计划与下推",
+    "构造数据倾斜场景并复现慢任务",
+    "用加盐 / 广播优化并对比耗时",
+    "整理一份调优 checklist"
+   ],
+   "accept": [
+    "能读懂物理执行计划",
+    "数据倾斜可复现且优化有效",
+    "优化前后有耗时对比",
+    "checklist 覆盖 8 项以上"
+   ],
+   "interview": [
+    "宽窄依赖如何决定 Shuffle",
+    "数据倾斜的三种解法",
+    "Spark 为什么比 MapReduce 快"
+   ]
+  },
+  {
+   "slug": "starrocks-lakehouse",
+   "track": "bigdata",
+   "tier": "t4",
+   "hours": 80,
+   "level": "hard",
+   "title": "StarRocks · 湖仓一体的实时分析底座",
+   "repo": "StarRocks/starrocks",
+   "summary": "StarRocks 用 FE/BE 分离的 MPP 架构同时吃高并发点查和 Ad-hoc 大查询，物化视图能自动改写查询。这个项目要你回答一个真实业务问题：同一份明细数据，怎么在 3 秒内支撑 200 并发看板，又不让夜间跑批把白天打挂。",
+   "stack": [
+    "StarRocks",
+    "MPP",
+    "物化视图",
+    "主键模型",
+    "Iceberg",
+    "资源组"
+   ],
+   "learn": [
+    "FE 的元数据与查询规划、BE 的向量化执行与列存读取",
+    "明细 / 聚合 / 主键 / 更新模型各自的写入与查询代价",
+    "物化视图的透明改写规则：什么情况下优化器会自动选中",
+    "前缀索引、分区分桶、Colocate Join 对执行路径的影响",
+    "资源组隔离如何避免大查询挤占高并发点查"
+   ],
+   "career": "「实时看板 + 明细查询」是电商与 SaaS 的标配需求，能拿出并发压测曲线和物化视图命中率的人可以直接聊数据平台岗。",
+   "steps": [
+    "部署 1FE + 3BE，导入 1 亿行订单明细（主键模型）",
+    "建 3 个物化视图，用 EXPLAIN 验证查询改写是否命中",
+    "做 200 并发的看板查询压测，记录 P99 与 BE CPU 水位",
+    "制造一次夜间跑批与白天查询的资源竞争，用资源组隔离解决",
+    "对接 Iceberg 外表做冷热分层，对比查询耗时与存储成本",
+    "输出容量规划表：数据量 → BE 数量 → 预期 QPS"
+   ],
+   "accept": [
+    "物化视图命中率与查询改写有 EXPLAIN 截图佐证",
+    "并发压测报告含 P99、错误率、资源水位三组曲线",
+    "冷热分层后的成本与性能可以同时讲清"
+   ],
+   "interview": [
+    "什么查询条件下物化视图不会命中",
+    "主键模型和聚合模型在写入放大上差多少",
+    "MPP 引擎里数据倾斜会表现成什么现象"
+   ]
+  },
+  {
+   "slug": "trino-federation",
+   "track": "bigdata",
+   "tier": "t4",
+   "hours": 90,
+   "level": "hard",
+   "title": "Trino · 联邦查询引擎的生产化改造",
+   "repo": "trinodb/trino",
+   "summary": "Trino 不存数据，只负责把一条 SQL 拆到多个数据源上并行执行。真正的门槛在于：跨源 join 的数据怎么搬、CBO 的统计信息不准时怎么调、内存打爆时 spill 怎么开。做完这一套，你对「查询优化」的理解会从背规则变成看执行计划说话。",
+   "stack": [
+    "Trino",
+    "Connector",
+    "CBO",
+    "Spill",
+    "Iceberg",
+    "JVM 调优"
+   ],
+   "learn": [
+    "Coordinator / Worker 的查询生命周期：解析→分析→优化→切分→调度",
+    "Connector 如何把外部数据源的切分信息（split）暴露给调度器",
+    "CBO 的统计信息来源与 stale statistics 导致的错误计划",
+    "跨源 join 的三种执行策略及其网络开销",
+    "内存池、revocable memory 与 spill-to-disk 的触发条件"
+   ],
+   "career": "简历上写「用 Trino 做过联邦查询治理」，必须能接住「你怎么证明优化有效」——这里产出的执行计划对比和 P99 数据就是答案。",
+   "steps": [
+    "用 Docker 起 coordinator + 2 worker，挂 Hive 与 PostgreSQL 两个 catalog",
+    "造 5000 万行事实表，跑 TPC-DS 子集，记录每条的 P50/P99 与峰值内存",
+    "用 EXPLAIN (TYPE DISTRIBUTED) 找出 3 条最差计划，定位原因",
+    "对跨源 join 改写（下推 / 预聚合 / 广播）并重测，形成前后对比表",
+    "打开 spill，把内存受限场景的失败率从有到无，记录磁盘放大倍数",
+    "写一份调优手册：症状 → 判据 → 动作 → 预期收益"
+   ],
+   "accept": [
+    "至少 3 条查询有可复现的优化前后 P99 对比",
+    "能指着执行计划说出瓶颈算子与原因",
+    "调优手册里每条建议都对应一次自己跑过的实验"
+   ],
+   "interview": [
+    "Trino 为什么不支持 UPDATE，这个限制带来了什么好处",
+    "CBO 统计信息缺失时优化器会怎么退化",
+    "Spill 开启后性能反而下降，可能是什么原因"
+   ]
+  }
+ ]
+}

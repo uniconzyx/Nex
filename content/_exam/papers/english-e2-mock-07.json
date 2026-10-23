@@ -1,0 +1,141 @@
+{
+  "id": "english-e2-mock-07",
+  "exam": "english",
+  "kind": "mock",
+  "subject": "e2",
+  "title": "英语（二） · 阅读精读专项（7）",
+  "duration": 50,
+  "totalScore": 30,
+  "disclaimer": "本卷为按题型结构自编的专项练习卷，题目与解析均为原创，不是真题还原；考点年份为历年命题的归纳性标注，请以当年考试大纲为准。",
+  "blueprint": [
+    {
+      "subject": "e2",
+      "name": "英语（二）",
+      "score": 30
+    }
+  ],
+  "sections": [
+    {
+      "no": 1,
+      "name": "阅读理解",
+      "type": "choice",
+      "range": "1~3 题",
+      "score": 6,
+      "perScore": 2,
+      "note": "每题 2 分。阅读所给文章，从四个选项中选出最佳答案。",
+      "passage": {
+        "id": "e2-p7",
+        "title": "Wellness programmes at work",
+        "text": "Company wellness programmes usually offer gym discounts, fruit in the kitchen and an app that counts steps. Reviews of their effects are mixed. Participation is highest among employees who are already healthy, and the measured improvements are small. Meanwhile the strongest influence on employee health is rarely mentioned: how work is organised. Long and unpredictable hours, low control over tasks and unclear expectations produce stress that no step counter can offset. A few employers have redirected the budget from apps to scheduling, giving teams notice of shifts and a voice in how work is divided. Reported stress fell further than in any of the fitness schemes."
+      },
+      "items": [
+        "q-e2-e2-p7-q1",
+        "q-e2-e2-p7-q2",
+        "q-e2-e2-p7-q3"
+      ]
+    },
+    {
+      "no": 2,
+      "name": "翻译",
+      "type": "calc",
+      "range": "4 题",
+      "score": 12,
+      "note": "本题 12 分。把划线句子译成汉语，要求准确、通顺。",
+      "items": [
+        {
+          "id": "q-e2-e2-p7-tr",
+          "topic": "e2-translation",
+          "knowledge": "e2-translation-k1",
+          "type": "calc",
+          "diff": 3,
+          "stem": "Long and unpredictable hours, low control over tasks and unclear expectations produce stress that no step counter can offset.",
+          "answer": {
+            "text": "漫长且不可预测的工时、对任务缺乏掌控感，以及不明确的期望，会带来任何计步器都无法抵消的压力。"
+          },
+          "explain": {
+            "right": "先切分意群定主干，再按汉语习惯重排语序，最后检查术语与指代是否统一。",
+            "wrong": "常见错误：三个并列主语较长，译文用顿号分隔；that 引导定语从句修饰 stress；offset 译「抵消」，no step counter 前置为「任何计步器都无法……」。",
+            "link": "e2-translation-k1"
+          },
+          "walkthrough": {
+            "framework": {
+              "title": "段落翻译",
+              "pattern": "e2-translation-p1",
+              "steps": [
+                "通读全段，判断文体与时态基调",
+                "逐句找主干，切出定语与状语",
+                "把后置定语译成前置，长状语提到句首",
+                "检查段内代词与术语一致性",
+                "通读成段，修掉翻译腔"
+              ],
+              "trap": "逐词直译，句子不通"
+            },
+            "approach": "先切分意群定主干，再按汉语习惯重排语序，最后检查术语与指代是否统一。",
+            "points": [
+              {
+                "id": "e2-translation-k1",
+                "note": "按引导词、介词短语、分词结构切意群，先定主谓宾。",
+                "title": "长难句切分",
+                "core": "按引导词、介词短语、分词结构切意群，先定主谓宾。",
+                "pitfall": "三个并列主语较长，译文用顿号分隔；that 引导定语从句修饰 stress；offset 译「抵消」，no step counter 前置为「任何计步器都无法……」。"
+              }
+            ],
+            "solution": "参考译文：漫长且不可预测的工时、对任务缺乏掌控感，以及不明确的期望，会带来任何计步器都无法抵消的压力。\n得分点：三个并列主语较长，译文用顿号分隔；that 引导定语从句修饰 stress；offset 译「抵消」，no step counter 前置为「任何计步器都无法……」。\n检查清单：主干是否译出、修饰是否归位、指代是否还原。"
+          },
+          "score": 12
+        }
+      ]
+    },
+    {
+      "no": 3,
+      "name": "写作",
+      "type": "design",
+      "range": "5 题",
+      "score": 12,
+      "note": "本题 12 分。按题目要求写一篇短文。",
+      "items": [
+        {
+          "id": "q-e2-e2-p7-wr",
+          "topic": "e2-writing",
+          "knowledge": "e2-writing-k2",
+          "type": "design",
+          "diff": 3,
+          "stem": "Write an essay of about 150 words on the following topic: many companies offer wellness programmes. Do they address the real causes of workplace stress?",
+          "answer": {
+            "text": "Wellness programmes are popular because they are visible and inexpensive. A gym discount and a step counter signal that the company cares, yet the evidence suggests they reach the wrong people: participation is highest among employees who are already fit, and the measured gains are small. The main sources of stress lie elsewhere, in long and unpredictable hours, low control over tasks and unclear expectations. No app offsets a schedule that changes without notice. The more effective investment is therefore organisational: publish shifts in advance, let teams influence how work is divided, and make priorities explicit. Health programmes can supplement such changes, but they cannot substitute for them."
+          },
+          "explain": {
+            "right": "先定三段骨架（描述—分析—结论），再把题目给出的信息逐条落进段落，最后检查字数与衔接词。",
+            "wrong": "常见错误：把健康项目说成完全无用，或只呼吁「员工多运动」，回避工作组织方式这一成因。",
+            "link": "e2-writing-k2"
+          },
+          "walkthrough": {
+            "framework": {
+              "title": "图表作文",
+              "pattern": "e2-writing-p2",
+              "steps": [
+                "首段：一句点明图表主题 + 2 个关键数据",
+                "二段：2 条原因，用 First/Moreover 衔接",
+                "三段：一句趋势预测或建议",
+                "数字保留一位小数，趋势词要准确"
+              ],
+              "trap": "只罗列数字不做比较"
+            },
+            "approach": "先定三段骨架（描述—分析—结论），再把题目给出的信息逐条落进段落，最后检查字数与衔接词。",
+            "points": [
+              {
+                "id": "e2-writing-k2",
+                "note": "观点句 + 解释 + 例证 + 小结，四句一段。",
+                "title": "议论段展开",
+                "core": "观点句 + 解释 + 例证 + 小结，四句一段。",
+                "pitfall": "把健康项目说成完全无用，或只呼吁「员工多运动」，回避工作组织方式这一成因。"
+              }
+            ],
+            "solution": "Wellness programmes are popular because they are visible and inexpensive. A gym discount and a step counter signal that the company cares, yet the evidence suggests they reach the wrong people: participation is highest among employees who are already fit, and the measured gains are small. The main sources of stress lie elsewhere, in long and unpredictable hours, low control over tasks and unclear expectations. No app offsets a schedule that changes without notice. The more effective investment is therefore organisational: publish shifts in advance, let teams influence how work is divided, and make priorities explicit. Health programmes can supplement such changes, but they cannot substitute for them."
+          },
+          "score": 12
+        }
+      ]
+    }
+  ]
+}

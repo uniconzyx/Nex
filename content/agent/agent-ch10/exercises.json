@@ -1,0 +1,133 @@
+{
+  "meta": {
+    "chapter": "agent-ch10",
+    "title": "AI 产品设计与评估方法论：把「感觉不错」变成分数 —— 习题集",
+    "count": 6,
+    "note": "3 道概念题（指标分层、judge 校准准入、小样本显著性判断）+ 3 道算法实践题（黄金集分层覆盖与回加权、A/B 样本量与检验力、judge 位置/长度偏差诊断实验），全部为原创题干。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "下列哪一项不属于护栏指标",
+      "content_md": "某团队为 RAG 问答系统设计了三层指标体系。下列哪一项**不属于**护栏指标？\n\nA. P99 端到端延迟超过基线 30%\nB. 单请求平均成本超过预算 20%\nC. 黄金集上的忠实度（faithfulness）从 0.71 涨到 0.74\nD. 拒答率单日从 5% 异常波动到 18%",
+      "answer": {
+        "correct": "C",
+        "explain": "护栏指标的职责是「有没有变坏」，盯的是延迟、成本、异常波动、安全投诉等运行健康度，通常一票否决。忠实度是**离线能力指标**，回答「生成是否凭空编造」，它涨了是好事，不属于护栏。A、B 都是典型护栏项：延迟长尾与成本超预算都直接威胁可用性；D 是护栏中的「异常检测」项——拒答率单日三倍波动往往意味着底层检索或依赖服务出了故障，即使平均质量指标没动也要告警。易错点是把「离线指标变好/变坏」与「护栏越界」混为一谈：前者进回归门禁做双侧比较，后者做单侧越界检测，两者的统计口径和响应动作完全不同。"
+      },
+      "explanation": "考点：离线指标 / 线上指标 / 护栏指标三层体系的职责划分。",
+      "tags": [
+        "指标体系",
+        "护栏指标",
+        "离线指标"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/01 第 2 节；示例 ex09"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "judge 与人工标注的 kappa 只有 0.55，下列处置最合理的是",
+      "content_md": "团队用一个 LLM judge 给 RAG 系统的答案打「合格/不合格」标签。在 80 条人工双标样本上，judge 与人工仲裁结果的 Cohen's kappa = 0.55，Spearman 相关 0.62。下列哪种处置最合理？\n\nA. kappa 已经超过随机一致，可以正式用作发布门禁\nB. 把 judge 的打分标准从 1-5 分改成 1-10 分，提高分辨率\nC. judge 只能用于粗筛/排序参考，正式门禁仍以人工标注为准；同时按偏差清单去偏后重校\nD. 换用更贵的模型重跑一次校准，kappa 自然就会上去",
+      "answer": {
+        "correct": "C",
+        "explain": "kappa 0.55 处于「一般一致」区间（经验判断：0.4~0.6 只适合粗筛，≥0.6 才考虑进门禁；<0.4 应退回人工）。A 错在把「超过随机」当成「可用于门禁」——kappa 的意义是扣除随机一致后的净一致，门槛值取决于误判代价，回归门禁误放行的代价高，准入线应更严。B 错：提高分数分辨率不改善分类一致性，judge 的问题在判定边界模糊而不在刻度疏密。D 错：换模型或许能提升一致性，但「自然会上去」是把校准当抽奖；正确做法是先量化偏差（位置翻转率、长度相关）、修 prompt 与口径，再用同一批校准集重测，并检查 judge 与人工是否犯了同类错误（共同偏差）。C 的做法符合「judge 省人力但不省责任」的原则。"
+      },
+      "explanation": "考点：Cohen's kappa 的准入线含义与 judge 校准流程的工程处置。",
+      "tags": [
+        "LLM-as-judge",
+        "Cohen's kappa",
+        "校准"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/02 第 2 节；示例 ex05"
+    },
+    {
+      "type": "judge",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "50 条黄金集上准确率从 80% 升到 82%，可以判定新版本显著更优",
+      "content_md": "判断：同一份 50 条黄金集上，新版本准确率 82%（41/50），旧版本 80%（40/50）。团队据此在周报写「新版本显著更优，达到发布标准」。（对/错，并说明原因）",
+      "answer": {
+        "correct": "错",
+        "explain": "两条硬伤。其一，2 个百分点远小于 50 条样本的抽样噪声：p̂=0.8 时 95% Wilson 区间半宽约 ±10~11 个百分点，82% 与 80% 的差异完全在波动范围内， McNemar 成对检验下这类「一进一出」的差异同样不显著——50 条黄金集的设计目标是抓大退化（5 个百分点以上），不是分辨 2 个百分点的改进。其二，即便差异真实，也缺了护栏与线上映射的检查：延迟、成本、拒答率是否越界，离线提升是否映射到线上解决率，都要单独看。正确周报写法是「离线准确率 82%（95% 置信区间约 [70%, 91%]），与旧版本差异不具统计显著性；建议继续扩样本至 300+ 条或改用线上 A/B 验证」。把「点值变大」直接写成「显著更优」，是评估报告最常见的过度断言。"
+      },
+      "explanation": "考点：小样本下点值差异与统计显著性的区分、置信区间报告口径。",
+      "tags": [
+        "统计显著性",
+        "置信区间",
+        "黄金集"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/01 第 3 节；示例 ex02"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "黄金集分层覆盖度统计与难例回加权指标",
+      "content_md": "给定黄金集样本列表 `samples`（每条为 dict，含 `stratum`（层名，如 \"查询x易\"）、`is_hard`（是否难例）、`correct`（0/1））。实现：\n1. `coverage(samples)`：输出每层样本数、难例数、难例占比，标出样本数为 0 的「盲区」层；\n2. `weighted_acc(samples, weights)`：按层权重回加权的准确率 `Σwₖ·accₖ`（权重按层归一）；\n3. `report(samples)`：打印覆盖度小表 + 原始准确率 + 回加权准确率 + 盲区警告；\n4. 验证：构造 50 条、6 个层的数据（其中一层为空、难例占比 30%），说明回加权为什么必要。\n纯标准库 + numpy，固定种子，禁止读外部文件。",
+      "answer": {
+        "reference_code": "from collections import defaultdict\n\ndef coverage(samples):\n    d = defaultdict(lambda: [0, 0])\n    for s in samples:\n        d[s[\"stratum\"]][0] += 1\n        d[s[\"stratum\"]][1] += int(s[\"is_hard\"])\n    return {k: (n, h, h / n if n else 0.0) for k, (n, h) in d.items()}\n\ndef weighted_acc(samples, weights):\n    tot = defaultdict(int); hit = defaultdict(int)\n    for s in samples:\n        tot[s[\"stratum\"]] += 1\n        hit[s[\"stratum\"]] += s[\"correct\"]\n    wsum = sum(weights.values())\n    return sum(weights.get(k, 0) * hit[k] / tot[k] for k in tot if tot[k]) / wsum\n\nraw = sum(s[\"correct\"] for s in samples) / len(samples)\ncov = coverage(samples)\nempty = [k for k, (n, h, r) in cov.items() if n == 0]\nprint(f\"原始准确率={raw:.2%} 回加权={weighted_acc(samples, w):.2%} 盲区={empty}\")",
+        "explain": "坑一：空层要在 coverage 里显式检查——`h / n` 对空层会除零，且空层是「盲区」，比低覆盖更严重，报告必须列出而不是静默跳过。坑二：回加权的分母是「权重之和」而不是样本数：难例 oversampling 后，直接用 `sum(correct)/N` 得到的是**有偏**估计，必须按目标流量占比回加权 `Σwₖaccₖ / Σwₖ`。坑三：层内准确率 `hit[k]/tot[k]` 要防空层（`if tot[k]`）。这道题对应黄金集验收的第一动作：先看覆盖度表有无空格、难例占比是否 ≥30%，再看回加权后的指标——顺序反了就会用一份偏科的黄金集给系统打分。"
+      },
+      "explanation": "手写核心逻辑：分层覆盖度统计、盲区检测与难例回加权指标计算。",
+      "tags": [
+        "黄金集",
+        "分层抽样",
+        "回加权",
+        "覆盖度"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/01 第 1 节；示例 ex01"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "A/B 样本量与检验力计算器：MDE 减半意味着什么",
+      "content_md": "实现两比例检验的样本量估算与检验力曲线：\n1. `sample_size(p1, mde, alpha=0.05, power=0.8)`：正态近似公式 `n = 2·p̄·(1−p̄)·(z_{α/2}+z_β)²/δ²`，p̄=(p1+p1+mde)/2，向上取整；\n2. `power_of(n, p1, p2, alpha=0.05)`：给定每组样本量反解检验力（用正态近似的功效公式）；\n3. 对 `p1=0.70`，输出 MDE ∈ {0.10, 0.05, 0.02, 0.01} 所需每组样本量小表，并验证「MDE 减半 → 样本量约 4 倍」；\n4. 输出 p1=0.70、每组 500 样本时对 MDE=0.05 的检验力，并回答：此时实验「不显著」能说明什么、不能说明什么。\n纯标准库 + numpy，禁止联网。",
+      "answer": {
+        "reference_code": "from math import ceil, sqrt\n\ndef z_of(a):\n    return 1.96 if abs(a - 0.05) < 1e-9 else 2.58  # 仅支持 0.05/0.01\n\ndef sample_size(p1, mde, alpha=0.05, power=0.8):\n    p2 = p1 + mde\n    pbar = (p1 + p2) / 2\n    return ceil(2 * pbar * (1 - pbar) * (z_of(alpha) + 0.84) ** 2 / mde ** 2)\n\ndef power_of(n, p1, p2, alpha=0.05):\n    se0 = sqrt(2 * ((p1 + p2) / 2) * (1 - (p1 + p2) / 2) / n)\n    se1 = sqrt((p1 * (1 - p1) + p2 * (1 - p2)) / n)\n    return 0.5 * (1 + erf((abs(p2 - p1) - z_of(alpha) * se0) / se1))\n\nfrom math import erf\nfor mde in (0.10, 0.05, 0.02, 0.01):\n    print(f\"MDE={mde:.2f}: n/组={sample_size(0.70, mde)}\")\nprint(f\"n=500 对 MDE=0.05 的检验力≈{power_of(500, 0.70, 0.75):.2f}\")",
+        "explain": "坑一：样本量公式里用的是**合并方差** `p̄(1−p̄)`（原假设下的方差），而检验力公式要同时用原假设方差 se0 与备择假设方差 se1——两者混用是经典错误，功效会算高。坑二：`z_{α/2}` 与 `z_β` 的取值要和 alpha/power 对应（0.05→1.96，0.80→0.84），写死常量时要在注释里标明只支持这两个水平。坑三：MDE 减半样本量约 4 倍（δ² 在分母），所以「想把可检测提升从 5% 降到 2.5%」不是多跑几天，是流量翻四倍——这就是为什么小改进要靠线上长期指标而非短期 A/B。最后问的回答：n=500 对 5% MDE 的功效通常只有 0.5 上下，「不显著」只说明数据不足以检出该效应，不能说明效应不存在（不显著 ≠ 无效果）。"
+      },
+      "explanation": "数值/边界验证：两比例样本量公式、MDE 的平方关系与低功效实验的结论边界。",
+      "tags": [
+        "A/B 测试",
+        "样本量",
+        "检验力",
+        "两比例检验"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/03 第 3 节；示例 ex03"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "judge 偏差诊断实验：位置翻转率与长度相关的量化",
+      "content_md": "给定一个**本地模拟 judge**：`judge_pair(quality_a, quality_b, len_a, len_b, order)` 返回赢家，其内部含位置加成（先出现 +0.3）与长度加成（每多 100 字 +0.1，封顶 0.5）。实现：\n1. `flip_rate(cases)`：对每个案例按 A-B 与 B-A 两种顺序各评一次，统计结论翻转比例；\n2. `length_corr(cases)`：judge 单打分（`judge_score`）与答案长度的 Spearman 相关；\n3. 构造 40 个案例（质量差 ±0.5 混合、长度 100~600 字混合，固定种子），输出翻转率与长度相关；\n4. 给出「该 judge 能否进门禁」的判定字符串（准入线：翻转率 ≤10% 且 |ρ| < 0.3，经验值）。\n纯标准库 + numpy，judge 为本地模拟，禁止调用任何真实 API。",
+      "answer": {
+        "reference_code": "import numpy as np\n\nrng = np.random.default_rng(0)\n\ndef judge_score(q, length):\n    return q + 0.1 * (length - 200) / 100  # 长度加成：每多100字+0.1\n\ndef judge_pair(qa, qb, la, lb, order):\n    sa, sb = judge_score(qa, la), judge_score(qb, lb)\n    if order == \"AB\":\n        sa += 0.3                        # 位置加成：先出现 +0.3\n    else:\n        sb += 0.3\n    return \"A\" if sa > sb else (\"B\" if sb > sa else \"tie\")\n\ndef spearman(x, y):\n    rx = np.argsort(np.argsort(x)); ry = np.argsort(np.argsort(y))\n    return float(np.corrcoef(rx, ry)[0, 1])\n\ncases = [(rng.normal(), rng.normal(), rng.integers(100, 600), rng.integers(100, 600)) for _ in range(40)]\nflips = sum(judge_pair(*c[:2], c[2], c[3], \"AB\") !=\n            judge_pair(*c[:2], c[2], c[3], \"BA\") for c in cases) / len(cases)\ncorr = abs(spearman([c[2] for c in cases], [judge_score(c[0], c[2]) for c in cases]))\nprint(f\"位置翻转率={flips:.0%} 长度|rho|={corr:.2f}\")\nok = flips <= 0.10 and corr < 0.30\nprint(\"准入判定:\", \"可进门禁\" if ok else \"仅可粗筛，需交换取平均+长度去偏\")",
+        "explain": "坑一：翻转率必须让**质量差小于位置加成**的案例也参与统计——若只构造质量悬殊的案例，翻转率会被人为压到 0，偏差检测形同虚设；模拟里位置加成 0.3 大于质量差 ±0.5 的多数组合，翻转率才会暴露出来。坑二：Spearman 相关用 `argsort(argsort(x))` 求秩再算 Pearson，`np.corrcoef` 对常数序列会给出 nan，长度构造必须拉开范围（100~600）。坑三：准入判定是**合取条件**（翻转率与长度相关都要达标），任一超标就只能粗筛；真实工程里还要加 kappa 与共同偏差检查。这道题对应 judge 接入 CI 前的体检流程：没有体检报告的 judge 不允许作为门禁尺子。"
+      },
+      "explanation": "诊断/对比实验：judge 位置偏差与长度偏差的量化模拟与准入判定。",
+      "tags": [
+        "LLM-as-judge",
+        "位置偏差",
+        "长度偏差",
+        "Spearman"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/02 第 1、2 节；示例 ex04、ex05"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "title": "步长上限 1/L：超过它，下降引理失效并开始发散",
+  "code_lang": "python",
+  "code_std": "3.13",
+  "stdin": "",
+  "expected_output": "L = 10.0  →  理论步长上限 1/L = 0.1000，2/L = 0.2000\n       η    η·L    f_50 − f*     单调下降\n  0.0250   0.25    3.976e-02     True\n  0.0500   0.50    2.960e-03     True\n  0.1000   1.00    1.328e-05     True\n  0.1500   1.50    4.374e-08     True\n  0.1900   1.90    1.328e-06     True\n  0.2100   2.10    6.890e+02    False\n\n机理：沿特征向量方向误差按 |1 − ηλ_i| 收缩。\nη < 1/L 时所有方向都收缩；1/L < η < 2/L 时最大特征值方向开始震荡但仍有界；\nη > 2/L 时 |1 − ηλ_max| > 1，误差被指数放大 → 发散。\n",
+  "code": "# L 是 Hessian 的最大特征值。这个实验把「学习率不能乱设」变成可验证的事实。\nimport numpy as np\n\nA = np.diag([10.0, 1.0])          # L = 10\nb = np.array([1.0, 1.0])\nL = np.linalg.eigvalsh(A).max()\nw_star = np.linalg.solve(A, b)\nf = lambda w: 0.5 * w @ A @ w - b @ w\nf_star = f(w_star)\n\nprint(f\"L = {L:.1f}  →  理论步长上限 1/L = {1/L:.4f}，2/L = {2/L:.4f}\")\nprint(f\"{'η':>8} {'η·L':>6} {'f_50 − f*':>12} {'单调下降':>8}\")\nfor ratio in (0.25, 0.5, 1.0, 1.5, 1.9, 2.1):\n    eta = ratio / L\n    w, hist = np.zeros(2), []\n    for _ in range(50):\n        w = w - eta * (A @ w - b)\n        hist.append(f(w) - f_star)\n    mono = all(hist[i + 1] <= hist[i] + 1e-15 for i in range(len(hist) - 1))\n    print(f\"{eta:>8.4f} {eta*L:>6.2f} {hist[-1]:>12.3e} {str(mono):>8}\")\n\nprint(\"\\n机理：沿特征向量方向误差按 |1 − ηλ_i| 收缩。\")\nprint(\"η < 1/L 时所有方向都收缩；1/L < η < 2/L 时最大特征值方向开始震荡但仍有界；\")\nprint(\"η > 2/L 时 |1 − ηλ_max| > 1，误差被指数放大 → 发散。\")\n"
+}

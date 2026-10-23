@@ -1,0 +1,216 @@
+{
+ "track": "tooling",
+ "items": [
+  {
+   "slug": "act-local-actions",
+   "track": "tooling",
+   "tier": "t1",
+   "hours": 6,
+   "level": "easy",
+   "title": "nektos/act · 在本地把 CI 跑一遍",
+   "repo": "nektos/act",
+   "summary": "把 GitHub Actions 的 workflow 拉到本机 Docker 里执行。最大的收益是「改 CI 不用 push 等五分钟」——本地跑通再推，一次推对。顺带会逼你真正读懂 workflow 的触发条件与 job 依赖。",
+   "stack": [
+    "GitHub Actions",
+    "Docker",
+    "YAML",
+    "Shell"
+   ],
+   "learn": [
+    "workflow 的 on / jobs / needs 如何构成执行图",
+    "runner 镜像与宿主环境的差异，为什么本地过线上挂",
+    "matrix 展开后的任务数与缓存复用关系",
+    "secrets 在本地如何注入而不落盘",
+    "artifact 与 cache 的存储位置和失效策略"
+   ],
+   "career": "能自己维护 CI 的人，在团队里天然承担「让流水线别老红」的角色，这是实习生最容易做出可见贡献的地方。",
+   "steps": [
+    "装 act，用默认镜像跑通一个 hello-world workflow",
+    "把本仓库的真实 CI 拉下来本地跑，记录失败点",
+    "加一个 matrix job，本地验证展开是否正确",
+    "把耗时最长的步骤换成 cache 命中，对比本地耗时",
+    "写一页笔记：本地与线上的环境差异清单"
+   ],
+   "accept": [
+    "真实 workflow 能在本地跑绿",
+    "matrix 与 cache 的效果有耗时对比",
+    "环境差异清单里至少三条是自己踩出来的"
+   ],
+   "interview": [
+    "CI 里为什么要区分 build 和 test 两个 job",
+    "缓存 key 怎么设计才不会互相污染",
+    "本地能过线上挂，你按什么顺序排查"
+   ]
+  },
+  {
+   "slug": "gitleaks-guard",
+   "track": "tooling",
+   "tier": "t1",
+   "hours": 5,
+   "level": "easy",
+   "title": "gitleaks · 别让密钥进 git 历史",
+   "repo": "gitleaks/gitleaks",
+   "summary": "用正则加熵值检测扫描仓库里的密钥、令牌、私钥。跑一次全历史扫描，多数人会在自己的老仓库里扫出东西——这比任何安全课都更有说服力。接进 pre-commit 之后，泄露从「事后补救」变成「提交时就挡」。",
+   "stack": [
+    "gitleaks",
+    "pre-commit",
+    "正则",
+    "SARIF"
+   ],
+   "learn": [
+    "规则文件里 regex 与 entropy 两个判据如何配合降误报",
+    "全历史扫描（--log-opts）与增量扫描的成本差异",
+    "baseline 机制怎么让存量问题不阻塞新提交",
+    "检测到密钥后的正确处理顺序：吊销 → 轮换 → 清历史",
+    "为什么 git 历史里的密钥删文件也没用"
+   ],
+   "career": "安全合规是校招简历上少见的加分项，能讲清「密钥泄露后如何止损」的人极少。",
+   "steps": [
+    "对三个自己的老仓库跑全历史扫描，统计命中",
+    "给误报加 allowlist，把噪声降到可接受水平",
+    "接进 pre-commit 与 CI 两道关卡",
+    "故意提交一个假密钥，验证两道关卡都能拦住",
+    "写一份泄露响应流程：发现→吊销→轮换→清理→复盘"
+   ],
+   "accept": [
+    "pre-commit 与 CI 两级都能拦住测试密钥",
+    "误报率降到不影响日常提交",
+    "响应流程里每一步都有具体命令"
+   ],
+   "interview": [
+    "密钥进了 git 历史，只删文件为什么不够",
+    "pre-commit 能防住所有泄露吗，为什么还要服务端扫描",
+    "如何降低密钥扫描的误报"
+   ]
+  },
+  {
+   "slug": "tooling-fd",
+   "track": "tooling",
+   "tier": "t2",
+   "hours": 20,
+   "level": "mid",
+   "title": "fd · 更快的 find 替代品",
+   "repo": "sharkdp/fd",
+   "summary": "4.4 万星的 Rust 文件查找工具，并行遍历 + 正则匹配 + 智能忽略，代码量适中，适合作为第一个 Rust 实战。",
+   "stack": [
+    "Rust",
+    "并行遍历",
+    "正则",
+    "CLI",
+    "ignore 规则"
+   ],
+   "learn": [
+    "Rust 的所有权与生命周期实践",
+    "并行目录遍历的实现",
+    "gitignore 规则的解析",
+    "命令行参数与错误处理",
+    "跨平台文件系统差异"
+   ],
+   "career": "Rust 入门第一课。能独立读改一个真实 Rust 项目，简历上「会 Rust」才站得住。",
+   "steps": [
+    "读完 README 与 --help，列出全部能力",
+    "通读主流程，画参数解析到遍历的路径",
+    "用 fd 与 find 做性能对比",
+    "给它加一个自定义过滤参数",
+    "写一篇 Rust 学习笔记"
+   ],
+   "accept": [
+    "能讲清并行遍历的任务模型",
+    "性能对比有数据",
+    "自定义参数可用且通过测试",
+    "笔记覆盖所有权与错误处理"
+   ],
+   "interview": [
+    "Rust 所有权如何避免数据竞争",
+    "并行遍历的负载均衡",
+    "CLI 工具的错误处理约定"
+   ]
+  },
+  {
+   "slug": "tooling-fzf",
+   "track": "tooling",
+   "tier": "t2",
+   "hours": 20,
+   "level": "mid",
+   "title": "fzf · 终端模糊查找器",
+   "repo": "junegunn/fzf",
+   "summary": "8.3 万星的命令行模糊查找工具，Go 实现。核心是模糊匹配算法与终端 UI 的高效重绘。",
+   "stack": [
+    "Go",
+    "模糊匹配",
+    "终端 UI",
+    "并发",
+    "Shell 集成"
+   ],
+   "learn": [
+    "模糊匹配算法与评分策略",
+    "终端 ANSI 渲染与增量重绘",
+    "并发读取与结果流式输出",
+    "Shell 集成与快捷键设计",
+    "跨平台兼容处理"
+   ],
+   "career": "工具链 / 效率工程方向的代表作。能写一个顺手的 CLI 工具，是很实在的工程能力证明。",
+   "steps": [
+    "配置 fzf 到日常 shell 工作流",
+    "读匹配算法，理解评分规则",
+    "手写一个简易模糊匹配器并对比结果",
+    "给 fzf 加一个自定义预览命令",
+    "整理一份终端效率配置"
+   ],
+   "accept": [
+    "日常使用覆盖文件/历史/分支三类场景",
+    "自写匹配器与 fzf 结果一致率 > 90%",
+    "预览命令可用",
+    "配置可复用到新机器"
+   ],
+   "interview": [
+    "模糊匹配的评分如何设计",
+    "终端 UI 如何做到不闪烁",
+    "流式输入下的增量过滤"
+   ]
+  },
+  {
+   "slug": "tooling-ripgrep",
+   "track": "tooling",
+   "tier": "t3",
+   "hours": 45,
+   "level": "hard",
+   "title": "ripgrep · Rust 高性能代码搜索",
+   "repo": "BurntSushi/ripgrep",
+   "summary": "6.9 万星的搜索工具。正则引擎、SIMD、并行目录遍历与内存映射，是系统工程与性能优化的极佳案例。",
+   "stack": [
+    "Rust",
+    "正则引擎",
+    "SIMD",
+    "并行遍历",
+    "CLI 设计"
+   ],
+   "learn": [
+    "正则引擎的自动机实现",
+    "SIMD 加速字面量匹配",
+    "并行遍历与任务分发",
+    "内存映射的收益与陷阱",
+    "CLI 工具的接口设计"
+   ],
+   "career": "系统 / 基础架构岗加分项。能讲清性能优化路径，比写业务代码更能体现深度。",
+   "steps": [
+    "装好并用 rg 替代 grep 做日常搜索",
+    "读 regex 自动机部分，画匹配流程",
+    "对比 rg / grep / ag 在大仓库的耗时",
+    "用 perf 定位一处热点",
+    "给项目提一个文档或小修复 PR"
+   ],
+   "accept": [
+    "能解释为何 rg 更快",
+    "有 benchmark 数据对比",
+    "能定位一处热点并说明优化方向",
+    "至少 1 个 PR 或等价贡献"
+   ],
+   "interview": [
+    "正则引擎的回溯与自动机取舍",
+    "SIMD 在字符串匹配中的应用",
+    "并行遍历如何避免 IO 抖动"
+   ]
+  }
+ ]
+}

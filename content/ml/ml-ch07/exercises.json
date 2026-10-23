@@ -1,0 +1,137 @@
+{
+  "meta": {
+    "chapter": "ml-ch07",
+    "title": "推荐系统：协同过滤与矩阵分解 —— 习题集",
+    "count": 6,
+    "note": "3 道基础题（中心化口径、负采样语义、指标口径错位）+ 3 道算法题（手写 user-based CF、均值归一化数值验证、BPR 与 MSE 诊断对比），全部为原创题干。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "中心化到底修好了 CF 的哪个环节",
+      "content_md": "某视频网站用 user-based CF，相似度用原始余弦。上线后推荐列表被一批「什么都打 5 分」的用户主导，换一批苛刻用户的评分后推荐立刻失准。团队在同一份 100 用户 × 40 物品的稀疏评分数据上做了受控实验：\n\n| 方案 | MAE |\n|---|---|\n| ① 原始余弦 + 对邻居原始分直接加权平均 | 0.963 |\n| ② 原始余弦 + 均值修正预测式（减 μ_v 加 μ_u） | 0.656 |\n| ③ 中心化余弦 + 均值修正预测式 | 0.625 |\n\n下列哪项最准确地解释了②③相对①的改善来源？\n\nA. 中心化减去了物品均值，消除了「神作加分、烂片减分」的物品偏置，这是误差下降的主因\nB. 均值修正把邻居的「打分尺度」从预测中剥离，让预测只反映相对偏好；中心化进一步让「选谁当邻居」本身变准，两者作用在不同环节\nC. 方案①误差大只是因为少数异常评分把均值拉偏，中心化等价于对评分做 winsorize 截断\nD. 三个数字的差距在 n=309 的测试集上属于随机波动，换随机种子就会反转",
+      "answer": {
+        "correct": "B",
+        "explain": "关键是把「相似度怎么算」和「预测怎么算」分成两个环节。方案②只改预测式：`r̂_ui = μ_u + Σ sim·(r_vi−μ_v)/Σ|sim|`，先用邻居自己的均值减掉「打分松紧」，再加回目标用户的基线——一个习惯打 5 分的邻居不再把所有人抬高，这是收益最大的一步（0.963→0.656）。方案③把相似度也中心化，收益变小（0.656→0.625）但方向一致：不中心化时，宽容用户 [5,5,4] 与苛刻用户 [3,3,2] 的原始余弦≈0.999，会被误判成同口味；中心化后相似度才反映「相对偏好的形状」，邻居选择变准。A 错在口径：user-based 的中心化减的是**用户**均值 μ_u、μ_v（item-based 的调整余弦同样减用户均值，不是物品均值）；物品偏置 b_i 应由 baseline 或 MF 的 b_i 项吸收。C 把「减均值」误当成「截断异常值」。D 无视了系统性的偏置来源：0.34 的 MAE 差距远大于抽样噪声。"
+      },
+      "explanation": "考点：均值归一化分别作用于「邻居选择」与「预测公式」两个环节，且后者收益更大。",
+      "tags": [
+        "中心化",
+        "Pearson",
+        "均值归一化",
+        "协同过滤"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/01 第 2.1、4 节；示例 ex01、ex03"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "负采样的两个想当然做法错在哪",
+      "content_md": "某电商把「用户点击过」当正样本训练 BPR。工程师为省事做了两件事：① 负样本从全库物品里均匀随机采，且不排除该用户已经交互过的物品；② 把日志里所有「曝光但未点击」的物品全部当作确定性负例加入训练。以下哪项最准确地描述了这两个做法的问题？\n\nA. 均匀负样本只是训练慢，不影响正确性；曝光未点击是干净的负例，应当全部采用\nB. 不排除已交互物品等于把正样本当负样本，模型被教唆「把用户喜欢的排后面」；把曝光未点击全盘当真会混入「没注意/误点/加载失败」等噪声，且未点击的真实含义依赖曝光机制，应按置信度处理而非无条件当真\nC. 负样本必须全部替换成热门物品，否则 pairwise 损失不收敛\nD. 两个做法都没问题，BPR 对负样本分布不敏感，采什么都能学",
+      "answer": {
+        "correct": "B",
+        "explain": "BPR 的梯度是 `−δ(q_i − q_j)`，其中 j 被假定为「用户更不喜欢」的物品。如果 j 恰好在用户的交互集 I_u 里，等于告诉模型「把用户点过的排到没点过的后面」，与目标自相矛盾——这是必须排除 I_u 的原因（示例 ex06 的读法第 3 条）。第二个做法错在把「未观测」直接等同于「负偏好」：未点击至少混着没曝光、没注意、误点三种情况（MNAR）。工业上负样本通常从「曝光未点击」里采，但仍需按展示位置、停留时长等做置信度加权；均匀采样则走向另一个极端——大多数负样本太容易，σ→1、δ→0，梯度消失，所以常用 `pop^0.75` 增加难度。C 无依据：纯热门负样本会放大流行度偏差。D 与 concept/02 §5.3 的结论相反：BPR 的效果高度依赖负样本分布，采样策略是它最重要的超参之一。"
+      },
+      "explanation": "考点：隐式反馈的「未观测 ≠ 负样本」，以及负采样分布对 BPR 的决定性影响。",
+      "tags": [
+        "BPR",
+        "负采样",
+        "隐式反馈",
+        "曝光偏差"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/01 第 1 节、concept/02 第 5.3 节；示例 ex06"
+    },
+    {
+      "type": "judge",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "BPR 的 RMSE 比 MF 差，能说明 BPR 不行吗",
+      "content_md": "判断：某团队在同一份隐式反馈数据上训练了两个模型——评分回归 MF（RMSE=0.91）与 BPR（RMSE=1.12）。团队据此得出结论「BPR 拟合能力差，下线上线 MF」。这个判断和做法是否合理？请说明理由，并给出正确的对比方式。",
+      "answer": {
+        "correct": "不合理",
+        "explain": "这是典型的「目标函数与评测口径错位」。BPR 最大化的是 pairwise 似然 `−log σ(x̂_ui − x̂_uj)`，它只约束「正样本分数高于负样本」，从不拟合评分的绝对值——预测值整体偏高或偏低都不影响损失，所以 RMSE 差是**预期行为**，不是缺陷。反过来，RMSE 对排序也不敏感：给所有预测分加同一个常数，RMSE 变差而排序不变。正确的对比方式是同口径：在测试集上比 AUC、HR@10、Recall@K、NDCG@K（示例 ex06 中 BPR 的测试 AUC=0.8788、HR@10=0.60）；若一定要比评分预测，双方都该用 MSE 类损失训练。更重要的是，离线指标只用于筛候选模型，最终以上线 A/B 的核心指标（CTR/转化/时长）为准。本题的完整教训来自 pitfalls 第 4 条：先声明任务口径——评分预测 → 平方损失 + RMSE/MAE；Top-N 推荐 → pairwise 损失 + 排序指标。"
+      },
+      "explanation": "考点：目标函数与评测指标必须同口径；RMSE 衡量分数拟合，BPR 优化排序。",
+      "tags": [
+        "BPR",
+        "RMSE",
+        "指标口径",
+        "排序评估"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/02 第 5.4 节；pitfalls 第 4 条；示例 ex06"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "手写 user-based CF：相似度、邻居与均值修正预测",
+      "content_md": "给定 5 用户 × 6 物品的评分矩阵（None 表示未观测，不是 0 分）：\n\n```\n        i0   i1   i2   i3   i4   i5\n u0      5    4    ?    1    5    2\n u1      4    5    ?    2    4    1\n u2      1    2    5    4    1    5\n u3      2    1    4    5    2    4\n u4      4    4    2    2    5    3\n```\n\n请完成：\n1. 实现只在**共同评分项**上计算的中心化相似度：`sim(u,v) = Σ(r_ui−μ_u)(r_vi−μ_v) / sqrt(Σ(r_ui−μ_u)² · Σ(r_vi−μ_v)²)`，μ 为该用户全部已观测评分的均值；\n2. 取与 u0 中心化相似度 Top-2 的邻居，用均值修正预测式 `r̂_ui = μ_u + Σ sim·(r_vi−μ_v) / Σ|sim|` 预测 u0 对 i2 的评分；注意对 i2 未观测的邻居不能当 0 参与，分母只累加实际参与的邻居；\n3. 同时输出「对邻居原始分直接加权平均」的结果，比较两者差异并解释差异来源；\n4. 打印 u0 与各用户的共同评分数，并说明为什么共同项只有 1~2 个时相似度不可信、工程上要加收缩 `sim·|I_uv|/(|I_uv|+λ)`。\n\n验证口径：中心化 sim(u0,u4)≈0.911、sim(u0,u1)≈0.804、sim(u0,u2) 为负；预测值≈2.067；朴素加权平均≈2.00。",
+      "answer": {
+        "reference_code": "import numpy as np\n\nR = np.array([\n    [5, 4, np.nan, 1, 5, 2],\n    [4, 5, np.nan, 2, 4, 1],\n    [1, 2, 5, 4, 1, 5],\n    [2, 1, 4, 5, 2, 4],\n    [4, 4, 2, 2, 5, 3],\n], dtype=float)\nmu = np.nanmean(R, axis=1)\n\ndef center_sim(u, v):\n    mask = ~np.isnan(R[u]) & ~np.isnan(R[v])          # 只在共同项上\n    du, dv = R[u, mask] - mu[u], R[v, mask] - mu[v]\n    return float(du @ dv / np.sqrt((du @ du) * (dv @ dv)))\n\ndef predict(u, i, neighbors):\n    num = den = 0.0\n    for v in neighbors:\n        if not np.isnan(R[v, i]):                      # 未观测不能当 0\n            num += center_sim(u, v) * (R[v, i] - mu[v])\n            den += abs(center_sim(u, v))\n    return mu[u] + num / den, den\n\nsims = sorted(((center_sim(0, v), v) for v in range(1, 5)), reverse=True)\nfor s, v in sims:\n    print(f\"sim(u0,u{v}) = {s:+.3f}, 共同评分 {int((~np.isnan(R[0]) & ~np.isnan(R[v])).sum())} 项\")\ntop2 = [v for _, v in sims[:2]]\nhat, den = predict(0, 2, top2)\nprint(f\"Top-2 邻居 {top2}, 实际参与 {den:.3f}\")\nprint(f\"均值修正预测 r_hat(u0,i2) = {hat:.3f}\")\nnaive = sum(center_sim(0, v) * R[v, 2] for v in top2 if not np.isnan(R[v, 2])) / \\\n        sum(abs(center_sim(0, v)) for v in top2 if not np.isnan(R[v, 2]))\nprint(f\"朴素加权原始分均值 = {naive:.3f}\")",
+        "explain": "三个易错点：① 共同掩码——相似度只能在双方都观测过的物品上算，用 `np.nanmean` 求 μ 时也要跳过缺失；② 分母口径——`Σ|sim|` 只累加「对 i2 有观测且实际参与」的邻居，未观测项既不能进分子也不能进分母；③ 减 μ_v 加 μ_u 的顺序——等价于「用邻居的偏差修正目标用户的基线」。朴素做法 2.00 与修正后 2.067 的差异看似小，是因为本例邻居 u4 的 μ=3.33 与 u0 的 μ=3.40 接近；换成宽容用户当邻居时差异会大到 1 分以上（见示例 ex03 的 u98 与 u19 案例）。共同项少于 3 个时，相似度的抽样方差极大，一个巧合就能造出 sim≈1 的「完美邻居」，必须用 `|I_uv|/(|I_uv|+λ)` 收缩。"
+      },
+      "explanation": "手写核心算法：中心化相似度 + Top-k 邻居 + 均值修正预测，掩码与分母是两个坑。",
+      "tags": [
+        "user-based CF",
+        "Pearson",
+        "邻居预测",
+        "相似度收缩"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/01 第 2.1、2.2 节；示例 ex01"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "数值验证：均值归一化为什么几乎是必需品",
+      "content_md": "用固定种子合成一份受控评分数据，量化「评分尺度差异」对 CF 的三重影响：\n\n1. 生成数据：100 用户 × 40 物品，每个用户随机观测 12~20 个物品；评分 `r_ui = clip(round(μ + b_u + b_i + ε), 1, 5)`，其中 μ=3.5，用户偏置 `b_u ~ U(−1.5, 1.5)`（模拟打分松紧），物品偏置 `b_i ~ U(−1, 1)`，噪声 `ε ~ N(0, 0.3)`；\n2. 按用户留一法切分：每个用户**最后一个观测**进测试集，其余进训练集（固定种子）；\n3. 实现并对比三种预测口径的 MAE：① 原始余弦 + 原始分加权平均；② 原始余弦 + 均值修正预测式；③ 中心化余弦 + 均值修正预测式（邻居数 k=5）；\n4. 另取一对「口味相同、尺度不同」的用户 u=[5,5,4,5] 与 v=[3,3,2,3]，以及口味相反的 w=[5,1,5,1]，打印两种相似度口径下的 sim(u,v)、sim(u,w)；\n5. 从「用户偏置方差 ≫ 交互项方差」的角度解释：为什么②的收益远大于③相对②的增量？\n\n验证口径：三种 MAE 严格递减，约为 0.59 → 0.37 → 0.37（②与③已非常接近，差额 <0.01，这正是第 5 问要解释的现象；允许因实现细节 ±0.03 浮动）；sim(u,v) 原始≈0.998、中心化后=1.000；sim(u,w) 原始=0.800、中心化后=−0.577（由正转负）。",
+      "answer": {
+        "reference_code": "import numpy as np\n\nrng = np.random.default_rng(42)\nm, n, mu0 = 100, 40, 3.5\nb_u = rng.uniform(-1.5, 1.5, m)\nb_i = rng.uniform(-1.0, 1.0, n)\nR = np.full((m, n), np.nan)\nfor u in range(m):\n    for i in rng.choice(n, size=rng.integers(12, 21), replace=False):\n        R[u, i] = np.clip(round(mu0 + b_u[u] + b_i[i] + rng.normal(0, 0.3)), 1, 5)\n\nmu = np.nanmean(R, axis=1)\ntrain, test = R.copy(), np.full_like(R, np.nan)\nfor u in range(m):                       # 每用户最后一个观测进测试\n    idx = np.flatnonzero(~np.isnan(R[u]))\n    test[u, idx[-1]] = R[u, idx[-1]]\n    train[u, idx[-1]] = np.nan\n\ndef sim(u, v, center):\n    A = train - mu[:, None] if center else train\n    mask = ~np.isnan(A[u]) & ~np.isnan(A[v])\n    du, dv = A[u, mask], A[v, mask]\n    den = np.sqrt((du @ du) * (dv @ dv))\n    return float(du @ dv / den) if den > 0 else 0.0   # 零方差防护\n\ndef mae(center, fix_bias):\n    errs = []\n    for u in range(m):\n        js = np.flatnonzero(~np.isnan(test[u]))\n        for i in js:\n            order = sorted(((sim(u, v, center), v) for v in range(m) if v != u), reverse=True)[:5]\n            num = den = 0.0\n            for s, v in order:\n                if np.isnan(train[v, i]):\n                    continue\n                num += s * (train[v, i] - (mu[v] if fix_bias else 0.0))\n                den += abs(s)\n            if den == 0:\n                continue\n            errs.append(abs(test[u, i] - (mu[u] if fix_bias else 0.0) - num / den))\n    return float(np.mean(errs))\n\nfor name, c, f in [(\"① 原始余弦+原始平均\", False, False),\n                   (\"② 原始余弦+均值修正\", False, True),\n                   (\"③ 中心化余弦+均值修正\", True, True)]:\n    print(f\"{name}: MAE = {mae(c, f):.4f}\")\n\nu = np.array([5., 5, 4, 5]); v = np.array([3., 3, 2, 3]); w = np.array([5., 1, 5, 1])\ncos = lambda a, b: float(a @ b / np.linalg.norm(a) / np.linalg.norm(b))\npc = lambda a, b: float((a - a.mean()) @ (b - b.mean()) /\n                    np.linalg.norm(a - a.mean()) / np.linalg.norm(b - b.mean()))\nprint(f\"sim(u,v): 原始 {cos(u, v):.3f} -> 中心化 {pc(u, v):.3f}\")\nprint(f\"sim(u,w): 原始 {cos(u, w):.3f} -> 中心化 {pc(u, w):.3f}\")",
+        "explain": "三个 MAE 递减的顺序是稳定的，与种子无关。解释框架是方差分解：`Var(r) = Var(b_u) + Var(b_i) + Var(交互项) + Var(ε)`，本数据里用户偏置的方差（U(−1.5,1.5) 约 0.75）远大于交互项。方案①同时踩两个坑：加权平均把邻居的 b_u 混进预测（系统偏差），原始余弦把「打分尺度」当成「口味」选错邻居（选错比算错更致命）。方案②修掉第一个坑，拿走了大头；方案③修第二个坑，只拿小头——因为邻居选错的代价在 k=5 时被平均掉了一部分。这也解释了为什么工程顺序永远是「先 baseline（μ+b_u+b_i）再上因子」：偏置是方差最大的成分，不先剥掉，隐因子的容量会被浪费在拟合偏置上（concept/01 §4.3）。数值上 sim(u,w) 中心化后翻负，说明未中心化余弦连「口味相反」都识别不出来。"
+      },
+      "explanation": "数值验证：用受控合成数据复现三种口径的 MAE 排序，并从方差分解解释收益大小。",
+      "tags": [
+        "均值归一化",
+        "MAE",
+        "受控实验",
+        "方差分解"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/01 第 4 节；示例 ex03"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 5,
+      "title": "诊断实验：BPR 与「未交互当 0」的 MSE 差在哪",
+      "content_md": "在一份带隐群结构的合成隐式反馈数据上做对比诊断（固定种子=7）：120 个物品随机分入 6 个群；150 个用户各自偏好 2 个群，其交互的 90% 采样自偏好群、10% 均匀随机，每人 12~20 个交互；每个用户留出最后 1 个交互作为测试正样本，其余做训练。\n\n1. **方法 A**：把未交互当 0 分，训练带偏置的 MF（r̂ = b_u + b_i + p_uᵀq_i），最小化**全矩阵** MSE（复现 pitfalls 第 2 条的错误）；\n2. **方法 B**：BPR——对每个训练正样本采 1 个负样本（从该用户**未交互**物品中均匀采，必须排除已交互集合），最大化 −log σ(x̂_ui − x̂_uj)，其中 x̂_ui = b_i + p_uᵀq_i（b_u 在成对差里抵消，可省）；\n3. 测试协议：每个用户取 1 个留出正样本 + 100 个固定种子的随机负物品，报告两种方法的 **AUC** 与 **HR@10**（同一批负物品，保证可比）；\n4. **诊断输出**：找出「测试正样本在方法 A 下排名 50 名开外、在方法 B 下进入 Top-10」的用户，打印其两方法下的正样本排名与分数均值/标准差；\n5. 从损失函数角度解释差异：为什么大量假负例会把方法 A 的分数整体压向 0、方差被压扁？为什么方法 A 对「已经排对的 pair」继续推高绝对分是浪费？\n\n验证口径：方法 B 的 AUC 与 HR@10 均应显著高于方法 A（AUC 差距 ≥0.05；参考实现下 A≈0.53/0.08，B≈0.76/0.29）；诊断案例存在（参考数据下有 16 个用户满足）。",
+      "answer": {
+        "reference_code": "import numpy as np\n\nrng = np.random.default_rng(7)\nm, n, G = 150, 120, 6\ngroup = rng.integers(0, G, n)                        # 物品分群\nfav = rng.integers(0, G, (m, 2))                     # 每用户偏好 2 个群\n\ndef sample_items(u, k):\n    out = []\n    while len(out) < k:\n        pool = np.flatnonzero(np.isin(group, fav[u])) if rng.random() < 0.9 else np.arange(n)\n        i = int(rng.choice(pool))\n        if i not in out:\n            out.append(i)\n    return np.array(out)\n\ninter = {u: sample_items(u, int(rng.integers(12, 21))) for u in range(m)}\ntrain = {u: inter[u][:-1] for u in range(m)}         # 每用户留 1 个正样本\nholdout = {u: np.array([inter[u][-1]]) for u in range(m)}\n\ndef train_mf():\n    bu, bi = np.zeros(m), np.zeros(n)\n    P, Q = rng.normal(0, 0.01, (m, 8)), rng.normal(0, 0.01, (n, 8))\n    R = np.zeros((m, n))                             # 未交互 = 0（错误示范）\n    for u in train:\n        R[u, train[u]] = 1.0\n    for _ in range(30):\n        for u in range(m):\n            for i in range(n):\n                e = R[u, i] - (bu[u] + bi[i] + P[u] @ Q[i])\n                bu[u] += 0.01 * e; bi[i] += 0.01 * e\n                P[u] += 0.01 * (e * Q[i] - 0.01 * P[u])\n                Q[i] += 0.01 * (e * P[u] - 0.01 * Q[i])\n    return lambda u, i: bu[u] + bi[i] + P[u] @ Q[i]\n\ndef train_bpr():\n    bi = np.zeros(n)\n    P, Q = rng.normal(0, 0.01, (m, 8)), rng.normal(0, 0.01, (n, 8))\n    for _ in range(100):\n        for u in range(m):\n            for i in train[u]:\n                neg = rng.integers(n)\n                while neg in inter[u]:               # 必须排除已交互\n                    neg = rng.integers(n)\n                z = (bi[i] + P[u] @ Q[i]) - (bi[neg] + P[u] @ Q[neg])\n                d = 1.0 / (1.0 + np.exp(z))          # δ = 1 − σ(z)\n                bi[i] += 0.05 * d; bi[neg] -= 0.05 * d\n                P[u] += 0.05 * d * (Q[i] - Q[neg])\n                Q[i] += 0.05 * d * P[u]; Q[neg] -= 0.05 * d * P[u]\n    return lambda u, i: bi[i] + P[u] @ Q[i]\n\nrng2 = np.random.default_rng(123)                    # 固定负样本，保证两方法可比\ncands = {u: np.append(rng2.choice(n, 100, replace=False), holdout[u][0]) for u in range(m)}\n\ndef ranks(score):\n    return {u: int((np.array([score(u, i) for i in cands[u]]) >\n                    np.array([score(u, i) for i in cands[u]])[-1]).sum()) + 1\n            for u in range(m)}\n\ndef report(name, rk):\n    auc = sum(101 - rk[u] for u in range(m)) / (100 * m)\n    hr = sum(rk[u] <= 10 for u in range(m)) / m\n    print(f'{name}: AUC={auc:.4f}  HR@10={hr:.4f}')\n    return auc, hr\n\nA, B = train_mf(), train_bpr()\nrA, rB = ranks(A), ranks(B)\nreport('方法A 未交互当0+MSE', rA)\nreport('方法B BPR', rB)\ndiag = [u for u in range(m) if rA[u] > 50 and rB[u] <= 10]\nu = diag[0]\nsA = np.array([A(u, i) for i in cands[u]]); sB = np.array([B(u, i) for i in cands[u]])\nprint(f'诊断案例 user {u}: 排名A={rA[u]} 排名B={rB[u]}')\nprint(f'  方法A 分数 mean={sA.mean():.4f} std={sA.std():.4f}')\nprint(f'  方法B 分数 mean={sB.mean():.4f} std={sB.std():.4f}')\nprint(f'共 {len(diag)} 个用户满足「A 排 50+ 且 B 进 Top-10」')",
+        "explain": "差异来自损失函数对「未观测」的假设。方法 A 把 120 个物品里的 100+ 个未交互都标成 0 分，正样本只占约 8%，最优解被大量假负例整体拉向 0：诊断输出里它的分数均值只有 0.15、标准差 0.03，全被压扁在基线附近，正样本与随机负例拉不开差距。同时 MSE 是**绝对值**损失：一旦 x̂_pos 已经高于 x̂_neg，梯度仍继续推高两者的绝对分，对排序毫无帮助却消耗容量——这就是「边际收益递减」的数学形态。BPR 只约束差值 σ(x̂_pos − x̂_neg)：排对的 pair 上 σ→1、δ→0，梯度自动消失，容量集中到排错的 pair 上；且未交互物品只在被采到时以「负样本」身份出现，不会被当成 0 分标签。参考数据下 AUC 0.53 → 0.76、HR@10 0.08 → 0.29，就是「目标函数与排序任务对齐」的直接收益。注意本实验故意让方法 A 使用全矩阵口径，正是为了复现 pitfalls 第 2、4 条的两个错误；生产实现请回到「只对观测求和 + 正确任务口径」。"
+      },
+      "explanation": "诊断对比实验：同一数据、同一打分函数族，只换损失函数，量化排序指标差异并定位根因。",
+      "tags": [
+        "BPR",
+        "MSE",
+        "隐式反馈",
+        "AUC",
+        "诊断实验"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/02 第 5.1、5.4 节；pitfalls 第 2、4 条；示例 ex06"
+    }
+  ]
+}

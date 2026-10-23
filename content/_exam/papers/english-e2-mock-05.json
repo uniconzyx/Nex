@@ -1,0 +1,141 @@
+{
+  "id": "english-e2-mock-05",
+  "exam": "english",
+  "kind": "mock",
+  "subject": "e2",
+  "title": "英语（二） · 阅读精读专项（5）",
+  "duration": 50,
+  "totalScore": 30,
+  "disclaimer": "本卷为按题型结构自编的专项练习卷，题目与解析均为原创，不是真题还原；考点年份为历年命题的归纳性标注，请以当年考试大纲为准。",
+  "blueprint": [
+    {
+      "subject": "e2",
+      "name": "英语（二）",
+      "score": 30
+    }
+  ],
+  "sections": [
+    {
+      "no": 1,
+      "name": "阅读理解",
+      "type": "choice",
+      "range": "1~3 题",
+      "score": 6,
+      "perScore": 2,
+      "note": "每题 2 分。阅读所给文章，从四个选项中选出最佳答案。",
+      "passage": {
+        "id": "e2-p5",
+        "title": "The food supermarkets throw away",
+        "text": "A supermarket throws away food for reasons that have little to do with hunger and everything to do with appearance. A banana with a brown spot, a loaf past its display date, a carton dented in delivery: all are edible, none is sellable by the usual rules. Some chains now sell such items at a discount in a separate aisle, and a few have changed the rules themselves, removing best-before dates from fruit and vegetables. The results are modest but consistent: less waste, lower costs, and customers who say they prefer shops that do it. The obstacle is not customer resistance but the habit of ordering by appearance."
+      },
+      "items": [
+        "q-e2-e2-p5-q1",
+        "q-e2-e2-p5-q2",
+        "q-e2-e2-p5-q3"
+      ]
+    },
+    {
+      "no": 2,
+      "name": "翻译",
+      "type": "calc",
+      "range": "4 题",
+      "score": 12,
+      "note": "本题 12 分。把划线句子译成汉语，要求准确、通顺。",
+      "items": [
+        {
+          "id": "q-e2-e2-p5-tr",
+          "topic": "e2-translation",
+          "knowledge": "e2-translation-k1",
+          "type": "calc",
+          "diff": 3,
+          "stem": "The obstacle is not customer resistance but the habit of ordering by appearance.",
+          "answer": {
+            "text": "障碍并不在于顾客的抵触，而在于按外观订货的习惯。"
+          },
+          "explain": {
+            "right": "先切分意群定主干，再按汉语习惯重排语序，最后检查术语与指代是否统一。",
+            "wrong": "常见错误：not… but… 译「不在于……而在于……」；ordering by appearance 是动名词短语，译「按外观订货」；resistance 译「抵触」比「抵抗」更贴切。",
+            "link": "e2-translation-k1"
+          },
+          "walkthrough": {
+            "framework": {
+              "title": "段落翻译",
+              "pattern": "e2-translation-p1",
+              "steps": [
+                "通读全段，判断文体与时态基调",
+                "逐句找主干，切出定语与状语",
+                "把后置定语译成前置，长状语提到句首",
+                "检查段内代词与术语一致性",
+                "通读成段，修掉翻译腔"
+              ],
+              "trap": "逐词直译，句子不通"
+            },
+            "approach": "先切分意群定主干，再按汉语习惯重排语序，最后检查术语与指代是否统一。",
+            "points": [
+              {
+                "id": "e2-translation-k1",
+                "note": "按引导词、介词短语、分词结构切意群，先定主谓宾。",
+                "title": "长难句切分",
+                "core": "按引导词、介词短语、分词结构切意群，先定主谓宾。",
+                "pitfall": "not… but… 译「不在于……而在于……」；ordering by appearance 是动名词短语，译「按外观订货」；resistance 译「抵触」比「抵抗」更贴切。"
+              }
+            ],
+            "solution": "参考译文：障碍并不在于顾客的抵触，而在于按外观订货的习惯。\n得分点：not… but… 译「不在于……而在于……」；ordering by appearance 是动名词短语，译「按外观订货」；resistance 译「抵触」比「抵抗」更贴切。\n检查清单：主干是否译出、修饰是否归位、指代是否还原。"
+          },
+          "score": 12
+        }
+      ]
+    },
+    {
+      "no": 3,
+      "name": "写作",
+      "type": "design",
+      "range": "5 题",
+      "score": 12,
+      "note": "本题 12 分。按题目要求写一篇短文。",
+      "items": [
+        {
+          "id": "q-e2-e2-p5-wr",
+          "topic": "e2-writing",
+          "knowledge": "e2-writing-k2",
+          "type": "design",
+          "diff": 3,
+          "stem": "Write an essay of about 150 words on the following topic: supermarkets waste large amounts of edible food. Discuss the causes and suggest what shops and customers can do.",
+          "answer": {
+            "text": "Supermarkets discard edible food for reasons that are commercial rather than biological. A spotted banana or a dented carton breaks the rules of display, and ordering systems reward full shelves over empty ones. The waste is therefore built into habits, not into customer preference. Shops can change the habits: sell imperfect produce in a designated aisle, drop best-before dates where they carry no safety meaning, and order by observed demand rather than by appearance. Customers can help by buying the discounted items and by treating a brown spot as a sign of ripeness rather than a defect. Neither change is dramatic, but together they keep good food in kitchens instead of bins."
+          },
+          "explain": {
+            "right": "先定三段骨架（描述—分析—结论），再把题目给出的信息逐条落进段落，最后检查字数与衔接词。",
+            "wrong": "常见错误：只强调「顾客应该买丑蔬果」，忽略订货与陈列规则这一主要成因。",
+            "link": "e2-writing-k2"
+          },
+          "walkthrough": {
+            "framework": {
+              "title": "图表作文",
+              "pattern": "e2-writing-p2",
+              "steps": [
+                "首段：一句点明图表主题 + 2 个关键数据",
+                "二段：2 条原因，用 First/Moreover 衔接",
+                "三段：一句趋势预测或建议",
+                "数字保留一位小数，趋势词要准确"
+              ],
+              "trap": "只罗列数字不做比较"
+            },
+            "approach": "先定三段骨架（描述—分析—结论），再把题目给出的信息逐条落进段落，最后检查字数与衔接词。",
+            "points": [
+              {
+                "id": "e2-writing-k2",
+                "note": "观点句 + 解释 + 例证 + 小结，四句一段。",
+                "title": "议论段展开",
+                "core": "观点句 + 解释 + 例证 + 小结，四句一段。",
+                "pitfall": "只强调「顾客应该买丑蔬果」，忽略订货与陈列规则这一主要成因。"
+              }
+            ],
+            "solution": "Supermarkets discard edible food for reasons that are commercial rather than biological. A spotted banana or a dented carton breaks the rules of display, and ordering systems reward full shelves over empty ones. The waste is therefore built into habits, not into customer preference. Shops can change the habits: sell imperfect produce in a designated aisle, drop best-before dates where they carry no safety meaning, and order by observed demand rather than by appearance. Customers can help by buying the discounted items and by treating a brown spot as a sign of ripeness rather than a defect. Neither change is dramatic, but together they keep good food in kitchens instead of bins."
+          },
+          "score": 12
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "meta": {
+    "chapter": "agent-ch03",
+    "title": "模型接入与 DeepSeek 实操 —— 综合项目",
+    "count": 1
+  },
+  "items": [
+    {
+      "title": "可切换厂商的 LLM 客户端：重试、限流、日志、成本四件套",
+      "requirement_md": "用 Python 标准库 + 任意一个本地 mock transport，交付一个可直接被业务调用的 LLM 客户端。**不要求真实联网**：用 mock 服务模拟两种响应（正常流式、429/503/超时），业务方通过配置切换「厂商」。\n\n1. **统一接口**：`chat(messages, tools=None, json_mode=False, stream=True)`；业务代码不得出现厂商名、不得出现 `base_url`。厂商差异（tool call id 长度、JSON 模式、reasoning 字段）在适配器内消化。\n2. **超时两段式**：TTFT（默认 3s）与总超时（默认 15s）分别可配；TTFT 超时立即降级到备用厂商，总超时返回已生成的 partial 内容并标记 `truncated=true`。\n3. **重试策略表**：429/503/超时可重试，401/400/404/content_filter 快速失败；指数退避带 full jitter，最多 4 次；重试时 `request_id` 不变、`attempt` 递增；非幂等工具调用必须带幂等键，否则拒绝重试。\n4. **令牌桶**：按 `vendor × model` 独立限流；容量与速率可配置；被限流的请求进入有界队列（默认 100），队列满则快速失败并返回 `queue_full`。\n5. **结构化日志与成本**：每条请求一行 JSON，字段至少包含 `request_id/trace_id/vendor/model/feature/prompt_tokens/cached_tokens/completion_tokens/cost_cny/ttft_ms/total_ms/retry_count/fallback_reason/finish_reason`。成本按输入/缓存/输出三档单价计算，禁止用估算 token 记账。\n6. **可回放**：提供 `--replay` 模式，把一次真实（或 mock）会话的所有请求按 `request_id` 重放，输出调用树与各段 self time；用于排障与回归。\n\n**不做什么**：不做真实计费对账、不做多租户配额后台、不做前端。**验收口径**：用仓库内的 `unittest` 或 `pytest` 跑 6 个场景（正常流式、跨包 JSON、429 重试、TTFT 超时降级、队列满、切换厂商），全部通过；并提交一份 `report.md`，包含成本表与一次故障回放。",
+      "tasks": [
+        {
+          "title": "搭统一接口与两个 mock 厂商适配器",
+          "verification": {
+            "type": "output",
+            "desc": "同一段业务调用代码在两个厂商配置下都能返回文本；切换只改配置。日志中 vendor 字段随配置变化，业务文件里 grep 不到厂商名。"
+          }
+        },
+        {
+          "title": "实现跨包 SSE 解析与两段式超时",
+          "verification": {
+            "type": "output",
+            "desc": "把同一段 SSE 响应按 1/3/7/13 字符切分，解析出的文本完全一致；TTFT 超时触发 fallback，总超时返回 partial 且 truncated=true。"
+          }
+        },
+        {
+          "title": "实现策略表驱动的重试与令牌桶",
+          "verification": {
+            "type": "accuracy",
+            "desc": "429/503/超时按预期重试且带抖动；401/400 只调用一次；令牌桶在突发 12 个请求、C=10/r=5 时放行 10 个，稳态不丢包；重试日志 request_id 不变、attempt 递增。"
+          }
+        },
+        {
+          "title": "落地结构化日志与三档成本核算",
+          "verification": {
+            "type": "output",
+            "desc": "每条请求输出一行 JSON，字段齐全；给定 20 条模拟日志，成本汇总与逐条相加误差 < 1e-6 元；缓存命中率可单独聚合。"
+          }
+        },
+        {
+          "title": "实现降级链路与熔断/半开",
+          "verification": {
+            "type": "output",
+            "desc": "主厂商连续 3 次失败后进入 open，冷却期内快速失败；备用厂商接管；冷却后半开探针成功即回切；日志中 fallback_reason 可解释每次切换。"
+          }
+        },
+        {
+          "title": "写回放器与一页故障报告",
+          "verification": {
+            "type": "output",
+            "desc": "从散乱日志按 request_id 还原调用树，输出各 span 的 dur/self time；报告指出一次故障的根因（重试风暴/缓存失效/超时）并给出 2 条可执行修复。"
+          }
+        }
+      ],
+      "tags": ["LLM 客户端", "重试", "限流", "成本", "可观测性"]
+    }
+  ]
+}

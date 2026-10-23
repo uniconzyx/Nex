@@ -1,0 +1,133 @@
+{
+  "meta": {
+    "chapter": "agent-ch16",
+    "title": "简历、模拟面试与入职答辩：把项目讲成录用理由 —— 习题集",
+    "count": 6,
+    "note": "3 道概念题（简历四要素、容量估算口径、ReAct 终止条件）+ 3 道算法实践题（BM25 手写打分、令牌桶突发验证、简历诊断器），全部为原创题干。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "四条简历 bullet 中哪一条最不可信",
+      "content_md": "下面是同一名候选人简历里的四条 bullet。按「简历是证据清单」的标准（量化指标四要素：基线/口径/归因/对比 + 无空话），哪一条**最不可信**？\n\nA. 独立重写召回层：300 条标注查询上召回率 71%→89%，高于开源默认配置 6 个点\nB. 参与知识库项目，负责检索模块，系统效果获得显著提升\nC. A/B 同流量两周对比：检索 P99 从 850ms 降到 210ms，瓶颈定位为同步 OCR 调用\nD. 值班期间处理 3 起检索超时告警，定位为索引未预热，已补预热脚本并入例行发布",
+      "answer": {
+        "correct": "B",
+        "explain": "B 同时踩了三个坑：动词空话（「参与」「负责」收尾，没有说你改变了什么）、程度形容词（「显著」）、不可证伪成果（「效果提升」无数字），且四要素全缺——没有基线（从多少到多少）、没有口径（多少样本、什么判定）、没有归因（哪部分是你的动作）、没有对比（好在哪一档），整条 bullet 的信息量趋近于零。A 四要素齐备（基线 71%→89%、口径 300 条标注查询、归因「独立重写」、对比「高于开源默认配置」）；C 有基线、口径（A/B 两周）与归因（瓶颈定位）；D 虽无百分比，但「3 起告警 + 定位原因 + 补脚本」是可核对的行动证据，比 B 强得多。考点：判断一条 bullet 是否可信，不看他用了什么词，看它能不能被追问三层而不塌。"
+      },
+      "explanation": "考点：量化指标四要素与空话识别，B 是典型的三坑合一反例。",
+      "tags": [
+        "STAR-R",
+        "量化指标",
+        "空话识别"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/01 第 1-2 节；示例 ex07、ex08"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "企业知识库容量估算：哪个口径正确",
+      "content_md": "系统设计题：企业知识库 10 万文档、平均每篇 20KB、3 副本；员工 2000 人、峰值 50 QPS；生成侧用 7B fp16 模型，单卡实测约 20 QPS。下列哪个估算口径**正确**？\n\nA. 原文存储 = 10 万 × 20KB = 2GB，生成侧 50/20 = 2.5 取 3 张卡\nB. 原文存储 ≈ 6GB（乘 3 副本），生成侧按 3 卡起步并留冗余\nC. 存储 = 原文 6GB + 向量 3GB ≈ 9GB，卡数 = 峰值/单卡 = 3 张，无需冗余\nD. 出口带宽 = 50 QPS × 20KB ≈ 1MB/s，因为每个请求都要带回整篇文档",
+      "answer": {
+        "correct": "B",
+        "explain": "B 正确：存储要乘副本系数（10 万 × 20KB × 3 ≈ 6GB），这是工程存储与「裸数据量」的本质差别；生成侧卡数除按吞吐估（50/20≈2.5）外还要留冗余并乘安全系数（0.7~0.8），所以是「3 卡起、实际 4 张」而非精确等于 2.5。A 错在漏乘副本——只算了单份原文。C 前半段对（6GB+约 3GB 向量是合理量级），但「无需冗余」错：生产必须留冗余卡，否则一张卡故障容量直接少三分之一。D 错在混淆了「文档大小」与「请求出站大小」：在线请求只带回检索到的上下文片段（约 3KB）加答案，不是整篇 20KB 文档，按文档大小估带宽会高估近 7 倍。考点：容量估算考的是口径（副本、峰值系数、单位）不是算术。"
+      },
+      "explanation": "考点：容量估算三口径——副本系数、冗余与安全系数、请求出站 ≠ 文档大小。",
+      "tags": [
+        "系统设计",
+        "容量估算",
+        "副本系数"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/02 第 2 节；示例 ex09"
+    },
+    {
+      "type": "judge",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "ReAct 循环只要配了 max_steps 就足够防失控",
+      "content_md": "判断：ReAct 循环加上 `max_steps=30` 就足够防止 Agent 失控，因为最坏情况不过是烧完 30 步的钱，损失有上界。（对/错，并说明原因）",
+      "answer": {
+        "correct": "错",
+        "explain": "max_steps 只是「兜底保险丝」，意味着『已经烧够了才停』，不等于足够。第一，它防不住空转烧钱：原地重复类失控在第 3 步就该被无进展检测（最近 K 个 observation 两两相似度 ≥0.9，或连续 K 步无 action）拉闸，配了 30 步上限意味着放任 27 步的纯浪费，实测可占总浪费的 90%。第二，步数上限不防 token 型失控：每步上下文在膨胀（历史越滚越长），30 步的 token 账单可能远超 10 步的 3 倍，必须再配预算上限（累计 token/金额）。第三，阈值不能一刀切：无进展检测的 K 取 2 会误杀『换参数重试一次』的合法重试，工程上取 3 并要求换参数即重置计数。正确姿势是三层检测器同时在跑：无进展检测当主力提前拉闸，步数与预算上限当兜底，触发后先提醒换策略再熔断，不要直接杀任务。"
+      },
+      "explanation": "考点：终止条件的三层结构——无进展检测是主力，步数/预算上限是兜底保险丝。",
+      "tags": [
+        "ReAct",
+        "死循环防护",
+        "终止条件"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/02 第 3 节；示例 ex03、ex04"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "白板手写 BM25：打分公式、top-k 与未登录词行为",
+      "content_md": "白板场景：面试官要求 20 分钟内手写检索打分。实现 `bm25(query, docs, k1=1.5, b=0.75, topk=2)`：\n1. `docs` 为已分词的文档列表（`list[list[str]]`），先统计每文档词频、文档频率 df 与平均文档长度 avgdl；\n2. `IDF(w)=ln((N-n+0.5)/(n+0.5)+1)`（N 为文档总数，n 为含词 w 的文档数）；\n3. 按 BM25 公式累加每个查询词的贡献，查询词在某文档中不出现时该词贡献 0 分；\n4. 返回 `[(文档索引, 分数), ...]` 按分数降序；\n5. 固定构造 4 篇文档验证两类查询：① 正常命中（top1 与预期一致）；② 查询词全库缺失（输出应全为 0 分而非抛错），并打印两种查询的 top-2 结果。\n纯标准库，不联网。",
+      "answer": {
+        "reference_code": "import math\nfrom collections import Counter\n\ndef bm25(query, docs, k1=1.5, b=0.75, topk=2):\n    N = len(docs)\n    avgdl = sum(len(d) for d in docs) / N\n    df = Counter(w for d in docs for w in set(d))\n    idf = {w: math.log((N - n + 0.5) / (n + 0.5) + 1) for w, n in df.items()}\n    scored = []\n    for i, d in enumerate(docs):\n        f, dl = Counter(d), len(d)\n        s = sum(idf.get(q, 0.0) * f[q] * (k1 + 1)\n                / (f[q] + k1 * (1 - b + b * dl / avgdl))\n                for q in set(query) if q in f)\n        scored.append((s, i))\n    return sorted(scored, reverse=True)[:topk]",
+        "explain": "这道题是三道手写题里最常考的一道。坑一：IDF 用的是**文档频率 df**（多少篇文档含该词）不是词频，写成 Counter(所有词) 不取 set 会把一篇文档里的重复出现重复计数，IDF 直接错。坑二：`idf.get(q, 0.0)` 与 `if q in f` 两道保险处理未登录词——查询词全库缺失时每篇得分 0.0，排序后正常返回，而不是 KeyError 或静默空列表；生产上还应把「部分查询词未命中」作为信号上抛，供查询扩展使用。坑三：分母 `f + k1*(1-b+b*dl/avgdl)` 别漏掉长度归一项，漏了就等于没实现 BM25 相对 TF-IDF 的核心改进；k1=0 时公式退化为布尔匹配，b=0 时不做长度归一，这两个极限值可以在白板上主动说，证明懂参数含义。坑四：`sorted(scored, reverse=True)` 按 (分数, 索引) 排，同分时索引小的在前，行为确定可复现；若要稳定按文档顺序输出需显式说明。最后必须能说出调参方向：k1 调大让词频影响更持久（长文档堆砌关键词更易得高分），b 调大加强对长文档的惩罚。"
+      },
+      "explanation": "手写核心逻辑：BM25 打分公式、IDF 的文档频率口径与未登录词的确定性行为。",
+      "tags": [
+        "BM25",
+        "检索打分",
+        "手写题",
+        "IDF"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/02 第 3 节；示例 ex01、ex02"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "白板手写令牌桶：准入判定与突发容量边界验证",
+      "content_md": "白板场景：面试官要求手写一个 API 网关限流器。实现 `TokenBucket(capacity, rate)`：\n1. 令牌按速率 r 持续补充，桶容量上限 C，**初始满桶**；补充规则 `tokens(t)=min(C, tokens(t-Δ)+r·Δ)`；\n2. 方法 `allow(now)`：到达时有 ≥1 令牌则准入并扣 1，否则拒绝；\n3. 方法 `admit(series)`：接收请求到达时间序列（秒），返回每个请求的 `(准入?, 剩余令牌)`；\n4. 验证两类时序并打印结论：① 10 个请求间隔 0.1s 到达（共 1s）打到 `C=5, r=5` 的桶——应全部准入（速率匹配）；② 桶空静默 60s 后，50 个请求在同一时刻到达 `C=20` 的桶——应恰好前 20 个准入、后 30 个拒绝（突发容量 = min(C, r·Δt) = min(20, 300) = 20）；\n5. 额外构造一个时间戳乱序请求（now 回退 1s），说明代码当前行为与工程修法。\n纯标准库，不联网。",
+      "answer": {
+        "reference_code": "class TokenBucket:\n    def __init__(self, capacity, rate):\n        self.cap, self.rate = capacity, rate\n        self.tokens, self.last = float(capacity), 0.0   # 初始满桶\n\n    def allow(self, now):\n        self.tokens = min(self.cap, self.tokens + self.rate * (now - self.last))\n        self.last = now\n        if self.tokens >= 1:\n            self.tokens -= 1\n            return True\n        return False\n\n    def admit(self, series):\n        return [(self.allow(t), round(self.tokens, 3)) for t in series]",
+        "explain": "这道题考边界比考公式多。坑一：时间戳乱序（多实例部署时的时钟漂移，或同一请求重试带旧时间戳）会让 `now - self.last` 为负，令牌被反向扣减，极端情况把桶刷成 0 拒绝一切——工程修法是 `delta = max(0, now - self.last)` 或改用单调时钟。坑二：初始满桶 = 允许启动突发，这是产品决策（启动瞬间放过 C 个请求）不是自然属性，白板上要主动说明；若业务要求严格匀速，应初始化为 0 并配漏桶。坑三：突发容量是 `min(C, r·Δt)`，C 与 r 要分别按「下游能吸收的最大瞬时并发」和「下游可持续吞吐 × 安全系数」定，按入口带宽定 r 会把下游打挂（本章 pitfalls 第 4 条）。坑四：浮点累计误差在长时间运行后会漂移，生产实现用整数毫秒计数或定期用权威时钟校正。坑五：单机实现每个实例一个桶，N 个实例总放行是 N 倍，分布式限流必须换共享存储（如 Redis + Lua 脚本）才能对总 QPS 生效。验证时序②的「恰好前 20 准入」要按顺序逐个判定，批量断言而不是抽样。"
+      },
+      "explanation": "数值/边界验证：令牌桶 replenish 公式、突发容量上限与时间戳乱序的失效边界。",
+      "tags": [
+        "令牌桶",
+        "限流",
+        "突发容量",
+        "手写题"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/02 第 3 节；示例 ex05、ex06"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "简历诊断器：空话检测、四要素打分与重写优先级",
+      "content_md": "实现 `audit_bullets(bullets)`，把 concept/01 的自检规则落成代码：\n1. 空话检测：内置规则表（动词空话：`负责/参与/协助` 后直接收尾；程度形容词：`深入/熟练/扎实 掌握`；不可证伪成果：`显著/大幅 地?(提升|优化)`），输出每条 bullet 命中的规则名列表；\n2. 四要素打分：对每条 bullet 检查 基线（含 `→` 或 `从…到…`）、口径（含 `条/样本/天/周`）、归因（含 `独立/重写/引入`）、对比（含 `→` 或 `高于`），输出缺失要素；\n3. 输入固定 6 条 bullet（3 条空话反例、3 条合格范例），输出诊断小表；\n4. 按「先修空话（信息量为零），再补缺失要素」输出重写优先级排序，并打印优先级最高那条的规则命中详情。\n纯标准库，不联网。",
+      "answer": {
+        "reference_code": "import re\n\nEMPTY_RULES = [\n    (r\"(负责|参与|协助)[^，。]{0,12}$\", \"动词空话\"),\n    (r\"(深入|熟练|扎实)掌握\", \"程度形容词\"),\n    (r\"(显著|大幅|极大)地?(提升|优化|改善)\", \"不可证伪成果\"),\n]\n\ndef audit_bullets(bullets):\n    report = []\n    for b in bullets:\n        hits = [name for pat, name in EMPTY_RULES if re.search(pat, b)]\n        checks = {\"基线\": (\"→\" in b or \"从\" in b), \"口径\": any(k in b for k in (\"条\", \"样本\", \"天\", \"周\")),\n                  \"归因\": any(k in b for k in (\"独立\", \"重写\", \"引入\")), \"对比\": (\"→\" in b or \"高于\" in b)}\n        missing = [k for k, ok in checks.items() if not ok]\n        report.append((b, hits, missing))\n    return sorted(report, key=lambda r: (-len(r[1]), -len(r[2])))",
+        "explain": "这道题是诊断/对比实验：工具不写简历，只把「不可信」变成可定位的问题。坑一：规则表必然误伤——「独立负责召回层重写」也含「负责」，所以输出必须是规则名而非自动删除，最终重写是人来做；白纸上要说明这是初筛器不是终审。坑二：四要素检查是关键词近似，真实口径判断（样本量是否够、归因是否排除混杂因素）超出规则能力，别在面试里把它说成「自动化评估」。坑三：排序规则本身是考点——空话 bullet 整条信息量为零，修它优先于给一条合格 bullet 补要素，所以 key 是 `(-len(hits), -len(missing))`。坑四：正则锚点 `[^，。]{0,12}$` 表示「动词后一小段内直到句子结束」，避免把「负责设计并实现了带缓存的检索服务」误判为空话（后半句有实质内容）——规则粒度要能在现场解释清楚。输出报告后要能口述重写示范：把「参与知识库项目，效果显著提升」改写为带四要素的 STAR-R 单 bullet。"
+      },
+      "explanation": "诊断/对比实验：空话规则检测、四要素打分与「先修空话再补要素」的优先级排序。",
+      "tags": [
+        "简历诊断",
+        "空话检测",
+        "量化指标",
+        "规则引擎"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/01 第 1-2 节；示例 ex07、ex08"
+    }
+  ]
+}

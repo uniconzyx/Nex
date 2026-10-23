@@ -1,0 +1,990 @@
+{
+  "subject": "e2",
+  "exam": "english",
+  "passages": [
+    {
+      "id": "e2-p1",
+      "title": "A recycling scheme that worked",
+      "text": "Two years ago the university installed recycling bins in every dormitory. The first survey was disappointing: only a third of bottles reached the correct bin. Instead of adding more bins, the housing office tried something cheaper. It published a weekly chart in each building showing how much waste had been sorted correctly, and it asked the cleaners to leave one wrongly sorted bag beside the bin with a short note. Within a term the rate rose to nearly three quarters. The lesson is that people do not need more instructions; they need to see how they are doing compared with their neighbours.",
+      "paragraphs": [
+        {
+          "no": 1,
+          "zh": "问题：宿舍装了回收桶，但第一次调查只有三分之一瓶子投对。"
+        },
+        {
+          "no": 2,
+          "zh": "做法：不加桶，改为每周公布各楼正确率，并让保洁把分错的袋子留在桶边附短说明。"
+        },
+        {
+          "no": 3,
+          "zh": "结果与启示：一学期升到近四分之三；人需要的不是更多说明，而是看见自己做得怎样。"
+        }
+      ],
+      "vocab": [
+        {
+          "word": "disappointing",
+          "pos": "adj.",
+          "cn": "令人失望的",
+          "note": "The first survey was disappointing"
+        },
+        {
+          "word": "sort",
+          "pos": "v.",
+          "cn": "分类",
+          "note": "sorted correctly 分类正确"
+        },
+        {
+          "word": "chart",
+          "pos": "n.",
+          "cn": "图表",
+          "note": "a weekly chart 每周图表"
+        },
+        {
+          "word": "rate",
+          "pos": "n.",
+          "cn": "比率",
+          "note": "the rate rose to nearly three quarters"
+        },
+        {
+          "word": "neighbour",
+          "pos": "n.",
+          "cn": "邻居",
+          "note": "compared with their neighbours 与邻楼相比"
+        }
+      ],
+      "sentences": [
+        {
+          "en": "Instead of adding more bins, the housing office tried something cheaper.",
+          "main": "The housing office tried something cheaper.",
+          "mods": "Instead of… 介词短语作状语，表示「而不是」。",
+          "zh": "宿管部门没有增加垃圾桶，而是尝试了更省钱的办法。",
+          "point": "转折句。Instead of 直接否掉「多买桶」的选项，是细节题的分界。"
+        },
+        {
+          "en": "The lesson is that people do not need more instructions; they need to see how they are doing compared with their neighbours.",
+          "main": "The lesson is that people need to see how they are doing.",
+          "mods": "that 表语从句；how 宾语从句；compared with… 过去分词短语作状语。",
+          "zh": "这一做法的启示是：人们并不需要更多说明，他们需要看到自己与邻居相比做得如何。",
+          "point": "主旨句。not… 与分号后的肯定形成对照，答案应落在「可见的反馈」。"
+        }
+      ],
+      "questionMap": [
+        {
+          "qid": "q-e2-e2-p1-q1",
+          "type": "choice",
+          "locate": "细节题，关键词 first survey，定位 only a third of bottles reached the correct bin"
+        },
+        {
+          "qid": "q-e2-e2-p1-q2",
+          "type": "choice",
+          "locate": "细节题，关键词 improved，定位「每周图表 + 把分错的袋子放在桶边」这两种反馈方式"
+        },
+        {
+          "qid": "q-e2-e2-p1-q3",
+          "type": "choice",
+          "locate": "主旨题，看末句 people do not need more instructions; they need to see how they are doing"
+        }
+      ],
+      "takeaway": [
+        "主旨：比起增加设施，让人看见自己与同伴的差距更能改变行为。",
+        "命题手法：先给失败数据（one third），再给低成本做法，末句点题。",
+        "易错点：把「不是加桶」误读成「桶不重要」，忽略 instead of 只是否定该方案。"
+      ],
+      "falseFriends": [
+        {
+          "word": "sort",
+          "usual": "分类",
+          "here": "把……分类投放",
+          "note": "sorted correctly：分类正确"
+        },
+        {
+          "word": "rate",
+          "usual": "比率",
+          "here": "正确率",
+          "note": "the rate rose to nearly three quarters：比例升到近四分之三"
+        },
+        {
+          "word": "chart",
+          "usual": "图表",
+          "here": "周榜",
+          "note": "a weekly chart：每周公布的成绩表"
+        }
+      ],
+      "synonyms": [
+        {
+          "from": "feedback",
+          "to": "seeing how they are doing"
+        },
+        {
+          "from": "instructions",
+          "to": "guidance / leaflets"
+        },
+        {
+          "from": "rose to",
+          "to": "increased to"
+        }
+      ]
+    },
+    {
+      "id": "e2-p2",
+      "title": "Older learners and online courses",
+      "text": "Online courses were expected to be a gift for older learners, who often find it hard to travel to a campus. Participation tells a different story. Adults over sixty enroll in large numbers but complete far fewer courses than younger students. The reasons are practical rather than attitudinal: platforms assume users can navigate menus, upload files and join video calls, and a single confusing step can end the attempt. A pilot programme that paired each learner with a student helper for the first two weeks raised completion sharply. The technology was not the barrier; learning the technology alone was.",
+      "paragraphs": [
+        {
+          "no": 1,
+          "zh": "反差：线上课本该方便老年人，报名人数多但完成率远低于年轻人。"
+        },
+        {
+          "no": 2,
+          "zh": "原因：不是态度问题，而是操作门槛——菜单、上传、进会议，一步卡住就放弃。"
+        },
+        {
+          "no": 3,
+          "zh": "办法：前两周配学生助手，完成率大幅上升；技术不是障碍，独自学技术才是。"
+        }
+      ],
+      "vocab": [
+        {
+          "word": "attitudinal",
+          "pos": "adj.",
+          "cn": "态度上的",
+          "note": "practical rather than attitudinal 是操作而非态度问题"
+        },
+        {
+          "word": "navigate",
+          "pos": "v.",
+          "cn": "操作、浏览（界面）",
+          "note": "navigate menus 操作菜单"
+        },
+        {
+          "word": "pilot",
+          "pos": "adj./n.",
+          "cn": "试点的",
+          "note": "a pilot programme 试点项目"
+        },
+        {
+          "word": "completion",
+          "pos": "n.",
+          "cn": "完成率",
+          "note": "raised completion sharply 大幅提高完成率"
+        },
+        {
+          "word": "barrier",
+          "pos": "n.",
+          "cn": "障碍",
+          "note": "The technology was not the barrier"
+        }
+      ],
+      "sentences": [
+        {
+          "en": "The reasons are practical rather than attitudinal: platforms assume users can navigate menus, upload files and join video calls, and a single confusing step can end the attempt.",
+          "main": "The reasons are practical.",
+          "mods": "rather than 对比；冒号后解释 practical 的具体内容；assume 后接省略 that 的宾语从句。",
+          "zh": "原因是操作层面的，而非态度层面的：平台假定用户会操作菜单、上传文件、加入视频通话，而一个令人困惑的步骤就可能让尝试中断。",
+          "point": "细节题依据。practical rather than attitudinal 一句排除「不愿学」的选项。"
+        },
+        {
+          "en": "The technology was not the barrier; learning the technology alone was.",
+          "main": "The technology was not the barrier; learning it alone was the barrier.",
+          "mods": "分号连接两个分句；alone 修饰 learning；句末 was 后省略 the barrier。",
+          "zh": "技术本身并不是障碍；真正的障碍在于要独自学会使用这项技术。",
+          "point": "结论句。省略结构是翻译与理解难点，答题时要补出省略成分。"
+        }
+      ],
+      "questionMap": [
+        {
+          "qid": "q-e2-e2-p2-q1",
+          "type": "choice",
+          "locate": "细节题，关键词 older learners，定位 enroll in large numbers but complete far fewer courses"
+        },
+        {
+          "qid": "q-e2-e2-p2-q2",
+          "type": "choice",
+          "locate": "细节题，关键词 obstacle，定位 platforms assume users can navigate menus… a single confusing step can end the attempt"
+        },
+        {
+          "qid": "q-e2-e2-p2-q3",
+          "type": "choice",
+          "locate": "细节题，关键词 pilot programme，定位 raised completion sharply 及其条件「前两周配学生助手」"
+        }
+      ],
+      "takeaway": [
+        "主旨：老年人线上课完成率低，卡点在操作而非态度；短期人工陪伴能显著提升完成率。",
+        "命题手法：先破常识（gift for older learners），再给数据，最后用 not… but… 定性。",
+        "易错点：把「完成率低」归因于「不愿学」，与 practical rather than attitudinal 冲突。"
+      ],
+      "falseFriends": [
+        {
+          "word": "navigate",
+          "usual": "航行、导航",
+          "here": "操作（界面）",
+          "note": "navigate menus：在菜单里操作"
+        },
+        {
+          "word": "pilot",
+          "usual": "飞行员",
+          "here": "试点的",
+          "note": "a pilot programme：试点项目"
+        },
+        {
+          "word": "alone",
+          "usual": "孤独的",
+          "here": "独自、无协助",
+          "note": "learning the technology alone：没人陪着自己摸索"
+        }
+      ],
+      "synonyms": [
+        {
+          "from": "barrier",
+          "to": "obstacle"
+        },
+        {
+          "from": "completion",
+          "to": "finishing the course"
+        },
+        {
+          "from": "pair with",
+          "to": "match with"
+        }
+      ]
+    },
+    {
+      "id": "e2-p3",
+      "title": "Bike-sharing after the novelty",
+      "text": "Bike-sharing arrived with promises of clean transport and crowded streets full of bicycles. Several cities now report a quieter outcome. Ridership peaks in the first year and then flattens, while maintenance costs keep rising. The companies that survive tend to be those that moved bikes to where people actually need them, near metro exits and housing estates, instead of scattering them across the centre. Parking rules matter as much as price. Where bikes may be left only in marked areas, streets stay tidy and the service is used more; where they may be left anywhere, the opposite happens.",
+      "paragraphs": [
+        {
+          "no": 1,
+          "zh": "预期与现实：共享单车承诺绿色出行，多城却出现「第一年火热、随后趋平」。"
+        },
+        {
+          "no": 2,
+          "zh": "存活关键：把车投到真正有需求的地方（地铁口、住宅区），而非撒在市中心。"
+        },
+        {
+          "no": 3,
+          "zh": "规则：指定停车区让街道整洁、使用率更高；随意停放则相反。"
+        }
+      ],
+      "vocab": [
+        {
+          "word": "ridership",
+          "pos": "n.",
+          "cn": "骑行量",
+          "note": "Ridership peaks in the first year"
+        },
+        {
+          "word": "flatten",
+          "pos": "v.",
+          "cn": "趋于平缓",
+          "note": "then flattens 随后走平"
+        },
+        {
+          "word": "estate",
+          "pos": "n.",
+          "cn": "住宅区",
+          "note": "housing estates 住宅小区"
+        },
+        {
+          "word": "scatter",
+          "pos": "v.",
+          "cn": "散布",
+          "note": "scattering them across the centre 撒在市中心"
+        },
+        {
+          "word": "marked",
+          "pos": "adj.",
+          "cn": "划定的",
+          "note": "marked areas 指定区域"
+        }
+      ],
+      "sentences": [
+        {
+          "en": "The companies that survive tend to be those that moved bikes to where people actually need them, near metro exits and housing estates, instead of scattering them across the centre.",
+          "main": "The companies tend to be those.",
+          "mods": "两个 that 定语从句；where 宾语从句作 to 的宾语；instead of 对比。",
+          "zh": "存活下来的公司往往是那些把车投放到人们真正需要之处——地铁口和住宅区——而不是撒在市中心的公司。",
+          "point": "细节题依据。instead of 否掉「撒在市中心」，near… 给出正确投放点。"
+        },
+        {
+          "en": "Where bikes may be left only in marked areas, streets stay tidy and the service is used more; where they may be left anywhere, the opposite happens.",
+          "main": "Streets stay tidy and the service is used more; the opposite happens.",
+          "mods": "Where 引导地点状语从句（两处）；the opposite 指「街道乱、使用少」。",
+          "zh": "在只允许停放在指定区域的地方，街道保持整洁、服务使用率更高；而在可随意停放的地方，情况正好相反。",
+          "point": "细节题依据。两个 where 形成对照，答案必须体现「规则严→使用多」这一反直觉结论。"
+        }
+      ],
+      "questionMap": [
+        {
+          "qid": "q-e2-e2-p3-q1",
+          "type": "choice",
+          "locate": "细节题，关键词 ridership，定位 peaks in the first year and then flattens"
+        },
+        {
+          "qid": "q-e2-e2-p3-q2",
+          "type": "choice",
+          "locate": "细节题，关键词 survive，定位 moved bikes to where people actually need them"
+        },
+        {
+          "qid": "q-e2-e2-p3-q3",
+          "type": "choice",
+          "locate": "细节题，关键词 marked areas，定位末句 Where bikes may be left only in marked areas, streets stay tidy and the service is used more"
+        }
+      ],
+      "takeaway": [
+        "主旨：共享单车第一年后使用趋平，存活靠投放位置与停车规则，而不是铺量。",
+        "命题手法：数据趋势（peaks then flattens）+ 对比（marked areas vs anywhere）。",
+        "易错点：把「规则变严」等同于「使用减少」，原文结论相反。"
+      ],
+      "falseFriends": [
+        {
+          "word": "flatten",
+          "usual": "使变平",
+          "here": "（增长）走平",
+          "note": "then flattens：不再增长但也没崩"
+        },
+        {
+          "word": "estate",
+          "usual": "庄园、遗产",
+          "here": "住宅区",
+          "note": "housing estates：居民小区"
+        },
+        {
+          "word": "marked",
+          "usual": "显著的、标记过的",
+          "here": "划定的",
+          "note": "marked areas：指定停车区"
+        }
+      ],
+      "synonyms": [
+        {
+          "from": "ridership",
+          "to": "number of riders"
+        },
+        {
+          "from": "level off",
+          "to": "stop growing"
+        },
+        {
+          "from": "scatter",
+          "to": "spread randomly"
+        }
+      ]
+    },
+    {
+      "id": "e2-p4",
+      "title": "Volunteering and the first job",
+      "text": "Employers say they value volunteering, but students often suspect that only impressive internships count. A survey of graduate recruiters suggests the students are half right. Volunteering was rarely listed as a requirement, yet interviewers frequently asked candidates to describe a situation where they had worked with others to solve a problem. A term spent organising a food bank shift supplied better answers than a month of photocopying in an office. The value lies less in the activity itself than in the evidence it provides of reliability, coordination and persistence.",
+      "paragraphs": [
+        {
+          "no": 1,
+          "zh": "学生认知：认为只有亮眼实习才算数。"
+        },
+        {
+          "no": 2,
+          "zh": "调查结果：志愿经历很少被列为硬性要求，但面试官常问「合作解决问题」的经历。"
+        },
+        {
+          "no": 3,
+          "zh": "原因：价值不在活动本身，而在它提供的可靠、协作、坚持的证据。"
+        }
+      ],
+      "vocab": [
+        {
+          "word": "recruiter",
+          "pos": "n.",
+          "cn": "招聘人员",
+          "note": "graduate recruiters 校招招聘官"
+        },
+        {
+          "word": "requirement",
+          "pos": "n.",
+          "cn": "要求",
+          "note": "rarely listed as a requirement"
+        },
+        {
+          "word": "shift",
+          "pos": "n.",
+          "cn": "班次",
+          "note": "a food bank shift 食物银行的一班岗"
+        },
+        {
+          "word": "coordination",
+          "pos": "n.",
+          "cn": "协作",
+          "note": "evidence of coordination 协作的证据"
+        },
+        {
+          "word": "persistence",
+          "pos": "n.",
+          "cn": "坚持",
+          "note": "reliability, coordination and persistence"
+        }
+      ],
+      "sentences": [
+        {
+          "en": "Volunteering was rarely listed as a requirement, yet interviewers frequently asked candidates to describe a situation where they had worked with others to solve a problem.",
+          "main": "Volunteering was rarely a requirement, yet interviewers asked candidates to describe a situation.",
+          "mods": "yet 表转折；where 定语从句修饰 situation；ask sb to do 结构。",
+          "zh": "志愿经历很少被列为硬性要求，但面试官常请候选人描述一个与他人合作解决问题的情境。",
+          "point": "细节题依据。「不是要求」与「常被追问」并存，正是 half right 的第一半。"
+        },
+        {
+          "en": "The value lies less in the activity itself than in the evidence it provides of reliability, coordination and persistence.",
+          "main": "The value lies in the evidence.",
+          "mods": "less… than… 比较结构；it provides 是省略 which 的定语从句。",
+          "zh": "其价值与其说在于活动本身，不如说在于它所提供的、关于可靠、协作与坚持的证据。",
+          "point": "例证题结论句。活动标签不重要，提供的证据才重要，这是选项辨析的核心。"
+        }
+      ],
+      "questionMap": [
+        {
+          "qid": "q-e2-e2-p4-q1",
+          "type": "choice",
+          "locate": "细节题，关键词 survey，定位 Volunteers was rarely listed as a requirement, yet interviewers frequently asked…"
+        },
+        {
+          "qid": "q-e2-e2-p4-q2",
+          "type": "choice",
+          "locate": "例证题：例子服务于「价值不在活动本身，而在它提供的证据」这一论点"
+        },
+        {
+          "qid": "q-e2-e2-p4-q3",
+          "type": "choice",
+          "locate": "词义题：half right 指学生「对了一半」——要求判断对，价值判断错，后文分别说明"
+        }
+      ],
+      "takeaway": [
+        "主旨：志愿经历不是硬性要求，但它提供的协作与坚持证据，正是面试要问的。",
+        "命题手法：让步（rarely a requirement）+ 转折（yet frequently asked）+ 结论（evidence）。",
+        "易错点：把 half right 理解成「一半学生是对的」，它是「学生只对了一半」。"
+      ],
+      "falseFriends": [
+        {
+          "word": "shift",
+          "usual": "转变、轮班",
+          "here": "一班岗",
+          "note": "a food bank shift：食物银行的一班志愿服务"
+        },
+        {
+          "word": "count",
+          "usual": "计数",
+          "here": "算数、有分量",
+          "note": "only internships count：只有实习才算数"
+        },
+        {
+          "word": "half right",
+          "usual": "一半正确（字面）",
+          "here": "对了一半、另一半错了",
+          "note": "the students are half right：判断对、理由错"
+        }
+      ],
+      "synonyms": [
+        {
+          "from": "evidence",
+          "to": "proof / demonstration"
+        },
+        {
+          "from": "persistence",
+          "to": "sticking with a task"
+        },
+        {
+          "from": "reliability",
+          "to": "being dependable"
+        }
+      ]
+    },
+    {
+      "id": "e2-p5",
+      "title": "The food supermarkets throw away",
+      "text": "A supermarket throws away food for reasons that have little to do with hunger and everything to do with appearance. A banana with a brown spot, a loaf past its display date, a carton dented in delivery: all are edible, none is sellable by the usual rules. Some chains now sell such items at a discount in a separate aisle, and a few have changed the rules themselves, removing best-before dates from fruit and vegetables. The results are modest but consistent: less waste, lower costs, and customers who say they prefer shops that do it. The obstacle is not customer resistance but the habit of ordering by appearance.",
+      "paragraphs": [
+        {
+          "no": 1,
+          "zh": "现象：超市丢弃食物，原因多与外观和日期规则有关，而非不能吃。"
+        },
+        {
+          "no": 2,
+          "zh": "做法：设折扣货架、取消部分果蔬的保质期标签，效果是浪费减少、成本下降。"
+        },
+        {
+          "no": 3,
+          "zh": "障碍：不是顾客抵触，而是按外观订货的习惯。"
+        }
+      ],
+      "vocab": [
+        {
+          "word": "edible",
+          "pos": "adj.",
+          "cn": "可食用的",
+          "note": "all are edible 都可食用"
+        },
+        {
+          "word": "sellable",
+          "pos": "adj.",
+          "cn": "可销售的",
+          "note": "none is sellable by the usual rules"
+        },
+        {
+          "word": "aisle",
+          "pos": "n.",
+          "cn": "货架通道",
+          "note": "a separate aisle 单独的货架区"
+        },
+        {
+          "word": "discard",
+          "pos": "v.",
+          "cn": "丢弃",
+          "note": "supermarkets discard food"
+        },
+        {
+          "word": "resistance",
+          "pos": "n.",
+          "cn": "抵触",
+          "note": "not customer resistance"
+        }
+      ],
+      "sentences": [
+        {
+          "en": "A supermarket throws away food for reasons that have little to do with hunger and everything to do with appearance.",
+          "main": "A supermarket throws away food for reasons.",
+          "mods": "that 定语从句；have little to do with… and everything to do with… 对比结构。",
+          "zh": "超市丢弃食物，其原因与饥饿几乎无关，而完全与外观有关。",
+          "point": "主旨句。little… everything… 的对比直接锁定「外观规则」这一成因。"
+        },
+        {
+          "en": "The obstacle is not customer resistance but the habit of ordering by appearance.",
+          "main": "The obstacle is the habit.",
+          "mods": "not… but… 结构；ordering by appearance 动名词短语作 of 的宾语。",
+          "zh": "障碍并不在于顾客的抵触，而在于按外观订货的习惯。",
+          "point": "结论句。否定顾客责任，指向商家订货习惯，是推断题的依据。"
+        }
+      ],
+      "questionMap": [
+        {
+          "qid": "q-e2-e2-p5-q1",
+          "type": "choice",
+          "locate": "细节题，关键词 throw away 与 reasons，定位 have little to do with hunger and everything to do with appearance"
+        },
+        {
+          "qid": "q-e2-e2-p5-q2",
+          "type": "choice",
+          "locate": "细节题，关键词 best-before dates，回到 removal 所在句，并联系上一句的 edible but not sellable"
+        },
+        {
+          "qid": "q-e2-e2-p5-q3",
+          "type": "choice",
+          "locate": "主旨/推断题，看末句 The obstacle is not customer resistance but the habit of ordering by appearance"
+        }
+      ],
+      "takeaway": [
+        "主旨：超市丢弃可食用食物，主因是外观与日期规则；障碍是订货习惯而非顾客抵触。",
+        "命题手法：little to do with… everything to do with… 的强对比，末句 not… but… 收束。",
+        "易错点：把「顾客不愿买」当成主因，原文明确否定。"
+      ],
+      "falseFriends": [
+        {
+          "word": "edible",
+          "usual": "可食用的",
+          "here": "（虽不好看但）能吃",
+          "note": "all are edible：都能吃"
+        },
+        {
+          "word": "aisle",
+          "usual": "过道",
+          "here": "货架通道",
+          "note": "a separate aisle：单独一个货架区"
+        },
+        {
+          "word": "discard",
+          "usual": "丢弃",
+          "here": "下架处理",
+          "note": "discard food：把食物处理掉"
+        }
+      ],
+      "synonyms": [
+        {
+          "from": "throw away",
+          "to": "discard"
+        },
+        {
+          "from": "appearance",
+          "to": "looks / cosmetic standards"
+        },
+        {
+          "from": "resistance",
+          "to": "refusal / opposition"
+        }
+      ]
+    },
+    {
+      "id": "e2-p6",
+      "title": "Paying without a smartphone",
+      "text": "Cashless payment is convenient for anyone who owns a smartphone and frustrating for anyone who does not. Shops that stop accepting cash save time at the counter, but they also exclude older customers and people without a bank account. Several cities have responded with rules requiring retailers to accept cash, and some banks now issue cards with large-print keypads and a single confirmation button. The debate is often framed as progress versus nostalgia. In practice it is a question of design: a payment system is only as good as the number of people who can use it.",
+      "paragraphs": [
+        {
+          "no": 1,
+          "zh": "两面性：无现金支付对有机者方便，对无机者构成排斥。"
+        },
+        {
+          "no": 2,
+          "zh": "应对：部分城市要求商户收现金，部分银行推出大字键盘、单键确认的卡。"
+        },
+        {
+          "no": 3,
+          "zh": "结论：这不是进步与怀旧之争，而是设计问题——好系统取决于有多少人能用。"
+        }
+      ],
+      "vocab": [
+        {
+          "word": "cashless",
+          "pos": "adj.",
+          "cn": "无现金的",
+          "note": "Cashless payment 无现金支付"
+        },
+        {
+          "word": "exclude",
+          "pos": "v.",
+          "cn": "排斥",
+          "note": "exclude older customers 把老年顾客排除在外"
+        },
+        {
+          "word": "retailer",
+          "pos": "n.",
+          "cn": "零售商",
+          "note": "requiring retailers to accept cash"
+        },
+        {
+          "word": "keypad",
+          "pos": "n.",
+          "cn": "键盘",
+          "note": "large-print keypads 大字键盘"
+        },
+        {
+          "word": "nostalgia",
+          "pos": "n.",
+          "cn": "怀旧",
+          "note": "progress versus nostalgia 进步与怀旧之争"
+        }
+      ],
+      "sentences": [
+        {
+          "en": "Shops that stop accepting cash save time at the counter, but they also exclude older customers and people without a bank account.",
+          "main": "Shops save time, but they exclude customers.",
+          "mods": "that 定语从句；but 转折；介词短语 without a bank account 作定语。",
+          "zh": "停止收现金的商店节省了柜台时间，但也把老年顾客和没有银行账户的人排除在外。",
+          "point": "细节题依据。saves… but excludes… 是典型的「收益—代价」结构，选项只取一半即为片面。"
+        },
+        {
+          "en": "A payment system is only as good as the number of people who can use it.",
+          "main": "A payment system is only as good as the number of people.",
+          "mods": "only as good as 比较结构；who 定语从句。",
+          "zh": "一个支付系统的好坏，取决于有多少人能够使用它。",
+          "point": "结论句。评判标准是「可用人数」，不是速度或新颖度。"
+        }
+      ],
+      "questionMap": [
+        {
+          "qid": "q-e2-e2-p6-q1",
+          "type": "choice",
+          "locate": "细节题，关键词 refuse cash 的后果，定位 they also exclude older customers and people without a bank account"
+        },
+        {
+          "qid": "q-e2-e2-p6-q2",
+          "type": "choice",
+          "locate": "细节题，关键词 cards，定位 large-print keypads and a single confirmation button"
+        },
+        {
+          "qid": "q-e2-e2-p6-q3",
+          "type": "choice",
+          "locate": "结论题，看末句 a payment system is only as good as the number of people who can use it"
+        }
+      ],
+      "takeaway": [
+        "主旨：无现金支付有效率优势，却排斥部分人群；好系统的标准是「多少人能用」。",
+        "命题手法：收益—代价并列（save time / exclude），末句给评判标准。",
+        "易错点：把「技术进步」当成「所有人都受益」。"
+      ],
+      "falseFriends": [
+        {
+          "word": "keypad",
+          "usual": "键盘",
+          "here": "（密码）按键区",
+          "note": "large-print keypads：大字按键"
+        },
+        {
+          "word": "nostalgia",
+          "usual": "怀旧",
+          "here": "守旧、留恋过去",
+          "note": "progress versus nostalgia：进步与守旧之争"
+        },
+        {
+          "word": "exclude",
+          "usual": "排除",
+          "here": "把……挡在服务之外",
+          "note": "exclude older customers：让老年顾客用不了"
+        }
+      ],
+      "synonyms": [
+        {
+          "from": "cashless",
+          "to": "digital payment"
+        },
+        {
+          "from": "only as good as",
+          "to": "depends on"
+        },
+        {
+          "from": "exclude",
+          "to": "leave out"
+        }
+      ]
+    },
+    {
+      "id": "e2-p7",
+      "title": "Wellness programmes at work",
+      "text": "Company wellness programmes usually offer gym discounts, fruit in the kitchen and an app that counts steps. Reviews of their effects are mixed. Participation is highest among employees who are already healthy, and the measured improvements are small. Meanwhile the strongest influence on employee health is rarely mentioned: how work is organised. Long and unpredictable hours, low control over tasks and unclear expectations produce stress that no step counter can offset. A few employers have redirected the budget from apps to scheduling, giving teams notice of shifts and a voice in how work is divided. Reported stress fell further than in any of the fitness schemes.",
+      "paragraphs": [
+        {
+          "no": 1,
+          "zh": "现状：企业健康项目多是健身折扣、水果、计步 App。"
+        },
+        {
+          "no": 2,
+          "zh": "效果有限：参与者本就是健康人群，改善幅度小。"
+        },
+        {
+          "no": 3,
+          "zh": "真正的成因：工时长且不可预测、缺乏掌控感、期望不清；改排班比改 App 更有效。"
+        }
+      ],
+      "vocab": [
+        {
+          "word": "wellness",
+          "pos": "n.",
+          "cn": "健康（项目）",
+          "note": "wellness programmes 员工健康项目"
+        },
+        {
+          "word": "participation",
+          "pos": "n.",
+          "cn": "参与率",
+          "note": "Participation is highest among…"
+        },
+        {
+          "word": "offset",
+          "pos": "v.",
+          "cn": "抵消",
+          "note": "no step counter can offset 计步器无法抵消"
+        },
+        {
+          "word": "schedule",
+          "pos": "n./v.",
+          "cn": "排班",
+          "note": "redirected the budget from apps to scheduling"
+        },
+        {
+          "word": "shift",
+          "pos": "n.",
+          "cn": "轮班",
+          "note": "notice of shifts 提前告知班次"
+        }
+      ],
+      "sentences": [
+        {
+          "en": "Participation is highest among employees who are already healthy, and the measured improvements are small.",
+          "main": "Participation is highest and improvements are small.",
+          "mods": "who 定语从句；两个并列分句。",
+          "zh": "参与率最高的恰恰是本来就很健康的员工，而测得的改善幅度很小。",
+          "point": "细节题依据。「本来健康 + 改善小」两句并列，共同否定健康项目的效果。"
+        },
+        {
+          "en": "Long and unpredictable hours, low control over tasks and unclear expectations produce stress that no step counter can offset.",
+          "main": "Hours, control and expectations produce stress.",
+          "mods": "三个并列主语；that 定语从句修饰 stress；no… can offset 否定结构。",
+          "zh": "漫长且不可预测的工时、对任务缺乏掌控感、以及不明确的期望，会带来任何计步器都无法抵消的压力。",
+          "point": "因果句。压力来源是工作组织方式，这正是作者主张改排班的依据。"
+        }
+      ],
+      "questionMap": [
+        {
+          "qid": "q-e2-e2-p7-q1",
+          "type": "choice",
+          "locate": "细节题，关键词 reviews，定位 Participation is highest among employees who are already healthy"
+        },
+        {
+          "qid": "q-e2-e2-p7-q2",
+          "type": "choice",
+          "locate": "细节题，关键词 strongest influence，定位 the strongest influence on employee health is rarely mentioned: how work is organised"
+        },
+        {
+          "qid": "q-e2-e2-p7-q3",
+          "type": "choice",
+          "locate": "细节题，关键词 redirected，定位末句 Reported stress fell further than in any of the fitness schemes"
+        }
+      ],
+      "takeaway": [
+        "主旨：企业健康项目效果有限，真正影响健康的是工时、掌控感与期望清晰度。",
+        "命题手法：现象（gym discounts）→ 数据（participation highest among healthy）→ 归因（work organisation）。",
+        "易错点：把「参与率高」当成「项目有效」，原文说参与者本就健康。"
+      ],
+      "falseFriends": [
+        {
+          "word": "wellness",
+          "usual": "健康",
+          "here": "员工健康项目",
+          "note": "wellness programmes：健身折扣、计步 App 这类项目"
+        },
+        {
+          "word": "offset",
+          "usual": "抵消",
+          "here": "弥补",
+          "note": "no step counter can offset：计步器弥补不了"
+        },
+        {
+          "word": "shift",
+          "usual": "转变",
+          "here": "轮班",
+          "note": "notice of shifts：提前告知班次"
+        }
+      ],
+      "synonyms": [
+        {
+          "from": "stress",
+          "to": "pressure / strain"
+        },
+        {
+          "from": "scheduling",
+          "to": "timing of work"
+        },
+        {
+          "from": "redirect",
+          "to": "move / reallocate"
+        }
+      ]
+    },
+    {
+      "id": "e2-p8",
+      "title": "Tourism that pays for the place",
+      "text": "Tourism is often described as an export industry: visitors arrive, spend, and leave. The description hides a cost. A small town that attracts a million visitors a year may find its rents rising, its shops turning into souvenir stalls, and its residents moving away. Some destinations now charge an entry fee and use the money to maintain the very streets that visitors come to see. Others limit the number of cruise ships per day. The measures are unpopular with parts of the industry, but they rest on a simple idea: a place that is pleasant to visit must first be pleasant to live in.",
+      "paragraphs": [
+        {
+          "no": 1,
+          "zh": "说法与代价：旅游被说成出口产业，但这个说法掩盖了居民承担的成本。"
+        },
+        {
+          "no": 2,
+          "zh": "做法：收门票维护街道、限制每日游轮数量。"
+        },
+        {
+          "no": 3,
+          "zh": "理念：宜游之地必先宜居。"
+        }
+      ],
+      "vocab": [
+        {
+          "word": "export",
+          "pos": "n.",
+          "cn": "出口（产业）",
+          "note": "an export industry 出口型产业"
+        },
+        {
+          "word": "rent",
+          "pos": "n.",
+          "cn": "租金",
+          "note": "its rents rising 租金上涨"
+        },
+        {
+          "word": "souvenir",
+          "pos": "n.",
+          "cn": "纪念品",
+          "note": "souvenir stalls 纪念品摊"
+        },
+        {
+          "word": "cruise",
+          "pos": "n.",
+          "cn": "游轮",
+          "note": "cruise ships 游轮"
+        },
+        {
+          "word": "liveable",
+          "pos": "adj.",
+          "cn": "宜居的",
+          "note": "pleasant to live in 宜居"
+        }
+      ],
+      "sentences": [
+        {
+          "en": "The description hides a cost.",
+          "main": "The description hides a cost.",
+          "mods": "主谓宾结构，短句承担转折功能。",
+          "zh": "这一说法掩盖了一项成本。",
+          "point": "转折句。它否定了「旅游纯属收益」的前提，是推断题「作者为何不满」的依据。"
+        },
+        {
+          "en": "A place that is pleasant to visit must first be pleasant to live in.",
+          "main": "A place must first be pleasant to live in.",
+          "mods": "that 定语从句；first 强调先后条件。",
+          "zh": "一个宜游的地方，首先必须宜居。",
+          "point": "结论句。宜居是宜游的前提，对应「可持续发展」的立场。"
+        }
+      ],
+      "questionMap": [
+        {
+          "qid": "q-e2-e2-p8-q1",
+          "type": "choice",
+          "locate": "细节题，关键词 export industry，定位 The description hides a cost，后面列举租金上涨、商店变纪念品店、居民外迁"
+        },
+        {
+          "qid": "q-e2-e2-p8-q2",
+          "type": "choice",
+          "locate": "细节题，关键词 entry fee，定位 use the money to maintain the very streets that visitors come to see"
+        },
+        {
+          "qid": "q-e2-e2-p8-q3",
+          "type": "choice",
+          "locate": "主旨句题：must first be pleasant to live in 说明「宜居是宜游的前提」"
+        }
+      ],
+      "takeaway": [
+        "主旨：旅游的收益被看见、成本被隐藏；收费与限流是为了保住「宜居」这一前提。",
+        "命题手法：短句转折（hides a cost）+ 例证（门票、限流）+ 格言式结论。",
+        "易错点：把「收费」理解成「不欢迎游客」，原文说是保护旅游的基础。"
+      ],
+      "falseFriends": [
+        {
+          "word": "export",
+          "usual": "出口（货物）",
+          "here": "出口型产业",
+          "note": "an export industry：把旅游当作向外销售的服务"
+        },
+        {
+          "word": "liveable",
+          "usual": "可居住的",
+          "here": "宜居的",
+          "note": "pleasant to live in：居民住得舒服"
+        },
+        {
+          "word": "hide",
+          "usual": "躲藏",
+          "here": "掩盖",
+          "note": "hides a cost：把成本遮住了"
+        }
+      ],
+      "synonyms": [
+        {
+          "from": "cost",
+          "to": "burden"
+        },
+        {
+          "from": "residents moving away",
+          "to": "local population leaving"
+        },
+        {
+          "from": "limit",
+          "to": "cap"
+        }
+      ]
+    }
+  ]
+}

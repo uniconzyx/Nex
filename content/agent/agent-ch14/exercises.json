@@ -1,0 +1,134 @@
+{
+  "meta": {
+    "chapter": "agent-ch14",
+    "title": "职业发展框架：把能力翻译成岗位语言 —— 习题集",
+    "count": 6,
+    "note": "3 道概念题（行为锚点自评、路径与考核差异、计划排期承诺）+ 3 道算法实践题（行为锚点判定与证据校准、JD 匹配度打分与边界、STAR-R 完整性与量化三要素诊断），全部为原创题干。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "哪一条自评符合工程维 L3 的行为锚点",
+      "content_md": "按本章行为锚点定义：L3 = 能独立把一个需求做成含评估的产物（有指标、有失败样本集）。以下四条自评，哪一条**可以**主张工程维 L3？\n\nA. 看过 20 个 RAG 教程，能复现其中大部分的示例代码\nB. 在课程项目里给现成框架加了重排模块，读得懂报错并定位到模块\nC. 独立上线一个工单问答服务，附 50 条样本的评估报告（Recall 0.71→0.86）与失败样本集\nD. 熟悉五种 Agent 编排框架的 API，能说出各自的优劣",
+      "answer": {
+        "correct": "C",
+        "explain": "L3 的判据是「含评估的独立交付物」：必须有指标、有样本集、有失败归因，三者共同构成可出示产物。C 同时满足独立交付（上线服务）与评估（50 条样本报告 + 失败样本集），主张 L3 成立。A 只有跟随记录，按产物分级只到 L1——看过多少教程不改变产物类型；B 是框架内修改（有定位记录但无端到端评估），到 L2；D 是工具熟悉度，没有任何交付产物，按锚点甚至不够 L2。这条题对应本章核心认知：能力不是「我会什么」，而是「我能出示什么」，自评声明必须挂产物，面试官的追问全部沿「产物 → 指标 → 取舍」向下挖。"
+      },
+      "explanation": "考点：行为锚点的判据是产物类型而非数量或自我感觉。",
+      "tags": [
+        "能力矩阵",
+        "行为锚点",
+        "可出示产物"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/01 第 1 节；示例 ex01、ex02"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "JD 反推发现覆盖率 60%、证据率 30%，先补哪个",
+      "content_md": "你把一份 Agent 工程岗 JD 反推成四维权重后，与个人矩阵比对：覆盖率（JD 要求的能力项被覆盖的比例）只有 60%，证据率（已覆盖项里有可出示产物的比例）只有 30%。距离投递还有 4 周，你的优先动作是什么？\n\nA. 集中 4 周把覆盖率从 60% 拉到 100%，缺的能力项全部从零开始学\nB. 先花 1-2 周把已有项目按 STAR-R 补齐指标与取舍（提证据率），再评估剩余差距决定学什么\nC. 覆盖率低说明岗位不匹配，直接换一个 JD 更省力\nD. 在简历里把关键词全部写上，覆盖率是筛选系统的事，与面试无关",
+      "answer": {
+        "correct": "B",
+        "explain": "覆盖率低是努力问题（要花月级时间补能力），证据率低是表达问题（一个周末就能洗掉一半）——两者补救的时间尺度差一个量级，当然先做便宜的。把已有项目按 STAR-R 补齐 Result 三要素（基线/口径/归因）与取舍记录，既提高证据率，又顺带产出面试可讲的追问点；补完再重算覆盖率，剩下的负差维度才进入 12 个月计划。A 错在 4 周从零补 40% 覆盖不现实，且没有产物的「学过了」照样没有证据；C 把一次匹配度测量当成终局判断，反推的价值正是定位差距；D 是关键词造假：关键词密度高 + 证据率低是简历高危组合，面试第一个追问就会崩。"
+      },
+      "explanation": "考点：覆盖率（规划问题）与证据率（表达问题）的区分及补救优先级。",
+      "tags": [
+        "JD 反推",
+        "覆盖率",
+        "证据率",
+        "STAR-R"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/02 第 2 节、concept/03 第 1 节；示例 ex04、ex05"
+    },
+    {
+      "type": "judge",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "12 个月计划应按最乐观工期排期以逼自己更快",
+      "content_md": "判断：做 12 个月成长计划时，每个任务都按「最顺利情况下的工期」排期（比如预估 3 周就写 3 周），这样能给自己压力、逼自己更快完成。（对/错，并说明原因）",
+      "answer": {
+        "correct": "错",
+        "explain": "按最乐观值排期，等于让计划的每一步都没有缓冲，任何一个任务的估计误差（而估计误差几乎必然发生）都会沿依赖链传导，第 3 个月起全部条目同时亮红，最终整表作废。正确做法有两点：① 工期用三点估计（乐观 a / 最可能 m / 悲观 b），期望工期 = (a+4m+b)/6，承诺按分位数表述（P50 / P80），而不是拍一个最乐观数；② 排期前先算关键路径（CPM），关键路径上的任务优先保资源、非关键路径任务用 slack 兜底——计划失效通常不是因为不努力，而是因为没有关键路径概念，把资源均匀撒在了关键路径之外。可以给自己压力，但压力要加在关键路径的当期押注上（每月只押 1-2 项），不是加在虚假紧凑的甘特图上。"
+      },
+      "explanation": "考点：三点估计、分位数承诺与关键路径，反对乐观值排期。",
+      "tags": [
+        "12 个月计划",
+        "关键路径",
+        "PERT",
+        "分位数承诺"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/02 第 2 节；示例 ex07、ex08"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "实现行为锚点判定器与证据校准函数",
+      "content_md": "实现两个函数（纯标准库）：\n1. `anchor_level(artifacts)`：按产物类型判级——`tutorial_notes`→1、`pr_fix_rerank`→2、`online_record`/`eval_report`→3、`design_doc`/`review_notes`→4、`team_spec`/`mentoring_log`→5；未知产物按 1 计；空列表返回 0。取所有产物能证明的最高等级；\n2. `evidence_score(claim, arts, peer)`：有效等级 = min(声称等级, 产物判级, 他评确认数+1)；\n3. 验证三组：`evidence_score(4, [\"eval_report\"], 1)`、`evidence_score(3, [\"tutorial_notes\"], 3)`、`evidence_score(2, [\"online_record\",\"eval_report\"], 2)`；\n4. 打印每组结果并标注是否降级。",
+      "answer": {
+        "reference_code": "LEVEL_ART = {\"tutorial_notes\": 1, \"pr_fix_rerank\": 2, \"online_record\": 3,\n             \"eval_report\": 3, \"design_doc\": 4, \"review_notes\": 4,\n             \"team_spec\": 5, \"mentoring_log\": 5}\n\ndef anchor_level(artifacts):\n    return max((LEVEL_ART.get(a, 1) for a in artifacts), default=0)\n\ndef evidence_score(claim, arts, peer):\n    return min(claim, anchor_level(arts), min(peer + 1, 5))\n\nfor claim, arts, peer in [(4, [\"eval_report\"], 1),\n                          (3, [\"tutorial_notes\"], 3),\n                          (2, [\"online_record\", \"eval_report\"], 2)]:\n    eff = evidence_score(claim, arts, peer)\n    print(f\"claim={claim} eff={eff} {'降级' if eff < claim else '不降级'}\")",
+        "explain": "坑一：判级必须按产物**类型**取最高，不是按数量——看过 20 个教程仍是 L1，`max(LEVEL_ART.get(...))` 的类型映射才是锚点表的代码化；写成 `len(artifacts)` 会把「独立上线」（4 件产物）误判到 L4。坑二：空列表要返回 0（`default=0`），否则 `max()` 抛 ValueError——无产物不是 L1，是「没有主张」。坑三：他评封顶用 `min(peer+1, 5)`：0 个他评确认最多主张到 L1，这是对抗宽大误差的硬闸门；三组验证的期望输出是 2（降级）、1（降级）、2（不降级），第二组即使他评确认 3 个也被产物类型摁在 L1——**他评不能代替产物**。这道题对应交付物一：自评表的每一行都过一遍这个函数，输出就是补证清单。"
+      },
+      "explanation": "手写核心逻辑：产物类型判级 + 证据折减，自评校准的最小可运行内核。",
+      "tags": [
+        "行为锚点",
+        "自评校准",
+        "他评"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/01 第 1-2 节；示例 ex02、ex03"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "JD 匹配度打分器：四维权重、空 JD 与未识别词边界",
+      "content_md": "给定关键词映射表 `KEYMAP`（主映射计 1.0、次映射计 0.5，含 LangChain/RAG/评测集/微调/高并发/A/B/跨团队/vLLM 八个词）：\n1. 实现 `jd_profile(jd_words)`：`{关键词: 出现次数}` → 四维权重（归一化到和为 1）；\n2. 边界一：`jd_words` 为空字典时不得除零，返回全 0 权重；\n3. 边界二：JD 含映射表之外的词（如「Owner」）时跳过并计入未识别词清单；\n4. 实现 `gaps(jd, mine, topn)`：返回差距（JD 权重 − 我的证据权重）最小的 topn 维度，即补齐优先级；\n5. 验证：`jd_profile({\"RAG\": 4, \"LangChain\": 3, \"评测集\": 2})` 与 `mine = {\"工程\": .45, \"模型\": .35, \"产品\": .10, \"业务\": .10}`，打印四维权重与 Top-2 差距维度。",
+      "answer": {
+        "reference_code": "KEYMAP = {\"LangChain\": (\"工程\", \"模型\"), \"RAG\": (\"模型\", \"工程\"),\n          \"评测集\": (\"工程\", \"产品\"), \"微调\": (\"模型\", \"工程\"),\n          \"高并发\": (\"工程\", \"业务\"), \"A/B\": (\"产品\", \"工程\"),\n          \"跨团队\": (\"业务\", \"产品\"), \"vLLM\": (\"模型\", \"工程\")}\n\ndef jd_profile(jd_words):\n    w = dict.fromkeys([\"工程\", \"模型\", \"产品\", \"业务\"], 0.0)\n    for word, n in jd_words.items():\n        if word not in KEYMAP:\n            continue\n        p, s = KEYMAP[word]\n        w[p] += 1.0 * n\n        w[s] += 0.5 * n\n    tot = sum(w.values())\n    return {k: v / tot for k, v in w.items()} if tot else w\n\ndef gaps(jd, mine, topn=2):\n    return sorted(((d, jd[d] - mine[d]) for d in jd),\n                  key=lambda x: x[1])[:topn]\n\njd = jd_profile({\"RAG\": 4, \"LangChain\": 3, \"评测集\": 2})\nmine = {\"工程\": .45, \"模型\": .35, \"产品\": .10, \"业务\": .10}\nprint({k: round(v, 3) for k, v in jd.items()})\nprint(\"空JD:\", jd_profile({}))\nprint(\"Top差距:\", [(d, round(g, 3)) for d, g in gaps(jd, mine)])",
+        "explain": "坑一：归一化前必须判空——空 JD 时 `tot=0`，直接除会抛 ZeroDivisionError，这是该函数最常见的崩溃点；返回全 0 权重让上游按「无信号」处理。坑二：未识别词不能静默丢弃——「Owner」「推动落地」这类软技能词往往是一票否决项，正确做法是计入未识别清单交人工过目，而不是当没看见；本实现用 `continue` 跳过计数，但生产中应同时返回清单。坑三：主/次映射权重（1.0/0.5）是经验判断，应按目标 JD 实测标定；差距排序用升序（最小的即最负的），`key=lambda x: x[1]` 别写成按维度名排。验证输出的期望值：工程 0.519 / 模型 0.407 / 产品 0.074 / 业务 0.0，Top-2 差距为业务 −0.10、产品 −0.026。这道题对应交付物：差距维度直接转 12 个月计划任务。"
+      },
+      "explanation": "数值/边界验证：JD 四维权重计算、空输入与未识别词的防御、差距排序。",
+      "tags": [
+        "JD 反推",
+        "权重归一化",
+        "边界条件",
+        "差距分析"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/02 第 2 节；示例 ex04"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "STAR-R 完整性与量化三要素诊断：强弱项目对比实验",
+      "content_md": "实现 `star_r_score(proj)`，返回三元组 `(parts, metric, probes)`：\n1. `parts`：S/T/A/R/Reflection 五段中存在（真值）的段数，0-5；\n2. `metric`：Result 段字典中「基线/口径/归因」三要素齐全的个数，0-3；\n3. `probes`：可追问点 = 指标条数 + 取舍条数 + 教训条数；\n4. 构造「弱版」项目（有 S/T/A 与 Result，Result 只有一个形容词式指标，无 Reflection/取舍/教训）与「强版」项目（五段齐全、三要素齐全、各至少 1 条取舍与教训）；\n5. 打印两版的三元组与「抗追问评级」（parts==5 且 metric==3 且 probes>=3 记为「抗追问」，否则记「需补结构」）。",
+      "answer": {
+        "reference_code": "def star_r_score(proj):\n    parts = sum(bool(proj.get(k)) for k in (\"S\", \"T\", \"A\", \"R\", \"Reflection\"))\n    r = proj.get(\"R\", {})\n    metric = sum(bool(r.get(k)) for k in (\"基线\", \"口径\", \"归因\"))\n    probes = len(r.get(\"指标\", [])) + len(proj.get(\"取舍\", [])) \\\n             + len(proj.get(\"教训\", []))\n    return parts, metric, probes\n\ndef grade(t):\n    parts, metric, probes = t\n    return \"抗追问\" if parts == 5 and metric == 3 and probes >= 3 else \"需补结构\"\n\nweak = {\"S\": \"课程作业\", \"T\": \"做问答\", \"A\": \"调 API\",\n        \"R\": {\"指标\": [\"答得更准了\"]}}\nstrong = {\"S\": \"售后 40% 重复工单\", \"T\": \"自动处理率 50%\", \"A\": \"RAG+兜底\",\n          \"R\": {\"指标\": [\"12%→50%\"], \"基线\": 1, \"口径\": 1, \"归因\": 1},\n          \"取舍\": [\"选 RAG 不微调\"], \"教训\": [\"先加路由\"],\n          \"Reflection\": \"先建评估集\"}\nfor n, p in [(\"弱版\", weak), (\"强版\", strong)]:\n    t = star_r_score(p)\n    print(n, t, grade(t))",
+        "explain": "这道题是诊断/对比实验：同一个技术水平，两种写法的三元组是 (4,0,1) 与 (5,3,3)，评级分别是「需补结构」与「抗追问」——差距全部来自结构而非技术。坑一：`parts` 用真值判定（`bool(proj.get(k))`），空字符串与空列表都要算缺失，别用 `k in proj`——键在但值为空等于没写。坑二：`metric` 三要素要单独计：Result 段存在但三要素全缺（弱版正是如此）是最常见的伪量化，`指标` 列表里写「答得更准了」这种形容词不计任何要素。坑三：`probes` 是抗追问的量化代理——指标/取舍/教训每多一条，面试官就多一个开挖点；强版 3 个可追问点意味着至少能扛三轮深挖。期望输出：弱版 (4, 0, 1) 需补结构；强版 (5, 3, 3) 抗追问。补结构的顺序也有讲究：先补 Reflection 与三要素（一个周末），再补取舍记录（回忆决策现场），指标数字最后校准。"
+      },
+      "explanation": "诊断/对比实验：STAR-R 五段、Result 三要素与可追问点的量化诊断。",
+      "tags": [
+        "STAR-R",
+        "量化指标",
+        "作品集",
+        "对比实验"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/03 第 1 节；示例 ex05、ex06"
+    }
+  ]
+}

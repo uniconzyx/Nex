@@ -1,0 +1,141 @@
+{
+  "id": "english-e2-mock-03",
+  "exam": "english",
+  "kind": "mock",
+  "subject": "e2",
+  "title": "英语（二） · 阅读精读专项（3）",
+  "duration": 50,
+  "totalScore": 30,
+  "disclaimer": "本卷为按题型结构自编的专项练习卷，题目与解析均为原创，不是真题还原；考点年份为历年命题的归纳性标注，请以当年考试大纲为准。",
+  "blueprint": [
+    {
+      "subject": "e2",
+      "name": "英语（二）",
+      "score": 30
+    }
+  ],
+  "sections": [
+    {
+      "no": 1,
+      "name": "阅读理解",
+      "type": "choice",
+      "range": "1~3 题",
+      "score": 6,
+      "perScore": 2,
+      "note": "每题 2 分。阅读所给文章，从四个选项中选出最佳答案。",
+      "passage": {
+        "id": "e2-p3",
+        "title": "Bike-sharing after the novelty",
+        "text": "Bike-sharing arrived with promises of clean transport and crowded streets full of bicycles. Several cities now report a quieter outcome. Ridership peaks in the first year and then flattens, while maintenance costs keep rising. The companies that survive tend to be those that moved bikes to where people actually need them, near metro exits and housing estates, instead of scattering them across the centre. Parking rules matter as much as price. Where bikes may be left only in marked areas, streets stay tidy and the service is used more; where they may be left anywhere, the opposite happens."
+      },
+      "items": [
+        "q-e2-e2-p3-q1",
+        "q-e2-e2-p3-q2",
+        "q-e2-e2-p3-q3"
+      ]
+    },
+    {
+      "no": 2,
+      "name": "翻译",
+      "type": "calc",
+      "range": "4 题",
+      "score": 12,
+      "note": "本题 12 分。把划线句子译成汉语，要求准确、通顺。",
+      "items": [
+        {
+          "id": "q-e2-e2-p3-tr",
+          "topic": "e2-translation",
+          "knowledge": "e2-translation-k1",
+          "type": "calc",
+          "diff": 3,
+          "stem": "Where bikes may be left only in marked areas, streets stay tidy and the service is used more; where they may be left anywhere, the opposite happens.",
+          "answer": {
+            "text": "在只允许把车停放在指定区域的地方，街道保持整洁，服务的使用率也更高；而在可以随意停放的地方，情况正好相反。"
+          },
+          "explain": {
+            "right": "先切分意群定主干，再按汉语习惯重排语序，最后检查术语与指代是否统一。",
+            "wrong": "常见错误：Where 引导地点状语从句，译「在……的地方」；the opposite happens 译「情况正好相反」，不要直译「相反发生」；两个分句保持对照。",
+            "link": "e2-translation-k1"
+          },
+          "walkthrough": {
+            "framework": {
+              "title": "段落翻译",
+              "pattern": "e2-translation-p1",
+              "steps": [
+                "通读全段，判断文体与时态基调",
+                "逐句找主干，切出定语与状语",
+                "把后置定语译成前置，长状语提到句首",
+                "检查段内代词与术语一致性",
+                "通读成段，修掉翻译腔"
+              ],
+              "trap": "逐词直译，句子不通"
+            },
+            "approach": "先切分意群定主干，再按汉语习惯重排语序，最后检查术语与指代是否统一。",
+            "points": [
+              {
+                "id": "e2-translation-k1",
+                "note": "按引导词、介词短语、分词结构切意群，先定主谓宾。",
+                "title": "长难句切分",
+                "core": "按引导词、介词短语、分词结构切意群，先定主谓宾。",
+                "pitfall": "Where 引导地点状语从句，译「在……的地方」；the opposite happens 译「情况正好相反」，不要直译「相反发生」；两个分句保持对照。"
+              }
+            ],
+            "solution": "参考译文：在只允许把车停放在指定区域的地方，街道保持整洁，服务的使用率也更高；而在可以随意停放的地方，情况正好相反。\n得分点：Where 引导地点状语从句，译「在……的地方」；the opposite happens 译「情况正好相反」，不要直译「相反发生」；两个分句保持对照。\n检查清单：主干是否译出、修饰是否归位、指代是否还原。"
+          },
+          "score": 12
+        }
+      ]
+    },
+    {
+      "no": 3,
+      "name": "写作",
+      "type": "design",
+      "range": "5 题",
+      "score": 12,
+      "note": "本题 12 分。按题目要求写一篇短文。",
+      "items": [
+        {
+          "id": "q-e2-e2-p3-wr",
+          "topic": "e2-writing",
+          "knowledge": "e2-writing-k2",
+          "type": "design",
+          "diff": 3,
+          "stem": "Write an essay of about 150 words on the following topic: bike-sharing schemes often lose users after the first year. Explain the reasons and suggest improvements.",
+          "answer": {
+            "text": "Bike-sharing schemes usually start with crowded streets and end with rows of broken bicycles. The novelty explains the early peak; the flat line afterwards has more ordinary causes. Bikes are placed where they are easy to park rather than where trips begin and end, maintenance is deferred until vehicles fail, and casual parking leaves pavements messy, which turns public opinion against the service. The fixes are practical. Operators should station bikes near metro exits and housing estates, set marked parking zones, and publish repair response times. Cities should treat the scheme as public transport, not as advertising space. Reliability, more than novelty, keeps riders."
+          },
+          "explain": {
+            "right": "先定三段骨架（描述—分析—结论），再把题目给出的信息逐条落进段落，最后检查字数与衔接词。",
+            "wrong": "常见错误：只描述「共享单车很方便」，没有分析第一年后使用量停滞的原因。",
+            "link": "e2-writing-k2"
+          },
+          "walkthrough": {
+            "framework": {
+              "title": "图表作文",
+              "pattern": "e2-writing-p2",
+              "steps": [
+                "首段：一句点明图表主题 + 2 个关键数据",
+                "二段：2 条原因，用 First/Moreover 衔接",
+                "三段：一句趋势预测或建议",
+                "数字保留一位小数，趋势词要准确"
+              ],
+              "trap": "只罗列数字不做比较"
+            },
+            "approach": "先定三段骨架（描述—分析—结论），再把题目给出的信息逐条落进段落，最后检查字数与衔接词。",
+            "points": [
+              {
+                "id": "e2-writing-k2",
+                "note": "观点句 + 解释 + 例证 + 小结，四句一段。",
+                "title": "议论段展开",
+                "core": "观点句 + 解释 + 例证 + 小结，四句一段。",
+                "pitfall": "只描述「共享单车很方便」，没有分析第一年后使用量停滞的原因。"
+              }
+            ],
+            "solution": "Bike-sharing schemes usually start with crowded streets and end with rows of broken bicycles. The novelty explains the early peak; the flat line afterwards has more ordinary causes. Bikes are placed where they are easy to park rather than where trips begin and end, maintenance is deferred until vehicles fail, and casual parking leaves pavements messy, which turns public opinion against the service. The fixes are practical. Operators should station bikes near metro exits and housing estates, set marked parking zones, and publish repair response times. Cities should treat the scheme as public transport, not as advertising space. Reliability, more than novelty, keeps riders."
+          },
+          "score": 12
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,247 @@
+{
+  "subject": "algo",
+  "exam": "algorithm",
+  "book": "算法设计与分析",
+  "items": [
+    {
+      "topic": "algo-complexity",
+      "chapter": "复杂度与渐进分析",
+      "knowledge": [
+        {
+          "id": "algo-complexity-k1",
+          "title": "主定理",
+          "chapter": "1.1 递归式",
+          "patterns": [
+            "algo-complexity-p1"
+          ],
+          "core": "T(n)=aT(n/b)+f(n)，与 n^(log_b a) 比较：小则取后者，同阶则乘 log n，大则取 f(n)。",
+          "tip": "同阶情形最容易漏乘 log n，例如 T(n)=2T(n/2)+n 的结果是 Θ(n log n)。"
+        },
+        {
+          "id": "algo-complexity-k2",
+          "title": "摊还分析",
+          "chapter": "1.2 摊还",
+          "patterns": [
+            "algo-complexity-p2"
+          ],
+          "core": "一串操作的总代价除以操作次数，动态数组扩容的摊还代价是 O(1)。",
+          "tip": "摊还不是「每次最坏 O(1)」，单次扩容仍是 O(n)。"
+        }
+      ]
+    },
+    {
+      "topic": "algo-sort",
+      "chapter": "排序",
+      "knowledge": [
+        {
+          "id": "algo-sort-k1",
+          "title": "比较排序下界",
+          "chapter": "2.1 排序",
+          "patterns": [
+            "algo-sort-p1"
+          ],
+          "core": "基于比较的排序至少需要 Ω(n log n) 次比较，决策树有 n! 个叶子。",
+          "tip": "计数排序能到 O(n+k) 是因为不比较，不是突破了下界。"
+        },
+        {
+          "id": "algo-sort-k2",
+          "title": "稳定性与原地性",
+          "chapter": "2.2 排序性质",
+          "patterns": [
+            "algo-sort-p1",
+            "algo-sort-p2"
+          ],
+          "core": "归并稳定且需 O(n) 空间；快排不稳定、平均 O(n log n)；堆排不稳定、原地。",
+          "tip": "多关键字排序常要求稳定：先按次要关键字排，再按主要关键字稳定排序。"
+        },
+        {
+          "id": "algo-sort-k3",
+          "title": "划分与合并",
+          "chapter": "2.3 排序过程",
+          "patterns": [
+            "algo-sort-p2"
+          ],
+          "core": "快排一趟划分把小于枢轴的放左、大于的放右，枢轴归位。",
+          "tip": "手算划分时两指针相遇的位置才是枢轴的最终位置。"
+        }
+      ]
+    },
+    {
+      "topic": "algo-search",
+      "chapter": "查找与散列",
+      "knowledge": [
+        {
+          "id": "algo-search-k1",
+          "title": "二分查找",
+          "chapter": "3.1 查找",
+          "patterns": [
+            "algo-search-p1"
+          ],
+          "core": "有序 + 随机访问才能二分，复杂度 O(log n)。",
+          "tip": "找边界时命中不能立即返回，要继续收缩区间。"
+        },
+        {
+          "id": "algo-search-k2",
+          "title": "散列与冲突",
+          "chapter": "3.2 散列",
+          "patterns": [
+            "algo-search-p2"
+          ],
+          "core": "平均 O(1)，最坏 O(n)；装填因子越大冲突越多。",
+          "tip": "开放定址删除要打标记，直接置空会截断探测链。"
+        }
+      ]
+    },
+    {
+      "topic": "algo-divide",
+      "chapter": "递归与分治",
+      "knowledge": [
+        {
+          "id": "algo-divide-k1",
+          "title": "分治三步骤",
+          "chapter": "4.1 分治",
+          "patterns": [
+            "algo-divide-p1"
+          ],
+          "core": "分解、解决、合并；子问题必须独立同型。",
+          "tip": "子问题重叠时应改用动态规划，否则重复计算导致指数级。"
+        },
+        {
+          "id": "algo-divide-k2",
+          "title": "跨区间贡献",
+          "chapter": "4.2 分治统计",
+          "patterns": [
+            "algo-divide-p2"
+          ],
+          "core": "归并统计逆序对、最近点对带状检查，都是「递归 + 合并时统计跨界贡献」。",
+          "tip": "只统计半边是最常见的漏解，跨中点的部分必须单独算。"
+        }
+      ]
+    },
+    {
+      "topic": "algo-dp",
+      "chapter": "动态规划",
+      "knowledge": [
+        {
+          "id": "algo-dp-k1",
+          "title": "状态与转移",
+          "chapter": "5.1 动态规划",
+          "patterns": [
+            "algo-dp-p1"
+          ],
+          "core": "状态要能用一句话说清，转移由「最后一步决策」推出。",
+          "tip": "状态定义含糊时，转移方程一定写不对，先复述状态再动笔。"
+        },
+        {
+          "id": "algo-dp-k2",
+          "title": "背包与序列问题",
+          "chapter": "5.2 经典模型",
+          "patterns": [
+            "algo-dp-p1",
+            "algo-dp-p2"
+          ],
+          "core": "0-1 背包倒序更新容量；完全背包正序；LCS 与编辑距离是二维表。",
+          "tip": "0-1 背包正序更新会重复使用同一物品，等价于完全背包。"
+        },
+        {
+          "id": "algo-dp-k3",
+          "title": "空间优化",
+          "chapter": "5.3 滚动数组",
+          "patterns": [
+            "algo-dp-p2"
+          ],
+          "core": "一维数组滚动时，更新方向由依赖方向决定。",
+          "tip": "压成一维后要确认答案位置，不能照搬二维表的右下角。"
+        }
+      ]
+    },
+    {
+      "topic": "algo-greedy",
+      "chapter": "贪心",
+      "knowledge": [
+        {
+          "id": "algo-greedy-k1",
+          "title": "贪心选择性质",
+          "chapter": "6.1 贪心",
+          "patterns": [
+            "algo-greedy-p1"
+          ],
+          "core": "贪心策略需用交换论证证明：最优解可改成含贪心选择且不变差。",
+          "tip": "只说「显然」不得分，必须写出交换的那一步。"
+        },
+        {
+          "id": "algo-greedy-k2",
+          "title": "贪心失效",
+          "chapter": "6.2 反例",
+          "patterns": [
+            "algo-greedy-p2"
+          ],
+          "core": "0-1 背包、任意币值找零都可能让贪心失效。",
+          "tip": "反例优先构造小规模、数值不规整的例子，一眼能看出差异。"
+        }
+      ]
+    },
+    {
+      "topic": "algo-graph",
+      "chapter": "图算法",
+      "knowledge": [
+        {
+          "id": "algo-graph-k1",
+          "title": "最短路算法选择",
+          "chapter": "7.1 最短路",
+          "patterns": [
+            "algo-graph-p1"
+          ],
+          "core": "无权 BFS；非负权 Dijkstra；有负权 Bellman-Ford；多源 Floyd。",
+          "tip": "Dijkstra 一旦确定某点最短就不能再更新，负权会破坏这个前提。"
+        },
+        {
+          "id": "algo-graph-k2",
+          "title": "最小生成树",
+          "chapter": "7.2 MST",
+          "patterns": [
+            "algo-graph-p2"
+          ],
+          "core": "Kruskal 按边 + 并查集；Prim 按点扩展；都得到 n−1 条边。",
+          "tip": "MST 不唯一（等权边可换），但总权值唯一。"
+        },
+        {
+          "id": "algo-graph-k3",
+          "title": "拓扑排序",
+          "chapter": "7.3 拓扑",
+          "patterns": [
+            "algo-graph-p3"
+          ],
+          "core": "入度法：入度 0 入队，出队后邻点入度减 1；输出少于 n 个即有环。",
+          "tip": "拓扑序通常不唯一，题目问「一个」时给出任意合法序即可。"
+        }
+      ]
+    },
+    {
+      "topic": "algo-string",
+      "chapter": "字符串匹配",
+      "knowledge": [
+        {
+          "id": "algo-string-k1",
+          "title": "KMP 与前缀函数",
+          "chapter": "8.1 字符串匹配",
+          "patterns": [
+            "algo-string-p1"
+          ],
+          "core": "π[i] 是最长相等真前后缀长度，失配时 j=π[j−1]。",
+          "tip": "π 与 next 差一位，做题前先看题目给的定义。"
+        },
+        {
+          "id": "algo-string-k2",
+          "title": "哈希与 Trie",
+          "chapter": "8.2 字符串结构",
+          "patterns": [
+            "algo-string-p2"
+          ],
+          "core": "哈希 O(1) 取子串，Trie O(L) 查前缀。",
+          "tip": "单哈希可能被构造冲突，重要场合用双哈希。"
+        }
+      ]
+    }
+  ]
+}

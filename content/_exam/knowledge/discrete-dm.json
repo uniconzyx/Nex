@@ -1,0 +1,258 @@
+{
+  "subject": "dm",
+  "exam": "discrete",
+  "book": "离散数学（数理逻辑 / 集合论 / 图论 / 代数结构 / 组合）",
+  "items": [
+    {
+      "topic": "dm-logic",
+      "chapter": "数理逻辑 · 命题逻辑",
+      "knowledge": [
+        {
+          "id": "dm-logic-k1",
+          "title": "真值表与联结词",
+          "chapter": "1.1 命题与联结词",
+          "patterns": [
+            "dm-logic-p1"
+          ],
+          "core": "五个联结词中，→ 只在 1→0 时为假，↔ 在同真同假时为真。",
+          "tip": "自然语言「如果…那么」不区分充分必要，符号化时先判断是 → 还是 ↔。"
+        },
+        {
+          "id": "dm-logic-k2",
+          "title": "等值演算",
+          "chapter": "1.2 等值演算",
+          "patterns": [
+            "dm-logic-p1",
+            "dm-logic-p2"
+          ],
+          "core": "常用等值式：p→q ≡ ¬p∨q；¬(p∧q) ≡ ¬p∨¬q；p↔q ≡ (p→q)∧(q→p)。",
+          "tip": "化简时优先消去 → 和 ↔，只剩 ¬、∧、∨ 后规律最明显。"
+        },
+        {
+          "id": "dm-logic-k3",
+          "title": "范式与推理",
+          "chapter": "1.3 范式",
+          "patterns": [
+            "dm-logic-p1",
+            "dm-logic-p2"
+          ],
+          "core": "主析取范式对应成真赋值，主合取范式对应成假赋值。",
+          "tip": "写小项时变量取 1 写本身、取 0 写否定，编号按二进制读。"
+        }
+      ]
+    },
+    {
+      "topic": "dm-predicate",
+      "chapter": "数理逻辑 · 谓词逻辑",
+      "knowledge": [
+        {
+          "id": "dm-predicate-k1",
+          "title": "量词与否定",
+          "chapter": "2.1 谓词与量词",
+          "patterns": [
+            "dm-predicate-p1",
+            "dm-predicate-p2"
+          ],
+          "core": "¬∀xP(x) ≡ ∃x¬P(x)；¬∃xP(x) ≡ ∀x¬P(x)，否定号逐层内推并翻转量词。",
+          "tip": "「所有人都有老师」是 ∀x∃yT(x,y)，否定为 ∃x∀y¬T(x,y)，量词顺序会变。"
+        },
+        {
+          "id": "dm-predicate-k2",
+          "title": "谓词推理规则",
+          "chapter": "2.2 谓词演算",
+          "patterns": [
+            "dm-predicate-p2"
+          ],
+          "core": "UI 去全称、EI 去存在、UG 加全称、EG 加存在。",
+          "tip": "EI 取的常元必须是新的，否则会把两个不同的存在个体当成同一个。"
+        }
+      ]
+    },
+    {
+      "topic": "dm-set",
+      "chapter": "集合与关系",
+      "knowledge": [
+        {
+          "id": "dm-set-k1",
+          "title": "集合运算与幂集",
+          "chapter": "3.1 集合",
+          "patterns": [
+            "dm-set-p1"
+          ],
+          "core": "|P(A)|=2^|A|；∅ 与 {∅} 不同，前者无元素，后者有一个元素。",
+          "tip": "幂集里既要有 ∅ 也要有 A 本身，这两个最容易漏。"
+        },
+        {
+          "id": "dm-set-k2",
+          "title": "关系性质与闭包",
+          "chapter": "3.2 关系",
+          "patterns": [
+            "dm-set-p2"
+          ],
+          "core": "自反看对角线，对称看矩阵对称，传递看 R²⊆R。",
+          "tip": "反对称不是「对称的否定」：既不对称也不反对称的关系大量存在。"
+        },
+        {
+          "id": "dm-set-k3",
+          "title": "等价关系与偏序",
+          "chapter": "3.3 等价关系与偏序",
+          "patterns": [
+            "dm-set-p3"
+          ],
+          "core": "等价关系把集合划分成互不相交的等价类；偏序用 Hasse 图表示。",
+          "tip": "极大元可以有多个且不必唯一，最大元必须唯一且与所有元素可比。"
+        }
+      ]
+    },
+    {
+      "topic": "dm-function",
+      "chapter": "函数与基数",
+      "knowledge": [
+        {
+          "id": "dm-function-k1",
+          "title": "单射、满射与双射",
+          "chapter": "4.1 函数",
+          "patterns": [
+            "dm-function-p1"
+          ],
+          "core": "单射要求不同原像到不同像；满射要求陪域每个元素都被取到。",
+          "tip": "有限集上 |A|=|B| 时，单射、满射、双射三者等价，这是计数题的关键。"
+        },
+        {
+          "id": "dm-function-k2",
+          "title": "可数性与基数",
+          "chapter": "4.2 集合的基数",
+          "patterns": [
+            "dm-function-p2"
+          ],
+          "core": "可数集能与自然数集建立双射；有理数可数，实数不可数。",
+          "tip": "「无限」不等于「不可数」：整数、有理数都是可数无限集。"
+        }
+      ]
+    },
+    {
+      "topic": "dm-graph",
+      "chapter": "图论",
+      "knowledge": [
+        {
+          "id": "dm-graph-k1",
+          "title": "握手定理与连通性",
+          "chapter": "5.1 图的基本概念",
+          "patterns": [
+            "dm-graph-p1"
+          ],
+          "core": "Σdeg(v)=2|E|，奇度顶点个数必为偶数。",
+          "tip": "握手定理常用于「已知度数序列，判断是否可图」和求边数。"
+        },
+        {
+          "id": "dm-graph-k2",
+          "title": "欧拉图与哈密顿图",
+          "chapter": "5.2 欧拉图与哈密顿图",
+          "patterns": [
+            "dm-graph-p2"
+          ],
+          "core": "欧拉回路看边（每个顶点偶度），哈密顿回路看点（经过每个顶点一次）。",
+          "tip": "欧拉回路要求连通且全偶度，缺一不可；有向图还要入度等于出度。"
+        },
+        {
+          "id": "dm-graph-k3",
+          "title": "平面图与着色",
+          "chapter": "5.3 平面图",
+          "patterns": [
+            "dm-graph-p3"
+          ],
+          "core": "连通平面图 n−m+r=2；简单平面图 m≤3n−6。",
+          "tip": "用 m≤3n−6 判非平面最快，但只适用于简单图（无重边无自环）。"
+        }
+      ]
+    },
+    {
+      "topic": "dm-tree",
+      "chapter": "树",
+      "knowledge": [
+        {
+          "id": "dm-tree-k1",
+          "title": "树的性质与生成树",
+          "chapter": "6.1 树",
+          "patterns": [
+            "dm-tree-p1"
+          ],
+          "core": "n 阶树有 n−1 条边，连通且无回路，任意两点路径唯一。",
+          "tip": "「n−1 条边」单独不充分，必须加上连通；这是判断题最常设的坑。"
+        },
+        {
+          "id": "dm-tree-k2",
+          "title": "二叉树与哈夫曼树",
+          "chapter": "6.2 二叉树",
+          "patterns": [
+            "dm-tree-p2"
+          ],
+          "core": "二叉树 n0=n2+1；哈夫曼树 WPL 最小，等于所有合并值之和。",
+          "tip": "哈夫曼合并后要重新排序，否则得到的不是最优树。"
+        }
+      ]
+    },
+    {
+      "topic": "dm-algebra",
+      "chapter": "代数系统",
+      "knowledge": [
+        {
+          "id": "dm-algebra-k1",
+          "title": "群的定义与性质",
+          "chapter": "7.1 群",
+          "patterns": [
+            "dm-algebra-p1"
+          ],
+          "core": "群 = 封闭 + 结合 + 单位元 + 逆元；有限群元素阶整除群阶。",
+          "tip": "验证群先查封闭与结合，再找单位元，最后逐个找逆元。"
+        },
+        {
+          "id": "dm-algebra-k2",
+          "title": "同态与同构",
+          "chapter": "7.2 同态",
+          "patterns": [
+            "dm-algebra-p2"
+          ],
+          "core": "同态保持运算，同构还要求双射；同态核是正规子群。",
+          "tip": "证明同态只需 f(ab)=f(a)f(b)，不要额外假设双射。"
+        }
+      ]
+    },
+    {
+      "topic": "dm-combinatorics",
+      "chapter": "组合计数",
+      "knowledge": [
+        {
+          "id": "dm-combinatorics-k1",
+          "title": "排列与组合",
+          "chapter": "8.1 排列组合",
+          "patterns": [
+            "dm-combinatorics-p1"
+          ],
+          "core": "有序用排列 P(n,r)，无序用组合 C(n,r)，分组用隔板法。",
+          "tip": "先判断「顺序是否重要」，这一步错了后面全错。"
+        },
+        {
+          "id": "dm-combinatorics-k2",
+          "title": "容斥原理",
+          "chapter": "8.2 容斥",
+          "patterns": [
+            "dm-combinatorics-p2"
+          ],
+          "core": "并集 = 单集之和 − 两两交之和 + 三三交之和 − …，符号交替。",
+          "tip": "整除问题的交集是 lcm 的倍数，不是两数相乘（除非互素）。"
+        },
+        {
+          "id": "dm-combinatorics-k3",
+          "title": "递推关系",
+          "chapter": "8.3 递推",
+          "patterns": [
+            "dm-combinatorics-p3"
+          ],
+          "core": "一阶线性用迭代或待定常数，二阶线性写特征方程。",
+          "tip": "解出通项后用 n=1,2 代回验证，能抓住大部分代数失误。"
+        }
+      ]
+    }
+  ]
+}

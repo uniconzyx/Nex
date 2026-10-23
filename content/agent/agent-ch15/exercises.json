@@ -1,0 +1,132 @@
+{
+  "meta": {
+    "chapter": "agent-ch15",
+    "title": "项目实操：端到端交付一个可演示的 Agent 产品 —— 习题集",
+    "count": 6,
+    "note": "3 道概念题（选题评分与范围冻结、基线与回归、成本与监控口径）+ 3 道算法实践题（评分卡与一票否决、关键路径计算、黄金集回归三列对比与帕累托排序），全部为原创题干。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "范围冻结后收到一个新需求，正确的处理顺序是什么",
+      "content_md": "项目第 2 周，范围已冻结。产品同学提出「加一个导出 PDF 的功能，很简单」。下列哪一项是符合本章方法学的正确做法？\n\nA. 先评估该需求对关键路径与风险的影响（工期增量、是否动冻结接口），再按评估结论决定接纳/推迟/拒绝，并记录变更日志\nB. 先答应下来，反正「很简单」，做不完再砍别的\nC. 直接拒绝，冻结后的需求一律不做，不需要评估\nD. 先做了再说，等里程碑结束一起补文档",
+      "answer": {
+        "correct": "A",
+        "explain": "范围冻结不是「拒绝变更」，而是「变更必须过影响评估再决策」（concept/01 §3）：用同一个依赖图算这个需求让关键路径增加几天、是否动已冻结接口或已评测模块，然后按结论分流——工期增量 ≤1 天且不动骨架才接纳，否则推迟进 backlog 或拒绝并给替代方案，全程记录变更日志。B 是范围蔓延的典型入口：每个需求单独看都小，累加后关键路径失控，最后一周同时改五个模块还没人跑回归。C 把冻结理解成「一刀切拒绝」，丢掉了冻结的真正价值——评估后该做的仍然要做（真正的紧急需求值得排期）。D 让交付失控：没有记录的变更在答辩时说不清「为什么做了这个没做那个」，也违反配置管理的基本要求。"
+      },
+      "explanation": "考点：范围冻结与变更控制——冻结的价值在影响评估与记录，不在一刀切拒绝。",
+      "tags": [
+        "范围冻结",
+        "变更控制",
+        "关键路径"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/01 第 3 节；示例 ex03"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "黄金集回归后总通过数涨了 1，能宣布优化有效吗",
+      "content_md": "某轮迭代后，黄金集（50 条）总通过数从 40 涨到 41。下列哪一项判断正确？\n\nA. 不能只看总数：必须出三列对比（上轮失败→本轮通过 / 上轮通过→本轮失败 / 均失败），若有新增失败样本而无归因与豁免，本轮改动应回滚\nB. 总通过数涨了就是有效，可以直接合入\nC. 总通过数只涨 1 说明优化无效，应该直接回滚\nD. 总通过数不重要，应该只看平均响应时间",
+      "answer": {
+        "correct": "A",
+        "explain": "总通过数是净额，会掩盖错误结构的恶化：完全可能「事实错误」从 6 条涨到 14 条，同时「检索未召回」下降 15 条，净变化 +1 但系统在变脆弱。回归验收的核心是三列对比：修复集（上轮失败→本轮通过）、退化集（上轮通过→本轮失败）、未动集。退化集里的每一条都必须有明确归因（预期内的取舍）并记录豁免理由，否则回滚（concept/02 §3）。B 错在把净额当结论——这是「修一个坏三个」被放过的直接原因。C 错把 1 条差异当成无效证据：小样本下 1 条的波动很可能是噪声，该做的是看三列结构而非下有效性结论。D 用性能指标偷换质量指标：响应时间只回答快慢，不回答对错，两者都要但不可互相替代。"
+      },
+      "explanation": "考点：黄金集回归的验收口径是三列对比而非总通过数净额。",
+      "tags": [
+        "黄金集",
+        "回归测试",
+        "三列对比"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/02 第 3 节；示例 ex04"
+    },
+    {
+      "type": "judge",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "为了加快进度，每轮迭代应该同时修好几类错误，回归跑一次总通过数就行",
+      "content_md": "判断：团队时间紧，每轮迭代应该同时修帕累托排序里的前三类错误以最大化收益；验证时只要黄金集总通过数不降就合入。（对/错，并说明原因）",
+      "answer": {
+        "correct": "错",
+        "explain": "两个做法都错。第一，同时修多类错误会让回归结果无法归因：总通过数变了，你不知道是哪类改动起的作用、哪类在拖后腿——等于放弃错误分析，回到「按感觉迭代」。正确做法是每轮只修帕累托头部的一类（或一组强耦合的改动），修完必须回归，用三列对比证明「该类下降且无新增失败」（concept/02 §2）。第二，「总通过数不降就合入」的验收口径不成立：净额不变可能掩盖退化集非空（修好 5 条同时坏 5 条），错误结构已经恶化而无人知晓；且总通过数不报错误类型分布，看不出下一轮该修什么。时间紧时的正确压缩方式是砍范围或砍非关键路径任务，不是砍验收口径——口径一旦放松，迭代数据全部失真，答辩时拿不出任何可信数字。"
+      },
+      "explanation": "考点：迭代的最小可归因单元与回归验收口径——时间紧砍范围，不砍验收。",
+      "tags": [
+        "错误分析",
+        "帕累托",
+        "迭代节奏"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/02 第 2、3 节；示例 ex05"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "实现选题评分卡：加权打分、一票否决与换题建议",
+      "content_md": "实现选题评分卡 `score_idea(name, pain, feasible, distinct, weights, floor=3.5)`：\n1. 三维各 1~5 分（痛感/可行/差异化），加权求和；\n2. 任一维 ≤ 2 触发一票否决（致命短板不过加权补救），输出被否决的维度名；\n3. 无否决且加权分 ≥ floor 判「通过」，否则输出「低于阈值，建议换题」；\n4. 对候选列表（至少 3 个，含一个「通用聊天框」型陪跑项）逐个评估，按结论排序输出小表；\n5. 打印结论：哪个选题进 W1，并说明一票否决为什么比加权平均更保护交付。\n纯标准库，不联网。",
+      "answer": {
+        "reference_code": "def score_idea(name, pain, feasible, distinct, weights=(0.4, 0.35, 0.25), floor=3.5):\n    scores = {\"痛感\": pain, \"可行\": feasible, \"差异\": distinct}\n    veto = [k for k, v in scores.items() if v <= 2]          # 致命短板\n    total = sum(s * w for s, w in zip(scores.values(), weights))\n    if veto:\n        return total, \"否决(\" + \",\".join(veto) + \")\"\n    return total, \"通过\" if total >= floor else \"低于阈值,建议换题\"\n\nideas = [(\"周报助手\", 4, 5, 4), (\"文档问答\", 5, 4, 2), (\"通用聊天框\", 2, 5, 1)]\nfor name, *s in sorted(ideas, key=lambda x: -score_idea(x[0], *x[1:])[0]):\n    total, verdict = score_idea(name, *s)\n    print(f\"{name}: {total:.2f} -> {verdict}\")",
+        "explain": "这道题把选题决策落成代码。核心逻辑是「一票否决优先于加权」：加权平均会让一个维度的致命短板被另两个维度的高分补偿（如文档问答 5/4/2 加权 3.80 看着不错，但差异化 2 分意味着做出来和现成方案拉不开差距，答辩时讲不出差别），否决项必须在加权之前判定。坑一：否决阈值取 ≤2 而不是 <3——3 分是「勉强及格」，允许加权补救，2 分是「没人要/做不完/没差别」，不可补救。坑二：权重应按项目性质调整（学习型项目可行性权重更高，作品集项目差异化权重更高），写死权重是教条；floor 同理，可按周期松紧调。坑三：输出要按加权分排序展示，但排序只用于「无否决项之间比较」，有否决项的排最后——别让排序掩盖否决。"
+      },
+      "explanation": "手写核心逻辑：评分卡加权 + 一票否决的判定顺序与阈值语义。",
+      "tags": [
+        "选题评分卡",
+        "一票否决",
+        "加权打分"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/01 第 1 节；示例 ex01"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "3 周计划求解器：拓扑排序、关键路径与砍单建议",
+      "content_md": "给定任务表 `tasks = [(名, 工期天, [前置任务...]), ...]`（约 12~15 个，覆盖数据/链路/部署/文档四组）。实现：\n1. `topo_order(tasks)`：Kahn 拓扑排序，检测环（有环直接报错）；\n2. `critical_path(tasks)`：按拓扑序算最早完成时间，输出关键路径（总工期 = 最长链）与非关键任务的浮动时间；\n3. 对「21 天上限」判定是否超期；超期则按预设砍单优先级（UI→次要功能→锦上添花）模拟砍掉任务后的新关键路径，输出砍单建议表；\n4. 打印原始与砍单后的关键路径长度对比。\n纯标准库，固定构造一组数据验证。",
+      "answer": {
+        "reference_code": "from collections import deque\n\ndef topo_order(tasks):\n    dur = {n: d for n, d, _ in tasks}\n    pre = {n: p for n, _, p in tasks}\n    suc = {n: [] for n in dur}\n    indeg = {n: len(p) for n, p in pre.items()}\n    for n, ps in pre.items():\n        for p in ps:\n            suc[p].append(n)\n    q = deque(sorted(n for n, d in indeg.items() if d == 0))\n    order = []\n    while q:\n        n = q.popleft(); order.append(n)\n        for m in suc[n]:\n            indeg[m] -= 1\n            if indeg[m] == 0:\n                q.append(m)\n    assert len(order) == len(dur), \"依赖有环\"\n    return order\n\ndef critical_path(tasks):\n    order = topo_order(tasks)\n    dur = {n: d for n, d, _ in tasks}; pre = {n: p for n, _, p in tasks}\n    ef = {}\n    for n in order:\n        ef[n] = max([ef[p] for p in pre[n]], default=0) + dur[n]\n    return max(ef.values()), ef",
+        "explain": "坑一：拓扑排序要处理环——Kahn 算法结束时 order 长度小于任务数即说明有环，必须 assert 而不是死循环；起点队列要排序保证输出可复现。坑二：最早完成时间 ef[n] = max(前置 ef) + dur[n]，空前置取 0；关键路径长度 = max(ef.values())，不是所有 ef 之和——串行任务才累加，并行的取 max。坑三：浮动时间 = 最晚完成 − 最早完成，计算时要从终点倒推 ls[n] = min(后继 ls) − dur[n]；简化版可以直接报告 ef 与总工期的差作为「可宽松天数」的近似（结论方向一致）。坑四：砍单模拟要按预设优先级（UI→次要功能→锦上添花）而不是按工期从大到小——砍工期最长的可能砍掉核心链路，项目直接不成立；砍单后必须重算关键路径验证真的降到 21 天内，别砍完发现关键路径没动（砍的任务本来就不在关键路径上，白砍）。"
+      },
+      "explanation": "数值/边界验证：拓扑排序（含环检测）、关键路径与砍单模拟的完整链路。",
+      "tags": [
+        "关键路径",
+        "拓扑排序",
+        "砍单",
+        "里程碑"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/01 第 2 节；示例 ex02"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "黄金集回归对比器：三列差异集、帕累托排序与回滚判定",
+      "content_md": "给定黄金集两轮评测结果：`prev = {样本id: 通过/失败}`、`curr = {样本id: 通过/失败}`，以及失败样本的归因标签 `tags = {样本id: 错误类型}`。实现：\n1. `regression_diff(prev, curr)`：输出三列——修复集（prev 失败→curr 通过）、退化集（prev 通过→curr 失败）、未动失败集；\n2. `must_rollback(prev, curr, exemptions)`：退化集非空且无豁免记录 → 判定必须回滚；\n3. `pareto(tags_curr)`：对当前失败样本按错误类型降序排，输出累计占比并标出「头部 50%」类型（本轮只修它）；\n4. 构造一组数据：修复 8 条、退化 2 条（其中 1 条有豁免记录）、未动失败 12 条分 3 类，验证：不回滚、头部类型正确、输出小表。\n纯标准库，不联网。",
+      "answer": {
+        "reference_code": "from collections import Counter\n\ndef regression_diff(prev, curr):\n    fixed = [k for k in prev if prev[k] == \"fail\" and curr[k] == \"pass\"]\n    regressed = [k for k in prev if prev[k] == \"pass\" and curr[k] == \"fail\"]\n    still = [k for k in curr if curr[k] == \"fail\"]\n    return fixed, regressed, still\n\ndef must_rollback(prev, curr, exemptions):\n    _, regressed, _ = regression_diff(prev, curr)\n    unexplained = [k for k in regressed if k not in exemptions]\n    return bool(unexplained), unexplained\n\n# 构造：修复 8、退化 2（s40 有豁免）、未动失败 12 条分 3 类\nprev = {f\"s{i}\": (\"fail\" if i < 8 else \"pass\") for i in range(50)}\ncurr = {f\"s{i}\": \"pass\" for i in range(50)}\ncurr[\"s40\"], curr[\"s41\"] = \"fail\", \"fail\"              # 退化 2 条\nfor i in range(20, 32):\n    curr[f\"s{i}\"] = \"fail\"                               # 未动失败 12 条\nfixed, reg, still = regression_diff(prev, curr)\nprint(f\"修复 {len(fixed)} / 退化 {len(reg)} / 未动失败 {len(still)}\")\nprint(\"必须回滚:\", must_rollback(prev, curr, {\"s40\"}))   # s41 无豁免 -> True",
+        "explain": "这道题把回归验收落成代码。核心判据是「退化集非空且无豁免 → 回滚」：豁免是显式记录（样本 id + 归因 + 理由），不是口头「应该没事」；有一条没豁免就回滚，没有商量余地（concept/02 §3）。坑一：三列划分要按「对」处理 prev 失败且 curr 也失败的样本——它们属于未动失败集，不能算修复；用集合运算写最稳（fixed = prev_fail ∩ curr_pass）。坑二：帕累托只对当前失败样本统计，头部 50% 用累计占比判定（cum ≤ total×0.5），边界相等时归入头部——差一条两条不重要，重要的是「每轮只修头部一类」。坑三：退化样本也要进错误类型统计，否则下一轮帕累托看不到「新引入的失败」；报告中应单列「本轮新增失败按类型」一小节。结论必须能回答：回滚/放行 + 下一轮修哪一类 + 豁免了几条为什么。"
+      },
+      "explanation": "诊断/对比实验：回归三列差异集、豁免式回滚判定与错误类型帕累托的完整链路。",
+      "tags": [
+        "回归测试",
+        "黄金集",
+        "帕累托",
+        "回滚判定"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/02 第 2、3 节；示例 ex04、ex05"
+    }
+  ]
+}

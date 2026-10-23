@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>考研题库样张 · 四层讲解与分类总结</title>
+<style>
+:root{
+  --ground:#ECEDEA; --surface:#F6F7F4; --ink:#15171A; --muted:#454A51;
+  --accent:#1B4DD8; --tint:#E4EBFB;
+  --serif:"Source Han Serif SC","Songti SC","Noto Serif SC",Georgia,serif;
+  --sans:"PingFang SC","Microsoft YaHei","Noto Sans SC",system-ui,-apple-system,sans-serif;
+  --fs-display:clamp(2.6rem,6.2vw,5.4rem);
+  --fs-h2:2.125rem; --fs-h3:1.375rem;
+  --fs-small:0.875rem;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);
+  font-size:17px;line-height:1.7;letter-spacing:.01em}
+.wrap{max-width:56rem;margin:0 auto;padding:0 24px}
+.masthead{padding:84px 0 36px}
+.masthead h1{font-family:var(--serif);font-weight:700;letter-spacing:-.03em;
+  font-size:var(--fs-display);line-height:1.06;margin:0 0 24px}
+.lede{font-size:var(--fs-h3);line-height:1.5;max-width:36rem;margin:0 0 28px}
+.cta{display:inline-flex;align-items:center;height:48px;padding:0 22px;margin:8px 0 0;
+  background:var(--accent);color:#fff;text-decoration:none;font-weight:600;border-radius:2px}
+.cta:hover{background:#153FB8}
+.cta:focus-visible{outline:3px solid #15171A;outline-offset:3px}
+.figures{display:flex;flex-wrap:wrap;gap:40px;margin:0 0 32px;padding:0;list-style:none}
+.figures b{display:block;font-family:var(--serif);font-size:var(--fs-h2);line-height:1.1;
+  letter-spacing:-.02em}
+.figures span{font-size:var(--fs-small);color:var(--muted)}
+section{padding:32px 0 8px}
+.sec-title{font-family:var(--serif);font-size:var(--fs-h2);letter-spacing:-.015em;
+  line-height:1.2;margin:0 0 12px}
+.sec-note{color:var(--muted);margin:0 0 20px;max-width:40rem}
+.sec-h{font-family:var(--serif);font-size:var(--fs-h3);margin:44px 0 6px}
+.q{display:grid;grid-template-columns:9rem 1fr;gap:24px;padding:32px 24px;
+  background:var(--surface);margin:16px 0;border-radius:2px}
+.q-no{font-family:var(--sans)}
+.q-no b{display:block;font-size:var(--fs-h2);line-height:1;letter-spacing:-.03em}
+.q-no span{display:block;font-family:var(--sans);font-size:var(--fs-small);
+  color:var(--muted);margin-top:8px;white-space:nowrap}
+.stem{font-family:var(--serif);font-size:var(--fs-h3);line-height:1.6;margin:0 0 14px}
+.opts{list-style:none;margin:0 0 20px;padding:0;display:grid;gap:6px}
+.opts li{display:flex;gap:10px}
+.opts b{min-width:1.2rem;color:var(--accent)}
+.opts span{flex:1}
+.layers{margin-top:24px;display:grid;gap:26px}
+.layer{display:grid;grid-template-columns:7.5rem 1fr;gap:20px;align-items:start}
+.layer h4{margin:0;font-size:1rem;font-weight:700;color:var(--accent);
+  letter-spacing:.01em;padding-top:.05em}
+.layer-body p{margin:0 0 10px}
+.steps{margin:0;padding-left:1.2rem;display:grid;gap:6px}
+.trap{margin:14px 0 0;background:var(--tint);padding:12px 16px;border-radius:2px}
+.trap span{font-weight:700;color:var(--accent);margin-right:10px}
+.trap span::after{content:"｜";color:var(--muted);font-weight:400}
+.pts{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.pts li{display:grid;grid-template-columns:11rem 1fr;gap:12px}
+.pts b{font-weight:600}
+.pt-pit{display:block;margin-top:6px;color:var(--accent);font-size:var(--fs-small)}
+.sol{white-space:pre-wrap}
+.grp{background:var(--surface);padding:28px 24px;margin:16px 0;border-radius:2px}
+.grp h3{font-family:var(--serif);font-size:var(--fs-h3);margin:0 0 10px;letter-spacing:-.01em}
+.recog{color:var(--muted);margin:0 0 20px}
+.grp-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px}
+.grp h4{font-size:1rem;margin:0 0 10px;color:var(--accent);letter-spacing:.01em}
+.grp h4:not(:first-child){margin-top:20px}
+.skill{margin:0 0 12px}
+.skill b{display:block}
+.skill p{margin:2px 0 0;color:var(--muted)}
+.traps{margin:0;padding-left:1.1rem;display:grid;gap:4px}
+.grp h3 .cnt{font-family:inherit;font-size:var(--fs-small);font-weight:400;color:var(--muted)}
+.wrap-note{margin:28px 0 0;color:var(--muted);max-width:40rem}
+.tbl{width:100%;border-collapse:collapse;background:var(--surface);margin:8px 0 0}
+.tbl th,.tbl td{padding:9px 12px;text-align:left;border-bottom:1px solid #DBDCD5}
+.tbl th{font-size:var(--fs-small);color:var(--muted);font-weight:600}
+.tbl td:nth-child(n+3),.tbl th:nth-child(n+3){text-align:right;font-variant-numeric:tabular-nums}
+.tbl tfoot td{font-weight:700;border-bottom:none}
+footer{padding:56px 0 80px;color:var(--muted);font-size:var(--fs-small);max-width:40rem}
+@media (prefers-reduced-motion:no-preference){
+  .js .reveal{opacity:0;transform:translateY(14px)}
+  .js .reveal.in{opacity:1;transform:none;transition:opacity .5s ease,transform .5s ease}
+  .js .layer{opacity:0;transform:translateY(10px)}
+  .js .q.in .layer,.js .grp.in .layer{opacity:1;transform:none;
+    transition:opacity .45s ease,transform .45s ease}
+  .js .q.in .layer:nth-child(2){transition-delay:.08s}
+  .js .q.in .layer:nth-child(3){transition-delay:.16s}
+  .js .q.in .layer:nth-child(4){transition-delay:.24s}
+}
+@media (max-width:720px){
+  .q{grid-template-columns:1fr;gap:12px;padding:24px 18px}
+  .q-no{display:flex;align-items:baseline;gap:10px}
+  .q-no span{margin-top:0}
+  .layer{grid-template-columns:1fr;gap:6px}
+  .layer h4{padding-top:0}
+  .pts li{grid-template-columns:1fr;gap:2px}
+  .grp-grid{grid-template-columns:1fr;gap:24px}
+  .figures{gap:28px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="masthead">
+    <h1>一道题，按四层讲透</h1>
+    <p class="lede">框架先立住，思路再落地，知识点对上号，最后才展开完整解法。
+      下面是题库里真实的一套卷子，四层顺序与陷阱提示都没改过。</p>
+    <ul class="figures">
+      <li><b>435</b><span>道题</span></li>
+      <li><b>11</b><span>个考试科目</span></li>
+      <li><b>73</b><span>份分类总结</span></li>
+      <li><b>72</b><span>套模拟卷</span></li>
+    </ul>
+  </header>
+
+  <section>
+    <h2 class="sec-title">样卷：算法设计与分析 · 专项模拟卷（1）</h2>
+    <p class="sec-note">每题固定四层，顺序不可调换：先看框架知道「这类题按什么动作做」，
+      再看思路知道「这道题具体从哪下手」，然后核对知识点，最后才是完整解法。
+      框架底部单列一步「容易错在」，把最常见的失分点放在动笔之前。</p>
+    <h3 class="sec-h">单项选择题</h3><article class="q"><div class="q-no"><b>1</b><span>单项选择题 · 5 分</span></div><div class="q-main"><p class="stem">递归式 T(n) = 2T(n/2) + n·log n 的时间复杂度是（　）</p><ol class="opts"><li><b>A</b><span>Θ(n log n)</span></li><li><b>B</b><span>Θ(n log² n)</span></li><li><b>C</b><span>Θ(n²)</span></li><li><b>D</b><span>Θ(n)</span></li></ol><div class="layers"><div class="layer"><h4>解题框架</h4><div class="layer-body"><ol class="steps"><li>写出 a（子问题个数）、b（规模缩小倍数）、f(n)（分解与合并代价）</li><li>算 n^(log_b a)</li><li>f(n) 更小 → Θ(n^(log_b a))；同阶 → 乘一个 log n；更大且满足正则条件 → Θ(f(n))</li><li>不符合主定理形式（如 T(n)=T(n−1)+n）改用展开法</li><li>最后只保留最高阶，去掉常数</li></ol><p class="trap"><span>容易错在</span>把 a、b 认反（a 是分支数，不是缩小倍数）</p></div></div><div class="layer"><h4>解决思路</h4><div class="layer-body"><p>套主定理：a=2、b=2，n^(log₂2)=n，而 f(n)=n log n 与 n 同阶但多一个 log 因子。</p></div></div><div class="layer"><h4>知识点</h4><div class="layer-body"><ul class="pts"><li><b>主定理</b><span>T(n)=aT(n/b)+f(n)，与 n^(log_b a) 比较：小则取后者，同阶则乘 log n，大则取 f(n)。<span class="pt-pit">易错：把 f(n)=n log n 直接当成 n²，选 Θ(n²)；或忽略 log 因子选 Θ(n log n)。</span></span></li></ul></div></div><div class="layer"><h4>详细解法</h4><div class="layer-body"><p class="sol">a=2，b=2，log_b a = 1，故 n^(log_b a) = n。f(n) = n log n 比 n 大一个 log 因子，属于主定理第二类的扩展情形，结果在 n 上再乘一个 log：Θ(n log² n)。<br>对照：若 f(n)=n，结果是 Θ(n log n)；若 f(n)=n²，结果是 Θ(n²)。</p></div></div></div></div></article><article class="q"><div class="q-no"><b>2</b><span>单项选择题 · 5 分</span></div><div class="q-main"><p class="stem">下列函数中增长最慢的是（　）</p><ol class="opts"><li><b>A</b><span>log n</span></li><li><b>B</b><span>√n</span></li><li><b>C</b><span>n</span></li><li><b>D</b><span>n log n</span></li></ol><div class="layers"><div class="layer"><h4>解题框架</h4><div class="layer-body"><ol class="steps"><li>先明确问的是单次最坏、平均还是摊还</li><li>最坏找最不利输入（快排已排序、散列全冲突）</li><li>平均要说明输入分布假设</li><li>摊还看一串操作的总代价除以操作数</li><li>答题时写出结论 + 一句理由</li></ol><p class="trap"><span>容易错在</span>把平均当最坏</p></div></div><div class="layer"><h4>解决思路</h4><div class="layer-body"><p>比较阶：log n &lt; √n &lt; n &lt; n log n，取 n=10⁶ 代入即可直观看出。</p></div></div><div class="layer"><h4>知识点</h4><div class="layer-body"><ul class="pts"><li><b>摊还分析</b><span>一串操作的总代价除以操作次数，动态数组扩容的摊还代价是 O(1)。<span class="pt-pit">易错：认为 √n 比 log n 小——多项式增长总快于对数增长。</span></span></li></ul></div></div><div class="layer"><h4>详细解法</h4><div class="layer-body"><p class="sol">令 n=10⁶：log₂n ≈ 20，√n = 1000，n = 10⁶，n log n ≈ 2×10⁷。故增长最慢的是 log n。记忆顺序：log n &lt; √n &lt; n &lt; n log n &lt; n² &lt; 2ⁿ。</p></div></div></div></div></article><article class="q"><div class="q-no"><b>3</b><span>单项选择题 · 5 分</span></div><div class="q-main"><p class="stem">动态数组（容量不足时翻倍扩容）的 push 操作，摊还时间复杂度是（　）</p><ol class="opts"><li><b>A</b><span>O(1)</span></li><li><b>B</b><span>O(log n)</span></li><li><b>C</b><span>O(n)</span></li><li><b>D</b><span>O(n log n)</span></li></ol><div class="layers"><div class="layer"><h4>解题框架</h4><div class="layer-body"><ol class="steps"><li>先明确问的是单次最坏、平均还是摊还</li><li>最坏找最不利输入（快排已排序、散列全冲突）</li><li>平均要说明输入分布假设</li><li>摊还看一串操作的总代价除以操作数</li><li>答题时写出结论 + 一句理由</li></ol><p class="trap"><span>容易错在</span>把平均当最坏</p></div></div><div class="layer"><h4>解决思路</h4><div class="layer-body"><p>摊还看总代价：n 次 push 的扩容总代价为 1+2+4+…+n &lt; 2n，平均到每次是常数。</p></div></div><div class="layer"><h4>知识点</h4><div class="layer-body"><ul class="pts"><li><b>摊还分析</b><span>一串操作的总代价除以操作次数，动态数组扩容的摊还代价是 O(1)。<span class="pt-pit">易错：把单次扩容的 O(n) 当成每次 push 的复杂度。</span></span></li></ul></div></div><div class="layer"><h4>详细解法</h4><div class="layer-body"><p class="sol">n 次 push 中，扩容发生在容量 1,2,4,…,2^k 时，拷贝总次数为 1+2+…+2^k &lt; 2n，加上 n 次写入，总代价 O(n)，摊还到每次为 O(1)。<br>注意：单次最坏仍是 O(n)，摊还与最坏是两个不同口径。</p></div></div></div></div></article><h3 class="sec-h">填空题</h3><article class="q"><div class="q-no"><b>4</b><span>填空题 · 5 分</span></div><div class="q-main"><p class="stem">递归式 T(n) = 2T(n/2) + n 的解为 ______。</p><div class="layers"><div class="layer"><h4>解题框架</h4><div class="layer-body"><ol class="steps"><li>写出 a（子问题个数）、b（规模缩小倍数）、f(n)（分解与合并代价）</li><li>算 n^(log_b a)</li><li>f(n) 更小 → Θ(n^(log_b a))；同阶 → 乘一个 log n；更大且满足正则条件 → Θ(f(n))</li><li>不符合主定理形式（如 T(n)=T(n−1)+n）改用展开法</li><li>最后只保留最高阶，去掉常数</li></ol><p class="trap"><span>容易错在</span>把 a、b 认反（a 是分支数，不是缩小倍数）</p></div></div><div class="layer"><h4>解决思路</h4><div class="layer-body"><p>主定理：n^(log₂2)=n 与 f(n)=n 同阶，结果要乘 log n。</p></div></div><div class="layer"><h4>知识点</h4><div class="layer-body"><ul class="pts"><li><b>主定理</b><span>T(n)=aT(n/b)+f(n)，与 n^(log_b a) 比较：小则取后者，同阶则乘 log n，大则取 f(n)。<span class="pt-pit">易错：写成 Θ(n)，漏掉同阶情形要乘的 log 因子。</span></span></li></ul></div></div><div class="layer"><h4>详细解法</h4><div class="layer-body"><p class="sol">a=2，b=2，log_b a=1，n^(log_b a)=n，与 f(n)=n 同阶，由主定理第二类得 T(n)=Θ(n log n)。这正是归并排序的递归式。</p></div></div></div></div></article><h3 class="sec-h">解答题</h3><article class="q"><div class="q-no"><b>5</b><span>解答题 · 10 分</span></div><div class="q-main"><p class="stem">用主定理求 T(n) = 2T(n/2) + n² 的渐进复杂度，并写出判断过程。</p><div class="layers"><div class="layer"><h4>解题框架</h4><div class="layer-body"><ol class="steps"><li>写出 a（子问题个数）、b（规模缩小倍数）、f(n)（分解与合并代价）</li><li>算 n^(log_b a)</li><li>f(n) 更小 → Θ(n^(log_b a))；同阶 → 乘一个 log n；更大且满足正则条件 → Θ(f(n))</li><li>不符合主定理形式（如 T(n)=T(n−1)+n）改用展开法</li><li>最后只保留最高阶，去掉常数</li></ol><p class="trap"><span>容易错在</span>把 a、b 认反（a 是分支数，不是缩小倍数）</p></div></div><div class="layer"><h4>解决思路</h4><div class="layer-body"><p>先算 a、b 与 n^(log_b a)，再与 f(n)=n² 比较大小，确定属于主定理哪一类。</p></div></div><div class="layer"><h4>知识点</h4><div class="layer-body"><ul class="pts"><li><b>主定理</b><span>T(n)=aT(n/b)+f(n)，与 n^(log_b a) 比较：小则取后者，同阶则乘 log n，大则取 f(n)。<span class="pt-pit">易错：只写结果不写比较过程；或把 n^(log_b a) 算成 n²。</span></span></li></ul></div></div><div class="layer"><h4>详细解法</h4><div class="layer-body"><p class="sol">a = 2，b = 2，log_b a = log₂2 = 1，故 n^(log_b a) = n。<br>f(n) = n² 比 n 高阶（多项式意义上大），且满足正则条件 a·f(n/b) = 2·(n/2)² = n²/2 ≤ c·f(n)（取 c = 1/2 &lt; 1）。<br>属于主定理第三类，故 T(n) = Θ(f(n)) = Θ(n²)。<br>对照记忆：f 小取 n^log，同阶乘 log，f 大取 f。</p></div></div></div></div></article>
+  </section>
+
+  <section id="summary">
+    <h2 class="sec-title">分类总结：按专题收口</h2>
+    <p class="sec-note">同一专题的题共用一套步骤与陷阱。做完该专题的题后回看这一页，
+      把「认题信号、固定步骤、技巧、陷阱」四件事过一遍，比再刷十道同类题有效。</p>
+    <article class="grp"><h3>复杂度与渐进分析<span class="cnt"> · 本专题 5 题</span></h3><p class="recog">本专题常见问法：给递归式求时间复杂度；问某种操作的时间复杂度。看到这类问法先归到本专题，再套下面的固定步骤，不要从题目细节重新想。</p><div class="grp-grid"><div><h4>固定步骤</h4><ol class="steps"><li>写出 a（子问题个数）、b（规模缩小倍数）、f(n)（分解与合并代价）</li><li>算 n^(log_b a)</li><li>f(n) 更小 → Θ(n^(log_b a))；同阶 → 乘一个 log n；更大且满足正则条件 → Θ(f(n))</li><li>不符合主定理形式（如 T(n)=T(n−1)+n）改用展开法</li><li>最后只保留最高阶，去掉常数</li></ol></div><div><h4>技巧</h4><div class="skill"><b>主定理</b><p>同阶情形最容易漏乘 log n，例如 T(n)=2T(n/2)+n 的结果是 Θ(n log n)。</p></div><div class="skill"><b>摊还分析</b><p>摊还不是「每次最坏 O(1)」，单次扩容仍是 O(n)。</p></div><h4>陷阱</h4><ul class="traps"><li>把 a、b 认反（a 是分支数，不是缩小倍数）</li><li>同阶情形忘记乘 log n</li><li>递归式有减号还硬套主定理</li><li>把平均当最坏</li></ul></div></div></article><article class="grp"><h3>排序<span class="cnt"> · 本专题 7 题</span></h3><p class="recog">本专题常见问法：比较各排序的复杂度、稳定性、适用场景；写出快排一趟划分结果或归并过程。看到这类问法先归到本专题，再套下面的固定步骤，不要从题目细节重新想。</p><div class="grp-grid"><div><h4>固定步骤</h4><ol class="steps"><li>先分类：比较排序还是非比较排序</li><li>写出最好/平均/最坏三档</li><li>判断稳定性：相等元素相对次序是否改变</li><li>看空间：归并 O(n)，快排 O(log n) 栈，堆排 O(1)</li><li>按题目条件选：要求稳定选归并，要求原地选堆排</li></ol></div><div><h4>技巧</h4><div class="skill"><b>比较排序下界</b><p>计数排序能到 O(n+k) 是因为不比较，不是突破了下界。</p></div><div class="skill"><b>稳定性与原地性</b><p>多关键字排序常要求稳定：先按次要关键字排，再按主要关键字稳定排序。</p></div><h4>陷阱</h4><ul class="traps"><li>把快排平均 O(n log n) 当成最坏</li><li>认为堆排稳定（实际不稳定）</li><li>对已有序数据仍选快排且取首元素为枢轴</li><li>划分时指针移动顺序写反导致死循环</li></ul></div></div></article><article class="grp"><h3>查找与散列<span class="cnt"> · 本专题 3 题</span></h3><p class="recog">本专题常见问法：判断二分能否使用，或求第一个/最后一个位置；分析散列查找长度或选择冲突处理方式。看到这类问法先归到本专题，再套下面的固定步骤，不要从题目细节重新想。</p><div class="grp-grid"><div><h4>固定步骤</h4><ol class="steps"><li>确认数组有序且可随机访问</li><li>统一区间写法（左闭右开或左闭右闭），全程不混用</li><li>找第一个 ≥ target：命中后继续收缩右边界</li><li>循环结束条件与返回值要和区间写法匹配</li><li>用 n=1、target 不存在两种边界自测</li></ol></div><div><h4>技巧</h4><div class="skill"><b>二分查找</b><p>找边界时命中不能立即返回，要继续收缩区间。</p></div><div class="skill"><b>散列与冲突</b><p>开放定址删除要打标记，直接置空会截断探测链。</p></div><h4>陷阱</h4><ul class="traps"><li>区间开闭混用导致死循环或漏解</li><li>命中就返回，找边界时只能得到任意一个</li><li>对链表使用二分（无法 O(1) 随机访问）</li><li>认为散列查找恒为 O(1)</li></ul></div></div></article><article class="grp"><h3>递归与分治<span class="cnt"> · 本专题 4 题</span></h3><p class="recog">本专题常见问法：把问题拆成子问题并给出合并方式；用分治统计跨区间的贡献。看到这类问法先归到本专题，再套下面的固定步骤，不要从题目细节重新想。</p><div class="grp-grid"><div><h4>固定步骤</h4><ol class="steps"><li>确认子问题与原问题同型且相互独立</li><li>确定拆分点（中点、按位、按值域）</li><li>写出合并步骤及其代价</li><li>列递归式并用主定理求复杂度</li><li>检查递归出口</li></ol></div><div><h4>技巧</h4><div class="skill"><b>分治三步骤</b><p>子问题重叠时应改用动态规划，否则重复计算导致指数级。</p></div><div class="skill"><b>跨区间贡献</b><p>只统计半边是最常见的漏解，跨中点的部分必须单独算。</p></div><h4>陷阱</h4><ul class="traps"><li>子问题有重叠却仍用分治（应改 DP）</li><li>合并代价算漏，导致复杂度估低</li><li>递归出口缺失或写错</li><li>只统计半边，漏掉跨中点的情况</li></ul></div></div></article><article class="grp"><h3>动态规划<span class="cnt"> · 本专题 7 题</span></h3><p class="recog">本专题常见问法：给问题建模，写出状态与转移方程；填表求最优值，或把二维压成一维。看到这类问法先归到本专题，再套下面的固定步骤，不要从题目细节重新想。</p><div class="grp-grid"><div><h4>固定步骤</h4><ol class="steps"><li>用一句话定义 dp 下标的含义（必须能复述）</li><li>想「最后一步」：最优解的最后一次决策是什么</li><li>由最后一步反推转移方程</li><li>确定边界（空串、容量 0、长度为 0）</li><li>确定计算顺序，保证依赖项先算</li></ol></div><div><h4>技巧</h4><div class="skill"><b>状态与转移</b><p>状态定义含糊时，转移方程一定写不对，先复述状态再动笔。</p></div><div class="skill"><b>背包与序列问题</b><p>0-1 背包正序更新会重复使用同一物品，等价于完全背包。</p></div><h4>陷阱</h4><ul class="traps"><li>状态含义说不清，转移必然出错</li><li>边界漏写导致越界或初值错</li><li>0-1 背包用正序更新（变成完全背包）</li><li>填表顺序与依赖方向相反</li></ul></div></div></article><article class="grp"><h3>贪心<span class="cnt"> · 本专题 5 题</span></h3><p class="recog">本专题常见问法：选择贪心指标并说明为什么最优；判断某策略是否总能得到最优解。看到这类问法先归到本专题，再套下面的固定步骤，不要从题目细节重新想。</p><div class="grp-grid"><div><h4>固定步骤</h4><ol class="steps"><li>明确每一步的贪心指标（最早结束、最小权值、最大单位价值）</li><li>用交换论证证明：任意最优解都能改成含贪心选择且不更差</li><li>确认剩余子问题与原问题同型</li><li>给出反例会立刻暴露错误策略</li><li>写复杂度：排序 + 一次扫描</li></ol></div><div><h4>技巧</h4><div class="skill"><b>贪心选择性质</b><p>只说「显然」不得分，必须写出交换的那一步。</p></div><div class="skill"><b>贪心失效</b><p>反例优先构造小规模、数值不规整的例子，一眼能看出差异。</p></div><h4>陷阱</h4><ul class="traps"><li>只说「显然最优」，没有交换论证</li><li>贪心指标选错（区间调度按开始时间）</li><li>把 0-1 背包当成分数背包用贪心</li><li>用大规模例子，反而看不清差异</li></ul></div></div></article><article class="grp"><h3>图算法<span class="cnt"> · 本专题 4 题</span></h3><p class="recog">本专题常见问法：选择最短路算法并手算距离；求 MST 或判断连通性；判断 DAG 并给出拓扑序。看到这类问法先归到本专题，再套下面的固定步骤，不要从题目细节重新想。</p><div class="grp-grid"><div><h4>固定步骤</h4><ol class="steps"><li>先看有无负权：有负权用 Bellman-Ford/SPFA</li><li>无权图用 BFS</li><li>Dijkstra 每次取未确定点中 dist 最小的，松弛邻边</li><li>记录前驱以便回溯路径</li><li>多源最短路用 Floyd O(n³)</li></ol></div><div><h4>技巧</h4><div class="skill"><b>最短路算法选择</b><p>Dijkstra 一旦确定某点最短就不能再更新，负权会破坏这个前提。</p></div><div class="skill"><b>最小生成树</b><p>MST 不唯一（等权边可换），但总权值唯一。</p></div><h4>陷阱</h4><ul class="traps"><li>Dijkstra 用于负权图</li><li>松弛时忘记取 min</li><li>把边数当顶点数，复杂度写错</li><li>选边时未判环</li></ul></div></div></article><article class="grp"><h3>字符串匹配<span class="cnt"> · 本专题 5 题</span></h3><p class="recog">本专题常见问法：求 next/π 数组，或说明匹配过程；选择字符串数据结构或分析复杂度。看到这类问法先归到本专题，再套下面的固定步骤，不要从题目细节重新想。</p><div class="grp-grid"><div><h4>固定步骤</h4><ol class="steps"><li>先明确题目用哪种定义（π 还是 next）</li><li>π[0]=0；递推时用上一个 π 值回退</li><li>失配时 j = π[j−1] 继续比较，不回退主串</li><li>匹配成功后可继续用 π 找重叠出现</li><li>复杂度 O(n+m)</li></ol></div><div><h4>技巧</h4><div class="skill"><b>KMP 与前缀函数</b><p>π 与 next 差一位，做题前先看题目给的定义。</p></div><div class="skill"><b>哈希与 Trie</b><p>单哈希可能被构造冲突，重要场合用双哈希。</p></div><h4>陷阱</h4><ul class="traps"><li>π 与 next 混用，差一位导致全错</li><li>失配时主串指针回退，退化成朴素匹配</li><li>π 计算时忘记 while 回退</li><li>单哈希在大数据下被卡</li></ul></div></div></article>
+    <p class="wrap-note">八个专题已经覆盖全部 40 道题，每道题都能回指到上面的某一步骤。
+      做完一套卷再回看对应专题，比重复刷题更容易发现自己固定的错法。</p>
+  </section>
+
+  <section>
+    <h2 class="sec-title">全库概况</h2>
+    <p class="sec-note">每个科目都有独立的题型框架、知识点表、分类总结与模拟卷，
+      由脚本生成并逐项校验：四层顺序、答案有效、总结覆盖全部专题、卷面分值配平。</p>
+    <table class="tbl"><thead><tr><th>考试</th><th>科目</th><th>题数</th><th>分类总结</th><th>模拟卷</th></tr></thead><tbody><tr><td>408 计算机学科专业基础</td><td>数据结构</td><td>49</td><td>9</td><td>4</td></tr><tr><td>408 计算机学科专业基础</td><td>计算机组成原理</td><td>43</td><td>7</td><td>4</td></tr><tr><td>408 计算机学科专业基础</td><td>操作系统</td><td>30</td><td>5</td><td>4</td></tr><tr><td>408 计算机学科专业基础</td><td>计算机网络</td><td>26</td><td>6</td><td>4</td></tr><tr><td>考研数学</td><td>数学（一）</td><td>47</td><td>11</td><td>8</td></tr><tr><td>考研数学</td><td>数学（二）</td><td>40</td><td>8</td><td>8</td></tr><tr><td>考研英语</td><td>英语（一）</td><td>40</td><td>3</td><td>8</td></tr><tr><td>考研英语</td><td>英语（二）</td><td>40</td><td>3</td><td>8</td></tr><tr><td>思想政治理论</td><td>政治</td><td>40</td><td>5</td><td>8</td></tr><tr><td>离散数学</td><td>离散数学</td><td>40</td><td>8</td><td>8</td></tr><tr><td>算法设计与分析</td><td>算法设计与分析</td><td>40</td><td>8</td><td>8</td></tr></tbody><tfoot><tr><td>合计</td><td>11 个科目</td><td>435</td><td>73</td><td>72</td></tr></tfoot></table>
+  </section>
+
+  <footer>本卷为按题型结构自编的专项练习卷，题目与解析均为原创，不是真题还原；考点年份为历年命题的归纳性标注，请以当年考试大纲为准。</footer>
+</div>
+<script>
+document.documentElement.classList.add('js');
+const io = new IntersectionObserver((es)=>{
+  es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+},{rootMargin:'0px 0px -8% 0px'});
+document.querySelectorAll('.q,.grp').forEach(el=>{el.classList.add('reveal');io.observe(el);});
+</script>
+</body>
+</html>

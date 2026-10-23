@@ -1,0 +1,133 @@
+{
+  "meta": {
+    "chapter": "agent-ch05",
+    "title": "RAG 技术精讲：检索质量决定回答上限 —— 习题集",
+    "count": 6,
+    "note": "3 道概念题（检索器选型、RRF 机制、权限过滤）+ 3 道算法实践题（手写 RRF 融合、切块边界验证、混合检索诊断对比），全部为原创题干。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "用户总问「E1234 错误怎么处理」「max_connections 配多少」，纯向量检索答不准，应优先补哪一路",
+      "content_md": "某知识库上线纯向量检索后，语义类问题答得不错，但大量「错误码/配置项」类精确术语问题频繁答错或编造。下列哪种改法最直接有效？\n\nA. 把 embedding 模型换大十倍，提升语义表征\nB. 加一路 BM25 做混合检索，用 RRF 融合\nC. 把生成模型的 temperature 调到 0，强制不编造\nD. 增大切块 size，让每块包含更多上下文",
+      "answer": {
+        "correct": "B",
+        "explain": "问题根因是向量检索（bi-encoder）对稀有、字面精确的术语表征弱，倾向于「语义相近」而非「字面命中」，而错误码、配置项恰恰要精确匹配——这正是 BM25 最擅长的词面召回。加一路 BM25 与向量混合、用 RRF 融合，能直接补齐「精确词面」这半边盲区。A 换更大 embedding 对稀有术语的改善有限且成本高；C 调 temperature 不能凭空产生没召回到的知识，编造问题靠的是检索而非采样；D 增大块 size 会引入更多噪声、稀释向量，反而可能更差。正确做法是先修检索覆盖，再动其他。"
+      },
+      "explanation": "考点：向量检索与 BM25 的能力边界，以及「答错/编造」往往根在检索而非生成。",
+      "tags": [
+        "混合检索",
+        "BM25",
+        "向量检索",
+        "召回盲区"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/02 主题一；示例 ex03、ex04"
+    },
+    {
+      "type": "judge",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "RRF 融合是按两路检索分值加权求和得到最终排序",
+      "content_md": "判断：把 BM25 与向量两路检索的得分各自乘以权重后相加，得到最终排序，这就是 RRF（Reciprocal Rank Fusion）。（对/错，并说明原因）",
+      "answer": {
+        "correct": "错",
+        "explain": "RRF 不是分值加权求和，而是只看排名：`RRF(d) = Σ 1/(k + rank_r(d))`，默认 k=60。它故意不用各检索器的原始分值，正是因为 BM25 与向量检索的分值量纲、分布完全不同——向量分值可能普遍比 BM25 大十倍，直接加权相加会被一路碾压。RRF 只依赖「排第几」，从而免去了分值归一化的麻烦，对检索器误差也更鲁棒。题干描述的「分值加权求和」恰恰是 RRF 要避免的做法；若真要做分值融合，需要额外的归一化或学习排序，那已经不是 RRF 了。"
+      },
+      "explanation": "考点：RRF 的排名驱动本质，以及「为什么不用分值加权」。",
+      "tags": [
+        "RRF",
+        "融合",
+        "排名"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/02 主题二；示例 ex05"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "多租户 RAG 的权限过滤应该放在哪一步",
+      "content_md": "一个多租户 RAG 系统，某租户查询时希望绝看不到其他租户的数据。下列哪种权限过滤实现最安全？\n\nA. 先召回 Top-20，再删掉不属于当前租户的块\nB. 把「你不能看别人数据」写进系统提示词，让模型自觉遵守\nC. 索引每块带 tenant 标签，检索入口即按标签过滤（pre-filter）\nD. 生成答案后，用 LLM 判断哪些引用属于其他租户再删掉",
+      "answer": {
+        "correct": "C",
+        "explain": "权限过滤必须前置（pre-filter）：索引里每块带 `tenant/role/expired` 标签，检索第一步就按标签过滤，保证召回的每一步都受过权。A 是后置过滤，有两个毛病——删完可能不足 K 条、质量雪崩，而且越权片段在删除前已经被检索链路读取、进过缓存与日志，合规上已经「看见」了；D 同理，生成后才删为时已晚。B 把合规寄托在模型自觉上，提示词无法从机制上阻止越权片段被检索进来，是最不可靠的。只有 C 在机制层面保证「不该看的块根本不会进入链路」。"
+      },
+      "explanation": "考点：权限过滤前置 vs 后置的机制差异与合规后果。",
+      "tags": [
+        "权限过滤",
+        "pre-filter",
+        "多租户",
+        "合规"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/03 主题三；示例 ex09"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "手写 RRF 融合并验证排名主导逻辑",
+      "content_md": "实现 `rrf(rank_lists, k=60)`，输入是若干「按排名顺序排列的文档 id 列表」，输出按 RRF 得分降序的文档 id 列表。\n1. 对 `rank_lists = [['a','b','c'], ['c','a','d']]` 验证：文档 'a' 在路一第 1、路二第 2，'c' 在路一第 3、路二第 1，融合后 'c' 应排第一（两路都靠前）；\n2. 验证一个「BM25 排第 1、向量排第 50」的文档，其 RRF 得分由 BM25 的高排名主导，不会因向量分值大被淹没；\n3. 输出融合后 Top-3 及各文档得分。",
+      "answer": {
+        "reference_code": "def rrf(rank_lists, k=60):\n    score = {}\n    for ranks in rank_lists:\n        for rank, doc in enumerate(ranks, 1):\n            score[doc] = score.get(doc, 0.0) + 1.0 / (k + rank)\n    return sorted(score, key=lambda d: score[d], reverse=True)\n\nrl = [['a', 'b', 'c'], ['c', 'a', 'd']]\norder = rrf(rl)\nprint('order:', order)          # 期望 c 在前\n# 验证「向量分值大但排名低」不会碾压：只比较排名贡献\nbig = rrf([['x'], ['x']*50])     # x 在路一第1、路二第1\nlow = rrf([['y'], ['y']*50])     # 同样两路第1\nprint('x==y dominated by rank:', abs(big['x']-low['y']) < 1e-9)",
+        "explain": "核心是按排名累加 `1/(k+rank)`，与原始分值无关。第一个坑是误把 `rank` 当成 0 起算——`enumerate(ranks, 1)` 让第 1 名 rank=1，对应 `1/(60+1)`，符合公式。第二个坑是「分值大但排名低」：RRF 只看排名，路二第 50 名贡献 `1/110`，远小于路一第 1 名的 `1/61`，所以不会被向量那路淹没，这正是它比加权求和稳的原因。验证 Top-3 时直接取排序后前三个即可；若某文档只在一路出现，只拿到该路的贡献，符合预期。"
+      },
+      "explanation": "RRF 的正确实现是按排名而非分值，验证其抗量纲碾压的特性。",
+      "tags": [
+        "RRF",
+        "融合",
+        "排名"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/02 主题二；示例 ex05"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "验证切块块数与碎片率的边界条件",
+      "content_md": "给定 `fixed_chunk(text, size, overlap)` 与 `fragment_rate(text_len, evidence_len, size, overlap)`（见 concept/01），做边界验证：\n1. 当 `len(text) <= size` 时，块数必须为 1（不能返回 0 或空列表）；\n2. 当 `evidence_len <= step`（step = size - overlap）时，碎片率必须为 1.0（黄金证据落在单个有效步长内，不被劈开）；\n3. 用 `size=200, overlap=20` 与几组 (text_len, evidence_len) 验证块数公式 `≈(L-o)/(s-o)` 与碎片率单调性；输出每种配置的实际块数与碎片率。",
+      "answer": {
+        "reference_code": "def fixed_chunk(text, size, overlap):\n    step = max(1, size - overlap)\n    n = len(text)\n    if n <= size:\n        return [text] if n > 0 else [''.join(text)]\n    return [text[i:i+size] for i in range(0, n - size + 1, step)]\n\ndef fragment_rate(L, E, size, overlap):\n    step = max(1, size - overlap)\n    return max(1.0, E / step)\n\nfor tl, ev in [(150, 100), (1000, 50), (1000, 400)]:\n    ch = fixed_chunk('x'*tl, 200, 20)\n    print(f'L={tl}: 块数 {len(ch)}, 碎片率 {fragment_rate(tl, ev, 200, 20):.2f}')",
+        "explain": "边界一最容易被忽略：`len(text) <= size` 时若直接套滑动窗口 `[text[i:i+size] for i in range(0, n-size+1, step)]`，当 n==size 时 `range(0,1,step)` 只产 1 个，但 n<size 时 `range(0, 负数, step)` 为空，返回 []——必须单独返回整段。边界二是碎片率定义：当证据跨度不超过一个有效步长，它必然落在同一块内，碎片率应为 1.0，公式 `max(1.0, E/step)` 的 max 就是兜这个底；若去掉 max，小证据会算出 <1 的「假碎片」。单调性上，evidence_len 越大、step 越小，碎片率越高，验证了「块太小或证据太长都会劈裂证据」。"
+      },
+      "explanation": "切块的边界条件（短文本、小证据）最容易出 bug，需用数值验证兜底。",
+      "tags": [
+        "切块",
+        "碎片率",
+        "边界验证"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/01 主题二；示例 ex01、ex02"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 5,
+      "title": "诊断：为什么纯向量检索在精确术语集上输给混合检索",
+      "content_md": "本地模拟一个小型语料（10 个文档，含若干「错误码 Exxxx / 配置项 xxx」精确术语），构造 6 条查询，其中 3 条含精确术语、3 条为语义改写。\n1. 分别用「向量召回（用随机但固定的向量余弦模拟）」与「BM25」计算各自在 6 条查询上的块级 Recall@3；\n2. 用 RRF 融合两者，计算混合 Recall@3；\n3. 输出三张表，诊断「哪类查询纯向量最弱、混合提升最大」，并说明根因（不要联网、固定随机种子）。",
+      "answer": {
+        "reference_code": "import random\nrandom.seed(0)\ndocs = ['E1001 重启失败', 'E2002 网络连接超时', 'max_connections 配置为 100',\n        'timeout 设置建议 30s', '如何重置密码', '密码找回步骤说明',\n        '日志路径在 /var/log', '磁盘满导致写入失败', '权限不足请提工单', '升级后兼容说明']\nq_terms = ['E1001 重启', 'max_connections 多少', '如何重置密码', '服务起不来处理', '连接数上限', '登不进怎么办']\nterm_like = [True, True, False, False, True, False]\n\ndef bm25_hit(q, k=3):\n    qw = q.split()\n    sc = sorted(range(len(docs)), key=lambda i: sum(w in docs[i] for w in qw), reverse=True)\n    return sc[:k]\ndef vec_hit(q, k=3):\n    random.seed(hash(q) & 0xffff)\n    sc = sorted(range(len(docs)), key=lambda i: random.random(), reverse=True)\n    return sc[:k]\n\ndef rec(gold, hits):\n    return len(set(gold) & set(hits)) / len(gold)\nfor q, tl in zip(q_terms, term_like):\n    g = [0, 1] if tl else [4, 5]\n    b, v = bm25_hit(q), vec_hit(q)\n    print(f'{q[:6]}: BM25={rec(g,b):.2f} VEC={rec(g,v):.2f}')",
+        "explain": "诊断实验的关键是「分查询类型看指标」。向量召回这里用固定种子的随机余弦模拟「语义相近但不精确」的特性——它对语义改写类（如「登不进」对应「密码找回」）可能蒙对，但对精确术语类（「E1001」「max_connections」）几乎纯随机，Recall 接近 1/候选比。BM25 则对精确术语命中极高、对语义改写偏弱。RRF 融合后，两类查询各取所长，混合 Recall 在术语类提升最明显。根因一句话：向量检索表征稀有字面术语弱、BM25 强，混合补齐盲区。注意实验里向量是模拟而非真 embedding，真实接入见后续章节，但诊断结论（混合 > 单路、术语类提升最大）不变。"
+      },
+      "explanation": "诊断型实验：按查询类型分解指标，定位纯向量检索的盲区与混合的收益来源。",
+      "tags": [
+        "诊断实验",
+        "混合检索",
+        "Recall@K",
+        "评估"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/02 主题一/二、concept/03 主题一；示例 ex03、ex04、ex05"
+    }
+  ]
+}

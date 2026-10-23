@@ -1,0 +1,346 @@
+{
+ "track": "database",
+ "items": [
+  {
+   "slug": "db-dbeaver",
+   "track": "database",
+   "tier": "t1",
+   "hours": 8,
+   "level": "easy",
+   "title": "DBeaver · 用真实数据练 SQL",
+   "repo": "dbeaver/dbeaver",
+   "summary": "通用数据库客户端，能同时连 MySQL、Postgres、SQLite。作为 t1 的价值不是学工具，而是有一个能立刻执行、能看执行计划的环境。",
+   "stack": [
+    "JDBC",
+    "SQL",
+    "执行计划",
+    "多数据库方言"
+   ],
+   "learn": [
+    "连接配置与驱动管理",
+    "执行计划（EXPLAIN）的读法",
+    "不同数据库方言的差异（分页、日期函数）",
+    "结果集导出与数据对比",
+    "事务的手动提交与回滚"
+   ],
+   "career": "SQL 是数据岗和后端岗的共同底线。能在真实数据上写对查询、看懂计划，比刷题更接近工作。",
+   "steps": [
+    "连上 MySQL 与 SQLite，各建一张表并导入 10 万行",
+    "写 10 条查询：聚合、分组、窗口函数、子查询",
+    "对其中 3 条看 EXPLAIN，指出走没走索引",
+    "给未走索引的查询加索引并复测",
+    "写 README：10 条 SQL + 执行计划对比"
+   ],
+   "accept": [
+    "10 条查询结果正确且覆盖窗口函数",
+    "能读懂 EXPLAIN 里的扫描方式与行数",
+    "加索引前后耗时或扫描行数有明显变化"
+   ],
+   "interview": [
+    "索引失效的常见场景",
+    "窗口函数与 GROUP BY 的区别",
+    "事务隔离级别与脏读、幻读"
+   ]
+  },
+  {
+   "slug": "db-metabase",
+   "track": "database",
+   "tier": "t1",
+   "hours": 8,
+   "level": "easy",
+   "title": "Metabase · 把查询变成可交付的看板",
+   "repo": "metabase/metabase",
+   "summary": "开源 BI 工具，连上库就能拖拽出图表和看板。作为 t1 的意义是让「写 SQL」和「回答业务问题」之间建立连接。",
+   "stack": [
+    "BI",
+    "SQL 查询",
+    "看板",
+    "数据建模"
+   ],
+   "learn": [
+    "数据源接入与字段类型映射",
+    "原生 SQL 与可视化查询的取舍",
+    "看板与筛选器的设计",
+    "指标口径如何在看板层固化",
+    "权限与数据可见性"
+   ],
+   "career": "数据分析岗的日常工具。能独立交付一个看板，比只会跑查询更接近岗位要求。",
+   "steps": [
+    "本地起 Metabase，连一个样例库",
+    "用原生 SQL 做一个漏斗分析",
+    "配一个带日期筛选器的看板",
+    "给看板加说明，写清指标口径",
+    "写 README：口径定义 + 看板截图"
+   ],
+   "accept": [
+    "看板可由非技术用户自助筛选",
+    "每个指标都有口径说明",
+    "漏斗各层数据与手写 SQL 一致"
+   ],
+   "interview": [
+    "指标口径不一致会带来什么问题",
+    "BI 工具与手写报表各自的适用场景",
+    "如何验证一个看板的数字是对的"
+   ]
+  },
+  {
+   "slug": "database-db-tutorial",
+   "track": "database",
+   "tier": "t2",
+   "hours": 20,
+   "level": "mid",
+   "title": "db_tutorial · 从零写一个 SQLite",
+   "repo": "cstack/db_tutorial",
+   "summary": "用 C 从零实现一个 SQLite 克隆，分 13 个阶段推进：REPL、B-Tree、页管理、游标、持久化，每步都可运行验证。",
+   "stack": [
+    "C",
+    "B-Tree",
+    "页式存储",
+    "REPL",
+    "SQL 解析"
+   ],
+   "learn": [
+    "数据库的页式存储布局",
+    "B-Tree 插入与分裂",
+    "游标遍历与查找",
+    "行序列化与反序列化",
+    "从内存到磁盘的持久化"
+   ],
+   "career": "「我写过一个数据库」是最有辨识度的项目之一，面试官会顺着追问 B-Tree 与页布局。",
+   "steps": [
+    "按阶段实现 REPL 与元命令",
+    "实现页管理与 B-Tree 节点",
+    "支持 insert / select 全流程",
+    "加持久化，重启后数据不丢",
+    "扩展一个 where 条件过滤"
+   ],
+   "accept": [
+    "支持 insert / select 并持久化",
+    "B-Tree 分裂有单测覆盖",
+    "能画出页与节点的结构图",
+    "扩展功能有测试用例"
+   ],
+   "interview": [
+    "B+Tree 与 B-Tree 在数据库中的选择",
+    "页大小如何影响性能",
+    "如何实现事务的原子写"
+   ]
+  },
+  {
+   "slug": "duckdb-local-olap",
+   "track": "database",
+   "tier": "t2",
+   "hours": 24,
+   "level": "mid",
+   "title": "DuckDB · 把分析型数据库装进进程里",
+   "repo": "duckdb/duckdb",
+   "summary": "不用起服务、不用建集群，直接对 Parquet/CSV 跑向量化 SQL。适合练「数据量上到千万行之后 SQL 怎么写才快」：同一个需求，标量函数、窗口函数、CTE 三种写法性能可能差十倍。做完你会对执行计划有直觉。",
+   "stack": [
+    "DuckDB",
+    "Parquet",
+    "向量化执行",
+    "窗口函数",
+    "EXPLAIN ANALYZE"
+   ],
+   "learn": [
+    "列存 + 向量化执行相比行存的读取放大差异",
+    "Parquet 的谓词下推与投影裁剪在扫描量上的体现",
+    "窗口函数与自连接实现同语义的代价对比",
+    "EXPLAIN ANALYZE 里每个算子的输出行数与耗时含义",
+    "DuckDB 与 SQLite 各自的适用边界"
+   ],
+   "career": "取数岗日常就是「在有限资源里把一条 SQL 跑快」，能读执行计划的人交付质量明显更高。",
+   "steps": [
+    "造 2000 万行订单数据，导出 Parquet 并建视图",
+    "写 10 条分析 SQL：同环比、漏斗、留存、TopN 占比",
+    "每条 SQL 写两个版本（窗口函数 vs 自连接），记录耗时",
+    "用 EXPLAIN ANALYZE 找出 3 条最慢的算子并改写",
+    "对比 DuckDB 与 SQLite 在同一数据上的耗时",
+    "输出 SQL 优化清单：症状 → 改法 → 实测收益"
+   ],
+   "accept": [
+    "10 条 SQL 全部能跑出正确结果",
+    "至少有 3 条有明显提速并附执行计划对比",
+    "能解释谓词下推为什么能减少 IO"
+   ],
+   "interview": [
+    "列存为什么适合分析而不适合点查",
+    "窗口函数和 group by 的区别与性能差异",
+    "Parquet 的分区与排序对查询的影响"
+   ]
+  },
+  {
+   "slug": "database-sqlite",
+   "track": "database",
+   "tier": "t3",
+   "hours": 45,
+   "level": "hard",
+   "title": "SQLite · 单文件数据库内核",
+   "repo": "sqlite/sqlite",
+   "summary": "全球部署量最大的数据库。B-Tree、VDBE 虚拟机、WAL 日志与查询优化器，全部在可读的 C 代码里。",
+   "stack": [
+    "C",
+    "B-Tree",
+    "VDBE",
+    "WAL",
+    "查询优化"
+   ],
+   "learn": [
+    "SQL 编译到 VDBE 字节码的过程",
+    "B-Tree 页格式与空闲页管理",
+    "WAL 模式下的并发读写",
+    "索引选择与查询计划",
+    "事务与回滚日志"
+   ],
+   "career": "嵌入式 / 端侧存储岗位的核心知识；移动端、IoT 公司尤其看重。",
+   "steps": [
+    "编译并跑通 CLI，执行 EXPLAIN 看字节码",
+    "读 WAL 相关代码，理解 checkpoint",
+    "构造并发读写场景，对比 WAL 开关差异",
+    "分析一个慢查询的执行计划并加索引",
+    "整理 VDBE 指令集笔记"
+   ],
+   "accept": [
+    "能读懂 EXPLAIN 输出的执行计划",
+    "能解释 WAL 如何提升并发",
+    "慢查询优化有前后耗时对比",
+    "笔记覆盖至少 10 条 VDBE 指令"
+   ],
+   "interview": [
+    "WAL 与回滚日志的差异",
+    "SQLite 为什么适合嵌入式",
+    "索引什么时候反而变慢"
+   ]
+  },
+  {
+   "slug": "database-tidb",
+   "track": "database",
+   "tier": "t3",
+   "hours": 45,
+   "level": "hard",
+   "title": "TiDB · 分布式 HTAP 数据库",
+   "repo": "pingcap/tidb",
+   "summary": "4 万星的国产分布式数据库，兼容 MySQL 协议，计算存储分离，TiKV 基于 Raft 保证多副本一致性。",
+   "stack": [
+    "Go",
+    "Raft",
+    "TiKV",
+    "MVCC",
+    "MySQL 协议"
+   ],
+   "learn": [
+    "计算与存储分离的架构收益",
+    "Raft 选主与日志复制",
+    "MVCC 与事务隔离实现",
+    "分布式执行计划与下推",
+    "在线扩缩容与 Region 调度"
+   ],
+   "career": "数据库内核 / 基础架构岗的硬通货。能讲清 Raft 与 MVCC，直接进入高薪赛道。",
+   "steps": [
+    "用 tiup 起一个本地集群",
+    "跑 TPCC / sysbench 观察吞吐",
+    "读一篇官方架构文档并画图",
+    "手动下线一个 TiKV 节点，观察自愈",
+    "写一篇 Raft 复制流程笔记"
+   ],
+   "accept": [
+    "集群可正常读写且扩缩容成功",
+    "能画出一次写入的完整链路",
+    "能解释 Region 分裂与调度",
+    "压测数据可复现"
+   ],
+   "interview": [
+    "Raft 如何保证日志一致性",
+    "MVCC 如何实现快照读",
+    "计算存储分离的代价是什么"
+   ]
+  },
+  {
+   "slug": "db-cockroach",
+   "track": "database",
+   "tier": "t4",
+   "hours": 90,
+   "level": "hard",
+   "title": "CockroachDB · 分布式事务与共识",
+   "repo": "cockroachdb/cockroach",
+   "summary": "兼容 Postgres 协议的分布式数据库，用 Raft 做多副本共识、用 MVCC 做事务隔离。是理解「分布式数据库怎么保证不丢不重」的最佳样本。",
+   "stack": [
+    "Go",
+    "Raft",
+    "MVCC",
+    "分布式事务",
+    "Range 分片"
+   ],
+   "learn": [
+    "Range 分片与副本放置策略",
+    "Raft 日志复制与 leader 选举",
+    "MVCC 如何支撑快照隔离",
+    "分布式事务的两阶段提交与时钟不确定性",
+    "跨地域部署下的延迟与一致性取舍"
+   ],
+   "career": "数据库内核与分布式存储方向的高门槛项目。能讲清 Raft 与 MVCC 的配合，属于稀缺能力。",
+   "steps": [
+    "用 Docker 起三节点集群，验证节点故障自动恢复",
+    "读 Raft 相关文档，画日志复制时序",
+    "构造跨 Range 事务，观察提交开销",
+    "kill 一个节点，验证读写不中断",
+    "写 README：三节点故障恢复记录 + 事务时序图"
+   ],
+   "accept": [
+    "单节点故障下集群仍可读写",
+    "能说清 Range 分裂的触发条件",
+    "有跨 Range 事务与单 Range 事务的耗时对比",
+    "能解释时钟偏差为什么影响事务正确性"
+   ],
+   "interview": [
+    "Raft 相比 Paxos 的可理解性优势",
+    "MVCC 如何避免读写互相阻塞",
+    "分布式事务为什么难以做到低延迟"
+   ]
+  },
+  {
+   "slug": "db-elasticsearch",
+   "track": "database",
+   "tier": "t4",
+   "hours": 90,
+   "level": "hard",
+   "title": "Elasticsearch · 倒排索引与搜索工程",
+   "repo": "elastic/elasticsearch",
+   "summary": "搜索的事实标准。核心是倒排索引、分词、相关性打分与聚合，理解它能回答「为什么 LIKE '%x%' 不可用」这类问题。",
+   "stack": [
+    "Java",
+    "Lucene",
+    "倒排索引",
+    "分词",
+    "相关性打分",
+    "聚合"
+   ],
+   "learn": [
+    "倒排索引的结构与为什么比 B+ 树适合全文检索",
+    "分词器链（char filter / tokenizer / token filter）",
+    "BM25 相关性打分的组成",
+    "分片与副本对写入和查询的影响",
+    "聚合查询的内存与精度取舍"
+   ],
+   "career": "搜索与数据检索方向的高价值技能。能讲清倒排索引与 BM25，直接对上搜索岗的核心考点。",
+   "steps": [
+    "本地起单节点，导入 10 万条中文数据",
+    "配一个中文分词器，对比默认分词效果",
+    "对同一查询调整 boost，观察排序变化",
+    "用聚合做一个分面统计",
+    "写 README：倒排索引结构图 + 相关性调优记录"
+   ],
+   "accept": [
+    "中文分词后召回明显优于默认分词",
+    "能解释某条结果为什么排第一（BM25 视角）",
+    "有分片数变化对查询耗时的影响数据",
+    "能说清 ES 不适合当主库的原因"
+   ],
+   "interview": [
+    "倒排索引与 B+ 树的适用场景差异",
+    "ES 的写入为什么是近实时的",
+    "深分页为什么会爆内存，怎么解"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,137 @@
+{
+  "id": "algorithm-algo-mock-08",
+  "exam": "algorithm",
+  "kind": "mock",
+  "subject": "algo",
+  "title": "算法设计与分析 · 专项模拟卷（8）",
+  "duration": 40,
+  "totalScore": 30,
+  "disclaimer": "本卷为按题型结构自编的专项练习卷，题目与解析均为原创，不是真题还原；考点年份为历年命题的归纳性标注，请以当年考试大纲为准。",
+  "blueprint": [
+    {
+      "subject": "algo",
+      "name": "算法设计与分析",
+      "score": 30
+    }
+  ],
+  "sections": [
+    {
+      "no": 1,
+      "name": "单项选择题",
+      "type": "choice",
+      "range": "1~3 题",
+      "score": 15,
+      "perScore": 5,
+      "note": "每题 5 分，共 15 分。只有一个选项符合题目要求。",
+      "items": [
+        "q-algo-c22",
+        "q-algo-c23",
+        "q-algo-c24"
+      ]
+    },
+    {
+      "no": 2,
+      "name": "填空题",
+      "type": "blank",
+      "range": "4 题",
+      "score": 5,
+      "note": "本题 5 分，直接写结果。",
+      "items": [
+        {
+          "id": "q-algo-b08",
+          "topic": "algo-sort",
+          "knowledge": "algo-sort-k1",
+          "type": "blank",
+          "diff": 3,
+          "stem": "基于比较的排序算法的时间复杂度下界为 ______。",
+          "answer": {
+            "text": "Ω(n log n)"
+          },
+          "explain": {
+            "right": "决策树叶子数为 n!，树高至少 log₂(n!)。",
+            "wrong": "常见错误：写成 Ω(n)，把非比较排序的下界混进来。",
+            "link": "algo-sort-k1"
+          },
+          "walkthrough": {
+            "framework": {
+              "title": "复杂度与稳定性辨析",
+              "pattern": "algo-sort-p1",
+              "steps": [
+                "先分类：比较排序还是非比较排序",
+                "写出最好/平均/最坏三档",
+                "判断稳定性：相等元素相对次序是否改变",
+                "看空间：归并 O(n)，快排 O(log n) 栈，堆排 O(1)",
+                "按题目条件选：要求稳定选归并，要求原地选堆排"
+              ],
+              "trap": "把快排平均 O(n log n) 当成最坏"
+            },
+            "approach": "决策树叶子数为 n!，树高至少 log₂(n!)。",
+            "points": [
+              {
+                "id": "algo-sort-k1",
+                "note": "基于比较的排序至少需要 Ω(n log n) 次比较，决策树有 n! 个叶子。",
+                "title": "比较排序下界",
+                "core": "基于比较的排序至少需要 Ω(n log n) 次比较，决策树有 n! 个叶子。",
+                "pitfall": "写成 Ω(n)，把非比较排序的下界混进来。"
+              }
+            ],
+            "solution": "n 个元素有 n! 种排列，决策树至少 n! 个叶子，高度 h 满足 2^h ≥ n!，由 Stirling 公式 h = Ω(n log n)。故比较排序不可能低于此界。"
+          },
+          "score": 5
+        }
+      ]
+    },
+    {
+      "no": 3,
+      "name": "解答题",
+      "type": "calc",
+      "range": "5 题",
+      "score": 10,
+      "note": "本题 10 分，写出必要的推导过程。",
+      "items": [
+        {
+          "id": "q-algo-k08",
+          "topic": "algo-graph",
+          "knowledge": "algo-graph-k1",
+          "type": "calc",
+          "diff": 3,
+          "stem": "有向图：A→B 权 4，A→C 权 1，C→B 权 2，B→D 权 1，C→D 权 5，D→E 权 3。用 Dijkstra 求 A 到 E 的最短路。",
+          "answer": {
+            "text": "初始化 dist(A)=0，其余 ∞。\n① 确定 A(0)：dist(B)=4，dist(C)=1。\n② 取 C(1)：dist(B)=min(4,1+2)=3，dist(D)=1+5=6。\n③ 取 B(3)：dist(D)=min(6,3+1)=4。\n④ 取 D(4)：dist(E)=4+3=7。\n⑤ 取 E(7)，结束。\n最短路 A→C→B→D→E，长度 1+2+1+3 = 7。对照 A→B→D→E 为 4+1+3 = 8，A→C→D→E 为 1+5+3 = 9，均更长。"
+          },
+          "explain": {
+            "right": "每次取未确定点中 dist 最小的，松弛其出边，记录前驱。",
+            "wrong": "常见错误：松弛时忘记取 min；或提前把未确定的点当成最终值。",
+            "link": "algo-graph-k1"
+          },
+          "walkthrough": {
+            "framework": {
+              "title": "最短路",
+              "pattern": "algo-graph-p1",
+              "steps": [
+                "先看有无负权：有负权用 Bellman-Ford/SPFA",
+                "无权图用 BFS",
+                "Dijkstra 每次取未确定点中 dist 最小的，松弛邻边",
+                "记录前驱以便回溯路径",
+                "多源最短路用 Floyd O(n³)"
+              ],
+              "trap": "Dijkstra 用于负权图"
+            },
+            "approach": "每次取未确定点中 dist 最小的，松弛其出边，记录前驱。",
+            "points": [
+              {
+                "id": "algo-graph-k1",
+                "note": "无权 BFS；非负权 Dijkstra；有负权 Bellman-Ford；多源 Floyd。",
+                "title": "最短路算法选择",
+                "core": "无权 BFS；非负权 Dijkstra；有负权 Bellman-Ford；多源 Floyd。",
+                "pitfall": "松弛时忘记取 min；或提前把未确定的点当成最终值。"
+              }
+            ],
+            "solution": "初始化 dist(A)=0，其余 ∞。\n① 确定 A(0)：dist(B)=4，dist(C)=1。\n② 取 C(1)：dist(B)=min(4,1+2)=3，dist(D)=1+5=6。\n③ 取 B(3)：dist(D)=min(6,3+1)=4。\n④ 取 D(4)：dist(E)=4+3=7。\n⑤ 取 E(7)，结束。\n最短路 A→C→B→D→E，长度 1+2+1+3 = 7。对照 A→B→D→E 为 4+1+3 = 8，A→C→D→E 为 1+5+3 = 9，均更长。"
+          },
+          "score": 10
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,141 @@
+{
+  "id": "english-e2-mock-01",
+  "exam": "english",
+  "kind": "mock",
+  "subject": "e2",
+  "title": "英语（二） · 阅读精读专项（1）",
+  "duration": 50,
+  "totalScore": 30,
+  "disclaimer": "本卷为按题型结构自编的专项练习卷，题目与解析均为原创，不是真题还原；考点年份为历年命题的归纳性标注，请以当年考试大纲为准。",
+  "blueprint": [
+    {
+      "subject": "e2",
+      "name": "英语（二）",
+      "score": 30
+    }
+  ],
+  "sections": [
+    {
+      "no": 1,
+      "name": "阅读理解",
+      "type": "choice",
+      "range": "1~3 题",
+      "score": 6,
+      "perScore": 2,
+      "note": "每题 2 分。阅读所给文章，从四个选项中选出最佳答案。",
+      "passage": {
+        "id": "e2-p1",
+        "title": "A recycling scheme that worked",
+        "text": "Two years ago the university installed recycling bins in every dormitory. The first survey was disappointing: only a third of bottles reached the correct bin. Instead of adding more bins, the housing office tried something cheaper. It published a weekly chart in each building showing how much waste had been sorted correctly, and it asked the cleaners to leave one wrongly sorted bag beside the bin with a short note. Within a term the rate rose to nearly three quarters. The lesson is that people do not need more instructions; they need to see how they are doing compared with their neighbours."
+      },
+      "items": [
+        "q-e2-e2-p1-q1",
+        "q-e2-e2-p1-q2",
+        "q-e2-e2-p1-q3"
+      ]
+    },
+    {
+      "no": 2,
+      "name": "翻译",
+      "type": "calc",
+      "range": "4 题",
+      "score": 12,
+      "note": "本题 12 分。把划线句子译成汉语，要求准确、通顺。",
+      "items": [
+        {
+          "id": "q-e2-e2-p1-tr",
+          "topic": "e2-translation",
+          "knowledge": "e2-translation-k1",
+          "type": "calc",
+          "diff": 3,
+          "stem": "The lesson is that people do not need more instructions; they need to see how they are doing compared with their neighbours.",
+          "answer": {
+            "text": "这一做法带来的启示是：人们并不需要更多说明，他们需要的是看到自己与邻居相比做得如何。"
+          },
+          "explain": {
+            "right": "先切分意群定主干，再按汉语习惯重排语序，最后检查术语与指代是否统一。",
+            "wrong": "常见错误：that 引导表语从句，用冒号处理更简洁；compared with 译「与……相比」；they are doing 是进行时，译「做得如何」而非「正在做」。",
+            "link": "e2-translation-k1"
+          },
+          "walkthrough": {
+            "framework": {
+              "title": "段落翻译",
+              "pattern": "e2-translation-p1",
+              "steps": [
+                "通读全段，判断文体与时态基调",
+                "逐句找主干，切出定语与状语",
+                "把后置定语译成前置，长状语提到句首",
+                "检查段内代词与术语一致性",
+                "通读成段，修掉翻译腔"
+              ],
+              "trap": "逐词直译，句子不通"
+            },
+            "approach": "先切分意群定主干，再按汉语习惯重排语序，最后检查术语与指代是否统一。",
+            "points": [
+              {
+                "id": "e2-translation-k1",
+                "note": "按引导词、介词短语、分词结构切意群，先定主谓宾。",
+                "title": "长难句切分",
+                "core": "按引导词、介词短语、分词结构切意群，先定主谓宾。",
+                "pitfall": "that 引导表语从句，用冒号处理更简洁；compared with 译「与……相比」；they are doing 是进行时，译「做得如何」而非「正在做」。"
+              }
+            ],
+            "solution": "参考译文：这一做法带来的启示是：人们并不需要更多说明，他们需要的是看到自己与邻居相比做得如何。\n得分点：that 引导表语从句，用冒号处理更简洁；compared with 译「与……相比」；they are doing 是进行时，译「做得如何」而非「正在做」。\n检查清单：主干是否译出、修饰是否归位、指代是否还原。"
+          },
+          "score": 12
+        }
+      ]
+    },
+    {
+      "no": 3,
+      "name": "写作",
+      "type": "design",
+      "range": "5 题",
+      "score": 12,
+      "note": "本题 12 分。按题目要求写一篇短文。",
+      "items": [
+        {
+          "id": "q-e2-e2-p1-wr",
+          "topic": "e2-writing",
+          "knowledge": "e2-writing-k2",
+          "type": "design",
+          "diff": 3,
+          "stem": "Write an essay of about 150 words on the following topic: your university wants to increase the recycling rate in dormitories. Suggest one practical measure and explain why it should work.",
+          "answer": {
+            "text": "Instead of printing more instructions, the university should publish a weekly ranking of dormitory buildings by recycling rate. Each building would see its own figure and its position among neighbours. The measure is cheap, since the data are already collected when the waste is weighed, and it works on a well-documented principle: people adjust their behaviour when they can see how it compares with that of people around them. To avoid resentment, the ranking should praise improvement rather than shame the bottom building, and the top three could receive a small fund for a floor party. Visible progress, rather than another leaflet, is what changes habits."
+          },
+          "explain": {
+            "right": "先定三段骨架（描述—分析—结论），再把题目给出的信息逐条落进段落，最后检查字数与衔接词。",
+            "wrong": "常见错误：只写「加强宣传」这类空泛建议，没有说明具体做法与生效机制。",
+            "link": "e2-writing-k2"
+          },
+          "walkthrough": {
+            "framework": {
+              "title": "图表作文",
+              "pattern": "e2-writing-p2",
+              "steps": [
+                "首段：一句点明图表主题 + 2 个关键数据",
+                "二段：2 条原因，用 First/Moreover 衔接",
+                "三段：一句趋势预测或建议",
+                "数字保留一位小数，趋势词要准确"
+              ],
+              "trap": "只罗列数字不做比较"
+            },
+            "approach": "先定三段骨架（描述—分析—结论），再把题目给出的信息逐条落进段落，最后检查字数与衔接词。",
+            "points": [
+              {
+                "id": "e2-writing-k2",
+                "note": "观点句 + 解释 + 例证 + 小结，四句一段。",
+                "title": "议论段展开",
+                "core": "观点句 + 解释 + 例证 + 小结，四句一段。",
+                "pitfall": "只写「加强宣传」这类空泛建议，没有说明具体做法与生效机制。"
+              }
+            ],
+            "solution": "Instead of printing more instructions, the university should publish a weekly ranking of dormitory buildings by recycling rate. Each building would see its own figure and its position among neighbours. The measure is cheap, since the data are already collected when the waste is weighed, and it works on a well-documented principle: people adjust their behaviour when they can see how it compares with that of people around them. To avoid resentment, the ranking should praise improvement rather than shame the bottom building, and the top three could receive a small fund for a floor party. Visible progress, rather than another leaflet, is what changes habits."
+          },
+          "score": 12
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,434 @@
+{
+ "track": "fullstack",
+ "items": [
+  {
+   "slug": "fullstack-next-learn",
+   "track": "fullstack",
+   "tier": "t1",
+   "hours": 8,
+   "level": "easy",
+   "title": "Next.js Learn · 官方全栈入门课程",
+   "repo": "vercel/next-learn",
+   "summary": "Vercel 官方的 Next.js 教程代码，从渲染方式讲到数据获取、鉴权与部署。是理解 App Router 与 Server Component 的最短路径。",
+   "stack": [
+    "Next.js",
+    "React",
+    "App Router",
+    "Server Component",
+    "Vercel"
+   ],
+   "learn": [
+    "SSR / SSG / ISR / CSR 的差异与选择",
+    "Server Component 与 Client Component 的边界",
+    "App Router 的目录即路由约定",
+    "数据获取放在服务端带来的收益",
+    "流式渲染与 Suspense 的配合"
+   ],
+   "career": "全栈岗的高频要求。能讲清 RSC 与渲染模式，是 Next.js 相关面试的分水岭。",
+   "steps": [
+    "跑通教程并部署一版到线上",
+    "把某个页面从 CSR 改成 RSC，对比首屏指标",
+    "用 Suspense 做流式渲染，观察加载顺序",
+    "接入一个真实数据源替换 mock",
+    "写 README：四种渲染模式对比表"
+   ],
+   "accept": [
+    "有改造前后的 Lighthouse 或 Core Web Vitals 数据",
+    "能说清什么时候必须用 Client Component",
+    "线上版本可访问且数据来自真实接口"
+   ],
+   "interview": [
+    "RSC 相比传统 SSR 解决了什么问题",
+    "ISR 的再验证时机怎么定",
+    "流式渲染对 SEO 有没有影响"
+   ]
+  },
+  {
+   "slug": "fullstack-realworld",
+   "track": "fullstack",
+   "tier": "t1",
+   "hours": 8,
+   "level": "easy",
+   "title": "RealWorld · 同一个产品的一百种实现",
+   "repo": "realworld-apps/realworld",
+   "summary": "「Medium 克隆」的标准化规格，前端后端各有几十种技术栈实现。最大价值是能横向对比：同一个功能，不同框架的代码长什么样。",
+   "stack": [
+    "REST 规范",
+    "前端框架",
+    "后端框架",
+    "Docker"
+   ],
+   "learn": [
+    "同一份 API 契约如何约束前后端",
+    "不同框架在路由、状态、鉴权上的表达差异",
+    "规格驱动的开发方式（先定契约再实现）",
+    "容器化启动多服务的最小实践",
+    "如何阅读一个陌生项目的入口"
+   ],
+   "career": "面试问「你还了解哪些框架」时，能说出具体差异比列名字有效。这也是一份现成的技术选型参考。",
+   "steps": [
+    "选两套实现（如 React+Express 与 Vue+FastAPI）分别跑通",
+    "对着同一份 API 规格比较两者的路由与鉴权写法",
+    "用 Postman 跑通注册-发帖-评论-点赞主流程",
+    "整理一张两套实现的对照表",
+    "写 README：API 契约摘要 + 框架差异表"
+   ],
+   "accept": [
+    "两套实现都能完成完整业务流程",
+    "能说清至少 5 处实现差异及其原因",
+    "主流程有接口级验证记录"
+   ],
+   "interview": [
+    "前后端如何约定 API 契约",
+    "Token 该存在哪里，各有什么风险",
+    "为什么同一功能在不同框架里代码差异这么大"
+   ]
+  },
+  {
+   "slug": "fullstack-agileboot",
+   "track": "fullstack",
+   "tier": "t2",
+   "hours": 20,
+   "level": "mid",
+   "title": "AgileBoot · Spring Boot 3 + Vue3 全栈脚手架",
+   "repo": "valarchie/AgileBoot-Back-End",
+   "summary": "规范易二开的全栈快速开发框架：Spring Boot 3 + Vue3 + TypeScript，内置 RBAC、部门、字典、日志与代码生成。",
+   "stack": [
+    "Spring Boot 3",
+    "Vue 3",
+    "TypeScript",
+    "MyBatis-Plus",
+    "RBAC"
+   ],
+   "learn": [
+    "企业级分层与模块边界",
+    "RBAC + 数据权限的实现",
+    "前后端分离的鉴权与会话",
+    "代码生成器如何减少重复劳动",
+    "统一异常与操作日志"
+   ],
+   "career": "能快速交付后台系统的证明。企业里大量需求就是「按规范加一个模块」，这套骨架最贴合。",
+   "steps": [
+    "起后端 + 前端，登录进入工作台",
+    "用代码生成器生成一张表的 CRUD",
+    "加一个自定义业务模块并配权限",
+    "接一个定时任务与操作日志",
+    "按团队规范补接口文档"
+   ],
+   "accept": [
+    "生成模块可增删改查并有权限控制",
+    "操作日志可追溯操作人",
+    "接口文档与实现一致",
+    "能讲清分层职责"
+   ],
+   "interview": [
+    "数据权限如何做到行级隔离",
+    "代码生成器的适用边界",
+    "前后端鉴权的完整链路"
+   ]
+  },
+  {
+   "slug": "fullstack-mood",
+   "track": "fullstack",
+   "tier": "t2",
+   "hours": 20,
+   "level": "mid",
+   "title": "Mood · Nuxt + Nest 全栈博客系统",
+   "repo": "wsydxiangwang/Mood",
+   "summary": "面向个人站点的全栈博客：Nuxt 服务端渲染 + Node 后端，支持 Docker 一键部署，适合练完整上线流程。",
+   "stack": [
+    "Nuxt",
+    "Vue",
+    "Node.js",
+    "NestJS",
+    "Docker",
+    "SSR"
+   ],
+   "learn": [
+    "SSR 与 CSR 的渲染差异",
+    "SEO 友好的页面组织",
+    "前后端接口约定",
+    "Docker 镜像与一键部署",
+    "Nginx 反代与 HTTPS"
+   ],
+   "career": "一个人能独立上线一个站，是前端 / 全栈岗很实在的加分项，面试可讲部署与性能。",
+   "steps": [
+    "本地起前后端并发布一篇文章",
+    "配置 SSR，对比首屏与 CSR 的差异",
+    "打包镜像并用 docker compose 部署",
+    "配 Nginx 反代 + HTTPS",
+    "做一次 Lighthouse 优化"
+   ],
+   "accept": [
+    "线上可访问且有 HTTPS",
+    "首屏性能评分有前后对比",
+    "文章发布、编辑、删除全链路可用",
+    "能讲清部署拓扑"
+   ],
+   "interview": [
+    "SSR 的首屏与 SEO 收益",
+    "Docker 镜像如何减小体积",
+    "反向代理下的缓存策略"
+   ]
+  },
+  {
+   "slug": "fullstack-shadcn",
+   "track": "fullstack",
+   "tier": "t2",
+   "hours": 20,
+   "level": "mid",
+   "title": "shadcn/ui · 可复制而非安装的组件库",
+   "repo": "shadcn-ui/ui",
+   "summary": "把组件源码直接复制进项目的模式，绕开了「组件库改不动」的老问题。读它能理解现代 React 组件设计：无样式底座 + 可访问性 + 主题令牌。",
+   "stack": [
+    "React",
+    "Radix UI",
+    "Tailwind CSS",
+    "TypeScript",
+    "可访问性"
+   ],
+   "learn": [
+    "「复制源码」相比 npm 依赖的取舍",
+    "Radix 无样式组件如何保证可访问性",
+    "主题令牌与暗色模式的实现方式",
+    "受控与非受控组件的边界",
+    "组合式 API 设计（asChild 模式）"
+   ],
+   "career": "前端岗的实用技能。能说清组件库的可维护性问题，是工程判断力的体现。",
+   "steps": [
+    "初始化项目并接入 5 个组件",
+    "改一套主题令牌，实现亮暗双色",
+    "用组合模式封装一个业务表单组件",
+    "跑 axe 做一次可访问性检查",
+    "写 README：组件改造成本对比"
+   ],
+   "accept": [
+    "主题切换不出现硬编码颜色",
+    "封装组件保持键盘可操作",
+    "axe 检查无严重级别问题"
+   ],
+   "interview": [
+    "组件库该封装到什么程度",
+    "可访问性在工程里怎么落地",
+    "Tailwind 相比 CSS-in-JS 的取舍"
+   ]
+  },
+  {
+   "slug": "fullstack-ai-code-mother",
+   "track": "fullstack",
+   "tier": "t3",
+   "hours": 45,
+   "level": "hard",
+   "title": "yu-ai-code-mother · AI 应用生成器全栈实战",
+   "repo": "liyupi/yu-ai-code-mother",
+   "summary": "Spring Boot 3 + LangChain4j 的 AI 代码生成平台：自然语言生成应用、多轮对话、流式输出与微服务拆分。",
+   "stack": [
+    "Spring Boot 3",
+    "Java 21",
+    "LangChain4j",
+    "Vue 3",
+    "SSE",
+    "微服务"
+   ],
+   "learn": [
+    "LLM 调用与提示词工程落地",
+    "SSE 流式输出的前后端配合",
+    "多轮会话与上下文管理",
+    "AI 生成结果的落库与版本",
+    "微服务拆分与网关"
+   ],
+   "career": "AI + 后端的复合型项目，正好对上当前招聘热点；能讲清流式与上下文管理很加分。",
+   "steps": [
+    "配置模型 Key，跑通生成流程",
+    "读生成链路，画出 Prompt → 模型 → 解析 → 落库",
+    "把流式输出改成 SSE 并观察首字延迟",
+    "加一层生成结果校验与重试",
+    "压测并发生成，观察超时与限流"
+   ],
+   "accept": [
+    "端到端可生成可运行的应用",
+    "首字延迟有优化前后对比",
+    "生成失败有降级与重试",
+    "能画清微服务调用关系"
+   ],
+   "interview": [
+    "SSE 与 WebSocket 在流式场景的取舍",
+    "如何控制 LLM 输出格式稳定",
+    "生成式应用的限流与成本控制"
+   ]
+  },
+  {
+   "slug": "fullstack-nextjs",
+   "track": "fullstack",
+   "tier": "t3",
+   "hours": 45,
+   "level": "hard",
+   "title": "Next.js · 框架源码与渲染管线",
+   "repo": "vercel/next.js",
+   "summary": "百万行级的 React 全栈框架。不求通读，挑「路由匹配、RSC 序列化、构建产物」三条线读，就能理解现代前端框架的复杂度来源。",
+   "stack": [
+    "React",
+    "RSC",
+    "Turbopack",
+    "路由系统",
+    "构建管线"
+   ],
+   "learn": [
+    "App Router 的文件系统路由如何编译成路由表",
+    "RSC 的序列化格式与跨端传输",
+    "构建产物（client/server chunk）的划分逻辑",
+    "中间件（middleware）的执行时机与限制",
+    "缓存层（fetch cache / full route cache）的分层"
+   ],
+   "career": "前端高阶岗位的加分项。能讲清 RSC 序列化与缓存分层，说明不是只会写页面。",
+   "steps": [
+    "构建一个最小应用，分析 .next 产物结构",
+    "读路由匹配相关源码，画出匹配流程",
+    "构造一个缓存失效场景，验证缓存分层",
+    "写一个中间件做鉴权重定向",
+    "写 README：产物结构图 + 缓存分层说明"
+   ],
+   "accept": [
+    "能解释产物里 client/server 两部分的职责",
+    "缓存失效行为与预期一致",
+    "中间件能正确拦截未登录请求",
+    "能指出框架在某场景下的性能陷阱"
+   ],
+   "interview": [
+    "RSC 的序列化为什么不能用 JSON",
+    "多层缓存各自失效条件是什么",
+    "中间件为什么不能做重 IO"
+   ]
+  },
+  {
+   "slug": "fullstack-supabase",
+   "track": "fullstack",
+   "tier": "t3",
+   "hours": 45,
+   "level": "hard",
+   "title": "Supabase · Postgres 驱动的后端即服务",
+   "repo": "supabase/supabase",
+   "summary": "把 Postgres、鉴权、存储、实时订阅打包成开箱可用的后端。读它能理解「BaaS 到底替你做了什么」，以及行级安全（RLS）为什么是关键。",
+   "stack": [
+    "PostgreSQL",
+    "RLS",
+    "Realtime",
+    "Storage",
+    "GoTrue 鉴权"
+   ],
+   "learn": [
+    "行级安全策略（RLS）如何做多租户隔离",
+    "Realtime 基于 Postgres 逻辑复制的实现",
+    "JWT 与数据库角色如何联动",
+    "存储桶的权限模型",
+    "BaaS 在什么规模下会碰到天花板"
+   ],
+   "career": "全栈与独立开发者方向的高性价比技能。RLS 讲得清，等于掌握了多租户数据隔离的核心手段。",
+   "steps": [
+    "本地起 Supabase，建表并开启 RLS",
+    "写策略实现「用户只能看自己的数据」",
+    "用两个账号验证隔离是否生效",
+    "接入 Realtime 做一个实时列表",
+    "写 README：RLS 策略清单 + 隔离验证记录"
+   ],
+   "accept": [
+    "跨用户读取被数据库层拦截（不是前端隐藏）",
+    "实时订阅延迟在可接受范围",
+    "能说清 RLS 与后端鉴权的分工",
+    "能指出 BaaS 在复杂事务上的局限"
+   ],
+   "interview": [
+    "RLS 相比应用层过滤的优势",
+    "多租户数据隔离有哪些方案",
+    "BaaS 什么时候该换成自建后端"
+   ]
+  },
+  {
+   "slug": "fullstack-appwrite",
+   "track": "fullstack",
+   "tier": "t4",
+   "hours": 90,
+   "level": "hard",
+   "title": "Appwrite · 自托管 BaaS 的完整实现",
+   "repo": "appwrite/appwrite",
+   "summary": "可自托管的开源后端平台，覆盖鉴权、数据库、存储、函数、消息。相比 Supabase 更强调多语言 SDK 与容器化部署，适合研究「一个 BaaS 要解多少问题」。",
+   "stack": [
+    "TypeScript",
+    "Docker",
+    "多语言 SDK",
+    "权限模型",
+    "Serverless Functions"
+   ],
+   "learn": [
+    "多租户下的权限与角色模型",
+    "多语言 SDK 如何从同一份 API 规格生成",
+    "Serverless 函数的隔离与冷启动",
+    "容器化部署的组件拆分",
+    "自托管场景的升级与数据迁移"
+   ],
+   "career": "平台工程与全栈架构方向的加分项。能讲清多租户权限与 SDK 生成，属于架构层面的能力。",
+   "steps": [
+    "用 Docker Compose 部署一整套服务",
+    "建集合、配权限、用两种语言的 SDK 调通",
+    "写一个 Function 并测冷启动耗时",
+    "模拟多租户场景验证数据隔离",
+    "写 README：组件拓扑图 + 权限模型说明"
+   ],
+   "accept": [
+    "自托管环境完整可用（非仅跑通 demo）",
+    "两种语言 SDK 调用结果一致",
+    "有冷启动耗时数据",
+    "多租户隔离有验证记录"
+   ],
+   "interview": [
+    "多租户有哪几种隔离级别",
+    "Serverless 冷启动怎么缓解",
+    "自托管 BaaS 的运维成本在哪里"
+   ]
+  },
+  {
+   "slug": "fullstack-calcom",
+   "track": "fullstack",
+   "tier": "t4",
+   "hours": 90,
+   "level": "hard",
+   "title": "Cal.com · 生产级开源 SaaS 全栈",
+   "repo": "calcom/cal.diy",
+   "summary": "开源的 Calendly 替代品，真实在运营的 SaaS。含多租户、订阅计费、时区处理、团队协作、Webhook，是「全栈能力能否交付产品」的试金石。",
+   "stack": [
+    "Next.js",
+    "tRPC",
+    "Prisma",
+    "PostgreSQL",
+    "Stripe",
+    "多时区"
+   ],
+   "learn": [
+    "tRPC 如何做到端到端类型安全",
+    "多时区与夏令时的时间建模",
+    "订阅计费与 Webhook 的幂等处理",
+    "团队权限与资源归属模型",
+    "SaaS 的可观测性与错误追踪"
+   ],
+   "career": "全栈岗的旗舰项目。能讲清时区建模与计费幂等，直接对上 SaaS 公司的面试重点。",
+   "steps": [
+    "本地部署并完成一次预约全流程",
+    "读时区处理代码，画出时间转换链路",
+    "接入 Stripe 测试模式，跑通订阅与退款",
+    "构造重复 Webhook，验证幂等",
+    "写 README：预约时序图 + 时区处理说明"
+   ],
+   "accept": [
+    "跨时区预约时间不出现偏移错误",
+    "重复 Webhook 不产生重复计费",
+    "能说清 DST 切换日期的处理方式",
+    "有完整预约链路的时序图"
+   ],
+   "interview": [
+    "时间存储该用 UTC 还是本地时间",
+    "支付 Webhook 如何保证幂等",
+    "SaaS 的多租户数据模型怎么设计"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,290 @@
+{
+ "version": 1,
+ "note": "来源为 GitHub 开源仓库 elonwoo-02/11408（MIT）。这里只做「结构化索引 + 要点提炼 + 原文跳转」，不搬运笔记正文：408 笔记单篇最大 44MB 且依赖同目录 assets 图片，整篇搬进 App 既超限也会断图。经验贴部分按原文观点改写成可扫读的要点，未改变结论。",
+ "source": {
+  "repo": "elonwoo-02/11408",
+  "repo_url": "https://github.com/elonwoo-02/11408",
+  "license": "MIT",
+  "title": "11408 考研笔记",
+  "author_note": "计算机科学与技术专业硕士研究生入学考试（11408）复习笔记",
+  "updated": "2026-06-08",
+  "stars": 169
+ },
+ "subjects": [
+  {"key": "general", "label": "总纲"},
+  {"key": "math", "label": "数学（一）"},
+  {"key": "cs408", "label": "408 专业课"},
+  {"key": "politics", "label": "政治"},
+  {"key": "english", "label": "英语（一）"},
+  {"key": "mindset", "label": "环境与心态"}
+ ],
+ "items": [
+  {
+   "slug": "11408-exp-general",
+   "kind": "experience",
+   "subject": "general",
+   "title": "总纲：少听课，多看书，多刷题",
+   "recommended": true,
+   "read_min": 3,
+   "summary": "作者的核心判断是「课听得越多分越低」——把视频课当主线是低效路径，正确做法是直接看书，卡住的地方再针对性听课。",
+   "points": [
+    "时间分配：每天数学 4h + 408 4h 打底，英语政治各 1h、合计不超过 2h",
+    "课是听不完的，考试目标是在考场上把题做对，不是把课听完",
+    "张宇、武忠祥、徐涛的课质量都高，但属于「可选」而不是「主线」",
+    "坚持到最后一刻：大量人中途放弃，也有人考了半场不来了",
+    "408 题量大，铃响前不要提前交卷"
+   ],
+   "source_path": "README.md",
+   "url": "https://github.com/elonwoo-02/11408/blob/main/README.md"
+  },
+  {
+   "slug": "11408-exp-math",
+   "kind": "experience",
+   "subject": "math",
+   "title": "数学：怎么成为 150 分的苗子",
+   "recommended": true,
+   "read_min": 8,
+   "summary": "数学要尽早开始且不能断线，用一本书吃透基础，练习册一本刷到底，真题和模拟按考场时间成套模考。",
+   "points": [
+    "尽早开始，开始后每天都要学，保证睡眠——睡不好早上做数学不清醒",
+    "如无必要不要听课：张宇基础 30 讲一本书已覆盖基础与强化内容",
+    "「基础班+强化班+冲刺班」是机构续费逻辑，不是效率最高的路径",
+    "做题不要分轮次：一本练习册的 A、B 两组一次做完，才能看清题型全貌",
+    "推荐组合：高数张宇全家桶 + 夜雨讲义 / 线代夜雨 + 李永乐 / 概率方浩 + 王式安",
+    "重点刷近 15 年真题，按套卷模考；模拟题做 20 套基本够",
+    "模考时间对齐考场：早上 8:30–11:30，清空桌面，用纸质卷"
+   ],
+   "source_path": "README.md#一数学怎么成为150分的苗子",
+   "url": "https://github.com/elonwoo-02/11408/blob/main/README.md"
+  },
+  {
+   "slug": "11408-exp-cs408",
+   "kind": "experience",
+   "subject": "cs408",
+   "title": "408：考点藏在教材字里行间",
+   "recommended": true,
+   "read_min": 7,
+   "summary": "408 考得极细，视频课覆盖不到教材颗粒度。推荐直接死磕教材 + 反复刷题，反对把时间花在做精美笔记和思维导图上。",
+   "points": [
+    "教材优先级：汤小丹《计算机操作系统》、袁春风《计算机组成与系统结构》、王道四本",
+    "手写笔记和思维导图看着有仪式感，本质是形式主义，会吃掉刷题时间",
+    "直接在书上记，多翻几遍书，比抄一遍更有效",
+    "刷题组合：王道课后题（选择+大题）+ 竟成题（选择题）补充",
+    "每题把错误选项错在哪写在题旁，不能只知道正确答案",
+    "二刷目标：30 秒一道选择题，多数题靠「瞪眼法」秒杀而非现场推导",
+    "真题多刷几遍，选择题只错 1–2 个、2 小时内完成算合格",
+    "模考定在下午 14:00–17:00，故意选嘈杂环境适应干扰"
+   ],
+   "source_path": "README.md#二408还是要做150分的苗子",
+   "url": "https://github.com/elonwoo-02/11408/blob/main/README.md"
+  },
+  {
+   "slug": "11408-exp-politics",
+   "kind": "experience",
+   "subject": "politics",
+   "title": "政治：每天一小时，九月后再开始",
+   "recommended": false,
+   "read_min": 5,
+   "summary": "政治不需要抢跑，也不需要听课。选择题靠带背 + 刷题，主观题靠肖四保底。",
+   "points": [
+    "每天 1 小时足够，9 月以后开始来得及",
+    "不听课，直接跟带背 + 刷题；张修齐系列（时政九页纸、十张纸等）",
+    "选择题 50 分：基础知识约 30 分（马原/史纲/道法）+ 时政与习思想约 20 分",
+    "史纲只考书上内容，反复看带背书册，用 1000 题检验",
+    "马原是唯一值得听课的部分，配合 1000 题练习",
+    "毛中特考得少，道法基本只考 1000 题上的内容",
+    "主观题看肖四大题，压中率不高但至少有话可写；马原大题要早背"
+   ],
+   "source_path": "README.md#三政治我考84把85分做目标吧",
+   "url": "https://github.com/elonwoo-02/11408/blob/main/README.md"
+  },
+  {
+   "slug": "11408-exp-english",
+   "kind": "experience",
+   "subject": "english",
+   "title": "英语：别听课，背单词刷真题就够",
+   "recommended": false,
+   "read_min": 3,
+   "summary": "作者认为英语老师整体水平不如数学圈，课程基本可以跳过，把时间省下来背单词和刷真题。",
+   "points": [
+    "单词背红皮书，真题直接刷，不需要额外阅读资料",
+    "用纸质卷刷，保持考场手感",
+    "需要讲解辅助可看 B 站 Vita 老师，优先看笔记而非视频",
+    "作文和政治马原一样，尽早开始，别留到考前几周"
+   ],
+   "source_path": "README.md#四英语别听课背单词刷真题就够",
+   "url": "https://github.com/elonwoo-02/11408/blob/main/README.md"
+  },
+  {
+   "slug": "11408-exp-mindset",
+   "kind": "experience",
+   "subject": "mindset",
+   "title": "环境这件事，真的会决定发挥",
+   "recommended": false,
+   "read_min": 4,
+   "summary": "考场噪音、住宿、复习地点都会直接影响发挥。作者用自己的经历说明：模考要提前适应干扰。",
+   "points": [
+    "408 与自命题考生同场，贴封条、提前交卷都会制造噪音，题量大时最容易被干扰",
+    "模考故意选不安静的场合，比在绝对安静环境里模拟更接近真实考场",
+    "尽量在学校图书馆或自习室，不建议在家复习（书桌旁就是床）",
+    "需要订酒店时优先选隔音好的，考前作息比多刷一套题重要"
+   ],
+   "source_path": "README.md#五写在最后环境这件事真的会决定发挥",
+   "url": "https://github.com/elonwoo-02/11408/blob/main/README.md"
+  },
+  {
+   "slug": "11408-note-cpu",
+   "kind": "note",
+   "subject": "cs408",
+   "title": "中央处理器",
+   "recommended": true,
+   "read_min": 40,
+   "size_kb": 91,
+   "summary": "从冯·诺依曼「存储程序」讲起，按 CPU 结构与功能展开，属于可以直接替代教材精读的高密度笔记。",
+   "points": ["冯·诺依曼结构与指令执行流程", "CPU 结构与功能", "数据通路与控制器"],
+   "source_path": "408/中央处理器.md",
+   "url": "https://github.com/elonwoo-02/11408/blob/main/408/中央处理器.md"
+  },
+  {
+   "slug": "11408-note-isa",
+   "kind": "note",
+   "subject": "cs408",
+   "title": "指令系统",
+   "recommended": true,
+   "read_min": 120,
+   "size_kb": 44400,
+   "summary": "全仓体量最大的一篇（44MB），配图极多，覆盖指令格式、寻址方式、CISC/RISC 等完整考纲。图片依赖同目录 assets，建议用支持图片预览的编辑器打开。",
+   "points": ["指令格式与扩展操作码", "寻址方式", "CISC 与 RISC 对比"],
+   "source_path": "408/指令系统.md",
+   "url": "https://github.com/elonwoo-02/11408/blob/main/408/指令系统.md"
+  },
+  {
+   "slug": "11408-note-io",
+   "kind": "note",
+   "subject": "cs408",
+   "title": "IO 子系统",
+   "recommended": true,
+   "read_min": 50,
+   "size_kb": 152,
+   "summary": "横跨组成原理与操作系统两门课，把中断、DMA、通道、缓冲区串成一条线，是 408 里最容易割裂复习的部分。",
+   "points": ["中断与异常", "DMA 与通道", "缓冲与设备分配", "磁盘调度"],
+   "source_path": "408/IO子系统.md",
+   "url": "https://github.com/elonwoo-02/11408/blob/main/408/IO子系统.md"
+  },
+  {
+   "slug": "11408-note-memory",
+   "kind": "note",
+   "subject": "cs408",
+   "title": "内存知识（思维导图）",
+   "recommended": true,
+   "read_min": 25,
+   "size_kb": 1,
+   "summary": "文件本身只有 191 字节，是一个指向幕布思维导图的入口，不是空文件。覆盖传统存储、虚拟存储、存储系统三个主题。",
+   "points": ["传统存储", "虚拟存储", "存储系统（组成原理视角）"],
+   "source_path": "408/内存知识.md",
+   "url": "https://github.com/elonwoo-02/11408/blob/main/408/内存知识.md"
+  },
+  {
+   "slug": "11408-note-sync",
+   "kind": "note",
+   "subject": "cs408",
+   "title": "同步互斥问题",
+   "recommended": true,
+   "read_min": 30,
+   "size_kb": 40,
+   "summary": "从进程同步的基本概念出发，梳理信号量、管程与经典同步问题，是操作系统大题的集中考点。",
+   "points": ["进程同步与互斥的基本概念", "信号量机制", "经典同步问题（生产者消费者、读者写者等）"],
+   "source_path": "408/同步互斥问题.md",
+   "url": "https://github.com/elonwoo-02/11408/blob/main/408/同步互斥问题.md"
+  },
+  {
+   "slug": "11408-note-network",
+   "kind": "note",
+   "subject": "cs408",
+   "title": "计算机网络",
+   "recommended": true,
+   "read_min": 60,
+   "size_kb": 298,
+   "summary": "按自顶向下顺序撰写，先给考纲内容再逐层展开，适合当复习主线而不是零散查漏。",
+   "points": ["计算机网络概述与性能指标", "体系结构与参考模型（OSI / TCP-IP）", "自顶向下的分层讲解"],
+   "source_path": "408/计算机网络.md",
+   "url": "https://github.com/elonwoo-02/11408/blob/main/408/计算机网络.md"
+  },
+  {
+   "slug": "11408-note-ds",
+   "kind": "note",
+   "subject": "cs408",
+   "title": "数据结构",
+   "recommended": false,
+   "read_min": 10,
+   "size_kb": 14,
+   "summary": "作者自己标注「不看这个，ds 比较简单，没什么想整理的」。实际内容是幕布外链 + 排序算法的 LeetCode 题号与配图，密度低，只适合当索引。",
+   "points": ["排序算法（堆排/归并/插入）对应 LeetCode 题号", "配图为截图，需在同目录 assets 下查看"],
+   "source_path": "408/数据结构.md",
+   "url": "https://github.com/elonwoo-02/11408/blob/main/408/数据结构.md"
+  },
+  {
+   "slug": "11408-note-arith",
+   "kind": "note",
+   "subject": "cs408",
+   "title": "数据运算",
+   "recommended": false,
+   "read_min": 15,
+   "size_kb": 32,
+   "summary": "作者自评「整理得不太好」，可作补充参考，不建议作为主线。",
+   "points": ["定点数与浮点数运算", "ALU 与运算器"],
+   "source_path": "408/数据运算.md",
+   "url": "https://github.com/elonwoo-02/11408/blob/main/408/数据运算.md"
+  },
+  {
+   "slug": "11408-note-process",
+   "kind": "note",
+   "subject": "cs408",
+   "title": "进程管理",
+   "recommended": false,
+   "read_min": 5,
+   "size_kb": 1,
+   "summary": "文件只有 189 字节，是三条约 189 字节的幕布外链，没有正文，属于未完成章节。",
+   "points": ["仅有幕布链接，无正文"],
+   "source_path": "408/进程管理.md",
+   "url": "https://github.com/elonwoo-02/11408/blob/main/408/进程管理.md"
+  },
+  {
+   "slug": "11408-note-cache-pdf",
+   "kind": "external",
+   "subject": "cs408",
+   "title": "Cache.pdf · 教材截图",
+   "recommended": true,
+   "read_min": 30,
+   "summary": "作者强调这是教材截图而非笔记，但内容极重要，务必严肃阅读。Cache 是 408 里计算题和大题的高频考点。",
+   "points": ["教材原图，非二次整理", "Cache 映射方式与命中率计算"],
+   "source_path": "408/Cache.pdf",
+   "url": "https://github.com/elonwoo-02/11408/blob/main/408/Cache.pdf"
+  },
+  {
+   "slug": "11408-note-english-writing",
+   "kind": "note",
+   "subject": "english",
+   "title": "英语应用文（含大作文）模板与素材",
+   "recommended": true,
+   "read_min": 45,
+   "size_kb": 1717,
+   "summary": "1.7MB 的模板与素材库，是仓库里除 408 笔记外最有实用价值的部分，适合按题型检索而不是通读。",
+   "points": ["应用文模板", "大作文素材", "按题型组织，可当写作词典查"],
+   "source_path": "English/应用文.md",
+   "url": "https://github.com/elonwoo-02/11408/blob/main/English/应用文.md"
+  },
+  {
+   "slug": "11408-note-math-map",
+   "kind": "external",
+   "subject": "math",
+   "title": "数学全科脑图（幕布外链）",
+   "recommended": false,
+   "read_min": 20,
+   "summary": "按张宇书总结的全科知识脑图，仓库内只有 1KB 的 README 指向幕布，需要跳转外部查看。",
+   "points": ["高数 / 线代 / 概率 全科脑图", "按张宇体系整理"],
+   "source_path": "Mathematics/README.md",
+   "url": "https://github.com/elonwoo-02/11408/blob/main/Mathematics/README.md"
+  }
+ ]
+}

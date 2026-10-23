@@ -1,0 +1,8 @@
+{
+  "title": "小批量梯度：方差按 1/B 下降，但收益会饱和",
+  "code_lang": "python",
+  "code_std": "3.13",
+  "stdin": "",
+  "expected_output": " batch    |g_B − g_full| 均值           方差       方差×B\n     1               0.3133       0.2411     0.2411\n     4               0.1838       0.0605     0.2421\n    16               0.0947       0.0144     0.2309\n    64               0.0469       0.0035     0.2210\n   256               0.0223       0.0008     0.1997\n\n读法：方差 × B 近似为常数 → 方差 ∝ σ²/B（理想线性加速）。\n但真实训练里梯度计算可并行、通信与显存不可并行，所以超过临界 batch 后\n「每步更准」换不来「更少步数」，性价比急剧下降；这也是线性缩放学习率有上限的原因。\n",
+  "code": "# 这是「为什么 batch size 不是越大越好」的最直接证据。\nimport numpy as np\n\nrng = np.random.default_rng(3)\nn, d = 2000, 20\nX = rng.normal(size=(n, d))\nw_true = rng.normal(size=d)\ny = X @ w_true + rng.normal(0, 0.5, n)\n\ndef grad(idx):\n    Xi, yi = X[idx], y[idx]\n    return Xi.T @ (Xi @ w_true - yi) / idx.size\n\nfull = grad(np.arange(n))\nprint(f\"{'batch':>6} {'|g_B − g_full| 均值':>20} {'方差':>12} {'方差×B':>10}\")\nfor B in (1, 4, 16, 64, 256):\n    diffs = []\n    for _ in range(300):\n        idx = rng.choice(n, B, replace=False)\n        diffs.append(grad(idx) - full)\n    diffs = np.array(diffs)\n    v = diffs.var(axis=0).mean()\n    print(f\"{B:>6} {np.abs(diffs).mean():>20.4f} {v:>12.4f} {v*B:>10.4f}\")\n\nprint(\"\\n读法：方差 × B 近似为常数 → 方差 ∝ σ²/B（理想线性加速）。\")\nprint(\"但真实训练里梯度计算可并行、通信与显存不可并行，所以超过临界 batch 后\")\nprint(\"「每步更准」换不来「更少步数」，性价比急剧下降；这也是线性缩放学习率有上限的原因。\")\n"
+}

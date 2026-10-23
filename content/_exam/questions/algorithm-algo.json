@@ -1,0 +1,1790 @@
+{
+  "subject": "algo",
+  "exam": "algorithm",
+  "items": [
+    {
+      "id": "q-algo-c01",
+      "topic": "algo-complexity",
+      "knowledge": "algo-complexity-k1",
+      "type": "choice",
+      "diff": 3,
+      "stem": "递归式 T(n) = 2T(n/2) + n·log n 的时间复杂度是（　）",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "套主定理：a=2、b=2，n^(log₂2)=n，而 f(n)=n log n 与 n 同阶但多一个 log 因子。",
+        "wrong": "常见错误：把 f(n)=n log n 直接当成 n²，选 Θ(n²)；或忽略 log 因子选 Θ(n log n)。",
+        "link": "algo-complexity-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "主定理与递归式",
+          "pattern": "algo-complexity-p1",
+          "steps": [
+            "写出 a（子问题个数）、b（规模缩小倍数）、f(n)（分解与合并代价）",
+            "算 n^(log_b a)",
+            "f(n) 更小 → Θ(n^(log_b a))；同阶 → 乘一个 log n；更大且满足正则条件 → Θ(f(n))",
+            "不符合主定理形式（如 T(n)=T(n−1)+n）改用展开法",
+            "最后只保留最高阶，去掉常数"
+          ],
+          "trap": "把 a、b 认反（a 是分支数，不是缩小倍数）"
+        },
+        "approach": "套主定理：a=2、b=2，n^(log₂2)=n，而 f(n)=n log n 与 n 同阶但多一个 log 因子。",
+        "points": [
+          {
+            "id": "algo-complexity-k1",
+            "note": "T(n)=aT(n/b)+f(n)，与 n^(log_b a) 比较：小则取后者，同阶则乘 log n，大则取 f(n)。",
+            "title": "主定理",
+            "core": "T(n)=aT(n/b)+f(n)，与 n^(log_b a) 比较：小则取后者，同阶则乘 log n，大则取 f(n)。",
+            "pitfall": "把 f(n)=n log n 直接当成 n²，选 Θ(n²)；或忽略 log 因子选 Θ(n log n)。"
+          }
+        ],
+        "solution": "a=2，b=2，log_b a = 1，故 n^(log_b a) = n。f(n) = n log n 比 n 大一个 log 因子，属于主定理第二类的扩展情形，结果在 n 上再乘一个 log：Θ(n log² n)。\n对照：若 f(n)=n，结果是 Θ(n log n)；若 f(n)=n²，结果是 Θ(n²)。"
+      },
+      "options": [
+        "Θ(n log n)",
+        "Θ(n log² n)",
+        "Θ(n²)",
+        "Θ(n)"
+      ]
+    },
+    {
+      "id": "q-algo-c02",
+      "topic": "algo-complexity",
+      "knowledge": "algo-complexity-k2",
+      "type": "choice",
+      "diff": 3,
+      "stem": "下列函数中增长最慢的是（　）",
+      "answer": {
+        "correct": 0
+      },
+      "explain": {
+        "right": "比较阶：log n < √n < n < n log n，取 n=10⁶ 代入即可直观看出。",
+        "wrong": "常见错误：认为 √n 比 log n 小——多项式增长总快于对数增长。",
+        "link": "algo-complexity-k2"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "最好、最坏与摊还",
+          "pattern": "algo-complexity-p2",
+          "steps": [
+            "先明确问的是单次最坏、平均还是摊还",
+            "最坏找最不利输入（快排已排序、散列全冲突）",
+            "平均要说明输入分布假设",
+            "摊还看一串操作的总代价除以操作数",
+            "答题时写出结论 + 一句理由"
+          ],
+          "trap": "把平均当最坏"
+        },
+        "approach": "比较阶：log n < √n < n < n log n，取 n=10⁶ 代入即可直观看出。",
+        "points": [
+          {
+            "id": "algo-complexity-k2",
+            "note": "一串操作的总代价除以操作次数，动态数组扩容的摊还代价是 O(1)。",
+            "title": "摊还分析",
+            "core": "一串操作的总代价除以操作次数，动态数组扩容的摊还代价是 O(1)。",
+            "pitfall": "认为 √n 比 log n 小——多项式增长总快于对数增长。"
+          }
+        ],
+        "solution": "令 n=10⁶：log₂n ≈ 20，√n = 1000，n = 10⁶，n log n ≈ 2×10⁷。故增长最慢的是 log n。记忆顺序：log n < √n < n < n log n < n² < 2ⁿ。"
+      },
+      "options": [
+        "log n",
+        "√n",
+        "n",
+        "n log n"
+      ]
+    },
+    {
+      "id": "q-algo-c03",
+      "topic": "algo-complexity",
+      "knowledge": "algo-complexity-k2",
+      "type": "choice",
+      "diff": 3,
+      "stem": "动态数组（容量不足时翻倍扩容）的 push 操作，摊还时间复杂度是（　）",
+      "answer": {
+        "correct": 0
+      },
+      "explain": {
+        "right": "摊还看总代价：n 次 push 的扩容总代价为 1+2+4+…+n < 2n，平均到每次是常数。",
+        "wrong": "常见错误：把单次扩容的 O(n) 当成每次 push 的复杂度。",
+        "link": "algo-complexity-k2"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "最好、最坏与摊还",
+          "pattern": "algo-complexity-p2",
+          "steps": [
+            "先明确问的是单次最坏、平均还是摊还",
+            "最坏找最不利输入（快排已排序、散列全冲突）",
+            "平均要说明输入分布假设",
+            "摊还看一串操作的总代价除以操作数",
+            "答题时写出结论 + 一句理由"
+          ],
+          "trap": "把平均当最坏"
+        },
+        "approach": "摊还看总代价：n 次 push 的扩容总代价为 1+2+4+…+n < 2n，平均到每次是常数。",
+        "points": [
+          {
+            "id": "algo-complexity-k2",
+            "note": "一串操作的总代价除以操作次数，动态数组扩容的摊还代价是 O(1)。",
+            "title": "摊还分析",
+            "core": "一串操作的总代价除以操作次数，动态数组扩容的摊还代价是 O(1)。",
+            "pitfall": "把单次扩容的 O(n) 当成每次 push 的复杂度。"
+          }
+        ],
+        "solution": "n 次 push 中，扩容发生在容量 1,2,4,…,2^k 时，拷贝总次数为 1+2+…+2^k < 2n，加上 n 次写入，总代价 O(n)，摊还到每次为 O(1)。\n注意：单次最坏仍是 O(n)，摊还与最坏是两个不同口径。"
+      },
+      "options": [
+        "O(1)",
+        "O(log n)",
+        "O(n)",
+        "O(n log n)"
+      ]
+    },
+    {
+      "id": "q-algo-c04",
+      "topic": "algo-sort",
+      "knowledge": "algo-sort-k2",
+      "type": "choice",
+      "diff": 3,
+      "stem": "下列排序算法中，稳定的是（　）",
+      "answer": {
+        "correct": 2
+      },
+      "explain": {
+        "right": "稳定性看相等元素相对次序是否保持：归并合并时优先取左边，故稳定。",
+        "wrong": "常见错误：认为快排稳定——划分时的远距离交换会打乱相等元素次序。",
+        "link": "algo-sort-k2"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "复杂度与稳定性辨析",
+          "pattern": "algo-sort-p1",
+          "steps": [
+            "先分类：比较排序还是非比较排序",
+            "写出最好/平均/最坏三档",
+            "判断稳定性：相等元素相对次序是否改变",
+            "看空间：归并 O(n)，快排 O(log n) 栈，堆排 O(1)",
+            "按题目条件选：要求稳定选归并，要求原地选堆排"
+          ],
+          "trap": "把快排平均 O(n log n) 当成最坏"
+        },
+        "approach": "稳定性看相等元素相对次序是否保持：归并合并时优先取左边，故稳定。",
+        "points": [
+          {
+            "id": "algo-sort-k2",
+            "note": "归并稳定且需 O(n) 空间；快排不稳定、平均 O(n log n)；堆排不稳定、原地。",
+            "title": "稳定性与原地性",
+            "core": "归并稳定且需 O(n) 空间；快排不稳定、平均 O(n log n)；堆排不稳定、原地。",
+            "pitfall": "认为快排稳定——划分时的远距离交换会打乱相等元素次序。"
+          }
+        ],
+        "solution": "归并排序在合并两个有序段时，相等元素优先取左段，相对次序不变，故稳定。快排的划分交换、堆排的堆顶交换、选择排序的交换都会跨距离移动元素，均不稳定。"
+      },
+      "options": [
+        "快速排序",
+        "堆排序",
+        "归并排序",
+        "选择排序"
+      ]
+    },
+    {
+      "id": "q-algo-c05",
+      "topic": "algo-sort",
+      "knowledge": "algo-sort-k1",
+      "type": "choice",
+      "diff": 3,
+      "stem": "快速排序最坏 O(n²) 的典型触发条件是（　）",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "枢轴每次取到最小值或最大值时，划分极不均衡，递归深度退化为 n。",
+        "wrong": "常见错误：认为数据随机是最坏情况——随机恰恰是平均情况。",
+        "link": "algo-sort-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "复杂度与稳定性辨析",
+          "pattern": "algo-sort-p1",
+          "steps": [
+            "先分类：比较排序还是非比较排序",
+            "写出最好/平均/最坏三档",
+            "判断稳定性：相等元素相对次序是否改变",
+            "看空间：归并 O(n)，快排 O(log n) 栈，堆排 O(1)",
+            "按题目条件选：要求稳定选归并，要求原地选堆排"
+          ],
+          "trap": "把快排平均 O(n log n) 当成最坏"
+        },
+        "approach": "枢轴每次取到最小值或最大值时，划分极不均衡，递归深度退化为 n。",
+        "points": [
+          {
+            "id": "algo-sort-k1",
+            "note": "基于比较的排序至少需要 Ω(n log n) 次比较，决策树有 n! 个叶子。",
+            "title": "比较排序下界",
+            "core": "基于比较的排序至少需要 Ω(n log n) 次比较，决策树有 n! 个叶子。",
+            "pitfall": "认为数据随机是最坏情况——随机恰恰是平均情况。"
+          }
+        ],
+        "solution": "已有序时取首元素为枢轴，每次划分一侧为空、另一侧 n−1 个元素，递归式 T(n)=T(n−1)+O(n)，解得 O(n²)。\n改进：随机选枢轴、三数取中、三路划分（应对大量重复元素）。"
+      },
+      "options": [
+        "数据随机排列",
+        "数据已有序且取首元素为枢轴",
+        "数据全部相等且用三路划分",
+        "数据规模很小"
+      ]
+    },
+    {
+      "id": "q-algo-c06",
+      "topic": "algo-sort",
+      "knowledge": "algo-sort-k1",
+      "type": "choice",
+      "diff": 3,
+      "stem": "基于比较的排序算法，其时间复杂度下界是（　）",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "决策树有 n! 个叶子，高度至少 log₂(n!) = Θ(n log n)。",
+        "wrong": "常见错误：认为计数排序达到 O(n) 就说明下界是 Ω(n)——计数排序不是比较排序。",
+        "link": "algo-sort-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "复杂度与稳定性辨析",
+          "pattern": "algo-sort-p1",
+          "steps": [
+            "先分类：比较排序还是非比较排序",
+            "写出最好/平均/最坏三档",
+            "判断稳定性：相等元素相对次序是否改变",
+            "看空间：归并 O(n)，快排 O(log n) 栈，堆排 O(1)",
+            "按题目条件选：要求稳定选归并，要求原地选堆排"
+          ],
+          "trap": "把快排平均 O(n log n) 当成最坏"
+        },
+        "approach": "决策树有 n! 个叶子，高度至少 log₂(n!) = Θ(n log n)。",
+        "points": [
+          {
+            "id": "algo-sort-k1",
+            "note": "基于比较的排序至少需要 Ω(n log n) 次比较，决策树有 n! 个叶子。",
+            "title": "比较排序下界",
+            "core": "基于比较的排序至少需要 Ω(n log n) 次比较，决策树有 n! 个叶子。",
+            "pitfall": "认为计数排序达到 O(n) 就说明下界是 Ω(n)——计数排序不是比较排序。"
+          }
+        ],
+        "solution": "比较排序的每次比较只有两个结果，n! 种排列对应决策树的 n! 个叶子，树高至少 log₂(n!) ≈ n log n − 1.44n，故下界为 Ω(n log n)。计数/基数排序能线性时间，是因为利用了关键字的数值结构，不做比较。"
+      },
+      "options": [
+        "Ω(n)",
+        "Ω(n log n)",
+        "Ω(n²)",
+        "Ω(log n)"
+      ]
+    },
+    {
+      "id": "q-algo-c07",
+      "topic": "algo-search",
+      "knowledge": "algo-search-k1",
+      "type": "choice",
+      "diff": 3,
+      "stem": "二分查找能正确使用的前提是（　）",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "二分依赖「按下标 O(1) 取中间元素」和「有序性决定收缩方向」。",
+        "wrong": "常见错误：认为链表也能二分——链表取中间元素需要 O(n) 遍历。",
+        "link": "algo-search-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "二分查找与边界",
+          "pattern": "algo-search-p1",
+          "steps": [
+            "确认数组有序且可随机访问",
+            "统一区间写法（左闭右开或左闭右闭），全程不混用",
+            "找第一个 ≥ target：命中后继续收缩右边界",
+            "循环结束条件与返回值要和区间写法匹配",
+            "用 n=1、target 不存在两种边界自测"
+          ],
+          "trap": "区间开闭混用导致死循环或漏解"
+        },
+        "approach": "二分依赖「按下标 O(1) 取中间元素」和「有序性决定收缩方向」。",
+        "points": [
+          {
+            "id": "algo-search-k1",
+            "note": "有序 + 随机访问才能二分，复杂度 O(log n)。",
+            "title": "二分查找",
+            "core": "有序 + 随机访问才能二分，复杂度 O(log n)。",
+            "pitfall": "认为链表也能二分——链表取中间元素需要 O(n) 遍历。"
+          }
+        ],
+        "solution": "二分每次取中点比较，依据有序性排除一半，要求：① 有序；② 能 O(1) 随机访问（数组）。链表不支持随机访问，取中点需遍历，二分退化为 O(n log n) 甚至更差。数据是否重复不影响基本二分。"
+      },
+      "options": [
+        "数据存储在链表中",
+        "数据有序且支持随机访问",
+        "数据全部不重复",
+        "数据规模为 2 的幂"
+      ]
+    },
+    {
+      "id": "q-algo-c08",
+      "topic": "algo-search",
+      "knowledge": "algo-search-k2",
+      "type": "choice",
+      "diff": 3,
+      "stem": "散列表查找的最坏时间复杂度是（　）",
+      "answer": {
+        "correct": 2
+      },
+      "explain": {
+        "right": "最坏情况是所有关键字映射到同一槽，退化为链表线性查找。",
+        "wrong": "常见错误：把平均 O(1) 当成最坏。",
+        "link": "algo-search-k2"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "散列冲突与性能",
+          "pattern": "algo-search-p2",
+          "steps": [
+            "先算装填因子 α = n/m",
+            "链地址法：平均查找长度 1+α/2（成功）",
+            "线性探测：容易产生聚集，删除需标记",
+            "开放定址的删除不能直接置空",
+            "最坏情况所有关键字同槽，退化为 O(n)"
+          ],
+          "trap": "认为散列查找恒为 O(1)"
+        },
+        "approach": "最坏情况是所有关键字映射到同一槽，退化为链表线性查找。",
+        "points": [
+          {
+            "id": "algo-search-k2",
+            "note": "平均 O(1)，最坏 O(n)；装填因子越大冲突越多。",
+            "title": "散列与冲突",
+            "core": "平均 O(1)，最坏 O(n)；装填因子越大冲突越多。",
+            "pitfall": "把平均 O(1) 当成最坏。"
+          }
+        ],
+        "solution": "散列平均 O(1) 依赖关键字均匀分布。若所有关键字冲突到同一槽，链地址法下该槽形成长度 n 的链表，查找退化为 O(n)。开放定址在表满时也可能退化。故最坏为 O(n)。"
+      },
+      "options": [
+        "O(1)",
+        "O(log n)",
+        "O(n)",
+        "O(n²)"
+      ]
+    },
+    {
+      "id": "q-algo-c09",
+      "topic": "algo-search",
+      "knowledge": "algo-search-k2",
+      "type": "choice",
+      "diff": 3,
+      "stem": "装填因子 α 增大时，散列表的平均查找长度（　）",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "α = 元素数/槽数，α 越大冲突概率越高，探测或链长增加。",
+        "wrong": "常见错误：认为只要哈希函数好，α 不影响性能。",
+        "link": "algo-search-k2"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "散列冲突与性能",
+          "pattern": "algo-search-p2",
+          "steps": [
+            "先算装填因子 α = n/m",
+            "链地址法：平均查找长度 1+α/2（成功）",
+            "线性探测：容易产生聚集，删除需标记",
+            "开放定址的删除不能直接置空",
+            "最坏情况所有关键字同槽，退化为 O(n)"
+          ],
+          "trap": "认为散列查找恒为 O(1)"
+        },
+        "approach": "α = 元素数/槽数，α 越大冲突概率越高，探测或链长增加。",
+        "points": [
+          {
+            "id": "algo-search-k2",
+            "note": "平均 O(1)，最坏 O(n)；装填因子越大冲突越多。",
+            "title": "散列与冲突",
+            "core": "平均 O(1)，最坏 O(n)；装填因子越大冲突越多。",
+            "pitfall": "认为只要哈希函数好，α 不影响性能。"
+          }
+        ],
+        "solution": "α 增大意味着槽更拥挤，冲突概率上升。链地址法成功查找的平均长度为 1+α/2，线性探测更长，故平均查找长度随 α 增大而增大。工程上通常扩容以把 α 控制在 0.75 以下。"
+      },
+      "options": [
+        "减小",
+        "增大",
+        "不变",
+        "先增后减"
+      ]
+    },
+    {
+      "id": "q-algo-c10",
+      "topic": "algo-divide",
+      "knowledge": "algo-divide-k1",
+      "type": "choice",
+      "diff": 3,
+      "stem": "归并排序的递归式与复杂度是（　）",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "分成两半各排一次，合并两个有序段需线性时间。",
+        "wrong": "常见错误：把合并代价写成 O(1)，得到 Θ(n)。",
+        "link": "algo-divide-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "分治算法设计",
+          "pattern": "algo-divide-p1",
+          "steps": [
+            "确认子问题与原问题同型且相互独立",
+            "确定拆分点（中点、按位、按值域）",
+            "写出合并步骤及其代价",
+            "列递归式并用主定理求复杂度",
+            "检查递归出口"
+          ],
+          "trap": "子问题有重叠却仍用分治（应改 DP）"
+        },
+        "approach": "分成两半各排一次，合并两个有序段需线性时间。",
+        "points": [
+          {
+            "id": "algo-divide-k1",
+            "note": "分解、解决、合并；子问题必须独立同型。",
+            "title": "分治三步骤",
+            "core": "分解、解决、合并；子问题必须独立同型。",
+            "pitfall": "把合并代价写成 O(1)，得到 Θ(n)。"
+          }
+        ],
+        "solution": "归并排序把数组分成两个 n/2 的子问题，递归排序后合并需 O(n)，故 T(n)=2T(n/2)+O(n)。由主定理 a=2,b=2，n^(log_b a)=n，与 f(n) 同阶，结果 Θ(n log n)。"
+      },
+      "options": [
+        "T(n)=2T(n/2)+O(1)，Θ(n)",
+        "T(n)=2T(n/2)+O(n)，Θ(n log n)",
+        "T(n)=T(n−1)+O(n)，Θ(n²)",
+        "T(n)=2T(n/2)+O(n²)，Θ(n²)"
+      ]
+    },
+    {
+      "id": "q-algo-c11",
+      "topic": "algo-divide",
+      "knowledge": "algo-divide-k1",
+      "type": "choice",
+      "diff": 3,
+      "stem": "Karatsuba 大整数乘法的时间复杂度是（　）",
+      "answer": {
+        "correct": 2
+      },
+      "explain": {
+        "right": "它把 4 次子乘法降到 3 次，递归式 T(n)=3T(n/2)+O(n)。",
+        "wrong": "常见错误：套普通分治的 4 次乘法，得到 O(n²)。",
+        "link": "algo-divide-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "分治算法设计",
+          "pattern": "algo-divide-p1",
+          "steps": [
+            "确认子问题与原问题同型且相互独立",
+            "确定拆分点（中点、按位、按值域）",
+            "写出合并步骤及其代价",
+            "列递归式并用主定理求复杂度",
+            "检查递归出口"
+          ],
+          "trap": "子问题有重叠却仍用分治（应改 DP）"
+        },
+        "approach": "它把 4 次子乘法降到 3 次，递归式 T(n)=3T(n/2)+O(n)。",
+        "points": [
+          {
+            "id": "algo-divide-k1",
+            "note": "分解、解决、合并；子问题必须独立同型。",
+            "title": "分治三步骤",
+            "core": "分解、解决、合并；子问题必须独立同型。",
+            "pitfall": "套普通分治的 4 次乘法，得到 O(n²)。"
+          }
+        ],
+        "solution": "普通分治做 4 次 n/2 位乘法：T(n)=4T(n/2)+O(n) → Θ(n²)。Karatsuba 用三次乘法（含加减法组合）完成：T(n)=3T(n/2)+O(n)，由主定理得 Θ(n^(log₂3)) ≈ Θ(n^1.585)。"
+      },
+      "options": [
+        "O(n²)",
+        "O(n log n)",
+        "O(n^1.585)",
+        "O(n)"
+      ]
+    },
+    {
+      "id": "q-algo-c12",
+      "topic": "algo-divide",
+      "knowledge": "algo-divide-k1",
+      "type": "choice",
+      "diff": 3,
+      "stem": "二分查找的递归式 T(n)=T(n/2)+O(1) 的解是（　）",
+      "answer": {
+        "correct": 0
+      },
+      "explain": {
+        "right": "每次问题规模减半，代价为常数，递归深度为 log₂n。",
+        "wrong": "常见错误：把 O(1) 当成整体复杂度，选 Θ(1)。",
+        "link": "algo-divide-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "分治算法设计",
+          "pattern": "algo-divide-p1",
+          "steps": [
+            "确认子问题与原问题同型且相互独立",
+            "确定拆分点（中点、按位、按值域）",
+            "写出合并步骤及其代价",
+            "列递归式并用主定理求复杂度",
+            "检查递归出口"
+          ],
+          "trap": "子问题有重叠却仍用分治（应改 DP）"
+        },
+        "approach": "每次问题规模减半，代价为常数，递归深度为 log₂n。",
+        "points": [
+          {
+            "id": "algo-divide-k1",
+            "note": "分解、解决、合并；子问题必须独立同型。",
+            "title": "分治三步骤",
+            "core": "分解、解决、合并；子问题必须独立同型。",
+            "pitfall": "把 O(1) 当成整体复杂度，选 Θ(1)。"
+          }
+        ],
+        "solution": "T(n)=T(n/2)+c，展开得 T(n)=c·log₂n + T(1)，故 Θ(log n)。直观理解：每次排除一半，最多比较 log₂n 次。"
+      },
+      "options": [
+        "Θ(log n)",
+        "Θ(n)",
+        "Θ(n log n)",
+        "Θ(1)"
+      ]
+    },
+    {
+      "id": "q-algo-c13",
+      "topic": "algo-dp",
+      "knowledge": "algo-dp-k2",
+      "type": "choice",
+      "diff": 3,
+      "stem": "0-1 背包问题用动态规划求解的时间复杂度是（　）",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "状态 dp[i][w] 有 n×W 个，每个 O(1) 转移。",
+        "wrong": "常见错误：认为它是多项式算法——O(nW) 对 W 的数值是多项式，对输入位数是指数的。",
+        "link": "algo-dp-k2"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "状态定义与转移",
+          "pattern": "algo-dp-p1",
+          "steps": [
+            "用一句话定义 dp 下标的含义（必须能复述）",
+            "想「最后一步」：最优解的最后一次决策是什么",
+            "由最后一步反推转移方程",
+            "确定边界（空串、容量 0、长度为 0）",
+            "确定计算顺序，保证依赖项先算"
+          ],
+          "trap": "状态含义说不清，转移必然出错"
+        },
+        "approach": "状态 dp[i][w] 有 n×W 个，每个 O(1) 转移。",
+        "points": [
+          {
+            "id": "algo-dp-k2",
+            "note": "0-1 背包倒序更新容量；完全背包正序；LCS 与编辑距离是二维表。",
+            "title": "背包与序列问题",
+            "core": "0-1 背包倒序更新容量；完全背包正序；LCS 与编辑距离是二维表。",
+            "pitfall": "认为它是多项式算法——O(nW) 对 W 的数值是多项式，对输入位数是指数的。"
+          }
+        ],
+        "solution": "dp[i][w] 表示前 i 件物品、容量 w 的最大价值，共 n×(W+1) 个状态，每个状态取「放/不放」两种转移，故 O(nW)。\n这叫伪多项式：W 以二进制编码时输入规模是 log W，因此 O(nW) 对输入长度是指数级。"
+      },
+      "options": [
+        "O(n log W)",
+        "O(nW)",
+        "O(2ⁿ)",
+        "O(n²)"
+      ]
+    },
+    {
+      "id": "q-algo-c14",
+      "topic": "algo-dp",
+      "knowledge": "algo-dp-k2",
+      "type": "choice",
+      "diff": 3,
+      "stem": "求两个长度分别为 m、n 的字符串的最长公共子序列，DP 的时间复杂度是（　）",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "二维状态 dp[i][j] 表示前缀 i、j 的 LCS 长度，逐格转移。",
+        "wrong": "常见错误：用一维状态，导致无法区分两个字符串的匹配位置。",
+        "link": "algo-dp-k2"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "状态定义与转移",
+          "pattern": "algo-dp-p1",
+          "steps": [
+            "用一句话定义 dp 下标的含义（必须能复述）",
+            "想「最后一步」：最优解的最后一次决策是什么",
+            "由最后一步反推转移方程",
+            "确定边界（空串、容量 0、长度为 0）",
+            "确定计算顺序，保证依赖项先算"
+          ],
+          "trap": "状态含义说不清，转移必然出错"
+        },
+        "approach": "二维状态 dp[i][j] 表示前缀 i、j 的 LCS 长度，逐格转移。",
+        "points": [
+          {
+            "id": "algo-dp-k2",
+            "note": "0-1 背包倒序更新容量；完全背包正序；LCS 与编辑距离是二维表。",
+            "title": "背包与序列问题",
+            "core": "0-1 背包倒序更新容量；完全背包正序；LCS 与编辑距离是二维表。",
+            "pitfall": "用一维状态，导致无法区分两个字符串的匹配位置。"
+          }
+        ],
+        "solution": "dp[i][j] 表示 A 的前 i 个字符与 B 的前 j 个字符的 LCS 长度：若 A[i]=B[j]，dp[i][j]=dp[i−1][j−1]+1；否则取 max(dp[i−1][j], dp[i][j−1])。共 mn 个状态，每个 O(1)，故 O(mn)，空间可优化到 O(min(m,n))。"
+      },
+      "options": [
+        "O(m+n)",
+        "O(mn)",
+        "O(m log n)",
+        "O(2^m)"
+      ]
+    },
+    {
+      "id": "q-algo-c15",
+      "topic": "algo-dp",
+      "knowledge": "algo-dp-k1",
+      "type": "choice",
+      "diff": 3,
+      "stem": "一个问题能用动态规划求解，必须同时具备（　）",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "DP 的两个前提：最优子结构（子问题最优可组合成整体最优）+ 重叠子问题（需要记忆化）。",
+        "wrong": "常见错误：把贪心选择性质当成 DP 的前提——那是贪心的条件。",
+        "link": "algo-dp-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "状态定义与转移",
+          "pattern": "algo-dp-p1",
+          "steps": [
+            "用一句话定义 dp 下标的含义（必须能复述）",
+            "想「最后一步」：最优解的最后一次决策是什么",
+            "由最后一步反推转移方程",
+            "确定边界（空串、容量 0、长度为 0）",
+            "确定计算顺序，保证依赖项先算"
+          ],
+          "trap": "状态含义说不清，转移必然出错"
+        },
+        "approach": "DP 的两个前提：最优子结构（子问题最优可组合成整体最优）+ 重叠子问题（需要记忆化）。",
+        "points": [
+          {
+            "id": "algo-dp-k1",
+            "note": "状态要能用一句话说清，转移由「最后一步决策」推出。",
+            "title": "状态与转移",
+            "core": "状态要能用一句话说清，转移由「最后一步决策」推出。",
+            "pitfall": "把贪心选择性质当成 DP 的前提——那是贪心的条件。"
+          }
+        ],
+        "solution": "动态规划要求：① 最优子结构，问题的最优解包含子问题的最优解；② 重叠子问题，递归过程中同一子问题被多次求解，故可记忆化/填表。\n只有最优子结构而无重叠（如归并排序）用分治即可；有贪心选择性质则可用贪心。"
+      },
+      "options": [
+        "贪心选择性质与最优子结构",
+        "最优子结构与重叠子问题",
+        "单调性与无后效性",
+        "可分性与稳定性"
+      ]
+    },
+    {
+      "id": "q-algo-c16",
+      "topic": "algo-greedy",
+      "knowledge": "algo-greedy-k1",
+      "type": "choice",
+      "diff": 3,
+      "stem": "区间调度问题（选最多不重叠区间）的正确贪心策略是（　）",
+      "answer": {
+        "correct": 2
+      },
+      "explain": {
+        "right": "结束越早，给后面留下的空间越大，可用交换论证证明最优。",
+        "wrong": "常见错误：选开始时间最早——一个很早开始但很长的区间会占满整段时间。",
+        "link": "algo-greedy-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "贪心策略与正确性",
+          "pattern": "algo-greedy-p1",
+          "steps": [
+            "明确每一步的贪心指标（最早结束、最小权值、最大单位价值）",
+            "用交换论证证明：任意最优解都能改成含贪心选择且不更差",
+            "确认剩余子问题与原问题同型",
+            "给出反例会立刻暴露错误策略",
+            "写复杂度：排序 + 一次扫描"
+          ],
+          "trap": "只说「显然最优」，没有交换论证"
+        },
+        "approach": "结束越早，给后面留下的空间越大，可用交换论证证明最优。",
+        "points": [
+          {
+            "id": "algo-greedy-k1",
+            "note": "贪心策略需用交换论证证明：最优解可改成含贪心选择且不变差。",
+            "title": "贪心选择性质",
+            "core": "贪心策略需用交换论证证明：最优解可改成含贪心选择且不变差。",
+            "pitfall": "选开始时间最早——一个很早开始但很长的区间会占满整段时间。"
+          }
+        ],
+        "solution": "按结束时间升序排序，依次选取与已选区间不重叠的区间，可得到最多数量。证明用交换论证：设最优解第一个区间为 O₁，贪心选 G₁，因 G₁ 结束最早，把 O₁ 换成 G₁ 不会与后续冲突，解不变差。\n反例说明其他策略不行：开始最早可能持续最长；持续最短可能卡在中间阻断两侧。"
+      },
+      "options": [
+        "每次选开始时间最早的",
+        "每次选持续时间最短的",
+        "每次选结束时间最早的",
+        "每次选重叠区间最多的"
+      ]
+    },
+    {
+      "id": "q-algo-c17",
+      "topic": "algo-greedy",
+      "knowledge": "algo-greedy-k2",
+      "type": "choice",
+      "diff": 3,
+      "stem": "币值为 {1, 3, 4}，要凑出 6 元，贪心（每次取最大面值）得到的硬币数是（　）",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "贪心先取 4，剩 2，只能取 1+1，共 3 枚；而最优是 3+3 = 2 枚。",
+        "wrong": "常见错误：认为贪心一定最优，直接答 2 枚。",
+        "link": "algo-greedy-k2"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "贪心失效的反例",
+          "pattern": "algo-greedy-p2",
+          "steps": [
+            "构造小规模反例，优先试币值/容量不规整的情况",
+            "比较贪心解与最优解的具体数值",
+            "反例只需一组即可否定策略",
+            "若找不到反例，再尝试证明",
+            "答题时写出贪心解与最优解各是什么"
+          ],
+          "trap": "用大规模例子，反而看不清差异"
+        },
+        "approach": "贪心先取 4，剩 2，只能取 1+1，共 3 枚；而最优是 3+3 = 2 枚。",
+        "points": [
+          {
+            "id": "algo-greedy-k2",
+            "note": "0-1 背包、任意币值找零都可能让贪心失效。",
+            "title": "贪心失效",
+            "core": "0-1 背包、任意币值找零都可能让贪心失效。",
+            "pitfall": "认为贪心一定最优，直接答 2 枚。"
+          }
+        ],
+        "solution": "贪心过程：6 → 取 4，余 2 → 取 1，余 1 → 取 1，共 3 枚（4+1+1）。最优解是 3+3，共 2 枚。故贪心在此币值系统下失效。\n这说明「面值成倍数关系」才是贪心找零正确的条件，任意币值需用 DP。"
+      },
+      "options": [
+        "2 枚",
+        "3 枚",
+        "4 枚",
+        "5 枚"
+      ]
+    },
+    {
+      "id": "q-algo-c18",
+      "topic": "algo-greedy",
+      "knowledge": "algo-greedy-k1",
+      "type": "choice",
+      "diff": 3,
+      "stem": "哈夫曼编码采用「每次合并权值最小的两个结点」，其正确性依据是（　）",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "每步都做当前最优选择且可证明不劣于任何最优解，属于贪心。",
+        "wrong": "常见错误：认为是 DP——Huffman 不需要枚举子问题，只做局部最优合并。",
+        "link": "algo-greedy-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "贪心策略与正确性",
+          "pattern": "algo-greedy-p1",
+          "steps": [
+            "明确每一步的贪心指标（最早结束、最小权值、最大单位价值）",
+            "用交换论证证明：任意最优解都能改成含贪心选择且不更差",
+            "确认剩余子问题与原问题同型",
+            "给出反例会立刻暴露错误策略",
+            "写复杂度：排序 + 一次扫描"
+          ],
+          "trap": "只说「显然最优」，没有交换论证"
+        },
+        "approach": "每步都做当前最优选择且可证明不劣于任何最优解，属于贪心。",
+        "points": [
+          {
+            "id": "algo-greedy-k1",
+            "note": "贪心策略需用交换论证证明：最优解可改成含贪心选择且不变差。",
+            "title": "贪心选择性质",
+            "core": "贪心策略需用交换论证证明：最优解可改成含贪心选择且不变差。",
+            "pitfall": "认为是 DP——Huffman 不需要枚举子问题，只做局部最优合并。"
+          }
+        ],
+        "solution": "Huffman 每次合并最小两个权值，属于贪心：可用交换论证证明，权值最小的两个结点一定可以放在最深层且互为兄弟，故先合并它们不会损失最优性。整体复杂度 O(n log n)（用优先队列）。"
+      },
+      "options": [
+        "分治",
+        "贪心选择性质",
+        "动态规划最优子结构",
+        "回溯"
+      ]
+    },
+    {
+      "id": "q-algo-c19",
+      "topic": "algo-graph",
+      "knowledge": "algo-graph-k1",
+      "type": "choice",
+      "diff": 3,
+      "stem": "Dijkstra 算法不适用于下列哪种图（　）",
+      "answer": {
+        "correct": 2
+      },
+      "explain": {
+        "right": "Dijkstra 一旦确定某点最短就不再更新，负权边会破坏这一前提。",
+        "wrong": "常见错误：认为只要没有负环就可用 Dijkstra——单条负权边也会让它出错。",
+        "link": "algo-graph-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "最短路",
+          "pattern": "algo-graph-p1",
+          "steps": [
+            "先看有无负权：有负权用 Bellman-Ford/SPFA",
+            "无权图用 BFS",
+            "Dijkstra 每次取未确定点中 dist 最小的，松弛邻边",
+            "记录前驱以便回溯路径",
+            "多源最短路用 Floyd O(n³)"
+          ],
+          "trap": "Dijkstra 用于负权图"
+        },
+        "approach": "Dijkstra 一旦确定某点最短就不再更新，负权边会破坏这一前提。",
+        "points": [
+          {
+            "id": "algo-graph-k1",
+            "note": "无权 BFS；非负权 Dijkstra；有负权 Bellman-Ford；多源 Floyd。",
+            "title": "最短路算法选择",
+            "core": "无权 BFS；非负权 Dijkstra；有负权 Bellman-Ford；多源 Floyd。",
+            "pitfall": "认为只要没有负环就可用 Dijkstra——单条负权边也会让它出错。"
+          }
+        ],
+        "solution": "Dijkstra 的正确性依赖「已确定点的距离不会再被更短路径更新」。存在负权边时，后续经过负边的路径可能更短，已确定的值就错了。含负权应改用 Bellman-Ford（可检测负环）或 SPFA。"
+      },
+      "options": [
+        "无向图",
+        "有向无环图",
+        "含负权边的图",
+        "稠密图"
+      ]
+    },
+    {
+      "id": "q-algo-c20",
+      "topic": "algo-graph",
+      "knowledge": "algo-graph-k2",
+      "type": "choice",
+      "diff": 3,
+      "stem": "Kruskal 算法求最小生成树的时间复杂度是（　）",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "主要开销是对 E 条边排序，并查集操作近似常数。",
+        "wrong": "常见错误：写成 O(V²)——那是 Prim 用邻接矩阵的实现。",
+        "link": "algo-graph-k2"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "最小生成树与并查集",
+          "pattern": "algo-graph-p2",
+          "steps": [
+            "Kruskal：所有边按权升序，依次加入不成环的边",
+            "用并查集判环：find(u) != find(v) 才合并",
+            "选够 n−1 条边即停止",
+            "Prim：从任一点出发，每次加连接已选集合的最小边",
+            "稠密图用 Prim，稀疏图用 Kruskal"
+          ],
+          "trap": "选边时未判环"
+        },
+        "approach": "主要开销是对 E 条边排序，并查集操作近似常数。",
+        "points": [
+          {
+            "id": "algo-graph-k2",
+            "note": "Kruskal 按边 + 并查集；Prim 按点扩展；都得到 n−1 条边。",
+            "title": "最小生成树",
+            "core": "Kruskal 按边 + 并查集；Prim 按点扩展；都得到 n−1 条边。",
+            "pitfall": "写成 O(V²)——那是 Prim 用邻接矩阵的实现。"
+          }
+        ],
+        "solution": "Kruskal 先对 E 条边按权排序 O(E log E)，再依次用并查集判环，每次近似 O(α(V))，总 O(E log E)。\nPrim 用邻接矩阵是 O(V²)，用优先队列是 O(E log V)，稠密图更有优势。"
+      },
+      "options": [
+        "O(V²)",
+        "O(E log E)",
+        "O(V+E)",
+        "O(E²)"
+      ]
+    },
+    {
+      "id": "q-algo-c21",
+      "topic": "algo-graph",
+      "knowledge": "algo-graph-k3",
+      "type": "choice",
+      "diff": 3,
+      "stem": "拓扑排序适用于（　）",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "拓扑序要求所有边从前指向后，有环时不存在这样的线性序。",
+        "wrong": "常见错误：认为有向图都能拓扑——有环时有向图不存在拓扑序。",
+        "link": "algo-graph-k3"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "拓扑排序",
+          "pattern": "algo-graph-p3",
+          "steps": [
+            "统计每个顶点入度",
+            "入度为 0 的入队",
+            "出队输出，把其邻接点入度减 1，减到 0 入队",
+            "输出顶点数小于 n 说明有环",
+            "也可用 DFS 后序取逆序"
+          ],
+          "trap": "有环图仍强行拓扑"
+        },
+        "approach": "拓扑序要求所有边从前指向后，有环时不存在这样的线性序。",
+        "points": [
+          {
+            "id": "algo-graph-k3",
+            "note": "入度法：入度 0 入队，出队后邻点入度减 1；输出少于 n 个即有环。",
+            "title": "拓扑排序",
+            "core": "入度法：入度 0 入队，出队后邻点入度减 1；输出少于 n 个即有环。",
+            "pitfall": "认为有向图都能拓扑——有环时有向图不存在拓扑序。"
+          }
+        ],
+        "solution": "拓扑排序把顶点排成线性序列，使每条有向边 u→v 中 u 都在 v 之前。若存在环，环上顶点互相要求排在对方之前，矛盾，故只适用于 DAG。入度法输出顶点数少于 n 时，也正好用来判环。"
+      },
+      "options": [
+        "任意有向图",
+        "有向无环图",
+        "无向连通图",
+        "完全图"
+      ]
+    },
+    {
+      "id": "q-algo-c22",
+      "topic": "algo-string",
+      "knowledge": "algo-string-k1",
+      "type": "choice",
+      "diff": 3,
+      "stem": "KMP 算法匹配的时间复杂度是（　）",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "主串指针不回退，模式串指针靠 π 数组回退，两者总移动量都是线性的。",
+        "wrong": "常见错误：认为失配时主串要回退，复杂度仍是 O(nm)。",
+        "link": "algo-string-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "KMP 与前缀函数",
+          "pattern": "algo-string-p1",
+          "steps": [
+            "先明确题目用哪种定义（π 还是 next）",
+            "π[0]=0；递推时用上一个 π 值回退",
+            "失配时 j = π[j−1] 继续比较，不回退主串",
+            "匹配成功后可继续用 π 找重叠出现",
+            "复杂度 O(n+m)"
+          ],
+          "trap": "π 与 next 混用，差一位导致全错"
+        },
+        "approach": "主串指针不回退，模式串指针靠 π 数组回退，两者总移动量都是线性的。",
+        "points": [
+          {
+            "id": "algo-string-k1",
+            "note": "π[i] 是最长相等真前后缀长度，失配时 j=π[j−1]。",
+            "title": "KMP 与前缀函数",
+            "core": "π[i] 是最长相等真前后缀长度，失配时 j=π[j−1]。",
+            "pitfall": "认为失配时主串要回退，复杂度仍是 O(nm)。"
+          }
+        ],
+        "solution": "KMP 先花 O(m) 求 π 数组，匹配阶段主串指针 i 只增不减，模式串指针 j 每次失配跳到 π[j−1]，j 的总减少量不超过总增加量，故匹配 O(n)。合计 O(n+m)。对比朴素匹配：失配时 i 回退到 i−j+1，最坏 O(nm)。"
+      },
+      "options": [
+        "O(nm)",
+        "O(n+m)",
+        "O(n log m)",
+        "O(m²)"
+      ]
+    },
+    {
+      "id": "q-algo-c23",
+      "topic": "algo-string",
+      "knowledge": "algo-string-k1",
+      "type": "choice",
+      "diff": 3,
+      "stem": "前缀函数 π[i] 的含义是（　）",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "「真前缀/真后缀」要求长度小于子串本身，π 记录最长的相等长度。",
+        "wrong": "常见错误：把 π 当成 next 数组——next 通常是 π 右移一位、首位补 −1。",
+        "link": "algo-string-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "KMP 与前缀函数",
+          "pattern": "algo-string-p1",
+          "steps": [
+            "先明确题目用哪种定义（π 还是 next）",
+            "π[0]=0；递推时用上一个 π 值回退",
+            "失配时 j = π[j−1] 继续比较，不回退主串",
+            "匹配成功后可继续用 π 找重叠出现",
+            "复杂度 O(n+m)"
+          ],
+          "trap": "π 与 next 混用，差一位导致全错"
+        },
+        "approach": "「真前缀/真后缀」要求长度小于子串本身，π 记录最长的相等长度。",
+        "points": [
+          {
+            "id": "algo-string-k1",
+            "note": "π[i] 是最长相等真前后缀长度，失配时 j=π[j−1]。",
+            "title": "KMP 与前缀函数",
+            "core": "π[i] 是最长相等真前后缀长度，失配时 j=π[j−1]。",
+            "pitfall": "把 π 当成 next 数组——next 通常是 π 右移一位、首位补 −1。"
+          }
+        ],
+        "solution": "π[i] = max{k | k < i+1 且 s[0..k−1] = s[i−k+1..i]}，即子串 s[0..i] 的最长相等真前缀与真后缀长度。例如 \"abab\" 的 π = [0,0,1,2]。它是 KMP 失配跳转的依据。"
+      },
+      "options": [
+        "模式串第 i 个字符的出现次数",
+        "子串 s[0..i] 的最长相等真前缀与真后缀的长度",
+        "模式串在主串中第 i 次出现的位置",
+        "子串 s[0..i] 的字符种类数"
+      ]
+    },
+    {
+      "id": "q-algo-c24",
+      "topic": "algo-string",
+      "knowledge": "algo-string-k2",
+      "type": "choice",
+      "diff": 3,
+      "stem": "在 Trie 中查找一个长度为 L 的字符串，时间复杂度是（　）",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "从根开始按字符逐层下行，查找代价只与串长有关，与串的总数无关。",
+        "wrong": "常见错误：认为 Trie 查找是 O(1)——它只与串长有关，与集合大小无关，但不是常数。",
+        "link": "algo-string-k2"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "哈希与 Trie",
+          "pattern": "algo-string-p2",
+          "steps": [
+            "哈希：预处理前缀哈希，O(1) 取子串哈希",
+            "冲突用双哈希或直接比对",
+            "Trie：按字符逐层建树，查找 O(L)",
+            "Trie 适合前缀统计、自动补全",
+            "注意哈希被卡（构造冲突）的风险"
+          ],
+          "trap": "单哈希在大数据下被卡"
+        },
+        "approach": "从根开始按字符逐层下行，查找代价只与串长有关，与串的总数无关。",
+        "points": [
+          {
+            "id": "algo-string-k2",
+            "note": "哈希 O(1) 取子串，Trie O(L) 查前缀。",
+            "title": "哈希与 Trie",
+            "core": "哈希 O(1) 取子串，Trie O(L) 查前缀。",
+            "pitfall": "认为 Trie 查找是 O(1)——它只与串长有关，与集合大小无关，但不是常数。"
+          }
+        ],
+        "solution": "Trie 的每条边对应一个字符，查找时从根出发，沿字符串的每个字符走一层，共走 L 步，每步查子结点。用数组或哈希存子结点时每步 O(1)，故总 O(L)。与集合中字符串数量无关，这是 Trie 相对哈希表的优势场景（前缀查询）。"
+      },
+      "options": [
+        "O(1)",
+        "O(L)",
+        "O(log L)",
+        "O(26^L)"
+      ]
+    },
+    {
+      "id": "q-algo-b01",
+      "topic": "algo-complexity",
+      "knowledge": "algo-complexity-k1",
+      "type": "blank",
+      "diff": 3,
+      "stem": "递归式 T(n) = 2T(n/2) + n 的解为 ______。",
+      "answer": {
+        "text": "Θ(n log n)"
+      },
+      "explain": {
+        "right": "主定理：n^(log₂2)=n 与 f(n)=n 同阶，结果要乘 log n。",
+        "wrong": "常见错误：写成 Θ(n)，漏掉同阶情形要乘的 log 因子。",
+        "link": "algo-complexity-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "主定理与递归式",
+          "pattern": "algo-complexity-p1",
+          "steps": [
+            "写出 a（子问题个数）、b（规模缩小倍数）、f(n)（分解与合并代价）",
+            "算 n^(log_b a)",
+            "f(n) 更小 → Θ(n^(log_b a))；同阶 → 乘一个 log n；更大且满足正则条件 → Θ(f(n))",
+            "不符合主定理形式（如 T(n)=T(n−1)+n）改用展开法",
+            "最后只保留最高阶，去掉常数"
+          ],
+          "trap": "把 a、b 认反（a 是分支数，不是缩小倍数）"
+        },
+        "approach": "主定理：n^(log₂2)=n 与 f(n)=n 同阶，结果要乘 log n。",
+        "points": [
+          {
+            "id": "algo-complexity-k1",
+            "note": "T(n)=aT(n/b)+f(n)，与 n^(log_b a) 比较：小则取后者，同阶则乘 log n，大则取 f(n)。",
+            "title": "主定理",
+            "core": "T(n)=aT(n/b)+f(n)，与 n^(log_b a) 比较：小则取后者，同阶则乘 log n，大则取 f(n)。",
+            "pitfall": "写成 Θ(n)，漏掉同阶情形要乘的 log 因子。"
+          }
+        ],
+        "solution": "a=2，b=2，log_b a=1，n^(log_b a)=n，与 f(n)=n 同阶，由主定理第二类得 T(n)=Θ(n log n)。这正是归并排序的递归式。"
+      }
+    },
+    {
+      "id": "q-algo-b02",
+      "topic": "algo-sort",
+      "knowledge": "algo-sort-k1",
+      "type": "blank",
+      "diff": 3,
+      "stem": "快速排序在最坏情况下的时间复杂度为 ______。",
+      "answer": {
+        "text": "O(n²)"
+      },
+      "explain": {
+        "right": "枢轴每次取到端点值时划分极不均衡，递归深度退化为 n，单层代价累加即为平方级。",
+        "wrong": "常见错误：写成 O(n log n)——那是最好的平均情况。",
+        "link": "algo-sort-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "复杂度与稳定性辨析",
+          "pattern": "algo-sort-p1",
+          "steps": [
+            "先分类：比较排序还是非比较排序",
+            "写出最好/平均/最坏三档",
+            "判断稳定性：相等元素相对次序是否改变",
+            "看空间：归并 O(n)，快排 O(log n) 栈，堆排 O(1)",
+            "按题目条件选：要求稳定选归并，要求原地选堆排"
+          ],
+          "trap": "把快排平均 O(n log n) 当成最坏"
+        },
+        "approach": "枢轴每次取到端点值时划分极不均衡，递归深度退化为 n，单层代价累加即为平方级。",
+        "points": [
+          {
+            "id": "algo-sort-k1",
+            "note": "基于比较的排序至少需要 Ω(n log n) 次比较，决策树有 n! 个叶子。",
+            "title": "比较排序下界",
+            "core": "基于比较的排序至少需要 Ω(n log n) 次比较，决策树有 n! 个叶子。",
+            "pitfall": "写成 O(n log n)——那是最好的平均情况。"
+          }
+        ],
+        "solution": "当每次划分都产生 0 与 n−1 两部分时，递归式退化为 T(n) = T(n−1) + O(n)，展开得 n+(n−1)+…+1 = n(n+1)/2 = O(n²)。已排序数组 + 取首元素为枢轴正是这种情形，随机化枢轴或三数取中可把最坏情况压回 O(n log n) 量级。"
+      }
+    },
+    {
+      "id": "q-algo-b03",
+      "topic": "algo-sort",
+      "knowledge": "algo-sort-k2",
+      "type": "blank",
+      "diff": 3,
+      "stem": "归并排序除输入数组外，额外需要的辅助空间为 ______。",
+      "answer": {
+        "text": "O(n)"
+      },
+      "explain": {
+        "right": "合并两个有序段时需要一块能同时容纳两边元素的临时数组，长度随区间规模线性增长。",
+        "wrong": "常见错误：写成 O(1)，把归并当成原地排序。",
+        "link": "algo-sort-k2"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "复杂度与稳定性辨析",
+          "pattern": "algo-sort-p1",
+          "steps": [
+            "先分类：比较排序还是非比较排序",
+            "写出最好/平均/最坏三档",
+            "判断稳定性：相等元素相对次序是否改变",
+            "看空间：归并 O(n)，快排 O(log n) 栈，堆排 O(1)",
+            "按题目条件选：要求稳定选归并，要求原地选堆排"
+          ],
+          "trap": "把快排平均 O(n log n) 当成最坏"
+        },
+        "approach": "合并两个有序段时需要一块能同时容纳两边元素的临时数组，长度随区间规模线性增长。",
+        "points": [
+          {
+            "id": "algo-sort-k2",
+            "note": "归并稳定且需 O(n) 空间；快排不稳定、平均 O(n log n)；堆排不稳定、原地。",
+            "title": "稳定性与原地性",
+            "core": "归并稳定且需 O(n) 空间；快排不稳定、平均 O(n log n)；堆排不稳定、原地。",
+            "pitfall": "写成 O(1)，把归并当成原地排序。"
+          }
+        ],
+        "solution": "归并排序在合并阶段需要一块能容纳当前区间所有元素的临时空间，最长区间为 n，故额外空间为 O(n)；递归调用栈深度为 O(log n)，被 O(n) 支配，所以总额外空间是 O(n) 而不是 O(log n)。"
+      }
+    },
+    {
+      "id": "q-algo-b04",
+      "topic": "algo-dp",
+      "knowledge": "algo-dp-k2",
+      "type": "blank",
+      "diff": 3,
+      "stem": "0-1 背包动态规划的时间复杂度为 ______（n 为物品数，W 为容量）。",
+      "answer": {
+        "text": "O(nW)"
+      },
+      "explain": {
+        "right": "状态数是「物品数 × 容量」的二维规模，每个状态只做常数次比较与赋值。",
+        "wrong": "常见错误：写成 O(n log W) 或认为它是多项式时间算法。",
+        "link": "algo-dp-k2"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "状态定义与转移",
+          "pattern": "algo-dp-p1",
+          "steps": [
+            "用一句话定义 dp 下标的含义（必须能复述）",
+            "想「最后一步」：最优解的最后一次决策是什么",
+            "由最后一步反推转移方程",
+            "确定边界（空串、容量 0、长度为 0）",
+            "确定计算顺序，保证依赖项先算"
+          ],
+          "trap": "状态含义说不清，转移必然出错"
+        },
+        "approach": "状态数是「物品数 × 容量」的二维规模，每个状态只做常数次比较与赋值。",
+        "points": [
+          {
+            "id": "algo-dp-k2",
+            "note": "0-1 背包倒序更新容量；完全背包正序；LCS 与编辑距离是二维表。",
+            "title": "背包与序列问题",
+            "core": "0-1 背包倒序更新容量；完全背包正序；LCS 与编辑距离是二维表。",
+            "pitfall": "写成 O(n log W) 或认为它是多项式时间算法。"
+          }
+        ],
+        "solution": "dp[i][w] 表示前 i 件物品、容量 w 的最大价值，共 n×(W+1) 个状态，每个状态只需比较「放第 i 件」与「不放」两种选择，转移为 O(1)，故总时间 O(nW)、空间可用滚动数组降到 O(W)。注意这是伪多项式：W 的数值虽大，其输入长度只有 log W。"
+      }
+    },
+    {
+      "id": "q-algo-b05",
+      "topic": "algo-dp",
+      "knowledge": "algo-dp-k1",
+      "type": "blank",
+      "diff": 3,
+      "stem": "序列 [3, 1, 4, 2, 5] 的最长上升子序列长度为 ______。",
+      "answer": {
+        "text": "3"
+      },
+      "explain": {
+        "right": "逐个维护「以当前元素结尾的 LIS 长度」。",
+        "wrong": "常见错误：把子序列当成子串，误答 2（连续上升只有 4,5）。",
+        "link": "algo-dp-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "状态定义与转移",
+          "pattern": "algo-dp-p1",
+          "steps": [
+            "用一句话定义 dp 下标的含义（必须能复述）",
+            "想「最后一步」：最优解的最后一次决策是什么",
+            "由最后一步反推转移方程",
+            "确定边界（空串、容量 0、长度为 0）",
+            "确定计算顺序，保证依赖项先算"
+          ],
+          "trap": "状态含义说不清，转移必然出错"
+        },
+        "approach": "逐个维护「以当前元素结尾的 LIS 长度」。",
+        "points": [
+          {
+            "id": "algo-dp-k1",
+            "note": "状态要能用一句话说清，转移由「最后一步决策」推出。",
+            "title": "状态与转移",
+            "core": "状态要能用一句话说清，转移由「最后一步决策」推出。",
+            "pitfall": "把子序列当成子串，误答 2（连续上升只有 4,5）。"
+          }
+        ],
+        "solution": "以各元素结尾的 LIS 长度：3→1；1→1；4→2（1,4）；2→2（1,2）；5→3（1,2,5 或 3,4,5）。故最长长度为 3。注意子序列不要求连续。"
+      }
+    },
+    {
+      "id": "q-algo-b06",
+      "topic": "algo-string",
+      "knowledge": "algo-string-k1",
+      "type": "blank",
+      "diff": 3,
+      "stem": "模式串 \"abab\" 的 next 数组（next[0] = −1）为 ______。",
+      "answer": {
+        "text": "[-1, 0, 0, 1]"
+      },
+      "explain": {
+        "right": "先求前缀函数 π=[0,0,1,2]，再右移一位、首位补 −1。",
+        "wrong": "常见错误：把 π 直接当成 next，得到 [0,0,1,2]，整体差一位。",
+        "link": "algo-string-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "KMP 与前缀函数",
+          "pattern": "algo-string-p1",
+          "steps": [
+            "先明确题目用哪种定义（π 还是 next）",
+            "π[0]=0；递推时用上一个 π 值回退",
+            "失配时 j = π[j−1] 继续比较，不回退主串",
+            "匹配成功后可继续用 π 找重叠出现",
+            "复杂度 O(n+m)"
+          ],
+          "trap": "π 与 next 混用，差一位导致全错"
+        },
+        "approach": "先求前缀函数 π=[0,0,1,2]，再右移一位、首位补 −1。",
+        "points": [
+          {
+            "id": "algo-string-k1",
+            "note": "π[i] 是最长相等真前后缀长度，失配时 j=π[j−1]。",
+            "title": "KMP 与前缀函数",
+            "core": "π[i] 是最长相等真前后缀长度，失配时 j=π[j−1]。",
+            "pitfall": "把 π 直接当成 next，得到 [0,0,1,2]，整体差一位。"
+          }
+        ],
+        "solution": "π(\"abab\") = [0,0,1,2]：π[2]=1（\"a\"），π[3]=2（\"ab\"）。next 定义为 π 右移一位、首位补 −1，故 next = [-1,0,0,1]。做题前必须先确认题目采用哪种定义。"
+      }
+    },
+    {
+      "id": "q-algo-b07",
+      "topic": "algo-greedy",
+      "knowledge": "algo-greedy-k1",
+      "type": "blank",
+      "diff": 3,
+      "stem": "区间调度问题中，贪心策略应按区间的 ______ 升序排序。",
+      "answer": {
+        "text": "结束时间"
+      },
+      "explain": {
+        "right": "区间越早结束，给后面留下的可选空间越大，因此排序键是结束时间而不是开始时间。",
+        "wrong": "常见错误：按开始时间或持续时长排序，都会得到反例。",
+        "link": "algo-greedy-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "贪心策略与正确性",
+          "pattern": "algo-greedy-p1",
+          "steps": [
+            "明确每一步的贪心指标（最早结束、最小权值、最大单位价值）",
+            "用交换论证证明：任意最优解都能改成含贪心选择且不更差",
+            "确认剩余子问题与原问题同型",
+            "给出反例会立刻暴露错误策略",
+            "写复杂度：排序 + 一次扫描"
+          ],
+          "trap": "只说「显然最优」，没有交换论证"
+        },
+        "approach": "区间越早结束，给后面留下的可选空间越大，因此排序键是结束时间而不是开始时间。",
+        "points": [
+          {
+            "id": "algo-greedy-k1",
+            "note": "贪心策略需用交换论证证明：最优解可改成含贪心选择且不变差。",
+            "title": "贪心选择性质",
+            "core": "贪心策略需用交换论证证明：最优解可改成含贪心选择且不变差。",
+            "pitfall": "按开始时间或持续时长排序，都会得到反例。"
+          }
+        ],
+        "solution": "按结束时间升序，每次选取与已选区间不重叠的最早结束区间，可用交换论证证明最优：若最优解首个区间不是最早结束者，把它替换成最早结束区间不会减少可选数量。按开始时间排序时，一个早开始但很长的区间会挤掉多个短区间，得到更差解。"
+      }
+    },
+    {
+      "id": "q-algo-b08",
+      "topic": "algo-sort",
+      "knowledge": "algo-sort-k1",
+      "type": "blank",
+      "diff": 3,
+      "stem": "基于比较的排序算法的时间复杂度下界为 ______。",
+      "answer": {
+        "text": "Ω(n log n)"
+      },
+      "explain": {
+        "right": "决策树叶子数为 n!，树高至少 log₂(n!)。",
+        "wrong": "常见错误：写成 Ω(n)，把非比较排序的下界混进来。",
+        "link": "algo-sort-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "复杂度与稳定性辨析",
+          "pattern": "algo-sort-p1",
+          "steps": [
+            "先分类：比较排序还是非比较排序",
+            "写出最好/平均/最坏三档",
+            "判断稳定性：相等元素相对次序是否改变",
+            "看空间：归并 O(n)，快排 O(log n) 栈，堆排 O(1)",
+            "按题目条件选：要求稳定选归并，要求原地选堆排"
+          ],
+          "trap": "把快排平均 O(n log n) 当成最坏"
+        },
+        "approach": "决策树叶子数为 n!，树高至少 log₂(n!)。",
+        "points": [
+          {
+            "id": "algo-sort-k1",
+            "note": "基于比较的排序至少需要 Ω(n log n) 次比较，决策树有 n! 个叶子。",
+            "title": "比较排序下界",
+            "core": "基于比较的排序至少需要 Ω(n log n) 次比较，决策树有 n! 个叶子。",
+            "pitfall": "写成 Ω(n)，把非比较排序的下界混进来。"
+          }
+        ],
+        "solution": "n 个元素有 n! 种排列，决策树至少 n! 个叶子，高度 h 满足 2^h ≥ n!，由 Stirling 公式 h = Ω(n log n)。故比较排序不可能低于此界。"
+      }
+    },
+    {
+      "id": "q-algo-k01",
+      "topic": "algo-complexity",
+      "knowledge": "algo-complexity-k1",
+      "type": "calc",
+      "diff": 3,
+      "stem": "用主定理求 T(n) = 2T(n/2) + n² 的渐进复杂度，并写出判断过程。",
+      "answer": {
+        "text": "a = 2，b = 2，log_b a = log₂2 = 1，故 n^(log_b a) = n。\nf(n) = n² 比 n 高阶（多项式意义上大），且满足正则条件 a·f(n/b) = 2·(n/2)² = n²/2 ≤ c·f(n)（取 c = 1/2 < 1）。\n属于主定理第三类，故 T(n) = Θ(f(n)) = Θ(n²)。\n对照记忆：f 小取 n^log，同阶乘 log，f 大取 f。"
+      },
+      "explain": {
+        "right": "先算 a、b 与 n^(log_b a)，再与 f(n)=n² 比较大小，确定属于主定理哪一类。",
+        "wrong": "常见错误：只写结果不写比较过程；或把 n^(log_b a) 算成 n²。",
+        "link": "algo-complexity-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "主定理与递归式",
+          "pattern": "algo-complexity-p1",
+          "steps": [
+            "写出 a（子问题个数）、b（规模缩小倍数）、f(n)（分解与合并代价）",
+            "算 n^(log_b a)",
+            "f(n) 更小 → Θ(n^(log_b a))；同阶 → 乘一个 log n；更大且满足正则条件 → Θ(f(n))",
+            "不符合主定理形式（如 T(n)=T(n−1)+n）改用展开法",
+            "最后只保留最高阶，去掉常数"
+          ],
+          "trap": "把 a、b 认反（a 是分支数，不是缩小倍数）"
+        },
+        "approach": "先算 a、b 与 n^(log_b a)，再与 f(n)=n² 比较大小，确定属于主定理哪一类。",
+        "points": [
+          {
+            "id": "algo-complexity-k1",
+            "note": "T(n)=aT(n/b)+f(n)，与 n^(log_b a) 比较：小则取后者，同阶则乘 log n，大则取 f(n)。",
+            "title": "主定理",
+            "core": "T(n)=aT(n/b)+f(n)，与 n^(log_b a) 比较：小则取后者，同阶则乘 log n，大则取 f(n)。",
+            "pitfall": "只写结果不写比较过程；或把 n^(log_b a) 算成 n²。"
+          }
+        ],
+        "solution": "a = 2，b = 2，log_b a = log₂2 = 1，故 n^(log_b a) = n。\nf(n) = n² 比 n 高阶（多项式意义上大），且满足正则条件 a·f(n/b) = 2·(n/2)² = n²/2 ≤ c·f(n)（取 c = 1/2 < 1）。\n属于主定理第三类，故 T(n) = Θ(f(n)) = Θ(n²)。\n对照记忆：f 小取 n^log，同阶乘 log，f 大取 f。"
+      }
+    },
+    {
+      "id": "q-algo-k02",
+      "topic": "algo-sort",
+      "knowledge": "algo-sort-k2",
+      "type": "calc",
+      "diff": 3,
+      "stem": "对数组 [5, 3, 8, 4, 2, 7, 1, 6] 以首元素 5 为枢轴做一趟快速排序划分，写出划分后的数组与枢轴位置。",
+      "answer": {
+        "text": "初始：[5, 3, 8, 4, 2, 7, 1, 6]，pivot = 5。\ni 从左找 >5：i=2 处 8；j 从右找 <5：j=6 处 1；交换 → [5,3,1,4,2,7,8,6]。\ni 继续：i=3 的 4、i=4 的 2 都 <5，i=5 的 7 >5 停；j 左移：j=5 的 7 >5，j=4 的 2 <5 停。\n此时 i ≥ j，把 pivot 与 a[j] 交换 → [2,3,1,4,5,7,8,6]。\n枢轴 5 落在下标 4，左侧 [2,3,1,4] 全小于 5，右侧 [7,8,6] 全大于 5。"
+      },
+      "explain": {
+        "right": "双指针从两端向中间扫：左找大于枢轴的，右找小于枢轴的，交换；相遇后枢轴归位。",
+        "wrong": "常见错误：指针移动顺序写反导致死循环；或把枢轴放到相遇点的前一格。",
+        "link": "algo-sort-k2"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "一趟划分与合并过程",
+          "pattern": "algo-sort-p2",
+          "steps": [
+            "快排：确定枢轴，双指针从两端向中间扫",
+            "左指针找大于枢轴的元素，右指针找小于枢轴的，交换",
+            "两指针相遇后把枢轴换到分界位置",
+            "归并：先递归排左右半，再合并两个有序段",
+            "合并时相等元素取左边，保证稳定"
+          ],
+          "trap": "划分时指针移动顺序写反导致死循环"
+        },
+        "approach": "双指针从两端向中间扫：左找大于枢轴的，右找小于枢轴的，交换；相遇后枢轴归位。",
+        "points": [
+          {
+            "id": "algo-sort-k2",
+            "note": "归并稳定且需 O(n) 空间；快排不稳定、平均 O(n log n)；堆排不稳定、原地。",
+            "title": "稳定性与原地性",
+            "core": "归并稳定且需 O(n) 空间；快排不稳定、平均 O(n log n)；堆排不稳定、原地。",
+            "pitfall": "指针移动顺序写反导致死循环；或把枢轴放到相遇点的前一格。"
+          }
+        ],
+        "solution": "初始：[5, 3, 8, 4, 2, 7, 1, 6]，pivot = 5。\ni 从左找 >5：i=2 处 8；j 从右找 <5：j=6 处 1；交换 → [5,3,1,4,2,7,8,6]。\ni 继续：i=3 的 4、i=4 的 2 都 <5，i=5 的 7 >5 停；j 左移：j=5 的 7 >5，j=4 的 2 <5 停。\n此时 i ≥ j，把 pivot 与 a[j] 交换 → [2,3,1,4,5,7,8,6]。\n枢轴 5 落在下标 4，左侧 [2,3,1,4] 全小于 5，右侧 [7,8,6] 全大于 5。"
+      }
+    },
+    {
+      "id": "q-algo-k03",
+      "topic": "algo-divide",
+      "knowledge": "algo-divide-k2",
+      "type": "calc",
+      "diff": 3,
+      "stem": "用分治（归并）求数组 [2, 4, 1, 3, 5] 的逆序对个数，写出合并时的统计过程。",
+      "answer": {
+        "text": "拆分为 [2,4] 与 [1,3,5]。\n左半 [2,4]：逆序对 0；右半 [1,3,5]：逆序对 0。\n合并：左指针指向 2，右指针指向 1。1 < 2，取 1，此时左段剩余 2 个元素（2,4），它们都大于 1，贡献 2 个逆序对（2,1）、（4,1）。\n继续：2 < 3，取 2；3 < 4，取 3，左段剩余 1 个（4），贡献 1 个逆序对（4,3）；取 4；取 5。\n总逆序对 = 2 + 1 = 3，即 (2,1)、(4,1)、(4,3)。"
+      },
+      "explain": {
+        "right": "递归统计左右半边内部的逆序对，合并时统计「左段元素 > 右段元素」的跨区间对数。",
+        "wrong": "常见错误：只统计半边；或合并时把「左大于右」的方向数反。",
+        "link": "algo-divide-k2"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "逆序对与最近点对",
+          "pattern": "algo-divide-p2",
+          "steps": [
+            "按中点拆成左右两半",
+            "递归统计左半、右半内部的贡献",
+            "合并时统计跨越中点的贡献（归并过程顺手统计逆序对）",
+            "最近点对合并时只检查中线附近带状区域",
+            "总复杂度 O(n log n)"
+          ],
+          "trap": "只统计半边，漏掉跨中点的情况"
+        },
+        "approach": "递归统计左右半边内部的逆序对，合并时统计「左段元素 > 右段元素」的跨区间对数。",
+        "points": [
+          {
+            "id": "algo-divide-k2",
+            "note": "归并统计逆序对、最近点对带状检查，都是「递归 + 合并时统计跨界贡献」。",
+            "title": "跨区间贡献",
+            "core": "归并统计逆序对、最近点对带状检查，都是「递归 + 合并时统计跨界贡献」。",
+            "pitfall": "只统计半边；或合并时把「左大于右」的方向数反。"
+          }
+        ],
+        "solution": "拆分为 [2,4] 与 [1,3,5]。\n左半 [2,4]：逆序对 0；右半 [1,3,5]：逆序对 0。\n合并：左指针指向 2，右指针指向 1。1 < 2，取 1，此时左段剩余 2 个元素（2,4），它们都大于 1，贡献 2 个逆序对（2,1）、（4,1）。\n继续：2 < 3，取 2；3 < 4，取 3，左段剩余 1 个（4），贡献 1 个逆序对（4,3）；取 4；取 5。\n总逆序对 = 2 + 1 = 3，即 (2,1)、(4,1)、(4,3)。"
+      }
+    },
+    {
+      "id": "q-algo-k04",
+      "topic": "algo-dp",
+      "knowledge": "algo-dp-k2",
+      "type": "calc",
+      "diff": 3,
+      "stem": "0-1 背包：物品重量 [2,3,4,5]，价值 [3,4,5,6]，容量 W=5，求最大价值。",
+      "answer": {
+        "text": "一维 dp，初值全 0，按物品逐个更新，容量倒序：\n物品 1（w=2,v=3）：dp[5]=3, dp[4]=3, dp[3]=3, dp[2]=3。\n物品 2（w=3,v=4）：dp[5]=max(3, dp[2]+4=7)=7；dp[4]=max(3, dp[1]+4=4)=4；dp[3]=4。\n物品 3（w=4,v=5）：dp[5]=max(7, dp[1]+5=5)=7；dp[4]=max(4, dp[0]+5=5)=5。\n物品 4（w=5,v=6）：dp[5]=max(7, dp[0]+6=6)=7。\n最大价值 7，方案为物品 1+2（重量 2+3=5，价值 3+4=7）。"
+      },
+      "explain": {
+        "right": "定义 dp[w] 为容量 w 的最大价值，倒序遍历容量避免重复使用同一物品。",
+        "wrong": "常见错误：正序更新容量，导致同一物品被放多次（变成完全背包）。",
+        "link": "algo-dp-k2"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "状态定义与转移",
+          "pattern": "algo-dp-p1",
+          "steps": [
+            "用一句话定义 dp 下标的含义（必须能复述）",
+            "想「最后一步」：最优解的最后一次决策是什么",
+            "由最后一步反推转移方程",
+            "确定边界（空串、容量 0、长度为 0）",
+            "确定计算顺序，保证依赖项先算"
+          ],
+          "trap": "状态含义说不清，转移必然出错"
+        },
+        "approach": "定义 dp[w] 为容量 w 的最大价值，倒序遍历容量避免重复使用同一物品。",
+        "points": [
+          {
+            "id": "algo-dp-k2",
+            "note": "0-1 背包倒序更新容量；完全背包正序；LCS 与编辑距离是二维表。",
+            "title": "背包与序列问题",
+            "core": "0-1 背包倒序更新容量；完全背包正序；LCS 与编辑距离是二维表。",
+            "pitfall": "正序更新容量，导致同一物品被放多次（变成完全背包）。"
+          }
+        ],
+        "solution": "一维 dp，初值全 0，按物品逐个更新，容量倒序：\n物品 1（w=2,v=3）：dp[5]=3, dp[4]=3, dp[3]=3, dp[2]=3。\n物品 2（w=3,v=4）：dp[5]=max(3, dp[2]+4=7)=7；dp[4]=max(3, dp[1]+4=4)=4；dp[3]=4。\n物品 3（w=4,v=5）：dp[5]=max(7, dp[1]+5=5)=7；dp[4]=max(4, dp[0]+5=5)=5。\n物品 4（w=5,v=6）：dp[5]=max(7, dp[0]+6=6)=7。\n最大价值 7，方案为物品 1+2（重量 2+3=5，价值 3+4=7）。"
+      }
+    },
+    {
+      "id": "q-algo-k05",
+      "topic": "algo-dp",
+      "knowledge": "algo-dp-k2",
+      "type": "calc",
+      "diff": 3,
+      "stem": "求 A=\"ABCBDAB\" 与 B=\"BDCABA\" 的最长公共子序列长度。",
+      "answer": {
+        "text": "按 dp[i][j]（A 前 i 个、B 前 j 个的 LCS 长度）填表，关键行结果：\ni=7（A 全部）、j=6（B 全部）时 dp[7][6] = 4。\n一条最长公共子序列为 \"BCBA\"（也可取 \"BDAB\"），长度 4。\n验证：B C B A 在 A 中依次出现在位置 2,3,5,7，在 B 中出现在 1,3,4,6。\n复杂度 O(mn)=O(42)，空间可压到 O(n)。"
+      },
+      "explain": {
+        "right": "建二维表 dp[i][j]，字符相等取左上+1，否则取上、左的较大值。",
+        "wrong": "常见错误：字符不等时取 min 或漏掉某个方向；或把子序列当子串要求连续。",
+        "link": "algo-dp-k2"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "状态定义与转移",
+          "pattern": "algo-dp-p1",
+          "steps": [
+            "用一句话定义 dp 下标的含义（必须能复述）",
+            "想「最后一步」：最优解的最后一次决策是什么",
+            "由最后一步反推转移方程",
+            "确定边界（空串、容量 0、长度为 0）",
+            "确定计算顺序，保证依赖项先算"
+          ],
+          "trap": "状态含义说不清，转移必然出错"
+        },
+        "approach": "建二维表 dp[i][j]，字符相等取左上+1，否则取上、左的较大值。",
+        "points": [
+          {
+            "id": "algo-dp-k2",
+            "note": "0-1 背包倒序更新容量；完全背包正序；LCS 与编辑距离是二维表。",
+            "title": "背包与序列问题",
+            "core": "0-1 背包倒序更新容量；完全背包正序；LCS 与编辑距离是二维表。",
+            "pitfall": "字符不等时取 min 或漏掉某个方向；或把子序列当子串要求连续。"
+          }
+        ],
+        "solution": "按 dp[i][j]（A 前 i 个、B 前 j 个的 LCS 长度）填表，关键行结果：\ni=7（A 全部）、j=6（B 全部）时 dp[7][6] = 4。\n一条最长公共子序列为 \"BCBA\"（也可取 \"BDAB\"），长度 4。\n验证：B C B A 在 A 中依次出现在位置 2,3,5,7，在 B 中出现在 1,3,4,6。\n复杂度 O(mn)=O(42)，空间可压到 O(n)。"
+      }
+    },
+    {
+      "id": "q-algo-k06",
+      "topic": "algo-greedy",
+      "knowledge": "algo-greedy-k1",
+      "type": "calc",
+      "diff": 3,
+      "stem": "区间集合 {(1,4),(3,5),(0,6),(5,7),(3,9),(5,9),(6,10),(8,11)}，求最多可选多少个互不重叠的区间。",
+      "answer": {
+        "text": "按结束时间排序：(1,4),(3,5),(0,6),(5,7),(5,9),(3,9),(6,10),(8,11)。\n选 (1,4)；下一个开始 ≥4 的是 (5,7)；下一个开始 ≥7 的是 (8,11)。\n共 3 个，即 (1,4)、(5,7)、(8,11)，均为 3 个区间。\n若按开始时间排序，先选 (0,6)，之后只能选 (6,10) 或 (8,11)，同样 2 个，但多数实例会比按结束时间差。"
+      },
+      "explain": {
+        "right": "按结束时间升序排序，依次选取与上一个不重叠的区间。",
+        "wrong": "常见错误：按开始时间排序，选了 (0,6) 后只能再选一个，得 2 个。",
+        "link": "algo-greedy-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "贪心策略与正确性",
+          "pattern": "algo-greedy-p1",
+          "steps": [
+            "明确每一步的贪心指标（最早结束、最小权值、最大单位价值）",
+            "用交换论证证明：任意最优解都能改成含贪心选择且不更差",
+            "确认剩余子问题与原问题同型",
+            "给出反例会立刻暴露错误策略",
+            "写复杂度：排序 + 一次扫描"
+          ],
+          "trap": "只说「显然最优」，没有交换论证"
+        },
+        "approach": "按结束时间升序排序，依次选取与上一个不重叠的区间。",
+        "points": [
+          {
+            "id": "algo-greedy-k1",
+            "note": "贪心策略需用交换论证证明：最优解可改成含贪心选择且不变差。",
+            "title": "贪心选择性质",
+            "core": "贪心策略需用交换论证证明：最优解可改成含贪心选择且不变差。",
+            "pitfall": "按开始时间排序，选了 (0,6) 后只能再选一个，得 2 个。"
+          }
+        ],
+        "solution": "按结束时间排序：(1,4),(3,5),(0,6),(5,7),(5,9),(3,9),(6,10),(8,11)。\n选 (1,4)；下一个开始 ≥4 的是 (5,7)；下一个开始 ≥7 的是 (8,11)。\n共 3 个，即 (1,4)、(5,7)、(8,11)，均为 3 个区间。\n若按开始时间排序，先选 (0,6)，之后只能选 (6,10) 或 (8,11)，同样 2 个，但多数实例会比按结束时间差。"
+      }
+    },
+    {
+      "id": "q-algo-k07",
+      "topic": "algo-string",
+      "knowledge": "algo-string-k1",
+      "type": "calc",
+      "diff": 3,
+      "stem": "求模式串 \"ababaca\" 的前缀函数 π 数组，并说明 π[6] 的含义。",
+      "answer": {
+        "text": "逐位计算：\nπ[0]=0（单字符无真前后缀）；\nπ[1]：\"ab\" 前后缀不等 → 0；\nπ[2]：\"aba\" 前缀 \"a\" = 后缀 \"a\" → 1；\nπ[3]：\"abab\" 前缀 \"ab\" = 后缀 \"ab\" → 2；\nπ[4]：\"ababa\" 最长 \"aba\" → 3；\nπ[5]：\"ababac\" 结尾 c 无法匹配 → 0；\nπ[6]：\"ababaca\" 前缀 \"a\" = 后缀 \"a\" → 1。\n故 π = [0,0,1,2,3,0,1]。π[6]=1 表示整个串的最长相等真前后缀长度为 1（字符 a）。"
+      },
+      "explain": {
+        "right": "π[i] 是 s[0..i] 的最长相等真前缀与真后缀长度，用上一个 π 值回退比较。",
+        "wrong": "常见错误：把 π 与 next 混用；或计算时忘记 while 回退，只比较相邻字符。",
+        "link": "algo-string-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "KMP 与前缀函数",
+          "pattern": "algo-string-p1",
+          "steps": [
+            "先明确题目用哪种定义（π 还是 next）",
+            "π[0]=0；递推时用上一个 π 值回退",
+            "失配时 j = π[j−1] 继续比较，不回退主串",
+            "匹配成功后可继续用 π 找重叠出现",
+            "复杂度 O(n+m)"
+          ],
+          "trap": "π 与 next 混用，差一位导致全错"
+        },
+        "approach": "π[i] 是 s[0..i] 的最长相等真前缀与真后缀长度，用上一个 π 值回退比较。",
+        "points": [
+          {
+            "id": "algo-string-k1",
+            "note": "π[i] 是最长相等真前后缀长度，失配时 j=π[j−1]。",
+            "title": "KMP 与前缀函数",
+            "core": "π[i] 是最长相等真前后缀长度，失配时 j=π[j−1]。",
+            "pitfall": "把 π 与 next 混用；或计算时忘记 while 回退，只比较相邻字符。"
+          }
+        ],
+        "solution": "逐位计算：\nπ[0]=0（单字符无真前后缀）；\nπ[1]：\"ab\" 前后缀不等 → 0；\nπ[2]：\"aba\" 前缀 \"a\" = 后缀 \"a\" → 1；\nπ[3]：\"abab\" 前缀 \"ab\" = 后缀 \"ab\" → 2；\nπ[4]：\"ababa\" 最长 \"aba\" → 3；\nπ[5]：\"ababac\" 结尾 c 无法匹配 → 0；\nπ[6]：\"ababaca\" 前缀 \"a\" = 后缀 \"a\" → 1。\n故 π = [0,0,1,2,3,0,1]。π[6]=1 表示整个串的最长相等真前后缀长度为 1（字符 a）。"
+      }
+    },
+    {
+      "id": "q-algo-k08",
+      "topic": "algo-graph",
+      "knowledge": "algo-graph-k1",
+      "type": "calc",
+      "diff": 3,
+      "stem": "有向图：A→B 权 4，A→C 权 1，C→B 权 2，B→D 权 1，C→D 权 5，D→E 权 3。用 Dijkstra 求 A 到 E 的最短路。",
+      "answer": {
+        "text": "初始化 dist(A)=0，其余 ∞。\n① 确定 A(0)：dist(B)=4，dist(C)=1。\n② 取 C(1)：dist(B)=min(4,1+2)=3，dist(D)=1+5=6。\n③ 取 B(3)：dist(D)=min(6,3+1)=4。\n④ 取 D(4)：dist(E)=4+3=7。\n⑤ 取 E(7)，结束。\n最短路 A→C→B→D→E，长度 1+2+1+3 = 7。对照 A→B→D→E 为 4+1+3 = 8，A→C→D→E 为 1+5+3 = 9，均更长。"
+      },
+      "explain": {
+        "right": "每次取未确定点中 dist 最小的，松弛其出边，记录前驱。",
+        "wrong": "常见错误：松弛时忘记取 min；或提前把未确定的点当成最终值。",
+        "link": "algo-graph-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "最短路",
+          "pattern": "algo-graph-p1",
+          "steps": [
+            "先看有无负权：有负权用 Bellman-Ford/SPFA",
+            "无权图用 BFS",
+            "Dijkstra 每次取未确定点中 dist 最小的，松弛邻边",
+            "记录前驱以便回溯路径",
+            "多源最短路用 Floyd O(n³)"
+          ],
+          "trap": "Dijkstra 用于负权图"
+        },
+        "approach": "每次取未确定点中 dist 最小的，松弛其出边，记录前驱。",
+        "points": [
+          {
+            "id": "algo-graph-k1",
+            "note": "无权 BFS；非负权 Dijkstra；有负权 Bellman-Ford；多源 Floyd。",
+            "title": "最短路算法选择",
+            "core": "无权 BFS；非负权 Dijkstra；有负权 Bellman-Ford；多源 Floyd。",
+            "pitfall": "松弛时忘记取 min；或提前把未确定的点当成最终值。"
+          }
+        ],
+        "solution": "初始化 dist(A)=0，其余 ∞。\n① 确定 A(0)：dist(B)=4，dist(C)=1。\n② 取 C(1)：dist(B)=min(4,1+2)=3，dist(D)=1+5=6。\n③ 取 B(3)：dist(D)=min(6,3+1)=4。\n④ 取 D(4)：dist(E)=4+3=7。\n⑤ 取 E(7)，结束。\n最短路 A→C→B→D→E，长度 1+2+1+3 = 7。对照 A→B→D→E 为 4+1+3 = 8，A→C→D→E 为 1+5+3 = 9，均更长。"
+      }
+    }
+  ]
+}

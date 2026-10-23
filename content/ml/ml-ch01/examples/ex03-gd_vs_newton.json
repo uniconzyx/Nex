@@ -1,0 +1,8 @@
+{
+  "title": "梯度下降 vs 牛顿法：条件数如何决定迭代数",
+  "code_lang": "python",
+  "code_std": "3.13",
+  "stdin": "",
+  "expected_output": "    条件数κ     GD迭代      牛顿迭代       GD最终误差\n       1        1         1     0.00e+00\n      10      219         1     9.53e-11\n     100     2292         1     9.91e-11\n    1000    23015         1     9.99e-11\n   10000   200000         1     2.06e-09\n\n结论：\n1. 牛顿法对二次目标 1 步精确收敛（迭代数与 κ 无关），代价是每步 O(d³) 求逆；\n2. 梯度下降迭代数≈κ·log(1/ε)，κ=10⁴ 时要上万步；\n3. 所以「特征标准化」不是习惯，是在把 κ 压下来 —— 这是最便宜的加速手段。\n",
+  "code": "# 同一个二次目标，只改 κ（Hessian 谱的比值），收敛速度差两个数量级。\nimport numpy as np\n\ndef gd(A, b, kappa, tol=1e-10, max_iter=200000):\n    L = A[0, 0]\n    x = np.zeros(2)\n    for k in range(1, max_iter + 1):\n        x = x - (1.0 / L) * (A @ x - b)\n        if np.linalg.norm(A @ x - b) < tol:\n            return k, x\n    return max_iter, x\n\ndef newton(A, b, tol=1e-10, max_iter=50):\n    x = np.zeros(2)\n    for k in range(1, max_iter + 1):\n        g = A @ x - b\n        if np.linalg.norm(g) < tol:\n            return k - 1, x\n        x = x - np.linalg.solve(A, g)\n    return max_iter, x\n\nb = np.array([1.0, 1.0])\nprint(f\"{'条件数κ':>8} {'GD迭代':>8} {'牛顿迭代':>9} {'GD最终误差':>12}\")\nfor kappa in (1, 10, 100, 1000, 10000):\n    A = np.array([[kappa, 0.0], [0.0, 1.0]])\n    k_gd, x_gd = gd(A, b, kappa)\n    k_nt, _ = newton(A, b)\n    print(f\"{kappa:>8} {k_gd:>8} {k_nt:>9} {np.linalg.norm(A @ x_gd - b):>12.2e}\")\n\nprint(\"\\n结论：\")\nprint(\"1. 牛顿法对二次目标 1 步精确收敛（迭代数与 κ 无关），代价是每步 O(d³) 求逆；\")\nprint(\"2. 梯度下降迭代数≈κ·log(1/ε)，κ=10⁴ 时要上万步；\")\nprint(\"3. 所以「特征标准化」不是习惯，是在把 κ 压下来 —— 这是最便宜的加速手段。\")\n"
+}

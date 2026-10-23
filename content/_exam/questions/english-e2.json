@@ -1,0 +1,1870 @@
+{
+  "subject": "e2",
+  "exam": "english",
+  "items": [
+    {
+      "id": "q-e2-e2-p1-q1",
+      "topic": "e2-reading",
+      "knowledge": "e2-reading-k1",
+      "type": "choice",
+      "diff": 3,
+      "stem": "The first survey showed that",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "细节题，关键词 first survey，定位 only a third of bottles reached the correct bin。",
+        "wrong": "常见错误：把 installed bins in every dormitory 当成效果好，忽略 disappointing 与 only a third。",
+        "link": "e2-reading-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "细节与数字题",
+          "pattern": "e2-reading-p1",
+          "steps": [
+            "圈题干关键词，定位到唯一句子",
+            "核对数字的单位与限定词（about / at least / by 2030）",
+            "排除偷换主语的选项",
+            "确认时态与原文一致"
+          ],
+          "trap": "把 about 当成精确值"
+        },
+        "approach": "细节题，关键词 first survey，定位 only a third of bottles reached the correct bin。",
+        "points": [
+          {
+            "id": "e2-reading-k1",
+            "note": "题干关键词回原文定位，正确选项是定位句的同义改写。",
+            "title": "细节定位与同义替换",
+            "core": "题干关键词回原文定位，正确选项是定位句的同义改写。",
+            "pitfall": "把 installed bins in every dormitory 当成效果好，忽略 disappointing 与 only a third。"
+          }
+        ],
+        "solution": "原文：The first survey was disappointing: only a third of bottles reached the correct bin。B 与之一致；A 与 one third 矛盾；C、D 原文未提。"
+      },
+      "options": [
+        "most bottles were recycled correctly",
+        "only about one third of bottles were sorted correctly",
+        "students refused to use the bins",
+        "the bins were too small"
+      ],
+      "passage": {
+        "id": "e2-p1",
+        "title": "A recycling scheme that worked",
+        "text": "Two years ago the university installed recycling bins in every dormitory. The first survey was disappointing: only a third of bottles reached the correct bin. Instead of adding more bins, the housing office tried something cheaper. It published a weekly chart in each building showing how much waste had been sorted correctly, and it asked the cleaners to leave one wrongly sorted bag beside the bin with a short note. Within a term the rate rose to nearly three quarters. The lesson is that people do not need more instructions; they need to see how they are doing compared with their neighbours."
+      }
+    },
+    {
+      "id": "q-e2-e2-p1-q2",
+      "topic": "e2-reading",
+      "knowledge": "e2-reading-k2",
+      "type": "choice",
+      "diff": 3,
+      "stem": "The housing office improved the rate mainly by",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "细节题，关键词 improved，定位「每周图表 + 把分错的袋子放在桶边」这两种反馈方式。",
+        "wrong": "常见错误：选 buying more bins——原文明确说 Instead of adding more bins，正好相反。",
+        "link": "e2-reading-k2"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "词义猜测题",
+          "pattern": "e2-reading-p2",
+          "steps": [
+            "回到该词所在句，先看是否有定义（that is / means / 破折号）",
+            "看是否有举例（such as / for instance）",
+            "看是否有对比（unlike / rather than），取反义",
+            "把候选义代回原句检验"
+          ],
+          "trap": "按熟词僻义硬套常见义"
+        },
+        "approach": "细节题，关键词 improved，定位「每周图表 + 把分错的袋子放在桶边」这两种反馈方式。",
+        "points": [
+          {
+            "id": "e2-reading-k2",
+            "note": "推理只走一步，答案必须有原文依据。",
+            "title": "推理判断的边界",
+            "core": "推理只走一步，答案必须有原文依据。",
+            "pitfall": "选 buying more bins——原文明确说 Instead of adding more bins，正好相反。"
+          }
+        ],
+        "solution": "原文：It published a weekly chart… and asked the cleaners to leave one wrongly sorted bag beside the bin with a short note。两者都是「让人看到自己做得怎样」，即反馈，选 B；A 与 Instead of adding more bins 相反。"
+      },
+      "options": [
+        "buying more bins",
+        "giving students feedback on their performance",
+        "hiring more cleaners",
+        "fining students who sorted wrongly"
+      ],
+      "passage": {
+        "id": "e2-p1",
+        "title": "A recycling scheme that worked",
+        "text": "Two years ago the university installed recycling bins in every dormitory. The first survey was disappointing: only a third of bottles reached the correct bin. Instead of adding more bins, the housing office tried something cheaper. It published a weekly chart in each building showing how much waste had been sorted correctly, and it asked the cleaners to leave one wrongly sorted bag beside the bin with a short note. Within a term the rate rose to nearly three quarters. The lesson is that people do not need more instructions; they need to see how they are doing compared with their neighbours."
+      }
+    },
+    {
+      "id": "q-e2-e2-p1-q3",
+      "topic": "e2-reading",
+      "knowledge": "e2-reading-k3",
+      "type": "choice",
+      "diff": 3,
+      "stem": "The main point of the passage is that",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "主旨题，看末句 people do not need more instructions; they need to see how they are doing。",
+        "wrong": "常见错误：选 recycling is difficult——文章讲的是「怎么让人做对」，不是难度本身。",
+        "link": "e2-reading-k3"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "主旨与作者态度",
+          "pattern": "e2-reading-p3",
+          "steps": [
+            "读首段与末段，抓重复出现的名词",
+            "态度看评价性形容词与情态动词",
+            "排除只覆盖局部的选项"
+          ],
+          "trap": "把分论点当主旨"
+        },
+        "approach": "主旨题，看末句 people do not need more instructions; they need to see how they are doing。",
+        "points": [
+          {
+            "id": "e2-reading-k3",
+            "note": "首末段加各段首句定主旨；评价性形容词定态度。",
+            "title": "主旨与作者态度",
+            "core": "首末段加各段首句定主旨；评价性形容词定态度。",
+            "pitfall": "选 recycling is difficult——文章讲的是「怎么让人做对」，不是难度本身。"
+          }
+        ],
+        "solution": "末句点题：people do not need more instructions; they need to see how they are doing compared with their neighbours。B 与之同义；A 只是开头现象；C、D 是细节或未提。"
+      },
+      "options": [
+        "recycling is difficult for students",
+        "visible feedback changes behaviour more than instructions",
+        "cleaners should sort the waste",
+        "charts are expensive to produce"
+      ],
+      "passage": {
+        "id": "e2-p1",
+        "title": "A recycling scheme that worked",
+        "text": "Two years ago the university installed recycling bins in every dormitory. The first survey was disappointing: only a third of bottles reached the correct bin. Instead of adding more bins, the housing office tried something cheaper. It published a weekly chart in each building showing how much waste had been sorted correctly, and it asked the cleaners to leave one wrongly sorted bag beside the bin with a short note. Within a term the rate rose to nearly three quarters. The lesson is that people do not need more instructions; they need to see how they are doing compared with their neighbours."
+      }
+    },
+    {
+      "id": "q-e2-e2-p1-tr",
+      "topic": "e2-translation",
+      "knowledge": "e2-translation-k1",
+      "type": "calc",
+      "diff": 3,
+      "stem": "The lesson is that people do not need more instructions; they need to see how they are doing compared with their neighbours.",
+      "answer": {
+        "text": "这一做法带来的启示是：人们并不需要更多说明，他们需要的是看到自己与邻居相比做得如何。"
+      },
+      "explain": {
+        "right": "先切分意群定主干，再按汉语习惯重排语序，最后检查术语与指代是否统一。",
+        "wrong": "常见错误：that 引导表语从句，用冒号处理更简洁；compared with 译「与……相比」；they are doing 是进行时，译「做得如何」而非「正在做」。",
+        "link": "e2-translation-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "段落翻译",
+          "pattern": "e2-translation-p1",
+          "steps": [
+            "通读全段，判断文体与时态基调",
+            "逐句找主干，切出定语与状语",
+            "把后置定语译成前置，长状语提到句首",
+            "检查段内代词与术语一致性",
+            "通读成段，修掉翻译腔"
+          ],
+          "trap": "逐词直译，句子不通"
+        },
+        "approach": "先切分意群定主干，再按汉语习惯重排语序，最后检查术语与指代是否统一。",
+        "points": [
+          {
+            "id": "e2-translation-k1",
+            "note": "按引导词、介词短语、分词结构切意群，先定主谓宾。",
+            "title": "长难句切分",
+            "core": "按引导词、介词短语、分词结构切意群，先定主谓宾。",
+            "pitfall": "that 引导表语从句，用冒号处理更简洁；compared with 译「与……相比」；they are doing 是进行时，译「做得如何」而非「正在做」。"
+          }
+        ],
+        "solution": "参考译文：这一做法带来的启示是：人们并不需要更多说明，他们需要的是看到自己与邻居相比做得如何。\n得分点：that 引导表语从句，用冒号处理更简洁；compared with 译「与……相比」；they are doing 是进行时，译「做得如何」而非「正在做」。\n检查清单：主干是否译出、修饰是否归位、指代是否还原。"
+      }
+    },
+    {
+      "id": "q-e2-e2-p1-wr",
+      "topic": "e2-writing",
+      "knowledge": "e2-writing-k2",
+      "type": "design",
+      "diff": 3,
+      "stem": "Write an essay of about 150 words on the following topic: your university wants to increase the recycling rate in dormitories. Suggest one practical measure and explain why it should work.",
+      "answer": {
+        "text": "Instead of printing more instructions, the university should publish a weekly ranking of dormitory buildings by recycling rate. Each building would see its own figure and its position among neighbours. The measure is cheap, since the data are already collected when the waste is weighed, and it works on a well-documented principle: people adjust their behaviour when they can see how it compares with that of people around them. To avoid resentment, the ranking should praise improvement rather than shame the bottom building, and the top three could receive a small fund for a floor party. Visible progress, rather than another leaflet, is what changes habits."
+      },
+      "explain": {
+        "right": "先定三段骨架（描述—分析—结论），再把题目给出的信息逐条落进段落，最后检查字数与衔接词。",
+        "wrong": "常见错误：只写「加强宣传」这类空泛建议，没有说明具体做法与生效机制。",
+        "link": "e2-writing-k2"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "图表作文",
+          "pattern": "e2-writing-p2",
+          "steps": [
+            "首段：一句点明图表主题 + 2 个关键数据",
+            "二段：2 条原因，用 First/Moreover 衔接",
+            "三段：一句趋势预测或建议",
+            "数字保留一位小数，趋势词要准确"
+          ],
+          "trap": "只罗列数字不做比较"
+        },
+        "approach": "先定三段骨架（描述—分析—结论），再把题目给出的信息逐条落进段落，最后检查字数与衔接词。",
+        "points": [
+          {
+            "id": "e2-writing-k2",
+            "note": "观点句 + 解释 + 例证 + 小结，四句一段。",
+            "title": "议论段展开",
+            "core": "观点句 + 解释 + 例证 + 小结，四句一段。",
+            "pitfall": "只写「加强宣传」这类空泛建议，没有说明具体做法与生效机制。"
+          }
+        ],
+        "solution": "Instead of printing more instructions, the university should publish a weekly ranking of dormitory buildings by recycling rate. Each building would see its own figure and its position among neighbours. The measure is cheap, since the data are already collected when the waste is weighed, and it works on a well-documented principle: people adjust their behaviour when they can see how it compares with that of people around them. To avoid resentment, the ranking should praise improvement rather than shame the bottom building, and the top three could receive a small fund for a floor party. Visible progress, rather than another leaflet, is what changes habits."
+      }
+    },
+    {
+      "id": "q-e2-e2-p2-q1",
+      "topic": "e2-reading",
+      "knowledge": "e2-reading-k1",
+      "type": "choice",
+      "diff": 3,
+      "stem": "Older learners are described as",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "细节题，关键词 older learners，定位 enroll in large numbers but complete far fewer courses。",
+        "wrong": "常见错误：选 unwilling to study online——原文说 enroll in large numbers，意愿并不低。",
+        "link": "e2-reading-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "细节与数字题",
+          "pattern": "e2-reading-p1",
+          "steps": [
+            "圈题干关键词，定位到唯一句子",
+            "核对数字的单位与限定词（about / at least / by 2030）",
+            "排除偷换主语的选项",
+            "确认时态与原文一致"
+          ],
+          "trap": "把 about 当成精确值"
+        },
+        "approach": "细节题，关键词 older learners，定位 enroll in large numbers but complete far fewer courses。",
+        "points": [
+          {
+            "id": "e2-reading-k1",
+            "note": "题干关键词回原文定位，正确选项是定位句的同义改写。",
+            "title": "细节定位与同义替换",
+            "core": "题干关键词回原文定位，正确选项是定位句的同义改写。",
+            "pitfall": "选 unwilling to study online——原文说 enroll in large numbers，意愿并不低。"
+          }
+        ],
+        "solution": "原文：Adults over sixty enroll in large numbers but complete far fewer courses than younger students。B 为原文同义；A 与 enroll in large numbers 矛盾；C 与 complete far fewer 矛盾；D 未提。"
+      },
+      "options": [
+        "unwilling to study online",
+        "enrolling in large numbers but completing fewer courses",
+        "better at online study than younger students",
+        "unable to afford courses"
+      ],
+      "passage": {
+        "id": "e2-p2",
+        "title": "Older learners and online courses",
+        "text": "Online courses were expected to be a gift for older learners, who often find it hard to travel to a campus. Participation tells a different story. Adults over sixty enroll in large numbers but complete far fewer courses than younger students. The reasons are practical rather than attitudinal: platforms assume users can navigate menus, upload files and join video calls, and a single confusing step can end the attempt. A pilot programme that paired each learner with a student helper for the first two weeks raised completion sharply. The technology was not the barrier; learning the technology alone was."
+      }
+    },
+    {
+      "id": "q-e2-e2-p2-q2",
+      "topic": "e2-reading",
+      "knowledge": "e2-reading-k2",
+      "type": "choice",
+      "diff": 3,
+      "stem": "The main obstacle for older learners was",
+      "answer": {
+        "correct": 2
+      },
+      "explain": {
+        "right": "细节题，关键词 obstacle，定位 platforms assume users can navigate menus… a single confusing step can end the attempt。",
+        "wrong": "常见错误：选 the cost——原文明确说 reasons are practical rather than attitudinal，且列举的都是操作步骤。",
+        "link": "e2-reading-k2"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "词义猜测题",
+          "pattern": "e2-reading-p2",
+          "steps": [
+            "回到该词所在句，先看是否有定义（that is / means / 破折号）",
+            "看是否有举例（such as / for instance）",
+            "看是否有对比（unlike / rather than），取反义",
+            "把候选义代回原句检验"
+          ],
+          "trap": "按熟词僻义硬套常见义"
+        },
+        "approach": "细节题，关键词 obstacle，定位 platforms assume users can navigate menus… a single confusing step can end the attempt。",
+        "points": [
+          {
+            "id": "e2-reading-k2",
+            "note": "推理只走一步，答案必须有原文依据。",
+            "title": "推理判断的边界",
+            "core": "推理只走一步，答案必须有原文依据。",
+            "pitfall": "选 the cost——原文明确说 reasons are practical rather than attitudinal，且列举的都是操作步骤。"
+          }
+        ],
+        "solution": "原文：platforms assume users can navigate menus, upload files and join video calls, and a single confusing step can end the attempt。C 概括了这一障碍；A、B、D 均无原文依据。"
+      },
+      "options": [
+        "the cost of courses",
+        "the lack of interesting subjects",
+        "navigating the platform without help",
+        "the length of the courses"
+      ],
+      "passage": {
+        "id": "e2-p2",
+        "title": "Older learners and online courses",
+        "text": "Online courses were expected to be a gift for older learners, who often find it hard to travel to a campus. Participation tells a different story. Adults over sixty enroll in large numbers but complete far fewer courses than younger students. The reasons are practical rather than attitudinal: platforms assume users can navigate menus, upload files and join video calls, and a single confusing step can end the attempt. A pilot programme that paired each learner with a student helper for the first two weeks raised completion sharply. The technology was not the barrier; learning the technology alone was."
+      }
+    },
+    {
+      "id": "q-e2-e2-p2-q3",
+      "topic": "e2-reading",
+      "knowledge": "e2-reading-k3",
+      "type": "choice",
+      "diff": 3,
+      "stem": "The pilot programme showed that",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "细节题，关键词 pilot programme，定位 raised completion sharply 及其条件「前两周配学生助手」。",
+        "wrong": "常见错误：选 older learners need easier content——原文说 technology was not the barrier，内容难度不是问题。",
+        "link": "e2-reading-k3"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "主旨与作者态度",
+          "pattern": "e2-reading-p3",
+          "steps": [
+            "读首段与末段，抓重复出现的名词",
+            "态度看评价性形容词与情态动词",
+            "排除只覆盖局部的选项"
+          ],
+          "trap": "把分论点当主旨"
+        },
+        "approach": "细节题，关键词 pilot programme，定位 raised completion sharply 及其条件「前两周配学生助手」。",
+        "points": [
+          {
+            "id": "e2-reading-k3",
+            "note": "首末段加各段首句定主旨；评价性形容词定态度。",
+            "title": "主旨与作者态度",
+            "core": "首末段加各段首句定主旨；评价性形容词定态度。",
+            "pitfall": "选 older learners need easier content——原文说 technology was not the barrier，内容难度不是问题。"
+          }
+        ],
+        "solution": "原文：A pilot programme that paired each learner with a student helper for the first two weeks raised completion sharply… The technology was not the barrier; learning the technology alone was。B 与「短期人工支持」一致；A 与 content 无关；C、D 过度推论。"
+      },
+      "options": [
+        "older learners need easier content",
+        "short-term human support can make technology usable",
+        "video calls should be removed",
+        "student helpers should teach the subjects"
+      ],
+      "passage": {
+        "id": "e2-p2",
+        "title": "Older learners and online courses",
+        "text": "Online courses were expected to be a gift for older learners, who often find it hard to travel to a campus. Participation tells a different story. Adults over sixty enroll in large numbers but complete far fewer courses than younger students. The reasons are practical rather than attitudinal: platforms assume users can navigate menus, upload files and join video calls, and a single confusing step can end the attempt. A pilot programme that paired each learner with a student helper for the first two weeks raised completion sharply. The technology was not the barrier; learning the technology alone was."
+      }
+    },
+    {
+      "id": "q-e2-e2-p2-tr",
+      "topic": "e2-translation",
+      "knowledge": "e2-translation-k1",
+      "type": "calc",
+      "diff": 3,
+      "stem": "The technology was not the barrier; learning the technology alone was.",
+      "answer": {
+        "text": "技术本身并不是障碍；真正的障碍在于要独自学会使用这项技术。"
+      },
+      "explain": {
+        "right": "先切分意群定主干，再按汉语习惯重排语序，最后检查术语与指代是否统一。",
+        "wrong": "常见错误：分号保持对比；alone 修饰 learning，译「独自」而非「仅仅」；句末 was 后省略了 the barrier，汉语需补出「真正的障碍」。",
+        "link": "e2-translation-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "段落翻译",
+          "pattern": "e2-translation-p1",
+          "steps": [
+            "通读全段，判断文体与时态基调",
+            "逐句找主干，切出定语与状语",
+            "把后置定语译成前置，长状语提到句首",
+            "检查段内代词与术语一致性",
+            "通读成段，修掉翻译腔"
+          ],
+          "trap": "逐词直译，句子不通"
+        },
+        "approach": "先切分意群定主干，再按汉语习惯重排语序，最后检查术语与指代是否统一。",
+        "points": [
+          {
+            "id": "e2-translation-k1",
+            "note": "按引导词、介词短语、分词结构切意群，先定主谓宾。",
+            "title": "长难句切分",
+            "core": "按引导词、介词短语、分词结构切意群，先定主谓宾。",
+            "pitfall": "分号保持对比；alone 修饰 learning，译「独自」而非「仅仅」；句末 was 后省略了 the barrier，汉语需补出「真正的障碍」。"
+          }
+        ],
+        "solution": "参考译文：技术本身并不是障碍；真正的障碍在于要独自学会使用这项技术。\n得分点：分号保持对比；alone 修饰 learning，译「独自」而非「仅仅」；句末 was 后省略了 the barrier，汉语需补出「真正的障碍」。\n检查清单：主干是否译出、修饰是否归位、指代是否还原。"
+      }
+    },
+    {
+      "id": "q-e2-e2-p2-wr",
+      "topic": "e2-writing",
+      "knowledge": "e2-writing-k2",
+      "type": "design",
+      "diff": 3,
+      "stem": "Write an essay of about 150 words on the following topic: many older adults sign up for online courses but few finish them. Suggest how platforms or universities could help.",
+      "answer": {
+        "text": "Older adults are not short of motivation: they enroll in online courses in large numbers. What they lack is support in the first hours, when a confusing menu or a failed upload can end the attempt. Universities could therefore offer a short induction, either in person or by phone, in which a student helper sits beside the learner and completes one real task together. Platforms could simplify registration and keep a telephone line open during the first week. Neither measure is expensive, and both attack the real barrier, which is learning the technology alone rather than learning the subject. Completion, not enrolment, is the number that matters."
+      },
+      "explain": {
+        "right": "先定三段骨架（描述—分析—结论），再把题目给出的信息逐条落进段落，最后检查字数与衔接词。",
+        "wrong": "常见错误：把原因归为「老年人不愿学」或「课程太难」，与原文 attitudinal / content 无关的判断相反。",
+        "link": "e2-writing-k2"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "图表作文",
+          "pattern": "e2-writing-p2",
+          "steps": [
+            "首段：一句点明图表主题 + 2 个关键数据",
+            "二段：2 条原因，用 First/Moreover 衔接",
+            "三段：一句趋势预测或建议",
+            "数字保留一位小数，趋势词要准确"
+          ],
+          "trap": "只罗列数字不做比较"
+        },
+        "approach": "先定三段骨架（描述—分析—结论），再把题目给出的信息逐条落进段落，最后检查字数与衔接词。",
+        "points": [
+          {
+            "id": "e2-writing-k2",
+            "note": "观点句 + 解释 + 例证 + 小结，四句一段。",
+            "title": "议论段展开",
+            "core": "观点句 + 解释 + 例证 + 小结，四句一段。",
+            "pitfall": "把原因归为「老年人不愿学」或「课程太难」，与原文 attitudinal / content 无关的判断相反。"
+          }
+        ],
+        "solution": "Older adults are not short of motivation: they enroll in online courses in large numbers. What they lack is support in the first hours, when a confusing menu or a failed upload can end the attempt. Universities could therefore offer a short induction, either in person or by phone, in which a student helper sits beside the learner and completes one real task together. Platforms could simplify registration and keep a telephone line open during the first week. Neither measure is expensive, and both attack the real barrier, which is learning the technology alone rather than learning the subject. Completion, not enrolment, is the number that matters."
+      }
+    },
+    {
+      "id": "q-e2-e2-p3-q1",
+      "topic": "e2-reading",
+      "knowledge": "e2-reading-k1",
+      "type": "choice",
+      "diff": 3,
+      "stem": "According to the passage, ridership in several cities",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "细节题，关键词 ridership，定位 peaks in the first year and then flattens。",
+        "wrong": "常见错误：把 peaks 当成持续增长；或把 falls to zero 夸大，原文是 flattens（趋平）。",
+        "link": "e2-reading-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "细节与数字题",
+          "pattern": "e2-reading-p1",
+          "steps": [
+            "圈题干关键词，定位到唯一句子",
+            "核对数字的单位与限定词（about / at least / by 2030）",
+            "排除偷换主语的选项",
+            "确认时态与原文一致"
+          ],
+          "trap": "把 about 当成精确值"
+        },
+        "approach": "细节题，关键词 ridership，定位 peaks in the first year and then flattens。",
+        "points": [
+          {
+            "id": "e2-reading-k1",
+            "note": "题干关键词回原文定位，正确选项是定位句的同义改写。",
+            "title": "细节定位与同义替换",
+            "core": "题干关键词回原文定位，正确选项是定位句的同义改写。",
+            "pitfall": "把 peaks 当成持续增长；或把 falls to zero 夸大，原文是 flattens（趋平）。"
+          }
+        ],
+        "solution": "原文：Ridership peaks in the first year and then flattens, while maintenance costs keep rising。B 为原文同义；A 与 flattens 矛盾；C 过度；D 原文说的是把车放在地铁口与住宅区，而非「市中心骑行最多」。"
+      },
+      "options": [
+        "keeps rising every year",
+        "peaks in the first year and then levels off",
+        "falls to zero after a year",
+        "is highest in the city centre"
+      ],
+      "passage": {
+        "id": "e2-p3",
+        "title": "Bike-sharing after the novelty",
+        "text": "Bike-sharing arrived with promises of clean transport and crowded streets full of bicycles. Several cities now report a quieter outcome. Ridership peaks in the first year and then flattens, while maintenance costs keep rising. The companies that survive tend to be those that moved bikes to where people actually need them, near metro exits and housing estates, instead of scattering them across the centre. Parking rules matter as much as price. Where bikes may be left only in marked areas, streets stay tidy and the service is used more; where they may be left anywhere, the opposite happens."
+      }
+    },
+    {
+      "id": "q-e2-e2-p3-q2",
+      "topic": "e2-reading",
+      "knowledge": "e2-reading-k2",
+      "type": "choice",
+      "diff": 3,
+      "stem": "Surviving companies are those that",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "细节题，关键词 survive，定位 moved bikes to where people actually need them。",
+        "wrong": "常见错误：选 charge the lowest prices——原文说 Parking rules matter as much as price，价格不是唯一因素。",
+        "link": "e2-reading-k2"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "词义猜测题",
+          "pattern": "e2-reading-p2",
+          "steps": [
+            "回到该词所在句，先看是否有定义（that is / means / 破折号）",
+            "看是否有举例（such as / for instance）",
+            "看是否有对比（unlike / rather than），取反义",
+            "把候选义代回原句检验"
+          ],
+          "trap": "按熟词僻义硬套常见义"
+        },
+        "approach": "细节题，关键词 survive，定位 moved bikes to where people actually need them。",
+        "points": [
+          {
+            "id": "e2-reading-k2",
+            "note": "推理只走一步，答案必须有原文依据。",
+            "title": "推理判断的边界",
+            "core": "推理只走一步，答案必须有原文依据。",
+            "pitfall": "选 charge the lowest prices——原文说 Parking rules matter as much as price，价格不是唯一因素。"
+          }
+        ],
+        "solution": "原文：The companies that survive tend to be those that moved bikes to where people actually need them, near metro exits and housing estates。B 为同义；A 把 as much as price 误读为「价格最重要」；C、D 无依据。"
+      },
+      "options": [
+        "charge the lowest prices",
+        "put bikes where demand actually is",
+        "advertise most heavily",
+        "avoid parking rules"
+      ],
+      "passage": {
+        "id": "e2-p3",
+        "title": "Bike-sharing after the novelty",
+        "text": "Bike-sharing arrived with promises of clean transport and crowded streets full of bicycles. Several cities now report a quieter outcome. Ridership peaks in the first year and then flattens, while maintenance costs keep rising. The companies that survive tend to be those that moved bikes to where people actually need them, near metro exits and housing estates, instead of scattering them across the centre. Parking rules matter as much as price. Where bikes may be left only in marked areas, streets stay tidy and the service is used more; where they may be left anywhere, the opposite happens."
+      }
+    },
+    {
+      "id": "q-e2-e2-p3-q3",
+      "topic": "e2-reading",
+      "knowledge": "e2-reading-k3",
+      "type": "choice",
+      "diff": 3,
+      "stem": "The passage suggests that marked parking areas",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "细节题，关键词 marked areas，定位末句 Where bikes may be left only in marked areas, streets stay tidy and the service is used more。",
+        "wrong": "常见错误：只读到规则变严就以为会减少使用，忽略 the service is used more。",
+        "link": "e2-reading-k3"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "主旨与作者态度",
+          "pattern": "e2-reading-p3",
+          "steps": [
+            "读首段与末段，抓重复出现的名词",
+            "态度看评价性形容词与情态动词",
+            "排除只覆盖局部的选项"
+          ],
+          "trap": "把分论点当主旨"
+        },
+        "approach": "细节题，关键词 marked areas，定位末句 Where bikes may be left only in marked areas, streets stay tidy and the service is used more。",
+        "points": [
+          {
+            "id": "e2-reading-k3",
+            "note": "首末段加各段首句定主旨；评价性形容词定态度。",
+            "title": "主旨与作者态度",
+            "core": "首末段加各段首句定主旨；评价性形容词定态度。",
+            "pitfall": "只读到规则变严就以为会减少使用，忽略 the service is used more。"
+          }
+        ],
+        "solution": "原文：Where bikes may be left only in marked areas, streets stay tidy and the service is used more。B 与原文一致；A 与 used more 相反；C、D 未提。"
+      },
+      "options": [
+        "reduce the number of users",
+        "keep streets tidy and increase use",
+        "are opposed by companies",
+        "are more expensive to build"
+      ],
+      "passage": {
+        "id": "e2-p3",
+        "title": "Bike-sharing after the novelty",
+        "text": "Bike-sharing arrived with promises of clean transport and crowded streets full of bicycles. Several cities now report a quieter outcome. Ridership peaks in the first year and then flattens, while maintenance costs keep rising. The companies that survive tend to be those that moved bikes to where people actually need them, near metro exits and housing estates, instead of scattering them across the centre. Parking rules matter as much as price. Where bikes may be left only in marked areas, streets stay tidy and the service is used more; where they may be left anywhere, the opposite happens."
+      }
+    },
+    {
+      "id": "q-e2-e2-p3-tr",
+      "topic": "e2-translation",
+      "knowledge": "e2-translation-k1",
+      "type": "calc",
+      "diff": 3,
+      "stem": "Where bikes may be left only in marked areas, streets stay tidy and the service is used more; where they may be left anywhere, the opposite happens.",
+      "answer": {
+        "text": "在只允许把车停放在指定区域的地方，街道保持整洁，服务的使用率也更高；而在可以随意停放的地方，情况正好相反。"
+      },
+      "explain": {
+        "right": "先切分意群定主干，再按汉语习惯重排语序，最后检查术语与指代是否统一。",
+        "wrong": "常见错误：Where 引导地点状语从句，译「在……的地方」；the opposite happens 译「情况正好相反」，不要直译「相反发生」；两个分句保持对照。",
+        "link": "e2-translation-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "段落翻译",
+          "pattern": "e2-translation-p1",
+          "steps": [
+            "通读全段，判断文体与时态基调",
+            "逐句找主干，切出定语与状语",
+            "把后置定语译成前置，长状语提到句首",
+            "检查段内代词与术语一致性",
+            "通读成段，修掉翻译腔"
+          ],
+          "trap": "逐词直译，句子不通"
+        },
+        "approach": "先切分意群定主干，再按汉语习惯重排语序，最后检查术语与指代是否统一。",
+        "points": [
+          {
+            "id": "e2-translation-k1",
+            "note": "按引导词、介词短语、分词结构切意群，先定主谓宾。",
+            "title": "长难句切分",
+            "core": "按引导词、介词短语、分词结构切意群，先定主谓宾。",
+            "pitfall": "Where 引导地点状语从句，译「在……的地方」；the opposite happens 译「情况正好相反」，不要直译「相反发生」；两个分句保持对照。"
+          }
+        ],
+        "solution": "参考译文：在只允许把车停放在指定区域的地方，街道保持整洁，服务的使用率也更高；而在可以随意停放的地方，情况正好相反。\n得分点：Where 引导地点状语从句，译「在……的地方」；the opposite happens 译「情况正好相反」，不要直译「相反发生」；两个分句保持对照。\n检查清单：主干是否译出、修饰是否归位、指代是否还原。"
+      }
+    },
+    {
+      "id": "q-e2-e2-p3-wr",
+      "topic": "e2-writing",
+      "knowledge": "e2-writing-k2",
+      "type": "design",
+      "diff": 3,
+      "stem": "Write an essay of about 150 words on the following topic: bike-sharing schemes often lose users after the first year. Explain the reasons and suggest improvements.",
+      "answer": {
+        "text": "Bike-sharing schemes usually start with crowded streets and end with rows of broken bicycles. The novelty explains the early peak; the flat line afterwards has more ordinary causes. Bikes are placed where they are easy to park rather than where trips begin and end, maintenance is deferred until vehicles fail, and casual parking leaves pavements messy, which turns public opinion against the service. The fixes are practical. Operators should station bikes near metro exits and housing estates, set marked parking zones, and publish repair response times. Cities should treat the scheme as public transport, not as advertising space. Reliability, more than novelty, keeps riders."
+      },
+      "explain": {
+        "right": "先定三段骨架（描述—分析—结论），再把题目给出的信息逐条落进段落，最后检查字数与衔接词。",
+        "wrong": "常见错误：只描述「共享单车很方便」，没有分析第一年后使用量停滞的原因。",
+        "link": "e2-writing-k2"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "图表作文",
+          "pattern": "e2-writing-p2",
+          "steps": [
+            "首段：一句点明图表主题 + 2 个关键数据",
+            "二段：2 条原因，用 First/Moreover 衔接",
+            "三段：一句趋势预测或建议",
+            "数字保留一位小数，趋势词要准确"
+          ],
+          "trap": "只罗列数字不做比较"
+        },
+        "approach": "先定三段骨架（描述—分析—结论），再把题目给出的信息逐条落进段落，最后检查字数与衔接词。",
+        "points": [
+          {
+            "id": "e2-writing-k2",
+            "note": "观点句 + 解释 + 例证 + 小结，四句一段。",
+            "title": "议论段展开",
+            "core": "观点句 + 解释 + 例证 + 小结，四句一段。",
+            "pitfall": "只描述「共享单车很方便」，没有分析第一年后使用量停滞的原因。"
+          }
+        ],
+        "solution": "Bike-sharing schemes usually start with crowded streets and end with rows of broken bicycles. The novelty explains the early peak; the flat line afterwards has more ordinary causes. Bikes are placed where they are easy to park rather than where trips begin and end, maintenance is deferred until vehicles fail, and casual parking leaves pavements messy, which turns public opinion against the service. The fixes are practical. Operators should station bikes near metro exits and housing estates, set marked parking zones, and publish repair response times. Cities should treat the scheme as public transport, not as advertising space. Reliability, more than novelty, keeps riders."
+      }
+    },
+    {
+      "id": "q-e2-e2-p4-q1",
+      "topic": "e2-reading",
+      "knowledge": "e2-reading-k1",
+      "type": "choice",
+      "diff": 3,
+      "stem": "The survey suggests that volunteering",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "细节题，关键词 survey，定位 Volunteers was rarely listed as a requirement, yet interviewers frequently asked…",
+        "wrong": "常见错误：选 is a formal requirement——原文明确说 rarely listed as a requirement。",
+        "link": "e2-reading-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "细节与数字题",
+          "pattern": "e2-reading-p1",
+          "steps": [
+            "圈题干关键词，定位到唯一句子",
+            "核对数字的单位与限定词（about / at least / by 2030）",
+            "排除偷换主语的选项",
+            "确认时态与原文一致"
+          ],
+          "trap": "把 about 当成精确值"
+        },
+        "approach": "细节题，关键词 survey，定位 Volunteers was rarely listed as a requirement, yet interviewers frequently asked…",
+        "points": [
+          {
+            "id": "e2-reading-k1",
+            "note": "题干关键词回原文定位，正确选项是定位句的同义改写。",
+            "title": "细节定位与同义替换",
+            "core": "题干关键词回原文定位，正确选项是定位句的同义改写。",
+            "pitfall": "选 is a formal requirement——原文明确说 rarely listed as a requirement。"
+          }
+        ],
+        "solution": "原文：Volunteering was rarely listed as a requirement, yet interviewers frequently asked candidates to describe a situation… B 准确概括「不是硬性要求，但能提供素材」；A 与 rarely 相反；C、D 无依据。"
+      },
+      "options": [
+        "is a formal requirement for most jobs",
+        "rarely appears as a requirement but provides useful examples",
+        "is less useful than any internship",
+        "is only valued by charities"
+      ],
+      "passage": {
+        "id": "e2-p4",
+        "title": "Volunteering and the first job",
+        "text": "Employers say they value volunteering, but students often suspect that only impressive internships count. A survey of graduate recruiters suggests the students are half right. Volunteering was rarely listed as a requirement, yet interviewers frequently asked candidates to describe a situation where they had worked with others to solve a problem. A term spent organising a food bank shift supplied better answers than a month of photocopying in an office. The value lies less in the activity itself than in the evidence it provides of reliability, coordination and persistence."
+      }
+    },
+    {
+      "id": "q-e2-e2-p4-q2",
+      "topic": "e2-reading",
+      "knowledge": "e2-reading-k2",
+      "type": "choice",
+      "diff": 3,
+      "stem": "The food bank example is used to show that",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "例证题：例子服务于「价值不在活动本身，而在它提供的证据」这一论点。",
+        "wrong": "常见错误：把例子理解成「慈善工作更难」或「实习无用」，都超出了原文范围。",
+        "link": "e2-reading-k2"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "词义猜测题",
+          "pattern": "e2-reading-p2",
+          "steps": [
+            "回到该词所在句，先看是否有定义（that is / means / 破折号）",
+            "看是否有举例（such as / for instance）",
+            "看是否有对比（unlike / rather than），取反义",
+            "把候选义代回原句检验"
+          ],
+          "trap": "按熟词僻义硬套常见义"
+        },
+        "approach": "例证题：例子服务于「价值不在活动本身，而在它提供的证据」这一论点。",
+        "points": [
+          {
+            "id": "e2-reading-k2",
+            "note": "推理只走一步，答案必须有原文依据。",
+            "title": "推理判断的边界",
+            "core": "推理只走一步，答案必须有原文依据。",
+            "pitfall": "把例子理解成「慈善工作更难」或「实习无用」，都超出了原文范围。"
+          }
+        ],
+        "solution": "原文在例子后立刻总结：The value lies less in the activity itself than in the evidence it provides of reliability, coordination and persistence。B 正是该句的同义；A、C、D 都是对例子的过度引申。"
+      },
+      "options": [
+        "charity work is harder than office work",
+        "relevant evidence matters more than the label of the activity",
+        "photocopying is useless",
+        "students should avoid internships"
+      ],
+      "passage": {
+        "id": "e2-p4",
+        "title": "Volunteering and the first job",
+        "text": "Employers say they value volunteering, but students often suspect that only impressive internships count. A survey of graduate recruiters suggests the students are half right. Volunteering was rarely listed as a requirement, yet interviewers frequently asked candidates to describe a situation where they had worked with others to solve a problem. A term spent organising a food bank shift supplied better answers than a month of photocopying in an office. The value lies less in the activity itself than in the evidence it provides of reliability, coordination and persistence."
+      }
+    },
+    {
+      "id": "q-e2-e2-p4-q3",
+      "topic": "e2-reading",
+      "knowledge": "e2-reading-k3",
+      "type": "choice",
+      "diff": 3,
+      "stem": "The phrase 'half right' implies that students",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "词义题：half right 指学生「对了一半」——要求判断对，价值判断错，后文分别说明。",
+        "wrong": "常见错误：按字面理解成「一半学生对」，脱离上下文对 survey 结果的解释。",
+        "link": "e2-reading-k3"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "主旨与作者态度",
+          "pattern": "e2-reading-p3",
+          "steps": [
+            "读首段与末段，抓重复出现的名词",
+            "态度看评价性形容词与情态动词",
+            "排除只覆盖局部的选项"
+          ],
+          "trap": "把分论点当主旨"
+        },
+        "approach": "词义题：half right 指学生「对了一半」——要求判断对，价值判断错，后文分别说明。",
+        "points": [
+          {
+            "id": "e2-reading-k3",
+            "note": "首末段加各段首句定主旨；评价性形容词定态度。",
+            "title": "主旨与作者态度",
+            "core": "首末段加各段首句定主旨；评价性形容词定态度。",
+            "pitfall": "按字面理解成「一半学生对」，脱离上下文对 survey 结果的解释。"
+          }
+        ],
+        "solution": "后文结构：rarely a requirement（学生以为只有实习才算，这点被证实）→ 但面试官常问合作解决问题的经历（志愿活动同样算）。故 half right = 对要求判断正确、对「什么算数」判断错误，选 B。"
+      },
+      "options": [
+        "completely misunderstood employers",
+        "were correct about requirements but wrong about what counts",
+        "were wrong about everything",
+        "had not read the survey"
+      ],
+      "passage": {
+        "id": "e2-p4",
+        "title": "Volunteering and the first job",
+        "text": "Employers say they value volunteering, but students often suspect that only impressive internships count. A survey of graduate recruiters suggests the students are half right. Volunteering was rarely listed as a requirement, yet interviewers frequently asked candidates to describe a situation where they had worked with others to solve a problem. A term spent organising a food bank shift supplied better answers than a month of photocopying in an office. The value lies less in the activity itself than in the evidence it provides of reliability, coordination and persistence."
+      }
+    },
+    {
+      "id": "q-e2-e2-p4-tr",
+      "topic": "e2-translation",
+      "knowledge": "e2-translation-k1",
+      "type": "calc",
+      "diff": 3,
+      "stem": "The value lies less in the activity itself than in the evidence it provides of reliability, coordination and persistence.",
+      "answer": {
+        "text": "其价值与其说在于活动本身，不如说在于它所提供的、关于可靠、协作与坚持的证据。"
+      },
+      "explain": {
+        "right": "先切分意群定主干，再按汉语习惯重排语序，最后检查术语与指代是否统一。",
+        "wrong": "常见错误：less… than… 译「与其说……不如说……」；it provides 是省略 that 的定语从句，修饰 evidence；三个抽象名词并列，译文保留并列节奏。",
+        "link": "e2-translation-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "段落翻译",
+          "pattern": "e2-translation-p1",
+          "steps": [
+            "通读全段，判断文体与时态基调",
+            "逐句找主干，切出定语与状语",
+            "把后置定语译成前置，长状语提到句首",
+            "检查段内代词与术语一致性",
+            "通读成段，修掉翻译腔"
+          ],
+          "trap": "逐词直译，句子不通"
+        },
+        "approach": "先切分意群定主干，再按汉语习惯重排语序，最后检查术语与指代是否统一。",
+        "points": [
+          {
+            "id": "e2-translation-k1",
+            "note": "按引导词、介词短语、分词结构切意群，先定主谓宾。",
+            "title": "长难句切分",
+            "core": "按引导词、介词短语、分词结构切意群，先定主谓宾。",
+            "pitfall": "less… than… 译「与其说……不如说……」；it provides 是省略 that 的定语从句，修饰 evidence；三个抽象名词并列，译文保留并列节奏。"
+          }
+        ],
+        "solution": "参考译文：其价值与其说在于活动本身，不如说在于它所提供的、关于可靠、协作与坚持的证据。\n得分点：less… than… 译「与其说……不如说……」；it provides 是省略 that 的定语从句，修饰 evidence；三个抽象名词并列，译文保留并列节奏。\n检查清单：主干是否译出、修饰是否归位、指代是否还原。"
+      }
+    },
+    {
+      "id": "q-e2-e2-p4-wr",
+      "topic": "e2-writing",
+      "knowledge": "e2-writing-k2",
+      "type": "design",
+      "diff": 3,
+      "stem": "Write an essay of about 150 words on the following topic: some students believe only internships matter for finding a job. Give your view with examples.",
+      "answer": {
+        "text": "Students often assume that only internships count when employers read a CV. Recruiters tell a more nuanced story. Volunteering is seldom a formal requirement, but interviews are built around questions about teamwork and problem solving, and a term spent running a food bank shift answers those questions better than a month of photocopying. What matters is not the label of the activity but the evidence it supplies: reliability, coordination, persistence. Students should therefore choose activities by the responsibilities they involve rather than by the prestige of the organisation. A well-documented volunteering role can be worth more than a famous name on a certificate."
+      },
+      "explain": {
+        "right": "先定三段骨架（描述—分析—结论），再把题目给出的信息逐条落进段落，最后检查字数与衔接词。",
+        "wrong": "常见错误：把实习与志愿对立起来，或只强调「志愿活动加分」而不说明原因。",
+        "link": "e2-writing-k2"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "图表作文",
+          "pattern": "e2-writing-p2",
+          "steps": [
+            "首段：一句点明图表主题 + 2 个关键数据",
+            "二段：2 条原因，用 First/Moreover 衔接",
+            "三段：一句趋势预测或建议",
+            "数字保留一位小数，趋势词要准确"
+          ],
+          "trap": "只罗列数字不做比较"
+        },
+        "approach": "先定三段骨架（描述—分析—结论），再把题目给出的信息逐条落进段落，最后检查字数与衔接词。",
+        "points": [
+          {
+            "id": "e2-writing-k2",
+            "note": "观点句 + 解释 + 例证 + 小结，四句一段。",
+            "title": "议论段展开",
+            "core": "观点句 + 解释 + 例证 + 小结，四句一段。",
+            "pitfall": "把实习与志愿对立起来，或只强调「志愿活动加分」而不说明原因。"
+          }
+        ],
+        "solution": "Students often assume that only internships count when employers read a CV. Recruiters tell a more nuanced story. Volunteering is seldom a formal requirement, but interviews are built around questions about teamwork and problem solving, and a term spent running a food bank shift answers those questions better than a month of photocopying. What matters is not the label of the activity but the evidence it supplies: reliability, coordination, persistence. Students should therefore choose activities by the responsibilities they involve rather than by the prestige of the organisation. A well-documented volunteering role can be worth more than a famous name on a certificate."
+      }
+    },
+    {
+      "id": "q-e2-e2-p5-q1",
+      "topic": "e2-reading",
+      "knowledge": "e2-reading-k1",
+      "type": "choice",
+      "diff": 3,
+      "stem": "According to the passage, supermarkets discard food mainly because",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "细节题，关键词 throw away 与 reasons，定位 have little to do with hunger and everything to do with appearance。",
+        "wrong": "常见错误：选 customers refuse to buy it——末句明确说 The obstacle is not customer resistance。",
+        "link": "e2-reading-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "细节与数字题",
+          "pattern": "e2-reading-p1",
+          "steps": [
+            "圈题干关键词，定位到唯一句子",
+            "核对数字的单位与限定词（about / at least / by 2030）",
+            "排除偷换主语的选项",
+            "确认时态与原文一致"
+          ],
+          "trap": "把 about 当成精确值"
+        },
+        "approach": "细节题，关键词 throw away 与 reasons，定位 have little to do with hunger and everything to do with appearance。",
+        "points": [
+          {
+            "id": "e2-reading-k1",
+            "note": "题干关键词回原文定位，正确选项是定位句的同义改写。",
+            "title": "细节定位与同义替换",
+            "core": "题干关键词回原文定位，正确选项是定位句的同义改写。",
+            "pitfall": "选 customers refuse to buy it——末句明确说 The obstacle is not customer resistance。"
+          }
+        ],
+        "solution": "原文：throws away food for reasons that have little to do with hunger and everything to do with appearance，随后举例（褐斑香蕉、过期面包、凹陷纸盒）都是外观或日期规则。B 概括准确；A 与末句相反；C 与 all are edible 矛盾；D 未提。"
+      },
+      "options": [
+        "customers refuse to buy it",
+        "it does not meet appearance or date rules",
+        "it is unsafe to eat",
+        "storage space is limited"
+      ],
+      "passage": {
+        "id": "e2-p5",
+        "title": "The food supermarkets throw away",
+        "text": "A supermarket throws away food for reasons that have little to do with hunger and everything to do with appearance. A banana with a brown spot, a loaf past its display date, a carton dented in delivery: all are edible, none is sellable by the usual rules. Some chains now sell such items at a discount in a separate aisle, and a few have changed the rules themselves, removing best-before dates from fruit and vegetables. The results are modest but consistent: less waste, lower costs, and customers who say they prefer shops that do it. The obstacle is not customer resistance but the habit of ordering by appearance."
+      }
+    },
+    {
+      "id": "q-e2-e2-p5-q2",
+      "topic": "e2-reading",
+      "knowledge": "e2-reading-k2",
+      "type": "choice",
+      "diff": 3,
+      "stem": "Some chains have removed best-before dates from fruit and vegetables in order to",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "细节题，关键词 best-before dates，回到 removal 所在句，并联系上一句的 edible but not sellable。",
+        "wrong": "常见错误：选 comply with new laws——原文没提法规，改动是商家自己做的（changed the rules themselves）。",
+        "link": "e2-reading-k2"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "词义猜测题",
+          "pattern": "e2-reading-p2",
+          "steps": [
+            "回到该词所在句，先看是否有定义（that is / means / 破折号）",
+            "看是否有举例（such as / for instance）",
+            "看是否有对比（unlike / rather than），取反义",
+            "把候选义代回原句检验"
+          ],
+          "trap": "按熟词僻义硬套常见义"
+        },
+        "approach": "细节题，关键词 best-before dates，回到 removal 所在句，并联系上一句的 edible but not sellable。",
+        "points": [
+          {
+            "id": "e2-reading-k2",
+            "note": "推理只走一步，答案必须有原文依据。",
+            "title": "推理判断的边界",
+            "core": "推理只走一步，答案必须有原文依据。",
+            "pitfall": "选 comply with new laws——原文没提法规，改动是商家自己做的（changed the rules themselves）。"
+          }
+        ],
+        "solution": "原文：a few have changed the rules themselves, removing best-before dates from fruit and vegetables，目的承前：这些食物 edible 却因规则不可售。故为减少由日期规则造成的浪费，选 B。"
+      },
+      "options": [
+        "raise prices",
+        "reduce waste caused by date rules",
+        "comply with new laws",
+        "attract younger customers"
+      ],
+      "passage": {
+        "id": "e2-p5",
+        "title": "The food supermarkets throw away",
+        "text": "A supermarket throws away food for reasons that have little to do with hunger and everything to do with appearance. A banana with a brown spot, a loaf past its display date, a carton dented in delivery: all are edible, none is sellable by the usual rules. Some chains now sell such items at a discount in a separate aisle, and a few have changed the rules themselves, removing best-before dates from fruit and vegetables. The results are modest but consistent: less waste, lower costs, and customers who say they prefer shops that do it. The obstacle is not customer resistance but the habit of ordering by appearance."
+      }
+    },
+    {
+      "id": "q-e2-e2-p5-q3",
+      "topic": "e2-reading",
+      "knowledge": "e2-reading-k3",
+      "type": "choice",
+      "diff": 3,
+      "stem": "The passage suggests that reducing food waste depends mainly on",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "主旨/推断题，看末句 The obstacle is not customer resistance but the habit of ordering by appearance。",
+        "wrong": "常见错误：选 customer education——原文说障碍不是顾客抵触，教育顾客并非关键。",
+        "link": "e2-reading-k3"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "主旨与作者态度",
+          "pattern": "e2-reading-p3",
+          "steps": [
+            "读首段与末段，抓重复出现的名词",
+            "态度看评价性形容词与情态动词",
+            "排除只覆盖局部的选项"
+          ],
+          "trap": "把分论点当主旨"
+        },
+        "approach": "主旨/推断题，看末句 The obstacle is not customer resistance but the habit of ordering by appearance。",
+        "points": [
+          {
+            "id": "e2-reading-k3",
+            "note": "首末段加各段首句定主旨；评价性形容词定态度。",
+            "title": "主旨与作者态度",
+            "core": "首末段加各段首句定主旨；评价性形容词定态度。",
+            "pitfall": "选 customer education——原文说障碍不是顾客抵触，教育顾客并非关键。"
+          }
+        ],
+        "solution": "末句：The obstacle is not customer resistance but the habit of ordering by appearance。B 与「按外观订货的习惯」同义；A 与 not customer resistance 相反；C、D 无依据。"
+      },
+      "options": [
+        "customer education",
+        "changing ordering and display habits",
+        "building more warehouses",
+        "lowering food prices"
+      ],
+      "passage": {
+        "id": "e2-p5",
+        "title": "The food supermarkets throw away",
+        "text": "A supermarket throws away food for reasons that have little to do with hunger and everything to do with appearance. A banana with a brown spot, a loaf past its display date, a carton dented in delivery: all are edible, none is sellable by the usual rules. Some chains now sell such items at a discount in a separate aisle, and a few have changed the rules themselves, removing best-before dates from fruit and vegetables. The results are modest but consistent: less waste, lower costs, and customers who say they prefer shops that do it. The obstacle is not customer resistance but the habit of ordering by appearance."
+      }
+    },
+    {
+      "id": "q-e2-e2-p5-tr",
+      "topic": "e2-translation",
+      "knowledge": "e2-translation-k1",
+      "type": "calc",
+      "diff": 3,
+      "stem": "The obstacle is not customer resistance but the habit of ordering by appearance.",
+      "answer": {
+        "text": "障碍并不在于顾客的抵触，而在于按外观订货的习惯。"
+      },
+      "explain": {
+        "right": "先切分意群定主干，再按汉语习惯重排语序，最后检查术语与指代是否统一。",
+        "wrong": "常见错误：not… but… 译「不在于……而在于……」；ordering by appearance 是动名词短语，译「按外观订货」；resistance 译「抵触」比「抵抗」更贴切。",
+        "link": "e2-translation-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "段落翻译",
+          "pattern": "e2-translation-p1",
+          "steps": [
+            "通读全段，判断文体与时态基调",
+            "逐句找主干，切出定语与状语",
+            "把后置定语译成前置，长状语提到句首",
+            "检查段内代词与术语一致性",
+            "通读成段，修掉翻译腔"
+          ],
+          "trap": "逐词直译，句子不通"
+        },
+        "approach": "先切分意群定主干，再按汉语习惯重排语序，最后检查术语与指代是否统一。",
+        "points": [
+          {
+            "id": "e2-translation-k1",
+            "note": "按引导词、介词短语、分词结构切意群，先定主谓宾。",
+            "title": "长难句切分",
+            "core": "按引导词、介词短语、分词结构切意群，先定主谓宾。",
+            "pitfall": "not… but… 译「不在于……而在于……」；ordering by appearance 是动名词短语，译「按外观订货」；resistance 译「抵触」比「抵抗」更贴切。"
+          }
+        ],
+        "solution": "参考译文：障碍并不在于顾客的抵触，而在于按外观订货的习惯。\n得分点：not… but… 译「不在于……而在于……」；ordering by appearance 是动名词短语，译「按外观订货」；resistance 译「抵触」比「抵抗」更贴切。\n检查清单：主干是否译出、修饰是否归位、指代是否还原。"
+      }
+    },
+    {
+      "id": "q-e2-e2-p5-wr",
+      "topic": "e2-writing",
+      "knowledge": "e2-writing-k2",
+      "type": "design",
+      "diff": 3,
+      "stem": "Write an essay of about 150 words on the following topic: supermarkets waste large amounts of edible food. Discuss the causes and suggest what shops and customers can do.",
+      "answer": {
+        "text": "Supermarkets discard edible food for reasons that are commercial rather than biological. A spotted banana or a dented carton breaks the rules of display, and ordering systems reward full shelves over empty ones. The waste is therefore built into habits, not into customer preference. Shops can change the habits: sell imperfect produce in a designated aisle, drop best-before dates where they carry no safety meaning, and order by observed demand rather than by appearance. Customers can help by buying the discounted items and by treating a brown spot as a sign of ripeness rather than a defect. Neither change is dramatic, but together they keep good food in kitchens instead of bins."
+      },
+      "explain": {
+        "right": "先定三段骨架（描述—分析—结论），再把题目给出的信息逐条落进段落，最后检查字数与衔接词。",
+        "wrong": "常见错误：只强调「顾客应该买丑蔬果」，忽略订货与陈列规则这一主要成因。",
+        "link": "e2-writing-k2"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "图表作文",
+          "pattern": "e2-writing-p2",
+          "steps": [
+            "首段：一句点明图表主题 + 2 个关键数据",
+            "二段：2 条原因，用 First/Moreover 衔接",
+            "三段：一句趋势预测或建议",
+            "数字保留一位小数，趋势词要准确"
+          ],
+          "trap": "只罗列数字不做比较"
+        },
+        "approach": "先定三段骨架（描述—分析—结论），再把题目给出的信息逐条落进段落，最后检查字数与衔接词。",
+        "points": [
+          {
+            "id": "e2-writing-k2",
+            "note": "观点句 + 解释 + 例证 + 小结，四句一段。",
+            "title": "议论段展开",
+            "core": "观点句 + 解释 + 例证 + 小结，四句一段。",
+            "pitfall": "只强调「顾客应该买丑蔬果」，忽略订货与陈列规则这一主要成因。"
+          }
+        ],
+        "solution": "Supermarkets discard edible food for reasons that are commercial rather than biological. A spotted banana or a dented carton breaks the rules of display, and ordering systems reward full shelves over empty ones. The waste is therefore built into habits, not into customer preference. Shops can change the habits: sell imperfect produce in a designated aisle, drop best-before dates where they carry no safety meaning, and order by observed demand rather than by appearance. Customers can help by buying the discounted items and by treating a brown spot as a sign of ripeness rather than a defect. Neither change is dramatic, but together they keep good food in kitchens instead of bins."
+      }
+    },
+    {
+      "id": "q-e2-e2-p6-q1",
+      "topic": "e2-reading",
+      "knowledge": "e2-reading-k1",
+      "type": "choice",
+      "diff": 3,
+      "stem": "Shops that refuse cash are criticised because they",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "细节题，关键词 refuse cash 的后果，定位 they also exclude older customers and people without a bank account。",
+        "wrong": "常见错误：选 slow down the queue——原文说 stop accepting cash save time at the counter，正好相反。",
+        "link": "e2-reading-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "细节与数字题",
+          "pattern": "e2-reading-p1",
+          "steps": [
+            "圈题干关键词，定位到唯一句子",
+            "核对数字的单位与限定词（about / at least / by 2030）",
+            "排除偷换主语的选项",
+            "确认时态与原文一致"
+          ],
+          "trap": "把 about 当成精确值"
+        },
+        "approach": "细节题，关键词 refuse cash 的后果，定位 they also exclude older customers and people without a bank account。",
+        "points": [
+          {
+            "id": "e2-reading-k1",
+            "note": "题干关键词回原文定位，正确选项是定位句的同义改写。",
+            "title": "细节定位与同义替换",
+            "core": "题干关键词回原文定位，正确选项是定位句的同义改写。",
+            "pitfall": "选 slow down the queue——原文说 stop accepting cash save time at the counter，正好相反。"
+          }
+        ],
+        "solution": "原文：they also exclude older customers and people without a bank account。B 为同义；A、D 未提；C 与 save time 相反。"
+      },
+      "options": [
+        "charge higher prices",
+        "exclude some groups of customers",
+        "slow down the queue",
+        "break international rules"
+      ],
+      "passage": {
+        "id": "e2-p6",
+        "title": "Paying without a smartphone",
+        "text": "Cashless payment is convenient for anyone who owns a smartphone and frustrating for anyone who does not. Shops that stop accepting cash save time at the counter, but they also exclude older customers and people without a bank account. Several cities have responded with rules requiring retailers to accept cash, and some banks now issue cards with large-print keypads and a single confirmation button. The debate is often framed as progress versus nostalgia. In practice it is a question of design: a payment system is only as good as the number of people who can use it."
+      }
+    },
+    {
+      "id": "q-e2-e2-p6-q2",
+      "topic": "e2-reading",
+      "knowledge": "e2-reading-k2",
+      "type": "choice",
+      "diff": 3,
+      "stem": "The cards described in the passage are designed to",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "细节题，关键词 cards，定位 large-print keypads and a single confirmation button。",
+        "wrong": "常见错误：选 replace smartphones entirely——这类卡是补充手段，原文没有主张取消手机支付。",
+        "link": "e2-reading-k2"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "词义猜测题",
+          "pattern": "e2-reading-p2",
+          "steps": [
+            "回到该词所在句，先看是否有定义（that is / means / 破折号）",
+            "看是否有举例（such as / for instance）",
+            "看是否有对比（unlike / rather than），取反义",
+            "把候选义代回原句检验"
+          ],
+          "trap": "按熟词僻义硬套常见义"
+        },
+        "approach": "细节题，关键词 cards，定位 large-print keypads and a single confirmation button。",
+        "points": [
+          {
+            "id": "e2-reading-k2",
+            "note": "推理只走一步，答案必须有原文依据。",
+            "title": "推理判断的边界",
+            "core": "推理只走一步，答案必须有原文依据。",
+            "pitfall": "选 replace smartphones entirely——这类卡是补充手段，原文没有主张取消手机支付。"
+          }
+        ],
+        "solution": "原文：some banks now issue cards with large-print keypads and a single confirmation button。大字键盘与单一确认键都是为「看不清、操作困难」的人设计，B 最贴切；A、C、D 无依据。"
+      },
+      "options": [
+        "replace smartphones entirely",
+        "make payment easier for people who struggle with small screens",
+        "increase bank profits",
+        "track customer spending"
+      ],
+      "passage": {
+        "id": "e2-p6",
+        "title": "Paying without a smartphone",
+        "text": "Cashless payment is convenient for anyone who owns a smartphone and frustrating for anyone who does not. Shops that stop accepting cash save time at the counter, but they also exclude older customers and people without a bank account. Several cities have responded with rules requiring retailers to accept cash, and some banks now issue cards with large-print keypads and a single confirmation button. The debate is often framed as progress versus nostalgia. In practice it is a question of design: a payment system is only as good as the number of people who can use it."
+      }
+    },
+    {
+      "id": "q-e2-e2-p6-q3",
+      "topic": "e2-reading",
+      "knowledge": "e2-reading-k3",
+      "type": "choice",
+      "diff": 3,
+      "stem": "The author's conclusion is that a payment system should be judged by",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "结论题，看末句 a payment system is only as good as the number of people who can use it。",
+        "wrong": "常见错误：选 its speed——速度只是商家的收益，不是作者的评判标准。",
+        "link": "e2-reading-k3"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "主旨与作者态度",
+          "pattern": "e2-reading-p3",
+          "steps": [
+            "读首段与末段，抓重复出现的名词",
+            "态度看评价性形容词与情态动词",
+            "排除只覆盖局部的选项"
+          ],
+          "trap": "把分论点当主旨"
+        },
+        "approach": "结论题，看末句 a payment system is only as good as the number of people who can use it。",
+        "points": [
+          {
+            "id": "e2-reading-k3",
+            "note": "首末段加各段首句定主旨；评价性形容词定态度。",
+            "title": "主旨与作者态度",
+            "core": "首末段加各段首句定主旨；评价性形容词定态度。",
+            "pitfall": "选 its speed——速度只是商家的收益，不是作者的评判标准。"
+          }
+        ],
+        "solution": "末句：a payment system is only as good as the number of people who can use it。B 为原文同义；A 是商家视角；C、D 未提。"
+      },
+      "options": [
+        "its speed",
+        "how many people can use it",
+        "its novelty",
+        "its cost to banks"
+      ],
+      "passage": {
+        "id": "e2-p6",
+        "title": "Paying without a smartphone",
+        "text": "Cashless payment is convenient for anyone who owns a smartphone and frustrating for anyone who does not. Shops that stop accepting cash save time at the counter, but they also exclude older customers and people without a bank account. Several cities have responded with rules requiring retailers to accept cash, and some banks now issue cards with large-print keypads and a single confirmation button. The debate is often framed as progress versus nostalgia. In practice it is a question of design: a payment system is only as good as the number of people who can use it."
+      }
+    },
+    {
+      "id": "q-e2-e2-p6-tr",
+      "topic": "e2-translation",
+      "knowledge": "e2-translation-k1",
+      "type": "calc",
+      "diff": 3,
+      "stem": "The debate is often framed as progress versus nostalgia. In practice it is a question of design: a payment system is only as good as the number of people who can use it.",
+      "answer": {
+        "text": "这场争论常被描述为进步与怀旧之争。而实际上，这是一个设计问题：一个支付系统的好坏，取决于有多少人能够使用它。"
+      },
+      "explain": {
+        "right": "先切分意群定主干，再按汉语习惯重排语序，最后检查术语与指代是否统一。",
+        "wrong": "常见错误：is framed as 译「被描述为」；versus 译「与……之争」；only as good as 是固定表达，译「取决于」；冒号后的解释句保持独立。",
+        "link": "e2-translation-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "段落翻译",
+          "pattern": "e2-translation-p1",
+          "steps": [
+            "通读全段，判断文体与时态基调",
+            "逐句找主干，切出定语与状语",
+            "把后置定语译成前置，长状语提到句首",
+            "检查段内代词与术语一致性",
+            "通读成段，修掉翻译腔"
+          ],
+          "trap": "逐词直译，句子不通"
+        },
+        "approach": "先切分意群定主干，再按汉语习惯重排语序，最后检查术语与指代是否统一。",
+        "points": [
+          {
+            "id": "e2-translation-k1",
+            "note": "按引导词、介词短语、分词结构切意群，先定主谓宾。",
+            "title": "长难句切分",
+            "core": "按引导词、介词短语、分词结构切意群，先定主谓宾。",
+            "pitfall": "is framed as 译「被描述为」；versus 译「与……之争」；only as good as 是固定表达，译「取决于」；冒号后的解释句保持独立。"
+          }
+        ],
+        "solution": "参考译文：这场争论常被描述为进步与怀旧之争。而实际上，这是一个设计问题：一个支付系统的好坏，取决于有多少人能够使用它。\n得分点：is framed as 译「被描述为」；versus 译「与……之争」；only as good as 是固定表达，译「取决于」；冒号后的解释句保持独立。\n检查清单：主干是否译出、修饰是否归位、指代是否还原。"
+      }
+    },
+    {
+      "id": "q-e2-e2-p6-wr",
+      "topic": "e2-writing",
+      "knowledge": "e2-writing-k2",
+      "type": "design",
+      "diff": 3,
+      "stem": "Write an essay of about 150 words on the following topic: some shops no longer accept cash. Discuss the advantages and disadvantages, and give your opinion.",
+      "answer": {
+        "text": "Cashless payment saves time at the counter and reduces the cost of handling notes and coins. For a small shop, those savings are real. The disadvantage is equally real: customers without a smartphone or a bank account are excluded from ordinary shopping, and the exclusion falls hardest on older people. The choice is not between efficiency and nostalgia. It is a design question. Shops can keep fast digital payment while accepting cash at one counter, and banks can issue cards with large print and a single confirmation button. A payment system should be judged by how many people can use it, not by how modern it looks."
+      },
+      "explain": {
+        "right": "先定三段骨架（描述—分析—结论），再把题目给出的信息逐条落进段落，最后检查字数与衔接词。",
+        "wrong": "常见错误：只写「无现金很方便」或「老人可怜」，没有给出兼顾效率与包容的具体做法。",
+        "link": "e2-writing-k2"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "图表作文",
+          "pattern": "e2-writing-p2",
+          "steps": [
+            "首段：一句点明图表主题 + 2 个关键数据",
+            "二段：2 条原因，用 First/Moreover 衔接",
+            "三段：一句趋势预测或建议",
+            "数字保留一位小数，趋势词要准确"
+          ],
+          "trap": "只罗列数字不做比较"
+        },
+        "approach": "先定三段骨架（描述—分析—结论），再把题目给出的信息逐条落进段落，最后检查字数与衔接词。",
+        "points": [
+          {
+            "id": "e2-writing-k2",
+            "note": "观点句 + 解释 + 例证 + 小结，四句一段。",
+            "title": "议论段展开",
+            "core": "观点句 + 解释 + 例证 + 小结，四句一段。",
+            "pitfall": "只写「无现金很方便」或「老人可怜」，没有给出兼顾效率与包容的具体做法。"
+          }
+        ],
+        "solution": "Cashless payment saves time at the counter and reduces the cost of handling notes and coins. For a small shop, those savings are real. The disadvantage is equally real: customers without a smartphone or a bank account are excluded from ordinary shopping, and the exclusion falls hardest on older people. The choice is not between efficiency and nostalgia. It is a design question. Shops can keep fast digital payment while accepting cash at one counter, and banks can issue cards with large print and a single confirmation button. A payment system should be judged by how many people can use it, not by how modern it looks."
+      }
+    },
+    {
+      "id": "q-e2-e2-p7-q1",
+      "topic": "e2-reading",
+      "knowledge": "e2-reading-k1",
+      "type": "choice",
+      "diff": 3,
+      "stem": "Reviews of wellness programmes found that",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "细节题，关键词 reviews，定位 Participation is highest among employees who are already healthy。",
+        "wrong": "常见错误：把 offer gym discounts 当成有效，忽略 measured improvements are small。",
+        "link": "e2-reading-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "细节与数字题",
+          "pattern": "e2-reading-p1",
+          "steps": [
+            "圈题干关键词，定位到唯一句子",
+            "核对数字的单位与限定词（about / at least / by 2030）",
+            "排除偷换主语的选项",
+            "确认时态与原文一致"
+          ],
+          "trap": "把 about 当成精确值"
+        },
+        "approach": "细节题，关键词 reviews，定位 Participation is highest among employees who are already healthy。",
+        "points": [
+          {
+            "id": "e2-reading-k1",
+            "note": "题干关键词回原文定位，正确选项是定位句的同义改写。",
+            "title": "细节定位与同义替换",
+            "core": "题干关键词回原文定位，正确选项是定位句的同义改写。",
+            "pitfall": "把 offer gym discounts 当成有效，忽略 measured improvements are small。"
+          }
+        ],
+        "solution": "原文：Participation is highest among employees who are already healthy, and the measured improvements are small。B 为同义；A 与 small 矛盾；C 与最后一句「降幅大于任何健身方案」相反；D 未提。"
+      },
+      "options": [
+        "they improved health substantially",
+        "they mainly attracted already healthy employees",
+        "they reduced stress more than scheduling changes",
+        "they were too expensive"
+      ],
+      "passage": {
+        "id": "e2-p7",
+        "title": "Wellness programmes at work",
+        "text": "Company wellness programmes usually offer gym discounts, fruit in the kitchen and an app that counts steps. Reviews of their effects are mixed. Participation is highest among employees who are already healthy, and the measured improvements are small. Meanwhile the strongest influence on employee health is rarely mentioned: how work is organised. Long and unpredictable hours, low control over tasks and unclear expectations produce stress that no step counter can offset. A few employers have redirected the budget from apps to scheduling, giving teams notice of shifts and a voice in how work is divided. Reported stress fell further than in any of the fitness schemes."
+      }
+    },
+    {
+      "id": "q-e2-e2-p7-q2",
+      "topic": "e2-reading",
+      "knowledge": "e2-reading-k2",
+      "type": "choice",
+      "diff": 3,
+      "stem": "The passage says the strongest influence on employee health is",
+      "answer": {
+        "correct": 2
+      },
+      "explain": {
+        "right": "细节题，关键词 strongest influence，定位 the strongest influence on employee health is rarely mentioned: how work is organised。",
+        "wrong": "常见错误：选 exercise——原文说锻炼类项目效果有限，真正影响大的是工作组织方式。",
+        "link": "e2-reading-k2"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "词义猜测题",
+          "pattern": "e2-reading-p2",
+          "steps": [
+            "回到该词所在句，先看是否有定义（that is / means / 破折号）",
+            "看是否有举例（such as / for instance）",
+            "看是否有对比（unlike / rather than），取反义",
+            "把候选义代回原句检验"
+          ],
+          "trap": "按熟词僻义硬套常见义"
+        },
+        "approach": "细节题，关键词 strongest influence，定位 the strongest influence on employee health is rarely mentioned: how work is organised。",
+        "points": [
+          {
+            "id": "e2-reading-k2",
+            "note": "推理只走一步，答案必须有原文依据。",
+            "title": "推理判断的边界",
+            "core": "推理只走一步，答案必须有原文依据。",
+            "pitfall": "选 exercise——原文说锻炼类项目效果有限，真正影响大的是工作组织方式。"
+          }
+        ],
+        "solution": "原文：the strongest influence on employee health is rarely mentioned: how work is organised，后文列举长工时、低控制感、期望不清。C 为原文原词；A、B 是 wellness 项目的内容而非最强因素；D 无关。"
+      },
+      "options": [
+        "diet",
+        "exercise",
+        "how work is organised",
+        "the weather"
+      ],
+      "passage": {
+        "id": "e2-p7",
+        "title": "Wellness programmes at work",
+        "text": "Company wellness programmes usually offer gym discounts, fruit in the kitchen and an app that counts steps. Reviews of their effects are mixed. Participation is highest among employees who are already healthy, and the measured improvements are small. Meanwhile the strongest influence on employee health is rarely mentioned: how work is organised. Long and unpredictable hours, low control over tasks and unclear expectations produce stress that no step counter can offset. A few employers have redirected the budget from apps to scheduling, giving teams notice of shifts and a voice in how work is divided. Reported stress fell further than in any of the fitness schemes."
+      }
+    },
+    {
+      "id": "q-e2-e2-p7-q3",
+      "topic": "e2-reading",
+      "knowledge": "e2-reading-k3",
+      "type": "choice",
+      "diff": 3,
+      "stem": "The employers who redirected their budget found that",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "细节题，关键词 redirected，定位末句 Reported stress fell further than in any of the fitness schemes。",
+        "wrong": "常见错误：选 fitness apps were more effective——与末句「降幅超过任何健身方案」相反。",
+        "link": "e2-reading-k3"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "主旨与作者态度",
+          "pattern": "e2-reading-p3",
+          "steps": [
+            "读首段与末段，抓重复出现的名词",
+            "态度看评价性形容词与情态动词",
+            "排除只覆盖局部的选项"
+          ],
+          "trap": "把分论点当主旨"
+        },
+        "approach": "细节题，关键词 redirected，定位末句 Reported stress fell further than in any of the fitness schemes。",
+        "points": [
+          {
+            "id": "e2-reading-k3",
+            "note": "首末段加各段首句定主旨；评价性形容词定态度。",
+            "title": "主旨与作者态度",
+            "core": "首末段加各段首句定主旨；评价性形容词定态度。",
+            "pitfall": "选 fitness apps were more effective——与末句「降幅超过任何健身方案」相反。"
+          }
+        ],
+        "solution": "末句：Reported stress fell further than in any of the fitness schemes。B 为同义；A、C、D 均与原文相反或无据。"
+      },
+      "options": [
+        "fitness apps were more effective",
+        "changing scheduling reduced stress more",
+        "employees stopped exercising",
+        "the budget was wasted"
+      ],
+      "passage": {
+        "id": "e2-p7",
+        "title": "Wellness programmes at work",
+        "text": "Company wellness programmes usually offer gym discounts, fruit in the kitchen and an app that counts steps. Reviews of their effects are mixed. Participation is highest among employees who are already healthy, and the measured improvements are small. Meanwhile the strongest influence on employee health is rarely mentioned: how work is organised. Long and unpredictable hours, low control over tasks and unclear expectations produce stress that no step counter can offset. A few employers have redirected the budget from apps to scheduling, giving teams notice of shifts and a voice in how work is divided. Reported stress fell further than in any of the fitness schemes."
+      }
+    },
+    {
+      "id": "q-e2-e2-p7-tr",
+      "topic": "e2-translation",
+      "knowledge": "e2-translation-k1",
+      "type": "calc",
+      "diff": 3,
+      "stem": "Long and unpredictable hours, low control over tasks and unclear expectations produce stress that no step counter can offset.",
+      "answer": {
+        "text": "漫长且不可预测的工时、对任务缺乏掌控感，以及不明确的期望，会带来任何计步器都无法抵消的压力。"
+      },
+      "explain": {
+        "right": "先切分意群定主干，再按汉语习惯重排语序，最后检查术语与指代是否统一。",
+        "wrong": "常见错误：三个并列主语较长，译文用顿号分隔；that 引导定语从句修饰 stress；offset 译「抵消」，no step counter 前置为「任何计步器都无法……」。",
+        "link": "e2-translation-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "段落翻译",
+          "pattern": "e2-translation-p1",
+          "steps": [
+            "通读全段，判断文体与时态基调",
+            "逐句找主干，切出定语与状语",
+            "把后置定语译成前置，长状语提到句首",
+            "检查段内代词与术语一致性",
+            "通读成段，修掉翻译腔"
+          ],
+          "trap": "逐词直译，句子不通"
+        },
+        "approach": "先切分意群定主干，再按汉语习惯重排语序，最后检查术语与指代是否统一。",
+        "points": [
+          {
+            "id": "e2-translation-k1",
+            "note": "按引导词、介词短语、分词结构切意群，先定主谓宾。",
+            "title": "长难句切分",
+            "core": "按引导词、介词短语、分词结构切意群，先定主谓宾。",
+            "pitfall": "三个并列主语较长，译文用顿号分隔；that 引导定语从句修饰 stress；offset 译「抵消」，no step counter 前置为「任何计步器都无法……」。"
+          }
+        ],
+        "solution": "参考译文：漫长且不可预测的工时、对任务缺乏掌控感，以及不明确的期望，会带来任何计步器都无法抵消的压力。\n得分点：三个并列主语较长，译文用顿号分隔；that 引导定语从句修饰 stress；offset 译「抵消」，no step counter 前置为「任何计步器都无法……」。\n检查清单：主干是否译出、修饰是否归位、指代是否还原。"
+      }
+    },
+    {
+      "id": "q-e2-e2-p7-wr",
+      "topic": "e2-writing",
+      "knowledge": "e2-writing-k2",
+      "type": "design",
+      "diff": 3,
+      "stem": "Write an essay of about 150 words on the following topic: many companies offer wellness programmes. Do they address the real causes of workplace stress?",
+      "answer": {
+        "text": "Wellness programmes are popular because they are visible and inexpensive. A gym discount and a step counter signal that the company cares, yet the evidence suggests they reach the wrong people: participation is highest among employees who are already fit, and the measured gains are small. The main sources of stress lie elsewhere, in long and unpredictable hours, low control over tasks and unclear expectations. No app offsets a schedule that changes without notice. The more effective investment is therefore organisational: publish shifts in advance, let teams influence how work is divided, and make priorities explicit. Health programmes can supplement such changes, but they cannot substitute for them."
+      },
+      "explain": {
+        "right": "先定三段骨架（描述—分析—结论），再把题目给出的信息逐条落进段落，最后检查字数与衔接词。",
+        "wrong": "常见错误：把健康项目说成完全无用，或只呼吁「员工多运动」，回避工作组织方式这一成因。",
+        "link": "e2-writing-k2"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "图表作文",
+          "pattern": "e2-writing-p2",
+          "steps": [
+            "首段：一句点明图表主题 + 2 个关键数据",
+            "二段：2 条原因，用 First/Moreover 衔接",
+            "三段：一句趋势预测或建议",
+            "数字保留一位小数，趋势词要准确"
+          ],
+          "trap": "只罗列数字不做比较"
+        },
+        "approach": "先定三段骨架（描述—分析—结论），再把题目给出的信息逐条落进段落，最后检查字数与衔接词。",
+        "points": [
+          {
+            "id": "e2-writing-k2",
+            "note": "观点句 + 解释 + 例证 + 小结，四句一段。",
+            "title": "议论段展开",
+            "core": "观点句 + 解释 + 例证 + 小结，四句一段。",
+            "pitfall": "把健康项目说成完全无用，或只呼吁「员工多运动」，回避工作组织方式这一成因。"
+          }
+        ],
+        "solution": "Wellness programmes are popular because they are visible and inexpensive. A gym discount and a step counter signal that the company cares, yet the evidence suggests they reach the wrong people: participation is highest among employees who are already fit, and the measured gains are small. The main sources of stress lie elsewhere, in long and unpredictable hours, low control over tasks and unclear expectations. No app offsets a schedule that changes without notice. The more effective investment is therefore organisational: publish shifts in advance, let teams influence how work is divided, and make priorities explicit. Health programmes can supplement such changes, but they cannot substitute for them."
+      }
+    },
+    {
+      "id": "q-e2-e2-p8-q1",
+      "topic": "e2-reading",
+      "knowledge": "e2-reading-k1",
+      "type": "choice",
+      "diff": 3,
+      "stem": "The passage says the 'export industry' description",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "细节题，关键词 export industry，定位 The description hides a cost，后面列举租金上涨、商店变纪念品店、居民外迁。",
+        "wrong": "常见错误：选 explains the full benefit——原文用 hides a cost 明确否定其完整性。",
+        "link": "e2-reading-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "细节与数字题",
+          "pattern": "e2-reading-p1",
+          "steps": [
+            "圈题干关键词，定位到唯一句子",
+            "核对数字的单位与限定词（about / at least / by 2030）",
+            "排除偷换主语的选项",
+            "确认时态与原文一致"
+          ],
+          "trap": "把 about 当成精确值"
+        },
+        "approach": "细节题，关键词 export industry，定位 The description hides a cost，后面列举租金上涨、商店变纪念品店、居民外迁。",
+        "points": [
+          {
+            "id": "e2-reading-k1",
+            "note": "题干关键词回原文定位，正确选项是定位句的同义改写。",
+            "title": "细节定位与同义替换",
+            "core": "题干关键词回原文定位，正确选项是定位句的同义改写。",
+            "pitfall": "选 explains the full benefit——原文用 hides a cost 明确否定其完整性。"
+          }
+        ],
+        "solution": "原文：The description hides a cost，随后举例说明居民承担的成本。B 为同义；A 与 hides 相反；C、D 未提。"
+      },
+      "options": [
+        "explains the full benefit of tourism",
+        "ignores the costs borne by local residents",
+        "is accepted by all economists",
+        "applies only to small towns"
+      ],
+      "passage": {
+        "id": "e2-p8",
+        "title": "Tourism that pays for the place",
+        "text": "Tourism is often described as an export industry: visitors arrive, spend, and leave. The description hides a cost. A small town that attracts a million visitors a year may find its rents rising, its shops turning into souvenir stalls, and its residents moving away. Some destinations now charge an entry fee and use the money to maintain the very streets that visitors come to see. Others limit the number of cruise ships per day. The measures are unpopular with parts of the industry, but they rest on a simple idea: a place that is pleasant to visit must first be pleasant to live in."
+      }
+    },
+    {
+      "id": "q-e2-e2-p8-q2",
+      "topic": "e2-reading",
+      "knowledge": "e2-reading-k2",
+      "type": "choice",
+      "diff": 3,
+      "stem": "The entry fee mentioned in the passage is used to",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "细节题，关键词 entry fee，定位 use the money to maintain the very streets that visitors come to see。",
+        "wrong": "常见错误：选 advertise the town——费用用途在原文已明确，是维护街道。",
+        "link": "e2-reading-k2"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "词义猜测题",
+          "pattern": "e2-reading-p2",
+          "steps": [
+            "回到该词所在句，先看是否有定义（that is / means / 破折号）",
+            "看是否有举例（such as / for instance）",
+            "看是否有对比（unlike / rather than），取反义",
+            "把候选义代回原句检验"
+          ],
+          "trap": "按熟词僻义硬套常见义"
+        },
+        "approach": "细节题，关键词 entry fee，定位 use the money to maintain the very streets that visitors come to see。",
+        "points": [
+          {
+            "id": "e2-reading-k2",
+            "note": "推理只走一步，答案必须有原文依据。",
+            "title": "推理判断的边界",
+            "core": "推理只走一步，答案必须有原文依据。",
+            "pitfall": "选 advertise the town——费用用途在原文已明确，是维护街道。"
+          }
+        ],
+        "solution": "原文：charge an entry fee and use the money to maintain the very streets that visitors come to see。B 为原文同义；A、C、D 无依据。"
+      },
+      "options": [
+        "subsidise hotels",
+        "maintain the streets visitors come to see",
+        "advertise the town abroad",
+        "reduce the number of residents"
+      ],
+      "passage": {
+        "id": "e2-p8",
+        "title": "Tourism that pays for the place",
+        "text": "Tourism is often described as an export industry: visitors arrive, spend, and leave. The description hides a cost. A small town that attracts a million visitors a year may find its rents rising, its shops turning into souvenir stalls, and its residents moving away. Some destinations now charge an entry fee and use the money to maintain the very streets that visitors come to see. Others limit the number of cruise ships per day. The measures are unpopular with parts of the industry, but they rest on a simple idea: a place that is pleasant to visit must first be pleasant to live in."
+      }
+    },
+    {
+      "id": "q-e2-e2-p8-q3",
+      "topic": "e2-reading",
+      "knowledge": "e2-reading-k3",
+      "type": "choice",
+      "diff": 3,
+      "stem": "The last sentence suggests that",
+      "answer": {
+        "correct": 1
+      },
+      "explain": {
+        "right": "主旨句题：must first be pleasant to live in 说明「宜居是宜游的前提」。",
+        "wrong": "常见错误：选 tourism should be banned——原文主张管理，不是禁止。",
+        "link": "e2-reading-k3"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "主旨与作者态度",
+          "pattern": "e2-reading-p3",
+          "steps": [
+            "读首段与末段，抓重复出现的名词",
+            "态度看评价性形容词与情态动词",
+            "排除只覆盖局部的选项"
+          ],
+          "trap": "把分论点当主旨"
+        },
+        "approach": "主旨句题：must first be pleasant to live in 说明「宜居是宜游的前提」。",
+        "points": [
+          {
+            "id": "e2-reading-k3",
+            "note": "首末段加各段首句定主旨；评价性形容词定态度。",
+            "title": "主旨与作者态度",
+            "core": "首末段加各段首句定主旨；评价性形容词定态度。",
+            "pitfall": "选 tourism should be banned——原文主张管理，不是禁止。"
+          }
+        ],
+        "solution": "末句：a place that is pleasant to visit must first be pleasant to live in。B 正是该句的抽象概括；A 过度；C、D 是细节。"
+      },
+      "options": [
+        "tourism should be banned",
+        "local liveability is a condition for sustainable tourism",
+        "visitors should not pay fees",
+        "cruise ships are the main problem"
+      ],
+      "passage": {
+        "id": "e2-p8",
+        "title": "Tourism that pays for the place",
+        "text": "Tourism is often described as an export industry: visitors arrive, spend, and leave. The description hides a cost. A small town that attracts a million visitors a year may find its rents rising, its shops turning into souvenir stalls, and its residents moving away. Some destinations now charge an entry fee and use the money to maintain the very streets that visitors come to see. Others limit the number of cruise ships per day. The measures are unpopular with parts of the industry, but they rest on a simple idea: a place that is pleasant to visit must first be pleasant to live in."
+      }
+    },
+    {
+      "id": "q-e2-e2-p8-tr",
+      "topic": "e2-translation",
+      "knowledge": "e2-translation-k1",
+      "type": "calc",
+      "diff": 3,
+      "stem": "The measures are unpopular with parts of the industry, but they rest on a simple idea: a place that is pleasant to visit must first be pleasant to live in.",
+      "answer": {
+        "text": "这些措施遭到了部分业内人士的反对，但它们基于一个简单的理念：一个宜游的地方，首先必须宜居。"
+      },
+      "explain": {
+        "right": "先切分意群定主干，再按汉语习惯重排语序，最后检查术语与指代是否统一。",
+        "wrong": "常见错误：be unpopular with 译「遭到……反对」；rest on 译「基于」；冒号引出同位解释；pleasant to visit / to live in 对举，译「宜游」「宜居」最简洁。",
+        "link": "e2-translation-k1"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "段落翻译",
+          "pattern": "e2-translation-p1",
+          "steps": [
+            "通读全段，判断文体与时态基调",
+            "逐句找主干，切出定语与状语",
+            "把后置定语译成前置，长状语提到句首",
+            "检查段内代词与术语一致性",
+            "通读成段，修掉翻译腔"
+          ],
+          "trap": "逐词直译，句子不通"
+        },
+        "approach": "先切分意群定主干，再按汉语习惯重排语序，最后检查术语与指代是否统一。",
+        "points": [
+          {
+            "id": "e2-translation-k1",
+            "note": "按引导词、介词短语、分词结构切意群，先定主谓宾。",
+            "title": "长难句切分",
+            "core": "按引导词、介词短语、分词结构切意群，先定主谓宾。",
+            "pitfall": "be unpopular with 译「遭到……反对」；rest on 译「基于」；冒号引出同位解释；pleasant to visit / to live in 对举，译「宜游」「宜居」最简洁。"
+          }
+        ],
+        "solution": "参考译文：这些措施遭到了部分业内人士的反对，但它们基于一个简单的理念：一个宜游的地方，首先必须宜居。\n得分点：be unpopular with 译「遭到……反对」；rest on 译「基于」；冒号引出同位解释；pleasant to visit / to live in 对举，译「宜游」「宜居」最简洁。\n检查清单：主干是否译出、修饰是否归位、指代是否还原。"
+      }
+    },
+    {
+      "id": "q-e2-e2-p8-wr",
+      "topic": "e2-writing",
+      "knowledge": "e2-writing-k2",
+      "type": "design",
+      "diff": 3,
+      "stem": "Write an essay of about 150 words on the following topic: some tourist towns now charge an entry fee or limit visitor numbers. Discuss whether such measures are justified.",
+      "answer": {
+        "text": "Tourism brings income, but it also raises rents, replaces local shops with souvenir stalls and pushes residents out. An entry fee or a daily limit on visitors looks unwelcoming, yet it addresses a real problem: the town must remain liveable for the people who work there. The revenue can be used to maintain the streets and facilities that visitors come to see, which is precisely what a crowded destination struggles to fund. Such measures are not against tourism; they protect its foundation. The design matters, however: fees should be modest, revenue should be visible in local upkeep, and residents should not be charged for their own town."
+      },
+      "explain": {
+        "right": "先定三段骨架（描述—分析—结论），再把题目给出的信息逐条落进段落，最后检查字数与衔接词。",
+        "wrong": "常见错误：只表态「收费不合理」或「游客太多」，没有讨论费用用途与宜居前提。",
+        "link": "e2-writing-k2"
+      },
+      "walkthrough": {
+        "framework": {
+          "title": "图表作文",
+          "pattern": "e2-writing-p2",
+          "steps": [
+            "首段：一句点明图表主题 + 2 个关键数据",
+            "二段：2 条原因，用 First/Moreover 衔接",
+            "三段：一句趋势预测或建议",
+            "数字保留一位小数，趋势词要准确"
+          ],
+          "trap": "只罗列数字不做比较"
+        },
+        "approach": "先定三段骨架（描述—分析—结论），再把题目给出的信息逐条落进段落，最后检查字数与衔接词。",
+        "points": [
+          {
+            "id": "e2-writing-k2",
+            "note": "观点句 + 解释 + 例证 + 小结，四句一段。",
+            "title": "议论段展开",
+            "core": "观点句 + 解释 + 例证 + 小结，四句一段。",
+            "pitfall": "只表态「收费不合理」或「游客太多」，没有讨论费用用途与宜居前提。"
+          }
+        ],
+        "solution": "Tourism brings income, but it also raises rents, replaces local shops with souvenir stalls and pushes residents out. An entry fee or a daily limit on visitors looks unwelcoming, yet it addresses a real problem: the town must remain liveable for the people who work there. The revenue can be used to maintain the streets and facilities that visitors come to see, which is precisely what a crowded destination struggles to fund. Such measures are not against tourism; they protect its foundation. The design matters, however: fees should be modest, revenue should be visible in local upkeep, and residents should not be charged for their own town."
+      }
+    }
+  ]
+}

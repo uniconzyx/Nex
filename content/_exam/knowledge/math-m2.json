@@ -1,0 +1,285 @@
+{
+  "subject": "m2",
+  "exam": "math",
+  "book": "考研数学二（高数 + 线代）",
+  "items": [
+    {
+      "topic": "m2-limits",
+      "chapter": "第 1 章 函数、极限与连续",
+      "knowledge": [
+        {
+          "id": "m2-limits-k1",
+          "title": "七种未定式与洛必达",
+          "chapter": "1.4 极限的求法",
+          "patterns": [
+            "m2-limits-p1"
+          ],
+          "core": "识别型别 → 化形 → 再用洛必达或等价无穷小。0/0 与 ∞/∞ 可直接洛必达，其余五种要先化成这两种。",
+          "tip": "1^∞ 统一写成 e^{lim(f−1)g}；0·∞ 把其中一个取倒数搬到分母；∞−∞ 先通分或有理化。"
+        },
+        {
+          "id": "m2-limits-k2",
+          "title": "等价无穷小与泰勒展开",
+          "chapter": "1.4 极限的求法",
+          "patterns": [
+            "m2-limits-p1"
+          ],
+          "core": "乘除因子可直接替换等价无穷小；加减项替换必须保证不丢失低阶项。",
+          "tip": "x−sin x ~ x³/6 而不是 0，这是加减替换翻车的经典例子。加减场景一律用泰勒展开到同阶。"
+        },
+        {
+          "id": "m2-limits-k3",
+          "title": "连续与间断点分类",
+          "chapter": "1.5 连续性与间断点",
+          "patterns": [
+            "m2-limits-p2"
+          ],
+          "core": "可去（左右极限相等但不等于函数值）、跳跃（左右极限不等）、无穷、振荡四类。",
+          "tip": "先求左右极限再定性；分段点处必须两侧都算，只算一侧是错的。"
+        }
+      ]
+    },
+    {
+      "topic": "m2-derivative",
+      "chapter": "第 2 章 一元函数微分学",
+      "knowledge": [
+        {
+          "id": "m2-derivative-k1",
+          "title": "导数定义与可导性判定",
+          "chapter": "2.1 导数概念",
+          "patterns": [
+            "m2-derivative-p1"
+          ],
+          "core": "可导 ⇒ 连续，反之不成立；分段点用定义式算左右导数。",
+          "tip": "看到 lim [f(x₀+h)−f(x₀−h)]/h 这类式子，先凑成标准定义再代值，别直接洛必达。"
+        },
+        {
+          "id": "m2-derivative-k2",
+          "title": "复合函数与隐函数求导",
+          "chapter": "2.2 求导法则",
+          "patterns": [
+            "m2-derivative-p1"
+          ],
+          "core": "链式法则逐层剥；隐函数两边对 x 求导，把 y 看作 y(x)。",
+          "tip": "对数求导法专治幂指函数 u(x)^{v(x)}；参数方程 dy/dx=(dy/dt)/(dx/dt)。"
+        },
+        {
+          "id": "m2-derivative-k3",
+          "title": "单调性、极值与最值",
+          "chapter": "2.4 单调性与极值",
+          "patterns": [
+            "m2-derivative-p2"
+          ],
+          "core": "一阶导定单调，二阶导定凹凸；极值点必须是一阶导变号点或不可导点。",
+          "tip": "端点与不可导点都要纳入最值候选，只在驻点里挑是常见丢分点。"
+        }
+      ]
+    },
+    {
+      "topic": "m2-integral",
+      "chapter": "第 3 章 一元函数积分学",
+      "knowledge": [
+        {
+          "id": "m2-integral-k1",
+          "title": "换元法与分部积分",
+          "chapter": "3.2 不定积分",
+          "patterns": [
+            "m2-integral-p1"
+          ],
+          "core": "换元看结构（根式、分母二次式、e^x），分部积分按「反对幂指三」定 u。",
+          "tip": "定积分换元必须同步换上下限，换完不要再回代原变量。"
+        },
+        {
+          "id": "m2-integral-k2",
+          "title": "定积分的性质与变上限积分",
+          "chapter": "3.3 定积分",
+          "patterns": [
+            "m2-integral-p1"
+          ],
+          "core": "变上限积分 Φ(x)=∫ₐˣ f(t)dt 的导数是 f(x)，这是求极限与判单调的主力工具。",
+          "tip": "被积函数含 x 时先把 x 提到积分号外或换元，不能直接对 x 求导。"
+        },
+        {
+          "id": "m2-integral-k3",
+          "title": "定积分的几何应用",
+          "chapter": "3.4 定积分应用",
+          "patterns": [
+            "m2-integral-p2"
+          ],
+          "core": "面积 ∫|f−g|dx、旋转体体积 π∫f²dx、弧长 ∫√(1+y′²)dx。",
+          "tip": "先画草图定上下界与谁在上方，再列式；两曲线交点决定积分区间。"
+        }
+      ]
+    },
+    {
+      "topic": "m2-multivar",
+      "chapter": "第 4 章 多元函数微积分",
+      "knowledge": [
+        {
+          "id": "m2-multivar-k1",
+          "title": "偏导数与全微分",
+          "chapter": "4.2 偏导数与全微分",
+          "patterns": [
+            "m2-multivar-p1"
+          ],
+          "core": "偏导是对一个变量求导、其余当常数；可微 ⇒ 偏导存在，反之不成立。",
+          "tip": "判定可微要用定义验证 Δz−AΔx−BΔy 是 o(ρ)，不能只看偏导连续。"
+        },
+        {
+          "id": "m2-multivar-k2",
+          "title": "复合函数与隐函数求偏导",
+          "chapter": "4.3 多元复合函数",
+          "patterns": [
+            "m2-multivar-p1"
+          ],
+          "core": "画变量关系树，按路径相乘、分支相加。",
+          "tip": "z=f(x,y), y=y(x) 时 dz/dx=f_x+f_y·y′，漏掉第二项是最常见错误。"
+        },
+        {
+          "id": "m2-multivar-k3",
+          "title": "二重积分的计算",
+          "chapter": "4.5 二重积分",
+          "patterns": [
+            "m2-multivar-p2"
+          ],
+          "core": "直角坐标看型（X 型先 y 后 x），极坐标看圆与射线；被积函数含 x²+y² 优先极坐标。",
+          "tip": "交换积分次序前必须重画区域，直接调换上下限会算错。"
+        }
+      ]
+    },
+    {
+      "topic": "m2-ode",
+      "chapter": "第 5 章 常微分方程",
+      "knowledge": [
+        {
+          "id": "m2-ode-k1",
+          "title": "一阶方程的识别与通解",
+          "chapter": "5.2 一阶微分方程",
+          "patterns": [
+            "m2-ode-p1"
+          ],
+          "core": "可分离变量、齐次、一阶线性 y′+P(x)y=Q(x) 三类，各有固定解法。",
+          "tip": "一阶线性用公式 y=e^{−∫P}(∫Qe^{∫P}dx+C)，先化成标准形再套。"
+        },
+        {
+          "id": "m2-ode-k2",
+          "title": "二阶常系数线性方程",
+          "chapter": "5.3 二阶微分方程",
+          "patterns": [
+            "m2-ode-p3"
+          ],
+          "core": "先解特征方程 r²+pr+q=0，按两实根/重根/共轭复根写通解。",
+          "tip": "非齐次特解按右端项类型设形，与齐次解重根时要乘 x。"
+        },
+        {
+          "id": "m2-ode-k3",
+          "title": "初值问题与特解",
+          "chapter": "5.4 微分方程应用",
+          "patterns": [
+            "m2-ode-p2"
+          ],
+          "core": "通解加初值条件定常数；应用题先设变量、再按变化率列方程。",
+          "tip": "定常数要在通解阶段做，先代入具体值再求导容易混。"
+        }
+      ]
+    },
+    {
+      "topic": "m2-linear",
+      "chapter": "第 6 章 行列式、矩阵与向量",
+      "knowledge": [
+        {
+          "id": "m2-linear-k1",
+          "title": "行列式的性质与计算",
+          "chapter": "6.1 行列式",
+          "patterns": [
+            "m2-linear-p1"
+          ],
+          "core": "行列互换值不变、两行互换变号、某行乘 k 值乘 k；上三角行列式等于对角元之积。",
+          "tip": "含参数行列式先化三角再展开，硬按定义展开几乎必错。"
+        },
+        {
+          "id": "m2-linear-k2",
+          "title": "矩阵运算与逆矩阵",
+          "chapter": "6.2 矩阵",
+          "patterns": [
+            "m2-linear-p1"
+          ],
+          "core": "(AB)⁻¹=B⁻¹A⁻¹，(Aᵀ)⁻¹=(A⁻¹)ᵀ；A 可逆 ⇔ |A|≠0。",
+          "tip": "求逆用初等行变换 [A|E]→[E|A⁻¹]，比伴随矩阵法快且不易错。"
+        },
+        {
+          "id": "m2-linear-k3",
+          "title": "向量组的秩与线性相关性",
+          "chapter": "6.3 向量组",
+          "patterns": [
+            "m2-linear-p2"
+          ],
+          "core": "秩 = 极大线性无关组所含向量个数；相关 ⇔ 存在非零组合为零。",
+          "tip": "把向量按列排成矩阵做行变换，秩不变，直接读出相关性与表示系数。"
+        }
+      ]
+    },
+    {
+      "topic": "m2-equation",
+      "chapter": "第 7 章 线性方程组与特征值",
+      "knowledge": [
+        {
+          "id": "m2-equation-k1",
+          "title": "解的判定与通解结构",
+          "chapter": "7.1 线性方程组",
+          "patterns": [
+            "m2-equation-p1"
+          ],
+          "core": "r(A)=r(A|b)=n 唯一解；=r<n 无穷多解；r(A)<r(A|b) 无解。",
+          "tip": "通解 = 特解 + 齐次基础解系的线性组合，基础解系取自由变量为单位向量。"
+        },
+        {
+          "id": "m2-equation-k2",
+          "title": "特征值与特征向量",
+          "chapter": "7.2 特征值",
+          "patterns": [
+            "m2-equation-p3"
+          ],
+          "core": "解 |λE−A|=0 得特征值，再解 (λE−A)x=0 得特征向量。",
+          "tip": "迹 = Σλ，行列式 = Πλ，这两个恒等式可用来快速验算。"
+        },
+        {
+          "id": "m2-equation-k3",
+          "title": "相似对角化",
+          "chapter": "7.3 相似矩阵",
+          "patterns": [
+            "m2-equation-p2"
+          ],
+          "core": "n 阶矩阵可对角化 ⇔ 有 n 个线性无关特征向量；实对称矩阵必可正交对角化。",
+          "tip": "重根特征值要检查其几何重数是否等于代数重数，只算特征值就下结论是错的。"
+        }
+      ]
+    },
+    {
+      "topic": "m2-quadratic",
+      "chapter": "第 8 章 二次型",
+      "knowledge": [
+        {
+          "id": "m2-quadratic-k1",
+          "title": "二次型的标准形",
+          "chapter": "8.1 二次型",
+          "patterns": [
+            "m2-quadratic-p1"
+          ],
+          "core": "配方法或正交变换法化标准形，惯性指数由正负特征值个数决定。",
+          "tip": "正交变换保持长度与内积，标准形系数就是特征值；配方法不保特征值但保惯性。"
+        },
+        {
+          "id": "m2-quadratic-k2",
+          "title": "正定性的判定",
+          "chapter": "8.2 正定二次型",
+          "patterns": [
+            "m2-quadratic-p2"
+          ],
+          "core": "顺序主子式全大于 0 ⇔ 正定；特征值全正也等价。",
+          "tip": "半正定只要求主子式非负，且允许奇异，别与正定混用。"
+        }
+      ]
+    }
+  ]
+}

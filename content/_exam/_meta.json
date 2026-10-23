@@ -1,0 +1,115 @@
+{
+  "version": 1,
+  "note": "本目录只装「考点矩阵 + 题型分类 + 解题框架 + 自编同型题 + 按真题结构编制的模拟套卷」。真题题面与官方答案受著作权保护，一律不收录；框架与题目均为原创整理，考点年份为历年命题的归纳性标注，请以当年考试大纲为准。",
+  "exams": [
+    {
+      "key": "408",
+      "label": "408 计算机学科专业基础",
+      "short": "408",
+      "duration": 180,
+      "total": 150,
+      "subjects": [
+        {
+          "key": "ds",
+          "label": "数据结构",
+          "score": 45
+        },
+        {
+          "key": "co",
+          "label": "计算机组成原理",
+          "score": 45
+        },
+        {
+          "key": "os",
+          "label": "操作系统",
+          "score": 35
+        },
+        {
+          "key": "cn",
+          "label": "计算机网络",
+          "score": 25
+        }
+      ]
+    },
+    {
+      "key": "math",
+      "label": "考研数学",
+      "short": "数学",
+      "duration": 180,
+      "total": 150,
+      "subjects": [
+        {
+          "key": "m1",
+          "label": "数学（一）",
+          "score": 150
+        },
+        {
+          "key": "m2",
+          "label": "数学（二）",
+          "score": 150
+        }
+      ]
+    },
+    {
+      "key": "english",
+      "label": "考研英语",
+      "short": "英语",
+      "duration": 180,
+      "total": 100,
+      "subjects": [
+        {
+          "key": "e1",
+          "label": "英语（一）",
+          "score": 100
+        },
+        {
+          "key": "e2",
+          "label": "英语（二）",
+          "score": 100
+        }
+      ]
+    },
+    {
+      "key": "politics",
+      "label": "思想政治理论",
+      "short": "政治",
+      "duration": 180,
+      "total": 100,
+      "subjects": [
+        {
+          "key": "pol",
+          "label": "政治",
+          "score": 100
+        }
+      ]
+    },
+    {
+      "key": "discrete",
+      "label": "离散数学",
+      "short": "离散",
+      "duration": 180,
+      "total": 150,
+      "subjects": [
+        {
+          "key": "dm",
+          "label": "离散数学",
+          "score": 150
+        }
+      ]
+    },
+    {
+      "key": "algorithm",
+      "label": "算法设计与分析",
+      "short": "算法",
+      "duration": 180,
+      "total": 150,
+      "subjects": [
+        {
+          "key": "algo",
+          "label": "算法设计与分析",
+          "score": 150
+        }
+      ]
+    }
+  ]
+}

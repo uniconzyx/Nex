@@ -1,0 +1,433 @@
+{
+ "track": "cpp",
+ "items": [
+  {
+   "slug": "cpp-algorithms",
+   "track": "cpp",
+   "tier": "t1",
+   "hours": 8,
+   "level": "easy",
+   "title": "TheAlgorithms/C-Plus-Plus · 用现代 C++ 重写经典算法",
+   "repo": "TheAlgorithms/C-Plus-Plus",
+   "summary": "上百个算法的 C++ 实现合集，每个文件独立可编译。价值不在背算法，而在看同一道题里 STL、模板、迭代器是怎么被用出来的。",
+   "stack": [
+    "C++17",
+    "STL",
+    "模板",
+    "算法与数据结构"
+   ],
+   "learn": [
+    "同一算法的手写实现与 STL 版本差在哪里",
+    "模板函数如何避免为每种类型重复写代码",
+    "迭代器与 range-based for 的适用边界",
+    "递归与迭代在栈开销上的实际差异",
+    "竞赛式写法与工程式写法的取舍"
+   ],
+   "career": "补齐「会语法但不会用 STL」的缺口。刷题之外，这是最省力的 C++ 手感训练。",
+   "steps": [
+    "挑选 10 个已学过的算法，读实现并与自己的写法对比",
+    "用 CMake 单独编译其中一个文件，跑通测试",
+    "把某个递归实现改成迭代版，对比性能",
+    "用模板泛化一个只支持 int 的实现",
+    "写 README：10 个算法的复杂度与 STL 对应关系表"
+   ],
+   "accept": [
+    "能说清至少 5 个算法的手写版与 STL 版差异",
+    "模板泛化后的实现能通过原有用例",
+    "能解释某处为什么用 move 而不是拷贝"
+   ],
+   "interview": [
+    "STL 容器的时间复杂度与迭代器失效规则",
+    "模板为什么通常定义在头文件里",
+    "递归改迭代的一般套路"
+   ]
+  },
+  {
+   "slug": "cpp-googletest",
+   "track": "cpp",
+   "tier": "t1",
+   "hours": 8,
+   "level": "easy",
+   "title": "GoogleTest · 把「能跑」变成「可验证」",
+   "repo": "google/googletest",
+   "summary": "C++ 事实标准的单元测试框架。学会它不是学 API，而是学会把一段代码拆成可断言的边界条件——这是从学生代码走向工程代码的第一步。",
+   "stack": [
+    "C++14",
+    "CMake",
+    "gtest",
+    "gmock",
+    "断言与夹具"
+   ],
+   "learn": [
+    "TEST / TEST_F 的差异与夹具生命周期",
+    "EXPECT_* 与 ASSERT_* 的失败传播区别",
+    "gmock 如何模拟依赖、避免真实 IO",
+    "参数化测试覆盖边界值",
+    "测试覆盖率与「测试写得多但没用」的界限"
+   ],
+   "career": "任何 C++ 岗位都默认你会写测试。简历上写「有单测」远不如能拿出一个 80% 覆盖的模块。",
+   "steps": [
+    "用 CMake 接入 gtest，跑通官方 sample",
+    "给自己写过的某个类补 5 个用例（正常/边界/异常）",
+    "用 TEST_F 抽公共夹具，消除重复初始化",
+    "用 gmock 模拟一个文件读取依赖",
+    "写 README：测试用例设计清单 + 覆盖率截图"
+   ],
+   "accept": [
+    "至少 5 个用例覆盖正常、边界、异常三类",
+    "能说清 ASSERT 与 EXPECT 各自该用在哪",
+    "mock 掉的依赖不产生真实 IO",
+    "有覆盖率数据（gcov 或 lcov）"
+   ],
+   "interview": [
+    "单元测试与集成测试的边界怎么划",
+    "怎么测一个依赖时间的函数",
+    "mock 过度会带来什么问题"
+   ]
+  },
+  {
+   "slug": "cpp-fmt",
+   "track": "cpp",
+   "tier": "t2",
+   "hours": 20,
+   "level": "mid",
+   "title": "fmt · 现代 C++ 的格式化基石",
+   "repo": "fmtlib/fmt",
+   "summary": "C++20 std::format 的原型实现，也是无数项目的基础依赖。读它能把模板、编译期检查、变参展开这几件事真正串起来。",
+   "stack": [
+    "C++11/17",
+    "模板元编程",
+    "编译期格式串检查",
+    "变参模板"
+   ],
+   "learn": [
+    "编译期格式串解析如何做到类型安全",
+    "变参模板的参数打包与展开",
+    "format_to 的迭代器输出设计",
+    "为什么 fmt 比 iostream 快（避免虚函数与 locale）",
+    "header-only 与编译库两种接入方式"
+   ],
+   "career": "能把模板讲清楚的人，在 C++ 岗面试里天然占优。fmt 是「模板用于实战」的最佳样本。",
+   "steps": [
+    "用 CMake 接入 fmt，跑通基础格式化与自定义类型",
+    "写一个自定义 formatter，支持自己的结构体",
+    "对比 fmt 与 iostream / printf 的输出性能",
+    "故意传错格式串，观察编译期报错信息",
+    "写 README：格式串解析流程图 + 三种方案性能表"
+   ],
+   "accept": [
+    "自定义类型 formatter 可正常工作",
+    "格式串错误在编译期被拦截",
+    "有 fmt / iostream / printf 三者性能对比数据",
+    "能解释 fmt 为什么不需要 locale 也快"
+   ],
+   "interview": [
+    "编译期检查是怎么在模板里实现的",
+    "变参模板如何做到类型安全",
+    "为什么 iostream 的性能常被诟病"
+   ]
+  },
+  {
+   "slug": "cpp-linyacool-webserver",
+   "track": "cpp",
+   "tier": "t2",
+   "hours": 20,
+   "level": "mid",
+   "title": "linyacool/WebServer · 另一个高并发服务器视角",
+   "repo": "linyacool/WebServer",
+   "summary": "与 TinyWebServer 同类的 Linux C++ 服务器，但在 reactor 组织、定时器与日志上做了不同取舍。两个都读，才看得出「设计选择」而不是「唯一答案」。",
+   "stack": [
+    "C++11",
+    "epoll",
+    "Reactor",
+    "线程池",
+    "状态机解析"
+   ],
+   "learn": [
+    "两种 reactor 组织方式（单 reactor vs 主从）的差异",
+    "HTTP 报文的状态机解析相比字符串切分的优势",
+    "定时器容器选择：小根堆 / 时间轮 / 红黑树",
+    "RAII 管理 fd 与连接生命周期",
+    "压测工具 wrk / webbench 的指标口径"
+   ],
+   "career": "面试讲项目时最大的加分是「我对比过两种实现」。同题对比能体现判断力，而不只是动手能力。",
+   "steps": [
+    "编译跑通，用 curl 验证 GET / POST",
+    "画出它的事件分发图，与 TinyWebServer 并列对比",
+    "用 wrk 压测同一台机器上的两个实现，记录 QPS/P99",
+    "把状态机解析换成按行切分，构造畸形请求看差异",
+    "写 README：两种 reactor 的取舍分析 + 压测对比"
+   ],
+   "accept": [
+    "能画出两种 reactor 的线程模型差异",
+    "有同一机器上的横向压测数据",
+    "能说清状态机解析在什么输入下优于字符串切分",
+    "畸形请求不会导致崩溃或内存泄漏"
+   ],
+   "interview": [
+    "主从 reactor 相比单 reactor 解决了什么",
+    "HTTP 解析为什么要用状态机",
+    "定时器为什么要配合非活跃连接回收"
+   ]
+  },
+  {
+   "slug": "cpp-tinywebserver",
+   "track": "cpp",
+   "tier": "t2",
+   "hours": 20,
+   "level": "mid",
+   "title": "TinyWebServer · Linux C++ 高并发服务器",
+   "repo": "qinguoyi/TinyWebServer",
+   "summary": "面试圈最常用的 C++ 服务端练手项目：epoll + 线程池 + 定时器 + 异步日志，主线程 accept、工作线程读写，支持 HTTP/1.1 与 CGI。",
+   "stack": [
+    "C++11",
+    "epoll",
+    "Reactor",
+    "线程池",
+    "MySQL 连接池"
+   ],
+   "learn": [
+    "ET / LT 两种触发模式的区别与选型",
+    "Reactor 事件分发与 one loop per thread",
+    "小根堆定时器回收非活跃连接",
+    "异步日志的双缓冲落盘",
+    "RAII 与线程同步的工程写法"
+   ],
+   "career": "后端 / 基础架构岗高频项目。能把 epoll 与线程池讲透，基本覆盖 C++ 服务端一面。",
+   "steps": [
+    "clone 后 make 跑通，curl 验证静态页与 POST 登录",
+    "读 webserver.cpp，画出事件循环与线程池时序图",
+    "用 wrk 压测 1k / 5k 并发，记录 QPS 与 CPU",
+    "改造：日志换异步双缓冲，或加一个自定义路由",
+    "写 README：架构图 + 压测数据 + 踩坑记录"
+   ],
+   "accept": [
+    "本机 1000 并发无崩溃，valgrind 无 definitely lost",
+    "能口述 ET 模式为什么要循环读到 EAGAIN",
+    "能指出原项目一处不足并给出改法",
+    "压测报告含 QPS、P99 延迟、资源占用"
+   ],
+   "interview": [
+    "epoll 水平触发与边缘触发的差异及适用场景",
+    "线程池任务队列如何避免惊群",
+    "日志异步化的收益与丢日志风险"
+   ]
+  },
+  {
+   "slug": "cpp-leveldb",
+   "track": "cpp",
+   "tier": "t3",
+   "hours": 45,
+   "level": "hard",
+   "title": "LevelDB · LSM-Tree 存储引擎",
+   "repo": "google/leveldb",
+   "summary": "Google 出品的嵌入式 KV 引擎，LSM-Tree 的教科书实现：MemTable → Immutable → SSTable 分层，配上 Compaction 与布隆过滤器。",
+   "stack": [
+    "C++",
+    "LSM-Tree",
+    "SSTable",
+    "Compaction",
+    "Bloom Filter"
+   ],
+   "learn": [
+    "写路径：WAL + MemTable + 冻结 + 落盘",
+    "读路径：MemTable → Immutable → 多层 SST 查找",
+    "Compaction 策略与写放大权衡",
+    "Bloom Filter 与块索引",
+    "版本管理与快照读"
+   ],
+   "career": "存储 / 数据库内核方向的门票项目；字节、PingCAP 一类岗位会直接问 LSM 细节。",
+   "steps": [
+    "编译后跑 db_bench，记录不同 value 大小下的写放大",
+    "读 db_impl.cc 的写入流程，画数据流",
+    "手动构造 SST 文件，用 ldb 工具 dump 查看",
+    "改造：换一种 Compaction 策略做对比实验",
+    "总结读放大 / 写放大 / 空间放大的三角权衡"
+   ],
+   "accept": [
+    "能讲清一次 Put 到落盘的完整链路",
+    "能解释为什么 LevelDB 读放大高",
+    "压测数据能支撑写放大结论",
+    "改造实验有前后对比曲线"
+   ],
+   "interview": [
+    "LSM-Tree 与 B+Tree 的读写放大对比",
+    "WAL 的作用与 fsync 时机",
+    "Bloom Filter 假阳性对读性能的影响"
+   ]
+  },
+  {
+   "slug": "cpp-muduo",
+   "track": "cpp",
+   "tier": "t3",
+   "hours": 45,
+   "level": "hard",
+   "title": "muduo · 陈硕的 C++11 多线程网络库",
+   "repo": "chenshuo/muduo",
+   "summary": "工业级 C++ 网络库范本，贯彻 one loop per thread 与非阻塞 IO，代码结构清晰，是理解现代 C++ 服务端设计的标准读物。",
+   "stack": [
+    "C++11",
+    "Reactor",
+    "非阻塞 IO",
+    "CMake",
+    "多线程"
+   ],
+   "learn": [
+    "EventLoop / Channel / Poller 三层抽象",
+    "跨线程任务投递与 wakeup fd",
+    "Buffer 设计与粘包处理",
+    "定时器队列 TimerQueue",
+    "用 shared_ptr 管理对象生命周期"
+   ],
+   "career": "面试中「你读过什么网络库」的标准答案；能讲清 Reactor 分层，明显拉开与 CRUD 候选人的差距。",
+   "steps": [
+    "编译安装，跑通 examples 里的 echo / chat 服务",
+    "按 EventLoop→Channel→Poller 顺序读，画类图",
+    "手写一个简易 echo server，复用其 EventLoop",
+    "对比 muduo 与 TinyWebServer 的线程模型差异",
+    "整理一篇源码笔记，标注关键设计权衡"
+   ],
+   "accept": [
+    "能画出三个核心类的协作时序",
+    "能解释 wakeup fd 解决什么问题",
+    "自写 echo server 可承受 500 并发",
+    "笔记含至少 3 处设计权衡分析"
+   ],
+   "interview": [
+    "one loop per thread 相比线程池收发的优势",
+    "如何安全地在 IO 线程销毁连接对象",
+    "水平触发下 Buffer 的读写策略"
+   ]
+  },
+  {
+   "slug": "cpp-taskflow",
+   "track": "cpp",
+   "tier": "t3",
+   "hours": 45,
+   "level": "hard",
+   "title": "Taskflow · 现代 C++ 并行任务图",
+   "repo": "taskflow/taskflow",
+   "summary": "用 C++17 写的任务图并行库，把「依赖关系」表达成 DAG 再调度到线程池。读它是理解任务并行、work-stealing 与无锁调度的捷径。",
+   "stack": [
+    "C++17",
+    "Taskflow",
+    "work-stealing",
+    "无锁队列",
+    "DAG 调度"
+   ],
+   "learn": [
+    "任务图的构建方式与依赖表达",
+    "work-stealing 调度器的窃取策略",
+    "无锁队列在调度器里的作用与 ABA 风险",
+    "条件任务与子流（subflow）的控制语义",
+    "任务粒度对并行加速比的影响"
+   ],
+   "career": "并行与调度是高级 C++ 岗的核心考点。能画出 work-stealing 的执行流程，比背八股有说服力。",
+   "steps": [
+    "跑通官方示例，构造一个 100 节点的 DAG",
+    "用 tf::Executor 调整线程数，测加速比曲线",
+    "把同一个计算分别用串行、std::thread、taskflow 实现并对比",
+    "读 executor 源码，画 work-stealing 的窃取时序",
+    "写 README：加速比曲线 + 调度流程图"
+   ],
+   "accept": [
+    "有 1/2/4/8 线程下的加速比数据",
+    "能说清任务粒度过细为什么反而变慢",
+    "能解释 work-stealing 相比中心队列的优势",
+    "条件任务的执行路径与预期一致"
+   ],
+   "interview": [
+    "work-stealing 相比共享队列解决了什么",
+    "无锁队列的 ABA 问题怎么处理",
+    "如何判断一个任务该不该并行"
+   ]
+  },
+  {
+   "slug": "cpp-brpc",
+   "track": "cpp",
+   "tier": "t4",
+   "hours": 90,
+   "level": "hard",
+   "title": "brpc · 工业级 RPC 框架",
+   "repo": "apache/brpc",
+   "summary": "百度开源、Apache 孵化的 C++ RPC 框架，单机可跑百万级 QPS。覆盖协议解析、连接池、bthread 协程、负载均衡与服务发现，是 C++ 后端最值得啃的框架之一。",
+   "stack": [
+    "C++",
+    "protobuf",
+    "bthread",
+    "连接池",
+    "服务发现",
+    "负载均衡"
+   ],
+   "learn": [
+    "bthread 的 M:N 协程模型与 pthread 的差异",
+    "多协议支持（baidu_std / http / grpc）的抽象层",
+    "连接池与超时、重试、熔断的配合",
+    "负载均衡算法与健康检查",
+    "一次 RPC 从序列化到回包的完整链路"
+   ],
+   "career": "C++ 后端岗的高价值项目。能把 bthread 与连接池讲清楚，基本能覆盖 RPC 相关的所有追问。",
+   "steps": [
+    "编译并跑通 example，起 server 与 client",
+    "用内置压测工具测不同并发下的 QPS 与 P99",
+    "读 bthread 文档与源码，画 M:N 调度图",
+    "实现一个自定义协议或自定义负载均衡策略",
+    "写 README：RPC 全链路时序图 + 压测报告"
+   ],
+   "accept": [
+    "能复现一次压测并给出 QPS/P99/CPU 数据",
+    "能说清 bthread 相比线程池在 IO 密集场景的优势",
+    "自定义策略可插拔且生效",
+    "能指出框架在某类场景下的局限"
+   ],
+   "interview": [
+    "M:N 协程模型如何避免线程阻塞拖垮调度",
+    "RPC 超时、重试、幂等三者的关系",
+    "连接池大小怎么定"
+   ]
+  },
+  {
+   "slug": "cpp-clickhouse",
+   "track": "cpp",
+   "tier": "t4",
+   "hours": 90,
+   "level": "hard",
+   "title": "ClickHouse · 列式分析引擎的 C++ 工程",
+   "repo": "ClickHouse/ClickHouse",
+   "summary": "千万行级代码的列式 OLAP 数据库。不求通读，挑「向量化执行 + 列式存储 + 稀疏索引」三条线读，就能理解为什么它比行存快两个数量级。",
+   "stack": [
+    "C++20",
+    "列式存储",
+    "向量化执行",
+    "MergeTree",
+    "稀疏索引"
+   ],
+   "learn": [
+    "列式存储为什么在分析场景碾压行存",
+    "向量化执行如何利用 SIMD 与缓存局部性",
+    "MergeTree 的 part 合并与主键稀疏索引",
+    "跳数索引（skip index）的加速原理",
+    "大规模 C++ 工程的模块划分与构建"
+   ],
+   "career": "数据库与 OLAP 方向的高门槛项目。能讲清向量化与稀疏索引，直接对上大数据/数据库岗的核心考点。",
+   "steps": [
+    "用 Docker 起一个单机实例，导入千万行数据",
+    "对同一份数据分别做行存与列存的聚合查询对比",
+    "读 MergeTree 文档，画 part 合并流程",
+    "用 explain 观察索引命中与扫描行数",
+    "写 README：列存 vs 行存 / 向量化 / 稀疏索引三张图"
+   ],
+   "accept": [
+    "有千万行量级的查询耗时对比数据",
+    "能解释向量化为什么依赖列式布局",
+    "能用 explain 说明某条查询为什么快或慢",
+    "能说清 MergeTree 合并带来的写放大代价"
+   ],
+   "interview": [
+    "列式存储的压缩率为什么更高",
+    "向量化执行与 JIT 编译的取舍",
+    "OLAP 与 OLTP 在存储布局上的根本分歧"
+   ]
+  }
+ ]
+}

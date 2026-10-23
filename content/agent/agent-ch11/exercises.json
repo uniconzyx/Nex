@@ -1,0 +1,133 @@
+{
+  "meta": {
+    "chapter": "agent-ch11",
+    "title": "Agent 系统开发：工具、记忆、规划与多智能体 —— 习题集",
+    "count": 6,
+    "note": "3 道概念题（幂等键设计、上下文压缩策略对比、记忆衰减 λ 的 U 型曲线）+ 3 道算法实践题（幂等键与重放抑制器、无进展检测器 D3 阈值标定、上下文压缩四策略诊断对比），全部为原创题干。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "给工具调用设计幂等键，哪种做法最合理",
+      "content_md": "一个 Agent 的重试 middleware 要保证「同一语义的工具调用被重放多次，副作用只发生一次」。以下哪种幂等键设计最合理？\n\nA. 用 `md5(json.dumps(args))`，参数原样序列化后直接哈希\nB. 用 `hash(工具名 + 剔除 nonce/ts 后按键名排序归一化的参数)`\nC. 用「时间戳 + 工具名」当键，保证每次调用的键都不同\nD. 在工具内部维护一个调用计数器，按第几次调用编号",
+      "answer": {
+        "correct": "B",
+        "explain": "幂等键的语义是「同一意图 → 同一键」。B 剔除 nonce/ts 这类每次重试都不同的字段，再按键名排序序列化，保证 dict 顺序无关、重放同键。A 有两个坑：一是 nonce/ts 让同语义调用键不同，重放全被当成新调用；二是 dict 未排序时序列化结果随插入顺序变化，键不稳定。C 是反幂等——每次键都不同，等于主动放弃重放抑制。D 的计数与重放语义无关：进程崩溃后计数丢失，重试从 0 开始，旧编号被重新发放，仍会重复执行。正确做法是 B，并且效果函数要惰性调用（先判键、再执行），否则判断完副作用已经发生了。"
+      },
+      "explanation": "考点：幂等键的构造原则——语义等价归一化、顺序无关、剔除易变字段。",
+      "tags": [
+        "幂等键",
+        "重试",
+        "副作用抑制"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/01 第 2 节；示例 ex03"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "40 个「早期植入、末轮追问」任务上，四种上下文策略的实测对比",
+      "content_md": "在 40 个「第 1/5/9 轮随机植入订单号事实、第 10 轮末轮追问」的任务上（token 口径：约 2 字符 1 token），四种策略实测结果如下，哪项描述正确？\n\n| 策略 | 成功率 | 平均 token |\n|---|---|---|\n| 全量上下文 | 100% | 133 |\n| 滑动窗口 k=4 | 30% | 48 |\n| 摘要压缩（抽取全部关键事实） | 100% | 62 |\n| 摘要压缩（只摘要最近一块） | 62.5% | 58 |\n\nA. 全量上下文成功率最高且 token 最少，应作为默认策略\nB. 滑动窗口 token 最省，但它把早期植入的事实整体挤出窗口，末轮追问类任务几乎全灭\nC. 两种摘要压缩都是无损的，token 差异来自摘要长度，与覆盖范围无关\nD. 四种策略成功率相同，压缩只影响速度、不影响正确性",
+      "answer": {
+        "correct": "B",
+        "explain": "B 对：窗口只留最近 4 轮，第 1/5 轮植入的事实（占任务的 2/3）被挤出，按植入轮次拆解后这两批命中率都是 0%，只有第 9 轮植入的那批幸存，总体 30%。A 错：全量 token 133 最高，且随轮次线性增长，必然超窗。C 错：全量事实摘要回到 100%，只摘要最近一块的 lossy 版本掉到 62.5%——差 6 个 token、丢 37.5 个百分点，说明摘要的覆盖范围必须到窗口起点，压缩不是无损的。D 错：这张表本身就是反例，压缩直接改变了「读得到读不到」。工程结论：事实必须进摘要，窗口只适合「近因为主」的任务；压缩前后要用同一批任务测成功率。"
+      },
+      "explanation": "考点：上下文压缩不是无损操作，「丢什么」比「省多少」更决定成败。",
+      "tags": [
+        "上下文压缩",
+        "滑动窗口",
+        "摘要",
+        "针在干草堆"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/02 第 1 节；示例 ex04"
+    },
+    {
+      "type": "judge",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "记忆检索打分里的衰减系数 λ 调得越大越好",
+      "content_md": "判断：长期记忆打分公式为 `score = cos(q, m) × importance × exp(−λ·age)`，其中 age 是记忆距今天数。因为衰减项让旧记忆权重下降，所以 λ 调得越大，检索结果越聚焦、越准。（对/错，并说明原因）",
+      "answer": {
+        "correct": "错",
+        "explain": "λ 不是单调越大越好，实验测出的是 U 型曲线。λ=0 时新写入的琐碎记忆与旧重要记忆同权竞争，top-1 命中率只有 50%——不衰减会让近期噪声淹没旧重要事实；λ=0.3 时旧重要事实被过度衰减，同样掉回 50%；λ=0.05 时达到 100%。两个失效方向都存在：不衰减 → 新事实淹没旧事实；过衰减 → 该记住的被忘掉。正确做法是按「记忆半衰期 ≈ 业务遗忘周期」标定 λ（如订单号类 30 天、偏好类 180 天），并配合清理阈值删除「旧且不重要」的记忆（低 importance × 高 age 双低才清），而不是只调大 λ。打分项之间是乘法耦合，importance 与 age 必须联合使用，单拧一个旋钮都会把另一类错误放大。"
+      },
+      "explanation": "考点：衰减系数的 U 型曲线——不衰减与过衰减是两个方向的失效，需联合 importance 治理。",
+      "tags": [
+        "长期记忆",
+        "时间衰减",
+        "U 型曲线"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/02 第 2 节；示例 ex05"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "实现幂等键计算与重放抑制器",
+      "content_md": "某通知服务的投递语义是 at-least-once（网络超时时客户端会重试，服务端可能收到重复请求）。请实现：\n1. `idem_key(tool, args, drop=(\"nonce\", \"ts\"))`：剔除 drop 列表中的易变字段，其余参数按键名排序后与工具名一起做稳定序列化，取 SHA-256 前 16 位十六进制；\n2. `ReplayGuard` 类：`call(tool, args, effect)` 首次遇到某键时以惰性方式执行 `effect()` 并缓存结果，之后同键调用直接返回缓存、不再执行；\n3. 验证场景：同一封邮件（`to` 相同）带 3 个不同 nonce 重放 3 次，真实副作用（`effect` 实际执行次数）必须是 1，抑制 2 次；再故意用 dict 不同插入顺序传同语义参数，键必须相同；\n4. 打印「真实副作用数 / 抑制数 / 两种插入顺序的键是否一致」。\n纯标准库，固定构造，不联网。",
+      "answer": {
+        "reference_code": "import hashlib, json\n\ndef idem_key(tool, args, drop=(\"nonce\", \"ts\")):\n    norm = {k: v for k, v in args.items() if k not in drop}\n    blob = json.dumps([tool, norm], sort_keys=True, ensure_ascii=False)\n    return hashlib.sha256(blob.encode()).hexdigest()[:16]\n\nclass ReplayGuard:\n    def __init__(self):\n        self.seen = {}\n    def call(self, tool, args, effect):\n        k = idem_key(tool, args)\n        if k not in self.seen:\n            self.seen[k] = effect()          # 只有第一次真执行，且必须先判键\n        return self.seen[k]\n\ng = ReplayGuard()\nbox = []\nfor n in (\"n1\", \"n2\", \"n3\"):                # 同一封邮件，三个不同 nonce\n    g.call(\"send_email\", {\"to\": \"a@x.com\", \"nonce\": n}, lambda: box.append(\"sent\"))\nk1 = idem_key(\"send_email\", {\"to\": \"a@x.com\", \"subject\": \"s\"})\nk2 = idem_key(\"send_email\", {\"subject\": \"s\", \"to\": \"a@x.com\"})\nprint(\"真实副作用:\", len(box), \"抑制:\", 3 - len(box), \"键顺序无关:\", k1 == k2)",
+        "explain": "坑一：易变字段必须在排序和序列化之前剔除，先 dump 再删字符串是自欺欺人；`sort_keys=True` 与手动 `sorted(args.items())` 二选一即可保证 dict 顺序无关，别只做一半。坑二：`effect()` 必须惰性传函数而不是先算好传结果——写成 `call(tool, args, effect())` 就变成了「先执行再判断」，重放抑制形同虚设。坑三：缓存 value 存的是首次执行的结果，这样重放调用还能拿到一致的返回，符合 replayed 语义。坑四：真实系统里这个 seen 字典要落盘或进 Redis 并设 TTL，进程内存版一重启就全忘；at-least-once + 幂等 ≈ effectively-once，但近似成立的边界正在于键的存储生命周期。"
+      },
+      "explanation": "手写核心逻辑：稳定幂等键构造 + 惰性效果执行的重放抑制器。",
+      "tags": [
+        "幂等键",
+        "重放抑制",
+        "at-least-once"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/01 第 2 节；示例 ex03"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "无进展检测器 D3 实现与阈值 K 标定",
+      "content_md": "死循环防护的 D3 检测器判据：最近 K 个 observation 与最后一个的两两 Jaccard 相似度都 ≥ 0.9，即判「无进展」拉闸。请实现：\n1. `jaccard(a, b)`：两个词集的 Jaccard 相似度，双空集返回 1.0；\n2. `d3(obs_seq, k, th=0.9)`：返回首次拉闸的步号（1 起），未触发返回 `None`；\n3. 在两条轨迹上标定 K：轨迹 A「空转」= 6 步 observation 完全相同；轨迹 B「合法重试」= 第 1/2 步 observation 相同（换参数重试前先原样重试一次），第 3 步出现新结果；\n4. 对 K ∈ {2, 3, 5} 输出两条轨迹的拉闸步号，判断哪些 K 会误杀轨迹 B。\n纯标准库，固定构造，不联网。",
+      "answer": {
+        "reference_code": "def jaccard(a, b):\n    if not a and not b:\n        return 1.0\n    return len(a & b) / len(a | b)\n\ndef d3(obs_seq, k, th=0.9):\n    for i in range(k - 1, len(obs_seq)):\n        recent = obs_seq[i - k + 1: i + 1]\n        if all(jaccard(recent[-1], o) >= th for o in recent[:-1]):\n            return i + 1                    # 首次拉闸步号（1 起）\n    return None\n\nstall = [{\"无相关结果\"}] * 6                # 空转：6 步一模一样\nretry = [{\"a.txt\"}, {\"a.txt\"}, {\"ok\"}]     # 合法重试：连续 2 步同 observation\nfor k in (2, 3, 5):\n    a, b = d3(stall, k), d3(retry, k)\n    print(f\"K={k}: 空转轨迹第 {a} 步拉闸；合法重试轨迹 {'第 %d 步误杀' % b if b else '放行'}\")",
+        "explain": "坑一：Jaccard 要处理双空集——Agent 连续多步「只规划不动手」时 observation 都是空集，按 `0/0` 会直接抛异常，必须先判 `not a and not b` 返回 1.0，这类空转才会被 D3 抓到。坑二：窗口至少要有 K 个元素才能比较，`range(k - 1, len(obs_seq))` 别写成从 0 开始导致 `obs_seq[-1]` 取到尾部。坑三：判据是「最近 K 个与最后一个都相似」而不是「相邻 K−1 对相似」，否则中间抖动一次就会漏检。标定结论：K=2 时轨迹 A 第 2 步拉闸（快）但轨迹 B 也被误杀；K=3/5 都能放行合法重试，K=5 则要空转到第 5 步才停。工程上取 K=3 并配合「换参数即重置计数」，检测器触发后先提醒换策略、再熔断，不要直接杀任务。"
+      },
+      "explanation": "数值/边界验证：Jaccard 无进展检测器的实现与 K 阈值的误杀/漏放标定。",
+      "tags": [
+        "死循环防护",
+        "无进展检测",
+        "Jaccard",
+        "阈值标定"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/03 第 2 节；示例 ex07"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "上下文压缩四策略诊断对比实验",
+      "content_md": "给定任务集 `tasks`（40 个「早期植入订单号事实、末轮追问」任务，每条为 `{\"fact_turn\": int, \"order_no\": str, \"turns\": [(role, text), ...]}`，结构同示例 ex04）。请实现一个诊断实验：\n1. `ctx_tokens(turns)`：token 近似，按约 2 字符 1 token；\n2. 四个策略：`full`（原样）、`window`（只留最近 4 轮）、`summary`（旧轮次中用规则抽取含「订单号」的关键事实替换，覆盖到窗口起点）、`lossy`（只扫描旧轮次的最后 4 轮抽事实）；\n3. 评估：答案字符串出现在拼好的上下文里即算答对，输出四策略的「成功率 + 平均 token」对比表；\n4. 按 `fact_turn` ∈ {0, 4, 8} 拆解 window 策略的命中率，打印一行结论：哪个策略同时做到「成功率不降 + token 大幅下降」，lossy 漏掉了哪一批。\n纯标准库 + numpy，固定种子生成 tasks，不联网。",
+      "answer": {
+        "reference_code": "import numpy as np\ndef ctx_tokens(turns):\n    return sum(len(x) // 2 for _, x in turns)\ndef _facts(head):                        # 只认「订单号」事实，排除追问轮\n    return [x for _, x in head if \"订单号\" in x and \"请问\" not in x]\ndef s_sum(t, k=4):\n    return [(\"system\", \"早期摘要：\" + \"；\".join(_facts(t[:-k])))] + t[-k:]\ndef s_lossy(t, k=4):                     # 只扫旧轮次最后 4 块：更早事实丢失\n    return [(\"system\", \"早期摘要：\" + \"；\".join(_facts(t[:-k][-4:])))] + t[-k:]\ndef evaluate(fn):\n    ok = sum(t[\"order_no\"] in \" \".join(x for _, x in fn(t[\"turns\"])) for t in tasks)\n    return ok / len(tasks), float(np.mean([ctx_tokens(fn(t[\"turns\"])) for t in tasks]))\nwin = lambda t: t[-4:]\nfor name, fn in [(\"全量\", lambda t: t), (\"窗口k=4\", win), (\"摘要\", s_sum), (\"lossy\", s_lossy)]:\n    acc, tok = evaluate(fn)\n    print(f\"{name}: 成功率 {acc:.1%}, 平均 {tok:.0f} tok\")\nfor ft in (0, 4, 8):                     # 按事实植入轮次拆解窗口策略\n    sub = [t for t in tasks if t[\"fact_turn\"] == ft]\n    hit = sum(t[\"order_no\"] in \" \".join(x for _, x in win(t[\"turns\"])) for t in sub)\n    print(f\"事实第 {ft + 1} 轮植入：窗口命中 {hit / len(sub):.1%}\")",
+        "explain": "这道题考的是「诊断实验怎么设计」而不是背结论。坑一：`t[:-k]` 是旧轮次、`t[-k:]` 是窗口，两个切片都带 k，摘要必须覆盖全部旧轮次——`summary` 抽 `t[:-k]` 全部事实，`lossy` 只抽 `t[:-k][-4:]`，这正是两者 100% vs 62.5% 的唯一差别。坑二：过滤条件要同时排除追问轮（含「请问」），否则末轮问题会被当成事实写进摘要，摘要自我循环。坑三：token 口径要先统一（2 字符 1 token）再比大小，混用两种口径的对比表没有意义。坑四：按 fact_turn 拆解是定位问题的手段——总体 30% 说明不了任何事，拆开后立刻看到「第 1/5 轮植入 0%、第 9 轮 100%」，根因（窗口挤掉早期事实）才可行动。真实系统里摘要是 LLM 生成的、有漏事实风险，关键字段要用规则抽取兜底。"
+      },
+      "explanation": "诊断/对比实验：四策略评估框架 + 按事实植入位置拆解定位压缩损失根因。",
+      "tags": [
+        "上下文压缩",
+        "诊断实验",
+        "策略对比",
+        "根因拆解"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/02 第 1 节；示例 ex04"
+    }
+  ]
+}

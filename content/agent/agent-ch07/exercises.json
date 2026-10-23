@@ -1,0 +1,106 @@
+{
+  "meta": {
+    "chapter": "agent-ch07",
+    "title": "轻量化微调：LoRA / QLoRA 与数据工程 —— 习题集",
+    "count": 6,
+    "note": "3 道概念题（rank/alpha 缩放、微调 vs RAG 决策、留出集显著性）+ 3 道算法实践题（LoRA 参数量、显存账本边界、过拟合早停诊断），全部为原创题干。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "α=32、r=16 时把 rank 调到 32 但 α 不变，增量幅度和有效学习率怎么变",
+      "content_md": "LoRA 前向为 h = W0·x + (α/r)·B·A·x。当前 α=32、r=16（缩放=2.0）。若只把 r 调到 32、α 保持 32 不变，下列说法正确的是？\n\nA. 缩放变为 1.0，增量幅度减半，但适配器容量翻倍，整体表达力必提升\nB. 缩放变为 0.5，增量幅度减半；若学习率不变，等效学习率也跟着减半，可能欠拟合\nC. 缩放变为 1.0，与容量无关，因此调 rank 不会影响训练动态\nD. 缩放变为 0.5，但 B/A 初始化会自适应补偿，等效学习率不变",
+      "answer": {
+        "correct": "B",
+        "explain": "LoRA 的有效更新幅度由 (α/r) 控制。α 不变、r 翻倍 → α/r 从 2.0 降到 0.5，即增量幅度减半。由于优化器步长是作用在 B、A 上的，缩放系数变小等价于「每步把同样的参数更新乘上更小的系数」，因此在不调学习率的前提下，有效学习率也减半，模型可能收敛更慢甚至欠拟合。这正是为什么业界常用 α=2r 让缩放恒为 1，使 rank 只控制容量而非步长。A 错在「表达力必提升」——rank 翻倍参数量涨 4 倍但表达力提升远小于 4 倍；C 错在忽略缩放对动态地影响；D 错在初始化不会自动补偿缩放。"
+      },
+      "explanation": "考点：α/r 缩放与有效学习率的关系，以及「改 rank 也要改 α」的工程惯例。",
+      "tags": ["LoRA", "rank", "alpha", "缩放"],
+      "source": "self",
+      "source_ref": "本章 concept/02 第 1 节；示例 ex02"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "知识每天变且需引用出处的场景，该微调还是 RAG",
+      "content_md": "某业务要做一个「公司制度问答」助手：制度每周更新、回答必须能指向具体条款原文（可审计）、月请求量约 3 万。下列哪种方案最合适？\n\nA. 每周重训一次 LoRA，把最新制度塞进权重，省掉检索\nB. 全参微调一个专用小模型，靠模型记忆条款\nC. 用 RAG：每周重新索引，检索片段作为出处直接展示\nD. 先微调学「语气」，再用 RAG 供「知识」，两者组合",
+      "answer": {
+        "correct": "C",
+        "explain": "判定树先问「知识是否高频变化」「是否需要溯源」。制度每周变 → 微调追不上（重训成本会吃掉节省）；需引用出处 → 微调把知识揉进权重无法指向原文，而 RAG 的检索片段天然可回溯。因此 C 最直接。D 看似聪明，但在「知识每天/每周变 + 必须溯源」这一项上，行为层微调并不能解决知识层问题，且增加了维护负担；若制度稳定且还要统一话术，D 才有意义。A/B 都违反「高频变 + 可溯源」两条，是典型反例。月请求 3 万也远低于微调摊销回本的盈亏线（示例 ex10 约 10 万/月）。"
+      },
+      "explanation": "考点：微调 vs RAG 判定树的顺序——先问知识频率与溯源，再算成本。",
+      "tags": ["微调vsRAG", "决策", "溯源"],
+      "source": "self",
+      "source_ref": "本章 concept/01 第 2 节；示例 ex10"
+    },
+    {
+      "type": "judge",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "留出集 200 条、82%→87% 就能宣称微调「提升 5 个点」吗",
+      "content_md": "判断：在 200 条留出集上，微调后模型准确率从 82% 升到 87%，可以对外宣称「本次微调提升 5 个百分点」。（对/错，并说明原因）",
+      "answer": {
+        "correct": "错",
+        "explain": "200 条样本的 95% 置信区间约 ±5pp（公式 1.96·√(0.85·0.15/200)≈4.9pp）。2.5pp 的差异完全落在噪声范围内，不能宣称「提升」。正确做法是：报告必须带「准确率 + 95% 置信区间 + n」；在同一批样本上比较两个模型要用配对 Bootstrap 或 McNemar 检验（只看独立区间会低估显著性）；若业务只关心「不退步」，还应看置信下界而非点估计。要把区间压到 ±3pp，留出集至少需 700~1000 条——这比换模型便宜得多（示例 ex09 结论）。"
+      },
+      "explanation": "考点：留出集评估的置信区间与配对显著性，点估计不足以支持「提升」结论。",
+      "tags": ["评估", "置信区间", "Bootstrap", "McNemar"],
+      "source": "self",
+      "source_ref": "本章 concept/03 第 3 节；示例 ex09"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "实现 LoRA 可训练参数量计算器",
+      "content_md": "给定基座配置：层数 L、隐藏维度 D、FFN 中间维度 F、挂载模块列表 modules（每个为 (in_dim, out_dim)）。LoRA 在每个被挂载的线性层上引入参数 r*(in+out)，且每个模块在 L 层中都各挂一份。\n1. 实现 `lora_params(L, D, F, r, modules)`，返回总可训练参数量；\n2. 用 L=32, D=4096, F=11008, r=16, modules=全部线性层[q,k,v,o + gate,up,down] 验证，答案应为约 39,976,960；\n3. 输出 rank=4/8/16/32 下「仅挂 q,k,v,o」与「挂全部线性层」的参数量，并验证 rank 翻倍参数量翻 4 倍。",
+      "answer": {
+        "reference_code": "def lora_params(L, D, F, r, modules):\n    total = 0\n    for in_dim, out_dim in modules:\n        total += r * (in_dim + out_dim)\n    return L * total\n\nL, D, F, r = 32, 4096, 11008, 16\nqkv = [(D, D)] * 4\nall_lin = qkv + [(D, F), (D, F), (F, D)]\nprint(lora_params(L, D, F, r, all_lin))   # 39,976,960\nfor r in (4, 8, 16, 32):\n    qv = lora_params(L, D, F, r, qkv)\n    al = lora_params(L, D, F, r, all_lin)\n    print(f\"r={r:>2}  q,k,v,o={qv:>12,}  全部={al:>12,}\")",
+        "explain": "核心是每个被挂载线性层的 LoRA 参数 = r*(in+out)（A 是 r×in、B 是 out×r），再乘层数 L。注意 q,k,v,o 各是 (D,D)，gate/up 是 (D,F)、down 是 (F,D)，所以全部线性层每层的增量维度和为 4·2D + 2·(D+F) + (F+D) = 11D+3F。坑在于「rank 翻倍参数量翻 4 倍」：因为 B、A 都含 r，r→2r 时两者乘积的 r 项各乘 2，合计 ×4，但表达力提升远小于 ×4（见 ex02）。另一坑是层数只对「每层都挂」的模块相乘，embedding/lm_head 若单独处理不要重复计入全线性层。"
+      },
+      "explanation": "LoRA 参数量 = r×(in+out)×层数，rank 翻倍参数翻 4 倍但表达力非线性的经典误区。",
+      "tags": ["LoRA", "参数量", "rank"],
+      "source": "self",
+      "source_ref": "本章 concept/02 第 1 节；示例 ex02"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "QLoRA 显存账本与 OOM 边界判定",
+      "content_md": "实现 `memory_ledger(P, L, D, SEQ, BATCH, r)`，按四项返回显存（GB，1GB=1024^3 字节）：\n① 权重：QLoRA 双重量化 NF4 = P*0.5 + P/64*(1+4/256) 字节；\n② LoRA 适配器（挂 q,k,v,o）：训练期 = 16 字节/参数 × L×4×r×(D+D)；\n③ 激活：开梯度检查点时 = L×BATCH×SEQ×D×2 字节；\n④ 合计 = ①②③之和。\n给定 7B：P=6.74e9, L=32, D=4096。验证 seq=1024,batch=4,r=16 时合计约 4.49GB（可训练）；\n再判 seq=2048 时合计约 5.49GB。最后输出「在 24GB 单卡下最先可能爆的是哪一块（权重/激活）」，并给出救 OOM 的顺序。",
+      "answer": {
+        "reference_code": "GB = 1024 ** 3\ndef memory_ledger(P, L, D, SEQ, BATCH, r):\n    w = P * 0.5 + P / 64 * (1 + 4 / 256)            # NF4 双重量化基座\n    adapter = 16 * (L * 4 * r * (D + D))             # LoRA 训练期(参数+梯度+Adam m,v)\n    act = L * BATCH * SEQ * D * 2                    # 开梯度检查点\n    return w / GB, adapter / GB, act / GB, (w + adapter + act) / GB\n\nfor seq, batch in ((1024, 4), (2048, 4)):\n    w, a, act, tot = memory_ledger(6.74e9, 32, 4096, seq, batch, 16)\n    print(f\"seq={seq}: 权重 {w:.2f} 适配器 {a:.2f} 激活 {act:.2f} 合计 {tot:.2f}GB\")\nprint(\"最先爆的是激活（权重仅 ~3.24GB，激活随 seq 线性涨）\")\nprint(\"救 OOM 顺序：开梯度检查点(8->1GB) -> 降 seq/降 batch -> 最后降 rank -> paged optimizer\")",
+        "explain": "逐项拆解是这道题的关键，不能只给一个「总计」。权重在双重量化后固定约 3.24GB，几乎不动；适配器随 r 线性、占比极小（r=16 仅 0.25GB）；真正随配置弹性最大的是**激活**，它正比于 L×BATCH×SEQ×D，seq 翻倍激活直接翻倍（4.49→5.49GB）。所以判定结论是「最先爆的是激活」，救 OOM 必须先开梯度检查点（把激活从 8GB 压到 1GB），再降 seq，最后才降 rank——降 rank 几乎不影响激活却直接砍表达力，是性价比最低的兜底。这就是 ex03 的账本结论。"
+      },
+      "explanation": "显存账本四块分解：权重固定、适配器极小、激活随 seq 弹性最大，OOM 先查激活。",
+      "tags": ["QLoRA", "显存", "NF4", "梯度检查点"],
+      "source": "self",
+      "source_ref": "本章 concept/02 第 2 节；示例 ex03"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 5,
+      "title": "过拟合诊断：找最佳早停点并判过拟合",
+      "content_md": "给定两个等长数组 train_loss、val_loss（长度 n）。实现 `diagnose(train, val, patience=8, gap_ratio=1.5)`：\n1. 找到验证 loss 最低的 epoch（best_epoch）与对应值；\n2. 用 patience 规则给出建议停止 epoch（val 连续 patience 轮未创新低即停）；\n3. 判定是否过拟合：若存在某个 epoch>best_epoch 使得 val/train > gap_ratio 且持续 5 轮，标记 overfit=true；\n4. 返回 {best_epoch, stop_epoch, overfit, best_val, final_gap_ratio}。\n用示例：train 单调下降、val 先降后升（如 ex07 合成曲线），验证 best_epoch≈41、stop_epoch≈49、overfit=true。",
+      "answer": {
+        "reference_code": "def diagnose(train, val, patience=8, gap_ratio=1.5):\n    n = len(val)\n    best_epoch = int(min(range(n), key=lambda e: val[e]))\n    best_val = val[best_epoch]\n    wait, stop_epoch = 0, n - 1\n    for e in range(best_epoch + 1, n):\n        if val[e] < best_val - 1e-4:\n            best_val, wait = val[e], 0\n        else:\n            wait += 1\n            if wait >= patience:\n                stop_epoch = e\n                break\n    overfit = False\n    cnt = 0\n    for e in range(best_epoch + 1, n):\n        if train[e] > 0 and val[e] / train[e] > gap_ratio:\n            cnt += 1\n            if cnt >= 5:\n                overfit = True\n        else:\n            cnt = 0\n    return {\"best_epoch\": best_epoch, \"stop_epoch\": stop_epoch,\n            \"overfit\": overfit, \"best_val\": best_val,\n            \"final_gap_ratio\": val[-1] / train[-1]}\n\n# 复现 ex07 形态：train 单调降，val 先降后升\nt = list(range(90))\ntrain = [2.2*(0.95**e)+0.35 for e in t]\nval = [2.6*(0.95**e)+0.5+0.0025*max(0,e-35)**1.7 for e in t]\nprint(diagnose(train, val))",
+        "explain": "过拟合诊断不能只看「最终 val 比最优点高多少」，因为 train 一直降会误导你以为还在进步。核心是三点：① 以 val 最低点为锚（best_epoch），不是 train 最低；② 早停用 patience 窗口（连续 N 轮 val 不创新低就停），避免单点抖动误判；③ 用 val/train 间距比（而非绝对差）判断过拟合，因为绝对差随尺度变化、间距比更稳定。ex07 的合成曲线里 best_epoch≈41、stop_epoch≈49、硬训到末尾 val/train 从 1.21 涨到 6.92，明显 overfit。注意 val[e]/train[e] 要先判 train[e]>0 防除零；gap_ratio 用 1.5、持续 5 轮是经验阈值，数据量小可放宽。"
+      },
+      "explanation": "过拟合诊断以验证曲线为锚：最佳点、patience 早停、val/train 间距比判过拟合。",
+      "tags": ["过拟合", "早停", "验证曲线"],
+      "source": "self",
+      "source_ref": "本章 concept/03 第 3 节；示例 ex07"
+    }
+  ]
+}

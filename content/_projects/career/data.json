@@ -1,0 +1,347 @@
+{
+ "track": "data",
+ "items": [
+  {
+   "slug": "data-joyful-pandas",
+   "track": "data",
+   "tier": "t1",
+   "hours": 8,
+   "level": "easy",
+   "title": "joyful-pandas · pandas 系统教程",
+   "repo": "datawhalechina/joyful-pandas",
+   "summary": "Datawhale 出品的 pandas 教程，从索引、分组、变形到时序与性能，配有习题与真实数据集。",
+   "stack": [
+    "Python",
+    "pandas",
+    "NumPy",
+    "Jupyter",
+    "数据清洗"
+   ],
+   "learn": [
+    "索引与多层索引的正确用法",
+    "groupby 的聚合与变换",
+    "长宽表变形与连接",
+    "缺失值与异常值处理",
+    "向量化与性能优化"
+   ],
+   "career": "数据分析岗的基本功。能熟练做清洗与聚合，是笔试与实操的第一道门槛。",
+   "steps": [
+    "按章节完成全部习题并提交 Notebook",
+    "用真实数据集做一次完整清洗",
+    "做一份分组聚合分析报告",
+    "对比 for 循环与向量化的耗时",
+    "整理常用操作速查表"
+   ],
+   "accept": [
+    "习题完成率 100%",
+    "报告含清洗步骤与结论",
+    "向量化提速有量化对比",
+    "速查表覆盖 30 个操作"
+   ],
+   "interview": [
+    "loc 与 iloc 的区别",
+    "groupby 聚合与 transform 的差异",
+    "大数据量下 pandas 的替代方案"
+   ]
+  },
+  {
+   "slug": "pandas-exercises",
+   "track": "data",
+   "tier": "t1",
+   "hours": 10,
+   "level": "easy",
+   "title": "pandas_exercises · 十一条命令练到手指有记忆",
+   "repo": "guipsamora/pandas_exercises",
+   "summary": "按主题切好的练习册：筛选、分组、合并、时间序列、可视化各一章，每题都有参考答案。分析岗的笔试基本就是这些动作的组合，练到不用查文档就能写出 groupby + agg + unstack，才算过了第一关。",
+   "stack": [
+    "pandas",
+    "NumPy",
+    "Matplotlib",
+    "Jupyter"
+   ],
+   "learn": [
+    "loc / iloc / query 三种取数方式在链式调用中的差异",
+    "groupby 的 split-apply-combine 与 agg 多函数聚合写法",
+    "merge 的 how 参数与重复键导致的笛卡尔膨胀",
+    "pivot_table 与 unstack 在长宽表转换上的分工",
+    "时间序列的 resample、rolling 与 shift 组合出同比环比"
+   ],
+   "career": "把「会用 pandas」变成「不必查文档也能写对」，直接决定笔试能不能在 40 分钟内做完三道 SQL/Pandas 题。",
+   "steps": [
+    "每天做一章，做完先不看答案，隔天再对答案",
+    "把每章的错题重写一遍，注释写清错在哪（索引？类型？空值？）",
+    "挑一章用 SQL 再实现一遍，对比两种表达",
+    "自己造一份脏数据（缺失/重复/异常值），写清洗脚本",
+    "整理一页速查表：只放自己用错过的写法"
+   ],
+   "accept": [
+    "11 章全部完成且错题有重做记录",
+    "同一问题能写出 pandas 与 SQL 两版",
+    "速查表里的每一条都来自真实踩坑"
+   ],
+   "interview": [
+    "groupby 之后想保留原索引怎么做",
+    "merge 之后行数变多了，怎么排查",
+    "apply 和向量化操作性能差多少，什么时候必须用 apply"
+   ]
+  },
+  {
+   "slug": "data-datashine",
+   "track": "data",
+   "tier": "t2",
+   "hours": 20,
+   "level": "mid",
+   "title": "datashine · Python 统计与数据分析实战",
+   "repo": "jinhualee/datashine",
+   "summary": "《Python 统计与数据分析实战》配套代码，覆盖描述统计、假设检验、回归、方差分析与非参数方法。",
+   "stack": [
+    "Python",
+    "Jupyter",
+    "统计学",
+    "回归分析",
+    "可视化"
+   ],
+   "learn": [
+    "描述统计与分布诊断",
+    "假设检验的适用条件",
+    "回归建模与残差分析",
+    "方差分析与多重比较",
+    "统计结论的业务表达"
+   ],
+   "career": "数据分析岗的统计学底子。能把检验方法与业务问题对应起来，面试很吃香。",
+   "steps": [
+    "跑通各章 Notebook 并补注释",
+    "选一个真实数据集做完整分析",
+    "完成一次假设检验并解释 p 值",
+    "建回归模型并检查残差",
+    "写成一份可汇报的分析报告"
+   ],
+   "accept": [
+    "分析报告含问题→方法→结论",
+    "检验方法选择有依据",
+    "模型诊断步骤完整",
+    "结论可被业务理解"
+   ],
+   "interview": [
+    "p 值的正确解释",
+    "第一类与第二类错误",
+    "回归共线性如何诊断"
+   ]
+  },
+  {
+   "slug": "data-warehouse-learning",
+   "track": "data",
+   "tier": "t2",
+   "hours": 20,
+   "level": "mid",
+   "title": "电商数仓 · 离线 + 实时全链路",
+   "repo": "MrSuiChuan/data-warehouse-learning",
+   "summary": "电商场景数仓实战：维度建模、分层设计、离线与实时链路，覆盖 Flink、Hive、ClickHouse 等组件。",
+   "stack": [
+    "Flink",
+    "Hive",
+    "ClickHouse",
+    "维度建模",
+    "数据湖"
+   ],
+   "learn": [
+    "ODS / DWD / DWS / ADS 分层职责",
+    "维度建模与事实表设计",
+    "缓慢变化维的处理",
+    "离线与实时指标对齐",
+    "数仓质量与口径管理"
+   ],
+   "career": "数仓岗的标准简历项目。能讲清分层与口径，是数据开发面试的核心。",
+   "steps": [
+    "按文档搭环境并导入业务数据",
+    "完成 ODS → DWD 的清洗层",
+    "建 DWS 汇总层与 ADS 应用层",
+    "做一个实时指标并与离线对账",
+    "输出口径文档与数据地图"
+   ],
+   "accept": [
+    "四层链路可端到端产出报表",
+    "实时与离线口径一致",
+    "有数据质量校验规则",
+    "口径文档可交付"
+   ],
+   "interview": [
+    "为什么数仓要分层",
+    "事实表与维度表如何设计",
+    "实时与离线口径不一致怎么查"
+   ]
+  },
+  {
+   "slug": "ds-handbook",
+   "track": "data",
+   "tier": "t2",
+   "hours": 28,
+   "level": "mid",
+   "title": "Python Data Science Handbook · 把工具箱写成自己的",
+   "repo": "jakevdp/PythonDataScienceHandbook",
+   "summary": "五部分结构（IPython / NumPy / Pandas / Matplotlib / 机器学习）完整覆盖分析岗的日常工具链，全部是可执行 notebook。重点不是读完，而是把书里的示例换成自己的数据，重做一遍分析过程。",
+   "stack": [
+    "NumPy",
+    "pandas",
+    "Matplotlib",
+    "scikit-learn",
+    "Jupyter"
+   ],
+   "learn": [
+    "NumPy 的 stride、视图与拷贝，以及为什么切片赋值会改到原数组",
+    "广播规则在不规则形状上的推断过程",
+    "pandas 的 dtype 体系与 category / nullable 类型的取舍",
+    "Matplotlib 的 Figure/Axes 对象模型与 seaborn 的封装边界",
+    "用 Pipeline + 交叉验证把特征处理和模型绑在一起"
+   ],
+   "career": "能独立从一份原始 CSV 走到「有结论、有图、有置信度」的报告，这是数据分析实习的第一道交付门槛。",
+   "steps": [
+    "选一份真实公开数据（如城市房价或公开问卷），替换书中示例",
+    "按 描述统计 → 可视化 → 假设检验 → 结论 四步走完整流程",
+    "把清洗逻辑抽成函数并写 3 个单测",
+    "做一组对照图：同一结论用两种图表表达，选更能说服人的那个",
+    "写一份 5 页以内的分析报告，结论前置、图表支撑、局限单独一节"
+   ],
+   "accept": [
+    "报告里的每个数字都能用代码复现",
+    "至少一处结论被自己的数据推翻并如实记录",
+    "清洗函数有测试，不是一次性脚本"
+   ],
+   "interview": [
+    "pandas 里视图和副本怎么判断，SettingWithCopyWarning 在警告什么",
+    "样本量很小的时候你还会用 t 检验吗",
+    "相关性显著就说明存在因果吗，怎么验证"
+   ]
+  },
+  {
+   "slug": "pandas-internals",
+   "track": "data",
+   "tier": "t3",
+   "hours": 45,
+   "level": "hard",
+   "title": "pandas · 拆开 groupby 与 join 的内核",
+   "repo": "pandas-dev/pandas",
+   "summary": "日常写 pandas 的人很多，能解释「为什么这个 merge 慢十倍」的人很少。这个项目要你走进 BlockManager、索引对齐、哈希 join 的实现，用 benchmark 证明自己的判断，而不是靠经验猜。",
+   "stack": [
+    "pandas 源码",
+    "Cython",
+    "BlockManager",
+    "哈希 join",
+    "asv 基准"
+   ],
+   "learn": [
+    "BlockManager 如何按 dtype 分块存储，以及它对列操作的性能影响",
+    "索引对齐（alignment）在算术运算中的隐式开销",
+    "merge 的 sort=False 与哈希表构建成本",
+    "groupby 的三种路径：cython 聚合、python fallback、以及何时退化",
+    "Copy-on-Write 之后链式赋值的语义变化"
+   ],
+   "career": "数据平台岗与「只会调包」的分界线：能定位一次线上 ETL 变慢是 pandas 的哪一层造成的。",
+   "steps": [
+    "用 py-spy 抓一次慢 merge 的火焰图，指出热点函数",
+    "对比 merge / join / map 三种实现同语义操作的耗时",
+    "构造高基数和低基数 groupby，测两条执行路径的差异",
+    "读 pandas/core/groupby 的 ops 实现，画出调用链",
+    "提一个真实的小 PR（文档或边界修复）并跑通 CI",
+    "把结论写成一篇 benchmarks 报告，附可复现脚本"
+   ],
+   "accept": [
+    "有一份自行跑出的性能对比表（含机器配置与版本）",
+    "能画出 groupby 从 API 到 Cython 的完整调用链",
+    "至少提交过一个被合并或通过 CI 的改动"
+   ],
+   "interview": [
+    "为什么对 DataFrame 逐行 iterrows 会慢到不可用",
+    "merge 时 on 的列有空值会发生什么",
+    "Copy-on-Write 解决了什么历史问题，代价是什么"
+   ]
+  },
+  {
+   "slug": "superset-bi",
+   "track": "data",
+   "tier": "t3",
+   "hours": 50,
+   "level": "hard",
+   "title": "Superset · 从 BI 使用者变成平台维护者",
+   "repo": "apache/superset",
+   "summary": "Superset 是大多数公司 BI 平台的原型。跑起来只是开始，真正的活在于：数据集权限怎么隔、查询怎么缓存、大查询怎么不把数据库打挂、前端图表插件怎么加一个自己的。",
+   "stack": [
+    "Superset",
+    "SQLAlchemy",
+    "Redis 缓存",
+    "Celery",
+    "React 插件"
+   ],
+   "learn": [
+    "数据集（Dataset）与物理表的映射关系，以及虚拟数据集的代价",
+    "查询缓存的键构成，为什么改一个过滤器就必然穿透",
+    "异步查询（Celery）与同步查询的适用边界",
+    "行级安全（RLS）规则的注入位置与绕过风险",
+    "图表插件的注册机制与前端构建产物的加载路径"
+   ],
+   "career": "「搭过 BI」和「维护过 BI」是两回事，后者要能回答权限、缓存、慢查询三连问。",
+   "steps": [
+    "用 Docker Compose 部署，接 PostgreSQL 作为元数据库与分析库",
+    "建 3 个数据集、8 张图表、1 个 dashboard，配好 RLS",
+    "给一个慢查询加缓存，测命中前后的响应时间",
+    "打开异步查询，观察大查询期间 web 进程是否仍可用",
+    "写一个自定义图表插件（哪怕只是换个渲染方式）并接入",
+    "输出运维手册：备份、升级、慢查询排查三条流程"
+   ],
+   "accept": [
+    "RLS 用两个不同账号验证过隔离有效",
+    "缓存命中率与响应时间有前后对比",
+    "自定义插件能在干净环境里一键构建"
+   ],
+   "interview": [
+    "BI 平台的查询缓存该怎么失效",
+    "行级权限在 SQL 层和 BI 层各做一遍有必要吗",
+    "为什么 BI 工具不建议直连生产库"
+   ]
+  },
+  {
+   "slug": "growthbook-ab",
+   "track": "data",
+   "tier": "t4",
+   "hours": 75,
+   "level": "hard",
+   "title": "GrowthBook · 从埋点到实验结论的完整闭环",
+   "repo": "growthbook/growthbook",
+   "summary": "一个开源的特性开关 + 实验平台：分流靠哈希、指标来自数仓、显著性用 CUPED 和序贯检验。它的价值在于把「AB 实验」从一句概念变成一条可验证的链路——分流是否均匀、指标是否可信、结论是否经得起重复。",
+   "stack": [
+    "GrowthBook",
+    "特征开关",
+    "哈希分流",
+    "CUPED",
+    "序贯检验",
+    "数仓"
+   ],
+   "learn": [
+    "基于哈希的确定性分流如何保证同一用户始终进同一组",
+    "样本比例失衡（SRM）的检测方法与常见成因",
+    "CUPED 用协变量降方差的原理与前提条件",
+    "序贯检验为什么能避免「看一次算一次」的假阳性膨胀",
+    "指标定义里的触发口径（exposure）如何影响实验效力"
+   ],
+   "career": "增长 / 策略数据岗的核心竞争力就是「能设计并正确解读一次实验」，这套东西能直接写进简历并撑住追问。",
+   "steps": [
+    "本地部署 GrowthBook + 数仓（DuckDB 或 PG），接一份模拟埋点数据",
+    "配 3 个实验：一个无效果、一个有效果、一个分流 bug",
+    "用 SRM 检查把分流 bug 那个实验揪出来",
+    "对有效果的实验算 CUPED 前后方差与所需样本量",
+    "模拟「每天看一次 p 值」，对比序贯检验与固定样本的结论差异",
+    "写实验规范：假设、指标、样本量、停止规则、结论模板"
+   ],
+   "accept": [
+    "能在一个实验里同时给出点估计与置信区间",
+    "分流 bug 被自己的检查抓到并说明原因",
+    "实验规范能让别人照着独立跑完一次实验"
+   ],
+   "interview": [
+    "实验跑了三天就显著，能不能直接上线",
+    "AA 测试不通过通常说明什么",
+    "指标方差太大导致样本量爆炸，你有哪些降方差手段"
+   ]
+  }
+ ]
+}

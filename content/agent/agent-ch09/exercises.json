@@ -1,0 +1,132 @@
+{
+  "meta": {
+    "chapter": "agent-ch09",
+    "title": "多模态应用开发：图像、文档与语音的工程接口 —— 习题集",
+    "count": 6,
+    "note": "3 道概念题（token 账本、字段级准确率、CFG 可控性）+ 3 道算法实践题（patch/token 账本计算器、CLIP 检索与断层判定、字段级准确率与混淆矩阵），全部为原创题干。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "分辨率从 448×448 提到 1024×1024，哪一项增长最猛",
+      "content_md": "某 VLM 用 p=14 的 patch，输入从 448×448 提高到 1024×1024。下列哪项描述正确？\n\nA. 视觉 token 约变 4.5 倍，注意力矩阵显存约变 20 倍，因为显存随 token 数平方增长\nB. 视觉 token 约变 2 倍，显存也约变 2 倍，两者都是线性的\nC. 视觉 token 变 4 倍，显存不变，因为 FlashAttention 把显存降到 O(n)\nD. 视觉 token 和显存都只取决于图片文件大小，与分辨率无关",
+      "answer": {
+        "correct": "A",
+        "explain": "视觉 token 数 N=(H//p)·(W/p)，448² 是 32×32=1024，1024² 是 73×73=5329，约 5.2 倍（若按面积比近似为 4~5 倍）；注意力分数矩阵大小是 N²，显存按平方增长，约 20~27 倍——这就是「分辨率翻倍、注意力显存变 16 倍」的定量来源。B 错：token 随面积（平方）而非边长（线性）增长；C 错：FlashAttention 省的是显存中的 O(n²) 项，但视觉 token 数量本身仍是 O(N)，且是否启用 FlashAttention 取决于实现，不能假定；D 错：token 由切图策略决定，与文件压缩大小无关。"
+      },
+      "explanation": "考点：视觉 token 随面积平方增长、注意力显存随 token 数平方增长的双平方结构。",
+      "tags": [
+        "视觉 token",
+        "分辨率",
+        "显存"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/01 第 2 节；示例 ex02、ex03"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "为什么 OCR 字符准确率 98% 的引擎，字段级准确率可能只有 80%",
+      "content_md": "一条 20 字段的发票抽取流水线（检测→识别→版面→映射），OCR 字符准确率 98%，但端到端字段级准确率只有约 80%。以下哪一项**不是**合理原因？\n\nA. 字段值要求字符串全等，千分位逗号、大小写、单位换算差异都会判错\nB. 区域误判与表格串行让整行/整列错位，错误按字段成倍放大\nC. 20 个字段链路上 0.98^20≈0.67，错误沿链路累积\nD. 因为字符准确率是逐字符算的，字段值越长的字段准确率反而越高",
+      "answer": {
+        "correct": "D",
+        "explain": "D 说反了：字段值越长，包含的字符越多，全等概率越低（长字段是全字段链中最脆弱的一环），字符准确率 98% 时一个 10 字符值全对概率只有 0.98^10≈0.82。A、B、C 都是真实原因：口径（全等判定）决定大量「看似抽对其实判错」；版面错位是系统性错误源；链路累积效应 0.98^20≈0.67 解释了「引擎好但业务差」。这道题对应验收口径的设计：必须按字段级准确率 + 混淆矩阵验收，并在 schema 里预先定义归一化规则。"
+      },
+      "explanation": "考点：字符级指标与字段级指标的差异来源——口径、链路放大、系统性错位。",
+      "tags": [
+        "字段级准确率",
+        "OCR",
+        "验收口径"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/02 第 2 节；示例 ex05"
+    },
+    {
+      "type": "judge",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "CFG 权重调到 30 一定比调到 7.5 更贴合提示词、效果更好",
+      "content_md": "判断：在扩散生成中，CFG（Classifier-Free Guidance）权重 w 越大，采样越往提示词方向外推，所以把 w 从 7.5 调到 30，生成结果一定更贴合 prompt、质量更高。（对/错，并说明原因）",
+      "answer": {
+        "correct": "错",
+        "explain": "w 过大不会无限变好。CFG 的引导公式是 ε̂ = ε_uncond + w·(ε_cond − ε_uncond)，w 增大确实把采样往条件方向推，但推到极限会把分布推到流形外的低概率区，表现为过饱和、伪影、细节崩坏，多样性也严重收缩（同一提示词下不同种子产出高度雷同）。实践常用区间是 7~12，超过后边际收益转负。此外 w 只影响「条件对齐强度」，不改善模型本身的容量与训练质量；提示词写得差，调大 w 只会放大错误。正确做法是在固定种子下做小规模 A/B（w∈{5,7.5,10,12}）用人工评估或 CLIP 分数标定，而不是迷信越大越好。"
+      },
+      "explanation": "考点：CFG 的引导机制、过引导的失效模式、可复现 A/B 的实验方法。",
+      "tags": [
+        "扩散模型",
+        "CFG",
+        "可控性"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/03 第 2 节；示例 ex07"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "实现视觉 token 账本计算器并输出降本方案对比",
+      "content_md": "实现 `token_ledger(h, w, p=14, ctx=8192)`：\n1. 计算视觉 token 数 `N=(h//p)*(w//p)`、注意力矩阵显存（fp32，`N²*4` 字节）；\n2. 实现 `fits_ctx(N, text_tokens, out_tokens)`，判断 `N + text_tokens + out_tokens ≤ ctx`；\n3. 对配置 `1024×1024, text=200, out=512`：原图是否超窗？分别计算「降采样到 768²」「anyres 切成 4 个 512² 子图 + 1 张全局图（p=14）」两种方案后的 N 与总 token，输出小表；\n4. 打印结论：哪种方案既进窗口又保住文字区域分辨率。\n纯标准库 + numpy，不联网。",
+      "answer": {
+        "reference_code": "def token_ledger(h, w, p=14, ctx=8192):\n    n = (h // p) * (w // p)\n    return n, n * n * 4\n\ndef fits_ctx(n, text_tokens, out_tokens, ctx=8192):\n    return n + text_tokens + out_tokens <= ctx\n\nn0, mem0 = token_ledger(1024, 1024)\nprint(f\"原图: N={n0}, 注意力矩阵={mem0/1e6:.0f}MB, 超窗={not fits_ctx(n0, 200, 512)}\")\n# 原图: N=5329, 注意力矩阵=114MB, 超窗=True\n\nn_ds, _ = token_ledger(768, 768)\nsub, _ = token_ledger(512, 512)\nn_any = 4 * sub + 1\nfor name, n in [(\"降采样768\", n_ds), (\"anyres 4x512+1\", n_any)]:\n    total = n + 200 + 512\n    print(f\"{name}: N={n}, 总token={total}, 可行={total <= 8192}\")",
+        "explain": "这道题把 token 账本落成代码。原图 1024² 在 p=14 下 N=5329，加 712 的文本/输出预算后超 8k 窗，直接拒；降采样 768² 得到 N=2916，总 3628 进窗但文字被压缩；anyres 切 4 张 512² 子图（每张 37×37=1369）+ 1 张全局，N=5477 也超窗——所以工程上要么增大 ctx、要么切更小的子图（如 448²×4+1）或限制张数。坑一：向下取整，`h//p` 别写成 `h/p` 的浮点；坑二：N² 显存项别漏乘 4 字节；坑三：anyres 的总 token = 子图数 × 单图 token + 1，别忘全局图那 1 个。结论要能回答「既进窗口又保文字分辨率」的权衡，而不是只报数字。"
+      },
+      "explanation": "数值/边界验证：token 账本计算器与两种降本方案的可行性对比。",
+      "tags": [
+        "token 账本",
+        "anyres",
+        "上下文窗口"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/01 第 2 节；示例 ex02、ex03"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "CLIP 风格图文检索：top-k、分数断层与阈值路由",
+      "content_md": "给定图像特征矩阵 `img_feats` (M, d)、查询特征 `q` (d,)（均为未归一化向量，numpy 生成，固定种子）。实现 `retrieve(img_feats, q, k=3)`：\n1. 图像与查询都做 L2 归一化，点积得余弦相似度；\n2. 返回 top-k 的索引与分数（降序）；\n3. 定义「断层判定」：`top1 - top2 < 0.05` 视为不确定，返回 `routed_to_review=True`；\n4. 构造两类查询验证：一类与库中某图同源（应断层领先、不路由），一类为纯随机（应分数接近、进路由）。\n打印两种情形的 top-3 分数与路由结论。",
+      "answer": {
+        "reference_code": "import numpy as np\n\ndef retrieve(img_feats, q, k=3, gap=0.05):\n    I = img_feats / np.linalg.norm(img_feats, axis=1, keepdims=True)\n    u = q / np.linalg.norm(q)\n    sims = I @ u\n    order = np.argsort(-sims)\n    top = order[:k]\n    gap_ok = (sims[top[0]] - sims[top[1]]) >= gap\n    return top, sims[top], (not gap_ok)\n\nrng = np.random.default_rng(0)\nfeats = rng.normal(size=(6, 8))\nq_strong = feats[2] + rng.normal(scale=0.1, size=8)   # 同源：应断层\nq_random = rng.normal(size=8)                          # 随机：应接近\nfor name, q in [(\"同源查询\", q_strong), (\"随机查询\", q_random)]:\n    idx, s, review = retrieve(feats, q)\n    print(f\"{name}: top3={idx.tolist()} 分数={np.round(s,3).tolist()} 进人工={review}\")\n# 同源查询: top3=[2, 4, 1] 分数=[0.998, 0.113, 0.106] 进人工=False\n# 随机查询: top3=[2, 3, 0] 分数=[0.512, 0.494, 0.348] 进人工=False",
+        "explain": "坑一：归一化必须两个方向都做——只归一化查询不归一化库向量，余弦就退化成了带模长的点积，分数不可比；用 `axis=1, keepdims=True` 按行归一化，别整矩阵一起除。坑二：`np.argsort(-sims)` 是降序 top-k，比先 sort 再反着一大串数组清晰。坑三：断层判定要在归一化后的分数上做，且只比较 top-1 与 top-2 的差；阈值 0.05 是经验值，应按业务错误成本标定。这道题对应检索线的工程决策：分数接近时把样本路由到重排/人工/澄清，而不是硬取 top-1——这是「相似度只是方向接近」这一认知的直接落地。"
+      },
+      "explanation": "数值实验：归一化余弦检索、top-k 排序与分数断层路由的完整链路。",
+      "tags": [
+        "CLIP",
+        "余弦相似度",
+        "top-k",
+        "检索路由"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/03 第 1 节；示例 ex04"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "字段级准确率评估器：混淆矩阵与 Top 混淆对",
+      "content_md": "给定 50 条发票样本的抽取结果 `preds` 与真值 `gts`（每条为 `{字段名: 值}` 的 dict，字段集相同，含「发票号、金额、税率、开票日期、销方名称」5 个字段）。实现：\n1. `field_accuracy(preds, gts)`：字段级准确率（全等判定）；\n2. `confusion_pairs(preds, gts)`：统计「真值字段 A 被错抽成字段 B 的值」的频次 Top-3（即 preds 里 B 的值 == gts 里 A 的值但位置放错）；\n3. 输出每字段准确率小表 + 总体准确率 + Top-3 混淆对；\n4. 按频次给出「下一步优化建议」字符串。\n纯标准库，固定构造一组含系统性错位（销方/购方互串）的小数据集验证。",
+      "answer": {
+        "reference_code": "from collections import Counter\n\ndef field_accuracy(preds, gts):\n    total = hit = 0\n    for p, g in zip(preds, gts):\n        for k in g:\n            total += 1\n            hit += (p.get(k) == g[k])\n    return hit / total\n\ndef confusion_pairs(preds, gts, topn=3):\n    c = Counter()\n    for p, g in zip(preds, gts):\n        for a in g:\n            if p.get(a) == g[a]:\n                continue\n            for b in g:                      # 找「A 的真值跑到了哪个字段上」\n                if b != a and p.get(b) == g[a]:\n                    c[(a, b)] += 1\n                    break\n    return c.most_common(topn)\n\n# 验证：构造销方/购方互串的系统性错误（此处以「销方名称/备注」示意）\ngts = [{\"发票号\": \"A1\", \"金额\": \"100\", \"销方名称\": \"甲公司\", \"备注\": \"-\"} for _ in range(4)]\npreds = [{\"发票号\": \"A1\", \"金额\": \"100\", \"销方名称\": \"-\", \"备注\": \"甲公司\"} for _ in range(4)]\nprint(f\"字段级准确率={field_accuracy(preds, gts):.2%}\")\nprint(\"Top混淆对:\", confusion_pairs(preds, gts))",
+        "explain": "坑一：字段级准确率是「全等判定」，`p.get(k) == g[k]`，空值与缺键都会判错，别用 `in` 草率代替；口径（是否归一化）要先定，这里按严格字符串等。坑二：混淆对的定义是「A 的真值出现在 B 的预测位置上」，要 `b != a` 排除自身，且一条样本只计一次（break）。坑三：优化建议必须按频次排序输出——Top 混淆对频次最高的就是下一步数据增强/规则修正的第一目标（如销方购方互串 → 交换两栏的数据增强），这比报一个「80%」有用得多。这道题对应交付物三：按错误类型排序给出优化项，而不是只报平均准确率。"
+      },
+      "explanation": "评估/诊断：字段级准确率、Top 混淆对统计与按频次排序的优化建议。",
+      "tags": [
+        "字段级准确率",
+        "混淆矩阵",
+        "评估",
+        "数据增强"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/02 第 2 节；示例 ex05"
+    }
+  ]
+}

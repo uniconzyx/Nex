@@ -1,0 +1,130 @@
+{
+  "meta": {
+    "chapter": "agent-ch01",
+    "title": "AI 行业认知与岗位地图 —— 习题集",
+    "count": 6,
+    "note": "3 道概念题（产业链利润杠杆 / 单位经济计算 / 岗位匹配口径）+ 3 道算法实践题（加权缺口、P99 合成、关键路径诊断），全部为原创题干。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "哪一层生意的利润主要由「产能利用率」决定",
+      "content_md": "在 AI 产业链的「算力层 / 模型层 / 推理服务层 / 应用与工具层」中，利润对**产能利用率**最敏感、且固定成本占比最高的是：\n\nA. 算力层\nB. 模型层\nC. 推理服务层\nD. 应用与工具层",
+      "answer": {
+        "correct": "A",
+        "explain": "算力层是重资产：GPU/机房/电力/折旧构成高额固定成本，收入按卡时或包年包月结算。利用率下降时，折旧与电费不会同比例下降，摊到每个交付单位上的固定成本上升，净利率迅速转负。\n\n模型层的固定成本是训练投入，但可被多次调用分摊；推理服务层的固定成本是工程与运维，相对轻；应用层的固定成本主要是获客与研发，受留存率影响更大。因此四层里「利用率」是算力层的第一变量，「留存率」是应用层的第一变量。答题时要把「固定成本占比」与「收入计价单位」一起说清，不能只背结论。"
+      },
+      "explanation": "区分四层的利润杠杆：利用率 vs 留存率。",
+      "tags": [
+        "产业链",
+        "毛利结构",
+        "固定成本"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/01 第 1~2 节；数值可用 examples/ex01 复算"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "给定毛利率与流失率，判断订阅制应用是否健康",
+      "content_md": "某 AI 应用：月 ARPU = 100 元，毛利率 = 20%，月流失率 = 5%，获客成本 CAC = 300 元。按 `LTV = ARPU×毛利率/月流失率`、健康线 `LTV/CAC ≥ 3` 判断，下列结论正确的是：\n\nA. LTV=400，LTV/CAC≈1.33，不健康\nB. LTV=2000，LTV/CAC≈6.67，健康\nC. LTV=500，LTV/CAC≈1.67，不健康\nD. 无法计算，缺少留存曲线",
+      "answer": {
+        "correct": "A",
+        "explain": "先算月毛利：100×20% = 20 元；LTV = 20/0.05 = 400 元；LTV/CAC = 400/300 ≈ 1.33，低于 3 的健康线，属于「每获取一个客户都在亏」。\n\n常见错选 B 是把 ARPU 直接当毛利（100/0.05=2000），忽略了毛利率；错选 C 是用 100×25% 或把流失率当 4%。这道题的考点是：**LTV 用的是毛利，不是收入**。另外回收期 = CAC/(ARPU×毛利率) = 300/20 = 15 个月，即使 LTV 看起来够，回本也太慢——现金流会在回本前先断。"
+      },
+      "explanation": "LTV 必须用毛利计算，且要同时看回收期。",
+      "tags": [
+        "单位经济",
+        "LTV",
+        "CAC"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/01 第 2 节；examples/ex01 表 3"
+    },
+    {
+      "type": "judge",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "JD 关键词命中率越高，岗位匹配度就越高",
+      "content_md": "判断：把简历技能与 JD 关键词逐条比对，命中率越高说明匹配度越高，因此应该优先投递命中率最高的岗位。（对/错，并说明理由）",
+      "answer": {
+        "correct": "错",
+        "explain": "关键词命中率有两个结构性缺陷。第一，**底座词不区分岗位**：Python、部署、Prompt 在五类岗位里都高频出现，命中它们不构成差异化优势；真正决定匹配的是共现块，例如 Agent 岗的「Prompt + 工具调用 + 评测 + 状态机」。\n\n第二，**分母可被操纵**：JD 写得越全，命中率越容易被稀释；反过来，只写三个宽泛词的 JD 很容易「满分」。此外还要看动词级别（参与/负责/主导）与必须项权重——一个必须项缺失，抵得上五个加分项。正确做法是先判共现块，再算加权缺口与补一项的边际收益（examples/ex03），最后看动词级别是否够。"
+      },
+      "explanation": "匹配度要看共现块、权重与动词级别，不是关键词命中率。",
+      "tags": [
+        "岗位地图",
+        "JD 拆解",
+        "匹配度"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/02 第 2 节；examples/ex02、ex03"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "手写岗位加权缺口与「补一项」的边际收益",
+      "content_md": "给定：\n- 12 维技能名称列表 `dims`；\n- 候选人自评向量 `c`（0~5）；\n- 目标 JD 的字典 `req = {技能名: 权重}`，其中权重 3 表示必须项、1 表示加分项；\n- 目标等级 `target = 4`。\n\n要求：\n1. 输出加权缺口 `gap = Σ max(0, target − c_i) × w_i`；\n2. 对每个未达标的技能，计算「+1 分」带来的**加权缺口下降**，按性价比排序；\n3. 额外输出余弦相似度，并说明它为什么会高估/低估匹配。\n\n不得使用 sklearn，只用标准库或 numpy。",
+      "answer": {
+        "reference_code": "import numpy as np\n\ndef analyze(c, dims, req, target=4):\n    gap = sum(max(0, target - c[dims.index(k)]) * w for k, w in req.items())\n    gains = []\n    for k, w in req.items():\n        i = dims.index(k)\n        if c[i] < target:\n            gains.append((w, k, c[i]))          # 每 +1 分固定减少 w\n    j = np.zeros(len(dims))\n    for k, w in req.items():\n        j[dims.index(k)] = w\n    cos = c @ j / (np.linalg.norm(c) * np.linalg.norm(j) + 1e-12)\n    return gap, sorted(gains, reverse=True), cos",
+        "explain": "关键点：加权缺口是**线性**的，所以每 +1 分的边际收益恰好等于该技能权重 `w`，与当前分数无关（只要还没到 target）。这意味着「必须项权重 3」补一级的价值是「加分项权重 1」的三倍，排序应按权重而不是按当前差距。\n\n余弦相似度衡量的是方向一致性，对模长不敏感，也对维度数量不敏感：技能列得越全，单个关键项缺失被稀释得越厉害，所以会出现「余弦很高但必须项缺失」的错觉。工程上应把 `gap`、`覆盖率`、余弦三者一起看，并以 gap 为主做投递决策。"
+      },
+      "explanation": "加权缺口的边际收益等于权重，余弦会稀释关键项。",
+      "tags": [
+        "匹配度",
+        "加权缺口",
+        "余弦相似度"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/02 第 2.2 节；examples/ex03"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 5,
+      "title": "用蒙特卡洛验证「P99 不能直接相加」及其失效条件",
+      "content_md": "链路有 3 段，每段服从对数正态分布，给定 `(P50, P99)`：\nA=(420,1500)、B=(180,900)、C=(900,3200)，单位 ms。\n\n要求：\n1. 由 `σ = ln(P99/P50)/2.326` 反推每段参数，采样 20000 次，输出合成总时延的 P50/P95/P99；\n2. 与「三段 P99 直接相加」比较，给出高估比例；\n3. 构造一个**独立性失效**的场景（例如三段共享同一瓶颈，尾延迟完全正相关），说明此时相加是否更接近真实值；\n4. 输出每段削减 20% 对总 P99 的边际收益，指出应先优化哪一段。",
+      "answer": {
+        "reference_code": "import numpy as np\nrng = np.random.default_rng(0)\n\ndef s(p50, p99):\n    return rng.lognormal(np.log(p50), np.log(p99/p50)/2.326, 20000)\n\nA, B, C = s(420,1500), s(180,900), s(900,3200)\ntot = A + B + C\nprint(np.percentile(tot, [50,95,99]), 1500+900+3200)\nfor name, arr in [('A',A),('B',B),('C',C)]:\n    new = tot - arr + arr*0.8\n    print(name, np.percentile(tot,99) - np.percentile(new,99))\n# 完全正相关：用同一个分位点缩放\nq = np.random.default_rng(1).random(20000)\nprint(np.percentile(np.quantile(A,q)+np.quantile(B,q)+np.quantile(C,q), 99))",
+        "explain": "独立假设下，和的方差是方差之和，标准差按 √n 增长，因此合成 P99 明显小于各段 P99 之和（本组约低 30%~45%）。但真实系统常有**共同瓶颈**：同一台 GPU、同一个下游、同一段网络。当各段尾延迟完全正相关时，分位点可以近似相加，直接相加反而更接近真实值。\n\n所以正确的工程顺序是：先用 trace 判断各段是否共享瓶颈 → 再选独立合成或正相关合成 → 最后按「对总 P99 的边际贡献」排序优化。本题中 C 段的方差最大，削减 20% 的收益通常最高；优化 A 段的 P50 对尾延迟几乎没有影响。"
+      },
+      "explanation": "P99 合成的关键是相关性假设，不是公式本身。",
+      "tags": [
+        "延迟预算",
+        "蒙特卡洛",
+        "尾延迟"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/03 第 3 节；examples/ex07"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "90 天排期的关键路径诊断：哪些延期真的会推后交付",
+      "content_md": "给定任务列表 `(名称, 工期, 前置任务列表)`，构成有向无环图。要求：\n1. 用 Kahn 算法输出拓扑序，并检测环；\n2. 计算每个任务的最早开始 ES、最早结束 EF、最晚开始 LS、松弛 slack；\n3. 输出关键路径（slack=0 的任务链）与总工期；\n4. 给定任意一个任务延期 d 天，判断总工期是否变化，并解释「关键路径上的延期」与「非关键路径但超过 slack 的延期」的区别。",
+      "answer": {
+        "reference_code": "from collections import defaultdict, deque\n\ndef schedule(tasks):\n    dur = {t: d for t, d, _ in tasks}\n    pre = {t: p for t, _, p in tasks}\n    succ, indeg = defaultdict(list), {t: len(p) for t, _, p in tasks}\n    for t, _, ps in tasks:\n        for x in ps: succ[x].append(t)\n    q = deque(t for t in indeg if indeg[t] == 0); order = []\n    while q:\n        u = q.popleft(); order.append(u)\n        for v in succ[u]:\n            indeg[v] -= 1\n            if indeg[v] == 0: q.append(v)\n    assert len(order) == len(tasks)\n    ES = {t: max((ES[p] + dur[p] for p in pre[t]), default=0) for t in order}\n    total = max(ES[t] + dur[t] for t in tasks)\n    LF = {t: total for t, _, _ in tasks}\n    for t in reversed(order):\n        if succ[t]: LF[t] = min(LF[s] - dur[s] for s in succ[t])\n    return order, ES, LF, total",
+        "explain": "关键路径是「slack=0」的任务链，它决定总工期。延期的影响分三种：① 关键路径任务延期 d → 总工期 +d；② 非关键任务延期 d ≤ slack → 不影响；③ 非关键任务延期 d > slack → 总工期 +(d−slack)。\n\n常见错误是「按工期最长的任务排优先级」，忽略了依赖关系：一个 14 天的任务如果有 20 天 slack，延期 5 天毫无影响；而一个 5 天的任务如果 slack=0，延期一天就推后交付。排期的正确姿势是先算 slack，再决定把注意力放在哪里；对关键路径设 checkpoint，延期时砍范围而不是压缩测试。"
+      },
+      "explanation": "延期是否影响交付，取决于 slack，而不是任务时长。",
+      "tags": [
+        "关键路径",
+        "拓扑排序",
+        "排期"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept/02 第 5 节；examples/ex09"
+    }
+  ]
+}

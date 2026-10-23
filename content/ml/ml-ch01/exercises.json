@@ -1,0 +1,106 @@
+{
+  "meta": {
+    "chapter": "ml-ch01",
+    "title": "学习范式与数学基础 —— 习题集",
+    "count": 6,
+    "note": "3 道概念题（泛化/正则/优化几何）+ 3 道算法实践题（梯度下降、偏差-方差实测、凸性验算），全部为原创题干。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "偏差-方差分解中，哪一项通常随模型复杂度上升",
+      "content_md": "在平方损失下，期望测试误差可分解为「噪声 + 偏差² + 方差」。当模型复杂度（假设空间容量）增大时，通常发生的是：\n\nA. 偏差下降、方差上升\nB. 偏差上升、方差下降\nC. 两项同时下降\nD. 两项同时上升",
+      "answer": {
+        "correct": "A",
+        "explain": "容量增大使模型更能逼近真实函数 f*，因此**偏差下降**；同时模型对训练集抽样更敏感（换一批样本，拟合结果变化更大），**方差上升**；噪声 σ² 与算法无关、保持不变。\n\n注意「通常」二字：双下降说明在过参数化区间，测试误差可以再次下降，但那是**有效容量**不再由参数个数决定，不是方差重新变小。"
+      },
+      "explanation": "这是偏差-方差权衡最基本的走向。",
+      "tags": ["偏差-方差", "模型复杂度"],
+      "source": "self",
+      "source_ref": "《The Elements of Statistical Learning》第7章"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "L2 正则化对应的贝叶斯先验",
+      "content_md": "把岭回归 `min ‖y − Xw‖² + λ‖w‖²` 解释为最大后验（MAP）估计时，参数 w 的先验是：\n\nA. 拉普拉斯分布（L1）\nB. 高斯分布（L2）\nC. 均匀分布\nD. 伯努利分布",
+      "answer": {
+        "correct": "B",
+        "explain": "MAP 目标为 `log P(S|w) + log P(w)`。若 `w_j ~ N(0, τ²)`，则 `log P(w) = −‖w‖²/(2τ²) + C`，与 `−λ‖w‖²` 同形，对应 `λ = 1/(2τ²)`。\n\nL1 对应**拉普拉斯先验**（在 0 处有尖峰），所以后验众数容易落在坐标轴上 → 稀疏。这也是「L1 做特征选择」的概率解释。"
+      },
+      "explanation": "正则化的贝叶斯解释是高频追问点。",
+      "tags": ["正则化", "MAP", "贝叶斯"],
+      "source": "self",
+      "source_ref": "《统计学习方法》第1章 正则化与贝叶斯估计"
+    },
+    {
+      "type": "judge",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "可分数据上不加正则的逻辑回归是否唯一",
+      "content_md": "判断：在**线性可分**的数据上，不加正则化的逻辑回归用梯度下降仍能收敛到一个唯一的有限参数解。（对/错，并说明原因）",
+      "answer": {
+        "correct": "错",
+        "explain": "若数据线性可分，存在 w 使所有样本都被正确分类且间隔为正。此时把 w 放大 k 倍，所有样本的 `y·wᵀx` 同比例增大，交叉熵损失**严格下降并趋于 0**，但永远取不到 0（sigmoid 只在无穷远处饱和）。\n\n因此最优解在 `‖w‖→∞` 的方向上，**不存在有限的最优参数**；梯度会持续把 ‖w‖ 推大，数值上表现为参数爆炸、迭代不收敛。加 L2 正则（或早停）才能让问题强凸、解唯一。\n\n这也解释了为什么 sklearn 的 LogisticRegression 默认带 `C=1.0`（即带正则）。"
+      },
+      "explanation": "「可分 + 无正则 → 无有限解」是逻辑回归的经典陷阱。",
+      "tags": ["逻辑回归", "强凸", "可分性"],
+      "source": "self",
+      "source_ref": "《统计学习方法》第6章"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "手写梯度下降并验证 O(1/k) 收敛率",
+      "content_md": "对二次目标 `f(w) = ½ wᵀAw − bᵀw`（A 正定），实现梯度下降并验证：\n1. 步长取 `1/L`（L 为 A 的最大特征值）时单调下降且收敛；\n2. 步长取 `1.5/L` 时发散；\n3. 次优间隙 `f(w_k) − f*` 在双对数坐标下斜率约为 −1（对应 O(1/k)）。\n\n打印不同条件数 κ 下的迭代次数，说明 κ 对收敛速度的影响。",
+      "answer": {
+        "reference_code": "import numpy as np\n\nA = np.array([[10.0, 0.0], [0.0, 1.0]])   # κ = 10\nb = np.array([1.0, 1.0])\nL, mu = np.linalg.eigvalsh(A).max(), np.linalg.eigvalsh(A).min()\nw_star = np.linalg.solve(A, b)\nf_star = 0.5 * w_star @ A @ w_star - b @ w_star\n\nfor eta in (1.0 / L, 1.5 / L):\n    w, hist = np.zeros(2), []\n    for k in range(60):\n        g = A @ w - b\n        w = w - eta * g\n        hist.append(0.5 * w @ A @ w - b @ w - f_star)\n    print(f\"eta={eta:.4f}  f_60-f*={hist[-1]:.3e}  单调={all(hist[i+1] <= hist[i] + 1e-18 for i in range(len(hist)-1))}\")\n\n# 次优间隙的双对数斜率\neta = 1.0 / L\nw, gaps = np.zeros(2), []\nfor k in range(1, 201):\n    w = w - eta * (A @ w - b)\n    gaps.append(0.5 * w @ A @ w - b @ w - f_star)\nslope = np.polyfit(np.log(np.arange(20, 200)), np.log(gaps[19:199]), 1)[0]\nprint(f\"log-log slope = {slope:.3f}  (理论 O(1/k) → -1)\")",
+        "explain": "步长 `η=1/L` 恰好使二次型的一步收缩因子为 `|1 − ηλ_i| ≤ 1`，因此稳定；`η>2/L` 时最大特征值方向出现 `|1 − ηλ_max| > 1`，误差被放大 → 发散。\n\n收敛率：`f(w_k) − f* ≤ (L/2)‖w_0−w*‖²/k`，双对数斜率趋近 −1。条件数 κ 越大，`(1−μ/L)` 越接近 1，所需迭代数约为 `κ log(1/ε)`。"
+      },
+      "explanation": "把「步长上限 1/L」与「κ 决定速度」用实验坐实。",
+      "tags": ["梯度下降", "收敛率", "条件数"],
+      "source": "self",
+      "source_ref": "Nesterov《Lectures on Convex Optimization》第2章"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 5,
+      "title": "用 Bootstrap 实测偏差-方差分解",
+      "content_md": "对一维回归任务 `y = sin(x) + ε`，用**多项式次数**作为复杂度旋钮（例如 1/3/9 次）：\n1. 从同一真实分布重复抽 B=200 个训练集，各自拟合；\n2. 在固定的测试网格上估计 `f̄(x) = mean_b f_b(x)`；\n3. 分解 `E[(y − f_b(x))²] ≈ σ² + (f*(x) − f̄(x))² + mean_b(f_b(x) − f̄(x))²`；\n4. 打印三个复杂度下的 bias²、variance、总误差，验证「复杂度 ↑ → 偏差 ↓、方差 ↑」。\n\n注意：噪声方差 σ² 用**同一 x 重复采样的经验方差**估计，不要用残差方差（会低估）。",
+      "answer": {
+        "reference_code": "import numpy as np\nrng = np.random.default_rng(0)\nf_true = lambda x: np.sin(2 * np.pi * x)\nsigma = 0.25\nxt = np.linspace(0, 1, 60)          # 固定测试网格\n\ndef draw(n=40):\n    x = rng.uniform(0, 1, n)\n    return x, f_true(x) + rng.normal(0, sigma, n)\n\nfor deg in (1, 3, 9):\n    preds = np.array([np.polyval(np.polyfit(*draw(), deg), xt) for _ in range(200)])\n    fbar = preds.mean(0)\n    bias2 = ((f_true(xt) - fbar) ** 2).mean()\n    var = preds.var(0).mean()\n    print(f\"deg={deg:2d}  bias^2={bias2:.4f}  var={var:.4f}  sum={bias2+var+sigma**2:.4f}\")",
+        "explain": "关键手法：**固定测试网格、重复抽样训练集**，才能把「对训练集分布的期望」近似出来。若只用一份数据，你得到的是单次误差，无法拆项。\n\n预期结果：`deg=1` 偏差最大（欠拟合）、方差最小；`deg=9` 偏差小、方差最大（少数点上剧烈摆动）。总误差在中低复杂度处最小——这就是「最优点不在两端」。\n\n坑：用训练残差估 σ² 会低估（模型已经把噪声拟合掉了一部分）；用测试集残差则混入了偏差与方差。"
+      },
+      "explanation": "用实验证明分解，而不是背公式。",
+      "tags": ["偏差-方差", "Bootstrap", "过拟合"],
+      "source": "self",
+      "source_ref": "ESL 第7章 图7.1 的实验思路"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "用 Hessian 特征值判断目标函数是否凸",
+      "content_md": "实现一个通用检查器：给定目标函数 f 与点 x，用中心差分估计 Hessian，输出特征值与最小特征值；\n1. 对 `f(w)=½wᵀAw−bᵀw`（A 正定）判定为凸；\n2. 对 `f(w)=w₁²−w₂²` 判定为非凸；\n3. 对逻辑回归的负对数似然在随机数据上判定为凸（Hessian 半正定），并说明为什么 `X` 满秩时是**严格**凸。",
+      "answer": {
+        "reference_code": "import numpy as np\n\ndef hessian(f, x, h=1e-5):\n    n = x.size; H = np.zeros((n, n))\n    for i in range(n):\n        for j in range(n):\n            ei, ej = np.eye(n)[i] * h, np.eye(n)[j] * h\n            H[i, j] = (f(x+ei+ej) - f(x+ei-ej) - f(x-ei+ej) + f(x-ei-ej)) / (4*h*h)\n    return H\n\nA = np.array([[2.0, 0.5], [0.5, 1.0]]); b = np.array([1.0, -1.0])\nfor name, f in [(\"quad\", lambda w: 0.5*w@A@w - b@w),\n                (\"saddle\", lambda w: w[0]**2 - w[1]**2)]:\n    w = np.linalg.eigvalsh(hessian(f, np.array([0.3, -0.2])))\n    print(f\"{name:7s} eigvals={np.round(w, 4)}  convex={w.min() >= -1e-6}\")",
+        "explain": "二阶条件是 `∇²f ⪰ 0`。数值上必须用**对称差分**（中心二阶差分误差 O(h²)），并注意 `h` 不能太小（浮点相消）也不能太大（截断误差）。判据要留容差：`λ_min ≥ −1e-6` 而非 `≥ 0`。\n\n逻辑回归：`∇² = Xᵀ diag(p(1−p)) X`，对角元 `p(1−p) ∈ (0, 0.25]` 恒正，故半正定；若 X 列满秩且 p 不退化，则正定 → 严格凸 → 解唯一。这就是「可分数据下无正则逻辑回归不收敛」的另一面：`p→0/1` 时对角元趋于 0，Hessian 退化。"
+      },
+      "explanation": "凸性判断要落到数值可验证的判据上。",
+      "tags": ["凸优化", "Hessian", "数值微分"],
+      "source": "self",
+      "source_ref": "Boyd & Vandenberghe《Convex Optimization》第3章"
+    }
+  ]
+}

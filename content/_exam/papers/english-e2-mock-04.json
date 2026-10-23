@@ -1,0 +1,141 @@
+{
+  "id": "english-e2-mock-04",
+  "exam": "english",
+  "kind": "mock",
+  "subject": "e2",
+  "title": "英语（二） · 阅读精读专项（4）",
+  "duration": 50,
+  "totalScore": 30,
+  "disclaimer": "本卷为按题型结构自编的专项练习卷，题目与解析均为原创，不是真题还原；考点年份为历年命题的归纳性标注，请以当年考试大纲为准。",
+  "blueprint": [
+    {
+      "subject": "e2",
+      "name": "英语（二）",
+      "score": 30
+    }
+  ],
+  "sections": [
+    {
+      "no": 1,
+      "name": "阅读理解",
+      "type": "choice",
+      "range": "1~3 题",
+      "score": 6,
+      "perScore": 2,
+      "note": "每题 2 分。阅读所给文章，从四个选项中选出最佳答案。",
+      "passage": {
+        "id": "e2-p4",
+        "title": "Volunteering and the first job",
+        "text": "Employers say they value volunteering, but students often suspect that only impressive internships count. A survey of graduate recruiters suggests the students are half right. Volunteering was rarely listed as a requirement, yet interviewers frequently asked candidates to describe a situation where they had worked with others to solve a problem. A term spent organising a food bank shift supplied better answers than a month of photocopying in an office. The value lies less in the activity itself than in the evidence it provides of reliability, coordination and persistence."
+      },
+      "items": [
+        "q-e2-e2-p4-q1",
+        "q-e2-e2-p4-q2",
+        "q-e2-e2-p4-q3"
+      ]
+    },
+    {
+      "no": 2,
+      "name": "翻译",
+      "type": "calc",
+      "range": "4 题",
+      "score": 12,
+      "note": "本题 12 分。把划线句子译成汉语，要求准确、通顺。",
+      "items": [
+        {
+          "id": "q-e2-e2-p4-tr",
+          "topic": "e2-translation",
+          "knowledge": "e2-translation-k1",
+          "type": "calc",
+          "diff": 3,
+          "stem": "The value lies less in the activity itself than in the evidence it provides of reliability, coordination and persistence.",
+          "answer": {
+            "text": "其价值与其说在于活动本身，不如说在于它所提供的、关于可靠、协作与坚持的证据。"
+          },
+          "explain": {
+            "right": "先切分意群定主干，再按汉语习惯重排语序，最后检查术语与指代是否统一。",
+            "wrong": "常见错误：less… than… 译「与其说……不如说……」；it provides 是省略 that 的定语从句，修饰 evidence；三个抽象名词并列，译文保留并列节奏。",
+            "link": "e2-translation-k1"
+          },
+          "walkthrough": {
+            "framework": {
+              "title": "段落翻译",
+              "pattern": "e2-translation-p1",
+              "steps": [
+                "通读全段，判断文体与时态基调",
+                "逐句找主干，切出定语与状语",
+                "把后置定语译成前置，长状语提到句首",
+                "检查段内代词与术语一致性",
+                "通读成段，修掉翻译腔"
+              ],
+              "trap": "逐词直译，句子不通"
+            },
+            "approach": "先切分意群定主干，再按汉语习惯重排语序，最后检查术语与指代是否统一。",
+            "points": [
+              {
+                "id": "e2-translation-k1",
+                "note": "按引导词、介词短语、分词结构切意群，先定主谓宾。",
+                "title": "长难句切分",
+                "core": "按引导词、介词短语、分词结构切意群，先定主谓宾。",
+                "pitfall": "less… than… 译「与其说……不如说……」；it provides 是省略 that 的定语从句，修饰 evidence；三个抽象名词并列，译文保留并列节奏。"
+              }
+            ],
+            "solution": "参考译文：其价值与其说在于活动本身，不如说在于它所提供的、关于可靠、协作与坚持的证据。\n得分点：less… than… 译「与其说……不如说……」；it provides 是省略 that 的定语从句，修饰 evidence；三个抽象名词并列，译文保留并列节奏。\n检查清单：主干是否译出、修饰是否归位、指代是否还原。"
+          },
+          "score": 12
+        }
+      ]
+    },
+    {
+      "no": 3,
+      "name": "写作",
+      "type": "design",
+      "range": "5 题",
+      "score": 12,
+      "note": "本题 12 分。按题目要求写一篇短文。",
+      "items": [
+        {
+          "id": "q-e2-e2-p4-wr",
+          "topic": "e2-writing",
+          "knowledge": "e2-writing-k2",
+          "type": "design",
+          "diff": 3,
+          "stem": "Write an essay of about 150 words on the following topic: some students believe only internships matter for finding a job. Give your view with examples.",
+          "answer": {
+            "text": "Students often assume that only internships count when employers read a CV. Recruiters tell a more nuanced story. Volunteering is seldom a formal requirement, but interviews are built around questions about teamwork and problem solving, and a term spent running a food bank shift answers those questions better than a month of photocopying. What matters is not the label of the activity but the evidence it supplies: reliability, coordination, persistence. Students should therefore choose activities by the responsibilities they involve rather than by the prestige of the organisation. A well-documented volunteering role can be worth more than a famous name on a certificate."
+          },
+          "explain": {
+            "right": "先定三段骨架（描述—分析—结论），再把题目给出的信息逐条落进段落，最后检查字数与衔接词。",
+            "wrong": "常见错误：把实习与志愿对立起来，或只强调「志愿活动加分」而不说明原因。",
+            "link": "e2-writing-k2"
+          },
+          "walkthrough": {
+            "framework": {
+              "title": "图表作文",
+              "pattern": "e2-writing-p2",
+              "steps": [
+                "首段：一句点明图表主题 + 2 个关键数据",
+                "二段：2 条原因，用 First/Moreover 衔接",
+                "三段：一句趋势预测或建议",
+                "数字保留一位小数，趋势词要准确"
+              ],
+              "trap": "只罗列数字不做比较"
+            },
+            "approach": "先定三段骨架（描述—分析—结论），再把题目给出的信息逐条落进段落，最后检查字数与衔接词。",
+            "points": [
+              {
+                "id": "e2-writing-k2",
+                "note": "观点句 + 解释 + 例证 + 小结，四句一段。",
+                "title": "议论段展开",
+                "core": "观点句 + 解释 + 例证 + 小结，四句一段。",
+                "pitfall": "把实习与志愿对立起来，或只强调「志愿活动加分」而不说明原因。"
+              }
+            ],
+            "solution": "Students often assume that only internships count when employers read a CV. Recruiters tell a more nuanced story. Volunteering is seldom a formal requirement, but interviews are built around questions about teamwork and problem solving, and a term spent running a food bank shift answers those questions better than a month of photocopying. What matters is not the label of the activity but the evidence it supplies: reliability, coordination, persistence. Students should therefore choose activities by the responsibilities they involve rather than by the prestige of the organisation. A well-documented volunteering role can be worth more than a famous name on a certificate."
+          },
+          "score": 12
+        }
+      ]
+    }
+  ]
+}
