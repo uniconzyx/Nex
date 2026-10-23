@@ -216,6 +216,7 @@ node scripts/browser_acceptance.mjs
 | `tsc --noEmit` | EXIT 0 |
 | `vite build` | EXIT 0 |
 | `cargo check`（src-tauri） | Finished，无警告 |
+| `cargo test --lib`（src-tauri） | **32 passed / 0 failed**（含 `api_client` 7 条） |
 
 ## 9. 顺带修掉的 bug
 
@@ -224,6 +225,54 @@ node scripts/browser_acceptance.mjs
 | `exam_bank.py` 括号多一层 | `server/app/services/exam_bank.py` | **后端整个起不来**（SyntaxError），上一阶段编辑残留 |
 | 设置页标题与实际键不符 | `frontend/src/pages/SettingsPage.tsx` | 用户改「判题地址」其实改的是内容服务地址 |
 | 设置页深探测拖慢首屏 | `frontend/src/pages/SettingsPage.tsx` | 打开设置页要等 2s（DB 超时）才出信息；改为浅探测，深探测只在点按钮时做 |
+| **Windows 测试宿主缺应用清单** | `src-tauri/build.rs` | `cargo test --lib` 必崩（`STATUS_ENTRYPOINT_NOT_FOUND`），看着像代码挂了其实是清单缺失，详见下节 |
+
+### 9.1 `cargo test --lib` 崩在加载阶段的根因（Windows 特有）
+
+上一版文档里「Rust 侧没有单元测试」这一条，其实卡在一个**与业务代码无关**的
+Windows 加载问题上，值得单独记一笔：
+
+**现象**：`cargo test --lib` 编译通过，但一运行就报
+
+```
+error: test failed, to rerun pass `--lib`
+Caused by: process didn't exit successfully: nex-<hash>.exe
+  (exit code: 0xc0000139, STATUS_ENTRYPOINT_NOT_FOUND)
+```
+
+**排查过程**（每一步都排除了一个可能）：
+
+1. `import app.main` 之类？—— 不是，Python 侧正常。
+2. DLL 缺失？—— 补上 `WebView2Loader.dll`（`webview2-com-sys` 的 out/x64 里就有）、
+   `libgcc_s_seh-1.dll` / `libwinpthread-1.dll`（rust 工具链 bin 里）后，**依旧**同样报错。
+3. 直接解析 PE 导入表，看 exe 到底要哪些符号：
+
+   ```
+   WebView2Loader.dll ['GetAvailableCoreWebView2BrowserVersionString']   ← 补了，还是崩
+   comctl32.dll      ['DefSubclassProc','RemoveWindowSubclass','SetWindowSubclass','TaskDialogIndirect']
+   ```
+
+4. 核对 System32 的 `comctl32.dll` 导出：只有 v5 那套，**没有 `TaskDialogIndirect`**；
+   `TaskDialogIndirect` 只存在于 **Common-Controls v6**（WinSxS 里的 side-by-side 副本）。
+5. 定位引用源：`grep -rl TaskDialogIndirect ~/.cargo/registry/src/` →
+   `tauri-runtime-wry/src/dialog/windows.rs` 与 `muda`。
+
+**根因**：Windows 应用清单里必须显式依赖 `Microsoft.Windows.Common-Controls` v6，
+否则加载器只认 System32 的 v5，v5 又不导出 `TaskDialogIndirect` → 加载期就崩。
+而 **Tauri 的清单只嵌进 `bin` 目标**（`tauri-winres` → `cargo:rustc-link-arg-bins`），
+`cargo test --lib` 生成的**测试宿主是另一个 exe**，它没有清单。
+
+**修法**（`src-tauri/build.rs`）：不再用 Tauri 自带的清单，改为自编一份
+（内容等价 + `dpiAware`），用 `windres` 编成 COFF 资源对象后通过
+`cargo:rustc-link-arg` 链给**所有**链接目标（bin / 测试宿主 / cdylib），
+保证 test 与 build 的运行时行为一致。
+
+> MSVC 工具链不需要这段：`mt.exe` 与链接器会自动生成外置 `.manifest`，
+> 测试宿主同样能解析到 v6 控件。代码里已按 `CARGO_CFG_TARGET_ENV` 分支跳过。
+
+**顺带收获**：`cargo test --lib` 一旦能跑，之前累积的 `payload` / `sandbox` /
+`lan_server` 单测也全部复活——**32 条一次通过**，其中 `sandbox` 的看门狗、
+临时目录清理、mock 降级等高风险路径现在有回归网了。
 
 ## 10. 自查：这一版还有什么没做
 
@@ -245,8 +294,8 @@ node scripts/browser_acceptance.mjs
    浏览器验收证明了断网后指示灯会变红，但页面内容本身没有「点击重试」入口。
 6. **单文件脚本没进 CI**。`verify_integration.py` 需要后端在跑，
    CI 里要么加 service container，要么退化成静态检查。
-7. **Rust 侧没有单元测试**。`api_client.rs` 的候选地址构造逻辑只被静态断言覆盖，
-   没写 `#[cfg(test)]` 单测。
+7. **Rust 侧单测已补齐并跑通**（`cargo test --lib` 32 passed），
+   但**仍未做真客户端（.exe / .apk）的人工验收**——见第 1 条。
 
 ## 11. 下一步建议
 
@@ -254,7 +303,7 @@ node scripts/browser_acceptance.mjs
 
 1. **在有桌面会话的机器上跑一次真客户端验收**：起 `.exe` → 看顶栏圆点 →
    点设置看健康卡片 → 进「考研手札」看题库加载 → 判一道题。
-   同时补 `api_client.rs` 的 `#[cfg(test)]` 单测。
+   （Rust 单测已补齐，见第 9.1 节。）
 2. **补离线加速重试 + 断线重试入口**（第 10 节第 4、5 条），这两条是真实用户最常撞的。
 3. **Flutter 客户端接 `system/health`**，让 v1 客户端也能判断后端状态。
 4. **`verify_integration.py` 进 CI**：起一个 uvicorn service container，
