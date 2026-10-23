@@ -38,6 +38,12 @@
         "q-os-overview-k3-01",
         "q-os-overview-k4-01",
         "q-os-design-10"
+      ],
+      "suggestedOrder": [
+        "q-os-overview-k2-01",
+        "q-os-overview-k3-01",
+        "q-os-overview-k4-01",
+        "q-os-design-10"
       ]
     },
     {
@@ -86,6 +92,17 @@
         "q-os-design-03",
         "q-os-design-04",
         "q-os-design-05"
+      ],
+      "suggestedOrder": [
+        "q-os-process-k2-01",
+        "q-os-process-k1-01",
+        "q-os-process-k4-01",
+        "q-os-process-k5-01",
+        "q-os-design-01",
+        "q-os-process-k3-01",
+        "q-os-design-04",
+        "q-os-design-03",
+        "q-os-design-05"
       ]
     },
     {
@@ -130,6 +147,15 @@
         "q-os-memory-k3-01",
         "q-os-memory-k3-02",
         "q-os-memory-k4-01",
+        "q-os-design-06",
+        "q-os-design-07"
+      ],
+      "suggestedOrder": [
+        "q-os-memory-k1-01",
+        "q-os-memory-k3-02",
+        "q-os-memory-k4-01",
+        "q-os-memory-k2-01",
+        "q-os-memory-k3-01",
         "q-os-design-06",
         "q-os-design-07"
       ]
@@ -177,6 +203,14 @@
         "q-os-file-k5-01",
         "q-os-design-02",
         "q-os-design-08"
+      ],
+      "suggestedOrder": [
+        "q-os-file-k1-01",
+        "q-os-file-k4-01",
+        "q-os-file-k5-01",
+        "q-os-file-k3-01",
+        "q-os-design-08",
+        "q-os-design-02"
       ]
     },
     {
@@ -217,6 +251,12 @@
         "q-os-io-k3-01",
         "q-os-io-k2-01",
         "q-os-io-k1-01",
+        "q-os-design-09"
+      ],
+      "suggestedOrder": [
+        "q-os-io-k1-01",
+        "q-os-io-k2-01",
+        "q-os-io-k3-01",
         "q-os-design-09"
       ]
     }

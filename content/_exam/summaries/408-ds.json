@@ -43,6 +43,12 @@
         "q-ds-complexity-k1-02",
         "q-ds-complexity-k2-01",
         "q-ds-design-12"
+      ],
+      "suggestedOrder": [
+        "q-ds-complexity-k1-02",
+        "q-ds-complexity-k2-01",
+        "q-ds-complexity-k1-01",
+        "q-ds-design-12"
       ]
     },
     {
@@ -85,6 +91,13 @@
         "q-ds-list-k2-01",
         "q-ds-list-k2-02",
         "q-ds-list-k3-01",
+        "q-ds-design-03"
+      ],
+      "suggestedOrder": [
+        "q-ds-list-k1-01",
+        "q-ds-list-k2-02",
+        "q-ds-list-k3-01",
+        "q-ds-list-k2-01",
         "q-ds-design-03"
       ]
     },
@@ -131,6 +144,15 @@
         "q-ds-stack-k4-01",
         "q-ds-stack-k5-01",
         "q-ds-design-04"
+      ],
+      "suggestedOrder": [
+        "q-ds-stack-k3-01",
+        "q-ds-stack-k2-01",
+        "q-ds-stack-k3-02",
+        "q-ds-stack-k4-01",
+        "q-ds-stack-k2-02",
+        "q-ds-stack-k5-01",
+        "q-ds-design-04"
       ]
     },
     {
@@ -166,6 +188,11 @@
       "questionIds": [
         "q-ds-string-k2-01",
         "q-ds-string-k1-01",
+        "q-ds-design-11"
+      ],
+      "suggestedOrder": [
+        "q-ds-string-k1-01",
+        "q-ds-string-k2-01",
         "q-ds-design-11"
       ]
     },
@@ -210,6 +237,15 @@
         "q-ds-tree-k1-02",
         "q-ds-tree-k2-01",
         "q-ds-tree-k2-02",
+        "q-ds-tree-k5-01",
+        "q-ds-design-05",
+        "q-ds-design-06"
+      ],
+      "suggestedOrder": [
+        "q-ds-tree-k2-02",
+        "q-ds-tree-k1-02",
+        "q-ds-tree-k2-01",
+        "q-ds-tree-k1-01",
         "q-ds-tree-k5-01",
         "q-ds-design-05",
         "q-ds-design-06"
@@ -264,6 +300,16 @@
         "q-ds-graph-k6-01",
         "q-ds-design-02",
         "q-ds-design-07"
+      ],
+      "suggestedOrder": [
+        "q-ds-graph-k1-01",
+        "q-ds-graph-k4-01",
+        "q-ds-graph-k2-01",
+        "q-ds-graph-k3-01",
+        "q-ds-graph-k5-01",
+        "q-ds-graph-k6-01",
+        "q-ds-design-02",
+        "q-ds-design-07"
       ]
     },
     {
@@ -298,6 +344,12 @@
         "在链表上讨论折半查找"
       ],
       "questionIds": [
+        "q-ds-search-k1-01",
+        "q-ds-search-k1-02",
+        "q-ds-search-k5-01",
+        "q-ds-design-08"
+      ],
+      "suggestedOrder": [
         "q-ds-search-k1-01",
         "q-ds-search-k1-02",
         "q-ds-search-k5-01",
@@ -346,6 +398,14 @@
         "q-ds-sort-k4-01",
         "q-ds-sort-k5-01",
         "q-ds-design-09"
+      ],
+      "suggestedOrder": [
+        "q-ds-sort-k1-01",
+        "q-ds-sort-k4-01",
+        "q-ds-sort-k2-01",
+        "q-ds-sort-k3-01",
+        "q-ds-sort-k5-01",
+        "q-ds-design-09"
       ]
     },
     {
@@ -387,6 +447,13 @@
         "q-ds-algo-k1-01",
         "q-ds-algo-k1-02",
         "q-ds-algo-k4-01",
+        "q-ds-design-01",
+        "q-ds-design-10"
+      ],
+      "suggestedOrder": [
+        "q-ds-algo-k4-01",
+        "q-ds-algo-k1-01",
+        "q-ds-algo-k1-02",
         "q-ds-design-01",
         "q-ds-design-10"
       ]

@@ -40,6 +40,14 @@
         "q-dm-b01",
         "q-dm-b08",
         "q-dm-k01"
+      ],
+      "suggestedOrder": [
+        "q-dm-b01",
+        "q-dm-c02",
+        "q-dm-c01",
+        "q-dm-b08",
+        "q-dm-c03",
+        "q-dm-k01"
       ]
     },
     {
@@ -73,6 +81,12 @@
         "q-dm-c04",
         "q-dm-c05",
         "q-dm-c06",
+        "q-dm-k02"
+      ],
+      "suggestedOrder": [
+        "q-dm-c04",
+        "q-dm-c06",
+        "q-dm-c05",
         "q-dm-k02"
       ]
     },
@@ -113,6 +127,13 @@
         "q-dm-c09",
         "q-dm-b02",
         "q-dm-k03"
+      ],
+      "suggestedOrder": [
+        "q-dm-c07",
+        "q-dm-c09",
+        "q-dm-c08",
+        "q-dm-b02",
+        "q-dm-k03"
       ]
     },
     {
@@ -146,6 +167,11 @@
         "q-dm-c10",
         "q-dm-c11",
         "q-dm-c12"
+      ],
+      "suggestedOrder": [
+        "q-dm-c10",
+        "q-dm-c12",
+        "q-dm-c11"
       ]
     },
     {
@@ -180,6 +206,14 @@
         "把欧拉回路与哈密顿回路混为一谈"
       ],
       "questionIds": [
+        "q-dm-c13",
+        "q-dm-c14",
+        "q-dm-c15",
+        "q-dm-b03",
+        "q-dm-k04",
+        "q-dm-k05"
+      ],
+      "suggestedOrder": [
         "q-dm-c13",
         "q-dm-c14",
         "q-dm-c15",
@@ -222,6 +256,14 @@
         "q-dm-b04",
         "q-dm-b05",
         "q-dm-k06"
+      ],
+      "suggestedOrder": [
+        "q-dm-c17",
+        "q-dm-c16",
+        "q-dm-c18",
+        "q-dm-b04",
+        "q-dm-b05",
+        "q-dm-k06"
       ]
     },
     {
@@ -255,6 +297,13 @@
         "q-dm-c19",
         "q-dm-c20",
         "q-dm-c21",
+        "q-dm-b06",
+        "q-dm-k07"
+      ],
+      "suggestedOrder": [
+        "q-dm-c19",
+        "q-dm-c21",
+        "q-dm-c20",
         "q-dm-b06",
         "q-dm-k07"
       ]
@@ -295,6 +344,13 @@
         "q-dm-c23",
         "q-dm-c24",
         "q-dm-b07",
+        "q-dm-k08"
+      ],
+      "suggestedOrder": [
+        "q-dm-c23",
+        "q-dm-c22",
+        "q-dm-b07",
+        "q-dm-c24",
         "q-dm-k08"
       ]
     }

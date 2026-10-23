@@ -38,6 +38,12 @@
         "q-co-overview-k2-02",
         "q-co-overview-k3-01",
         "q-co-design-03"
+      ],
+      "suggestedOrder": [
+        "q-co-overview-k2-01",
+        "q-co-overview-k3-01",
+        "q-co-overview-k2-02",
+        "q-co-design-03"
       ]
     },
     {
@@ -82,6 +88,16 @@
         "q-co-data-k3-01",
         "q-co-data-k3-02",
         "q-co-data-k4-01",
+        "q-co-data-k5-01",
+        "q-co-design-04",
+        "q-co-design-05"
+      ],
+      "suggestedOrder": [
+        "q-co-data-k1-01",
+        "q-co-data-k3-01",
+        "q-co-data-k4-01",
+        "q-co-data-k2-01",
+        "q-co-data-k3-02",
         "q-co-data-k5-01",
         "q-co-design-04",
         "q-co-design-05"
@@ -132,6 +148,17 @@
         "q-co-design-01",
         "q-co-design-06",
         "q-co-design-07"
+      ],
+      "suggestedOrder": [
+        "q-co-memory-k1-01",
+        "q-co-memory-k4-01",
+        "q-co-memory-k3-01",
+        "q-co-memory-k4-02",
+        "q-co-memory-k3-02",
+        "q-co-memory-k2-01",
+        "q-co-design-07",
+        "q-co-design-01",
+        "q-co-design-06"
       ]
     },
     {
@@ -174,6 +201,14 @@
         "q-co-isa-k2-02",
         "q-co-isa-k3-01",
         "q-co-isa-k4-01",
+        "q-co-design-08"
+      ],
+      "suggestedOrder": [
+        "q-co-isa-k2-02",
+        "q-co-isa-k3-01",
+        "q-co-isa-k2-01",
+        "q-co-isa-k4-01",
+        "q-co-isa-k1-01",
         "q-co-design-08"
       ]
     },
@@ -219,6 +254,15 @@
         "q-co-design-02",
         "q-co-design-09",
         "q-co-design-10"
+      ],
+      "suggestedOrder": [
+        "q-co-cpu-k1-01",
+        "q-co-cpu-k4-01",
+        "q-co-cpu-k4-02",
+        "q-co-cpu-k5-01",
+        "q-co-design-02",
+        "q-co-design-09",
+        "q-co-design-10"
       ]
     },
     {
@@ -253,6 +297,11 @@
       "questionIds": [
         "q-co-bus-k1-01",
         "q-co-bus-k2-01",
+        "q-co-design-11"
+      ],
+      "suggestedOrder": [
+        "q-co-bus-k2-01",
+        "q-co-bus-k1-01",
         "q-co-design-11"
       ]
     },
@@ -297,6 +346,14 @@
         "q-co-io-k2-02",
         "q-co-io-k4-01",
         "q-co-io-k4-02",
+        "q-co-design-12"
+      ],
+      "suggestedOrder": [
+        "q-co-io-k1-01",
+        "q-co-io-k4-02",
+        "q-co-io-k2-01",
+        "q-co-io-k4-01",
+        "q-co-io-k2-02",
         "q-co-design-12"
       ]
     }

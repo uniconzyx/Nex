@@ -320,13 +320,14 @@ def summaries(exam: str, subject: str) -> dict:
     groups = [
         {
             "topic": g.get("topic"),
-            "title": g.get("title"),
-            "recognize": g.get("recognize"),
-            "framework": g.get("framework") or [],
-            "skills": g.get("skills") or [],
-            "traps": g.get("traps") or [],
-            "question_ids": g.get("questionIds") or [],
-        }
+                "title": g.get("title"),
+                "recognize": g.get("recognize"),
+                "framework": g.get("framework") or [],
+                "skills": g.get("skills") or [],
+                "traps": g.get("traps") or [],
+                "question_ids": g.get("questionIds") or [],
+                "suggested_order": g.get("suggestedOrder") or [],
+            }
         for g in doc.get("groups") or []
     ]
     return {"exam": exam, "subject": subject, "groups": groups, "total": len(groups)}

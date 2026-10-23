@@ -1,0 +1,19 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Nex 主窗口默认权限。重点：严格最小权限，网络访问只放行本机回环（go-judge / 本地 WS）。",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "core:event:default",
+    "core:window:default",
+    "core:app:default",
+    "core:path:default",
+    "allow-judge",
+    "allow-judge-batch",
+    "allow-judge-ws-url",
+    "allow-check-environment",
+    "allow-get-status",
+    "allow-api-probe"
+  ]
+}

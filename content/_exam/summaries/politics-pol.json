@@ -43,6 +43,18 @@
         "q-pol-m06",
         "q-pol-a01",
         "q-pol-a06"
+      ],
+      "suggestedOrder": [
+        "q-pol-s03",
+        "q-pol-s02",
+        "q-pol-s05",
+        "q-pol-s01",
+        "q-pol-s04",
+        "q-pol-s06",
+        "q-pol-m06",
+        "q-pol-m01",
+        "q-pol-a06",
+        "q-pol-a01"
       ]
     },
     {
@@ -83,6 +95,16 @@
         "q-pol-s11",
         "q-pol-m02",
         "q-pol-m07",
+        "q-pol-a02"
+      ],
+      "suggestedOrder": [
+        "q-pol-s09",
+        "q-pol-s07",
+        "q-pol-s08",
+        "q-pol-s10",
+        "q-pol-s11",
+        "q-pol-m07",
+        "q-pol-m02",
         "q-pol-a02"
       ]
     },
@@ -125,6 +147,16 @@
         "q-pol-m03",
         "q-pol-a03",
         "q-pol-a07"
+      ],
+      "suggestedOrder": [
+        "q-pol-s12",
+        "q-pol-s15",
+        "q-pol-s14",
+        "q-pol-s13",
+        "q-pol-a07",
+        "q-pol-s16",
+        "q-pol-m03",
+        "q-pol-a03"
       ]
     },
     {
@@ -166,6 +198,16 @@
         "q-pol-m08",
         "q-pol-a04",
         "q-pol-a08"
+      ],
+      "suggestedOrder": [
+        "q-pol-s18",
+        "q-pol-s17",
+        "q-pol-s19",
+        "q-pol-s20",
+        "q-pol-m08",
+        "q-pol-m04",
+        "q-pol-a04",
+        "q-pol-a08"
       ]
     },
     {
@@ -203,6 +245,14 @@
         "q-pol-s22",
         "q-pol-s23",
         "q-pol-s24",
+        "q-pol-m05",
+        "q-pol-a05"
+      ],
+      "suggestedOrder": [
+        "q-pol-s21",
+        "q-pol-s22",
+        "q-pol-s24",
+        "q-pol-s23",
         "q-pol-m05",
         "q-pol-a05"
       ]

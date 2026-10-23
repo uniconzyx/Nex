@@ -35,6 +35,13 @@
         "q-algo-c03",
         "q-algo-b01",
         "q-algo-k01"
+      ],
+      "suggestedOrder": [
+        "q-algo-c01",
+        "q-algo-c02",
+        "q-algo-b01",
+        "q-algo-c03",
+        "q-algo-k01"
       ]
     },
     {
@@ -76,6 +83,15 @@
         "q-algo-b03",
         "q-algo-b08",
         "q-algo-k02"
+      ],
+      "suggestedOrder": [
+        "q-algo-c05",
+        "q-algo-c04",
+        "q-algo-c06",
+        "q-algo-b03",
+        "q-algo-b02",
+        "q-algo-k02",
+        "q-algo-b08"
       ]
     },
     {
@@ -108,6 +124,11 @@
       "questionIds": [
         "q-algo-c07",
         "q-algo-c08",
+        "q-algo-c09"
+      ],
+      "suggestedOrder": [
+        "q-algo-c08",
+        "q-algo-c07",
         "q-algo-c09"
       ]
     },
@@ -143,6 +164,12 @@
         "q-algo-c11",
         "q-algo-c12",
         "q-algo-k03"
+      ],
+      "suggestedOrder": [
+        "q-algo-c10",
+        "q-algo-k03",
+        "q-algo-c11",
+        "q-algo-c12"
       ]
     },
     {
@@ -184,6 +211,15 @@
         "q-algo-b05",
         "q-algo-k04",
         "q-algo-k05"
+      ],
+      "suggestedOrder": [
+        "q-algo-c13",
+        "q-algo-c15",
+        "q-algo-c14",
+        "q-algo-b05",
+        "q-algo-b04",
+        "q-algo-k04",
+        "q-algo-k05"
       ]
     },
     {
@@ -214,6 +250,13 @@
         "用大规模例子，反而看不清差异"
       ],
       "questionIds": [
+        "q-algo-c16",
+        "q-algo-c17",
+        "q-algo-c18",
+        "q-algo-b07",
+        "q-algo-k06"
+      ],
+      "suggestedOrder": [
         "q-algo-c16",
         "q-algo-c17",
         "q-algo-c18",
@@ -257,6 +300,12 @@
         "q-algo-c20",
         "q-algo-c21",
         "q-algo-k08"
+      ],
+      "suggestedOrder": [
+        "q-algo-c19",
+        "q-algo-c20",
+        "q-algo-c21",
+        "q-algo-k08"
       ]
     },
     {
@@ -290,6 +339,13 @@
         "q-algo-c22",
         "q-algo-c23",
         "q-algo-c24",
+        "q-algo-b06",
+        "q-algo-k07"
+      ],
+      "suggestedOrder": [
+        "q-algo-c22",
+        "q-algo-c24",
+        "q-algo-c23",
         "q-algo-b06",
         "q-algo-k07"
       ]

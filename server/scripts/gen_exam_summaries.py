@@ -16,6 +16,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from exam_ordering import order_questions
+
 ROOT = Path(__file__).resolve().parents[2]
 EXAM = ROOT / "content" / "_exam"
 
@@ -62,6 +64,7 @@ def main() -> int:
             if not skills:
                 skills = [{"title": p["title"], "body": p["ask"]} for p in pats][:2]
 
+            qids = [q["id"] for q in items]
             groups.append({
                 "topic": tid,
                 "title": titles.get(tid, t["title"]),
@@ -70,7 +73,8 @@ def main() -> int:
                 "framework": steps,
                 "skills": skills,
                 "traps": traps[:4],
-                "questionIds": [q["id"] for q in items],
+                "questionIds": qids,
+                "suggestedOrder": order_questions(items),
             })
 
         out = EXAM / "summaries" / f"{exam}-{subj}.json"

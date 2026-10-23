@@ -1,0 +1,6 @@
+# Nex 自定义权限：api-probe 命令（探测内容服务 FastAPI 的地址与可达性）
+# 由 capabilities/default.json 以裸名 `allow-api-probe` 引用。
+[[permission]]
+identifier = "allow-api-probe"
+description = "Allow the frontend to ask the client which content-service base URL is reachable."
+commands.allow = ["api_probe"]

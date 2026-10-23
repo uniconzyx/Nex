@@ -38,6 +38,12 @@
         "q-cn-arch-k2-01",
         "q-cn-arch-k3-01",
         "q-cn-arch-k3-02"
+      ],
+      "suggestedOrder": [
+        "q-cn-arch-k1-01",
+        "q-cn-arch-k2-01",
+        "q-cn-arch-k3-01",
+        "q-cn-arch-k3-02"
       ]
     },
     {
@@ -71,6 +77,11 @@
         "同时给两个条件时只算一个，没有取较小值"
       ],
       "questionIds": [
+        "q-cn-phy-k1-01",
+        "q-cn-phy-k1-02",
+        "q-cn-design-02"
+      ],
+      "suggestedOrder": [
         "q-cn-phy-k1-01",
         "q-cn-phy-k1-02",
         "q-cn-design-02"
@@ -117,6 +128,13 @@
         "q-cn-link-k4-01",
         "q-cn-link-k5-01",
         "q-cn-design-03"
+      ],
+      "suggestedOrder": [
+        "q-cn-link-k4-01",
+        "q-cn-link-k5-01",
+        "q-cn-link-k2-01",
+        "q-cn-link-k3-01",
+        "q-cn-design-03"
       ]
     },
     {
@@ -161,6 +179,14 @@
         "q-cn-network-k4-01",
         "q-cn-design-01",
         "q-cn-design-04"
+      ],
+      "suggestedOrder": [
+        "q-cn-network-k4-01",
+        "q-cn-network-k2-01",
+        "q-cn-network-k1-01",
+        "q-cn-network-k3-01",
+        "q-cn-design-01",
+        "q-cn-design-04"
       ]
     },
     {
@@ -203,6 +229,13 @@
         "q-cn-transport-k3-01",
         "q-cn-transport-k4-01",
         "q-cn-design-05"
+      ],
+      "suggestedOrder": [
+        "q-cn-transport-k1-01",
+        "q-cn-transport-k2-01",
+        "q-cn-transport-k3-01",
+        "q-cn-transport-k4-01",
+        "q-cn-design-05"
       ]
     },
     {
@@ -236,6 +269,11 @@
         "忽略 DNS 缓存导致的 RTT 减少"
       ],
       "questionIds": [
+        "q-cn-app-k1-01",
+        "q-cn-app-k2-01",
+        "q-cn-design-06"
+      ],
+      "suggestedOrder": [
         "q-cn-app-k1-01",
         "q-cn-app-k2-01",
         "q-cn-design-06"

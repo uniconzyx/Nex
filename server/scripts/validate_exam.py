@@ -187,6 +187,7 @@ def main() -> int:
     # ---------------- 题库 ----------------
     all_ids: set[str] = set()
     by_topic: dict[str, list[dict]] = defaultdict(list)
+    by_id: dict[str, dict] = {}
     type_cnt: Counter[str] = Counter()
     per_exam: dict[str, int] = Counter()
     total = 0
@@ -211,6 +212,7 @@ def main() -> int:
                     rep.err(f"{where} id 重复")
                 else:
                     all_ids.add(qid)
+                    by_id[qid] = q
 
                 typ = q.get("type")
                 if typ not in VALID_TYPES:
@@ -306,6 +308,24 @@ def main() -> int:
                         rep.err(f"{where} 漏统计题目 {sorted(miss)[:3]}")
                     if extra:
                         rep.err(f"{where} 统计了不存在的题目 {sorted(extra)[:3]}")
+
+                # 第④步：推荐刷题序列必须为 questionIds 的排列，且相邻尽量少撞同一考点
+                order = g.get("suggestedOrder") or []
+                if ids and not order:
+                    rep.err(f"{where} 缺 suggestedOrder（推荐刷题序列）")
+                elif order:
+                    if len(order) != len(ids) or set(order) != set(ids):
+                        rep.err(f"{where} suggestedOrder 不是 questionIds 的排列（漏/多/重复）")
+                    else:
+                        same = 0
+                        for a, b in zip(order, order[1:]):
+                            qa = by_id.get(a)
+                            qb = by_id.get(b)
+                            if qa and qb and qa.get("knowledge") == qb.get("knowledge"):
+                                same += 1
+                        ratio = same / max(1, len(order) - 1)
+                        if ratio > 0.34:
+                            rep.warn(f"{where} 建议顺序相邻同考点比例偏高（{same}/{len(order) - 1}，{ratio:.0%}）")
                 sum_done += 1
 
             have = {t for t in by_topic if by_topic[t]}
