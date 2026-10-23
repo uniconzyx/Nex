@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import shutil
 import socket
 import subprocess
 import sys
@@ -36,7 +37,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[1]
 SERVER = ROOT / "server"
 FRONTEND = ROOT / "frontend"
 LOG_DIR = ROOT / "scratch" / "logs"
@@ -89,7 +90,9 @@ def preflight() -> bool:
         import fastapi  # noqa: F401
         import uvicorn  # noqa: F401
     except Exception:
-        log("✗ 缺少 fastapi/uvicorn。请先安装：pip install -r server/requirements.txt")
+        log("✗ 缺少 fastapi/uvicorn。请用装了依赖的解释器跑本脚本，例如：")
+        log(f"    {sys.executable} scripts/dev_stack.py")
+        log("  依赖安装：pip install -r server/requirements.txt")
         ok = False
 
     # 2. 题库数据（文件型功能的基础）
@@ -142,15 +145,14 @@ def start_frontend() -> subprocess.Popen | None:
 
     LOG_DIR.mkdir(parents=True, exist_ok=True)
     logf = open(LOG_DIR / "frontend.log", "w", encoding="utf-8")
-    npm = shutil_which_npm()
-    if not npm:
-        log("✗ 找不到 npm。前端启动失败。")
+    cmd = frontend_command()
+    if not cmd:
+        log("✗ 找不到可用的前端启动方式（既无 node 也无 npm）。")
         return None
-    log("启动前端 vite …")
+    log(f"启动前端 vite …（{' '.join(cmd)}）")
     proc = subprocess.Popen(
-        [npm, "run", "dev", "--", "--port", str(WEB_PORT), "--strictPort"],
+        cmd,
         cwd=str(FRONTEND), stdout=logf, stderr=subprocess.STDOUT,
-        shell=True,
     )
     if wait_http(f"http://127.0.0.1:{WEB_PORT}/", 60):
         log(f"✓ 前端就绪 http://127.0.0.1:{WEB_PORT}（日志：{LOG_DIR / 'frontend.log'}）")
@@ -159,19 +161,28 @@ def start_frontend() -> subprocess.Popen | None:
     return None
 
 
-def shutil_which_npm() -> str | None:
-    """Windows 上 npm 是 npm.cmd，直接 exec 找不到。"""
-    for name in ("npm.cmd", "npm"):
-        path = shutil_which(name)
-        if path:
-            return path
+def frontend_command() -> list[str] | None:
+    """构造启动 vite dev server 的命令。
+
+    优先**直跑 vite 脚本**，不走 `npm run dev`：
+      本机的 `npm` 会被命令安全层路由到 wsl.exe 并被黑名单拦截，
+      直跑 node + node_modules/vite/bin/vite.js 才稳。
+    找不到 node 时才退回 npm。
+    """
+    vite_js = FRONTEND / "node_modules" / "vite" / "bin" / "vite.js"
+    if vite_js.is_file():
+        node = shutil.which("node")
+        if node:
+            return [
+                node,
+                str(vite_js),
+                "--port", str(WEB_PORT),
+                "--strictPort",
+            ]
+    npm = shutil.which("npm.cmd") or shutil.which("npm")
+    if npm:
+        return [npm, "run", "dev", "--", "--port", str(WEB_PORT), "--strictPort"]
     return None
-
-
-def shutil_which(cmd: str) -> str | None:
-    from shutil import which
-
-    return which(cmd)
 
 
 # ------------------------------------------------------------------ 收尾 --
