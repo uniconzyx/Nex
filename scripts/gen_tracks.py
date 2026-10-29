@@ -107,16 +107,49 @@ def gen_reexam() -> None:
         "  university: string;",
         "  year: number;",
         "  module: string;",
+        "  /** 题型（模拟/贪心/二分/DP/图/树/字符串/位运算…），用于按题型筛题 */",
+        "  type: string;",
         "  scene: string;",
         "  framework: string;",
         "  algorithm: string;",
         "  code: string;",
+        "  /** 可复跑样例输入（audit_reexam_code.py 用它重编译重跑验真） */",
+        "  sampleIn?: string;",
+        "  /** 样例期望输出（真实运行所得，非人脑推算） */",
+        "  sampleOut?: string;",
+        "}",
+        "export interface ReexamPlaybookPattern {",
+        "  name: string;",
+        "  when: string;",
+        "  template: string;",
+        "  trap: string;",
+        "  complexity: string;",
+        "}",
+        "export interface ReexamPlaybookGroup {",
+        "  group: string;",
+        "  /** 这组题的共性 / 为什么归为一类（一句话，便于先判断该不该用） */",
+        "  why?: string;",
+        "  /** 该组框架覆盖的机试题题型（与 ReexamMachineTest.type 同名词表） */",
+        "  types: string[];",
+        "  patterns: ReexamPlaybookPattern[];",
+        "}",
+        "export interface ReexamPlaybookStep {",
+        "  name: string;",
+        "  detail: string;",
+        "}",
+        "export interface ReexamPlaybook {",
+        "  title: string;",
+        "  intro: string;",
+        "  steps: ReexamPlaybookStep[];",
+        "  groups: ReexamPlaybookGroup[];",
+        "  checklist: string[];",
         "}",
         "export interface ReexamDef {",
         "  trackId: string;",
         "  name: string;",
         "  interview: ReexamInterview;",
         "  machineTests: ReexamMachineTest[];",
+        "  algorithmPlaybook: ReexamPlaybook;",
         "}",
         "",
         f"export const REEXAM: ReexamDef = {json.dumps(data, ensure_ascii=False, indent=2)};",
@@ -125,8 +158,12 @@ def gen_reexam() -> None:
     out.write_text("\n".join(lines), encoding="utf-8")
     n_q = sum(len(c["questions"]) for c in data["interview"]["categories"])
     n_t = len(data["machineTests"])
+    n_types = len({t.get("type") for t in data["machineTests"] if t.get("type")})
+    pb = data.get("algorithmPlaybook") or {"groups": []}
+    n_pat = sum(len(g["patterns"]) for g in pb["groups"])
     print(
-        f"写入 {out.relative_to(ROOT)}：{data['trackId']} · 面试 {n_q} 题 · 机试 {n_t} 题"
+        f"写入 {out.relative_to(ROOT)}：{data['trackId']} · 面试 {n_q} 题 · "
+        f"机试 {n_t} 题（{n_types} 类题型）· 算法框架 {len(pb['groups'])} 组 {n_pat} 个"
     )
 
 

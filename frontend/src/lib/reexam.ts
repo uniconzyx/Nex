@@ -1,9 +1,10 @@
 /**
- * reexam.ts —— 考研复试板块（P6）纯函数层
+ * reexam.ts —— 考研复试板块（P6 + 题型/框架扩充）纯函数层
  * ============================================================================
  * 读 REEXAM（由 content/_tracks/reexam.json 经 gen_tracks.py 生成），
- * 把「复试专属面试问题（非八股）+ 机试题库（三层答案 + 工作场景）」
- * 整理成视图模型，供 ReexamPage 渲染、供 --check-reexam 断言。
+ * 把「复试专属面试问题（非八股）+ 机试题库（三层答案 + 工作场景）
+ * + 常考算法思想与框架速查」整理成视图模型，供 ReexamPage 渲染、
+ * 供 --check-reexam 断言。
  *
  * 与 employment.ts 同构：纯函数、只读、零 dispatch。
  * 机试答案固定三层（大框架 / 核心算法思想 / 完整代码），每题附工作场景，
@@ -14,6 +15,7 @@ import {
   REEXAM,
   type ReexamInterviewCategory,
   type ReexamMachineTest,
+  type ReexamPlaybookGroup,
 } from '../data/reexam';
 
 export interface InterviewQuestion {
@@ -43,6 +45,26 @@ export interface InterviewSection {
   totalQuestions: number;
 }
 
+/** 题型聚合：题型名 -> 题目数（按数量降序，同量按名称） */
+export interface TypeBucket {
+  type: string;
+  count: number;
+}
+
+/** 算法框架分组视图 */
+export interface PlaybookGroupView extends ReexamPlaybookGroup {
+  count: number;
+}
+
+export interface PlaybookView {
+  title: string;
+  intro: string;
+  steps: { name: string; detail: string }[];
+  groups: PlaybookGroupView[];
+  checklist: string[];
+  totalPatterns: number;
+}
+
 export interface ReexamView {
   trackId: string;
   name: string;
@@ -52,11 +74,14 @@ export interface ReexamView {
   universities: string[];
   /** 去重后的关联模块（与 408 模块呼应） */
   modules: string[];
+  /** 去重后的题型列表（机试题分类维度） */
+  types: TypeBucket[];
+  playbook: PlaybookView;
   totalQuestions: number;
   totalMachineTests: number;
 }
 
-/** 构建复试视图：面试分类 + 机试题三层答案 */
+/** 构建复试视图：面试分类 + 机试题三层答案 + 题型聚合 + 算法框架 */
 export function buildReexamView(): ReexamView {
   const interviewDef = REEXAM.interview;
   const categories: InterviewCategoryView[] = interviewDef.categories.map((c) => ({
@@ -77,6 +102,26 @@ export function buildReexamView(): ReexamView {
   const universities = Array.from(new Set(REEXAM.machineTests.map((t) => t.university)));
   const modules = Array.from(new Set(REEXAM.machineTests.map((t) => t.module)));
 
+  const counter = new Map<string, number>();
+  for (const t of REEXAM.machineTests) {
+    const key = t.type || '未分类';
+    counter.set(key, (counter.get(key) ?? 0) + 1);
+  }
+  const types: TypeBucket[] = Array.from(counter, ([type, count]) => ({ type, count })).sort(
+    (a, b) => b.count - a.count || a.type.localeCompare(b.type, 'zh'),
+  );
+
+  const pbDef = REEXAM.algorithmPlaybook;
+  const groups: PlaybookGroupView[] = pbDef.groups.map((g) => ({ ...g, count: g.patterns.length }));
+  const playbook: PlaybookView = {
+    title: pbDef.title,
+    intro: pbDef.intro,
+    steps: pbDef.steps,
+    groups,
+    checklist: pbDef.checklist,
+    totalPatterns: groups.reduce((n, g) => n + g.count, 0),
+  };
+
   return {
     trackId: REEXAM.trackId,
     name: REEXAM.name,
@@ -89,19 +134,55 @@ export function buildReexamView(): ReexamView {
     machineTests,
     universities,
     modules,
+    types,
+    playbook,
     totalQuestions,
     totalMachineTests: machineTests.length,
   };
+}
+
+/* ------------------------------------------------------------------ 筛选 */
+
+export interface MachineFilter {
+  /** 题型；空串 = 全部 */
+  type?: string;
+  /** 来源高校；空串 = 全部 */
+  university?: string;
+  /** 关联模块；空串 = 全部 */
+  module?: string;
+  /** 关键词（标题/场景/算法思想大小写不敏感子串） */
+  keyword?: string;
+}
+
+/** 按题型 / 高校 / 模块 / 关键词筛选机试题（纯函数，不改原数组） */
+export function filterMachineTests(
+  tests: MachineTestView[],
+  f: MachineFilter,
+): MachineTestView[] {
+  const kw = (f.keyword ?? '').trim().toLowerCase();
+  return tests.filter((t) => {
+    if (f.type && t.type !== f.type) return false;
+    if (f.university && t.university !== f.university) return false;
+    if (f.module && t.module !== f.module) return false;
+    if (kw) {
+      const hay = `${t.title}\n${t.scene}\n${t.algorithm}\n${t.framework}`.toLowerCase();
+      if (!hay.includes(kw)) return false;
+    }
+    return true;
+  });
 }
 
 /* ------------------------------------------------------------------ 导出 */
 
 /** 把复试视图渲染成 Markdown（用于导出 / 复盘） */
 export function reexamToMarkdown(v: ReexamView): string {
+  const typeLine = v.types.map((t) => `${t.type}×${t.count}`).join('、');
   const head = [
     `### ${v.name}`,
     '',
-    `> 面试问题 ${v.totalQuestions} 道（${v.interview.categories.length} 类，非八股） · 机试题 ${v.totalMachineTests} 道（来源：${v.universities.join('、')}）`,
+    `> 面试问题 ${v.totalQuestions} 道（${v.interview.categories.length} 类，非八股） · 机试题 ${v.totalMachineTests} 道（来源 ${v.universities.length} 所高校）`,
+    '',
+    `> 题型分布：${typeLine}`,
     '',
   ];
 
@@ -126,12 +207,45 @@ export function reexamToMarkdown(v: ReexamView): string {
     return lines.join('\n');
   });
 
-  const mtHead = ['## 二、机试题库（高校真题 · 三层答案 · 工作场景）', ''];
+  const pb = v.playbook;
+  const pbHead = [
+    '## 二、常考算法思想与框架（速查）',
+    '',
+    `> ${pb.intro}`,
+    '',
+    '### 拿到题先走的五步',
+    '',
+    ...pb.steps.map((s) => `- **${s.name}**：${s.detail}`),
+    '',
+    '### 框架速查',
+    '',
+  ];
+  const pbBlocks = pb.groups.map((g) => {
+    const lines = [`#### ${g.group}（${g.count}）`, ''];
+    if (g.why) lines.push(`> ${g.why}`, '');
+    if (g.types.length) lines.push(`- 对应题型：${g.types.join('、')}`, '');
+    g.patterns.forEach((p, i) => {
+      lines.push(`**${i + 1}. ${p.name}**`);
+      lines.push('');
+      lines.push(`- 何时用：${p.when}`);
+      lines.push(`- 复杂度：${p.complexity}`);
+      lines.push(`- 易错：${p.trap}`);
+      lines.push('');
+      lines.push('```cpp');
+      lines.push(p.template.trimEnd());
+      lines.push('```');
+      lines.push('');
+    });
+    return lines.join('\n');
+  });
+  const pbTail = ['### 提交前自检清单', '', ...pb.checklist.map((c, i) => `${i + 1}. ${c}`), ''];
+
+  const mtHead = ['## 三、机试题库（高校真题 · 三层答案 · 工作场景）', ''];
   const mtBlocks = v.machineTests.map((t, i) => {
     const lines = [
       `### ${i + 1}. ${t.title}`,
       '',
-      `- 来源：${t.university}（${t.year}）｜关联模块：${t.module}`,
+      `- 来源：${t.university}（${t.year}）｜题型：${t.type}｜关联模块：${t.module}`,
       `- 工作场景：${t.scene}`,
       '',
     ];
@@ -144,5 +258,15 @@ export function reexamToMarkdown(v: ReexamView): string {
     return lines.join('\n');
   });
 
-  return [...head, ...ivHead, ...catBlocks, ...mtHead, ...mtBlocks, ''].join('\n');
+  return [
+    ...head,
+    ...ivHead,
+    ...catBlocks,
+    ...pbHead,
+    ...pbBlocks,
+    ...pbTail,
+    ...mtHead,
+    ...mtBlocks,
+    '',
+  ].join('\n');
 }

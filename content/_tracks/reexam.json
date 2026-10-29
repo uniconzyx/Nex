@@ -9,40 +9,160 @@
         "category": "研究计划",
         "desc": "导师最看重：你读研想做什么、为什么、是否匹配他的方向。",
         "questions": [
-          { "q": "你读研最想研究的方向是什么？为什么选它？", "tip": "要具体（如「图神经网络在推荐系统的冷启动」），切忌「我对 AI 感兴趣」这种空话；讲清痛点与你的动机。" },
-          { "q": "你最近读过哪篇论文？它解决了什么问题、方法创新在哪？", "tip": "准备 1-2 篇精读论文，能讲清「输入/输出/核心方法/实验结论」，别只背摘要。" },
-          { "q": "你的研究计划与我的方向（或实验室方向）怎么契合？", "tip": "提前读导师近 3 年论文/项目，把你的兴趣锚定到他的工作线上，展现「做过功课」。" },
-          { "q": "如果选题做不出来，你的备选方案是什么？", "tip": "导师想看风险意识与 Plan B，体现科研韧性而非盲目自信。" }
+          {
+            "q": "你读研最想研究的方向是什么？为什么选它？",
+            "tip": "要具体（如「图神经网络在推荐系统的冷启动」），切忌「我对 AI 感兴趣」这种空话；讲清痛点与你的动机。"
+          },
+          {
+            "q": "你最近读过哪篇论文？它解决了什么问题、方法创新在哪？",
+            "tip": "准备 1-2 篇精读论文，能讲清「输入/输出/核心方法/实验结论」，别只背摘要。"
+          },
+          {
+            "q": "你的研究计划与我的方向（或实验室方向）怎么契合？",
+            "tip": "提前读导师近 3 年论文/项目，把你的兴趣锚定到他的工作线上，展现「做过功课」。"
+          },
+          {
+            "q": "如果选题做不出来，你的备选方案是什么？",
+            "tip": "导师想看风险意识与 Plan B，体现科研韧性而非盲目自信。"
+          },
+          {
+            "q": "你读过我们组最近三年的哪几篇论文？请挑一篇讲讲它的方法和不足。",
+            "tip": "这是最有效的「反套磁过滤器」：导师一眼能看出你是真读还是只看标题。准备结构=① 问题背景一句话 ② 方法核心（用图或公式讲清一个关键设计）③ 实验设置的局限④ 你认为可以改的一点（哪怕是工程上的）。切忌泛泛夸「工作很扎实」。"
+          },
+          {
+            "q": "如果你的研究计划做了半年发现走不通，你会怎么处理？",
+            "tip": "导师想知道你有没有「止损」的判断力。好答案要有可判定的失败信号（指标不涨、假设被证伪）、备选路径（换建模/缩小问题/换数据）、以及向导师汇报的节奏（两周一次小结论，而不是半年后突然说不行）。"
+          },
+          {
+            "q": "你更想做工程落地型课题还是理论型课题？为什么？",
+            "tip": "不要为了讨好而选边。诚实说明偏好，再给出「我能补什么」：偏工程就说愿意补数学基础，偏理论就说愿意做系统实现验证。导师最怕的是「什么都行」——那通常意味着没有想过。"
+          }
         ]
       },
       {
         "category": "项目陈述",
         "desc": "把你做过的项目讲清楚：难点、你的角色、量化结果。",
         "questions": [
-          { "q": "讲一个你最有成就感的项目，你的角色和贡献是什么？", "tip": "用 STAR：背景-任务-行动-结果，量化指标（QPS 提升 X%、延迟降 Yms）比「做了很多」更有力。" },
-          { "q": "这个项目最大的技术难点是什么？你怎么攻克的？", "tip": "选真难点，展示排查链路（现象→假设→验证→定位），别编一个你讲不深的坑。" },
-          { "q": "这个项目如果重做，你会怎么改进架构？", "tip": "体现复盘与架构演进思维，展示你不止会写业务代码。" },
-          { "q": "你遇到过最难复现的 Bug 是什么？怎么定位的？", "tip": "线上问题、偶发卡顿、并发竞态都是好素材，重点在定位方法论。" }
+          {
+            "q": "讲一个你最有成就感的项目，你的角色和贡献是什么？",
+            "tip": "用 STAR：背景-任务-行动-结果，量化指标（QPS 提升 X%、延迟降 Yms）比「做了很多」更有力。"
+          },
+          {
+            "q": "这个项目最大的技术难点是什么？你怎么攻克的？",
+            "tip": "选真难点，展示排查链路（现象→假设→验证→定位），别编一个你讲不深的坑。"
+          },
+          {
+            "q": "这个项目如果重做，你会怎么改进架构？",
+            "tip": "体现复盘与架构演进思维，展示你不止会写业务代码。"
+          },
+          {
+            "q": "你遇到过最难复现的 Bug 是什么？怎么定位的？",
+            "tip": "线上问题、偶发卡顿、并发竞态都是好素材，重点在定位方法论。"
+          },
+          {
+            "q": "这个项目里哪部分是你独立完成的？如果换个人来做，你预计他会在哪里卡住？",
+            "tip": "用「模块 + 决策点」回答：我负责 X 模块，其中最难的是 Y 决策（为什么选 A 不选 B）。第二问考的是你有没有真正理解难点——能指出「卡点」说明你走过弯路，可信度远高于「都很顺利」。"
+          },
+          {
+            "q": "你的项目上线后有没有出过故障？怎么定位和修复的？",
+            "tip": "导师特别看重「故障复盘」因为它同时暴露技术深度与工程素养。按 现象→假设→验证→根因→修复→防复发 讲，务必给出一个具体指标（P99、错误率、内存增长曲线），并说明你加了什么监控/单测让同类问题不再发生。"
+          },
+          {
+            "q": "如果给你两倍的时间和资源，你会把这个项目改成什么样？",
+            "tip": "考的是「架构想象力 + 取舍意识」。好答案先说不改什么（说明你知道边界），再说改一处最有杠杆的地方，并量化收益（延迟降多少、成本降多少）。避免列一堆「上 Kubernetes、上微服务」的空话。"
+          }
         ]
       },
       {
         "category": "英语口语",
         "desc": "自我介绍、专业文献朗读翻译、日常与学术问答。",
         "questions": [
-          { "q": "Please introduce yourself in English (1-2 min).", "tip": "背熟 3 段：本科学校/专业、项目亮点、读研动机；语速稳比华丽词藻重要。" },
-          { "q": "Translate this paragraph about your major into Chinese.", "tip": "遇到生词别卡壳，按意群猜译；平时多读英文 abstract 练长句。" },
-          { "q": "Why do you choose to pursue a master's degree?", "tip": "学术导向（research interest）比「好就业」更受导师欢迎。" },
-          { "q": "Describe your hometown / your favorite course.", "tip": "准备 5 个万能话题词库，灵活组合，避免临场组织语言。" }
+          {
+            "q": "Please introduce yourself in English (1-2 min).",
+            "tip": "背熟 3 段：本科学校/专业、项目亮点、读研动机；语速稳比华丽词藻重要。"
+          },
+          {
+            "q": "Translate this paragraph about your major into Chinese.",
+            "tip": "遇到生词别卡壳，按意群猜译；平时多读英文 abstract 练长句。"
+          },
+          {
+            "q": "Why do you choose to pursue a master's degree?",
+            "tip": "学术导向（research interest）比「好就业」更受导师欢迎。"
+          },
+          {
+            "q": "Describe your hometown / your favorite course.",
+            "tip": "准备 5 个万能话题词库，灵活组合，避免临场组织语言。"
+          },
+          {
+            "q": "Please summarize your undergraduate thesis in one minute.",
+            "tip": "一分钟结构：What problem → What I did → What result。准备 3 个句式模板（`The goal of my thesis is to…` / `I implemented…` / `We achieved… by…`），并提前把专有名词读音练准，比背长难句有效得多。"
+          },
+          {
+            "q": "Why do you choose our university instead of staying at your own?",
+            "tip": "忌讳贬低母校。答「资源匹配」：具体到某实验室设备、某门课、某位老师的方向，再补一句你能带来的东西（某工程经验/数据集）。英语回答控制在 4 句以内，句子短、错误少，比长句更得分。"
+          }
         ]
       },
       {
         "category": "专业素养",
         "desc": "导师追问的发散/批判性问题，考察思维而非记忆。",
         "questions": [
-          { "q": "你怎么看大模型对你们方向的影响？", "tip": "展现「理解技术边界 + 有自己的判断」，不盲目捧杀也不排斥。" },
-          { "q": "你过去一年里，哪次失败让你成长最多？", "tip": "真实失败 + 反思 + 行动改变，比成功故事更打动人。" },
-          { "q": "如果给你一台 8 核机器和一个 CPU 密集任务，你怎么并行优化？", "tip": "考察工程直觉：分片、无锁、Cache 友好、I/O 与计算重叠。" },
-          { "q": "你认为一个优秀的工程师最重要的特质是什么？", "tip": "结合经历谈（如「把复杂问题拆解清楚的能力」），别背教科书定义。" }
+          {
+            "q": "你怎么看大模型对你们方向的影响？",
+            "tip": "展现「理解技术边界 + 有自己的判断」，不盲目捧杀也不排斥。"
+          },
+          {
+            "q": "你过去一年里，哪次失败让你成长最多？",
+            "tip": "真实失败 + 反思 + 行动改变，比成功故事更打动人。"
+          },
+          {
+            "q": "如果给你一台 8 核机器和一个 CPU 密集任务，你怎么并行优化？",
+            "tip": "考察工程直觉：分片、无锁、Cache 友好、I/O 与计算重叠。"
+          },
+          {
+            "q": "你认为一个优秀的工程师最重要的特质是什么？",
+            "tip": "结合经历谈（如「把复杂问题拆解清楚的能力」），别背教科书定义。"
+          },
+          {
+            "q": "如果导师给你的方向你完全不感兴趣，你会怎么办？",
+            "tip": "导师在测稳定性。成熟答法：先说明会认真做 3-6 个月并给出阶段性结论，同时主动提出「在组内找一个交叉点」的方案；若确实不适合，按学期沟通调整而不是消极拖延。不要答「完全听老师的」——那暗示你没有判断。"
+          },
+          {
+            "q": "你怎么看「大模型让很多算法岗消失」这个说法？",
+            "tip": "结构化回答：① 消失的是「调包式实现」，不是问题建模能力；② 门槛上移到数据质量、评测体系、系统约束（延迟/成本）；③ 举一个你亲自遇到的例子（如某任务模型能写但评测指标设计错，结果全错）。给出结论而不是只罗列观点。"
+          },
+          {
+            "q": "给你一个从没接触过的领域，两周内要出一个能跑的原型，你会怎么安排？",
+            "tip": "考的是学习策略。给可执行计划：第 1-2 天读综述+跑通官方 demo，第 3-5 天做 baseline，第 6-10 天做一处改进并搭评测，最后留 2 天写文档与复现脚本。强调「先有可复现 baseline 再谈创新」，这是导师最认可的科研习惯。"
+          }
+        ]
+      },
+      {
+        "category": "选导与联系导师",
+        "desc": "复试前后与导师沟通的实际操作：邮件、名额、方向匹配与边界感。",
+        "questions": [
+          {
+            "q": "你联系导师的邮件里写了什么？为什么这么写？",
+            "tip": "导师平均 30 秒扫一封邮件。有效结构：标题「姓名-本科学校-报考方向-初试分数」；正文 5 行内说清「我是谁/分数/读过您哪篇论文/我能做什么/附简历与成绩单」；不群发、不写长篇抒情、不问「能不能收我」这种只能被拒的问题。"
+          },
+          {
+            "q": "如果导师名额满了，你还会报这个组吗？你会怎么调整？",
+            "tip": "诚实 + 有备选。可以说「会优先考虑组内其他老师或联合培养」，并说明你关注的是方向而非某个人。切忌表现出「非此不可」的执念或当场改口说「那我不来了」——两种都让导师觉得不成熟。"
+          }
+        ]
+      },
+      {
+        "category": "科研潜质与读博",
+        "desc": "导师判断「能不能带」的核心问题：读研认知、读博意愿、长期投入。",
+        "questions": [
+          {
+            "q": "你觉得读研和本科最大的区别是什么？",
+            "tip": "一句话抓本质：本科是「把已知问题解对」，研究生是「把未知问题定义清楚」。再补两条具体差异：需要读论文建立判断力、需要自己设计评测而不是等老师给标准答案。"
+          },
+          {
+            "q": "你有读博的打算吗？如果读，你想解决什么问题？",
+            "tip": "可以不确定，但要给出判断依据（对某类问题的持续兴趣、能否忍受长期无反馈）。若说想读，必须能说出一个具体问题域和为什么现在没被解决；说不想读也要给出理由（更想做工程落地），不要为了加分而假装想读博——入学后转硕博会很尴尬。"
+          }
         ]
       }
     ]
@@ -56,8 +176,11 @@
       "module": "数据结构 · 树",
       "scene": "工作中：后端要把一份「声明顺序 + 依赖顺序」的配置（如类 XML 的标签树）解析成内部对象。本质是「前序(声明序)+中序(依赖序)→后序(逆初始化序)」的镜像：先拿到两个序列，重建出执行 DAG，再逆序回写，确保子节点先于父节点就绪。",
       "framework": "① 大框架：输入 N + 前序序列 + 中序序列 → 递归定位根（前序首元素）→ 在中序找根下标 k，左子树 [0,k)、右子树 [k+1,) → 递归重建 → 后序遍历压栈输出。边界：N=0 直接返回空；两序列长度不一致或值不匹配视为非法输入。",
-      "algorithm": "② 核心算法思想：前序首元素即当前子树根；在中序里线性扫描定位根下标 k，左子树节点数 = k-il。递归时前序区间与中序区间要同步偏移：左子树前序 [pl+1, pl+left]、中序 [il, k-1]；右子树前序 [pl+left+1, pr]、中序 [k+1, ir]。后序在「左右都返回后」再压根，天然得到后序。",
-      "code": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nvector<int> pre, in, post;\n\n// 递归重建：pl/pr 前序区间，il/ir 中序区间\nvoid build(int pl, int pr, int il, int ir) {\n  if (pl > pr) return;            // 空子树直接返回\n  int root = pre[pl];             // 前序第一个是当前根\n  int k = il;\n  while (in[k] != root) k++;      // 在中序里找到根的位置\n  int left = k - il;              // 左子树节点个数\n  build(pl + 1, pl + left, il, k - 1);          // 先递归左子树\n  build(pl + left + 1, pr, k + 1, ir);          // 再递归右子树\n  post.push_back(root);           // 后序：左右都处理完再压根\n}\n\nint main() {\n  int n; cin >> n;\n  pre.resize(n); in.resize(n);\n  for (int i = 0; i < n; i++) cin >> pre[i];\n  for (int i = 0; i < n; i++) cin >> in[i];\n  build(0, n - 1, 0, n - 1);\n  for (int i = 0; i < n; i++) {\n    if (i) cout << ' ';\n    cout << post[i];\n  }\n  cout << endl;\n  return 0;\n}"
+      "algorithm": "② 核心算法思想：前序首元素即当前子树根；在中序里线性扫描定位根下标 k，左子树节点数 = k-il。递归时前序区间与中序区间要同步偏移：左子树前序 [pl+1, pl+left]、中序 [il, k-1]；右子树前序 [pl+left+1, pr]、中序 [k+1, ir]。后序在「左右都返回后」再压根，天然得到后序。\n复杂度：每层在中序里线性扫描定位根，最坏（树退化成链）总时间 O(n^2)；用哈希表预存「值->中序下标」可降到 O(n)。空间 O(n)（含递归栈）。",
+      "code": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nvector<int> pre, in, post;\n\n// 递归重建：pl/pr 前序区间，il/ir 中序区间\nvoid build(int pl, int pr, int il, int ir) {\n  if (pl > pr) return;            // 空子树直接返回\n  int root = pre[pl];             // 前序第一个是当前根\n  int k = il;\n  while (in[k] != root) k++;      // 在中序里找到根的位置\n  int left = k - il;              // 左子树节点个数\n  build(pl + 1, pl + left, il, k - 1);          // 先递归左子树\n  build(pl + left + 1, pr, k + 1, ir);          // 再递归右子树\n  post.push_back(root);           // 后序：左右都处理完再压根\n}\n\nint main() {\n  int n; cin >> n;\n  pre.resize(n); in.resize(n);\n  for (int i = 0; i < n; i++) cin >> pre[i];\n  for (int i = 0; i < n; i++) cin >> in[i];\n  build(0, n - 1, 0, n - 1);\n  for (int i = 0; i < n; i++) {\n    if (i) cout << ' ';\n    cout << post[i];\n  }\n  cout << endl;\n  return 0;\n}",
+      "type": "遍历与重建",
+      "sampleIn": "5\n3 9 20 15 7\n9 3 15 20 7\n",
+      "sampleOut": "9 15 7 20 3\n"
     },
     {
       "id": "pat-a1003-dijkstra",
@@ -67,8 +190,11 @@
       "module": "数据结构 · 图",
       "scene": "工作中：微服务调用链里，要算「从网关到某个故障节点的最短跳数路径」，并在多条等长路径里选「经过的健康实例最多」的一条做熔断降级；同时统计有多少条等价最短路径（用于限流均摊）。与本题的 dist/ways/weight 三维最短路完全同构。",
       "framework": "① 大框架：输入 N 城市、M 边、起点 C1、终点 C2，及每个城市救援队数 → Dijkstra 求最短路 → 同步维护「最短路条数 ways」与「沿最短路能集结的最大救援队数 teams」。边界：起点=终点时 ways=1、teams=起点的救援队数；重边取最小。",
-      "algorithm": "② 核心算法思想：优先队列维护 (dist,u)。松弛时若 d[v] > d[u]+w 则整体更新（dist/ways=ways[u]/teams=teams[u]+team[v]）；若相等则 ways[v]+=ways[u] 且 teams[v]=max(teams[v], teams[u]+team[v])。注意 ways 用加法原理、teams 用择优，二者更新时机不同。",
-      "code": "#include <iostream>\n#include <vector>\n#include <queue>\nusing namespace std;\nconst int INF = 1e9;\n\nint main() {\n  int n, m, c1, c2; cin >> n >> m >> c1 >> c2;\n  vector<int> team(n);\n  for (int i = 0; i < n; i++) cin >> team[i];\n  vector<vector<pair<int,int>>> g(n);   // 邻接表 (to, w)\n  for (int i = 0; i < m; i++) {\n    int a, b, w; cin >> a >> b >> w;\n    g[a].push_back({b, w}); g[b].push_back({a, w});\n  }\n  vector<int> dist(n, INF), ways(n, 0), teams(n, 0);\n  dist[c1] = 0; ways[c1] = 1; teams[c1] = team[c1];\n  priority_queue<pair<int,int>, vector<pair<int,int>>, greater<>> pq;\n  pq.push({0, c1});\n  while (!pq.empty()) {\n    auto [d, u] = pq.top(); pq.pop();\n    if (d > dist[u]) continue;           // 过期堆元素跳过\n    for (auto [v, w] : g[u]) {\n      if (dist[v] > dist[u] + w) {       // 找到更短路径：整体更新\n        dist[v] = dist[u] + w;\n        ways[v] = ways[u];\n        teams[v] = teams[u] + team[v];\n        pq.push({dist[v], v});\n      } else if (dist[v] == dist[u] + w) { // 等长路径：叠加条数、择优救援队\n        ways[v] += ways[u];\n        teams[v] = max(teams[v], teams[u] + team[v]);\n      }\n    }\n  }\n  cout << ways[c2] << ' ' << teams[c2] << endl;\n  return 0;\n}"
+      "algorithm": "② 核心算法思想：优先队列维护 (dist,u)。松弛时若 d[v] > d[u]+w 则整体更新（dist/ways=ways[u]/teams=teams[u]+team[v]）；若相等则 ways[v]+=ways[u] 且 teams[v]=max(teams[v], teams[u]+team[v])。注意 ways 用加法原理、teams 用择优，二者更新时机不同。\n复杂度：堆优化 Dijkstra 为 O((n+m) log n)，每条边最多引发一次入堆；空间 O(n+m)。路径条数与救援队数都在松弛时顺带维护，不增加量级。",
+      "code": "#include <iostream>\n#include <vector>\n#include <queue>\nusing namespace std;\nconst int INF = 1e9;\n\nint main() {\n  int n, m, c1, c2; cin >> n >> m >> c1 >> c2;\n  vector<int> team(n);\n  for (int i = 0; i < n; i++) cin >> team[i];\n  vector<vector<pair<int,int>>> g(n);   // 邻接表 (to, w)\n  for (int i = 0; i < m; i++) {\n    int a, b, w; cin >> a >> b >> w;\n    g[a].push_back({b, w}); g[b].push_back({a, w});\n  }\n  vector<int> dist(n, INF), ways(n, 0), teams(n, 0);\n  dist[c1] = 0; ways[c1] = 1; teams[c1] = team[c1];\n  priority_queue<pair<int,int>, vector<pair<int,int>>, greater<>> pq;\n  pq.push({0, c1});\n  while (!pq.empty()) {\n    auto [d, u] = pq.top(); pq.pop();\n    if (d > dist[u]) continue;           // 过期堆元素跳过\n    for (auto [v, w] : g[u]) {\n      if (dist[v] > dist[u] + w) {       // 找到更短路径：整体更新\n        dist[v] = dist[u] + w;\n        ways[v] = ways[u];\n        teams[v] = teams[u] + team[v];\n        pq.push({dist[v], v});\n      } else if (dist[v] == dist[u] + w) { // 等长路径：叠加条数、择优救援队\n        ways[v] += ways[u];\n        teams[v] = max(teams[v], teams[u] + team[v]);\n      }\n    }\n  }\n  cout << ways[c2] << ' ' << teams[c2] << endl;\n  return 0;\n}",
+      "type": "图论最短路",
+      "sampleIn": "5 6 0 2\n1 2 1 5 3\n0 1 1\n0 2 2\n0 3 1\n1 2 1\n2 4 1\n3 4 1\n",
+      "sampleOut": "2 4\n"
     },
     {
       "id": "buaa-linkedlist-dedup",
@@ -79,7 +205,10 @@
       "scene": "工作中：消息去重。上游同一批事件可能因重试重复投递（key 是「业务单号」的绝对哈希），你要保留首次出现的事件、丢弃后续重复，并原地改写链表式队列。与本题「绝对值去重 + 原地删节点」一一对应。",
       "framework": "① 大框架：输入链表头 + 长度 N → 用布尔数组 seen[10001] 记录已出现的绝对值 → 遍历链表，若 |val| 已出现过则删除当前节点，否则标记并前进。边界：空链表直接返回；头节点重复需特殊处理（本题约定头一定保留）。",
       "algorithm": "② 核心算法思想：单指针 pre 指向已保留链表的尾，cur 遍历。遇到重复绝对值就 pre->next = cur->next 跳过并 free，cur 不前进；否则 pre=cur 前进。用定长 seen 数组 O(1) 判重，整体 O(N)。",
-      "code": "#include <iostream>\nusing namespace std;\n\nstruct Node { int val; Node* next; Node(int v): val(v), next(nullptr) {} };\n\nNode* dedup(Node* head) {\n  bool seen[10001] = {false};      // 值绝对值上限约定 10000\n  Node* pre = head;\n  Node* cur = head ? head->next : nullptr;\n  if (head) seen[abs(head->val)] = true;   // 头节点一定保留\n  while (cur) {\n    int a = abs(cur->val);\n    if (seen[a]) {                 // 绝对值重复：摘掉 cur\n      pre->next = cur->next;\n      Node* tmp = cur; cur = cur->next; delete tmp;\n    } else {                       // 首次出现：标记并前进\n      seen[a] = true; pre = cur; cur = cur->next;\n    }\n  }\n  return head;\n}\n\nint main() {\n  // 读取省略：按题面构造链表后调用 dedup 并顺序打印\n  return 0;\n}"
+      "code": "#include <iostream>\nusing namespace std;\n\nstruct Node { int val; Node* next; Node(int v): val(v), next(nullptr) {} };\n\nNode* dedup(Node* head) {\n  bool seen[10001] = {false};      // 值绝对值上限约定 10000\n  Node* pre = head;\n  Node* cur = head ? head->next : nullptr;\n  if (head) seen[abs(head->val)] = true;   // 头节点一定保留\n  while (cur) {\n    int a = abs(cur->val);\n    if (seen[a]) {                 // 绝对值重复：摘掉 cur\n      pre->next = cur->next;\n      Node* tmp = cur; cur = cur->next; delete tmp;\n    } else {                       // 首次出现：标记并前进\n      seen[a] = true; pre = cur; cur = cur->next;\n    }\n  }\n  return head;\n}\n\nint main() {\n  int n;\n  cin >> n;                        // 第一行：节点个数\n  Node* head = nullptr;\n  Node* tail = nullptr;\n  for (int i = 0; i < n; i++) {    // 第二行起：依次建链（尾插保持原序）\n    int v; cin >> v;\n    Node* node = new Node(v);\n    if (!head) { head = tail = node; }\n    else { tail->next = node; tail = node; }\n  }\n  head = dedup(head);\n  bool first = true;\n  for (Node* p = head; p; p = p->next) {   // 顺序打印去重后的链表\n    if (!first) cout << ' ';\n    cout << p->val;\n    first = false;\n  }\n  cout << endl;\n  while (head) { Node* t = head; head = head->next; delete t; }  // 释放\n  return 0;\n}",
+      "type": "链表",
+      "sampleIn": "5\n21 -15 -15 21 7\n",
+      "sampleOut": "21 -15 7\n"
     },
     {
       "id": "hust-topo-course",
@@ -89,8 +218,11 @@
       "module": "数据结构 · 图",
       "scene": "工作中：CI/CD 流水线或 Airflow DAG 的任务依赖。你要确认「依赖图无环」才能调度，否则会死锁；合法时还要给出一个可行的执行顺序（拓扑序）供并行分批。与本题 Kahn 算法拓扑排序完全同构。",
       "framework": "① 大框架：输入课程数 num + 先修对 [a,b]（学 a 前先学 b）→ 建图（b→a）+ 入度表 → Kahn 算法：队列放所有入度 0 的节点，逐个出队、消去其出边、入度归零者入队 → 输出顺序；若输出数 < num 说明有环，返回空。",
-      "algorithm": "② 核心算法思想：拓扑排序本质是对 DAG 的层次展开。Kahn 用「入度为 0 即可开始」不断削减；若最后仍有节点入度 >0，则存在环（互相依赖），无法完成。队列保证字典序最小可用小根堆，本题顺序任意。",
-      "code": "#include <iostream>\n#include <vector>\n#include <queue>\nusing namespace std;\n\nvector<int> topo(int num, vector<pair<int,int>>& pre) {\n  vector<vector<int>> g(num);\n  vector<int> indeg(num, 0);\n  for (auto& [a, b] : pre) { g[b].push_back(a); indeg[a]++; } // b 是 a 的先修\n  queue<int> q;\n  for (int i = 0; i < num; i++) if (indeg[i] == 0) q.push(i);\n  vector<int> order;\n  while (!q.empty()) {\n    int u = q.front(); q.pop();\n    order.push_back(u);\n    for (int v : g[u]) if (--indeg[v] == 0) q.push(v);\n  }\n  if ((int)order.size() != num) return {};   // 有环，无法修完\n  return order;\n}\n\nint main() {\n  int num, m; cin >> num >> m;\n  vector<pair<int,int>> pre(m);\n  for (auto& [a, b] : pre) cin >> a >> b;\n  auto ans = topo(num, pre);\n  if (ans.empty()) cout << \"IMPOSSIBLE\" << endl;\n  else { for (int i = 0; i < num; i++) cout << ans[i] << (i+1<num?' ':'\\n'); }\n  return 0;\n}"
+      "algorithm": "② 核心算法思想：拓扑排序本质是对 DAG 的层次展开。Kahn 用「入度为 0 即可开始」不断削减；若最后仍有节点入度 >0，则存在环（互相依赖），无法完成。队列保证字典序最小可用小根堆，本题顺序任意。\n复杂度：Kahn 每个点入队出队一次、每条边被看一次，时间 O(n+m)；空间 O(n+m)（入度数组 + 邻接表 + 队列）。",
+      "code": "#include <iostream>\n#include <vector>\n#include <queue>\nusing namespace std;\n\nvector<int> topo(int num, vector<pair<int,int>>& pre) {\n  vector<vector<int>> g(num);\n  vector<int> indeg(num, 0);\n  for (auto& [a, b] : pre) { g[b].push_back(a); indeg[a]++; } // b 是 a 的先修\n  queue<int> q;\n  for (int i = 0; i < num; i++) if (indeg[i] == 0) q.push(i);\n  vector<int> order;\n  while (!q.empty()) {\n    int u = q.front(); q.pop();\n    order.push_back(u);\n    for (int v : g[u]) if (--indeg[v] == 0) q.push(v);\n  }\n  if ((int)order.size() != num) return {};   // 有环，无法修完\n  return order;\n}\n\nint main() {\n  int num, m; cin >> num >> m;\n  vector<pair<int,int>> pre(m);\n  for (auto& [a, b] : pre) cin >> a >> b;\n  auto ans = topo(num, pre);\n  if (ans.empty()) cout << \"IMPOSSIBLE\" << endl;\n  else { for (int i = 0; i < num; i++) cout << ans[i] << (i+1<num?' ':'\\n'); }\n  return 0;\n}",
+      "type": "图论拓扑",
+      "sampleIn": "4 4\n1 0\n2 0\n3 1\n3 2\n",
+      "sampleOut": "0 1 2 3\n"
     },
     {
       "id": "sjtu-maxsubarray",
@@ -101,7 +233,10 @@
       "scene": "工作中：监控指标异常检测。比如一段心跳时延序列里，找出「连续 N 分钟」使平均/累计延迟最大的一段（定位故障窗口）；或交易系统找出收益最猛的连续持仓区间。与本题「最大子段和」同构，只是阈值从「最大」换成「超过某值的最长区间」。",
       "framework": "① 大框架：输入序列 → 设 dp[i] 为「以 i 结尾的最大子段和」→ 转移 dp[i]=max(a[i], dp[i-1]+a[i]) → 全程取最大。同时用 pre/cur 滚动省空间。边界：全负数返回最大负数；记录起止下标需额外维护。",
       "algorithm": "② 核心算法思想：关键洞察是「如果前面累加和为负，不如从当前元素重新开始」——负数前缀只会拖累后面。因此转移只在 dp[i-1]>0 时才接上。O(N) 一次扫描，空间 O(1)。",
-      "code": "#include <iostream>\n#include <vector>\n#include <climits>\nusing namespace std;\n\nint maxSub(const vector<int>& a) {\n  int cur = 0, best = INT_MIN;\n  for (int x : a) {\n    cur = max(x, cur + x);   // 负数前缀就丢弃，从 x 重开\n    best = max(best, cur);\n  }\n  return best;\n}\n\nint main() {\n  int n; cin >> n;\n  vector<int> a(n);\n  for (int i = 0; i < n; i++) cin >> a[i];\n  cout << maxSub(a) << endl;\n  return 0;\n}"
+      "code": "#include <iostream>\n#include <vector>\n#include <climits>\nusing namespace std;\n\nint maxSub(const vector<int>& a) {\n  int cur = 0, best = INT_MIN;\n  for (int x : a) {\n    cur = max(x, cur + x);   // 负数前缀就丢弃，从 x 重开\n    best = max(best, cur);\n  }\n  return best;\n}\n\nint main() {\n  int n; cin >> n;\n  vector<int> a(n);\n  for (int i = 0; i < n; i++) cin >> a[i];\n  cout << maxSub(a) << endl;\n  return 0;\n}",
+      "type": "动态规划",
+      "sampleIn": "9\n-2 1 -3 4 -1 2 1 -5 4\n",
+      "sampleOut": "6\n"
     },
     {
       "id": "unified-island",
@@ -112,7 +247,812 @@
       "scene": "工作中：用户分群或风控里的「连通团伙识别」。比如一批设备/账号构成关系图，找出相互关联的团伙数（一个团伙 = 一个连通块）；或图像里数出几块相连的故障区域。与本题「1 的连通块个数」完全同构，只是把网格换成邻接表。",
       "framework": "① 大框架：输入 M×N 的 0/1 网格 → 遍历每个格子，遇到未访问的 1 就「淹没」它所在的整块（DFS 或 BFS 把相邻 1 标为已访问）→ 每淹没一块计数 +1。边界：网格为空返回 0；注意上下左右四连通（斜向不算）。",
       "algorithm": "② 核心算法思想：连通块计数 = 遍历起点数。每进入一个未访问的陆地，就把它整块「染色」成已访问，保证不重复计数。DFS 用递归/栈，BFS 用队列，二者复杂度都是 O(MN)。",
-      "code": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nint m, n;\nvector<vector<int>> g;\n\nvoid dfs(int x, int y) {\n  if (x<0||y<0||x>=m||y>=n||!g[x][y]) return;  // 越界或海水\n  g[x][y] = 0;                                  // 淹没当前陆地\n  dfs(x+1,y); dfs(x-1,y); dfs(x,y+1); dfs(x,y-1); // 四连通扩散\n}\n\nint main() {\n  cin >> m >> n;\n  g.assign(m, vector<int>(n));\n  for (int i=0;i<m;i++) for (int j=0;j<n;j++) cin >> g[i][j];\n  int cnt = 0;\n  for (int i=0;i<m;i++) for (int j=0;j<n;j++)\n    if (g[i][j]) { dfs(i, j); cnt++; }   // 每发现一块新陆地就淹没并计数\n  cout << cnt << endl;\n  return 0;\n}"
+      "code": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nint m, n;\nvector<vector<int>> g;\n\nvoid dfs(int x, int y) {\n  if (x<0||y<0||x>=m||y>=n||!g[x][y]) return;  // 越界或海水\n  g[x][y] = 0;                                  // 淹没当前陆地\n  dfs(x+1,y); dfs(x-1,y); dfs(x,y+1); dfs(x,y-1); // 四连通扩散\n}\n\nint main() {\n  cin >> m >> n;\n  g.assign(m, vector<int>(n));\n  for (int i=0;i<m;i++) for (int j=0;j<n;j++) cin >> g[i][j];\n  int cnt = 0;\n  for (int i=0;i<m;i++) for (int j=0;j<n;j++)\n    if (g[i][j]) { dfs(i, j); cnt++; }   // 每发现一块新陆地就淹没并计数\n  cout << cnt << endl;\n  return 0;\n}",
+      "type": "搜索",
+      "sampleIn": "4 5\n1 1 0 0 0\n1 1 0 0 0\n0 0 1 0 0\n0 0 0 1 1\n",
+      "sampleOut": "3\n"
+    },
+    {
+      "id": "hit-2019-expression",
+      "title": "中缀表达式求值（含括号与多位数）",
+      "university": "哈尔滨工业大学",
+      "year": 2019,
+      "module": "数据结构 · 栈",
+      "scene": "工作中：配置中心要支持「带括号的表达式的派生配置」，如 `timeout = base*2 + (retry-1)*backoff`。直接 eval 有注入风险，正确做法是自己写一个只认数字与四则运算的求值器——正是本题的双栈算法，再配上白名单词法与深度限制即可安全上线。",
+      "framework": "① 大框架：两个栈——操作数栈 num、运算符栈 op；从左到右扫描；遇数字直接入 num；遇 `(` 入 op；遇 `)` 弹 op 直到 `(` 并把结果压回 num；遇运算符则先弹掉所有优先级 ≥ 当前的所有运算符（先算），再把自己压栈；扫描结束后把 op 弹空。边界：除零、括号不匹配、末尾多运算符都要报错。",
+      "algorithm": "② 核心算法思想：运算符优先级表 `+ -` 为 1，`* /` 为 2；「先弹再压」保证同级运算符左结合（`8-3-2` 得 3 而不是 7）；括号不是运算符而是一个「栈标记」，`)` 触发一次局部清空。数值用 long long，乘法前判溢出。\n复杂度：每个字符最多入栈出栈各一次，时间 O(n)；两个栈的空间 O(n)。递归下降解析器同阶，但双栈写法更省代码。",
+      "code": "#include <iostream>\n#include <stack>\n#include <string>\n#include <cctype>\nusing namespace std;\n\n// 运算符优先级：数字越大越先算\nint prec(char c) {\n  if (c == '+' || c == '-') return 1;\n  if (c == '*' || c == '/') return 2;\n  return 0;                     // '(' 的优先级最低，保证不会被弹出\n}\n\n// 弹出一个运算符，从 num 栈取两个操作数计算后压回\nvoid apply(stack<long long> &num, char op) {\n  long long b = num.top(); num.pop();   // 注意顺序：先弹出的是右操作数\n  long long a = num.top(); num.pop();\n  long long r = 0;\n  if (op == '+') r = a + b;\n  else if (op == '-') r = a - b;\n  else if (op == '*') r = a * b;\n  else r = a / b;                        // 题目保证除数非 0\n  num.push(r);\n}\n\nint main() {\n  string s;\n  getline(cin, s);\n  stack<long long> num;\n  stack<char> op;\n  for (size_t i = 0; i < s.size(); i++) {\n    char c = s[i];\n    if (isdigit(c)) {                    // 扫描完整的多位数\n      long long v = 0;\n      while (i < s.size() && isdigit(s[i])) v = v * 10 + (s[i++] - '0');\n      i--;\n      num.push(v);\n    } else if (c == '(') {\n      op.push(c);\n    } else if (c == ')') {\n      while (!op.empty() && op.top() != '(') { apply(num, op.top()); op.pop(); }\n      op.pop();                           // 丢掉 '('\n    } else {                              // + - * /\n      // 先算掉所有优先级不低于当前的运算符 -> 保证同级左结合\n      while (!op.empty() && prec(op.top()) >= prec(c)) { apply(num, op.top()); op.pop(); }\n      op.push(c);\n    }\n  }\n  while (!op.empty()) { apply(num, op.top()); op.pop(); }\n  cout << num.top() << endl;\n  return 0;\n}",
+      "type": "栈",
+      "sampleIn": "3+4*2-(1+5)/3\n",
+      "sampleOut": "9\n"
+    },
+    {
+      "id": "bupt-2020-union-find",
+      "title": "朋友圈：连通分量计数",
+      "university": "北京邮电大学",
+      "year": 2020,
+      "module": "数据结构 · 并查集",
+      "scene": "工作中：微服务依赖图里要快速回答「这几个服务是否属于同一个部署单元」。服务数量上万、边每天变化，用并查集做增量合并比每次跑 DFS 便宜一个数量级——本题就是「最终有多少个独立部署单元」的最小模型。",
+      "framework": "① 大框架：parent 数组初始化为自身；读入每条边就 union 两端；最后统计 `find(i)==i` 的个数即为连通分量数。边界：自环（a==b）不影响结果；重复边直接幂等；n=0 时答案为 0。",
+      "algorithm": "② 核心算法思想：路径压缩（find 时把沿途节点直接挂到根）+ 按大小合并（小树挂到大树上），两个优化一起把单次操作摊还到 O(α(n))≈常数。写成递归 find 时可以顺便做压缩，代码最短；n 很大时改迭代避免爆栈。",
+      "code": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nvector<int> parent_, sz;\n\nint find(int x) {\n  if (parent_[x] != x) parent_[x] = find(parent_[x]);   // 路径压缩\n  return parent_[x];\n}\n\nvoid unite(int a, int b) {\n  int ra = find(a), rb = find(b);\n  if (ra == rb) return;                 // 已在同一集合，幂等\n  if (sz[ra] < sz[rb]) swap(ra, rb);    // 小树挂到大树上（按大小合并）\n  parent_[rb] = ra;\n  sz[ra] += sz[rb];\n}\n\nint main() {\n  int n, m;\n  cin >> n >> m;\n  parent_.resize(n + 1);\n  sz.assign(n + 1, 1);\n  for (int i = 1; i <= n; i++) parent_[i] = i;\n\n  for (int i = 0; i < m; i++) {\n    int a, b;\n    cin >> a >> b;\n    unite(a, b);\n  }\n\n  int groups = 0;\n  for (int i = 1; i <= n; i++)\n    if (find(i) == i) groups++;         // 根的个数 = 连通分量数\n  cout << groups << endl;\n  return 0;\n}",
+      "type": "并查集",
+      "sampleIn": "5 3\n1 2\n2 3\n4 5\n",
+      "sampleOut": "2\n"
+    },
+    {
+      "id": "xidian-2018-count-shortest",
+      "title": "最短路径条数（Dijkstra + 计数）",
+      "university": "西安电子科技大学",
+      "year": 2018,
+      "module": "数据结构 · 图",
+      "scene": "工作中：容灾演练要评估「从入口网关到支付服务的冗余路径有几条」。只算最短距离不够——单条最短路径意味着单点风险，路径条数才是冗余度指标。本题就是该指标的算法内核。",
+      "framework": "① 大框架：优先队列 Dijkstra 求 dist[]，同时维护 cnt[]；松弛时若 `dist[v] > dist[u]+w` 则更新 dist 并令 `cnt[v]=cnt[u]`；若相等则 `cnt[v]+=cnt[u]`（累加等价路径）。边界：不可达输出 -1 与 0；重边保留最小者；起点 cnt=1。",
+      "algorithm": "② 核心算法思想：Dijkstra 的正确性依赖「出队即定型」，因此 cnt 的累加必须发生在「u 出队并松弛邻居」的时刻，而不是入队时刻——否则同一个 u 被多次入队会重复计数。若图含 0 权边需用「按 dist 排序的 DP」，含负权则换 Bellman-Ford 并把计数改成拓扑序累加。\n复杂度：堆优化 Dijkstra 为 O((n+m) log n)；计数只是松弛时的一次加法，不改变量级。空间 O(n+m)。",
+      "code": "#include <iostream>\n#include <vector>\n#include <queue>\n#include <climits>\nusing namespace std;\n\ntypedef pair<long long, int> pli;         // (距离, 节点)\n\nint main() {\n  int n, m, s, t;\n  cin >> n >> m >> s >> t;\n  vector<vector<pair<int, int>>> g(n + 1);   // 邻接表：{邻居, 权}\n  for (int i = 0; i < m; i++) {\n    int u, v, w;\n    cin >> u >> v >> w;\n    g[u].push_back({v, w});\n    g[v].push_back({u, w});                  // 无向图；有向图删掉这一行\n  }\n\n  const long long INF = LLONG_MAX / 4;\n  vector<long long> dist(n + 1, INF);\n  vector<long long> cnt(n + 1, 0);            // 最短路径条数\n  priority_queue<pli, vector<pli>, greater<pli>> pq;\n\n  dist[s] = 0;\n  cnt[s] = 1;                                 // 起点到自己算 1 条\n  pq.push({0, s});\n  while (!pq.empty()) {\n    pli cur = pq.top(); pq.pop();\n    long long d = cur.first;\n    int u = cur.second;\n    if (d > dist[u]) continue;                // 过期堆项，跳过（关键：避免重复计数）\n    for (auto &e : g[u]) {\n      int v = e.first, w = e.second;\n      long long nd = d + w;\n      if (nd < dist[v]) {\n        dist[v] = nd;\n        cnt[v] = cnt[u];                      // 更短 -> 覆盖计数\n        pq.push({nd, v});\n      } else if (nd == dist[v]) {\n        cnt[v] += cnt[u];                     // 等长 -> 累加计数\n      }\n    }\n  }\n  if (dist[t] >= INF) cout << -1 << \" \" << 0 << endl;\n  else cout << dist[t] << \" \" << cnt[t] << endl;\n  return 0;\n}",
+      "type": "图论最短路",
+      "sampleIn": "4 4 1 4\n1 2 1\n2 4 1\n1 3 1\n3 4 1\n",
+      "sampleOut": "2 2\n"
+    },
+    {
+      "id": "sysu-2021-lru",
+      "title": "LRU 缓存：哈希表 + 双向链表",
+      "university": "中山大学",
+      "year": 2021,
+      "module": "数据结构 · 哈希与链表",
+      "scene": "工作中：本地缓存层（如 Caffeine 的精简版）要在 O(1) 内完成 get/put 与淘汰。只用一个哈希表无法知道「谁最久没被访问」，只用一个链表无法 O(1) 定位——两者组合才是工业实现，本题就是这个组合的最小可运行版本。",
+      "framework": "① 大框架：`list` 存 (key,value)，表头是最近使用、表尾是最久未用；`unordered_map<key, list 迭代器>` 做 O(1) 定位。get：命中则把节点 splice 到表头并返回值；未命中返回 -1。put：已存在则更新值并提到表头；不存在则插入表头，超容量时删表尾并同步删 map。",
+      "algorithm": "② 核心算法思想：所有 O(1) 的秘诀是「链表节点地址稳定 + map 存迭代器」——`std::list::splice` 只改指针不搬数据，所以迭代器不会失效。若用 `vector` 存节点，一旦扩容迭代器全废，这就是为什么教科书强调「双向链表」。",
+      "code": "#include <iostream>\n#include <list>\n#include <unordered_map>\n#include <string>\nusing namespace std;\n\nstruct LRU {\n  int cap;\n  list<pair<int, int>> lst;                                  // 头部最新，尾部最旧\n  unordered_map<int, list<pair<int, int>>::iterator> pos;    // key -> 链表迭代器\n\n  explicit LRU(int c) : cap(c) {}\n\n  int get(int key) {\n    auto it = pos.find(key);\n    if (it == pos.end()) return -1;          // 未命中\n    lst.splice(lst.begin(), lst, it->second); // 提到表头（O(1)，不搬数据）\n    return it->second->second;\n  }\n\n  void put(int key, int val) {\n    auto it = pos.find(key);\n    if (it != pos.end()) {                   // 已存在：更新 + 提头\n      it->second->second = val;\n      lst.splice(lst.begin(), lst, it->second);\n      return;\n    }\n    if ((int)lst.size() == cap) {            // 满：淘汰最久未用\n      int oldKey = lst.back().first;\n      lst.pop_back();\n      pos.erase(oldKey);                     // 两处结构必须同步删，否则内存泄漏 + 脏命中\n    }\n    lst.push_front({key, val});\n    pos[key] = lst.begin();\n  }\n};\n\nint main() {\n  int cap;\n  cin >> cap;\n  LRU cache(cap);\n  string op;\n  while (cin >> op) {\n    if (op == \"get\") {\n      int k; cin >> k;\n      cout << cache.get(k) << endl;\n    } else if (op == \"put\") {\n      int k, v; cin >> k >> v;\n      cache.put(k, v);\n    }\n  }\n  return 0;\n}",
+      "type": "哈希与链表",
+      "sampleIn": "2\nput 1 1\nput 2 2\nget 1\nput 3 3\nget 2\nget 3\nget 1\n",
+      "sampleOut": "1\n-1\n3\n1\n"
+    },
+    {
+      "id": "ustc-2017-fast-pow",
+      "title": "快速幂取模（指数达 1e18）",
+      "university": "中国科学技术大学",
+      "year": 2017,
+      "module": "算法 · 数论",
+      "scene": "工作中：接口签名/防重放要用 HMAC 的模幂运算，指数是 256 位大数；RSA 加解密更是直接算 a^b mod m。朴素循环 1e18 次必然超时，二进制快速幂只要 60 次乘法——本题是密码学库的第一课。",
+      "framework": "① 大框架：读入 a、b、m；把 b 按二进制拆位，底数不断平方、指数不断右移；遇到当前位为 1 就把当前底数乘进答案；每步都取模防止溢出。边界：b=0 时答案为 1%m（m=1 时为 0）；a 先对 m 取模；m=1 直接输出 0。",
+      "algorithm": "② 核心算法思想：`a^b = (a^(b/2))^2 * a^(b%2)`，把线性次乘法降到 O(log b)。乘法用 long long 并先取模：`(x*y)%m` 在 m<2^31 时安全；m 接近 2^63 时要用 `__int128` 或龟速乘，否则中间积溢出——这是面试常追问的点。",
+      "code": "#include <iostream>\nusing namespace std;\n\n// 计算 (a^b) % m，b 可到 1e18\nlong long power_mod(long long a, long long b, long long m) {\n  if (m == 1) return 0;              // 任何数 mod 1 都是 0\n  long long res = 1 % m;\n  a %= m;                            // 先约简底数\n  while (b > 0) {\n    if (b & 1) res = (__int128)res * a % m;   // 当前位为 1：乘进答案（__int128 防溢出）\n    a = (__int128)a * a % m;                  // 底数平方\n    b >>= 1;                                  // 指数右移\n  }\n  return res;\n}\n\nint main() {\n  long long a, b, m;\n  cin >> a >> b >> m;\n  cout << power_mod(a, b, m) << endl;\n  return 0;\n}",
+      "type": "数学",
+      "sampleIn": "2 10 1000\n",
+      "sampleOut": "24\n"
+    },
+    {
+      "id": "zju-2019-heap-check",
+      "title": "判断完全二叉树是大顶堆还是小顶堆",
+      "university": "浙江大学 PAT",
+      "year": 2019,
+      "module": "数据结构 · 堆",
+      "scene": "工作中：优先级队列的底层是堆，线上偶发「取出的不是最高优先级」时，第一步就是把底层数组 dump 出来判断「它到底还是不是堆」。本题就是那个诊断脚本的核心判定。",
+      "framework": "① 大框架：输入 n 与按层序给出的 n 个关键字（即完全二叉树的数组表示）；对每个非叶节点 i（0-based，子节点 2i+1、2i+2）比较父子关系：若所有父 ≥ 子则大顶堆；若所有父 ≤ 子则小顶堆；否则不是堆。边界：n=1 既是堆也可以说两者皆可，按题目约定优先判大顶堆。",
+      "algorithm": "② 核心算法思想：完全二叉树用数组存储时，父子下标关系是 `2i+1 / 2i+2`，因此判堆只需一次线性扫描，O(n) 且不用真的建树。注意「层序数组」并不等于「有序数组」——堆只保证偏序，兄弟之间无序，这是最常见的误判来源。",
+      "code": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n  int n;\n  cin >> n;\n  vector<int> a(n);\n  for (int i = 0; i < n; i++) cin >> a[i];\n\n  bool maxHeap = true, minHeap = true;\n  for (int i = 0; i < n; i++) {\n    int l = 2 * i + 1, r = 2 * i + 2;          // 完全二叉树的数组下标关系\n    if (l < n) {\n      if (a[i] < a[l]) maxHeap = false;        // 父 < 子 -> 不是大顶堆\n      if (a[i] > a[l]) minHeap = false;        // 父 > 子 -> 不是小顶堆\n    }\n    if (r < n) {\n      if (a[i] < a[r]) maxHeap = false;\n      if (a[i] > a[r]) minHeap = false;\n    }\n  }\n  if (maxHeap) cout << \"Max Heap\" << endl;\n  else if (minHeap) cout << \"Min Heap\" << endl;\n  else cout << \"Not Heap\" << endl;\n  return 0;\n}",
+      "type": "堆",
+      "sampleIn": "5\n9 8 7 6 5\n",
+      "sampleOut": "Max Heap\n"
+    },
+    {
+      "id": "thu-2016-lcs",
+      "title": "最长公共子序列（输出长度与一个具体解）",
+      "university": "清华大学",
+      "year": 2016,
+      "module": "算法 · 动态规划",
+      "scene": "工作中：代码评审要做「两个版本的 diff 摘要」，底层的 Myers 算法与 LCS 同源；配置中心比对两份 YAML 的公共键序列也用它。只给长度没用，必须能回溯出一个具体解才能生成 diff 片段。",
+      "framework": "① 大框架：`dp[i][j]` = s1 前 i 个字符与 s2 前 j 个字符的 LCS 长度；转移 `s1[i-1]==s2[j-1] ? dp[i-1][j-1]+1 : max(dp[i-1][j], dp[i][j-1])`；再从 (n,m) 回溯：相等则收集该字符并同时左移，否则朝 dp 更大的方向移动。边界：任一串为空则长度为 0；回溯得到的是逆序，需要反转。",
+      "algorithm": "② 核心算法思想：LCS 满足最优子结构（去掉末尾相同字符不损失最优性），因此可以自底向上填表，时间 O(nm)、空间 O(nm)（可滚动数组降到 O(min(n,m))，但那样无法回溯）。回溯时的等号方向决定「取哪一个解」，本题约定：`dp[i-1][j] >= dp[i][j-1]` 时上移，保证结果稳定可复现。",
+      "code": "#include <iostream>\n#include <vector>\n#include <string>\n#include <algorithm>\nusing namespace std;\n\nint main() {\n  string a, b;\n  cin >> a >> b;\n  int n = a.size(), m = b.size();\n  vector<vector<int>> dp(n + 1, vector<int>(m + 1, 0));\n\n  // 自底向上填表\n  for (int i = 1; i <= n; i++)\n    for (int j = 1; j <= m; j++)\n      if (a[i - 1] == b[j - 1]) dp[i][j] = dp[i - 1][j - 1] + 1;\n      else dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);\n\n  // 回溯出一个具体解（先得到逆序）\n  string res;\n  int i = n, j = m;\n  while (i > 0 && j > 0) {\n    if (a[i - 1] == b[j - 1]) { res.push_back(a[i - 1]); i--; j--; }\n    else if (dp[i - 1][j] >= dp[i][j - 1]) i--;   // 约定：相等时上移，保证结果稳定\n    else j--;\n  }\n  reverse(res.begin(), res.end());\n\n  cout << dp[n][m] << endl;   // 长度\n  cout << res << endl;        // 一个具体解\n  return 0;\n}",
+      "type": "动态规划",
+      "sampleIn": "ABCBDAB\nBDCABA\n",
+      "sampleOut": "4\nBCBA\n"
+    },
+    {
+      "id": "pku-2018-zigzag-level-order",
+      "title": "二叉树的之字形层序遍历",
+      "university": "北京大学",
+      "year": 2018,
+      "module": "数据结构 · 树与队列",
+      "scene": "工作中：组织架构/商品类目的展示需要「奇偶层换向」的折叠视图（第一层从左到右、第二层从右到左），这样相邻两层的父子连线不会互相压盖。本题就是该渲染逻辑的算法内核。",
+      "framework": "① 大框架：先按「前序 + # 表示空」建树；再用队列做 BFS，逐层收集；偶数层（0-based）正序输出、奇数层反转后输出。边界：空树输出空行；单节点直接输出；用 `#` 结尾的输入要正确停止递归。",
+      "algorithm": "② 核心算法思想：层序靠队列，换向靠「按层收集后决定是否 reverse」——不要试图用两个栈（那是另一道题），一层的元素必须先全部出队才能知道这一层有多少个。复杂度 O(n)，每个节点进出队各一次。",
+      "code": "#include <iostream>\n#include <queue>\n#include <vector>\n#include <string>\n#include <algorithm>\nusing namespace std;\n\nstruct Node {\n  int val;\n  Node *l, *r;\n  explicit Node(int v) : val(v), l(nullptr), r(nullptr) {}\n};\n\n// 按前序读入建树，'#' 表示空\nNode *build() {\n  string s;\n  if (!(cin >> s)) return nullptr;\n  if (s == \"#\") return nullptr;\n  Node *p = new Node(stoi(s));\n  p->l = build();\n  p->r = build();\n  return p;\n}\n\nint main() {\n  Node *root = build();\n  if (!root) return 0;\n\n  queue<Node *> q;\n  q.push(root);\n  int level = 0;\n  while (!q.empty()) {\n    int sz = q.size();                 // 当前层节点数必须在出队前记下来\n    vector<int> row;\n    for (int i = 0; i < sz; i++) {\n      Node *p = q.front(); q.pop();\n      row.push_back(p->val);\n      if (p->l) q.push(p->l);\n      if (p->r) q.push(p->r);\n    }\n    if (level % 2 == 1) reverse(row.begin(), row.end());   // 奇数层换向\n    for (size_t i = 0; i < row.size(); i++) {\n      if (i) cout << ' ';\n      cout << row[i];\n    }\n    cout << endl;\n    level++;\n  }\n  return 0;\n}",
+      "type": "遍历与重建",
+      "sampleIn": "3 9 # # 20 15 # # 7 # #\n",
+      "sampleOut": "3\n20 9\n15 7\n"
+    },
+    {
+      "id": "fudan-2020-kmp",
+      "title": "KMP 找出模式串全部出现位置",
+      "university": "复旦大学",
+      "year": 2020,
+      "module": "数据结构 · 串",
+      "scene": "工作中：日志脱敏系统要把「身份证号/手机号」等敏感模式在千万行日志里全量定位。用库函数逐个起点暴力比对在长行上会退化成 O(nm)，而日志行往往有大量重复前缀——KMP 的失配跳转让每个字符只被比较常数次，这是本题的最小模型。",
+      "framework": "① 大框架：先对模式串自匹配求出 next（失配后该跳到哪），再拿文本串跑一遍匹配；匹配成功时输出起点并「假装失配一次」继续找下一个，从而拿到全部出现位置。",
+      "algorithm": "② 核心算法思想：next[i] 表示 pattern[0..i] 的「最长相等真前后缀」长度。求 next 时 i 走新字符、j 走已匹配前缀长度：若 p[i]==p[j] 则 j++ 后 next[i]=j；否则 j 沿 next[j-1] 回退，直到能匹配或 j==0。匹配阶段同理，区别是文本指针 i 永不回退——这正是 KMP 相对暴力 O(nm) 的关键。找到一次后令 j=next[j-1]，避免漏掉重叠出现（如 text=aaaa, pat=aa 有 3 处）。\n复杂度：预处理 O(m)、匹配 O(n)，总时间 O(n+m)；空间 O(m) 存 next。",
+      "code": "#include <iostream>\n#include <string>\n#include <vector>\nusing namespace std;\n\n// 求 next 数组：next[i] = pattern[0..i] 的最长相等真前后缀长度\nvector<int> buildNext(const string &p) {\n  int m = (int)p.size();\n  vector<int> nxt(m, 0);\n  int j = 0;                              // j = 当前已匹配的前缀长度\n  for (int i = 1; i < m; i++) {\n    while (j > 0 && p[i] != p[j]) j = nxt[j - 1];  // 失配：沿 next 回退\n    if (p[i] == p[j]) j++;                // 匹配：前缀长度 +1\n    nxt[i] = j;\n  }\n  return nxt;\n}\n\nint main() {\n  string text, pat;\n  getline(cin, text);\n  getline(cin, pat);\n  if (pat.empty()) return 0;\n\n  vector<int> nxt = buildNext(pat);\n  vector<int> hits;                       // 所有出现位置（0 基）\n  int j = 0;                              // 文本指针 i 只前进，不回退\n  for (int i = 0; i < (int)text.size(); i++) {\n    while (j > 0 && text[i] != pat[j]) j = nxt[j - 1];\n    if (text[i] == pat[j]) j++;\n    if (j == (int)pat.size()) {\n      hits.push_back(i - j + 1);          // 命中：起点 = 终点 - 长度 + 1\n      j = nxt[j - 1];                     // 假装失配，继续找重叠出现\n    }\n  }\n\n  cout << hits.size() << endl;\n  for (size_t k = 0; k < hits.size(); k++) {\n    if (k) cout << ' ';\n    cout << hits[k];\n  }\n  if (!hits.empty()) cout << endl;\n  return 0;\n}",
+      "type": "字符串",
+      "sampleIn": "ababababc\nabab\n",
+      "sampleOut": "3\n0 2 4\n"
+    },
+    {
+      "id": "nju-2019-merge-inversions",
+      "title": "归并排序统计逆序对个数",
+      "university": "南京大学",
+      "year": 2019,
+      "module": "算法 · 分治",
+      "scene": "工作中：推荐系统要做「用户偏好一致性」度量，判断某个用户的行为序列相对基准序列有多少对逆序。一亿条数据下 O(n^2) 双循环跑不完，而逆序对数正好可以在归并排序的合并步骤里顺带累加，不额外增加复杂度——这是把「统计」寄生在「排序」上的经典手法。",
+      "framework": "① 大框架：分治——把区间一分为二，分别递归求左右内部的逆序对，再在「合并两段有序数组」时数出「左段元素 > 右段元素」的跨界对数，三者相加。",
+      "algorithm": "② 核心算法思想：合并时左右两段各自已有序。用双指针 i、j 比较，当 a[i] <= a[j] 时先放 a[i]（不产生逆序）；当 a[i] > a[j] 时，说明 a[i..mid] 这 (mid-i+1) 个元素都大于 a[j]，一次性累加 mid-i+1 个逆序对，再放 a[j]。这样每个元素只被移动一次，统计是「批量的」而不是逐个比较。\n复杂度：T(n)=2T(n/2)+O(n) → 时间 O(n log n)；辅助数组空间 O(n)。答案最大约 n(n-1)/2，n=1e5 时约 5e9，必须用 long long。",
+      "code": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nlong long mergeCount(vector<int> &a, vector<int> &tmp, int l, int r) {\n  if (l >= r) return 0;\n  int mid = (l + r) / 2;\n  long long cnt = 0;\n  cnt += mergeCount(a, tmp, l, mid);         // 左半内部逆序对\n  cnt += mergeCount(a, tmp, mid + 1, r);     // 右半内部逆序对\n\n  int i = l, j = mid + 1, k = l;\n  while (i <= mid && j <= r) {\n    if (a[i] <= a[j]) {\n      tmp[k++] = a[i++];                     // 不产生逆序\n    } else {\n      cnt += mid - i + 1;                    // 批量累加：a[i..mid] 全大于 a[j]\n      tmp[k++] = a[j++];\n    }\n  }\n  while (i <= mid) tmp[k++] = a[i++];        // 左段剩余\n  while (j <= r) tmp[k++] = a[j++];          // 右段剩余\n  for (int t = l; t <= r; t++) a[t] = tmp[t];// 写回，供上层使用\n  return cnt;\n}\n\nint main() {\n  int n;\n  cin >> n;\n  vector<int> a(n), tmp(n);\n  for (int i = 0; i < n; i++) cin >> a[i];\n  cout << mergeCount(a, tmp, 0, n - 1) << endl;\n  return 0;\n}",
+      "type": "分治",
+      "sampleIn": "5\n5 4 3 2 1\n",
+      "sampleOut": "10\n"
+    },
+    {
+      "id": "whu-2021-sliding-window-min",
+      "title": "滑动窗口最小值（单调队列）",
+      "university": "武汉大学",
+      "year": 2021,
+      "module": "数据结构 · 队列",
+      "scene": "工作中：监控系统每 3 分钟统计一次「最近 3 分钟的最小 QPS」用于告警抑制。数据点每天 28800 个，若每个窗口都重新取最小值是 O(nk)；单调队列把「维护最小值」摊到每个点进出队各一次，整体 O(n)——这是限流与滑窗告警的底层结构。",
+      "framework": "① 大框架：用双端队列存下标，队列里的值单调递增。每来一个新元素，从队尾弹掉所有比它大的（它们不可能再成为最小值），再入队；队列头部过期（下标 <= i-k）就弹出；窗口成型后队头即最小值。",
+      "algorithm": "② 核心算法思想：单调队列的正确性来自「后来者更优则前者永久失效」——若 a[j] >= a[i] 且 j < i，那么在 i 之后的所有窗口里 a[j] 都不可能成为最小值，可以安全丢弃。因此每个下标最多入队一次、出队一次。注意过期判断用「下标」而不是「值」，否则值相等的元素会被误删。\n复杂度：每个元素入队一次、出队至多一次，时间 O(n)；队列空间 O(k)。",
+      "code": "#include <iostream>\n#include <deque>\n#include <vector>\nusing namespace std;\n\nint main() {\n  int n, k;\n  cin >> n >> k;\n  vector<int> a(n);\n  for (int i = 0; i < n; i++) cin >> a[i];\n\n  deque<int> dq;            // 存下标，对应值单调递增\n  vector<int> ans;\n  for (int i = 0; i < n; i++) {\n    // 1) 队尾比当前大的全部出队：它们永远不可能再成为最小值\n    while (!dq.empty() && a[dq.back()] >= a[i]) dq.pop_back();\n    dq.push_back(i);\n\n    // 2) 队头若已滑出窗口左边界则弹出（按下标判断，不能用值判断）\n    if (dq.front() <= i - k) dq.pop_front();\n\n    // 3) 窗口填满后即可输出\n    if (i >= k - 1) ans.push_back(a[dq.front()]);\n  }\n\n  for (size_t i = 0; i < ans.size(); i++) {\n    if (i) cout << ' ';\n    cout << ans[i];\n  }\n  cout << endl;\n  return 0;\n}",
+      "type": "滑动窗口",
+      "sampleIn": "8 3\n1 3 -1 -3 5 3 6 7\n",
+      "sampleOut": "-1 -3 -3 -3 3 3\n"
+    },
+    {
+      "id": "uestc-2018-knapsack",
+      "title": "0/1 背包：容量约束下的最大价值",
+      "university": "电子科技大学",
+      "year": 2018,
+      "module": "算法 · 动态规划",
+      "scene": "工作中：容器编排要在一台 5 核机器上挑选待调度任务，每个任务有 CPU 需求和业务价值，任务不可拆分（要么全跑要么不跑）。这就是 0/1 背包：挑出价值最大的子集，而「不可拆分」正是它与分数背包（贪心）的分水岭。",
+      "framework": "① 大框架：dp[j] 表示容量 j 下的最大价值，逐个物品更新；每个物品只有「拿/不拿」两种决策，因此容量维度必须**倒序**遍历。",
+      "algorithm": "② 核心算法思想：状态转移 dp[j] = max(dp[j], dp[j-w] + v)，含义是「不拿该物品」与「拿该物品（腾出 w 容量）」取优。倒序遍历 j 是关键：正序会让同一物品被重复使用（退化成完全背包）；倒序保证 dp[j-w] 还是「上一轮」的值，即每个物品最多用一次。这种一维滚动写法把空间从 O(nW) 压到 O(W)。\n复杂度：时间 O(nW)（n 个物品 × W 个容量），空间 O(W)。W 很大而 n 很小时应换成「按价值做维度」的对称写法。",
+      "code": "#include <iostream>\n#include <vector>\n#include <algorithm>\nusing namespace std;\n\nint main() {\n  int n, W;\n  cin >> n >> W;\n  vector<int> dp(W + 1, 0);          // dp[j] = 容量 j 时的最大价值\n\n  for (int i = 0; i < n; i++) {\n    int w, v;\n    cin >> w >> v;\n    // 倒序遍历：保证 dp[j-w] 仍是「没有考虑本物品」的旧值\n    for (int j = W; j >= w; j--)\n      dp[j] = max(dp[j], dp[j - w] + v);\n  }\n\n  cout << dp[W] << endl;\n  return 0;\n}",
+      "type": "动态规划",
+      "sampleIn": "4 5\n1 2\n2 4\n3 4\n4 5\n",
+      "sampleOut": "8\n"
+    },
+    {
+      "id": "xjtu-2020-search-rotated",
+      "title": "旋转有序数组中的二分查找",
+      "university": "西安交通大学",
+      "year": 2020,
+      "module": "数据结构 · 查找",
+      "scene": "工作中：时序数据库的索引块按时间有序写入，但滚动重启会从中间截断后拼到头部，形成「旋转有序」的块。要在这种块里按时间戳定位记录，若退化成线性扫描会拖垮查询 P99——必须仍用二分。",
+      "framework": "① 大框架：仍是二分，但每次取 mid 后先判断「哪一半是有序的」：若 a[l] <= a[mid] 则左半有序，否则右半有序；再看 target 是否落在有序那半的区间内，决定收缩哪一侧。",
+      "algorithm": "② 核心算法思想：旋转后数组被分成两段各自有序，且任意切一半，至少有一半是完全有序的（这是旋转数组的结构性质）。落在有序半就用普通二分的区间判断，否则去另一半。易错点：区间端点要用闭区间且 mid 计算防溢出；判断有序时用 `a[l] <= a[mid]`（等号处理重复元素）。\n复杂度：每次把区间砍半，时间 O(log n)；空间 O(1)。",
+      "code": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nint search(const vector<int> &a, int target) {\n  int l = 0, r = (int)a.size() - 1;\n  while (l <= r) {\n    int mid = l + (r - l) / 2;              // 防溢出写法\n    if (a[mid] == target) return mid;\n\n    if (a[l] <= a[mid]) {                   // 左半 [l, mid] 有序\n      if (a[l] <= target && target < a[mid]) r = mid - 1;  // target 落在左半\n      else l = mid + 1;\n    } else {                                // 右半 [mid, r] 有序\n      if (a[mid] < target && target <= a[r]) l = mid + 1;  // target 落在右半\n      else r = mid - 1;\n    }\n  }\n  return -1;                                // 未找到\n}\n\nint main() {\n  int n, target;\n  cin >> n >> target;\n  vector<int> a(n);\n  for (int i = 0; i < n; i++) cin >> a[i];\n  cout << search(a, target) << endl;\n  return 0;\n}",
+      "type": "二分查找",
+      "sampleIn": "7 0\n4 5 6 7 0 1 2\n",
+      "sampleOut": "4\n"
+    },
+    {
+      "id": "seu-2022-floyd",
+      "title": "Floyd 多源最短路（任意两点）",
+      "university": "东南大学",
+      "year": 2022,
+      "module": "数据结构 · 图",
+      "scene": "工作中：微服务调用链要做「全链路延迟地图」——需要任意两个服务之间的最短调用延迟，而且拓扑每天变化几十次。节点数只有几百时，重跑一次 Floyd（三重循环）比分别对每个源点跑 Dijkstra 代码更短、更容易验证，这正是本题的工程取舍。",
+      "framework": "① 大框架：用邻接矩阵 dist 存边，然后以每个点 k 为中转站，尝试松弛所有点对 (i, j)。三重循环必须把 k 放最外层。",
+      "algorithm": "② 核心算法思想：dist[i][j] 表示只允许经过「前 k 个点」作为中转时的最短路。当引入第 k 个点，要么不经过它（沿用旧值），要么绕它（dist[i][k]+dist[k][j]），取小。k 必须在最外层，因为第 k 层依赖的是「k-1 层已收敛」的结论；把 k 放内层会得到错误结果。本题用 N 个 (x,y) 结构体存边，适合稀疏图；稠密图直接用矩阵。\n复杂度：时间 O(n^3)，空间 O(n^2)。n 超过约 500 就应考虑对每个源点跑堆优化 Dijkstra。",
+      "code": "#include <iostream>\n#include <vector>\n#include <climits>\nusing namespace std;\n\nint main() {\n  int n, m;\n  cin >> n >> m;\n  const long long INF = LLONG_MAX / 4;\n  vector<vector<long long>> d(n + 1, vector<long long>(n + 1, INF));\n  for (int i = 1; i <= n; i++) d[i][i] = 0;      // 自己到自己为 0\n\n  for (int i = 0; i < m; i++) {\n    int u, v, w;\n    cin >> u >> v >> w;\n    if (w < d[u][v]) d[u][v] = w;               // 有向边；重边取最小\n  }\n\n  // k 必须在最外层：第 k 层只依赖「已收敛」的前 k-1 层\n  for (int k = 1; k <= n; k++)\n    for (int i = 1; i <= n; i++) {\n      if (d[i][k] >= INF) continue;             // 剪枝：i 到不了 k\n      for (int j = 1; j <= n; j++)\n        if (d[k][j] < INF && d[i][k] + d[k][j] < d[i][j])\n          d[i][j] = d[i][k] + d[k][j];\n    }\n\n  for (int i = 1; i <= n; i++) {\n    for (int j = 1; j <= n; j++) {\n      if (j > 1) cout << ' ';\n      if (d[i][j] >= INF) cout << \"INF\";        // 不可达\n      else cout << d[i][j];\n    }\n    cout << endl;\n  }\n  return 0;\n}",
+      "type": "图论最短路",
+      "sampleIn": "4 5\n1 2 3\n2 3 1\n3 4 2\n1 4 10\n1 3 7\n",
+      "sampleOut": "0 3 4 6\nINF 0 1 3\nINF INF 0 2\nINF INF INF 0\n"
+    },
+    {
+      "id": "nankai-2021-date-diff",
+      "type": "模拟",
+      "title": "日期差值（跨闰年跨月）",
+      "university": "南开大学",
+      "year": 2021,
+      "module": "算法 · 模拟",
+      "scene": "工作中：会员有效期与账单周期都按「自然日」结算。曾有一次跨闰年 2 月的续费因为手写 30 天近似，导致 2 月 29 日当天的用户被多扣一天费用——日期题唯一正确的做法是「统一折算成自纪元起的天数再相减」，不要自己拍脑袋。",
+      "framework": "① 大框架：写一个 `daysFromEpoch(y,m,d)` 把任意日期折算成「距 1970-01-01 的天数」，两个日期各算一次再相减。折算内部再拆成「整年 + 整月 + 零头日」三段累加。",
+      "algorithm": "② 核心算法思想：闰年规则是「能被 400 整除，或能被 4 整除但不能被 100 整除」，写成布尔函数只出现一次，年/月两处复用。月份天数用静态表，2 月按当年是否闰年临时 +1。零头日用 `d-1`（因为当天还没过完）。这样任何跨年跨闰年的日期都统一处理，不需要特判。\n复杂度：年份循环 O(Y)、月份循环 O(12)，整体 O(Y)；空间 O(1)。若要处理公元前后或超大年份，应直接用儒略日公式 O(1)。",
+      "code": "#include <iostream>\nusing namespace std;\n\n// 闰年判定：能被 400 整除，或能被 4 整除但不能被 100 整除\nbool isLeap(int y) { return (y % 400 == 0) || (y % 4 == 0 && y % 100 != 0); }\n\n// 把日期折算成「距 1970-01-01 的天数」，从而跨年跨闰年都能直接相减\nlong long daysFromEpoch(int y, int m, int d) {\n  static const int mdays[13] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};\n  long long days = 0;\n  for (int i = 1970; i < y; i++) days += isLeap(i) ? 366 : 365;   // 整年\n  for (int i = 1; i < m; i++) {                                   // 整月\n    days += mdays[i];\n    if (i == 2 && isLeap(y)) days += 1;                           // 闰年 2 月多一天\n  }\n  days += d - 1;                                                  // 当月零头（当天未过完）\n  return days;\n}\n\nint main() {\n  int y1, m1, d1, y2, m2, d2;\n  cin >> y1 >> m1 >> d1 >> y2 >> m2 >> d2;\n  cout << daysFromEpoch(y2, m2, d2) - daysFromEpoch(y1, m1, d1) << endl;\n  return 0;\n}",
+      "sampleIn": "2020 1 1 2021 3 1\n",
+      "sampleOut": "425\n"
+    },
+    {
+      "id": "ecnu-2020-interval-schedule",
+      "type": "贪心",
+      "title": "区间调度：最多能参加多少个不重叠会议",
+      "university": "华东师范大学",
+      "year": 2020,
+      "module": "算法 · 贪心",
+      "scene": "工作中：会议室/面试官排期要在一个日历里塞进最多的会议安排（端点相接算不冲突）。按「开始时间」排序做贪心是错的——会被一个超长会议卡死；按「结束时间」排序才能保证每一步都给后面留出最大余量，这是排期系统的标准做法。",
+      "framework": "① 大框架：把所有区间按**右端点**升序排序；维护 `lastEnd`，依次扫描，若当前区间左端点 >= lastEnd 就选它并更新 lastEnd。",
+      "algorithm": "② 核心算法思想：交换论证——设最优解第一个区间是 B、贪心选的是 A（右端点最小），则 A 的右端点 <= B 的右端点，把 B 换成 A 不会让后面的区间变得不可选，故「最早结束优先」不劣于任何最优解，贪心正确。易错点：端点相接是否算冲突要按题意明确（本题用 `l >= lastEnd` 表示允许相接）。\n复杂度：排序 O(n log n) + 扫描 O(n)，总时间 O(n log n)；空间 O(n) 存区间。",
+      "code": "#include <iostream>\n#include <vector>\n#include <algorithm>\nusing namespace std;\n\nint main() {\n  int n;\n  cin >> n;\n  vector<pair<int, int>> seg(n);          // (右端点, 左端点)，方便按右端点排序\n  for (int i = 0; i < n; i++) {\n    int l, r;\n    cin >> l >> r;\n    seg[i] = {r, l};\n  }\n  sort(seg.begin(), seg.end());           // 按右端点升序：最早结束优先\n\n  int cnt = 0, lastEnd = -2147483647;     // 上一个已选区间的右端点\n  for (int i = 0; i < n; i++) {\n    int r = seg[i].first, l = seg[i].second;\n    if (l >= lastEnd) {                   // 端点相接也算不冲突\n      cnt++;\n      lastEnd = r;                        // 选中后把边界推到它的右端点\n    }\n  }\n  cout << cnt << endl;\n  return 0;\n}",
+      "sampleIn": "5\n1 4\n3 5\n5 7\n6 9\n8 10\n",
+      "sampleOut": "3\n"
+    },
+    {
+      "id": "buaa-2019-two-singles-bitwise",
+      "type": "位运算",
+      "title": "只出现一次的两个数（异或分组）",
+      "university": "北京航空航天大学",
+      "year": 2019,
+      "module": "算法 · 位运算",
+      "scene": "工作中：日志管道做双写后，绝大多数 event_id 都出现了两次，但有两个 id 因重试丢失只写了一次。要在几十 GB 日志、内存只够放一个整数的情况下定位这两个 id——异或扫描一遍即可，这就是本题。",
+      "framework": "① 大框架：先把全部数异或起来得到 `x`（成对的全消掉），`x` 就是那两个数异或的结果；取 `x` 的最低位 1 作为「分组位」，把数组按该位分成两组分别异或，每组剩下的那个就是答案。",
+      "algorithm": "② 核心算法思想：`a^a=0`、`a^0=a`，异或满足交换律，因此整体异或只留下两个单例的异或值。由于两数不同，其异或值必不为 0，最低位的 1 说明「这两个数在该位上不同」，于是可以用这一位把它们分到不同组；组内其余元素成对抵消，剩下即为答案。`x & -x` 取最低位 1 是补码性质的标准用法。\n复杂度：两遍扫描 O(n)，额外空间 O(1)。若是「只出现一次的一个数」，去掉分组、直接输出整体异或即可。",
+      "code": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n  int n;\n  cin >> n;\n  vector<int> a(n);\n  for (int i = 0; i < n; i++) cin >> a[i];\n\n  int x = 0;\n  for (int v : a) x ^= v;              // 成对的都消掉，剩下 a^b\n\n  int low = x & -x;                    // 取最低位的 1：用它把两数分到不同组\n  int g1 = 0, g2 = 0;\n  for (int v : a) {\n    if (v & low) g1 ^= v;              // 该位为 1 的一组\n    else g2 ^= v;                      // 该位为 0 的一组\n  }\n\n  if (g1 > g2) swap(g1, g2);           // 按题意输出升序\n  cout << g1 << ' ' << g2 << endl;\n  return 0;\n}",
+      "sampleIn": "6\n1 2 3 1 2 5\n",
+      "sampleOut": "3 5\n"
+    },
+    {
+      "id": "fudan-2018-three-sum",
+      "type": "双指针",
+      "title": "三数之和为零（排序 + 对撞指针 + 去重）",
+      "university": "复旦大学",
+      "year": 2018,
+      "module": "算法 · 双指针",
+      "scene": "工作中：对账系统要找出「三笔金额加起来刚好抵消为 0」的可疑冲正组合。笔数十万级，三层循环必然超时；排序后用对撞指针把第三层压成一次线性扫描，并把「同一组只报一次」做进循环里，避免同一笔风险被重复告警。",
+      "framework": "① 大框架：先排序；固定第一个数 `i`，在 `i` 右边用左右指针 `l/r` 向中间收，三数之和偏小就 `l++`、偏大就 `r--`。三层去重分别在 `i`、`l`、`r` 处跳过重复值。",
+      "algorithm": "② 核心算法思想：排序后「两数之和为目标」可用对撞指针 O(n) 解决——因为数组有序，和偏小只能靠增大左指针、偏大只能靠减小右指针，不存在「该动另一个」的情况，所以不会漏解。外层再套一个 i 得 O(n^2)。去重是本题真正的坑：`i` 与前一个相同则跳过；命中后 `l/r` 要跳过所有相同值，否则同一三元组会输出多次。\n复杂度：排序 O(n log n) + 双层 O(n^2)，总时间 O(n^2)；空间 O(1)（不计排序栈与输出）。",
+      "code": "#include <iostream>\n#include <vector>\n#include <algorithm>\nusing namespace std;\n\nint main() {\n  int n;\n  cin >> n;\n  vector<int> a(n);\n  for (int i = 0; i < n; i++) cin >> a[i];\n  sort(a.begin(), a.end());                 // 对撞指针的前提：有序\n\n  vector<vector<int>> res;\n  for (int i = 0; i < n - 2; i++) {\n    if (i > 0 && a[i] == a[i - 1]) continue;          // 去重 1：第一个数不重复\n    if (a[i] > 0) break;                              // 剪枝：最小数已 >0，后面不可能凑成 0\n    int l = i + 1, r = n - 1;\n    while (l < r) {\n      int s = a[i] + a[l] + a[r];\n      if (s == 0) {\n        res.push_back({a[i], a[l], a[r]});\n        int lv = a[l], rv = a[r];\n        while (l < r && a[l] == lv) l++;              // 去重 2：左指针跳过相同值\n        while (l < r && a[r] == rv) r--;              // 去重 3：右指针跳过相同值\n      } else if (s < 0) {\n        l++;                                          // 和偏小 -> 增大左指针\n      } else {\n        r--;                                          // 和偏大 -> 减小右指针\n      }\n    }\n  }\n\n  cout << res.size() << endl;\n  for (auto &t : res) cout << t[0] << ' ' << t[1] << ' ' << t[2] << endl;\n  return 0;\n}",
+      "sampleIn": "6\n-1 0 1 2 -1 -4\n",
+      "sampleOut": "2\n-1 -1 2\n-1 0 1\n"
+    },
+    {
+      "id": "csu-2020-range-add",
+      "type": "前缀和与差分",
+      "title": "区间批量加后输出最终数组（差分）",
+      "university": "中南大学",
+      "year": 2020,
+      "module": "算法 · 差分",
+      "scene": "工作中：埋点聚合服务收到几十万条「某时间片区间内计数 +1」的批量更新，最后只需输出每个时间片的累计量。逐条更新每个时间片是 O(nm)，而差分只改两个端点，最后一遍前缀和还原——这是时序统计的标准优化。",
+      "framework": "① 大框架：开一个长度 n+2 的差分数组 `d`，每次区间 [l,r] 加 v 就做 `d[l]+=v; d[r+1]-=v`；所有更新结束后对 `d` 做一次前缀和，`d[i]` 即为位置 i 的最终值。",
+      "algorithm": "② 核心算法思想：前缀和与差分互为逆运算。区间加在「差分视角」下只是两个点的变化，因为 `a[i] = d[1]+...+d[i]`，只要让 l 处开始累加、r+1 处停止累加即可。把 m 次区间更新从 O(nm) 降到 O(m+n)。易错点：`r+1` 可能越界，数组要开 n+2；下标 1 基与 0 基混用会错位。\n复杂度：更新 O(1)/次，总 O(m+n)；空间 O(n)。二维场景（子矩阵加）用二维差分同理。",
+      "code": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n  int n, m;\n  cin >> n >> m;\n  vector<long long> d(n + 2, 0);          // 差分数组，多开一格防止 r+1 越界\n\n  for (int i = 0; i < m; i++) {\n    int l, r, v;\n    cin >> l >> r >> v;\n    d[l] += v;                            // 从 l 开始加上 v\n    d[r + 1] -= v;                        // 从 r+1 起撤销\n  }\n\n  long long cur = 0;                      // 前缀和即最终值\n  for (int i = 1; i <= n; i++) {\n    cur += d[i];\n    if (i > 1) cout << ' ';\n    cout << cur;\n  }\n  cout << endl;\n  return 0;\n}",
+      "sampleIn": "5 3\n1 3 2\n2 4 3\n1 5 1\n",
+      "sampleOut": "3 6 6 4 1\n"
+    },
+    {
+      "id": "scu-2021-binary-answer-rope",
+      "type": "二分答案",
+      "title": "切绳：最大化最短段长度（二分答案）",
+      "university": "四川大学",
+      "year": 2021,
+      "module": "算法 · 二分",
+      "scene": "工作中：CDN 把一批视频切成等长分片，要求总片数不少于 k（为了并发拉流），片长越大约束越强。这就是「最小值最大化」——直接求最优值没有公式，但判定「片长 L 是否可行」是 O(n) 的，于是二分 L。",
+      "framework": "① 大框架：答案在 [1, 最长绳] 区间内且具有**单调性**（L 越小越容易满足 k 段），于是二分 L：对每个候选 L 计算 `sum(len_i / L)`，若 >= k 说明可行，去右半找更大的 L。",
+      "algorithm": "② 核心算法思想：二分答案的前提是「可判定 + 单调」。判定函数 `feasible(L)` 只需一次线性扫描。注意二分形态：要找**最后一个**满足条件的 L，用 `lo<=hi`、`mid=(lo+hi)/2`，可行则 `ans=mid; lo=mid+1`，否则 `hi=mid-1`。易错点：整数截断（`len/L` 自动向下取整，不需要 floor）；若 k 大于总段数上限，答案应为 0。\n复杂度：二分 O(log maxLen) 次，每次判定 O(n)，总 O(n log maxLen)；空间 O(n)。",
+      "code": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n  int n, k;\n  cin >> n >> k;\n  vector<long long> len(n);\n  long long hi = 0;\n  for (int i = 0; i < n; i++) {\n    cin >> len[i];\n    if (len[i] > hi) hi = len[i];\n  }\n\n  long long lo = 1, ans = 0;\n  while (lo <= hi) {\n    long long mid = lo + (hi - lo) / 2;\n    long long pieces = 0;                     // 以 mid 为段长能切多少段\n    for (int i = 0; i < n; i++) pieces += len[i] / mid;\n    if (pieces >= k) {                        // 可行：记录答案并试着更大\n      ans = mid;\n      lo = mid + 1;\n    } else {                                  // 不可行：段长必须更小\n      hi = mid - 1;\n    }\n  }\n  cout << ans << endl;                        // 一段都切不出来时为 0\n  return 0;\n}",
+      "sampleIn": "4 11\n802 743 457 539\n",
+      "sampleOut": "200\n"
+    },
+    {
+      "id": "nudt-2019-permute-unique",
+      "type": "回溯",
+      "title": "含重复元素的全排列（字典序去重）",
+      "university": "国防科技大学",
+      "year": 2019,
+      "module": "算法 · 回溯",
+      "scene": "工作中：A/B 实验要给一组参数枚举所有生效顺序，参数里有重复项（比如两个同名开关）。不去重会导致组合数指数级膨胀、报告里出现重复分组；本题就是「回溯 + 同层去重」的最小模型。",
+      "framework": "① 大框架：先排序，用 `used[]` 标记是否已选，深度优先逐位填数；到达长度 n 时输出一个排列。同一层里若 `a[i]==a[i-1]` 且前一个未被使用，则跳过。",
+      "algorithm": "② 核心算法思想：回溯 = 「选择 → 递归 → 撤销」。去重的关键判断是 `i>0 && a[i]==a[i-1] && !used[i-1]`：它表达「相同值的元素必须按顺序被使用」，从而保证同一层不会用相同值开启两个分支。若漏掉 `!used[i-1]` 会把合法排列也剪掉。排序是前提，否则重复元素不相邻、判重失效。\n复杂度：最坏 O(n!·n)（无重复时）；含重复时实际排列数为 n!/∏(cnt_i!)。空间 O(n)（used + 递归栈）。",
+      "code": "#include <iostream>\n#include <vector>\n#include <algorithm>\nusing namespace std;\n\nint n;\nvector<int> a, cur;\nvector<char> used;\nvector<vector<int>> res;\n\nvoid dfs() {\n  if ((int)cur.size() == n) {          // 填满 n 位：得到一个排列\n    res.push_back(cur);\n    return;\n  }\n  for (int i = 0; i < n; i++) {\n    if (used[i]) continue;\n    // 同层去重：相同值必须按顺序使用，避免重复排列\n    if (i > 0 && a[i] == a[i - 1] && !used[i - 1]) continue;\n    used[i] = 1;\n    cur.push_back(a[i]);               // 选择\n    dfs();                             // 递归\n    cur.pop_back();                    // 撤销\n    used[i] = 0;\n  }\n}\n\nint main() {\n  cin >> n;\n  a.resize(n);\n  for (int i = 0; i < n; i++) cin >> a[i];\n  sort(a.begin(), a.end());            // 去重的前提：相同元素相邻\n  used.assign(n, 0);\n\n  dfs();\n\n  cout << res.size() << endl;\n  for (auto &p : res) {\n    for (int i = 0; i < n; i++) {\n      if (i) cout << ' ';\n      cout << p[i];\n    }\n    cout << endl;\n  }\n  return 0;\n}",
+      "sampleIn": "3\n1 1 2\n",
+      "sampleOut": "3\n1 1 2\n1 2 1\n2 1 1\n"
+    },
+    {
+      "id": "hust-2018-largest-rectangle",
+      "type": "单调栈",
+      "title": "柱状图中最大的矩形（单调栈）",
+      "university": "华中科技大学",
+      "year": 2018,
+      "module": "数据结构 · 栈",
+      "scene": "工作中：监控大盘把「过去 N 个时间片的可用实例数」画成柱状图，要回答「连续一段时间内按最低水位能承载多少并发」——即最大矩形面积。面试里它是单调栈的招牌题，也是「用栈记录左边界」这一思想的原型。",
+      "framework": "① 大框架：维护一个**单调递增**的下标栈，遇到比栈顶矮的柱子就不断弹出并结算面积；首尾各加一个高度 0 的哨兵，省掉「栈非空」与「收尾清栈」两处特判。",
+      "algorithm": "② 核心算法思想：对每根柱子，它能向左右扩展的边界是「第一个比它矮的柱子」。单调栈正好在弹出时同时拿到这两个边界：弹出时右边界是当前 i，左边界是弹出后的新栈顶。因此每根柱子只入栈出栈一次，面积 = 高度 × (右-左-1)。易错点：栈里存**下标**而非高度（要靠下标算宽度）；哨兵高度 0 保证最后一根也能结算。\n复杂度：每根柱子入栈出栈各一次，时间 O(n)；栈空间 O(n)。若用暴力向两侧扩展则是 O(n^2)。",
+      "code": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n  int n;\n  cin >> n;\n  vector<int> h(n + 2, 0);              // 首尾各加一个 0 哨兵\n  for (int i = 1; i <= n; i++) cin >> h[i];\n\n  vector<int> st;                       // 存下标，对应高度单调递增\n  long long best = 0;\n  for (int i = 0; i <= n + 1; i++) {\n    // 当前柱子比栈顶矮：栈顶的右边界就是 i，可以结算了\n    while (!st.empty() && h[st.back()] > h[i]) {\n      int height = h[st.back()];\n      st.pop_back();\n      int left = st.empty() ? -1 : st.back();     // 弹出后的栈顶即左边界\n      long long area = 1LL * height * (i - left - 1);\n      if (area > best) best = area;\n    }\n    st.push_back(i);                    // 下标入栈（等高的也入栈，不影响结果）\n  }\n  cout << best << endl;\n  return 0;\n}",
+      "sampleIn": "6\n2 1 5 6 2 3\n",
+      "sampleOut": "10\n"
+    },
+    {
+      "id": "bupt-2019-bit-indexed-tree",
+      "type": "树状数组",
+      "title": "单点修改 + 区间求和（树状数组）",
+      "university": "北京邮电大学",
+      "year": 2019,
+      "module": "数据结构 · 树状数组",
+      "scene": "工作中：实时排行榜既要「某人加分」又要「查某个名次区间的总分」。前缀和数组改动是 O(n)、暴力查询是 O(n)，树状数组让两者都变成 O(log n)，这是刷榜/计费这类「读写混合」场景的常见选择。",
+      "framework": "① 大框架：开数组 `tree[]`，`add(i,v)` 沿 `i += i&-i` 向上更新，`sum(i)` 沿 `i -= i&-i` 向下累加。区间 [l,r] 的和 = `sum(r)-sum(l-1)`。",
+      "algorithm": "② 核心算法思想：树状数组用「下标的二进制最低位 1」把前缀切成若干块，`tree[i]` 存的是「以 i 结尾、长度为 lowbit(i)」那一段的和，因此查询只需 O(log n) 次累加。修改时沿着 lowbit 向上爬，把包含 i 的所有块都更新。易错点：`lowbit(x)=x&-x`；下标必须从 1 开始（0 会让 lowbit 为 0 死循环）。\n复杂度：单次修改 O(log n)、单次查询 O(log n)，建树可 O(n)（每个 i 把值加到 i+lowbit(i)）。空间 O(n)。若需要区间修改 + 区间查询，用两个树状数组或改线段树。",
+      "code": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nint n;\nvector<long long> tree_;               // 1 基下标\n\nint lowbit(int x) { return x & -x; }   // 最低位的 1\n\nvoid add(int i, long long v) {         // 单点加：沿 lowbit 向上爬\n  for (; i <= n; i += lowbit(i)) tree_[i] += v;\n}\n\nlong long sum(int i) {                 // 前缀和：沿 lowbit 向下减\n  long long s = 0;\n  for (; i > 0; i -= lowbit(i)) s += tree_[i];\n  return s;\n}\n\nint main() {\n  int m;\n  cin >> n >> m;\n  tree_.assign(n + 1, 0);\n  for (int i = 1; i <= n; i++) {\n    long long v;\n    cin >> v;\n    add(i, v);                         // 建树（也可 O(n) 直接构造）\n  }\n\n  for (int q = 0; q < m; q++) {\n    int op;\n    cin >> op;\n    if (op == 1) {                     // 1 i v：单点加\n      int i;\n      long long v;\n      cin >> i >> v;\n      add(i, v);\n    } else {                           // 2 l r：区间和\n      int l, r;\n      cin >> l >> r;\n      cout << sum(r) - sum(l - 1) << endl;\n    }\n  }\n  return 0;\n}",
+      "sampleIn": "5 4\n1 2 3 4 5\n2 1 5\n1 3 10\n2 1 5\n2 3 3\n",
+      "sampleOut": "15\n25\n13\n"
+    },
+    {
+      "id": "hit-2021-big-factorial",
+      "type": "高精度",
+      "title": "大数阶乘（数组模拟竖式乘法）",
+      "university": "哈尔滨工业大学",
+      "year": 2021,
+      "module": "算法 · 高精度",
+      "scene": "工作中：算组合数 C(100,50) 或排列数时，64 位整数很快溢出——曾有一次报表把「排列数」算成负数，排查半天才发现是 long long 溢出。本题用数组模拟竖式乘法，是所有高精度运算（加/减/乘/除）的入门形态。",
+      "framework": "① 大框架：把大数按「低位在前」存进数组，逐位乘上 i 并处理进位，最后从高位到低位输出。外层循环 i=2..n，内层遍历当前所有有效位。",
+      "algorithm": "② 核心算法思想：竖式乘法的本质是「每位乘以因子 + 进位」。低位在前的存储让进位方向与数组下标增长方向一致，避免整体搬移。每位计算 `t = a[k]*i + carry`，写入 `a[k]=t%10`、`carry=t/10`；内层结束后若 carry 仍非 0，要继续展开成多位（可能一次进多位）。易错点：内层循环边界要用「当前有效位数」而不是固定 n；输出必须跳过前导 0。\n复杂度：结果有 O(n log n) 位，逐位乘的总时间为 O(n^2 log n) 量级；空间为结果位数。n 上千后应改用 FFT 或分块。",
+      "code": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n  int n;\n  cin >> n;\n\n  vector<int> a(1, 1);                 // 低位在前，初始为 1\n  for (int i = 2; i <= n; i++) {\n    int carry = 0;\n    for (size_t k = 0; k < a.size(); k++) {\n      int t = a[k] * i + carry;         // 当前位乘因子并加上进位\n      a[k] = t % 10;                    // 保留个位\n      carry = t / 10;                   // 向上进位\n    }\n    while (carry > 0) {                 // 进位可能不止一位\n      a.push_back(carry % 10);\n      carry /= 10;\n    }\n  }\n\n  for (int k = (int)a.size() - 1; k >= 0; k--) cout << a[k];   // 高位到低位\n  cout << endl;\n  return 0;\n}",
+      "sampleIn": "50\n",
+      "sampleOut": "30414093201713378043612608166064768844377641568960512000000000000\n"
     }
-  ]
+  ],
+  "algorithmPlaybook": {
+    "title": "常考算法思想与框架速查",
+    "intro": "机试不是「背题」，而是「认题型 → 套框架 → 补细节」。下面按题型给出四件事：① 什么时候该想到它（识别信号）；② 可直接默写的最小框架；③ 最容易踩的坑；④ 复杂度。配合上方机试题库使用：先看题想题型，再对照这里的框架，最后回到题里看完整代码。",
+    "steps": [
+      {
+        "name": "① 读题拆三个数",
+        "detail": "先把「n 的上限 / 时间限制 / 内存限制」抄到纸上。规模直接决定算法：n≤20 想状压或爆搜；n≤5e3 允许 O(n^2)；n≤1e5 必须 O(n log n) 或 O(n)；n≤1e6 只能 O(n) 且常数要小。这一步做错，后面全白写。"
+      },
+      {
+        "name": "② 定题型",
+        "detail": "拿题面里的关键词去对「识别信号」表：出现「最多/最少选几个不重叠」→ 贪心区间调度；「最大值最小 / 最小值最大」→ 二分答案；「区间加、最后求值」→ 差分；「第 k 大、动态最值」→ 堆；「任意两点最短路」→ Floyd。先猜题型，再想具体算法。"
+      },
+      {
+        "name": "③ 先写骨架再填逻辑",
+        "detail": "把 main 写成「读入 → 处理 → 输出」三段，中间先留一个空函数。先让样例的读入输出跑通（哪怕答案是错的），再补算法。这能避免「代码写了一百行，最后发现读入格式理解错了」的返工。"
+      },
+      {
+        "name": "④ 算一遍复杂度",
+        "detail": "动手前用 n 的上限代进你打算用的复杂度：O(n^2) 在 n=1e5 是 1e10，必然超时；O(n log n) 是 1.7e6，很安全；O(2^n) 只在 n≤20 可行。内存同理：1e7 个 int 约 40MB，超过 256MB 限制就要降维。"
+      },
+      {
+        "name": "⑤ 自测四类边界",
+        "detail": "空输入 / 只有一个元素 / 所有元素相同 / 极值（0、负数、1e9）。再加一条：多组测试数据时全局数组必须清空——这是机试最常见的「本地过、提交 WA」。"
+      }
+    ],
+    "groups": [
+      {
+        "group": "枚举与模拟",
+        "why": "题面把规则写得很细（走格子、日期、进制、排队），没有现成算法可套——先把状态显式化，再逐步推进。",
+        "patterns": [
+          {
+            "name": "模拟：按题意推进",
+            "when": "给了明确的状态与转移规则，且数据范围小到「步数 × 单步代价」过得去。",
+            "template": "struct State { int x, y, dir; };          // 把状态的所有分量写全\nState s = init();\nint cnt = 0;\nwhile (!done(s) && cnt++ < LIMIT) {       // 必须设上限，防死循环\n  s = step(s);                            // 所有规则集中在 step 里\n}\n",
+            "trap": "不设循环上限是模拟题第一杀手；闰年/越界/取模判断散落在多个分支里，应抽成函数复用，否则改一处漏一处。",
+            "complexity": "O(步数 × 单步代价)"
+          },
+          {
+            "name": "子集枚举（位掩码）",
+            "when": "n ≤ 20 且要「枚举所有选择方案」比较最优（选/不选的组合问题）。",
+            "template": "for (int mask = 0; mask < (1 << n); mask++) {\n  long long sum = 0, cost = 0;\n  for (int i = 0; i < n; i++)\n    if (mask >> i & 1) { sum += a[i]; cost += c[i]; }\n  if (cost <= budget) best = max(best, sum);\n}\n",
+            "trap": "n=25 时 2^25≈3300 万，勉强；n=30 就爆。用 `mask >> i & 1` 判位比 `mask & (1<<i)` 更清晰。",
+            "complexity": "O(2^n · n)"
+          }
+        ],
+        "types": [
+          "模拟",
+          "搜索"
+        ]
+      },
+      {
+        "group": "贪心",
+        "why": "每步都选「当前看起来最好」的，且能证明局部最优不会被后面的选择推翻。证明方式通常是交换论证。",
+        "patterns": [
+          {
+            "name": "区间调度：按右端点排序",
+            "when": "「最多选几个互不重叠的区间 / 最多参加几个会议 / 最少用几支箭」。",
+            "template": "vector<pair<int,int>> seg(n);            // (右端点, 左端点)\nfor (auto &x : seg) swap(x.first, x.second);   // 让右端点排在前面\nsort(seg.begin(), seg.end());\nint cnt = 0, lastEnd = INT_MIN;\nfor (auto &x : seg)\n  if (x.second >= lastEnd) { cnt++; lastEnd = x.first; }\n",
+            "trap": "按左端点排序或按长度排序都是错的：一个超长区间会把后面的全挡住。端点相接算不算冲突，必须回题面确认。",
+            "complexity": "O(n log n)"
+          },
+          {
+            "name": "排序贪心 + 交换论证",
+            "when": "要安排一个顺序（按截止时间、按单位价值、按人数），使某个总量最优。",
+            "template": "sort(a.begin(), a.end(), [](const Item &p, const Item &q) {\n  return 1LL * p.v * q.w > 1LL * q.v * p.w;   // 性价比比较：交叉相乘，不用 double\n});\n",
+            "trap": "用 double 比性价比会有精度误差导致排序不稳定；写不出「交换论证」就说明贪心可能是错的，此时应改 DP。",
+            "complexity": "O(n log n)"
+          }
+        ],
+        "types": [
+          "贪心"
+        ]
+      },
+      {
+        "group": "二分",
+        "why": "有序性（或可判定性）能把搜索空间每次砍半。两种用法：在有序数组里找位置、在答案空间里找最优值。",
+        "patterns": [
+          {
+            "name": "有序查找：lower_bound 写法",
+            "when": "有序数组里找「第一个 ≥ x」「最后一个 ≤ x」的边界。",
+            "template": "int lo = 0, hi = n;                    // 左闭右开 [lo, hi)\nwhile (lo < hi) {\n  int mid = lo + (hi - lo) / 2;          // 防溢出\n  if (a[mid] < x) lo = mid + 1;\n  else hi = mid;\n}\n// lo = 第一个 >= x 的下标；可能等于 n（全都小于 x）\n",
+            "trap": "混用开区间闭区间是死循环的头号原因：`while(lo<=hi)` 必须配 `hi=mid-1`，`while(lo<hi)` 必须配 `hi=mid`。写之前先声明用哪种。",
+            "complexity": "O(log n)"
+          },
+          {
+            "name": "二分答案：最大值最小 / 最小值最大",
+            "when": "直接求最优值没有公式，但「给定一个候选值，判断是否可行」是 O(n)。",
+            "template": "long long lo = LOWER, hi = UPPER, ans = -1;\nwhile (lo <= hi) {\n  long long mid = lo + (hi - lo) / 2;\n  if (feasible(mid)) { ans = mid; lo = mid + 1; }   // 可行就试着更大\n  else hi = mid - 1;\n}\n",
+            "trap": "必先确认单调性（候选值越大越难满足，或反之）。答案区间上界要给足（常取 1e18 或 sum），否则会漏掉最优解。",
+            "complexity": "O(n log C)，C 为答案范围"
+          }
+        ],
+        "types": [
+          "二分查找",
+          "二分答案"
+        ]
+      },
+      {
+        "group": "双指针与滑动窗口",
+        "why": "利用「单调性」让两个指针同向或相向移动，把 O(n^2) 的枚举压成 O(n)。",
+        "patterns": [
+          {
+            "name": "对撞指针",
+            "when": "有序数组求两数/三数之和、回文判定、容器装水。",
+            "template": "int l = 0, r = n - 1;\nwhile (l < r) {\n  long long s = a[l] + a[r];\n  if (s == target) { /* 记录答案 */ l++; r--; }\n  else if (s < target) l++;               // 和偏小 → 增大左指针\n  else r--;                               // 和偏大 → 减小右指针\n}\n",
+            "trap": "三数之和必须三层去重（固定项 i、命中后 l 与 r）；漏一层就会输出重复三元组。",
+            "complexity": "O(n)（有序前提，排序另算 O(n log n)）"
+          },
+          {
+            "name": "定长滑窗 + 单调队列",
+            "when": "求每个长度 k 的窗口的最大值/最小值；或滑窗内的极值维护。",
+            "template": "deque<int> dq;                            // 存下标，值单调递增\nfor (int i = 0; i < n; i++) {\n  while (!dq.empty() && a[dq.back()] >= a[i]) dq.pop_back();\n  dq.push_back(i);\n  if (dq.front() <= i - k) dq.pop_front();            // 按下标判过期\n  if (i >= k - 1) ans.push_back(a[dq.front()]);\n}\n",
+            "trap": "过期判断必须用「下标」而不是「值」——值相等的元素会被误删；先弹队尾再判过期，顺序反了会留下过期元素。",
+            "complexity": "O(n)"
+          }
+        ],
+        "types": [
+          "双指针",
+          "滑动窗口"
+        ]
+      },
+      {
+        "group": "前缀和与差分",
+        "why": "把「区间操作」变成「端点操作」，一次预处理换多次 O(1) 查询，或把 m 次区间修改压成 O(m+n)。",
+        "patterns": [
+          {
+            "name": "一维前缀和",
+            "when": "数组不变、多次询问区间和（或区间内某类计数）。",
+            "template": "vector<long long> pre(n + 1, 0);\nfor (int i = 1; i <= n; i++) pre[i] = pre[i - 1] + a[i];\nlong long rangeSum(int l, int r) { return pre[r] - pre[l - 1]; }   // 1 基\n",
+            "trap": "前缀和数组要用 long long（1e5 个 1e9 相加必爆 int）；二维前缀和记得容斥：四个角加减。",
+            "complexity": "预处理 O(n)、查询 O(1)"
+          },
+          {
+            "name": "差分（区间加）",
+            "when": "多次「区间 [l,r] 全部加上 v」，最后一次性求每个位置的值。",
+            "template": "vector<long long> d(n + 2, 0);             // 多开一格防 r+1 越界\n// 每次区间加：\nd[l] += v; d[r + 1] -= v;\n// 最后一遍前缀和还原：\nlong long cur = 0;\nfor (int i = 1; i <= n; i++) { cur += d[i]; a[i] = cur; }\n",
+            "trap": "`r+1` 可能等于 n+1，数组必须开 n+2；差分只负责「区间加」，若同时要区间求和得用两个差分数组或树状数组。",
+            "complexity": "O(m + n)"
+          }
+        ],
+        "types": [
+          "前缀和与差分"
+        ]
+      },
+      {
+        "group": "栈与单调栈",
+        "why": "栈处理「最近的相关元素」；单调栈进一步保证「栈内元素有序」，从而在弹出时一次拿到左右边界。",
+        "patterns": [
+          {
+            "name": "括号匹配 / 表达式求值",
+            "when": "成对结构（括号、标签）、运算符优先级、后缀表达式。",
+            "template": "stack<char> st;\nfor (char c : s) {\n  if (c == '(' || c == '[' || c == '{') st.push(c);\n  else if (c == ')' || c == ']' || c == '}') {\n    if (st.empty() || !match(st.top(), c)) return false;   // 空栈先判\n    st.pop();\n  }\n}\nreturn st.empty();                          // 最后必须为空\n",
+            "trap": "空栈时直接取 top 会崩；中缀求值要「同级运算符先弹再压」才能保证左结合（8-3-2 应为 3，不是 7）。",
+            "complexity": "O(n)"
+          },
+          {
+            "name": "单调栈：求左右第一个更小/更大",
+            "when": "柱状图最大矩形、每日温度、接雨水、删掉 k 个数字使字典序最小。",
+            "template": "vector<int> st;                          // 存下标，高度单调递增\nfor (int i = 0; i <= n; i++) {              // i==n 处放哨兵高度 0\n  int h = (i == n ? 0 : a[i]);\n  while (!st.empty() && a[st.back()] > h) {\n    int height = a[st.back()]; st.pop_back();\n    int left = st.empty() ? -1 : st.back();// 左边界 = 弹出后的栈顶\n    best = max(best, 1LL * height * (i - left - 1));\n  }\n  st.push_back(i);\n}\n",
+            "trap": "栈里要存「下标」而不是高度——宽度要靠下标算；不设哨兵就要在循环结束后再清一次栈。",
+            "complexity": "O(n)"
+          }
+        ],
+        "types": [
+          "栈",
+          "单调栈"
+        ]
+      },
+      {
+        "group": "堆与优先队列",
+        "why": "只需要「当前最值」而不需要全序时，堆比排序便宜：插入 O(log n)、取最值 O(1)。",
+        "patterns": [
+          {
+            "name": "Top-K：小根堆装 k 个",
+            "when": "流式数据求第 k 大 / 前 k 个最大；数据量大到不能全排序。",
+            "template": "priority_queue<int, vector<int>, greater<int>> pq;   // 小根堆\nfor (int v : a) {\n  pq.push(v);\n  if ((int)pq.size() > k) pq.pop();       // 只保留最大的 k 个，堆顶是其中最小\n}\nint kth = pq.top();\n",
+            "trap": "C++ 的 priority_queue 默认是**大**根堆，求第 k 大必须显式写 greater<int>；求第 k 小则用大根堆。两者极易写反。",
+            "complexity": "O(n log k)"
+          },
+          {
+            "name": "堆优化 Dijkstra / 多路归并",
+            "when": "带非负权的单源最短路；k 个有序序列合并；事件驱动的模拟。",
+            "template": "priority_queue<pair<long long,int>, vector<pair<long long,int>>, greater<>> pq;\npq.push({0, s});\nwhile (!pq.empty()) {\n  auto [d, u] = pq.top(); pq.pop();\n  if (d > dist[u]) continue;              // 过期堆项必须跳过，否则退化\n  for (auto [v, w] : g[u])\n    if (d + w < dist[v]) { dist[v] = d + w; pq.push({dist[v], v}); }\n}\n",
+            "trap": "不写 `if (d > dist[u]) continue;` 会让同一点被反复展开，复杂度从 O(m log n) 退化；负权边一律不能用 Dijkstra。",
+            "complexity": "O((n + m) log n)"
+          }
+        ],
+        "types": [
+          "堆"
+        ]
+      },
+      {
+        "group": "哈希与链表",
+        "why": "哈希把「查找某值」降到 O(1)；链表把「中间插入/删除」降到 O(1)。两者组合是 LRU 这类题的标准解。",
+        "patterns": [
+          {
+            "name": "哈希计数 / 边查边插",
+            "when": "统计频次、找重复、无序数组两数之和、判重。",
+            "template": "unordered_map<int, int> pos;             // 值 -> 下标\nfor (int i = 0; i < n; i++) {\n  auto it = pos.find(target - a[i]);\n  if (it != pos.end()) return {it->second, i};   // 先查\n  pos[a[i]] = i;                                  // 再插\n}\n",
+            "trap": "「先插后查」会把元素自己当成答案（当 target = 2a[i] 时返回同一个下标）；unordered_map 在最坏情况下可能被构造数据卡到 O(n)。",
+            "complexity": "O(n) 平均"
+          },
+          {
+            "name": "快慢指针 / 双向链表 + 哈希（LRU）",
+            "when": "判环、找中点、找入环点；或「O(1) 淘汰最久未用」的缓存。",
+            "template": "Node *slow = head, *fast = head;\nwhile (fast && fast->next) {\n  slow = slow->next;\n  fast = fast->next->next;\n  if (slow == fast) return true;          // 有环\n}\n// LRU 淘汰：lst.pop_back() 之后必须 pos.erase(oldKey)\n",
+            "trap": "LRU 的哈希表与链表是两份结构，删除时漏同步会「脏命中」并内存泄漏；判环后找入口要用「一指针回头、两指针同速」再走一次。",
+            "complexity": "判环 O(n)；LRU 每次 O(1)"
+          }
+        ],
+        "types": [
+          "哈希与链表",
+          "链表"
+        ]
+      },
+      {
+        "group": "树",
+        "why": "树的题几乎都能归到「遍历顺序」与「区间划分」两件事上：前/中/后序决定访问时机，层序决定按层处理。",
+        "patterns": [
+          {
+            "name": "遍历与重建（前序 + 中序）",
+            "when": "给两种遍历求第三种；或要按「根的位置」把序列切成左右子树。",
+            "template": "int build(int pl, int pr, int il, int ir) {\n  if (pl > pr) return -1;\n  int root = pre[pl];\n  int k = il;\n  while (in_[k] != root) k++;             // 中序里定位根\n  int left = k - il;                      // 左子树节点数\n  lc[root] = build(pl + 1, pl + left, il, k - 1);\n  rc[root] = build(pl + left + 1, pr, k + 1, ir);\n  return root;                            // 要输出后序就在这里访问根（左右已建完）\n}\n",
+            "trap": "区间偏移算错是本题最大来源：左子树前序是 [pl+1, pl+left]，右子树是 [pl+left+1, pr]；`left` 一定要用 `k - il` 而不是 `k`。",
+            "complexity": "O(n^2)，用哈希预存中序下标可降到 O(n)"
+          },
+          {
+            "name": "层序 / 之字形 / 按层统计",
+            "when": "按层处理（每层最右节点、层平均值、之字形输出、树的宽度）。",
+            "template": "queue<Node*> q;\nq.push(root);\nint level = 0;\nwhile (!q.empty()) {\n  int sz = q.size();                      // 当前层节点数必须提前存\n  vector<int> row;\n  for (int i = 0; i < sz; i++) {\n    Node *p = q.front(); q.pop();\n    row.push_back(p->val);\n    if (p->l) q.push(p->l);\n    if (p->r) q.push(p->r);\n  }\n  if (level % 2) reverse(row.begin(), row.end());   // 之字形\n  level++;\n}\n",
+            "trap": "把 `q.size()` 直接写进 for 条件会被新入队的子节点污染，导致「一层」变成「一直到底」。",
+            "complexity": "O(n)"
+          }
+        ],
+        "types": [
+          "遍历与重建"
+        ]
+      },
+      {
+        "group": "图",
+        "why": "图论题先问三个问题：有向还是无向？有环吗？边权非负吗？答案决定用遍历、拓扑还是最短路。",
+        "patterns": [
+          {
+            "name": "连通块：DFS / BFS",
+            "when": "数岛屿、数朋友圈、判断连通性、染色（二分图）。",
+            "template": "void dfs(int u) {\n  vis[u] = 1;\n  for (int v : g[u]) if (!vis[v]) dfs(v);\n}\nint blocks = 0;\nfor (int i = 1; i <= n; i++)\n  if (!vis[i]) { blocks++; dfs(i); }      // 每个未访问点开启一个新块\n",
+            "trap": "n=1e5 的链会让递归爆栈，必须改迭代（显式栈）；网格图要写四个方向而不是八个。",
+            "complexity": "O(n + m)"
+          },
+          {
+            "name": "拓扑排序（Kahn）",
+            "when": "有依赖关系的排序（课程表、构建顺序）、判断 DAG 是否有环。",
+            "template": "queue<int> q;\nfor (int i = 1; i <= n; i++) if (deg[i] == 0) q.push(i);\nint seen = 0;\nwhile (!q.empty()) {\n  int u = q.front(); q.pop();\n  order.push_back(u); seen++;\n  for (int v : g[u]) if (--deg[v] == 0) q.push(v);\n}\nif (seen < n) /* 有环，无法完成 */ ;\n",
+            "trap": "同一点可能被多次减入度，务必在「减到 0」时才入队；要字典序最小用 priority_queue 替代 queue。",
+            "complexity": "O(n + m)"
+          },
+          {
+            "name": "最短路：Dijkstra / Floyd",
+            "when": "单源非负权 → Dijkstra；任意两点且 n≤500 → Floyd；含负权 → Bellman-Ford/SPFA。",
+            "template": "// Dijkstra（堆优化）：见「堆」分组的模板\n// Floyd：k 必须在最外层\nfor (int k = 1; k <= n; k++)\n  for (int i = 1; i <= n; i++)\n    for (int j = 1; j <= n; j++)\n      d[i][j] = min(d[i][j], d[i][k] + d[k][j]);\n",
+            "trap": "Floyd 的 k 放到内层会得到错误结果（第 k 层依赖前 k-1 层已收敛）；INF 要取足够大但相加不溢出（用 LLONG_MAX/4）。",
+            "complexity": "Dijkstra O((n+m) log n)；Floyd O(n^3)"
+          }
+        ],
+        "types": [
+          "图论拓扑",
+          "图论最短路"
+        ]
+      },
+      {
+        "group": "并查集",
+        "why": "只关心「是否同一集合」而不关心路径时，并查集比图遍历更便宜——合并与查询都近似 O(1)。",
+        "patterns": [
+          {
+            "name": "路径压缩 + 按秩/按大小合并",
+            "when": "动态连边并快速判连通（连通分量计数、Kruskal、冗余连接、等式传递性）。",
+            "template": "int find(int x) {\n  if (par[x] != x) par[x] = find(par[x]);  // 路径压缩\n  return par[x];\n}\nvoid unite(int a, int b) {\n  int ra = find(a), rb = find(b);\n  if (ra == rb) return;                    // 已同集合，幂等\n  if (sz[ra] < sz[rb]) swap(ra, rb);       // 小树挂大树\n  par[rb] = ra; sz[ra] += sz[rb];\n}\n",
+            "trap": "压缩后必须用 find() 的返回值比较，不能用 par[] 旧值；只压缩不按秩合并，最坏仍可能退化成链（虽然实际很快）。",
+            "complexity": "均摊 O(α(n)) ≈ O(1)"
+          }
+        ],
+        "types": [
+          "并查集"
+        ]
+      },
+      {
+        "group": "动态规划",
+        "why": "有重叠子问题 + 最优子结构时用它。关键是把「状态」定义清楚，再写转移方程。",
+        "patterns": [
+          {
+            "name": "线性 DP（最大子段和）",
+            "when": "在一维序列上做「选/不选」「接上/重开」的决策。",
+            "template": "long long best = a[0], cur = a[0];\nfor (int i = 1; i < n; i++) {\n  cur = max<long long>(a[i], cur + a[i]);  // 接上前面 or 从自己重开\n  best = max(best, cur);\n}\n",
+            "trap": "全负数时把 best 初始化成 0 会输出 0（正确答案应该是最大的那个负数）；`cur + a[i]` 在 cur 很大时可能溢出。",
+            "complexity": "O(n)"
+          },
+          {
+            "name": "0/1 背包（一维滚动）",
+            "when": "容量有限的「选或不选」，每个物品只能用一次。",
+            "template": "vector<long long> dp(W + 1, 0);\nfor (int i = 0; i < n; i++)\n  for (int j = W; j >= w[i]; j--)          // 必须倒序\n    dp[j] = max(dp[j], dp[j - w[i]] + v[i]);\n",
+            "trap": "容量正序遍历会变成「完全背包」（同一物品用多次）；若要输出具体方案，一维滚动无法回溯，得留二维数组或记录决策。",
+            "complexity": "O(nW)"
+          },
+          {
+            "name": "区间 DP",
+            "when": "合并石子、矩阵连乘、括号匹配计数——答案由「把区间切成两半」组合而来。",
+            "template": "for (int len = 2; len <= n; len++)        // 按区间长度递增\n  for (int i = 1; i + len - 1 <= n; i++) {\n    int j = i + len - 1;\n    dp[i][j] = LLONG_MAX;\n    for (int k = i; k < j; k++)\n      dp[i][j] = min(dp[i][j], dp[i][k] + dp[k + 1][j] + cost(i, j));\n  }\n",
+            "trap": "枚举顺序必须「长度由小到大」，否则用到的子区间还没算；cost 要能 O(1) 求出（配合前缀和），否则多一层 O(n)。",
+            "complexity": "O(n^3)"
+          }
+        ],
+        "types": [
+          "动态规划"
+        ]
+      },
+      {
+        "group": "回溯",
+        "why": "要枚举所有方案（而不是只要最优值）时用回溯：本质是「在决策树上 DFS」，配上剪枝才跑得动。",
+        "patterns": [
+          {
+            "name": "排列 / 组合 / 子集",
+            "when": "输出全部方案、计数、找第一个可行解。",
+            "template": "void dfs(int start) {\n  if (满足条件) { ans.push_back(cur); return; }   // 收集答案\n  for (int i = start; i < n; i++) {                // 组合用 start，排列用 0..n + used\n    if (剪枝条件) continue;\n    cur.push_back(a[i]);                           // 选择\n    dfs(i + 1);                                    // 递归\n    cur.pop_back();                                // 撤销\n  }\n}\n",
+            "trap": "组合用 `start=i+1` 保证不重复选前面的；排列要用 `used[]`；同一层相同值必须跳过，否则重复方案爆炸。",
+            "complexity": "最坏 O(n!)；靠剪枝降"
+          },
+          {
+            "name": "剪枝（可行性 / 最优性 / 去重）",
+            "when": "搜空间太大，必须靠「提前否决」把不可能的分支砍掉。",
+            "template": "void dfs(int idx, long long sum) {\n  if (sum > target) return;                       // 可行性剪枝\n  if (best && cur >= best) return;                // 最优性剪枝（求最大值时）\n  if (idx == n) { if (sum == target) ans++; return; }\n  for (int i = idx; i < n; i++) {\n    if (i > idx && a[i] == a[i - 1]) continue;    // 同层去重\n    dfs(i + 1, sum + a[i]);\n  }\n}\n",
+            "trap": "剪枝条件写松了没效果，写紧了会漏解——剪枝必须「只砍掉确定不可能是解的分支」；去重前必须先排序。",
+            "complexity": "最坏 O(b^d)（b = 每层分支数，d = 递归深度）；剪枝后会低几个数量级，但无法给出统一上界"
+          }
+        ],
+        "types": [
+          "回溯"
+        ]
+      },
+      {
+        "group": "分治",
+        "why": "把问题劈成两半分别解决再合并。合并步骤常常能顺带统计出答案（逆序对、最大子段和）。",
+        "patterns": [
+          {
+            "name": "归并统计（逆序对 / 右侧更小数）",
+            "when": "要统计「跨左右两段」的配对数量。",
+            "template": "while (i <= mid && j <= r) {\n  if (a[i] <= a[j]) tmp[k++] = a[i++];       // 不产生逆序\n  else { cnt += mid - i + 1; tmp[k++] = a[j++]; }   // 批量累加\n}\n",
+            "trap": "累加量是 `mid - i + 1`（左段剩余全部大于 a[j]），不是 1；答案规模 O(n^2)，必须 long long。",
+            "complexity": "O(n log n)"
+          },
+          {
+            "name": "快速选择（第 k 小）",
+            "when": "只要第 k 小/大，不需要全排序。",
+            "template": "nth_element(a.begin(), a.begin() + k - 1, a.end());\nlong long kth = a[k - 1];                    // 期望 O(n)\n",
+            "trap": "手写 partition 时用「三路划分」处理大量重复，否则重复元素多时会退化成 O(n^2)。",
+            "complexity": "期望 O(n)"
+          }
+        ],
+        "types": [
+          "分治"
+        ]
+      },
+      {
+        "group": "字符串",
+        "why": "暴力匹配 O(nm) 会被卡；KMP 用「失配跳转」、哈希用「预处理」把匹配降到 O(n+m)。",
+        "patterns": [
+          {
+            "name": "KMP（next 失配跳转）",
+            "when": "在长文本里找模式串的所有出现位置、判断循环节。",
+            "template": "vector<int> buildNext(const string &p) {\n  int m = p.size(); vector<int> nxt(m, 0);\n  for (int i = 1, j = 0; i < m; i++) {\n    while (j > 0 && p[i] != p[j]) j = nxt[j - 1];\n    if (p[i] == p[j]) j++;\n    nxt[i] = j;\n  }\n  return nxt;\n}\n// 匹配：命中后 j = nxt[j-1]，以继续找重叠出现\n",
+            "trap": "命中后若不回退 j 就会漏掉重叠匹配（text=aaaa, pat=aa 应命中 3 次）；next 与 nextval 两种定义别混用。",
+            "complexity": "O(n + m)"
+          },
+          {
+            "name": "字符串哈希 / Trie",
+            "when": "多次询问子串是否相等、找最长重复子串；或按前缀检索（敏感词、自动补全）。",
+            "template": "const unsigned long long B = 131;\nh[i + 1] = h[i] * B + s[i];                  // 前缀哈希\nunsigned long long sub(int l, int r) {       // 子串 [l, r] 的哈希\n  return h[r + 1] - h[l] * pw[r - l + 1];\n}\n// Trie：nxt[u][c] 存子节点，节点数开到「总字符数 + 1」\n",
+            "trap": "单个 64 位哈希可被构造碰撞，比赛可用双模数；Trie 节点上限按「所有串长度之和」开，否则越界崩溃。",
+            "complexity": "哈希 O(n) 预处理 / O(1) 查询；Trie O(L)"
+          }
+        ],
+        "types": [
+          "字符串"
+        ]
+      },
+      {
+        "group": "位运算",
+        "why": "把「集合」压进一个整数的二进制位里：运算快、内存省，是状压 DP 的基础。",
+        "patterns": [
+          {
+            "name": "异或性质（成对消除）",
+            "when": "只有一个/两个数出现奇数次，其余成对出现；不用额外空间找单例。",
+            "template": "int x = 0;\nfor (int v : a) x ^= v;                    // 成对的抵消\n// 单个单例：x 即答案\n// 两个单例：lowbit = x & -x; 按该位分组再异或\n",
+            "trap": "`a^a=0`、`a^0=a` 是全部依据；两个单例必须靠 lowbit 分组，不分就只得到「两者异或值」而不是两个数。",
+            "complexity": "O(n)"
+          },
+          {
+            "name": "状压 DP / 位掩码集合",
+            "when": "n≤20 且状态是「哪些元素已被选/已访问」（旅行商、集合覆盖、棋盘覆盖）。",
+            "template": "for (int mask = 0; mask < (1 << n); mask++)\n  for (int i = 0; i < n; i++) {\n    if (mask >> i & 1) continue;                     // 已选过\n    int nm = mask | (1 << i);\n    dp[nm] = min(dp[nm], dp[mask] + cost(mask, i));\n  }\n",
+            "trap": "状态里若不含「最后一个是谁」，就无法计算下一步代价——TSP 要用 dp[mask][last]；1<<n 在 n≥31 时溢出 int。",
+            "complexity": "O(2^n · n^2)"
+          }
+        ],
+        "types": [
+          "位运算"
+        ]
+      },
+      {
+        "group": "树状数组与线段树",
+        "why": "需要「边改边查」时用它们：把单点修改与前缀查询都压到 O(log n)。",
+        "patterns": [
+          {
+            "name": "树状数组（单点改 + 区间和）",
+            "when": "数组会变、但只需要前缀和/区间和；或求逆序对（按下标建树）。",
+            "template": "int lowbit(int x) { return x & -x; }\nvoid add(int i, long long v) { for (; i <= n; i += lowbit(i)) tr[i] += v; }\nlong long sum(int i) { long long s = 0; for (; i > 0; i -= lowbit(i)) s += tr[i]; return s; }\n// 区间和 = sum(r) - sum(l - 1)\n",
+            "trap": "下标必须从 1 开始（lowbit(0)=0 会死循环）；区间修改 + 区间查询需要两个树状数组或改线段树。",
+            "complexity": "O(log n)"
+          },
+          {
+            "name": "线段树（区间改 + 区间查）",
+            "when": "需要区间赋值/加、区间最值/求和，树状数组不够用时。",
+            "template": "void pushup(int p) { tr[p] = tr[p << 1] + tr[p << 1 | 1]; }\nvoid apply(int p, int l, int r, long long v) { tr[p] += v * (r - l + 1); lazy[p] += v; }\nvoid pushdown(int p, int l, int r) {\n  if (!lazy[p]) return;\n  int mid = (l + r) >> 1;\n  apply(p << 1, l, mid, lazy[p]); apply(p << 1 | 1, mid + 1, r, lazy[p]);\n  lazy[p] = 0;\n}\n",
+            "trap": "查询前忘记 pushdown 会读到过期值；懒标记要支持「叠加」（加法的 lazy 可直接累加，赋值与加法混用则需要额外标记）。",
+            "complexity": "O(log n)"
+          }
+        ],
+        "types": [
+          "树状数组"
+        ]
+      },
+      {
+        "group": "数学与高精度",
+        "why": "快速幂处理大指数、筛法预处理质数、高精度处理超长数字——都是「标准套路题」，背下来即可。",
+        "patterns": [
+          {
+            "name": "快速幂 / GCD / 筛法",
+            "when": "求 a^b mod m（b 可达 1e18）、求 gcd/lcm、预处理质数表。",
+            "template": "long long qpow(long long a, long long b, long long mod) {\n  long long r = 1;\n  while (b) {\n    if (b & 1) r = r * a % mod;           // 每步取模，防溢出\n    a = a * a % mod;\n    b >>= 1;\n  }\n  return r;\n}\n// gcd：__gcd(a, b) 或 while (b) { t = a % b; a = b; b = t; }\n",
+            "trap": "快速幂任何一步漏取模都会溢出；筛法内层从 `i*i` 开始划（不是 2*i），并且数组要开 n+1。",
+            "complexity": "快速幂 O(log b)；埃氏筛 O(n log log n)"
+          },
+          {
+            "name": "高精度（数组模拟竖式）",
+            "when": "数值超过 64 位（阶乘、2^1000、大数加减乘）。",
+            "template": "vector<int> a(1, 1);                     // 低位在前\nfor (int i = 2; i <= n; i++) {\n  int carry = 0;\n  for (size_t k = 0; k < a.size(); k++) {\n    int t = a[k] * i + carry;\n    a[k] = t % 10; carry = t / 10;\n  }\n  while (carry) { a.push_back(carry % 10); carry /= 10; }\n}\n// 输出：从 a.size()-1 到 0\n",
+            "trap": "必须「低位在前」，否则进位要整体搬移；进位可能一次进多位，内层结束后要用 while 展开而不是 if。",
+            "complexity": "O(位数 × 因子数)"
+          }
+        ],
+        "types": [
+          "数学",
+          "高精度"
+        ]
+      }
+    ],
+    "checklist": [
+      "数据范围 → 复杂度反推过了吗？（n 的上限代入，超了立刻换思路）",
+      "下标从 0 还是 1 开始？全文统一了吗？（前缀和/树状数组必须 1 基）",
+      "会不会溢出？和、积、答案计数一律 long long，路径条数尤其容易爆 int。",
+      "空输入、n=1、全相同、负数、极值，这五种都试过吗？",
+      "多组数据：全局数组 / 邻接表 / vis 标记清空了吗？",
+      "输出格式：行末有没有多余空格？大小写？浮点保留几位？换行有没有漏？",
+      "递归深度会不会爆栈？（树/图 DFS 在 n=1e5 的链上必爆，改迭代）",
+      "有没有把「端点相接算不算冲突」这类题意细节确认清楚？"
+    ]
+  }
 }
