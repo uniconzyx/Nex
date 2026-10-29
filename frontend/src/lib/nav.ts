@@ -23,7 +23,8 @@ export type KmPage =
   | 'settings'
   | 'help'
   | 'diagrams'
-  | 'track408';
+  | 'track408'
+  | 'employment';
 
 export interface NavItem {
   key: KmPage;
@@ -142,6 +143,12 @@ export const NAV_GROUPS: NavGroup[] = [
         key: 'track408',
         label: '考研 408',
         paths: ['M2 9l10-5 10 5-10 5z', 'M6 11v5c0 1 3 3 6 3s6-2 6-3v-5'],
+        badge: 'NEW',
+      },
+      {
+        key: 'employment',
+        label: '就业八股',
+        paths: ['M3 7h18v12H3z', 'M8 7v12M12 7v12M16 7v12', 'M3 11h18'],
         badge: 'NEW',
       },
       {

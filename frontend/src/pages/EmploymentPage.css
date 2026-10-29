@@ -1,0 +1,177 @@
+.emp-root {
+  padding: 18px 20px 40px;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+.emp-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.emp-head h1 {
+  margin: 0 0 4px;
+  font-size: 22px;
+}
+
+.emp-lede {
+  margin: 0;
+  color: var(--km-ink, #444);
+  opacity: 0.8;
+  font-size: 13px;
+}
+
+/* ── 四区卡片 ─────────────────────────────────────── */
+.emp-zone {
+  border-left: 4px solid var(--zone, #4f9dff);
+  margin-bottom: 14px;
+}
+
+.emp-zone-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  flex: none;
+}
+
+.emp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.emp-node {
+  text-align: left;
+  background: color-mix(in srgb, var(--zone) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--zone) 35%, transparent);
+  border-radius: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: inherit;
+  font: inherit;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.emp-node:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
+.emp-node.active {
+  box-shadow: 0 0 0 2px var(--zone, #4f9dff);
+}
+
+.emp-node b {
+  font-size: 14px;
+}
+
+.emp-node-type {
+  font-size: 11px;
+  opacity: 0.65;
+}
+
+.emp-node-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+  font-size: 12px;
+}
+
+.emp-node-role {
+  opacity: 0.85;
+}
+
+.emp-node-cover {
+  opacity: 0.7;
+}
+
+.emp-node-detail a {
+  color: var(--zone, #4f9dff);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* ── Agent 专项 ──────────────────────────────────── */
+.emp-agent {
+  margin-top: 14px;
+}
+
+.emp-layers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.emp-layer {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  background: color-mix(in srgb, #b98cff 16%, transparent);
+  border: 1px solid color-mix(in srgb, #b98cff 40%, transparent);
+}
+
+.emp-modtable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 6px;
+  font-size: 13px;
+}
+
+.emp-modtable th,
+.emp-modtable td {
+  border: 1px solid var(--km-line, #e3e8ef);
+  padding: 6px 8px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.emp-modtable th {
+  background: rgba(127, 127, 127, 0.08);
+}
+
+.emp-mod-src {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.emp-papers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  align-items: center;
+}
+
+.emp-papers-title {
+  font-weight: 700;
+  font-size: 13px;
+  margin-right: 4px;
+}
+
+.emp-paper {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: rgba(127, 127, 127, 0.07);
+}
+
+.emp-paper b {
+  color: var(--km-glow, #4f9dff);
+}

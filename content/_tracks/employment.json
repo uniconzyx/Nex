@@ -1,0 +1,141 @@
+{
+  "trackId": "employment",
+  "name": "就业 · 八股面试专轨",
+  "zones": [
+    {
+      "zone": "A",
+      "name": "底层学科",
+      "desc": "跨专轨通用地基：计算机基础图解 + 综合刷题，覆盖全部技术栈的最底层",
+      "color": "#4f9dff",
+      "sources": [
+        {
+          "id": "xiaolin-coding",
+          "name": "小林coding",
+          "type": "site",
+          "url": "https://xiaolincoding.com/",
+          "role": "计算机基础图解，408 总结与八股底层双向复用",
+          "covers": "网络 / OS / 计组 / 数据库",
+          "subjects": ["计组", "OS", "网络", "DB"]
+        },
+        {
+          "id": "mianshiya",
+          "name": "面试鸭 Mianshiya",
+          "type": "site",
+          "url": "https://www.mianshiya.com/",
+          "role": "综合题库，Java/C++/Python/Go/前端/基础，网页·小程序·IDE 插件多端同步刷题",
+          "covers": "Java / C++ / Python / Go / 前端 / 计算机基础",
+          "subjects": ["全栈", "基础"]
+        }
+      ]
+    },
+    {
+      "zone": "B",
+      "name": "语言/框架专轨",
+      "desc": "按技术栈切片：前端 / Java 后端 / 全栈工程化，附结构化知识框架",
+      "color": "#36c2a8",
+      "sources": [
+        {
+          "id": "fe-interview",
+          "name": "Alessandro-Pang/fe-interview",
+          "type": "repo",
+          "url": "https://github.com/Alessandro-Pang/fe-interview",
+          "role": "聚合 1000+ 前端面试真题，覆盖 HTML/CSS/JS/React/Vue/Node.js，每题含参考答案 / 考点分析 / 关联题",
+          "covers": "前端（HTML/CSS/JS/React/Vue/Node）",
+          "subjects": ["前端"]
+        },
+        {
+          "id": "baguwen-wiki",
+          "name": "itwanger/baguwen-wiki",
+          "type": "repo",
+          "url": "https://github.com/itwanger/baguwen-wiki",
+          "role": "Java 后端八股合集：基础 / 集合 / JVM / Spring / MySQL / Redis",
+          "covers": "Java 基础·集合·JVM·Spring·MySQL·Redis",
+          "subjects": ["Java"]
+        },
+        {
+          "id": "java-eight-part",
+          "name": "CoderLeixiaoshuai/java-eight-part",
+          "type": "repo",
+          "url": "https://github.com/CoderLeixiaoshuai/java-eight-part",
+          "role": "Java 八股合集，系统梳理后端知识点",
+          "covers": "Java 后端八股",
+          "subjects": ["Java"]
+        },
+        {
+          "id": "fullstack-interview-resources",
+          "name": "vikrant-d1/fullstack-interview-resources",
+          "type": "repo",
+          "url": "https://github.com/vikrant-d1/fullstack-interview-resources",
+          "role": "React / Node.js / JWT / Docker / CI-CD / AWS 等现代全栈工程化面试题",
+          "covers": "React / Node / JWT / Docker / CI-CD / AWS",
+          "subjects": ["全栈"]
+        },
+        {
+          "id": "isboyjc-interview",
+          "name": "isboyjc/Interview",
+          "type": "repo",
+          "url": "https://github.com/isboyjc/Interview",
+          "role": "结构化知识图谱，愿景覆盖 90%+ IT 知识点，适合构建前端知识框架而非零散刷题",
+          "covers": "IT 知识框架（前端为主）",
+          "subjects": ["前端", "全栈"]
+        }
+      ]
+    },
+    {
+      "zone": "C",
+      "name": "AI 叠加层",
+      "desc": "前沿题库：AI 全栈 / 字节企业库；Agent 八股专项见下方独立体系",
+      "color": "#b98cff",
+      "sources": [
+        {
+          "id": "interview-yuge",
+          "name": "yugef3h/interview-yuge",
+          "type": "repo",
+          "url": "https://github.com/yugef3h/interview-yuge",
+          "role": "2026-AI 全栈面试，含字节跳动企业题库 + AI/LLM 应用开发深度追问，适合目标大厂或 AI 方向全栈求职者",
+          "covers": "AI 全栈 / LLM 应用 / 字节企业题库",
+          "subjects": ["AI", "全栈"]
+        }
+      ]
+    },
+    {
+      "zone": "D",
+      "name": "导航与工具",
+      "desc": "顺藤摸瓜找方向资料 + 多端模拟刷题（面试鸭的多端刷题入口见 A 区）",
+      "color": "#f2b34a",
+      "sources": [
+        {
+          "id": "interviewmap",
+          "name": "interviewMap",
+          "type": "site",
+          "url": "https://github.com/search?q=interviewMap",
+          "role": "八股文导航站，整理各类面试题资源访问地址，适合顺藤摸瓜找到特定方向资料",
+          "covers": "面试资源导航",
+          "subjects": ["导航"]
+        }
+      ]
+    }
+  ],
+  "agentTrack": {
+    "name": "Agent 八股专项",
+    "layers": [
+      {"layer": "Prompt", "desc": "提示词工程", "ref": "harrisliangsu/ai-agent-engineer-handbook"},
+      {"layer": "Context", "desc": "上下文管理", "ref": "harrisliangsu/ai-agent-engineer-handbook"},
+      {"layer": "Agent", "desc": "智能体本体", "ref": "harrisliangsu/ai-agent-engineer-handbook"},
+      {"layer": "Harness", "desc": "工程化承载（调度 / 沙箱 / 评测）", "ref": "harrisliangsu/ai-agent-engineer-handbook"}
+    ],
+    "modules": [
+      {"module": "基础概念 / ReAct / LangGraph / RAG / 工具调用 / MCP", "sources": ["bcefghj/ai-agent-interview-guide"], "scale": "9 大模块专项突破"},
+      {"module": "RAG 基础 / Agent 基础 / MCP & A2A", "sources": ["ombharatiya/ai-system-design-guide"], "scale": "128 题 + 系统设计（英文）"},
+      {"module": "核心题库", "sources": ["ranxi2001/zero2Agent"], "scale": "《Agent面试800问》828+ 大厂真题，新手答 vs 高手答对比"},
+      {"module": "公共真题 + 模拟面试引擎", "sources": ["SuperGODOG/ai-agent-interview-240"], "scale": "477 题，1-5 级深度分级"},
+      {"module": "图文 / 视频向", "sources": ["itwanger/ai-better"], "scale": "369 题，12 分类，视觉型"},
+      {"module": "工程化与系统设计", "sources": ["cdavid817/agent-interview"], "scale": "1820 题，工程边界 / 失败处理 / 验证指标，多 Agent 协作"}
+    ],
+    "mockPapers": [
+      {"level": "L1-L2", "rule": "每模块抽 N 道低分级题组卷", "source": "SuperGODOG 1-5 级"},
+      {"level": "L3-L4", "rule": "中分级 + 场景题", "source": "SuperGODOG 1-5 级"},
+      {"level": "L5", "rule": "高分级 + 失败处理 / 验证指标", "source": "SuperGODOG + cdavid817"}
+    ]
+  }
+}
