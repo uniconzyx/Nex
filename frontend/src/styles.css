@@ -444,44 +444,134 @@ button:disabled {
  * AI 助手：全局悬浮球 + 对话面板
  * ============================================================ */
 
+/*
+ * 全局 AI 入口：胶囊而不是头像圆球。
+ * 圆球在游戏化外壳里会被读成「装扮 / 好感度」入口，所以必须带字。
+ * 注意 --km-* 令牌由 kaimao.css 在 .km-app 上定义，styles.css 里用 var(--km-x, 兜底)。
+ */
 .ai-fab {
   position: fixed;
   right: 24px;
   bottom: 24px;
   z-index: 100;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  border: 2px solid var(--nex-ice);
-  background: var(--nex-card);
-  box-shadow: 0 4px 16px rgb(59 130 246 / 0.25);
-  padding: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
-  transition: transform 0.15s ease;
+  gap: 10px;
+  padding: 7px 18px 7px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--km-line, var(--nex-border));
+  background: var(--km-surf1, var(--nex-card));
+  box-shadow: var(--km-sh-pop, 0 12px 36px rgb(60 95 135 / 0.2));
+  color: var(--km-ink, var(--nex-text));
+  cursor: pointer;
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease,
+    border-color 0.16s ease;
 }
 
 .ai-fab:hover {
-  transform: scale(1.06);
+  transform: translateY(-2px);
+  border-color: var(--km-accent, var(--nex-blue));
+  box-shadow: 0 16px 40px rgb(60 95 135 / 0.26);
 }
 
-.ai-fab img {
-  width: 44px;
-  height: 44px;
+.ai-fab:focus-visible {
+  outline: 2px solid var(--km-accent, var(--nex-blue));
+  outline-offset: 3px;
+}
+
+.ai-fab:active {
+  transform: translateY(0) scale(0.985);
+}
+
+.ai-fab-face {
+  position: relative;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
+  background: var(--km-accent-soft, var(--nex-blue-light));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
 }
 
-.ai-fab .ai-fab-dot {
+.ai-fab-face img {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.ai-fab-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  line-height: 1.25;
+  text-align: left;
+}
+
+.ai-fab-text b {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--km-ink, var(--nex-text));
+}
+
+/* 这句是「它是谁」的说明，不是噱头：11px 在浅底上用 ink-soft 仍过 4.5:1 */
+.ai-fab-text em {
+  font-style: normal;
+  font-size: 11px;
+  color: var(--km-ink-soft, var(--nex-text-2));
+}
+
+.ai-fab-dot {
   position: absolute;
-  top: 2px;
-  right: 2px;
+  top: 0;
+  right: 0;
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: var(--nex-green);
-  border: 2px solid #fff;
+  background: var(--km-ok, var(--nex-green));
+  border: 2px solid var(--km-surf1, #fff);
+  animation: ai-fab-pulse 2.4s ease-in-out infinite;
 }
+
+@keyframes ai-fab-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 0.72;
+  }
+}
+
+/* 面板打开时收起说明文字，只留头像 + ✕，避免两块浮层打架 */
+.ai-fab.is-open .ai-fab-text em {
+  display: none;
+}
+
+.ai-fab.is-open {
+  padding-right: 14px;
+}
+
+/*
+ * 宽屏时把入口贴到外壳右边缘上，而不是视口右下角。
+ * 外壳撑满宽屏（.km-main 三栏 220/1fr/300），固定 right:24px 会压在右栏凯喵卡片上方；
+ * 1200px 是右栏开始消失的断点（kaimao.css 的 1180 媒体查询），两侧留一点余量。
+ */
+@media (min-width: 1200px) {
+  .ai-fab {
+    right: 40px;
+    bottom: 32px;
+  }
+}
+
 
 .ai-panel {
   position: fixed;
@@ -2474,4 +2564,30 @@ button:disabled {
 .ex-verdict-UNGRADED {
   background: rgb(132 150 171 / 0.16);
   color: var(--km-ink-soft);
+}
+
+/* ===== 图表总览页（DiagramsPage） ===== */
+.cp-chains {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.cp-chain {
+  padding: 6px 12px;
+  border: 1px solid var(--nex-border);
+  border-radius: 999px;
+  background: var(--nex-card);
+  color: var(--nex-text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.15s;
+}
+.cp-chain:hover {
+  color: var(--nex-text);
+  border-color: var(--nex-blue);
+}
+.cp-chain.on {
+  background: var(--nex-blue);
+  border-color: var(--nex-blue);
+  color: #fff;
 }

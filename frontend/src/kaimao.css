@@ -30,6 +30,9 @@
   --km-line2: rgb(91 155 213 / 0.14);
   --km-ok: #3b9a6c;
   --km-warn: #b57f22;
+  /* 同色系的「文字版」：--km-warn 本身是给底/边框用的，当 11px 正文在浅底上
+     只有 3.4:1，达不到 4.5。文字一律用这一档。 */
+  --km-warn-ink: #8a5a10;
   --km-bad: #c75b5b;
   --km-gold: #e3b44f;
   --km-legend: #c9971f;
@@ -78,12 +81,13 @@ html[data-km-theme='dark'] .km-app,
   --km-surf2: rgb(22 34 49 / 0.66);
   --km-sunk: rgb(140 192 238 / 0.1);
   --km-ink: #dce8f4;
-  --km-ink-soft: #9db2c8;
+  --km-ink-soft: #bcd0e2;
   --km-ink-faint: #647c96;
   --km-line: rgb(140 192 238 / 0.18);
   --km-line2: rgb(140 192 238 / 0.1);
   --km-ok: #4fb07e;
   --km-warn: #d9a94e;
+  --km-warn-ink: #e9c274;
   --km-bad: #e07575;
   --km-sh-soft: 0 6px 20px rgb(0 0 0 / 0.3);
   --km-sh-pop: 0 12px 36px rgb(0 0 0 / 0.45);
@@ -393,6 +397,54 @@ html[data-km-theme='dark'] .km-app,
   max-width: 960px;
 }
 
+/* 全局离线横幅（Phase18）：内容区顶部，sticky 让长页滚动时也能看见。
+   底色沿用 --km-surf1，描边用 --km-bad，不引入新的渐变/玻璃拟态。 */
+.km-offline {
+  position: sticky;
+  top: -20px;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  align-items: center;
+  justify-content: space-between;
+  margin: -20px -20px 16px;
+  padding: 10px 20px;
+  border-bottom: 1px solid rgb(199 91 91 / 0.45);
+  background: var(--km-surf1);
+  box-shadow: var(--km-sh-soft);
+}
+
+.km-offline-main {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  align-items: baseline;
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--km-ink-soft);
+}
+
+.km-offline-main b {
+  color: var(--km-bad);
+}
+
+.km-offline-main code {
+  padding: 1px 6px;
+  border-radius: var(--km-r-xs);
+  background: var(--km-surf2);
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-size: 12px;
+  color: var(--km-ink);
+}
+
+.km-offline-act {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
 /* ── 右栏：凯喵伙伴 ───────────────────────────────────────────────────── */
 .km-right {
   display: flex;
@@ -546,7 +598,9 @@ html[data-km-theme='dark'] .km-app,
   flex: none;
   border: 1.5px solid var(--km-line);
   border-radius: 5px;
-  color: #fff;
+  /* 未完成的勾必须不可见：之前写死 #fff，浅色下看不见、深色下反而全亮，
+     看起来像"所有目标都完成了"。 */
+  color: transparent;
   font-size: 10px;
 }
 
@@ -570,6 +624,7 @@ html[data-km-theme='dark'] .km-app,
 
 .km-tick.on {
   border-color: transparent;
+  color: #fff;
   background: linear-gradient(135deg, var(--km-accent), var(--km-accent-deep));
 }
 
@@ -719,12 +774,18 @@ html[data-km-theme='dark'] .km-app,
 
 .km-tag-warn {
   background: rgb(181 127 34 / 0.15);
-  color: var(--km-warn);
+  color: var(--km-warn-ink);
 }
 
 .km-tag-gray {
   background: rgb(132 150 171 / 0.16);
   color: var(--km-ink-soft);
+}
+
+.km-tag-lock {
+  background: rgb(132 150 171 / 0.16);
+  color: var(--km-ink-soft);
+  border: 1px solid rgb(132 150 171 / 0.42);
 }
 
 .km-tag-epic {
@@ -1848,13 +1909,23 @@ html[data-km-theme='dark'] .km-app,
   .ai-fab {
     right: 12px;
     bottom: calc(14px + env(safe-area-inset-bottom, 0px));
-    width: 50px;
-    height: 50px;
+    gap: 8px;
+    padding: 5px 14px 5px 5px;
   }
 
-  .ai-fab img {
-    width: 50px;
-    height: 50px;
+  .ai-fab-face {
+    width: 34px;
+    height: 34px;
+  }
+
+  .ai-fab-face img {
+    width: 30px;
+    height: 30px;
+  }
+
+  /* 手机上副标题会被挤成两行，只留「问凯喵」三个字 */
+  .ai-fab-text em {
+    display: none;
   }
 
   .km-content {
@@ -3256,6 +3327,44 @@ html[data-km-theme='dark'] .km-app,
 
 .bank-mark.ok {
   color: var(--km-ok);
+}
+
+/* 云端目录同步状态条：紧贴筛选区下方，浅色信息条 */
+.bank-sync {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 2px;
+}
+.bank-sync-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 1.6;
+  border: 1px solid var(--km-border);
+  background: var(--km-bg-soft);
+  color: var(--km-muted);
+}
+.bank-sync-pill.ok {
+  border-color: rgb(64 150 120 / 0.45);
+  background: rgb(64 150 120 / 0.12);
+  color: var(--km-ok);
+}
+.bank-sync-pill.err {
+  border-color: rgb(200 120 120 / 0.45);
+  background: rgb(200 120 120 / 0.1);
+  color: var(--km-err);
+}
+.bank-sync-pill.loading {
+  border-color: var(--km-border);
+  background: var(--km-bg-soft);
+  color: var(--km-muted);
+}
+.bank-mark.cloud {
+  color: #2f80c4;
 }
 
 /* 题型色标：低饱和度区分，不抢主色 */

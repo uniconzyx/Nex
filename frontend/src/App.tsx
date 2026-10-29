@@ -11,6 +11,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { KaimaoShell } from './components/KaimaoShell';
 import { CppCatFab } from './components/CppCatFab';
+import { ToastHost } from './components/ToastHost';
 import { AiPanel, type AiMode } from './components/AiPanel';
 import { HomePage } from './pages/HomePage';
 import { LearnPage } from './pages/LearnPage';
@@ -21,6 +22,8 @@ import { DressPage } from './pages/DressPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { SettingsPage } from './pages/SettingsPage';
 import { HelpPage } from './pages/HelpPage';
+import { AiPage } from './pages/AiPage';
+import { DiagramsPage } from './pages/DiagramsPage';
 import {
   AchievementsPage,
   BagPage,
@@ -35,6 +38,7 @@ import { installProgressSync, pullProgress } from './lib/sync';
 import { setSignedInHook } from './lib/session';
 import { connectContentService } from './lib/clientBridge';
 import { installConnectionWatch } from './lib/connection';
+import { setAppNavigator } from './lib/challenge';
 import type { KmPage } from './lib/nav';
 
 export interface AiInvocation {
@@ -44,7 +48,15 @@ export interface AiInvocation {
 }
 
 export function App() {
-  const [page, setPage] = useState<KmPage>('home');
+  const [page, setPage] = useState<KmPage>(() => {
+    const h = (location.hash || '').replace(/^#/, '') as KmPage;
+    const VALID: KmPage[] = [
+      'home', 'learn', 'projects', 'bestiary', 'story', 'bag', 'rank', 'mini',
+      'checkin', 'dress', 'lab', 'me', 'achievements', 'guides', 'ai',
+      'settings', 'help', 'diagrams',
+    ];
+    return VALID.includes(h) ? h : 'home';
+  });
   const [ai, setAi] = useState<AiInvocation>({ open: false });
 
   // 首屏恢复主题，避免刷新时白闪
@@ -86,33 +98,67 @@ export function App() {
 
   const navigate = useCallback((p: KmPage) => {
     setPage(p);
+    // 把当前页写进 URL hash，支持直接深链（如 #diagrams 直达图表总览）
+    // 用 replaceState 而非直接赋值，避免每次切页都塞一条历史记录
+    if (location.hash !== `#${p}`) {
+      history.replaceState(null, '', `#${p}`);
+    }
     // 切页时关掉 AI 面板，避免遮挡新页面
     setAi((prev) => ({ ...prev, open: false }));
   }, []);
 
+  /**
+   * 把导航函数注入 challenge.ts。
+   * 图鉴卡片、遭遇弹窗、每日试炼都要「带着题目跳到试炼实验室」，
+   * 但它们不该各自拿一份 navigate props；lib 层拿不到 React 上下文，
+   * 所以由 App 这里单向注册。
+   */
+  useEffect(() => {
+    setAppNavigator(navigate);
+    return () => setAppNavigator(null);
+  }, [navigate]);
+
   return (
     <>
       <KaimaoShell active={page} onNavigate={navigate} onOpenAi={() => openAi()}>
-        {page === 'home' && <HomePage onNavigate={navigate} />}
-        {page === 'learn' && <LearnPage onNavigate={navigate} />}
-        {page === 'projects' && <ProjectsPage />}
-        {page === 'bestiary' && <BestiaryPage onNavigate={navigate} />}
-        {page === 'story' && <StoryPage />}
-        {page === 'bag' && <BagPage />}
-        {page === 'rank' && <RankPage />}
-        {page === 'mini' && <MiniPage />}
-        {page === 'checkin' && <CheckinPage />}
-        {page === 'dress' && <DressPage />}
-        {page === 'lab' && <PracticePage onAskCat={openAi} />}
-        {page === 'me' && <ProfilePage onNavigate={navigate} />}
-        {page === 'achievements' && <AchievementsPage />}
-        {page === 'guides' && <GuidesPage />}
-        {page === 'settings' && <SettingsPage onNavigate={navigate} />}
-        {page === 'help' && <HelpPage onNavigate={navigate} />}
+        {/*
+          key={page} 让每次切页都重新挂载，配合 .km-page 的入场动画：
+          没有 key 时 React 会复用节点，动画只在首次出现，切换就变成"硬切"。
+        */}
+        <div className="km-page" key={page}>
+          {page === 'home' && <HomePage onNavigate={navigate} />}
+          {page === 'learn' && <LearnPage onNavigate={navigate} />}
+          {page === 'projects' && <ProjectsPage onNavigate={navigate} />}
+          {page === 'bestiary' && <BestiaryPage onNavigate={navigate} />}
+          {page === 'story' && <StoryPage />}
+          {page === 'bag' && <BagPage />}
+          {page === 'rank' && <RankPage />}
+          {page === 'mini' && <MiniPage />}
+          {page === 'checkin' && <CheckinPage />}
+          {page === 'dress' && <DressPage />}
+          {page === 'lab' && <PracticePage onAskCat={openAi} />}
+          {page === 'me' && <ProfilePage onNavigate={navigate} />}
+          {page === 'achievements' && <AchievementsPage />}
+          {page === 'guides' && <GuidesPage />}
+          {page === 'ai' && <AiPage onNavigate={navigate} />}
+          {page === 'settings' && <SettingsPage onNavigate={navigate} />}
+          {page === 'help' && <HelpPage onNavigate={navigate} />}
+          {page === 'diagrams' && <DiagramsPage />}
+        </div>
       </KaimaoShell>
 
+      {/* 全局反馈层：toast + 怪物遭遇，任何页面的动作都从这里出声 */}
+      <ToastHost />
+
       <CppCatFab onClick={() => openAi()} active={ai.open} />
-      {ai.open && <AiPanel initialContext={ai.context} initialMode={ai.mode} onClose={closeAi} />}
+      {ai.open && (
+        <AiPanel
+          initialContext={ai.context}
+          initialMode={ai.mode}
+          onClose={closeAi}
+          onRequireLogin={() => navigate('me')}
+        />
+      )}
     </>
   );
 }

@@ -1,0 +1,329 @@
+/* DiagramsPage.css —— 图表总览（学习链）
+ * 设计原则（design-taste-frontend）：强层级、扁平色阶分隔、真实动效、拒绝套路。
+ * 配色严格沿用凯喵蓝白品牌：--km-accent 系列；学科主题色用传入的 --hue / --hue-a。
+ * 浅色主题下所有面板/卡片均为浅底深字；代码块也用浅色面，不破坏主题。
+ */
+
+.dgv-root {
+  --dgv-ink: #26364a;
+  --dgv-ink-soft: #54687d;
+  --dgv-ink-faint: #8496ab;
+  --dgv-line: #d7e2ee;
+  --dgv-card: #ffffff;
+  --dgv-soft: #f3f8fd;
+  --dgv-code-bg: #f4f8fc;
+  --dgv-code-ink: #1d3147;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 30px 26px 84px;
+  color: var(--dgv-ink);
+  font-family: inherit;
+}
+
+/* ---------- 头部 ---------- */
+.dgv-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+.dgv-head-main { min-width: 0; }
+.dgv-title {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 760;
+  letter-spacing: -0.01em;
+  color: var(--km-accent-ink, #2f6494);
+}
+.dgv-lede {
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--dgv-ink-soft);
+  max-width: 660px;
+}
+.dgv-lede-q { color: var(--km-accent-deep, #3f7db8); font-weight: 600; }
+
+.dgv-search {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid var(--dgv-line);
+  border-radius: 12px;
+  padding: 9px 13px;
+  min-width: 264px;
+  transition: border-color 0.18s, box-shadow 0.18s;
+}
+.dgv-search:focus-within {
+  border-color: var(--km-accent, #5b9bd5);
+  box-shadow: 0 0 0 3px var(--km-accent-soft, #d9eaf7);
+}
+.dgv-search svg {
+  width: 17px;
+  height: 17px;
+  flex: none;
+  fill: none;
+  stroke: var(--dgv-ink-faint);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.dgv-search input {
+  border: 0;
+  outline: 0;
+  background: transparent;
+  width: 100%;
+  font: inherit;
+  font-size: 14px;
+  color: var(--dgv-ink);
+}
+.dgv-search input::placeholder { color: var(--dgv-ink-faint); }
+
+/* ---------- 主体：脊 + 内容 ---------- */
+.dgv-body {
+  display: grid;
+  grid-template-columns: 204px 1fr;
+  gap: 34px;
+  align-items: start;
+}
+
+/* 学习脊（页面的「活物」） */
+.dgv-spine {
+  position: sticky;
+  top: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 12px;
+  background: var(--dgv-soft);
+  border: 1px solid var(--dgv-line);
+  border-radius: 14px;
+}
+.dgv-spine-cap {
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  color: var(--dgv-ink-faint);
+  padding: 2px 8px 9px;
+}
+.dgv-spine-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 8px 9px;
+  border-radius: 9px;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: var(--dgv-ink-soft);
+  transition: background 0.16s, color 0.16s, transform 0.16s;
+}
+.dgv-spine-item:hover:not(:disabled) {
+  background: #fff;
+  color: var(--dgv-ink);
+}
+.dgv-spine-item.on {
+  background: #fff;
+  color: var(--dgv-ink);
+  box-shadow: inset 0 0 0 1px var(--hue-a);
+}
+.dgv-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--hue);
+  flex: none;
+  box-shadow: 0 0 0 3px var(--hue-a);
+  transition: transform 0.2s;
+}
+.dgv-spine-item.on .dgv-dot { transform: scale(1.35); }
+.dgv-spine-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 13.5px;
+  font-weight: 560;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dgv-spine-n {
+  font-size: 12px;
+  color: var(--dgv-ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+.dgv-spine-item:disabled { opacity: 0.4; cursor: default; }
+
+/* ---------- 内容 ---------- */
+.dgv-content { min-width: 0; }
+.dgv-empty {
+  padding: 44px 20px;
+  text-align: center;
+  color: var(--dgv-ink-faint);
+  border: 1px dashed var(--dgv-line);
+  border-radius: 14px;
+}
+
+.dgv-subject { margin-bottom: 46px; }
+.dgv-subject-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--dgv-line);
+}
+.dgv-subject-bar {
+  width: 4px;
+  height: 30px;
+  border-radius: 3px;
+  background: var(--hue);
+  flex: none;
+}
+.dgv-subject-titles { flex: 1; min-width: 0; }
+.dgv-subject-name {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--dgv-ink);
+}
+.dgv-subject-note {
+  margin: 3px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--dgv-ink-soft);
+}
+.dgv-subject-count {
+  flex: none;
+  font-size: 12px;
+  color: var(--dgv-ink-soft);
+  background: var(--dgv-soft);
+  border: 1px solid var(--dgv-line);
+  padding: 4px 11px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.dgv-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.dgv-card {
+  position: relative;
+  background: var(--dgv-card);
+  border: 1px solid var(--dgv-line);
+  border-radius: 14px;
+  padding: 16px 16px 14px 18px;
+  overflow: hidden;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.dgv-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--hue);
+  box-shadow: 0 12px 26px -18px var(--hue);
+}
+.dgv-card-band {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--hue);
+  opacity: 0.9;
+}
+.dgv-card-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.dgv-ch {
+  font-size: 11.5px;
+  font-weight: 650;
+  color: var(--hue);
+  background: var(--hue-a);
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.dgv-card-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.4;
+  color: var(--dgv-ink);
+}
+.dgv-card-desc {
+  margin: 9px 0 0;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--dgv-ink-soft);
+}
+.dgv-code {
+  margin: 11px 0 0;
+  background: var(--dgv-code-bg);
+  color: var(--dgv-code-ink);
+  border: 1px solid var(--dgv-line);
+  border-radius: 10px;
+  padding: 13px 14px;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  line-height: 1.55;
+  white-space: pre;
+  overflow-x: auto;
+}
+.dgv-card-foot {
+  margin-top: 10px;
+  font-size: 11px;
+  color: var(--dgv-ink-faint);
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  word-break: break-all;
+}
+
+/* ---------- 揭幕动效 ---------- */
+/* 仅在 JS 已就绪（dgv-anim）后才隐藏，保证无 JS 时内容可见（渐进增强） */
+.dgv-anim [data-reveal] {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s cubic-bezier(0.22, 0.61, 0.36, 1),
+    transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.dgv-anim [data-reveal].is-revealed {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---------- 响应式 ---------- */
+@media (max-width: 880px) {
+  .dgv-body { grid-template-columns: 1fr; }
+  .dgv-spine {
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .dgv-spine-cap { width: 100%; }
+  .dgv-spine-item { width: auto; }
+  .dgv-cards { grid-template-columns: 1fr; }
+}
+@media (max-width: 520px) {
+  .dgv-root { padding: 22px 16px 64px; }
+  .dgv-title { font-size: 25px; }
+  .dgv-search { min-width: 0; width: 100%; }
+}
+
+/* ---------- 无障碍：减少动态 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .dgv-anim [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none;
+  }
+  .dgv-card:hover { transform: none; }
+  .dgv-spine-item.on .dgv-dot { transform: none; }
+}
