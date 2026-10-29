@@ -1,0 +1,1380 @@
+/* ============================================================================
+ * game.css —— 玩法层样式（P0-P1）：过渡动画 / 即时反馈 / 图鉴 / 每日试炼 / 金币流水
+ * ----------------------------------------------------------------------------
+ * 为什么和 kaimao.css 分开：
+ *   kaimao.css 是「外壳 + 通用卡片」的稳定层（3770 行，已被所有页面依赖）；
+ *   玩法层还在长，单独一个文件便于 review 与回退，也不会让外壳文件继续膨胀。
+ *   引用顺序必须在 kaimao.css 之后，才能用到它定义的 --km-* 令牌。
+ *
+ * 三条约束：
+ *   1. 只用 --km-* 令牌，不引入新配色；
+ *   2. 所有动画都能被 prefers-reduced-motion 关掉（见末尾）；
+ *   3. 动画只服务于「因果可见」——出现 / 收服 / 进账三种状态变化才动，
+ *      不做无意义的背景漂浮，避免把学习界面做成弹窗游戏。
+ * ========================================================================== */
+
+/* ── 1. 页面切换与卡片入场 ────────────────────────────────────────────── */
+@keyframes km-page-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes km-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.994);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.km-page {
+  animation: km-page-in 0.28s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.km-view > .km-card,
+.km-view > section {
+  animation: km-card-in 0.34s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.km-view > *:nth-child(1) { animation-delay: 0.02s; }
+.km-view > *:nth-child(2) { animation-delay: 0.06s; }
+.km-view > *:nth-child(3) { animation-delay: 0.1s; }
+.km-view > *:nth-child(4) { animation-delay: 0.14s; }
+.km-view > *:nth-child(5) { animation-delay: 0.18s; }
+.km-view > *:nth-child(n + 6) { animation-delay: 0.22s; }
+
+/* ── 2. Toast（右下角，不遮内容区） ───────────────────────────────────── */
+@keyframes km-toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(28px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.km-toasts {
+  position: fixed;
+  /* 右栏宽 300：toast 贴在内容列右下角，别盖住凯喵与今日目标 */
+  right: 320px;
+  bottom: 20px;
+  z-index: 92;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(300px, calc(100vw - 32px));
+  pointer-events: none;
+}
+
+.km-toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px 12px;
+  border: 1px solid var(--km-line);
+  border-left-width: 3px;
+  border-radius: var(--km-r-sm);
+  background: var(--km-surf1);
+  box-shadow: var(--km-sh-pop);
+  backdrop-filter: blur(18px);
+  pointer-events: auto;
+  animation: km-toast-in 0.26s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.km-toast.k-ok { border-left-color: var(--km-ok); }
+.km-toast.k-bad { border-left-color: var(--km-bad); }
+.km-toast.k-info { border-left-color: var(--km-accent); }
+.km-toast.k-coin { border-left-color: var(--km-gold); }
+.km-toast.k-tame { border-left-color: var(--km-epic); }
+
+.km-toast-ico {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--km-accent);
+}
+
+.km-toast.k-ok .km-toast-ico { background: var(--km-ok); }
+.km-toast.k-bad .km-toast-ico { background: var(--km-bad); }
+.km-toast.k-coin .km-toast-ico { background: var(--km-gold); }
+.km-toast.k-tame .km-toast-ico { background: var(--km-epic); }
+
+.km-toast-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.km-toast-body b {
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.km-toast-body span {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--km-ink-faint);
+  font-size: 11.5px;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.km-toast-coin {
+  flex: none;
+  color: var(--km-legend);
+  font-size: 12.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.km-toast-coin.neg { color: var(--km-bad); }
+
+.km-toast-x {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  color: var(--km-ink-faint);
+  font-size: 15px;
+  line-height: 1;
+  transition: 0.15s;
+}
+
+.km-toast-x:hover {
+  color: var(--km-ink);
+  background: var(--km-sunk);
+}
+
+/* ── 3. 怪物遭遇（全屏打断，值得） ───────────────────────────────────── */
+@keyframes km-enc-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes km-enc-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.82) translateY(16px);
+  }
+  60% {
+    transform: scale(1.02) translateY(0);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes km-spark-fly {
+  from {
+    opacity: 0;
+    transform: rotate(calc(var(--i) * 36deg)) translateY(-10px) scale(0.4);
+  }
+  40% { opacity: 0.9; }
+  to {
+    opacity: 0;
+    transform: rotate(calc(var(--i) * 36deg)) translateY(-70px) scale(1);
+  }
+}
+
+.km-encounter {
+  position: fixed;
+  inset: 0;
+  z-index: 96;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgb(12 22 34 / 0.52);
+  backdrop-filter: blur(5px) saturate(0.92);
+  animation: km-enc-fade 0.2s ease-out both;
+}
+
+.km-enc {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: min(380px, 100%);
+  padding: 26px 24px 20px;
+  border: 1px solid var(--km-line);
+  border-radius: 22px;
+  /* 遭遇卡是模态：用近乎不透明的面板，否则背后模糊内容会透上来把字糊掉 */
+  background: rgb(255 255 255 / 0.97);
+  box-shadow: 0 26px 70px rgb(20 40 60 / 0.34), inset 0 0 0 1px rgb(255 255 255 / 0.4);
+  text-align: center;
+  animation: km-enc-pop 0.34s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+html[data-km-theme='dark'] .km-enc {
+  background: rgb(30 46 66 / 0.97);
+}
+
+.km-enc-spark {
+  position: absolute;
+  top: 44%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.km-enc-spark i {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--km-gold);
+  box-shadow: 0 0 8px var(--km-gold);
+  animation: km-spark-fly 1.1s ease-out calc(var(--i) * 60ms) infinite;
+}
+
+.km-enc-kicker {
+  color: var(--km-bad);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+}
+
+.km-enc-title {
+  margin-top: 4px;
+  font-size: 15.5px;
+  line-height: 1.45;
+}
+
+.km-enc-sub {
+  color: var(--km-ink-faint);
+  font-size: 12px;
+}
+
+.km-enc-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.km-enc-hint {
+  margin: 6px 0 0;
+  color: var(--km-ink-faint);
+  font-size: 11.5px;
+  line-height: 1.6;
+}
+
+/* ── 4. 怪物形象 ─────────────────────────────────────────────────────── */
+@keyframes km-mon-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes km-mon-shake {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  20% { transform: translateX(-4px) rotate(-2deg); }
+  40% { transform: translateX(4px) rotate(2deg); }
+  60% { transform: translateX(-3px) rotate(-1deg); }
+  80% { transform: translateX(3px) rotate(1deg); }
+}
+
+@keyframes km-halo-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes km-tame-burst {
+  0% { transform: scale(0.94); box-shadow: 0 0 0 0 var(--km-gold); }
+  60% { transform: scale(1.02); box-shadow: 0 0 0 8px rgb(227 180 79 / 0); }
+  100% { transform: none; box-shadow: 0 0 0 0 rgb(227 180 79 / 0); }
+}
+
+.km-mon-spr {
+  display: block;
+  overflow: visible;
+  filter: drop-shadow(0 6px 14px rgb(40 70 100 / 0.18));
+}
+
+.km-mon-spr.is-wild {
+  animation: km-mon-float 3.6s ease-in-out infinite;
+}
+
+.km-mon-spr.is-hit {
+  animation: km-mon-shake 0.62s ease-in-out 2;
+}
+
+.km-mon-halo {
+  transform-origin: 60px 62px;
+}
+
+.km-mon-spr.is-shiny .km-mon-halo {
+  animation: km-halo-spin 14s linear infinite;
+}
+
+.km-mon-spr.is-tamed .km-mon-halo {
+  opacity: 0.75;
+}
+
+/* ── 5. 图鉴页 ───────────────────────────────────────────────────────── */
+.km-best-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+
+.km-best-stats {
+  display: flex;
+  gap: 18px;
+  margin-left: auto;
+}
+
+.km-best-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+}
+
+.km-best-stat b {
+  font-size: 19px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.km-best-stat span {
+  color: var(--km-ink-faint);
+  font-size: 11px;
+}
+
+.km-best-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 14px 0 4px;
+}
+
+.km-best-tab {
+  padding: 6px 13px;
+  border: 1px solid var(--km-line2);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--km-ink-soft);
+  font-size: 12.5px;
+  transition: 0.16s;
+}
+
+.km-best-tab i {
+  margin-left: 5px;
+  color: var(--km-ink-faint);
+  font-style: normal;
+  font-size: 11px;
+}
+
+.km-best-tab:hover {
+  border-color: var(--km-line);
+  background: var(--km-sunk);
+}
+
+.km-best-tab.on {
+  border-color: transparent;
+  background: var(--km-accent);
+  color: #fff;
+}
+
+.km-best-tab.on i {
+  color: rgb(255 255 255 / 0.72);
+}
+
+.km-mon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.km-mon-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 12px 12px;
+  border: 1px solid var(--km-line2);
+  border-radius: var(--km-r-sm);
+  background: var(--km-surf2);
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  animation: km-card-in 0.32s ease both;
+}
+
+.km-mon-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--km-line);
+  box-shadow: var(--km-sh-pop);
+}
+
+.km-mon-card.on {
+  border-color: var(--km-accent);
+  box-shadow: 0 0 0 2px var(--km-glow);
+}
+
+.km-mon-card.just-tamed {
+  animation: km-tame-burst 0.9s ease-out both;
+}
+
+.km-mon-card b {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 12.5px;
+  line-height: 1.4;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.km-mon-card .km-mon-ch {
+  overflow: hidden;
+  width: 100%;
+  color: var(--km-ink-faint);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.km-mon-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+}
+
+.km-rarity {
+  padding: 1px 7px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
+.km-hp {
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgb(199 91 91 / 0.14);
+  color: var(--km-bad);
+  font-size: 10.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.km-hp.ok {
+  background: rgb(59 154 108 / 0.14);
+  color: var(--km-ok);
+}
+
+/* 图鉴详情 */
+.km-mon-detail {
+  position: relative;
+  margin-top: 14px;
+  padding: 16px 18px;
+  border: 1px solid var(--km-line2);
+  border-radius: var(--km-r-sm);
+  background: var(--km-surf1);
+  animation: km-card-in 0.24s ease both;
+}
+
+.km-mon-detail-head {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.km-mon-detail-head h4 {
+  margin: 0 0 4px;
+  font-size: 14.5px;
+  line-height: 1.45;
+}
+
+.km-mon-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: var(--km-ink-faint);
+  font-size: 11.5px;
+}
+
+.km-mon-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.km-intel {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--km-line2);
+}
+
+.km-intel-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: var(--km-ink-soft);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.km-intel-title span {
+  color: var(--km-ink-faint);
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.km-intel-item {
+  margin-bottom: 8px;
+  padding: 9px 11px;
+  border: 1px solid var(--km-line2);
+  border-radius: var(--km-r-xs);
+  background: var(--km-sunk);
+}
+
+.km-intel-item summary {
+  cursor: pointer;
+  list-style: none;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.km-intel-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.km-intel-item summary::before {
+  content: '▸';
+  display: inline-block;
+  width: 14px;
+  color: var(--km-accent-deep);
+  transition: transform 0.16s;
+}
+
+.km-intel-item[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.km-intel-a {
+  margin: 8px 0 0 14px;
+  color: var(--km-ink-soft);
+  font-size: 12px;
+  line-height: 1.75;
+  white-space: pre-wrap;
+}
+
+.km-intel-src {
+  margin: 6px 0 0 14px;
+  color: var(--km-ink-faint);
+  font-size: 11px;
+}
+
+.km-intel-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 6px 0 0 14px;
+}
+
+/* 八股情报库 */
+.km-archive-sub {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0 2px;
+}
+
+.km-archive-cat {
+  margin-top: 12px;
+}
+
+.km-archive-cat > b {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--km-ink-soft);
+  font-size: 12.5px;
+}
+
+/* ── 6. 每日试炼（首页） ─────────────────────────────────────────────── */
+.km-daily {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.km-daily-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border: 1px solid var(--km-line2);
+  border-radius: var(--km-r-xs);
+  background: var(--km-surf2);
+  text-align: left;
+  transition: 0.16s;
+}
+
+.km-daily-row:hover {
+  border-color: var(--km-line);
+  transform: translateX(2px);
+}
+
+.km-daily-row.done {
+  opacity: 0.62;
+}
+
+.km-daily-no {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  flex: none;
+  border-radius: 7px;
+  background: var(--km-sunk);
+  color: var(--km-accent-deep);
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.km-daily-row.done .km-daily-no {
+  background: rgb(59 154 108 / 0.16);
+  color: var(--km-ok);
+}
+
+.km-daily-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+
+.km-daily-main b {
+  overflow: hidden;
+  font-size: 12.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.km-daily-main span {
+  color: var(--km-ink-faint);
+  font-size: 11px;
+}
+
+.km-daily-bar {
+  overflow: hidden;
+  height: 5px;
+  margin-top: 2px;
+  border-radius: 999px;
+  background: var(--km-sunk);
+}
+
+.km-daily-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--km-accent-lift), var(--km-accent));
+  transition: width 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* ── 7. NextAction 主卡 ─────────────────────────────────────────────── */
+.km-next {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--km-line);
+  background: linear-gradient(120deg, rgb(91 155 213 / 0.16), var(--km-surf1) 62%);
+}
+
+.km-next.tone-warn {
+  background: linear-gradient(120deg, rgb(181 127 34 / 0.14), var(--km-surf1) 62%);
+}
+
+.km-next.tone-ok {
+  background: linear-gradient(120deg, rgb(59 154 108 / 0.14), var(--km-surf1) 62%);
+}
+
+.km-next::after {
+  content: '';
+  position: absolute;
+  top: -40%;
+  right: -12%;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--km-glow), transparent 68%);
+  pointer-events: none;
+}
+
+.km-next-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--km-accent-ink);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.km-next h2 {
+  position: relative;
+  margin: 6px 0;
+  font-size: 19px;
+  line-height: 1.35;
+}
+
+.km-next p {
+  position: relative;
+  max-width: 62ch;
+  margin: 0 0 14px;
+  color: var(--km-ink-soft);
+  font-size: 12.5px;
+  line-height: 1.7;
+}
+
+/* ── 8. 金币飘字 ─────────────────────────────────────────────────────── */
+@keyframes km-coin-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.9);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-16px) scale(1);
+  }
+}
+
+@keyframes km-coin-bump {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+.km-coin {
+  position: relative;
+}
+
+.km-coin-pop {
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  color: var(--km-legend);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: km-coin-rise 1.1s ease-out both;
+}
+
+.km-coin-pop.neg {
+  color: var(--km-bad);
+}
+
+.km-coin.bump {
+  animation: km-coin-bump 0.42s ease-out;
+}
+
+/* ── 9. 金币流水 ─────────────────────────────────────────────────────── */
+.km-ledger {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.km-ledger-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 11px;
+  border-radius: var(--km-r-xs);
+  background: var(--km-sunk);
+  font-size: 12px;
+}
+
+.km-ledger-row time {
+  margin-left: auto;
+  color: var(--km-ink-faint);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.km-ledger-delta {
+  width: 46px;
+  flex: none;
+  color: var(--km-ok);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.km-ledger-delta.neg {
+  color: var(--km-bad);
+}
+
+/* ── 10. 无障碍：尊重系统的「减少动态效果」 ─────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .km-page,
+  .km-view > .km-card,
+  .km-view > section,
+  .km-mon-card,
+  .km-toast,
+  .km-enc,
+  .km-encounter,
+  .km-mon-spr,
+  .km-mon-spr.is-hit,
+  .km-mon-spr.is-shiny .km-mon-halo,
+  .km-enc-spark i,
+  .km-coin-pop,
+  .km-coin.bump {
+    animation: none !important;
+  }
+
+  .km-daily-bar i,
+  .km-card,
+  .km-btn,
+  .km-mon-card {
+    transition: none !important;
+  }
+}
+
+@media (max-width: 1180px) {
+  /* 右栏收起后，toast 回到真正的右下角 */
+  .km-toasts {
+    right: 16px;
+    bottom: 88px;
+  }
+}
+
+@media (max-width: 900px) {
+  .km-toasts {
+    right: 12px;
+    bottom: 84px;
+    left: 12px;
+    width: auto;
+  }
+
+  .km-best-stats {
+    justify-content: space-between;
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .km-best-stat {
+    align-items: flex-start;
+  }
+
+  .km-mon-detail-head {
+    flex-direction: column;
+  }
+
+  .km-mon-detail-actions {
+    margin-left: 0;
+  }
+}
+
+/* ==========================================================================
+   P2 · 章节三关 / 依赖图 / 项目前置
+   --------------------------------------------------------------------------
+   这一层只解决「玩家看得懂自己到哪一步了」：
+     ① 地图节点上的三个小圆点 = 三关状态，不点开也能看到进度；
+     ② 展开后的三张关卡卡 = 做什么、还差几道、差在哪；
+     ③ 掌握度条按 30 / 30 / 40 分段，视觉上就是权重本身，不用额外解释。
+   全部沿用 --km-* 令牌，深色主题自动跟随，不写死任何颜色。
+   ========================================================================== */
+
+/* ── 地图节点 ─────────────────────────────────────────────────────────── */
+
+.km-pips {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  flex: none;
+}
+
+.km-pip {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 700;
+  /* 未点亮时也要读得清：这是「这一关还没过」的唯一视觉线索，
+     用 ink-faint 在深色底上只有 1.8:1，等于没写。 */
+  color: var(--km-ink-soft);
+  background: var(--km-sunk);
+  border: 1px solid var(--km-line);
+  transition: color .25s ease, background .25s ease, border-color .25s ease, transform .25s ease;
+}
+
+.km-pip.on {
+  color: #fff;
+  background: var(--km-accent);
+  border-color: var(--km-accent);
+  box-shadow: 0 0 0 3px rgb(91 155 213 / 0.16);
+}
+
+.km-node.partial .km-node-dot {
+  border-color: var(--km-accent);
+  color: var(--km-accent-ink);
+  background: var(--km-accent-soft);
+}
+
+.km-stage-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--km-ink-soft);
+}
+
+.km-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ── 展开后的章节面板 ─────────────────────────────────────────────────── */
+
+.km-chapter-open {
+  animation: km-stage-in .34s ease both;
+}
+
+@keyframes km-stage-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.995);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.km-mastery-chip {
+  flex: none;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: var(--km-ink);
+  background: var(--km-accent-soft);
+  border: 1px solid var(--km-line);
+}
+
+.km-mastery-chip.done {
+  color: #fff;
+  background: var(--km-ok);
+  border-color: var(--km-ok);
+}
+
+.km-mastery-bar {
+  display: flex;
+  gap: 4px;
+  margin-top: 10px;
+  height: 8px;
+}
+
+.km-mastery-seg {
+  flex: 1 1 30%;
+  border-radius: 999px;
+  background: var(--km-sunk);
+  border: 1px solid var(--km-line2);
+  transition: background .35s ease, border-color .35s ease;
+}
+
+.km-mastery-seg.on {
+  background: linear-gradient(90deg, var(--km-accent), var(--km-accent-lift));
+  border-color: transparent;
+}
+
+.km-dep-ok {
+  color: var(--km-ok);
+  font-weight: 600;
+}
+
+.km-dep-bad {
+  color: var(--km-warn-ink);
+  font-weight: 600;
+}
+
+/* ── 三张关卡卡 ───────────────────────────────────────────────────────── */
+
+.km-stages {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.km-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  border-radius: var(--km-r-sm);
+  background: var(--km-surf1);
+  border: 1px solid var(--km-line2);
+  box-shadow: var(--km-sh-soft);
+  transition: border-color .25s ease, transform .25s ease, box-shadow .25s ease;
+  animation: km-stage-in .4s ease both;
+}
+
+.km-stage:nth-child(2) { animation-delay: .06s; }
+.km-stage:nth-child(3) { animation-delay: .12s; }
+
+.km-stage:hover {
+  transform: translateY(-2px);
+  border-color: var(--km-line);
+}
+
+.km-stage.done {
+  border-color: rgb(59 154 108 / 0.4);
+  background: linear-gradient(180deg, rgb(59 154 108 / 0.08), transparent 62%), var(--km-surf1);
+}
+
+.km-stage-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.km-stage-head b {
+  font-size: 14px;
+  color: var(--km-ink);
+}
+
+.km-stage-weight {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--km-ink-soft);
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--km-sunk);
+}
+
+.km-stage-bar {
+  height: 5px;
+  border-radius: 999px;
+  background: var(--km-sunk);
+  overflow: hidden;
+}
+
+.km-stage-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--km-accent), var(--km-accent-lift));
+  transition: width .45s cubic-bezier(.2, .8, .3, 1);
+}
+
+.km-stage.done .km-stage-bar i {
+  background: linear-gradient(90deg, var(--km-ok), #6cc79a);
+}
+
+.km-stage-desc {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--km-ink-soft);
+}
+
+.km-stage-hint {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--km-ink);
+  font-weight: 600;
+}
+
+.km-stage-blockers {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--km-warn-ink);
+}
+
+.km-stage .km-btn {
+  margin-top: auto;
+  align-self: flex-start;
+}
+
+@media (max-width: 980px) {
+  .km-stages {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── 本章总结面板（P3） ──────────────────────────────────── */
+.km-summary {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--km-line2);
+}
+
+.km-summary-locked {
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  border-radius: var(--km-r-sm);
+  background: var(--km-sunk);
+  border: 1px dashed var(--km-line2);
+  color: var(--km-ink-soft);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.km-summary-table-wrap {
+  margin-top: 10px;
+  overflow-x: auto;
+  border-radius: var(--km-r-sm);
+  border: 1px solid var(--km-line2);
+}
+
+.km-summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  background: var(--km-surf1);
+}
+
+.km-summary-table th,
+.km-summary-table td {
+  text-align: left;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--km-line2);
+  vertical-align: top;
+}
+
+.km-summary-table thead th {
+  background: var(--km-sunk);
+  color: var(--km-ink);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.km-summary-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.km-summary-dim {
+  font-weight: 700;
+  color: var(--km-ink);
+  white-space: nowrap;
+}
+
+.km-summary-num {
+  white-space: nowrap;
+  color: var(--km-ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.km-summary-items {
+  margin: 0;
+  padding-left: 16px;
+  line-height: 1.65;
+  color: var(--km-ink);
+}
+
+.km-summary-items li {
+  margin: 2px 0;
+}
+
+.km-summary-empty {
+  color: var(--km-ink-soft);
+  opacity: 0.6;
+}
+
+.km-summary-badge {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.km-summary-badge.ok {
+  color: #fff;
+  background: var(--km-ok);
+}
+
+.km-summary-badge.warn {
+  color: var(--km-warn-ink);
+  background: color-mix(in srgb, var(--km-warn-ink) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--km-warn-ink) 45%, transparent);
+}
+
+.km-summary-total td {
+  background: linear-gradient(180deg, rgb(59 154 108 / 0.08), transparent 70%);
+  font-weight: 700;
+  color: var(--km-ink);
+}
+
+.km-summary-detail {
+  margin-top: 12px;
+  border: 1px solid var(--km-line2);
+  border-radius: var(--km-r-sm);
+  background: var(--km-surf1);
+  padding: 8px 12px;
+}
+
+.km-summary-detail > summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--km-ink);
+  user-select: none;
+}
+
+.km-summary-sec {
+  margin-top: 10px;
+}
+
+.km-summary-sec > b {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--km-accent-lift);
+  font-size: 13px;
+}
+
+/* ── 项目前置 ─────────────────────────────────────────────────────────── */
+
+.cp-open-only {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 8px;
+  font-size: 12px;
+  color: var(--km-ink-soft);
+  cursor: pointer;
+}
+
+.cp-open-only input {
+  accent-color: var(--km-accent);
+}
+
+.cp-ready-tag,
+.cp-lock-tag {
+  flex: none;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.cp-ready-tag {
+  color: var(--km-ok);
+  background: rgb(59 154 108 / 0.12);
+  border: 1px solid rgb(59 154 108 / 0.3);
+}
+
+.cp-lock-tag {
+  color: var(--km-ink-soft);
+  background: var(--km-sunk);
+  border: 1px solid var(--km-line2);
+}
+
+.cp-requires {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cp-requires li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cp-requires button {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  padding: 7px 10px;
+  border-radius: var(--km-r-xs);
+  border: 1px solid var(--km-line2);
+  background: var(--km-surf2);
+  color: var(--km-ink);
+  font-size: 12.5px;
+  line-height: 1.5;
+  cursor: pointer;
+  transition: border-color .2s ease, background .2s ease, transform .2s ease;
+}
+
+.cp-requires button:hover {
+  border-color: var(--km-accent);
+  background: var(--km-accent-soft);
+  transform: translateX(2px);
+}
+
+.cp-requires li.bad button {
+  border-color: rgb(181 127 34 / 0.35);
+}
+
+.cp-mastery {
+  flex: none;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  color: var(--km-warn-ink);
+  background: rgb(181 127 34 / 0.1);
+}
+
+.cp-mastery.ok {
+  color: var(--km-ok);
+  background: rgb(59 154 108 / 0.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .km-chapter-open,
+  .km-stage,
+  .km-stage-bar i,
+  .km-mastery-seg,
+  .km-pip,
+  .cp-requires button {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .km-stage:hover,
+  .cp-requires button:hover {
+    transform: none;
+  }
+}

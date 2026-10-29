@@ -31,6 +31,8 @@ import { challengeQuestion } from '../lib/challenge';
 import { chapterDeps, chapterName, masteryOfChapter, subjectMastery, UNLOCK_MASTERY } from '../lib/graph';
 import { isUnlocked } from '../lib/logicChain';
 import { chapterStages, STAGE_META, type StageView } from '../lib/stages';
+import { buildChapterSummary, contentOf, summaryToMarkdown, type ChapterSummary, type SummaryDim } from '../lib/chapterSummary';
+import type { ChapterContent } from '../data/chapterContent';
 import type { KmPage } from '../lib/nav';
 
 const TYPE_ORDER: BankType[] = ['choice', 'coding', 'output', 'fix_error', 'explain', 'design'];
@@ -39,6 +41,31 @@ export function LearnPage({ onNavigate }: { onNavigate?: (p: KmPage) => void }) 
   const [subject] = useSubject();
   const p = useProgress();
   const [openId, setOpenId] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  /** 把单章总结复制成 Markdown 表格（对齐主人 E 盘笔记习惯） */
+  const handleCopySummary = async (s: ChapterSummary) => {
+    const md = summaryToMarkdown(s);
+    try {
+      await navigator.clipboard.writeText(md);
+    } catch {
+      // 非安全上下文（http/iframe）降级到 textarea + execCommand
+      const ta = document.createElement('textarea');
+      ta.value = md;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+      } catch {
+        /* 复制失败也不报错，用户可手动选文本 */
+      }
+      document.body.removeChild(ta);
+    }
+    setCopiedId(s.chapterId);
+    setTimeout(() => setCopiedId((cur) => (cur === s.chapterId ? null : cur)), 1800);
+  };
 
   const isClang = subject === 'clang';
   const pack = isClang ? undefined : BUNDLE.chapters[subject as keyof typeof BUNDLE.chapters];
@@ -370,9 +397,139 @@ export function LearnPage({ onNavigate }: { onNavigate?: (p: KmPage) => void }) 
                   </>
                 )}
               </div>
+
+              {/* ── 本章总结（仅三关全通后可见，P3） ───────────── */}
+              {(() => {
+                const sum = buildChapterSummary(c.id, p);
+                if (!sum) {
+                  return (
+                    <p className="km-summary-locked">
+                      通关三关（概念 / 演练 / BOSS 全绿）后，这里会解锁「本章总结 · 7 维表」与一键导出 Markdown。
+                    </p>
+                  );
+                }
+                return (
+                  <ChapterSummaryPanel
+                    summary={sum}
+                    content={contentOf(c.id)}
+                    copied={copiedId === c.id}
+                    onCopy={() => handleCopySummary(sum)}
+                  />
+                );
+              })()}
             </section>
           );
         })()}
+    </div>
+  );
+}
+
+/* ── 本章总结 · 7 维表面板（P3） ─────────────────────────────
+ * 仅当章 mastery===100（buildChapterSummary 返回非 null）时渲染。
+ * 数据来自 chapterSummary.ts 的纯函数层，本组件只负责呈现与导出。
+ */
+
+function SummaryRow({ label, dim, extra }: { label: string; dim: SummaryDim; extra?: string }) {
+  return (
+    <tr>
+      <td className="km-summary-dim">{label}</td>
+      <td className="km-summary-num">
+        {extra ? `${dim.done ?? dim.count}/${dim.required ?? dim.count} ${extra}` : `${dim.count} 条`}
+      </td>
+      <td>
+        <span className={`km-summary-badge ${dim.ok ? 'ok' : 'warn'}`}>
+          {dim.ok ? '✓ 达标' : '⚠ 待补'}
+        </span>
+      </td>
+      <td>
+        {dim.items.length ? (
+          <ul className="km-summary-items">
+            {dim.items.map((it, i) => (
+              <li key={i}>{it}</li>
+            ))}
+          </ul>
+        ) : (
+          <span className="km-summary-empty">—</span>
+        )}
+      </td>
+    </tr>
+  );
+}
+
+function SummarySection({ title, items }: { title: string; items: string[] }) {
+  if (!items.length) return null;
+  return (
+    <div className="km-summary-sec">
+      <b>{title}</b>
+      <ul className="km-summary-items">
+        {items.map((it, i) => (
+          <li key={i}>{it}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function ChapterSummaryPanel({
+  summary,
+  content,
+  copied,
+  onCopy,
+}: {
+  summary: ChapterSummary;
+  content: ChapterContent | undefined;
+  copied: boolean;
+  onCopy: () => void;
+}) {
+  return (
+    <div className="km-summary">
+      <div className="km-cont-top">
+        <h3 style={{ margin: 0 }}>本章总结 · 7 维表</h3>
+        <button type="button" className="km-btn km-btn-sm km-btn-ghost" onClick={onCopy}>
+          {copied ? '已复制 ✓' : '复制为 Markdown 表格'}
+        </button>
+      </div>
+      <p className="km-hint" style={{ marginTop: 8 }}>
+        掌握度 100% 已解锁。下表逐维对照内容标准（概念 / 易错 / 面试题 ≥ 3，例题 ≥ 5，项目 ≥ 1）。
+      </p>
+      <div className="km-summary-table-wrap">
+        <table className="km-summary-table">
+          <thead>
+            <tr>
+              <th>维度</th>
+              <th>数量 / 状态</th>
+              <th>达标</th>
+              <th>关键条目（前 3）</th>
+            </tr>
+          </thead>
+          <tbody>
+            <SummaryRow label="目标 Goals" dim={summary.goals} />
+            <SummaryRow label="核心概念 Concepts" dim={summary.concepts} />
+            <SummaryRow label="易错点 Pitfalls" dim={summary.pitfalls} />
+            <SummaryRow label="例题 Exercises" dim={summary.exercises} extra="已答对" />
+            <SummaryRow label="面试 / 真题 Interview" dim={summary.interview} />
+            <SummaryRow label="实战 Project" dim={summary.project} />
+            <tr className="km-summary-total">
+              <td>总掌握度</td>
+              <td>{summary.totalMastery}%</td>
+              <td>
+                <span className="km-summary-badge ok">✓</span>
+              </td>
+              <td>三关全通 · BOSS 通过</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      {content && (
+        <details className="km-summary-detail">
+          <summary>展开全部条目（{content.goals.length + content.concepts.length + content.pitfalls.length + content.interviews.length + content.projects.length} 条）</summary>
+          <SummarySection title="目标" items={content.goals} />
+          <SummarySection title="核心概念" items={content.concepts} />
+          <SummarySection title="易错点" items={content.pitfalls} />
+          <SummarySection title="面试 / 真题" items={content.interviews} />
+          <SummarySection title="实战项目" items={content.projects} />
+        </details>
+      )}
     </div>
   );
 }

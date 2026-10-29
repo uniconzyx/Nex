@@ -129,7 +129,7 @@
 |---|---|---|
 | P1 | 写 `408.json`（cross-walk） | ✅ 已落地 |
 | P2 | `chapterSummary.ts` + `examTracks.ts` + 生成数据层（`chapterContent.ts`/`track408.ts`/`gen_*.py`/`summary_checks.ts`） | ✅ 已落地（`--check-summary` 全绿、`tsc` 零错） |
-| P3 | `LearnPage` 接"本章总结" + 导出 | 单章表可用 |
+| P3 | `LearnPage` 接"本章总结" + 导出 | ✅ 已落地（仅 mastery===100 解锁，7 维表 + 一键导出 Markdown + 全量条目折叠） |
 | P4 | `#track/408` 总表 + 下钻 | 408 可用 |
 | P5 | `verify --check-summary` 验收 | 全绿 |
 
@@ -343,7 +343,7 @@
 |---|---|---|
 | P1 | 写 `408.json`（cross-walk） | ✅ 已落地 |
 | P2 | `chapterSummary.ts` + `examTracks.ts` + 生成数据层（`chapterContent.ts`/`track408.ts`/`gen_*.py`/`summary_checks.ts`） | ✅ 已落地（`--check-summary` 全绿、`tsc` 零错） |
-| P3 | `LearnPage` 本章总结 + 导出 | 单章表（全学科可用） |
+| P3 | `LearnPage` 本章总结 + 导出 | ✅ 已落地（仅 mastery===100 解锁，7 维表 + 一键导出 Markdown + 全量条目折叠） |
 | P4 | `#track/408` 总表 + 下钻 | 408 可用 |
 | P5 | `#employment` 就业板块 + 八股图 | 就业链路 |
 | P6 | `#reexam` 复试板块（面试 + 机试） | 复试链路 |
