@@ -2,10 +2,11 @@
 # -*- coding: utf-8 -*-
 """从 content/_tracks/*.json 生成前端可 import 的专轨数据文件。
 
-前端无法直读文件系统 JSON，所以把专轨映射（考研 408 / 就业八股）生成为 TS 常量。
+前端无法直读文件系统 JSON，所以把专轨映射（考研 408 / 就业八股 / 考研复试）生成为 TS 常量。
 当前生成：
   - frontend/src/data/track408.ts     ← content/_tracks/408.json
   - frontend/src/data/employment.ts   ← content/_tracks/employment.json
+  - frontend/src/data/reexam.ts       ← content/_tracks/reexam.json
 
 幂等；纯生成，不回写 content/_tracks；可重复运行。
 """
@@ -89,6 +90,47 @@ def gen_employment() -> None:
     )
 
 
+def gen_reexam() -> None:
+    src = TRACKS / "reexam.json"
+    out = ROOT / "frontend" / "src" / "data" / "reexam.ts"
+    data = json.loads(src.read_text(encoding="utf-8"))
+
+    lines = [
+        "/* 由 scripts/gen_tracks.py 从 content/_tracks/reexam.json 生成，请勿手改。 */",
+        "/* eslint-disable */",
+        "export interface ReexamInterviewQuestion { q: string; tip?: string; }",
+        "export interface ReexamInterviewCategory { category: string; desc: string; questions: ReexamInterviewQuestion[]; }",
+        "export interface ReexamInterview { name: string; desc: string; categories: ReexamInterviewCategory[]; }",
+        "export interface ReexamMachineTest {",
+        "  id: string;",
+        "  title: string;",
+        "  university: string;",
+        "  year: number;",
+        "  module: string;",
+        "  scene: string;",
+        "  framework: string;",
+        "  algorithm: string;",
+        "  code: string;",
+        "}",
+        "export interface ReexamDef {",
+        "  trackId: string;",
+        "  name: string;",
+        "  interview: ReexamInterview;",
+        "  machineTests: ReexamMachineTest[];",
+        "}",
+        "",
+        f"export const REEXAM: ReexamDef = {json.dumps(data, ensure_ascii=False, indent=2)};",
+        "",
+    ]
+    out.write_text("\n".join(lines), encoding="utf-8")
+    n_q = sum(len(c["questions"]) for c in data["interview"]["categories"])
+    n_t = len(data["machineTests"])
+    print(
+        f"写入 {out.relative_to(ROOT)}：{data['trackId']} · 面试 {n_q} 题 · 机试 {n_t} 题"
+    )
+
+
 if __name__ == "__main__":
     gen_408()
     gen_employment()
+    gen_reexam()

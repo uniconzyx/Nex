@@ -132,6 +132,7 @@
 | P3 | `LearnPage` 接"本章总结" + 导出 | ✅ 已落地（仅 mastery===100 解锁，7 维表 + 一键导出 Markdown + 全量条目折叠） |
 | P4 | `#track/408` 路由 + 四模块总表 + 单章下钻 | ✅ 已落地（路由 #track408 + Track408Page + 深链 #track408/<章>） |
 | P5 | `#employment` 就业板块 + 八股图 | ✅ 已落地（路由 #employment + EmploymentPage + buildInterviewGraph + `--check-employment` 全绿） |
+| P6 | `#reexam` 复试板块（面试 + 机试） | ✅ 已落地（路由 #reexam + ReexamPage + buildReexamView + `--check-reexam` 全绿；机试题库入 reexam.json，吸收 P7） |
 
 ## 九、与"可玩性第 3 项（丰富化）"的关系
 
@@ -346,7 +347,7 @@
 | P3 | `LearnPage` 本章总结 + 导出 | ✅ 已落地（仅 mastery===100 解锁，7 维表 + 一键导出 Markdown + 全量条目折叠） |
 | P4 | `#track/408` 路由 + 四模块总表 + 单章下钻 | ✅ 已落地（路由 #track408 + Track408Page + 深链 #track408/<章>） |
 | P5 | `#employment` 就业板块 + 八股图 | ✅ 已落地（路由 #employment + EmploymentPage + buildInterviewGraph + `--check-employment` 全绿） |
-| P6 | `#reexam` 复试板块（面试 + 机试） | 复试链路 |
+| P6 | `#reexam` 复试板块（面试 + 机试） | ✅ 已落地（路由 #reexam + ReexamPage + buildReexamView + `--check-reexam` 全绿；机试题库入 reexam.json，吸收 P7） |
 | P7 | 机试题库（高校真题 + 三层答案 + 工作场景）seed | 机试内容 |
 | P8 | 场景化标准接入 `validate_content.py`（全学科） | 内容守门 |
 | **P9** | **完工自检**：`--check-summary`/`--check-employment`/`--check-reexam` + `audit_graph.py`(全学科) + `validate_content.py`(场景覆盖) + `tsc`+`vite build`，出自检报告 | 全绿 + 覆盖报告 |

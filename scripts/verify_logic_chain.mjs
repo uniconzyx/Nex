@@ -19,17 +19,22 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 
 const root = process.cwd();
+const isReexam = process.argv.includes('--check-reexam');
 const isEmployment = process.argv.includes('--check-employment');
 const isSummary = process.argv.includes('--check-summary');
-const mode = isEmployment ? 'employment' : isSummary ? 'summary' : 'logic';
-const entry = join(
-  root,
-  'scripts',
-  mode === 'employment' ? 'employment_checks.ts' : mode === 'summary' ? 'summary_checks.ts' : 'logic_chain_checks.ts',
-);
-const out = join(mkdtempSync(join(tmpdir(), mode === 'employment' ? 'emp-' : mode === 'summary' ? 'sum-' : 'logic-')), 'checks.mjs');
+const mode = isReexam ? 'reexam' : isEmployment ? 'employment' : isSummary ? 'summary' : 'logic';
+const entryMap = {
+  reexam: 'reexam_checks.ts',
+  employment: 'employment_checks.ts',
+  summary: 'summary_checks.ts',
+  logic: 'logic_chain_checks.ts',
+};
+const prefixMap = { reexam: 'rx-', employment: 'emp-', summary: 'sum-', logic: 'logic-' };
+const labelMap = { reexam: '复试层', employment: '就业八股层', summary: '总结表层', logic: '逻辑层' };
+const entry = join(root, 'scripts', entryMap[mode]);
+const out = join(mkdtempSync(join(tmpdir(), prefixMap[mode])), 'checks.mjs');
 
-console.log(`› esbuild 打包${mode === 'employment' ? '就业八股层' : mode === 'summary' ? '总结表层' : '逻辑层'}…`);
+console.log(`› esbuild 打包${labelMap[mode]}…`);
 await build({
   entryPoints: [entry],
   bundle: true,
