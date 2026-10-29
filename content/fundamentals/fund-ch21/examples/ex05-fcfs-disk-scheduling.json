@@ -1,0 +1,8 @@
+{
+  "title": "FCFS磁盘调度的总寻道距离",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "初始磁头=53\n请求   移动距离 累计\n98       45         45\n183      85         130\n37       146        276\n122      85         361\n14       108        469\n124      110        579\n65       59         638\n67       2          640\nFCFS 总寻道距离 = 640 个磁道\n若每移动 1 道耗时 0.2ms，总寻道时间 = 128.0 ms\n",
+  "code": "#include <stdio.h>\n#include <stdlib.h>\n/* ex05：FCFS 磁盘调度——按请求到达顺序服务\n * 优点：公平、无饥饿；缺点：磁头来回跑，总寻道距离可能极大。\n * 本程序用同一组请求对比 FCFS 与 SSTF 的总寻道距离。*/\nint main(void) {\n    int req[] = {98, 183, 37, 122, 14, 124, 65, 67};\n    int n = (int)(sizeof(req) / sizeof(req[0]));\n    int head = 53;\n\n    int total = 0, cur = head;\n    printf(\"初始磁头=%d\\n\", head);\n    printf(\"%-8s %-10s %s\\n\", \"请求\", \"移动距离\", \"累计\");\n    for (int i = 0; i < n; i++) {\n        int d = abs(req[i] - cur);\n        total += d;\n        cur = req[i];\n        printf(\"%-8d %-10d %d\\n\", req[i], d, total);\n    }\n    printf(\"FCFS 总寻道距离 = %d 个磁道\\n\", total);\n    printf(\"若每移动 1 道耗时 0.2ms，总寻道时间 = %.1f ms\\n\", total * 0.2);\n    return 0;\n}\n"
+}

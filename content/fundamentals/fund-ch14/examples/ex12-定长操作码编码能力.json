@@ -3,6 +3,6 @@
   "code_lang": "c",
   "code_std": "c11",
   "stdin": "",
-  "expected_output": "操作码 4 位 -> 最多 16 条指令\n操作码 7 位 -> 最多 128 条指令\n操作码 8 位 -> 最多 256 条指令\n操作码 16 位 -> 最多 65536 条指令",
+  "expected_output": "操作码 4 位 -> 最多 16 条指令\n操作码 7 位 -> 最多 128 条指令\n操作码 8 位 -> 最多 256 条指令\n操作码 16 位 -> 最多 65536 条指令\n",
   "code": "#include <stdio.h>\n\nint main() {\n    int bits[] = {4, 7, 8, 16};     /* 不同定长操作码位数 */\n    int n = 4;\n    for (int i = 0; i < n; i++) {\n        int b = bits[i];\n        long cnt = 1L << b;         /* 定长操作码最多 2^b 条 */\n        printf(\"操作码 %d 位 -> 最多 %ld 条指令\\n\", b, cnt);\n    }\n    return 0;\n}"
 }

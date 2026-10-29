@@ -1,0 +1,248 @@
+{
+  "meta": {
+    "chapter": "fund-ch20",
+    "note": "7 题：基础题 6 + 算法题 1；覆盖逻辑/物理结构辨析、FAT 与隐式链接、混合索引最大文件、位示图换算、硬链接与软链接、inode 与 FCB、日志一致性；算法题为「偏移→区域+索引块数」的混合索引映射。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "索引文件与索引分配的区别",
+      "content_md": "关于「索引文件」和「索引分配」，下列说法**正确**的是：",
+      "options": [
+        {
+          "key": "A",
+          "text": "二者是同一概念的不同叫法"
+        },
+        {
+          "key": "B",
+          "text": "索引文件属于逻辑结构，索引分配属于物理结构"
+        },
+        {
+          "key": "C",
+          "text": "索引文件属于物理结构，索引分配属于逻辑结构"
+        },
+        {
+          "key": "D",
+          "text": "二者都描述文件在磁盘上的块分布"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "索引文件是**逻辑结构**（记录级：主文件 + 关键字索引表），索引分配是**物理结构**（块级：索引块存数据块号）。二者正交——一个采用索引分配的文件，其逻辑结构可以是顺序文件。这是本章最经典的辨析题。",
+      "tags": [
+        "逻辑结构",
+        "物理结构",
+        "索引",
+        "408"
+      ],
+      "source": "book",
+      "source_ref": "《操作系统概念》第 11-12 章"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "medium",
+      "title": "FAT 与隐式链接的本质差别",
+      "content_md": "显式链接（FAT）相对隐式链接的最关键改进是：",
+      "options": [
+        {
+          "key": "A",
+          "text": "把链指针集中存放在内存的表中，随机访问不必逐块读盘"
+        },
+        {
+          "key": "B",
+          "text": "取消了指针，改用索引块"
+        },
+        {
+          "key": "C",
+          "text": "支持文件跨磁盘分区"
+        },
+        {
+          "key": "D",
+          "text": "消除了内部碎片"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "A"
+        ]
+      },
+      "explanation": "两者都是链式分配，区别只在**链存在哪里**：隐式链接把 next 存在每个数据块末尾（读第 k 块要 k+1 次磁盘 I/O），FAT 把 next 集中到一张常驻内存的表里（走链零 I/O，只需最后读数据块）。B 描述的是索引分配；FAT 不解决跨分区；链式分配本来就没有外部碎片，内部碎片是块大小造成的。",
+      "tags": [
+        "FAT",
+        "链接分配",
+        "408"
+      ],
+      "source": "book",
+      "source_ref": "《操作系统概念》第 12 章 文件系统实现"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "hard",
+      "title": "混合索引的最大文件大小",
+      "content_md": "某文件系统采用混合索引：inode 含 10 个直接块、1 个一级间接、1 个二级间接、1 个三级间接。块大小 **4KB**，块号占 **4B**。该文件系统支持的最大文件约为：",
+      "options": [
+        {
+          "key": "A",
+          "text": "约 4 GB"
+        },
+        {
+          "key": "B",
+          "text": "约 4 TB"
+        },
+        {
+          "key": "C",
+          "text": "约 64 MB"
+        },
+        {
+          "key": "D",
+          "text": "约 16 GB"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "每块可放 4KB/4B = 1024 个块号。直接 10×4KB；一级 1024×4KB=4MB；二级 1024²×4KB=4GB；三级 1024³×4KB=4TB。合计约 **4TB + 4GB**，取近似为 4TB。注意：若块大小换成 1KB、块号 4B，则每块 256 个块号，最大约 16GB（本章 ex05 的例子）——一定要先算「每块块号数」。",
+      "tags": [
+        "混合索引",
+        "最大文件",
+        "计算题",
+        "408"
+      ],
+      "source": "book",
+      "source_ref": "408 统考 操作系统 文件管理"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "位示图的字号与位号",
+      "content_md": "某磁盘共 **10000** 个块，采用位示图管理，字长为 **32 位**，块号从 **0** 开始编号。\n\n1. 位示图需要多少个字？\n2. 块号 9999 对应的字号和位号分别是多少？\n3. 若块号改为从 **1** 开始编号，块号 9999 的字号与位号又是多少？\n\n请写出三个答案（第 3 问要说明为什么）。",
+      "answer": {
+        "text": "1) 10000/32 = 312.5 → 向上取整 313 个字（1252 字节）。2) 字号 = 9999/32 = 312，位号 = 9999%32 = 15。3) 先减 1：9998/32 = 312，9998%32 = 14。"
+      },
+      "explanation": "核心是「字号 = 块号 / 字长，位号 = 块号 % 字长」，字数必须**向上取整**（否则最后不满一个字的那部分块没地方表示）。第 3 问是常见陷阱：编号起点不同，同一个块的位偏移会整体错开一位，必须先 `块号-1` 再套公式。",
+      "tags": [
+        "位示图",
+        "字号位号",
+        "计算题",
+        "408"
+      ],
+      "source": "self",
+      "source_ref": "408 统考 操作系统 文件管理"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "medium",
+      "title": "删除文件后空间未释放",
+      "content_md": "某进程打开了 `/var/log/app.log`，此时执行 `rm /var/log/app.log`。下列描述**正确**的是：",
+      "options": [
+        {
+          "key": "A",
+          "text": "文件数据块立即被回收，磁盘空间马上变大"
+        },
+        {
+          "key": "B",
+          "text": "目录项被移除、link_count 减 1，但因进程仍持有该文件，数据块不回收"
+        },
+        {
+          "key": "C",
+          "text": "文件被转换为软链接，指向空路径"
+        },
+        {
+          "key": "D",
+          "text": "必须重启机器才能删除该文件"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "`rm` 做两件事：移除目录项、`link_count--`。但内核还会维护**打开文件引用计数**，只要还有进程持有 fd，inode 与数据块就不释放（此时 `lsof | grep deleted` 能看到 `(deleted)`）。真正释放发生在最后一个 fd 关闭之后。这也是「`df` 满了但 `du` 找不到大文件」的经典成因。",
+      "tags": [
+        "硬链接",
+        "link_count",
+        "lsof",
+        "408"
+      ],
+      "source": "book",
+      "source_ref": "《UNIX 环境高级编程》第 4 章"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "medium",
+      "title": "FCB 与 inode",
+      "content_md": "关于文件控制块 FCB 与索引节点 inode，下列说法**错误**的是：",
+      "options": [
+        {
+          "key": "A",
+          "text": "FCB 通常包含文件名，而 inode 不含文件名"
+        },
+        {
+          "key": "B",
+          "text": "inode 可以看作是 FCB 的一种现代实现（把文件名剥离到目录项）"
+        },
+        {
+          "key": "C",
+          "text": "inode 中保存了文件的物理块地址"
+        },
+        {
+          "key": "D",
+          "text": "inode 必须与文件数据块存放在同一磁盘块中"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "D"
+        ]
+      },
+      "explanation": "inode 集中存放在磁盘的 **inode 表区**（ext4 里由块组描述符定位），与数据块区分开，所以 D 错。A、B、C 都正确：文件名在目录项（dentry）里，inode 存类型/权限/大小/时间戳/链接数/块指针。",
+      "tags": [
+        "FCB",
+        "inode",
+        "目录项",
+        "408"
+      ],
+      "source": "book",
+      "source_ref": "《操作系统概念》第 12 章"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": "hard",
+      "title": "混合索引：偏移到区域的映射",
+      "content_md": "实现 `map_offset(offset, blk=1024, ptrs_per_block=256)`：给定文件内字节偏移，返回 `(区域名, 需要额外读几个索引块, 该区域内的逻辑块号)`。\n\n规则（UNIX inode 风格）：\n- 10 个直接块；\n- 1 个一级间接；\n- 1 个二级间接；\n- 1 个三级间接；\n- 每块 `blk` 字节，每个索引块放 `ptrs_per_block` 个块号。\n\n验证用例（`blk=1024, ptrs=256`）：\n- `offset=0` → 直接，0 个额外索引块，块号 0\n- `offset=1023` → 直接，块号 0\n- `offset=1024` → 直接，块号 1\n- `offset=10*1024` → 一级间接，1，块号 0\n- `offset=10*1024+256*1024` → 二级间接，2，块号 0\n\n最后打印本配置下的最大文件大小（GB，保留 2 位）。",
+      "answer": {
+        "text": "用四段区间累加：D=10·blk，L1=p·blk，L2=p²·blk，L3=p³·blk。逐段判断 offset 落在哪一段，落在第 i 段就把 offset 减去前面各段之和，再 `// blk` 得到区域内逻辑块号，额外索引块数 = 段序号（0/1/2/3）。",
+        "code": "def map_offset(offset, blk=1024, ptrs_per_block=256):\n    \"\"\"\n    混合索引：10 直接 + 1 一级 + 1 二级 + 1 三级（UNIX inode 风格）。\n    给定文件内字节偏移 offset，返回 (区域名, 需要读几个索引块, 该区域第几个逻辑块)。\n\n    每块 blk 字节，每索引块 ptrs_per_block 个块号。\n      D  = 10 * blk                      -> 直接块\n      L1 = ptrs_per_block * blk          -> 一级间接\n      L2 = ptrs_per_block**2 * blk       -> 二级间接\n      L3 = ptrs_per_block**3 * blk       -> 三级间接（本例不越界检查上界）\n    \"\"\"\n    D = 10 * blk\n    L1 = ptrs_per_block * blk\n    L2 = ptrs_per_block ** 2 * blk\n    L3 = ptrs_per_block ** 3 * blk\n\n    if offset < D:\n        return (\"直接\", 0, offset // blk)\n    off = offset - D\n    if off < L1:\n        return (\"一级间接\", 1, off // blk)\n    off -= L1\n    if off < L2:\n        return (\"二级间接\", 2, off // blk)\n    off -= L2\n    if off < L3:\n        return (\"三级间接\", 3, off // blk)\n    return (\"越界\", -1, -1)\n\n\nif __name__ == \"__main__\":\n    cases = [0, 1023, 1024, 10 * 1024, 10 * 1024 + 256 * 1024]   # 直接 -> 一级 -> 二级 边界\n    for off in cases:\n        area, extra, blk_no = map_offset(off)\n        print(\"offset=%-10d 区域=%-8s 额外索引块=%d 区域内块号=%d\" % (off, area, extra, blk_no))\n    # 期望：0/1023 -> 直接；1024 -> 直接块1（仍 < 10*1024）；10*1024 -> 一级间接第0块；\n    #       10*1024+256*1024 -> 二级间接第0块\n    total = 10 * 1024 + 256 * 1024 + 256 ** 2 * 1024 + 256 ** 3 * 1024\n    print(\"最大文件 =\", total, \"字节 =\", round(total / 1024 ** 3, 2), \"GB\")\n"
+      },
+      "explanation": "考点是把「混合索引」从公式变成可执行的分段映射。三个易错点：① 把 `ptrs_per_block` 写成块大小（应是 块大小/块号字节数）；② 忘记减去前面各段的偏移量，导致区域内块号算错；③ 用 32 位整型算最大文件（1KB 块、256 指针时最大 16GB，会溢出成负数）——Python 无此问题，但换成 C 就必须用 `long long`。",
+      "tags": [
+        "混合索引",
+        "偏移映射",
+        "coding",
+        "408"
+      ],
+      "source": "self",
+      "source_ref": "408 统考 操作系统 文件管理"
+    }
+  ]
+}

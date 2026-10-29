@@ -1,0 +1,228 @@
+{
+  "meta": {
+    "chapter": "fund-ch23",
+    "note": "基础题 + 算法题混合，覆盖组帧/差错控制/流量控制/介质访问控制"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "哪种组帧方法无法自恢复",
+      "content_md": "下列组帧方法中，一旦定界信息被破坏就**无法自行恢复帧同步**的是：",
+      "options": [
+        {
+          "key": "A",
+          "text": "字符计数法"
+        },
+        {
+          "key": "B",
+          "text": "字节填充法"
+        },
+        {
+          "key": "C",
+          "text": "零比特填充法"
+        },
+        {
+          "key": "D",
+          "text": "违规编码法"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "A"
+        ]
+      },
+      "explanation": "字符计数法把「帧长」放在帧头的计数字段里。计数字段一旦出错，接收方会从错误的偏移开始读下一帧长度，导致后续所有帧边界错位；而且它没有任何可用于重新同步的标志，只能等整段数据结束。B/C/D 都依赖一个「数据区里不可能出现」的定界模式（FLAG 或非法码元），收到下一个定界符即可重新同步。",
+      "tags": [
+        "组帧",
+        "透明传输",
+        "408高频"
+      ],
+      "source": "self",
+      "source_ref": "《计算机网络》谢希仁 第3章 3.1"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "medium",
+      "title": "GBN 与 SR 的窗口上限",
+      "content_md": "采用 3 位序号（序号空间 0~7）的后退 N 帧协议，发送窗口最大为多少？若改用选择重传协议，发送窗口最大又是多少？",
+      "options": [
+        {
+          "key": "A",
+          "text": "GBN 为 7，SR 为 4"
+        },
+        {
+          "key": "B",
+          "text": "GBN 为 8，SR 为 4"
+        },
+        {
+          "key": "C",
+          "text": "GBN 为 7，SR 为 8"
+        },
+        {
+          "key": "D",
+          "text": "GBN 为 8，SR 为 8"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "A"
+        ]
+      },
+      "explanation": "GBN 要求 W <= 2^n - 1 = 7；若取 8，则整窗 ACK 全丢时重传的帧号与接收方期待的新帧号完全重合，无法区分新旧。SR 收发窗口都等于 W，要求 2W <= 2^n，即 W <= 2^(n-1) = 4。",
+      "tags": [
+        "GBN",
+        "SR",
+        "窗口",
+        "408高频"
+      ],
+      "source": "book",
+      "source_ref": "《计算机网络》谢希仁 第3章 3.4"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "medium",
+      "title": "求 CRC 校验位 FCS",
+      "content_md": "待发送数据 D = `101110`，生成多项式 G(x) = x³ + 1（对应比特串 `1001`）。求 CRC 校验位 FCS，并写出实际发送的比特串。\n\n（提示：r = deg G(x) = 3，需在 D 后补 3 个 0 再做模 2 除法）",
+      "answer": {
+        "correct": [
+          "011"
+        ]
+      },
+      "explanation": "在 D 后补 3 个 0 得 101110000，用 1001 做模 2 除法，余数为 011，故发送帧为 101110011。注意补 0 的个数等于 G(x) 的阶数（3），不是 G 的位数（4）。",
+      "tags": [
+        "CRC",
+        "模2除法",
+        "408高频"
+      ],
+      "source": "book",
+      "source_ref": "《计算机网络》谢希仁 第3章 3.2 习题改编"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "hard",
+      "title": "由最小帧长反推最大跨距",
+      "content_md": "10 Mbps 以太网规定最小帧长为 64 字节，信号在电缆中的传播速度为 2×10⁸ m/s。若只考虑纯传播时延，求网络的最大跨距（单位：m）。",
+      "answer": {
+        "correct": [
+          "5120"
+        ]
+      },
+      "explanation": "最小帧长 64 B = 512 bit，发送时延 Td = 512 / (10×10⁶) = 51.2 μs。冲突检测要求 Td >= 2τ，故 2τ <= 51.2 μs，单程 τ <= 25.6 μs，最大跨距 = v·τ = 2×10⁸ × 25.6×10⁻⁶ = 5120 m。实际标准取 2500 m，因为 2τ 里还要留给中继器与收发器的处理延迟。",
+      "tags": [
+        "CSMA/CD",
+        "最小帧长",
+        "争用期"
+      ],
+      "source": "book",
+      "source_ref": "《计算机网络》谢希仁 第3章 3.3 习题改编"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "交换机隔离哪个域",
+      "content_md": "关于以太网交换机，下列说法正确的是：",
+      "options": [
+        {
+          "key": "A",
+          "text": "既隔离冲突域，也隔离广播域"
+        },
+        {
+          "key": "B",
+          "text": "隔离冲突域，但不隔离广播域"
+        },
+        {
+          "key": "C",
+          "text": "不隔离冲突域，但隔离广播域"
+        },
+        {
+          "key": "D",
+          "text": "两者都不隔离"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "交换机每个端口是独立的冲突域（全双工下甚至不存在冲突），但广播帧仍会泛洪到同一 VLAN 内的所有端口，因此不隔离广播域。隔离广播域要靠 VLAN 或路由器。集线器则两者都不隔离。",
+      "tags": [
+        "交换机",
+        "冲突域",
+        "广播域",
+        "408高频"
+      ],
+      "source": "self",
+      "source_ref": "《计算机网络》谢希仁 第3章 3.5"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "修复零比特填充的判断条件",
+      "content_md": "下面的零比特填充实现有误，导致某些数据仍会与定界符 `01111110` 混淆。请指出问题并给出修正。\n\n```c\nint ones = 0;\nfor (int i = 0; bits[i]; i++) {\n    out[m++] = bits[i];\n    if (bits[i] == '1') {\n        ones++;\n        if (ones == 6) { out[m++] = '0'; ones = 0; }  /* 问题在这 */\n    } else ones = 0;\n}\n```",
+      "answer": {
+        "correct": [
+          "ones == 5"
+        ]
+      },
+      "explanation": "判断条件应为 `ones == 5` 而不是 `ones == 6`。若等凑满 6 个连续 1 才插 0，那么 `01111110` 这种数据在插入 0 之前就已经完整出现了 6 个 1，定界符已经产生歧义。正确规则是「每出现 5 个连续 1 就立即插入一个 0」，从而保证数据区永远不会出现 6 个连续 1。",
+      "tags": [
+        "零比特填充",
+        "HDLC",
+        "代码审查"
+      ],
+      "source": "self",
+      "source_ref": "《计算机网络》谢希仁 第3章 3.1"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "实现零比特填充与去填充",
+      "content_md": "实现一对互逆函数：\n\n1. `bit_stuff(bits)`：发送方，每出现 **5 个连续 1** 就立即插入一个 `0`；\n2. `bit_unstuff(bits)`：接收方，每见到 5 个连续 1 就删除紧跟的那个 `0`。\n\n要求对输入 `01111110101111111` 输出填充结果与还原结果，并验证还原后与原始比特串一致。\n\n示例输出格式：\n```\n原始   : 01111110101111111 (17 bit)\n填充后 : ... \n还原后 : 01111110101111111 (17 bit)\n一致   : True\n```",
+      "answer": {
+        "code": "def bit_stuff(bits: str) -> str:\n    \"\"\"发送方：每出现 5 个连续 1，立即插入一个 0。\"\"\"\n    out, ones = [], 0\n    for b in bits:\n        out.append(b)\n        if b == '1':\n            ones += 1\n            if ones == 5:          # 恰好 5 个就插，不等第 6 个\n                out.append('0')\n                ones = 0\n        else:\n            ones = 0\n    return ''.join(out)\n\n\ndef bit_unstuff(bits: str) -> str:\n    \"\"\"接收方：每见到 5 个连续 1，就把紧跟的那个 0 删掉（严格镜像）。\"\"\"\n    out, ones, i = [], 0, 0\n    while i < len(bits):\n        out.append(bits[i])\n        if bits[i] == '1':\n            ones += 1\n            if ones == 5:\n                i += 1             # 跳过被插入的 0\n                ones = 0\n        else:\n            ones = 0\n        i += 1\n    return ''.join(out)\n\n\ndata = '01111110101111111'\nstuffed = bit_stuff(data)\nback = bit_unstuff(stuffed)\nprint('原始   :', data, '(%d bit)' % len(data))\nprint('填充后 :', stuffed, '(%d bit)' % len(stuffed))\nprint('还原后 :', back, '(%d bit)' % len(back))\nprint('一致   :', back == data)\nprint('填充率 : %.1f%%' % (100.0 * (len(stuffed) - len(data)) / len(data)))\n"
+      },
+      "explanation": "关键在于「恰好 5 个就插」而不是「等第 6 个出现」。去填充必须与填充严格镜像：数到 5 个 1 后直接跳过下一位，并把计数器清零。本题输入含两段 5 个以上连续 1，共插入 2 位，填充率 11.8%；一般情况下填充开销只有百分之一量级，这就是「用极小的冗余换取定界符唯一」的定量体现。",
+      "tags": [
+        "零比特填充",
+        "透明传输",
+        "字符串处理"
+      ],
+      "source": "self",
+      "source_ref": "408 统考 计网 数据链路层"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "通用 CRC 编码与校验",
+      "content_md": "实现模 2 除法（减法即异或，不借位不进位）：\n\n1. `crc_remainder(data, g)`：在 data 末尾补 `len(g)-1` 个 0，除以 g，返回余数；\n2. `encode(data, g)`：返回 `data + 余数`；\n3. `check(frame, g)`：对整帧取余，全 0 返回 True。\n\n用 G = `10011`（x⁴+x+1）分别处理 `1101011011`、`101110`、`1101`，并验证把一个正确的帧改错一位后，校验应返回 False。",
+      "answer": {
+        "code": "def crc_remainder(data: str, g: str) -> str:\n    \"\"\"模 2 除法求余数：data 末尾补 len(g)-1 个 0。\"\"\"\n    r = len(g) - 1\n    bits = [int(c) for c in data] + [0] * r\n    gen = [int(c) for c in g]\n    for i in range(len(data)):\n        if bits[i]:                       # 最高位为 1 才除\n            for j in range(len(gen)):\n                bits[i + j] ^= gen[j]\n    return ''.join(str(b) for b in bits[-r:])\n\n\ndef encode(data: str, g: str) -> str:\n    return data + crc_remainder(data, g)\n\n\ndef check(frame: str, g: str) -> bool:\n    r = len(g) - 1\n    bits = [int(c) for c in frame]        # 不再补 0，直接对整帧取余\n    gen = [int(c) for c in g]\n    for i in range(len(frame) - r):\n        if bits[i]:\n            for j in range(len(gen)):\n                bits[i + j] ^= gen[j]\n    return all(b == 0 for b in bits[-r:])\n\n\nG = '10011'                    # x^4 + x + 1\nfor data in ['1101011011', '101110', '1101']:\n    frame = encode(data, G)\n    print('D=%-12s FCS=%-5s 帧=%-16s 校验=%s'\n          % (data, crc_remainder(data, G), frame, check(frame, G)))\nprint('注入 1 位错误后校验:', check('1101011011' + '1111', G))\n"
+      },
+      "explanation": "三个易错点：① 求余数时必须先补 r 个 0（r = len(g)-1）；② 校验时对整帧直接取余、不再补 0；③ 「够除」的判据是当前最高位为 1，而不是数值大小比较。D=1101011011、G=10011 的经典结果为 FCS=1110，可作为自测基准。",
+      "tags": [
+        "CRC",
+        "模2除法",
+        "位运算"
+      ],
+      "source": "self",
+      "source_ref": "408 统考 计网 差错控制"
+    }
+  ]
+}

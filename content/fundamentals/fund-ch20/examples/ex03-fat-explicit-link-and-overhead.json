@@ -1,0 +1,8 @@
+{
+  "title": "FAT显式链接与FAT表空间开销",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "FAT 链: 0 -> 7 -> 3 -> 9\n沿链在内存中走完，共 3 步（零磁盘 I/O）\n\n-----------------------------------------------\n磁盘容量      = 3906 MB\nFAT 表大小    = 3906 KB (0.10% 的磁盘)\n若块大小改成 512B，FAT 会变成 30.5 MB —— 这就是 FAT32 为什么限制分区大小\n",
+  "code": "#include <stdio.h>\n/* ex03：显式链接（FAT）——把 next 指针集中到内存里的 FAT 表\n * 好处：链在内存里走，只有真正读数据块才 I/O，随机访问大幅改善；\n * 代价：整张 FAT 必须常驻内存，磁盘越大 FAT 越大。*/\nint main(void) {\n    int nblocks = 1000000;     /* 1M 个块 */\n    int blk_size = 4096;       /* 4KB/块 */\n    int fat_entry = 4;         /* 每个 FAT 项 4 字节 */\n\n    long long disk_bytes = (long long)nblocks * blk_size;\n    long long fat_bytes = (long long)nblocks * fat_entry;\n\n    /* 一条 5 块的链：0->7->3->9->END */\n    int fat[16] = {7, -1, -1, 9, -1, -1, -1, 3, -1, -2};  /* -2 = 文件结束 */\n    printf(\"FAT 链: \");\n    int cur = 0, steps = 0;\n    while (cur >= 0) {\n        printf(\"%d%s\", cur, fat[cur] == -2 ? \"\" : \" -> \");\n        if (fat[cur] == -2) break;\n        cur = fat[cur];\n        steps++;\n    }\n    printf(\"\\n沿链在内存中走完，共 %d 步（零磁盘 I/O）\\n\", steps);\n\n    printf(\"\\n-----------------------------------------------\\n\");\n    printf(\"磁盘容量      = %lld MB\\n\", disk_bytes / 1024 / 1024);\n    printf(\"FAT 表大小    = %lld KB (%.2f%% 的磁盘)\\n\", fat_bytes / 1024,\n           100.0 * fat_bytes / disk_bytes);\n    printf(\"若块大小改成 512B，FAT 会变成 %.1f MB —— 这就是 FAT32 为什么限制分区大小\\n\",\n           (double)nblocks * 8 * fat_entry / 1024 / 1024);\n    return 0;\n}\n"
+}

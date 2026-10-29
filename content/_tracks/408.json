@@ -5,27 +5,44 @@
     {
       "module": "数据结构",
       "chapters": [
-        "fund-ch01", "fund-ch02", "fund-ch03", "fund-ch04", "fund-ch18",
-        "fund-ch05", "fund-ch06", "cpp-ch08", "cpp-ch09"
+        "fund-ch01",
+        "fund-ch02",
+        "fund-ch03",
+        "fund-ch04",
+        "fund-ch18",
+        "fund-ch05",
+        "fund-ch06"
       ]
     },
     {
       "module": "计算机组成原理",
       "chapters": [
-        "fund-ch13", "fund-ch07", "fund-ch08",
-        "fund-ch14", "fund-ch15", "fund-ch16", "fund-ch17"
+        "fund-ch13",
+        "fund-ch07",
+        "fund-ch08",
+        "fund-ch14",
+        "fund-ch15",
+        "fund-ch16",
+        "fund-ch17"
       ]
     },
     {
       "module": "操作系统",
-      "chapters": ["fund-ch09", "fund-ch10", "cpp-ch16"]
+      "chapters": [
+        "fund-ch19",
+        "fund-ch09",
+        "fund-ch10",
+        "fund-ch20",
+        "fund-ch21"
+      ]
     },
     {
       "module": "计算机网络",
       "chapters": [
-        "fund-ch11", "fund-ch12",
-        "mw-ch01", "mw-ch02", "mw-ch03", "mw-ch04",
-        "mw-ch05", "mw-ch06", "mw-ch07", "mw-ch08"
+        "fund-ch11",
+        "fund-ch22",
+        "fund-ch23",
+        "fund-ch12"
       ]
     }
   ]

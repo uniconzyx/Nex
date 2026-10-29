@@ -3,6 +3,6 @@
   "code_lang": "c",
   "code_std": "c11",
   "stdin": "",
-  "expected_output": "RISC 指令字长序列: 32 32 32 32 32 -> 定长? 是(RISC)\nCISC 指令字长序列: 16 32 48 16 64 -> 定长? 否(CISC)",
+  "expected_output": "RISC 指令字长序列: 32 32 32 32 32 -> 定长? 是(RISC)\nCISC 指令字长序列: 16 32 48 16 64 -> 定长? 否(CISC)\n",
   "code": "#include <stdio.h>\n\nint main() {\n    int len1[] = {32, 32, 32, 32, 32};   /* RISC：定长 32 位 */\n    int len2[] = {16, 32, 48, 16, 64};   /* CISC：变长 */\n    int n = 5;\n    int fixed1 = 1, fixed2 = 1;\n\n    for (int i = 1; i < n; i++) {\n        if (len1[i] != len1[0]) fixed1 = 0;  /* 是否所有指令等长 */\n        if (len2[i] != len2[0]) fixed2 = 0;\n    }\n\n    printf(\"RISC 指令字长序列: \");\n    for (int i = 0; i < n; i++) printf(\"%d \", len1[i]);\n    printf(\"-> 定长? %s\\n\", fixed1 ? \"是(RISC)\" : \"否\");\n\n    printf(\"CISC 指令字长序列: \");\n    for (int i = 0; i < n; i++) printf(\"%d \", len2[i]);\n    printf(\"-> 定长? %s\\n\", fixed2 ? \"是(RISC)\" : \"否(CISC)\");\n    return 0;\n}"
 }

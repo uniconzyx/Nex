@@ -5,7 +5,7 @@
 //
 //   1) buildChapterSummary(done)     —— 已通关章返回 7 维非空
 //   2) buildChapterSummary(notDone)  —— 未通关章返回 null（不变量）
-//   3) buildTrack408Summary(empty)   —— 29 章 / 4 模块 / 0 通关 / 均分 0
+//   3) buildTrack408Summary(empty)   —— 23 章 / 4 模块 / 0 通关 / 均分 0（数据结构 7 / 计组 7 / OS 5 / 网络 4）
 //   4) buildTrack408Summary(done)    —— 标记通关的章进入对应模块 doneCount
 //   5) markdown 导出不抛错
 //
@@ -81,24 +81,26 @@ assert(notDone === null, 'fund-ch02 未通关 → 返回 null');
 const neverTouched = buildChapterSummary('fund-ch99', st);
 assert(neverTouched === null, '不存在/未学的章 → 返回 null');
 
-console.log('[3] buildTrack408Summary：空状态 = 29 章 / 4 模块 / 0 通关 / 均分 0');
+console.log('[3] buildTrack408Summary：空状态 = 23 章 / 4 模块 / 0 通关 / 均分 0');
 const t0 = buildTrack408Summary(emptyState());
 assert(t0.modules.length === 4, `模块数 = 4（实际 ${t0.modules.length}）`);
 const total = t0.modules.reduce((n, m) => n + m.chapterCount, 0);
-// 408.json 现状：数据结构 9 + 计组 7 + OS 3 + 网络 10 = 29
-assert(total === 29, `章节总数 = 29（实际 ${total}）`);
+// 408.json 现状（按王道收口、剔除 STL/Redis/Kafka 后）：
+// 数据结构 7 + 计组 7 + OS 5 + 网络 4 = 23
+assert(total === 23, `章节总数 = 23（实际 ${total}）`);
 assert(t0.totalDone === 0, 'totalDone === 0');
 assert(t0.overallAvg === 0, 'overallAvg === 0');
 const ds = t0.modules.find((m) => m.module === '数据结构');
-assert(!!ds && ds.chapterCount === 9, `数据结构模块 9 章（实际 ${ds?.chapterCount}）`);
+assert(!!ds && ds.chapterCount === 7, `数据结构模块 7 章（实际 ${ds?.chapterCount}）`);
 const co = t0.modules.find((m) => m.module === '计算机组成原理');
-// P10-P11 按王道扩章后：概述/数据表示/存储与CPU/指令/CPU/总线/IO = 7 章
+// 王道 7 章：概述/数据表示/存储与CPU/指令/CPU/总线/IO
 assert(!!co && co.chapterCount === 7, `计组模块 7 章（实际 ${co?.chapterCount}）`);
 const os = t0.modules.find((m) => m.module === '操作系统');
-assert(!!os && os.chapterCount === 3, `操作系统模块 3 章（实际 ${os?.chapterCount}）`);
+// 概述/进程线程调度/内存管理/文件管理/IO 与磁盘 = 5 章
+assert(!!os && os.chapterCount === 5, `操作系统模块 5 章（实际 ${os?.chapterCount}）`);
 const net = t0.modules.find((m) => m.module === '计算机网络');
-// 当前 408.json：fund-ch11/12 + mw-ch01..08 = 10 章；后续可再按王道细分
-assert(!!net && net.chapterCount === 10, `计算机网络模块 10 章（实际 ${net?.chapterCount}）`);
+// 体系结构/物理层/数据链路层/应用层 = 4 章
+assert(!!net && net.chapterCount === 4, `计算机网络模块 4 章（实际 ${net?.chapterCount}）`);
 
 console.log('[4] buildTrack408Summary：标记通关的章进入对应模块 doneCount');
 const t1 = buildTrack408Summary(st);

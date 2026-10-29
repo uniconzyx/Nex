@@ -3,6 +3,6 @@
   "code_lang": "c",
   "code_std": "c11",
   "stdin": "",
-  "expected_output": "立即寻址：指令内含操作数 42，结果 = 84\n直接寻址：EA=3000 取数 99，结果 = 198",
+  "expected_output": "立即寻址：指令内含操作数 42，结果 = 84\n直接寻址：EA=3000 取数 99，结果 = 198\n",
   "code": "#include <stdio.h>\n\nint main() {\n    /* 立即寻址：操作数直接编码在指令中 */\n    int imm = 42;\n    /* 直接寻址：操作数放在内存单元 3000，其值为 99 */\n    int mem_3000 = 99;\n\n    int result_imm = imm * 2;       /* 立即数参与运算，无需访存取数 */\n    int result_dir = mem_3000 * 2;  /* 按 EA=3000 访存取数后再运算 */\n\n    printf(\"立即寻址：指令内含操作数 %d，结果 = %d\\n\", imm, result_imm);\n    printf(\"直接寻址：EA=3000 取数 %d，结果 = %d\\n\", mem_3000, result_dir);\n    return 0;\n}"
 }

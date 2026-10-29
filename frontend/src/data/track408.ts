@@ -23,9 +23,7 @@ export const TRACK_408: TrackDef = {
         "fund-ch04",
         "fund-ch18",
         "fund-ch05",
-        "fund-ch06",
-        "cpp-ch08",
-        "cpp-ch09"
+        "fund-ch06"
       ]
     },
     {
@@ -43,24 +41,20 @@ export const TRACK_408: TrackDef = {
     {
       "module": "操作系统",
       "chapters": [
+        "fund-ch19",
         "fund-ch09",
         "fund-ch10",
-        "cpp-ch16"
+        "fund-ch20",
+        "fund-ch21"
       ]
     },
     {
       "module": "计算机网络",
       "chapters": [
         "fund-ch11",
-        "fund-ch12",
-        "mw-ch01",
-        "mw-ch02",
-        "mw-ch03",
-        "mw-ch04",
-        "mw-ch05",
-        "mw-ch06",
-        "mw-ch07",
-        "mw-ch08"
+        "fund-ch22",
+        "fund-ch23",
+        "fund-ch12"
       ]
     }
   ]

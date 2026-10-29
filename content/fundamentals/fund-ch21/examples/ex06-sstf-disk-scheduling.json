@@ -1,0 +1,8 @@
+{
+  "title": "SSTF最短寻道优先与饥饿风险",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "初始磁头=53\n请求   移动距离 累计\n65       12         12\n67       2          14\n37       30         44\n14       23         67\n98       84         151\n122      24         175\n124      2          177\n183      59         236\nSSTF 总寻道距离 = 236 个磁道（FCFS 是 640，省 63%）\n注意：本序列恰好两端都会走到；构造「持续到达中间偏外侧请求」的场景时，\n      最内侧/最外侧的请求会被无限推迟 —— 这就是饥饿。\n",
+  "code": "#include <stdio.h>\n#include <stdlib.h>\n/* ex06：SSTF（最短寻道时间优先）\n * 每次选「离当前磁头最近」的请求 -> 贪心。\n * 优点：总寻道距离明显小于 FCFS；缺点：远处的请求可能长期得不到服务（饥饿）。*/\nint main(void) {\n    int req[] = {98, 183, 37, 122, 14, 124, 65, 67};\n    int n = (int)(sizeof(req) / sizeof(req[0]));\n    int done[8] = {0};\n    int head = 53, total = 0;\n\n    printf(\"初始磁头=%d\\n\", head);\n    printf(\"%-8s %-10s %s\\n\", \"请求\", \"移动距离\", \"累计\");\n    for (int k = 0; k < n; k++) {\n        int best = -1, bestd = 1 << 30;\n        for (int i = 0; i < n; i++) {\n            if (done[i]) continue;\n            int d = abs(req[i] - head);\n            if (d < bestd) { bestd = d; best = i; }\n        }\n        done[best] = 1;\n        head = req[best];\n        total += bestd;\n        printf(\"%-8d %-10d %d\\n\", req[best], bestd, total);\n    }\n    printf(\"SSTF 总寻道距离 = %d 个磁道（FCFS 是 640，省 %.0f%%）\\n\",\n           total, 100.0 * (640 - total) / 640);\n    printf(\"注意：本序列恰好两端都会走到；构造「持续到达中间偏外侧请求」的场景时，\\n\");\n    printf(\"      最内侧/最外侧的请求会被无限推迟 —— 这就是饥饿。\\n\");\n    return 0;\n}\n"
+}

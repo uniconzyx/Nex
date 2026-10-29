@@ -359,12 +359,14 @@
 | P4 | `#track/408` 路由 + 四模块总表 + 单章下钻 | ✅ 已落地（路由 #track408 + Track408Page + 深链 #track408/<章>） |
 | P5 | `#employment` 就业板块 + 八股图 | ✅ 已落地（路由 #employment + EmploymentPage + buildInterviewGraph + `--check-employment` 全绿） |
 | P6 | `#reexam` 复试板块（面试 + 机试） | ✅ 已落地（路由 #reexam + ReexamPage + buildReexamView + `--check-reexam` 全绿；机试题库入 reexam.json，吸收 P7） |
-| P7 | 机试题库（高校真题 + 三层答案 + 工作场景）seed | 机试内容 |
+| P7 | 机试题库（高校真题 + 三层答案 + 工作场景）seed | ✅ 已并入 P6（`reexam.json` 的 `machine_tests`，6 道高校真题 × 三层答案 × 工作场景） |
 | P8 | 场景化标准接入 `validate_content.py`（全学科） | 内容守门 |
 | **P9** | **完工自检**：`--check-summary`/`--check-employment`/`--check-reexam` + `audit_graph.py`(全学科) + `validate_content.py`(场景覆盖) + `tsc`+`vite build`，出自检报告 | 全绿 + 覆盖报告 |
 | **P10** | 408·计组按王道扩章：`fund-ch13` 计算机系统概述 / `ch14` 指令系统 / `ch15` 中央处理器 / `ch16` 总线 / `ch17` I/O 系统 | ✅ 已落地（5 章 × 7 类内容，`validate_content.py` 全 OK；计组模块 2 → **7 章**） |
 | **P11** | 408·数据结构补缺：`fund-ch18` 并查集与字符串高级 | ✅ 已落地（补王道缺失的并查集专题 + KMP/BM/Rabin-Karp/Trie/AC） |
 | **P11.5** | 集成：`_manifest.json` 注册 6 章并按王道重排（概览→数据表示→存储→指令→CPU→总线→IO）+ `408.json` 更新 + 五条生成链重跑 | ✅ 已落地（bundle/manifest 152 章一致；`track408.ts` 29 章；题库 962 → 1122 题） |
+| **P11.6** | 408 收口三件事：①OS 补 `ch19` 概述 / `ch20` 文件管理 / `ch21` I/O 与磁盘；②网络补 `ch22` 物理层 / `ch23` 数据链路层；③**剔除映射污染**（`cpp-ch08/09` STL≠数据结构、`cpp-ch16` 并发库≠OS、`mw-ch01..08` Redis/Kafka≠计网） | ✅ 已落地（408 由 29 章虚胖收口为 **23 章全真 408**：数据结构 7 / 计组 7 / OS 5 / 网络 4；新增 5 章 × 7 类内容） |
+| **P11.7** | **正确性审计**：`scripts/audit_correctness.py` —— examples 重新编译+运行逐字符比对、exercises 参考代码实跑、choice 答案与选项一致性、三视角标记、来源仓库 HTTP 200、跨章星数一致 | ✅ 已落地（可复跑；本批 11 章全绿）。本轮据审计修掉三类真问题：①`C-SCAN` 漏算 199 磁道空返却与含返程的 `SCAN` 同表比较（183 vs 382 口径混用，已改为双口径并列 + 修正"优于 SSTF"的错误结论）；②5 道选择题用字符串选项/下标答案，生成器静默丢弃选项导致前端无法作答（生成器加 `_norm_options`/`_coerce_correct` 容错 + 源数据规范化）；③网络超时被误判成"仓库不存在"（`000` 改为提醒、`404` 才失败） |
 | **P12** | 考研数学**学科**建库：`content/kaoyan-math/`（不是另建库；`math.json` 仅在做数一/数二/数三差异视图时才加）——高数 张宇+武忠祥 / 线代 李永乐 / 概率 方浩+ | 待实施 |
 | **P13** | 数学章内容（每章按「两条标准」齐备 7 类 + 场景化） | 待实施 |
 | **P14** | 内容充实完工自检（全学科详细完整 + 场景校验 + 408/数学进度报告） | 待实施 |

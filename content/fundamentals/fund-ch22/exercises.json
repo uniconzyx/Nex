@@ -1,0 +1,131 @@
+{
+  "meta": {
+    "chapter": "fund-ch22",
+    "note": "基础题 + 算法题混合：奈氏/香农、编码、复用、CDMA、物理层设备"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "奈奎斯特公式里的 2 从哪来",
+      "content_md": "奈奎斯特定理 $C = 2W\\log_2 V$ 中的系数 **2** 表示：",
+      "options": [
+        { "key": "A", "text": "因为信号是双向传输的（全双工）" },
+        { "key": "B", "text": "因为一个周期可以表示两个码元（正半周、负半周各一个）" },
+        { "key": "C", "text": "因为需要 2 倍的冗余比特用于差错控制" },
+        { "key": "D", "text": "因为电平数要成对出现" }
+      ],
+      "answer": { "correct": ["B"] },
+      "explanation": "带宽为 W 的信道，每秒最多可采 2W 个样本（采样定理），每个样本对应一个码元，所以码元速率上限是 2W Baud。**与双工方式、冗余、电平数无关**——这是最高频的失分点，很多同学凭直觉选了 A。",
+      "tags": ["奈奎斯特", "采样定理", "408"],
+      "source": "book",
+      "source_ref": "《计算机网络》谢希仁 第 2 章"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "medium",
+      "title": "曼彻斯特编码为什么能自同步",
+      "content_md": "曼彻斯特编码能够实现「自同步」，根本原因是：",
+      "options": [
+        { "key": "A", "text": "它使用了比 NRZ 更高的电压" },
+        { "key": "B", "text": "每一位的中间都有一次电平跳变，跳变本身可作为时钟信号" },
+        { "key": "C", "text": "它在数据前后加了专门的同步帧" },
+        { "key": "D", "text": "它把每个比特重复发送两次" }
+      ],
+      "answer": { "correct": ["B"] },
+      "explanation": "自同步指接收方能从**信号本身的跳变**中恢复时钟，不需要额外的时钟线。曼彻斯特编码规定每一位中间必须跳变（0=高→低，1=低→高），因此无论数据内容如何，跳变密度恒定，时钟信息不依赖数据模式。代价是波特率翻倍（1 bit 占 2 个码元），带宽利用率只有 50%。",
+      "tags": ["曼彻斯特", "自同步", "编码", "408"],
+      "source": "book",
+      "source_ref": "《计算机网络》谢希仁 第 2 章"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "信噪比 30dB 的香农上限",
+      "content_md": "某信道带宽为 **3 kHz**，信噪比为 **30 dB**。\n\n1. 求该信道的极限数据传输速率（香农）。\n2. 若同时要求采用 4 电平调制，综合奈氏与香农，实际最大速率是多少？谁在起约束作用？\n\n（$\\log_2 1001 \\approx 9.97$，$\\log_2 4 = 2$）",
+      "answer": {
+        "text": "① S/N = 10^(30/10) = 1000；香农 C = 3000×log2(1001) ≈ 29.9 kbps。② 奈氏 C = 2×3000×log2(4) = 12 kbps；取 min → 12 kbps，此时**奈氏（码元速率）在起约束作用**。",
+        "code": "import math\nW, snr_db, V = 3000, 30, 4\nsnr = 10 ** (snr_db / 10)          # 30dB -> 1000 倍\nshannon = W * math.log2(1 + snr)\nnyquist = 2 * W * math.log2(V)\nbest = min(shannon, nyquist)\nprint(f'S/N = {snr:.0f} 倍')\nprint(f'香农 = {shannon:.0f} bps, 奈氏 = {nyquist:.0f} bps')\nprint(f'取较小值 = {best:.0f} bps，约束方 = {\"香农\" if shannon < nyquist else \"奈氏\"}')"
+      },
+      "explanation": "三步固定流程：① dB → 倍数（最容易错，30dB 是 1000 倍不是 30 倍）；② 分别算香农与奈氏；③ 取较小值并**说明谁在起约束**。本题香农给到 29.9 kbps，但 4 电平的奈氏只有 12 kbps，所以 12 kbps 才是真的天花板——**这就是「木桶最短板」的含义**。若题目不给电平数，就只答香农上限。",
+      "tags": ["香农", "奈奎斯特", "dB", "计算", "408"],
+      "source": "self",
+      "source_ref": "408 统考 计算机网络 物理层"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "hard",
+      "title": "这段香农计算错在哪",
+      "content_md": "某同学的解题过程如下，请找出**全部错误**并改正：\n\n> 已知带宽 W = 4 kHz，信噪比 20 dB。\n> 由香农定理：$C = W\\log_2(1 + S/N) = 4000 \\times \\log_2(1 + 20) = 4000 \\times 4.39 = 17.6\\text{ kbps}$。\n> 又因为采用 8 电平调制，奈氏上限为 $2W\\log_2 8 = 4000\\times3=12\\text{kbps}$，故取 12 kbps。\n\n提示：注意单位与 dB 的定义，以及「取较小值」这一步是否用对了对象。",
+      "answer": {
+        "text": "两处错误。① **20 dB 不是 20 倍**：20dB → S/N = 10^(20/10) = 100 倍，正确香农 = 4000×log2(101) ≈ 4000×6.66 = 26.6 kbps。② 第二步的奈氏算错了：2W·log2(V) = 2×4000×3 = **24 kbps**（他漏乘了 2，写成 4000×3=12kbps）。改正后：香农 26.6 kbps，奈氏 24 kbps，取较小值 = **24 kbps**，此时奈氏（码元速率）在起约束作用。"
+      },
+      "explanation": "这一题同时踩了两个最高频的坑：**dB 换算**（20dB = 100 倍）和**奈氏漏乘 2**。两个错误恰好互相抵消了一半（一个算小了、一个也算了小），所以最终答案看起来「还能接受」——这正是考试中最危险的错误类型。做题时务必分开写两行、各自检查单位。",
+      "tags": ["香农", "奈奎斯特", "dB", "纠错", "408"],
+      "source": "self",
+      "source_ref": "408 统考 计算机网络 物理层"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "medium",
+      "title": "集线器与交换机的冲突域",
+      "content_md": "10 台主机通过一台 **100Mbps 集线器** 相连，则每台主机平均可用的带宽约为：",
+      "options": [
+        { "key": "A", "text": "100 Mbps，因为每台独享一个端口" },
+        { "key": "B", "text": "10 Mbps，因为所有端口在同一冲突域共享总带宽" },
+        { "key": "C", "text": "1000 Mbps，因为集线器会放大信号" },
+        { "key": "D", "text": "100 Mbps，因为集线器支持全双工" }
+      ],
+      "answer": { "correct": ["B"] },
+      "explanation": "集线器工作在**物理层**，只做信号放大整形，没有地址概念，因此所有端口处于**同一个冲突域**，同一时刻只能有一台主机发送，100Mbps 被 10 台主机**共享**（平均 10Mbps）。若是交换机，每端口独立冲突域、可全双工，则每台独享 100Mbps。**hub 也不支持全双工**（共享介质无法同时收发）。",
+      "tags": ["集线器", "交换机", "冲突域", "408"],
+      "source": "book",
+      "source_ref": "《计算机网络》谢希仁 第 3 章"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "medium",
+      "title": "E1 的每路话音速率",
+      "content_md": "E1 标准采用 TDM，每秒 8000 帧、每帧 32 个时隙、每时隙 8 bit。则 **每一路话音** 的速率是：",
+      "options": [
+        { "key": "A", "text": "64 kbps" },
+        { "key": "B", "text": "2.048 Mbps" },
+        { "key": "C", "text": "8 kbps" },
+        { "key": "D", "text": "32 kbps" }
+      ],
+      "answer": { "correct": ["A"] },
+      "explanation": "每路话音只占**一个时隙**，所以速率 = 8000 帧/s × 8 bit = **64 kbps**。2.048Mbps 是 32 个时隙的**总速率**（8000×32×8）。注意 32 个时隙里 0 号用于帧同步、16 号用于信令，**有效话路只有 30 路**——这是另一个高频考点。",
+      "tags": ["TDM", "E1", "复用", "408"],
+      "source": "book",
+      "source_ref": "《计算机网络》谢希仁 第 2 章"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": "hard",
+      "title": "实现 CDMA 的发送叠加与内积解码",
+      "content_md": "实现两个函数，完整模拟 CDMA 的一帧收发：\n\n```python\ndef cdma_send(chips, sends):\n    \"\"\"chips: {站名: 码片列表}；sends: {站名: 1 / 0 / None}\n       返回公共信道上的叠加信号（列表）\"\"\"\n\ndef cdma_decode(signal, chip):\n    \"\"\"返回 (内积, 解码值)；解码值 = 内积 / 码片长度\n       约定：+1 -> 1，-1 -> 0，0 -> None（该站静默）\"\"\"\n```\n\n规则：发 `1` 发送码片本身，发 `0` 发送码片的**反码**，`None` 表示静默不发。\n\n验证用例：\n```python\nchips = {'A': [1,1,1,1], 'B': [1,1,-1,-1], 'C': [1,-1,1,-1], 'D': [1,-1,-1,1]}\nsends = {'A': 1, 'B': 0, 'C': None, 'D': 1}\nsignal = cdma_send(chips, sends)          # [1, -1, 1, 3]\ncdma_decode(signal, chips['A'])           # (4, 1)\ncdma_decode(signal, chips['B'])           # (-4, -1)\ncdma_decode(signal, chips['C'])           # (0, 0)\ncdma_decode(signal, chips['D'])           # (4, 1)\n```\n\n要求：解码必须用「内积 ÷ 码片长度」，且 `0` 要能正确区分「静默」与「收到 0」。",
+      "answer": {
+        "text": "发送端逐码片累加：发 1 加码片、发 0 减码片、静默跳过。接收端做点积后除以码片长度得到 +1/-1/0 三态。关键是三态映射：**0 表示该站静默，不是收到 0**。",
+        "code": "def cdma_send(chips, sends):\n    \"\"\"把各站的码片按发送数据叠加成公共信道信号。\"\"\"\n    n = len(next(iter(chips.values())))\n    signal = [0] * n\n    for name, chip in chips.items():\n        v = sends.get(name)\n        if v is None:                 # 静默：不发，对信道无贡献\n            continue\n        sign = 1 if v == 1 else -1    # 发 0 用反码\n        for i in range(n):\n            signal[i] += sign * chip[i]\n    return signal\n\n\ndef cdma_decode(signal, chip):\n    \"\"\"内积 / 码片长度 -> 三态解码。\"\"\"\n    dot = sum(s * c for s, c in zip(signal, chip))\n    value = dot / len(chip)\n    if value > 0.5:\n        return dot, 1\n    if value < -0.5:\n        return dot, 0\n    return dot, None                  # 0 -> 静默（关键：不是「收到 0」）\n\n\nif __name__ == '__main__':\n    chips = {'A': [1, 1, 1, 1], 'B': [1, 1, -1, -1],\n             'C': [1, -1, 1, -1], 'D': [1, -1, -1, 1]}\n    sends = {'A': 1, 'B': 0, 'C': None, 'D': 1}\n    sig = cdma_send(chips, sends)\n    print('信号 =', sig)\n    for k in 'ABCD':\n        print(k, cdma_decode(sig, chips[k]))"
+      },
+      "explanation": "考点是把「正交码片」变成可执行的三态解码。三个易错点：① 发 0 忘记取**反码**（而是当成不发），会导致解码全错；② 解码忘记**除以码片长度**，得到 ±4 而不是 ±1；③ 把解码值 `0` 当成「收到 0」——**0 表示静默**，收到 0 的解码值是 −1。这也是 408 大题最常见的两处扣分点。",
+      "tags": ["CDMA", "码分复用", "正交", "coding", "408"],
+      "source": "self",
+      "source_ref": "408 统考 计算机网络 物理层"
+    }
+  ]
+}

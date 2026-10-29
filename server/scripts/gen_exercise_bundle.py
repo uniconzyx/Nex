@@ -40,6 +40,11 @@ DERIVED = CONTENT / "_derived_cases.json"
 TYPES = ("choice", "coding", "output", "fix_error", "explain", "design")
 DIFFS = ("easy", "medium", "hard")
 
+# 方案 A：agent(16 章) 与 ml(8 章) 挂到 ai 学科下（见 scripts/merge_agent_ml_into_ai.py）。
+# 这里必须在打题时就把 subj 归一，否则前端按 SUBJECTS 过滤题库时这 144 道题
+# 会因为 subj="agent"/"ml" 而永远筛不出来。
+SUBJ_ALIAS = {"agent": "ai", "ml": "ai"}
+
 
 # --------------------------------------------------------------------------
 # 语言推断
@@ -103,6 +108,8 @@ def infer_lang(subject: str, code: str | None, hint: str | None = None) -> str |
         "middleware": "sql",
         "fundamentals": "c",
         "fullstack": "js",
+        "agent": "python",
+        "ml": "python",
     }.get(subject)
 
 
@@ -123,6 +130,51 @@ def _as_list(v) -> list[str]:
 
 def _letter_of_index(i: int) -> str:
     return chr(ord("A") + i) if 0 <= i < 26 else str(i)
+
+
+def _norm_options(raw) -> list[dict]:
+    """把选项归一成 [{key,text}]。
+
+    兼容三种写法：
+      1) [{"key": "A", "text": "..."}]        —— 标准写法，原样保留
+      2) ["A. 文本", "B. 文本", ...]          —— 文本自带字母前缀
+      3) ["文本1", "文本2", ...]              —— 纯文本，按顺序补 A/B/C/D
+    """
+    if not isinstance(raw, list):
+        return []
+    out: list[dict] = []
+    for i, o in enumerate(raw):
+        if isinstance(o, dict):
+            key = o.get("key")
+            text = o.get("text")
+            if key and isinstance(text, str):
+                out.append({"key": str(key).strip().upper(), "text": text})
+            elif isinstance(text, str):
+                out.append({"key": _letter_of_index(i), "text": text})
+            continue
+        if isinstance(o, (int, float)):
+            out.append({"key": _letter_of_index(i), "text": str(o)})
+            continue
+        if not isinstance(o, str):
+            continue
+        m = re.match(r"^\s*([A-Za-z])\s*[.、)．]\s*(.+)$", o)
+        if m:
+            out.append({"key": m.group(1).upper(), "text": m.group(2).strip()})
+        else:
+            out.append({"key": _letter_of_index(i), "text": o.strip()})
+    return out
+
+
+def _coerce_correct(correct: list[str]) -> list[str]:
+    """把 ["1"] / ["0"] 这类下标型答案转成 ["B"] / ["A"]。"""
+    out: list[str] = []
+    for c in correct:
+        s = str(c).strip()
+        if s.isdigit():
+            out.append(_letter_of_index(int(s)))
+        else:
+            out.append(s.upper() if len(s) == 1 and s.isalpha() else s)
+    return out
 
 
 def normalize_answer(item: dict) -> tuple[dict, list[str]]:
@@ -171,7 +223,7 @@ def normalize_answer(item: dict) -> tuple[dict, list[str]]:
     if isinstance(idx, int) and not correct:
         correct = [_letter_of_index(idx)]
     if correct:
-        out["correct"] = correct
+        out["correct"] = _coerce_correct(correct)
 
     # --- 期望输出 ---
     for k in ("output", "expected_output", "stdout"):
@@ -287,7 +339,7 @@ def build() -> tuple[list[dict], dict]:
     seen: set[str] = set()
 
     for f in sorted(CONTENT.glob("*/*/exercises.json")):
-        subj = f.parent.parent.name
+        subj = SUBJ_ALIAS.get(f.parent.parent.name, f.parent.parent.name)
         ch = f.parent.name
         try:
             doc = json.loads(f.read_text(encoding="utf-8"))
@@ -308,17 +360,18 @@ def build() -> tuple[list[dict], dict]:
 
             eid = str(it.get("id") or f"{ch}-{i + 1:02d}")
             if eid in seen:
-                eid = f"{eid}-{i + 1}"
+                # 全局递增计数，保证跨章节唯一（同一显式 id 出现在多个章节时不会撞车）
+                _c = 1
+                while f"{eid}-{_c}" in seen:
+                    _c += 1
+                eid = f"{eid}-{_c}"
             seen.add(eid)
 
             md = it.get("content_md") or it.get("stem_md") or ""
             ans, used = normalize_answer(it)
 
-            # 选项：兼容 options[{key,text}] 与 options_md
-            options = []
-            for o in it.get("options") or []:
-                if isinstance(o, dict) and o.get("key") and isinstance(o.get("text"), str):
-                    options.append({"key": str(o["key"]), "text": o["text"]})
+            # 选项：兼容 [{key,text}] / ["A. 文本"] / ["文本"] 三种写法
+            options = _norm_options(it.get("options"))
 
             cases = normalize_cases(it)
             if not cases:

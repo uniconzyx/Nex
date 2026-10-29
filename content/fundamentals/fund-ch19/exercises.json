@@ -1,0 +1,247 @@
+{
+  "meta": {
+    "chapter": "fund-ch19",
+    "note": "7 题：基础题 6 + 算法题 1；覆盖四大特征辨析、特权指令、中断/异常分类、系统调用过程、大内核 vs 微内核、装入方式、引导链；算法题为「单道 vs 多道 CPU 利用率」时间线模拟。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "并发与并行的区别",
+      "content_md": "下列关于并发与并行的说法，**正确**的是：",
+      "options": [
+        {
+          "key": "A",
+          "text": "并发要求多个处理机，单处理机只能并行"
+        },
+        {
+          "key": "B",
+          "text": "并发指同一时间间隔内多个事件发生，单处理机也可以并发"
+        },
+        {
+          "key": "C",
+          "text": "并行指多个事件在同一时间间隔内交替发生"
+        },
+        {
+          "key": "D",
+          "text": "并发与并行是同一概念的不同叫法"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "并发是「同一时间间隔内」多个事件发生（宏观同时、微观交替），单处理机完全可以并发（靠时间片轮转）；并行要求「同一时刻」在多个处理单元上真正同时执行，必须有多个处理机/多核。A 把两者说反，C 把并行的定义写成了并发，D 混淆概念。",
+      "tags": [
+        "并发",
+        "并行",
+        "四大特征",
+        "408"
+      ],
+      "source": "book",
+      "source_ref": "《操作系统概念》第 1 章 导论"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "medium",
+      "title": "哪个不是特权指令",
+      "content_md": "下列指令中，**用户态可以执行**的是：",
+      "options": [
+        {
+          "key": "A",
+          "text": "关中断指令（cli）"
+        },
+        {
+          "key": "B",
+          "text": "设置页表基址寄存器（mov cr3）"
+        },
+        {
+          "key": "C",
+          "text": "陷入指令（syscall / int 0x80）"
+        },
+        {
+          "key": "D",
+          "text": "停机指令（hlt）"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "C"
+        ]
+      },
+      "explanation": "陷入指令恰恰**必须由用户态主动执行**，它的作用就是「合法地进入内核」。关中断、修改页表基址、停机都属于特权指令，用户态执行会触发 #GP 通用保护异常。这是本章最容易错的一道辨析题。",
+      "tags": [
+        "特权指令",
+        "内核态",
+        "用户态",
+        "408"
+      ],
+      "source": "book",
+      "source_ref": "《操作系统概念》第 2 章 操作系统结构"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "medium",
+      "title": "缺页中断的归类与返回地址",
+      "content_md": "进程访问的页面不在内存中，引发缺页。该事件属于（　），处理结束后应返回到（　）。",
+      "options": [
+        {
+          "key": "A",
+          "text": "外中断；下一条指令"
+        },
+        {
+          "key": "B",
+          "text": "内中断中的故障(fault)；当前指令重新执行"
+        },
+        {
+          "key": "C",
+          "text": "内中断中的自陷(trap)；下一条指令"
+        },
+        {
+          "key": "D",
+          "text": "内中断中的终止(abort)；不返回"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "缺页由当前指令的访存引起，属于内中断（异常）里的**故障 fault**，是可恢复的：把缺的页调入后必须**重新执行当前这条指令**（此时页表已修好，指令可正常完成）。自陷（trap）是主动陷入、返回下一条；终止（abort）不可恢复。",
+      "tags": [
+        "缺页",
+        "故障",
+        "自陷",
+        "408"
+      ],
+      "source": "book",
+      "source_ref": "《操作系统概念》第 9 章 虚拟内存"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "medium",
+      "title": "系统调用过程中 CPU 的模式变化",
+      "content_md": "关于系统调用的执行过程，下列说法**正确**的是：",
+      "options": [
+        {
+          "key": "A",
+          "text": "系统调用全程在用户态完成，只是调用了内核里的函数"
+        },
+        {
+          "key": "B",
+          "text": "执行陷入指令时处于用户态，进入内核执行服务例程时处于内核态"
+        },
+        {
+          "key": "C",
+          "text": "系统调用全程在内核态完成，包括参数传递"
+        },
+        {
+          "key": "D",
+          "text": "系统调用不需要切换特权级，只切换页表"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "标准过程：用户态准备参数并执行陷入指令 → 硬件切换到内核态并跳到入口 → 内核按调用号查表执行服务例程 → 返回用户态。所以「传参 + 陷入」在用户态，「服务例程」在内核态。A 忽略了特权级切换，D 更是错在「不切换特权级」。",
+      "tags": [
+        "系统调用",
+        "特权级",
+        "408"
+      ],
+      "source": "book",
+      "source_ref": "《操作系统概念》第 2 章 系统调用"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "medium",
+      "title": "微内核结构下哪些功能仍在内核",
+      "content_md": "采用微内核结构时，下列功能**仍然保留在内核**的是：",
+      "options": [
+        {
+          "key": "A",
+          "text": "文件系统"
+        },
+        {
+          "key": "B",
+          "text": "设备驱动程序"
+        },
+        {
+          "key": "C",
+          "text": "进程间通信与低级调度"
+        },
+        {
+          "key": "D",
+          "text": "网络协议栈"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "C"
+        ]
+      },
+      "explanation": "微内核只保留最基本的能力：**进程（线程）管理、低级存储器管理、中断和陷入处理、进程间通信**。文件系统、驱动、网络协议栈都下沉到用户态作为服务进程——这正是微内核「内核小、隔离强」的来源，代价是服务间通信要走 IPC，性能下降。",
+      "tags": [
+        "微内核",
+        "体系结构",
+        "408"
+      ],
+      "source": "book",
+      "source_ref": "《现代操作系统》第 1 章 1.4 节"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "静态重定位与动态重定位的地址推导",
+      "content_md": "某程序被装入到物理地址 `0x2000`，其中一条指令的逻辑地址为 `0x0340`。\n\n1. 若采用**静态重定位**，装入后该指令的物理地址是多少？\n2. 若采用**动态重定位**，重定位寄存器的值为 `0x2000`，物理地址是多少？\n3. 若该进程随后被换出、再换入到 `0x5000`，两种方式分别会怎样？\n\n请写出三个答案。",
+      "answer": {
+        "text": "1) 0x2340；2) 0x2340；3) 静态重定位的表项仍是 0x2340（已失效，进程会跑飞）；动态重定位由寄存器兜底，自动变成 0x5340（正确）。"
+      },
+      "explanation": "物理地址 = 逻辑地址 + 装入地址 = 0x0340 + 0x2000 = 0x2340，两种方式在「装入地址不变」时结果相同——差别只在**能否应对地址变化**：静态重定位在装入时把地址写死进指令，之后不能移动；动态重定位每次访存都现算，所以支持换出换入与进程迁移。",
+      "tags": [
+        "重定位",
+        "装入",
+        "地址变换",
+        "408"
+      ],
+      "source": "self",
+      "source_ref": "408 统考 操作系统 内存管理"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": "hard",
+      "title": "单道 vs 多道：CPU 利用率时间线模拟",
+      "content_md": "给定若干作业 `(名字, 到达时间, CPU 时间, IO 时间)`，单 CPU、按到达顺序调度，实现 `fcfs_utilization(jobs)`，返回 `(单道CPU利用率, 多道CPU利用率, 多道总完成时间)`：\n\n- **单道**：CPU 与 IO 不能重叠，每个作业串行跑完 `CPU + IO`，总时间 = `Σ(cpu+io)`；\n- **多道**：CPU 空闲时可以切换到别的作业，IO 与其他作业的 CPU 并行；\n- 利用率 = 累计 CPU 忙碌时间 / 总时间。\n\n用 `[(\"J1\",0,4,6), (\"J2\",0,3,5), (\"J3\",0,2,7)]` 验证：单道应为 `0.333`（9/27），多道应为 `0.5625`（9/16），多道总完成时间 `16.0`。",
+      "answer": {
+        "text": "手算：t=0 跑 J1 的 CPU 4 个 → t=4 开始 IO，IO 到 10；t=4 跑 J2 的 3 个 → t=7 开始 IO，到 12；t=7 跑 J3 的 2 个 → t=9 开始 IO，到 16。CPU 忙 4+3+2=9，墙钟到 16（等 J3 的 IO 收尾），故 9/16=0.5625。单道则是 Σ(cpu+io)=10+8+9=27，9/27≈0.333。实现要点：每个作业三态（cpu/io/done），进入 io 时记下绝对结束时刻；CPU 空闲时**跳到最早的 IO 结束时刻**而不是逐拍推进。",
+        "code": "def fcfs_utilization(jobs):\n    \"\"\"\n    jobs: [(名字, 到达时间, CPU 时间, IO 时间)]，单 CPU，按到达顺序调度(FCFS)。\n\n    单道：CPU 与 IO 不能重叠，一个作业跑完 CPU 再等 IO，总时间 = Σ(cpu+io)。\n    多道：一个作业做 IO 时，CPU 可以切去跑别的作业；但同一作业的 CPU 与 IO 仍串行。\n    返回 (单道CPU利用率, 多道CPU利用率, 多道总完成时间)。\n    \"\"\"\n    # ---------- 单道 ----------\n    busy = sum(j[2] for j in jobs)                  # 累计 CPU 时间\n    serial_total = sum(j[2] + j[3] for j in jobs)   # 串行总时间\n    util_serial = busy / serial_total if serial_total else 0.0\n\n    # ---------- 多道：离散事件模拟 ----------\n    n = len(jobs)\n    phase = [\"cpu\"] * n          # cpu / io / done\n    rem = [float(j[2]) for j in jobs]\n    io_end = [0.0] * n\n    t = 0.0\n    busy_multi = 0.0\n\n    while any(p != \"done\" for p in phase):\n        # 1) 把本时刻已经做完 IO 的作业标记为完成\n        for i in range(n):\n            if phase[i] == \"io\" and t >= io_end[i] - 1e-12:\n                phase[i] = \"done\"\n\n        # 2) 找一个能上 CPU 的作业（已到达 + 处于 cpu 阶段），FCFS 取下标最小\n        run = -1\n        for i in range(n):\n            if phase[i] == \"cpu\" and jobs[i][1] <= t:\n                run = i\n                break\n\n        if run >= 0:\n            t += rem[run]                 # 一口气跑完该作业的 CPU 段\n            busy_multi += rem[run]\n            rem[run] = 0.0\n            if jobs[run][3] > 0:\n                phase[run] = \"io\"\n                io_end[run] = t + jobs[run][3]\n            else:\n                phase[run] = \"done\"\n        else:\n            # 3) CPU 空闲：直接跳到最早的 IO 结束时刻（不要逐拍推进）\n            pending = [io_end[i] for i in range(n) if phase[i] == \"io\"]\n            if not pending:\n                break\n            t = min(pending)\n\n    util_multi = busy_multi / t if t else 0.0\n    return util_serial, util_multi, t\n\n\nif __name__ == \"__main__\":\n    jobs = [(\"J1\", 0, 4, 6), (\"J2\", 0, 3, 5), (\"J3\", 0, 2, 7)]\n    s, m, tt = fcfs_utilization(jobs)\n    print(\"作业(名,到达,CPU,IO):\", jobs)\n    print(\"单道 CPU 利用率 = %.3f\" % s)\n    print(\"多道 CPU 利用率 = %.3f\" % m)\n    print(\"多道总完成时间 = %.1f\" % tt)\n    # 期望：单道 9/27=0.333；多道 9/16=0.5625；总时间 16.0\n    # 手算：t=0 跑 J1(4)->IO 到 10；t=4 跑 J2(3)->IO 到 12；t=7 跑 J3(2)->IO 到 16；\n    #       CPU 忙 9，收尾等 J3 的 IO 到 16 -> 9/16\n"
+      },
+      "explanation": "考点是把「单道/多道」从概念变成时间线模拟：单道时分母是 Σ(cpu+io)，多道时分母由「CPU 何时真正闲下来」决定。易错点：① 多道里忘记 IO 与 CPU 可重叠，直接把总时间也写成 Σ；② CPU 空闲时逐拍推进（应为「跳到最近 IO 结束时刻」，否则复杂度退化）；③ 把利用率算成 CPU 忙/CPU 总可用 而不是 CPU 忙/总墙钟时间。",
+      "tags": [
+        "多道批处理",
+        "CPU利用率",
+        "时间线模拟",
+        "coding"
+      ],
+      "source": "self",
+      "source_ref": "408 统考 操作系统 概述"
+    }
+  ]
+}

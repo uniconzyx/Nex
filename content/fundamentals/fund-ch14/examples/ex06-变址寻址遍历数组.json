@@ -3,6 +3,6 @@
   "code_lang": "c",
   "code_std": "c11",
   "stdin": "",
-  "expected_output": "数组 a 首地址(模拟) = 1000\ni=0  IX=0  EA=1000  取数=10\ni=1  IX=4  EA=1004  取数=20\ni=2  IX=8  EA=1008  取数=30\ni=3  IX=12  EA=1012  取数=40\ni=4  IX=16  EA=1016  取数=50\ni=5  IX=20  EA=1020  取数=60",
+  "expected_output": "数组 a 首地址(模拟) = 1000\ni=0  IX=0  EA=1000  取数=10\ni=1  IX=4  EA=1004  取数=20\ni=2  IX=8  EA=1008  取数=30\ni=3  IX=12  EA=1012  取数=40\ni=4  IX=16  EA=1016  取数=50\ni=5  IX=20  EA=1020  取数=60\n",
   "code": "#include <stdio.h>\n\nint main() {\n    int a[6] = {10, 20, 30, 40, 50, 60};\n    int IX = 0;                 /* 变址寄存器，从 0 开始，每次 +4（字长） */\n    int base = 1000;            /* 模拟基址，仅用于演示 EA 计算 */\n\n    printf(\"数组 a 首地址(模拟) = %d\\n\", base);\n    for (int i = 0; i < 6; i++) {\n        int EA = base + IX;     /* 变址寻址：EA = 基址 + (IX) */\n        printf(\"i=%d  IX=%d  EA=%d  取数=%d\\n\", i, IX, EA, a[i]);\n        IX += 4;                /* 变址寄存器自增，遍历数组元素 */\n    }\n    return 0;\n}"
 }

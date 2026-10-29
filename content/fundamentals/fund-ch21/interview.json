@@ -1,0 +1,48 @@
+{
+  "meta": {
+    "chapter": "fund-ch21",
+    "note": "考研复试 + 校招通用：I/O 性能排查、中断机制、RAID/SSD 选型"
+  },
+  "items": [
+    {
+      "question": "`write()` 返回成功，数据就真的写到磁盘上了吗？如果没写，为什么线上还会丢数据？",
+      "answer_md": "1. **不是。** `write()` 只是把数据从用户缓冲区拷进内核的**页缓存（page cache）**，返回时数据仍在内存里。真正的落盘由内核回写线程（`kworker`/`flush`，由 `dirty_ratio` 与 `dirty_expire_centisecs` 驱动）异步完成。\n2. **要保证持久化必须显式 `fsync(fd)`**（或 `fdatasync`）。`fsync` 会等待数据 + 元数据都落到稳定存储，代价就是一次真实的磁盘访问（机械盘 ~10ms，SSD ~0.1ms，但都远高于内存）。\n3. **丢数据的真实原因**：机器掉电/被 `kill -9` 时页缓存里的脏页还没回写。所以数据库必须自己控制：MySQL 的 `innodb_flush_log_at_trx_commit=1` 就是每事务 `fsync` redo；`=2` 是写进 OS 缓存但不 fsync（性能好，掉电丢 1 秒）。\n4. **代价与优化**：`fsync` 昂贵，所以工程上做**组提交（group commit）**——把 N 个事务的 redo 攒一次 `fsync`，用延迟换吞吐。这就是本章「增大介入粒度」原理的典型应用。",
+      "follow_ups": [
+        "`O_DIRECT` 与 `fsync` 分别绕过/保证了什么？",
+        "什么是 `fdatasync`？它比 `fsync` 少了什么？"
+      ],
+      "difficulty": "medium",
+      "company_tags": ["字节跳动", "腾讯", "阿里", "美团"]
+    },
+    {
+      "question": "Linux 中断为什么要分上半部和下半部？什么工作该放上半部？",
+      "answer_md": "1. **根本原因**：中断处理期间 CPU **关中断**，此时同 CPU 上的其他中断得不到响应。上半部一长，后续中断被推迟甚至丢失（网卡场景就是**丢包 + 中断风暴**）。\n2. **分工**：上半部（hardirq）只做「**必须立刻做、且很快**」的事——应答设备、把数据从设备寄存器取走、清中断标志、唤醒下半部，要求微秒级；下半部（softirq / tasklet / workqueue）做协议解析、内存拷贝、唤醒用户进程，允许毫秒级且**可被中断**。\n3. **收益是响应性，不是吞吐**：总处理时间不变（本章实测 1120us → 关中断时长 20us，总处理仍 1120us），但**关中断窗口缩小 98%**，系统抖动大幅下降。\n4. **代价**：下半部太长会把软中断打满（`ksoftirqd` 100% CPU），甚至反过来饿死业务进程；所以重活应该丢给 workqueue（进程上下文，可睡眠）而不是 softirq。",
+      "follow_ups": [
+        "softirq 与 workqueue 的关键区别是什么？（能否睡眠）",
+        "NAPI 是怎么把「中断模式」降级成「轮询模式」的？"
+      ],
+      "difficulty": "medium",
+      "company_tags": ["字节跳动", "华为", "腾讯"]
+    },
+    {
+      "question": "线上服务 P99 延迟抖动，怎么快速判断是不是磁盘 I/O 的问题？",
+      "answer_md": "1. **先看三件套**：`iostat -x 1` 看 `%util`（设备饱和度）、`await`（平均 I/O 等待）、`aqu-sz`（队列深度）；再看 `vmstat 1` 的 `wa`（CPU 等 I/O 比例）。\n2. **组合判读**（这是关键）：\n   - `%util` 高 + `await` 高 + 队列深 → **设备真的饱和**，换硬件或加盘；\n   - `%util` 不高但 `await` 高 → **请求太碎**（大量小随机 I/O），瓶颈在寻道/排队，不是带宽；\n   - `await` 高但 `%util` 很低 + 应用线程在 `D` 状态 → 可能是**下游存储（NFS/云盘）或文件系统锁**问题。\n3. **下钻**：`pidstat -d 1` 找出哪个进程在写；`cat /proc/<pid>/io` 看 `write_bytes`；`strace -f -T -e trace=write,fsync` 看单次调用耗时。\n4. **常见真凶**（按概率）：① 每行 `fsync`（应改批量）；② 日志/数据文件碎片化导致随机写；③ 页缓存被大文件刷穿（`echo 3 > /proc/sys/vm/drop_caches` 会加剧）；④ RAID 5 上做随机写（写惩罚 4×）。",
+      "follow_ups": [
+        "`%util` 在 NVMe 上还可靠吗？为什么？",
+        "如果是容器环境，`iostat` 看到的设备不是真实设备，该怎么排查？"
+      ],
+      "difficulty": "hard",
+      "company_tags": ["阿里", "腾讯", "字节跳动"]
+    },
+    {
+      "question": "数据库的 redo 日志盘为什么推荐 RAID 10 而不是 RAID 5？SSD 上还需要 RAID 吗？",
+      "answer_md": "1. **因为写惩罚**：RAID 5 的小块随机写需要「读旧数据 + 读旧校验 + 写新数据 + 写新校验 = 4 次物理 I/O」，而 RAID 10 只需 2 次（两份副本）。redo 日志是**高频小随机写**（每次事务提交都 fsync），正好踩在 RAID 5 最差的场景上。\n2. **算一笔账**：6 块盘、单盘 200 随机写 IOPS → RAID 5 可用约 250 IOPS，RAID 10 约 300 IOPS；再叠加 fsync 的串行化，差距在延迟 P99 上更明显。容量上 RAID 5 是 5C（更划算），但日志盘通常只要几十 GB，容量不是瓶颈。\n3. **顺序写场景反过来**：归档/备份/大数据批处理是大块顺序写，RAID 5 的校验可以整条带一次算出、不需要读旧数据，此时 RAID 5 的容量优势就值钱了。\n4. **SSD 上还要 RAID**：要，但目的变了——**防的是盘故障（可用性），不是性能**。SSD 单盘 IOPS 已很高，RAID 5 的 4 倍写放大在 SSD 上会变成 4 倍**磨损**（WAF 放大），所以主流仍是 RAID 10 或 RAID 6 + 大 OP。另外**RAID 不是备份**：它防不了误删、勒索加密和逻辑损坏。",
+      "follow_ups": [
+        "RAID 5 重建（rebuild）期间为什么风险最高？",
+        "什么是「写洞」（write hole）？BBU/超级电容解决什么问题？"
+      ],
+      "difficulty": "hard",
+      "company_tags": ["阿里", "腾讯", "字节跳动", "华为"]
+    }
+  ]
+}

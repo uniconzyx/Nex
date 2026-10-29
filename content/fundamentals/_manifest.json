@@ -956,8 +956,78 @@
       }
     },
     {
+      "id": "fund-ch19",
+      "status": "complete",
+      "group": "F4",
+      "title": "操作系统：操作系统概述与运行机制",
+      "summary": "操作系统的概念、四大特征（并发/共享/虚拟/异步）与作为资源管理者的角色；发展历程（批处理/分时/实时）；运行机制：内核态与用户态、特权指令、中断与异常（故障/陷入/终止）、系统调用全流程；OS 体系结构（大内核 vs 微内核、分层、模块、外核、容器 vs 虚拟机）；引导流程（BIOS/UEFI→MBR→bootloader→内核→init）；程序装入与链接（绝对/可重定位/动态运行时装入，静态/动态链接）与进程内存映像。",
+      "prerequisites": [],
+      "resources": {
+        "github": [
+          "torvalds/linux",
+          "mit-pdos/xv6-public",
+          "sysprog21/lkmpg",
+          "remzi-arpacidusseau/ostep-code",
+          "CyC2018/CS-Notes"
+        ],
+        "github_stars": [
+          253833,
+          9711,
+          8634,
+          4474,
+          186375
+        ],
+        "github_notes": [
+          "§系统调用｜只读 `include/linux/syscalls.h`：几百行全是 `SYSCALL_DEFINE*` 宏——这就是\"系统调用表\"的真身，你会看到每个调用号对应哪个服务例程",
+          "§中断与陷入｜读 `trap.c` 的 `alltraps`：硬件自动压栈一部分、软件再保存剩余寄存器——\"中断发生时 CPU 做一半\"这句话的实物证据；再读 `syscall.c` 的 `syscalls[]` 数组，一眼看懂系统调用号怎么分发",
+          "§内核态｜《Linux 内核模块编程指南》：写一个 hello 模块跑起来，你会第一次\"以内核态身份\"执行代码——比看十遍概念更直观",
+          "§进程与系统调用｜《操作系统导论》配套代码：`intro/` 下的 `cpu.c`、`mem.c` 演示 `gettimeofday`/`malloc` 背后都落到系统调用，适合边读边改",
+          "§全章速记｜中文\"操作系统概述\"一节：考前 20 分钟过一遍四大特征、特权指令、系统调用步骤，性价比极高"
+        ],
+        "github_fetched_at": "2026-10-29",
+        "books": [
+          "[torvalds/linux](https://github.com/torvalds/linux) | 253833 | §系统调用 | 只读 `include/linux/syscalls.h`：几百行全是 `SYSCALL_DEFINE*` 宏——这就是\"系统调用表\"的真身，你会看到每个调用号对应哪个服务例程",
+          "[mit-pdos/xv6-public](https://github.com/mit-pdos/xv6-public) | 9711 | §中断与陷入 | 读 `trap.c` 的 `alltraps`：硬件自动压栈一部分、软件再保存剩余寄存器——\"中断发生时 CPU 做一半\"这句话的实物证据；再读 `syscall.c` 的 `syscalls[]` 数组，一眼看懂系统调用号怎么分发",
+          "[sysprog21/lkmpg](https://github.com/sysprog21/lkmpg) | 8634 | §内核态 | 《Linux 内核模块编程指南》：写一个 hello 模块跑起来，你会第一次\"以内核态身份\"执行代码——比看十遍概念更直观",
+          "[remzi-arpacidusseau/ostep-code](https://github.com/remzi-arpacidusseau/ostep-code) | 4474 | §进程与系统调用 | 《操作系统导论》配套代码：`intro/` 下的 `cpu.c`、`mem.c` 演示 `gettimeofday`/`malloc` 背后都落到系统调用，适合边读边改",
+          "[CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186375 | §全章速记 | 中文\"操作系统概述\"一节：考前 20 分钟过一遍四大特征、特权指令、系统调用步骤，性价比极高",
+          "王道 · 操作系统（考研） | [BV1YE411D7nH](https://www.bilibili.com/video/BV1YE411D7nH/) | 第 1 章 | 操作系统概述：四大特征、内核态/用户态、中断与系统调用、大内核 vs 微内核——408 第一道选择题就出在这",
+          "王道 · 计算机组成原理 | [BV1BE411D7ii](https://www.bilibili.com/video/BV1BE411D7ii/) | §中断机制 | 配合看\"中断系统\"那一节：从硬件角度理解中断向量、中断隐指令",
+          "王道 · 数据结构（考研） | [BV1b7411N798](https://www.bilibili.com/video/BV1b7411N798/) | §多道批处理 | 看作业调度部分，帮助理解\"多道\"为什么能提高 CPU 利用率",
+          "《操作系统概念（第 9 版）》Silberschatz 等 —— 第 1 章 \"Introduction\"、第 2 章 \"Operating-System Structures\"",
+          "《现代操作系统（第 4 版）》Tanenbaum & Bos —— 第 1 章 \"Introduction\"（微内核论述的经典出处）",
+          "《操作系统导论》Arpaci-Dusseau —— 第 2 章 \"Introduction to Operating Systems\"、第 4 章 \"The Abstraction: The Process\"",
+          "《深入理解计算机系统（第 3 版）》Bryant & O'Hallaron —— 第 8 章 \"Exceptional Control Flow\"（异常与系统调用的硬件视角）"
+        ],
+        "leetcode": [],
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1YE411D7nH/",
+        "bilibili_list": [
+          {
+            "name": "王道 · 操作系统（考研）",
+            "url": "https://www.bilibili.com/video/BV1YE411D7nH/",
+            "note": "第 1 章：操作系统概述：四大特征、内核态/用户态、中断与系统调用、大内核 vs 微内核——408 第一道选择题就出在这",
+            "bv": "BV1YE411D7nH"
+          },
+          {
+            "name": "王道 · 计算机组成原理",
+            "url": "https://www.bilibili.com/video/BV1BE411D7ii/",
+            "note": "§中断机制：配合看\"中断系统\"那一节：从硬件角度理解中断向量、中断隐指令",
+            "bv": "BV1BE411D7ii"
+          },
+          {
+            "name": "王道 · 数据结构（考研）",
+            "url": "https://www.bilibili.com/video/BV1b7411N798/",
+            "note": "§多道批处理：看作业调度部分，帮助理解\"多道\"为什么能提高 CPU 利用率",
+            "bv": "BV1b7411N798"
+          }
+        ]
+      },
+      "order": 15
+    },
+    {
       "id": "fund-ch09",
-      "order": 15,
+      "order": 16,
       "group": "F4",
       "title": "操作系统：进程、线程与调度",
       "summary": "进程与线程的本质差异（资源分配 vs 调度单位）与共享内容；PCB 与上下文切换的开销来源；调度算法（FCFS/SJF/HRRN/时间片轮转/多级反馈队列）与周转时间的计算；同步互斥机制（临界区、信号量 PV、管程）与生产者消费者/读者写者/哲学家进餐；死锁四条件、预防/避免（银行家算法）/检测；IPC 与管道。",
@@ -1018,7 +1088,7 @@
     },
     {
       "id": "fund-ch10",
-      "order": 16,
+      "order": 17,
       "group": "F4",
       "title": "操作系统：内存管理、文件与 IO",
       "summary": "连续分配与外部碎片；分页/分段/段页式与地址转换；页面置换算法（OPT/FIFO/LRU/Clock）与缺页率计算、Belady 异常；抖动与工作集模型；文件系统（inode、目录结构、硬链接 vs 软链接、空闲空间管理、日志式文件系统）；磁盘调度算法；五种 IO 模型与零拷贝。",
@@ -1080,8 +1150,144 @@
       }
     },
     {
+      "id": "fund-ch20",
+      "status": "complete",
+      "group": "F4",
+      "title": "操作系统：文件管理",
+      "summary": "文件的逻辑结构（无结构/顺序/索引/索引顺序）与物理结构（连续/链接/索引/FAT/inode 混合索引）；目录与 inode、硬链接 vs 软链接；空闲空间管理（空闲表/空闲链表/位示图/成组链接）；文件系统的一致性与日志（write-ahead journaling）、VFS 抽象；文件打开与读写的完整路径。",
+      "prerequisites": [
+        "fund-ch19"
+      ],
+      "resources": {
+        "github": [
+          "torvalds/linux",
+          "mit-pdos/xv6-public",
+          "remzi-arpacidusseau/ostep-code",
+          "CyC2018/CS-Notes"
+        ],
+        "github_stars": [
+          253833,
+          9711,
+          4474,
+          186375
+        ],
+        "github_notes": [
+          "§inode 与索引 + §目录查找｜两处对照读：`fs/ext4/inode.c` 的 `ext4_map_blocks` 把「逻辑块号」翻成「物理块号」（extent 树就是混合索引的工业版）；`fs/namei.c` 的 `link_path_walk` 把 `/a/b/c` 逐段解析成 dentry，配合 `fs/dcache.c` 看 dentry 缓存",
+          "§目录结构 + §日志一致性｜`fs.c` 里 `dirlookup`/`namei`/`ialloc` 三个函数就讲完「目录是特殊文件」与 inode 分配；`log.c` 只有几百行，begin_op / log_write / commit 就是最小可读的 write-ahead 日志",
+          "§全章实验｜《操作系统导论》配套代码的文件系统实验：自己实现一遍 inode 分配与位示图，计算题就不再是背公式",
+          "§考前速记｜中文「文件系统」一节：把本章的计算题套路（混合索引、位示图、FAT 大小）浓缩成几页，适合考前 30 分钟过一遍"
+        ],
+        "github_fetched_at": "2026-10-29",
+        "books": [
+          "[torvalds/linux](https://github.com/torvalds/linux) | 253833 | §inode 与索引 + §目录查找 | 两处对照读：`fs/ext4/inode.c` 的 `ext4_map_blocks` 把「逻辑块号」翻成「物理块号」（extent 树就是混合索引的工业版）；`fs/namei.c` 的 `link_path_walk` 把 `/a/b/c` 逐段解析成 dentry，配合 `fs/dcache.c` 看 dentry 缓存",
+          "[mit-pdos/xv6-public](https://github.com/mit-pdos/xv6-public) | 9711 | §目录结构 + §日志一致性 | `fs.c` 里 `dirlookup`/`namei`/`ialloc` 三个函数就讲完「目录是特殊文件」与 inode 分配；`log.c` 只有几百行，begin_op / log_write / commit 就是最小可读的 write-ahead 日志",
+          "[remzi-arpacidusseau/ostep-code](https://github.com/remzi-arpacidusseau/ostep-code) | 4474 | §全章实验 | 《操作系统导论》配套代码的文件系统实验：自己实现一遍 inode 分配与位示图，计算题就不再是背公式",
+          "[CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186375 | §考前速记 | 中文「文件系统」一节：把本章的计算题套路（混合索引、位示图、FAT 大小）浓缩成几页，适合考前 30 分钟过一遍",
+          "王道 · 操作系统（考研） | [BV1YE411D7nH](https://www.bilibili.com/video/BV1YE411D7nH/) | 文件管理全章 | 逻辑结构 → 目录 → 物理结构（连续/链接/索引）→ 空闲空间管理；混合索引计算题在这里讲得最细",
+          "王道 · 计算机组成原理 | [BV1BE411D7ii](https://www.bilibili.com/video/BV1BE411D7ii/) | §磁盘与I/O | 配合看磁盘结构与访问时间，理解\"读一块\"的物理代价",
+          "王道 · 计算机网络（考研） | [BV19E411D78Q](https://www.bilibili.com/video/BV19E411D78Q/) | §网络文件系统 | 看 NFS 一节，理解 VFS 为什么能把远端文件系统挂进来",
+          "《操作系统概念（第 9 版）》Silberschatz 等 —— 第 11 章 \"File-System Interface\"、第 12 章 \"File-System Implementation\"",
+          "《现代操作系统（第 4 版）》Tanenbaum & Bos —— 第 4 章 \"File Systems\"",
+          "《操作系统导论》Arpaci-Dusseau —— 第 39-41 章（Files and Directories / File System Implementation / Fast File System）",
+          "《UNIX 环境高级编程（第 3 版）》Stevens —— 第 4 章 \"Files and Directories\"（硬链接/软链接的 POSIX 语义）"
+        ],
+        "leetcode": [],
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1YE411D7nH/",
+        "bilibili_list": [
+          {
+            "name": "王道 · 操作系统（考研）",
+            "url": "https://www.bilibili.com/video/BV1YE411D7nH/",
+            "note": "文件管理全章：逻辑结构 → 目录 → 物理结构（连续/链接/索引）→ 空闲空间管理；混合索引计算题在这里讲得最细",
+            "bv": "BV1YE411D7nH"
+          },
+          {
+            "name": "王道 · 计算机组成原理",
+            "url": "https://www.bilibili.com/video/BV1BE411D7ii/",
+            "note": "§磁盘与I/O：配合看磁盘结构与访问时间，理解\"读一块\"的物理代价",
+            "bv": "BV1BE411D7ii"
+          },
+          {
+            "name": "王道 · 计算机网络（考研）",
+            "url": "https://www.bilibili.com/video/BV19E411D78Q/",
+            "note": "§网络文件系统：看 NFS 一节，理解 VFS 为什么能把远端文件系统挂进来",
+            "bv": "BV19E411D78Q"
+          }
+        ]
+      },
+      "order": 18
+    },
+    {
+      "id": "fund-ch21",
+      "status": "complete",
+      "group": "F4",
+      "title": "操作系统：I/O 管理与磁盘",
+      "summary": "I/O 控制的四种方式（程序查询/中断/DMA/通道）与 CPU 参与度对比；中断处理与上下半部（top/bottom half）；缓冲（单缓冲/双缓冲/缓冲池）与假脱机 SPOOLing；I/O 软件层次（中断处理/设备驱动/设备无关/用户层）；磁盘结构与调度（FCFS/SSTF/SCAN/C-SCAN/LOOK）、RAID 0/1/5/6/10、SSD 的 FTL 与写放大。",
+      "prerequisites": [
+        "fund-ch19"
+      ],
+      "resources": {
+        "github": [
+          "torvalds/linux",
+          "mit-pdos/xv6-public",
+          "remzi-arpacidusseau/ostep-code",
+          "CyC2018/CS-Notes"
+        ],
+        "github_stars": [
+          253833,
+          9711,
+          4474,
+          186375
+        ],
+        "github_notes": [
+          "§中断上下半部 + §块层调度 + §DMA｜三处对照：`kernel/irq/manage.c` 的 `request_threaded_irq` 把\"上半部只做最少的事、下半部交给线程\"写成了 API；`block/mq-deadline.c` 是本章 SCAN 思想在 blk-mq 上的现代实现（deadline + fifo 双队列）；`block/blk-mq.c` 看一次 `submit_bio` 到设备队列的完整路径",
+          "§驱动与缓冲的最小实现｜`bio.c` 只有一百多行：`bget`/`bread`/`bwrite` 就是一个**双链表 LRU 缓冲池**，比任何教材图都直观；`ide.c` 是极简的磁盘驱动（含中断处理），能看清\"发命令-等中断-取数据\"的完整握手",
+          "§磁盘调度实验｜《操作系统导论》配套的 `disksched.py`：改几行参数就能观察 FCFS/SSTF/SCAN 的总寻道距离差异，计算题从此不用背",
+          "§考前速记｜中文「设备管理 / 磁盘」几节：四种 I/O 方式对比表、磁盘调度例题、RAID 对比，适合考前过一遍"
+        ],
+        "github_fetched_at": "2026-10-29",
+        "books": [
+          "[torvalds/linux](https://github.com/torvalds/linux) | 253833 | §中断上下半部 + §块层调度 + §DMA | 三处对照：`kernel/irq/manage.c` 的 `request_threaded_irq` 把\"上半部只做最少的事、下半部交给线程\"写成了 API；`block/mq-deadline.c` 是本章 SCAN 思想在 blk-mq 上的现代实现（deadline + fifo 双队列）；`block/blk-mq.c` 看一次 `submit_bio` 到设备队列的完整路径",
+          "[mit-pdos/xv6-public](https://github.com/mit-pdos/xv6-public) | 9711 | §驱动与缓冲的最小实现 | `bio.c` 只有一百多行：`bget`/`bread`/`bwrite` 就是一个**双链表 LRU 缓冲池**，比任何教材图都直观；`ide.c` 是极简的磁盘驱动（含中断处理），能看清\"发命令-等中断-取数据\"的完整握手",
+          "[remzi-arpacidusseau/ostep-code](https://github.com/remzi-arpacidusseau/ostep-code) | 4474 | §磁盘调度实验 | 《操作系统导论》配套的 `disksched.py`：改几行参数就能观察 FCFS/SSTF/SCAN 的总寻道距离差异，计算题从此不用背",
+          "[CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186375 | §考前速记 | 中文「设备管理 / 磁盘」几节：四种 I/O 方式对比表、磁盘调度例题、RAID 对比，适合考前过一遍",
+          "王道 · 操作系统（考研） | [BV1YE411D7nH](https://www.bilibili.com/video/BV1YE411D7nH/) | I/O 管理与磁盘全章 | 四种 I/O 控制方式对比 → 中断流程 → 缓冲计算 → 磁盘调度手算例题；SCAN/C-SCAN 的总寻道距离一定要跟着算一遍",
+          "王道 · 计算机组成原理 | [BV1BE411D7ii](https://www.bilibili.com/video/BV1BE411D7ii/) | §中断与 DMA 硬件 | 配合看中断控制器与 DMA 控制器的寄存器与握手时序，理解 OS 侧 API 背后的硬件动作",
+          "王道 · 计算机网络（考研） | [BV19E411D78Q](https://www.bilibili.com/video/BV19E411D78Q/) | §网卡与中断 | 看网卡收包为什么要\"上半部入环、下半部走协议栈\"，这是中断分层最典型的工业案例",
+          "《操作系统概念（第 9 版）》Silberschatz 等 —— 第 13 章 \"I/O Systems\"",
+          "《计算机操作系统（第 4 版）》汤小丹等 —— 第 5 章 \"输入输出管理\"、第 6 章 \"磁盘存储器管理\"",
+          "《操作系统导论》Arpaci-Dusseau —— 第 37 章 \"Hard Disk Drives\"、第 44 章 \"Flash-based SSDs\"",
+          "《深入理解计算机系统（第 3 版）》Bryant & O'Hallaron —— 第 6 章 \"存储器层次结构\"（磁盘与 SSD 的量化对比）"
+        ],
+        "leetcode": [],
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1YE411D7nH/",
+        "bilibili_list": [
+          {
+            "name": "王道 · 操作系统（考研）",
+            "url": "https://www.bilibili.com/video/BV1YE411D7nH/",
+            "note": "I/O 管理与磁盘全章：四种 I/O 控制方式对比 → 中断流程 → 缓冲计算 → 磁盘调度手算例题；SCAN/C-SCAN 的总寻道距离一定要跟着算一遍",
+            "bv": "BV1YE411D7nH"
+          },
+          {
+            "name": "王道 · 计算机组成原理",
+            "url": "https://www.bilibili.com/video/BV1BE411D7ii/",
+            "note": "§中断与 DMA 硬件：配合看中断控制器与 DMA 控制器的寄存器与握手时序，理解 OS 侧 API 背后的硬件动作",
+            "bv": "BV1BE411D7ii"
+          },
+          {
+            "name": "王道 · 计算机网络（考研）",
+            "url": "https://www.bilibili.com/video/BV19E411D78Q/",
+            "note": "§网卡与中断：看网卡收包为什么要\"上半部入环、下半部走协议栈\"，这是中断分层最典型的工业案例",
+            "bv": "BV19E411D78Q"
+          }
+        ]
+      },
+      "order": 19
+    },
+    {
       "id": "fund-ch11",
-      "order": 17,
+      "order": 20,
       "group": "F5",
       "title": "计算机网络：分层模型与 TCP/IP",
       "summary": "OSI 七层与 TCP/IP 四层的对应与封装/分用过程；数据链路层的成帧、差错控制与以太网帧、交换机自学习；网络层的 IP 编址与子网划分/CIDR、ARP 解析、ICMP、路由算法与协议；TCP 的三次握手/四次挥手与状态机、可靠传输（序号确认重传）、流量控制（滑动窗口）与拥塞控制（慢启动/拥塞避免/快重传快恢复）；UDP 与 QUIC。",
@@ -1141,8 +1347,156 @@
       }
     },
     {
+      "id": "fund-ch22",
+      "status": "complete",
+      "group": "F5",
+      "title": "计算机网络：物理层",
+      "summary": "码元/波特率/比特率的关系；奈氏准则与香农定理（含 dB 换算）；编码（NRZ/曼彻斯特/差分曼彻斯特/4B5B）与调制（ASK/FSK/PSK/QAM）；传输介质（双绞线/同轴/光纤/无线）；多路复用（FDM/TDM/WDM/CDM）；时延（发送/传播/处理/排队）与带宽时延积；中继器/集线器与冲突域的物理层成因。",
+      "prerequisites": [
+        "fund-ch11"
+      ],
+      "resources": {
+        "github": [
+          "torvalds/linux",
+          "lwip-tcpip/lwip",
+          "wireshark/wireshark",
+          "CyC2018/CS-Notes"
+        ],
+        "github_stars": [
+          253833,
+          1770,
+          10117,
+          186375
+        ],
+        "github_notes": [
+          "§物理层设备与驱动 + §链路统计｜两处对照：`drivers/net/phy/phy_device.c` 看内核如何读取 PHY 的链路状态/自协商结果（这就是\"物理层真的连上了吗\"的判据来源）；`net/core/dev.c` 里 `dev_get_stats` 把 `rx_crc_errors`、`rx_length_errors` 暴露给 `ethtool -S`，是现场排查物理层故障的入口",
+          "§以太网帧与物理层接口｜`src/netif/ethernet.c` 只有几百行：`ethernet_input` 如何从\"一块原始字节\"解析出帧类型并分发 —— 看清\"物理层交上来的是比特，链路层才开始认帧\"这条边界",
+          "§编码与帧结构验证｜`epan/dissectors/packet-eth.c` 是\"教材帧格式\"的权威对照物：抓一个包，逐字段对照本章的\"前导码/帧首定界符/目的 MAC/类型/数据/FCS\"",
+          "§考前速记｜中文「计算机网络 / 物理层」一节：奈氏与香农公式、编码波形图、复用方式对比，适合考前 20 分钟过一遍"
+        ],
+        "github_fetched_at": "2026-10-29",
+        "books": [
+          "[torvalds/linux](https://github.com/torvalds/linux) | 253833 | §物理层设备与驱动 + §链路统计 | 两处对照：`drivers/net/phy/phy_device.c` 看内核如何读取 PHY 的链路状态/自协商结果（这就是\"物理层真的连上了吗\"的判据来源）；`net/core/dev.c` 里 `dev_get_stats` 把 `rx_crc_errors`、`rx_length_errors` 暴露给 `ethtool -S`，是现场排查物理层故障的入口",
+          "[lwip-tcpip/lwip](https://github.com/lwip-tcpip/lwip) | 1770 | §以太网帧与物理层接口 | `src/netif/ethernet.c` 只有几百行：`ethernet_input` 如何从\"一块原始字节\"解析出帧类型并分发 —— 看清\"物理层交上来的是比特，链路层才开始认帧\"这条边界",
+          "[wireshark/wireshark](https://github.com/wireshark/wireshark) | 10117 | §编码与帧结构验证 | `epan/dissectors/packet-eth.c` 是\"教材帧格式\"的权威对照物：抓一个包，逐字段对照本章的\"前导码/帧首定界符/目的 MAC/类型/数据/FCS\"",
+          "[CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186375 | §考前速记 | 中文「计算机网络 / 物理层」一节：奈氏与香农公式、编码波形图、复用方式对比，适合考前 20 分钟过一遍",
+          "王道 · 计算机网络（考研） | [BV19E411D78Q](https://www.bilibili.com/video/BV19E411D78Q/) | 物理层全章 | 码元/波特率/比特率 → 奈氏与香农 → 编码与调制 → 复用 → 物理层设备；CDMA 内积例题一定要跟着算一遍",
+          "王道 · 操作系统（考研） | [BV1YE411D7nH](https://www.bilibili.com/video/BV1YE411D7nH/) | §I/O 与中断 | 配合看\"设备如何通知 CPU\"，理解物理层\"信号→中断→驱动\"的链条",
+          "王道 · 数据结构（考研） | [BV1b7411N798](https://www.bilibili.com/video/BV1b7411N798/) | §编码中的位运算 | 4B/5B、CRC 都要用位运算，数据结构里的位操作基础在这里复用",
+          "《计算机网络（第 7 版）》谢希仁 —— 第 2 章 \"物理层\"",
+          "《计算机网络：自顶向下方法（第 7 版）》Kurose & Ross —— 第 6 章 \"无线与移动网络\"（物理层部分）、第 1 章 \"时延与带宽积\"",
+          "《数据通信与网络》Forouzan —— 第 3-4 章（信号、编码与调制）、第 6 章（复用）",
+          "《TCP/IP 详解 卷 1：协议》Stevens —— 第 2 章 \"链路层\"（以太网与物理层封装）"
+        ],
+        "leetcode": [],
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV19E411D78Q/",
+        "bilibili_list": [
+          {
+            "name": "王道 · 计算机网络（考研）",
+            "url": "https://www.bilibili.com/video/BV19E411D78Q/",
+            "note": "物理层全章：码元/波特率/比特率 → 奈氏与香农 → 编码与调制 → 复用 → 物理层设备；CDMA 内积例题一定要跟着算一遍",
+            "bv": "BV19E411D78Q"
+          },
+          {
+            "name": "王道 · 操作系统（考研）",
+            "url": "https://www.bilibili.com/video/BV1YE411D7nH/",
+            "note": "§I/O 与中断：配合看\"设备如何通知 CPU\"，理解物理层\"信号→中断→驱动\"的链条",
+            "bv": "BV1YE411D7nH"
+          },
+          {
+            "name": "王道 · 数据结构（考研）",
+            "url": "https://www.bilibili.com/video/BV1b7411N798/",
+            "note": "§编码中的位运算：4B/5B、CRC 都要用位运算，数据结构里的位操作基础在这里复用",
+            "bv": "BV1b7411N798"
+          }
+        ]
+      },
+      "order": 21
+    },
+    {
+      "id": "fund-ch23",
+      "status": "complete",
+      "group": "F5",
+      "title": "计算机网络：数据链路层",
+      "summary": "链路层三大问题：组帧（字符计数/字节填充/零比特填充/违规编码）、差错控制（奇偶/CRC/海明码）、流量控制（停等/GBN/SR 及窗口上限）；介质访问控制（信道划分 FDM/TDM/WDM/CDM、随机访问 ALOHA/CSMA/CD/CSMA/CA、轮询令牌）；以太网帧结构与 64/1518 字节边界、最小帧长与争用期、二进制指数退避；交换机自学习与泛洪、冲突域/广播域、VLAN 802.1Q、STP。",
+      "prerequisites": [
+        "fund-ch22"
+      ],
+      "resources": {
+        "github": [
+          "lwip-tcpip/lwip",
+          "wireshark/wireshark",
+          "the-tcpdump-group/tcpdump",
+          "torvalds/linux",
+          "mininet/mininet"
+        ],
+        "github_stars": [
+          1770,
+          10117,
+          3256,
+          253833,
+          5875
+        ],
+        "github_notes": [
+          "§1.2 组帧 / §4.4 以太网帧｜读 `src/netif/ethernet.c` 的 `ethernet_input`：它先检查 `len >= SIZEOF_ETH_HDR`，再按 type 分发——「帧太短直接丢」在代码里只有一行，却对应本章的最小帧长约束；配套看 `src/core/ipv4/etharp.c` 的 ARP 表，就是「MAC 地址怎么被学出来」",
+          "§4.4 以太网帧结构｜读 `epan/dissectors/packet-eth.c`：字段注册顺序就是教材帧格式的顺序（dst/src/type），VLAN 用 `packet-vlan.c` 单独一层 dissector 插进去——「4 字节 Tag 插在哪」一看便知",
+          "§4.4 帧解析与截断｜读 `print-ether.c` 的 `ether_print`：它先打印长度、再判 `caplen < ETHER_HDRLEN` 就报 `[",
+          "§4.5 交换机与网桥｜读 `net/core/dev.c` 的 `netif_receive_skb` 与 `net/bridge/br_fdb.c`：前者是「帧进入协议栈的总入口」，后者是**软件交换机 MAC 表**（`br_fdb_update` 更新、老化由 `br_fdb_cleanup` 定时器做）——交换机自学习在这里是几十行 C",
+          "§4.5 冲突域与实验｜读 `mininet/link.py` 与 `mininet/node.py` 的 `OVSBridge`：用 `tc` 给链路注入带宽/延迟/丢包，用 OVS 做交换机——把本章的「最小帧长、争用期、退避」放进可控环境里实测"
+        ],
+        "github_fetched_at": "2026-10-29",
+        "books": [
+          "[lwip-tcpip/lwip](https://github.com/lwip-tcpip/lwip) | 1770 | §1.2 组帧 / §4.4 以太网帧 | 读 `src/netif/ethernet.c` 的 `ethernet_input`：它先检查 `len >= SIZEOF_ETH_HDR`，再按 type 分发——「帧太短直接丢」在代码里只有一行，却对应本章的最小帧长约束；配套看 `src/core/ipv4/etharp.c` 的 ARP 表，就是「MAC 地址怎么被学出来」",
+          "[wireshark/wireshark](https://github.com/wireshark/wireshark) | 10117 | §4.4 以太网帧结构 | 读 `epan/dissectors/packet-eth.c`：字段注册顺序就是教材帧格式的顺序（dst/src/type），VLAN 用 `packet-vlan.c` 单独一层 dissector 插进去——「4 字节 Tag 插在哪」一看便知",
+          "[the-tcpdump-group/tcpdump](https://github.com/the-tcpdump-group/tcpdump) | 3256 | §4.4 帧解析与截断 | 读 `print-ether.c` 的 `ether_print`：它先打印长度、再判 `caplen < ETHER_HDRLEN` 就报 `[|ether]`——这正是「抓包丢失尾部导致无法校验 FCS」的现场",
+          "[torvalds/linux](https://github.com/torvalds/linux) | 253833 | §4.5 交换机与网桥 | 读 `net/core/dev.c` 的 `netif_receive_skb` 与 `net/bridge/br_fdb.c`：前者是「帧进入协议栈的总入口」，后者是**软件交换机 MAC 表**（`br_fdb_update` 更新、老化由 `br_fdb_cleanup` 定时器做）——交换机自学习在这里是几十行 C",
+          "[mininet/mininet](https://github.com/mininet/mininet) | 5875 | §4.5 冲突域与实验 | 读 `mininet/link.py` 与 `mininet/node.py` 的 `OVSBridge`：用 `tc` 给链路注入带宽/延迟/丢包，用 OVS 做交换机——把本章的「最小帧长、争用期、退避」放进可控环境里实测",
+          "王道 · 计算机网络（考研） | [BV19E411D78Q](https://www.bilibili.com/video/BV19E411D78Q/) | 全章 | 组帧、差错控制、流量控制、介质访问控制逐节精讲（408 主线）",
+          "王道 · 操作系统（考研） | [BV1YE411D7nH](https://www.bilibili.com/video/BV1YE411D7nH/) | §4.5 缓冲类比 | 用「缓冲区/队列」类比滑动窗口与交换机缓存",
+          "王道 · 计算机组成原理 | [BV1BE411D7ii](https://www.bilibili.com/video/BV1BE411D7ii/) | §4.3 CSMA/CD 时序 | 总线仲裁与冲突检测的硬件时序视角",
+          "王道 · 数据结构（考研） | [BV1b7411N798](https://www.bilibili.com/video/BV1b7411N798/) | §4.5 STP | 生成树协议用到的图论基础（最小生成树）",
+          "《计算机网络（第 8 版）》谢希仁 · 第 3 章 数据链路层",
+          "《计算机网络：自顶向下方法（第 8 版）》Kurose & Ross · 第 6 章 The Link Layer and LANs",
+          "《数据通信与网络（第 5 版）》Forouzan · 第 11 章 Data Link Control、第 12 章 Multiple Access",
+          "Metcalfe R. M., Boggs D. R. *Ethernet: Distributed Packet Switching for Local Computer Networks*, CACM 1976（以太网原始论文，CSMA/CD 的出处）",
+          "Saltzer J., Reed D., Clark D. *End-to-End Arguments in System Design*, ACM TOCS 1984（解释「为什么链路层只检错不纠错」）"
+        ],
+        "leetcode": [],
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV19E411D78Q/",
+        "bilibili_list": [
+          {
+            "name": "王道 · 计算机网络（考研）",
+            "url": "https://www.bilibili.com/video/BV19E411D78Q/",
+            "note": "全章：组帧、差错控制、流量控制、介质访问控制逐节精讲（408 主线）",
+            "bv": "BV19E411D78Q"
+          },
+          {
+            "name": "王道 · 操作系统（考研）",
+            "url": "https://www.bilibili.com/video/BV1YE411D7nH/",
+            "note": "§4.5 缓冲类比：用「缓冲区/队列」类比滑动窗口与交换机缓存",
+            "bv": "BV1YE411D7nH"
+          },
+          {
+            "name": "王道 · 计算机组成原理",
+            "url": "https://www.bilibili.com/video/BV1BE411D7ii/",
+            "note": "§4.3 CSMA/CD 时序：总线仲裁与冲突检测的硬件时序视角",
+            "bv": "BV1BE411D7ii"
+          },
+          {
+            "name": "王道 · 数据结构（考研）",
+            "url": "https://www.bilibili.com/video/BV1b7411N798/",
+            "note": "§4.5 STP：生成树协议用到的图论基础（最小生成树）",
+            "bv": "BV1b7411N798"
+          }
+        ]
+      },
+      "order": 22
+    },
+    {
       "id": "fund-ch12",
-      "order": 18,
+      "order": 23,
       "group": "F5",
       "title": "计算机网络：应用层与链路排查",
       "summary": "HTTP/1.1 到 HTTP/2（多路复用、头部压缩）到 HTTP/3（QUIC、无队头阻塞）的演进动机；HTTPS 与 TLS 握手（对称/非对称混合、证书链、前向安全）；DNS 递归与迭代解析、缓存层级；从输入 URL 到页面渲染的完整链路（高频面试题）；Cookie/Session/Token 与跨域；常用排查命令（ping/traceroute/netstat/tcpdump/curl）。",
