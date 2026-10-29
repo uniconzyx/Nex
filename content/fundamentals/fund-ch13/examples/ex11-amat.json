@@ -1,0 +1,8 @@
+{
+  "title": "平均访存时间 AMAT（L1 95%/1ns, L2 90%/10ns, 主存 100ns）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "L1 命中率 = 0.95, L1 命中时间 = 1 ns\nL1 miss 后 L2 命中率 = 0.90, L2 时间 = 10 ns\n主存时间 = 100 ns\nAMAT = h1*t1 + (1-h1)*(t1 + h2*t2 + (1-h2)*(t2+tm))\n     = 2.00 ns\n",
+  "code": "#include <stdio.h>\nint main(void) {\n    double h1 = 0.95, t1 = 1.0;   /* L1 命中率/命中时间 */\n    double h2 = 0.90, t2 = 10.0;  /* L1 miss 后 L2 命中率/时间 */\n    double tm = 100.0;            /* 主存时间 */\n    double amat = h1 * t1 + (1 - h1) * (t1 + h2 * t2 + (1 - h2) * (t2 + tm));\n    printf(\"L1 命中率 = %.2f, L1 命中时间 = %.0f ns\\n\", h1, t1);\n    printf(\"L1 miss 后 L2 命中率 = %.2f, L2 时间 = %.0f ns\\n\", h2, t2);\n    printf(\"主存时间 = %.0f ns\\n\", tm);\n    printf(\"AMAT = h1*t1 + (1-h1)*(t1 + h2*t2 + (1-h2)*(t2+tm))\\n\");\n    printf(\"     = %.2f ns\\n\", amat);\n    return 0;\n}\n"
+}

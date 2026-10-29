@@ -1,0 +1,8 @@
+{
+  "title": "主频升 50% 但 CPI 恶化：新 CPU 反而更慢（2GHz/CPI1.2 vs 3GHz/CPI2.0）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "指令数 = 400000000\n旧 CPU: 主频 2.0GHz, CPI=1.2 -> 时间 = 0.2400 s\n新 CPU: 主频 3.0GHz, CPI=2.0 -> 时间 = 0.2667 s\n结论: 主频提升 50%, 但 CPI 从 1.2 升到 2.0, 新机器反而更慢\n时间比 (旧/新) = 0.9000\n",
+  "code": "#include <stdio.h>\nint main(void) {\n    double ic = 4e8;\n    double f1 = 2e9, cpi1 = 1.2;\n    double f2 = 3e9, cpi2 = 2.0;\n    double t1 = ic * cpi1 / f1;\n    double t2 = ic * cpi2 / f2;\n    printf(\"指令数 = 400000000\\n\");\n    printf(\"旧 CPU: 主频 2.0GHz, CPI=1.2 -> 时间 = %.4f s\\n\", t1);\n    printf(\"新 CPU: 主频 3.0GHz, CPI=2.0 -> 时间 = %.4f s\\n\", t2);\n    printf(\"结论: 主频提升 50%%, 但 CPI 从 1.2 升到 2.0, 新机器%s\\n\", t2 > t1 ? \"反而更慢\" : \"更快\");\n    printf(\"时间比 (旧/新) = %.4f\\n\", t1 / t2);\n    return 0;\n}\n"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "总线带宽计算（位宽×频率×每周期传输次数）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "总线带宽计算\n位宽=32 bit (= 4 字节/拍), 时钟=33 MHz, 每周期传输=1 次\n带宽 = 32/8 × 33 × 1 = 132 MB/s\n对比: 64 位 100 MHz -> 800 MB/s\n",
+  "code": "#include <stdio.h>\n// 总线带宽(MB/s) = 总线位宽/8 × 时钟频率(MHz) × 每周期传输次数\nint main() {\n    int width_bit = 32;\n    double freq_mhz = 33.0;\n    int tpc = 1;                       // 每时钟周期传输次数\n    double bw = (width_bit / 8.0) * freq_mhz * tpc;\n    printf(\"总线带宽计算\\n\");\n    printf(\"位宽=%d bit (= %d 字节/拍), 时钟=%.0f MHz, 每周期传输=%d 次\\n\",\n           width_bit, width_bit / 8, freq_mhz, tpc);\n    printf(\"带宽 = %d/8 × %.0f × %d = %.0f MB/s\\n\", width_bit, freq_mhz, tpc, bw);\n    int w2 = 64; double f2 = 100.0;\n    double bw2 = (w2 / 8.0) * f2 * 1;\n    printf(\"对比: %d 位 %.0f MHz -> %.0f MB/s\\n\", w2, f2, bw2);\n    return 0;\n}\n"
+}

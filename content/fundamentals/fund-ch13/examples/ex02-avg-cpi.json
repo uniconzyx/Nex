@@ -1,0 +1,8 @@
+{
+  "title": "平均 CPI：按指令混布加权平均（60%@1, 30%@2, 10%@4）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "指令总数 = 1000\n  A类(60%) CPI=1: 600 条 -> 600 周期\n  B类(30%) CPI=2: 300 条 -> 600 周期\n  C类(10%) CPI=4: 100 条 -> 400 周期\n总时钟周期 = 1600\n平均CPI = 1600 / 1000 = 1.60\n",
+  "code": "#include <stdio.h>\nint main(void) {\n    int n = 1000;\n    int a = 600, b = 300, c = 100;   /* 三类指令条数 */\n    int ca = 1, cb = 2, cc = 4;      /* 各类 CPI */\n    long cycles = (long)a * ca + (long)b * cb + (long)c * cc;\n    double cpi = (double)cycles / n;\n    printf(\"指令总数 = 1000\\n\");\n    printf(\"  A类(60%%) CPI=1: %d 条 -> %ld 周期\\n\", a, (long)a * ca);\n    printf(\"  B类(30%%) CPI=2: %d 条 -> %ld 周期\\n\", b, (long)b * cb);\n    printf(\"  C类(10%%) CPI=4: %d 条 -> %ld 周期\\n\", c, (long)c * cc);\n    printf(\"总时钟周期 = %ld\\n\", cycles);\n    printf(\"平均CPI = %ld / %d = %.2f\\n\", cycles, n, cpi);\n    return 0;\n}\n"
+}

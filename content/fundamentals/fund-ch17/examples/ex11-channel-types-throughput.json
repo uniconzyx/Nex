@@ -1,0 +1,8 @@
+{
+  "title": "三种通道类型吞吐对比",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== 三种通道类型吞吐对比 ===\n字节多路通道(3终端,各8字): 数据 24 字, 耗时 24\n选择通道(高速 1024字):        数据 1024 字, 耗时 1025\n数组多路通道(高速1024字,块64): 数据 1024 字, 耗时 1040\n结论: 字节多路适合多低速设备轮流; 选择通道适合独占高速整块;\n        数组多路以'分块+让出'兼顾多个中高速设备。\n",
+  "code": "# 示例11: 三种通道类型吞吐对比\nHIGH = 1024\nSWITCH = 1\n\n\ndef byte_mux(n_dev, per_dev_words):\n    total = n_dev * per_dev_words\n    t = total * SWITCH\n    return total, t\n\n\ndef select_chan(words):\n    t = words + SWITCH\n    return words, t\n\n\ndef block_mux(words, blk=64):\n    nblk = (words + blk - 1) // blk\n    t = nblk * SWITCH + words\n    return words, t\n\n\ntb, tt_b = byte_mux(3, 8)\nts, tt_s = select_chan(HIGH)\ntbm, tt_bm = block_mux(HIGH, 64)\n\nprint(\"=== 三种通道类型吞吐对比 ===\")\nprint(\"字节多路通道(3终端,各8字): 数据 %d 字, 耗时 %d\" % (tb, tt_b))\nprint(\"选择通道(高速% d字):        数据 %d 字, 耗时 %d\" % (HIGH, ts, tt_s))\nprint(\"数组多路通道(高速%d字,块64): 数据 %d 字, 耗时 %d\" % (HIGH, tbm, tt_bm))\nprint(\"结论: 字节多路适合多低速设备轮流; 选择通道适合独占高速整块;\")\nprint(\"        数组多路以'分块+让出'兼顾多个中高速设备。\")\n"
+}

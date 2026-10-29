@@ -1,0 +1,8 @@
+{
+  "title": "基址寻址与程序重定位",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "程序在基址 1000 处装入：\n  逻辑 100 -> 物理 1100\n  逻辑 200 -> 物理 1200\n  逻辑 300 -> 物理 1300\n  逻辑 400 -> 物理 1400\n  逻辑 500 -> 物理 1500\n程序在基址 5000 处装入（重定位）：\n  逻辑 100 -> 物理 5100\n  逻辑 200 -> 物理 5200\n  逻辑 300 -> 物理 5300\n  逻辑 400 -> 物理 5400\n  逻辑 500 -> 物理 5500",
+  "code": "#include <stdio.h>\n\nint main() {\n    int logical[5] = {100, 200, 300, 400, 500};  /* 程序内的逻辑地址 */\n    int base1 = 1000, base2 = 5000;              /* 不同装载基址 */\n\n    printf(\"程序在基址 %d 处装入：\\n\", base1);\n    for (int i = 0; i < 5; i++)\n        printf(\"  逻辑%4d -> 物理 %d\\n\", logical[i], base1 + logical[i]);\n\n    printf(\"程序在基址 %d 处装入（重定位）：\\n\", base2);\n    for (int i = 0; i < 5; i++)\n        printf(\"  逻辑%4d -> 物理 %d\\n\", logical[i], base2 + logical[i]);\n    return 0;\n}"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "扩展操作码译码（15/15/15/16 思想）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "译码：三地址指令，操作码=1，三个地址码=2 3 4\n译码：二地址指令，操作码=F2，两个地址码=3 4\n译码：一地址指令，操作码=FF3，地址码=4\n译码：零地址指令，操作码=1\n译码：零地址指令，操作码=F",
+  "code": "#include <stdio.h>\n\n/* 模拟 16 位变长操作码译码：每段 4 位，全 1 码点保留给下一级扩展 */\nvoid decode(unsigned int ins) {\n    unsigned int top4 = (ins >> 12) & 0xF;\n    if (top4 != 0xF) {                                   /* 非全 1：三地址 */\n        printf(\"译码：三地址指令，操作码=%X，三个地址码=%X %X %X\\n\",\n               top4, (ins >> 8) & 0xF, (ins >> 4) & 0xF, ins & 0xF);\n    } else {\n        unsigned int top8 = (ins >> 8) & 0xFF;\n        if (top8 != 0xFF) {                              /* 1111 非全 1：二地址 */\n            printf(\"译码：二地址指令，操作码=%X，两个地址码=%X %X\\n\",\n                   top8, (ins >> 4) & 0xF, ins & 0xF);\n        } else {\n            unsigned int top12 = (ins >> 4) & 0xFFF;\n            if (top12 != 0xFFF) {                        /* 1111 1111 非全 1：一地址 */\n                printf(\"译码：一地址指令，操作码=%X，地址码=%X\\n\", top12, ins & 0xF);\n            } else {                                     /* 全 1：零地址 */\n                printf(\"译码：零地址指令，操作码=%X\\n\", ins & 0xF);\n            }\n        }\n    }\n}\n\nint main() {\n    unsigned int samples[] = {0x1234, 0xF234, 0xFF34, 0xFFF1, 0xFFFF};\n    int n = 5;\n    for (int i = 0; i < n; i++) decode(samples[i]);\n    return 0;\n}"
+}

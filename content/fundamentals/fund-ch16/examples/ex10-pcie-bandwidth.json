@@ -1,0 +1,8 @@
+{
+  "title": "PCIe 带宽计算（Lane 数 × 线速率 × 编码效率）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "PCIe 带宽: 每 Lane 线速率 × 编码效率 / 8 × Lane数 (单方向)\n  Gen2 x1: 单方向 0.50 GB/s (双向约 1.00 GB/s)\n  Gen2 x8: 单方向 4.00 GB/s (双向约 8.00 GB/s)\n  Gen2 x16: 单方向 8.00 GB/s (双向约 16.00 GB/s)\n  Gen3 x1: 单方向 0.98 GB/s (双向约 1.97 GB/s)\n  Gen3 x8: 单方向 7.88 GB/s (双向约 15.75 GB/s)\n  Gen3 x16: 单方向 15.75 GB/s (双向约 31.51 GB/s)\n  Gen4 x1: 单方向 1.97 GB/s (双向约 3.94 GB/s)\n  Gen4 x8: 单方向 15.75 GB/s (双向约 31.51 GB/s)\n  Gen4 x16: 单方向 31.51 GB/s (双向约 63.02 GB/s)\n",
+  "code": "# PCIe 带宽 = 每 Lane 线速率(GT/s) × 编码效率 / 8(转字节) × Lane 数 (单方向)\n# Gen2: 5 GT/s, 8b/10b 编码(效率 0.8); Gen3/Gen4: 128b/130b 编码(效率≈0.985)\nconfigs = [(\"Gen2\", 5.0, 8.0 / 10.0), (\"Gen3\", 8.0, 128.0 / 130.0),\n           (\"Gen4\", 16.0, 128.0 / 130.0)]\nprint(\"PCIe 带宽: 每 Lane 线速率 × 编码效率 / 8 × Lane数 (单方向)\")\nfor name, gt, enc in configs:\n    per_lane = gt * 1e9 * enc / 8 / 1e9     # GB/s per lane\n    for lanes in (1, 8, 16):\n        print(\"  %s x%d: 单方向 %.2f GB/s (双向约 %.2f GB/s)\" %\n              (name, lanes, per_lane * lanes, per_lane * lanes * 2))\n"
+}

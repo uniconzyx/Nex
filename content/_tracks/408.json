@@ -5,13 +5,16 @@
     {
       "module": "数据结构",
       "chapters": [
-        "fund-ch01", "fund-ch02", "fund-ch03", "fund-ch04",
+        "fund-ch01", "fund-ch02", "fund-ch03", "fund-ch04", "fund-ch18",
         "fund-ch05", "fund-ch06", "cpp-ch08", "cpp-ch09"
       ]
     },
     {
       "module": "计算机组成原理",
-      "chapters": ["fund-ch07", "fund-ch08"]
+      "chapters": [
+        "fund-ch13", "fund-ch07", "fund-ch08",
+        "fund-ch14", "fund-ch15", "fund-ch16", "fund-ch17"
+      ]
     },
     {
       "module": "操作系统",

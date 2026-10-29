@@ -1,0 +1,8 @@
+{
+  "title": "DMAC 与 CPU 访存争夺：三种仲裁方式对比",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== DMAC 与 CPU 访存争夺: 三种仲裁对比 (N=1000 字) ===\n方式             CPU 代价\n停止CPU访存        CPU 停顿 1000 总线周期 (完全冻结, 最简单)\n周期挪用           仅 500 周期被短暂挪用 (偷空闲, CPU几乎无感)\n交替访存           CPU 带宽降为 50% (各用各的周期)\n结论: 周期挪用对 CPU 最友好; 停止访存实现最简单但最伤 CPU; 交替访存需硬件把时序分开。\n",
+  "code": "# 示例09: DMAC 与 CPU 争用内存总线 —— 三种仲裁方式对比\nN_WORDS = 1000\nCPU_NEEDS_RATIO = 0.5\n\nstop_stall = N_WORDS\nidle_cycles = int(N_WORDS * CPU_NEEDS_RATIO)\ncycle_stall = min(N_WORDS, idle_cycles)\nalt_cpu_bw = 0.5\n\nprint(\"=== DMAC 与 CPU 访存争夺: 三种仲裁对比 (N=%d 字) ===\" % N_WORDS)\nprint(\"%-14s %s\" % (\"方式\", \"CPU 代价\"))\nprint(\"%-14s %s\" % (\"停止CPU访存\", \"CPU 停顿 %d 总线周期 (完全冻结, 最简单)\" % stop_stall))\nprint(\"%-14s %s\" % (\"周期挪用\", \"仅 %d 周期被短暂挪用 (偷空闲, CPU几乎无感)\" % cycle_stall))\nprint(\"%-14s %s\" % (\"交替访存\", \"CPU 带宽降为 %.0f%% (各用各的周期)\" % (alt_cpu_bw * 100)))\nprint(\"结论: 周期挪用对 CPU 最友好; 停止访存实现最简单但最伤 CPU; 交替访存需硬件把时序分开。\")\n"
+}

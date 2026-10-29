@@ -1,0 +1,8 @@
+{
+  "title": "多周期 CPU 的指令节拍统计与平均 CPI",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "多周期 CPU 指令序列节拍统计（多周期模型）\n指令         类型 机器周期\nADD  R1,R2,R3  运算 3\nLW   R4,0(R1)  访存 4\nSUB  R5,R4,R2  运算 3\nSW   0(R1),R5  访存 4\nBEQ  R5,R0,L   转移 3\nADD  R6,R4,R5  运算 3\n指令条数=6  总机器周期=20  平均CPI=3.33\n",
+  "code": "#include <stdio.h>\n/*\n * ex01：多周期 CPU 的指令节拍统计\n * 为什么：单周期 CPU 每条指令都要等最慢那条走完（浪费），多周期把一条指令拆成\n *        取指/译码/执行/访存/写回若干机器周期，不同指令占的周期数不同，\n *        所以「平均 CPI」必须按指令类型分别加权统计，不能直接取 1。\n * 本程序：给定一段指令序列与各自的机器周期数，算出总周期与平均 CPI。\n */\ntypedef struct {\n    const char *name;   /* 指令助记符 */\n    const char *type;   /* 指令类型：运算 / 访存 / 转移 */\n    int ticks;          /* 该指令占用的机器周期数 */\n} Insn;\n\nint main(void) {\n    /* 一段典型的混合指令流：3 条运算 + 2 条访存 + 1 条转移 */\n    Insn prog[] = {\n        {\"ADD  R1,R2,R3\", \"运算\", 3},   /* 取指/执行/写回：3 周期 */\n        {\"LW   R4,0(R1)\", \"访存\", 4},   /* 多一个访存周期：4 周期 */\n        {\"SUB  R5,R4,R2\", \"运算\", 3},\n        {\"SW   0(R1),R5\", \"访存\", 4},\n        {\"BEQ  R5,R0,L\",  \"转移\", 3},\n        {\"ADD  R6,R4,R5\", \"运算\", 3},\n    };\n    int n = (int)(sizeof(prog) / sizeof(prog[0]));\n    int total = 0;\n\n    printf(\"多周期 CPU 指令序列节拍统计（多周期模型）\\n\");\n    printf(\"%-14s %-6s %s\\n\", \"指令\", \"类型\", \"机器周期\");\n    for (int i = 0; i < n; i++) {\n        printf(\"%-14s %-6s %d\\n\", prog[i].name, prog[i].type, prog[i].ticks);\n        total += prog[i].ticks;      /* 累加真实周期数 */\n    }\n    /* 平均 CPI = 总周期数 / 指令条数；这里 >3，说明访存指令拉高了均值 */\n    printf(\"指令条数=%d  总机器周期=%d  平均CPI=%.2f\\n\", n, total, (double)total / n);\n    return 0;\n}\n"
+}

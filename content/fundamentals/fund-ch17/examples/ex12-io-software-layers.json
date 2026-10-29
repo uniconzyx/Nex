@@ -1,0 +1,8 @@
+{
+  "title": "I/O 软件四层调用链模拟",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== I/O 软件四层调用链 (read 一次磁盘文件) ===\n  [用户层]   调用库函数 read(3, buf)\n  [与设备无关] 校验参数 / 分配内核缓冲 / 检查权限\n  [设备驱动]   写控制端口启动设备, 设置 DMA 描述符\n  [中断处理]   设备就绪中断: 清中断, 数据已由 DMA 入内存, 唤醒进程\n  [用户层]   read 返回, 数据已拷到用户 buf\n四层(自顶向下): 用户层 -> 与设备无关 -> 设备驱动 -> 中断处理\n四层(自底向上): 中断处理程序 -> 设备驱动 -> 与设备无关 -> 用户层I/O软件\n结论: 越往下越贴近硬件(寄存器/中断), 越往上越统一/安全(SPOOLING、统一命名)。\n",
+  "code": "# 示例12: I/O 软件四层调用链模拟 (用户 read() 自顶向下的分层)\ndef user_layer(fd, buf):\n    print(\"  [用户层]   调用库函数 read(%d, buf)\" % fd)\n    device_independent(fd, buf)\n    print(\"  [用户层]   read 返回, 数据已拷到用户 buf\")\n\n\ndef device_independent(fd, buf):\n    print(\"  [与设备无关] 校验参数 / 分配内核缓冲 / 检查权限\")\n    driver_read(fd, buf)\n\n\ndef driver_read(fd, buf):\n    print(\"  [设备驱动]   写控制端口启动设备, 设置 DMA 描述符\")\n    irq_handler(buf)\n\n\ndef irq_handler(buf):\n    print(\"  [中断处理]   设备就绪中断: 清中断, 数据已由 DMA 入内存, 唤醒进程\")\n\n\nprint(\"=== I/O 软件四层调用链 (read 一次磁盘文件) ===\")\nuser_layer(3, \"page_cache\")\nprint(\"四层(自顶向下): 用户层 -> 与设备无关 -> 设备驱动 -> 中断处理\")\nprint(\"四层(自底向上): 中断处理程序 -> 设备驱动 -> 与设备无关 -> 用户层I/O软件\")\nprint(\"结论: 越往下越贴近硬件(寄存器/中断), 越往上越统一/安全(SPOOLING、统一命名)。\")\n"
+}

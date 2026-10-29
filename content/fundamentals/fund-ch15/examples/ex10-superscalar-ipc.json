@@ -1,0 +1,8 @@
+{
+  "title": "超标量多发射的 IPC 与加速比",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "超标量宽度 w=2, 指令数 n=100, 发射槽利用率 u=0.70\n理想IPC=2 (单周期发2条) ; 实际IPC=1.40\n单发射周期=100 ; 超标量周期≈72\n相对单发射加速比=1.39 倍\n",
+  "code": "#include <stdio.h>\n/*\n * ex10：超标量（多发射）能带来多少 IPC 与加速比\n * 概念：\n *   单发射：每拍最多启动 1 条指令 -> IPC 上限 1；\n *   超标量宽度 w：每拍最多启动 w 条 -> IPC 上限 w；\n *   实际 IPC = w × 发射槽利用率 u（受依赖、资源冲突、分支限制）。\n * 本程序算实际 IPC、完成 n 条指令所需周期与相对单发射的加速比。\n */\nint main(void) {\n    int w = 2;              /* 超标量宽度：每拍最多发射 2 条 */\n    int n = 100;            /* 待执行指令数 */\n    double u = 0.70;        /* 发射槽利用率（实测值，非理论值）*/\n\n    double ipc_ideal = (double)w;         /* 理想 IPC */\n    double ipc_real  = w * u;             /* 实际 IPC */\n    double cycles    = n / ipc_real;      /* 实际完成周期（含小数）*/\n    int    cycles_i  = (int)(cycles + 0.999999);   /* 向上取整 */\n    int    cycles_single = n;             /* 单发射：每拍 1 条 */\n\n    printf(\"超标量宽度 w=%d, 指令数 n=%d, 发射槽利用率 u=%.2f\\n\", w, n, u);\n    printf(\"理想IPC=%d (单周期发%d条) ; 实际IPC=%.2f\\n\", w, w, ipc_real);\n    printf(\"单发射周期=%d ; 超标量周期≈%d\\n\", cycles_single, cycles_i);\n    printf(\"相对单发射加速比=%.2f 倍\\n\", (double)cycles_single / cycles_i);\n    return 0;\n}\n"
+}

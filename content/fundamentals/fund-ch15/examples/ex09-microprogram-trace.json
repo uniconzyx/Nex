@@ -1,0 +1,8 @@
+{
+  "title": "微程序控制器执行 ADD 的微指令轨迹",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "执行机器指令 ADD R1,R2,R3 的微程序轨迹：\nμ地址 微操作                  下址\n0     DISPATCH(按操作码多路转移) 4\n4     PC->MAR, 读内存       5\n5     MDR->IR, PC+1            6\n6     R2->Y, R3->Z             7\n7     Y+Z->TMP                 8\n8     TMP->R1                  9\n9     (顺序提交, 结束)   0\n本次 ADD 共执行 7 条微指令（微地址由下址字段顺序形成，入口由操作码多路转移决定）\n",
+  "code": "#include <stdio.h>\n/*\n * ex09：微程序控制器执行一条 ADD 的微指令轨迹\n * 概念：\n *   一条机器指令 = 一段微程序；微程序由若干微指令组成；微指令由微命令（控制信号）构成。\n *   微地址形成方式：① 操作码多路转移（指令入口）② 下址字段（顺序）③ 断定方式。\n * 本程序按「取指公共微程序 -> 执行段微程序」打印每条微指令的微操作与下址。\n */\ntypedef struct {\n    int addr;              /* 微地址 */\n    const char *micro_op;  /* 该拍的微操作 */\n    int next;              /* 下址 */\n} MicroInsn;\n\nint main(void) {\n    MicroInsn mp[] = {\n        /* 取指公共段：所有指令共用 */\n        {0, \"DISPATCH(按操作码多路转移)\", 4},\n        /* ADD 指令的执行段微程序 */\n        {4, \"PC->MAR, 读内存\",            5},\n        {5, \"MDR->IR, PC+1\",              6},\n        {6, \"R2->Y, R3->Z\",               7},\n        {7, \"Y+Z->TMP\",                   8},\n        {8, \"TMP->R1\",                    9},\n        {9, \"(顺序提交, 结束)\",            0},\n    };\n    int n = (int)(sizeof(mp) / sizeof(mp[0]));\n\n    printf(\"执行机器指令 ADD R1,R2,R3 的微程序轨迹：\\n\");\n    printf(\"%-4s %-26s %s\\n\", \"μ地址\", \"微操作\", \"下址\");\n    for (int i = 0; i < n; i++)\n        printf(\"%-5d %-24s %d\\n\", mp[i].addr, mp[i].micro_op, mp[i].next);\n    printf(\"本次 ADD 共执行 %d 条微指令（微地址由下址字段顺序形成，入口由操作码多路转移决定）\\n\", n);\n    return 0;\n}\n"
+}

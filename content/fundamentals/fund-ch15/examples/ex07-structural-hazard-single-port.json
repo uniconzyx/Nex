@@ -1,0 +1,8 @@
+{
+  "title": "结构冒险：单端口存储器造成的取指停顿",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "结构冒险(单口存储器)检测：每条访存指令占MEM段，后继IF延后1拍\n  LW  R4,0(R1) : 访存占用存储器 -> +1 结构停顿\n  SW  0(R1),R5 : 访存占用存储器 -> +1 结构停顿\n  LW  R7,0(R6) : 访存占用存储器 -> +1 结构停顿\n结构停顿总计=3 拍; 总流水周期=14 (无冒险时=11)\n",
+  "code": "#include <stdio.h>\n/*\n * ex07：结构冒险 —— 单端口存储器导致的取指停顿\n * 背景：五段流水线里 IF 要读指令、MEM 要读写数据。若只有一个存储器端口，\n *       当访存指令进入 MEM 时，紧接着的 IF 就没法同时读指令 → 必须停 1 拍。\n *       解决：指令 cache 与数据 cache 分离（哈佛结构），或加双端口存储。\n * 本程序扫描指令流，统计访存指令造成的结构停顿。\n */\ntypedef struct {\n    const char *name;  /* 助记符 */\n    int touches_mem;   /* 是否在 MEM 段访问数据存储器 */\n} Insn;\n\nint main(void) {\n    Insn prog[] = {\n        {\"ADD R1,R2,R3\", 0},\n        {\"LW  R4,0(R1)\", 1},   /* load：MEM 段读数据 */\n        {\"ADD R5,R4,R2\", 0},\n        {\"SW  0(R1),R5\", 1},   /* store：MEM 段写数据 */\n        {\"ADD R6,R4,R5\", 0},\n        {\"LW  R7,0(R6)\", 1},   /* load */\n        {\"ADD R8,R7,R6\", 0},\n    };\n    int n = (int)(sizeof(prog) / sizeof(prog[0]));\n    int stalls = 0;\n\n    printf(\"结构冒险(单口存储器)检测：每条访存指令占MEM段，后继IF延后1拍\\n\");\n    for (int i = 0; i < n; i++) {\n        if (prog[i].touches_mem) {\n            stalls += 1;   /* 单口冲突：IF 让路 1 拍 */\n            printf(\"  %s : 访存占用存储器 -> +1 结构停顿\\n\", prog[i].name);\n        }\n    }\n    printf(\"结构停顿总计=%d 拍; 总流水周期=%d (无冒险时=%d)\\n\",\n           stalls, (5 + n - 1) + stalls, 5 + n - 1);\n    return 0;\n}\n"
+}

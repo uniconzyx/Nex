@@ -1,0 +1,8 @@
+{
+  "title": "相对寻址计算转移目标地址",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "disp=  10  -> 转移目标地址 EA = PC + disp = 204 + 10 = 214\ndisp=  -8  -> 转移目标地址 EA = PC + disp = 204 + -8 = 196\ndisp=  40  -> 转移目标地址 EA = PC + disp = 204 + 40 = 244",
+  "code": "#include <stdio.h>\n\nint main() {\n    /* 假设当前指令地址 200，指令长度 4，取指后 PC 已更新为 204 */\n    int PC = 204;\n    int disp[] = {10, -8, 40};     /* 相对位移（可正可负） */\n    int n = 3;\n    for (int i = 0; i < n; i++)\n        printf(\"disp=%4d  -> 转移目标地址 EA = PC + disp = %d + %d = %d\\n\",\n               disp[i], PC, disp[i], PC + disp[i]);\n    return 0;\n}"
+}

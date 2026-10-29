@@ -1,0 +1,8 @@
+{
+  "title": "异步全互锁握手状态机（每字节 4 步）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "异步全互锁握手: 传送 3 字节\nstep   事件\n  0    主: 断言 REQ (放上第0字节数据)\n  1    从: 收到 REQ, 断言 ACK\n  2    主: 见 ACK, 撤 REQ\n  3    从: 见 REQ 撤, 撤 ACK (第0字节完成)\n  4    主: 断言 REQ (放上第1字节数据)\n  5    从: 收到 REQ, 断言 ACK\n  6    主: 见 ACK, 撤 REQ\n  7    从: 见 REQ 撤, 撤 ACK (第1字节完成)\n  8    主: 断言 REQ (放上第2字节数据)\n  9    从: 收到 REQ, 断言 ACK\n  10    主: 见 ACK, 撤 REQ\n  11    从: 见 REQ 撤, 撤 ACK (第2字节完成)\n共 12 步 (每字节 4 步全互锁)\n",
+  "code": "#include <stdio.h>\n// 异步全互锁：主发 REQ -> 等 ACK -> 撤 REQ -> 等 ACK 撤；双向互等，绝不失步\nint main() {\n    int n = 3;\n    printf(\"异步全互锁握手: 传送 %d 字节\\n\", n);\n    printf(\"step   事件\\n\");\n    int s = 0;\n    for (int b = 0; b < n; b++) {\n        printf(\"  %d    主: 断言 REQ (放上第%d字节数据)\\n\", s++, b);\n        printf(\"  %d    从: 收到 REQ, 断言 ACK\\n\", s++);\n        printf(\"  %d    主: 见 ACK, 撤 REQ\\n\", s++);\n        printf(\"  %d    从: 见 REQ 撤, 撤 ACK (第%d字节完成)\\n\", s++, b);\n    }\n    printf(\"共 %d 步 (每字节 4 步全互锁)\\n\", s);\n    return 0;\n}\n"
+}

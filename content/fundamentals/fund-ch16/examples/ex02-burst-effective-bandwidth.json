@@ -1,0 +1,8 @@
+{
+  "title": "突发（burst）传送的有效带宽",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "峰值带宽 = 132 MB/s (32位, 33MHz)\n突发长度   有效利用率    有效带宽(MB/s)\n    1        0.5000         66.00\n    4        0.8000         105.60\n    8        0.8889         117.33\n   16        0.9412         124.24\n",
+  "code": "# 突发传送：1 个地址相位 + N 个数据相位；地址相位被 N 次数据分摊\nwidth_bit = 32\nfreq_mhz = 33.0\nbytes_per_beat = width_bit / 8          # 4 字节/拍\npeak = bytes_per_beat * freq_mhz        # 峰值带宽 MB/s\nprint(\"峰值带宽 = %.0f MB/s (32位, 33MHz)\" % peak)\nprint(\"突发长度   有效利用率    有效带宽(MB/s)\")\nfor n in (1, 4, 8, 16):\n    util = n / (n + 1)                  # 1 地址拍 + n 数据拍\n    eff = peak * util\n    print(\"   %2d        %.4f         %.2f\" % (n, util, eff))\n"
+}

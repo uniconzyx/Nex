@@ -1,0 +1,8 @@
+{
+  "title": "五段流水线的吞吐率、加速比与效率",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "五段流水线 处理 12 条指令\n理想总拍(无停顿)=n+k-1=16\n实际总拍(含4停顿)=20\n吞吐率 TP=n/总拍=0.6000 指令/拍\n加速比 S =n*k/总拍=3.0000\n效率   E =n/总拍  =0.6000 (60.0%)\n",
+  "code": "#include <stdio.h>\n/*\n * ex02：五段流水线的吞吐率 / 加速比 / 效率\n * 公式：\n *   理想总拍  = n + k - 1        （k 段流水线处理 n 条指令）\n *   实际总拍  = 理想总拍 + 停顿拍\n *   吞吐率 TP = n / 实际总拍\n *   加速比 S  = (n*k) / 实际总拍 = 顺序执行拍数 / 流水执行拍数\n *   效率   E  = S / k = n / 实际总拍\n * 注意：E 与 TP 数值相同只是「每拍 1 条」这个前提下的巧合，概念不同（E 是设备利用率）。\n */\nint main(void) {\n    int k = 5;        /* 流水段数：IF/ID/EX/MEM/WB */\n    int n = 12;       /* 指令条数 */\n    int stall = 4;    /* 因冒险插入的停顿拍 */\n\n    int ideal = k + (n - 1);          /* 无停顿时的总拍数 */\n    int total = ideal + stall;        /* 含停顿的实际总拍数 */\n\n    double tp = (double)n / total;              /* 吞吐率：每拍完成多少条 */\n    double s  = (double)(n * k) / total;        /* 加速比：顺序 n*k 拍 vs 流水 total 拍 */\n    double e  = s / k;                          /* 效率：加速比 / 段数 */\n\n    printf(\"五段流水线 处理 %d 条指令\\n\", n);\n    printf(\"理想总拍(无停顿)=n+k-1=%d\\n\", ideal);\n    printf(\"实际总拍(含%d停顿)=%d\\n\", stall, total);\n    printf(\"吞吐率 TP=n/总拍=%.4f 指令/拍\\n\", tp);\n    printf(\"加速比 S =n*k/总拍=%.4f\\n\", s);\n    printf(\"效率   E =n/总拍  =%.4f (%.1f%%)\\n\", e, e * 100.0);\n    return 0;\n}\n"
+}

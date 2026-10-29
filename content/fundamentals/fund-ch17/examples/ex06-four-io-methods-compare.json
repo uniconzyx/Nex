@@ -1,0 +1,8 @@
+{
+  "title": "四种 I/O 方式 CPU 占用时间对比",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== 四种 I/O 方式 CPU 占用时间对比 (N=1024 字节) ===\n方式              CPU占用(us)\n程序查询                 1074\n程序中断                 1024\nDMA                    10\n通道                     10\nDMA 比查询少占 CPU 1064 微秒 (约 107.4 倍)\n结论: 数据量越大, 查询/中断越吃亏, DMA/通道对解放 CPU 的优势越明显。\n",
+  "code": "# 示例06: 四种 I/O 方式 CPU 占用时间对比\nN = 1024\nT_MOVE = 1\nT_ISR = 1\nT_POLL = 1\nREADY_WAIT = 50\nT_DMA_SETUP = 5\nT_DMA_DONE = 5\nT_CHAN = 10\n\ncpu_query = READY_WAIT * T_POLL + N * T_MOVE\ncpu_intr = N * T_ISR\ncpu_dma = T_DMA_SETUP + T_DMA_DONE\ncpu_chan = T_CHAN\n\nprint(\"=== 四种 I/O 方式 CPU 占用时间对比 (N=%d 字节) ===\" % N)\nprint(\"%-10s %14s\" % (\"方式\", \"CPU占用(us)\"))\nprint(\"%-10s %14d\" % (\"程序查询\", cpu_query))\nprint(\"%-10s %14d\" % (\"程序中断\", cpu_intr))\nprint(\"%-10s %14d\" % (\"DMA\", cpu_dma))\nprint(\"%-10s %14d\" % (\"通道\", cpu_chan))\nprint(\"DMA 比查询少占 CPU %d 微秒 (约 %.1f 倍)\" % (cpu_query - cpu_dma, cpu_query / cpu_dma))\nprint(\"结论: 数据量越大, 查询/中断越吃亏, DMA/通道对解放 CPU 的优势越明显。\")\n"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "分离式事务提升总线利用率",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "场景: 主0占2拍后需等从设备5拍; 主1有2拍工作\n非分离式: 总线被主0空占5拍, 总耗时=9, 总线利用率=44.4%\n分离式:   主0释放后主1穿插, 总耗时=6, 总线利用率=100.0%\n",
+  "code": "# 分离式事务：主设备发请求+地址后立刻释放总线，从设备准备好再夺回总线回数据\n# 场景：主0占 2 拍后需等从设备 5 拍；主1有 2 拍工作可做\nm0_use, m0_wait, m1_work = 2, 5, 2\nnon_split_total = m0_use + m0_wait + m1_work\nnon_split_busy = m0_use + m1_work\nsplit_total = m0_use + m1_work + m0_use\nsplit_busy = m0_use + m1_work + m0_use\nprint(\"场景: 主0占2拍后需等从设备5拍; 主1有2拍工作\")\nprint(\"非分离式: 总线被主0空占5拍, 总耗时=%d, 总线利用率=%.1f%%\" %\n      (non_split_total, 100 * non_split_busy / non_split_total))\nprint(\"分离式:   主0释放后主1穿插, 总耗时=%d, 总线利用率=%.1f%%\" %\n      (split_total, 100 * split_busy / split_total))\n"
+}

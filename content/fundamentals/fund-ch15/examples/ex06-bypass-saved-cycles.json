@@ -1,0 +1,8 @@
+{
+  "title": "旁路（转发）技术节省的周期数",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "RAW链(全ALU->ALU, 可转发) 指令数=4 段数=5\n无旁路: 每处RAW插2拍 -> 总停顿6 -> 总周期=14\n有旁路: 每处RAW 0停顿 -> 总停顿0 -> 总周期=8\n旁路带来的周期节省=6 (42.9%)\n",
+  "code": "#include <stdio.h>\n/*\n * ex06：旁路（转发）技术到底省了多少拍\n * 背景：没有旁路时，后一条指令必须等前一条「写回」完成才能读寄存器 → 每个 RAW 插 2 拍；\n *       有旁路时，ALU 结果在 EX 末就能被下一条的 EX 直接取走 → 0 拍（ALU->ALU 情形）。\n * 本程序对同一条 RAW 链分别按两种策略算总周期并给出节省比例。\n */\nint main(void) {\n    int k = 5;                      /* 五段流水线 */\n    int n = 4;                      /* 4 条指令构成 RAW 链：R1->R2->R3->R4 */\n    int hazards = n - 1;            /* 相邻依赖数 = 3 处 RAW */\n    int stall_no_bypass = 2;        /* 无旁路：每处停 2 拍 */\n    int stall_bypass = 0;           /* 有旁路（全 ALU）：每处停 0 拍 */\n\n    int base  = k + (n - 1);                                  /* 理想拍数 */\n    int total_no = base + hazards * stall_no_bypass;\n    int total_by = base + hazards * stall_bypass;\n    int saved = total_no - total_by;\n\n    printf(\"RAW链(全ALU->ALU, 可转发) 指令数=%d 段数=%d\\n\", n, k);\n    printf(\"无旁路: 每处RAW插%d拍 -> 总停顿%d -> 总周期=%d\\n\",\n           stall_no_bypass, hazards * stall_no_bypass, total_no);\n    printf(\"有旁路: 每处RAW %d停顿 -> 总停顿%d -> 总周期=%d\\n\",\n           stall_bypass, hazards * stall_bypass, total_by);\n    printf(\"旁路带来的周期节省=%d (%.1f%%)\\n\", saved, 100.0 * saved / total_no);\n    return 0;\n}\n"
+}

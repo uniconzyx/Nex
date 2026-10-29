@@ -1,0 +1,8 @@
+{
+  "title": "计数器定时查询仲裁（轮转，更公平）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "计数器定时查询仲裁 (轮转: 从当前计数值起扫描, 授权后计数器+1)\ncycle   请求   起点   授权设备\n  0       1     0       0\n  1       6     1       1\n  2       8     2       3\n  3       2     0       1\n  4      13     2       2\n  5       0     3       -1\n  6       4     3       2\n  7       6     3       1\n",
+  "code": "# 计数器定时查询：仲裁器把计数值放到设备地址线上，从当前计数值起扫描\n# 找到请求者即授权，并把计数器设为 授权者+1（下次从下一位继续）-> 近似轮转\nreq = [1, 6, 8, 2, 13, 0, 4, 6]     # 与 ex03 同一请求序列，便于对比\nN = 4\ncounter = 0\nprint(\"计数器定时查询仲裁 (轮转: 从当前计数值起扫描, 授权后计数器+1)\")\nprint(\"cycle   请求   起点   授权设备\")\nfor c, r in enumerate(req):\n    start = counter\n    g = -1\n    for k in range(N):\n        i = (start + k) % N\n        if r & (1 << i):\n            g = i\n            counter = (i + 1) % N\n            break\n    print(\"  %d      %2d     %d       %d\" % (c, r, start, g))\n"
+}

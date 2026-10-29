@@ -1,0 +1,8 @@
+{
+  "title": "链式查询仲裁模拟（链前优先、固定优先级）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "链式查询仲裁 (优先级: 设备0 > 1 > 2 > 3, 链前优先)\ncycle   请求(mask)   授权设备\n  0        1           0\n  1        6           1\n  2        8           3\n  3        2           1\n  4       13           0\n  5        0           -1\n  6        4           2\n  7        6           1\n",
+  "code": "#include <stdio.h>\n// 链式查询：授权信号(BG)沿物理链传递，第一个有请求的设备截获 -> 链前永远优先\n// req[c] 的 bit i = 第 c 拍设备 i 是否请求总线（4 个设备，设备0链前=最高优先级）\nint req[8] = {1, 6, 8, 2, 13, 0, 4, 6};\nint main() {\n    printf(\"链式查询仲裁 (优先级: 设备0 > 1 > 2 > 3, 链前优先)\\n\");\n    printf(\"cycle   请求(mask)   授权设备\\n\");\n    for (int c = 0; c < 8; c++) {\n        int r = req[c];\n        int g = -1;\n        for (int i = 0; i < 4; i++) {\n            if (r & (1 << i)) { g = i; break; }\n        }\n        printf(\"  %d       %2d           %d\\n\", c, r, g);\n    }\n    return 0;\n}\n"
+}

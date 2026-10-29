@@ -1,0 +1,8 @@
+{
+  "title": "各种寻址方式的有效地址 EA 计算",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "直接寻址   EA = 2000\n一次间接   EA = M[2000] = 3000\n寄存器间接 EA = (R1) = 4000\n基址寻址   EA = BR + disp = 5000 + 200 = 5200\n变址寻址   EA = IX + disp = 50 + 1000 = 1050\n相对寻址   EA = PC + disp = 8000 + -4 = 7996",
+  "code": "#include <stdio.h>\n\nint main() {\n    int A = 2000, mem_2000 = 3000;     /* 直接寻址地址码；一次间接指向的内容 */\n    int R1 = 4000;                     /* 寄存器间接：寄存器里存的是地址 */\n    int BR = 5000, dispB = 200;        /* 基址寄存器与位移 */\n    int IX = 50, dispI = 1000;         /* 变址寄存器与位移 */\n    int PC = 8000, dispR = -4;         /* 相对寻址：PC 已指向下一条指令 */\n\n    printf(\"直接寻址   EA = %d\\n\", A);\n    printf(\"一次间接   EA = M[%d] = %d\\n\", A, mem_2000);\n    printf(\"寄存器间接 EA = (R1) = %d\\n\", R1);\n    printf(\"基址寻址   EA = BR + disp = %d + %d = %d\\n\", BR, dispB, BR + dispB);\n    printf(\"变址寻址   EA = IX + disp = %d + %d = %d\\n\", IX, dispI, IX + dispI);\n    printf(\"相对寻址   EA = PC + disp = %d + %d = %d\\n\", PC, dispR, PC + dispR);\n    return 0;\n}"
+}

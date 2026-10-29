@@ -1,0 +1,8 @@
+{
+  "title": "CPU 时间 = 指令数 × CPI ÷ 主频（1 GHz / 5 亿指令 / CPI 1.5）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "主频 = 1000 MHz\n指令数 = 500000000\n平均CPI = 1.50\nCPU 时间 = 指令数 * CPI / 主频 = 0.750 s (750.0 ms)\n",
+  "code": "#include <stdio.h>\nint main(void) {\n    double f = 1e9;      /* 主频 1 GHz = 1e9 Hz */\n    double ic = 5e8;     /* 程序指令数 = 5 亿 */\n    double cpi = 1.5;    /* 平均 CPI */\n    double t = ic * cpi / f;   /* CPU 时间（秒） */\n    printf(\"主频 = 1000 MHz\\n\");\n    printf(\"指令数 = 500000000\\n\");\n    printf(\"平均CPI = 1.50\\n\");\n    printf(\"CPU 时间 = 指令数 * CPI / 主频 = %.3f s (%.1f ms)\\n\", t, t * 1000);\n    return 0;\n}\n"
+}

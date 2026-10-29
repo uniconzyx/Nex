@@ -1,0 +1,8 @@
+{
+  "title": "峰值 FLOPS = 核心数 × 每核每周期 FLOP × 主频（1024 核 / FMA / 1.5GHz）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "GPU 核心数 = 1024\n每核心每周期浮点操作 = 2 (FMA)\n主频 = 1.5 GHz\n峰值 FLOPS = 1024 * 2 * 1.5e9 = 3.072e+12 FLOPS\n           = 3.072 TFLOPS\n",
+  "code": "#include <stdio.h>\nint main(void) {\n    double cores = 1024, flop_per_cycle = 2, ghz = 1.5;  /* FMA = 2 FLOP/周期 */\n    double flops = cores * flop_per_cycle * ghz * 1e9;\n    printf(\"GPU 核心数 = 1024\\n\");\n    printf(\"每核心每周期浮点操作 = 2 (FMA)\\n\");\n    printf(\"主频 = 1.5 GHz\\n\");\n    printf(\"峰值 FLOPS = 1024 * 2 * 1.5e9 = %.3e FLOPS\\n\", flops);\n    printf(\"           = %.3f TFLOPS\\n\", flops / 1e12);\n    return 0;\n}\n"
+}

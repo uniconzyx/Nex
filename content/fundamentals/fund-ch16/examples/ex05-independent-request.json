@@ -1,0 +1,8 @@
+{
+  "title": "独立请求仲裁模拟（每设备独立 BR/BG，优先级可编程）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "独立请求仲裁 (优先级 设备2 > 0 > 3 > 1)\ncycle   请求   授权设备\n  0       1       0\n  1       6       2\n  2       8       3\n  3       2       1\n  4      13       2\n  5       0       -1\n  6       4       2\n  7       6       2\n",
+  "code": "#include <stdio.h>\n// 独立请求：每设备一对线(BR_i 请求 / BG_i 授权)，中央仲裁器用优先级编码器选最高优先级\n// 优先级顺序可任意编程：这里设 设备2 > 设备0 > 设备3 > 设备1\nint prio[4] = {2, 0, 3, 1};          // 从高到低\nint req[8] = {1, 6, 8, 2, 13, 0, 4, 6};\nint main() {\n    printf(\"独立请求仲裁 (优先级 设备2 > 0 > 3 > 1)\\n\");\n    printf(\"cycle   请求   授权设备\\n\");\n    for (int c = 0; c < 8; c++) {\n        int r = req[c];\n        int g = -1;\n        for (int k = 0; k < 4; k++) {\n            int i = prio[k];\n            if (r & (1 << i)) { g = i; break; }\n        }\n        printf(\"  %d      %2d       %d\\n\", c, r, g);\n    }\n    return 0;\n}\n"
+}

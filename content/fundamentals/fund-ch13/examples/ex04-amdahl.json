@@ -1,0 +1,8 @@
+{
+  "title": "Amdahl 定律：占比 40% 加速 10 倍，整体加速比",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "可优化部分占比 f = 0.40\n该部分加速比 S = 10.0\n整体加速比 = 1 / ((1-f) + f/S)\n           = 1 / (0.6 + 0.04) = 1 / 0.64 = 1.5625\n并行上限(占比固定时) = 1 / (1-f) = 1.6667\n",
+  "code": "#include <stdio.h>\nint main(void) {\n    double f = 0.40, S = 10.0;   /* 可优化占比 f, 该部分加速 S */\n    double total = 1.0 / ((1.0 - f) + f / S);\n    printf(\"可优化部分占比 f = 0.40\\n\");\n    printf(\"该部分加速比 S = 10.0\\n\");\n    printf(\"整体加速比 = 1 / ((1-f) + f/S)\\n\");\n    printf(\"           = 1 / (%g + %g) = 1 / %g = %.4f\\n\", (1.0 - f), f / S, (1.0 - f) + f / S, total);\n    printf(\"并行上限(占比固定时) = 1 / (1-f) = %.4f\\n\", 1.0 / (1.0 - f));\n    return 0;\n}\n"
+}

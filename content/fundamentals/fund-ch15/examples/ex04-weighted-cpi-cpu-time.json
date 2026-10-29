@@ -1,0 +1,8 @@
+{
+  "title": "加权 CPI 与 CPU 时间计算",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "加权CPI = 0.45*1 + 0.15*2 + 0.25*3 + 0.15*2 = 1.80\n指令总数 IC=1000\nCPU时间 = IC*CPI/主频 = 1000*1.80/2e+09 = 9.000e-07 秒 (0.90 微秒)\n",
+  "code": "#include <stdio.h>\n/*\n * ex04：加权 CPI 与 CPU 时间\n * 公式：\n *   CPI = Σ(各类指令占比 × 该类 CPI)\n *   CPU时间 = 指令总数 IC × CPI / 主频\n * 这是 408 最常考的性能计算：给了指令混合比例就不能用「单条指令 CPI」算。\n */\nint main(void) {\n    /* 四类指令：ALU / load-store / 转移 / 其他 */\n    const char *cls[4] = {\"ALU\", \"load-store\", \"分支\", \"其他\"};\n    double ratio[4] = {0.45, 0.15, 0.25, 0.15};   /* 占比之和必须 = 1 */\n    int    cpi[4]   = {1,     2,     3,     2};   /* 各类指令各自的 CPI */\n\n    double cpi_avg = 0.0;\n    printf(\"加权CPI = \");\n    for (int i = 0; i < 4; i++) {\n        cpi_avg += ratio[i] * cpi[i];             /* 按占比加权 */\n        printf(\"%s%.2f*%d\", i ? \" + \" : \"\", ratio[i], cpi[i]);   /* 逐项加权展开 */\n    }\n    printf(\" = %.2f\\n\", cpi_avg);\n\n    double ic = 1000.0;          /* 指令总数 */\n    double freq = 2.0e9;         /* 主频 2GHz */\n    double t = ic * cpi_avg / freq;   /* CPU 时间（秒）*/\n\n    printf(\"指令总数 IC=%.0f\\n\", ic);\n    printf(\"CPU时间 = IC*CPI/主频 = %.0f*%.2f/%.0e = %.3e 秒 (%.2f 微秒)\\n\",\n           ic, cpi_avg, freq, t, t * 1e6);\n    return 0;\n}\n"
+}

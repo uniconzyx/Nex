@@ -1,0 +1,8 @@
+{
+  "title": "向量中断分发：中断号经中断向量表定位 ISR",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== 向量中断分发模拟 ===\n中断向量表:\n  向量号  0 -> ISR_除零异常\n  向量号 32 -> ISR_定时器\n  向量号 33 -> ISR_键盘\n  向量号 34 -> ISR_网卡收包\n  向量号 35 -> ISR_磁盘_DMA完成\n控制器收到的向量号序列: [33, 32, 34, 35, 99]\n分发结果:\n  向量 33 -> 调用 ISR_键盘()\n  向量 32 -> 调用 ISR_定时器()\n  向量 34 -> 调用 ISR_网卡收包()\n  向量 35 -> 调用 ISR_磁盘_DMA完成()\n  向量 99 -> 无对应入口 (spurious 伪中断, 记录并忽略)\n结论: 硬件用向量号直接定位ISR, 响应快且能区分来源;\n        无对应入口的伪中断需被安全丢弃, 否则会跑飞。\n",
+  "code": "# 示例05: 向量中断分发 —— 中断号经中断向量表定位 ISR\nVECTOR_TABLE = {\n    0:  \"ISR_除零异常\",\n    32: \"ISR_定时器\",\n    33: \"ISR_键盘\",\n    34: \"ISR_网卡收包\",\n    35: \"ISR_磁盘_DMA完成\",\n}\nRECEIVED = [33, 32, 34, 35, 99]\n\nprint(\"=== 向量中断分发模拟 ===\")\nprint(\"中断向量表:\")\nfor vec, name in VECTOR_TABLE.items():\n    print(\"  向量号 %2d -> %s\" % (vec, name))\nprint(\"控制器收到的向量号序列:\", RECEIVED)\nprint(\"分发结果:\")\nfor v in RECEIVED:\n    if v in VECTOR_TABLE:\n        print(\"  向量 %2d -> 调用 %s()\" % (v, VECTOR_TABLE[v]))\n    else:\n        print(\"  向量 %2d -> 无对应入口 (spurious 伪中断, 记录并忽略)\" % v)\nprint(\"结论: 硬件用向量号直接定位ISR, 响应快且能区分来源;\")\nprint(\"        无对应入口的伪中断需被安全丢弃, 否则会跑飞。\")\n"
+}

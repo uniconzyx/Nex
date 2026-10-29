@@ -1,0 +1,8 @@
+{
+  "title": "地址线 24 条 → 可寻址空间 2^24 = 16 MiB",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "地址线条数 = 24\n可寻址空间 = 2^24 = 16777216 字节\n           = 16384 KiB = 16 MiB\n",
+  "code": "#include <stdio.h>\nint main(void) {\n    int lines = 24;\n    long long space = 1LL << lines;\n    printf(\"地址线条数 = %d\\n\", lines);\n    printf(\"可寻址空间 = 2^%d = %lld 字节\\n\", lines, space);\n    printf(\"           = %.0f KiB = %.0f MiB\\n\", space / 1024.0, space / 1048576.0);\n    return 0;\n}\n"
+}

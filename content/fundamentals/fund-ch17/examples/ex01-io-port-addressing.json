@@ -1,0 +1,8 @@
+{
+  "title": "I/O 端口编址：独立编址 vs 统一编址地址空间对比",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== I/O 端口编址方式对比 ===\n独立编址(Isolated I/O):\n  内存可寻址: 1048576 字节 (0x0 ~ 0xFFFFF)\n  I/O 空间:   65536 字节 (专用 IN/OUT 指令)\n  总可寻址:   1114112 字节 (内存+I/O 两套地址空间)\n统一编址(Memory-Mapped I/O):\n  内存被 I/O 划走: 4096 字节 (0xFF000 ~ 0xFFFFF)\n  内存实际可用:   1044480 字节 (0x0 ~ 0xFEFFF)\n  总可寻址:       1048576 字节 (内存与I/O共用一套地址空间)\n结论: 独立编址多一套地址空间但无需占用内存地址; 统一编址占用内存地址但无需专用I/O指令。\n",
+  "code": "# 示例01: I/O 端口编址 —— 独立编址 vs 统一编址(MMIO)地址空间对比\nMEM = 1 << 20          # 内存 1 MiB, 地址 0 .. 0xFFFFF\nIO_INDEP = 1 << 16     # 独立 I/O 空间 64 KiB (x86 传统 IN/OUT)\nIO_MMIO = 1 << 12      # 统一编址: 划走 4 KiB 给外设寄存器\nmem_mmio = MEM - IO_MMIO\n\nprint(\"=== I/O 端口编址方式对比 ===\")\nprint(\"独立编址(Isolated I/O):\")\nprint(\"  内存可寻址: %d 字节 (0x0 ~ 0x%X)\" % (MEM, MEM - 1))\nprint(\"  I/O 空间:   %d 字节 (专用 IN/OUT 指令)\" % IO_INDEP)\nprint(\"  总可寻址:   %d 字节 (内存+I/O 两套地址空间)\" % (MEM + IO_INDEP))\nprint(\"统一编址(Memory-Mapped I/O):\")\nprint(\"  内存被 I/O 划走: %d 字节 (0x%X ~ 0x%X)\" % (IO_MMIO, MEM - IO_MMIO, MEM - 1))\nprint(\"  内存实际可用:   %d 字节 (0x0 ~ 0x%X)\" % (mem_mmio, mem_mmio - 1))\nprint(\"  总可寻址:       %d 字节 (内存与I/O共用一套地址空间)\" % MEM)\nprint(\"结论: 独立编址多一套地址空间但无需占用内存地址; 统一编址占用内存地址但无需专用I/O指令。\")\n"
+}

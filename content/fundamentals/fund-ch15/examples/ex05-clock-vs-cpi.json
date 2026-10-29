@@ -1,0 +1,8 @@
+{
+  "title": "主频 vs CPI：哪台机器更快",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "机器A: 主频=3.0GHz CPI=1.5 -> 单指令耗时=0.50 ns\n机器B: 主频=2.5GHz CPI=1.0 -> 单指令耗时=0.40 ns\n结论: 机器B(主频低但CPI更优) 更快\nA 相对 B 的耗时倍数 = 1.250 (即 B 快 25.0%)\n",
+  "code": "#include <stdio.h>\n/*\n * ex05：主频高不等于更快 —— 用「单指令耗时 = CPI / 主频」比较两台机器\n *   A: CPI=1.5, 3.0GHz -> 1.5/3e9 s = 0.50 ns\n *   B: CPI=1.0, 2.5GHz -> 1.0/2.5e9 s = 0.40 ns\n * 结论：B 主频更低但 CPI 更优，反而更快（加速比 1.25）。\n * 这就是为什么只看 GHz 选 CPU 是外行：架构（CPI）与主频要一起看。\n */\nint main(void) {\n    double fA = 3.0e9, cpiA = 1.5;   /* 机器 A：高主频、高 CPI */\n    double fB = 2.5e9, cpiB = 1.0;   /* 机器 B：低主频、低 CPI */\n\n    double tA = cpiA / fA;           /* 单条指令平均耗时（秒） */\n    double tB = cpiB / fB;\n    double speedup = tA / tB;        /* A 的耗时是 B 的多少倍 */\n\n    printf(\"机器A: 主频=%.1fGHz CPI=%.1f -> 单指令耗时=%.2f ns\\n\", fA / 1e9, cpiA, tA * 1e9);\n    printf(\"机器B: 主频=%.1fGHz CPI=%.1f -> 单指令耗时=%.2f ns\\n\", fB / 1e9, cpiB, tB * 1e9);\n    printf(\"结论: %s 更快\\n\", tB < tA ? \"机器B(主频低但CPI更优)\" : \"机器A\");\n    printf(\"A 相对 B 的耗时倍数 = %.3f (即 B 快 %.1f%%)\\n\", speedup, (speedup - 1) * 100.0);\n    return 0;\n}\n"
+}

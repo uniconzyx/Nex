@@ -1,0 +1,8 @@
+{
+  "title": "机器字长 32 位 → 地址空间 2^32 = 4 GiB",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "机器字长 = 32 位\n地址空间 = 2^32 = 4294967296 字节\n         = 4096 MiB = 4 GiB\n",
+  "code": "#include <stdio.h>\nint main(void) {\n    int w = 32;\n    long long addr = 1LL << w;\n    printf(\"机器字长 = %d 位\\n\", w);\n    printf(\"地址空间 = 2^%d = %lld 字节\\n\", w, addr);\n    printf(\"         = %.0f MiB = %.0f GiB\\n\", addr / 1048576.0, addr / 1073741824.0);\n    return 0;\n}\n"
+}

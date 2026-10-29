@@ -1,0 +1,8 @@
+{
+  "title": "并查集：统计无向图连通分量个数",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "节点数 n = 8，合并边 = 5 条\r\n并查集统计连通分量个数 = 3\r\n",
+  "code": "#include <stdio.h>\n#define MAXN 16\nint parent[MAXN], rk[MAXN];\nvoid init(int n){ for(int i=0;i<n;i++){ parent[i]=i; rk[i]=0; } }\nint find(int x){ int r=x; while(parent[r]!=r) r=parent[r];\n    while(parent[x]!=r){ int t=parent[x]; parent[x]=r; x=t; } return r; }\nvoid unite(int a,int b){ int ra=find(a),rb=find(b); if(ra==rb) return;\n    if(rk[ra]<rk[rb]) parent[ra]=rb; else if(rk[ra]>rk[rb]) parent[rb]=ra;\n    else { parent[rb]=ra; rk[ra]++; } }\nint main(void){\n    int n=8; init(n);\n    int edges[][2]={{0,1},{1,2},{3,4},{5,6},{6,7}};\n    int E=5;\n    for(int i=0;i<E;i++) unite(edges[i][0],edges[i][1]);\n    int cnt=0;\n    for(int i=0;i<n;i++) if(find(i)==i) cnt++;\n    printf(\"节点数 n = %d，合并边 = %d 条\\n\", n, E);\n    printf(\"并查集统计连通分量个数 = %d\\n\", cnt);\n    return 0;\n}\n"
+}

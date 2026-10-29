@@ -1,0 +1,8 @@
+{
+  "title": "指令周期各阶段节拍数统计",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "取指周期 = 4 节拍\n间址周期 = 3 节拍\n执行周期 = 5 节拍\n需间址指令耗时 = 4+3+5 = 12 节拍\n普通指令耗时   = 4+5 = 9 节拍\n中断周期 = 2 节拍\n上述序列总节拍 = 23 节拍",
+  "code": "#include <stdio.h>\n\nint main() {\n    int fetch = 4, indirect = 3, execute = 5, interrupt = 2;\n    int with_indirect = fetch + indirect + execute;  /* 需间址：取指+间址+执行 */\n    int normal = fetch + execute;                    /* 普通：取指+执行 */\n    int total = with_indirect + normal + interrupt;\n\n    printf(\"取指周期 = %d 节拍\\n\", fetch);\n    printf(\"间址周期 = %d 节拍\\n\", indirect);\n    printf(\"执行周期 = %d 节拍\\n\", execute);\n    printf(\"需间址指令耗时 = %d+%d+%d = %d 节拍\\n\", fetch, indirect, execute, with_indirect);\n    printf(\"普通指令耗时   = %d+%d = %d 节拍\\n\", fetch, execute, normal);\n    printf(\"中断周期 = %d 节拍\\n\", interrupt);\n    printf(\"上述序列总节拍 = %d 节拍\\n\", total);\n    return 0;\n}"
+}

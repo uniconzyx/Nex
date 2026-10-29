@@ -1,0 +1,8 @@
+{
+  "title": "DMA 周期挪用(透明 DMA)模拟",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== DMA 周期挪用(透明DMA)模拟 ===\n时间片  CPU访存  DMA动作\n   0      1       CPU占用总线, 设备暂等待\n   1      0       窃取空闲总线, 搬1字入内存\n   2      1       CPU占用总线, 设备暂等待\n   3      0       窃取空闲总线, 搬1字入内存\n   4      1       CPU占用总线, 设备暂等待\n   5      0       窃取空闲总线, 搬1字入内存\n   6      1       CPU占用总线, 设备暂等待\n   7      0       窃取空闲总线, 搬1字入内存\n   8      1       CPU占用总线, 设备暂等待\n   9      0       窃取空闲总线, 搬1字入内存\n设备共 5 字, DMA 成功挪用 5 次总线周期完成搬运\n结论: 周期挪用只偷 CPU 不访存的瞬间, CPU 几乎无感; 这是最常用也最友好的仲裁方式。\n",
+  "code": "# 示例08: DMA 周期挪用(透明 DMA)模拟\nCPU_VISIT = [1, 0, 1, 0, 1, 0, 1, 0, 1, 0]\nDEV_WORDS = 5\n\nproduced = 0\nstolen = 0\n\nprint(\"=== DMA 周期挪用(透明DMA)模拟 ===\")\nprint(\"时间片  CPU访存  DMA动作\")\nfor i in range(len(CPU_VISIT)):\n    if produced < DEV_WORDS and CPU_VISIT[i] == 0:\n        stolen += 1\n        produced += 1\n        action = \"窃取空闲总线, 搬1字入内存\"\n    elif produced < DEV_WORDS and CPU_VISIT[i] == 1:\n        action = \"CPU占用总线, 设备暂等待\"\n    else:\n        action = \"传送完成, 总线归还CPU\"\n    print(\"  %2d      %d       %s\" % (i, CPU_VISIT[i], action))\n\nprint(\"设备共 %d 字, DMA 成功挪用 %d 次总线周期完成搬运\" % (DEV_WORDS, stolen))\nprint(\"结论: 周期挪用只偷 CPU 不访存的瞬间, CPU 几乎无感; 这是最常用也最友好的仲裁方式。\")\n"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "地址码位数与寻址空间",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "地址码位数 = 16 位\n寻址空间 = 2^16 = 65536 个存储单元\n若按字节编址，可寻址 65536 字节 = 64 KB",
+  "code": "#include <stdio.h>\n\nint main() {\n    int addr_bits = 16;                 /* 地址码字段占 16 位 */\n    long space = 1L << addr_bits;       /* 寻址空间 = 2^addr_bits */\n    printf(\"地址码位数 = %d 位\\n\", addr_bits);\n    printf(\"寻址空间 = 2^%d = %ld 个存储单元\\n\", addr_bits, space);\n    printf(\"若按字节编址，可寻址 %ld 字节 = %ld KB\\n\", space, space / 1024);\n    return 0;\n}"
+}

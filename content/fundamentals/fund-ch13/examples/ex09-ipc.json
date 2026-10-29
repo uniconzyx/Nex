@@ -1,0 +1,8 @@
+{
+  "title": "IPC = 1 / CPI（CPI 1.25 → IPC 0.8；4GHz 等效 MIPS）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "CPI = 1.25\nIPC = 1 / CPI = 0.80 条/周期\n主频 = 4.0 GHz\n等效 MIPS = 4e9 / (1.25 * 1e6) = 3200\n",
+  "code": "#include <stdio.h>\nint main(void) {\n    double cpi = 1.25;\n    double ipc = 1.0 / cpi;\n    double f = 4e9;\n    double mips = f / (cpi * 1e6);\n    printf(\"CPI = 1.25\\n\");\n    printf(\"IPC = 1 / CPI = %.2f 条/周期\\n\", ipc);\n    printf(\"主频 = 4.0 GHz\\n\");\n    printf(\"等效 MIPS = 4e9 / (1.25 * 1e6) = %.0f\\n\", mips);\n    return 0;\n}\n"
+}

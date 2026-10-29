@@ -1,0 +1,8 @@
+{
+  "title": "KMP：构造 next 数组",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "模式串: ababc\r\n位置  : 1 2 3 4 5\r\n字符  : a b a b c\r\nnext  : 0 1 1 2 3\r\n",
+  "code": "#include <stdio.h>\n#include <string.h>\nint main(void){\n    const char *p=\"ababc\";\n    int m=(int)strlen(p);\n    int next[16];\n    next[1]=0;\n    for(int j=1,k=0;j<m;){          /* 1-indexed 王道 next：next[1]=0 */\n        if(k==0 || p[j-1]==p[k-1]){ j++; k++; next[j]=k; }\n        else k=next[k];\n    }\n    printf(\"模式串: %s\\n\", p);\n    printf(\"位置  :\"); for(int i=1;i<=m;i++) printf(\" %d\",i); printf(\"\\n\");\n    printf(\"字符  :\"); for(int i=0;i<m;i++) printf(\" %c\",p[i]); printf(\"\\n\");\n    printf(\"next  :\"); for(int i=1;i<=m;i++) printf(\" %d\",next[i]); printf(\"\\n\");\n    return 0;\n}\n"
+}

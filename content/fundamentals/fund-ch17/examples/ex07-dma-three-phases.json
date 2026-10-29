@@ -1,0 +1,8 @@
+{
+  "title": "DMA 传送三阶段 与 CPU 占用率",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== DMA 传送三阶段 与 CPU 占用率 ===\n阶段时间轴(单位: 时间片):\n  [预处理 4] | [数据传送 100: CPU并行] | [后处理 6]\n  CPU 占用时段: 预处理 + 后处理 = 10\n  数据传送时段: CPU 占用 = 0 (DMAC 与 CPU 并行)\n总耗时 = 110, CPU 被占用 = 10\nCPU 占用率 = 10 / 110 = 9.1%\n结论: 数据传送占比越大, DMA 越能解放 CPU; DMA 不是完全不用 CPU, 只省下传送阶段。\n",
+  "code": "# 示例07: DMA 传送三阶段 与 CPU 占用率\nT_PRE = 4\nT_DMA = 100\nT_POST = 6\n\ntotal = T_PRE + T_DMA + T_POST\ncpu_busy = T_PRE + T_POST\noccupancy = cpu_busy / total * 100\n\nprint(\"=== DMA 传送三阶段 与 CPU 占用率 ===\")\nprint(\"阶段时间轴(单位: 时间片):\")\nprint(\"  [预处理 %d] | [数据传送 %d: CPU并行] | [后处理 %d]\" % (T_PRE, T_DMA, T_POST))\nprint(\"  CPU 占用时段: 预处理 + 后处理 = %d\" % cpu_busy)\nprint(\"  数据传送时段: CPU 占用 = 0 (DMAC 与 CPU 并行)\")\nprint(\"总耗时 = %d, CPU 被占用 = %d\" % (total, cpu_busy))\nprint(\"CPU 占用率 = %d / %d = %.1f%%\" % (cpu_busy, total, occupancy))\nprint(\"结论: 数据传送占比越大, DMA 越能解放 CPU; DMA 不是完全不用 CPU, 只省下传送阶段。\")\n"
+}

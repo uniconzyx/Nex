@@ -21,6 +21,7 @@ export const TRACK_408: TrackDef = {
         "fund-ch02",
         "fund-ch03",
         "fund-ch04",
+        "fund-ch18",
         "fund-ch05",
         "fund-ch06",
         "cpp-ch08",
@@ -30,8 +31,13 @@ export const TRACK_408: TrackDef = {
     {
       "module": "计算机组成原理",
       "chapters": [
+        "fund-ch13",
         "fund-ch07",
-        "fund-ch08"
+        "fund-ch08",
+        "fund-ch14",
+        "fund-ch15",
+        "fund-ch16",
+        "fund-ch17"
       ]
     },
     {

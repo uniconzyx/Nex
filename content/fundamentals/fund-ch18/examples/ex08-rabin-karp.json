@@ -1,0 +1,8 @@
+{
+  "title": "字符串哈希：Rabin-Karp 滚动匹配",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "文本: hello  模式: ell  (base=100)\r\n窗口哈希:\r\n  [0] hel -> 80512\r\n  [1] ell -> 51212  <- 匹配\r\n  匹配起始位置(0基): 1\r\n  [2] llo -> 121215\r\n",
+  "code": "#include <stdio.h>\n#include <string.h>\nint main(void){\n    const char *txt=\"hello\", *pat=\"ell\";\n    int n=(int)strlen(txt), m=(int)strlen(pat);\n    int base=100;                 /* 每位 1..26，base=100 保证无进位串味 */\n    long power=1; for(int i=1;i<m;i++) power*=base;   /* base^(m-1) */\n    long ph=0;\n    for(int i=0;i<m;i++) ph = ph*base + (pat[i]-'a'+1);\n    long hw=0;\n    for(int i=0;i<m;i++) hw = hw*base + (txt[i]-'a'+1);\n    printf(\"文本: %s  模式: %s  (base=%d)\\n\", txt, pat, base);\n    printf(\"窗口哈希:\\n\");\n    int matched=0;\n    printf(\"  [0] %.*s -> %ld%s\\n\", m, txt, hw, (hw==ph?\"  <- 匹配\":\"\"));\n    if(hw==ph){ printf(\"  匹配起始位置(0基): 0\\n\"); matched=1; }\n    for(int s=1;s+m<=n;s++){\n        hw = (hw - (txt[s-1]-'a'+1)*power)*base + (txt[s+m-1]-'a'+1);\n        printf(\"  [%d] %.*s -> %ld%s\\n\", s, m, txt+s, hw, (hw==ph?\"  <- 匹配\":\"\"));\n        if(hw==ph){ printf(\"  匹配起始位置(0基): %d\\n\", s); matched=1; }\n    }\n    if(!matched) printf(\"未找到匹配\\n\");\n    return 0;\n}\n"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "通道程序(CCW)执行模拟",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== 通道程序(CCW)执行模拟 ===\n通道程序:\n  CCW0: R  addr=0x1000  count=64  链接\n  CCW1: R  addr=0x1100  count=32  链接\n  CCW2: T  addr=0x2000  count=0  链接\n  CCW3: W  addr=0x2000  count=16  链接\n  CCW4: S  addr=0x0  count=0  停止\n  执行: 从设备读 64 字 -> 内存 0x1000\n  执行: 从设备读 32 字 -> 内存 0x1100\n  执行: 转移到地址 0x2000 继续取 CCW\n  执行: 从内存 0x2000 写 16 字 -> 设备\n  执行: 停止通道, 向 CPU 发通道中断\n本次通道程序共搬运 112 字\n结论: 相比 DMA, 通道能用 CCW 链处理带格式/带跳转的复杂 I/O, CPU 参与更少。\n",
+  "code": "# 示例10: 通道程序(CCW)执行模拟\nCCW = [\n    ('R', 0x1000, 64, 'CH'),\n    ('R', 0x1100, 32, 'CH'),\n    ('T', 0x2000, 0,  'CH'),\n    ('W', 0x2000, 16, 'CH'),\n    ('S', 0x0000, 0,  'NO'),\n]\n\nprint(\"=== 通道程序(CCW)执行模拟 ===\")\nprint(\"通道程序:\")\nfor i, (cmd, addr, cnt, flag) in enumerate(CCW):\n    print(\"  CCW%d: %s  addr=%#x  count=%d  %s\" % (i, cmd, addr, cnt,\n          \"链接\" if flag == 'CH' else \"停止\"))\nmoved = 0\nfor i, (cmd, addr, cnt, flag) in enumerate(CCW):\n    if cmd == 'R':\n        print(\"  执行: 从设备读 %d 字 -> 内存 %#x\" % (cnt, addr)); moved += cnt\n    elif cmd == 'W':\n        print(\"  执行: 从内存 %#x 写 %d 字 -> 设备\" % (addr, cnt)); moved += cnt\n    elif cmd == 'T':\n        print(\"  执行: 转移到地址 %#x 继续取 CCW\" % addr)\n    elif cmd == 'S':\n        print(\"  执行: 停止通道, 向 CPU 发通道中断\")\nprint(\"本次通道程序共搬运 %d 字\" % moved)\nprint(\"结论: 相比 DMA, 通道能用 CCW 链处理带格式/带跳转的复杂 I/O, CPU 参与更少。\")\n"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "程序查询方式耗时模拟：等待期间 CPU 100% 被占用",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "=== 程序查询 vs 程序中断 (CPU 被占用时间) ===\n设备就绪前需轮询次数: 500\n程序查询: CPU 忙等 500 微秒 (每次轮询 1 微秒)\n程序中断: CPU 仅花 5 微秒进入/退出 ISR, 等待期间可并行干别的\n节省 CPU 时间: 495 微秒 (查询方式约为中断的 100 倍)\n结论: 查询方式在'等待'阶段 CPU 占用率 100% , 中断方式把等待变成了并行。\n",
+  "code": "# 示例02: 程序查询方式耗时模拟\nT_POLL = 1          # 一次轮询(读状态端口)耗时, 单位: 微秒\nREADY_AFTER = 500   # 设备在第 500 次轮询时才就绪\nT_ISR = 5           # 程序中断: 进入/退出一次 ISR 的固定开销(微秒)\n\nbusy_poll = READY_AFTER * T_POLL\nbusy_intr = T_ISR\n\nprint(\"=== 程序查询 vs 程序中断 (CPU 被占用时间) ===\")\nprint(\"设备就绪前需轮询次数: %d\" % READY_AFTER)\nprint(\"程序查询: CPU 忙等 %d 微秒 (每次轮询 %d 微秒)\" % (busy_poll, T_POLL))\nprint(\"程序中断: CPU 仅花 %d 微秒进入/退出 ISR, 等待期间可并行干别的\" % busy_intr)\nprint(\"节省 CPU 时间: %d 微秒 (查询方式约为中断的 %.0f 倍)\" % (busy_poll - busy_intr, busy_poll / busy_intr))\nprint(\"结论: 查询方式在'等待'阶段 CPU 占用率 100%% , 中断方式把等待变成了并行。\" % ())\n"
+}

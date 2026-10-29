@@ -1,0 +1,270 @@
+{
+  "meta": {
+    "chapter": "fund-ch15",
+    "note": "8 题：基础题 7 + 算法题 1；覆盖流水线时空图与加速比、三类冒险、硬布线 vs 微程序、微指令编码、CPU 性能公式，算法题为五段流水线含停顿的周期模拟（source: 408 统考 计组 CPU）。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "五段流水线处理 100 条指令的加速比",
+      "content_md": "某 5 段流水线 CPU，各段耗时相等且无任何停顿。处理 100 条指令时，相对顺序执行（非流水）的加速比约为？",
+      "options": [
+        {
+          "key": "A",
+          "text": "5.00"
+        },
+        {
+          "key": "B",
+          "text": "4.81"
+        },
+        {
+          "key": "C",
+          "text": "20.00"
+        },
+        {
+          "key": "D",
+          "text": "1.00"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "顺序执行需 n×k = 100×5 = 500 拍；流水执行需 n+k-1 = 104 拍。S = 500/104 ≈ 4.81。A 是「理想加速比上限 = 段数」的误记，只有 n→∞ 时才逼近 5；C 把 n 当段数算了。",
+      "tags": [
+        "流水线",
+        "加速比",
+        "408"
+      ],
+      "source": "book",
+      "source_ref": "《计算机组成原理》唐朔飞 第 5 章 中央处理器"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "medium",
+      "title": "load-use 数据冒险最少需要几拍停顿",
+      "content_md": "在采用**完整旁路（转发）**的五段流水线（IF/ID/EX/MEM/WB）中，指令 `LW R1,0(R2)` 紧跟 `ADD R3,R1,R4`，最少需要插入几拍停顿？",
+      "options": [
+        {
+          "key": "A",
+          "text": "0 拍，有旁路就不需要停顿"
+        },
+        {
+          "key": "B",
+          "text": "1 拍"
+        },
+        {
+          "key": "C",
+          "text": "2 拍"
+        },
+        {
+          "key": "D",
+          "text": "3 拍"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "load 的数据要到 MEM 段末才拿到，而 ADD 的 EX 段在 MEM 段之前就要用该值，时间上差一拍，所以即使有旁路也必须插 1 拍（通常配「转发 + 1 拍 stall」）。ALU→ALU 的 RAW 才是 0 拍。0 拍是常见误选点。",
+      "tags": [
+        "数据冒险",
+        "load-use",
+        "旁路",
+        "408"
+      ],
+      "source": "book",
+      "source_ref": "《计算机组成原理》唐朔飞 第 5 章 中央处理器"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "medium",
+      "title": "硬布线控制器与微程序控制器的取舍",
+      "content_md": "关于硬布线控制器与微程序控制器，下列说法**正确**的是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "硬布线控制器速度慢但易修改，适合 CISC"
+        },
+        {
+          "key": "B",
+          "text": "微程序控制器速度快但难修改，适合 RISC"
+        },
+        {
+          "key": "C",
+          "text": "硬布线控制器速度快、难修改，适合 RISC；微程序控制器速度稍慢、易修改，适合 CISC"
+        },
+        {
+          "key": "D",
+          "text": "两者速度完全等价，只是实现语言不同"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "C"
+        ]
+      },
+      "explanation": "硬布线用组合逻辑直接产生控制信号：快、但改一条指令就要改电路，适合指令少而规整的 RISC。微程序把控制信号存进控制存储器（微指令）：改指令＝改微程序，灵活、适合指令复杂的 CISC，代价是多一次访存（或查表）延迟。A、B 把两者的优缺点完全说反了。",
+      "tags": [
+        "硬布线",
+        "微程序",
+        "RISC",
+        "CISC",
+        "408"
+      ],
+      "source": "book",
+      "source_ref": "《计算机组成原理》唐朔飞 第 5 章 中央处理器"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "hard",
+      "title": "微指令的字段编码方式选择",
+      "content_md": "某微指令中，`A`、`B` 两个微命令不能在同一拍同时有效，`C`、`D` 两个微命令可以同时有效。欲使微指令字长最短，应采用的编码方式是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "直接编码（每位一个微命令）"
+        },
+        {
+          "key": "B",
+          "text": "A、B 用字段直接编码，C、D 各自独立一位"
+        },
+        {
+          "key": "C",
+          "text": "全部四个微命令用同一字段直接编码"
+        },
+        {
+          "key": "D",
+          "text": "全部四个微命令用字段间接编码"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "关键概念：**互斥（相斥）的微命令可放在同一字段里编码**，**相容的微命令必须各占一位**（否则无法同时有效）。A、B 互斥 → 放同一字段，2 个状态只需 ⌈log2(2+1)⌉=2 位（含「都不发」）；C、D 相容 → 各 1 位。合计 4 位。若全用直接编码要 4 位（这里恰好相同，但指令多时字段编码优势明显）；全放同一字段会让 C、D 无法同时有效，语义错误——这是本题最主要的坑。",
+      "tags": [
+        "微指令",
+        "编码",
+        "相容",
+        "相斥",
+        "408"
+      ],
+      "source": "book",
+      "source_ref": "《计算机组成原理》唐朔飞 第 5 章 中央处理器"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "medium",
+      "title": "结构冒险的成因与消除",
+      "content_md": "五段流水线中，`LW` 指令与紧随其后的取指操作都要访问同一个单端口存储器，由此产生的冒险属于哪一类，最彻底的解决办法是？",
+      "options": [
+        {
+          "key": "A",
+          "text": "数据冒险；用旁路转发解决"
+        },
+        {
+          "key": "B",
+          "text": "控制冒险；用分支预测解决"
+        },
+        {
+          "key": "C",
+          "text": "结构冒险；用指令 cache 与数据 cache 分离（或双端口存储）解决"
+        },
+        {
+          "key": "D",
+          "text": "结构冒险；插入 3 拍停顿即可彻底消除"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "C"
+        ]
+      },
+      "explanation": "多个操作在同一拍争用同一硬件资源 = 结构冒险（资源冲突）。根治靠「加资源」：哈佛结构（指令/数据 cache 分离）、双端口寄存器堆、多总线。插停顿只是缓解（且随指令数线性变差），所以 D 的「彻底消除」是错的；A、B 类型判错。",
+      "tags": [
+        "结构冒险",
+        "哈佛结构",
+        "408"
+      ],
+      "source": "book",
+      "source_ref": "《计算机组成原理》唐朔飞 第 5 章 中央处理器"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "给定 CPI 与主频计算 CPU 时间",
+      "content_md": "某程序共 2×10⁶ 条指令，平均 CPI = 1.5，主频 2 GHz。该程序的 CPU 执行时间是多少毫秒？（写出算式）",
+      "answer": {
+        "text": "CPU 时间 = IC×CPI/f = 2×10⁶ × 1.5 / 2×10⁹ = 1.5×10⁻³ s = 1.5 ms",
+        "code": "# 验证：IC*CPI/f\nIC = 2e6\nCPI = 1.5\nf = 2e9\nt = IC * CPI / f\nprint(f\"CPU时间 = {t:.4g} 秒 = {t*1e3:.2f} 毫秒\")"
+      },
+      "explanation": "核心公式 CPU时间 = 指令条数 × CPI / 主频。易错点：① 把 GHz 写成 10⁶；② 用 MIPS 反算时忘了 MIPS = f/(CPI×10⁶)，量纲混乱；③ 忘记 IC 是「指令条数」而不是「程序行数」。答案 1.5 ms。",
+      "tags": [
+        "性能公式",
+        "CPU时间",
+        "408"
+      ],
+      "source": "self",
+      "source_ref": "408 统考 计组 CPU 性能"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "修正流水线效率公式的错误",
+      "content_md": "下面的 Python 函数想算五段流水线的加速比与效率，但结果明显不合理（效率 > 1）。请指出错误并改正。\n\n```python\ndef pipe(n, k, stall):\n    total = k + (n - 1) + stall\n    speedup = n * k / total\n    eff = n * k / total      # 错在这里\n    return speedup, eff\n```",
+      "answer": {
+        "text": "效率 E = 加速比 S / 流水段数 k = n / total，而不是 n*k/total。原式把「顺序执行拍数」当成了效率，量纲上也不是比值（会 >1）。",
+        "code": "def pipe(n, k, stall):\n    total = k + (n - 1) + stall   # 实际总拍数\n    speedup = (n * k) / total     # S = 顺序拍数 / 流水拍数\n    eff = speedup / k             # E = S / k = n / total\n    return speedup, eff\n\nprint(pipe(12, 5, 4))   # (3.0, 0.6)"
+      },
+      "explanation": "三个量关系必须记牢：TP = n/总拍，S = n*k/总拍，E = S/k = n/总拍。E 的物理含义是「流水线各段的时间利用率」，必然 ≤ 1；一旦算出 >1 就说明公式写错。本例 n=12,k=5,stall=4 → S=3.0、E=0.6。",
+      "tags": [
+        "流水线",
+        "效率",
+        "调试",
+        "408"
+      ],
+      "source": "self",
+      "source_ref": "408 统考 计组 CPU 流水线"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": "hard",
+      "title": "模拟五段流水线：按冒险规则插入停顿并算总周期",
+      "content_md": "实现 `simulate(insns, k=5)`，输入一个指令列表，每条指令形如 `{\"dst\": 1, \"src\": [2, 3], \"is_load\": False}`（`dst=0` 表示不写寄存器）。规则：\n\n1. **load-use 冒险**：前一条是 `is_load=True` 且其 `dst` 出现在后一条的 `src` 中 → 插入 **1** 拍停顿；\n2. **ALU RAW 冒险**：前一条不是 load 且 `dst` 出现在后一条 `src` 中 → 旁路可解，**0** 拍停顿；\n3. 其余情况不停顿。\n\n返回 `(total_cycles, stalls)`：`total_cycles = k + (n-1) + stalls`，`stalls` 为总停顿拍数。",
+      "answer": {
+        "text": "顺序扫描相邻指令对，只对「前一条是 load 且结果被后一条立刻使用」的情况累加 1 拍停顿；ALU 情形靠旁路为 0。总周期 = 流水填充拍 + 剩余指令拍 + 停顿。",
+        "code": "def simulate(insns, k=5):\n    n = len(insns)\n    if n == 0:\n        return 0, 0\n    stalls = 0\n    for i in range(n - 1):\n        cur, nxt = insns[i], insns[i + 1]\n        dst = cur.get(\"dst\", 0)\n        if dst and dst in nxt.get(\"src\", []):\n            # 只有 load-use 才真的停 1 拍；ALU 结果可旁路\n            if cur.get(\"is_load\", False):\n                stalls += 1\n    total = k + (n - 1) + stalls\n    return total, stalls\n\nif __name__ == \"__main__\":\n    prog = [\n        {\"dst\": 1, \"src\": [2, 3], \"is_load\": False},   # ADD R1,R2,R3\n        {\"dst\": 4, \"src\": [1, 5], \"is_load\": False},   # SUB R4,R1,R5  -> ALU RAW, 0 停\n        {\"dst\": 6, \"src\": [4],    \"is_load\": True},    # LW  R6,0(R4)  -> ALU RAW, 0 停\n        {\"dst\": 0, \"src\": [6, 1], \"is_load\": False},   # SW  0(R6),R1  -> load-use, 1 停\n        {\"dst\": 7, \"src\": [6, 4], \"is_load\": False},\n    ]\n    print(simulate(prog))   # (10, 1)  -> 5 段填充 + 4 条后续 + 1 拍 load-use 停顿"
+      },
+      "explanation": "考点是把「冒险判定规则」翻译成可执行的相邻对扫描。三个易错点：① 把 ALU RAW 也插 1 拍（旁路能吃掉的不能算停顿）；② 忘记 `dst=0`（store 不写寄存器）会造成假冒险；③ 总周期漏加 `k-1` 的流水填充拍。本题 n=5、k=5、stalls=1 → total = 5 + 4 + 1 = **10**，返回 `(10, 1)`。",
+      "tags": [
+        "流水线",
+        "冒险",
+        "模拟",
+        "coding"
+      ],
+      "source": "self",
+      "source_ref": "408 统考 计组 CPU 流水线"
+    }
+  ]
+}

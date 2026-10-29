@@ -1,0 +1,149 @@
+{
+  "meta": {
+    "chapter": "fund-ch16",
+    "note": "8 题：基础题 7 + 算法题 1；覆盖带宽计算、三种集中仲裁对比、异步互锁、PCIe/PCI、突发与分离式，算法题模拟独立请求仲裁并算占用率（source: 408 统考 计组 总线）。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "总线带宽计算",
+      "content_md": "某 32 位同步总线，时钟频率 33 MHz，每个总线时钟周期完成 1 次数据传输，则其**总线带宽**约为多少（MB/s）？",
+      "options": [
+        { "key": "A", "text": "33 MB/s" },
+        { "key": "B", "text": "66 MB/s" },
+        { "key": "C", "text": "132 MB/s" },
+        { "key": "D", "text": "264 MB/s" }
+      ],
+      "answer": { "correct": ["C"] },
+      "explanation": "总线带宽 = 总线位宽/8 × 时钟频率 × 每周期传输次数。32 位 = 4 字节，4 × 33 × 1 = 132 MB/s。注意区分「峰值带宽」与「实际传输率」——这里求的是峰值。",
+      "tags": ["带宽", "总线", "408"],
+      "source": "book",
+      "source_ref": "《计算机组成原理》唐朔飞 第 7 章 总线"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "medium",
+      "title": "三种集中式仲裁的控制线数",
+      "content_md": "关于三种集中式总线仲裁（链式查询 / 计数器定时查询 / 独立请求）所需控制线数，下列说法正确的是？",
+      "options": [
+        { "key": "A", "text": "链式查询所需控制线数最多" },
+        { "key": "B", "text": "独立请求所需控制线数最少" },
+        { "key": "C", "text": "链式查询约需 3 根（BR/BG/BS），独立请求需 2N 根（N 为设备数）" },
+        { "key": "D", "text": "计数器定时查询所需线数比独立请求还多" }
+      ],
+      "answer": { "correct": ["C"] },
+      "explanation": "线数由少到多：链式（约 3 根 BR/BG/BS）< 计数器定时（⌈log₂N⌉ + 2）< 独立请求（每设备 BR+BG 各一，共 2N 根）。A、B 说反，D 也反了。",
+      "tags": ["仲裁", "链式", "独立请求", "408"],
+      "source": "book",
+      "source_ref": "《计算机组成原理》唐朔飞 第 7 章 总线"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "medium",
+      "title": "异步定时的全互锁",
+      "content_md": "异步总线定时中的「全互锁」是指？",
+      "options": [
+        { "key": "A", "text": "主方发请求后延时固定时间自动撤请求，不管从方是否收到" },
+        { "key": "B", "text": "主方发请求后等从方应答才撤请求，但从方应答不互等（半互锁）" },
+        { "key": "C", "text": "主方等从方应答才撤请求，从方等主方撤请求才撤应答，双向互等" },
+        { "key": "D", "text": "不发送任何握手信号，完全靠全局时钟同步" }
+      ],
+      "answer": { "correct": ["C"] },
+      "explanation": "全互锁 = 四相握手：主发 REQ→等 ACK 才撤 REQ；从收 REQ 发 ACK→等 REQ 撤才撤 ACK，双向互等，最可靠但每步多一轮握手。A 是不互锁，B 是半互锁。",
+      "tags": ["异步", "互锁", "握手", "408"],
+      "source": "book",
+      "source_ref": "《计算机组成原理》唐朔飞 第 7 章 总线"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "medium",
+      "title": "PCI 与 PCIe 的差异",
+      "content_md": "关于 PCI 与 PCIe，下列说法**错误**的是？",
+      "options": [
+        { "key": "A", "text": "PCI 是并行共享总线，PCIe 是串行、点对点交换结构" },
+        { "key": "B", "text": "PCIe 带宽靠 Lane 数叠加，支持全双工" },
+        { "key": "C", "text": "PCIe 可视为『更宽的并行 PCI』，本质相同" },
+        { "key": "D", "text": "PCIe 采用 8b/10b 或 128b/130b 线路编码" }
+      ],
+      "answer": { "correct": ["C"] },
+      "explanation": "PCIe 在架构上与传统 PCI **完全不同**：从并行共享总线变为串行差分、点对点交换，靠 Lane 数堆带宽，不是『更宽的 PCI』。D 正确：Gen2 用 8b/10b，Gen3/4 用 128b/130b。",
+      "tags": ["PCIe", "PCI", "总线标准", "408"],
+      "source": "book",
+      "source_ref": "《计算机组成原理》唐朔飞 第 7 章 总线"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "medium",
+      "title": "突发传送与分离式事务",
+      "content_md": "关于突发（burst）传送与分离式事务，下列说法正确的是？",
+      "options": [
+        { "key": "A", "text": "突发传送每次数据都要重新发送地址" },
+        { "key": "B", "text": "分离式事务把一次操作拆成请求与响应两个相位，从设备忙时主设备释放总线" },
+        { "key": "C", "text": "分离式事务在只有一个主设备时利用率一定更高" },
+        { "key": "D", "text": "突发传送不能提高有效带宽" }
+      ],
+      "answer": { "correct": ["B"] },
+      "explanation": "B 是分离式事务的定义与收益点。A 反了（突发只发一次首地址）；C 错：单主设备时分离式反而增加重竞争开销；D 错：突发靠省地址相位显著提升有效带宽。",
+      "tags": ["突发", "分离式", "408"],
+      "source": "book",
+      "source_ref": "《计算机组成原理》唐朔飞 第 7 章 总线"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "突发有效带宽与总线利用率计算",
+      "content_md": "一条 64 位同步总线，时钟频率 100 MHz，每周期传输 1 次。采用突发传送，一个总线事务包含 **1 个地址相位 + 8 个数据相位**。求：\n(1) 该总线的峰值带宽（MB/s）；\n(2) 上述突发事务的有效带宽（MB/s）；\n(3) 若系统每秒发起 1×10⁶ 次这样的突发事务，总线被有效占用的时间占比（总线利用率，忽略其它开销）。",
+      "answer": {
+        "text": "(1) 峰值带宽 = 64/8 × 100 × 1 = 8 × 100 = 800 MB/s。\n\n(2) 一个突发事务共 9 个时钟拍（1 地址 + 8 数据），有效利用率 = 8/9 ≈ 0.8889；有效带宽 = 800 × 8/9 ≈ 711.1 MB/s。\n\n(3) 每次突发耗时 = 9 拍 = 9 / 100 MHz = 9×10⁻⁸ s。每秒 1×10⁶ 次 → 占用时间 = 1×10⁶ × 9×10⁻⁸ = 0.09 s，即总线利用率 = 0.09 / 1 s = 9%。\n\n小结：峰值 800 MB/s 只是上限，突发结构把有效带宽拉到约 711 MB/s（利用率 88.9%），而宏观上事务频繁度又决定了总线时间占用率仅 9%。"
+      },
+      "explanation": "考点是把「峰值带宽、突发有效带宽、宏观占用率」三层概念区分开：第一层 ÷8 与频率；第二层乘 (数据拍/总拍)；第三层用『每事务拍数 × 频率倒数 × 事务率』算时间占比。",
+      "tags": ["带宽", "突发", "利用率", "计算"],
+      "source": "self",
+      "source_ref": "fund-ch16 concept 01 / 04"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "修复链式查询优先级反转的代码",
+      "content_md": "下面这段「链式查询仲裁」代码想实现『设备 0 链前优先（最高优先级）』，但存在 bug，请指出并改正：\n\n```c\n// 链式查询：授权信号沿物理链传递，链前(设备0)优先\nint grant(int req) {\n    for (int i = 3; i >= 0; i--) {   // 从最高号设备开始扫描\n        if (req & (1 << i))\n            return i;               // 第一个命中的设备获得总线\n    }\n    return -1;\n}\n```",
+      "answer": {
+        "text": "**Bug**：链式查询中「链前优先」意味着**设备 0（物理链最前端）优先级最高**。原代码从 `i = 3` 向 `0` 扫描，会把**设备 3**当成最高优先级，造成**优先级反转**——完全违背链式查询「链前永远优先」的语义。\n\n**修复**：从 `i = 0` 向 `3` 扫描，保证链前设备先命中：\n\n```c\nint grant(int req) {\n    for (int i = 0; i < 4; i++) {   // 从链首(设备0)开始扫描\n        if (req & (1 << i))\n            return i;               // 第一个命中者 = 链前最高优先级\n    }\n    return -1;\n}\n```\n\n**延伸**：链式查询的优先级是**由物理连线顺序固定**的，不是由编号大小决定；代码中扫描顺序必须等于物理链顺序，否则就会出现这种『低号反而优先级低』的事故。另外注意：链上任一设备断连会导致其下游全部无法获得授权。"
+      },
+      "explanation": "考点是「链式查询优先级由物理链顺序决定」与「扫描顺序必须匹配链顺序」。把 for 方向写反是典型错误。",
+      "tags": ["仲裁", "链式", "fix_error"],
+      "source": "self",
+      "source_ref": "fund-ch16 concept 02"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "模拟独立请求集中仲裁并统计总线占用率",
+      "content_md": "实现 `arbitrate(priority, requests)`：\n- `priority`：长度为 N 的列表，**索引 0 为最高优先级**（如 `[2,0,3,1]` 表示设备 2 最高、设备 1 最低）；\n- `requests`：长度为 T 的列表，每个元素是整数**位掩码**，第 `i` 位为 1 表示该主设备在那一拍请求总线；\n返回：`(grants, utilization)`。`grants` 为长度 T 的列表，每拍被授予总线的设备号（无人请求为 -1）；`utilization` 为总线被占用的周期占比（被授权周期数 / T）。\n\n要求：每拍由中央仲裁器的**优先级编码器**选出当前请求中优先级最高者；输出 grants 与利用率。",
+      "answer": {
+        "text": "每拍在请求集合中按 priority 顺序选第一个命中的设备即可；占用率 = 有授权的拍数 / 总拍数。",
+        "code": "def arbitrate(priority, requests):\n    N = max(max(priority) + 1, 1) if priority else 0\n    grants = []\n    used = 0\n    for r in requests:\n        g = -1\n        for dev in priority:          # 按优先级从高到低\n            if r & (1 << dev):\n                g = dev\n                break\n        grants.append(g)\n        if g != -1:\n            used += 1\n    util = used / len(requests) if requests else 0.0\n    return grants, util\n\nif __name__ == \"__main__\":\n    priority = [2, 0, 3, 1]\n    requests = [1, 6, 8, 2, 13, 0, 4, 6]   # 与本章 ex03/ex05 同一序列\n    grants, util = arbitrate(priority, requests)\n    print(\"优先级顺序:\", priority)\n    print(\"每拍授权  :\", grants)\n    print(\"总线占用率: %.2f\" % util)\n    # 验证: 期望授权 [0,2,3,1,2,-1,2,2], 占用率 7/8=0.875"
+      },
+      "explanation": "考点是把「独立请求 + 优先级编码器」落成 O(T·N) 的模拟。与 ex05 的 C 版一致：每拍按可程序化优先级选最高请求者；占用率统计体现总线争用强度。",
+      "tags": ["仲裁", "独立请求", "占用率", "coding"],
+      "source": "self",
+      "source_ref": "408 统考 计组 总线"
+    }
+  ]
+}

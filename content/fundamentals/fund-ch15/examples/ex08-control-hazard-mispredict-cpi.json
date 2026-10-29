@@ -1,0 +1,8 @@
+{
+  "title": "控制冒险：分支误预测的额外 CPI",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "分支占比=0.20 误预测率=0.10 惩罚=15拍\n控制冒险额外CPI = 0.20*0.10*15 = 0.30\n完美预测 CPI=1.00 ; 实际CPI=1.30\n分支预测把CPI放大了 1.30 倍 (性能约降为 76.9%)\n",
+  "code": "#include <stdio.h>\n/*\n * ex08：控制冒险 —— 分支误预测把 CPI 拉高多少\n * 公式：额外 CPI = 分支指令占比 × 误预测率 × 误预测惩罚(拍)\n * 含义：分支越多、预测越不准、流水线越深（惩罚越大），控制冒险代价越高。\n * 这也是为什么深流水 CPU 必须配强分支预测器（BTB + 历史寄存器）。\n */\nint main(void) {\n    double branch_ratio = 0.20;   /* 分支指令占比 20% */\n    double mispredict   = 0.10;   /* 误预测率 10% */\n    int    penalty      = 15;     /* 误预测惩罚 15 拍（深流水线典型值）*/\n\n    double extra = branch_ratio * mispredict * penalty;   /* 分摊到每条指令的额外拍 */\n    double cpi_perfect = 1.00;                            /* 理想 CPI */\n    double cpi_real = cpi_perfect + extra;\n\n    printf(\"分支占比=%.2f 误预测率=%.2f 惩罚=%d拍\\n\", branch_ratio, mispredict, penalty);\n    printf(\"控制冒险额外CPI = %.2f*%.2f*%d = %.2f\\n\",\n           branch_ratio, mispredict, penalty, extra);\n    printf(\"完美预测 CPI=%.2f ; 实际CPI=%.2f\\n\", cpi_perfect, cpi_real);\n    printf(\"分支预测把CPI放大了 %.2f 倍 (性能约降为 %.1f%%)\\n\",\n           cpi_real / cpi_perfect, 100.0 * cpi_perfect / cpi_real);\n    return 0;\n}\n"
+}

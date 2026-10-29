@@ -1,0 +1,133 @@
+{
+  "meta": {
+    "chapter": "fund-ch13",
+    "note": "基础题 + 算法题混合，408 计组概述考点（五大部件、冯·诺依曼/哈佛、性能指标、透明性、Amdahl）"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "冯·诺依曼结构的特征判断",
+      "content_md": "关于冯·诺依曼结构，下列说法错误的是？",
+      "options": [
+        {"key": "A", "text": "采用二进制表示指令和数据"},
+        {"key": "B", "text": "指令与数据以同等地位存放在同一存储器，按地址寻址"},
+        {"key": "C", "text": "计算机由运算器、控制器、存储器、输入设备、输出设备五大部件组成"},
+        {"key": "D", "text": "传统冯·诺依曼计算机以输入设备为中心"}
+      ],
+      "answer": {"correct": ["D"]},
+      "explanation": "传统冯·诺依曼结构以**运算器**为中心（现代计算机已演变为以存储器/总线为中心），绝不是以输入设备为中心，故 D 错。A/B/C 均为冯氏五大特征的正确表述（二进制、存储程序统一编址、五大部件）。",
+      "tags": ["冯诺依曼", "五大特征", "概念"],
+      "source": "self",
+      "source_ref": "《计算机组成原理》唐朔飞 第1章"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "五大部件职责辨析",
+      "content_md": "在五大部件中，负责「取指、译码、向各部件发出控制信号指挥其协同工作」的是？",
+      "options": [
+        {"key": "A", "text": "运算器"},
+        {"key": "B", "text": "控制器"},
+        {"key": "C", "text": "存储器"},
+        {"key": "D", "text": "数据总线"}
+      ],
+      "answer": {"correct": ["B"]},
+      "explanation": "**控制器**是「总指挥」：取指→译码→发微命令，节拍式指挥运算器/存储器/IO 协同；运算器只负责算术逻辑运算，并不指挥。程序计数器 PC 属于控制器。",
+      "tags": ["五大部件", "控制器", "概念"],
+      "source": "self",
+      "source_ref": "《计算机组成原理》唐朔飞 第1章"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "平均 CPI 的计算输出",
+      "content_md": "某程序指令混布为：A 类占 50%（CPI=1）、B 类占 30%（CPI=3）、C 类占 20%（CPI=5）。执行下列代码，打印结果是多少（保留两位小数）？\n\n```c\n#include <stdio.h>\nint main(void){\n    double cpi = 0.5*1 + 0.3*3 + 0.2*5;\n    printf(\"%.2f\\n\", cpi);\n    return 0;\n}\n```",
+      "answer": {"expected_output": "2.40"},
+      "explanation": "平均 CPI 是按指令占比的加权平均：0.5×1 + 0.3×3 + 0.2×5 = 0.5 + 0.9 + 1.0 = 2.40。注意 CPI 不是常数，必须按混布加权，这是 408 计算题的常考点。",
+      "tags": ["CPI", "性能指标", "计算"],
+      "source": "self",
+      "source_ref": "《计算机组成原理》唐朔飞 第1章"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "修复 MIPS 计算的单位错误",
+      "content_md": "下面代码想计算某 CPU 的 MIPS（主频 2.0 GHz，CPI=2），但结果错得离谱（算出 1.0）。请指出错误并修正。\n\n```c\n#include <stdio.h>\nint main(void){\n    double mips = 2.0 / 2.0;   /* 主频 2.0GHz 直接除以 CPI */\n    printf(\"%f\\n\", mips);\n    return 0;\n}\n```",
+      "answer": {
+        "reference_code": "#include <stdio.h>\nint main(void){\n    double f = 2.0e9;      /* 主频必须换算成 Hz：2.0 GHz = 2.0e9 Hz */\n    double cpi = 2.0;\n    double mips = f / (cpi * 1e6);   /* MIPS = f / (CPI * 10^6) */\n    printf(\"%.0f\\n\", mips);\n    return 0;\n}"
+      },
+      "explanation": "错误有两处：(1) 主频 2.0 GHz 必须换算为 2.0×10^9 Hz，不能直接用「2.0」；(2) MIPS 的分母是 `CPI × 10^6`（百万条/秒），不是单纯 CPI。正确值 = 2.0e9 / (2 × 1e6) = 1000 MIPS。这是「单位没统一」导致的典型坑。",
+      "tags": ["MIPS", "单位换算", "性能指标"],
+      "source": "self",
+      "source_ref": "《计算机组成与设计：硬件/软件接口》Patterson & Hennessy 第1章"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "透明性的对象判断",
+      "content_md": "下列事物中，对**高级语言程序员**透明（存在且影响性能，但无需、也通常无法直接干预）的是？",
+      "options": [
+        {"key": "A", "text": "通用寄存器"},
+        {"key": "B", "text": "指令系统"},
+        {"key": "C", "text": "Cache"},
+        {"key": "D", "text": "程序状态字 PSW"}
+      ],
+      "answer": {"correct": ["C"]},
+      "explanation": "Cache 对高级语言程序员**透明**：你写 `a[i]` 时完全不知道数据此刻在 L1 还是主存，但 Cache 命中率会显著影响程序快慢。通用寄存器、指令系统、PSW 对汇编/编译器工程师是**不透明**的（可见可控）。注意透明性必须指明「对谁」。",
+      "tags": ["透明性", "Cache", "概念"],
+      "source": "self",
+      "source_ref": "《计算机组成原理》唐朔飞 第1章"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "book",
+      "difficulty": "medium",
+      "title": "CPU 性能计算器（CPU 时间 + MIPS）",
+      "content_md": "实现一个小工具：从标准输入读入三个数——指令数 `n`、平均 `CPI`、`f`（`f` 以 **MHz** 为单位），输出两行：\n- 第一行：CPU 时间，单位为**毫秒（ms）**，保留 3 位小数；\n- 第二行：MIPS（百万条指令每秒），保留 1 位小数。\n\n公式：CPU时间(s) = n × CPI ÷ (f × 10⁶)；MIPS = f ÷ CPI（MHz 直接除以 CPI）。\n\n<!-- judge-io -->\n**判题 I/O 约定**（提交完整 C 程序：从 stdin 读、向 stdout 写）\n\n输入：一行三个数 `n CPI f`（空格分隔）。\n输出：两行，见上。",
+      "answer": {
+        "reference_code": "#include <stdio.h>\nint main(void){\n    long long n; double cpi, f;\n    if (scanf(\"%lld %lf %lf\", &n, &cpi, &f) != 3) return 0;\n    double t = (double)n * cpi / (f * 1e6);   /* 单位：秒 */\n    double mips = f / cpi;                     /* MHz / CPI = MIPS */\n    printf(\"CPU时间 = %.3f ms\\n\", t * 1000);\n    printf(\"MIPS = %.1f\\n\", mips);\n    return 0;\n}",
+        "expected_output": "CPU时间 = 750.000 ms\nMIPS = 666.7"
+      },
+      "explanation": "核心是**统一单位**：主频 f 给的是 MHz，转成 Hz 要乘 10⁶，于是 CPU 时间(s)=n×CPI/(f×10⁶)，毫秒再乘 1000。而 MIPS = f_Hz/(CPI×10⁶) = (f×10⁶)/(CPI×10⁶) = f/CPI，MHz 数值直接除以 CPI 即得 MIPS。样例 n=5×10⁸、CPI=1.5、f=1000 ⇒ 时间=0.75s=750.000ms，MIPS=1000/1.5≈666.7。",
+      "tags": ["CPU时间", "MIPS", "性能指标", "计算"],
+      "source": "book",
+      "source_ref": "408 统考 计组 概述",
+      "test_cases": [
+        {"input": "500000000 1.5 1000", "expected_output": "CPU时间 = 750.000 ms\nMIPS = 666.7", "is_sample": true},
+        {"input": "120000000 2.0 600", "expected_output": "CPU时间 = 400.000 ms\nMIPS = 300.0", "is_sample": true},
+        {"input": "300000000 1.0 3000", "expected_output": "CPU时间 = 100.000 ms\nMIPS = 3000.0", "is_sample": false}
+      ]
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "Amdahl 定律的加速上限",
+      "content_md": "某程序可并行化部分（即可优化部分）占比 f=0.6。若把可优化部分加速到「无穷倍」（瞬间完成），整个程序的加速比上限为？",
+      "options": [
+        {"key": "A", "text": "1 / (1 − 0.6) = 2.5 倍"},
+        {"key": "B", "text": "1 / 0.6 ≈ 1.67 倍"},
+        {"key": "C", "text": "0.6 倍"},
+        {"key": "D", "text": "无穷倍"}
+      ],
+      "answer": {"correct": ["A"]},
+      "explanation": "Amdahl 定律：整体加速上限（可优化部分瞬间完成，S→∞）= 1/(1−f) = 1/0.4 = 2.5 倍。串行部分（1−f=0.4）钳制了整体加速，再怎么堆可并行部分的硬件也超不过 2.5 倍。这正说明「优化串行瓶颈」比「无限加速并行部分」更重要。",
+      "tags": ["Amdahl", "加速比", "性能指标"],
+      "source": "self",
+      "source_ref": "《计算机体系结构：量化研究方法》Hennessy & Patterson 第1章"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "title": "MIPS = 主频 ÷ (CPI × 10^6)（600 MHz / CPI 2）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "主频 = 600 MHz\nCPI = 2.00\nMIPS = 主频 / (CPI * 1e6) = 300.0\n若指令数 = 120000000, CPU 时间 = 0.4000 s\n",
+  "code": "#include <stdio.h>\nint main(void) {\n    double f = 600e6;     /* 600 MHz */\n    double cpi = 2.0;\n    double mips = f / (cpi * 1e6);\n    double ic = 1.2e8;\n    double t = ic * cpi / f;\n    printf(\"主频 = 600 MHz\\n\");\n    printf(\"CPI = 2.00\\n\");\n    printf(\"MIPS = 主频 / (CPI * 1e6) = %.1f\\n\", mips);\n    printf(\"若指令数 = 120000000, CPU 时间 = %.4f s\\n\", t);\n    return 0;\n}\n"
+}
