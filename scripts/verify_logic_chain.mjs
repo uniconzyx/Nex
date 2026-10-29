@@ -19,10 +19,11 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 
 const root = process.cwd();
-const entry = join(root, 'scripts', 'logic_chain_checks.ts');
-const out = join(mkdtempSync(join(tmpdir(), 'logic-')), 'checks.mjs');
+const mode = process.argv.includes('--check-summary') ? 'summary' : 'logic';
+const entry = join(root, 'scripts', mode === 'summary' ? 'summary_checks.ts' : 'logic_chain_checks.ts');
+const out = join(mkdtempSync(join(tmpdir(), mode === 'summary' ? 'sum-' : 'logic-')), 'checks.mjs');
 
-console.log('› esbuild 打包逻辑层…');
+console.log(`› esbuild 打包${mode === 'summary' ? '总结表层' : '逻辑层'}…`);
 await build({
   entryPoints: [entry],
   bundle: true,

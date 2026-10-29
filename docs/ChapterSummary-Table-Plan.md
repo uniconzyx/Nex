@@ -93,8 +93,10 @@
 | 内容源 | `content/<s>/<ch>/{goals,concept,pitfalls,exercises,interview,project}.json` | 素材 | 只读 |
 | 状态源 | `lib/progress.ts` → `ProgressState` | 完成度 | 只读 |
 | 逻辑源 | `lib/logicChain.ts` | `isUnlocked`/`done` | 纯 |
-| **新增** 生成 | `lib/chapterSummary.ts` | `buildChapterSummary` / `buildTrackSummary` | 纯、无 dispatch |
-| **新增** 轨道 | `lib/examTracks.ts` | 读 `408.json` 按模块聚合 | 纯 |
+| **新增** 生成 | `lib/chapterSummary.ts` | `buildChapterSummary` / `buildAllChapterSummaries` / `summaryToMarkdown` | 纯、无 dispatch |
+| **新增** 轨道 | `lib/examTracks.ts` | 读 `TRACK_408` 按模块聚合 | 纯 |
+| **新增** 内容切片 | `data/chapterContent.ts`（生成） | 章节正文切片（goals/pitfalls/concept/interview/project） | 只读，由 `scripts/gen_chapter_content.py` 生成 |
+| **新增** 专轨数据 | `data/track408.ts`（生成） | 408 模块映射（前端不可直读 JSON） | 只读，由 `scripts/gen_tracks.py` 生成 |
 | **新增** 就业 | `lib/employment.ts` | `buildInterviewGraph`（八股图） | 纯 |
 | **新增** 复试 | `lib/reexam.ts` | `buildReexamView`（面试+机试） | 纯 |
 
@@ -126,7 +128,7 @@
 | 阶段 | 内容 | 产出 |
 |---|---|---|
 | P1 | 写 `408.json`（cross-walk） | ✅ 已落地 |
-| P2 | `chapterSummary.ts` + `examTracks.ts` | 单章/专轨数据 |
+| P2 | `chapterSummary.ts` + `examTracks.ts` + 生成数据层（`chapterContent.ts`/`track408.ts`/`gen_*.py`/`summary_checks.ts`） | ✅ 已落地（`--check-summary` 全绿、`tsc` 零错） |
 | P3 | `LearnPage` 接"本章总结" + 导出 | 单章表可用 |
 | P4 | `#track/408` 总表 + 下钻 | 408 可用 |
 | P5 | `verify --check-summary` 验收 | 全绿 |
@@ -340,7 +342,7 @@
 | 阶段 | 内容 | 产出 |
 |---|---|---|
 | P1 | 写 `408.json`（cross-walk） | ✅ 已落地 |
-| P2 | `chapterSummary.ts` + `examTracks.ts` | 单章/专轨数据 |
+| P2 | `chapterSummary.ts` + `examTracks.ts` + 生成数据层（`chapterContent.ts`/`track408.ts`/`gen_*.py`/`summary_checks.ts`） | ✅ 已落地（`--check-summary` 全绿、`tsc` 零错） |
 | P3 | `LearnPage` 本章总结 + 导出 | 单章表（全学科可用） |
 | P4 | `#track/408` 总表 + 下钻 | 408 可用 |
 | P5 | `#employment` 就业板块 + 八股图 | 就业链路 |
