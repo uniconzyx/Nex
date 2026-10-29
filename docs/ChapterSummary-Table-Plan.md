@@ -149,6 +149,68 @@
 - **UI 落点**：`#employment` 路由；或 `DiagramsPage` 增"面试题图"分组（复用图渲染基建）。
 - **与单章表关系**：单章"面试/真题"行点"展开图表"即跳 B/C。
 
+### 10.1 八股资源分区与专轨映射（分区整理 ★ 就业专属）
+
+> 八股归就业（不归考研）。以下资源按「底层学科 → 语言/框架专轨 → AI 叠加层 → 导航工具」四区组织；Agent 八股单列专项（见 10.2）。所有资源经 `content/_tracks/employment.json`（新增，与 408.json 并列）登记，星数走**三级兜底**（API→manifest→`_star_snapshot.json`），作为八股图节点与 `github_notes` 来源；与 408 的 `attach_all_sources.py` 走**并行注册表**（408 仓库不混入就业区）。
+
+**四区总览**
+
+| 区 | 定位 | 数据源 | 覆盖 |
+|---|---|---|---|
+| A 底层学科 | 跨专轨通用地基 | 小林coding（图解计算机基础）、面试鸭 Mianshiya | 计算机基础全栈 + 综合刷题（Java/C++/Python/Go/前端） |
+| B 语言/框架专轨 | 按技术栈切片 | Alessandro-Pang/fe-interview（前端）、itwanger/baguwen-wiki + CoderLeixiaoshuai/java-eight-part（Java 后端）、vikrant-d1/fullstack-interview-resources（Node/全栈） | 前端 1000+ / Java 基础·集合·JVM·Spring·MySQL·Redis / 现代全栈工程 |
+| C AI 叠加层 | 前沿题库 | yugef3h/interview-yuge（AI 全栈/字节企业库）、Agent 八股专项（见 10.2） | LLM 应用、Agent 工程、RAG/MCP |
+| D 导航与工具 | 顺藤摸瓜 + 多端刷题 | interviewMap（八股导航站）、面试鸭 Mianshiya | 检索入口、模拟刷题 |
+
+**资源 → 分区映射表**
+
+| 资源 | 类型 | 区 | 角色 / 特色 |
+|---|---|---|---|
+| 小林coding | 仓库 | A | 计算机基础图解，408 总结与八股底层双向复用 |
+| 面试鸭 Mianshiya | 网站/开源 | A·D | 综合题库，Java/C++/Python/Go/前端/基础，多端同步 |
+| Alessandro-Pang/fe-interview | 仓库 | B | 1000+ 前端真题，每题含参考答案/考点分析/关联题 |
+| itwanger/baguwen-wiki | 仓库 | B | Java 后端八股（基础/集合/JVM/Spring/MySQL/Redis） |
+| CoderLeixiaoshuai/java-eight-part | 仓库 | B | Java 八股合集 |
+| vikrant-d1/fullstack-interview-resources | 仓库 | B | React/Node/JWT/Docker/CI-CD/AWS 全栈工程化 |
+| yugef3h/interview-yuge | 仓库 | C | 2026-AI 全栈，含字节企业题库 + AI/LLM 深度追问 |
+| interviewMap | 网站 | D | 八股文导航站，顺藤摸瓜找方向资料 |
+| isboyjc/Interview | 仓库 | B（知识框架） | 结构化知识图谱，覆盖 90%+ IT 知识点 |
+
+### 10.2 Agent 八股专项（独立体系：工程落地 / 系统设计 / 生产实践）
+
+> Agent 八股已成独立体系，核心是「工程落地 + 系统设计 + 生产实践」，不混进通用语言专轨。以 **Prompt→Context→Agent→Harness** 四层工程骨架为底层学科，RAG/LangGraph/MCP 为专项模块，SuperGODOG 的 1-5 级深度分级生成「虚拟试卷」。
+
+**四层工程骨架（基础学科）**
+
+| 层 | 含义 | 参考 |
+|---|---|---|
+| Prompt | 提示词工程 | harrisliangsu/ai-agent-engineer-handbook |
+| Context | 上下文管理 | 同上 |
+| Agent | 智能体本体 | 同上 |
+| Harness | 工程化承载（调度/沙箱/评测） | 同上 |
+
+**专项模块 → 题库映射**
+
+| 模块 | 题库来源 | 规模/特色 |
+|---|---|---|
+| 基础概念 / ReAct / LangGraph / RAG / 工具调用 / MCP | bcefghj/ai-agent-interview-guide（9 大模块） | 按模块专项突破 |
+| RAG 基础 / Agent 基础 / MCP & A2A | ombharatiya/ai-system-design-guide（英文） | 128 题 + 系统设计 |
+| 核心题库 | ranxi2001/zero2Agent（《Agent面试800问》828+ 大厂真题，"新手答 vs 高手答"对比） | 绿皮书 PDF |
+| 公共真题 + 模拟面试引擎 | SuperGODOG/ai-agent-interview-240（477 题，含秒杀/Redis/MQ 后端，1-5 级深度） | 分级刷 |
+| 图文/视频向 | itwanger/ai-better（369 题，Agent/RAG/MCP 等 12 分类） | 视觉型 |
+| 工程化与系统设计 | cdavid817/agent-interview（1820 题，工程边界/失败处理/验证指标，多 Agent 协作） | 架构向 |
+
+**模拟考卷（虚拟试卷）**
+
+| 试卷难度 | 分级来源 | 生成规则 |
+|---|---|---|
+| L1-L2 概念定义 | SuperGODOG 1-5 级 | 每模块抽 N 道低分级题组卷 |
+| L3-L4 落地权衡 | 同上 | 中分级 + 场景题 |
+| L5 生产实践 | 同上 + cdavid817 | 高分级 + 失败处理/验证指标 |
+
+- **接入方式**：就业专轨资源登记进 `content/_tracks/employment.json`（新增，与 408.json 并列）；星数走三级兜底；`lib/employment.ts` 的 `buildInterviewGraph` 把这些节点并入八股图，并按「区/专轨/模块」着色。
+- **与单章表关系**：单章"面试/真题"行点"展开图表"即跳八股图对应节点。
+
 ## 十一、考研复试板块（面试问题[复试专属] + 机试）
 
 > 复试 ≠ 八股。复试面试是**复试专属问题**（研究计划、项目陈述、英语口语、专业素养）；机试是编码测试。
