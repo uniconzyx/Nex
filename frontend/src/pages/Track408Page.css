@@ -1,0 +1,211 @@
+/* Track408Page.css —— 考研 408 专轨总表 + 下钻（P4）
+ * 复用凯喵主题变量与 .km-card / .km-btn / .km-tag / .km-hint / .km-mini-bar / .km-summary-* 体系，
+ * 仅新增 track408 专属布局类，视觉与图表总览、知识试炼区一致。
+ */
+
+.track408-root {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 18px 16px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.track408-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.track408-head h1 {
+  margin: 0;
+  font-size: 26px;
+  letter-spacing: 0.5px;
+  color: var(--km-ink);
+}
+
+.track408-lede {
+  margin: 6px 0 0;
+  color: var(--km-ink-soft);
+  font-size: 14px;
+}
+
+.track408-lede b {
+  color: var(--km-glow);
+}
+
+.track408-overall {
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--km-line2);
+  margin-top: -2px;
+}
+
+.track408-overall > i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--km-glow), color-mix(in srgb, var(--km-glow) 60%, #fff));
+  transition: width 0.4s ease;
+}
+
+/* ── 四模块总表 ── */
+.track408-master-wrap {
+  margin-top: 10px;
+  overflow-x: auto;
+}
+
+.track408-master {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 720px;
+}
+
+.track408-master th,
+.track408-master td {
+  padding: 9px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--km-line2);
+  vertical-align: top;
+}
+
+.track408-master thead th {
+  color: var(--km-ink-faint);
+  font-weight: 600;
+  background: color-mix(in srgb, var(--km-line2) 50%, transparent);
+  position: sticky;
+  top: 0;
+}
+
+.track408-mod-name {
+  font-weight: 700;
+  color: var(--km-ink);
+  white-space: nowrap;
+}
+
+.track408-done-all {
+  color: var(--km-glow);
+  font-weight: 700;
+}
+
+.track408-sprint {
+  color: var(--km-ink-soft);
+  min-width: 160px;
+}
+
+/* 掌握度条（总表 + 模块） */
+.track408-bar {
+  display: inline-block;
+  width: 64px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--km-line2);
+  overflow: hidden;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+.track408-bar > i {
+  display: block;
+  height: 100%;
+  background: var(--km-glow);
+  transition: width 0.4s ease;
+}
+
+.track408-barnum {
+  color: var(--km-ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── 模块卡片 + 章节网格 ── */
+.track408-module-bar {
+  height: 8px;
+  margin-top: 4px;
+}
+
+.track408-chgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.track408-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--km-line2);
+  background: color-mix(in srgb, var(--km-card) 80%, #fff 0%);
+  color: var(--km-ink);
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  font: inherit;
+}
+
+.track408-chip:hover {
+  transform: translateY(-2px);
+  border-color: var(--km-glow);
+  box-shadow: 0 6px 16px -10px var(--km-glow);
+}
+
+.track408-chip b {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.track408-chip-m {
+  flex: none;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--km-ink-soft);
+  background: var(--km-line2);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.track408-chip-m.done {
+  color: #fff;
+  background: var(--km-glow);
+  font-weight: 700;
+}
+
+.track408-chip.done {
+  border-color: color-mix(in srgb, var(--km-glow) 60%, var(--km-line2));
+}
+
+.track408-chip.weak {
+  border-color: #e0a23a;
+  background: color-mix(in srgb, #e0a23a 12%, var(--km-card));
+}
+
+.track408-chip.unstarted {
+  opacity: 0.72;
+}
+
+.track408-chip.active {
+  border-color: var(--km-glow);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--km-glow) 35%, transparent);
+}
+
+/* ── 下钻面板 ── */
+.track408-drill {
+  animation: km-card-in 0.3s ease both;
+}
+
+@media (max-width: 640px) {
+  .track408-chgrid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .track408-head h1 {
+    font-size: 22px;
+  }
+}

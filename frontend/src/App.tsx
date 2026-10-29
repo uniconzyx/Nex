@@ -24,6 +24,7 @@ import { SettingsPage } from './pages/SettingsPage';
 import { HelpPage } from './pages/HelpPage';
 import { AiPage } from './pages/AiPage';
 import { DiagramsPage } from './pages/DiagramsPage';
+import { Track408Page } from './pages/Track408Page';
 import {
   AchievementsPage,
   BagPage,
@@ -49,13 +50,16 @@ export interface AiInvocation {
 
 export function App() {
   const [page, setPage] = useState<KmPage>(() => {
-    const h = (location.hash || '').replace(/^#/, '') as KmPage;
+    const raw = (location.hash || '').replace(/^#/, '');
+    // 考研 408 专轨支持深链：#track408 与 #track408/<chapterId>
+    const isTrack = raw === 'track408' || raw.startsWith('track/') || raw.startsWith('track408/');
+    const h = raw as KmPage;
     const VALID: KmPage[] = [
       'home', 'learn', 'projects', 'bestiary', 'story', 'bag', 'rank', 'mini',
       'checkin', 'dress', 'lab', 'me', 'achievements', 'guides', 'ai',
-      'settings', 'help', 'diagrams',
+      'settings', 'help', 'diagrams', 'track408',
     ];
-    return VALID.includes(h) ? h : 'home';
+    return isTrack ? 'track408' : (VALID.includes(h) ? h : 'home');
   });
   const [ai, setAi] = useState<AiInvocation>({ open: false });
 
@@ -144,6 +148,7 @@ export function App() {
           {page === 'settings' && <SettingsPage onNavigate={navigate} />}
           {page === 'help' && <HelpPage onNavigate={navigate} />}
           {page === 'diagrams' && <DiagramsPage />}
+          {page === 'track408' && <Track408Page onNavigate={navigate} />}
         </div>
       </KaimaoShell>
 

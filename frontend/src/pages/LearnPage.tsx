@@ -470,7 +470,7 @@ function SummarySection({ title, items }: { title: string; items: string[] }) {
   );
 }
 
-function ChapterSummaryPanel({
+export function ChapterSummaryPanel({
   summary,
   content,
   copied,
