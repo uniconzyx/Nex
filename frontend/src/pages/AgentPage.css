@@ -1,0 +1,428 @@
+/**
+ * AgentPage.css —— 凯喵陪练
+ *
+ * 约束（与项目既有体系一致，不引入新配色）：
+ *   - 只用 --km-* 令牌，深色主题自动跟随；
+ *   - 面与面之间用「一层色调差」分隔（surf1 / surf2 / sunk），不加投影、不加渐变；
+ *   - 层级靠字号与字重，不靠描边粗细。
+ */
+
+.ag-root {
+  max-width: 1180px;
+  margin: 0 auto;
+  /* 底部留够：右下角有全局「问凯喵」悬浮球，不留白会遮住最后一张卡的字 */
+  padding: 22px 24px 96px;
+}
+
+/* ── 头部 ─────────────────────────────────────────── */
+.ag-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.ag-head-main {
+  max-width: 640px;
+}
+
+.ag-head h1 {
+  margin: 0 0 6px;
+  font-size: 26px;
+  letter-spacing: -0.01em;
+  color: var(--km-ink);
+}
+
+.ag-lede {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: var(--km-ink-soft);
+}
+
+.ag-pickers {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.ag-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--km-ink-faint);
+}
+
+.ag-field select {
+  min-width: 132px;
+  padding: 7px 10px;
+  border-radius: var(--km-r-xs);
+  border: 1px solid var(--km-line);
+  background: var(--km-surf1);
+  color: var(--km-ink);
+  font-size: 13px;
+}
+
+.ag-field select:focus-visible {
+  outline: 2px solid var(--km-accent);
+  outline-offset: 1px;
+}
+
+/* ── 场景卡 ───────────────────────────────────────── */
+.ag-scenarios {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.ag-scenario {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px 18px 16px;
+  text-align: left;
+  border: 1px solid var(--km-line);
+  border-radius: var(--km-r);
+  background: var(--km-surf1);
+  color: var(--km-ink);
+  cursor: pointer;
+  transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
+}
+
+.ag-scenario:hover:not(:disabled) {
+  background: var(--km-surf2);
+  border-color: var(--km-accent);
+}
+
+.ag-scenario:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.ag-scenario:focus-visible {
+  outline: 2px solid var(--km-accent);
+  outline-offset: 2px;
+}
+
+.ag-scenario:disabled {
+  cursor: default;
+  opacity: 0.72;
+}
+
+.ag-scenario.is-running {
+  border-color: var(--km-accent);
+  background: var(--km-sunk);
+}
+
+.ag-scenario-name {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.ag-scenario-tag {
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--km-ink-soft);
+}
+
+.ag-scenario-foot {
+  margin-top: 2px;
+  font-size: 11.5px;
+  color: var(--km-ink-faint);
+}
+
+/* ── 提示条 ───────────────────────────────────────── */
+.ag-note {
+  margin: 0 0 14px;
+  padding: 10px 14px;
+  border-radius: var(--km-r-sm);
+  background: var(--km-sunk);
+  color: var(--km-ink-soft);
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+.ag-note strong {
+  color: var(--km-ink);
+}
+
+.ag-error {
+  margin: 0 0 14px;
+  padding: 10px 14px;
+  border-radius: var(--km-r-sm);
+  background: color-mix(in srgb, var(--km-bad) 12%, transparent);
+  color: var(--km-bad);
+  font-size: 12.5px;
+}
+
+/* ── 两栏主体 ─────────────────────────────────────── */
+.ag-body {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: 18px;
+  align-items: start;
+}
+
+@media (max-width: 940px) {
+  .ag-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ag-trail,
+.ag-report {
+  min-width: 0;
+  padding: 16px 16px 20px;
+  border-radius: var(--km-r);
+  background: var(--km-surf1);
+}
+
+.ag-sec-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.ag-sec-head h2 {
+  margin: 0;
+  font-size: 15px;
+  color: var(--km-ink);
+}
+
+.ag-count {
+  font-size: 11.5px;
+  color: var(--km-ink-faint);
+}
+
+/* ── 轨迹 ─────────────────────────────────────────── */
+.ag-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ag-step {
+  padding: 11px 12px;
+  border-radius: var(--km-r-sm);
+  background: var(--km-surf2);
+}
+
+.ag-step.is-fail {
+  background: color-mix(in srgb, var(--km-bad) 10%, transparent);
+}
+
+.ag-step.is-pending {
+  color: var(--km-ink-faint);
+  font-size: 12px;
+}
+
+.ag-step-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 5px;
+}
+
+.ag-tool {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--km-accent-ink);
+}
+
+.ag-ms {
+  font-size: 11px;
+  color: var(--km-ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.ag-thought {
+  margin: 0 0 4px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--km-ink-soft);
+}
+
+.ag-obs {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--km-ink);
+  overflow-wrap: anywhere;
+}
+
+.ag-logs {
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--km-ink-soft);
+}
+
+.ag-logs summary {
+  cursor: pointer;
+}
+
+.ag-logs pre {
+  margin: 8px 0 0;
+  padding: 10px;
+  max-height: 200px;
+  overflow: auto;
+  border-radius: var(--km-r-xs);
+  background: var(--km-sunk);
+  font-size: 11.5px;
+  line-height: 1.55;
+}
+
+/* ── 报告 ─────────────────────────────────────────── */
+.ag-export {
+  padding: 6px 12px;
+  border: 1px solid var(--km-line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--km-accent-ink);
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.16s ease, border-color 0.16s ease;
+}
+
+.ag-export:hover {
+  background: var(--km-accent-soft);
+  border-color: var(--km-accent);
+}
+
+.ag-export:focus-visible {
+  outline: 2px solid var(--km-accent);
+  outline-offset: 2px;
+}
+
+.ag-headline {
+  margin: 0 0 14px;
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--km-ink);
+  letter-spacing: -0.01em;
+}
+
+.ag-audit {
+  margin-bottom: 16px;
+  padding: 10px 12px;
+  border-radius: var(--km-r-sm);
+  font-size: 12px;
+  line-height: 1.6;
+  background: var(--km-sunk);
+  color: var(--km-ink-soft);
+}
+
+.ag-audit.is-ok {
+  color: var(--km-ok);
+}
+
+.ag-audit.is-warn {
+  color: var(--km-warn-ink);
+}
+
+.ag-audit.is-bad {
+  background: color-mix(in srgb, var(--km-bad) 12%, transparent);
+  color: var(--km-bad);
+}
+
+.ag-audit ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
+
+.ag-sec {
+  margin-bottom: 18px;
+}
+
+.ag-sec h3 {
+  margin: 0 0 6px;
+  font-size: 13.5px;
+  color: var(--km-ink);
+}
+
+.ag-sec h4 {
+  margin: 12px 0 4px;
+  font-size: 12.5px;
+  color: var(--km-ink-soft);
+}
+
+.ag-md {
+  font-size: 13px;
+  line-height: 1.72;
+  color: var(--km-ink);
+}
+
+.ag-md p {
+  margin: 0 0 8px;
+}
+
+.ag-md ul,
+.ag-md ol {
+  margin: 0 0 8px;
+  padding-left: 20px;
+}
+
+.ag-md blockquote {
+  margin: 0 0 8px;
+  padding: 8px 12px;
+  border-radius: var(--km-r-xs);
+  background: var(--km-sunk);
+  color: var(--km-ink-soft);
+}
+
+.ag-md code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--km-sunk);
+  font-size: 12px;
+}
+
+.ag-md table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.ag-md th,
+.ag-md td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--km-line2);
+  text-align: left;
+}
+
+.ag-ev {
+  margin: 6px 0 0;
+  font-size: 11px;
+  color: var(--km-ink-faint);
+}
+
+.ag-code {
+  margin: 0;
+  padding: 12px;
+  max-height: 320px;
+  overflow: auto;
+  border-radius: var(--km-r-sm);
+  background: var(--km-sunk);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--km-ink);
+}
+
+.ag-code.ag-out {
+  background: color-mix(in srgb, var(--km-ok) 8%, transparent);
+}
+
+.ag-empty {
+  margin: 0;
+  padding: 24px 0;
+  color: var(--km-ink-faint);
+  font-size: 13px;
+}

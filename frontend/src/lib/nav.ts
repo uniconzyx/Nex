@@ -25,7 +25,8 @@ export type KmPage =
   | 'diagrams'
   | 'track408'
   | 'employment'
-  | 'reexam';
+  | 'reexam'
+  | 'agent';
 
 export interface NavItem {
   key: KmPage;
@@ -156,6 +157,16 @@ export const NAV_GROUPS: NavGroup[] = [
         key: 'reexam',
         label: '考研复试',
         paths: ['M4 4h16v4H4z', 'M4 10h16v10H4z', 'M8 14h8'],
+        badge: 'NEW',
+      },
+      {
+        key: 'agent',
+        label: '凯喵陪练',
+        paths: [
+          'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z',
+          'M7.8 14.2l2.6-2.6 2.3 2.3 3.5-4.4',
+          'M16.2 9.5h-1.6v1.6',
+        ],
         badge: 'NEW',
       },
       {

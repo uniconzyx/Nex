@@ -27,6 +27,7 @@ import { DiagramsPage } from './pages/DiagramsPage';
 import { Track408Page } from './pages/Track408Page';
 import { EmploymentPage } from './pages/EmploymentPage';
 import { ReexamPage } from './pages/ReexamPage';
+import { AgentPage } from './pages/AgentPage';
 import {
   AchievementsPage,
   BagPage,
@@ -59,7 +60,7 @@ export function App() {
     const VALID: KmPage[] = [
       'home', 'learn', 'projects', 'bestiary', 'story', 'bag', 'rank', 'mini',
       'checkin', 'dress', 'lab', 'me', 'achievements', 'guides', 'ai',
-      'settings', 'help', 'diagrams', 'track408', 'employment', 'reexam',
+      'settings', 'help', 'diagrams', 'track408', 'employment', 'reexam', 'agent',
     ];
     return isTrack ? 'track408' : (VALID.includes(h) ? h : 'home');
   });
@@ -153,6 +154,7 @@ export function App() {
           {page === 'track408' && <Track408Page onNavigate={navigate} />}
           {page === 'employment' && <EmploymentPage />}
           {page === 'reexam' && <ReexamPage />}
+          {page === 'agent' && <AgentPage />}
         </div>
       </KaimaoShell>
 

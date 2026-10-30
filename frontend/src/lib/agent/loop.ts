@@ -422,7 +422,7 @@ export function buildFallbackReport(
         body: [
           `1. 打开 **${weak0}** 的「概念」关，重读上面那条易错点所在的 concept；`,
           `2. 做本章 **${exData.total}** 道题里你还没做对的：${(exData.items ?? []).slice(0, 3).map((x) => `\`${x.id}\``).join('、')}；`,
-          '3. 三关全通后本章掌握度才会到 100%。',
+          '3. 三关全通（概念 / 演练 / BOSS）后本章掌握度才会满。',
         ].join('\n'),
         evidence: `list_chapter_exercises#${ex?.idx}`,
       });
@@ -451,12 +451,26 @@ export function buildFallbackReport(
   }
 
   const weakList = (prog?.observation?.data as { weak?: string[] } | undefined)?.weak ?? [];
+  const stats = (prog?.observation?.data as
+    | { stats?: { total: number; done: number; avg_mastery: number; wrong_total: number } }
+    | undefined)?.stats;
+  // 三档语气，对应三种真实状态。中间那档才是「诊断」，另两档只是边界：
+  //   fresh      —— 一章都没通、也没错题：说「最该补 ch01」是错的语气，用户根本没开始
+  //   completed  —— 全部通关：此时 weak 排序已无意义（mastery 都是 100），
+  //                 继续输出「最该补」会让人以为还有欠账
+  const fresh = !!stats && stats.done === 0 && stats.wrong_total === 0;
+  const completed = !!stats && stats.total > 0 && stats.done === stats.total;
+  const firstChapter = weakList[0] ?? '';
   return {
     title: `${subject} 学情诊断`,
     scenario: scenario.id,
-    headline: weakList.length
-      ? `最该补的是 ${weakList.slice(0, 3).join('、')}；报告里的数字全部来自你的真实进度`
-      : `「${subject}」暂时没有可诊断的数据（可能还没开始学）`,
+    headline: fresh
+      ? `「${subject}」还没有开始记录：建议从 ${firstChapter} 开机，先过概念关再上 BOSS`
+      : completed
+        ? `「${subject}」已全部通关：接下来该做项目与面试题，而不是再补章节`
+        : weakList.length
+          ? `最该补的是 ${weakList.slice(0, 3).join('、')}；报告里的数字全部来自你的真实进度`
+          : `「${subject}」暂时没有可诊断的数据（可能还没开始学）`,
     sections,
   };
 }

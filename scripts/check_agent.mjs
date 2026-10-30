@@ -398,6 +398,48 @@ section('E. .ipynb 导出');
 }
 
 /* ========================================================================== */
+/* F. 三种用户状态（方案 §8 A2 的验收要求）                                     */
+/* ========================================================================== */
+
+section('F. 三种进度状态各跑一遍（全 0 / 有薄弱 / 全通）');
+{
+  /** 全 0：什么都没做过 */
+  const fresh = { ...fakeProgress(), chapterRuns: {}, answers: {}, doneChapters: [] };
+  /** 全通：ml 九章三关全亮、无错题 */
+  const chapterRuns = {};
+  for (let i = 1; i <= 9; i++) {
+    chapterRuns[`ml-ch0${i}`] = { concept: 1, drill: 1, boss: 1, attempts: 9, lastAt: 0 };
+  }
+  const full = { ...fakeProgress(), chapterRuns, answers: {}, doneChapters: Object.keys(chapterRuns) };
+
+  const runWith = (progress) =>
+    A.runAgent({
+      scenario: A.getScenario('diagnose'),
+      subject: 'ml',
+      progress,
+      maxSteps: 8,
+      planner: async () => {
+        throw new Error('规则模式');
+      },
+    });
+
+  const r1 = await runWith(fresh);
+  ok('全 0：给的是「还没开始」而不是薄弱排序', /还没有开始/.test(r1.report?.headline ?? ''), r1.report?.headline);
+  ok('全 0：审计无 error', A.auditReport(r1).filter((i) => i.level === 'error').length === 0);
+  ok('全 0：仍给出可执行的起点', (r1.report?.sections.length ?? 0) >= 2, `${r1.report?.sections.length} 节`);
+
+  const r2 = await runWith(progress);
+  ok('有薄弱：指出具体章节', /ml-ch0\d/.test(r2.report?.headline ?? ''), r2.report?.headline);
+  ok('有薄弱：点名的是学了没通的章', /ml-ch0[34]/.test(JSON.stringify(r2.report?.sections)), r2.report?.headline);
+
+  const r3 = await runWith(full);
+  ok('全通：不再说「最该补」', !/最该补/.test(r3.report?.headline ?? ''), r3.report?.headline);
+  ok('全通：审计无 error', A.auditReport(r3).filter((i) => i.level === 'error').length === 0);
+  const stats = r3.steps.find((s) => s.tool === 'get_progress')?.observation?.data?.stats;
+  ok('全通：已通关数等于总章数', stats && stats.done === stats.total, JSON.stringify(stats));
+}
+
+/* ========================================================================== */
 /* 汇总                                                                        */
 /* ========================================================================== */
 

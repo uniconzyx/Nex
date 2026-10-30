@@ -24,8 +24,12 @@ import { parseAction } from './loop';
 import type { ChatTurn, UiAiMode } from '../aiChat';
 
 export interface LlmPlannerOptions {
-  /** 完整的 agent 协议 prompt（含工具目录与场景任务） */
-  systemPrompt: string;
+  /**
+   * 完整的 agent 协议 prompt（含工具目录与场景任务）。
+   * 省略时取 messages 里 role==='system' 的那一条——loop 本来就是这么传的，
+   * 所以页面层不需要自己拼一遍（拼两遍必然会漂移）。
+   */
+  systemPrompt?: string;
   /** 章节 id（数字）——后端按它做检索锚定；agent 模式下只用于上下文 */
   chapterId?: number | null;
   /** 增量文本回显（UI 上能看到「模型正在想」） */
@@ -49,6 +53,7 @@ export function makeLlmPlanner(opts: LlmPlannerOptions): Planner {
 
   return async (messages: PlannerMessage[]): Promise<AgentAction> => {
     const { streamChat } = await import('../aiChat');
+    const systemPrompt = opts.systemPrompt ?? messages.find((m) => m.role === 'system')?.content ?? '';
 
     const history: ChatTurn[] = messages
       .filter((m) => m.role !== 'system')
@@ -62,7 +67,7 @@ export function makeLlmPlanner(opts: LlmPlannerOptions): Planner {
         message,
         history: hist.slice(-HISTORY_KEEP),
         chapterId: opts.chapterId ?? null,
-        attach: { agent_system: opts.systemPrompt },
+        attach: { agent_system: systemPrompt },
         conversationId,
         signal: opts.signal,
         callbacks: {
