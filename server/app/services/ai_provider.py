@@ -35,6 +35,16 @@ PROMPTS: dict[str, str] = {
         "你是 CppCat，深度学习 C++ 部署向导。熟悉 ONNX Runtime、LibTorch、TensorRT、llama.cpp。"
         "回答部署问题时给出具体版本匹配建议、最小可运行步骤与常见坑。用中文。"
     ),
+    # agent 模式的 system prompt 由前端逐轮下发（context["agent_system"]），
+    # 这里只是「没下发时的兜底」。为什么兜底也要写：漏传 context 时若回落到
+    # socratic，模型会开始反问用户，而 agent 循环期望的是 JSON 动作——表现为
+    # 「每步都解析失败 → 直接降级」，排查成本很高。
+    "agent": (
+        "你是一个工具型 agent。每一轮只输出一个 JSON 对象，"
+        '形如 {"type":"tool","thought":"...","tool":"工具名","args":{...}} '
+        '或 {"type":"final","thought":"...","report":{...}}。'
+        "不要输出解释文字，不要用 markdown 代码块包裹。所有数字必须来自工具返回，禁止编造。"
+    ),
 }
 
 MAX_CONTEXT_CHARS = 6000  # 上下文注入预算（架构文档 8.2）
@@ -187,15 +197,29 @@ def build_messages(
     ctx_text = "\n\n".join(ctx_parts)[:MAX_CONTEXT_CHARS]
 
     system = PROMPTS.get(mode, PROMPTS["socratic"])
-    if ctx_text:
+    agent_system = context.get("agent_system")
+    if agent_system:
+        # agent 模式：协议 prompt 由前端下发，**整体替换**而不是拼接——
+        # 拼接会让人设（"温柔耐心的小猫"）和协议（"只输出 JSON"）互相打架。
+        # 课程检索片段也不注入：agent 的取材由它自己的 search_local / read_chapter 完成，
+        # 这里再塞 4 条 RAG 命中只会挤占 token 并诱导它跳过工具。
+        system = str(agent_system)[:MAX_CONTEXT_CHARS]
+        ctx_only = "\n\n".join(p for p in ctx_parts if not p.startswith("【相关资料"))
+        if ctx_only:
+            system += f"\n\n【用户上下文】\n{ctx_only}"
+    elif ctx_text:
         system += f"\n\n【用户上下文】\n{ctx_text}"
 
     return [{"role": "system", "content": system}, *history]
 
 
 def pick_model(mode: str) -> str:
-    """模型分级：诊断/短答用小模型，面试/审查/计划用大模型。"""
-    heavy = {"interview", "review", "plan"}
+    """模型分级：诊断/短答用小模型，面试/审查/计划/agent 用大模型。
+
+    agent 归 heavy 的原因：它每轮只吐 ~80 token 的 JSON，但**必须严格合法**。
+    小模型在长上下文里漏一个引号，整步就作废并触发降级——质量比省这点 token 重要。
+    """
+    heavy = {"interview", "review", "plan", "agent"}
     if settings.ai_provider == "claude":
         return settings.claude_model
     if settings.ai_provider == "openai":

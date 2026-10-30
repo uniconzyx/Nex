@@ -165,6 +165,7 @@ class AIMode(str, Enum):
     interview = "interview"
     plan = "plan"
     dl_guide = "dl_guide"
+    agent = "agent"
 
 
 class MessageRole(str, Enum):
