@@ -40,34 +40,45 @@
 - 可行性评估表覆盖数据可得性、任务可判定性、错误代价三维，给出四档判定与理由；
 - 成本脚本输入日活/输入输出 token/单价/接管率，输出单次成本、日/月成本、毛利率与保本用量；
 - 给出 3 条「不做什么」与对应的范围变更预算（例如不超过基线 20%）。
-
-## 本章 GitHub 资源（star 数由 GitHub API 实测，2026-10-21）
-
-- `eugeneyan/applied-ml` — 30666★：工业界 ML 落地案例合集，重点看「模型之外」的评估、
-  监控、组织协作怎么写；对应本章的失败模式与指标设计。
-- `Azure-Samples/azure-search-openai-demo` — 7787★：RAG 端到端参考架构（含引用溯源），
-  看它的「无答案时怎么回答」与「引用怎么展示」——这正是画布里的失败兜底。
-- `GokuMohandas/Made-With-ML` — 49787★：从数据校验到部署监控的完整流水线，
-  补「只会调 API」的短板；对应可行性里的数据可得性评估。
-- `microsoft/AI-For-Beginners` — 70073★：24 课 AI 通识，用来快速补齐术语与全景，
-  避免在需求评审时把「分类」「生成」「Agent」概念串味。
-
-## 本章 B 站学习清单
-
-入口（站内搜索，视频会更新，故不写死 BV 号）：
-https://search.bilibili.com/all?keyword=AI%E4%BA%A7%E5%93%81%E7%BB%8F%E7%90%86%E5%AE%9E%E6%88%98%E6%89%8B%E5%86%8C
-
-按 manifest 的 `bilibili_keywords` 看三组：
-
-1. **AI 产品经理 用户故事**：看别人怎么把「我想要」写成可验收的「当…则…」。看完要能回答：
-   「一条没有阈值的验收条件，为什么等于没写？」
-2. **AI 产品 需求分析**：看需求分级与优先级方法（RICE/KANO）。看完要能回答：
-   「置信度下降 20% 为什么会改变排序？RICE 的分子分母分别代表什么？」
-3. **产品画布**：看一页纸画布的实际填法。看完要能回答：
-   「画布里哪三格最容易互相矛盾？你会怎么在评审前自动查出来？」
-
 ## 与 ai 学科的分界
 
 `ai` 学科讲「怎么把模型做出来/训出来」，本章讲「**要不要做、做到什么程度、错了怎么办、赚不赚钱**」。
 同一个需求，`ai` 关心 loss 与架构，本章关心四档判定、可判定性、错误代价与单位经济。
 本章不写模型代码；需要理解能力上限时，回 `ai` 学科看对应模型的能力边界。
+
+## 本章 GitHub 学习路线（按阅读顺序）
+
+> ★ 为 **2026-10-27** 的 GitHub API 快照（已逐条验证仓库存在）。
+> 顺序即路线：**先读能跑的最小实现 → 再读同章对照实现 → 最后读工业级库**。「对应本章」写 `§x.y` 的，说明这份仓库与本章那一节直接对应，先读那里；写「全章」的，按右侧「读什么」给的入口文件读，不要从 README 通读。
+
+| # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
+|---|---|---|---|---|
+| 1 | [eugeneyan/applied-ml](https://github.com/eugeneyan/applied-ml) | 30,732 | 全章 | 工业界 ML 落地案例合集，看「模型之外」的评估、监控、组织协作怎么写；本章先读与「用户故事」「验收条件」相关的部分 |
+| 2 | [Azure-Samples/azure-search-openai-demo](https://github.com/Azure-Samples/azure-search-openai-demo) | 7,787 | 全章 | RAG 端到端参考架构（含引用溯源），企业方案的常见骨架；本章先读与「用户故事」「验收条件」相关的部分 |
+| 3 | [GokuMohandas/Made-With-ML](https://github.com/GokuMohandas/Made-With-ML) | 49,828 | 全章 | 从数据校验到部署监控的完整工程流水线，补「只会调 API」的短板；本章先读与「用户故事」「验收条件」相关的部分 |
+| 4 | [microsoft/AI-For-Beginners](https://github.com/microsoft/AI-For-Beginners) | 70,073 | 全章 | 12 周 24 课的 AI 通识课，用来快速补齐术语与全景，避免面试时概念串味；本章先读与「用户故事」「验收条件」相关的部分 |
+
+## 本章 B 站视频路线（与 GitHub 互补）
+
+> 全部为 B 站直链（`bilibili.com/video/BV…`），BV 号均已通过站内接口核验可播放。
+> 分工：**B 站给直觉与推导，GitHub 给源码与工程取舍**；两者冲突时以源码为准。顺序：主线课定位知识点 → 专题课补推导 → 论文精读补出处。
+
+| # | 系列 / UP 主 | 视频 | 对应本章 | 看什么 |
+|---|---|---|---|---|
+| 1 | 尚硅谷 · LangChain 入门与 Agent 实战<br><sub>尚硅谷</sub> | [BV1rv7A6oEeP](https://www.bilibili.com/video/BV1rv7A6oEeP/) | 全章 | 主线：模型接入 → Prompt 与结构化输出 → Chain/LangGraph 编排 → RAG → Agent 工具循环；看完回 `ex01`（用户故事评分器）核对 |
+| 2 | 提示词工程（Prompt Engineering）系统教程<br><sub>AIAgent开发</sub> | [BV1VEA8zYE6f](https://www.bilibili.com/video/BV1VEA8zYE6f/) | §2.1 九个格子 | 把 Prompt 当接口设计：角色/约束/示例/输出格式四要素，以及失败时的收敛手段；看完回 `ex02`（AI 适用性四档判断）核对 |
+| 3 | 吴恩达 · 大模型合集（Prompt 到 Agent）<br><sub>吴恩达大模型课程</sub> | [BV1nc31zzEa3](https://www.bilibili.com/video/BV1nc31zzEa3/) | 全章 | 方法论最正：Prompt 的四条原则、评估驱动开发、Agent 的反思与规划模式；看完回 `ex03`（需求-能力匹配矩阵）核对 |
+| 4 | 黑马程序员 · 大模型 RAG 与 Agent 智能体实战<br><sub>黑马程序员</sub> | [BV1yjz5BLEoY](https://www.bilibili.com/video/BV1yjz5BLEoY/) | 全章 | 工程视角：文档切分、向量化与召回、重排、评测；Agent 部分讲工具定义与失败重试；看完回 `ex04`（失败模式 FMEA）核对 |
+
+## 本章配套论文与书（溯源用）
+
+> 公式与结论的出处。只查对应章节，不必通读整本。
+
+| # | 文献 / 章节 |
+|---|---|
+| 1 | 《Prompt Engineering for LLMs》Berryman & Ziegler |
+| 2 | 《Designing Machine Learning Systems》Chip Huyen |
+| 3 | 《大语言模型应用开发》相关官方文档（OpenAI / DeepSeek API Docs） |
+
+> 图例：`§3.2` = 本章第 3 篇 concept 文件的第 2 节。共 4 个 GitHub 来源、4 条 B 站视频、3 条文献；
+> 全部链接由 `scripts/collect_links.py` + `scripts/audit_sources.py` 定期复核，失效链接会被审计器标红。

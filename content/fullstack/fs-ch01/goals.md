@@ -41,26 +41,39 @@
 - 打开任意网页，在 Network 面板里**独立读懂**一次请求-响应的每一层细节，并能定位「为什么这个请求慢/为什么这个接口 401」。
 - 手写一个最小 HTTP 服务端与客户端（Node.js 原生 `http` 模块），亲眼看请求行、头部与状态码在两端的样子。
 - 为后续 REST API 设计打下**协议正确性**的基础（方法用对、状态码用对、缓存用对）。
+## 本章 GitHub 学习路线（按阅读顺序）
 
+> ★ 为 **2026-10-27** 的 GitHub API 快照（已逐条验证仓库存在）。
+> 顺序即路线：**先读能跑的最小实现 → 再读同章对照实现 → 最后读工业级库**。「对应本章」写 `§x.y` 的，说明这份仓库与本章那一节直接对应，先读那里；写「全章」的，按右侧「读什么」给的入口文件读，不要从 README 通读。
 
-## 本章 GitHub 资源（大纲实时抓取，star 最高）
+| # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
+|---|---|---|---|---|
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 375,800 | 全章 | 系统设计入门：HTTP/API/缓存/CDN/负载均衡的工程视角（英文） |
+| 2 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,353 | 全章 | 技术面试必备基础知识：计算机网络与 HTTP 专题的中文精华笔记 |
+| 3 | [nodejs/node](https://github.com/nodejs/node) | 122,410 | 全章 | Node.js 运行时：lib/http.js 为标准库 HTTP 实现，本章示例即基于其公开 API |
+| 4 | [hoppscotch/hoppscotch](https://github.com/hoppscotch/hoppscotch) | 80,699 | 全章 | 开源 API 调试工具：可直接观察请求头/响应头，配合本章 Network 面板学习 |
 
-| 仓库 | star | 用途 |
-|---|---|---|
-| [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 373461 | 系统设计入门：HTTP/API/缓存/CDN/负载均衡的工程视角（英文） |
-| [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186392 | 技术面试必备基础知识：计算机网络与 HTTP 专题的中文精华笔记 |
-| [nodejs/node](https://github.com/nodejs/node) | 122410 | Node.js 运行时：lib/http.js 为标准库 HTTP 实现，本章示例即基于其公开 API |
-| [hoppscotch/hoppscotch](https://github.com/hoppscotch/hoppscotch) | 80581 | 开源 API 调试工具：可直接观察请求头/响应头，配合本章 Network 面板学习 |
+## 本章 B 站视频路线（与 GitHub 互补）
 
-> 资源由 `server/scripts/sync_github_resources.py` 从 GitHub API 实时抓取并固化到 `_manifest.json`，star 数以文件内 `github_fetched_at`(2026-10-07) 为准。
+> 全部为 B 站直链（`bilibili.com/video/BV…`），BV 号均已通过站内接口核验可播放。
+> 分工：**B 站给直觉与推导，GitHub 给源码与工程取舍**；两者冲突时以源码为准。顺序：主线课定位知识点 → 专题课补推导 → 论文精读补出处。
 
-## 本章 B 站视频教程（与 GitHub 代码资源互补）
+| # | 系列 / UP 主 | 视频 | 对应本章 | 看什么 |
+|---|---|---|---|---|
+| 1 | 尚硅谷 · JavaScript 基础与实战<br><sub>尚硅谷</sub> | [BV1YW411T7GX](https://www.bilibili.com/video/BV1YW411T7GX/) | 全章 | 主线：语法与类型 → 函数与作用域 → 原型与 this → DOM/BOM → ES6+ → 异步与 Promise；看完回 `ex01`（URL 的解剖）核对 |
+| 2 | 黑马程序员 · AJAX + Node.js + webpack<br><sub>黑马程序员</sub> | [BV1MN411y7pw](https://www.bilibili.com/video/BV1MN411y7pw/) | §1.1 HTTP 是「无状态的文本… | 前后端怎么接上：HTTP 请求、跨域、接口约定、打包构建；看完回 `ex02`（最小 HTTP 往返）核对 |
+| 3 | 黑马程序员 · React 零基础到实战<br><sub>黑马程序员</sub> | [BV1gh411U7JD](https://www.bilibili.com/video/BV1gh411U7JD/) | §1.1 HTTP 是「无状态的文本… | 组件与 props/state、Hooks 的依赖数组、路由与状态管理，最后落到一个完整项目；看完回 `ex03`（HTTP 报文结构）核对 |
+| 4 | HTML + CSS + JS + Vue 前端全套<br><sub>web前端自学官方</sub> | [BV1jj411P7Yp](https://www.bilibili.com/video/BV1jj411P7Yp/) | 全章 | 补页面那一层：盒模型、Flex/Grid 布局、响应式；做「能看的界面」时按需查；看完回 `ex04`（状态码的五类语义与可重试判定）核对 |
 
-> 视频来源均来自 B 站（bilibili.com）。与上方 GitHub 仓库互为补充：**GitHub 看工业级源码实现，B 站看原理讲解与「从零手搓」演示**。
+## 本章配套论文与书（溯源用）
 
-| UP 主 / 系列 | 链接 | 对应本章内容 |
-|---|---|---|
-| 黑马程序员 · Node.js 全套入门教程 | [视频](https://www.bilibili.com/video/BV1a34y167AZ/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 尚硅谷 · Vue3 全家桶（张天禹） | [视频](https://www.bilibili.com/video/BV1Zy4y1K7SH/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 尚硅谷 · React 全家桶 | [视频](https://www.bilibili.com/video/BV1wy4y1D7JT/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 尚硅谷 · HTML5+CSS3 前端零基础（李立超） | [视频](https://www.bilibili.com/video/BV14J4114768/) | 本学科配套视频，建议结合本章示例与习题观看 |
+> 公式与结论的出处。只查对应章节，不必通读整本。
+
+| # | 文献 / 章节 |
+|---|---|
+| 1 | 《JavaScript 高级程序设计（第 4 版）》Zakas |
+| 2 | 《深入浅出 Node.js》朴灵 |
+| 3 | 《CSS 世界》张鑫旭 |
+
+> 图例：`§3.2` = 本章第 3 篇 concept 文件的第 2 节。共 4 个 GitHub 来源、4 条 B 站视频、3 条文献；
+> 全部链接由 `scripts/collect_links.py` + `scripts/audit_sources.py` 定期复核，失效链接会被审计器标红。

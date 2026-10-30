@@ -23,27 +23,39 @@
 7. **区分 `this` 与 `target`**：`this` 指向「代理对象」、`target` 指向「被代理的真实对象」，
    以及为什么同类内部方法自调用（self-invocation）会绕过代理、导致通知失效（ex08、ex09）。
 8. **能解释 AOP 在事务/日志/鉴权中的落地**，并识别「代理失效」这一最高频的生产坑。
+## 本章 GitHub 学习路线（按阅读顺序）
 
+> ★ 为 **2026-10-27** 的 GitHub API 快照（已逐条验证仓库存在）。
+> 顺序即路线：**先读能跑的最小实现 → 再读同章对照实现 → 最后读工业级库**。「对应本章」写 `§x.y` 的，说明这份仓库与本章那一节直接对应，先读那里；写「全章」的，按右侧「读什么」给的入口文件读，不要从 README 通读。
 
-## 本章 GitHub 资源（大纲实时抓取，star 最高）
+| # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
+|---|---|---|---|---|
+| 1 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,863 | 全章 | SpringBoot + MyBatis 完整电商项目，最佳工程范例；本章先读与「JDK 动态代理的工作机制」「InvocationHan…」相关的部分 |
+| 2 | [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81,563 | 全章 | Spring Boot 官方仓库：源码、文档与示例；本章先读与「JDK 动态代理的工作机制」「InvocationHan…」相关的部分 |
+| 3 | [YunaiV/ruoyi-vue-pro](https://github.com/YunaiV/ruoyi-vue-pro) | 40,081 | 全章 | 企业级快速开发平台：Spring Boot + MyBatis Plus 全栈实现；本章先读与「JDK 动态代理的工作机制」「InvocationHan…」相关的部分 |
+| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,313 | 全章 | Spring 生态系统化教程代码；本章先读与「JDK 动态代理的工作机制」「InvocationHan…」相关的部分 |
 
-| 仓库 | star | 用途 |
-|---|---|---|
-| [macrozheng/mall](https://github.com/macrozheng/mall) | 84863 | SpringBoot + MyBatis 完整电商项目，最佳工程范例 |
-| [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81563 | Spring Boot 官方仓库：源码、文档与示例 |
-| [YunaiV/ruoyi-vue-pro](https://github.com/YunaiV/ruoyi-vue-pro) | 39566 | 企业级快速开发平台：Spring Boot + MyBatis Plus 全栈实现 |
-| [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37326 | Spring 生态系统化教程代码 |
+## 本章 B 站视频路线（与 GitHub 互补）
 
-> 资源由 `server/scripts/sync_github_resources.py` 从 GitHub API 实时抓取并固化到 `_manifest.json`，star 数以文件内 `github_fetched_at`(2026-09-21) 为准。
+> 全部为 B 站直链（`bilibili.com/video/BV…`），BV 号均已通过站内接口核验可播放。
+> 分工：**B 站给直觉与推导，GitHub 给源码与工程取舍**；两者冲突时以源码为准。顺序：主线课定位知识点 → 专题课补推导 → 论文精读补出处。
 
-## 本章 B 站视频教程（与 GitHub 代码资源互补）
+| # | 系列 / UP 主 | 视频 | 对应本章 | 看什么 |
+|---|---|---|---|---|
+| 1 | 尚硅谷 · Spring 框架（源码级）<br><sub>尚硅谷</sub> | [BV1Vf4y127N5](https://www.bilibili.com/video/BV1Vf4y127N5/) | 全章 | IoC 容器启动流程、Bean 生命周期、AOP 代理与事务传播：每节都对着源码讲，看完能回答「@Autowired 到底怎么注进去的」；看完回 `ex01`（JDK 动态代理）核对 |
+| 2 | 黑马程序员 · SSM 框架全套<br><sub>黑马程序员</sub> | [BV1WZ4y1P7Bp](https://www.bilibili.com/video/BV1WZ4y1P7Bp/) | 全章 | Spring + SpringMVC + MyBatis 三件套打通：MyBatis 的 Mapper 代理绑定与动态 SQL 在这里最清楚；看完回 `ex02`（JDK 动态代理）核对 |
+| 3 | 尚硅谷 · SpringBoot 2 零基础<br><sub>尚硅谷</sub> | [BV19K4y1L7MT](https://www.bilibili.com/video/BV19K4y1L7MT/) | 全章 | 自动配置原理（@Conditional 家族 + imports 文件）、起步依赖、内嵌容器与配置优先级；看完回 `ex03`（JDK 动态代理）核对 |
+| 4 | 尚硅谷 · SpringCloud 微服务<br><sub>尚硅谷</sub> | [BV18E411x7eT](https://www.bilibili.com/video/BV18E411x7eT/) | 全章 | 分布式事务、服务治理与配置中心；只在讲「多数据源/分布式」时选看，不必通读；看完回 `ex04`（通知嵌套顺序）核对 |
 
-> 视频来源均来自 B 站（bilibili.com）。与上方 GitHub 仓库互为补充：**GitHub 看工业级源码实现，B 站看原理讲解与「从零手搓」演示**。
+## 本章配套论文与书（溯源用）
 
-| UP 主 / 系列 | 链接 | 对应本章内容 |
-|---|---|---|
-| 尚硅谷 · Spring 5 框架教程 | [视频](https://www.bilibili.com/video/BV1Vf4y127N5/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 尚硅谷 · SpringMVC 2021 教程 | [视频](https://www.bilibili.com/video/BV1Ry4y1574R/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 尚硅谷 · MyBatis 实战教程 | [视频](https://www.bilibili.com/video/BV1mW411M737/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 雷丰阳 · SpringBoot2 零基础入门 | [视频](https://www.bilibili.com/video/BV19K4y1L7MT/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 尚硅谷 · Spring Cloud 微服务 | [视频](https://www.bilibili.com/video/BV18E411x7eT/) | 本学科配套视频，建议结合本章示例与习题观看 |
+> 公式与结论的出处。只查对应章节，不必通读整本。
+
+| # | 文献 / 章节 |
+|---|---|
+| 1 | 《Spring 实战（第 6 版）》Walls |
+| 2 | 《Spring Boot 编程思想》小马哥 |
+| 3 | 《MyBatis 从入门到精通》刘增辉 |
+
+> 图例：`§3.2` = 本章第 3 篇 concept 文件的第 2 节。共 4 个 GitHub 来源、4 条 B 站视频、3 条文献；
+> 全部链接由 `scripts/collect_links.py` + `scripts/audit_sources.py` 定期复核，失效链接会被审计器标红。

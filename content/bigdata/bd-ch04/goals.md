@@ -11,27 +11,39 @@
 5. **容错层面**：窄依赖失败只重算单分区、宽依赖失败需重算全部父分区；checkpoint 如何截断超长血缘。
 
 配套可运行示例（`examples/`）用 **Python 从零模拟** Spark 核心机制并量化：血缘 DAG 构建、惰性求值（`compute_calls` 计数器证明）、窄/宽依赖判定、Stage 与 Task 数、map vs mapPartitions、reduceByKey vs groupByKey 的 Shuffle 量、缓存重算次数、checkpoint 截断、宽依赖重算范围、数据倾斜负载、并行度与 Task 数。全部打印真实模拟数字，便于没有 Spark 集群时建立直观心智模型。
+## 本章 GitHub 学习路线（按阅读顺序）
 
+> ★ 为 **2026-10-27** 的 GitHub API 快照（已逐条验证仓库存在）。
+> 顺序即路线：**先读能跑的最小实现 → 再读同章对照实现 → 最后读工业级库**。「对应本章」写 `§x.y` 的，说明这份仓库与本章那一节直接对应，先读那里；写「全章」的，按右侧「读什么」给的入口文件读，不要从 README 通读。
 
-## 本章 GitHub 资源（大纲实时抓取，star 最高）
+| # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
+|---|---|---|---|---|
+| 1 | [DataTalksClub/data-engineering-zoomcamp](https://github.com/DataTalksClub/data-engineering-zoomcamp) | 46,442 | 全章 | 免费 9 周数据工程课程：含 Hadoop/Spark/数仓实践 |
+| 2 | [apache/spark](https://github.com/apache/spark) | 44,339 | 全章 | Apache Spark 官方仓库：RDD/SQL/调优权威来源 |
+| 3 | [heibaiying/BigData-Notes](https://github.com/heibaiying/BigData-Notes) | 16,992 | 全章 | 中文大数据入门指南：Hadoop/Hive/Spark/Flink 系统笔记 |
+| 4 | [apache/hadoop](https://github.com/apache/hadoop) | 15,699 | 全章 | Apache Hadoop 官方仓库：HDFS/YARN/MapReduce 实现 |
 
-| 仓库 | star | 用途 |
-|---|---|---|
-| [DataTalksClub/data-engineering-zoomcamp](https://github.com/DataTalksClub/data-engineering-zoomcamp) | 46045 | 免费 9 周数据工程课程：含 Hadoop/Spark/数仓实践 |
-| [apache/spark](https://github.com/apache/spark) | 44136 | Apache Spark 官方仓库：RDD/SQL/调优权威来源 |
-| [heibaiying/BigData-Notes](https://github.com/heibaiying/BigData-Notes) | 16979 | 中文大数据入门指南：Hadoop/Hive/Spark/Flink 系统笔记 |
-| [apache/hadoop](https://github.com/apache/hadoop) | 15681 | Apache Hadoop 官方仓库：HDFS/YARN/MapReduce 实现 |
+## 本章 B 站视频路线（与 GitHub 互补）
 
-> 资源由 `server/scripts/sync_github_resources.py` 从 GitHub API 实时抓取并固化到 `_manifest.json`，star 数以文件内 `github_fetched_at`(2026-09-21) 为准。
+> 全部为 B 站直链（`bilibili.com/video/BV…`），BV 号均已通过站内接口核验可播放。
+> 分工：**B 站给直觉与推导，GitHub 给源码与工程取舍**；两者冲突时以源码为准。顺序：主线课定位知识点 → 专题课补推导 → 论文精读补出处。
 
-## 本章 B 站视频教程（与 GitHub 代码资源互补）
+| # | 系列 / UP 主 | 视频 | 对应本章 | 看什么 |
+|---|---|---|---|---|
+| 1 | 尚硅谷 · Hadoop 3.x（搭建到调优）<br><sub>尚硅谷</sub> | [BV1Qp4y1n7EN](https://www.bilibili.com/video/BV1Qp4y1n7EN/) | 全章 | 主线：HDFS 读写与副本 → MapReduce 执行流程与 shuffle → YARN 资源调度 → 集群调优；看完回 `ex01`（RDD 血缘 DAG 的构建与打印）核对 |
+| 2 | 尚硅谷 · Spark 从入门到精通<br><sub>尚硅谷</sub> | [BV11A411L7CK](https://www.bilibili.com/video/BV11A411L7CK/) | 全章 | RDD 的血缘与宽窄依赖、DAG 与 stage 划分、shuffle 与内存管理；DataFrame 部分接 Spark SQL；看完回 `ex02`（惰性求值）核对 |
+| 3 | 尚硅谷 · Hive 框架详解<br><sub>尚硅谷</sub> | [BV1W4411B7cN](https://www.bilibili.com/video/BV1W4411B7cN/) | 全章 | 把 SQL 翻译成 MapReduce 的过程、分区与分桶、内部表与外部表的差别；看完回 `ex03`（窄依赖 vs 宽依赖（是否 Shuffl）核对 |
+| 4 | 尚硅谷 · Flink 1.17 实战<br><sub>尚硅谷</sub> | [BV1eg4y1V7AN](https://www.bilibili.com/video/BV1eg4y1V7AN/) | 全章 | 流处理模型：事件时间与水印、窗口、状态与 checkpoint、精确一次语义；看完回 `ex04`（Stage 划分（以宽依赖为界）与 Ta）核对 |
 
-> 视频来源均来自 B 站（bilibili.com）。与上方 GitHub 仓库互为补充：**GitHub 看工业级源码实现，B 站看原理讲解与「从零手搓」演示**。
+## 本章配套论文与书（溯源用）
 
-| UP 主 / 系列 | 链接 | 对应本章内容 |
-|---|---|---|
-| 尚硅谷 · Hadoop 3.x 教程 | [视频](https://www.bilibili.com/video/BV1Qp4y1n7EN/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 尚硅谷 · Hive 3.x 教程 | [视频](https://www.bilibili.com/video/BV1W4411B7cN/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 尚硅谷 · Spark 教程 | [视频](https://www.bilibili.com/video/BV11A411L7CK/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 尚硅谷 · Kafka 教程 | [视频](https://www.bilibili.com/video/BV1a4411B7V9/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 尚硅谷 · Flink 实战教程 | [视频](https://www.bilibili.com/video/BV1qy4y1q728/) | 本学科配套视频，建议结合本章示例与习题观看 |
+> 公式与结论的出处。只查对应章节，不必通读整本。
+
+| # | 文献 / 章节 |
+|---|---|
+| 1 | 《Hadoop 权威指南（第 4 版）》White |
+| 2 | 《Spark 快速大数据分析》Zaharia 等 |
+| 3 | 《Streaming Systems》Akidau 等 |
+
+> 图例：`§3.2` = 本章第 3 篇 concept 文件的第 2 节。共 4 个 GitHub 来源、4 条 B 站视频、3 条文献；
+> 全部链接由 `scripts/collect_links.py` + `scripts/audit_sources.py` 定期复核，失效链接会被审计器标红。

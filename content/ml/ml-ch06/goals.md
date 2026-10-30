@@ -1,7 +1,7 @@
 # ml-ch06 · 无监督学习与降维：聚类、谱方法与 PCA
 
-> 先修：ml-ch01（向量空间、特征值直觉）、ml-ch05（高斯混合与 EM——K-means 是它的极限）。
-> 后续：ml-ch08（评估与特征工程，聚类结果怎么评）、ai 学科（非线性流形学习用神经网络表达）。
+> 先修：ml-ch01（向量空间、特征值直觉）、ml-ch02（最小二乘与正则化的误差口径）。
+> 后续：ml-ch04（聚类结果怎么评——轮廓系数与误差分析口径）、ml-ch07（矩阵分解与协同过滤）；非线性流形学习见 `ai` 学科。
 > 面试权重：★★★★☆（K-means/PCA 几乎必问；谱聚类和 t-SNE 的「距离不可解释」是区分度题）
 
 ## 本章目标
@@ -29,13 +29,6 @@
   此时要么换度量（谱），要么换密度定义（DBSCAN），而不是调 k。
 - **t-SNE/UMAP 只承诺「邻域关系」，不承诺「全局距离」**：在它的图上看簇间远近、看异常点是**错觉**；
   真要做定量距离，回到 PCA 或原始空间。
-
-## 本章 GitHub 资源（star 数由 GitHub API 实测，2026-10-21）
-
-- `scikit-learn/scikit-learn` — 67840★：`cluster` 与 `decomposition` 模块：K-means、DBSCAN、谱聚类、PCA 的参考实现
-- `jakevdp/PythonDataScienceHandbook` — 50114★：《Python 数据科学手册》里降维与聚类的可视化讲解
-- `amueller/introduction_to_ml_with_python` — 8220★：无监督方法的实际边界与常见误用
-
 ## 与「深度学习」的分界（避免与 ai 学科混淆）
 
 本章是**线性/核/图**驱动的经典降维与聚类。深度学习从**自编码器/表示学习**讲起——AE 用神经网络
@@ -51,3 +44,39 @@
 | 非线性 | 靠核技巧（手动选核） | 自动学（端到端） |
 
 非线性流形（如图像流形）用核 PCA/UMAP 只够「探索性」；要拿它做特征，才上自编码器——那是 ai 学科。
+
+## 本章 GitHub 学习路线（按阅读顺序）
+
+> ★ 为 **2026-10-27** 的 GitHub API 快照（已逐条验证仓库存在）。
+> 顺序即路线：**先读能跑的最小实现 → 再读同章对照实现 → 最后读工业级库**。「对应本章」写 `§x.y` 的，说明这份仓库与本章那一节直接对应，先读那里；写「全章」的，按右侧「读什么」给的入口文件读，不要从 README 通读。
+
+| # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
+|---|---|---|---|---|
+| 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | 全章 | cluster / covariance 模块：K-means、DBSCAN、GMM、异常检测；本章先读与「目标函数」「Lloyd 迭代」相关的部分 |
+| 2 | [jakevdp/PythonDataScienceHandbook](https://github.com/jakevdp/PythonDataScienceHandbook) | 50,229 | 全章 | 《Python 数据科学手册》：聚类与密度估计的可视化讲解；本章先读与「目标函数」「Lloyd 迭代」相关的部分 |
+| 3 | [amueller/introduction_to_ml_with_python](https://github.com/amueller/introduction_to_ml_with_python) | 8,224 | 全章 | 无监督方法的实际使用边界与常见误用；本章先读与「目标函数」「Lloyd 迭代」相关的部分 |
+
+## 本章 B 站视频路线（与 GitHub 互补）
+
+> 全部为 B 站直链（`bilibili.com/video/BV…`），BV 号均已通过站内接口核验可播放。
+> 分工：**B 站给直觉与推导，GitHub 给源码与工程取舍**；两者冲突时以源码为准。顺序：主线课定位知识点 → 专题课补推导 → 论文精读补出处。
+
+| # | 系列 / UP 主 | 视频 | 对应本章 | 看什么 |
+|---|---|---|---|---|
+| 1 | 吴恩达 · 机器学习系列（中英字幕）<br><sub>岁月觞</sub> | [BV164411b7dx](https://www.bilibili.com/video/BV164411b7dx/) | 全章 | 主干课：线性/逻辑回归 → 神经网络 → 评估与调优 → 聚类与降维 → 推荐与强化学习；看完回 `ex01`（Lloyd 迭代的单调性）核对 |
+| 2 | 白板推导系列（机器学习 1~33）<br><sub>shuhuai008</sub> | [BV1aE411o7qd](https://www.bilibili.com/video/BV1aE411o7qd/) | §1.4 k-means++ | 从概率视角把每个模型重新推一遍：极大似然、EM、变分推断、SVM 对偶。公式卡住时看它；看完回 `ex02`（K-means++ vs 随机初始化）核对 |
+| 3 | 李宏毅 · 机器学习 2021<br><sub>二次元的Datawhale</sub> | [BV1JA411c7VT](https://www.bilibili.com/video/BV1JA411c7VT/) | §1.6 失效边界 | 补「为什么」：偏差方差分解、梯度下降的失效模式、注意力与自监督；讲法比教科书更直观；看完回 `ex03`（选 K）核对 |
+| 4 | 李航《统计学习方法》啃书指导<br><sub>深度之眼官方账号</sub> | [BV1i4411G7Xv](https://www.bilibili.com/video/BV1i4411G7Xv/) | 全章 | 按书章节带读：感知机、kNN、朴素贝叶斯、决策树、SVM、提升方法，配考研/面试视角的重点标注；看完回 `ex04`（K-means 失效边界）核对 |
+
+## 本章配套论文与书（溯源用）
+
+> 公式与结论的出处。只查对应章节，不必通读整本。
+
+| # | 文献 / 章节 |
+|---|---|
+| 1 | 《机器学习》周志华 第9章（聚类） |
+| 2 | 《统计学习方法》李航 第9章（EM 算法） |
+| 3 | 《Pattern Recognition and Machine Learning》第9章（混合模型与 EM） |
+
+> 图例：`§3.2` = 本章第 3 篇 concept 文件的第 2 节。共 3 个 GitHub 来源、4 条 B 站视频、3 条文献；
+> 全部链接由 `scripts/collect_links.py` + `scripts/audit_sources.py` 定期复核，失效链接会被审计器标红。

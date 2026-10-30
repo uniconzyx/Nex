@@ -58,40 +58,6 @@
   15 分钟答辩有时间分配表，讲完后观众能复述「你解决了谁的什么问题、数据是多少」。
 - 说明：本学科示例环境禁网、无密钥，所有「模型」「部署」「流量」均为本地模拟
   （规则打分、模拟请求流、文本看板），真实接入方式在文中指向对应 GitHub 仓库与 ch03 客户端封装。
-
-## 本章 GitHub 资源（star 数由 GitHub API 实测，2026-10-21；均为精确值，无 ≈）
-
-- `datawhalechina/llm-universe` — 14178★：中文 LLM 应用开发教程，API→RAG→Agent→评估
-  的完整路径。看它的章节顺序与「小项目驱动」组织方式：一个 3 周项目的学习曲线
-  应该长什么样，直接照它排你的第一周；评估部分对应本章黄金集与回归的做法。
-- `datawhalechina/happy-llm` — 34489★：从零构建大模型的教学项目，补「模型内部发生了什么」。
-  交付 demo 被问「你这个效果为什么不行」时，它的 Transformer/RLHF 部分能让你答到
-  机制层而不是停在调用层——选型与排障的底气来源。
-- `langchain-ai/langgraph` — 43638★：有状态 Agent 编排：图、检查点、人工介入，
-  Agent 章的主线。看 `libs/langgraph` 里 `StateGraph` 与 checkpoint 的实现：
-  你的 demo 若含多步流程，「状态怎么存、崩溃怎么续」的工程答案就在它的源码里；
-  部署部分参考它文档中的 streaming 与 persistence 接口。
-- `langgenius/dify` — 159119★：可视化 LLM 应用平台，商业化交付最常见的底座之一。
-  看它的应用编排（工作流/Agent 策略）、日志与标注面板：本章「监控面板 + 成本看板」
-  的产品形态答案在它的 `api` 与 `web` 目录里——即使你自己写，也知道该抄哪些指标。
-
-## 本章 B 站学习清单
-
-入口（站内搜索，视频会更新，故不写死 BV 号）：
-https://search.bilibili.com/all?keyword=AI%E4%BA%A7%E5%93%81%E7%BB%8F%E7%90%86%E5%AE%9E%E6%88%98%E6%89%8B%E5%86%8C
-
-按 manifest 的 `bilibili_keywords` 看三组：
-
-1. **大模型 项目 实战**：看完整项目从选题到上线的全流程实录（尤其「翻车与返工」片段）。
-   看完要能回答：「up 主的选题为什么成立（用户/痛点/周期三要素）？他的 3 周计划
-   关键路径是哪几天？如果砍掉一半范围，他会砍哪三件事、为什么？」
-2. **从0到1 AI 产品**：看产品定义、需求冻结与 demo 演示的组织方式。
-   看完要能回答：「最小可用产品（MVP）和『半成品』的边界在哪？需求方临时加需求时，
-   完整流程是先评估影响还是先动手？15 分钟演示里观众最爱问的三类问题是什么？」
-3. **Agent 项目 部署**：看容器化、上线、监控与成本控制的具体操作。
-   看完要能回答：「健康检查就绪探针和存活探针分别查什么？ demo 上线第一天
-   你要盯哪四个指标？成本看板的 burn rate 怎么算、预算告警阈值怎么定？」
-
 ## 与 ai 学科的分界
 
 `ai` 学科负责模型与框架内部：检索器的向量实现、Agent 框架源码、推理成本的技术细节。
@@ -100,3 +66,40 @@ https://search.bilibili.com/all?keyword=AI%E4%BA%A7%E5%93%81%E7%BB%8F%E7%90%86%E
 指标怎么上墙、文档怎么组织、答辩怎么讲。遇到「为什么这个方案效果差」的机理问题，
 本章只给定位方法（哪类错误、哪一层），深挖回 `ai` 学科；
 本章停在「够用即止的原理 + 工程判据 + 可运行产物」。
+
+## 本章 GitHub 学习路线（按阅读顺序）
+
+> ★ 为 **2026-10-27** 的 GitHub API 快照（已逐条验证仓库存在）。
+> 顺序即路线：**先读能跑的最小实现 → 再读同章对照实现 → 最后读工业级库**。「对应本章」写 `§x.y` 的，说明这份仓库与本章那一节直接对应，先读那里；写「全章」的，按右侧「读什么」给的入口文件读，不要从 README 通读。
+
+| # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
+|---|---|---|---|---|
+| 1 | [datawhalechina/llm-universe](https://github.com/datawhalechina/llm-universe) | 14,178 | 全章 | 中文 LLM 应用开发教程：API→RAG→Agent→评估的完整路径；本章先读与「选题评分卡」「3 周可完成性拆解」相关的部分 |
+| 2 | [datawhalechina/happy-llm](https://github.com/datawhalechina/happy-llm) | 34,489 | 全章 | 从零构建大模型的教学项目，补「模型内部发生了什么」；本章先读与「选题评分卡」「3 周可完成性拆解」相关的部分 |
+| 3 | [langchain-ai/langgraph](https://github.com/langchain-ai/langgraph) | 43,638 | 全章 | 有状态 Agent 编排：图、检查点、人工介入，Agent 章的主线；本章先读与「选题评分卡」「3 周可完成性拆解」相关的部分 |
+| 4 | [langgenius/dify](https://github.com/langgenius/dify) | 159,119 | 全章 | 可视化 LLM 应用平台，商业化交付最常见的底座之一；本章先读与「选题评分卡」「3 周可完成性拆解」相关的部分 |
+
+## 本章 B 站视频路线（与 GitHub 互补）
+
+> 全部为 B 站直链（`bilibili.com/video/BV…`），BV 号均已通过站内接口核验可播放。
+> 分工：**B 站给直觉与推导，GitHub 给源码与工程取舍**；两者冲突时以源码为准。顺序：主线课定位知识点 → 专题课补推导 → 论文精读补出处。
+
+| # | 系列 / UP 主 | 视频 | 对应本章 | 看什么 |
+|---|---|---|---|---|
+| 1 | 尚硅谷 · LangChain 入门与 Agent 实战<br><sub>尚硅谷</sub> | [BV1rv7A6oEeP](https://www.bilibili.com/video/BV1rv7A6oEeP/) | 全章 | 主线：模型接入 → Prompt 与结构化输出 → Chain/LangGraph 编排 → RAG → Agent 工具循环；看完回 `ex01`（选题评分卡）核对 |
+| 2 | 黑马程序员 · 大模型 RAG 与 Agent 智能体实战<br><sub>黑马程序员</sub> | [BV1yjz5BLEoY](https://www.bilibili.com/video/BV1yjz5BLEoY/) | 全章 | 工程视角：文档切分、向量化与召回、重排、评测；Agent 部分讲工具定义与失败重试；看完回 `ex02`（三周计划求解器）核对 |
+| 3 | 吴恩达 · 大模型合集（Prompt 到 Agent）<br><sub>吴恩达大模型课程</sub> | [BV1nc31zzEa3](https://www.bilibili.com/video/BV1nc31zzEa3/) | 全章 | 方法论最正：Prompt 的四条原则、评估驱动开发、Agent 的反思与规划模式；看完回 `ex03`（MVP 范围冻结与变更影响评估）核对 |
+| 4 | 提示词工程（Prompt Engineering）系统教程<br><sub>AIAgent开发</sub> | [BV1VEA8zYE6f](https://www.bilibili.com/video/BV1VEA8zYE6f/) | 全章 | 把 Prompt 当接口设计：角色/约束/示例/输出格式四要素，以及失败时的收敛手段；看完回 `ex04`（黄金集回归对比器）核对 |
+
+## 本章配套论文与书（溯源用）
+
+> 公式与结论的出处。只查对应章节，不必通读整本。
+
+| # | 文献 / 章节 |
+|---|---|
+| 1 | 《Prompt Engineering for LLMs》Berryman & Ziegler |
+| 2 | 《Designing Machine Learning Systems》Chip Huyen |
+| 3 | 《大语言模型应用开发》相关官方文档（OpenAI / DeepSeek API Docs） |
+
+> 图例：`§3.2` = 本章第 3 篇 concept 文件的第 2 节。共 4 个 GitHub 来源、4 条 B 站视频、3 条文献；
+> 全部链接由 `scripts/collect_links.py` + `scripts/audit_sources.py` 定期复核，失效链接会被审计器标红。

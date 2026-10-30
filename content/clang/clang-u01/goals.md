@@ -25,22 +25,38 @@
 - 传数组给函数**长度会丢失**，必须同时传 `n`（或约定哨兵值）；这是 C 没有原生边界检查的必然代价。
 - 指针算术是**无边界检查**的裸操作，越界是 UB（不是「一定崩溃」）——可能静默损坏数据，用 ASan 在 CI 里兜住。
 - 早期返回与错误分支是内存/指针 bug 的高发地；用「单一出口」或清晰的所有权约定降低风险。
+## 本章 GitHub 学习路线（按阅读顺序）
 
+> ★ 为 **2026-10-27** 的 GitHub API 快照（已逐条验证仓库存在）。
+> 顺序即路线：**先读能跑的最小实现 → 再读同章对照实现 → 最后读工业级库**。「对应本章」写 `§x.y` 的，说明这份仓库与本章那一节直接对应，先读那里；写「全章」的，按右侧「读什么」给的入口文件读，不要从 README 通读。
 
-## 本章 GitHub 资源（大纲实时抓取，star 最高）
+| # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
+|---|---|---|---|---|
+| 1 | [rswier/c4](https://github.com/rswier/c4) | 10,819 | §1.1 指针的本质 | §1.1 的活体样本：`c4.c` 把整个源程序读进一块 `char *src`，之后全靠 `*++p` / `*--p` 走路，`next()` 与 `expr()` 里每个取值都是「带类型的地址」——看这两个函数就能把 §1.1 的地址运算和 §1.4 的指针相减对上 |
+| 2 | [antirez/kilo](https://github.com/antirez/kilo) | 9,187 | §1.2 数组退化 | §1.2 数组退化：`kilo.c` 里 `E.row[y].chars`、`&E.row[y]` 全是「数组名当指针用」，`editorRowInsertChar` 里 `row->chars + at` 直接做指针偏移；注意它从不写 `E.row[y]->`  |
+| 3 | [DaveGamble/cJSON](https://github.com/DaveGamble/cJSON) | 13,040 | §1.6 `void *` | §1.6 `void *` 的工业用法：`cJSON.c` 的 `cJSON_malloc`/`cJSON_free` 返回与接收的都是 `void *`，赋值给 `cJSON *` 时不强转——对照 §1.6 的「void 指针可隐式转换」与 §3.1 的 const 形态 |
 
-| 仓库 | star | 用途 |
-|---|---|---|
-| [practical-tutorials/project-based-learning](https://github.com/practical-tutorials/project-based-learning) | 286133 | 项目驱动的实战教程合集（含 C 专题） |
-| [TheAlgorithms/C](https://github.com/TheAlgorithms/C) | 22507 | C 语言实现的算法与数据结构合集 |
+## 本章 B 站视频路线（与 GitHub 互补）
 
-> 资源由 `server/scripts/sync_github_resources.py` 从 GitHub API 实时抓取并固化到 `_manifest.json`，star 数以文件内 `github_fetched_at`(2026-09-21) 为准。
+> 全部为 B 站直链（`bilibili.com/video/BV…`），BV 号均已通过站内接口核验可播放。
+> 分工：**B 站给直觉与推导，GitHub 给源码与工程取舍**；两者冲突时以源码为准。顺序：主线课定位知识点 → 专题课补推导 → 论文精读补出处。
 
-## 本章 B 站视频教程（与 GitHub 代码资源互补）
+| # | 系列 / UP 主 | 视频 | 对应本章 | 看什么 |
+|---|---|---|---|---|
+| 1 | 翁恺（浙江大学）· C 语言程序设计<br><sub>翁恺c语言</sub> | [BV1dr4y1n7vA](https://www.bilibili.com/video/BV1dr4y1n7vA/) | §1.1 指针的本质 | 国内最稳的 C 语言入门课：指针与数组的关系讲得极细，每节都有可当场上机的最小例子；看完回 `ex01`（sizeof）核对 |
+| 2 | 黑马程序员 · C 语言基础教程<br><sub>黑马程序员</sub> | [BV1vs411n7TH](https://www.bilibili.com/video/BV1vs411n7TH/) | §1.1 指针的本质 | 配套源码与案例齐全，位运算、预处理、指针进阶这几节比多数课细；看完回 `ex02`（同一地址）核对 |
+| 3 | 郝斌 · C 语言自学教程<br><sub>蠢杠杠</sub> | [BV1os411h77o](https://www.bilibili.com/video/BV1os411h77o/) | §1.1 指针的本质 | 老派但极清楚：链表、结构体、指针的板书推导，适合把数据结构那几节看明白；看完回 `ex03`（退化陷阱）核对 |
+| 4 | 黑马程序员 · C 语言零基础到精通<br><sub>黑马程序员</sub> | [BV1Xa4y1k7LU](https://www.bilibili.com/video/BV1Xa4y1k7LU/) | §1.1 指针的本质 | 工程视角更重：多文件编译、头文件组织、调试与内存查看，适合把「写题」过渡到「写工程」；看完回 `ex04`（指针算术与求最大值）核对 |
 
-> 视频来源均来自 B 站（bilibili.com）。与上方 GitHub 仓库互为补充：**GitHub 看工业级源码实现，B 站看原理讲解与「从零手搓」演示**。
+## 本章配套论文与书（溯源用）
 
-| UP 主 / 系列 | 链接 | 对应本章内容 |
-|---|---|---|
-| 小甲鱼 · 带你学透 C 语言 | [视频](https://www.bilibili.com/video/BV1ti4y1K7rA/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 郝斌 · C 语言自学完整版 | [视频](https://www.bilibili.com/video/BV1vh411S7LV/) | 本学科配套视频，建议结合本章示例与习题观看 |
+> 公式与结论的出处。只查对应章节，不必通读整本。
+
+| # | 文献 / 章节 |
+|---|---|
+| 1 | 《C 程序设计语言（第 2 版）》Kernighan & Ritchie |
+| 2 | 《C 和指针》Reek |
+| 3 | 《C 陷阱与缺陷》Koenig |
+
+> 图例：`§3.2` = 本章第 3 篇 concept 文件的第 2 节。共 3 个 GitHub 来源、4 条 B 站视频、3 条文献；
+> 全部链接由 `scripts/collect_links.py` + `scripts/audit_sources.py` 定期复核，失效链接会被审计器标红。

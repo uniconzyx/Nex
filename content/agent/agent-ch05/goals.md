@@ -39,34 +39,46 @@
 - 检索层支持权限标签 pre-filter，租户 A 的查询不能返回租户 B 的片段；
 - 输出每条问答的引用片段与对齐分数（Jaccard），并在无高置信证据时触发拒答；
 - 提交一份 `report.md`：30 条黄金集的 Recall@K 曲线、忠实度、拒答率，以及一次「召回但答错」的归因。
-
-## 本章 GitHub 资源（star 数由 GitHub API 实测，2026-10-21）
-
-- `langchain-ai/langchain` — 148187★：看 `libs/langchain-core` 的 `retrievers/` 与 `text_splitter/`，
-  理解「检索抽象」与「切块抽象」的边界，避免把实现细节写死在业务里。
-- `run-llama/llama_index` — 52595★：看 `llama_index/core/node_parser/` 与 `llama_index/core/retriever/`，
-  对照它的语义切块、父子节点与多种检索器，理解「索引即一等公民」的工程取舍。
-- `infiniflow/ragflow` — 92592★：看 `rag/nodes/` 与 `deepdoc/` 的文档解析（版面、表格、OCR 预处理），
-  对照「解析质量」如何直接决定下游召回上限，而不是只看切块算法。
-- `HKUDS/LightRAG` — 40252★：看 `lightrag/` 的图抽取与图检索模块，理解「实体-关系」如何补向量检索的语义短板，
-  适合多跳与跨文档推理场景。
-
-## 本章 B 站学习清单
-
-入口（站内搜索，视频会更新，故不写死 BV 号）：https://search.bilibili.com/all?keyword=LangChain%20RAG%20%E6%95%99%E7%A8%8B
-
-按 manifest 的 `bilibili_keywords` 看三组：
-
-1. **LangChain RAG 教程**：看 RetrievalQA / VectorStoreRetriever 的实际拼装，以及它把哪些环节封装成了黑盒。
-  看完要能回答：「同样是 RAG，为什么有的视频只调 `as_retriever`，有的要手写 fusion？黑盒封装丢掉了什么可控性？」
-2. **向量数据库 原理**：看 embedding、近似最近邻（HNSW/IVF）与余弦相似度的底层逻辑。
-  看完要能回答：「向量检索的召回率为什么天生低于 BM25 精确匹配？什么数据特征下向量检索会翻车？」
-3. **RAG 切块 重排**：看 chunk size、overlap、parent-child、rerank 的实测对比。
-  看完要能回答：「为什么重排（cross-encoder）通常只作用在前 20 个候选？切块 overlap 大了会引入什么新毛病？」
-
 ## 与 ai 学科的分界
 
 `ai` 学科讲 embedding 模型怎么训练、注意力怎么把 query 和 doc 对齐、对比学习的损失；本章**不训练也不推导编码器**，
 只把 embedding 模型当成一个「给定文本返回定长向量」的黑盒服务来用。
 需要理解「为什么向量检索召回率有上限」时，回 `ai` 学科看对比学习与表征空间；
 本章只给工程结论：检索是预算，重排是精读，拒答是底线。
+
+## 本章 GitHub 学习路线（按阅读顺序）
+
+> ★ 为 **2026-10-27** 的 GitHub API 快照（已逐条验证仓库存在）。
+> 顺序即路线：**先读能跑的最小实现 → 再读同章对照实现 → 最后读工业级库**。「对应本章」写 `§x.y` 的，说明这份仓库与本章那一节直接对应，先读那里；写「全章」的，按右侧「读什么」给的入口文件读，不要从 README 通读。
+
+| # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
+|---|---|---|---|---|
+| 1 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,187 | 全章 | RAG 组件全家桶，适合快速拼原型，也适合读源码理解抽象边界；本章先读与「主题一」「主题二」相关的部分 |
+| 2 | [run-llama/llama_index](https://github.com/run-llama/llama_index) | 52,595 | 全章 | 以索引为中心的数据框架，文档解析与检索策略比 LangChain 更细；本章先读与「主题一」「主题二」相关的部分 |
+| 3 | [infiniflow/ragflow](https://github.com/infiniflow/ragflow) | 92,592 | 全章 | 带 UI 的 RAG 引擎，可直接对照「文档解析→切块→召回→重排」每一步的参数；本章先读与「主题一」「主题二」相关的部分 |
+| 4 | [HKUDS/LightRAG](https://github.com/HKUDS/LightRAG) | 40,252 | 全章 | 轻量图增强 RAG，理解「实体关系」如何补向量检索的短板；本章先读与「主题一」「主题二」相关的部分 |
+
+## 本章 B 站视频路线（与 GitHub 互补）
+
+> 全部为 B 站直链（`bilibili.com/video/BV…`），BV 号均已通过站内接口核验可播放。
+> 分工：**B 站给直觉与推导，GitHub 给源码与工程取舍**；两者冲突时以源码为准。顺序：主线课定位知识点 → 专题课补推导 → 论文精读补出处。
+
+| # | 系列 / UP 主 | 视频 | 对应本章 | 看什么 |
+|---|---|---|---|---|
+| 1 | 尚硅谷 · LangChain 入门与 Agent 实战<br><sub>尚硅谷</sub> | [BV1rv7A6oEeP](https://www.bilibili.com/video/BV1rv7A6oEeP/) | 全章 | 主线：模型接入 → Prompt 与结构化输出 → Chain/LangGraph 编排 → RAG → Agent 工具循环；看完回 `ex01`（两种切块的对照）核对 |
+| 2 | 黑马程序员 · 大模型 RAG 与 Agent 智能体实战<br><sub>黑马程序员</sub> | [BV1yjz5BLEoY](https://www.bilibili.com/video/BV1yjz5BLEoY/) | 全章 | 工程视角：文档切分、向量化与召回、重排、评测；Agent 部分讲工具定义与失败重试；看完回 `ex02`（父子块）核对 |
+| 3 | 吴恩达 · 大模型合集（Prompt 到 Agent）<br><sub>吴恩达大模型课程</sub> | [BV1nc31zzEa3](https://www.bilibili.com/video/BV1nc31zzEa3/) | 全章 | 方法论最正：Prompt 的四条原则、评估驱动开发、Agent 的反思与规划模式；看完回 `ex03`（手写 BM25）核对 |
+| 4 | 提示词工程（Prompt Engineering）系统教程<br><sub>AIAgent开发</sub> | [BV1VEA8zYE6f](https://www.bilibili.com/video/BV1VEA8zYE6f/) | 全章 | 把 Prompt 当接口设计：角色/约束/示例/输出格式四要素，以及失败时的收敛手段；看完回 `ex04`（手写 TF-IDF 向量与余弦）核对 |
+
+## 本章配套论文与书（溯源用）
+
+> 公式与结论的出处。只查对应章节，不必通读整本。
+
+| # | 文献 / 章节 |
+|---|---|
+| 1 | 《Prompt Engineering for LLMs》Berryman & Ziegler |
+| 2 | 《Designing Machine Learning Systems》Chip Huyen |
+| 3 | 《大语言模型应用开发》相关官方文档（OpenAI / DeepSeek API Docs） |
+
+> 图例：`§3.2` = 本章第 3 篇 concept 文件的第 2 节。共 4 个 GitHub 来源、4 条 B 站视频、3 条文献；
+> 全部链接由 `scripts/collect_links.py` + `scripts/audit_sources.py` 定期复核，失效链接会被审计器标红。

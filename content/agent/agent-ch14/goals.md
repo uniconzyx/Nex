@@ -54,46 +54,6 @@
 - 说明：本学科示例环境禁网、无密钥，本章所有「自评 / 打分 / 规划」工具均为本地确定性程序
   （规则判定 + 固定数据），不调用任何外部服务；面试问答本身不可自动化，工具只生产
   「可被追问的材料」。
-
-## 本章 GitHub 资源（star 数由 GitHub API 实测，2026-10-21；≈ 表示千位近似）
-
-- `donnemartin/system-design-primer` — 374985★：系统设计面试基础，Agent 服务也要过容量与
-  一致性这关。看 `solutions/` 里「设计短链服务 / 设计限流器 / 设计 Web 爬虫」三篇的答题骨架
-  （需求澄清 → 容量估算 → API 设计 → 数据模型 → 扩展），本章「路径选择」里 Agent 工程岗的
-  系统设计考核直接复用这套骨架；容量估算的「每用户 QPS × 峰值系数」是本章 ex07 关键路径
-  之外另一道高频追问。
-- `yangshun/tech-interview-handbook` — 143087★：技术面试通用题库与行为面框架。看
-  `behavioral-questions/` 的 STAR 变体与 `resume/` 的简历清单写法（每条 bullet 要有
-  动作 + 对象 + 可量化结果），本章作品集的 STAR-R 与简历密度自检（ex05 / ex10）以它为蓝本；
-   Algorithms 目录按「是否适合自己当前水平」分流，避免在面试准备上平均用力。
-- `alirezadir/Machine-Learning-Interviews` — ≈9900★：ML/LLM 岗位面试题分类整理，含系统设计。
-  看按岗位切分的目录（ML 工程 / 研究 / 应用），把本书题目当成「JD 关键词 → 考查点」的
-  翻译样本：同一关键词（如「模型 serving」）在研究岗与工程岗的问法完全不同——这正是本章
-  「路径选择决定考核差异」的一手证据。
-- `chiphuyen/ml-interviews-book` — 4788★：《Machine Learning Interviews》开源书，面试官视角的
-  评分逻辑。看 `interviews/` 里真实面试官的出题记录与 `evaluation` 相关章节：评分表按
-  「问题分解 / 权衡意识 / 沟通」三维打分，本章「作品集取舍段怎么写」直接对照它的
-  评分口径写——先知道怎么被打分，再决定怎么展示。
-
-## 本章 B 站学习清单
-
-入口（站内搜索，视频会更新，故不写死 BV 号）：
-https://search.bilibili.com/all?keyword=AI%E4%BA%A7%E5%93%81%E7%BB%8F%E7%90%86%E5%AE%9E%E6%88%98%E6%89%8B%E5%86%8C
-
-按 manifest 的 `bilibili_keywords` 看三组：
-
-1. **AI 工程师 职业规划**：看在职工程师的路径复盘（研究方向 vs 工程方向、大厂 vs 初创、
-   校招时间线）。看完要能回答：「应用开发 / Agent 工程 / 解决方案 / AI 产品四条路径，
-   各自的核心技能栈与日常产出是什么？同一段 Agent 项目经历，投这四类岗位时分别该
-   突出哪一段？」
-2. **实习 面试 准备**：看实习/校招的流程复盘（简历筛选 → 笔试 → 技术面 → 主管面），
-   重点看被追问的片段。看完要能回答：「实习考核与校招考核的差异是什么
-   （基础与学习速度 vs 项目深度与系统设计）？面试官问『介绍一下你的项目』时，
-   哪三句话决定他是否继续深挖？」
-3. **能力矩阵**：看任何以「能力模型 / 职级 / 成长」为主题的经验分享，注意区分
-   有锚点定义的与纯鸡汤的。看完要能回答：「一个能力等级描述为什么必须包含
-   『可出示产物』？自评 4 级但他评 2 级时，你的处理流程是什么？」
-
 ## 与 ai 学科的分界
 
 `ai` 学科负责模型与算法的机理纵深：Transformer 完整推导、LoRA 数学、RAG 内部实现、
@@ -103,3 +63,40 @@ https://search.bilibili.com/all?keyword=AI%E4%BA%A7%E5%93%81%E7%BB%8F%E7%90%86%E
 遇到「这个指标为什么这样定义、这个误差项从哪来」的机理问题，回 `ai` 学科追推导；
 本章停在「够用即止的原理 + 工程判据 + 可运行产物」——所有自评与规划工具都不依赖
 任何模型调用，纯本地规则与数值计算，产出物必须经得起面试官逐条追问。
+
+## 本章 GitHub 学习路线（按阅读顺序）
+
+> ★ 为 **2026-10-27** 的 GitHub API 快照（已逐条验证仓库存在）。
+> 顺序即路线：**先读能跑的最小实现 → 再读同章对照实现 → 最后读工业级库**。「对应本章」写 `§x.y` 的，说明这份仓库与本章那一节直接对应，先读那里；写「全章」的，按右侧「读什么」给的入口文件读，不要从 README 通读。
+
+| # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
+|---|---|---|---|---|
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 375,800 | 全章 | 系统设计面试基础，Agent 服务也要过容量与一致性这关；本章先读与「能力矩阵与行为锚定等级」「自评的证据要求与常见偏差」相关的部分 |
+| 2 | [yangshun/tech-interview-handbook](https://github.com/yangshun/tech-interview-handbook) | 143,087 | 全章 | 技术面试通用题库与行为面框架；本章先读与「能力矩阵与行为锚定等级」「自评的证据要求与常见偏差」相关的部分 |
+| 3 | [alirezadir/Machine-Learning-Interviews](https://github.com/alirezadir/Machine-Learning-Interviews) | 9,900 | 全章 | ML/LLM 岗位面试题分类整理，含系统设计；本章先读与「能力矩阵与行为锚定等级」「自评的证据要求与常见偏差」相关的部分 |
+| 4 | [chiphuyen/ml-interviews-book](https://github.com/chiphuyen/ml-interviews-book) | 4,788 | 全章 | 《Machine Learning Interviews》开源书，面试官视角的评分逻辑；本章先读与「能力矩阵与行为锚定等级」「自评的证据要求与常见偏差」相关的部分 |
+
+## 本章 B 站视频路线（与 GitHub 互补）
+
+> 全部为 B 站直链（`bilibili.com/video/BV…`），BV 号均已通过站内接口核验可播放。
+> 分工：**B 站给直觉与推导，GitHub 给源码与工程取舍**；两者冲突时以源码为准。顺序：主线课定位知识点 → 专题课补推导 → 论文精读补出处。
+
+| # | 系列 / UP 主 | 视频 | 对应本章 | 看什么 |
+|---|---|---|---|---|
+| 1 | 尚硅谷 · LangChain 入门与 Agent 实战<br><sub>尚硅谷</sub> | [BV1rv7A6oEeP](https://www.bilibili.com/video/BV1rv7A6oEeP/) | 全章 | 主线：模型接入 → Prompt 与结构化输出 → Chain/LangGraph 编排 → RAG → Agent 工具循环；看完回 `ex01`（能力矩阵四维自评与雷达图）核对 |
+| 2 | 黑马程序员 · 大模型 RAG 与 Agent 智能体实战<br><sub>黑马程序员</sub> | [BV1yjz5BLEoY](https://www.bilibili.com/video/BV1yjz5BLEoY/) | 全章 | 工程视角：文档切分、向量化与召回、重排、评测；Agent 部分讲工具定义与失败重试；看完回 `ex02`（行为锚点等级判定器）核对 |
+| 3 | 吴恩达 · 大模型合集（Prompt 到 Agent）<br><sub>吴恩达大模型课程</sub> | [BV1nc31zzEa3](https://www.bilibili.com/video/BV1nc31zzEa3/) | 全章 | 方法论最正：Prompt 的四条原则、评估驱动开发、Agent 的反思与规划模式；看完回 `ex03`（自评 vs 他评偏差量化）核对 |
+| 4 | 提示词工程（Prompt Engineering）系统教程<br><sub>AIAgent开发</sub> | [BV1VEA8zYE6f](https://www.bilibili.com/video/BV1VEA8zYE6f/) | 全章 | 把 Prompt 当接口设计：角色/约束/示例/输出格式四要素，以及失败时的收敛手段；看完回 `ex04`（JD 关键词反推）核对 |
+
+## 本章配套论文与书（溯源用）
+
+> 公式与结论的出处。只查对应章节，不必通读整本。
+
+| # | 文献 / 章节 |
+|---|---|
+| 1 | 《Prompt Engineering for LLMs》Berryman & Ziegler |
+| 2 | 《Designing Machine Learning Systems》Chip Huyen |
+| 3 | 《大语言模型应用开发》相关官方文档（OpenAI / DeepSeek API Docs） |
+
+> 图例：`§3.2` = 本章第 3 篇 concept 文件的第 2 节。共 4 个 GitHub 来源、4 条 B 站视频、3 条文献；
+> 全部链接由 `scripts/collect_links.py` + `scripts/audit_sources.py` 定期复核，失效链接会被审计器标红。

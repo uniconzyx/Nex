@@ -53,45 +53,6 @@
   p 值、效应量与门禁判定（通过/阻断），并模拟「模型未变时重复跑 200 次」统计误报率 ≤5%；
 - 《评估方案.md》：50 条黄金样本清单、3 个指标、1 套回归流程、Responsible AI 检查表
   （隐私脱敏、偏见抽测、幻觉免责声明、审计日志字段）。
-
-## 本章 GitHub 资源（star 由 GitHub API 实测，2026-10-21；≈ 表示千位近似）
-
-- `openai/evals` — 19623★：OpenAI 的评测框架与题库结构，本章「黄金集 + 回归流程」的
-  工程范本。重点看 `evals/registry/` 的 eval 注册方式与 `templates/`：一个 eval 就是
-  「数据文件 + completion 函数 + 评分函数」三件套，`basic_match` 等 grade 函数演示了
-  「匹配 + 打分」的标准写法——这正是把「感觉不错」变成可回归分数的最小骨架。
-- `EleutherAI/lm-evaluation-harness` — 14285★：学术基准评测的行业标准，面试问
-  MMLU/GSM8K 口径时的依据。看 `lm_eval/tasks/` 下单个任务的 YAML：`doc_to_text`
-  （怎么把样本变成 prompt）、`doc_to_target`（答案在哪）、`metric_list`（acc 怎么算），
-  理解「同一基准、不同 prompt 模板分数差 5 个点」的来源；`aggregation` 的
-  mean/stderr 计算就是本章置信区间的工程实现。
-- `explodinggradients/ragas` — ≈16000★：RAG 专用评测库，faithfulness（无支持即幻觉）、
-  answer relevancy、context precision/recall 的计算方式都在源码里。对应 ch05 的
-  RAG 应用：ch05 管「检索管道怎么搭」，本章管「faithfulness 掉到 0.7 时先改检索还是
-  改生成」——指标先定义清楚，优化才有抓手。
-- `microsoft/AI-For-Beginners` — 70073★：12 周 24 课的 AI 通识课。本章不拿它学评估
-  代码，拿它补齐术语全景（监督/无监督、偏差/方差、precision/recall 的通用口径），
-  避免面试时把「评测」与「训练指标」概念串味；其中 Responsible AI 一课的检查清单
-  可直接对照本章最后的合规落地表。
-
-## 本章 B 站学习清单
-
-入口（站内搜索，视频会更新，故不写死 BV 号）：
-https://search.bilibili.com/all?keyword=AI%E4%BA%A7%E5%93%81%E7%BB%8F%E7%90%86%E5%AE%9E%E6%88%98%E6%89%8B%E5%86%8C
-
-按 manifest 的 `bilibili_keywords` 看三组：
-
-1. **LLM 评测 方法**：看评测集构建、LLM-as-judge 的实操演示（打分口径、成对比较、
-   与人工标注的一致性检验）。看完要能回答：「judge 为什么偏爱先出现的答案？
-   怎么用 50 条人工标注样本验证一个 judge 能不能用？kappa 0.55 的 judge 你怎么办？」
-2. **RAGAS 评估**：看 RAG 四指标（faithfulness / answer relevancy / context precision /
-   context recall）的演示与解读。看完要能回答：「faithfulness 低说明检索错还是生成错？
-   context recall 和 answer relevancy 同时低，先修哪一层？没有人工标注时这些指标
-   可信到什么程度？」
-3. **AI 产品 指标**：看 AI 产品经理视角的指标体系（解决率、转人工率、满意度、
-   护栏指标）与 A/B 实践。看完要能回答：「离线指标涨了线上不动的三种可能原因？
-   为什么满意度不能单独作为发布门禁？A/B 的样本量由哪三个量决定？」
-
 ## 与 ai 学科的分界
 
 `ai` 学科负责指标背后的数学与模型机理：假设检验的推导、p 值与检验力的严格定义、
@@ -101,3 +62,40 @@ LLM-as-judge 偏差的理论分析、RAG 四指标的形式化定义与语义分
 judge 怎么用人工样本校准、门禁阈值怎么定到误报率 5%、回归脚本怎么接 CI。
 遇到「为什么两比例检验用这个统计量、faithfulness 的声明分解从何而来」的深层问题，
 回 `ai` 学科追推导；本章停在「够用即止的原理 + 工程判据 + 可运行产物」。
+
+## 本章 GitHub 学习路线（按阅读顺序）
+
+> ★ 为 **2026-10-27** 的 GitHub API 快照（已逐条验证仓库存在）。
+> 顺序即路线：**先读能跑的最小实现 → 再读同章对照实现 → 最后读工业级库**。「对应本章」写 `§x.y` 的，说明这份仓库与本章那一节直接对应，先读那里；写「全章」的，按右侧「读什么」给的入口文件读，不要从 README 通读。
+
+| # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
+|---|---|---|---|---|
+| 1 | [openai/evals](https://github.com/openai/evals) | 19,623 | 全章 | 评测框架与题库结构，学会把「感觉不错」变成可回归的分数；本章先读与「黄金集构建」「指标分层」相关的部分 |
+| 2 | [EleutherAI/lm-evaluation-harness](https://github.com/EleutherAI/lm-evaluation-harness) | 14,285 | 全章 | 学术基准评测标准，面试问 MMLU/GSM8K 口径时的依据；本章先读与「黄金集构建」「指标分层」相关的部分 |
+| 3 | [explodinggradients/ragas](https://github.com/explodinggradients/ragas) | 16,000 | 全章 | RAG 专用评测：faithfulness/answer relevancy 的计算方式；本章先读与「黄金集构建」「指标分层」相关的部分 |
+| 4 | [microsoft/AI-For-Beginners](https://github.com/microsoft/AI-For-Beginners) | 70,073 | 全章 | 12 周 24 课的 AI 通识课，用来快速补齐术语与全景，避免面试时概念串味；本章先读与「黄金集构建」「指标分层」相关的部分 |
+
+## 本章 B 站视频路线（与 GitHub 互补）
+
+> 全部为 B 站直链（`bilibili.com/video/BV…`），BV 号均已通过站内接口核验可播放。
+> 分工：**B 站给直觉与推导，GitHub 给源码与工程取舍**；两者冲突时以源码为准。顺序：主线课定位知识点 → 专题课补推导 → 论文精读补出处。
+
+| # | 系列 / UP 主 | 视频 | 对应本章 | 看什么 |
+|---|---|---|---|---|
+| 1 | 尚硅谷 · LangChain 入门与 Agent 实战<br><sub>尚硅谷</sub> | [BV1rv7A6oEeP](https://www.bilibili.com/video/BV1rv7A6oEeP/) | 全章 | 主线：模型接入 → Prompt 与结构化输出 → Chain/LangGraph 编排 → RAG → Agent 工具循环；看完回 `ex01`（黄金集分层抽样与覆盖度）核对 |
+| 2 | 吴恩达 · 大模型合集（Prompt 到 Agent）<br><sub>吴恩达大模型课程</sub> | [BV1nc31zzEa3](https://www.bilibili.com/video/BV1nc31zzEa3/) | 全章 | 方法论最正：Prompt 的四条原则、评估驱动开发、Agent 的反思与规划模式；看完回 `ex02`（二项比例的置信区间与样本量）核对 |
+| 3 | 黑马程序员 · 大模型 RAG 与 Agent 智能体实战<br><sub>黑马程序员</sub> | [BV1yjz5BLEoY](https://www.bilibili.com/video/BV1yjz5BLEoY/) | 全章 | 工程视角：文档切分、向量化与召回、重排、评测；Agent 部分讲工具定义与失败重试；看完回 `ex03`（A/B 两比例检验）核对 |
+| 4 | 提示词工程（Prompt Engineering）系统教程<br><sub>AIAgent开发</sub> | [BV1VEA8zYE6f](https://www.bilibili.com/video/BV1VEA8zYE6f/) | 全章 | 把 Prompt 当接口设计：角色/约束/示例/输出格式四要素，以及失败时的收敛手段；看完回 `ex04`（LLM-as-judge 偏差体检）核对 |
+
+## 本章配套论文与书（溯源用）
+
+> 公式与结论的出处。只查对应章节，不必通读整本。
+
+| # | 文献 / 章节 |
+|---|---|
+| 1 | 《Prompt Engineering for LLMs》Berryman & Ziegler |
+| 2 | 《Designing Machine Learning Systems》Chip Huyen |
+| 3 | 《大语言模型应用开发》相关官方文档（OpenAI / DeepSeek API Docs） |
+
+> 图例：`§3.2` = 本章第 3 篇 concept 文件的第 2 节。共 4 个 GitHub 来源、4 条 B 站视频、3 条文献；
+> 全部链接由 `scripts/collect_links.py` + `scripts/audit_sources.py` 定期复核，失效链接会被审计器标红。

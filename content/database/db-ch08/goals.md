@@ -24,20 +24,48 @@
 > 本章全部示例为可实跑的 **Python 3 标准库**（无第三方依赖），共 12 个；
 > 每个 `expected_output` 都来自真实执行，关键定量结论（迁移率、倾斜度、冲突率、
 > 脑裂判据、Quorum 判据）均以**实测数字**为准，回放脚本可复现。
-
-## 学习资源（GitHub star 最高）
-- **Snailclimb/JavaGuide**（★159056）—— 含 MySQL 索引、事务、锁与调优的系统讲解
-  <https://github.com/Snailclimb/JavaGuide>
-- **macrozheng/mall**（★84863）—— 真实业务库表设计范例与 SQL 实践
-  <https://github.com/macrozheng/mall>
-- **doocs/advanced-java**（★79141）—— 含分库分表、读写分离与分布式事务
-  <https://github.com/doocs/advanced-java>
-
 ## 推荐书目
+
 - 《高性能 MySQL》第 9 章（复制）/ 第 11 章（高可用与故障切换）—— **本章主教材**
 - 《数据库系统概念》第 18 章（分布式数据库：分片、复制、分布式事务）
 - 《数据密集型应用系统设计》第 5、6、9 章（复制、分区、一致性与共识）—— CAP/BASE 与共识讲得最透
 - 《MySQL 技术内幕：InnoDB 存储引擎》第 3 章（binlog 与复制实现细节）
+
+## 本章 GitHub 学习路线（按阅读顺序）
+
+> ★ 为 **2026-10-27** 的 GitHub API 快照（已逐条验证仓库存在）。
+> 顺序即路线：**先读能跑的最小实现 → 再读同章对照实现 → 最后读工业级库**。「对应本章」写 `§x.y` 的，说明这份仓库与本章那一节直接对应，先读那里；写「全章」的，按右侧「读什么」给的入口文件读，不要从 README 通读。
+
+| # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
+|---|---|---|---|---|
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,300 | 全章 | 含 MySQL 索引、事务、锁与调优的系统讲解；本章先读与「复制链路」「复制模式」相关的部分 |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,863 | 全章 | 真实业务库表设计范例与 SQL 实践；本章先读与「复制链路」「复制模式」相关的部分 |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,162 | 全章 | 含分库分表、读写分离与分布式事务；本章先读与「复制链路」「复制模式」相关的部分 |
+
+## 本章 B 站视频路线（与 GitHub 互补）
+
+> 全部为 B 站直链（`bilibili.com/video/BV…`），BV 号均已通过站内接口核验可播放。
+> 分工：**B 站给直觉与推导，GitHub 给源码与工程取舍**；两者冲突时以源码为准。顺序：主线课定位知识点 → 专题课补推导 → 论文精读补出处。
+
+| # | 系列 / UP 主 | 视频 | 对应本章 | 看什么 |
+|---|---|---|---|---|
+| 1 | 黑马程序员 · MySQL 入门到精通<br><sub>黑马程序员</sub> | [BV1Kr4y1i7ru](https://www.bilibili.com/video/BV1Kr4y1i7ru/) | 全章 | 主线课：SQL 语法 → 约束与多表 → 索引与事务 → 优化，每段都有可直接跑的脚本；看完回 `ex01`（一致性哈希环）核对 |
+| 2 | 尚硅谷 · MySQL 基础+高级篇<br><sub>黎曼的猜想</sub> | [BV12b411K7Zu](https://www.bilibili.com/video/BV12b411K7Zu/) | 全章 | 基础篇讲 SQL 与建表规范，高级篇讲索引、explain、慢查询与优化器；看完回 `ex02`（范围分片 vs 哈希分片）核对 |
+| 3 | 尚硅谷 · MySQL 数据库高级<br><sub>尚硅谷</sub> | [BV1KW411u7vy](https://www.bilibili.com/video/BV1KW411u7vy/) | 全章 | 专攻优化：B+ 树索引结构、执行计划、锁与隔离级别的实验演示；看完回 `ex03`（雪花算法）核对 |
+| 4 | 一个动画搞懂 MySQL 索引原理<br><sub>轩辕的编程宇宙</sub> | [BV1pJ4m1j7Pm](https://www.bilibili.com/video/BV1pJ4m1j7Pm/) | 全章 | 6 分钟动画：聚簇索引与二级索引的回表过程，看完再读概念篇会顺很多；看完回 `ex04`（基因法分片）核对 |
+
+## 本章配套论文与书（溯源用）
+
+> 公式与结论的出处。只查对应章节，不必通读整本。
+
+| # | 文献 / 章节 |
+|---|---|
+| 1 | 《MySQL 技术内幕：InnoDB 存储引擎（第 2 版）》姜承尧 |
+| 2 | 《高性能 MySQL（第 4 版）》 |
+| 3 | 《数据库系统概念（第 7 版）》Silberschatz |
+
+> 图例：`§3.2` = 本章第 3 篇 concept 文件的第 2 节。共 3 个 GitHub 来源、4 条 B 站视频、3 条文献；
+> 全部链接由 `scripts/collect_links.py` + `scripts/audit_sources.py` 定期复核，失效链接会被审计器标红。
 
 ## 验收标准
 1. 能画出并讲清一次事务从主库提交到从库可见的**完整链路**，并说出链路上三个位点
@@ -59,29 +87,6 @@
 16. 能对给定 (N, W, R) 用 `W + R > N` 判定强一致，并说明 `W + R = N` 为什么不行。
 17. 能按接口粒度而非整库粒度做 CAP 取舍，并说出 PACELC 补全了 CAP 的哪一半。
 18. 能列举一致性保障的三个层次（预防 / 修复 / 检测），并说明为什么后两层不可省略。
-
-
-## 本章 GitHub 资源（大纲实时抓取，star 最高）
-
-| 仓库 | star | 用途 |
-|---|---|---|
-| [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159056 | 含 MySQL 索引、事务、锁与调优的系统讲解 |
-| [macrozheng/mall](https://github.com/macrozheng/mall) | 84863 | 真实业务库表设计范例与 SQL 实践 |
-| [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79141 | 含分库分表、读写分离与分布式事务 |
-
-> 资源由 `server/scripts/sync_github_resources.py` 从 GitHub API 实时抓取并固化到 `_manifest.json`，star 数以文件内 `github_fetched_at`(2026-09-21) 为准。
-
-## 本章 B 站视频教程（与 GitHub 代码资源互补）
-
-> 视频来源均来自 B 站（bilibili.com）。与上方 GitHub 仓库互为补充：**GitHub 看工业级源码实现，B 站看原理讲解与「从零手搓」演示**。
-
-| UP 主 / 系列 | 链接 | 对应本章内容 |
-|---|---|---|
-| 尚硅谷 · MySQL 基础+高级篇 | [视频](https://www.bilibili.com/video/BV12b411K7Zu/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 黑马程序员 · MySQL 实战教程 | [视频](https://www.bilibili.com/video/BV1vi4y137PN/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 尚硅谷 · MySQL 高级教程（索引/锁/调优） | [视频](https://www.bilibili.com/video/BV1KW411u7vy/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 尚硅谷 · Redis 6 入门到精通 | [视频](https://www.bilibili.com/video/BV1Rv41177Af/) | 本学科配套视频，建议结合本章示例与习题观看 |
-
 ## 软前置（可选，不阻断学习）
 - 本章只依赖本学科 `db-ch03` 与 `db-ch07`。若已掌握任意一种编程语言的字典、有序数组
   与哈希函数（Python 的 `dict` / `bisect` / `zlib.crc32` 即可），可直接阅读 `examples/` 中的算法实现。

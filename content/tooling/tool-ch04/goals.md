@@ -69,26 +69,39 @@ Git 是一个**内容寻址的对象库**、分支只是指向 commit 的指针�
 - jlevy/the-art-of-command-line（162k★）—— 命令行体系化进阶，含 Git 别名与日常流水线
 - trimstray/the-book-of-secret-knowledge（248k★）—— 运维与安全知识合集
 - 推荐读物：《Pro Git》第 3、5、6 章（分支、分布式 Git、GitHub）
+## 本章 GitHub 学习路线（按阅读顺序）
 
+> ★ 为 **2026-10-27** 的 GitHub API 快照（已逐条验证仓库存在）。
+> 顺序即路线：**先读能跑的最小实现 → 再读同章对照实现 → 最后读工业级库**。「对应本章」写 `§x.y` 的，说明这份仓库与本章那一节直接对应，先读那里；写「全章」的，按右侧「读什么」给的入口文件读，不要从 README 通读。
 
-## 本章 GitHub 资源（大纲实时抓取，star 最高）
+| # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
+|---|---|---|---|---|
+| 1 | [trimstray/the-book-of-secret-knowledge](https://github.com/trimstray/the-book-of-secret-knowledge) | 248,407 | 全章 | 运维与工程工具知识合集：Linux、网络、排障命令速查；本章先读与「`pull` 不是「拉取」」「push 为什么被拒绝，以…」相关的部分 |
+| 2 | [ohmyzsh/ohmyzsh](https://github.com/ohmyzsh/ohmyzsh) | 190,209 | 全章 | Shell 生产力框架（工程效率的入门必装）；本章先读与「`pull` 不是「拉取」」「push 为什么被拒绝，以…」相关的部分 |
+| 3 | [jlevy/the-art-of-command-line](https://github.com/jlevy/the-art-of-command-line) | 162,576 | 全章 | 命令行艺术：Linux 命令的体系化进阶指南；本章先读与「`pull` 不是「拉取」」「push 为什么被拒绝，以…」相关的部分 |
+| 4 | [bregman-arie/devops-exercises](https://github.com/bregman-arie/devops-exercises) | 85,071 | 全章 | DevOps 练习题集：Linux/Docker/K8s/Git/CI 全覆盖；本章先读与「`pull` 不是「拉取」」「push 为什么被拒绝，以…」相关的部分 |
 
-| 仓库 | star | 用途 |
-|---|---|---|
-| [trimstray/the-book-of-secret-knowledge](https://github.com/trimstray/the-book-of-secret-knowledge) | 248407 | 运维与工程工具知识合集：Linux、网络、排障命令速查 |
-| [ohmyzsh/ohmyzsh](https://github.com/ohmyzsh/ohmyzsh) | 190209 | Shell 生产力框架（工程效率的入门必装） |
-| [jlevy/the-art-of-command-line](https://github.com/jlevy/the-art-of-command-line) | 162576 | 命令行艺术：Linux 命令的体系化进阶指南 |
-| [bregman-arie/devops-exercises](https://github.com/bregman-arie/devops-exercises) | 84793 | DevOps 练习题集：Linux/Docker/K8s/Git/CI 全覆盖 |
+## 本章 B 站视频路线（与 GitHub 互补）
 
-> 资源由 `server/scripts/sync_github_resources.py` 从 GitHub API 实时抓取并固化到 `_manifest.json`，star 数以文件内 `github_fetched_at`(2026-09-21) 为准。
+> 全部为 B 站直链（`bilibili.com/video/BV…`），BV 号均已通过站内接口核验可播放。
+> 分工：**B 站给直觉与推导，GitHub 给源码与工程取舍**；两者冲突时以源码为准。顺序：主线课定位知识点 → 专题课补推导 → 论文精读补出处。
 
-## 本章 B 站视频教程（与 GitHub 代码资源互补）
+| # | 系列 / UP 主 | 视频 | 对应本章 | 看什么 |
+|---|---|---|---|---|
+| 1 | 尚硅谷 · Docker 实战（入门到大神）<br><sub>尚硅谷</sub> | [BV1gr4y1U7CY](https://www.bilibili.com/video/BV1gr4y1U7CY/) | 全章 | 主线：镜像分层 → 容器生命周期 → Dockerfile 与多阶段构建 → 数据卷与网络 → Compose；看完回 `ex01`（fetch 与 pull 的真实语义（p）核对 |
+| 2 | 黑马程序员 · Git 全套教程<br><sub>黑马程序员</sub> | [BV1MU4y1Y7h5](https://www.bilibili.com/video/BV1MU4y1Y7h5/) | §4.1 分支策略选型 | 对象模型 → 分支本质 → merge/rebase → 冲突与 reflog 救援；配真实协作场景演示；看完回 `ex02`（提交 DAG 的 merge-base（）核对 |
+| 3 | GeekHour · 一小时 Git 教程<br><sub>GeekHour</sub> | [BV1HM411377j](https://www.bilibili.com/video/BV1HM411377j/) | §4.1 分支策略选型 | 一小时建立全局图：三区、HEAD、常用命令的对应关系，适合先看这个再进细节；看完回 `ex03`（三方合并）核对 |
+| 4 | 于仕琪 · Linux 常用命令与 Shell<br><sub>于仕琪</sub> | [BV1Uv4y127tU](https://www.bilibili.com/video/BV1Uv4y127tU/) | 全章 | 25 分钟过一遍 13 个基本命令与 Shell 脚本骨架，南方科大老师讲得干净；看完回 `ex04`（三方合并）核对 |
 
-> 视频来源均来自 B 站（bilibili.com）。与上方 GitHub 仓库互为补充：**GitHub 看工业级源码实现，B 站看原理讲解与「从零手搓」演示**。
+## 本章配套论文与书（溯源用）
 
-| UP 主 / 系列 | 链接 | 对应本章内容 |
-|---|---|---|
-| 韩顺平 · 一周学会 Linux | [视频](https://www.bilibili.com/video/BV1Sv411r7vd/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 尚硅谷 · Linux 教程（千万级学习人次） | [视频](https://www.bilibili.com/video/BV1dW411M7xL/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 尚硅谷 · 5h 打通 Git 全套教程 | [视频](https://www.bilibili.com/video/BV1vy4y1s7k6/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 狂神说 · Docker 教程 | [视频](https://www.bilibili.com/video/BV1og4y1q7M4/) | 本学科配套视频，建议结合本章示例与习题观看 |
+> 公式与结论的出处。只查对应章节，不必通读整本。
+
+| # | 文献 / 章节 |
+|---|---|
+| 1 | 《鸟哥的 Linux 私房菜（第 4 版）》 |
+| 2 | 《Pro Git（第 2 版）》Chacon & Straub |
+| 3 | 《Docker 技术入门与实战（第 3 版）》杨保华 等 |
+
+> 图例：`§3.2` = 本章第 3 篇 concept 文件的第 2 节。共 4 个 GitHub 来源、4 条 B 站视频、3 条文献；
+> 全部链接由 `scripts/collect_links.py` + `scripts/audit_sources.py` 定期复核，失效链接会被审计器标红。

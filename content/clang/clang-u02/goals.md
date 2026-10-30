@@ -26,22 +26,38 @@
 - **接口成对设计**：`create`/`destroy` 成对；缓冲区一律「指针 + 长度」；只读参数加 `const`。
 - **测量而非猜测**：用 ASan/valgrind 定位，不要靠肉眼读代码。
 - **能不用动态分配就不用**：栈上定长数组、`static` 缓冲（注明不可重入）在很多嵌入式/系统场景更可靠。
+## 本章 GitHub 学习路线（按阅读顺序）
 
+> ★ 为 **2026-10-27** 的 GitHub API 快照（已逐条验证仓库存在）。
+> 顺序即路线：**先读能跑的最小实现 → 再读同章对照实现 → 最后读工业级库**。「对应本章」写 `§x.y` 的，说明这份仓库与本章那一节直接对应，先读那里；写「全章」的，按右侧「读什么」给的入口文件读，不要从 README 通读。
 
-## 本章 GitHub 资源（大纲实时抓取，star 最高）
+| # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
+|---|---|---|---|---|
+| 1 | [antirez/kilo](https://github.com/antirez/kilo) | 9,187 | §2.2 `realloc` 的正确… | §2.2 `realloc` 的正确写法就在 `editorRowInsertChar`：先 `realloc(row->chars, ...)` 到新指针，再赋值回去；`editorUpdateRow` 每次重建 render 缓冲，看它怎么避免「realloc 失败把原指针弄丢」 |
+| 2 | [DaveGamble/cJSON](https://github.com/DaveGamble/cJSON) | 13,040 | §2.1 四个函数的语义 | §2.1/§2.3 的一 malloc 一 free 配对：`cJSON_New_Item` 先 `memset` 再返回、`cJSON_Delete` 递归释放子节点；`cJSON_Parse` 失败路径上每一处 return 前都调 `cJSON_Delete`，对照 §3.2 泄漏成因第 1 条 |
+| 3 | [redis/redis](https://github.com/redis/redis) | 76,964 | §3.5 内存池 | §3.5 池化与统计：`src/zmalloc.c` 在 `malloc` 外包一层，用 `PREFIX_SIZE` 记字节数，`zmalloc_used_memory` 对外报总量——这就是「分配器之上再包一层」的最小实现，对照 §1.4 的真实成本 |
 
-| 仓库 | star | 用途 |
-|---|---|---|
-| [practical-tutorials/project-based-learning](https://github.com/practical-tutorials/project-based-learning) | 286133 | 项目驱动的实战教程合集（含 C 专题） |
-| [TheAlgorithms/C](https://github.com/TheAlgorithms/C) | 22507 | C 语言实现的算法与数据结构合集 |
+## 本章 B 站视频路线（与 GitHub 互补）
 
-> 资源由 `server/scripts/sync_github_resources.py` 从 GitHub API 实时抓取并固化到 `_manifest.json`，star 数以文件内 `github_fetched_at`(2026-09-21) 为准。
+> 全部为 B 站直链（`bilibili.com/video/BV…`），BV 号均已通过站内接口核验可播放。
+> 分工：**B 站给直觉与推导，GitHub 给源码与工程取舍**；两者冲突时以源码为准。顺序：主线课定位知识点 → 专题课补推导 → 论文精读补出处。
 
-## 本章 B 站视频教程（与 GitHub 代码资源互补）
+| # | 系列 / UP 主 | 视频 | 对应本章 | 看什么 |
+|---|---|---|---|---|
+| 1 | 翁恺（浙江大学）· C 语言程序设计<br><sub>翁恺c语言</sub> | [BV1dr4y1n7vA](https://www.bilibili.com/video/BV1dr4y1n7vA/) | §2.1 四个函数的语义 | 国内最稳的 C 语言入门课：指针与数组的关系讲得极细，每节都有可当场上机的最小例子；看完回 `ex01`（malloc 申请一维数组并读写）核对 |
+| 2 | 黑马程序员 · C 语言零基础到精通<br><sub>黑马程序员</sub> | [BV1Xa4y1k7LU](https://www.bilibili.com/video/BV1Xa4y1k7LU/) | §1.1 进程内存分区 | 工程视角更重：多文件编译、头文件组织、调试与内存查看，适合把「写题」过渡到「写工程」；看完回 `ex02`（calloc 清零 vs malloc ）核对 |
+| 3 | 郝斌 · C 语言自学教程<br><sub>蠢杠杠</sub> | [BV1os411h77o](https://www.bilibili.com/video/BV1os411h77o/) | §2.1 四个函数的语义 | 老派但极清楚：链表、结构体、指针的板书推导，适合把数据结构那几节看明白；看完回 `ex03`（realloc 扩容）核对 |
+| 4 | 黑马程序员 · C 语言基础教程<br><sub>黑马程序员</sub> | [BV1vs411n7TH](https://www.bilibili.com/video/BV1vs411n7TH/) | §2.1 四个函数的语义 | 配套源码与案例齐全，位运算、预处理、指针进阶这几节比多数课细；看完回 `ex04`（malloc 失败返回 NULL 的处理）核对 |
 
-> 视频来源均来自 B 站（bilibili.com）。与上方 GitHub 仓库互为补充：**GitHub 看工业级源码实现，B 站看原理讲解与「从零手搓」演示**。
+## 本章配套论文与书（溯源用）
 
-| UP 主 / 系列 | 链接 | 对应本章内容 |
-|---|---|---|
-| 小甲鱼 · 带你学透 C 语言 | [视频](https://www.bilibili.com/video/BV1ti4y1K7rA/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 郝斌 · C 语言自学完整版 | [视频](https://www.bilibili.com/video/BV1vh411S7LV/) | 本学科配套视频，建议结合本章示例与习题观看 |
+> 公式与结论的出处。只查对应章节，不必通读整本。
+
+| # | 文献 / 章节 |
+|---|---|
+| 1 | 《C 程序设计语言（第 2 版）》Kernighan & Ritchie |
+| 2 | 《C 和指针》Reek |
+| 3 | 《C 陷阱与缺陷》Koenig |
+
+> 图例：`§3.2` = 本章第 3 篇 concept 文件的第 2 节。共 3 个 GitHub 来源、4 条 B 站视频、3 条文献；
+> 全部链接由 `scripts/collect_links.py` + `scripts/audit_sources.py` 定期复核，失效链接会被审计器标红。

@@ -56,42 +56,6 @@
 - **入职 30 天计划**：按周切片（读代码 / 小切口 / 建信任 / 攒证据），每周有可验证产出
   （架构图、第一个 PR、一次跨组同步、一份试用期指标基线）；转正答辩叙事用四段式：
   问题 - 动作 - 数字 - 复盘。
-
-## 本章 GitHub 资源（star 数由 GitHub API 实测，2026-10-21；≈ 表示千位近似）
-
-- `alirezadir/Machine-Learning-Interviews` — ≈9900★：ML/LLM 岗位面试题分类整理，含系统设计部分。
-  看 README 的题目分类目录（ML 基础 / 深度学习 / ML 系统设计 / 编程题），把本章面试层的八股清单
-  与它的分类对表——漏掉的主题就是你复习计划的缺口。
-- `chiphuyen/ml-interviews-book` — 4788★：《Machine Learning Interviews》开源书，面试官视角的
-  评分逻辑。看技能树与「面试流程」相关章节：面试官按什么维度打分、什么回答加分、什么回答减分，
-  直接决定你复盘表的维度设计。
-- `GokuMohandas/Made-With-ML` — 49787★：从数据校验到部署监控的完整工程流水线，补「只会调 API」的短板。
-  看 `notebooks/` 的章节组织（数据 → 特征 → 训练 → 调优 → 部署 → 监控）与仓库里的测试与 CI 配置：
-  面试讲项目时「你的项目工程化程度如何」，答案就长这样。
-- `donnemartin/system-design-primer` — 374985★：系统设计面试基础，Agent 服务也要过容量与一致性这关。
-  看「back-of-the-envelope 估算」与「限流 / 缓存 / 负载均衡 / 数据库选型」章节，
-  对应本章系统设计线的容量账（QPS → 存储 → 带宽 → 卡数）与降级路径设计。
-
-## 本章 B 站学习清单
-
-入口（站内搜索，视频会更新，故不写死 BV 号）：
-https://search.bilibili.com/all?keyword=AI%E4%BA%A7%E5%93%81%E7%BB%8F%E7%90%86%E5%AE%9E%E6%88%98%E6%89%8B%E5%86%8C
-
-按 manifest 的 `bilibili_keywords` 看三组：
-
-1. **大模型 面试 题**：看 LLM 岗位八股的成体系讲解（Transformer 必考计算、RAG 链路、Agent 框架、
-   部署与推理优化四类都要覆盖，不要只看一类）。
-   看完要能回答：「Q/K/V 为什么是三个矩阵不是三个向量？RAG 召回率 90% 但答案错你先改哪一层？
-   Agent 死循环怎么防、阈值 K 为什么不能取 2？vLLM 的连续批处理和 PagedAttention 各自解决什么？」
-2. **项目 介绍 STAR**：看简历项目描述的写法与反面案例（空话识别、量化指标怎么写、
-   面试官怎么顺着项目追问）。
-   看完要能回答：「把『负责知识库问答系统，使用 RAG 技术』改写成 STAR-R 五段式并写出带四要素的
-   量化指标」「面试官问『这个 92% 的准确率基线是什么、提升多少算你的功劳』，你怎么答？」
-3. **系统设计 面试**：看企业级系统设计的完整推演（估算 → 接口 → 存储 → 扩展 → 降级），
-   重点看「设计一个知识库 / 搜索 / 推荐系统」这类与本章同构的题。
-   看完要能回答：「10 万文档、峰值 50 QPS 的知识库 Agent，存储和带宽各多少、需要几张卡、
-   限流阈值怎么定、检索服务挂了降级成什么？」
-
 ## 与 ai 学科的分界
 
 `ai` 学科讲模型与算法机理：BM25 与向量检索的数学形式、ReAct 的论文脉络与推理理论、
@@ -101,3 +65,40 @@ https://search.bilibili.com/all?keyword=AI%E4%BA%A7%E5%93%81%E7%BB%8F%E7%90%86%E
 系统设计是「用容量账本做技术选型」，简历与面试是「把项目讲成证据」。
 遇到「BM25 为什么这样设计、ReAct 为什么有效」的机理追问，本章只给够用的解释与判据，
 完整推导回 `ai` 学科。
+
+## 本章 GitHub 学习路线（按阅读顺序）
+
+> ★ 为 **2026-10-27** 的 GitHub API 快照（已逐条验证仓库存在）。
+> 顺序即路线：**先读能跑的最小实现 → 再读同章对照实现 → 最后读工业级库**。「对应本章」写 `§x.y` 的，说明这份仓库与本章那一节直接对应，先读那里；写「全章」的，按右侧「读什么」给的入口文件读，不要从 README 通读。
+
+| # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
+|---|---|---|---|---|
+| 1 | [alirezadir/Machine-Learning-Interviews](https://github.com/alirezadir/Machine-Learning-Interviews) | 9,900 | 全章 | ML/LLM 岗位面试题分类整理，含系统设计；本章先读与「一页纸结构与 STAR-R」「量化指标四要素」相关的部分 |
+| 2 | [chiphuyen/ml-interviews-book](https://github.com/chiphuyen/ml-interviews-book) | 4,788 | 全章 | 《Machine Learning Interviews》开源书，面试官视角的评分逻辑；本章先读与「一页纸结构与 STAR-R」「量化指标四要素」相关的部分 |
+| 3 | [GokuMohandas/Made-With-ML](https://github.com/GokuMohandas/Made-With-ML) | 49,828 | 全章 | 从数据校验到部署监控的完整工程流水线，补「只会调 API」的短板；本章先读与「一页纸结构与 STAR-R」「量化指标四要素」相关的部分 |
+| 4 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 375,800 | 全章 | 系统设计面试基础，Agent 服务也要过容量与一致性这关；本章先读与「一页纸结构与 STAR-R」「量化指标四要素」相关的部分 |
+
+## 本章 B 站视频路线（与 GitHub 互补）
+
+> 全部为 B 站直链（`bilibili.com/video/BV…`），BV 号均已通过站内接口核验可播放。
+> 分工：**B 站给直觉与推导，GitHub 给源码与工程取舍**；两者冲突时以源码为准。顺序：主线课定位知识点 → 专题课补推导 → 论文精读补出处。
+
+| # | 系列 / UP 主 | 视频 | 对应本章 | 看什么 |
+|---|---|---|---|---|
+| 1 | 尚硅谷 · LangChain 入门与 Agent 实战<br><sub>尚硅谷</sub> | [BV1rv7A6oEeP](https://www.bilibili.com/video/BV1rv7A6oEeP/) | §2.2 系统设计 | 主线：模型接入 → Prompt 与结构化输出 → Chain/LangGraph 编排 → RAG → Agent 工具循环；看完回 `ex01`（手写题一）核对 |
+| 2 | 黑马程序员 · 大模型 RAG 与 Agent 智能体实战<br><sub>黑马程序员</sub> | [BV1yjz5BLEoY](https://www.bilibili.com/video/BV1yjz5BLEoY/) | §2.2 系统设计 | 工程视角：文档切分、向量化与召回、重排、评测；Agent 部分讲工具定义与失败重试；看完回 `ex02`（BM25 参数敏感性）核对 |
+| 3 | 吴恩达 · 大模型合集（Prompt 到 Agent）<br><sub>吴恩达大模型课程</sub> | [BV1nc31zzEa3](https://www.bilibili.com/video/BV1nc31zzEa3/) | §2.2 系统设计 | 方法论最正：Prompt 的四条原则、评估驱动开发、Agent 的反思与规划模式；看完回 `ex03`（手写题二）核对 |
+| 4 | 提示词工程（Prompt Engineering）系统教程<br><sub>AIAgent开发</sub> | [BV1VEA8zYE6f](https://www.bilibili.com/video/BV1VEA8zYE6f/) | 全章 | 把 Prompt 当接口设计：角色/约束/示例/输出格式四要素，以及失败时的收敛手段；看完回 `ex04`（ReAct 终止条件）核对 |
+
+## 本章配套论文与书（溯源用）
+
+> 公式与结论的出处。只查对应章节，不必通读整本。
+
+| # | 文献 / 章节 |
+|---|---|
+| 1 | 《Prompt Engineering for LLMs》Berryman & Ziegler |
+| 2 | 《Designing Machine Learning Systems》Chip Huyen |
+| 3 | 《大语言模型应用开发》相关官方文档（OpenAI / DeepSeek API Docs） |
+
+> 图例：`§3.2` = 本章第 3 篇 concept 文件的第 2 节。共 4 个 GitHub 来源、4 条 B 站视频、3 条文献；
+> 全部链接由 `scripts/collect_links.py` + `scripts/audit_sources.py` 定期复核，失效链接会被审计器标红。

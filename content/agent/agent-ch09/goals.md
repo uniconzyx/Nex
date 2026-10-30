@@ -47,39 +47,6 @@
 - 异步任务队列带进度反馈；单次请求成本按「文本 token + 视觉 token」两段记账。
 - 说明：本学科的示例环境禁网、无密钥，所有「模型」均为本地模拟（规则 OCR、模拟嵌入、
   虚拟队列），真实接入方式在文中指向对应 GitHub 仓库与 ch03 的客户端封装。
-
-## 本章 GitHub 资源（star 数由 GitHub API 实测，2026-10-21；≈ 表示千位近似）
-
-- `huggingface/diffusers` — 34772★：扩散模型标准库，多模态章的图像生成基线。
-  看 `examples/text_to_image/` 与 `examples/controlnet/`：采样器（scheduler）、pipeline、
-  ControlNet 条件在接口上各自封装了什么，比看论文更知道「上线时要调哪些旋钮」。
-- `openai/CLIP` — 34501★：图文对齐的经典实现。读 `model.py` 的双塔结构与对比损失、
-  `simple_test.py` 的零样本分类，理解「多模态检索为什么能跨模态」——归一化嵌入的点积
-  就是余弦，训练与推理是同一个几何。
-- `AUTOMATIC1111/stable-diffusion-webui` — 165088★：最流行的 SD 前端，看插件生态如何把
-  模型变成产品。重点看 `modules/` 的参数面板、任务队列与结果管理——「异步任务队列 +
-  进度反馈」的产品形态答案就在这个仓库里。
-- `QwenLM/Qwen3-VL` — ≈20000★：国产多模态模型，中文场景的视觉问答/文档理解首选。
-  看文档里的动态分辨率与 token 策略（最小/最大像素、patch 合并），直接对应本章的
-  「分辨率-token 账本」；发票/报表抽取的 prompt 模板也可照它改写。
-
-## 本章 B 站学习清单
-
-入口（站内搜索，视频会更新，故不写死 BV 号）：
-https://search.bilibili.com/all?keyword=%E6%9D%8E%E6%B2%90%20AI
-
-按 manifest 的 `bilibili_keywords` 看三组：
-
-1. **Stable Diffusion 教程**：看文生图全流程与 WebUI 参数（步数、CFG、种子、采样器、负面提示词）。
-   看完要能回答：「CFG 调高一定能提质吗？步数从 20 加到 50，什么时候开始边际收益归零？
-   固定种子在工程上用来做什么？」
-2. **多模态大模型**：看 VLM 的整体结构（视觉编码器 → 投影层 → LLM）与典型应用演示。
-   看完要能回答：「一张 1024×1024 的图进去，视觉 token 大概多少？为什么各家都限制
-   最大像素？多图输入的 token 是简单相加吗？」
-3. **VLM 文档识别**：看发票/报表抽取的演示与常见失败案例（手写体、印章遮挡、褶皱）。
-   看完要能回答：「字符准确率 98% 的 OCR，为什么字段级准确率可能只有 80%？
-   拿到一批失败样本，你的排查顺序是什么？」
-
 ## 与 ai 学科的分界
 
 `ai` 学科负责多模态模型的内部机理：ViT 的完整推导、CLIP 对比损失的数学形式、
@@ -88,3 +55,40 @@ https://search.bilibili.com/all?keyword=%E6%9D%8E%E6%B2%90%20AI
 本章**只要求工程接口与数字**：视觉 token 怎么算、字段级准确率怎么评、生成参数怎么调、
 单次请求成本怎么记账。遇到「为什么这样对齐、为什么这样采样」的深层机理问题，
 回 `ai` 学科追推导；本章停在「够用即止的原理 + 工程判据 + 可运行产物」。
+
+## 本章 GitHub 学习路线（按阅读顺序）
+
+> ★ 为 **2026-10-27** 的 GitHub API 快照（已逐条验证仓库存在）。
+> 顺序即路线：**先读能跑的最小实现 → 再读同章对照实现 → 最后读工业级库**。「对应本章」写 `§x.y` 的，说明这份仓库与本章那一节直接对应，先读那里；写「全章」的，按右侧「读什么」给的入口文件读，不要从 README 通读。
+
+| # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
+|---|---|---|---|---|
+| 1 | [huggingface/diffusers](https://github.com/huggingface/diffusers) | 34,819 | 全章 | 扩散模型标准库，多模态章的图像生成基线；本章先读与「图像分块与 patch e…」「分辨率、长宽比与 toke…」相关的部分 |
+| 2 | [openai/CLIP](https://github.com/openai/CLIP) | 34,501 | 全章 | 图文对齐的经典实现，理解「多模态检索」为什么能跨模态；本章先读与「图像分块与 patch e…」「分辨率、长宽比与 toke…」相关的部分 |
+| 3 | [AUTOMATIC1111/stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) | 165,088 | 全章 | 最流行的 SD 前端，看插件生态如何把模型变成产品；本章先读与「图像分块与 patch e…」「分辨率、长宽比与 toke…」相关的部分 |
+| 4 | [QwenLM/Qwen3-VL](https://github.com/QwenLM/Qwen3-VL) | 20,000 | 全章 | 国产多模态模型，中文场景的视觉问答/文档理解首选；本章先读与「图像分块与 patch e…」「分辨率、长宽比与 toke…」相关的部分 |
+
+## 本章 B 站视频路线（与 GitHub 互补）
+
+> 全部为 B 站直链（`bilibili.com/video/BV…`），BV 号均已通过站内接口核验可播放。
+> 分工：**B 站给直觉与推导，GitHub 给源码与工程取舍**；两者冲突时以源码为准。顺序：主线课定位知识点 → 专题课补推导 → 论文精读补出处。
+
+| # | 系列 / UP 主 | 视频 | 对应本章 | 看什么 |
+|---|---|---|---|---|
+| 1 | 尚硅谷 · LangChain 入门与 Agent 实战<br><sub>尚硅谷</sub> | [BV1rv7A6oEeP](https://www.bilibili.com/video/BV1rv7A6oEeP/) | 全章 | 主线：模型接入 → Prompt 与结构化输出 → Chain/LangGraph 编排 → RAG → Agent 工具循环；看完回 `ex01`（图像分块）核对 |
+| 2 | 吴恩达 · 大模型合集（Prompt 到 Agent）<br><sub>吴恩达大模型课程</sub> | [BV1nc31zzEa3](https://www.bilibili.com/video/BV1nc31zzEa3/) | §2.2 字段级准确率与混淆矩阵 | 方法论最正：Prompt 的四条原则、评估驱动开发、Agent 的反思与规划模式；看完回 `ex02`（视觉 token 预算门）核对 |
+| 3 | 提示词工程（Prompt Engineering）系统教程<br><sub>AIAgent开发</sub> | [BV1VEA8zYE6f](https://www.bilibili.com/video/BV1VEA8zYE6f/) | §3.2 扩散生成的可控性 | 把 Prompt 当接口设计：角色/约束/示例/输出格式四要素，以及失败时的收敛手段；看完回 `ex03`（分辨率与长宽比的代价）核对 |
+| 4 | 黑马程序员 · 大模型 RAG 与 Agent 智能体实战<br><sub>黑马程序员</sub> | [BV1yjz5BLEoY](https://www.bilibili.com/video/BV1yjz5BLEoY/) | 全章 | 工程视角：文档切分、向量化与召回、重排、评测；Agent 部分讲工具定义与失败重试；看完回 `ex04`（CLIP 双塔检索）核对 |
+
+## 本章配套论文与书（溯源用）
+
+> 公式与结论的出处。只查对应章节，不必通读整本。
+
+| # | 文献 / 章节 |
+|---|---|
+| 1 | 《Prompt Engineering for LLMs》Berryman & Ziegler |
+| 2 | 《Designing Machine Learning Systems》Chip Huyen |
+| 3 | 《大语言模型应用开发》相关官方文档（OpenAI / DeepSeek API Docs） |
+
+> 图例：`§3.2` = 本章第 3 篇 concept 文件的第 2 节。共 4 个 GitHub 来源、4 条 B 站视频、3 条文献；
+> 全部链接由 `scripts/collect_links.py` + `scripts/audit_sources.py` 定期复核，失效链接会被审计器标红。

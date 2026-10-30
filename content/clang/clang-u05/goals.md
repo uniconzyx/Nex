@@ -26,22 +26,38 @@
 - **所有宏参数在使用处加括号、整个表达式加括号**：这是避免运算符优先级事故的硬规矩。
 - **把宏当「代码生成」而非「计算」**：X-Macro、日志宏、`#define` 配置开关都是它的主战场；别拿宏写复杂逻辑。
 - **工程里用条件编译隔离平台差异**（Windows/Linux、32/64 位、调试/发布），但开关过多会让构建矩阵爆炸——用构建系统（见 clang-u06）统一控制更稳妥。
+## 本章 GitHub 学习路线（按阅读顺序）
 
+> ★ 为 **2026-10-27** 的 GitHub API 快照（已逐条验证仓库存在）。
+> 顺序即路线：**先读能跑的最小实现 → 再读同章对照实现 → 最后读工业级库**。「对应本章」写 `§x.y` 的，说明这份仓库与本章那一节直接对应，先读那里；写「全章」的，按右侧「读什么」给的入口文件读，不要从 README 通读。
 
-## 本章 GitHub 资源（大纲实时抓取，star 最高）
+| # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
+|---|---|---|---|---|
+| 1 | [DaveGamble/cJSON](https://github.com/DaveGamble/cJSON) | 13,040 | §4.2 `#ifndef` 守卫 | §4.2/§4.4 头文件守卫：`cJSON.h` 顶部的 `#ifndef cJSON__h` + `#define` 是标准守卫写法，`CJSON_PUBLIC` 宏统一处理导出符号；顺带看它怎么用 `#ifdef __cplusplus` 给 C++ 留 `extern \"C\"` |
+| 2 | [redis/redis](https://github.com/redis/redis) | 76,964 | §2.3 什么时候用宏、什么时候用… | §2.3 宏还是 inline：`src/sds.h` 里 `sdslen`/`sdsavail` 是 `static inline`，而 `src/zmalloc.h` 里 `zmalloc_usable_size` 是宏包函数——同一份代码里两种取舍并存，正好对照那节的判据 |
+| 3 | [rswier/c4](https://github.com/rswier/c4) | 10,819 | §1.1 C 程序如何变成可执行文件 | §1.1/§1.2 亲手量一次：`c4.c` 只有一个翻译单元、只包含标准头，直接 `cc -E c4.c | wc -l` 与 `grep -c '' c4.c` 对比，就能看到 `#include` 展开后的体积差 |
 
-| 仓库 | star | 用途 |
-|---|---|---|
-| [practical-tutorials/project-based-learning](https://github.com/practical-tutorials/project-based-learning) | 286133 | 项目驱动的实战教程合集（含 C 专题） |
-| [TheAlgorithms/C](https://github.com/TheAlgorithms/C) | 22507 | C 语言实现的算法与数据结构合集 |
+## 本章 B 站视频路线（与 GitHub 互补）
 
-> 资源由 `server/scripts/sync_github_resources.py` 从 GitHub API 实时抓取并固化到 `_manifest.json`，star 数以文件内 `github_fetched_at`(2026-09-21) 为准。
+> 全部为 B 站直链（`bilibili.com/video/BV…`），BV 号均已通过站内接口核验可播放。
+> 分工：**B 站给直觉与推导，GitHub 给源码与工程取舍**；两者冲突时以源码为准。顺序：主线课定位知识点 → 专题课补推导 → 论文精读补出处。
 
-## 本章 B 站视频教程（与 GitHub 代码资源互补）
+| # | 系列 / UP 主 | 视频 | 对应本章 | 看什么 |
+|---|---|---|---|---|
+| 1 | 翁恺（浙江大学）· C 语言程序设计<br><sub>翁恺c语言</sub> | [BV1dr4y1n7vA](https://www.bilibili.com/video/BV1dr4y1n7vA/) | §1.1 C 程序如何变成可执行文件 | 国内最稳的 C 语言入门课：指针与数组的关系讲得极细，每节都有可当场上机的最小例子；看完回 `ex01`（对象宏 vs 函数宏与括号陷阱）核对 |
+| 2 | 黑马程序员 · C 语言零基础到精通<br><sub>黑马程序员</sub> | [BV1Xa4y1k7LU](https://www.bilibili.com/video/BV1Xa4y1k7LU/) | §1.1 C 程序如何变成可执行文件 | 工程视角更重：多文件编译、头文件组织、调试与内存查看，适合把「写题」过渡到「写工程」；看完回 `ex02`（宏参数多重求值带来的副作用）核对 |
+| 3 | 黑马程序员 · C 语言基础教程<br><sub>黑马程序员</sub> | [BV1vs411n7TH](https://www.bilibili.com/video/BV1vs411n7TH/) | §3.1 预处理期的「元编程」运算符 | 配套源码与案例齐全，位运算、预处理、指针进阶这几节比多数课细；看完回 `ex03`（多语句宏必须用 do-while(0) ）核对 |
+| 4 | 郝斌 · C 语言自学教程<br><sub>蠢杠杠</sub> | [BV1os411h77o](https://www.bilibili.com/video/BV1os411h77o/) | 全章 | 老派但极清楚：链表、结构体、指针的板书推导，适合把数据结构那几节看明白；看完回 `ex04`（# 字符串化运算符（含二次展开技巧））核对 |
 
-> 视频来源均来自 B 站（bilibili.com）。与上方 GitHub 仓库互为补充：**GitHub 看工业级源码实现，B 站看原理讲解与「从零手搓」演示**。
+## 本章配套论文与书（溯源用）
 
-| UP 主 / 系列 | 链接 | 对应本章内容 |
-|---|---|---|
-| 小甲鱼 · 带你学透 C 语言 | [视频](https://www.bilibili.com/video/BV1ti4y1K7rA/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 郝斌 · C 语言自学完整版 | [视频](https://www.bilibili.com/video/BV1vh411S7LV/) | 本学科配套视频，建议结合本章示例与习题观看 |
+> 公式与结论的出处。只查对应章节，不必通读整本。
+
+| # | 文献 / 章节 |
+|---|---|
+| 1 | 《C 程序设计语言（第 2 版）》Kernighan & Ritchie |
+| 2 | 《C 和指针》Reek |
+| 3 | 《C 陷阱与缺陷》Koenig |
+
+> 图例：`§3.2` = 本章第 3 篇 concept 文件的第 2 节。共 3 个 GitHub 来源、4 条 B 站视频、3 条文献；
+> 全部链接由 `scripts/collect_links.py` + `scripts/audit_sources.py` 定期复核，失效链接会被审计器标红。

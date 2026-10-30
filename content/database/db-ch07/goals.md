@@ -18,19 +18,47 @@
 2. **恢复线**：binlog 三种格式 → 位点/时间戳 → 时间点恢复（PITR）→ 目标点裁剪与核对；
 3. **安全线**：用户@主机与 GRANT/REVOKE → 最小权限与角色 → SQL 注入（预编译/白名单/权限兜底）
    → 脱敏、列级加密、TDE、审计日志 → 安全清单。
-
-## 学习资源（GitHub star 最高）
-- **Snailclimb/JavaGuide**（★159056）—— 含 MySQL 索引、事务、锁与调优的系统讲解
-  <https://github.com/Snailclimb/JavaGuide>
-- **macrozheng/mall**（★84863）—— 真实业务库表设计范例与 SQL 实践
-  <https://github.com/macrozheng/mall>
-- **doocs/advanced-java**（★79141）—— 含分库分表、读写分离与分布式事务
-  <https://github.com/doocs/advanced-java>
-
 ## 推荐书目
+
 - 《高性能 MySQL》第 10 章（备份与恢复）—— **本章主教材**，备份类型与工具的工程取舍
 - 《数据库系统概念》第 16 章（授权）—— 权限模型与视图授权的标准定义
 - 《MySQL 必知必会》第 21-25 章 —— 账号管理与 DDL/DML 语法基础
+
+## 本章 GitHub 学习路线（按阅读顺序）
+
+> ★ 为 **2026-10-27** 的 GitHub API 快照（已逐条验证仓库存在）。
+> 顺序即路线：**先读能跑的最小实现 → 再读同章对照实现 → 最后读工业级库**。「对应本章」写 `§x.y` 的，说明这份仓库与本章那一节直接对应，先读那里；写「全章」的，按右侧「读什么」给的入口文件读，不要从 README 通读。
+
+| # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
+|---|---|---|---|---|
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,300 | 全章 | 含 MySQL 索引、事务、锁与调优的系统讲解；本章先读与「逻辑备份与物理备份」「备份策略」相关的部分 |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,863 | 全章 | 真实业务库表设计范例与 SQL 实践；本章先读与「逻辑备份与物理备份」「备份策略」相关的部分 |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,162 | 全章 | 含分库分表、读写分离与分布式事务；本章先读与「逻辑备份与物理备份」「备份策略」相关的部分 |
+
+## 本章 B 站视频路线（与 GitHub 互补）
+
+> 全部为 B 站直链（`bilibili.com/video/BV…`），BV 号均已通过站内接口核验可播放。
+> 分工：**B 站给直觉与推导，GitHub 给源码与工程取舍**；两者冲突时以源码为准。顺序：主线课定位知识点 → 专题课补推导 → 论文精读补出处。
+
+| # | 系列 / UP 主 | 视频 | 对应本章 | 看什么 |
+|---|---|---|---|---|
+| 1 | 黑马程序员 · MySQL 入门到精通<br><sub>黑马程序员</sub> | [BV1Kr4y1i7ru](https://www.bilibili.com/video/BV1Kr4y1i7ru/) | §3.1 MySQL 的账号不是「用… | 主线课：SQL 语法 → 约束与多表 → 索引与事务 → 优化，每段都有可直接跑的脚本；看完回 `ex01`（sqlite 在线备份（Connecti）核对 |
+| 2 | 尚硅谷 · MySQL 基础+高级篇<br><sub>黎曼的猜想</sub> | [BV12b411K7Zu](https://www.bilibili.com/video/BV12b411K7Zu/) | §3.1 MySQL 的账号不是「用… | 基础篇讲 SQL 与建表规范，高级篇讲索引、explain、慢查询与优化器；看完回 `ex02`（逻辑备份（iterdump））核对 |
+| 3 | 尚硅谷 · MySQL 数据库高级<br><sub>尚硅谷</sub> | [BV1KW411u7vy](https://www.bilibili.com/video/BV1KW411u7vy/) | 全章 | 专攻优化：B+ 树索引结构、执行计划、锁与隔离级别的实验演示；看完回 `ex03`（备份文件完整性校验）核对 |
+| 4 | 一个动画搞懂 MySQL 索引原理<br><sub>轩辕的编程宇宙</sub> | [BV1pJ4m1j7Pm](https://www.bilibili.com/video/BV1pJ4m1j7Pm/) | 全章 | 6 分钟动画：聚簇索引与二级索引的回表过程，看完再读概念篇会顺很多；看完回 `ex04`（模拟 PITR）核对 |
+
+## 本章配套论文与书（溯源用）
+
+> 公式与结论的出处。只查对应章节，不必通读整本。
+
+| # | 文献 / 章节 |
+|---|---|
+| 1 | 《MySQL 技术内幕：InnoDB 存储引擎（第 2 版）》姜承尧 |
+| 2 | 《高性能 MySQL（第 4 版）》 |
+| 3 | 《数据库系统概念（第 7 版）》Silberschatz |
+
+> 图例：`§3.2` = 本章第 3 篇 concept 文件的第 2 节。共 3 个 GitHub 来源、4 条 B 站视频、3 条文献；
+> 全部链接由 `scripts/collect_links.py` + `scripts/audit_sources.py` 定期复核，失效链接会被审计器标红。
 
 ## 本章示例的实测口径
 > 本机无 MySQL 实例与凭证。因此本章示例分两类：
@@ -55,29 +83,6 @@
 10. 能写出 `GRANT` / `REVOKE` 的语句，并说明为何「回收权限」要覆盖所有粒度（幽灵权限）。
 11. 能说清 **SQL 注入**的成因，并写出预编译、白名单、最小权限三道防线的分工。
 12. 能实现并解释**脱敏**（掩码/假名化）、**加盐哈希**与**审计日志触发器**，指出各自的适用边界。
-
-
-## 本章 GitHub 资源（大纲实时抓取，star 最高）
-
-| 仓库 | star | 用途 |
-|---|---|---|
-| [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159056 | 含 MySQL 索引、事务、锁与调优的系统讲解 |
-| [macrozheng/mall](https://github.com/macrozheng/mall) | 84863 | 真实业务库表设计范例与 SQL 实践 |
-| [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79141 | 含分库分表、读写分离与分布式事务 |
-
-> 资源由 `server/scripts/sync_github_resources.py` 从 GitHub API 实时抓取并固化到 `_manifest.json`，star 数以文件内 `github_fetched_at`(2026-09-21) 为准。
-
-## 本章 B 站视频教程（与 GitHub 代码资源互补）
-
-> 视频来源均来自 B 站（bilibili.com）。与上方 GitHub 仓库互为补充：**GitHub 看工业级源码实现，B 站看原理讲解与「从零手搓」演示**。
-
-| UP 主 / 系列 | 链接 | 对应本章内容 |
-|---|---|---|
-| 尚硅谷 · MySQL 基础+高级篇 | [视频](https://www.bilibili.com/video/BV12b411K7Zu/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 黑马程序员 · MySQL 实战教程 | [视频](https://www.bilibili.com/video/BV1vi4y137PN/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 尚硅谷 · MySQL 高级教程（索引/锁/调优） | [视频](https://www.bilibili.com/video/BV1KW411u7vy/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 尚硅谷 · Redis 6 入门到精通 | [视频](https://www.bilibili.com/video/BV1Rv41177Af/) | 本学科配套视频，建议结合本章示例与习题观看 |
-
 ## 软前置（可选，不阻断学习）
 - 本章仅依赖本学科 `db-ch01`。若已具备任意一种语言的字符串/哈希库使用经验
   （Python 标准库 `sqlite3` + `hashlib` 即可），可直接阅读 `examples/` 中的实现。

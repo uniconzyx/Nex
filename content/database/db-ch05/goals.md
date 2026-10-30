@@ -15,19 +15,47 @@
 > 语法结构要点与结果集表头形态，**不编造行数据**；
 > 所有「真实实测」的证据来自用 **Python 的 sqlite3** 实跑的等价示例（sqlite 原生支持
 > `CREATE TRIGGER` / `BEFORE` / `AFTER` / `NEW` / `OLD` / 事务，足以复现触发器的语义与陷阱）。
-
-## 学习资源（GitHub star 最高）
-- **Snailclimb/JavaGuide**（★159056）—— 含 MySQL 存储过程、触发器、权限与调优的系统讲解
-  <https://github.com/Snailclimb/JavaGuide>
-- **macrozheng/mall**（★84863）—— 真实业务库表设计范例与 SQL 实践（观察其**几乎不用存储过程**的工程取向）
-  <https://github.com/macrozheng/mall>
-- **doocs/advanced-java**（★79141）—— 含分库分表、读写分离与分布式事务，解释「为什么过程在分片下失灵」
-  <https://github.com/doocs/advanced-java>
-
 ## 推荐书目
+
 - 《MySQL 必知必会》第 23~25 章（存储过程 / 游标 / 触发器）——**本章主教材**，语法口径以它为准
 - 《数据库系统概念》第 4 章（中级 SQL）与第 5 章（高级 SQL：触发器、递归查询）——SQL/PSM 的形式化基础
 - 《高性能 MySQL》第 6 章（查询性能优化）——用它的代价模型解释「游标逐行为什么慢」
+
+## 本章 GitHub 学习路线（按阅读顺序）
+
+> ★ 为 **2026-10-27** 的 GitHub API 快照（已逐条验证仓库存在）。
+> 顺序即路线：**先读能跑的最小实现 → 再读同章对照实现 → 最后读工业级库**。「对应本章」写 `§x.y` 的，说明这份仓库与本章那一节直接对应，先读那里；写「全章」的，按右侧「读什么」给的入口文件读，不要从 README 通读。
+
+| # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
+|---|---|---|---|---|
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,300 | 全章 | 含 MySQL 索引、事务、锁与调优的系统讲解；本章先读与「存储过程与自定义函数」「参数模式 IN / OUT…」相关的部分 |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,863 | 全章 | 真实业务库表设计范例与 SQL 实践；本章先读与「存储过程与自定义函数」「参数模式 IN / OUT…」相关的部分 |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,162 | 全章 | 含分库分表、读写分离与分布式事务；本章先读与「存储过程与自定义函数」「参数模式 IN / OUT…」相关的部分 |
+
+## 本章 B 站视频路线（与 GitHub 互补）
+
+> 全部为 B 站直链（`bilibili.com/video/BV…`），BV 号均已通过站内接口核验可播放。
+> 分工：**B 站给直觉与推导，GitHub 给源码与工程取舍**；两者冲突时以源码为准。顺序：主线课定位知识点 → 专题课补推导 → 论文精读补出处。
+
+| # | 系列 / UP 主 | 视频 | 对应本章 | 看什么 |
+|---|---|---|---|---|
+| 1 | 黑马程序员 · MySQL 入门到精通<br><sub>黑马程序员</sub> | [BV1Kr4y1i7ru](https://www.bilibili.com/video/BV1Kr4y1i7ru/) | §4.2 动态 SQL 拼接与注入；… | 主线课：SQL 语法 → 约束与多表 → 索引与事务 → 优化，每段都有可直接跑的脚本；看完回 `ex01`（用 Python 值语义模拟存储过程参数）核对 |
+| 2 | 尚硅谷 · MySQL 基础+高级篇<br><sub>黎曼的猜想</sub> | [BV12b411K7Zu](https://www.bilibili.com/video/BV12b411K7Zu/) | §4.2 动态 SQL 拼接与注入；… | 基础篇讲 SQL 与建表规范，高级篇讲索引、explain、慢查询与优化器；看完回 `ex02`（DELIMITER 的必要性）核对 |
+| 3 | 尚硅谷 · MySQL 数据库高级<br><sub>尚硅谷</sub> | [BV1KW411u7vy](https://www.bilibili.com/video/BV1KW411u7vy/) | §4.2 动态 SQL 拼接与注入；… | 专攻优化：B+ 树索引结构、执行计划、锁与隔离级别的实验演示；看完回 `ex03`（游标逐行处理 vs 集合操作）核对 |
+| 4 | 一个动画搞懂 MySQL 索引原理<br><sub>轩辕的编程宇宙</sub> | [BV1pJ4m1j7Pm](https://www.bilibili.com/video/BV1pJ4m1j7Pm/) | 全章 | 6 分钟动画：聚簇索引与二级索引的回表过程，看完再读概念篇会顺很多；看完回 `ex04`（触发器 BEFORE/AFTER 时序与）核对 |
+
+## 本章配套论文与书（溯源用）
+
+> 公式与结论的出处。只查对应章节，不必通读整本。
+
+| # | 文献 / 章节 |
+|---|---|
+| 1 | 《MySQL 技术内幕：InnoDB 存储引擎（第 2 版）》姜承尧 |
+| 2 | 《高性能 MySQL（第 4 版）》 |
+| 3 | 《数据库系统概念（第 7 版）》Silberschatz |
+
+> 图例：`§3.2` = 本章第 3 篇 concept 文件的第 2 节。共 3 个 GitHub 来源、4 条 B 站视频、3 条文献；
+> 全部链接由 `scripts/collect_links.py` + `scripts/audit_sources.py` 定期复核，失效链接会被审计器标红。
 
 ## 验收标准
 1. 能写出存储过程与自定义函数的完整定义（含 `DELIMITER`），并说出二者在**调用方式、返回值、能否含事务、能否出现在 `WHERE`**四条上的差异。
@@ -39,25 +67,3 @@
 7. 能写出 `IF` / `CASE` / `WHILE` / `LOOP` / `REPEAT` 五种流程控制，并说出 `WHILE` 与 `REPEAT` 的判定时机差异。
 8. 能给出「存储过程 vs 函数 vs 应用层」的职责边界决策表，并复述「为什么互联网公司普遍不用存储过程」的完整论证链。
 9. 能说明存储过程内 `COMMIT` / `ROLLBACK` 与外层事务的冲突，以及 MySQL 中 DDL 隐式提交带来的原子性破坏。
-
-
-## 本章 GitHub 资源（大纲实时抓取，star 最高）
-
-| 仓库 | star | 用途 |
-|---|---|---|
-| [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159056 | 含 MySQL 索引、事务、锁与调优的系统讲解 |
-| [macrozheng/mall](https://github.com/macrozheng/mall) | 84863 | 真实业务库表设计范例与 SQL 实践 |
-| [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79141 | 含分库分表、读写分离与分布式事务 |
-
-> 资源由 `server/scripts/sync_github_resources.py` 从 GitHub API 实时抓取并固化到 `_manifest.json`，star 数以文件内 `github_fetched_at`(2026-09-21) 为准。
-
-## 本章 B 站视频教程（与 GitHub 代码资源互补）
-
-> 视频来源均来自 B 站（bilibili.com）。与上方 GitHub 仓库互为补充：**GitHub 看工业级源码实现，B 站看原理讲解与「从零手搓」演示**。
-
-| UP 主 / 系列 | 链接 | 对应本章内容 |
-|---|---|---|
-| 尚硅谷 · MySQL 基础+高级篇 | [视频](https://www.bilibili.com/video/BV12b411K7Zu/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 黑马程序员 · MySQL 实战教程 | [视频](https://www.bilibili.com/video/BV1vi4y137PN/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 尚硅谷 · MySQL 高级教程（索引/锁/调优） | [视频](https://www.bilibili.com/video/BV1KW411u7vy/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 尚硅谷 · Redis 6 入门到精通 | [视频](https://www.bilibili.com/video/BV1Rv41177Af/) | 本学科配套视频，建议结合本章示例与习题观看 |

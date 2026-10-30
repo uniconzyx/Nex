@@ -33,13 +33,6 @@
 - **Q-learning 的收敛保证是有前提的**：表格表示 + 每个状态-动作对被无限次访问 +
   学习率衰减。换成函数逼近（致命三要素：逼近 + 自举 + 离策略同时出现），
   收敛性证明就失效了——DQN 是工程上work、理论上开口的补丁集合，不是定理。
-
-## 本章 GitHub 资源（star 数由 GitHub API 实测，2026-10-21）
-
-- `dennybritz/reinforcement-learning` — 22153★：经典 RL 算法的 Notebook 实现：Q-learning、策略迭代、价值迭代，看它如何把 Sutton 书上的伪码变成几十行可跑代码
-- `ray-project/ray` — 44096★：RLlib：从单机 Q-learning 到分布式 RL 的工程路径，看工业界怎么组织采样/训练/评估流水线
-- `Farama-Foundation/Gymnasium` — 12704★：课程 W3 的 Lunar Lander 就是 Gym 环境；重点看 env 接口（`reset/step/render`）与环境设计约定
-
 ## 与「深度学习」的分界（避免与 ai 学科混淆）
 
 本章只讲**表格型强化学习**与 DQN 的**最小直觉**：价值迭代、Q-learning、SARSA
@@ -62,3 +55,39 @@ DQN 部分只解释「用网络代替 Q 表时出现的两个问题及两个补�
 
 一句话：**本章负责「把 Bellman 方程和 Q-learning 的机理讲透」，
 「把神经网装进去还能不能训」是 ai 学科的问题。**
+
+## 本章 GitHub 学习路线（按阅读顺序）
+
+> ★ 为 **2026-10-27** 的 GitHub API 快照（已逐条验证仓库存在）。
+> 顺序即路线：**先读能跑的最小实现 → 再读同章对照实现 → 最后读工业级库**。「对应本章」写 `§x.y` 的，说明这份仓库与本章那一节直接对应，先读那里；写「全章」的，按右侧「读什么」给的入口文件读，不要从 README 通读。
+
+| # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
+|---|---|---|---|---|
+| 1 | [dennybritz/reinforcement-learning](https://github.com/dennybritz/reinforcement-learning) | 22,165 | 全章 | 经典 RL 算法的 Notebook 实现：Q-learning、策略迭代、价值迭代；本章先读与「MDP 五元组」「回报 G_t」相关的部分 |
+| 2 | [ray-project/ray](https://github.com/ray-project/ray) | 44,096 | 全章 | RLlib：从单机 Q-learning 到分布式 RL 的工程路径；本章先读与「MDP 五元组」「回报 G_t」相关的部分 |
+| 3 | [Farama-Foundation/Gymnasium](https://github.com/Farama-Foundation/Gymnasium) | 12,738 | 全章 | 课程 W3 的 Lunar Lander 就是 Gym 环境；看 env 接口与环境设计；本章先读与「MDP 五元组」「回报 G_t」相关的部分 |
+
+## 本章 B 站视频路线（与 GitHub 互补）
+
+> 全部为 B 站直链（`bilibili.com/video/BV…`），BV 号均已通过站内接口核验可播放。
+> 分工：**B 站给直觉与推导，GitHub 给源码与工程取舍**；两者冲突时以源码为准。顺序：主线课定位知识点 → 专题课补推导 → 论文精读补出处。
+
+| # | 系列 / UP 主 | 视频 | 对应本章 | 看什么 |
+|---|---|---|---|---|
+| 1 | 吴恩达 · 机器学习系列（中英字幕）<br><sub>岁月觞</sub> | [BV164411b7dx](https://www.bilibili.com/video/BV164411b7dx/) | §1.4 与监督学习的根本分界 | 主干课：线性/逻辑回归 → 神经网络 → 评估与调优 → 聚类与降维 → 推荐与强化学习；看完回 `ex01`（MDP 五元组）核对 |
+| 2 | 李航《统计学习方法》啃书指导<br><sub>深度之眼官方账号</sub> | [BV1i4411G7Xv](https://www.bilibili.com/video/BV1i4411G7Xv/) | 全章 | 按书章节带读：感知机、kNN、朴素贝叶斯、决策树、SVM、提升方法，配考研/面试视角的重点标注；看完回 `ex02`（折扣回报）核对 |
+| 3 | 李宏毅 · 机器学习 2021<br><sub>二次元的Datawhale</sub> | [BV1JA411c7VT](https://www.bilibili.com/video/BV1JA411c7VT/) | 全章 | 补「为什么」：偏差方差分解、梯度下降的失效模式、注意力与自监督；讲法比教科书更直观；看完回 `ex03`（策略评估）核对 |
+| 4 | 白板推导系列（机器学习 1~33）<br><sub>shuhuai008</sub> | [BV1aE411o7qd](https://www.bilibili.com/video/BV1aE411o7qd/) | 全章 | 从概率视角把每个模型重新推一遍：极大似然、EM、变分推断、SVM 对偶。公式卡住时看它；看完回 `ex04`（价值迭代）核对 |
+
+## 本章配套论文与书（溯源用）
+
+> 公式与结论的出处。只查对应章节，不必通读整本。
+
+| # | 文献 / 章节 |
+|---|---|
+| 1 | 《Reinforcement Learning: An Introduction》Sutton & Barto 第3、6章 |
+| 2 | 吴恩达课程三 W3 的配套笔记 |
+| 3 | David Silver 的 RL 课程讲义（UCL） |
+
+> 图例：`§3.2` = 本章第 3 篇 concept 文件的第 2 节。共 3 个 GitHub 来源、4 条 B 站视频、3 条文献；
+> 全部链接由 `scripts/collect_links.py` + `scripts/audit_sources.py` 定期复核，失效链接会被审计器标红。

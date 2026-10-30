@@ -35,26 +35,38 @@
 | 响应比（HRRN） | `(等待时间 + 服务时间) / 服务时间` |
 
 > 调度算法的完整手工演算见 concept/02，同步与死锁见 concept/03，可运行模拟见 examples/。
+## 本章 GitHub 学习路线（按阅读顺序）
 
+> ★ 为 **2026-10-27** 的 GitHub API 快照（已逐条验证仓库存在）。
+> 顺序即路线：**先读能跑的最小实现 → 再读同章对照实现 → 最后读工业级库**。「对应本章」写 `§x.y` 的，说明这份仓库与本章那一节直接对应，先读那里；写「全章」的，按右侧「读什么」给的入口文件读，不要从 README 通读。
 
-## 本章 GitHub 资源（大纲实时抓取，star 最高）
+| # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
+|---|---|---|---|---|
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 375,800 | 全章 | 系统设计入门：性能、一致性、可用性与面试题（408 之上的系统视野）；本章先读与「进程控制原语与上下文切换」「调度的三个层次与评价指标」相关的部分 |
+| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 362,479 | 全章 | 完整的计算机科学自学计划：数据结构、算法、OS、网络全覆盖；本章先读与「进程控制原语与上下文切换」「调度的三个层次与评价指标」相关的部分 |
+| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,353 | 全章 | 中文技术面试必备：操作系统、计算机网络、组成原理、算法、数据库；本章先读与「进程控制原语与上下文切换」「调度的三个层次与评价指标」相关的部分 |
 
-| 仓库 | star | 用途 |
-|---|---|---|
-| [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 373461 | 系统设计入门：性能、一致性、可用性与面试题（408 之上的系统视野） |
-| [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 362479 | 完整的计算机科学自学计划：数据结构、算法、OS、网络全覆盖 |
-| [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186393 | 中文技术面试必备：操作系统、计算机网络、组成原理、算法、数据库 |
+## 本章 B 站视频路线（与 GitHub 互补）
 
-> 资源由 `server/scripts/sync_github_resources.py` 从 GitHub API 实时抓取并固化到 `_manifest.json`，star 数以文件内 `github_fetched_at`(2026-09-21) 为准。
+> 全部为 B 站直链（`bilibili.com/video/BV…`），BV 号均已通过站内接口核验可播放。
+> 分工：**B 站给直觉与推导，GitHub 给源码与工程取舍**；两者冲突时以源码为准。顺序：主线课定位知识点 → 专题课补推导 → 论文精读补出处。
 
-## 本章 B 站视频教程（与 GitHub 代码资源互补）
+| # | 系列 / UP 主 | 视频 | 对应本章 | 看什么 |
+|---|---|---|---|---|
+| 1 | 王道 · 数据结构（考研）<br><sub>王道计算机教育</sub> | [BV1b7411N798](https://www.bilibili.com/video/BV1b7411N798/) | 全章 | 主线：复杂度 → 线性表 → 栈队列 → 树 → 图 → 查找 → 排序；每个结构都配手写代码与大题模板；看完回 `ex01`（FCFS 调度）核对 |
+| 2 | 王道 · 操作系统（考研）<br><sub>王道计算机教育</sub> | [BV1YE411D7nH](https://www.bilibili.com/video/BV1YE411D7nH/) | 全章 | 进程与线程、调度、同步互斥与死锁、内存管理与虚拟内存、文件系统与 IO；看完回 `ex02`（SJF 最优性验证）核对 |
+| 3 | 王道 · 计算机组成原理<br><sub>王道计算机教育</sub> | [BV1BE411D7ii](https://www.bilibili.com/video/BV1BE411D7ii/) | §1.2 线程 | 数据表示与运算、存储层次与 Cache、指令系统与 CPU 数据通路、总线与 IO；看完回 `ex03`（SRTN（抢占式最短剩余时间））核对 |
+| 4 | 王道 · 计算机网络（考研）<br><sub>王道计算机教育</sub> | [BV19E411D78Q](https://www.bilibili.com/video/BV19E411D78Q/) | 全章 | 自顶向下或按层都行：TCP 三次握手/四次挥手、拥塞控制、IP 与路由、HTTP；看完回 `ex04`（HRRN 高响应比优先）核对 |
 
-> 视频来源均来自 B 站（bilibili.com）。与上方 GitHub 仓库互为补充：**GitHub 看工业级源码实现，B 站看原理讲解与「从零手搓」演示**。
+## 本章配套论文与书（溯源用）
 
-| UP 主 / 系列 | 链接 | 对应本章内容 |
-|---|---|---|
-| 青岛大学 · 王卓 数据结构与算法 | [视频](https://www.bilibili.com/video/BV1nJ411V7bd/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 王道考研 · 计算机组成原理 | [视频](https://www.bilibili.com/video/BV1ps4y1d73V/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 哈工大 · 李治军 操作系统 | [视频](https://www.bilibili.com/video/BV1d4411v7u7/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 湖南科技大学 · 计算机网络微课堂 | [视频](https://www.bilibili.com/video/BV1c4411d7jb/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 清华 · 邓俊辉 数据结构与算法 | [视频](https://www.bilibili.com/video/BV1jt4y117KR/) | 本学科配套视频，建议结合本章示例与习题观看 |
+> 公式与结论的出处。只查对应章节，不必通读整本。
+
+| # | 文献 / 章节 |
+|---|---|
+| 1 | 《深入理解计算机系统（第 3 版）》Bryant & O'Hallaron |
+| 2 | 《算法导论（第 4 版）》Cormen 等 |
+| 3 | 《计算机网络：自顶向下方法（第 8 版）》Kurose & Ross |
+
+> 图例：`§3.2` = 本章第 3 篇 concept 文件的第 2 节。共 3 个 GitHub 来源、4 条 B 站视频、3 条文献；
+> 全部链接由 `scripts/collect_links.py` + `scripts/audit_sources.py` 定期复核，失效链接会被审计器标红。

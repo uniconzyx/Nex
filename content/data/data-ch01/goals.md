@@ -23,24 +23,43 @@
 | list comprehension | ~50 ms |
 | `np.sum(a)`（向量化） | **~1 ms** |
 | 说明 | 差距来自解释器开销 + 内存局部性 + SIMD |
-
-## 本章 GitHub 资源（star 最高，实时抓取）
-
-- `scikit-learn/scikit-learn` — 67487★：NumPy/SciPy 生态的最佳实践范本
-- `numpy/numpy` — 官方源码，`ndarray` 的 strides 机制读源码最能理解
-- `jakevdp/PythonDataScienceHandbook` — 数据科学手册，含 NumPy 深度章节
-
-
-## 本章 B 站视频教程（与 GitHub 代码资源互补）
-
-> 视频来源均来自 B 站（bilibili.com）。与上方 GitHub 仓库互为补充：**GitHub 看工业级源码实现，B 站看原理讲解与「从零手搓」演示**。
-
-| UP 主 / 系列 | 链接 | 对应本章内容 |
-|---|---|---|
-| 黑马程序员 · Python 数据分析教程 | [视频](https://www.bilibili.com/video/BV1hx411d7jb/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 莫烦 Python · Numpy & Pandas 数据处理 | [视频](https://www.bilibili.com/video/av16378934/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| Datawhale · 巨硬的 NumPy（视频） | [视频](https://www.bilibili.com/video/BV1Ym4y1U7at/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 北京理工大学 · Python 数据分析与展示 | [视频](https://www.bilibili.com/video/av10101509/) | 本学科配套视频，建议结合本章示例与习题观看 |
-
 ## 软前置（可选，不阻断学习）
+
 - Python 语法基础（py-ch01）：本线**独立自足**，若你已会用 Python 写循环/函数/列表，可直接从本章开始；若不熟悉，建议先花 1~2 小时过一遍 Python 基础语法，本章不依赖其进阶内容。
+
+## 本章 GitHub 学习路线（按阅读顺序）
+
+> ★ 为 **2026-10-27** 的 GitHub API 快照（已逐条验证仓库存在）。
+> 顺序即路线：**先读能跑的最小实现 → 再读同章对照实现 → 最后读工业级库**。「对应本章」写 `§x.y` 的，说明这份仓库与本章那一节直接对应，先读那里；写「全章」的，按右侧「读什么」给的入口文件读，不要从 README 通读。
+
+| # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
+|---|---|---|---|---|
+| 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | 全章 | 经典机器学习库官方仓库：算法实现与最佳实践；本章先读与「先看一个反直觉的事实」「list 的内存模型」相关的部分 |
+| 2 | [jakevdp/PythonDataScienceHandbook](https://github.com/jakevdp/PythonDataScienceHandbook) | 50,229 | 全章 | 《Python 数据科学手册》全书 Jupyter Notebook（NumPy/Pandas/Matplotlib）；本章先读与「先看一个反直觉的事实」「list 的内存模型」相关的部分 |
+| 3 | [pandas-dev/pandas](https://github.com/pandas-dev/pandas) | 49,928 | 全章 | Pandas 官方仓库：API 与内部机制权威来源；本章先读与「先看一个反直觉的事实」「list 的内存模型」相关的部分 |
+| 4 | [microsoft/Data-Science-For-Beginners](https://github.com/microsoft/Data-Science-For-Beginners) | 37,525 | 全章 | 微软官方 10 周数据科学课程；本章先读与「先看一个反直觉的事实」「list 的内存模型」相关的部分 |
+
+## 本章 B 站视频路线（与 GitHub 互补）
+
+> 全部为 B 站直链（`bilibili.com/video/BV…`），BV 号均已通过站内接口核验可播放。
+> 分工：**B 站给直觉与推导，GitHub 给源码与工程取舍**；两者冲突时以源码为准。顺序：主线课定位知识点 → 专题课补推导 → 论文精读补出处。
+
+| # | 系列 / UP 主 | 视频 | 对应本章 | 看什么 |
+|---|---|---|---|---|
+| 1 | 黑马程序员 · Python 数据分析全套<br><sub>黑马程序员</sub> | [BV1ReshzoEgG](https://www.bilibili.com/video/BV1ReshzoEgG/) | §1.4 strides | 从 numpy/pandas 到清洗、可视化、案例的完整链路，配真实的电商与招聘数据集；看完回 `ex01`（list 与 ndarray 的内存占用）核对 |
+| 2 | 莫烦 Python · NumPy & Pandas<br><sub>莫烦Python</sub> | [BV1Ex411L7oT](https://www.bilibili.com/video/BV1Ex411L7oT/) | §1.4 strides | API 速查：广播、索引、合并、透视各一集，10 分钟能补齐一个操作；看完回 `ex02`（dtype、itemsize 与 ast）核对 |
+| 3 | 黑马程序员 · MySQL 入门到精通<br><sub>黑马程序员</sub> | [BV1Kr4y1i7ru](https://www.bilibili.com/video/BV1Kr4y1i7ru/) | §3.5 聚合的 axis 语义 | 数据分析绕不开 SQL：查询、聚合、窗口函数与索引，看前 1/3 足够支撑取数；看完回 `ex03`（形状变换与 strides）核对 |
+| 4 | Pandas 数据分析从入门到实战<br><sub>蚂蚁学Python</sub> | [BV1UJ411A7Fs](https://www.bilibili.com/video/BV1UJ411A7Fs/) | 全章 | 偏实战：时间序列、缺失值、多表关联这几节比教科书细；看完回 `ex04`（视图 vs 拷贝的判定与污染实验）核对 |
+
+## 本章配套论文与书（溯源用）
+
+> 公式与结论的出处。只查对应章节，不必通读整本。
+
+| # | 文献 / 章节 |
+|---|---|
+| 1 | 《利用 Python 进行数据分析（第 3 版）》McKinney |
+| 2 | 《Python 数据科学手册》VanderPlas |
+| 3 | 《统计学（第 8 版）》贾俊平 |
+
+> 图例：`§3.2` = 本章第 3 篇 concept 文件的第 2 节。共 4 个 GitHub 来源、4 条 B 站视频、3 条文献；
+> 全部链接由 `scripts/collect_links.py` + `scripts/audit_sources.py` 定期复核，失效链接会被审计器标红。

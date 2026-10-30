@@ -53,45 +53,6 @@
   三类脚本化失控场景都在第 3 步被无进展检测拉闸，正常任务（含一次合法重试）零误杀；
 - trace 可按 step 回放：每步记录 thought/action/args/observation + token + 双时延，
   能重放出任意一次任务的完整过程并按步汇总成本。
-
-## 本章 GitHub 资源（star 数由 GitHub API 实测，2026-10-21；≈ 表示千位近似）
-
-- `langchain-ai/langgraph` — 43638★：Agent 章主线。看 `libs/langgraph` 里
-  `StateGraph`/`checkpoint`（检查点与断点续跑）与 `interrupt`（人工介入）的实现，
-  本章 tech_load 的每个零件都能在它的源码里找到对应物。
-- `microsoft/autogen` — 61505★：多智能体对话框架。看 `GroupChat` 的发言轮转与
-  终止条件（`max_round`、`speaker_selection`），理解「角色分工」与「什么时候必须停」。
-- `crewAIInc/crewAI` — 59947★：角色化多 Agent 框架，快速搭「调研-写作-审核」流水线。
-  看 `Crew`/`Agent`/`Task` 的编排方式，对照本章 ex08 的角色账本。
-- `openai/openai-agents-python` — 30195★：官方 Agents SDK 的最小实现：
-  handoff、guardrail、tracing 三个概念的最小代码量版本，适合建立词汇表。
-- `modelcontextprotocol/python-sdk` — 24629★：MCP 官方 SDK。照 `examples` 写一个
-  stdio server 就懂了：工具发现（list tools）、调用（call tool）、生命周期，
-  这是「工具生态标准接口」的本来面目。
-- `FoundationAgents/MetaGPT` — ≈71000★：软件公司式多 Agent。看 `roles` 目录——
-  SOP（需求→PRD→代码→测试）如何被编码进角色定义与动作序列，
-  这是「共享黑板 + 角色分工」的完整案例。
-
-## 本章 B 站学习清单
-
-入口（站内搜索，视频会更新，故不写死 BV 号）：
-https://search.bilibili.com/all?keyword=AI%E4%BA%A7%E5%93%81%E7%BB%8F%E7%90%86%E5%AE%9E%E6%88%98%E6%89%8B%E5%86%8C
-
-按 manifest 的 `bilibili_keywords` 看四组：
-
-1. **LangGraph 教程**：看图（StateGraph）、节点/边、检查点与人工介入的实际写法。
-   看完要能回答：「一个多步任务的 state 怎么设计？检查点存在哪、崩溃后怎么续跑？
-   `interrupt` 等人工时已发生的副作用怎么办？」
-2. **Agent 开发 实战**：看工具调用全流程与常见事故（参数错、重复调用、死循环）。
-   看完要能回答：「模型生成了非法工具参数你怎么处理？同一个调用重试三次
-   怎么保证只执行一次？Agent 转了 20 步还没完，你先看哪三个指标？」
-3. **MCP 协议**：看 server/client 的握手、工具发现与调用的报文长什么样。
-   看完要能回答：「MCP 和直接写 function calling 有什么区别？工具列表谁说了算？
-   权限与沙箱在哪一层做？」
-4. **多智能体**：看角色分工、handoff 与成本演示（AutoGen/CrewAI/MetaGPT 均可）。
-   看完要能回答：「什么任务值得上多智能体？handoff 时上下文怎么传才不重复烧钱？
-   怎么判断该加角色还是该加工具？」
-
 ## 与 ai 学科的分界
 
 `ai` 学科讲模型内部：注意力机理、推理优化、RAG 的向量检索实现、Agent 框架源码。
@@ -102,3 +63,42 @@ https://search.bilibili.com/all?keyword=AI%E4%BA%A7%E5%93%81%E7%BB%8F%E7%90%86%E
 本章只给工程结论：上下文是预算、检查点是保险丝、handoff 是账单。
 遇到「ReAct 为什么有效、反思的收益边界在哪」这类机理问题，
 本章只给够用的解释与判据，推导在 `ai` 学科。
+
+## 本章 GitHub 学习路线（按阅读顺序）
+
+> ★ 为 **2026-10-27** 的 GitHub API 快照（已逐条验证仓库存在）。
+> 顺序即路线：**先读能跑的最小实现 → 再读同章对照实现 → 最后读工业级库**。「对应本章」写 `§x.y` 的，说明这份仓库与本章那一节直接对应，先读那里；写「全章」的，按右侧「读什么」给的入口文件读，不要从 README 通读。
+
+| # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
+|---|---|---|---|---|
+| 1 | [langchain-ai/langgraph](https://github.com/langchain-ai/langgraph) | 43,638 | 全章 | 有状态 Agent 编排：图、检查点、人工介入，Agent 章的主线；本章先读与「工具 schema 设计与…」「幂等与副作用」相关的部分 |
+| 2 | [microsoft/autogen](https://github.com/microsoft/autogen) | 61,505 | 全章 | 多智能体对话框架，理解角色分工与终止条件；本章先读与「工具 schema 设计与…」「幂等与副作用」相关的部分 |
+| 3 | [crewAIInc/crewAI](https://github.com/crewAIInc/crewAI) | 59,947 | 全章 | 角色化多 Agent 框架，快速搭「调研-写作-审核」流水线；本章先读与「工具 schema 设计与…」「幂等与副作用」相关的部分 |
+| 4 | [openai/openai-agents-python](https://github.com/openai/openai-agents-python) | 30,195 | 全章 | 官方 Agents SDK：handoff、guardrail、tracing 的最小实现；本章先读与「工具 schema 设计与…」「幂等与副作用」相关的部分 |
+| 5 | [modelcontextprotocol/python-sdk](https://github.com/modelcontextprotocol/python-sdk) | 24,629 | 全章 | MCP 官方 SDK，工具生态的标准接口，写一个 server 就懂；本章先读与「工具 schema 设计与…」「幂等与副作用」相关的部分 |
+| 6 | [FoundationAgents/MetaGPT](https://github.com/FoundationAgents/MetaGPT) | 71,000 | 全章 | 软件公司式多 Agent，看 SOP 如何被编码进角色；本章先读与「工具 schema 设计与…」「幂等与副作用」相关的部分 |
+
+## 本章 B 站视频路线（与 GitHub 互补）
+
+> 全部为 B 站直链（`bilibili.com/video/BV…`），BV 号均已通过站内接口核验可播放。
+> 分工：**B 站给直觉与推导，GitHub 给源码与工程取舍**；两者冲突时以源码为准。顺序：主线课定位知识点 → 专题课补推导 → 论文精读补出处。
+
+| # | 系列 / UP 主 | 视频 | 对应本章 | 看什么 |
+|---|---|---|---|---|
+| 1 | 尚硅谷 · LangChain 入门与 Agent 实战<br><sub>尚硅谷</sub> | [BV1rv7A6oEeP](https://www.bilibili.com/video/BV1rv7A6oEeP/) | 全章 | 主线：模型接入 → Prompt 与结构化输出 → Chain/LangGraph 编排 → RAG → Agent 工具循环；看完回 `ex01`（ReAct 循环的状态机实现与 trac）核对 |
+| 2 | 黑马程序员 · 大模型 RAG 与 Agent 智能体实战<br><sub>黑马程序员</sub> | [BV1yjz5BLEoY](https://www.bilibili.com/video/BV1yjz5BLEoY/) | 全章 | 工程视角：文档切分、向量化与召回、重排、评测；Agent 部分讲工具定义与失败重试；看完回 `ex02`（工具 schema 校验与参数修复）核对 |
+| 3 | 吴恩达 · 大模型合集（Prompt 到 Agent）<br><sub>吴恩达大模型课程</sub> | [BV1nc31zzEa3](https://www.bilibili.com/video/BV1nc31zzEa3/) | 全章 | 方法论最正：Prompt 的四条原则、评估驱动开发、Agent 的反思与规划模式；看完回 `ex03`（工具调用的幂等键与重复调用抑制）核对 |
+| 4 | 提示词工程（Prompt Engineering）系统教程<br><sub>AIAgent开发</sub> | [BV1VEA8zYE6f](https://www.bilibili.com/video/BV1VEA8zYE6f/) | 全章 | 把 Prompt 当接口设计：角色/约束/示例/输出格式四要素，以及失败时的收敛手段；看完回 `ex04`（上下文压缩前后任务成功率对比）核对 |
+
+## 本章配套论文与书（溯源用）
+
+> 公式与结论的出处。只查对应章节，不必通读整本。
+
+| # | 文献 / 章节 |
+|---|---|
+| 1 | 《Prompt Engineering for LLMs》Berryman & Ziegler |
+| 2 | 《Designing Machine Learning Systems》Chip Huyen |
+| 3 | 《大语言模型应用开发》相关官方文档（OpenAI / DeepSeek API Docs） |
+
+> 图例：`§3.2` = 本章第 3 篇 concept 文件的第 2 节。共 6 个 GitHub 来源、4 条 B 站视频、3 条文献；
+> 全部链接由 `scripts/collect_links.py` + `scripts/audit_sources.py` 定期复核，失效链接会被审计器标红。

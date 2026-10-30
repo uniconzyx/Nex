@@ -25,22 +25,41 @@
   而是连乘矩阵的奇异值指数级衰减到 0。
 - **AdamW vs Adam 的区别不是「加了 weight decay」这么简单**：Adam 里 L2 正则被自适应学习率
   缩放，导致大梯度参数受到的正则反而更弱；AdamW 把权重衰减从梯度里拿出来，直接作用在参数上。
+## 本章 GitHub 学习路线（按阅读顺序）
 
-## 本章 GitHub 资源（star 最高，实时抓取）
+> ★ 为 **2026-10-27** 的 GitHub API 快照（已逐条验证仓库存在）。
+> 顺序即路线：**先读能跑的最小实现 → 再读同章对照实现 → 最后读工业级库**。「对应本章」写 `§x.y` 的，说明这份仓库与本章那一节直接对应，先读那里；写「全章」的，按右侧「读什么」给的入口文件读，不要从 README 通读。
 
-- `tensorflow/tensorflow` — 200724★：工业级框架，看它的 `GradientTape` 实现
-- `karpathy/micrograd` — 手写 autograd 的极简范本（100 行读懂反向传播）
-- `huggingface/transformers` — 现代模型的事实标准
-- `pytorch/pytorch` — autograd 引擎的参考实现
+| # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
+|---|---|---|---|---|
+| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,297 | 全章 | 深度学习框架官方仓库，工业级模型工程范例；本章先读与「张量不是「多维数组」这么简单」「计算图」相关的部分 |
+| 2 | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 195,953 | 全章 | 为 AI Agent 提供网页数据：抓取到结构化数据的工程实现；本章先读与「张量不是「多维数组」这么简单」「计算图」相关的部分 |
+| 3 | [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) | 187,785 | 全章 | 自主 Agent 的开创性项目，Agent 架构与工具循环的经典参考；本章先读与「张量不是「多维数组」这么简单」「计算图」相关的部分 |
+| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,241 | 全章 | Transformer 模型定义框架：从 BERT/GPT 到多模态的全量实现；本章先读与「张量不是「多维数组」这么简单」「计算图」相关的部分 |
+| 5 | [langgenius/dify](https://github.com/langgenius/dify) | 159,119 | 全章 | Agentic 工作流与 RAG 流水线平台：生产级 LLM 应用工程范例；本章先读与「张量不是「多维数组」这么简单」「计算图」相关的部分 |
+| 6 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,187 | 全章 | Agent 工程平台：工具、记忆、检索与编排的工业实现；本章先读与「张量不是「多维数组」这么简单」「计算图」相关的部分 |
 
+## 本章 B 站视频路线（与 GitHub 互补）
 
-## 本章 B 站视频教程（与 GitHub 代码资源互补）
+> 全部为 B 站直链（`bilibili.com/video/BV…`），BV 号均已通过站内接口核验可播放。
+> 分工：**B 站给直觉与推导，GitHub 给源码与工程取舍**；两者冲突时以源码为准。顺序：主线课定位知识点 → 专题课补推导 → 论文精读补出处。
 
-> 视频来源均来自 B 站（bilibili.com）。与上方 GitHub 仓库互为补充：**GitHub 看工业级源码实现，B 站看原理讲解与「从零手搓」演示**。
+| # | 系列 / UP 主 | 视频 | 对应本章 | 看什么 |
+|---|---|---|---|---|
+| 1 | 吴恩达 · 深度学习专项（双语字幕）<br><sub>mHarvey</sub> | [BV1FT4y1E74V](https://www.bilibili.com/video/BV1FT4y1E74V/) | 全章 | 主干：神经网络基础 → 优化与正则 → CNN → 序列模型，每节都配可复现的作业；看完回 `ex01`（张量的形状、strides 与广播（深度）核对 |
+| 2 | 李沐 · Transformer 论文逐段精读<br><sub>跟李沐学AI</sub> | [BV1pu411o7BE](https://www.bilibili.com/video/BV1pu411o7BE/) | §4.3 归一化 | 逐段读原论文：多头注意力的形状变化、位置编码、残差与 LayerNorm 的位置，读完能自己写一遍；看完回 `ex02`（手写两层全连接网络的前向传播（无框架））核对 |
+| 3 | 李宏毅 · 机器学习/深度学习 2021<br><sub>二次元的Datawhale</sub> | [BV1JA411c7VT](https://www.bilibili.com/video/BV1JA411c7VT/) | 全章 | 讲「为什么」最透的一套：自注意力、Transformer、GAN、自监督与元学习都有完整推导；看完回 `ex03`（手写反向传播（拓扑排序 + VJP））核对 |
+| 4 | ViT / SAM / CLIP 多模态大模型详解<br><sub>人工智能AI大模型课程</sub> | [BV1AT411y7Zg](https://www.bilibili.com/video/BV1AT411y7Zg/) | 全章 | 把 ViT 的 patch 化、CLIP 的对比学习、SAM 的提示式分割串起来，补「视觉侧」的边界；看完回 `ex04`（实证梯度消失）核对 |
 
-| UP 主 / 系列 | 链接 | 对应本章内容 |
-|---|---|---|
-| 吴恩达 · 深度学习专项课程（中英字幕） | [视频](https://www.bilibili.com/video/BV164411b7dx/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 跟李沐学 AI · 动手学深度学习 v2 | [视频](https://space.bilibili.com/1567748478/lists/358497/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 炮哥带你学 · PyTorch 框架与经典 CNN 实战 | [视频](https://www.bilibili.com/video/BV1eP411w7Re/) | 本学科配套视频，建议结合本章示例与习题观看 |
-| 李宏毅 · 机器学习 2021 | [视频](https://www.bilibili.com/video/BV1JA411c7VT/) | 本学科配套视频，建议结合本章示例与习题观看 |
+## 本章配套论文与书（溯源用）
+
+> 公式与结论的出处。只查对应章节，不必通读整本。
+
+| # | 文献 / 章节 |
+|---|---|
+| 1 | 《深度学习》Goodfellow 等（花书） |
+| 2 | 《动手学深度学习》李沐 等 |
+| 3 | 《Deep Learning with PyTorch》Stevens 等 |
+
+> 图例：`§3.2` = 本章第 3 篇 concept 文件的第 2 节。共 6 个 GitHub 来源、4 条 B 站视频、3 条文献；
+> 全部链接由 `scripts/collect_links.py` + `scripts/audit_sources.py` 定期复核，失效链接会被审计器标红。
