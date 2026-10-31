@@ -1,0 +1,154 @@
+{
+ "huggingface/diffusers": {
+  "stars": 34819,
+  "desc": "🤗 Diffusers: State-of-the-art diffusion models for image, video, and audio generation in PyTorch.",
+  "pushed": "2026-10-27T08:51:21Z",
+  "license": "Apache-2.0",
+  "archived": false,
+  "lang": "Python"
+ },
+ "CompVis/latent-diffusion": {
+  "stars": 14180,
+  "desc": "High-Resolution Image Synthesis with Latent Diffusion Models",
+  "pushed": "2024-02-29T05:29:47Z",
+  "license": "MIT",
+  "archived": false,
+  "lang": "Jupyter Notebook"
+ },
+ "ermongroup/ddim": {
+  "stars": 1855,
+  "desc": "Denoising Diffusion Implicit Models",
+  "pushed": "2024-07-26T09:07:25Z",
+  "license": "MIT",
+  "archived": false,
+  "lang": "Python"
+ },
+ "hojonathanho/diffusion": {
+  "stars": 5352,
+  "desc": "Denoising Diffusion Probabilistic Models",
+  "pushed": "2023-08-29T16:48:57Z",
+  "license": null,
+  "archived": false,
+  "lang": "Python"
+ },
+ "openai/guided-diffusion": {
+  "stars": 7442,
+  "desc": null,
+  "pushed": "2024-07-02T11:26:50Z",
+  "license": "MIT",
+  "archived": false,
+  "lang": "Python"
+ },
+ "lucidrains/denoising-diffusion-pytorch": {
+  "stars": 10720,
+  "desc": "Implementation of Denoising Diffusion Probabilistic Model in Pytorch",
+  "pushed": "2026-09-29T14:13:08Z",
+  "license": "MIT",
+  "archived": false,
+  "lang": "Python"
+ },
+ "karpathy/nanoGPT": {
+  "stars": 64145,
+  "desc": "The simplest, fastest repository for training/finetuning medium-sized GPTs.",
+  "pushed": "2025-11-12T19:52:34Z",
+  "license": "MIT",
+  "archived": false,
+  "lang": "Python"
+ },
+ "microsoft/DeepSpeed": {
+  "stars": 43271,
+  "desc": "DeepSpeed is a deep learning optimization library that makes distributed training and inference easy, efficient, and effective.",
+  "pushed": "2026-10-27T14:52:12Z",
+  "license": "Apache-2.0",
+  "archived": false,
+  "lang": "Python"
+ },
+ "NVIDIA/Megatron-LM": {
+  "stars": 18278,
+  "desc": "Ongoing research training transformer models at scale",
+  "pushed": "2026-10-27T15:06:18Z",
+  "license": "NOASSERTION",
+  "archived": false,
+  "lang": "Python"
+ },
+ "google-research/tuning_playbook": {
+  "stars": 30404,
+  "desc": "A playbook for systematically maximizing the performance of deep learning models.",
+  "pushed": "2024-06-18T00:25:53Z",
+  "license": "NOASSERTION",
+  "archived": false,
+  "lang": null
+ },
+ "huggingface/accelerate": {
+  "stars": 9926,
+  "desc": "🚀 A simple way to launch, train, and use PyTorch models on almost any device and distributed configuration, automatic mixed precision (including fp8), and easy-to-configure FSDP and DeepSpeed support",
+  "pushed": "2026-10-27T15:01:54Z",
+  "license": "Apache-2.0",
+  "archived": false,
+  "lang": "Python"
+ },
+ "pytorch/pytorch": {
+  "stars": 105120,
+  "desc": "Tensors and Dynamic neural networks in Python with strong GPU acceleration",
+  "pushed": "2026-10-27T15:10:38Z",
+  "license": "NOASSERTION",
+  "archived": false,
+  "lang": "Python"
+ },
+ "cjlin1/libsvm": {
+  "stars": 4716,
+  "desc": "LIBSVM -- A Library for Support Vector Machines",
+  "pushed": "2025-12-29T11:23:20Z",
+  "license": "BSD-3-Clause",
+  "archived": false,
+  "lang": "Java"
+ },
+ "cjlin1/liblinear": {
+  "stars": 1052,
+  "desc": "LIBLINEAR -- A Library for Large Linear Classification",
+  "pushed": "2025-12-29T11:32:11Z",
+  "license": "BSD-3-Clause",
+  "archived": false,
+  "lang": "C++"
+ },
+ "scikit-learn/scikit-learn": {
+  "stars": 67957,
+  "desc": "scikit-learn: machine learning in Python",
+  "pushed": "2026-10-27T14:46:33Z",
+  "license": "BSD-3-Clause",
+  "archived": false,
+  "lang": "Python"
+ },
+ "fengdu78/lihang-code": {
+  "stars": 19606,
+  "desc": "《统计学习方法》的代码实现",
+  "pushed": "2026-10-05T08:38:45Z",
+  "license": null,
+  "archived": false,
+  "lang": "Jupyter Notebook"
+ },
+ "tensorflow/tensorflow": {
+  "stars": 201297,
+  "desc": "An Open Source Machine Learning Framework for Everyone",
+  "pushed": "2026-10-27T14:49:33Z",
+  "license": "Apache-2.0",
+  "archived": false,
+  "lang": "C++"
+ },
+ "huggingface/transformers": {
+  "stars": 168241,
+  "desc": "🤗 Transformers: the model-definition framework for state-of-the-art machine learning models in text, vision, audio, and multimodal models, for both inference and training. ",
+  "pushed": "2026-10-27T14:56:09Z",
+  "license": "Apache-2.0",
+  "archived": false,
+  "lang": "Python"
+ },
+ "microsoft/ML-For-Beginners": {
+  "stars": 91785,
+  "desc": "12 weeks, 26 lessons, 52 quizzes, classic Machine Learning for all",
+  "pushed": "2026-10-21T01:01:31Z",
+  "license": "MIT",
+  "archived": false,
+  "lang": "Jupyter Notebook"
+ }
+}

@@ -14,6 +14,8 @@
  *   3. 考研手札 → 考研题库 Tab：目录加载出 6 场考试；
  *   4. 分类总结：建议刷题顺序列表渲染出题目条目；
  *   5. 断网模拟：把后端地址改成坏端口 → 指示灯变红 + 页面给出可操作提示。
+ *   6. Phase18 断线韧性：离线横幅（含在找的地址）→ 离线心跳自行加速 →
+ *      点「重试」立刻探测 → 恢复后端后横幅消失、指示灯回绿、心跳回到 60s。
  *
  * 用法：
  *   node scripts/browser_acceptance.mjs
@@ -165,6 +167,84 @@ try {
   await page.waitForTimeout(1500);
   const offText = await page.textContent('body');
   rec(/未连接|无法连接/.test(offText), '设置页显示「未连接」并给出指引');
+
+  // ── 6. Phase18：离线横幅 + 重试入口 + 心跳退避 ────────────────────
+  // 6.1 离线横幅出现，且写清「在找哪个地址」
+  const banner = await page
+    .waitForSelector('[data-testid="offline-banner"]', { timeout: 10000 })
+    .catch(() => null);
+  rec(!!banner, '离线时出现全局横幅');
+  if (banner) {
+    const bt = await banner.textContent();
+    rec(bt.includes('后端未连接'), '横幅标题为「后端未连接」');
+    rec(bt.includes('59999'), '横幅写明正在找的地址', bt.match(/127\.0\.0\.1:\d+/)?.[0] ?? '');
+    rec(
+      (await page.locator('[data-testid="offline-retry"]').count()) > 0,
+      '横幅带「重试」按钮',
+    );
+  }
+
+  // 6.2 心跳退避：离线后应在 ~3s 档重试一次（failures 从 0→1）
+  //     观测点：横幅上的「已重试 N 次」文案，靠离线心跳自己涨上去，
+  //     不点任何按钮——这正是「离线加速」的意义。
+  const grewTo = await page
+    .waitForFunction(
+      () => {
+        const el = document.querySelector('[data-testid="offline-banner"]');
+        if (!el) return false;
+        const m = el.textContent?.match(/已重试\s*(\d+)\s*次/);
+        // 首帧 failures=0（网络错误钩子给的 1），这里等心跳把它推到 >=2
+        return m ? Number(m[1]) >= 2 : false;
+      },
+      { timeout: 12000 },
+    )
+    .then(() => 2)
+    .catch(() => 0);
+  rec(grewTo >= 2, '离线心跳自行加速（未点击，3s 档重试）', `failures=${grewTo}`);
+
+  // 6.3 点「重试」应立刻发起一次探测（按钮进入 disabled/重试中态）
+  const retryBtn = page.locator('[data-testid="offline-retry"]').first();
+  if (await retryBtn.count()) {
+    await retryBtn.click();
+    const wentBusy = await page
+      .waitForFunction(
+        () =>
+          document
+            .querySelector('[data-testid="offline-retry"]')
+            ?.hasAttribute('disabled'),
+        { timeout: 3000 },
+      )
+      .then(() => true)
+      .catch(() => false);
+    rec(wentBusy, '点「重试」立即发起探测（不用等退避计时器）');
+  }
+
+  // 6.4 恢复：把地址改回来 → 横幅消失、指示灯变绿
+  await page.evaluate(() => localStorage.setItem('nex.apiBaseUrl', 'http://127.0.0.1:8000'));
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('.km-conn-badge', { timeout: 15000 });
+  await page
+    .waitForFunction(
+      () => document.querySelector('.km-conn-badge')?.classList.contains('online'),
+      { timeout: 20000 },
+    )
+    .catch(() => {});
+  const backCls = await page.getAttribute('.km-conn-badge', 'class');
+  rec(backCls.includes('online'), '恢复后端后指示灯变绿', backCls);
+  rec(
+    (await page.locator('[data-testid="offline-banner"]').count()) === 0,
+    '恢复后离线横幅消失',
+  );
+
+  // 6.5 恢复后心跳应回到 60s 档（failures 归零，不带「已重试」文案）
+  const stillOnline = await page
+    .waitForFunction(
+      () => document.querySelector('.km-conn-badge')?.classList.contains('online'),
+      { timeout: 5000 },
+    )
+    .then(() => true)
+    .catch(() => false);
+  rec(stillOnline, '恢复后心跳回到 60s 档并保持在线');
 } catch (e) {
   rec(false, '验收流程异常', String(e).slice(0, 200));
 } finally {

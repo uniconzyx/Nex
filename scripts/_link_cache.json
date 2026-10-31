@@ -1,0 +1,1260 @@
+{
+ "github": {
+  "Chalarangelo/30-seconds-of-code": {
+   "status": "ok",
+   "stars": 129352,
+   "license": "CC-BY-4.0",
+   "pushed_at": "2026-10-26",
+   "lang": "JavaScript",
+   "desc": "Coding articles to level up your development skills",
+   "archived": false
+  },
+  "CyC2018/CS-Notes": {
+   "status": "ok",
+   "stars": 186353,
+   "license": null,
+   "pushed_at": "2026-10-26",
+   "lang": "Python",
+   "desc": ":books: 技术面试必备基础知识、Leetcode、计算机操作系统、计算机网络、系统设计",
+   "archived": false
+  },
+  "DataTalksClub/data-engineering-zoomcamp": {
+   "status": "ok",
+   "stars": 46442,
+   "license": null,
+   "pushed_at": "2026-10-15",
+   "lang": "Jupyter Notebook",
+   "desc": "Data Engineering Zoomcamp is a free 9-week course on building production-ready data pipelines. Join the course here 👇🏼",
+   "archived": false
+  },
+  "Farama-Foundation/Gymnasium": {
+   "status": "ok",
+   "stars": 12738,
+   "license": "MIT",
+   "pushed_at": "2026-10-26",
+   "lang": "Python",
+   "desc": "A standard API for single-agent reinforcement learning environments, with popular reference environments and related utilities (formerly Gym)",
+   "archived": false
+  },
+  "GokuMohandas/Made-With-ML": {
+   "status": "ok",
+   "stars": 49828,
+   "license": "MIT",
+   "pushed_at": "2026-03-04",
+   "lang": "Jupyter Notebook",
+   "desc": "Learn how to develop, deploy and iterate on production-grade ML applications.",
+   "archived": false
+  },
+  "RUCAIBox/RecBole": {
+   "status": "ok",
+   "stars": 4600,
+   "license": "MIT",
+   "pushed_at": "2025-02-24",
+   "lang": "Python",
+   "desc": "A unified, comprehensive and efficient recommendation library",
+   "archived": false
+  },
+  "Significant-Gravitas/AutoGPT": {
+   "status": "ok",
+   "stars": 187785,
+   "license": "NOASSERTION",
+   "pushed_at": "2026-10-27",
+   "lang": "Python",
+   "desc": "AutoGPT is the vision of accessible AI for everyone, to use and to build on. Our mission is to provide the tools, so that you can focus on what matters.",
+   "archived": false
+  },
+  "Snailclimb/JavaGuide": {
+   "status": "ok",
+   "stars": 159300,
+   "license": "Apache-2.0",
+   "pushed_at": "2026-10-25",
+   "lang": "JavaScript",
+   "desc": "Java 面试 & 后端通用面试指南，覆盖计算机基础、数据库、分布式、高并发、系统设计与 AI 应用开发",
+   "archived": false
+  },
+  "TheAlgorithms/C": {
+   "status": "ok",
+   "stars": 22581,
+   "license": "GPL-3.0",
+   "pushed_at": "2024-08-07",
+   "lang": "C",
+   "desc": "Collection of various algorithms in mathematics, machine learning, computer science, physics, etc implemented in C for educational purposes.",
+   "archived": false
+  },
+  "TheAlgorithms/C-Plus-Plus": {
+   "status": "ok",
+   "stars": 34813,
+   "license": "MIT",
+   "pushed_at": "2026-10-03",
+   "lang": "C++",
+   "desc": "Collection of various algorithms in mathematics, machine learning, computer science and physics implemented in C++ for educational purposes.",
+   "archived": false
+  },
+  "TheAlgorithms/Python": {
+   "status": "ok",
+   "stars": 225569,
+   "license": "MIT",
+   "pushed_at": "2026-10-20",
+   "lang": "Python",
+   "desc": "All Algorithms implemented in Python",
+   "archived": false
+  },
+  "TheSyart/claude-agent-examples": {
+   "status": "ok",
+   "stars": 419,
+   "license": null,
+   "pushed_at": "2026-10-15",
+   "lang": "HTML",
+   "desc": "Claude Agent examples - from simple to complex",
+   "archived": false
+  },
+  "TheSyart/emperor-agent": {
+   "status": "ok",
+   "stars": 207,
+   "license": "MIT",
+   "pushed_at": "2026-10-26",
+   "lang": "TypeScript",
+   "desc": "Local Emperor-style AI agent with Vue WebUI, multi-provider LLMs, streaming chat, tools, skills, memory, and token telemetry.",
+   "archived": false
+  },
+  "YunaiV/ruoyi-vue-pro": {
+   "status": "ok",
+   "stars": 40081,
+   "license": "MIT",
+   "pushed_at": "2026-10-25",
+   "lang": "Java",
+   "desc": "🔥 官方推荐 🔥 RuoYi-Vue 全新 Pro 版本，优化重构所有功能。基于 Spring Boot + MyBatis Plus + Vue & Element 实现的后台管理系统 + 微信小程序，支持 RBAC 动态权限、数据权限、SaaS 多租户、Flowable 工作流、三方登录、支付、短信、商城、CRM、",
+   "archived": false
+  },
+  "amueller/introduction_to_ml_with_python": {
+   "status": "ok",
+   "stars": 8224,
+   "license": null,
+   "pushed_at": "2024-03-14",
+   "lang": "Jupyter Notebook",
+   "desc": "Notebooks and code for the book \"Introduction to Machine Learning with Python\"",
+   "archived": false
+  },
+  "apache/hadoop": {
+   "status": "ok",
+   "stars": 15699,
+   "license": "Apache-2.0",
+   "pushed_at": "2026-10-26",
+   "lang": "Java",
+   "desc": "Apache Hadoop",
+   "archived": false
+  },
+  "apache/kafka": {
+   "status": "ok",
+   "stars": 34141,
+   "license": "Apache-2.0",
+   "pushed_at": "2026-10-27",
+   "lang": "Java",
+   "desc": "Apache Kafka - A distributed event streaming platform",
+   "archived": false
+  },
+  "apache/spark": {
+   "status": "ok",
+   "stars": 44339,
+   "license": "Apache-2.0",
+   "pushed_at": "2026-10-27",
+   "lang": "Scala",
+   "desc": "Apache Spark - A unified analytics engine for large-scale data processing",
+   "archived": false
+  },
+  "apachecn/AiLearning": {
+   "status": "ok",
+   "stars": 42609,
+   "license": "NOASSERTION",
+   "pushed_at": "2024-11-12",
+   "lang": "Python",
+   "desc": "AiLearning：数据分析+机器学习实战+线性代数+PyTorch+NLTK+TF2",
+   "archived": false
+  },
+  "bregman-arie/devops-exercises": {
+   "status": "ok",
+   "stars": 85071,
+   "license": "NOASSERTION",
+   "pushed_at": "2025-12-27",
+   "lang": "Python",
+   "desc": "Linux, Jenkins, AWS, SRE, Prometheus, Docker, Python, Ansible, Git, Kubernetes, Terraform, OpenStack, SQL, NoSQL, Azure, GCP, DNS, Elastic, Network, Virtualizat",
+   "archived": false
+  },
+  "catboost/catboost": {
+   "status": "ok",
+   "stars": 9178,
+   "license": "Apache-2.0",
+   "pushed_at": "2026-10-27",
+   "lang": "C++",
+   "desc": "A fast, scalable, high performance Gradient Boosting on Decision Trees library, used for ranking, classification, regression and other machine learning tasks fo",
+   "archived": false
+  },
+  "datawhalechina/pumpkin-book": {
+   "status": "ok",
+   "stars": 26146,
+   "license": "NOASSERTION",
+   "pushed_at": "2026-04-22",
+   "lang": null,
+   "desc": "南瓜书：《机器学习》（西瓜书）公式详解",
+   "archived": false
+  },
+  "dennybritz/reinforcement-learning": {
+   "status": "ok",
+   "stars": 22165,
+   "license": "MIT",
+   "pushed_at": "2023-07-13",
+   "lang": "Jupyter Notebook",
+   "desc": "Implementation of Reinforcement Learning Algorithms. Python, OpenAI Gym, Tensorflow. Exercises and Solutions to accompany Sutton's Book and David Silver's cours",
+   "archived": false
+  },
+  "dmlc/xgboost": {
+   "status": "ok",
+   "stars": 28916,
+   "license": "Apache-2.0",
+   "pushed_at": "2026-10-27",
+   "lang": "C++",
+   "desc": "Scalable, Portable and Distributed Gradient Boosting (GBDT, GBRT or GBM) Library,  for Python, R, Java, Scala, C and more. Runs on single machine, Hadoop, Spark",
+   "archived": false
+  },
+  "donnemartin/system-design-primer": {
+   "status": "ok",
+   "stars": 375800,
+   "license": "NOASSERTION",
+   "pushed_at": "2026-09-15",
+   "lang": "Python",
+   "desc": "Learn how to design large-scale systems. Prep for the system design interview.  Includes Anki flashcards.",
+   "archived": false
+  },
+  "doocs/advanced-java": {
+   "status": "ok",
+   "stars": 79162,
+   "license": "CC-BY-SA-4.0",
+   "pushed_at": "2026-10-19",
+   "lang": "Java",
+   "desc": "😮 Core Interview Questions & Answers For Experienced Java(Backend) Developers | 互联网 Java 工程师进阶知识完全扫盲：涵盖高并发、分布式、高可用、微服务、海量数据处理等领域知识",
+   "archived": false
+  },
+  "eugeneyan/applied-ml": {
+   "status": "ok",
+   "stars": 30732,
+   "license": "MIT",
+   "pushed_at": "2024-07-18",
+   "lang": null,
+   "desc": "📚 Papers & tech blogs by companies sharing their work on data science & machine learning in production.",
+   "archived": false
+  },
+  "eugenp/tutorials": {
+   "status": "ok",
+   "stars": 37313,
+   "license": "MIT",
+   "pushed_at": "2026-10-26",
+   "lang": "Java",
+   "desc": "Getting Started with Spring Boot 3: ",
+   "archived": false
+  },
+  "fengdu78/lihang-code": {
+   "status": "ok",
+   "stars": 19606,
+   "license": null,
+   "pushed_at": "2026-10-05",
+   "lang": "Jupyter Notebook",
+   "desc": "《统计学习方法》的代码实现",
+   "archived": false
+  },
+  "firecrawl/firecrawl": {
+   "status": "ok",
+   "stars": 195953,
+   "license": "AGPL-3.0",
+   "pushed_at": "2026-10-27",
+   "lang": "TypeScript",
+   "desc": "Supercharge your AI agents with data from the web and beyond. Building the library for superintelligence. 🔥",
+   "archived": false
+  },
+  "heibaiying/BigData-Notes": {
+   "status": "ok",
+   "stars": 16992,
+   "license": null,
+   "pushed_at": "2024-01-05",
+   "lang": "Java",
+   "desc": "大数据入门指南  :star:",
+   "archived": false
+  },
+  "hoppscotch/hoppscotch": {
+   "status": "ok",
+   "stars": 80699,
+   "license": "MIT",
+   "pushed_at": "2026-10-26",
+   "lang": "TypeScript",
+   "desc": "Open-Source API Development Ecosystem • https://hoppscotch.io • Offline, On-Prem & Cloud • Web, Desktop & CLI • Open-Source Alternative to Postman, Insomnia",
+   "archived": false
+  },
+  "huggingface/peft": {
+   "status": "ok",
+   "stars": 21852,
+   "license": "Apache-2.0",
+   "pushed_at": "2026-10-26",
+   "lang": "Python",
+   "desc": "🤗 PEFT: State-of-the-art Parameter-Efficient Fine-Tuning.",
+   "archived": false
+  },
+  "huggingface/transformers": {
+   "status": "ok",
+   "stars": 168241,
+   "license": "Apache-2.0",
+   "pushed_at": "2026-10-27",
+   "lang": "Python",
+   "desc": "🤗 Transformers: the model-definition framework for state-of-the-art machine learning models in text, vision, audio, and multimodal models, for both inference an",
+   "archived": false
+  },
+  "jackfrued/Python-100-Days": {
+   "status": "ok",
+   "stars": 187492,
+   "license": null,
+   "pushed_at": "2026-07-29",
+   "lang": "Jupyter Notebook",
+   "desc": "Python - 100天从新手到大师",
+   "archived": false
+  },
+  "jakevdp/PythonDataScienceHandbook": {
+   "status": "ok",
+   "stars": 50229,
+   "license": "MIT",
+   "pushed_at": "2024-06-26",
+   "lang": "Jupyter Notebook",
+   "desc": "Python Data Science Handbook: full text in Jupyter Notebooks",
+   "archived": false
+  },
+  "jlevy/the-art-of-command-line": {
+   "status": "error",
+   "http": 403,
+   "msg": "API rate limit exceeded for 220.200.177.57. (But here's the good news: Authentic"
+  },
+  "jwasham/coding-interview-university": {
+   "status": "error",
+   "http": 403,
+   "msg": "API rate limit exceeded for 220.200.177.57. (But here's the good news: Authentic"
+  },
+  "langchain-ai/langchain": {
+   "status": "error",
+   "http": 403,
+   "msg": "API rate limit exceeded for 220.200.177.57. (But here's the good news: Authentic"
+  },
+  "langgenius/dify": {
+   "status": "error",
+   "http": 403,
+   "msg": "API rate limit exceeded for 220.200.177.57. (But here's the good news: Authentic"
+  },
+  "lightgbm-org/LightGBM": {
+   "status": "error",
+   "http": 403,
+   "msg": "API rate limit exceeded for 220.200.177.57. (But here's the good news: Authentic"
+  },
+  "macrozheng/mall": {
+   "status": "error",
+   "http": 403,
+   "msg": "API rate limit exceeded for 220.200.177.57. (But here's the good news: Authentic"
+  },
+  "microsoft/Data-Science-For-Beginners": {
+   "status": "error",
+   "http": 403,
+   "msg": "API rate limit exceeded for 220.200.177.57. (But here's the good news: Authentic"
+  },
+  "microsoft/DeepSpeed": {
+   "status": "error",
+   "http": 403,
+   "msg": "API rate limit exceeded for 220.200.177.57. (But here's the good news: Authentic",
+   "stars": 43271,
+   "lang": "Python",
+   "license": "Apache-2.0",
+   "note": "star 取自 scripts/_gh_cache.json（同轮 GitHub API 抓取）"
+  },
+  "microsoft/ML-For-Beginners": {
+   "status": "error",
+   "http": 403,
+   "msg": "API rate limit exceeded for 220.200.177.57. (But here's the good news: Authentic",
+   "stars": 91785,
+   "lang": "Jupyter Notebook",
+   "license": "MIT",
+   "note": "star 取自 scripts/_gh_cache.json（同轮 GitHub API 抓取）"
+  },
+  "nodejs/node": {
+   "status": "error",
+   "http": 403,
+   "msg": "API rate limit exceeded for 220.200.177.57. (But here's the good news: Authentic"
+  },
+  "ohmyzsh/ohmyzsh": {
+   "status": "error",
+   "http": 403,
+   "msg": "API rate limit exceeded for 220.200.177.57. (But here's the good news: Authentic"
+  },
+  "optuna/optuna": {
+   "status": "error",
+   "http": 403,
+   "msg": "API rate limit exceeded for 220.200.177.57. (But here's the good news: Authentic"
+  },
+  "pandas-dev/pandas": {
+   "status": "error",
+   "http": 403,
+   "msg": "API rate limit exceeded for 220.200.177.57. (But here's the good news: Authentic"
+  },
+  "practical-tutorials/project-based-learning": {
+   "status": "error",
+   "http": 403,
+   "msg": "API rate limit exceeded for 220.200.177.57. (But here's the good news: Authentic"
+  },
+  "rasbt/python-machine-learning-book": {
+   "status": "error",
+   "http": 403,
+   "msg": "API rate limit exceeded for 220.200.177.57. (But here's the good news: Authentic"
+  },
+  "ray-project/ray": {
+   "status": "error",
+   "http": 403,
+   "msg": "API rate limit exceeded for 220.200.177.57. (But here's the good news: Authentic"
+  },
+  "recommenders-team/recommenders": {
+   "status": "error",
+   "http": 403,
+   "msg": "API rate limit exceeded for 220.200.177.57. (But here's the good news: Authentic"
+  },
+  "redis/redis": {
+   "status": "ok",
+   "stars": 76964,
+   "lang": "C",
+   "license": "",
+   "note": "star 取自 frontend/src/data/bundle.ts 的既有快照（2026-09）；GitHub API 当日限流未刷新"
+  },
+  "scikit-learn/scikit-learn": {
+   "status": "error",
+   "http": 403,
+   "msg": "API rate limit exceeded for 220.200.177.57. (But here's the good news: Authentic",
+   "stars": 67957,
+   "lang": "Python",
+   "license": "BSD-3-Clause",
+   "note": "star 取自 scripts/_gh_cache.json（同轮 GitHub API 抓取）"
+  },
+  "shap/shap": {
+   "status": "error",
+   "http": 403,
+   "msg": "API rate limit exceeded for 220.200.177.57. (But here's the good news: Authentic"
+  },
+  "spring-projects/spring-boot": {
+   "status": "error",
+   "http": 403,
+   "msg": "API rate limit exceeded for 220.200.177.57. (But here's the good news: Authentic"
+  },
+  "ssloy/tinyrenderer": {
+   "status": "error",
+   "http": 403,
+   "msg": "API rate limit exceeded for 220.200.177.57. (But here's the good news: Authentic"
+  },
+  "tensorflow/tensorflow": {
+   "status": "error",
+   "http": 403,
+   "msg": "API rate limit exceeded for 220.200.177.57. (But here's the good news: Authentic",
+   "stars": 201297,
+   "lang": "C++",
+   "license": "Apache-2.0",
+   "note": "star 取自 scripts/_gh_cache.json（同轮 GitHub API 抓取）"
+  },
+  "trekhleb/javascript-algorithms": {
+   "status": "error",
+   "http": 403,
+   "msg": "API rate limit exceeded for 220.200.177.57. (But here's the good news: Authentic"
+  },
+  "trimstray/the-book-of-secret-knowledge": {
+   "status": "error",
+   "http": 403,
+   "msg": "API rate limit exceeded for 220.200.177.57. (But here's the good news: Authentic"
+  },
+  "yangshun/front-end-interview-handbook": {
+   "status": "error",
+   "http": 403,
+   "msg": "API rate limit exceeded for 220.200.177.57. (But here's the good news: Authentic"
+  },
+  "DaveGamble/cJSON": {
+   "status": "ok",
+   "stars": 13040,
+   "lang": "C",
+   "license": "MIT",
+   "note": "star 取自 frontend/src/data/bundle.ts 的既有快照（2026-09）；GitHub API 当日限流未刷新"
+  },
+  "rswier/c4": {
+   "status": "ok",
+   "stars": 10819,
+   "lang": "C",
+   "license": "GPL-2.0",
+   "note": "star 取自 frontend/src/data/bundle.ts 的既有快照（2026-09）；GitHub API 当日限流未刷新"
+  },
+  "antirez/kilo": {
+   "status": "ok",
+   "stars": 9187,
+   "lang": "C",
+   "license": "BSD-2-Clause",
+   "note": "star 取自 frontend/src/data/bundle.ts 的既有快照（2026-09）；GitHub API 当日限流未刷新"
+  },
+  "kokke/tiny-AES-c": {
+   "status": "ok",
+   "stars": 5016,
+   "lang": "C",
+   "license": "Unlicense",
+   "note": "star 取自 frontend/src/data/bundle.ts 的既有快照（2026-09）；GitHub API 当日限流未刷新"
+  },
+  "huggingface/diffusers": {
+   "status": "ok",
+   "stars": 34819,
+   "lang": "Python",
+   "license": "Apache-2.0",
+   "note": "star 取自 scripts/_gh_cache.json（同轮 GitHub API 抓取）"
+  },
+  "CompVis/latent-diffusion": {
+   "status": "ok",
+   "stars": 14180,
+   "lang": "Jupyter Notebook",
+   "license": "MIT",
+   "note": "star 取自 scripts/_gh_cache.json（同轮 GitHub API 抓取）"
+  },
+  "ermongroup/ddim": {
+   "status": "ok",
+   "stars": 1855,
+   "lang": "Python",
+   "license": "MIT",
+   "note": "star 取自 scripts/_gh_cache.json（同轮 GitHub API 抓取）"
+  },
+  "hojonathanho/diffusion": {
+   "status": "ok",
+   "stars": 5352,
+   "lang": "Python",
+   "license": null,
+   "note": "star 取自 scripts/_gh_cache.json（同轮 GitHub API 抓取）"
+  },
+  "openai/guided-diffusion": {
+   "status": "ok",
+   "stars": 7442,
+   "lang": "Python",
+   "license": "MIT",
+   "note": "star 取自 scripts/_gh_cache.json（同轮 GitHub API 抓取）"
+  },
+  "lucidrains/denoising-diffusion-pytorch": {
+   "status": "ok",
+   "stars": 10720,
+   "lang": "Python",
+   "license": "MIT",
+   "note": "star 取自 scripts/_gh_cache.json（同轮 GitHub API 抓取）"
+  },
+  "karpathy/nanoGPT": {
+   "status": "ok",
+   "stars": 64145,
+   "lang": "Python",
+   "license": "MIT",
+   "note": "star 取自 scripts/_gh_cache.json（同轮 GitHub API 抓取）"
+  },
+  "NVIDIA/Megatron-LM": {
+   "status": "ok",
+   "stars": 18278,
+   "lang": "Python",
+   "license": "NOASSERTION",
+   "note": "star 取自 scripts/_gh_cache.json（同轮 GitHub API 抓取）"
+  },
+  "google-research/tuning_playbook": {
+   "status": "ok",
+   "stars": 30404,
+   "lang": null,
+   "license": "NOASSERTION",
+   "note": "star 取自 scripts/_gh_cache.json（同轮 GitHub API 抓取）"
+  },
+  "huggingface/accelerate": {
+   "status": "ok",
+   "stars": 9926,
+   "lang": "Python",
+   "license": "Apache-2.0",
+   "note": "star 取自 scripts/_gh_cache.json（同轮 GitHub API 抓取）"
+  },
+  "pytorch/pytorch": {
+   "status": "ok",
+   "stars": 105120,
+   "lang": "Python",
+   "license": "NOASSERTION",
+   "note": "star 取自 scripts/_gh_cache.json（同轮 GitHub API 抓取）"
+  },
+  "cjlin1/libsvm": {
+   "status": "ok",
+   "stars": 4716,
+   "lang": "Java",
+   "license": "BSD-3-Clause",
+   "note": "star 取自 scripts/_gh_cache.json（同轮 GitHub API 抓取）"
+  },
+  "cjlin1/liblinear": {
+   "status": "ok",
+   "stars": 1052,
+   "lang": "C++",
+   "license": "BSD-3-Clause",
+   "note": "star 取自 scripts/_gh_cache.json（同轮 GitHub API 抓取）"
+  },
+  "AUTOMATIC1111/stable-diffusion-webui": {
+   "status": "ok",
+   "stars": null,
+   "lang": null,
+   "star_source": "repo-page-html"
+  },
+  "Azure-Samples/azure-search-openai-demo": {
+   "status": "ok",
+   "stars": null,
+   "lang": null,
+   "star_source": "repo-page-html"
+  },
+  "EleutherAI/lm-evaluation-harness": {
+   "status": "ok",
+   "stars": null,
+   "lang": null,
+   "star_source": "repo-page-html"
+  },
+  "FoundationAgents/MetaGPT": {
+   "status": "ok",
+   "stars": null,
+   "lang": null,
+   "star_source": "repo-page-html"
+  },
+  "HKUDS/LightRAG": {
+   "status": "ok",
+   "stars": null,
+   "lang": null,
+   "star_source": "repo-page-html"
+  },
+  "Hannibal046/Awesome-LLM": {
+   "status": "ok",
+   "stars": null,
+   "lang": null,
+   "star_source": "repo-page-html"
+  },
+  "QwenLM/Qwen3-VL": {
+   "status": "ok",
+   "stars": null,
+   "lang": null,
+   "star_source": "repo-page-html"
+  },
+  "alirezadir/Machine-Learning-Interviews": {
+   "status": "ok",
+   "stars": null,
+   "lang": null,
+   "star_source": "repo-page-html"
+  },
+  "anthropics/claude-cookbooks": {
+   "status": "ok",
+   "stars": null,
+   "lang": null,
+   "star_source": "repo-page-html"
+  },
+  "chiphuyen/ml-interviews-book": {
+   "status": "ok",
+   "stars": null,
+   "lang": null,
+   "star_source": "repo-page-html"
+  },
+  "crewAIInc/crewAI": {
+   "status": "ok",
+   "stars": null,
+   "lang": null,
+   "star_source": "repo-page-html"
+  },
+  "dair-ai/ML-Papers-of-the-Week": {
+   "status": "ok",
+   "stars": null,
+   "lang": null,
+   "star_source": "repo-page-html"
+  },
+  "dair-ai/Prompt-Engineering-Guide": {
+   "status": "ok",
+   "stars": null,
+   "lang": null,
+   "star_source": "repo-page-html"
+  },
+  "datawhalechina/happy-llm": {
+   "status": "ok",
+   "stars": null,
+   "lang": null,
+   "star_source": "repo-page-html"
+  },
+  "datawhalechina/llm-universe": {
+   "status": "ok",
+   "stars": null,
+   "lang": null,
+   "star_source": "repo-page-html"
+  },
+  "nlohmann/json": {
+   "status": "ok",
+   "stars": 50813,
+   "license": "MIT",
+   "pushed_at": "2026-10-27",
+   "lang": "C++",
+   "desc": "JSON for Modern C++",
+   "archived": false
+  },
+  "fmtlib/fmt": {
+   "status": "ok",
+   "stars": 25897,
+   "license": "MIT",
+   "pushed_at": "2026-10-25",
+   "lang": "C++",
+   "desc": "A modern formatting library",
+   "archived": false
+  },
+  "Tencent/rapidjson": {
+   "status": "ok",
+   "stars": 15147,
+   "license": "NOASSERTION",
+   "pushed_at": "2025-02-05",
+   "lang": "C++",
+   "desc": "A fast JSON parser/generator for C++ with both SAX/DOM style API",
+   "archived": false
+  },
+  "google/leveldb": {
+   "status": "ok",
+   "stars": 39513,
+   "license": "BSD-3-Clause",
+   "pushed_at": "2026-10-08",
+   "lang": "C++",
+   "desc": "LevelDB is a fast key-value storage library written at Google that provides an ordered mapping from string keys to string values.",
+   "archived": false
+  },
+  "abseil/abseil-cpp": {
+   "status": "ok",
+   "stars": 18171,
+   "license": "Apache-2.0",
+   "pushed_at": "2026-10-28",
+   "lang": "C++",
+   "desc": "Abseil Common Libraries (C++)",
+   "archived": false
+  },
+  "protocolbuffers/protobuf": {
+   "status": "ok",
+   "stars": 72137,
+   "license": "NOASSERTION",
+   "pushed_at": "2026-10-28",
+   "lang": "C++",
+   "desc": "Protocol Buffers - Google's data interchange format",
+   "archived": false
+  },
+  "google/googletest": {
+   "status": "ok",
+   "stars": 39670,
+   "license": "BSD-3-Clause",
+   "pushed_at": "2026-10-21",
+   "lang": "C++",
+   "desc": "GoogleTest - Google Testing and Mocking Framework",
+   "archived": false
+  },
+  "catchorg/Catch2": {
+   "status": "ok",
+   "stars": 21538,
+   "license": "BSL-1.0",
+   "pushed_at": "2026-10-08",
+   "lang": "C++",
+   "desc": "A modern, C++-native, test framework for unit-tests, TDD and BDD - using C++14, C++17 and later (C++11 support is in v2.x branch, and C++03 on the Catch1.x bran",
+   "archived": false
+  },
+  "microsoft/STL": {
+   "status": "ok",
+   "stars": 11172,
+   "license": "NOASSERTION",
+   "pushed_at": "2026-10-27",
+   "lang": "C++",
+   "desc": "MSVC's implementation of the C++ Standard Library.",
+   "archived": false
+  },
+  "google/benchmark": {
+   "status": "ok",
+   "stars": 10486,
+   "license": "Apache-2.0",
+   "pushed_at": "2026-10-27",
+   "lang": "C++",
+   "desc": "A microbenchmark support library",
+   "archived": false
+  },
+  "simdjson/simdjson": {
+   "status": "ok",
+   "stars": 24473,
+   "license": "Apache-2.0",
+   "pushed_at": "2026-10-27",
+   "lang": "C++",
+   "desc": "Parsing gigabytes of JSON per second : used by Facebook/Meta Velox, the Node.js runtime, ClickHouse, WatermelonDB, Apache Doris, Milvus, StarRocks",
+   "archived": false
+  },
+  "apache/brpc": {
+   "status": "ok",
+   "stars": 17638,
+   "license": "Apache-2.0",
+   "pushed_at": "2026-10-27",
+   "lang": "C++",
+   "desc": "brpc is an Industrial-grade RPC framework using C++ Language, which is often used in high performance system such as Search, Storage, Machine learning, Advertis",
+   "archived": false
+  },
+  "chenshuo/muduo": {
+   "status": "ok",
+   "stars": 16279,
+   "license": "NOASSERTION",
+   "pushed_at": "2025-12-23",
+   "lang": "C++",
+   "desc": "Event-driven network library for multi-threaded Linux server in C++11",
+   "archived": false
+  },
+  "taskflow/taskflow": {
+   "status": "ok",
+   "stars": 12214,
+   "license": "NOASSERTION",
+   "pushed_at": "2026-10-15",
+   "lang": "C++",
+   "desc": "A General-purpose Task-parallel Programming System in C++",
+   "archived": false
+  },
+  "ClickHouse/ClickHouse": {
+   "status": "ok",
+   "stars": 50637,
+   "license": "Apache-2.0",
+   "pushed_at": "2026-10-28",
+   "lang": "C++",
+   "desc": "ClickHouse® is a real-time analytics database management system",
+   "archived": false
+  },
+  "include-what-you-use/include-what-you-use": {
+   "status": "ok",
+   "stars": 4781,
+   "license": "NOASSERTION",
+   "pushed_at": "2026-10-25",
+   "lang": "C++",
+   "desc": "A tool for use with clang to analyze #includes in C and C++ source files",
+   "archived": false
+  },
+  "AnthonyCalandra/modern-cpp-features": {
+   "status": "ok",
+   "stars": 21924,
+   "license": "MIT",
+   "pushed_at": "2026-10-24",
+   "lang": null,
+   "desc": "A cheatsheet of modern C++ language and library features.",
+   "archived": false
+  },
+  "isocpp/CppCoreGuidelines": {
+   "status": "ok",
+   "stars": 45390,
+   "license": "NOASSERTION",
+   "pushed_at": "2026-10-26",
+   "lang": "CSS",
+   "desc": "The C++ Core Guidelines are a set of tried-and-true guidelines, rules, and best practices about coding in C++",
+   "archived": false
+  },
+  "cpp-best-practices/cppbestpractices": {
+   "status": "ok",
+   "stars": 8851,
+   "license": "NOASSERTION",
+   "pushed_at": "2024-08-06",
+   "lang": null,
+   "desc": "Collaborative Collection of C++ Best Practices. This online resource is part of Jason Turner's collection of C++ Best Practices resources. See README.md for mor",
+   "archived": false
+  },
+  "llvm/llvm-project": {
+   "status": "ok",
+   "stars": 41230,
+   "license": "NOASSERTION",
+   "pushed_at": "2026-10-28",
+   "lang": "LLVM",
+   "desc": "The LLVM Project is a collection of modular and reusable compiler and toolchain technologies.",
+   "archived": false
+  }
+ },
+ "bili": {
+  "BV11A411L7CK": {
+   "status": "ok",
+   "title": "尚硅谷大数据Spark教程从入门到精通",
+   "owner": "尚硅谷",
+   "videos": 210,
+   "pubdate": 1603327338,
+   "view": 1467875
+  },
+  "BV11NNAz5EKn": {
+   "status": "ok",
+   "title": "【2026最新】B站最全最细的AI Agent智能体搭建教程，从入门到实战！手把手教你快速打造自己的专属智能体，一次性搞懂AI大模型智能体开发，学完薪资翻倍！",
+   "owner": "AI-智能体搭建教程",
+   "videos": 60,
+   "pubdate": 1772882919,
+   "view": 1399232
+  },
+  "BV12b411K7Zu": {
+   "status": "ok",
+   "title": "MySQL_基础+高级篇- 数据库 -sql -mysql教程_mysql视频_mysql入门_尚硅谷",
+   "owner": "黎曼的猜想",
+   "videos": 350,
+   "pubdate": 1555145337,
+   "view": 7479769
+  },
+  "BV14J4114768": {
+   "status": "ok",
+   "title": "黑马程序员pink老师前端入门教程，零基础必看的h5(html5)+css3+移动端前端视频教程",
+   "owner": "黑马pink讲前端",
+   "videos": 540,
+   "pubdate": 1576943287,
+   "view": 20076162
+  },
+  "BV14s411E772": {
+   "status": "missing",
+   "code": -404,
+   "msg": "啥都木有"
+  },
+  "BV164411b7dx": {
+   "status": "ok",
+   "title": "[中英字幕]吴恩达机器学习系列课程",
+   "owner": "岁月觞",
+   "videos": 112,
+   "pubdate": 1556446103,
+   "view": 5170559
+  },
+  "BV18E411x7eT": {
+   "status": "ok",
+   "title": "尚硅谷SpringCloud框架开发教程(SpringCloudAlibaba微服务分布式架构丨springcloud)",
+   "owner": "尚硅谷",
+   "videos": 150,
+   "pubdate": 1583376515,
+   "view": 4649076
+  },
+  "BV19K4y1L7MT": {
+   "status": "ok",
+   "title": "【尚硅谷】SpringBoot2零基础入门教程（spring boot2干货满满）",
+   "owner": "尚硅谷",
+   "videos": 87,
+   "pubdate": 1608596460,
+   "view": 4089065
+  },
+  "BV1CJ411m7gg": {
+   "status": "ok",
+   "title": "求知讲堂Java视频 128天完整版 学完可就业",
+   "owner": "求知讲堂",
+   "videos": 131,
+   "pubdate": 1574135147,
+   "view": 1961397
+  },
+  "BV1JA411c7VT": {
+   "status": "ok",
+   "title": "李宏毅《机器学习/深度学习》2021课程（国语版本，已授权）",
+   "owner": "二次元的Datawhale",
+   "videos": 41,
+   "pubdate": 1629705118,
+   "view": 186052
+  },
+  "BV1KW411u7vy": {
+   "status": "ok",
+   "title": "尚硅谷MySQL数据库高级，mysql优化，数据库优化",
+   "owner": "尚硅谷",
+   "videos": 61,
+   "pubdate": 1522228995,
+   "view": 970443
+  },
+  "BV1Kb411B7N8": {
+   "status": "missing",
+   "code": 62002,
+   "msg": "稿件不可见"
+  },
+  "BV1PA411b75a": {
+   "status": "missing",
+   "code": -404,
+   "msg": "啥都木有"
+  },
+  "BV1Qb411g7cz": {
+   "status": "missing",
+   "code": 62002,
+   "msg": "稿件不可见"
+  },
+  "BV1Qp4y1n7EN": {
+   "status": "ok",
+   "title": "Hadoop教程，大数据hadoop3.x搭建到集群调优（MapReduce、YARN、HDFS）",
+   "owner": "尚硅谷",
+   "videos": 178,
+   "pubdate": 1614211203,
+   "view": 2534955
+  },
+  "BV1R7411F7JV": {
+   "status": "ok",
+   "title": "史上最牛Python零基础教程视频（全700集，适合Python 0基础，Python自学入门）",
+   "owner": "千锋python",
+   "videos": 717,
+   "pubdate": 1582348358,
+   "view": 5455160
+  },
+  "BV1Rv41177Af": {
+   "status": "ok",
+   "title": "【尚硅谷】Redis 6 入门到精通 超详细 教程",
+   "owner": "尚硅谷",
+   "videos": 47,
+   "pubdate": 1618876844,
+   "view": 1818895
+  },
+  "BV1Ry4y1574R": {
+   "status": "ok",
+   "title": "SpringMVC教程，一套快速上手spring mvc，springmvc入门到实战",
+   "owner": "尚硅谷",
+   "videos": 97,
+   "pubdate": 1627948802,
+   "view": 2328055
+  },
+  "BV1Sv411r7vd": {
+   "status": "ok",
+   "title": "【小白入门 通俗易懂】韩顺平 一周学会Linux",
+   "owner": "韩顺平",
+   "videos": 153,
+   "pubdate": 1605784565,
+   "view": 5021229
+  },
+  "BV1Tb411j7uM": {
+   "status": "missing",
+   "code": 62002,
+   "msg": "稿件不可见"
+  },
+  "BV1Vf4y127N5": {
+   "status": "ok",
+   "title": "【尚硅谷】Spring框架视频教程（spring超详细源码级讲解）",
+   "owner": "尚硅谷",
+   "videos": 62,
+   "pubdate": 1590367868,
+   "view": 3320472
+  },
+  "BV1W4411B7cN": {
+   "status": "ok",
+   "title": "尚硅谷Hive教程(hive框架详解)",
+   "owner": "尚硅谷",
+   "videos": 92,
+   "pubdate": 1566880807,
+   "view": 374330
+  },
+  "BV1Ym4y1U7at": {
+   "status": "ok",
+   "title": "巨硬的Numpy：从小白到入门",
+   "owner": "二次元的Datawhale",
+   "videos": 1,
+   "pubdate": 1642420807,
+   "view": 37524
+  },
+  "BV1Zy4y1K7SH": {
+   "status": "ok",
+   "title": "尚硅谷Vue2.0+Vue3.0全套教程丨vuejs从入门到精通",
+   "owner": "尚硅谷",
+   "videos": 168,
+   "pubdate": 1626134409,
+   "view": 13244581
+  },
+  "BV1a34y167AZ": {
+   "status": "ok",
+   "title": "黑马程序员Node.js全套入门教程，nodejs新教程含es6模块化+npm+express+webpack+promise等_Nodejs实战案例详解",
+   "owner": "黑马程序员",
+   "videos": 96,
+   "pubdate": 1640136607,
+   "view": 2978168
+  },
+  "BV1a4411B7V9": {
+   "status": "ok",
+   "title": "尚硅谷Kafka教程(消息队列kafka快速入门)",
+   "owner": "尚硅谷",
+   "videos": 43,
+   "pubdate": 1566875351,
+   "view": 891323
+  },
+  "BV1c4411d7jb": {
+   "status": "ok",
+   "title": "计算机网络微课堂（有字幕无背景音乐版）",
+   "owner": "湖科大教书匠",
+   "videos": 73,
+   "pubdate": 1566307833,
+   "view": 8983618
+  },
+  "BV1ct411n7oG": {
+   "status": "ok",
+   "title": "【尚学堂】Java300集 - 高琪(零基础初学入门)UP求求各位点个关注吧！",
+   "owner": "哇哈哈是鸡肉味儿的",
+   "videos": 377,
+   "pubdate": 1563520125,
+   "view": 1698464
+  },
+  "BV1d4411v7u7": {
+   "status": "missing",
+   "code": 62002,
+   "msg": "稿件不可见"
+  },
+  "BV1dW411M7xL": {
+   "status": "ok",
+   "title": "尚硅谷Linux教程(千万级学习人次，好评如潮)",
+   "owner": "尚硅谷",
+   "videos": 77,
+   "pubdate": 1522150918,
+   "view": 2780299
+  },
+  "BV1db411q7B8": {
+   "status": "missing",
+   "code": 62002,
+   "msg": "稿件不可见"
+  },
+  "BV1eP411w7Re": {
+   "status": "ok",
+   "title": "[手把手教学]快速带你入门深度学习与实战",
+   "owner": "炮哥带你学",
+   "videos": 67,
+   "pubdate": 1667268004,
+   "view": 282981
+  },
+  "BV1ex411x7Em": {
+   "status": "ok",
+   "title": "黑马程序员Python教程_600集Python从入门到精通教程（懂中文就能学会）",
+   "owner": "黑马程序员",
+   "videos": 536,
+   "pubdate": 1504581916,
+   "view": 20853355
+  },
+  "BV1hx411d7jb": {
+   "status": "ok",
+   "title": "【python教程】数据分析——numpy、pandas、matplotlib",
+   "owner": "luvm的小屋",
+   "videos": 42,
+   "pubdate": 1561638913,
+   "view": 2624261
+  },
+  "BV1jt4y117KR": {
+   "status": "ok",
+   "title": "清华大学邓俊辉数据结构与算法【完】",
+   "owner": "老网恋教父了",
+   "videos": 474,
+   "pubdate": 1589122143,
+   "view": 419299
+  },
+  "BV1mW411M737": {
+   "status": "ok",
+   "title": "尚硅谷MyBatis实战教程全套完整版(初学者零基础从入门到精通,好评如潮,资料齐全)",
+   "owner": "尚硅谷",
+   "videos": 88,
+   "pubdate": 1522083416,
+   "view": 512761
+  },
+  "BV1n9CwYoEro": {
+   "status": "ok",
+   "title": "【AI大模型实战】2小时彻底掌握提示词工程（Prompt Engineering）深入浅出，草履虫都能听懂！——LLM/大模型入门/大模型学习路线",
+   "owner": "吴恩达langchain",
+   "videos": 8,
+   "pubdate": 1735103547,
+   "view": 322124
+  },
+  "BV1nJ411V7bd": {
+   "status": "ok",
+   "title": "数据结构与算法基础（青岛大学-王卓）",
+   "owner": "87师兄",
+   "videos": 173,
+   "pubdate": 1578646875,
+   "view": 16617535
+  },
+  "BV1np4y1C7Yf": {
+   "status": "ok",
+   "title": "Java项目《谷粒商城》架构师级Java项目实战，对标阿里P6-P7，全网最强",
+   "owner": "尚硅谷",
+   "videos": 408,
+   "pubdate": 1585652088,
+   "view": 6415657
+  },
+  "BV1og4y1q7M4": {
+   "status": "ok",
+   "title": "【狂神说Java】Docker最新超详细版教程通俗易懂",
+   "owner": "遇见狂神说",
+   "videos": 40,
+   "pubdate": 1589607452,
+   "view": 2962983
+  },
+  "BV1p4411v7Dh": {
+   "status": "missing",
+   "code": -404,
+   "msg": "啥都木有"
+  },
+  "BV1ps4y1d73V": {
+   "status": "ok",
+   "title": "王道计算机考研 计算机组成原理",
+   "owner": "王道计算机教育",
+   "videos": 92,
+   "pubdate": 1681811354,
+   "view": 18746180
+  },
+  "BV1qy4y1q728": {
+   "status": "ok",
+   "title": "尚硅谷Java版Flink（深入源码，一套学透）",
+   "owner": "尚硅谷",
+   "videos": 142,
+   "pubdate": 1606867257,
+   "view": 641156
+  },
+  "BV1sw4m1U7Qe": {
+   "status": "ok",
+   "title": "尚硅谷2024最新RabbitMQ教程，消息中间件RabbitMQ迅速上手！",
+   "owner": "尚硅谷",
+   "videos": 62,
+   "pubdate": 1716256841,
+   "view": 141306
+  },
+  "BV1ti4y1K7rA": {
+   "status": "ok",
+   "title": "带你学c带你飞【小甲鱼c语言入门教学】",
+   "owner": "tool_bin",
+   "videos": 61,
+   "pubdate": 1616302461,
+   "view": 23718
+  },
+  "BV1to4y1C7gw": {
+   "status": "ok",
+   "title": "【尚硅谷】大数据技术之Zookeeper 3.5.7版本教程",
+   "owner": "尚硅谷",
+   "videos": 46,
+   "pubdate": 1625011241,
+   "view": 543794
+  },
+  "BV1vh411S7LV": {
+   "status": "ok",
+   "title": "郝斌c语言入门教学第一部分",
+   "owner": "tool_bin",
+   "videos": 100,
+   "pubdate": 1616908258,
+   "view": 10041
+  },
+  "BV1vi4y137PN": {
+   "status": "ok",
+   "title": "黑马程序员MySQL全套教程，MySQL从基础到黑马订单案例实战",
+   "owner": "黑马程序员",
+   "videos": 38,
+   "pubdate": 1595311998,
+   "view": 136738
+  },
+  "BV1vy4y1s7k6": {
+   "status": "ok",
+   "title": "Git全套教程，git技术大全（GitHub、Gitee码云、GitLab）",
+   "owner": "尚硅谷",
+   "videos": 45,
+   "pubdate": 1619396438,
+   "view": 1374113
+  },
+  "BV1wXZfYRErX": {
+   "status": "ok",
+   "title": "ReAct和CodeAct-Agent调用外部工具的两种方法，从原理到实战-工具调用/MCP/FunctionCall/OpenAI/Cursor/LLM",
+   "owner": "MiuMiu8802",
+   "videos": 1,
+   "pubdate": 1743562800,
+   "view": 8513
+  },
+  "BV1wy4y1D7JT": {
+   "status": "ok",
+   "title": "尚硅谷React教程（已加更新版内容，B站最火）",
+   "owner": "尚硅谷",
+   "videos": 141,
+   "pubdate": 1607991644,
+   "view": 4329281
+  },
+  "BV1zJ411w7SV": {
+   "status": "ok",
+   "title": "尚硅谷Nginx教程由浅入深（一套打通丨初学者也可掌握）",
+   "owner": "尚硅谷",
+   "videos": 17,
+   "pubdate": 1568773145,
+   "view": 1147294
+  }
+ },
+ "fetched_at": "2026-10-27"
+}
