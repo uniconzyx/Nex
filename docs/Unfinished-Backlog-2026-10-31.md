@@ -48,25 +48,48 @@ HEAD 仅跟踪 3707 个文件，但工作树里还有 **175 个已跟踪文件�
 
 ---
 
-## P1 · 内容深度：86 章 C 级偏薄
+## P1 · 内容深度：79 章 C 级偏薄（最薄 7 章已补齐 ✅ 2026-10-31）
 
-`audit_depth.py --min-grade C` 判为 C 级（讲解/推导/实现/陷阱密度不够）的 86 章，按学科分布：
+`audit_depth.py` 判为 C 级（讲解/推导/实现/陷阱密度不够）的章节，按学科分布（2026-10-31 复跑）：
 
 | 学科 | C 级章数 | 学科 | C 级章数 |
 |---|---|---|---|
-| cpp | 13 | ml | 6 |
-| agent | 12 | spring | 6 |
-| ai | 9 | middleware | 6 |
-| fullstack | 8 | fundamentals | 5 |
-| bigdata | 4 | java | 4 |
-| clang | 3 | database | 3 |
-| tooling | 3 | python | 2 |
+| agent | 12 | ml | 6 |
+| cpp | 9 | spring | 6 |
+| ai | 9 | fundamentals | 5 |
+| fullstack | 8 | bigdata | 4 |
+| middleware | 6 | clang | 3 |
+| java | 3 | tooling | 3 |
+| database | 2 | python | 1 |
 | data | 1 | discrete-math | 1 |
 
-**最薄的 7 章**（字数 < 1700，先补这批性价比最高）：
-`java-ch01`、`py-ch01`、`cpp-ch03`、`db-ch01`、`cpp-ch01`、`cpp-ch04`、`cpp-ch02`。短板集中在 `concept_chars / code_blocks / h3 / pitfalls`。
+**已完成**：最薄的 7 章（`cpp-ch01~04`、`java-ch01`、`py-ch01`、`db-ch01`）已全量重写 concept 三篇 + 补齐 pitfalls，全部 C→B。实测指标：
 
-**修法**：给 concept 补可运行代码块 + 拆 H3 小节 + 补陷阱；补完必须过 `audit_correctness.py`（重编译重跑示例）与 `check_md_outputs.py`（正文输出必须对得上真实 stdout）。
+| 章节 | chars | 代码块 | H3 | 陷阱 | 等级 |
+|---|---|---|---|---|---|
+| cpp-ch01 | 1616→5130 | 3→15 | 9→15 | 4→11 | C→B |
+| cpp-ch02 | 1679→4955 | 4→16 | 9→11 | 5→12 | C→B |
+| cpp-ch03 | 1545→4321 | 3→13 | 9→10 | 4→12 | C→B |
+| cpp-ch04 | 1661→4519 | 3→20 | 9→11 | 5→12 | C→B |
+| java-ch01 | 1414→4654 | 5→20 | 9→16 | 5→15 | C→B |
+| py-ch01 | 1419→4557 | 3→27 | 9→14 | 6→17 | C→B |
+| db-ch01 | 1548→5018 | 6→21 | 9→22 | 6→16 | C→B |
+
+总盘：A 8 / B 71 / C 86 → **A 8 / B 78 / C 79**。
+
+**下一批优先级（按性价比排序，非按字数）**——剩余 79 章的短板已高度集中：
+
+| 短板类型 | 章数 | 修法 | 成本 |
+|---|---|---|---|
+| 仅 `code_blocks`<5 | 27 | concept 加代码块（正文不动） | 低 |
+| 仅 `h3`<10 | 23 | 拆 `###` 小节标题 | 极低 |
+| `code_blocks`+`pitfalls` | 9 | 加代码块 + 补陷阱 | 中 |
+| 仅 `pitfalls`<8 | 7 | 补陷阱条目 | 低 |
+| `code_blocks`+`h3` | 6 | 两者都加 | 低 |
+
+> 注意：`ai-ch09`（14912 字）、`ai-ch10`（13808 字）、`tool-ch06`（12782 字）这些"厚章"也在 C 级——**它们的正文已经足够，只缺代码块数量**。按字数排序会严重误判优先级。
+
+**修法（通用）**：补完必须过 `audit_correctness.py` + `check_md_outputs.py`（正文 ```text 块若上文 3 行含"输出/打印/终端"字样，会被要求对得上真实 stdout）。
 
 ---
 
@@ -125,7 +148,8 @@ HEAD 仅跟踪 3707 个文件，但工作树里还有 **175 个已跟踪文件�
 
 ## 建议推进顺序
 
-1. **P0 提交**（按上面的 4 个 commit 分批把未入库目录纳入版本控制，先消除丢失风险）。
-2. **P1 深度**：先补最薄的 7 章（<1700 字），一批一批过 `audit_correctness`。
-3. **P1 路线**：按学科逐个把 95 章改成章节级路线（fullstack 13 + fundamentals 12 + ai 11 最大块）。
-4. **P2 discrete-math**：补 dm-ch02/03 并接线（决定这个学科是否正式上线）。
+1. ~~**P0 提交**~~ ✅ 已完成（7 个 commit，工作区清零）。
+2. ~~**P1 深度·最薄 7 章**~~ ✅ 已完成（全部 C→B，`audit_correctness` 对新改章节 `AUDIT_OK`）。
+3. **P1 深度·按短板类型批量推进**：先做「仅缺 `code_blocks`」的 27 章 → 再做「仅缺 `h3`」的 23 章。这两批只需补代码块/小节标题，不用重写正文，成本远低于本轮。
+4. **P1 路线**：按学科逐个把 95 章改成章节级路线（fullstack 13 + fundamentals 12 + ai 11 最大块）。
+5. **P2 discrete-math**：补 dm-ch02/03 并接线（决定这个学科是否正式上线）。

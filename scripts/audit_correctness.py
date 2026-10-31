@@ -249,7 +249,8 @@ def check_concepts(cdir: str, cid: str, rep: Report) -> None:
 # --------------------------------------------------------------------- 来源
 REPO_RE = re.compile(r'https://github\.com/([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)')
 STAR_ROW = re.compile(
-    r'\|\s*\d+\s*\|\s*\[[^\]]+\]\((https://github\.com/[^)]+)\)\s*\|\s*(\d+)\s*\|')
+    # star 列允许千分位逗号（教材表格常用 34,813 这种写法），匹配后统一去逗号
+    r'\|\s*\d+\s*\|\s*\[[^\]]+\]\((https://github\.com/[^)]+)\)\s*\|\s*([\d,]+)\s*\|')
 
 
 def http_code(url: str, retries: int = 1) -> str:
@@ -280,7 +281,7 @@ def check_sources(cdir: str, cid: str, rep: Report, star_map: dict, cache: dict,
         return
     t = io.open(fp, encoding='utf-8').read()
 
-    rows = STAR_ROW.findall(t)
+    rows = [(u, s.replace(',', '')) for u, s in STAR_ROW.findall(t)]
     if len(rows) < 3:
         rep.fail(cid, 'goals GitHub 表行数 %d < 3' % len(rows))
     for url, star in rows:
