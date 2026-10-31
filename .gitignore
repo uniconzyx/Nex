@@ -93,3 +93,27 @@ deploy/launcher/dist-new/
 
 # ---------- 前端验收截图（shot.mjs 产出，本地看，不入库）----------
 frontend/.shots/
+
+# ---------- 内容审计与备份（脚本可再生，不入库）----------
+content/_backup_*/
+content/_depth_audit.json
+content/_depth_audit.md
+content/_standards_audit.json
+content/_standards_audit.md
+
+# ---------- 本地草稿 / 技能缓存 / 临时目录 ----------
+.scratch/
+.taste-skill/
+frontend/.scratch/
+server/.scratch/
+web-preview/.taste-skill/
+tmp/
+scripts/_ai11_out/
+scripts/_chparts/
+
+# ---------- Vite 临时时间戳配置副本 ----------
+frontend/vite.config.ts.timestamp-*.mjs
+
+# ---------- Tauri 生成的平台工程（gen/schemas、gen/android）----------
+src-tauri/gen/
+
