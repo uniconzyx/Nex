@@ -3,7 +3,7 @@
   "items": [
     {
       "title": "简易动态数组 MyVector",
-      "requirement_md": "用裸指针 + new[]/delete[] 实现一个简化版动态数组类：支持构造、push_back 动态扩容、下标访问、size()、析构释放。练习指针管理、扩容策略与析构防泄漏；进阶用 std::unique_ptr<T[]> 改写以消除手动 delete。",
+      "requirement_md": "### 背景（真实工作场景）\n`std::vector` 的内部就是「指针 + size + capacity」三件套。自己写一遍 MyVector，扩容、析构、异常安全为什么那样设计，就都成了可推导的结论而不是需要背的规则。\n\n### 功能要求\n1. 实现一个类模板（或先写 `MyVector<int>`），支持默认构造、拷贝构造、拷贝赋值、析构。\n2. `push_back`：容量不足时按 2 倍扩容，搬移旧元素后释放旧内存块。\n3. 提供 `operator[]`、`size()`、`capacity()`、`empty()`。\n4. 进阶：用 `std::unique_ptr<T[]>` 替代裸 `new[]`/`delete[]`，功能等价且不手写 `delete`。\n\n### 约束与边界\n- 必须自己管理内存，不允许内部直接包一个 `std::vector` 或 `std::string` 来「作弊」。\n- 拷贝构造与拷贝赋值要做深拷贝；推荐「拷贝并交换」惯用法统一两处逻辑。\n- 自赋值（`v = v`）必须安全，不得先释放再读取。\n\n### 验收标准\n1. 用 `-fsanitize=address,undefined` 编译运行全部用例：无泄漏、无越界、无未定义行为报告。\n2. 连续 `push_back` 1000 个元素后数据完整且顺序正确，`capacity()` 呈 1→2→4→8 的倍增序列。\n3. 拷贝出的副本修改后不影响原对象（深拷贝生效），自赋值后对象内容不变。",
       "tasks": [
         { "title": "实现构造/析构与 new[]/delete[] 配对", "verification": { "type": "test", "desc": "用 ASan 跑无泄漏报告" } },
         { "title": "实现 push_back 扩容", "verification": { "type": "test", "desc": "超过容量后数据不丢、容量翻倍" } },

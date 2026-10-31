@@ -3,7 +3,7 @@
   "items": [
     {
       "title": "单词频率统计器",
-      "requirement_md": "读取一段英文文本（字符串或文件），按空白/标点分割成单词，统计每个单词出现次数并排序输出 Top-K。练习 std::string 解析、std::string_view 切片与 std::map 计数；处理大小写与标点。",
+      "requirement_md": "### 背景（真实工作场景）\n文本解析是字符串接口的高频实战：分词、归一化、计数、排序。四步里每一步都可能踩到 `std::string` 的坑——多余的拷贝、失效的 `c_str()`、悬垂的 `string_view`。\n\n### 功能要求\n1. 读取一段英文文本：命令行参数指定文件路径，未指定则读标准输入。\n2. 按空白与标点分割成单词，标点本身不进入 token。\n3. 全部转小写后统计每个单词的出现次数。\n4. 输出按次数降序的 Top-K（K 默认 10，可由参数指定）；次数相同的按字典序升序，保证结果可复现。\n\n### 约束与边界\n- 分词必须用 `std::string_view` 切片 + `remove_prefix`，**不允许每切一个词就 `substr` 拷贝**。\n- 计数用 `std::map<std::string,int>`（或 `unordered_map` + 显式排序），排序规则要写进注释。\n- 是否过滤纯数字 token，必须明确定义并在输出里体现选择。\n\n### 验收标准\n1. 同一份输入多次运行，输出完全一致（排序稳定、无哈希序抖动）。\n2. 连续空格、行首行尾标点、`Hello` 与 `hello` 三种情况都被正确处理为同一词。\n3. 用 ASan 或 valgrind 运行无报错，且 `string_view` 全程未悬垂（源文本在统计期间保持存活）。",
       "tasks": [
         { "title": "实现分词（用 string_view 切片）", "verification": { "type": "test", "desc": "覆盖标点/连续空格/大小写归一" } },
         { "title": "用 map 计数并排序 Top-K", "verification": { "type": "test", "desc": "同一文本结果稳定可复现" } },

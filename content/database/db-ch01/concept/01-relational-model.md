@@ -2,18 +2,124 @@
 
 关系模型以「二维表」组织数据。一张表称为一个**关系（relation）**，表中的一行称为**元组（tuple，即记录）**，一列称为**属性（attribute，即字段）**。
 
-## 核心要素
+这不是比喻，而是一套严格的数学结构：关系是**元组的集合**，属性有定义域，SQL 只是它的语法外壳。理解了这层对应，`NULL` 的反直觉行为、`GROUP BY` 为什么必须列出非聚合列、`UNION` 为什么要显式去重，都不再是记忆题。
 
-- **主键（PRIMARY KEY）**：唯一标识一行，非空且唯一，一张表只能有一个（可由多列组成复合主键）。
-- **外键（FOREIGN KEY）**：引用另一张表的主键，用于建立表间关联，保证引用完整性。
-- **数据类型**：MySQL 常用 `INT`、`DECIMAL`、`VARCHAR(n)`、`DATE`、`DATETIME`、`TEXT` 等。
+## 一、术语对照：数学 ↔ 表
 
-## 示例：用 DDL 描述一个关系
+| 数学 / 关系模型 | 二维表 | 说明 |
+|---|---|---|
+| 关系（relation） | 表（table） | 元组的集合 |
+| 元组（tuple） | 行（row） | 一条记录 |
+| 属性（attribute） | 列（column） | 有名字与定义域 |
+| 域（domain） | 数据类型 + 约束 | 该列允许的取值范围 |
+| 关系模式 | 表结构（表头） | `employee(emp_id, name, dept_id, salary)` |
+| 基数（cardinality） | 行数 | 元组个数 |
+| 度（degree） | 列数 | 属性个数 |
+
+关系模型的三个核心要求：**属性原子**（不可再分）、**元组无序**、**属性无序**（但 SQL 表有物理顺序与列顺序，这是实现补充，不是模型要求）。
+
+## 二、键的四层概念
+
+这是考试与设计都绕不开的一组定义，层层收窄：
+
+```text
+超键 ⊃ 候选键 ⊃ 主键
+超键：能唯一标识一行的属性集合（可含多余属性）
+候选键：最小超键 —— 去掉任一属性就不再唯一
+主键：从候选键中选定的一个
+外键：引用另一张表主键（或候选键）的属性，用于表达表间关联
+```
+
+例子：`employee(emp_id, id_card, name, dept_id)` 中
+
+- 超键：`{emp_id}`、`{id_card}`、`{emp_id, name}`、`{emp_id, id_card}`……
+- 候选键：`{emp_id}`、`{id_card}`（各自最小）
+- 主键：选 `{emp_id}`
+- 外键：`dept_id` → `department(dept_id)`
+
+判候选键的方法：**求属性闭包**。从给定属性集出发，反复用函数依赖推导能被确定的属性，若闭包包含全部属性，则该集合是超键；再检查最小性。
+
+## 三、三类完整性约束
+
+| 约束 | 规则 | 由谁保证 |
+|---|---|---|
+| 实体完整性 | 主键非空且唯一 | `PRIMARY KEY` |
+| 参照完整性 | 外键值必须存在于被引用表，或为 `NULL` | `FOREIGN KEY` |
+| 用户定义完整性 | 业务规则（年龄 > 0、状态枚举） | `CHECK` / `NOT NULL` / `DEFAULT` / 触发器 |
+
+一个常被忽略的细节：**外键列允许 `NULL`**，且 `NULL` 不参与参照完整性检查（"不知道"不等于"不存在"）。所以"可选关联"用可空外键表达是合法的。
+
+## 四、关系代数：SQL 的语义内核
+
+五种**基本**运算（其余都可由它们导出）：
+
+- **选择 σ**：按条件筛行 → `WHERE`
+- **投影 π**：取列（并**去重**）→ `SELECT DISTINCT`
+- **并 ∪**：两关系合并去重 → `UNION`
+- **差 −**：存在于前者且不在后者 → `EXCEPT` / `NOT EXISTS`
+- **笛卡尔积 ×**：全组合 → `CROSS JOIN`
+
+派生运算：**交 ∩**、**连接 ⋈**（= σ 条件 (R × S)）、**除 ÷**（"对所有…都…"这类查询）。
+
+关键差异：**关系代数默认去重（集合语义），SQL 默认不去重（多重集语义）**。因此 `π` 对应的是 `SELECT DISTINCT` 而不是 `SELECT`，`UNION` 默认去重而 `UNION ALL` 才保留重复。这个错位是"关系代数表达式与 SQL 互译"题的最大坑。
+
+```text
+关系代数 → SQL 的映射（注意去重语义）
+
+  σ_{salary>5000}(employee)        →  WHERE salary > 5000
+  π_{name}(employee)               →  SELECT DISTINCT name
+  employee ⋈_{dept_id} dept        →  INNER JOIN ... ON ...
+  A ∪ B                            →  UNION（去重） / UNION ALL（不去重）
+  A − B                            →  EXCEPT（MySQL 8.0.31+ 支持）
+```
+
+## 五、`NULL`：三值逻辑的代价
+
+`NULL` 表示"未知/不适用"，不是 0、不是空串。它引入了三值逻辑：
+
+| 表达式 | 结果 |
+|---|---|
+| `NULL = NULL` | UNKNOWN（不是 TRUE） |
+| `NULL <> 5` | UNKNOWN |
+| `NULL AND FALSE` | FALSE |
+| `NULL OR TRUE` | TRUE |
+| `NULL + 1` | NULL |
+
+`WHERE` 只保留结果为 TRUE 的行，UNKNOWN 与 FALSE 一样被丢弃。于是：
+
+```sql
+-- 想查"部门不是 20 的员工"，会漏掉 dept_id 为 NULL 的人
+SELECT * FROM employee WHERE dept_id <> 20;
+
+-- 正确写法：显式包含 NULL
+SELECT * FROM employee WHERE dept_id <> 20 OR dept_id IS NULL;
+```
+
+`NOT IN` 更危险：若子查询结果含 `NULL`，`x NOT IN (…, NULL)` 恒为 UNKNOWN → **整条查询返回空**。改用 `NOT EXISTS` 可规避。
+
+## 六、范式：从 1NF 到 3NF（够用版）
+
+- **1NF**：属性原子。字段里存 `"1,2,3"` 这种逗号分隔列表就违反 1NF——它没法索引、没法外键、没法聚合。
+- **2NF**：在 1NF 基础上，**非主属性完全依赖候选键**（消除对复合键的部分依赖）。
+- **3NF**：在 2NF 基础上，**非主属性不传递依赖候选键**（`emp_id → dept_id → dept_name` 中的 `dept_name` 该拆出去）。
+
+工程实践通常停在 3NF，再按查询性能做**受控冗余**（反范式）。范式的目标是消除更新异常（插入/删除/修改异常），不是"越规范越好"。
+
+## 七、边界与陷阱
+
+- **把"表"当"文件"设计**：一张大表塞所有字段、用逗号分隔存多值 → 违反 1NF，索引与约束全部失效。
+- **`NULL` 当 0 或空串用**：语义不同，聚合、比较、`NOT IN` 全部受影响。
+- **`NOT IN` 遇 `NULL`**：整条查询返回空，是生产事故高发点。
+- **候选键求错**：忘了"最小性"，把超键当候选键，范式判定随之全错。
+- **关系代数与 SQL 去重语义混淆**：`π` 要去重，`SELECT` 不去重。
+- **外键在高并发写入下成为瓶颈**：会加锁、放大死锁概率，很多团队改用应用层校验或异步对账。
+
+## 八、可运行示例：三值逻辑与 1NF 违例
 
 ```sql
 CREATE TABLE department (
-    dept_id   INT PRIMARY KEY,          -- 主键
-    dept_name VARCHAR(20) NOT NULL,     -- 非空约束
+    dept_id   INT PRIMARY KEY,
+    dept_name VARCHAR(20) NOT NULL,
     location  VARCHAR(20)
 );
 
@@ -22,13 +128,23 @@ CREATE TABLE employee (
     name    VARCHAR(20) NOT NULL,
     dept_id INT,
     salary  DECIMAL(10,2),
-    FOREIGN KEY (dept_id) REFERENCES department(dept_id)  -- 外键关联
+    FOREIGN KEY (dept_id) REFERENCES department(dept_id)
 );
+
+INSERT INTO department VALUES (10,'研发','Beijing'), (20,'市场','Shanghai');
+INSERT INTO employee VALUES (1,'Alice',10,6000.00), (2,'Bob',NULL,8000.00);
+
+-- 三值逻辑：Bob 的 dept_id 是 NULL，会被 <> 条件排除
+SELECT emp_id, name FROM employee WHERE dept_id <> 20;          -- 只有 Alice
+
+-- 显式处理 NULL
+SELECT emp_id, name FROM employee WHERE dept_id <> 20 OR dept_id IS NULL;  -- Alice + Bob
+
+-- NOT IN 遇 NULL 的坑：以下查询一条都查不到
+SELECT * FROM employee WHERE dept_id NOT IN (SELECT dept_id FROM department);
 ```
 
-> 要点：表与表之间通过「外键 → 另一表主键」建立关系；查询时再把这些关系「拼」回来，这正是 JOIN 的本质。
-
----
+最后一条查询返回空：Bob 的 `dept_id` 是 `NULL`，`NULL NOT IN (10, 20)` 求值为 UNKNOWN，被 `WHERE` 丢弃；Alice 的 `10` 在集合里，结果是 FALSE。两侧都可能出问题——若**子查询结果本身含 `NULL`**，则任何行与它比较都得 UNKNOWN，整条查询必然返回空。把 `NOT IN` 换成 `NOT EXISTS` 才能得到"Bob 没有部门"这个正确结论。
 
 ## 三视角解析
 
@@ -36,13 +152,17 @@ CREATE TABLE employee (
 - 建表三件套的取舍：主键必有、唯一约束按业务加、**外键在高并发写入场景常改为应用层或异步校验**（外键会加锁并放大死锁概率）。
 - 记住 `NULL` 的三值逻辑：`NULL = NULL` 结果是 UNKNOWN，判断必须用 `IS NULL`；`NOT IN` 列表里含 NULL 时结果恒为空——这是最经典的生产事故来源。
 - 设计习惯：给时间字段统一 `DATETIME(3)` 与默认值；金额一律 `DECIMAL`。
+- 表名/列名用单数或复数要全库统一，别一半 `user` 一半 `users`——命名不一致的代价会随表数量指数上升。
 
 ### 🎓 博士生视角
 - 关系模型以**集合论**为数学基础：关系是元组的集合，SQL 则是它的语法糖；关系代数（选择 σ、投影 π、连接 ⋈、并 ∪、差 −）是 SQL 的语义基础，也是查询优化的中间表示。
 - 第一范式要求属性**原子**，这直接引出「为什么不该在字段里存逗号分隔的 id 列表」——那会破坏关系模型并让索引失效。
 - `NULL` 的引入破坏了经典二值逻辑的排中律，形成了三值逻辑（TRUE/FALSE/UNKNOWN）。这不是实现缺陷，而是「未知」这一语义的自然结果，但它让 `NOT IN`、`<>` 等运算出现反直觉行为。
+- 关系代数是**等价变换系统**：查询优化器的核心工作就是在关系代数表达式上做等价重写（选择下推、投影下推、连接顺序调整），再用代价模型挑一个执行计划。理解这一点，`EXPLAIN` 的输出才有意义。
+- Codd 1970 年的原始论文把"关系"定义为**属性到域的映射的集合**（数学上的 relation），SQL 的"表"允许重复行与列序，是对模型的工程化放宽——这就是 bag 语义与集合语义分歧的根源。
 
 ### 📚 考研者视角
 - 408 统考不含数据库，但**多数院校的自命题专业课（如 408+数据库 / 数据库原理）必考**：关系代数表达式书写、E-R 图转关系模式、候选键求解、范式判定。
 - 高频概念题：关系模型三要素（**关系 = 表、元组 = 行、属性 = 列**）、三类完整性约束（实体完整性、参照完整性、用户定义完整性）。
-- 记忆锚点：**关系代数五个基本运算 = 并、差、笛卡尔积、选择、投影**（连接、交等可由它们导出）。
+- 常考计算：给函数依赖集求候选键、判断最高范式（1NF/2NF/3NF/BCNF）、关系代数表达式与 SQL 互译。
+- 记忆锚点：**关系代数五个基本运算 = 并、差、笛卡尔积、选择、投影**（连接、交等可由它们导出）；**关系代数去重、SQL 不去重**。
