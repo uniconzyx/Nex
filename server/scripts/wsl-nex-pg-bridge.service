@@ -1,0 +1,14 @@
+[Unit]
+Description=Nex bridge: expose PostgreSQL socket under /run/nex
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+ExecStartPre=/bin/mkdir -p /run/nex
+ExecStartPre=/bin/chmod 777 /run/nex
+ExecStart=/usr/bin/socat UNIX-LISTEN:/run/nex/pg.sock,fork,reuseaddr,mode=777 TCP:127.0.0.1:55432
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

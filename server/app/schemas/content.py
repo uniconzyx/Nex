@@ -23,7 +23,12 @@ class FavoriteIn(BaseModel):
 
 
 class StudyStateIn(BaseModel):
-    """前端 localStorage 快照。字段名与 ProgressState 一一对应，便于直接序列化。"""
+    """前端 localStorage 快照。字段名与 ProgressState 一一对应，便于直接序列化。
+
+    2026-10-31 起支持 `snapshot`：整份 ProgressState（含 answers / bestiary /
+    chapterRuns / weekly 等）。传了 snapshot 就按整份处理（与 auth-server 对齐）；
+    只传 5 个扁平字段则走历史兼容路径。两者互斥以 snapshot 优先。
+    """
 
     done_chapters: list[str] = Field(default_factory=list, max_length=2000)
     done_projects: list[str] = Field(default_factory=list, max_length=2000)
@@ -32,3 +37,4 @@ class StudyStateIn(BaseModel):
     outfit: str = Field(default="default", max_length=40)
     theme: Literal["light", "dark"] = "light"
     client_rev: int = Field(default=0, ge=0)
+    snapshot: dict | None = None

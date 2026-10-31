@@ -1,11 +1,11 @@
 import json
 
-from sqlalchemy import select
+from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.content import Chapter
 from app.models.enums import Difficulty, ExerciseType, ResourceSource, ResourceType
-from app.models.exercise import Exercise, Tag, TestCase
+from app.models.exercise import Exercise, Tag, TestCase, exercise_tags
 from app.models.resource import Resource, resource_chapters
 from app.services.sync.schemas import ExercisePackage, ExternalPackage
 
@@ -96,6 +96,7 @@ async def _import_exercises(db: AsyncSession, pkg: ExercisePackage) -> dict:
                 title=item.title, content_md=item.content_md, options=item.options,
                 answer=item.answer, explanation=item.explanation,
                 time_limit_ms=item.time_limit_ms, memory_limit_mb=item.memory_limit_mb,
+                bundle_id=item.bundle_id,
             )
             db.add(exercise)
             await db.flush()
@@ -110,7 +111,9 @@ async def _import_exercises(db: AsyncSession, pkg: ExercisePackage) -> dict:
                         db.add(tag)
                         await db.flush()
                     tag_cache[tag_name] = tag
-                exercise.tags.append(tag_cache[tag_name])
+                # 显式插入关联表，避免 exercise.tags.append 在异步会话里触发隐式懒加载（MissingGreenlet）
+                await db.execute(insert(exercise_tags).values(
+                    exercise_id=exercise.id, tag_id=tag_cache[tag_name].id))
             created += 1
     await db.commit()
     return {"created": created, "type": "exercise", "chapter": chapter.code}

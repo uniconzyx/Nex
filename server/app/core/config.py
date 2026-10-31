@@ -46,6 +46,14 @@ class Settings(BaseSettings):
 
     sentry_dsn: str = ""
 
+    # 微信登录（网站应用扫码登录）。
+    # 留空 = 未配置，此时 /auth/wechat/config 会如实回报缺哪几项，
+    # 前端据此告诉用户「卡在资质」而不是弹一句写死的话。
+    # 这三个值都来自微信开放平台「网站应用」审核通过后拿到的凭据。
+    wechat_app_id: str = ""
+    wechat_app_secret: str = ""
+    wechat_redirect_uri: str = ""
+
     shared_dir: str = "../shared"
     content_dir: str = "../content"
 

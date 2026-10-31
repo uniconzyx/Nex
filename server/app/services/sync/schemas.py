@@ -46,6 +46,8 @@ class BankExercise(BaseModel):
     time_limit_ms: int = 2000
     memory_limit_mb: int = 256
     test_cases: list[BankTestCase] = []
+    # 与前端 data/exercises.ts 的稳定 id 对齐（如 cpp-ch01-03）；不强制，缺失时由导入脚本补全。
+    bundle_id: str | None = None
 
     @model_validator(mode="after")
     def check_business_rules(self):

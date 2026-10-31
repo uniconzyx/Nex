@@ -16,6 +16,7 @@ from app.core.security import (
     hash_password,
     verify_password,
 )
+from app.core.validate import assert_nickname
 from app.db import get_db
 from app.models.user import User, UserProfile
 from app.schemas.auth import LoginIn, ProfilePatch, RefreshIn, RegisterIn
@@ -31,7 +32,8 @@ async def register(body: RegisterIn, db: AsyncSession = Depends(get_db)):
     user = User(email=body.email, password_hash=hash_password(body.password))
     db.add(user)
     await db.flush()
-    db.add(UserProfile(user_id=user.id, nickname=body.nickname or body.email.split("@")[0]))
+    # 注册时的昵称也走同一套校验，避免「注册能过、改昵称却报错」的双后端不一致
+    db.add(UserProfile(user_id=user.id, nickname=assert_nickname(body.nickname) or body.email.split("@")[0]))
     await db.commit()
     return ok({"user_id": user.id, "uuid": str(user.uuid)}, "注册成功")
 
@@ -72,6 +74,55 @@ async def refresh(body: RefreshIn, db: AsyncSession = Depends(get_db)):
     })
 
 
+@router.get("/auth/wechat/config")
+async def wechat_config():
+    """
+    微信登录可用性探测（公开端点，无需登录）。
+
+    为什么要有它：前端那颗「微信登录」按钮原来点下去只弹一句写死的话，
+    用户分不清「我网络不好 / 这功能没做 / 缺资质」三件事。这个端点把它们分开：
+
+      unconfigured    缺 WECHAT_APP_ID / SECRET / REDIRECT_URI —— 卡在资质
+      not_implemented 凭据齐了，但 /auth/wechat/callback 还没接
+      ready           可直接跳授权页（回调实现后才会出现）
+
+    只读配置、不碰数据库，所以不会因为 DB / Redis 没起而失败。
+    """
+    appid = settings.wechat_app_id.strip()
+    secret = settings.wechat_app_secret.strip()
+    redirect = (settings.wechat_redirect_uri or "").strip()
+
+    missing = [
+        name
+        for name, value in (
+            ("WECHAT_APP_ID", appid),
+            ("WECHAT_APP_SECRET", secret),
+            ("WECHAT_REDIRECT_URI", redirect),
+        )
+        if not value
+    ]
+
+    if missing:
+        return ok({
+            "enabled": False,
+            "stage": "unconfigured",
+            "missing": missing,
+            "reason": (
+                "后端未配置 " + " / ".join(missing)
+                + "：需要微信开放平台「网站应用」资质（审核通过后才发 AppID）"
+            ),
+        })
+
+    # 凭据齐了但回调没实现。这里故意不返回 auth_url——
+    # 跳过去之后没有 /auth/wechat/callback 能换到令牌，等于把用户带进死路。
+    return ok({
+        "enabled": False,
+        "stage": "not_implemented",
+        "missing": [],
+        "reason": "凭据已配置，但授权回调 /auth/wechat/callback 尚未实现",
+    })
+
+
 @router.get("/users/me")
 async def get_me(user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     profile = (
@@ -99,6 +150,9 @@ async def patch_me(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
+    # 昵称与本地账号服务（auth-server）同规则：折叠空白、≤24、拒控制字符、空串=清除
+    if body.nickname is not None:
+        body.nickname = assert_nickname(body.nickname)
     profile = (
         await db.execute(select(UserProfile).where(UserProfile.user_id == user.id))
     ).scalar_one_or_none()

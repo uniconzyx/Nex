@@ -42,6 +42,9 @@ class Exercise(IDMixin, TimestampMixin, Base):
     )
     external_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
     external_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    # 与前端 data/exercises.ts（gen_exercise_bundle.py 生成）的稳定字符串 id 对齐，
+    # 形如 cpp-ch01-03。用于云端目录与本地 bundle 的 1:1 精确映射（不再靠标题模糊匹配）。
+    bundle_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     time_limit_ms: Mapped[int] = mapped_column(Integer, default=2000)
     memory_limit_mb: Mapped[int] = mapped_column(Integer, default=256)
     is_daily_eligible: Mapped[bool] = mapped_column(Boolean, default=False)

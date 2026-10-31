@@ -55,6 +55,11 @@ class StudyState(TimestampMixin, Base):
     outfit: Mapped[str] = mapped_column(String(40), default="default")
     theme: Mapped[str] = mapped_column(String(10), default="light")
     client_rev: Mapped[int] = mapped_column(Integer, default=0)  # 客户端自增版本，便于排查冲突
+    # 整份进度快照（与 auth-server /api/auth/progress 对齐）。
+    # 存的是完整 ProgressState（含 answers / bestiary / chapterRuns / weekly 等），
+    # 这样 Nex 后端也能做到跨设备全量恢复，不再只是 5 个扁平字段。
+    # 旧数据（只走过 5 字段路径）此列为 NULL，读取时回退到去规范化字段即可。
+    snapshot: Mapped[dict | None] = mapped_column(JSONType, nullable=True)
 
 
 class Checkin(TimestampMixin, Base):

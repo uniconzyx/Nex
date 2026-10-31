@@ -49,6 +49,7 @@ async def list_exercises(
             "id": e.id, "chapter_id": e.chapter_id, "type": e.type.value,
             "difficulty": e.difficulty.value, "title": e.title,
             "source": e.source.value, "external_url": e.external_url,
+            "bundle_id": e.bundle_id,
         }
         for e in rows
     ]

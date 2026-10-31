@@ -1,4 +1,5 @@
 from datetime import UTC, date, datetime, timedelta
+import json
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func, select
@@ -299,7 +300,7 @@ async def remove_favorite(
 # 上传是整行覆盖 + 打卡并集，因此重复上传同一份快照是幂等的。
 
 
-def _state_payload(st: StudyState | None, checkins: list[date]) -> dict:
+def _state_payload(st: StudyState | None, checkins: list[date], full_snapshot=None) -> dict:
     return {
         "done_chapters": list(st.done_chapters or []) if st else [],
         "done_projects": list(st.done_projects or []) if st else [],
@@ -309,7 +310,13 @@ def _state_payload(st: StudyState | None, checkins: list[date]) -> dict:
         "theme": st.theme if st else "light",
         "client_rev": st.client_rev if st else 0,
         "updated_at": st.updated_at.isoformat() if st and st.updated_at else None,
+        # 整份快照：存在时一并返回，前端据此走 mergeRemoteSnapshot 做全量恢复；
+        # 旧数据（只走过 5 字段路径）此字段为 None，前端回退到上面 5 个扁平字段。
+        "snapshot": full_snapshot,
     }
+
+
+MAX_SNAPSHOT_BYTES = 1_000_000  # 1MB，与 auth-server /api/auth/progress 对齐
 
 
 async def _load_state(db: AsyncSession, user_id: int) -> tuple[StudyState | None, list[date]]:
@@ -325,7 +332,7 @@ async def _load_state(db: AsyncSession, user_id: int) -> tuple[StudyState | None
 @router.get("/progress/state")
 async def get_state(user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     st, days = await _load_state(db, user.id)
-    return ok(_state_payload(st, days))
+    return ok(_state_payload(st, days, full_snapshot=st.snapshot if st else None))
 
 
 @router.put("/progress/state")
@@ -339,22 +346,47 @@ async def put_state(
         st = StudyState(user_id=user.id)
         db.add(st)
 
-    # 集合类字段取并集：换设备时旧记录不该被新设备的空列表抹掉
-    st.done_chapters = sorted(set(st.done_chapters or []) | set(body.done_chapters))
-    st.done_projects = sorted(set(st.done_projects or []) | set(body.done_projects))
-    st.coins = max(st.coins or 0, body.coins)
-    st.outfit = body.outfit or st.outfit
-    st.theme = body.theme or st.theme
-    st.client_rev = max(st.client_rev or 0, body.client_rev)
+    if body.snapshot is not None:
+        # ── 整份快照路径（与 auth-server /api/auth/progress 对齐）──
+        # 存的是完整 ProgressState（含 answers / bestiary / chapterRuns / weekly 等），
+        # 因此 Nex 后端也支持跨设备全量恢复，不再只是 5 个扁平字段。
+        snap = body.snapshot
+        if not isinstance(snap, dict):
+            raise AppError(PARAM_ERROR, "snapshot 必须是对象", http_status=400)
+        raw = json.dumps(snap, ensure_ascii=False)
+        if len(raw.encode("utf-8")) > MAX_SNAPSHOT_BYTES:
+            raise AppError(PARAM_ERROR, "进度快照过大（>1MB）", http_status=400)
+        st.snapshot = snap
+        # 去规范化：保留扁平字段，供 dashboard / 旧客户端使用
+        st.done_chapters = sorted(set(map(str, snap.get("doneChapters") or [])))
+        st.done_projects = sorted(set(map(str, snap.get("doneProjects") or [])))
+        st.coins = int(snap.get("coins") or 0)
+        if snap.get("outfit"):
+            st.outfit = str(snap["outfit"])[:40]
+        if snap.get("theme"):
+            st.theme = str(snap["theme"])[:10]
+        st.client_rev = max(st.client_rev or 0, int(snap.get("rev") or body.client_rev or 0))
+        raw_checkins = snap.get("checkins") or []
+    else:
+        # ── 历史 5 字段路径（向后兼容，老客户端只发这 5 个）──
+        st.snapshot = None
+        st.done_chapters = sorted(set(st.done_chapters or []) | set(body.done_chapters))
+        st.done_projects = sorted(set(st.done_projects or []) | set(body.done_projects))
+        st.coins = max(st.coins or 0, body.coins)
+        st.outfit = body.outfit or st.outfit
+        st.theme = body.theme or st.theme
+        st.client_rev = max(st.client_rev or 0, body.client_rev)
+        raw_checkins = body.checkins
 
+    # 打卡始终取并集：换设备时旧记录不该被新设备的空列表抹掉
     existing = {
         d for d in (
             await db.execute(select(Checkin.day).where(Checkin.user_id == user.id))
         ).scalars().all()
     }
-    for raw in body.checkins:
+    for raw in raw_checkins:
         try:
-            day = date.fromisoformat(raw)
+            day = date.fromisoformat(str(raw))
         except ValueError:
             continue  # 脏日期跳过，不影响整批
         if day not in existing:
@@ -363,4 +395,4 @@ async def put_state(
 
     await db.commit()
     st2, days = await _load_state(db, user.id)
-    return ok(_state_payload(st2, days), "已同步")
+    return ok(_state_payload(st2, days, full_snapshot=st2.snapshot if st2 else None), "已同步")
