@@ -1,4 +1,22 @@
 # 一、提交日志模型：Kafka 为什么不是「队列」
+> Kafka 用「一个 Topic 切成多个 Partition（并行单位）+ 每个 Partition 多 Replica（容错单位）」同时拿到吞吐与高可用：Producer 按 key 哈希落 Partition 保顺序，Consumer Group 每组每 Partition 至多一个消费者。
+
+```text
+Topic = orders
+  Partition-0  [replica: L P F]      ← Leader(L) 在 broker2
+  Partition-1  [replica: P F L]      ← Leader 在 broker0
+  Partition-2  [replica: F L P]      ← Leader 在 broker1
+
+  Producer: key=user_id → hash → 固定 Partition（同用户有序）
+  Consumer Group G:
+     C1 消费 P0, P1
+     C2 消费 P2          （每 Partition 同组仅 1 消费者）
+  再起 C3 → 自动 rebalance 重新分配
+  某 broker 挂 → Partition 的 Follower 之一升 Leader，服务不中断
+
+  ISR = 与 Leader 同步的副本集；ack=all 才算写入成功。
+```
+
 
 ## ① 从「队列」到「分布式提交日志」
 

@@ -1,0 +1,8 @@
+{
+  "title": "OCR→VLM 文档理解链路：版面块 + 问答",
+  "code_lang": "python",
+  "code_std": "3.11",
+  "stdin": "",
+  "expected_output": "检测到版面块: ['标题', '段落', '表格', '页脚']\n  [标题] OCR: 2024年季度报告\n  [段落] OCR: 公司营收同比增长12%。\n  [表格] OCR: Q1:100 Q2:130 Q3:150 Q4:170\nQA: 已检索到营收信息。",
+  "code": "layout = [\"标题\", \"段落\", \"表格\", \"页脚\"]\nocr_text = {\n    \"标题\": \"2024年季度报告\",\n    \"段落\": \"公司营收同比增长12%。\",\n    \"表格\": \"Q1:100 Q2:130 Q3:150 Q4:170\",\n}\ndef vlm_qa(block_text, question):\n    if \"营收\" in question and block_text:\n        return \"已检索到营收信息。\"\n    return \"未找到相关信息。\"\n\nprint(\"检测到版面块:\", layout)\nfor blk in [\"标题\", \"段落\", \"表格\"]:\n    print(f\"  [{blk}] OCR: {ocr_text[blk]}\")\nprint(\"QA:\", vlm_qa(ocr_text[\"段落\"], \"营收是多少？\"))\n"
+}

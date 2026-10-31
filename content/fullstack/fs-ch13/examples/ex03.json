@@ -1,0 +1,8 @@
+{
+  "title": "测试替身：Mock 断言调用",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "true\n[{\"to\":\"a@x.com\",\"subject\":\"welcome\"}]",
+  "code": "// 测试替身：mock——不仅替掉行为，还断言「被测代码是否按预期调用了它」\nfunction createMockEmail() {\n  const calls = [];\n  return {\n    send(to, subject) { calls.push({ to, subject }); },\n    assertCalledOnceWith(expectedTo) {\n      return calls.length === 1 && calls[0].to === expectedTo;\n    },\n    calls,\n  };\n}\n\nfunction notifySignup(email, user) { email.send(user.email, \"welcome\"); }\n\nconst mock = createMockEmail();\nnotifySignup(mock, { email: \"a@x.com\" });\nconsole.log(mock.assertCalledOnceWith(\"a@x.com\"));\nconsole.log(JSON.stringify(mock.calls));\n"
+}

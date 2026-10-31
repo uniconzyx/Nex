@@ -1,0 +1,8 @@
+{
+  "title": "难例挖掘：hard negative 按锚点距离选取",
+  "code_lang": "python",
+  "code_std": "3.11",
+  "stdin": "",
+  "expected_output": "正样本距离 d+=0.361\n按锚点距离排序的负样本: [0.5, 0.673, 2.828, 5.099]\nhard negative: (0.4, 0.3) gap=0.139",
+  "code": "anchor = (0.0, 0.0)\npos = (0.3, 0.2)\nnegs = [(0.4, 0.3), (2.0, 2.0), (0.5, 0.45), (5.0, 1.0)]\ndef dist(a, b):\n    return ((a[0]-b[0])**2 + (a[1]-b[1])**2) ** 0.5\nd_pos = dist(anchor, pos)\nmargins = [(dist(anchor, n), n) for n in negs]\nmargins.sort()\nhard = margins[0]\nprint(f\"正样本距离 d+={d_pos:.3f}\")\nprint(\"按锚点距离排序的负样本:\", [round(d,3) for d,_ in margins])\nprint(\"hard negative:\", hard[1], f\"gap={hard[0]-d_pos:.3f}\")\n"
+}

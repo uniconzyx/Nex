@@ -1,0 +1,8 @@
+{
+  "title": "类型守卫单看对象形状会误判",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "true false\nNaN\ntrue",
+  "code": "// 只判断「是对象且非 null」的守卫：任何对象都会通过\nfunction isCircleWeak(x) { return typeof x === \"object\" && x !== null; }\n\n// 逐字段校验的守卫：判别字段 + 必需字段类型\nfunction isCircle(x) {\n  return typeof x === \"object\" && x !== null &&\n    x.kind === \"circle\" && typeof x.r === \"number\";\n}\n\nconsole.log(isCircleWeak({ r: 1 }), isCircle({ r: 1 }));\nconsole.log(Math.PI * undefined ** 2); // 弱守卫放行后算出来的东西\nconsole.log(isCircle({ kind: \"circle\", r: 2 }));\n"
+}

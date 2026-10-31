@@ -1,0 +1,8 @@
+{
+  "title": "配置外置：行为由外部配置决定",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "https://api.x (timeout=3000, retries=2)\n3000",
+  "code": "// 配置外置：行为由外部配置决定，而不是散落在代码里的常量\nfunction makeService(config) {\n  return {\n    timeout: config.timeoutMs ?? 3000,\n    retries: config.retries ?? 0,\n    endpoint: config.endpoint,\n    describe() {\n      return `${this.endpoint} (timeout=${this.timeout}, retries=${this.retries})`;\n    },\n  };\n}\n\nconst s = makeService({ endpoint: \"https://api.x\", retries: 2 });\nconsole.log(s.describe());\nconsole.log(s.timeout); // 没传则使用默认值\n"
+}

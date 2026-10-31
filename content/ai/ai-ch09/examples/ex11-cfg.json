@@ -1,0 +1,8 @@
+{
+  "title": "无分类器引导 CFG：外推强度 s 的作用",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": " s     eps_tilde    相对 eps_cond 的放大倍数   说明\n 0.0   -0.2000          0.00x              退化无条件\n 1.0   +0.5000          1.00x              无引导（等价条件模型）\n 3.0   +1.9000          3.00x              工业常用区间\n 7.5   +5.0500          7.50x              工业常用区间\n15.0   +10.3000         15.00x              过饱和风险\n\n引导项 (eps_cond - eps_uncond) 近似 grad log p(c|x)：\n  s=1 时梯度强度 = +0.7000；s=7.5 时等价于把条件梯度放大 7.5 倍\n结论：s 线性放大条件信号，同时也放大与条件无关的高频分量 -> 过饱和；\n      s=1 接近原模型分布，s>1 用多样性换条件一致性\n",
+  "code": "\nimport numpy as np\neps_uncond, eps_cond = -0.20, 0.50\nprint(\" s     eps_tilde    相对 eps_cond 的放大倍数   说明\")\nfor s in (0.0, 1.0, 3.0, 7.5, 15.0):\n    e = eps_uncond + s * (eps_cond - eps_uncond)\n    ratio = (e - eps_uncond) / (eps_cond - eps_uncond) if eps_cond != eps_uncond else float(\"nan\")\n    note = \"退化无条件\" if s == 0 else (\"无引导（等价条件模型）\" if s == 1 else (\"工业常用区间\" if s <= 9 else \"过饱和风险\"))\n    print(f\"{s:>4.1f}   {e:+.4f}        {ratio:>6.2f}x              {note}\")\n\nprint()\nprint(\"引导项 (eps_cond - eps_uncond) 近似 grad log p(c|x)：\")\nprint(f\"  s=1 时梯度强度 = {eps_cond-eps_uncond:+.4f}；s=7.5 时等价于把条件梯度放大 7.5 倍\")\nprint(\"结论：s 线性放大条件信号，同时也放大与条件无关的高频分量 -> 过饱和；\")\nprint(\"      s=1 接近原模型分布，s>1 用多样性换条件一致性\")\n"
+}

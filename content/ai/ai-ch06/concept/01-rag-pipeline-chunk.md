@@ -49,3 +49,89 @@ chunk 是把长文档切成可检索片段的基本单元。常见四类：固�
 - **重叠（overlap）的作用**：减少边界切断造成的语义丢失，但会增加存储与重复计算。
 - **易错点**：认为「越细的块召回越准」——过细会把实体关系拆散，反而损害多跳问答。
 
+<!-- injected-code -->
+## 可运行代码：把上面的说法跑一遍
+
+下面两段直接取自本章示例库（`examples/`），期望输出就是判题台里判定的那串字符串，不是事后补写的说明。读完正文后先照着跑一遍，再回去看「三视角解析」里对应的那条。
+
+### 相似度度量对比：余弦 / 内积 / L2 的等价关系
+
+```python
+import numpy as np
+rng = np.random.default_rng(42)
+D = 8
+docs = rng.standard_normal((5, D))
+q = rng.standard_normal(D)
+
+def cosine(a, b):
+    return float(np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)))
+
+cos_scores = [cosine(q, d) for d in docs]
+ip_scores = [float(np.dot(q, d)) for d in docs]
+l2_scores = [float(np.linalg.norm(q - d)) for d in docs]
+
+rank_cos = [i for i, _ in sorted(enumerate(cos_scores), key=lambda x: -x[1])]
+rank_ip = [i for i, _ in sorted(enumerate(ip_scores), key=lambda x: -x[1])]
+rank_l2 = [i for i, _ in sorted(enumerate(l2_scores), key=lambda x: x[1])]
+
+qn = q / np.linalg.norm(q)
+dn = docs / np.linalg.norm(docs, axis=1, keepdims=True)
+ip_norm = [float(np.dot(qn, d)) for d in dn]
+rank_ipn = [i for i, _ in sorted(enumerate(ip_norm), key=lambda x: -x[1])]
+
+print('文档数 = %d  维度 = %d' % (len(docs), D))
+print('余弦相似度 =', [round(x, 4) for x in cos_scores])
+print('内积 =', [round(x, 4) for x in ip_scores])
+print('L2 距离 =', [round(x, 4) for x in l2_scores])
+print('余弦排名(降序) =', rank_cos)
+print('内积排名(降序) =', rank_ip)
+print('L2排名(升序) =', rank_l2)
+print('归一化后 余弦排名 == 内积排名 =', rank_cos == rank_ipn)
+print('L2排名(升序) 与 余弦排名(降序) 一致 =', rank_l2 == rank_cos)
+```
+
+实际输出：
+
+```text
+文档数 = 5  维度 = 8
+余弦相似度 = [-0.2554, -0.1326, 0.006, 0.3168, -0.5575]
+内积 = [-1.0912, -0.411, 0.0174, 1.1388, -1.7406]
+L2 距离 = [3.555, 2.7158, 2.4548, 2.402, 3.1775]
+余弦排名(降序) = [3, 2, 1, 0, 4]
+内积排名(降序) = [3, 2, 1, 0, 4]
+L2排名(升序) = [3, 2, 1, 4, 0]
+归一化后 余弦排名 == 内积排名 = True
+L2排名(升序) 与 余弦排名(降序) 一致 = False
+```
+
+> 出处：`examples/ex01-similarity-metrics.json`。改一处再看输出变没变，比读三遍解释有用。
+
+### 余弦相似度手算：点积、模长与余弦值
+
+```python
+import numpy as np
+q = np.array([1.0, 2.0, 3.0, 4.0])
+d = np.array([2.0, 0.0, 1.0, 3.0])
+dot = float(np.dot(q, d))
+nq = float(np.linalg.norm(q))
+nd = float(np.linalg.norm(d))
+cos = dot / (nq * nd)
+print('q =', q.tolist())
+print('d =', d.tolist())
+print('点积 q·d = %.4f' % dot)
+print('|q| = %.4f  |d| = %.4f' % (nq, nd))
+print('cos(q,d) = %.4f / (%.4f * %.4f) = %.4f' % (dot, nq, nd, cos))
+```
+
+实际输出：
+
+```text
+q = [1.0, 2.0, 3.0, 4.0]
+d = [2.0, 0.0, 1.0, 3.0]
+点积 q·d = 17.0000
+|q| = 5.4772  |d| = 3.7417
+cos(q,d) = 17.0000 / (5.4772 * 3.7417) = 0.8295
+```
+
+> 出处：`examples/ex02-cosine-manual.json`。改一处再看输出变没变，比读三遍解释有用。
+

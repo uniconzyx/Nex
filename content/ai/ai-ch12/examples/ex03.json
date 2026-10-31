@@ -1,0 +1,8 @@
+{
+  "title": "规则过滤：长度门限 + 重复率门限",
+  "code_lang": "python",
+  "code_std": "3.11",
+  "stdin": "",
+  "expected_output": "保留 2/4\n- 机器学习是让计算机从数据中学习的技术机器学习是让计算机从数据中学习的技术机器学习是让计算机从数据中学习的技术\n- 过拟合指模型在训练集表现好但在测试集表现差的现象，通常由容量过大引起。",
+  "code": "def rep_ratio(s):\n    toks = s.split()\n    if not toks:\n        return 0.0\n    return 1.0 - len(set(toks)) / len(toks)\n\nsamples = [\n    \"短\",\n    \"机器学习是让计算机从数据中学习的技术机器学习是让计算机从数据中学习的技术机器学习是让计算机从数据中学习的技术\",\n    \"过拟合指模型在训练集表现好但在测试集表现差的现象，通常由容量过大引起。\",\n    \"aaaa bbbb aaaa bbbb aaaa bbbb\",\n]\nMIN_LEN, MAX_LEN, MAX_REP = 4, 60, 0.5\nkept = []\nfor s in samples:\n    if MIN_LEN <= len(s) <= MAX_LEN and rep_ratio(s) <= MAX_REP:\n        kept.append(s)\nprint(f\"保留 {len(kept)}/{len(samples)}\")\nfor s in kept:\n    print(\"-\", s)\n"
+}

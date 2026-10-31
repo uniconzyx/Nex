@@ -1,0 +1,8 @@
+{
+  "title": "密钥管理：从环境变量注入，绝不打印明文",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "DB_PASSWORD ***env\nerror: 缺少环境变量 API_KEY",
+  "code": "// 密钥管理：敏感值从环境变量取，绝不写进代码或配置文件；日志中掩码\nconst env = { DB_PASSWORD: \"s3cr3t-from-env\", API_KEY: \"\" };\n\nfunction requireSecret(name) {\n  const v = env[name];\n  if (!v) throw new Error(`缺少环境变量 ${name}`);\n  return \"***\" + v.slice(-3); // 只展示掩码，绝不打印明文\n}\n\ntry {\n  console.log(\"DB_PASSWORD\", requireSecret(\"DB_PASSWORD\"));\n  console.log(\"API_KEY\", requireSecret(\"API_KEY\"));\n} catch (e) {\n  console.log(\"error:\", e.message);\n}\n"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "背压：有界缓冲（容量2）下生产者满则阻塞",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "put 1: ok (buf=[1])\nput 2: ok (buf=[1,2])\nput 3: blocked (buf=[1,2])\nput 4: blocked (buf=[1,2])\nput 5: blocked (buf=[1,2])\nput 6: blocked (buf=[1,2])\ntake: 1 (buf=[2])\ntake: 2 (buf=[])\ntake: empty (buf=[])\nput 7: ok (buf=[7])\nput 8: ok (buf=[7,8])",
+  "code": "const CAP = 2; const buf = [];\nfunction put(v) { if (buf.length < CAP) { buf.push(v); return \"ok\"; } return \"blocked\"; }\nfunction take() { return buf.length ? buf.shift() : \"empty\"; }\nconst ev = [];\nfor (let i = 1; i <= 6; i++) ev.push(`put ${i}: ${put(i)} (buf=[${buf}])`);\nfor (let i = 0; i < 3; i++) ev.push(`take: ${take()} (buf=[${buf}])`);\nfor (let i = 7; i <= 8; i++) ev.push(`put ${i}: ${put(i)} (buf=[${buf}])`);\nconsole.log(ev.join(\"\\n\"));\n"
+}

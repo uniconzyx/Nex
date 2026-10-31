@@ -29,10 +29,10 @@
           "hoppscotch/hoppscotch"
         ],
         "github_stars": [
-          373461,
-          186392,
+          375800,
+          186353,
           122410,
-          80581
+          80699
         ],
         "github_notes": [
           "系统设计入门：HTTP/API/缓存/CDN/负载均衡的工程视角（英文）",
@@ -40,15 +40,41 @@
           "Node.js 运行时：lib/http.js 为标准库 HTTP 实现，本章示例即基于其公开 API",
           "开源 API 调试工具：可直接观察请求头/响应头，配合本章 Network 面板学习"
         ],
-        "github_fetched_at": "2026-10-07",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "MDN Web Docs · HTTP 指南（GitHub: mdn/content，11028★，权威规范解读，随规范持续更新）"
+          "《JavaScript 高级程序设计（第 4 版）》Zakas",
+          "《深入浅出 Node.js》朴灵",
+          "《CSS 世界》张鑫旭"
         ],
-        "leetcode": [
-          "https://leetcode.cn/problems/lru-cache/",
-          "https://leetcode.cn/problems/logger-rate-limiter/"
-        ],
-        "nowcoder": []
+        "leetcode": [],
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1YW411T7GX/",
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · JavaScript 基础与实战",
+            "url": "https://www.bilibili.com/video/BV1YW411T7GX/",
+            "note": "主线：语法与类型 → 函数与作用域 → 原型与 this → DOM/BOM → ES6+ → 异步与 Promise",
+            "bv": "BV1YW411T7GX"
+          },
+          {
+            "name": "黑马程序员 · AJAX + Node.js + webpack",
+            "url": "https://www.bilibili.com/video/BV1MN411y7pw/",
+            "note": "前后端怎么接上：HTTP 请求、跨域、接口约定、打包构建",
+            "bv": "BV1MN411y7pw"
+          },
+          {
+            "name": "黑马程序员 · React 零基础到实战",
+            "url": "https://www.bilibili.com/video/BV1gh411U7JD/",
+            "note": "组件与 props/state、Hooks 的依赖数组、路由与状态管理，最后落到一个完整项目",
+            "bv": "BV1gh411U7JD"
+          },
+          {
+            "name": "HTML + CSS + JS + Vue 前端全套",
+            "url": "https://www.bilibili.com/video/BV1jj411P7Yp/",
+            "note": "补页面那一层：盒模型、Flex/Grid 布局、响应式；做「能看的界面」时按需查",
+            "bv": "BV1jj411P7Yp"
+          }
+        ]
       }
     },
     {
@@ -69,7 +95,7 @@
         ],
         "github_stars": [
           196855,
-          129326,
+          129352,
           44008
         ],
         "github_notes": [
@@ -77,13 +103,41 @@
           "短小精悍的 JS/CSS/HTML 代码片段集，覆盖日常前端技巧",
           "前端面试手册：HTML/CSS/JS/浏览器/性能"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《HTML & CSS 设计与构建网站》（Jon Duckett）",
-          "《CSS 权威指南（第4版）》第 1-8 章"
+          "《JavaScript 高级程序设计（第 4 版）》Zakas",
+          "《深入浅出 Node.js》朴灵",
+          "《CSS 世界》张鑫旭"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1YW411T7GX/",
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · JavaScript 基础与实战",
+            "url": "https://www.bilibili.com/video/BV1YW411T7GX/",
+            "note": "主线：语法与类型 → 函数与作用域 → 原型与 this → DOM/BOM → ES6+ → 异步与 Promise",
+            "bv": "BV1YW411T7GX"
+          },
+          {
+            "name": "HTML + CSS + JS + Vue 前端全套",
+            "url": "https://www.bilibili.com/video/BV1jj411P7Yp/",
+            "note": "补页面那一层：盒模型、Flex/Grid 布局、响应式；做「能看的界面」时按需查",
+            "bv": "BV1jj411P7Yp"
+          },
+          {
+            "name": "黑马程序员 · AJAX + Node.js + webpack",
+            "url": "https://www.bilibili.com/video/BV1MN411y7pw/",
+            "note": "前后端怎么接上：HTTP 请求、跨域、接口约定、打包构建",
+            "bv": "BV1MN411y7pw"
+          },
+          {
+            "name": "黑马程序员 · React 零基础到实战",
+            "url": "https://www.bilibili.com/video/BV1gh411U7JD/",
+            "note": "组件与 props/state、Hooks 的依赖数组、路由与状态管理，最后落到一个完整项目",
+            "bv": "BV1gh411U7JD"
+          }
+        ]
       }
     },
     {
@@ -104,7 +158,7 @@
         ],
         "github_stars": [
           196855,
-          129326,
+          129352,
           44008
         ],
         "github_notes": [
@@ -112,23 +166,342 @@
           "短小精悍的 JS/CSS/HTML 代码片段集，覆盖日常前端技巧",
           "前端面试手册：HTML/CSS/JS/浏览器/性能"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《JavaScript 高级程序设计（第4版）》第 3-11 章",
-          "《你不知道的 JavaScript（上/中/下）》"
+          "《JavaScript 高级程序设计（第 4 版）》Zakas",
+          "《深入浅出 Node.js》朴灵",
+          "《CSS 世界》张鑫旭"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1YW411T7GX/",
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · JavaScript 基础与实战",
+            "url": "https://www.bilibili.com/video/BV1YW411T7GX/",
+            "note": "主线：语法与类型 → 函数与作用域 → 原型与 this → DOM/BOM → ES6+ → 异步与 Promise",
+            "bv": "BV1YW411T7GX"
+          },
+          {
+            "name": "黑马程序员 · React 零基础到实战",
+            "url": "https://www.bilibili.com/video/BV1gh411U7JD/",
+            "note": "组件与 props/state、Hooks 的依赖数组、路由与状态管理，最后落到一个完整项目",
+            "bv": "BV1gh411U7JD"
+          },
+          {
+            "name": "HTML + CSS + JS + Vue 前端全套",
+            "url": "https://www.bilibili.com/video/BV1jj411P7Yp/",
+            "note": "补页面那一层：盒模型、Flex/Grid 布局、响应式；做「能看的界面」时按需查",
+            "bv": "BV1jj411P7Yp"
+          },
+          {
+            "name": "黑马程序员 · AJAX + Node.js + webpack",
+            "url": "https://www.bilibili.com/video/BV1MN411y7pw/",
+            "note": "前后端怎么接上：HTTP 请求、跨域、接口约定、打包构建",
+            "bv": "BV1MN411y7pw"
+          }
+        ]
+      }
+    },
+    {
+      "id": "fs-ch09",
+      "order": 4,
+      "group": "L2",
+      "title": "TypeScript：结构化类型、泛型与类型收窄",
+      "summary": "TypeScript 的类型不是注释，是一套在编译期跑的约束求解。本章讲清：结构类型（structural typing）与名义类型的差别、`unknown` 与 `any` 的边界、联合类型的收窄（narrowing）与穷尽性检查、泛型与条件类型/映射类型如何把「运行时才发现的错」提前到编译期；以及最重要的一条——类型在运行时不存在（erasure），所以类型不能替代校验。",
+      "prerequisites": [
+        "fs-ch03"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "yangshun/front-end-interview-handbook",
+          "Chalarangelo/30-seconds-of-code",
+          "trekhleb/javascript-algorithms"
+        ],
+        "github_stars": [
+          44008,
+          129352,
+          196855
+        ],
+        "github_notes": [
+          "前端面试手册：HTML/CSS/JS/浏览器/性能，TS 与工程化章节可对照其类型与构建部分",
+          "短小代码片段集：读别人怎么写类型收窄与工具函数，比读规范快",
+          "算法与数据结构（JS 实现），本章的 groupBy/穷尽检查可与其中的类型标注对照"
+        ],
+        "github_fetched_at": "2026-10-27",
+        "books": [
+          "《TypeScript 编程》（Boris Cherny）",
+          "《Effective TypeScript》Dan Vanderkam",
+          "《JavaScript 高级程序设计（第 4 版）》Zakas"
+        ],
+        "leetcode": [],
+        "nowcoder": [],
+        "bilibili": "",
+        "bilibili_list": []
+      }
+    },
+    {
+      "id": "fs-ch10",
+      "order": 5,
+      "group": "L2",
+      "title": "Vue 3 + TypeScript + Pinia：响应式原理与 ref/reactive 边界",
+      "summary": "Vue 3 的响应式是「用 Proxy 在对象与读取方之间插一层依赖收集」：effect 运行时会记下自己读过哪些字段（track），字段被改写时再通知这些 effect 重跑（trigger）。这套机制决定了 ref 为什么必须读 `.value`、reactive 为什么只对对象生效、以及「解构会丢响应性」这一连串现象的根因。本章讲清：依赖追踪的全链路、ref 与 reactive 的边界与取舍、toRefs / shallowRef / 数组与 Map 的响应性，以及 Pinia 的组合式 store 如何把响应式封装成可维护的全局状态。",
+      "prerequisites": [
+        "fs-ch03",
+        "fs-ch09"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "vuejs/core",
+          "vuejs/pinia",
+          "vuejs/router",
+          "vuejs/rfcs"
+        ],
+        "github_stars": [
+          54801,
+          14755,
+          4706,
+          4926
+        ],
+        "github_notes": [
+          "按本章小节定位相关目录",
+          "按本章小节定位相关目录",
+          "按本章小节定位相关目录",
+          "按本章小节定位相关目录"
+        ],
+        "github_fetched_at": "2026-10-27",
+        "books": [
+          "霍春阳《Vue.js 设计与实现》第3章『响应式系统』—— 对应 §1.1、§1.6",
+          "Vue 官方文档《Reactivity in Depth》—— 对应 §1 全章、§2 ref/reactive 边界",
+          "TC39 `Proxy`/`Reflect` 规范与 Decorators 提案 —— 对应 §1.1 为什么是 Proxy"
+        ],
+        "leetcode": [],
+        "nowcoder": [],
+        "bilibili": "",
+        "bilibili_list": []
+      }
+    },
+    {
+      "id": "fs-ch11",
+      "order": 6,
+      "group": "L2",
+      "title": "Spring Boot 3 工程骨架：分层边界、异常与校验收口",
+      "summary": "Spring Boot 让「能跑起来」很容易，但「跑得对、改得动」依赖骨架纪律。本章讲清三条边界：一是**分层边界**——controller 只接 HTTP、service 只放业务、repository 只管持久化，依赖方向单向、禁止跨层调用；二是**异常边界**——用 @ControllerAdvice 把散落的 try/catch 收口成统一错误响应，业务异常与系统异常分流，且**绝不把堆栈返给前端**；三是**校验边界**——入参校验放在哪一层、Jakarta Validation 怎么用、分组校验与自定义约束如何落地。这三条合起来，决定了一个Spring Boot 项目是可维护还是会变成「改一处炸一片」的意大利面。",
+      "prerequisites": [
+        "fs-ch03",
+        "fs-ch10"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "spring-projects/spring-boot",
+          "spring-projects/spring-framework",
+          "spring-projects/spring-security",
+          "openjdk/jdk"
+        ],
+        "github_stars": [
+          81772,
+          60300,
+          9653,
+          23477
+        ],
+        "github_notes": [
+          "按本章小节定位相关目录",
+          "按本章小节定位相关目录",
+          "按本章小节定位相关目录",
+          "按本章小节定位相关目录"
+        ],
+        "github_fetched_at": "2026-10-27",
+        "books": [
+          "Craig Walls《Spring in Action》第 4、6 章（Web、AOP）—— 对应 §1 分层、§2 异常",
+          "汪云飞《Spring Boot 实战》第 6 章数据校验 —— 对应 §3 校验收口",
+          "Spring 官方 Reference：Validation / Exception Handling 章节 —— 对应 §2、§3"
+        ],
+        "leetcode": [],
+        "nowcoder": [],
+        "bilibili": "",
+        "bilibili_list": []
+      }
+    },
+    {
+      "id": "fs-ch12",
+      "order": 7,
+      "group": "L2",
+      "title": "服务拆分与网关：拆分判断、网关职责、配置中心",
+      "summary": "单体不是原罪，微服务也不是银弹。本章讲清一条主线：什么时候该把单体拆开、拆的边界按什么划（限界上下文与康威定律）、拆完之后入口处放什么（API 网关的鉴权/限流/路由/BFF 边界）、以及配置如何外置、隔离、热更新与保密。重点不在背概念，而在建立「拆分是把组织问题换成技术复杂度」的判断力，和「网关要薄、配置要离代码」的工程纪律。",
+      "prerequisites": [
+        "fs-ch11"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "spring-projects/spring-cloud-gateway",
+          "nestjs/nest",
+          "vercel/next.js",
+          "google/guava"
+        ],
+        "github_stars": [
+          0,
+          76927,
+          143173,
+          51918
+        ],
+        "github_notes": [
+          "按本章小节定位相关目录",
+          "按本章小节定位相关目录",
+          "按本章小节定位相关目录",
+          "按本章小节定位相关目录"
+        ],
+        "github_fetched_at": "2026-10-27",
+        "books": [
+          "Sam Newman《Building Microservices》第 1、5 章（单块边界、服务拆分）—— 对应 §1 何时该拆",
+          "《Spring Microservices in Action》第 4 章 Gateway —— 对应 §2 网关职责",
+          "Chris Richardson《Microservices Patterns》第 3 章（配置中心）—— 对应 §3 配置外置"
+        ],
+        "leetcode": [],
+        "nowcoder": [],
+        "bilibili": "",
+        "bilibili_list": []
+      }
+    },
+    {
+      "id": "fs-ch13",
+      "order": 8,
+      "group": "L2",
+      "title": "前端测试与质量门禁：测试金字塔、E2E、契约测试",
+      "summary": "测试不是写得越多越好，而是「在正确的层、用正确的替身、以正确的稳定性」覆盖正确的东西。本章讲清测试金字塔的分层比例与测试替身（stub/mock/fake/spy）的分工、E2E 与组件测试如何做稳（选择器策略、等待而非 sleep、不依赖实现细节）、以及消费者驱动契约（CDC）如何补上微服务间的接口验证；最后落到 CI 质量门禁（lint/typecheck/coverage/构建）。CI/CD 的流水线细节在 fs-ch08 已讲，本章只聚焦「质量门禁」这一层。",
+      "prerequisites": [
+        "fs-ch12",
+        "fs-ch08"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "microsoft/playwright",
+          "cypress-io/cypress",
+          "pact-foundation/pact-js",
+          "facebook/react"
+        ],
+        "github_stars": [
+          98704,
+          51015,
+          1825,
+          251766
+        ],
+        "github_notes": [
+          "按本章小节定位相关目录",
+          "按本章小节定位相关目录",
+          "按本章小节定位相关目录",
+          "按本章小节定位相关目录"
+        ],
+        "github_fetched_at": "2026-10-27",
+        "books": [
+          "Kent Beck《Test-Driven Development》—— 对应 §1 测试金字塔理念",
+          "《Software Engineering at Google》第 11-12 章（测试规模与模式）—— 对应 §1、§3 门禁",
+          "Jez Humble《Continuous Delivery》第 10 章（部署流水线门禁）—— 对应 §3.3 质量门禁"
+        ],
+        "leetcode": [],
+        "nowcoder": [],
+        "bilibili": "",
+        "bilibili_list": []
+      }
+    },
+    {
+      "id": "fs-ch14",
+      "order": 9,
+      "group": "L2",
+      "title": "Agent × 全栈工程接缝：流式、长任务、幂等与成本",
+      "summary": "Agent 不是一段函数调用，而是一条横跨网关、后端、模型与工具的长链路。本章把「工程接缝」讲透：流式响应如何安全地穿过网关（SSE/WebSocket、透传而非缓冲、背压、超时与取消）；长任务如何用任务 id 实现断线重连与幂等恢复；工具调用如何用唯一 id 保证重试幂等、用哈希链保证审计不可篡改；以及成本与限流（token 计量、按租户限流、降级与预算）。这些都是「能跑 demo」与「能上生产」之间的真正分水岭。",
+      "prerequisites": [
+        "fs-ch09",
+        "fs-ch11",
+        "fs-ch12"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "vercel/ai",
+          "langchain-ai/langchain",
+          "gin-gonic/gin",
+          "huggingface/transformers"
+        ],
+        "github_stars": [
+          27560,
+          148600,
+          89445,
+          168266
+        ],
+        "github_notes": [
+          "按本章小节定位相关目录",
+          "按本章小节定位相关目录",
+          "按本章小节定位相关目录",
+          "按本章小节定位相关目录"
+        ],
+        "github_fetched_at": "2026-10-27",
+        "books": [
+          "《Designing Data-Intensive Applications》第 11 章（流处理与一致性）—— 对应 §1 流式、§2 长任务状态",
+          "OpenAI / Anthropic Function Calling 官方文档 —— 对应 §3.1 唯一 id、§3.2 幂等",
+          "LangChain 官方文档《Streaming》《Tools》章节 —— 对应 §1.1、§3"
+        ],
+        "leetcode": [],
+        "nowcoder": [],
+        "bilibili": "",
+        "bilibili_list": []
+      }
+    },
+    {
+      "id": "fs-ch15",
+      "order": 10,
+      "group": "L2",
+      "title": "Go + Gin 后端：并发模型、接口契约与 Java 路线对照",
+      "summary": "Go 是后端 Agent 服务的常见底座。本章用「和 Java 对照」的线索讲清：Goroutine 与 Channel 的并发模型（GMP 调度、channel 作为同步原语、「不要通过共享内存通信」）；Gin 的路由树、中间件链与 Context（与 Spring 拦截器/过滤器对照）；以及 Go「error 作为值」的错误处理哲学（与 Java 受检异常/Spring 统一异常对照）、隐式实现的接口契约。每处都给出可在 Node 里模拟运行的最小机制示例，便于没有 Go 环境也能体会模型差异。",
+      "prerequisites": [
+        "fs-ch09",
+        "fs-ch14"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "gin-gonic/gin",
+          "gofiber/fiber",
+          "golang/go",
+          "spring-projects/spring-framework"
+        ],
+        "github_stars": [
+          89445,
+          40232,
+          139482,
+          60300
+        ],
+        "github_notes": [
+          "按本章小节定位相关目录",
+          "按本章小节定位相关目录",
+          "按本章小节定位相关目录",
+          "按本章小节定位相关目录"
+        ],
+        "github_fetched_at": "2026-10-27",
+        "books": [
+          "Alan Donovan《The Go Programming Language》第 8、9 章（goroutine、channel）—— 对应 §1",
+          "《Go in Action》第 3、4 章（并发与通道）—— 对应 §1.2、§1.3",
+          "Go 官方《Effective Go》—— 对应 §3.1 error 作为值、§3.2 panic"
+        ],
+        "leetcode": [],
+        "nowcoder": [],
+        "bilibili": "",
+        "bilibili_list": []
       }
     },
     {
       "id": "fs-ch04",
-      "order": 4,
+      "order": 11,
       "group": "L4",
       "title": "Node.js 与后端 API",
       "summary": "Node 运行时与事件循环；CommonJS/ESM 模块；HTTP 服务；Express/Koa 路由与中间件；错误处理；环境变量与配置。",
       "prerequisites": [
-        "fs-ch02"
+        "fs-ch02",
+        "java-ch01"
       ],
       "status": "complete",
       "resources": {
@@ -139,7 +512,7 @@
         ],
         "github_stars": [
           196855,
-          129326,
+          129352,
           44008
         ],
         "github_notes": [
@@ -147,22 +520,53 @@
           "短小精悍的 JS/CSS/HTML 代码片段集，覆盖日常前端技巧",
           "前端面试手册：HTML/CSS/JS/浏览器/性能"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《Node.js 设计模式（第3版）》"
+          "《JavaScript 高级程序设计（第 4 版）》Zakas",
+          "《深入浅出 Node.js》朴灵",
+          "《CSS 世界》张鑫旭"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1YW411T7GX/",
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · JavaScript 基础与实战",
+            "url": "https://www.bilibili.com/video/BV1YW411T7GX/",
+            "note": "主线：语法与类型 → 函数与作用域 → 原型与 this → DOM/BOM → ES6+ → 异步与 Promise",
+            "bv": "BV1YW411T7GX"
+          },
+          {
+            "name": "黑马程序员 · AJAX + Node.js + webpack",
+            "url": "https://www.bilibili.com/video/BV1MN411y7pw/",
+            "note": "前后端怎么接上：HTTP 请求、跨域、接口约定、打包构建",
+            "bv": "BV1MN411y7pw"
+          },
+          {
+            "name": "黑马程序员 · React 零基础到实战",
+            "url": "https://www.bilibili.com/video/BV1gh411U7JD/",
+            "note": "组件与 props/state、Hooks 的依赖数组、路由与状态管理，最后落到一个完整项目",
+            "bv": "BV1gh411U7JD"
+          },
+          {
+            "name": "HTML + CSS + JS + Vue 前端全套",
+            "url": "https://www.bilibili.com/video/BV1jj411P7Yp/",
+            "note": "补页面那一层：盒模型、Flex/Grid 布局、响应式；做「能看的界面」时按需查",
+            "bv": "BV1jj411P7Yp"
+          }
+        ]
       }
     },
     {
       "id": "fs-ch05",
-      "order": 5,
+      "order": 12,
       "group": "L5",
       "title": "数据库与 REST API 设计",
       "summary": "关系型与文档型数据库选型；SQL 基础与索引；ORM/ODM；RESTful 资源设计；请求校验与分页；API 文档（OpenAPI）。",
       "prerequisites": [
-        "fs-ch04"
+        "fs-ch04",
+        "db-ch01",
+        "db-ch02"
       ],
       "status": "complete",
       "resources": {
@@ -173,7 +577,7 @@
         ],
         "github_stars": [
           196855,
-          129326,
+          129352,
           44008
         ],
         "github_notes": [
@@ -181,23 +585,54 @@
           "短小精悍的 JS/CSS/HTML 代码片段集，覆盖日常前端技巧",
           "前端面试手册：HTML/CSS/JS/浏览器/性能"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《REST API 设计与实践》"
+          "《JavaScript 高级程序设计（第 4 版）》Zakas",
+          "《深入浅出 Node.js》朴灵",
+          "《CSS 世界》张鑫旭"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1YW411T7GX/",
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · JavaScript 基础与实战",
+            "url": "https://www.bilibili.com/video/BV1YW411T7GX/",
+            "note": "主线：语法与类型 → 函数与作用域 → 原型与 this → DOM/BOM → ES6+ → 异步与 Promise",
+            "bv": "BV1YW411T7GX"
+          },
+          {
+            "name": "黑马程序员 · React 零基础到实战",
+            "url": "https://www.bilibili.com/video/BV1gh411U7JD/",
+            "note": "组件与 props/state、Hooks 的依赖数组、路由与状态管理，最后落到一个完整项目",
+            "bv": "BV1gh411U7JD"
+          },
+          {
+            "name": "HTML + CSS + JS + Vue 前端全套",
+            "url": "https://www.bilibili.com/video/BV1jj411P7Yp/",
+            "note": "补页面那一层：盒模型、Flex/Grid 布局、响应式；做「能看的界面」时按需查",
+            "bv": "BV1jj411P7Yp"
+          },
+          {
+            "name": "黑马程序员 · AJAX + Node.js + webpack",
+            "url": "https://www.bilibili.com/video/BV1MN411y7pw/",
+            "note": "前后端怎么接上：HTTP 请求、跨域、接口约定、打包构建",
+            "bv": "BV1MN411y7pw"
+          }
+        ]
       }
     },
     {
       "id": "fs-ch06",
-      "order": 6,
+      "order": 13,
       "group": "L6",
       "title": "用户认证 / JWT / 鉴权",
       "summary": "会话与令牌机制；JWT 结构与签发校验；密码哈希（bcrypt）；中间件鉴权；OAuth2/第三方登录概览；CSRF/XSS 防护基础。",
       "prerequisites": [
         "fs-ch04",
-        "fs-ch05"
+        "fs-ch05",
+        "spring-ch05",
+        "mw-ch04"
       ],
       "status": "complete",
       "resources": {
@@ -208,7 +643,7 @@
         ],
         "github_stars": [
           196855,
-          129326,
+          129352,
           44008
         ],
         "github_notes": [
@@ -216,17 +651,46 @@
           "短小精悍的 JS/CSS/HTML 代码片段集，覆盖日常前端技巧",
           "前端面试手册：HTML/CSS/JS/浏览器/性能"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《Web 安全深度剖析》"
+          "《JavaScript 高级程序设计（第 4 版）》Zakas",
+          "《深入浅出 Node.js》朴灵",
+          "《CSS 世界》张鑫旭"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1YW411T7GX/",
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · JavaScript 基础与实战",
+            "url": "https://www.bilibili.com/video/BV1YW411T7GX/",
+            "note": "主线：语法与类型 → 函数与作用域 → 原型与 this → DOM/BOM → ES6+ → 异步与 Promise",
+            "bv": "BV1YW411T7GX"
+          },
+          {
+            "name": "黑马程序员 · React 零基础到实战",
+            "url": "https://www.bilibili.com/video/BV1gh411U7JD/",
+            "note": "组件与 props/state、Hooks 的依赖数组、路由与状态管理，最后落到一个完整项目",
+            "bv": "BV1gh411U7JD"
+          },
+          {
+            "name": "HTML + CSS + JS + Vue 前端全套",
+            "url": "https://www.bilibili.com/video/BV1jj411P7Yp/",
+            "note": "补页面那一层：盒模型、Flex/Grid 布局、响应式；做「能看的界面」时按需查",
+            "bv": "BV1jj411P7Yp"
+          },
+          {
+            "name": "黑马程序员 · AJAX + Node.js + webpack",
+            "url": "https://www.bilibili.com/video/BV1MN411y7pw/",
+            "note": "前后端怎么接上：HTTP 请求、跨域、接口约定、打包构建",
+            "bv": "BV1MN411y7pw"
+          }
+        ]
       }
     },
     {
       "id": "fs-ch07",
-      "order": 7,
+      "order": 14,
       "group": "L7",
       "title": "全栈项目实战（GitHub 资源驱动）",
       "summary": "综合运用前端框架 + Node 后端 + 数据库，完成一个完整全栈应用；组件/接口联调；状态管理与数据流转；以 GitHub 真实开源项目为参考范式。",
@@ -243,7 +707,7 @@
         ],
         "github_stars": [
           196855,
-          129326,
+          129352,
           44008
         ],
         "github_notes": [
@@ -251,22 +715,53 @@
           "短小精悍的 JS/CSS/HTML 代码片段集，覆盖日常前端技巧",
           "前端面试手册：HTML/CSS/JS/浏览器/性能"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《全栈开发实战》"
+          "《JavaScript 高级程序设计（第 4 版）》Zakas",
+          "《深入浅出 Node.js》朴灵",
+          "《CSS 世界》张鑫旭"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1YW411T7GX/",
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · JavaScript 基础与实战",
+            "url": "https://www.bilibili.com/video/BV1YW411T7GX/",
+            "note": "主线：语法与类型 → 函数与作用域 → 原型与 this → DOM/BOM → ES6+ → 异步与 Promise",
+            "bv": "BV1YW411T7GX"
+          },
+          {
+            "name": "黑马程序员 · React 零基础到实战",
+            "url": "https://www.bilibili.com/video/BV1gh411U7JD/",
+            "note": "组件与 props/state、Hooks 的依赖数组、路由与状态管理，最后落到一个完整项目",
+            "bv": "BV1gh411U7JD"
+          },
+          {
+            "name": "HTML + CSS + JS + Vue 前端全套",
+            "url": "https://www.bilibili.com/video/BV1jj411P7Yp/",
+            "note": "补页面那一层：盒模型、Flex/Grid 布局、响应式；做「能看的界面」时按需查",
+            "bv": "BV1jj411P7Yp"
+          },
+          {
+            "name": "黑马程序员 · AJAX + Node.js + webpack",
+            "url": "https://www.bilibili.com/video/BV1MN411y7pw/",
+            "note": "前后端怎么接上：HTTP 请求、跨域、接口约定、打包构建",
+            "bv": "BV1MN411y7pw"
+          }
+        ]
       }
     },
     {
       "id": "fs-ch08",
-      "order": 8,
+      "order": 15,
       "group": "L6",
       "title": "部署 / CI-CD / Docker",
       "summary": "Linux 与 SSH 基础；Docker 镜像与容器；Docker Compose 编排；GitHub Actions 流水线；环境变量与日志；基础监控与回滚。",
       "prerequisites": [
-        "fs-ch04"
+        "fs-ch04",
+        "tool-ch05",
+        "tool-ch06"
       ],
       "status": "complete",
       "resources": {
@@ -277,7 +772,7 @@
         ],
         "github_stars": [
           196855,
-          129326,
+          129352,
           44008
         ],
         "github_notes": [
@@ -285,12 +780,41 @@
           "短小精悍的 JS/CSS/HTML 代码片段集，覆盖日常前端技巧",
           "前端面试手册：HTML/CSS/JS/浏览器/性能"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《Docker 深入浅出》"
+          "《JavaScript 高级程序设计（第 4 版）》Zakas",
+          "《深入浅出 Node.js》朴灵",
+          "《CSS 世界》张鑫旭"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1YW411T7GX/",
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · JavaScript 基础与实战",
+            "url": "https://www.bilibili.com/video/BV1YW411T7GX/",
+            "note": "主线：语法与类型 → 函数与作用域 → 原型与 this → DOM/BOM → ES6+ → 异步与 Promise",
+            "bv": "BV1YW411T7GX"
+          },
+          {
+            "name": "黑马程序员 · AJAX + Node.js + webpack",
+            "url": "https://www.bilibili.com/video/BV1MN411y7pw/",
+            "note": "前后端怎么接上：HTTP 请求、跨域、接口约定、打包构建",
+            "bv": "BV1MN411y7pw"
+          },
+          {
+            "name": "黑马程序员 · React 零基础到实战",
+            "url": "https://www.bilibili.com/video/BV1gh411U7JD/",
+            "note": "组件与 props/state、Hooks 的依赖数组、路由与状态管理，最后落到一个完整项目",
+            "bv": "BV1gh411U7JD"
+          },
+          {
+            "name": "HTML + CSS + JS + Vue 前端全套",
+            "url": "https://www.bilibili.com/video/BV1jj411P7Yp/",
+            "note": "补页面那一层：盒模型、Flex/Grid 布局、响应式；做「能看的界面」时按需查",
+            "bv": "BV1jj411P7Yp"
+          }
+        ]
       }
     }
   ],

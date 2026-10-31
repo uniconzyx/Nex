@@ -1,0 +1,8 @@
+{
+  "title": "任务 schema 模板渲染：system/user 占位符填充",
+  "code_lang": "python",
+  "code_std": "3.11",
+  "stdin": "",
+  "expected_output": "system: 你是一个严谨的助手，专注于机器学习。\nuser: 问题：什么是过拟合？\n请给出分点的答案。",
+  "code": "SYSTEM_TMPL = \"你是一个{tone}的助手，专注于{domain}。\"\nUSER_TMPL = \"问题：{question}\\n请给出{format}的答案。\"\n\nsample = {\n    \"tone\": \"严谨\",\n    \"domain\": \"机器学习\",\n    \"question\": \"什么是过拟合？\",\n    \"format\": \"分点\",\n}\nmessages = [\n    {\"role\": \"system\", \"content\": SYSTEM_TMPL.format(**sample)},\n    {\"role\": \"user\", \"content\": USER_TMPL.format(**sample)},\n]\nfor m in messages:\n    print(f\"{m['role']}: {m['content']}\")\n"
+}

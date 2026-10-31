@@ -56,7 +56,8 @@
   "groups": {
     "C1": "课程一 · 监督学习：回归与分类",
     "C2": "课程二 · 高级学习算法",
-    "C3": "课程三 · 无监督、推荐与强化学习"
+    "C3": "课程三 · 无监督、推荐与强化学习",
+    "C4": "课程四 · 从经典 ML 到深度学习的桥（本项目补充）"
   },
   "chapters": [
     {
@@ -82,10 +83,10 @@
           "apachecn/AiLearning"
         ],
         "github_stars": [
-          49786,
-          67840,
-          26132,
-          42601
+          49828,
+          67957,
+          26146,
+          42609
         ],
         "github_notes": [
           "生产级 ML 全流程：数据校验→训练→部署→监控，用来对照「课程里的玩具流程」与真实工程",
@@ -93,11 +94,41 @@
           "西瓜书公式推导详解，补课程里跳过推导的部分",
           "《机器学习实战》中文笔记：经典算法的可运行实现"
         ],
-        "github_fetched_at": "2026-10-21",
+        "github_fetched_at": "2026-10-27",
         "bilibili": "https://www.bilibili.com/video/BV164411b7dx/",
-        "books": [],
+        "books": [
+          "《机器学习》周志华 第1-2章（假设空间、归纳偏好、评估）",
+          "《统计学习方法》李航 第1章（统计学习三要素）",
+          "《The Elements of Statistical Learning》第2、7章（偏差-方差、模型复杂度）"
+        ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili_list": [
+          {
+            "name": "吴恩达 · 机器学习系列（中英字幕）",
+            "url": "https://www.bilibili.com/video/BV164411b7dx/",
+            "note": "主干课：线性/逻辑回归 → 神经网络 → 评估与调优 → 聚类与降维 → 推荐与强化学习",
+            "bv": "BV164411b7dx"
+          },
+          {
+            "name": "李宏毅 · 机器学习 2021",
+            "url": "https://www.bilibili.com/video/BV1JA411c7VT/",
+            "note": "补「为什么」：偏差方差分解、梯度下降的失效模式、注意力与自监督；讲法比教科书更直观",
+            "bv": "BV1JA411c7VT"
+          },
+          {
+            "name": "白板推导系列（机器学习 1~33）",
+            "url": "https://www.bilibili.com/video/BV1aE411o7qd/",
+            "note": "从概率视角把每个模型重新推一遍：极大似然、EM、变分推断、SVM 对偶。公式卡住时看它",
+            "bv": "BV1aE411o7qd"
+          },
+          {
+            "name": "白板推导 · 支持向量机 SVM 专题",
+            "url": "https://www.bilibili.com/video/BV1Hs411w7ci/",
+            "note": "SVM 专讲：间隔最大化 → 拉格朗日对偶 → KKT → 核技巧，正好对应 SVM 整章的推导链",
+            "bv": "BV1Hs411w7ci"
+          }
+        ]
       }
     },
     {
@@ -125,10 +156,10 @@
           "amueller/introduction_to_ml_with_python"
         ],
         "github_stars": [
-          67840,
+          67957,
           19606,
           12659,
-          8220
+          8224
         ],
         "github_notes": [
           "linear_model 模块：闭式解、正则化与求解器选择的参考实现",
@@ -136,11 +167,41 @@
           "算法手写 + sklearn 对照，适合核对公式与实现",
           "scikit-learn 作者写的入门书代码：讲清 API 背后的取舍"
         ],
-        "github_fetched_at": "2026-10-21",
+        "github_fetched_at": "2026-10-27",
         "bilibili": "https://www.bilibili.com/video/BV164411b7dx/",
-        "books": [],
+        "books": [
+          "《统计学习方法》李航 第6章（逻辑回归与最大熵）",
+          "《The Elements of Statistical Learning》第3章（最小二乘与岭回归）",
+          "《机器学习》周志华 第3章（线性模型）"
+        ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili_list": [
+          {
+            "name": "吴恩达 · 机器学习系列（中英字幕）",
+            "url": "https://www.bilibili.com/video/BV164411b7dx/",
+            "note": "主干课：线性/逻辑回归 → 神经网络 → 评估与调优 → 聚类与降维 → 推荐与强化学习",
+            "bv": "BV164411b7dx"
+          },
+          {
+            "name": "白板推导系列（机器学习 1~33）",
+            "url": "https://www.bilibili.com/video/BV1aE411o7qd/",
+            "note": "从概率视角把每个模型重新推一遍：极大似然、EM、变分推断、SVM 对偶。公式卡住时看它",
+            "bv": "BV1aE411o7qd"
+          },
+          {
+            "name": "李宏毅 · 机器学习 2021",
+            "url": "https://www.bilibili.com/video/BV1JA411c7VT/",
+            "note": "补「为什么」：偏差方差分解、梯度下降的失效模式、注意力与自监督；讲法比教科书更直观",
+            "bv": "BV1JA411c7VT"
+          },
+          {
+            "name": "李航《统计学习方法》啃书指导",
+            "url": "https://www.bilibili.com/video/BV1i4411G7Xv/",
+            "note": "按书章节带读：感知机、kNN、朴素贝叶斯、决策树、SVM、提升方法，配考研/面试视角的重点标注",
+            "bv": "BV1i4411G7Xv"
+          }
+        ]
       }
     },
     {
@@ -167,20 +228,50 @@
           "GokuMohandas/Made-With-ML"
         ],
         "github_stars": [
-          201154,
-          91642,
-          49786
+          201297,
+          91785,
+          49828
         ],
         "github_notes": [
           "吴恩达课程用 TensorFlow 演示；看 Keras 层的实现与自动微分",
           "微软 12 周 ML 课程，含神经网络与分类的配套 Notebook",
           "把「训练一个网络」放进完整工程链路里看"
         ],
-        "github_fetched_at": "2026-10-21",
+        "github_fetched_at": "2026-10-27",
         "bilibili": "https://www.bilibili.com/video/BV164411b7dx/",
-        "books": [],
+        "books": [
+          "《机器学习》周志华 第5章（神经网络）",
+          "《深度学习》Goodfellow 第6章（反向传播）——仅第 6 章，其余归 ai 学科",
+          "吴恩达课程二 W1-W2 的配套笔记"
+        ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili_list": [
+          {
+            "name": "吴恩达 · 机器学习系列（中英字幕）",
+            "url": "https://www.bilibili.com/video/BV164411b7dx/",
+            "note": "主干课：线性/逻辑回归 → 神经网络 → 评估与调优 → 聚类与降维 → 推荐与强化学习",
+            "bv": "BV164411b7dx"
+          },
+          {
+            "name": "李宏毅 · 机器学习 2021",
+            "url": "https://www.bilibili.com/video/BV1JA411c7VT/",
+            "note": "补「为什么」：偏差方差分解、梯度下降的失效模式、注意力与自监督；讲法比教科书更直观",
+            "bv": "BV1JA411c7VT"
+          },
+          {
+            "name": "李航《统计学习方法》啃书指导",
+            "url": "https://www.bilibili.com/video/BV1i4411G7Xv/",
+            "note": "按书章节带读：感知机、kNN、朴素贝叶斯、决策树、SVM、提升方法，配考研/面试视角的重点标注",
+            "bv": "BV1i4411G7Xv"
+          },
+          {
+            "name": "白板推导系列（机器学习 1~33）",
+            "url": "https://www.bilibili.com/video/BV1aE411o7qd/",
+            "note": "从概率视角把每个模型重新推一遍：极大似然、EM、变分推断、SVM 对偶。公式卡住时看它",
+            "bv": "BV1aE411o7qd"
+          }
+        ]
       }
     },
     {
@@ -209,8 +300,8 @@
           "shap/shap"
         ],
         "github_stars": [
-          67840,
-          49786,
+          67957,
+          49828,
           14945,
           25823
         ],
@@ -220,11 +311,41 @@
           "贝叶斯超参搜索：比手工网格更接近「应用建议」的自动化版本",
           "特征重要性的可解释替代，避免只看树模型 importance"
         ],
-        "github_fetched_at": "2026-10-21",
+        "github_fetched_at": "2026-10-27",
         "bilibili": "https://www.bilibili.com/video/BV164411b7dx/",
-        "books": [],
+        "books": [
+          "《机器学习》周志华 第2章（评估方法、性能度量、比较检验）",
+          "《The Elements of Statistical Learning》第7章（模型评估与选择）",
+          "《Designing Machine Learning Systems》Chip Huyen 第8章（误差分析与上线）"
+        ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili_list": [
+          {
+            "name": "吴恩达 · 机器学习系列（中英字幕）",
+            "url": "https://www.bilibili.com/video/BV164411b7dx/",
+            "note": "主干课：线性/逻辑回归 → 神经网络 → 评估与调优 → 聚类与降维 → 推荐与强化学习",
+            "bv": "BV164411b7dx"
+          },
+          {
+            "name": "李宏毅 · 机器学习 2021",
+            "url": "https://www.bilibili.com/video/BV1JA411c7VT/",
+            "note": "补「为什么」：偏差方差分解、梯度下降的失效模式、注意力与自监督；讲法比教科书更直观",
+            "bv": "BV1JA411c7VT"
+          },
+          {
+            "name": "白板推导系列（机器学习 1~33）",
+            "url": "https://www.bilibili.com/video/BV1aE411o7qd/",
+            "note": "从概率视角把每个模型重新推一遍：极大似然、EM、变分推断、SVM 对偶。公式卡住时看它",
+            "bv": "BV1aE411o7qd"
+          },
+          {
+            "name": "白板推导 · 支持向量机 SVM 专题",
+            "url": "https://www.bilibili.com/video/BV1Hs411w7ci/",
+            "note": "SVM 专讲：间隔最大化 → 拉格朗日对偶 → KKT → 核技巧，正好对应 SVM 整章的推导链",
+            "bv": "BV1Hs411w7ci"
+          }
+        ]
       }
     },
     {
@@ -252,10 +373,10 @@
           "catboost/catboost"
         ],
         "github_stars": [
-          28895,
+          28916,
           25823,
           18897,
-          9155
+          9178
         ],
         "github_notes": [
           "课程 W4 直接讲到 XGBoost；这里看二阶泰勒与分裂增益的权威实现",
@@ -263,11 +384,41 @@
           "直方图分箱 + leaf-wise + GOSS/EFB，大规模数据的工程解法",
           "有序目标统计解决类别特征泄漏"
         ],
-        "github_fetched_at": "2026-10-21",
+        "github_fetched_at": "2026-10-27",
         "bilibili": "https://www.bilibili.com/video/BV164411b7dx/",
-        "books": [],
+        "books": [
+          "《机器学习》周志华 第4章（决策树）、第8章（集成学习）",
+          "《The Elements of Statistical Learning》第9-10章（树、Boosting）",
+          "XGBoost 论文：Chen & Guestrin, 2016"
+        ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili_list": [
+          {
+            "name": "吴恩达 · 机器学习系列（中英字幕）",
+            "url": "https://www.bilibili.com/video/BV164411b7dx/",
+            "note": "主干课：线性/逻辑回归 → 神经网络 → 评估与调优 → 聚类与降维 → 推荐与强化学习",
+            "bv": "BV164411b7dx"
+          },
+          {
+            "name": "李宏毅 · 机器学习 2021",
+            "url": "https://www.bilibili.com/video/BV1JA411c7VT/",
+            "note": "补「为什么」：偏差方差分解、梯度下降的失效模式、注意力与自监督；讲法比教科书更直观",
+            "bv": "BV1JA411c7VT"
+          },
+          {
+            "name": "李航《统计学习方法》啃书指导",
+            "url": "https://www.bilibili.com/video/BV1i4411G7Xv/",
+            "note": "按书章节带读：感知机、kNN、朴素贝叶斯、决策树、SVM、提升方法，配考研/面试视角的重点标注",
+            "bv": "BV1i4411G7Xv"
+          },
+          {
+            "name": "白板推导系列（机器学习 1~33）",
+            "url": "https://www.bilibili.com/video/BV1aE411o7qd/",
+            "note": "从概率视角把每个模型重新推一遍：极大似然、EM、变分推断、SVM 对偶。公式卡住时看它",
+            "bv": "BV1aE411o7qd"
+          }
+        ]
       }
     },
     {
@@ -294,20 +445,50 @@
           "amueller/introduction_to_ml_with_python"
         ],
         "github_stars": [
-          67840,
-          50114,
-          8220
+          67957,
+          50229,
+          8224
         ],
         "github_notes": [
           "cluster / covariance 模块：K-means、DBSCAN、GMM、异常检测",
           "《Python 数据科学手册》：聚类与密度估计的可视化讲解",
           "无监督方法的实际使用边界与常见误用"
         ],
-        "github_fetched_at": "2026-10-21",
+        "github_fetched_at": "2026-10-27",
         "bilibili": "https://www.bilibili.com/video/BV164411b7dx/",
-        "books": [],
+        "books": [
+          "《机器学习》周志华 第9章（聚类）",
+          "《统计学习方法》李航 第9章（EM 算法）",
+          "《Pattern Recognition and Machine Learning》第9章（混合模型与 EM）"
+        ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili_list": [
+          {
+            "name": "吴恩达 · 机器学习系列（中英字幕）",
+            "url": "https://www.bilibili.com/video/BV164411b7dx/",
+            "note": "主干课：线性/逻辑回归 → 神经网络 → 评估与调优 → 聚类与降维 → 推荐与强化学习",
+            "bv": "BV164411b7dx"
+          },
+          {
+            "name": "白板推导系列（机器学习 1~33）",
+            "url": "https://www.bilibili.com/video/BV1aE411o7qd/",
+            "note": "从概率视角把每个模型重新推一遍：极大似然、EM、变分推断、SVM 对偶。公式卡住时看它",
+            "bv": "BV1aE411o7qd"
+          },
+          {
+            "name": "李宏毅 · 机器学习 2021",
+            "url": "https://www.bilibili.com/video/BV1JA411c7VT/",
+            "note": "补「为什么」：偏差方差分解、梯度下降的失效模式、注意力与自监督；讲法比教科书更直观",
+            "bv": "BV1JA411c7VT"
+          },
+          {
+            "name": "李航《统计学习方法》啃书指导",
+            "url": "https://www.bilibili.com/video/BV1i4411G7Xv/",
+            "note": "按书章节带读：感知机、kNN、朴素贝叶斯、决策树、SVM、提升方法，配考研/面试视角的重点标注",
+            "bv": "BV1i4411G7Xv"
+          }
+        ]
       }
     },
     {
@@ -336,19 +517,49 @@
         ],
         "github_stars": [
           21959,
-          4589,
-          30664
+          4600,
+          30732
         ],
         "github_notes": [
           "微软推荐系统最佳实践：召回-排序-评测的完整链路",
           "统一推荐算法框架：100+ 模型的公平对比基线",
           "工业界推荐/搜索落地案例与经验教训"
         ],
-        "github_fetched_at": "2026-10-21",
+        "github_fetched_at": "2026-10-27",
         "bilibili": "https://www.bilibili.com/video/BV164411b7dx/",
-        "books": [],
+        "books": [
+          "《推荐系统实践》项亮（协同过滤与评测）",
+          "《深度学习推荐系统》王喆（召回-排序-工程链路）",
+          "吴恩达课程三 W2 的配套笔记"
+        ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili_list": [
+          {
+            "name": "吴恩达 · 机器学习系列（中英字幕）",
+            "url": "https://www.bilibili.com/video/BV164411b7dx/",
+            "note": "主干课：线性/逻辑回归 → 神经网络 → 评估与调优 → 聚类与降维 → 推荐与强化学习",
+            "bv": "BV164411b7dx"
+          },
+          {
+            "name": "李航《统计学习方法》啃书指导",
+            "url": "https://www.bilibili.com/video/BV1i4411G7Xv/",
+            "note": "按书章节带读：感知机、kNN、朴素贝叶斯、决策树、SVM、提升方法，配考研/面试视角的重点标注",
+            "bv": "BV1i4411G7Xv"
+          },
+          {
+            "name": "李宏毅 · 机器学习 2021",
+            "url": "https://www.bilibili.com/video/BV1JA411c7VT/",
+            "note": "补「为什么」：偏差方差分解、梯度下降的失效模式、注意力与自监督；讲法比教科书更直观",
+            "bv": "BV1JA411c7VT"
+          },
+          {
+            "name": "白板推导系列（机器学习 1~33）",
+            "url": "https://www.bilibili.com/video/BV1aE411o7qd/",
+            "note": "从概率视角把每个模型重新推一遍：极大似然、EM、变分推断、SVM 对偶。公式卡住时看它",
+            "bv": "BV1aE411o7qd"
+          }
+        ]
       }
     },
     {
@@ -375,20 +586,123 @@
           "Farama-Foundation/Gymnasium"
         ],
         "github_stars": [
-          22153,
+          22165,
           44096,
-          12704
+          12738
         ],
         "github_notes": [
           "经典 RL 算法的 Notebook 实现：Q-learning、策略迭代、价值迭代",
           "RLlib：从单机 Q-learning 到分布式 RL 的工程路径",
           "课程 W3 的 Lunar Lander 就是 Gym 环境；看 env 接口与环境设计"
         ],
-        "github_fetched_at": "2026-10-21",
+        "github_fetched_at": "2026-10-27",
         "bilibili": "https://www.bilibili.com/video/BV164411b7dx/",
-        "books": [],
+        "books": [
+          "《Reinforcement Learning: An Introduction》Sutton & Barto 第3、6章",
+          "吴恩达课程三 W3 的配套笔记",
+          "David Silver 的 RL 课程讲义（UCL）"
+        ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili_list": [
+          {
+            "name": "吴恩达 · 机器学习系列（中英字幕）",
+            "url": "https://www.bilibili.com/video/BV164411b7dx/",
+            "note": "主干课：线性/逻辑回归 → 神经网络 → 评估与调优 → 聚类与降维 → 推荐与强化学习",
+            "bv": "BV164411b7dx"
+          },
+          {
+            "name": "李航《统计学习方法》啃书指导",
+            "url": "https://www.bilibili.com/video/BV1i4411G7Xv/",
+            "note": "按书章节带读：感知机、kNN、朴素贝叶斯、决策树、SVM、提升方法，配考研/面试视角的重点标注",
+            "bv": "BV1i4411G7Xv"
+          },
+          {
+            "name": "李宏毅 · 机器学习 2021",
+            "url": "https://www.bilibili.com/video/BV1JA411c7VT/",
+            "note": "补「为什么」：偏差方差分解、梯度下降的失效模式、注意力与自监督；讲法比教科书更直观",
+            "bv": "BV1JA411c7VT"
+          },
+          {
+            "name": "白板推导系列（机器学习 1~33）",
+            "url": "https://www.bilibili.com/video/BV1aE411o7qd/",
+            "note": "从概率视角把每个模型重新推一遍：极大似然、EM、变分推断、SVM 对偶。公式卡住时看它",
+            "bv": "BV1aE411o7qd"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ml-ch09",
+      "order": 9,
+      "group": "C4",
+      "course": "课程四 · 从经典 ML 到深度学习的桥（本项目补充）",
+      "week": "第 4 周",
+      "title": "支持向量机与核方法：最大间隔、对偶与核技巧",
+      "summary": "补齐「经典 ML」到「核方法」这一段缺失的链：几何间隔与函数间隔的尺度规范化、$2/\\|w\\|$ 的经济学解释、软间隔的两种等价写法（松弛变量 vs hinge 损失）、$C$ 作为「违规单价」而非正则强度、拉格朗日对偶三式与 KKT 三类支持向量、核技巧的前提是「对偶只含内积」、Mercer 条件与 Gram 半正定、RBF 的无限维与高维距离集中、SMO 的双变量闭式更新与裁剪、OvO/OvR 的默认行为、Platt scaling 与 proper scoring rule。**与 ai-ch09/ai-ch10 的边界**：本章只谈「凸优化 + 核」这一支，深度模型不在此展开。",
+      "prerequisites": [
+        "ml-ch02"
+      ],
+      "books": [
+        "《统计学习方法（第 2 版）》李航 第 7 章（支持向量机）",
+        "《The Elements of Statistical Learning》第 12 章（支持向量机与灵活判别）",
+        "《Learning with Kernels》Schölkopf & Smola（核方法专著）"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "cjlin1/libsvm",
+          "cjlin1/liblinear",
+          "scikit-learn/scikit-learn",
+          "fengdu78/lihang-code"
+        ],
+        "github_stars": [
+          4716,
+          1052,
+          67957,
+          19606
+        ],
+        "github_notes": [
+          "SMO 官方实现：`svm.cpp` 的 `Solver::Solve` 与 `select_working_set` 就是本章 ex07/ex08 的工程版",
+          "坐标下降的线性 SVM：`n` 大且不核化时的正确选择，看它如何处理原始形式",
+          "`sklearn/svm/` 的封装层：确认 `SVC` 默认 OvO、`LinearSVC` 默认 OvR、`probability=True` 内部 5 折 Platt",
+          "《统计学习方法》第 7 章代码：教学版 SMO，可与本章推导逐行对照"
+        ],
+        "github_fetched_at": "2026-10-27",
+        "books": [
+          "《统计学习方法（第 2 版）》李航 第 7 章（支持向量机）",
+          "《The Elements of Statistical Learning》第 12 章（支持向量机与灵活判别）",
+          "《Learning with Kernels》Schölkopf & Smola（核方法专著）"
+        ],
+        "leetcode": [],
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV164411b7dx/",
+        "bilibili_list": [
+          {
+            "name": "吴恩达 · 机器学习系列（中英字幕）",
+            "url": "https://www.bilibili.com/video/BV164411b7dx/",
+            "note": "主干课：线性/逻辑回归 → 神经网络 → 评估与调优 → 聚类与降维 → 推荐与强化学习",
+            "bv": "BV164411b7dx"
+          },
+          {
+            "name": "白板推导 · 支持向量机 SVM 专题",
+            "url": "https://www.bilibili.com/video/BV1Hs411w7ci/",
+            "note": "SVM 专讲：间隔最大化 → 拉格朗日对偶 → KKT → 核技巧，正好对应 SVM 整章的推导链",
+            "bv": "BV1Hs411w7ci"
+          },
+          {
+            "name": "白板推导系列（机器学习 1~33）",
+            "url": "https://www.bilibili.com/video/BV1aE411o7qd/",
+            "note": "从概率视角把每个模型重新推一遍：极大似然、EM、变分推断、SVM 对偶。公式卡住时看它",
+            "bv": "BV1aE411o7qd"
+          },
+          {
+            "name": "李航《统计学习方法》啃书指导",
+            "url": "https://www.bilibili.com/video/BV1i4411G7Xv/",
+            "note": "按书章节带读：感知机、kNN、朴素贝叶斯、决策树、SVM、提升方法，配考研/面试视角的重点标注",
+            "bv": "BV1i4411G7Xv"
+          }
+        ]
       }
     }
   ],

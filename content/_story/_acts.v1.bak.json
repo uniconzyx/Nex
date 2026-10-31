@@ -1,0 +1,469 @@
+{
+  "version": 1,
+  "note": "141 幕旁白源文件。tone: pitfall=错误认知自述(未完成可预告) / archive=旁观记录(必须完成后才显示)。line 不含书名引号，由 UI 负责排版。anchor 指向该章 goals.md 的认知点，改内容时须同步核对。",
+  "subjects": {
+    "ai": {
+      "label": "AI · Agent 开发",
+      "acts": [
+        {
+          "id": "ai-a1",
+          "group": "Agent 开发",
+          "title": "从岗位到接口：把「会用」变成「能交付」",
+          "chapters": [
+            { "id": "agent-ch01", "tone": "pitfall", "line": "我背了一堆模型名，JD 上问的是「你做过哪一层的成本账」。", "anchor": "goals-1 产业链四层与毛利" },
+            { "id": "agent-ch02", "tone": "pitfall", "line": "提示词越写越长，输出还是时好时坏。我没给它接口，只给了它期望。", "anchor": "goals-1 四段式模板" },
+            { "id": "agent-ch03", "tone": "pitfall", "line": "我第一次接模型只写了 model 和 messages。上生产那天，超时、限流、跨包 SSE 一起来了。", "anchor": "goals-1/2 客户端与流式解析" },
+            { "id": "agent-ch04", "tone": "archive", "line": "「让 AI 更智能」不是需求。需求是能被写进验收条件的那句话。", "anchor": "goals-1 可验收用户故事" }
+          ]
+        },
+        {
+          "id": "ai-a2",
+          "group": "Agent 开发",
+          "title": "瓶颈不在模型：检索、显存、数据与那条前向链路",
+          "chapters": [
+            { "id": "agent-ch05", "tone": "pitfall", "line": "召回率 90%，答案还是错的。我一直在调提示词，没人告诉我错在上游。", "anchor": "goals-1 检索决定上限" },
+            { "id": "agent-ch06", "tone": "pitfall", "line": "24G 单卡能不能跑 14B？我拍脑袋说能，然后被 KV Cache 的账打了脸。", "anchor": "goals-1 显存四拆" },
+            { "id": "agent-ch07", "tone": "pitfall", "line": "我先上了微调，后来才发现我要的只是更新知识——那本该交给 RAG。", "anchor": "goals-1 该不该微调决策表" },
+            { "id": "agent-ch08", "tone": "archive", "line": "能背出注意力公式，和能从 token 一路画到 logits，中间隔着一整条链路。", "anchor": "goals-1 完整前向链路" }
+          ]
+        },
+        {
+          "id": "ai-a3",
+          "group": "Agent 开发",
+          "title": "从感觉到数字：多模态的成本、评估的口径、Agent 的边界",
+          "chapters": [
+            { "id": "agent-ch09", "tone": "pitfall", "line": "一张发票我先想的是「喂给模型」，没想到先算它会占多少 token。", "anchor": "goals-1 视觉 token 账本" },
+            { "id": "agent-ch10", "tone": "pitfall", "line": "上线前我们说「效果不错」。上线后没人能证明它比上周好。", "anchor": "goals-1 黄金集与三层指标" },
+            { "id": "agent-ch11", "tone": "pitfall", "line": "循环跑飞了三次。我以为是模型笨，其实是我没给它一个能判定的终止条件。", "anchor": "goals-1 三要素" },
+            { "id": "agent-ch12", "tone": "archive", "line": "按席位收费很爽，直到重度用户的推理成本吃掉了他全年订阅。", "anchor": "goals-1 三种计费的毛利" }
+          ]
+        },
+        {
+          "id": "ai-a4",
+          "group": "Agent 开发",
+          "title": "把做过的事，讲成别人愿意付钱的证据",
+          "chapters": [
+            { "id": "agent-ch13", "tone": "pitfall", "line": "我一年读了 200 篇论文，一篇都没跑过。收藏夹不算知识。", "anchor": "goals-4 复现最小闭环" },
+            { "id": "agent-ch14", "tone": "pitfall", "line": "简历写「熟悉大模型」。面试官问：哪个模型、多熟、怎么证明。", "anchor": "goals-1 四维五级能力矩阵" },
+            { "id": "agent-ch15", "tone": "pitfall", "line": "我把最难的部分先做了。三周后 demo 能跑，但没人愿意点第二次。", "anchor": "goals-2 先跑通最简方案" },
+            { "id": "agent-ch16", "tone": "archive", "line": "项目我能讲十分钟，讲不到「你做的决定导致了什么数字变化」。", "anchor": "goals-1 STAR-R 证据清单" }
+          ]
+        },
+        {
+          "id": "ai-a5",
+          "group": "大模型原理",
+          "title": "从梯度到接口：原理被压缩成一行 API 之前的样子",
+          "chapters": [
+            { "id": "ai-ch01", "tone": "pitfall", "line": "我以为反向传播就是链式法则。直到有人问：为什么它只要一次前向的代价。", "anchor": "goals-1 反向模式自动微分" },
+            { "id": "ai-ch02", "tone": "pitfall", "line": "3×3 卷积、64 通道，我答不出这层参数量。而面试第一问就是这个。", "anchor": "goals-2 参数量与感受野" },
+            { "id": "ai-ch03", "tone": "pitfall", "line": "我能默写 QKV，却说不出为什么除以根号 d_k。后来发现，那是个方差问题。", "anchor": "goals-1 缩放的必要性" },
+            { "id": "ai-ch04", "tone": "pitfall", "line": "rank 从 8 调到 64，效果没动。我调的不是容量，是我不理解的旋钮。", "anchor": "goals-2 LoRA 的 rank 与 alpha" },
+            { "id": "ai-ch05", "tone": "archive", "line": "提示词不是咒语。措辞、示例、结构、上下文，四件事各有各的价钱。", "anchor": "goals-1 可度量的四件事" }
+          ]
+        },
+        {
+          "id": "ai-a6",
+          "group": "大模型原理",
+          "title": "把模型装进系统：检索、循环、延迟、显存",
+          "chapters": [
+            { "id": "ai-ch06", "tone": "pitfall", "line": "余弦和内积，我当成两个指标比了一下午。归一化之后它们是同一个。", "anchor": "goals-2 相似度等价" },
+            { "id": "ai-ch07", "tone": "pitfall", "line": "能用确定性 DAG 写完的流程，我上了一个 Agent。它每次跑的结果都不一样。", "anchor": "goals-3 架构判据" },
+            { "id": "ai-ch08", "tone": "pitfall", "line": "用户说卡，我去优化模型。其实 TTFT 卡在 prefill，那是算力不是模型。", "anchor": "goals-1 两阶段延迟" },
+            { "id": "ai-ch09", "tone": "pitfall", "line": "我调了一周 GAN，loss 在抖，样本在崩。没人告诉我这是纳什均衡，不是梯度下降。", "anchor": "goals-3 最优判别器" },
+            { "id": "ai-ch10", "tone": "archive", "line": "7B 要几卡不是玄学：十六字节一参数，四个部分组成，加起来就是答案。", "anchor": "goals-4 训练显存口算" }
+          ]
+        },
+        {
+          "id": "ai-a7",
+          "group": "机器学习",
+          "title": "几何、代数、统计：同一件事的三种说法",
+          "chapters": [
+            { "id": "ml-ch01", "tone": "pitfall", "line": "训练高、验证也高，我以为是过拟合，去加了正则。方向正好反了。", "anchor": "goals-3 曲线诊断" },
+            { "id": "ml-ch02", "tone": "pitfall", "line": "L1 稀疏、L2 平滑，我背了三年。有人问我 L1 的等值线为什么是菱形，我愣住了。", "anchor": "goals-3 几何视角" },
+            { "id": "ml-ch03", "tone": "pitfall", "line": "多分类我用了 MSE。梯度照样能算，只是它不再指向我要的方向。", "anchor": "goals-2 损失与激活配对" },
+            { "id": "ml-ch04", "tone": "pitfall", "line": "准确率 98%，上线一塌糊涂。因为那 2% 里全是我想抓的人。", "anchor": "goals-4 业务代价选指标" },
+            { "id": "ml-ch05", "tone": "archive", "line": "树自己找分裂点，森林用方差公式投票。集成为什么有用，写成了 ρσ²+(1−ρ)σ²/B。", "anchor": "goals-4 Bagging 方差缩减" }
+          ]
+        },
+        {
+          "id": "ai-a8",
+          "group": "机器学习",
+          "title": "没有标签的时候，怎么知道学对了",
+          "chapters": [
+            { "id": "ml-ch06", "tone": "pitfall", "line": "K-means 把数据分成两簇：一簇是金额，一簇是时间。因为量纲差了一千倍。", "anchor": "goals-2 对尺度敏感" },
+            { "id": "ml-ch07", "tone": "pitfall", "line": "用户没点过，我把它当成 0 喂进回归。模型学会了「不存在的偏好」。", "anchor": "goals-4 隐式反馈换损失" },
+            { "id": "ml-ch08", "tone": "pitfall", "line": "Q-learning 的 target 里有一个 max。它让我高估了从没试过的动作。", "anchor": "goals-4 target 差异" },
+            { "id": "ml-ch09", "tone": "archive", "line": "最大间隔不是几何直觉，是一次尺度规范化；核技巧不是魔法，是对偶里只剩内积。", "anchor": "goals-1/4 规范化与核技巧" }
+          ]
+        }
+      ]
+    },
+
+    "cpp": {
+      "label": "C / C++",
+      "acts": [
+        {
+          "id": "cpp-a1",
+          "group": "C++",
+          "title": "从语法到内存：语言开始有重量",
+          "chapters": [
+            { "id": "cpp-ch01", "tone": "pitfall", "line": "我以为引用是语法糖里的指针。可它不能为空、不能重绑，也不能挪位置。", "anchor": "goals-2 引用与指针的区别" },
+            { "id": "cpp-ch02", "tone": "pitfall", "line": "重载决议我以为是按返回类型。它只看参数，返回类型根本不参与。", "anchor": "goals-3 重载决议规则" },
+            { "id": "cpp-ch03", "tone": "pitfall", "line": "sizeof(arr) 在 main 里是 40，在函数里变成 8。数组名一传参就退化了。", "anchor": "goals-1 数组退化" },
+            { "id": "cpp-ch04", "tone": "pitfall", "line": "delete 完还能读出原来的值，我就以为那块内存还归我。", "anchor": "goals-4 悬垂指针" },
+            { "id": "cpp-ch05", "tone": "archive", "line": "对象的一生只有两个确定时刻：构造开始，析构结束。中间那些拷贝，才是 bug 的入口。", "anchor": "goals-3 三/五法则" }
+          ]
+        },
+        {
+          "id": "cpp-a2",
+          "group": "C++",
+          "title": "抽象、容器与所有权：让别人能读懂",
+          "chapters": [
+            { "id": "cpp-ch06", "tone": "pitfall", "line": "基类构造函数里调虚函数，调到的还是基类版本。对象那时还没长成子类。", "anchor": "goals-2 构造/析构中不触发多态" },
+            { "id": "cpp-ch07", "tone": "pitfall", "line": "模板报错两百行，第一行才是我的错。可我每次都在最后一行找原因。", "anchor": "goals-3 两阶段查找" },
+            { "id": "cpp-ch08", "tone": "pitfall", "line": "我在循环里 push_back 一个指向 vector 元素的指针。扩容那次，它们一起悬空。", "anchor": "goals-1 扩容与迭代器失效" },
+            { "id": "cpp-ch09", "tone": "pitfall", "line": "比较器写成 <=，std::sort 在某些输入上读到了数组外面。它没崩，这才可怕。", "anchor": "goals-4 严格弱序" },
+            { "id": "cpp-ch10", "tone": "archive", "line": "C++ 没有 GC，但它有析构函数。这一章把「谁负责释放」钉进了一个花括号里。", "anchor": "goals-1 RAII 第一性" }
+          ]
+        },
+        {
+          "id": "cpp-a3",
+          "group": "C++",
+          "title": "从能跑到能改：工程的基本礼貌",
+          "chapters": [
+            { "id": "cpp-ch11", "tone": "pitfall", "line": "noexcept 我是随手加的。后来发现它决定了 vector 扩容时移动还是拷贝。", "anchor": "goals-4 noexcept 的影响" },
+            { "id": "cpp-ch12", "tone": "pitfall", "line": "std::move 之后我以为对象空了。它只是转成了右值，搬不搬看构造函数。", "anchor": "goals-2 移动语义本质" },
+            { "id": "cpp-ch13", "tone": "pitfall", "line": "cin 慢，我关了同步。它快了，但和 printf 混用就开始乱序。", "anchor": "goals-2 sync_with_stdio" },
+            { "id": "cpp-ch14", "tone": "pitfall", "line": "#define SQUARE(x) x*x，SQUARE(1+2) 得 5。它是文本替换，不是函数调用。", "anchor": "goals-3 宏的卫生问题" },
+            { "id": "cpp-ch15", "tone": "archive", "line": "同一个名字，在两个文件里可能指两个东西。作用域管查找，链接管归属。", "anchor": "goals-2 ADL" }
+          ]
+        },
+        {
+          "id": "cpp-a4",
+          "group": "C++",
+          "title": "并发、极限与交付：让它在真实负载下不死",
+          "chapters": [
+            { "id": "cpp-ch16", "tone": "pitfall", "line": "i++ 在多线程里丢了数。它明明是一行，编译出来是三条指令。", "anchor": "goals-2 数据竞争" },
+            { "id": "cpp-ch17", "tone": "pitfall", "line": "SFINAE 我抄了三年。直到写出一个替换失败却报错的版本，才懂它只是「不报错」。", "anchor": "goals-3 SFINAE" },
+            { "id": "cpp-ch18", "tone": "pitfall", "line": "sizeof 出来 24，我写的是 20。那 4 个字节，编译器替我做了决定。", "anchor": "goals-2 对齐与 padding" },
+            { "id": "cpp-ch19", "tone": "pitfall", "line": "target_link_libraries 写成 PUBLIC，一个依赖泄漏到所有下游。编得过，只是没人能单独用它。", "anchor": "goals-2 usage requirements" },
+            { "id": "cpp-ch20", "tone": "archive", "line": "自己写的 vector 扩容那一下，才让人相信前 19 章讲的是同一件事。", "anchor": "goals-1 造一遍 STL" }
+          ]
+        }
+      ]
+    },
+
+    "fundamentals": {
+      "label": "计算机基础（408）",
+      "acts": [
+        {
+          "id": "fund-a1",
+          "group": "数据结构",
+          "title": "连续、受限、分层、成环：四种底座",
+          "chapters": [
+            { "id": "fund-ch01", "tone": "pitfall", "line": "数组和链表都写 O(N)，实测差五倍。复杂度只算次数，不算缓存。", "anchor": "goals-3 渐进≠实测" },
+            { "id": "fund-ch02", "tone": "pitfall", "line": "函数能返回，是因为有人替你把返回地址压进了栈。栈不是数据结构，是硬件约定。", "anchor": "goals-4 栈帧" },
+            { "id": "fund-ch03", "tone": "pitfall", "line": "前中后序我背了三套模板。其实只有一件事在变：根什么时候被访问。", "anchor": "goals-4 访问根的时机" },
+            { "id": "fund-ch04", "tone": "archive", "line": "图和树只差一个字：环。所有图算法，都在处理那一条多余的边。", "anchor": "goals-2 DFS/BFS 是搜索序" }
+          ]
+        },
+        {
+          "id": "fund-a2",
+          "group": "数据结构 + 计组",
+          "title": "算法之下的硬件：为什么「一样快」的两种写法差五倍",
+          "chapters": [
+            { "id": "fund-ch05", "tone": "pitfall", "line": "ASL 我算了个平均值。成功和失败要分开算，权重也不一样。", "anchor": "goals-1 ASL 定义" },
+            { "id": "fund-ch06", "tone": "pitfall", "line": "快排最坏 O(n²)，我知道。可我的数据是预排序的，每次都挑到端点做枢轴。", "anchor": "goals-2 最坏情况与优化" },
+            { "id": "fund-ch07", "tone": "pitfall", "line": "0.1 + 0.2 != 0.3，我以为是语言的问题。它是 IEEE 754 的正确行为。", "anchor": "goals-3 浮点表示" },
+            { "id": "fund-ch08", "tone": "archive", "line": "CPU 一次搬 64 字节，你只要了 4 个。剩下 60 个，是缓存替你赌的下一步。", "anchor": "goals-1 局部性" }
+          ]
+        },
+        {
+          "id": "fund-a3",
+          "group": "操作系统 + 网络",
+          "title": "从上到下：一台机器怎么同时做很多事、怎么把字节送到对面",
+          "chapters": [
+            { "id": "fund-ch09", "tone": "pitfall", "line": "运行到阻塞是自己要的，阻塞到就绪是别人通知的，运行到就绪是被抢走的。", "anchor": "goals-2 状态转换判据" },
+            { "id": "fund-ch10", "tone": "pitfall", "line": "页表存在内存里，取一次数据要访两次存。所以 CPU 里还得再放一个 TLB。", "anchor": "goals-4 TLB 与 EAT" },
+            { "id": "fund-ch11", "tone": "pitfall", "line": "每层都加一个头。我一直以为那是开销，其实那是让下层不必知道上层在干什么。", "anchor": "goals-2 封装与分用" },
+            { "id": "fund-ch12", "tone": "archive", "line": "地址栏敲下回车，到页面亮起来那一刻，中间排着六次握手和一次渲染。", "anchor": "goals-2 一次请求全链路" }
+          ]
+        }
+      ]
+    },
+
+    "java": {
+      "label": "Java",
+      "acts": [
+        {
+          "id": "java-a1",
+          "group": "语言",
+          "title": "语法、对象、类型：Java 的三层地基",
+          "chapters": [
+            { "id": "java-ch01", "tone": "pitfall", "line": "public static void main 我敲了几百遍。没人告诉我四个词各在约束什么。", "anchor": "goals-2 固定签名约定" },
+            { "id": "java-ch02", "tone": "pitfall", "line": "Java 只有值传递。可我把对象传进去改了字段，它确实变了——变的是同一个堆对象。", "anchor": "goals-2 引用的副本" },
+            { "id": "java-ch03", "tone": "pitfall", "line": "父类引用指向子类对象：方法变了，字段没变。多态只在方法上。", "anchor": "goals-3 字段隐藏" },
+            { "id": "java-ch04", "tone": "pitfall", "line": "我把对象塞进 HashSet，再改它的字段，然后就再也 remove 不掉了。", "anchor": "goals-4 equals/hashCode 契约" },
+            { "id": "java-ch05", "tone": "archive", "line": "异常不是为了让你打印栈，是为了让「这一步可能失败」进入类型系统。", "anchor": "goals-1 受检异常契约" }
+          ]
+        },
+        {
+          "id": "java-a2",
+          "group": "运行时",
+          "title": "运行时：字节怎么流、线程怎么排、对象怎么活、依赖怎么来",
+          "chapters": [
+            { "id": "java-ch06", "tone": "pitfall", "line": "FileInputStream 读中文乱码。因为我把字节当成了字符。", "anchor": "goals-1 字节流/字符流边界" },
+            { "id": "java-ch07", "tone": "pitfall", "line": "volatile 我用来保证原子性。它只保证可见性，i++ 照样丢。", "anchor": "goals-4 volatile 边界" },
+            { "id": "java-ch08", "tone": "pitfall", "line": "堆切成 Region，对象拆成对象头。「泄漏」= 还有一条 GC Root 指着它。", "anchor": "goals-3/5 布局与可达性" },
+            { "id": "java-ch09", "tone": "archive", "line": "一串 groupId:artifactId:version 背后是一次依赖调解。构建工具管的不是命令，是版本。", "anchor": "goals-3 依赖调解" }
+          ]
+        }
+      ]
+    },
+
+    "database": {
+      "label": "数据库",
+      "acts": [
+        {
+          "id": "db-a1",
+          "group": "SQL 与索引",
+          "title": "从「我要什么」到「它怎么取」",
+          "chapters": [
+            { "id": "db-ch01", "tone": "pitfall", "line": "NULL 不等于任何值，包括它自己。所以 WHERE x != 1 会漏掉 x 为空的那些行。", "anchor": "goals-1 关系完整性与 NULL" },
+            { "id": "db-ch02", "tone": "pitfall", "line": "LEFT JOIN 之后行数变多了。右表有两行匹配，而我以为是去重。", "anchor": "goals-2 JOIN 语义" },
+            { "id": "db-ch03", "tone": "pitfall", "line": "三层 B+ 树，四次 I/O，一亿行。这一章让「为什么快」有了次数。", "anchor": "goals-1 树高估算" },
+            { "id": "db-ch04", "tone": "archive", "line": "索引建好，不代表被用上。EXPLAIN 是数据库唯一愿意跟你说实话的地方。", "anchor": "goals-3 EXPLAIN 逐列" }
+          ]
+        },
+        {
+          "id": "db-a2",
+          "group": "工程与运维",
+          "title": "一个库的四件麻烦事：过程、规范、灾备、拆表",
+          "chapters": [
+            { "id": "db-ch05", "tone": "pitfall", "line": "函数能出现在 WHERE 里，过程不能。它们不是一个东西的两个名字。", "anchor": "goals-3 过程与函数四条差异" },
+            { "id": "db-ch06", "tone": "pitfall", "line": "表拆到 3NF，查询要 join 五张表。范式保证不冗余，不保证不快。", "anchor": "goals-2 ER 与反范式权衡" },
+            { "id": "db-ch07", "tone": "pitfall", "line": "DELETE 没加 WHERE。备份能恢复，但恢复点是昨晚两点，中间六小时订单没了。", "anchor": "goals-2 PITR" },
+            { "id": "db-ch08", "tone": "archive", "line": "机器一定会坏，数据一定会装不下。所以只有两问：坏了怎么不停，满了怎么拆。", "anchor": "goals-1 可用性与扩展性" }
+          ]
+        }
+      ]
+    },
+
+    "fullstack": {
+      "label": "全栈开发",
+      "acts": [
+        {
+          "id": "fs-a1",
+          "group": "Web 与前端",
+          "title": "一个请求的旅程：从地址栏到事件循环",
+          "chapters": [
+            { "id": "fs-ch01", "tone": "pitfall", "line": "PUT 和 PATCH 我随手用。重试一次，PUT 没事，PATCH 把值加了两遍。", "anchor": "goals-3 幂等性" },
+            { "id": "fs-ch02", "tone": "pitfall", "line": "width: 100% 加 padding 之后撑破了容器。100% 算的是 content，不是 border。", "anchor": "goals-3 盒模型" },
+            { "id": "fs-ch03", "tone": "pitfall", "line": "typeof null 是 object。这个 1995 年的 bug，我第一场面试就栽在它上面。", "anchor": "goals-1 typeof 坑" },
+            { "id": "fs-ch04", "tone": "archive", "line": "Node 只有一个线程，却能同时等一万个请求。等，是被排进一个队列里的。", "anchor": "goals-1 事件循环六阶段" }
+          ]
+        },
+        {
+          "id": "fs-a2",
+          "group": "后端与上线",
+          "title": "让它上线：契约、凭证、状态、机器",
+          "chapters": [
+            { "id": "fs-ch05", "tone": "pitfall", "line": "我加了联合索引 (a,b)，查询只带 b，索引一点没用上。最左前缀不是建议，是规则。", "anchor": "goals-2 最左前缀" },
+            { "id": "fs-ch06", "tone": "pitfall", "line": "JWT 我塞了角色，然后发现改权限得等它过期。它没有撤销，只有到期。", "anchor": "goals-2 能否主动撤销" },
+            { "id": "fs-ch07", "tone": "pitfall", "line": "所有状态都塞进全局 store。后来每次请求失败，我都要手动回滚五个地方。", "anchor": "goals-3 服务端/客户端状态" },
+            { "id": "fs-ch08", "tone": "archive", "line": "部署不是把代码拷上去，是让一台机器在没人看着的时候，自己回到该有的样子。", "anchor": "goals-2 systemd 与日志" }
+          ]
+        }
+      ]
+    },
+
+    "middleware": {
+      "label": "中间件",
+      "acts": [
+        {
+          "id": "mw-a1",
+          "group": "Redis 与缓存",
+          "title": "缓存的四道坎：编码、落盘、故障、被冲垮",
+          "chapters": [
+            { "id": "mw-ch01", "tone": "pitfall", "line": "一次 HSET 卡了 200ms。不是网络，是那张哈希表正在 rehash。", "anchor": "goals-3 渐进式 rehash" },
+            { "id": "mw-ch02", "tone": "pitfall", "line": "我开了 RDB，以为数据就安全了。最后一次快照之后写的东西，全没了。", "anchor": "goals-2 AOF 三档 fsync" },
+            { "id": "mw-ch03", "tone": "pitfall", "line": "主库挂了，哨兵切了，客户端还连着旧主。切换不是原子的，客户端得会重连。", "anchor": "goals-2 ODOWN 与选举" },
+            { "id": "mw-ch04", "tone": "archive", "line": "缓存不是加速器，是数据库前面的一道闸。闸会漏、会堵、会被同时冲垮。", "anchor": "goals-1/2/3 穿透击穿雪崩" }
+          ]
+        },
+        {
+          "id": "mw-a2",
+          "group": "消息队列",
+          "title": "消息的四次交付：分区、位移、幂等、积压",
+          "chapters": [
+            { "id": "mw-ch05", "tone": "pitfall", "line": "acks=1 我以为写成功了。leader 挂了，那条消息跟着它一起没了。", "anchor": "goals-3 ISR 与 acks" },
+            { "id": "mw-ch06", "tone": "pitfall", "line": "自动提交位移很方便。它在我处理完之前就提交了，崩一次丢一批。", "anchor": "goals-4 位移提交时机" },
+            { "id": "mw-ch07", "tone": "pitfall", "line": "我追求 exactly-once，调了两周。最后落地的是：至少一次，加一张去重表。", "anchor": "goals-2 至少一次+幂等" },
+            { "id": "mw-ch08", "tone": "archive", "line": "MQ 把同步变异步，也把「立刻知道失败」变成了「以后才知道」。", "anchor": "goals-1 三大价值与代价" }
+          ]
+        }
+      ]
+    },
+
+    "python": {
+      "label": "Python",
+      "acts": [
+        {
+          "id": "py-a1",
+          "group": "语言核心",
+          "title": "名字、对象、容器：Python 的三件事",
+          "chapters": [
+            { "id": "py-ch01", "tone": "pitfall", "line": "a = b 之后我改了 a，b 也变了。名字不是盒子，是贴在对象上的标签。", "anchor": "goals-1 名字绑定" },
+            { "id": "py-ch02", "tone": "pitfall", "line": "我在函数里给全局变量赋值，它变成了局部变量。global 不是装饰，是声明。", "anchor": "goals-3 LEGB" },
+            { "id": "py-ch03", "tone": "pitfall", "line": "元组不可变。但元组里的那个列表，一直都能改。", "anchor": "goals-4 引用不可变" },
+            { "id": "py-ch04", "tone": "archive", "line": "带时区和不带时区的时间能相减，结果是一个没人想要的数。先立坐标系。", "anchor": "goals-3 时区处理" }
+          ]
+        },
+        {
+          "id": "py-a2",
+          "group": "IO、并发与数据",
+          "title": "把数据搬进来：文件、文本、线程、数组",
+          "chapters": [
+            { "id": "py-ch05", "tone": "pitfall", "line": "with open 写完我就走了。断电后文件是空的——flush 不等于 fsync。", "anchor": "goals-3 缓冲与落盘" },
+            { "id": "py-ch06", "tone": "pitfall", "line": "一条正则跑了 40 秒。(a+)+b 在长串上不是慢，是指数。", "anchor": "goals-4 回溯爆炸" },
+            { "id": "py-ch07", "tone": "pitfall", "line": "十个线程跑 CPU 密集任务，耗时和一个线程一样。我看了半小时监控才想起 GIL。", "anchor": "goals-1 GIL" },
+            { "id": "py-ch08", "tone": "archive", "line": "一次调用算完整张表，靠的不是 Python 快，是它把循环交给了 C 和 SIMD。", "anchor": "goals-1 ndarray 与 list" }
+          ]
+        }
+      ]
+    },
+
+    "spring": {
+      "label": "Spring",
+      "acts": [
+        {
+          "id": "spring-a1",
+          "group": "容器",
+          "title": "容器怎么把对象造出来，又在什么时候插一手",
+          "chapters": [
+            { "id": "spring-ch01", "tone": "pitfall", "line": "new 出来的对象不归容器管。所以它的 @Autowired 字段一直是 null。", "anchor": "goals-1 IoC 与 DI" },
+            { "id": "spring-ch02", "tone": "pitfall", "line": "我在构造函数里用注入的字段，拿到 null。它那时还没被填充。", "anchor": "goals-1 生命周期顺序" },
+            { "id": "spring-ch03", "tone": "pitfall", "line": "注解加了，日志没打。那个类是 final 的，CGLIB 生不出子类。", "anchor": "goals-3 final 不可代理" },
+            { "id": "spring-ch04", "tone": "archive", "line": "自动配置不是魔法，是一堆「有就用、没有就跳过」的条件。", "anchor": "goals-3 条件装配" }
+          ]
+        },
+        {
+          "id": "spring-a2",
+          "group": "Web 与持久层",
+          "title": "一次请求穿过四层：控制器、SQL、缓存、事务",
+          "chapters": [
+            { "id": "spring-ch05", "tone": "pitfall", "line": "参数校验注解加了没生效。类上少了 @Valid，它只是注释，不是开关。", "anchor": "goals-2 参数校验" },
+            { "id": "spring-ch06", "tone": "pitfall", "line": "${} 拼出来的 SQL 能被注入。#{} 是占位符，${} 是字符串替换，一字之差。", "anchor": "goals-2 预编译与拼接" },
+            { "id": "spring-ch07", "tone": "pitfall", "line": "二级缓存开了，两个服务读到不一样的数据。它跨了 SqlSession，也跨了我以为的边界。", "anchor": "goals-2 两级缓存失效条件" },
+            { "id": "spring-ch08", "tone": "archive", "line": "@Transactional 失效的四个原因，都指向同一件事：它作用在代理上，不在方法上。", "anchor": "goals-2 事务失效场景" }
+          ]
+        }
+      ]
+    },
+
+    "clang": {
+      "label": "C 语言（clang 单元）",
+      "acts": [
+        {
+          "id": "clang-a1",
+          "group": "C 语言",
+          "title": "地址、堆、布局、文件：C 眼里的内存",
+          "chapters": [
+            { "id": "clang-u01", "tone": "pitfall", "line": "p + 1 前进几个字节？取决于 p 指向什么。指针的类型决定步长。", "anchor": "goals-2 指针运算" },
+            { "id": "clang-u02", "tone": "pitfall", "line": "p = realloc(p, n)。它失败时返回 NULL，我连原来那块也弄丢了。", "anchor": "goals-3 realloc 搬迁" },
+            { "id": "clang-u03", "tone": "pitfall", "line": "sizeof 出来 24，我写的是 20。那 4 个字节不是浪费，是对齐的过路费。", "anchor": "goals-2 内存对齐" },
+            { "id": "clang-u04", "tone": "archive", "line": "fread 返回的数字比你要的少，它不是在报错，是在告诉你读到了哪里。", "anchor": "goals-3 返回值与 EOF" }
+          ]
+        },
+        {
+          "id": "clang-a2",
+          "group": "C 语言",
+          "title": "从文本到可执行：宏、目标文件、符号",
+          "chapters": [
+            { "id": "clang-u05", "tone": "pitfall", "line": "宏不是函数，是翻译阶段 4 的一次纯文本替换。它连括号都不替你加。", "anchor": "goals-2 括号卫生与多重求值" },
+            { "id": "clang-u06", "tone": "pitfall", "line": "改了个头文件，make 什么都没做。它只看 .c 的时间戳，不知道头文件也进来了。", "anchor": "goals-4 mtime 驱动的增量" },
+            { "id": "clang-u07", "tone": "archive", "line": "编译通过、链接失败，是两个世界的事。名字要在第二个世界被认领一次。", "anchor": "goals-2 声明/定义与链接属性" }
+          ]
+        }
+      ]
+    },
+
+    "bigdata": {
+      "label": "大数据",
+      "acts": [
+        {
+          "id": "bd-a1",
+          "group": "离线计算",
+          "title": "把一台机器撑不住的事，摊到一千台上",
+          "chapters": [
+            { "id": "bd-ch01", "tone": "pitfall", "line": "Secondary NameNode 不是备胎。它只帮忙合并日志，主节点挂了它接不上。", "anchor": "goals-4 checkpoint 误区" },
+            { "id": "bd-ch02", "tone": "pitfall", "line": "Combiner 我拿来做了求和之外的聚合。它不是优化，它改了语义。", "anchor": "goals-3 Combiner 边界" },
+            { "id": "bd-ch03", "tone": "archive", "line": "一条 HQL 变成分布式作业，路上会丢掉一些东西。丢掉的，就是你调不动的部分。", "anchor": "goals-3 编译执行" }
+          ]
+        },
+        {
+          "id": "bd-a2",
+          "group": "Spark 与数仓",
+          "title": "内存、DAG、口径：快的原因和算错的原因",
+          "chapters": [
+            { "id": "bd-ch04", "tone": "pitfall", "line": "Spark 快不是因为「在内存」，是它只在宽依赖那条线上付 Shuffle 的钱。", "anchor": "goals-3 窄/宽依赖" },
+            { "id": "bd-ch05", "tone": "pitfall", "line": "我用 RDD 写的聚合比 DataFrame 慢八倍。优化器看不见 lambda 里发生了什么。", "anchor": "goals-1 结构化信息=优化空间" },
+            { "id": "bd-ch06", "tone": "archive", "line": "同一个指标两张表算出两个数，问题不在 SQL，在口径没被定义过。", "anchor": "goals-4 指标四要素" }
+          ]
+        }
+      ]
+    },
+
+    "data": {
+      "label": "数据分析",
+      "acts": [
+        {
+          "id": "data-a1",
+          "group": "NumPy 与 Pandas",
+          "title": "数组与表：把循环交给 C",
+          "chapters": [
+            { "id": "data-ch01", "tone": "pitfall", "line": "b = a[::2] 之后我改了 b，a 也变了。切片给的是视图，不是副本。", "anchor": "goals-2 视图与拷贝" },
+            { "id": "data-ch02", "tone": "pitfall", "line": "广播不复制数据，它把 stride 改成 0。一物化，内存就炸。", "anchor": "goals-1 stride 置 0" },
+            { "id": "data-ch03", "tone": "archive", "line": "两个 Series 相加，索引对不上就补 NaN。Pandas 先对齐，再运算。", "anchor": "goals-1 自动对齐" }
+          ]
+        },
+        {
+          "id": "data-a2",
+          "group": "分析实战",
+          "title": "从分组到结论：聚合、抓取、证伪",
+          "chapters": [
+            { "id": "data-ch04", "tone": "pitfall", "line": "merge 之后行数翻了三倍。右表的键不唯一，它做了笛卡尔积。", "anchor": "goals-2 merge 语义" },
+            { "id": "data-ch05", "tone": "pitfall", "line": "爬虫跑了一晚上，第二天被封了。我看的是内容，没看 robots.txt。", "anchor": "goals-4 合规边界" },
+            { "id": "data-ch06", "tone": "archive", "line": "能不能复现，取决于你有没有先问「这个特征是怎么来的」。", "anchor": "goals-1/2/3/4 四问" }
+          ]
+        }
+      ]
+    },
+
+    "tooling": {
+      "label": "工程工具",
+      "acts": [
+        {
+          "id": "tool-a1",
+          "group": "Linux 与 Git",
+          "title": "文件、进程、对象：机器怎么记住东西",
+          "chapters": [
+            { "id": "tool-ch01", "tone": "pitfall", "line": "rm 删了文件，磁盘没释放。因为还有个进程开着它，inode 引用数没归零。", "anchor": "goals-4 inode 与链接" },
+            { "id": "tool-ch02", "tone": "pitfall", "line": "子进程结束了，父进程没 wait。它变成了僵尸，占着一个 PID 不放。", "anchor": "goals-4 僵尸进程" },
+            { "id": "tool-ch03", "tone": "archive", "line": "Git 不是存差异的数据库，是内容寻址的对象库。想通这一点，所有命令都只是增删查改。", "anchor": "本章定位 内容寻址" }
+          ]
+        },
+        {
+          "id": "tool-a2",
+          "group": "协作与容器",
+          "title": "和别人一起干：分支、镜像、编排",
+          "chapters": [
+            { "id": "tool-ch04", "tone": "pitfall", "line": "git pull 我以为只是下载。它先 fetch 再 merge，我本地一堆提交被合了进来。", "anchor": "goals-1 三类引用与 pull 语义" },
+            { "id": "tool-ch05", "tone": "pitfall", "line": "镜像是摞只读层，容器是顶上那层可写的。所以重启容器，数据会没。", "anchor": "goals-1 分层与写时复制" },
+            { "id": "tool-ch06", "tone": "archive", "line": "depends_on 只保证启动顺序，不保证能用了。中间那段，得靠健康检查填。", "anchor": "goals-1 健康检查与就绪门控" }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "title": "W1 距离：一维闭式 vs 线性 critic 的盲区",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "经验 W1 = 1.0448\n高斯闭式 sqrt((dmu)^2+(dsigma)^2) = 1.2806\n线性 critic f(x)=x 的 E_p[f]-E_q[f] = -0.8042\n线性 critic 只能看到均值差，漏掉标准差差 1.0\n结论：critic 必须是非线性网络，否则 W 距离估计会严重低估分布差异（这正是 WGAN 用深层 critic 的原因）\n",
+  "code": "\nimport numpy as np\nrng = np.random.default_rng(3)\nn = 200000\np = rng.normal(0.0, 1.0, n)\nq = rng.normal(0.8, 2.0, n)     # 均值差 0.8，标准差差 1.0\n\n# 一维 W1 闭式：|mu1-mu2| 只在同方差时成立；一般用经验分位数积分\nw1 = np.abs(np.sort(p) - np.sort(q)).mean()\nw1_gauss = np.sqrt((0.0 - 0.8) ** 2 + (1.0 - 2.0) ** 2)   # 高斯情形的闭式\nprint(f\"经验 W1 = {w1:.4f}\")\nprint(f\"高斯闭式 sqrt((dmu)^2+(dsigma)^2) = {w1_gauss:.4f}\")\n\n# KR 对偶：sup_{|f|_L<=1} E_p[f]-E_q[f]\nlinear_best = np.mean(p) - np.mean(q)             # 线性 f(x)=x 的取值差\nprint(f\"线性 critic f(x)=x 的 E_p[f]-E_q[f] = {linear_best:.4f}\")\nprint(f\"线性 critic 只能看到均值差，漏掉标准差差 {abs(1.0-2.0):.1f}\")\nprint(\"结论：critic 必须是非线性网络，否则 W 距离估计会严重低估分布差异（这正是 WGAN 用深层 critic 的原因）\")\n"
+}

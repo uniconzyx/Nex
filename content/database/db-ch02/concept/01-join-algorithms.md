@@ -1,4 +1,26 @@
 # 01 · JOIN 的执行算法：从"双重循环"到 Hash/Merge Join
+> 三类 Join 的本质是「如何为左右两边每一行找匹配」。Nested Loop 朴素双循环（小表驱动）；Hash Join 建哈希表（适合大数据、等值）；Merge Join 先排序再指针合并（已排序时最优）。
+
+```text
+1) Nested Loop（小表驱动）
+   for r in R(out):            # R 小
+     for s in S: if r.k==s.k: emit(r,s)
+   代价 O(|R|·|S|)；建索引后内表可索引查找
+
+2) Hash Join（大数据·等值）
+   build: 对 S 建哈希表 H( key )
+   probe: 逐行 r∈R，算 h(r.k) 进 H 找匹配
+   代价 O(|R|+|S|)；不适合非等值
+
+3) Merge Join（两边已按连接键排序）
+   i=j=0
+   while i<|R| and j<|S|:
+     if R[i].k==S[j].k: emit; 推进较小的指针
+     elif R[i].k < S[j].k: i++
+     else: j++
+   代价 O(|R|+|S|)，省去排序时最优
+```
+
 
 > 博士视角看"关联"的算法本质，程序员视角看"InnoDB 到底怎么跑我的 JOIN"。
 
@@ -36,6 +58,63 @@ MySQL 优化器在 8.0 之前主要靠「索引嵌套循环」（Index Nested Lo
 见 `examples/ex01-inner-join-dept.json`（INNER JOIN）、`examples/ex02-left-join-null.json`（NULL 语义）、`examples/ex03-block-nested-loop.json`（无索引退化的演示数据），以及 `examples/ex11-self-join.json`（员工-经理自连接）。
 
 ---
+
+<!-- injected-code -->
+## 可运行代码：把上面的说法跑一遍
+
+下面两段直接取自本章示例库（`examples/`），期望输出就是判题台里判定的那串字符串，不是事后补写的说明。读完正文后先照着跑一遍，再回去看「三视角解析」里对应的那条。
+
+### INNER JOIN 关联员工与部门（仅返回可匹配的行）
+
+```sql
+CREATE TABLE department (dept_id INT PRIMARY KEY, dept_name VARCHAR(20), location VARCHAR(20));
+CREATE TABLE employee (emp_id INT PRIMARY KEY, name VARCHAR(20), dept_id INT, salary DECIMAL(10,2));
+INSERT INTO department VALUES (10,'Sales','Beijing'),(20,'Engineering','Shanghai'),(30,'HR','Shenzhen');
+INSERT INTO employee VALUES (1,'Alice',10,6000.00),(2,'Bob',20,8000.00),(3,'Carol',10,4500.00),(4,'Dave',20,9000.00),(5,'Eve',30,5000.00),(6,'Frank',20,7000.00);
+SELECT e.name, d.dept_name FROM employee e INNER JOIN department d ON e.dept_id = d.dept_id ORDER BY e.emp_id;
+```
+
+实际输出：
+
+```text
+Query OK, 0 rows affected
+Query OK, 3 rows affected
+Query OK, 6 rows affected
+name|dept_name
+Alice|Sales
+Bob|Engineering
+Carol|Sales
+Dave|Engineering
+Eve|HR
+Frank|Engineering
+```
+
+> 出处：`examples/ex01-inner-join-dept.json`。改一处再看输出变没变，比读三遍解释有用。
+
+### LEFT JOIN 保留左表全部行，右表无匹配补 NULL
+
+```sql
+CREATE TABLE customer (cust_id INT PRIMARY KEY, cust_name VARCHAR(20));
+CREATE TABLE orders (order_id INT PRIMARY KEY, cust_id INT, amount DECIMAL(10,2));
+INSERT INTO customer VALUES (1,'Tom'),(2,'Jerry'),(3,'Lucy');
+INSERT INTO orders VALUES (101,1,200.00),(102,1,350.00);
+SELECT c.cust_name, o.amount FROM customer c LEFT JOIN orders o ON c.cust_id = o.cust_id ORDER BY c.cust_id;
+```
+
+实际输出：
+
+```text
+Query OK, 0 rows affected
+Query OK, 3 rows affected
+Query OK, 2 rows affected
+cust_name|amount
+Tom|200.00
+Tom|350.00
+Jerry|NULL
+Lucy|NULL
+```
+
+> 出处：`examples/ex02-left-join-null.json`。改一处再看输出变没变，比读三遍解释有用。
 
 ## 三视角解析
 

@@ -79,6 +79,15 @@ print("MSS           =", MTU - IP_HDR - TCP_HDR, "(IP+TCP headers subtracted)")
 print("small packets waste bandwidth: 1 byte of data costs", frame(1)[2], "bytes on the wire")
 ```
 
+```text
+应用层  HTTP / DNS / FTP
+传输层  TCP(可靠,三次握手)  UDP(不可靠,低延迟)
+网络层  IP(路由,无连接)     ICMP
+链路层  帧 / MAC / ARP / 交换机
+TCP 三次握手建连:  SYN → SYN+ACK → ACK
+TCP 四次挥手断连:  FIN → ACK → FIN → ACK
+```
+
 ## 三视角解析
 
 ### 🧑‍💻 程序员视角

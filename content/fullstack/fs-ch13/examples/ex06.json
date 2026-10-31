@@ -1,0 +1,8 @@
+{
+  "title": "E2E 选择器策略：用 data-testid 而非 DOM 路径",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "提交\ntrue\ntrue",
+  "code": "// E2E 选择器策略：用稳定的 data-testid 而非易变的 CSS 路径\nfunction findByTestId(dom, id) {\n  return dom.find((el) => el[\"data-testid\"] === id) ?? null;\n}\n\nconst page = [\n  { \"data-testid\": \"submit-btn\", text: \"提交\" },\n  { \"data-testid\": \"email-input\", text: \"\" },\n];\n\nconsole.log(findByTestId(page, \"submit-btn\")?.text);\nconsole.log(findByTestId(page, \"email-input\") !== null);\nconsole.log(findByTestId(page, \"missing\") === null);\n"
+}

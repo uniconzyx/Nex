@@ -1,0 +1,8 @@
+{
+  "title": "satisfies：保字面量类型又不失校验",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "retry number\ntimeout number\nverbose boolean\n3.0",
+  "code": "// TS 里 `const conf = { retry: 3 } satisfies Config` 会保留 retry 的窄类型 3\n// 运行时等价于普通对象，这里演示「配置读取」的常见写法\nconst conf = { retry: 3, timeout: 1000, verbose: false };\n\nfor (const [k, v] of Object.entries(conf)) {\n  console.log(k, typeof v);\n}\nconsole.log(conf.retry.toFixed(1));\n"
+}

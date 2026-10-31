@@ -1,0 +1,8 @@
+{
+  "title": "测试替身：Spy 记录真实调用",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "5 9\n[[2,3],[4,5]]",
+  "code": "// 测试替身：spy——包裹真实对象，记录调用但放行真实逻辑\nfunction makeSpy(target, method) {\n  const orig = target[method];\n  const calls = [];\n  target[method] = function (...args) {\n    calls.push(args);\n    return orig.apply(this, args);\n  };\n  target[method].calls = calls;\n  return target;\n}\n\nconst calc = { add(a, b) { return a + b; } };\nmakeSpy(calc, \"add\");\nconsole.log(calc.add(2, 3), calc.add(4, 5));\nconsole.log(JSON.stringify(calc.add.calls));\n"
+}

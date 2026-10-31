@@ -1,0 +1,8 @@
+{
+  "title": "ZeRO 三阶段的每卡显存（8 卡）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "7B 模型，8 卡，单位 GB（仅模型状态）\n方案                B/参数        每卡显存   说明\nDDP/基线           16.00       104.3   完整副本\nZeRO-1            5.50        35.9   只分片优化器状态\nZeRO-2            3.75        24.4   再分片梯度\nZeRO-3/FSDP       2.00        13.0   再分片参数（通信最多）\n\n显存节省倍数（相对基线）：ZeRO-1 2.9x, ZeRO-2 4.3x, ZeRO-3 8x\n代价：ZeRO-3 前向/反向需逐层 gather 参数，通信量约为基线 1.5 倍\n结论：先 ZeRO-2（几乎无额外通信、收益最大），装不下再 ZeRO-3\n",
+  "code": "\nimport numpy as np\nN, K = 7e9, 8\nopt_states = 12          # fp32 master 4 + m 4 + v 4\nparam16, grad16 = 2, 2\n\ndef gb(bytes_per_param):\n    return bytes_per_param * N / (1024 ** 3)\n\nprint(f\"7B 模型，{K} 卡，单位 GB（仅模型状态）\")\nprint(f\"{'方案':<12s}{'B/参数':>10s}{'每卡显存':>12s}   说明\")\nrows = [\n    (\"DDP/基线\", param16 + grad16 + opt_states, \"完整副本\"),\n    (\"ZeRO-1\", param16 + grad16 + opt_states / K, \"只分片优化器状态\"),\n    (\"ZeRO-2\", param16 + grad16 / K + opt_states / K, \"再分片梯度\"),\n    (\"ZeRO-3/FSDP\", (param16 + grad16 + opt_states) / K, \"再分片参数（通信最多）\"),\n]\nfor name, bpp, note in rows:\n    print(f\"{name:<12s}{bpp:>10.2f}{gb(bpp):>12.1f}   {note}\")\n\nprint()\nprint(f\"显存节省倍数（相对基线）：ZeRO-1 {16/(2+2+12/K):.1f}x, ZeRO-2 {16/(2+2/K+12/K):.1f}x, ZeRO-3 {K:.0f}x\")\nprint(\"代价：ZeRO-3 前向/反向需逐层 gather 参数，通信量约为基线 1.5 倍\")\nprint(\"结论：先 ZeRO-2（几乎无额外通信、收益最大），装不下再 ZeRO-3\")\n"
+}

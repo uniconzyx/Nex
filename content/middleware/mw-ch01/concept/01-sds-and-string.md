@@ -43,3 +43,134 @@
 - **标准问法**：「为什么 Redis 的字符串有 embstr 和 raw 两种，分界是多少？」答：44 字节，源于 64B jemalloc 块减去 robj(16)+sdshdr8(3)+\0(1)。
 - **易错口径**：`embstr` 是**一次性内存分配**且**只读**，不是「分配两次但因为小所以快」——这是高频错误表述；改 embstr 会触发转 raw。
 - **连问**：`SET k 123` 后 `OBJECT ENCODING k` 是什么？答 `int`；`APPEND k "x"` 后呢？答 `raw`（先转 raw 再追加）。
+
+<!-- injected-code -->
+## 可运行代码：把上面的说法跑一遍
+
+下面两段直接取自本章示例库（`examples/`），期望输出就是判题台里判定的那串字符串，不是事后补写的说明。读完正文后先照着跑一遍，再回去看「三视角解析」里对应的那条。
+
+### SDS 动态字符串：长度前缀、预分配与二进制安全
+
+```python
+class SDS:
+    def __init__(self, s):
+        self.buf = bytearray(s.encode("utf-8", "surrogatepass"))
+        self.len = len(self.buf)
+        self.alloc = self.len
+    def _ensure(self, need):
+        if self.alloc >= need:
+            return
+        if self.len < 1024 * 1024:
+            newalloc = need * 2
+        else:
+            newalloc = self.alloc + 1024 * 1024
+        if newalloc < need:
+            newalloc = need
+        self.alloc = newalloc
+    def append(self, s):
+        b = s.encode("utf-8", "surrogatepass")
+        self._ensure(self.len + len(b))
+        self.buf.extend(b)
+        self.len = len(self.buf)
+    def __repr__(self):
+        return "len=%d alloc=%d free=%d bytes=%s" % (self.len, self.alloc, self.alloc - self.len, list(self.buf))
+
+s = SDS("hi")
+print("init:", s)
+s.append("A")          # len 2 -> need 3 (<1MB) -> alloc = 6
+print("after append 'A':", s)
+s.append("B" * 10)
+print("after append 10B:", s)
+s2 = SDS("a\x00b")     # 含 NUL，二进制安全
+print("binary-safe len (should be 3):", s2.len)
+print("c-string strlen would be:", len(s2.buf.split(b"\x00")[0]))
+```
+
+实际输出：
+
+```text
+init: len=2 alloc=2 free=0 bytes=[104, 105]
+after append 'A': len=3 alloc=6 free=3 bytes=[104, 105, 65]
+after append 10B: len=13 alloc=26 free=13 bytes=[104, 105, 65, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66]
+binary-safe len (should be 3): 3
+c-string strlen would be: 1
+```
+
+> 出处：`examples/ex01_sds_dynamic_string.json`。改一处再看输出变没变，比读三遍解释有用。
+
+### dict 渐进式 rehash：双表 + rehashidx 逐步搬迁
+
+```python
+import zlib
+
+class Dict:
+    def __init__(self, size=4):
+        self.ht = [[[] for _ in range(size)], None]
+        self.rehashidx = -1
+        self.count = 0
+    def _idx(self, table, key):
+        return zlib.crc32(key.encode()) & (len(table) - 1)   # 确定性哈希（str 哈希带随机种子）
+    def _put(self, table, key, val):
+        i = self._idx(table, key)
+        for pair in table[i]:
+            if pair[0] == key:
+                pair[1] = val
+                return
+        table[i].append([key, val])
+    def _get(self, table, key):
+        if table is None:
+            return None
+        i = self._idx(table, key)
+        for k, v in table[i]:
+            if k == key:
+                return v
+        return None
+    def _move_one(self):
+        if self.rehashidx < 0:
+            return False
+        while self.rehashidx < len(self.ht[0]) and not self.ht[0][self.rehashidx]:
+            self.rehashidx += 1
+        if self.rehashidx >= len(self.ht[0]):
+            self.ht[0] = self.ht[1]; self.ht[1] = None; self.rehashidx = -1
+            return False
+        for pair in self.ht[0][self.rehashidx]:
+            self._put(self.ht[1], pair[0], pair[1])
+        self.ht[0][self.rehashidx] = []
+        self.rehashidx += 1
+        return True
+    def put(self, key, val):
+        if self.rehashidx >= 0:
+            self._put(self.ht[1], key, val); self.count += 1; self._move_one(); return
+        used = sum(len(b) for b in self.ht[0])
+        if used / len(self.ht[0]) >= 1.0:
+            self.ht[1] = [[] for _ in range(len(self.ht[0]) * 2)]
+            self.rehashidx = 0
+            self._put(self.ht[1], key, val); self.count += 1; self._move_one(); return
+        self._put(self.ht[0], key, val); self.count += 1
+    def get(self, key):
+        v = self._get(self.ht[0], key)
+        return v if v is not None else self._get(self.ht[1], key)
+
+d = Dict(4)
+for k in ["a", "b", "c", "d", "e", "f"]:
+    d.put(k, 1)
+print("after 6 inserts: count=%d ht0_buckets=%d ht1=%s rehashidx=%d" % (
+    d.count, len(d.ht[0]), "present" if d.ht[1] is not None else "None", d.rehashidx))
+steps = 0
+while d.rehashidx >= 0:
+    d._move_one(); steps += 1
+print("rehash drained in %d more steps; ht0_buckets=%d ht1=%s" % (
+    steps, len(d.ht[0]), "None" if d.ht[1] is None else "present"))
+print("get 'c' =>", d.get("c"), " get 'f' =>", d.get("f"))
+```
+
+实际输出：
+
+```text
+after 6 inserts: count=6 ht0_buckets=4 ht1=present rehashidx=2
+rehash drained in 2 more steps; ht0_buckets=8 ht1=None
+get 'c' => 1  get 'f' => 1
+```
+
+> 出处：`examples/ex02_dict_incremental_rehash.json`。改一处再看输出变没变，比读三遍解释有用。
+

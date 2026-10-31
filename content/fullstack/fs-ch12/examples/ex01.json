@@ -1,0 +1,8 @@
+{
+  "title": "拆分触发判断：单体积分 vs 成长中的单体",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "7.7\n58.0\n建议拆分",
+  "code": "// 用一组「信号」给单体打「是否该拆」的分：部署频率、团队人数、跨模块耦合\nfunction splitScore({ deploysPerWeek, teamSize, coupling }) {\n  return deploysPerWeek * 0.5 + teamSize * 0.8 + coupling * 4;\n}\n\nconst mono = { deploysPerWeek: 1, teamSize: 4, coupling: 1 };\nconst growing = { deploysPerWeek: 20, teamSize: 25, coupling: 7 };\n\nconsole.log(splitScore(mono).toFixed(1));\nconsole.log(splitScore(growing).toFixed(1));\nconsole.log(splitScore(growing) > 15 ? \"建议拆分\" : \"维持单体\");\n"
+}

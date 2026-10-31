@@ -102,3 +102,189 @@
 | 消费端 | 自动提交、先提交后处理 | 处理成功后 `commitSync()` | 重复消费（靠业务幂等兜） |
 
 **一句话记住**：不丢的本质是「每个环节都让确认**晚于**真正的持久/处理动作」；代价是把风险从「丢失」转移到「重复」，而重复由下一章的幂等设计承接。
+
+<!-- injected-code -->
+## 可运行代码：把上面的说法跑一遍
+
+下面两段直接取自本章示例库（`examples/`），期望输出就是判题台里判定的那串字符串，不是事后补写的说明。读完正文后先照着跑一遍，再回去看「三视角解析」里对应的那条。
+
+### 丢失窗口清单：三段链路的危险配置与后果
+
+```python
+print("=== 一条消息的丢失窗口：三段链路逐项检查 ===")
+print()
+print("链路: 生产者 -> broker(存储) -> 消费者 -> 业务库")
+print()
+
+CHECKS = [
+    ("生产端", "acks", "acks=0", "「发送成功」不含任何持久化承诺"),
+    ("生产端", "攒批与退出", "未 flush() 就退出", "内存中攒批的消息随进程消失"),
+    ("生产端", "回调处理", "忽略 send() 的 Future", "失败被静默吞掉"),
+    ("存储端", "min.insync.replicas", "=1", "acks=all 退化为 acks=1"),
+    ("存储端", "unclean.leader.election", "=true", "已确认消息被回滚"),
+    ("存储端", "副本因子", "1", "单点故障即丢"),
+    ("消费端", "enable.auto.commit", "=true", "poll 时提交 -> 未处理消息被跳过"),
+    ("消费端", "提交时机", "先提交后处理", "at-most-once，处理失败即丢"),
+    ("消费端", "max.poll.interval.ms", "过小", "被踢出组 -> 重放或长时间停摆"),
+]
+
+print("%-8s %-28s %-24s %s" % ("段位", "检查项", "危险配置", "后果"))
+for stage, item, bad, effect in CHECKS:
+    print("%-8s %-28s %-24s %s" % (stage, item, bad, effect))
+print()
+
+RECOMMENDED = {
+    "acks": "acks=all",
+    "攒批与退出": "退出前 flush()",
+    "回调处理": "回调中记录失败并告警",
+    "min.insync.replicas": "=2",
+    "unclean.leader.election": "=false",
+    "副本因子": "=3",
+    "enable.auto.commit": "=false",
+    "提交时机": "处理成功后 commitSync()",
+    "max.poll.interval.ms": "按最坏处理耗时设置",
+}
+
+DEFAULT_BAD = {"acks", "攒批与退出", "回调处理", "min.insync.replicas",
+               "unclean.leader.election", "副本因子", "enable.auto.commit",
+               "提交时机", "max.poll.interval.ms"}
+
+print("=== 两套配置下的危险项计数（共 %d 项）===" % len(CHECKS))
+print("%-28s %-12s %s" % ("配置", "危险项数", "说明"))
+print("%-28s %-12d %s" % ("全默认（未做任何设置）", len(DEFAULT_BAD), "生产事故的常见起点"))
+fixed = set()
+for k in ("acks", "min.insync.replicas", "unclean.leader.election", "副本因子",
+          "enable.auto.commit", "提交时机"):
+    fixed.add(k)
+print("%-28s %-12d %s" % ("只调中间件参数", len(DEFAULT_BAD - fixed), "剩下 3 项与代码写法有关"))
+ok = set()
+for k in RECOMMENDED:
+    ok.add(k)
+print("%-28s %-12d %s" % ("中间件 + 代码写法都对齐", len(DEFAULT_BAD - ok), "仍需业务幂等兜重复"))
+print()
+print("-> 三个环节必须同时堵; 只做配置、不改代码写法, 最多消掉 6 项")
+print("-> 剩余风险统一转化为「重复」，由下一章的幂等设计承接")
+```
+
+实际输出：
+
+```text
+=== 一条消息的丢失窗口：三段链路逐项检查 ===
+
+链路: 生产者 -> broker(存储) -> 消费者 -> 业务库
+
+段位       检查项                          危险配置                     后果
+生产端      acks                         acks=0                   「发送成功」不含任何持久化承诺
+生产端      攒批与退出                        未 flush() 就退出            内存中攒批的消息随进程消失
+生产端      回调处理                         忽略 send() 的 Future       失败被静默吞掉
+存储端      min.insync.replicas          =1                       acks=all 退化为 acks=1
+存储端      unclean.leader.election      =true                    已确认消息被回滚
+存储端      副本因子                         1                        单点故障即丢
+消费端      enable.auto.commit           =true                    poll 时提交 -> 未处理消息被跳过
+消费端      提交时机                         先提交后处理                   at-most-once，处理失败即丢
+消费端      max.poll.interval.ms         过小                       被踢出组 -> 重放或长时间停摆
+
+=== 两套配置下的危险项计数（共 9 项）===
+配置                           危险项数         说
+…（后续输出略，完整结果见判题台）
+```
+
+> 出处：`examples/ex01-loss-window-checklist.json`。改一处再看输出变没变，比读三遍解释有用。
+
+### 幂等：先查后写的 TOCTOU 双写 vs 唯一索引
+
+```python
+print("=== 幂等的两种写法：先查后写（有竞态） vs 唯一索引（原子） ===")
+print()
+
+ORDER = "ORD-1001"
+CONCURRENT = 3          # 3 个并发请求
+LATER = 3               # 之后再有 3 次重复投递
+
+print("=== 方案 A：先 SELECT 判断，再 INSERT ===")
+store_a = []
+
+# 第一步：3 个并发请求都先执行「查」，此刻表里还没有数据 -> 三份快照都是「不存在」
+snapshots = [ORDER in store_a for _ in range(CONCURRENT)]
+print("  并发查询快照（都查到「不存在」）: %s" % snapshots)
+
+# 第二步：各自根据快照写入 -> 双写
+double_write = 0
+for exists in snapshots:
+    if not exists:
+        if store_a:
+            double_write += 1
+        store_a.append(ORDER)
+print("  并发写入后落库行数 = %d, 其中双写 = %d" % (len(store_a), double_write))
+
+# 第三步：后续重复投递，这次能查到 -> 跳过
+skipped = 0
+for _ in range(LATER):
+    if ORDER in store_a:
+        skipped += 1
+    else:
+        store_a.append(ORDER)
+print("  后续 %d 次重复投递: 跳过 %d 次" % (LATER, skipped))
+print("  合计: %d 次投递 -> 落库 %d 行（期望 1 行）" % (CONCURRENT + LATER, len(store_a)))
+print()
+
+print("=== 方案 B：唯一索引 + ON CONFLICT DO NOTHING ===")
+store_b = []
+unique_idx = set()
+insert_ok = conflict = 0
+for _ in range(CONCURRENT + LATER):
+    if ORDER in unique_idx:
+        conflict += 1
+    else:
+        unique_idx.add(ORDER)
+        store_b.append(ORDER)
+        insert_ok += 1
+print("  合计: %d 次投递 -> 落库 %d 行, 冲突被吸收 %d 次"
+      % (CONCURRENT + LATER, len(store_b), conflict))
+print()
+print("-> 判据: 并发重复投递下最终状态必须与投递一次相同")
+print("-> 「先查后写」的检查与写入之间是 TOCTOU 窗口, 并发下必然双写")
+print("-> 唯一索引把原子性下沉到存储引擎（唯一约束在页锁内判定）")
+
+print()
+print("=== 状态机 CAS：防止状态回退 ===")
+STATES = ["CREATED", "PAID", "SHIPPED", "DONE"]
+cur = "CREATED"
+for target in ("PAID", "PAID", "CREATED", "SHIPPED"):
+    if STATES.index(target) == STATES.index(cur) + 1:
+        cur = target
+        res = "OK（影响 1 行）"
+    else:
+        res = "影响 0 行 -> 幂等吸收或非法回退"
+    print("  请求 %-8s -> %-30s 当前状态 = %s" % (target, res, cur))
+print("-> UPDATE ... WHERE status='CREATED' 靠行锁 + 前置条件实现 CAS 语义")
+```
+
+实际输出：
+
+```text
+=== 幂等的两种写法：先查后写（有竞态） vs 唯一索引（原子） ===
+
+=== 方案 A：先 SELECT 判断，再 INSERT ===
+  并发查询快照（都查到「不存在」）: [False, False, False]
+  并发写入后落库行数 = 3, 其中双写 = 2
+  后续 3 次重复投递: 跳过 3 次
+  合计: 6 次投递 -> 落库 3 行（期望 1 行）
+
+=== 方案 B：唯一索引 + ON CONFLICT DO NOTHING ===
+  合计: 6 次投递 -> 落库 1 行, 冲突被吸收 5 次
+
+-> 判据: 并发重复投递下最终状态必须与投递一次相同
+-> 「先查后写」的检查与写入之间是 TOCTOU 窗口, 并发下必然双写
+-> 唯一索引把原子性下沉到存储引擎（唯一约束在页锁内判定）
+
+=== 状态机 CAS：防止状态回退 ===
+  请求 PAID     -> OK（影响 1 行）                     当前状态 = PAID
+  请求 PAID     -> 影响 0 行 -> 幂等吸收或非法回退            当前状态 = PAID
+  请求 CREATED  -> 影响 0 行 -> 幂等吸收或非法回退            当前状态 = PAID
+  请求 SHIPPED  -> OK（影响 1 行）                     当前状态 = SHIPPED
+-> UPDATE ... WHERE status='CREATED' 靠行锁 + 前置条件实现 CAS 语义
+```
+
+> 出处：`examples/ex02-idempotence-check-then-insert-vs-unique.json`。改一处再看输出变没变，比读三遍解释有用。
+

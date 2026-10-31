@@ -1,0 +1,56 @@
+{
+  "meta": {
+    "chapter": "fs-ch10",
+    "category": "basic"
+  },
+  "items": [
+    {
+      "title": "用 Pinia 重构一个迷你计数器 + 待办应用，落实 ref/reactive 边界与持久化",
+      "requirement_md": "在空目录初始化一个 Vite + Vue 3 + TS + Pinia 项目（或改造已有小项目），完成：\n\n1. 用 **Setup 写法** 定义两个 store：`useCounterStore`（ref 计数 + computed 双倍 + action 自增）和 `useTodoStore`（reactive 风格的对象结构：todos 数组 + 过滤 getter + add/remove/toggle action）；\n2. 在组件里演示**正确的解构**：用 `storeToRefs` 取出状态，`count.value` 写法规范；展示一处「错误解构会丢响应性」的反例并注释说明；\n3. `useTodoStore` 调用 `useCounterStore` 实现「每加一个 todo，计数 +1」的 store 间依赖；\n4. 接入 `pinia-plugin-persistedstate`，只持久化 `theme`/`lang` 这类非敏感字段（**不要**持久化任何 token/用户数据），刷新后验证 hydrate；\n5. 用 `shallowRef` 封装一个由第三方库（或 `JSON.parse` 大对象）托管的「不可变快照」字段，说明为什么这里用 shallow 而非 reactive；\n6. 在 README 里用一段话写清：这一版相比「全用 ref 散落在组件里」少了哪些样板、状态边界在哪。",
+      "tasks": [
+        {
+          "title": "Setup store 双实例 + 类型推导",
+          "verification": {
+            "type": "test",
+            "desc": "store 内部用 ref/computed/function；TS 下 state/action 类型无需手写 declare，直接推断成功"
+          }
+        },
+        {
+          "title": "storeToRefs 解构不丢响应性",
+          "verification": {
+            "type": "test",
+            "desc": "组件里通过 storeToRefs 取状态后，store 内改动能反映到组件；反例（直接解构）有注释说明且不影响主功能"
+          }
+        },
+        {
+          "title": "store 间依赖生效",
+          "verification": {
+            "type": "test",
+            "desc": "新增 todo 后 counter 自增；无循环依赖导致初始化报错"
+          }
+        },
+        {
+          "title": "持久化白名单正确",
+          "verification": {
+            "type": "test",
+            "desc": "刷新后 theme/lang 保留；localStorage 中搜索不到 token / 用户名等敏感字段"
+          }
+        },
+        {
+          "title": "shallowRef 场景合理",
+          "verification": {
+            "type": "test",
+            "desc": "不可变快照字段用 shallowRef；整体替换能触发、内部改不触发（有注释说明预期行为）"
+          }
+        },
+        {
+          "title": "README 讲清边界",
+          "verification": {
+            "type": "doc",
+            "desc": "README 含「相比散落 ref 少了哪些样板、状态归属哪个 store」的说明"
+          }
+        }
+      ]
+    }
+  ]
+}

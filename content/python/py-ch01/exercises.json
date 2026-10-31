@@ -82,9 +82,9 @@
       "type": "coding",
       "difficulty": "easy",
       "title": "实现字符串反转函数",
-      "content_md": "实现 `def reverse_str(s: str) -> str:`，返回反转后的字符串。",
+      "content_md": "实现 `def reverse_str(s: str) -> str:`，返回反转后的字符串。\n\n<!-- judge-io -->\n**判题 I/O 约定**（提交完整程序：从 stdin 读、向 stdout 写）\n\n输入：一行字符串 `s`（可能含空格，不含换行）。\n输出：反转后的字符串，占一行。",
       "answer": {
-        "reference_code": "def reverse_str(s):\n    return s[::-1]\n\nif __name__ == '__main__':\n    print(reverse_str('cat'))"
+        "reference_code": "import sys\n\n\ndef reverse_str(s):\n    return s[::-1]\n\n\nif __name__ == '__main__':\n    s = sys.stdin.readline().rstrip('\\n')\n    print(reverse_str(s))\n"
       },
       "explanation": "切步长 -1 即可反转；也可手写 for 拼装。",
       "tags": [
@@ -94,15 +94,32 @@
       "source": "self",
       "source_ref": "《Python 编程：从入门到实践》第 3 章 习题",
       "category": "基础题",
-      "platform": "book"
+      "platform": "book",
+      "test_cases": [
+        {
+          "input": "cat",
+          "expected_output": "tac",
+          "is_sample": true
+        },
+        {
+          "input": "hello world",
+          "expected_output": "dlrow olleh",
+          "is_sample": true
+        },
+        {
+          "input": "CppMind 2026",
+          "expected_output": "6202 dniMppC",
+          "is_sample": false
+        }
+      ]
     },
     {
       "type": "coding",
       "difficulty": "mid",
       "title": "LeetCode 704 · 二分查找（Python）",
-      "content_md": "实现函数 `def binary_search(nums, target):`，在升序整型列表中二分查找 target，返回下标，未找到返回 -1。",
+      "content_md": "实现函数 `def binary_search(nums, target):`，在升序整型列表中二分查找 target，返回下标，未找到返回 -1。\n\n<!-- judge-io -->\n**判题 I/O 约定**（提交完整程序：从 stdin 读、向 stdout 写）\n\n输入：第一行两个整数 `n target`；第二行 `n` 个严格升序整数（空格分隔）。\n输出：`target` 的下标，未找到输出 `-1`。",
       "answer": {
-        "reference_code": "def binary_search(nums, target):\n    lo, hi = 0, len(nums) - 1\n    while lo <= hi:\n        mid = (lo + hi) // 2\n        if nums[mid] == target:\n            return mid\n        elif nums[mid] < target:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return -1\n\nif __name__ == '__main__':\n    print(binary_search([-1, 0, 3, 5, 9, 12], 9))"
+        "reference_code": "import sys\n\n\ndef binary_search(nums, target):\n    lo, hi = 0, len(nums) - 1\n    while lo <= hi:\n        mid = (lo + hi) // 2\n        if nums[mid] == target:\n            return mid\n        elif nums[mid] < target:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return -1\n\n\nif __name__ == '__main__':\n    data = sys.stdin.read().split()\n    n, target = int(data[0]), int(data[1])\n    nums = [int(x) for x in data[2:2 + n]]\n    print(binary_search(nums, target))\n"
       },
       "explanation": "经典二分，注意区间闭合与 mid 下取整；本题仅映射真题，题面以来源链接为准。",
       "tags": [
@@ -113,15 +130,32 @@
       "source_ref": "LeetCode 704（binary-search）",
       "external_url": "https://leetcode.cn/problems/binary-search/",
       "category": "算法题",
-      "platform": "leetcode"
+      "platform": "leetcode",
+      "test_cases": [
+        {
+          "input": "6 9\n-1 0 3 5 9 12",
+          "expected_output": "4",
+          "is_sample": true
+        },
+        {
+          "input": "6 2\n-1 0 3 5 9 12",
+          "expected_output": "-1",
+          "is_sample": true
+        },
+        {
+          "input": "1 5\n5",
+          "expected_output": "0",
+          "is_sample": false
+        }
+      ]
     },
     {
       "type": "coding",
       "difficulty": "mid",
       "title": "牛客 BM21 · 旋转数组（Python）",
-      "content_md": "实现函数 `def rotate(nums, k):`，将整型列表向右旋转 k 位（原地修改优先，也可返回新列表）。",
+      "content_md": "实现函数 `def rotate(nums, k):`，将整型列表向右旋转 k 位（原地修改优先，也可返回新列表）。\n\n<!-- judge-io -->\n**判题 I/O 约定**（提交完整程序：从 stdin 读、向 stdout 写）\n\n输入：第一行两个整数 `n k`；第二行 `n` 个整数（空格分隔）。\n输出：向右旋转 `k` 位后的数组，空格分隔，占一行。",
       "answer": {
-        "reference_code": "def rotate(nums, k):\n    n = len(nums)\n    if n == 0:\n        return nums\n    k %= n\n    return nums[-k:] + nums[:-k]\n\nif __name__ == '__main__':\n    print(rotate([1, 2, 3, 4, 5], 2))"
+        "reference_code": "import sys\n\n\ndef rotate(nums, k):\n    n = len(nums)\n    if n == 0:\n        return nums\n    k %= n\n    return nums[-k:] + nums[:-k] if k else nums\n\n\nif __name__ == '__main__':\n    data = sys.stdin.read().split()\n    n, k = int(data[0]), int(data[1])\n    nums = [int(x) for x in data[2:2 + n]]\n    print(' '.join(map(str, rotate(nums, k))))\n"
       },
       "explanation": "右旋 k 位等价于取末尾 k 个移到前面；本题仅映射真题，题面以来源链接为准。",
       "tags": [
@@ -132,7 +166,24 @@
       "source_ref": "牛客 BM21（旋转数组）",
       "external_url": "https://www.nowcoder.com/exam/oj?tab=BM%E7%AF%87",
       "category": "算法题",
-      "platform": "nowcoder"
+      "platform": "nowcoder",
+      "test_cases": [
+        {
+          "input": "5 2\n1 2 3 4 5",
+          "expected_output": "4 5 1 2 3",
+          "is_sample": true
+        },
+        {
+          "input": "3 4\n1 2 3",
+          "expected_output": "3 1 2",
+          "is_sample": true
+        },
+        {
+          "input": "1 0\n7",
+          "expected_output": "7",
+          "is_sample": false
+        }
+      ]
     }
   ]
 }

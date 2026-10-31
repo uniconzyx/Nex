@@ -15,14 +15,28 @@
       "title": "np.array([1, 2, 3.5]) 的 dtype 是什么",
       "stem_md": "`np.array([1, 2, 3.5])` 得到的数组 dtype 是？",
       "options": [
-        "int64",
-        "float64",
-        "object",
-        "报错"
+        {
+          "key": "A",
+          "text": "`int64`"
+        },
+        {
+          "key": "B",
+          "text": "`float64`"
+        },
+        {
+          "key": "C",
+          "text": "`object`"
+        },
+        {
+          "key": "D",
+          "text": "`float32`"
+        }
       ],
       "answer": {
-        "index": 1,
-        "explain": "NumPy 会按能容纳所有元素的类型向上取齐。int64 装不下 3.5，于是整体提升为 float64，原整数也被转成浮点。"
+        "explain": "NumPy 会按能容纳所有元素的类型向上取齐。int64 装不下 3.5，于是整体提升为 float64，原整数也被转成浮点。",
+        "correct": [
+          "B"
+        ]
       },
       "explanation_md": "类型提升（type promotion）按「宽度与语义向上取齐」规则：`int + float -> float`、`bool + int -> int`。\n\n若混入字符串，则退化为 `<U..` 或 object，**数值计算能力丧失**：`np.array([1, '2']).dtype` 得到 `<U21`，里面存的是文本而不是数字。"
     },
@@ -37,14 +51,28 @@
       "title": "哪些索引方式返回的是副本而不是视图",
       "stem_md": "下列哪种操作返回的结果与**原数组不共享内存**（即副本）？",
       "options": [
-        "`a[2:6]`（基本切片）",
-        "`a.reshape(3, 4)`",
-        "`a.T`（转置）",
-        "`a[[2, 3, 4]]`（花式索引）"
+        {
+          "key": "A",
+          "text": "`a[1:3]`（基本切片）"
+        },
+        {
+          "key": "B",
+          "text": "`a.reshape(2, 2)`"
+        },
+        {
+          "key": "C",
+          "text": "`a.T`（转置）"
+        },
+        {
+          "key": "D",
+          "text": "`a[[0, 2]]`（花式索引）"
+        }
       ],
       "answer": {
-        "index": 3,
-        "explain": "基本切片、reshape、转置都只改视图的 shape/strides，仍指向同一块内存；花式索引（整数数组、布尔掩码）必须按新的下标顺序取值，无法用 strides 表达，只能返回副本。"
+        "explain": "基本切片、reshape、转置都只改视图的 shape/strides，仍指向同一块内存；花式索引（整数数组、布尔掩码）必须按新的下标顺序取值，无法用 strides 表达，只能返回副本。",
+        "correct": [
+          "D"
+        ]
       },
       "explanation_md": "判定标准是**能否用「起始指针 + strides」表达结果**：\n\n- 能 -> 视图：基本切片、`reshape`、`ravel`、`transpose`、`broadcast_to`\n- 不能 -> 副本：花式索引、布尔索引、`astype`（换 dtype）、`copy()`、算术运算结果\n\n用 `np.shares_memory(a, b)` 可一行验证。**这是排查「改了 b 为什么 a 也变了」类 bug 的第一诊断工具。**"
     },
@@ -90,14 +118,28 @@
       "title": "loc 与 iloc 的切片端点差异",
       "stem_md": "对于索引为 `['a','b','c','d','e']` 的 Series，`s.loc['b':'d']` 与 `s.iloc[1:4]` 的元素个数分别是？",
       "options": [
-        "3 个 和 3 个",
-        "3 个 和 4 个",
-        "4 个 和 3 个",
-        "4 个 和 4 个"
+        {
+          "key": "A",
+          "text": "都是 3 个"
+        },
+        {
+          "key": "B",
+          "text": "都是 4 个"
+        },
+        {
+          "key": "C",
+          "text": "`loc` 3 个，`iloc` 4 个"
+        },
+        {
+          "key": "D",
+          "text": "`loc` 2 个，`iloc` 3 个"
+        }
       ],
       "answer": {
-        "index": 0,
-        "explain": "`loc` 是标签切片，**含右端点** -> 'b','c','d' 共 3 个；`iloc` 是位置切片，遵循 Python 习惯**不含右端点** -> 位置 1,2,3 共 3 个。两者在这组数据上恰好数量相同，但端点语义完全不同。"
+        "explain": "`loc` 是标签切片，**含右端点** -> 'b','c','d' 共 3 个；`iloc` 是位置切片，遵循 Python 习惯**不含右端点** -> 位置 1,2,3 共 3 个。两者在这组数据上恰好数量相同，但端点语义完全不同。",
+        "correct": [
+          "A"
+        ]
       },
       "explanation_md": "**这是 pandas 最经典的混淆点之一。** 记住：\n\n| 索引器 | 依据 | 切片端点 |\n|---|---|---|\n| `loc` | 标签 | 闭区间（含右） |\n| `iloc` | 位置 | 左闭右开 |\n\n数量「恰好相同」是数据巧合：当标签恰好等距且与位置错开 1 时才会出现。**判断依据只能是标签还是位置，不能靠数量推断。** 另外 `loc` 用于布尔/可调用对象时也不支持位置语义。"
     },

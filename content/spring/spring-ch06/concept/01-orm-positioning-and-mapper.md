@@ -40,6 +40,77 @@ MyBatis 是「半自动」持久层框架：程序员写 SQL，框架负责参�
 - 易错：以为「JPA 一定比 MyBatis 慢」或反之——性能取决于 SQL 质量与映射开销，不是框架标签；两者的 N+1 是同类问题。
 - 关联考点：ORM 解决「对象-关系阻抗失配」的几种范式（ActiveRecord / DataMapper / 注解驱动）。
 
+<!-- injected-code -->
+## 可运行代码：把上面的说法跑一遍
+
+下面两段直接取自本章示例库（`examples/`），期望输出就是判题台里判定的那串字符串，不是事后补写的说明。读完正文后先照着跑一遍，再回去看「三视角解析」里对应的那条。
+
+### ex01-xml-mapper-parse
+
+```python
+import xml.etree.ElementTree as ET
+import re
+
+XML = """<mapper namespace="com.demo.UserMapper">
+  <select id="selectById" resultType="User">
+    SELECT id, user_name, age FROM t_user WHERE id = #{id}
+  </select>
+  <insert id="insertUser" useGeneratedKeys="true" keyProperty="id">
+    INSERT INTO t_user(user_name, age) VALUES(#{name}, #{age})
+  </insert>
+</mapper>"""
+
+tree = ET.fromstring(XML)
+print("namespace:", tree.get("namespace"))
+for stmt in tree:
+    if not isinstance(stmt.tag, str):
+        continue
+    text = " ".join(stmt.text.split())
+    params = re.findall(r"#\{([^}]+)\}", text)
+    print(stmt.tag, "id=" + stmt.get("id"), "params=" + str(params))
+```
+
+实际输出：
+
+```text
+namespace: com.demo.UserMapper
+select id=selectById params=['id']
+insert id=insertUser params=['name', 'age']
+```
+
+> 出处：`examples/ex01-xml-mapper-parse.json`。改一处再看输出变没变，比读三遍解释有用。
+
+### ex02-hash-vs-dollar
+
+```python
+import re
+
+def hash_sub(sql):
+    params = []
+    def repl(m):
+        params.append(m.group(1))
+        return "?"
+    out = re.sub(r"#\{([^}]+)\}", repl, sql)
+    return out, params
+
+def dollar_sub(sql, ctx):
+    return re.sub(r"\$\{([^}]+)\}", lambda m: str(ctx[m.group(1)]), sql)
+
+s1, p1 = hash_sub("SELECT * FROM t_user WHERE name = #{name} AND age > #{age}")
+print("hash ->", s1, "| params:", p1)
+s2 = dollar_sub("SELECT * FROM t_user ORDER BY ${column}", {"column": "age DESC"})
+print("dollar ->", s2)
+```
+
+实际输出：
+
+```text
+hash -> SELECT * FROM t_user WHERE name = ? AND age > ? | params: ['name', 'age']
+dollar -> SELECT * FROM t_user ORDER BY age DESC
+```
+
+> 出处：`examples/ex02-hash-vs-dollar.json`。改一处再看输出变没变，比读三遍解释有用。
+
 ## 三视角小结
 
 | 视角 | 一句话结论 |

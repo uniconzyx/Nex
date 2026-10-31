@@ -1,0 +1,65 @@
+{
+  "meta": {
+    "chapter": "ai-ch10",
+    "title": "训练工程与规模化 —— 综合项目",
+    "category": "dl",
+    "count": 1
+  },
+  "items": [
+    {
+      "title": "写一个「训练可行性评估器 + 迷你训练管线」（NumPy only）",
+      "requirement_md": "目标：把本章的「算账」与「诊断」两件事变成可运行工具，而不是停留在公式。\n\n**Part A · 显存/算力评估器**（纯计算，无训练）\n1. 输入：参数量 $N$、卡数 $K$、单卡显存 $M$、精度（fp32/fp16/bf16）、ZeRO stage（0-3）、是否开重计算、batch、seq、hidden、层数。\n2. 输出：每卡模型状态（按 16 B/参数或对应精度口径）、激活估算、是否可行、推荐的最小 stage、以及若不可行时的三条建议（按性价比排序）。\n3. 用 7B/13B/70B × 8/32/64 卡各跑一遍，输出一张可行性表。\n\n**Part B · 迷你训练管线**（真实训练一个 8 层 MLP 回归任务）\n4. 实现 He 初始化 + LayerNorm + AdamW + warmup-cosine + 全局范数裁剪，训练一个 8 层 MLP 拟合 2 维非线性函数。\n5. 做三组消融：① 初始化（naive / Xavier / He）；② 归一化（无 / LN）；③ 优化器（SGD / Adam / AdamW）。每组打印最终验证 loss 与前 200 步的 grad norm 曲线（每 20 步一个点）。\n6. 做一次「故意崩」实验：把 lr 调大 10 倍，记录 loss 第几步开始 NaN、当时 grad norm 多大、裁剪是否救住（对比开/关裁剪）。\n7. 用 Part A 的评估器给 Part B 的模型算一次账，并解释「为什么玩具模型算出来只要几 MB，实际训练仍要 GPU」（提示：算力与并行开销，不是显存）。\n\n**Part C · 报告**\n8. 一张表汇总 9 组消融的最终 loss；一段 300 字以内的归因（哪一项影响最大、为什么）；一段「如果要把这个模型放大 100 倍，我会先改什么」的方案。",
+      "tasks": [
+        {
+          "title": "显存/算力评估器",
+          "verification": {
+            "type": "output",
+            "desc": "对 7B/8 卡输出「112GB 不可行，建议 ZeRO-2 后 24.4GB 可行」；对 70B/32 卡输出「ZeRO-1 + PP=4 + TP=8 可行」。所有数字与 16 B/参数口径一致（误差 < 1%）。"
+          }
+        },
+        {
+          "title": "迷你训练管线跑通",
+          "verification": {
+            "type": "output",
+            "desc": "8 层 MLP 在 5000 步内验证 loss 下降 > 90%；打印的 grad norm 每层同量级（首末层比 < 100）。"
+          }
+        },
+        {
+          "title": "初始化消融",
+          "verification": {
+            "type": "output",
+            "desc": "三组各训一次并打印最终 loss；naive 初始化应明显最差（或直接 NaN），He 应最好；给出「方差保持」与 loss 的关系解释。"
+          }
+        },
+        {
+          "title": "归一化/优化器消融",
+          "verification": {
+            "type": "output",
+            "desc": "无 LN vs 有 LN、SGD vs Adam vs AdamW 各打印最终 loss 与第 200 步 grad norm；AdamW 的 ||θ|| 应小于 Adam+L2（若实现了 L2 对照）。"
+          }
+        },
+        {
+          "title": "故意崩实验",
+          "verification": {
+            "type": "output",
+            "desc": "lr×10 时记录首次 NaN 的 step 与当步 grad norm；开裁剪的版本应能撑更久或恢复，打印两者对比。"
+          }
+        },
+        {
+          "title": "评估器与训练的对照报告",
+          "verification": {
+            "type": "output",
+            "desc": "输出 Part A 的可行性表 + Part B 的 9 组消融表 + 300 字归因；结论需明确「显存可行 ≠ 算力可行」。"
+          }
+        }
+      ],
+      "tags": [
+        "显存账",
+        "AdamW",
+        "初始化",
+        "梯度裁剪",
+        "消融实验"
+      ]
+    }
+  ]
+}

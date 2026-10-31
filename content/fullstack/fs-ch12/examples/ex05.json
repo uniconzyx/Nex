@@ -1,0 +1,8 @@
+{
+  "title": "网关限流：固定窗口计数",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "[ true, true, true, false ]",
+  "code": "// 网关固定窗口限流：每分钟最多 N 次，超过返回 false（注意临界突变缺陷）\nclass FixedWindowLimiter {\n  constructor(limit, windowMs) {\n    this.limit = limit;\n    this.windowMs = windowMs;\n    this.count = 0;\n    this.resetAt = Date.now() + windowMs;\n  }\n  allow() {\n    const now = Date.now();\n    if (now > this.resetAt) { this.count = 0; this.resetAt = now + this.windowMs; }\n    if (this.count >= this.limit) return false;\n    this.count++;\n    return true;\n  }\n}\n\nconst lim = new FixedWindowLimiter(3, 60000);\nconsole.log([1, 2, 3, 4].map(() => lim.allow()));\n"
+}

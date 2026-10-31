@@ -1,0 +1,8 @@
+{
+  "title": "网关路由匹配：路径前缀到上游",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "order-svc:8080\npayment-svc:8080\nuser-svc:8080\n404-no-route",
+  "code": "// 网关按路径前缀把请求路由到对应后端服务\nconst routes = [\n  { prefix: \"/api/orders\", upstream: \"order-svc:8080\" },\n  { prefix: \"/api/pay\", upstream: \"payment-svc:8080\" },\n  { prefix: \"/api/users\", upstream: \"user-svc:8080\" },\n];\n\nfunction route(path) {\n  const r = routes.find((x) => path.startsWith(x.prefix));\n  return r ? r.upstream : \"404-no-route\";\n}\n\nconsole.log(route(\"/api/orders/123\"));\nconsole.log(route(\"/api/pay/capture\"));\nconsole.log(route(\"/api/users/me\"));\nconsole.log(route(\"/healthz\"));\n"
+}

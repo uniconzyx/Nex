@@ -1,0 +1,8 @@
+{
+  "title": "OCR 失败模式：低置信度与乱码兜底",
+  "code_lang": "python",
+  "code_std": "3.11",
+  "stdin": "",
+  "expected_output": "需人工复核: ['##########', '✱✱✱✱✱']\n通过: ['正常发票内容', '金额: 123.45']",
+  "code": "ocr_results = [\n    {\"text\": \"正常发票内容\", \"conf\": 0.98},\n    {\"text\": \"##########\", \"conf\": 0.21},\n    {\"text\": \"金额: 123.45\", \"conf\": 0.91},\n    {\"text\": \"✱✱✱✱✱\", \"conf\": 0.34},\n]\nGARBLED = set(\"✱#@*%&\")\ndef needs_review(r):\n    if r[\"conf\"] < 0.5:\n        return True\n    if any(ch in GARBLED for ch in r[\"text\"]):\n        return True\n    return False\nreview = [r[\"text\"] for r in ocr_results if needs_review(r)]\nprint(\"需人工复核:\", review)\nprint(\"通过:\", [r[\"text\"] for r in ocr_results if not needs_review(r)])\n"
+}

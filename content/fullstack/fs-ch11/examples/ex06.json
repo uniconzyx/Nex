@@ -1,0 +1,8 @@
+{
+  "title": "Jakarta 风格校验：收集所有违反约束的错误，而非遇到第一个就停",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "[\"name 长度需在 2-10 之间\"]\n[\"name 不能为空\",\"age 不能为空\"]",
+  "code": "class BizException extends Error {\n  constructor(code, message){ super(message); this.code = code; this.biz = true; }\n}\n\nfunction validate(dto, rules) {\n  const errors = [];\n  for (const [field, rule] of Object.entries(rules)) {\n    const v = dto[field];\n    if (rule.notNull && (v === null || v === undefined)) errors.push(field + \" 不能为空\");\n    if (rule.size && typeof v === \"string\" && (v.length < rule.size.min || v.length > rule.size.max))\n      errors.push(field + \" 长度需在 \" + rule.size.min + \"-\" + rule.size.max + \" 之间\");\n  }\n  return errors;\n}\nconst rules = { name: { notNull: true, size: { min: 2, max: 10 } }, age: { notNull: true } };\nconsole.log(JSON.stringify(validate({ name: \"A\", age: 20 }, rules)));\nconsole.log(JSON.stringify(validate({ age: null }, rules)));\n"
+}

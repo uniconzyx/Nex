@@ -23,26 +23,55 @@
       "status": "complete",
       "resources": {
         "github": [
-          "practical-tutorials/project-based-learning",
           "TheAlgorithms/C-Plus-Plus",
-          "ssloy/tinyrenderer"
+          "fmtlib/fmt",
+          "nlohmann/json"
         ],
         "github_stars": [
-          286133,
-          34742,
-          24335
+          34813,
+          25897,
+          50813
         ],
         "github_notes": [
-          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
-          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
-          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+          "本章讲「值传参 vs 引用传参」时，先看 `math/greatest_common_divisor.cpp` 与 `math/lcm.cpp`：参数写成 `int` 还是 `const T&` 不是风格问题——内建类型按值、可能很大的对象按 const 引用，这份仓库把两种写法放在同一个目录里，一眼能对照出选择依据",
+          "讲「引用绑定与类型退化」看 `include/fmt/base.h` 的 `type_mapper`（v11 起；v10 及以前在 `core.h`）：它把 `T`、`const T&`、`T&` 分别映射成同一套呈现方式，这是标准库 `std::decay` 之外最实用的「引用到底绑到了什么」的工业样本",
+          "讲「类型别名与 const 正确性」看 `include/nlohmann/json.hpp` 顶部的 `using string_t = StringType;`、`using number_integer_t = ...`：全部用 `using` 而不是 `typedef`，且返回 `const string_t&` 不返回副本，正是本章「引用避免拷贝」那一条的落地"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《C++ Primer（第5版）》第 2 章 变量与基本类型 / 第 3 章 字符串、向量和数组"
+          "《C++ Primer（第 5 版）》Lippman 等",
+          "《Effective C++（第 3 版）》Meyers",
+          "《深度探索 C++ 对象模型》Lippman"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1et411b73Z/",
+        "bilibili_list": [
+          {
+            "name": "黑马程序员 · C++ 从 0 到 1 入门",
+            "url": "https://www.bilibili.com/video/BV1et411b73Z/",
+            "note": "按目录定位到本章语法点所在集，跟敲一遍再回来做 exercise；这套的强项是「每个特性都配一个能跑的小例子」",
+            "bv": "BV1et411b73Z"
+          },
+          {
+            "name": "侯捷 · C++ 面向对象高级开发（上）",
+            "url": "https://www.bilibili.com/video/BV1r6h5zgE2i/",
+            "note": "讲「类到底怎么长出来的」：构造/析构顺序、拷贝构造与赋值、深拷贝、static、类模板。看完应能画出对象内存布局",
+            "bv": "BV1r6h5zgE2i"
+          },
+          {
+            "name": "侯捷 · C++ 面向对象高级开发（下）",
+            "url": "https://www.bilibili.com/video/BV1kBh5zrEWL/",
+            "note": "继承、虚函数与多态的实现机制：vptr/vtable、虚析构、委托与继承的组合取舍。对应「为什么基类析构要 virtual」",
+            "bv": "BV1kBh5zrEWL"
+          },
+          {
+            "name": "侯捷 · STL 标准库与泛型编程",
+            "url": "https://www.bilibili.com/video/BV1kBh5zrEYh/",
+            "note": "六大部件（容器/分配器/算法/迭代器/适配器/仿函数）的协作关系，以及 traits 如何让算法适配不同迭代器",
+            "bv": "BV1kBh5zrEYh"
+          }
+        ]
       }
     },
     {
@@ -57,26 +86,55 @@
       "status": "complete",
       "resources": {
         "github": [
-          "practical-tutorials/project-based-learning",
-          "TheAlgorithms/C-Plus-Plus",
-          "ssloy/tinyrenderer"
+          "fmtlib/fmt",
+          "catchorg/Catch2",
+          "TheAlgorithms/C-Plus-Plus"
         ],
         "github_stars": [
-          286133,
-          34742,
-          24335
+          25897,
+          21538,
+          34813
         ],
         "github_notes": [
-          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
-          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
-          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+          "§2.1 函数重载的工业规模样本：`include/fmt/base.h` 里 `format_to` 有十几个重载（`OutputIt` 版本、`locale` 版本、`memory_buffer` 版本），参数个数与类型各差一点；读它们之前先问「编译器凭什么在这么多同名函数里选中这一个」，再回 §2.1 看重载决议的排序规则",
+          "§3.1 捕获方式：`src/catch2/catch_test_macros.hpp` 的 `TEST_CASE`/`SECTION` 宏最终展开成「注册一个 lambda」，`INTERNAL_CATCH_TEST` 里按值捕获比较表达式两侧；看清它为什么不按引用捕获（section 结束后临时对象已经没了）",
+          "§2.2 默认参数的替代方案：`sort/` 目录里同一算法常有两个版本——一个只用 `<`，一个多接一个比较器；对照本章说的「默认参数 vs 重载 vs 模板参数」，看真实代码更愿意选哪种、为什么"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《C++ Primer（第5版）》第 6 章 函数"
+          "《C++ Primer（第 5 版）》Lippman 等",
+          "《Effective C++（第 3 版）》Meyers",
+          "《深度探索 C++ 对象模型》Lippman"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1et411b73Z/",
+        "bilibili_list": [
+          {
+            "name": "黑马程序员 · C++ 从 0 到 1 入门",
+            "url": "https://www.bilibili.com/video/BV1et411b73Z/",
+            "note": "按目录定位到本章语法点所在集，跟敲一遍再回来做 exercise；这套的强项是「每个特性都配一个能跑的小例子」",
+            "bv": "BV1et411b73Z"
+          },
+          {
+            "name": "侯捷 · C++ 面向对象高级开发（下）",
+            "url": "https://www.bilibili.com/video/BV1kBh5zrEWL/",
+            "note": "继承、虚函数与多态的实现机制：vptr/vtable、虚析构、委托与继承的组合取舍。对应「为什么基类析构要 virtual」",
+            "bv": "BV1kBh5zrEWL"
+          },
+          {
+            "name": "侯捷 · STL 标准库与泛型编程",
+            "url": "https://www.bilibili.com/video/BV1kBh5zrEYh/",
+            "note": "六大部件（容器/分配器/算法/迭代器/适配器/仿函数）的协作关系，以及 traits 如何让算法适配不同迭代器",
+            "bv": "BV1kBh5zrEYh"
+          },
+          {
+            "name": "侯捷 · C++ 内存管理机制",
+            "url": "https://www.bilibili.com/video/BV1d3h5zFEjL/",
+            "note": "new/delete 的真实调用链、allocator、内存池与 placement new；讲清「一次 new 到底发生了几件事」",
+            "bv": "BV1d3h5zFEjL"
+          }
+        ]
       }
     },
     {
@@ -92,26 +150,55 @@
       "status": "complete",
       "resources": {
         "github": [
-          "practical-tutorials/project-based-learning",
-          "TheAlgorithms/C-Plus-Plus",
-          "ssloy/tinyrenderer"
+          "nlohmann/json",
+          "fmtlib/fmt",
+          "Tencent/rapidjson"
         ],
         "github_stars": [
-          286133,
-          34742,
-          24335
+          50813,
+          25897,
+          15147
         ],
         "github_notes": [
-          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
-          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
-          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+          "本章讲「string_view 式零拷贝」看 `include/nlohmann/json.hpp` 的 `get_ref<const string_t&>()`：它不复制字符串，直接把内部 `std::string` 以 const 引用交出去；再读 `get<std::string>()` 的返回类型，对比「视图」和「拥有」在这一个 API 上的分野",
+          "`include/fmt/core.h`（v11 起并入 `base.h`）里的 `basic_string_view` 是 fmt 自带实现：只存 `const Char* data_` 与 `size_t size_`，`substr` 返回新视图而非新字符串；把它和 `std::string` 的 `substr` 并排看，就明白本章「视图不拥有内存」的代价与收益",
+          "「视图 vs 拥有」的极端案例：`include/rapidjson/document.h` 的 `kParseInsituFlag` 直接在你的缓冲区上把 token 切开（原地写 `\\\\0`），解析完字符串指针指向原缓冲——省掉全部拷贝，代价是原数据不能再用"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《C++ Primer（第5版）》第 3 章 字符串、向量和数组 / 第 9 章 顺序容器"
+          "《C++ Primer（第 5 版）》Lippman 等",
+          "《Effective C++（第 3 版）》Meyers",
+          "《深度探索 C++ 对象模型》Lippman"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1et411b73Z/",
+        "bilibili_list": [
+          {
+            "name": "黑马程序员 · C++ 从 0 到 1 入门",
+            "url": "https://www.bilibili.com/video/BV1et411b73Z/",
+            "note": "按目录定位到本章语法点所在集，跟敲一遍再回来做 exercise；这套的强项是「每个特性都配一个能跑的小例子」",
+            "bv": "BV1et411b73Z"
+          },
+          {
+            "name": "侯捷 · STL 标准库与泛型编程",
+            "url": "https://www.bilibili.com/video/BV1kBh5zrEYh/",
+            "note": "六大部件（容器/分配器/算法/迭代器/适配器/仿函数）的协作关系，以及 traits 如何让算法适配不同迭代器",
+            "bv": "BV1kBh5zrEYh"
+          },
+          {
+            "name": "侯捷 · C++ 面向对象高级开发（上）",
+            "url": "https://www.bilibili.com/video/BV1r6h5zgE2i/",
+            "note": "讲「类到底怎么长出来的」：构造/析构顺序、拷贝构造与赋值、深拷贝、static、类模板。看完应能画出对象内存布局",
+            "bv": "BV1r6h5zgE2i"
+          },
+          {
+            "name": "侯捷 · C++ 面向对象高级开发（下）",
+            "url": "https://www.bilibili.com/video/BV1kBh5zrEWL/",
+            "note": "继承、虚函数与多态的实现机制：vptr/vtable、虚析构、委托与继承的组合取舍。对应「为什么基类析构要 virtual」",
+            "bv": "BV1kBh5zrEWL"
+          }
+        ]
       }
     },
     {
@@ -126,26 +213,55 @@
       "status": "complete",
       "resources": {
         "github": [
-          "practical-tutorials/project-based-learning",
-          "TheAlgorithms/C-Plus-Plus",
-          "ssloy/tinyrenderer"
+          "google/leveldb",
+          "DaveGamble/cJSON",
+          "redis/redis"
         ],
         "github_stars": [
-          286133,
-          34742,
-          24335
+          39513,
+          13040,
+          76964
         ],
         "github_notes": [
-          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
-          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
-          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+          "本章讲「大块预分配 + bump 指针」看 `util/arena.h` 与 `util/arena.cc`：`Arena::Allocate` 只在当前 4KB 块里移动 `alloc_ptr_`，块用完才 `new char[]`；`AllocateAligned` 还会按 `align` 把指针向上取整——这就是本章说的「指针运算 + 手动对齐」",
+          "「一 malloc 一 free 配对」的标准形态：`cJSON.c` 的 `cJSON_New_Item` 先 `malloc` 再 `memset` 清零，`cJSON_Delete` 递归释放 `child`/`next` 链表；重点看 `cJSON_Parse` 的失败路径——每个提前 return 前都先 `cJSON_Delete`，否则就是本书反复警告的那类泄漏",
+          "「指针往前挪一格做记账」看 `src/zmalloc.c`：`zmalloc` 多申请 `PREFIX_SIZE` 字节，把长度写在返回指针之前，`zmalloc_size` 用 `(size_t*)ptr - 1` 取回；这是本章「指针算术 + 内存布局」最直接的工业用法，也解释了 `zmalloc_used_memory` 为什么准"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《C++ Primer（第5版）》第 4 章 表达式 / 第 12 章 动态内存"
+          "《C++ Primer（第 5 版）》Lippman 等",
+          "《Effective C++（第 3 版）》Meyers",
+          "《深度探索 C++ 对象模型》Lippman"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1et411b73Z/",
+        "bilibili_list": [
+          {
+            "name": "黑马程序员 · C++ 从 0 到 1 入门",
+            "url": "https://www.bilibili.com/video/BV1et411b73Z/",
+            "note": "按目录定位到本章语法点所在集，跟敲一遍再回来做 exercise；这套的强项是「每个特性都配一个能跑的小例子」",
+            "bv": "BV1et411b73Z"
+          },
+          {
+            "name": "侯捷 · C++ 内存管理机制",
+            "url": "https://www.bilibili.com/video/BV1d3h5zFEjL/",
+            "note": "new/delete 的真实调用链、allocator、内存池与 placement new；讲清「一次 new 到底发生了几件事」",
+            "bv": "BV1d3h5zFEjL"
+          },
+          {
+            "name": "侯捷 · C++ 面向对象高级开发（下）",
+            "url": "https://www.bilibili.com/video/BV1kBh5zrEWL/",
+            "note": "继承、虚函数与多态的实现机制：vptr/vtable、虚析构、委托与继承的组合取舍。对应「为什么基类析构要 virtual」",
+            "bv": "BV1kBh5zrEWL"
+          },
+          {
+            "name": "侯捷 · C++ 面向对象高级开发（上）",
+            "url": "https://www.bilibili.com/video/BV1r6h5zgE2i/",
+            "note": "讲「类到底怎么长出来的」：构造/析构顺序、拷贝构造与赋值、深拷贝、static、类模板。看完应能画出对象内存布局",
+            "bv": "BV1r6h5zgE2i"
+          }
+        ]
       }
     },
     {
@@ -161,26 +277,55 @@
       "status": "complete",
       "resources": {
         "github": [
-          "practical-tutorials/project-based-learning",
-          "TheAlgorithms/C-Plus-Plus",
-          "ssloy/tinyrenderer"
+          "ssloy/tinyrenderer",
+          "nlohmann/json",
+          "google/leveldb"
         ],
         "github_stars": [
-          286133,
-          34742,
-          24335
+          24335,
+          50813,
+          39513
         ],
         "github_notes": [
-          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
-          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
-          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+          "§3.2 与 §3.4 的活样本：`geometry.h` 里 `Vec3` 的 `operator+`/`operator*` 全部返回**值**（不是引用），因为 `a+b` 的结果是个临时量；而 `operator+=` 返回 `Vec3&` 以支持链式。把这两个返回类型并排看，就是「复合赋值返回引用、二元运算返回值」的判据",
+          "§2.2 与 §2.4 对照：`include/nlohmann/json.hpp` 的 `basic_json` 显式写了拷贝构造、拷贝赋值、`swap`；读 `swap` 的实现会发现它交换的是内部 `json_value` union 与指针——这正是「拷贝赋值用 copy-and-swap 拿到强异常安全」的实例",
+          "§1.2「对象在内存里到底是什么」：`include/leveldb/slice.h` 的 `Slice` 只有 `const char* data_` 与`size_t size_` 两个成员，`sizeof(Slice)` 就是 16 字节且不拥有任何内存；它把「轻量值类型」做到了极致——按值传参也不亏，因为拷贝的只是这两个字段"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《C++ Primer（第5版）》第 7 章 类"
+          "《C++ Primer（第 5 版）》Lippman 等",
+          "《Effective C++（第 3 版）》Meyers",
+          "《深度探索 C++ 对象模型》Lippman"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1et411b73Z/",
+        "bilibili_list": [
+          {
+            "name": "黑马程序员 · C++ 从 0 到 1 入门",
+            "url": "https://www.bilibili.com/video/BV1et411b73Z/",
+            "note": "按目录定位到本章语法点所在集，跟敲一遍再回来做 exercise；这套的强项是「每个特性都配一个能跑的小例子」",
+            "bv": "BV1et411b73Z"
+          },
+          {
+            "name": "侯捷 · C++ 面向对象高级开发（上）",
+            "url": "https://www.bilibili.com/video/BV1r6h5zgE2i/",
+            "note": "讲「类到底怎么长出来的」：构造/析构顺序、拷贝构造与赋值、深拷贝、static、类模板。看完应能画出对象内存布局",
+            "bv": "BV1r6h5zgE2i"
+          },
+          {
+            "name": "侯捷 · C++ 内存管理机制",
+            "url": "https://www.bilibili.com/video/BV1d3h5zFEjL/",
+            "note": "new/delete 的真实调用链、allocator、内存池与 placement new；讲清「一次 new 到底发生了几件事」",
+            "bv": "BV1d3h5zFEjL"
+          },
+          {
+            "name": "侯捷 · C++ 面向对象高级开发（下）",
+            "url": "https://www.bilibili.com/video/BV1kBh5zrEWL/",
+            "note": "继承、虚函数与多态的实现机制：vptr/vtable、虚析构、委托与继承的组合取舍。对应「为什么基类析构要 virtual」",
+            "bv": "BV1kBh5zrEWL"
+          }
+        ]
       }
     },
     {
@@ -195,26 +340,55 @@
       "status": "complete",
       "resources": {
         "github": [
-          "practical-tutorials/project-based-learning",
-          "TheAlgorithms/C-Plus-Plus",
-          "ssloy/tinyrenderer"
+          "google/googletest",
+          "llvm/llvm-project",
+          "google/leveldb"
         ],
         "github_stars": [
-          286133,
-          34742,
-          24335
+          39670,
+          41230,
+          39513
         ],
         "github_notes": [
-          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
-          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
-          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+          "§2.2 vtable 与动态绑定：`googletest/src/gtest.cc` 里 `Test::Run()` 是虚函数，`UnitTestImpl::RunAllTests` 只持有 `TestInfo*`，通过基类指针调用 `Run()`——派生类 `TestBody()` 的具体实现到运行时才被选中，这就是 vptr 指到派生类 vtable 的结果",
+          "§3.2 RTTI 的另一条路：`llvm/include/llvm/Support/Casting.h` 的 `classof` + `dyn_cast` 自己实现类型判别，不依赖 `dynamic_cast`（LLVM 默认关闭 RTTI）。读 `isa`/`cast`/`dyn_cast` 三件套，就明白「RTTI 只是手段，类型判别可以有更便宜的实现」",
+          "§3.1 接口隔离的标准写法：`include/leveldb/env.h` 的 `class Env` 几乎全是纯虚函数（文件、锁、线程全抽象掉），实现放在 `util/env_posix.cc` 的 `PosixEnv : public Env`；整份 leveldb 只通过 `Env*` 访问系统调用——这是「面向接口编程」在 C++ 里的完整闭环"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《C++ Primer（第5版）》第 15 章 面向对象程序设计"
+          "《C++ Primer（第 5 版）》Lippman 等",
+          "《Effective C++（第 3 版）》Meyers",
+          "《深度探索 C++ 对象模型》Lippman"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1et411b73Z/",
+        "bilibili_list": [
+          {
+            "name": "黑马程序员 · C++ 从 0 到 1 入门",
+            "url": "https://www.bilibili.com/video/BV1et411b73Z/",
+            "note": "按目录定位到本章语法点所在集，跟敲一遍再回来做 exercise；这套的强项是「每个特性都配一个能跑的小例子」",
+            "bv": "BV1et411b73Z"
+          },
+          {
+            "name": "侯捷 · C++ 面向对象高级开发（下）",
+            "url": "https://www.bilibili.com/video/BV1kBh5zrEWL/",
+            "note": "继承、虚函数与多态的实现机制：vptr/vtable、虚析构、委托与继承的组合取舍。对应「为什么基类析构要 virtual」",
+            "bv": "BV1kBh5zrEWL"
+          },
+          {
+            "name": "侯捷 · C++ 面向对象高级开发（上）",
+            "url": "https://www.bilibili.com/video/BV1r6h5zgE2i/",
+            "note": "讲「类到底怎么长出来的」：构造/析构顺序、拷贝构造与赋值、深拷贝、static、类模板。看完应能画出对象内存布局",
+            "bv": "BV1r6h5zgE2i"
+          },
+          {
+            "name": "侯捷 · C++ 内存管理机制",
+            "url": "https://www.bilibili.com/video/BV1d3h5zFEjL/",
+            "note": "new/delete 的真实调用链、allocator、内存池与 placement new；讲清「一次 new 到底发生了几件事」",
+            "bv": "BV1d3h5zFEjL"
+          }
+        ]
       }
     },
     {
@@ -229,26 +403,55 @@
       "status": "complete",
       "resources": {
         "github": [
-          "practical-tutorials/project-based-learning",
-          "TheAlgorithms/C-Plus-Plus",
-          "ssloy/tinyrenderer"
+          "fmtlib/fmt",
+          "nlohmann/json",
+          "microsoft/STL"
         ],
         "github_stars": [
-          286133,
-          34742,
-          24335
+          25897,
+          50813,
+          11172
         ],
         "github_notes": [
-          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
-          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
-          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+          "§2.3 全特化的实战：`include/fmt/base.h` 的 `template <typename T, typename Char> struct formatter` 主模板故意不实现 `format()`，谁要支持格式化就特化谁（`formatter<std::string>`、`formatter<int>`）；读主模板那条注释，它写清了「为什么主模板要留空」",
+          "§3.3 SFINAE 的工程写法：`include/nlohmann/json.hpp` 里 `is_compatible_type`、`has_to_json`、`has_from_json` 全靠「替换失败不算错」来探测用户类型有没有提供 `to_json`/`from_json`；顺着 `has_to_json` 的 `decltype` 表达式看，能看清 SFINAE 到底在哪一步生效",
+          "§3.3 与 §3.5 的底层：`stl/inc/type_traits` 里 `void_t`、`enable_if`、`conjunction` 的真实实现；看完再读 `stl/inc/concepts`（若你所看的版本已含 C++20 约束），就能对照出「SFINAE 时代」与「concept 时代」表达同一约束的成本差"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《C++ Primer（第5版）》第 16 章 模板与泛型编程"
+          "《C++ Primer（第 5 版）》Lippman 等",
+          "《Effective C++（第 3 版）》Meyers",
+          "《深度探索 C++ 对象模型》Lippman"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1et411b73Z/",
+        "bilibili_list": [
+          {
+            "name": "黑马程序员 · C++ 从 0 到 1 入门",
+            "url": "https://www.bilibili.com/video/BV1et411b73Z/",
+            "note": "按目录定位到本章语法点所在集，跟敲一遍再回来做 exercise；这套的强项是「每个特性都配一个能跑的小例子」",
+            "bv": "BV1et411b73Z"
+          },
+          {
+            "name": "侯捷 · STL 标准库与泛型编程",
+            "url": "https://www.bilibili.com/video/BV1kBh5zrEYh/",
+            "note": "六大部件（容器/分配器/算法/迭代器/适配器/仿函数）的协作关系，以及 traits 如何让算法适配不同迭代器",
+            "bv": "BV1kBh5zrEYh"
+          },
+          {
+            "name": "侯捷 · C++ 内存管理机制",
+            "url": "https://www.bilibili.com/video/BV1d3h5zFEjL/",
+            "note": "new/delete 的真实调用链、allocator、内存池与 placement new；讲清「一次 new 到底发生了几件事」",
+            "bv": "BV1d3h5zFEjL"
+          },
+          {
+            "name": "侯捷 · C++ 面向对象高级开发（上）",
+            "url": "https://www.bilibili.com/video/BV1r6h5zgE2i/",
+            "note": "讲「类到底怎么长出来的」：构造/析构顺序、拷贝构造与赋值、深拷贝、static、类模板。看完应能画出对象内存布局",
+            "bv": "BV1r6h5zgE2i"
+          }
+        ]
       }
     },
     {
@@ -264,26 +467,55 @@
       "status": "complete",
       "resources": {
         "github": [
-          "practical-tutorials/project-based-learning",
-          "TheAlgorithms/C-Plus-Plus",
-          "ssloy/tinyrenderer"
+          "microsoft/STL",
+          "redis/redis",
+          "TheAlgorithms/C-Plus-Plus"
         ],
         "github_stars": [
-          286133,
-          34742,
-          24335
+          11172,
+          76964,
+          34813
         ],
         "github_notes": [
-          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
-          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
-          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+          "§1.2 的 2× 扩容：`stl/inc/vector` 的 `_Calculate_growth` 做 `max(size + size/2, requested)` 再对齐，`_Emplace_reallocate` 分配新块、搬移旧元素、释放旧块——三步全在这里；对照本章算的摊销 O(1)，能看出「1.5× 还是 2×」对重新分配次数的影响",
+          "§3.3 负载因子与 rehash：`src/dict.c` 的 `dictExpand` 建两张表，`dictRehash` 每次只搬 `n` 个桶（渐进式 rehash），查找时两张表都要看；这是「不一次性搬完以免卡顿」的工程答案，与 `unordered_map` 的一次性 rehash 形成对照",
+          "「选容器」的实例库：`data_structures/` 下同一个结构常有数组版与链表版两种实现，`sort/` 下也区分「适合 vector」与「只能链表做」的算法；把本章的容器选择决策树拿过来，逐目录验证一遍你的判断"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《C++ Primer（第5版）》第 9-11 章 顺序/关联/无序容器"
+          "《C++ Primer（第 5 版）》Lippman 等",
+          "《Effective C++（第 3 版）》Meyers",
+          "《深度探索 C++ 对象模型》Lippman"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1et411b73Z/",
+        "bilibili_list": [
+          {
+            "name": "黑马程序员 · C++ 从 0 到 1 入门",
+            "url": "https://www.bilibili.com/video/BV1et411b73Z/",
+            "note": "按目录定位到本章语法点所在集，跟敲一遍再回来做 exercise；这套的强项是「每个特性都配一个能跑的小例子」",
+            "bv": "BV1et411b73Z"
+          },
+          {
+            "name": "侯捷 · STL 标准库与泛型编程",
+            "url": "https://www.bilibili.com/video/BV1kBh5zrEYh/",
+            "note": "六大部件（容器/分配器/算法/迭代器/适配器/仿函数）的协作关系，以及 traits 如何让算法适配不同迭代器",
+            "bv": "BV1kBh5zrEYh"
+          },
+          {
+            "name": "侯捷 · C++ 内存管理机制",
+            "url": "https://www.bilibili.com/video/BV1d3h5zFEjL/",
+            "note": "new/delete 的真实调用链、allocator、内存池与 placement new；讲清「一次 new 到底发生了几件事」",
+            "bv": "BV1d3h5zFEjL"
+          },
+          {
+            "name": "侯捷 · C++ 面向对象高级开发（上）",
+            "url": "https://www.bilibili.com/video/BV1r6h5zgE2i/",
+            "note": "讲「类到底怎么长出来的」：构造/析构顺序、拷贝构造与赋值、深拷贝、static、类模板。看完应能画出对象内存布局",
+            "bv": "BV1r6h5zgE2i"
+          }
+        ]
       }
     },
     {
@@ -298,26 +530,55 @@
       "status": "complete",
       "resources": {
         "github": [
-          "practical-tutorials/project-based-learning",
-          "TheAlgorithms/C-Plus-Plus",
-          "ssloy/tinyrenderer"
+          "microsoft/STL",
+          "simdjson/simdjson",
+          "TheAlgorithms/C-Plus-Plus"
         ],
         "github_stars": [
-          286133,
-          34742,
-          24335
+          11172,
+          24473,
+          34813
         ],
         "github_notes": [
-          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
-          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
-          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+          "§2.2 sort 的真实实现：`stl/inc/algorithm` 的 `sort` 调 `_Sort_unchecked`，内部是「快排分区 → 递归深度超限就转堆排 → 小区间用插排」三段式（introsort）；找到那个深度阈值常量，就明白本章说的「最坏 O(n log n) 靠什么兜底」",
+          "§1.1「迭代器是算法与容器的契约」：`include/simdjson/dom/array.h` 的 `iterator` 只提供 `operator*`/`operator++`/`operator!=`，够 `std::distance` 与范围 for 用，却不暴露底层实现；再看 `ondemand` 版的迭代器语义差异，能体会「迭代器范畴决定算法能用多强」",
+          "§1.2 范畴差异的实际后果：`numeric/` 与 `sort/` 里 `std::accumulate`、`std::sort`、`std::reverse` 各自要求输入迭代器/随机访问迭代器；把同一段代码的容器从 `list` 换成 `vector` 再编译，报错信息就是范畴不够用的证据"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《C++ Primer（第5版）》第 10 章 泛型算法"
+          "《C++ Primer（第 5 版）》Lippman 等",
+          "《Effective C++（第 3 版）》Meyers",
+          "《深度探索 C++ 对象模型》Lippman"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1et411b73Z/",
+        "bilibili_list": [
+          {
+            "name": "黑马程序员 · C++ 从 0 到 1 入门",
+            "url": "https://www.bilibili.com/video/BV1et411b73Z/",
+            "note": "按目录定位到本章语法点所在集，跟敲一遍再回来做 exercise；这套的强项是「每个特性都配一个能跑的小例子」",
+            "bv": "BV1et411b73Z"
+          },
+          {
+            "name": "侯捷 · STL 标准库与泛型编程",
+            "url": "https://www.bilibili.com/video/BV1kBh5zrEYh/",
+            "note": "六大部件（容器/分配器/算法/迭代器/适配器/仿函数）的协作关系，以及 traits 如何让算法适配不同迭代器",
+            "bv": "BV1kBh5zrEYh"
+          },
+          {
+            "name": "侯捷 · C++ 内存管理机制",
+            "url": "https://www.bilibili.com/video/BV1d3h5zFEjL/",
+            "note": "new/delete 的真实调用链、allocator、内存池与 placement new；讲清「一次 new 到底发生了几件事」",
+            "bv": "BV1d3h5zFEjL"
+          },
+          {
+            "name": "侯捷 · C++ 面向对象高级开发（上）",
+            "url": "https://www.bilibili.com/video/BV1r6h5zgE2i/",
+            "note": "讲「类到底怎么长出来的」：构造/析构顺序、拷贝构造与赋值、深拷贝、static、类模板。看完应能画出对象内存布局",
+            "bv": "BV1r6h5zgE2i"
+          }
+        ]
       }
     },
     {
@@ -333,26 +594,55 @@
       "status": "complete",
       "resources": {
         "github": [
-          "practical-tutorials/project-based-learning",
-          "TheAlgorithms/C-Plus-Plus",
-          "ssloy/tinyrenderer"
+          "google/leveldb",
+          "abseil/abseil-cpp",
+          "protocolbuffers/protobuf"
         ],
         "github_stars": [
-          286133,
-          34742,
-          24335
+          39513,
+          18171,
+          72137
         ],
         "github_notes": [
-          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
-          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
-          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+          "§1.2「析构调用是编译器插入的」：`db/db_impl.cc` 的 `DBImpl::~DBImpl()` 里显式停后台线程、删 memtable、释放文件锁——所有清理都钉在析构里，因此 `DB::Open` 失败时只要 `delete impl` 就干净；注意 leveldb 用的是裸指针 + `delete`，正好用来对照「手写 RAII 与 unique_ptr 的等价关系」",
+          "§1.2 的通用化：`absl/cleanup/cleanup.h` 的 `absl::Cleanup` 把「析构时执行一段代码」抽成可组合对象，`absl/synchronization/mutex.h` 的 `MutexLock` 用它管锁；这两处合看，就明白 RAII 不是「智能指针专用技巧」，而是资源管理的通用形态",
+          "§2.2 与 §3.3 的所有权边界：`src/google/protobuf/arena.h` 里 `Arena` 用 `unique_ptr` 管自己的块，但 `CreateMessage` 在 arena 上创建的对象由 arena 统一回收（不逐个 delete）；这是「所有权不在指针、而在容器」的典型，也解释了自定义删除器为什么要做类型擦除"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《C++ Primer（第5版）》第 12 章 动态内存 / 第 13 章 拷贝控制"
+          "《C++ Primer（第 5 版）》Lippman 等",
+          "《Effective C++（第 3 版）》Meyers",
+          "《深度探索 C++ 对象模型》Lippman"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1et411b73Z/",
+        "bilibili_list": [
+          {
+            "name": "黑马程序员 · C++ 从 0 到 1 入门",
+            "url": "https://www.bilibili.com/video/BV1et411b73Z/",
+            "note": "按目录定位到本章语法点所在集，跟敲一遍再回来做 exercise；这套的强项是「每个特性都配一个能跑的小例子」",
+            "bv": "BV1et411b73Z"
+          },
+          {
+            "name": "侯捷 · C++ 面向对象高级开发（上）",
+            "url": "https://www.bilibili.com/video/BV1r6h5zgE2i/",
+            "note": "讲「类到底怎么长出来的」：构造/析构顺序、拷贝构造与赋值、深拷贝、static、类模板。看完应能画出对象内存布局",
+            "bv": "BV1r6h5zgE2i"
+          },
+          {
+            "name": "侯捷 · C++ 内存管理机制",
+            "url": "https://www.bilibili.com/video/BV1d3h5zFEjL/",
+            "note": "new/delete 的真实调用链、allocator、内存池与 placement new；讲清「一次 new 到底发生了几件事」",
+            "bv": "BV1d3h5zFEjL"
+          },
+          {
+            "name": "侯捷 · C++ 面向对象高级开发（下）",
+            "url": "https://www.bilibili.com/video/BV1kBh5zrEWL/",
+            "note": "继承、虚函数与多态的实现机制：vptr/vtable、虚析构、委托与继承的组合取舍。对应「为什么基类析构要 virtual」",
+            "bv": "BV1kBh5zrEWL"
+          }
+        ]
       }
     },
     {
@@ -367,26 +657,55 @@
       "status": "complete",
       "resources": {
         "github": [
-          "practical-tutorials/project-based-learning",
-          "TheAlgorithms/C-Plus-Plus",
-          "ssloy/tinyrenderer"
+          "fmtlib/fmt",
+          "google/googletest",
+          "nlohmann/json"
         ],
         "github_stars": [
-          286133,
-          34742,
-          24335
+          25897,
+          39670,
+          50813
         ],
         "github_notes": [
-          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
-          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
-          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+          "§1.2 栈展开前的最后一站：`include/fmt/base.h` 的 `FMT_THROW` 可被配置成抛异常或直接 abort，`FMT_ASSERT` 在 debug 下抛 `format_error`；读这两个宏的分支，就看清「库要不要让异常穿过自己」是一个可配置的契约，而不是语言强制",
+          "§3.4 断言分级：`googletest/include/gtest/gtest.h` 里 `EXPECT_*` 失败继续跑、`ASSERT_*` 失败立刻 return，`EXPECT_THROW`/`EXPECT_NO_THROW` 把「抛不抛」变成可断言的性质，`ASSERT_DEATH` 连崩溃都能测；这套 API 是本章「断言与异常各管一段」的现实版",
+          "§2.1 异常安全契约的开关：`include/nlohmann/json.hpp` 的 `JSON_THROW` 由 `JSON_NOEXCEPTION` 决定展开成`throw` 还是 `std::abort`，`parse(..., allow_exceptions=false)` 则让调用方自己查 `is_discarded()`；同一个库给出三条错误处理路径，正好对本章的「异常 vs 错误码 vs 终止」取舍"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《C++ Primer（第5版）》第 18 章 用于大型程序的工具"
+          "《C++ Primer（第 5 版）》Lippman 等",
+          "《Effective C++（第 3 版）》Meyers",
+          "《深度探索 C++ 对象模型》Lippman"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1et411b73Z/",
+        "bilibili_list": [
+          {
+            "name": "黑马程序员 · C++ 从 0 到 1 入门",
+            "url": "https://www.bilibili.com/video/BV1et411b73Z/",
+            "note": "按目录定位到本章语法点所在集，跟敲一遍再回来做 exercise；这套的强项是「每个特性都配一个能跑的小例子」",
+            "bv": "BV1et411b73Z"
+          },
+          {
+            "name": "侯捷 · STL 标准库与泛型编程",
+            "url": "https://www.bilibili.com/video/BV1kBh5zrEYh/",
+            "note": "六大部件（容器/分配器/算法/迭代器/适配器/仿函数）的协作关系，以及 traits 如何让算法适配不同迭代器",
+            "bv": "BV1kBh5zrEYh"
+          },
+          {
+            "name": "侯捷 · C++ 面向对象高级开发（上）",
+            "url": "https://www.bilibili.com/video/BV1r6h5zgE2i/",
+            "note": "讲「类到底怎么长出来的」：构造/析构顺序、拷贝构造与赋值、深拷贝、static、类模板。看完应能画出对象内存布局",
+            "bv": "BV1r6h5zgE2i"
+          },
+          {
+            "name": "侯捷 · C++ 内存管理机制",
+            "url": "https://www.bilibili.com/video/BV1d3h5zFEjL/",
+            "note": "new/delete 的真实调用链、allocator、内存池与 placement new；讲清「一次 new 到底发生了几件事」",
+            "bv": "BV1d3h5zFEjL"
+          }
+        ]
       }
     },
     {
@@ -402,26 +721,55 @@
       "status": "complete",
       "resources": {
         "github": [
-          "practical-tutorials/project-based-learning",
-          "TheAlgorithms/C-Plus-Plus",
-          "ssloy/tinyrenderer"
+          "AnthonyCalandra/modern-cpp-features",
+          "microsoft/STL",
+          "abseil/abseil-cpp"
         ],
         "github_stars": [
-          286133,
-          34742,
-          24335
+          21924,
+          11172,
+          18171
         ],
         "github_notes": [
-          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
-          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
-          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+          "§2.2 值类别与 §4.1 结构化绑定的对照表：`README.md` 按 C++11/14/17/20 分节，每节都有最小可编译示例；建议先读「rvalue references」「structured bindings」两节，把本章的术语和标准里的正式名字对上，再回代码里验证",
+          "§3.3 emplace_back 与 push_back 的差别：`stl/inc/vector` 的 `emplace_back` 直接把参数转发给`_Emplace_reallocate` 里的 `construct_at`，全程只构造一次；而 `push_back(const T&)` 要先凑出一个 `T` 再移动。看这两条实现路径，就明白「构造次数差异」不是玄学而是参数转发位置不同",
+          "§2.3 `std::move` 只是一次 cast：`absl/utility/utility.h` 的 `absl::exchange` 与 `absl/types/optional.h` 的 `value() &&` 重载都靠 `std::move` 把左值转成右值再转发；注意它们转完从不「清空源对象」——移动后的源对象仍是有效但未指定状态，这是本章最常被误解的一条"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《Effective Modern C++》条款 1-42（Scott Meyers）"
+          "《C++ Primer（第 5 版）》Lippman 等",
+          "《Effective C++（第 3 版）》Meyers",
+          "《深度探索 C++ 对象模型》Lippman"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1et411b73Z/",
+        "bilibili_list": [
+          {
+            "name": "黑马程序员 · C++ 从 0 到 1 入门",
+            "url": "https://www.bilibili.com/video/BV1et411b73Z/",
+            "note": "按目录定位到本章语法点所在集，跟敲一遍再回来做 exercise；这套的强项是「每个特性都配一个能跑的小例子」",
+            "bv": "BV1et411b73Z"
+          },
+          {
+            "name": "侯捷 · STL 标准库与泛型编程",
+            "url": "https://www.bilibili.com/video/BV1kBh5zrEYh/",
+            "note": "六大部件（容器/分配器/算法/迭代器/适配器/仿函数）的协作关系，以及 traits 如何让算法适配不同迭代器",
+            "bv": "BV1kBh5zrEYh"
+          },
+          {
+            "name": "侯捷 · C++ 面向对象高级开发（上）",
+            "url": "https://www.bilibili.com/video/BV1r6h5zgE2i/",
+            "note": "讲「类到底怎么长出来的」：构造/析构顺序、拷贝构造与赋值、深拷贝、static、类模板。看完应能画出对象内存布局",
+            "bv": "BV1r6h5zgE2i"
+          },
+          {
+            "name": "侯捷 · C++ 内存管理机制",
+            "url": "https://www.bilibili.com/video/BV1d3h5zFEjL/",
+            "note": "new/delete 的真实调用链、allocator、内存池与 placement new；讲清「一次 new 到底发生了几件事」",
+            "bv": "BV1d3h5zFEjL"
+          }
+        ]
       }
     },
     {
@@ -436,26 +784,55 @@
       "status": "complete",
       "resources": {
         "github": [
-          "practical-tutorials/project-based-learning",
-          "TheAlgorithms/C-Plus-Plus",
-          "ssloy/tinyrenderer"
+          "fmtlib/fmt",
+          "Tencent/rapidjson",
+          "nlohmann/json"
         ],
         "github_stars": [
-          286133,
-          34742,
-          24335
+          25897,
+          15147,
+          50813
         ],
         "github_notes": [
-          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
-          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
-          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+          "§4.3 `std::format` 的设计动机：`include/fmt/format.h` 的 `format_to` 把结果直接写进输出迭代器，`include/fmt/ostream.h` 则给「只有 `operator<<` 的老类型」搭桥；两处合看就知道 `std::format` 为什么比 `stringstream` 快——它不建流对象、不碰 locale",
+          "§1.3 与 §3.2 的缓冲策略：`include/rapidjson/filereadstream.h` 的 `FileReadStream` 要你自己给一块`buffer`（默认 64KB），`FileWriteStream` 同理；这解释了本章「stdio 缓冲 vs 流对象」的层次——库不替你藏缓冲，性能就变得可预测",
+          "§4.4 结构化文本解析：`include/nlohmann/json.hpp` 的 `operator>>` 与 `dump()` 是「流式接口 + 一次性序列化」的组合；对比它和 `std::stringstream` 解析同一份 CSV 的代码量，能直观看出本章说的「手写分隔符解析为什么容易漏边界」"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《C++ Primer（第5版）》第 8 章 IO 库"
+          "《C++ Primer（第 5 版）》Lippman 等",
+          "《Effective C++（第 3 版）》Meyers",
+          "《深度探索 C++ 对象模型》Lippman"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1et411b73Z/",
+        "bilibili_list": [
+          {
+            "name": "黑马程序员 · C++ 从 0 到 1 入门",
+            "url": "https://www.bilibili.com/video/BV1et411b73Z/",
+            "note": "按目录定位到本章语法点所在集，跟敲一遍再回来做 exercise；这套的强项是「每个特性都配一个能跑的小例子」",
+            "bv": "BV1et411b73Z"
+          },
+          {
+            "name": "侯捷 · C++ 内存管理机制",
+            "url": "https://www.bilibili.com/video/BV1d3h5zFEjL/",
+            "note": "new/delete 的真实调用链、allocator、内存池与 placement new；讲清「一次 new 到底发生了几件事」",
+            "bv": "BV1d3h5zFEjL"
+          },
+          {
+            "name": "侯捷 · C++ 面向对象高级开发（下）",
+            "url": "https://www.bilibili.com/video/BV1kBh5zrEWL/",
+            "note": "继承、虚函数与多态的实现机制：vptr/vtable、虚析构、委托与继承的组合取舍。对应「为什么基类析构要 virtual」",
+            "bv": "BV1kBh5zrEWL"
+          },
+          {
+            "name": "侯捷 · STL 标准库与泛型编程",
+            "url": "https://www.bilibili.com/video/BV1kBh5zrEYh/",
+            "note": "六大部件（容器/分配器/算法/迭代器/适配器/仿函数）的协作关系，以及 traits 如何让算法适配不同迭代器",
+            "bv": "BV1kBh5zrEYh"
+          }
+        ]
       }
     },
     {
@@ -470,26 +847,55 @@
       "status": "complete",
       "resources": {
         "github": [
-          "practical-tutorials/project-based-learning",
-          "TheAlgorithms/C-Plus-Plus",
-          "ssloy/tinyrenderer"
+          "DaveGamble/cJSON",
+          "fmtlib/fmt",
+          "include-what-you-use/include-what-you-use"
         ],
         "github_stars": [
-          286133,
-          34742,
-          24335
+          13040,
+          25897,
+          4781
         ],
         "github_notes": [
-          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
-          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
-          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+          "§1.2 与 §1.3 头文件守卫的现实版：`cJSON.h` 顶部 `#ifndef cJSON__h` / `#define cJSON__h`，`CJSON_PUBLIC` 宏负责导出符号、`CJSON_EXPORT_SYMBOLS` 控制静态/动态；整个头文件只有声明——把「头文件该放什么」这件事做到了教科书级",
+          "§2.4 宏与 inline 的取舍：`include/fmt/base.h` 的 `FMT_BEGIN_NAMESPACE`/`FMT_END_NAMESPACE`、`FMT_API`、`FMT_INLINE` 三层宏分别管「命名空间版本化、符号可见性、强制内联」；看清每个宏存在的理由，就明白为什么现代库仍需要宏——跨编译器差异无法用 C++ 语法表达",
+          "§1.2 的量化工具：`iwyu.cc` 是主分析器，`iwyu_include_picker.cc` 维护「哪个头文件该由谁包含」的映射表；拿它跑一遍本章的示例工程，`#include` 的传递闭包会被直接列出——这是「文本包含」语义最硬的证据"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《C++ Primer（第5版）》第 2 章 预处理"
+          "《C++ Primer（第 5 版）》Lippman 等",
+          "《Effective C++（第 3 版）》Meyers",
+          "《深度探索 C++ 对象模型》Lippman"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1et411b73Z/",
+        "bilibili_list": [
+          {
+            "name": "黑马程序员 · C++ 从 0 到 1 入门",
+            "url": "https://www.bilibili.com/video/BV1et411b73Z/",
+            "note": "按目录定位到本章语法点所在集，跟敲一遍再回来做 exercise；这套的强项是「每个特性都配一个能跑的小例子」",
+            "bv": "BV1et411b73Z"
+          },
+          {
+            "name": "侯捷 · C++ 面向对象高级开发（上）",
+            "url": "https://www.bilibili.com/video/BV1r6h5zgE2i/",
+            "note": "讲「类到底怎么长出来的」：构造/析构顺序、拷贝构造与赋值、深拷贝、static、类模板。看完应能画出对象内存布局",
+            "bv": "BV1r6h5zgE2i"
+          },
+          {
+            "name": "侯捷 · C++ 内存管理机制",
+            "url": "https://www.bilibili.com/video/BV1d3h5zFEjL/",
+            "note": "new/delete 的真实调用链、allocator、内存池与 placement new；讲清「一次 new 到底发生了几件事」",
+            "bv": "BV1d3h5zFEjL"
+          },
+          {
+            "name": "侯捷 · STL 标准库与泛型编程",
+            "url": "https://www.bilibili.com/video/BV1kBh5zrEYh/",
+            "note": "六大部件（容器/分配器/算法/迭代器/适配器/仿函数）的协作关系，以及 traits 如何让算法适配不同迭代器",
+            "bv": "BV1kBh5zrEYh"
+          }
+        ]
       }
     },
     {
@@ -504,26 +910,55 @@
       "status": "complete",
       "resources": {
         "github": [
-          "practical-tutorials/project-based-learning",
-          "TheAlgorithms/C-Plus-Plus",
-          "ssloy/tinyrenderer"
+          "fmtlib/fmt",
+          "abseil/abseil-cpp",
+          "apache/brpc"
         ],
         "github_stars": [
-          286133,
-          34742,
-          24335
+          25897,
+          18171,
+          17638
         ],
         "github_notes": [
-          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
-          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
-          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+          "§3.1 与 §3.2 inline namespace 的工业用法：`include/fmt/base.h` 里 `FMT_BEGIN_NAMESPACE` 展开成`namespace fmt { inline namespace v11 {`，于是 `fmt::format` 与 `fmt::v11::format` 是同一个实体；库靠它做到「ABI 版本可以换、用户代码不用改」",
+          "§3.1 的另一套做法：`absl/base/config.h` 的 `ABSL_NAMESPACE_BEGIN` 展开成 `namespace absl { ABSL_INTERNAL_NAMESPACE {`，具体名字由 `absl/base/options.h` 的 LTS 宏决定；对照 fmt 与 abseil 两种版本化命名空间，能看清「透明 vs 显式」的取舍",
+          "§1.2 名字查找的实际分层：`src/brpc/server.h` 里 `namespace brpc`，其下再分 `policy`、`detail` 等子命名空间，对外只暴露少数类型；读它的 include 顺序与 `using` 声明，能看到「哪些名字允许被 ADL 找到、哪些必须写全限定名」是被刻意设计的"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《C++ Primer（第5版）》第 18 章 命名空间"
+          "《C++ Primer（第 5 版）》Lippman 等",
+          "《Effective C++（第 3 版）》Meyers",
+          "《深度探索 C++ 对象模型》Lippman"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1et411b73Z/",
+        "bilibili_list": [
+          {
+            "name": "黑马程序员 · C++ 从 0 到 1 入门",
+            "url": "https://www.bilibili.com/video/BV1et411b73Z/",
+            "note": "按目录定位到本章语法点所在集，跟敲一遍再回来做 exercise；这套的强项是「每个特性都配一个能跑的小例子」",
+            "bv": "BV1et411b73Z"
+          },
+          {
+            "name": "侯捷 · C++ 内存管理机制",
+            "url": "https://www.bilibili.com/video/BV1d3h5zFEjL/",
+            "note": "new/delete 的真实调用链、allocator、内存池与 placement new；讲清「一次 new 到底发生了几件事」",
+            "bv": "BV1d3h5zFEjL"
+          },
+          {
+            "name": "侯捷 · STL 标准库与泛型编程",
+            "url": "https://www.bilibili.com/video/BV1kBh5zrEYh/",
+            "note": "六大部件（容器/分配器/算法/迭代器/适配器/仿函数）的协作关系，以及 traits 如何让算法适配不同迭代器",
+            "bv": "BV1kBh5zrEYh"
+          },
+          {
+            "name": "侯捷 · C++ 面向对象高级开发（下）",
+            "url": "https://www.bilibili.com/video/BV1kBh5zrEWL/",
+            "note": "继承、虚函数与多态的实现机制：vptr/vtable、虚析构、委托与继承的组合取舍。对应「为什么基类析构要 virtual」",
+            "bv": "BV1kBh5zrEWL"
+          }
+        ]
       }
     },
     {
@@ -539,26 +974,55 @@
       "status": "complete",
       "resources": {
         "github": [
-          "practical-tutorials/project-based-learning",
-          "TheAlgorithms/C-Plus-Plus",
-          "ssloy/tinyrenderer"
+          "chenshuo/muduo",
+          "taskflow/taskflow",
+          "apache/brpc"
         ],
         "github_stars": [
-          286133,
-          34742,
-          24335
+          16279,
+          12214,
+          17638
         ],
         "github_notes": [
-          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
-          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
-          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+          "§2.2 三种 RAII 锁与 §4.2 wait 的三件事：`muduo/base/Mutex.h` 的 `MutexLockGuard` 只在构造/析构里加解锁，`muduo/base/Condition.h` 的 `wait()` 内部「解锁 → 等待 → 重新加锁」；`muduo/net/EventLoop.cc` 则示范 one loop per thread——三处合起来就是本章的锁 + 条件变量 + 线程模型",
+          "§5.3 线程池：`taskflow/core/executor.hpp` 的 `Executor` 预先起 `_config.num_workers` 个线程，每个 worker 在自己的 `_wsq`（work-stealing queue）上取任务，空闲时从别人队尾偷；读 `_wait_for_task` 与 `_steal` 两个函数，就懂「任务图 + 工作窃取」如何避免线程空转",
+          "§5.1 高层并发抽象的另一种答案：`src/bthread/` 用 M:N 调度（大量 bthread 跑在少量 pthread 上），把「阻塞等待」换成用户态挂起；对照 `std::thread` 的 1:1 模型，能看清本章说的「线程池解决的是创建成本，协程解决的是调度成本」"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《C++ Concurrency in Action（第2版）》Anthony Williams"
+          "《C++ Primer（第 5 版）》Lippman 等",
+          "《Effective C++（第 3 版）》Meyers",
+          "《深度探索 C++ 对象模型》Lippman"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1et411b73Z/",
+        "bilibili_list": [
+          {
+            "name": "黑马程序员 · C++ 从 0 到 1 入门",
+            "url": "https://www.bilibili.com/video/BV1et411b73Z/",
+            "note": "按目录定位到本章语法点所在集，跟敲一遍再回来做 exercise；这套的强项是「每个特性都配一个能跑的小例子」",
+            "bv": "BV1et411b73Z"
+          },
+          {
+            "name": "侯捷 · C++ 内存管理机制",
+            "url": "https://www.bilibili.com/video/BV1d3h5zFEjL/",
+            "note": "new/delete 的真实调用链、allocator、内存池与 placement new；讲清「一次 new 到底发生了几件事」",
+            "bv": "BV1d3h5zFEjL"
+          },
+          {
+            "name": "侯捷 · STL 标准库与泛型编程",
+            "url": "https://www.bilibili.com/video/BV1kBh5zrEYh/",
+            "note": "六大部件（容器/分配器/算法/迭代器/适配器/仿函数）的协作关系，以及 traits 如何让算法适配不同迭代器",
+            "bv": "BV1kBh5zrEYh"
+          },
+          {
+            "name": "侯捷 · C++ 面向对象高级开发（上）",
+            "url": "https://www.bilibili.com/video/BV1r6h5zgE2i/",
+            "note": "讲「类到底怎么长出来的」：构造/析构顺序、拷贝构造与赋值、深拷贝、static、类模板。看完应能画出对象内存布局",
+            "bv": "BV1r6h5zgE2i"
+          }
+        ]
       }
     },
     {
@@ -574,26 +1038,55 @@
       "status": "complete",
       "resources": {
         "github": [
-          "practical-tutorials/project-based-learning",
-          "TheAlgorithms/C-Plus-Plus",
-          "ssloy/tinyrenderer"
+          "microsoft/STL",
+          "fmtlib/fmt",
+          "abseil/abseil-cpp"
         ],
         "github_stars": [
-          286133,
-          34742,
-          24335
+          11172,
+          25897,
+          18171
         ],
         "github_notes": [
-          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
-          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
-          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+          "§1.1 与 §1.3 的原始实现：`stl/inc/type_traits` 里 `is_destructible` 靠 `declval<T>().~T()` 的SFINAE 探测，`conjunction`/`disjunction` 用短路继承避免多余实例化；把这几处读完，`<type_traits>` 就不再是「查表用的魔法」",
+          "§3.1 与 §3.2 的过渡样本：`include/fmt/base.h` 里 `is_formattable` 同时有 C++20 concept 版（`requires` 表达式）与旧编译器的 SFINAE 版，两份实现并列；对照它们能看清 concept 把「替换失败」从错误信息里救出来这件事有多实际",
+          "§3.1 的工具箱：`absl/meta/type_traits.h` 的 `absl::void_t`、`type_identity`、`is_comparable` 都是为「检测某操作是否合法」准备的积木；读 `is_comparable` 的 `decltype` 表达式，是本章 SFINAE 一节最干净的例题"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《C++ Templates: The Complete Guide（第2版）》"
+          "《C++ Primer（第 5 版）》Lippman 等",
+          "《Effective C++（第 3 版）》Meyers",
+          "《深度探索 C++ 对象模型》Lippman"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1et411b73Z/",
+        "bilibili_list": [
+          {
+            "name": "黑马程序员 · C++ 从 0 到 1 入门",
+            "url": "https://www.bilibili.com/video/BV1et411b73Z/",
+            "note": "按目录定位到本章语法点所在集，跟敲一遍再回来做 exercise；这套的强项是「每个特性都配一个能跑的小例子」",
+            "bv": "BV1et411b73Z"
+          },
+          {
+            "name": "侯捷 · STL 标准库与泛型编程",
+            "url": "https://www.bilibili.com/video/BV1kBh5zrEYh/",
+            "note": "六大部件（容器/分配器/算法/迭代器/适配器/仿函数）的协作关系，以及 traits 如何让算法适配不同迭代器",
+            "bv": "BV1kBh5zrEYh"
+          },
+          {
+            "name": "侯捷 · C++ 面向对象高级开发（上）",
+            "url": "https://www.bilibili.com/video/BV1r6h5zgE2i/",
+            "note": "讲「类到底怎么长出来的」：构造/析构顺序、拷贝构造与赋值、深拷贝、static、类模板。看完应能画出对象内存布局",
+            "bv": "BV1r6h5zgE2i"
+          },
+          {
+            "name": "侯捷 · C++ 面向对象高级开发（下）",
+            "url": "https://www.bilibili.com/video/BV1kBh5zrEWL/",
+            "note": "继承、虚函数与多态的实现机制：vptr/vtable、虚析构、委托与继承的组合取舍。对应「为什么基类析构要 virtual」",
+            "bv": "BV1kBh5zrEWL"
+          }
+        ]
       }
     },
     {
@@ -609,26 +1102,55 @@
       "status": "complete",
       "resources": {
         "github": [
-          "practical-tutorials/project-based-learning",
-          "TheAlgorithms/C-Plus-Plus",
-          "ssloy/tinyrenderer"
+          "simdjson/simdjson",
+          "google/benchmark",
+          "ClickHouse/ClickHouse"
         ],
         "github_stars": [
-          286133,
-          34742,
-          24335
+          24473,
+          10486,
+          50637
         ],
         "github_notes": [
-          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
-          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
-          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+          "§1.1 对齐与 §1.2 显式对齐：`src/generic/stage1/json_structural_indexer.h` 每次吃 64 字节块，用 `SIMDJSON_ALIGNED` 保证输入指针对齐到 64 字节边界（否则 AVX2 加载会慢甚至崩）；这是「对齐不是学究问题，是 SIMD 的硬要求」的第一手证据",
+          "配 §3.2 的测量方法：`include/benchmark/benchmark.h` 的 `DoNotOptimize` 阻止编译器把结果删掉、`ClobberMemory` 强制刷新内存可见性；本章讲「链表 vs 数组」时，没有这两个工具测出来的数字基本不可信",
+          "§3.1 AoS vs SoA 的极致：`src/Columns/ColumnVector.cpp` 每个数值列就是一条连续 `PODArray`，`src/Common/PODArray.h` 负责带 padding 的增长；读 `ColumnVector::getData()` 直接返回裸指针——因为列存的前提就是「同类型紧挨着」，这正是本章要论证的局部性收益"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《Effective C++》条款 16-25（内存与效率）"
+          "《C++ Primer（第 5 版）》Lippman 等",
+          "《Effective C++（第 3 版）》Meyers",
+          "《深度探索 C++ 对象模型》Lippman"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1et411b73Z/",
+        "bilibili_list": [
+          {
+            "name": "黑马程序员 · C++ 从 0 到 1 入门",
+            "url": "https://www.bilibili.com/video/BV1et411b73Z/",
+            "note": "按目录定位到本章语法点所在集，跟敲一遍再回来做 exercise；这套的强项是「每个特性都配一个能跑的小例子」",
+            "bv": "BV1et411b73Z"
+          },
+          {
+            "name": "侯捷 · STL 标准库与泛型编程",
+            "url": "https://www.bilibili.com/video/BV1kBh5zrEYh/",
+            "note": "六大部件（容器/分配器/算法/迭代器/适配器/仿函数）的协作关系，以及 traits 如何让算法适配不同迭代器",
+            "bv": "BV1kBh5zrEYh"
+          },
+          {
+            "name": "侯捷 · C++ 内存管理机制",
+            "url": "https://www.bilibili.com/video/BV1d3h5zFEjL/",
+            "note": "new/delete 的真实调用链、allocator、内存池与 placement new；讲清「一次 new 到底发生了几件事」",
+            "bv": "BV1d3h5zFEjL"
+          },
+          {
+            "name": "侯捷 · C++ 面向对象高级开发（上）",
+            "url": "https://www.bilibili.com/video/BV1r6h5zgE2i/",
+            "note": "讲「类到底怎么长出来的」：构造/析构顺序、拷贝构造与赋值、深拷贝、static、类模板。看完应能画出对象内存布局",
+            "bv": "BV1r6h5zgE2i"
+          }
+        ]
       }
     },
     {
@@ -644,26 +1166,55 @@
       "status": "complete",
       "resources": {
         "github": [
-          "practical-tutorials/project-based-learning",
-          "TheAlgorithms/C-Plus-Plus",
-          "ssloy/tinyrenderer"
+          "google/googletest",
+          "catchorg/Catch2",
+          "cpp-best-practices/gui_starter_template"
         ],
         "github_stars": [
-          286133,
-          34742,
-          24335
+          39670,
+          21538,
+          null
         ],
         "github_notes": [
-          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
-          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
-          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+          "§2.1 测试框架的最小内核：`googletest/src/gtest.cc` 的 `RUN_ALL_TESTS` → `UnitTest::Run` → 逐个 `TestInfo::Run`，最后把失败数折成进程退出码；看清「退出码即结论」这条链，CI 里的 `ctest` 才知道该不该红",
+          "§2.1 的另一种内核与 §1.2 的 CMake 用法：`src/catch2/catch_session.cpp` 的 `Session::run` 返回失败用例数，`CMakeLists.txt` 里 `catch_discover_tests` 把用例注册成独立测试；对照 googletest 的「一次跑完」与 Catch2 的「逐用例发现」，能看出两种框架对 CI 并行粒度的不同假设",
+          "§1.2、§1.3 与 §4.1 的整体样板：根 `CMakeLists.txt` 用 target-based 写法，`cmake/` 放自写模块，`.github/workflows/` 里是完整的矩阵构建 + 缓存 + artifact；把它当作本章的参考实现逐条对照——这是少数把「现代 CMake + 测试 + CI」串成一条线的小型仓库"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《CMake 实践》"
+          "《C++ Primer（第 5 版）》Lippman 等",
+          "《Effective C++（第 3 版）》Meyers",
+          "《深度探索 C++ 对象模型》Lippman"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1et411b73Z/",
+        "bilibili_list": [
+          {
+            "name": "黑马程序员 · C++ 从 0 到 1 入门",
+            "url": "https://www.bilibili.com/video/BV1et411b73Z/",
+            "note": "按目录定位到本章语法点所在集，跟敲一遍再回来做 exercise；这套的强项是「每个特性都配一个能跑的小例子」",
+            "bv": "BV1et411b73Z"
+          },
+          {
+            "name": "侯捷 · C++ 内存管理机制",
+            "url": "https://www.bilibili.com/video/BV1d3h5zFEjL/",
+            "note": "new/delete 的真实调用链、allocator、内存池与 placement new；讲清「一次 new 到底发生了几件事」",
+            "bv": "BV1d3h5zFEjL"
+          },
+          {
+            "name": "侯捷 · C++ 面向对象高级开发（上）",
+            "url": "https://www.bilibili.com/video/BV1r6h5zgE2i/",
+            "note": "讲「类到底怎么长出来的」：构造/析构顺序、拷贝构造与赋值、深拷贝、static、类模板。看完应能画出对象内存布局",
+            "bv": "BV1r6h5zgE2i"
+          },
+          {
+            "name": "侯捷 · C++ 面向对象高级开发（下）",
+            "url": "https://www.bilibili.com/video/BV1kBh5zrEWL/",
+            "note": "继承、虚函数与多态的实现机制：vptr/vtable、虚析构、委托与继承的组合取舍。对应「为什么基类析构要 virtual」",
+            "bv": "BV1kBh5zrEWL"
+          }
+        ]
       }
     },
     {
@@ -680,27 +1231,55 @@
       "status": "complete",
       "resources": {
         "github": [
-          "practical-tutorials/project-based-learning",
-          "TheAlgorithms/C-Plus-Plus",
-          "ssloy/tinyrenderer"
+          "isocpp/CppCoreGuidelines",
+          "cpp-best-practices/cppbestpractices",
+          "practical-tutorials/project-based-learning"
         ],
         "github_stars": [
-          286133,
-          34742,
-          24335
+          45390,
+          8851,
+          286133
         ],
         "github_notes": [
-          "项目驱动的多语言实战教程合集（含 C/C++ 专题）",
-          "C++ 实现的经典算法与数据结构合集，可直接编译运行",
-          "从零手写软件渲染器，C++ 底层与内存布局的极佳教材"
+          "§3.1 异常安全等级的规范表述：`CppCoreGuidelines.md` 的 E.6（RAII 保证）与 C.vector 相关条款把「Basic / Strong / No-throw」写成了可引用规则；面试口述前先按编号找到原文，比背二手总结更抗追问",
+          "§2.1 线程池之外的另一半——工程化清单：`chapters/` 目录按主题分章（工具、风格、CMake、测试、CI），每章末尾给可执行检查项；拿它给自己的项目做一次体检，能找出「能跑但不能交付」的具体项",
+          "§5.2 系统设计取材：`README.md` 的 C++ 一节列了几十个「从零写一个 X」的项目（解释器、渲染器、数据库）；面试讲项目经历时，从这类项目里挑一个真正做完的，比堆功能列表更能撑住「你解决过什么真实约束」的追问"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《剑指 Offer（第2版）》",
-          "《C++ 面试宝典》"
+          "《C++ Primer（第 5 版）》Lippman 等",
+          "《Effective C++（第 3 版）》Meyers",
+          "《深度探索 C++ 对象模型》Lippman"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1et411b73Z/",
+        "bilibili_list": [
+          {
+            "name": "黑马程序员 · C++ 从 0 到 1 入门",
+            "url": "https://www.bilibili.com/video/BV1et411b73Z/",
+            "note": "按目录定位到本章语法点所在集，跟敲一遍再回来做 exercise；这套的强项是「每个特性都配一个能跑的小例子」",
+            "bv": "BV1et411b73Z"
+          },
+          {
+            "name": "侯捷 · STL 标准库与泛型编程",
+            "url": "https://www.bilibili.com/video/BV1kBh5zrEYh/",
+            "note": "六大部件（容器/分配器/算法/迭代器/适配器/仿函数）的协作关系，以及 traits 如何让算法适配不同迭代器",
+            "bv": "BV1kBh5zrEYh"
+          },
+          {
+            "name": "侯捷 · C++ 面向对象高级开发（上）",
+            "url": "https://www.bilibili.com/video/BV1r6h5zgE2i/",
+            "note": "讲「类到底怎么长出来的」：构造/析构顺序、拷贝构造与赋值、深拷贝、static、类模板。看完应能画出对象内存布局",
+            "bv": "BV1r6h5zgE2i"
+          },
+          {
+            "name": "侯捷 · C++ 面向对象高级开发（下）",
+            "url": "https://www.bilibili.com/video/BV1kBh5zrEWL/",
+            "note": "继承、虚函数与多态的实现机制：vptr/vtable、虚析构、委托与继承的组合取舍。对应「为什么基类析构要 virtual」",
+            "bv": "BV1kBh5zrEWL"
+          }
+        ]
       }
     }
   ],
@@ -714,23 +1293,55 @@
         "status": "complete",
         "resources": {
           "github": [
-            "practical-tutorials/project-based-learning",
-            "TheAlgorithms/C"
+            "rswier/c4",
+            "antirez/kilo",
+            "DaveGamble/cJSON"
           ],
           "github_stars": [
-            286133,
-            22507
+            10819,
+            9187,
+            13040
           ],
           "github_notes": [
-            "项目驱动的实战教程合集（含 C 专题）",
-            "C 语言实现的算法与数据结构合集"
+            "§1.1 的活体样本：`c4.c` 把整个源程序读进一块 `char *src`，之后全靠 `*++p` / `*--p` 走路，`next()` 与 `expr()` 里每个取值都是「带类型的地址」——看这两个函数就能把 §1.1 的地址运算和 §1.4 的指针相减对上",
+            "§1.2 数组退化：`kilo.c` 里 `E.row[y].chars`、`&E.row[y]` 全是「数组名当指针用」，`editorRowInsertChar` 里 `row->chars + at` 直接做指针偏移；注意它从不写 `E.row[y]->` ",
+            "§1.6 `void *` 的工业用法：`cJSON.c` 的 `cJSON_malloc`/`cJSON_free` 返回与接收的都是 `void *`，赋值给 `cJSON *` 时不强转——对照 §1.6 的「void 指针可隐式转换」与 §3.1 的 const 形态"
           ],
-          "github_fetched_at": "2026-09-21",
+          "github_fetched_at": "2026-10-27",
           "books": [
-            "《C 程序设计语言（K&R）》第 5 章 指针与数组"
+            "《C 程序设计语言（第 2 版）》Kernighan & Ritchie",
+            "《C 和指针》Reek",
+            "《C 陷阱与缺陷》Koenig"
           ],
           "leetcode": [],
-          "nowcoder": []
+          "nowcoder": [],
+          "bilibili": "https://www.bilibili.com/video/BV1dr4y1n7vA/",
+          "bilibili_list": [
+            {
+              "name": "翁恺（浙江大学）· C 语言程序设计",
+              "url": "https://www.bilibili.com/video/BV1dr4y1n7vA/",
+              "note": "国内最稳的 C 语言入门课：指针与数组的关系讲得极细，每节都有可当场上机的最小例子",
+              "bv": "BV1dr4y1n7vA"
+            },
+            {
+              "name": "黑马程序员 · C 语言基础教程",
+              "url": "https://www.bilibili.com/video/BV1vs411n7TH/",
+              "note": "配套源码与案例齐全，位运算、预处理、指针进阶这几节比多数课细",
+              "bv": "BV1vs411n7TH"
+            },
+            {
+              "name": "郝斌 · C 语言自学教程",
+              "url": "https://www.bilibili.com/video/BV1os411h77o/",
+              "note": "老派但极清楚：链表、结构体、指针的板书推导，适合把数据结构那几节看明白",
+              "bv": "BV1os411h77o"
+            },
+            {
+              "name": "黑马程序员 · C 语言零基础到精通",
+              "url": "https://www.bilibili.com/video/BV1Xa4y1k7LU/",
+              "note": "工程视角更重：多文件编译、头文件组织、调试与内存查看，适合把「写题」过渡到「写工程」",
+              "bv": "BV1Xa4y1k7LU"
+            }
+          ]
         }
       },
       {
@@ -739,23 +1350,55 @@
         "status": "complete",
         "resources": {
           "github": [
-            "practical-tutorials/project-based-learning",
-            "TheAlgorithms/C"
+            "antirez/kilo",
+            "DaveGamble/cJSON",
+            "redis/redis"
           ],
           "github_stars": [
-            286133,
-            22507
+            9187,
+            13040,
+            76964
           ],
           "github_notes": [
-            "项目驱动的实战教程合集（含 C 专题）",
-            "C 语言实现的算法与数据结构合集"
+            "§2.2 `realloc` 的正确写法就在 `editorRowInsertChar`：先 `realloc(row->chars, ...)` 到新指针，再赋值回去；`editorUpdateRow` 每次重建 render 缓冲，看它怎么避免「realloc 失败把原指针弄丢」",
+            "§2.1/§2.3 的一 malloc 一 free 配对：`cJSON_New_Item` 先 `memset` 再返回、`cJSON_Delete` 递归释放子节点；`cJSON_Parse` 失败路径上每一处 return 前都调 `cJSON_Delete`，对照 §3.2 泄漏成因第 1 条",
+            "§3.5 池化与统计：`src/zmalloc.c` 在 `malloc` 外包一层，用 `PREFIX_SIZE` 记字节数，`zmalloc_used_memory` 对外报总量——这就是「分配器之上再包一层」的最小实现，对照 §1.4 的真实成本"
           ],
-          "github_fetched_at": "2026-09-21",
+          "github_fetched_at": "2026-10-27",
           "books": [
-            "《C 程序设计语言（K&R）》第 7 章 内存管理"
+            "《C 程序设计语言（第 2 版）》Kernighan & Ritchie",
+            "《C 和指针》Reek",
+            "《C 陷阱与缺陷》Koenig"
           ],
           "leetcode": [],
-          "nowcoder": []
+          "nowcoder": [],
+          "bilibili": "https://www.bilibili.com/video/BV1dr4y1n7vA/",
+          "bilibili_list": [
+            {
+              "name": "翁恺（浙江大学）· C 语言程序设计",
+              "url": "https://www.bilibili.com/video/BV1dr4y1n7vA/",
+              "note": "国内最稳的 C 语言入门课：指针与数组的关系讲得极细，每节都有可当场上机的最小例子",
+              "bv": "BV1dr4y1n7vA"
+            },
+            {
+              "name": "黑马程序员 · C 语言零基础到精通",
+              "url": "https://www.bilibili.com/video/BV1Xa4y1k7LU/",
+              "note": "工程视角更重：多文件编译、头文件组织、调试与内存查看，适合把「写题」过渡到「写工程」",
+              "bv": "BV1Xa4y1k7LU"
+            },
+            {
+              "name": "郝斌 · C 语言自学教程",
+              "url": "https://www.bilibili.com/video/BV1os411h77o/",
+              "note": "老派但极清楚：链表、结构体、指针的板书推导，适合把数据结构那几节看明白",
+              "bv": "BV1os411h77o"
+            },
+            {
+              "name": "黑马程序员 · C 语言基础教程",
+              "url": "https://www.bilibili.com/video/BV1vs411n7TH/",
+              "note": "配套源码与案例齐全，位运算、预处理、指针进阶这几节比多数课细",
+              "bv": "BV1vs411n7TH"
+            }
+          ]
         }
       },
       {
@@ -764,23 +1407,55 @@
         "status": "complete",
         "resources": {
           "github": [
-            "practical-tutorials/project-based-learning",
-            "TheAlgorithms/C"
+            "DaveGamble/cJSON",
+            "redis/redis",
+            "antirez/kilo"
           ],
           "github_stars": [
-            286133,
-            22507
+            13040,
+            76964,
+            9187
           ],
           "github_notes": [
-            "项目驱动的实战教程合集（含 C 专题）",
-            "C 语言实现的算法与数据结构合集"
+            "§2.3 tagged union 的工业写法：`struct cJSON` 是 `int type` 加一个 union（valuedouble/valuestring/…），读的时候先用 `cJSON_IsNumber` 判 type 再取成员——正是「把 UB 关进笼子」那节的做法",
+            "§3.4 柔性数组 + 对齐省字节：`sds.h` 的 `sdshdr8/16/32/64` 末尾都是 `char buf[]`，外层用 `__attribute__((__packed__))` 压掉填充；把它和 §1.2 手算的 sizeof 对照，能看清「填充是 ABI 契约」",
+            "§3.1 逐成员浅拷贝：`struct erow` 里 `int size; char *chars; char *render;` 混着指针，赋值时只拷指针不拷内容——`editorRowInsertChar` 之后两处都要改，否则就是浅拷贝的经典 bug"
           ],
-          "github_fetched_at": "2026-09-21",
+          "github_fetched_at": "2026-10-27",
           "books": [
-            "《C 程序设计语言（K&R）》第 6 章 结构"
+            "《C 程序设计语言（第 2 版）》Kernighan & Ritchie",
+            "《C 和指针》Reek",
+            "《C 陷阱与缺陷》Koenig"
           ],
           "leetcode": [],
-          "nowcoder": []
+          "nowcoder": [],
+          "bilibili": "https://www.bilibili.com/video/BV1dr4y1n7vA/",
+          "bilibili_list": [
+            {
+              "name": "翁恺（浙江大学）· C 语言程序设计",
+              "url": "https://www.bilibili.com/video/BV1dr4y1n7vA/",
+              "note": "国内最稳的 C 语言入门课：指针与数组的关系讲得极细，每节都有可当场上机的最小例子",
+              "bv": "BV1dr4y1n7vA"
+            },
+            {
+              "name": "黑马程序员 · C 语言零基础到精通",
+              "url": "https://www.bilibili.com/video/BV1Xa4y1k7LU/",
+              "note": "工程视角更重：多文件编译、头文件组织、调试与内存查看，适合把「写题」过渡到「写工程」",
+              "bv": "BV1Xa4y1k7LU"
+            },
+            {
+              "name": "郝斌 · C 语言自学教程",
+              "url": "https://www.bilibili.com/video/BV1os411h77o/",
+              "note": "老派但极清楚：链表、结构体、指针的板书推导，适合把数据结构那几节看明白",
+              "bv": "BV1os411h77o"
+            },
+            {
+              "name": "黑马程序员 · C 语言基础教程",
+              "url": "https://www.bilibili.com/video/BV1vs411n7TH/",
+              "note": "配套源码与案例齐全，位运算、预处理、指针进阶这几节比多数课细",
+              "bv": "BV1vs411n7TH"
+            }
+          ]
         }
       },
       {
@@ -789,23 +1464,55 @@
         "status": "complete",
         "resources": {
           "github": [
-            "practical-tutorials/project-based-learning",
-            "TheAlgorithms/C"
+            "antirez/kilo",
+            "redis/redis",
+            "rswier/c4"
           ],
           "github_stars": [
-            286133,
-            22507
+            9187,
+            76964,
+            10819
           ],
           "github_notes": [
-            "项目驱动的实战教程合集（含 C 专题）",
-            "C 语言实现的算法与数据结构合集"
+            "§2.1 模式表的最小用法：`editorOpen` 用 `fopen(path, \\\"r\\\")` + `getline` 逐行读，`editorSave` 用 `fopen(..., \\\"w\\\")` + `fwrite`；注意它对 `fopen` 返回 NULL 立刻报错退出（§3.1）",
+            "§3.2 短读：`src/rio.c` 是对「一次读写可能只走一部分」的抽象层，`rioRead`/`rioWrite` 都返回实际字节数，调用方必须循环补满——这正是核对 `fread` 返回值的通用做法",
+            "§1.3 用户态缓冲 vs 系统调用次数：`c4.c` 不用 stdio，直接用 `read()` 把整个源文件一次性读进 `src`，系统调用只发生一次——对照 §1.2 的三种缓冲模式就明白 stdio 在替你做什么"
           ],
-          "github_fetched_at": "2026-09-21",
+          "github_fetched_at": "2026-10-27",
           "books": [
-            "《C 程序设计语言（K&R）》第 7 章 输入与输出"
+            "《C 程序设计语言（第 2 版）》Kernighan & Ritchie",
+            "《C 和指针》Reek",
+            "《C 陷阱与缺陷》Koenig"
           ],
           "leetcode": [],
-          "nowcoder": []
+          "nowcoder": [],
+          "bilibili": "https://www.bilibili.com/video/BV1dr4y1n7vA/",
+          "bilibili_list": [
+            {
+              "name": "翁恺（浙江大学）· C 语言程序设计",
+              "url": "https://www.bilibili.com/video/BV1dr4y1n7vA/",
+              "note": "国内最稳的 C 语言入门课：指针与数组的关系讲得极细，每节都有可当场上机的最小例子",
+              "bv": "BV1dr4y1n7vA"
+            },
+            {
+              "name": "黑马程序员 · C 语言零基础到精通",
+              "url": "https://www.bilibili.com/video/BV1Xa4y1k7LU/",
+              "note": "工程视角更重：多文件编译、头文件组织、调试与内存查看，适合把「写题」过渡到「写工程」",
+              "bv": "BV1Xa4y1k7LU"
+            },
+            {
+              "name": "郝斌 · C 语言自学教程",
+              "url": "https://www.bilibili.com/video/BV1os411h77o/",
+              "note": "老派但极清楚：链表、结构体、指针的板书推导，适合把数据结构那几节看明白",
+              "bv": "BV1os411h77o"
+            },
+            {
+              "name": "黑马程序员 · C 语言基础教程",
+              "url": "https://www.bilibili.com/video/BV1vs411n7TH/",
+              "note": "配套源码与案例齐全，位运算、预处理、指针进阶这几节比多数课细",
+              "bv": "BV1vs411n7TH"
+            }
+          ]
         }
       },
       {
@@ -814,23 +1521,55 @@
         "status": "complete",
         "resources": {
           "github": [
-            "practical-tutorials/project-based-learning",
-            "TheAlgorithms/C"
+            "DaveGamble/cJSON",
+            "redis/redis",
+            "rswier/c4"
           ],
           "github_stars": [
-            286133,
-            22507
+            13040,
+            76964,
+            10819
           ],
           "github_notes": [
-            "项目驱动的实战教程合集（含 C 专题）",
-            "C 语言实现的算法与数据结构合集"
+            "§4.2/§4.4 头文件守卫：`cJSON.h` 顶部的 `#ifndef cJSON__h` + `#define` 是标准守卫写法，`CJSON_PUBLIC` 宏统一处理导出符号；顺带看它怎么用 `#ifdef __cplusplus` 给 C++ 留 `extern \\\"C\\\"`",
+            "§2.3 宏还是 inline：`src/sds.h` 里 `sdslen`/`sdsavail` 是 `static inline`，而 `src/zmalloc.h` 里 `zmalloc_usable_size` 是宏包函数——同一份代码里两种取舍并存，正好对照那节的判据",
+            "§1.1/§1.2 亲手量一次：`c4.c` 只有一个翻译单元、只包含标准头，直接 `cc -E c4.c | wc -l` 与 `grep -c '' c4.c` 对比，就能看到 `#include` 展开后的体积差"
           ],
-          "github_fetched_at": "2026-09-21",
+          "github_fetched_at": "2026-10-27",
           "books": [
-            "《C 程序设计语言（K&R）》第 4 章 函数与程序结构"
+            "《C 程序设计语言（第 2 版）》Kernighan & Ritchie",
+            "《C 和指针》Reek",
+            "《C 陷阱与缺陷》Koenig"
           ],
           "leetcode": [],
-          "nowcoder": []
+          "nowcoder": [],
+          "bilibili": "https://www.bilibili.com/video/BV1dr4y1n7vA/",
+          "bilibili_list": [
+            {
+              "name": "翁恺（浙江大学）· C 语言程序设计",
+              "url": "https://www.bilibili.com/video/BV1dr4y1n7vA/",
+              "note": "国内最稳的 C 语言入门课：指针与数组的关系讲得极细，每节都有可当场上机的最小例子",
+              "bv": "BV1dr4y1n7vA"
+            },
+            {
+              "name": "黑马程序员 · C 语言零基础到精通",
+              "url": "https://www.bilibili.com/video/BV1Xa4y1k7LU/",
+              "note": "工程视角更重：多文件编译、头文件组织、调试与内存查看，适合把「写题」过渡到「写工程」",
+              "bv": "BV1Xa4y1k7LU"
+            },
+            {
+              "name": "黑马程序员 · C 语言基础教程",
+              "url": "https://www.bilibili.com/video/BV1vs411n7TH/",
+              "note": "配套源码与案例齐全，位运算、预处理、指针进阶这几节比多数课细",
+              "bv": "BV1vs411n7TH"
+            },
+            {
+              "name": "郝斌 · C 语言自学教程",
+              "url": "https://www.bilibili.com/video/BV1os411h77o/",
+              "note": "老派但极清楚：链表、结构体、指针的板书推导，适合把数据结构那几节看明白",
+              "bv": "BV1os411h77o"
+            }
+          ]
         }
       },
       {
@@ -839,23 +1578,55 @@
         "status": "complete",
         "resources": {
           "github": [
-            "practical-tutorials/project-based-learning",
-            "TheAlgorithms/C"
+            "rswier/c4",
+            "antirez/kilo",
+            "redis/redis"
           ],
           "github_stars": [
-            286133,
-            22507
+            10819,
+            9187,
+            76964
           ],
           "github_notes": [
-            "项目驱动的实战教程合集（含 C 专题）",
-            "C 语言实现的算法与数据结构合集"
+            "§2.1 规则三要素的最小样例：仓库根的 `Makefile` 只有「目标: 依赖 + 命令」的几条规则，没有变量、没有模式规则；先把它读懂，再去看复杂工程的 Makefile 才不会迷路",
+            "§2.3 变量与自动变量：`kilo` 的 `Makefile` 用 `$(CC)`、`$(CFLAGS)` 拼命令，把 `CFLAGS = -O2` 改成 `CFLAGS := -O2` 再 `make -n`，能直接看出 `=` 与 `:=` 的展开时机差异",
+            "§3.4 为什么大家不再手写：`src/Makefile` 是上千行手写构建（带 `$(REDIS_SERVER_OBJ)` 这类目标文件列表），读完就知道 CMake/Meson/Bazel 想解决的到底是什么问题"
           ],
-          "github_fetched_at": "2026-09-21",
+          "github_fetched_at": "2026-10-27",
           "books": [
-            "《GNU Make 手册》"
+            "《C 程序设计语言（第 2 版）》Kernighan & Ritchie",
+            "《C 和指针》Reek",
+            "《C 陷阱与缺陷》Koenig"
           ],
           "leetcode": [],
-          "nowcoder": []
+          "nowcoder": [],
+          "bilibili": "https://www.bilibili.com/video/BV1dr4y1n7vA/",
+          "bilibili_list": [
+            {
+              "name": "翁恺（浙江大学）· C 语言程序设计",
+              "url": "https://www.bilibili.com/video/BV1dr4y1n7vA/",
+              "note": "国内最稳的 C 语言入门课：指针与数组的关系讲得极细，每节都有可当场上机的最小例子",
+              "bv": "BV1dr4y1n7vA"
+            },
+            {
+              "name": "黑马程序员 · C 语言零基础到精通",
+              "url": "https://www.bilibili.com/video/BV1Xa4y1k7LU/",
+              "note": "工程视角更重：多文件编译、头文件组织、调试与内存查看，适合把「写题」过渡到「写工程」",
+              "bv": "BV1Xa4y1k7LU"
+            },
+            {
+              "name": "郝斌 · C 语言自学教程",
+              "url": "https://www.bilibili.com/video/BV1os411h77o/",
+              "note": "老派但极清楚：链表、结构体、指针的板书推导，适合把数据结构那几节看明白",
+              "bv": "BV1os411h77o"
+            },
+            {
+              "name": "黑马程序员 · C 语言基础教程",
+              "url": "https://www.bilibili.com/video/BV1vs411n7TH/",
+              "note": "配套源码与案例齐全，位运算、预处理、指针进阶这几节比多数课细",
+              "bv": "BV1vs411n7TH"
+            }
+          ]
         }
       },
       {
@@ -864,23 +1635,55 @@
         "status": "complete",
         "resources": {
           "github": [
-            "practical-tutorials/project-based-learning",
-            "TheAlgorithms/C"
+            "DaveGamble/cJSON",
+            "redis/redis",
+            "rswier/c4"
           ],
           "github_stars": [
-            286133,
-            22507
+            13040,
+            76964,
+            10819
           ],
           "github_notes": [
-            "项目驱动的实战教程合集（含 C 专题）",
-            "C 语言实现的算法与数据结构合集"
+            "§1.2/§1.4 声明与定义分离的标准形态：`cJSON.h` 只有声明与 `CJSON_PUBLIC`，`cJSON.c` 里才有定义；头文件里没有任何 `static` 变量——这就是「头文件该放什么」的答案",
+            "§3.3 链接顺序的实物：`src/Makefile` 里 `REDIS_SERVER_OBJ` 把几十个 `.o` 列成一串再交给链接器，顺序变了就可能出现未定义符号——对照那节的「被依赖者放后面」",
+            "§2.1/§2.2 反例对照：`c4` 只有一个翻译单元，`nm c4` 看到的几乎全是本地符号；拿它和 cJSON 的 `nm cJSON.o` 对比，`U`（未定义）与 `T`（已定义）的区别一下就清楚了"
           ],
-          "github_fetched_at": "2026-09-21",
+          "github_fetched_at": "2026-10-27",
           "books": [
-            "《程序员的自我修养：链接、装载与库》"
+            "《C 程序设计语言（第 2 版）》Kernighan & Ritchie",
+            "《C 和指针》Reek",
+            "《C 陷阱与缺陷》Koenig"
           ],
           "leetcode": [],
-          "nowcoder": []
+          "nowcoder": [],
+          "bilibili": "https://www.bilibili.com/video/BV1dr4y1n7vA/",
+          "bilibili_list": [
+            {
+              "name": "翁恺（浙江大学）· C 语言程序设计",
+              "url": "https://www.bilibili.com/video/BV1dr4y1n7vA/",
+              "note": "国内最稳的 C 语言入门课：指针与数组的关系讲得极细，每节都有可当场上机的最小例子",
+              "bv": "BV1dr4y1n7vA"
+            },
+            {
+              "name": "黑马程序员 · C 语言零基础到精通",
+              "url": "https://www.bilibili.com/video/BV1Xa4y1k7LU/",
+              "note": "工程视角更重：多文件编译、头文件组织、调试与内存查看，适合把「写题」过渡到「写工程」",
+              "bv": "BV1Xa4y1k7LU"
+            },
+            {
+              "name": "郝斌 · C 语言自学教程",
+              "url": "https://www.bilibili.com/video/BV1os411h77o/",
+              "note": "老派但极清楚：链表、结构体、指针的板书推导，适合把数据结构那几节看明白",
+              "bv": "BV1os411h77o"
+            },
+            {
+              "name": "黑马程序员 · C 语言基础教程",
+              "url": "https://www.bilibili.com/video/BV1vs411n7TH/",
+              "note": "配套源码与案例齐全，位运算、预处理、指针进阶这几节比多数课细",
+              "bv": "BV1vs411n7TH"
+            }
+          ]
         }
       }
     ]

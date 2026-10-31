@@ -17,14 +17,26 @@
       "title": "acks=all 与 min.insync.replicas 的联合语义",
       "stem_md": "下面关于 `acks=all` 的说法，哪一项**正确**？",
       "options": [
-        "acks=all 表示消息已被所有副本持久化，绝对不会丢",
-        "acks=all 表示消息已被当前 ISR 全体接受；若 min.insync.replicas=1，ISR 缩到 1 时它等价于 acks=1",
-        "acks=all 只在副本数为 2 时有意义",
-        "acks=all 会自动把 min.insync.replicas 设为副本因子"
+        {
+          "key": "A",
+          "text": "`acks=all` 要求所有副本（含尚未同步的 follower）都写入成功才返回"
+        },
+        {
+          "key": "B",
+          "text": "`acks=all` 的强度等于 min(ISR 实际大小, min.insync.replicas)；当 min.insync.replicas=1 时它会退化为 `acks=1`"
+        },
+        {
+          "key": "C",
+          "text": "`acks=all` 与 min.insync.replicas 无关，只要设了 all 就不会丢消息"
+        },
+        {
+          "key": "D",
+          "text": "`acks=all` 只能用于单副本 topic，多副本时必须用 `acks=1`"
+        }
       ],
       "answer": {
         "correct": [
-          1
+          "B"
         ],
         "reference_code": "",
         "output": "acks=all 的强度 = min(ISR 实际大小, min.insync.replicas)；min.insync.replicas=1 时它会退化成 acks=1。"
@@ -42,14 +54,26 @@
       "title": "什么情况下生产者重试会导致分区内乱序",
       "stem_md": "关于生产者重试导致的乱序，下列哪一项**正确**？",
       "options": [
-        "只要设置了 retries，重试就不会导致乱序",
-        "max.in.flight.requests.per.connection>1 且未开启幂等时，重试的旧消息可能排在新消息之后落盘",
-        "开启幂等后必须把 max.in.flight 设为 1 才能保序",
-        "乱序只可能发生在多分区场景，单分区绝不会乱序"
+        {
+          "key": "A",
+          "text": "只要 `retries>0` 就一定乱序，与其它参数无关"
+        },
+        {
+          "key": "B",
+          "text": "`max.in.flight.requests.per.connection>1` 且未开启幂等时，重试可能乱序；开启幂等后 Kafka 用 (PID, partition, seq) 保证有序，允许 in.flight ≤ 5"
+        },
+        {
+          "key": "C",
+          "text": "乱序只发生在消费者端，与生产者重试无关"
+        },
+        {
+          "key": "D",
+          "text": "开启幂等后必须把 in.flight 设为 1 才能保证有序"
+        }
       ],
       "answer": {
         "correct": [
-          1
+          "B"
         ],
         "reference_code": "",
         "output": "in.flight>1 且未开幂等 -> 重试乱序；开启幂等后 Kafka 用 (PID, partition, seq) 保证有序，允许 in.flight<=5。"
@@ -85,14 +109,26 @@
       "title": "幂等落库的正确写法",
       "stem_md": "要在订单表上实现幂等落库（`order_no` 有唯一索引），下面哪种写法在**并发重复投递**下是正确的？",
       "options": [
-        "先 SELECT 判断订单是否存在，不存在再 INSERT",
-        "INSERT ... ON CONFLICT (order_no) DO NOTHING，并检查影响行数",
-        "捕获唯一键冲突异常后直接忽略",
-        "REPLACE INTO orders (...) VALUES (...)"
+        {
+          "key": "A",
+          "text": "先 `SELECT` 判断 `order_no` 是否存在，不存在再 `INSERT`"
+        },
+        {
+          "key": "B",
+          "text": "`INSERT ... ON CONFLICT (order_no) DO NOTHING`，把原子性下沉到存储引擎"
+        },
+        {
+          "key": "C",
+          "text": "用 `REPLACE INTO`，冲突时直接覆盖"
+        },
+        {
+          "key": "D",
+          "text": "在应用层加一把 `synchronized` 锁，然后普通 `INSERT`"
+        }
       ],
       "answer": {
         "correct": [
-          1
+          "B"
         ],
         "reference_code": "",
         "output": "唯一索引 + ON CONFLICT 把原子性下沉到存储引擎；先查后写存在 TOCTOU 竞态；REPLACE INTO 是删除+插入，会丢字段。"

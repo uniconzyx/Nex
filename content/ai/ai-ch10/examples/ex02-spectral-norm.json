@@ -1,0 +1,8 @@
+{
+  "title": "随机矩阵 vs 正交矩阵的谱半径",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "Gaussian/sqrt(n): max sigma = 1.9750, min = 0.0004, 条件数 = 4881.55\n正交矩阵:          max sigma = 1.0000, min = 1.0000, 条件数 = 1.00\n理论上高斯缩放矩阵 max sigma -> 2（Marchenko-Pastur 上界 2*sqrt(n)*1/sqrt(n)=2）\n结论：即使按 1/sqrt(n) 缩放，高斯矩阵的谱范数仍约 2（每层放大 2 倍），\n      正交初始化把奇异值全钉在 1，才是真正的『等距』，因而深链/RNN 更稳\n",
+  "code": "\nimport numpy as np\nrng = np.random.default_rng(1)\nn = 256\n\nG = rng.normal(0, 1.0 / np.sqrt(n), (n, n))     # He 缩放后的高斯矩阵\nsv = np.linalg.svd(G, compute_uv=False)\nQ, _ = np.linalg.qr(rng.normal(size=(n, n)))    # 正交矩阵\nsv_q = np.linalg.svd(Q, compute_uv=False)\n\nprint(f\"Gaussian/sqrt(n): max sigma = {sv.max():.4f}, min = {sv.min():.4f}, 条件数 = {sv.max()/sv.min():.2f}\")\nprint(f\"正交矩阵:          max sigma = {sv_q.max():.4f}, min = {sv_q.min():.4f}, 条件数 = {sv_q.max()/sv_q.min():.2f}\")\nprint(f\"理论上高斯缩放矩阵 max sigma -> 2（Marchenko-Pastur 上界 2*sqrt(n)*1/sqrt(n)=2）\")\nprint(\"结论：即使按 1/sqrt(n) 缩放，高斯矩阵的谱范数仍约 2（每层放大 2 倍），\")\nprint(\"      正交初始化把奇异值全钉在 1，才是真正的『等距』，因而深链/RNN 更稳\")\n"
+}

@@ -155,7 +155,7 @@
           70073,
           27445,
           32547,
-          30666
+          30732
         ],
         "github_approx": [
           false,
@@ -169,17 +169,47 @@
           "开源大模型部署与微调实战教程，中文、可复现，适合做第一个私有化 demo",
           "工业界 ML 落地案例合集，看「模型之外」的评估、监控、组织协作怎么写"
         ],
-        "github_fetched_at": "2026-10-21",
-        "bilibili": "https://search.bilibili.com/all?keyword=%E6%9D%8E%E6%B2%90%20AI",
+        "github_fetched_at": "2026-10-27",
+        "bilibili": "https://www.bilibili.com/video/BV1rv7A6oEeP/",
         "bilibili_keywords": [
           "李沐 深度学习 课程",
           "大模型 应用开发 岗位",
           "AI 行业 产业链"
         ],
         "bilibili_note": "站内搜索入口（关键词固定、视频会更新，故不写死 BV 号）",
-        "books": [],
+        "books": [
+          "《Prompt Engineering for LLMs》Berryman & Ziegler",
+          "《Designing Machine Learning Systems》Chip Huyen",
+          "《大语言模型应用开发》相关官方文档（OpenAI / DeepSeek API Docs）"
+        ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · LangChain 入门与 Agent 实战",
+            "url": "https://www.bilibili.com/video/BV1rv7A6oEeP/",
+            "note": "主线：模型接入 → Prompt 与结构化输出 → Chain/LangGraph 编排 → RAG → Agent 工具循环",
+            "bv": "BV1rv7A6oEeP"
+          },
+          {
+            "name": "黑马程序员 · 大模型 RAG 与 Agent 智能体实战",
+            "url": "https://www.bilibili.com/video/BV1yjz5BLEoY/",
+            "note": "工程视角：文档切分、向量化与召回、重排、评测；Agent 部分讲工具定义与失败重试",
+            "bv": "BV1yjz5BLEoY"
+          },
+          {
+            "name": "吴恩达 · 大模型合集（Prompt 到 Agent）",
+            "url": "https://www.bilibili.com/video/BV1nc31zzEa3/",
+            "note": "方法论最正：Prompt 的四条原则、评估驱动开发、Agent 的反思与规划模式",
+            "bv": "BV1nc31zzEa3"
+          },
+          {
+            "name": "提示词工程（Prompt Engineering）系统教程",
+            "url": "https://www.bilibili.com/video/BV1VEA8zYE6f/",
+            "note": "把 Prompt 当接口设计：角色/约束/示例/输出格式四要素，以及失败时的收敛手段",
+            "bv": "BV1VEA8zYE6f"
+          }
+        ]
       }
     },
     {
@@ -221,17 +251,47 @@
           "Claude 的工具调用、长上下文、评测 notebook，对照 OpenAI 的差异",
           "提示流工程化：把 prompt 当代码做版本、测试、批量评测"
         ],
-        "github_fetched_at": "2026-10-21",
-        "bilibili": "https://search.bilibili.com/all?keyword=%E5%90%B4%E6%81%A9%E8%BE%BE%20Prompt%20%E5%B7%A5%E7%A8%8B",
+        "github_fetched_at": "2026-10-27",
+        "bilibili": "https://www.bilibili.com/video/BV1rv7A6oEeP/",
         "bilibili_keywords": [
           "吴恩达 Prompt Engineering",
           "function calling 教程",
           "提示注入 防御"
         ],
         "bilibili_note": "站内搜索入口（关键词固定、视频会更新，故不写死 BV 号）",
-        "books": [],
+        "books": [
+          "《Prompt Engineering for LLMs》Berryman & Ziegler",
+          "《Designing Machine Learning Systems》Chip Huyen",
+          "《大语言模型应用开发》相关官方文档（OpenAI / DeepSeek API Docs）"
+        ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · LangChain 入门与 Agent 实战",
+            "url": "https://www.bilibili.com/video/BV1rv7A6oEeP/",
+            "note": "主线：模型接入 → Prompt 与结构化输出 → Chain/LangGraph 编排 → RAG → Agent 工具循环",
+            "bv": "BV1rv7A6oEeP"
+          },
+          {
+            "name": "提示词工程（Prompt Engineering）系统教程",
+            "url": "https://www.bilibili.com/video/BV1VEA8zYE6f/",
+            "note": "把 Prompt 当接口设计：角色/约束/示例/输出格式四要素，以及失败时的收敛手段",
+            "bv": "BV1VEA8zYE6f"
+          },
+          {
+            "name": "吴恩达 · 大模型合集（Prompt 到 Agent）",
+            "url": "https://www.bilibili.com/video/BV1nc31zzEa3/",
+            "note": "方法论最正：Prompt 的四条原则、评估驱动开发、Agent 的反思与规划模式",
+            "bv": "BV1nc31zzEa3"
+          },
+          {
+            "name": "黑马程序员 · 大模型 RAG 与 Agent 智能体实战",
+            "url": "https://www.bilibili.com/video/BV1yjz5BLEoY/",
+            "note": "工程视角：文档切分、向量化与召回、重排、评测；Agent 部分讲工具定义与失败重试",
+            "bv": "BV1yjz5BLEoY"
+          }
+        ]
       }
     },
     {
@@ -273,17 +333,47 @@
           "官方集成清单：IDE/Agent/客服等落地形态，做选型时先看这里",
           "本地一键跑模型，验证「私有化」可行性最快的路径"
         ],
-        "github_fetched_at": "2026-10-21",
-        "bilibili": "https://search.bilibili.com/all?keyword=%E6%9D%8E%E6%B2%90%20AI",
+        "github_fetched_at": "2026-10-27",
+        "bilibili": "https://www.bilibili.com/video/BV1rv7A6oEeP/",
         "bilibili_keywords": [
           "DeepSeek API 教程",
           "Ollama 本地部署",
           "OpenAI 兼容 接口"
         ],
         "bilibili_note": "站内搜索入口（关键词固定、视频会更新，故不写死 BV 号）",
-        "books": [],
+        "books": [
+          "《Prompt Engineering for LLMs》Berryman & Ziegler",
+          "《Designing Machine Learning Systems》Chip Huyen",
+          "《大语言模型应用开发》相关官方文档（OpenAI / DeepSeek API Docs）"
+        ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · LangChain 入门与 Agent 实战",
+            "url": "https://www.bilibili.com/video/BV1rv7A6oEeP/",
+            "note": "主线：模型接入 → Prompt 与结构化输出 → Chain/LangGraph 编排 → RAG → Agent 工具循环",
+            "bv": "BV1rv7A6oEeP"
+          },
+          {
+            "name": "提示词工程（Prompt Engineering）系统教程",
+            "url": "https://www.bilibili.com/video/BV1VEA8zYE6f/",
+            "note": "把 Prompt 当接口设计：角色/约束/示例/输出格式四要素，以及失败时的收敛手段",
+            "bv": "BV1VEA8zYE6f"
+          },
+          {
+            "name": "吴恩达 · 大模型合集（Prompt 到 Agent）",
+            "url": "https://www.bilibili.com/video/BV1nc31zzEa3/",
+            "note": "方法论最正：Prompt 的四条原则、评估驱动开发、Agent 的反思与规划模式",
+            "bv": "BV1nc31zzEa3"
+          },
+          {
+            "name": "黑马程序员 · 大模型 RAG 与 Agent 智能体实战",
+            "url": "https://www.bilibili.com/video/BV1yjz5BLEoY/",
+            "note": "工程视角：文档切分、向量化与召回、重排、评测；Agent 部分讲工具定义与失败重试",
+            "bv": "BV1yjz5BLEoY"
+          }
+        ]
       }
     },
     {
@@ -308,9 +398,9 @@
           "microsoft/AI-For-Beginners"
         ],
         "github_stars": [
-          30666,
+          30732,
           7787,
-          49787,
+          49828,
           70073
         ],
         "github_approx": [
@@ -325,17 +415,47 @@
           "从数据校验到部署监控的完整工程流水线，补「只会调 API」的短板",
           "12 周 24 课的 AI 通识课，用来快速补齐术语与全景，避免面试时概念串味"
         ],
-        "github_fetched_at": "2026-10-21",
-        "bilibili": "https://search.bilibili.com/all?keyword=AI%E4%BA%A7%E5%93%81%E7%BB%8F%E7%90%86%E5%AE%9E%E6%88%98%E6%89%8B%E5%86%8C",
+        "github_fetched_at": "2026-10-27",
+        "bilibili": "https://www.bilibili.com/video/BV1rv7A6oEeP/",
         "bilibili_keywords": [
           "AI 产品经理 用户故事",
           "AI 产品 需求分析",
           "产品画布"
         ],
         "bilibili_note": "站内搜索入口（关键词固定、视频会更新，故不写死 BV 号）",
-        "books": [],
+        "books": [
+          "《Prompt Engineering for LLMs》Berryman & Ziegler",
+          "《Designing Machine Learning Systems》Chip Huyen",
+          "《大语言模型应用开发》相关官方文档（OpenAI / DeepSeek API Docs）"
+        ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · LangChain 入门与 Agent 实战",
+            "url": "https://www.bilibili.com/video/BV1rv7A6oEeP/",
+            "note": "主线：模型接入 → Prompt 与结构化输出 → Chain/LangGraph 编排 → RAG → Agent 工具循环",
+            "bv": "BV1rv7A6oEeP"
+          },
+          {
+            "name": "提示词工程（Prompt Engineering）系统教程",
+            "url": "https://www.bilibili.com/video/BV1VEA8zYE6f/",
+            "note": "把 Prompt 当接口设计：角色/约束/示例/输出格式四要素，以及失败时的收敛手段",
+            "bv": "BV1VEA8zYE6f"
+          },
+          {
+            "name": "吴恩达 · 大模型合集（Prompt 到 Agent）",
+            "url": "https://www.bilibili.com/video/BV1nc31zzEa3/",
+            "note": "方法论最正：Prompt 的四条原则、评估驱动开发、Agent 的反思与规划模式",
+            "bv": "BV1nc31zzEa3"
+          },
+          {
+            "name": "黑马程序员 · 大模型 RAG 与 Agent 智能体实战",
+            "url": "https://www.bilibili.com/video/BV1yjz5BLEoY/",
+            "note": "工程视角：文档切分、向量化与召回、重排、评测；Agent 部分讲工具定义与失败重试",
+            "bv": "BV1yjz5BLEoY"
+          }
+        ]
       }
     },
     {
@@ -377,17 +497,47 @@
           "带 UI 的 RAG 引擎，可直接对照「文档解析→切块→召回→重排」每一步的参数",
           "轻量图增强 RAG，理解「实体关系」如何补向量检索的短板"
         ],
-        "github_fetched_at": "2026-10-21",
-        "bilibili": "https://search.bilibili.com/all?keyword=%E6%9D%8E%E6%B2%90%20AI",
+        "github_fetched_at": "2026-10-27",
+        "bilibili": "https://www.bilibili.com/video/BV1rv7A6oEeP/",
         "bilibili_keywords": [
           "LangChain RAG 教程",
           "向量数据库 原理",
           "RAG 切块 重排"
         ],
         "bilibili_note": "站内搜索入口（关键词固定、视频会更新，故不写死 BV 号）",
-        "books": [],
+        "books": [
+          "《Prompt Engineering for LLMs》Berryman & Ziegler",
+          "《Designing Machine Learning Systems》Chip Huyen",
+          "《大语言模型应用开发》相关官方文档（OpenAI / DeepSeek API Docs）"
+        ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · LangChain 入门与 Agent 实战",
+            "url": "https://www.bilibili.com/video/BV1rv7A6oEeP/",
+            "note": "主线：模型接入 → Prompt 与结构化输出 → Chain/LangGraph 编排 → RAG → Agent 工具循环",
+            "bv": "BV1rv7A6oEeP"
+          },
+          {
+            "name": "黑马程序员 · 大模型 RAG 与 Agent 智能体实战",
+            "url": "https://www.bilibili.com/video/BV1yjz5BLEoY/",
+            "note": "工程视角：文档切分、向量化与召回、重排、评测；Agent 部分讲工具定义与失败重试",
+            "bv": "BV1yjz5BLEoY"
+          },
+          {
+            "name": "吴恩达 · 大模型合集（Prompt 到 Agent）",
+            "url": "https://www.bilibili.com/video/BV1nc31zzEa3/",
+            "note": "方法论最正：Prompt 的四条原则、评估驱动开发、Agent 的反思与规划模式",
+            "bv": "BV1nc31zzEa3"
+          },
+          {
+            "name": "提示词工程（Prompt Engineering）系统教程",
+            "url": "https://www.bilibili.com/video/BV1VEA8zYE6f/",
+            "note": "把 Prompt 当接口设计：角色/约束/示例/输出格式四要素，以及失败时的收敛手段",
+            "bv": "BV1VEA8zYE6f"
+          }
+        ]
       }
     },
     {
@@ -429,17 +579,47 @@
           "CPU/量化推理的参考实现，理解 GGUF 与显存账本",
           "本地一键跑模型，验证「私有化」可行性最快的路径"
         ],
-        "github_fetched_at": "2026-10-21",
-        "bilibili": "https://search.bilibili.com/all?keyword=%E6%9D%8E%E6%B2%90%20AI",
+        "github_fetched_at": "2026-10-27",
+        "bilibili": "https://www.bilibili.com/video/BV1rv7A6oEeP/",
         "bilibili_keywords": [
           "vLLM 部署",
           "大模型 量化 显存",
           "推理 压测"
         ],
         "bilibili_note": "站内搜索入口（关键词固定、视频会更新，故不写死 BV 号）",
-        "books": [],
+        "books": [
+          "《Prompt Engineering for LLMs》Berryman & Ziegler",
+          "《Designing Machine Learning Systems》Chip Huyen",
+          "《大语言模型应用开发》相关官方文档（OpenAI / DeepSeek API Docs）"
+        ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · LangChain 入门与 Agent 实战",
+            "url": "https://www.bilibili.com/video/BV1rv7A6oEeP/",
+            "note": "主线：模型接入 → Prompt 与结构化输出 → Chain/LangGraph 编排 → RAG → Agent 工具循环",
+            "bv": "BV1rv7A6oEeP"
+          },
+          {
+            "name": "吴恩达 · 大模型合集（Prompt 到 Agent）",
+            "url": "https://www.bilibili.com/video/BV1nc31zzEa3/",
+            "note": "方法论最正：Prompt 的四条原则、评估驱动开发、Agent 的反思与规划模式",
+            "bv": "BV1nc31zzEa3"
+          },
+          {
+            "name": "黑马程序员 · 大模型 RAG 与 Agent 智能体实战",
+            "url": "https://www.bilibili.com/video/BV1yjz5BLEoY/",
+            "note": "工程视角：文档切分、向量化与召回、重排、评测；Agent 部分讲工具定义与失败重试",
+            "bv": "BV1yjz5BLEoY"
+          },
+          {
+            "name": "提示词工程（Prompt Engineering）系统教程",
+            "url": "https://www.bilibili.com/video/BV1VEA8zYE6f/",
+            "note": "把 Prompt 当接口设计：角色/约束/示例/输出格式四要素，以及失败时的收敛手段",
+            "bv": "BV1VEA8zYE6f"
+          }
+        ]
       }
     },
     {
@@ -464,7 +644,7 @@
           "huggingface/trl"
         ],
         "github_stars": [
-          21817,
+          21852,
           76000,
           78352,
           19561
@@ -481,17 +661,47 @@
           "单卡微调加速，显存不够时的现实解",
           "RLHF/DPO/GRPO 训练库，理解对齐阶段的工程接口"
         ],
-        "github_fetched_at": "2026-10-21",
-        "bilibili": "https://search.bilibili.com/all?keyword=%E6%9D%8E%E6%B2%90%20AI",
+        "github_fetched_at": "2026-10-27",
+        "bilibili": "https://www.bilibili.com/video/BV1rv7A6oEeP/",
         "bilibili_keywords": [
           "LoRA 微调 教程",
           "QLoRA 显存",
           "LLaMA-Factory 使用"
         ],
         "bilibili_note": "站内搜索入口（关键词固定、视频会更新，故不写死 BV 号）",
-        "books": [],
+        "books": [
+          "《Prompt Engineering for LLMs》Berryman & Ziegler",
+          "《Designing Machine Learning Systems》Chip Huyen",
+          "《大语言模型应用开发》相关官方文档（OpenAI / DeepSeek API Docs）"
+        ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · LangChain 入门与 Agent 实战",
+            "url": "https://www.bilibili.com/video/BV1rv7A6oEeP/",
+            "note": "主线：模型接入 → Prompt 与结构化输出 → Chain/LangGraph 编排 → RAG → Agent 工具循环",
+            "bv": "BV1rv7A6oEeP"
+          },
+          {
+            "name": "黑马程序员 · 大模型 RAG 与 Agent 智能体实战",
+            "url": "https://www.bilibili.com/video/BV1yjz5BLEoY/",
+            "note": "工程视角：文档切分、向量化与召回、重排、评测；Agent 部分讲工具定义与失败重试",
+            "bv": "BV1yjz5BLEoY"
+          },
+          {
+            "name": "吴恩达 · 大模型合集（Prompt 到 Agent）",
+            "url": "https://www.bilibili.com/video/BV1nc31zzEa3/",
+            "note": "方法论最正：Prompt 的四条原则、评估驱动开发、Agent 的反思与规划模式",
+            "bv": "BV1nc31zzEa3"
+          },
+          {
+            "name": "提示词工程（Prompt Engineering）系统教程",
+            "url": "https://www.bilibili.com/video/BV1VEA8zYE6f/",
+            "note": "把 Prompt 当接口设计：角色/约束/示例/输出格式四要素，以及失败时的收敛手段",
+            "bv": "BV1VEA8zYE6f"
+          }
+        ]
       }
     },
     {
@@ -516,9 +726,9 @@
           "jingyaogong/minimind"
         ],
         "github_stars": [
-          63967,
+          64145,
           5577,
-          167942,
+          168241,
           64067
         ],
         "github_approx": [
@@ -533,17 +743,47 @@
           "工业级模型库，读 modeling_*.py 看真实实现与论文的差异",
           "从零训练 26M 小模型的全流程，算力有限时最好的练手项目"
         ],
-        "github_fetched_at": "2026-10-21",
-        "bilibili": "https://search.bilibili.com/all?keyword=%E7%8E%8B%E6%A0%91%E6%A3%AE%20Transformer",
+        "github_fetched_at": "2026-10-27",
+        "bilibili": "https://www.bilibili.com/video/BV1rv7A6oEeP/",
         "bilibili_keywords": [
           "王树森 Transformer",
           "注意力机制 手推",
           "KV Cache 原理"
         ],
         "bilibili_note": "站内搜索入口（关键词固定、视频会更新，故不写死 BV 号）",
-        "books": [],
+        "books": [
+          "《Prompt Engineering for LLMs》Berryman & Ziegler",
+          "《Designing Machine Learning Systems》Chip Huyen",
+          "《大语言模型应用开发》相关官方文档（OpenAI / DeepSeek API Docs）"
+        ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · LangChain 入门与 Agent 实战",
+            "url": "https://www.bilibili.com/video/BV1rv7A6oEeP/",
+            "note": "主线：模型接入 → Prompt 与结构化输出 → Chain/LangGraph 编排 → RAG → Agent 工具循环",
+            "bv": "BV1rv7A6oEeP"
+          },
+          {
+            "name": "吴恩达 · 大模型合集（Prompt 到 Agent）",
+            "url": "https://www.bilibili.com/video/BV1nc31zzEa3/",
+            "note": "方法论最正：Prompt 的四条原则、评估驱动开发、Agent 的反思与规划模式",
+            "bv": "BV1nc31zzEa3"
+          },
+          {
+            "name": "提示词工程（Prompt Engineering）系统教程",
+            "url": "https://www.bilibili.com/video/BV1VEA8zYE6f/",
+            "note": "把 Prompt 当接口设计：角色/约束/示例/输出格式四要素，以及失败时的收敛手段",
+            "bv": "BV1VEA8zYE6f"
+          },
+          {
+            "name": "黑马程序员 · 大模型 RAG 与 Agent 智能体实战",
+            "url": "https://www.bilibili.com/video/BV1yjz5BLEoY/",
+            "note": "工程视角：文档切分、向量化与召回、重排、评测；Agent 部分讲工具定义与失败重试",
+            "bv": "BV1yjz5BLEoY"
+          }
+        ]
       }
     },
     {
@@ -568,7 +808,7 @@
           "QwenLM/Qwen3-VL"
         ],
         "github_stars": [
-          34772,
+          34819,
           34501,
           165088,
           20000
@@ -585,17 +825,47 @@
           "最流行的 SD 前端，看插件生态如何把模型变成产品",
           "国产多模态模型，中文场景的视觉问答/文档理解首选"
         ],
-        "github_fetched_at": "2026-10-21",
-        "bilibili": "https://search.bilibili.com/all?keyword=%E6%9D%8E%E6%B2%90%20AI",
+        "github_fetched_at": "2026-10-27",
+        "bilibili": "https://www.bilibili.com/video/BV1rv7A6oEeP/",
         "bilibili_keywords": [
           "Stable Diffusion 教程",
           "多模态大模型",
           "VLM 文档识别"
         ],
         "bilibili_note": "站内搜索入口（关键词固定、视频会更新，故不写死 BV 号）",
-        "books": [],
+        "books": [
+          "《Prompt Engineering for LLMs》Berryman & Ziegler",
+          "《Designing Machine Learning Systems》Chip Huyen",
+          "《大语言模型应用开发》相关官方文档（OpenAI / DeepSeek API Docs）"
+        ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · LangChain 入门与 Agent 实战",
+            "url": "https://www.bilibili.com/video/BV1rv7A6oEeP/",
+            "note": "主线：模型接入 → Prompt 与结构化输出 → Chain/LangGraph 编排 → RAG → Agent 工具循环",
+            "bv": "BV1rv7A6oEeP"
+          },
+          {
+            "name": "吴恩达 · 大模型合集（Prompt 到 Agent）",
+            "url": "https://www.bilibili.com/video/BV1nc31zzEa3/",
+            "note": "方法论最正：Prompt 的四条原则、评估驱动开发、Agent 的反思与规划模式",
+            "bv": "BV1nc31zzEa3"
+          },
+          {
+            "name": "提示词工程（Prompt Engineering）系统教程",
+            "url": "https://www.bilibili.com/video/BV1VEA8zYE6f/",
+            "note": "把 Prompt 当接口设计：角色/约束/示例/输出格式四要素，以及失败时的收敛手段",
+            "bv": "BV1VEA8zYE6f"
+          },
+          {
+            "name": "黑马程序员 · 大模型 RAG 与 Agent 智能体实战",
+            "url": "https://www.bilibili.com/video/BV1yjz5BLEoY/",
+            "note": "工程视角：文档切分、向量化与召回、重排、评测；Agent 部分讲工具定义与失败重试",
+            "bv": "BV1yjz5BLEoY"
+          }
+        ]
       }
     },
     {
@@ -638,17 +908,47 @@
           "RAG 专用评测：faithfulness/answer relevancy 的计算方式",
           "12 周 24 课的 AI 通识课，用来快速补齐术语与全景，避免面试时概念串味"
         ],
-        "github_fetched_at": "2026-10-21",
-        "bilibili": "https://search.bilibili.com/all?keyword=AI%E4%BA%A7%E5%93%81%E7%BB%8F%E7%90%86%E5%AE%9E%E6%88%98%E6%89%8B%E5%86%8C",
+        "github_fetched_at": "2026-10-27",
+        "bilibili": "https://www.bilibili.com/video/BV1rv7A6oEeP/",
         "bilibili_keywords": [
           "LLM 评测 方法",
           "RAGAS 评估",
           "AI 产品 指标"
         ],
         "bilibili_note": "站内搜索入口（关键词固定、视频会更新，故不写死 BV 号）",
-        "books": [],
+        "books": [
+          "《Prompt Engineering for LLMs》Berryman & Ziegler",
+          "《Designing Machine Learning Systems》Chip Huyen",
+          "《大语言模型应用开发》相关官方文档（OpenAI / DeepSeek API Docs）"
+        ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · LangChain 入门与 Agent 实战",
+            "url": "https://www.bilibili.com/video/BV1rv7A6oEeP/",
+            "note": "主线：模型接入 → Prompt 与结构化输出 → Chain/LangGraph 编排 → RAG → Agent 工具循环",
+            "bv": "BV1rv7A6oEeP"
+          },
+          {
+            "name": "吴恩达 · 大模型合集（Prompt 到 Agent）",
+            "url": "https://www.bilibili.com/video/BV1nc31zzEa3/",
+            "note": "方法论最正：Prompt 的四条原则、评估驱动开发、Agent 的反思与规划模式",
+            "bv": "BV1nc31zzEa3"
+          },
+          {
+            "name": "黑马程序员 · 大模型 RAG 与 Agent 智能体实战",
+            "url": "https://www.bilibili.com/video/BV1yjz5BLEoY/",
+            "note": "工程视角：文档切分、向量化与召回、重排、评测；Agent 部分讲工具定义与失败重试",
+            "bv": "BV1yjz5BLEoY"
+          },
+          {
+            "name": "提示词工程（Prompt Engineering）系统教程",
+            "url": "https://www.bilibili.com/video/BV1VEA8zYE6f/",
+            "note": "把 Prompt 当接口设计：角色/约束/示例/输出格式四要素，以及失败时的收敛手段",
+            "bv": "BV1VEA8zYE6f"
+          }
+        ]
       }
     },
     {
@@ -699,8 +999,8 @@
           "MCP 官方 SDK，工具生态的标准接口，写一个 server 就懂",
           "软件公司式多 Agent，看 SOP 如何被编码进角色"
         ],
-        "github_fetched_at": "2026-10-21",
-        "bilibili": "https://search.bilibili.com/all?keyword=AI%E4%BA%A7%E5%93%81%E7%BB%8F%E7%90%86%E5%AE%9E%E6%88%98%E6%89%8B%E5%86%8C",
+        "github_fetched_at": "2026-10-27",
+        "bilibili": "https://www.bilibili.com/video/BV1rv7A6oEeP/",
         "bilibili_keywords": [
           "LangGraph 教程",
           "Agent 开发 实战",
@@ -708,9 +1008,39 @@
           "多智能体"
         ],
         "bilibili_note": "站内搜索入口（关键词固定、视频会更新，故不写死 BV 号）",
-        "books": [],
+        "books": [
+          "《Prompt Engineering for LLMs》Berryman & Ziegler",
+          "《Designing Machine Learning Systems》Chip Huyen",
+          "《大语言模型应用开发》相关官方文档（OpenAI / DeepSeek API Docs）"
+        ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · LangChain 入门与 Agent 实战",
+            "url": "https://www.bilibili.com/video/BV1rv7A6oEeP/",
+            "note": "主线：模型接入 → Prompt 与结构化输出 → Chain/LangGraph 编排 → RAG → Agent 工具循环",
+            "bv": "BV1rv7A6oEeP"
+          },
+          {
+            "name": "黑马程序员 · 大模型 RAG 与 Agent 智能体实战",
+            "url": "https://www.bilibili.com/video/BV1yjz5BLEoY/",
+            "note": "工程视角：文档切分、向量化与召回、重排、评测；Agent 部分讲工具定义与失败重试",
+            "bv": "BV1yjz5BLEoY"
+          },
+          {
+            "name": "吴恩达 · 大模型合集（Prompt 到 Agent）",
+            "url": "https://www.bilibili.com/video/BV1nc31zzEa3/",
+            "note": "方法论最正：Prompt 的四条原则、评估驱动开发、Agent 的反思与规划模式",
+            "bv": "BV1nc31zzEa3"
+          },
+          {
+            "name": "提示词工程（Prompt Engineering）系统教程",
+            "url": "https://www.bilibili.com/video/BV1VEA8zYE6f/",
+            "note": "把 Prompt 当接口设计：角色/约束/示例/输出格式四要素，以及失败时的收敛手段",
+            "bv": "BV1VEA8zYE6f"
+          }
+        ]
       }
     },
     {
@@ -753,17 +1083,47 @@
           "RAG 端到端参考架构（含引用溯源），企业方案的常见骨架",
           "12 周 24 课的 AI 通识课，用来快速补齐术语与全景，避免面试时概念串味"
         ],
-        "github_fetched_at": "2026-10-21",
-        "bilibili": "https://search.bilibili.com/all?keyword=AI%E4%BA%A7%E5%93%81%E7%BB%8F%E7%90%86%E5%AE%9E%E6%88%98%E6%89%8B%E5%86%8C",
+        "github_fetched_at": "2026-10-27",
+        "bilibili": "https://www.bilibili.com/video/BV1rv7A6oEeP/",
         "bilibili_keywords": [
           "大模型 商业化",
           "企业 知识库 方案",
           "AI 项目 报价"
         ],
         "bilibili_note": "站内搜索入口（关键词固定、视频会更新，故不写死 BV 号）",
-        "books": [],
+        "books": [
+          "《Prompt Engineering for LLMs》Berryman & Ziegler",
+          "《Designing Machine Learning Systems》Chip Huyen",
+          "《大语言模型应用开发》相关官方文档（OpenAI / DeepSeek API Docs）"
+        ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · LangChain 入门与 Agent 实战",
+            "url": "https://www.bilibili.com/video/BV1rv7A6oEeP/",
+            "note": "主线：模型接入 → Prompt 与结构化输出 → Chain/LangGraph 编排 → RAG → Agent 工具循环",
+            "bv": "BV1rv7A6oEeP"
+          },
+          {
+            "name": "黑马程序员 · 大模型 RAG 与 Agent 智能体实战",
+            "url": "https://www.bilibili.com/video/BV1yjz5BLEoY/",
+            "note": "工程视角：文档切分、向量化与召回、重排、评测；Agent 部分讲工具定义与失败重试",
+            "bv": "BV1yjz5BLEoY"
+          },
+          {
+            "name": "吴恩达 · 大模型合集（Prompt 到 Agent）",
+            "url": "https://www.bilibili.com/video/BV1nc31zzEa3/",
+            "note": "方法论最正：Prompt 的四条原则、评估驱动开发、Agent 的反思与规划模式",
+            "bv": "BV1nc31zzEa3"
+          },
+          {
+            "name": "提示词工程（Prompt Engineering）系统教程",
+            "url": "https://www.bilibili.com/video/BV1VEA8zYE6f/",
+            "note": "把 Prompt 当接口设计：角色/约束/示例/输出格式四要素，以及失败时的收敛手段",
+            "bv": "BV1VEA8zYE6f"
+          }
+        ]
       }
     },
     {
@@ -801,17 +1161,47 @@
           "每周论文榜，解决「不知道追什么」的问题",
           "LLM 生态索引：训练/推理/应用/评测的仓库地图，用来判断「这个方向还有没有坑」"
         ],
-        "github_fetched_at": "2026-10-21",
-        "bilibili": "https://search.bilibili.com/all?keyword=%E6%9D%8E%E6%B2%90%20%E8%AE%BA%E6%96%87%E7%B2%BE%E8%AF%BB",
+        "github_fetched_at": "2026-10-27",
+        "bilibili": "https://www.bilibili.com/video/BV1rv7A6oEeP/",
         "bilibili_keywords": [
           "李沐 论文精读",
           "如何读论文",
           "论文 复现"
         ],
         "bilibili_note": "站内搜索入口（关键词固定、视频会更新，故不写死 BV 号）",
-        "books": [],
+        "books": [
+          "《Prompt Engineering for LLMs》Berryman & Ziegler",
+          "《Designing Machine Learning Systems》Chip Huyen",
+          "《大语言模型应用开发》相关官方文档（OpenAI / DeepSeek API Docs）"
+        ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · LangChain 入门与 Agent 实战",
+            "url": "https://www.bilibili.com/video/BV1rv7A6oEeP/",
+            "note": "主线：模型接入 → Prompt 与结构化输出 → Chain/LangGraph 编排 → RAG → Agent 工具循环",
+            "bv": "BV1rv7A6oEeP"
+          },
+          {
+            "name": "黑马程序员 · 大模型 RAG 与 Agent 智能体实战",
+            "url": "https://www.bilibili.com/video/BV1yjz5BLEoY/",
+            "note": "工程视角：文档切分、向量化与召回、重排、评测；Agent 部分讲工具定义与失败重试",
+            "bv": "BV1yjz5BLEoY"
+          },
+          {
+            "name": "吴恩达 · 大模型合集（Prompt 到 Agent）",
+            "url": "https://www.bilibili.com/video/BV1nc31zzEa3/",
+            "note": "方法论最正：Prompt 的四条原则、评估驱动开发、Agent 的反思与规划模式",
+            "bv": "BV1nc31zzEa3"
+          },
+          {
+            "name": "提示词工程（Prompt Engineering）系统教程",
+            "url": "https://www.bilibili.com/video/BV1VEA8zYE6f/",
+            "note": "把 Prompt 当接口设计：角色/约束/示例/输出格式四要素，以及失败时的收敛手段",
+            "bv": "BV1VEA8zYE6f"
+          }
+        ]
       }
     },
     {
@@ -836,7 +1226,7 @@
           "chiphuyen/ml-interviews-book"
         ],
         "github_stars": [
-          374985,
+          375800,
           143087,
           9900,
           4788
@@ -853,17 +1243,47 @@
           "ML/LLM 岗位面试题分类整理，含系统设计",
           "《Machine Learning Interviews》开源书，面试官视角的评分逻辑"
         ],
-        "github_fetched_at": "2026-10-21",
-        "bilibili": "https://search.bilibili.com/all?keyword=AI%E4%BA%A7%E5%93%81%E7%BB%8F%E7%90%86%E5%AE%9E%E6%88%98%E6%89%8B%E5%86%8C",
+        "github_fetched_at": "2026-10-27",
+        "bilibili": "https://www.bilibili.com/video/BV1rv7A6oEeP/",
         "bilibili_keywords": [
           "AI 工程师 职业规划",
           "实习 面试 准备",
           "能力矩阵"
         ],
         "bilibili_note": "站内搜索入口（关键词固定、视频会更新，故不写死 BV 号）",
-        "books": [],
+        "books": [
+          "《Prompt Engineering for LLMs》Berryman & Ziegler",
+          "《Designing Machine Learning Systems》Chip Huyen",
+          "《大语言模型应用开发》相关官方文档（OpenAI / DeepSeek API Docs）"
+        ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · LangChain 入门与 Agent 实战",
+            "url": "https://www.bilibili.com/video/BV1rv7A6oEeP/",
+            "note": "主线：模型接入 → Prompt 与结构化输出 → Chain/LangGraph 编排 → RAG → Agent 工具循环",
+            "bv": "BV1rv7A6oEeP"
+          },
+          {
+            "name": "黑马程序员 · 大模型 RAG 与 Agent 智能体实战",
+            "url": "https://www.bilibili.com/video/BV1yjz5BLEoY/",
+            "note": "工程视角：文档切分、向量化与召回、重排、评测；Agent 部分讲工具定义与失败重试",
+            "bv": "BV1yjz5BLEoY"
+          },
+          {
+            "name": "吴恩达 · 大模型合集（Prompt 到 Agent）",
+            "url": "https://www.bilibili.com/video/BV1nc31zzEa3/",
+            "note": "方法论最正：Prompt 的四条原则、评估驱动开发、Agent 的反思与规划模式",
+            "bv": "BV1nc31zzEa3"
+          },
+          {
+            "name": "提示词工程（Prompt Engineering）系统教程",
+            "url": "https://www.bilibili.com/video/BV1VEA8zYE6f/",
+            "note": "把 Prompt 当接口设计：角色/约束/示例/输出格式四要素，以及失败时的收敛手段",
+            "bv": "BV1VEA8zYE6f"
+          }
+        ]
       }
     },
     {
@@ -907,17 +1327,47 @@
           "有状态 Agent 编排：图、检查点、人工介入，Agent 章的主线",
           "可视化 LLM 应用平台，商业化交付最常见的底座之一"
         ],
-        "github_fetched_at": "2026-10-21",
-        "bilibili": "https://search.bilibili.com/all?keyword=AI%E4%BA%A7%E5%93%81%E7%BB%8F%E7%90%86%E5%AE%9E%E6%88%98%E6%89%8B%E5%86%8C",
+        "github_fetched_at": "2026-10-27",
+        "bilibili": "https://www.bilibili.com/video/BV1rv7A6oEeP/",
         "bilibili_keywords": [
           "大模型 项目 实战",
           "从0到1 AI 产品",
           "Agent 项目 部署"
         ],
         "bilibili_note": "站内搜索入口（关键词固定、视频会更新，故不写死 BV 号）",
-        "books": [],
+        "books": [
+          "《Prompt Engineering for LLMs》Berryman & Ziegler",
+          "《Designing Machine Learning Systems》Chip Huyen",
+          "《大语言模型应用开发》相关官方文档（OpenAI / DeepSeek API Docs）"
+        ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · LangChain 入门与 Agent 实战",
+            "url": "https://www.bilibili.com/video/BV1rv7A6oEeP/",
+            "note": "主线：模型接入 → Prompt 与结构化输出 → Chain/LangGraph 编排 → RAG → Agent 工具循环",
+            "bv": "BV1rv7A6oEeP"
+          },
+          {
+            "name": "黑马程序员 · 大模型 RAG 与 Agent 智能体实战",
+            "url": "https://www.bilibili.com/video/BV1yjz5BLEoY/",
+            "note": "工程视角：文档切分、向量化与召回、重排、评测；Agent 部分讲工具定义与失败重试",
+            "bv": "BV1yjz5BLEoY"
+          },
+          {
+            "name": "吴恩达 · 大模型合集（Prompt 到 Agent）",
+            "url": "https://www.bilibili.com/video/BV1nc31zzEa3/",
+            "note": "方法论最正：Prompt 的四条原则、评估驱动开发、Agent 的反思与规划模式",
+            "bv": "BV1nc31zzEa3"
+          },
+          {
+            "name": "提示词工程（Prompt Engineering）系统教程",
+            "url": "https://www.bilibili.com/video/BV1VEA8zYE6f/",
+            "note": "把 Prompt 当接口设计：角色/约束/示例/输出格式四要素，以及失败时的收敛手段",
+            "bv": "BV1VEA8zYE6f"
+          }
+        ]
       }
     },
     {
@@ -945,8 +1395,8 @@
         "github_stars": [
           9900,
           4788,
-          49787,
-          374985
+          49828,
+          375800
         ],
         "github_approx": [
           true,
@@ -960,17 +1410,47 @@
           "从数据校验到部署监控的完整工程流水线，补「只会调 API」的短板",
           "系统设计面试基础，Agent 服务也要过容量与一致性这关"
         ],
-        "github_fetched_at": "2026-10-21",
-        "bilibili": "https://search.bilibili.com/all?keyword=AI%E4%BA%A7%E5%93%81%E7%BB%8F%E7%90%86%E5%AE%9E%E6%88%98%E6%89%8B%E5%86%8C",
+        "github_fetched_at": "2026-10-27",
+        "bilibili": "https://www.bilibili.com/video/BV1rv7A6oEeP/",
         "bilibili_keywords": [
           "大模型 面试 题",
           "项目 介绍 STAR",
           "系统设计 面试"
         ],
         "bilibili_note": "站内搜索入口（关键词固定、视频会更新，故不写死 BV 号）",
-        "books": [],
+        "books": [
+          "《Prompt Engineering for LLMs》Berryman & Ziegler",
+          "《Designing Machine Learning Systems》Chip Huyen",
+          "《大语言模型应用开发》相关官方文档（OpenAI / DeepSeek API Docs）"
+        ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · LangChain 入门与 Agent 实战",
+            "url": "https://www.bilibili.com/video/BV1rv7A6oEeP/",
+            "note": "主线：模型接入 → Prompt 与结构化输出 → Chain/LangGraph 编排 → RAG → Agent 工具循环",
+            "bv": "BV1rv7A6oEeP"
+          },
+          {
+            "name": "黑马程序员 · 大模型 RAG 与 Agent 智能体实战",
+            "url": "https://www.bilibili.com/video/BV1yjz5BLEoY/",
+            "note": "工程视角：文档切分、向量化与召回、重排、评测；Agent 部分讲工具定义与失败重试",
+            "bv": "BV1yjz5BLEoY"
+          },
+          {
+            "name": "吴恩达 · 大模型合集（Prompt 到 Agent）",
+            "url": "https://www.bilibili.com/video/BV1nc31zzEa3/",
+            "note": "方法论最正：Prompt 的四条原则、评估驱动开发、Agent 的反思与规划模式",
+            "bv": "BV1nc31zzEa3"
+          },
+          {
+            "name": "提示词工程（Prompt Engineering）系统教程",
+            "url": "https://www.bilibili.com/video/BV1VEA8zYE6f/",
+            "note": "把 Prompt 当接口设计：角色/约束/示例/输出格式四要素，以及失败时的收敛手段",
+            "bv": "BV1VEA8zYE6f"
+          }
+        ]
       }
     }
   ],

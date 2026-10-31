@@ -1,5 +1,14 @@
 # 排序总览：内部排序分类与复杂度/稳定性对照表
 
+```text
+        最好      平均      最坏     稳定   核心思想
+插入排序  O(n)     O(n²)    O(n²)    稳    边扫描边把元素插到已排序区
+快速排序  O(nlogn) O(nlogn) O(n²)   不稳  分治+基准，最左/右作枢轴
+归并排序  O(nlogn) O(nlogn) O(nlogn) 稳   分治+合并，额外 O(n) 空间
+堆排序    O(nlogn) O(nlogn) O(nlogn) 不稳  建堆后反复取堆顶
+计数/桶/基: 非比较排序，可突破 O(nlogn) 下界
+```
+
 ## 1. 八种内部排序的「时间·空间·稳定性」统一口径
 
 内部排序指待排序记录全部装入内存。按「是否基于关键字比较」分两大类：
@@ -60,3 +69,144 @@
 - **必考证明**：408 常要求「证明比较排序最坏 Ω(n log n)」或「用决策树说明」。答题三要素：① 叶子数 = n!；② 满二叉树叶子 ≤ 2^h；③ h ≥ log₂(n!) = Ω(n log n)。斯特林近似 log₂(n!) ≈ n log₂ n − n log₂ e，主项即 n log n。
 - **突破前提（选择题高频）**：基数/计数排序之所以能 O(n)，是因为**利用了关键字的值分布而非比较**，代价是要求关键字范围有限（计数）或位数固定（基数）；当关键字范围远大于 n 时退化为 O(k)，不再优于比较排序。
 - **易错**：下界 Ω(n log n) 是说「存在输入需要这么多比较」，不是「每个输入都要这么多」；插/冒在已有序输入上 O(n) 与此不矛盾（那是最好情况）。
+
+<!-- injected-code -->
+## 可运行代码：把上面的说法跑一遍
+
+下面两段直接取自本章示例库（`examples/`），期望输出就是判题台里判定的那串字符串，不是事后补写的说明。读完正文后先照着跑一遍，再回去看「三视角解析」里对应的那条。
+
+### 插入排序：比较/移动次数统计与稳定性验证
+
+```c
+#include <stdio.h>
+
+typedef struct { int key; int idx; } Elem;
+
+static long cmp_count = 0, move_count = 0;
+
+void insertion_sort(Elem a[], int n) {
+    for (int i = 1; i < n; i++) {
+        Elem x = a[i];
+        move_count++;              /* 取出待插入元素 */
+        int j = i - 1;
+        while (j >= 0) {
+            cmp_count++;           /* 一次关键字比较 */
+            if (a[j].key > x.key) {
+                a[j + 1] = a[j];
+                move_count++;
+                j--;
+            } else {
+                break;
+            }
+        }
+        a[j + 1] = x;
+        move_count++;
+    }
+}
+
+/* 稳定性：对所有 key 相同的元素，检查 idx 是否仍按升序排列 */
+int is_stable(const Elem a[], int n) {
+    for (int i = 0; i + 1 < n; i++) {
+        if (a[i].key == a[i + 1].key && a[i].idx > a[i + 1].idx) return 0;
+    }
+    return 1;
+}
+
+int main(void) {
+    Elem a[] = {{5,0},{2,1},{4,2},{6,3},{1,4},{3,5},{2,6},{5,7},{4,8},{1,9}};
+    int n = (int)(sizeof(a) / sizeof(a[0]));
+
+    printf("原始序列 (key,idx):");
+    for (int i = 0; i < n; i++) printf(" (%d,%d)", a[i].key, a[i].idx);
+    printf("\n");
+
+    insertion_sort(a, n);
+
+    printf("排序结果 (key,idx):");
+    for (int i = 0; i < n; i++) printf(" (%d,%d)", a[i].key, a[i].idx);
+    printf("\n");
+
+    printf("比较次数 = %ld\n", cmp_count);
+    printf("移动次数 = %ld\n", move_count);
+    printf("是否稳定 = %s\n", is_stable(a, n) ? "是" : "否");
+    printf("原因: 插入排序只在严格大于时后移，等值元素不发生跨越 -> 稳定\n");
+    return 0;
+}
+```
+
+实际输出：
+
+```text
+原始序列 (key,idx): (5,0) (2,1) (4,2) (6,3) (1,4) (3,5) (2,6) (5,7) (4,8) (1,9)
+排序结果 (key,idx): (1,4) (1,9) (2,1) (2,6) (3,5) (4,2) (4,8) (5,0) (5,7) (6,3)
+比较次数 = 32
+移动次数 = 43
+是否稳定 = 是
+原因: 插入排序只在严格大于时后移，等值元素不发生跨越 -> 稳定
+```
+
+> 出处：`examples/ex01-insertion-sort-counters.json`。改一处再看输出变没变，比读三遍解释有用。
+
+### 冒泡排序：提前退出标志与基本有序时的 O(n)
+
+```c
+#include <stdio.h>
+
+typedef struct { int key; int idx; } Elem;
+
+static long cmp_count = 0, swap_count = 0;
+
+void bubble_sort(Elem a[], int n) {
+    for (int i = 0; i < n - 1; i++) {
+        int swapped = 0;
+        for (int j = 0; j < n - 1 - i; j++) {
+            cmp_count++;
+            if (a[j].key > a[j + 1].key) {
+                Elem t = a[j]; a[j] = a[j + 1]; a[j + 1] = t;
+                swap_count++;
+                swapped = 1;
+            }
+        }
+        if (!swapped) { printf("第 %d 趟无交换，提前退出\n", i + 1); break; }
+    }
+}
+
+int main(void) {
+    Elem sorted[] = {{1,0},{2,1},{3,2},{4,3},{5,4},{6,5}};
+    int n1 = (int)(sizeof(sorted) / sizeof(sorted[0]));
+    cmp_count = swap_count = 0;
+    bubble_sort(sorted, n1);
+    printf("--- 已有序序列 (n=%d) ---\n", n1);
+    printf("比较次数 = %ld, 交换次数 = %ld\n", cmp_count, swap_count);
+    printf("最好情况: 只需一趟 n-1 = %d 次比较即退出 -> O(n)\n", n1 - 1);
+
+    Elem rev[] = {{6,0},{5,1},{4,2},{3,3},{2,4},{1,5}};
+    int n2 = (int)(sizeof(rev) / sizeof(rev[0]));
+    cmp_count = swap_count = 0;
+    bubble_sort(rev, n2);
+    printf("\n--- 逆序序列 (n=%d) ---\n", n2);
+    printf("比较次数 = %ld, 交换次数 = %ld\n", cmp_count, swap_count);
+    printf("最坏情况: 比较 n(n-1)/2 = %d 次, 交换同样多 -> O(n^2)\n", n2 * (n2 - 1) / 2);
+    printf("排序结果:");
+    for (int i = 0; i < n2; i++) printf(" %d", rev[i].key);
+    printf("\n");
+    return 0;
+}
+```
+
+实际输出：
+
+```text
+第 1 趟无交换，提前退出
+--- 已有序序列 (n=6) ---
+比较次数 = 5, 交换次数 = 0
+最好情况: 只需一趟 n-1 = 5 次比较即退出 -> O(n)
+
+--- 逆序序列 (n=6) ---
+比较次数 = 15, 交换次数 = 15
+最坏情况: 比较 n(n-1)/2 = 15 次, 交换同样多 -> O(n^2)
+排序结果: 1 2 3 4 5 6
+```
+
+> 出处：`examples/ex02-bubble-sort-early-exit.json`。改一处再看输出变没变，比读三遍解释有用。
+

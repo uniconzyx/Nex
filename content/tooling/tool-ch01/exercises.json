@@ -12,9 +12,12 @@
       "platform": "self",
       "difficulty": 2,
       "title": "目录权限 rwx 的语义：删除文件看的是谁的权限",
-      "content_md": "环境：目录 `d` 权限 `drwxr-x---`，属主 alice，属组 devs；其下文件 `d/f.txt` 权限 `-rw-r-----`，属主 alice，属组 devs。\n\n- **bob**：既不是 alice，也不属于 devs\n- **carol**：属于 devs（但不是 alice）\n\n下列判断正确的是？\n\nA. alice 可以 `ls d` 列出目录中的文件名\nB. bob 可以 `cd d` 进入该目录\nC. carol 可以 `cat d/f.txt` 读到文件内容\nD. carol 可以 `rm d/f.txt` 删除该文件",
+      "content_md": "环境：目录 `d` 权限 `drwxr-x---`，属主 alice，属组 devs；其下文件 `d/f.txt` 权限 `-rw-r-----`，属主 alice，属组 devs。\n\n- **bob**：既不是 alice，也不属于 devs\n- **carol**：属于 devs（但不是 alice）\n\n下列判断正确的是？",
       "answer": {
-        "correct": "A、C",
+        "correct": [
+          "A",
+          "C"
+        ],
         "explain": "先逐位拆解两个对象的权限，再逐个判断：\n\n**目录 `d`：`drwxr-x---`** → 属主 `rwx`、属组 `r-x`、其他 `---`。\n**文件 `f.txt`：`-rw-r-----`** → 属主 `rw-`、属组 `r--`、其他 `---`。\n\n- **A 对**：`ls d` 需要目录的 `r`（读目录的数据块 = 列出名字表）。alice 是属主，属主位含 `r` → 成功。\n- **B 错**：`cd` 需要目录的 `x`（穿越资格）。bob 命中「其他」分组，权限 `---`，无 `x` → 失败。注意一个常被忽略的点：**即使 `f.txt` 是 `644`，只要目录缺 `x`，bob 连一步都走不进去** —— 路径上每一层目录都必须有 `x`。\n- **C 对**：需要两个条件同时满足。① 穿越目录：carol 属 devs，目录属组位 `r-x` 含 `x` → 可穿越；② 读文件：文件属组位 `r--` 含 `r` → 可读。两个条件都成立 → 成功。（对比 B 和 C：同一个 `x` 位，bob 拿不到是因为他落在「其他」组，carol 拿得到是因为她命中「属组」。**这说明「我明明给权限了为什么还拒绝」通常是把权限位加错了分组。**）\n- **D 错**：这是本题的核心考点。**删除文件靠的是「文件所在目录」的 `w` + `x`，与被删文件自身的权限无关。**因为 `rm` 本质是 `unlink()` —— 在目录里删掉一条 `名字 → inode` 记录，这是对**目录**的写操作。carol 对目录 `d` 的属组权限是 `r-x`，**没有 `w`** → 不能删除。\n\n**反向验证 D 的结论**：若把目录改成 `drwxrwx---`（属组含 w），则 carol 就能删掉 `f.txt`，**即使把 `f.txt` 设成 `-r--r--r--`（只读）也不影响**。这就是「只读文件仍可被删除」这一反直觉现象的完整解释。"
       },
       "explanation": "把「目录 rwx 的三重语义」「判定短路」与「删除看目录权限」三个考点合并成一道题。",
@@ -25,7 +28,25 @@
         "chmod"
       ],
       "source": "self",
-      "source_ref": "《鸟哥的 Linux 私房菜》第 5 章 · 文件权限"
+      "source_ref": "《鸟哥的 Linux 私房菜》第 5 章 · 文件权限",
+      "options": [
+        {
+          "key": "A",
+          "text": "alice 可以 `ls d` 列出目录中的文件名"
+        },
+        {
+          "key": "B",
+          "text": "bob 可以 `cd d` 进入该目录"
+        },
+        {
+          "key": "C",
+          "text": "carol 可以 `cat d/f.txt` 读到文件内容"
+        },
+        {
+          "key": "D",
+          "text": "carol 可以 `rm d/f.txt` 删除该文件"
+        }
+      ]
     },
     {
       "type": "output",

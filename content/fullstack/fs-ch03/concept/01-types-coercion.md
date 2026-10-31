@@ -19,6 +19,78 @@ JavaScript 的值分两大类：
 
 ---
 
+<!-- injected-code -->
+## 可运行代码：把上面的说法跑一遍
+
+下面两段直接取自本章示例库（`examples/`），期望输出就是判题台里判定的那串字符串，不是事后补写的说明。读完正文后先照着跑一遍，再回去看「三视角解析」里对应的那条。
+
+### typeof 对 7 种原始类型与对象/函数的结果
+
+```js
+const samples = [
+  ['number', 1],
+  ['string', 'a'],
+  ['boolean', true],
+  ['null', null],
+  ['undefined', undefined],
+  ['symbol', Symbol('s')],
+  ['bigint', 10n],
+  ['object', {}],
+  ['array', []],
+  ['function', function(){}],
+];
+for (const [name, v] of samples) {
+  console.log(name, '=>', typeof v);
+}
+```
+
+实际输出：
+
+```text
+number => number
+string => string
+boolean => boolean
+null => object
+undefined => undefined
+symbol => symbol
+bigint => bigint
+object => object
+array => object
+function => function
+```
+
+> 出处：`examples/ex01-typeof-primitives.json`。改一处再看输出变没变，比读三遍解释有用。
+
+### == / === / Object.is 的相等性差异
+
+```js
+console.log('1 == "1":', 1 == '1');
+console.log('1 === "1":', 1 === '1');
+console.log('null == undefined:', null == undefined);
+console.log('null === undefined:', null === undefined);
+console.log('NaN === NaN:', NaN === NaN);
+console.log('Object.is(NaN, NaN):', Object.is(NaN, NaN));
+console.log('+0 === -0:', +0 === -0);
+console.log('Object.is(+0, -0):', Object.is(+0, -0));
+console.log('[] == false:', [] == false);
+```
+
+实际输出：
+
+```text
+1 == "1": true
+1 === "1": false
+null == undefined: true
+null === undefined: false
+NaN === NaN: false
+Object.is(NaN, NaN): true
++0 === -0: true
+Object.is(+0, -0): false
+[] == false: true
+```
+
+> 出处：`examples/ex02-equality-three.json`。改一处再看输出变没变，比读三遍解释有用。
+
 ## 三视角解析
 
 ### 🧑‍💻 程序员视角

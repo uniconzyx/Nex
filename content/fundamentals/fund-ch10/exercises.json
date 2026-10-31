@@ -215,10 +215,11 @@
       "platform": "self",
       "difficulty": "medium",
       "title": "实现 LRU 页面置换并统计缺页次数",
-      "content_md": "给定引用串 `pages`（数组）与可用帧数 `capacity`，实现 **LRU 页面置换算法**，返回**缺页次数**。要求命中时更新该页的「最近使用时间」；缺页且帧满时淘汰**最久未使用**的页。时间复杂度 O(n·capacity) 即可。\n\n示例：`pages = [7,0,1,2,0,3,0,4,2,3,0,3,2,1,2,0,1,7,0,1]`，`capacity = 3` → 缺页 12 次。",
+      "content_md": "给定引用串 `pages`（数组）与可用帧数 `capacity`，实现 **LRU 页面置换算法**，返回**缺页次数**。要求命中时更新该页的「最近使用时间」；缺页且帧满时淘汰**最久未使用**的页。时间复杂度 O(n·capacity) 即可。\n\n示例：`pages = [7,0,1,2,0,3,0,4,2,3,0,3,2,1,2,0,1,7,0,1]`，`capacity = 3` → 缺页 12 次。\n\n<!-- judge-io -->\n**判题 I/O 约定**（提交完整程序：从 stdin 读、向 stdout 写）\n\n输入：第一行两个整数 `capacity n`；第二行 `n` 个页面号（空格分隔）。\n输出：缺页（page fault）次数。",
       "answer": {
         "text": "用两个并行数组：frames 存页号、last 存该页最后一次被引用的时间戳。命中则只更新时间戳；缺页且已满则线性扫描 last 找最小值对应的帧作为受害者。",
-        "code": "#include <stdio.h>\n\nint lru_faults(const int *pages, int n, int capacity) {\n    int frame[64], last[64], used = 0, faults = 0;\n    for (int i = 0; i < n; i++) {\n        int hit = -1;\n        for (int j = 0; j < used; j++) if (frame[j] == pages[i]) { hit = j; break; }\n        if (hit >= 0) { last[hit] = i; continue; }      /* 命中：只刷新时间戳 */\n        faults++;\n        if (used < capacity) { frame[used] = pages[i]; last[used] = i; used++; }\n        else {\n            int victim = 0;\n            for (int j = 1; j < capacity; j++) if (last[j] < last[victim]) victim = j;\n            frame[victim] = pages[i]; last[victim] = i;\n        }\n    }\n    return faults;\n}\n\nint main(void) {\n    int pages[] = {7,0,1,2,0,3,0,4,2,3,0,3,2,1,2,0,1,7,0,1};\n    int n = 20;\n    for (int cap = 3; cap <= 5; cap++)\n        printf(\"capacity=%d -> faults=%d\\n\", cap, lru_faults(pages, n, cap));\n    return 0;\n}"
+        "code": "#include <stdio.h>\n\nint lru_faults(const int *pages, int n, int capacity) {\n    int frame[64], last[64], used = 0, faults = 0;\n    for (int i = 0; i < n; i++) {\n        int hit = -1;\n        for (int j = 0; j < used; j++) if (frame[j] == pages[i]) { hit = j; break; }\n        if (hit >= 0) { last[hit] = i; continue; }      /* 命中：只刷新时间戳 */\n        faults++;\n        if (used < capacity) { frame[used] = pages[i]; last[used] = i; used++; }\n        else {\n            int victim = 0;\n            for (int j = 1; j < capacity; j++) if (last[j] < last[victim]) victim = j;\n            frame[victim] = pages[i]; last[victim] = i;\n        }\n    }\n    return faults;\n}\n\nint main(void) {\n    int pages[] = {7,0,1,2,0,3,0,4,2,3,0,3,2,1,2,0,1,7,0,1};\n    int n = 20;\n    for (int cap = 3; cap <= 5; cap++)\n        printf(\"capacity=%d -> faults=%d\\n\", cap, lru_faults(pages, n, cap));\n    return 0;\n}",
+        "reference_code": "#include <stdio.h>\n\nint main(void) {\n    int cap, n;\n    if (scanf(\"%d %d\", &cap, &n) != 2) return 0;\n    static int pages[100005];\n    for (int i = 0; i < n; i++) scanf(\"%d\", &pages[i]);\n    int frame[1024], last[1024], used = 0, faults = 0;\n    for (int i = 0; i < n; i++) {\n        int p = pages[i], hit = -1;\n        for (int j = 0; j < used; j++)\n            if (frame[j] == p) { hit = j; break; }\n        if (hit >= 0) { last[hit] = i; continue; }\n        faults++;\n        if (used < cap) { frame[used] = p; last[used] = i; used++; }\n        else {\n            int victim = 0;\n            for (int j = 1; j < used; j++)\n                if (last[j] < last[victim]) victim = j;\n            frame[victim] = p; last[victim] = i;\n        }\n    }\n    printf(\"%d\\n\", faults);\n    return 0;\n}\n"
       },
       "explanation": "LRU 的关键是**「命中也要刷新时间戳」**——只更新缺页时的时间戳是常见错误，会让算法退化成 FIFO。时间戳用**引用序号**而非墙钟时间，既保证确定性又避免同毫秒歧义。答案里用 `used` 表示当前帧数，避免「未填满就淘汰」的错误。**复杂度优化**：工程实现会用哈希表 + 双向链表做到 O(1)（见下一题的 LRU 缓存），而缺页统计只需 O(n·capacity)。",
       "tags": [
@@ -228,7 +229,24 @@
         "simulation"
       ],
       "source": "self",
-      "source_ref": "fund-ch10 concept 03 · 页面置换算法"
+      "source_ref": "fund-ch10 concept 03 · 页面置换算法",
+      "test_cases": [
+        {
+          "input": "3 20\n7 0 1 2 0 3 0 4 2 3 0 3 2 1 2 0 1 7 0 1",
+          "expected_output": "12",
+          "is_sample": true
+        },
+        {
+          "input": "3 5\n1 2 3 1 4",
+          "expected_output": "4",
+          "is_sample": true
+        },
+        {
+          "input": "1 4\n1 1 1 1",
+          "expected_output": "1",
+          "is_sample": false
+        }
+      ]
     },
     {
       "type": "coding",

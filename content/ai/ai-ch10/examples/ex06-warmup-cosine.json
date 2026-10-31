@@ -1,0 +1,8 @@
+{
+  "title": "warmup + cosine 调度曲线",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "step       lr\n     0   1.500e-07\n   999   1.500e-04\n  1999   3.000e-04\n  2000   3.000e-04\n  5000   2.819e-04\n 11000   1.650e-04\n 15000   7.822e-05\n 19999   3.000e-05\n\n峰值 3.0e-04，warmup 2000 步（占 10%），末端下限 3.0e-05\nt=11000 处 cos 相位 = half，lr 恰为 (peak+min)/2 = 1.650e-04\n结论：warmup 段线性升、cosine 段对称降；总『面积』(lr 积分) 决定等效训练步长预算\n",
+  "code": "\nimport numpy as np\npeak, warmup, total, floor_ratio = 3e-4, 2000, 20000, 0.1\nlr_min = peak * floor_ratio\n\ndef lr_at(t):\n    if t < warmup:\n        return peak * (t + 1) / warmup\n    p = (t - warmup) / (total - warmup)\n    return lr_min + 0.5 * (peak - lr_min) * (1 + np.cos(np.pi * p))\n\nprint(\"step       lr\")\nfor t in (0, 999, 1999, 2000, 5000, 11000, 15000, 19999):\n    print(f\"{t:>6d}   {lr_at(t):.3e}\")\nprint()\nprint(f\"峰值 {peak:.1e}，warmup {warmup} 步（占 10%），末端下限 {lr_min:.1e}\")\nprint(f\"t=11000 处 cos 相位 = half，lr 恰为 (peak+min)/2 = {(peak+lr_min)/2:.3e}\")\nprint(\"结论：warmup 段线性升、cosine 段对称降；总『面积』(lr 积分) 决定等效训练步长预算\")\n"
+}

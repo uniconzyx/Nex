@@ -94,15 +94,16 @@
       ],
       "source": "self",
       "source_ref": "《MySQL 必知必会》第 4-5 章",
-      "test_cases": [
+      "category": "基础题",
+      "platform": "book",
+      "samples": [
         {
           "input": "employee 示例数据：(1,Alice,6000),(2,Bob,8000),(3,Carol,4000)",
           "expected_output": "name|salary\nBob|8000\nAlice|6000",
           "is_sample": true
         }
       ],
-      "category": "基础题",
-      "platform": "book"
+      "judge_note": "本题需要在真实数据库上执行 DDL/DML 才能验证，离线不做自动判分。请对照 samples 在本地库里跑一遍。"
     },
     {
       "type": "coding",
@@ -120,15 +121,16 @@
       "source": "leetcode",
       "source_ref": "LeetCode 175（combine-two-tables）",
       "external_url": "https://leetcode.cn/problems/combine-two-tables/",
-      "test_cases": [
+      "category": "算法题",
+      "platform": "leetcode",
+      "samples": [
         {
           "input": "schema 与样例数据见 external_url",
           "expected_output": "见 external_url（Person LEFT JOIN Address 结果）",
           "is_sample": true
         }
       ],
-      "category": "算法题",
-      "platform": "leetcode"
+      "judge_note": "本题需要在真实数据库上执行 DDL/DML 才能验证，离线不做自动判分。请对照 samples 在本地库里跑一遍。"
     }
   ]
 }

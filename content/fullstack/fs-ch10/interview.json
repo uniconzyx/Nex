@@ -1,0 +1,86 @@
+{
+  "meta": {
+    "chapter": "fs-ch10",
+    "note": "6 个高频问题。"
+  },
+  "items": [
+    {
+      "question": "Vue 3 的响应式是怎么实现的？track 和 trigger 分别做什么？",
+      "answer_md": "建立在 Proxy 之上。每个被 reactive 的对象罩一层 Proxy；读取字段时 get 拦截器执行 track，把『当前正在跑的 effect（全局 activeEffect）』登记进 WeakMap(target)->Map(key)->Set(effect) 这张反向索引；改写字段时 set 拦截器执行 trigger，找到对应 Set 里的 effect 逐个重跑。effect 重跑前先 cleanup 旧依赖再重收集，所以依赖随控制流精确变化。",
+      "follow_ups": [
+        "为什么用 WeakMap 而不是普通 Map？",
+        "effect 重跑前为什么要先 cleanup？不 cleanup 会怎样？",
+        "如果同一个 effect 读了 a 又读了 b，改 a 和改 b 都会触发它吗？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用"
+      ]
+    },
+    {
+      "question": "为什么 ref 要写 .value，而 reactive 不用？",
+      "answer_md": "因为 JS 的原始类型（number/string/boolean）不是对象，无法被 Proxy 包裹、无法装拦截器。ref 把原始值装进一个带 value 属性的容器对象，对这个容器做访问器/Proxy 拦截，于是读 `ref.value`、写 `ref.value=...` 都能走 track/trigger。reactive 只作用于对象，它直接代理对象本身，所以访问属性时天然经过拦截，不需要再套一层 `.value`。模板里 Vue 编译器会自动拆 `.value`，但 script 逻辑里必须手写。",
+      "follow_ups": [
+        "ref 能不能装对象？装了之后深层还响应吗？",
+        "那为什么不全用 ref 而还要有 reactive？",
+        "toRefs 和 ref 是什么关系？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用"
+      ]
+    },
+    {
+      "question": "为什么解构 reactive 对象会丢响应性？toRefs 怎么解决？",
+      "answer_md": "解构 `const { x } = reactiveObj` 取出的是 x 当时的原始值/引用，和原 Proxy 脱离了关系，后续对原对象的修改不会再反映到这个局部变量上，effect 也不订阅它。toRefs 遍历对象每个属性，为每个属性生成一个 ref，这个 ref 的 getter/setter 直接读写原对象的对应字段，于是解构后仍是 ref，读写 `.value` 会原路回到原对象，链路不断。",
+      "follow_ups": [
+        "toRefs 和 toRef 有什么区别？",
+        "storeToRefs 为什么在 Pinia 里需要？",
+        "如果对象有 100 个字段，toRefs 会不会很慢/很占内存？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用"
+      ]
+    },
+    {
+      "question": "数组和 Map 在响应式里有什么坑？Vue 怎么处理的？",
+      "answer_md": "数组：push/pop/splice 等内建方法在 V8 有快速路径，对 length 的改写可能绕过 Proxy 的 set 拦截，导致 effect 不触发。Vue 在 get 拦截里对这些方法做 instrument，返回一个包了一层、执行原方法后手动 trigger(length) 的版本。Map/Set：它们的 get/set/has/delete 是方法而非属性访问，Proxy 的 get/set 拦不到内部存储改动，Vue 同样对集合方法做 instrument 让它们正确派发。",
+      "follow_ups": [
+        "如果我自己用 Proxy 写响应式，最容易漏掉哪一步？",
+        "为什么 Vue 不干脆每次都递归代理整棵树？",
+        "用普通对象当字典时，以响应式对象为 key 有什么问题？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用"
+      ]
+    },
+    {
+      "question": "Pinia 相比 Vuex 改了什么？为什么官方推荐它？",
+      "answer_md": "去掉了 mutations（action 直接改 state），state/getters/actions 界限更松，Setup 写法内部就是 ref/computed/function，类型推导基于 TS 原生、几乎零样板，每个 store 天然独立无需命名空间。Vuex 的 mutation 当初是为了强制变更可追踪，但带来大量 `commit('SET_X')` 字符串样板；Pinia 借助 patch + devtools 同样能做到追踪却不必强制。官方已让 Vuex 进入维护模式，新项目用 Pinia。",
+      "follow_ups": [
+        "没有 mutation 了，Pinia 怎么保证变更可追踪/时间旅行？",
+        "Pinia 的 store 是单例吗？多个组件调用拿到的是同一个吗？",
+        "store 之间互相调用会不会有初始化顺序问题？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用"
+      ]
+    },
+    {
+      "question": "什么情况下该用 shallowRef / shallowReactive？滥用会怎样？",
+      "answer_md": "当你明确只关心『引用整体替换』、不关心内部深层改动时用。典型：值是一个由第三方库管理的大对象（如 THREE.Scene、图表实例），深层代理既没用又拖慢。shallowRef 仅对 `.value` 整体替换响应，内部字段改动不触发；shallowReactive 只对第一层属性响应。滥用会让子字段改动静默失效——你以为改了状态会刷新，实际什么都没发生，是最难排查的一类 bug，所以只在清楚边界时用，必要时用 triggerRef 手动派发。",
+      "follow_ups": [
+        "shallowRef 改了内部字段想强制刷新怎么办？",
+        "shallow 系列是性能优化还是语义声明？",
+        "大列表渲染时用 shallow 要注意什么？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用"
+      ]
+    }
+  ]
+}

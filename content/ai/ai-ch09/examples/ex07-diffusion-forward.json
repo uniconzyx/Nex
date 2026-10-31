@@ -1,0 +1,8 @@
+{
+  "title": "任意步加噪的闭式解 vs 逐步加噪（分布一致性）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "t     闭式均值   闭式方差   逐步均值   逐步方差   N(0,1)理论\n  10  +1.4984    0.0022    +1.4984    0.0022    var=0.0022\n 250  +1.0842    0.4786    +1.0860    0.4785    var=0.4786\n 500  +0.4199    0.9292    +0.4090    0.9201    var=0.9222\n 999  +0.0162    1.0007    +0.0120    1.0109    var=1.0000\n结论：两列方差都约等于 1-abar_t，闭式解与逐步实现分布一致（但噪声样本不同，不能逐元素比较）\n",
+  "code": "\nimport numpy as np\nrng = np.random.default_rng(11)\nT = 1000\nbetas = np.linspace(1e-4, 0.02, T)\nabar = np.cumprod(1 - betas)\nx0, n = 1.5, 40000\n\nprint(\"t     闭式均值   闭式方差   逐步均值   逐步方差   N(0,1)理论\")\nfor t in (10, 250, 500, 999):\n    # 闭式：x_t = sqrt(abar)*x0 + sqrt(1-abar)*eps\n    direct = np.sqrt(abar[t]) * x0 + np.sqrt(1 - abar[t]) * rng.normal(size=n)\n    # 逐步：从 x0 开始走 t+1 步\n    x = np.full(n, x0)\n    for s in range(t + 1):\n        x = np.sqrt(1 - betas[s]) * x + np.sqrt(betas[s]) * rng.normal(size=n)\n    print(f\"{t:>4d}  {direct.mean():+.4f}    {direct.var():.4f}    \"\n          f\"{x.mean():+.4f}    {x.var():.4f}    \"\n          f\"var={1-abar[t]:.4f}\")\nprint(\"结论：两列方差都约等于 1-abar_t，闭式解与逐步实现分布一致（但噪声样本不同，不能逐元素比较）\")\n"
+}

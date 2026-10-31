@@ -12,9 +12,11 @@
       "platform": "self",
       "difficulty": 2,
       "title": "零样本、少样本与思维链的适用边界",
-      "content_md": "关于 few-shot 与 CoT（Chain-of-Thought），下列说法**错误**的是？\n\nA. few-shot 通过示例隐式指定输出格式，比纯文字描述格式更稳\nB. CoT 让模型先输出中间推理步骤，通常能提升多步推理任务准确率\nC. CoT 提示只对足够大的模型有效，小模型上可能反而变差\nD. few-shot 示例越多效果一定越好，所以应尽量塞满上下文窗口",
+      "content_md": "关于 few-shot 与 CoT（Chain-of-Thought），下列说法**错误**的是？",
       "answer": {
-        "correct": "D",
+        "correct": [
+          "D"
+        ],
         "explain": "示例数量收益递减且受上下文窗口预算约束；示例过多会挤占检索片段与输出空间，且可能引入噪声、加剧「中间遗忘」（lost in the middle）。这是个典型的「越多越好」误判。"
       },
       "explanation": "few-shot 的收益是递减的，选示例的**质量与相关性/多样性**比数量更重要；上下文是有限资源，必须做预算分配。",
@@ -25,7 +27,25 @@
       ],
       "source": "self",
       "source_ref": "《Chain-of-Thought Prompting Elicits Reasoning in Large Language Models》§2 · 提示设计",
-      "source_ref_detail": "NeurIPS 2022"
+      "source_ref_detail": "NeurIPS 2022",
+      "options": [
+        {
+          "key": "A",
+          "text": "few-shot 通过示例隐式指定输出格式，比纯文字描述格式更稳"
+        },
+        {
+          "key": "B",
+          "text": "CoT 让模型先输出中间推理步骤，通常能提升多步推理任务准确率"
+        },
+        {
+          "key": "C",
+          "text": "CoT 提示只对足够大的模型有效，小模型上可能反而变差"
+        },
+        {
+          "key": "D",
+          "text": "few-shot 示例越多效果一定越好，所以应尽量塞满上下文窗口"
+        }
+      ]
     },
     {
       "type": "choice",
@@ -33,9 +53,11 @@
       "platform": "self",
       "difficulty": 3,
       "title": "「中间遗忘」现象与上下文位置",
-      "content_md": "研究表明，长上下文中模型对**中间位置**信息的利用率明显低于开头和结尾。实践中下列做法**最不能**缓解这一问题的是？\n\nA. 把最关键的指令/检索片段放在上下文开头或结尾\nB. 对检索结果按相关性重排（rerank）后只保留 top-k\nC. 把无关的长文档全部塞进上下文「以防万一」\nD. 把长文档先做摘要/抽取再拼接，压缩无关内容",
+      "content_md": "研究表明，长上下文中模型对**中间位置**信息的利用率明显低于开头和结尾。实践中下列做法**最不能**缓解这一问题的是？",
       "answer": {
-        "correct": "C",
+        "correct": [
+          "C"
+        ],
         "explain": "「全塞进去」会稀释关键信息、把重要片段推到中间位置，正是加剧 lost-in-the-middle 的做法。A/B/D 都是围绕「减少无关内容 + 优化位置」的有效手段。"
       },
       "explanation": "上下文工程的核心不是「塞多少」，而是「放什么、放哪里、留多少给输出」。",
@@ -46,7 +68,25 @@
       ],
       "source": "self",
       "source_ref": "《Lost in the Middle: How Language Models Use Long Contexts》§3 · 位置敏感性",
-      "source_ref_detail": "TACL 2024"
+      "source_ref_detail": "TACL 2024",
+      "options": [
+        {
+          "key": "A",
+          "text": "把最关键的指令/检索片段放在上下文开头或结尾"
+        },
+        {
+          "key": "B",
+          "text": "对检索结果按相关性重排（rerank）后只保留 top-k"
+        },
+        {
+          "key": "C",
+          "text": "把无关的长文档全部塞进上下文「以防万一」"
+        },
+        {
+          "key": "D",
+          "text": "把长文档先做摘要/抽取再拼接，压缩无关内容"
+        }
+      ]
     },
     {
       "type": "output",

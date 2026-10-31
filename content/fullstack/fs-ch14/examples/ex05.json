@@ -1,0 +1,8 @@
+{
+  "title": "断线重连：用游标只补发后续事件、去重合并",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "首次收到: e1,e2,e3 (在 e3 后断开)\n重连续传: e4,e5\n合计去重: 5 条",
+  "code": "const events = [\"e1\", \"e2\", \"e3\", \"e4\", \"e5\"];\nfunction serve(fromIdx) { return events.slice(fromIdx); }\nlet idx = 0;\nconst first = serve(idx); idx = 2; // 只处理到 e3（下标2）就断开\nconsole.log(\"首次收到:\", first.slice(0, 3).join(\",\"), \"(在 e3 后断开)\");\nconst replay = serve(idx + 1); // 从 e4 续传\nconsole.log(\"重连续传:\", replay.join(\",\"));\nconsole.log(\"合计去重:\", first.slice(0, 3).concat(replay).length, \"条\");\n"
+}

@@ -29,10 +29,10 @@
           "eugenp/tutorials"
         ],
         "github_stars": [
-          159056,
+          159300,
           84863,
-          79141,
-          37326
+          79162,
+          37313
         ],
         "github_notes": [
           "Java 面试与后端通用指南：计算机基础、数据库、分布式、高并发、系统设计",
@@ -40,13 +40,41 @@
           "互联网 Java 工程师进阶知识：高并发、分布式、微服务",
           "Spring 官方生态的系统化代码教程仓库"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《Java 核心技术 卷I》第 3 章 Java 基本的程序设计结构",
-          "《Effective Java》第 2 条 遇多个构造器参数考虑用构建器（类型设计进阶）"
+          "《Java 核心技术 卷I》Horstmann",
+          "《Effective Java（第 3 版）》Bloch",
+          "《深入理解 Java 虚拟机》周志明"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1Kb411W75N/",
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · Java 入门（宋红康）",
+            "url": "https://www.bilibili.com/video/BV1Kb411W75N/",
+            "note": "语法主线课：每章都从「为什么这么设计」讲到字节码层面，适合边看边在 IDE 里复现",
+            "bv": "BV1Kb411W75N"
+          },
+          {
+            "name": "黑马程序员 · Java 零基础（上部）",
+            "url": "https://www.bilibili.com/video/BV17F411T7Ao/",
+            "note": "练习密度最高的一套：每节配一个可提交的小任务，含力扣题与面试题讲解",
+            "bv": "BV17F411T7Ao"
+          },
+          {
+            "name": "黑马程序员 · Java 并发编程（JUC）",
+            "url": "https://www.bilibili.com/video/BV16J411h7Rd/",
+            "note": "synchronized 监视器、volatile 内存语义、AQS 与线程池参数逐个拆开讲，并发章的唯一主线",
+            "bv": "BV16J411h7Rd"
+          },
+          {
+            "name": "尚硅谷 · JVM 全套教程",
+            "url": "https://www.bilibili.com/video/BV1PJ411n7xZ/",
+            "note": "内存区域、GC 算法与收集器、类加载与双亲委派、字节码；配 jstat/jmap 实操",
+            "bv": "BV1PJ411n7xZ"
+          }
+        ]
       }
     },
     {
@@ -67,10 +95,10 @@
           "eugenp/tutorials"
         ],
         "github_stars": [
-          159056,
+          159300,
           84863,
-          79141,
-          37326
+          79162,
+          37313
         ],
         "github_notes": [
           "Java 面试与后端通用指南：计算机基础、数据库、分布式、高并发、系统设计",
@@ -78,13 +106,41 @@
           "互联网 Java 工程师进阶知识：高并发、分布式、微服务",
           "Spring 官方生态的系统化代码教程仓库"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《Java 核心技术 卷I》第 4 章 对象与类",
-          "《Effective Java》第 15-17 条 类与接口的设计（最小化可变性、复合优先于继承）"
+          "《Java 核心技术 卷I》Horstmann",
+          "《Effective Java（第 3 版）》Bloch",
+          "《深入理解 Java 虚拟机》周志明"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1Kb411W75N/",
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · Java 入门（宋红康）",
+            "url": "https://www.bilibili.com/video/BV1Kb411W75N/",
+            "note": "语法主线课：每章都从「为什么这么设计」讲到字节码层面，适合边看边在 IDE 里复现",
+            "bv": "BV1Kb411W75N"
+          },
+          {
+            "name": "黑马程序员 · JavaWeb 全流程",
+            "url": "https://www.bilibili.com/video/BV1m84y1w7Tb/",
+            "note": "从 Servlet 到 Spring + MyBatis 的完整链路，Maven 与分层工程的落点在最后几章",
+            "bv": "BV1m84y1w7Tb"
+          },
+          {
+            "name": "尚硅谷 · JVM 全套教程",
+            "url": "https://www.bilibili.com/video/BV1PJ411n7xZ/",
+            "note": "内存区域、GC 算法与收集器、类加载与双亲委派、字节码；配 jstat/jmap 实操",
+            "bv": "BV1PJ411n7xZ"
+          },
+          {
+            "name": "黑马程序员 · JVM 快速入门",
+            "url": "https://www.bilibili.com/video/BV1yE411Z7AP/",
+            "note": "比尚硅谷短，适合先建立全局图再回头抠细节；GC 日志与调优参数讲得直给",
+            "bv": "BV1yE411Z7AP"
+          }
+        ]
       }
     },
     {
@@ -105,10 +161,10 @@
           "eugenp/tutorials"
         ],
         "github_stars": [
-          159056,
+          159300,
           84863,
-          79141,
-          37326
+          79162,
+          37313
         ],
         "github_notes": [
           "Java 面试与后端通用指南：计算机基础、数据库、分布式、高并发、系统设计",
@@ -116,13 +172,41 @@
           "互联网 Java 工程师进阶知识：高并发、分布式、微服务",
           "Spring 官方生态的系统化代码教程仓库"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《Java 核心技术 卷I》第 5-6 章 继承 / 接口",
-          "《Effective Java》第 18-21 条 组合优于继承、接口设计、子类型化"
+          "《Java 核心技术 卷I》Horstmann",
+          "《Effective Java（第 3 版）》Bloch",
+          "《深入理解 Java 虚拟机》周志明"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1Kb411W75N/",
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · Java 入门（宋红康）",
+            "url": "https://www.bilibili.com/video/BV1Kb411W75N/",
+            "note": "语法主线课：每章都从「为什么这么设计」讲到字节码层面，适合边看边在 IDE 里复现",
+            "bv": "BV1Kb411W75N"
+          },
+          {
+            "name": "尚硅谷 · JVM 全套教程",
+            "url": "https://www.bilibili.com/video/BV1PJ411n7xZ/",
+            "note": "内存区域、GC 算法与收集器、类加载与双亲委派、字节码；配 jstat/jmap 实操",
+            "bv": "BV1PJ411n7xZ"
+          },
+          {
+            "name": "黑马程序员 · JavaWeb 全流程",
+            "url": "https://www.bilibili.com/video/BV1m84y1w7Tb/",
+            "note": "从 Servlet 到 Spring + MyBatis 的完整链路，Maven 与分层工程的落点在最后几章",
+            "bv": "BV1m84y1w7Tb"
+          },
+          {
+            "name": "黑马程序员 · Java 零基础（上部）",
+            "url": "https://www.bilibili.com/video/BV17F411T7Ao/",
+            "note": "练习密度最高的一套：每节配一个可提交的小任务，含力扣题与面试题讲解",
+            "bv": "BV17F411T7Ao"
+          }
+        ]
       }
     },
     {
@@ -144,10 +228,10 @@
           "eugenp/tutorials"
         ],
         "github_stars": [
-          159056,
+          159300,
           84863,
-          79141,
-          37326
+          79162,
+          37313
         ],
         "github_notes": [
           "Java 面试与后端通用指南：计算机基础、数据库、分布式、高并发、系统设计",
@@ -155,13 +239,41 @@
           "互联网 Java 工程师进阶知识：高并发、分布式、微服务",
           "Spring 官方生态的系统化代码教程仓库"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《Java 核心技术 卷I》第 9 章 集合",
-          "《Effective Java》第 33 条 用 EnumMap 代替序数索引等集合建议"
+          "《Java 核心技术 卷I》Horstmann",
+          "《Effective Java（第 3 版）》Bloch",
+          "《深入理解 Java 虚拟机》周志明"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1Kb411W75N/",
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · Java 入门（宋红康）",
+            "url": "https://www.bilibili.com/video/BV1Kb411W75N/",
+            "note": "语法主线课：每章都从「为什么这么设计」讲到字节码层面，适合边看边在 IDE 里复现",
+            "bv": "BV1Kb411W75N"
+          },
+          {
+            "name": "黑马程序员 · JavaWeb 全流程",
+            "url": "https://www.bilibili.com/video/BV1m84y1w7Tb/",
+            "note": "从 Servlet 到 Spring + MyBatis 的完整链路，Maven 与分层工程的落点在最后几章",
+            "bv": "BV1m84y1w7Tb"
+          },
+          {
+            "name": "黑马程序员 · Java 零基础（上部）",
+            "url": "https://www.bilibili.com/video/BV17F411T7Ao/",
+            "note": "练习密度最高的一套：每节配一个可提交的小任务，含力扣题与面试题讲解",
+            "bv": "BV17F411T7Ao"
+          },
+          {
+            "name": "黑马程序员 · Java 并发编程（JUC）",
+            "url": "https://www.bilibili.com/video/BV16J411h7Rd/",
+            "note": "synchronized 监视器、volatile 内存语义、AQS 与线程池参数逐个拆开讲，并发章的唯一主线",
+            "bv": "BV16J411h7Rd"
+          }
+        ]
       }
     },
     {
@@ -183,10 +295,10 @@
           "eugenp/tutorials"
         ],
         "github_stars": [
-          159056,
+          159300,
           84863,
-          79141,
-          37326
+          79162,
+          37313
         ],
         "github_notes": [
           "Java 面试与后端通用指南：计算机基础、数据库、分布式、高并发、系统设计",
@@ -194,13 +306,41 @@
           "互联网 Java 工程师进阶知识：高并发、分布式、微服务",
           "Spring 官方生态的系统化代码教程仓库"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《Java 核心技术 卷I》第 7 章 异常 / 第 8 章 泛型程序设计",
-          "《Effective Java》第 10 章 异常 / 第 5 章 泛型"
+          "《Java 核心技术 卷I》Horstmann",
+          "《Effective Java（第 3 版）》Bloch",
+          "《深入理解 Java 虚拟机》周志明"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1Kb411W75N/",
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · Java 入门（宋红康）",
+            "url": "https://www.bilibili.com/video/BV1Kb411W75N/",
+            "note": "语法主线课：每章都从「为什么这么设计」讲到字节码层面，适合边看边在 IDE 里复现",
+            "bv": "BV1Kb411W75N"
+          },
+          {
+            "name": "黑马程序员 · JavaWeb 全流程",
+            "url": "https://www.bilibili.com/video/BV1m84y1w7Tb/",
+            "note": "从 Servlet 到 Spring + MyBatis 的完整链路，Maven 与分层工程的落点在最后几章",
+            "bv": "BV1m84y1w7Tb"
+          },
+          {
+            "name": "黑马程序员 · Java 零基础（上部）",
+            "url": "https://www.bilibili.com/video/BV17F411T7Ao/",
+            "note": "练习密度最高的一套：每节配一个可提交的小任务，含力扣题与面试题讲解",
+            "bv": "BV17F411T7Ao"
+          },
+          {
+            "name": "尚硅谷 · JVM 全套教程",
+            "url": "https://www.bilibili.com/video/BV1PJ411n7xZ/",
+            "note": "内存区域、GC 算法与收集器、类加载与双亲委派、字节码；配 jstat/jmap 实操",
+            "bv": "BV1PJ411n7xZ"
+          }
+        ]
       }
     },
     {
@@ -221,10 +361,10 @@
           "eugenp/tutorials"
         ],
         "github_stars": [
-          159056,
+          159300,
           84863,
-          79141,
-          37326
+          79162,
+          37313
         ],
         "github_notes": [
           "Java 面试与后端通用指南：计算机基础、数据库、分布式、高并发、系统设计",
@@ -232,13 +372,41 @@
           "互联网 Java 工程师进阶知识：高并发、分布式、微服务",
           "Spring 官方生态的系统化代码教程仓库"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《Java 核心技术 卷II》第 1-2 章 流与文件 / NIO",
-          "《Effective Java》第 11 条 Serializable 谨慎实现"
+          "《Java 核心技术 卷I》Horstmann",
+          "《Effective Java（第 3 版）》Bloch",
+          "《深入理解 Java 虚拟机》周志明"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1Kb411W75N/",
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · Java 入门（宋红康）",
+            "url": "https://www.bilibili.com/video/BV1Kb411W75N/",
+            "note": "语法主线课：每章都从「为什么这么设计」讲到字节码层面，适合边看边在 IDE 里复现",
+            "bv": "BV1Kb411W75N"
+          },
+          {
+            "name": "黑马程序员 · JavaWeb 全流程",
+            "url": "https://www.bilibili.com/video/BV1m84y1w7Tb/",
+            "note": "从 Servlet 到 Spring + MyBatis 的完整链路，Maven 与分层工程的落点在最后几章",
+            "bv": "BV1m84y1w7Tb"
+          },
+          {
+            "name": "黑马程序员 · Java 并发编程（JUC）",
+            "url": "https://www.bilibili.com/video/BV16J411h7Rd/",
+            "note": "synchronized 监视器、volatile 内存语义、AQS 与线程池参数逐个拆开讲，并发章的唯一主线",
+            "bv": "BV16J411h7Rd"
+          },
+          {
+            "name": "黑马程序员 · Java 零基础（上部）",
+            "url": "https://www.bilibili.com/video/BV17F411T7Ao/",
+            "note": "练习密度最高的一套：每节配一个可提交的小任务，含力扣题与面试题讲解",
+            "bv": "BV17F411T7Ao"
+          }
+        ]
       }
     },
     {
@@ -260,10 +428,10 @@
           "eugenp/tutorials"
         ],
         "github_stars": [
-          159056,
+          159300,
           84863,
-          79141,
-          37326
+          79162,
+          37313
         ],
         "github_notes": [
           "Java 面试与后端通用指南：计算机基础、数据库、分布式、高并发、系统设计",
@@ -271,13 +439,41 @@
           "互联网 Java 工程师进阶知识：高并发、分布式、微服务",
           "Spring 官方生态的系统化代码教程仓库"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《Java 并发编程实战》（Brian Goetz）",
-          "《Java 核心技术 卷II》第 5 章 并发"
+          "《Java 核心技术 卷I》Horstmann",
+          "《Effective Java（第 3 版）》Bloch",
+          "《深入理解 Java 虚拟机》周志明"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1Kb411W75N/",
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · Java 入门（宋红康）",
+            "url": "https://www.bilibili.com/video/BV1Kb411W75N/",
+            "note": "语法主线课：每章都从「为什么这么设计」讲到字节码层面，适合边看边在 IDE 里复现",
+            "bv": "BV1Kb411W75N"
+          },
+          {
+            "name": "黑马程序员 · Java 并发编程（JUC）",
+            "url": "https://www.bilibili.com/video/BV16J411h7Rd/",
+            "note": "synchronized 监视器、volatile 内存语义、AQS 与线程池参数逐个拆开讲，并发章的唯一主线",
+            "bv": "BV16J411h7Rd"
+          },
+          {
+            "name": "黑马程序员 · JavaWeb 全流程",
+            "url": "https://www.bilibili.com/video/BV1m84y1w7Tb/",
+            "note": "从 Servlet 到 Spring + MyBatis 的完整链路，Maven 与分层工程的落点在最后几章",
+            "bv": "BV1m84y1w7Tb"
+          },
+          {
+            "name": "尚硅谷 · JVM 全套教程",
+            "url": "https://www.bilibili.com/video/BV1PJ411n7xZ/",
+            "note": "内存区域、GC 算法与收集器、类加载与双亲委派、字节码；配 jstat/jmap 实操",
+            "bv": "BV1PJ411n7xZ"
+          }
+        ]
       }
     },
     {
@@ -300,10 +496,10 @@
           "eugenp/tutorials"
         ],
         "github_stars": [
-          159056,
+          159300,
           84863,
-          79141,
-          37326
+          79162,
+          37313
         ],
         "github_notes": [
           "Java 面试与后端通用指南：计算机基础、数据库、分布式、高并发、系统设计",
@@ -311,13 +507,41 @@
           "互联网 Java 工程师进阶知识：高并发、分布式、微服务",
           "Spring 官方生态的系统化代码教程仓库"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《深入理解 Java 虚拟机》（周志明）",
-          "《Java 核心技术 卷II》第 9 章 虚拟机"
+          "《Java 核心技术 卷I》Horstmann",
+          "《Effective Java（第 3 版）》Bloch",
+          "《深入理解 Java 虚拟机》周志明"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1Kb411W75N/",
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · Java 入门（宋红康）",
+            "url": "https://www.bilibili.com/video/BV1Kb411W75N/",
+            "note": "语法主线课：每章都从「为什么这么设计」讲到字节码层面，适合边看边在 IDE 里复现",
+            "bv": "BV1Kb411W75N"
+          },
+          {
+            "name": "尚硅谷 · JVM 全套教程",
+            "url": "https://www.bilibili.com/video/BV1PJ411n7xZ/",
+            "note": "内存区域、GC 算法与收集器、类加载与双亲委派、字节码；配 jstat/jmap 实操",
+            "bv": "BV1PJ411n7xZ"
+          },
+          {
+            "name": "黑马程序员 · JVM 快速入门",
+            "url": "https://www.bilibili.com/video/BV1yE411Z7AP/",
+            "note": "比尚硅谷短，适合先建立全局图再回头抠细节；GC 日志与调优参数讲得直给",
+            "bv": "BV1yE411Z7AP"
+          },
+          {
+            "name": "黑马程序员 · JavaWeb 全流程",
+            "url": "https://www.bilibili.com/video/BV1m84y1w7Tb/",
+            "note": "从 Servlet 到 Spring + MyBatis 的完整链路，Maven 与分层工程的落点在最后几章",
+            "bv": "BV1m84y1w7Tb"
+          }
+        ]
       }
     },
     {
@@ -339,10 +563,10 @@
           "eugenp/tutorials"
         ],
         "github_stars": [
-          159056,
+          159300,
           84863,
-          79141,
-          37326
+          79162,
+          37313
         ],
         "github_notes": [
           "Java 面试与后端通用指南：计算机基础、数据库、分布式、高并发、系统设计",
@@ -350,13 +574,41 @@
           "互联网 Java 工程师进阶知识：高并发、分布式、微服务",
           "Spring 官方生态的系统化代码教程仓库"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《Spring 实战》（Craig Walls）",
-          "《Effective Java》工程与 API 设计相关条款"
+          "《Java 核心技术 卷I》Horstmann",
+          "《Effective Java（第 3 版）》Bloch",
+          "《深入理解 Java 虚拟机》周志明"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1Kb411W75N/",
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · Java 入门（宋红康）",
+            "url": "https://www.bilibili.com/video/BV1Kb411W75N/",
+            "note": "语法主线课：每章都从「为什么这么设计」讲到字节码层面，适合边看边在 IDE 里复现",
+            "bv": "BV1Kb411W75N"
+          },
+          {
+            "name": "黑马程序员 · JavaWeb 全流程",
+            "url": "https://www.bilibili.com/video/BV1m84y1w7Tb/",
+            "note": "从 Servlet 到 Spring + MyBatis 的完整链路，Maven 与分层工程的落点在最后几章",
+            "bv": "BV1m84y1w7Tb"
+          },
+          {
+            "name": "黑马程序员 · Java 并发编程（JUC）",
+            "url": "https://www.bilibili.com/video/BV16J411h7Rd/",
+            "note": "synchronized 监视器、volatile 内存语义、AQS 与线程池参数逐个拆开讲，并发章的唯一主线",
+            "bv": "BV16J411h7Rd"
+          },
+          {
+            "name": "黑马程序员 · Java 零基础（上部）",
+            "url": "https://www.bilibili.com/video/BV17F411T7Ao/",
+            "note": "练习密度最高的一套：每节配一个可提交的小任务，含力扣题与面试题讲解",
+            "bv": "BV17F411T7Ao"
+          }
+        ]
       }
     }
   ],

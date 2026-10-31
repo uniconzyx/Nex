@@ -1,0 +1,219 @@
+{
+  "meta": {
+    "chapter": "fs-ch10",
+    "note": "8 题，含选择题/输出题/改错题/编程题；题面与参考实现均为自建，不搬运第三方题面。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "关于 Vue 3 响应式的依赖收集，正确的是",
+      "content_md": "选择**正确**的描述。",
+      "options": [
+        {
+          "key": "A",
+          "text": "依赖关系在组件创建时一次性固定，之后不再变化"
+        },
+        {
+          "key": "B",
+          "text": "effect 运行时会把读过的字段登记到 (对象, 字段) -> effect 集合 的索引里（track），字段改写时再通知这些 effect（trigger）"
+        },
+        {
+          "key": "C",
+          "text": "Vue 3 仍用 Object.defineProperty，只是做了性能优化"
+        },
+        {
+          "key": "D",
+          "text": "只有模板渲染函数会被收集为依赖，watch 和 computed 不受影响"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "Vue 3 用 Proxy + 全局 activeEffect：effect 运行时读字段触发 get 拦截执行 track，把 activeEffect 登记进 (target,key)->Set(effects) 的 WeakMap；字段改写触发 set 拦截执行 trigger 通知。依赖是随控制流动态重收集的（每次重跑先 cleanup 再收集），故 A 错。Vue 3 用 Proxy 而非 defineProperty，C 错。watch/computed 也是 effect，都会被收集，D 错。",
+      "tags": [
+        "reactivity",
+        "track",
+        "trigger"
+      ],
+      "source": "book",
+      "source_ref": "Vue 3 Docs · Reactivity Fundamentals"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "读代码写输出（ref 必须 .value）",
+      "content_md": "```js\nconst count = ref(1);\nconsole.log(\"initial value:\", count.value);\ncount.value = count.value + 4;\nconsole.log(\"after +4:\", count.value);\nlet seen = [];\neffect(() => { seen.push(count.value); });\ncount.value = 100;\nconsole.log(\"effect saw:\", seen.join(\" -> \"));\n```",
+      "answer": {
+        "output": "initial value: 1\nafter +4: 5\neffect saw: 5 -> 100"
+      },
+      "explanation": "ref 是容器对象，读必须 `count.value`：初始 1；自增后是 5。effect 第一次运行把当前值 5 推入 seen；随后 `count.value=100` 触发 trigger，effect 重跑推入 100，所以 seen 是 `5 -> 100`。",
+      "tags": [
+        "ref",
+        "value",
+        "effect"
+      ],
+      "source": "book",
+      "source_ref": "Vue 3 Docs · Ref"
+    },
+    {
+      "type": "fix",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "改错：为什么解构后视图不更新",
+      "content_md": "下面的组件逻辑期望「点击按钮计数 +1 并刷新」，但 `count` 永远停在 0。指出问题并改正。\n\n```js\nconst store = reactive({ count: 0 });\nconst { count } = store;          // 局部变量\nfunction inc() { count++; }        // 改的是局部值快照\nconsole.log(count);\n```",
+      "answer": {
+        "reference_code": "const store = reactive({ count: 0 });\n// 用 toRefs 把字段转成 ref，保持响应性\nconst { count } = toRefs(store);\nfunction inc() { count.value++; }   // 注意 ref 要 .value\nconsole.log(store.count);"
+      },
+      "explanation": "解构 `const { count } = store` 取出的是 `store.count` 当时的原始值 0（一个数字），和 proxy 脱钩；`count++` 只是改局部变量，原对象没动、effect 也没订阅局部变量。正确做法是用 `toRefs(store)` 生成 ref 再解构，写 `count.value++`，读写都回到原对象。",
+      "tags": [
+        "toRefs",
+        "destructure",
+        "reactivity-loss"
+      ],
+      "source": "book",
+      "source_ref": "Vue 3 Docs · Reactive · toRefs"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "shallowRef 与 ref 的差别",
+      "content_md": "关于 shallowRef，正确的是",
+      "options": [
+        {
+          "key": "A",
+          "text": "shallowRef 完全不能触发，等于普通变量"
+        },
+        {
+          "key": "B",
+          "text": "shallowRef 只对 .value 的整体替换做响应，内部对象的字段改动不触发"
+        },
+        {
+          "key": "C",
+          "text": "shallowRef 比 ref 更深，会递归代理内部所有层级"
+        },
+        {
+          "key": "D",
+          "text": "shallowRef 是 ref 的语法糖，二者运行时完全一致"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "shallowRef 只对 `.value` 被整体替换（`x.value = newObj`）做响应，内部对象不被递归代理，所以 `x.value.field = 1` 不会触发更新。它是用来明确「只关心引用替换、不关心内部」的边界声明，不是语法糖也不是完全无效。需要强制派发可用 `triggerRef`。",
+      "tags": [
+        "shallowRef",
+        "shallow"
+      ],
+      "source": "book",
+      "source_ref": "Vue 3 Docs · shallowRef"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "book",
+      "difficulty": "hard",
+      "title": "实现一个迷你响应式：reactive + effect",
+      "content_md": "用 Proxy 实现一个极简响应式：支持 `reactive(obj)`（深层代理）、`effect(fn)`（首次运行并收集依赖，依赖变化时重跑）、对象字段改写自动触发。要求：① 用 WeakMap(target) -> Map(key) -> Set(effects) 存依赖；② 数组 push 也要能触发（提示：拦截数组方法）；③ effect 重跑前先清理旧依赖再重收集。写出并在 main 中自测：state.count++ 触发打印、state.user.age=20 触发打印。",
+      "answer": {
+        "reference_code": "const targetMap = new WeakMap();\nlet activeEffect = null;\nconst effectStack = [];\nfunction track(t, k){ if(!activeEffect) return; let dm=targetMap.get(t); if(!dm) targetMap.set(t,(dm=new Map())); let dep=dm.get(k); if(!dep) dm.set(k,(dep=new Set())); dep.add(activeEffect); activeEffect.deps.add(dep); }\nfunction trigger(t, k){ const dm=targetMap.get(t); if(!dm) return; const dep=dm.get(k); if(dep) [...dep].forEach(e=>e.run()); }\nconst ARR=[\"push\",\"pop\",\"shift\",\"unshift\",\"splice\"];\nfunction reactive(obj){\n  if(obj===null || typeof obj!=='object') return obj;\n  return new Proxy(obj, {\n    get(t,k,r){ const res=Reflect.get(t,k,r);\n      if(Array.isArray(t) && ARR.includes(k)) return function(...a){ const r=res.apply(t,a); trigger(t,'length'); return r; };\n      track(t,k); return typeof res==='object' && res!==null ? reactive(res) : res; },\n    set(t,k,v,r){ const old=t[k]; const res=Reflect.set(t,k,v,r); if(old!==v){ trigger(t,k); trigger(t,'length'); } return res; }\n  });\n}\nfunction effect(fn){ const e={ deps:new Set(), run(){ e.deps.forEach(d=>d.delete(e)); e.deps.clear(); effectStack.push(e); activeEffect=e; try{ return fn(); } finally { effectStack.pop(); activeEffect=effectStack[effectStack.length-1]||null; } } }; e.run(); return e; }\n\nconst state = reactive({ count: 0, user: { age: 18 } });\neffect(()=>console.log('count=', state.count));\neffect(()=>console.log('age=', state.user.age));\nstate.count++;\nstate.user.age = 20;"
+      },
+      "explanation": "核心是 track/trigger 与 Proxy 拦截：get 时 track 记录 (t,k)->effect；set 时若值变化 trigger 通知。深层靠 get 返回时惰性 reactive(res)。数组方法需 instrument（push 后手动 trigger length）以绕过 V8 快速路径。effect.run 先 cleanup 旧依赖再重收集，保证依赖随控制流精确。",
+      "tags": [
+        "reactive",
+        "effect",
+        "proxy",
+        "track",
+        "trigger"
+      ],
+      "source": "book",
+      "source_ref": "Vue 3 RFC · Reactivity"
+    },
+    {
+      "type": "fix",
+      "category": "算法题",
+      "platform": "book",
+      "difficulty": "hard",
+      "title": "改错：Pinia store 持久化泄露敏感信息",
+      "content_md": "下面的 Pinia 配置把整个用户 store 持久化到 localStorage，包含 token。改为只持久化非敏感字段（theme、lang），并解释为什么。\n\n```js\ndefineStore('user', {\n  state: () => ({ name: '', token: '', theme: 'dark', lang: 'zh' }),\n  persist: true,\n})\n```",
+      "answer": {
+        "reference_code": "defineStore('user', {\n  state: () => ({ name: '', token: '', theme: 'dark', lang: 'zh' }),\n  // 只持久化非敏感偏好，token/name 不落盘\n  persist: { paths: ['theme', 'lang'] },\n})"
+      },
+      "explanation": "`persist: true` 会把 state 整体序列化进 localStorage，而 localStorage 任意脚本可读、易遭 XSS 窃取，把 token 存进去等于明文暴露凭据。应当用 `paths` 白名单只挑 theme/lang 这类偏好字段，token 放内存 ref 或 httpOnly cookie，刷新后由后端重新下发。",
+      "tags": [
+        "pinia",
+        "persist",
+        "security"
+      ],
+      "source": "book",
+      "source_ref": "pinia-plugin-persistedstate Docs"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "读代码写输出（深层代理触发）",
+      "content_md": "```js\nconst s = reactive({ user: { age: 18 } });\nlet log = [];\neffect(() => { log.push(\"age=\" + s.user.age); });\nconsole.log(\"init:\", log.join(\" | \"));\ns.user.age = 20;\nconsole.log(\"after deep set:\", log.join(\" | \"));\n```",
+      "answer": {
+        "output": "init: age=18\nafter deep set: age=18 | age=20"
+      },
+      "explanation": "effect 读取 `s.user.age` 时，get 拦截对 `user`（对象）惰性地也套了 Proxy，所以改 `s.user.age` 会触发。init 打印 age=18；深层改写后 effect 重跑打印 age=20，日志为 `age=18 | age=20`。",
+      "tags": [
+        "deep-proxy",
+        "reactive"
+      ],
+      "source": "book",
+      "source_ref": "Vue 3 Docs · Reactivity"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "Pinia Setup 写法的描述，正确的是",
+      "content_md": "关于 Pinia 的 Setup 写法，正确的是",
+      "options": [
+        {
+          "key": "A",
+          "text": "必须在 store 里写 mutations 才能改状态"
+        },
+        {
+          "key": "B",
+          "text": "store 内部直接用 ref/computed/function 定义状态、派生与行为，返回要暴露的成员即可"
+        },
+        {
+          "key": "C",
+          "text": "Setup 写法无法在一个 store 里调用另一个 store"
+        },
+        {
+          "key": "D",
+          "text": "Setup 写法不支持 TypeScript 类型推导"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "Setup 写法复用 Vue 组合式 API：用 ref 定义状态、computed 定义派生、function 定义 action，return 出要暴露的成员，没有 mutation 概念（A 错）。store 间可相互 `useOtherStore()` 调用（C 错），且基于 TS 原生推断、类型推导很好（D 错）。",
+      "tags": [
+        "pinia",
+        "setup-store"
+      ],
+      "source": "book",
+      "source_ref": "Pinia Docs · Setup Stores"
+    }
+  ]
+}

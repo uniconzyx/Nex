@@ -1,0 +1,218 @@
+{
+  "meta": {
+    "chapter": "fs-ch11",
+    "note": "8 题，含选择题/输出题/改错题/编程题；题面与参考实现均为自建，不搬运第三方题面。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "关于 Spring Boot 的分层依赖方向",
+      "content_md": "正确的是",
+      "options": [
+        {
+          "key": "A",
+          "text": "Repository 可以依赖 Service，以便复用业务逻辑"
+        },
+        {
+          "key": "B",
+          "text": "依赖方向应单向向下：Controller -> Service -> Repository，反向禁止"
+        },
+        {
+          "key": "C",
+          "text": "Controller 直接调 Repository 没关系，只要能跑通"
+        },
+        {
+          "key": "D",
+          "text": "Service 应当依赖 Controller，因为请求是从 Controller 进来的"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "分层依赖必须单向向下：controller 依赖 service，service 依赖 repository，反向/跨层会破坏抽象、让事务与测试失控。A/C/D 都颠倒了方向，是典型的腐化起点。",
+      "tags": [
+        "layering",
+        "dependency-direction"
+      ],
+      "source": "book",
+      "source_ref": "Spring Boot Reference · Structuring"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "读代码写输出（统一异常拦截）",
+      "content_md": "```js\nconst handlers = [];\nfunction ControllerAdvice(fn){ handlers.push(fn); }\nfunction handle(err){\n  for (const h of handlers){ const r = h(err); if (r) return r; }\n  return { code: 500, message: \"系统错误\", data: null };\n}\nclass BizException extends Error { constructor(code, message){ super(message); this.code=code; this.biz=true; } }\nControllerAdvice(e => { if (e.biz) return { code: e.code, message: e.message, data: null }; });\nControllerAdvice(e => { if (e instanceof Error) return { code: 500, message: \"系统繁忙\", data: null }; });\nconsole.log(JSON.stringify(handle(new BizException(1001, \"用户不存在\"))));\n```",
+      "answer": {
+        "output": "{\"code\":1001,\"message\":\"用户不存在\",\"data\":null}"
+      },
+      "explanation": "BizException 携带 biz=true 且 code=1001，第一个 advice 命中返回 `{code:1001,message:'用户不存在',data:null}`。注意这里没有把堆栈/异常类名返给前端，符合「业务异常给码给提示」的收口原则。",
+      "tags": [
+        "exception-handler",
+        "controller-advice"
+      ],
+      "source": "book",
+      "source_ref": "Spring Docs · @ControllerAdvice"
+    },
+    {
+      "type": "fix",
+      "category": "算法题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "改错：系统异常把堆栈返给了前端",
+      "content_md": "下面的全局异常处理，把系统异常的堆栈直接序列化进了响应体。改正它。\n\n```java\n@RestControllerAdvice\npublic class GlobalExceptionHandler {\n    @ExceptionHandler(Exception.class)\n    public ApiError handleOther(Exception e) {\n        return new ApiError(5000, e.toString(), e.getStackTrace()); // 泄露堆栈\n    }\n}\n```",
+      "answer": {
+        "reference_code": "@RestControllerAdvice\npublic class GlobalExceptionHandler {\n    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);\n\n    @ExceptionHandler(Exception.class)\n    public ApiError handleOther(Exception e) {\n        log.error(\"unexpected error\", e);            // 堆栈落服务端日志\n        return new ApiError(5000, \"系统繁忙，请稍后再试\", null); // 前端只见中性提示\n    }\n}"
+      },
+      "explanation": "系统异常绝对不能把 e.toString() 或 getStackTrace() 返前端——那等于泄露类名/行号/SQL 给攻击者。正确做法是 log.error 把堆栈写到服务端，响应体只给错误码 + 一句中性提示，detail 置 null。业务异常（BizException）才给具体 message。",
+      "tags": [
+        "exception",
+        "security",
+        "stack-trace"
+      ],
+      "source": "book",
+      "source_ref": "OWASP · Error Handling"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "Jakarta 校验应放在哪一层",
+      "content_md": "「用户名长度 2-10、手机号符合正则」这类格式约束，最合理的落点是",
+      "options": [
+        {
+          "key": "A",
+          "text": "写在 Service 方法开头的一堆 if 里"
+        },
+        {
+          "key": "B",
+          "text": "写在 Repository 的 SQL 里"
+        },
+        {
+          "key": "C",
+          "text": "写在入站 DTO 的 Jakarta 注解上，由 Controller 的 @Validated 触发"
+        },
+        {
+          "key": "D",
+          "text": "写在 Vue 前端，后端不用管"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "C"
+        ]
+      },
+      "explanation": "格式类约束是「边界问题」，应声明式地写在入站 DTO 的注解（@NotNull/@Size/@Pattern）上，controller 用 @Validated 触发，框架在进方法体前统一校验并收集 fieldErrors。写在 service 的 if 会重复且绕过统一错误结构；只放前端则后端失去防护。",
+      "tags": [
+        "validation",
+        "jakarta",
+        "boundary"
+      ],
+      "source": "book",
+      "source_ref": "Jakarta Validation Spec"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "book",
+      "difficulty": "hard",
+      "title": "实现分层调用 + 统一异常 + 校验的串联",
+      "content_md": "用 JS 模拟一个最小 Spring Boot 风格请求流：① repository 返回数据；② service 做业务（如登录校验，失败抛 Error）；③ controller 先跑入参校验（username 至少3位、password 必填），再调 service，最后用统一 advice 收口——业务/系统异常都包成 `{code,message,data}` 且**系统异常不暴露内部信息**。要求写出并在 main 中自测三种情况：参数不合法、业务失败（密码错）、成功。",
+      "answer": {
+        "reference_code": "function validateLogin(dto){\n  if(!dto.username) return 'username 必填';\n  if(!/^\\w{3,}$/.test(dto.username)) return 'username 至少3位';\n  if(!dto.password) return 'password 必填';\n  return null;\n}\nfunction loginService(dto){\n  if(dto.username==='admin' && dto.password==='123456') return { token: 'tk_abc' };\n  throw new Error('用户名或密码错误');\n}\nfunction controller(dto){\n  const verr = validateLogin(dto);\n  if(verr) return { code:400, message:verr, data:null };\n  try { const data = loginService(dto); return { code:0, message:'ok', data }; }\n  catch(e){ return { code:500, message:'系统繁忙', data:null }; } // 不暴露 e\n}\nconsole.log(JSON.stringify(controller({username:'ad',password:'123456'})));\nconsole.log(JSON.stringify(controller({username:'admin',password:'wrong'})));\nconsole.log(JSON.stringify(controller({username:'admin',password:'123456'})));"
+      },
+      "explanation": "三层职责清晰：validateLogin 是边界格式校验（声明式思想的命令式版）；loginService 是业务层，条件不满足抛 Error；controller 先校验再调 service，并用 try/catch 兜底成统一响应。关键点是系统异常只返「系统繁忙」、绝不把 e.stack/e.message 给前端，对应 @ControllerAdvice 的兜底分支。",
+      "tags": [
+        "layering",
+        "validation",
+        "exception",
+        "integration"
+      ],
+      "source": "book",
+      "source_ref": "Spring Boot · Web Layer"
+    },
+    {
+      "type": "fix",
+      "category": "算法题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "改错：把 Entity 当 DTO 序列化泄露密码",
+      "content_md": "下面的接口直接把 User 实体返回，包含密码字段。改为只暴露安全字段。\n\n```java\n@GetMapping(\"/{id}\")\npublic User getUser(@PathVariable Long id) {\n    return userRepository.findById(id).orElseThrow(); // User 含 password/salt\n}\n```",
+      "answer": {
+        "reference_code": "public record UserVO(Long id, String name, String email) {}\n\n@GetMapping(\"/{id}\")\npublic UserVO getUser(@PathVariable Long id) {\n    User u = userRepository.findById(id).orElseThrow();\n    return new UserVO(u.getId(), u.getName(), u.getEmail()); // 只暴露需要的字段\n}"
+      },
+      "explanation": "直接序列化 Entity 会把 password/salt 等敏感字段泄露给前端，还可能在延迟加载/循环引用时序列化失败。应定义专门的出站 VO，在 controller 或 converter 里做显式映射，只含前端该看的字段；敏感字段再用 @JsonIgnore 兜底。",
+      "tags": [
+        "dto",
+        "vo",
+        "leak",
+        "mapping"
+      ],
+      "source": "book",
+      "source_ref": "Spring Boot · Data Transfer Objects"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "读代码写输出（分组校验）",
+      "content_md": "```js\nfunction validateGroup(dto, group, rules){\n  const errors = [];\n  for (const [field, rule] of Object.entries(rules)){\n    if (rule.groups && !rule.groups.includes(group)) continue;\n    const v = dto[field];\n    if (rule.notNull && (v === null || v === undefined)) errors.push(field + \" 必填(\" + group + \")\");\n  }\n  return errors;\n}\nconst rules = {\n  id:   { groups: [\"update\"], notNull: true },\n  name: { groups: [\"insert\",\"update\"], notNull: true },\n};\nconsole.log(JSON.stringify(validateGroup({ name: \"x\" }, \"insert\", rules)));\nconsole.log(JSON.stringify(validateGroup({ name: \"x\" }, \"update\", rules)));\n```",
+      "answer": {
+        "output": "[]\n[\"id 必填(update)\"]"
+      },
+      "explanation": "insert 场景只启用标注了 insert 分组的约束：id 只在 update 分组，故 insert 不校验 id，只 name 必填且已提供，结果为空数组。update 场景启用 update 分组：id 必填但 dto 没给，所以报 `id 必填(update)`。这演示了「同一 DTO 多场景用分组」避免复制 DTO。",
+      "tags": [
+        "validation",
+        "groups"
+      ],
+      "source": "book",
+      "source_ref": "Jakarta Validation · Groups"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "业务异常 vs 系统异常的处理",
+      "content_md": "关于二者在统一异常里的处理，正确的是",
+      "options": [
+        {
+          "key": "A",
+          "text": "都直接把 e.getMessage() 返给前端，方便排查"
+        },
+        {
+          "key": "B",
+          "text": "业务异常给业务码+友好提示（可展示），系统异常只返中性提示并记日志（藏堆栈）"
+        },
+        {
+          "key": "C",
+          "text": "系统异常比业务异常严重，所以也不该记录日志"
+        },
+        {
+          "key": "D",
+          "text": "二者应该合并成一个异常类，用布尔字段区分"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "业务异常是「请求在业务上不成立」，可预期、要给用户友好提示+业务码；系统异常是故障，用户看不懂也不该看，前端只收「系统繁忙」，真实原因写服务端日志供排查。A 泄露敏感信息；C 说反了（系统异常更要记日志告警）；D 把两类语义混在一起，不利分类处理。",
+      "tags": [
+        "exception",
+        "biz-vs-system"
+      ],
+      "source": "book",
+      "source_ref": "Spring Boot · Exception Handling"
+    }
+  ]
+}

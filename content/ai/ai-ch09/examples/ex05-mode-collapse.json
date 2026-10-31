@@ -1,0 +1,8 @@
+{
+  "title": "模式崩塌的诊断：均值几乎一样，覆盖差了 50%",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "真实: 均值=+0.0083 标准差=1.0450\nA 崩塌: 均值=-0.9978 标准差=0.3014 W1=1.0061 左峰覆盖=0.997 右峰覆盖=0.000 直方图峰数=1\nB 正常: 均值=+0.0072 标准差=1.0445 W1=0.0039 左峰覆盖=0.495 右峰覆盖=0.503 直方图峰数=2\n关键：A 的均值(-1.0) 与真实均值(0.0) 差 1.0，但 A 的『左峰覆盖』=1.0 看起来极好——\n      只看单峰内部的统计量无法发现崩塌，必须看覆盖（recall）与峰数。\n",
+  "code": "\nimport numpy as np\nrng = np.random.default_rng(7)\n# 真实分布：双峰，各 50%\nn = 20000\nreal = np.where(rng.random(n) < 0.5, rng.normal(-1, 0.3, n), rng.normal(1, 0.3, n))\n# A: 崩塌（只覆盖左峰）  B: 正常覆盖双峰\ngen_col = rng.normal(-1, 0.3, n)\ngen_ok = np.where(rng.random(n) < 0.5, rng.normal(-1, 0.3, n), rng.normal(1, 0.3, n))\n\ndef report(name, g):\n    # 一维 W1 = 排序后分位数的平均绝对差\n    w1 = np.abs(np.sort(real) - np.sort(g)).mean()\n    left = np.mean(np.abs(g + 1) < 0.9)\n    right = np.mean(np.abs(g - 1) < 0.9)\n    hist, _ = np.histogram(g, bins=40, range=(-2.5, 2.5))\n    peaks = sum(1 for i in range(1, len(hist) - 1) if hist[i] > hist[i-1] and hist[i] > hist[i+1] and hist[i] > n / 80)\n    print(f\"{name}: 均值={g.mean():+.4f} 标准差={g.std():.4f} W1={w1:.4f} \"\n          f\"左峰覆盖={left:.3f} 右峰覆盖={right:.3f} 直方图峰数={peaks}\")\n\nprint(f\"真实: 均值={real.mean():+.4f} 标准差={real.std():.4f}\")\nreport(\"A 崩塌\", gen_col)\nreport(\"B 正常\", gen_ok)\nprint(\"关键：A 的均值(-1.0) 与真实均值(0.0) 差 1.0，但 A 的『左峰覆盖』=1.0 看起来极好——\")\nprint(\"      只看单峰内部的统计量无法发现崩塌，必须看覆盖（recall）与峰数。\")\n"
+}

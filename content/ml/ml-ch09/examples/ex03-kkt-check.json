@@ -1,0 +1,8 @@
+{
+  "title": "KKT 互补松弛：三类支持向量",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "i  x_i   y_i   α_i    y_i(w·x_i+b)   互补松弛 α_i·[y_i f_i - 1]\n0  -2   -1   0.0    +2.00          +0.000000\n1  -1   -1   0.5    +1.00          +0.000000\n2  +1   +1   0.5    +1.00          +0.000000\n3  +2   +1   0.0    +2.00          +0.000000\n\nΣα_i y_i = +0.000000（等式约束）\nw = Σα_i y_i x_i = +1.0000\nα 全为非负: True\n\n判读：α=0 的点（间隔外）对模型无影响；α>0 且 margin=1 的是自由支持向量；\n      若 α=C 且 margin<1，则是有界支持向量（间隔内/错分），见 ex07 的软间隔结果\n",
+  "code": "\nimport numpy as np\n# 给定一组解（硬间隔，1D）：x=[-2,-1,1,2], y=[-1,-1,1,1]\nx = np.array([-2.0, -1.0, 1.0, 2.0])\ny = np.array([-1.0, -1.0, 1.0, 1.0])\nw, b = 1.0, 0.0\nalpha = np.array([0.0, 0.5, 0.5, 0.0])     # 内侧两点是支持向量\nprint(\"i  x_i   y_i   α_i    y_i(w·x_i+b)   互补松弛 α_i·[y_i f_i - 1]\")\nfor i in range(4):\n    margin_i = y[i] * (w * x[i] + b)\n    slack = alpha[i] * (margin_i - 1)\n    print(f\"{i}  {x[i]:+.0f}   {y[i]:+.0f}   {alpha[i]:.1f}    {margin_i:+.2f}          {slack:+.6f}\")\nprint()\nprint(f\"Σα_i y_i = {np.sum(alpha*y):+.6f}（等式约束）\")\nprint(f\"w = Σα_i y_i x_i = {np.sum(alpha*y*x):+.4f}\")\nprint(f\"α 全为非负: {bool(np.all(alpha>=0))}\")\nprint()\nprint(\"判读：α=0 的点（间隔外）对模型无影响；α>0 且 margin=1 的是自由支持向量；\")\nprint(\"      若 α=C 且 margin<1，则是有界支持向量（间隔内/错分），见 ex07 的软间隔结果\")\n"
+}

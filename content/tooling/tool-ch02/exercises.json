@@ -13,9 +13,12 @@
       "platform": "self",
       "difficulty": 2,
       "title": "僵尸进程与孤儿进程的成因与回收",
-      "content_md": "下列说法正确的是？（多选）\n\nA. 子进程先于父进程退出、父进程未调用 `wait()`，子进程会变成**僵尸（Z）**状态，残留 task_struct 占一个 pid 槽\nB. 僵尸进程可以通过 `kill -9` 杀掉，因为它还「活着」\nC. 父进程先于子进程退出时，子进程会被 **init（pid 1）** 或最近的 subreaper 收养，照常运行，不是「丢失」\nD. 孤儿进程无法被回收，会一直泄漏资源\n\n请选择并说明。",
+      "content_md": "下列说法正确的是？（多选）\n\n\n请选择并说明。",
       "answer": {
-        "correct": "A、C",
+        "correct": [
+          "A",
+          "C"
+        ],
         "explain": "**A 正确**：子进程 `exit()` 后内核释放其地址空间与 fd，但保留 task_struct 与退出码，直到父进程 `wait()/waitpid()` 取走才彻底删除；未回收期间为 Z 状态，只占用一个 pid 编号，不占内存/CPU。\n\n**B 错误**：僵尸已经终止，`kill -9` 只能向存活进程发信号，对尸体无效。正确做法是让**它的父进程**正确 `wait`（或杀掉父进程，僵尸被 init 收养后随即回收）。\n\n**C 正确**：父进程退出后，内核把子进程 reparent 到 init/subreaper，PPID 变 1，调度与回收都正常——这是系统保证 pid 最终都被回收的不变式。\n\n**D 错误**：孤儿被 init 收养后会正常 `wait` 回收，**不会**残留；真正会堆积僵尸、耗尽 pid 的是「父进程长期不 wait」。\n\n记忆口诀：**僵尸占槽、kill -9 无效、找父进程；孤儿被收养、正常回收**。"
       },
       "explanation": "考僵尸/孤儿的发生条件与回收责任，是 408 与 SRE 面试高频。",
@@ -27,7 +30,25 @@
         "wait"
       ],
       "source": "self",
-      "source_ref": "《现代操作系统》第 2 章 · 进程状态；Linux man 7 credentials"
+      "source_ref": "《现代操作系统》第 2 章 · 进程状态；Linux man 7 credentials",
+      "options": [
+        {
+          "key": "A",
+          "text": "子进程先于父进程退出、父进程未调用 `wait()`，子进程会变成**僵尸（Z）**状态，残留 task_struct 占一个 pid 槽"
+        },
+        {
+          "key": "B",
+          "text": "僵尸进程可以通过 `kill -9` 杀掉，因为它还「活着」"
+        },
+        {
+          "key": "C",
+          "text": "父进程先于子进程退出时，子进程会被 **init（pid 1）** 或最近的 subreaper 收养，照常运行，不是「丢失」"
+        },
+        {
+          "key": "D",
+          "text": "孤儿进程无法被回收，会一直泄漏资源"
+        }
+      ]
     },
     {
       "id": "q2",
@@ -36,9 +57,12 @@
       "platform": "self",
       "difficulty": 2,
       "title": "SIGTERM 与 SIGKILL 的语义差异",
-      "content_md": "运维需要停止一个正在运行的服务进程。关于 `SIGTERM(15)` 与 `SIGKILL(9)`，下列说法正确的是？\n\nA. `kill PID`（不带参数）默认发送 SIGKILL，立即强制杀掉进程\nB. SIGTERM 可被进程捕获，进程可借机 flush 缓冲区、关连接、删 pidfile 后优雅退出\nC. SIGKILL 不可被捕获、阻塞或忽略，内核直接回收进程，跳过所有清理逻辑\nD. 数据库正在写 WAL 时，应优先用 SIGKILL 以保证「立刻停」\n\n请选择并说明。",
+      "content_md": "运维需要停止一个正在运行的服务进程。关于 `SIGTERM(15)` 与 `SIGKILL(9)`，下列说法正确的是？\n\n\n请选择并说明。",
       "answer": {
-        "correct": "B、C",
+        "correct": [
+          "B",
+          "C"
+        ],
         "explain": "**A 错误**：`kill PID` 默认发 **SIGTERM(15)** 而非 SIGKILL；真正「立即杀、不可拒绝」的是 `kill -9`（SIGKILL）。把 SIGTERM 当 SIGKILL 是新手最大误区。\n\n**B 正确**：SIGTERM 默认行为是 Term，但进程可以注册 handler **拦截**它，借机做清理再 `_exit()`。这也是 `systemctl stop`/`docker stop` 默认发 SIGTERM 并给超时窗口（90s/10s）再转 SIGKILL 的原因。\n\n**C 正确**：SIGKILL 与 SIGSTOP 是内核定义的**不可捕获/阻塞/忽略**信号——这是操作系统的最终控制权，保证任何失控进程都可被终止。代价是进程收不到任何清理机会。\n\n**D 错误**：数据库写 WAL 时若被 SIGKILL，会跳过 fsync/崩溃恢复标记，可能留下损坏的 WAL、锁未释放。应先 SIGTERM（让 DB 自己 crash recovery），确认卡死才 SIGKILL。\n\n结论：**SIGTERM 是礼貌请求，SIGKILL 是最后手段**。"
       },
       "explanation": "考信号默认行为与「为什么不该把 SIGKILL 当首选」。",
@@ -49,7 +73,25 @@
         "SIGKILL"
       ],
       "source": "self",
-      "source_ref": "Linux man 7 signal；《UNIX 环境高级编程》第 10 章"
+      "source_ref": "Linux man 7 signal；《UNIX 环境高级编程》第 10 章",
+      "options": [
+        {
+          "key": "A",
+          "text": "`kill PID`（不带参数）默认发送 SIGKILL，立即强制杀掉进程"
+        },
+        {
+          "key": "B",
+          "text": "SIGTERM 可被进程捕获，进程可借机 flush 缓冲区、关连接、删 pidfile 后优雅退出"
+        },
+        {
+          "key": "C",
+          "text": "SIGKILL 不可被捕获、阻塞或忽略，内核直接回收进程，跳过所有清理逻辑"
+        },
+        {
+          "key": "D",
+          "text": "数据库正在写 WAL 时，应优先用 SIGKILL 以保证「立刻停」"
+        }
+      ]
     },
     {
       "id": "q3",

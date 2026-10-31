@@ -210,13 +210,14 @@
         "group-by",
         "event-stream"
       ],
-      "test_cases": [
+      "samples": [
         {
           "input": "schema 与样例数据见 external_url",
           "expected_output": "见 external_url",
           "is_sample": true
         }
-      ]
+      ],
+      "judge_note": "本题需要在真实数据库上执行 DDL/DML 才能验证，离线不做自动判分。请对照 samples 在本地库里跑一遍。"
     }
   ]
 }

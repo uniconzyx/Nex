@@ -12,9 +12,11 @@
       "platform": "self",
       "difficulty": "easy",
       "title": "顺序表插入的复杂度判断",
-      "content_md": "已知一个长度为 n 的顺序表（数组），要在**下标为 i 的位置**（0 ≤ i ≤ n）插入一个新元素。关于时间复杂度，下列说法正确的是？\n\nA. 无论如何都是 O(1)\nB. 无论如何都是 O(N)\nC. 头插是 O(N)，尾插（不扩容）是 O(1)，平均 O(N)\nD. 是 O(log N)",
+      "content_md": "已知一个长度为 n 的顺序表（数组），要在**下标为 i 的位置**（0 ≤ i ≤ n）插入一个新元素。关于时间复杂度，下列说法正确的是？",
       "answer": {
-        "choice": "C"
+        "correct": [
+          "C"
+        ]
       },
       "explanation": "顺序表插入需要把 i 位置及其后的所有元素**整体后移一位**，搬移量为 n − i。i=0（头插）时搬移 n 个 → O(N)；i=n（尾插）且容量足够时搬移 0 个 → O(1)；对所有位置取平均，期望搬移 n/2 → O(N)。**注意如果尾插触发扩容，还要 O(N) 的搬移，但均摊回每次仍是 O(1)**（见 concept/03 的聚合分析）。",
       "tags": [
@@ -23,7 +25,25 @@
         "插入"
       ],
       "source": "self",
-      "source_ref": "《数据结构（C 语言版）》第2章"
+      "source_ref": "《数据结构（C 语言版）》第2章",
+      "options": [
+        {
+          "key": "A",
+          "text": "无论如何都是 O(1)"
+        },
+        {
+          "key": "B",
+          "text": "无论如何都是 O(N)"
+        },
+        {
+          "key": "C",
+          "text": "头插是 O(N)，尾插（不扩容）是 O(1)，平均 O(N)"
+        },
+        {
+          "key": "D",
+          "text": "是 O(log N)"
+        }
+      ]
     },
     {
       "type": "fix_error",
@@ -70,9 +90,9 @@
       "platform": "self",
       "difficulty": "mid",
       "title": "原地删除有序数组中的重复元素",
-      "content_md": "给定**非递减有序**数组 nums，**原地**删除重复元素，使每个元素只出现一次，返回新长度。要求空间复杂度 O(1)（不允许使用额外数组）。\n\n请用 C 语言实现，并打印处理后的数组前 k 个元素。",
+      "content_md": "给定**非递减有序**数组 nums，**原地**删除重复元素，使每个元素只出现一次，返回新长度。要求空间复杂度 O(1)（不允许使用额外数组）。\n\n请用 C 语言实现，并打印处理后的数组前 k 个元素。\n\n<!-- judge-io -->\n**判题 I/O 约定**（提交完整程序：从 stdin 读、向 stdout 写）\n\n输入：第一行整数 `n`；第二行 `n` 个非递减整数（空格分隔）。\n输出：第一行新长度 `k`；第二行去重后的前 `k` 个元素（空格分隔）。",
       "answer": {
-        "reference_code": "int remove_duplicates(int *a, int n) {\n    if (n == 0) return 0;\n    int k = 1;                       /* k 指向下一个可写入位置 */\n    for (int i = 1; i < n; i++)\n        if (a[i] != a[k - 1]) a[k++] = a[i];\n    return k;\n}",
+        "reference_code": "#include <stdio.h>\n\nint remove_duplicates(int *a, int n) {\n    if (n == 0) return 0;\n    int k = 1;\n    for (int i = 1; i < n; i++)\n        if (a[i] != a[k - 1]) a[k++] = a[i];\n    return k;\n}\n\nint main(void) {\n    int n;\n    if (scanf(\"%d\", &n) != 1) return 0;\n    static int a[100005];\n    for (int i = 0; i < n; i++) scanf(\"%d\", &a[i]);\n    int k = remove_duplicates(a, n);\n    printf(\"%d\\n\", k);\n    for (int i = 0; i < k; i++) printf(i ? \" %d\" : \"%d\", a[i]);\n    printf(\"\\n\");\n    return 0;\n}\n",
         "expected_output": "k=5, a=[0,1,2,3,4]"
       },
       "explanation": "**双指针（读写指针）**：`k` 是写指针，始终指向「已去重区间的下一个位置」；`i` 是读指针扫描全数组。因为数组有序，**重复元素一定相邻**，所以只需比较 `a[i]` 与「已写入的最后一个元素」`a[k-1]`。时间复杂度 O(N)，空间 O(1)。这是「原地算法」的经典范式——用两个指针在同一数组里一个读一个写。",
@@ -82,7 +102,24 @@
         "数组"
       ],
       "source": "self",
-      "source_ref": "LeetCode 26 同型题"
+      "source_ref": "LeetCode 26 同型题",
+      "test_cases": [
+        {
+          "input": "8\n0 0 1 1 1 2 2 3",
+          "expected_output": "4\n0 1 2 3",
+          "is_sample": true
+        },
+        {
+          "input": "5\n1 1 2 3 3",
+          "expected_output": "3\n1 2 3",
+          "is_sample": true
+        },
+        {
+          "input": "1\n7",
+          "expected_output": "1\n7",
+          "is_sample": false
+        }
+      ]
     },
     {
       "type": "coding",

@@ -1,0 +1,176 @@
+{
+  "meta": {
+    "chapter": "ai-ch12",
+    "note": "7 题，含选择题/输出题/改错题/编程题；题面与参考实现均为自建，不搬运第三方题面。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "关于 SFT 任务 schema，正确的是",
+      "content_md": "选择**正确**的描述。",
+      "options": [
+        {
+          "key": "A",
+          "text": "system 模板里应写入样本特有的具体内容（如具体订单号）以提供更多上下文"
+        },
+        {
+          "key": "B",
+          "text": "user 模板用占位符描述输入骨架，真实内容在生成/标注时填充，可批量合成"
+        },
+        {
+          "key": "C",
+          "text": "多轮对话样本只需保留最后一轮 user/assistant 即可节省存储"
+        },
+        {
+          "key": "D",
+          "text": "标注规范写成「答案要正确完整」即可，不需要分维度打分"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "user 模板用占位符（如 `{question}`）描述输入骨架，真实内容填充后可由组合爆炸批量合成，且格式统一。A 错：system 应是与样本无关的常量，塞样本特有内容会让模板漂移；C 错：多轮必须保留完整 history，否则模型学不会基于上下文作答；D 错：规范必须是可打分的 rubric，否则标注员间分歧无法控制。",
+      "tags": [
+        "schema",
+        "template"
+      ],
+      "source": "book",
+      "source_ref": "SFT Data Engineering · Task Schema"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "读代码写输出（多轮对话构造）",
+      "content_md": "```python\ndef build_multiturn(history):\n    msgs = [{\"role\": \"system\", \"content\": \"你是有帮助的助手。\"}]\n    for turn in history:\n        msgs.append({\"role\": \"user\", \"content\": turn[\"q\"]})\n        msgs.append({\"role\": \"assistant\", \"content\": turn[\"a\"]})\n    return msgs\n\nconv = build_multiturn([\n    {\"q\": \"1+1等于几？\", \"a\": \"等于2。\"},\n    {\"q\": \"那它加3呢？\", \"a\": \"2+3=5。\"},\n])\nprint(len(conv))\nprint(conv[1][\"content\"], conv[2][\"content\"])\nprint(conv[-2][\"content\"], conv[-1][\"content\"])\n```",
+      "answer": {
+        "output": "5\n1+1等于几？ 等于2。\n那它加3呢？ 2+3=5。"
+      },
+      "explanation": "system 占 1 条，两轮各贡献 user+assistant 两条，共 5 条。conv[1]/conv[2] 是第一轮的 user/assistant，conv[-2]/conv[-1] 是最后一轮的 user/assistant。多轮样本必须保留完整 history，模型才能学会基于上下文作答。",
+      "tags": [
+        "multiturn",
+        "messages"
+      ],
+      "source": "book",
+      "source_ref": "SFT Data Engineering · Multi-turn"
+    },
+    {
+      "type": "fix",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "改错：这条去重为什么漏掉了近重复",
+      "content_md": "下面用全文哈希去重，结果「我爱机器学习」和「我爱机器学习模型」都没被去掉。指出问题并改正。\n\n```python\nseen = set()\nkeep = []\nfor s in samples:\n    h = hash(s)\n    if h not in seen:\n        seen.add(h); keep.append(s)\n```",
+      "answer": {
+        "reference_code": "def ngrams(s, n=3):\n    return set(s[i:i+n] for i in range(len(s)-n+1))\n\ndef jaccard(a, b):\n    if not a or not b:\n        return 0.0\n    return len(a & b) / len(a | b)\n\nsigs = {i: ngrams(s, 3) for i, s in enumerate(samples)}\nkeep = []\nfor i, s in enumerate(samples):\n    if not any(jaccard(sigs[i], sigs[j]) >= 0.5 for j in keep):\n        keep.append(i)"
+      },
+      "explanation": "全文 hash 只在整串相等时才判重，对「同模板换说法」的近重复完全无效。改法是用 3-gram 集合的指纹 + Jaccard 相似度（>=0.5 判重复），或者使用 SimHash 的 Hamming 距离。注意原代码还用了 `hash(str)`——Python 字符串 hash 受 PYTHONHASHSEED 影响跨进程不稳定，指纹用途下更应避免。",
+      "tags": [
+        "dedup",
+        "jaccard",
+        "simhash"
+      ],
+      "source": "book",
+      "source_ref": "SFT Data Engineering · Dedup"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "关于训练集污染与留验隔离",
+      "content_md": "下列说法正确的是",
+      "options": [
+        {
+          "key": "A",
+          "text": "先合成 100 万条，再随机抽 1 万条当测试集，这样测试集最多样"
+        },
+        {
+          "key": "B",
+          "text": "污染检测只需判断测试 prompt 是否整句等于某条训练样本"
+        },
+        {
+          "key": "C",
+          "text": "应冻结评测集，训练候选池里与其重叠率超阈值的样本必须剔除"
+        },
+        {
+          "key": "D",
+          "text": "评测集可以参与去重，反正最终也会从训练里拿掉"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "C"
+        ]
+      },
+      "explanation": "正确做法是先冻结评测集，合成/去重/过滤只在训练候选池进行，任何与评测集重叠率超阈值的候选直接丢弃，评测集要疫苗级干净。A 错：随机抽的测试集已被合成模板近重复污染；B 错：测试题常以同义改写/换数字形式泄进训练，整句相等永远 False；D 错：评测集绝不能参与任何清洗步骤，否则污染无法隔离。",
+      "tags": [
+        "contamination",
+        "holdout"
+      ],
+      "source": "book",
+      "source_ref": "SFT Data Engineering · Contamination"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "book",
+      "difficulty": "hard",
+      "title": "实现 Cohen's Kappa 一致性计算",
+      "content_md": "给定两个标注员对 N 条样本的二值标注列表 `a`、`b`（元素为 0 或 1），实现 `cohen_kappa(a, b) -> float`：① 计算观察到的一致率 po；② 计算两人各自标 1 的比例 p_a、p_b，期望一致率 pe = p_a*p_b + (1-p_a)*(1-p_b)；③ 返回 (po-pe)/(1-pe)，保留 3 位小数用 round。用断言自测：a=[1,0,1,1,0,1,0,0,1,1], b=[1,0,1,0,0,1,1,0,1,0] 应得 0.4。",
+      "answer": {
+        "reference_code": "def cohen_kappa(a, b):\n    n = len(a)\n    po = sum(1 for i in range(n) if a[i] == b[i]) / n\n    pa = sum(a) / n\n    pb = sum(b) / n\n    pe = pa * pb + (1 - pa) * (1 - pb)\n    return round((po - pe) / (1 - pe), 3)\n\nassert cohen_kappa([1,0,1,1,0,1,0,0,1,1], [1,0,1,0,0,1,1,0,1,0]) == 0.4\nprint(cohen_kappa([1,0,1,1,0,1,0,0,1,1], [1,0,1,0,0,1,1,0,1,0]))"
+      },
+      "explanation": "关键三步：po 是观察到的一致比例；pe 是两人独立按各自边缘频率随机标注时的期望一致率，用来扣掉「瞎蒙也能撞上」的基线；kappa 把 po 相对 pe 的超出量归一化到 [0,1]。本题 po=0.7、pe=0.5，故 kappa=0.4。若只报一致率 70% 会严重高估一致性——这正是 Kappa 存在的意义。",
+      "tags": [
+        "kappa",
+        "reliability"
+      ],
+      "source": "book",
+      "source_ref": "SFT Data Engineering · Annotator Agreement"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "实现规则过滤 + 3-gram 去重流水线",
+      "content_md": "实现 `clean(samples)`：① 规则过滤——丢弃长度不在 [4,60] 或 重复率>0.5 的样本（重复率=1-唯一词数/总词数，按空格分词）；② 对通过规则的样本做 3-gram Jaccard>=0.5 近重复去重，保留首次出现。返回保留的样本列表。自测：`[\"短\",\"aaaa bbbb aaaa bbbb aaaa bbbb\",\"机器学习是让计算机从数据中学习的技术\"*3]` 应只保留后两条。",
+      "answer": {
+        "reference_code": "def rep_ratio(s):\n    toks = s.split()\n    if not toks:\n        return 0.0\n    return 1.0 - len(set(toks)) / len(toks)\n\ndef ngrams(s, n=3):\n    return set(s[i:i+n] for i in range(len(s)-n+1))\n\ndef jaccard(a, b):\n    if not a or not b:\n        return 0.0\n    return len(a & b) / len(a | b)\n\ndef clean(samples):\n    kept_rules = [s for s in samples\n                  if 4 <= len(s) <= 60 and rep_ratio(s) <= 0.5]\n    sigs, out = [], []\n    for s in kept_rules:\n        g = ngrams(s, 3)\n        if not any(jaccard(g, prev) >= 0.5 for prev in sigs):\n            sigs.append(g); out.append(s)\n    return out\n\nprint(clean([\"短\", \"aaaa bbbb aaaa bbbb aaaa bbbb\",\n             \"机器学习是让计算机从数据中学习的技术\"*3]))"
+      },
+      "explanation": "两阶段：规则过滤先把明显垃圾（过短、车轱辘话）用接近零的成本砍掉；语义去重再用 3-gram 指纹的 Jaccard 去掉「换汤不换药」的近重复。注意规则过滤用 `len(s)` 是字符数（中文无空格），重复率用空格分词——若样本无空格则整串为一个 token、重复率记 0，不会被误杀，符合预期。",
+      "tags": [
+        "filter",
+        "dedup",
+        "pipeline"
+      ],
+      "source": "book",
+      "source_ref": "SFT Data Engineering · Pipeline"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "读代码写输出（SimHash 近重复）",
+      "content_md": "```python\ndef stable_hash(ch):\n    h = 0\n    for c in ch:\n        h = (h * 31 + ord(c)) & 0xFFFFFFFF\n    return h\n\ndef simhash(text, dim=64):\n    v = [0] * dim\n    for ch in text:\n        h = stable_hash(ch)\n        for i in range(dim):\n            v[i] += 1 if (h >> i) & 1 else -1\n    return \"\".join(\"1\" if x > 0 else \"0\" for x in v)\n\ndef hamming(a, b):\n    return sum(1 for x, y in zip(a, b) if x != y)\n\ndocs = [\"机器学习很有趣\", \"机器学习真有趣\", \"今天天气很好\"]\nhs = [simhash(d) for d in docs]\nprint(\"哈希位数:\", len(hs[0]))\ndups = [i for i in range(1, len(docs)) if hamming(hs[i], hs[0]) <= 3]\nprint(\"与首文档相似(<=3位)的索引:\", dups)\n```",
+      "answer": {
+        "output": "哈希位数: 64\n与首文档相似(<=3位)的索引: [1]"
+      },
+      "explanation": "SimHash 把每个字符的稳定哈希（注意不能用受 PYTHONHASHSEED 影响的 `hash(str)`，所以这里用自写的 stable_hash）累加到位向量，最后按符号得 64 位指纹。「机器学习很有趣」与「机器学习真有趣」语义相近、指纹 Hamming 距离仅 1–3 位，被判为近重复；「今天天气很好」差异大，距离远，不判重。这是海量合成数据去重的主流做法。",
+      "tags": [
+        "simhash",
+        "near-dup"
+      ],
+      "source": "book",
+      "source_ref": "SFT Data Engineering · SimHash"
+    }
+  ]
+}

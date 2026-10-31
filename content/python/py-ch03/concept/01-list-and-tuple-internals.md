@@ -1,4 +1,23 @@
 # list 与 tuple 的底层：动态指针数组 vs 定长引用数组
+> Python dict 是「开地址哈希表」：底层是 entries 数组，每个槽存 hash、key、value。删除不真删而是打「哑元」标记，插入时复用；负载过高触发扩容并重新散列，查找平均接近 O(1)。
+
+```text
+dict 内部（简化）
+  indices: [None, 0, None, 1, ...]      # 探测链索引
+  entries:
+    [0] hash=.. key='a' value=1
+    [1] hash=.. key='b' value=2
+    [2] <dummy>  (被删占位，可被新键覆盖)
+
+  插入 'c': hash(c)%mask 命中槽 → 若 occupied 且 key 不同
+          → 按 perturb 伪随机向后探测空/dummy 槽
+  查找 'a': 同样探测链，key 相等才命中；遇 dummy 继续；遇空停
+  删除 'a': 槽标 dummy（保留探测链不断）
+
+  list/tuple：连续数组，O(1) 索引；set：只存 key 的 hash 表
+  copy：浅拷贝共享元素；deepcopy：递归复制嵌套对象
+```
+
 
 ## 1. list 不是链表，是「过度分配的动态指针数组」
 

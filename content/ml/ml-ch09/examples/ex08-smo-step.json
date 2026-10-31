@@ -1,0 +1,8 @@
+{
+  "title": "SMO 的单步解析更新与裁剪",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "初始 a = [0. 0.], E1 = -1.00, E2 = +1.00, eta = 6.00\neta = K11+K22-2K12 = 6.00（= 两样本在特征空间的距离平方，必须 >= 0）\n未裁剪 a2 = -0.3333；可行区间 [0.00, 1.00] -> 裁剪后 a2 = +0.0000\n回代 a1 = a1 + y1*y2*(a2_old - a2_new) = +0.0000\n新 α = [0.0000, 0.0000]，Σα_i y_i = +0.000000（等式约束保持）\n\n结论：单变量更新会破坏 Σα_i y_i=0，所以必须成对更新；\n      更新公式是二次函数的最小点，裁剪保证落在 [L,H] 可行域内\n",
+  "code": "\nimport numpy as np\nK = np.array([[4.0, 1.0], [1.0, 4.0]])   # 两个样本的核矩阵\ny = np.array([1.0, -1.0])\na = np.array([0.0, 0.0])\nC = 1.0\nb = 0.0\n\ndef f(i):\n    return float(K[i, 0] * a[0] * y[0] + K[i, 1] * a[1] * y[1] + b)\n\nE1, E2 = f(0) - y[0], f(1) - y[1]\neta = K[0, 0] + K[1, 1] - 2 * K[0, 1]\nprint(f\"初始 a = {a}, E1 = {E1:+.2f}, E2 = {E2:+.2f}, eta = {eta:.2f}\")\nprint(f\"eta = K11+K22-2K12 = {eta:.2f}（= 两样本在特征空间的距离平方，必须 >= 0）\")\n\n# y1 != y2 -> L = max(0, a2-a1), H = min(C, C+a2-a1)\nL = max(0.0, a[1] - a[0]); H = min(C, C + a[1] - a[0])\na2_new = a[1] - y[1] * (E1 - E2) / eta\na2_clip = min(max(a2_new, L), H)\na1_new = a[0] + y[0] * y[1] * (a[1] - a2_clip)\nprint(f\"未裁剪 a2 = {a2_new:+.4f}；可行区间 [{L:.2f}, {H:.2f}] -> 裁剪后 a2 = {a2_clip:+.4f}\")\nprint(f\"回代 a1 = a1 + y1*y2*(a2_old - a2_new) = {a1_new:+.4f}\")\nprint(f\"新 α = [{a1_new:.4f}, {a2_clip:.4f}]，Σα_i y_i = {a1_new*y[0] + a2_clip*y[1]:+.6f}（等式约束保持）\")\nprint()\nprint(\"结论：单变量更新会破坏 Σα_i y_i=0，所以必须成对更新；\")\nprint(\"      更新公式是二次函数的最小点，裁剪保证落在 [L,H] 可行域内\")\n"
+}

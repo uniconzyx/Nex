@@ -1,0 +1,49 @@
+{
+  "meta": {
+    "chapter": "ai-ch12",
+    "category": "basic"
+  },
+  "items": [
+    {
+      "title": "搭建一个最小可用的 SFT 数据工程流水线（schema → 合成 → 过滤 → 去重 → 污染检测 → 一致性）",
+      "requirement_md": "用一个真实或仿真的任务（如「数学应用题解答」或「客服话术」），产出一条可复现的数据流水线脚本：\n\n1. 定义任务 schema：写 `system_template` 与 `user_template`（带占位符），并用 `.format(**sample)` 程序化生成至少 200 条样本；\n2. 实现规则过滤：长度门限 + 重复率门限，记录被砍掉的比例；\n3. 实现语义去重：3-gram Jaccard>=0.5 或 SimHash Hamming<=3，记录去重率；\n4. 实现污染检测：用一份冻结的「评测集」，计算候选池与评测集的 token 级重叠率，剔除超阈值样本，证明评测集零污染；\n5. 模拟两个标注员对同一批样本的标注，实现 `cohen_kappa`，计算首轮 Kappa；挑出分歧样本，补一条 rubric 判据，重标后 Kappa 提升；\n6. 在 README 里汇报：原始条数、过滤率、去重率、污染剔除数、首轮/二轮 Kappa，并贴出一条完整 messages 样本。",
+      "tasks": [
+        {
+          "title": "schema 程序化生成 ≥200 条样本",
+          "verification": {
+            "type": "test",
+            "desc": "脚本可重跑产出 ≥200 条 (system,messages) 样本，且 system 不含样本特有内容"
+          }
+        },
+        {
+          "title": "规则过滤 + 语义去重可运行并记录比例",
+          "verification": {
+            "type": "test",
+            "desc": "输出过滤率与去重率；去重用 Jaccard 或 SimHash，而非全文哈希"
+          }
+        },
+        {
+          "title": "污染检测证明评测集零污染",
+          "verification": {
+            "type": "test",
+            "desc": "冻结评测集，候选池里与其重叠率超阈值的被剔除；最终候选与评测集重叠率为 0"
+          }
+        },
+        {
+          "title": "Cohen's Kappa 计算与规范迭代闭环",
+          "verification": {
+            "type": "test",
+            "desc": "实现 cohen_kappa；补 rubric 后二轮 Kappa 明显高于一轮，README 给出两数值"
+          }
+        },
+        {
+          "title": "README 汇报指标并贴样本",
+          "verification": {
+            "type": "doc",
+            "desc": "含原始条数/过滤率/去重率/污染剔除数/两轮 Kappa，以及一条完整多轮 messages 示例"
+          }
+        }
+      ]
+    }
+  ]
+}

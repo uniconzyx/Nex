@@ -1,0 +1,8 @@
+{
+  "title": "余弦相似度跨模态检索：以文搜图 Top-1",
+  "code_lang": "python",
+  "code_std": "3.11",
+  "stdin": "",
+  "expected_output": "查询向量: [0.9, 0.1, 0.2]\ncat.png: 0.987\ncar.png: 0.430\ndog.png: 0.256\nTop1: cat.png",
+  "code": "import math\ndef dot(a,b): return sum(x*y for x,y in zip(a,b))\ndef cos(a,b):\n    na = math.sqrt(dot(a,a)); nb = math.sqrt(dot(b,b))\n    return dot(a,b)/(na*nb)\n\ntext_q = [0.9, 0.1, 0.2]\nimg_embs = {\n    \"cat.png\": [0.8, 0.2, 0.1],\n    \"dog.png\": [0.1, 0.9, 0.2],\n    \"car.png\": [0.2, 0.1, 0.9],\n}\nranked = sorted(img_embs.items(), key=lambda kv: cos(text_q, kv[1]), reverse=True)\nprint(\"查询向量:\", text_q)\nfor name, e in ranked:\n    print(f\"{name}: {cos(text_q,e):.3f}\")\nprint(\"Top1:\", ranked[0][0])\n"
+}

@@ -12,15 +12,39 @@
       "platform": "self",
       "difficulty": 2,
       "title": "PCA 两个目标的等价性",
-      "content_md": "关于主成分分析（PCA），以下哪一项是正确的？\n\nA. 最大化投影方差 与 最小化重构误差 是两种不同、矛盾的准则\nB. 最大化投影方差 等价于 最小化丢弃方向上的方差（即最小重构误差）\nC. PCA 必须先用核技巧才能处理线性数据\nD. 主成分方向是 X 的左奇异向量",
+      "content_md": "关于主成分分析（PCA），以下哪一项是正确的？",
       "answer": {
-        "correct": "B",
+        "correct": [
+          "B"
+        ],
         "explanation": "总方差守恒：保留前 K 个方向方差 = 总方差 − 丢弃方向方差，所以「最大化保留方差」≡「最小化重构误差」，两者是同一件事的两面。\n\nA 把等价说成矛盾，错；C 反了，核 PCA 才是为**非线性**准备的，标准 PCA 就是线性的；D 主成分是 `XᵀX` 的特征向量 / X 的**右**奇异向量（V 的列），左奇异向量 U 维度是样本数，不是特征方向。"
       },
       "explanation": "PCA 两目标等价是核心考点。",
-      "tags": ["PCA", "最大方差", "最小重构"],
+      "tags": [
+        "PCA",
+        "最大方差",
+        "最小重构"
+      ],
       "source": "self",
-      "source_ref": "《机器学习》周志华 第10章"
+      "source_ref": "《机器学习》周志华 第10章",
+      "options": [
+        {
+          "key": "A",
+          "text": "最大化投影方差 与 最小化重构误差 是两种不同、矛盾的准则"
+        },
+        {
+          "key": "B",
+          "text": "最大化投影方差 等价于 最小化丢弃方向上的方差（即最小重构误差）"
+        },
+        {
+          "key": "C",
+          "text": "PCA 必须先用核技巧才能处理线性数据"
+        },
+        {
+          "key": "D",
+          "text": "主成分方向是 X 的左奇异向量"
+        }
+      ]
     },
     {
       "type": "choice",
@@ -28,15 +52,39 @@
       "platform": "self",
       "difficulty": 2,
       "title": "K-means 的目标函数与收敛性",
-      "content_md": "K-means 的 Lloyd 迭代最小化的是以下哪项，并且该目标：\n\nA. 簇间距离之和；且保证收敛到全局最优\nB. 簇内平方和的畸变 J；保证单调不增、收敛到局部极小\nC. 簇内平方和的畸变 J；保证收敛到全局最优\nD. 互信息；保证单调不增",
+      "content_md": "K-means 的 Lloyd 迭代最小化的是以下哪项，并且该目标：",
       "answer": {
-        "correct": "B",
+        "correct": [
+          "B"
+        ],
         "explanation": "K-means 最小化畸变 `J=Σ r_{nk}‖xₙ−μ_k‖²`。分配步（固定 μ 归最近中心）与更新步（固定 r 取均值）都使 J 不增，J 有下界，故**单调不增、收敛到局部极小**——不是全局最优，依赖初始化。\n\nA 目标错了（是簇内不是簇间），且「全局最优」错；C 目标对但「全局最优」错；D 目标错。这也是 K-means++ 与多次重启存在的理由。"
       },
       "explanation": "目标函数与「只到局部最优」是高频辨析。",
-      "tags": ["K-means", "Lloyd", "收敛性"],
+      "tags": [
+        "K-means",
+        "Lloyd",
+        "收敛性"
+      ],
       "source": "self",
-      "source_ref": "《The Elements of Statistical Learning》第14章"
+      "source_ref": "《The Elements of Statistical Learning》第14章",
+      "options": [
+        {
+          "key": "A",
+          "text": "簇间距离之和；且保证收敛到全局最优"
+        },
+        {
+          "key": "B",
+          "text": "簇内平方和的畸变 J；保证单调不增、收敛到局部极小"
+        },
+        {
+          "key": "C",
+          "text": "簇内平方和的畸变 J；保证收敛到全局最优"
+        },
+        {
+          "key": "D",
+          "text": "互信息；保证单调不增"
+        }
+      ]
     },
     {
       "type": "judge",
@@ -50,7 +98,11 @@
         "explanation": "特征向量给出的是**嵌入（embedding）**：每行是一个 K 维点，落在 K 个「角」附近，但还不是离散标签。谱聚类的标准流程是「取最小的 K 个特征向量 → 把每行当 K 维点 → 再跑一次 K-means」得到离散簇标签。\n\n跳过 K-means 直接把连续特征向量当标签是错的（它们是实数向量，没有 0/1 归属）。这也是为什么谱聚类对特征向量行通常需要归一化（尤其未归一化 L），否则度大的点会带偏最后那步 K-means。"
       },
       "explanation": "「特征向量即标签」是常见误解。",
-      "tags": ["谱聚类", "嵌入", "K-means"],
+      "tags": [
+        "谱聚类",
+        "嵌入",
+        "K-means"
+      ],
       "source": "self",
       "source_ref": "《Pattern Recognition and Machine Learning》第13章（谱聚类归属）"
     },
@@ -66,7 +118,11 @@
         "explain": "核心两步：分配步 `lab=argmin ‖x−c‖²`、更新步 `c=均值`。J 每轮必然不增（两步都各自最小化自己的子问题），序列有限故收敛。\n\nK-means++ 初始化：第一个中心随机，之后每个新中心以「到已选中心最近距离的平方」为权重概率化选取，使中心彼此远离，期望代价 ≤ O(log K)·最优。纯随机常把两个初始中心塞进同一个真簇，落到更高的局部极小——这正是初始化敏感性。坑：空簇（某次迭代某簇没人）要处理，可把该中心重置为最远点。"
       },
       "explanation": "把 K-means 的两步与单调性用最少代码拆开。",
-      "tags": ["K-means", "Lloyd", "畸变"],
+      "tags": [
+        "K-means",
+        "Lloyd",
+        "畸变"
+      ],
       "source": "self",
       "source_ref": "《The Elements of Statistical Learning》第14章"
     },
@@ -82,7 +138,11 @@
         "explain": "SVD 直接作用于标准化数据：`X=U S Vᵀ`，主方向是 `Vᵀ` 的前 K 行（右奇异向量），方差解释率 = `s_k²/Σs_j²`。所有解释率之和必为 1（总方差守恒）。\n\n等价性验证：弃掉后 `d−K` 个方向的方差（`Σ_{k>K} s_k²/n`）应等于用前 K 主成分重建的均方重构误差——这是「最大方差 ≡ 最小重构」的数值体现。坑：必须先标准化，否则大尺度特征独占方差；`full_matrices=False` 省内存（只算 min(n,d) 个奇异值）。"
       },
       "explanation": "把 PCA 两目标等价性用 SVD 坐实。",
-      "tags": ["PCA", "SVD", "方差解释率"],
+      "tags": [
+        "PCA",
+        "SVD",
+        "方差解释率"
+      ],
       "source": "self",
       "source_ref": "《The Elements of Statistical Learning》第14章"
     },
@@ -98,7 +158,11 @@
         "explain": "同心环在欧氏空间里，内环点到外环的边界被「环间空隙」主导，K-means 按质心距离会横切两环，错分率很高（接近把每环切两半）。谱聚类先在图上定义「近」：内环点彼此全连、外环点彼此全连、内外之间边稀疏，`L_sym` 的最小特征向量天然把两环分到不同嵌入角，最后 K-means 轻松分开，错分率接近 0。\n\n坑：谱聚类相似图要设好 σ（高斯带宽，这里取 1 匹配环间距）；`L_sym` 特征向量行已单位范数，最后 K-means 不需再归一化；取的是**最小**的特征值对应的向量（含近零的连通结构）。这是「K-means 假设球状簇」失效、谱聚类补洞的标准演示。"
       },
       "explanation": "用受控非凸数据对比两类方法的能力边界。",
-      "tags": ["谱聚类", "K-means", "非凸簇"],
+      "tags": [
+        "谱聚类",
+        "K-means",
+        "非凸簇"
+      ],
       "source": "self",
       "source_ref": "《Pattern Recognition and Machine Learning》第13章"
     }

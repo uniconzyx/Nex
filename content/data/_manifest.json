@@ -15,7 +15,9 @@
       "group": "D1",
       "title": "NumPy 基础：ndarray 与向量化",
       "summary": "为什么需要 ndarray（同构连续内存 + 向量化 vs Python list 的对象开销）；dtype 与内存布局（C/F order）；创建与形状变换（reshape/ravel/transpose/expand_dims）；索引与切片、视图 vs 拷贝（base 属性判断）；广播机制三条规则；向量化替代显式循环的性能实证；ufunc 与聚合（axis 语义）。",
-      "prerequisites": [],
+      "prerequisites": [
+        "py-ch03"
+      ],
       "status": "complete",
       "resources": {
         "github": [
@@ -25,8 +27,8 @@
           "microsoft/Data-Science-For-Beginners"
         ],
         "github_stars": [
-          67487,
-          50114,
+          67957,
+          50229,
           49928,
           37525
         ],
@@ -36,13 +38,41 @@
           "Pandas 官方仓库：API 与内部机制权威来源",
           "微软官方 10 周数据科学课程"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《利用 Python 进行数据分析》第4章",
-          "NumPy 官方 Quickstart"
+          "《利用 Python 进行数据分析（第 3 版）》McKinney",
+          "《Python 数据科学手册》VanderPlas",
+          "《统计学（第 8 版）》贾俊平"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1ReshzoEgG/",
+        "bilibili_list": [
+          {
+            "name": "黑马程序员 · Python 数据分析全套",
+            "url": "https://www.bilibili.com/video/BV1ReshzoEgG/",
+            "note": "从 numpy/pandas 到清洗、可视化、案例的完整链路，配真实的电商与招聘数据集",
+            "bv": "BV1ReshzoEgG"
+          },
+          {
+            "name": "莫烦 Python · NumPy & Pandas",
+            "url": "https://www.bilibili.com/video/BV1Ex411L7oT/",
+            "note": "API 速查：广播、索引、合并、透视各一集，10 分钟能补齐一个操作",
+            "bv": "BV1Ex411L7oT"
+          },
+          {
+            "name": "黑马程序员 · MySQL 入门到精通",
+            "url": "https://www.bilibili.com/video/BV1Kr4y1i7ru/",
+            "note": "数据分析绕不开 SQL：查询、聚合、窗口函数与索引，看前 1/3 足够支撑取数",
+            "bv": "BV1Kr4y1i7ru"
+          },
+          {
+            "name": "Pandas 数据分析从入门到实战",
+            "url": "https://www.bilibili.com/video/BV1UJ411A7Fs/",
+            "note": "偏实战：时间序列、缺失值、多表关联这几节比教科书细",
+            "bv": "BV1UJ411A7Fs"
+          }
+        ]
       },
       "soft_prerequisites": [
         {
@@ -69,8 +99,8 @@
           "microsoft/Data-Science-For-Beginners"
         ],
         "github_stars": [
-          67487,
-          50114,
+          67957,
+          50229,
           49928,
           37525
         ],
@@ -80,13 +110,41 @@
           "Pandas 官方仓库：API 与内部机制权威来源",
           "微软官方 10 周数据科学课程"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《利用 Python 进行数据分析》第4章",
-          "NumPy 官方进阶文档"
+          "《利用 Python 进行数据分析（第 3 版）》McKinney",
+          "《Python 数据科学手册》VanderPlas",
+          "《统计学（第 8 版）》贾俊平"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1ReshzoEgG/",
+        "bilibili_list": [
+          {
+            "name": "黑马程序员 · Python 数据分析全套",
+            "url": "https://www.bilibili.com/video/BV1ReshzoEgG/",
+            "note": "从 numpy/pandas 到清洗、可视化、案例的完整链路，配真实的电商与招聘数据集",
+            "bv": "BV1ReshzoEgG"
+          },
+          {
+            "name": "莫烦 Python · NumPy & Pandas",
+            "url": "https://www.bilibili.com/video/BV1Ex411L7oT/",
+            "note": "API 速查：广播、索引、合并、透视各一集，10 分钟能补齐一个操作",
+            "bv": "BV1Ex411L7oT"
+          },
+          {
+            "name": "Pandas 数据分析从入门到实战",
+            "url": "https://www.bilibili.com/video/BV1UJ411A7Fs/",
+            "note": "偏实战：时间序列、缺失值、多表关联这几节比教科书细",
+            "bv": "BV1UJ411A7Fs"
+          },
+          {
+            "name": "黑马程序员 · MySQL 入门到精通",
+            "url": "https://www.bilibili.com/video/BV1Kr4y1i7ru/",
+            "note": "数据分析绕不开 SQL：查询、聚合、窗口函数与索引，看前 1/3 足够支撑取数",
+            "bv": "BV1Kr4y1i7ru"
+          }
+        ]
       }
     },
     {
@@ -107,8 +165,8 @@
           "microsoft/Data-Science-For-Beginners"
         ],
         "github_stars": [
-          67487,
-          50114,
+          67957,
+          50229,
           49928,
           37525
         ],
@@ -118,13 +176,41 @@
           "Pandas 官方仓库：API 与内部机制权威来源",
           "微软官方 10 周数据科学课程"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《利用 Python 进行数据分析》第5章",
-          "Pandas 官方 10 minutes"
+          "《利用 Python 进行数据分析（第 3 版）》McKinney",
+          "《Python 数据科学手册》VanderPlas",
+          "《统计学（第 8 版）》贾俊平"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1ReshzoEgG/",
+        "bilibili_list": [
+          {
+            "name": "黑马程序员 · Python 数据分析全套",
+            "url": "https://www.bilibili.com/video/BV1ReshzoEgG/",
+            "note": "从 numpy/pandas 到清洗、可视化、案例的完整链路，配真实的电商与招聘数据集",
+            "bv": "BV1ReshzoEgG"
+          },
+          {
+            "name": "莫烦 Python · NumPy & Pandas",
+            "url": "https://www.bilibili.com/video/BV1Ex411L7oT/",
+            "note": "API 速查：广播、索引、合并、透视各一集，10 分钟能补齐一个操作",
+            "bv": "BV1Ex411L7oT"
+          },
+          {
+            "name": "Pandas 数据分析从入门到实战",
+            "url": "https://www.bilibili.com/video/BV1UJ411A7Fs/",
+            "note": "偏实战：时间序列、缺失值、多表关联这几节比教科书细",
+            "bv": "BV1UJ411A7Fs"
+          },
+          {
+            "name": "黑马程序员 · MySQL 入门到精通",
+            "url": "https://www.bilibili.com/video/BV1Kr4y1i7ru/",
+            "note": "数据分析绕不开 SQL：查询、聚合、窗口函数与索引，看前 1/3 足够支撑取数",
+            "bv": "BV1Kr4y1i7ru"
+          }
+        ]
       }
     },
     {
@@ -145,8 +231,8 @@
           "microsoft/Data-Science-For-Beginners"
         ],
         "github_stars": [
-          67487,
-          50114,
+          67957,
+          50229,
           49928,
           37525
         ],
@@ -156,12 +242,41 @@
           "Pandas 官方仓库：API 与内部机制权威来源",
           "微软官方 10 周数据科学课程"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《利用 Python 进行数据分析》第8、10、11章"
+          "《利用 Python 进行数据分析（第 3 版）》McKinney",
+          "《Python 数据科学手册》VanderPlas",
+          "《统计学（第 8 版）》贾俊平"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1ReshzoEgG/",
+        "bilibili_list": [
+          {
+            "name": "黑马程序员 · Python 数据分析全套",
+            "url": "https://www.bilibili.com/video/BV1ReshzoEgG/",
+            "note": "从 numpy/pandas 到清洗、可视化、案例的完整链路，配真实的电商与招聘数据集",
+            "bv": "BV1ReshzoEgG"
+          },
+          {
+            "name": "莫烦 Python · NumPy & Pandas",
+            "url": "https://www.bilibili.com/video/BV1Ex411L7oT/",
+            "note": "API 速查：广播、索引、合并、透视各一集，10 分钟能补齐一个操作",
+            "bv": "BV1Ex411L7oT"
+          },
+          {
+            "name": "Pandas 数据分析从入门到实战",
+            "url": "https://www.bilibili.com/video/BV1UJ411A7Fs/",
+            "note": "偏实战：时间序列、缺失值、多表关联这几节比教科书细",
+            "bv": "BV1UJ411A7Fs"
+          },
+          {
+            "name": "黑马程序员 · MySQL 入门到精通",
+            "url": "https://www.bilibili.com/video/BV1Kr4y1i7ru/",
+            "note": "数据分析绕不开 SQL：查询、聚合、窗口函数与索引，看前 1/3 足够支撑取数",
+            "bv": "BV1Kr4y1i7ru"
+          }
+        ]
       }
     },
     {
@@ -170,7 +285,9 @@
       "group": "D3",
       "title": "数据采集：requests 与解析（含合规边界）",
       "summary": "HTTP 在采集中的落地（请求方法、状态码、重定向、Session 与 Cookie）；requests 的参数/头/超时/重试/会话复用；解析方案对比（lxml+XPath 的性能、BeautifulSoup 的容错、正则的边界）；动态渲染页面的应对（优先找接口，其次才考虑浏览器内核）；编码与乱码排查；**合规红线：robots.txt、频率控制、版权与个人信息边界、不绕过技术措施**。",
-      "prerequisites": [],
+      "prerequisites": [
+        "tool-ch02"
+      ],
       "status": "complete",
       "resources": {
         "github": [
@@ -180,8 +297,8 @@
           "microsoft/Data-Science-For-Beginners"
         ],
         "github_stars": [
-          67487,
-          50114,
+          67957,
+          50229,
           49928,
           37525
         ],
@@ -191,13 +308,41 @@
           "Pandas 官方仓库：API 与内部机制权威来源",
           "微软官方 10 周数据科学课程"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《Python 网络爬虫实战》",
-          "requests 官方文档"
+          "《利用 Python 进行数据分析（第 3 版）》McKinney",
+          "《Python 数据科学手册》VanderPlas",
+          "《统计学（第 8 版）》贾俊平"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1ReshzoEgG/",
+        "bilibili_list": [
+          {
+            "name": "黑马程序员 · Python 数据分析全套",
+            "url": "https://www.bilibili.com/video/BV1ReshzoEgG/",
+            "note": "从 numpy/pandas 到清洗、可视化、案例的完整链路，配真实的电商与招聘数据集",
+            "bv": "BV1ReshzoEgG"
+          },
+          {
+            "name": "莫烦 Python · NumPy & Pandas",
+            "url": "https://www.bilibili.com/video/BV1Ex411L7oT/",
+            "note": "API 速查：广播、索引、合并、透视各一集，10 分钟能补齐一个操作",
+            "bv": "BV1Ex411L7oT"
+          },
+          {
+            "name": "Pandas 数据分析从入门到实战",
+            "url": "https://www.bilibili.com/video/BV1UJ411A7Fs/",
+            "note": "偏实战：时间序列、缺失值、多表关联这几节比教科书细",
+            "bv": "BV1UJ411A7Fs"
+          },
+          {
+            "name": "黑马程序员 · MySQL 入门到精通",
+            "url": "https://www.bilibili.com/video/BV1Kr4y1i7ru/",
+            "note": "数据分析绕不开 SQL：查询、聚合、窗口函数与索引，看前 1/3 足够支撑取数",
+            "bv": "BV1Kr4y1i7ru"
+          }
+        ]
       },
       "soft_prerequisites": [
         {
@@ -214,7 +359,8 @@
       "summary": "数据清洗流程与质量检查清单；特征工程（缺失填充、异常检测、标准化/归一化、类别编码）；探索性分析（EDA）与可视化选型（分布/关系/时间/构成）；相关性分析与回归/分类的基本流程与评价指标；数学建模方法论（问题抽象、假设与符号、模型建立与求解、灵敏度分析、论文结构）；一个端到端案例。",
       "prerequisites": [
         "data-ch04",
-        "data-ch05"
+        "data-ch05",
+        "tool-ch02"
       ],
       "status": "complete",
       "resources": {
@@ -225,8 +371,8 @@
           "microsoft/Data-Science-For-Beginners"
         ],
         "github_stars": [
-          67487,
-          50114,
+          67957,
+          50229,
           49928,
           37525
         ],
@@ -236,13 +382,41 @@
           "Pandas 官方仓库：API 与内部机制权威来源",
           "微软官方 10 周数据科学课程"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《利用 Python 进行数据分析》第7、9章",
-          "《数学建模算法与应用》"
+          "《利用 Python 进行数据分析（第 3 版）》McKinney",
+          "《Python 数据科学手册》VanderPlas",
+          "《统计学（第 8 版）》贾俊平"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1ReshzoEgG/",
+        "bilibili_list": [
+          {
+            "name": "黑马程序员 · Python 数据分析全套",
+            "url": "https://www.bilibili.com/video/BV1ReshzoEgG/",
+            "note": "从 numpy/pandas 到清洗、可视化、案例的完整链路，配真实的电商与招聘数据集",
+            "bv": "BV1ReshzoEgG"
+          },
+          {
+            "name": "Pandas 数据分析从入门到实战",
+            "url": "https://www.bilibili.com/video/BV1UJ411A7Fs/",
+            "note": "偏实战：时间序列、缺失值、多表关联这几节比教科书细",
+            "bv": "BV1UJ411A7Fs"
+          },
+          {
+            "name": "莫烦 Python · NumPy & Pandas",
+            "url": "https://www.bilibili.com/video/BV1Ex411L7oT/",
+            "note": "API 速查：广播、索引、合并、透视各一集，10 分钟能补齐一个操作",
+            "bv": "BV1Ex411L7oT"
+          },
+          {
+            "name": "黑马程序员 · MySQL 入门到精通",
+            "url": "https://www.bilibili.com/video/BV1Kr4y1i7ru/",
+            "note": "数据分析绕不开 SQL：查询、聚合、窗口函数与索引，看前 1/3 足够支撑取数",
+            "bv": "BV1Kr4y1i7ru"
+          }
+        ]
       }
     }
   ],

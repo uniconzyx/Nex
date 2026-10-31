@@ -1,0 +1,8 @@
+{
+  "title": "契约测试：消费者定义期望",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "web-frontend -> order-svc\nGET /orders/1\n{\"id\":1,\"total\":99}",
+  "code": "// 契约测试：消费者先声明「我期望提供者返回什么」，生成契约\nfunction defineConsumerContract() {\n  return {\n    consumer: \"web-frontend\",\n    provider: \"order-svc\",\n    interactions: [\n      {\n        uponReceiving: \"获取订单\",\n        withRequest: { method: \"GET\", path: \"/orders/1\" },\n        willRespondWith: { status: 200, body: { id: 1, total: 99 } },\n      },\n    ],\n  };\n}\n\nconst contract = defineConsumerContract();\nconsole.log(contract.consumer, \"->\", contract.provider);\nconsole.log(contract.interactions[0].withRequest.method,\n            contract.interactions[0].withRequest.path);\nconsole.log(JSON.stringify(contract.interactions[0].willRespondWith.body));\n"
+}

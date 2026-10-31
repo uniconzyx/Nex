@@ -1,0 +1,8 @@
+{
+  "title": "可辨识联合 + 穷尽检查（运行时部分）",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "9.00\n6.00\n未处理的形状: {\"kind\":\"rect\",\"w\":1,\"h\":1}",
+  "code": "function areaShape(s) {\n  switch (s.kind) {\n    case \"circle\": return Math.PI * s.r ** 2;\n    case \"square\": return s.side ** 2;\n    case \"triangle\": {\n      const p = (s.a + s.b + s.c) / 2;\n      return Math.sqrt(p * (p - s.a) * (p - s.b) * (p - s.c));\n    }\n    default:\n      // TS 里这一行是 `const n: never = s;`，加了新形状忘写分支会在此报错\n      throw new Error(`未处理的形状: ${JSON.stringify(s)}`);\n  }\n}\n\nconsole.log(areaShape({ kind: \"square\", side: 3 }).toFixed(2));\nconsole.log(areaShape({ kind: \"triangle\", a: 3, b: 4, c: 5 }).toFixed(2));\ntry { areaShape({ kind: \"rect\", w: 1, h: 1 }); } catch (e) { console.log(e.message); }\n"
+}

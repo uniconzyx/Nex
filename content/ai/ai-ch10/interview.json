@@ -1,0 +1,105 @@
+{
+  "meta": {
+    "chapter": "ai-ch10",
+    "title": "训练工程与规模化 —— 面试题",
+    "count": 6
+  },
+  "items": [
+    {
+      "question": "7B 模型为什么单张 80G 卡训不动？如果必须在这张卡上做，你会怎么改？",
+      "answer_md": "先算账再回答，这是这类题的正确打开方式。\n\n**账**：Adam + 混合精度训练需要 16 B/参数 —— fp16 参数 2 + fp16 梯度 2 + fp32 主权重 4 + Adam 的 $m$ 4 + $v$ 4。7B 就是 $16\\times7\\approx112$ GB，**已经超过 80GB**，还没算激活（数十 GB）。所以不是「优化一下就能跑」，而是账本身不成立。\n\n**方案的优先级**（从便宜到贵）：\n1. **LoRA/QLoRA**：只训适配器，模型权重冻结（可 4-bit 量化），模型状态降到 ~2-4 B/参数，24G 卡都能跑。这是「必须在这张卡上做」的正确答案。\n2. **激活重计算**：把激活从 $O(L)$ 降到 $O(\\sqrt{L})$，省 30%-50% 显存，代价 ~30% 算力。\n3. **ZeRO-2/3 或 FSDP**：跨卡分片；但这就不是「一张卡」了。\n4. **降序列长度/微 batch + 梯度累积**：省激活，但改不了 112GB 的模型状态。\n\n关键判断：**模型状态是刚性的，只有「不训全参」或「分片到多卡」两条路**；重计算、降 batch 只能救激活。",
+      "follow_ups": [
+        "LoRA 的显存账具体是多少？",
+        "ZeRO-3 在 8 卡上能不能把这 112GB 压到 80GB 以下？",
+        "为什么 112GB 比「7B × 4 字节」大这么多？"
+      ],
+      "difficulty": 4,
+      "company_tags": [
+        "字节跳动",
+        "阿里",
+        "蚂蚁",
+        "百度"
+      ]
+    },
+    {
+      "question": "Adam 和 AdamW 有什么区别？为什么现在大模型都用 AdamW？",
+      "answer_md": "**公式上的差别只有一处**：Adam + L2 把 $\\lambda\\theta$ 加进梯度再走 Adam；AdamW 把它从梯度里拿出来，直接作用在参数上：\n\n$$\\theta\\leftarrow\\theta-\\eta\\Big(\\frac{\\hat m}{\\sqrt{\\hat v}+\\epsilon}+\\lambda\\theta\\Big)$$\n\n**为什么这个位置很重要**：Adam 的分母 $\\sqrt{\\hat v}$ 是逐参数的，把 $\\lambda\\theta$ 丢进梯度后，衰减项也被这个分母归一化了 —— 梯度大的参数衰减被削弱、梯度小的参数被过度衰减，正则强度与参数本身的重要性耦合在一起，这违背了「均匀收缩」的初衷。AdamW 的衰减是 $\\eta\\lambda\\theta$，与梯度尺度无关，等价于每步乘 $(1-\\eta\\lambda)$。\n\n**为什么大模型更敏感**：Transformer 里不同参数的梯度尺度差异极大（embedding、LayerNorm、注意力、FFN 差几个数量级），耦合衰减的偏差被放大；再加上大模型通常训很久，微小偏差会累积成泛化差距。所以 AdamW 在 LLM 上稳定优于 Adam+L2，而小模型上差异不明显。\n\n**配套细节**：bias 与 LayerNorm 的 $\\gamma$ 排除 weight decay；$\\beta_2$ 常从 0.999 降到 0.95 以适应梯度尺度变化。",
+      "follow_ups": [
+        "为什么 β2 在 LLM 里常用 0.95 而不是 0.999？",
+        "解耦衰减在数学上等价于什么（proximal 视角）？",
+        "SGD 为什么在某些视觉任务上泛化更好？"
+      ],
+      "difficulty": 4,
+      "company_tags": [
+        "OpenAI",
+        "字节跳动",
+        "商汤",
+        "腾讯"
+      ]
+    },
+    {
+      "question": "混合精度训练里，loss scaling 和 fp32 主权重分别解决什么问题？",
+      "answer_md": "两个问题完全不同，一个是**范围**，一个是**精度**。\n\n**loss scaling 解决下溢**：fp16 的最小正规数约 $6\\times10^{-5}$，而很多梯度小于这个值，直接变成 0（表现为「loss 不降但也不报错」）。做法是把 loss 乘 $S$（如 $2^{14}$），梯度整体放大到可表示区间，更新前再除回去。动态 scaling 会在连续无溢出时增大 $S$、溢出时跳过该步并减半。\n\n**fp32 主权重解决舍入**：fp16 的 ulp 随数值变化，参数在 1 附近时 ulp 约 $10^{-3}$，而典型更新量是 $10^{-5}$ 量级，$\theta+\\Delta\theta=\theta$（更新被吃掉）。所以必须保留一份 fp32 参数做累加，计算时再 cast 成低精度。\n\n**补充两点**：① 上溢（>65504）需要靠梯度裁剪/更好的初始化，loss scaling 只防下溢；② bf16 指数位与 fp32 相同，范围够大，**不需要 loss scaling**，但精度更差（7 位尾数），所以累加仍要 fp32。这就是 LLM 训练用 bf16、视觉用 fp16+AMP 的分野。",
+      "follow_ups": [
+        "bf16 为什么不用 loss scaling？",
+        "fp16 在什么情况下会 inf，怎么排查？",
+        "fp8 训练需要什么额外机制？"
+      ],
+      "difficulty": 4,
+      "company_tags": [
+        "NVIDIA",
+        "字节跳动",
+        "华为",
+        "阿里"
+      ]
+    },
+    {
+      "question": "DDP、ZeRO、TP、PP 分别在切什么？给定 32 张卡训 70B，你怎么组合？",
+      "answer_md": "**先分清切什么**：\n- DDP：切数据，每卡一份完整模型，每步 AllReduce 梯度。\n- ZeRO/FSDP：切**模型状态**（优化器状态→梯度→参数），按需 gather。\n- TP：切**单层矩阵**（列并行 + 行并行配对），每层两次 AllReduce，对延迟极敏感。\n- PP：切**层**（stage），点对点传激活，有 bubble。\n\n**70B 的账**：16 B/参数 → 1120GB 模型状态。32 卡若每卡 80GB，总共 2560GB，模型状态占 44%，剩下的留给激活与碎片 —— 可行但不宽裕。\n\n**方案**：\n- 单机 8 卡内做 **TP=8**（NVLink 域内，两次 AllReduce 才付得起）；\n- 4 个节点做 **PP=4**（每节点 4 个 stage 的层，跨机只传激活）；\n- 再叠加 **ZeRO-1**（分片优化器状态，几乎无额外通信）；\n- 若显存仍紧，用 **ZeRO-3/FSDP 替代 DP 维度的复制**。\n- micro-batch 数取 $\\ge4P$ 压 bubble（$P=4$ 时 ≥16）。\n\n**一句话原则**：**TP 不出机、PP 跨机、ZeRO 兜底、DP 扩吞吐**。",
+      "follow_ups": [
+        "为什么 TP 不能跨机？",
+        "PP 的 bubble 比例怎么算？",
+        "MoE 的 EP 有什么额外问题？"
+      ],
+      "difficulty": 5,
+      "company_tags": [
+        "字节跳动",
+        "阿里",
+        "华为",
+        "商汤"
+      ]
+    },
+    {
+      "question": "训练中 loss 突然出现尖峰（spike），你怎么定位和恢复？",
+      "answer_md": "**先分类再动手**，spike 有四类成因：\n\n1. **异常数据**：单 batch 的 loss 突然 ×10，之后立刻恢复 → 查该 batch 的样本（超长、乱码、重复），清洗或跳过。\n2. **优化器状态污染**：spike 后 loss 持续高位不恢复 → $v$ 被大梯度污染，必须回滚到 spike 前的 checkpoint。\n3. **数值溢出**：出现 inf/nan → 查 fp16 溢出点（注意力 logits、exp 未减最大值、LayerNorm eps）、检查 loss scale 是否在频繁回退。\n4. **结构性不稳定**：周期性 spike，与数据无关 → 降 lr、加长 warmup、加 QK-norm/z-loss、降 batch。\n\n**恢复流程**（工程标准做法）：保存最近 N 个 checkpoint + dataloader 状态；spike 后回滚到前一个稳定点，**跳过引发 spike 的若干 batch** 继续训；同时记录 lr、grad norm、优化器状态范数、数据 id 做归因。\n\n**预防**：全局范数裁剪（$c=1.0$）、bf16 替代 fp16、embedding/LayerNorm 用 fp32、监控 grad norm 与 update/param ratio。\n\n注意：裁剪只是「把发散变成缓慢漂移」，不能修复结构性不稳定 —— 如果长期有 10% 的步被裁剪，说明 lr 太大。",
+      "follow_ups": [
+        "什么情况下应该直接重启而不是回滚？",
+        "grad norm 与 update/param ratio 的健康值是多少？",
+        "为什么 fp16 比 bf16 更容易出现 spike？"
+      ],
+      "difficulty": 5,
+      "company_tags": [
+        "字节跳动",
+        "蚂蚁",
+        "百度",
+        "快手"
+      ]
+    },
+    {
+      "question": "Chinchilla 说 20 tokens/参数最优，为什么现在大家都在「过训练」？",
+      "answer_md": "因为两者的**目标函数不同**。\n\nChinchilla 在固定**训练**算力 $C=6ND$ 下最小化 loss，得到 $N\\propto D\\propto C^{0.5}$、$D/N\\approx20$ —— 这是「训练最省」的解。\n\n但产品要最小化**总成本 = 训练 + 推理 × 生命周期调用量**。推理成本正比于参数量 $N$，而调用量可能远超训练 token 数。于是把 $N$ 调小、$D$ 调大（过训练）能让推理便宜得多，训练多花的钱在生命周期内被摊平。7B 训 2T tokens（约 14 倍于 Chinchilla 比例）就是这个逻辑。\n\n**代价与边界**：过训练会让「达到同等 loss」的训练算力更高，且超过约 4 个 epoch 的重复数据边际收益迅速衰减 —— 所以「堆数据」必须配去重与质量过滤。\n\n**反过来也要会答**：如果数据受限（垂直领域只有 50B tokens），强行按 20:1 配比会让模型欠训练，此时应该缩小模型规模、或引入通用数据做预训练再接领域微调。",
+      "follow_ups": [
+        "过训练到什么程度开始不划算？",
+        "数据受限时最优策略是什么？",
+        "Scaling Law 在能力层面为什么失效（涌现/逆缩放）？"
+      ],
+      "difficulty": 4,
+      "company_tags": [
+        "OpenAI",
+        "DeepMind",
+        "字节跳动",
+        "阿里"
+      ]
+    }
+  ]
+}

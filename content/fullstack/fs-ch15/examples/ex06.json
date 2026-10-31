@@ -1,0 +1,8 @@
+{
+  "title": "select：多 channel 中选择先就绪者（Promise.race 模拟）",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "select 选中: B 值: 来自B的数据",
+  "code": "class Chan {\n  constructor(cap = 0) { this.cap = cap; this.buf = []; this.putQ = []; this.takeQ = []; }\n  put(v) { return new Promise(res => {\n    if (this.takeQ.length) { const t = this.takeQ.shift(); t(v); res(); return; }\n    if (this.buf.length < this.cap) { this.buf.push(v); res(); return; }\n    this.putQ.push({ v, res });\n  }); }\n  take() { return new Promise(res => {\n    if (this.buf.length) { const v = this.buf.shift(); if (this.putQ.length) { const p = this.putQ.shift(); this.buf.push(p.v); p.res(); } res(v); return; }\n    if (this.putQ.length) { const p = this.putQ.shift(); res(p.v); p.res(); return; }\n    this.takeQ.push(res);\n  }); }\n}\nconst a = new Chan(), b = new Chan();\n(async () => {\n  // b 先放入数据；无缓冲 channel 上发送会等接收者，故放进独立 goroutine\n  const sendB = (async () => { await b.put(\"来自B的数据\"); })();\n  const winner = await Promise.race([\n    a.take().then(v => ({ ch: \"A\", v })),\n    b.take().then(v => ({ ch: \"B\", v })),\n  ]);\n  await sendB;\n  console.log(\"select 选中:\", winner.ch, \"值:\", winner.v);\n})();\n"
+}

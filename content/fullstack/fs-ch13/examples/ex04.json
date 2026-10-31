@@ -1,0 +1,8 @@
+{
+  "title": "测试替身：Fake 轻量真实现",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "mimi null 2",
+  "code": "// 测试替身：fake——一个轻量但真实的实现（内存版），可跑完整链路\nclass FakeUserRepo {\n  constructor() { this.rows = new Map(); }\n  save(u) { this.rows.set(u.id, u); return u; }\n  find(id) { return this.rows.get(id) ?? null; }\n  count() { return this.rows.size; }\n}\n\nconst repo = new FakeUserRepo();\nrepo.save({ id: 1, name: \"mimi\" });\nrepo.save({ id: 2, name: \"kai\" });\nconsole.log(repo.find(1).name, repo.find(99), repo.count());\n"
+}

@@ -15,14 +15,28 @@
       "title": "open 的 mode 参数语义",
       "stem_md": "关于 `open(path, mode)`，下列说法**错误**的是？",
       "options": [
-        "A. `'r'` 是默认值，要求文件必须存在",
-        "B. `'w'` 会截断已有文件，不存在则新建",
-        "C. `'a'` 追加写入，但写指针每次都被重置到文件开头",
-        "D. 带 `'b'` 的模式返回 `bytes`，不能指定 `encoding`"
+        {
+          "key": "A",
+          "text": "`encoding` 只在文本模式下合法，二进制模式传入会抛 `ValueError`"
+        },
+        {
+          "key": "B",
+          "text": "`'a'` 模式在文件不存在时会创建新文件"
+        },
+        {
+          "key": "C",
+          "text": "`'a'` 模式会把写指针定位到文件开头，从而覆盖原有内容"
+        },
+        {
+          "key": "D",
+          "text": "`'r+'` 要求文件必须已存在，否则抛 `FileNotFoundError`"
+        }
       ],
       "answer": {
-        "value": "C",
-        "explanation_md": "`'a'` 会把写指针定位到文件末尾，正是「追加」的含义，C 说反了。A/B/D 正确：`encoding` 只在文本模式下合法，二进制模式给 `encoding` 会抛 `ValueError`。"
+        "explanation_md": "`'a'` 会把写指针定位到文件末尾，正是「追加」的含义，C 说反了。A/B/D 正确：`encoding` 只在文本模式下合法，二进制模式给 `encoding` 会抛 `ValueError`。",
+        "correct": [
+          "C"
+        ]
       },
       "explanation_md": "区分 `w`（截断）与 `a`（末尾追加）是日常最容易踩的坑：用 `w` 重跑一次任务就把上次结果清空。"
     },
@@ -37,14 +51,28 @@
       "title": "__exit__ 的返回值语义",
       "stem_md": "自定义上下文管理器的 `__exit__(self, exc_type, exc, tb)` **返回 True** 意味着什么？",
       "options": [
-        "A. 关闭操作成功，正常继续",
-        "B. `with` 块内抛出的异常被吞掉，不再向外传播",
-        "C. 异常会被重新抛出并附加 traceback",
-        "D. 与返回 False 完全等价"
+        {
+          "key": "A",
+          "text": "异常会被重新抛出，返回 True 只是记录日志"
+        },
+        {
+          "key": "B",
+          "text": "异常被视为已处理，不再向外传播"
+        },
+        {
+          "key": "C",
+          "text": "只对 `KeyboardInterrupt` 生效，其它异常照常抛出"
+        },
+        {
+          "key": "D",
+          "text": "返回 True 是非法的，解释器会抛 `TypeError`"
+        }
       ],
       "answer": {
-        "value": "B",
-        "explanation_md": "`__exit__` 返回真值等价于「异常已处理」，解释器不再传播；返回 `None`/`False` 则继续抛出。这正是 `contextlib.suppress` 的实现原理。"
+        "explanation_md": "`__exit__` 返回真值等价于「异常已处理」，解释器不再传播；返回 `None`/`False` 则继续抛出。这正是 `contextlib.suppress` 的实现原理。",
+        "correct": [
+          "B"
+        ]
       },
       "explanation_md": "对比 C：细节上返回真值后 traceback 也就丢了，所以吞噬异常要非常克制，通常只吞特定异常类型。"
     },
@@ -95,12 +123,29 @@
       "source_ref": "py-ch05 概念 04 · CSV 解析",
       "difficulty": "hard",
       "title": "手写 CSV 行解析器（不依赖 csv 模块）",
-      "stem_md": "实现 `parse_csv_line(line)`：把一行 CSV 文本解析成字段列表。规则：逗号分隔；字段可被双引号包裹；被包裹时内部 `\"\"` 表示一个 `\"`，且内部的逗号/换行不视为分隔符。返回字段列表。",
+      "stem_md": "实现 `parse_csv_line(line)`：把一行 CSV 文本解析成字段列表。规则：逗号分隔；字段可被双引号包裹；被包裹时内部 `\"\"` 表示一个 `\"`，且内部的逗号/换行不视为分隔符。返回字段列表。\n\n<!-- judge-io -->\n**判题 I/O 约定**（提交完整程序：从 stdin 读、向 stdout 写）\n\n输入：一行 CSV 文本（字段可能被双引号包裹，内部 `\"\"` 表示一个引号）。\n输出：解析出的字段个数，随后逐行输出每个字段（用 `[字段]` 包裹，便于看出空字段）。",
       "answer": {
-        "reference_code": "def parse_csv_line(line):\n    fields = []\n    buf = []\n    i = 0\n    n = len(line)\n    in_quotes = False\n    while i < n:\n        c = line[i]\n        if in_quotes:\n            if c == '\"':\n                if i + 1 < n and line[i + 1] == '\"':\n                    buf.append('\"')\n                    i += 2\n                    continue\n                in_quotes = False\n            else:\n                buf.append(c)\n        else:\n            if c == '\"':\n                in_quotes = True\n            elif c == ',':\n                fields.append(''.join(buf))\n                buf = []\n            else:\n                buf.append(c)\n        i += 1\n    fields.append(''.join(buf))\n    return fields\n",
+        "reference_code": "import sys\n\n\ndef parse_csv_line(line):\n    fields, buf, i, n, in_quotes = [], [], 0, len(line), False\n    while i < n:\n        c = line[i]\n        if in_quotes:\n            if c == '\"':\n                if i + 1 < n and line[i + 1] == '\"':\n                    buf.append('\"')\n                    i += 2\n                    continue\n                in_quotes = False\n            else:\n                buf.append(c)\n        else:\n            if c == '\"':\n                in_quotes = True\n            elif c == ',':\n                fields.append(''.join(buf))\n                buf = []\n            else:\n                buf.append(c)\n        i += 1\n    fields.append(''.join(buf))\n    return fields\n\n\nif __name__ == '__main__':\n    fs = parse_csv_line(sys.stdin.readline().rstrip('\\n'))\n    print(len(fs))\n    for f in fs:\n        print('[' + f + ']')\n",
         "tests_md": "`parse_csv_line('a,b,c')` → `['a','b','c']`；`parse_csv_line('\"a,b\",c')` → `['a,b','c']`；`parse_csv_line('\"say \"\"hi\"\"\",x')` → `['say \"hi\"', 'x']`。"
       },
-      "explanation_md": "状态机方法：`in_quotes` 是唯一状态位，遇到 `\"\"` 先探测下一字符再决定是转义还是收尾。该题正是 `csv` 模块内部的简化版。"
+      "explanation_md": "状态机方法：`in_quotes` 是唯一状态位，遇到 `\"\"` 先探测下一字符再决定是转义还是收尾。该题正是 `csv` 模块内部的简化版。",
+      "test_cases": [
+        {
+          "input": "a,b,c",
+          "expected_output": "3\n[a]\n[b]\n[c]",
+          "is_sample": true
+        },
+        {
+          "input": "a,\"b,c\",d",
+          "expected_output": "3\n[a]\n[b,c]\n[d]",
+          "is_sample": true
+        },
+        {
+          "input": "\"he said \"\"hi\"\"\",2",
+          "expected_output": "2\n[he said \"hi\"]\n[2]",
+          "is_sample": false
+        }
+      ]
     },
     {
       "id": "py5-ex06",
@@ -129,14 +174,28 @@
       "title": "解码错误的不可逆性",
       "stem_md": "字节串 `b'caf\\xe9 ok'`（本意是 latin-1 的 `café ok`）用 `decode('utf-8', errors='replace')` 再 `encode('utf-8')`，结果是？",
       "options": [
-        "A. 与原始字节完全相同",
-        "B. 得到 `b'caf\\xef\\xbf\\xbd ok'`，替换字符已固化，原始信息不可恢复",
-        "C. 抛 UnicodeEncodeError",
-        "D. 自动探测出 latin-1 并正确还原"
+        {
+          "key": "A",
+          "text": "可以完整恢复为原来的 `b'caf\\xe9 ok'`"
+        },
+        {
+          "key": "B",
+          "text": "得到 `b'caf\\xef\\xbf\\xbd ok'`：`\\xe9` 已被 U+FFFD 替换，原字节永久丢失"
+        },
+        {
+          "key": "C",
+          "text": "第一步 `decode` 就会抛 `UnicodeDecodeError`，因为指定了 `errors='replace'` 也不生效"
+        },
+        {
+          "key": "D",
+          "text": "得到 UTF-8 编码的 `b'café ok'`，与原始字节一致"
+        }
       ],
       "answer": {
-        "value": "B",
-        "explanation_md": "`errors='replace'` 把无法解码的字节换成 U+FFFD（UTF-8 编码为 `EF BF BD`），原字节序列 `\\xe9` 已被丢弃。之后的编码只是在固化这个错误，无法回滚。"
+        "explanation_md": "`errors='replace'` 把无法解码的字节换成 U+FFFD（UTF-8 编码为 `EF BF BD`），原字节序列 `\\xe9` 已被丢弃。之后的编码只是在固化这个错误，无法回滚。",
+        "correct": [
+          "B"
+        ]
       },
       "explanation_md": "所以排错顺序永远是：先确认真实编码（看响应头/文件声明/嗅探），再决定是否用宽松策略；宽松策略只用于「宁可丢几个字也要跑通」的场景。"
     },
@@ -151,14 +210,28 @@
       "title": "flush 与 fsync 的边界",
       "stem_md": "关于 `f.flush()` 与 `os.fsync(f.fileno())`，正确的是？",
       "options": [
-        "A. 二者等价，`flush()` 内部会调用 `fsync()`",
-        "B. `flush()` 把用户态缓冲推给操作系统；`fsync()` 才要求 OS 把数据写到存储介质",
-        "C. `fsync()` 只对二进制模式文件有效",
-        "D. 只要调用了 `flush()`，机器断电也不会丢数据"
+        {
+          "key": "A",
+          "text": "`flush()` 已经把数据写到磁盘，进程崩溃或断电都不会丢"
+        },
+        {
+          "key": "B",
+          "text": "`flush()` 只把数据交给 OS 页缓存（进程崩溃可保、断电不可保）；`fsync()` 才触发落盘，两者都做才算断电安全"
+        },
+        {
+          "key": "C",
+          "text": "`fsync()` 只同步元数据，文件内容仍可能丢失"
+        },
+        {
+          "key": "D",
+          "text": "`flush()` 与 `fsync()` 是同一件事的两个名字"
+        }
       ],
       "answer": {
-        "value": "B",
-        "explanation_md": "`flush()` 之后数据在 OS 页缓存里，进程崩溃可保、断电不可保；`fsync()` 触发真正的落盘（还需注意部分文件系统只保证元数据之外的 `fdatasync` 差异）。只有 A+B 都做，才谈得上「断电安全」。"
+        "explanation_md": "`flush()` 之后数据在 OS 页缓存里，进程崩溃可保、断电不可保；`fsync()` 触发真正的落盘（还需注意部分文件系统只保证元数据之外的 `fdatasync` 差异）。只有 A+B 都做，才谈得上「断电安全」。",
+        "correct": [
+          "B"
+        ]
       },
       "explanation_md": "代价是 `fsync` 要等磁盘，QPS 敏感场景常改成 `append + 定期 fsync`；数据库的 WAL 就是在这个矛盾上做折中。"
     }

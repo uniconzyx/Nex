@@ -1,0 +1,8 @@
+{
+  "title": "LayerNorm 与 RMSNorm 的数值对比",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "x      = [ 0.5 -1.5  2.   3.  -0.5]\nmean=0.7000 var=2.6600 rms=1.7748\nLayerNorm 输出 = [-0.122628 -1.348904  0.79708   1.410218 -0.735766]  (mean=0.00e+00, std=0.999998)\nRMSNorm  输出 = [ 0.281718 -0.845153  1.126871  1.690306 -0.281718]  (mean=0.394405, rms=0.999998)\n\n差异：LN 减均值 + 除 std，输出零均值单位方差；RMSNorm 只除 RMS，保留均值偏移\nLN 不改变方向（与 x-mean 同向）；RMSNorm 与 x 同向，但尺度只由二阶矩决定\n成本：LN 需一次减均值 + 一次方差归约；RMSNorm 只做平方均值归约（少一次归约，kernel 更快）\n",
+  "code": "\nimport numpy as np\nx = np.array([0.5, -1.5, 2.0, 3.0, -0.5])\neps = 1e-5\n\nmu = x.mean()\nvar = x.var()\nln = (x - mu) / np.sqrt(var + eps)\nrms = 1.0 / np.sqrt((x ** 2).mean() + eps)\ny_rms = x * rms\n\nprint(f\"x      = {x}\")\nprint(f\"mean={mu:.4f} var={var:.4f} rms={np.sqrt((x**2).mean()):.4f}\")\nprint(f\"LayerNorm 输出 = {np.round(ln, 6)}  (mean={ln.mean():.2e}, std={ln.std():.6f})\")\nprint(f\"RMSNorm  输出 = {np.round(y_rms, 6)}  (mean={y_rms.mean():.6f}, rms={np.sqrt((y_rms**2).mean()):.6f})\")\nprint()\nprint(\"差异：LN 减均值 + 除 std，输出零均值单位方差；RMSNorm 只除 RMS，保留均值偏移\")\nprint(f\"LN 不改变方向（与 x-mean 同向）；RMSNorm 与 x 同向，但尺度只由二阶矩决定\")\nprint(\"成本：LN 需一次减均值 + 一次方差归约；RMSNorm 只做平方均值归约（少一次归约，kernel 更快）\")\n"
+}

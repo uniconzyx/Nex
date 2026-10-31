@@ -16,7 +16,9 @@
       "group": "B1",
       "title": "Hadoop 生态与 HDFS 架构",
       "summary": "从单机到分布式的动机（容量、吞吐、容错）；HDFS 的 NameNode/DataNode/Block 与元数据设计；副本放置策略与机架感知；edits log 与 fsimage 的合并（checkpoint）；文件写入的流水线复制与读取的短路读；小文件问题的根因与治理。",
-      "prerequisites": [],
+      "prerequisites": [
+        "tool-ch01"
+      ],
       "status": "complete",
       "resources": {
         "github": [
@@ -26,10 +28,10 @@
           "apache/hadoop"
         ],
         "github_stars": [
-          46045,
-          44136,
-          16979,
-          15681
+          46442,
+          44339,
+          16992,
+          15699
         ],
         "github_notes": [
           "免费 9 周数据工程课程：含 Hadoop/Spark/数仓实践",
@@ -37,12 +39,41 @@
           "中文大数据入门指南：Hadoop/Hive/Spark/Flink 系统笔记",
           "Apache Hadoop 官方仓库：HDFS/YARN/MapReduce 实现"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《Hadoop 权威指南》第1-3章"
+          "《Hadoop 权威指南（第 4 版）》White",
+          "《Spark 快速大数据分析》Zaharia 等",
+          "《Streaming Systems》Akidau 等"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1Qp4y1n7EN/",
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · Hadoop 3.x（搭建到调优）",
+            "url": "https://www.bilibili.com/video/BV1Qp4y1n7EN/",
+            "note": "主线：HDFS 读写与副本 → MapReduce 执行流程与 shuffle → YARN 资源调度 → 集群调优",
+            "bv": "BV1Qp4y1n7EN"
+          },
+          {
+            "name": "尚硅谷 · Hive 框架详解",
+            "url": "https://www.bilibili.com/video/BV1W4411B7cN/",
+            "note": "把 SQL 翻译成 MapReduce 的过程、分区与分桶、内部表与外部表的差别",
+            "bv": "BV1W4411B7cN"
+          },
+          {
+            "name": "尚硅谷 · Spark 从入门到精通",
+            "url": "https://www.bilibili.com/video/BV11A411L7CK/",
+            "note": "RDD 的血缘与宽窄依赖、DAG 与 stage 划分、shuffle 与内存管理；DataFrame 部分接 Spark SQL",
+            "bv": "BV11A411L7CK"
+          },
+          {
+            "name": "尚硅谷 · Flink 1.17 实战",
+            "url": "https://www.bilibili.com/video/BV1eg4y1V7AN/",
+            "note": "流处理模型：事件时间与水印、窗口、状态与 checkpoint、精确一次语义",
+            "bv": "BV1eg4y1V7AN"
+          }
+        ]
       }
     },
     {
@@ -63,10 +94,10 @@
           "apache/hadoop"
         ],
         "github_stars": [
-          46045,
-          44136,
-          16979,
-          15681
+          46442,
+          44339,
+          16992,
+          15699
         ],
         "github_notes": [
           "免费 9 周数据工程课程：含 Hadoop/Spark/数仓实践",
@@ -74,12 +105,41 @@
           "中文大数据入门指南：Hadoop/Hive/Spark/Flink 系统笔记",
           "Apache Hadoop 官方仓库：HDFS/YARN/MapReduce 实现"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《Hadoop 权威指南》第2、4章"
+          "《Hadoop 权威指南（第 4 版）》White",
+          "《Spark 快速大数据分析》Zaharia 等",
+          "《Streaming Systems》Akidau 等"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1Qp4y1n7EN/",
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · Hadoop 3.x（搭建到调优）",
+            "url": "https://www.bilibili.com/video/BV1Qp4y1n7EN/",
+            "note": "主线：HDFS 读写与副本 → MapReduce 执行流程与 shuffle → YARN 资源调度 → 集群调优",
+            "bv": "BV1Qp4y1n7EN"
+          },
+          {
+            "name": "尚硅谷 · Spark 从入门到精通",
+            "url": "https://www.bilibili.com/video/BV11A411L7CK/",
+            "note": "RDD 的血缘与宽窄依赖、DAG 与 stage 划分、shuffle 与内存管理；DataFrame 部分接 Spark SQL",
+            "bv": "BV11A411L7CK"
+          },
+          {
+            "name": "尚硅谷 · Hive 框架详解",
+            "url": "https://www.bilibili.com/video/BV1W4411B7cN/",
+            "note": "把 SQL 翻译成 MapReduce 的过程、分区与分桶、内部表与外部表的差别",
+            "bv": "BV1W4411B7cN"
+          },
+          {
+            "name": "尚硅谷 · Flink 1.17 实战",
+            "url": "https://www.bilibili.com/video/BV1eg4y1V7AN/",
+            "note": "流处理模型：事件时间与水印、窗口、状态与 checkpoint、精确一次语义",
+            "bv": "BV1eg4y1V7AN"
+          }
+        ]
       }
     },
     {
@@ -100,10 +160,10 @@
           "apache/hadoop"
         ],
         "github_stars": [
-          46045,
-          44136,
-          16979,
-          15681
+          46442,
+          44339,
+          16992,
+          15699
         ],
         "github_notes": [
           "免费 9 周数据工程课程：含 Hadoop/Spark/数仓实践",
@@ -111,12 +171,41 @@
           "中文大数据入门指南：Hadoop/Hive/Spark/Flink 系统笔记",
           "Apache Hadoop 官方仓库：HDFS/YARN/MapReduce 实现"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《Hive 编程指南》"
+          "《Hadoop 权威指南（第 4 版）》White",
+          "《Spark 快速大数据分析》Zaharia 等",
+          "《Streaming Systems》Akidau 等"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1Qp4y1n7EN/",
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · Hadoop 3.x（搭建到调优）",
+            "url": "https://www.bilibili.com/video/BV1Qp4y1n7EN/",
+            "note": "主线：HDFS 读写与副本 → MapReduce 执行流程与 shuffle → YARN 资源调度 → 集群调优",
+            "bv": "BV1Qp4y1n7EN"
+          },
+          {
+            "name": "尚硅谷 · Hive 框架详解",
+            "url": "https://www.bilibili.com/video/BV1W4411B7cN/",
+            "note": "把 SQL 翻译成 MapReduce 的过程、分区与分桶、内部表与外部表的差别",
+            "bv": "BV1W4411B7cN"
+          },
+          {
+            "name": "尚硅谷 · Spark 从入门到精通",
+            "url": "https://www.bilibili.com/video/BV11A411L7CK/",
+            "note": "RDD 的血缘与宽窄依赖、DAG 与 stage 划分、shuffle 与内存管理；DataFrame 部分接 Spark SQL",
+            "bv": "BV11A411L7CK"
+          },
+          {
+            "name": "尚硅谷 · Flink 1.17 实战",
+            "url": "https://www.bilibili.com/video/BV1eg4y1V7AN/",
+            "note": "流处理模型：事件时间与水印、窗口、状态与 checkpoint、精确一次语义",
+            "bv": "BV1eg4y1V7AN"
+          }
+        ]
       }
     },
     {
@@ -137,10 +226,10 @@
           "apache/hadoop"
         ],
         "github_stars": [
-          46045,
-          44136,
-          16979,
-          15681
+          46442,
+          44339,
+          16992,
+          15699
         ],
         "github_notes": [
           "免费 9 周数据工程课程：含 Hadoop/Spark/数仓实践",
@@ -148,13 +237,41 @@
           "中文大数据入门指南：Hadoop/Hive/Spark/Flink 系统笔记",
           "Apache Hadoop 官方仓库：HDFS/YARN/MapReduce 实现"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《Spark 快速大数据分析》",
-          "《Spark 内核设计的艺术》"
+          "《Hadoop 权威指南（第 4 版）》White",
+          "《Spark 快速大数据分析》Zaharia 等",
+          "《Streaming Systems》Akidau 等"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1Qp4y1n7EN/",
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · Hadoop 3.x（搭建到调优）",
+            "url": "https://www.bilibili.com/video/BV1Qp4y1n7EN/",
+            "note": "主线：HDFS 读写与副本 → MapReduce 执行流程与 shuffle → YARN 资源调度 → 集群调优",
+            "bv": "BV1Qp4y1n7EN"
+          },
+          {
+            "name": "尚硅谷 · Spark 从入门到精通",
+            "url": "https://www.bilibili.com/video/BV11A411L7CK/",
+            "note": "RDD 的血缘与宽窄依赖、DAG 与 stage 划分、shuffle 与内存管理；DataFrame 部分接 Spark SQL",
+            "bv": "BV11A411L7CK"
+          },
+          {
+            "name": "尚硅谷 · Hive 框架详解",
+            "url": "https://www.bilibili.com/video/BV1W4411B7cN/",
+            "note": "把 SQL 翻译成 MapReduce 的过程、分区与分桶、内部表与外部表的差别",
+            "bv": "BV1W4411B7cN"
+          },
+          {
+            "name": "尚硅谷 · Flink 1.17 实战",
+            "url": "https://www.bilibili.com/video/BV1eg4y1V7AN/",
+            "note": "流处理模型：事件时间与水印、窗口、状态与 checkpoint、精确一次语义",
+            "bv": "BV1eg4y1V7AN"
+          }
+        ]
       }
     },
     {
@@ -175,10 +292,10 @@
           "apache/hadoop"
         ],
         "github_stars": [
-          46045,
-          44136,
-          16979,
-          15681
+          46442,
+          44339,
+          16992,
+          15699
         ],
         "github_notes": [
           "免费 9 周数据工程课程：含 Hadoop/Spark/数仓实践",
@@ -186,12 +303,41 @@
           "中文大数据入门指南：Hadoop/Hive/Spark/Flink 系统笔记",
           "Apache Hadoop 官方仓库：HDFS/YARN/MapReduce 实现"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《Spark SQL 内核剖析》"
+          "《Hadoop 权威指南（第 4 版）》White",
+          "《Spark 快速大数据分析》Zaharia 等",
+          "《Streaming Systems》Akidau 等"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1Qp4y1n7EN/",
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · Hadoop 3.x（搭建到调优）",
+            "url": "https://www.bilibili.com/video/BV1Qp4y1n7EN/",
+            "note": "主线：HDFS 读写与副本 → MapReduce 执行流程与 shuffle → YARN 资源调度 → 集群调优",
+            "bv": "BV1Qp4y1n7EN"
+          },
+          {
+            "name": "尚硅谷 · Spark 从入门到精通",
+            "url": "https://www.bilibili.com/video/BV11A411L7CK/",
+            "note": "RDD 的血缘与宽窄依赖、DAG 与 stage 划分、shuffle 与内存管理；DataFrame 部分接 Spark SQL",
+            "bv": "BV11A411L7CK"
+          },
+          {
+            "name": "尚硅谷 · Hive 框架详解",
+            "url": "https://www.bilibili.com/video/BV1W4411B7cN/",
+            "note": "把 SQL 翻译成 MapReduce 的过程、分区与分桶、内部表与外部表的差别",
+            "bv": "BV1W4411B7cN"
+          },
+          {
+            "name": "尚硅谷 · Flink 1.17 实战",
+            "url": "https://www.bilibili.com/video/BV1eg4y1V7AN/",
+            "note": "流处理模型：事件时间与水印、窗口、状态与 checkpoint、精确一次语义",
+            "bv": "BV1eg4y1V7AN"
+          }
+        ]
       }
     },
     {
@@ -201,7 +347,8 @@
       "title": "离线数仓实战：分层建模与调度",
       "summary": "ODS/DWD/DWS/ADS 分层职责；维度建模与星型/雪花模型、缓慢变化维；指标口径一致性与数据质量校验；任务依赖与调度（DAG、补数、SLA）；一条端到端离线链路的拆解（采集 → 清洗 → 聚合 → 报表）；数据倾斜与资源调优的实战清单。",
       "prerequisites": [
-        "bd-ch05"
+        "bd-ch05",
+        "db-ch01"
       ],
       "status": "complete",
       "resources": {
@@ -212,10 +359,10 @@
           "apache/hadoop"
         ],
         "github_stars": [
-          46045,
-          44136,
-          16979,
-          15681
+          46442,
+          44339,
+          16992,
+          15699
         ],
         "github_notes": [
           "免费 9 周数据工程课程：含 Hadoop/Spark/数仓实践",
@@ -223,12 +370,41 @@
           "中文大数据入门指南：Hadoop/Hive/Spark/Flink 系统笔记",
           "Apache Hadoop 官方仓库：HDFS/YARN/MapReduce 实现"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《大数据之路：阿里巴巴大数据实践》"
+          "《Hadoop 权威指南（第 4 版）》White",
+          "《Spark 快速大数据分析》Zaharia 等",
+          "《Streaming Systems》Akidau 等"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1Qp4y1n7EN/",
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · Hadoop 3.x（搭建到调优）",
+            "url": "https://www.bilibili.com/video/BV1Qp4y1n7EN/",
+            "note": "主线：HDFS 读写与副本 → MapReduce 执行流程与 shuffle → YARN 资源调度 → 集群调优",
+            "bv": "BV1Qp4y1n7EN"
+          },
+          {
+            "name": "尚硅谷 · Hive 框架详解",
+            "url": "https://www.bilibili.com/video/BV1W4411B7cN/",
+            "note": "把 SQL 翻译成 MapReduce 的过程、分区与分桶、内部表与外部表的差别",
+            "bv": "BV1W4411B7cN"
+          },
+          {
+            "name": "尚硅谷 · Spark 从入门到精通",
+            "url": "https://www.bilibili.com/video/BV11A411L7CK/",
+            "note": "RDD 的血缘与宽窄依赖、DAG 与 stage 划分、shuffle 与内存管理；DataFrame 部分接 Spark SQL",
+            "bv": "BV11A411L7CK"
+          },
+          {
+            "name": "尚硅谷 · Flink 1.17 实战",
+            "url": "https://www.bilibili.com/video/BV1eg4y1V7AN/",
+            "note": "流处理模型：事件时间与水印、窗口、状态与 checkpoint、精确一次语义",
+            "bv": "BV1eg4y1V7AN"
+          }
+        ]
       }
     }
   ],

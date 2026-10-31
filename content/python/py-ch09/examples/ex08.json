@@ -1,0 +1,8 @@
+{
+  "title": "Mixin + MutableSequence：只写 5 个方法，补齐整个容器协议",
+  "code_lang": "python",
+  "code_std": "3.11",
+  "stdin": "",
+  "expected_output": "3 [1, 2, 3] True 3 [1, 2]\n[2, 1] True",
+  "code": "import json\nfrom collections.abc import MutableSequence\n\nclass JsonMixin:\n    def to_json(self):\n        return json.dumps(self._items, ensure_ascii=False)\n\nclass Bag(JsonMixin, MutableSequence):\n    def __init__(self, items=()):\n        self._items = list(items)\n    def __getitem__(self, i): return self._items[i]\n    def __setitem__(self, i, v): self._items[i] = v\n    def __delitem__(self, i): del self._items[i]\n    def __len__(self): return len(self._items)\n    def insert(self, i, v): self._items.insert(i, v)\n\nb = Bag([1, 2])\nb.append(3)\nprint(len(b), list(b), 2 in b, b.pop(), b.to_json())\nb.reverse()\nprint(list(b), isinstance(b, MutableSequence))\n"
+}

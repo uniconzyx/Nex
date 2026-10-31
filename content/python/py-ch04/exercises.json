@@ -200,12 +200,13 @@
       "type": "coding",
       "difficulty": "medium",
       "title": "简化 Unix 风格路径（LeetCode 71）",
-      "content_md": "给定一个 Unix 风格绝对路径字符串，将其简化为规范路径（`..` 回退、`.` 与多余斜杠忽略、栈空时 `..` 不越界）。\n\n请到 LeetCode 71 查看完整题面并用 Python 实现。",
+      "content_md": "给定一个 Unix 风格绝对路径字符串，将其简化为规范路径（`..` 回退、`.` 与多余斜杠忽略、栈空时 `..` 不越界）。\n\n请到 LeetCode 71 查看完整题面并用 Python 实现。\n\n<!-- judge-io -->\n**判题 I/O 约定**（提交完整程序：从 stdin 读、向 stdout 写）\n\n输入：一行 Unix 风格绝对路径（不含换行）。\n输出：简化后的规范路径，占一行。",
       "answer": {
         "correct": [
           "题面见 https://leetcode.cn/problems/simplify-path/"
         ],
-        "explanation": "典型解法：按 `/` 切分，用列表当栈——`''` 与 `'.'` 跳过；`'..'` 时若栈非空则 `pop()`（栈空则忽略，因为根目录的上一级还是根）；其余 `push`。最后 `'/' + '/'.join(stack)`。进阶：可对照本题与 `pathlib.PurePosixPath` 的行为差异——`PurePosixPath` **不折叠** `..`，`resolve()` 才折叠且会访问文件系统，这也解释了为什么这类题不能直接用 `pathlib` 一行解决。"
+        "explanation": "典型解法：按 `/` 切分，用列表当栈——`''` 与 `'.'` 跳过；`'..'` 时若栈非空则 `pop()`（栈空则忽略，因为根目录的上一级还是根）；其余 `push`。最后 `'/' + '/'.join(stack)`。进阶：可对照本题与 `pathlib.PurePosixPath` 的行为差异——`PurePosixPath` **不折叠** `..`，`resolve()` 才折叠且会访问文件系统，这也解释了为什么这类题不能直接用 `pathlib` 一行解决。",
+        "reference_code": "import sys\n\n\ndef simplify_path(path):\n    stack = []\n    for part in path.split('/'):\n        if part == '' or part == '.':\n            continue\n        if part == '..':\n            if stack:\n                stack.pop()\n        else:\n            stack.append(part)\n    return '/' + '/'.join(stack)\n\n\nif __name__ == '__main__':\n    print(simplify_path(sys.stdin.readline().strip()))\n"
       },
       "tags": [
         "栈",
@@ -216,7 +217,29 @@
       "source_ref": "LeetCode 71. Simplify Path",
       "category": "算法题",
       "platform": "leetcode",
-      "external_url": "https://leetcode.cn/problems/simplify-path/"
+      "external_url": "https://leetcode.cn/problems/simplify-path/",
+      "test_cases": [
+        {
+          "input": "/home/",
+          "expected_output": "/home",
+          "is_sample": true
+        },
+        {
+          "input": "/../",
+          "expected_output": "/",
+          "is_sample": true
+        },
+        {
+          "input": "/home//foo/",
+          "expected_output": "/home/foo",
+          "is_sample": false
+        },
+        {
+          "input": "/a/./b/../../c/",
+          "expected_output": "/c",
+          "is_sample": false
+        }
+      ]
     },
     {
       "id": "py4-ex08",

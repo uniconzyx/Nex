@@ -1,0 +1,8 @@
+{
+  "title": "自定义约束：手机号格式校验",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "null\n手机号格式不正确\n手机号不能为空",
+  "code": "class BizException extends Error {\n  constructor(code, message){ super(message); this.code = code; this.biz = true; }\n}\n\nfunction validatePhone(v) {\n  if (v === null || v === undefined) return \"手机号不能为空\";\n  if (!/^1[3-9]\\d{9}$/.test(v)) return \"手机号格式不正确\";\n  return null;\n}\nconsole.log(validatePhone(\"13800138000\"));\nconsole.log(validatePhone(\"12345\"));\nconsole.log(validatePhone(null));\n"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "标注一致性两轮 Kappa：规范迭代前后",
+  "code_lang": "python",
+  "code_std": "3.11",
+  "stdin": "",
+  "expected_output": "第1轮 kappa=0.000\n第2轮 kappa=1.000",
+  "code": "r1_a = [1,0,1,1,0,1,0,0]\nr1_b = [0,0,1,0,1,1,0,1]\nr2_a = [1,0,1,1,0,1,0,0]\nr2_b = [1,0,1,1,0,1,0,0]\n\ndef kappa(x, y):\n    n = len(x)\n    p = sum(1 for i in range(n) if x[i]==y[i]) / n\n    pa = sum(x)/n\n    pe = pa*pa + (1-pa)*(1-pa)\n    return (p-pe)/(1-pe)\n\nprint(f\"第1轮 kappa={kappa(r1_a, r1_b):.3f}\")\nprint(f\"第2轮 kappa={kappa(r2_a, r2_b):.3f}\")\n"
+}

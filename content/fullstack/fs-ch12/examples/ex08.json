@@ -1,0 +1,8 @@
+{
+  "title": "配置热更新：订阅推送，无需重启",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "初始: false\n热更新: {\"featureX\":true,\"rate\":10}\n热更新: {\"featureX\":true,\"rate\":20}\n最终: false",
+  "code": "// 配置热更新：配置中心推送变更时，运行中实例无需重启即可生效\nclass ConfigStore {\n  constructor(initial) {\n    this.data = { ...initial };\n    this.listeners = new Set();\n  }\n  get(key) { return this.data[key]; }\n  subscribe(fn) { this.listeners.add(fn); return () => this.listeners.delete(fn); }\n  update(patch) {\n    this.data = { ...this.data, ...patch };\n    for (const fn of this.listeners) fn(this.data);\n  }\n}\n\nconst cs = new ConfigStore({ featureX: false, rate: 10 });\nconst unsub = cs.subscribe((d) => console.log(\"热更新:\", JSON.stringify(d)));\nconsole.log(\"初始:\", cs.get(\"featureX\"));\ncs.update({ featureX: true }); // 推送到订阅者，无需重启\ncs.update({ rate: 20 });\nunsub();\ncs.update({ featureX: false }); // 已退订，不再输出\nconsole.log(\"最终:\", cs.get(\"featureX\"));\n"
+}

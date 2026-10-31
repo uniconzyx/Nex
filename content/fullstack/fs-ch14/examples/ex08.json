@@ -1,0 +1,8 @@
+{
+  "title": "审计日志不可篡改：哈希链检出篡改",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "条目数: 3\n被篡改检出: 1",
+  "code": "import { createHash } from \"crypto\";\nfunction h(s) { return createHash(\"sha256\").update(s).digest(\"hex\").slice(0, 16); }\nconst chain = [];\nfunction append(entry) {\n  const prev = chain.length ? chain[chain.length - 1].hash : \"GENESIS\";\n  const hash = h(prev + \"|\" + entry);\n  chain.push({ entry, prev, hash });\n}\nappend(\"tool:search args={q:'hi'}\");\nappend(\"tool:calc args={x:1}\");\nappend(\"tool:send args={to:'u'}\");\nchain[1].entry = \"tool:calc args={x:999}\"; // 篡改第二条\nlet tampered = 0;\nfor (let i = 0; i < chain.length; i++) {\n  const prev = i ? chain[i - 1].hash : \"GENESIS\";\n  if (h(prev + \"|\" + chain[i].entry) !== chain[i].hash) tampered++;\n}\nconsole.log(\"条目数:\", chain.length);\nconsole.log(\"被篡改检出:\", tampered);\n"
+}

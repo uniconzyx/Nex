@@ -12,9 +12,13 @@
       "platform": "self",
       "difficulty": 2,
       "title": "哪些操作返回视图",
-      "content_md": "对二维数组 `a = np.arange(12).reshape(3,4)`，下列哪些操作**一定**返回视图（与 a 共享内存）？\n\nA. `a[0]`\nB. `a[:, 0]`\nC. `a[a > 5]`\nD. `a.T`",
+      "content_md": "对二维数组 `a = np.arange(12).reshape(3,4)`，下列哪些操作**一定**返回视图（与 a 共享内存）？",
       "answer": {
-        "correct": "A、B、D",
+        "correct": [
+          "A",
+          "B",
+          "D"
+        ],
         "explain": "A、B 是基本切片（可用「起点 + strides」表达）→ view；D 的转置只交换 strides → view。C 是布尔索引，结果元素个数未知、无法用 strides 描述 → 必然 copy。\n\n判定口诀：**能用 strides 表达的就是 view，需要「挑元素」的就是 copy。**"
       },
       "explanation": "视图 vs 拷贝是 NumPy 内存正确性的第一道关。",
@@ -24,7 +28,25 @@
         "内存"
       ],
       "source": "self",
-      "source_ref": "《Python for Data Analysis》第4章 · NumPy 基础"
+      "source_ref": "《Python for Data Analysis》第4章 · NumPy 基础",
+      "options": [
+        {
+          "key": "A",
+          "text": "`a[0]`"
+        },
+        {
+          "key": "B",
+          "text": "`a[:, 0]`"
+        },
+        {
+          "key": "C",
+          "text": "`a[a > 5]`"
+        },
+        {
+          "key": "D",
+          "text": "`a.T`"
+        }
+      ]
     },
     {
       "type": "fix_error",

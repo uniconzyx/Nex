@@ -1,0 +1,8 @@
+{
+  "title": "error 作为值：显式返回 [result, error] 并必须检查",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "商=5\n错误:division by zero\n商=0",
+  "code": "function divide(a, b) { if (b === 0) return [null, \"division by zero\"]; return [a / b, null]; }\nfunction useQuotient(x, y) {\n  const [q, err] = divide(x, y);\n  if (err !== null) return \"错误:\" + err;\n  return \"商=\" + q;\n}\nconsole.log(useQuotient(10, 2));\nconsole.log(useQuotient(10, 0));\nfunction badUse(x, y) { const [q] = divide(x, y); return \"商=\" + (q ?? 0); }\nconsole.log(badUse(10, 0));\n"
+}

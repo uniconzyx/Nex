@@ -13,10 +13,22 @@
       "title": "对 std::vector 调用 reserve(n) 之后，下列哪项一定成立？",
       "content_md": "已知 `std::vector<int> v; v.reserve(100);`，随后 `auto* p = v.data();` 并执行若干次 `push_back`。关于 `p` 与 `capacity`，哪项正确？",
       "options": [
-        "A. `capacity()` 一定 >= 100，且 `p` 指向的地址在整个过程中一定不变",
-        "B. `capacity()` 一定 >= 100，但 `p` 在触发扩容后成为悬空指针",
-        "C. `capacity()` 可能为 0，`p` 始终有效",
-        "D. `reserve` 会清空已有元素，因此 `p` 指向空"
+        {
+          "key": "A",
+          "text": "`capacity()` 恒为 100，`p` 始终有效"
+        },
+        {
+          "key": "B",
+          "text": "`size()` 不超过 100 时 `p` 有效；一旦扩容，旧内存被释放，`p` 悬空"
+        },
+        {
+          "key": "C",
+          "text": "`reserve` 之后 `p` 永远有效，因为 vector 不再搬移内存"
+        },
+        {
+          "key": "D",
+          "text": "`reserve(n)` 会把 `size()` 也设为 n，因此 `p` 指向已构造的元素"
+        }
       ],
       "answer": {
         "correct": [
@@ -46,10 +58,22 @@
       "title": "两个对象互相持有对方的 std::shared_ptr，会导致什么？",
       "content_md": "对象 A 持有 `shared_ptr<B>`，对象 B 持有 `shared_ptr<A>`，二者无其他外部引用。",
       "options": [
-        "A. 程序结束自动回收，无影响",
-        "B. 控制块引用计数永不为 0，析构永不触发，内存泄漏",
-        "C. 其中一方会先析构，另一方随后析构",
-        "D. 编译器会报循环引用错误，无法编译"
+        {
+          "key": "A",
+          "text": "引用计数仍能归零，两个对象都正常析构"
+        },
+        {
+          "key": "B",
+          "text": "引用计数无法归零，两个对象都不析构，内存泄漏"
+        },
+        {
+          "key": "C",
+          "text": "编译期报错，因为 shared_ptr 不允许互相持有"
+        },
+        {
+          "key": "D",
+          "text": "只有先构造的那个对象泄漏，另一个正常析构"
+        }
       ],
       "answer": {
         "correct": [
@@ -112,10 +136,22 @@
       "title": "关于返回局部对象，下列哪种写法最推荐？",
       "content_md": "函数需要返回一个局部构造的大对象 `obj`。",
       "options": [
-        "A. `return std::move(obj);`",
-        "B. `return obj;`",
-        "C. `return std::forward<decltype(obj)>(obj);`",
-        "D. 先把 obj 存入 static 再返回引用"
+        {
+          "key": "A",
+          "text": "`return std::move(obj);`"
+        },
+        {
+          "key": "B",
+          "text": "`return obj;`"
+        },
+        {
+          "key": "C",
+          "text": "`return std::ref(obj);`"
+        },
+        {
+          "key": "D",
+          "text": "`return new Obj(obj);`"
+        }
       ],
       "answer": {
         "correct": [
@@ -145,10 +181,22 @@
       "title": "基类析构函数非 virtual 时，经基类指针 delete 派生对象会发生什么？",
       "content_md": "```cpp\nstruct Base { ~Base(){} };\nstruct Derived : Base { int* p = new int[1024]; ~Derived(){ delete[] p; } };\nBase* b = new Derived(); delete b;\n```",
       "options": [
-        "A. 先调 Derived 析构再调 Base 析构，资源正常释放",
-        "B. 只调 Base 析构，Derived 的 `p` 泄漏",
-        "C. 编译错误",
-        "D. 运行期抛出异常"
+        {
+          "key": "A",
+          "text": "编译失败，因为基类析构函数不是 virtual"
+        },
+        {
+          "key": "B",
+          "text": "未定义行为：只调用 Base 的析构，Derived 的析构与 `p` 的释放都不执行，内存泄漏"
+        },
+        {
+          "key": "C",
+          "text": "运行期抛出 std::bad_cast"
+        },
+        {
+          "key": "D",
+          "text": "编译器会自动补一个虚析构，行为与加了 virtual 相同"
+        }
       ],
       "answer": {
         "correct": [
@@ -178,10 +226,22 @@
       "title": "在 for 循环里对 vector 持续 push_back，同时持有元素指针，风险是？",
       "content_md": "`std::vector<int> v; int* p = &v[0]; for(...) v.push_back(x);` 然后使用 `*p`。",
       "options": [
-        "A. 无风险，vector 保证不搬移",
-        "B. 扩容后 p 悬空，使用即未定义行为",
-        "C. 只会在 debug 模式崩溃",
-        "D. p 会自动跟随 vector 重分配"
+        {
+          "key": "A",
+          "text": "无风险，vector 保证元素地址在生命周期内稳定"
+        },
+        {
+          "key": "B",
+          "text": "扩容时元素整体搬移、旧内存释放，`p` 悬空，解引用是未定义行为"
+        },
+        {
+          "key": "C",
+          "text": "只会发生一次数据复制，`p` 仍指向有效副本"
+        },
+        {
+          "key": "D",
+          "text": "`p` 会被自动更新为新地址"
+        }
       ],
       "answer": {
         "correct": [

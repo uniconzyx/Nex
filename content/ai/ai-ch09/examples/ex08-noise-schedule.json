@@ -1,0 +1,8 @@
+{
+  "title": "噪声调度：linear vs cosine 的 abar 与 SNR",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "t/T     linear abar   linear SNR    cosine abar   cosine SNR\n0.10    0.897018         8.7104     0.972605        35.5033\n0.25    0.524085         1.1012     0.848133         5.5847\n0.50    0.078587         0.0853     0.495402         0.9818\n0.75    0.003351         0.0034     0.145369         0.1701\n0.90    0.000275         0.0003     0.024572         0.0252\n0.99    0.000049         0.0000     0.000294         0.0003\nlinear: abar 降到 0.5 的时刻 t≈259\ncosine: abar 降到 0.5 的时刻 t≈497\n结论：cosine 在前期降得更慢（保留结构更久），末段才快速趋近纯噪声；linear 在中段就把信息压掉，高分辨率下表现更差\n",
+  "code": "\nimport numpy as np\nT, s = 1000, 0.008\nlinear = np.cumprod(1 - np.linspace(1e-4, 0.02, T))\nts = np.arange(T + 1)\ncos = np.cos((ts / T + s) / (1 + s) * np.pi / 2) ** 2\ncos = cos / cos[0]                      # 归一化到 1\ncos = cos[:T]\n\ndef snr(a):\n    return a / (1 - a)\n\nprint(\"t/T     linear abar   linear SNR    cosine abar   cosine SNR\")\nfor frac in (0.1, 0.25, 0.5, 0.75, 0.9, 0.99):\n    i = int(frac * T) - 1\n    print(f\"{frac:>4.2f}    {linear[i]:.6f}      {snr(linear[i]):9.4f}     \"\n          f\"{cos[i]:.6f}      {snr(cos[i]):9.4f}\")\nprint(f\"linear: abar 降到 0.5 的时刻 t≈{int(np.argmax(linear < 0.5))}\")\nprint(f\"cosine: abar 降到 0.5 的时刻 t≈{int(np.argmax(cos < 0.5))}\")\nprint(\"结论：cosine 在前期降得更慢（保留结构更久），末段才快速趋近纯噪声；\"\n      \"linear 在中段就把信息压掉，高分辨率下表现更差\")\n"
+}

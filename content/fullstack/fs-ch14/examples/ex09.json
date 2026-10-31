@@ -1,0 +1,8 @@
+{
+  "title": "token 计量：输入/输出分开计费",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "{\"model\":\"gpt-x\",\"inTokens\":1200,\"outTokens\":350,\"cost\":\"1.900000\"}\n{\"model\":\"gpt-x\",\"inTokens\":1200,\"outTokens\":800,\"cost\":\"2.800000\"}\n两次总花费: 4.700000",
+  "code": "const PRICE = { in: 0.001, out: 0.002 };\nfunction meter(model, inTokens, outTokens) {\n  const cost = inTokens * PRICE.in + outTokens * PRICE.out;\n  return { model, inTokens, outTokens, cost: cost.toFixed(6) };\n}\nconst r1 = meter(\"gpt-x\", 1200, 350);\nconst r2 = meter(\"gpt-x\", 1200, 800);\nconsole.log(JSON.stringify(r1));\nconsole.log(JSON.stringify(r2));\nconsole.log(\"两次总花费:\", (parseFloat(r1.cost) + parseFloat(r2.cost)).toFixed(6));\n"
+}

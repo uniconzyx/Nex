@@ -1,0 +1,8 @@
+{
+  "title": "一维硬间隔 SVM 的解析解",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "数据: x=[-1.  1.], y=[-1.  1.]\n解析解: w=1.0, b=0.0\n  y=-1: y(w·x+b) = +1.00  (应为 1 -> 是支持向量)\n  y=+1: y(w·x+b) = +1.00  (应为 1 -> 是支持向量)\n间隔宽度 = 2/|w| = 2.0000\n\n对偶验证：α 由 KKT 决定，两点的 α 都应为 1/2（对称），且 Σα_i y_i = 0：\n  Σα_i y_i = +0.000000\n  w = Σα_i y_i x_i = +1.0000  (与解析解一致)\n结论：1D 两个对称点 ⇒ w=1, b=0, margin=2；α 的对称性来自数据的对称性\n",
+  "code": "\nimport numpy as np\nx = np.array([-1.0, 1.0])\ny = np.array([-1.0, 1.0])\n# 对称 ⇒ b=0；支持向量满足 w*x_i = y_i ⇒ w=1\nw, b = 1.0, 0.0\nprint(f\"数据: x={x}, y={y}\")\nprint(f\"解析解: w={w}, b={b}\")\nfor xi, yi in zip(x, y):\n    print(f\"  y={yi:+.0f}: y(w·x+b) = {yi*(w*xi+b):+.2f}  (应为 1 -> 是支持向量)\")\nprint(f\"间隔宽度 = 2/|w| = {2/abs(w):.4f}\")\nprint()\nprint(\"对偶验证：α 由 KKT 决定，两点的 α 都应为 1/2（对称），且 Σα_i y_i = 0：\")\nalpha = np.array([0.5, 0.5])\nprint(f\"  Σα_i y_i = {(alpha*y).sum():+.6f}\")\nprint(f\"  w = Σα_i y_i x_i = {(alpha*y*x).sum():+.4f}  (与解析解一致)\")\nprint(\"结论：1D 两个对称点 ⇒ w=1, b=0, margin=2；α 的对称性来自数据的对称性\")\n"
+}

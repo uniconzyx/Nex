@@ -1,0 +1,8 @@
+{
+  "title": "训练显存账：16 B/参数从哪来",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "每参数字节数：\n  fp16 参数      2 B\n  fp16 梯度      2 B\n  fp32 主权重     4 B\n  Adam m       4 B\n  Adam v       4 B\n  合计           16 B/参数\n\n模型规模 -> 仅模型状态显存（不含激活）：\n    1B:    14.9 GB   单张 80GB 卡能否装下: 可以\n    7B:   104.3 GB   单张 80GB 卡能否装下: 不行\n   13B:   193.7 GB   单张 80GB 卡能否装下: 不行\n   70B:  1043.1 GB   单张 80GB 卡能否装下: 不行\n\n激活估算（含重计算关闭）：batch*seq*hidden*L*2B 量级\n  7B 级模型 b=8, s=2048, h=4096, L=32 -> 约 48.0 GB（×12 系数的数量级估算）\n  开激活重计算后可降到 O(sqrt(L)) 倍量级，约 8.5 GB\n\n对照：推理 fp16 只需 2 B/参数 -> 7B 约 13.0 GB（差 8 倍）\n",
+  "code": "\nimport numpy as np\nper_param = {\"fp16 参数\": 2, \"fp16 梯度\": 2, \"fp32 主权重\": 4, \"Adam m\": 4, \"Adam v\": 4}\ntotal_per_param = sum(per_param.values())\n\nprint(\"每参数字节数：\")\nfor k, v in per_param.items():\n    print(f\"  {k:<12s} {v} B\")\nprint(f\"  {'合计':<12s} {total_per_param} B/参数\")\nprint()\nprint(\"模型规模 -> 仅模型状态显存（不含激活）：\")\nfor name, N in ((\"1B\", 1e9), (\"7B\", 7e9), (\"13B\", 13e9), (\"70B\", 70e9)):\n    gb = total_per_param * N / (1024 ** 3)\n    print(f\"  {name:>4s}: {gb:7.1f} GB   单张 80GB 卡能否装下: {'可以' if gb < 80 else '不行'}\")\n\nprint()\nprint(\"激活估算（含重计算关闭）：batch*seq*hidden*L*2B 量级\")\nb, s, h, L = 8, 2048, 4096, 32\nact = b * s * h * L * 2 * 12 / (1024 ** 3)   # 12x：MLP 中间层(4h)、注意力、多个张量\nprint(f\"  7B 级模型 b={b}, s={s}, h={h}, L={L} -> 约 {act:.1f} GB（×12 系数的数量级估算）\")\nprint(f\"  开激活重计算后可降到 O(sqrt(L)) 倍量级，约 {act/np.sqrt(L):.1f} GB\")\nprint()\nprint(\"对照：推理 fp16 只需 2 B/参数 -> 7B 约 {:.1f} GB（差 8 倍）\".format(2 * 7e9 / (1024 ** 3)))\n"
+}

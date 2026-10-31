@@ -1,0 +1,8 @@
+{
+  "title": "训练集污染检测：token 级重叠率",
+  "code_lang": "python",
+  "code_std": "3.11",
+  "stdin": "",
+  "expected_output": "污染率: 2/2 = 1.00",
+  "code": "def token_overlap(a, b):\n    sa, sb = set(a.split()), set(b.split())\n    if not sa or not sb:\n        return 0.0\n    return len(sa & sb) / len(sa | sb)\n\ntest_prompts = [\"what is the capital of France\", \"how to sort a list in python\"]\ntrain_corpus = [\n    \"python is a programming language\",\n    \"how to sort a list in python use the sorted function\",\n    \"the capital of France is Paris\",\n    \"machine learning needs data\",\n]\ncontaminated = 0\nfor t in test_prompts:\n    if any(token_overlap(t, c) >= 0.5 for c in train_corpus):\n        contaminated += 1\nprint(f\"污染率: {contaminated}/{len(test_prompts)} = {contaminated/len(test_prompts):.2f}\")\n"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "质量门禁：lint/typecheck/coverage/build 串起",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "GREEN\nRED: lint,coverage",
+  "code": "// 质量门禁：CI 里串起 lint/typecheck/coverage/build，任一不过就红灯\nfunction runGate(checks) {\n  const results = checks.map((c) => ({ name: c.name, pass: c.run() }));\n  const failed = results.filter((r) => !r.pass).map((r) => r.name);\n  return failed.length === 0 ? \"GREEN\" : `RED: ${failed.join(\",\")}`;\n}\n\nconst gate = runGate([\n  { name: \"lint\", run: () => true },\n  { name: \"typecheck\", run: () => true },\n  { name: \"coverage\", run: () => 85 >= 80 },\n  { name: \"build\", run: () => true },\n]);\nconsole.log(gate);\n\nconst gate2 = runGate([\n  { name: \"lint\", run: () => false },\n  { name: \"typecheck\", run: () => true },\n  { name: \"coverage\", run: () => 70 >= 80 },\n  { name: \"build\", run: () => true },\n]);\nconsole.log(gate2);\n"
+}

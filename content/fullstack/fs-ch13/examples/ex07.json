@@ -1,0 +1,8 @@
+{
+  "title": "E2E 稳定性：等待条件而非固定 sleep",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "元素出现: true\n超时未出现: false",
+  "code": "// E2E 稳定性：用「轮询等待」替代固定 sleep，减少偶发失败\nasync function waitFor(predicate, { timeoutMs = 1000, intervalMs = 50 } = {}) {\n  const start = Date.now();\n  while (Date.now() - start < timeoutMs) {\n    if (predicate()) return true;\n    await new Promise((r) => setTimeout(r, intervalMs));\n  }\n  return false;\n}\n\n(async () => {\n  let ready = false;\n  setTimeout(() => { ready = true; }, 120); // 模拟异步渲染完成\n  const ok1 = await waitFor(() => ready);\n  console.log(\"元素出现:\", ok1);\n  const ok2 = await waitFor(() => false, { timeoutMs: 100, intervalMs: 20 });\n  console.log(\"超时未出现:\", ok2);\n})();\n"
+}

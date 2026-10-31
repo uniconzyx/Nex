@@ -1,0 +1,8 @@
+{
+  "title": "Worker Pool：缓冲 channel + N 个 worker 并发处理",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "处理结果: t1->2,t2->4,t3->6,t4->8,t5->10",
+  "code": "class Chan {\n  constructor(cap = 0) { this.cap = cap; this.buf = []; this.putQ = []; this.takeQ = []; }\n  put(v) { return new Promise(res => {\n    if (this.takeQ.length) { const t = this.takeQ.shift(); t(v); res(); return; }\n    if (this.buf.length < this.cap) { this.buf.push(v); res(); return; }\n    this.putQ.push({ v, res });\n  }); }\n  take() { return new Promise(res => {\n    if (this.buf.length) { const v = this.buf.shift(); if (this.putQ.length) { const p = this.putQ.shift(); this.buf.push(p.v); p.res(); } res(v); return; }\n    if (this.putQ.length) { const p = this.putQ.shift(); res(p.v); p.res(); return; }\n    this.takeQ.push(res);\n  }); }\n}\nconst tasks = new Chan(3), results = new Chan(3);\nfunction worker() {\n  return (async () => { while (true) { const t = await tasks.take(); if (t === null) break; await results.put({ task: t, val: t * 2 }); } })();\n}\n(async () => {\n  for (let i = 0; i < 3; i++) worker();\n  const inputs = [1, 2, 3, 4, 5];\n  for (const x of inputs) await tasks.put(x);\n  for (let i = 0; i < 3; i++) await tasks.put(null);\n  const out = [];\n  for (let i = 0; i < inputs.length; i++) out.push(await results.take());\n  out.sort((a, b) => a.task - b.task);\n  console.log(\"处理结果:\", out.map(o => `t${o.task}->${o.val}`).join(\",\"));\n})();\n"
+}

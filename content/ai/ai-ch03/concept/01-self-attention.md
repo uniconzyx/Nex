@@ -43,3 +43,97 @@ $$Attention(Q,K,V)=softmax\left(\frac{QK^\top}{\sqrt{d_k}}\right)V$$
 |---|---|---|---|
 | 自注意力 | prefill/decode 差异、KV 显存 | 置换等变→位置编码必然、√d_k 缩放 | 结构组成、QKV 维度 |
 | 多头 | KV Cache 估算、MQA/GQA | 缩放即温度、子空间并行 | 参数量 4d² 与头数无关 |
+
+<!-- injected-code -->
+## 可运行代码：把上面的说法跑一遍
+
+下面两段直接取自本章示例库（`examples/`），期望输出就是判题台里判定的那串字符串，不是事后补写的说明。读完正文后先照着跑一遍，再回去看「三视角解析」里对应的那条。
+
+### 单头自注意力完整数值演算（含因果掩码）
+
+```python
+import numpy as np
+rng = np.random.default_rng(42)
+d = 4
+T = 5
+x = rng.standard_normal((T, d)).astype(np.float64)
+Wq = rng.standard_normal((d, d))
+Wk = rng.standard_normal((d, d))
+Wv = rng.standard_normal((d, d))
+Q = x @ Wq
+K = x @ Wk
+V = x @ Wv
+scores = Q @ K.T / np.sqrt(d)
+mask = np.triu(np.ones((T, T), dtype=bool), k=1)
+masked = np.where(mask, -np.inf, scores)
+def softmax(z):
+    m = np.max(z, axis=-1, keepdims=True)
+    e = np.exp(z - m)
+    return e / e.sum(axis=-1, keepdims=True)
+A = softmax(masked)
+out = A @ V
+print("scores shape:", scores.shape)
+print("causal mask 上三角(未来)数:", int(mask.sum()))
+print("A 每行和(应=1):", np.round(A.sum(axis=1), 6))
+print("A[0] 只看位置0:", np.round(A[0], 6))
+print("A[2] 后两位(应=0):", np.round(A[2, 3:], 6))
+print("out shape:", out.shape)
+print("out[0]:", np.round(out[0], 4))
+```
+
+实际输出：
+
+```text
+scores shape: (5, 5)
+causal mask 上三角(未来)数: 10
+A 每行和(应=1): [1. 1. 1. 1. 1.]
+A[0] 只看位置0: [1. 0. 0. 0. 0.]
+A[2] 后两位(应=0): [0. 0.]
+out shape: (5, 4)
+out[0]: [-0.7518 -1.1572  0.5513 -1.1966]
+```
+
+> 出处：`examples/ex01-single-head-attention.json`。改一处再看输出变没变，比读三遍解释有用。
+
+### 多头注意力拆头/合并维度变换逐项验证
+
+```python
+import numpy as np
+rng = np.random.default_rng(42)
+T, d_model, n_heads = 6, 8, 2
+x = rng.standard_normal((T, d_model))
+Wq = rng.standard_normal((d_model, d_model))
+Q = x @ Wq
+head_dim = d_model // n_heads
+Qh = Q.reshape(T, n_heads, head_dim)
+Qht = Qh.transpose(1, 0, 2)
+print("head_dim:", head_dim)
+print("Q:", Q.shape, "-> Qh:", Qh.shape, "-> Qht:", Qht.shape)
+ok = True
+for h in range(n_heads):
+    for t in range(T):
+        if not np.allclose(Qht[h, t], Q[t, h * head_dim:(h + 1) * head_dim]):
+            ok = False
+print("拆头等价性(逐元素):", ok)
+Oh = rng.standard_normal((n_heads, T, head_dim))
+Oht = Oh.transpose(1, 0, 2).reshape(T, d_model)
+ok2 = True
+for h in range(n_heads):
+    if not np.allclose(Oht[:, h * head_dim:(h + 1) * head_dim], Oh[h]):
+        ok2 = False
+print("合并等价性(逐元素):", ok2)
+print("合并后 shape:", Oht.shape)
+```
+
+实际输出：
+
+```text
+head_dim: 4
+Q: (6, 8) -> Qh: (6, 2, 4) -> Qht: (2, 6, 4)
+拆头等价性(逐元素): True
+合并等价性(逐元素): True
+合并后 shape: (6, 8)
+```
+
+> 出处：`examples/ex02-multi-head-reshape.json`。改一处再看输出变没变，比读三遍解释有用。
+

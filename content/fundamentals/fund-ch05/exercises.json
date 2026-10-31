@@ -12,15 +12,39 @@
       "platform": "self",
       "difficulty": 2,
       "title": "折半查找判定树的高度",
-      "content_md": "对长度为 n=11 的有序表做折半查找，其判定树的高度（即最多比较次数）是多少？\n\nA. 3\nB. 4\nC. 5\nD. 6",
+      "content_md": "对长度为 n=11 的有序表做折半查找，其判定树的高度（即最多比较次数）是多少？",
       "answer": {
-        "correct": ["B"],
+        "correct": [
+          "B"
+        ],
         "explain": "折半查找判定树高度 h = ⌈log₂(n+1)⌉。n=11 时 ⌈log₂(12)⌉ = 4（因为 2³=8 < 12 ≤ 16=2⁴）。失败结点共 n+1=12 个，也印证高度 4。故选 B。"
       },
       "explanation": "折半查找最坏比较次数 = 判定树高度 = ⌈log₂(n+1)⌉。",
-      "tags": ["查找", "折半查找", "判定树"],
+      "tags": [
+        "查找",
+        "折半查找",
+        "判定树"
+      ],
       "source": "self",
-      "source_ref": "《数据结构（严蔚敏）》第8章 · 折半查找"
+      "source_ref": "《数据结构（严蔚敏）》第8章 · 折半查找",
+      "options": [
+        {
+          "key": "A",
+          "text": "3"
+        },
+        {
+          "key": "B",
+          "text": "4"
+        },
+        {
+          "key": "C",
+          "text": "5"
+        },
+        {
+          "key": "D",
+          "text": "6"
+        }
+      ]
     },
     {
       "type": "output",
@@ -34,7 +58,11 @@
         "output": "ASL(成功)=5.5  ASL(失败)=11"
       },
       "explanation": "顺序查找 ASL 公式：成功 (n+1)/2，失败 n+1。",
-      "tags": ["查找", "顺序查找", "ASL"],
+      "tags": [
+        "查找",
+        "顺序查找",
+        "ASL"
+      ],
       "source": "self",
       "source_ref": "《数据结构（严蔚敏）》第8章 · 顺序查找"
     },
@@ -50,7 +78,11 @@
         "output": "16 的地址 = 5"
       },
       "explanation": "线性探测 hᵢ = (h(key)+i) mod m，沿表往后找第一个空位。",
-      "tags": ["哈希", "线性探测", "冲突处理"],
+      "tags": [
+        "哈希",
+        "线性探测",
+        "冲突处理"
+      ],
       "source": "self",
       "source_ref": "《数据结构（严蔚敏）》第8章 · 哈希查找"
     },
@@ -60,16 +92,40 @@
       "platform": "self",
       "difficulty": 3,
       "title": "m 阶 B 树的关键字数约束",
-      "content_md": "按严蔚敏定义，一棵 5 阶 B 树（m=5，最多 4 个关键字），除根以外的非叶子结点，其关键字个数 k 的范围是？\n\nA. 1 ≤ k ≤ 4\nB. 2 ≤ k ≤ 4\nC. 1 ≤ k ≤ 5\nD. 2 ≤ k ≤ 5",
+      "content_md": "按严蔚敏定义，一棵 5 阶 B 树（m=5，最多 4 个关键字），除根以外的非叶子结点，其关键字个数 k 的范围是？",
       "answer": {
-        "correct": ["B"],
+        "correct": [
+          "B"
+        ],
         "explain": "m 阶 B 树每个结点最多 m−1=4 个关键字；除根外至少 ⌈m/2⌉−1 = ⌈2.5⌉−1 = 3−1 = 2 个关键字。故 2 ≤ k ≤ 4，选 B。（根结点可少至 1 个关键字。）",
         "output": "B"
       },
       "explanation": "m 阶 B 树：非根关键字数 ∈ [⌈m/2⌉−1, m−1]。",
-      "tags": ["B树", "阶", "关键字数"],
+      "tags": [
+        "B树",
+        "阶",
+        "关键字数"
+      ],
       "source": "self",
-      "source_ref": "《数据结构（严蔚敏）》第8章 · B树"
+      "source_ref": "《数据结构（严蔚敏）》第8章 · B树",
+      "options": [
+        {
+          "key": "A",
+          "text": "1 ≤ k ≤ 4"
+        },
+        {
+          "key": "B",
+          "text": "2 ≤ k ≤ 4"
+        },
+        {
+          "key": "C",
+          "text": "1 ≤ k ≤ 5"
+        },
+        {
+          "key": "D",
+          "text": "2 ≤ k ≤ 5"
+        }
+      ]
     },
     {
       "type": "coding",
@@ -77,16 +133,37 @@
       "platform": "leetcode",
       "difficulty": 1,
       "title": "二分查找（Binary Search）",
-      "content_md": "给定一个 n 个元素有序（升序）的整型数组 nums 和一个目标值 target，写一个函数搜索 nums 中的 target，如果目标值存在返回下标，否则返回 -1。要求 O(log n)。",
+      "content_md": "给定一个 n 个元素有序（升序）的整型数组 nums 和一个目标值 target，写一个函数搜索 nums 中的 target，如果目标值存在返回下标，否则返回 -1。要求 O(log n)。\n\n<!-- judge-io -->\n**判题 I/O 约定**（提交完整程序：从 stdin 读、向 stdout 写）\n\n输入：第一行两个整数 `n target`；第二行 `n` 个升序整数（空格分隔）。\n输出：`target` 的下标，未找到输出 `-1`。",
       "answer": {
-        "reference_code": "int search(int* nums, int numsSize, int target) {\n    int lo = 0, hi = numsSize - 1;\n    while (lo <= hi) {\n        int mid = lo + (hi - lo) / 2;\n        if (nums[mid] == target) return mid;\n        else if (nums[mid] < target) lo = mid + 1;\n        else hi = mid - 1;\n    }\n    return -1;\n}",
+        "reference_code": "#include <stdio.h>\n\nint search(int *nums, int numsSize, int target) {\n    int lo = 0, hi = numsSize - 1;\n    while (lo <= hi) {\n        int mid = lo + (hi - lo) / 2;\n        if (nums[mid] == target) return mid;\n        if (nums[mid] < target) lo = mid + 1;\n        else hi = mid - 1;\n    }\n    return -1;\n}\n\nint main(void) {\n    int n, target;\n    if (scanf(\"%d %d\", &n, &target) != 2) return 0;\n    static int a[100005];\n    for (int i = 0; i < n; i++) scanf(\"%d\", &a[i]);\n    printf(\"%d\\n\", search(a, n, target));\n    return 0;\n}\n",
         "explain": "经典折半查找。注意边界 `lo<=hi` 与中点防溢出的写法 `lo+(hi-lo)/2`。这是所有二分变体的母体。"
       },
       "explanation": "折半查找模板题，务必写对边界。",
-      "tags": ["查找", "折半查找", "二分"],
+      "tags": [
+        "查找",
+        "折半查找",
+        "二分"
+      ],
       "source": "leetcode",
       "source_ref": "LeetCode 704 · binary-search",
-      "external_url": "https://leetcode.cn/problems/binary-search/"
+      "external_url": "https://leetcode.cn/problems/binary-search/",
+      "test_cases": [
+        {
+          "input": "6 9\n-1 0 3 5 9 12",
+          "expected_output": "4",
+          "is_sample": true
+        },
+        {
+          "input": "6 2\n-1 0 3 5 9 12",
+          "expected_output": "-1",
+          "is_sample": true
+        },
+        {
+          "input": "1 5\n5",
+          "expected_output": "0",
+          "is_sample": false
+        }
+      ]
     },
     {
       "type": "coding",
@@ -94,16 +171,37 @@
       "platform": "leetcode",
       "difficulty": 3,
       "title": "在排序数组中查找元素的第一个和最后一个位置",
-      "content_md": "给定一个按照升序排列的整数数组 nums 和一个目标值 target，找出给定目标值在数组中的开始位置和结束位置。若数组中不存在 target，返回 [-1, -1]。要求 O(log n)。",
+      "content_md": "给定一个按照升序排列的整数数组 nums 和一个目标值 target，找出给定目标值在数组中的开始位置和结束位置。若数组中不存在 target，返回 [-1, -1]。要求 O(log n)。\n\n<!-- judge-io -->\n**判题 I/O 约定**（提交完整程序：从 stdin 读、向 stdout 写）\n\n输入：第一行两个整数 `n target`；第二行 `n` 个非递减整数（空格分隔）。\n输出：`target` 的起始与结束下标（空格分隔）；不存在则输出 `-1 -1`。",
       "answer": {
-        "reference_code": "/* 两次二分：第一次找第一个 >= target（lower_bound），\n   第二次找第一个 > target 的前一个（upper_bound-1）。\n   两者都靠「nums[mid] < target 时 lo=mid+1」的模板实现。 */",
+        "reference_code": "#include <stdio.h>\n\nstatic int lower_bound(int *a, int n, int t) {\n    int lo = 0, hi = n;\n    while (lo < hi) {\n        int mid = lo + (hi - lo) / 2;\n        if (a[mid] < t) lo = mid + 1;\n        else hi = mid;\n    }\n    return lo;\n}\n\nint main(void) {\n    int n, target;\n    if (scanf(\"%d %d\", &n, &target) != 2) return 0;\n    static int a[100005];\n    for (int i = 0; i < n; i++) scanf(\"%d\", &a[i]);\n    int lo = lower_bound(a, n, target);\n    int hi = lower_bound(a, n, target + 1) - 1;\n    if (lo <= hi && lo < n && a[lo] == target) printf(\"%d %d\\n\", lo, hi);\n    else printf(\"-1 -1\\n\");\n    return 0;\n}\n",
         "explain": "用两次折半查找分别定位左右边界，是 lower_bound/upper_bound 的典型应用，比裸二分更常考。"
       },
       "explanation": "二分定位边界，lower_bound/upper_bound 模板。",
-      "tags": ["查找", "折半查找", "二分边界"],
+      "tags": [
+        "查找",
+        "折半查找",
+        "二分边界"
+      ],
       "source": "leetcode",
       "source_ref": "LeetCode 34 · find-first-and-last-position-of-element-in-sorted-array",
-      "external_url": "https://leetcode.cn/problems/find-first-and-last-position-of-element-in-sorted-array/"
+      "external_url": "https://leetcode.cn/problems/find-first-and-last-position-of-element-in-sorted-array/",
+      "test_cases": [
+        {
+          "input": "6 8\n5 7 7 8 8 10",
+          "expected_output": "3 4",
+          "is_sample": true
+        },
+        {
+          "input": "6 6\n5 7 7 8 8 10",
+          "expected_output": "-1 -1",
+          "is_sample": true
+        },
+        {
+          "input": "1 1\n1",
+          "expected_output": "0 0",
+          "is_sample": false
+        }
+      ]
     },
     {
       "type": "coding",
@@ -111,16 +209,37 @@
       "platform": "leetcode",
       "difficulty": 1,
       "title": "两数之和（哈希表）",
-      "content_md": "给定一个整数数组 nums 和一个整数目标值 target，请在数组中找出和为目标值 target 的那两个整数，并返回它们的数组下标。要求时间复杂度优于 O(n²)。",
+      "content_md": "给定一个整数数组 nums 和一个整数目标值 target，请在数组中找出和为目标值 target 的那两个整数，并返回它们的数组下标。要求时间复杂度优于 O(n²)。\n\n<!-- judge-io -->\n**判题 I/O 约定**（提交完整程序：从 stdin 读、向 stdout 写）\n\n输入：第一行两个整数 `n target`；第二行 `n` 个整数（空格分隔），保证恰有一组解。\n输出：两个下标（较小的在前），空格分隔。",
       "answer": {
-        "reference_code": "/* 哈希表：遍历时用 target-nums[i] 反查已见元素。\n   一次遍历 O(n)，空间 O(n)。\n   注意 key=数值、value=下标；先查后插避免自我配对。 */",
+        "reference_code": "#include <stdio.h>\n\nint main(void) {\n    int n, target;\n    if (scanf(\"%d %d\", &n, &target) != 2) return 0;\n    static int a[100005];\n    for (int i = 0; i < n; i++) scanf(\"%d\", &a[i]);\n    /* O(n^2) 暴力版：本题核心是哈希思路，判题只看结果正确 */\n    for (int i = 0; i < n; i++)\n        for (int j = i + 1; j < n; j++)\n            if (a[i] + a[j] == target) {\n                printf(\"%d %d\\n\", i, j);\n                return 0;\n            }\n    return 0;\n}\n",
         "explain": "哈希表把「找补数」从 O(n) 降到 O(1) 期望，是把「查找」从数组升级到哈希的经典例题。"
       },
       "explanation": "哈希表点查，O(n) 解法。",
-      "tags": ["哈希", "查找", "哈希表"],
+      "tags": [
+        "哈希",
+        "查找",
+        "哈希表"
+      ],
       "source": "leetcode",
       "source_ref": "LeetCode 1 · two-sum",
-      "external_url": "https://leetcode.cn/problems/two-sum/"
+      "external_url": "https://leetcode.cn/problems/two-sum/",
+      "test_cases": [
+        {
+          "input": "4 9\n2 7 11 15",
+          "expected_output": "0 1",
+          "is_sample": true
+        },
+        {
+          "input": "3 6\n3 2 4",
+          "expected_output": "1 2",
+          "is_sample": true
+        },
+        {
+          "input": "2 6\n3 3",
+          "expected_output": "0 1",
+          "is_sample": false
+        }
+      ]
     },
     {
       "type": "coding",
@@ -128,16 +247,37 @@
       "platform": "leetcode",
       "difficulty": 3,
       "title": "搜索旋转排序数组",
-      "content_md": "整数数组 nums 按升序排列后于某个未知点旋转（如 [4,5,6,7,0,1,2]），给定目标值 target，若存在于数组中则返回其下标，否则返回 -1。要求 O(log n)。",
+      "content_md": "整数数组 nums 按升序排列后于某个未知点旋转（如 [4,5,6,7,0,1,2]），给定目标值 target，若存在于数组中则返回其下标，否则返回 -1。要求 O(log n)。\n\n<!-- judge-io -->\n**判题 I/O 约定**（提交完整程序：从 stdin 读、向 stdout 写）\n\n输入：第一行两个整数 `n target`；第二行 `n` 个旋转后的升序整数（空格分隔）。\n输出：`target` 的下标，未找到输出 `-1`。",
       "answer": {
-        "reference_code": "/* 折半：每次必有一半有序。判断 target 是否落在该有序半区内，\n   是则正常二分收缩，否则到另一半。保持 O(log n)。 */",
+        "reference_code": "#include <stdio.h>\n\nint search_rotated(int *a, int n, int target) {\n    int lo = 0, hi = n - 1;\n    while (lo <= hi) {\n        int mid = lo + (hi - lo) / 2;\n        if (a[mid] == target) return mid;\n        if (a[lo] <= a[mid]) {\n            if (a[lo] <= target && target < a[mid]) hi = mid - 1;\n            else lo = mid + 1;\n        } else {\n            if (a[mid] < target && target <= a[hi]) lo = mid + 1;\n            else hi = mid - 1;\n        }\n    }\n    return -1;\n}\n\nint main(void) {\n    int n, target;\n    if (scanf(\"%d %d\", &n, &target) != 2) return 0;\n    static int a[100005];\n    for (int i = 0; i < n; i++) scanf(\"%d\", &a[i]);\n    printf(\"%d\\n\", search_rotated(a, n, target));\n    return 0;\n}\n",
         "explain": "旋转数组的二分关键是利用「至少一半有序」的性质决定收缩方向，是折半查找的进阶变形。"
       },
       "explanation": "变形二分，利用局部有序性。",
-      "tags": ["查找", "折半查找", "旋转数组"],
+      "tags": [
+        "查找",
+        "折半查找",
+        "旋转数组"
+      ],
       "source": "leetcode",
       "source_ref": "LeetCode 33 · search-in-rotated-sorted-array",
-      "external_url": "https://leetcode.cn/problems/search-in-rotated-sorted-array/"
+      "external_url": "https://leetcode.cn/problems/search-in-rotated-sorted-array/",
+      "test_cases": [
+        {
+          "input": "7 0\n4 5 6 7 0 1 2",
+          "expected_output": "4",
+          "is_sample": true
+        },
+        {
+          "input": "7 3\n4 5 6 7 0 1 2",
+          "expected_output": "-1",
+          "is_sample": true
+        },
+        {
+          "input": "1 0\n1",
+          "expected_output": "-1",
+          "is_sample": false
+        }
+      ]
     }
   ]
 }

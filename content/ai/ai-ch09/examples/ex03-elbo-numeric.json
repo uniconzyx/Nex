@@ -1,0 +1,8 @@
+{
+  "title": "ELBO 是似然的下界（数值验证）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "重建项 E_q[log p(x|z)] = -1.518853\nKL 项                 = 0.373265\nELBO                  = -1.892118\n真实 log p(x)         = -1.430510\ngap = log p - ELBO    = 0.461608  (应 >= 0)\nELBO <= log p -> True\n",
+  "code": "\nimport numpy as np\n\nx, sx = 1.0, 0.5                 # 数据点与解码器噪声标准差 p(x|z)=N(z, sx^2)\nmu, logvar = 0.8, -0.5           # 编码器输出 q(z|x)=N(mu, sigma^2)\ns = np.exp(0.5 * logvar)\n\n# ELBO = E_q[log p(x|z)] - KL(q||p(z))\n# 高斯期望项可解析： E[(x-z)^2] = (x-mu)^2 + s^2\nrec = -0.5 * np.log(2 * np.pi * sx ** 2) - ((x - mu) ** 2 + s ** 2) / (2 * sx ** 2)\nkl = 0.5 * (mu ** 2 + s ** 2 - 1.0 - logvar)\nelbo = rec - kl\n\n# 真实 log p(x) = log ∫ p(x|z) p(z) dz，用细网格数值积分\nz = np.linspace(-10, 10, 400001)\npz = np.exp(-0.5 * z ** 2) / np.sqrt(2 * np.pi)\npxz = np.exp(-0.5 * ((x - z) / sx) ** 2) / (np.sqrt(2 * np.pi) * sx)\nlogp = np.log(np.trapezoid(pxz * pz, z))\n\nprint(f\"重建项 E_q[log p(x|z)] = {rec:.6f}\")\nprint(f\"KL 项                 = {kl:.6f}\")\nprint(f\"ELBO                  = {elbo:.6f}\")\nprint(f\"真实 log p(x)         = {logp:.6f}\")\nprint(f\"gap = log p - ELBO    = {logp - elbo:.6f}  (应 >= 0)\")\nprint(f\"ELBO <= log p -> {elbo <= logp}\")\n"
+}

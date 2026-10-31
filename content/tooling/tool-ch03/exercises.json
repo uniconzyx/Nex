@@ -13,9 +13,12 @@
       "platform": "self",
       "difficulty": 2,
       "title": "Git 与 SVN 的核心差异",
-      "content_md": "关于 Git 与 SVN 的核心差异，下列说法正确的是？\n\nA. SVN 是分布式版本控制，每个开发者都有完整仓库；Git 是集中式\nB. Git 存储的是文件**快照（snapshot）**并以**内容寻址（SHA-1）**组织对象，SVN 主要存储文件**差异（delta）**\nC. Git 的「分支」只是一个指向 commit 的轻量指针（约 41 字节），SVN 的分支是目录拷贝，开销大\nD. Git 完全不需要任何服务器，因此无法做集中式协作\n\n请选择并说明。",
+      "content_md": "关于 Git 与 SVN 的核心差异，下列说法正确的是？\n\n\n请选择并说明。",
       "answer": {
-        "correct": "B、C",
+        "correct": [
+          "B",
+          "C"
+        ],
         "explain": "**B 正确**：Git 的对象数据库以「类型+长度+内容」算出的 SHA-1 为键（内容寻址），每个提交保存文件快照；SVN 以版本号/路径寻址，主要存差异。\n\n**C 正确**：Git 分支只是 `.git/refs/heads/<name>` 里一个 41 字节的 commit SHA，创建/切换 O(1)；SVN 分支是目录拷贝，开销与文件数成正比。\n\n**A 错误**：正好相反——Git 分布式、SVN 集中式。\n\n**D 错误**：Git 虽可纯本地工作，但协作仍需一个共享远端（bare repo）；「无需中心服务器」是误解。"
       },
       "explanation": "考 Git 与 SVN 的根本区别（分布式/快照/内容寻址/分支指针），是考研与面试高频。",
@@ -26,7 +29,25 @@
         "内容寻址"
       ],
       "source": "self",
-      "source_ref": "《Pro Git》第 1 章 · 起步；tool-ch03 concept/01"
+      "source_ref": "《Pro Git》第 1 章 · 起步；tool-ch03 concept/01",
+      "options": [
+        {
+          "key": "A",
+          "text": "SVN 是分布式版本控制，每个开发者都有完整仓库；Git 是集中式"
+        },
+        {
+          "key": "B",
+          "text": "Git 存储的是文件**快照（snapshot）**并以**内容寻址（SHA-1）**组织对象，SVN 主要存储文件**差异（delta）**"
+        },
+        {
+          "key": "C",
+          "text": "Git 的「分支」只是一个指向 commit 的轻量指针（约 41 字节），SVN 的分支是目录拷贝，开销大"
+        },
+        {
+          "key": "D",
+          "text": "Git 完全不需要任何服务器，因此无法做集中式协作"
+        }
+      ]
     },
     {
       "id": "q2",
@@ -35,9 +56,13 @@
       "platform": "self",
       "difficulty": 2,
       "title": "三区模型与 reset 三模式",
-      "content_md": "关于工作区/暂存区/版本库与 `git reset` 三模式，正确的是？\n\nA. `git commit` 会把「工作区所有改动」提交，无需 `git add`\nB. `git reset --hard HEAD~1` 会把 HEAD、暂存区、工作区全部回退到上一个提交，未提交的改动会丢失\nC. `git reset --soft HEAD~1` 只移动 HEAD，暂存区与工作区保持不变（改动仍 staged）\nD. `git reset --mixed`（默认）会移动 HEAD 并重置暂存区，但保留工作区改动\n\n请选择并说明。",
+      "content_md": "关于工作区/暂存区/版本库与 `git reset` 三模式，正确的是？\n\n\n请选择并说明。",
       "answer": {
-        "correct": "B、C、D",
+        "correct": [
+          "B",
+          "C",
+          "D"
+        ],
         "explain": "**A 错误**：`commit` 只提交**暂存区（index）**，未 `git add` 的改动不会进提交。\n\n**B 正确**：`--hard` 三者全动，工作区未提交改动被直接丢弃（危险）。\n\n**C 正确**：`--soft` 只改 HEAD 引用，index 与工作树不动，改动仍「已暂存」。\n\n**D 正确**：`--mixed`（默认）回退指针并清空暂存区，改动退回工作区（未暂存）。"
       },
       "explanation": "考三区归属与 reset 三模式对三区的影响范围，是本章核心。",
@@ -48,7 +73,25 @@
         "暂存区"
       ],
       "source": "self",
-      "source_ref": "《Pro Git》第 2 章 · 基础；tool-ch03 concept/02、04"
+      "source_ref": "《Pro Git》第 2 章 · 基础；tool-ch03 concept/02、04",
+      "options": [
+        {
+          "key": "A",
+          "text": "`git commit` 会把「工作区所有改动」提交，无需 `git add`"
+        },
+        {
+          "key": "B",
+          "text": "`git reset --hard HEAD~1` 会把 HEAD、暂存区、工作区全部回退到上一个提交，未提交的改动会丢失"
+        },
+        {
+          "key": "C",
+          "text": "`git reset --soft HEAD~1` 只移动 HEAD，暂存区与工作区保持不变（改动仍 staged）"
+        },
+        {
+          "key": "D",
+          "text": "`git reset --mixed`（默认）会移动 HEAD 并重置暂存区，但保留工作区改动"
+        }
+      ]
     },
     {
       "id": "q3",
@@ -79,9 +122,13 @@
       "platform": "self",
       "difficulty": 3,
       "title": "detached HEAD 与救援",
-      "content_md": "关于 detached HEAD，正确的是？\n\nA. `git checkout <commit-sha>` 会进入 detached HEAD，此时 HEAD 直接指向某个 commit 而非分支引用\nB. 在 detached HEAD 状态下提交的 commit 会立即被垃圾回收（GC）删除，无法找回\nC. 离开 detached 状态（切回分支）后，该状态下产生的提交若未被任何分支/标签引用，确实可能「丢失」，但可用 `git reflog` 找回\nD. 救援 detached 提交的正确做法之一是 `git checkout -b rescue <sha>` 为其创建分支\n\n请选择并说明。",
+      "content_md": "关于 detached HEAD，正确的是？\n\n\n请选择并说明。",
       "answer": {
-        "correct": "A、C、D",
+        "correct": [
+          "A",
+          "C",
+          "D"
+        ],
         "explain": "**A 正确**：checkout 一个具体 SHA 时 HEAD 不再以 `ref: refs/heads/...` 形式存在，而是直接存 SHA。\n\n**B 错误**：提交仍在对象库，只是无分支引用；不会「立即」被 GC，且 reflog 默认保留 90 天。\n\n**C 正确**：离开后该游离提交无引用，最终可能 GC；但 `.git/logs/HEAD` 的 reflog 记录了它的 SHA，可据此找回。\n\n**D 正确**：`git checkout -b rescue <sha>`（或 `git branch rescue <sha>`）把游离提交收编成分支，避免丢失。"
       },
       "explanation": "考 detached HEAD 含义、reflog 救援网与收编手法。",
@@ -92,7 +139,25 @@
         "救援"
       ],
       "source": "self",
-      "source_ref": "《Pro Git》第 3 章 · 分支基础；tool-ch03 concept/04"
+      "source_ref": "《Pro Git》第 3 章 · 分支基础；tool-ch03 concept/04",
+      "options": [
+        {
+          "key": "A",
+          "text": "`git checkout <commit-sha>` 会进入 detached HEAD，此时 HEAD 直接指向某个 commit 而非分支引用"
+        },
+        {
+          "key": "B",
+          "text": "在 detached HEAD 状态下提交的 commit 会立即被垃圾回收（GC）删除，无法找回"
+        },
+        {
+          "key": "C",
+          "text": "离开 detached 状态（切回分支）后，该状态下产生的提交若未被任何分支/标签引用，确实可能「丢失」，但可用 `git reflog` 找回"
+        },
+        {
+          "key": "D",
+          "text": "救援 detached 提交的正确做法之一是 `git checkout -b rescue <sha>` 为其创建分支"
+        }
+      ]
     },
     {
       "id": "q5",

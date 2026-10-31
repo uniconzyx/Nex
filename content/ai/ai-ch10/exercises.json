@@ -1,0 +1,247 @@
+{
+  "meta": {
+    "chapter": "ai-ch10",
+    "title": "训练工程与规模化 —— 习题集",
+    "count": 8,
+    "note": "8 题，基础题 4 + 算法题 4（平台题仅存元数据与链接，不复述题面）"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "为什么必须存 fp32 主权重",
+      "content_md": "混合精度训练时，参数更新为什么必须在 fp32 主副本上做，而不能直接更新 fp16 参数？",
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "explain": "fp16 的 ulp 随数值大小变化：参数在 1 附近时 ulp 约 $2^{-10}\\approx10^{-3}$，而典型更新量 $\\eta g$ 可能是 $10^{-5}$ 量级，直接加到 fp16 上会被舍入掉（$\\theta+\\Delta\\theta=\\theta$），训练「在跑但参数不变」。\n\nA 错：与算力无关；C 错：fp16 存得下参数；D 错：梯度裁剪解决的是爆炸，不解决舍入。"
+      },
+      "explanation": "master weights 是混合精度可训练的必要条件，不是可选项。",
+      "tags": [
+        "混合精度",
+        "master weights",
+        "fp16"
+      ],
+      "source": "self",
+      "source_ref": "Micikevicius et al., 2017 · Mixed Precision Training",
+      "options": [
+        {
+          "key": "A",
+          "text": "因为 fp16 计算速度比 fp32 慢"
+        },
+        {
+          "key": "B",
+          "text": "fp16 的精度不足以表示小更新量，直接更新会被舍入掉"
+        },
+        {
+          "key": "C",
+          "text": "因为 fp16 无法存储大于 1 的数"
+        },
+        {
+          "key": "D",
+          "text": "为了配合梯度裁剪的阈值计算"
+        }
+      ]
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "AdamW 与 Adam + L2 的差别",
+      "content_md": "把 weight decay 作为 $\\lambda\\theta$ 加进梯度再交给 Adam（即 Adam + L2），与 AdamW 的解耦衰减相比，主要问题是什么？",
+      "answer": {
+        "correct": [
+          "C"
+        ],
+        "explain": "Adam 用 $\\sqrt{\\hat v}$ 做逐参数缩放，$\\lambda\\theta$ 进入 $v$ 后，等效衰减强度被 $\\sqrt{\\hat v}$ 除掉——**梯度大的参数衰减被削弱、梯度小的被加强**，这不是想要的均匀正则。AdamW 把 $\\eta\\lambda\\theta$ 直接作用在参数上，与梯度尺度无关。\n\nA 错：两者都合法；B 错：不是数值溢出；D 错：AdamW 也更新一阶矩，只是衰减不入梯度。"
+      },
+      "explanation": "解耦衰减 = 把「正则」与「自适应缩放」分开，是 LLM 训练默认 AdamW 的原因。",
+      "tags": [
+        "AdamW",
+        "weight decay",
+        "L2"
+      ],
+      "source": "self",
+      "source_ref": "Loshchilov & Hutter, 2019 · Decoupled Weight Decay Regularization",
+      "options": [
+        {
+          "key": "A",
+          "text": "没有区别，两者在数学上完全等价"
+        },
+        {
+          "key": "B",
+          "text": "$\\lambda\\theta$ 会让梯度上溢成 inf"
+        },
+        {
+          "key": "C",
+          "text": "衰减项被 $\\sqrt{\\hat v}$ 归一化，导致不同参数的衰减强度不一致"
+        },
+        {
+          "key": "D",
+          "text": "Adam + L2 无法更新一阶矩估计"
+        }
+      ]
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "ZeRO 三个阶段各分片什么",
+      "content_md": "ZeRO-1 / ZeRO-2 / ZeRO-3 依次增加了哪部分的分片？",
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "explain": "ZeRO-1 分片**优化器状态**（fp32 master + m + v，共 12 B/参数）；ZeRO-2 再加上**梯度**；ZeRO-3（FSDP 是其工程实现）再加上**参数**。\n\nA 错：数据从来没被分片（那是 DP 的语义）；C 错：激活分片是 activation partitioning，不在 ZeRO 三阶段定义内；D 错：顺序不能反，分片参数必然要求同时分片梯度与优化器状态。"
+      },
+      "explanation": "ZeRO 的分片是「由内到外」：优化器状态 → 梯度 → 参数。",
+      "tags": [
+        "ZeRO",
+        "FSDP",
+        "并行"
+      ],
+      "source": "self",
+      "source_ref": "Rajbhandari et al., 2020 · ZeRO: Memory Optimizations Toward Training Trillion Parameter Models",
+      "options": [
+        {
+          "key": "A",
+          "text": "依次分片：数据 → 模型 → 激活"
+        },
+        {
+          "key": "B",
+          "text": "依次分片：优化器状态 → 梯度 → 参数"
+        },
+        {
+          "key": "C",
+          "text": "依次分片：激活 → 梯度 → 优化器状态"
+        },
+        {
+          "key": "D",
+          "text": "三个阶段分片对象相同，只是通信量不同"
+        }
+      ]
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "Pre-LN 为什么能省掉长 warmup",
+      "content_md": "GPT-2 之后普遍改用 Pre-LN（$x_{l+1}=x_l+F(\\mathrm{LN}(x_l))$）而非原始 Post-LN。最主要的原因是：",
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "explain": "Pre-LN 把归一化放进分支内，残差是**纯恒等路径** $x_l$，梯度可沿 $\\partial x_L/\\partial x_l=\\prod(I+\\partial F)$ 中的全 $I$ 项直通到底层，浅层不会因反复被 LN 缩放而梯度量级失控，因此不需要长 warmup 也能训深。\n\nA 错：预算是常数级变化；C 错：相反，Post-LN 才是「深层好、浅层难」；D 错：位置编码与 LN 位置无关。"
+      },
+      "explanation": "梯度能否直通底层，决定了深网要不要靠 warmup 兜住早期不稳定。",
+      "tags": [
+        "Pre-LN",
+        "Post-LN",
+        "梯度路径"
+      ],
+      "source": "self",
+      "source_ref": "Xiong et al., 2020 · On Layer Normalization in the Transformer Architecture",
+      "options": [
+        {
+          "key": "A",
+          "text": "Pre-LN 的计算量比 Post-LN 少一半"
+        },
+        {
+          "key": "B",
+          "text": "残差是恒等路径，梯度可直通底层，不依赖 warmup 抑制早期不稳定"
+        },
+        {
+          "key": "C",
+          "text": "Pre-LN 让深层梯度更大，因此需要更小的学习率"
+        },
+        {
+          "key": "D",
+          "text": "Pre-LN 改变了位置编码的注入方式"
+        }
+      ]
+    },
+    {
+      "type": "output",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "算 13B 模型的训练显存",
+      "content_md": "用 Adam + 混合精度全参训练 13B 模型，仅模型状态需要多少显存（按 16 B/参数，结果用 GB，$1\\text{GB}=1024^3$ 字节）？单张 80GB 卡能装下吗？",
+      "answer": {
+        "explain": "$16\\times13\\times10^9=2.08\\times10^{11}$ 字节 $=208\\times10^9/1024^3\\approx193.7$ GB。\n\n单张 80GB 装不下（差 2.4 倍），必须分片：ZeRO-2 在 8 卡下每卡 $2+2/8+12/8=3.75$ B/参数 → $3.75\\times13\\text{B}\\approx45.4$ GB，加激活才可运行。\n\n注意这还没算激活（数十 GB），实际至少要 ZeRO-2/3 或 16 卡以上。"
+      },
+      "explanation": "16 B/参数是训练显存口算的基准，13B→193.7GB 是必背量级。",
+      "tags": [
+        "显存",
+        "13B",
+        "训练"
+      ],
+      "source": "self",
+      "source_ref": "ZeRO 论文的 16 B/参数口径"
+    },
+    {
+      "type": "output",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "算 ZeRO-2 每卡显存",
+      "content_md": "7B 模型用 ZeRO-2、8 卡训练，每卡仅模型状态占多少 GB？相对 DDP 的基线节省了几倍？（$1\\text{GB}=1024^3$）",
+      "answer": {
+        "explain": "ZeRO-2：参数 2 + 梯度 $2/8$ + 优化器状态 $12/8$ = $2+0.25+1.5=3.75$ B/参数。\n\n每卡：$3.75\\times7\\times10^9/1024^3\\approx24.4$ GB。基线 16 B/参数 → $16\\times7\\text{B}\\approx104.3$ GB，节省 $16/3.75\\approx4.27$ 倍。\n\n结论：ZeRO-2 让 7B 从「需要 2 张 80G」变成「单张 40G 可跑」，且几乎无额外通信。"
+      },
+      "explanation": "ZeRO-2 是性价比最高的阶段：分片梯度与优化器状态，参数仍全量复制。",
+      "tags": [
+        "ZeRO-2",
+        "显存",
+        "7B"
+      ],
+      "source": "self",
+      "source_ref": "ZeRO 论文的 stage 划分"
+    },
+    {
+      "type": "output",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "算 warmup + cosine 的某一时刻学习率",
+      "content_md": "峰值 lr $=3\\times10^{-4}$，warmup 2000 步，总 20000 步，cosine 衰减到峰值的 10%。求第 11000 步（0-based）的学习率。",
+      "answer": {
+        "explain": "$\\eta_{\\min}=3\\times10^{-5}$，进度 $p=(11000-2000)/(20000-2000)=9000/18000=0.5$。\n\n$\\eta=\\eta_{\\min}+\\frac{1}{2}(\\eta_{\\max}-\\eta_{\\min})(1+\\cos(\\pi\\cdot0.5))$\n$=3\\times10^{-5}+\\frac{1}{2}(2.7\\times10^{-4})(1+0)=3\\times10^{-5}+1.35\\times10^{-4}=1.65\\times10^{-4}$。\n\n巧记：cosine 段正中间（$p=0.5$）的学习率恰为 $\\eta_{\\min}$ 与 $\\eta_{\\max}$ 的算术平均。"
+      },
+      "explanation": "cosine 段的中点值 = (max+min)/2，是最常被考的一个点。",
+      "tags": [
+        "学习率",
+        "cosine",
+        "warmup"
+      ],
+      "source": "self",
+      "source_ref": "cosine decay 标准公式"
+    },
+    {
+      "type": "fix_error",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "梯度累积后训练发散的修复",
+      "content_md": "下面这段梯度累积实现，把 micro-batch 从 1 增加到 4 之后训练立刻发散（loss 飙升）。指出问题并给出修正：\n\n```python\nfor i, batch in enumerate(loader):\n    loss = model(batch)\n    loss.backward()                    # 没有除累积步数\n    if (i + 1) % 4 == 0:\n        optimizer.step()\n        optimizer.zero_grad()\n```",
+      "answer": {
+        "reference_code": "import torch\n\naccum = 4\nfor i, batch in enumerate(loader):\n    loss = model(batch)\n    (loss / accum).backward()           # 关键：除以累积步数\n    if (i + 1) % accum == 0:\n        torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)\n        optimizer.step()\n        optimizer.zero_grad()\n\n# 若用 AMP，scaler 要同步：\n# scaler.scale(loss / accum).backward()\n# scaler.unscale_(optimizer); clip_grad_norm_(...); scaler.step(optimizer); scaler.update()",
+        "explain": "`loss.backward()` 在 4 个 micro-batch 上把梯度**累加**了 4 份，等效学习率变成 4 倍 → 发散。\n\n修正三条：① `loss = loss / accum` 再 backward（或 backward 后手动 `p.grad /= accum`）；② `optimizer.step()` 与 `zero_grad()` 严格每 accum 次一次；③ 用 AMP 时 scaler 的 step/update 也要同频，否则 loss scale 的统计会错。"
+      },
+      "explanation": "「除以累积步数」是梯度累积唯一容易漏的一行，漏了就等于偷偷把 lr 乘 K。",
+      "tags": [
+        "梯度累积",
+        "学习率",
+        "AMP"
+      ],
+      "source": "self",
+      "source_ref": "梯度累积的等价性条件"
+    }
+  ]
+}

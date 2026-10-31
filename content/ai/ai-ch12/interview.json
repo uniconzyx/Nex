@@ -1,0 +1,73 @@
+{
+  "meta": {
+    "chapter": "ai-ch12",
+    "note": "5 个高频问题。"
+  },
+  "items": [
+    {
+      "question": "SFT 数据工程里，任务 schema 解决了什么问题？没有它会怎样？",
+      "answer_md": "schema 把模糊的业务意图形式化为「system（角色/边界）+ user 模板（输入骨架）+ rubric（质量判据）」的契约。没有它，标注员各凭理解，同一意图出现十几种风格，模型学到的是风格噪声的加权平均而非能力。schema 还让数据可程序化批量合成、可溯源、可质检。",
+      "follow_ups": [
+        "system 模板为什么应该低频变化、与样本无关？",
+        "多轮对话的 messages 为什么必须保留完整 assistant 历史？",
+        "rubric 维度怎么设计才能控制标注员间分歧？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用"
+      ]
+    },
+    {
+      "question": "海量合成数据你怎么去重？全文哈希为什么不够？",
+      "answer_md": "三段式：先规则粗筛（长度/重复率/格式合法性），再语义去重，最后污染检测+留验隔离。全文哈希只在整串相等时判重，对「同模板换数字/换说法」的近重复完全无效。改用 3-gram Jaccard>=0.5 或 SimHash Hamming<=3 做指纹比较。SimHash 64 位指纹配 LSH 可在亿级数据上高效近重复。",
+      "follow_ups": [
+        "SimHash 的位向量是怎么累加出来的？为什么不能用 Python 内置 hash？",
+        "n-gram Jaccard 和 SimHash 分别适合什么规模？",
+        "去重会不会把长尾难样本也删掉？怎么权衡？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用"
+      ]
+    },
+    {
+      "question": "训练集污染是什么，为什么随机抽测试集会失效？",
+      "answer_md": "污染指评测样本或其近重复混进训练集，使 benchmark 虚高。随机抽测试集会失败，因为合成数据的近重复（同模板变体）早已遍布训练池，抽出来的「测试集」与训练高度重叠。正确做法是先冻结评测集，清洗只在训练候选池做，任何与评测重叠率超阈值的候选丢弃。",
+      "follow_ups": [
+        "污染检测用整句相等还是 token 级重叠？为什么？",
+        "n-gram 子串包含比 Jaccard 更严在哪？",
+        "动态/私有测试集为什么能进一步防刷？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用"
+      ]
+    },
+    {
+      "question": "两个标注员一致率 85%，你能说标注质量高吗？Kappa 怎么修正？",
+      "answer_md": "不能。若任务 90% 是类别 0，两人都瞎标 0 也能有 90% 一致。Cohen's Kappa 扣掉「独立随机按边缘频率标注」的期望一致率 pe：kappa=(po-pe)/(1-pe)。kappa>=0.8 优秀，0.6–0.8 可接受，<0.6 必须重写规范。多标注员时用 Fleiss' Kappa。",
+      "follow_ups": [
+        "pe 是怎么算出来的？它代表什么？",
+        "类别极不平衡时 Kappa 会失真吗？怎么办？",
+        "加权 Kappa 在什么场景用？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用"
+      ]
+    },
+    {
+      "question": "hard negative mining 是什么？有什么风险？怎么和一致性闭环？",
+      "answer_md": "在对比/检索任务里，hard negative 是离锚点最近的异类样本，逼模型学更细边界。风险是最近异类里可能混进「本应是正样本」的标注错误，毒化对齐目标。折中是 semi-hard negative（中等难度）。它与一致性是同一枚硬币：难例往往正是一致性最低处，把难例挑出来统一标准重标，既补质量又抬 Kappa，形成「挖难例→查分歧→修规范→重标」的迭代闭环。",
+      "follow_ups": [
+        "semi-hard negative 和 hard negative 的优化差异？",
+        "难例挖掘怎么用于数据巡检挖标注 bug？",
+        "数据迭代为什么是循环而不是一次性？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "title": "fp16 的上溢/下溢与 loss scaling",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "fp16 最大有限值 = 65504.0\nfp16 最小正规数 = 6.104e-05\nfp16 最小可表示（含 denormal） = 5.960e-08\n60000 + 10000 (fp16) = inf   -> 上溢为 inf\n1e-8 存成 fp16 = 0.0        -> 下溢为 0（梯度消失的隐形原因）\nloss scale S=2^14=16384: 1e-8*S = 1.638e-04 -> fp16 = 0.00016379356384277344  (可表示)\n还原：0.00016379356384277344 / S = 9.997e-09\n\nbf16 的指数位与 fp32 相同，最大有限值 = 3.403e+38（Python 无原生 bf16，用 fp32 范围代表）\n结论：fp16 必须做 loss scaling 且需 fp32 主权重；bf16 范围够大，无需缩放\n",
+  "code": "\nimport numpy as np\nnp.seterr(over=\"ignore\", under=\"ignore\")\n\nprint(f\"fp16 最大有限值 = {np.finfo(np.float16).max}\")\nprint(f\"fp16 最小正规数 = {np.finfo(np.float16).tiny:.3e}\")\nprint(f\"fp16 最小可表示（含 denormal） = {np.nextafter(np.float16(0), np.float16(1)):.3e}\")\n\nbig = np.float16(60000) + np.float16(10000)\nprint(f\"60000 + 10000 (fp16) = {big}   -> 上溢为 inf\")\ntiny = np.float16(1e-8)\nprint(f\"1e-8 存成 fp16 = {tiny}        -> 下溢为 0（梯度消失的隐形原因）\")\n\nS = 1 << 14\nscaled = np.float16(1e-8 * S)\nprint(f\"loss scale S=2^14={S}: 1e-8*S = {1e-8*S:.3e} -> fp16 = {scaled}  (可表示)\")\nprint(f\"还原：{scaled} / S = {float(scaled)/S:.3e}\")\nprint()\nprint(f\"bf16 的指数位与 fp32 相同，最大有限值 = {np.finfo(np.float32).max:.3e}（Python 无原生 bf16，用 fp32 范围代表）\")\nprint(\"结论：fp16 必须做 loss scaling 且需 fp32 主权重；bf16 范围够大，无需缩放\")\n"
+}

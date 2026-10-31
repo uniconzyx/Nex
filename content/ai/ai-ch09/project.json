@@ -1,0 +1,65 @@
+{
+  "meta": {
+    "chapter": "ai-ch09",
+    "title": "生成模型 —— 综合项目",
+    "category": "dl",
+    "count": 1
+  },
+  "items": [
+    {
+      "title": "从零实现 VAE 与 DDPM，并做定量对比（NumPy only）",
+      "requirement_md": "只用 NumPy（**不允许** PyTorch/TensorFlow）在一个 2 维玩具数据集（如双月/双峰）上完成两代生成模型的实现与对比，所有指标必须被打印且可复现（固定种子）。\n\n1. **VAE**：编码器/解码器各一层 MLP，输出 `mu` 与 `logvar`；手写重参数化与高斯 KL 闭式解；训练后打印 ELBO 曲线（前 10 个 epoch 的均值）、KL 项与重建项的量级。\n2. **扩散（DDPM）**：$T=200$，cosine 调度；噪声预测器用两层 MLP（时间步用正弦编码注入）；训练目标是 $\\|\\varepsilon-\\varepsilon_\\theta\\|^2$；采样用 DDPM 与 DDIM（$\\eta=0$，20 步）各跑一次。\n3. **定量对比**：对两种模型各生成 5000 个样本，计算 ① 均值/协方差与真实分布的 Fréchet 距离；② 网格覆盖率（把平面划成 20×20 格，统计被生成样本覆盖的格子比例）；③ 生成 5000 个样本的耗时。\n4. **消融**：DDPM 分别用 linear 与 cosine 调度训练，比较最终 Fréchet 距离与覆盖率的差异；VAE 用 $\\beta\\in\\{0.1,1,4\\}$ 各训一次，画出「重建误差 vs KL」的取舍。\n5. **报告**：用一张表给出 5 个配置的（Fréchet↓、覆盖率↑、采样耗时↓），并解释排名背后的原因（KL 项的作用、调度对 SNR 分布的影响、DDIM 跳步的代价）。",
+      "tasks": [
+        {
+          "title": "实现 VAE 并跑通训练",
+          "verification": {
+            "type": "output",
+            "desc": "打印 ELBO、重建项、KL 项三个数；KL 项不应在训练早期就贴 0（否则即后验坍塌，需调整 β 或网络容量）；重参数化的梯度检查：对 mu 做数值梯度与解析梯度对比，相对误差 < 1e-4。"
+          }
+        },
+        {
+          "title": "实现 DDPM 前向与训练",
+          "verification": {
+            "type": "output",
+            "desc": "打印 x_t 的均值/方差并与 sqrt(abar)*x0、1-abar 对账（误差 < 1e-6）；训练 loss 应在前 1000 步内下降一个数量级以上。"
+          }
+        },
+        {
+          "title": "DDPM 与 DDIM 采样",
+          "verification": {
+            "type": "output",
+            "desc": "DDPM 200 步与 DDIM 20 步各生成 5000 样本，打印两者的 Fréchet 距离与耗时；DDIM 耗时应约为 DDPM 的 1/10，Fréchet 差距不应超过 2 倍。"
+          }
+        },
+        {
+          "title": "调度消融",
+          "verification": {
+            "type": "output",
+            "desc": "linear 与 cosine 各训一次，打印两者的 abar 曲线关键点（t/T=0.25/0.5/0.75）与最终 Fréchet；给出「cosine 不差于 linear」的结论或反例。"
+          }
+        },
+        {
+          "title": "β 的率失真取舍",
+          "verification": {
+            "type": "output",
+            "desc": "β∈{0.1,1,4} 三组各打印重建误差与 KL；应观察到 β↑ → KL↓、重建误差↑ 的单调趋势（允许小幅波动）。"
+          }
+        },
+        {
+          "title": "覆盖率与耗时对比表",
+          "verification": {
+            "type": "output",
+            "desc": "输出 5 个配置的表（Fréchet、覆盖率、采样耗时），并给出 200 字以内的归因解释；覆盖率用 20×20 网格统计，数值在 [0,1] 内。"
+          }
+        }
+      ],
+      "tags": [
+        "VAE",
+        "DDPM",
+        "DDIM",
+        "NumPy",
+        "定量对比"
+      ]
+    }
+  ]
+}

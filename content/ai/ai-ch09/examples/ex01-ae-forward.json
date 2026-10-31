@@ -1,0 +1,8 @@
+{
+  "title": "自编码器前向与参数量",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "输入形状 (5, 8) -> 隐表示 (5, 3) -> 重建 (5, 8)\n压缩比 d/D = 3/8 = 0.375\n参数量 = 59  (W1 24 + W2 24)\n随机初始化下重建 MSE = 1.0673（未训练，只验证形状与参数量口径）\n",
+  "code": "\nimport numpy as np\nrng = np.random.default_rng(0)\nD, d = 8, 3                     # 输入 8 维，瓶颈 3 维\nW1 = rng.normal(0, 0.3, (D, d)); b1 = np.zeros(d)\nW2 = rng.normal(0, 0.3, (d, D)); b2 = np.zeros(D)\nX = rng.normal(size=(5, D))\nZ = np.tanh(X @ W1 + b1)        # 编码\nXhat = Z @ W2 + b2              # 解码\nmse = ((X - Xhat) ** 2).mean()\nprint(f\"输入形状 {X.shape} -> 隐表示 {Z.shape} -> 重建 {Xhat.shape}\")\nprint(f\"压缩比 d/D = {d}/{D} = {d/D:.3f}\")\nprint(f\"参数量 = {W1.size + b1.size + W2.size + b2.size}  (W1 {W1.size} + W2 {W2.size})\")\nprint(f\"随机初始化下重建 MSE = {mse:.4f}（未训练，只验证形状与参数量口径）\")\n"
+}

@@ -1,0 +1,86 @@
+{
+  "meta": {
+    "chapter": "fs-ch11",
+    "note": "6 个高频问题。"
+  },
+  "items": [
+    {
+      "question": "Spring Boot 项目为什么要分层？依赖方向应该是什么样的？",
+      "answer_md": "分层是为了隔离变化、便于测试与替换：controller 只处理 HTTP 语义（收参、调 service、包响应），service 承载业务规则与事务边界，repository 只管持久化。依赖方向必须单向向下：controller -> service -> repository，反向和跨层调用都禁止。这样每层可独立测试（用 mock 替换下一层），改动也被限制在一定范围内。破坏分层（如 controller 直接写 SQL）会让事务、缓存、异常收口全部失控。",
+      "follow_ups": [
+        "如果业务很简单，还要不要严格分层？",
+        "Service 之间互相调用要注意什么？怎么避免循环依赖？",
+        "为什么事务要放在 Service 而不是 Controller？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用"
+      ]
+    },
+    {
+      "question": "@ControllerAdvice 是怎么把异常收口的？为什么不要返堆栈？",
+      "answer_md": "它是一个集中式的 AOP 拦截器：用 @ExceptionHandler(异常类型) 标注方法，Spring 在 controller 抛出异常后、返回响应前，按「最具体优先」匹配对应的处理方法，把异常转成统一结构的响应。这样业务代码只管抛自定义异常、不用写 try/catch。绝不返堆栈的原因是：堆栈含类名、行号、SQL、依赖版本，等于给攻击者指纹信息，且对用户毫无意义；系统异常应该 log.error 落服务端日志、前端只收到中性提示（如『系统繁忙』）。",
+      "follow_ups": [
+        "@ControllerAdvice 和 @ExceptionHandler 的匹配顺序是怎样的？",
+        "如果想按业务域返回不同结构怎么办？",
+        "开发环境为了调试返了堆栈，上线前怎么关？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用"
+      ]
+    },
+    {
+      "question": "业务异常和系统异常该怎么区分处理？",
+      "answer_md": "业务异常（如余额不足、用户不存在）是可预期的、用户能理解的错误，应该携带业务错误码和友好提示，可以安全展示，属于产品体验一部分；系统异常（NPE、DB 断连、第三方超时）是不可预期的故障，用户看不懂，前端只收到一句『系统繁忙』，真实堆栈写进服务端日志供研发排查。分流的意义是：业务异常要可枚举、可文档化，系统异常要可观测、可告警。把两者混在一起返 e.getMessage() 既坑用户又坑安全。",
+      "follow_ups": [
+        "错误码和 HTTP 状态码为什么要解耦？",
+        "业务异常该继承 checked 还是 RuntimeException？为什么？",
+        "怎样设计一套可扩展的错误码体系（按域分段等）？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用"
+      ]
+    },
+    {
+      "question": "入参校验应该放在哪一层？Jakarta Validation 怎么用？",
+      "answer_md": "格式类约束（必填、长度、正则、范围）是边界问题，用 Jakarta Validation 声明式地写在入站 DTO 上（@NotNull/@Size/@Pattern 等），controller 参数加 @Validated 触发，框架在进方法体前自动校验、不通过抛异常由 advice 收口成统一错误。业务规则（余额够不够、状态能否转换）依赖领域知识与当前数据，注解表达不了，写在 service 里抛 BizException。一句话：格式校验在边界（声明式），业务校验在领域（命令式），规则不重复。",
+      "follow_ups": [
+        "@Valid 和 @Validated 有什么区别？",
+        "分组校验怎么解决「同一个 DTO 新增不填 id、更新必填 id」？",
+        "自定义约束怎么写？校验器里能查数据库吗，有什么坑？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用"
+      ]
+    },
+    {
+      "question": "DTO / VO / Entity 为什么要分开？直接序列化 Entity 有什么问题？",
+      "answer_md": "三者形状不同：Entity 对应表结构（含密码、salt 等内部字段与关联关系），DTO 接前端入参（带校验注解），VO 是出站的视图对象（只含前端该看的）。直接序列化 Entity 会把敏感字段泄露给前端，还可能因延迟加载（LazyInitializationException）或循环引用在序列化时炸。分开后数据库改表、前端改字段互不影响，转换集中在 mapper/converter 一层。",
+      "follow_ups": [
+        "转换逻辑写在哪？手写 setter 还是用 MapStruct？",
+        "出站 VO 还有哪些字段绝对不能给前端？",
+        "@JsonIgnore 和 DTO/VO 分层是重复防护吗？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用"
+      ]
+    },
+    {
+      "question": "如果让你从零搭一个 Spring Boot 工程的骨架，你会定哪些规矩？",
+      "answer_md": "我会定四条硬规矩：① 分层单向依赖，controller 只注入 service、service 注入 repository，事务在 service；② 全局 @RestControllerAdvice 统一异常，业务码+提示 vs 系统繁忙+日志，响应体绝不带堆栈；③ 入站 DTO 用 Jakarta 注解声明式校验、按场景用分组，业务规则在 service 抛 BizException；④ 所有跨层数据走 DTO/VO，Entity 不越界、敏感字段不序列化。再加一条：错误码用枚举集中管理、前后端共享契约。这四条能把『意大利面』风险压到最低。",
+      "follow_ups": [
+        "这些规矩里哪条最容易在赶进度时被破？怎么防？",
+        "DDD 的富领域模型和这里的贫血实体怎么取舍？",
+        "如果团队很小、接口很少，这些规矩是不是过度设计？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用"
+      ]
+    }
+  ]
+}

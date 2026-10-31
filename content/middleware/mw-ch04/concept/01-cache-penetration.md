@@ -1,4 +1,20 @@
 # 一、缓存穿透：查不到的数据把压力打到数据库
+> 缓存三大经典问题本质是「查不到时往哪去、什么时候失效」：穿透是查不存在的 key 直击库，击穿是热点 key 突失效瞬间被打穿，雪崩是大量 key 同时过期把库冲垮。解法分别是空值/布隆、单飞/逻辑过期、错峰 TTL。
+
+```text
+① 缓存穿透：查 db 也没有的 key → 每次都打到库
+   解：缓存空值(null,短时TTL) + 布隆过滤器挡非法 key
+
+② 缓存击穿：某个热点 key 突然过期 → 瞬间大量请求穿透过载
+   解：互斥单飞(只放1个去查库) + 逻辑过期(异步重建不阻塞)
+
+③ 缓存雪崩：大量 key 同一时刻过期 / Redis 宕机 → 库被冲垮
+   解：TTL 加随机抖动错峰 + 多级缓存 + 高可用(集群)
+
+读路径： 请求 → Cache 命中? 返回 : 查 DB → 写回 Cache → 返回
+写路径： 更新 DB → 删 Cache(或双删) → 防脏读
+```
+
 
 本文件覆盖两个核心主题：**① 布隆过滤器（bit 数组 + 多哈希 + 误判率）** 与 **② 空值缓存兜底**。二者是缓存穿透（查询根本不存在的 key，缓存与 DB 都没有，请求每次穿透到 DB）的两条主流防线。
 
@@ -44,3 +60,166 @@
 - **标准问法**：「缓存穿透除了布隆过滤器还有什么办法？」答：空值缓存（null caching）——查 DB 为空也写缓存并设短 TTL；以及接口层校验 / 限流。
 - **常考对比**：布隆过滤器 vs 空值缓存——前者不存原值、空间极小、有假阳性、不能删；后者存空结果、有空间成本、有「写后短期不可见」窗口、需短 TTL 防污染。
 - **易错口径**：空值缓存若 TTL 过长会「缓存了不存在」，导致刚写入的合法数据短期读不到；别把空值 TTL 设得和正常数据一样长。
+
+<!-- injected-code -->
+## 可运行代码：把上面的说法跑一遍
+
+下面两段直接取自本章示例库（`examples/`），期望输出就是判题台里判定的那串字符串，不是事后补写的说明。读完正文后先照着跑一遍，再回去看「三视角解析」里对应的那条。
+
+### 布隆过滤器：bit 数组与多哈希的基本判定
+
+```python
+import zlib
+
+class BloomFilter:
+    """m 个 bit、k 个哈希的布隆过滤器。"""
+    def __init__(self, m_bits, k):
+        self.m = m_bits
+        self.k = k
+        self.bits = bytearray((m_bits + 7) // 8)
+
+    def _positions(self, key):
+        b = key.encode("utf-8") if isinstance(key, str) else bytes(key)
+        pos = []
+        for i in range(self.k):
+            # 用 crc32 派生 k 个确定性哈希（内置 hash() 受 PYTHONHASHSEED 影响，不可复现）
+            h = zlib.crc32(b + bytes([i]))
+            pos.append(h % self.m)
+        return pos
+
+    def add(self, key):
+        for p in self._positions(key):
+            self.bits[p // 8] |= (1 << (p % 8))
+
+    def contains(self, key):
+        return all(self.bits[p // 8] & (1 << (p % 8)) for p in self._positions(key))
+
+    def bits_set(self):
+        return sum(bin(byte).count("1") for byte in self.bits)
+
+
+bf = BloomFilter(m_bits=512, k=3)
+data = ["user:1", "user:2", "user:3", "user:4", "user:5"]
+for d in data:
+    bf.add(d)
+
+print("参数: m=%d bits, k=%d" % (bf.m, bf.k))
+print("插入元素数: %d" % len(data))
+print("被置位的 bit 数: %d / %d" % (bf.bits_set(), bf.m))
+
+print("--- 已插入元素的查询（必须全部为 True，布隆无假阴性）---")
+for d in data:
+    print("contains(%s) = %s" % (d, bf.contains(d)))
+
+print("--- 未插入元素的查询（False=一定不存在；True=假阳性）---")
+for d in ["user:100", "user:200", "user:300", "user:400", "user:500"]:
+    print("contains(%s) = %s" % (d, bf.contains(d)))
+
+probes = ["user:%d" % i for i in range(1000, 1100)]
+fp = sum(1 for d in probes if bf.contains(d))
+print("用 100 个未插入元素测误判: 误判 %d 次" % fp)
+print("结论: 判定 False 一定不存在（无假阴性），判定 True 只是可能存在（有假阳性）")
+```
+
+实际输出：
+
+```text
+参数: m=512 bits, k=3
+插入元素数: 5
+被置位的 bit 数: 15 / 512
+--- 已插入元素的查询（必须全部为 True，布隆无假阴性）---
+contains(user:1) = True
+contains(user:2) = True
+contains(user:3) = True
+contains(user:4) = True
+contains(user:5) = True
+--- 未插入元素的查询（False=一定不存在；True=假阳性）---
+contains(user:100) = False
+contains(user:200) = False
+contains(user:300) = False
+contains(user:400) = False
+contains(user:500) = False
+用 100 个未插入元素测误判: 误判 5 次
+结论: 判定 False 一定不存在（无假阴性），判定 True 只是可能存在（有假阳性）
+```
+
+> 出处：`examples/ex01-bloom-basic.json`。改一处再看输出变没变，比读三遍解释有用。
+
+### 布隆过滤器误判率：理论公式与实测对比
+
+```python
+import math, zlib
+
+class BloomFilter:
+    def __init__(self, m_bits, k):
+        self.m = m_bits
+        self.k = k
+        self.bits = bytearray((m_bits + 7) // 8)
+
+    def _positions(self, key):
+        b = key.encode("utf-8")
+        return [zlib.crc32(b + bytes([i])) % self.m for i in range(self.k)]
+
+    def add(self, key):
+        for p in self._positions(key):
+            self.bits[p // 8] |= (1 << (p % 8))
+
+    def contains(self, key):
+        return all(self.bits[p // 8] & (1 << (p % 8)) for p in self._positions(key))
+
+
+def theory_fpr(m, n, k):
+    return (1.0 - math.exp(-k * n / m)) ** k
+
+
+def k_opt(m, n):
+    return max(1, int(round((m / n) * math.log(2))))
+
+
+n = 1000
+for m in [5000, 10000, 20000]:
+    k = k_opt(m, n)
+    bf = BloomFilter(m, k)
+    inserted = ["key-%d" % i for i in range(n)]
+    for x in inserted:
+        bf.add(x)
+    probes = ["probe-%d" % i for i in range(2000)]
+    fp = sum(1 for x in probes if bf.contains(x))
+    rate = fp / len(probes)
+    print("m=%6d bits, n=%d, k_opt=%d -> 理论 %.4f, 实测 %.4f (%d/%d)"
+          % (m, n, k, theory_fpr(m, n, k), rate, fp, len(probes)))
+
+print("--- 固定 m/n=10 时，k 对误判率的影响（k 不是越大越好）---")
+m = 10000
+bf0 = BloomFilter(m, 3)
+for i in range(n):
+    bf0.add("key-%d" % i)
+for k in range(1, 9):
+    bf = BloomFilter(m, k)
+    for i in range(n):
+        bf.add("key-%d" % i)
+    fp = sum(1 for x in ["probe-%d" % i for i in range(2000)] if bf.contains(x))
+    print("k=%d -> 理论 %.4f, 实测 %.4f" % (k, theory_fpr(m, n, k), fp / 2000))
+print("最优 k = (m/n)*ln2 = %d" % k_opt(m, n))
+```
+
+实际输出：
+
+```text
+m=  5000 bits, n=1000, k_opt=3 -> 理论 0.0918, 实测 0.1020 (204/2000)
+m= 10000 bits, n=1000, k_opt=7 -> 理论 0.0082, 实测 0.0110 (22/2000)
+m= 20000 bits, n=1000, k_opt=14 -> 理论 0.0001, 实测 0.0000 (0/2000)
+--- 固定 m/n=10 时，k 对误判率的影响（k 不是越大越好）---
+k=1 -> 理论 0.0952, 实测 0.0840
+k=2 -> 理论 0.0329, 实测 0.0300
+k=3 -> 理论 0.0174, 实测 0.0235
+k=4 -> 理论 0.0118, 实测 0.0125
+k=5 -> 理论 0.0094, 实测 0.0135
+k=6 -> 理论 0.0084, 实测 0.0125
+k=7 -> 理论 0.0082, 实测 0.0110
+k=8 -> 理论 0.0085, 实测 0.0105
+最优 k = (m/n)*ln2 = 7
+```
+
+> 出处：`examples/ex02-bloom-false-positive-rate.json`。改一处再看输出变没变，比读三遍解释有用。
+

@@ -1,0 +1,8 @@
+{
+  "title": "分层调用：controller -> service -> repository 正常返回",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "{\"code\":0,\"data\":[{\"id\":1,\"label\":\"任务A\"}]}",
+  "code": "class BizException extends Error {\n  constructor(code, message){ super(message); this.code = code; this.biz = true; }\n}\n\nfunction repository() {\n  const db = [{ id: 1, name: \"任务A\" }];\n  return { findAll: () => db };\n}\nfunction service(repo) {\n  return { list: () => repo.findAll().map(t => ({ id: t.id, label: t.name })) };\n}\nfunction controller(svc) {\n  return { get: () => ({ code: 0, data: svc.list() }) };\n}\nconst repo = repository();\nconst svc = service(repo);\nconst ctrl = controller(svc);\nconsole.log(JSON.stringify(ctrl.get()));\n"
+}

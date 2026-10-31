@@ -1,0 +1,8 @@
+{
+  "title": "泛型擦除：同一个函数适配所有类型",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "10\nundefined\na",
+  "code": "function first(arr) { return arr[0]; }\n\nconsole.log(first([10, 20]));\nconsole.log(first([]));\nconsole.log(String(first([\"a\"])));\n"
+}

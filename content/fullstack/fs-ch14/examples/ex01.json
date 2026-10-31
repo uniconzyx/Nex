@@ -1,0 +1,8 @@
+{
+  "title": "流式透传：后端逐块产生、网关逐块转发、客户端拼接",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "转发块数: 4\n客户端拼接: 思考中…检索知识库生成：你好，我是助手",
+  "code": "async function* backend() {\n  for (const t of [\"思考中…\", \"检索知识库\", \"生成：你好\", \"，我是助手\"]) {\n    await new Promise(r => setTimeout(r, 5));\n    yield `data: ${t}\\n\\n`;\n  }\n}\nasync function gateway(src, sink) {\n  for await (const c of src) sink.push(c); // 收到一块立刻转发一块\n}\n(async () => {\n  const out = [];\n  await gateway(backend(), out);\n  const events = out.join(\"\").split(\"\\n\\n\").filter(Boolean).map(e => e.replace(/^data: /, \"\"));\n  console.log(\"转发块数:\", out.length);\n  console.log(\"客户端拼接:\", events.join(\"\"));\n})();\n"
+}

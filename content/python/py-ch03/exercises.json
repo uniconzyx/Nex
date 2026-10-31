@@ -148,9 +148,9 @@
       "type": "coding",
       "difficulty": "easy",
       "title": "用 dict 计数判断字母异位词（valid-anagram）",
-      "content_md": "完成 LeetCode 242（valid-anagram）：定义 `def is_anagram(s, t)` 判断两个字符串是否互为字母异位词。要求：\n\n1. 用 `dict` 或 `collections.Counter` 做字符计数；\n2. 说明为何比「排序后比较」复杂度更优（O(n) vs O(n log n)）；\n3. 扩展到 Unicode 场景说明差异。\n\n题面与示例以链接为准（不在本文件复述题干）。",
+      "content_md": "完成 LeetCode 242（valid-anagram）：定义 `def is_anagram(s, t)` 判断两个字符串是否互为字母异位词。要求：\n\n1. 用 `dict` 或 `collections.Counter` 做字符计数；\n2. 说明为何比「排序后比较」复杂度更优（O(n) vs O(n log n)）；\n3. 扩展到 Unicode 场景说明差异。\n\n题面与示例以链接为准（不在本文件复述题干）。\n\n<!-- judge-io -->\n**判题 I/O 约定**（提交完整程序：从 stdin 读、向 stdout 写）\n\n输入：两行，分别为字符串 `s` 与 `t`（只含小写字母，不含空格）。\n输出：`True` 或 `False`。",
       "answer": {
-        "reference_code": "from collections import Counter\n\ndef is_anagram(s, t):\n    if len(s) != len(t):\n        return False\n    return Counter(s) == Counter(t)\n\n# 手写 dict 版本\ndef is_anagram2(s, t):\n    if len(s) != len(t):\n        return False\n    cnt = {}\n    for ch in s:\n        cnt[ch] = cnt.get(ch, 0) + 1\n    for ch in t:\n        if ch not in cnt:\n            return False\n        cnt[ch] -= 1\n        if cnt[ch] == 0:\n            del cnt[ch]\n    return not cnt\n\nprint(is_anagram('anagram', 'nagaram'))  # True"
+        "reference_code": "import sys\n\n\ndef is_anagram(s, t):\n    if len(s) != len(t):\n        return False\n    cnt = {}\n    for ch in s:\n        cnt[ch] = cnt.get(ch, 0) + 1\n    for ch in t:\n        if ch not in cnt:\n            return False\n        cnt[ch] -= 1\n        if cnt[ch] == 0:\n            del cnt[ch]\n    return not cnt\n\n\nif __name__ == '__main__':\n    lines = sys.stdin.read().split('\\n')\n    s = lines[0].strip()\n    t = lines[1].strip() if len(lines) > 1 else ''\n    print(is_anagram(s, t))\n"
       },
       "explanation": "计数法 O(n) 时间、O(k) 空间（k 为字符集大小）；排序法 O(n log n)。Counter 内部就是 dict 计数，C 层实现更快。Unicode 场景需注意「组合字符」（如 é 可能是单码位或 e+́ 两个码位），此时应先 unicodedata.normalize('NFC', s)。",
       "tags": [
@@ -162,15 +162,32 @@
       "source_ref": "LeetCode 242 valid-anagram",
       "category": "算法题",
       "platform": "leetcode",
-      "external_url": "https://leetcode.cn/problems/valid-anagram/"
+      "external_url": "https://leetcode.cn/problems/valid-anagram/",
+      "test_cases": [
+        {
+          "input": "anagram\nnagaram",
+          "expected_output": "True",
+          "is_sample": true
+        },
+        {
+          "input": "rat\ncar",
+          "expected_output": "False",
+          "is_sample": true
+        },
+        {
+          "input": "a\nab",
+          "expected_output": "False",
+          "is_sample": false
+        }
+      ]
     },
     {
       "type": "coding",
       "difficulty": "easy",
       "title": "用 set 求交集并保序（intersection-of-two-arrays）",
-      "content_md": "完成 LeetCode 349（intersection-of-two-arrays）：定义 `def intersection(nums1, nums2)` 返回两数组的交集（去重）。要求：\n\n1. 先用 `set` 完成 O(n+m) 的去重交集；\n2. 额外实现**保序版本**：结果按 `nums1` 中首次出现的顺序排列（提示：用 `dict.fromkeys` 去重保序，再配合 set 判断）；\n3. 说明为何 `x in set` 是 O(1) 而 `x in list` 是 O(n)，以及这带来的数量级差异。\n\n题面以链接为准。",
+      "content_md": "完成 LeetCode 349（intersection-of-two-arrays）：定义 `def intersection(nums1, nums2)` 返回两数组的交集（去重）。要求：\n\n1. 先用 `set` 完成 O(n+m) 的去重交集；\n2. 额外实现**保序版本**：结果按 `nums1` 中首次出现的顺序排列（提示：用 `dict.fromkeys` 去重保序，再配合 set 判断）；\n3. 说明为何 `x in set` 是 O(1) 而 `x in list` 是 O(n)，以及这带来的数量级差异。\n\n题面以链接为准。\n\n<!-- judge-io -->\n**判题 I/O 约定**（提交完整程序：从 stdin 读、向 stdout 写）\n\n输入：两行，每行为若干个整数（空格分隔），分别表示 `nums1`、`nums2`。\n输出：交集元素（去重，按 `nums1` 中首次出现的顺序），空格分隔，占一行。",
       "answer": {
-        "reference_code": "def intersection(nums1, nums2):\n    return list(set(nums1) & set(nums2))\n\ndef intersection_ordered(nums1, nums2):\n    s2 = set(nums2)\n    return [x for x in dict.fromkeys(nums1) if x in s2]\n\nprint(intersection([1, 2, 2, 1], [2, 2]))              # [2]\nprint(intersection_ordered([4, 9, 5, 9], [9, 4, 9, 8, 4]))  # [4, 9]"
+        "reference_code": "import sys\n\n\ndef intersection_ordered(nums1, nums2):\n    s2 = set(nums2)\n    return [x for x in dict.fromkeys(nums1) if x in s2]\n\n\nif __name__ == '__main__':\n    lines = sys.stdin.read().split('\\n')\n    a = [int(x) for x in lines[0].split()] if lines else []\n    b = [int(x) for x in lines[1].split()] if len(lines) > 1 else []\n    print(' '.join(map(str, intersection_ordered(a, b))))\n"
       },
       "explanation": "set 基于哈希表，成员判断平均 O(1)，整体 O(n+m)；若直接双重循环则是 O(n·m)。dict.fromkeys(nums1) 利用 3.7+ 字典保序特性去重且保留首次出现顺序，再配合 set 做 O(1) 判断，得到保序结果。这是「set 提速 + dict 保序」的经典组合。",
       "tags": [
@@ -182,7 +199,24 @@
       "source_ref": "LeetCode 349 intersection-of-two-arrays",
       "category": "算法题",
       "platform": "leetcode",
-      "external_url": "https://leetcode.cn/problems/intersection-of-two-arrays/"
+      "external_url": "https://leetcode.cn/problems/intersection-of-two-arrays/",
+      "test_cases": [
+        {
+          "input": "1 2 2 1\n2 2",
+          "expected_output": "2",
+          "is_sample": true
+        },
+        {
+          "input": "4 9 5 9\n9 4 9 8 4",
+          "expected_output": "4 9",
+          "is_sample": true
+        },
+        {
+          "input": "1 1 2\n1",
+          "expected_output": "1",
+          "is_sample": false
+        }
+      ]
     }
   ]
 }

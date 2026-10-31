@@ -1,0 +1,8 @@
+{
+  "title": "测试金字塔比例校验：健康 vs 倒金字塔",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "{\"ratio\":{\"unit\":70,\"integration\":20,\"e2e\":10},\"healthy\":true}\n{\"ratio\":{\"unit\":20,\"integration\":20,\"e2e\":60},\"healthy\":false}",
+  "code": "// 测试金字塔比例校验：单元:集成:E2E 大致应为 70:20:10\nfunction pyramidReport(counts) {\n  const total = counts.unit + counts.integration + counts.e2e;\n  const ratio = {\n    unit: Math.round((counts.unit / total) * 100),\n    integration: Math.round((counts.integration / total) * 100),\n    e2e: Math.round((counts.e2e / total) * 100),\n  };\n  const healthy = ratio.unit > ratio.integration && ratio.integration > ratio.e2e;\n  return { ratio, healthy };\n}\n\nconsole.log(JSON.stringify(pyramidReport({ unit: 70, integration: 20, e2e: 10 })));\nconsole.log(JSON.stringify(pyramidReport({ unit: 20, integration: 20, e2e: 60 })));\n"
+}

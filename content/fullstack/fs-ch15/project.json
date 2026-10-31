@@ -1,0 +1,42 @@
+{
+  "meta": {
+    "chapter": "fs-ch15",
+    "category": "basic"
+  },
+  "items": [
+    {
+      "title": "用 Gin 风格的思路搭一个并发安全的 Agent 任务后端（JS 模拟可运行）",
+      "requirement_md": "不要求真装 Go，但要用 Gin/Go 的模型把后端骨架写出来（可用 JS 模拟 channel/中间件，\n对比 Go 写法），覆盖本章三个主题：\n\n1. **并发模型**：实现一个 worker pool（缓冲 channel + N 个 worker），安全地处理一批任务，\n   不出现共享变量竞争；证明「用 channel 汇总」优于「共享计数器」。\n2. **中间件链**：实现 Gin 风格的 `runMiddleware` + `Context`（logs/abort/isAborted/next），\n   至少包含 auth、ratelimit 两个中间件，且 ratelimit 超限能正确 Abort 并阻断后续 handler；\n   给出「中间件顺序即安全顺序」的注册示例。\n3. **error 作为值 + 消费者定义接口**：把「调用下游」写成返回 `[result, error]` 的形式，\n   调用方显式检查；定义一个「消费者侧小接口」并用两个不同对象满足它（结构化接口）。\n4. **对照文档**：写一份 `GO_VS_JAVA.md`，把 GMP/线程池、channel/BlockingQueue、\n   中间件/HandlerInterceptor、error/异常、消费者接口/implements 五组对照列成表。",
+      "tasks": [
+        {
+          "title": "worker pool 并发处理且无竞争",
+          "verification": {
+            "type": "test",
+            "desc": "用 channel 汇总任务结果；共享计数器方案在注释里标明是数据竞争，运行结果二者都正确但模型不同"
+          }
+        },
+        {
+          "title": "中间件链 Abort 正确阻断",
+          "verification": {
+            "type": "test",
+            "desc": "ratelimit 超限后后续 handler 不再执行；正常链呈洋葱顺序（m before→handler→m after）"
+          }
+        },
+        {
+          "title": "error 显式返回 + 接口消费者定义",
+          "verification": {
+            "type": "test",
+            "desc": "`[result,error]` 调用方必查；两个无继承关系的对象因方法集满足同一接口均可用"
+          }
+        },
+        {
+          "title": "Go vs Java 对照文档",
+          "verification": {
+            "type": "doc",
+            "desc": "GO_VS_JAVA.md 含五组对照（GMP/线程池、channel/BlockingQueue、中间件/拦截器、error/异常、消费者接口/implements）"
+          }
+        }
+      ]
+    }
+  ]
+}

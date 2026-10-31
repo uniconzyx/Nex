@@ -1,0 +1,63 @@
+{
+  "meta": {
+    "chapter": "fs-ch11",
+    "category": "basic"
+  },
+  "items": [
+    {
+      "title": "搭建一个符合分层/异常/校验纪律的 Spring Boot 3 用户管理骨架",
+      "requirement_md": "从空目录用 Spring Initializr（Spring Boot 3、Java 17、Web/JPA/Validation）初始化项目，实现用户注册与查询接口，并落地本章三条边界：\n\n1. **分层**：`UserController`（只接 HTTP）→ `UserService`（业务 + `@Transactional`）→ `UserRepository`（JPA）。禁止 controller 直接碰 repository，禁止 service 注入 controller；\n2. **DTO/VO 隔离**：入站 `CreateUserDTO`（带 `@NotNull/@Size/@Pattern` 手机号正则），出站 `UserVO`（只含 id/name/email，绝不暴露 password/salt）；用 MapStruct 或构造函数做转换；\n3. **统一异常**：写 `@RestControllerAdvice`，区分 `BizException`（带错误码+友好提示，可展示）与系统异常（只返「系统繁忙」+ `log.error` 记堆栈，**响应体不含任何异常内部信息**）；错误码用枚举集中管理；\n4. **校验收口**：controller 用 `@Validated` 触发声明式校验；校验失败由 advice 解析 `MethodArgumentNotValidException` 返回「字段->错误信息」列表；\n5. **分组校验**：`CreateUserDTO` 用于注册（id 不约束），另写一个 `UpdateUserDTO` 用分组使 `id` 在更新时必填；\n6. 写一个 `ErrorCode` 枚举（按域分段，如 `USER_*`、`SYS_*`），并在 README 里说明：为什么三层依赖必须单向、为什么系统异常不能返堆栈、DTO/VO 存在的理由。",
+      "tasks": [
+        {
+          "title": "分层结构正确且可独立测试",
+          "verification": {
+            "type": "test",
+            "desc": "代码评审确认 controller 仅依赖 service、service 仅依赖 repository；用 @MockBean 替换 repository 能单独跑通 service 测试"
+          }
+        },
+        {
+          "title": "DTO/VO 不泄露敏感字段",
+          "verification": {
+            "type": "test",
+            "desc": "调用查询接口，响应 JSON 中搜索不到 password/salt；用 MapStruct/构造函数做映射，无手写 setter 散落"
+          }
+        },
+        {
+          "title": "统一异常收口且不含堆栈",
+          "verification": {
+            "type": "test",
+            "desc": "触发一个系统异常，响应体只含 code+中性 message，detail 为 null；服务端日志可见完整堆栈；BizException 返回业务码+友好提示"
+          }
+        },
+        {
+          "title": "声明式校验 + 字段级错误列表",
+          "verification": {
+            "type": "test",
+            "desc": "传入不合法 DTO（如手机号格式错），返回含 field->message 列表的 400；合法请求正常通过"
+          }
+        },
+        {
+          "title": "分组校验生效",
+          "verification": {
+            "type": "test",
+            "desc": "更新接口不带 id 被拦下；注册接口不要求 id 且不报错；两组约束不互相干扰"
+          }
+        },
+        {
+          "title": "错误码枚举化",
+          "verification": {
+            "type": "test",
+            "desc": "ErrorCode 为枚举且按域分段；前后端契约中错误码有文档说明，响应体使用枚举值而非硬编码字符串"
+          }
+        },
+        {
+          "title": "README 讲清三条边界",
+          "verification": {
+            "type": "doc",
+            "desc": "README 含「依赖为何单向、系统异常为何不返堆栈、DTO/VO 为何存在」三段说明"
+          }
+        }
+      ]
+    }
+  ]
+}

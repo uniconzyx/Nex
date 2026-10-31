@@ -1,0 +1,196 @@
+{
+  "meta": {
+    "chapter": "fs-ch14",
+    "note": "8 题，含选择题/输出题/改错题/编程题；题面与参考实现均为自建，不搬运第三方题面。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "关于流式穿过网关，正确的是",
+      "content_md": "选择**正确**的描述。",
+      "options": [
+        {
+          "key": "A",
+          "text": "网关应在中间件里 await response.text() 把流读光再返回，这样最稳定"
+        },
+        {
+          "key": "B",
+          "text": "网关应做字节级透传，收到一块立刻转发一块，避免缓冲整条响应"
+        },
+        {
+          "key": "C",
+          "text": "SSE 需要像 WebSocket 一样独立握手一条全双工长连接"
+        },
+        {
+          "key": "D",
+          "text": "流式请求只要设一个整体超时即可，不需要首字节超时"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "流式网关的核心是「透传而非缓冲」：用 `for await (chunk)` 逐块转发，否则首字节延迟极高且内存随流增长。A 正是反面教材；SSE 复用普通 HTTP、无需独立握手（C 错）；首字节超时用于快速暴露上游无产出，不能省（D 错）。",
+      "tags": [
+        "streaming",
+        "gateway",
+        "sse"
+      ],
+      "source": "book",
+      "source_ref": "MDN · Server-Sent Events"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "读代码写输出（流式透传块数）",
+      "content_md": "下面这段模拟「后端逐块产生、网关透传、客户端拼接」的代码，输出是什么？\n\n```js\nasync function* backend() {\n  for (const t of [\"思考中…\", \"检索知识库\", \"生成：你好\", \"，我是助手\"]) {\n    await new Promise(r => setTimeout(r, 5));\n    yield `data: ${t}\\n\\n`;\n  }\n}\nasync function gateway(src, sink) {\n  for await (const c of src) sink.push(c);\n}\n(async () => {\n  const out = [];\n  await gateway(backend(), out);\n  const events = out.join(\"\").split(\"\\n\\n\").filter(Boolean).map(e => e.replace(/^data: /, \"\"));\n  console.log(\"转发块数:\", out.length);\n  console.log(\"客户端拼接:\", events.join(\"\"));\n})();\n```",
+      "answer": {
+        "output": "转发块数: 4\n客户端拼接: 思考中…检索知识库生成：你好，我是助手"
+      },
+      "explanation": "后端 yield 出 4 块，网关逐块 push 不聚合，所以 `out.length` 为 4。SSE 以空行 `\\n\\n` 分隔，`split` 后每块去掉 `data: ` 前缀再拼接，得到完整文本。注意 `events.join(\"\")` 是把四段直接连起来，没有分隔符。",
+      "tags": [
+        "streaming",
+        "sse",
+        "output"
+      ],
+      "source": "book",
+      "source_ref": "MDN · ReadableStream"
+    },
+    {
+      "type": "fix",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "改错：为什么这个长任务断线后会重复执行",
+      "content_md": "下面的「创建任务」实现，在客户端断网重连时会新建第二个任务，导致同一个业务被跑两遍。指出问题并改正。\n\n```js\nasync function createTask(userId, docId) {\n  // 每次请求都新建一个 task，没有幂等键\n  const id = \"task_\" + Math.random().toString(36).slice(2);\n  await db.insert({ id, userId, docId, state: \"queued\" });\n  return id;\n}\n```",
+      "answer": {
+        "reference_code": "async function createTask(userId, docId) {\n  const idemKey = `${userId}:${docId}`; // 业务幂等键\n  const existing = await db.findByKey(idemKey);\n  if (existing) return existing.id;     // 重复提交返回同一任务，不新建\n  const id = \"task_\" + crypto.randomUUID();\n  await db.insert({ id, idemKey, userId, docId, state: \"queued\" });\n  return id;\n}"
+      },
+      "explanation": "问题在「每次请求都新建任务」，断线重连等于再提交一次，于是同一份文档被两个任务各跑一遍。修法是用 `(userId, docId)` 这类业务键做幂等键：重复创建时先查，命中就返回已有任务 id，从而保证「同一业务只有一个任务、可重入」。",
+      "tags": [
+        "idempotency",
+        "long-task"
+      ],
+      "source": "book",
+      "source_ref": "AWS · Idempotency for REST APIs"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "book",
+      "difficulty": "hard",
+      "title": "实现工具调用的重试幂等",
+      "content_md": "实现 `callTool(callId, op)`：用全局 `Map` 以 `callId` 为键缓存执行结果；同一 `callId` 第二次调用直接返回首次结果（标记 `retried:true`），不重复执行。要求：① 用一个计数器记录「真实执行次数」；② 不同 callId 各自独立执行；③ 在 main 里自测：同 id 调两次、不同 id 调一次，打印执行次数应为 2。",
+      "answer": {
+        "reference_code": "const log = new Map();\nlet execCount = 0;\nfunction callTool(callId, op) {\n  if (log.has(callId)) return { out: log.get(callId), retried: true };\n  execCount++;\n  const out = `exec:${op}#${execCount}`;\n  log.set(callId, out);\n  return { out, retried: false };\n}\nconsole.log(JSON.stringify(callTool(\"c1\", \"search\")));\nconsole.log(JSON.stringify(callTool(\"c1\", \"search\")));\nconsole.log(JSON.stringify(callTool(\"c2\", \"search\")));\nconsole.log(\"实际执行次数:\", execCount);"
+      },
+      "explanation": "幂等的核心是「以 callId 为键去重」。第一次见到该 id 才真正执行并把结果存入 Map；之后见到同一 id 直接返回缓存结果，并把 `retried` 标 true。计数器只在「真正执行」分支自增，因此同 id 重试不会让它增长——这正是「至少一次投递变精确一次效果」的最小实现。",
+      "tags": [
+        "idempotency",
+        "tool-call"
+      ],
+      "source": "book",
+      "source_ref": "Stripe · Idempotent Requests"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "令牌桶与漏桶的区别",
+      "content_md": "关于令牌桶（token bucket）与漏桶（leaky bucket），正确的是",
+      "options": [
+        {
+          "key": "A",
+          "text": "两者都强制恒定输出速率，不允许任何突发"
+        },
+        {
+          "key": "B",
+          "text": "令牌桶允许短时突发（桶内有存量时），漏桶强制平滑输出"
+        },
+        {
+          "key": "C",
+          "text": "漏桶允许短时突发，令牌桶强制平滑"
+        },
+        {
+          "key": "D",
+          "text": "两者没有区别，只是名字不同"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "令牌桶以固定速率加令牌，请求取令牌，桶里有存量时允许短时突发；漏桶以固定速率漏出，强制输出平滑、不允许突发。API 限流通常选令牌桶（容忍突发），保护下游数据库时才用漏桶（强制平滑）。",
+      "tags": [
+        "rate-limit",
+        "token-bucket"
+      ],
+      "source": "book",
+      "source_ref": "Cloudflare · Rate Limiting"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "读代码写输出（租户令牌桶限流）",
+      "content_md": "```js\nfunction makeBucket(rate, cap) {\n  let tokens = cap;\n  return {\n    tick(seconds) { tokens = Math.min(cap, tokens + rate * seconds); },\n    allow(n = 1) { if (tokens >= n) { tokens -= n; return true; } return false; },\n    left() { return tokens; }\n  };\n}\nconst b = makeBucket(2, 5);\nconsole.log(\"初始允许3? \" + b.allow(3));\nconsole.log(\"再允许4? \" + b.allow(4));\nb.tick(1);\nconsole.log(\"tick1s后允许4? \" + b.allow(4));\nb.tick(10);\nconsole.log(\"tick10s后剩余(上限5): \" + b.left());\n```",
+      "answer": {
+        "output": "初始允许3? true\n再允许4? false\ntick1s后允许4? true\ntick10s后剩余(上限5): 5"
+      },
+      "explanation": "初始令牌 5，allow(3) 成功剩 2；allow(4) 不够失败；tick(1) 补 2 → 4，allow(4) 成功剩 0；tick(10) 补 20 但受 cap=5 限制，剩余 5。这演示了令牌桶「允许突发 + 上限封顶」的特性。",
+      "tags": [
+        "rate-limit",
+        "token-bucket"
+      ],
+      "source": "book",
+      "source_ref": "Cloudflare · Rate Limiting"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "book",
+      "difficulty": "hard",
+      "title": "实现断线重连的事件补发",
+      "content_md": "服务端有一串有序事件 `[\"e1\",\"e2\",\"e3\",\"e4\",\"e5\"]`。实现 `serve(fromIdx)`，只返回 `events.slice(fromIdx)`（即「上次游标之后」的事件）。模拟：客户端首次收到前 3 条后在 e3 断开（`idx=2`），重连时调用 `serve(idx+1)` 续传。打印首次收到、重连续传、去重后的总条数（应为 5）。",
+      "answer": {
+        "reference_code": "const events = [\"e1\", \"e2\", \"e3\", \"e4\", \"e5\"];\nfunction serve(fromIdx) { return events.slice(fromIdx); }\nlet idx = 0;\nconst first = serve(idx); idx = 2; // 只处理到 e3（下标2）就断开\nconsole.log(\"首次收到:\", first.slice(0, 3).join(\",\"), \"(在 e3 后断开)\");\nconst replay = serve(idx + 1); // 从 e4 续传\nconsole.log(\"重连续传:\", replay.join(\",\"));\nconsole.log(\"合计去重:\", first.slice(0, 3).concat(replay).length, \"条\");"
+      },
+      "explanation": "断线重连的关键是「记住游标并从游标之后补发」。首次拿到前 3 条后把游标记为 2（e3 的下标），重连传 `idx+1=3`，`slice(3)` 只返回 e4、e5。客户端把首批与续传做去重合并，总条数不变仍是 5——既不少（漏）也不多（重）。",
+      "tags": [
+        "reconnect",
+        "cursor",
+        "idempotency"
+      ],
+      "source": "book",
+      "source_ref": "W3C · Server-Sent Events (Last-Event-ID)"
+    },
+    {
+      "type": "fix",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "改错：审计日志为什么能被偷偷篡改",
+      "content_md": "下面的审计记录方式，事后无法发现某条记录被改过。指出问题并改正。\n\n```js\nfunction appendAudit(entry) {\n  fs.appendFileSync(\"audit.log\", JSON.stringify(entry) + \"\\n\"); // 明文追加，无完整性校验\n}\n```",
+      "answer": {
+        "reference_code": "const crypto = require(\"crypto\");\nfunction h(s) { return crypto.createHash(\"sha256\").update(s).digest(\"hex\"); }\nconst chain = [];\nfunction appendAudit(entry) {\n  const prev = chain.length ? chain[chain.length - 1].hash : \"GENESIS\";\n  const hash = h(prev + \"|\" + JSON.stringify(entry));\n  chain.push({ entry, prev, hash }); // 每条引用上一条的哈希\n}\nfunction verify() {\n  for (let i = 0; i < chain.length; i++) {\n    const prev = i ? chain[i - 1].hash : \"GENESIS\";\n    if (h(prev + \"|\" + JSON.stringify(chain[i].entry)) !== chain[i].hash) return false;\n  }\n  return true;\n}"
+      },
+      "explanation": "明文追加的日志，谁都能改且改完看不出来。改用哈希链：每条记录除自身内容外，还存「上一条记录的哈希」，本记录哈希 = `hash(上一条哈希 || 本记录)`。任何一条被改，它的哈希就对不上，且后续每条都引用前一条，篡改会向后传播，定时 `verify()` 即可检出。",
+      "tags": [
+        "audit",
+        "hash-chain",
+        "integrity"
+      ],
+      "source": "book",
+      "source_ref": "NIST · Audit Trail Integrity"
+    }
+  ]
+}

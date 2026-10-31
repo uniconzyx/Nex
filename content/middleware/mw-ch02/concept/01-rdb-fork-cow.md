@@ -45,3 +45,78 @@
 - **标准定义**：`save m n` = m 秒内至少 n 次写操作则自动 BGSAVE；多条规则为“或”关系，满足其一即触发。
 - **常考辨析**：`SAVE` 与 `BGSAVE` 的区别（阻塞 vs 后台 fork）、RDB 文件是「二进制紧凑」且「全量」、「恢复远快于 AOF 重放」。
 - **易混点**：RDB 保存的是**触发时刻的内存数据**，不是写命令日志；因此“RDB 能恢复到最近一次命令”是错误的，应表述为“恢复到最近一次快照点”。
+
+<!-- injected-code -->
+## 可运行代码：把上面的说法跑一遍
+
+下面两段直接取自本章示例库（`examples/`），期望输出就是判题台里判定的那串字符串，不是事后补写的说明。读完正文后先照着跑一遍，再回去看「三视角解析」里对应的那条。
+
+### RDB 快照：fork + 写时复制(COW) 模拟
+
+```python
+class KV:
+    def __init__(self):
+        self.data = {f"k{i}": i for i in range(5)}
+    def fork_snapshot(self):
+        # 模拟 COW：子进程拿到 fork 时刻的只读视图（浅拷贝共享页）
+        return dict(self.data)
+
+db = KV()
+print("BGSAVE 触发，fork 子进程生成 RDB 快照")
+snapshot = db.fork_snapshot()
+print("快照内容:", snapshot)
+# 主进程继续服务写入，COW 让子进程视图不受影响
+db.data["k0"] = 999
+db.data["k6"] = 6
+print("父进程新增/修改后当前数据:", db.data)
+print("快照内容(未被父进程写入影响):", snapshot)
+print("COW 收益: 仅被修改的页在父进程侧复制, 未改页父子共享, fork 开销=O(页表)")
+```
+
+实际输出：
+
+```text
+BGSAVE 触发，fork 子进程生成 RDB 快照
+快照内容: {'k0': 0, 'k1': 1, 'k2': 2, 'k3': 3, 'k4': 4}
+父进程新增/修改后当前数据: {'k0': 999, 'k1': 1, 'k2': 2, 'k3': 3, 'k4': 4, 'k6': 6}
+快照内容(未被父进程写入影响): {'k0': 0, 'k1': 1, 'k2': 2, 'k3': 3, 'k4': 4}
+COW 收益: 仅被修改的页在父进程侧复制, 未改页父子共享, fork 开销=O(页表)
+```
+
+> 出处：`examples/ex01_rdb_fork_cow.json`。改一处再看输出变没变，比读三遍解释有用。
+
+### RDB 触发条件：save m n 规则判定
+
+```python
+saves = [(900, 1), (300, 10), (60, 10000)]
+state = {"last_save_t": 0, "changes_since": 0}
+def check(t, change_delta):
+    state["changes_since"] += change_delta
+    for sec, changes in saves:
+        if t - state["last_save_t"] >= sec and state["changes_since"] >= changes:
+            return True
+    return False
+
+events = [(0, 0), (120, 5), (300, 0), (305, 8), (600, 3)]
+for t, d in events:
+    triggered = check(t, d)
+    if triggered:
+        print(f"t={t}s 变更累计={state['changes_since']} -> 满足 save 规则, 触发 BGSAVE")
+        state["last_save_t"] = t
+        state["changes_since"] = 0
+    else:
+        print(f"t={t}s 变更累计={state['changes_since']} -> 未达任何 save 规则")
+```
+
+实际输出：
+
+```text
+t=0s 变更累计=0 -> 未达任何 save 规则
+t=120s 变更累计=5 -> 未达任何 save 规则
+t=300s 变更累计=5 -> 未达任何 save 规则
+t=305s 变更累计=13 -> 满足 save 规则, 触发 BGSAVE
+t=600s 变更累计=3 -> 未达任何 save 规则
+```
+
+> 出处：`examples/ex02_rdb_save_m_n.json`。改一处再看输出变没变，比读三遍解释有用。
+

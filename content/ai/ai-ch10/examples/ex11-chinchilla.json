@@ -1,0 +1,8 @@
+{
+  "title": "Chinchilla：给定算力求最优参数量与数据量",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "约束 C = 6*N*D，最优 D = 20*N  =>  C = 120*N^2  =>  N = sqrt(C/120)\n\nC=1e+21 FLOPs -> N_opt=   2.89B 参数, D_opt=    57.7B tokens, 校验 6ND=1.00e+21\nC=1e+22 FLOPs -> N_opt=   9.13B 参数, D_opt=   182.6B tokens, 校验 6ND=1.00e+22\nC=1e+23 FLOPs -> N_opt=  28.87B 参数, D_opt=   577.4B tokens, 校验 6ND=1.00e+23\nC=1e+24 FLOPs -> N_opt=  91.29B 参数, D_opt=  1825.7B tokens, 校验 6ND=1.00e+24\n\n反推：7B 模型的 Chinchilla 最优数据量 = 140B tokens\n过训练：7B 训 2T tokens -> C = 8.40e+22 FLOPs（约 Chinchilla 最优的 14.3 倍算力）\n\n结论：C 每涨 10 倍，N 与 D 各涨 ~3.16 倍（sqrt(10)）；\n      过训练是『用训练算力换推理成本』，Chinchilla 只优化训练侧\n",
+  "code": "\nimport numpy as np\nprint(\"约束 C = 6*N*D，最优 D = 20*N  =>  C = 120*N^2  =>  N = sqrt(C/120)\")\nprint()\nfor C in (1e21, 1e22, 1e23, 1e24):\n    N = np.sqrt(C / 120)\n    D = 20 * N\n    print(f\"C={C:.0e} FLOPs -> N_opt={N/1e9:7.2f}B 参数, D_opt={D/1e9:8.1f}B tokens, \"\n          f\"校验 6ND={6*N*D:.2e}\")\n\nprint()\nprint(\"反推：7B 模型的 Chinchilla 最优数据量 = {:.0f}B tokens\".format(7e9 * 20 / 1e9))\nprint(\"过训练：7B 训 2T tokens -> C = {:.2e} FLOPs（约 Chinchilla 最优的 {:.1f} 倍算力）\".format(\n    6 * 7e9 * 2e12, 6 * 7e9 * 2e12 / (6 * 7e9 * 140e9)))\nprint()\nprint(\"结论：C 每涨 10 倍，N 与 D 各涨 ~3.16 倍（sqrt(10)）；\")\nprint(\"      过训练是『用训练算力换推理成本』，Chinchilla 只优化训练侧\")\n"
+}

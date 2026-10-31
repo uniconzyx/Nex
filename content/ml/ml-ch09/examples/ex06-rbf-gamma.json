@@ -1,0 +1,8 @@
+{
+  "title": "RBF 的 gamma 对核矩阵条件数与有效秩的影响",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "gamma    最小特征值      最大特征值     条件数       有效秩(>1e-6)\n0.01       -7.199e-15        77.575    7.76e+301         13\n0.10       -3.224e-15        62.273    6.23e+301         27\n1.00        3.097e-12        25.634     8.28e+12         63\n10.00       4.327e-04         6.055     1.40e+04         80\n\n结论：gamma 越大 -> 核矩阵越接近单位阵（条件数爆炸、有效秩=样本数），模型趋近『记忆每个点』；\n      gamma 越小 -> 核矩阵趋近全 1 矩阵（有效秩 1），模型趋近常数/线性\n      所以 gamma 控制的是『有效自由度』，不是直觉上的『半径』\n",
+  "code": "\nimport numpy as np\nrng = np.random.default_rng(1)\nX = rng.normal(size=(80, 2))\nsq = np.sum((X[:, None, :] - X[None, :, :]) ** 2, -1)\n\nprint(\"gamma    最小特征值      最大特征值     条件数       有效秩(>1e-6)\")\nfor g in (0.01, 0.1, 1.0, 10.0):\n    K = np.exp(-g * sq)\n    ev = np.linalg.eigvalsh(K)\n    cond = ev.max() / max(ev.min(), 1e-300)\n    rank = int((ev > 1e-6).sum())\n    print(f\"{g:<8.2f} {ev.min():>12.3e} {ev.max():>13.3f} {cond:>12.2e} {rank:>10d}\")\n\nprint()\nprint(\"结论：gamma 越大 -> 核矩阵越接近单位阵（条件数爆炸、有效秩=样本数），模型趋近『记忆每个点』；\")\nprint(\"      gamma 越小 -> 核矩阵趋近全 1 矩阵（有效秩 1），模型趋近常数/线性\")\nprint(\"      所以 gamma 控制的是『有效自由度』，不是直觉上的『半径』\")\n"
+}

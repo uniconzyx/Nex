@@ -16,7 +16,10 @@
       "group": "S1",
       "title": "Spring 核心：IoC 容器与依赖注入",
       "summary": "IoC/DI 反转了什么；BeanFactory 与 ApplicationContext 的差异；构造器/Setter/字段注入的取舍（循环依赖与不可变性）；@Component/@Bean/@Configuration 与组件扫描；容器启动主流程；三级缓存如何解决单例循环依赖。",
-      "prerequisites": [],
+      "prerequisites": [
+        "java-ch03",
+        "java-ch04"
+      ],
       "status": "complete",
       "resources": {
         "github": [
@@ -28,8 +31,8 @@
         "github_stars": [
           84863,
           81563,
-          39566,
-          37326
+          40081,
+          37313
         ],
         "github_notes": [
           "SpringBoot + MyBatis 完整电商项目，最佳工程范例",
@@ -37,13 +40,41 @@
           "企业级快速开发平台：Spring Boot + MyBatis Plus 全栈实现",
           "Spring 生态系统化教程代码"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《Spring 实战（第6版）》第2章",
-          "《Spring 解密》IoC 部分"
+          "《Spring 实战（第 6 版）》Walls",
+          "《Spring Boot 编程思想》小马哥",
+          "《MyBatis 从入门到精通》刘增辉"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1Vf4y127N5/",
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · Spring 框架（源码级）",
+            "url": "https://www.bilibili.com/video/BV1Vf4y127N5/",
+            "note": "IoC 容器启动流程、Bean 生命周期、AOP 代理与事务传播：每节都对着源码讲，看完能回答「@Autowired 到底怎么注进去的」",
+            "bv": "BV1Vf4y127N5"
+          },
+          {
+            "name": "尚硅谷 · SpringBoot 2 零基础",
+            "url": "https://www.bilibili.com/video/BV19K4y1L7MT/",
+            "note": "自动配置原理（@Conditional 家族 + imports 文件）、起步依赖、内嵌容器与配置优先级",
+            "bv": "BV19K4y1L7MT"
+          },
+          {
+            "name": "黑马程序员 · SSM 框架全套",
+            "url": "https://www.bilibili.com/video/BV1WZ4y1P7Bp/",
+            "note": "Spring + SpringMVC + MyBatis 三件套打通：MyBatis 的 Mapper 代理绑定与动态 SQL 在这里最清楚",
+            "bv": "BV1WZ4y1P7Bp"
+          },
+          {
+            "name": "尚硅谷 · SpringCloud 微服务",
+            "url": "https://www.bilibili.com/video/BV18E411x7eT/",
+            "note": "分布式事务、服务治理与配置中心；只在讲「多数据源/分布式」时选看，不必通读",
+            "bv": "BV18E411x7eT"
+          }
+        ]
       }
     },
     {
@@ -53,7 +84,8 @@
       "title": "Bean 生命周期与作用域",
       "summary": "实例化→属性填充→Aware 回调→BeanPostProcessor 前置→@PostConstruct→初始化方法→后置处理→使用→销毁；singleton/prototype/request/session 的语义差异与 prototype 注入 singleton 的陷阱；BeanFactoryPostProcessor 与 BeanPostProcessor 的执行时机；懒加载与提前暴露。",
       "prerequisites": [
-        "spring-ch01"
+        "spring-ch01",
+        "java-ch08"
       ],
       "status": "complete",
       "resources": {
@@ -66,8 +98,8 @@
         "github_stars": [
           84863,
           81563,
-          39566,
-          37326
+          40081,
+          37313
         ],
         "github_notes": [
           "SpringBoot + MyBatis 完整电商项目，最佳工程范例",
@@ -75,12 +107,41 @@
           "企业级快速开发平台：Spring Boot + MyBatis Plus 全栈实现",
           "Spring 生态系统化教程代码"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《Spring 实战（第6版）》第2-3章"
+          "《Spring 实战（第 6 版）》Walls",
+          "《Spring Boot 编程思想》小马哥",
+          "《MyBatis 从入门到精通》刘增辉"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1Vf4y127N5/",
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · Spring 框架（源码级）",
+            "url": "https://www.bilibili.com/video/BV1Vf4y127N5/",
+            "note": "IoC 容器启动流程、Bean 生命周期、AOP 代理与事务传播：每节都对着源码讲，看完能回答「@Autowired 到底怎么注进去的」",
+            "bv": "BV1Vf4y127N5"
+          },
+          {
+            "name": "黑马程序员 · SSM 框架全套",
+            "url": "https://www.bilibili.com/video/BV1WZ4y1P7Bp/",
+            "note": "Spring + SpringMVC + MyBatis 三件套打通：MyBatis 的 Mapper 代理绑定与动态 SQL 在这里最清楚",
+            "bv": "BV1WZ4y1P7Bp"
+          },
+          {
+            "name": "尚硅谷 · SpringBoot 2 零基础",
+            "url": "https://www.bilibili.com/video/BV19K4y1L7MT/",
+            "note": "自动配置原理（@Conditional 家族 + imports 文件）、起步依赖、内嵌容器与配置优先级",
+            "bv": "BV19K4y1L7MT"
+          },
+          {
+            "name": "尚硅谷 · SpringCloud 微服务",
+            "url": "https://www.bilibili.com/video/BV18E411x7eT/",
+            "note": "分布式事务、服务治理与配置中心；只在讲「多数据源/分布式」时选看，不必通读",
+            "bv": "BV18E411x7eT"
+          }
+        ]
       }
     },
     {
@@ -90,7 +151,8 @@
       "title": "AOP 与代理机制",
       "summary": "横切关注点与 AOP 术语（切面/切点/通知）；JDK 动态代理与 CGLIB 的字节码原理与适用边界（final 类/方法、接口存在与否）；@Aspect/@Pointcut/@Around；自调用导致代理失效的根因；AOP 在事务、日志、鉴权中的落地。",
       "prerequisites": [
-        "spring-ch01"
+        "spring-ch01",
+        "java-ch07"
       ],
       "status": "complete",
       "resources": {
@@ -103,8 +165,8 @@
         "github_stars": [
           84863,
           81563,
-          39566,
-          37326
+          40081,
+          37313
         ],
         "github_notes": [
           "SpringBoot + MyBatis 完整电商项目，最佳工程范例",
@@ -112,12 +174,41 @@
           "企业级快速开发平台：Spring Boot + MyBatis Plus 全栈实现",
           "Spring 生态系统化教程代码"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《Spring 实战（第6版）》第4章"
+          "《Spring 实战（第 6 版）》Walls",
+          "《Spring Boot 编程思想》小马哥",
+          "《MyBatis 从入门到精通》刘增辉"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1Vf4y127N5/",
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · Spring 框架（源码级）",
+            "url": "https://www.bilibili.com/video/BV1Vf4y127N5/",
+            "note": "IoC 容器启动流程、Bean 生命周期、AOP 代理与事务传播：每节都对着源码讲，看完能回答「@Autowired 到底怎么注进去的」",
+            "bv": "BV1Vf4y127N5"
+          },
+          {
+            "name": "黑马程序员 · SSM 框架全套",
+            "url": "https://www.bilibili.com/video/BV1WZ4y1P7Bp/",
+            "note": "Spring + SpringMVC + MyBatis 三件套打通：MyBatis 的 Mapper 代理绑定与动态 SQL 在这里最清楚",
+            "bv": "BV1WZ4y1P7Bp"
+          },
+          {
+            "name": "尚硅谷 · SpringBoot 2 零基础",
+            "url": "https://www.bilibili.com/video/BV19K4y1L7MT/",
+            "note": "自动配置原理（@Conditional 家族 + imports 文件）、起步依赖、内嵌容器与配置优先级",
+            "bv": "BV19K4y1L7MT"
+          },
+          {
+            "name": "尚硅谷 · SpringCloud 微服务",
+            "url": "https://www.bilibili.com/video/BV18E411x7eT/",
+            "note": "分布式事务、服务治理与配置中心；只在讲「多数据源/分布式」时选看，不必通读",
+            "bv": "BV18E411x7eT"
+          }
+        ]
       }
     },
     {
@@ -141,8 +232,8 @@
         "github_stars": [
           84863,
           81563,
-          39566,
-          37326
+          40081,
+          37313
         ],
         "github_notes": [
           "SpringBoot + MyBatis 完整电商项目，最佳工程范例",
@@ -150,13 +241,41 @@
           "企业级快速开发平台：Spring Boot + MyBatis Plus 全栈实现",
           "Spring 生态系统化教程代码"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《Spring Boot 编程思想》核心篇",
-          "《Spring Boot 实战》"
+          "《Spring 实战（第 6 版）》Walls",
+          "《Spring Boot 编程思想》小马哥",
+          "《MyBatis 从入门到精通》刘增辉"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1Vf4y127N5/",
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · Spring 框架（源码级）",
+            "url": "https://www.bilibili.com/video/BV1Vf4y127N5/",
+            "note": "IoC 容器启动流程、Bean 生命周期、AOP 代理与事务传播：每节都对着源码讲，看完能回答「@Autowired 到底怎么注进去的」",
+            "bv": "BV1Vf4y127N5"
+          },
+          {
+            "name": "尚硅谷 · SpringBoot 2 零基础",
+            "url": "https://www.bilibili.com/video/BV19K4y1L7MT/",
+            "note": "自动配置原理（@Conditional 家族 + imports 文件）、起步依赖、内嵌容器与配置优先级",
+            "bv": "BV19K4y1L7MT"
+          },
+          {
+            "name": "黑马程序员 · SSM 框架全套",
+            "url": "https://www.bilibili.com/video/BV1WZ4y1P7Bp/",
+            "note": "Spring + SpringMVC + MyBatis 三件套打通：MyBatis 的 Mapper 代理绑定与动态 SQL 在这里最清楚",
+            "bv": "BV1WZ4y1P7Bp"
+          },
+          {
+            "name": "尚硅谷 · SpringCloud 微服务",
+            "url": "https://www.bilibili.com/video/BV18E411x7eT/",
+            "note": "分布式事务、服务治理与配置中心；只在讲「多数据源/分布式」时选看，不必通读",
+            "bv": "BV18E411x7eT"
+          }
+        ]
       }
     },
     {
@@ -179,8 +298,8 @@
         "github_stars": [
           84863,
           81563,
-          39566,
-          37326
+          40081,
+          37313
         ],
         "github_notes": [
           "SpringBoot + MyBatis 完整电商项目，最佳工程范例",
@@ -188,12 +307,41 @@
           "企业级快速开发平台：Spring Boot + MyBatis Plus 全栈实现",
           "Spring 生态系统化教程代码"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《Spring 实战（第6版）》第7章"
+          "《Spring 实战（第 6 版）》Walls",
+          "《Spring Boot 编程思想》小马哥",
+          "《MyBatis 从入门到精通》刘增辉"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1Vf4y127N5/",
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · Spring 框架（源码级）",
+            "url": "https://www.bilibili.com/video/BV1Vf4y127N5/",
+            "note": "IoC 容器启动流程、Bean 生命周期、AOP 代理与事务传播：每节都对着源码讲，看完能回答「@Autowired 到底怎么注进去的」",
+            "bv": "BV1Vf4y127N5"
+          },
+          {
+            "name": "黑马程序员 · SSM 框架全套",
+            "url": "https://www.bilibili.com/video/BV1WZ4y1P7Bp/",
+            "note": "Spring + SpringMVC + MyBatis 三件套打通：MyBatis 的 Mapper 代理绑定与动态 SQL 在这里最清楚",
+            "bv": "BV1WZ4y1P7Bp"
+          },
+          {
+            "name": "黑马程序员 · JavaWeb（含 Spring+MyBatis）",
+            "url": "https://www.bilibili.com/video/BV1m84y1w7Tb/",
+            "note": "工程视角：分层、DTO/VO、统一响应与异常处理；事务与多数据源在最后几章",
+            "bv": "BV1m84y1w7Tb"
+          },
+          {
+            "name": "尚硅谷 · SpringBoot 2 零基础",
+            "url": "https://www.bilibili.com/video/BV19K4y1L7MT/",
+            "note": "自动配置原理（@Conditional 家族 + imports 文件）、起步依赖、内嵌容器与配置优先级",
+            "bv": "BV19K4y1L7MT"
+          }
+        ]
       }
     },
     {
@@ -203,7 +351,8 @@
       "title": "MyBatis 基础：映射与 CRUD",
       "summary": "半自动 ORM 的定位；SqlSession 与 Mapper 接口的动态代理绑定；#{} 预编译与 ${} 字符串拼接的 SQL 注入差异；resultMap、驼峰映射与关联映射；主键回填与 useGeneratedKeys；与原生 JDBC、JPA 的对比取舍。",
       "prerequisites": [
-        "spring-ch01"
+        "spring-ch01",
+        "db-ch01"
       ],
       "status": "complete",
       "resources": {
@@ -216,8 +365,8 @@
         "github_stars": [
           84863,
           81563,
-          39566,
-          37326
+          40081,
+          37313
         ],
         "github_notes": [
           "SpringBoot + MyBatis 完整电商项目，最佳工程范例",
@@ -225,12 +374,41 @@
           "企业级快速开发平台：Spring Boot + MyBatis Plus 全栈实现",
           "Spring 生态系统化教程代码"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《MyBatis 从入门到精通》"
+          "《Spring 实战（第 6 版）》Walls",
+          "《Spring Boot 编程思想》小马哥",
+          "《MyBatis 从入门到精通》刘增辉"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1Vf4y127N5/",
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · Spring 框架（源码级）",
+            "url": "https://www.bilibili.com/video/BV1Vf4y127N5/",
+            "note": "IoC 容器启动流程、Bean 生命周期、AOP 代理与事务传播：每节都对着源码讲，看完能回答「@Autowired 到底怎么注进去的」",
+            "bv": "BV1Vf4y127N5"
+          },
+          {
+            "name": "黑马程序员 · SSM 框架全套",
+            "url": "https://www.bilibili.com/video/BV1WZ4y1P7Bp/",
+            "note": "Spring + SpringMVC + MyBatis 三件套打通：MyBatis 的 Mapper 代理绑定与动态 SQL 在这里最清楚",
+            "bv": "BV1WZ4y1P7Bp"
+          },
+          {
+            "name": "尚硅谷 · SpringBoot 2 零基础",
+            "url": "https://www.bilibili.com/video/BV19K4y1L7MT/",
+            "note": "自动配置原理（@Conditional 家族 + imports 文件）、起步依赖、内嵌容器与配置优先级",
+            "bv": "BV19K4y1L7MT"
+          },
+          {
+            "name": "尚硅谷 · SpringCloud 微服务",
+            "url": "https://www.bilibili.com/video/BV18E411x7eT/",
+            "note": "分布式事务、服务治理与配置中心；只在讲「多数据源/分布式」时选看，不必通读",
+            "bv": "BV18E411x7eT"
+          }
+        ]
       },
       "soft_prerequisites": [
         {
@@ -259,8 +437,8 @@
         "github_stars": [
           84863,
           81563,
-          39566,
-          37326
+          40081,
+          37313
         ],
         "github_notes": [
           "SpringBoot + MyBatis 完整电商项目，最佳工程范例",
@@ -268,12 +446,41 @@
           "企业级快速开发平台：Spring Boot + MyBatis Plus 全栈实现",
           "Spring 生态系统化教程代码"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《MyBatis 从入门到精通》进阶篇"
+          "《Spring 实战（第 6 版）》Walls",
+          "《Spring Boot 编程思想》小马哥",
+          "《MyBatis 从入门到精通》刘增辉"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1Vf4y127N5/",
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · Spring 框架（源码级）",
+            "url": "https://www.bilibili.com/video/BV1Vf4y127N5/",
+            "note": "IoC 容器启动流程、Bean 生命周期、AOP 代理与事务传播：每节都对着源码讲，看完能回答「@Autowired 到底怎么注进去的」",
+            "bv": "BV1Vf4y127N5"
+          },
+          {
+            "name": "黑马程序员 · SSM 框架全套",
+            "url": "https://www.bilibili.com/video/BV1WZ4y1P7Bp/",
+            "note": "Spring + SpringMVC + MyBatis 三件套打通：MyBatis 的 Mapper 代理绑定与动态 SQL 在这里最清楚",
+            "bv": "BV1WZ4y1P7Bp"
+          },
+          {
+            "name": "尚硅谷 · SpringBoot 2 零基础",
+            "url": "https://www.bilibili.com/video/BV19K4y1L7MT/",
+            "note": "自动配置原理（@Conditional 家族 + imports 文件）、起步依赖、内嵌容器与配置优先级",
+            "bv": "BV19K4y1L7MT"
+          },
+          {
+            "name": "尚硅谷 · SpringCloud 微服务",
+            "url": "https://www.bilibili.com/video/BV18E411x7eT/",
+            "note": "分布式事务、服务治理与配置中心；只在讲「多数据源/分布式」时选看，不必通读",
+            "bv": "BV18E411x7eT"
+          }
+        ]
       }
     },
     {
@@ -297,8 +504,8 @@
         "github_stars": [
           84863,
           81563,
-          39566,
-          37326
+          40081,
+          37313
         ],
         "github_notes": [
           "SpringBoot + MyBatis 完整电商项目，最佳工程范例",
@@ -306,12 +513,41 @@
           "企业级快速开发平台：Spring Boot + MyBatis Plus 全栈实现",
           "Spring 生态系统化教程代码"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《Spring 实战（第6版）》第6章"
+          "《Spring 实战（第 6 版）》Walls",
+          "《Spring Boot 编程思想》小马哥",
+          "《MyBatis 从入门到精通》刘增辉"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1Vf4y127N5/",
+        "bilibili_list": [
+          {
+            "name": "尚硅谷 · Spring 框架（源码级）",
+            "url": "https://www.bilibili.com/video/BV1Vf4y127N5/",
+            "note": "IoC 容器启动流程、Bean 生命周期、AOP 代理与事务传播：每节都对着源码讲，看完能回答「@Autowired 到底怎么注进去的」",
+            "bv": "BV1Vf4y127N5"
+          },
+          {
+            "name": "黑马程序员 · JavaWeb（含 Spring+MyBatis）",
+            "url": "https://www.bilibili.com/video/BV1m84y1w7Tb/",
+            "note": "工程视角：分层、DTO/VO、统一响应与异常处理；事务与多数据源在最后几章",
+            "bv": "BV1m84y1w7Tb"
+          },
+          {
+            "name": "尚硅谷 · SpringCloud 微服务",
+            "url": "https://www.bilibili.com/video/BV18E411x7eT/",
+            "note": "分布式事务、服务治理与配置中心；只在讲「多数据源/分布式」时选看，不必通读",
+            "bv": "BV18E411x7eT"
+          },
+          {
+            "name": "黑马程序员 · SSM 框架全套",
+            "url": "https://www.bilibili.com/video/BV1WZ4y1P7Bp/",
+            "note": "Spring + SpringMVC + MyBatis 三件套打通：MyBatis 的 Mapper 代理绑定与动态 SQL 在这里最清楚",
+            "bv": "BV1WZ4y1P7Bp"
+          }
+        ]
       }
     }
   ],

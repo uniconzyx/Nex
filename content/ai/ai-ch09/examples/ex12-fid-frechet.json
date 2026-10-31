@@ -1,0 +1,8 @@
+{
+  "title": "FID 的 Fréchet 距离：一维闭式与多维 Bures 公式",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "1D: (dmu)^2+(dsigma)^2 = 0.250000\n2D: |dmu|^2 = 0.130000\n2D: Tr(Sr+Sg-2(Sr^1/2 Sg Sr^1/2)^1/2) = 0.060626\n2D FID = 0.190626\n退化校验（1D 公式应约等于 0.130000）: 0.130000\n结论：FID 的两项分别对应『均值偏移』与『协方差（多样性/相关性）差异』\n",
+  "code": "\nimport numpy as np\n\ndef sqrtm(A):\n    w, V = np.linalg.eigh(A)\n    return V @ np.diag(np.sqrt(np.clip(w, 0, None))) @ V.T\n\n# 一维：FID = (dmu)^2 + (dsigma)^2\nmr, sr = 0.0, 1.0\nmg, sg = 0.3, 1.4\nfid_1d = (mr - mg) ** 2 + (sr - sg) ** 2\nprint(f\"1D: (dmu)^2+(dsigma)^2 = {fid_1d:.6f}\")\n\n# 二维：Bures 公式\nmr2 = np.array([0.0, 0.0]); Sr = np.array([[1.0, 0.3], [0.3, 1.0]])\nmg2 = np.array([0.3, -0.2]); Sg = np.array([[1.4, 0.1], [0.1, 0.9]])\nS = sqrtm(Sr)\nM = S @ Sg @ S\nfid_2d = ((mr2 - mg2) ** 2).sum() + np.trace(Sr + Sg - 2 * sqrtm(M))\nprint(f\"2D: |dmu|^2 = {((mr2-mg2)**2).sum():.6f}\")\nprint(f\"2D: Tr(Sr+Sg-2(Sr^1/2 Sg Sr^1/2)^1/2) = {np.trace(Sr+Sg-2*sqrtm(M)):.6f}\")\nprint(f\"2D FID = {fid_2d:.6f}\")\n\n# 退化到一维（协方差退化成标量）应与 1D 公式一致\nA = np.array([[1.0]]); B = np.array([[1.44]])\nfid_chk = 0.3 ** 2 + np.trace(A + B - 2 * sqrtm(sqrtm(A) @ B @ sqrtm(A)))\nprint(f\"退化校验（1D 公式应约等于 {0.09 + (1.0-1.2)**2:.6f}）: {fid_chk:.6f}\")\nprint(\"结论：FID 的两项分别对应『均值偏移』与『协方差（多样性/相关性）差异』\")\n"
+}

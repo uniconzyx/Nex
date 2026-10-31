@@ -1,0 +1,8 @@
+{
+  "title": "消费者定义接口：任何带 Greet 方法的对象都满足",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "Woof\nBeep\n不是 Greetable",
+  "code": "function greetable(obj) {\n  if (typeof obj.Greet === \"function\") return obj.Greet();\n  return \"不是 Greetable\";\n}\nconst dog = { Greet() { return \"Woof\"; } };\nconst robot = { Greet() { return \"Beep\"; }, id: 1 };\nconst rock = {};\nconsole.log(greetable(dog));\nconsole.log(greetable(robot));\nconsole.log(greetable(rock));\n"
+}

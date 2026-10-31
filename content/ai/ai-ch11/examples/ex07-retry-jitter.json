@@ -1,0 +1,9 @@
+{
+  "title": "重试退避的抖动：峰值占比的定量对比",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "note": "无抖动时 200 客户端在同一毫秒重试，有抖动后峰值占比降到 7%",
+  "expected_output": "无抖动（固定退避）:\n  重试总次数 800，落在 4 个时间桶内（桶宽 10ms）\n  最挤的一桶：50ms 处有 200 次（占 25%）\n  前 8 桶分布: 50ms:200, 150ms:200, 350ms:200, 750ms:200\n\n有抖动（0.5~1.5 倍随机）:\n  重试总次数 800，落在 100 个时间桶内（桶宽 10ms）\n  最挤的一桶：30ms 处有 56 次（占 7%）\n  前 8 桶分布: 30ms:56, 40ms:45, 50ms:40, 60ms:30, 70ms:29, 80ms:4, 90ms:5, 100ms:14\n\n结论：无抖动时所有客户端在同一毫秒重试，形成尖峰；\n有抖动时重试被摊开到整个窗口，服务端压力被平滑。\n峰值占比就是「重试风暴」的定量指标：越接近 100% 越危险。\n",
+  "code": "\"\"\"超时重试与退避抖动：对比「无抖动」与「有抖动」的重试时刻分布。\"\"\"\nimport random\n\n\ndef retry_times(attempts=4, base=0.05, jitter=False, n_clients=200, seed=7):\n    \"\"\"模拟 n_clients 个客户端同时超时后的重试时刻（秒）。\"\"\"\n    rng = random.Random(seed)\n    stamps = []\n    for _ in range(n_clients):\n        t = 0.0\n        for a in range(attempts):\n            d = base * (2 ** a)\n            if jitter:\n                d *= (0.5 + rng.random())\n            t += d\n            stamps.append(t)\n    return stamps\n\n\ndef report(name, stamps, bucket=0.01):\n    \"\"\"按 10ms 分桶，统计每桶有多少次重试。\"\"\"\n    import collections\n    c = collections.Counter(round(s / bucket) for s in stamps)\n    peak_bucket, peak_n = c.most_common(1)[0]\n    occupied = len(c)\n    total = len(stamps)\n    print(\"%s:\" % name)\n    print(\"  重试总次数 %d，落在 %d 个时间桶内（桶宽 %.0fms）\" % (total, occupied, bucket * 1000))\n    print(\"  最挤的一桶：%.0fms 处有 %d 次（占 %.0f%%）\"\n          % (peak_bucket * bucket * 1000, peak_n, peak_n / total * 100))\n    # 打印前 6 个桶\n    top = sorted(c.items())[:8]\n    print(\"  前 8 桶分布:\", \", \".join(\"%.0fms:%d\" % (k * bucket * 1000, v) for k, v in top))\n    print()\n\n\nreport(\"无抖动（固定退避）\", retry_times(jitter=False))\nreport(\"有抖动（0.5~1.5 倍随机）\", retry_times(jitter=True))\n\nprint(\"结论：无抖动时所有客户端在同一毫秒重试，形成尖峰；\")\nprint(\"有抖动时重试被摊开到整个窗口，服务端压力被平滑。\")\nprint(\"峰值占比就是「重试风暴」的定量指标：越接近 100% 越危险。\")\n"
+}

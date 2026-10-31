@@ -1,0 +1,8 @@
+{
+  "title": "端到端串联：入参校验 -> service -> 统一异常收口",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "{\"code\":400,\"message\":\"username 至少3位\",\"data\":null}\n{\"code\":500,\"message\":\"系统繁忙\",\"data\":null}\n{\"code\":0,\"message\":\"ok\",\"data\":{\"token\":\"tk_abc\"}}",
+  "code": "class BizException extends Error {\n  constructor(code, message){ super(message); this.code = code; this.biz = true; }\n}\n\nfunction validateLogin(dto) {\n  if (!dto.username) return \"username 必填\";\n  if (!/^\\w{3,}$/.test(dto.username)) return \"username 至少3位\";\n  if (!dto.password) return \"password 必填\";\n  return null;\n}\nfunction loginService(dto) {\n  if (dto.username === \"admin\" && dto.password === \"123456\") return { token: \"tk_abc\" };\n  throw new Error(\"用户名或密码错误\");\n}\nfunction loginController(dto) {\n  const verr = validateLogin(dto);\n  if (verr) return { code: 400, message: verr, data: null };\n  try {\n    const data = loginService(dto);\n    return { code: 0, message: \"ok\", data };\n  } catch (e) {\n    return { code: 500, message: \"系统繁忙\", data: null }; // 不暴露 e.stack\n  }\n}\nconsole.log(JSON.stringify(loginController({ username: \"ad\", password: \"123456\" })));\nconsole.log(JSON.stringify(loginController({ username: \"admin\", password: \"wrong\" })));\nconsole.log(JSON.stringify(loginController({ username: \"admin\", password: \"123456\" })));\n"
+}

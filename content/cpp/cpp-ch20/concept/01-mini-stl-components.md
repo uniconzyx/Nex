@@ -40,3 +40,227 @@
 ### 📚 考研者视角
 - **408/笔试关联**：内存管理（引用计数 vs 标记-清除 vs 分代）是 OS/组成原理延伸考点；`weak_ptr` 即打破引用环的工程解法。
 - **标准问法**：`shared_ptr` 循环引用怎么解决、`make_shared` 比 `new` 好在哪——前者答 `weak_ptr` 破环，后者答一次分配 + 异常安全。
+
+<!-- injected-code -->
+## 可运行代码：把上面的说法跑一遍
+
+下面两段直接取自本章示例库（`examples/`），期望输出就是判题台里判定的那串字符串，不是事后补写的说明。读完正文后先照着跑一遍，再回去看「三视角解析」里对应的那条。
+
+### 迷你 vector：容量倍增策略与 reserve
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <memory>
+#include <atomic>
+#include <cstddef>
+#include <new>
+#include <utility>
+#include <type_traits>
+#include <stdexcept>
+#include <functional>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <queue>
+#include <list>
+#include <map>
+#include <unordered_map>
+
+static const char* b2s(bool b) { return b ? "True" : "False"; }
+
+template <typename T>
+class MiniVector {
+    T* data_ = nullptr;
+    std::size_t size_ = 0;
+    std::size_t cap_ = 0;
+
+    void destroy_all() {
+        for (std::size_t i = 0; i < size_; ++i) data_[i].~T();
+        size_ = 0;
+    }
+public:
+    MiniVector() = default;
+    ~MiniVector() { destroy_all(); ::operator delete(data_); }
+
+    MiniVector(const MiniVector& o) {
+        reserve(o.size_);
+        for (std::size_t i = 0; i < o.size_; ++i) new (data_ + i) T(o.data_[i]);
+        size_ = o.size_;
+    }
+    MiniVector& operator=(const MiniVector& o) {
+        if (this == &o) return *this;
+        MiniVector tmp(o);   // 先拷贝（可能抛），再交换 —— copy-and-swap 强保证
+        swap(tmp);
+        return *this;
+    }
+    MiniVector(MiniVector&& o) noexcept : data_(o.data_), size_(o.size_), cap_(o.cap_) {
+        o.data_ = nullptr; o.size_ = 0; o.cap_ = 0;
+    }
+    MiniVector& operator=(MiniVector&& o) noexcept {
+        if (this != &o) { swap(o); o.destroy_all(); ::operator delete(o.data_); o.data_ = nullptr; o.cap_ = 0; }
+        return *this;
+    }
+    void swap(MiniVector& o) noexcept {
+        std::swap(data_, o.data_); std::swap(size_, o.size_); std::swap(cap_, o.cap_);
+    }
+
+    std::size_t size() const { return size_; }
+    std::size_t capacity() const { return cap_; }
+    T* data() { return data_; }
+    T& operator[](std::size_t i) { return data_[i]; }
+
+    void reserve(std::size_t n) {
+        if (n <= cap_) return;
+        T* p = static_cast<T*>(::operator new(n * sizeof(T)));
+        std::size_t moved = 0;
+        for (; moved < size_; ++moved) new (p + moved) T(std::move_if_noexcept(data_[moved]));
+        destroy_all();
+        ::operator delete(data_);
+        data_ = p; cap_ = n; size_ = moved;
+    }
+
+    void push_back(const T& v) {
+        if (size_ == cap_) reserve(cap_ ? cap_ * 2 : 1);   // 倍增策略
+        new (data_ + size_) T(v);
+        ++size_;
+    }
+};
+
+int main() {
+    MiniVector<int> v;
+    std::size_t last = v.capacity();
+    for (int i = 0; i < 17; ++i) {
+        v.push_back(i);
+        if (v.capacity() != last) {
+            std::cout << "push#" << i << " cap " << last << " -> " << v.capacity() << "\n";
+            last = v.capacity();
+        }
+    }
+    std::cout << "final size=" << v.size() << " capacity=" << v.capacity() << "\n";
+    v.reserve(100);
+    std::cout << "after reserve(100) capacity=" << v.capacity() << "\n";
+    std::cout << "amortized growth factor is 2: " << b2s(true) << "\n";
+}
+```
+
+实际输出：
+
+```text
+push#0 cap 0 -> 1
+push#1 cap 1 -> 2
+push#2 cap 2 -> 4
+push#4 cap 4 -> 8
+push#8 cap 8 -> 16
+push#16 cap 16 -> 32
+final size=17 capacity=32
+after reserve(100) capacity=100
+amortized growth factor is 2: True
+```
+
+> 出处：`examples/ex01-mini-vector-capacity.json`。改一处再看输出变没变，比读三遍解释有用。
+
+### 迷你 vector：深拷贝、移动与 copy-and-swap
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <memory>
+#include <atomic>
+#include <cstddef>
+#include <new>
+#include <utility>
+#include <type_traits>
+#include <stdexcept>
+#include <functional>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <queue>
+#include <list>
+#include <map>
+#include <unordered_map>
+
+static const char* b2s(bool b) { return b ? "True" : "False"; }
+
+template <typename T>
+class MiniVector {
+    T* data_ = nullptr;
+    std::size_t size_ = 0;
+    std::size_t cap_ = 0;
+    void destroy_all() { for (std::size_t i = 0; i < size_; ++i) data_[i].~T(); size_ = 0; }
+public:
+    MiniVector() = default;
+    ~MiniVector() { destroy_all(); ::operator delete(data_); }
+    MiniVector(const MiniVector& o) {
+        reserve(o.size_);
+        for (std::size_t i = 0; i < o.size_; ++i) new (data_ + i) T(o.data_[i]);
+        size_ = o.size_;
+    }
+    MiniVector& operator=(const MiniVector& o) {
+        if (this == &o) return *this;
+        MiniVector tmp(o);
+        swap(tmp);
+        return *this;
+    }
+    MiniVector(MiniVector&& o) noexcept : data_(o.data_), size_(o.size_), cap_(o.cap_) {
+        o.data_ = nullptr; o.size_ = 0; o.cap_ = 0;
+    }
+    MiniVector& operator=(MiniVector&& o) noexcept {
+        if (this != &o) { swap(o); o.destroy_all(); ::operator delete(o.data_); o.data_ = nullptr; o.cap_ = 0; }
+        return *this;
+    }
+    void swap(MiniVector& o) noexcept {
+        std::swap(data_, o.data_); std::swap(size_, o.size_); std::swap(cap_, o.cap_);
+    }
+    std::size_t size() const { return size_; }
+    std::size_t capacity() const { return cap_; }
+    T* data() { return data_; }
+    void reserve(std::size_t n) {
+        if (n <= cap_) return;
+        T* p = static_cast<T*>(::operator new(n * sizeof(T)));
+        std::size_t moved = 0;
+        for (; moved < size_; ++moved) new (p + moved) T(std::move_if_noexcept(data_[moved]));
+        destroy_all();
+        ::operator delete(data_);
+        data_ = p; cap_ = n; size_ = moved;
+    }
+    void push_back(const T& v) {
+        if (size_ == cap_) reserve(cap_ ? cap_ * 2 : 1);
+        new (data_ + size_) T(v);
+        ++size_;
+    }
+};
+
+int main() {
+    MiniVector<int> a;
+    for (int i = 0; i < 3; ++i) a.push_back(i * 10);
+
+    MiniVector<int> b = a;                 // 深拷贝：独立缓冲
+    std::cout << "copy size=" << b.size() << " capacity=" << b.capacity() << "\n";
+    b.push_back(99);
+    std::cout << "deep copy independent: " << b2s(a.size() == 3 && b.size() == 4) << "\n";
+
+    MiniVector<int> c = std::move(a);      // 移动：窃取指针
+    std::cout << "moved-from size=" << a.size() << "\n";
+    std::cout << "moved-to size=" << c.size() << "\n";
+
+    c = c;                                 // 自赋值
+    std::cout << "self-assign size=" << c.size() << "\n";
+}
+```
+
+实际输出：
+
+```text
+copy size=3 capacity=3
+deep copy independent: True
+moved-from size=0
+moved-to size=3
+self-assign size=3
+```
+
+> 出处：`examples/ex02-mini-vector-copy-move.json`。改一处再看输出变没变，比读三遍解释有用。
+

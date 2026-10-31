@@ -39,6 +39,58 @@
 
 ---
 
+<!-- injected-code -->
+## 可运行代码：把上面的说法跑一遍
+
+下面两段直接取自本章示例库（`examples/`），期望输出就是判题台里判定的那串字符串，不是事后补写的说明。读完正文后先照着跑一遍，再回去看「三视角解析」里对应的那条。
+
+### 类与对象：定义、实例化与字段访问
+
+```java
+public class E201 {
+    public int x = 3;
+    public int y = 4;
+    public double norm2() { return x * x + y * y; }
+    public static void main(String[] args) {
+        E201 p = new E201();
+        System.out.println(p.x + " " + p.norm2());
+    }
+}
+```
+
+实际输出：
+
+```text
+3 25.0
+```
+
+> 出处：`examples/ex01-class-and-object.json`。改一处再看输出变没变，比读三遍解释有用。
+
+### 构造器重载与 this 引用
+
+```java
+public class E202 {
+    int a;
+    int b;
+    E202() { this(0, 0); }
+    E202(int a, int b) { this.a = a; this.b = b; }
+    int sum() { return a + b; }
+    public static void main(String[] args) {
+        E202 p = new E202();
+        E202 q = new E202(2, 5);
+        System.out.println(p.sum() + " " + q.sum());
+    }
+}
+```
+
+实际输出：
+
+```text
+0 7
+```
+
+> 出处：`examples/ex02-constructor-overload.json`。改一处再看输出变没变，比读三遍解释有用。
+
 ## 三视角解析
 
 ### 🧑‍💻 程序员视角

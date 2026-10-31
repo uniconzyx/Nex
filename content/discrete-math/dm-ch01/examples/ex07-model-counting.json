@@ -1,0 +1,8 @@
+{
+  "title": "#SAT 模型计数：约束强度与信息量",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "p q r | p v q | ~q v r | ~p v ~r | f\n------+-------+--------+---------+--\n0 0 0 |   0   |   1    |    1    | 0\n0 0 1 |   0   |   1    |    1    | 0\n0 1 0 |   1   |   0    |    1    | 0\n0 1 1 |   1   |   1    |    1    | 1  <- model\n1 0 0 |   1   |   1    |    1    | 1  <- model\n1 0 1 |   1   |   1    |    0    | 0\n1 1 0 |   1   |   0    |    1    | 0\n1 1 1 |   1   |   1    |    0    | 0\n\nmodels = 2 out of 2^3 = 8\ninterpretation: the formula pins down 2 of the 3 bits' combinations.\nif models == 0 -> UNSAT;  if models == 8 -> TAUTOLOGY.\n",
+  "code": "#include <stdio.h>\n/*\n * ex07：#SAT（模型计数）\n * 为什么：一个公式「有多少个赋值让它为真」直接决定它的信息量：\n *        模型越少，约束越强；模型数为 0 就是不可满足，为 2^n 就是重言式。\n * 本例对 f = (p∨q) ∧ (¬q∨r) ∧ (¬p∨¬r) 枚举 8 个赋值，逐个判定并计数。\n */\nstatic int clause(int a, int b) { return a || b; }\n\nint main(void) {\n    printf(\"p q r | p v q | ~q v r | ~p v ~r | f\\n\");\n    printf(\"------+-------+--------+---------+--\\n\");\n    int cnt = 0;\n    for (int v = 0; v < 8; v++) {\n        int p = (v >> 2) & 1, q = (v >> 1) & 1, r = v & 1;\n        int c1 = clause(p, q), c2 = clause(!q, r), c3 = clause(!p, !r);\n        int f = c1 && c2 && c3;\n        printf(\"%d %d %d |   %d   |   %d    |    %d    | %d%s\\n\", p, q, r, c1, c2, c3, f,\n               f ? \"  <- model\" : \"\");\n        cnt += f;\n    }\n    printf(\"\\nmodels = %d out of 2^3 = 8\\n\", cnt);\n    printf(\"interpretation: the formula pins down %d of the 3 bits' combinations.\\n\", cnt);\n    printf(\"if models == 0 -> UNSAT;  if models == 8 -> TAUTOLOGY.\\n\");\n    return 0;\n}\n"
+}

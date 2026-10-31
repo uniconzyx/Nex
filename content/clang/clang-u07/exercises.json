@@ -13,9 +13,11 @@
       "source_ref": "《C 程序设计语言》第 4 章 / C99 6.2.2 链接属性",
       "difficulty": "easy",
       "title": "编译错误还是链接错误",
-      "content_md": "下面两个报错分别发生在哪个阶段，根因是什么？\n\n① `error: implicit declaration of function 'add'`\n② `undefined reference to 'add'`\n\nA. 都是链接错误\nB. ① 编译错误（缺声明）② 链接错误（缺定义）\nC. ① 链接错误（缺声明）② 编译错误（缺定义）\nD. 都是编译错误",
+      "content_md": "下面两个报错分别发生在哪个阶段，根因是什么？\n\n① `error: implicit declaration of function 'add'`\n② `undefined reference to 'add'`",
       "answer": {
-        "correct": "B",
+        "correct": [
+          "B"
+        ],
         "explain": "① 由编译器报出：它在本翻译单元里看不到 `add` 的签名，无法生成正确的调用指令。加入声明（或包含头文件）即可。\n② 由链接器报出：编译已经通过（说明有声明），但把所有 `.o` 和库扫描完后，仍未找到 `add` 的定义 —— 可能是没编译 `util.c`、没把 `util.o` 加进链接命令、或 `add` 被写成了 `static`。\n\n关键区分：**编译器只管签名，链接器才管地址**。"
       },
       "explanation": "考察对「编译期/链接期职责边界」的理解，是本节最核心的一条线。",
@@ -23,6 +25,24 @@
         "链接",
         "编译",
         "extern"
+      ],
+      "options": [
+        {
+          "key": "A",
+          "text": "都是链接错误"
+        },
+        {
+          "key": "B",
+          "text": "① 编译错误（缺声明）② 链接错误（缺定义）"
+        },
+        {
+          "key": "C",
+          "text": "① 链接错误（缺声明）② 编译错误（缺定义）"
+        },
+        {
+          "key": "D",
+          "text": "都是编译错误"
+        }
       ]
     },
     {
@@ -33,9 +53,13 @@
       "source_ref": "C99 6.2.2 / C99 6.9.2 试探性定义",
       "difficulty": "medium",
       "title": "文件作用域 static 与块作用域 static",
-      "content_md": "下列关于 `static` 的说法，**正确**的是（多选）：\n\nA. 文件作用域的 `static int n;` 具有内部链接，其他翻译单元无法引用\nB. 块作用域的 `static int n;` 具有内部链接，跨函数共享\nC. 块作用域的 `static int n;` 具有静态存储期，但无链接\nD. 文件作用域的 `static` 函数无法被本翻译单元以外的代码调用",
+      "content_md": "下列关于 `static` 的说法，**正确**的是（多选）：",
       "answer": {
-        "correct": "A、C、D",
+        "correct": [
+          "A",
+          "C",
+          "D"
+        ],
         "explain": "- A 对：文件作用域 `static` 的语义是**内部链接**。\n- B 错、C 对：块作用域 `static` 提供的是**静态存储期**（变量生存到程序结束，值在函数调用间保持），但**没有链接属性**（无链接），谈不上「跨函数共享」——别的函数连名字都看不见。\n- D 对：内部链接意味着符号不进入全局符号表，其他翻译单元无法链接到它。\n\n同一个关键字在两种作用域下有**两套完全不同的语义**，这是 C 语言的设计包袱，也是面试爱考的对比点。"
       },
       "explanation": "考察 static 的双重语义（内部链接 vs 静态存储期），极易混淆。",
@@ -43,6 +67,24 @@
         "static",
         "链接属性",
         "作用域"
+      ],
+      "options": [
+        {
+          "key": "A",
+          "text": "文件作用域的 `static int n;` 具有内部链接，其他翻译单元无法引用"
+        },
+        {
+          "key": "B",
+          "text": "块作用域的 `static int n;` 具有内部链接，跨函数共享"
+        },
+        {
+          "key": "C",
+          "text": "块作用域的 `static int n;` 具有静态存储期，但无链接"
+        },
+        {
+          "key": "D",
+          "text": "文件作用域的 `static` 函数无法被本翻译单元以外的代码调用"
+        }
       ]
     },
     {

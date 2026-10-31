@@ -81,9 +81,9 @@
       "type": "coding",
       "difficulty": "easy",
       "title": "LeetCode 344 · 反转字符串",
-      "content_md": "给定字符数组/字符串 s，原地反转。实现 `void reverseString(std::string& s)`。",
+      "content_md": "给定字符数组/字符串 s，原地反转。实现 `void reverseString(std::string& s)`。\n\n<!-- judge-io -->\n**判题 I/O 约定**（提交完整程序：从 stdin 读、向 stdout 写）\n\n输入：一行字符串 `s`。\n输出：原地反转后的字符串，占一行。",
       "answer": {
-        "reference_code": "#include <iostream>\n#include <string>\n#include <algorithm>\nvoid reverseString(std::string& s){std::reverse(s.begin(), s.end());}\nint main(){std::string s=\"hello\";reverseString(s);std::cout<<s;}"
+        "reference_code": "#include <algorithm>\n#include <iostream>\n#include <string>\n\nvoid reverseString(std::string& s) {\n    std::reverse(s.begin(), s.end());\n}\n\nint main() {\n    std::string s;\n    std::getline(std::cin, s);\n    reverseString(s);\n    std::cout << s << \"\\n\";\n    return 0;\n}\n"
       },
       "explanation": "双指针或 std::reverse 均可。",
       "tags": [
@@ -94,15 +94,32 @@
       "source_ref": "LeetCode 344（反转字符串）",
       "external_url": "https://leetcode.cn/problems/reverse-string/",
       "category": "算法题",
-      "platform": "leetcode"
+      "platform": "leetcode",
+      "test_cases": [
+        {
+          "input": "hello",
+          "expected_output": "olleh",
+          "is_sample": true
+        },
+        {
+          "input": "Hannah",
+          "expected_output": "hannaH",
+          "is_sample": true
+        },
+        {
+          "input": "a",
+          "expected_output": "a",
+          "is_sample": false
+        }
+      ]
     },
     {
       "type": "coding",
       "difficulty": "mid",
       "title": "LeetCode 415 · 字符串相加",
-      "content_md": "给定两个非负整数字符串 num1、num2，返回其和的字符串（模拟竖式加法，不转整数）。",
+      "content_md": "给定两个非负整数字符串 num1、num2，返回其和的字符串（模拟竖式加法，不转整数）。\n\n<!-- judge-io -->\n**判题 I/O 约定**（提交完整程序：从 stdin 读、向 stdout 写）\n\n输入：两行，分别为非负整数字符串 `num1`、`num2`。\n输出：两者之和的字符串表示。",
       "answer": {
-        "reference_code": "#include <iostream>\n#include <string>\n#include <algorithm>\nstd::string addStrings(std::string a, std::string b){\n  std::string r; int i=(int)a.size()-1, j=(int)b.size()-1, c=0;\n  while(i>=0||j>=0||c){int x=i>=0?a[i--]-'0':0;int y=j>=0?b[j--]-'0':0;int s=x+y+c;r+=char(s%10+'0');c=s/10;}\n  std::reverse(r.begin(),r.end());return r;\n}\nint main(){std::cout<<addStrings(\"11\",\"123\");}"
+        "reference_code": "#include <algorithm>\n#include <iostream>\n#include <string>\n\nstd::string addStrings(std::string a, std::string b) {\n    std::string r;\n    int i = (int)a.size() - 1, j = (int)b.size() - 1, carry = 0;\n    while (i >= 0 || j >= 0 || carry) {\n        int s = carry;\n        if (i >= 0) s += a[i--] - '0';\n        if (j >= 0) s += b[j--] - '0';\n        r.push_back(char('0' + s % 10));\n        carry = s / 10;\n    }\n    std::reverse(r.begin(), r.end());\n    return r;\n}\n\nint main() {\n    std::string a, b;\n    std::getline(std::cin, a);\n    std::getline(std::cin, b);\n    std::cout << addStrings(a, b) << \"\\n\";\n    return 0;\n}\n"
       },
       "explanation": "从末位逐位相加，注意进位与结果反转。",
       "tags": [
@@ -113,7 +130,29 @@
       "source_ref": "LeetCode 415（字符串相加）",
       "external_url": "https://leetcode.cn/problems/add-strings/",
       "category": "算法题",
-      "platform": "leetcode"
+      "platform": "leetcode",
+      "test_cases": [
+        {
+          "input": "11\n123",
+          "expected_output": "134",
+          "is_sample": true
+        },
+        {
+          "input": "456\n77",
+          "expected_output": "533",
+          "is_sample": true
+        },
+        {
+          "input": "0\n0",
+          "expected_output": "0",
+          "is_sample": false
+        },
+        {
+          "input": "9999\n1",
+          "expected_output": "10000",
+          "is_sample": false
+        }
+      ]
     }
   ]
 }

@@ -1,0 +1,73 @@
+{
+  "meta": {
+    "chapter": "ai-ch13",
+    "note": "5 个高频问题。"
+  },
+  "items": [
+    {
+      "question": "KV Cache 为什么必须存在？显存怎么算？",
+      "answer_md": "自回归每步理论上需全部历史 token 的 K/V，朴素重算是 O(n²)。KV Cache 缓存每层每个历史 token 的 K/V，把每步降到 O(n)，代价是显存常驻随序列增长的 KV。显存账：batch×seq_len×2×n_layers×n_heads×head_dim×dtype_bytes，再除 1024³。它随并发和长度线性膨胀，是部署的变动成本，和固定成本的权重都要算。",
+      "follow_ups": [
+        "为什么 KV Cache 不能像权重那样只加载一次？",
+        "长上下文推理的瓶颈为什么从算力转向显存带宽？",
+        "FlashAttention 和 PagedAttention 在哪一层优化？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用"
+      ]
+    },
+    {
+      "question": "PagedAttention 解决了什么？和操作系统分页什么关系？",
+      "answer_md": "传统连续分配 KV 有内部碎片（预留过长）、外部碎片（长短不一留空洞）、共享 prefix 重复存。PagedAttention 借虚拟内存思想：KV 切块、块表（逻辑块号→物理块号）映射、物理块池化、按需分配，并支持多请求共享同一物理块做前缀复用。关系就是页表/页框池/共享页那一套搬到显存管理，区别是缺页由序列增长触发、KV 块只读共享无写时复制。",
+      "follow_ups": [
+        "前缀复用除了省显存还带来什么收益？",
+        "block size 怎么权衡？",
+        "PagedAttention 和 continuous batching 怎么互相成就？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用"
+      ]
+    },
+    {
+      "question": "静态批处理和连续批处理差在哪？",
+      "answer_md": "静态以「整个请求生命周期」为调度单位，批内步调一致，慢请求拖死快请求、尾延迟爆炸，且实时请求要排队等下一批。连续批处理把粒度降到「每个 decode 步」：每步收集在场未完成的请求成批，出 EOS 立即释放，空位马上补新请求，GPU 在每个步尽量满批。吞吐常翻几倍、尾延迟压一个量级，但需 PagedAttention 管理变长 KV 才能落地。",
+      "follow_ups": [
+        "连续批处理的调度开销来自哪里？",
+        "它和 ai-ch11 的「先凑批后算」语义上有什么关系？",
+        "什么场景连续批处理收益不明显？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用"
+      ]
+    },
+    {
+      "question": "GPTQ 和 AWQ 怎么做的？怎么选？",
+      "answer_md": "GPTQ 是 PTQ，量化每层时最小化整层输出误差并做补偿，把舍入误差在通道间分摊，int4 仍保高精度，但要校准集、量化慢。AWQ 认为激活大的权重通道更重要，按激活幅度对通道缩放保护、再量化，量化快、对校准不敏感。服务端高吞吐显存紧选 GPTQ/AWQ int4；本地/CPU 离线跑选 GGUF 封装。精度敏感用 int8/fp16。量化不是越低越好，要下游评测验证。",
+      "follow_ups": [
+        "校准集对 GPTQ 为什么关键？",
+        "AWQ 的激活显著性怎么估计？",
+        "QAT 和 PTQ 路线差异？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用"
+      ]
+    },
+    {
+      "question": "GGUF 是什么，它和量化算法什么关系？",
+      "answer_md": "GGUF 是 llama.cpp 的模型文件格式，不是量化算法。它有统一头（magic GGUF + version + 张量数 + 元数据键值对），自描述地封装模型结构、量化类型、超参，把 GPTQ/AWQ 或 llama.cpp 自家的量化结果打包成一个可移植文件，让不同后端（CPU/GPU/Apple Silicon）无缝加载。选 GGUF 通常意味着「本地、离线、低资源」诉求。它和 Safetensors/ONNX 一样是权重容器，只是更面向端侧。",
+      "follow_ups": [
+        "GGUF 头里必须有哪些字段？",
+        "它和 Safetensors 的设计哲学差异？",
+        "为什么本地推理特别吃重量化格式？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用"
+      ]
+    }
+  ]
+}

@@ -168,13 +168,14 @@
         "heap",
         "cross-shard"
       ],
-      "test_cases": [
+      "samples": [
         {
           "input": "schema 与样例数据见 external_url",
           "expected_output": "见 external_url",
           "is_sample": true
         }
-      ]
+      ],
+      "judge_note": "本题参考实现是「函数 + 自测脚本」，没有 stdin 接口，离线不做自动判分。请对照 samples 与参考实现自评。"
     },
     {
       "id": "db-ch08-ex07",
@@ -220,7 +221,7 @@
         "split-brain",
         "leader-election"
       ],
-      "test_cases": [
+      "samples": [
         {
           "input": "5 节点，分区 {n1,n2} | {n3,n4,n5}，quorum = 3",
           "expected_output": "少数派当选 False，多数派当选 True，脑裂 False",
@@ -231,7 +232,8 @@
           "expected_output": "两侧均当选 True，脑裂 True",
           "is_sample": false
         }
-      ]
+      ],
+      "judge_note": "本题参考实现是「函数 + 自测脚本」，没有 stdin 接口，离线不做自动判分。请对照 samples 与参考实现自评。"
     }
   ]
 }

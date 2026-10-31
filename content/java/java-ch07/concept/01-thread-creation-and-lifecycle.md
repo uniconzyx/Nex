@@ -1,4 +1,19 @@
 # 01 · 线程的创建与生命周期：从 `start()` 到六种状态
+> 线程池用「一个阻塞队列 + 一组常驻 worker」解耦「提交任务」与「执行任务」：提交方只丢进队列，worker 循环取任务跑。核心线程保活、队列满再扩容到最大线程、再满则按拒绝策略处理。
+
+```text
+提交任务 ──▶ [ 队列 BlockingQueue ] ──▶ worker-1 取走执行
+                         │                          worker-2 取走执行
+                         │                          worker-3 ...
+       corePoolSize=2  ↓ maxPoolSize=5
+   提交速度 > 消费速度:
+     1) 核心线程(2) 全忙 → 2) 任务入队 → 3) 队满 → 4) 扩到最大(5)
+     → 仍满 → RejectedExecutionHandler:
+        Abort(抛异常) / CallerRuns(调用者自己跑) / Discard / DiscardOldest
+
+   调参口诀：CPU 密集 ≈ 核数；IO 密集 ≈ 核数×(1+等待/计算)
+```
+
 
 ## 一、理论根基：线程是「操作系统调度单元」在 JVM 中的句柄
 

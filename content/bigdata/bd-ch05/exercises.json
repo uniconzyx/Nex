@@ -153,13 +153,14 @@
       "source_ref": "apache/spark sql/catalyst/optimizer/ColumnPruning.scala",
       "time_limit_ms": 60000,
       "memory_limit_mb": 256,
-      "test_cases": [
+      "samples": [
         {
           "input": "orders(id,uid,dept,amount,ts) JOIN users(uid,city,age) GROUP BY city, sum(amount)",
           "expected_output": "orders 裁剪前 5 列 -> 裁剪后 2 列: ['uid', 'amount']\nusers 裁剪前 3 列 -> 裁剪后 2 列: ['uid', 'city']\n判据 列数下降: True",
           "is_sample": true
         }
-      ]
+      ],
+      "judge_note": "本题参考实现是「函数 + 自测脚本」，没有 stdin 接口，离线不做自动判分。请对照 samples 与参考实现自评。"
     },
     {
       "type": "choice",
@@ -297,13 +298,14 @@
       "external_url": "https://github.com/apache/spark/tree/master/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/optimizer",
       "time_limit_ms": 120000,
       "memory_limit_mb": 256,
-      "test_cases": [
+      "samples": [
         {
           "input": "Aggregate(city, amount) <- Filter(city='bj') <- Join(uid) <- [orders(5列), users(3列)]",
           "expected_output": "orders: 5 列 -> 2 列 ['uid', 'amount']\nusers: 3 列 -> 2 列 ['uid', 'city']\n谓词已下推到 users 侧: True\n列裁剪生效: True",
           "is_sample": true
         }
-      ]
+      ],
+      "judge_note": "本题参考实现是「函数 + 自测脚本」，没有 stdin 接口，离线不做自动判分。请对照 samples 与参考实现自评。"
     }
   ]
 }

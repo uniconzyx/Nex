@@ -1,0 +1,8 @@
+{
+  "title": "结构类型：多一个成员不报错，少一个报错",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "3\nNaN",
+  "code": "// 只用 JS 表达结构类型的行为（TS 的检查发生在编译期，运行期无痕迹）\nfunction takesPoint(p) { return p.x + p.y; }\n\nconst withExtra = { x: 1, y: 2, label: \"origin\" }; // 多一个 label：合法\nconst missing = { x: 1 };                          // 少一个 y：TS 会报错\n\nconsole.log(takesPoint(withExtra));\nconsole.log(takesPoint(missing));\n"
+}

@@ -94,15 +94,16 @@
       "external_url": "https://leetcode.cn/problems/two-sum/",
       "time_limit_ms": 2000,
       "memory_limit_mb": 256,
-      "test_cases": [
+      "category": "算法题",
+      "platform": "leetcode",
+      "samples": [
         {
           "input": "nums=[2,7,11,15], target=9",
           "expected_output": "0 1",
           "is_sample": true
         }
       ],
-      "category": "算法题",
-      "platform": "leetcode"
+      "judge_note": "本题参考实现是「方法 + 硬编码 main」，不读 args，离线不做自动判分。请对照 samples 与参考实现自评。"
     },
     {
       "type": "coding",
@@ -122,15 +123,16 @@
       "external_url": "https://www.nowcoder.com/practice/3194a4f4cf814f63919d079691d9dac8",
       "time_limit_ms": 2000,
       "memory_limit_mb": 256,
-      "test_cases": [
+      "category": "算法题",
+      "platform": "nowcoder",
+      "samples": [
         {
           "input": "this is nowcoder",
           "expected_output": "redocon si siht",
           "is_sample": true
         }
       ],
-      "category": "算法题",
-      "platform": "nowcoder"
+      "judge_note": "本题参考实现是「方法 + 硬编码 main」，不读 args，离线不做自动判分。请对照 samples 与参考实现自评。"
     },
     {
       "type": "output",

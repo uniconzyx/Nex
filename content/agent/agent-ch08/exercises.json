@@ -12,9 +12,11 @@
       "platform": "self",
       "difficulty": 2,
       "title": "缩放因子 √d_k 到底在解决什么问题",
-      "content_md": "在缩放点积注意力 `softmax(QKᵀ/√d_k)V` 中，除以 √d_k 的主要作用是什么？\n\nA. 让注意力权重更集中在最相似的 Token 上，从而提升准确率\nB. 把点积的方差从约 d_k 拉回到约 1，防止高维下 softmax 进入饱和区、梯度消失\nC. 保证每行注意力权重之和恰好等于 1\nD. 减少 Q/K/V 投影矩阵的参数量",
+      "content_md": "在缩放点积注意力 `softmax(QKᵀ/√d_k)V` 中，除以 √d_k 的主要作用是什么？",
       "answer": {
-        "correct": "B",
+        "correct": [
+          "B"
+        ],
         "explain": "假设 Q、K 各分量独立、均值 0、方差 1，单个点积 `Q·K` 的方差约为 d_k。当 d_k 很大（如 64、128）时，softmax 的输入被推到很远的饱和区，`e^x` 巨大且梯度趋近 0，注意力层几乎学不动，训练初期 loss 不降。除以 √d_k 把方差拉回 1，使 softmax 工作在非饱和区。A 错：缩放不改变「谁最相似」的排序，只影响分布的尖锐程度，不是为提升准确率；C 错：行和为 1 由 softmax 本身保证，与是否缩放无关；D 错：缩放是推理期的数值操作，不减少任何参数。"
       },
       "explanation": "考点：缩放因子是稳定性手段而非准确性修正，根因是高维点积方差爆炸。",
@@ -24,7 +26,25 @@
         "梯度消失"
       ],
       "source": "self",
-      "source_ref": "本章 concept/01 第 2 节；示例 ex01"
+      "source_ref": "本章 concept/01 第 2 节；示例 ex01",
+      "options": [
+        {
+          "key": "A",
+          "text": "让注意力权重更集中在最相似的 Token 上，从而提升准确率"
+        },
+        {
+          "key": "B",
+          "text": "把点积的方差从约 d_k 拉回到约 1，防止高维下 softmax 进入饱和区、梯度消失"
+        },
+        {
+          "key": "C",
+          "text": "保证每行注意力权重之和恰好等于 1"
+        },
+        {
+          "key": "D",
+          "text": "减少 Q/K/V 投影矩阵的参数量"
+        }
+      ]
     },
     {
       "type": "choice",
@@ -32,9 +52,11 @@
       "platform": "self",
       "difficulty": 3,
       "title": "GQA 相比 MHA 为什么更省显存",
-      "content_md": "某模型用 MHA 时 32k 上下文单条请求 KV Cache 约 16GB，改用 GQA（h_g=8，原 h=32）后显存大幅下降。下降主要来自哪一项？\n\nA. GQA 把注意力头数从 32 减到 8，计算量变小\nB. GQA 让多个 Query 头共享同一套 K/V，每 Token 缓存的 KV 头数从 h 降到 h_g\nC. GQA 把词表嵌入也压缩了\nD. GQA 把 FFN 的 d_ff 减小了",
+      "content_md": "某模型用 MHA 时 32k 上下文单条请求 KV Cache 约 16GB，改用 GQA（h_g=8，原 h=32）后显存大幅下降。下降主要来自哪一项？",
       "answer": {
-        "correct": "B",
+        "correct": [
+          "B"
+        ],
         "explain": "KV Cache 显存正比于「每 Token 缓存的 KV 头数」。MHA 中每个 Query 头都有独立的一套 K/V，共 h 套；GQA 中每 g 个 Query 头共享一套 K/V，只缓存 h_g = h/g 套，显存按 h_g/h 比例下降（本题中 8/32 = 1/4）。A 错：GQA 的 Query 头数仍是 h=32，计算量基本不变，变的只是 K/V 的复用；C、D 错：GQA 只改 K/V 的复用方式，与词表嵌入、FFN 维度无关。注意 GQA 省的是推理时的 KV Cache，不是模型权重参数。"
       },
       "explanation": "考点：KV Cache 显存随缓存的 KV 头数线性增长，GQA/MQA 通过共享 K/V 削减它。",
@@ -44,7 +66,25 @@
         "显存"
       ],
       "source": "self",
-      "source_ref": "本章 concept/03 第 3 节；示例 ex08"
+      "source_ref": "本章 concept/03 第 3 节；示例 ex08",
+      "options": [
+        {
+          "key": "A",
+          "text": "GQA 把注意力头数从 32 减到 8，计算量变小"
+        },
+        {
+          "key": "B",
+          "text": "GQA 让多个 Query 头共享同一套 K/V，每 Token 缓存的 KV 头数从 h 降到 h_g"
+        },
+        {
+          "key": "C",
+          "text": "GQA 把词表嵌入也压缩了"
+        },
+        {
+          "key": "D",
+          "text": "GQA 把 FFN 的 d_ff 减小了"
+        }
+      ]
     },
     {
       "type": "judge",

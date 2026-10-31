@@ -1,0 +1,8 @@
+{
+  "title": "KV Cache 显存账：随 batch 与长度线性膨胀",
+  "code_lang": "python",
+  "code_std": "3.11",
+  "stdin": "",
+  "expected_output": "fp16, 1x4096: 2.000 GB\nfp16, 32x2048: 32.000 GB",
+  "code": "def kv_cache_gb(batch, seq_len, n_layers, n_heads, head_dim, dtype_bytes=2):\n    per_token = batch * 2 * n_layers * n_heads * head_dim * dtype_bytes\n    total_bytes = per_token * seq_len\n    return total_bytes / (1024**3)\n\nprint(\"fp16, 1x4096:\", f\"{kv_cache_gb(1, 4096, 32, 32, 128):.3f} GB\")\nprint(\"fp16, 32x2048:\", f\"{kv_cache_gb(32, 2048, 32, 32, 128):.3f} GB\")\n"
+}

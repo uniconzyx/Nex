@@ -109,3 +109,148 @@ at-least-once 是工程默认，重复几乎必然发生（重试、rebalance、
 ### 📚 考研者视角
 
 面试延伸题：「小公司该不该上 Kafka？」标准口径是**按规模与运维能力选**，而非按「Kafka 先进」选。可答：日消息量 < 百万级且无专职中间件运维时，Redis Stream 或 DB 轮询往往性价比更高；消息量上百万/天、需要重放与长期留存、且有多消费者组时，Kafka 的收益才盖过成本。
+
+<!-- injected-code -->
+## 可运行代码：把上面的说法跑一遍
+
+下面两段直接取自本章示例库（`examples/`），期望输出就是判题台里判定的那串字符串，不是事后补写的说明。读完正文后先照着跑一遍，再回去看「三视角解析」里对应的那条。
+
+### 削峰填谷：脉冲流量需要多大缓冲（含反压拒绝量化）
+
+```python
+# 削峰填谷：脉冲流量 + 恒定消费，需要多大缓冲？
+def simulate(peak_rate, peak_dur, steady_rate, buf_cap, total_sec=30):
+    """prod[i] 为第 i 秒到达量；消费恒定为 steady_rate（受缓冲区非空约束）。"""
+    buf = 0          # 当前积压
+    peak_buf = 0
+    rejected = 0     # 因缓冲满被拒（反压）的量
+    for i in range(total_sec):
+        arrived = peak_rate if i < peak_dur else 1
+        # 先消费（缓冲区已有数据）
+        consumed = min(buf, steady_rate)
+        buf -= consumed
+        # 再接收（缓冲区有上限）
+        room = buf_cap - buf
+        accept = min(arrived, room)
+        rejected += arrived - accept
+        buf += accept
+        peak_buf = max(peak_buf, buf)
+    return peak_buf, rejected
+
+
+print("=== 场景：峰值 500/s 持续 5s，之后 1/s；下游稳态 100/s ===")
+r_p, T_p, r_s = 500, 5, 100
+cont = (r_p - r_s) * T_p          # 连续模型给出的缓冲下界
+print("连续模型下界 Q = (r_p - r_s) * T_p = (%d - %d) * %d = %d" % (r_p, r_s, T_p, cont))
+print()
+print("%-12s %-12s %-10s" % ("缓冲上限", "峰值积压", "被拒量"))
+rows = []
+for cap in (500, 1500, 2000, 2100, 2500, 5000):
+    pb, rj = simulate(r_p, T_p, r_s, cap)
+    rows.append((cap, pb, rj))
+    print("%-12d %-12d %-10d" % (cap, pb, rj))
+print()
+zero = [c for c, pb, rj in rows if rj == 0]
+least = min(zero) if zero else None
+print("被拒为 0 的最小缓冲上限 = %d（实测）" % least)
+print("注意：它比连续模型大 %d —— 第 1 秒缓冲区为空，下游无数据可消费，" % (least - cont))
+print("      该秒 %d 个请求全部落入缓冲，此后每秒才净增 %d。" % (r_p, r_p - r_s))
+```
+
+实际输出：
+
+```text
+=== 场景：峰值 500/s 持续 5s，之后 1/s；下游稳态 100/s ===
+连续模型下界 Q = (r_p - r_s) * T_p = (500 - 100) * 5 = 2000
+
+缓冲上限         峰值积压         被拒量       
+500          500          1600      
+1500         1500         600       
+2000         2000         100       
+2100         2100         0         
+2500         2100         0         
+5000         2100         0         
+
+被拒为 0 的最小缓冲上限 = 2100（实测）
+注意：它比连续模型大 100 —— 第 1 秒缓冲区为空，下游无数据可消费，
+      该秒 500 个请求全部落入缓冲，此后每秒才净增 400。
+```
+
+> 出处：`examples/ex01-peak-shaving-buffer-sizing.json`。改一处再看输出变没变，比读三遍解释有用。
+
+### 解耦：同步 RPC 与异步事件的故障传播范围对比
+
+```python
+# 系统解耦：同步 RPC 调用链的故障域 vs 异步事件的故障域
+# 用「受影响的下游服务数」作为确定性判据（不测真实时间）。
+
+SYNC_CALL = {                      # 调用方 -> 被调用方
+    "下单": ["订单", "库存"],
+    "订单": ["支付"],
+    "支付": ["账务", "通知"],
+}
+ASYNC_SUB = {                      # 事件 -> 订阅者
+    "订单已创建": ["库存", "通知"],
+    "支付已完成": ["账务"],
+}
+
+
+def sync_blast(broken):
+    """同步：broken 故障 -> 它自身 + 所有（直接/间接）调用它的上游全部被阻塞。
+
+    机制：上游线程阻塞在等待响应上，重试又继续占用线程池，故障沿调用栈反向传播。
+    """
+    affected = {broken}
+    changed = True
+    while changed:
+        changed = False
+        for caller, callees in SYNC_CALL.items():
+            if any(c in affected for c in callees) and caller not in affected:
+                affected.add(caller)
+                changed = True
+    return affected
+
+
+def async_blast(broken):
+    """异步：下游故障不反向阻塞上游，受影响集合就是它自己（故障不外溢）。"""
+    return {broken}
+
+
+print("=== 同步 RPC：某个下游故障的影响范围 ===")
+sync_rows = []
+for broken in ("账务", "通知"):
+    affected = sync_blast(broken)
+    sync_rows.append(len(affected))
+    print("  %s 故障 -> 受影响服务数 = %d  %s" % (broken, len(affected), sorted(affected)))
+
+print()
+print("=== 异步事件：同样故障的影响范围 ===")
+async_rows = []
+for broken in ("账务", "通知"):
+    affected = async_blast(broken)
+    async_rows.append(len(affected))
+    print("  %s 故障 -> 受影响服务数 = %d  %s" % (broken, len(affected), sorted(affected)))
+
+print()
+print("对比：同步链 1 个下游故障波及 %d 个服务；异步只波及 %d 个（故障不反向传播）。"
+      % (max(sync_rows), max(async_rows)))
+print("注意：异步并未消除故障，只是把「阻塞传播」换成了「消息积压」。")
+```
+
+实际输出：
+
+```text
+=== 同步 RPC：某个下游故障的影响范围 ===
+  账务 故障 -> 受影响服务数 = 4  ['下单', '支付', '订单', '账务']
+  通知 故障 -> 受影响服务数 = 4  ['下单', '支付', '订单', '通知']
+
+=== 异步事件：同样故障的影响范围 ===
+  账务 故障 -> 受影响服务数 = 1  ['账务']
+  通知 故障 -> 受影响服务数 = 1  ['通知']
+
+对比：同步链 1 个下游故障波及 4 个服务；异步只波及 1 个（故障不反向传播）。
+注意：异步并未消除故障，只是把「阻塞传播」换成了「消息积压」。
+```
+
+> 出处：`examples/ex02-sync-vs-async-blast-radius.json`。改一处再看输出变没变，比读三遍解释有用。
+

@@ -1,0 +1,8 @@
+{
+  "title": "依赖方向校验：只能指向更底层，反向/跨层都违规",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "OK: 依赖指向更底层\nOK: 依赖指向更底层\nBAD: service 不应依赖 controller（破坏分层）\nOK: 依赖指向更底层",
+  "code": "class BizException extends Error {\n  constructor(code, message){ super(message); this.code = code; this.biz = true; }\n}\n\nfunction checkLayer(callFrom, callTo) {\n  const order = { controller: 0, service: 1, repository: 2 };\n  if (order[callTo] >= order[callFrom]) {\n    return \"OK: 依赖指向更底层\";\n  }\n  return \"BAD: \" + callFrom + \" 不应依赖 \" + callTo + \"（破坏分层）\";\n}\nconsole.log(checkLayer(\"controller\", \"service\"));\nconsole.log(checkLayer(\"service\", \"repository\"));\nconsole.log(checkLayer(\"service\", \"controller\"));\nconsole.log(checkLayer(\"controller\", \"repository\"));\n"
+}

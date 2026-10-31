@@ -1,0 +1,8 @@
+{
+  "title": "环境隔离：按环境加载不同配置",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "env=prod db=prod.db:5432 log=warn\nenv=dev db=localhost:5432 log=debug\nenv=unknown db=localhost:5432 log=debug",
+  "code": "// 环境隔离：同一份代码按环境加载不同配置，互不串门\nconst configs = {\n  dev: { db: \"localhost:5432\", log: \"debug\" },\n  staging: { db: \"stg.db:5432\", log: \"info\" },\n  prod: { db: \"prod.db:5432\", log: \"warn\" },\n};\n\nfunction loadConfig(env) {\n  const c = configs[env] ?? configs.dev; // 未知环境回退到最安全的 dev\n  return `env=${env} db=${c.db} log=${c.log}`;\n}\n\nconsole.log(loadConfig(\"prod\"));\nconsole.log(loadConfig(\"dev\"));\nconsole.log(loadConfig(\"unknown\")); // 回退到 dev，不读生产库\n"
+}

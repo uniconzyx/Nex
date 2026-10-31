@@ -140,13 +140,14 @@
       "external_url": "https://leetcode.cn/problems/two-sum/",
       "time_limit_ms": 2000,
       "memory_limit_mb": 256,
-      "test_cases": [
+      "samples": [
         {
           "input": "nums=[2,7,11,15] target=9",
           "expected_output": "0,1",
           "is_sample": true
         }
-      ]
+      ],
+      "judge_note": "本题参考实现是「方法 + 硬编码 main」，不读 args，离线不做自动判分。请对照 samples 与参考实现自评。"
     },
     {
       "type": "coding",
@@ -169,13 +170,14 @@
       "external_url": "https://leetcode.cn/problems/group-anagrams/",
       "time_limit_ms": 2000,
       "memory_limit_mb": 256,
-      "test_cases": [
+      "samples": [
         {
           "input": "eat tea tan ate nat bat",
           "expected_output": "[[bat], [ate, eat, tea], [nat, tan]]",
           "is_sample": true
         }
-      ]
+      ],
+      "judge_note": "本题参考实现是「方法 + 硬编码 main」，不读 args，离线不做自动判分。请对照 samples 与参考实现自评。"
     },
     {
       "type": "coding",
@@ -198,13 +200,14 @@
       "external_url": "https://leetcode.cn/problems/top-k-frequent-elements/",
       "time_limit_ms": 2000,
       "memory_limit_mb": 256,
-      "test_cases": [
+      "samples": [
         {
           "input": "nums=[1,1,1,2,2,3] k=2",
           "expected_output": "[1, 2]",
           "is_sample": true
         }
-      ]
+      ],
+      "judge_note": "本题参考实现是「方法 + 硬编码 main」，不读 args，离线不做自动判分。请对照 samples 与参考实现自评。"
     }
   ]
 }

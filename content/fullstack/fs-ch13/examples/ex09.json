@@ -1,0 +1,8 @@
+{
+  "title": "契约测试：提供者在 CI 重放验证",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "[{\"path\":\"/orders/1\",\"ok\":true}]",
+  "code": "// 契约测试：提供者在 CI 里重放契约，证明自己仍满足消费者期望\nfunction verifyProvider(contract, handler) {\n  return contract.interactions.map((it) => {\n    const actual = handler(it.withRequest);\n    const ok =\n      actual.status === it.willRespondWith.status &&\n      actual.body.id === it.willRespondWith.body.id;\n    return { path: it.withRequest.path, ok };\n  });\n}\n\nconst handler = (req) =>\n  req.path === \"/orders/1\"\n    ? { status: 200, body: { id: 1, total: 99 } }\n    : { status: 404, body: null };\n\nconst contract = {\n  interactions: [\n    { withRequest: { path: \"/orders/1\" }, willRespondWith: { status: 200, body: { id: 1 } } },\n  ],\n};\nconsole.log(JSON.stringify(verifyProvider(contract, handler)));\n"
+}

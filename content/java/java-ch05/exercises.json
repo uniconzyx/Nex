@@ -138,13 +138,14 @@
       "external_url": "https://leetcode.cn/problems/valid-parentheses/",
       "time_limit_ms": 2000,
       "memory_limit_mb": 256,
-      "test_cases": [
+      "samples": [
         {
           "input": "()[]{} / (]",
           "expected_output": "true\nfalse",
           "is_sample": true
         }
-      ]
+      ],
+      "judge_note": "本题参考实现是「方法 + 硬编码 main」，不读 args，离线不做自动判分。请对照 samples 与参考实现自评。"
     },
     {
       "type": "choice",

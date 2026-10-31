@@ -1,4 +1,22 @@
 # 01 · RAII：资源获取即初始化，与异常安全的第一性原理
+> RAII 把「资源生命周期」绑死在「对象作用域」上：构造即获取、析构即释放，离开作用域（无论正常 return 还是抛异常）都会自动回收，是 C++ 防泄漏的基石。三种智能指针表达三种所有权语义——unique 独占、shared 引用计数、weak 旁观不持有。
+
+```text
+所有权三态：
+
+  unique_ptr<T>   独占     move 转移，不可拷贝      ── 默认首选
+  shared_ptr<T>   共享     引用计数，归零才释放      ── 需共享时
+  weak_ptr<T>     旁观     不增计数，lock() 探活     ── 破循环引用
+
+  auto a = make_unique<File>();   // 构造即 open
+  { auto b = a; }                // 编译失败：unique 不可拷贝（安全）
+  auto s = make_shared<Res>();   // use_count = 1
+  weak_ptr<Res> w = s;           // use_count 仍为 1
+  if (auto p = w.lock()) { /* 仍活着 */ }   // 防悬垂
+
+RAII 链：锁/文件/连接/内存 全部「栈上对象管堆上资源」，异常安全靠它。
+```
+
 
 ## 一、理论根基：为什么"确定性析构"是 C++ 的脊梁
 

@@ -1,0 +1,8 @@
+{
+  "title": "有缓冲 channel（容量2）：缓冲满后发送阻塞",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "put a (buf可用)\nput b (buf可用)\nput c 前缓冲已满，发送者将阻塞\n发送c: 被取走后放行\n取走:a\n取走:b\n取走:c",
+  "code": "class Chan {\n  constructor(cap = 0) { this.cap = cap; this.buf = []; this.putQ = []; this.takeQ = []; }\n  put(v) { return new Promise(res => {\n    if (this.takeQ.length) { const t = this.takeQ.shift(); t(v); res(); return; }\n    if (this.buf.length < this.cap) { this.buf.push(v); res(); return; }\n    this.putQ.push({ v, res });\n  }); }\n  take() { return new Promise(res => {\n    if (this.buf.length) { const v = this.buf.shift(); if (this.putQ.length) { const p = this.putQ.shift(); this.buf.push(p.v); p.res(); } res(v); return; }\n    if (this.putQ.length) { const p = this.putQ.shift(); res(p.v); p.res(); return; }\n    this.takeQ.push(res);\n  }); }\n}\nconst ch = new Chan(2);\nconst log = [];\n(async () => {\n  await ch.put(\"a\"); log.push(\"put a (buf可用)\");\n  await ch.put(\"b\"); log.push(\"put b (buf可用)\");\n  const sendC = (async () => { await ch.put(\"c\"); log.push(\"发送c: 被取走后放行\"); })();\n  log.push(\"put c 前缓冲已满，发送者将阻塞\");\n  log.push(\"取走:\" + await ch.take());\n  await sendC;\n  log.push(\"取走:\" + await ch.take());\n  log.push(\"取走:\" + await ch.take());\n  console.log(log.join(\"\\n\"));\n})();\n"
+}

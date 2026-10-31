@@ -1,0 +1,8 @@
+{
+  "title": "全局范数裁剪：只改长度不改方向",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "原梯度 norm = 5.0000, 方向 = [0.6 0.8 0. ]\n裁剪系数 scale = 0.2000\n裁剪后 norm = 1.0000, 方向 = [0.6 0.8 0. ]\n方向余弦 = 1.0000000000（=1 表示方向完全不变）\n\n对比逐元素裁剪 (clamp to [-1,1])：\n  [1. 1. 0.], norm=1.4142, 方向=[0.70710678 0.70710678 0.        ]\n  方向余弦 = 0.9899 -> 方向被改变\n结论：全局范数裁剪是等比缩放（保方向，等价于降学习率）；逐元素裁剪会扭曲更新方向\n",
+  "code": "\nimport numpy as np\ng = np.array([3.0, 4.0, 0.0])     # ||g|| = 5\nc = 1.0\nnorm = np.linalg.norm(g)\nscale = min(1.0, c / norm)\ng_clip = g * scale\ncos = float(g @ g_clip / (norm * np.linalg.norm(g_clip)))\n\nprint(f\"原梯度 norm = {norm:.4f}, 方向 = {g/norm}\")\nprint(f\"裁剪系数 scale = {scale:.4f}\")\nprint(f\"裁剪后 norm = {np.linalg.norm(g_clip):.4f}, 方向 = {g_clip/np.linalg.norm(g_clip)}\")\nprint(f\"方向余弦 = {cos:.10f}（=1 表示方向完全不变）\")\nprint()\nprint(\"对比逐元素裁剪 (clamp to [-1,1])：\")\ng_el = np.clip(g, -c, c)\nprint(f\"  {g_el}, norm={np.linalg.norm(g_el):.4f}, 方向={g_el/np.linalg.norm(g_el)}\")\nprint(\"  方向余弦 = {:.4f} -> 方向被改变\".format(float(g @ g_el / (norm * np.linalg.norm(g_el)))))\nprint(\"结论：全局范数裁剪是等比缩放（保方向，等价于降学习率）；逐元素裁剪会扭曲更新方向\")\n"
+}

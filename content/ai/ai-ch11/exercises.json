@@ -1,0 +1,185 @@
+{
+  "meta": {
+    "chapter": "ai-ch11",
+    "note": "9 题，含选择题/输出题/改错题/编程题；题面与参考实现均为自建，示例数值可在本机 python3 复现"
+  },
+  "items": [
+    {
+      "id": "ai-ch11-q1",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "max_batch_size 与 max_wait_ms 的关系",
+      "content_md": "某服务把 `max_batch_size` 从 8 调到 128，但 `max_wait_ms` 仍是 20ms，观察到的平均批大小几乎没变化。最合理的解释是？",
+      "options": [
+        {"key": "A", "text": "GPU 显存不足，框架自动把批降回去了"},
+        {"key": "B", "text": "20ms 等待窗口内到达的请求数太少，批在达标前就因超时被发出，上限不起作用"},
+        {"key": "C", "text": "max_batch_size 只影响显存分配，不影响实际批大小"},
+        {"key": "D", "text": "需要同时重启服务才能生效"}
+      ],
+      "answer": {
+        "correct": ["B"],
+        "explain": "关批有两个触发条件：收满 `max_batch_size` 个，或窗口到期。当到达率低时，20ms 内根本凑不到 128 个，于是总由「窗口到期」触发关批，上限永远达不到。要让上限生效，必须让等待窗口足够长，或提高到达率。"
+      },
+      "explanation": "两个参数是乘性关系：只有「窗口内能到的请求数」大于等于批上限时，上限才是有效约束。",
+      "tags": ["batching", "latency"],
+      "source": "self",
+      "source_ref": "ai-ch11 concept/01 · 动态批处理：延迟与吞吐的对冲"
+    },
+    {
+      "id": "ai-ch11-q2",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "等待窗口应该怎么定",
+      "content_md": "产品承诺 P99 延迟 < 500ms，模型单批计算耗时 100ms，框架与网络开销 50ms。合理的 `max_wait_ms` 取值最接近？",
+      "options": [
+        {"key": "A", "text": "500ms，把整个预算都用来等，批能凑得最满"},
+        {"key": "B", "text": "350ms 左右，即 SLO 减去计算耗时与框架开销后留些余量"},
+        {"key": "C", "text": "10ms，等待越短用户体验越好"},
+        {"key": "D", "text": "越小越好，因为等待是纯粹的成本"}
+      ],
+      "answer": {
+        "correct": ["B"],
+        "explain": "可用预算 = 500 − 100（计算）− 50（框架/网络）= 350ms。等待窗口超过 350ms 就必然突破 P99 承诺；远小于 350ms（如 10ms）则批凑不起来，吞吐浪费在固定开销上。所以取 300ms 上下留余量最合理。"
+      },
+      "explanation": "等待窗口必须从 SLO 倒推，两头都是约束：太长必然超时，太短必然浪费算力。",
+      "tags": ["batching", "slo"],
+      "source": "self",
+      "source_ref": "ai-ch11 concept/01 · 为什么等待窗口应该由延迟预算倒推"
+    },
+    {
+      "id": "ai-ch11-q3",
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "NaN 的比较行为",
+      "content_md": "运行以下代码，输出是什么？\n\n```python\nimport math\nnan = float(\"nan\")\nprint(nan == nan, nan != nan, math.isfinite(nan))\nprint([x for x in [1.0, nan, 2.0] if x == x])\n```",
+      "answer": {
+        "expected_output": "False True False\n[1.0, 2.0]\n",
+        "explain": "`NaN` 是 IEEE 754 中唯一不满足自反性的值：`nan == nan` 为 False，`nan != nan` 为 True。判它必须用 `math.isfinite` 或 `math.isnan`。第二行用 `x == x` 做过滤，`NaN` 会被当成「不相等」直接滤掉——这正说明为什么用 `==` 拦不住 `NaN`，反而会把它悄悄丢掉。"
+      },
+      "explanation": "记住三条：`nan == nan` 假、`nan != nan` 真、`isfinite(nan)` 假。凡是把 `==` 当等价关系用的地方（去重、缓存键、集合）遇到 NaN 都会失效。",
+      "tags": ["nan", "validation"],
+      "source": "self",
+      "source_ref": "ai-ch11 concept/02 · 为什么 NaN 值得单独一段"
+    },
+    {
+      "id": "ai-ch11-q4",
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "批处理里一个坏请求拖垮整批",
+      "content_md": "以下批处理函数在遇到一条含 `NaN` 的输入时，会让同一批的其它正常请求也返回 500。找出问题并修正。\n\n```python\ndef run_batch(items):\n    cleaned = [validate(x) for x in items]   # 任一失败就抛 BadInput\n    return model(cleaned)\n```",
+      "answer": {
+        "reference_code": "def run_batch(items):\n    ok, idx, errors = [], [], []\n    for i, x in enumerate(items):\n        try:\n            ok.append(validate(x))\n            idx.append(i)\n        except BadInput as e:\n            errors.append((i, str(e)))\n    results = model(ok) if ok else []\n    out = [None] * len(items)\n    for j, i in enumerate(idx):\n        out[i] = {\"ok\": True, \"value\": results[j]}\n    for i, msg in errors:\n        out[i] = {\"ok\": False, \"error\": msg}\n    return out",
+        "explain": "原写法用列表推导式一次性校验，第一个异常就中断整个批，且已经算好的部分被丢弃。修正的关键是**逐请求隔离**：各自的异常各自捕获，正常的照常推理，最后按原下标回填结果。列表推导式在这里是错误工具——它无法表达「部分失败」。"
+      },
+      "explanation": "批处理的容错基本原则：失败必须被隔离到单条请求，且结果要能按原下标回填，否则调用方无法对应。",
+      "tags": ["batching", "fault-isolation"],
+      "source": "self",
+      "source_ref": "ai-ch11 concept/02 · 校验放在哪一层"
+    },
+    {
+      "id": "ai-ch11-q5",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "重试为什么必须加抖动",
+      "content_md": "某服务超时后按固定 50ms、150ms、350ms 退避重试。当 200 个客户端同时遇到超时时，最严重的后果是？",
+      "options": [
+        {"key": "A", "text": "总重试次数超过预期，日志膨胀"},
+        {"key": "B", "text": "所有客户端在同一毫秒重试，形成尖峰，把已过载的服务彻底压死"},
+        {"key": "C", "text": "退避时间过长导致用户等待过久"},
+        {"key": "D", "text": "固定退避没有副作用，等长退避本身就是最佳实践"}
+      ],
+      "answer": {
+        "correct": ["B"],
+        "explain": "固定退避让所有客户端的重试时刻完全重合。200 个客户端会在 50ms、150ms、350ms 三个时刻各形成一次 200 并发尖峰，而正常承载可能只有 50。这就是重试风暴。加 0.5~1.5 倍随机抖动后，重试被摊到整个窗口，峰值占比从 25% 降到 7%。"
+      },
+      "explanation": "退避解决的是「重试太频繁」，抖动解决的是「重试太同步」。两者缺一不可。",
+      "tags": ["retry", "backoff"],
+      "source": "self",
+      "source_ref": "ai-ch11 concept/03 · 超时必须带退避，否则会引发重试风暴"
+    },
+    {
+      "id": "ai-ch11-q6",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "ready 与 warm 的区别",
+      "content_md": "服务重启后，`GET /health` 在权重加载完成时立刻返回 `ready: true`。此时网关把全量流量打进来，第一个用户请求超时。最合理的修法是？",
+      "options": [
+        {"key": "A", "text": "把超时时间调大，让首次推理能跑完"},
+        {"key": "B", "text": "健康检查增加 `warm` 层，摘流条件改为 ready AND warm，并在预热时用真实形状输入"},
+        {"key": "C", "text": "增加副本数分摊首次请求压力"},
+        {"key": "D", "text": "这是框架 bug，换推理框架即可"}
+      ],
+      "answer": {
+        "correct": ["B"],
+        "explain": "`ready` 只表示权重在内存里，`warm` 才表示「kernel 已编译、显存池已分配，首次推理不会慢」。两者的差距就是冷启动，实测是正常耗时的接近两倍。修法是加 warm 层并用真实长度预热——用长度 1 的假输入预热不会分配长序列需要的显存块，等于白做。"
+      },
+      "explanation": "健康检查分三层：alive（进程在）、ready（权重已加载）、warm（已用真实形状预热）。摘流看后两者。",
+      "tags": ["health-check", "cold-start"],
+      "source": "self",
+      "source_ref": "ai-ch11 concept/03 · 健康检查要检查什么"
+    },
+    {
+      "id": "ai-ch11-q7",
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "hard",
+      "title": "容量规划漏掉了显存约束",
+      "content_md": "下面的容量规划只看延迟：给定 SLO 就一路把批开到最大。请指出它会导致什么问题，并说明正确做法。\n\n```python\ndef plan(qps, slo_ms):\n    n = 1\n    while 20 + 2.5 * (n + 1) <= slo_ms:\n        n += 1\n    return n, qps / (n / ((20 + 2.5 * n) / 1000))\n```\n\n设 SLO=1000ms、权重 1400MB、每请求 KV 180MB。",
+      "answer": {
+        "reference_code": "def plan(qps, slo_ms, weight_mb=1400, kv_mb=180, hw_max=64):\n    # 延迟允许的批\n    n_by_lat = 1\n    while 20 + 2.5 * (n_by_lat + 1) <= slo_ms:\n        n_by_lat += 1\n    # 硬件/显存允许的批：取小\n    n = min(n_by_lat, hw_max)\n    batch_s = (20 + 2.5 * n) / 1000.0\n    per_replica = n / batch_s\n    vram_gb = (weight_mb + n * kv_mb) / 1024\n    import math\n    return {\n        \"n_by_latency\": n_by_lat,\n        \"n_actual\": n,\n        \"per_replica_qps\": round(per_replica, 1),\n        \"replicas\": math.ceil(qps / per_replica),\n        \"vram_gb\": round(vram_gb, 1),\n    }",
+        "explain": "原写法在 SLO=1000ms 时算出批 392，KV 需 392×180MB ≈ 69GB，加上权重共 70GB——单卡装不下，直接 OOM。正确做法是批大小取 `min(延迟允许, 硬件允许)`：延迟允许 392，硬件上限 64，实际批 64，显存 12.6GB。副作用是单副本吞吐被压到约 356 请求/s，副本数因此需要更多——这个代价必须显式算出来，而不是被一个不可能的批大小掩盖。"
+      },
+      "explanation": "两个约束都要算，取小。只按延迟会算出爆显存的天真方案；只按硬件会算出必超时的方案。",
+      "tags": ["capacity", "vram"],
+      "source": "self",
+      "source_ref": "ai-ch11 concept/01 + ex06 容量规划"
+    },
+    {
+      "id": "ai-ch11-q8",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "实现一个带超时、退避抖动与抖动的批处理调度器",
+      "content_md": "实现 `schedule(arrivals, max_batch, max_wait_ms, latency_fn)`，模拟动态批处理并返回延迟统计。要求：\n\n1. `arrivals` 是递增的到达时刻（秒）；\n2. 批在 `max(arrivals[i], free_at)` 打开，窗口为 `max_wait_ms`；\n3. 收满 `max_batch` 个，或窗口到期，即关批；\n4. 关批时刻：收满时取第 `max_batch` 个的到达时刻，否则取窗口到期时刻；\n5. 计算耗时由 `latency_fn(n)` 给出（毫秒），返回 P50、P99、平均批大小；\n6. **断言所有延迟非负**。\n\n自行构造一组泊松到达做验证。",
+      "answer": {
+        "reference_code": "def schedule(arrivals, max_batch, max_wait_ms, latency_fn):\n    lat, batches, free_at, i = [], 0, 0.0, 0\n    while i < len(arrivals):\n        start = max(arrivals[i], free_at)\n        close = start + max_wait_ms / 1000.0\n        k = i\n        while k < len(arrivals) and (k - i) < max_batch and arrivals[k] <= close:\n            k += 1\n        n = k - i\n        close_at = arrivals[k - 1] if n == max_batch else close\n        finish = close_at + latency_fn(n) / 1000.0\n        for m in range(i, k):\n            lat.append((finish - arrivals[m]) * 1000.0)\n        i, free_at, batches = k, finish, batches + 1\n    assert all(v >= 0 for v in lat), \"负延迟\"\n    lat.sort()\n    t = len(lat)\n    return {\n        \"p50\": lat[t // 2],\n        \"p99\": lat[min(t - 1, int(t * 0.99))],\n        \"avg_batch\": t / batches,\n    }",
+        "explain": "最容易写错的是第 4 步。若统一用「窗口到期时刻」作为计算起点，则收满时也会等到窗口结束才开算，白白多等；若统一用「最后一个请求到达」作起点，则未收满时提前开算，等于窗口没起作用。必须分支处理。\n\n负延迟的来源：`finish` 若早于批内某个请求的到达时刻，该请求的延迟就是负的。这通常意味着关批时刻算错了（用了 `start` 而不是真正的关批时刻）。断言是检查这个错误的最便宜手段。"
+      },
+      "explanation": "核心是把「关批时刻」和「批打开时刻」分开。两者混同会同时产生「白等」和「负延迟」两类错误。",
+      "tags": ["batching", "simulation"],
+      "source": "self",
+      "source_ref": "ai-ch11 concept/01 + ex02 动态批处理模拟"
+    },
+    {
+      "id": "ai-ch11-q9",
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "实现模型版本文件名解析与覆盖检测",
+      "content_md": "模型权重命名规范为 `{model}-v{ver}-{YYYYMMDD}-{hash6}.{ext}`。实现：\n\n1. 解析文件名，返回 model、ver（整数）、date、hash；命名不合规返回 `None`；\n2. 检出「同 model 同 ver 同 date 但 hash 不同」的覆盖冲突；\n3. 按 ver **数值**排序（`v10` 必须排在 `v2` 之后）。\n\n用以下列表验证：\n\n```\nintent-clf-v1-20260901-a1b2c3.safetensors\nintent-clf-v3-20261028-9a8b7c.safetensors\nintent-clf-v3-20261028-1f2e3d.safetensors\nmodel.safetensors\nintent-clf-v10-20261101-abcdef.safetensors\n```",
+      "answer": {
+        "reference_code": "import re\n\nNAME_RE = re.compile(\n    r\"^(?P<model>[a-z0-9-]+)-v(?P<ver>\\d+)-(?P<date>\\d{8})-(?P<hash>[0-9a-f]{6})\\.(?P<ext>\\w+)$\"\n)\n\n\ndef parse(fn):\n    m = NAME_RE.match(fn)\n    if not m:\n        return None\n    d = m.groupdict()\n    d[\"ver\"] = int(d[\"ver\"])\n    return d\n\n\ndef conflicts(files):\n    buckets = {}\n    for fn in files:\n        d = parse(fn)\n        if not d:\n            continue\n        buckets.setdefault((d[\"model\"], d[\"ver\"], d[\"date\"]), []).append(d[\"hash\"])\n    return {k: v for k, v in buckets.items() if len(set(v)) > 1}\n\n\ndef ordered(files):\n    ds = [d for d in (parse(f) for f in files) if d]\n    return sorted(ds, key=lambda d: (d[\"ver\"], d[\"date\"]))",
+        "explain": "三个关键点：① 正则必须锚定 `^...$`，否则 `model.safetensors` 可能被部分匹配；② `ver` 必须转成 int，字符串排序会把 `v10` 排在 `v2` 前面（`\"1\" < \"2\"`）；③ 冲突判定要先 `set` 去重再比长度，否则同一个 hash 重复出现会被误报。"
+      },
+      "explanation": "版本号排序必须数值化，这是「v10 排在 v2 前」这类 bug 的唯一根因。冲突检测的价值在于暴露「同名覆盖」。",
+      "tags": ["versioning", "regex"],
+      "source": "self",
+      "source_ref": "ai-ch11 concept/03 + ex09 模型版本命名解析"
+    }
+  ]
+}

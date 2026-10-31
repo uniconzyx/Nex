@@ -35,6 +35,80 @@ REST 用 HTTP 状态码表达结果；**幂等性**指「多次相同请求产�
 - 标准问法：「GET/POST/PUT/DELETE 哪些幂等？」答：GET、PUT、DELETE 幂等；POST 不幂等；GET 同时安全且幂等，PUT 幂等但不安全。
 - 易错：认为「返回相同响应就是幂等」是错的，幂等看**副作用终态**，与响应体是否相同无关。
 - 401 与 403 区别（前者未认证/未登录，后者已登录但无权限）是高频送分题，必须一字不差。
+
+<!-- injected-code -->
+## 可运行代码：把上面的说法跑一遍
+
+下面两段直接取自本章示例库（`examples/`），期望输出就是判题台里判定的那串字符串，不是事后补写的说明。读完正文后先照着跑一遍，再回去看「三视角解析」里对应的那条。
+
+### ex01-router-basic
+
+```java
+import java.util.*;
+public class Main {
+    interface Handler { String handle(String body); }
+    public static void main(String[] a){
+        Map<String,Handler> routes = new LinkedHashMap<>();
+        routes.put("GET /users", (b)->"200 OK [list 2 users]");
+        routes.put("POST /users", (b)->"201 Created [id=3]");
+        String[] reqs = {"GET /users","POST /users","DELETE /users"};
+        for(String r: reqs){
+            Handler h = routes.get(r);
+            System.out.println(r + " -> " + (h==null ? "404 Not Found" : h.handle("")));
+        }
+    }
+}
+```
+
+实际输出：
+
+```text
+GET /users -> 200 OK [list 2 users]
+POST /users -> 201 Created [id=3]
+DELETE /users -> 404 Not Found
+```
+
+> 出处：`examples/ex01-router-basic.json`。改一处再看输出变没变，比读三遍解释有用。
+
+### ex02-path-variable
+
+```java
+import java.util.*;
+public class Main {
+    static String extract(String template, String path){
+        String[] tp = template.split("/");
+        String[] pp = path.split("/");
+        if(tp.length!=pp.length) return null;
+        Map<String,String> vars=new LinkedHashMap<>();
+        for(int i=0;i<tp.length;i++){
+            if(tp[i].startsWith("{")&&tp[i].endsWith("}")){
+                vars.put(tp[i].substring(1,tp[i].length()-1), pp[i]);
+            } else if(!tp[i].equals(pp[i])){
+                return null;
+            }
+        }
+        return vars.isEmpty()?"" : vars.toString();
+    }
+    public static void main(String[] a){
+        System.out.println(extract("/users/{id}","/users/42"));
+        System.out.println(extract("/users/{id}","/users/abc"));
+        System.out.println(extract("/users/{id}","/posts/42"));
+        System.out.println(extract("/users/{id}/posts/{pid}","/users/7/posts/99"));
+    }
+}
+```
+
+实际输出：
+
+```text
+{id=42}
+{id=abc}
+null
+{id=7, pid=99}
+```
+
+> 出处：`examples/ex02-path-variable.json`。改一处再看输出变没变，比读三遍解释有用。
+
 ## 三视角小结
 
 | 视角 | 一句话结论 |

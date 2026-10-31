@@ -1,0 +1,8 @@
+{
+  "title": "unknown 与 any 的区别：在使用点才暴露",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "3 3 2 -1",
+  "code": "// any 直接可用；unknown 必须先收窄\nfunction lenAny(x) { return x.length; }\nfunction lenUnknown(x) {\n  if (typeof x === \"string\" || Array.isArray(x)) return x.length;\n  return -1;\n}\n\nconsole.log(lenAny(\"abc\"), lenUnknown(\"abc\"), lenUnknown([1, 2]), lenUnknown(42));\n"
+}

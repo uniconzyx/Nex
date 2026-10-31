@@ -10,14 +10,34 @@
       "title": "关于 std::sort 的比较器，正确的是",
       "content_md": "以下描述中，选出**正确**的一项。",
       "options": [
-        { "key": "A", "text": "比较器可以写成 a <= b，方便表达「小于等于」" },
-        { "key": "B", "text": "std::sort 的比较器必须满足严格弱序（Strict Weak Ordering）" },
-        { "key": "C", "text": "std::list 可以直接传随机访问迭代器给 std::sort" },
-        { "key": "D", "text": "std::sort 最坏复杂度可能退化到 O(N^2) 也无所谓" }
+        {
+          "key": "A",
+          "text": "比较器可以写成 a <= b，方便表达「小于等于」"
+        },
+        {
+          "key": "B",
+          "text": "std::sort 的比较器必须满足严格弱序（Strict Weak Ordering）"
+        },
+        {
+          "key": "C",
+          "text": "std::list 可以直接传随机访问迭代器给 std::sort"
+        },
+        {
+          "key": "D",
+          "text": "std::sort 最坏复杂度可能退化到 O(N^2) 也无所谓"
+        }
       ],
-      "answer": { "correct": ["B"] },
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
       "explanation": "sort 要求严格弱序，违反即 UB（A 错）；list 是双向迭代器，不能调需要随机访问的 std::sort，只能 list::sort（C 错）；introsort 把最坏锁在 O(N log N)（D 错）。",
-      "tags": ["sort", "strict-weak-ordering", "iterator-category"],
+      "tags": [
+        "sort",
+        "strict-weak-ordering",
+        "iterator-category"
+      ],
       "source": "self",
       "source_ref": "《C++ Primer（第5版）》第 10 章 泛型算法 / 《Effective STL》条款 21",
       "category": "基础题",
@@ -28,9 +48,14 @@
       "difficulty": "easy",
       "title": "读代码写输出（stable_sort 稳定性）",
       "content_md": "```cpp\n#include <iostream>\n#include <vector>\n#include <algorithm>\nstruct Item { int key; int id; };\nint main() {\n  std::vector<Item> a = {{1,0},{2,1},{1,2},{3,3},{2,4},{1,5}};\n  std::stable_sort(a.begin(), a.end(), [](auto& x, auto& y){ return x.key < y.key; });\n  for (auto& it : a) std::cout << it.key << ':' << it.id << ' ';\n}\n```",
-      "answer": { "output": "1:0 1:2 1:5 2:1 2:4 3:3 " },
+      "answer": {
+        "output": "1:0 1:2 1:5 2:1 2:4 3:3 "
+      },
       "explanation": "stable_sort 对相等 key 保持原相对顺序：key=1 的 id 依次为 0,2,5；key=2 为 1,4；key=3 为 3。",
-      "tags": ["stable-sort", "stability"],
+      "tags": [
+        "stable-sort",
+        "stability"
+      ],
       "source": "self",
       "source_ref": "《C++ Primer（第5版）》第 10 章 stable_sort",
       "category": "基础题",
@@ -45,7 +70,11 @@
         "reference_code": "std::vector<int> v = {1,2,3,4,5,6};\nfor (auto it = v.begin(); it != v.end(); )\n  it = (*it % 2 == 0) ? v.erase(it) : std::next(it);\n// C++20 更简洁：std::erase_if(v, [](int x){ return x % 2 == 0; });"
       },
       "explanation": "erase 返回下一有效迭代器，必须用其推进，绝不能用失效的 it 再 ++。需 #include <iterator> 用 std::next。",
-      "tags": ["iterator-invalidation", "erase", "vector"],
+      "tags": [
+        "iterator-invalidation",
+        "erase",
+        "vector"
+      ],
       "source": "self",
       "source_ref": "《C++ Primer（第5版）》第 9/10 章 删除元素",
       "category": "基础题",
@@ -55,16 +84,38 @@
       "type": "coding",
       "difficulty": "mid",
       "title": "用 STL 算法统计并输出词频 Top3",
-      "content_md": "给定 `vector<string> words`，要求：1) 用 `std::unordered_map` 统计每个词频次；2) 用 `std::vector` 收集 (词,频次) 对；3) 用 `std::sort` + lambda 按频次降序排序并输出前 3 个（频次相同按字典序）。只调 STL，不手写排序循环。",
+      "content_md": "给定 `vector<string> words`，要求：1) 用 `std::unordered_map` 统计每个词频次；2) 用 `std::vector` 收集 (词,频次) 对；3) 用 `std::sort` + lambda 按频次降序排序并输出前 3 个（频次相同按字典序）。只调 STL，不手写排序循环。\n\n<!-- judge-io -->\n**判题 I/O 约定**（提交完整程序：从 stdin 读、向 stdout 写）\n\n输入：第一行整数 `n`；第二行 `n` 个以空格分隔的单词。\n输出：频次最高的 3 个单词，每行 `word:count`（频次相同按词典序，不足 3 个则全部输出）。",
       "answer": {
-        "reference_code": "#include <iostream>\n#include <vector>\n#include <string>\n#include <unordered_map>\n#include <algorithm>\nint main() {\n  std::vector<std::string> words = {\"a\",\"b\",\"a\",\"c\",\"b\",\"a\",\"d\",\"b\"};\n  std::unordered_map<std::string,int> freq;\n  for (auto& w : words) freq[w]++;\n  std::vector<std::pair<std::string,int>> v(freq.begin(), freq.end());\n  std::sort(v.begin(), v.end(), [](auto& x, auto& y){\n    return x.second != y.second ? x.second > y.second : x.first < y.first;\n  });\n  for (size_t i = 0; i < std::min<size_t>(3, v.size()); ++i)\n    std::cout << v[i].first << ':' << v[i].second << '\\n';\n}"
+        "reference_code": "#include <algorithm>\n#include <iostream>\n#include <string>\n#include <unordered_map>\n#include <vector>\n\nint main() {\n    int n = 0;\n    if (!(std::cin >> n)) return 0;\n    std::unordered_map<std::string, int> cnt;\n    for (int i = 0; i < n; ++i) {\n        std::string w;\n        std::cin >> w;\n        ++cnt[w];\n    }\n    std::vector<std::pair<std::string, int>> v(cnt.begin(), cnt.end());\n    std::sort(v.begin(), v.end(), [](const auto& a, const auto& b) {\n        if (a.second != b.second) return a.second > b.second;\n        return a.first < b.first;\n    });\n    int k = std::min<int>(3, (int)v.size());\n    for (int i = 0; i < k; ++i)\n        std::cout << v[i].first << \":\" << v[i].second << \"\\n\";\n    return 0;\n}\n"
       },
       "explanation": "unordered_map 计数 O(N)；sort lambda 先比频次（降序）再比字典序；min(3,size) 避免越界。综合考察 find/count 思路 + sort + lambda。",
-      "tags": ["unordered-map", "sort", "lambda", "top-k"],
+      "tags": [
+        "unordered-map",
+        "sort",
+        "lambda",
+        "top-k"
+      ],
       "source": "self",
       "source_ref": "《C++ Primer（第5版）》第 10 章 泛型算法综合",
       "category": "基础题",
-      "platform": "book"
+      "platform": "book",
+      "test_cases": [
+        {
+          "input": "5\napple banana apple cherry banana",
+          "expected_output": "apple:2\nbanana:2\ncherry:1",
+          "is_sample": true
+        },
+        {
+          "input": "7\na b c a b a",
+          "expected_output": "a:3\nb:2\n:1",
+          "is_sample": true
+        },
+        {
+          "input": "4\nz y x w",
+          "expected_output": "w:1\nx:1\ny:1",
+          "is_sample": false
+        }
+      ]
     },
     {
       "type": "design",
@@ -75,7 +126,12 @@
         "reference_code": "void sortColors(vector<int>& a) {\n  int lo = 0, mid = 0, hi = (int)a.size() - 1;\n  while (mid <= hi) {\n    if (a[mid] == 0) swap(a[lo++], a[mid++]);\n    else if (a[mid] == 2) swap(a[mid], a[hi--]);\n    else ++mid;\n  }\n}"
       },
       "explanation": "三路划分：lo 之前全 0、hi 之后全 2、中间全 1；用「一次扫描 + 常数空间」的方法，本质与 std::partition 同族。",
-      "tags": ["sort", "partition", "two-pointers", "dutch-flag"],
+      "tags": [
+        "sort",
+        "partition",
+        "two-pointers",
+        "dutch-flag"
+      ],
       "source": "leetcode",
       "source_ref": "LeetCode 75（sort-colors）",
       "external_url": "https://leetcode.cn/problems/sort-colors/",
@@ -91,7 +147,12 @@
         "reference_code": "vector<vector<int>> merge(vector<vector<int>>& iv) {\n  sort(iv.begin(), iv.end(), [](auto& a, auto& b){ return a[0] < b[0]; });\n  vector<vector<int>> ans;\n  for (auto& cur : iv) {\n    if (ans.empty() || cur[0] > ans.back()[1]) ans.push_back(cur);\n    else ans.back()[1] = max(ans.back()[1], cur[1]);\n  }\n  return ans;\n}"
       },
       "explanation": "先按左端点排序（sort + lambda），再贪心合并：当前区间左端点大于上一区间右端点就新开，否则延展。考察 sort + lambda + 区间处理。",
-      "tags": ["sort", "lambda", "intervals", "greedy"],
+      "tags": [
+        "sort",
+        "lambda",
+        "intervals",
+        "greedy"
+      ],
       "source": "leetcode",
       "source_ref": "LeetCode 56（merge-intervals）",
       "external_url": "https://leetcode.cn/problems/merge-intervals/",
@@ -107,7 +168,11 @@
         "reference_code": "// 同 LeetCode 56：按左端点 sort，再贪心合并；注意牛客返回下标/格式依题面调整。"
       },
       "explanation": "牛客 BM89 与 LeetCode 56 思路一致，重点仍是「排序 + 一次扫描合并」的 STL 算法组合。",
-      "tags": ["sort", "intervals", "nowcoder"],
+      "tags": [
+        "sort",
+        "intervals",
+        "nowcoder"
+      ],
       "source": "nowcoder",
       "source_ref": "牛客 BM89（合并区间）",
       "external_url": "https://www.nowcoder.com/practice/69f4e5b7ad284a9a979f6400d4cd4cae",

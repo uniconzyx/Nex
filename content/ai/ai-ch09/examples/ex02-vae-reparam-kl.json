@@ -1,0 +1,8 @@
+{
+  "title": "重参数化与高斯 KL 闭式解对账",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "sigma = [1.     0.6065 1.4191]\nKL 闭式解 = 1.185816\n蒙特卡洛估计（重参数化 z = mu + sigma*eps）：\n  n=   100  KL_MC = 1.280487  |误差| = 0.094671\n  n=  1000  KL_MC = 1.205819  |误差| = 0.020003\n  n= 10000  KL_MC = 1.187616  |误差| = 0.001800\n  n=100000  KL_MC = 1.189946  |误差| = 0.004130\n结论：误差量级约 sigma/sqrt(n)（n=100 时约 0.09，n=10000 时约 0.002），\n      不严格单调是随机波动的正常表现；闭式解与采样估计在同一量级即为一致\n",
+  "code": "\nimport numpy as np\nrng = np.random.default_rng(1)\nmu = np.array([0.5, -1.2, 0.0])\nlogvar = np.array([0.0, -1.0, 0.7])\nsigma = np.exp(0.5 * logvar)\n# 闭式解: 0.5 * sum(mu^2 + sigma^2 - 1 - logvar)\nkl_closed = 0.5 * (mu ** 2 + sigma ** 2 - 1.0 - logvar).sum()\nprint(f\"sigma = {np.round(sigma, 4)}\")\nprint(f\"KL 闭式解 = {kl_closed:.6f}\")\nprint(\"蒙特卡洛估计（重参数化 z = mu + sigma*eps）：\")\nfor n in (100, 1000, 10000, 100000):\n    eps = rng.normal(size=(n, 3))\n    z = mu + sigma * eps                       # 梯度可穿过 mu/sigma\n    log_q = -0.5 * (((z - mu) / sigma) ** 2 + logvar + np.log(2 * np.pi)).sum(1)\n    log_p = -0.5 * (z ** 2 + np.log(2 * np.pi)).sum(1)\n    est = (log_q - log_p).mean()               # E_q[log q - log p]\n    print(f\"  n={n:>6d}  KL_MC = {est:.6f}  |误差| = {abs(est - kl_closed):.6f}\")\nprint(\"结论：误差量级约 sigma/sqrt(n)（n=100 时约 0.09，n=10000 时约 0.002），\")\nprint(\"      不严格单调是随机波动的正常表现；闭式解与采样估计在同一量级即为一致\")\n"
+}

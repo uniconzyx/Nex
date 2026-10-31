@@ -45,3 +45,94 @@
 - **标准问法**：「什么是部分同步？repl_backlog 起什么作用？」答：从节点短暂断线重连时，若断线期间写命令仍在主节点 `repl_backlog` 环形缓冲中（offset 未滑出窗口），主节点回 `CONTINUE` 并只补发缺失区间，无需全量；backlog 大小决定了可容忍的断线时长/写入量。
 - **常考辨析**：`offset` 是全局单调递增的逻辑复制进度，不是字节绝对地址；`REPLCONF ACK` 周期（1s）上报 offset，用于计算 `lag` 与 min-replicas 保护。
 - **易错口径**：部分同步「不是」默认永远可用——backlog 是固定大小环形缓冲，写入过快或断线过久导致 offset 被覆盖，就会退化成全量同步；backlog 调大能延长可容忍窗口。
+
+<!-- injected-code -->
+## 可运行代码：把上面的说法跑一遍
+
+下面两段直接取自本章示例库（`examples/`），期望输出就是判题台里判定的那串字符串，不是事后补写的说明。读完正文后先照着跑一遍，再回去看「三视角解析」里对应的那条。
+
+### 主从全量同步 PSYNC（fork RDB + 从节点载入 + 补增量）
+
+```python
+print("=== 主从全量同步 PSYNC 模拟 ===")
+master_data = {"k1": 100, "k2": 200, "k3": 300}
+print("主节点数据:", master_data)
+print("从节点 -> 主节点: PSYNC ? -1 (首次, 请求全量)")
+snapshot = dict(master_data)
+print("主节点 fork 子进程生成 RDB 快照:", snapshot)
+slave_data = dict(snapshot)
+print("从节点清空本地并载入 RDB -> 数据:", slave_data)
+master_data["k4"] = 400
+print("同步期间主节点新写 k4=400")
+slave_data["k4"] = 400
+print("主节点补发增量写命令, 从节点应用 -> 数据:", slave_data)
+print("结果: 全量同步完成, 主从数据一致")
+```
+
+实际输出：
+
+```text
+=== 主从全量同步 PSYNC 模拟 ===
+主节点数据: {'k1': 100, 'k2': 200, 'k3': 300}
+从节点 -> 主节点: PSYNC ? -1 (首次, 请求全量)
+主节点 fork 子进程生成 RDB 快照: {'k1': 100, 'k2': 200, 'k3': 300}
+从节点清空本地并载入 RDB -> 数据: {'k1': 100, 'k2': 200, 'k3': 300}
+同步期间主节点新写 k4=400
+主节点补发增量写命令, 从节点应用 -> 数据: {'k1': 100, 'k2': 200, 'k3': 300, 'k4': 400}
+结果: 全量同步完成, 主从数据一致
+```
+
+> 出处：`examples/ex01_fullsync_psync.json`。改一处再看输出变没变，比读三遍解释有用。
+
+### 部分同步：repl_backlog 环形缓冲 + offset 续传
+
+```python
+print("=== 部分同步 repl_backlog 模拟 ===")
+BACKLOG = 16
+backlog = []
+master_offset = 0
+def master_write(cmd):
+    global master_offset
+    backlog.append(cmd)
+    if len(backlog) > BACKLOG:
+        backlog.pop(0)
+    master_offset += 1
+for c in ["SET a 1", "SET b 2", "SET c 3"]:
+    master_write(c)
+print("主节点写入3条, master_offset =", master_offset)
+print("repl_backlog (环形, 容量 %d):" % BACKLOG, backlog)
+slave_offset = 2
+print("从节点同步到 slave_offset =", slave_offset, "后断线")
+for c in ["SET d 4", "SET e 5"]:
+    master_write(c)
+print("断线期间主节点再写2条, master_offset =", master_offset)
+window_base = master_offset - len(backlog)
+print("从节点重连: PSYNC <replid> %d" % slave_offset)
+if slave_offset >= window_base:
+    print("offset %d 仍在 repl_backlog 窗口 [base=%d, now=%d] -> 部分同步 CONTINUE" % (slave_offset, window_base, master_offset))
+    missing = backlog[slave_offset - window_base:]
+    print("主节点只补发缺失区间命令:", missing)
+    slave_offset = master_offset
+    print("从节点应用缺失区间 -> slave_offset =", slave_offset)
+else:
+    print("offset 已滑出窗口 -> 全量同步 FULLRESYNC")
+print("结果: 主从恢复一致, 仅补增量未走全量")
+```
+
+实际输出：
+
+```text
+=== 部分同步 repl_backlog 模拟 ===
+主节点写入3条, master_offset = 3
+repl_backlog (环形, 容量 16): ['SET a 1', 'SET b 2', 'SET c 3']
+从节点同步到 slave_offset = 2 后断线
+断线期间主节点再写2条, master_offset = 5
+从节点重连: PSYNC <replid> 2
+offset 2 仍在 repl_backlog 窗口 [base=0, now=5] -> 部分同步 CONTINUE
+主节点只补发缺失区间命令: ['SET c 3', 'SET d 4', 'SET e 5']
+从节点应用缺失区间 -> slave_offset = 5
+结果: 主从恢复一致, 仅补增量未走全量
+```
+
+> 出处：`examples/ex02_partial_repl_backlog.json`。改一处再看输出变没变，比读三遍解释有用。
+

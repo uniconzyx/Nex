@@ -1,0 +1,8 @@
+{
+  "title": "多项式核：隐式内积 vs 显式特征映射",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "x=[ 2. -1.], z=[0.5 3. ]\n隐式： (x·z+1)^2 = 1.000000\n显式： <phi(x),phi(z)> = 1.000000\n误差 = 8.88e-16\n显式特征维度 = 6\n\n2 阶升 6 维只是小例子：d=10、deg=3 时显式维度 = C(10+3,3) = 286\n而核计算仍是 1 次内积 + 1 次幂：与维度无关\n结论：核技巧的核心是『只算内积、不造 φ』，维度爆炸被绕开\n",
+  "code": "\nimport numpy as np\nx = np.array([2.0, -1.0]); z = np.array([0.5, 3.0])\n\ndef phi(v):\n    # (x·z + 1)^2 对应 6 维显式特征\n    a, b = v\n    return np.array([a*a, np.sqrt(2)*a*b, b*b, np.sqrt(2)*a, np.sqrt(2)*b, 1.0])\n\nk_implicit = (x @ z + 1) ** 2\nk_explicit = phi(x) @ phi(z)\nprint(f\"x={x}, z={z}\")\nprint(f\"隐式： (x·z+1)^2 = {k_implicit:.6f}\")\nprint(f\"显式： <phi(x),phi(z)> = {k_explicit:.6f}\")\nprint(f\"误差 = {abs(k_implicit-k_explicit):.2e}\")\nprint(f\"显式特征维度 = {len(phi(x))}\")\nprint()\nd, deg = 10, 3\nfrom math import comb\ndim = comb(d + deg, deg)\nprint(f\"2 阶升 6 维只是小例子：d={d}、deg={deg} 时显式维度 = C({d}+{deg},{deg}) = {dim}\")\nprint(f\"而核计算仍是 1 次内积 + 1 次幂：与维度无关\")\nprint(\"结论：核技巧的核心是『只算内积、不造 φ』，维度爆炸被绕开\")\n"
+}

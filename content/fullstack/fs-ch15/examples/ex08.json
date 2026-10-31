@@ -1,0 +1,8 @@
+{
+  "title": "Gin 风格 c.Abort() 阻断后续 handler",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "auth -> ratelimit: 超限，中断\naborted = true",
+  "code": "function runMiddleware(handlers, ctx) {\n  let i = 0;\n  function next() {\n    if (ctx.isAborted()) return;\n    if (i >= handlers.length) return;\n    const h = handlers[i++]; h(ctx, next);\n  }\n  next();\n}\nfunction makeCtx() {\n  const logs = []; let aborted = false;\n  return { logs, abort() { aborted = true; }, isAborted() { return aborted; } };\n}\nconst ctx = makeCtx();\nrunMiddleware([\n  (c, n) => { c.logs.push(\"auth\"); n(); },\n  (c, n) => { c.logs.push(\"ratelimit: 超限，中断\"); c.abort(); n(); },\n  (c, n) => { c.logs.push(\"handler(不应执行)\"); n(); },\n  (c, n) => { c.logs.push(\"after(不应执行)\"); n(); },\n], ctx);\nconsole.log(ctx.logs.join(\" -> \"));\nconsole.log(\"aborted =\", ctx.isAborted());\n"
+}

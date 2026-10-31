@@ -1,0 +1,8 @@
+{
+  "title": "合页损失与对数损失的差别（异常点为什么拉不动 SVM）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "margin   hinge损失  log损失   hinge梯度  log梯度\n-1.0       2.0000    1.3133      -1.00    -0.7311\n+0.0       1.0000    0.6931      -1.00    -0.5000\n+1.0       0.0000    0.3133      +0.00    -0.2689\n+2.0       0.0000    0.1269      +0.00    -0.1192\n+2.5       0.0000    0.0789      +0.00    -0.0759\n\n读表：margin > 1 后 hinge 的损失与梯度都为 0 —— 该样本不再影响模型（稀疏性的来源）；\n      log 损失的梯度始终非 0，远处的『已经分对』的样本仍持续推边界（对异常点更敏感）\n\nmargin=2.5 处：hinge 梯度 = +0.0，log 梯度 = -0.075858\n结论：hinge 在间隔外截断 => 模型只由边界附近样本决定，鲁棒性来自『不再理会』而不是『更聪明』\n",
+  "code": "\nimport numpy as np\nm = np.linspace(-2, 3, 2001)     # margin = y*f(x)\n\nhinge = np.maximum(0, 1 - m)\nlogloss = np.log1p(np.exp(-m))\nd_hinge = np.where(m < 1, -1.0, 0.0)\nd_log = -1.0 / (1.0 + np.exp(m))\n\ndef at(v):\n    i = int(np.argmin(np.abs(m - v)))\n    return hinge[i], logloss[i], d_hinge[i], d_log[i]\n\nprint(\"margin   hinge损失  log损失   hinge梯度  log梯度\")\nfor v in (-1.0, 0.0, 1.0, 2.0, 2.5):\n    h, l, dh, dl = at(v)\n    print(f\"{v:+.1f}     {h:8.4f}  {l:8.4f}   {dh:+8.2f}   {dl:+8.4f}\")\n\nprint()\nprint(\"读表：margin > 1 后 hinge 的损失与梯度都为 0 —— 该样本不再影响模型（稀疏性的来源）；\")\nprint(\"      log 损失的梯度始终非 0，远处的『已经分对』的样本仍持续推边界（对异常点更敏感）\")\nprint()\nprint(f\"margin=2.5 处：hinge 梯度 = {at(2.5)[2]:+.1f}，log 梯度 = {at(2.5)[3]:+.6f}\")\nprint(\"结论：hinge 在间隔外截断 => 模型只由边界附近样本决定，鲁棒性来自『不再理会』而不是『更聪明』\")\n"
+}

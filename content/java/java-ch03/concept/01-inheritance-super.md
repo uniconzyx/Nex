@@ -32,6 +32,65 @@
 
 ---
 
+<!-- injected-code -->
+## 可运行代码：把上面的说法跑一遍
+
+下面两段直接取自本章示例库（`examples/`），期望输出就是判题台里判定的那串字符串，不是事后补写的说明。读完正文后先照着跑一遍，再回去看「三视角解析」里对应的那条。
+
+### 继承与 super：构造器链与方法调用
+
+```java
+public class E301 {
+    static class Animal {
+        String name = "animal";
+        Animal() { System.out.println("Animal()"); }
+        void speak() { System.out.println("animal sound"); }
+    }
+    static class Dog extends Animal {
+        Dog() { super(); System.out.println("Dog()"); }
+        @Override void speak() { super.speak(); System.out.println("woof"); }
+    }
+    public static void main(String[] args) {
+        Dog d = new Dog();
+        d.speak();
+    }
+}
+```
+
+实际输出：
+
+```text
+Animal()
+Dog()
+animal sound
+woof
+```
+
+> 出处：`examples/ex01-inheritance-super.json`。改一处再看输出变没变，比读三遍解释有用。
+
+### 方法重写：自定义 toString
+
+```java
+public class E302 {
+    static class Point {
+        int x, y;
+        Point(int x, int y){ this.x=x; this.y=y; }
+        @Override public String toString(){ return "(" + x + "," + y + ")"; }
+    }
+    public static void main(String[] args) {
+        System.out.println(new Point(1,2));
+    }
+}
+```
+
+实际输出：
+
+```text
+(1,2)
+```
+
+> 出处：`examples/ex02-override-tostring.json`。改一处再看输出变没变，比读三遍解释有用。
+
 ## 三视角解析
 
 ### 🧑‍💻 程序员视角

@@ -1,0 +1,8 @@
+{
+  "title": "无缓冲 channel 的会合（rendezvous）语义",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "收到:hello\n已发送(接收者就位后才返回)",
+  "code": "class Chan {\n  constructor(cap = 0) { this.cap = cap; this.buf = []; this.putQ = []; this.takeQ = []; }\n  put(v) { return new Promise(res => {\n    if (this.takeQ.length) { const t = this.takeQ.shift(); t(v); res(); return; }\n    if (this.buf.length < this.cap) { this.buf.push(v); res(); return; }\n    this.putQ.push({ v, res });\n  }); }\n  take() { return new Promise(res => {\n    if (this.buf.length) { const v = this.buf.shift(); if (this.putQ.length) { const p = this.putQ.shift(); this.buf.push(p.v); p.res(); } res(v); return; }\n    if (this.putQ.length) { const p = this.putQ.shift(); res(p.v); p.res(); return; }\n    this.takeQ.push(res);\n  }); }\n}\nconst ch = new Chan(); // 无缓冲\nconst log = [];\n(async () => {\n  const r = (async () => { const v = await ch.take(); log.push(\"收到:\" + v); })();\n  const s = (async () => { await ch.put(\"hello\"); log.push(\"已发送(接收者就位后才返回)\"); })();\n  await Promise.all([r, s]);\n  console.log(log.join(\"\\n\"));\n})();\n"
+}

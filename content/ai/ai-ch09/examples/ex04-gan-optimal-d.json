@@ -1,0 +1,8 @@
+{
+  "title": "GAN 最优判别器与 2*JSD-log4 的数值对账",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "D* 取值范围 = [0.000, 0.976]（理论应在 (0,1)）\nV(D*, G)            = -1.188466\n-log4 + 2*JSD       = -1.188466\n两者之差            = 6.02e-10  (数值积分误差)\n密度比 pd/pg 在 x=0 处 = 1.0439；D*/(1-D*) = 1.0439\n结论：最优判别器就是密度比估计器 D*/(1-D*) = pd/pg\n",
+  "code": "\nimport numpy as np\n\ndef gauss(x, m, s):\n    return np.exp(-0.5 * ((x - m) / s) ** 2) / (s * np.sqrt(2 * np.pi))\n\nx = np.linspace(-7, 7, 400001)\npd = 0.6 * gauss(x, -1.0, 1.0) + 0.4 * gauss(x, 1.2, 0.7)   # 真实分布\npg = 0.5 * gauss(x, 0.2, 1.1) + 0.5 * gauss(x, 2.0, 0.8)    # 生成分布\n\nD_star = pd / (pd + pg)                    # 理论最优判别器\nV = np.trapezoid(pd * np.log(D_star) + pg * np.log(1 - D_star), x)\nm = (pd + pg) / 2\njsd = 0.5 * np.trapezoid(pd * np.log(pd / m) + pg * np.log(pg / m), x)\nrhs = -np.log(4) + 2 * jsd\n\nprint(f\"D* 取值范围 = [{D_star.min():.3f}, {D_star.max():.3f}]（理论应在 (0,1)）\")\nprint(f\"V(D*, G)            = {V:.6f}\")\nprint(f\"-log4 + 2*JSD       = {rhs:.6f}\")\nprint(f\"两者之差            = {abs(V - rhs):.2e}  (数值积分误差)\")\nprint(f\"密度比 pd/pg 在 x=0 处 = {(pd/(pg+1e-300))[200000]:.4f}；D*/(1-D*) = {(D_star/(1-D_star))[200000]:.4f}\")\nprint(\"结论：最优判别器就是密度比估计器 D*/(1-D*) = pd/pg\")\n"
+}

@@ -12,15 +12,38 @@
       "platform": "self",
       "difficulty": 2,
       "title": "一张 24GB 显存的卡要部署 7B 模型并开 16 并发、8k 上下文，最先撞上的瓶颈通常是哪一项？",
-      "content_md": "题干：一张 24GB 显存的消费级显卡，想部署一个 7B 模型（约 28 层、8 个 KV 头、head_dim=128），目标开 16 并发、最大上下文 8k。请判断规划时最先撞上的瓶颈。\nA. 权重占用（FP16 下约 14GB）\nB. KV Cache（随上下文长度与并发双线性增长）\nC. 激活值（随 batch 小幅增长）\nD. 框架开销（CUDA context 等固定约 0.8GB）",
+      "content_md": "题干：一张 24GB 显存的消费级显卡，想部署一个 7B 模型（约 28 层、8 个 KV 头、head_dim=128），目标开 16 并发、最大上下文 8k。请判断规划时最先撞上的瓶颈。",
       "answer": {
-        "correct": "B",
+        "correct": [
+          "B"
+        ],
         "explain": "选 B。权重在 FP16 下约 14GB、INT4 下约 3.5GB，是加载一次就固定的常数；而 KV Cache 字节数 = 2 × L × n_kv_heads × d_head × S × C × b_kv，随上下文长度 S 与并发 C 双线性增长。本题 S=8192、C=16 时，单请求 KV 约 0.94GB，16 并发就是约 15GB，已逼近甚至超过权重，再加上激活与框架开销，最先击穿的往往是 KV 这条线。激活和框架开销相对固定且较小，不是主要瓶颈；权重虽然在 FP16 下也很大，但它不随并发增长，规划时可先算 KV 再反推权重能否放下。"
       },
       "explanation": "显存规划的第一优先级是 KV Cache，不是权重。",
-      "tags": ["显存账本", "KV Cache"],
+      "tags": [
+        "显存账本",
+        "KV Cache"
+      ],
       "source": "self",
-      "source_ref": "agent-ch06/concept/01-vram-ledger.md"
+      "source_ref": "agent-ch06/concept/01-vram-ledger.md",
+      "options": [
+        {
+          "key": "A",
+          "text": "权重占用（FP16 下约 14GB）"
+        },
+        {
+          "key": "B",
+          "text": "KV Cache（随上下文长度与并发双线性增长）"
+        },
+        {
+          "key": "C",
+          "text": "激活值（随 batch 小幅增长）"
+        },
+        {
+          "key": "D",
+          "text": "框架开销（CUDA context 等固定约 0.8GB）"
+        }
+      ]
     },
     {
       "type": "choice",
@@ -28,15 +51,40 @@
       "platform": "self",
       "difficulty": 3,
       "title": "连续批处理（continuous batching）带来的核心权衡是什么？",
-      "content_md": "题干：在固定一张显卡、固定模型的前提下，开启连续批处理（动态换入换出请求）后，通常会发生什么变化？\nA. 吞吐下降、TTFT 上升、TPOT 下降\nB. 吞吐上升、TPOT 上升、单请求首字更快\nC. 吞吐上升、TPOT 上升、TTFT 主要取决于 prefill 队列\nD. 三项指标同时下降，只是更省电",
+      "content_md": "题干：在固定一张显卡、固定模型的前提下，开启连续批处理（动态换入换出请求）后，通常会发生什么变化？",
       "answer": {
-        "correct": "C",
+        "correct": [
+          "C"
+        ],
         "explain": "选 C。连续批处理让每个 decode step 的 GPU 槽位尽量被填满，因此系统整体吞吐（tok/s）上升；但同卡上并发请求越多，每 token 能分到的显存带宽越少，TPOT（每输出 token 延迟）随之上升。TTFT 主要由 prefill 的算力与排队决定，与「此刻有多少 prefill 在抢算力」强相关，连续批处理并不自动降低它，有时因并发 prefill 变多反而略升。A、B、D 都错：吞吐是上升而非下降，且连续批处理优化的是设备利用率，不是单请求速度。结论是指标要分开看，SLO 需分别给 TTFT 与 TPOT。"
       },
       "explanation": "连续批处理抬吞吐但抬 TPOT，TTFT 看 prefill 队列。",
-      "tags": ["连续批处理", "TTFT", "TPOT", "吞吐"],
+      "tags": [
+        "连续批处理",
+        "TTFT",
+        "TPOT",
+        "吞吐"
+      ],
       "source": "self",
-      "source_ref": "agent-ch06/concept/02-inference-scheduling.md"
+      "source_ref": "agent-ch06/concept/02-inference-scheduling.md",
+      "options": [
+        {
+          "key": "A",
+          "text": "吞吐下降、TTFT 上升、TPOT 下降"
+        },
+        {
+          "key": "B",
+          "text": "吞吐上升、TPOT 上升、单请求首字更快"
+        },
+        {
+          "key": "C",
+          "text": "吞吐上升、TPOT 上升、TTFT 主要取决于 prefill 队列"
+        },
+        {
+          "key": "D",
+          "text": "三项指标同时下降，只是更省电"
+        }
+      ]
     },
     {
       "type": "judge",
@@ -50,7 +98,11 @@
         "explain": "错误。INT4 量化改变的是权重的每参数字节数 b（从 2.0 降到约 0.55 含 group scale），因此权重显存确实约降到 1/4；但 KV Cache 的字节数取决于 KV 元素的字节数 b_kv，工程上 KV 通常仍保持 FP16（b_kv=2.0），除非显式开启 KV 量化（部分引擎支持把 KV 压到 INT8/INT4）。所以默认情况下 KV 并不随权重量化而缩小，所谓『一起降到 1/4』是常见误解。正确做法是：量化后单独评估 KV 占用与长上下文下的质量退化，必要时再决定是否开启 KV 量化。"
       },
       "explanation": "权重量化不等于 KV 量化，KV 默认仍 FP16。",
-      "tags": ["量化", "KV Cache", "INT4"],
+      "tags": [
+        "量化",
+        "KV Cache",
+        "INT4"
+      ],
       "source": "self",
       "source_ref": "agent-ch06/concept/01-vram-ledger.md"
     },
@@ -66,7 +118,10 @@
         "explain": "核心是把四笔账分开算再求和：权重是常数（params×每参数字节），KV 随层数、KV 头、head_dim、上下文、并发五因子双线性增长，激活用『固定 0.6GB + 每并发 0.05GB』的经验近似，开销固定 0.8GB。坑点：(1) 单位要统一成字节，且按 1e9 而非 GiB 估算，两者差 7.4%；(2) 可用显存要乘 0.9 给驱动与碎片留余量，否则边界 case 会误判；(3) 调用方应先算 KV 再反推权重放不放得下，而不是反过来。该函数可直接复用于容量预检与压测前的显存可行性判断。"
       },
       "explanation": "把权重/KV/激活/开销四笔账拆开再求和。",
-      "tags": ["显存账本", "Python"],
+      "tags": [
+        "显存账本",
+        "Python"
+      ],
       "source": "self",
       "source_ref": "agent-ch06/concept/01-vram-ledger.md"
     },
@@ -82,7 +137,11 @@
         "explain": "这是『数值/边界验证』题：不靠拍脑袋，而是用公式对并发 C 做单调扫描。因为 KV 随 C 线性、激活也随 C 线性，总显存是 C 的单调增函数，所以第一个越界的 C 就是安全并发上界（再 +1 即 OOM）。坑点：(1) 必须复用与账本一致的公式与 0.9 系数，否则边界错位；(2) 上限 64 是防御性收口，真实部署应配合压测确认；(3) 若固定的是『总显存』反推并发，注意 KV 用最大上下文 S 预留，实际平均长度更低时可更安全，规划要用 P99 而非均值。该函数可用于上线前的快速容量预检。"
       },
       "explanation": "对并发做单调扫描找第一个 OOM 点。",
-      "tags": ["显存账本", "边界验证", "Python"],
+      "tags": [
+        "显存账本",
+        "边界验证",
+        "Python"
+      ],
       "source": "self",
       "source_ref": "agent-ch06/concept/01-vram-ledger.md"
     },
@@ -98,7 +157,12 @@
         "explain": "这是『诊断/对比实验』题：用同一请求流对比两种策略的爆炸半径。全量直切下，受损请求 = 坏副本命中数（约 bad_rate×window）。灰度+探活+摘流下，先放 10% 流量，首阶段错误率若超过阈值（说明是坏构建）就停止灰度，绝大多数请求回老版本兜底，受损数被压到首阶段那一点。坑点：(1) 两种策略必须共用同一请求流才可比；(2) 『探活+摘流』的止损效果取决于探测间隔，本简化模型用『首阶段阈值判断』体现灰度的价值；(3) 结论不是『灰度永远更好』，而是『坏构建场景下灰度的爆炸半径小一个数量级』。可用于上线前的风险评估。"
       },
       "explanation": "同请求流对比两种策略的受损请求数。",
-      "tags": ["灰度", "探活", "摘流", "对比实验"],
+      "tags": [
+        "灰度",
+        "探活",
+        "摘流",
+        "对比实验"
+      ],
       "source": "self",
       "source_ref": "agent-ch06/concept/03-deployment-engineering.md"
     }

@@ -58,3 +58,77 @@ Spring 提供两套各三种等价钩子：
 |---|---|---|---|
 | 完整生命周期 | 不变量 + BPP 性能 + 启动期时序 | 实例化≠初始化、状态机 | 9 步骨架 + 顺序判定 |
 | 初始化/销毁三方式 | 首选注解、资源释放 | 多入口单处理点 | 固定顺序背记 |
+
+<!-- injected-code -->
+## 可运行代码：把上面的说法跑一遍
+
+下面两段直接取自本章示例库（`examples/`），期望输出就是判题台里判定的那串字符串，不是事后补写的说明。读完正文后先照着跑一遍，再回去看「三视角解析」里对应的那条。
+
+### BeanDefinition 注册与反射实例化（容器骨架）
+
+```java
+import java.util.*;
+
+public class Main {
+    static class BeanDefinition {
+        String beanName;
+        String className;
+        String scope = "singleton";
+        BeanDefinition(String n, String c) { beanName = n; className = c; }
+    }
+
+    static class UserService { UserService() {} String hi() { return "hi"; } }
+
+    public static void main(String[] args) throws Exception {
+        Map<String, BeanDefinition> registry = new HashMap<>();
+        registry.put("userService", new BeanDefinition("userService", "Main$UserService"));
+        System.out.println("registered beans: " + registry.size());
+        BeanDefinition bd = registry.get("userService");
+        Class<?> cls = Class.forName(bd.className);
+        Object bean = cls.getDeclaredConstructor().newInstance();
+        System.out.println("instantiated: " + (bean != null));
+        System.out.println("bean class: " + bean.getClass().getSimpleName());
+    }
+}
+```
+
+实际输出：
+
+```text
+registered beans: 1
+instantiated: true
+bean class: UserService
+```
+
+> 出处：`examples/ex01.json`。改一处再看输出变没变，比读三遍解释有用。
+
+### 属性填充：反射把依赖 set 进字段（模拟 DI）
+
+```java
+import java.lang.reflect.*;
+
+public class Main {
+    static class Repo { String find() { return "data"; } }
+    static class Service { Repo repo; void use() { System.out.println(repo.find()); } }
+
+    public static void main(String[] args) throws Exception {
+        Service svc = new Service();
+        Repo repo = new Repo();
+        Field f = Service.class.getDeclaredField("repo");
+        f.setAccessible(true);
+        f.set(svc, repo);
+        System.out.println("repo injected: " + (f.get(svc) != null));
+        svc.use();
+    }
+}
+```
+
+实际输出：
+
+```text
+repo injected: true
+data
+```
+
+> 出处：`examples/ex02.json`。改一处再看输出变没变，比读三遍解释有用。
+

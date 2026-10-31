@@ -1,0 +1,8 @@
+{
+  "title": "可选链与空值合并：不改行为地躲开 undefined",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "Hangzhou\nundefined\n未知\n未知",
+  "code": "const user = { name: \"mimi\", profile: { city: \"Hangzhou\" } };\nconst ghost = { name: \"nobody\" };\n\nconsole.log(user.profile?.city);\nconsole.log(ghost.profile?.city);\nconsole.log(ghost.profile?.city ?? \"未知\");\nconsole.log(ghost.profile?.city || \"未知\"); // || 会把 \"\" 和 0 也当空\n"
+}

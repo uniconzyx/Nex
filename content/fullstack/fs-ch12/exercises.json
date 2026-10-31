@@ -1,0 +1,215 @@
+{
+  "meta": {
+    "chapter": "fs-ch12",
+    "note": "8 题，含选择题/输出题/改错题/编程题；题面与参考实现均为自建，不搬运第三方题面。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "关于「什么时候该拆」，正确的是",
+      "content_md": "选择**正确**的描述。",
+      "options": [
+        {
+          "key": "A",
+          "text": "只要团队技术上「想用微服务」，就应该立刻从单体拆开"
+        },
+        {
+          "key": "B",
+          "text": "微服务能消灭系统复杂度，是单体演进的必然终态"
+        },
+        {
+          "key": "C",
+          "text": "拆分的真实触发信号多来自组织与演进层面（部署耦合、多团队、伸缩不一致），而非技术潮流"
+        },
+        {
+          "key": "D",
+          "text": "按技术分层（controller/service/dao）拆分，能得到清晰的微服务边界"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "C"
+        ]
+      },
+      "explanation": "拆分的回报来自部署耦合、团队踩脚、伸缩诉求不一致等组织/演进信号被满足；微服务把复杂度从代码内部搬到基础设施与协作上，并不消灭它。按技术层拆分只会得到「分布式单体」。所以 A、B、D 都错，C 正确。",
+      "tags": [
+        "monolith",
+        "microservice",
+        "conway"
+      ],
+      "source": "book",
+      "source_ref": "Sam Newman《Building Microservices》"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "读代码写输出（网关路由匹配）",
+      "content_md": "```js\nconst routes = [\n  { prefix: \"/api/orders\", upstream: \"order-svc:8080\" },\n  { prefix: \"/api/pay\", upstream: \"payment-svc:8080\" },\n  { prefix: \"/api/users\", upstream: \"user-svc:8080\" },\n];\nfunction route(path) {\n  const r = routes.find((x) => path.startsWith(x.prefix));\n  return r ? r.upstream : \"404-no-route\";\n}\nconsole.log(route(\"/api/orders/123\"));\nconsole.log(route(\"/api/pay/capture\"));\nconsole.log(route(\"/api/users/me\"));\nconsole.log(route(\"/healthz\"));\n```",
+      "answer": {
+        "output": "order-svc:8080\npayment-svc:8080\nuser-svc:8080\n404-no-route"
+      },
+      "explanation": "路由按路径前缀匹配第一个命中的上游；都不命中返回 404-no-route。注意这里用 find 顺序匹配，因此前提路由表里没有「更宽泛的前缀写在前面」这种顺序 bug。",
+      "tags": [
+        "gateway",
+        "routing"
+      ],
+      "source": "book",
+      "source_ref": "Spring Cloud Gateway · Route Predicate"
+    },
+    {
+      "type": "fix",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "改错：固定窗口限流的临界突变",
+      "content_md": "下面的限流用「每分钟清零」的固定窗口，攻击者在两个窗口交界处可以瞬间突破限额。说明问题并改成令牌桶思路（允许平滑突发但限制总量）。\n\n```js\nclass Limiter {\n  constructor(limit) { this.limit = limit; this.count = 0; }\n  allow() {\n    if (this.count >= this.limit) return false;\n    this.count++;\n    return true;\n  }\n}\n```",
+      "answer": {
+        "reference_code": "class TokenBucket {\n  constructor(capacity, refillPerSec) {\n    this.capacity = capacity;      // 桶容量（允许的最大突发）\n    this.tokens = capacity;        // 当前令牌数\n    this.refill = refillPerSec;    // 每秒补充速率\n    this.last = Date.now();\n  }\n  allow() {\n    const now = Date.now();\n    this.tokens = Math.min(this.capacity,\n      this.tokens + ((now - this.last) / 1000) * this.refill);\n    this.last = now;\n    if (this.tokens >= 1) { this.tokens -= 1; return true; }\n    return false;\n  }\n}"
+      },
+      "explanation": "固定窗口在「窗口清零」瞬间会让「前一秒末 + 后一秒初」两个请求都通过，等于限额翻倍。令牌桶按时间平滑补充令牌，既允许一定突发（桶容量内），又把长时间速率限制在 refill 内，没有临界突变。生产中常用令牌桶/漏桶替代裸固定窗口。",
+      "tags": [
+        "rate-limit",
+        "token-bucket"
+      ],
+      "source": "book",
+      "source_ref": "Nginx · Rate Limiting"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "网关不应该承担的职责是",
+      "content_md": "下列工作中，哪一项**不该**放在 API 网关？",
+      "options": [
+        {
+          "key": "A",
+          "text": "统一校验请求身份（鉴权）并注入可信声明"
+        },
+        {
+          "key": "B",
+          "text": "按路径把请求路由到对应上游服务"
+        },
+        {
+          "key": "C",
+          "text": "具体的下单优惠计算与风控规则"
+        },
+        {
+          "key": "D",
+          "text": "入口处统一打 traceId 与限流"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "C"
+        ]
+      },
+      "explanation": "网关应保持「薄」，只管横切且稳定的关注点（路由、鉴权身份、限流、traceId）。优惠计算、风控是易变的领域逻辑，放网关会让它变成无人敢改的胖单点，且每次业务变更都要动入口。所以 C 是不该放的。",
+      "tags": [
+        "gateway",
+        "boundary"
+      ],
+      "source": "book",
+      "source_ref": "Chris Richardson《Microservice Patterns》"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "实现一个带优先级的网关路由匹配",
+      "content_md": "实现 `route(routes, path)`，其中 `routes` 是 `[{ match, svc, priority }]` 数组。规则：**精确路径（不以 `/` 结尾且无子路径）优先；否则取前缀匹配中 priority 最大的；都不命中返回 `null`**。要求不用 any，并用三组数据自测：① `/api/orders` 在 `[{match:'/api',svc:'a',priority:1},{match:'/api/orders',svc:'b',priority:10}]` 中应路由到 `b`；② `/api/users/x` 应路由到 `a`；③ `/healthz` 返回 null。",
+      "answer": {
+        "reference_code": "function route(routes, path) {\n  let best = null;\n  for (const r of routes) {\n    const exact = r.match === path;\n    const prefix = r.match !== '/' && path.startsWith(r.match) &&\n      (path.length === r.match.length || path[r.match.length] === '/');\n    if (exact || prefix) {\n      if (!best || r.priority > best.priority) best = r;\n    }\n  }\n  return best ? best.svc : null;\n}\n\nconst rs = [\n  { match: '/api', svc: 'a', priority: 1 },\n  { match: '/api/orders', svc: 'b', priority: 10 },\n];\nconsole.log(route(rs, '/api/orders'));\nconsole.log(route(rs, '/api/users/x'));\nconsole.log(route(rs, '/healthz'));"
+      },
+      "explanation": "要点：① 精确匹配（完全相等）优先级最高；② 前缀匹配要保证是「路径段边界」，即 path 在 match 长度处要么是结尾、要么是 `/`，避免 `/api` 误吞 `/apix`；③ 多个前缀命中时取 priority 最大。实现里用 best 跟踪最优，覆盖题目三组用例。",
+      "tags": [
+        "gateway",
+        "routing",
+        "priority"
+      ],
+      "source": "book",
+      "source_ref": "Spring Cloud Gateway · Ordering"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "读代码写输出（配置热更新）",
+      "content_md": "```js\nclass ConfigStore {\n  constructor(initial) { this.data = { ...initial }; this.listeners = new Set(); }\n  get(key) { return this.data[key]; }\n  subscribe(fn) { this.listeners.add(fn); return () => this.listeners.delete(fn); }\n  update(patch) { this.data = { ...this.data, ...patch }; for (const fn of this.listeners) fn(this.data); }\n}\nconst cs = new ConfigStore({ featureX: false, rate: 10 });\nconst unsub = cs.subscribe((d) => console.log(\"热更新:\", JSON.stringify(d)));\nconsole.log(\"初始:\", cs.get(\"featureX\"));\ncs.update({ featureX: true });\ncs.update({ rate: 20 });\nunsub();\ncs.update({ featureX: false });\nconsole.log(\"最终:\", cs.get(\"featureX\"));\n```",
+      "answer": {
+        "output": "初始: false\n热更新: {\"featureX\":true,\"rate\":10}\n热更新: {\"featureX\":true,\"rate\":20}\n最终: false"
+      },
+      "explanation": "初始 featureX 为 false；订阅者在每次 update 时收到合并后的完整 data 并打印；第二次 update 只改 rate，featureX 仍为 true；退订后第三次 update 不再触发打印；最终读取到 featureX=false。注意热更新不重启进程即可生效。",
+      "tags": [
+        "config",
+        "hot-reload"
+      ],
+      "source": "book",
+      "source_ref": "Nacos · Dynamic Configuration"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "book",
+      "difficulty": "hard",
+      "title": "实现 BFF 聚合：并发拉取并裁剪",
+      "content_md": "实现 `bffCart(userId, fetchers)`，其中 `fetchers` 为 `{ user(id), cart(id), reco(id) }`，每个返回 Promise。要求：用 `Promise.all` 并发拉取三个上游，把结果聚合为 `{ profile, items, suggest }` 返回（仍为 Promise），并在 main 里用内存 fake fetchers 自测一组用户。强调：BFF 只做编排裁剪，不做业务计算。",
+      "answer": {
+        "reference_code": "async function bffCart(userId, fetchers) {\n  const [user, cart, recommendations] = await Promise.all([\n    fetchers.user(userId),\n    fetchers.cart(userId),\n    fetchers.reco(userId),\n  ]);\n  return { profile: user, items: cart, suggest: recommendations };\n}\n\nconst fakeFetchers = {\n  user: (id) => Promise.resolve({ id, tier: 'gold' }),\n  cart: (id) => Promise.resolve([{ sku: 'A', qty: 2 }]),\n  reco: (id) => Promise.resolve(['B', 'C']),\n};\n\nbffCart('u1', fakeFetchers).then((r) => console.log(JSON.stringify(r)));"
+      },
+      "explanation": "BFF 的价值是「前端一次请求拿全」：原本要并发拉三个服务，现在在 BFF 层用 Promise.all 聚合，返回前端友好的单一 payload。注意它只做编排与裁剪（profile/items/suggest 是字段挑选），不下单、不算优惠——那是订单服务的职责。",
+      "tags": [
+        "bff",
+        "aggregation",
+        "promise"
+      ],
+      "source": "book",
+      "source_ref": "Sam Newman《Building Microservices》· BFF"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "关于密钥管理，正确的是",
+      "content_md": "选择**正确**的做法。",
+      "options": [
+        {
+          "key": "A",
+          "text": "为了方便，把 API Key 写在源码里并提交到 Git"
+        },
+        {
+          "key": "B",
+          "text": "密钥经环境变量/密钥管理服务在运行时注入，日志中掩码，启动缺失则 fail-fast"
+        },
+        {
+          "key": "C",
+          "text": "把密钥写进前端 bundle，前端直接调用第三方接口最方便"
+        },
+        {
+          "key": "D",
+          "text": "密钥即使提交到 Git，事后删除提交记录即可彻底清除"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "Git 历史不可篡改，删除提交无法清除已泄露的密钥，补救只能旋转（rotate）。前端包任何人可反编译，绝不放密钥。正确做法是运行时注入、日志掩码、缺失即 fail-fast。A、C、D 都是典型事故来源。",
+      "tags": [
+        "secret",
+        "security"
+      ],
+      "source": "book",
+      "source_ref": "12-Factor · Config"
+    }
+  ]
+}

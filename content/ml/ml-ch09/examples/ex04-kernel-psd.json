@@ -1,0 +1,8 @@
+{
+  "title": "核矩阵的半正定性（Mercer 条件）",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "线性 x·z             最小特征值 =   -0.0000   半正定: True\n多项式 (x·z+1)^2      最小特征值 =   -0.0000   半正定: True\nRBF γ=0.5          最小特征值 =   +0.0304   半正定: True\n非法核 -||x-z||       最小特征值 =  -20.3933   半正定: False\n\n结论：前三个合法核的 Gram 矩阵最小特征值 >= 0（线性为 0~正，多项式/RBF 为正）；\n      『负距离』不是合法核（最小特征值显著为负），用它做 SVM 会得到非凸问题\n",
+  "code": "\nimport numpy as np\nrng = np.random.default_rng(0)\nX = rng.normal(size=(12, 3))\n\ndef gram(kernel):\n    n = len(X)\n    return np.array([[kernel(X[i], X[j]) for j in range(n)] for i in range(n)])\n\nkernels = {\n    \"线性 x·z\": lambda a, b: a @ b,\n    \"多项式 (x·z+1)^2\": lambda a, b: (a @ b + 1) ** 2,\n    \"RBF γ=0.5\": lambda a, b: np.exp(-0.5 * np.sum((a - b) ** 2)),\n    \"非法核 -||x-z||\": lambda a, b: -np.linalg.norm(a - b),\n}\nfor name, k in kernels.items():\n    K = gram(k)\n    ev = np.linalg.eigvalsh(K)\n    print(f\"{name:<18s} 最小特征值 = {ev.min():+9.4f}   半正定: {ev.min() >= -1e-8}\")\nprint()\nprint(\"结论：前三个合法核的 Gram 矩阵最小特征值 >= 0（线性为 0~正，多项式/RBF 为正）；\")\nprint(\"      『负距离』不是合法核（最小特征值显著为负），用它做 SVM 会得到非凸问题\")\n"
+}

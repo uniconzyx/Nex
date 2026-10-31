@@ -1,0 +1,8 @@
+{
+  "title": "统一异常处理：@ControllerAdvice 风格的全局拦截器",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "{\"code\":1001,\"message\":\"用户不存在\",\"data\":null}",
+  "code": "class BizException extends Error {\n  constructor(code, message){ super(message); this.code = code; this.biz = true; }\n}\n\nconst handlers = [];\nfunction ControllerAdvice(fn) { handlers.push(fn); }\nfunction handle(err) {\n  for (const h of handlers) {\n    const r = h(err);\n    if (r) return r;\n  }\n  return { code: 500, message: \"系统错误\", data: null };\n}\nControllerAdvice(e => { if (e.biz) return { code: e.code, message: e.message, data: null }; });\nControllerAdvice(e => { if (e instanceof Error) return { code: 500, message: \"系统繁忙\", data: null }; });\nfunction controller() {\n  try {\n    throw new BizException(1001, \"用户不存在\");\n  } catch (e) {\n    return handle(e);\n  }\n}\nconsole.log(JSON.stringify(controller()));\n"
+}

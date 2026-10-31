@@ -190,11 +190,12 @@
       "platform": "leetcode",
       "difficulty": "easy",
       "title": "位 1 的个数（汉明重量）",
-      "content_md": "统计一个 32 位无符号整数的二进制表示中 1 的个数。可用「n & (n-1) 消掉最低位 1」的技巧把循环次数降到 1 的个数。",
+      "content_md": "统计一个 32 位无符号整数的二进制表示中 1 的个数。可用「n & (n-1) 消掉最低位 1」的技巧把循环次数降到 1 的个数。\n\n<!-- judge-io -->\n**判题 I/O 约定**（提交完整程序：从 stdin 读、向 stdout 写）\n\n输入：一行一个非负整数 `n`（32 位范围内）。\n输出：其二进制表示中 `1` 的个数。",
       "answer": {
         "correct": [
           "见外链题解"
-        ]
+        ],
+        "reference_code": "#include <stdio.h>\n\nint hammingWeight(unsigned int n) {\n    int c = 0;\n    while (n) {\n        n &= n - 1;\n        ++c;\n    }\n    return c;\n}\n\nint main(void) {\n    unsigned int n;\n    if (scanf(\"%u\", &n) != 1) return 0;\n    printf(\"%d\\n\", hammingWeight(n));\n    return 0;\n}\n"
       },
       "explanation": "本题是位运算的基本功，直接对应本章「机器数按位表示」的知识：理解一个整数在机器里就是若干 bit，`n & (n-1)` 能清掉最低位的 1（因为减 1 会把最低位的 1 变成 0、其后的 0 全变成 1），循环次数等于 1 的个数而不是 32 次。另有 SWAR 分治写法，$O(1)$ 无分支。**本题只提供元数据与链接，题面正文请到原站查看**。",
       "tags": [
@@ -203,7 +204,29 @@
       ],
       "source": "leetcode",
       "source_ref": "LeetCode 191. Number of 1 Bits（仅元数据）",
-      "external_url": "https://leetcode.cn/problems/number-of-1-bits/"
+      "external_url": "https://leetcode.cn/problems/number-of-1-bits/",
+      "test_cases": [
+        {
+          "input": "11",
+          "expected_output": "3",
+          "is_sample": true
+        },
+        {
+          "input": "128",
+          "expected_output": "1",
+          "is_sample": true
+        },
+        {
+          "input": "0",
+          "expected_output": "0",
+          "is_sample": false
+        },
+        {
+          "input": "4294967295",
+          "expected_output": "32",
+          "is_sample": false
+        }
+      ]
     },
     {
       "type": "coding",

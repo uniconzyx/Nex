@@ -1,4 +1,26 @@
 # 01 · InnoDB B+树索引的物理结构
+> B+树索引把「有序性」与「矮树高扇出」结合：所有数据在叶子层串成有序链表，非叶只存路由键，三层即可索引千万行；事务靠 ACID 四性守住正确，隔离级别用锁/多版本在「并发」与「脏读/幻读」间权衡。
+
+```text
+B+树（m=3 示意）
+        [ 50 ]
+       /      \
+  [10,30]    [70,90]
+   │││        │││
+  叶子层有序链表: 10-20-30-40-50-60-70-80-90   ← 真正数据/指针在这
+  查找 72：根 50→右 70→叶子 70..90，O(log) 且稳定
+
+  事务 ACID:
+   A 原子  全做或全不做（undo log 回滚）
+   C 一致  约束不被破坏
+   I 隔离  并发互不干扰
+   D 持久  commit 后不丢（redo log）
+
+  隔离级别（并发 vs 异常）：
+   RU 读未提交 → 脏读     RC 读已提交 → 不可重复读
+   RR 可重复读 → 防幻读    Serializable 全串行（最安全最慢）
+```
+
 
 > 博士视角看"B+树为什么是数据库的默认索引"，程序员视角看"一次查询到底几次 I/O、回不回表"。
 
@@ -38,6 +60,53 @@ InnoDB 按 **页（默认 16KB）** 组织磁盘，B+树的一个节点 = 一个
 见 `examples/ex01-create-and-explain-index.json`（建索引+EXPLAIN 看走索引）、`examples/ex12-show-index-metadata.json`（`SHOW INDEX` 看索引列顺序与类型）。
 
 ---
+
+<!-- injected-code -->
+## 可运行代码：把上面的说法跑一遍
+
+下面两段直接取自本章示例库（`examples/`），期望输出就是判题台里判定的那串字符串，不是事后补写的说明。读完正文后先照着跑一遍，再回去看「三视角解析」里对应的那条。
+
+### 建二级索引并用 EXPLAIN 验证走索引（type=ref）
+
+```sql
+CREATE TABLE emp (emp_id INT PRIMARY KEY, name VARCHAR(20), dept_id INT, salary DECIMAL(10,2));
+INSERT INTO emp VALUES (1,'Alice',10,6000.00),(2,'Bob',20,8000.00),(3,'Carol',10,4500.00),(4,'Dave',20,9000.00),(5,'Eve',30,5000.00),(6,'Frank',20,7000.00);
+CREATE INDEX idx_dept ON emp(dept_id);
+EXPLAIN SELECT * FROM emp WHERE dept_id = 20;
+```
+
+实际输出：
+
+```text
+Query OK, 0 rows affected
+Query OK, 6 rows affected
+Query OK, 0 rows affected
+id|select_type|table|type|possible_keys|key|key_len|ref|rows|Extra
+1|SIMPLE|emp|ref|idx_dept|idx_dept|5|const|3|
+```
+
+> 出处：`examples/ex01-create-and-explain-index.json`。改一处再看输出变没变，比读三遍解释有用。
+
+### 覆盖索引：索引包含查询全部列，Extra 出现 Using index
+
+```sql
+CREATE TABLE emp (emp_id INT PRIMARY KEY, name VARCHAR(20), dept_id INT, salary DECIMAL(10,2));
+INSERT INTO emp VALUES (1,'Alice',10,6000.00),(2,'Bob',20,8000.00),(3,'Carol',10,4500.00),(4,'Dave',20,9000.00),(5,'Eve',30,5000.00),(6,'Frank',20,7000.00);
+CREATE INDEX idx_dept_sal ON emp(dept_id, salary);
+EXPLAIN SELECT dept_id, salary FROM emp WHERE dept_id = 20;
+```
+
+实际输出：
+
+```text
+Query OK, 0 rows affected
+Query OK, 6 rows affected
+Query OK, 0 rows affected
+id|select_type|table|type|possible_keys|key|key_len|ref|rows|Extra
+1|SIMPLE|emp|ref|idx_dept_sal|idx_dept_sal|5|const|3|Using index
+```
+
+> 出处：`examples/ex02-covering-index.json`。改一处再看输出变没变，比读三遍解释有用。
 
 ## 三视角解析
 

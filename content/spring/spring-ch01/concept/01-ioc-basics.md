@@ -1,4 +1,22 @@
 # 一、IoC 基础与容器定位
+> IoC（控制反转）把「对象怎么造、依赖谁」交给容器，而非在代码里 new。DI（依赖注入）是落地手段：容器读配置/注解，按类型或名字把依赖「塞进」对象。结果是类之间解耦、可单测、可替换实现。
+
+```text
+传统： class A { B b = new B(); }   ← A 自己负责 B 的创建（紧耦合）
+
+IoC/DI：
+   @Component class B {}
+   @Component class A { @Autowired B b; }   ← 容器注入，A 不 new B
+
+容器启动：
+   1) 扫描 @Component/@Bean → 建 BeanDefinition 注册表
+   2) 按依赖图实例化（先 B 后 A）
+   3) 注入：构造器 / 字段(@Autowired) / Setter
+   4) 放入单例池，按需取用
+
+好处：A 只声明「我需要 B 的能力」，B 的实现可随时替换/打桩测试。
+```
+
 
 ## 一、什么是 IoC / 控制反转
 
@@ -62,3 +80,89 @@ AOP 基础设施等。二者都满足「持有 bean 定义」，但能力边界�
 - 易错口径：不要说「ApplicationContext 比 BeanFactory 快」——运行期两者单例获取都是 Map 查找；
   差异在启动期是否预实例化，应说「启动更慢但更早暴露错误、运行期无差别」。
 - 常见追问：「为什么有了 BeanFactory 还要 ApplicationContext？」答：能力扩展 + fail-fast。
+
+<!-- injected-code -->
+## 可运行代码：把上面的说法跑一遍
+
+下面两段直接取自本章示例库（`examples/`），期望输出就是判题台里判定的那串字符串，不是事后补写的说明。读完正文后先照着跑一遍，再回去看「三视角解析」里对应的那条。
+
+### 迷你 IoC 容器：容器接管对象装配
+
+```java
+import java.util.*;
+
+public class Ex01 {
+    static class Container {
+        private final Map<String, Object> beans = new HashMap<>();
+        public void register(String name, Object bean) { beans.put(name, bean); }
+        public Object get(String name) { return beans.get(name); }
+    }
+    static class Service { String hello() { return "hello from service"; } }
+    static class Controller {
+        private final Service service;
+        Controller(Service s) { this.service = s; }
+        String handle() { return service.hello(); }
+    }
+    public static void main(String[] args) {
+        Container c = new Container();
+        // 容器负责装配：程序员不再手动 new Controller(new Service())
+        Service s = new Service();
+        c.register("service", s);
+        c.register("controller", new Controller(s));
+        Controller ctrl = (Controller) c.get("controller");
+        System.out.println(ctrl.handle());
+        System.out.println("controller wired: " + (ctrl != null));
+    }
+}
+```
+
+实际输出：
+
+```text
+hello from service
+controller wired: true
+```
+
+> 出处：`examples/ex01.json`。改一处再看输出变没变，比读三遍解释有用。
+
+### 反射字段注入：模拟 @Autowired
+
+```java
+import java.lang.reflect.*;
+import java.lang.annotation.*;
+import java.util.*;
+
+public class Ex02 {
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface Autowired {}
+
+    static class Repo { String find() { return "data"; } }
+    static class Service {
+        @Autowired Repo repo;
+        String work() { return repo.find(); }
+    }
+    public static void main(String[] args) throws Exception {
+        Repo repo = new Repo();
+        Service svc = new Service();
+        // 容器通过反射把 repo 注入到 svc 的 @Autowired 字段
+        for (Field f : svc.getClass().getDeclaredFields()) {
+            if (f.isAnnotationPresent(Autowired.class)) {
+                f.setAccessible(true);
+                f.set(svc, repo);
+            }
+        }
+        System.out.println(svc.work());
+        System.out.println("injected? " + (svc.repo != null));
+    }
+}
+```
+
+实际输出：
+
+```text
+data
+injected? true
+```
+
+> 出处：`examples/ex02.json`。改一处再看输出变没变，比读三遍解释有用。
+

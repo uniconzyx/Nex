@@ -1,0 +1,215 @@
+{
+  "meta": {
+    "chapter": "fs-ch13",
+    "note": "8 题，含选择题/输出题/改错题/编程题；题面与参考实现均为自建，不搬运第三方题面。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "测试金字塔的健康比例是",
+      "content_md": "关于测试分层比例，最符合「金字塔」原则的是",
+      "options": [
+        {
+          "key": "A",
+          "text": "单元测试最少，E2E 最多（冰淇淋锥）"
+        },
+        {
+          "key": "B",
+          "text": "单元:集成:E2E 大致 70:20:10"
+        },
+        {
+          "key": "C",
+          "text": "三层各占三分之一，均匀用力"
+        },
+        {
+          "key": "D",
+          "text": "只写 E2E，因为最贴近用户最可靠"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "金字塔强调底层单测多而快、顶层 E2E 少而关键，经验比例约 70/20/10。A 是反模式（慢且 flaky），C 没有体现反馈速度差异，D 忽视单测的速度与隔离价值。",
+      "tags": [
+        "test-pyramid"
+      ],
+      "source": "book",
+      "source_ref": "Mike Cohn《Succeeding with Agile》"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "读代码写输出（四类测试替身行为）",
+      "content_md": "```js\n// Stub：返回预设值\nfunction getUser(id, db) {\n  const row = db.query('users', [id]);\n  return row ? { id, name: row.name.toUpperCase() } : null;\n}\nconst stubDb = { query(_s, [id]) { return id === 1 ? { name: 'mimi' } : null; } };\nconsole.log(JSON.stringify(getUser(1, stubDb)));\nconsole.log(JSON.stringify(getUser(2, stubDb)));\n\n// Spy：包裹真实对象并记录调用\nfunction makeSpy(t, m) {\n  const orig = t[m]; const calls = [];\n  t[m] = function (...a) { calls.push(a); return orig.apply(this, a); };\n  t[m].calls = calls; return t;\n}\nconst calc = { add(a, b) { return a + b; } };\nmakeSpy(calc, 'add');\nconsole.log(calc.add(2, 3), calc.add(4, 5));\nconsole.log(JSON.stringify(calc.add.calls));\n```",
+      "answer": {
+        "output": "{\"id\":1,\"name\":\"MIMI\"}\nnull\n5 9\n[[2,3],[4,5]]"
+      },
+      "explanation": "Stub 给 getUser 预设了数据库查询结果，id=1 返回 name、id=2 返回 null；Spy 包裹 add 后如实放行计算（5、9）并记录每次调用的参数 [[2,3],[4,5]]。注意 Stub 是假的、Spy 是透明的。",
+      "tags": [
+        "stub",
+        "spy",
+        "test-double"
+      ],
+      "source": "book",
+      "source_ref": "Martin Fowler·Test Double"
+    },
+    {
+      "type": "fix",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "改错：固定 sleep 导致的偶发失败",
+      "content_md": "下面的 E2E 用 `sleep(2000)` 等元素出现，经常偶发超时。改成「等待条件成立」的稳定写法。\n\n```js\nasync function checkLoaded(page) {\n  await sleep(2000);\n  return page.isVisible('.submit-btn');\n}\n```",
+      "answer": {
+        "reference_code": "async function waitFor(predicate, { timeoutMs = 1000, intervalMs = 50 } = {}) {\n  const start = Date.now();\n  while (Date.now() - start < timeoutMs) {\n    if (predicate()) return true;\n    await new Promise((r) => setTimeout(r, intervalMs));\n  }\n  return false;\n}\n\nasync function checkLoaded(page) {\n  return waitFor(() => page.isVisible('.submit-btn'), { timeoutMs: 5000, intervalMs: 50 });\n}"
+      },
+      "explanation": "固定 sleep 假设了确定时序，慢一点就超时、快一点又白等。改成轮询 waitFor：在超时窗口内反复检查条件是否成立，对异步渲染的非确定性有容忍度，既不误判也不空等。这是消除 E2E flaky 的第一招。",
+      "tags": [
+        "flaky",
+        "wait-for",
+        "e2e"
+      ],
+      "source": "book",
+      "source_ref": "Playwright·Auto-waiting"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "关于消费者驱动契约（CDC），正确的是",
+      "content_md": "选择**正确**的描述。",
+      "options": [
+        {
+          "key": "A",
+          "text": "由提供者定义接口，消费者被动适应，提供者改了消费者自然跟上"
+        },
+        {
+          "key": "B",
+          "text": "消费者先写「我期望提供者返回什么」生成契约，提供者在自己 CI 重放验证"
+        },
+        {
+          "key": "C",
+          "text": "契约测试需要拉起所有微服务做全链路联调才能跑"
+        },
+        {
+          "key": "D",
+          "text": "契约只校验状态码即可，字段细节不重要"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "CDC 反转了传统方向：消费者声明期望并生成契约，提供者在自身 CI 重放，破坏性改动当场红，不用等联调/生产。契约测试各自独立跑、不需拉起全部依赖（C 错）；契约必须校验关键字段类型与存在性，只认状态码会漏掉字段级破坏（D 错）。",
+      "tags": [
+        "contract-testing",
+        "cdc",
+        "pact"
+      ],
+      "source": "book",
+      "source_ref": "Pact·Consumer Driven Contracts"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "实现一个 Spy：包裹真实函数并记录调用",
+      "content_md": "实现 `makeSpy(target, method)`，返回同一个 target，但 `target[method]` 被包裹：调用时**如实放行原逻辑**并把参数记录到 `target[method].calls`。要求：① 不破坏原返回值；② `calls` 是数组，记录每次调用的参数数组；③ 不用 any。用 `calc.add` 自测两组调用并打印 calls。",
+      "answer": {
+        "reference_code": "function makeSpy(target, method) {\n  const orig = target[method];\n  const calls = [];\n  target[method] = function (...args) {\n    calls.push(args);\n    return orig.apply(this, args);\n  };\n  target[method].calls = calls;\n  return target;\n}\n\nconst calc = { add(a, b) { return a + b; } };\nmakeSpy(calc, 'add');\nconsole.log(calc.add(2, 3), calc.add(4, 5));\nconsole.log(JSON.stringify(calc.add.calls));"
+      },
+      "explanation": "Spy 与 Stub/Mock 的关键区别是「透明」：它调用真实 orig 并 apply 原 this，不篡改行为，只额外记账。calls 记录每次参数数组，便于事后统计调用次数与入参。断言里 `orig.apply(this, args)` 保证返回值与副作用都不变。",
+      "tags": [
+        "spy",
+        "test-double"
+      ],
+      "source": "book",
+      "source_ref": "Martin Fowler·Test Double"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "读代码写输出（质量门禁）",
+      "content_md": "```js\nfunction runGate(checks) {\n  const failed = checks.filter((c) => !c.run()).map((c) => c.name);\n  return failed.length === 0 ? 'GREEN' : `RED: ${failed.join(',')}`;\n}\nconst gate = runGate([\n  { name: 'lint', run: () => true },\n  { name: 'typecheck', run: () => true },\n  { name: 'coverage', run: () => 85 >= 80 },\n  { name: 'build', run: () => true },\n]);\nconsole.log(gate);\nconst gate2 = runGate([\n  { name: 'lint', run: () => false },\n  { name: 'typecheck', run: () => true },\n  { name: 'coverage', run: () => 70 >= 80 },\n  { name: 'build', run: () => true },\n]);\nconsole.log(gate2);\n```",
+      "answer": {
+        "output": "GREEN\nRED: lint,coverage"
+      },
+      "explanation": "第一个门禁四项全过，返回 GREEN；第二个门禁里 lint 返回 false、coverage 的 70>=80 为 false，二者进入失败列表，返回 `RED: lint,coverage`。门禁的本质就是把一组自动检查串起来，任一不过即红灯禁合并。",
+      "tags": [
+        "quality-gate",
+        "ci"
+      ],
+      "source": "book",
+      "source_ref": "Martin Fowler·Deployment Pipeline"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "book",
+      "difficulty": "hard",
+      "title": "实现契约验证：提供者重放消费者契约",
+      "content_md": "实现 `verifyProvider(contract, handler)`：对契约里每个 interaction，用 `handler(it.withRequest)` 取得真实响应，校验 `actual.status === it.willRespondWith.status` 且 `actual.body.id === it.willRespondWith.body.id`，返回 `[{ path, ok }]`。要求用 Fake 内存 handler 自测一个满足契约的提供者，并演示字段被改坏时 ok 为 false。",
+      "answer": {
+        "reference_code": "function verifyProvider(contract, handler) {\n  return contract.interactions.map((it) => {\n    const actual = handler(it.withRequest);\n    const ok =\n      actual.status === it.willRespondWith.status &&\n      actual.body.id === it.willRespondWith.body.id;\n    return { path: it.withRequest.path, ok };\n  });\n}\n\n// Fake 内存版提供者：满足契约\nconst good = (req) => req.path === '/orders/1'\n  ? { status: 200, body: { id: 1, total: 99 } }\n  : { status: 404, body: null };\n\n// 被破坏的提供者：把 id 类型改成了字符串\nconst broken = (req) => req.path === '/orders/1'\n  ? { status: 200, body: { id: '1', total: 99 } }\n  : { status: 404, body: null };\n\nconst contract = { interactions: [\n  { withRequest: { path: '/orders/1' }, willRespondWith: { status: 200, body: { id: 1 } } },\n] };\nconsole.log(JSON.stringify(verifyProvider(contract, good)));\nconsole.log(JSON.stringify(verifyProvider(contract, broken)));"
+      },
+      "explanation": "契约验证的核心是「用真实 handler 重放契约请求，比对关键字段」。good 提供者 id 类型与值都匹配，ok 为 true；broken 把 id 从数字改成字符串，类型不一致，ok 为 false——这正是 CDC 要在提供者 CI 里拦下的「字段级破坏」。注意校验的是 body.id 而非整个 body，避免把无关字段变化误判为破坏。",
+      "tags": [
+        "contract-testing",
+        "cdc",
+        "fake"
+      ],
+      "source": "book",
+      "source_ref": "Pact·Provider Verification"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "E2E 选择器策略，最稳定的是",
+      "content_md": "为了降低测试对 UI 变更的敏感度，定位元素应优先使用",
+      "options": [
+        {
+          "key": "A",
+          "text": "深层 CSS 路径如 `#app > div:nth-child(2) .btn`"
+        },
+        {
+          "key": "B",
+          "text": "基于视觉位置的 class 与嵌套层级"
+        },
+        {
+          "key": "C",
+          "text": "专门为测试打的 `data-testid` 标记"
+        },
+        {
+          "key": "D",
+          "text": "随文案变化的文本精确匹配"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "C"
+        ]
+      },
+      "explanation": "data-testid 与样式、文案、DOM 层级完全解耦，UI 怎么改只要测试标记不动测试就不红，最稳。CSS 路径与层级（A、B）绑死实现细节，文案（D）易变，都不如 data-testid 稳定。",
+      "tags": [
+        "e2e",
+        "selector"
+      ],
+      "source": "book",
+      "source_ref": "Testing Library·Guiding Principles"
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "meta": {
+    "chapter": "py-ch09",
+    "category": "basic"
+  },
+  "items": [
+    {
+      "title": "用 OOP 重写小工具：从函数式脚本到可扩展的对象模型",
+      "requirement_md": "选一个此前用一堆函数写的脚本（如 JSON 配置读写器、CSV 清洗器、爬虫），改成面向对象设计：\n\n1. 抽象出一个基类（用 `abc.ABC` + `@abstractmethod`），声明「必须实现哪些方法」；\n2. 用 `classmethod` 提供至少两个工厂入口（如 `from_file()` / `from_dict()`），并验证子类调用时返回子类实例；\n3. 用 mixin 提供一项正交能力（如 `JsonSerializableMixin.to_json()`），mixin 不持有 `__init__` 状态；\n4. 至少一处用 `@property` 暴露只读派生属性，并拒绝外部赋值；\n5. 为数据类实现 `__repr__`、`__eq__`、`__hash__`，并说明为什么 hash 只用不可变字段；\n6. 写一个对比说明：改造前后的调用方代码各长什么样，扩展一个新格式需要改几个文件。",
+      "tasks": [
+        {
+          "title": "抽象基类 + 至少两个子类实现",
+          "verification": {
+            "type": "test",
+            "desc": "`ABC` 中声明的抽象方法缺一个就实例化失败；两个子类行为不同且都通过同一套测试"
+          }
+        },
+        {
+          "title": "工厂方法返回正确子类",
+          "verification": {
+            "type": "test",
+            "desc": "对子类调用 `from_file()` 返回的是子类实例（`type(obj) is SubClass`）"
+          }
+        },
+        {
+          "title": "mixin 不破坏协作链",
+          "verification": {
+            "type": "test",
+            "desc": "mixin 无 `__init__`；多继承链上所有 `__init__` 走 `super()`，打印 MRO 符合预期"
+          }
+        },
+        {
+          "title": "`__eq__`/`__hash__` 契约成立",
+          "verification": {
+            "type": "test",
+            "desc": "相等对象可互相在 set 中找到；修改可变字段后行为符合文档说明"
+          }
+        },
+        {
+          "title": "扩展性对比说明",
+          "verification": {
+            "type": "doc",
+            "desc": "README 含「新增一种格式需要改动哪些文件」的清单，且行数少于改造前"
+          }
+        }
+      ]
+    }
+  ]
+}

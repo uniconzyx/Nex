@@ -1,0 +1,8 @@
+{
+  "title": "readonly 只在类型层生效，运行时可改",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "6\n10 4",
+  "code": "function sum(ro) { return ro.reduce((a, b) => a + b, 0); }\n\nconst arr = [1, 2, 3];\nconsole.log(sum(arr));\narr.push(4);          // readonly 只是编译期约束，运行期照样能改\nconsole.log(sum(arr), arr.length);\n"
+}

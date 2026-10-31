@@ -2,6 +2,77 @@
 
 （中立陈述）一次 MapReduce 作业由三类进程协作完成：**MapTask** 读输入分片、把每条记录映射成 `(key, value)` 中间对；**Shuffle** 负责把同 key 的 value「搬运并排序」到同一个 ReduceTask；**ReduceTask** 按 key 聚合 value 得到最终结果。三者构成「分而治之 + 归并」的经典批处理范式，输入/输出都落在 HDFS（或兼容存储）上。
 
+<!-- injected-code -->
+## 可运行代码：把上面的说法跑一遍
+
+下面两段直接取自本章示例库（`examples/`），期望输出就是判题台里判定的那串字符串，不是事后补写的说明。读完正文后先照着跑一遍，再回去看「三视角解析」里对应的那条。
+
+### Map 阶段：文本 -> (word, 1) 中间 kv 流
+
+```python
+def mapper(line):
+    for w in line.split():
+        yield (w.lower(), 1)
+
+docs = ["Hello world hello", "world of BigData", "hello bigdata world"]
+kv = []
+for line in docs:
+    for k, v in mapper(line):
+        kv.append((k, v))
+for k, v in kv:
+    print(f"{k}	{v}")
+print(f"--total kv pairs: {len(kv)}")
+```
+
+实际输出：
+
+```text
+hello	1
+world	1
+hello	1
+world	1
+of	1
+bigdata	1
+hello	1
+bigdata	1
+world	1
+--total kv pairs: 9
+```
+
+> 出处：`examples/ex01.json`。改一处再看输出变没变，比读三遍解释有用。
+
+### Partitioner：hash(key) % R 决定 key 去哪个 reducer
+
+```python
+def partition(key, num_reduce):
+    h = 0
+    for ch in key:
+        h = (h * 31 + ord(ch)) & 0x7fffffff
+    return h % num_reduce
+
+R = 3
+words = ["hello", "world", "bigdata", "of", "data", "map", "reduce", "spark"]
+for w in words:
+    print(f"{w:10s} -> reducer {partition(w, R)}")
+print(f"--num_reducers={R}")
+```
+
+实际输出：
+
+```text
+hello      -> reducer 1
+world      -> reducer 0
+bigdata    -> reducer 1
+of         -> reducer 0
+data       -> reducer 2
+map        -> reducer 0
+reduce     -> reducer 0
+spark      -> reducer 2
+--num_reducers=3
+```
+
+> 出处：`examples/ex02.json`。改一处再看输出变没变，比读三遍解释有用。
+
 ### 🧑‍💻 程序员视角
 - 工程落地：绝大多数业务不必手写 Map/Reduce——Hive/Spark SQL 会把 SQL 翻译成底层作业；但理解数据流是**调优的前提**，否则你连「为什么慢」都看不出。
 - 性能坑：Shuffle 是 job 的「性能胜负手」。Map 端吐出的中间 kv 要落本地磁盘并经网络拉取，数据量 = Map 输出总量；一旦 Map 输出过大（`mapreduce.task.io.sort.mb` 太小），就会频繁 spill 到磁盘，IO 飙升。
@@ -22,6 +93,24 @@
 ---
 
 # 二、WordCount 端到端走读
+
+> MapReduce 把「计算」搬近「数据」，避免搬大盘：Map 在本地切片并行处理，Shuffle 按 key 归并到同 reducer，Reduce 聚合输出。YARN 负责把任务调度到数据所在的节点，做到「数据不动、计算动」。
+
+```text
+input 分片 ──▶ Map(本地,并行) ──▶ [ Shuffle: 按 key 分组 ] ──▶ Reduce ──▶ 输出
+                 (k1,v1)          partition+sort       (k2, [v2..])
+                 (k1,v2)   ─────────────┐
+                 (k3,v1)   ───┐         │
+                               ▼         ▼
+                            reduce0    reduce1
+                            k1→聚合    k3→聚合
+
+  Map:  逐行转 (key, value)       例: (word,1)
+  Shuffle: 同 key 进同 reducer（网络传输，最贵一步）
+  Reduce: 同 key 的 values 聚合    例: word→count
+
+  YARN: ResourceManager 调度，NodeManager 在 DataNode 本地起 Container 跑任务。
+```
 
 （中立陈述）WordCount 是 MapReduce 的「Hello World」：Mapper 把每行 `split()` 成词并 `(word, 1)`；Partitioner 用 `hash(word) % R` 决定去哪个 reducer；Reducer 把同一词的 `[1,1,...]` 求和。端到端看，2 个 map、3 个 reduce 的小作业就能体现全部数据流。
 

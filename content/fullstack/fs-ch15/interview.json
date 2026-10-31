@@ -1,0 +1,86 @@
+{
+  "meta": {
+    "chapter": "fs-ch15",
+    "note": "6 个高频问题。"
+  },
+  "items": [
+    {
+      "question": "Go 的 Goroutine 和 Java 的线程有什么区别？为什么能开那么多？",
+      "answer_md": "Goroutine 初始栈只有约 2KB、按需增长，而 Java 线程默认栈约 1MB；更重要的是 Go 在用户态用 GMP 做 M:N 调度——少量 OS 线程（M）驱动海量 goroutine（G），阻塞系统调用时 M 与 P 解绑让别的 M 顶上，所以开几十万 goroutine 也不至于拖垮进程。Java 一个任务占一个线程、阻塞就空转一个线程，数量上不去。",
+      "follow_ups": [
+        "GMP 里 P 的作用到底是什么？",
+        "goroutine 阻塞在 channel 和阻塞在系统调用，对调度的影响有何不同？",
+        "Java 虚拟线程（Loom）和 goroutine 思路像吗？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用"
+      ]
+    },
+    {
+      "question": "为什么说「不要通过共享内存通信」？Go 推荐怎么做？",
+      "answer_md": "共享内存加锁容易写出数据竞争和死锁，且「谁锁了哪块」很难审查。Go 推荐开 channel，让 goroutine 之间只通过 channel 传数据——发送和接收的会合本身就完成了同步，不需要锁。比如 N 个 goroutine 要累加，不要都去 `count++`，而是各自把「+1」事件发到 channel，由一个汇总 goroutine 收。",
+      "follow_ups": [
+        "什么场景反而适合用 sync.Mutex 而不是 channel？",
+        "无缓冲和有缓冲 channel 的语义差别是什么？",
+        "向已关闭的 channel 发送为什么 panic、怎么避免？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用"
+      ]
+    },
+    {
+      "question": "Gin 的中间件链是怎么工作的？Next 和 Abort 各干什么？",
+      "answer_md": "中间件是 `func(c *gin.Context)`，多个中间件和 handler 串成洋葱：在 `c.Next()` 之前的代码请求「进」时执行，之后「出」时执行。`Next()` 把控制交还给框架执行链上下一个。某中间件要拦截请求时调 `c.Abort()`，它置上「后续不再执行」标记；注意 Abort 后不要再 `Next()`，否则那一次仍会放行。中间件注册顺序就是执行顺序，安全相关中间件要排最前。",
+      "follow_ups": [
+        "Gin 的 Context 和 Go 的 context.Context 是一回事吗？",
+        "中间件顺序排错会有什么具体的安全后果？",
+        "Spring 的 HandlerInterceptor 三段怎么对应 Gin 的两段？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用"
+      ]
+    },
+    {
+      "question": "Go 把 error 当值返回，和 Java 异常比有什么优劣？",
+      "answer_md": "Go 没有异常（panic 只给不可恢复状态），错误是普通返回值，调用方必须显式 `if err != nil`，把「可能出错」写在签名里、逼你在调用点处理，错误传播路径一目了然。代价是代码啰嗦。Java 受检异常也强制处理但更侵入，运行时异常常被吞。Go 推荐用 `fmt.Errorf(\"...: %w\", err)` 包装、`errors.Is/As` 判断，而不是字符串匹配。",
+      "follow_ups": [
+        "什么时候 Go 才该用 panic？",
+        "为什么 error 包装要用 %w 而不是 %v？",
+        "Spring 的 @ControllerAdvice 对应 Gin 里的什么机制？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用"
+      ]
+    },
+    {
+      "question": "Go 的接口为什么「由消费者定义」？和 Java 的 implements 有什么不同？",
+      "answer_md": "Java 接口多在提供方定义、实现类 `implements`；Go 是结构化的：接口由使用方按「只用到的几个方法」定义，任何恰好有这些方法的类型自动满足，无需声明 implements、无需 import 提供方。这把耦合降到最低，催生了 `io.Reader` 这种小接口被无数类型实现、复用同一段逻辑。和 TypeScript 结构类型、Python 鸭子类型同源。",
+      "follow_ups": [
+        "Go 的接口零方法 interface{} 和 Java 的 Object 有什么异同？",
+        "消费者定义接口在 mock/测试上有啥好处？",
+        "为什么大接口在 Go 里是被反感的？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用"
+      ]
+    },
+    {
+      "question": "用 Go 写 Agent 后端，并发和错误模型上要注意什么？",
+      "answer_md": "并发上：每个请求可以 `go` 一个 goroutine，但要有明确退出条件（用 context 取消）避免泄漏；多个 goroutine 协作用 channel 而不是共享变量。错误上：工具调用、模型调用都返回 error，要在边界显式转成对外错误码而非 panic；流式/长任务用 context 做取消传播，用户断开就停生成。限流和成本在网关与后端分层做。",
+      "follow_ups": [
+        "context.Context 在流式取消里具体怎么串？",
+        "goroutine 泄漏怎么用 pprof/race 排查？",
+        "错误在多层调用里怎么既包装又不丢失类型？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用"
+      ]
+    }
+  ]
+}

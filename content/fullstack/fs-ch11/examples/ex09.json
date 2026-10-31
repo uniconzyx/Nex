@@ -1,0 +1,8 @@
+{
+  "title": "DTO 与领域对象转换：边界处做映射，内部用领域类型",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "{\"userId\":7,\"fullName\":\"张三\",\"createdAt\":\"2026-01-15\"}\nnumber string",
+  "code": "class BizException extends Error {\n  constructor(code, message){ super(message); this.code = code; this.biz = true; }\n}\n\nfunction toDomain(dto) {\n  return {\n    userId: dto.id,\n    fullName: dto.name,\n    createdAt: new Date(dto.ts).toISOString().slice(0, 10),\n  };\n}\nconst dto = { id: 7, name: \"张三\", ts: \"2026-01-15T08:00:00Z\" };\nconst dom = toDomain(dto);\nconsole.log(JSON.stringify(dom));\nconsole.log(typeof dom.userId, typeof dom.createdAt);\n"
+}

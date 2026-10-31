@@ -1,0 +1,8 @@
+{
+  "title": "真值表枚举与重言式判定：假言三段论",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "p q r | p->q q->r p->r | whole\n------+-----------------+------\n0 0 0 |  1    1    1   |  1\n0 0 1 |  1    1    1   |  1\n0 1 0 |  1    0    1   |  1\n0 1 1 |  1    1    1   |  1\n1 0 0 |  0    1    0   |  1\n1 0 1 |  0    1    1   |  1\n1 1 0 |  1    0    0   |  1\n1 1 1 |  1    1    1   |  1\n\nverdict: the formula is a TAUTOLOGY (valid)\nkey point: p->q is false only when p=1 and q=0;\n           when p=0 the implication is vacuously true.\n",
+  "code": "#include <stdio.h>\n/* 蕴含：只在 1 -> 0 时为假 */\nstatic int imp(int a, int b) { return (!a) || b; }\n/* 等价：同真同假 */\nstatic int iff(int a, int b) { return a == b; }\n\n/*\n * ex01：真值表枚举 —— 判定「假言三段论」是否重言式\n * 为什么：教材上写「(p→q)∧(q→r) → (p→r) 是重言式」，但只有把 8 行真值表\n *        全部算出来，你才会真正相信「p 假时整个蕴含自动为真」这条反直觉规则。\n */\nint main(void) {\n    printf(\"p q r | p->q q->r p->r | whole\\n\");\n    printf(\"------+-----------------+------\\n\");\n    int taut = 1;\n    for (int p = 0; p < 2; p++)\n        for (int q = 0; q < 2; q++)\n            for (int r = 0; r < 2; r++) {\n                int a = imp(p, q), b = imp(q, r), c = imp(p, r);\n                int f = imp(a && b, c);\n                printf(\"%d %d %d |  %d    %d    %d   |  %d%s\\n\", p, q, r, a, b, c, f,\n                       f ? \"\" : \"   <-- counterexample\");\n                if (!f) taut = 0;\n            }\n    printf(\"\\nverdict: the formula is %s\\n\", taut ? \"a TAUTOLOGY (valid)\" : \"NOT a tautology\");\n    printf(\"key point: p->q is false only when p=1 and q=0;\\n\");\n    printf(\"           when p=0 the implication is vacuously true.\\n\");\n    return 0;\n}\n"
+}

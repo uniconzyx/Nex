@@ -1,0 +1,228 @@
+{
+  "meta": {
+    "chapter": "ai-ch09",
+    "title": "生成模型 —— 习题集",
+    "count": 8,
+    "note": "8 题，基础题 3 + 算法题 5（平台题仅存元数据与链接，不复述题面）"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "VAE 的 KL 项在做什么",
+      "content_md": "VAE 的目标是 ELBO = 重建项 − KL(q(z|x)||p(z))。关于 KL 项的必要性，下列说法正确的是：",
+      "answer": {
+        "correct": [
+          "C"
+        ],
+        "explain": "KL 项把每个样本的后验拉向先验 N(0,I)，这才使『从先验采样再解码』有意义，从而具备生成能力。\n\nA 错：去掉 KL 项就是普通 AE，隐空间无序、不能采样生成；B 错：KL 项限制的是隐编码的信息量（rate），不是重建误差上限；D 错：KL 项不增加参数，也不改变网络结构。"
+      },
+      "explanation": "只保留重建项 = AE，只有两项同时存在才有生成模型语义。",
+      "tags": [
+        "VAE",
+        "ELBO",
+        "KL"
+      ],
+      "source": "self",
+      "source_ref": "Kingma & Welling, 2013 · Auto-Encoding Variational Bayes",
+      "options": [
+        {
+          "key": "A",
+          "text": "它是可选项：去掉 KL 项后模型退化成更强的自编码器，重建更准"
+        },
+        {
+          "key": "B",
+          "text": "它保证重建误差单调下降，否则训练不收敛"
+        },
+        {
+          "key": "C",
+          "text": "它把后验约束到先验附近，使先验采样点能被解码成有意义的样本"
+        },
+        {
+          "key": "D",
+          "text": "它通过增加参数容量来提高隐空间的表达能力"
+        }
+      ]
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "GAN 最优判别器的形式",
+      "content_md": "固定生成器 G，使 GAN 目标 $\\mathbb{E}_{p_{data}}[\\log D]+\\mathbb{E}_{p_g}[\\log(1-D)]$ 最大化的判别器是：",
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "explain": "对 $D(x)$ 逐点求导置零可得 $D^*(x)=\\frac{p_{data}(x)}{p_{data}(x)+p_g(x)}$，即密度比 $\\frac{p_{data}}{p_{data}+p_g}$。代回目标函数得 $-\\log4+2D_{JS}(p_{data}\\|p_g)$。\n\nA 错：那是『永远判真』，不是最优；C 错：那是贝叶斯最优分类器（先验相等的假设下才与 B 同形，且分母缺失 1/2 因子）；D 错：最优判别器不依赖参数量。"
+      },
+      "explanation": "最优判别器本质是密度比估计器，这是把 GAN 与 f-GAN、引导采样串起来的关键恒等式。",
+      "tags": [
+        "GAN",
+        "最优判别器",
+        "JS散度"
+      ],
+      "source": "self",
+      "source_ref": "Goodfellow et al., 2014 · Generative Adversarial Nets",
+      "options": [
+        {
+          "key": "A",
+          "text": "$D^*(x)=1$（把所有样本判为真）"
+        },
+        {
+          "key": "B",
+          "text": "$D^*(x)=\\dfrac{p_{data}(x)}{p_{data}(x)+p_g(x)}$"
+        },
+        {
+          "key": "C",
+          "text": "$D^*(x)=\\dfrac{p_{data}(x)}{p_{data}(x)-p_g(x)}$"
+        },
+        {
+          "key": "D",
+          "text": "$D^*(x)$ 由判别器参数量决定，越大越接近最优"
+        }
+      ]
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "扩散模型在回归什么",
+      "content_md": "DDPM 的简化目标 $\\mathcal{L}_{simple}=\\mathbb{E}\\|\\varepsilon-\\varepsilon_\\theta(x_t,t)\\|^2$ 中，网络实际预测的是：",
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "explain": "网络预测的是**加到 x_0 上的标准高斯噪声** $\\varepsilon$；由 $q$ 的闭式解可推出它等价于预测得分函数（差一个 $\\sqrt{1-\\bar\\alpha_t}$ 缩放）。\n\nA 错：这是 DDIM 里由 $\\varepsilon$ 反解出的量，不是网络直接输出；C 错：分类标签是无条件扩散里不存在的（条件扩散用 c 作输入）；D 错：$x_t$ 是网络输入，不是输出。"
+      },
+      "explanation": "ε-prediction 的目标尺度与 t 无关，因此训练最稳；它同时等价于 score prediction。",
+      "tags": [
+        "扩散模型",
+        "DDPM",
+        "ε预测"
+      ],
+      "source": "self",
+      "source_ref": "Ho et al., 2020 · Denoising Diffusion Probabilistic Models",
+      "options": [
+        {
+          "key": "A",
+          "text": "干净样本 $x_0$"
+        },
+        {
+          "key": "B",
+          "text": "前向过程加入的标准高斯噪声 $\\varepsilon$"
+        },
+        {
+          "key": "C",
+          "text": "时间步 $t$ 的类别标签"
+        },
+        {
+          "key": "D",
+          "text": "加噪后的样本 $x_t$ 本身"
+        }
+      ]
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "手算任意步的加噪结果",
+      "content_md": "设 $x_0=2.0$、$\\varepsilon=-0.5$、$\\bar\\alpha_t=0.64$。求 $x_t$，并说明 $\\bar\\alpha_t$ 与单步 $\\alpha_t$ 的关系。",
+      "answer": {
+        "explain": "$x_t=\\sqrt{0.64}\\cdot2.0+\\sqrt{1-0.64}\\cdot(-0.5)=0.8\\cdot2.0+0.6\\cdot(-0.5)=1.6-0.3=1.3$。\n\n$\\bar\\alpha_t=\\prod_{s=1}^{t}\\alpha_s$ 是**累积**保留系数，$\\alpha_t=1-\\beta_t$ 是单步系数；两者不可混用（用 $\\sqrt{\\alpha_t}$ 代替 $\\sqrt{\\bar\\alpha_t}$ 会让 $t$ 大时结果完全错）。\n\n附带口径：$\\mathrm{SNR}=\\bar\\alpha/(1-\\bar\\alpha)=0.64/0.36\\approx1.78$。"
+      },
+      "explanation": "这是扩散最基础的一次手算，公式里必须用累积系数。",
+      "tags": [
+        "扩散模型",
+        "闭式解",
+        "abar"
+      ],
+      "source": "self",
+      "source_ref": "DDPM 前向过程闭式解"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "手算 VAE 的 KL 项",
+      "content_md": "某样本的编码器输出 $\\mu=0.5$、$\\log\\sigma^2=-1$（一维）。求 $D_{KL}(q(z|x)\\|\\mathcal{N}(0,1))$。",
+      "answer": {
+        "explain": "闭式：$D_{KL}=\\frac{1}{2}(\\mu^2+\\sigma^2-1-\\log\\sigma^2)$。\n\n$\\sigma^2=e^{-1}\\approx0.3679$，代入：$\\frac{1}{2}(0.25+0.3679-1+1)=\\frac{1}{2}(0.6179)\\approx0.3090$。\n\n校验：$\\mu=0,\\sigma=1$ 时结果应为 0；此处 $\\mu\\neq0$ 且 $\\sigma^2<1$，两项都贡献正数，合理。"
+      },
+      "explanation": "KL 闭式解是 VAE 实现的第一个公式，务必能脱稿手算。",
+      "tags": [
+        "VAE",
+        "KL",
+        "闭式解"
+      ],
+      "source": "self",
+      "source_ref": "高斯 KL 闭式解"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "FID 的两项分别是什么",
+      "content_md": "一维情形下，真样本特征 $\\mu_r=0,\\sigma_r=1$，生成样本 $\\mu_g=0.5,\\sigma_g=1.5$。求 FID（1 维 Fréchet 距离），并指出哪一项对应『多样性差异』。",
+      "answer": {
+        "explain": "1 维 Fréchet：$\\mathrm{FID}=(\\mu_r-\\mu_g)^2+(\\sigma_r-\\sigma_g)^2=0.25+0.25=0.5$。\n\n- 第一项 $(\\Delta\\mu)^2$ 对应**整体偏移**（色调/结构系统性偏差）；\n- 第二项 $(\\Delta\\sigma)^2$ 对应**协方差差异**，即多样性与特征相关性结构。\n\n结论：本例两项各贡献 0.25，说明模型既偏又不够多样。"
+      },
+      "explanation": "FID 拆成均值项与协方差项，是解读指标的第一步。",
+      "tags": [
+        "FID",
+        "评估",
+        "Frechet距离"
+      ],
+      "source": "self",
+      "source_ref": "Heusel et al., 2017 · GANs Trained by a Two Time-Scale Update Rule"
+    },
+    {
+      "type": "fix_error",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "这段 VAE 实现为什么训练不动",
+      "content_md": "下面这段 VAE 的重参数化写法，训练时 encoder 的梯度始终为 None / 接近 0。指出问题并给出修正：\n\n```python\nsigma = decoder_ish  # 假设来自 encoder 的输出\nz = torch.distributions.Normal(mu, sigma).sample()   # 直接采样\nx_hat = dec(z)\nloss = mse(x_hat, x) + kl\nloss.backward()\n```",
+      "answer": {
+        "reference_code": "import torch\n# 正确：重参数化（随机性与参数解耦）\nlogvar = enc_logvar(x)                 # 输出 logvar 而非 sigma\nsigma = torch.exp(0.5 * logvar)\neps = torch.randn_like(sigma)\nz = mu + sigma * eps                   # 梯度可穿过 mu / sigma\nx_hat = dec(z)\nrec = ((x_hat - x) ** 2).mean()\nkl = 0.5 * (mu ** 2 + logvar.exp() - 1 - logvar).sum(1).mean()\nloss = rec + kl\nloss.backward()",
+        "explain": "`Normal(mu, sigma).sample()` 是**不可重参数化**的采样：随机节点隔断了计算图，梯度无法回传到 `mu`/`sigma`，所以 encoder 学不到东西（或者靠 `.rsample()` 才能通）。\n\n修正两条：① 用 `z = mu + sigma * eps`（等价于 rsample）；② 让网络输出 `logvar` 而不是 `sigma`，保证正定且数值稳定，KL 直接用闭式。"
+      },
+      "explanation": "重参数化是 VAE 可训练的唯一原因，写错就等于 encoder 不学习。",
+      "tags": [
+        "VAE",
+        "重参数化",
+        "梯度"
+      ],
+      "source": "self",
+      "source_ref": "Kingma & Welling, 2013 · 重参数化技巧"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "github",
+      "difficulty": 5,
+      "title": "用 NumPy 实现 DDPM 采样循环",
+      "content_md": "给定噪声调度与一个「完美的」噪声预测器 $\\varepsilon_\\theta(x_t,t)=\\varepsilon^\\star$（本题用解析函数模拟），实现 1000 步 DDPM 反向采样，并验证生成的样本接近目标 $x_0$。要求打印每 200 步的 $x_t$ 与 $\\hat{x}_0$ 估计。",
+      "answer": {
+        "reference_code": "import numpy as np\nT = 1000\nbetas = np.linspace(1e-4, 0.02, T)\nalphas = 1 - betas\nabar = np.cumprod(alphas)\nx0_target = 0.8\nrng = np.random.default_rng(0)\n\ndef eps_theta(xt, t):\n    # 完美预测器：由 xt 反解出前向时用的 eps\n    return (xt - np.sqrt(abar[t]) * x0_target) / np.sqrt(1 - abar[t])\n\nx = rng.normal()\nfor t in reversed(range(T)):\n    e = eps_theta(x, t)\n    mu = (x - betas[t] / np.sqrt(1 - abar[t]) * e) / np.sqrt(alphas[t])\n    sigma = np.sqrt(betas[t] * (1 - abar[t-1]) / (1 - abar[t])) if t > 0 else 0.0\n    x = mu + sigma * (rng.normal() if t > 0 else 0.0)\n    if t % 200 == 0:\n        x0_hat = (x - np.sqrt(1 - abar[t]) * e) / np.sqrt(abar[t])\n        print(f't={t:4d} x_t={x:+.4f} x0_hat={x0_hat:+.4f}')\nprint(f'最终样本 x_0 = {x:+.4f}（目标 {x0_target}）')",
+        "explain": "关键三点：① 反向按 $t$ 从 $T-1$ 递减；② 均值用 $\\frac{1}{\\sqrt{\\alpha_t}}(x_t-\\frac{\\beta_t}{\\sqrt{1-\\bar\\alpha_t}}\\varepsilon_\\theta)$；③ 方差用后验 $\\tilde\\beta_t$，最后一步（t=0）不加噪。\n\n本题的预测器由目标反解得到，因此最终样本应精确回到 0.8 附近（误差来自随机采样的累积，量级 <1e-2）。"
+      },
+      "explanation": "采样循环是扩散工程的地基，四个量（α_t、β_t、ᾱ_t、σ_t）必须分清。",
+      "tags": [
+        "DDPM",
+        "采样",
+        "NumPy"
+      ],
+      "source": "github",
+      "source_ref": "hojonathanho/diffusion",
+      "external_url": "https://github.com/hojonathanho/diffusion"
+    }
+  ]
+}

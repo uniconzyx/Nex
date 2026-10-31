@@ -1,0 +1,189 @@
+{
+  "meta": {
+    "chapter": "ml-ch09",
+    "title": "支持向量机与核方法 —— 习题集",
+    "count": 6,
+    "note": "6 题，基础题 3 + 算法题 3（平台题仅存元数据与链接，不复述题面）"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "函数间隔与几何间隔",
+      "content_md": "关于 SVM 的两种间隔，下列说法正确的是：",
+      "answer": {
+        "correct": [
+          "C"
+        ],
+        "explain": "函数间隔 $|w^\\top x+b|$ 会随 $w,b$ 同比例缩放而变（$w,b$ 乘 2，函数间隔翻倍但超平面不变），因此没有几何意义；几何间隔要除以 $\\|w\\|$，它才是不随尺度变化的真实距离。\n\nA 错：两者不相等；B 错：几何间隔不随缩放变化；D 错：SVM 正是利用函数间隔的尺度自由度，令 $y_i(w^\\top x_i+b)\\ge1$ 来固定尺度。"
+      },
+      "explanation": "尺度规范化是「最大化间隔 ⇔ 最小化 ||w||²」得以成立的前提。",
+      "tags": [
+        "SVM",
+        "间隔",
+        "尺度"
+      ],
+      "source": "self",
+      "source_ref": "《统计学习方法》第7章 · 线性可分支持向量机",
+      "options": [
+        {
+          "key": "A",
+          "text": "函数间隔与几何间隔总是相等"
+        },
+        {
+          "key": "B",
+          "text": "几何间隔会随 $w$ 的缩放而同比变化"
+        },
+        {
+          "key": "C",
+          "text": "函数间隔可被缩放改变，几何间隔才是真实距离"
+        },
+        {
+          "key": "D",
+          "text": "SVM 的最小化目标是直接最小化几何间隔"
+        }
+      ]
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "对偶问题里 0 ≤ α ≤ C 从哪来",
+      "content_md": "软间隔 SVM 的对偶约束是 $0\\le\\alpha_i\\le C$。上界 $C$ 的来源是：",
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "explain": "对松弛变量 $\\xi_i$ 求偏导置零得 $\\alpha_i+\\mu_i=C$，而 $\\mu_i\\ge0$（不等式约束的乘子），于是 $\\alpha_i\\le C$。\n\nA 错：$C$ 是超参不是推导结果；C 错：与 $\\sum\\alpha_iy_i=0$ 无关；D 错：核函数不影响上界。"
+      },
+      "explanation": "α 的上界来自「ξ 的乘子非负」这一条 KKT 条件，是软间隔推导的必经一步。",
+      "tags": [
+        "SVM",
+        "对偶",
+        "KKT"
+      ],
+      "source": "self",
+      "source_ref": "《统计学习方法》第7章 · 软间隔最大化",
+      "options": [
+        {
+          "key": "A",
+          "text": "由样本数量 $n$ 决定"
+        },
+        {
+          "key": "B",
+          "text": "由 $\\partial L/\\partial\\xi_i=0$ 得 $\\alpha_i+\\mu_i=C$，且 $\\mu_i\\ge0$"
+        },
+        {
+          "key": "C",
+          "text": "由等式约束 $\\sum_i\\alpha_iy_i=0$ 推出"
+        },
+        {
+          "key": "D",
+          "text": "由核函数的选择决定"
+        }
+      ]
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "核技巧能成立的关键前提",
+      "content_md": "核技巧之所以能不显式构造 $\\phi$ 就完成升维，最关键的原因是：",
+      "answer": {
+        "correct": [
+          "C"
+        ],
+        "explain": "SVM 的对偶问题与决策函数里数据**只以内积形式出现**，因此可以把 $\\langle x_i,x_j\\rangle$ 换成 $K(x_i,x_j)$，形式完全不变。这是核技巧的全部内容。\n\nA 错：原始问题里 $w$ 是显式向量，无法核化，所以才要转对偶；B 错：核不需要是无穷维（线性核是有限维）；D 错：Mercer 条件是「核合法」的判据，不是「能不构造 φ」的原因。"
+      },
+      "explanation": "「只用内积」是核化的前提，这也是为什么要先推到对偶形式。",
+      "tags": [
+        "核技巧",
+        "对偶",
+        "SVM"
+      ],
+      "source": "self",
+      "source_ref": "《统计学习方法》第7章 · 核函数",
+      "options": [
+        {
+          "key": "A",
+          "text": "原始问题中的 $w$ 可以直接用核函数表示"
+        },
+        {
+          "key": "B",
+          "text": "核函数必须是无限维的"
+        },
+        {
+          "key": "C",
+          "text": "对偶问题与决策函数中数据只以内积出现，可整体替换为核"
+        },
+        {
+          "key": "D",
+          "text": "因为核函数一定满足 Mercer 条件"
+        }
+      ]
+    },
+    {
+      "type": "output",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 3,
+      "title": "算几何间隔与间隔宽度",
+      "content_md": "$w=(3,4)$、$b=-1$，样本点 $x=(1,1)$ 且 $y=+1$。求该点的函数间隔与几何间隔；若它是支持向量，间隔宽度是多少？",
+      "answer": {
+        "explain": "函数间隔 $y(w^\\top x+b)=1\\cdot(3+4-1)=6$；$\\|w\\|=\\sqrt{9+16}=5$，几何间隔 $=6/5=1.2$。\n\n若它是支持向量，规范化后应有 $y(w^\\top x+b)=1$，对应 $\\|w\\|=1/1.2=0.8333$，间隔宽度 $2/\\|w\\|=2.4$。\n\n更一般的口径：只要给出规范化后的 $\\|w\\|$，间隔宽度就是 $2/\\|w\\|$（本题原始尺度下不能直接用 6 去算宽度）。"
+      },
+      "explanation": "函数间隔先除 ||w|| 才是距离；宽度 2/||w|| 只在规范化后成立。",
+      "tags": [
+        "SVM",
+        "几何间隔",
+        "间隔宽度"
+      ],
+      "source": "self",
+      "source_ref": "《统计学习方法》第7章 例7.1"
+    },
+    {
+      "type": "output",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "判断哪些样本是支持向量",
+      "content_md": "1D 问题：$x=[-2,-1,1,2]$、$y=[-1,-1,+1,+1]$，解为 $w=1,b=0$。给定 $\\alpha=[0,0.5,0.5,0]$，用 KKT 判断哪些是支持向量，并指出各自属于哪一类。",
+      "answer": {
+        "explain": "先算 $y_i f(x_i)$：$-2$ 点得 $1\\cdot2=2$；$-1$ 点得 $1$；$+1$ 点得 $1$；$+2$ 点得 $2$。\n\n- $x=-1$ 与 $x=+1$：$\\alpha>0$ 且 $y f=1$（在边界上）→ **自由支持向量**（$0<\\alpha<C$，决定 $b$）；\n- $x=\\pm2$：$\\alpha=0$ 且 $yf>1$（间隔外）→ 普通点，对模型无影响。\n\n另需验证 $\\sum\\alpha_iy_i=-0.5+0.5=0$ 与 $w=\\sum\\alpha_iy_ix_i=(-0.5)(-1)+(0.5)(1)=1$，均成立。\n\n本题无 $\\alpha=C$ 的样本，因此没有有界支持向量（硬间隔、无违规）。"
+      },
+      "explanation": "三类支持向量的判据同时看 α 与 y·f(x)，不能只看 α。",
+      "tags": [
+        "KKT",
+        "支持向量",
+        "SVM"
+      ],
+      "source": "self",
+      "source_ref": "KKT 互补松弛条件"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": 5,
+      "title": "用 NumPy 实现核矩阵与决策函数",
+      "content_md": "实现 `kernel_matrix(X, kernel, gamma)` 与 `svm_predict(X_train, y_train, alpha, b, kernel, X_test)`，支持线性核与 RBF 核，并在一个 2D 非线性可分数据上验证：用 RBF 核的决策函数能把内圈/外圈分开（训练准确率 > 95%）。",
+      "answer": {
+        "reference_code": "import numpy as np\n\ndef kernel_matrix(X, kind='rbf', gamma=0.5):\n    if kind == 'linear':\n        return X @ X.T\n    sq = np.sum((X[:, None, :] - X[None, :, :]) ** 2, -1)\n    return np.exp(-gamma * sq)\n\ndef svm_predict(Xtr, ytr, alpha, b, Xte, kind='rbf', gamma=0.5):\n    # 决策函数：f(x) = sum_i alpha_i y_i K(x_i, x) + b\n    if kind == 'linear':\n        Kte = Xte @ Xtr.T\n    else:\n        sq = np.sum((Xte[:, None, :] - Xtr[None, :, :]) ** 2, -1)\n        Kte = np.exp(-gamma * sq)\n    return np.sign(Kte @ (alpha * ytr) + b)",
+        "explain": "两个要点：① 决策函数**只用核值**，绝不显式构造 φ；② 系数是 $\\alpha_i y_i$（不是 $\\alpha_i$ 单独）。\n\n验证思路：生成内圈（半径 0.5）+ 外圈（半径 1.5）2D 点，用 RBF（$\\gamma\\approx1$）训练后可 >95% 分开；换成线性核则只能 ~50%（无法用一个超平面分开同心圆）。\n\n工程提醒：$\\gamma$ 太大会过拟合（每个点自成一类），太小会退化成线性。"
+      },
+      "explanation": "核矩阵 + 决策函数是核 SVM 推理的全部，写对它就理解了「不构造 φ」。",
+      "tags": [
+        "核矩阵",
+        "决策函数",
+        "NumPy"
+      ],
+      "source": "github",
+      "source_ref": "cjlin1/libsvm",
+      "external_url": "https://github.com/cjlin1/libsvm"
+    }
+  ]
+}

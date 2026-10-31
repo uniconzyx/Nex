@@ -1,0 +1,8 @@
+{
+  "title": "classmethod 工厂在子类上返回子类实例",
+  "code_lang": "python",
+  "code_std": "3.11",
+  "stdin": "",
+  "expected_output": "Shape Circle\n静态方法拿不到 cls",
+  "code": "class Shape:\n    def __init__(self, name):\n        self.name = name\n\n    @classmethod\n    def unit(cls):\n        return cls(\"unit\")\n\n    @staticmethod\n    def describe():\n        return \"静态方法拿不到 cls\"\n\nclass Circle(Shape):\n    pass\n\nprint(type(Shape.unit()).__name__, type(Circle.unit()).__name__)\nprint(Shape.describe())\n"
+}

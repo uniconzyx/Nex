@@ -1,0 +1,8 @@
+{
+  "title": "__eq__ 与 __hash__ 必须成对：set 里找得到",
+  "code_lang": "python",
+  "code_std": "3.11",
+  "stdin": "",
+  "expected_output": "True True 1",
+  "code": "class Point:\n    __slots__ = (\"x\", \"y\")\n\n    def __init__(self, x, y):\n        self.x, self.y = x, y\n\n    def __eq__(self, other):\n        if not isinstance(other, Point):\n            return NotImplemented\n        return (self.x, self.y) == (other.x, other.y)\n\n    def __hash__(self):\n        return hash((self.x, self.y))\n\np = Point(1, 2)\ns = {Point(1, 2)}\nprint(p in s, p == Point(1, 2), len({Point(1, 2), Point(1, 2)}))\n"
+}

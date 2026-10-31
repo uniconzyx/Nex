@@ -1,0 +1,8 @@
+{
+  "title": "长任务状态机 + 轮询（queued→running→succeeded）",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "task_8f3a:queued@0% -> task_8f3a:running@0% -> task_8f3a:running@25% -> task_8f3a:succeeded@100%",
+  "code": "function makeTask(id) {\n  let state = \"queued\", progress = 0;\n  return {\n    id,\n    start() { state = \"running\"; },\n    tick() { if (state === \"running\") { progress = Math.min(100, progress + 25); if (progress >= 100) state = \"succeeded\"; } },\n    poll() { return { id, state, progress }; }\n  };\n}\nconst t = makeTask(\"task_8f3a\");\nconst snaps = [];\nsnaps.push(t.poll());\nt.start(); snaps.push(t.poll());\nt.tick(); snaps.push(t.poll());\nt.tick(); t.tick(); t.tick(); snaps.push(t.poll());\nconsole.log(snaps.map(s => `${s.id}:${s.state}@${s.progress}%`).join(\" -> \"));\n"
+}

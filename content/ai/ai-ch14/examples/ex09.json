@@ -1,0 +1,8 @@
+{
+  "title": "多模态调用成本模型：视觉 token + 文本 token",
+  "code_lang": "python",
+  "code_std": "3.11",
+  "stdin": "",
+  "expected_output": "图像数: 5 × $0.01 = $0.05\n文本: 2000 tokens × $0.0005/1k = $0.0010\n单次调用成本: $0.0510",
+  "code": "VISION_PRICE = 0.01\nTEXT_PRICE = 0.0005\nn_images = 5\nn_text_tokens = 2000\ncost = n_images * VISION_PRICE + (n_text_tokens/1000) * TEXT_PRICE\nprint(f\"图像数: {n_images} × ${VISION_PRICE} = ${n_images*VISION_PRICE:.2f}\")\nprint(f\"文本: {n_text_tokens} tokens × ${TEXT_PRICE}/1k = ${(n_text_tokens/1000)*TEXT_PRICE:.4f}\")\nprint(f\"单次调用成本: ${cost:.4f}\")\n"
+}

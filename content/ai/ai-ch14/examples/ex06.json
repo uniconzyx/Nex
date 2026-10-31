@@ -1,0 +1,8 @@
+{
+  "title": "延迟预算分解：拆段定位瓶颈",
+  "code_lang": "python",
+  "code_std": "3.11",
+  "stdin": "",
+  "expected_output": "延迟预算分解(ms):\n  图像预处理: 50 (11%)\n  视觉编码: 120 (27%)\n  文本生成(8 tokens): 240 (55%)\n  网络/调度: 30 (7%)\n总预算: 440 ms  目标<=500ms: True",
+  "code": "BUDGET = {\n    \"图像预处理\": 50,\n    \"视觉编码\": 120,\n    \"文本生成(8 tokens)\": 240,\n    \"网络/调度\": 30,\n}\ntotal = sum(BUDGET.values())\nprint(\"延迟预算分解(ms):\")\nfor k, v in BUDGET.items():\n    print(f\"  {k}: {v} ({v/total:.0%})\")\nprint(\"总预算:\", total, \"ms  目标<=500ms:\", total <= 500)\n"
+}

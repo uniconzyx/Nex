@@ -1,0 +1,8 @@
+{
+  "title": "租户限流：令牌桶允许突发、上限封顶",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "初始允许3? true\n再允许4? false\ntick1s后允许4? true\ntick10s后剩余(上限5): 5",
+  "code": "function makeBucket(rate, cap) {\n  let tokens = cap;\n  return {\n    tick(seconds) { tokens = Math.min(cap, tokens + rate * seconds); },\n    allow(n = 1) { if (tokens >= n) { tokens -= n; return true; } return false; },\n    left() { return tokens; }\n  };\n}\nconst b = makeBucket(2, 5);\nconsole.log(\"初始允许3? \" + b.allow(3));\nconsole.log(\"再允许4? \" + b.allow(4));\nb.tick(1);\nconsole.log(\"tick1s后允许4? \" + b.allow(4));\nb.tick(10);\nconsole.log(\"tick10s后剩余(上限5): \" + b.left());\n"
+}

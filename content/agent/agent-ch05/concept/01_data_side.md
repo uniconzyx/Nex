@@ -34,6 +34,26 @@ RAG 的「数据侧」指把原始文档变成可被检索的最小语义单元�
 
 ```python
 # 解析评估的最小可行实现：对比抽取文本与人工标注字段的命中
+
+> RAG（检索增强生成）让模型「先查资料再回答」：把知识切块向量化建库，提问时先检索最相关片段，拼接进 prompt 再生成。它把「参数记忆」变成「可更新的外部知识」，幻觉与时效问题大幅缓解——但上限由检索质量决定。
+
+```text
+知识入库（离线）:
+   文档 → 切片 chunk → Embedding 模型 → 向量库(如 Milvus)
+
+在线问答（实时）:
+   用户问题 → Embedding → 向量检索 Top-K 片段
+        │
+        ▼
+   拼装 Prompt: [系统: 只依据下列资料] + [资料:K个片段] + [问题]
+        │
+        ▼
+   LLM 生成（带引用来源）
+
+  质量杠杆：
+   切片粒度 / 检索召回率 / 重排(Rerank) / 来源可信度
+  常见坑：检索不到→答非所问；片段太长→淹没重点
+```
 def parse_recall(extracted_text: str, golden_fields: list[str]) -> float:
     hit = sum(1 for f in golden_fields if f in extracted_text)
     return hit / max(1, len(golden_fields))

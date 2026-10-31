@@ -139,13 +139,14 @@
       "source_ref": "408 数据结构：拓扑排序 / 《Spring Boot 编程思想》第3章",
       "time_limit_ms": 2000,
       "memory_limit_mb": 256,
-      "test_cases": [
+      "samples": [
         {
           "input": "MyBatis->DataSource; Transaction->DataSource; DataSource->[]",
           "expected_output": "DataSourceAutoConfiguration, MyBatisAutoConfiguration, TransactionAutoConfiguration",
           "is_sample": true
         }
-      ]
+      ],
+      "judge_note": "本题参考实现是「方法 + 硬编码 main」，不读 args，离线不做自动判分。请对照 samples 与参考实现自评。"
     },
     {
       "type": "coding",

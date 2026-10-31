@@ -12,9 +12,11 @@
       "platform": "self",
       "difficulty": 3,
       "title": "自注意力的时间与空间复杂度",
-      "content_md": "对长度为 n、模型维度 d 的自注意力（无稀疏 / 无局部窗口），单次前向的时间复杂度与显存（存储 QK^T）分别为？\n\nA. O(n·d) 与 O(n·d)\nB. O(n²·d) 与 O(n²)\nC. O(n·d²) 与 O(n·d)\nD. O(n²·d²) 与 O(n²·d)",
+      "content_md": "对长度为 n、模型维度 d 的自注意力（无稀疏 / 无局部窗口），单次前向的时间复杂度与显存（存储 QK^T）分别为？",
       "answer": {
-        "correct": "B",
+        "correct": [
+          "B"
+        ],
         "explain": "Q/K/V 投影为 O(n·d²)（被 n²·d 主导项盖过），核心是 QK^T 为 n×n 矩阵，算与存都是 O(n²)，再乘 d 得 O(n²·d)。这正是长上下文 O(n²) 瓶颈的来源。"
       },
       "explanation": "O(n²) 复杂度是注意力效率工程（FlashAttention/MQA）要解决的靶点。",
@@ -23,7 +25,25 @@
         "复杂度"
       ],
       "source": "self",
-      "source_ref": "《Attention Is All You Need》§3.2 · 计算复杂度表"
+      "source_ref": "《Attention Is All You Need》§3.2 · 计算复杂度表",
+      "options": [
+        {
+          "key": "A",
+          "text": "O(n·d) 与 O(n·d)"
+        },
+        {
+          "key": "B",
+          "text": "O(n²·d) 与 O(n²)"
+        },
+        {
+          "key": "C",
+          "text": "O(n·d²) 与 O(n·d)"
+        },
+        {
+          "key": "D",
+          "text": "O(n²·d²) 与 O(n²·d)"
+        }
+      ]
     },
     {
       "type": "choice",
@@ -31,9 +51,11 @@
       "platform": "self",
       "difficulty": 3,
       "title": "LayerNorm 与 BatchNorm 的区别（正确表述）",
-      "content_md": "关于 Transformer 中归一化的正确说法是？\n\nA. LayerNorm 沿 batch 维归一化，推理期用 running_mean\nB. BatchNorm 沿特征维归一化，与 batch 大小无关\nC. LayerNorm 沿特征维、逐样本计算，与 batch 无关，Transformer 用 LN\nD. BatchNorm 更适合变长序列与小 batch",
+      "content_md": "关于 Transformer 中归一化的正确说法是？",
       "answer": {
-        "correct": "C",
+        "correct": [
+          "C"
+        ],
         "explain": "LN 沿特征维、逐样本做零均值单位方差，没有 batch 统计量，适合变长/小 batch；BN 沿 batch 维、需大 batch，Transformer 标准用 LN。A/B/D 都把两者机制说反了。"
       },
       "explanation": "LN 与 BN 的归一化轴不同是高频考点。",
@@ -43,7 +65,25 @@
         "BatchNorm"
       ],
       "source": "self",
-      "source_ref": "Ba et al. 《Layer Normalization》"
+      "source_ref": "Ba et al. 《Layer Normalization》",
+      "options": [
+        {
+          "key": "A",
+          "text": "LayerNorm 沿 batch 维归一化，推理期用 running_mean"
+        },
+        {
+          "key": "B",
+          "text": "BatchNorm 沿特征维归一化，与 batch 大小无关"
+        },
+        {
+          "key": "C",
+          "text": "LayerNorm 沿特征维、逐样本计算，与 batch 无关，Transformer 用 LN"
+        },
+        {
+          "key": "D",
+          "text": "BatchNorm 更适合变长序列与小 batch"
+        }
+      ]
     },
     {
       "type": "fix_error",
@@ -146,7 +186,25 @@
       ],
       "source": "leetcode",
       "source_ref": "LeetCode 146（lru-cache）",
-      "external_url": "https://leetcode.cn/problems/lru-cache/"
+      "external_url": "https://leetcode.cn/problems/lru-cache/",
+      "options": [
+        {
+          "key": "A",
+          "text": "哈希表 + 双向链表即可让 `get` / `put` 均摊 O(1)；推理侧的 KV Cache 分页淘汰与它同构"
+        },
+        {
+          "key": "B",
+          "text": "用动态数组保存元素就能做到 O(1)，因为数组支持随机访问"
+        },
+        {
+          "key": "C",
+          "text": "只需要哈希表，不必维护任何顺序信息"
+        },
+        {
+          "key": "D",
+          "text": "必须用红黑树实现，因为要按 key 排序"
+        }
+      ]
     },
     {
       "type": "coding",

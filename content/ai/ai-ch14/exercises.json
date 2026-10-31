@@ -1,0 +1,156 @@
+{
+  "meta": {
+    "chapter": "ai-ch14",
+    "note": "7 题，含选择题/输出题/改错题/编程题；题面与参考实现均为自建，不搬运第三方题面。"
+  },
+  "items": [
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "实现跨模态余弦检索 Top-1",
+      "content_md": "给定文本查询向量 `text_q` 和图像嵌入字典 `img_embs`（名→向量），实现 `top1(text_q, img_embs)` 返回最相似图像名。余弦相似度 = 点积 / (模长乘积)。自测：text_q=[0.9,0.1,0.2]，img_embs={'cat.png':[0.8,0.2,0.1],'dog.png':[0.1,0.9,0.2],'car.png':[0.2,0.1,0.9]}，应返回 'cat.png'。",
+      "answer": {
+        "reference_code": "import math\n\ndef dot(a, b):\n    return sum(x * y for x, y in zip(a, b))\n\ndef cos(a, b):\n    na = math.sqrt(dot(a, a)); nb = math.sqrt(dot(b, b))\n    return dot(a, b) / (na * nb)\n\ndef top1(text_q, img_embs):\n    return max(img_embs.items(), key=lambda kv: cos(text_q, kv[1]))[0]\n\nassert top1([0.9,0.1,0.2],\n            {'cat.png':[0.8,0.2,0.1],'dog.png':[0.1,0.9,0.2],'car.png':[0.2,0.1,0.9]}) == 'cat.png'\nprint(top1([0.9,0.1,0.2],\n           {'cat.png':[0.8,0.2,0.1],'dog.png':[0.1,0.9,0.2],'car.png':[0.2,0.1,0.9]}))"
+      },
+      "explanation": "跨模态检索退化为向量最近邻：关键是图、文都过各自编码器+投影层落到同一空间，再用同一度量（余弦）比较。本题未归一化也正确，因为余弦本身除以了模长；若用点积则必须先 L2 归一化，否则模长干扰排序。Top-1 是 cat，符合直觉。",
+      "tags": [
+        "retrieval",
+        "cosine"
+      ],
+      "source": "book",
+      "source_ref": "Multimodal · Cross-modal Retrieval"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "book",
+      "difficulty": "hard",
+      "title": "实现 CLIP 式 InfoNCE 对比损失",
+      "content_md": "给定 N 个 (图像,文本) 对的嵌入 `I`、`T`（已归一化），温度 τ=0.1，实现 `infonce(I, T) -> float`：对每个 i，分子=exp(sim(I_i,T_i)/τ)，分母=Σ_j exp(sim(I_i,T_j)/τ)，loss = -mean(log(分子/分母))。自测：I=[[0.9,0.1],[0.1,0.9],[0.3,0.3]], T=[[0.85,0.15],[0.15,0.85],[0.2,0.4]] 应得约 0.6875。",
+      "answer": {
+        "reference_code": "import math\n\ndef dot(a, b):\n    return sum(x * y for x, y in zip(a, b))\n\ndef infonce(I, T, tau=0.1):\n    N = len(I)\n    loss = 0.0\n    for i in range(N):\n        num = math.exp(dot(I[i], T[i]) / tau)\n        den = sum(math.exp(dot(I[i], T[j]) / tau) for j in range(N))\n        loss += -math.log(num / den)\n    return loss / N\n\nI = [[0.9,0.1],[0.1,0.9],[0.3,0.3]]\nT = [[0.85,0.15],[0.15,0.85],[0.2,0.4]]\nprint(f\"InfoNCE loss = {infonce(I,T):.4f}\")"
+      },
+      "explanation": "InfoNCE 在一个 batch 内构造 N 路分类：正样本是配对的 (I_i,T_i)，其余 T_j 是负例。分子是正确配对的相似度指数，分母是所有候选的指数和，取负对数即该样本的分类交叉熵。温度 τ 越小分布越尖锐、对比越强。本题 loss≈0.6875，对角线（正对）相似度应为 [0.78,0.78,0.18]，前两项高、第三项低说明第三对没对齐，拉高了损失。",
+      "tags": [
+        "clip",
+        "infonce"
+      ],
+      "source": "book",
+      "source_ref": "Multimodal · Contrastive Learning"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "关于投影层与图文对齐",
+      "content_md": "下列说法正确的是",
+      "options": [
+        {
+          "key": "A",
+          "text": "图像和文本编码器输出维度相同，因此可以直接算相似度，无需投影层"
+        },
+        {
+          "key": "B",
+          "text": "投影层把图像/文本嵌入映射到同一 hidden_dim 空间，旨在抹平模态偏置实现语义对齐"
+        },
+        {
+          "key": "C",
+          "text": "CLIP 训练需要大量「图像包围框」标注才能对齐图文"
+        },
+        {
+          "key": "D",
+          "text": "跨模态检索用点积时不需要归一化，模长不影响排序"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "投影层把异构模态映射到同一空间并抹平模态偏置，是对齐的关键（B 正确）。A 错：维度相同≠语义对齐，仍要投影；C 错：CLIP 用「图文配对」弱监督，不需要包围框标注；D 错：点积会被模长主导，必须先 L2 归一化使点积等价于余弦。",
+      "tags": [
+        "alignment",
+        "projection"
+      ],
+      "source": "book",
+      "source_ref": "Multimodal · Alignment"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "读代码写输出（OCR→VLM 流水线耗时）",
+      "content_md": "```python\nSTEPS = [(\"版面检测\", 120), (\"文本识别\", 300), (\"后处理/纠错\", 80)]\ntotal = sum(t for _, t in STEPS)\nprint(\"流水线步骤耗时(ms):\")\nfor name, t in STEPS:\n    print(f\"  {name}: {t}ms ({t/total:.0%})\")\nprint(\"端到端:\", total, \"ms\")\n```",
+      "answer": {
+        "output": "流水线步骤耗时(ms):\n  版面检测: 120ms (24%)\n  文本识别: 300ms (60%)\n  后处理/纠错: 80ms (16%)\n端到端: 500 ms"
+      },
+      "explanation": "这是用固定预算值做结构性容量规划（而非 time.perf_counter() 实测，后者不可复现且掩盖瓶颈）。文本识别占 60%，是整条 OCR→VLM 链路的优化重点——上更强识别模型或并行化收益最大。端到端 500ms 给后续 VLM 问答留了预算空间。",
+      "tags": [
+        "ocr",
+        "pipeline"
+      ],
+      "source": "book",
+      "source_ref": "Multimodal · OCR Pipeline"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "实现多模态 RAG 成本模型与延迟预算",
+      "content_md": "实现 `cost(n_images, n_text_tokens, vis=0.01, txt=0.0005)` 返回单次调用成本（视觉=vis×图数，文本=txt×词数/1000）；实现 `latency_budget()` 返回延迟各段 dict 与总和，段为：图像预处理50、视觉编码120、文本生成(8 tokens)240、网络/调度30。自测：cost(5,2000) 应为 0.051。",
+      "answer": {
+        "reference_code": "def cost(n_images, n_text_tokens, vis=0.01, txt=0.0005):\n    return n_images * vis + (n_text_tokens / 1000) * txt\n\ndef latency_budget():\n    b = {\"图像预处理\": 50, \"视觉编码\": 120, \"文本生成(8 tokens)\": 240, \"网络/调度\": 30}\n    b[\"总预算\"] = sum(v for k, v in b.items())\n    return b\n\nassert abs(cost(5, 2000) - 0.051) < 1e-9\nprint(f\"单次调用成本: ${cost(5,2000):.4f}\")\nprint(latency_budget())"
+      },
+      "explanation": "多模态 RAG 成本 = 视觉 token 单价×图数 + 文本 token 单价×词数，比文本 RAG 多出「视觉」这一块。延迟预算要拆段：文本生成常是大头（55%），超预算先砍生成 token 数或换小视觉编码器，而非盲目堆 GPU。延迟分解本质是关键路径分析。",
+      "tags": [
+        "rag",
+        "cost",
+        "latency"
+      ],
+      "source": "book",
+      "source_ref": "Multimodal · RAG Cost"
+    },
+    {
+      "type": "fix",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "改错：OCR 失败模式没被兜底",
+      "content_md": "下面直接把 OCR 结果拼进 VLM prompt，模糊处识别成了乱码也没拦。指出问题并加置信度兜底。\n\n```python\nocr_results = [\n    {\"text\": \"正常发票内容\", \"conf\": 0.98},\n    {\"text\": \"##########\", \"conf\": 0.21},\n    {\"text\": \"金额: 123.45\", \"conf\": 0.91},\n    {\"text\": \"✱✱✱✱✱\", \"conf\": 0.34},\n]\nprompt = \"\\n\".join(r[\"text\"] for r in ocr_results)\n# 直接送给 VLM 回答\n```",
+      "answer": {
+        "reference_code": "GARBLED = set(\"✱#@*%&\")\n\ndef needs_review(r):\n    if r[\"conf\"] < 0.5:\n        return True\n    if any(ch in GARBLED for ch in r[\"text\"]):\n        return True\n    return False\n\nocr_results = [\n    {\"text\": \"正常发票内容\", \"conf\": 0.98},\n    {\"text\": \"##########\", \"conf\": 0.21},\n    {\"text\": \"金额: 123.45\", \"conf\": 0.91},\n    {\"text\": \"✱✱✱✱✱\", \"conf\": 0.34},\n]\nreview = [r for r in ocr_results if needs_review(r)]\nclean = [r for r in ocr_results if not needs_review(r)]\nprompt = \"\\n\".join(r[\"text\"] for r in clean)\nprint(\"需人工复核:\", [r[\"text\"] for r in review])\nprint(\"通过:\", [r[\"text\"] for r in clean])"
+      },
+      "explanation": "OCR→VLM 链路必须做置信度过滤：conf<0.5 或含乱码字符（如 `✱`、`#`）的样本不能直接当真值喂 VLM，否则模型基于乱码推理必错且难排查。改动加了 `needs_review` 兜底，把低置信/乱码样本分流到人工复核，只把 clean 的拼进 prompt。这是 OCR 失败模式里最该兜住的一环。",
+      "tags": [
+        "ocr",
+        "fail-mode",
+        "guard"
+      ],
+      "source": "book",
+      "source_ref": "Multimodal · OCR Fail Mode"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "读代码写输出（多模态 RAG 延迟预算分解）",
+      "content_md": "```python\nBUDGET = {\n    \"图像预处理\": 50,\n    \"视觉编码\": 120,\n    \"文本生成(8 tokens)\": 240,\n    \"网络/调度\": 30,\n}\ntotal = sum(BUDGET.values())\nprint(\"延迟预算分解(ms):\")\nfor k, v in BUDGET.items():\n    print(f\"  {k}: {v} ({v/total:.0%})\")\nprint(\"总预算:\", total, \"ms  目标<=500ms:\", total <= 500)\n```",
+      "answer": {
+        "output": "延迟预算分解(ms):\n  图像预处理: 50 (11%)\n  视觉编码: 120 (27%)\n  文本生成(8 tokens): 240 (55%)\n  网络/调度: 30 (7%)\n总预算: 440 ms  目标<=500ms: True"
+      },
+      "explanation": "延迟预算要拆段看而不能只看总时长：文本生成占 55% 是大头，视觉编码 27% 其次。超预算时优先压缩生成 token 数或换更小视觉编码器，而不是盲目堆 GPU——这是关键路径分析的落地。440ms<500ms 达标，但余量不大，需监控生成长度。",
+      "tags": [
+        "latency",
+        "budget"
+      ],
+      "source": "book",
+      "source_ref": "Multimodal · Latency Budget"
+    }
+  ]
+}

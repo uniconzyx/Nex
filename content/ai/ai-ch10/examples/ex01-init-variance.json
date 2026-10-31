@@ -1,0 +1,8 @@
+{
+  "title": "三种初始化下 50 层前向的激活方差",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "每层 std（d=256, ReLU, 50 层）：\n层数              10        20        30        40        50\nnaive      2.87e+10  1.13e+21  4.10e+31  1.32e+42  5.13e+52\nxavier     2.53e-02  8.24e-04  2.51e-05  8.59e-07  1.28e-08\nhe         7.37e-01  7.16e-01  5.21e-01  5.71e-01  4.54e-01\n\n理论：Xavier std=sqrt(2/(nin+nout))=0.06250, He std=sqrt(2/nin)=0.08839\n结论：naive 初始化逐层指数爆炸；Xavier 配 ReLU 会指数衰减；\n      He 是唯一让 50 层后激活仍与输入同量级的选项（0.45~0.74 vs 1e52 / 1e-8）\n",
+  "code": "\nimport numpy as np\nrng = np.random.default_rng(0)\nd, L, n = 256, 50, 1024\n\ndef run(mode):\n    x = rng.normal(size=(n, d))\n    stds = []\n    for l in range(L):\n        if mode == \"naive\":\n            std = 1.0\n        elif mode == \"xavier\":\n            std = np.sqrt(2.0 / (d + d))\n        else:  # he\n            std = np.sqrt(2.0 / d)\n        W = rng.normal(0, std, (d, d))\n        x = np.maximum(x @ W, 0)          # ReLU\n        if (l + 1) % 10 == 0:\n            stds.append(x.std())\n    return stds\n\nprint(f\"每层 std（d={d}, ReLU, 50 层）：\")\nprint(\"层数      \" + \"\".join(f\"{i:>10d}\" for i in (10, 20, 30, 40, 50)))\nfor mode in (\"naive\", \"xavier\", \"he\"):\n    s = run(mode)\n    print(f\"{mode:<9s}\" + \"\".join(f\"{v:10.2e}\" for v in s))\nprint()\nprint(\"理论：Xavier std=sqrt(2/(nin+nout))={:.5f}, He std=sqrt(2/nin)={:.5f}\".format(\n    np.sqrt(2.0 / (2 * d)), np.sqrt(2.0 / d)))\nprint(\"结论：naive 初始化逐层指数爆炸；Xavier 配 ReLU 会指数衰减；\")\nprint(\"      He 是唯一让 50 层后激活仍与输入同量级的选项（0.45~0.74 vs 1e52 / 1e-8）\")\n"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "类型擦除：typeof 看到的是运行时类型",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "circle:number\nsquare:number\nfunction",
+  "code": "function describe(s) {\n  if (s.kind === \"circle\") return `circle:${typeof s.r}`;\n  return `square:${typeof s.side}`;\n}\n\nconsole.log(describe({ kind: \"circle\", r: 2 }));\nconsole.log(describe({ kind: \"square\", side: 3 }));\nconsole.log(typeof describe);\n"
+}

@@ -1,0 +1,105 @@
+{
+  "meta": {
+    "chapter": "ai-ch09",
+    "title": "生成模型 —— 面试题",
+    "count": 6
+  },
+  "items": [
+    {
+      "question": "从目标函数的角度，VAE、GAN、扩散三者的本质区别是什么？",
+      "answer_md": "三者的区别可以压缩成「优化什么」这一句：\n\n- **VAE**：优化对数似然的**下界**（ELBO = 重建 − KL）。它显式建模 $p(x)$ 的近似，因此能算似然下界、能编码；代价是样本偏糊（最优解码器输出后验均值）。\n- **GAN**：优化一个**对抗博弈**，等价于最小化 JS/W 距离。它不建模显式密度（隐式），因此样本锐利；代价是无似然、训练不稳、易模式崩塌。\n- **扩散**：优化一个**去噪回归**（$\\|\\varepsilon-\\varepsilon_\\theta\\|^2$），它本质是固定前向的层级 VAE、目标等价于得分匹配。既能算似然下界，又能生成高质量样本，代价是采样要几十到上千步。\n\n一句话收束：**VAE 用变分下界换可算似然，GAN 用对抗换锐利，扩散用迭代去噪换质量与稳定性**。",
+      "follow_ups": [
+        "为什么 VAE 的样本会糊，而扩散不会？",
+        "如果把扩散的 T 设为 1，它退化成什么？",
+        "哪种模型最适合做异常检测，为什么？"
+      ],
+      "difficulty": 4,
+      "company_tags": [
+        "字节跳动",
+        "商汤",
+        "百度",
+        "阿里"
+      ]
+    },
+    {
+      "question": "扩散模型的 ELBO 怎么推导到 L_simple？中间丢掉了什么？",
+      "answer_md": "推导链四步：\n\n1. **写 ELBO**：对整条马尔可夫链求变分下界，得到 $\\mathbb{E}_q[\\log p(x_T)+\\sum_t\\log\\frac{p_\\theta(x_{t-1}|x_t)}{q(x_t|x_{t-1})}]$。\n2. **逐项配成高斯 KL**：每一项可化为 $D_{KL}(q(x_{t-1}|x_t,x_0)\\,\\|\\,p_\\theta(x_{t-1}|x_t))$，而 $q(x_{t-1}|x_t,x_0)$ 是均值 $\\tilde\\mu_t$、方差 $\\tilde\\beta_t$ 的高斯（闭式可算）。\n3. **重参数化**：把 $\\tilde\\mu_t=\\frac{1}{\\sqrt{\\alpha_t}}(x_t-\\frac{\\beta_t}{\\sqrt{1-\\bar\\alpha_t}}\\varepsilon)$ 代进去，最小化 KL 变成最小化 $\\|\\varepsilon-\\varepsilon_\\theta(x_t,t)\\|^2$。\n4. **丢权重**：KL 项的系数是 $\\frac{\\beta_t^2}{2\\sigma_t^2\\alpha_t(1-\\bar\\alpha_t)}$，DDPM 直接令其等于 1，得到 $\\mathcal{L}_{\\text{simple}}$。\n\n丢掉的是**按时间步的加权**。理论代价：目标不再是严格的 ELBO（等价于换了一个 SNR 重加权的目标）；实践收益：低噪声步的权重不再被过度放大，模型把容量放在结构上，FID 更好。这是「理论正确 ≠ 效果最好」的经典案例。",
+      "follow_ups": [
+        "如果保留原始权重会怎样？",
+        "为什么预测 ε 比预测 x0 更稳？",
+        "v-prediction 在什么场景下更优？"
+      ],
+      "difficulty": 5,
+      "company_tags": [
+        "OpenAI",
+        "Stability AI",
+        "快手",
+        "蚂蚁"
+      ]
+    },
+    {
+      "question": "DDIM 为什么能在不重新训练的情况下把采样步数从 1000 降到 20？",
+      "answer_md": "核心是**训练与采样解耦**：DDPM 的训练目标只依赖前向边缘分布 $q(x_t|x_0)$，不依赖反向链的马尔可夫性。DDIM 构造了一族**非马尔可夫**的前向过程 $q_\\sigma(x_{t-1}|x_t,x_0)$，只要它的边缘 $q(x_t|x_0)$ 与 DDPM 相同，训练好的 $\\varepsilon_\\theta$ 就完全可复用。\n\n在这族过程里 $\\sigma_t$ 是一个自由参数：\n\n- $\\sigma_t=\\tilde\\beta_t$（最大）→ 退回 DDPM 的随机采样；\n- $\\sigma_t=0$ → **确定性**映射 $x_{t-1}=\\sqrt{\\bar\\alpha_{t-1}}\\hat{x}_0+\\sqrt{1-\\bar\\alpha_{t-1}}\\varepsilon_\\theta$。\n\n因为不再需要满足马尔可夫链的逐步约束，采样可以**只取时间步的一个子序列**（如 20 个点），每步仍然朝同一个确定性 ODE 的解靠近。$\\sigma=0$ 时该 ODE 就是概率流 ODE，轨迹唯一，因此同一起点得到同一结果（可复现、可插值）。\n\n代价：步数过少时细节损失、确定性采样少了随机探索导致多样性略降。",
+      "follow_ups": [
+        "DDIM 与概率流 ODE 的关系？",
+        "为什么 η=0 时可以做隐空间插值？",
+        "DPM-Solver 相比 DDIM 改进在哪？"
+      ],
+      "difficulty": 5,
+      "company_tags": [
+        "Stability AI",
+        "Midjourney",
+        "阿里",
+        "腾讯"
+      ]
+    },
+    {
+      "question": "CFG 为什么有效？s 调大会发生什么？",
+      "answer_md": "CFG 的公式是 $\\tilde\\varepsilon=\\varepsilon(x_t,c=\\varnothing)+s(\\varepsilon(x_t,c)-\\varepsilon(x_t,\\varnothing))$。\n\n**为什么有效**：由贝叶斯公式 $\\nabla\\log p(x|c)=\\nabla\\log p(x)+\\nabla\\log p(c|x)$，而 $\\varepsilon_{\\text{cond}}-\\varepsilon_{\\text{uncond}}$ 近似于 $\\nabla\\log p(c|x)$（乘一个 $-\\sqrt{1-\\bar\\alpha}$ 的缩放）。所以 CFG 是在**显式地加上条件似然的梯度**，$s$ 就是它的强度。$s>1$ 等价于把条件后验抬到 $s$ 次方，分布更尖锐——更贴 prompt、多样性更低。\n\n**s 调大的问题**：① 放大的是整条 score，包含与条件无关的高频分量 → 过饱和、色彩崩坏、细节「烧焦」；② 采样成本翻倍（每步两次前向）；③ 多样性趋零，$s\\to\\infty$ 时退化成一个「最符合条件」的确定性输出。\n\n工程口径：$s\\in[4,9]$ 是常用区间，且可做时间调度（前期小、后期大），既能保证结构又能保住细节。",
+      "follow_ups": [
+        "为什么训练时要随机丢弃条件？",
+        "CFG 与 classifier guidance 的区别？",
+        "如何在不翻倍成本的前提下近似 CFG？"
+      ],
+      "difficulty": 5,
+      "company_tags": [
+        "字节跳动",
+        "小红书",
+        "美团",
+        "百度"
+      ]
+    },
+    {
+      "question": "FID 有什么缺陷？你会怎么设计一套完整的生成模型评估？",
+      "answer_md": "FID 的四个已知问题：\n\n1. **依赖高斯假设**：只匹配 Inception 特征的一二阶矩，对多峰、流形结构无感 → 对模式崩塌不敏感；\n2. **样本数偏差**：协方差估计有偏，2k 与 50k 样本的 FID 不可比；\n3. **预处理敏感**：分辨率、resize 方式、归一化、Inception 权重不同，能差 5-10 个点；\n4. **与人类偏好不单调**：FID 最优不一定是人最喜欢。\n\n完整评估设计（三层）：\n\n- **第一层（分布级）**：FID（配固定 50k 真样本特征缓存）+ KID（小样本无偏）+ Precision/Recall（把保真与覆盖拆开）。\n- **第二层（语义级）**：CLIPScore / ImageReward（文图一致性）、类别条件准确率（可控性是否生效）。\n- **第三层（人评级）**：成对偏好胜率（A/B），并报告置信区间；产品上线前必须有人评。\n\n另外必须固定评估管线版本（VAE、tokenizer、分辨率、Inception 权重），否则指标变化无法归因。",
+      "follow_ups": [
+        "Precision/Recall 分别对应生成模型的什么错误？",
+        "为什么小样本要用 KID 而不是 FID？",
+        "如何检测模式崩塌？"
+      ],
+      "difficulty": 4,
+      "company_tags": [
+        "商汤",
+        "旷视",
+        "字节跳动",
+        "腾讯"
+      ]
+    },
+    {
+      "question": "只有一张 24G 显卡和一周时间，要做一个垂直领域的图像生成产品，你会怎么选型？",
+      "answer_md": "选型按「算力 → 方案」倒推，而不是先选模型：\n\n**1. 不从头训**。24G 单卡无法做基础模型的预训练（几十万步、多卡），只做**微调或蒸馏**。\n\n**2. 基座选择**：优先选有成熟生态与蒸馏版的开放基座（SDXL / SD3.5 / Flux 系列），因为 ① 有大量 LoRA 与 ControlNet 可直接用；② 有 1-4 步蒸馏版满足实时性；③ diffusers/ComfyUI 能直接跑。\n\n**3. 定制路径**（成本从低到高）：\n- 先试 **LoRA（rank 8-32）+ 少量精标数据（几十到几百张）**，24G 够用；\n- 不够再加 **DreamBooth/文本编码器微调**；\n- 要控构图就用 **ControlNet**，别去微调主干。\n\n**4. 数据**：垂直领域的关键不是数量而是**一致性**（同一风格、同一质检口径），并保留 10% 做留出集算 FID/CLIPScore。\n\n**5. 推理**：DPM-Solver++ / LCM 20 步以内 + fp16 + xformers/FlashAttention；批量与缓存 prompt embedding。\n\n**6. 验收**：FID 作护栏 + 人评胜率 + 「结构错误率」（手指数、文字、logo 崩坏）三项。\n\n一句话：**单卡做产品 = 选对基座 + LoRA + ControlNet + 少步采样 + 人评兜底**，不要试图训模型。",
+      "follow_ups": [
+        "LoRA 的 rank 怎么选？",
+        "垂直领域数据只有 200 张，怎么防过拟合？",
+        "如何评估『风格一致性』这种主观指标？"
+      ],
+      "difficulty": 4,
+      "company_tags": [
+        "小红书",
+        "得物",
+        "快手",
+        "美图"
+      ]
+    }
+  ]
+}

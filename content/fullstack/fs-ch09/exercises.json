@@ -1,0 +1,177 @@
+{
+  "meta": {
+    "chapter": "fs-ch09",
+    "note": "7 题，含选择题/输出题/改错题/编程题；题面与参考实现均为自建，不搬运第三方题面。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "关于 TypeScript 的结构类型，正确的是",
+      "content_md": "选择**正确**的描述。",
+      "options": [
+        {
+          "key": "A",
+          "text": "结构类型要求两个类型声明继承自同一个父类型才能互相赋值"
+        },
+        {
+          "key": "B",
+          "text": "结构类型只比较成员形状：多出成员合法，缺少必需成员不合法"
+        },
+        {
+          "key": "C",
+          "text": "结构类型在运行时也会检查对象形状，因此能替代数据校验"
+        },
+        {
+          "key": "D",
+          "text": "结构类型下 `{ id: string }` 与 `{ orderId: string }` 不能互相赋值"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "结构类型比形状不比名字：具备所需成员即可赋值，多出的成员不报错、缺少必需成员报错。类型在运行时被擦除，不做任何检查，因此不能替代数据校验。A 描述的是名义类型；D 恰好说反了——同形状不同类型在结构类型下可以互相赋值，这正是需要品牌类型的原因。",
+      "tags": [
+        "structural-typing",
+        "interface"
+      ],
+      "source": "book",
+      "source_ref": "TypeScript Handbook · Type Compatibility"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "读代码写输出（类型擦除）",
+      "content_md": "```ts\ninterface Circle { kind: \"circle\"; r: number }\ninterface Square { kind: \"square\"; side: number }\ntype Shape = Circle | Square;\n\nfunction describe(s: Shape): string {\n  if (s.kind === \"circle\") return `circle:${typeof s.r}`;\n  return `square:${typeof s.side}`;\n}\n\nconsole.log(describe({ kind: \"circle\", r: 2 }));\nconsole.log(describe({ kind: \"square\", side: 3 }));\nconsole.log(typeof describe);\n```",
+      "answer": {
+        "output": "circle:number\nsquare:number\nfunction"
+      },
+      "explanation": "前三行与类型无关，只需注意两点：① `typeof s.r` 是 JS 的 typeof 运算符，返回运行时类型字符串 `number`，不是 TS 的类型查询；② 第三行 `typeof describe` 在函数声明之后返回 `function`。类型本身（Circle/Shape）编译后不存在，无法被 typeof 观察到。",
+      "tags": [
+        "erasure",
+        "typeof",
+        "narrowing"
+      ],
+      "source": "book",
+      "source_ref": "TypeScript Handbook · Everyday Types"
+    },
+    {
+      "type": "fix",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "改错：这个守卫为什么形同虚设",
+      "content_md": "下面的类型守卫编译通过，但在运行时会把 `{ r: 1 }` 判成 `Circle`，导致 `area` 返回 `NaN`。指出问题并改正。\n\n```ts\nfunction isCircle(x: unknown): x is Circle {\n  return typeof x === \"object\" && x !== null;\n}\n\nfunction area(s: unknown): number {\n  if (isCircle(s)) return Math.PI * s.r ** 2;\n  throw new Error(\"not a circle\");\n}\n```",
+      "answer": {
+        "reference_code": "function isCircle(x: unknown): x is Circle {\n  return (\n    typeof x === \"object\" && x !== null &&\n    (x as { kind?: unknown }).kind === \"circle\" &&\n    typeof (x as { r?: unknown }).r === \"number\"\n  );\n}"
+      },
+      "explanation": "守卫只判断了「是对象且非 null」，任何对象都会通过，于是 `s.r` 取到 undefined，`undefined ** 2` 得到 NaN。类型守卫的正确性靠逐字段校验，而 `x is Circle` 只是向编译器声明「我保证」，编译器不会验证。修法：校验判别字段 `kind === \"circle\"` 与必需字段 `r` 的类型。生产代码更推荐用 Zod 从 schema 生成守卫，避免手写与类型漂移。",
+      "tags": [
+        "type-guard",
+        "narrowing"
+      ],
+      "source": "book",
+      "source_ref": "TypeScript Handbook · Narrowing"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "`unknown` 与 `any` 的差别",
+      "content_md": "关于 `unknown`，正确的是",
+      "options": [
+        {
+          "key": "A",
+          "text": "`unknown` 与 `any` 完全等价，只是写法不同"
+        },
+        {
+          "key": "B",
+          "text": "`unknown` 能接受任何值，但使用前必须先收窄，否则编译报错"
+        },
+        {
+          "key": "C",
+          "text": "`unknown` 只能用于函数参数，不能用于变量"
+        },
+        {
+          "key": "D",
+          "text": "`unknown` 会在运行时做类型检查，`any` 不会"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "`unknown` 是类型系统的「安全顶」：任何值都能赋给它，但它不能直接参与运算或取属性，必须先收窄（typeof / 守卫 / 断言）。`any` 则双向通行、跳过所有检查。二者在运行时都不存在，所以 D 错误。C 也错——`let x: unknown` 完全合法。",
+      "tags": [
+        "unknown",
+        "any"
+      ],
+      "source": "book",
+      "source_ref": "TypeScript Handbook · Unknown"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "book",
+      "difficulty": "hard",
+      "title": "实现类型安全的 groupBy",
+      "content_md": "实现一个泛型函数 `groupBy<T, K extends string>(items: T[], keyOf: (item: T) => K): Record<K, T[]>`：把数组按 `keyOf` 返回的键分组，返回一个 Partial 语义的字典（某键可能不存在）。要求：① 不使用 `any`；② 空数组返回空对象；③ 同一键的元素保持原有相对顺序。写出实现并在 main 中自测两组数据。",
+      "answer": {
+        "reference_code": "function groupBy<T, K extends string>(items: T[], keyOf: (item: T) => K): Partial<Record<K, T[]>> {\n  const out: Partial<Record<K, T[]>> = {};\n  for (const it of items) {\n    const k = keyOf(it);\n    (out[k] ??= []).push(it);\n  }\n  return out;\n}\n\nconst people = [{ name: \"a\", dept: \"eng\" }, { name: \"b\", dept: \"design\" }, { name: \"c\", dept: \"eng\" }];\nconsole.log(JSON.stringify(groupBy(people, (p) => p.dept as \"eng\" | \"design\")));"
+      },
+      "explanation": "要点有三：① 返回类型用 `Partial<Record<K, T[]>>` 而不是 `Record<K, T[]>`——后者声称每个键都存在，与事实不符，会在运行时误导调用方（取到 undefined 却以为有数组）；② `??=` 保证同键追加而不是覆盖，且顺序天然保持；③ 全程零 `any`，`keyOf` 的返回类型由泛型 `K` 约束，调用方传错字段名会在编译期报错。",
+      "tags": [
+        "generics",
+        "record",
+        "partial"
+      ],
+      "source": "book",
+      "source_ref": "TypeScript Handbook · Generics"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "用可辨识联合 + never 实现穷尽检查",
+      "content_md": "定义三种形状：`Circle`（r）、`Square`（side）、`Triangle`（a、b、c）。用可辨识联合 `Shape` 表示，实现 `area(s: Shape): number`，并在 `default` 分支上用 `never` 做穷尽性检查。然后新增一种 `Rect`（w、h）但**故意不写**它的分支，用注释说明此时编译器的报错会出现在哪一行。",
+      "answer": {
+        "reference_code": "type Circle = { kind: \"circle\"; r: number };\ntype Square = { kind: \"square\"; side: number };\ntype Triangle = { kind: \"triangle\"; a: number; b: number; c: number };\ntype Shape = Circle | Square | Triangle;\n\nfunction area(s: Shape): number {\n  switch (s.kind) {\n    case \"circle\": return Math.PI * s.r ** 2;\n    case \"square\": return s.side ** 2;\n    case \"triangle\": {\n      const p = (s.a + s.b + s.c) / 2;\n      return Math.sqrt(p * (p - s.a) * (p - s.b) * (p - s.c));\n    }\n    default: {\n      const never_: never = s;\n      throw new Error(`未处理的形状: ${JSON.stringify(never_)}`);\n    }\n  }\n}\n\nconsole.log(area({ kind: \"square\", side: 3 }).toFixed(2)); // 9.00\nconsole.log(area({ kind: \"triangle\", a: 3, b: 4, c: 5 }).toFixed(2)); // 6.00"
+      },
+      "explanation": "三角形用海伦公式。穷尽检查的关键是 `const never_: never = s`：三个 case 全过后 `s` 的类型被收窄成 `never`，赋值成立；一旦给 `Shape` 加第四种 `Rect` 而 switch 没加分支，`s` 在 default 里将是 `Rect`，赋给 `never` 立刻报 `Type 'Rect' is not assignable to type 'never'`。报错位置就在这一行——这就是「以后有人改代码」也被纳入检查的意思。",
+      "tags": [
+        "discriminated-union",
+        "never",
+        "exhaustive"
+      ],
+      "source": "book",
+      "source_ref": "TypeScript Handbook · Narrowing"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "读代码写输出（泛型擦除后的行为）",
+      "content_md": "```ts\nfunction first<T>(arr: readonly T[]): T | undefined {\n  return arr[0];\n}\nconsole.log(first([10, 20]));\nconsole.log(first<string>([]));\nconsole.log(String(first([\"a\"])));\n```",
+      "answer": {
+        "output": "10\nundefined\na"
+      },
+      "explanation": "泛型参数 `<string>` 只在编译期存在，产物里 `first([])` 与 `first([10, 20])` 是同一个函数，都只是取下标 0。空数组取 `[0]` 得 `undefined`，`console.log(undefined)` 打印 `undefined`；第三行显式 `String()` 所以打印 `a` 而不是带引号的 `'a'`。",
+      "tags": [
+        "generics",
+        "erasure"
+      ],
+      "source": "book",
+      "source_ref": "TypeScript Handbook · Generics"
+    }
+  ]
+}

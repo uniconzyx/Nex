@@ -145,6 +145,253 @@ examples/ex10 实测：同一宿主端口被两个服务同时发布会被判为
 
 ---
 
+<!-- injected-code -->
+## 可运行代码：把上面的说法跑一遍
+
+下面两段直接取自本章示例库（`examples/`），期望输出就是判题台里判定的那串字符串，不是事后补写的说明。读完正文后先照着跑一遍，再回去看「三视角解析」里对应的那条。
+
+### Compose 服务解析器：依赖图构建、拓扑排序与循环依赖检测（正反两组）
+
+```python
+from collections import defaultdict
+
+
+def parse_services(raw):
+    """把 compose 的 services 段归一成内部模型。
+
+    depends_on 有两种写法：短语法（列表）与长语法（映射，键是服务名，
+    值是 condition）。归一后统一成列表，保留 condition 供 ex02 使用。
+    """
+    services = {}
+    conditions = {}
+    for name, spec in raw.items():
+        deps = spec.get("depends_on") or []
+        cond = {}
+        if isinstance(deps, dict):
+            for d, cfg in deps.items():
+                cond[d] = (cfg or {}).get("condition", "service_started")
+            deps = list(deps.keys())
+        else:
+            for d in deps:
+                cond[d] = "service_started"
+        services[name] = {
+            "image": spec.get("image", ""),
+            "depends_on": list(deps),
+            "ports": list(spec.get("ports") or []),
+        }
+        conditions[name] = cond
+    return services, conditions
+
+
+def topo_sort(services):
+    """Kahn 算法：返回 (拓扑序, 启动批次, 环内服务, 悬空依赖)。"""
+    indeg = {n: 0 for n in services}
+    adj = defaultdict(list)
+    missing = []
+    for n, s in services.items():
+        for d in s["depends_on"]:
+            if d not in services:
+                missing.append((n, d))
+                continue
+            adj[d].append(n)
+            indeg[n] += 1
+    ready = sorted(n for n in services if indeg[n] == 0)
+    order, batches = [], []
+    while ready:
+        batches.append(list(ready))
+        nxt = []
+        for n in ready:
+            order.append(n)
+            for m in sorted(adj[n]):
+                indeg[m] -= 1
+                if indeg[m] == 0:
+                    nxt.append(m)
+        ready = sorted(nxt)
+    cycle = sorted(n for n in services if indeg[n] > 0)
+    return order, batches, cycle, missing
+
+
+def show(title, raw):
+    print("=== %s ===" % title)
+    svc, cond = parse_services(raw)
+    print("服务数 = %d" % len(svc))
+    for n, s in svc.items():
+        c = ",".join("%s:%s" % (d, cond[n][d]) for d in s["depends_on"]) or "-"
+        print("  %-6s image=%-30s depends_on=%-18s condition=%s" % (n, s["image"], str(s["depends_on"]), c))
+    order, batches, cycle, missing = topo_sort(svc)
+    print("拓扑序: %s" % (" -> ".join(order) if order else "(空)"))
+    for i, b in enumerate(batches, 1):
+        print("  启动批次 %d: %s" % (i, b))
+    print("批次总数 = %d（同批次内可并行启动）" % len(batches))
+    print("存在循环依赖: %s" % bool(cycle))
+    if cycle:
+        print("  环内服务: %s" % cycle)
+    print("悬空依赖(依赖了未定义的服务): %s" % (missing if missing else "无"))
+    print("可编排(无环且无悬空): %s" % (not cycle and not missing))
+    print()
+
+
+CASE_A = {
+    "web":   {"image": "nginx:1.27-alpine", "depends_on": ["api", "redis"], "ports": ["80:80"]},
+    "api":   {"image": "registry.internal/app:1.4.2", "ports": ["8080:8080"],
+              "depends_on": {"db": {"condition": "service_healthy"},
+                             "redis": {"condition": "service_started"}}},
+    "redis": {"image": "redis:7.4-alpine"},
+    "db":    {"image": "postgres:17.2-alpine", "ports": ["5432"]},
+}
+
+CASE_B = {
+    "web":   {"image": "nginx:1.27-alpine", "depends_on": ["api"]},
+    "api":   {"image": "registry.internal/app:1.4.2", "depends_on": ["cache"]},
+    "cache": {"image": "redis:7.4-alpine", "depends_on": ["web"]},
+}
+
+CASE_C = {
+    "worker": {"image": "registry.internal/app:1.4.2", "depends_on": ["worker"]},
+    "api":    {"image": "registry.internal/app:1.4.2", "depends_on": ["worker"]},
+}
+
+print("### Compose 依赖图分析：拓扑排序 + 环检测 ###")
+print()
+show("用例A（正例）：无环 DAG，可以排出启动顺序", CASE_A)
+show("用例B（反例）：三节点环 web -> api -> cache -> web", CASE_B)
+show("用例C（反例）：自环 worker -> worker", CASE_C)
+print("小结：Compose 要求依赖图是无环有向图（DAG）；")
+print("      存在环时编排器无法给出启动顺序，必须在设计阶段拆掉环。")
+```
+
+实际输出：
+
+```text
+### Compose 依赖图分析：拓扑排序 + 环检测 ###
+
+=== 用例A（正例）：无环 DAG，可以排出启动顺序 ===
+服务数 = 4
+  web    image=nginx:1.27-alpine              depends_on=['api', 'redis']   condition=api:service_started,redis:service_started
+  api    image=registry.internal/app:1.4.2    depends_on=['db', 'redis']    condition=db:service_healthy,redis:service_started
+  redis  image=redis:7.4-alpine               depends_on=[]                 condition=-
+  db     image=postgres:17.2-alpine           depends_on=[]                 condition=-
+拓扑序: db -> redis -> api -> web
+  启动批次 1: ['db', 'redis']
+  启动批次 2: ['api']
+  启动批次 3: ['web']
+批次总数 = 3（同批次内可并行启动）
+存在循环依赖: False
+悬空依赖(依赖了未定义的服务): 无
+可编排(无环且无悬空): True
+
+=== 用例B（反例）：三节点环 web -> api -> cache -> web ===
+服务数 = 3
+  web    image=nginx:1.27-alpine              depends_on=['api']            condition=api:service_started
+  api    image=registry.internal/app:1.4.2    depends_on=['cache']
+…（后续输出略，完整结果见判题台）
+```
+
+> 出处：`examples/ex01-compose-parser-topo-cycle.json`。改一处再看输出变没变，比读三遍解释有用。
+
+### depends_on 的局限：service_started 只等启动不等就绪（正反两组实测）
+
+```python
+ORDER = ["db", "redis", "api", "web"]
+
+SERVICES = {
+    "db":    {"depends_on": [],        "ready_after": 12, "note": "初始化数据目录 + 跑迁移"},
+    "redis": {"depends_on": [],        "ready_after": 2},
+    "api":   {"depends_on": ["db", "redis"], "ready_after": 3},
+    "web":   {"depends_on": ["api"],   "ready_after": 1},
+}
+
+
+def plan(condition):
+    """按 condition 计算各服务的启动时刻与真正可用时刻（整数逻辑时钟）。"""
+    start, ready = {}, {}
+    for n in ORDER:
+        deps = SERVICES[n]["depends_on"]
+        if not deps:
+            start[n] = 0
+        else:
+            t = 0
+            for d in deps:
+                wait = 0 if condition == "service_started" else SERVICES[d]["ready_after"]
+                t = max(t, start[d] + wait)
+            start[n] = t + 1          # 创建容器本身占 1 个 tick
+        ready[n] = start[n] + SERVICES[n]["ready_after"]
+    return start, ready
+
+
+def unready_pairs(start, ready):
+    """上游开始运行的时刻若早于依赖真正就绪的时刻，即为「抢跑」。"""
+    bad = []
+    for n in ORDER:
+        for d in SERVICES[n]["depends_on"]:
+            if start[n] < ready[d]:
+                bad.append((n, d, start[n], ready[d]))
+    return bad
+
+
+def report(title, condition):
+    print("=== %s ===" % title)
+    start, ready = plan(condition)
+    for n in ORDER:
+        print("  %-6s start=%-3d ready=%-3d" % (n, start[n], ready[n]))
+    bad = unready_pairs(start, ready)
+    print("  抢跑的上游: %s" % (["%s<-%s(%d<%d)" % b for b in bad] if bad else "无"))
+    print("  存在「依赖已 started 但未 ready 就启动」的上游: %s" % bool(bad))
+    print("  抢跑数量 = %d" % len(bad))
+    print("  全部服务真正可用的逻辑时刻 = %d" % max(ready.values()))
+    print("  判定：启动完成即业务可用 = %s" % (not bad))
+    print()
+    return bool(bad)
+
+
+print("### depends_on 的两种 condition 对比 ###")
+print()
+b1 = report("反例 A：短语法 depends_on（等价 condition: service_started）", "service_started")
+b2 = report("正例 B：长语法 condition: service_healthy", "service_healthy")
+
+print("=== 结论判据 ===")
+print("service_started 会抢跑: %s（预期 True）" % b1)
+print("service_healthy 会抢跑: %s（预期 False）" % b2)
+print("只有 service_healthy 能保证依赖就绪: %s" % (b1 and not b2))
+print("代价：service_healthy 把整体可用时刻从 12 推迟到 18，慢但正确")
+```
+
+实际输出：
+
+```text
+### depends_on 的两种 condition 对比 ###
+
+=== 反例 A：短语法 depends_on（等价 condition: service_started） ===
+  db     start=0   ready=12 
+  redis  start=0   ready=2  
+  api    start=1   ready=4  
+  web    start=2   ready=3  
+  抢跑的上游: ['api<-db(1<12)', 'api<-redis(1<2)', 'web<-api(2<4)']
+  存在「依赖已 started 但未 ready 就启动」的上游: True
+  抢跑数量 = 3
+  全部服务真正可用的逻辑时刻 = 12
+  判定：启动完成即业务可用 = False
+
+=== 正例 B：长语法 condition: service_healthy ===
+  db     start=0   ready=12 
+  redis  start=0   ready=2  
+  api    start=13  ready=16 
+  web    start=17  ready=18 
+  抢跑的上游: 无
+  存在「依赖已 started 但未 ready 就启动」的上游: False
+  抢跑数量 = 0
+  全部服务真正可用的逻辑时刻 = 18
+  判定：启动完成即业务可用 = True
+
+=== 结论判据 ===
+service_started 会抢跑: True（预期 True）
+service_healthy 会抢跑: False（预期 False）
+只有 service_healthy 能保证依赖就绪: True
+代价：service_healthy 把整体可用时刻从 12 推迟到 18，慢但正确
+```
+
+> 出处：`examples/ex02-depends-on-started-vs-healthy.json`。改一处再看输出变没变，比读三遍解释有用。
+
 ## 三视角小结
 
 | 视角 | 一句话结论 |

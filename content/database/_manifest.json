@@ -28,23 +28,50 @@
           "doocs/advanced-java"
         ],
         "github_stars": [
-          159056,
+          159300,
           84863,
-          79141
+          79162
         ],
         "github_notes": [
           "含 MySQL 索引、事务、锁与调优的系统讲解",
           "真实业务库表设计范例与 SQL 实践",
           "含分库分表、读写分离与分布式事务"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《MySQL 必知必会》第 1-17 章（基础 SQL 与联结）",
-          "《高性能 MySQL》第 4 章（Schema 与数据类型）",
-          "《数据库系统概念》第 2-3 章（关系模型与 SQL）"
+          "《MySQL 技术内幕：InnoDB 存储引擎（第 2 版）》姜承尧",
+          "《高性能 MySQL（第 4 版）》",
+          "《数据库系统概念（第 7 版）》Silberschatz"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1Kr4y1i7ru/",
+        "bilibili_list": [
+          {
+            "name": "黑马程序员 · MySQL 入门到精通",
+            "url": "https://www.bilibili.com/video/BV1Kr4y1i7ru/",
+            "note": "主线课：SQL 语法 → 约束与多表 → 索引与事务 → 优化，每段都有可直接跑的脚本",
+            "bv": "BV1Kr4y1i7ru"
+          },
+          {
+            "name": "尚硅谷 · MySQL 基础+高级篇",
+            "url": "https://www.bilibili.com/video/BV12b411K7Zu/",
+            "note": "基础篇讲 SQL 与建表规范，高级篇讲索引、explain、慢查询与优化器",
+            "bv": "BV12b411K7Zu"
+          },
+          {
+            "name": "尚硅谷 · MySQL 数据库高级",
+            "url": "https://www.bilibili.com/video/BV1KW411u7vy/",
+            "note": "专攻优化：B+ 树索引结构、执行计划、锁与隔离级别的实验演示",
+            "bv": "BV1KW411u7vy"
+          },
+          {
+            "name": "一个动画搞懂 MySQL 索引原理",
+            "url": "https://www.bilibili.com/video/BV1pJ4m1j7Pm/",
+            "note": "6 分钟动画：聚簇索引与二级索引的回表过程，看完再读概念篇会顺很多",
+            "bv": "BV1pJ4m1j7Pm"
+          }
+        ]
       }
     },
     {
@@ -64,23 +91,50 @@
           "doocs/advanced-java"
         ],
         "github_stars": [
-          159056,
+          159300,
           84863,
-          79141
+          79162
         ],
         "github_notes": [
           "含 MySQL 索引、事务、锁与调优的系统讲解",
           "真实业务库表设计范例与 SQL 实践",
           "含分库分表、读写分离与分布式事务"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《MySQL 必知必会》第 21 章（创建和操作表）/ 第 22 章（视图）",
-          "《高性能 MySQL》第 5 章（索引）",
-          "《数据库系统概念》第 8 章（SQL 中的完整性约束）"
+          "《MySQL 技术内幕：InnoDB 存储引擎（第 2 版）》姜承尧",
+          "《高性能 MySQL（第 4 版）》",
+          "《数据库系统概念（第 7 版）》Silberschatz"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1Kr4y1i7ru/",
+        "bilibili_list": [
+          {
+            "name": "黑马程序员 · MySQL 入门到精通",
+            "url": "https://www.bilibili.com/video/BV1Kr4y1i7ru/",
+            "note": "主线课：SQL 语法 → 约束与多表 → 索引与事务 → 优化，每段都有可直接跑的脚本",
+            "bv": "BV1Kr4y1i7ru"
+          },
+          {
+            "name": "尚硅谷 · MySQL 基础+高级篇",
+            "url": "https://www.bilibili.com/video/BV12b411K7Zu/",
+            "note": "基础篇讲 SQL 与建表规范，高级篇讲索引、explain、慢查询与优化器",
+            "bv": "BV12b411K7Zu"
+          },
+          {
+            "name": "尚硅谷 · MySQL 数据库高级",
+            "url": "https://www.bilibili.com/video/BV1KW411u7vy/",
+            "note": "专攻优化：B+ 树索引结构、执行计划、锁与隔离级别的实验演示",
+            "bv": "BV1KW411u7vy"
+          },
+          {
+            "name": "一个动画搞懂 MySQL 索引原理",
+            "url": "https://www.bilibili.com/video/BV1pJ4m1j7Pm/",
+            "note": "6 分钟动画：聚簇索引与二级索引的回表过程，看完再读概念篇会顺很多",
+            "bv": "BV1pJ4m1j7Pm"
+          }
+        ]
       }
     },
     {
@@ -91,7 +145,9 @@
       "summary": "InnoDB B+树索引结构（聚簇/二级索引、页 16KB、树高、根到叶查询路径、页分裂与合并）；回表与覆盖索引、最左前缀原则、索引下推 ICP；事务 ACID（redo log / undo log / double write buffer 的分工）；四种隔离级别与脏读/不可重复读/幻读；MVCC 版本链（DB_TRX_ID、DB_ROLL_PTR、undo log）与 ReadView、当前读 vs 快照读；Next-Key Lock（记录锁 + 间隙锁）解决幻读；死锁检测与长事务危害。",
       "prerequisites": [
         "db-ch01",
-        "db-ch02"
+        "db-ch02",
+        "fund-ch03",
+        "fund-ch10"
       ],
       "status": "complete",
       "resources": {
@@ -101,22 +157,50 @@
           "doocs/advanced-java"
         ],
         "github_stars": [
-          159056,
+          159300,
           84863,
-          79141
+          79162
         ],
         "github_notes": [
           "含 MySQL 索引、事务、锁与调优的系统讲解",
           "真实业务库表设计范例与 SQL 实践",
           "含分库分表、读写分离与分布式事务"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《高性能 MySQL》第 1 章（MySQL 架构与事务）",
-          "《数据库系统概念》第 14-15 章（事务/并发控制）"
+          "《MySQL 技术内幕：InnoDB 存储引擎（第 2 版）》姜承尧",
+          "《高性能 MySQL（第 4 版）》",
+          "《数据库系统概念（第 7 版）》Silberschatz"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1Kr4y1i7ru/",
+        "bilibili_list": [
+          {
+            "name": "黑马程序员 · MySQL 入门到精通",
+            "url": "https://www.bilibili.com/video/BV1Kr4y1i7ru/",
+            "note": "主线课：SQL 语法 → 约束与多表 → 索引与事务 → 优化，每段都有可直接跑的脚本",
+            "bv": "BV1Kr4y1i7ru"
+          },
+          {
+            "name": "尚硅谷 · MySQL 数据库高级",
+            "url": "https://www.bilibili.com/video/BV1KW411u7vy/",
+            "note": "专攻优化：B+ 树索引结构、执行计划、锁与隔离级别的实验演示",
+            "bv": "BV1KW411u7vy"
+          },
+          {
+            "name": "一个动画搞懂 MySQL 索引原理",
+            "url": "https://www.bilibili.com/video/BV1pJ4m1j7Pm/",
+            "note": "6 分钟动画：聚簇索引与二级索引的回表过程，看完再读概念篇会顺很多",
+            "bv": "BV1pJ4m1j7Pm"
+          },
+          {
+            "name": "尚硅谷 · MySQL 基础+高级篇",
+            "url": "https://www.bilibili.com/video/BV12b411K7Zu/",
+            "note": "基础篇讲 SQL 与建表规范，高级篇讲索引、explain、慢查询与优化器",
+            "bv": "BV12b411K7Zu"
+          }
+        ]
       }
     },
     {
@@ -136,22 +220,50 @@
           "doocs/advanced-java"
         ],
         "github_stars": [
-          159056,
+          159300,
           84863,
-          79141
+          79162
         ],
         "github_notes": [
           "含 MySQL 索引、事务、锁与调优的系统讲解",
           "真实业务库表设计范例与 SQL 实践",
           "含分库分表、读写分离与分布式事务"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《高性能 MySQL》第 6 章（查询性能优化）",
-          "《数据库系统概念》第 13 章（查询处理）"
+          "《MySQL 技术内幕：InnoDB 存储引擎（第 2 版）》姜承尧",
+          "《高性能 MySQL（第 4 版）》",
+          "《数据库系统概念（第 7 版）》Silberschatz"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1Kr4y1i7ru/",
+        "bilibili_list": [
+          {
+            "name": "黑马程序员 · MySQL 入门到精通",
+            "url": "https://www.bilibili.com/video/BV1Kr4y1i7ru/",
+            "note": "主线课：SQL 语法 → 约束与多表 → 索引与事务 → 优化，每段都有可直接跑的脚本",
+            "bv": "BV1Kr4y1i7ru"
+          },
+          {
+            "name": "尚硅谷 · MySQL 基础+高级篇",
+            "url": "https://www.bilibili.com/video/BV12b411K7Zu/",
+            "note": "基础篇讲 SQL 与建表规范，高级篇讲索引、explain、慢查询与优化器",
+            "bv": "BV12b411K7Zu"
+          },
+          {
+            "name": "尚硅谷 · MySQL 数据库高级",
+            "url": "https://www.bilibili.com/video/BV1KW411u7vy/",
+            "note": "专攻优化：B+ 树索引结构、执行计划、锁与隔离级别的实验演示",
+            "bv": "BV1KW411u7vy"
+          },
+          {
+            "name": "一个动画搞懂 MySQL 索引原理",
+            "url": "https://www.bilibili.com/video/BV1pJ4m1j7Pm/",
+            "note": "6 分钟动画：聚簇索引与二级索引的回表过程，看完再读概念篇会顺很多",
+            "bv": "BV1pJ4m1j7Pm"
+          }
+        ]
       }
     },
     {
@@ -171,22 +283,50 @@
           "doocs/advanced-java"
         ],
         "github_stars": [
-          159056,
+          159300,
           84863,
-          79141
+          79162
         ],
         "github_notes": [
           "含 MySQL 索引、事务、锁与调优的系统讲解",
           "真实业务库表设计范例与 SQL 实践",
           "含分库分表、读写分离与分布式事务"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《MySQL 必知必会》第 23-25 章（存储过程/游标/触发器）",
-          "《数据库系统概念》第 4 章（SQL 过程扩展）"
+          "《MySQL 技术内幕：InnoDB 存储引擎（第 2 版）》姜承尧",
+          "《高性能 MySQL（第 4 版）》",
+          "《数据库系统概念（第 7 版）》Silberschatz"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1Kr4y1i7ru/",
+        "bilibili_list": [
+          {
+            "name": "黑马程序员 · MySQL 入门到精通",
+            "url": "https://www.bilibili.com/video/BV1Kr4y1i7ru/",
+            "note": "主线课：SQL 语法 → 约束与多表 → 索引与事务 → 优化，每段都有可直接跑的脚本",
+            "bv": "BV1Kr4y1i7ru"
+          },
+          {
+            "name": "尚硅谷 · MySQL 基础+高级篇",
+            "url": "https://www.bilibili.com/video/BV12b411K7Zu/",
+            "note": "基础篇讲 SQL 与建表规范，高级篇讲索引、explain、慢查询与优化器",
+            "bv": "BV12b411K7Zu"
+          },
+          {
+            "name": "尚硅谷 · MySQL 数据库高级",
+            "url": "https://www.bilibili.com/video/BV1KW411u7vy/",
+            "note": "专攻优化：B+ 树索引结构、执行计划、锁与隔离级别的实验演示",
+            "bv": "BV1KW411u7vy"
+          },
+          {
+            "name": "一个动画搞懂 MySQL 索引原理",
+            "url": "https://www.bilibili.com/video/BV1pJ4m1j7Pm/",
+            "note": "6 分钟动画：聚簇索引与二级索引的回表过程，看完再读概念篇会顺很多",
+            "bv": "BV1pJ4m1j7Pm"
+          }
+        ]
       }
     },
     {
@@ -206,22 +346,50 @@
           "doocs/advanced-java"
         ],
         "github_stars": [
-          159056,
+          159300,
           84863,
-          79141
+          79162
         ],
         "github_notes": [
           "含 MySQL 索引、事务、锁与调优的系统讲解",
           "真实业务库表设计范例与 SQL 实践",
           "含分库分表、读写分离与分布式事务"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《数据库系统概念》第 7-8 章（数据库设计/规范化）",
-          "《高性能 MySQL》附录（Schema 设计）"
+          "《MySQL 技术内幕：InnoDB 存储引擎（第 2 版）》姜承尧",
+          "《高性能 MySQL（第 4 版）》",
+          "《数据库系统概念（第 7 版）》Silberschatz"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1Kr4y1i7ru/",
+        "bilibili_list": [
+          {
+            "name": "黑马程序员 · MySQL 入门到精通",
+            "url": "https://www.bilibili.com/video/BV1Kr4y1i7ru/",
+            "note": "主线课：SQL 语法 → 约束与多表 → 索引与事务 → 优化，每段都有可直接跑的脚本",
+            "bv": "BV1Kr4y1i7ru"
+          },
+          {
+            "name": "尚硅谷 · MySQL 基础+高级篇",
+            "url": "https://www.bilibili.com/video/BV12b411K7Zu/",
+            "note": "基础篇讲 SQL 与建表规范，高级篇讲索引、explain、慢查询与优化器",
+            "bv": "BV12b411K7Zu"
+          },
+          {
+            "name": "尚硅谷 · MySQL 数据库高级",
+            "url": "https://www.bilibili.com/video/BV1KW411u7vy/",
+            "note": "专攻优化：B+ 树索引结构、执行计划、锁与隔离级别的实验演示",
+            "bv": "BV1KW411u7vy"
+          },
+          {
+            "name": "一个动画搞懂 MySQL 索引原理",
+            "url": "https://www.bilibili.com/video/BV1pJ4m1j7Pm/",
+            "note": "6 分钟动画：聚簇索引与二级索引的回表过程，看完再读概念篇会顺很多",
+            "bv": "BV1pJ4m1j7Pm"
+          }
+        ]
       }
     },
     {
@@ -241,22 +409,50 @@
           "doocs/advanced-java"
         ],
         "github_stars": [
-          159056,
+          159300,
           84863,
-          79141
+          79162
         ],
         "github_notes": [
           "含 MySQL 索引、事务、锁与调优的系统讲解",
           "真实业务库表设计范例与 SQL 实践",
           "含分库分表、读写分离与分布式事务"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《高性能 MySQL》第 10 章（备份与恢复）",
-          "《数据库系统概念》第 16 章（授权）"
+          "《MySQL 技术内幕：InnoDB 存储引擎（第 2 版）》姜承尧",
+          "《高性能 MySQL（第 4 版）》",
+          "《数据库系统概念（第 7 版）》Silberschatz"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1Kr4y1i7ru/",
+        "bilibili_list": [
+          {
+            "name": "黑马程序员 · MySQL 入门到精通",
+            "url": "https://www.bilibili.com/video/BV1Kr4y1i7ru/",
+            "note": "主线课：SQL 语法 → 约束与多表 → 索引与事务 → 优化，每段都有可直接跑的脚本",
+            "bv": "BV1Kr4y1i7ru"
+          },
+          {
+            "name": "尚硅谷 · MySQL 基础+高级篇",
+            "url": "https://www.bilibili.com/video/BV12b411K7Zu/",
+            "note": "基础篇讲 SQL 与建表规范，高级篇讲索引、explain、慢查询与优化器",
+            "bv": "BV12b411K7Zu"
+          },
+          {
+            "name": "尚硅谷 · MySQL 数据库高级",
+            "url": "https://www.bilibili.com/video/BV1KW411u7vy/",
+            "note": "专攻优化：B+ 树索引结构、执行计划、锁与隔离级别的实验演示",
+            "bv": "BV1KW411u7vy"
+          },
+          {
+            "name": "一个动画搞懂 MySQL 索引原理",
+            "url": "https://www.bilibili.com/video/BV1pJ4m1j7Pm/",
+            "note": "6 分钟动画：聚簇索引与二级索引的回表过程，看完再读概念篇会顺很多",
+            "bv": "BV1pJ4m1j7Pm"
+          }
+        ]
       }
     },
     {
@@ -277,22 +473,50 @@
           "doocs/advanced-java"
         ],
         "github_stars": [
-          159056,
+          159300,
           84863,
-          79141
+          79162
         ],
         "github_notes": [
           "含 MySQL 索引、事务、锁与调优的系统讲解",
           "真实业务库表设计范例与 SQL 实践",
           "含分库分表、读写分离与分布式事务"
         ],
-        "github_fetched_at": "2026-09-21",
+        "github_fetched_at": "2026-10-27",
         "books": [
-          "《高性能 MySQL》第 9 章（复制）/ 第 11 章（高可用）",
-          "《数据库系统概念》第 18 章（分布式数据库）"
+          "《MySQL 技术内幕：InnoDB 存储引擎（第 2 版）》姜承尧",
+          "《高性能 MySQL（第 4 版）》",
+          "《数据库系统概念（第 7 版）》Silberschatz"
         ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1Kr4y1i7ru/",
+        "bilibili_list": [
+          {
+            "name": "黑马程序员 · MySQL 入门到精通",
+            "url": "https://www.bilibili.com/video/BV1Kr4y1i7ru/",
+            "note": "主线课：SQL 语法 → 约束与多表 → 索引与事务 → 优化，每段都有可直接跑的脚本",
+            "bv": "BV1Kr4y1i7ru"
+          },
+          {
+            "name": "尚硅谷 · MySQL 基础+高级篇",
+            "url": "https://www.bilibili.com/video/BV12b411K7Zu/",
+            "note": "基础篇讲 SQL 与建表规范，高级篇讲索引、explain、慢查询与优化器",
+            "bv": "BV12b411K7Zu"
+          },
+          {
+            "name": "尚硅谷 · MySQL 数据库高级",
+            "url": "https://www.bilibili.com/video/BV1KW411u7vy/",
+            "note": "专攻优化：B+ 树索引结构、执行计划、锁与隔离级别的实验演示",
+            "bv": "BV1KW411u7vy"
+          },
+          {
+            "name": "一个动画搞懂 MySQL 索引原理",
+            "url": "https://www.bilibili.com/video/BV1pJ4m1j7Pm/",
+            "note": "6 分钟动画：聚簇索引与二级索引的回表过程，看完再读概念篇会顺很多",
+            "bv": "BV1pJ4m1j7Pm"
+          }
+        ]
       }
     }
   ],

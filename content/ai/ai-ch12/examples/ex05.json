@@ -1,0 +1,8 @@
+{
+  "title": "SimHash 语义去重：稳定哈希 + Hamming 距离",
+  "code_lang": "python",
+  "code_std": "3.11",
+  "stdin": "",
+  "expected_output": "哈希位数: 64\n与首文档相似(<=3位)的索引: [1]",
+  "code": "def stable_hash(ch):\n    h = 0\n    for c in ch:\n        h = (h * 31 + ord(c)) & 0xFFFFFFFF\n    return h\n\ndef simhash(text, dim=64):\n    v = [0] * dim\n    for ch in text:\n        h = stable_hash(ch)\n        for i in range(dim):\n            if (h >> i) & 1:\n                v[i] += 1\n            else:\n                v[i] -= 1\n    return \"\".join(\"1\" if x > 0 else \"0\" for x in v)\n\ndef hamming(a, b):\n    return sum(1 for x, y in zip(a, b) if x != y)\n\ndocs = [\"机器学习很有趣\", \"机器学习真有趣\", \"今天天气很好\"]\nhs = [simhash(d) for d in docs]\nprint(\"哈希位数:\", len(hs[0]))\ndups = []\nfor i in range(1, len(docs)):\n    if hamming(hs[i], hs[0]) <= 3:\n        dups.append(i)\nprint(\"与首文档相似(<=3位)的索引:\", dups)\n"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "Cohen's Kappa 计算：扣掉随机基线的一致性",
+  "code_lang": "python",
+  "code_std": "3.11",
+  "stdin": "",
+  "expected_output": "po=0.700 pe=0.500 kappa=0.400",
+  "code": "a = [1,0,1,1,0,1,0,0,1,1]\nb = [1,0,1,0,0,1,1,0,1,0]\nn = len(a)\nfrom collections import Counter\ncm = Counter((a[i], b[i]) for i in range(n))\npo = sum(cm[(k,k)] for k in set(a)) / n\np_a = sum(1 for x in a if x==1)/n\np_b = sum(1 for x in b if x==1)/n\npe = p_a*p_b + (1-p_a)*(1-p_b)\nkappa = (po - pe)/(1 - pe)\nprint(f\"po={po:.3f} pe={pe:.3f} kappa={kappa:.3f}\")\n"
+}

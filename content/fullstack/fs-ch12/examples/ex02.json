@@ -1,0 +1,8 @@
+{
+  "title": "限界上下文：把模块按领域聚成上下文",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "logistics, order, payment\n2 2 1",
+  "code": "// 把一堆模块按「领域」聚成限界上下文，识别边界\nconst modules = [\n  { name: \"createOrder\", domain: \"order\" },\n  { name: \"payInvoice\", domain: \"payment\" },\n  { name: \"shipParcel\", domain: \"logistics\" },\n  { name: \"cancelOrder\", domain: \"order\" },\n  { name: \"refund\", domain: \"payment\" },\n];\n\nconst ctx = {};\nfor (const m of modules) (ctx[m.domain] ??= []).push(m.name);\n\nconsole.log(Object.keys(ctx).sort().join(\", \"));\nconsole.log(ctx.order.length, ctx.payment.length, ctx.logistics.length);\n"
+}

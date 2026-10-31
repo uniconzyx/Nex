@@ -1,0 +1,8 @@
+{
+  "title": "工具调用唯一 id + 重试幂等（同 id 只执行一次）",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "{\"out\":\"exec:search#1\",\"retried\":false}\n{\"out\":\"exec:search#1\",\"retried\":true}\n{\"out\":\"exec:search#2\",\"retried\":false}\n实际执行次数: 2",
+  "code": "const log = new Map();\nlet execCount = 0;\nfunction toolCall(callId, op) {\n  if (log.has(callId)) return { out: log.get(callId), retried: true };\n  execCount++;\n  const out = `exec:${op}#${execCount}`;\n  log.set(callId, out);\n  return { out, retried: false };\n}\nconsole.log(JSON.stringify(toolCall(\"c1\", \"search\")));\nconsole.log(JSON.stringify(toolCall(\"c1\", \"search\")));\nconsole.log(JSON.stringify(toolCall(\"c2\", \"search\")));\nconsole.log(\"实际执行次数:\", execCount);\n"
+}

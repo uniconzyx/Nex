@@ -1,0 +1,8 @@
+{
+  "title": "GPTQ 风格量化：per-channel 缩放 + 反量化 MSE",
+  "code_lang": "python",
+  "code_std": "3.11",
+  "stdin": "",
+  "expected_output": "scale: 0.3\n量化值(int4): [1, -3, 5, 0, 3, -4, 7, -2]\nMSE: 0.002737",
+  "code": "W = [0.31, -0.92, 1.47, -0.05, 0.78, -1.20, 2.10, -0.66]\ndef quantize_int4(w, bits=4):\n    max_abs = max(abs(x) for x in w)\n    scale = max_abs / (2**(bits-1) - 1)\n    q = [round(x / scale) for x in w]\n    return q, scale\nq, scale = quantize_int4(W)\ndeq = [x * scale for x in q]\nerr = sum((a-b)**2 for a,b in zip(W, deq)) / len(W)\nprint(\"scale:\", round(scale,4))\nprint(\"量化值(int4):\", q)\nprint(\"MSE:\", round(err,6))\n"
+}

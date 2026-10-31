@@ -201,11 +201,11 @@
       "platform": "github",
       "difficulty": "mid",
       "title": "为开源算法实现补一套参数化 + 边界值测试",
-      "content_md": "以 TheAlgorithms/C-Plus-Plus 里的查找类算法为对象（本章 `_manifest.json` 已收录该仓库），完成下列任务，**不要照抄仓库代码，自己写一份实现再测**：\n1. 实现 `binary_search_idx(const std::vector<int>&, int)`：找到返回下标，找不到返回 `-1`，   搜索区间统一写成**左闭右开** `[lo, hi)`，取中点用 `lo + (hi - lo) / 2` 防溢出；\n2. 先列等价类（命中/未命中）与边界点（首元素、末元素、小于最小值、大于最大值、中间不存在值、空容器），   **再**写用例；\n3. 用参数化方式组织用例（数据表 + 一份断言逻辑），输出 `[SUMMARY] 断言=N 失败断言=M` 并返回退出码；\n4. 把该测试接进 CTest：`enable_testing()` + `add_test(NAME search_tests COMMAND search_tests)`。",
+      "content_md": "以 TheAlgorithms/C-Plus-Plus 里的查找类算法为对象（本章 `_manifest.json` 已收录该仓库），完成下列任务，**不要照抄仓库代码，自己写一份实现再测**：\n1. 实现 `binary_search_idx(const std::vector<int>&, int)`：找到返回下标，找不到返回 `-1`，   搜索区间统一写成**左闭右开** `[lo, hi)`，取中点用 `lo + (hi - lo) / 2` 防溢出；\n2. 先列等价类（命中/未命中）与边界点（首元素、末元素、小于最小值、大于最大值、中间不存在值、空容器），   **再**写用例；\n3. 用参数化方式组织用例（数据表 + 一份断言逻辑），输出 `[SUMMARY] 断言=N 失败断言=M` 并返回退出码；\n4. 把该测试接进 CTest：`enable_testing()` + `add_test(NAME search_tests COMMAND search_tests)`。\n\n<!-- judge-io -->\n**判题 I/O 约定**（提交完整程序：从 stdin 读、向 stdout 写）\n\n输入：第一行两个整数 `n target`；第二行 `n` 个升序整数（空格分隔）。\n输出：`target` 的下标；找不到输出 `-1`。",
       "answer": {
         "correct": [],
         "output": "[SUMMARY] 断言=6 失败断言=0",
-        "reference_code": "#include <iostream>\n#include <vector>\n\n// 二分查找：返回下标，不存在返回 -1（搜索区间为左闭右开 [lo, hi)）\nint binary_search_idx(const std::vector<int>& a, int target) {\n    int lo = 0, hi = static_cast<int>(a.size());\n    while (lo < hi) {\n        int mid = lo + (hi - lo) / 2;          // 防溢出的取中点写法\n        if (a[mid] < target) lo = mid + 1;\n        else hi = mid;\n    }\n    return (lo < static_cast<int>(a.size()) && a[lo] == target) ? lo : -1;\n}\n\nstatic int checks = 0, failed = 0;\nstatic void eq(int got, int want, int line) {\n    ++checks;\n    if (got != want) {\n        ++failed;\n        std::cout << \"[ ASSERT ] 第\" << line << \"行 期望=\" << want << \" 实得=\" << got << \"\\n\";\n    }\n}\n\nint main() {\n    std::vector<int> a = {1, 3, 5, 7, 9};\n    // 边界值：首元素 / 末元素 / 小于最小 / 大于最大 / 中间不存在 / 空容器\n    eq(binary_search_idx(a, 1), 0, __LINE__);\n    eq(binary_search_idx(a, 9), 4, __LINE__);\n    eq(binary_search_idx(a, 0), -1, __LINE__);\n    eq(binary_search_idx(a, 10), -1, __LINE__);\n    eq(binary_search_idx(a, 4), -1, __LINE__);\n    std::vector<int> empty;\n    eq(binary_search_idx(empty, 1), -1, __LINE__);\n    std::cout << \"[SUMMARY] 断言=\" << checks << \" 失败断言=\" << failed << \"\\n\";\n    return failed ? 1 : 0;\n}\n"
+        "reference_code": "#include <iostream>\n#include <vector>\n\nint binary_search_idx(const std::vector<int>& a, int target) {\n    int lo = 0, hi = (int)a.size() - 1;\n    while (lo <= hi) {\n        int mid = lo + (hi - lo) / 2;\n        if (a[mid] == target) return mid;\n        if (a[mid] < target) lo = mid + 1;\n        else hi = mid - 1;\n    }\n    return -1;\n}\n\nint main() {\n    int n, target;\n    if (!(std::cin >> n >> target)) return 0;\n    std::vector<int> a(n);\n    for (int& v : a) std::cin >> v;\n    std::cout << binary_search_idx(a, target) << \"\\n\";\n    return 0;\n}\n"
       },
       "explanation": "二分查找的 bug 几乎全在边界：左闭右开区间下 `hi = a.size()`（不能是 `size()-1`），循环条件是 `lo < hi`（不能是 `lo <= hi`），更新是 `hi = mid`（不能是 `mid - 1`，否则死循环或漏解）。用例设计上，空容器是一个**独立等价类**，最容易被漏掉；「小于最小 / 大于最大 / 中间不存在」三个点覆盖未命中的三种情形。参数化让新增一组数据只改表、不改断言逻辑，这也是 ex04 的核心收益。",
       "tags": [
@@ -218,7 +218,24 @@
       "source_ref": "TheAlgorithms/C-Plus-Plus（search/ 目录，cpp-ch19 manifest 已收录 GitHub 资源）",
       "external_url": "https://github.com/TheAlgorithms/C-Plus-Plus",
       "time_limit_ms": 2000,
-      "memory_limit_mb": 256
+      "memory_limit_mb": 256,
+      "test_cases": [
+        {
+          "input": "6 9\n-1 0 3 5 9 12",
+          "expected_output": "4",
+          "is_sample": true
+        },
+        {
+          "input": "6 2\n-1 0 3 5 9 12",
+          "expected_output": "-1",
+          "is_sample": true
+        },
+        {
+          "input": "1 5\n5",
+          "expected_output": "0",
+          "is_sample": false
+        }
+      ]
     },
     {
       "id": "cpp-ch19-ex08",

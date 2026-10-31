@@ -1,0 +1,8 @@
+{
+  "title": "网关鉴权：统一校验身份再放行",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "{\"status\":200,\"body\":\"from upstream\"}\n{\"status\":403,\"body\":\"invalid token\"}\n{\"status\":401,\"body\":\"missing token\"}",
+  "code": "// 网关统一鉴权：没有合法 token 直接拒绝，不转发到后端\nfunction authGuard(token, next) {\n  if (!token || !token.startsWith(\"Bearer \")) {\n    return { status: 401, body: \"missing token\" };\n  }\n  const payload = token.slice(7);\n  if (payload !== \"valid-signature\") {\n    return { status: 403, body: \"invalid token\" };\n  }\n  return next(); // 放行\n}\n\nconst ok = () => ({ status: 200, body: \"from upstream\" });\nconsole.log(JSON.stringify(authGuard(\"Bearer valid-signature\", ok)));\nconsole.log(JSON.stringify(authGuard(\"Bearer bad\", ok)));\nconsole.log(JSON.stringify(authGuard(\"nothing\", ok)));\n"
+}

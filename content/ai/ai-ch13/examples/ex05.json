@@ -1,0 +1,8 @@
+{
+  "title": "量化位宽对文件体积的影响",
+  "code_lang": "python",
+  "code_std": "3.11",
+  "stdin": "",
+  "expected_output": "fp32: 26.08 GB\nfp16: 13.04 GB\nint8: 6.52 GB\nint4: 3.26 GB\nint4 相对 fp16 压缩比: 4x",
+  "code": "PARAMS = 7_000_000_000\ndef size_gb(bits):\n    return PARAMS * bits / 8 / (1024**3)\nfor bits, name in [(32,\"fp32\"),(16,\"fp16\"),(8,\"int8\"),(4,\"int4\")]:\n    print(f\"{name}: {size_gb(bits):.2f} GB\")\nprint(f\"int4 相对 fp16 压缩比: {size_gb(16)/size_gb(4):.0f}x\")\n"
+}

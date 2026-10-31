@@ -80,9 +80,9 @@
       "type": "coding",
       "difficulty": "easy",
       "title": "实现字符串反转函数",
-      "content_md": "实现 `std::string reverse_str(const std::string& s)`，返回反转后的字符串。",
+      "content_md": "实现 `std::string reverse_str(const std::string& s)`，返回反转后的字符串。\n\n<!-- judge-io -->\n**判题 I/O 约定**（提交完整程序：从 stdin 读、向 stdout 写）\n\n输入：一行字符串 `s`（可能含空格，不含换行）。\n输出：反转后的字符串，占一行。",
       "answer": {
-        "reference_code": "#include <iostream>\n#include <string>\nstd::string reverse_str(const std::string& s){std::string r;for(int i=(int)s.size()-1;i>=0;--i)r+=s[i];return r;}\nint main(){std::cout<<reverse_str(\"cat\");}"
+        "reference_code": "#include <algorithm>\n#include <iostream>\n#include <string>\n\nstd::string reverse_str(const std::string& s) {\n    std::string r(s);\n    std::reverse(r.begin(), r.end());\n    return r;\n}\n\nint main() {\n    std::string s;\n    std::getline(std::cin, s);\n    std::cout << reverse_str(s) << \"\\n\";\n    return 0;\n}\n"
       },
       "explanation": "从尾到头拼回即可；const 引用避免拷贝。",
       "tags": [
@@ -92,15 +92,32 @@
       "source": "self",
       "source_ref": "《C++ Primer（第5版）》第 6 章 习题",
       "category": "基础题",
-      "platform": "book"
+      "platform": "book",
+      "test_cases": [
+        {
+          "input": "cat",
+          "expected_output": "tac",
+          "is_sample": true
+        },
+        {
+          "input": "hello world",
+          "expected_output": "dlrow olleh",
+          "is_sample": true
+        },
+        {
+          "input": "CppMind",
+          "expected_output": "dniMppC",
+          "is_sample": false
+        }
+      ]
     },
     {
       "type": "coding",
       "difficulty": "mid",
       "title": "LeetCode 20 · 有效的括号",
-      "content_md": "给定一个只含 '()[]{}' 的字符串，判断括号是否匹配。用栈实现，封装成函数 `bool isValid(const std::string& s)`。",
+      "content_md": "给定一个只含 '()[]{}' 的字符串，判断括号是否匹配。用栈实现，封装成函数 `bool isValid(const std::string& s)`。\n\n<!-- judge-io -->\n**判题 I/O 约定**（提交完整程序：从 stdin 读、向 stdout 写）\n\n输入：一行只含 `()[]{}` 的字符串（可能为空行）。\n输出：`true` 或 `false`。",
       "answer": {
-        "reference_code": "#include <iostream>\n#include <string>\n#include <stack>\nbool isValid(const std::string& s){\n  std::stack<char> st;\n  for(char c: s){\n    if(c=='('||c=='['||c=='{') st.push(c);\n    else { if(st.empty()) return false; char t=st.top(); st.pop();\n      if((c==')'&&t!='(')||(c==']'&&t!='[')||(c=='}'&&t!='{')) return false; }\n  }\n  return st.empty();\n}\nint main(){ std::cout << (isValid(\"()[]{}\") ? 1 : 0); }"
+        "reference_code": "#include <iostream>\n#include <stack>\n#include <string>\n\nbool isValid(const std::string& s) {\n    std::stack<char> st;\n    for (char c : s) {\n        if (c == '(' || c == '[' || c == '{') {\n            st.push(c);\n        } else {\n            if (st.empty()) return false;\n            char t = st.top(); st.pop();\n            if ((c == ')' && t != '(') || (c == ']' && t != '[') ||\n                (c == '}' && t != '{')) return false;\n        }\n    }\n    return st.empty();\n}\n\nint main() {\n    std::string s;\n    std::getline(std::cin, s);\n    std::cout << (isValid(s) ? \"true\" : \"false\") << \"\\n\";\n    return 0;\n}\n"
       },
       "explanation": "经典栈题，函数式封装便于复用。",
       "tags": [
@@ -111,7 +128,29 @@
       "source_ref": "LeetCode 20（有效的括号）",
       "external_url": "https://leetcode.cn/problems/valid-parentheses/",
       "category": "算法题",
-      "platform": "leetcode"
+      "platform": "leetcode",
+      "test_cases": [
+        {
+          "input": "()[]{}",
+          "expected_output": "true",
+          "is_sample": true
+        },
+        {
+          "input": "(]",
+          "expected_output": "false",
+          "is_sample": true
+        },
+        {
+          "input": "([)]",
+          "expected_output": "false",
+          "is_sample": false
+        },
+        {
+          "input": "{[()]}",
+          "expected_output": "true",
+          "is_sample": false
+        }
+      ]
     }
   ]
 }

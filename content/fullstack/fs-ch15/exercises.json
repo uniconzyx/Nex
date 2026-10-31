@@ -1,0 +1,199 @@
+{
+  "meta": {
+    "chapter": "fs-ch15",
+    "note": "8 题，含选择题/输出题/改错题/编程题；题面与参考实现均为自建，不搬运第三方题面。"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "关于 Goroutine 与 Channel，正确的是",
+      "content_md": "选择**正确**的描述。",
+      "options": [
+        {
+          "key": "A",
+          "text": "goroutine 初始栈约 1MB，和 Java 线程一样重"
+        },
+        {
+          "key": "B",
+          "text": "无缓冲 channel 的 send 会一直阻塞，直到有 receive 接住（会合语义）"
+        },
+        {
+          "key": "C",
+          "text": "多个 goroutine 直接共享变量 count++ 是安全的，不需要任何同步"
+        },
+        {
+          "key": "D",
+          "text": "channel 只能传数据，不能用作同步原语"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "goroutine 初始栈仅约 2KB（A 错）；无缓冲 channel 的 send 必须等 receive 接住才返回，这是会合语义（B 对）。共享变量 count++ 在 Go 里仍是数据竞争（C 错）；channel 本身就是语言内建的同步原语（D 错）。",
+      "tags": [
+        "goroutine",
+        "channel"
+      ],
+      "source": "book",
+      "source_ref": "The Go Programming Language · Concurrency"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "读代码写输出（Go 风格的 channel 汇总，JS 模拟）",
+      "content_md": "下面用 JS 模拟「N 个 goroutine 各自通过 channel 汇报完成、单一收集者汇总」。输出是什么？\n\n```js\nclass Chan {\n  constructor(cap = 0) { this.cap = cap; this.buf = []; this.putQ = []; this.takeQ = []; }\n  put(v) { return new Promise(res => {\n    if (this.takeQ.length) { const t = this.takeQ.shift(); t(v); res(); return; }\n    if (this.buf.length < this.cap) { this.buf.push(v); res(); return; }\n    this.putQ.push({ v, res });\n  }); }\n  take() { return new Promise(res => {\n    if (this.buf.length) { const v = this.buf.shift(); if (this.putQ.length) { const p = this.putQ.shift(); this.buf.push(p.v); p.res(); } res(v); return; }\n    if (this.putQ.length) { const p = this.putQ.shift(); res(p.v); p.res(); return; }\n    this.takeQ.push(res);\n  }); }\n}\nconst ch = new Chan();\nlet done = 0; const N = 200;\nfor (let i = 0; i < N; i++) { (async () => { await ch.put(1); })(); }\n(async () => { for (let i = 0; i < N; i++) { await ch.take(); done++; } console.log(\"并发 goroutine 完成数:\", done); })();\n```",
+      "answer": {
+        "output": "并发 goroutine 完成数: 200"
+      },
+      "explanation": "200 个 goroutine 各往无缓冲 channel `put(1)`，单一收集者 `take` 200 次汇总。channel 保证每个「完成信号」被安全传递而非共享计数器，最终 `done` 必然等于 200，全程无锁——这正是「通过通信共享内存」的落地。",
+      "tags": [
+        "goroutine",
+        "channel",
+        "output"
+      ],
+      "source": "book",
+      "source_ref": "The Go Programming Language · Share by communicating"
+    },
+    {
+      "type": "fix",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "改错：为什么这个计数在 Go 里是数据竞争",
+      "content_md": "下面这段（Go 思路、用 JS 表达）想统计完成的 goroutine 数，但在 Go 里会是数据竞争。指出问题并改正。\n\n```js\nlet shared = 0;\nfor (let i = 0; i < 1000; i++) {\n  (async () => { shared++; })();\n}\n```\n（在 Go 中对应的是 N 个 goroutine 直接对包级变量 `shared++`。）",
+      "answer": {
+        "reference_code": "class Chan {\n  constructor(cap = 0) { this.cap = cap; this.buf = []; this.putQ = []; this.takeQ = []; }\n  put(v) { return new Promise(res => {\n    if (this.takeQ.length) { const t = this.takeQ.shift(); t(v); res(); return; }\n    if (this.buf.length < this.cap) { this.buf.push(v); res(); return; }\n    this.putQ.push({ v, res });\n  }); }\n  take() { return new Promise(res => {\n    if (this.buf.length) { const v = this.buf.shift(); if (this.putQ.length) { const p = this.putQ.shift(); this.buf.push(p.v); p.res(); } res(v); return; }\n    if (this.putQ.length) { const p = this.putQ.shift(); res(p.v); p.res(); return; }\n    this.takeQ.push(res);\n  }); }\n}\nconst ch = new Chan(1000);\nlet shared = 0;\nconst collector = (async () => { let sum = 0; for (let i = 0; i < 1000; i++) sum += await ch.take(); return sum; })();\nfor (let i = 0; i < 1000; i++) { (async () => { shared++; await ch.put(1); })(); }\ncollector.then(total => console.log(\"channel 汇总:\", total, \"shared:\", shared));"
+      },
+      "explanation": "N 个并发体直接改同一个 `shared` 在 Go 里是数据竞争（`go run -race` 会报）。正确做法是把「+1」作为事件发到 channel，由单一收集者汇总——数据只在那一个 goroutine 手里，根本不需要锁。JS 单线程下 shared++ 碰巧正确，但那是语言特性，不是模型正确。",
+      "tags": [
+        "race",
+        "channel",
+        "goroutine"
+      ],
+      "source": "book",
+      "source_ref": "Go Blog · Share Memory By Communicating"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "book",
+      "difficulty": "hard",
+      "title": "实现 Gin 风格中间件洋葱链与 Abort 中断",
+      "content_md": "用 JS 模拟 Gin 的中间件机制：实现 `runMiddleware(handlers, ctx)`，`ctx` 提供 `logs` 数组、`abort()`、`isAborted()`；`next()` 在未被 abort 时调用下一个 handler。要求：① 中间件在 `next()` 前后的代码分别作为「进/出」日志，形成洋葱顺序；② 某个中间件调 `abort()` 后，后续 handler 不再执行。自测两条链：正常链（m1/m2/handler 洋葱顺序）与 abort 链（auth→ratelimit abort→handler 不应执行）。",
+      "answer": {
+        "reference_code": "function runMiddleware(handlers, ctx) {\n  let i = 0;\n  function next() {\n    if (ctx.isAborted()) return;\n    if (i >= handlers.length) return;\n    const h = handlers[i++]; h(ctx, next);\n  }\n  next();\n}\nfunction makeCtx() {\n  const logs = []; let aborted = false;\n  return { logs, abort() { aborted = true; }, isAborted() { return aborted; } };\n}\nconst c1 = makeCtx();\nrunMiddleware([\n  (c, n) => { c.logs.push(\"m1 before\"); n(); c.logs.push(\"m1 after\"); },\n  (c, n) => { c.logs.push(\"m2 before\"); n(); c.logs.push(\"m2 after\"); },\n  (c, n) => { c.logs.push(\"handler\"); n(); },\n], c1);\nconsole.log(c1.logs.join(\" -> \"));\nconst c2 = makeCtx();\nrunMiddleware([\n  (c, n) => { c.logs.push(\"auth\"); n(); },\n  (c, n) => { c.logs.push(\"ratelimit: 超限，中断\"); c.abort(); n(); },\n  (c, n) => { c.logs.push(\"handler(不应执行)\"); n(); },\n  (c, n) => { c.logs.push(\"after(不应执行)\"); n(); },\n], c2);\nconsole.log(c2.logs.join(\" -> \"));\nconsole.log(\"aborted =\", c2.isAborted());"
+      },
+      "explanation": "洋葱模型的核心是 `next()` 把控制交还给框架执行链上下一个；`next()` 之前的代码在「进」时跑，`next()` 返回后跑「出」。`abort()` 置标记后，`next()` 开头检查 `isAborted()` 直接返回，后续 handler 不再执行——但注意 abort 后本函数内不应再调 `next()`，否则那一次仍会放行（模拟里那次 next 因标记被拦，但下个本该跳过的也因没再调用而不执行，逻辑正确）。",
+      "tags": [
+        "gin",
+        "middleware",
+        "onion"
+      ],
+      "source": "book",
+      "source_ref": "Gin · Middleware"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "Go 的 error 与 Java 异常对照，正确的是",
+      "content_md": "关于 Go 的错误处理，正确的是",
+      "options": [
+        {
+          "key": "A",
+          "text": "Go 用异常机制捕获错误，和 Java try/catch 一样"
+        },
+        {
+          "key": "B",
+          "text": "Go 把错误作为普通返回值，调用方需显式 `if err != nil` 检查"
+        },
+        {
+          "key": "C",
+          "text": "可预期的失败（网络超时）应该用 panic 抛出让 recover 兜住"
+        },
+        {
+          "key": "D",
+          "text": "Go 接口必须由实现方声明 implements 才算实现"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "Go 没有异常（panic 只给不可恢复状态），错误是普通返回值，调用点必须显式检查（B 对）。可预期失败要用 error 返回而非 panic（C 错）；Go 接口是结构化的、由消费者定义、满足方法集即实现，无需 implements（D 错）。",
+      "tags": [
+        "error",
+        "go",
+        "interface"
+      ],
+      "source": "book",
+      "source_ref": "Go · Error handling and Go"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "读代码写输出（error 作为值 + 消费者定义接口）",
+      "content_md": "```js\nfunction divide(a, b) { if (b === 0) return [null, \"division by zero\"]; return [a / b, null]; }\nfunction useQuotient(x, y) {\n  const [q, err] = divide(x, y);\n  if (err !== null) return \"错误:\" + err;\n  return \"商=\" + q;\n}\nconsole.log(useQuotient(10, 2));\nconsole.log(useQuotient(10, 0));\nfunction greetable(obj) {\n  if (typeof obj.Greet === \"function\") return obj.Greet();\n  return \"不是 Greetable\";\n}\nconsole.log(greetable({ Greet() { return \"Woof\"; } }));\nconsole.log(greetable({ }));\n```",
+      "answer": {
+        "output": "商=5\n错误:division by zero\nWoof\n不是 Greetable"
+      },
+      "explanation": "`divide` 返回 `[result, error]` 元组，调用方显式判断 err；`useQuotient(10,0)` 命中错误分支。`greetable` 模拟「消费者定义接口」：只要有 `Greet` 方法的对象就满足，空对象不满足返回提示。这对应 Go 的结构化接口与显式错误检查。",
+      "tags": [
+        "error",
+        "interface",
+        "output"
+      ],
+      "source": "book",
+      "source_ref": "Go · Why Go doesn't need Java-style interfaces"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "book",
+      "difficulty": "hard",
+      "title": "用 worker pool（缓冲 channel）并发处理任务",
+      "content_md": "用 JS 模拟 Go 的 worker pool：一个任务 channel（缓冲 3）、结果 channel（缓冲 3）、3 个 worker 从任务 channel 取任务算 `t*2` 再投结果 channel。主协程投 5 个任务、再投 3 个 null 作为各 worker 终止信号，最后取 5 个结果按任务 id 排序输出（`t1->2,t2->4,...,t5->10`）。",
+      "answer": {
+        "reference_code": "class Chan {\n  constructor(cap = 0) { this.cap = cap; this.buf = []; this.putQ = []; this.takeQ = []; }\n  put(v) { return new Promise(res => {\n    if (this.takeQ.length) { const t = this.takeQ.shift(); t(v); res(); return; }\n    if (this.buf.length < this.cap) { this.buf.push(v); res(); return; }\n    this.putQ.push({ v, res });\n  }); }\n  take() { return new Promise(res => {\n    if (this.buf.length) { const v = this.buf.shift(); if (this.putQ.length) { const p = this.putQ.shift(); this.buf.push(p.v); p.res(); } res(v); return; }\n    if (this.putQ.length) { const p = this.putQ.shift(); res(p.v); p.res(); return; }\n    this.takeQ.push(res);\n  }); }\n}\nconst tasks = new Chan(3), results = new Chan(3);\nfunction worker() {\n  return (async () => { while (true) { const t = await tasks.take(); if (t === null) break; await results.put({ task: t, val: t * 2 }); } })();\n}\n(async () => {\n  for (let i = 0; i < 3; i++) worker();\n  const inputs = [1, 2, 3, 4, 5];\n  for (const x of inputs) await tasks.put(x);\n  for (let i = 0; i < 3; i++) await tasks.put(null);\n  const out = [];\n  for (let i = 0; i < inputs.length; i++) out.push(await results.take());\n  out.sort((a, b) => a.task - b.task);\n  console.log(\"处理结果:\", out.map(o => `t${o.task}->${o.val}`).join(\",\"));\n})();"
+      },
+      "explanation": "这是 Go 里最经典的「用缓冲 channel 做 worker pool」模式：任务进 channel、worker 抢着取、结果回 channel、用 null 当终止信号让每个 worker 优雅退出。关键是 worker 数量与终止信号数量要匹配（3 个 worker 发 3 个 null），否则会有 worker 永远阻塞在 take 上。按 task id 排序保证输出确定，不依赖调度顺序。",
+      "tags": [
+        "goroutine",
+        "channel",
+        "worker-pool"
+      ],
+      "source": "book",
+      "source_ref": "The Go Programming Language · Multiplexing with channels"
+    },
+    {
+      "type": "fix",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "改错：Gin 中间件 Abort 后仍放行",
+      "content_md": "下面这个 Gin 风格鉴权中间件，期望「超限就拦截」，但实际仍会把请求放给 handler。指出问题并改正。\n\n```js\nfunction ratelimit(ctx, next) {\n  if (overLimit(ctx)) {\n    ctx.abort();\n  }\n  next(); // 无论是否 abort 都继续\n}\n```",
+      "answer": {
+        "reference_code": "function ratelimit(ctx, next) {\n  if (overLimit(ctx)) {\n    ctx.abort();\n    return; // abort 后不要再 next()，否则本次仍会放行链上下一个\n  }\n  next();\n}"
+      },
+      "explanation": "问题在 `abort()` 之后无条件调了 `next()`。`abort()` 只是置「后续不再执行」标记，但本次 `next()` 调用本身会触发链上下一个 handler，于是本应被拦的请求仍被放行。修法是 abort 后直接 `return`，不再 `next()`。",
+      "tags": [
+        "gin",
+        "middleware",
+        "abort"
+      ],
+      "source": "book",
+      "source_ref": "Gin · Context.Abort"
+    }
+  ]
+}

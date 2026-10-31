@@ -1,0 +1,8 @@
+{
+  "title": "超时与取消：客户端读完第一块即 Abort，上游停止",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "实际收到: 块1,[[已取消]]\nsignal.aborted = true",
+  "code": "function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }\nasync function* stream(signal) {\n  for (const t of [\"块1\", \"块2\", \"块3\"]) {\n    if (signal.aborted) { yield \"[[已取消]]\"; return; }\n    await sleep(5);\n    yield t;\n  }\n}\n(async () => {\n  const ac = new AbortController();\n  const gen = stream(ac.signal);\n  const got = [];\n  for await (const c of gen) {\n    got.push(c);\n    if (c === \"块1\") ac.abort(); // 客户端读完第一块就取消\n  }\n  console.log(\"实际收到:\", got.join(\",\"));\n  console.log(\"signal.aborted =\", ac.signal.aborted);\n})();\n"
+}

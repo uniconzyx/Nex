@@ -1,0 +1,8 @@
+{
+  "title": "分组校验：insert 不要求 id，update 要求 id 必填",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "[]\n[\"id 必填(update)\"]",
+  "code": "class BizException extends Error {\n  constructor(code, message){ super(message); this.code = code; this.biz = true; }\n}\n\nfunction validateGroup(dto, group, rules) {\n  const errors = [];\n  for (const [field, rule] of Object.entries(rules)) {\n    if (rule.groups && !rule.groups.includes(group)) continue;\n    const v = dto[field];\n    if (rule.notNull && (v === null || v === undefined)) errors.push(field + \" 必填(\" + group + \")\");\n  }\n  return errors;\n}\nconst rules = {\n  id:   { groups: [\"update\"], notNull: true },\n  name: { groups: [\"insert\", \"update\"], notNull: true },\n};\nconsole.log(JSON.stringify(validateGroup({ name: \"x\" }, \"insert\", rules)));\nconsole.log(JSON.stringify(validateGroup({ name: \"x\" }, \"update\", rules)));\n"
+}

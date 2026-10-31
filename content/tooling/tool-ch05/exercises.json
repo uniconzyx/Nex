@@ -13,9 +13,12 @@
       "platform": "self",
       "difficulty": "easy",
       "title": "容器与虚拟机的本质区别",
-      "content_md": "关于容器与虚拟机的区别，下列说法正确的是？\n\nA. 容器拥有独立的 Guest OS 内核，因此隔离强度高于虚拟机\nB. 容器依靠 namespace 隔离「视图」、cgroup 限制「用量」，并**共享宿主内核**\nC. 虚拟机需要引导一份完整的 Guest 内核，因此启动更慢、镜像体积更大\nD. 容器可以在 Windows 宿主上直接运行依赖 Linux 系统调用的镜像，无需任何虚拟机\n\n请选择并说明。",
+      "content_md": "关于容器与虚拟机的区别，下列说法正确的是？\n\n\n请选择并说明。",
       "answer": {
-        "correct": "B、C",
+        "correct": [
+          "B",
+          "C"
+        ],
         "explain": "**B 正确**：namespace 负责「看不见」（mount/pid/net/ipc/uts/user 六类），cgroup 负责「用不多」（cpu/memory/pids/io），容器与宿主共享同一个 Linux 内核。\n\n**C 正确**：虚拟机要走「固件 → Hypervisor → Guest 内核 → initrd → 用户态 init」，是分钟级、GB 级；容器复用已运行的内核，是秒级、MB 级。\n\n**A 错误**：正好相反——容器**没有**独立内核，隔离强度弱于虚拟机。\n\n**D 错误**：Docker Desktop 在 Windows/macOS 上要先起一层轻量 Linux 虚拟机，容器共享的是那层 VM 的 Linux 内核。"
       },
       "explanation": "考容器的两根支柱（namespace/cgroup）与「共享内核」这一根本差异，是本章第一考点。",
@@ -26,7 +29,25 @@
         "虚拟机"
       ],
       "source": "self",
-      "source_ref": "tool-ch05 concept/01；Docker 官方 Get Started"
+      "source_ref": "tool-ch05 concept/01；Docker 官方 Get Started",
+      "options": [
+        {
+          "key": "A",
+          "text": "容器拥有独立的 Guest OS 内核，因此隔离强度高于虚拟机"
+        },
+        {
+          "key": "B",
+          "text": "容器依靠 namespace 隔离「视图」、cgroup 限制「用量」，并**共享宿主内核**"
+        },
+        {
+          "key": "C",
+          "text": "虚拟机需要引导一份完整的 Guest 内核，因此启动更慢、镜像体积更大"
+        },
+        {
+          "key": "D",
+          "text": "容器可以在 Windows 宿主上直接运行依赖 Linux 系统调用的镜像，无需任何虚拟机"
+        }
+      ]
     },
     {
       "id": "q2",
@@ -35,9 +56,13 @@
       "platform": "self",
       "difficulty": "easy",
       "title": "镜像分层、overlayfs 与写时复制",
-      "content_md": "关于镜像分层与 overlayfs，下列说法正确的是？\n\nA. 镜像层是只读的，多个容器可以共享同一份只读层，各自只多出一个可写层\nB. 修改一个来自 lower 层的文件时，overlayfs 会先把它复制到 upper 层再改（写时复制），lower 永不被改动\nC. 在 Dockerfile 里用 `RUN rm -rf /big` 删除大目录可以有效减小最终镜像体积\nD. 删除一个来自 lower 层的文件时，是在 upper 层放一个 whiteout 把它遮蔽，下层数据依然存在\n\n请选择并说明。",
+      "content_md": "关于镜像分层与 overlayfs，下列说法正确的是？\n\n\n请选择并说明。",
       "answer": {
-        "correct": "A、B、D",
+        "correct": [
+          "A",
+          "B",
+          "D"
+        ],
         "explain": "**A 正确**：只读层共享是「N 个容器跑同一镜像磁盘不翻倍」的原因。\n\n**B 正确**：copy-up 把拷贝推迟到真正要写的那一刻，保证 lower 的不可变性。\n\n**D 正确**：whiteout 是放在 upper 侧的遮蔽标记，不破坏 lower 的只读性。\n\n**C 错误**：这正是最经典的陷阱——删除只是加了 whiteout，被删数据仍留在只读层里，体积不变。真正瘦身要用**多阶段构建**。"
       },
       "explanation": "考 overlayfs 的 lower/upper/merged 语义与「rm 不瘦身」的根因。",
@@ -48,7 +73,25 @@
         "whiteout"
       ],
       "source": "self",
-      "source_ref": "tool-ch05 concept/02；examples/ex04"
+      "source_ref": "tool-ch05 concept/02；examples/ex04",
+      "options": [
+        {
+          "key": "A",
+          "text": "镜像层是只读的，多个容器可以共享同一份只读层，各自只多出一个可写层"
+        },
+        {
+          "key": "B",
+          "text": "修改一个来自 lower 层的文件时，overlayfs 会先把它复制到 upper 层再改（写时复制），lower 永不被改动"
+        },
+        {
+          "key": "C",
+          "text": "在 Dockerfile 里用 `RUN rm -rf /big` 删除大目录可以有效减小最终镜像体积"
+        },
+        {
+          "key": "D",
+          "text": "删除一个来自 lower 层的文件时，是在 upper 层放一个 whiteout 把它遮蔽，下层数据依然存在"
+        }
+      ]
     },
     {
       "id": "q3",
@@ -57,9 +100,11 @@
       "platform": "book",
       "difficulty": "mid",
       "title": "CMD 与 ENTRYPOINT 的组合规则",
-      "content_md": "镜像里写了 `ENTRYPOINT [\"python\"]`、`CMD [\"app.py\"]`，执行 `docker run img -u` 时最终运行的命令是什么？\n\nA. `python app.py -u`\nB. `python -u`\nC. `-u`\nD. `python app.py`（run 参数被忽略）\n\n再判断：若把 ENTRYPOINT 改成 shell 形式 `ENTRYPOINT python app.py`，CMD 会怎样？请选择并说明。",
+      "content_md": "镜像里写了 `ENTRYPOINT [\"python\"]`、`CMD [\"app.py\"]`，执行 `docker run img -u` 时最终运行的命令是什么？",
       "answer": {
-        "correct": "B；shell 形式下 CMD 被完全忽略",
+        "correct": [
+          "B"
+        ],
         "explain": "**第一问选 B**：ENTRYPOINT 存在时，`docker run` 的尾部参数**整体替换 CMD 而不是 ENTRYPOINT**，所以最终 argv 是 `python -u`。若没有 ENTRYPOINT，同样操作会得到 `-u`（此时 `--help` 会被当成可执行文件，通常报 command not found）。\n\n**第二问**：ENTRYPOINT 为 shell 形式时等价于 `/bin/sh -c \"python app.py\"`，**CMD 被完全忽略**；而且 PID 1 是 `/bin/sh`，SIGTERM 不会转发给应用，`docker stop` 要等满 10 秒超时。\n\n工程建议：`ENTRYPOINT [\"/app/server\"]` + `CMD [\"--port\",\"8080\"]`。"
       },
       "explanation": "考 CMD/ENTRYPOINT 的组合与覆盖规则，以及 shell 形式的信号副作用。",
@@ -68,6 +113,66 @@
         "Dockerfile",
         "CMD",
         "ENTRYPOINT"
+      ],
+      "source": "book",
+      "source_ref": "《Docker 技术入门与实战》Dockerfile 指令章节；tool-ch05 examples/ex10",
+      "options": [
+        {
+          "key": "A",
+          "text": "`python app.py -u`"
+        },
+        {
+          "key": "B",
+          "text": "`python -u`"
+        },
+        {
+          "key": "C",
+          "text": "`-u`"
+        },
+        {
+          "key": "D",
+          "text": "`python app.py`（`docker run` 尾部参数被忽略）"
+        }
+      ]
+    },
+    {
+      "id": "q3b",
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "shell 形式的 ENTRYPOINT 会带来什么",
+      "content_md": "把上一题改成 shell 形式 `ENTRYPOINT python app.py` 后，下列哪种说法**正确**？",
+      "options": [
+        {
+          "key": "A",
+          "text": "等价于 `exec` 形式，`CMD` 仍会作为参数追加"
+        },
+        {
+          "key": "B",
+          "text": "等价于 `/bin/sh -c \"python app.py\"`，`CMD` 被完全忽略；且 PID 1 是 `/bin/sh`，SIGTERM 不会转发给应用"
+        },
+        {
+          "key": "C",
+          "text": "镜像构建会直接失败，因为 ENTRYPOINT 不支持 shell 形式"
+        },
+        {
+          "key": "D",
+          "text": "`CMD` 会覆盖 ENTRYPOINT，最终只执行 `CMD` 里的命令"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ],
+        "explain": "shell 形式会再套一层 `/bin/sh -c`：① `CMD` 不再作为参数被追加，而是完全失效；② PID 1 变成 sh，`docker stop` 发的 SIGTERM 不会传给 python，只能等 10 秒超时后 SIGKILL，优雅退出逻辑全部失效。工程上应始终用 exec 形式：`ENTRYPOINT [\"/app/server\"]` + `CMD [\"--port\",\"8080\"]`。"
+      },
+      "explanation": "shell 形式 ENTRYPOINT 的双重副作用：CMD 失效 + 信号不转发。",
+      "tags": [
+        "Docker",
+        "Dockerfile",
+        "ENTRYPOINT",
+        "信号处理"
       ],
       "source": "book",
       "source_ref": "《Docker 技术入门与实战》Dockerfile 指令章节；tool-ch05 examples/ex10"
@@ -173,9 +278,13 @@
       "platform": "self",
       "difficulty": "easy",
       "title": "数据卷生命周期与网络模式",
-      "content_md": "关于数据卷与网络，下列说法正确的是？\n\nA. 容器删除后，volume 与 bind mount 中的数据仍然保留，容器可写层中的数据会丢失\nB. tmpfs 挂载的数据写在宿主内存中，容器停止即丢失\nC. bridge 模式下即使不做 `-p` 映射，宿主也能直接访问容器的服务端口\nD. host 模式共享宿主 netns，性能好但容易端口冲突，且 `-p` 映射会被忽略\n\n请选择并说明。",
+      "content_md": "关于数据卷与网络，下列说法正确的是？\n\n\n请选择并说明。",
       "answer": {
-        "correct": "A、B、D",
+        "correct": [
+          "A",
+          "B",
+          "D"
+        ],
         "explain": "**A 正确**：volume 与 bind mount 是独立于容器生命周期的存储对象，删除容器只删引用；可写层与容器同生共死。\n\n**B 正确**：tmpfs 落在宿主内存，适合放密钥、session 等「绝不落盘」的临时数据。\n\n**D 正确**：host 模式下容器直接 `bind` 宿主端口，没有 DNAT 一跳，延迟更低，但两个容器抢同一端口会直接起不来，`-p` 也会被忽略。\n\n**C 错误**：bridge 模式下容器有自己的 netns 与私有 IP，必须 `-p 宿主端口:容器端口`（本质是 DNAT）才能从宿主/外部访问。"
       },
       "explanation": "考三类数据卷的生命周期与三种网络模式的可达性差异，是部署排障的基础。",
@@ -186,7 +295,25 @@
         "端口映射"
       ],
       "source": "self",
-      "source_ref": "tool-ch05 concept/03；examples/ex12"
+      "source_ref": "tool-ch05 concept/03；examples/ex12",
+      "options": [
+        {
+          "key": "A",
+          "text": "容器删除后，volume 与 bind mount 中的数据仍然保留，容器可写层中的数据会丢失"
+        },
+        {
+          "key": "B",
+          "text": "tmpfs 挂载的数据写在宿主内存中，容器停止即丢失"
+        },
+        {
+          "key": "C",
+          "text": "bridge 模式下即使不做 `-p` 映射，宿主也能直接访问容器的服务端口"
+        },
+        {
+          "key": "D",
+          "text": "host 模式共享宿主 netns，性能好但容易端口冲突，且 `-p` 映射会被忽略"
+        }
+      ]
     }
   ]
 }

@@ -1,4 +1,23 @@
 # 对象模型：blob/tree/commit 与内容寻址存储
+> Git 把版本存成「blob(文件内容)/tree(目录结构)/commit(快照指针)」三类对象的有向图，内容寻址（SHA-1 去重）；工作区、暂存区、版本库「三区」是改动流动的三个站点。
+
+```text
+对象模型（内容寻址）：
+  blob   文件内容（与名字无关，同内容同 hash）
+  tree   目录：文件名 → blob/tree 的指针
+  commit 指向一个 tree + 父 commit + 作者/信息
+
+  三区流动：
+   工作区(编辑) ──git add──▶ 暂存区(index) ──git commit──▶ 版本库(.git)
+        ▲                                            │
+        └──────────── git checkout ──────────────────┘
+
+  分支只是指向 commit 的轻量指针：
+    main ─▶ C3 ← C2 ← C1
+    feat ─▶ C4 (从 C3 分出)
+  merge: 建新 commit 把两历史汇合；rebase: 把提交重放到目标之后（线性）。
+```
+
 > 本节目标：把 Git 从「黑盒命令」还原成「内容寻址的对象数据库」。每个主题按 🧑‍💻 程序员 / 🎓 博士生 / 📚 考研者 三视角解析。
 
 ---
@@ -39,6 +58,154 @@ Git 内核本质是一个**内容寻址的文件系统（content-addressable sto
 - 易错：「为什么 Git 切换/比较版本快」——直接取快照对象，不依赖逐版本 diff；「为什么分支轻量」——分支只是指向 commit 的指针。
 
 ---
+
+<!-- injected-code -->
+## 可运行代码：把上面的说法跑一遍
+
+下面两段直接取自本章示例库（`examples/`），期望输出就是判题台里判定的那串字符串，不是事后补写的说明。读完正文后先照着跑一遍，再回去看「三视角解析」里对应的那条。
+
+### blob 对象与内容寻址（SHA-1 复算）
+
+```python
+import os, subprocess, tempfile, hashlib, pathlib
+
+GIT_ENV = dict(os.environ)
+for _k, _v in [("GIT_AUTHOR_NAME", "dev"), ("GIT_AUTHOR_EMAIL", "dev@example.com"),
+               ("GIT_AUTHOR_DATE", "2026-01-01T00:00:00+00:00"),
+               ("GIT_COMMITTER_NAME", "dev"), ("GIT_COMMITTER_EMAIL", "dev@example.com"),
+               ("GIT_COMMITTER_DATE", "2026-01-01T00:00:00+00:00")]:
+    GIT_ENV[_k] = _v
+
+def g(args, cwd):
+    r = subprocess.run(["git"] + args, cwd=cwd, capture_output=True, text=True, env=GIT_ENV)
+    if r.returncode != 0:
+        raise RuntimeError("git %s failed:\n%s" % (args, r.stderr))
+    return r.stdout
+
+def new_repo():
+    d = tempfile.mkdtemp(prefix="repo_")
+    g(["init", "-q", "-b", "main"], d)
+    g(["config", "user.name", "dev"], d)
+    g(["config", "user.email", "dev@example.com"], d)
+    g(["config", "commit.gpgsign", "false"], d)
+    g(["config", "core.autocrlf", "false"], d)
+    g(["config", "core.eol", "lf"], d)
+    return d
+
+def w(d, name, content):
+    p = pathlib.Path(d) / name
+    if isinstance(content, str):
+        p.write_bytes(content.encode("utf-8"))
+    else:
+        p.write_bytes(content)
+
+def blob_sha(content_bytes):
+    b = content_bytes.encode("utf-8") if isinstance(content_bytes, str) else content_bytes
+    h = hashlib.sha1()
+    h.update(b"blob " + str(len(b)).encode() + b"\x00" + b)
+    return h.hexdigest()
+
+
+d = new_repo()
+w(d, "a.txt", "hello\n")
+sha = g(["hash-object", "-w", "a.txt"], d).strip()
+calc = blob_sha("hello\n")
+print("blob 对象演示")
+print("  文件内容: hello")
+print("  git hash-object -w 计算的 SHA: " + sha)
+print("  hashlib 独立计算的 SHA: " + calc)
+print("  两者一致: " + str(sha == calc))
+print("  git cat-file -t " + sha[:7] + ": " + g(["cat-file", "-t", sha], d).strip())
+print("  git cat-file -p " + sha[:7] + ": " + g(["cat-file", "-p", sha], d).strip())
+print("结论: Git 用「内容」直接寻址，相同内容永远同一 SHA（内容寻址存储 CAS）")
+```
+
+实际输出：
+
+```text
+blob 对象演示
+  文件内容: hello
+  git hash-object -w 计算的 SHA: ce013625030ba8dba906f756967f9e9ca394464a
+  hashlib 独立计算的 SHA: ce013625030ba8dba906f756967f9e9ca394464a
+  两者一致: True
+  git cat-file -t ce01362: blob
+  git cat-file -p ce01362: hello
+结论: Git 用「内容」直接寻址，相同内容永远同一 SHA（内容寻址存储 CAS）
+```
+
+> 出处：`examples/ex01-object-model-blob.json`。改一处再看输出变没变，比读三遍解释有用。
+
+### 内容寻址去重：文件名不影响 SHA
+
+```python
+import os, subprocess, tempfile, hashlib, pathlib
+
+GIT_ENV = dict(os.environ)
+for _k, _v in [("GIT_AUTHOR_NAME", "dev"), ("GIT_AUTHOR_EMAIL", "dev@example.com"),
+               ("GIT_AUTHOR_DATE", "2026-01-01T00:00:00+00:00"),
+               ("GIT_COMMITTER_NAME", "dev"), ("GIT_COMMITTER_EMAIL", "dev@example.com"),
+               ("GIT_COMMITTER_DATE", "2026-01-01T00:00:00+00:00")]:
+    GIT_ENV[_k] = _v
+
+def g(args, cwd):
+    r = subprocess.run(["git"] + args, cwd=cwd, capture_output=True, text=True, env=GIT_ENV)
+    if r.returncode != 0:
+        raise RuntimeError("git %s failed:\n%s" % (args, r.stderr))
+    return r.stdout
+
+def new_repo():
+    d = tempfile.mkdtemp(prefix="repo_")
+    g(["init", "-q", "-b", "main"], d)
+    g(["config", "user.name", "dev"], d)
+    g(["config", "user.email", "dev@example.com"], d)
+    g(["config", "commit.gpgsign", "false"], d)
+    g(["config", "core.autocrlf", "false"], d)
+    g(["config", "core.eol", "lf"], d)
+    return d
+
+def w(d, name, content):
+    p = pathlib.Path(d) / name
+    if isinstance(content, str):
+        p.write_bytes(content.encode("utf-8"))
+    else:
+        p.write_bytes(content)
+
+def blob_sha(content_bytes):
+    b = content_bytes.encode("utf-8") if isinstance(content_bytes, str) else content_bytes
+    h = hashlib.sha1()
+    h.update(b"blob " + str(len(b)).encode() + b"\x00" + b)
+    return h.hexdigest()
+
+
+d = new_repo()
+w(d, "f1.txt", "same\n")
+w(d, "f2.txt", "same\n")
+w(d, "f3.txt", "different\n")
+s1 = g(["hash-object", "-w", "f1.txt"], d).strip()
+s2 = g(["hash-object", "-w", "f2.txt"], d).strip()
+s3 = g(["hash-object", "-w", "f3.txt"], d).strip()
+print("内容寻址去重演示")
+print("  f1.txt 与 f2.txt 内容相同 -> SHA 相同: " + str(s1 == s2))
+print("  f1.txt 与 f3.txt 内容不同 -> SHA 不同: " + str(s1 != s3))
+print("  f1 SHA: " + s1)
+print("  f2 SHA: " + s2)
+print("  f3 SHA: " + s3)
+print("结论: 文件名不影响 SHA，只有内容决定对象身份；相同内容在对象库只存一份")
+```
+
+实际输出：
+
+```text
+内容寻址去重演示
+  f1.txt 与 f2.txt 内容相同 -> SHA 相同: True
+  f1.txt 与 f3.txt 内容不同 -> SHA 不同: True
+  f1 SHA: 1275430f1765c63e539cb0452565563bd6aef6a6
+  f2 SHA: 1275430f1765c63e539cb0452565563bd6aef6a6
+  f3 SHA: 8dca2f88bcfeb5fb3ecb832c4170ea85ef7be25c
+结论: 文件名不影响 SHA，只有内容决定对象身份；相同内容在对象库只存一份
+```
+
+> 出处：`examples/ex02-content-addressing.json`。改一处再看输出变没变，比读三遍解释有用。
 
 ## 三视角小结
 

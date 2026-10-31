@@ -1,0 +1,9 @@
+{
+  "title": "NaN 在批内的传播边界",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "note": "单个 NaN 只污染所在条目，但下游聚合会让整批变 nan",
+  "expected_output": "干净输入:\n   [0.2312, 0.6285, 0.1402]\n   [0.042, 0.1142, 0.8438]\n   [0.6652, 0.09, 0.2447]\n\n混入一个 NaN 后:\n   批内第 0 条 -> [0.23122389762214907, 0.6285317192117624, 0.14024438316608848]\n   批内第 1 条 -> [nan, nan, nan]\n   批内第 2 条 -> [0.6652409557748218, 0.09003057317038046, 0.24472847105479764]\n\n观察：NaN 只污染它所在的那一条，同批其它两条仍正常。\n但若下游对整个批做 sum/mean，整批结果都会变成 nan：\n   整批求和 -> nan\n   整批均值 -> nan\n\n拦截点对比:\n  1) 入口 isfinite 检查 -> 该请求返回 400，同批其它请求不受影响\n  2) 不拦 -> 该请求返回 nan，若下游有聚合则整批污染\n\n工程结论：批内逐请求 try/except + 入口 isfinite，两层都要有。\n",
+  "code": "\"\"\"NaN 静默传播：一次 NaN 如何污染整条推理链路，以及拦截点在哪。\"\"\"\nimport math\n\n\ndef softmax(xs):\n    m = max(xs)\n    exps = [math.exp(x - m) for x in xs]\n    s = sum(exps)\n    return [e / s for e in exps]\n\n\ndef linear(x, w, b):\n    return [sum(xi * wi for xi, wi in zip(row, w)) + bb for row, bb in zip([x], b)]\n\n\ndef batch_softmax(rows):\n    return [softmax(r) for r in rows]\n\n\nbase = [\n    [1.0, 2.0, 0.5],\n    [0.0, 1.0, 3.0],\n    [2.0, 0.0, 1.0],\n]\n\nprint(\"干净输入:\")\nfor r in batch_softmax(base):\n    print(\"  \", [round(v, 4) for v in r])\n\nprint()\nprint(\"混入一个 NaN 后:\")\ndirty = [row[:] for row in base]\ndirty[1][2] = float(\"nan\")\nfor i, r in enumerate(batch_softmax(dirty)):\n    print(\"   批内第 %d 条 ->\" % i, r)\n\nprint()\nprint(\"观察：NaN 只污染它所在的那一条，同批其它两条仍正常。\")\nprint(\"但若下游对整个批做 sum/mean，整批结果都会变成 nan：\")\ntot = sum(sum(r) for r in batch_softmax(dirty))\nprint(\"   整批求和 ->\", tot)\nprint(\"   整批均值 ->\", tot / 3)\n\nprint()\nprint(\"拦截点对比:\")\nprint(\"  1) 入口 isfinite 检查 -> 该请求返回 400，同批其它请求不受影响\")\nprint(\"  2) 不拦 -> 该请求返回 nan，若下游有聚合则整批污染\")\nprint()\nprint(\"工程结论：批内逐请求 try/except + 入口 isfinite，两层都要有。\")\n"
+}

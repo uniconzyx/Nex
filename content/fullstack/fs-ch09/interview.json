@@ -1,0 +1,73 @@
+{
+  "meta": {
+    "chapter": "fs-ch09",
+    "note": "5 个高频问题。"
+  },
+  "items": [
+    {
+      "question": "TypeScript 的类型在运行时存在吗？这对工程实践有什么影响？",
+      "answer_md": "不存在，TS 是 erasure 语义：编译后类型信息全部删除，产物是普通 JavaScript。影响有三层：① 不能用类型做运行时判断（`instanceof T` 对泛型参数不成立，重载编译后是同一函数）；② 外部数据（API 响应、localStorage、URL 参数）必须在入口做运行时校验，类型系统帮不上忙；③ `as` 断言零成本也零保护，它只影响编译期。",
+      "follow_ups": [
+        "既然类型不存在，`as` 到底做了什么？",
+        "为什么 `JSON.parse` 返回 `any` 而不是 `unknown`？",
+        "端到端类型安全（如 tRPC）是怎么绕过这个限制的？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用"
+      ]
+    },
+    {
+      "question": "结构类型和名义类型各有什么问题？实际项目里怎么补救结构类型的不足？",
+      "answer_md": "结构类型比形状，开放但会「意外的兼容」——`{ id: string }` 既能当 UserId 也能当 OrderId。名义类型比名字，安全但需要显式继承，跨库时常常被迫适配。补救结构类型的三个手段：① 品牌类型（`string & { __brand: 'UserId' }`）给同形状不同类型打标签；② 可辨识联合用 `kind` 字段区分语义；③ 边界处 schema 校验（Zod/Valibot），同时产出类型与运行时校验。",
+      "follow_ups": [
+        "品牌类型在运行时有什么痕迹？",
+        "为什么说 TS 是 unsound 的？举两个绕过检查的例子。",
+        "Zod 的 `z.infer` 与手写 interface 相比解决了什么问题？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用"
+      ]
+    },
+    {
+      "question": "`any`、`unknown`、`never` 三者分别用在什么场景？",
+      "answer_md": "`any` 关闭检查，能双向赋值，是会传染的逃生舱——只应出现在从 JS 迁移的过渡代码里并加 TODO。`unknown` 是安全顶，任何值都能赋给它但不能直接使用，必须先收窄；外部输入一律用它。`never` 是空集，任何值都不能赋给它（除 never 本身），用途有三：表示不可达的 default 分支做穷尽检查、表示永不返回的函数（如 `throwError(): never`）、在条件类型里作过滤结果。",
+      "follow_ups": [
+        "`never` 和 `void` 有什么区别？",
+        "为什么 `never` 能赋值给所有类型，反过来不行？",
+        "函数返回 `never` 和返回 `void` 在控制流分析上有什么不同？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用"
+      ]
+    },
+    {
+      "question": "泛型约束（`extends`）和条件类型里的 `extends` 是同一个东西吗？",
+      "answer_md": "不是，同一个关键字两种角色。出现在类型参数位置 `<T extends X>` 是**约束**：限制 T 必须是 X 的子类型，不满足直接报错。出现在类型表达式 `T extends X ? A : B` 是**判断**：在类型层面做条件分派，配合 `infer` 可以从输入类型里提取片段（如 `ReturnType`）。读签名时要先看位置再判断含义。",
+      "follow_ups": [
+        "`infer` 能用在哪些位置？举一个从函数的参数类型提取的例子。",
+        "分布条件类型（naked type parameter）为什么对联合类型会展开？",
+        "`keyof` 与 `T[K]` 索引访问类型分别解决什么问题？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用"
+      ]
+    },
+    {
+      "question": "大型项目里如何组织 TS 类型？什么该放全局，什么该就近定义？",
+      "answer_md": "原则是「类型跟着使用者走，只在跨模块共享时才提升」：① 组件的 Props/State 就地定义在组件文件中，不放进全局 types 目录——否则会退化成一个什么都装的大杂烩；② 跨层契约（API DTO、领域实体）放 `types/` 或与 schema 同文件，且**由 schema 推导**而不是手写，保证单一来源；③ 第三方库缺失类型的补丁放 `types/*.d.ts` 并加注释说明来源；④ 禁止用全局 `declare global` 扩散，它会让依赖关系变成隐式的。",
+      "follow_ups": [
+        "monorepo 里多个 package 共享类型，用 project references 还是发布一个 types 包？",
+        "`paths` 别名与 `baseUrl` 对类型解析有什么影响？",
+        "为什么说「由 schema 推导类型」比「手写类型 + 手写校验」更可靠？"
+      ],
+      "difficulty": "mid",
+      "company_tags": [
+        "通用"
+      ]
+    }
+  ]
+}

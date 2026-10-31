@@ -1,0 +1,8 @@
+{
+  "title": "DDPM 反向单步：均值公式与「完美预测噪声」的回推",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "abar_t = 0.077797   x_t = 0.799325\n反向均值 mu_theta = 0.797059\n解析 x_(t-1)      = 0.800209\n|mu - x_(t-1)|    = 0.003150\nsigma_t^2 = 0.01005134（后验方差，另一选项是 betas[t]=0.010060）\n结论：残差 |mu-x_(t-1)| 只有 0.003（信号尺度 0.8 的 0.4%），且该残差来自后验方差\n      sigma_t^2≈0.010 的随机性（E[x_(t-1)|x_t]=mu，单次用同一 eps 比较会有 O(sigma) 差异）\n",
+  "code": "\nimport numpy as np\nT = 1000\nbetas = np.linspace(1e-4, 0.02, T)\nalphas = 1 - betas\nabar = np.cumprod(alphas)\n\nx0, eps, t = 0.8, 0.6, 500\nxt = np.sqrt(abar[t]) * x0 + np.sqrt(1 - abar[t]) * eps     # 前向\nprint(f\"abar_t = {abar[t]:.6f}   x_t = {xt:.6f}\")\n\n# 假设网络完美预测出 eps\neps_theta = eps\nmu = (xt - betas[t] / np.sqrt(1 - abar[t]) * eps_theta) / np.sqrt(alphas[t])\nx_prev = mu                                                  # 取 sigma=0 看均值项\nprint(f\"反向均值 mu_theta = {mu:.6f}\")\n\n# 解析的 x_{t-1} 真值（用同一个 eps 的前向）\nxt_prev_true = np.sqrt(abar[t-1]) * x0 + np.sqrt(1 - abar[t-1]) * eps\nprint(f\"解析 x_(t-1)      = {xt_prev_true:.6f}\")\nprint(f\"|mu - x_(t-1)|    = {abs(mu - xt_prev_true):.6f}\")\nprint(f\"sigma_t^2 = {betas[t] * (1 - abar[t-1]) / (1 - abar[t]):.8f}（后验方差，另一选项是 betas[t]={betas[t]:.6f}）\")\nprint(\"结论：残差 |mu-x_(t-1)| 只有 0.003（信号尺度 0.8 的 0.4%），且该残差来自后验方差\")\nprint(\"      sigma_t^2≈0.010 的随机性（E[x_(t-1)|x_t]=mu，单次用同一 eps 比较会有 O(sigma) 差异）\")\n"
+}

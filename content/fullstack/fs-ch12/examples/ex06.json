@@ -1,0 +1,8 @@
+{
+  "title": "BFF 聚合：并发拉取三个上游，一次返回",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "{\"profile\":{\"id\":\"u1\",\"tier\":\"gold\"},\"items\":[{\"sku\":\"A\",\"qty\":2}],\"suggest\":[\"B\",\"C\"]}",
+  "code": "// BFF：把多个后端响应聚合成一个前端友好的 payload，减少前端往返\nasync function bffCart(userId, fetchers) {\n  const [user, cart, recommendations] = await Promise.all([\n    fetchers.user(userId),\n    fetchers.cart(userId),\n    fetchers.reco(userId),\n  ]);\n  return { profile: user, items: cart, suggest: recommendations };\n}\n\nconst fakeFetchers = {\n  user: (id) => Promise.resolve({ id, tier: \"gold\" }),\n  cart: (id) => Promise.resolve([{ sku: \"A\", qty: 2 }]),\n  reco: (id) => Promise.resolve([\"B\", \"C\"]),\n};\n\nbffCart(\"u1\", fakeFetchers).then((r) =>\n  console.log(JSON.stringify(r))\n);\n"
+}

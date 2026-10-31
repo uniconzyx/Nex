@@ -13,9 +13,11 @@
       "source_ref": "GNU Make Manual §4.2 Types of Prerequisites / §9 How make Processes a Makefile",
       "difficulty": "easy",
       "title": "Make 判断「要不要重建」的唯一依据",
-      "content_md": "给出一条规则 `app: main.o util.o`。下列哪种情况 Make **不会**重新执行 recipe？\n\nA. `app` 文件不存在\nB. `main.o` 比 `app` 新\nC. `util.o` 的**内容**变了，但 mtime 没变\nD. `main.o` 的 mtime 比 `app` 早，但 `util.o` 比 `app` 新",
+      "content_md": "给出一条规则 `app: main.o util.o`。下列哪种情况 Make **不会**重新执行 recipe？",
       "answer": {
-        "correct": "C",
+        "correct": [
+          "C"
+        ],
         "explain": "Make **只比较 mtime**，从不读取内容。\n\n- A：目标不存在 → 必须重建。\n- B：存在比目标新的依赖 → 重建。\n- **C：内容变了但 mtime 没变 → Make 无从知晓，不会重建。** 这正是「内容哈希 vs 时间戳」这一设计分歧的根源——Bazel/Ninja 改用输入指纹正是为了消除这个盲区。\n- D：只要**任一**依赖比目标新就重建（不是全部依赖都更新才重建）。\n\n补充：mtime 相同（同一秒内修改）也视为「不新」，这是秒级精度带来的经典漏判。"
       },
       "explanation": "考察对「增量构建判据」这一根基性事实的掌握，是本节第一个必背点。",
@@ -23,6 +25,24 @@
         "Makefile",
         "增量构建",
         "mtime"
+      ],
+      "options": [
+        {
+          "key": "A",
+          "text": "`app` 文件不存在"
+        },
+        {
+          "key": "B",
+          "text": "`main.o` 比 `app` 新"
+        },
+        {
+          "key": "C",
+          "text": "`util.o` 的**内容**变了，但 mtime 没变"
+        },
+        {
+          "key": "D",
+          "text": "`main.o` 的 mtime 比 `app` 早，但 `util.o` 比 `app` 新"
+        }
       ]
     },
     {
@@ -74,9 +94,11 @@
       "source_ref": "GNU Make Manual §6.2 The Two Flavors of Variables",
       "difficulty": "medium",
       "title": "`=` 与 `:=` 的求值时机",
-      "content_md": "```makefile\nA = $(B)\nB = 1\n\nC := $(D)\nD = 2\n\nall:\n\\t@echo \"A=[$(A)] C=[$(C)]\"\n```\n\n`make` 的输出是？\n\nA. `A=[1] C=[2]`\nB. `A=[1] C=[]`\nC. `A=[] C=[2]`\nD. `A=[] C=[]`",
+      "content_md": "```makefile\nA = $(B)\nB = 1\n\nC := $(D)\nD = 2\n\nall:\n\\t@echo \"A=[$(A)] C=[$(C)]\"\n```\n\n`make` 的输出是？",
       "answer": {
-        "correct": "B",
+        "correct": [
+          "B"
+        ],
         "explain": "- `A = $(B)` 是**递归展开**：定义时不求值，**每次使用**才展开。`echo` 时 `B` 已是 `1` → `A=[1]`。\n- `C := $(D)` 是**立即展开**：定义那一刻就求值，此时 `D` 还没被赋值 → `C=[]`（空）。后面 `D = 2` 对 `C` 再无影响。\n\n**为什么推荐 `:=`？** 两个理由：\n1. **性能**：`=` 每次引用都重新展开。若右侧含 `$(shell ...)`，那个命令会被反复执行——`STAMP = $(shell date +%s)` 会得到一个「每次都不一样」的值，让构建不可复现。\n2. **可预测**：`=` 的最终值取决于「最后一次展开时」其他变量的状态，在大型工程里极易产生顺序敏感 bug。"
       },
       "explanation": "递归展开 vs 立即展开是 Makefile 里最反直觉的一处语义，也是 `$(shell)` 重复执行这类疑难问题的根因。",
@@ -84,6 +106,24 @@
         "Makefile",
         "变量展开",
         "递归展开"
+      ],
+      "options": [
+        {
+          "key": "A",
+          "text": "`A=[1] C=[2]`"
+        },
+        {
+          "key": "B",
+          "text": "`A=[1] C=[]`"
+        },
+        {
+          "key": "C",
+          "text": "`A=[] C=[2]`"
+        },
+        {
+          "key": "D",
+          "text": "`A=[] C=[]`"
+        }
       ]
     },
     {

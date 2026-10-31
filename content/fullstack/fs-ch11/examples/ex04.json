@@ -1,0 +1,8 @@
+{
+  "title": "业务异常 vs 系统异常：系统异常绝不返回堆栈",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "{\"code\":2001,\"message\":\"余额不足\"}\n{\"code\":500,\"message\":\"系统繁忙，请稍后再试\",\"stack\":\"（已隐藏）\"}",
+  "code": "class BizException extends Error {\n  constructor(code, message){ super(message); this.code = code; this.biz = true; }\n}\n\nfunction safeHandle(err) {\n  if (err.biz) return { code: err.code, message: err.message, stack: undefined };\n  return { code: 500, message: \"系统繁忙，请稍后再试\", stack: \"（已隐藏）\" };\n}\nconst biz = new BizException(2001, \"余额不足\");\nconst sys = new Error(\"TypeError: cannot read property\");\nconsole.log(JSON.stringify(safeHandle(biz)));\nconsole.log(JSON.stringify(safeHandle(sys)));\n"
+}

@@ -1,0 +1,8 @@
+{
+  "title": "groupBy：Partial<Record> 语义（键可能不存在）",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "{\"eng\":[{\"name\":\"a\",\"dept\":\"eng\"},{\"name\":\"c\",\"dept\":\"eng\"}],\"design\":[{\"name\":\"b\",\"dept\":\"design\"}]}\ntrue\ntrue",
+  "code": "function groupBy(items, keyOf) {\n  const out = {};\n  for (const it of items) {\n    const k = keyOf(it);\n    (out[k] ??= []).push(it);\n  }\n  return out;\n}\n\nconst people = [\n  { name: \"a\", dept: \"eng\" },\n  { name: \"b\", dept: \"design\" },\n  { name: \"c\", dept: \"eng\" },\n];\nconst g = groupBy(people, (p) => p.dept);\nconsole.log(JSON.stringify(g));\nconsole.log(g.sales === undefined); // 不存在的键是 undefined，不是 []\nconsole.log(groupBy([], (x) => x).constructor === Object);\n"
+}

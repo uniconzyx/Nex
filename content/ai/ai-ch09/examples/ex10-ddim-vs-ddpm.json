@@ -1,0 +1,8 @@
+{
+  "title": "DDIM 确定性跳步 vs DDPM 随机单步",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "x_t=0.605070  预测 x0_hat=0.800000（真值 0.8）\nDDIM 跳到 t=900: 0.613070\n解析真值            : 0.613070   误差 1.11e-16\nDDPM 单步 t->998 均值: 0.599091（走完 1000 步要 1000 次前向，DDIM 跳 99 步只要 1 次）\n结论：DDIM 用确定性映射 + 跳步，把 1000 次前向压到几十次；同权重、同 eps 下结果与解析真值一致\n",
+  "code": "\nimport numpy as np\nT = 1000\nbetas = np.linspace(1e-4, 0.02, T)\nalphas = 1 - betas\nabar = np.cumprod(alphas)\n\nx0, eps = 0.8, 0.6\nt, t_prev = 999, 900          # DDIM 直接跳 99 步\n\nxt = np.sqrt(abar[t]) * x0 + np.sqrt(1 - abar[t]) * eps\neps_theta = eps\nx0_hat = (xt - np.sqrt(1 - abar[t]) * eps_theta) / np.sqrt(abar[t])\nprint(f\"x_t={xt:.6f}  预测 x0_hat={x0_hat:.6f}（真值 {x0}）\")\n\n# DDIM 一步跳到 t_prev（确定性）\nx_ddim = np.sqrt(abar[t_prev]) * x0_hat + np.sqrt(1 - abar[t_prev]) * eps_theta\nprint(f\"DDIM 跳到 t={t_prev}: {x_ddim:.6f}\")\n\n# 解析真值（同一 eps 的前向）\nx_true = np.sqrt(abar[t_prev]) * x0 + np.sqrt(1 - abar[t_prev]) * eps\nprint(f\"解析真值            : {x_true:.6f}   误差 {abs(x_ddim-x_true):.2e}\")\n\n# DDPM 只能走 1 步到 t-1，且要加随机噪声\nmu = (xt - betas[t] / np.sqrt(1 - abar[t]) * eps_theta) / np.sqrt(alphas[t])\nprint(f\"DDPM 单步 t->{t-1} 均值: {mu:.6f}（走完 1000 步要 1000 次前向，DDIM 跳 99 步只要 1 次）\")\nprint(\"结论：DDIM 用确定性映射 + 跳步，把 1000 次前向压到几十次；同权重、同 eps 下结果与解析真值一致\")\n"
+}

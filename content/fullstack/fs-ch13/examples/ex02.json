@@ -1,0 +1,8 @@
+{
+  "title": "测试替身：Stub 返回预设值",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "{\"id\":1,\"name\":\"MIMI\"}\nnull",
+  "code": "// 测试替身：stub——替掉依赖，返回预设值，隔离被测单元\nfunction getUser(id, db) {\n  const row = db.query(\"SELECT * FROM users WHERE id=?\", [id]);\n  return row ? { id, name: row.name.toUpperCase() } : null;\n}\n\nconst stubDb = {\n  query(_sql, [id]) {\n    return id === 1 ? { name: \"mimi\" } : null;\n  },\n};\n\nconsole.log(JSON.stringify(getUser(1, stubDb)));\nconsole.log(JSON.stringify(getUser(2, stubDb)));\n"
+}

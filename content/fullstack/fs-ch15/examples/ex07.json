@@ -1,0 +1,8 @@
+{
+  "title": "Gin 风格中间件洋葱链（Next 前后分别为进/出）",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "m1 before -> m2 before -> handler -> m2 after -> m1 after",
+  "code": "function runMiddleware(handlers, ctx) {\n  let i = 0;\n  function next() {\n    if (ctx.isAborted()) return;\n    if (i >= handlers.length) return;\n    const h = handlers[i++]; h(ctx, next);\n  }\n  next();\n}\nfunction makeCtx() {\n  const logs = []; let aborted = false;\n  return { logs, abort() { aborted = true; }, isAborted() { return aborted; } };\n}\nconst ctx = makeCtx();\nrunMiddleware([\n  (c, n) => { c.logs.push(\"m1 before\"); n(); c.logs.push(\"m1 after\"); },\n  (c, n) => { c.logs.push(\"m2 before\"); n(); c.logs.push(\"m2 after\"); },\n  (c, n) => { c.logs.push(\"handler\"); n(); },\n], ctx);\nconsole.log(ctx.logs.join(\" -> \"));\n"
+}

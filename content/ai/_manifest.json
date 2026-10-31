@@ -2,7 +2,7 @@
   "schema_version": 1,
   "subject": "ai",
   "title": "CppMind · AI / Agent 开发课程体系",
-  "note": "阶段7 技术栈扩展大纲（AI 方向）。覆盖深度学习基础 → 大模型原理 → 对齐与微调 → 提示/上下文工程 → RAG → Agent 开发 → 应用工程化，形成「能训练、能调优、能落地 Agent」的完整链路。每章须齐备 7 类内容（见 _template 规范）。resources 仅存元数据与链接，不存第三方题面/正文，符合合规红线。",
+  "note": "阶段7 技术栈扩展大纲（AI 方向）。覆盖深度学习基础（含生成模型 ai-ch09）→ 大模型原理与训练工程（含 ai-ch10） → 对齐与微调 → 提示/上下文工程 → RAG → Agent 开发 → 应用工程化，形成「能训练、能调优、能落地 Agent」的完整链路。每章须齐备 7 类内容（见 _template 规范）。resources 仅存元数据与链接，不存第三方题面/正文，符合合规红线。",
   "groups": {
     "A1": "深度学习基础",
     "A2": "大模型原理与训练",
@@ -25,17 +25,15 @@
           "Significant-Gravitas/AutoGPT",
           "huggingface/transformers",
           "langgenius/dify",
-          "langchain-ai/langchain",
-          "microsoft/ML-For-Beginners"
+          "langchain-ai/langchain"
         ],
         "github_stars": [
-          200724,
-          189309,
-          187681,
-          167014,
-          157994,
-          147524,
-          91310
+          201297,
+          195953,
+          187785,
+          168241,
+          159119,
+          148187
         ],
         "github_notes": [
           "深度学习框架官方仓库，工业级模型工程范例",
@@ -43,13 +41,43 @@
           "自主 Agent 的开创性项目，Agent 架构与工具循环的经典参考",
           "Transformer 模型定义框架：从 BERT/GPT 到多模态的全量实现",
           "Agentic 工作流与 RAG 流水线平台：生产级 LLM 应用工程范例",
-          "Agent 工程平台：工具、记忆、检索与编排的工业实现",
-          "微软官方机器学习 12 周课程"
+          "Agent 工程平台：工具、记忆、检索与编排的工业实现"
         ],
-        "github_fetched_at": "2026-09-21",
-        "books": [],
+        "github_fetched_at": "2026-10-27",
+        "books": [
+          "《深度学习》Goodfellow 等（花书）",
+          "《动手学深度学习》李沐 等",
+          "《Deep Learning with PyTorch》Stevens 等"
+        ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1FT4y1E74V/",
+        "bilibili_list": [
+          {
+            "name": "吴恩达 · 深度学习专项（双语字幕）",
+            "url": "https://www.bilibili.com/video/BV1FT4y1E74V/",
+            "note": "主干：神经网络基础 → 优化与正则 → CNN → 序列模型，每节都配可复现的作业",
+            "bv": "BV1FT4y1E74V"
+          },
+          {
+            "name": "李沐 · Transformer 论文逐段精读",
+            "url": "https://www.bilibili.com/video/BV1pu411o7BE/",
+            "note": "逐段读原论文：多头注意力的形状变化、位置编码、残差与 LayerNorm 的位置，读完能自己写一遍",
+            "bv": "BV1pu411o7BE"
+          },
+          {
+            "name": "李宏毅 · 机器学习/深度学习 2021",
+            "url": "https://www.bilibili.com/video/BV1JA411c7VT/",
+            "note": "讲「为什么」最透的一套：自注意力、Transformer、GAN、自监督与元学习都有完整推导",
+            "bv": "BV1JA411c7VT"
+          },
+          {
+            "name": "ViT / SAM / CLIP 多模态大模型详解",
+            "url": "https://www.bilibili.com/video/BV1AT411y7Zg/",
+            "note": "把 ViT 的 patch 化、CLIP 的对比学习、SAM 的提示式分割串起来，补「视觉侧」的边界",
+            "bv": "BV1AT411y7Zg"
+          }
+        ]
       }
     },
     {
@@ -69,17 +97,15 @@
           "Significant-Gravitas/AutoGPT",
           "huggingface/transformers",
           "langgenius/dify",
-          "langchain-ai/langchain",
-          "microsoft/ML-For-Beginners"
+          "langchain-ai/langchain"
         ],
         "github_stars": [
-          200724,
-          189309,
-          187681,
-          167014,
-          157994,
-          147524,
-          91310
+          201297,
+          195953,
+          187785,
+          168241,
+          159119,
+          148187
         ],
         "github_notes": [
           "深度学习框架官方仓库，工业级模型工程范例",
@@ -87,13 +113,43 @@
           "自主 Agent 的开创性项目，Agent 架构与工具循环的经典参考",
           "Transformer 模型定义框架：从 BERT/GPT 到多模态的全量实现",
           "Agentic 工作流与 RAG 流水线平台：生产级 LLM 应用工程范例",
-          "Agent 工程平台：工具、记忆、检索与编排的工业实现",
-          "微软官方机器学习 12 周课程"
+          "Agent 工程平台：工具、记忆、检索与编排的工业实现"
         ],
-        "github_fetched_at": "2026-09-21",
-        "books": [],
+        "github_fetched_at": "2026-10-27",
+        "books": [
+          "《深度学习》Goodfellow 等（花书）",
+          "《动手学深度学习》李沐 等",
+          "《Deep Learning with PyTorch》Stevens 等"
+        ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1FT4y1E74V/",
+        "bilibili_list": [
+          {
+            "name": "吴恩达 · 深度学习专项（双语字幕）",
+            "url": "https://www.bilibili.com/video/BV1FT4y1E74V/",
+            "note": "主干：神经网络基础 → 优化与正则 → CNN → 序列模型，每节都配可复现的作业",
+            "bv": "BV1FT4y1E74V"
+          },
+          {
+            "name": "李沐 · Transformer 论文逐段精读",
+            "url": "https://www.bilibili.com/video/BV1pu411o7BE/",
+            "note": "逐段读原论文：多头注意力的形状变化、位置编码、残差与 LayerNorm 的位置，读完能自己写一遍",
+            "bv": "BV1pu411o7BE"
+          },
+          {
+            "name": "李宏毅 · 机器学习/深度学习 2021",
+            "url": "https://www.bilibili.com/video/BV1JA411c7VT/",
+            "note": "讲「为什么」最透的一套：自注意力、Transformer、GAN、自监督与元学习都有完整推导",
+            "bv": "BV1JA411c7VT"
+          },
+          {
+            "name": "ViT / SAM / CLIP 多模态大模型详解",
+            "url": "https://www.bilibili.com/video/BV1AT411y7Zg/",
+            "note": "把 ViT 的 patch 化、CLIP 的对比学习、SAM 的提示式分割串起来，补「视觉侧」的边界",
+            "bv": "BV1AT411y7Zg"
+          }
+        ]
       }
     },
     {
@@ -113,17 +169,15 @@
           "Significant-Gravitas/AutoGPT",
           "huggingface/transformers",
           "langgenius/dify",
-          "langchain-ai/langchain",
-          "microsoft/ML-For-Beginners"
+          "langchain-ai/langchain"
         ],
         "github_stars": [
-          200724,
-          189309,
-          187681,
-          167014,
-          157994,
-          147524,
-          91310
+          201297,
+          195953,
+          187785,
+          168241,
+          159119,
+          148187
         ],
         "github_notes": [
           "深度学习框架官方仓库，工业级模型工程范例",
@@ -131,13 +185,43 @@
           "自主 Agent 的开创性项目，Agent 架构与工具循环的经典参考",
           "Transformer 模型定义框架：从 BERT/GPT 到多模态的全量实现",
           "Agentic 工作流与 RAG 流水线平台：生产级 LLM 应用工程范例",
-          "Agent 工程平台：工具、记忆、检索与编排的工业实现",
-          "微软官方机器学习 12 周课程"
+          "Agent 工程平台：工具、记忆、检索与编排的工业实现"
         ],
-        "github_fetched_at": "2026-09-21",
-        "books": [],
+        "github_fetched_at": "2026-10-27",
+        "books": [
+          "《深度学习》Goodfellow 等（花书）",
+          "《动手学深度学习》李沐 等",
+          "《Deep Learning with PyTorch》Stevens 等"
+        ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1FT4y1E74V/",
+        "bilibili_list": [
+          {
+            "name": "吴恩达 · 深度学习专项（双语字幕）",
+            "url": "https://www.bilibili.com/video/BV1FT4y1E74V/",
+            "note": "主干：神经网络基础 → 优化与正则 → CNN → 序列模型，每节都配可复现的作业",
+            "bv": "BV1FT4y1E74V"
+          },
+          {
+            "name": "李沐 · Transformer 论文逐段精读",
+            "url": "https://www.bilibili.com/video/BV1pu411o7BE/",
+            "note": "逐段读原论文：多头注意力的形状变化、位置编码、残差与 LayerNorm 的位置，读完能自己写一遍",
+            "bv": "BV1pu411o7BE"
+          },
+          {
+            "name": "李宏毅 · 机器学习/深度学习 2021",
+            "url": "https://www.bilibili.com/video/BV1JA411c7VT/",
+            "note": "讲「为什么」最透的一套：自注意力、Transformer、GAN、自监督与元学习都有完整推导",
+            "bv": "BV1JA411c7VT"
+          },
+          {
+            "name": "扩散模型的原理是什么",
+            "url": "https://www.bilibili.com/video/BV1fS7nznEUf/",
+            "note": "36 分钟讲清加噪/去噪与「为什么可以从纯噪声生成」；先建立直觉，再回来看 ELBO 推导",
+            "bv": "BV1fS7nznEUf"
+          }
+        ]
       }
     },
     {
@@ -157,17 +241,15 @@
           "Significant-Gravitas/AutoGPT",
           "huggingface/transformers",
           "langgenius/dify",
-          "langchain-ai/langchain",
-          "microsoft/ML-For-Beginners"
+          "langchain-ai/langchain"
         ],
         "github_stars": [
-          200724,
-          189309,
-          187681,
-          167014,
-          157994,
-          147524,
-          91310
+          201297,
+          195953,
+          187785,
+          168241,
+          159119,
+          148187
         ],
         "github_notes": [
           "深度学习框架官方仓库，工业级模型工程范例",
@@ -175,13 +257,43 @@
           "自主 Agent 的开创性项目，Agent 架构与工具循环的经典参考",
           "Transformer 模型定义框架：从 BERT/GPT 到多模态的全量实现",
           "Agentic 工作流与 RAG 流水线平台：生产级 LLM 应用工程范例",
-          "Agent 工程平台：工具、记忆、检索与编排的工业实现",
-          "微软官方机器学习 12 周课程"
+          "Agent 工程平台：工具、记忆、检索与编排的工业实现"
         ],
-        "github_fetched_at": "2026-09-21",
-        "books": [],
+        "github_fetched_at": "2026-10-27",
+        "books": [
+          "《深度学习》Goodfellow 等（花书）",
+          "《动手学深度学习》李沐 等",
+          "《Deep Learning with PyTorch》Stevens 等"
+        ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1FT4y1E74V/",
+        "bilibili_list": [
+          {
+            "name": "吴恩达 · 深度学习专项（双语字幕）",
+            "url": "https://www.bilibili.com/video/BV1FT4y1E74V/",
+            "note": "主干：神经网络基础 → 优化与正则 → CNN → 序列模型，每节都配可复现的作业",
+            "bv": "BV1FT4y1E74V"
+          },
+          {
+            "name": "李宏毅 · 机器学习/深度学习 2021",
+            "url": "https://www.bilibili.com/video/BV1JA411c7VT/",
+            "note": "讲「为什么」最透的一套：自注意力、Transformer、GAN、自监督与元学习都有完整推导",
+            "bv": "BV1JA411c7VT"
+          },
+          {
+            "name": "李沐 · Transformer 论文逐段精读",
+            "url": "https://www.bilibili.com/video/BV1pu411o7BE/",
+            "note": "逐段读原论文：多头注意力的形状变化、位置编码、残差与 LayerNorm 的位置，读完能自己写一遍",
+            "bv": "BV1pu411o7BE"
+          },
+          {
+            "name": "扩散模型的原理是什么",
+            "url": "https://www.bilibili.com/video/BV1fS7nznEUf/",
+            "note": "36 分钟讲清加噪/去噪与「为什么可以从纯噪声生成」；先建立直觉，再回来看 ELBO 推导",
+            "bv": "BV1fS7nznEUf"
+          }
+        ]
       }
     },
     {
@@ -201,17 +313,15 @@
           "Significant-Gravitas/AutoGPT",
           "huggingface/transformers",
           "langgenius/dify",
-          "langchain-ai/langchain",
-          "microsoft/ML-For-Beginners"
+          "langchain-ai/langchain"
         ],
         "github_stars": [
-          200724,
-          189309,
-          187681,
-          167014,
-          157994,
-          147524,
-          91310
+          201297,
+          195953,
+          187785,
+          168241,
+          159119,
+          148187
         ],
         "github_notes": [
           "深度学习框架官方仓库，工业级模型工程范例",
@@ -219,13 +329,43 @@
           "自主 Agent 的开创性项目，Agent 架构与工具循环的经典参考",
           "Transformer 模型定义框架：从 BERT/GPT 到多模态的全量实现",
           "Agentic 工作流与 RAG 流水线平台：生产级 LLM 应用工程范例",
-          "Agent 工程平台：工具、记忆、检索与编排的工业实现",
-          "微软官方机器学习 12 周课程"
+          "Agent 工程平台：工具、记忆、检索与编排的工业实现"
         ],
-        "github_fetched_at": "2026-09-21",
-        "books": [],
+        "github_fetched_at": "2026-10-27",
+        "books": [
+          "《深度学习》Goodfellow 等（花书）",
+          "《动手学深度学习》李沐 等",
+          "《Deep Learning with PyTorch》Stevens 等"
+        ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1FT4y1E74V/",
+        "bilibili_list": [
+          {
+            "name": "吴恩达 · 深度学习专项（双语字幕）",
+            "url": "https://www.bilibili.com/video/BV1FT4y1E74V/",
+            "note": "主干：神经网络基础 → 优化与正则 → CNN → 序列模型，每节都配可复现的作业",
+            "bv": "BV1FT4y1E74V"
+          },
+          {
+            "name": "李沐 · Transformer 论文逐段精读",
+            "url": "https://www.bilibili.com/video/BV1pu411o7BE/",
+            "note": "逐段读原论文：多头注意力的形状变化、位置编码、残差与 LayerNorm 的位置，读完能自己写一遍",
+            "bv": "BV1pu411o7BE"
+          },
+          {
+            "name": "扩散模型的原理是什么",
+            "url": "https://www.bilibili.com/video/BV1fS7nznEUf/",
+            "note": "36 分钟讲清加噪/去噪与「为什么可以从纯噪声生成」；先建立直觉，再回来看 ELBO 推导",
+            "bv": "BV1fS7nznEUf"
+          },
+          {
+            "name": "李宏毅 · 机器学习/深度学习 2021",
+            "url": "https://www.bilibili.com/video/BV1JA411c7VT/",
+            "note": "讲「为什么」最透的一套：自注意力、Transformer、GAN、自监督与元学习都有完整推导",
+            "bv": "BV1JA411c7VT"
+          }
+        ]
       }
     },
     {
@@ -245,17 +385,15 @@
           "Significant-Gravitas/AutoGPT",
           "huggingface/transformers",
           "langgenius/dify",
-          "langchain-ai/langchain",
-          "microsoft/ML-For-Beginners"
+          "langchain-ai/langchain"
         ],
         "github_stars": [
-          200724,
-          189309,
-          187681,
-          167014,
-          157994,
-          147524,
-          91310
+          201297,
+          195953,
+          187785,
+          168241,
+          159119,
+          148187
         ],
         "github_notes": [
           "深度学习框架官方仓库，工业级模型工程范例",
@@ -263,13 +401,43 @@
           "自主 Agent 的开创性项目，Agent 架构与工具循环的经典参考",
           "Transformer 模型定义框架：从 BERT/GPT 到多模态的全量实现",
           "Agentic 工作流与 RAG 流水线平台：生产级 LLM 应用工程范例",
-          "Agent 工程平台：工具、记忆、检索与编排的工业实现",
-          "微软官方机器学习 12 周课程"
+          "Agent 工程平台：工具、记忆、检索与编排的工业实现"
         ],
-        "github_fetched_at": "2026-09-21",
-        "books": [],
+        "github_fetched_at": "2026-10-27",
+        "books": [
+          "《深度学习》Goodfellow 等（花书）",
+          "《动手学深度学习》李沐 等",
+          "《Deep Learning with PyTorch》Stevens 等"
+        ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1FT4y1E74V/",
+        "bilibili_list": [
+          {
+            "name": "吴恩达 · 深度学习专项（双语字幕）",
+            "url": "https://www.bilibili.com/video/BV1FT4y1E74V/",
+            "note": "主干：神经网络基础 → 优化与正则 → CNN → 序列模型，每节都配可复现的作业",
+            "bv": "BV1FT4y1E74V"
+          },
+          {
+            "name": "李宏毅 · 机器学习/深度学习 2021",
+            "url": "https://www.bilibili.com/video/BV1JA411c7VT/",
+            "note": "讲「为什么」最透的一套：自注意力、Transformer、GAN、自监督与元学习都有完整推导",
+            "bv": "BV1JA411c7VT"
+          },
+          {
+            "name": "李沐 · Transformer 论文逐段精读",
+            "url": "https://www.bilibili.com/video/BV1pu411o7BE/",
+            "note": "逐段读原论文：多头注意力的形状变化、位置编码、残差与 LayerNorm 的位置，读完能自己写一遍",
+            "bv": "BV1pu411o7BE"
+          },
+          {
+            "name": "扩散模型的原理是什么",
+            "url": "https://www.bilibili.com/video/BV1fS7nznEUf/",
+            "note": "36 分钟讲清加噪/去噪与「为什么可以从纯噪声生成」；先建立直觉，再回来看 ELBO 推导",
+            "bv": "BV1fS7nznEUf"
+          }
+        ]
       }
     },
     {
@@ -289,17 +457,15 @@
           "Significant-Gravitas/AutoGPT",
           "huggingface/transformers",
           "langgenius/dify",
-          "langchain-ai/langchain",
-          "microsoft/ML-For-Beginners"
+          "langchain-ai/langchain"
         ],
         "github_stars": [
-          200724,
-          189309,
-          187681,
-          167014,
-          157994,
-          147524,
-          91310
+          201297,
+          195953,
+          187785,
+          168241,
+          159119,
+          148187
         ],
         "github_notes": [
           "深度学习框架官方仓库，工业级模型工程范例",
@@ -307,13 +473,43 @@
           "自主 Agent 的开创性项目，Agent 架构与工具循环的经典参考",
           "Transformer 模型定义框架：从 BERT/GPT 到多模态的全量实现",
           "Agentic 工作流与 RAG 流水线平台：生产级 LLM 应用工程范例",
-          "Agent 工程平台：工具、记忆、检索与编排的工业实现",
-          "微软官方机器学习 12 周课程"
+          "Agent 工程平台：工具、记忆、检索与编排的工业实现"
         ],
-        "github_fetched_at": "2026-09-21",
-        "books": [],
+        "github_fetched_at": "2026-10-27",
+        "books": [
+          "《深度学习》Goodfellow 等（花书）",
+          "《动手学深度学习》李沐 等",
+          "《Deep Learning with PyTorch》Stevens 等"
+        ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1FT4y1E74V/",
+        "bilibili_list": [
+          {
+            "name": "吴恩达 · 深度学习专项（双语字幕）",
+            "url": "https://www.bilibili.com/video/BV1FT4y1E74V/",
+            "note": "主干：神经网络基础 → 优化与正则 → CNN → 序列模型，每节都配可复现的作业",
+            "bv": "BV1FT4y1E74V"
+          },
+          {
+            "name": "ViT / SAM / CLIP 多模态大模型详解",
+            "url": "https://www.bilibili.com/video/BV1AT411y7Zg/",
+            "note": "把 ViT 的 patch 化、CLIP 的对比学习、SAM 的提示式分割串起来，补「视觉侧」的边界",
+            "bv": "BV1AT411y7Zg"
+          },
+          {
+            "name": "李宏毅 · 机器学习/深度学习 2021",
+            "url": "https://www.bilibili.com/video/BV1JA411c7VT/",
+            "note": "讲「为什么」最透的一套：自注意力、Transformer、GAN、自监督与元学习都有完整推导",
+            "bv": "BV1JA411c7VT"
+          },
+          {
+            "name": "李沐 · Transformer 论文逐段精读",
+            "url": "https://www.bilibili.com/video/BV1pu411o7BE/",
+            "note": "逐段读原论文：多头注意力的形状变化、位置编码、残差与 LayerNorm 的位置，读完能自己写一遍",
+            "bv": "BV1pu411o7BE"
+          }
+        ]
       }
     },
     {
@@ -333,17 +529,15 @@
           "Significant-Gravitas/AutoGPT",
           "huggingface/transformers",
           "langgenius/dify",
-          "langchain-ai/langchain",
-          "microsoft/ML-For-Beginners"
+          "langchain-ai/langchain"
         ],
         "github_stars": [
-          200724,
-          189309,
-          187681,
-          167014,
-          157994,
-          147524,
-          91310
+          201297,
+          195953,
+          187785,
+          168241,
+          159119,
+          148187
         ],
         "github_notes": [
           "深度学习框架官方仓库，工业级模型工程范例",
@@ -351,13 +545,386 @@
           "自主 Agent 的开创性项目，Agent 架构与工具循环的经典参考",
           "Transformer 模型定义框架：从 BERT/GPT 到多模态的全量实现",
           "Agentic 工作流与 RAG 流水线平台：生产级 LLM 应用工程范例",
-          "Agent 工程平台：工具、记忆、检索与编排的工业实现",
-          "微软官方机器学习 12 周课程"
+          "Agent 工程平台：工具、记忆、检索与编排的工业实现"
         ],
-        "github_fetched_at": "2026-09-21",
-        "books": [],
+        "github_fetched_at": "2026-10-27",
+        "books": [
+          "《深度学习》Goodfellow 等（花书）",
+          "《动手学深度学习》李沐 等",
+          "《Deep Learning with PyTorch》Stevens 等"
+        ],
         "leetcode": [],
-        "nowcoder": []
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1FT4y1E74V/",
+        "bilibili_list": [
+          {
+            "name": "吴恩达 · 深度学习专项（双语字幕）",
+            "url": "https://www.bilibili.com/video/BV1FT4y1E74V/",
+            "note": "主干：神经网络基础 → 优化与正则 → CNN → 序列模型，每节都配可复现的作业",
+            "bv": "BV1FT4y1E74V"
+          },
+          {
+            "name": "扩散模型的原理是什么",
+            "url": "https://www.bilibili.com/video/BV1fS7nznEUf/",
+            "note": "36 分钟讲清加噪/去噪与「为什么可以从纯噪声生成」；先建立直觉，再回来看 ELBO 推导",
+            "bv": "BV1fS7nznEUf"
+          },
+          {
+            "name": "李宏毅 · 机器学习/深度学习 2021",
+            "url": "https://www.bilibili.com/video/BV1JA411c7VT/",
+            "note": "讲「为什么」最透的一套：自注意力、Transformer、GAN、自监督与元学习都有完整推导",
+            "bv": "BV1JA411c7VT"
+          },
+          {
+            "name": "李沐 · Transformer 论文逐段精读",
+            "url": "https://www.bilibili.com/video/BV1pu411o7BE/",
+            "note": "逐段读原论文：多头注意力的形状变化、位置编码、残差与 LayerNorm 的位置，读完能自己写一遍",
+            "bv": "BV1pu411o7BE"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ai-ch11",
+      "order": 9,
+      "group": "A4",
+      "title": "模型服务化落地：从 train() 跑到线上不崩",
+      "summary": "训练跑通到服务上线之间缺的七件事：权重序列化与版本、输入契约、批处理、超时、降级、容量、可观测。动态 batching 的延迟-吞吐对冲（固定开销摊销、max_batch 与 max_wait 的乘性关系、等待窗口由 SLO 倒推）；输入契约五类校验（形状/数值/长度/编码/白名单）与 NaN 的三条反直觉性质；故障三形态（慢/错/挂）与超时退避抖动、降级策略矩阵、模型版本四段式命名与同名覆盖检测、金丝雀发布与「代码-模型一起回滚」、三层健康检查（alive/ready/warm）与冷启动预热。与 ai-ch08 的分工：ch08 讲「为什么快」，本章讲「怎么摆上去且半夜不崩」。",
+      "prerequisites": [
+        "ai-ch08",
+        "fs-ch04"
+      ],
+      "status": "complete",
+      "books": [],
+      "resources": {
+        "github": [
+          "vllm-project/vllm",
+          "ggml-org/llama.cpp",
+          "mlc-ai/mlc-llm",
+          "huggingface/text-generation-inference",
+          "triton-inference-server/server",
+          "bentoml/BentoML"
+        ],
+        "github_stars": [
+          95727,
+          132583,
+          23284,
+          10880,
+          11115,
+          8923
+        ],
+        "github_notes": [
+          "PagedAttention + 连续批的工业实现：看它如何把「请求级批」拆成「token 级批」，对应本章「批内请求同构」的第三条出路",
+          "纯 C/C++ 推理：读 `examples/server` 的队列与超时实现，看最小可用的 batching 长什么样",
+          "把模型编译成可部署产物：冷启动与产物体积的关系在这里最直观",
+          "生产级推理服务的网关层：请求排队、动态批、token 流式返回的完整实现",
+          "多框架统一服务：模型仓库、版本目录结构、并发实例配置，是「模型版本化」的现成范式",
+          "把模型打成可部署 API：`service.py` 的并发与超时配置，适合做本章项目骨架的参考"
+        ],
+        "github_fetched_at": "2026-10-28",
+        "books": [
+          "《Designing Machine Learning Systems》Chip Huyen（第 7-8 章：模型部署与服务）",
+          "《Site Reliability Engineering》Google（第 21 章：过载处理，退避与降级的经典论述）",
+          "《Release It!》Michael Nygard（熔断、超时、快速失败的设计模式）"
+        ],
+        "leetcode": [],
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV14YopBEEGs/",
+        "bilibili_list": [
+          {
+            "name": "vLLM 推理优化从入门到精通（KV Cache 与连续批）",
+            "url": "https://www.bilibili.com/video/BV14YopBEEGs/",
+            "note": "长视频，按需跳看：先看「调度与 batching」一节，回到本章验证 max_wait 的作用；再看 KV Cache 分页，衔接 ai-ch13",
+            "bv": "BV14YopBEEGs"
+          },
+          {
+            "name": "10 分钟用 vLLM 部署大模型（喂饭教程）",
+            "url": "https://www.bilibili.com/video/BV17gXaBnE6A/",
+            "note": "最短的上手路径：起服务、发请求、看日志。用它对本章「七件事」逐条检查它没做什么",
+            "bv": "BV17gXaBnE6A"
+          },
+          {
+            "name": "大模型推理优化原理（6 分钟速览）",
+            "url": "https://www.bilibili.com/video/BV1Guth61EJz/",
+            "note": "先把 prefill/decode 两阶段的直觉建立起来，再读本章 batching 部分会顺很多",
+            "bv": "BV1Guth61EJz"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ai-ch12",
+      "order": 10,
+      "group": "A4",
+      "title": "SFT 数据工程：任务 schema、合成数据过滤、去重与污染、难例挖掘、标注一致性 Kappa",
+      "summary": "监督微调（SFT）的效果上限由数据决定，模型只是把数据里的模式「背」出来。本章讲清：如何把一句模糊的业务需求落成可训练的「任务 schema」——system/user 模板、多轮对话格式、质量标注规范；如何对海量（尤其是合成）数据做规则过滤、语义去重与训练集污染检测，并严格隔离留验集；以及如何在数据质检里用 hard negative 难例挖掘和 Cohen's Kappa 量化标注一致性，用数据迭代把噪声与分歧压下去。",
+      "prerequisites": [
+        "ai-ch08",
+        "ai-ch11"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "huggingface/transformers",
+          "huggingface/datasets",
+          "vllm-project/vllm",
+          "facebookresearch/llama"
+        ],
+        "github_stars": [
+          168266,
+          22091,
+          95746,
+          59628
+        ],
+        "github_notes": [
+          "按本章小节定位相关目录",
+          "按本章小节定位相关目录",
+          "按本章小节定位相关目录",
+          "按本章小节定位相关目录"
+        ],
+        "github_fetched_at": "2026-10-27",
+        "books": [
+          "《Training Language Models to Follow Instructions with Human Feedback》(InstructGPT, NeurIPS 2022) —— 对应 §1.1 schema、§1.8 标注",
+          "《Self-Instruct》(ACL 2023) —— 对应 §1.8 合成数据生成",
+          "《LIMA: Less Is More for Alignment》(NeurIPS 2023) —— 对应 §1.1 格式约束、§2.1 规则过滤"
+        ],
+        "leetcode": [],
+        "nowcoder": [],
+        "bilibili": "",
+        "bilibili_list": []
+      }
+    },
+    {
+      "id": "ai-ch13",
+      "order": 11,
+      "group": "A4",
+      "title": "推理引擎与量化部署：KV Cache 分页、continuous batching、GPTQ/AWQ/GGUF",
+      "summary": "训练完模型只是上半场，把它低成本、低延迟地跑起来才是交付。本章讲清：自回归生成为什么离不开 KV Cache、显存账怎么算、PagedAttention 如何用「分页」把碎片显存拼起来并支持前缀复用；continuous batching 如何把「静态凑批」升级为「迭代级调度」，把 GPU 利用率拉满；以及 GPTQ / AWQ / GGUF 三种量化的取舍——权重量化省显存与带宽，但带来精度损失，落地场景决定你选哪条路。",
+      "prerequisites": [
+        "ai-ch11"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "vllm-project/vllm",
+          "ggerganov/llama.cpp",
+          "mlc-ai/mlc-llm",
+          "huggingface/transformers"
+        ],
+        "github_stars": [
+          95746,
+          132583,
+          23284,
+          168266
+        ],
+        "github_notes": [
+          "按本章小节定位相关目录",
+          "按本章小节定位相关目录",
+          "按本章小节定位相关目录",
+          "按本章小节定位相关目录"
+        ],
+        "github_fetched_at": "2026-10-27",
+        "books": [
+          "《Efficient Memory Management for LLM Serving with PagedAttention》(vLLM, SOSP 2023) —— 对应 §1.1 PagedAttention、§2.2 连续批",
+          "《Orca: A Distributed Serving System for Transformer-Based Generative Models》(OSDI 2022) —— 对应 §2.2 continuous batching",
+          "《GPTQ: Accurate Post-Training Quantization》(ICLR 2023) 与《AWQ: Activation-aware Weight Quantization》(CVPR 2024) —— 对应 §3.1、§3.2"
+        ],
+        "leetcode": [],
+        "nowcoder": [],
+        "bilibili": "",
+        "bilibili_list": []
+      }
+    },
+    {
+      "id": "ai-ch14",
+      "order": 12,
+      "group": "A4",
+      "title": "多模态落地：图文对齐、OCR→VLM 流水线、多模态 RAG、成本与延迟",
+      "summary": "多模态不是「把图片塞进 LLM」那么简单。本章讲清：如何用 CLIP 式对比学习把图像和文本投影到同一表征空间实现跨模态检索；如何把 OCR 与 VLM 串成文档理解流水线，并识别它的失败模式；以及多模态 RAG 怎么把「视觉检索增强」落地，同时把图像预处理成本、调用成本与端到端延迟算进预算——落地工程最容易被忽略的恰恰是最后这条成本/延迟账。",
+      "prerequisites": [
+        "ai-ch11",
+        "ai-ch12"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "huggingface/transformers",
+          "openai/CLIP",
+          "InternVL/InternVL",
+          "microsoft/OmniParser"
+        ],
+        "github_stars": [
+          168266,
+          34539,
+          0,
+          25578
+        ],
+        "github_notes": [
+          "按本章小节定位相关目录",
+          "按本章小节定位相关目录",
+          "按本章小节定位相关目录",
+          "按本章小节定位相关目录"
+        ],
+        "github_fetched_at": "2026-10-27",
+        "books": [
+          "《Learning Transferable Visual Models From Natural Language Supervision》(CLIP, ICML 2021) —— 对应 §1.1 对比学习",
+          "《BLIP-2》(ICML 2023) 与《InternVL》(CVPR 2024) —— 对应 §1.4 对齐、§2.1 OCR→VLM 链路",
+          "《Dense X Retrieval》/ 多模态 RAG survey —— 对应 §3.1 多模态 RAG"
+        ],
+        "leetcode": [],
+        "nowcoder": [],
+        "bilibili": "",
+        "bilibili_list": []
+      }
+    },
+    {
+      "id": "ai-ch09",
+      "order": 13,
+      "group": "A1",
+      "title": "生成模型：从自编码器到扩散",
+      "summary": "AE 的重建目标与「不是生成模型」的边界；VAE 的 ELBO 推导、重参数化、高斯 KL 闭式解与后验坍塌；GAN 的最优判别器（密度比估计）与 2JSD−log4、模式崩塌、WGAN/谱归一化、条件生成；扩散的前向闭式解、ELBO→L_simple 的推导与丢弃权重的代价、ε 预测＝得分预测、DDIM 跳步、CFG 引导、SDE/概率流 ODE 与 Flow Matching 的统一视角；归一化流、自回归与生成模型评估（FID 的四个偏差、precision/recall 与 CLIPScore 三件套）。",
+      "prerequisites": [
+        "ai-ch01",
+        "ai-ch02"
+      ],
+      "status": "complete",
+      "books": [
+        "《Deep Learning》Goodfellow 第14章（自编码器）、第20章（深度生成模型）",
+        "Kingma & Welling, 2013 · Auto-Encoding Variational Bayes",
+        "Goodfellow et al., 2014 · Generative Adversarial Nets",
+        "Ho et al., 2020 · Denoising Diffusion Probabilistic Models",
+        "Song et al., 2021 · Score-Based Generative Modeling through SDEs"
+      ],
+      "resources": {
+        "github": [
+          "huggingface/diffusers",
+          "CompVis/latent-diffusion",
+          "ermongroup/ddim",
+          "openai/guided-diffusion"
+        ],
+        "github_stars": [
+          34819,
+          14180,
+          1855,
+          7442
+        ],
+        "github_notes": [
+          "工业实现先看 `src/diffusers/schedulers/scheduling_ddpm.py`：`set_timesteps` 用 betas 累乘造出 $\\bar\\alpha_t$ 表（§3.1 的闭式），`step` 是单步反向（§3.2）；再看 `pipelines/stable_diffusion` 里 `guidance_scale` 如何落地 CFG（§3.3）",
+          "潜空间扩散的原始实现：`ldm/models/diffusion/ddpm.py` 的 `p_losses` 是 $L_{simple}$（§3.2），`apply_model` 包住 U-Net 前向；潜空间压缩那部分回看 §1.2 的 VAE 编码器",
+          "DDIM 官方代码：`models/diffusion_utils.py` 的 `make_ddim_timesteps` 造跳步子序列、`ddim_step` 用 $\\varepsilon_\\theta$ 直接预测 $x_0$（§3.3 采样里的非马尔可夫边缘不变）",
+          "ADM 架构与 guidance：`guided_diffusion/gaussian_diffusion.py` 的 `p_mean_variance` 是反向均值/方差的标准写法（§3.2），`condition_mean` 的两个分支就是 CFG 的 $\\varepsilon_{uncond}+s(\\varepsilon_{cond}-\\varepsilon_{uncond})$（§3.3）"
+        ],
+        "github_fetched_at": "2026-10-27",
+        "bilibili": "https://www.bilibili.com/video/BV1FT4y1E74V/",
+        "books": [
+          "《Deep Learning》Goodfellow 第14章（自编码器）、第20章（深度生成模型）",
+          "Kingma & Welling, 2013 · Auto-Encoding Variational Bayes",
+          "Goodfellow et al., 2014 · Generative Adversarial Nets",
+          "Ho et al., 2020 · Denoising Diffusion Probabilistic Models",
+          "Song et al., 2021 · Score-Based Generative Modeling through SDEs"
+        ],
+        "leetcode": [],
+        "nowcoder": [],
+        "bilibili_list": [
+          {
+            "name": "吴恩达 · 深度学习专项（双语字幕）",
+            "url": "https://www.bilibili.com/video/BV1FT4y1E74V/",
+            "note": "主干：神经网络基础 → 优化与正则 → CNN → 序列模型，每节都配可复现的作业",
+            "bv": "BV1FT4y1E74V"
+          },
+          {
+            "name": "扩散模型的原理是什么",
+            "url": "https://www.bilibili.com/video/BV1fS7nznEUf/",
+            "note": "36 分钟讲清加噪/去噪与「为什么可以从纯噪声生成」；先建立直觉，再回来看 ELBO 推导",
+            "bv": "BV1fS7nznEUf"
+          },
+          {
+            "name": "ViT / SAM / CLIP 多模态大模型详解",
+            "url": "https://www.bilibili.com/video/BV1AT411y7Zg/",
+            "note": "把 ViT 的 patch 化、CLIP 的对比学习、SAM 的提示式分割串起来，补「视觉侧」的边界",
+            "bv": "BV1AT411y7Zg"
+          },
+          {
+            "name": "李宏毅 · 机器学习/深度学习 2021",
+            "url": "https://www.bilibili.com/video/BV1JA411c7VT/",
+            "note": "讲「为什么」最透的一套：自注意力、Transformer、GAN、自监督与元学习都有完整推导",
+            "bv": "BV1JA411c7VT"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ai-ch10",
+      "order": 14,
+      "group": "A2",
+      "title": "训练工程与规模化：从「能跑通」到「能训起来」",
+      "summary": "初始化的方差保持（Xavier/He/正交）与动力学等距；BN/LN/RMSNorm/GroupNorm 的统计维度差异、BN 的训练/推理不一致、Pre-LN vs Post-LN 的梯度路径；Adam/AdamW 的解耦权重衰减、warmup+cosine、梯度裁剪与 loss spike 的四类成因与回滚策略；fp16/bf16 的范围-精度取舍、loss scaling、fp32 主权重；训练显存账（16 B/参数）、激活重计算；DDP/TP/PP/EP 与 ZeRO 三阶段、FSDP；Scaling Law（$C=6ND$、Chinchilla 20 tokens/参数、过训练）、数据配比与去重、loss 曲线诊断与可复现性。",
+      "prerequisites": [
+        "ai-ch01",
+        "ai-ch03"
+      ],
+      "status": "complete",
+      "books": [
+        "《Deep Learning》Goodfellow 第7-8章（正则化、优化）",
+        "Rajbhandari et al., 2020 · ZeRO: Memory Optimizations Toward Training Trillion Parameter Models",
+        "Loshchilov & Hutter, 2019 · Decoupled Weight Decay Regularization",
+        "Hoffmann et al., 2022 · Training Compute-Optimal Large Language Models（Chinchilla）"
+      ],
+      "resources": {
+        "github": [
+          "microsoft/DeepSpeed",
+          "NVIDIA/Megatron-LM",
+          "google-research/tuning_playbook",
+          "karpathy/nanoGPT"
+        ],
+        "github_stars": [
+          43271,
+          18278,
+          30404,
+          64145
+        ],
+        "github_notes": [
+          "`deepspeed/runtime/zero/stage3.py` 是 ZeRO-3 的参数分片（§3.3 三阶段表的第三行）；`stage1.py`/`stage2.py` 分别是优化器状态与梯度分片，看 `_partition_param` 就懂「12 字节/参数」怎么摊",
+          "`megatron/core/tensor_parallel/layers.py` 里列并行/行并行两个 Linear 就是 §3.3 的 TP 原文；`pipeline_parallel/` 能对上 $(P-1)/(M+P-1)$ 的空泡推导",
+          "先读「Batch size」与「Learning rate schedule」两节：§2.2 的 warmup+cosine、§2.4 的线性缩放规则都在这里给了工程口径，可与 ex06 的学习率曲线对照",
+          "最小可训 GPT：`train.py` 的 `get_lr` 就是 warmup+cosine（§2.2），`model.py` 的 `Block` 是 Pre-LN 残差（§1.3），`estimate_loss` 是评估口径"
+        ],
+        "github_fetched_at": "2026-10-27",
+        "bilibili": "https://www.bilibili.com/video/BV1FT4y1E74V/",
+        "books": [
+          "《Deep Learning》Goodfellow 第7-8章（正则化、优化）",
+          "Rajbhandari et al., 2020 · ZeRO: Memory Optimizations Toward Training Trillion Parameter Models",
+          "Loshchilov & Hutter, 2019 · Decoupled Weight Decay Regularization",
+          "Hoffmann et al., 2022 · Training Compute-Optimal Large Language Models（Chinchilla）"
+        ],
+        "leetcode": [],
+        "nowcoder": [],
+        "bilibili_list": [
+          {
+            "name": "吴恩达 · 深度学习专项（双语字幕）",
+            "url": "https://www.bilibili.com/video/BV1FT4y1E74V/",
+            "note": "主干：神经网络基础 → 优化与正则 → CNN → 序列模型，每节都配可复现的作业",
+            "bv": "BV1FT4y1E74V"
+          },
+          {
+            "name": "李沐 · Transformer 论文逐段精读",
+            "url": "https://www.bilibili.com/video/BV1pu411o7BE/",
+            "note": "逐段读原论文：多头注意力的形状变化、位置编码、残差与 LayerNorm 的位置，读完能自己写一遍",
+            "bv": "BV1pu411o7BE"
+          },
+          {
+            "name": "ViT / SAM / CLIP 多模态大模型详解",
+            "url": "https://www.bilibili.com/video/BV1AT411y7Zg/",
+            "note": "把 ViT 的 patch 化、CLIP 的对比学习、SAM 的提示式分割串起来，补「视觉侧」的边界",
+            "bv": "BV1AT411y7Zg"
+          },
+          {
+            "name": "李宏毅 · 机器学习/深度学习 2021",
+            "url": "https://www.bilibili.com/video/BV1JA411c7VT/",
+            "note": "讲「为什么」最透的一套：自注意力、Transformer、GAN、自监督与元学习都有完整推导",
+            "bv": "BV1JA411c7VT"
+          }
+        ]
       }
     }
   ],

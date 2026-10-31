@@ -1,0 +1,179 @@
+{
+  "meta": {
+    "chapter": "py-ch09",
+    "note": "7 题，含选择题/输出题/改错题/编程题；题面与参考实现均为自建，不搬运第三方题面。"
+  },
+  "items": [
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "读代码写输出（实例属性遮蔽类属性）",
+      "content_md": "```python\nclass Cat:\n    sound = \"meow\"\n\nc = Cat()\nprint(c.sound)\nc.sound = \"nya\"\nprint(Cat.sound, c.sound)\nprint(\"sound\" in vars(c), \"sound\" in vars(Cat))\n```",
+      "answer": {
+        "output": "meow\nmeow nya\nTrue True"
+      },
+      "explanation": "第一行从类字典取到 `meow`。`c.sound = \"nya\"` 在**实例字典**里新建一项，不修改类属性，所以第二行打印 `meow nya`。第三行用 `vars()` 看字典内容：实例字典里现在有 `sound`（True），类字典里本来就有（True）——两者并存，实例遮蔽类。",
+      "tags": [
+        "class-attribute",
+        "shadowing"
+      ],
+      "source": "book",
+      "source_ref": "《流畅的 Python》第 1 章 数据模型"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "关于 `super()`，正确的是",
+      "content_md": "在 `class D(B, C)` 的 `B` 的方法里调用 `super()`，它会去找",
+      "options": [
+        {
+          "key": "A",
+          "text": "`B` 的所有直接父类，按定义顺序依次调用"
+        },
+        {
+          "key": "B",
+          "text": "`B` 的父类 `object`"
+        },
+        {
+          "key": "C",
+          "text": "`type(self).__mro__` 中 `B` 之后的下一个类，可能是 `C`"
+        },
+        {
+          "key": "D",
+          "text": "总是 `B` 自己，形成递归"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "C"
+        ]
+      },
+      "explanation": "无参 `super()` 的查找起点是「当前类在实例实际 MRO 中的位置之后」，因此 `D` 的实例走 `B` 时，下一个是 `C` 而不是 B 的父类。这正是协作式多继承能工作（也要求链上每个类都调用 `super()`）的原因。",
+      "tags": [
+        "mro",
+        "super"
+      ],
+      "source": "book",
+      "source_ref": "《流畅的 Python》第 2 章 序列构成的数组"
+    },
+    {
+      "type": "fix",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "改错：为什么这个 set 查不到刚放进去的元素",
+      "content_md": "下面的代码在 `s.add(p)` 之后 `p in s` 返回 False。找出原因并修正。\n\n```python\nclass Point:\n    def __init__(self, x, y):\n        self.x, self.y = x, y\n\n    def __eq__(self, other):\n        return self.x == other.x and self.y == other.y\n\np = Point(1, 2)\ns = {Point(1, 2)}\nprint(p in s, p == Point(1, 2))\n```",
+      "answer": {
+        "reference_code": "class Point:\n    __slots__ = (\"x\", \"y\")\n\n    def __init__(self, x, y):\n        self.x, self.y = x, y\n\n    def __eq__(self, other):\n        if not isinstance(other, Point):\n            return NotImplemented\n        return (self.x, self.y) == (other.x, other.y)\n\n    def __hash__(self):\n        return hash((self.x, self.y))\n\np = Point(1, 2)\ns = {Point(1, 2)}\nprint(p in s, p == Point(1, 2))  # True True"
+      },
+      "explanation": "定义 `__eq__` 时 Python 自动把 `__hash__` 置为 `None`，对象不可 hash。原代码能建出 set 说明 `__hash__` 未被定义时的默认 id 版 hash 仍生效——两个不同实例 hash 不同，set 用 hash 定位，因此 `p in s` 为 False，而 `p == Point(1,2)` 因为走了 `__eq__` 为 True。修法：显式实现 `__hash__`，hash 的字段必须与 `__eq__` 参与比较的字段一致，并先做类型判断返回 `NotImplemented`。",
+      "tags": [
+        "hash",
+        "eq",
+        "set"
+      ],
+      "source": "book",
+      "source_ref": "《流畅的 Python》第 1 章 数据模型"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "`classmethod` 与 `staticmethod`",
+      "content_md": "需要一个「根据参数创建实例」的工厂方法，并希望子类调用时创建的是子类实例。应该用",
+      "options": [
+        {
+          "key": "A",
+          "text": "`@staticmethod`，因为它不依赖实例"
+        },
+        {
+          "key": "B",
+          "text": "`@classmethod`，第一个参数 `cls` 保证子类调用时绑定到子类"
+        },
+        {
+          "key": "C",
+          "text": "普通实例方法，在外部先 `__new__` 一个空对象"
+        },
+        {
+          "key": "D",
+          "text": "`@property`，把构造逻辑包装成属性"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "`classmethod` 的第一个参数是类本身，子类调用时 `cls` 就是子类，所以工厂里写 `return cls(...)` 能自动产出正确的子类实例。`staticmethod` 拿不到类，只能硬编码基类名，子类调用会返回基类实例——这是工厂方法最常见的隐蔽 bug。",
+      "tags": [
+        "classmethod",
+        "staticmethod",
+        "factory"
+      ],
+      "source": "book",
+      "source_ref": "《流畅的 Python》第 5 章 一等函数"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "book",
+      "difficulty": "mid",
+      "title": "实现一个可迭代、可 len、可 in 的 Playlist",
+      "content_md": "实现 `Playlist` 类：构造时接受任意可迭代对象并拷贝一份；支持 `len(pl)`、`for x in pl`、`x in pl`、`pl[0]`、切片 `pl[1:3]`；`repr()` 输出形如 `Playlist(['a', 'b'])`；两个 Playlist 内容相同时 `==` 为 True。要求写出 `__len__`、`__iter__`、`__contains__`、`__getitem__`、`__repr__`、`__eq__`，并在 `main` 中自测。",
+      "answer": {
+        "reference_code": "class Playlist:\n    def __init__(self, songs):\n        self._songs = list(songs)\n\n    def __len__(self):\n        return len(self._songs)\n\n    def __iter__(self):\n        return iter(self._songs)\n\n    def __contains__(self, x):\n        return x in self._songs\n\n    def __getitem__(self, i):\n        return self._songs[i]\n\n    def __repr__(self):\n        return f\"Playlist({self._songs!r})\"\n\n    def __eq__(self, other):\n        if not isinstance(other, Playlist):\n            return NotImplemented\n        return self._songs == other._songs\n\npl = Playlist([\"a\", \"b\", \"c\"])\nprint(len(pl), list(pl), \"b\" in pl, pl[0], pl[1:3], pl == Playlist([\"a\", \"b\", \"c\"]), repr(pl))"
+      },
+      "explanation": "要点：① `__init__` 里 `list(songs)` 拷贝一份，避免外部列表后续变化影响对象，也允许传入生成器；② `__iter__` 返回 `iter(...)` 而不是 `self`，避免对象自身状态污染迭代；③ `__getitem__` 既支持下标也支持切片（`list` 的切片自然返回 list）；④ `__eq__` 先返回 `NotImplemented` 再比较，保证对称性；⑤ `__repr__` 用 `!r` 让字符串带引号。",
+      "tags": [
+        "dunder",
+        "iterator",
+        "protocol"
+      ],
+      "source": "book",
+      "source_ref": "《流畅的 Python》第 1 章 数据模型"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "book",
+      "difficulty": "hard",
+      "title": "用 ABC + mixin 实现一个带序列化能力的容器",
+      "content_md": "实现 `JsonMixin`（提供 `to_json()`，用标准库 `json.dumps` 序列化 `self._items`）与 `Bag`（继承 `JsonMixin` 与 `collections.abc.MutableSequence`，内部用 list 存储，实现 `__getitem__`/`__setitem__`/`__delitem__`/`__len__`/`insert`）。要求：不重复写 `__iter__`/`__contains__`/`append`/`pop`，验证 ABC 自动补齐后行为正确。",
+      "answer": {
+        "reference_code": "import json\nfrom collections.abc import MutableSequence\n\nclass JsonMixin:\n    def to_json(self):\n        return json.dumps(self._items, ensure_ascii=False)\n\nclass Bag(JsonMixin, MutableSequence):\n    def __init__(self, items=()):\n        self._items = list(items)\n    def __getitem__(self, i): return self._items[i]\n    def __setitem__(self, i, v): self._items[i] = v\n    def __delitem__(self, i): del self._items[i]\n    def __len__(self): return len(self._items)\n    def insert(self, i, v): self._items.insert(i, v)\n\nb = Bag([1, 2])\nb.append(3)\nprint(len(b), list(b), 2 in b, b.pop(), b.to_json())"
+      },
+      "explanation": "`MutableSequence` 只要求实现五个方法（`__getitem__`/`__setitem__`/`__delitem__`/`__len__`/`insert`），其余 `append`/`extend`/`pop`/`remove`/`__iter__`/`__contains__`/`index`/`count`/`reverse` 由 ABC 通过 mixin 方法自动提供——这正是「继承 ABC 而不是手写容器」的收益。`JsonMixin` 放在前面，MRO 上优先，`to_json` 直接可用；它不定义 `__init__`，所以不会打断协作链。",
+      "tags": [
+        "abc",
+        "mixin",
+        "mro",
+        "mutable-sequence"
+      ],
+      "source": "book",
+      "source_ref": "《流畅的 Python》第 5 章 一等函数"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "book",
+      "difficulty": "easy",
+      "title": "读代码写输出（类属性共享）",
+      "content_md": "```python\nclass Box:\n    items = []\n    def add(self, x):\n        self.items.append(x)\n\na, b = Box(), Box()\na.add(1)\nb.add(2)\nprint(a.items, b.items)\nprint(a.items is b.items)\n```",
+      "answer": {
+        "output": "[1, 2] [1, 2]\nTrue"
+      },
+      "explanation": "`items = []` 是类属性，定义时求值一次，`a` 与 `b` 都没有自己的 `items`，`self.items.append(...)` 解析到同一个 list 并原地修改。所以两次 append 都落在同一个列表里，两个实例看到 `[1, 2]`，且 `is` 判断为同一个对象。修法是在 `__init__` 里 `self.items = []`。",
+      "tags": [
+        "class-attribute",
+        "mutable-default"
+      ],
+      "source": "book",
+      "source_ref": "《流畅的 Python》第 1 章 数据模型"
+    }
+  ]
+}

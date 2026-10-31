@@ -1,0 +1,8 @@
+{
+  "title": "错误码设计：枚举集中管理 code / httpStatus / msg",
+  "code_lang": "javascript",
+  "code_std": "es2022",
+  "stdin": "",
+  "expected_output": "{\"httpStatus\":404,\"body\":{\"code\":1001,\"message\":\"用户不存在\",\"detail\":null}}\n{\"httpStatus\":400,\"body\":{\"code\":2001,\"message\":\"余额不足\",\"detail\":\"need 50\"}}",
+  "code": "class BizException extends Error {\n  constructor(code, message){ super(message); this.code = code; this.biz = true; }\n}\n\nconst ERROR_CODES = {\n  USER_NOT_FOUND: { code: 1001, http: 404, msg: \"用户不存在\" },\n  INSUFFICIENT:   { code: 2001, http: 400, msg: \"余额不足\" },\n  SYS:            { code: 5000, http: 500, msg: \"系统错误\" },\n};\nfunction buildResponse(key, detail) {\n  const e = ERROR_CODES[key];\n  return { httpStatus: e.http, body: { code: e.code, message: e.msg, detail: detail ?? null } };\n}\nconsole.log(JSON.stringify(buildResponse(\"USER_NOT_FOUND\")));\nconsole.log(JSON.stringify(buildResponse(\"INSUFFICIENT\", \"need 50\")));\n"
+}

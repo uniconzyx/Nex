@@ -37,6 +37,112 @@ RF_l = RF_{l-1} + (k_l − 1)·jump_{l-1}，jump_l = jump_{l-1}·s_l，初值 RF
 - **必考递推**：3 层 3×3 stride=1 卷积，感受野 = 1 + 2 + 2 + 2 = 7；含 stride=2 的层要把跳跃乘上去。
 - **对比题**：1 个 7×7 卷积 vs 3 个 3×3 卷积，感受野相同（7）但后者参数更少、非线性更多——这是 ResNet 的经典论据。
 - 易错：直接用 (k−1)×L 相加，忽略 stride 造成的跳跃放大，结果偏小。
+
+<!-- injected-code -->
+## 可运行代码：把上面的说法跑一遍
+
+下面两段直接取自本章示例库（`examples/`），期望输出就是判题台里判定的那串字符串，不是事后补写的说明。读完正文后先照着跑一遍，再回去看「三视角解析」里对应的那条。
+
+### 滑窗卷积：输出尺寸、参数量与感受野
+
+```python
+import numpy as np
+np.random.seed(42)
+X = np.random.randn(1, 1, 5, 5)                 # (N, Cin, H, W)
+K = np.random.randn(3, 1, 3, 3)                 # (Cout, Cin, kh, kw)
+b = np.zeros(3)
+
+def conv2d_slide(x, k, bias, stride=1, padding=0):
+    if padding:
+        x = np.pad(x, ((0,0),(0,0),(padding,padding),(padding,padding)))
+    N, Cin, H, W = x.shape
+    Cout, _, kh, kw = k.shape
+    oh = (H - kh)//stride + 1
+    ow = (W - kw)//stride + 1
+    out = np.zeros((N, Cout, oh, ow))
+    for n in range(N):
+        for c in range(Cout):
+            for i in range(oh):
+                for j in range(ow):
+                    patch = x[n,:, i*stride:i*stride+kh, j*stride:j*stride+kw]
+                    out[n,c,i,j] = np.sum(patch*k[c]) + bias[c]
+    return out
+
+out = conv2d_slide(X, K, b, stride=1, padding=0)
+params = K.size + b.size
+print("输入形状:", X.shape, " 核形状:", K.shape)
+print("输出特征图形状:", out.shape)
+print("参数量:", params, "(= Cout*Cin*k*k + Cout =", K.size, "+", b.size, ")")
+print("输出尺寸公式: floor((5 + 0 - 3)/1) + 1 =", (5+0-3)//1 + 1)
+# 感受野递推：单层 3x3 stride1 感受野 = 1 + (3-1)*1 = 3
+print("单层 3x3 stride1 感受野:", 1 + (3-1)*1)
+```
+
+实际输出：
+
+```text
+输入形状: (1, 1, 5, 5)  核形状: (3, 1, 3, 3)
+输出特征图形状: (1, 3, 3, 3)
+参数量: 30 (= Cout*Cin*k*k + Cout = 27 + 3 )
+输出尺寸公式: floor((5 + 0 - 3)/1) + 1 = 3
+单层 3x3 stride1 感受野: 3
+```
+
+> 出处：`examples/ex01-conv-slide.json`。改一处再看输出变没变，比读三遍解释有用。
+
+### im2col 卷积：与滑窗结果一致
+
+```python
+import numpy as np
+np.random.seed(0)
+X = np.arange(1*1*4*4, dtype=np.float64).reshape(1,1,4,4)
+K = np.random.randn(2,1,2,2)
+
+def conv2d_slide(x, k, stride=1):
+    N,Cin,H,W = x.shape
+    Cout,_,kh,kw = k.shape
+    oh=(H-kh)//stride+1; ow=(W-kw)//stride+1
+    out=np.zeros((N,Cout,oh,ow))
+    for n in range(N):
+        for c in range(Cout):
+            for i in range(oh):
+                for j in range(ow):
+                    p=x[n,0,i*stride:i*stride+kh, j*stride:j*stride+kw]
+                    out[n,c,i,j]=np.sum(p*k[c])
+    return out
+
+def conv2d_im2col(x, k, stride=1):
+    N,Cin,H,W = x.shape
+    Cout,_,kh,kw = k.shape
+    oh=(H-kh)//stride+1; ow=(W-kw)//stride+1
+    cols=[]
+    for i in range(oh):
+        for j in range(ow):
+            cols.append(x[0,0,i*stride:i*stride+kh, j*stride:j*stride+kw].reshape(-1))
+    cols=np.stack(cols).T                      # (Cin*kh*kw, oh*ow)
+    Wcol=k.reshape(Cout,-1)
+    out=Wcol @ cols                            # (Cout, oh*ow)
+    return out.reshape(Cout, oh, ow)[None]
+
+a = conv2d_slide(X, K)
+b = conv2d_im2col(X, K)
+print("滑窗输出形状:", a.shape)
+print("im2col 输出形状:", b.shape)
+print("两种方式最大绝对误差:", float(np.max(np.abs(a-b))))
+print("结论: 误差为 0 即两者等价 ->", bool(np.max(np.abs(a-b)) < 1e-12))
+```
+
+实际输出：
+
+```text
+滑窗输出形状: (1, 2, 3, 3)
+im2col 输出形状: (1, 2, 3, 3)
+两种方式最大绝对误差: 7.105427357601002e-15
+结论: 误差为 0 即两者等价 -> True
+```
+
+> 出处：`examples/ex02-im2col.json`。改一处再看输出变没变，比读三遍解释有用。
+
 ## 三视角小结
 
 | 视角 | 关注 | 本文件要点 |
