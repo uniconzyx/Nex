@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- viewport-fit=cover：适配 Android 刘海屏 / 安全区 -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#3B82F6" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>凯喵Code试炼录</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <!-- 必须是「外链模块脚本」：CSP 的 script-src 'self' 会拦截内联 <script> -->
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

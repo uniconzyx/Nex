@@ -1,21 +1,43 @@
 /**
  * KaimaoShell.tsx —— 「凯喵Code试炼录」React 外壳
  *
- * 结构对齐 web-preview/kaimao-desktop.html 的三栏：
+ * 三栏为主（主人 2026-10-30 定）：
  *   顶栏 64px（品牌 / 等级经验 / 经验结晶 / 搜索·主题·设置）
- *   左栏 220px（冒险 / 行囊 / 冒险者 三组导航）
+ *   左栏 220px（冒险 / 行囊 / 考研 / 求职 / AI / 冒险者 六组导航）
  *   中间自适应（业务页）
  *   右栏 300px（凯喵伙伴 / 今日目标〔含内容体量〕）
+ *
+ * 悬浮入口只有一颗球：App 里的「AI 助手」（CppCatFab，已由长条胶囊改成圆形悬浮球）。
+ * 右栏凯喵卡保持原样，两者分工不同——卡是伙伴面板，球是 AI 唤起。
+ *
+ * 聚焦页（FOCUS_PAGES，当前只有「就业」）：右栏整列收起、内容居中，
+ * 让求职三块（八股 / 简历 / 项目）能按门户式居中版式铺开。
  *
  * 响应式：<1180px 收掉右栏；<900px 侧栏变顶部横滑条。
  * 桌面端与 Android 端共用这一份代码，不做平台分叉。
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
 
 import { BUNDLE } from '../data/bundle';
-import { NAV_FLAT, NAV_GROUPS, type KmPage } from '../lib/nav';
-import { setTheme, streakOf, todayKey, useProgress } from '../lib/progress';
+import { NAV_FLAT, NAV_GROUPS, type KmPage, type NavItem } from '../lib/nav';
+import { bestiaryStats, expOf, streakOf, todayKey, useProgress } from '../lib/progress';
+import { masterySummary } from '../lib/graph';
+import { useCoinPulse } from '../lib/feedback';
+import { dailyProgress, useDaily } from '../lib/daily';
+import { useSubject } from '../lib/subject';
+import {
+  MOODS,
+  moodImage,
+  resolveMood,
+  useMoodFlash,
+  type MoodCtx,
+  type MoodDef,
+  type MoodKey,
+} from '../lib/mood';
 import { ConnectionBadge } from './ConnectionBadge';
+import { OfflineBanner } from './OfflineBanner';
+import { BottomSheet } from './BottomSheet';
 
 function Icon({ paths, size = 18 }: { paths: string[]; size?: number }) {
   return (
@@ -67,7 +89,19 @@ export interface ShellProps {
   children: React.ReactNode;
 }
 
-export function KaimaoShell({ active, onNavigate, onOpenAi, children }: ShellProps) {
+/**
+ * 聚焦页：右栏收起、正文居中。
+ * 目前只有「就业」——它是求职作战室，三块内容本身就是门户式居中版式，
+ * 右侧再压一列会把它挤成窄条。以后有同类页面往这里加即可。
+ */
+const FOCUS_PAGES: KmPage[] = ['employment'];
+
+export function KaimaoShell({
+  active,
+  onNavigate,
+  onOpenAi,
+  children,
+}: ShellProps) {
   const p = useProgress();
   const [searchOpen, setSearchOpen] = useState(false);
   const [kw, setKw] = useState('');
@@ -75,18 +109,22 @@ export function KaimaoShell({ active, onNavigate, onOpenAi, children }: ShellPro
   const [railOpen, setRailOpen] = useState(false);
   /** ≤900 导航横条只有一小截可见，用「全部」打开分组面板 */
   const [navOpen, setNavOpen] = useState(false);
+  /** 当前页是否走「聚焦」版式（右栏收起、正文居中） */
+  const focus = FOCUS_PAGES.includes(active);
   /** 移动端横滑条：切页时把当前项滑进视野，否则选中项可能藏在滚动区外 */
   const navRef = useRef<HTMLElement | null>(null);
 
   
 
-  const totalChapters = useMemo(
-    () => Object.values(BUNDLE.chapters).reduce((n, s) => n + s.chapters.length, 0),
-    [],
-  );
+  // 章节总数与平均掌握度都从依赖图取：它包含 clang 的 7 个独立单元（141 章），
+  // 只数 BUNDLE.chapters 会漏掉 C 语言模块（133 章）。
+  const mastery = useMemo(() => masterySummary(p), [p]);
+  const totalChapters = mastery.total;
+  const avgMastery = mastery.avg;
   const doneChapters = p.doneChapters.length;
   const doneProjects = p.doneProjects.length;
-  const exp = doneChapters * 20 + doneProjects * 30 + p.checkins.length * 50;
+  /** 经验口径统一到 progress.expOf：收服怪物也算经验，否则图鉴的成长感是断的 */
+  const exp = expOf(p);
   const level = 1 + Math.floor(exp / 300);
   const levelName = ['初入试炼', '语法学徒', '指针学徒', '容器行者', '并发术士', '源码猎人', '架构导师'][
     Math.min(level - 1, 6)
@@ -94,12 +132,45 @@ export function KaimaoShell({ active, onNavigate, onOpenAi, children }: ShellPro
   const levelPct = Math.round(((exp % 300) / 300) * 100);
   const streak = streakOf(p.checkins);
 
-  const catMood = p.checkins.includes(todayISO())
-    ? '开心'
-    : doneChapters > 0
-      ? '陪伴中'
-      : '待唤醒';
-  const catSrc = OUTFIT_IMG[p.outfit] ?? OUTFIT_IMG.default;
+  /** 图鉴里的野生怪物数 → 导航徽标 + 右栏今日目标，让「有东西没做」一直可见 */
+  const bs = bestiaryStats(p);
+  const [subject] = useSubject();
+  const daily = useDaily(subject);
+  const dp = dailyProgress(daily);
+  const coinPulse = useCoinPulse();
+
+  const badgeOf = (n: NavItem): string | undefined => {
+    if (n.key === 'bestiary') return bs.wild > 0 ? String(bs.wild) : n.badge;
+    return n.badge;
+  };
+
+  /**
+   * 情绪：常态由跨日进度算出，瞬时由答题结果打断（progress.recordAnswer 推 flash）。
+   * flash 必须优先——刚答错时的「委屈」要盖住「今天已签到」的开心，
+   * 否则脸在答错那一刻纹丝不动，情绪就成了摆设。
+   */
+  const moodFlash = useMoodFlash();
+  const moodCtx: MoodCtx = {
+    checkedIn: p.checkins.includes(todayISO()),
+    streak,
+    dailyDone: dp.done,
+    dailyTotal: dp.total,
+    wild: bs.wild,
+    doneChapters,
+    doneProjects,
+    page: active,
+    hour: new Date().getHours(),
+  };
+  const moodKey: MoodKey = moodFlash?.key ?? resolveMood(moodCtx);
+  const mood = MOODS[moodKey];
+
+  /**
+   * 立绘：没穿装扮（default）时直接用心情图——这是玩家最看得清的「换脸」；
+   * 穿了装扮（花结晶买的）就优先装扮图，心情退成角落一枚小徽章。
+   * 素材是两套平行立绘、没有「装扮 × 情绪」的交叉图，这是唯一不偏心的解法。
+   */
+  const dressed = p.outfit !== 'default';
+  const catSrc = dressed ? (OUTFIT_IMG[p.outfit] ?? OUTFIT_IMG.default) : moodImage(moodKey);
 
   const searchResults = useMemo(() => {
     const q = kw.trim().toLowerCase();
@@ -160,6 +231,13 @@ export function KaimaoShell({ active, onNavigate, onOpenAi, children }: ShellPro
         <div className="km-coin" title="经验结晶">
           <i />
           {p.coins.toLocaleString('zh-CN')}
+          {/* 每一笔金币都先在这里冒一下：进账没有反馈，结晶就只是个装饰数字 */}
+          {coinPulse && (
+            <span key={coinPulse.id} className={`km-coin-pop${coinPulse.delta < 0 ? ' neg' : ''}`}>
+              {coinPulse.delta > 0 ? '+' : '−'}
+              {Math.abs(coinPulse.delta)}
+            </span>
+          )}
         </div>
 
         <div className="km-top-icons">
@@ -185,24 +263,6 @@ export function KaimaoShell({ active, onNavigate, onOpenAi, children }: ShellPro
               <circle cx="11" cy="11" r="7" />
               <path d="M20 20l-3.5-3.5" />
             </svg>
-          </button>
-          <button
-            type="button"
-            className="km-icon-btn"
-            title={p.theme === 'light' ? '切换到深色' : '切换到浅色'}
-            onClick={() => setTheme(p.theme === 'light' ? 'dark' : 'light')}
-            aria-label="切换主题"
-          >
-            {p.theme === 'light' ? (
-              <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <circle cx="12" cy="12" r="4.5" />
-                <path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8" />
-              </svg>
-            ) : (
-              <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z" />
-              </svg>
-            )}
           </button>
           <button
             type="button"
@@ -252,7 +312,7 @@ export function KaimaoShell({ active, onNavigate, onOpenAi, children }: ShellPro
         )}
       </header>
 
-      <div className="km-main">
+      <div className={`km-main${focus ? ' km-main--focus' : ''}`}>
         <div className="km-nav-shell">
           <nav className="km-sidenav" aria-label="主导航" ref={navRef}>
           {NAV_GROUPS.map((g) => (
@@ -268,7 +328,7 @@ export function KaimaoShell({ active, onNavigate, onOpenAi, children }: ShellPro
                 >
                   <Icon paths={n.paths} />
                   {n.label}
-                  {n.badge && <span className="km-nav-badge">{n.badge}</span>}
+                  {badgeOf(n) && <span className="km-nav-badge">{badgeOf(n)}</span>}
                 </button>
               ))}
             </div>
@@ -289,18 +349,28 @@ export function KaimaoShell({ active, onNavigate, onOpenAi, children }: ShellPro
           </button>
         </div>
 
-        <main className="km-content">{children}</main>
+        <main className="km-content">
+          <OfflineBanner onNavigate={onNavigate} />
+          {children}
+        </main>
 
         <aside className="km-right">
           <RightRail
             catSrc={catSrc}
-            catMood={catMood}
+            mood={mood}
+            moodKey={moodKey}
+            moodCtx={moodCtx}
+            dressed={dressed}
             outfitName={OUTFIT_NAME[p.outfit] ?? '日常便装'}
             doneChapters={doneChapters}
             doneProjects={doneProjects}
             streak={streak}
             totalChapters={totalChapters}
+            avgMastery={avgMastery}
             checkins={p.checkins}
+            dailyDone={dp.done}
+            dailyTotal={dp.total}
+            wild={bs.wild}
             onOpenAi={onOpenAi}
           />
         </aside>
@@ -326,56 +396,56 @@ export function KaimaoShell({ active, onNavigate, onOpenAi, children }: ShellPro
             </div>
             <RightRail
               catSrc={catSrc}
-              catMood={catMood}
+              mood={mood}
+              moodKey={moodKey}
+              moodCtx={moodCtx}
+              dressed={dressed}
               outfitName={OUTFIT_NAME[p.outfit] ?? '日常便装'}
               doneChapters={doneChapters}
               doneProjects={doneProjects}
               streak={streak}
               totalChapters={totalChapters}
+              avgMastery={avgMastery}
               checkins={p.checkins}
+              dailyDone={dp.done}
+              dailyTotal={dp.total}
+              wild={bs.wild}
               onOpenAi={onOpenAi}
             />
           </aside>
         </>
       )}
 
-      {/* ≤900：横条放不下 15 项，用「全部」按原分组展开 */}
-      {navOpen && (
-        <>
-          <div className="km-nav-scrim" onClick={() => setNavOpen(false)} />
-          <div className="km-nav-sheet" role="dialog" aria-modal="true" aria-label="全部导航">
-            <div className="km-rail-head">
-              <b>全部导航</b>
-              <button type="button" onClick={() => setNavOpen(false)} aria-label="关闭">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                  <path d="M6 6l12 12M18 6L6 18" />
-                </svg>
-              </button>
+      {/* ≤900：横条放不下 15 项，用「全部」按原分组展开（复用 S0 统一 BottomSheet） */}
+      <BottomSheet
+        open={navOpen}
+        onClose={() => setNavOpen(false)}
+        title="全部导航"
+        className="km-nav-sheet"
+        ariaLabel="全部导航"
+      >
+        {NAV_GROUPS.map((g) => (
+          <div key={g.title} className="km-nav-sheet-group">
+            <div className="km-nav-sep">{g.title}</div>
+            <div className="km-nav-sheet-grid">
+              {g.items.map((n) => (
+                <button
+                  type="button"
+                  key={n.key}
+                  className={`km-nav-item${active === n.key ? ' on' : ''}`}
+                  onClick={() => {
+                    onNavigate(n.key);
+                    setNavOpen(false);
+                  }}
+                >
+                  <Icon paths={n.paths} />
+                  {n.label}
+                </button>
+              ))}
             </div>
-            {NAV_GROUPS.map((g) => (
-              <div key={g.title} className="km-nav-sheet-group">
-                <div className="km-nav-sep">{g.title}</div>
-                <div className="km-nav-sheet-grid">
-                  {g.items.map((n) => (
-                    <button
-                      type="button"
-                      key={n.key}
-                      className={`km-nav-item${active === n.key ? ' on' : ''}`}
-                      onClick={() => {
-                        onNavigate(n.key);
-                        setNavOpen(false);
-                      }}
-                    >
-                      <Icon paths={n.paths} />
-                      {n.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
           </div>
-        </>
-      )}
+        ))}
+      </BottomSheet>
     </div>
   );
 }
@@ -386,13 +456,24 @@ function todayISO(): string {
 
 interface RightRailProps {
   catSrc: string;
-  catMood: string;
+  /** 当前情绪（已含瞬时 flash 的择优结果） */
+  mood: MoodDef;
+  moodKey: MoodKey;
+  /** 判定情绪用的快照，台词里的数字从这儿取，保证「说的」和「算的」一致 */
+  moodCtx: MoodCtx;
+  /** 穿装扮时主图是装扮，心情退成角落小徽章 */
+  dressed: boolean;
   outfitName: string;
   doneChapters: number;
   doneProjects: number;
   streak: number;
   totalChapters: number;
+  /** 全库平均掌握度（三关加权后的 0~100） */
+  avgMastery: number;
   checkins: string[];
+  dailyDone: number;
+  dailyTotal: number;
+  wild: number;
   onOpenAi?: () => void;
 }
 
@@ -402,13 +483,20 @@ interface RightRailProps {
  */
 function RightRail({
   catSrc,
-  catMood,
+  mood,
+  moodKey,
+  moodCtx,
+  dressed,
   outfitName,
   doneChapters,
   doneProjects,
   streak,
   totalChapters,
+  avgMastery,
   checkins,
+  dailyDone,
+  dailyTotal,
+  wild,
   onOpenAi,
 }: RightRailProps) {
   const affection = 64 + Math.min(doneChapters + doneProjects, 30);
@@ -428,12 +516,27 @@ function RightRail({
           }
         }}
       >
-        <div className="km-cat-stage">
-          <div className="km-cat-aura" />
-          <img src={catSrc} alt={`凯喵 · ${outfitName}`} />
+        <div
+          className="km-cat-stage"
+          style={{ '--mood-aura': mood.aura } as CSSProperties}
+          data-mood={moodKey}
+        >
+          <div className={`km-cat-aura km-cat-aura--${moodKey}`} />
+          {/* key 让换脸时 img 重新挂载，触发淡入——直接改 src 会硬切 */}
+          <img key={moodKey} src={catSrc} alt={`凯喵 · ${dressed ? outfitName : mood.label}`} />
+          {dressed && (
+            <img
+              className="km-cat-mood-badge"
+              src={moodImage(moodKey)}
+              alt={mood.label}
+              title={mood.label}
+            />
+          )}
         </div>
         <div className="km-cat-name">凯喵</div>
-        <div className="km-cat-mood">{catMood}</div>
+        <div className="km-cat-mood">
+          <span aria-hidden="true">{mood.emoji}</span> {mood.label}
+        </div>
         <div className="km-aff-row">
           <span>好感度</span>
           <b>{affection}%</b>
@@ -441,11 +544,7 @@ function RightRail({
         <div className="km-aff-bar">
           <i style={{ width: `${affection}%` }} />
         </div>
-        <div className="km-cat-say">
-          {doneChapters === 0 && doneProjects === 0
-            ? '第一次见面！先从「知识试炼区」挑一章开个头，我会在旁边陪着你。'
-            : `你已经掌握 ${doneChapters} 章、通关 ${doneProjects} 个项目了。继续保持，别让连击断了～`}
-        </div>
+        <div className="km-cat-say">{mood.say(moodCtx)}</div>
       </div>
 
       <div className="km-side-card">
@@ -454,17 +553,18 @@ function RightRail({
           今日目标
         </h4>
         <div className="km-goal">
+          {/* 今日目标改成「今天真的能做完的三件事」，前两条直接读每日试炼与图鉴 */}
+          <div className="km-goal-row">
+            <span className={`km-tick${dailyTotal > 0 && dailyDone >= dailyTotal ? ' on' : ''}`}>✓</span>
+            今日试炼 {dailyDone} / {dailyTotal || 3}
+          </div>
+          <div className="km-goal-row">
+            <span className={`km-tick${wild === 0 && dailyDone > 0 ? ' on' : ''}`}>✓</span>
+            {wild > 0 ? `收服 ${wild} 只野生怪物` : '图鉴里没有待收服的怪物'}
+          </div>
           <div className="km-goal-row">
             <span className={`km-tick${checkins.includes(todayISO()) ? ' on' : ''}`}>✓</span>
             签到祭坛打卡
-          </div>
-          <div className="km-goal-row">
-            <span className={`km-tick${doneChapters > 0 ? ' on' : ''}`}>✓</span>
-            掌握 1 个章节
-          </div>
-          <div className="km-goal-row">
-            <span className={`km-tick${doneProjects > 0 ? ' on' : ''}`}>✓</span>
-            通关 1 个项目
           </div>
           <div className="km-goal-row">
             <span className="km-tick" />
@@ -473,7 +573,7 @@ function RightRail({
         </div>
         <div className="km-side-meta">
           <span>
-            章节 <b>{totalChapters}</b> · 已掌握 <b>{doneChapters}</b>
+            章节 <b>{totalChapters}</b> · 已掌握 <b>{doneChapters}</b> · 平均 <b>{avgMastery}%</b>
           </span>
           <span>
             项目 <b>{BUNDLE.projects.total}</b> · 已通关 <b>{doneProjects}</b>

@@ -1,0 +1,32 @@
+/* ============================================================
+   动效偏好（设置 → 外观 → 减少动效）
+   三态由 <html data-km-motion> 驱动，取值见 lib/motion.ts：
+     system  —— 无属性，交给下面的媒体查询（默认）
+     reduce  —— 强制减少
+     full    —— 强制完整（覆盖系统设置）
+   ============================================================ */
+
+/* 手动「始终减少」：与系统级 reduce 等效，关掉动画 / 过渡 / 平滑滚动。
+   用 * 选择器一次覆盖全站，避免逐个组件补规则漏掉新加动画。 */
+html[data-km-motion='reduce'] *,
+html[data-km-motion='reduce'] *::before,
+html[data-km-motion='reduce'] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  animation-delay: 0ms !important;
+  transition-duration: 0.01ms !important;
+  transition-delay: 0ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* 「始终减少」时，液态玻璃的流光直接不渲染（比 0.01ms 更快，也不占合成层） */
+html[data-km-motion='reduce'] .km-glass::after {
+  display: none !important;
+}
+
+/* 手动「完整动效」：即使系统开了 reduce，也把被媒体查询关掉的流光放回来。
+   注意这里必须用 !important，否则在各处 @media (prefers-reduced-motion) 之后失效。 */
+html[data-km-motion='full'] .km-glass::after {
+  display: block !important;
+  animation: km-sheen 6s ease-in-out infinite !important;
+}

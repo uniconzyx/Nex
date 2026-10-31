@@ -124,6 +124,24 @@ export function setRefreshHandler(fn: RefreshHandler | null): void {
   refreshHandler = fn;
 }
 
+/* ───────────────────── 请求失败时的状态上报 ───────────────────── */
+
+type NetworkErrorHandler = (err: ApiNetworkError) => void;
+let networkErrorHandler: NetworkErrorHandler | null = null;
+
+/**
+ * 注册「连不上后端」的通知钩子。由 connection.ts 注册。
+ *
+ * 为什么需要：用户点某个功能报「无法连接后端」时，顶栏指示灯还亮着绿点，
+ * 这在事实上是错的——后端已经断了。让 api 层把失败**主动**推给连接状态机，
+ * 指示灯立刻变红、离线重试立刻加速，而不是等下一次心跳（最长 60s 后）才发现。
+ *
+ * 同样用钩子而非直接 import，是为了避免 api.ts ← connection.ts 的循环依赖。
+ */
+export function setNetworkErrorHandler(fn: NetworkErrorHandler | null): void {
+  networkErrorHandler = fn;
+}
+
 function authHeaders(): Record<string, string> {
   const h: Record<string, string> = { Accept: 'application/json' };
   if (typeof localStorage !== 'undefined') {
@@ -219,10 +237,14 @@ async function send<T>(opts: SendOptions): Promise<T> {
     res = await rawFetch(base, opts.method, opts.path, opts.payload, opts.signal);
   } catch (e) {
     if ((e as Error)?.name === 'AbortError') throw e;
-    throw new ApiNetworkError(
+    const err = new ApiNetworkError(
       `无法连接后端（${base}）。请确认服务已启动，或在「设置」里修正服务地址。`,
       base,
     );
+    // 主动上报：让顶栏指示灯立刻变红、离线重试立刻加速，
+    // 而不是等下一次心跳才发现后端已经断了。
+    networkErrorHandler?.(err);
+    throw err;
   }
 
   const body = (await res.json().catch(() => null)) as Envelope<T> | null;

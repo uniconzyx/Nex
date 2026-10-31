@@ -3,6 +3,8 @@
  *
  * 14 个视图沿用设计稿（web-preview/kaimao-desktop.html）的分组与命名，
  * 另外补了「考研手札」：它是 11408 笔记导航，属于真实内容，不能因为换壳丢掉。
+ * 考研三板块（408 / 复试 / 公共课手札）归并到独立的「— 考研 —」分组，
+ * 三块天然对应、进度互通，不需要新增内容数据。
  */
 export type KmPage =
   | 'home'
@@ -26,7 +28,8 @@ export type KmPage =
   | 'track408'
   | 'employment'
   | 'reexam'
-  | 'agent';
+  | 'agent'
+  | 'kaoyan';
 
 export interface NavItem {
   key: KmPage;
@@ -124,6 +127,64 @@ export const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
+    title: '— 考研 —',
+    items: [
+      {
+        key: 'kaoyan',
+        label: '考研中枢',
+        paths: ['M4 4h16v16H4z', 'M8 8h8M8 12h8M8 16h5'],
+      },
+      {
+        key: 'track408',
+        label: '考研 408',
+        paths: ['M2 9l10-5 10 5-10 5z', 'M6 11v5c0 1 3 3 6 3s6-2 6-3v-5'],
+        badge: '专业课',
+      },
+      {
+        key: 'reexam',
+        label: '考研复试',
+        paths: ['M4 4h16v4H4z', 'M4 10h16v10H4z', 'M8 14h8'],
+        badge: '面试',
+      },
+      {
+        key: 'guides',
+        label: '考研手札',
+        paths: ['M4 4h16v16H4z', 'M8 8h8M8 12h8M8 16h5'],
+        badge: '数英政',
+      },
+    ],
+  },
+  {
+    /** 求职单独成组（主人 2026-10-30 定）：它和「考研」是同一条出路的两个岔口，
+        埋在「冒险者」里等于跟档案/设置并列，权重明显不够。 */
+    title: '— 求职 —',
+    items: [
+      {
+        key: 'employment',
+        label: '就业',
+        paths: ['M3 7h18v12H3z', 'M8 7v12M12 7v12M16 7v12', 'M3 11h18'],
+        badge: 'NEW',
+      },
+    ],
+  },
+  {
+    /** 「凯喵陪练」与「问凯喵」合并成「AI 助手」一项：
+        前者是跑循环（诊断/实验陪跑），后者是问一句答一句，都属于 AI 能力，
+        分成两个导航项会让人以为是两套东西。合并后组内用 tab 区分。 */
+    title: '— AI —',
+    items: [
+      {
+        key: 'ai',
+        label: 'AI 助手',
+        paths: [
+          'M12 3l2.2 5.6 6 .5-4.6 3.9 1.4 5.9L12 15.8 6.9 18.9l1.5-5.9L3.8 9.1l6-.5z',
+          'M12 18.5V21',
+        ],
+        badge: 'AI',
+      },
+    ],
+  },
+  {
     title: '— 冒险者 —',
     items: [
       {
@@ -135,48 +196,6 @@ export const NAV_GROUPS: NavGroup[] = [
         key: 'achievements',
         label: '成就殿堂',
         paths: ['M8 21h8M12 17v4', 'M7 4h10v5a5 5 0 0 1-10 0z', 'M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3'],
-      },
-      {
-        key: 'guides',
-        label: '考研手札',
-        paths: ['M4 4h16v16H4z', 'M8 8h8M8 12h8M8 16h5'],
-      },
-      {
-        key: 'track408',
-        label: '考研 408',
-        paths: ['M2 9l10-5 10 5-10 5z', 'M6 11v5c0 1 3 3 6 3s6-2 6-3v-5'],
-        badge: 'NEW',
-      },
-      {
-        key: 'employment',
-        label: '就业八股',
-        paths: ['M3 7h18v12H3z', 'M8 7v12M12 7v12M16 7v12', 'M3 11h18'],
-        badge: 'NEW',
-      },
-      {
-        key: 'reexam',
-        label: '考研复试',
-        paths: ['M4 4h16v4H4z', 'M4 10h16v10H4z', 'M8 14h8'],
-        badge: 'NEW',
-      },
-      {
-        key: 'agent',
-        label: '凯喵陪练',
-        paths: [
-          'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z',
-          'M7.8 14.2l2.6-2.6 2.3 2.3 3.5-4.4',
-          'M16.2 9.5h-1.6v1.6',
-        ],
-        badge: 'NEW',
-      },
-      {
-        key: 'ai',
-        label: '问凯喵',
-        paths: [
-          'M12 3l2.2 5.6 6 .5-4.6 3.9 1.4 5.9L12 15.8 6.9 18.9l1.5-5.9L3.8 9.1l6-.5z',
-          'M12 18.5V21',
-        ],
-        badge: 'AI',
       },
       {
         key: 'settings',

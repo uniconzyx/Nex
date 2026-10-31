@@ -24,7 +24,10 @@
   --km-surf2: rgb(255 255 255 / 0.58);
   --km-sunk: rgb(91 155 213 / 0.1);
   --km-ink: #26364a;
-  --km-ink-soft: #54687d;
+  --km-ink-soft: #4a5d72;
+  /* 说明性正文用这一档（对比度 ~4.8:1）；--km-ink-faint 只留给时间/计数这类
+     真正的元信息，不再承担句子级文字。 */
+  --km-ink-mute: #5c6e83;
   --km-ink-faint: #8496ab;
   --km-line: rgb(91 155 213 / 0.26);
   --km-line2: rgb(91 155 213 / 0.14);
@@ -82,6 +85,7 @@ html[data-km-theme='dark'] .km-app,
   --km-sunk: rgb(140 192 238 / 0.1);
   --km-ink: #dce8f4;
   --km-ink-soft: #bcd0e2;
+  --km-ink-mute: #9db4ca;
   --km-ink-faint: #647c96;
   --km-line: rgb(140 192 238 / 0.18);
   --km-line2: rgb(140 192 238 / 0.1);
@@ -112,7 +116,7 @@ html[data-km-theme='dark'] .km-app,
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 17px;
+  font-size: 19px;
   font-weight: 700;
   letter-spacing: 0.5px;
   white-space: nowrap;
@@ -143,7 +147,7 @@ html[data-km-theme='dark'] .km-app,
   display: flex;
   justify-content: space-between;
   gap: 8px;
-  font-size: 12px;
+  font-size: 13.5px;
   color: var(--km-ink-soft);
 }
 
@@ -175,7 +179,7 @@ html[data-km-theme='dark'] .km-app,
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 700;
   line-height: 1;
   letter-spacing: 0.02em;
@@ -199,7 +203,7 @@ html[data-km-theme='dark'] .km-app,
   border-radius: 99px;
   background: rgb(227 180 79 / 0.14);
   color: var(--km-legend);
-  font-size: 12.5px;
+  font-size: 14px;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -311,7 +315,7 @@ html[data-km-theme='dark'] .km-app,
 .km-nav-sep {
   margin: 12px 6px 4px;
   color: var(--km-ink-faint);
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 700;
   letter-spacing: 2px;
 }
@@ -325,7 +329,7 @@ html[data-km-theme='dark'] .km-app,
   padding: 11px 12px;
   border-radius: var(--km-r-sm);
   color: var(--km-ink-soft);
-  font-size: 14px;
+  font-size: 15.5px;
   text-align: left;
   white-space: nowrap;
   transition: 0.18s;
@@ -368,7 +372,7 @@ html[data-km-theme='dark'] .km-app,
   border-radius: 99px;
   background: linear-gradient(135deg, var(--km-accent), var(--km-accent-deep));
   color: #fff;
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 800;
   box-shadow: 0 2px 6px var(--km-glow);
 }
@@ -378,14 +382,18 @@ html[data-km-theme='dark'] .km-app,
   padding: 10px 8px 4px;
   border-top: 1px dashed var(--km-line2);
   color: var(--km-ink-faint);
-  font-size: 10.5px;
+  font-size: 12px;
   line-height: 1.7;
 }
 
 /* ── 中间内容 ─────────────────────────────────────────────────────────── */
 .km-content {
+  /* 内容区留白提成变量，离线横幅要用负 margin 贴满整宽，
+     两边必须是同一个数——写死 -20px 在移动端（12px）会横向溢出 8px。 */
+  --km-pad-x: 20px;
+  --km-pad-y: 20px;
   min-width: 0;
-  padding: 20px;
+  padding: var(--km-pad-y) var(--km-pad-x);
   overflow-x: hidden;
   overflow-y: auto;
 }
@@ -401,48 +409,101 @@ html[data-km-theme='dark'] .km-app,
    底色沿用 --km-surf1，描边用 --km-bad，不引入新的渐变/玻璃拟态。 */
 .km-offline {
   position: sticky;
-  top: -20px;
+  top: calc(-1 * var(--km-pad-y, 20px));
   z-index: 5;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 14px;
-  align-items: center;
-  justify-content: space-between;
-  margin: -20px -20px 16px;
-  padding: 10px 20px;
-  border-bottom: 1px solid rgb(199 91 91 / 0.45);
+  margin: calc(-1 * var(--km-pad-y, 20px)) calc(-1 * var(--km-pad-x, 20px)) 14px;
+  padding: 8px var(--km-pad-x, 20px);
+  border-bottom: 1px solid rgb(199 91 91 / 0.35);
   background: var(--km-surf1);
-  box-shadow: var(--km-sh-soft);
 }
 
-.km-offline-main {
+/* 单行：把「断在哪个地址」和两个动作放在同一条线上，不再占三行 */
+.km-offline-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 10px;
-  align-items: baseline;
-  min-width: 0;
-  font-size: 13px;
-  line-height: 1.6;
+  align-items: center;
+  gap: 8px 10px;
+  font-size: 14.5px;
+  line-height: 1.5;
   color: var(--km-ink-soft);
 }
 
-.km-offline-main b {
-  color: var(--km-bad);
+.km-offline-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--km-bad);
+  flex: 0 0 auto;
 }
 
-.km-offline-main code {
+.km-offline-row b {
+  color: var(--km-bad);
+  font-weight: 700;
+}
+
+.km-offline-base {
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   padding: 1px 6px;
   border-radius: var(--km-r-xs);
-  background: var(--km-surf2);
+  background: var(--km-sunk);
   font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
-  font-size: 12px;
+  font-size: 13.5px;
   color: var(--km-ink);
 }
 
-.km-offline-act {
-  display: flex;
-  flex: 0 0 auto;
-  gap: 8px;
+.km-offline-times {
+  font-size: 13.5px;
+  color: var(--km-ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.km-offline-spacer {
+  flex: 1 1 auto;
+}
+
+.km-offline-help {
+  margin: 8px 0 2px;
+  padding: 10px 12px;
+  border-radius: var(--km-r-sm);
+  background: var(--km-sunk);
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--km-ink-soft);
+}
+
+.km-offline-help p {
+  margin: 0 0 6px;
+}
+
+.km-offline-help p:last-child {
+  margin-bottom: 0;
+}
+
+.km-offline-help code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--km-surf2);
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-size: 13px;
+  color: var(--km-ink);
+}
+
+.km-offline-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--km-accent-ink);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.km-offline-link:focus-visible {
+  outline: 2px solid var(--km-accent);
+  outline-offset: 2px;
 }
 
 /* ── 右栏：凯喵伙伴 ───────────────────────────────────────────────────── */
@@ -485,7 +546,46 @@ html[data-km-theme='dark'] .km-app,
   position: absolute;
   inset: -6% -10%;
   border-radius: 50%;
+  /* 兜底：不支持 color-mix 时退回品牌蓝光晕，情绪色失效但不至于没光 */
   background: radial-gradient(circle, rgb(91 155 213 / 0.26) 0%, transparent 66%);
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--mood-aura, #9ec7f0) 42%, transparent) 0%,
+    transparent 68%
+  );
+  transition: background 0.5s ease;
+}
+
+/* 庆祝：光晕呼吸，配合「今日全清」那一刻 */
+.km-cat-aura--celebrate {
+  animation: km-aura-breathe 1.7s ease-in-out infinite;
+}
+
+/* 委屈：光晕压暗再回一点，像叹了口气 */
+.km-cat-aura--aggrieved {
+  animation: km-aura-sigh 3.4s ease-in-out infinite;
+}
+
+@keyframes km-aura-breathe {
+  0%,
+  100% {
+    opacity: 0.72;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+}
+
+@keyframes km-aura-sigh {
+  0%,
+  100% {
+    opacity: 0.62;
+  }
+  45% {
+    opacity: 0.34;
+  }
 }
 
 .km-cat-stage img {
@@ -495,20 +595,52 @@ html[data-km-theme='dark'] .km-app,
   height: 128px;
   object-fit: contain;
   filter: drop-shadow(0 10px 18px rgb(47 100 148 / 0.22));
-  animation: km-cat-float 4s ease-in-out infinite;
+  /* 换脸时 img 重新挂载，淡入 0.4s；浮动动画同时保留 */
+  animation:
+    km-cat-float 4s ease-in-out infinite,
+    km-cat-swap 0.4s ease both;
+}
+
+@keyframes km-cat-swap {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 穿装扮时心情退成角落里的一枚小徽章（主图让给花钱买的装扮） */
+.km-cat-stage img.km-cat-mood-badge {
+  position: absolute;
+  right: 2px;
+  bottom: 0;
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  padding: 2px;
+  border: 1.5px solid var(--km-line2);
+  border-radius: 50%;
+  background: var(--km-surf1);
+  box-shadow: 0 4px 10px rgb(47 100 148 / 0.18);
+  animation: none;
+  transition: border-color 0.3s ease;
 }
 
 .km-cat-name {
-  font-size: 14px;
+  font-size: 15.5px;
   font-weight: 700;
 }
 
 .km-cat-mood {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   padding: 2px 10px;
   border-radius: 99px;
   background: var(--km-sunk);
   color: var(--km-accent-ink);
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 600;
 }
 
@@ -519,7 +651,7 @@ html[data-km-theme='dark'] .km-app,
   width: 100%;
   margin-top: 4px;
   color: var(--km-ink-soft);
-  font-size: 11px;
+  font-size: 12.5px;
 }
 
 .km-aff-bar {
@@ -549,7 +681,7 @@ html[data-km-theme='dark'] .km-app,
   border-radius: var(--km-r-sm);
   background: var(--km-surf2);
   color: var(--km-ink-soft);
-  font-size: 12px;
+  font-size: 13.5px;
   line-height: 1.7;
   text-align: left;
 }
@@ -567,7 +699,7 @@ html[data-km-theme='dark'] .km-app,
   align-items: center;
   gap: 6px;
   margin: 0 0 9px;
-  font-size: 13px;
+  font-size: 14.5px;
 }
 
 .km-side-card h4 svg {
@@ -580,7 +712,7 @@ html[data-km-theme='dark'] .km-app,
   display: flex;
   flex-direction: column;
   gap: 7px;
-  font-size: 12px;
+  font-size: 13.5px;
   color: var(--km-ink-soft);
 }
 
@@ -601,7 +733,7 @@ html[data-km-theme='dark'] .km-app,
   /* 未完成的勾必须不可见：之前写死 #fff，浅色下看不见、深色下反而全亮，
      看起来像"所有目标都完成了"。 */
   color: transparent;
-  font-size: 10px;
+  font-size: 11px;
 }
 
 /* 内容体量并入「今日目标」卡：压掉右栏第 4 张卡，避免 820 高度下末卡被切 */
@@ -613,7 +745,7 @@ html[data-km-theme='dark'] .km-app,
   padding-top: 9px;
   border-top: 1px dashed var(--km-line2);
   color: var(--km-ink-faint);
-  font-size: 11.5px;
+  font-size: 13px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -640,7 +772,7 @@ html[data-km-theme='dark'] .km-app,
   border-radius: 10px;
   background: var(--km-sunk);
   color: var(--km-accent-ink);
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 600;
   transition: 0.15s;
 }
@@ -657,7 +789,11 @@ html[data-km-theme='dark'] .km-app,
   border-radius: var(--km-r);
   background: var(--km-surf1);
   box-shadow: var(--km-sh-soft);
-  backdrop-filter: blur(16px);
+  /* 接强度档位：原来写死 blur(16px)，导致设置里调「玻璃强度」时
+     全站卡片一动不动——而卡片正是最主要的视觉载体。
+     var 的兜底值与 liquidglass.css 的 html 块保持一致。 */
+  -webkit-backdrop-filter: blur(calc(var(--lg-blur-card, 16px) * var(--lg-k, 1)));
+  backdrop-filter: blur(calc(var(--lg-blur-card, 16px) * var(--lg-k, 1)));
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -671,7 +807,7 @@ html[data-km-theme='dark'] .km-app,
   align-items: center;
   gap: 8px;
   margin: 0 0 12px;
-  font-size: 15.5px;
+  font-size: 17.5px;
 }
 
 .km-card h3 svg {
@@ -684,7 +820,7 @@ html[data-km-theme='dark'] .km-app,
 .km-hint {
   margin-top: 8px;
   color: var(--km-ink-faint);
-  font-size: 12px;
+  font-size: 13.5px;
 }
 
 .km-btn {
@@ -694,7 +830,7 @@ html[data-km-theme='dark'] .km-app,
   gap: 6px;
   padding: 9px 20px;
   border-radius: 12px;
-  font-size: 13.5px;
+  font-size: 15px;
   font-weight: 600;
   transition: 0.18s;
 }
@@ -728,7 +864,7 @@ html[data-km-theme='dark'] .km-app,
 .km-btn-sm {
   padding: 7px 14px;
   border-radius: 10px;
-  font-size: 12.5px;
+  font-size: 14px;
 }
 
 .km-chips {
@@ -743,7 +879,7 @@ html[data-km-theme='dark'] .km-app,
   border-radius: 99px;
   background: var(--km-sunk);
   color: var(--km-ink-soft);
-  font-size: 12.5px;
+  font-size: 14px;
   font-weight: 600;
   transition: 0.15s;
 }
@@ -758,7 +894,7 @@ html[data-km-theme='dark'] .km-app,
 .km-tag {
   padding: 2px 9px;
   border-radius: 99px;
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -779,7 +915,9 @@ html[data-km-theme='dark'] .km-app,
 
 .km-tag-gray {
   background: rgb(132 150 171 / 0.16);
-  color: var(--km-ink-soft);
+  /* 浅色底上这层灰底几乎还是白，正文级小字需 ≥4.5:1，
+     故用比 ink-soft 再深一档的固定值；深色主题在下方单独提亮。 */
+  color: #45596e;
 }
 
 .km-tag-lock {
@@ -800,13 +938,13 @@ html[data-km-theme='dark'] .km-app,
   gap: 8px;
   padding: 40px 20px;
   color: var(--km-ink-faint);
-  font-size: 13px;
+  font-size: 14.5px;
   text-align: center;
 }
 
 .km-empty b {
   color: var(--km-ink-soft);
-  font-size: 14px;
+  font-size: 15.5px;
 }
 
 /* ── 首页 / 进度 ──────────────────────────────────────────────────────── */
@@ -835,7 +973,7 @@ html[data-km-theme='dark'] .km-app,
   display: grid;
   place-items: center;
   color: var(--km-accent-ink);
-  font-size: 26px;
+  font-size: 29px;
   font-weight: 800;
 }
 
@@ -843,7 +981,7 @@ html[data-km-theme='dark'] .km-app,
   display: block;
   margin-top: 1px;
   color: var(--km-ink-soft);
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 600;
   text-align: center;
 }
@@ -855,13 +993,13 @@ html[data-km-theme='dark'] .km-app,
 
 .km-prog-info .big {
   margin-bottom: 6px;
-  font-size: 17px;
+  font-size: 19px;
   font-weight: 700;
 }
 
 .km-prog-info .sub {
   color: var(--km-ink-soft);
-  font-size: 13px;
+  font-size: 14.5px;
   line-height: 1.7;
 }
 
@@ -881,12 +1019,12 @@ html[data-km-theme='dark'] .km-app,
 .km-stat b {
   display: block;
   color: var(--km-accent-ink);
-  font-size: 19px;
+  font-size: 21.5px;
 }
 
 .km-stat span {
   color: var(--km-ink-soft);
-  font-size: 12px;
+  font-size: 13.5px;
 }
 
 .km-mini-bar {
@@ -915,7 +1053,7 @@ html[data-km-theme='dark'] .km-app,
   border-radius: 99px;
   background: rgb(91 155 213 / 0.13);
   color: var(--km-accent-ink);
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 700;
 }
 
@@ -956,7 +1094,7 @@ html[data-km-theme='dark'] .km-app,
   border-radius: 50%;
   background: var(--km-surf1);
   color: var(--km-ink-faint);
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 700;
 }
 
@@ -980,20 +1118,45 @@ html[data-km-theme='dark'] .km-app,
 
 .km-node-main b {
   display: block;
-  font-size: 14px;
+  font-size: 15.5px;
 }
 
 .km-node-main span {
   display: block;
   margin-top: 2px;
   color: var(--km-ink-soft);
-  font-size: 12px;
+  font-size: 13.5px;
   line-height: 1.6;
 }
 
+/* 锁定节点用 ink-mute 而不是 ink-faint：
+   faint 在浅底上只有 2.6:1、深底 2.2:1，而「下一章叫什么」是用户判断
+   要不要继续学的内容，不是可以忽略的元信息。mute 仍有明显的"未解锁"暗感。 */
 .km-node.locked .km-node-main b,
 .km-node.locked .km-node-main span {
-  color: var(--km-ink-faint);
+  color: var(--km-ink-mute);
+}
+
+/* 「N 题」徽章也是 km-node-main 内的 span，会被上面的锁定兜底规则压成 ink-mute。
+   单独用一条更高特指度的规则把它拉回满足 WCAG 4.5:1 的固定色。 */
+.km-node.locked .km-node-main .km-tag-gray,
+.km-tl.locked .km-tag-gray {
+  color: #45596e;
+}
+
+/* 深色主题：灰底徽章与锁定标题在合成背景上对比度不足，
+   单独提亮到 ≥4.5:1（浅色主题用上面的固定深色即可）。 */
+html[data-km-theme='dark'] .km-app .km-tag-gray,
+html[data-km-theme='dark'] .km-app .km-tl.locked .km-tag {
+  color: #dcebf6;
+}
+html[data-km-theme='dark'] .km-app .km-node.locked .km-node-main b,
+html[data-km-theme='dark'] .km-app .km-node.locked .km-node-main span {
+  color: #a6c1d9;
+}
+html[data-km-theme='dark'] .km-app .km-node.locked .km-node-main .km-tag-gray,
+html[data-km-theme='dark'] .km-app .km-tl.locked .km-tag-gray {
+  color: #dcebf6;
 }
 
 /* ── 装扮衣柜 ─────────────────────────────────────────────────────────── */
@@ -1034,7 +1197,7 @@ html[data-km-theme='dark'] .km-app,
 }
 
 .km-dress b {
-  font-size: 12px;
+  font-size: 13.5px;
   font-weight: 600;
 }
 
@@ -1042,6 +1205,59 @@ html[data-km-theme='dark'] .km-app,
   position: absolute;
   top: 7px;
   right: 7px;
+}
+
+/* 未拥有的装扮：虚线边 + 灰度立绘。
+   灰掉是必要的——否则「点了没反应」会被当成 bug，而不是「还没买」。 */
+.km-dress.locked {
+  border-style: dashed;
+}
+
+.km-dress.locked img {
+  filter: grayscale(0.85) opacity(0.55);
+}
+
+.km-dress.locked:hover img {
+  filter: grayscale(0.45) opacity(0.78);
+}
+
+/* 价格 / 已拥有 —— 不用 .km-tag 是因为它在本块被绝对定位到右上角，会和稀有度标签重叠 */
+.dress-price {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--km-accent-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.dress-price.short {
+  color: var(--km-bad);
+  font-weight: 500;
+}
+
+.dress-price.owned {
+  color: var(--km-ink-faint);
+  font-weight: 500;
+}
+
+/* 购买确认条：扣款前的最后一道门 */
+.dress-confirm {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: var(--km-r-sm);
+  border: 1px solid var(--km-accent);
+  background: rgb(91 155 213 / 0.1);
+}
+
+.dress-confirm p {
+  margin: 0 0 10px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.dress-confirm-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 /* ── 签到 / 设置 / 档案 ───────────────────────────────────────────────── */
@@ -1058,7 +1274,7 @@ html[data-km-theme='dark'] .km-app,
   gap: 12px;
   padding: 10px 2px;
   border-bottom: 1px dashed var(--km-line2);
-  font-size: 13px;
+  font-size: 14.5px;
   color: var(--km-ink-soft);
 }
 
@@ -1117,7 +1333,7 @@ html[data-km-theme='dark'] .km-app,
   border: 1px solid var(--km-line2);
   border-radius: 10px;
   background: var(--km-sunk);
-  font-size: 11px;
+  font-size: 12.5px;
   color: var(--km-ink-soft);
 }
 
@@ -1130,7 +1346,7 @@ html[data-km-theme='dark'] .km-app,
 
 .km-day i {
   font-style: normal;
-  font-size: 16px;
+  font-size: 18px;
 }
 
 /* ── 动效 ─────────────────────────────────────────────────────────────── */
@@ -1195,7 +1411,7 @@ html[data-km-theme='dark'] .km-app,
   }
 
   .km-brand {
-    font-size: 15px;
+    font-size: 17px;
   }
 
   .km-brand img {
@@ -1253,7 +1469,7 @@ html[data-km-theme='dark'] .km-app,
     flex: none;
     width: auto;
     padding: 7px 12px;
-    font-size: 12.5px;
+    font-size: 14px;
   }
 
   .km-nav-item svg {
@@ -1275,7 +1491,9 @@ html[data-km-theme='dark'] .km-app,
   }
 
   .km-content {
-    padding: 14px 12px 24px;
+    --km-pad-x: 12px;
+    --km-pad-y: 14px;
+    padding: var(--km-pad-y) var(--km-pad-x) 24px;
   }
 
   .km-view {
@@ -1301,7 +1519,7 @@ html[data-km-theme='dark'] .km-app,
   }
 
   .km-ring-num {
-    font-size: 21px;
+    font-size: 23.5px;
   }
 
   .km-stat-row {
@@ -1352,7 +1570,7 @@ html[data-km-theme='dark'] .km-app,
   outline: none;
   background: rgb(255 255 255 / 0.6);
   color: var(--km-ink);
-  font-size: 13px;
+  font-size: 14.5px;
 }
 
 .km-app[data-km-theme='dark'] .km-search-pop input {
@@ -1378,7 +1596,7 @@ html[data-km-theme='dark'] .km-app,
   padding: 8px 10px;
   border-radius: 9px;
   color: var(--km-ink-soft);
-  font-size: 13px;
+  font-size: 14.5px;
   text-align: left;
   transition: 0.14s;
 }
@@ -1394,7 +1612,7 @@ html[data-km-theme='dark'] .km-app,
   border-radius: 99px;
   background: var(--km-sunk);
   color: var(--km-accent-ink);
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -1405,7 +1623,7 @@ html[data-km-theme='dark'] .km-app,
 .km-search-t b {
   display: block;
   overflow: hidden;
-  font-size: 12.5px;
+  font-size: 14px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1414,7 +1632,7 @@ html[data-km-theme='dark'] .km-app,
   display: block;
   overflow: hidden;
   color: var(--km-ink-faint);
-  font-size: 10.5px;
+  font-size: 12px;
   font-style: normal;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1423,7 +1641,7 @@ html[data-km-theme='dark'] .km-app,
 .km-search-empty {
   padding: 16px 8px;
   color: var(--km-ink-faint);
-  font-size: 12.5px;
+  font-size: 14px;
   text-align: center;
 }
 
@@ -1454,13 +1672,13 @@ html[data-km-theme='dark'] .km-app,
 
 .km-today-main b {
   display: block;
-  font-size: 14px;
+  font-size: 15.5px;
 }
 
 .km-today-main p {
   margin: 4px 0 6px;
   color: var(--km-ink-soft);
-  font-size: 12.5px;
+  font-size: 14px;
   line-height: 1.7;
 }
 
@@ -1470,7 +1688,7 @@ html[data-km-theme='dark'] .km-app,
   background: var(--km-sunk);
   color: var(--km-accent-ink);
   font-family: Consolas, 'Cascadia Code', monospace;
-  font-size: 11.5px;
+  font-size: 13px;
 }
 
 /* ── 章节延伸仓库 ─────────────────────────────────────────────────────── */
@@ -1483,7 +1701,7 @@ html[data-km-theme='dark'] .km-app,
   border-radius: 9px;
   background: var(--km-sunk);
   color: var(--km-accent-ink);
-  font-size: 12.5px;
+  font-size: 14px;
   text-decoration: none;
   transition: 0.15s;
 }
@@ -1504,7 +1722,7 @@ html[data-km-theme='dark'] .km-app,
 .km-repo span {
   flex: none;
   color: var(--km-legend);
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -1513,7 +1731,7 @@ html[data-km-theme='dark'] .km-app,
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 12.5px;
+  font-size: 14px;
 }
 
 .km-weak-name {
@@ -1555,7 +1773,7 @@ html[data-km-theme='dark'] .km-app,
   outline: none;
   background: rgb(255 255 255 / 0.55);
   color: var(--km-ink);
-  font-size: 13px;
+  font-size: 14.5px;
 }
 
 .km-app[data-km-theme='dark'] .km-input {
@@ -1597,15 +1815,15 @@ html[data-km-theme='dark'] .km-app,
 }
 
 .km-ach-ico {
-  font-size: 24px;
+  font-size: 27px;
 }
 
 .km-ach b {
-  font-size: 13px;
+  font-size: 14.5px;
 }
 
 .km-ach > span:nth-of-type(2) {
-  font-size: 11px;
+  font-size: 12.5px;
   line-height: 1.5;
 }
 
@@ -1618,7 +1836,7 @@ html[data-km-theme='dark'] .km-app,
   border: 1px solid var(--km-line2);
   border-radius: 10px;
   background: var(--km-sunk);
-  font-size: 13px;
+  font-size: 14.5px;
 }
 
 .km-task > span:nth-child(2) {
@@ -1635,7 +1853,7 @@ html[data-km-theme='dark'] .km-app,
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 12.5px;
+  font-size: 14px;
 }
 
 .km-rank-no {
@@ -1726,25 +1944,25 @@ html[data-km-theme='dark'] .km-app,
 }
 
 .km-tl b {
-  font-size: 13.5px;
+  font-size: 15px;
 }
 
 .km-tl-time {
   margin-left: 8px;
   color: var(--km-ink-faint);
-  font-size: 11px;
+  font-size: 12.5px;
 }
 
 .km-tl p {
   margin: 3px 0 0;
   color: var(--km-ink-soft);
-  font-size: 12.5px;
+  font-size: 14px;
   line-height: 1.65;
 }
 
 .km-tl.locked b,
 .km-tl.locked p {
-  color: var(--km-ink-faint);
+  color: var(--km-ink-mute);
 }
 
 @media (max-width: 900px) {
@@ -1852,7 +2070,7 @@ html[data-km-theme='dark'] .km-app,
   .km-brand {
     grid-area: brand;
     gap: 8px;
-    font-size: 15px;
+    font-size: 17px;
   }
 
   .km-brand img {
@@ -1863,7 +2081,7 @@ html[data-km-theme='dark'] .km-app,
   .km-coin {
     grid-area: coin;
     padding: 3px 9px;
-    font-size: 11px;
+    font-size: 12.5px;
   }
 
   .km-coin i {
@@ -1898,34 +2116,26 @@ html[data-km-theme='dark'] .km-app,
   }
 
   .km-stat b {
-    font-size: 17px;
+    font-size: 19px;
   }
 
   .km-stat span {
-    font-size: 11px;
+    font-size: 12.5px;
   }
 
-  /* 悬浮球缩小并避开卡片 */
+  /* 悬浮球缩小并避开底部安全区 */
   .ai-fab {
     right: 12px;
     bottom: calc(14px + env(safe-area-inset-bottom, 0px));
-    gap: 8px;
-    padding: 5px 14px 5px 5px;
+    width: 52px;
+    height: 52px;
+    padding: 0;
   }
 
-  .ai-fab-face {
-    width: 34px;
-    height: 34px;
-  }
-
+  .ai-fab-face,
   .ai-fab-face img {
-    width: 30px;
-    height: 30px;
-  }
-
-  /* 手机上副标题会被挤成两行，只留「问凯喵」三个字 */
-  .ai-fab-text em {
-    display: none;
+    width: 42px;
+    height: 42px;
   }
 
   .km-content {
@@ -1952,18 +2162,18 @@ html[data-km-theme='dark'] .km-app,
 
 .km-nav-item {
   padding: 6px 11px;
-  font-size: 13.5px;
+  font-size: 15px;
   line-height: 1.5;
 }
 
 .km-nav-sep {
   margin: 8px 6px 2px;
-  font-size: 10.5px;
+  font-size: 12px;
 }
 
 .km-nav-foot {
   padding: 8px 8px 2px;
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1.55;
 }
 
@@ -2003,7 +2213,7 @@ html[data-km-theme='dark'] .km-app,
   .km-stat span {
     display: block;
     overflow: hidden;
-    font-size: 10.5px;
+    font-size: 12px;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -2011,7 +2221,7 @@ html[data-km-theme='dark'] .km-app,
   /* 12) 移动端侧栏项再小一档，横滑条不至于太长 */
   .km-nav-item {
     padding: 6px 11px;
-    font-size: 12.5px;
+    font-size: 14px;
   }
 }
 
@@ -2029,18 +2239,18 @@ html[data-km-theme='dark'] .km-app,
 
 .km-nav-item {
   padding: 6px 11px;
-  font-size: 13.5px;
+  font-size: 15px;
   line-height: 1.5;
 }
 
 .km-nav-sep {
   margin: 8px 6px 2px;
-  font-size: 10.5px;
+  font-size: 12px;
 }
 
 .km-nav-foot {
   padding: 8px 8px 2px;
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1.55;
 }
 
@@ -2080,7 +2290,7 @@ html[data-km-theme='dark'] .km-app,
   .km-stat span {
     display: block;
     overflow: hidden;
-    font-size: 10.5px;
+    font-size: 12px;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -2088,17 +2298,14 @@ html[data-km-theme='dark'] .km-app,
   /* 12) 移动端侧栏项再小一档，横滑条不至于太长 */
   .km-nav-item {
     padding: 6px 11px;
-    font-size: 12.5px;
+    font-size: 14px;
   }
 }
 
-/* 10) 桌面宽屏（右栏可见）时隐藏右下浮动球：
-   右栏凯喵立绘本就可点击开 AI，避免浮动球压住「快捷入口」。 */
-@media (min-width: 1181px) {
-  .ai-fab {
-    display: none;
-  }
-}
+/* 10) 宽屏（右栏可见）也保留悬浮球（主人 2026-10-30 定：三栏 + 悬浮球）。
+   以前这里用 display:none 藏掉它，理由是会压住右栏「快捷入口」；
+   现在球只有 58px、贴右下角，右栏底部是留白，不再挡内容。
+   定位交给 styles.css 的 .ai-fab / ≥1200px 规则，这里不再重复覆盖。 */
 
 .km-cat-card--btn {
   cursor: pointer;
@@ -2132,7 +2339,7 @@ html[data-km-theme='dark'] .km-app,
   padding: 2px 9px;
   border: 1px solid var(--km-line);
   border-radius: 99px;
-  font-size: 11px;
+  font-size: 12.5px;
   color: var(--km-accent-ink);
   background: var(--km-accent-soft);
   white-space: nowrap;
@@ -2149,13 +2356,13 @@ html[data-km-theme='dark'] .km-app,
   border-radius: var(--km-r-xs);
   background: #eff6ff;
   color: #1d4ed8;
-  font-size: 13px;
+  font-size: 14.5px;
   line-height: 1.65;
 }
 
 .jp-blocked-icon {
   flex: 0 0 auto;
-  font-size: 14px;
+  font-size: 15.5px;
   line-height: 1.4;
 }
 
@@ -2165,7 +2372,7 @@ html[data-km-theme='dark'] .km-app,
   border-radius: var(--km-r-xs);
   background: var(--km-sunk);
   color: var(--km-accent-ink);
-  font-size: 12px;
+  font-size: 13.5px;
 }
 
 /* 题面（Markdown 渲染结果） */
@@ -2175,7 +2382,7 @@ html[data-km-theme='dark'] .km-app,
   border: 1px solid var(--km-line2);
   border-radius: var(--km-r-sm);
   background: var(--km-surf1);
-  font-size: 13.5px;
+  font-size: 15px;
   line-height: 1.75;
   color: var(--km-ink);
 }
@@ -2198,15 +2405,15 @@ html[data-km-theme='dark'] .km-app,
 }
 
 .md-body h1 {
-  font-size: 18px;
+  font-size: 20px;
 }
 
 .md-body h2 {
-  font-size: 16px;
+  font-size: 18px;
 }
 
 .md-body h3 {
-  font-size: 14.5px;
+  font-size: 16px;
 }
 
 .md-body p {
@@ -2237,7 +2444,7 @@ html[data-km-theme='dark'] .km-app,
   border-radius: var(--km-r-xs);
   background: var(--km-sunk);
   overflow-x: auto;
-  font-size: 12.5px;
+  font-size: 14px;
   line-height: 1.6;
 }
 
@@ -2268,7 +2475,7 @@ html[data-km-theme='dark'] .km-app,
 .md-body table {
   border-collapse: collapse;
   width: 100%;
-  font-size: 12.5px;
+  font-size: 14px;
 }
 
 .md-body th,
@@ -2307,12 +2514,12 @@ html[data-km-theme='dark'] .km-app,
 
 .jp-title {
   margin: 0 0 12px;
-  font-size: 20px;
+  font-size: 22.5px;
 }
 
 .jp-subtitle {
   margin: 16px 0 8px;
-  font-size: 15px;
+  font-size: 17px;
 }
 
 .jp-row {
@@ -2324,7 +2531,7 @@ html[data-km-theme='dark'] .km-app,
 }
 
 .jp-label {
-  font-size: 13px;
+  font-size: 14.5px;
   color: var(--km-ink-soft);
 }
 
@@ -2335,14 +2542,14 @@ html[data-km-theme='dark'] .km-app,
   border-radius: var(--km-r-xs);
   background: var(--km-surf1);
   color: var(--km-ink);
-  font-size: 13px;
+  font-size: 14.5px;
 }
 
 .jp-btn {
   height: 34px;
   padding: 0 16px;
   border-radius: var(--km-r-xs);
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
@@ -2385,7 +2592,7 @@ html[data-km-theme='dark'] .km-app,
   background: var(--km-surf2);
   color: var(--km-ink);
   font-family: ui-monospace, Consolas, monospace;
-  font-size: 13px;
+  font-size: 14.5px;
   line-height: 1.6;
   resize: vertical;
   box-sizing: border-box;
@@ -2412,7 +2619,7 @@ html[data-km-theme='dark'] .km-app,
   border-radius: var(--km-r-xs);
   background: var(--km-surf1);
   color: var(--km-ink);
-  font-size: 13px;
+  font-size: 14.5px;
 }
 
 .jp-banner,
@@ -2420,7 +2627,7 @@ html[data-km-theme='dark'] .km-app,
   margin-bottom: 12px;
   padding: 8px 12px;
   border-radius: var(--km-r-xs);
-  font-size: 13px;
+  font-size: 14.5px;
   line-height: 1.6;
 }
 
@@ -2458,23 +2665,23 @@ html[data-km-theme='dark'] .km-app,
   padding: 2px 10px;
   border: 1px solid;
   border-radius: 99px;
-  font-size: 12px;
+  font-size: 13.5px;
   font-weight: 600;
   cursor: help;
 }
 
 .jp-case-title {
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 500;
 }
 
 .jp-meta {
-  font-size: 12px;
+  font-size: 13.5px;
   color: var(--km-ink-faint);
 }
 
 .jp-reason {
-  font-size: 12px;
+  font-size: 13.5px;
   color: var(--km-bad);
 }
 
@@ -2485,7 +2692,7 @@ html[data-km-theme='dark'] .km-app,
   border-radius: 6px;
   background: var(--km-sunk);
   color: var(--km-ink);
-  font-size: 12px;
+  font-size: 13.5px;
   overflow-x: auto;
 }
 
@@ -2524,7 +2731,7 @@ html[data-km-theme='dark'] .km-app,
 
   .jp-editor {
     min-height: 200px;
-    font-size: 12.5px;
+    font-size: 14px;
   }
 }
 
@@ -2541,7 +2748,7 @@ html[data-km-theme='dark'] .km-app,
 }
 
 .lan-label {
-  font-size: 13px;
+  font-size: 14.5px;
   color: var(--km-ink-soft);
   white-space: nowrap;
 }
@@ -2559,7 +2766,7 @@ html[data-km-theme='dark'] .km-app,
   border-radius: var(--km-r-xs);
   background: var(--km-surf2);
   color: var(--km-ink);
-  font-size: 13px;
+  font-size: 14.5px;
 }
 
 .lan-select {
@@ -2569,7 +2776,7 @@ html[data-km-theme='dark'] .km-app,
   border-radius: var(--km-r-xs);
   background: var(--km-surf1);
   color: var(--km-ink);
-  font-size: 13px;
+  font-size: 14.5px;
 }
 
 .lan-btn {
@@ -2579,7 +2786,7 @@ html[data-km-theme='dark'] .km-app,
   border-radius: var(--km-r-xs);
   background: var(--km-accent);
   color: #fff;
-  font-size: 13px;
+  font-size: 14.5px;
   white-space: nowrap;
   cursor: pointer;
 }
@@ -2597,7 +2804,7 @@ html[data-km-theme='dark'] .km-app,
 
 .lan-msg {
   width: 100%;
-  font-size: 12px;
+  font-size: 13.5px;
   line-height: 1.6;
   white-space: pre-wrap;
   color: var(--km-ink-soft);
@@ -2622,7 +2829,7 @@ html[data-km-theme='dark'] .km-app,
 
 .help-steps li {
   color: var(--km-ink-soft);
-  font-size: 13px;
+  font-size: 14.5px;
   line-height: 1.7;
 }
 
@@ -2630,7 +2837,7 @@ html[data-km-theme='dark'] .km-app,
   display: block;
   margin-bottom: 2px;
   color: var(--km-ink);
-  font-size: 13.5px;
+  font-size: 15px;
 }
 
 .help-actions {
@@ -2654,7 +2861,7 @@ html[data-km-theme='dark'] .km-app,
 }
 
 .help-pane b {
-  font-size: 13px;
+  font-size: 14.5px;
 }
 
 .help-pane p {
@@ -2670,14 +2877,14 @@ html[data-km-theme='dark'] .km-app,
 
 .help-faq dt {
   color: var(--km-ink);
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 600;
 }
 
 .help-faq dd {
   margin: 4px 0 0;
   color: var(--km-ink-soft);
-  font-size: 12.5px;
+  font-size: 14px;
   line-height: 1.7;
 }
 
@@ -2698,6 +2905,27 @@ html[data-km-theme='dark'] .km-app,
 
 .km-account-head h3 {
   margin: 0 0 4px;
+}
+
+/* 改昵称：一行放下「输入 + 保存 + 取消」，窄屏时自动折行 */
+.km-name-edit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.km-name-edit .km-input {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+/* 提示独占一行，不把按钮挤成两行 */
+.km-name-msg {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--km-warn, #b4690e);
 }
 
 .km-login-box {
@@ -2739,7 +2967,7 @@ html[data-km-theme='dark'] .km-app,
   background: transparent;
   color: var(--km-ink-soft);
   font: inherit;
-  font-size: 12.5px;
+  font-size: 14px;
   cursor: pointer;
   transition: background 0.16s ease, color 0.16s ease;
 }
@@ -2783,7 +3011,7 @@ html[data-km-theme='dark'] .km-app,
   flex: 1 1 190px;
   min-width: 0;
   color: var(--km-ink-faint);
-  font-size: 12px;
+  font-size: 13.5px;
   line-height: 1.6;
 }
 
@@ -2859,7 +3087,7 @@ html[data-km-theme='dark'] .km-app,
   border-radius: 99px;
   background: var(--km-sunk);
   color: var(--km-accent-ink);
-  font-size: 12px;
+  font-size: 13.5px;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -2920,7 +3148,7 @@ html[data-km-theme='dark'] .km-app,
 }
 
 .km-rail-head b {
-  font-size: 14px;
+  font-size: 15.5px;
 }
 
 .km-rail-head button {
@@ -2981,7 +3209,7 @@ html[data-km-theme='dark'] .km-app,
 
 .km-nav-sheet .km-nav-item {
   padding: 10px 12px;
-  font-size: 13px;
+  font-size: 14.5px;
 }
 
 @media (max-width: 1180px) {
@@ -3015,7 +3243,7 @@ html[data-km-theme='dark'] .km-app,
     border-left: 1px solid var(--km-line);
     background: var(--km-surf1);
     color: var(--km-accent-ink);
-    font-size: 12.5px;
+    font-size: 14px;
     font-weight: 700;
     white-space: nowrap;
   }
@@ -3034,6 +3262,12 @@ html[data-km-theme='dark'] .km-app,
 
   /* 顶栏一行只放得下：头像 / 金币 / 目标 / 搜索·主题·设置 */
   .km-brand span {
+    display: none;
+  }
+
+  /* 手机上横幅一行放不下「地址 + 重试 + 怎么修」，先把地址收掉——
+     地址是给排障的人看的，不是给用户看的；「怎么修」里仍有完整地址。 */
+  .km-offline-base {
     display: none;
   }
 }
@@ -3065,7 +3299,7 @@ html[data-km-theme='dark'] .km-app,
   border-radius: var(--km-r-xs);
   background: none;
   color: var(--km-ink-soft);
-  font-size: 14px;
+  font-size: 15.5px;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.16s, color 0.16s;
@@ -3085,7 +3319,7 @@ html[data-km-theme='dark'] .km-app,
 .bank-tab i {
   max-width: 130px;
   overflow: hidden;
-  font-size: 11px;
+  font-size: 12.5px;
   font-style: normal;
   font-weight: 500;
   color: var(--km-ink-faint);
@@ -3100,7 +3334,7 @@ html[data-km-theme='dark'] .km-app,
   border-radius: var(--km-r-xs);
   background: none;
   color: var(--km-ink-soft);
-  font-size: 12px;
+  font-size: 13.5px;
   cursor: pointer;
 }
 
@@ -3128,7 +3362,7 @@ html[data-km-theme='dark'] .km-app,
   border: 1px solid var(--km-line);
   border-radius: var(--km-r-xs);
   background: #fff;
-  font-size: 13px;
+  font-size: 14.5px;
   color: var(--km-ink);
   outline: none;
 }
@@ -3153,14 +3387,14 @@ html[data-km-theme='dark'] .km-app,
   border-radius: 999px;
   background: #fff;
   color: var(--km-ink-soft);
-  font-size: 12px;
+  font-size: 13.5px;
   cursor: pointer;
   transition: all 0.16s;
 }
 
 .bank-chip i {
   font-style: normal;
-  font-size: 11px;
+  font-size: 12.5px;
   color: var(--km-ink-faint);
 }
 
@@ -3191,7 +3425,7 @@ html[data-km-theme='dark'] .km-app,
   border: 1px solid var(--km-line);
   border-radius: var(--km-r-xs);
   background: #fff;
-  font-size: 12px;
+  font-size: 13.5px;
   color: var(--km-ink);
   cursor: pointer;
 }
@@ -3200,7 +3434,7 @@ html[data-km-theme='dark'] .km-app,
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 12px;
+  font-size: 13.5px;
   color: var(--km-ink-soft);
   cursor: pointer;
   user-select: none;
@@ -3219,7 +3453,7 @@ html[data-km-theme='dark'] .km-app,
   border-left: 3px solid var(--km-accent);
   border-radius: var(--km-r-xs);
   background: var(--km-accent-soft);
-  font-size: 12px;
+  font-size: 13.5px;
   color: var(--km-accent-ink);
 }
 
@@ -3228,7 +3462,7 @@ html[data-km-theme='dark'] .km-app,
   border: 0;
   background: none;
   color: var(--km-accent-ink);
-  font-size: 12px;
+  font-size: 13.5px;
   text-decoration: underline;
   cursor: pointer;
 }
@@ -3304,7 +3538,7 @@ html[data-km-theme='dark'] .km-app,
 
 .bank-item-main b {
   overflow: hidden;
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 600;
   color: var(--km-ink);
   text-overflow: ellipsis;
@@ -3313,7 +3547,7 @@ html[data-km-theme='dark'] .km-app,
 
 .bank-item-main span {
   overflow: hidden;
-  font-size: 11px;
+  font-size: 12.5px;
   color: var(--km-ink-faint);
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -3321,7 +3555,7 @@ html[data-km-theme='dark'] .km-app,
 
 .bank-mark {
   flex: none;
-  font-size: 11px;
+  font-size: 12.5px;
   color: var(--km-accent);
 }
 
@@ -3342,7 +3576,7 @@ html[data-km-theme='dark'] .km-app,
   gap: 6px;
   padding: 3px 10px;
   border-radius: 999px;
-  font-size: 12px;
+  font-size: 13.5px;
   line-height: 1.6;
   border: 1px solid var(--km-border);
   background: var(--km-bg-soft);
@@ -3373,7 +3607,7 @@ html[data-km-theme='dark'] .km-app,
   padding: 2px 7px;
   border: 1px solid transparent;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -3393,7 +3627,7 @@ html[data-km-theme='dark'] .km-app,
   border: 1px dashed var(--km-line);
   border-radius: var(--km-r-sm);
   color: var(--km-ink-faint);
-  font-size: 13px;
+  font-size: 14.5px;
   text-align: center;
 }
 
@@ -3415,7 +3649,7 @@ html[data-km-theme='dark'] .km-app,
 
 .bank-detail-head h3 {
   margin: 0 0 6px;
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1.45;
   color: var(--km-ink);
 }
@@ -3425,7 +3659,7 @@ html[data-km-theme='dark'] .km-app,
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  font-size: 11px;
+  font-size: 12.5px;
   color: var(--km-ink-faint);
 }
 
@@ -3443,7 +3677,7 @@ html[data-km-theme='dark'] .km-app,
   border-radius: 8px;
   background: none;
   color: var(--km-ink-soft);
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1;
   cursor: pointer;
 }
@@ -3476,7 +3710,7 @@ html[data-km-theme='dark'] .km-app,
   border: 1px solid var(--km-line);
   border-radius: var(--km-r-xs);
   background: #fff;
-  font-size: 13px;
+  font-size: 14.5px;
   line-height: 1.6;
   text-align: left;
   color: var(--km-ink);
@@ -3494,7 +3728,7 @@ html[data-km-theme='dark'] .km-app,
   height: 20px;
   border: 1px solid var(--km-line);
   border-radius: 6px;
-  font-size: 11px;
+  font-size: 12.5px;
   font-style: normal;
   font-weight: 600;
   line-height: 18px;
@@ -3547,7 +3781,7 @@ html[data-km-theme='dark'] .km-app,
   border-radius: var(--km-r-xs);
   background: #fff;
   font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
-  font-size: 12.5px;
+  font-size: 14px;
   line-height: 1.6;
   color: var(--km-ink);
   resize: vertical;
@@ -3568,7 +3802,7 @@ html[data-km-theme='dark'] .km-app,
 }
 
 .bank-verdict {
-  font-size: 12px;
+  font-size: 13.5px;
   font-weight: 600;
 }
 
@@ -3601,12 +3835,12 @@ html[data-km-theme='dark'] .km-app,
 }
 
 .bank-cta b {
-  font-size: 13px;
+  font-size: 14.5px;
   color: var(--km-accent-ink);
 }
 
 .bank-cta span {
-  font-size: 11.5px;
+  font-size: 13px;
   line-height: 1.6;
   color: var(--km-ink-soft);
 }
@@ -3650,14 +3884,14 @@ html[data-km-theme='dark'] .km-app,
 
 .bank-reveal p {
   margin: 0 0 8px;
-  font-size: 13px;
+  font-size: 14.5px;
   line-height: 1.7;
   color: var(--km-ink);
 }
 
 .bank-sub {
   margin: 12px 0 6px;
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -3678,7 +3912,7 @@ html[data-km-theme='dark'] .km-app,
   background: #0f1b28;
   color: #cfe3f5;
   font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
-  font-size: 12px;
+  font-size: 13.5px;
   line-height: 1.65;
   white-space: pre-wrap;
   word-break: break-word;
@@ -3686,13 +3920,13 @@ html[data-km-theme='dark'] .km-app,
 
 .bank-ext a {
   color: var(--km-accent-ink);
-  font-size: 12px;
+  font-size: 13.5px;
 }
 
 .bank-src,
 .bank-hint {
   margin: 10px 0 0;
-  font-size: 11px;
+  font-size: 12.5px;
   line-height: 1.6;
   color: var(--km-ink-faint);
 }
@@ -3707,7 +3941,7 @@ html[data-km-theme='dark'] .km-app,
   border: 1px solid var(--km-line2);
   border-radius: var(--km-r-sm);
   background: var(--km-surf1);
-  font-size: 12.5px;
+  font-size: 14px;
   color: var(--km-ink-soft);
 }
 
@@ -3735,12 +3969,12 @@ html[data-km-theme='dark'] .km-app,
 }
 
 .learn-bank-head b {
-  font-size: 13px;
+  font-size: 14.5px;
   color: var(--km-ink);
 }
 
 .learn-bank-head span {
-  font-size: 11.5px;
+  font-size: 13px;
   color: var(--km-ink-faint);
 }
 
@@ -3779,7 +4013,7 @@ html[data-km-theme='dark'] .km-app,
 
   .bank-tab {
     padding: 7px 12px;
-    font-size: 13px;
+    font-size: 14.5px;
   }
 
   .bank-tab i {
@@ -3789,5 +4023,220 @@ html[data-km-theme='dark'] .km-app,
   .bank-cta {
     flex-direction: column;
     align-items: stretch;
+  }
+}
+
+/* ============================================================================
+ * 启动登录网关 + 账号表单（LoginGate / LoginForm / AccountDrawer 共用）
+ * ========================================================================== */
+/* 启动登录网关。
+   原来用 grid + place-items:center 且没开滚动，卡片在 1280×720 上高 987px：
+   上下被裁、按钮全在视口外，用户连「稍后体验」都点不到，等于把 app 锁死。
+   改成 flex + 子元素 margin:auto —— 空间够时照样垂直居中，
+   不够时 margin 归零、内容从顶部开始，配合 overflow-y 可以滚到底。 */
+.km-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 20px;
+  background:
+    radial-gradient(60% 80% at 50% 0%, rgba(120, 180, 255, 0.18), transparent 70%),
+    radial-gradient(50% 70% at 80% 100%, rgba(180, 140, 255, 0.14), transparent 70%),
+    var(--km-bg, #eef3fb);
+}
+.km-gate-card {
+  margin: auto;
+  width: min(420px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 26px 24px 22px;
+  border-radius: 22px;
+}
+.km-gate-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.km-gate-brand img {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: #fff;
+  padding: 3px;
+}
+.km-gate-brand b {
+  display: block;
+  font-size: 18px;
+}
+.km-gate-brand span {
+  font-size: 12.5px;
+  color: var(--km-ink-2, #475569);
+  line-height: 1.4;
+}
+.km-gate-skip {
+  align-self: center;
+  background: none;
+  border: none;
+  color: var(--km-ink-2, #475569);
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+.km-gate-note {
+  margin: 0;
+  font-size: 12px;
+  color: var(--km-ink-faint, #94a3b8);
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* 登录表单（抽屉与网关共用） */
+.km-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.km-login-online {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.km-login-tabs {
+  display: flex;
+  gap: 6px;
+}
+.km-login-tab {
+  flex: 1;
+  padding: 9px 0;
+  border: 1px solid var(--km-line, #dbe3f0);
+  border-radius: 11px;
+  background: var(--km-surf1, #fff);
+  color: var(--km-ink-2, #475569);
+  font-size: 14px;
+  cursor: pointer;
+}
+.km-login-tab.on {
+  background: var(--km-accent, #3b82f6);
+  border-color: var(--km-accent, #3b82f6);
+  color: #fff;
+}
+.km-login-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.km-login-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.km-login-hint {
+  font-size: 12.5px;
+  color: var(--km-ink-faint, #94a3b8);
+  line-height: 1.5;
+}
+.km-login-hint.is-error {
+  color: var(--km-bad, #ef4444);
+}
+.km-login-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--km-ink-faint, #94a3b8);
+  font-size: 12px;
+}
+.km-login-divider::before,
+.km-login-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--km-line, #dbe3f0);
+}
+.km-btn-wechat {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid #1aad19;
+  background: #1aad19;
+  color: #fff;
+}
+.km-btn-wechat:hover {
+  background: #179c16;
+}
+.km-wechat-ico {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  background: #fff;
+  color: #1aad19;
+  font-size: 12px;
+  font-weight: 700;
+}
+.km-wechat-note {
+  background: rgba(26, 173, 25, 0.08);
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+.km-wechat-note code {
+  background: rgba(26, 173, 25, 0.14);
+  padding: 0 4px;
+  border-radius: 4px;
+}
+
+/* 设置页分段选择（玻璃质感 A/B） */
+.km-kv-col {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+.km-seg {
+  display: flex;
+  gap: 8px;
+}
+.km-seg-btn {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid var(--km-line, #dbe3f0);
+  border-radius: 11px;
+  background: var(--km-surf1, #fff);
+  color: var(--km-ink-2, #475569);
+  font-size: 13px;
+  cursor: pointer;
+}
+.km-seg-btn.on {
+  background: rgba(59, 130, 246, 0.12);
+  border-color: var(--km-accent, #3b82f6);
+  color: var(--km-accent, #3b82f6);
+  font-weight: 600;
+}
+
+/* ── 聚焦页：右栏整列收起，正文居中（当前只有「就业」）──────────────── */
+@media (min-width: 901px) {
+  .km-main--focus {
+    grid-template-columns: 220px 1fr;
+  }
+
+  .km-main--focus .km-right {
+    display: none;
+  }
+
+  .km-main--focus .km-content {
+    --km-pad-y: 26px;
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1180px) {
+  .km-main--focus {
+    grid-template-columns: 200px 1fr;
   }
 }

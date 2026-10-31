@@ -26,6 +26,7 @@ import { CLANG_CHAPTERS } from '../data/clangUnits';
 import { SubjectSwitch } from '../components/SubjectSwitch';
 import { subjectLabel, useSubject } from '../lib/subject';
 import { chapterMastery, resetChapter, useProgress } from '../lib/progress';
+import { STORY_BY_CHAPTER, isTeaser } from '../data/story';
 import { chapterBankStats, focusChapter, TYPE_META, type BankType } from '../lib/exerciseBank';
 import { challengeQuestion } from '../lib/challenge';
 import { chapterDeps, chapterName, masteryOfChapter, subjectMastery, UNLOCK_MASTERY } from '../lib/graph';
@@ -275,6 +276,23 @@ export function LearnPage({ onNavigate }: { onNavigate?: (p: KmPage) => void }) 
               <p style={{ margin: '12px 0 0', color: 'var(--km-ink-soft)', fontSize: 13, lineHeight: 1.8 }}>
                 {c.summary}
               </p>
+
+              {/*
+                本章旁白（P3 · C4）：一句话把这一章的认知点说完。
+                pitfall / scene 类未完成也能读——它讲的是"当初怎么想错的"，提前读是钩子；
+                archive 类必须掌握度 ≥ 60%，因为它已经给出半个答案。
+              */}
+              {(() => {
+                const line = STORY_BY_CHAPTER[c.id];
+                if (!line) return null;
+                const open = mastery >= 60 || isTeaser(line.tone);
+                return (
+                  <div className={`km-chapter-line${open ? '' : ' locked'}`}>
+                    <span className="km-chapter-line-tag">{open ? '本章旁白' : '旁白未解锁'}</span>
+                    <p>{open ? line.line : `掌握度达到 60% 后解锁。锚点：${line.anchor}`}</p>
+                  </div>
+                );
+              })()}
               {deps.length > 0 && (
                 <p className="km-hint">
                   前置：

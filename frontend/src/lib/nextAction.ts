@@ -26,7 +26,18 @@
 import { BUNDLE } from '../data/bundle';
 import { dailyProgress } from './daily';
 import type { DailyRun, ProgressState } from './gameTypes';
-import { currentChapter, masteryOfChapter, nextChapter, projectGate, unlockedProjects } from './graph';
+import {
+  UNLOCK_MASTERY,
+  chapterDeps,
+  chapterName,
+  chapterRef,
+  chaptersOfSubject,
+  currentChapter,
+  masteryOfChapter,
+  nextChapter,
+  projectGate,
+  unlockedProjects,
+} from './graph';
 import { isUnlocked } from './logicChain';
 import type { KmPage } from './nav';
 import { subjectLabel } from './subject';
@@ -44,6 +55,14 @@ export interface NextAction {
   questionId?: string;
   /** 章节关：要定位的章节 */
   chapterId?: string;
+  /**
+   * 5b 档专用：这一章在别的学科里，点 CTA 时要先切学科。
+   *
+   * 为什么不得不加：data-ch01 的前置是 py-ch03（跨学科），
+   * 只 focusChapter 不切学科的话，学习页会打开一个"当前学科里不存在"的章节，
+   * 用户点完什么都没发生 —— 比不推还糟。
+   */
+  subject?: string;
 }
 
 export function nextAction(
@@ -134,6 +153,36 @@ export function nextAction(
       target: 'learn',
       tone: 'primary',
       chapterId: fresh.id,
+    };
+  }
+
+  /**
+   * 5b) 本科目一章都开不了 —— 说明卡在**跨学科**前置上。
+   *
+   * 真实场景：新用户选「数据分析」，而 data-ch01 的前置是 py-ch03。
+   * 没有这一档时，前面 1~5 步全部落空，最后推的是「签到」——
+   * 用户签完到，明天再进来还是签到。这不是激励，是死胡同。
+   * 所以这里直接指名"先去学哪一章"，并带上它的学科，让 CTA 能跨学科打开。
+   */
+  const stranded = chaptersOfSubject(subject)
+    .filter((c) => masteryOfChapter(c.id, st) < 100)
+    .map((c) => ({ c, missing: chapterDeps(c.id).filter((d) => masteryOfChapter(d, st) < UNLOCK_MASTERY) }))
+    .filter((x) => x.missing.length > 0)
+    // 缺口最少的先修：只差一章就能开工，比"还差五章"更值得先动
+    .sort((a, b) => a.missing.length - b.missing.length);
+
+  if (stranded.length > 0) {
+    const { c, missing } = stranded[0];
+    const gap = missing[0];
+    return {
+      kind: 'chapter',
+      title: `还有一章前置挡着：${chapterName(gap)}`,
+      subtitle: `「${c.title}」需要它先到 ${UNLOCK_MASTERY}%（共差 ${missing.length} 章）`,
+      cta: '去学那一章',
+      target: 'learn',
+      tone: 'warn',
+      chapterId: gap,
+      subject: chapterRef(gap)?.subject,
     };
   }
 

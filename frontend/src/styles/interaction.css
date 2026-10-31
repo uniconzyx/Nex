@@ -1,0 +1,246 @@
+/* ============================================================================
+ * interaction.css —— S0 统一交互骨架（策略层公共底座）
+ * ----------------------------------------------------------------------------
+ * 设计铁律（来自主人的明确要求，覆盖 design-taste-frontend 的 no-glass/no-shadow）：
+ *   保留现有「冰蓝奶白磨砂玻璃拟态 / 14px 圆角 / 柔和阴影」视觉体系。
+ *   本文件只新增「交互与动效」层，不改动任何既有卡片外观与配色令牌。
+ *   借用 skill 的「反 AI 套路」内核：统一动效层、控制反馈、reduced-motion 降级。
+ *   所有动画都能被 prefers-reduced-motion 关掉（见文件末尾）。
+ * ========================================================================== */
+
+/* ── 0. 策略层专属令牌：仅新增，不覆盖 --km-* 既有值 ─────────────────────── */
+:root {
+  --km-rarity-1: #8aa0b8; /* 普通 */
+  --km-rarity-2: #5b9bd5; /* 稀有 · 冰蓝主色 */
+  --km-rarity-3: #7fd1c4; /* 史诗 · 青绿梯度（避开紫，贴合冰蓝体系） */
+  --km-rarity-4: #e3b44f; /* 传说 · 暖金点缀 */
+  --km-bond: #6fd3c0;     /* 羁绊高亮 */
+  --km-particle: rgba(91, 155, 213, 0.55);
+}
+
+/* ── 1. 隐藏滚动条（保留滚动能力） ─────────────────────────────────────── */
+.km-scroll-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.km-scroll-hide::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+/* ── 2. 页面/容器顺滑淡入（复用 game.css 的 km-page-in 关键帧） ──────────── */
+.km-fade-in {
+  animation: km-page-in 0.28s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+@keyframes km-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ── 3. 卡片按压下沉 + 柔光（统一控制反馈） ─────────────────────────────── */
+.km-press {
+  transition:
+    transform 0.12s cubic-bezier(0.22, 0.61, 0.36, 1),
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
+  will-change: transform;
+}
+.km-press--click {
+  cursor: pointer;
+}
+.km-press:active {
+  transform: translateY(1px) scale(0.985);
+  box-shadow: var(--km-sh-soft), 0 0 0 3px rgb(91 155 213 / 0.26);
+}
+.km-press:focus-visible {
+  outline: none;
+  box-shadow: var(--km-sh-soft), 0 0 0 3px rgb(91 155 213 / 0.3);
+}
+
+/* ── 4. 底部上滑弹窗（底部统一交互：所有次级操作的标准载体） ───────────── */
+.km-sheet-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 119;
+  background: rgb(9 20 32 / 0.42);
+  animation: km-fade 0.2s ease-out;
+}
+
+.km-sheet {
+  position: fixed;
+  z-index: 120;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  max-height: min(82dvh, 760px);
+  display: flex;
+  flex-direction: column;
+  padding: 6px 16px calc(20px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--km-line);
+  border-radius: 20px 20px 0 0;
+  background: var(--km-surf1);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  box-shadow: 0 -12px 40px rgb(20 40 60 / 0.22);
+  animation: km-sheet-in 0.24s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.km-sheet-grab {
+  width: 40px;
+  height: 4px;
+  margin: 6px auto 8px;
+  border-radius: 999px;
+  background: var(--km-line);
+  flex: none;
+  cursor: grab;
+  touch-action: none;
+}
+.km-sheet-grab:active {
+  cursor: grabbing;
+}
+
+.km-sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 2px 2px 10px;
+}
+.km-sheet-head b {
+  font-size: 15.5px;
+}
+.km-sheet-head button {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--km-line2);
+  border-radius: 10px;
+  background: var(--km-sunk, transparent);
+  color: var(--km-ink-soft);
+}
+
+.km-sheet-body {
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  padding-bottom: 4px;
+}
+
+/* ── 5. 长按预览浮层 ──────────────────────────────────────────────────── */
+.km-lp-anchor {
+  display: inline-flex;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.km-lp-pop {
+  position: fixed;
+  z-index: 130;
+  max-width: min(280px, 80vw);
+  padding: 10px 12px;
+  border: 1px solid var(--km-line);
+  border-radius: 14px;
+  background: var(--km-surf1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: var(--km-sh-pop);
+  animation: km-fade 0.14s ease-out;
+  pointer-events: none;
+}
+.km-lp-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+}
+.km-lp-card .km-lp-title {
+  font-weight: 600;
+  font-size: 14px;
+}
+.km-lp-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ── 6. 冰蓝粒子层（连携 / 晋升 / 合成暴击 / 赛季升级 的轻反馈） ─────────── */
+.km-particles {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+  overflow: hidden;
+}
+.km-particle {
+  position: absolute;
+  border-radius: 50%;
+  animation: km-particle-burst 0.72s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+@keyframes km-particle-burst {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--dx, 0), var(--dy, 0)) scale(0.2);
+    opacity: 0;
+  }
+}
+
+/* ── 7. 右下角凯喵 FAB 冰蓝谐振微光（仅叠加发光，不动布局） ────────────────
+ * 注意：FAB 渲染在 .km-app 之外（App 根层级），拿不到 .km-app 作用域的 --km-* 令牌，
+ * 所以这里用硬编码冰蓝色，避免 var() 在无令牌时整条声明失效。
+ */
+.ai-fab {
+  box-shadow:
+    0 12px 36px rgb(60 95 135 / 0.2),
+    0 0 0 1px rgba(91, 155, 213, 0.26),
+    0 0 18px rgba(91, 155, 213, 0.38);
+  transition: box-shadow 0.3s ease, transform 0.18s ease;
+}
+.ai-fab:active {
+  transform: scale(0.96);
+}
+.ai-fab::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: 0 0 0 0 rgba(91, 155, 213, 0.32);
+  animation: km-fab-pulse 3.4s ease-out infinite;
+}
+@keyframes km-fab-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(91, 155, 213, 0.32); }
+  70% { box-shadow: 0 0 0 14px rgba(91, 155, 213, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(91, 155, 213, 0); }
+}
+
+/* ── 8. 安全区工具类 ──────────────────────────────────────────────────── */
+.km-safe-area {
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* ── 9. 统一降级：用户偏好减少动态时，全部动效关掉 ─────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .km-sheet,
+  .km-sheet-scrim,
+  .km-fade-in,
+  .km-lp-pop,
+  .ai-fab::after {
+    animation: none !important;
+  }
+  .km-press:active {
+    transform: none;
+  }
+  .km-particle {
+    display: none;
+  }
+}

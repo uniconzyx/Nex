@@ -19,7 +19,7 @@ export function ConnectionBadge({ onNavigate }: { onNavigate: (page: 'settings')
     conn.status === 'online'
       ? `后端已连接 · ${describeCapabilities(h)}`
       : conn.status === 'offline'
-        ? '后端未连接 · 点击去设置里检查服务地址'
+        ? '后端未连接 · 点击立即重试，右键去设置里改地址'
         : '正在检测后端…';
 
   const title =
@@ -33,7 +33,17 @@ export function ConnectionBadge({ onNavigate }: { onNavigate: (page: 'settings')
       className={`km-conn-badge ${conn.status}`}
       title={title}
       aria-label={title}
-      onClick={() => onNavigate('settings')}
+      data-testid="conn-badge"
+      onClick={() => {
+        // 离线时单击直接重试（最常见的场景就是「我刚把后端起好了」）；
+        // 右键才去设置改地址——两种意图分开，不让用户点一次做两件事。
+        if (conn.status === 'offline') void conn.retry();
+        else onNavigate('settings');
+      }}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        onNavigate('settings');
+      }}
     >
       <i />
     </button>

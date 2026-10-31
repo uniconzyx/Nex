@@ -1,0 +1,106 @@
+/**
+ * AiHubPage.css —— 「AI 助手」入口页
+ * 沿用就业页那套门户排版（居中收窄 + 玻璃卡），tab 用底部色条表达选中，
+ * 不靠染色背景——玻璃质感一旦被纯色块覆盖就没了。
+ */
+.aih-root {
+  padding: 22px 20px 48px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.aih-head {
+  margin-bottom: 18px;
+}
+
+.aih-head h1 {
+  margin: 0 0 8px;
+  font-size: 26px;
+  letter-spacing: 0.5px;
+  color: var(--km-ink);
+}
+
+.aih-lede {
+  margin: 0;
+  max-width: 740px;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--km-ink-soft);
+}
+
+.aih-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.aih-tab {
+  flex: 1 1 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 12px 15px;
+  text-align: left;
+  border: 1px solid var(--km-line, #cfe0f0);
+  border-radius: var(--km-r-sm, 12px);
+  background: var(--km-surf1, rgb(255 255 255 / 0.82));
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  color: var(--km-ink);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    transform 0.14s ease,
+    border-color 0.14s ease,
+    box-shadow 0.14s ease;
+}
+
+.aih-tab b {
+  font-size: 14.5px;
+  font-weight: 700;
+}
+
+.aih-tab span {
+  font-size: 12.5px;
+  color: var(--km-ink-soft);
+}
+
+.aih-tab:hover {
+  transform: translateY(-2px);
+  border-color: var(--km-accent);
+}
+
+.aih-tab:focus-visible {
+  outline: 2px solid var(--km-accent);
+  outline-offset: 2px;
+}
+
+.aih-tab.on {
+  border-color: var(--km-accent);
+  box-shadow:
+    inset 0 -3px 0 var(--km-accent),
+    0 8px 22px rgb(60 95 135 / 0.16);
+}
+
+.aih-tab.on b {
+  color: var(--km-accent-ink, var(--km-accent));
+}
+
+.aih-panel[hidden] {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .aih-root {
+    padding: 16px 14px 40px;
+  }
+
+  .aih-head h1 {
+    font-size: 22px;
+  }
+
+  .aih-tab {
+    flex: 1 1 100%;
+  }
+}

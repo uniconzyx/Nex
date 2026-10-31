@@ -1,0 +1,301 @@
+/* ============================================================
+   液体玻璃系统（A/B 运行时切换 · 省电模式强制 A）
+   加载顺序：main.tsx 末尾，覆盖并延展 kaimao.css 的 --km-* 令牌
+   ============================================================ */
+
+/* 基础玻璃面：顶部 1px 亮白高光，所有模式共有 */
+.km-glass {
+  position: relative;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  overflow: hidden;
+}
+.km-glass::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.85);
+  pointer-events: none;
+}
+
+/* ── 强度档位（三档真实生效） ────────────────────────────────
+   方案（lg-a / lg-b）给基准值，强度档位用两个调制量二次缩放：
+     --lg-k   模糊半径乘数   <1 更省、>1 更糊
+     --lg-da  白底不透明度偏移  >0 更实、<0 更透
+   两者组合出「轻磨砂 / 标准 / 重折射」三档，不需要为每档重写一遍规则。 */
+html {
+  --lg-k: 1;
+  --lg-da: 0;
+  /* 兜底值：万一 lg-a / lg-b 都没挂上（applyLgMode 未执行 / 脚本报错），
+     下面那些 calc(var(--lg-*)) 不能解析成空值——否则整条 backdrop-filter
+     会失效，卡片从「磨砂」直接变成「完全不糊」，比没做强度还糟。 */
+  --lg-blur: 18px;
+  --lg-blur-sheet: 20px;
+  --lg-blur-chip: 16px;
+  --lg-blur-card: 16px;
+  --lg-alpha: 0.6;
+  --lg-alpha-nav: 0.55;
+  --lg-alpha-sheet: 0.74;
+  --lg-alpha-chip: 0.62;
+  --lg-sat: 150%;
+}
+html[data-lg-intensity='light'] {
+  --lg-k: 0.55;
+  --lg-da: 0.1;
+}
+html[data-lg-intensity='heavy'] {
+  --lg-k: 1.55;
+  --lg-da: -0.09;
+}
+
+/* 方案 A · 冰蓝磨砂（APK 默认：实底 + 中等模糊，性能 / 低耗电） */
+html.lg-a {
+  --lg-blur: 18px;
+  --lg-blur-sheet: 20px;
+  --lg-blur-chip: 16px;
+  --lg-blur-card: 16px;
+  --lg-alpha: 0.6;
+  --lg-alpha-nav: 0.55;
+  --lg-alpha-sheet: 0.74;
+  --lg-alpha-chip: 0.62;
+  --lg-sat: 150%;
+}
+html.lg-a .km-glass {
+  background: rgba(255, 255, 255, calc(var(--lg-alpha) + var(--lg-da)));
+  -webkit-backdrop-filter: blur(calc(var(--lg-blur) * var(--lg-k))) saturate(var(--lg-sat));
+  backdrop-filter: blur(calc(var(--lg-blur) * var(--lg-k))) saturate(var(--lg-sat));
+  box-shadow: 0 6px 22px rgba(120, 150, 200, 0.18);
+}
+html.lg-a .km-sidenav {
+  background: rgba(255, 255, 255, calc(var(--lg-alpha-nav) + var(--lg-da)));
+  -webkit-backdrop-filter: blur(calc(var(--lg-blur) * var(--lg-k))) saturate(var(--lg-sat));
+  backdrop-filter: blur(calc(var(--lg-blur) * var(--lg-k))) saturate(var(--lg-sat));
+}
+html.lg-a .km-sheet {
+  background: rgba(255, 255, 255, calc(var(--lg-alpha-sheet) + var(--lg-da)));
+  -webkit-backdrop-filter: blur(calc(var(--lg-blur-sheet) * var(--lg-k))) saturate(var(--lg-sat));
+  backdrop-filter: blur(calc(var(--lg-blur-sheet) * var(--lg-k))) saturate(var(--lg-sat));
+  box-shadow: 0 14px 44px rgba(120, 150, 200, 0.3);
+}
+html.lg-a .km-account-chip {
+  background: rgba(255, 255, 255, calc(var(--lg-alpha-chip) + var(--lg-da)));
+  -webkit-backdrop-filter: blur(calc(var(--lg-blur-chip) * var(--lg-k))) saturate(var(--lg-sat));
+  backdrop-filter: blur(calc(var(--lg-blur-chip) * var(--lg-k))) saturate(var(--lg-sat));
+}
+
+/* 方案 B · 通透折射（EXE 默认：重 blur + 色散高光边框 + 流光） */
+html.lg-b {
+  --lg-blur: 30px;
+  --lg-blur-sheet: 34px;
+  --lg-blur-chip: 22px;
+  /* B 的卡片比 A 更糊：B 的定位就是「通透折射」，卡片也得跟着透 */
+  --lg-blur-card: 26px;
+  --lg-alpha: 0.42;
+  --lg-alpha-nav: 0.34;
+  --lg-alpha-sheet: 0.5;
+  --lg-alpha-chip: 0.46;
+  --lg-sat: 180%;
+}
+html.lg-b .km-glass {
+  background: rgba(255, 255, 255, calc(var(--lg-alpha) + var(--lg-da)));
+  -webkit-backdrop-filter: blur(calc(var(--lg-blur) * var(--lg-k))) saturate(var(--lg-sat));
+  backdrop-filter: blur(calc(var(--lg-blur) * var(--lg-k))) saturate(var(--lg-sat));
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 0 0 1px rgba(140, 180, 255, 0.18),
+    0 10px 40px rgba(110, 140, 210, 0.3);
+}
+/* 流光：缓动高光横扫玻璃面 */
+html.lg-b .km-glass::after {
+  content: '';
+  position: absolute;
+  top: -40%;
+  left: -10%;
+  right: -10%;
+  height: 70%;
+  background: linear-gradient(100deg, transparent 22%, rgba(255, 255, 255, 0.45) 50%, transparent 78%);
+  transform: translateX(-60%);
+  animation: km-sheen 6s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes km-sheen {
+  0% {
+    transform: translateX(-60%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+html.lg-b .km-sidenav {
+  background: rgba(255, 255, 255, calc(var(--lg-alpha-nav) + var(--lg-da)));
+  -webkit-backdrop-filter: blur(calc(var(--lg-blur) * var(--lg-k))) saturate(var(--lg-sat));
+  backdrop-filter: blur(calc(var(--lg-blur) * var(--lg-k))) saturate(var(--lg-sat));
+  border-right: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: inset -1px 0 0 rgba(140, 180, 255, 0.18);
+}
+html.lg-b .km-sheet {
+  background: rgba(255, 255, 255, calc(var(--lg-alpha-sheet) + var(--lg-da)));
+  -webkit-backdrop-filter: blur(calc(var(--lg-blur-sheet) * var(--lg-k))) saturate(var(--lg-sat));
+  backdrop-filter: blur(calc(var(--lg-blur-sheet) * var(--lg-k))) saturate(var(--lg-sat));
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 18px 60px rgba(110, 140, 210, 0.38);
+}
+html.lg-b .km-account-chip {
+  background: rgba(255, 255, 255, calc(var(--lg-alpha-chip) + var(--lg-da)));
+  -webkit-backdrop-filter: blur(calc(var(--lg-blur-chip) * var(--lg-k))) saturate(var(--lg-sat));
+  backdrop-filter: blur(calc(var(--lg-blur-chip) * var(--lg-k))) saturate(var(--lg-sat));
+  border: 1px solid rgba(255, 255, 255, 0.55);
+}
+
+/* 减少动效：关掉流光 */
+@media (prefers-reduced-motion: reduce) {
+  html.lg-b .km-glass::after {
+    animation: none;
+    display: none;
+  }
+}
+
+/* ===== 顶部常驻账号 chip ===== */
+.km-account-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: var(--km-ink, #1f2937);
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 0.12s ease;
+}
+.km-account-chip:hover {
+  transform: translateY(-1px);
+}
+.km-account-chip:active {
+  transform: translateY(0);
+}
+.km-account-chip .km-ac-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  flex: 0 0 auto;
+}
+.km-account-chip.online .km-ac-dot {
+  background: #22c55e;
+}
+.km-account-chip .km-ac-avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #93c5fd;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* ===== 考研中枢页（KaoyanPage） ===== */
+.kaoyan-view {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.kaoyan-hero {
+  padding: 20px 22px;
+  background:
+    radial-gradient(60% 120% at 12% 0%, rgba(120, 180, 255, 0.2), transparent 70%),
+    radial-gradient(50% 120% at 92% 10%, rgba(180, 140, 255, 0.16), transparent 70%);
+}
+.kaoyan-hero h2 {
+  margin: 0 0 6px;
+  font-size: 22px;
+}
+.kaoyan-hero p {
+  margin: 0;
+  color: var(--km-ink-2, #475569);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.kaoyan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+.kaoyan-board {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px;
+  text-align: left;
+  cursor: pointer;
+  color: var(--km-ink, #1f2937);
+  font: inherit;
+}
+.kaoyan-board h3 {
+  margin: 0;
+  font-size: 17px;
+}
+.kaoyan-board .kb-role {
+  margin: 0;
+  font-size: 13px;
+  color: var(--km-ink-2, #475569);
+  line-height: 1.55;
+}
+.kaoyan-board .kb-cta {
+  margin-top: auto;
+  align-self: flex-start;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1d4ed8;
+}
+.km-tag-blue {
+  align-self: flex-start;
+  background: rgba(29, 78, 216, 0.12);
+  color: #1d4ed8;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 12px;
+}
+.kaoyan-mastery {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.kaoyan-mastery .km-track {
+  position: relative;
+  flex: 1;
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+.kaoyan-mastery .km-track > i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: 4px;
+  background: #3b82f6;
+}
+.kaoyan-mnum {
+  font-size: 12px;
+  color: var(--km-ink-2, #475569);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 账号抽屉内复用既有 km-login-*，仅做少量间距微调 */
+.km-account-drawer .km-login-fields {
+  margin-top: 4px;
+}

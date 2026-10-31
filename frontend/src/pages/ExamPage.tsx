@@ -40,10 +40,41 @@ import {
 
 // ─────────────────────────── 通用小工具 ───────────────────────────
 
-type Load<T> = { data: T | null; loading: boolean; error: string | null };
+type Load<T> = {
+  data: T | null;
+  loading: boolean;
+  error: string | null;
+  /** 手动重试：deps 不变时也能重新拉一次（Phase18 断线重连入口）。 */
+  reload: () => void;
+};
+
+/** 错误态统一入口：给出「重试」而不只是一段文字指引。 */
+function LoadError({ error, onRetry }: { error: string; onRetry: () => void }) {
+  return (
+    <div className="km-empty">
+      <b>加载失败</b>
+      <p>{error}</p>
+      <p>
+        <button
+          type="button"
+          className="km-btn km-btn-primary km-btn-sm"
+          data-testid="load-retry"
+          onClick={onRetry}
+        >
+          重试
+        </button>
+      </p>
+    </div>
+  );
+}
 
 function useExamData<T>(fn: () => Promise<T>, deps: unknown[]): Load<T> {
-  const [state, setState] = useState<Load<T>>({ data: null, loading: true, error: null });
+  const [state, setState] = useState<Omit<Load<T>, 'reload'>>({
+    data: null,
+    loading: true,
+    error: null,
+  });
+  const [nonce, setNonce] = useState(0);
   useEffect(() => {
     let cancelled = false;
     setState({ data: null, loading: true, error: null });
@@ -60,8 +91,8 @@ function useExamData<T>(fn: () => Promise<T>, deps: unknown[]): Load<T> {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps);
-  return state;
+  }, [nonce, ...deps]);
+  return { ...state, reload: () => setNonce((n) => n + 1) };
 }
 
 const TYPE_LABEL: Record<string, string> = {
@@ -204,6 +235,16 @@ export function ExamPage({ embedded = false }: { embedded?: boolean }) {
             <code>uvicorn app.main:app --host 127.0.0.1 --port 8000</code>），
             或到「设置 → 内容服务」里检查服务地址。
           </p>
+          <p>
+            <button
+              type="button"
+              className="km-btn km-btn-primary km-btn-sm"
+              data-testid="load-retry"
+              onClick={cat.reload}
+            >
+              重试
+            </button>
+          </p>
         </div>
       </div>
     );
@@ -330,10 +371,7 @@ function FrameworkView({ exam, subject }: { exam: string; subject: string }) {
         (fw.loading ? (
           <div className="km-empty">加载解题框架…</div>
         ) : fw.error ? (
-          <div className="km-empty">
-            <b>加载失败</b>
-            <p>{fw.error}</p>
-          </div>
+          <LoadError error={fw.error} onRetry={fw.reload} />
         ) : (
           <FrameworkBody doc={fw.data!} />
         ))}
@@ -342,10 +380,7 @@ function FrameworkView({ exam, subject }: { exam: string; subject: string }) {
         (kd.loading ? (
           <div className="km-empty">加载知识点…</div>
         ) : kd.error ? (
-          <div className="km-empty">
-            <b>加载失败</b>
-            <p>{kd.error}</p>
-          </div>
+          <LoadError error={kd.error} onRetry={kd.reload} />
         ) : (
           <KnowledgeBody doc={kd.data!} />
         ))}
@@ -354,10 +389,7 @@ function FrameworkView({ exam, subject }: { exam: string; subject: string }) {
         (sm.loading ? (
           <div className="km-empty">加载分类总结…</div>
         ) : sm.error ? (
-          <div className="km-empty">
-            <b>加载失败</b>
-            <p>{sm.error}</p>
-          </div>
+          <LoadError error={sm.error} onRetry={sm.reload} />
         ) : (
           <SummaryBody doc={sm.data!} exam={exam} subject={subject} />
         ))}

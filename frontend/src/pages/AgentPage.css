@@ -48,16 +48,24 @@
   flex-wrap: wrap;
 }
 
+/* flex: 1 1 160px 而非固定宽：章节下拉的选项文字长度不定（「ml-ch05 树模型与
+   集成学习」比「ml-ch01」宽一倍），auto 宽会顶出卡片，在 390px 下被 overflow
+   裁掉一截。这里让它随容器伸缩，选项文字由浏览器内部省略。 */
 .ag-field {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  flex: 1 1 160px;
+  min-width: 0;
+  max-width: 100%;
   font-size: 12px;
   color: var(--km-ink-faint);
 }
 
 .ag-field select {
-  min-width: 132px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   padding: 7px 10px;
   border-radius: var(--km-r-xs);
   border: 1px solid var(--km-line);
