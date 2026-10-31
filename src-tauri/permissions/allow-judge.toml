@@ -1,0 +1,7 @@
+# Nex 自定义权限：judge 命令（前端提交代码到沙箱判题）
+# 由 Tauri v2 在 build 期载入，capabilities/default.json 通过**裸名** `allow-judge` 引用
+# （应用自身权限不带 scope 前缀，写 nex:allow-judge 会报 Permission not found）。
+[[permission]]
+identifier = "allow-judge"
+description = "Allow the frontend to invoke the `judge` command (submit code for sandbox execution)."
+commands.allow = ["judge"]

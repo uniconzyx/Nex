@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<title>凯喵Code试炼录 · 安卓竖屏 APP 设计稿</title>
+<style>
+/* ============ 设计令牌（冰蓝奶白磨砂 · 移动端 14px 圆角） ============ */
+:root{
+  --accent:#5B9BD5; --accent-deep:#3F7DB8; --accent-ink:#2F6494; --accent-lift:#8FC0EA; --accent-soft:#D9EAF7;
+  --accent-glow:rgba(91,155,213,.38);
+  --bg1:#EEF4FB; --bg2:#CCDEEC; --bg3:#ACC7DF;
+  --surf-1:rgba(255,255,255,.86); --surf-2:rgba(255,255,255,.6); --surf-3:rgba(255,255,255,.44);
+  --surf-sunk:rgba(91,155,213,.10);
+  --ink:#26364A; --ink-soft:#54687D; --ink-faint:#8496AB;
+  --line:rgba(91,155,213,.26); --line-2:rgba(91,155,213,.14);
+  --ok:#3B9A6C; --warn:#B57F22; --bad:#C75B5B;
+  --gold:#E3B44F; --legend:#C9971F; --epic:#9B6ED8; --rare:#5B8DEF;
+  --tip-bg:rgba(255,247,226,.9); --tip-line:rgba(226,178,84,.55); --tip-ink:#7A5B14;
+  --danger-bg:rgba(255,236,233,.88); --danger-line:rgba(199,91,91,.34); --danger-ink:#8F3535;
+  --sh-soft:0 4px 16px rgba(60,95,135,.12); --sh-pop:0 10px 32px rgba(60,95,135,.20);
+  --r:14px; --r-sm:11px; --r-xs:8px;
+}
+[data-theme="dark"]{
+  --accent:#8CC0EE; --accent-deep:#6FA8DC; --accent-ink:#A9CEEE; --accent-lift:#B9DCF6; --accent-soft:#23384E;
+  --accent-glow:rgba(140,192,238,.30);
+  --bg1:#182635; --bg2:#101B28; --bg3:#0B141D;
+  --surf-1:rgba(28,43,64,.9); --surf-2:rgba(22,34,49,.7); --surf-3:rgba(18,29,42,.56);
+  --surf-sunk:rgba(140,192,238,.1);
+  --ink:#DCE8F4; --ink-soft:#9DB2C8; --ink-faint:#647C96;
+  --line:rgba(140,192,238,.18); --line-2:rgba(140,192,238,.1);
+  --ok:#4FB07E; --warn:#D9A94E; --bad:#E07575;
+  --gold:#E0B44A; --legend:#E0B44A; --epic:#B48CE8; --rare:#7BA6F5;
+  --tip-bg:rgba(66,54,30,.82); --tip-line:rgba(214,170,84,.32); --tip-ink:#E8D5A8;
+  --danger-bg:rgba(72,36,36,.76); --danger-line:rgba(199,91,91,.3); --danger-ink:#F0B8B8;
+  --sh-soft:0 4px 16px rgba(0,0,0,.32); --sh-pop:0 10px 32px rgba(0,0,0,.46);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:"HarmonyOS Sans SC","MiSans","PingFang SC","Microsoft YaHei UI","Microsoft YaHei",sans-serif;
+  background:radial-gradient(1200px 900px at 30% 0%,var(--bg1) 0%,var(--bg2) 55%,var(--bg3) 100%);
+  display:flex;align-items:center;justify-content:center;color:var(--ink);
+  transition:background .4s;overflow:hidden;
+}
+/* 手机框 */
+.phone{
+  position:relative;width:100%;max-width:430px;height:100dvh;max-height:932px;
+  display:flex;flex-direction:column;overflow:hidden;
+  background:radial-gradient(900px 680px at 25% -5%,var(--bg1) 0%,var(--bg2) 60%,var(--bg3) 100%);
+  box-shadow:0 30px 80px rgba(30,55,90,.35);
+}
+@media(min-width:460px){.phone{border-radius:38px;border:10px solid #1b2530;height:min(932px,94dvh)}}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input{font-family:inherit}
+img{user-select:none;-webkit-user-drag:none}
+
+/* ============ 动效层 ============ */
+@keyframes cardIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes viewIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes flow{to{background-position:-200% 0}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 var(--accent-glow)}50%{box-shadow:0 0 0 7px rgba(91,155,213,.12)}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes popIn{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
+@keyframes maskIn{from{opacity:0}to{opacity:1}}
+@keyframes modalIn{from{transform:scale(.92) translateY(20px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+@keyframes starFall{0%{opacity:0;transform:translateY(-20px) scale(.5)}20%{opacity:1}100%{opacity:0;transform:translateY(70vh) scale(1.1)}}
+@keyframes legendShine{0%,100%{opacity:.3}50%{opacity:.9}}
+@keyframes catBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes catShy{0%,100%{transform:translateX(0) rotate(0)}25%{transform:translateX(-4px) rotate(-3deg)}75%{transform:translateX(4px) rotate(3deg)}}
+@keyframes catWave{0%,100%{transform:rotate(0)}25%{transform:rotate(-10deg)}75%{transform:rotate(10deg)}}
+@keyframes catFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes catBlink{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.12)}}
+@keyframes catYawn{0%,100%{transform:scale(1)}50%{transform:scale(1.05) rotate(-2deg)}}
+@keyframes ptFly{to{transform:translate(var(--dx),var(--dy)) scale(0);opacity:0}}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(16px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes eggShower{0%{transform:translateY(-30px) rotate(0);opacity:0}15%{opacity:1}100%{transform:translateY(60vh) rotate(360deg);opacity:0}}
+@keyframes typing{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-4px);opacity:1}}
+.view.active .card{animation:cardIn .45s cubic-bezier(.22,.8,.32,1) backwards}
+.view.active .card:nth-child(1){animation-delay:0ms}
+.view.active .card:nth-child(2){animation-delay:60ms}
+.view.active .card:nth-child(3){animation-delay:120ms}
+.view.active .card:nth-child(4){animation-delay:180ms}
+.view.active .card:nth-child(5){animation-delay:240ms}
+.view.active .card:nth-child(6){animation-delay:300ms}
+.card:active{transform:scale(.975)}
+.btn:active{transform:scale(.95)}
+.icon-btn:active{transform:scale(.88)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+/* ============ 顶栏 ============ */
+.topbar{
+  display:flex;align-items:center;gap:10px;flex:none;
+  padding:calc(10px + env(safe-area-inset-top)) 14px 10px;
+  background:var(--surf-2);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--line-2);position:relative;z-index:30;
+}
+.brand{display:flex;align-items:center;gap:9px;min-width:0;flex:1}
+.brand .bava{width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.85);box-shadow:0 2px 8px var(--accent-glow);flex:none}
+.brand .bt{display:flex;flex-direction:column;min-width:0}
+.brand .bt b{font-size:14.5px;font-weight:800;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand .bt span{font-size:10.5px;color:var(--ink-faint);line-height:1.15}
+.lv-pill{display:none}
+.icon-btns{display:flex;align-items:center;gap:6px;flex:none}
+.icon-btn{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:18px;
+  background:var(--surf-sunk);border:1px solid var(--line-2);transition:.15s;color:var(--ink-soft)}
+.icon-btn:active{background:rgba(91,155,213,.22);color:var(--accent-ink)}
+
+/* ============ 横向滑动标签 ============ */
+.tabbar{
+  display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;flex:none;
+  padding:8px 12px;background:var(--surf-2);backdrop-filter:blur(14px);border-bottom:1px solid var(--line-2);position:relative;z-index:20;
+}
+.tabbar::-webkit-scrollbar{display:none}
+.tab{position:relative;flex:none;padding:7px 13px 9px;border-radius:11px 11px 0 0;font-size:13px;font-weight:600;color:var(--ink-soft);transition:.18s;white-space:nowrap}
+.tab .badge{position:absolute;top:2px;right:-2px;min-width:15px;height:15px;padding:0 3px;border-radius:99px;background:var(--bad);color:#fff;font-size:9px;font-weight:800;display:grid;place-items:center;box-shadow:0 0 0 2px var(--surf-2)}
+.tab:active{background:rgba(91,155,213,.14)}
+.tab.active{color:var(--accent-ink);font-weight:800}
+.tab.active::after{content:"";position:absolute;left:13px;right:13px;bottom:0;height:2.5px;border-radius:2px;background:linear-gradient(90deg,var(--accent),var(--accent-deep));box-shadow:0 0 8px var(--accent-glow)}
+
+/* ============ 主屏滚动区 ============ */
+.screen{flex:1;overflow-y:auto;scrollbar-width:none;-ms-overflow-style:none;padding:14px 13px calc(96px + env(safe-area-inset-bottom));position:relative;z-index:10}
+.screen::-webkit-scrollbar{display:none}
+.view{display:none;flex-direction:column;gap:13px;animation:viewIn .35s ease}
+.view.active{display:flex}
+.card{background:var(--surf-1);border:1px solid var(--line-2);border-radius:var(--r);padding:15px;box-shadow:var(--sh-soft);backdrop-filter:blur(10px)}
+.card h3{font-size:15px;font-weight:800;display:flex;align-items:center;gap:7px;margin-bottom:11px}
+.card h3 .em{font-size:17px}
+.card .sub{font-size:11.5px;color:var(--ink-faint);margin-top:-7px;margin-bottom:10px}
+.sec-tip{font-size:12px;color:var(--ink-soft);line-height:1.6}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 16px;border-radius:12px;font-size:13.5px;font-weight:700;transition:.15s}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent-deep));color:#fff;box-shadow:0 4px 14px var(--accent-glow)}
+.btn-gold{background:linear-gradient(135deg,#F0C85C,var(--legend));color:#fff;box-shadow:0 4px 14px rgba(201,151,31,.32)}
+.btn-ghost{background:var(--surf-sunk);color:var(--accent-ink);border:1px solid var(--line)}
+.btn-sm{padding:7px 12px;font-size:12px;border-radius:10px}
+.btn-block{width:100%}
+
+/* 星光经验条 */
+.xp-card{background:linear-gradient(135deg,rgba(91,155,213,.28),rgba(63,125,184,.14));border:1px solid var(--line)}
+.xp-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.xp-top .lv{font-size:13px;font-weight:800;color:var(--accent-ink)}
+.xp-top .xp-num{font-size:11.5px;color:var(--ink-soft)}
+.xp-bar{height:11px;border-radius:99px;background:rgba(255,255,255,.5);overflow:hidden;position:relative;box-shadow:inset 0 1px 3px rgba(60,95,135,.22)}
+[data-theme="dark"] .xp-bar{background:rgba(0,0,0,.3)}
+.xp-bar i{position:absolute;inset:0;width:64%;border-radius:99px;
+  background:linear-gradient(90deg,#BFE0FB,var(--accent) 40%,var(--accent-deep));
+  background-size:200% 100%;animation:flow 3s linear infinite;box-shadow:0 0 10px var(--accent-glow)}
+.xp-bar i::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.6),transparent);background-size:200% 100%;animation:flow 2.2s linear infinite}
+
+/* 收集率挂件 */
+.coll-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.coll-cell{background:var(--surf-2);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:11px 13px}
+.coll-cell .cc-t{font-size:11.5px;color:var(--ink-soft);display:flex;align-items:center;gap:5px}
+.coll-cell b{display:block;font-size:18px;margin-top:3px;color:var(--accent-ink)}
+.coll-cell .cc-bar{height:6px;border-radius:99px;background:var(--surf-sunk);overflow:hidden;margin-top:7px}
+.coll-cell .cc-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--accent-deep))}
+
+/* 天气 + 秘境 */
+.secret-card{display:flex;gap:13px;align-items:center;background:linear-gradient(120deg,rgba(155,110,216,.18),rgba(91,155,213,.12));border:1px solid var(--line);border-radius:var(--r-sm);padding:13px}
+.secret-card .sc-ico{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;font-size:23px;background:var(--surf-1);box-shadow:var(--sh-soft);flex:none}
+.secret-card .sc-t{flex:1;min-width:0}
+.secret-card .sc-t b{font-size:13.5px;font-weight:800;display:block}
+.secret-card .sc-t span{font-size:11.5px;color:var(--ink-soft);line-height:1.5}
+.weather-chip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;padding:4px 11px;border-radius:99px;background:rgba(91,155,213,.15);color:var(--accent-ink);border:1px solid var(--line);margin-top:8px}
+.weather-chip.sun{background:rgba(227,180,79,.16);color:var(--legend);border-color:rgba(226,178,84,.4)}
+.weather-chip.star{background:rgba(91,141,222,.18);color:var(--rare)}
+.weather-chip.dusk{background:rgba(233,140,170,.16);color:#C76E90;border-color:rgba(233,140,170,.4)}
+
+/* 快速入口 */
+.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.quick-cell{display:flex;flex-direction:column;align-items:center;gap:6px;padding:13px 6px;border-radius:var(--r-sm);background:var(--surf-2);border:1px solid var(--line-2);transition:.16s}
+.quick-cell:active{transform:scale(.94);background:rgba(91,155,213,.16)}
+.quick-cell .qe{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;font-size:21px;background:linear-gradient(135deg,rgba(91,155,213,.2),rgba(63,125,184,.12));box-shadow:var(--sh-soft)}
+.quick-cell span{font-size:11.5px;font-weight:600;color:var(--ink-soft)}
+
+/* ============ 凯喵 7 态 ============ */
+.cat-stage{position:relative;display:grid;place-items:center}
+.cat-stage .cat-aura{position:absolute;width:120px;height:120px;border-radius:50%;filter:blur(8px);transition:.4s;z-index:0}
+.cat-stage #catImg{position:relative;z-index:1;width:88px;height:88px;object-fit:contain;filter:drop-shadow(0 6px 12px var(--accent-glow));transition:filter .3s}
+.cat-sheet .cat-stage #catImg{width:168px;height:168px}
+.cat-sheet .cat-stage .cat-aura{width:212px;height:212px}
+.cat-stage .cat-float{position:absolute;z-index:2;font-size:18px;right:30%;top:8%;animation:floaty 2.6s ease-in-out infinite}
+.cat-stage[data-mood="idle"] .cat-aura{background:radial-gradient(circle,rgba(91,155,213,.26) 0%,transparent 66%)}
+.cat-stage[data-mood="think"] .cat-aura{background:radial-gradient(circle,rgba(155,110,216,.3) 0%,transparent 66%);animation:pulse 2.4s ease-in-out infinite}
+.cat-stage[data-mood="happy"] .cat-aura{background:radial-gradient(circle,rgba(59,154,108,.32) 0%,transparent 66%)}
+.cat-stage[data-mood="shy"] .cat-aura{background:radial-gradient(circle,rgba(233,140,170,.3) 0%,transparent 66%)}
+.cat-stage[data-mood="celebrate"] .cat-aura{background:radial-gradient(circle,rgba(227,180,79,.34) 0%,transparent 66%)}
+.cat-stage[data-mood="aggrieved"] .cat-aura{background:radial-gradient(circle,rgba(91,155,213,.18) 0%,transparent 66%)}
+.cat-stage[data-mood="sleepy"] .cat-aura{background:radial-gradient(circle,rgba(140,160,187,.22) 0%,transparent 66%);opacity:.85}
+.cat-stage[data-mood="celebrate"] #catImg{animation:catBounce 1.1s ease-in-out infinite}
+.cat-stage[data-mood="shy"] #catImg{animation:catShy 2.6s ease-in-out infinite}
+.cat-stage[data-mood="sleepy"] #catImg{filter:brightness(.92) saturate(.88);animation:catFloat 4s ease-in-out infinite}
+.cat-stage.act-wave #catImg{animation:catWave 1s ease-in-out}
+.cat-stage.act-peek{transform:translateX(8px);transition:transform .5s}
+.cat-stage.act-tilt #catImg{animation:catShy 1.2s ease-in-out}
+.cat-stage.act-blink #catImg{animation:catBlink .5s ease-in-out 2}
+.cat-stage.act-yawn #catImg{animation:catYawn 1.4s ease-in-out}
+
+/* 好感度 */
+.aff-row{display:flex;align-items:center;justify-content:space-between;font-size:11.5px;color:var(--ink-soft);margin-top:8px}
+.aff-bar{height:7px;border-radius:99px;background:var(--surf-sunk);overflow:hidden;margin-top:5px;box-shadow:inset 0 1px 2px rgba(60,95,135,.2)}
+.aff-bar i{display:block;height:100%;width:64%;border-radius:99px;background:linear-gradient(90deg,#E389AA,#9B6ED8);background-size:200% 100%;animation:flow 3s linear infinite}
+
+/* ============ 关卡地图（星级章节） ============ */
+.map{position:relative;padding-left:28px}
+.map::before{content:"";position:absolute;left:12px;top:8px;bottom:8px;width:3px;border-radius:3px;background:repeating-linear-gradient(180deg,var(--line) 0 6px,transparent 6px 12px)}
+.map-node{display:flex;align-items:center;gap:12px;padding:9px 0;position:relative}
+.map-node .dot{position:absolute;left:-28px;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--surf-1);border:2px solid var(--line);transition:.2s;z-index:1}
+.map-node .dot svg{width:12px;height:12px}
+.map-node.done .dot{background:linear-gradient(135deg,var(--accent),var(--accent-deep));border-color:transparent;color:#fff;box-shadow:0 0 9px var(--accent-glow)}
+.map-node.current .dot{border-color:var(--accent);color:var(--accent-ink);animation:pulse 1.8s ease-out infinite}
+.map-node.locked .dot{color:var(--ink-faint)}
+.map-node .ni{flex:1;min-width:0}
+.map-node .ni b{font-size:14px;font-weight:700;display:block}
+.map-node .ni span{font-size:11.5px;color:var(--ink-soft)}
+.map-node.locked .ni b,.map-node.locked .ni span{color:var(--ink-faint)}
+.stars{display:flex;gap:2px;color:var(--ink-faint);flex:none}
+.stars svg{width:14px;height:14px}
+.stars .on{color:#E0A93A}
+.hidden-tag{font-size:10px;background:rgba(155,110,216,.14);color:#8A5FC7;padding:2px 9px;border-radius:99px;font-weight:700;flex:none}
+[data-theme="dark"] .hidden-tag{color:#C4A5EE}
+
+/* 题库类型 chips */
+.chips{display:flex;gap:7px;flex-wrap:wrap}
+.chip{padding:5px 13px;border-radius:99px;font-size:12px;background:var(--surf-sunk);color:var(--ink-soft);border:1px solid transparent;transition:.15s;font-weight:600}
+.chip:active{transform:scale(.95)}
+.chip.on,.chip:hover{background:rgba(91,155,213,.22);color:var(--accent-ink);border-color:var(--accent-glow)}
+
+/* 代码沙盒 */
+.sandbox{border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden;background:rgba(255,255,255,.5)}
+[data-theme="dark"] .sandbox{background:rgba(10,18,28,.5)}
+.sandbox .code-area{display:flex;font-family:Consolas,"Cascadia Code",monospace;font-size:12px;line-height:1.7}
+.sandbox .gutter{flex:none;padding:11px 7px;text-align:right;color:var(--ink-faint);background:var(--surf-sunk);user-select:none;font-size:10.5px;line-height:1.7}
+.sandbox pre{padding:11px 11px;overflow-x:auto;white-space:pre;flex:1;color:var(--ink);line-height:1.7}
+.sandbox .k{color:var(--accent-deep);font-weight:700}
+.sandbox .s{color:var(--ok)}
+.sandbox .c{color:var(--ink-faint);font-style:italic}
+.sandbox .f{color:var(--warn)}
+.sandbox .out{border-top:1px dashed var(--line);padding:9px 12px;font-family:Consolas,monospace;font-size:12px;color:var(--ink-soft);min-height:34px;background:var(--surf-sunk);white-space:pre-wrap}
+.sandbox .out b{color:var(--ok)}
+.sandbox-btns{display:flex;gap:9px;margin-top:10px}
+.field{width:100%;padding:10px 12px;border-radius:11px;border:1px solid rgba(91,155,213,.32);background:rgba(255,255,255,.55);font-size:13px;color:var(--ink);outline:none;transition:.18s}
+[data-theme="dark"] .field{background:rgba(16,26,38,.55)}
+.field::placeholder{color:var(--ink-faint)}
+.field:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow);background:rgba(255,255,255,.75)}
+[data-theme="dark"] .field:focus{background:rgba(22,34,49,.8)}
+
+/* BOSS */
+.boss-card{display:flex;gap:13px;align-items:center;padding:12px;border-radius:var(--r-sm);background:var(--surf-sunk);border:1px solid var(--line-2);transition:.16s}
+.boss-card:active{transform:scale(.98);background:rgba(91,155,213,.16)}
+.boss-emoji{width:56px;height:56px;border-radius:var(--r-sm);display:grid;place-items:center;font-size:28px;background:linear-gradient(135deg,rgba(199,91,91,.15),rgba(91,155,213,.15));flex:none}
+.boss-card .b-info{flex:1;min-width:0}
+.boss-card .b-info b{font-size:14.5px;font-weight:800;display:block}
+.boss-card .b-info p{font-size:12px;color:var(--ink-soft);margin:3px 0 7px;line-height:1.5}
+.boss-card.locked{opacity:.72}
+.boss-card.locked .boss-emoji{filter:grayscale(.6)}
+.chap-badge{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:99px;background:rgba(201,151,31,.16);color:var(--legend);border:1px solid rgba(201,151,31,.3)}
+
+/* 错题怪物 / 图鉴 */
+.monster{display:flex;align-items:center;gap:12px;background:var(--surf-sunk);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:11px;margin-bottom:9px;transition:.18s}
+.monster:active{transform:scale(.985);background:rgba(91,155,213,.16)}
+.monster .mimg{width:44px;height:44px;border-radius:var(--r-xs);flex:none;display:grid;place-items:center;background:linear-gradient(135deg,rgba(199,91,91,.16),rgba(155,110,216,.14));font-size:20px}
+.monster .mi{flex:1;min-width:0}
+.monster .mi b{font-size:13.5px;font-weight:700;display:block}
+.monster .mtags{display:flex;gap:5px;margin-top:4px;flex-wrap:wrap}
+.tag{font-size:10px;padding:2px 8px;border-radius:99px;font-weight:700;flex:none}
+.tag-bad{background:rgba(199,91,91,.15);color:var(--bad)}
+.tag-warn{background:rgba(181,127,34,.15);color:var(--warn)}
+.tag-gray{background:rgba(132,150,171,.16);color:var(--ink-soft)}
+.tag-lv{background:rgba(201,151,31,.16);color:var(--legend)}
+.monster .code-preview{font-family:Consolas,monospace;font-size:10.5px;color:var(--ink-soft);background:var(--surf-sunk);border-radius:6px;padding:2px 7px;margin-top:5px;display:inline-block}
+.monster.evolved .mimg{background:linear-gradient(135deg,rgba(59,154,108,.2),rgba(91,155,213,.18))}
+/* 救赎：黑化→守护精灵 */
+.redeem-row{display:flex;align-items:center;gap:10px;padding:11px;border-radius:var(--r-sm);background:rgba(38,40,52,.06);border:1px solid var(--line-2);margin-bottom:9px}
+[data-theme="dark"] .redeem-row{background:rgba(0,0,0,.2)}
+.redeem-row .rx{width:42px;height:42px;border-radius:var(--r-xs);display:grid;place-items:center;font-size:20px;flex:none}
+.redeem-row .rx.dark{background:linear-gradient(135deg,rgba(60,30,80,.3),rgba(40,40,60,.25));filter:grayscale(.4)}
+.redeem-row .rx.guard{background:linear-gradient(135deg,rgba(59,154,108,.22),rgba(91,155,213,.18))}
+.redeem-row .ri{flex:1;min-width:0}
+.redeem-row .ri b{font-size:13px;font-weight:700;display:block}
+.redeem-row .ri span{font-size:11px;color:var(--ink-soft)}
+
+/* 排行榜 */
+.rank-row{display:flex;align-items:center;gap:11px;padding:10px 2px;border-bottom:1px dashed var(--line-2)}
+.rank-row:last-child{border:none}
+.rank-row .no{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-size:12px;font-weight:800;background:var(--surf-sunk);color:var(--ink-soft);flex:none}
+.rank-row.top1 .no{background:linear-gradient(135deg,#F0C85C,#C9971F);color:#fff}
+.rank-row.top2 .no{background:linear-gradient(135deg,#C9D6E4,#9DB2C8);color:#fff}
+.rank-row.top3 .no{background:linear-gradient(135deg,#E0A377,#C57B4A);color:#fff}
+.rank-row .av{width:32px;height:32px;border-radius:50%;object-fit:cover;flex:none;border:1.5px solid var(--line)}
+.rank-row .ri{flex:1;min-width:0}
+.rank-row .ri b{font-size:13px;display:block}
+.rank-row .ri span{font-size:11px;color:var(--ink-faint)}
+.rank-row .rv{font-size:14px;font-weight:800;color:var(--accent-ink)}
+
+/* 背包 */
+.bag-tabs{display:flex;gap:7px;margin-bottom:13px}
+.bag-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+.item{aspect-ratio:1;border-radius:var(--r-sm);background:var(--surf-1);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:.16s;position:relative}
+.item:active{transform:scale(.93)}
+.item .ii{font-size:28px;filter:drop-shadow(0 2px 5px var(--accent-glow))}
+.item b{font-size:11.5px;font-weight:600;text-align:center;padding:0 4px}
+.item .n{position:absolute;top:5px;right:7px;font-size:10px;font-weight:800;color:var(--accent-ink)}
+.item.equipped{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-glow)}
+.item.locked{opacity:.5}
+
+/* 成就墙 */
+.ach-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+.ach{aspect-ratio:1;border-radius:var(--r);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:var(--surf-1);border:2px solid var(--line);padding:7px;text-align:center;position:relative;transition:.16s}
+.ach:active{transform:scale(.95)}
+.ach .ai{font-size:24px}
+.ach b{font-size:10.5px;font-weight:700;line-height:1.3}
+.ach.lock{opacity:.42;filter:grayscale(1)}
+.ach.r-rare{border-color:var(--rare)}
+.ach.r-epic{border-color:var(--epic);box-shadow:0 0 11px rgba(155,110,216,.25)}
+.ach.r-legend{border-color:var(--legend);box-shadow:0 0 15px rgba(201,151,31,.35)}
+.ach.r-legend::after{content:"";position:absolute;inset:-2px;border-radius:var(--r);pointer-events:none;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.5),transparent 40%);animation:legendShine 2.6s ease-in-out infinite}
+
+/* 打卡日历 */
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
+.cal-head b{font-size:14px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;text-align:center}
+.cal-grid .dow{font-size:10px;color:var(--ink-faint);padding:3px 0;font-weight:700}
+.cal-grid .day{aspect-ratio:1;border-radius:9px;display:grid;place-items:center;font-size:11.5px;font-weight:600;background:var(--surf-sunk);color:var(--ink-soft);position:relative;transition:.15s}
+.cal-grid .day.signed{background:linear-gradient(135deg,var(--accent),var(--accent-deep));color:#fff;box-shadow:0 3px 9px var(--accent-glow)}
+.cal-grid .day.signed::after{content:"✓";position:absolute;bottom:1px;right:3px;font-size:8px}
+.cal-grid .day.today{border:1.5px dashed var(--accent);color:var(--accent-ink)}
+.cal-grid .day.future{opacity:.32}
+.cal-grid .day:active{transform:scale(1.1)}
+.cal-rewards{display:flex;gap:7px;margin-top:13px}
+.cal-rewards .rw{flex:1;background:var(--surf-sunk);border-radius:var(--r-xs);padding:9px 5px;text-align:center;border:1px solid var(--line-2)}
+.cal-rewards .rw b{display:block;font-size:12px;font-weight:800;color:var(--accent-ink)}
+.cal-rewards .rw span{font-size:9.5px;color:var(--ink-soft)}
+.cal-rewards .rw.get{border-color:var(--legend);background:rgba(227,180,79,.12)}
+
+/* 装扮 */
+.dress-preview{display:flex;align-items:center;gap:13px;background:var(--surf-sunk);border-radius:var(--r);padding:13px;margin-bottom:13px}
+.dress-preview img{width:88px;height:88px;border-radius:15px;object-fit:contain;background:var(--surf-1);border:2px solid rgba(255,255,255,.8);box-shadow:0 4px 13px var(--accent-glow);transition:filter .3s}
+.dress-preview .dp{flex:1;min-width:0}
+.dress-preview .dp b{font-size:13.5px;font-weight:800;display:block}
+.dress-preview .dp span{font-size:11px;color:var(--ink-soft)}
+.swatch-row{display:flex;gap:10px;flex-wrap:wrap}
+.swatch{width:52px;height:52px;border-radius:50%;border:3px solid transparent;transition:.18s;position:relative;box-shadow:var(--sh-soft)}
+.swatch:active{transform:scale(.92)}
+.swatch.on{border-color:var(--accent-deep);box-shadow:0 0 0 3px var(--accent-glow)}
+.swatch .lock-ico{position:absolute;inset:0;display:grid;place-items:center;font-size:15px;background:rgba(38,54,74,.42);border-radius:50%;color:#fff}
+/* 立绘衣柜：8 套真实素材横滑卡片 */
+.dress-row{display:flex;gap:9px;overflow-x:auto;padding:2px 0 7px;scrollbar-width:none}
+.dress-row::-webkit-scrollbar{display:none}
+.dress-card{flex:0 0 auto;width:80px;display:flex;flex-direction:column;gap:5px;padding:6px;border-radius:13px;background:var(--surf-1);border:1px solid var(--line-2);font:inherit;color:inherit;transition:transform .16s,border-color .16s,box-shadow .16s}
+.dress-card:active{transform:scale(.95)}
+.dress-card .dc-img{width:100%;aspect-ratio:1;border-radius:9px;background:var(--surf-sunk);display:grid;place-items:center;overflow:hidden}
+.dress-card .dc-img img{width:100%;height:100%;object-fit:contain}
+.dress-card .dc-name{font-size:10px;text-align:center;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dress-card.on{border-color:var(--accent-deep);box-shadow:0 0 0 2px var(--accent-glow)}
+.dress-card.on .dc-name{color:var(--accent-ink);font-weight:800}
+.dress-meta .dm-row{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:var(--ink-soft);padding:5px 0}
+.dress-meta .dm-row b{color:var(--accent-ink);font-weight:800}
+
+/* 小游戏 */
+.mini-card{display:flex;align-items:center;gap:13px;padding:12px;border-radius:var(--r-sm);background:var(--surf-sunk);border:1px solid var(--line-2);transition:.16s}
+.mini-card:active{transform:scale(.985);background:rgba(91,155,213,.16)}
+.mini-card .mi-img{width:52px;height:52px;border-radius:var(--r-sm);flex:none;display:grid;place-items:center;font-size:25px;background:linear-gradient(135deg,rgba(91,155,213,.2),rgba(63,125,184,.14))}
+.mini-card .mi-t{flex:1;min-width:0}
+.mini-card .mi-t b{font-size:14px;font-weight:800;display:block}
+.mini-card .mi-t span{font-size:11.5px;color:var(--ink-soft);line-height:1.5;display:block;margin-top:2px}
+.mini-card .mc-go{color:var(--ink-faint);flex:none}
+.mem-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:13px 0}
+.mem-card{aspect-ratio:1;border-radius:var(--r-sm);display:grid;place-items:center;font-size:19px;cursor:pointer;background:linear-gradient(135deg,rgba(91,155,213,.22),rgba(63,125,184,.14));border:1.5px solid var(--line);transition:transform .18s;user-select:none;font-weight:700;color:var(--accent-ink)}
+.mem-card:active{transform:scale(.92)}
+.mem-card .face{opacity:0;transition:opacity .2s}
+.mem-card.flip .face{opacity:1}
+.mem-card.done{background:linear-gradient(135deg,var(--accent),var(--accent-deep));border-color:transparent;pointer-events:none;color:#fff}
+.mem-card.done .face{opacity:1}
+
+/* 个人档案 */
+.profile-banner{border-radius:var(--r);padding:18px;position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(91,155,213,.32),rgba(63,125,184,.18));border:1px solid var(--line)}
+.profile-banner::after{content:"";position:absolute;right:-26px;top:-26px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.2)}
+.pb-row{display:flex;align-items:center;gap:14px;position:relative;z-index:1}
+.pb-row .big-ava{width:68px;height:68px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.92);box-shadow:0 5px 17px var(--accent-glow);transition:filter .3s}
+.pb-row .pb-info{flex:1;min-width:0}
+.pb-row .pb-info b{font-size:17px;font-weight:800;display:block}
+.lv-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:#fff;margin-top:5px;background:linear-gradient(135deg,var(--accent),var(--accent-deep));padding:3px 11px;border-radius:99px;box-shadow:0 3px 9px var(--accent-glow)}
+.pb-xp{margin-top:13px;position:relative;z-index:1}
+.pb-xp .xp-bar{height:9px;border-radius:99px;background:rgba(255,255,255,.5);overflow:hidden;position:relative}
+[data-theme="dark"] .pb-xp .xp-bar{background:rgba(0,0,0,.3)}
+.pb-xp .xp-bar i{position:absolute;inset:0;width:64%;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--accent-deep));box-shadow:0 0 8px var(--accent-glow)}
+.pb-xp span{display:block;font-size:11px;color:var(--ink-soft);margin-top:5px}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center}
+.stats-grid b{display:block;font-size:20px;color:var(--accent-ink)}
+.stats-grid span{font-size:11px;color:var(--ink-soft)}
+
+/* 设置 */
+.set-row{display:flex;justify-content:space-between;align-items:center;padding:12px 2px;border-bottom:1px dashed var(--line-2)}
+.set-row:last-child{border:none}
+.set-row .sl{display:flex;align-items:center;gap:10px;font-size:13.5px}
+.set-row .sl .si{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:17px;background:var(--surf-sunk);flex:none}
+.set-row .sr{font-size:12px;color:var(--ink-faint);display:flex;align-items:center;gap:4px}
+.switch{width:44px;height:25px;border-radius:99px;background:var(--surf-sunk);position:relative;transition:.2s;border:1px solid var(--line-2);flex:none}
+.switch.on{background:linear-gradient(135deg,var(--accent),var(--accent-deep));border-color:transparent}
+.switch::after{content:"";position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.switch.on::after{left:21px}
+
+/* 提示卡三色 */
+.tip-card{background:var(--tip-bg);border:1px solid var(--tip-line);border-radius:var(--r-sm);padding:11px 13px;font-size:12px;line-height:1.6;color:var(--tip-ink)}
+.tip-card .tt{font-size:12.5px;font-weight:800;margin-bottom:5px;display:flex;align-items:center;gap:6px}
+.danger-card{background:var(--danger-bg);border:1px solid var(--danger-line);border-radius:var(--r-sm);padding:11px 13px;font-size:12px;line-height:1.6;color:var(--danger-ink)}
+.danger-card .tt{font-size:12.5px;font-weight:800;display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.danger-card code{font-family:Consolas,monospace;display:block;font-size:11px;margin-top:5px}
+.ok-card{background:rgba(59,154,108,.1);border:1px solid rgba(59,154,108,.3);border-radius:var(--r-sm);padding:11px 13px;font-size:12px;line-height:1.6;color:#2F7A54}
+
+/* ============ 凯喵悬浮钮 ============ */
+.cat-fab{position:absolute;right:14px;bottom:calc(18px + env(safe-area-inset-bottom));width:58px;height:58px;border-radius:50%;z-index:60;
+  background:linear-gradient(135deg,var(--accent),var(--accent-deep));box-shadow:0 8px 22px var(--accent-glow);display:grid;place-items:center;transition:.2s;animation:floaty 3.4s ease-in-out infinite}
+.cat-fab:active{transform:scale(.9)}
+.cat-fab img{width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))}
+.cat-fab .fab-ring{position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--accent-glow);animation:pulse 2.6s ease-out infinite}
+.cat-fab .fab-mood{position:absolute;top:-6px;right:-4px;font-size:15px;background:var(--surf-1);border-radius:50%;width:22px;height:22px;display:grid;place-items:center;box-shadow:var(--sh-soft);border:1px solid var(--line)}
+
+/* ============ 底部上滑弹窗：凯喵伙伴 ============ */
+.cat-sheet{position:fixed;inset:0;z-index:170;display:none}
+.cat-sheet.open{display:block}
+.cat-sheet .scrim{position:absolute;inset:0;background:rgba(20,30,45,.42);backdrop-filter:blur(4px);animation:maskIn .3s}
+.cat-sheet .sheet{position:absolute;left:0;right:0;bottom:0;max-width:430px;margin:0 auto;height:80dvh;max-height:760px;
+  background:var(--surf-1);backdrop-filter:blur(24px);border-radius:26px 26px 0 0;border:1px solid var(--line);border-bottom:none;
+  display:flex;flex-direction:column;padding:14px 14px calc(16px + env(safe-area-inset-bottom));box-shadow:var(--sh-pop);animation:sheetUp .42s cubic-bezier(.22,.8,.32,1)}
+.sheet-head{display:flex;align-items:center;gap:11px;padding-bottom:10px;border-bottom:1px solid var(--line-2)}
+.sheet-head .sh-ava{width:46px;height:46px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.85);box-shadow:0 3px 10px var(--accent-glow)}
+.sheet-head .sh-info{flex:1;min-width:0}
+.sheet-head .sh-info b{font-size:14px;font-weight:800;display:block}
+.sheet-head .sh-info .mood-label{font-size:11.5px;color:var(--ink-soft)}
+.sheet-head .sh-close{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;font-size:17px;background:var(--surf-sunk);color:var(--ink-soft)}
+.cat-chat{flex:1;overflow-y:auto;scrollbar-width:none;padding:12px 2px;display:flex;flex-direction:column;gap:9px}
+.cat-chat>:first-child{margin-top:auto}
+.cat-chat::-webkit-scrollbar{display:none}
+.bubble{max-width:78%;padding:10px 13px;border-radius:16px;font-size:13px;line-height:1.55;animation:popIn .25s ease}
+.bubble.me{align-self:flex-end;background:linear-gradient(135deg,var(--accent),var(--accent-deep));color:#fff;border-bottom-right-radius:5px}
+.bubble.cat{align-self:flex-start;background:var(--surf-sunk);color:var(--ink);border-bottom-left-radius:5px}
+.bubble.typing{align-self:flex-start;background:var(--surf-sunk);display:flex;gap:4px;padding:13px 15px}
+.bubble.typing i{width:6px;height:6px;border-radius:50%;background:var(--ink-faint);animation:typing 1.1s infinite}
+.bubble.typing i:nth-child(2){animation-delay:.18s}
+.bubble.typing i:nth-child(3){animation-delay:.36s}
+.cat-input{display:flex;gap:9px;align-items:center;padding-top:10px;border-top:1px solid var(--line-2)}
+.cat-input input{flex:1;padding:11px 13px;border-radius:13px;border:1px solid rgba(91,155,213,.32);background:rgba(255,255,255,.55);font-size:13px;color:var(--ink);outline:none}
+[data-theme="dark"] .cat-input input{background:rgba(16,26,38,.55)}
+.cat-input input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+.cat-input .send{width:42px;height:42px;border-radius:13px;flex:none;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),var(--accent-deep));color:#fff;box-shadow:0 4px 12px var(--accent-glow)}
+.quick-chips{display:flex;gap:7px;flex-wrap:wrap;padding-top:9px}
+.quick-chips button{flex:1;min-width:0;padding:8px 6px;border-radius:11px;font-size:11.5px;font-weight:600;background:var(--surf-sunk);color:var(--accent-ink);border:1px solid var(--line-2);transition:.15s}
+.quick-chips button:active{transform:scale(.94);background:rgba(91,155,213,.2)}
+.mood-chips{display:flex;gap:6px;flex-wrap:wrap;padding-top:9px}
+.mood-chips button{padding:5px 12px;border-radius:99px;font-size:11.5px;background:var(--surf-sunk);color:var(--ink-soft);border:1px solid transparent;transition:.15s}
+.mood-chips button.on{background:rgba(91,155,213,.22);color:var(--accent-ink);border-color:var(--accent-glow)}
+
+/* ============ 通用底部上滑弹窗（详情） ============ */
+.modal-mask{position:fixed;inset:0;z-index:200;display:none;align-items:flex-end;justify-content:center;background:rgba(20,30,45,.42);backdrop-filter:blur(4px)}
+.modal-mask.open{display:flex;animation:maskIn .3s}
+.modal{width:100%;max-width:430px;max-height:86dvh;overflow-y:auto;scrollbar-width:none;background:var(--surf-1);backdrop-filter:blur(24px);
+  border-radius:24px 24px 0 0;border:1px solid var(--line);border-bottom:none;padding:16px 15px calc(20px + env(safe-area-inset-bottom));box-shadow:var(--sh-pop);animation:sheetUp .4s cubic-bezier(.22,.8,.32,1)}
+.modal::-webkit-scrollbar{display:none}
+.mh{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;position:sticky;top:0}
+.mh b{font-size:16px;font-weight:800}
+.mh .x{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:var(--surf-sunk);color:var(--ink-soft)}
+.mh .grab{position:absolute;top:7px;left:50%;transform:translateX(-50%);width:40px;height:4px;border-radius:99px;background:var(--line);opacity:.6}
+
+/* 道具详情浮层（移动端底部居中） */
+.item-pop{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(110px + env(safe-area-inset-bottom));width:min(360px,90vw);z-index:190;
+  background:var(--surf-1);backdrop-filter:blur(18px);border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:var(--sh-pop);display:none}
+.item-pop.open{display:block;animation:popIn .25s cubic-bezier(.34,1.56,.64,1)}
+.item-pop .ip-h{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.item-pop .ip-h .ii{font-size:27px}
+.item-pop .ip-h b{font-size:14px;display:block}
+.item-pop .ip-h span{font-size:10.5px;color:var(--ink-soft);display:block}
+.item-pop p{font-size:12px;color:var(--ink-soft);line-height:1.6;margin-bottom:12px}
+
+/* 升级全屏 CG */
+.levelup{position:fixed;inset:0;z-index:300;display:none;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 40%,rgba(91,155,213,.5),rgba(20,30,45,.92));backdrop-filter:blur(8px)}
+.levelup.open{display:flex;animation:maskIn .3s}
+.stars-bg{position:absolute;inset:0;overflow:hidden}
+.stars-bg .st{position:absolute;width:4px;height:4px;border-radius:50%;background:#fff;box-shadow:0 0 8px #fff;animation:starFall 2.4s ease-in forwards}
+.lu-card{position:relative;text-align:center;padding:24px;background:var(--surf-1);border-radius:24px;border:1px solid var(--line);box-shadow:var(--sh-pop);max-width:340px;animation:modalIn .5s cubic-bezier(.34,1.56,.64,1)}
+.lu-card .lu-ava{width:90px;height:90px;border-radius:50%;object-fit:cover;margin:0 auto 12px;display:block;border:3px solid rgba(255,255,255,.9);box-shadow:0 0 26px var(--accent-glow);animation:catBounce 1s ease-in-out infinite alternate}
+.lu-card h2{font-size:21px;font-weight:800;margin-bottom:6px}
+.lu-card .lu-lv{font-size:13px;font-weight:700;color:var(--accent-ink);margin-bottom:8px}
+.lu-card p{font-size:12.5px;color:var(--ink-soft);line-height:1.6;margin-bottom:16px}
+
+/* 通关结算（复用 modal 内） */
+.settle{text-align:center}
+.settle .s-ava{width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto 10px;display:block;border:3px solid rgba(255,255,255,.9);box-shadow:0 0 24px var(--accent-glow);animation:catBounce 1s ease-in-out infinite alternate}
+.settle h2{font-size:18px;font-weight:800;margin-bottom:3px}
+.settle .s-sub{font-size:12px;color:var(--ink-soft);margin-bottom:15px}
+.settle .s-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:15px}
+.settle .s-cell{background:var(--surf-sunk);border-radius:var(--r-xs);padding:10px 5px}
+.settle .s-cell b{display:block;font-size:15px;font-weight:800;color:var(--accent-ink)}
+.settle .s-cell span{font-size:10px;color:var(--ink-soft)}
+
+/* 等级晋升轨道 */
+.lv-track{display:flex;flex-direction:column;gap:9px}
+.lv-row{display:flex;align-items:center;gap:12px;padding:11px;border-radius:var(--r-sm);background:var(--surf-sunk);border:1px solid var(--line-2)}
+.lv-row.cur{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-glow)}
+.lv-row .lv-ico{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:20px;background:var(--surf-1);flex:none}
+.lv-row .lv-info{flex:1;min-width:0}
+.lv-row .lv-info b{font-size:13.5px;font-weight:800;display:block}
+.lv-row .lv-info span{font-size:11px;color:var(--ink-soft)}
+.lv-row .lv-exp{font-size:11px;color:var(--ink-faint);font-weight:700;flex:none}
+
+/* 剧情时间轴 */
+.timeline{position:relative;padding-left:24px}
+.timeline::before{content:"";position:absolute;left:9px;top:6px;bottom:6px;width:3px;border-radius:3px;background:linear-gradient(180deg,var(--accent),var(--epic))}
+.tl-item{position:relative;padding:0 0 16px 4px}
+.tl-item .tl-dot{position:absolute;left:-24px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:11px;background:linear-gradient(135deg,var(--accent),var(--accent-deep));color:#fff;box-shadow:0 0 8px var(--accent-glow);border:2px solid var(--surf-1)}
+.tl-item.locked .tl-dot{background:var(--surf-sunk);color:var(--ink-faint);box-shadow:none}
+.tl-item .tl-card{background:var(--surf-2);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:11px 13px}
+.tl-item.locked .tl-card{opacity:.6}
+.tl-item .tl-card b{font-size:13.5px;font-weight:800;display:block}
+.tl-item .tl-card span{font-size:11.5px;color:var(--ink-soft);line-height:1.5;display:block;margin-top:3px}
+.tl-item .tl-card .tl-date{font-size:10px;color:var(--ink-faint);margin-top:5px}
+
+/* Buff 角标 */
+.buff-bar{display:flex;gap:7px;flex-wrap:wrap;margin-top:6px}
+.buff{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;background:rgba(91,155,213,.16);color:var(--accent-ink);border:1px solid var(--accent-glow);animation:floaty 2.4s ease-in-out infinite}
+.buff.gold{background:rgba(227,180,79,.16);color:var(--legend);border-color:rgba(201,151,31,.4)}
+.buff.green{background:rgba(59,154,108,.16);color:var(--ok);border-color:rgba(59,154,108,.4)}
+
+/* 搜索弹层 */
+.search-pop{position:absolute;top:calc(54px + env(safe-area-inset-top));left:12px;right:12px;z-index:80;background:var(--surf-1);backdrop-filter:blur(20px);border:1px solid var(--line);border-radius:18px;padding:13px;box-shadow:var(--sh-pop);display:none;animation:popIn .25s ease}
+.search-pop.open{display:block}
+.search-pop .sp-head{display:flex;gap:9px;align-items:center;margin-bottom:11px}
+.search-pop .sp-head input{flex:1}
+.search-res{display:flex;flex-direction:column;gap:3px;max-height:46dvh;overflow-y:auto;scrollbar-width:none}
+.search-res a{display:flex;align-items:center;gap:9px;padding:9px 4px;font-size:13px;border-bottom:1px dashed var(--line-2);color:var(--ink)}
+.search-res .sk{font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--surf-sunk);color:var(--accent-ink);flex:none}
+.search-res .empty{font-size:12px;color:var(--ink-faint);text-align:center;padding:16px 0}
+.search-res::-webkit-scrollbar{display:none}
+
+/* Toast */
+.toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:400;
+  background:rgba(38,54,74,.92);color:#fff;font-size:12.5px;font-weight:600;padding:10px 18px;border-radius:99px;
+  box-shadow:0 8px 24px rgba(0,0,0,.3);opacity:0;pointer-events:none;max-width:84vw;text-align:center;backdrop-filter:blur(8px)}
+.toast.show{opacity:1;animation:toastIn .3s ease}
+/* 全屏彩蛋飘落 */
+.egg-layer{position:fixed;inset:0;z-index:350;pointer-events:none;overflow:hidden;display:none}
+.egg-layer.open{display:block}
+.egg-layer span{position:absolute;top:-30px;font-size:22px;animation:eggShower 2.6s linear forwards}
+.ach .pop{display:none}
+.hidden-tag-inline{font-size:10px;background:rgba(155,110,216,.14);color:#8A5FC7;padding:2px 8px;border-radius:99px;font-weight:700}
+[data-theme="dark"] .hidden-tag-inline{color:#C4A5EE}
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+
+  <!-- 顶栏 -->
+  <header class="topbar">
+    <div class="brand" onclick="logoEgg()">
+      <img class="bava" id="brandAva" src="assets/kaimao-transparent.png" alt="凯喵">
+      <div class="bt"><b>凯喵Code试炼录</b><span>轻RPG编程闯关</span></div>
+    </div>
+    <div class="icon-btns">
+      <button class="icon-btn" id="searchBtn" title="搜索">🔍</button>
+      <button class="icon-btn" id="themeBtn" title="主题切换">🌙</button>
+      <button class="icon-btn" id="topSetBtn" title="设置">⚙️</button>
+    </div>
+  </header>
+
+  <!-- 横向滑动标签 -->
+  <nav class="tabbar" id="tabbar"></nav>
+
+  <!-- 主屏 -->
+  <main class="screen" id="screen">
+
+    <!-- 主城首页 -->
+    <section class="view active" id="view-home">
+      <div class="card xp-card">
+        <div class="xp-top"><span class="lv">指针勇者 · Lv.7</span><span class="xp-num">9,820 / 15,000 EXP</span></div>
+        <div class="xp-bar"><i></i></div>
+        <div class="aff-row" style="margin-top:9px"><span id="homeAffLbl">💞 好感度 · 挚友 Lv.4</span><span id="homeAffPct">64%</span></div>
+        <div class="aff-bar"><i id="homeAffFill" style="width:64%"></i></div>
+      </div>
+
+      <div class="card">
+        <h3><span class="em">📦</span>收集率 · 冒险图鉴</h3>
+        <div class="coll-grid">
+          <div class="coll-cell"><div class="cc-t">🐛 怪物图鉴</div><b>8 / 24</b><div class="cc-bar"><i style="width:33%"></i></div></div>
+          <div class="coll-cell"><div class="cc-t">🏅 成就徽章</div><b>6 / 16</b><div class="cc-bar"><i style="width:38%"></i></div></div>
+          <div class="coll-cell"><div class="cc-t">📜 章节通关</div><b>12 / 20</b><div class="cc-bar"><i style="width:60%"></i></div></div>
+          <div class="coll-cell"><div class="cc-t">👗 装扮收集</div><b>2 / 5</b><div class="cc-bar"><i style="width:40%"></i></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="secret-card">
+          <div class="sc-ico">🌌</div>
+          <div class="sc-t"><b>今日秘境 · 迷雾指针林</b><span>限时 30 分钟 · 通关 +200 EXP 与稀有碎片</span></div>
+        </div>
+        <div style="margin-top:10px">
+          <span class="weather-chip sun">☀️ 学习天气：晴·专注 +15%</span>
+          <span class="weather-chip star">🌟 幸运值偏高</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="em">⚡</span>快捷入口</h3>
+        <div class="quick-grid">
+          <button class="quick-cell" onclick="goTab('learn')"><span class="qe">📘</span><span>知识试炼</span></button>
+          <button class="quick-cell" onclick="goTab('boss')"><span class="qe">👹</span><span>BOSS实战</span></button>
+          <button class="quick-cell" onclick="goTab('checkin')"><span class="qe">📅</span><span>签到</span></button>
+          <button class="quick-cell" onclick="openMiniGame()"><span class="qe">🎮</span><span>小游戏</span></button>
+          <button class="quick-cell" onclick="goTab('lab')"><span class="qe">🧪</span><span>试炼实验室</span></button>
+          <button class="quick-cell" onclick="goTab('bag')"><span class="qe">🎒</span><span>背包</span></button>
+          <button class="quick-cell" onclick="goTab('rank')"><span class="qe">🏆</span><span>排行榜</span></button>
+          <button class="quick-cell" onclick="goTab('bestiary')"><span class="qe">📖</span><span>怪物图鉴</span></button>
+        </div>
+      </div>
+
+      <div class="card ok-card">
+        <b style="color:var(--ok)">🐱 凯喵晨报</b><br>昨日你击退了 3 只 Bug 怪物，连续打卡 7 天！今天点亮「智能指针」章节，凯喵在右下角等你聊天喵～
+      </div>
+    </section>
+
+    <!-- 知识试炼 -->
+    <section class="view" id="view-learn">
+      <div class="card">
+        <h3><span class="em">🗺️</span>章节试炼地图</h3>
+        <div class="map">
+          <div class="map-node done"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 6"/></svg></span><span class="ni"><b>第1章 · 语法入门</b><span>基础语法与第一个程序</span></span><span class="stars">★★★</span></div>
+          <div class="map-node done"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 6"/></svg></span><span class="ni"><b>第2章 · 数组与函数</b><span>循环、函数与递归</span></span><span class="stars">★★★</span></div>
+          <div class="map-node done"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 6"/></svg></span><span class="ni"><b>第3章 · 指针与引用</b><span>地址、解引用与悬垂</span></span><span class="stars">★★☆</span></div>
+          <div class="map-node current"><span class="dot">4</span><span class="ni"><b>第4章 · 智能指针</b><span>RAII 与内存安全</span></span><span class="stars">★☆☆</span></div>
+          <div class="map-node locked"><span class="dot">5</span><span class="ni"><b>第5章 · 模板与STL</b><span>解锁条件：第4章满星</span></span><span class="hidden-tag">隐藏</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3><span class="em">🧪</span>试炼 · 两数之和</h3>
+        <div class="sandbox">
+          <div class="code-area"><div class="gutter">1<br>2<br>3<br>4<br>5<br>6</div>
+          <pre><span class="c">// 用哈希表把查找降到 O(1)</span>
+<span class="k">vector</span>&lt;<span class="k">int</span>&gt; twoSum(<span class="k">vector</span>&lt;<span class="k">int</span>&gt;&amp; a, <span class="k">int</span> t){
+  <span class="k">unordered_map</span>&lt;<span class="k">int</span>,<span class="k">int</span>&gt; m;
+  <span class="k">for</span>(<span class="k">int</span> i=0;i&lt;a.size();i++){
+    <span class="k">if</span>(m.count(t-a[i])) <span class="k">return</span> {m[t-a[i]],i};
+    m[a[i]]=i;
+  }
+  <span class="k">return</span> {};
+}</pre></div>
+          <div class="out" id="sbOut">▸ 输出区：点击运行查看编译结果</div>
+        </div>
+        <div class="sandbox-btns">
+          <button class="btn btn-primary" style="flex:1" onclick="runSandbox()">▶ 运行试炼</button>
+          <button class="btn btn-ghost" onclick="clearSandbox()">清空</button>
+        </div>
+      </div>
+      <div class="card">
+        <h3><span class="em">⚔️</span>发起试炼</h3>
+        <p class="sec-tip">限时 30 分钟，系统按星级评定。通关有概率掉落道具与怪物碎片。</p>
+        <button class="btn btn-primary btn-block" style="margin-top:11px" onclick="startTrial()">开始今日试炼 ✨</button>
+      </div>
+    </section>
+
+    <!-- BOSS实战 -->
+    <section class="view" id="view-boss">
+      <div class="card">
+        <h3><span class="em">👹</span>项目实战 BOSS</h3>
+        <div class="boss-card"><div class="boss-emoji">🧩</div><div class="b-info"><b>学生成绩管理系统</b><p>综合结构体的增删改查实战</p><span class="chap-badge">🏅 章节徽章 · 第3章</span></div></div>
+        <div class="boss-card"><div class="boss-emoji">📊</div><div class="b-info"><b>内存池分配器</b><p>手写固定大小内存池，零泄漏</p><span class="chap-badge">🏅 章节徽章 · 第4章</span></div></div>
+        <div class="boss-card locked"><div class="boss-emoji">🚀</div><div class="b-info"><b>高性能日志库</b><p>异步写入 + 双缓冲（未解锁）</p><span class="hidden-tag-inline">满星解锁</span></div></div>
+      </div>
+      <div class="card">
+        <h3><span class="em">🏅</span>章节终极大战徽章</h3>
+        <p class="sec-tip">每章满星通关颁发限定徽章，集齐 20 枚解锁「代码贤者」传说称号。</p>
+        <div class="buff-bar" style="margin-top:9px">
+          <span class="buff">🥇 已得 12 枚</span><span class="buff gold">🏅 待领 8 枚</span>
+        </div>
+        <button class="btn btn-gold btn-block" style="margin-top:11px" onclick="toast('章节徽章墙：已点亮 12/20 枚 ✨')">查看徽章墙</button>
+      </div>
+    </section>
+
+    <!-- 怪物图鉴 -->
+    <section class="view" id="view-bestiary">
+      <div class="card">
+        <h3><span class="em">📖</span>错题怪物图鉴</h3>
+        <div class="aff-row" style="margin-top:0"><span>指针族群收集 3/5</span><span>集齐解锁「指针宗师」</span></div>
+        <div class="cc-bar" style="margin-top:6px"><i style="width:60%"></i></div>
+        <div class="chips" style="margin-top:11px">
+          <button class="chip on" onclick="setMonFilter(this,'全部')">全部</button>
+          <button class="chip" onclick="setMonFilter(this,'指针')">指针</button>
+          <button class="chip" onclick="setMonFilter(this,'数组')">数组</button>
+          <button class="chip" onclick="setMonFilter(this,'语法')">语法</button>
+          <button class="chip" onclick="setMonFilter(this,'智能指针')">智能指针</button>
+        </div>
+        <div id="monList" style="margin-top:12px"></div>
+      </div>
+      <div class="card">
+        <h3><span class="em">💡</span>错题救赎 · 黑化→守护精灵</h3>
+        <div class="redeem-row"><div class="rx dark">🦂</div><div class="ri"><b>未初始化蝎（黑化）</b><span>变量未初始化导致未定义行为</span></div><button class="btn btn-ghost btn-sm" onclick="redeemMon(this)">救赎</button></div>
+        <div class="redeem-row"><div class="rx dark">🦇</div><div class="ri"><b>泄漏蝙蝠（黑化）</b><span>忘记 delete 导致内存泄漏</span></div><button class="btn btn-ghost btn-sm" onclick="redeemMon(this)">救赎</button></div>
+        <p class="sec-tip" style="margin-top:8px">救赎后黑化 Bug 化为守护精灵，永久加成该考点经验 +5%。</p>
+      </div>
+    </section>
+
+    <!-- 剧情日志 -->
+    <section class="view" id="view-story">
+      <div class="card">
+        <h3><span class="em">📜</span>剧情解锁时间轴</h3>
+        <div class="timeline">
+          <div class="tl-item"><span class="tl-dot">1</span><div class="tl-card"><b>初遇凯喵</b><span>你在旧图书馆唤醒了沉睡的编译器精灵凯喵，踏上 Code 试炼之路。</span><span class="tl-date">2026-09-10 解锁</span></div></div>
+          <div class="tl-item"><span class="tl-dot">2</span><div class="tl-card"><b>指针森林的试炼</b><span>击败野指针幽浮，获得「解引用之证」。</span><span class="tl-date">2026-10-05 解锁</span></div></div>
+          <div class="tl-item"><span class="tl-dot">3</span><div class="tl-card"><b>智能指针的契约</b><span>与泄漏蝙蝠签订 RAII 契约，内存不再逃逸。</span><span class="tl-date">2026-10-15 解锁</span></div></div>
+          <div class="tl-item locked"><span class="tl-dot">🔒</span><div class="tl-card"><b>模板深处的回响</b><span>解锁条件：第5章满星</span><span class="tl-date">未解锁</span></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 签到祭坛 -->
+    <section class="view" id="view-checkin">
+      <div class="card">
+        <h3><span class="em">📅</span>月度阶梯签到</h3>
+        <div class="cal-head"><b>2026 年 10 月</b><span style="font-size:11px;color:var(--ink-faint)">连续 7 天 · 今日待签</span></div>
+        <div class="cal-grid" id="checkinGrid"></div>
+        <div class="cal-rewards">
+          <div class="rw get"><b>7天</b><span>头像框·已领</span></div>
+          <div class="rw"><b>30天</b><span>冰蓝气泡</span></div>
+          <div class="rw"><b>90天</b><span>凯喵皮肤</span></div>
+        </div>
+        <div style="display:flex;gap:9px;margin-top:13px">
+          <button class="btn btn-primary" style="flex:1" onclick="signIn()">签到 +20 EXP</button>
+          <button class="btn btn-ghost" onclick="toast('时光补签卡：可补签遗漏日期（持有 2 张）')">🕰️ 补签</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 装扮衣柜 -->
+    <section class="view" id="view-dress">
+      <div class="card">
+        <h3><span class="em">👗</span>凯喵装扮衣柜</h3>
+        <div class="dress-preview"><img id="dressAva" src="assets/kaimao-transparent.png" alt="凯喵"><div class="dp"><b id="dressName">当前：默认形象</b><span>实时预览 · 穿戴后全应用生效</span></div></div>
+        <div class="dress-row" id="dressRow"></div>
+        <p class="sec-tip" style="margin-top:11px">共 8 套装扮 · 左右滑动查看 · 预览版全部解锁，点击即刻试穿</p>
+      </div>
+      <div class="card">
+        <h3><span class="em">📦</span>衣柜收集进度</h3>
+        <div class="dress-meta">
+          <div class="dm-row"><span>已收集装扮</span><b>8 / 8</b></div>
+          <div class="aff-bar" style="margin:8px 0 4px"><i style="width:100%"></i></div>
+          <div class="dm-row"><span>全套装扮加成</span><b>好感度 +8%</b></div>
+          <div class="dm-row"><span>下一目标</span><b>神态收集 6 / 7</b></div>
+        </div>
+        <p class="sec-tip" style="margin-top:9px">每套装扮附带专属立绘；庆祝神态立绘制作中，暂用开心神态代替</p>
+      </div>
+    </section>
+
+    <!-- 试炼实验室 -->
+    <section class="view" id="view-lab">
+      <div class="card">
+        <h3><span class="em">🧪</span>试炼实验室</h3>
+        <div class="sandbox">
+          <div class="code-area"><div class="gutter">1<br>2<br>3<br>4<br>5<br>6<br>7</div>
+          <pre><span class="c">// 在线实验：凯喵陪你调玩具代码</span>
+<span class="k">#include</span> &lt;iostream&gt;
+<span class="k">int</span> main(){
+  <span class="k">for</span>(<span class="k">int</span> i=0;i&lt;3;i++)
+    std::cout &lt;&lt; <span class="s">"喵 "</span>;
+  <span class="k">return</span> 0;
+}</pre></div>
+          <div class="out" id="labOut">▸ 编译区：点击运行</div>
+        </div>
+        <div class="sandbox-btns">
+          <button class="btn btn-primary" style="flex:1" onclick="runLab()">▶ 运行</button>
+          <button class="btn btn-ghost" onclick="toast('实验室已重置')">重置</button>
+        </div>
+        <div class="buff-bar"><span class="buff green">🧪 实验模式</span><span class="buff">🍀 无惩罚</span></div>
+      </div>
+      <div class="card">
+        <h3><span class="em">📜</span>道具增益 Buff</h3>
+        <p class="sec-tip">在背包使用「试炼增益符」「专注沙漏」可在此叠加增益。</p>
+        <button class="btn btn-ghost btn-block" style="margin-top:10px" onclick="goTab('bag')">前往背包使用道具</button>
+      </div>
+    </section>
+
+    <!-- 背包 -->
+    <section class="view" id="view-bag">
+      <div class="card">
+        <h3><span class="em">🎒</span>道具背包</h3>
+        <div class="bag-tabs" id="bagTabs">
+          <button class="chip on" data-cat="use" onclick="renderBag('use')">消耗品</button>
+          <button class="chip" data-cat="collect" onclick="renderBag('collect')">收藏品</button>
+          <button class="chip" data-cat="dress" onclick="renderBag('dress')">凯喵装扮</button>
+        </div>
+        <div class="bag-grid" id="bagGrid"></div>
+      </div>
+    </section>
+
+    <!-- 排行榜 -->
+    <section class="view" id="view-rank">
+      <div class="card">
+        <h3><span class="em">🏆</span>本地排行榜</h3>
+        <div class="bag-tabs" id="rankTabs"></div>
+        <div id="rankList"></div>
+        <p class="sec-tip" style="margin-top:10px">📌 榜单仅存于本机，用于自我激励，不与他人比较。</p>
+      </div>
+    </section>
+
+    <!-- 支线小屋 -->
+    <section class="view" id="view-mini">
+      <div class="card">
+        <h3><span class="em">🎮</span>支线小屋</h3>
+        <div class="mini-card" onclick="openMiniGame()"><div class="mi-img">🧠</div><div class="mi-t"><b>指针记忆配对</b><span>翻牌匹配「符号 → 含义」，连对 3 组 +80 EXP</span></div><div class="mc-go">›</div></div>
+        <div class="mini-card" onclick="toast('语法接龙：用关键字续写合法语句，开发中~')"><div class="mi-img">🔤</div><div class="mi-t"><b>语法接龙</b><span>和凯喵轮流续写合法 C++ 语句</span></div><div class="mc-go">›</div></div>
+        <div class="mini-card" onclick="toast('Bug 消消乐：点击同类错误归堆，开发中~')"><div class="mi-img">🐛</div><div class="mi-t"><b>Bug 消消乐</b><span>消除同类错误，训练排错直觉</span></div><div class="mc-go">›</div></div>
+      </div>
+    </section>
+
+    <!-- 成就殿堂 -->
+    <section class="view" id="view-achievements">
+      <div class="card">
+        <h3><span class="em">🏅</span>成就殿堂 · 四品质墙</h3>
+        <div class="aff-row" style="margin-top:0"><span>普通 / 稀有 / 史诗 / 传说</span><span>已得 6 / 16</span></div>
+        <div class="ach-grid" id="achViewGrid" style="margin-top:11px"></div>
+        <button class="btn btn-gold btn-block" style="margin-top:13px" onclick="legendBurst()">✨ 演示：传说徽章解锁粒子特效</button>
+      </div>
+    </section>
+
+    <!-- 个人中心 -->
+    <section class="view" id="view-me">
+      <div class="card profile-banner">
+        <div class="pb-row"><img class="big-ava" id="profileAva" src="assets/kaimao-transparent.png" alt="凯喵"><div class="pb-info"><b>指针旅人</b><span class="lv-badge">🛡️ 指针勇者 Lv.7</span></div></div>
+        <div class="pb-xp"><div class="xp-bar"><i style="width:64%"></i></div><span>距离升级还差 5,180 EXP</span></div>
+      </div>
+      <div class="card">
+        <h3><span class="em">📊</span>我的数据</h3>
+        <div class="stats-grid"><div><b>2650</b><span>总经验</span></div><div><b>921</b><span>刷题数</span></div><div><b>8</b><span>连续打卡</span></div></div>
+        <div class="stats-grid" style="margin-top:11px"><div><b>8</b><span>怪物收录</span></div><div><b>64%</b><span>凯喵好感</span></div><div><b>12</b><span>章节通关</span></div></div>
+      </div>
+      <div class="card">
+        <h3><span class="em">🎖️</span>等级头衔晋升</h3>
+        <div class="aff-row" style="margin-top:0"><span>当前头衔：指针勇者</span><span>下一阶：算法行者</span></div>
+        <button class="btn btn-primary btn-block" style="margin-top:11px" onclick="openLevels()">查看晋升之路 ✨</button>
+      </div>
+    </section>
+
+    <!-- 设置 -->
+    <section class="view" id="view-settings">
+      <div class="card">
+        <h3><span class="em">⚙️</span>冒险设置</h3>
+        <div class="set-row"><div class="sl"><span class="si">🌙</span>暗夜模式</div><div class="switch on" id="setThemeSwitch" onclick="toggleTheme();syncSwitch()"></div></div>
+        <div class="set-row"><div class="sl"><span class="si">🔔</span>每日学习提醒</div><div class="switch on" onclick="this.classList.toggle('on');toast('提醒已'+(this.classList.contains('on')?'开启':'关闭'))"></div></div>
+        <div class="set-row"><div class="sl"><span class="si">🐱</span>凯喵闲置互动</div><div class="switch on" onclick="this.classList.toggle('on');toast('闲置互动已'+(this.classList.contains('on')?'开启':'关闭'))"></div></div>
+        <div class="set-row"><div class="sl"><span class="si">🎬</span>通关结算动画</div><div class="switch on" onclick="this.classList.toggle('on');toast('结算动画已'+(this.classList.contains('on')?'开启':'关闭'))"></div></div>
+        <div class="set-row"><div class="sl"><span class="si">🔊</span>音效</div><div class="switch" onclick="this.classList.toggle('on');toast('音效已'+(this.classList.contains('on')?'开启':'关闭'))"></div></div>
+      </div>
+      <div class="card">
+        <h3><span class="em">👤</span>账号与关于</h3>
+        <div class="set-row"><div class="sl"><span class="si">🆔</span>本机存档</div><div class="sr">指针旅人 ›</div></div>
+        <div class="set-row"><div class="sl"><span class="si">☁️</span>云同步</div><div class="sr">未登录 ›</div></div>
+        <div class="set-row"><div class="sl"><span class="si">📦</span>版本</div><div class="sr">v2.0.0 ›</div></div>
+        <div class="set-row"><div class="sl"><span class="si">💬</span>意见反馈</div><div class="sr">联系凯喵 ›</div></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 凯喵悬浮钮 -->
+  <button class="cat-fab" id="catFab" onclick="openCat()" title="凯喵伙伴">
+    <span class="fab-ring"></span>
+    <img id="fabImg" src="assets/kaimao/mood-idle.png" alt="凯喵">
+    <span class="fab-mood" id="fabMood">💤</span>
+  </button>
+
+  <!-- 搜索弹层 -->
+  <div class="search-pop" id="searchPop">
+    <div class="sp-head">
+      <input id="searchInput" placeholder="🔍 搜索关卡 / 题目 / 怪物…" oninput="filterSearch(this.value)">
+      <button class="icon-btn" onclick="$('searchPop').classList.remove('open')">✕</button>
+    </div>
+    <div class="search-res" id="searchRes"></div>
+  </div>
+
+  <!-- 凯喵伙伴底部上滑弹窗 -->
+  <div class="cat-sheet" id="catSheet">
+    <div class="scrim" onclick="closeCat()"></div>
+    <div class="sheet">
+      <div class="sheet-head">
+        <img class="sh-ava" src="assets/kaimao-transparent.png" alt="凯喵" onclick="catPat()">
+        <div class="sh-info"><b>凯喵伙伴</b><span class="mood-label" id="moodLabel">· 待机</span></div>
+        <button class="sh-close" onclick="closeCat()">✕</button>
+      </div>
+      <div style="display:grid;place-items:center;padding:8px 0"><div class="cat-stage" id="catStage" data-mood="idle"><div class="cat-aura"></div><img id="catImg" src="assets/kaimao-transparent.png" alt="凯喵" onclick="catPat()"><span class="cat-float" id="catFloat" style="right:34%;top:6%">💤</span></div></div>
+      <div class="aff-row"><span>💞 好感度 · 挚友 Lv.4</span><span id="affPct">64%</span></div>
+      <div class="aff-bar"><i id="affFill"></i></div>
+      <div class="cat-chat" id="catChat">
+        <div class="bubble cat">主人好呀，我是凯喵 ⚔️ 随时可以问我代码问题，编译失败也可以找我诊断！点我头像还能摸摸头喵～</div>
+      </div>
+      <div class="quick-chips">
+        <button onclick="askCat('这道题的思路该怎么想？','think')">💡 问思路</button>
+        <button onclick="askCat('夸夸我刚才的解法！','happy')">🎉 夸夸我</button>
+        <button onclick="askCat('这道题又错了，好沮丧…','aggrieved')">🥺 安慰我</button>
+      </div>
+      <div class="mood-chips" id="moodChips">
+        <button class="on" data-mood="idle">待机</button><button data-mood="think">思考</button><button data-mood="happy">开心</button>
+        <button data-mood="shy">害羞</button><button data-mood="celebrate">庆祝</button><button data-mood="aggrieved">委屈</button><button data-mood="sleepy">困倦</button>
+      </div>
+      <div class="cat-input">
+        <input id="catInput" placeholder="向凯喵提问代码问题…" onkeydown="if(event.key==='Enter')sendCat()">
+        <button class="send" onclick="sendCat()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 通用底部上滑弹窗 -->
+  <div class="modal-mask" id="modalMask" onclick="if(event.target===this)closeModal()">
+    <div class="modal" id="modalBox"></div>
+  </div>
+  <div class="item-pop" id="itemPop"></div>
+
+  <!-- 升级全屏 CG -->
+  <div class="levelup" id="levelup"><div class="stars-bg" id="starsBg"></div>
+    <div class="lu-card"><img class="lu-ava" src="assets/kaimao-transparent.png" alt="凯喵">
+      <h2>🎉 升级啦！</h2><div class="lu-lv" id="luLv">指针勇者 Lv.7 → 算法行者 Lv.8</div>
+      <p>凯喵为你撒花～ 解锁「算法专题训练」与新气泡样式，继续加油喵！</p>
+      <button class="btn btn-primary btn-block" onclick="$('levelup').classList.remove('open')">收下祝福 ✨</button>
+    </div>
+  </div>
+
+  <!-- 全屏彩蛋飘落 -->
+  <div class="egg-layer" id="eggLayer"></div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+/* ================= 工具 ================= */
+const $=id=>document.getElementById(id);
+function toast(t){const el=$('toast');el.textContent=t;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),1900);}
+function segPick(el){el.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('on'));el.classList.add('on');}
+function syncSwitch(){$('setThemeSwitch').classList.toggle('on',document.documentElement.getAttribute('data-theme')==='dark');}
+
+/* ================= 标签导航 ================= */
+const TABS=[
+  {v:'home',t:'主城',badge:''},{v:'learn',t:'知识试炼'},{v:'boss',t:'BOSS实战'},
+  {v:'bestiary',t:'怪物图鉴'},{v:'story',t:'剧情日志'},{v:'checkin',t:'签到祭坛',badge:'待签'},
+  {v:'dress',t:'装扮衣柜'},{v:'lab',t:'试炼实验室'},{v:'bag',t:'背包'},
+  {v:'rank',t:'排行榜'},{v:'mini',t:'支线小屋'},{v:'achievements',t:'成就殿堂'},
+  {v:'me',t:'个人中心'},{v:'settings',t:'设置'}
+];
+function renderTabs(){
+  $('tabbar').innerHTML=TABS.map((t,i)=>'<button class="tab'+(i===0?' active':'')+'" data-view="'+t.v+'" onclick="goTab(\''+t.v+'\')">'+t.t+(t.badge?'<span class="badge">'+(t.badge==='NEW'?'新':t.badge)+'</span>':'')+'</button>').join('');
+}
+function goTab(v){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
+  document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
+  const el=$('view-'+v);if(el)el.classList.add('active');
+  $('screen').scrollTop=0;
+  const tb=$('tabbar');const active=tb.querySelector('.tab.active');if(active)active.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
+  if(v==='me')renderMe();
+  if(v==='bag')renderBag('use');
+  if(v==='rank')renderRank('总经验');
+  if(v==='achievements')renderAchView();
+  if(v==='checkin')renderCheckinInline();
+  if(v==='dress')renderDressRow();
+}
+function goToMe(){goTab('me');}
+
+/* ================= 主题 ================= */
+function syncThemeUI(){
+  const dark=document.documentElement.getAttribute('data-theme')==='dark';
+  syncSwitch();
+  $('themeBtn').textContent=dark?'☀️':'🌙';
+}
+function toggleTheme(){
+  const dark=document.documentElement.getAttribute('data-theme')==='dark';
+  document.documentElement.setAttribute('data-theme',dark?'light':'dark');
+  syncThemeUI();toast(!dark?'已切换到暗夜模式 🌙':'已切换到白日模式 ☀️');
+}
+$('themeBtn').addEventListener('click',toggleTheme);
+$('topSetBtn').addEventListener('click',()=>goTab('settings'));
+
+/* ================= 凯喵伙伴弹窗 ================= */
+function openCat(){$('catSheet').classList.add('open');resetIdle();}
+function closeCat(){$('catSheet').classList.remove('open');}
+$('catFab').addEventListener('click',openCat);
+
+/* ================= 搜索 ================= */
+const SEARCH_ITEMS=[
+  {t:'第4章 智能指针 · unique_ptr',k:'关卡'},{t:'两数之和 · 哈希表解法',k:'题目'},
+  {t:'第3章 指针与数组',k:'章节'},{t:'野指针幽浮',k:'怪物'},{t:'内存泄漏蝙蝠',k:'怪物'},
+  {t:'STL 容器 vector 详解',k:'章节'},{t:'指针记忆配对',k:'小游戏'},{t:'冰蓝斗篷',k:'装扮'},
+  {t:'哈希骑士徽章',k:'成就'}
+];
+$('searchBtn').addEventListener('click',e=>{e.stopPropagation();$('searchPop').classList.toggle('open');if($('searchPop').classList.contains('open')){filterSearch('');$('searchInput').focus();}});
+document.addEventListener('click',e=>{if(!e.target.closest('.search-pop')&&!e.target.closest('#searchBtn'))$('searchPop').classList.remove('open');});
+function filterSearch(v){
+  const list=SEARCH_ITEMS.filter(i=>!v||i.t.includes(v)||i.k.includes(v));
+  $('searchRes').innerHTML=list.length?list.map(i=>'<a onclick="toast(\'打开：'+i.t+'\');$(\'searchPop\').classList.remove(\'open\')"><span class="sk">'+i.k+'</span>'+i.t+'</a>').join(''):'<div class="empty">没有找到相关内容喵～</div>';
+}
+
+/* ================= 凯喵对话 ================= */
+const MOOD_FLOAT={idle:'💤',think:'💭',happy:'😊',shy:'🥺',celebrate:'🎉',aggrieved:'💧',sleepy:'🌙'};
+const MOOD_TEXT={idle:'· 待机',think:'· 思考中',happy:'· 开心',shy:'· 害羞',celebrate:'· 庆祝',aggrieved:'· 委屈',sleepy:'· 困倦'}
+const MOOD_REPLY={
+  think:['喵？我们一起把问题拆小～先说出你的思路，我帮你补细节！','别急，看第 1 条报错行号，往往就是答案所在喵～'],
+  happy:['答对啦！凯喵为你撒花 ✨ 继续保持这个手感！','太棒了，这题思路很清楚，奖励经验 +1！'],
+  shy:['呜…被你夸得害羞了啦 🥺 我会更努力陪你刷题的～'],
+  celebrate:['🎉 通关庆祝！凯喵跳起舞来～ 这段剧情的高光时刻属于你！'],
+  aggrieved:['呜呜…错了也没关系，错题是变强的养分 💧 我陪你重新来一遍～'],
+  sleepy:['zzz…困了，但还会陪你到最后一题哦 🌙'],
+  idle:['喵呜～今天也要写干净的代码哦！']
+};
+const MOOD_ALIAS={puzzle:'think',diagnose:'think',teach:'think',worry:'aggrieved'};
+/* 凯喵立绘素材：6 神态（默认装）+ 8 套装扮 */
+const MOOD_IMG={
+  idle:'assets/kaimao/mood-idle.png', think:'assets/kaimao/mood-think.png',
+  happy:'assets/kaimao/mood-happy.png', shy:'assets/kaimao/mood-shy.png',
+  aggrieved:'assets/kaimao/mood-aggrieved.png', sleepy:'assets/kaimao/mood-sleepy.png',
+  celebrate:'assets/kaimao/mood-celebrate.png'
+};
+const OUTFIT_IMG={
+  none:'', cape:'assets/kaimao/outfit-cape.png', scarf:'assets/kaimao/outfit-scarf.png',
+  glasses:'assets/kaimao/outfit-glasses.png', nightprowler:'assets/kaimao/outfit-nightprowler.png',
+  cyberpunk:'assets/kaimao/outfit-cyberpunk.png', panda:'assets/kaimao/outfit-panda.png',
+  wizard:'assets/kaimao/outfit-wizard.png'
+};
+let curOutfit='none';
+function catArt(){const o=OUTFIT_IMG[curOutfit];if(o)return o;
+  return MOOD_IMG[$('catStage')?$('catStage').dataset.mood:'idle']||'assets/kaimao/mood-idle.png';}
+function setMood(m){
+  m=MOOD_ALIAS[m]||m;
+  $('catStage').dataset.mood=m;
+  $('catFloat').textContent=MOOD_FLOAT[m]||'💤';
+  $('moodLabel').textContent=MOOD_TEXT[m]||'';
+  $('fabMood').textContent=MOOD_FLOAT[m]||'💤';
+  document.querySelectorAll('#moodChips button').forEach(x=>x.classList.toggle('on',x.dataset.mood===m));
+  const img=$('catImg'),fab=$('fabImg');
+  if(img&&!OUTFIT_IMG[curOutfit])img.src=catArt();
+  if(fab)fab.src=catArt();
+}
+document.querySelectorAll('#moodChips button').forEach(b=>b.addEventListener('click',()=>setMood(b.dataset.mood)));
+function pushBubble(text,who){
+  const box=$('catChat');const d=document.createElement('div');d.className='bubble '+who;d.textContent=text;
+  box.appendChild(d);box.scrollTop=box.scrollHeight;return d;
+}
+const CAT_REPLIES=[
+  q=>'这道题的关键是先把问题拆小～比如「两数之和」：暴力 O(n²) 哪里浪费时间？重复的查找！用哈希表把「查找」变成 O(1)，整体降到 O(n)。',
+  q=>'报错先看第一行：编译器说「未声明标识符」九成是拼写或作用域。把报错行号点回去，看那一行上面有没有漏声明～',
+  q=>'喵呜，可以从三个角度想：1) 数据放哪 2) 怎么遍历 3) 边界是什么。先说思路，我再补细节！',
+  q=>'指针秘诀：画盒子📦 盒子里是地址，盒子上贴类型。解引用=「按地址找盒子」。unique_ptr 独占一个盒子，走了就带走～',
+  q=>'「vettor」这种八成手滑打错字母。凯喵一招：报错信息 Google 前两个词，通常 10 秒找到答案。'
+];
+function catReply(q){return CAT_REPLIES[Math.floor(Math.random()*CAT_REPLIES.length)](q);}
+function sendCat(){
+  const inp=$('catInput');const v=inp.value.trim();if(!v)return;
+  pushBubble(v,'me');inp.value='';
+  const prev=$('catStage').dataset.mood;
+  setMood(prev==='idle'?'think':prev);
+  const tp=document.createElement('div');tp.className='bubble typing';tp.innerHTML='<i></i><i></i><i></i>';
+  $('catChat').appendChild(tp);$('catChat').scrollTop=$('catChat').scrollHeight;
+  setTimeout(()=>{tp.remove();pushBubble(catReply(v),'cat');setMood(prev==='idle'?'idle':prev);},900);
+}
+function askCat(q,mood){if(mood)setMood(mood);$('catInput').value=q;sendCat();}
+function catPat(){
+  const talks=['喵呜，今天也要写干净的代码哦～','看到你在认真刷题，凯喵很开心！✨','累了就休息 5 分钟，效率更高喵～','需要提示随时点我肩膀！'];
+  pushBubble(talks[Math.floor(Math.random()*talks.length)],'cat');setMood('happy');incAff(1);
+  setTimeout(()=>setMood('idle'),1600);
+}
+
+/* ================= 好感度 / 闲置 ================= */
+let aff=64;
+function incAff(n){
+  aff=Math.min(100,aff+n);
+  ['affFill','homeAffFill'].forEach(id=>{const f=$(id);if(f)f.style.width=aff+'%';});
+  ['affPct','homeAffPct'].forEach(id=>{const p=$(id);if(p)p.textContent=aff+'%';});
+  const lbl=$('homeAffLbl');if(lbl&&aff>=80)lbl.textContent='💞 好感度 · 挚友 Max';
+}
+const COLD_FACTS=[
+  '冷知识：C++ 的引用不是对象，没有自己的地址，sizeof(引用)=sizeof(被引对象)～',
+  '冷知识：nullptr 类型是 std::nullptr_t，能隐式转任何指针类型，但不会意外变整型 0～',
+  '冷知识：unique_ptr 的删除器是类型的一部分，删除器不同就不是同一类型！',
+  '冷知识：数组传参会退化成指针，void f(int a[10]) 等价于 void f(int* a)～'
+];
+const IDLE_ACTS=['act-wave','act-peek','act-tilt','act-blink','act-yawn'];
+function doIdle(){
+  const st=$('catStage');const act=IDLE_ACTS[Math.floor(Math.random()*IDLE_ACTS.length)];
+  st.classList.add(act);setTimeout(()=>st.classList.remove(...IDLE_ACTS),1200);
+  if(Math.random()<0.6){
+    const r=Math.random();
+    if(r<0.34){setMood('think');pushBubble('💡 冷知识：'+COLD_FACTS[Math.floor(Math.random()*COLD_FACTS.length)],'cat');}
+    else if(r<0.67){setMood('happy');pushBubble('📜 凯喵语录：「代码不是写给人看的，但一定是写给人维护的。」','cat');}
+    else{setMood('think');pushBubble('🐛 趣味 Bug：1962 年 Mariner 1 号因一行公式漏横线，火箭升空后自爆 💥','cat');}
+    setTimeout(()=>setMood('idle'),2600);
+  }
+}
+let idleTimer=null;
+function resetIdle(){clearTimeout(idleTimer);idleTimer=setTimeout(doIdle,30000);}
+['click','keydown'].forEach(ev=>document.addEventListener(ev,resetIdle,{passive:true}));resetIdle();
+
+/* ================= 模态框 ================= */
+function openModal(title,html){
+  $('modalBox').innerHTML='<div class="grab"></div><div class="mh"><b>'+title+'</b><button class="x" onclick="closeModal()">✕</button></div>'+html;
+  $('modalMask').classList.add('open');
+}
+function closeModal(){$('modalMask').classList.remove('open');$('itemPop').classList.remove('open');}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();$('levelup').classList.remove('open');closeCat();$('searchPop').classList.remove('open');}});
+
+/* ================= 等级体系 ================= */
+const LEVELS=[
+  {ico:'🌱',name:'语法学徒',lv:'Lv.1-5',exp:'0 - 5,700',state:'done',desc:'掌握基础语法与第一个程序'},
+  {ico:'⚔️',name:'指针勇者',lv:'Lv.6-10',exp:'5,700 - 15,000',state:'cur',desc:'解锁指针专题与隐藏支线线索'},
+  {ico:'🌀',name:'算法行者',lv:'Lv.11-15',exp:'15,000 - 32,000',desc:'复杂度分析与常用算法'},
+  {ico:'🛡️',name:'STL 守护者',lv:'Lv.16-20',exp:'32,000 - 60,000',desc:'容器与算法的熟练运用'},
+  {ico:'🔮',name:'内存大师',lv:'Lv.21-25',exp:'60,000 - 100,000',desc:'内存管理与性能调优'},
+  {ico:'👑',name:'代码贤者',lv:'Lv.26+',exp:'100,000+',desc:'全章节大师 · 传说称号'},
+];
+function openLevels(){
+  let h='<div class="lv-track">';
+  LEVELS.forEach(l=>{h+='<div class="lv-row '+(l.state||'')+'"><span class="lv-ico">'+l.ico+'</span><span class="lv-info"><b>'+l.name+' <span style="font-size:11px;color:var(--ink-faint)">'+l.lv+'</span></b><span>'+l.desc+'</span></span><span class="lv-exp">'+l.exp+'</span></div>';});
+  h+='</div><button class="btn btn-primary btn-block" style="margin-top:14px" onclick="triggerLevelUp()">✨ 演示：经验满值触发升级</button>';
+  openModal('等级晋升之路',h);
+}
+function triggerLevelUp(){
+  closeModal();const bg=$('starsBg');bg.innerHTML='';
+  for(let i=0;i<28;i++){const s=document.createElement('span');s.className='st';s.style.left=Math.random()*100+'%';s.style.top=Math.random()*30+'%';s.style.animationDelay=(Math.random()*.8)+'s';s.style.width=s.style.height=(2+Math.random()*4)+'px';bg.appendChild(s);}
+  setMood('happy');$('levelup').classList.add('open');
+}
+
+/* ================= 成就系统 ================= */
+const ACHS=[
+  {ico:'🗡️',name:'初试锋芒',cat:'闯关',rar:'普通',got:1,desc:'完成第 1 个关卡',cond:'通关任意 1 关'},
+  {ico:'🏰',name:'章节征服者',cat:'闯关',rar:'稀有',got:1,desc:'通关 3 个章节',cond:'通关 3 章'},
+  {ico:'👹',name:'BOSS猎手',cat:'闯关',rar:'史诗',got:0,desc:'击败首个项目 BOSS',cond:'击败 1 个 BOSS'},
+  {ico:'👑',name:'全章节大师',cat:'闯关',rar:'传说',got:0,desc:'通关全部主线章节',cond:'20/20 章通关'},
+  {ico:'💯',name:'百题斩',cat:'刷题',rar:'普通',got:1,desc:'累计作答 100 题',cond:'做题 100 道'},
+  {ico:'#️⃣',name:'哈希骑士',cat:'刷题',rar:'稀有',got:1,desc:'哈希表连续 AC 10 题',cond:'哈希题 10 连 AC'},
+  {ico:'⚡',name:'一次AC之王',cat:'刷题',rar:'史诗',got:0,desc:'单题一次提交通过',cond:'一次提交 AC'},
+  {ico:'🌌',name:'万题穹顶',cat:'刷题',rar:'传说',got:0,desc:'累计作答 10,000 题',cond:'做题 10,000 道'},
+  {ico:'📅',name:'七日之约',cat:'打卡',rar:'普通',got:1,desc:'连续签到 7 天',cond:'连续打卡 7 天'},
+  {ico:'🗓️',name:'月度苦修',cat:'打卡',rar:'稀有',got:0,desc:'连续签到 30 天',cond:'连续打卡 30 天'},
+  {ico:'⏳',name:'百日铸魂',cat:'打卡',rar:'史诗',got:0,desc:'连续签到 90 天',cond:'连续打卡 90 天'},
+  {ico:'🌟',name:'时光旅人',cat:'打卡',rar:'传说',got:0,desc:'累计签到 365 天',cond:'累计打卡 365 天'},
+  {ico:'🥚',name:'好奇心满满',cat:'彩蛋',rar:'普通',got:1,desc:'发现 1 个凯喵彩蛋',cond:'触发任意彩蛋'},
+  {ico:'💞',name:'凯喵密友',cat:'彩蛋',rar:'稀有',got:0,desc:'与凯喵对话 100 轮',cond:'对话 100 轮'},
+  {ico:'🔍',name:'彩蛋猎人',cat:'彩蛋',rar:'史诗',got:0,desc:'发现 10 个隐藏彩蛋',cond:'彩蛋 10/10'},
+  {ico:'💎',name:'隐藏传说',cat:'彩蛋',rar:'传说',got:0,desc:'触发午夜限定彩蛋',cond:'0:00 提问凯喵'},
+];
+const RAR_CLS={'普通':'','稀有':'r-rare','史诗':'r-epic','传说':'r-legend'};
+function achCard(a){return '<div class="ach '+(a.got?'':'lock')+' '+RAR_CLS[a.rar]+'"><span class="ai">'+(a.got?a.ico:'❔')+'</span><b>'+a.name+'</b></div>';}
+function renderAchView(){$('achViewGrid').innerHTML=ACHS.map(achCard).join('');}
+function legendBurst(){
+  const mask=$('modalMask'),r=mask.getBoundingClientRect();
+  for(let i=0;i<24;i++){const p=document.createElement('span');p.className='st';p.style.cssText='position:absolute;width:6px;height:6px;border-radius:50%;background:#F0C85C;box-shadow:0 0 10px #F0C85C';p.style.left=(r.width/2)+'px';p.style.top=(r.height/2)+'px';const ang=Math.random()*Math.PI*2,d=60+Math.random()*90;p.style.setProperty('--dx',Math.cos(ang)*d+'px');p.style.setProperty('--dy',Math.sin(ang)*d+'px');p.style.animation='ptFly 1s ease-out forwards';mask.appendChild(p);setTimeout(()=>p.remove(),1000);}
+  toast('传说徽章「隐藏传说」解锁特效 ✨');
+}
+
+/* ================= 打卡 ================= */
+const SIGNED=new Set([1,2,3,5,6,7,9,10,11,12,13,14]);
+function renderCheckinInline(){
+  const g=$('checkinGrid');if(!g)return;let h='';
+  ['一','二','三','四','五','六','日'].forEach(d=>h+='<span class="dow">'+d+'</span>');
+  for(let d=1;d<=31;d++){const cls=SIGNED.has(d)?'signed':(d===18?'today':(d>18?'future':''));h+='<span class="day '+cls+'">'+d+'</span>';}
+  g.innerHTML=h;
+}
+function signIn(){
+  SIGNED.add(18);toast('签到成功 +20 EXP，连续打卡 8 天！');
+  renderCheckinInline();
+  if($('modalMask').classList.contains('open'))closeModal();
+  setTimeout(triggerLevelUp,400);
+}
+
+/* ================= 错题怪物 ================= */
+const MONSTERS=[
+  {name:'野指针幽浮',lv:2,weak:'解引用前判空',dmg:'空指针访问',chap:'第3章·指针',code:'int* p=nullptr; *p=5;',emoji:'🐛'},
+  {name:'越界哥布林',lv:1,weak:'循环用 < 而非 <=',dmg:'数组越界',chap:'第2章·数组',code:'a[10]=1; // size=10',emoji:'👾'},
+  {name:'拼写史莱姆',lv:1,weak:'编译器拼写检查',dmg:'编译错误',chap:'第1章·语法',code:'vettor<int> a;',emoji:'🦠'},
+  {name:'泄漏蝙蝠',lv:3,weak:'RAII / 智能指针',dmg:'内存泄漏',chap:'第4章·智能指针',code:'new int[10]; // 无 delete',emoji:'🦇'},
+  {name:'悬垂乌鸦',lv:2,weak:'返回局部变量地址',dmg:'use-after-free',chap:'第3章·指针',code:'return &local_var;',emoji:'🐦‍⬛'},
+  {name:'未初始化蝎',lv:1,weak:'声明即初始化',dmg:'未定义行为',chap:'第1章·语法',code:'int x; cout << x;',emoji:'🦂'},
+  {name:'递归九头狐',lv:3,weak:'基准条件先行',dmg:'栈溢出',chap:'第2章·函数',code:'f(n){ return f(n); }',emoji:'🦊'},
+  {name:'类型错乱蜥',lv:2,weak:'强转前确认布局',dmg:'类型双关',chap:'第4章·智能指针',code:'(double*)&int_var',emoji:'🦎'},
+];
+let monCat='全部';
+function monList(kw,cat){
+  return MONSTERS.filter(m=>(!kw||m.name.includes(kw)||m.dmg.includes(kw))&&(cat==='全部'||m.chap.includes(cat)))
+    .map(m=>'<div class="monster"><span class="mimg">'+m.emoji+'</span><span class="mi"><b>'+m.name+' · Lv.'+m.lv+'</b><span class="mtags"><span class="tag tag-bad">'+m.dmg+'</span><span class="tag tag-warn">'+m.chap+'</span></span><span class="code-preview">'+m.code+'</span></span><button class="btn btn-ghost btn-sm" onclick="challengeMonster(\''+m.name+'\')">挑战</button></div>').join('')
+    ||'<p style="font-size:12px;color:var(--ink-faint);text-align:center;padding:16px 0">没有符合条件的怪物喵～</p>';
+}
+function setMonFilter(el,c){document.querySelectorAll('#view-bestiary .chip').forEach(x=>x.classList.remove('on'));el.classList.add('on');monCat=c;$('monList').innerHTML=monList('',c);}
+function challengeMonster(name){toast('⚔️ 挑战「'+name+'」… 本题已重做');setMood('think');setTimeout(()=>{setMood('happy');incAff(3);toast('🎉 击败「'+name+'」！弱点命中，永久收录图鉴')},1200);}
+function redeemMon(btn){
+  const row=btn.closest('.redeem-row');const rx=row.querySelector('.rx');
+  rx.classList.remove('dark');rx.classList.add('guard');
+  const old=rx.textContent;rx.textContent='🛡️';
+  row.querySelector('.ri').innerHTML='<b>守护精灵 · '+old+'</b><span>已救赎 · 该考点经验永久 +5%</span>';
+  btn.remove();setMood('happy');incAff(2);toast('✨ 黑化 Bug 已救赎为守护精灵！');
+}
+
+/* ================= 道具背包 ================= */
+const BAG={
+  use:[{ico:'📜',name:'提示卷轴',n:3,desc:'关卡内使用，显示当前题目的凯喵思路提示（不扣经验）'},
+    {ico:'⏳',name:'专注沙漏',n:1,desc:'30 分钟内屏蔽推送提醒，试炼专注度 +20%'},
+    {ico:'🕰️',name:'时光补签卡',n:2,desc:'可补签遗漏的打卡日期，连续记录不断档'},
+    {ico:'🍀',name:'试炼增益符',n:1,desc:'下一次试炼经验收益 +50%，持续一场'},
+    {ico:'🔥',name:'暴击星火',n:2,desc:'下一次试炼正确率判定 +1 星'}],
+  collect:[{ico:'💠',name:'稀有怪物碎片',n:7,desc:'集齐 10 枚可在图鉴兑换限定凯喵皮肤'},
+    {ico:'📮',name:'纪念明信片',n:2,desc:'章节满星通关时掉落的收藏纪念'},
+    {ico:'🏅',name:'章节徽章',n:12,desc:'各章满星通关颁发的限定徽章'}],
+  dress:[{ico:'🧥',name:'冰蓝斗篷',n:'',desc:'指针勇者专属装扮 · 披风带流动冰蓝光效',eq:1},
+    {ico:'🧣',name:'星光围巾',n:'',desc:'连续打卡 30 天解锁',lock:1},
+    {ico:'👓',name:'学者眼镜',n:'',desc:'万题穹顶成就解锁（未拥有）',lock:1},
+    {ico:'🌟',name:'默认形象',n:'',desc:'凯喵初始形象',eq:1}]
+};
+function renderBag(cat){
+  document.querySelectorAll('#bagTabs .chip').forEach(x=>x.classList.toggle('on',x.dataset.cat===cat));
+  $('bagGrid').innerHTML=BAG[cat].map((it,i)=>
+    '<button class="item '+(it.eq?'equipped':'')+(it.lock?' locked':'')+'" onclick="showItem(event,\''+cat+'\','+i+')">'+
+    (it.n?'<span class="n">×'+it.n+'</span>':'')+'<span class="ii">'+(it.lock?'🔒':it.ico)+'</span><b>'+it.name+'</b></button>').join('');
+  $('itemPop').classList.remove('open');
+}
+function showItem(e,cat,i){
+  const it=BAG[cat][i];const pop=$('itemPop');
+  pop.innerHTML='<div class="ip-h"><span class="ii">'+(it.lock?'🔒':it.ico)+'</span><span><b>'+it.name+'</b><span>'+(cat==='use'?'消耗品':cat==='collect'?'收藏品':'凯喵装扮')+(it.n?' · 持有 ×'+it.n:'')+'</span></span></div><p>'+it.desc+'</p>'+
+    (it.lock?'<button class="btn btn-ghost btn-block" onclick="toast(\'尚未解锁：完成对应成就后自动获得\')">未解锁</button>'
+      :cat==='dress'&&it.eq?'<button class="btn btn-ghost btn-block" onclick="toast(\'已穿戴中\')">已穿戴</button>'
+      :'<button class="btn btn-primary btn-block" onclick="useItem(\''+cat+'\','+i+')">'+(cat==='dress'?'👔 一键穿戴':'✨ 一键使用')+'</button>');
+  pop.classList.add('open');
+  const r=e.currentTarget.getBoundingClientRect();
+  pop.style.bottom=(window.innerHeight-r.top+10)+'px';pop.style.top='auto';
+}
+function appendBuff(label,cls){const d=$('buffDock');const s=document.createElement('span');s.className='buff '+(cls||'');s.textContent=label;if(d)d.appendChild(s);setTimeout(()=>s.remove(),8000);}
+function useItem(cat,i){
+  $('itemPop').classList.remove('open');const it=BAG[cat][i];
+  if(cat==='dress'){toast('凯喵换上了「'+it.name+'」✨');return;}
+  if(cat==='use'&&BAG.use[i].n>0)BAG.use[i].n--;
+  if(/增益|符/.test(it.name))appendBuff('🍀 '+it.name+' 生效','gold');
+  if(/沙漏/.test(it.name))appendBuff('⏳ 专注 +20%','green');
+  toast('已使用「'+it.name+'」');renderBag(cat);
+}
+
+/* ================= 本地排行榜 ================= */
+const RANKS={
+  '总经验':[['指针旅人',3650],['算法小喵',3420],['Cpp战神',3180],['夜行的猫',2870],['你',2650]],
+  '刷题数':[['Cpp战神',1247],['指针旅人',1189],['算法小喵',1102],['卷王小凯',980],['你',921]],
+  '连续打卡':[['夜行的猫',45],['你',8],['算法小喵',7],['指针旅人',7],['Cpp战神',3]],
+};
+function rankTabsHTML(){return Object.keys(RANKS).map((k,i)=>'<button class="chip '+(i?'':'on')+'" onclick="renderRank(\''+k+'\')">'+k+'</button>').join('');}
+function renderRank(k){
+  const tabs=$('rankTabs');if(tabs)tabs.innerHTML=rankTabsHTML();
+  const list=$('rankList');if(!list)return;
+  list.innerHTML=RANKS[k].map((r,i)=>'<div class="rank-row '+(i===0?'top1':i===1?'top2':i===2?'top3':'')+'"><span class="no">'+(i+1)+'</span><img class="av" src="assets/kaimao-transparent.png" alt=""><span class="ri"><b>'+r[0]+'</b><span>'+(r[0]==='你'?'当前冒险者':'本机存档')+'</span></span><span class="rv">'+r[1].toLocaleString()+'</span></div>').join('');
+}
+/* 排行榜浮层入口 */
+function openRank(){goTab('rank');}
+
+/* ================= 凯喵装扮衣柜 ================= */
+const DRESS=[
+  {name:'默认形象',key:'none',img:'assets/kaimao/mood-idle.png',own:1,eq:1},
+  {name:'冰蓝斗篷',key:'cape',img:'assets/kaimao/outfit-cape.png',own:1},
+  {name:'星光围巾',key:'scarf',img:'assets/kaimao/outfit-scarf.png',own:1},
+  {name:'学者眼镜',key:'glasses',img:'assets/kaimao/outfit-glasses.png',own:1},
+  {name:'暗夜行者',key:'nightprowler',img:'assets/kaimao/outfit-nightprowler.png',own:1},
+  {name:'赛博朋克',key:'cyberpunk',img:'assets/kaimao/outfit-cyberpunk.png',own:1},
+  {name:'熊猫卫衣',key:'panda',img:'assets/kaimao/outfit-panda.png',own:1},
+  {name:'学院长袍',key:'wizard',img:'assets/kaimao/outfit-wizard.png',own:1},
+];
+function applyDressVisual(){
+  const d=DRESS.find(x=>x.eq)||DRESS[0];
+  curOutfit=d.key;
+  const art=catArt();
+  ['catImg','profileAva','brandAva','fabImg'].forEach(id=>{const el=$(id);if(el)el.src=art;});
+}
+function renderDressRow(){
+  const g=$('dressRow');if(!g)return;
+  g.innerHTML=DRESS.map((d,i)=>'<button class="dress-card '+(d.eq?'on':'')+'" onclick="wearDress('+i+')">'+
+    '<span class="dc-img"><img src="'+d.img+'" alt="'+d.name+'"></span>'+
+    '<span class="dc-name">'+d.name+'</span></button>').join('');
+  const cur=DRESS.find(d=>d.eq)||DRESS[0];
+  const a=$('dressAva');if(a)a.src=cur.img;
+  const nm=$('dressName');if(nm)nm.textContent='当前：'+cur.name;
+}
+function wearDress(i){
+  const d=DRESS[i];
+  DRESS.forEach(x=>x.eq=0);d.eq=1;
+  const nm=$('dressName');if(nm)nm.textContent='当前：'+d.name;
+  const a=$('dressAva');if(a)a.src=d.img;
+  renderDressRow();
+  applyDressVisual();toast('凯喵换上了「'+d.name+'」✨');
+}
+
+/* ================= 通关结算 / 实验室 / 小游戏 ================= */
+function startTrial(){
+  setMood('think');toast('⚔️ 试炼开始… 限时 30 分钟');
+  setTimeout(()=>{setMood('happy');openModal('🏆 通关结算',
+    '<div class="settle"><img class="s-ava" src="assets/kaimao-transparent.png" alt="凯喵"><h2>试炼通关！</h2><div class="s-sub">每日限时试炼 · 两数之和 · 第4章</div><div class="s-grid"><div class="s-cell"><b>+150</b><span>获得经验</span></div><div class="s-cell"><b>2/2</b><span>通过用例</span></div><div class="s-cell"><b>100%</b><span>正确率</span></div><div class="s-cell"><b>3★</b><span>本章评级</span></div></div><div class="tip-card" style="text-align:left;margin-bottom:13px"><div class="tt">🎁 掉落道具</div>提示卷轴 ×1 · 哈希骑士徽章碎片 ×1<br>🐛 击败 Bug 怪物「拼写史莱姆」</div><button class="btn btn-primary btn-block" style="margin-bottom:8px" onclick="closeModal();setTimeout(triggerLevelUp,300)">领取奖励并升级 ✨</button><button class="btn btn-ghost btn-block" onclick="closeModal()">返回主城</button></div>');},1500);
+}
+function runSandbox(){const o=$('sbOut');o.innerHTML='<span style="color:var(--ink-faint)">▸ 编译中…</span>';setTimeout(()=>{o.innerHTML='<b>✔ 编译通过</b> · 运行成功 · 退出码 0<br>程序输出：（无 stdout，返回值 0 = AC）';incAff(1);},900);}
+function clearSandbox(){$('sbOut').textContent='▸ 输出区：编辑器已清空';}
+function runLab(){const o=$('labOut');o.innerHTML='<span style="color:var(--ink-faint)">▸ 编译中…</span>';setTimeout(()=>{o.innerHTML='<b>✔ 编译通过</b> · 运行成功<br>程序输出：喵 喵 喵';incAff(1);},900);}
+const MEM_PAIRS=[['&','取地址'],['*','解引用'],['new','堆内存']];
+let memFirst=null,memLock=false,memDone=0;
+function openMiniGame(){
+  memFirst=null;memLock=false;memDone=0;
+  const cards=[...MEM_PAIRS,...MEM_PAIRS].sort(()=>Math.random()-.5);
+  let h='<div style="font-size:12px;color:var(--ink-soft);line-height:1.6;margin-bottom:4px">翻牌匹配「指针符号 → 含义」，连对 3 组 +80 EXP</div><div class="mem-grid">';
+  cards.forEach(c=>{h+='<div class="mem-card" onclick="flipMem(this)" data-v="'+c[0]+'"><span class="face">'+(c[0].length>2?c[1]:c[0])+'</span></div>';});
+  h+='</div><div style="font-size:12px;color:var(--ink-faint);text-align:center" id="memStat">已配对 0 / 3</div>';
+  openModal('🧠 指针记忆配对',h);
+}
+function flipMem(el){
+  if(memLock||el.classList.contains('done')||el===memFirst)return;
+  el.classList.add('flip');
+  if(!memFirst){memFirst=el;return;}
+  memLock=true;
+  if(memFirst.dataset.v===el.dataset.v){memFirst.classList.add('done');el.classList.add('done');memFirst=null;memLock=false;memDone++;
+    $('memStat').textContent='已配对 '+memDone+' / 3';
+    if(memDone===3){toast('🎉 全部配对成功！+80 EXP');setMood('happy');setTimeout(triggerLevelUp,500);}
+  }else{setTimeout(()=>{el.classList.remove('flip');memFirst.classList.remove('flip');memFirst=null;memLock=false;},650);}
+}
+
+/* ================= 全屏彩蛋 ================= */
+function logoEgg(){
+  const layer=$('eggLayer');layer.innerHTML='';
+  const items=['✨','🐱','⭐','💎','🎉','🌟'];
+  for(let i=0;i<26;i++){const s=document.createElement('span');s.textContent=items[Math.floor(Math.random()*items.length)];s.style.left=Math.random()*100+'%';s.style.animationDelay=(Math.random()*1.2)+'s';layer.appendChild(s);}
+  layer.classList.add('open');toast('🥚 隐藏彩蛋：凯喵的星光祝福洒满屏幕！');
+  setMood('celebrate');incAff(1);
+  setTimeout(()=>layer.classList.remove('open'),3000);
+}
+
+/* ================= 个人档案渲染 ================= */
+function renderMe(){renderAchView();}
+
+/* ================= 初始渲染 ================= */
+renderTabs();syncThemeUI();renderBag('use');renderRank('总经验');renderAchView();renderCheckinInline();renderDressRow();applyDressVisual();
+setMood('idle');
+</script>
+</body>
+</html>

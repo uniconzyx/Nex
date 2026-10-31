@@ -1,0 +1,9 @@
+# Tauri v2 自定义命令权限：允许前端调用 judge-batch 命令。
+# 由 capabilities/default.json 以裸名 `allow-judge-batch` 引用（应用自身权限无 scope 前缀）。
+# 注意 schema：是 commands.allow = [...]，不是 commands = [...]。
+
+[[permission]]
+identifier = "allow-judge-batch"
+description = "允许前端调用 judge-batch 批量判题命令（C++/Java 复用编译产物）"
+
+commands.allow = ["judge_batch"]

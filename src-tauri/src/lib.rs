@@ -6,6 +6,8 @@
 //   - 桌面端的 main.rs 只是薄壳：`fn main() { nex::run() }`。
 //   - 两边共用同一份 setup / 命令注册，保证 .exe 与 .apk 行为一致。
 mod api_client;
+// 暴露给 examples/ 做真机探测取证（不改动应用行为，仅重导出）。
+pub use crate::api_client::{probe, ApiTarget};
 mod config;
 mod defender;
 mod environment;
@@ -100,7 +102,16 @@ async fn get_status(
 /// 于是前端的所有请求都打到客户端确认过的地址上。
 #[tauri::command]
 async fn api_probe() -> Result<api_client::ApiTarget, String> {
-    Ok(api_client::probe().await)
+    let t = api_client::probe().await;
+    // 落盘探测证据：候选地址 / 是否可达 / 后端版本 / 耗时。
+    // 真客户端（浏览器里 isClient() 为 false）跑不到这条路径，
+    // 之前 Phase17 只能靠 Rust 单测覆盖；写进启动日志才能在人工验收时
+    // 确认「客户端确实自己探到了后端」，而不是碰巧用了默认地址。
+    boot_log(&format!(
+        "[api_probe] candidates={:?} base={} reachable={} version={:?} elapsed={}ms",
+        t.candidates, t.base_url, t.reachable, t.backend_version, t.elapsed_ms
+    ));
+    Ok(t)
 }
 
 /// 应用入口：桌面由 main.rs 调用，Android 由 `mobile_entry_point` 生成的 JNI 桥调用。

@@ -18,8 +18,12 @@ use std::path::PathBuf;
 ///   看着像代码挂了，其实是清单缺失。
 ///
 /// 所以本脚本：把 Tauri 的默认清单换成我们这份（多一个 dpiAware），
-/// 并用 `cargo:rustc-link-arg` 编给**所有**链接目标
-/// （bin / 测试宿主 / cdylib），保证 test 与 build 运行时行为一致。
+/// 编译成 COFF 资源对象 `target/nex_manifest.o`。
+/// 注意 rc 里 RT_MANIFEST 必须用**数值类型 24**（不能写字符串名 "RT_MANIFEST"，
+/// 否则 windres 把资源类型存成名称、Windows 不认作 app manifest）。
+/// 链接由 `.cargo/config.toml` 的全局 rustflags 链这个 .o，
+/// 覆盖 **bin / lib / test 宿主 / example / integration-test 所有目标**，
+/// 单一来源，彻底解决「清单只嵌 bin、example/test 缺清单」的问题。
 const MANIFEST: &str = r#"<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
   <assemblyIdentity type="win32" name="Nex.Desktop" version="1.0.0.0" processorArchitecture="*"/>
@@ -51,16 +55,24 @@ fn main() {
     tauri_build::try_build(attrs).expect("tauri-build failed");
 }
 
-/// 编译清单为 COFF 资源对象，并链给所有链接目标。
+/// 编译清单为 COFF 资源对象，并用 `cargo:rustc-link-arg` 链给 nex crate 的
+/// **所有自身链接目标**（bin / test 宿主 / cdylib）。
 ///
-/// - GNU 工具链：windres 编译 .rc → .o，再 `cargo:rustc-link-arg`。
-/// - MSVC 工具链：Tauri 已用 mt.exe 正确嵌 bin 清单；MSVC 链接器会自动
-///   生成外置 .manifest，测试宿主同样能解析到 v6 控件，无需额外处理。
+/// 关键修正（之前 Phase17 的坑）：
+///   rc 里 RT_MANIFEST 必须是**数值类型 24**，不能写成字符串名 "RT_MANIFEST"。
+///   若写成字符串名，windres 把资源类型存为名称而非 24，Windows 加载器不认作
+///   app manifest，SxS 不激活 → 仍加载 comctl32 v5 → 加载期崩
+///   STATUS_ENTRYPOINT_NOT_FOUND (0xc0000139)。
+///
+/// 为什么不用 `.cargo/config.toml` 全局 rustflags：它会无差别作用于所有 crate 的
+/// build script 链接（如 serde/thiserror 的 build script），那些链接的 cwd 不是
+/// package root，相对路径的 .o 找不到 → 全量链接失败。这里只覆盖 nex 自身目标。
+/// 取证用的 `src/bin/probe_smoke.rs` 是 nex 的 bin target，天然继承此 link-arg。
 fn build_manifest_resource() {
     if std::env::var("CARGO_CFG_TARGET_OS").unwrap_or_default() != "windows" {
         return;
     }
-    if std::env::var("CARGO_CFG_TARGET_ENV").unwrap_or_default() == "msvc" {
+    if std::env::var("CARGO_CFG_TARGET_ENV").unwrap_or_default() != "gnu" {
         return;
     }
 
@@ -69,12 +81,11 @@ fn build_manifest_resource() {
     };
     let manifest_path = out_dir.join("nex.manifest");
     let rc_path = out_dir.join("nex.rc");
-    if std::fs::write(&manifest_path, MANIFEST).is_err() {
-        println!("cargo:warning=无法写出 Windows 清单文件，cargo test 可能报 STATUS_ENTRYPOINT_NOT_FOUND");
-        return;
-    }
-    if std::fs::write(&rc_path, "1 RT_MANIFEST \"nex.manifest\"\n").is_err() {
-        println!("cargo:warning=无法写出 rc 文件，cargo test 可能报 STATUS_ENTRYPOINT_NOT_FOUND");
+    // rc 里用数值 24 表示 RT_MANIFEST（绝不能用字符串名 "RT_MANIFEST"）。
+    if std::fs::write(&manifest_path, MANIFEST).is_err()
+        || std::fs::write(&rc_path, "1 24 \"nex.manifest\"\n").is_err()
+    {
+        println!("cargo:warning=无法写出 Windows 清单/rc 文件，链接时可能缺 Common-Controls v6 清单");
         return;
     }
 
@@ -91,11 +102,7 @@ fn build_manifest_resource() {
         Ok(s) if s.success() && obj.is_file() => {
             println!("cargo:rustc-link-arg={}", obj.display());
         }
-        Ok(_) => {
-            println!("cargo:warning=windres 未成功编译清单资源，Windows 下 cargo test 可能报 STATUS_ENTRYPOINT_NOT_FOUND");
-        }
-        Err(e) => {
-            println!("cargo:warning=调用 windres 失败（{e}），Windows 下 cargo test 可能报 STATUS_ENTRYPOINT_NOT_FOUND");
-        }
+        Ok(_) => println!("cargo:warning=windres 未成功编译清单资源，可能缺 Common-Controls v6 清单"),
+        Err(e) => println!("cargo:warning=调用 windres 失败（{e}），可能缺 Common-Controls v6 清单"),
     }
 }

@@ -1,0 +1,5 @@
+# Nex 自定义权限：get-status 命令（读取判题管理器运行状态）
+[[permission]]
+identifier = "allow-get-status"
+description = "Allow the frontend to read the judge manager runtime status."
+commands.allow = ["get_status"]

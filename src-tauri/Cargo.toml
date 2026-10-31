@@ -1,0 +1,66 @@
+[package]
+name = "nex"
+version = "0.1.0"
+description = "Nex native desktop app — Tauri v2 + go-judge (Docker-free judge sandbox)"
+authors = ["uniconzyx"]
+license = "MIT"
+edition = "2021"
+rust-version = "1.77"
+
+# ---- 构建脚本：Tauri v2 必须在 build.rs 里调用 tauri_build ----
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+# ---- 库目标：Android 侧通过 cdylib 走 JNI（mobile_entry_point） ----
+# staticlib/cdylib 供移动端链接，rlib 供桌面 bin 与测试复用。
+[lib]
+name = "nex"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[dependencies]
+# Tauri 核心（Wry 运行时默认启用）
+tauri = { version = "2", features = [] }
+# 异步运行时（Tauri 已内置 tokio，这里显式声明以便直接使用 async API）
+tokio = { version = "1", features = ["full"] }
+# HTTP 客户端，封装 go-judge REST /run
+# 关闭默认 native-tls：Android 交叉编译找不到 OpenSSL（openssl-sys 会直接失败）。
+# 判题请求本身走 127.0.0.1 明文 HTTP，rustls 已足够，且桌面/移动行为一致。
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+# 局域网 HTTP 判题服务：Android 瘦客户端经 Wi-Fi 访问桌面端
+axum = { version = "0.7", features = ["json"] }
+# CORS 中间件（手机端 WebView / 浏览器跨域访问 /api/*）
+tower-http = { version = "0.6", features = ["cors"] }
+# 序列化
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# 错误链
+anyhow = "1"
+thiserror = "1"
+# go-judge 输出是 base64，需解码
+base64 = "0.22"
+# 宿主侧 WebSocket 取消服务（防僵尸进程）
+tokio-tungstenite = "0.24"
+futures-util = "0.3"
+
+# Unix 专属：在子进程 pre_exec 设置 RLIMIT_CPU 作为 CPU 时间硬保底。
+# 限定到 cfg(unix)，Windows 构建不会去编译 Unix-only 的 nix::resource 模块。
+[target.'cfg(unix)'.dependencies]
+nix = { version = "0.29", features = ["resource"] }
+
+[features]
+# default 必须是 custom-protocol —— 这不是可选项，是硬性要求。
+# ---------------------------------------------------------------------------
+# tauri-macros 里：dev = cfg!(not(feature = "custom-protocol"))
+# 而 tauri-codegen 在 dev=true 时**直接跳过前端资源嵌入**（EmbeddedAssets::default()）。
+# 也就是说：没有这个特性，`cargo build --release` 出来的 .so/.exe 不带任何前端，
+# 产物会从 ~16MB 掉到 ~7.6MB，运行期白屏 —— 而且构建全程零报错，极难排查。
+# `tauri build` 能正常出包，是因为 CLI 会显式加 `--features tauri/custom-protocol`；
+# 一旦绕过 CLI 直接跑 cargo（交叉编译时很常见），就必须靠这里兜底。
+# mock 默认关闭；go-judge 二进制缺失时自动降级为本地直跑（见 sandbox.rs）。
+default = ["tauri/custom-protocol"]
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true

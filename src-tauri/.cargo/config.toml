@@ -1,0 +1,13 @@
+# src-tauri 局部 cargo 配置
+#
+# 背景：Cargo.toml 里 [lib] crate-type 含 cdylib（Android/JNI 必需）。
+# 本机 Windows 用的是 x86_64-pc-windows-gnu（mingw）工具链，链接 cdylib 时
+# GNU ld 会为全部符号分配导出序号，依赖图一大就报：
+#   ld.exe: error: export ordinal too large: 68248
+# 桌面端只用 rlib（bin 直接静态链接），不需要 dll 导出任何符号，
+# 因此对该目标关闭「导出全部符号」，绕过序号上限。
+[target.x86_64-pc-windows-gnu]
+# 桌面 / Android cdylib 绕过 GNU ld 导出序号上限（export ordinal too large）。
+# Common-Controls v6 清单由 build.rs 经 cargo:rustc-link-arg 链入 nex 自身目标，
+# 不在此处全局链（全局会无差别作用于所有 crate 的 build script 链接而失败）。
+rustflags = ["-C", "link-arg=-Wl,--exclude-all-symbols"]

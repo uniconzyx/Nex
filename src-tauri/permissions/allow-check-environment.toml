@@ -1,0 +1,5 @@
+# Nex 自定义权限：check-environment 命令（探测编译器 / go-judge 是否就绪）
+[[permission]]
+identifier = "allow-check-environment"
+description = "Allow the frontend to check the sandbox/compiler environment readiness."
+commands.allow = ["check_environment"]

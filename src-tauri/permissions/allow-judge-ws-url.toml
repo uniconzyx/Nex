@@ -1,0 +1,5 @@
+# Nex 自定义权限：judge-ws-url 命令（读取本地 WebSocket 判题地址）
+[[permission]]
+identifier = "allow-judge-ws-url"
+description = "Allow the frontend to read the local WebSocket judge URL."
+commands.allow = ["judge_ws_url"]
