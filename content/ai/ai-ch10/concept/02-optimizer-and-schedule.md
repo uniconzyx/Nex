@@ -153,6 +153,41 @@ $$g_{\text{acc}}=\frac{1}{K}\sum_{k=1}^{K}g_k\quad(\text{对 }K\text{ 个 micro-
 - **常考问法**：① 梯度累积与增大 batch 是否等价（无状态层等价、BN 不等价）；② DDP 与模型并行的区别（数据切分 vs 模型切分）；③ AllReduce 是什么（所有卡归约到相同结果）。
 - **易混**：数据并行（每卡一份完整模型）≠ 模型并行（每卡一部分模型）；参数平均（联邦/模型平均）≠ 梯度平均（DDP）。
 
+## 可运行代码：warmup 曲线与两种 weight decay
+
+「warmup 不是玄学」可以看着学习率曲线说清楚——前 100 步线性升到峰值，之后余弦降到 0：
+
+```python
+import math
+import torch
+
+def lr_at(step, base=3e-4, warmup=100, total=1000):
+    """线性 warmup + 余弦退火；step 从 0 计。"""
+    if step < warmup:
+        return base * (step + 1) / warmup           # 峰值出现在第 warmup 步
+    t = (step - warmup) / max(1, total - warmup)
+    return 0.5 * base * (1 + math.cos(math.pi * t))  # 平滑降到 ~0
+
+print([round(lr_at(s), 7) for s in (0, 50, 99, 100, 550, 999)])
+
+# Adam 的 weight_decay 与 AdamW 的衰减不是一回事
+p1 = torch.nn.Parameter(torch.tensor([1.0, -2.0]))
+p2 = torch.nn.Parameter(torch.tensor([1.0, -2.0]))
+for p in (p1, p2):
+    p.grad = torch.zeros_like(p)                   # 梯度置零，只剩衰减项在起作用
+torch.optim.Adam([p1],  lr=0.1, weight_decay=0.1).step()
+torch.optim.AdamW([p2], lr=0.1, weight_decay=0.1).step()
+print("Adam :", [round(v, 4) for v in p1.data.tolist()])
+print("AdamW:", [round(v, 4) for v in p2.data.tolist()])
+```
+
+第一行列表里，第 100 步是峰值且**不连续**——`step < warmup` 用线性、之后切余弦，接缝处
+如果不专门处理就会有跳变，这也是很多实现把 warmup 写成 `min(1, step/warmup)` 再统一相乘的原因。
+
+后半段的对比更值得记：梯度为 0 时，`Adam(weight_decay)` 的衰减项会**进入梯度再被二阶矩归一化**，
+于是衰减幅度与参数大小脱钩，大参数反而衰减得更「慢」；`AdamW` 把 `lr * wd * p` 直接乘在参数上，
+是**按比例**缩小。这就是「Adam + L2 正则」与「AdamW」在论文里被分开讨论的根本原因。
+
 ## 三视角小结
 
 | 主题 | 程序员要会 | 博士生要会 | 考研/笔面要会 |

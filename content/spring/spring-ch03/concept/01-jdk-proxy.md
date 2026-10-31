@@ -63,6 +63,52 @@ JDK 动态代理是 `java.lang.reflect.Proxy` 在**运行时**为「一组接口
 - 易混点：`InvocationTargetException` 是反射调用目标方法抛异常时的「包装」，
   真实异常在 `getCause()` 中——笔试常考「如何拿到原始异常」。
 
+手写一遍最短的 JDK 代理，`$Proxy0` 的来历就清楚了——全程没有生成任何 `.java` 文件：
+
+```java
+import java.lang.reflect.*;
+
+interface OrderService { void create(String id); }
+
+class OrderServiceImpl implements OrderService {
+    public void create(String id) { System.out.println("create " + id); }
+}
+
+class TimingHandler implements InvocationHandler {
+    private final Object target;                       // 持有真实对象
+    TimingHandler(Object target) { this.target = target; }
+
+    @Override public Object invoke(Object proxy, Method method, Object[] args)
+            throws Throwable {
+        long t0 = System.nanoTime();
+        try {
+            return method.invoke(target, args);        // 反射委派，不是直接调用
+        } finally {
+            System.out.printf("%s took %d us%n", method.getName(),
+                              (System.nanoTime() - t0) / 1000);
+        }
+    }
+}
+
+public class Demo {
+    public static void main(String[] args) {
+        OrderService target = new OrderServiceImpl();
+        OrderService proxy = (OrderService) Proxy.newProxyInstance(
+                OrderService.class.getClassLoader(),
+                new Class<?>[]{ OrderService.class },   // 按接口生成，只能传接口
+                new TimingHandler(target));
+
+        proxy.create("A1001");                         // 先进 handler，再反射到 target
+        System.out.println(proxy.getClass().getName()); // com.sun.proxy.$Proxy0
+    }
+}
+```
+
+三个可以直接观察的点：`proxy.getClass()` 是 `$Proxy0`，运行时由 `ProxyGenerator` 拼出字节码并
+`defineClass`，所以**接口变了必须重启才有新代理类**；`newProxyInstance` 的第二个参数只接受
+`Class<?>[]` 里的接口，传 `OrderServiceImpl.class` 会立刻抛 `IllegalArgumentException`；
+`method.invoke` 抛出的异常会被包成 `InvocationTargetException`，业务异常在 `getCause()` 里。
+
 ## 二、InvocationHandler 与反射委派（中立陈述）
 
 `InvocationHandler` 是函数式接口（仅 `invoke` 方法），是 JDK 代理的「拦截中枢」。

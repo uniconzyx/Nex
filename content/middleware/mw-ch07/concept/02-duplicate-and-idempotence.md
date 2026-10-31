@@ -102,6 +102,40 @@ Kafka 的消费者协议默认站在「重放」一侧（`enable.auto.commit=fal
 - 「唯一索引冲突就直接吞掉异常」——不严谨，需要区分「重复消息」与「真实业务冲突」。
 - 「幂等键用消息 ID」——错，生产者重试会生成新的消息 ID。
 
+## 可运行代码：用唯一键把「去重」压进一个事务
+
+幂等消费最常见也最可靠的做法，是把「消息 id」变成数据库的唯一约束，让**重复投递自己撞墙**：
+
+```sql
+CREATE TABLE consumed_msg (
+  msg_id      VARCHAR(64) PRIMARY KEY,      -- 唯一键就是去重闸门
+  topic       VARCHAR(64) NOT NULL,
+  consumed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 业务写入与去重记录放在同一个事务里
+BEGIN;
+INSERT INTO consumed_msg (msg_id, topic) VALUES ('m-1001', 'order-created');
+INSERT INTO order_log (order_id, action) VALUES ('A1001', 'created');
+COMMIT;
+```
+
+重复投递 `m-1001` 时，第一条 `INSERT` 就违反主键，整个事务回滚——**业务表不会被写第二次**，
+不需要在应用层写 `if (exists) return`（那个写法在并发下会漏：两个消费者同时查到「不存在」）。
+代价是「去重表永远只有增」，需要用 TTL 或分区来回收。
+
+更省事的变体是把幂等键直接放进业务表：
+
+```sql
+ALTER TABLE order_log ADD CONSTRAINT uk_order_action UNIQUE (order_id, action);
+INSERT INTO order_log (order_id, action) VALUES ('A1001', 'created')
+ON CONFLICT (order_id, action) DO NOTHING;   -- PostgreSQL；MySQL 用 INSERT IGNORE / ON DUPLICATE KEY
+```
+
+`ON CONFLICT DO NOTHING` 让重复消息**静默成功**而不是抛错，适合「重复是常态」的场景
+（Kafka 至少一次投递下就是这样）；如果业务需要知道「这是第几次」，就该在 `DO UPDATE` 里累加计数，
+而不是把它当成错误处理。
+
 ## 小结
 
 - 重复是**语义的代价**，不是缺陷；幂等是**恢复恰好一次效果**的唯一工程手段。

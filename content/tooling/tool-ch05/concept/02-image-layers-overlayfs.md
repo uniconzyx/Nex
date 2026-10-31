@@ -77,6 +77,29 @@
 3. **删（whiteout）**：删一个来自 lower 的文件，lower 不能改，于是在 upper 放一个
    **whiteout 标记**把它遮蔽；`merged` 里就看不见了，但**下层数据依然存在**。
 
+这套机制在宿主上手工挂一次就再也不会记错——四条规则全部可以在 `ls` 里看到：
+
+```bash
+mkdir -p /tmp/ovl/{lower,upper,work,merged}
+echo "原内容" > /tmp/ovl/lower/base.txt          # 模拟只读镜像层
+
+sudo mount -t overlay overlay \
+  -o lowerdir=/tmp/ovl/lower,upperdir=/tmp/ovl/upper,workdir=/tmp/ovl/work \
+  /tmp/ovl/merged
+
+cat /tmp/ovl/merged/base.txt    # ① 读：命中 lower
+echo "改过了" > /tmp/ovl/merged/base.txt
+ls /tmp/ovl/upper               # ② 写：copy-up，upper 里出现了 base.txt
+cat /tmp/ovl/lower/base.txt     #    lower 内容仍是「原内容」
+rm /tmp/ovl/merged/base.txt
+ls -l /tmp/ovl/upper            # ③ 删：upper 里剩一个 c 0,0 的字符设备（whiteout）
+```
+
+第三行的 `c 0, 0`（主设备号 0、次设备号 0）就是 whiteout 的物理形态：**空设备**，
+表示「此处有东西但被遮蔽」。`upperdir` 与 `workdir` 必须在**同一个文件系统**上，
+否则内核无法保证 copy-up 的原子性；`workdir` 也必须为空目录，否则挂载直接失败。
+这两条是手工搭建 overlayfs 时最常见的两个报错原因。
+
 ### 🧑‍💻 程序员视角
 - 这解释了本章最反直觉的一条：**`RUN rm -rf /big` 不会减小镜像体积**。
   它在 upper 加了一个 whiteout，下层的大文件仍在每一层里躺着。

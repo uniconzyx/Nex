@@ -119,6 +119,27 @@
 - 卷与可写层的本质差异：**生命周期归属不同**。可写层是容器私有的、与容器同生共死；
   volume 是由 Docker 管理的**独立对象**，容器只是引用它，删除引用不触发对象回收。
 
+用三条命令就能验证这个归属差异：
+
+```bash
+# 匿名卷：删容器后数据仍在
+docker run -d --name db -v /var/lib/mysql mysql:8.0
+docker inspect -f '{{json .Mounts}}' db
+docker rm -f db                 # 只删可写层，匿名卷变成悬空卷（dangling）
+docker volume ls                # 仍能看到它，只是没有容器再引用
+
+# 具名卷：显式管理生命周期，可跨容器复用
+docker run -d --name db2 -v mysql_data:/var/lib/mysql mysql:8.0
+
+# 端口映射：宿主 8080 → 容器 80（宿主端口在前）
+docker run -d -p 8080:80 nginx:alpine
+curl -sI http://localhost:8080 | head -1
+```
+
+`docker volume ls` 里那些 `dangling` 卷就是「容器删了、数据还占着磁盘」的现场；
+`docker volume prune` 才会真正回收，而这一步**不可撤销**——这也解释了为什么生产环境
+更倾向用具名卷而不是匿名卷：名字本身就是一道防误删的护栏。
+
 ### 📚 考研者视角
 - 408 对应考点：**计算机网络**的「NAT」「私有 IP 地址」「端口」以及
   **操作系统**的「文件共享」。

@@ -27,6 +27,33 @@ CPython 用 `cell` 对象持有自由变量：`inner.__closure__` 是 `cell` 元
 
 见 `examples/ex05-closure-counter.json`、`examples/ex06-closure-late-binding.json`、`examples/ex11-closure-cache.json`。
 
+计数器与延迟绑定两件事，都可以在解释器里直接看到「cell」这一层：
+
+```python
+def counter():
+    n = 0
+    def inc():
+        nonlocal n            # 去掉这行会 UnboundLocalError：赋值使 n 成为局部名
+        n += 1
+        return n
+    return inc
+
+c = counter()
+print(c(), c(), c())                  # 1 2 3
+print(c.__closure__[0].cell_contents) # 3 ← n 真的活在 cell 里，不是拷贝
+
+fs = [lambda: i for i in range(3)]     # ✗ 延迟绑定：调用时才读 i，此时 i==2
+print([f() for f in fs])               # [2, 2, 2]
+
+gs = [lambda i=i: i for i in range(3)] # ✓ 默认参数在**创建时**求值，把当前值钉住
+print([g() for g in gs])               # [0, 1, 2]
+```
+
+`c.__closure__` 里只有一个 cell，`cell_contents` 就是 3——这解释了为什么两个 `counter()`
+实例互不干扰：每次调用 `counter()` 都**新建一个 cell**，闭包各自绑定各自的 cell。
+延迟绑定不是 bug，是「名字在调用时才查」的必然结果；`lambda i=i` 之所以有效，
+靠的是「默认参数值在函数对象创建时求值」这条规则，它把「变量」提前变成了「值」。
+
 ---
 
 ## 三视角解析

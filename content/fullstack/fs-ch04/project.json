@@ -6,7 +6,7 @@
   "items": [
     {
       "title": "用 Node 内置 http 手写迷你 REST API（items CRUD）",
-      "requirement_md": "不依赖任何第三方框架（express 等不可用），仅用 Node 内置 `http` / `url` / `stream`，实现一个 items 资源的迷你 REST API，覆盖本章核心考点：\n1. **路由表**：方法 + 路径匹配，支持路径变量 `/items/:id`（正则捕获）。\n2. **请求体**：累积 `req` 的 data/end 事件，JSON.parse 并 try/catch（失败返回 400），限制 body 大小。\n3. **状态码语义**：200 列表/详情、201 创建、400 坏 JSON、404 未找到/无路由、500 内部错误。\n4. **中间件式错误处理**：用四参数错误中间件统一收口（含 async 错误的 next(err) 传递）。\n5. **背压意识**：若返回大列表，用流/分块并注意 write() 返回值。\n把以上写成可在 Node 22 直接 `node server.js` 运行的最小可验证脚本，并用内置 `http.request` 发真实请求（listen(0) 取随机端口）打印各接口响应做断言；输出中不得出现端口号。",
+      "requirement_md": "### 背景\n\n不依赖任何第三方框架（express 等不可用），仅用 Node 内置 `http` / `url` / `stream`，实现一个 items 资源的迷你 REST API，覆盖本章核心考点\n\n### 功能要求\n\n1. **路由表**：方法 + 路径匹配，支持路径变量 `/items/:id`（正则捕获）。\n2. **请求体**：累积 `req` 的 data/end 事件，JSON.parse 并 try/catch（失败返回 400），限制 body 大小。\n3. **状态码语义**：200 列表/详情、201 创建、400 坏 JSON、404 未找到/无路由、500 内部错误。\n4. **中间件式错误处理**：用四参数错误中间件统一收口（含 async 错误的 next(err) 传递）。\n5. **背压意识**：若返回大列表，用流/分块并注意 write() 返回值。\n把以上写成可在 Node 22 直接 `node server.js` 运行的最小可验证脚本，并用内置 `http.request` 发真实请求（listen(0) 取随机端口）打印各接口响应做断言；输出中不得出现端口号。\n",
       "tasks": [
         {
           "title": "实现路由与路径变量",

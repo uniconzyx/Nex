@@ -37,3 +37,45 @@
 - 标准问法：「分区和分桶的区别？」标准答：分区是目录级、按列值切目录、用于裁剪扫描；分桶是文件级、按 `hash(col)%N` 切文件、用于 JOIN 免 shuffle 与采样；二者正交可叠加。
 - 易错口径：分桶数改了要全量重写（非一致性哈希）；分桶表 JOIN 提速的前提是「**同列 + 同桶数**」，否则优化不生效。
 - 关联考点：与「MapJoin/数据倾斜」「哈希分区」连考；桶数取 2 的幂的原因（位运算/对齐并行度）。
+
+## 可运行代码：用 EXPLAIN 验证裁剪是否生效
+
+分区裁剪不能靠「我写了 WHERE 所以肯定裁了」来判断，`EXPLAIN` 会直接列出实际扫描的分区数：
+
+```sql
+-- 分区表：dt 是目录级虚拟列，不物理存在于行内
+CREATE TABLE emp_part (
+  id     BIGINT,
+  name   STRING,
+  salary DOUBLE
+)
+PARTITIONED BY (dt STRING)
+STORED AS ORC;
+
+INSERT OVERWRITE TABLE emp_part PARTITION (dt = '2024-01-02')
+SELECT id, name, salary FROM emp_raw WHERE dt = '2024-01-02';
+
+-- ✓ 命中裁剪：只列举并扫描 dt=2024-01-02 一个目录
+EXPLAIN
+SELECT count(*) FROM emp_part WHERE dt = '2024-01-02';
+
+-- ✗ 裁剪失效：分区列被函数包裹，目录白名单推不出来
+EXPLAIN
+SELECT count(*) FROM emp_part WHERE substr(dt, 1, 7) = '2024-01';
+
+-- 分桶：文件级切分，供 JOIN 免 shuffle 与采样
+CREATE TABLE emp_bucket (id BIGINT, name STRING)
+CLUSTERED BY (id) INTO 8 BUCKETS
+STORED AS ORC;
+
+SET hive.enforce.bucketing = true;
+INSERT OVERWRITE TABLE emp_bucket SELECT id, name FROM emp_raw;
+```
+
+`EXPLAIN` 里看两个字段：`partition`（裁剪后剩下的分区数）与 `Statistics` 里的 `numFiles`。
+第一条查询的 `partition` 是 1；第二条会退化成全部分区，因为 `substr(dt,1,7)` 让优化器无法把
+谓词翻译成「目录白名单」。这也是「**WHERE 里别对分区列套函数**」这句经验的具体形态——
+不是语法问题，是优化器拿不到可下推的谓词。
+
+分桶那一侧的前置条件更硬：`CLUSTERED BY (id) INTO 8 BUCKETS` 之后，两个表要能用桶做
+`SMB JOIN`，必须**同列、同桶数**，否则优化器直接把桶信息忽略，退化回普通 shuffle。

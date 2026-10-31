@@ -49,6 +49,44 @@
 - 用 `std::hardware_destructive_interference_size` 做可移植的间距；
 - 结构体里插入填充成员把后继变量推到下一行。
 
+不靠工具也能**一分钟复现**：同一段写循环，只改变量的排布，看墙钟时间差多少倍。
+
+```cpp
+#include <atomic>
+#include <chrono>
+#include <cstdio>
+#include <thread>
+
+struct Together { std::atomic<long long> a{0}; std::atomic<long long> b{0}; };
+struct Apart    { alignas(64) std::atomic<long long> a{0};
+                  alignas(64) std::atomic<long long> b{0}; };
+
+template <class T>
+long long time_two_writers(T& s, int iters) {
+    const auto t0 = std::chrono::steady_clock::now();
+    std::thread w1([&]{ for (int i = 0; i < iters; ++i)
+                            s.a.fetch_add(1, std::memory_order_relaxed); });
+    std::thread w2([&]{ for (int i = 0; i < iters; ++i)
+                            s.b.fetch_add(1, std::memory_order_relaxed); });
+    w1.join();
+    w2.join();
+    return std::chrono::duration_cast<std::chrono::milliseconds>(
+               std::chrono::steady_clock::now() - t0).count();
+}
+
+int main() {
+    constexpr int kIters = 20000000;
+    Together same; Apart split;
+    std::printf("together=%lld ms\n", time_two_writers(same,  kIters));
+    std::printf("apart   =%lld ms\n", time_two_writers(split, kIters));
+}
+```
+
+`relaxed` 是刻意选的：本例不需要任何跨线程顺序保证，**只**想测「写不同变量却争同一行」的代价。
+如果换成默认的 `seq_cst`，fence 开销会掩盖差异。墙钟断言不适合进 CI（机器负载会抖），
+所以要量化伪共享应改用 `perf c2c` 的 HITM 计数或自写缓存迁移模型（见 examples/ex09），
+别写成 `assert(together > apart * 3)`。
+
 **确定性判据**（examples/ex09 实测）：两原子变量放在 `alignas(64)` 结构体内（偏移 0 与 8）
 → 「同一缓存行: 1」；用填充把它们推到偏移 0 与 64 → 「同一缓存行: 0」。
 缓存行迁移模型计数：同一行 **2000000** 次迁移，对齐后 **2** 次。

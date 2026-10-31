@@ -30,6 +30,33 @@ CPython 调用约定：
 
 见 `examples/ex01-function-params.json`、`examples/ex02-argument-unpacking.json`。
 
+五种参数形态一次看全，重点是**可变默认值那一组对比**：
+
+```python
+def f(a, b=2, *args, c, d=4, **kw):
+    return a, b, args, c, d, kw
+
+print(f(1, 3, 5, 7, c=9, x=0))
+# (1, 3, (5, 7), 9, 4, {'x': 0})   ← a b *args / c d **kw 各就各位
+
+def bad(x, acc=[]):          # ✗ 默认值在 def 执行时创建一次，被所有调用共享
+    acc.append(x)
+    return acc
+
+def good(x, acc=None):       # ✓ 哨兵 None，每次调用新建
+    acc = [] if acc is None else acc
+    acc.append(x)
+    return acc
+
+print(bad(1), bad(2))        # [1, 2] [1, 2]  ← 第二次调用看到第一次的残留
+print(good(1), good(2))      # [1] [2]
+```
+
+`c` 后面没有默认值，所以它**必须**用关键字传——这正是裸 `*` 的加锁效果，
+把「位置传参写错顺序」这类 bug 变成 `TypeError` 而不是静默的错误结果。
+`bad` 与 `good` 的差别不在函数体，而在**默认值被求值的时刻**：`def` 只执行一次，
+函数调用执行无数次，两者错位就会把状态带到下一次调用。
+
 ---
 
 ## 三视角解析

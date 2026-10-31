@@ -85,6 +85,35 @@
 
 ---
 
+## 可运行代码：先过硬约束，再加权打分
+
+「先约束过滤、再加权评分」这个流程写成代码只有十几行，但顺序反了就会选出错的方案：
+
+```python
+CANDIDATES = {
+    "kafka":    {"吞吐": 10, "延迟": 6, "运维": 5, "事务消息": True},
+    "rabbitmq": {"吞吐": 4,  "延迟": 9, "运维": 7, "事务消息": False},
+    "rocketmq": {"吞吐": 9,  "延迟": 7, "运维": 6, "事务消息": True},
+    "pulsar":   {"吞吐": 9,  "延迟": 7, "运维": 3, "事务消息": True},
+}
+WEIGHTS  = {"吞吐": 0.4, "延迟": 0.3, "运维": 0.3}
+MUST_HAVE = {"事务消息": True}          # 硬约束：不满足直接淘汰，不参与打分
+
+def score(spec):
+    if any(spec.get(k) != v for k, v in MUST_HAVE.items()):
+        return None
+    return round(sum(spec[k] * w for k, w in WEIGHTS.items()), 2)
+
+ranked = sorted(((score(s), n) for n, s in CANDIDATES.items()
+                 if score(s) is not None), reverse=True)
+print(ranked)   # [(7.5, 'rocketmq'), (7.3, 'kafka'), (6.6, 'pulsar')]
+```
+
+结果值得注意：**Kafka 在吞吐上是满分，却输给了 RocketMQ**——因为「运维成本」这一项
+它只拿 5 分，而业务把运维权重设成了 0.3。如果先算加权分再筛硬约束，`rabbitmq`（延迟 9 分）
+会排到很前面，最后才发现它不支持事务消息，整轮评估白做。**顺序本身就是方法论的一部分**：
+硬约束是布尔值，加权分是连续值，两者不可通约，混在一起算等于拿苹果比橘子。
+
 ## §3 选型的工程判据
 
 ### 3.1 先定需求，再看中间件

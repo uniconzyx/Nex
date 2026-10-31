@@ -16,6 +16,30 @@ EDA（探索性数据分析）不是"画几张图"，而是**用图提问、用�
 
 顺序不能跳：**先单变量**。跳过单变量直接算相关系数，是"用错的分布算出看似合理的数"的经典错误来源。
 
+单变量这一层用几行就能批量完成，关键是**同时看中心、离散与形状**——只看均值会漏掉偏态：
+
+```python
+import pandas as pd
+
+def describe_one(s: pd.Series) -> dict:
+    q1, q3 = s.quantile([0.25, 0.75])
+    iqr = q3 - q1
+    return {
+        "n": int(s.notna().sum()),
+        "mean": round(float(s.mean()), 3),
+        "median": round(float(s.median()), 3),
+        "skew": round(float(s.skew()), 3),          # |skew| > 1 即明显偏态
+        "outliers": int(((s < q1 - 1.5 * iqr) | (s > q3 + 1.5 * iqr)).sum()),
+    }
+
+print(describe_one(df["income"]))
+```
+
+读法：`mean` 与 `median` 差得远、`skew` 绝对值大于 1，说明分布单侧拖长尾，此时**中心用中位数、
+离散用 IQR**，均值和标准差都会被长尾拉偏。这一列的散点/相关分析之前应先取 `log1p`，
+否则一个极值就能把相关系数算成另一个符号。`outliers` 用 1.5 IQR 判据，只是"值得看一眼"的候选名单，
+不等于"必须删除"——是否删除取决于它是不是录入错误。
+
 ### 🎓 博士生视角
 
 EDA 的方法论价值在于**先验与数据的对齐**：建模前必须先检查分布假设是否成立（线性模型要线性、正态假设要有正态性）。

@@ -133,6 +133,40 @@ Kafka 的高吞吐**不是**来自「每条消息发得快」，而是来自**�
 **记忆锚点**：**「顺、批、零、分」**（顺序写、批处理、零拷贝、分区并行）。
 
 
+把「批处理」落到配置上，就是三个参数的配合——批大小决定单批上限，`linger.ms` 决定愿意等多久凑批，
+压缩决定网络与磁盘的实际字节数：
+
+```java
+Properties p = new Properties();
+p.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+p.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+p.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+
+// 攒批三件套
+p.put(ProducerConfig.BATCH_SIZE_CONFIG, 32 * 1024);   // 单批上限 32KB
+p.put(ProducerConfig.LINGER_MS_CONFIG, 5);            // 最多等 5ms 凑批
+p.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, "lz4"); // 压缩在批级别生效
+
+// 可靠性：等 ISR 全部确认；幂等开启后 acks 会被自动提到 all
+p.put(ProducerConfig.ACKS_CONFIG, "all");
+p.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
+
+try (KafkaProducer<String, String> producer = new KafkaProducer<>(p)) {
+    for (int i = 0; i < 100_000; i++) {
+        // 同一个 key 必落同一分区 → 该 key 内顺序有保证
+        producer.send(new ProducerRecord<>("orders", "k" + (i % 8), "v" + i),
+                      (md, ex) -> { if (ex != null) log.error("send failed", ex); });
+    }
+    producer.flush();   // 不 flush 直接 close，累加器里未发完的批会被丢弃
+}
+```
+
+`batch.size` 与 `linger.ms` 是一对**互相等待**的参数：谁先满足谁发车。调大 `linger.ms` 到 20~50ms
+能明显提升吞吐，代价是端到端延迟增加同样量级——这也是「Kafka 快」不是免费的证明。
+另外不要漏掉 `flush()`：`send()` 只是把记录放进累加器就返回，真正的网络发送在 Sender 线程，
+进程退出太快会把还没凑满的批一起丢掉。
+
+
 ## ③ 发送链路：从 send() 到 Broker
 
 ```

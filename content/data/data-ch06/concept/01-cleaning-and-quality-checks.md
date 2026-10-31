@@ -19,6 +19,41 @@
 
 一条纪律：**清洗必须留痕**。原始列不要就地覆盖，新增 `xxx_clean` 或保留原始表——否则无法回溯"这个结论是基于哪版数据得出的"。
 
+六项体检不用手点，写成函数跑一遍，输出就是"问题清单"的第一版：
+
+```python
+import pandas as pd
+
+def profile(df: pd.DataFrame) -> pd.DataFrame:
+    rows = []
+    for col in df.columns:
+        s = df[col]
+        rows.append({
+            "列": col,
+            "类型": str(s.dtype),
+            "缺失率": round(float(s.isna().mean()), 3),
+            "唯一值": int(s.nunique(dropna=True)),
+            "样例": s.dropna().iloc[0] if s.notna().any() else None,
+        })
+    return (pd.DataFrame(rows)
+              .sort_values("缺失率", ascending=False)
+              .reset_index(drop=True))
+
+print(profile(df).to_string(index=False))
+
+# 唯一性：主键重复要看"重复了几组"，不是"重复了几行"
+print("重复主键组数:", int(df.duplicated(subset=["order_id"]).sum()))
+
+# 一致性：同义异名会以多个键出现，值计数就能暴露
+print(df["city"].value_counts().head(10))
+```
+
+注意三处容易写错的判断口径：`缺失率` 用 `s.isna().mean()` 直接得到比例（True 参与算术即 1），
+不要写成 `s.isna().sum() / df.shape[0]` 再去手算；
+`nunique(dropna=True)` 才是"不同取值个数"，默认就会排除缺失；
+`duplicated()` 默认把**首次出现**的那行留作"非重复"，所以得到的数表示**多出来的重复行数**，
+与"重复组数"不总是相等——写报告时必须说清用的是哪个口径。
+
 ### 🎓 博士生视角
 
 质量维度可形式化为一组**约束集合**：完整性 = 非空约束，唯一性 = 键约束，有效性 = 类型约束，一致性 = 等价类约束（值域归一）。

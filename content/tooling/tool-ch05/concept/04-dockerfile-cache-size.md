@@ -101,6 +101,30 @@ examples/ex07 实测：单阶段 1555.6MB → 多阶段 14.0MB，**降幅 99.1%*
 - 易错点：以为「把 `RUN` 拆细可以提高缓存命中率」——拆细确实提高粒度，
   但每层都有元数据开销，且**任何一层失效都会让后面全失效**，需要在粒度与层数间权衡。
 
+多阶段构建把「构建环境」与「运行环境」拆成两个 `FROM`，是同时解决体积与安全的单一手段：
+
+```dockerfile
+# 构建阶段：带全套工具链，这一层体积可以很大
+FROM golang:1.22 AS build
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download                 # 依赖层：只改源码时这一层仍命中缓存
+COPY . .
+RUN CGO_ENABLED=0 go build -o /out/app ./cmd/app
+
+# 运行阶段：只拷贝产物，工具链、源码、缓存全部留在上一阶段
+FROM gcr.io/distroless/static-debian12
+COPY --from=build /out/app /app
+USER nonroot:nonroot
+ENTRYPOINT ["/app"]
+```
+
+两次 `COPY` 的先后顺序是这层的全部价值：`go.mod` 变化频率远低于源码，
+把它单独一层，日常改代码的构建就能跳过最耗时的 `go mod download`。
+最终镜像里没有 `go` 工具链、没有源码、没有 root 用户——**体积从 GB 级降到几十 MB，
+攻击面也从「一整套编译环境」缩到「一个静态二进制」**。`COPY --from=build` 只搬运指定路径，
+上一阶段的所有中间文件都不会进入最终镜像，这正好绕开了「`RUN rm` 不减体积」的陷阱。
+
 ---
 
 ## 三、体积优化与安全基线

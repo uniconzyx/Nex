@@ -37,6 +37,29 @@ padding 控制输入边界是否补零。'valid' 不补零（输出变小）；'
 - 公式题：已知 n=224, k=3, s=2, p=1，求 valid 与 same 输出。valid = (224−3)//2+1 = 111；same = ceil(224/2)=112。
 - 易错：'same' 当成了「输出恒等于 n」，忽略 s>1 时向上取整且可能小于 n。
 - 经典问法：「same 卷积真的总是保持尺寸吗？」「转置卷积输出尺寸怎么算」。
+## 可运行代码：用张量形状核对公式
+
+尺寸公式背得再熟，也不如让框架算一遍——注意池化**没有可学习参数**，而卷积有：
+
+```python
+import torch
+import torch.nn as nn
+
+x = torch.arange(1, 26, dtype=torch.float32).reshape(1, 1, 5, 5)   # 5×5 输入
+
+pool = nn.MaxPool2d(kernel_size=2, stride=2)      # 默认 stride = kernel_size
+conv = nn.Conv2d(1, 1, kernel_size=3, padding=1, stride=1)
+
+print("pool:", pool(x).shape)     # [1, 1, 2, 2]  ← floor((5-2)/2)+1=2
+print("conv:", conv(x).shape)     # [1, 1, 5, 5]  ← (5+2*1-3)/1+1=5
+print("pool 参数:", sum(p.numel() for p in pool.parameters()))   # 0
+print("conv 参数:", sum(p.numel() for p in conv.parameters()))   # 3*3+1 = 10
+```
+
+池化把 5 变成 2，意味着**最后一行一列被丢弃**（`5 - (2-1)*2 - 2 = 1`）；想让它们参与计算，
+要么 `ceil_mode=True`（输出变 3），要么先把边长 pad 到 6。看清这一点，就不会在「输入 224 输出
+为什么是 111 不是 112」这类问题上反复卡住。
+
 ## 三视角小结
 
 | 视角 | 关注 | 本文件要点 |

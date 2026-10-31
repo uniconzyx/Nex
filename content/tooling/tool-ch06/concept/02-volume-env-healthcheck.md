@@ -214,6 +214,56 @@ examples/ex07、ex08 实测了全部组合。
 
 ---
 
+## 可运行代码：一份带卷、环境变量与健康检查的 compose
+
+这几个字段互相牵连：卷决定数据活多久，`env_file` 决定敏感值进不进 git，
+健康检查决定 `depends_on` 能不能真正等到「能干活」而不只是「进程起来了」：
+
+```yaml
+services:
+  app:
+    image: myapp:1.4.0
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - DB_URL=jdbc:mysql://db:3306/orders
+    env_file:
+      - .env                      # 密码等敏感值走文件，.env 写进 .gitignore
+    volumes:
+      - appdata:/var/lib/app      # 具名卷：删容器、重建镜像都不丢数据
+    depends_on:
+      db:
+        condition: service_healthy   # 等到 db 健康，而不是「容器已启动」
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 30s           # 给 JVM 启动留时间，否则冷启动失败也算进 retries
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: orders
+    volumes:
+      - dbdata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  appdata:
+  dbdata:
+```
+
+三个字段各自对应一类线上事故：不写 `volumes` 就丢数据（容器删了可写层就没了）；
+把密码写进 `environment` 会随 `docker inspect` 和镜像历史泄露，所以走 `env_file`；
+`start_period` 缺失则 JVM 冷启动的 20 秒会被计入 `retries`，容器在真正可用前就被判死重启，
+形成「反复重启、永远起不来」的循环。健康检查的 `test` 必须**真的探业务端口**，
+`CMD-SHELL` 里的 `curl` 或应用自带的 actuator 探针都行，但别用 `ps aux | grep java` 这种
+「进程还在就算健康」的假探针——进程活着而连接池耗尽时，它照样返回 0。
+
 ## 三视角小结
 
 | 视角 | 一句话结论 |

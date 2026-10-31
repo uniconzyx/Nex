@@ -17,6 +17,28 @@
 
 关键结论：**namespace 负责「看不见」，cgroup 负责「用不多」，二者都不提供独立内核。**
 
+这两句话都能在裸 Linux 上手工复现——**不需要 Docker**，因为 Docker 只是它们的外壳：
+
+```bash
+# 宿主：PID 是全局连续编号
+ps -eo pid,comm | head -3
+
+# 新建 pid + mount + uts 三个 namespace，在其中启动 bash
+sudo unshare --pid --fork --mount-proc --uts /bin/bash
+  hostname container-a      # uts：只改自己看到的主机名，宿主 hostname 不变
+  ps -eo pid,comm           # pid：只剩 bash 与 ps，且 bash 就是 PID 1
+  exit
+
+# cgroup v2：给一组进程加 256MiB 内存上限
+sudo mkdir -p /sys/fs/cgroup/demo
+echo 256M | sudo tee /sys/fs/cgroup/demo/memory.max
+echo $$   | sudo tee /sys/fs/cgroup/demo/cgroup.procs
+```
+
+两个观察点值得记住：`unshare --pid` 之后 `ps` 只看到两个进程，说明「进程列表」本身
+就是 namespace 提供的一个**视图**而非内核的真实清单；而 cgroup 那一侧完全看不到这些进程的编号，
+它只管**用量账本**。`docker run` 做的事，就是把这两件事连同镜像挂载一起打包。
+
 ### 🧑‍💻 程序员视角
 - 排查顺序：容器里 `ps` 看到的 PID 1 是容器的 entrypoint，不是宿主 systemd；
   想看真实对应关系要去宿主的 `/proc/<宿主PID>` 或 `docker top`。

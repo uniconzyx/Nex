@@ -18,6 +18,45 @@ UUID（如 `task_8f3a...`），避免用自增整形（会被人遍历猜测）�
 只存在进程内存里——因为进程随时可能重启、扩缩容。状态机的好处是「任何时刻都能回答『这个任务
 现在在哪』」，这是断线重连的基石。
 
+把状态机写成**白名单**而不是一堆 `if`，非法迁移就会在入口被挡住，而不是几天后从错误数据里被发现：
+
+```js
+// 只允许这几条迁移，其余一律拒绝
+const NEXT = {
+  queued:    ["running", "failed"],
+  running:   ["succeeded", "failed"],
+  succeeded: [],
+  failed:    [],
+};
+
+async function advance(db, taskId, to) {
+  const [row] = await db.query(
+    "SELECT state FROM tasks WHERE id = ? FOR UPDATE", [taskId]);
+  if (!row) throw new Error("task not found");
+  if (!NEXT[row.state].includes(to)) {
+    throw new Error(`非法迁移 ${row.state} -> ${to}`);
+  }
+  await db.query("UPDATE tasks SET state = ? WHERE id = ?", [to, taskId]);
+}
+
+// 续跑：从已落库的 cursor 接着走，而不是从头再来
+async function resume(db, taskId, steps) {
+  const [row] = await db.query(
+    "SELECT state, cursor FROM tasks WHERE id = ?", [taskId]);
+  if (row.state === "succeeded" || row.state === "failed") return row.state; // 终态幂等
+  for (let i = row.cursor; i < steps.length; i++) {
+    await steps[i]();
+    await db.query("UPDATE tasks SET cursor = ? WHERE id = ?", [i + 1, taskId]);
+  }
+  return "succeeded";
+}
+```
+
+两个细节决定了它能不能在生产跑：`SELECT ... FOR UPDATE` 让「读状态 + 写状态」成为一次
+加锁判定，否则两个并发请求可能各自读到 `queued` 并双双推进；`cursor` 每步落库而非最后一次性写，
+才能在任意一步崩溃后精确续跑——代价是每个 checkpoint 一次写库，所以步骤要**足够粗**，
+别把每条记录都当成一步。
+
 ## 轮询还是订阅
 
 客户端想知道进度，有两种主流方式。**轮询（polling）** 最简单：客户端每隔几秒 `GET /task/:id`，

@@ -30,6 +30,35 @@
 - **能力不足的模型**：见上文涌现特性，小模型上 CoT 可能负收益。
 - **需要「不推理」的高一致性任务**：例如固定模板的字段抽取，让模型自由推理反而降低稳定性。
 
+## 可运行代码：自一致性的表决与置信度
+
+自一致性的核心只有两步：**多样本采样** + **多数表决**；中间那步「一致率」才是判断可信度的关键：
+
+```python
+from collections import Counter
+
+def self_consistency(samples: list[str]) -> tuple[str, float]:
+    """对多次采样的最终答案做多数表决，返回 (答案, 一致率)。"""
+    if not samples:
+        raise ValueError("samples 不能为空")
+    cnt = Counter(s.strip() for s in samples)
+    ans, n = cnt.most_common(1)[0]
+    return ans, n / len(samples)
+
+cases = {
+    "高一致": ["42", "42", "41", "42", "43"],
+    "全一致": ["42"] * 5,
+    "低一致": ["42", "17", "17", "9", "17"],
+}
+for name, votes in cases.items():
+    ans, conf = self_consistency(votes)
+    print(f"{name}: 答案={ans} 一致率={conf:.2f}")
+```
+
+输出里「低一致」那组会选到 `17`（3/5）——**多数表决赢了，但一致率只有 0.6**，这种样本应当
+被标记为「存疑」而不是直接采信。工程上通常还要约束两件事：`temperature > 0`（否则多次采样
+完全相同，表决毫无意义），以及同一条链路里**固定随机种子只用于复现实验、不用于线上投票**。
+
 ## 三视角解析
 
 ### 🧑‍💻 程序员视角

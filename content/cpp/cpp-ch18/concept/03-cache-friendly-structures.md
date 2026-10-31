@@ -18,6 +18,44 @@
 - AoS 未命中 **256**，SoA 未命中 **64** → SoA 更省缓存行 **True**；
 - 行优先未命中 **65536**，列优先未命中 **1048576**，比值 **16×** → 行优先更省 **True**。
 
+两个版本的代码只差一层循环的先后顺序，编译器也照原样发机器码——**语言层面看不出差别**，
+差别全在访存地址的步长上：
+
+```cpp
+#include <chrono>
+#include <cstdio>
+#include <vector>
+
+constexpr int M = 1024;
+
+void row_major(float* a) {                    // 内层步长 4B：连成一条缓存行
+    for (int i = 0; i < M; ++i)
+        for (int j = 0; j < M; ++j) a[i * M + j] += 1.0f;
+}
+
+void col_major(float* a) {                    // 内层步长 4KB：每次都换一页/一行
+    for (int j = 0; j < M; ++j)
+        for (int i = 0; i < M; ++i) a[i * M + j] += 1.0f;
+}
+
+template <class F>
+long long ms(F f, float* a) {
+    const auto t0 = std::chrono::steady_clock::now();
+    f(a);
+    return std::chrono::duration_cast<std::chrono::milliseconds>(
+               std::chrono::steady_clock::now() - t0).count();
+}
+
+int main() {
+    std::vector<float> buf(M * M);
+    std::printf("row=%lld ms  col=%lld ms\n",
+                ms(row_major, buf.data()), ms(col_major, buf.data()));
+}
+```
+
+实测常见 5~20 倍差距，且 `-O2` 不会替你把循环互相换掉——这属于**语义保持但访存模式改变**
+的重排，优化器只在能证明无别名时才敢动，`float*` 之间默认可能有别名。
+
 ### 🧑‍💻 程序员视角
 - **决策树**：① 循环是否只用到部分字段？→ 考虑 SoA；② 是否有向量化需求？→ SoA 天然连续，
   更易被自动向量化；③ 是否需要频繁按「对象」整体传递？→ AoS 更自然。

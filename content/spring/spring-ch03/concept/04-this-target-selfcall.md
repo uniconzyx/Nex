@@ -48,6 +48,40 @@
 根因：Spring 的 AOP 是「代理层」增强，只有「从代理进入」的调用才被拦截；
 对象内部的 `this.method()` 绕过代理，直接命中真实方法。
 
+把它写成代码，失效与修复只差一个 `this` 还是一个代理引用：
+
+```java
+@Service
+public class OrderService {
+    @Autowired private OrderRepository repo;
+    @Autowired private AuditRepository auditRepo;
+
+    @Autowired @Lazy private OrderService self;   // 自注入拿到的是代理，不是自己
+
+    @Transactional
+    public void save(Order o) {
+        repo.insert(o);
+        this.audit(o);        // ✗ this 是真实对象 → audit 的传播级别完全不生效
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void audit(Order o) {
+        auditRepo.insert(o);  // 期望：独立事务，save 回滚时审计仍在
+    }
+
+    @Transactional
+    public void saveFixed(Order o) {
+        repo.insert(o);
+        self.audit(o);        // ✓ 经代理进入 → REQUIRES_NEW 真正开出新事务
+    }
+}
+```
+
+`@Lazy` 不能省：不加它，`OrderService` 在创建自己时需要注入自己，会形成
+循环依赖，Spring Boot 2.6+ 默认直接启动失败。而在 `save()` 里即使加了 `@Transactional`，
+`audit()` 依然跑在同一个事务里——**它继承的是调用方的连接**，`REQUIRES_NEW` 挂在真实方法上
+但没被拦截，等于没写。
+
 ### 🧑‍💻 程序员视角
 - 这是 AOP 最经典的生产坑：事务方法 `save()` 调同类的 `update()`（`@Transactional`），
   结果 `update` 的事务不生效、没回滚——根因就是自调用绕过代理。

@@ -106,6 +106,33 @@ Git 的合并不是「比较两份文件的异同」，而是**三方合并**：
 
 ---
 
+## 可运行代码：rebase 冲突的标准处置流程
+
+冲突不是「报错了」，而是 Git 停在半路等你决策；关键是分清继续、跳过、放弃三条出口：
+
+```bash
+git fetch origin
+git rebase origin/main          # 把自己的提交逐个重放到最新 main 之上
+
+# 一旦冲突，git 会停下并提示哪些文件 unmerged
+git status                      # 列出 both modified 的文件
+git diff --name-only --diff-filter=U   # 只列未解决冲突的文件
+
+# 手工解决：删掉 <<<<<<< ======= >>>>>>> 三段标记，保留最终内容
+git add src/service.ts
+git rebase --continue           # 继续下一个提交；可能还会再冲突一次
+
+# 三条出口，按场景选
+git rebase --skip               # 当前这个提交已被别人实现，丢弃它
+git rebase --abort              # 彻底回到 rebase 之前的状态
+git merge --abort               # 若走的是 merge 流程
+```
+
+一条纪律比命令更重要：**已经 push 到共享分支的提交不要 rebase**。rebase 会重写提交哈希，
+别人基于旧哈希的工作全部要重新对齐；共享分支上改用
+`git merge --no-ff origin/main`，把冲突解决显式留成一个合并提交，历史难看了但没人被你坑。
+自己的 feature 分支还没人依赖时，rebase 才能放心用——这条边界比任何命令技巧都值钱。
+
 ## 三视角小结
 
 | 视角 | 关注 | 本节落点 |

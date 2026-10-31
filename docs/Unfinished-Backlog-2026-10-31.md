@@ -48,7 +48,7 @@ HEAD 仅跟踪 3707 个文件，但工作树里还有 **175 个已跟踪文件�
 
 ---
 
-## P1 · 内容深度：79 章 C 级偏薄（最薄 7 章已补齐 ✅ 2026-10-31）
+## P1 · 内容深度：52 章 C 级（最薄 7 章 + 仅缺代码块 27 章已补齐 ✅ 2026-10-31）
 
 `audit_depth.py` 判为 C 级（讲解/推导/实现/陷阱密度不够）的章节，按学科分布（2026-10-31 复跑）：
 
@@ -75,21 +75,52 @@ HEAD 仅跟踪 3707 个文件，但工作树里还有 **175 个已跟踪文件�
 | py-ch01 | 1419→4557 | 3→27 | 9→14 | 6→17 | C→B |
 | db-ch01 | 1548→5018 | 6→21 | 9→22 | 6→16 | C→B |
 
-总盘：A 8 / B 71 / C 86 → **A 8 / B 78 / C 79**。
+总盘：A 8 / B 71 / C 86 → **A 8 / B 78 / C 79** →（第二批）**A 8 / B 105 / C 52**。
 
-**下一批优先级（按性价比排序，非按字数）**——剩余 79 章的短板已高度集中：
+**第二批已完成（27 章「仅缺 code_blocks」，C→B）**：
+
+| 类别 | 章节 | 补法 |
+|---|---|---|
+| 各需 +4 | `cpp-ch18`、`data-ch06`、`tool-ch05` | 补齐到 5 个块（布局探针 / pandas 体检 / overlayfs 挂载等） |
+| 各需 +2 | `fs-ch14`、`mw-ch06`、`py-ch02`、`spring-ch03` | 状态机、事务型生产者、闭包 cell、JDK 代理手写 |
+| 各需 +1 | `ai-ch02/03/05/06/09/10`、`bd-ch03`、`cpp-ch20`、`fs-ch03/04`、`fund-ch07/08/09`、`ml-ch09`、`mw-ch07/08`、`spring-ch05/06`、`tool-ch04/06` | 统一补在各章第 2 篇 concept（原文里代码全挤在第 1 篇） |
+
+补的代码都带可验证的**定量结论**（如流水线加速比 5 级 4.81、停顿 20% 掉到 2.72；GAN 饱和损失在 logit=-8 时梯度仅 -0.000335；RoPE 旋转保范），不写「运行后你会看到」这类空话。
+
+**同批清理：26 个 project.json 的 `requirement_md` 缺 `###` 小节**（audit 硬性 FAIL）。做法是**原文一字不改**，只按语义重排为 `### 背景 / ### 功能要求 / ### 约束与边界 / ### 验收标准`。另把 `mw-ch07`、`mw-ch08` 的 `exercises.json` 从旧 schema（`stem_md`/`explanation_md`）统一到 `content_md`/`explanation`。
+
+**下一批优先级（按性价比排序，非按字数）**——剩余 52 章的短板已高度集中：
 
 | 短板类型 | 章数 | 修法 | 成本 |
 |---|---|---|---|
-| 仅 `code_blocks`<5 | 27 | concept 加代码块（正文不动） | 低 |
 | 仅 `h3`<10 | 23 | 拆 `###` 小节标题 | 极低 |
 | `code_blocks`+`pitfalls` | 9 | 加代码块 + 补陷阱 | 中 |
 | 仅 `pitfalls`<8 | 7 | 补陷阱条目 | 低 |
 | `code_blocks`+`h3` | 6 | 两者都加 | 低 |
+| 其余组合 | 7 | 逐项 | 中 |
 
 > 注意：`ai-ch09`（14912 字）、`ai-ch10`（13808 字）、`tool-ch06`（12782 字）这些"厚章"也在 C 级——**它们的正文已经足够，只缺代码块数量**。按字数排序会严重误判优先级。
 
 **修法（通用）**：补完必须过 `audit_correctness.py` + `check_md_outputs.py`（正文 ```text 块若上文 3 行含"输出/打印/终端"字样，会被要求对得上真实 stdout）。
+
+---
+
+## P1 · 审计可信度：`audit_correctness` 在 AI/ML/data 学科跑不动（新发现 2026-10-31）
+
+对 27 章跑 `audit_correctness --chapters ... --skip-net`，共 119 条问题，**没有一条由本批改动引入**，但暴露了四类既有缺陷：
+
+| 类别 | 数量 | 根因 | 处置 |
+|---|---|---|---|
+| `运行失败(rc=1)` | 72 | `server/.venv` **没装 numpy**，而 ai/ml/data 的 examples 全是 numpy 实现 | `pip install numpy` 到 server/.venv（`no_proxy=*` 直连），或单列 `server/requirements-audit.txt` |
+| `输出不一致` | 13 | 全在 `cpp-ch20`，13 个 examples 的 `expected_output` 与真实 stdout 逐行不符 | 重跑 examples 校准声明输出 |
+| `缺字段 content_md/answer/explanation/difficulty` | 8+6+6+8 | `data-ch06/exercises.json` 的 8 条只有 `title` + `answer_md`，**没有题面与选项** | 需要真写题面（非机械改名） |
+| `可疑字样 'error:'/'Error:'` | 2 | `tool-ch04/ex08`、`tool-ch06/ex13` 的期望输出含 error 文本（可能是正常的 git/docker 报错演示） | 人工判定，必要时改措辞 |
+
+另有 **12 章**的 `exercises.json` 仍是不合规 schema（`stem_md`/`explanation_md` 或直接缺题面）：`mw-ch07`/`mw-ch08` 已在本批统一，剩余 `data-ch05`、`py-ch04~py-ch08`、`mw-ch02`、`mw-ch03`、`cpp-ch12` 待处理。
+
+还有两类**不阻塞**的样式项：9 个 concept 文件「没有 ```text 图示块」、11 处「仅末尾换行不同」。
+
+> 结论：**审计脚本本身没错，是喂给它的环境与数据不全。** 想让 `audit_correctness` 成为可信门禁，必须先解决 numpy 缺失这一条，否则 AI/ML/data 三个学科 30+ 章的正确性永远无法验证。
 
 ---
 
@@ -150,6 +181,8 @@ HEAD 仅跟踪 3707 个文件，但工作树里还有 **175 个已跟踪文件�
 
 1. ~~**P0 提交**~~ ✅ 已完成（7 个 commit，工作区清零）。
 2. ~~**P1 深度·最薄 7 章**~~ ✅ 已完成（全部 C→B，`audit_correctness` 对新改章节 `AUDIT_OK`）。
-3. **P1 深度·按短板类型批量推进**：先做「仅缺 `code_blocks`」的 27 章 → 再做「仅缺 `h3`」的 23 章。这两批只需补代码块/小节标题，不用重写正文，成本远低于本轮。
-4. **P1 路线**：按学科逐个把 95 章改成章节级路线（fullstack 13 + fundamentals 12 + ai 11 最大块）。
-5. **P2 discrete-math**：补 dm-ch02/03 并接线（决定这个学科是否正式上线）。
+3. ~~**P1 深度·仅缺 `code_blocks` 的 27 章**~~ ✅ 已完成（C 86→52；同批把 26 个 project.json 的 `requirement_md` 补成 `###` 四小节）。
+4. **P1 审计可信度**：先给 `server/.venv` 装 numpy，让 ai/ml/data 的 examples 能真跑；再校准 `cpp-ch20` 的 13 个 `expected_output`、补 `data-ch06` 的 8 条题面。**这一步不做，后面任何「内容正确性通过」的结论都是空的。**
+5. **P1 深度·仅缺 `h3` 的 23 章**：拆 `###` 小节标题即可，成本最低。
+6. **P1 路线**：按学科逐个把 95 章改成章节级路线（fullstack 13 + fundamentals 12 + ai 11 最大块）。
+7. **P2 discrete-math**：补 dm-ch02/03 并接线（决定这个学科是否正式上线）。

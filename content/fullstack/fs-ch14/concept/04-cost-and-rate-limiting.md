@@ -25,6 +25,40 @@ Agent 调用大模型是按 token 计费的，而且「输入 token」和「输�
 **滑动窗口（sliding window）**：按时间窗口数请求数，比固定窗口更平滑、避免「窗口边界双倍放行」。
 工程选择上，绝大多数 API 限流用令牌桶就够，要平滑输出（如保护下游数据库）才上漏桶。
 
+令牌桶的实现只有十几行，关键在于「按时间差补令牌」而不是起一个定时器：
+
+```js
+// 容量 capacity，每秒补 refillPerSec 个令牌
+class TokenBucket {
+  constructor(capacity, refillPerSec) {
+    this.capacity = capacity;
+    this.rate = refillPerSec;
+    this.tokens = capacity;
+    this.last = Date.now();
+  }
+
+  tryTake(n = 1) {
+    const now = Date.now();
+    const elapsed = (now - this.last) / 1000;
+    this.tokens = Math.min(this.capacity, this.tokens + elapsed * this.rate);
+    this.last = now;
+    if (this.tokens < n) return false;   // 拒绝，客户端应收到 429 + Retry-After
+    this.tokens -= n;
+    return true;
+  }
+}
+
+const bucket = new TokenBucket(20, 2);   // 突发上限 20，稳态 2 次/秒
+console.log(bucket.tryTake());           // true
+console.log(bucket.tryTake(50));         // false：超过桶容量，永远取不到
+```
+
+两个必须知道的边界：一是**按需补令牌**（用 `elapsed * rate`）比定时器更准也更省，定时器在
+高并发下既拖精度又占资源；二是**进程内桶在多实例下是错的**——3 个副本各自 2 次/秒，
+实际放行 6 次/秒。生产环境要把 `tokens` 与 `last` 放进 Redis，并用 Lua 脚本做
+「读-算-写」的原子执行，否则并发下同样会超额。`tryTake(n > capacity)` 永远返回 false，
+这是容量与单次消耗必须匹配的隐含约束。
+
 ## 降级与预算：把「省钱的开关」做成显式的
 
 当预算快超支，或上游模型变慢/报错，要有明确的**降级（degradation）**策略，而不是硬扛到失败：

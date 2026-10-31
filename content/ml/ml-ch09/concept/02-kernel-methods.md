@@ -122,6 +122,46 @@ sklearn 的 `SVC` 默认 **OvO**，`LinearSVC` 默认 **OvR**——这是一个�
 - **常考问法**：① 为什么 SMO 一次更新两个 $\alpha$；② $k$ 分类问题 OvO 需要多少个分类器（$k(k-1)/2$）；③ SVM 训练慢怎么办。
 - **易混**：SMO ≠ 坐标下降（SMO 是两坐标的解析块更新，坐标下降是单坐标）；OvO 的投票 ≠ 概率（票数相同需要额外规则）。
 
+## 可运行代码：核技巧 = 不显式升维也算出高维内积
+
+「核函数等于高维内积」这句话可以用多项式核直接验证——两边数值完全相等：
+
+```python
+import numpy as np
+
+rng = np.random.default_rng(0)
+X = rng.normal(size=(5, 2))
+
+def poly(A, B, d=2):
+    return (A @ B.T + 1) ** d          # K(x, y) = (x·y + 1)^d
+
+def feat(X):                            # 显式映射：1, x1, x2, x1², x2², √2·x1x2
+    x1, x2 = X[:, 0], X[:, 1]
+    return np.column_stack([np.ones(len(X)), x1, x2, x1 ** 2, x2 ** 2,
+                            np.sqrt(2) * x1 * x2])
+
+Z = feat(X)
+print("poly 核 == 显式特征内积:", np.allclose(poly(X, X), Z @ Z.T))   # True
+print("特征维度:", Z.shape[1])                                         # 6，而原维度是 2
+
+def rbf(A, B, gamma=1.0):
+    d2 = ((A[:, None, :] - B[None, :, :]) ** 2).sum(-1)
+    return np.exp(-gamma * d2)          # 隐式映射到无限维，K 仍然只是 n×n 矩阵
+
+K = rbf(X, X)
+print("RBF 对称:", np.allclose(K, K.T))
+print("对角为 1:", np.allclose(np.diag(K), 1.0))
+print("半正定:", np.linalg.eigvalsh(K).min() >= -1e-12)
+```
+
+第一行 `True` 就是核技巧的全部内容：**同一个数字，可以用「先升维再内积」算，也可以用
+「在原空间算核」算**。RBF 对应的特征空间是无限维的，连 `feat()` 都写不出来，但 `K` 依然只是
+一个 `n×n` 矩阵——这就是它能把非线性问题交给线性算法的原因。
+
+顺带解释三条常用判据：对称性来自内积的交换律，对角为 1 来自 `exp(0)=1`，
+半正定则是「它必须是某个特征空间的内积」的充要条件（Mercer 定理）——**任给一个函数当核是错的，
+它得先过 PSD 这一关**。
+
 ## 三视角小结
 
 | 主题 | 程序员要会 | 博士生要会 | 考研/笔面要会 |

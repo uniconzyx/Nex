@@ -39,6 +39,46 @@
 - 易错：以为「转义单引号就能防注入」——转义是黑名单思维，预编译是白名单（结构固定、参数只是数据），更彻底。
 - 关联考点：PreparedStatement 预编译与执行计划缓存、SQL 注入的其他防御（最小权限、白名单）。
 
+## 可运行代码：`${}` 与 `#{}` 的区别
+
+两种花括号经常被混用：`${}` 取**配置值**（占位符替换，发生在容器启动期），
+`#{}` 是 **SpEL 表达式**（可参与运算），嵌套时先解析 `${}` 再求值 `#{}`：
+
+```java
+@Component
+public class RetryConfig {
+
+    @Value("${app.retry.max:3}")            // 冒号后是默认值：配置缺失也不报错
+    private int max;
+
+    @Value("${app.retry.delay-ms:200}")
+    private long delayMs;
+
+    @Value("#{${app.retry.max:3} * 2}")     // ✔ SpEL 里嵌占位符：3 → 6
+    private int maxAttempts;
+
+    @Value("${app.name}")                   // ✘ 没有默认值：配置缺失则启动失败
+    private String appName;
+}
+```
+
+```yaml
+app:
+  name: order-service
+  retry:
+    max: 5
+    delay-ms: 500
+```
+
+三类行为必须分清：`${app.retry.max:3}` 缺失时**静默用默认值**；`${app.name}` 缺失则抛
+`IllegalArgumentException: Could not resolve placeholder`，启动直接失败（这其实是好事——
+配置写错应该在启动时就炸，而不是运行到半夜才 NPE）；`#{}` 里的表达式写错（方法名拼错之类）
+同样会在**启动期**抛 `SpelEvaluationException`，因为单例 Bean 是启动时创建的。
+
+想让配置有类型安全和 IDE 提示，就别堆 `@Value`，改用
+`@ConfigurationProperties(prefix = "app.retry")` 绑定到一个 record——它默认失败快速、支持嵌套、
+可加 `@Validated` 校验，也让「一共有哪些配置项」变成可检索的事实而不是散落的字符串。
+
 ## 三视角小结
 
 | 视角 | 一句话结论 |

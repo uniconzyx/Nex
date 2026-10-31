@@ -24,6 +24,37 @@ JavaScript 采用**词法作用域（lexical scope）**：函数能访问哪些�
 
 ---
 
+## 可运行代码：TDZ 与 this 的五条规则
+
+提升、死区、绑定优先级三件事都能在同一个脚本里看到差别：
+
+```js
+// ① var 提升：声明提了、赋值没提
+console.log(typeof b);          // "undefined"（不报错）
+var b = 2;
+
+// ② let 的 TDZ：声明前访问直接抛错，不是 undefined
+try {
+  console.log(a);
+} catch (e) {
+  console.log(e.constructor.name, "-", e.message);   // ReferenceError - Cannot access 'a' before initialization
+}
+let a = 1;
+
+// ③ this 的五条绑定规则，按优先级从低到高
+const obj = { name: "obj", show() { return this.name; } };
+console.log(obj.show());                              // "obj"   隐式绑定
+const fn = obj.show;
+console.log(fn());                                    // undefined 隐式丢失 → 默认绑定
+console.log(fn.call({ name: "call" }));               // "call"  显式绑定
+console.log(fn.bind({ name: "bind" })());             // "bind"  硬绑定，后续 call 也改不回
+console.log(new (fn.bind(null))().name);              // undefined  new 优先于 bind
+```
+
+关键结论：`b` 打印 `undefined` 而不报错，`a` 直接抛 `ReferenceError`——**提升不是「提到顶部赋值」，
+而是「声明与初始化分离」**，`var` 的初始化被设为 `undefined`，`let` 则留在 TDZ 里。
+最后一行最能体现优先级：`bind` 通常不可覆盖，但 `new` 比它更高，`this` 仍指向新创建的对象。
+
 ## 三视角解析
 
 ### 🧑‍💻 程序员视角

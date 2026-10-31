@@ -21,6 +21,45 @@ Node 内置 http 模块把 socket 字节流按 RFC 7230 解析为 req/res 对象
 - 状态码分类（2xx/3xx/4xx/5xx 各自含义）；GET 与 POST 语义契约（GET 安全幂等、POST 非幂等建资源）。
 - 易错：为什么必须 res.end()、query string 与 path 的区别、JSON body 解析为何要 try/catch。
 
+## 可运行代码：compose 的洋葱模型
+
+中间件的「进去一圈、出来一圈」由 `next()` 返回 Promise 保证——`await next()` 之后才继续，
+那么后置逻辑就必然在**内层全部跑完之后**执行：
+
+```js
+function compose(middlewares) {
+  return function (ctx) {
+    let last = -1;                       // 防止同一个中间件里 next() 被调两次
+    function dispatch(i) {
+      if (i <= last) return Promise.reject(new Error("next() called multiple times"));
+      last = i;
+      const fn = middlewares[i];
+      if (!fn) return Promise.resolve();
+      try {
+        return Promise.resolve(fn(ctx, () => dispatch(i + 1)));
+      } catch (err) {
+        return Promise.reject(err);
+      }
+    }
+    return dispatch(0);
+  };
+}
+
+const mw = [
+  async (ctx, next) => { ctx.log.push("A-in");  await next(); ctx.log.push("A-out"); },
+  async (ctx, next) => { ctx.log.push("B-in");  await next(); ctx.log.push("B-out"); },
+];
+
+const ctx = { log: [] };
+compose(mw)(ctx).then(() => console.log(ctx.log));
+// [ 'A-in', 'B-in', 'B-out', 'A-out' ]
+```
+
+输出顺序就是洋葱：进入时 A→B，退出时 B→A。`ctx.log` 能被所有中间件共享，是因为**同一个 ctx
+对象被逐层传下去**；`last` 这个变量则拦住了「一个中间件里写两次 `await next()`」这种会重复执行
+后续链路的写法。错误处理中间件之所以要四个参数 `(err, ctx, next)`，也是因为它是**在 catch 里
+被调用的**，参数形态与普通中间件不同——Express 靠 `fn.length === 4` 来识别它。
+
 ## 二、中间件模型与 compose（next 传递、错误处理中间件四参数）
 
 中间件是 fn(ctx, next)（Koa）或 fn(req, res, next)（Express）；compose 把数组规约为单函数，靠 next() 串成「洋葱模型」：进入时从外到内，返回时从内到外。错误中间件通过 4 个参数 (err, req, res, next) 被框架识别。

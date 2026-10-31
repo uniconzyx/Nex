@@ -24,6 +24,36 @@ L = -log  exp(s(q,d+)/τ) / Σ exp(s(q,d)/τ)。其隐式假设是存在平滑�
 - **语义空间假设**：语义相近的文本在向量空间中距离更近，是「近邻即相关」的前提。
 - **易错点**：以为 embedding 能编码一切——对精确字符串/数值/ID，稠密向量常常失效，需混合稀疏检索。
 
+## 可运行代码：归一化后三种度量是同一件事
+
+只要向量先归一化，「余弦相似度」「内积」「L2 距离」给出的**排序完全一致**——三者的换算关系
+可以直接用数字验证：
+
+```python
+import numpy as np
+
+rng = np.random.default_rng(0)
+a, b = rng.normal(size=8), rng.normal(size=8)
+
+def cos(u, v):  return float(u @ v / (np.linalg.norm(u) * np.linalg.norm(v)))
+def l2(u, v):   return float(np.linalg.norm(u - v))
+
+au, bu = a / np.linalg.norm(a), b / np.linalg.norm(b)   # 单位球面
+
+print("cos    =", round(cos(au, bu), 4))
+print("inner  =", round(float(au @ bu), 4))            # 与 cos 相同：模长都是 1
+print("l2²    =", round(l2(au, bu) ** 2, 4))           # = 2 - 2·cos
+print("2-2cos =", round(2 - 2 * cos(au, bu), 4))        # 与上一行相同
+
+# 未归一化时，内积会被模长支配：把 b 放大 10 倍，cos 不变、inner 变 10 倍
+print("放大后 cos  =", round(cos(au, bu * 10), 4))
+print("放大后 inner=", round(float(au @ (bu * 10)), 4))
+```
+
+最后两行就是选型结论：**只关心方向用余弦，索引库用内积（前提是入库前已归一化），要绝对距离
+才用 L2**。数据库侧常把三者当可互换的三种 `metric_type`，靠的正是这条归一化前提——一旦忘了
+归一化，`IP` 与 `COSINE` 就会给出不同结果，而这不是 bug，是定义差异。
+
 ## 主题二：余弦 / 内积 / L2 的等价条件
 
 三者衡量「相似」但数值尺度不同。设向量已 L2 归一化（模长=1）：

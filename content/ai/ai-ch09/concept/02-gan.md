@@ -149,6 +149,34 @@ $$\min_G\max_D\ \mathbb{E}_{x,c}[\log D(x,c)]+\mathbb{E}_{z,c}[\log(1-D(G(z,c),c
 - **高频问法**：① cGAN 的判别器输入是什么（$(x,c)$ 对）；② 条件生成与「风格迁移」的区别（前者建模条件分布，后者是确定性的图像变换）。
 - **易混**：conditioning（条件输入）≠ guidance（引导）；前者改的是模型输入，后者改的是采样时的梯度方向（见扩散章的 CFG）。
 
+## 可运行代码：饱和损失为什么没梯度
+
+「D 太强会让 G 学不动」可以在 5 行里量化：把判别器对假样本的 logit 依次设为 -8 到 4，
+看两种 G 损失对同一输入的梯度大小：
+
+```python
+import torch
+import torch.nn.functional as F
+
+def g_saturating(logit_fake):        # 原始 GAN：min log(1 - D(G(z)))
+    return F.binary_cross_entropy_with_logits(logit_fake, torch.zeros_like(logit_fake))
+
+def g_nonsaturating(logit_fake):     # 非饱和替代：max log D(G(z))
+    return F.binary_cross_entropy_with_logits(logit_fake, torch.ones_like(logit_fake))
+
+for d in (-8.0, -2.0, 0.0, 4.0):
+    t1 = torch.tensor([d], requires_grad=True)
+    g_saturating(t1).backward()
+    t2 = torch.tensor([d], requires_grad=True)
+    g_nonsaturating(t2).backward()
+    print(f"logit={d:5.1f}  饱和梯度={t1.grad.item():+.6f}  非饱和梯度={t2.grad.item():+.6f}")
+```
+
+`logit=-8` 时饱和损失的梯度是 **-0.000335**，比 `logit=0` 时小三个数量级——这就是「G 完全骗不过
+D 时反而学不动」的数学形态。非饱和版本在同一处的梯度接近 -0.9997，把「判别器太强」这个困境
+转成了「信息更充分的学习信号」。注意二者在 logit 较大时都会变小，所以真正的瓶颈仍在
+「D 与 G 的能力平衡」，换损失只是把**梯度消失的那一端**补上了。
+
 ## 三视角小结
 
 | 主题 | 程序员要会 | 博士生要会 | 考研/笔面要会 |

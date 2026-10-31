@@ -170,6 +170,36 @@ Kafka 不做「消息只发一次」（网络不可能保证），而是**允许
 
 **记忆锚点**：**幂等 = 「PID + 分区 + 序列号」在三元组内的去重**。
 
+把「跨会话去重」和「跨分区原子写」同时拿下，靠的就是事务型生产者——`transactional.id`
+是那个「比会话更长久的名字」：
+
+```java
+Properties p = new Properties();
+p.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+p.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+p.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+p.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, "order-tx-1");  // 跨重启稳定，才能接续去重状态
+p.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);        // 事务的前置条件，开了才合法
+
+KafkaProducer<String, String> producer = new KafkaProducer<>(p);
+producer.initTransactions();     // 向协调者申请/接管 PID，fence 掉同 id 的旧实例
+
+try {
+    producer.beginTransaction();
+    producer.send(new ProducerRecord<>("orders", "k1", "created"));
+    producer.send(new ProducerRecord<>("audit",  "k1", "order created"));
+    producer.commitTransaction();      // 两条要么都可见，要么都不可见
+} catch (Exception e) {
+    producer.abortTransaction();       // 回滚：不会只写一半
+    throw e;
+}
+```
+
+`initTransactions()` 会**fence**（隔离）同一个 `transactional.id` 的旧实例，防止「僵尸生产者」
+重复写入——这是它比幂等生产者多出来的那层保障。但要注意最后一块拼图：消费者必须设
+`isolation.level=read_committed`，否则它会读到尚未提交的事务消息，事务隔离在读取侧就漏了。
+三个开关（`transactional.id` + `read_committed` + 事务内 send）缺一个，「精确一次」都不成立。
+
 
 ## 小结
 

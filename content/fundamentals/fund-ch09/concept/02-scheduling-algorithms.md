@@ -94,6 +94,52 @@ SJF 最优性的证明用**交换论证（exchange argument）**：
 **高频陷阱**：问「**平均周转时间最小**的算法」——答案 **SJF**（前提：同时到达、非抢占）；
 若问「**响应时间**最短」——答案 **RR**。
 
+## 可运行代码：三种调度的平均等待时间
+
+同一组作业（同时到达），把三种算法跑一遍，SJF 的优势就是算术结果而不是结论口号：
+
+```python
+def fcfs(bursts):
+    t, wait = 0, []
+    for b in bursts:
+        wait.append(t)          # 同时到达，等待时间 = 前面所有作业运行时间之和
+        t += b
+    return sum(wait) / len(wait)
+
+def sjf(bursts):
+    t, wait = 0, []
+    for b in sorted(bursts):    # 同时到达时，短作业优先 = 按长度升序执行
+        wait.append(t)
+        t += b
+    return sum(wait) / len(wait)
+
+def rr_completion(bursts, quantum=4):
+    rem, done, t = list(bursts), [None] * len(bursts), 0
+    while any(r > 0 for r in rem):
+        for i, r in enumerate(rem):
+            if r <= 0:
+                continue
+            run = min(quantum, r)
+            rem[i] -= run
+            t += run
+            if rem[i] == 0:
+                done[i] = t
+    return sum(done) / len(done)
+
+jobs = [7, 1, 4, 4]
+print("FCFS 平均等待:", round(fcfs(jobs), 2))          # 6.75
+print("SJF  平均等待:", round(sjf(jobs), 2))           # 3.75
+print("RR(q=4) 平均完成:", round(rr_completion(jobs), 2))  # 10.5
+```
+
+SJF 之所以最优，可以一句话证明：把任意序列里相邻的「长作业在前、短作业在后」交换，
+总等待时间必然减少（`a + (a+b)` 换成 `b + (a+b)`），反复交换即得升序最优——
+这就是「SJF 平均等待时间最短」的完整论证，不需要背结论。
+
+代价在最后一行：RR 把平均完成时间从 6.75 拉到 10.5，却换来了**响应时间**的公平性——
+每个作业最多等一个时间片就能得到 CPU。**吞吐最优与响应最优是两条不同的目标函数**，
+这也是分时系统宁可选 RR 的原因。
+
 ## 3. 实时调度简介
 
 实时系统要求**在截止时间内完成**。

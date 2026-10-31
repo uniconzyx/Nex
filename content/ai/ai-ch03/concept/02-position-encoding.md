@@ -19,6 +19,47 @@
 - 位置编码演进标准口径（笔试常考）：**正弦（Vaswani）→ 可学习（BERT）→ 相对位置（Transformer-XL / T5）→ RoPE（GPT-NeoX / LLaMA）/ ALiBi（MPT）**。
 - 常考「为什么需要位置编码」「绝对 vs 相对位置的区别」。
 
+## 可运行代码：正弦编码与 RoPE 的对照
+
+两种方案都能给出「位置信息」，差别在于正弦编码是**加到**向量上，RoPE 是**旋转**向量，
+后者天然保范：
+
+```python
+import torch
+
+def sinusoidal(max_len: int, d_model: int) -> torch.Tensor:
+    pos = torch.arange(max_len).unsqueeze(1).float()            # [L, 1]
+    i = torch.arange(0, d_model, 2).float()                     # [d/2]
+    div = torch.exp(-torch.log(torch.tensor(10000.0)) * i / d_model)
+    pe = torch.zeros(max_len, d_model)
+    pe[:, 0::2] = torch.sin(pos * div)
+    pe[:, 1::2] = torch.cos(pos * div)
+    return pe
+
+def rope(x: torch.Tensor, base: float = 10000.0) -> torch.Tensor:
+    L, d = x.shape
+    inv = base ** (-torch.arange(0, d, 2).float() / d)          # [d/2]
+    ang = torch.arange(L).float().unsqueeze(1) * inv            # [L, d/2]
+    cos, sin = ang.cos(), ang.sin()
+    x1, x2 = x[:, 0::2], x[:, 1::2]
+    out = torch.empty_like(x)
+    out[:, 0::2] = x1 * cos - x2 * sin
+    out[:, 1::2] = x1 * sin + x2 * cos
+    return out
+
+pe = sinusoidal(8, 16)
+print(pe[0, :6].tolist())                     # 位置 0 是 [0, 1, 0, 1, 0, 1]
+print("相邻位置内积:", round(float(pe[0] @ pe[1]), 4))   # 距离越远，内积越小
+
+x = torch.randn(8, 16)
+print("RoPE 后每行范数:", torch.norm(rope(x), dim=1)[:3].tolist())
+print("原向量每行范数  :", torch.norm(x, dim=1)[:3].tolist())   # 两行数值相同
+```
+
+最后两行数值相同，正是 RoPE 的关键性质：旋转矩阵是正交矩阵，`||R·x|| = ||x||`，
+注意力打分只受**相对角度**影响。这也是它比「加性位置编码」更适合外推的原因——
+长度变了，范数与尺度不变，只是角度继续增大。
+
 ## 2. RoPE：把位置「旋转」进隐空间
 
 RoPE 不为每个位置存一个向量，而是用旋转矩阵把位置信息编码进 Q、K 的方向：对每个 2 维子空间按角度 pos·θ_i 旋转。

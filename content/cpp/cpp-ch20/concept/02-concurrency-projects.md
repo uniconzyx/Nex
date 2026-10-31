@@ -21,6 +21,71 @@
 - **408/笔试关联**：生产者-消费者、条件变量、死锁四个必要条件（互斥/占有等待/不可抢占/循环等待）是 OS 核心考点；线程池的优雅关闭就是避免占有等待死锁的实例。
 - **标准问法**：条件变量为什么用 `while` 不用 `if`、线程池如何优雅退出——前者答虚假唤醒，后者答先置停止标志再唤醒全部再 join。
 
+## 可运行代码：线程池的三处关键细节
+
+线程池只有五十行，但**锁外执行任务**、**锁外通知**、**析构时 notify_all** 这三处任缺一个都会出问题：
+
+```cpp
+#include <condition_variable>
+#include <functional>
+#include <mutex>
+#include <queue>
+#include <stdexcept>
+#include <thread>
+#include <vector>
+
+class ThreadPool {
+public:
+    explicit ThreadPool(std::size_t n) {
+        for (std::size_t i = 0; i < n; ++i) {
+            workers_.emplace_back([this] {
+                for (;;) {
+                    std::function<void()> job;
+                    {
+                        std::unique_lock<std::mutex> lk(m_);
+                        cv_.wait(lk, [this] { return stop_ || !q_.empty(); });  // 带谓词防虚假唤醒
+                        if (stop_ && q_.empty()) return;      // 排空队列后再退出
+                        job = std::move(q_.front());
+                        q_.pop();
+                    }
+                    job();                                    // 锁外执行，否则任务串行化
+                }
+            });
+        }
+    }
+
+    void submit(std::function<void()> job) {
+        {
+            std::lock_guard<std::mutex> lk(m_);
+            if (stop_) throw std::runtime_error("pool stopped");
+            q_.push(std::move(job));
+        }
+        cv_.notify_one();                                     // 出锁再通知，减少无谓唤醒
+    }
+
+    ~ThreadPool() {
+        {
+            std::lock_guard<std::mutex> lk(m_);
+            stop_ = true;
+        }
+        cv_.notify_all();                                     // 必须全唤醒，否则 join 死锁
+        for (auto& t : workers_) t.join();
+    }
+
+private:
+    std::vector<std::thread> workers_;
+    std::queue<std::function<void()>> q_;
+    std::mutex m_;
+    std::condition_variable cv_;
+    bool stop_ = false;
+};
+```
+
+三个细节对应三种典型事故：在锁内 `job()` 会让多线程退化成串行（性能事故）；析构只
+`notify_one()` 会让其余工作线程永远等不到唤醒（**join 死锁**）；`wait` 不带谓词则在虚假唤醒后
+读到空队列并 `pop` 未定义行为（偶发崩溃）。`stop_ && q_.empty()` 这个顺序也很重要——
+先判 `stop_` 再判空，才能实现「停止接收新任务，但已排队的仍跑完」的优雅关闭。
+
 ## 二、简易 HTTP 请求行解析
 
 HTTP 请求行形如 `METHOD SP URI SP HTTP/1.1 CRLF`（见 ex07）。解析要做到**确定性**：只做字符串切分，

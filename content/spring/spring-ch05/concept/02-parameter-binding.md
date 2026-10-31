@@ -35,6 +35,48 @@
 - 笔面标准问法：「Spring 怎么根据 Accept 返回不同格式？」标准答：`ContentNegotiationManager` + `HttpMessageConverter` 链，按 `Accept` 的 `q` 权重选转换器。
 - 易错：以为「返回什么格式由 Controller 决定」——实际由**协商 + 转换器支持度**共同决定；服务端不支持就 406。
 - 关联考点：406 与 415（不支持的媒体类型，请求体 `Content-Type` 不匹配）是两个不同方向的协商失败。
+## 可运行代码：四种参数来源的绑定写法
+
+同一个 Controller 里四种来源并列摆出来，`@PathVariable` / `@RequestParam` / `@RequestBody` /
+`@RequestHeader` 各自取哪一段请求，一眼可辨：
+
+```java
+@RestController
+@RequestMapping("/api/orders")
+public class OrderController {
+
+    // 路径变量：GET /api/orders/42?detail=true
+    @GetMapping("/{id}")
+    public Order get(@PathVariable Long id,
+                     @RequestParam(defaultValue = "false") boolean detail) {
+        return service.find(id, detail);
+    }
+
+    // JSON body：请求头必须是 Content-Type: application/json
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public Order create(@RequestBody @Valid OrderReq req) {
+        return service.create(req);
+    }
+
+    // 同名多值：GET /api/orders/search?status=PAID&status=SHIPPED
+    @GetMapping("/search")
+    public List<Order> search(@RequestParam List<String> status,
+                              @RequestHeader("X-Tenant") String tenant) {
+        return service.search(tenant, status);
+    }
+}
+
+public record OrderReq(@NotBlank String sku, @Min(1) int qty) {}
+```
+
+四条绑定规则各有自己的失败形态，**报的错完全不同**，认错就等于省一半排查时间：路径变量类型
+不匹配抛 `MethodArgumentTypeMismatchException`；缺必填 `@RequestParam` 抛
+`MissingServletRequestParameterException`；`@RequestBody` 收到非法 JSON 抛
+`HttpMessageNotReadableException`；`@Valid` 校验不过抛 `MethodArgumentNotValidException`。
+想统一处理，就写一个 `@RestControllerAdvice` 分别捕获这四种——**别用一个 `Exception` 兜底**，
+那会把「客户端传错」误判成「服务端出错」，返回 500 而不是 400。
+
 ## 三视角小结
 
 | 视角 | 一句话结论 |

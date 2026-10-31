@@ -18,6 +18,31 @@
 
 **不必缩放的模型**：决策树、随机森林、梯度提升树——它们只在单个特征上找**分裂点**，分裂点的好坏与量纲无关（对单调变换不变）。
 
+"受异常值影响大"这句要能看出来。同一份数据、三种缩放器，比较**缩放后的跨度**就一目了然：
+
+```python
+import numpy as np
+from sklearn.preprocessing import MinMaxScaler, RobustScaler, StandardScaler
+
+age    = np.array([23, 31, 45, 52, 61], dtype=float)
+income = np.array([8e3, 1.2e4, 2.1e4, 3.0e4, 9.9e7], dtype=float)  # 末位是录入错误
+X = np.column_stack([age, income])
+
+for name, sc in [("minmax", MinMaxScaler()),
+                 ("zscore", StandardScaler()),
+                 ("robust", RobustScaler())]:
+    Z = sc.fit_transform(X)
+    span = Z.max(axis=0) - Z.min(axis=0)
+    print(f"{name:7s} age 跨度={span[0]:.3f}  income 跨度={span[1]:.3f}")
+```
+
+`minmax` 下两列跨度都是 1（被强行拉平），看起来"很干净"——但代价是年龄那 4 个正常值
+被挤进 `[0, 0.00007]` 这一小段，等于**用一列的信息换了另一列的**。`zscore` 被那个 9.9e7 拉高方差，
+年龄同样被压扁。只有 `robust` 用中位数与四分位距，极值只是"一个点"，不影响其余点的相对位置。
+
+结论落到工程上：**含极值的连续特征优先 Robust 或先做对数变换**；确定要用 Min-Max 就先把极值当缺失处理。
+另外无论用哪个缩放器，都必须在交叉验证的**训练折内部** `fit`——这一点见下一节的数据泄漏。
+
 ### 🎓 博士生视角
 
 缩放的本质是**改变特征空间的度量（metric）**。距离类模型隐含一个假设：各维在欧氏度量下**等权**。
@@ -81,6 +106,37 @@
 
 自查方法很简单：**问一句"这个特征在预测那一刻真的拿得到吗？"**
 再问一句："**如果我把测试集换成完全不同的数据，我的流程还能原样跑吗？**"
+
+"预处理泄漏"最容易验证，也最容易自我欺骗——把 `fit` 提到划分之前，指标只是**轻微**变好：
+因为标准化泄漏的只是两个标量。真正致命的是**目标编码**和**特征选择**：前者把标签均值编码进特征，
+后者用全量标签挑出"与 y 相关性最强"的 20 列，等于让模型提前看过答案。
+
+```python
+import numpy as np
+from sklearn.datasets import make_classification
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+X, y = make_classification(n_samples=600, n_features=20, n_informative=5, random_state=0)
+Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.3, random_state=0)
+
+# ✗ 泄漏：标准化器在全量（含测试集）上 fit
+sc = StandardScaler().fit(X)
+leaky = LogisticRegression(max_iter=1000).fit(sc.transform(Xtr), ytr)
+print("leaky AUC =", round(roc_auc_score(yte, leaky.predict_proba(sc.transform(Xte))[:, 1]), 4))
+
+# ✓ 正确：scaler 关进 Pipeline，fit 只发生在训练数据内部
+pipe = make_pipeline(StandardScaler(), LogisticRegression(max_iter=1000)).fit(Xtr, ytr)
+print("clean AUC =", round(roc_auc_score(yte, pipe.predict_proba(Xte)[:, 1]), 4))
+```
+
+两行数字往往只差千分之几——这正是它阴险的地方：**泄漏不总是给出夸张的高分，它只是让你的评估
+不再是"部署时的评估"**。判断标准不是"分数高不高"，而是"流程里有没有任何一步在划分前接触过验证数据"。
+用 `Pipeline` 的意义就是把这条纪律**变成类型系统**：`fit` 挂在管道上，交叉验证时 sklearn 会自动
+在每个训练折内重跑 `fit`，人为违规的空间被压缩到零。
 
 ### 🎓 博士生视角
 

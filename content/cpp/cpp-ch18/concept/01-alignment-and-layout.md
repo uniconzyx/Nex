@@ -20,6 +20,29 @@
       sizeof(S) = 24, alignof(S) = 8
 ```
 
+纸上推完，一定要用编译器核对一遍——布局是**实现定义**的，凭记忆算是最常见的事故源：
+
+```cpp
+#include <cstddef>
+#include <cstdio>
+
+struct S  { char a; double b; char c; };   // 声明顺序：char → double → char
+struct S2 { double b; char a; char c; };   // 同成员，按对齐从大到小重排
+
+int main() {
+    std::printf("sizeof(S)=%zu alignof(S)=%zu\n", sizeof(S), alignof(S));
+    std::printf("  a=%zu b=%zu c=%zu\n",
+                offsetof(S, a), offsetof(S, b), offsetof(S, c));
+    std::printf("sizeof(S2)=%zu alignof(S2)=%zu\n", sizeof(S2), alignof(S2));
+    std::printf("  b=%zu a=%zu c=%zu\n",
+                offsetof(S2, b), offsetof(S2, a), offsetof(S2, c));
+}
+```
+
+x86-64 上是 `24 / 8` 与 `16 / 8`：重排后填充从 14 字节缩到 6 字节。
+`offsetof` 需要 `<cstddef>`；它只对**标准布局类型**有定义，对含虚函数或私有基类的类型，
+标准说「行为未指定」，别拿它去探测多态对象。
+
 ### 🧑‍💻 程序员视角
 - **上线事故**：把带填充的结构体直接 `memcpy` 到网络/磁盘，填充字节是**未初始化内存**，
   既会造成**信息泄露**（可能带出栈上残留），又导致跨平台不可读（不同 ABI 填充不同）。
@@ -63,6 +86,34 @@
 `std::atomic<T>` 也带对齐要求：本机 `sizeof(std::atomic<long>)==4`、`alignof==4`
 （Windows 上 `long` 是 4 字节）；对宽度超过平台原子宽度的类型，编译器可能插入锁，
 且**必须自然对齐**才能保证原子性——这是「对齐不是优化而是正确性前提」的例子。
+
+三种手段放到同一段程序里，用 `sizeof/alignof` 一看就清楚它们各自的「只增」与「只减」：
+
+```cpp
+#include <cstddef>
+#include <cstdio>
+#include <new>
+
+#pragma pack(push, 1)
+struct WireHeader { char tag; int len; double ts; };   // 紧凑协议头：1 + 4 + 8
+#pragma pack(pop)
+
+struct alignas(64) HotCounter { long long v; };        // 独占一条缓存行的热点计数
+
+int main() {
+    std::printf("WireHeader sizeof=%zu alignof=%zu\n",
+                sizeof(WireHeader), alignof(WireHeader));
+    std::printf("HotCounter sizeof=%zu alignof=%zu\n",
+                sizeof(HotCounter), alignof(HotCounter));
+    std::printf("destructive_interference_size=%zu\n",
+                std::hardware_destructive_interference_size);
+}
+```
+
+`WireHeader` 打印 `13 / 1`：pack 把成员对齐压到 1，`sizeof` 就等于各字段相加，
+`alignof` 也跟着掉到 1——这正是 pack 后取成员地址可能非对齐、不能交给 SIMD/原子操作的原因。
+`HotCounter` 打印 `64 / 64`：`alignas` 只抬对齐，`sizeof` 被迫补齐到 64。
+最后一行在 GCC/Clang 上是 64，但它是**建议值**，不能当编译期常量断言跨平台一致。
 
 ### 🧑‍💻 程序员视角
 - **协议场景**：网卡抓下来的报文头是**紧凑**的，用默认对齐的 C 结构去 `reinterpret_cast`
