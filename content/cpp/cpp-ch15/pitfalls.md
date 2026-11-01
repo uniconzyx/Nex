@@ -23,3 +23,15 @@
 6. **`using` 指令掩盖了名字来源，制造「幽灵冲突」**
    `using namespace A; using namespace B;` 后，`A::x` 与 `B::x` 同时存在且都是候选，后续看似无害的 `x` 会触发歧义错误，且错误位置远离引入点。
    ✅ 优先 `using A::x;`（点名引入，可快速暴露冲突）；多命名空间并存时尽量保留限定名。
+
+7. **在头文件里写 `using namespace std;`**
+   它会把「包含该头文件的所有翻译单元」的 `std` 全部打开，`count` / `distance` / `size` / `data` 这类同名函数立刻出现二义性，而且报错位置与**包含顺序**有关，极难复现。
+   ✅ 头文件里用完全限定名或只引入单个名字（`using std::string;`）；`using namespace` 只放在 .cpp 的局部作用域或函数体内。
+
+8. **把类型定义在匿名 namespace 里却放进头文件**
+   匿名 namespace 的实质是「每个翻译单元一份唯一命名」，同一头文件被多个 TU 包含会得到**互不相同的类型**。一旦被 `inline` 函数或模板跨 TU 使用，就违反 ODR，链接期可能静默选中其中一份，行为随构建顺序变化。
+   ✅ 头文件里用具名 namespace（必要时 `inline namespace`）或 `inline` 变量/函数；匿名 namespace 只用于 .cpp 内部的实现细节。
+
+9. **以为 `#include` 进模块单元的内容会被自动导出**
+   `export { #include "x.h" }` 不合法；模块单元里 `#include` 进来的声明默认**属于模块私有**，下游 `import` 后看不到，报「未声明标识符」。
+   ✅ 用 `export module m;` 并逐条 `export` 声明；需要导出第三方头时，写一个 wrapper 模块做 `export import`；标准库优先用 `import <vector>;` 这类头单元。

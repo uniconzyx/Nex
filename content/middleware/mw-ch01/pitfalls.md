@@ -13,3 +13,15 @@
 5. **intset 升级后还能降级** —— intset 的 `encoding` 位宽升级（int16→int32→int64）是**单向、不回退**的，即使之后删掉大整数也不会缩回窄位宽。正确写法：答「intset 会升级但不会降级」，并说明升级是整块内存按新位宽重排，不是逐元素扩展。
 
 6. **用 ziplist 的「前驱长度字段」理解连锁更新** —— 旧 ziplist 用「前一 entry 长度」字段，长度从 1B 跨到 5B 会触发后续整段重编码（连锁更新）；Redis 7 换 listpack 改为「记录自身长度、从后向前遍历」以消除该问题。正确写法：被问「ziplist 缺陷」时答连锁更新，并补充 listpack 的修复思路，别把 ziplist 与 listpack 混为一谈。
+
+7. **线上用 `KEYS *` 扫 key**
+   Redis 是单线程处理命令，`KEYS` 是 O(N) 全表遍历且**阻塞**：百万级 key 会让实例卡住数百毫秒到数秒，所有客户端一起超时，触发重试风暴。
+   ✅ 用 `SCAN` 游标分批（每批 100~1000）；线上用 `rename-command` 直接屏蔽 `KEYS` / `FLUSHALL` / `FLUSHDB`。
+
+8. **用 `ZRANGEBYSCORE` 取出来再逐条 `ZREM` 删**
+   大集合下这是 N 次网络往返 + N 次单元素删除，延迟与网络放大几十倍，且中间态对并发读者可见。
+   ✅ 用 `ZREMRANGEBYSCORE` / `ZREMRANGEBYRANK` 一条命令批量删；跨结构迁移用 `ZUNIONSTORE`（`WEIGHTS 0`）落到新 key 再 `DEL` 旧的。
+
+9. **没算编码阈值，内存突然翻倍且不可逆**
+   `hash-max-listpack-entries`（默认 128）、`list-max-listpack-size`、`set-max-intset-entries` 等阈值一超，紧凑编码（listpack/intset）立刻转成 hashtable/quicklist，单 key 内存可跳一个量级；**删元素也不会转回去**。
+   ✅ 设计时就限制单 key 的元素个数与 value 长度；超大 hash 按业务维度拆成多个 key（分桶）；调整阈值前先用 `OBJECT ENCODING` 确认现状。

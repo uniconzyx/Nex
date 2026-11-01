@@ -11,3 +11,21 @@
 5. **构造器里调用可重写方法** —— 动态分派会调到子类覆写版，但此时子类字段尚未初始化（仍是默认值 0/null），导致读到错误值甚至 NPE；应只调用 `private`/`final` 方法或 `super` 方法。
 
 6. **向下转型未用 instanceof** —— `Animal a = new Dog(); Cat c = (Cat) a;` 会在运行期抛 `ClassCastException`；安全做法先 `if (a instanceof Cat c)` 再使用（`examples/ex09-upcast-downcast-instanceof.json`）。
+
+7. **以为 `static` 方法能被「重写」**
+   子类写同名 `static` 方法只是**隐藏（hiding）**，不是多态：调用哪个版本由**编译期声明类型**决定，与运行时对象无关。`A a = new B(); a.f();` 永远调 `A.f()`。
+   ✅ 需要多态就用实例方法；工具类的 `static` 方法不要指望被覆盖，也无法通过接口抽象。
+
+8. **以为字段访问是多态的**
+   ```java
+   class A { int x = 1; }
+   class B extends A { int x = 2; }
+   A a = new B();
+   System.out.println(a.x);      // 1，不是 2
+   ```
+   字段访问在编译期按声明类型绑定，父子同名字段是**两个独立字段**（各自占内存），不是覆盖。
+   ✅ 字段一律 `private`，对外用 getter——方法才会多态。
+
+9. **父类 `private` 方法被同名方法「重写」的错觉**
+   `private` 方法不参与继承，子类写同名方法只是新定义一个方法；父类内部调用仍然走父类那一份。看代码像模板方法模式，运行时却完全不按预期分流。
+   ✅ 需要扩展点用 `protected`（或 `protected abstract`）；不想被扩展就 `final`，并在命名上避开父类的私有实现名。

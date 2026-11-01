@@ -35,3 +35,26 @@
 6. **partition 不保证稳定性，误以为相等元素顺序不变**
    `std::partition` 会把「满足谓词」的元素聚到前端，但组内相对顺序**不保证**；需要保序用 `std::stable_partition` / `std::stable_sort`。
    ✅ 涉及「先按某键排序、再稳定分组/二次排序」时选 `stable_*`（见 `examples/ex02`、`ex07`）。
+
+7. **把 `std::remove` 当成「删除元素」**
+   ```cpp
+   std::remove(v.begin(), v.end(), 3);        // 错：v.size() 一点没变
+   ```
+   `remove` 是**重排算法**：它把要保留的元素前移，返回新的逻辑尾，容器大小不变，尾部残留的是被「移走」的旧值（不是被删掉）。
+   ✅ erase-remove 惯用法：`v.erase(std::remove(v.begin(), v.end(), 3), v.end())`；C++20 起直接 `std::erase(v, 3)`。
+
+8. **在未排序区间上用 `lower_bound` / `binary_search`**
+   ```cpp
+   std::vector<int> v = {3, 1, 2};
+   bool has = std::binary_search(v.begin(), v.end(), 2);   // 区间无序 → 结果未定义
+   ```
+   二分查找族（`lower_bound`/`upper_bound`/`equal_range`/`binary_search`）都要求区间**已按同一比较器有序**，否则不是「找不到」而是未定义行为。
+   ✅ 先 `std::sort`，且查找比较器与排序比较器必须一致；只判存在且数据量小，用 `std::find` 更安全。
+
+9. **`std::accumulate` 的初值类型决定整个累加的类型**
+   ```cpp
+   std::vector<double> v = {1.5, 2.5};
+   double s = std::accumulate(v.begin(), v.end(), 0);      // 错：初值 0 是 int
+   ```
+   返回类型由**初值**推导，且每一步都按初值类型运算——浮点被逐次截断，不是在最后才转换；大整数则会中途溢出。
+   ✅ 初值写对类型：`std::accumulate(v.begin(), v.end(), 0.0)`；累加大整数用 `0LL`，累加字符串用 `std::string{}`。

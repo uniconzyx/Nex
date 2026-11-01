@@ -11,3 +11,18 @@
 5. **安全模式（Safe Mode）是一种故障/错误状态** —— 错。它是 NameNode 启动后的**保护态**：块位置映射未收齐前只读不写，直到满足最小副本比例的块数达到阈值才自动退出。长时间卡住通常是欠副本块过多（节点没起来/磁盘坏），应先排查而非盲目 `safemode leave`。正确写法：理解它是「数据完整性闸门」，离开需谨慎，避免丢数据。
 
 6. **小文件在 HDFS 上只是『占不满一个块』的小事** —— 错。HDFS 的瓶颈在 NameNode 内存（每文件 ~150B 元数据）与任务/寻址膨胀；百万小文件会让 NameNode 内存暴涨且读放大严重。正确写法：用 HAR、HBase、或合并成 SequenceFile/ORC/Parquet 等列式大文件治理；MapReduce 输入小文件会「一文件一 map」。
+
+7. **小文件直接 put 进 HDFS → NameNode 内存被吃干**
+   ```bash
+   hdfs dfs -put /logs/2026-10-31/*.log /warehouse/raw/    # 几十万个 10KB 小文件
+   ```
+   每个文件、每个块、每个副本在 NameNode 里约占 150 字节元数据。1000 万个 10KB 小文件（数据总量才 100GB）就要吃掉约 3GB 堆，DataNode 磁盘还很空，NameNode 先 OOM。
+   ✅ 采集侧先 roll 成大文件，或入库后合并（HAR / SequenceFile / ORC）；Hive 用 `ALTER TABLE ... CONCATENATE`。
+
+8. **副本因子调成 1 省空间，容错一起没了**
+   `dfs.replication=1` 时任一 DataNode 掉线就直接丢块；机架感知也失效（默认 3 副本是「同机架 2 + 跨机架 1」，能扛整机架断电）。
+   ✅ 生产保持 ≥3；冷数据改用 Erasure Coding（RS-6-3 把 3x 开销降到约 1.5x），代价是恢复时网络与 CPU 更高、且不支持 append。
+
+9. **单 NameNode 且不做 checkpoint → editlog 无限增长、重启小时级**
+   只部署一个 NameNode，又没有 SecondaryNameNode / Standby 定期合并 fsimage，`edits` 文件会一直涨。重启时要回放几个月的 editlog，启动时间从小秒级变成小时级。
+   ✅ QJM + ZKFC 做 HA（Standby 自动 checkpoint），或至少部署 SecondaryNameNode 并监控 `Last checkpoint` 时间。

@@ -13,3 +13,15 @@
 5. **以为 Redis 用的是严格 LRU/LFU** —— Redis 不维护全局访问链表，而是随机采样 `maxmemory-samples`（默认 5）个候选、从中挑最久未用/最低频的淘汰，是近似算法。正确写法：答「近似 LRU/LFU（随机采样）」，并说明其在命中率接近的前提下大幅降低维护开销，是单线程低延迟的取舍。
 
 6. **把 `mem_fragmentation_ratio < 1` 当成“碎片好”** —— 该比值 = `used_memory_rss / used_memory`；`>1` 才表示有碎片（正常略大于 1，>1.5 需治理），`<1` 说明物理常驻小于逻辑内存，是**部分内存被 OS 换页到 swap**，属危险信号而非健康。正确写法：ratio<1 要立刻排查 swap，而非欣喜于“碎片低”。
+
+7. **`appendfsync everysec` 却承诺「零丢失」**
+   `everysec` 是「每秒后台 fsync 一次」，宕机最多丢约 1 秒写入；`no` 由 OS 决定（可能丢几十秒）；只有 `always` 才接近零丢失，但吞吐会掉一个量级。
+   ✅ 按 RPO 选：能接受秒级丢失用 `everysec`（多数场景的默认答案）；不能接受就 `always` + 独立盘，或 `everysec` + 主从 + `WAIT` 确认副本已收到。
+
+8. **设了 `maxmemory` 但没设淘汰策略**
+   默认策略是 `noeviction`：内存打满后**写命令直接报错**（`OOM command not allowed`），读还能用——监控上看着「服务还在」，业务侧却全线写失败。
+   ✅ 纯缓存用 `allkeys-lru` / `allkeys-lfu`；要保数据用 `volatile-*` 并确保 key 都有 TTL；同时盯 `evicted_keys` 与 `used_memory` 曲线。
+
+9. **忽略 RDB fork 的 COW 放大**
+   `bgsave` 靠 fork 出子进程写盘，期间父进程的写操作触发 copy-on-write 复制页。写入量大时 RSS 可接近翻倍，容易撞上容器内存上限被 OOM kill，恢复又要重放 AOF。
+   ✅ 单实例内存控制在物理内存一半以内；关掉 THP（`transparent_hugepage=never`）；快照错峰；用副本执行持久化，主库只保 `everysec`。
