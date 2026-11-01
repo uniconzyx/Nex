@@ -1,5 +1,18 @@
 # 四、循环依赖、三级缓存与 @Configuration 代理
 
+```text
+@Configuration 默认被 CGLIB 增强（proxyBeanMethods=true）
+    @Bean 方法互相调用 -> 被拦截 -> 走容器 -> 返回同一个单例
+    关闭后（proxyBeanMethods=false）-> 方法互调就是普通 Java 调用 -> 每次 new
+    -> 因此关闭代理时，@Bean 之间不要互相调用
+
+循环依赖的三种情况：
+    setter / 字段注入   三级缓存可解
+    构造器注入          无解，启动即失败
+    代理下的循环        可能拿到「早期引用」是原始对象 -> 代理失效
+    -> 正解是拆依赖（引入第三方 bean，或用事件解耦）
+```
+
 ## 一、循环依赖与三级缓存（中立陈述）
 
 **单例 + Setter/字段注入**的循环依赖（A 依赖 B、B 依赖 A）能被 Spring 解决，靠**三级缓存**：

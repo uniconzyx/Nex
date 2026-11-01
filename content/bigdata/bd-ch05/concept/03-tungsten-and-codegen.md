@@ -98,6 +98,20 @@ Tungsten 紧凑布局每行 112 字节（2.32 倍）；若再叠加列裁剪（�
 
 ---
 
+```text
+Tungsten 解决两件事：内存布局 + 代码生成
+    堆外内存自己管理 -> 绕过 JVM 对象头与 GC
+    紧凑二进制：多列拼成一条 UnsafeRow（定长偏移表 + 变长区）
+    whole-stage codegen：把 filter+project+agg 编成一个 Java 循环
+
+    效果：消除虚函数调用与中间对象，CPU 缓存友好
+
+    逻辑计划（scan/filter/agg） ──codegen──▶ 单个生成方法
+                                              for (row : rows) { ... }
+
+    代价：生成代码难调试；部分算子回退解释执行（explain 里带 * 的就是）
+```
+
 ## 三视角小结
 
 | 主题 | 程序员关注 | 博士生关注 | 考研/笔试口径 |

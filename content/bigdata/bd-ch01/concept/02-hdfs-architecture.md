@@ -1,3 +1,18 @@
+```text
+HDFS 三角色：
+    NameNode    命名空间与元数据（文件 -> block 列表 -> DN 位置），元数据常驻内存
+                （fsimage + edits 持久化）
+    DataNode    存真实 block（默认 128MB），定期块报告 + 心跳
+    JournalNode HA 时同步 edits（QJM），Standby NN 待命
+
+    读：Client -> NN 拿 block 位置 -> 直连 DN 读（数据不经过 NN）
+    写：Client -> NN 申请 block 与 DN 列表 -> 建 pipeline 写
+
+瓶颈与扩展：
+    NN 元数据全在堆内 -> 小文件过多会撑爆（每文件百字节级）
+    Federation：按路径挂多组 NN，分片命名空间
+```
+
 # 一、NameNode 元数据与命名空间（文件系统的大脑）
 
 （中立陈述）NameNode 是 HDFS 的**元数据管理者**，不存储实际文件数据，只保存「目录树 + 每个文件的块列表 + 每块存在哪些 DataNode」。它内存中维护 `fsimage`（命名空间的检查点快照）和 `edits`（增量操作日志），DataNode 启动时把「我有哪些块」汇报给 NameNode（块报告）。客户端读写都先向 NameNode 询问「块在哪」，再去对应 DataNode 搬数据。

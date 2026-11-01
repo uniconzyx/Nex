@@ -1,3 +1,20 @@
+```text
+三角色分工：
+    ResourceManager   全局资源仲裁（Scheduler + ApplicationsManager）
+    NodeManager       单节点代理：起 container、上报资源
+    ApplicationMaster 每应用一个，向 RM 申请 container 并调度任务
+
+    提交链路：Client -> RM 申请 AM container -> NM 起 AM
+              -> AM 申请任务 container -> NM 起任务 -> 汇报进度
+
+调度器：
+    FIFO      简单，大队列会饿死小作业
+    Capacity  多队列保底配额
+    Fair      动态均衡，短作业不被饿死
+
+container 是资源抽象（vcores + memory），起停有开销，不适合超短任务
+```
+
 # 一、YARN 三角色与容器分配状态机
 
 （中立陈述）YARN（Yet Another Resource Negotiator）把「资源调度」从计算框架中抽离成独立层。三类角色：**ResourceManager（RM，全局资源管理，含调度器）**、**NodeManager（NM，单节点代理，管容器生命周期）**、**ApplicationMaster（AM，每作业一个，向 RM 申请容器、在 NM 上启停任务、盯进度）**。作业提交后，RM 先为 AM 分配一个容器，AM 再循环向 RM 申请更多容器来跑 Task。

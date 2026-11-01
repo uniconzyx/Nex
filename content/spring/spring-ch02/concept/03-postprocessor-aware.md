@@ -1,5 +1,21 @@
 # 三、BeanPostProcessor 与 Aware 回调
 
+```text
+BeanPostProcessor：bean 初始化前后的容器级扩展点
+    postProcessBeforeInitialization   早于 @PostConstruct / InitializingBean
+    postProcessAfterInitialization    晚于它们，AOP 代理常在此生成
+    -> 所有 bean 都会经过，写重逻辑前先判断类型
+
+    与 BeanFactoryPostProcessor 的区别：
+      后者改 BeanDefinition（定义），时机更早、只跑一次
+
+Aware 回调：让 bean 拿到容器内部资源
+    BeanNameAware / BeanFactoryAware / ApplicationContextAware
+    时机：属性填充之后、初始化之前
+
+    现代写法：直接构造器注入依赖，比 Aware 更清晰、更好测
+```
+
 ## 一、BeanPostProcessor 原理与执行时机（中立陈述）
 
 `BeanPostProcessor`（BPP）是 Spring 的**容器级 bean 拦截器**：在「每个 bean 实例化、属性填充之后」统一执行，提供两个钩子：

@@ -1,4 +1,19 @@
 # 二、参数绑定与内容协商
+```text
+三类参数来源：
+    @RequestParam    查询串 / 表单      ?id=1
+    @PathVariable    路径变量           /users/{id}
+    @RequestBody     请求体（JSON）     需 @Valid 才级联校验
+    @RequestHeader / @CookieValue / @ModelAttribute（表单绑定）
+
+内容协商：
+    Accept        -> 决定 Produces（返回什么类型）
+    Content-Type  -> 决定用哪个 HttpMessageConverter 反序列化
+    @RestController = @Controller + @ResponseBody（返回值走 converter，不走视图）
+
+    常见坑：前端发 JSON 却没写 Content-Type -> 后端按表单解析 -> 参数全是 null
+```
+
 ## 1. 三类参数绑定：`@RequestParam` / `@PathVariable` / `@RequestBody`
 
 三者分别吃不同的请求位置：`@RequestParam` 取查询串或表单字段（`?page=2`），`@PathVariable` 取路径模板变量（`/users/{id}`），`@RequestBody` 把整个请求体（通常 JSON）反序列化成对象。绑定失败（类型转换错误）默认导致 400。

@@ -1,5 +1,20 @@
 # 三、组件扫描与 Java 配置
 
+```text
+@ComponentScan 从启动类所在包向下扫描
+    stereotype：@Component / @Service / @Repository / @Controller
+    （后三者本质都是 @Component，只是语义分层；@Repository 额外做异常转换）
+    @SpringBootApplication 已内建 @ComponentScan
+    -> 启动类要放最外层包，否则扫不到
+
+Java 配置：
+    @Configuration + @Bean 用于声明第三方类（无法加注解的类）
+    @Configuration 默认被 CGLIB 代理 -> @Bean 方法互调仍返回单例
+    proxyBeanMethods=false（Boot 2.2+ 默认）-> 不代理、启动更快，但方法互调会 new
+
+    条件装配：@ConditionalOnClass / @ConditionalOnMissingBean / @Profile
+```
+
 ## 一、组件扫描与 stereotype 注解
 
 （中立陈述）`@Component` 及其语义化派生 `@Service` / `@Repository` / `@Controller` /

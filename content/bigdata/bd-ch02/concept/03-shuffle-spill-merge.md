@@ -1,3 +1,18 @@
+```text
+Map 端：
+    map 输出先进环形缓冲（默认 100MB，80% 阈值触发）
+      -> 按 (partition, key) 排序 -> spill 到磁盘
+      -> 多个 spill 文件最后 merge 成一个（仍有序）
+
+Reduce 端：
+    fetch 各 map 的对应分区 -> 内存/磁盘归并 -> 按 key 分组 -> 调 reduce()
+
+    三次落盘 = 三次 IO：spill 写、merge 读+写、reduce 读
+    调优方向：增大缓冲与阈值、用 Combiner 缩体积、减少 map 数
+
+    倾斜会放大这里：超大 key -> 单个 reduce 长时间卡在 merge
+```
+
 # 一、Shuffle 的排序与溢写（spill）
 
 （中立陈述）Map 端并不边算边发网络——它先把 kv 写入**内存环形缓冲区（io.sort.mb，默认 100MB）**。缓冲区按 `spill.percent`（默认 0.8）阈值触发**溢写（spill）**：先按 partition 排序、partition 内按 key 排序（快速排序），再把有序数据写到本地磁盘的一个 spill 文件。Map 结束前，这些 spill 文件会被**归并**成一个大文件供 Reduce 拉取。

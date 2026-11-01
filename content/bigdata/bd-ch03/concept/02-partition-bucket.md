@@ -38,6 +38,22 @@
 - 易错口径：分桶数改了要全量重写（非一致性哈希）；分桶表 JOIN 提速的前提是「**同列 + 同桶数**」，否则优化不生效。
 - 关联考点：与「MapJoin/数据倾斜」「哈希分区」连考；桶数取 2 的幂的原因（位运算/对齐并行度）。
 
+```text
+Partition：目录级裁剪
+    /table/dt=2026-11-01/hour=09/part-00000
+    where dt='2026-11-01' -> 只扫该目录（分区裁剪）
+    -> 分区字段不能是高基数字段（否则海量小文件）
+
+Bucket：文件内哈希分桶
+    CLUSTERED BY (user_id) INTO 16 BUCKETS
+    bucket = hash(user_id) % 16
+    用途：TABLESAMPLE 抽样、map-side join（同桶可直接对齐）
+
+    分区 vs 分桶：
+      分区   物理目录，靠 where 裁剪，适合时间/地区等低基数
+      分桶   文件级哈希，适合 join 与抽样，需 bucket map join 支持
+```
+
 ## 可运行代码：用 EXPLAIN 验证裁剪是否生效
 
 分区裁剪不能靠「我写了 WHERE 所以肯定裁了」来判断，`EXPLAIN` 会直接列出实际扫描的分区数：

@@ -1,5 +1,21 @@
 # 三、切点表达式与通知执行顺序
 
+```text
+切点表达式：
+    execution(* com.x.service.*.*(..))     按方法签名（最常用）
+    @annotation(com.x.Log)                 按注解
+    within(com.x.service..*)               按类型
+    bean(*Service)                         按 bean 名
+    args(.., String)                       按参数类型
+
+通知执行顺序（同一连接点、多个切面）：
+    @Around 前 -> @Before -> 目标方法
+      -> @Around 后 -> @AfterReturning / @AfterThrowing -> @After
+
+    多切面排序：@Order（值越小越外层）或实现 Ordered
+    @After 总会执行（finally 语义）；@AfterReturning 只在正常返回时执行
+```
+
 ## 一、execution 切点匹配（中立陈述）
 
 切点是「对哪些连接点织入通知」的断言。Spring 用 AspectJ 切点表达式，最常用 `execution`：

@@ -1,5 +1,21 @@
 # 四、循环依赖与三级缓存
 
+```text
+三级缓存（只解决「单例 + setter/字段注入」的循环）：
+    一级 singletonObjects       成品 bean
+    二级 earlySingletonObjects  提前暴露的半成品
+    三级 singletonFactories     ObjectFactory（生成早期引用，必要时是 AOP 代理）
+
+    A 依赖 B，B 依赖 A：
+    A 实例化 -> 工厂入三级 -> 填充属性发现需要 B
+      -> 创建 B -> 填充发现需要 A -> 从三级拿到 A 的早期引用
+      -> B 完成入一级 -> 回到 A -> A 完成
+
+    为什么是三级而不是两级：为了让提前引用在需要时是「AOP 代理」而非原始对象
+
+    构造器注入的循环无解 -> BeanCurrentlyInCreationException
+```
+
 ## 一、单例循环依赖与三级缓存
 
 （中立陈述）单例 + **Setter/字段注入**的循环依赖（A 依赖 B，B 依赖 A）可以被 Spring 解决，核心是一套

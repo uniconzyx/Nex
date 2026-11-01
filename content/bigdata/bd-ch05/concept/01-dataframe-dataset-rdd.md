@@ -97,6 +97,20 @@ Encoder 做两件事：① 生成 `T → InternalRow` 的序列化代码（按 s
 
 ---
 
+```text
+RDD 无 schema，只有闭包 -> 优化器无从下手
+DataFrame / Dataset 带 schema -> Catalyst 可做等价变换与代价优化
+
+    RDD        逐条 JVM 对象，GC 压力大，调用黑盒
+    DataFrame  逻辑计划 -> 优化 -> 物理计划 -> 列式批处理 + 代码生成
+
+    Catalyst 常见优化：
+      谓词下推、列裁剪、常量折叠、按大小重排 join
+      whole-stage codegen：把多个算子编译成一个循环（消除虚调用与中间对象）
+
+    仍需 RDD 的场合：非结构化数据、要精细控制分区与顺序、第三方库只吃 RDD
+```
+
 ## 三视角小结
 
 | 主题 | 程序员关注 | 博士生关注 | 考研/笔试口径 |

@@ -1,3 +1,18 @@
+```text
+编译链：
+    SQL ─▶ AST（Antlr）─▶ 逻辑计划（TS / FILTER / JOIN / AGG 算子树）
+        ─▶ 优化器（谓词下推、列裁剪、join 重排、分区裁剪）
+        ─▶ 物理计划（MapJoin / CommonJoin，是否引入 reduce）
+        ─▶ Tez / Spark / MR 的任务 DAG
+
+    常见可优化信号：
+      小表 join 大表      -> MapJoin（广播小表，无 reduce）
+      where 可下推        -> 减少扫描量
+      select 只取少数列    -> 列裁剪（列存收益最大）
+
+    用 EXPLAIN 看执行计划，不要靠猜
+```
+
 # 一、HQL 的编译：AST → 逻辑计划 → 物理计划
 
 （中立陈述）一条 HQL 经过：① **词法/语法分析（Antlr）** 生成 AST；② **语义分析（SemanticAnalyzer）** 绑定元数据、做类型检查，生成**逻辑计划**（Relation 代数树：TableScan / Filter / Aggregate / Project）；③ **逻辑优化器**（谓词下推、列裁剪、常量折叠、CBO 基于代价重写）得到优化后逻辑计划；④ 翻译成**物理计划**（具体算子与执行引擎：Map → Shuffle → Reduce，或 Tez DAG / Spark RDD），最终提交执行。整条链路是「声明式 SQL → 等价、更优的执行方案」的自动转换。

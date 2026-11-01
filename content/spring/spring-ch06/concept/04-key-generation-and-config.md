@@ -1,5 +1,19 @@
 # 四、主键回填与 XML/注解配置
 
+```text
+主键回填：
+    useGeneratedKeys="true" keyProperty="id"     自增主键（最常见）
+    <selectKey order="BEFORE|AFTER">             序列 / UUID 等非自增
+    为什么需要：插入后要拿 id 做后续关联，否则只能再查一次
+
+XML vs 注解：
+    XML     复杂 SQL、动态 SQL、可热改、与 Java 分离（复杂场景首选）
+    注解     简单 CRUD 更紧凑；复杂动态 SQL 会很难读
+    混用     同一 namespace 不能存在两份同名 statement（启动即报错）
+
+    动态 SQL（<if> / <choose> / <foreach>）是 MyBatis 的核心优势，写进注解会难维护
+```
+
 ## 1. 主键回填：useGeneratedKeys 与 selectKey
 
 插入后数据库自增主键需要回填到实体。MyBatis 提供 `useGeneratedKeys + keyProperty`（数据库自增）

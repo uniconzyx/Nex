@@ -1,3 +1,18 @@
+```text
+写 pipeline（客户端只发给 DN1，逐级转发）：
+    Client ─▶ DN1 ─▶ DN2 ─▶ DN3
+              ack ◀── ack ◀── ack      （ack 反向逐级回传）
+
+    ① create -> NN 返回 block 与 3 个 DN
+    ② 建 pipeline，按 packet（约 64KB）流式发送
+    ③ 每 packet 带序号，DN 转发并缓存
+    ④ 全部 ack 回来，Client 才认为该 packet 成功
+    ⑤ 块完成 -> 汇报 NN -> 申请下一块
+
+    失败：DN 掉线 -> 剔除该节点重建 pipeline，块 genstamp 递增
+    读：就近优先（同机架），校验和不符则换副本重读
+```
+
 # 一、写入的流水线复制（pipeline）
 
 （中立陈述）HDFS 写文件是**流式追加**：客户端把数据切成 packet（默认 64KB），先请求 NameNode 分配目标 DataNode 列表（按副本策略），随后数据沿 `客户端 → dn1 → dn2 → dn3` 的**流水线**依次推送；每个节点收到 packet 先落本地再转发下游，确认沿原路回传；只有整条流水线都 ACK 成功，该 packet 才算写稳。全写完后客户端向 NameNode 提交「块完成」。

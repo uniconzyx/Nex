@@ -1,3 +1,19 @@
+```text
+Combiner = map 端本地 reduce（预聚合）
+    map 输出 ─▶ Combiner 局部聚合 ─▶ shuffle ─▶ Reducer 全局聚合
+    价值：直接减少 shuffle 的网络与磁盘数据量
+
+    语义边界：只对满足结合律、交换律的操作安全
+      ✔ sum / max / min / count
+      ✘ avg（要先转成 sum+count 两列）、median、简单去重计数
+
+Partitioner 决定 key 落到哪个 reduce：
+    默认 hash(key) % numReduceTasks
+    倾斜来自 key 分布不均 -> 加盐 / 两阶段聚合 / 自定义 Partitioner
+
+    改变 reduce 数会改变分区映射 -> 输出目录不能直接复用
+```
+
 # 一、Combiner：本地 Reduce 与它的语义边界
 
 （中立陈述）Combiner 是 Map 端可选的「本地聚合函数」，逻辑上与 Reducer 相同，但在**每个 MapTask 内部、溢写前/归并后**对 `(key, [v])` 先做一轮聚合，从而削减需要跨网络 shuffle 的 kv 数量。它必须满足**可结合、可交换**，否则会改变最终结果。

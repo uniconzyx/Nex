@@ -1,5 +1,19 @@
 # 三、resultMap、驼峰映射与关联映射
 
+```text
+自动映射前提：列名 == 属性名，或开启 map-underscore-to-camel-case
+    user_name -> userName（驼峰映射即可）
+
+必须手写 resultMap 的情况：
+    列名与属性语义不一致（db_col -> bizField）
+    需要 TypeHandler（枚举、JSON 列、加密字段）
+    嵌套关联（association 一对一 / collection 一对多）
+    需要复用映射片段（<include>）
+
+    一对多用 collection 聚合，避免 N+1：一次 join 查询 + 结果聚合
+    注意：join 会让行数膨胀，需要 id 列作为去重依据
+```
+
 ## 1. resultMap：列→字段映射与何时必须手写
 
 `resultType` 让 MyBatis 自动按「属性名=列名（或驼峰）」映射；`resultMap` 是显式映射声明，

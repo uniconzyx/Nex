@@ -1,5 +1,25 @@
 # 四、this 与 target 区别及自调用代理失效
 
+```text
+this   当前代理对象（外部调用进来的那个）-> 走代理链，有增强
+target 被代理的原始对象（内部的真实 this）-> 直接调用，无增强
+
+自调用失效：
+    class S {
+      @Transactional public void a() { b(); }
+      @Transactional public void b() { }
+    }
+    外部调 a() -> 代理 -> a 有事务
+    a 内部的 b() 用的是 this -> 绕过代理 -> b 的事务注解失效
+
+    解决：
+      拆类（把 b 挪到另一个 bean）
+      注入自身代理（@Lazy self / AopContext.currentProxy()）
+      用 TransactionTemplate 显式控制
+
+    同理：同类互调会让 @Async / @Cacheable 也失效
+```
+
 ## 一、this 与 target 的语义区别（中立陈述）
 
 在 AOP 语境里：

@@ -1,4 +1,19 @@
 # 三、参数校验：Bean Validation 的元数据模型
+```text
+JSR-303/380 元数据模型：约束注解 + ConstraintValidator
+    @NotNull(message="...") 由 NotNullValidator 实现
+    自定义：@Constraint(validatedBy = XxxValidator.class) + 实现 isValid
+
+触发方式：
+    @Valid       级联校验（嵌套对象必须加它）
+    @Validated   类/方法级，支持分组 @Validated(OnCreate.class)
+
+    分组：同一 DTO 在新增与更新时规则不同（id 必填 vs 不必填）
+    @GroupSequence 可以表达「基础校验通过才做重校验」
+
+失败信息：BindingResult，或抛 MethodArgumentNotValidException 交给 Advice 转字段级错误
+```
+
 ## 1. JSR-303/380 的元数据模型：约束注解 + ConstraintValidator
 
 Bean Validation 把校验规则表达为**注解（元数据）**贴在字段上（`@NotNull`/`@Size`/`@Min`），运行时由校验引擎通过**反射**读取这些注解并调用对应的 `ConstraintValidator` 执行。规则与代码解耦。

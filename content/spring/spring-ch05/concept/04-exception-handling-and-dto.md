@@ -1,4 +1,19 @@
 # 四、全局异常处理与 DTO 隔离
+```text
+@ControllerAdvice 把异常统一翻译成响应
+    @ExceptionHandler(BizException)                     -> 400 + 业务码
+    @ExceptionHandler(MethodArgumentNotValidException)  -> 字段级错误列表
+    @ExceptionHandler(Exception)                        -> 500 兜底，不泄漏堆栈
+
+DTO 隔离（不要直接暴露 Entity）：
+    Entity ──映射──▶ DTO（Request / Response）
+    理由：
+      不把内部字段（密码、逻辑删除标记）暴露出去
+      避免懒加载代理序列化异常
+      接口契约可独立演进，不必跟着表结构改
+      每个接口只带需要的字段，减小 payload
+```
+
 ## 1. @ControllerAdvice 全局异常处理与异常→状态码映射
 
 `@ControllerAdvice` 是集中式的横切Advice，配合 `@ExceptionHandler` 捕获所有 Controller 抛出的特定异常，统一转成「状态码 + 错误体」，避免每个方法写 try-catch。

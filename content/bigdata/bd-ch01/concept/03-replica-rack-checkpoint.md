@@ -1,3 +1,19 @@
+```text
+三副本的机架感知放置：
+    副本1  写端所在节点
+    副本2  另一机架的一个节点
+    副本3  与副本2 同机架的另一个节点
+    -> 容忍整机架故障，且跨机架带宽只付一份
+
+    机架判定靠 topology script（IP -> /dc/rack）
+
+Checkpoint（SecondaryNameNode / StandbyCheckpointer）：
+    edits 持续增长 -> 需定期合并进 fsimage
+    NN 滚动新 edits -> SBN 拉旧 edits + fsimage -> 合并 -> 回传 NN
+
+    HA 场景由 Standby NN 承担，不再需要 SecondaryNameNode
+```
+
 # 一、副本放置策略与机架感知（rack awareness）
 
 （中立陈述）HDFS 默认副本因子为 3，放置规则为：**第 1 副本放在客户端所在节点（或随机节点）；第 2 副本放在「不同机架」的节点；第 3 副本放在「与第 2 副本同机架但不同节点」**。机架感知依赖管理员配置的 `rack topology`（网络位置脚本），使 NameNode 知道每个 DataNode 属于哪个机架（如 `/rack1/dn1`）。

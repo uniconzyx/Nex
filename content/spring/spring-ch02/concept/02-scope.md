@@ -1,5 +1,19 @@
 # 二、Bean 作用域：singleton / prototype / request / session
 
+```text
+Bean 作用域：
+    singleton     容器内单例（默认），随容器创建与销毁
+    prototype     每次 getBean 都新建，容器不负责销毁（需自行清理）
+    request       每个 HTTP 请求一个实例（Web）
+    session       每个会话一个实例（Web）
+    application / websocket  ServletContext 级 / WS 会话级
+
+    陷阱：singleton 注入 prototype -> 只在注入时创建一次，之后永远是同一个
+    解决：@Lookup 方法注入、ObjectProvider<T>、Scoped Proxy（proxyMode）
+
+    有状态对象用 prototype，无状态服务用 singleton
+```
+
 ## 一、四种作用域的语义差异（中立陈述）
 
 Spring 通过 `scope` 决定 `getBean` 时返回的是「同一实例」还是「新实例」：
