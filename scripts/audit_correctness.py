@@ -30,6 +30,12 @@ import tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# Node 可执行文件：优先托管版本（隔离环境），否则回落到 PATH 里的 node。
+_NODE_CANDIDATES = [
+    r'C:\Users\zyx\.workbuddy\binaries\node\versions\22.22.2-3\node.exe',
+]
+NODE_BIN = next((p for p in _NODE_CANDIDATES if os.path.exists(p)), None) or 'node'
+
 TRI_VIEWS = [
     '### \U0001F9D1\u200D\U0001F4BB 程序员视角',
     '### \U0001F393 博士生视角',
@@ -67,6 +73,9 @@ class Report:
         self.fails: list[str] = []
         self.warns: list[str] = []
         self.checked = 0
+        # 已按「通过」处理、只做信息统计的项：不占 warn 名额，否则会淹没真问题
+        self.soft_newline = 0
+        self.soft_lang: dict[str, int] = {}
 
     def fail(self, where: str, msg: str) -> None:
         self.fails.append('%s: %s' % (where, msg))
@@ -154,8 +163,36 @@ def check_examples(cdir: str, cid: str, rep: Report, tmp: str) -> None:
             run = subprocess.run([sys.executable, src_name], input=stdin, capture_output=True,
                                  text=True, encoding='utf-8', errors='replace',
                                  timeout=60, cwd=tmp)
+        elif lang in ('java',):
+            # 源文件名必须与 public class 同名，否则 javac 直接拒绝编译
+            mcls = re.search(r'\b(?:public\s+)?(?:final\s+|abstract\s+|sealed\s+)?'
+                             r'(?:class|interface|enum|record)\s+(\w+)', code)
+            cls = (obj.get('run_filename') or '').rsplit('.', 1)[0] or \
+                  (mcls.group(1) if mcls else 'Main')
+            src_name = cls + '.java'
+            io.open(os.path.join(tmp, src_name), 'w', encoding='utf-8',
+                    newline='\n').write(code)
+            r = subprocess.run(['javac', '-encoding', 'UTF-8', '-d', '.', src_name],
+                               capture_output=True, text=True, encoding='utf-8',
+                               errors='replace', cwd=tmp)
+            if r.returncode != 0:
+                rep.fail(cid + '/' + name, '编译失败: ' + (r.stderr or '')[-300:])
+                continue
+            # JDK 18+ 重定向时按 native 编码写 stdout，显式指定避免中文乱码
+            run = subprocess.run(['java', '-Dstdout.encoding=UTF-8',
+                                  '-Dstderr.encoding=UTF-8', '-cp', '.', cls],
+                                 input=stdin, capture_output=True, text=True,
+                                 encoding='utf-8', errors='replace', timeout=60, cwd=tmp)
+        elif lang in ('javascript', 'js', 'node'):
+            src_name = obj.get('run_filename') or 'm.js'
+            io.open(os.path.join(tmp, src_name), 'w', encoding='utf-8',
+                    newline='\n').write(code)
+            run = subprocess.run([NODE_BIN, src_name], input=stdin, capture_output=True,
+                                 text=True, encoding='utf-8', errors='replace',
+                                 timeout=60, cwd=tmp)
         else:
-            rep.warn(cid + '/' + name, 'code_lang=%r 未支持，跳过实跑' % lang)
+            # 未支持的语言无法实跑验证：按语言聚合计数，避免上百条重复 warn 淹没真问题
+            rep.soft_lang[lang] = rep.soft_lang.get(lang, 0) + 1
             continue
 
         # 示例可声明 expect_rc：'nonzero' 表示「故意崩溃」的演示（assert / 测试失败），
@@ -192,7 +229,7 @@ def check_examples(cdir: str, cid: str, rep: Report, tmp: str) -> None:
             continue
         # 允许「末尾换行数不同」不算错，否则报差异首行
         if got.rstrip('\r\n') == want.rstrip('\r\n'):
-            rep.warn(cid + '/' + name, '仅末尾换行不同')
+            rep.soft_newline += 1
             continue
         gl, wl = got.split('\n'), want.split('\n')
         for i in range(max(len(gl), len(wl))):
@@ -398,6 +435,8 @@ def main() -> int:
     ap.add_argument('--chapters', default='')
     ap.add_argument('--all', action='store_true')
     ap.add_argument('--skip-net', action='store_true')
+    ap.add_argument('--warn-out', default='',
+                    help='把完整 warn 清单写入该文件（控制台只显示前 20 条）')
     args = ap.parse_args()
 
     if args.all:
@@ -430,12 +469,21 @@ def main() -> int:
 
     print('\n' + '=' * 66)
     print('审计章节 %d · 检查项 %d' % (len(chapters), rep.checked))
+    if rep.soft_newline:
+        print('[info] %d 个示例仅末尾换行不同（已按通过处理）' % rep.soft_newline)
+    if rep.soft_lang:
+        parts = ', '.join('%s×%d' % (k, v) for k, v in sorted(rep.soft_lang.items()))
+        print('[info] 未支持实跑的 code_lang: %s（这些示例未经验证）' % parts)
     if rep.warns:
         print('\n[warn] %d 条' % len(rep.warns))
         for w in rep.warns[:20]:
             print('  - ' + w)
         if len(rep.warns) > 20:
-            print('  ... 另 %d 条' % (len(rep.warns) - 20))
+            print('  ... 另 %d 条（加 --warn-out 可看全量）' % (len(rep.warns) - 20))
+        if args.warn_out:
+            with io.open(args.warn_out, 'w', encoding='utf-8', newline='\n') as f:
+                f.write('\n'.join(rep.warns) + '\n')
+            print('  （完整清单已写入 %s）' % args.warn_out)
     if rep.fails:
         print('\n[FAIL] %d 条' % len(rep.fails))
         for f in rep.fails:
