@@ -93,7 +93,15 @@ def find_chapter_dir(cid: str) -> str | None:
 
 
 # ------------------------------------------------------------------ examples
-def check_examples(cdir: str, cid: str, rep: Report, tmp: str) -> None:
+def check_examples(cdir: str, cid: str, rep: Report, tmp_root: str) -> None:
+    """逐示例实跑。注意每个示例用**独立子目录**，不能共用一个工作目录。
+
+    共用目录会被前面的示例污染：某个示例在默认包里定义了 `Target` 之后，
+    后续示例里的 `@Target(ElementType.FIELD)` 会解析到这个类而不是
+    `java.lang.annotation.Target`，javac 报
+    「incompatible types: Target cannot be converted to Annotation」——
+    完全无关的两个示例互相干扰，属审计自身的假 FAIL。
+    """
     files = sorted(glob.glob(os.path.join(cdir, 'examples', '*.json')))
     if not files:
         rep.fail(cid, 'examples 目录为空')
@@ -106,6 +114,9 @@ def check_examples(cdir: str, cid: str, rep: Report, tmp: str) -> None:
             rep.fail(cid + '/' + name, 'JSON 非法: %s' % e)
             continue
         rep.checked += 1
+
+        # 每个示例一个干净目录（见函数 docstring：共用目录会造成跨示例污染）
+        tmp = tempfile.mkdtemp(dir=tmp_root)
 
         code = obj.get('code') or ''
         expect = obj.get('expected_output')
