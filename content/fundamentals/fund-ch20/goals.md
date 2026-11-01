@@ -49,9 +49,9 @@
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
 | 1 | [torvalds/linux](https://github.com/torvalds/linux) | 253833 | §inode 与索引 + §目录查找 | 两处对照读：`fs/ext4/inode.c` 的 `ext4_map_blocks` 把「逻辑块号」翻成「物理块号」（extent 树就是混合索引的工业版）；`fs/namei.c` 的 `link_path_walk` 把 `/a/b/c` 逐段解析成 dentry，配合 `fs/dcache.c` 看 dentry 缓存 |
-| 2 | [mit-pdos/xv6-public](https://github.com/mit-pdos/xv6-public) | 9711 | §目录结构 + §日志一致性 | `fs.c` 里 `dirlookup`/`namei`/`ialloc` 三个函数就讲完「目录是特殊文件」与 inode 分配；`log.c` 只有几百行，begin_op / log_write / commit 就是最小可读的 write-ahead 日志 |
+| 2 | [mit-pdos/xv6-public](https://github.com/mit-pdos/xv6-public) | 9716 | §目录结构 + §日志一致性 | `fs.c` 里 `dirlookup`/`namei`/`ialloc` 三个函数就讲完「目录是特殊文件」与 inode 分配；`log.c` 只有几百行，begin_op / log_write / commit 就是最小可读的 write-ahead 日志 |
 | 3 | [remzi-arpacidusseau/ostep-code](https://github.com/remzi-arpacidusseau/ostep-code) | 4474 | §全章实验 | 《操作系统导论》配套代码的文件系统实验：自己实现一遍 inode 分配与位示图，计算题就不再是背公式 |
-| 4 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186375 | §考前速记 | 中文「文件系统」一节：把本章的计算题套路（混合索引、位示图、FAT 大小）浓缩成几页，适合考前 30 分钟过一遍 |
+| 4 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186408 | §考前速记 | 中文「文件系统」一节：把本章的计算题套路（混合索引、位示图、FAT 大小）浓缩成几页，适合考前 30 分钟过一遍 |
 
 ## 本章 B 站视频路线
 

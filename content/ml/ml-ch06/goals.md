@@ -53,8 +53,8 @@
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
 | 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | 全章 | cluster / covariance 模块：K-means、DBSCAN、GMM、异常检测；本章先读与「目标函数」「Lloyd 迭代」相关的部分 |
-| 2 | [jakevdp/PythonDataScienceHandbook](https://github.com/jakevdp/PythonDataScienceHandbook) | 50,229 | 全章 | 《Python 数据科学手册》：聚类与密度估计的可视化讲解；本章先读与「目标函数」「Lloyd 迭代」相关的部分 |
-| 3 | [amueller/introduction_to_ml_with_python](https://github.com/amueller/introduction_to_ml_with_python) | 8,224 | 全章 | 无监督方法的实际使用边界与常见误用；本章先读与「目标函数」「Lloyd 迭代」相关的部分 |
+| 2 | [jakevdp/PythonDataScienceHandbook](https://github.com/jakevdp/PythonDataScienceHandbook) | 50,277 | 全章 | 《Python 数据科学手册》：聚类与密度估计的可视化讲解；本章先读与「目标函数」「Lloyd 迭代」相关的部分 |
+| 3 | [amueller/introduction_to_ml_with_python](https://github.com/amueller/introduction_to_ml_with_python) | 8,225 | 全章 | 无监督方法的实际使用边界与常见误用；本章先读与「目标函数」「Lloyd 迭代」相关的部分 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

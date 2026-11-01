@@ -47,7 +47,7 @@
 | 1 | [microsoft/DeepSpeed](https://github.com/microsoft/DeepSpeed) | 43,271 | §3.3 并行策略 | `deepspeed/runtime/zero/stage3.py` 是 ZeRO-3 的参数分片（§3.3 三阶段表的第三行）；`stage1.py`/`stage2.py` 分别是优化器状态与梯度分片，看 `_partition_param` 就懂「12 字节/参数」怎么摊 |
 | 2 | [NVIDIA/Megatron-LM](https://github.com/NVIDIA/Megatron-LM) | 18,278 | §3.3 并行策略 | `megatron/core/tensor_parallel/layers.py` 里列并行/行并行两个 Linear 就是 §3.3 的 TP 原文；`pipeline_parallel/` 能对上 $(P-1)/(M+P-1)$ 的空泡推导 |
 | 3 | [google-research/tuning_playbook](https://github.com/google-research/tuning_playbook) | 30,404 | §2.2 学习率调度 | 先读「Batch size」与「Learning rate schedule」两节：§2.2 的 warmup+cosine、§2.4 的线性缩放规则都在这里给了工程口径，可与 ex06 的学习率曲线对照 |
-| 4 | [karpathy/nanoGPT](https://github.com/karpathy/nanoGPT) | 64,145 | §2.2 学习率调度 | 最小可训 GPT：`train.py` 的 `get_lr` 就是 warmup+cosine（§2.2），`model.py` 的 `Block` 是 Pre-LN 残差（§1.3），`estimate_loss` 是评估口径 |
+| 4 | [karpathy/nanoGPT](https://github.com/karpathy/nanoGPT) | 64,306 | §2.2 学习率调度 | 最小可训 GPT：`train.py` 的 `get_lr` 就是 warmup+cosine（§2.2），`model.py` 的 `Block` 是 Pre-LN 残差（§1.3），`estimate_loss` 是评估口径 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

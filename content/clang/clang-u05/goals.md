@@ -33,7 +33,7 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [DaveGamble/cJSON](https://github.com/DaveGamble/cJSON) | 13,040 | §4.2 `#ifndef` 守卫 | §4.2/§4.4 头文件守卫：`cJSON.h` 顶部的 `#ifndef cJSON__h` + `#define` 是标准守卫写法，`CJSON_PUBLIC` 宏统一处理导出符号；顺带看它怎么用 `#ifdef __cplusplus` 给 C++ 留 `extern \"C\"` |
+| 1 | [DaveGamble/cJSON](https://github.com/DaveGamble/cJSON) | 13,063 | §4.2 `#ifndef` 守卫 | §4.2/§4.4 头文件守卫：`cJSON.h` 顶部的 `#ifndef cJSON__h` + `#define` 是标准守卫写法，`CJSON_PUBLIC` 宏统一处理导出符号；顺带看它怎么用 `#ifdef __cplusplus` 给 C++ 留 `extern \"C\"` |
 | 2 | [redis/redis](https://github.com/redis/redis) | 77,159 | §2.3 什么时候用宏、什么时候用… | §2.3 宏还是 inline：`src/sds.h` 里 `sdslen`/`sdsavail` 是 `static inline`，而 `src/zmalloc.h` 里 `zmalloc_usable_size` 是宏包函数——同一份代码里两种取舍并存，正好对照那节的判据 |
 | 3 | [rswier/c4](https://github.com/rswier/c4) | 10,819 | §1.1 C 程序如何变成可执行文件 | §1.1/§1.2 亲手量一次：`c4.c` 只有一个翻译单元、只包含标准头，直接 `cc -E c4.c | wc -l` 与 `grep -c '' c4.c` 对比，就能看到 `#include` 展开后的体积差 |
 

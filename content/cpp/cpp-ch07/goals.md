@@ -29,9 +29,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [fmtlib/fmt](https://github.com/fmtlib/fmt) | 25,897 | §2.3 全特化 | §2.3 全特化的实战：`include/fmt/base.h` 的 `template <typename T, typename Char> struct formatter` 主模板故意不实现 `format()`，谁要支持格式化就特化谁（`formatter<std::string>`、`formatter<int>`）；读主模板那条注释，它写清了「为什么主模板要留空」 |
-| 2 | [nlohmann/json](https://github.com/nlohmann/json) | 50,813 | §3.3 SFINAE —— 替换失… | §3.3 SFINAE 的工程写法：`include/nlohmann/json.hpp` 里 `is_compatible_type`、`has_to_json`、`has_from_json` 全靠「替换失败不算错」来探测用户类型有没有提供 `to_json`/`from_json`；顺着 `has_to_json` 的 `decltype` 表达式看，能看清 SFINAE 到底在哪一步生效 |
-| 3 | [microsoft/STL](https://github.com/microsoft/STL) | 11,172 | §3.3 SFINAE —— 替换失… | §3.3 与 §3.5 的底层：`stl/inc/type_traits` 里 `void_t`、`enable_if`、`conjunction` 的真实实现；看完再读 `stl/inc/concepts`（若你所看的版本已含 C++20 约束），就能对照出「SFINAE 时代」与「concept 时代」表达同一约束的成本差 |
+| 1 | [fmtlib/fmt](https://github.com/fmtlib/fmt) | 25,899 | §2.3 全特化 | §2.3 全特化的实战：`include/fmt/base.h` 的 `template <typename T, typename Char> struct formatter` 主模板故意不实现 `format()`，谁要支持格式化就特化谁（`formatter<std::string>`、`formatter<int>`）；读主模板那条注释，它写清了「为什么主模板要留空」 |
+| 2 | [nlohmann/json](https://github.com/nlohmann/json) | 50,829 | §3.3 SFINAE —— 替换失… | §3.3 SFINAE 的工程写法：`include/nlohmann/json.hpp` 里 `is_compatible_type`、`has_to_json`、`has_from_json` 全靠「替换失败不算错」来探测用户类型有没有提供 `to_json`/`from_json`；顺着 `has_to_json` 的 `decltype` 表达式看，能看清 SFINAE 到底在哪一步生效 |
+| 3 | [microsoft/STL](https://github.com/microsoft/STL) | 11,177 | §3.3 SFINAE —— 替换失… | §3.3 与 §3.5 的底层：`stl/inc/type_traits` 里 `void_t`、`enable_if`、`conjunction` 的真实实现；看完再读 `stl/inc/concepts`（若你所看的版本已含 C++20 约束），就能对照出「SFINAE 时代」与「concept 时代」表达同一约束的成本差 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

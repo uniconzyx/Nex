@@ -49,7 +49,7 @@
 | 1 | [cjlin1/libsvm](https://github.com/cjlin1/libsvm) | 4,716 | 全章 | SMO 官方实现：`svm.cpp` 的 `Solver::Solve` 与 `select_working_set` 就是本章 ex07/ex08 的工程版；本章先读与「最大间隔」「拉格朗日对偶」相关的部分 |
 | 2 | [cjlin1/liblinear](https://github.com/cjlin1/liblinear) | 1,052 | 全章 | 坐标下降的线性 SVM：`n` 大且不核化时的正确选择，看它如何处理原始形式；本章先读与「最大间隔」「拉格朗日对偶」相关的部分 |
 | 3 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | 全章 | `sklearn/svm/` 的封装层：确认 `SVC` 默认 OvO、`LinearSVC` 默认 OvR、`probability=True` 内部 5 折 Platt；本章先读与「最大间隔」「拉格朗日对偶」相关的部分 |
-| 4 | [fengdu78/lihang-code](https://github.com/fengdu78/lihang-code) | 19,606 | 全章 | 《统计学习方法》第 7 章代码：教学版 SMO，可与本章推导逐行对照；本章先读与「最大间隔」「拉格朗日对偶」相关的部分 |
+| 4 | [fengdu78/lihang-code](https://github.com/fengdu78/lihang-code) | 19,605 | 全章 | 《统计学习方法》第 7 章代码：教学版 SMO，可与本章推导逐行对照；本章先读与「最大间隔」「拉格朗日对偶」相关的部分 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

@@ -12,9 +12,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [nlohmann/json](https://github.com/nlohmann/json) | 50,813 | 全章 | 本章讲「string_view 式零拷贝」看 `include/nlohmann/json.hpp` 的 `get_ref<const string_t&>()`：它不复制字符串，直接把内部 `std::string` 以 const 引用交出去；再读 `get<std::string>()` 的返回类型，对比「视图」和「拥有」在这一个 API 上的分野 |
-| 2 | [fmtlib/fmt](https://github.com/fmtlib/fmt) | 25,897 | 全章 | `include/fmt/core.h`（v11 起并入 `base.h`）里的 `basic_string_view` 是 fmt 自带实现：只存 `const Char* data_` 与 `size_t size_`，`substr` 返回新视图而非新字符串；把它和 `std::string` 的 `substr` 并排看，就明白本章「视图不拥有内存」的代价与收益 |
-| 3 | [Tencent/rapidjson](https://github.com/Tencent/rapidjson) | 15,147 | 全章 | 「视图 vs 拥有」的极端案例：`include/rapidjson/document.h` 的 `kParseInsituFlag` 直接在你的缓冲区上把 token 切开（原地写 `\\0`），解析完字符串指针指向原缓冲——省掉全部拷贝，代价是原数据不能再用 |
+| 1 | [nlohmann/json](https://github.com/nlohmann/json) | 50,829 | 全章 | 本章讲「string_view 式零拷贝」看 `include/nlohmann/json.hpp` 的 `get_ref<const string_t&>()`：它不复制字符串，直接把内部 `std::string` 以 const 引用交出去；再读 `get<std::string>()` 的返回类型，对比「视图」和「拥有」在这一个 API 上的分野 |
+| 2 | [fmtlib/fmt](https://github.com/fmtlib/fmt) | 25,899 | 全章 | `include/fmt/core.h`（v11 起并入 `base.h`）里的 `basic_string_view` 是 fmt 自带实现：只存 `const Char* data_` 与 `size_t size_`，`substr` 返回新视图而非新字符串；把它和 `std::string` 的 `substr` 并排看，就明白本章「视图不拥有内存」的代价与收益 |
+| 3 | [Tencent/rapidjson](https://github.com/Tencent/rapidjson) | 15,150 | 全章 | 「视图 vs 拥有」的极端案例：`include/rapidjson/document.h` 的 `kParseInsituFlag` 直接在你的缓冲区上把 token 切开（原地写 `\\0`），解析完字符串指针指向原缓冲——省掉全部拷贝，代价是原数据不能再用 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

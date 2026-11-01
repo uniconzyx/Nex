@@ -48,7 +48,7 @@
 |---|---|---|---|---|
 | 1 | [recommenders-team/recommenders](https://github.com/recommenders-team/recommenders) | 21,959 | 全章 | 微软推荐系统最佳实践：召回-排序-评测的完整链路；本章先读与「问题形式化」「user-based CF」相关的部分 |
 | 2 | [RUCAIBox/RecBole](https://github.com/RUCAIBox/RecBole) | 4,600 | 全章 | 统一推荐算法框架：100+ 模型的公平对比基线；本章先读与「问题形式化」「user-based CF」相关的部分 |
-| 3 | [eugeneyan/applied-ml](https://github.com/eugeneyan/applied-ml) | 30,732 | 全章 | 工业界推荐/搜索落地案例与经验教训；本章先读与「问题形式化」「user-based CF」相关的部分 |
+| 3 | [eugeneyan/applied-ml](https://github.com/eugeneyan/applied-ml) | 30,756 | 全章 | 工业界推荐/搜索落地案例与经验教训；本章先读与「问题形式化」「user-based CF」相关的部分 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

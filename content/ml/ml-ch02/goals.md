@@ -42,9 +42,9 @@
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
 | 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | 全章 | linear_model 模块：闭式解、正则化与求解器选择的参考实现；本章先读与「几何本质」「正规方程与数值稳定性」相关的部分 |
-| 2 | [fengdu78/lihang-code](https://github.com/fengdu78/lihang-code) | 19,606 | 全章 | 《统计学习方法》全章代码：感知机、逻辑回归、最大熵；本章先读与「几何本质」「正规方程与数值稳定性」相关的部分 |
+| 2 | [fengdu78/lihang-code](https://github.com/fengdu78/lihang-code) | 19,605 | 全章 | 《统计学习方法》全章代码：感知机、逻辑回归、最大熵；本章先读与「几何本质」「正规方程与数值稳定性」相关的部分 |
 | 3 | [rasbt/python-machine-learning-book](https://github.com/rasbt/python-machine-learning-book) | 12,659 | 全章 | 算法手写 + sklearn 对照，适合核对公式与实现；本章先读与「几何本质」「正规方程与数值稳定性」相关的部分 |
-| 4 | [amueller/introduction_to_ml_with_python](https://github.com/amueller/introduction_to_ml_with_python) | 8,224 | 全章 | scikit-learn 作者写的入门书代码：讲清 API 背后的取舍；本章先读与「几何本质」「正规方程与数值稳定性」相关的部分 |
+| 4 | [amueller/introduction_to_ml_with_python](https://github.com/amueller/introduction_to_ml_with_python) | 8,225 | 全章 | scikit-learn 作者写的入门书代码：讲清 API 背后的取舍；本章先读与「几何本质」「正规方程与数值稳定性」相关的部分 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

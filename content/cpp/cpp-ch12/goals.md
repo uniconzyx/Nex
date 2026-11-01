@@ -32,8 +32,8 @@
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
 | 1 | [AnthonyCalandra/modern-cpp-features](https://github.com/AnthonyCalandra/modern-cpp-features) | 21,924 | §2.2 值类别 | §2.2 值类别与 §4.1 结构化绑定的对照表：`README.md` 按 C++11/14/17/20 分节，每节都有最小可编译示例；建议先读「rvalue references」「structured bindings」两节，把本章的术语和标准里的正式名字对上，再回代码里验证 |
-| 2 | [microsoft/STL](https://github.com/microsoft/STL) | 11,172 | §3.3 `emplace_back… | §3.3 emplace_back 与 push_back 的差别：`stl/inc/vector` 的 `emplace_back` 直接把参数转发给`_Emplace_reallocate` 里的 `construct_at`，全程只构造一次；而 `push_back(const T&)` 要先凑出一个 `T` 再移动。看这两条实现路径，就明白「构造次数差异」不是玄学而是参数转发位置不同 |
-| 3 | [abseil/abseil-cpp](https://github.com/abseil/abseil-cpp) | 18,171 | §2.3 `std::move` 只… | §2.3 `std::move` 只是一次 cast：`absl/utility/utility.h` 的 `absl::exchange` 与 `absl/types/optional.h` 的 `value() &&` 重载都靠 `std::move` 把左值转成右值再转发；注意它们转完从不「清空源对象」——移动后的源对象仍是有效但未指定状态，这是本章最常被误解的一条 |
+| 2 | [microsoft/STL](https://github.com/microsoft/STL) | 11,177 | §3.3 `emplace_back… | §3.3 emplace_back 与 push_back 的差别：`stl/inc/vector` 的 `emplace_back` 直接把参数转发给`_Emplace_reallocate` 里的 `construct_at`，全程只构造一次；而 `push_back(const T&)` 要先凑出一个 `T` 再移动。看这两条实现路径，就明白「构造次数差异」不是玄学而是参数转发位置不同 |
+| 3 | [abseil/abseil-cpp](https://github.com/abseil/abseil-cpp) | 18,177 | §2.3 `std::move` 只… | §2.3 `std::move` 只是一次 cast：`absl/utility/utility.h` 的 `absl::exchange` 与 `absl/types/optional.h` 的 `value() &&` 重载都靠 `std::move` 把左值转成右值再转发；注意它们转完从不「清空源对象」——移动后的源对象仍是有效但未指定状态，这是本章最常被误解的一条 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

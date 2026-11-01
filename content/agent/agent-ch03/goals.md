@@ -57,7 +57,7 @@
 | 1 | [deepseek-ai/DeepSeek-V3](https://github.com/deepseek-ai/DeepSeek-V3) | 104,539 | 全章 | DeepSeek 主力开源模型的技术报告与推理代码，理解成本为何能压这么低；本章先读与「鉴权与密钥管理」「错误码分类」相关的部分 |
 | 2 | [deepseek-ai/DeepSeek-R1](https://github.com/deepseek-ai/DeepSeek-R1) | 91,920 | 全章 | 推理模型 RL 训练范式，面试问「为什么 R1 会思考」时的第一手材料；本章先读与「鉴权与密钥管理」「错误码分类」相关的部分 |
 | 3 | [deepseek-ai/awesome-deepseek-integration](https://github.com/deepseek-ai/awesome-deepseek-integration) | 39,457 | 全章 | 官方集成清单：IDE/Agent/客服等落地形态，做选型时先看这里；本章先读与「鉴权与密钥管理」「错误码分类」相关的部分 |
-| 4 | [ollama/ollama](https://github.com/ollama/ollama) | 184,126 | 全章 | 本地一键跑模型，验证「私有化」可行性最快的路径；本章先读与「鉴权与密钥管理」「错误码分类」相关的部分 |
+| 4 | [ollama/ollama](https://github.com/ollama/ollama) | 185,510 | 全章 | 本地一键跑模型，验证「私有化」可行性最快的路径；本章先读与「鉴权与密钥管理」「错误码分类」相关的部分 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

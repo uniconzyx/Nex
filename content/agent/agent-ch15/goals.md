@@ -76,8 +76,8 @@
 |---|---|---|---|---|
 | 1 | [datawhalechina/llm-universe](https://github.com/datawhalechina/llm-universe) | 14,178 | 全章 | 中文 LLM 应用开发教程：API→RAG→Agent→评估的完整路径；本章先读与「选题评分卡」「3 周可完成性拆解」相关的部分 |
 | 2 | [datawhalechina/happy-llm](https://github.com/datawhalechina/happy-llm) | 34,489 | 全章 | 从零构建大模型的教学项目，补「模型内部发生了什么」；本章先读与「选题评分卡」「3 周可完成性拆解」相关的部分 |
-| 3 | [langchain-ai/langgraph](https://github.com/langchain-ai/langgraph) | 43,638 | 全章 | 有状态 Agent 编排：图、检查点、人工介入，Agent 章的主线；本章先读与「选题评分卡」「3 周可完成性拆解」相关的部分 |
-| 4 | [langgenius/dify](https://github.com/langgenius/dify) | 159,119 | 全章 | 可视化 LLM 应用平台，商业化交付最常见的底座之一；本章先读与「选题评分卡」「3 周可完成性拆解」相关的部分 |
+| 3 | [langchain-ai/langgraph](https://github.com/langchain-ai/langgraph) | 44,248 | 全章 | 有状态 Agent 编排：图、检查点、人工介入，Agent 章的主线；本章先读与「选题评分卡」「3 周可完成性拆解」相关的部分 |
+| 4 | [langgenius/dify](https://github.com/langgenius/dify) | 160,127 | 全章 | 可视化 LLM 应用平台，商业化交付最常见的底座之一；本章先读与「选题评分卡」「3 周可完成性拆解」相关的部分 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

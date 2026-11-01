@@ -13,9 +13,9 @@
 | # | 仓库 | Star | 对应本章 | 读什么 |
 | --- | --- | ---: | --- | --- |
 | 1 | [vercel/ai](https://github.com/vercel/ai) | 27,560 | §1.1 SSE · §3.1 callId | AI 流式 SDK：读 `packages/ai` 的 `stream`/`tool` 实现，对应 §1.1、§3.1 |
-| 2 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,600 | §1.1 流式 · §3 工具调用 | Agent 框架：LCEL 流式与 tool calling，对应 §1.1、§3 |
-| 3 | [gin-gonic/gin](https://github.com/gin-gonic/gin) | 89,445 | §2 长任务 · §4 限流 | 网关侧实现参考：中间件链与限流，对应 §2、§4 |
-| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,266 | §3.5 审计边界 | 推理服务内 tool/函数调用范式，对应 §3.5 |
+| 2 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | §1.1 流式 · §3 工具调用 | Agent 框架：LCEL 流式与 tool calling，对应 §1.1、§3 |
+| 3 | [gin-gonic/gin](https://github.com/gin-gonic/gin) | 89,466 | §2 长任务 · §4 限流 | 网关侧实现参考：中间件链与限流，对应 §2、§4 |
+| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §3.5 审计边界 | 推理服务内 tool/函数调用范式，对应 §3.5 |
 
 > 全部为工业级真实仓库；Star 数为本会话经 GitHub API 实取快照，仅供路线排序参考。
 

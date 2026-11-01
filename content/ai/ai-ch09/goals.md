@@ -42,7 +42,7 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [huggingface/diffusers](https://github.com/huggingface/diffusers) | 34,819 | §3.1 前向过程 | 工业实现先看 `src/diffusers/schedulers/scheduling_ddpm.py`：`set_timesteps` 用 betas 累乘造出 $\bar\alpha_t$ 表（§3.1 的闭式），`step` 是单步反向（§3.2）；再看 `pipelines/stable_diffusion` 里 `guidance_scale` 如何落地 CFG（§3.3） |
+| 1 | [huggingface/diffusers](https://github.com/huggingface/diffusers) | 34,844 | §3.1 前向过程 | 工业实现先看 `src/diffusers/schedulers/scheduling_ddpm.py`：`set_timesteps` 用 betas 累乘造出 $\bar\alpha_t$ 表（§3.1 的闭式），`step` 是单步反向（§3.2）；再看 `pipelines/stable_diffusion` 里 `guidance_scale` 如何落地 CFG（§3.3） |
 | 2 | [CompVis/latent-diffusion](https://github.com/CompVis/latent-diffusion) | 14,180 | §3.2 反向过程与训练目标 | 潜空间扩散的原始实现：`ldm/models/diffusion/ddpm.py` 的 `p_losses` 是 $L_{simple}$（§3.2），`apply_model` 包住 U-Net 前向；潜空间压缩那部分回看 §1.2 的 VAE 编码器 |
 | 3 | [ermongroup/ddim](https://github.com/ermongroup/ddim) | 1,855 | §3.3 采样 | DDIM 官方代码：`models/diffusion_utils.py` 的 `make_ddim_timesteps` 造跳步子序列、`ddim_step` 用 $\varepsilon_\theta$ 直接预测 $x_0$（§3.3 采样里的非马尔可夫边缘不变） |
 | 4 | [openai/guided-diffusion](https://github.com/openai/guided-diffusion) | 7,442 | §3.2 反向过程与训练目标 | ADM 架构与 guidance：`guided_diffusion/gaussian_diffusion.py` 的 `p_mean_variance` 是反向均值/方差的标准写法（§3.2），`condition_mean` 的两个分支就是 CFG 的 $\varepsilon_{uncond}+s(\varepsilon_{cond}-\varepsilon_{uncond})$（§3.3） |

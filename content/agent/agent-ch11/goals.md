@@ -71,7 +71,7 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [langchain-ai/langgraph](https://github.com/langchain-ai/langgraph) | 43,638 | 全章 | 有状态 Agent 编排：图、检查点、人工介入，Agent 章的主线；本章先读与「工具 schema 设计与…」「幂等与副作用」相关的部分 |
+| 1 | [langchain-ai/langgraph](https://github.com/langchain-ai/langgraph) | 44,248 | 全章 | 有状态 Agent 编排：图、检查点、人工介入，Agent 章的主线；本章先读与「工具 schema 设计与…」「幂等与副作用」相关的部分 |
 | 2 | [microsoft/autogen](https://github.com/microsoft/autogen) | 61,505 | 全章 | 多智能体对话框架，理解角色分工与终止条件；本章先读与「工具 schema 设计与…」「幂等与副作用」相关的部分 |
 | 3 | [crewAIInc/crewAI](https://github.com/crewAIInc/crewAI) | 59,947 | 全章 | 角色化多 Agent 框架，快速搭「调研-写作-审核」流水线；本章先读与「工具 schema 设计与…」「幂等与副作用」相关的部分 |
 | 4 | [openai/openai-agents-python](https://github.com/openai/openai-agents-python) | 30,195 | 全章 | 官方 Agents SDK：handoff、guardrail、tracing 的最小实现；本章先读与「工具 schema 设计与…」「幂等与副作用」相关的部分 |

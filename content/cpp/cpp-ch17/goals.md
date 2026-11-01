@@ -36,9 +36,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [microsoft/STL](https://github.com/microsoft/STL) | 11,172 | §1.1 <type_traits> | §1.1 与 §1.3 的原始实现：`stl/inc/type_traits` 里 `is_destructible` 靠 `declval<T>().~T()` 的SFINAE 探测，`conjunction`/`disjunction` 用短路继承避免多余实例化；把这几处读完，`<type_traits>` 就不再是「查表用的魔法」 |
-| 2 | [fmtlib/fmt](https://github.com/fmtlib/fmt) | 25,897 | §3.1 SFINAE | §3.1 与 §3.2 的过渡样本：`include/fmt/base.h` 里 `is_formattable` 同时有 C++20 concept 版（`requires` 表达式）与旧编译器的 SFINAE 版，两份实现并列；对照它们能看清 concept 把「替换失败」从错误信息里救出来这件事有多实际 |
-| 3 | [abseil/abseil-cpp](https://github.com/abseil/abseil-cpp) | 18,171 | §3.1 SFINAE | §3.1 的工具箱：`absl/meta/type_traits.h` 的 `absl::void_t`、`type_identity`、`is_comparable` 都是为「检测某操作是否合法」准备的积木；读 `is_comparable` 的 `decltype` 表达式，是本章 SFINAE 一节最干净的例题 |
+| 1 | [microsoft/STL](https://github.com/microsoft/STL) | 11,177 | §1.1 <type_traits> | §1.1 与 §1.3 的原始实现：`stl/inc/type_traits` 里 `is_destructible` 靠 `declval<T>().~T()` 的SFINAE 探测，`conjunction`/`disjunction` 用短路继承避免多余实例化；把这几处读完，`<type_traits>` 就不再是「查表用的魔法」 |
+| 2 | [fmtlib/fmt](https://github.com/fmtlib/fmt) | 25,899 | §3.1 SFINAE | §3.1 与 §3.2 的过渡样本：`include/fmt/base.h` 里 `is_formattable` 同时有 C++20 concept 版（`requires` 表达式）与旧编译器的 SFINAE 版，两份实现并列；对照它们能看清 concept 把「替换失败」从错误信息里救出来这件事有多实际 |
+| 3 | [abseil/abseil-cpp](https://github.com/abseil/abseil-cpp) | 18,177 | §3.1 SFINAE | §3.1 的工具箱：`absl/meta/type_traits.h` 的 `absl::void_t`、`type_identity`、`is_comparable` 都是为「检测某操作是否合法」准备的积木；读 `is_comparable` 的 `decltype` 表达式，是本章 SFINAE 一节最干净的例题 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

@@ -12,9 +12,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [fmtlib/fmt](https://github.com/fmtlib/fmt) | 25,897 | §2.1 函数重载 | §2.1 函数重载的工业规模样本：`include/fmt/base.h` 里 `format_to` 有十几个重载（`OutputIt` 版本、`locale` 版本、`memory_buffer` 版本），参数个数与类型各差一点；读它们之前先问「编译器凭什么在这么多同名函数里选中这一个」，再回 §2.1 看重载决议的排序规则 |
-| 2 | [catchorg/Catch2](https://github.com/catchorg/Catch2) | 21,538 | §3.1 捕获方式 | §3.1 捕获方式：`src/catch2/catch_test_macros.hpp` 的 `TEST_CASE`/`SECTION` 宏最终展开成「注册一个 lambda」，`INTERNAL_CATCH_TEST` 里按值捕获比较表达式两侧；看清它为什么不按引用捕获（section 结束后临时对象已经没了） |
-| 3 | [TheAlgorithms/C-Plus-Plus](https://github.com/TheAlgorithms/C-Plus-Plus) | 34,813 | §2.2 默认参数 | §2.2 默认参数的替代方案：`sort/` 目录里同一算法常有两个版本——一个只用 `<`，一个多接一个比较器；对照本章说的「默认参数 vs 重载 vs 模板参数」，看真实代码更愿意选哪种、为什么 |
+| 1 | [fmtlib/fmt](https://github.com/fmtlib/fmt) | 25,899 | §2.1 函数重载 | §2.1 函数重载的工业规模样本：`include/fmt/base.h` 里 `format_to` 有十几个重载（`OutputIt` 版本、`locale` 版本、`memory_buffer` 版本），参数个数与类型各差一点；读它们之前先问「编译器凭什么在这么多同名函数里选中这一个」，再回 §2.1 看重载决议的排序规则 |
+| 2 | [catchorg/Catch2](https://github.com/catchorg/Catch2) | 21,539 | §3.1 捕获方式 | §3.1 捕获方式：`src/catch2/catch_test_macros.hpp` 的 `TEST_CASE`/`SECTION` 宏最终展开成「注册一个 lambda」，`INTERNAL_CATCH_TEST` 里按值捕获比较表达式两侧；看清它为什么不按引用捕获（section 结束后临时对象已经没了） |
+| 3 | [TheAlgorithms/C-Plus-Plus](https://github.com/TheAlgorithms/C-Plus-Plus) | 34,827 | §2.2 默认参数 | §2.2 默认参数的替代方案：`sort/` 目录里同一算法常有两个版本——一个只用 `<`，一个多接一个比较器；对照本章说的「默认参数 vs 重载 vs 模板参数」，看真实代码更愿意选哪种、为什么 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

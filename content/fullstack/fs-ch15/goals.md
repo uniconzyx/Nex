@@ -11,7 +11,7 @@
 
 | # | 仓库 | Star | 对应本章 | 读什么 |
 | --- | --- | ---: | --- | --- |
-| 1 | [gin-gonic/gin](https://github.com/gin-gonic/gin) | 89,445 | §2.1 路由树 · §2.2 中间件 | Web 框架：读 `routergroup.go` 与 `context.go` 的 `Next()`，对应 §2.1、§2.2 |
+| 1 | [gin-gonic/gin](https://github.com/gin-gonic/gin) | 89,466 | §2.1 路由树 · §2.2 中间件 | Web 框架：读 `routergroup.go` 与 `context.go` 的 `Next()`，对应 §2.1、§2.2 |
 | 2 | [gofiber/fiber](https://github.com/gofiber/fiber) | 40,232 | §2 对照 | Express 风格对照：与 Gin 中间件模型对比，对应 §2.6 |
 | 3 | [golang/go](https://github.com/golang/go) | 139,482 | §1.1 goroutine · §3.1 error | 语言本体：读 `src/runtime` 的 GMP 调度，对应 §1.1；error 即值对应 §3.1 |
 | 4 | [spring-projects/spring-framework](https://github.com/spring-projects/spring-framework) | 60,300 | §2.5 对照 · §3.4 对照 | Java 路线对照：拦截器/受检异常对照，对应 §2.5、§3.4 |

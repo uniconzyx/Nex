@@ -30,11 +30,11 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376022 | §指令即接口 | 看 API 设计那一章：指令集本质上就是「硬件对外暴露的 API」，格式规整、向后兼容的取舍和接口设计同构 |
-| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363505 | §位运算与编码 | 看 Bitwise operations 一节：扩展操作码设计题全靠位域切分，先把「用几位表示几个状态」的手感练出来 |
-| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186375 | §CISC/RISC | 中文速记：计算机组成原理里的指令系统一节，重点背 CISC 与 RISC 的六条差异对照表 |
-| 4 | [llvm/llvm-project](https://github.com/llvm/llvm-project) | 41243 | §指令选择 | 读 `llvm/lib/Target/RISCV/` 的 InstrInfo 与 ISel：看真实编译器如何把 IR 落到具体指令格式，以及寻址模式如何被匹配 |
-| 5 | [chipsalliance/rocket-chip](https://github.com/chipsalliance/rocket-chip) | 3892 | §译码 | 读 `src/main/scala/rocket/Instructions.scala` 与 `IBuf.scala`：一条 32 位机器码怎么被拆成 opcode/rd/rs1/rs2，比看教材图直观得多 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376373 | §指令即接口 | 看 API 设计那一章：指令集本质上就是「硬件对外暴露的 API」，格式规整、向后兼容的取舍和接口设计同构 |
+| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363641 | §位运算与编码 | 看 Bitwise operations 一节：扩展操作码设计题全靠位域切分，先把「用几位表示几个状态」的手感练出来 |
+| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186408 | §CISC/RISC | 中文速记：计算机组成原理里的指令系统一节，重点背 CISC 与 RISC 的六条差异对照表 |
+| 4 | [llvm/llvm-project](https://github.com/llvm/llvm-project) | 41282 | §指令选择 | 读 `llvm/lib/Target/RISCV/` 的 InstrInfo 与 ISel：看真实编译器如何把 IR 落到具体指令格式，以及寻址模式如何被匹配 |
+| 5 | [chipsalliance/rocket-chip](https://github.com/chipsalliance/rocket-chip) | 3895 | §译码 | 读 `src/main/scala/rocket/Instructions.scala` 与 `IBuf.scala`：一条 32 位机器码怎么被拆成 opcode/rd/rs1/rs2，比看教材图直观得多 |
 | 6 | [riscv/riscv-isa-manual](https://github.com/riscv/riscv-isa-manual) | 4869 | §指令格式原文 | 第 2 章 RV32I 的指令编码表就是本章「指令格式」的权威原文，对照教材的 R/I/S/B/U/J 六种格式逐位核对 |
 | 7 | [riscv-collab/riscv-gnu-toolchain](https://github.com/riscv-collab/riscv-gnu-toolchain) | 4656 | §汇编与反汇编 | 装好后用 `riscv64-unknown-elf-as` 写几条带不同寻址方式的汇编，再 `objdump -d` 反汇编，亲眼看到 EA 是怎么算出来的 |
 

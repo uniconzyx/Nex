@@ -27,9 +27,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [microsoft/STL](https://github.com/microsoft/STL) | 11,172 | §2.2 sort 的 intros… | §2.2 sort 的真实实现：`stl/inc/algorithm` 的 `sort` 调 `_Sort_unchecked`，内部是「快排分区 → 递归深度超限就转堆排 → 小区间用插排」三段式（introsort）；找到那个深度阈值常量，就明白本章说的「最坏 O(n log n) 靠什么兜底」 |
+| 1 | [microsoft/STL](https://github.com/microsoft/STL) | 11,177 | §2.2 sort 的 intros… | §2.2 sort 的真实实现：`stl/inc/algorithm` 的 `sort` 调 `_Sort_unchecked`，内部是「快排分区 → 递归深度超限就转堆排 → 小区间用插排」三段式（introsort）；找到那个深度阈值常量，就明白本章说的「最坏 O(n log n) 靠什么兜底」 |
 | 2 | [simdjson/simdjson](https://github.com/simdjson/simdjson) | 24,473 | §1.1 迭代器是「算法与容器之间的… | §1.1「迭代器是算法与容器的契约」：`include/simdjson/dom/array.h` 的 `iterator` 只提供 `operator*`/`operator++`/`operator!=`，够 `std::distance` 与范围 for 用，却不暴露底层实现；再看 `ondemand` 版的迭代器语义差异，能体会「迭代器范畴决定算法能用多强」 |
-| 3 | [TheAlgorithms/C-Plus-Plus](https://github.com/TheAlgorithms/C-Plus-Plus) | 34,813 | §1.2 范畴如何被编译器强制 | §1.2 范畴差异的实际后果：`numeric/` 与 `sort/` 里 `std::accumulate`、`std::sort`、`std::reverse` 各自要求输入迭代器/随机访问迭代器；把同一段代码的容器从 `list` 换成 `vector` 再编译，报错信息就是范畴不够用的证据 |
+| 3 | [TheAlgorithms/C-Plus-Plus](https://github.com/TheAlgorithms/C-Plus-Plus) | 34,827 | §1.2 范畴如何被编译器强制 | §1.2 范畴差异的实际后果：`numeric/` 与 `sort/` 里 `std::accumulate`、`std::sort`、`std::reverse` 各自要求输入迭代器/随机访问迭代器；把同一段代码的容器从 `list` 换成 `vector` 再编译，报错信息就是范畴不够用的证据 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

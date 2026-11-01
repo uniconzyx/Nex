@@ -36,9 +36,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [google/googletest](https://github.com/google/googletest) | 39,670 | §2.2 vtable 与 vptr | §2.2 vtable 与动态绑定：`googletest/src/gtest.cc` 里 `Test::Run()` 是虚函数，`UnitTestImpl::RunAllTests` 只持有 `TestInfo*`，通过基类指针调用 `Run()`——派生类 `TestBody()` 的具体实现到运行时才被选中，这就是 vptr 指到派生类 vtable 的结果 |
-| 2 | [llvm/llvm-project](https://github.com/llvm/llvm-project) | 41,243 | §3.2 RTTI | §3.2 RTTI 的另一条路：`llvm/include/llvm/Support/Casting.h` 的 `classof` + `dyn_cast` 自己实现类型判别，不依赖 `dynamic_cast`（LLVM 默认关闭 RTTI）。读 `isa`/`cast`/`dyn_cast` 三件套，就明白「RTTI 只是手段，类型判别可以有更便宜的实现」 |
-| 3 | [google/leveldb](https://github.com/google/leveldb) | 39,513 | §3.1 纯虚函数与抽象类 | §3.1 接口隔离的标准写法：`include/leveldb/env.h` 的 `class Env` 几乎全是纯虚函数（文件、锁、线程全抽象掉），实现放在 `util/env_posix.cc` 的 `PosixEnv : public Env`；整份 leveldb 只通过 `Env*` 访问系统调用——这是「面向接口编程」在 C++ 里的完整闭环 |
+| 1 | [google/googletest](https://github.com/google/googletest) | 39,687 | §2.2 vtable 与 vptr | §2.2 vtable 与动态绑定：`googletest/src/gtest.cc` 里 `Test::Run()` 是虚函数，`UnitTestImpl::RunAllTests` 只持有 `TestInfo*`，通过基类指针调用 `Run()`——派生类 `TestBody()` 的具体实现到运行时才被选中，这就是 vptr 指到派生类 vtable 的结果 |
+| 2 | [llvm/llvm-project](https://github.com/llvm/llvm-project) | 41,282 | §3.2 RTTI | §3.2 RTTI 的另一条路：`llvm/include/llvm/Support/Casting.h` 的 `classof` + `dyn_cast` 自己实现类型判别，不依赖 `dynamic_cast`（LLVM 默认关闭 RTTI）。读 `isa`/`cast`/`dyn_cast` 三件套，就明白「RTTI 只是手段，类型判别可以有更便宜的实现」 |
+| 3 | [google/leveldb](https://github.com/google/leveldb) | 39,514 | §3.1 纯虚函数与抽象类 | §3.1 接口隔离的标准写法：`include/leveldb/env.h` 的 `class Env` 几乎全是纯虚函数（文件、锁、线程全抽象掉），实现放在 `util/env_posix.cc` 的 `PosixEnv : public Env`；整份 leveldb 只通过 `Env*` 访问系统调用——这是「面向接口编程」在 C++ 里的完整闭环 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

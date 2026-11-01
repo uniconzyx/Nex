@@ -61,9 +61,9 @@ CUDA 实现，但要能算出 KV Cache 的显存账本。遇到「为什么这�
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [karpathy/nanoGPT](https://github.com/karpathy/nanoGPT) | 64,145 | 全章 | 200 行级 GPT 训练脚本，把 Transformer 从公式变成可运行的张量；本章先读与「注意力在算什么」「为什么要缩放 √d_k」相关的部分 |
+| 1 | [karpathy/nanoGPT](https://github.com/karpathy/nanoGPT) | 64,306 | 全章 | 200 行级 GPT 训练脚本，把 Transformer 从公式变成可运行的张量；本章先读与「注意力在算什么」「为什么要缩放 √d_k」相关的部分 |
 | 2 | [karpathy/build-nanogpt](https://github.com/karpathy/build-nanogpt) | 5,577 | 全章 | 逐行重写 GPT-2 的视频配套仓库，适合跟着敲一遍；本章先读与「注意力在算什么」「为什么要缩放 √d_k」相关的部分 |
-| 3 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,266 | 全章 | 工业级模型库，读 modeling_*.py 看真实实现与论文的差异；本章先读与「注意力在算什么」「为什么要缩放 √d_k」相关的部分 |
+| 3 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | 全章 | 工业级模型库，读 modeling_*.py 看真实实现与论文的差异；本章先读与「注意力在算什么」「为什么要缩放 √d_k」相关的部分 |
 | 4 | [jingyaogong/minimind](https://github.com/jingyaogong/minimind) | 64,067 | 全章 | 从零训练 26M 小模型的全流程，算力有限时最好的练手项目；本章先读与「注意力在算什么」「为什么要缩放 √d_k」相关的部分 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）

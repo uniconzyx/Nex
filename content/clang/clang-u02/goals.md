@@ -33,8 +33,8 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [antirez/kilo](https://github.com/antirez/kilo) | 9,187 | §2.2 `realloc` 的正确… | §2.2 `realloc` 的正确写法就在 `editorRowInsertChar`：先 `realloc(row->chars, ...)` 到新指针，再赋值回去；`editorUpdateRow` 每次重建 render 缓冲，看它怎么避免「realloc 失败把原指针弄丢」 |
-| 2 | [DaveGamble/cJSON](https://github.com/DaveGamble/cJSON) | 13,040 | §2.1 四个函数的语义 | §2.1/§2.3 的一 malloc 一 free 配对：`cJSON_New_Item` 先 `memset` 再返回、`cJSON_Delete` 递归释放子节点；`cJSON_Parse` 失败路径上每一处 return 前都调 `cJSON_Delete`，对照 §3.2 泄漏成因第 1 条 |
+| 1 | [antirez/kilo](https://github.com/antirez/kilo) | 9,212 | §2.2 `realloc` 的正确… | §2.2 `realloc` 的正确写法就在 `editorRowInsertChar`：先 `realloc(row->chars, ...)` 到新指针，再赋值回去；`editorUpdateRow` 每次重建 render 缓冲，看它怎么避免「realloc 失败把原指针弄丢」 |
+| 2 | [DaveGamble/cJSON](https://github.com/DaveGamble/cJSON) | 13,063 | §2.1 四个函数的语义 | §2.1/§2.3 的一 malloc 一 free 配对：`cJSON_New_Item` 先 `memset` 再返回、`cJSON_Delete` 递归释放子节点；`cJSON_Parse` 失败路径上每一处 return 前都调 `cJSON_Delete`，对照 §3.2 泄漏成因第 1 条 |
 | 3 | [redis/redis](https://github.com/redis/redis) | 77,159 | §3.5 内存池 | §3.5 池化与统计：`src/zmalloc.c` 在 `malloc` 外包一层，用 `PREFIX_SIZE` 记字节数，`zmalloc_used_memory` 对外报总量——这就是「分配器之上再包一层」的最小实现，对照 §1.4 的真实成本 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）

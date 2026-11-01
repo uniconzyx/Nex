@@ -16,9 +16,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 225,666 | 全章 | Python 实现的全部经典算法，含详细注释；本章先读与「命名空间与作用域」「可运行代码」相关的部分 |
-| 2 | [jackfrued/Python-100-Days](https://github.com/jackfrued/Python-100-Days) | 187,492 | 全章 | Python 100 天从新手到大师（中文系统教程）；本章先读与「命名空间与作用域」「可运行代码」相关的部分 |
-| 3 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,785 | 全章 | 微软官方 12 周机器学习入门课程，含 26 课与测验；本章先读与「命名空间与作用域」「可运行代码」相关的部分 |
+| 1 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 225,745 | 全章 | Python 实现的全部经典算法，含详细注释；本章先读与「命名空间与作用域」「可运行代码」相关的部分 |
+| 2 | [jackfrued/Python-100-Days](https://github.com/jackfrued/Python-100-Days) | 187,609 | 全章 | Python 100 天从新手到大师（中文系统教程）；本章先读与「命名空间与作用域」「可运行代码」相关的部分 |
+| 3 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,917 | 全章 | 微软官方 12 周机器学习入门课程，含 26 课与测验；本章先读与「命名空间与作用域」「可运行代码」相关的部分 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

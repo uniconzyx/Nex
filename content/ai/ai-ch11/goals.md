@@ -73,7 +73,7 @@
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
 | 1 | [vllm-project/vllm](https://github.com/vllm-project/vllm) | 95,746 | §1.1 参数对 · §1.4 自适应 | continuous batching 与自适应等待窗口的真实实现：读 `vllm/core/scheduler.py` 的 `add_seq_group` 与 `_schedule_prefills`，直接对应 §1.1、§1.4 |
-| 2 | [ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp) | 132,584 | §1.3 同构批 | 批内同构 + KV cache 复用的工业级样例：读 `llama_batch` 与 `ggml_backend_sched`，对应 §1.3「批内请求必须同构」 |
+| 2 | [ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp) | 133,016 | §1.3 同构批 | 批内同构 + KV cache 复用的工业级样例：读 `llama_batch` 与 `ggml_backend_sched`，对应 §1.3「批内请求必须同构」 |
 | 3 | [huggingface/text-generation-inference](https://github.com/huggingface/text-generation-inference) | 10,880 | §2.1 输入契约 · §3.1 故障 | 输入校验与错误处理的源码：读 `router/src` 的 `validation.rs` 与 `infer.rs`，对应 §2.1「五类必须拦的输入」、§3.1「故障的三种形态」 |
 | 4 | [triton-inference-server/server](https://github.com/triton-inference-server/server) | 11,115 | §3.4 版本 · §3.7 健康检查 | 模型版本管理与健康检查的真实实现：读 `src/model_repository_manager` 与 `src/health_monitor`，对应 §3.4「模型状态可追溯」、§3.7 |
 

@@ -50,10 +50,10 @@
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
 | 1 | [torvalds/linux](https://github.com/torvalds/linux) | 253833 | §系统调用 | 只读 `include/linux/syscalls.h`：几百行全是 `SYSCALL_DEFINE*` 宏——这就是"系统调用表"的真身，你会看到每个调用号对应哪个服务例程 |
-| 2 | [mit-pdos/xv6-public](https://github.com/mit-pdos/xv6-public) | 9711 | §中断与陷入 | 读 `trap.c` 的 `alltraps`：硬件自动压栈一部分、软件再保存剩余寄存器——"中断发生时 CPU 做一半"这句话的实物证据；再读 `syscall.c` 的 `syscalls[]` 数组，一眼看懂系统调用号怎么分发 |
+| 2 | [mit-pdos/xv6-public](https://github.com/mit-pdos/xv6-public) | 9716 | §中断与陷入 | 读 `trap.c` 的 `alltraps`：硬件自动压栈一部分、软件再保存剩余寄存器——"中断发生时 CPU 做一半"这句话的实物证据；再读 `syscall.c` 的 `syscalls[]` 数组，一眼看懂系统调用号怎么分发 |
 | 3 | [sysprog21/lkmpg](https://github.com/sysprog21/lkmpg) | 8634 | §内核态 | 《Linux 内核模块编程指南》：写一个 hello 模块跑起来，你会第一次"以内核态身份"执行代码——比看十遍概念更直观 |
 | 4 | [remzi-arpacidusseau/ostep-code](https://github.com/remzi-arpacidusseau/ostep-code) | 4474 | §进程与系统调用 | 《操作系统导论》配套代码：`intro/` 下的 `cpu.c`、`mem.c` 演示 `gettimeofday`/`malloc` 背后都落到系统调用，适合边读边改 |
-| 5 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186375 | §全章速记 | 中文"操作系统概述"一节：考前 20 分钟过一遍四大特征、特权指令、系统调用步骤，性价比极高 |
+| 5 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186408 | §全章速记 | 中文"操作系统概述"一节：考前 20 分钟过一遍四大特征、特权指令、系统调用步骤，性价比极高 |
 
 ## 本章 B 站视频路线
 

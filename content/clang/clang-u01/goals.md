@@ -33,8 +33,8 @@
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
 | 1 | [rswier/c4](https://github.com/rswier/c4) | 10,819 | §1.1 指针的本质 | §1.1 的活体样本：`c4.c` 把整个源程序读进一块 `char *src`，之后全靠 `*++p` / `*--p` 走路，`next()` 与 `expr()` 里每个取值都是「带类型的地址」——看这两个函数就能把 §1.1 的地址运算和 §1.4 的指针相减对上 |
-| 2 | [antirez/kilo](https://github.com/antirez/kilo) | 9,187 | §1.2 数组退化 | §1.2 数组退化：`kilo.c` 里 `E.row[y].chars`、`&E.row[y]` 全是「数组名当指针用」，`editorRowInsertChar` 里 `row->chars + at` 直接做指针偏移；注意它从不写 `E.row[y]->`  |
-| 3 | [DaveGamble/cJSON](https://github.com/DaveGamble/cJSON) | 13,040 | §1.6 `void *` | §1.6 `void *` 的工业用法：`cJSON.c` 的 `cJSON_malloc`/`cJSON_free` 返回与接收的都是 `void *`，赋值给 `cJSON *` 时不强转——对照 §1.6 的「void 指针可隐式转换」与 §3.1 的 const 形态 |
+| 2 | [antirez/kilo](https://github.com/antirez/kilo) | 9,212 | §1.2 数组退化 | §1.2 数组退化：`kilo.c` 里 `E.row[y].chars`、`&E.row[y]` 全是「数组名当指针用」，`editorRowInsertChar` 里 `row->chars + at` 直接做指针偏移；注意它从不写 `E.row[y]->`  |
+| 3 | [DaveGamble/cJSON](https://github.com/DaveGamble/cJSON) | 13,063 | §1.6 `void *` | §1.6 `void *` 的工业用法：`cJSON.c` 的 `cJSON_malloc`/`cJSON_free` 返回与接收的都是 `void *`，赋值给 `cJSON *` 时不强转——对照 §1.6 的「void 指针可隐式转换」与 §3.1 的 const 形态 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

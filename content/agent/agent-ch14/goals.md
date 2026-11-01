@@ -71,10 +71,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,022 | 全章 | 系统设计面试基础，Agent 服务也要过容量与一致性这关；本章先读与「能力矩阵与行为锚定等级」「自评的证据要求与常见偏差」相关的部分 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | 全章 | 系统设计面试基础，Agent 服务也要过容量与一致性这关；本章先读与「能力矩阵与行为锚定等级」「自评的证据要求与常见偏差」相关的部分 |
 | 2 | [yangshun/tech-interview-handbook](https://github.com/yangshun/tech-interview-handbook) | 143,087 | 全章 | 技术面试通用题库与行为面框架；本章先读与「能力矩阵与行为锚定等级」「自评的证据要求与常见偏差」相关的部分 |
-| 3 | [alirezadir/Machine-Learning-Interviews](https://github.com/alirezadir/Machine-Learning-Interviews) | 9,900 | 全章 | ML/LLM 岗位面试题分类整理，含系统设计；本章先读与「能力矩阵与行为锚定等级」「自评的证据要求与常见偏差」相关的部分 |
-| 4 | [chiphuyen/ml-interviews-book](https://github.com/chiphuyen/ml-interviews-book) | 4,788 | 全章 | 《Machine Learning Interviews》开源书，面试官视角的评分逻辑；本章先读与「能力矩阵与行为锚定等级」「自评的证据要求与常见偏差」相关的部分 |
+| 3 | [alirezadir/Machine-Learning-Interviews](https://github.com/alirezadir/Machine-Learning-Interviews) | 9,931 | 全章 | ML/LLM 岗位面试题分类整理，含系统设计；本章先读与「能力矩阵与行为锚定等级」「自评的证据要求与常见偏差」相关的部分 |
+| 4 | [chiphuyen/ml-interviews-book](https://github.com/chiphuyen/ml-interviews-book) | 4,797 | 全章 | 《Machine Learning Interviews》开源书，面试官视角的评分逻辑；本章先读与「能力矩阵与行为锚定等级」「自评的证据要求与常见偏差」相关的部分 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

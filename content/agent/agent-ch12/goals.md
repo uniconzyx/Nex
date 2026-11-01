@@ -68,10 +68,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [langgenius/dify](https://github.com/langgenius/dify) | 159,119 | 全章 | 可视化 LLM 应用平台，商业化交付最常见的底座之一；本章先读与「三种计费模式」「毛利结构诊断」相关的部分 |
+| 1 | [langgenius/dify](https://github.com/langgenius/dify) | 160,127 | 全章 | 可视化 LLM 应用平台，商业化交付最常见的底座之一；本章先读与「三种计费模式」「毛利结构诊断」相关的部分 |
 | 2 | [n8n-io/n8n](https://github.com/n8n-io/n8n) | 208,204 | 全章 | 工作流自动化，把 Agent 接进企业既有系统的最低成本方式；本章先读与「三种计费模式」「毛利结构诊断」相关的部分 |
-| 3 | [Azure-Samples/azure-search-openai-demo](https://github.com/Azure-Samples/azure-search-openai-demo) | 7,787 | 全章 | RAG 端到端参考架构（含引用溯源），企业方案的常见骨架；本章先读与「三种计费模式」「毛利结构诊断」相关的部分 |
-| 4 | [microsoft/AI-For-Beginners](https://github.com/microsoft/AI-For-Beginners) | 70,073 | 全章 | 12 周 24 课的 AI 通识课，用来快速补齐术语与全景，避免面试时概念串味；本章先读与「三种计费模式」「毛利结构诊断」相关的部分 |
+| 3 | [Azure-Samples/azure-search-openai-demo](https://github.com/Azure-Samples/azure-search-openai-demo) | 7,798 | 全章 | RAG 端到端参考架构（含引用溯源），企业方案的常见骨架；本章先读与「三种计费模式」「毛利结构诊断」相关的部分 |
+| 4 | [microsoft/AI-For-Beginners](https://github.com/microsoft/AI-For-Beginners) | 70,422 | 全章 | 12 周 24 课的 AI 通识课，用来快速补齐术语与全景，避免面试时概念串味；本章先读与「三种计费模式」「毛利结构诊断」相关的部分 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

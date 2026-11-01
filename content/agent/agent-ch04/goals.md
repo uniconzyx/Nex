@@ -53,10 +53,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [eugeneyan/applied-ml](https://github.com/eugeneyan/applied-ml) | 30,732 | 全章 | 工业界 ML 落地案例合集，看「模型之外」的评估、监控、组织协作怎么写；本章先读与「用户故事」「验收条件」相关的部分 |
-| 2 | [Azure-Samples/azure-search-openai-demo](https://github.com/Azure-Samples/azure-search-openai-demo) | 7,787 | 全章 | RAG 端到端参考架构（含引用溯源），企业方案的常见骨架；本章先读与「用户故事」「验收条件」相关的部分 |
-| 3 | [GokuMohandas/Made-With-ML](https://github.com/GokuMohandas/Made-With-ML) | 49,828 | 全章 | 从数据校验到部署监控的完整工程流水线，补「只会调 API」的短板；本章先读与「用户故事」「验收条件」相关的部分 |
-| 4 | [microsoft/AI-For-Beginners](https://github.com/microsoft/AI-For-Beginners) | 70,073 | 全章 | 12 周 24 课的 AI 通识课，用来快速补齐术语与全景，避免面试时概念串味；本章先读与「用户故事」「验收条件」相关的部分 |
+| 1 | [eugeneyan/applied-ml](https://github.com/eugeneyan/applied-ml) | 30,756 | 全章 | 工业界 ML 落地案例合集，看「模型之外」的评估、监控、组织协作怎么写；本章先读与「用户故事」「验收条件」相关的部分 |
+| 2 | [Azure-Samples/azure-search-openai-demo](https://github.com/Azure-Samples/azure-search-openai-demo) | 7,798 | 全章 | RAG 端到端参考架构（含引用溯源），企业方案的常见骨架；本章先读与「用户故事」「验收条件」相关的部分 |
+| 3 | [GokuMohandas/Made-With-ML](https://github.com/GokuMohandas/Made-With-ML) | 49,873 | 全章 | 从数据校验到部署监控的完整工程流水线，补「只会调 API」的短板；本章先读与「用户故事」「验收条件」相关的部分 |
+| 4 | [microsoft/AI-For-Beginners](https://github.com/microsoft/AI-For-Beginners) | 70,422 | 全章 | 12 周 24 课的 AI 通识课，用来快速补齐术语与全景，避免面试时概念串味；本章先读与「用户故事」「验收条件」相关的部分 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

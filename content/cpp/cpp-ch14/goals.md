@@ -26,8 +26,8 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [DaveGamble/cJSON](https://github.com/DaveGamble/cJSON) | 13,040 | §1.2 #include 的「文本… | §1.2 与 §1.3 头文件守卫的现实版：`cJSON.h` 顶部 `#ifndef cJSON__h` / `#define cJSON__h`，`CJSON_PUBLIC` 宏负责导出符号、`CJSON_EXPORT_SYMBOLS` 控制静态/动态；整个头文件只有声明——把「头文件该放什么」这件事做到了教科书级 |
-| 2 | [fmtlib/fmt](https://github.com/fmtlib/fmt) | 25,897 | §2.4 宏与 inline 的取舍 | §2.4 宏与 inline 的取舍：`include/fmt/base.h` 的 `FMT_BEGIN_NAMESPACE`/`FMT_END_NAMESPACE`、`FMT_API`、`FMT_INLINE` 三层宏分别管「命名空间版本化、符号可见性、强制内联」；看清每个宏存在的理由，就明白为什么现代库仍需要宏——跨编译器差异无法用 C++ 语法表达 |
+| 1 | [DaveGamble/cJSON](https://github.com/DaveGamble/cJSON) | 13,063 | §1.2 #include 的「文本… | §1.2 与 §1.3 头文件守卫的现实版：`cJSON.h` 顶部 `#ifndef cJSON__h` / `#define cJSON__h`，`CJSON_PUBLIC` 宏负责导出符号、`CJSON_EXPORT_SYMBOLS` 控制静态/动态；整个头文件只有声明——把「头文件该放什么」这件事做到了教科书级 |
+| 2 | [fmtlib/fmt](https://github.com/fmtlib/fmt) | 25,899 | §2.4 宏与 inline 的取舍 | §2.4 宏与 inline 的取舍：`include/fmt/base.h` 的 `FMT_BEGIN_NAMESPACE`/`FMT_END_NAMESPACE`、`FMT_API`、`FMT_INLINE` 三层宏分别管「命名空间版本化、符号可见性、强制内联」；看清每个宏存在的理由，就明白为什么现代库仍需要宏——跨编译器差异无法用 C++ 语法表达 |
 | 3 | [include-what-you-use/include-what-you-use](https://github.com/include-what-you-use/include-what-you-use) | 4,781 | §1.2 #include 的「文本… | §1.2 的量化工具：`iwyu.cc` 是主分析器，`iwyu_include_picker.cc` 维护「哪个头文件该由谁包含」的映射表；拿它跑一遍本章的示例工程，`#include` 的传递闭包会被直接列出——这是「文本包含」语义最硬的证据 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）

@@ -52,7 +52,7 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [GokuMohandas/Made-With-ML](https://github.com/GokuMohandas/Made-With-ML) | 49,828 | 全章 | 生产级 ML 全流程：数据校验→训练→部署→监控，用来对照「课程里的玩具流程」与真实工程；本章先读与「形式化」「经验风险最小化」相关的部分 |
+| 1 | [GokuMohandas/Made-With-ML](https://github.com/GokuMohandas/Made-With-ML) | 49,873 | 全章 | 生产级 ML 全流程：数据校验→训练→部署→监控，用来对照「课程里的玩具流程」与真实工程；本章先读与「形式化」「经验风险最小化」相关的部分 |
 | 2 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | 全章 | 工业标准 ML 库：每个算法的参考实现与 API 取舍；本章先读与「形式化」「经验风险最小化」相关的部分 |
 | 3 | [datawhalechina/pumpkin-book](https://github.com/datawhalechina/pumpkin-book) | 26,146 | 全章 | 西瓜书公式推导详解，补课程里跳过推导的部分；本章先读与「形式化」「经验风险最小化」相关的部分 |
 | 4 | [apachecn/AiLearning](https://github.com/apachecn/AiLearning) | 42,609 | 全章 | 《机器学习实战》中文笔记：经典算法的可运行实现；本章先读与「形式化」「经验风险最小化」相关的部分 |

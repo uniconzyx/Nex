@@ -71,7 +71,7 @@
 |---|---|---|---|---|
 | 1 | [mli/paper-reading](https://github.com/mli/paper-reading) | 33,996 | 全章 | 李沐论文精读系列配套，建立「读一篇顶会」的节奏；本章先读与「信息源分层与可信度排序」「三遍读法与论文价值判断」相关的部分 |
 | 2 | [dair-ai/ML-Papers-of-the-Week](https://github.com/dair-ai/ML-Papers-of-the-Week) | 13,000 | 全章 | 每周论文榜，解决「不知道追什么」的问题；本章先读与「信息源分层与可信度排序」「三遍读法与论文价值判断」相关的部分 |
-| 3 | [Hannibal046/Awesome-LLM](https://github.com/Hannibal046/Awesome-LLM) | 27,445 | 全章 | LLM 生态索引：训练/推理/应用/评测的仓库地图，用来判断「这个方向还有没有坑」；本章先读与「信息源分层与可信度排序」「三遍读法与论文价值判断」相关的部分 |
+| 3 | [Hannibal046/Awesome-LLM](https://github.com/Hannibal046/Awesome-LLM) | 27,468 | 全章 | LLM 生态索引：训练/推理/应用/评测的仓库地图，用来判断「这个方向还有没有坑」；本章先读与「信息源分层与可信度排序」「三遍读法与论文价值判断」相关的部分 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

@@ -28,7 +28,7 @@
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
 | 1 | [trekhleb/javascript-algorithms](https://github.com/trekhleb/javascript-algorithms) | 196,855 | 全章 | JavaScript 算法与数据结构，含英文详解；本章先读与「分层与目录组织」「契约优先」相关的部分 |
-| 2 | [Chalarangelo/30-seconds-of-code](https://github.com/Chalarangelo/30-seconds-of-code) | 129,352 | 全章 | 短小精悍的 JS/CSS/HTML 代码片段集，覆盖日常前端技巧；本章先读与「分层与目录组织」「契约优先」相关的部分 |
+| 2 | [Chalarangelo/30-seconds-of-code](https://github.com/Chalarangelo/30-seconds-of-code) | 129,384 | 全章 | 短小精悍的 JS/CSS/HTML 代码片段集，覆盖日常前端技巧；本章先读与「分层与目录组织」「契约优先」相关的部分 |
 | 3 | [yangshun/front-end-interview-handbook](https://github.com/yangshun/front-end-interview-handbook) | 44,008 | 全章 | 前端面试手册：HTML/CSS/JS/浏览器/性能；本章先读与「分层与目录组织」「契约优先」相关的部分 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）

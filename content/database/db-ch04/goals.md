@@ -27,9 +27,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,300 | 全章 | 含 MySQL 索引、事务、锁与调优的系统讲解；本章先读与「EXPLAIN 的每一列在…」「type 的优劣阶梯」相关的部分 |
-| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,863 | 全章 | 真实业务库表设计范例与 SQL 实践；本章先读与「EXPLAIN 的每一列在…」「type 的优劣阶梯」相关的部分 |
-| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,162 | 全章 | 含分库分表、读写分离与分布式事务；本章先读与「EXPLAIN 的每一列在…」「type 的优劣阶梯」相关的部分 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | 全章 | 含 MySQL 索引、事务、锁与调优的系统讲解；本章先读与「EXPLAIN 的每一列在…」「type 的优劣阶梯」相关的部分 |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | 全章 | 真实业务库表设计范例与 SQL 实践；本章先读与「EXPLAIN 的每一列在…」「type 的优劣阶梯」相关的部分 |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | 全章 | 含分库分表、读写分离与分布式事务；本章先读与「EXPLAIN 的每一列在…」「type 的优劣阶梯」相关的部分 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

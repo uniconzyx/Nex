@@ -70,10 +70,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [microsoft/AI-For-Beginners](https://github.com/microsoft/AI-For-Beginners) | 70,073 | 全章 | 12 周 24 课的 AI 通识课，用来快速补齐术语与全景，避免面试时概念串味；本章先读与「四层结构」「毛利结构」相关的部分 |
-| 2 | [Hannibal046/Awesome-LLM](https://github.com/Hannibal046/Awesome-LLM) | 27,445 | 全章 | LLM 生态索引：训练/推理/应用/评测的仓库地图，用来判断「这个方向还有没有坑」；本章先读与「四层结构」「毛利结构」相关的部分 |
+| 1 | [microsoft/AI-For-Beginners](https://github.com/microsoft/AI-For-Beginners) | 70,422 | 全章 | 12 周 24 课的 AI 通识课，用来快速补齐术语与全景，避免面试时概念串味；本章先读与「四层结构」「毛利结构」相关的部分 |
+| 2 | [Hannibal046/Awesome-LLM](https://github.com/Hannibal046/Awesome-LLM) | 27,468 | 全章 | LLM 生态索引：训练/推理/应用/评测的仓库地图，用来判断「这个方向还有没有坑」；本章先读与「四层结构」「毛利结构」相关的部分 |
 | 3 | [datawhalechina/self-llm](https://github.com/datawhalechina/self-llm) | 32,547 | 全章 | 开源大模型部署与微调实战教程，中文、可复现，适合做第一个私有化 demo；本章先读与「四层结构」「毛利结构」相关的部分 |
-| 4 | [eugeneyan/applied-ml](https://github.com/eugeneyan/applied-ml) | 30,732 | 全章 | 工业界 ML 落地案例合集，看「模型之外」的评估、监控、组织协作怎么写；本章先读与「四层结构」「毛利结构」相关的部分 |
+| 4 | [eugeneyan/applied-ml](https://github.com/eugeneyan/applied-ml) | 30,756 | 全章 | 工业界 ML 落地案例合集，看「模型之外」的评估、监控、组织协作怎么写；本章先读与「四层结构」「毛利结构」相关的部分 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

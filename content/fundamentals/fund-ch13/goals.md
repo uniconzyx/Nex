@@ -47,9 +47,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376022 | §性能指标 | 先读 Performance vs scalability 与 Latency numbers 两节：建立「吞吐率 / 响应时间 / 加速比」的工程直觉，再看本章 Amdahl 定律为什么是天花板 |
-| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363505 | §五大部件 | 看 Computer Architecture 清单里的「CPU / 内存 / 总线」条目，把它当成本章五大部件的检查表，缺一项就回头补概念 |
-| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186375 | §系统概述 | 中文速记：计算机系统概述 + 性能指标两节，考前 20 分钟过一遍，适合背「CPI / MIPS / 主频」三者的换算关系 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376373 | §性能指标 | 先读 Performance vs scalability 与 Latency numbers 两节：建立「吞吐率 / 响应时间 / 加速比」的工程直觉，再看本章 Amdahl 定律为什么是天花板 |
+| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363641 | §五大部件 | 看 Computer Architecture 清单里的「CPU / 内存 / 总线」条目，把它当成本章五大部件的检查表，缺一项就回头补概念 |
+| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186408 | §系统概述 | 中文速记：计算机系统概述 + 性能指标两节，考前 20 分钟过一遍，适合背「CPI / MIPS / 主频」三者的换算关系 |
 | 4 | [qemu/qemu](https://github.com/qemu/qemu) | 13951 | §软硬件协作 | 读 `hw/core/` 与 `target/`：一台被模拟的机器如何把 CPU、内存、设备挂到同一条总线上——这是冯·诺依曼结构最直白的运行时样本 |
 | 5 | [riscv/riscv-isa-manual](https://github.com/riscv/riscv-isa-manual) | 4869 | §指令驱动 | 只看第 1-2 章的 CSR 与特权级引言：理解「控制器靠指令驱动」，以及为什么指令集是软硬件之间的契约 |
 

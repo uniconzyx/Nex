@@ -31,8 +31,8 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [fmtlib/fmt](https://github.com/fmtlib/fmt) | 25,897 | §3.1 为什么需要「inline… | §3.1 与 §3.2 inline namespace 的工业用法：`include/fmt/base.h` 里 `FMT_BEGIN_NAMESPACE` 展开成`namespace fmt { inline namespace v11 {`，于是 `fmt::format` 与 `fmt::v11::format` 是同一个实体；库靠它做到「ABI 版本可以换、用户代码不用改」 |
-| 2 | [abseil/abseil-cpp](https://github.com/abseil/abseil-cpp) | 18,171 | §3.1 为什么需要「inline… | §3.1 的另一套做法：`absl/base/config.h` 的 `ABSL_NAMESPACE_BEGIN` 展开成 `namespace absl { ABSL_INTERNAL_NAMESPACE {`，具体名字由 `absl/base/options.h` 的 LTS 宏决定；对照 fmt 与 abseil 两种版本化命名空间，能看清「透明 vs 显式」的取舍 |
+| 1 | [fmtlib/fmt](https://github.com/fmtlib/fmt) | 25,899 | §3.1 为什么需要「inline… | §3.1 与 §3.2 inline namespace 的工业用法：`include/fmt/base.h` 里 `FMT_BEGIN_NAMESPACE` 展开成`namespace fmt { inline namespace v11 {`，于是 `fmt::format` 与 `fmt::v11::format` 是同一个实体；库靠它做到「ABI 版本可以换、用户代码不用改」 |
+| 2 | [abseil/abseil-cpp](https://github.com/abseil/abseil-cpp) | 18,177 | §3.1 为什么需要「inline… | §3.1 的另一套做法：`absl/base/config.h` 的 `ABSL_NAMESPACE_BEGIN` 展开成 `namespace absl { ABSL_INTERNAL_NAMESPACE {`，具体名字由 `absl/base/options.h` 的 LTS 宏决定；对照 fmt 与 abseil 两种版本化命名空间，能看清「透明 vs 显式」的取舍 |
 | 3 | [apache/brpc](https://github.com/apache/brpc) | 17,638 | §1.2 名字查找到底怎么走 | §1.2 名字查找的实际分层：`src/brpc/server.h` 里 `namespace brpc`，其下再分 `policy`、`detail` 等子命名空间，对外只暴露少数类型；读它的 include 顺序与 `using` 声明，能看到「哪些名字允许被 ADL 找到、哪些必须写全限定名」是被刻意设计的 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）

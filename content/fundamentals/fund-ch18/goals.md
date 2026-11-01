@@ -29,12 +29,12 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376022 | §1.2 | 读「一致性 / 分区」相关段落：并查集回答的「两个点是否连通」在分布式里就是「两个节点是否在同一分区」，抽象完全一致 |
-| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363505 | §1.2 | 看 Union-Find 与 String searching 清单：KMP 与并查集都在上面，可当本章的检查表 |
-| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186375 | §2.2 | 中文速记：字符串一节给了 next 数组的逐位推演，适合考前对照手推三遍固化手感 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376373 | §1.2 | 读「一致性 / 分区」相关段落：并查集回答的「两个点是否连通」在分布式里就是「两个节点是否在同一分区」，抽象完全一致 |
+| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363641 | §1.2 | 看 Union-Find 与 String searching 清单：KMP 与并查集都在上面，可当本章的检查表 |
+| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186408 | §2.2 | 中文速记：字符串一节给了 next 数组的逐位推演，适合考前对照手推三遍固化手感 |
 | 4 | [torvalds/linux](https://github.com/torvalds/linux) | 253833 | §1.2 | 读 `lib/union_find.c`（或 `mm/` 里基于并查集的结构）：看路径压缩与按秩合并如何在生产代码里被实现与压测 |
 | 5 | [redis/redis](https://github.com/redis/redis) | 77159 | §3.2 | 读 `src/rax.c`：Redis 的 radix tree 就是压缩 Trie，看它如何做前缀匹配与内存压缩——比教科书 Trie 省大量空间 |
-| 6 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 225666 | §1.2 | 看 `data_structures/disjoint_set/` 与 `strings/` 下的 KMP：短小可直接跑，用来对照自己写的版本查边界 bug |
+| 6 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 225745 | §1.2 | 看 `data_structures/disjoint_set/` 与 `strings/` 下的 KMP：短小可直接跑，用来对照自己写的版本查边界 bug |
 
 ## 本章 B 站视频路线
 | # | 系列 / UP 主 | 视频 | 对应本章 | 看什么 |

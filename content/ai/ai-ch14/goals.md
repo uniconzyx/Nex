@@ -11,8 +11,8 @@
 
 | # | 仓库 | Star | 对应本章 | 读什么 |
 | --- | --- | ---: | --- | --- |
-| 1 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,266 | §1.1 CLIP · §2.1 流水线 | 多模态模型库：CLIP/Blip/Intern 实现，对应 §1.1、§2.1 |
-| 2 | [openai/CLIP](https://github.com/openai/CLIP) | 34,539 | §1.1 对比学习 | 图文对比学习本体：读 `model.py` 的 image-text 对比，对应 §1.1 |
+| 1 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §1.1 CLIP · §2.1 流水线 | 多模态模型库：CLIP/Blip/Intern 实现，对应 §1.1、§2.1 |
+| 2 | [openai/CLIP](https://github.com/openai/CLIP) | 34,550 | §1.1 对比学习 | 图文对比学习本体：读 `model.py` 的 image-text 对比，对应 §1.1 |
 | 3 | [OpenGVLab/InternVL](https://github.com/OpenGVLab/InternVL) | 10,171 | §1.4 对齐 · §2.1 链路 | 多模态大模型：VLM 与 OCR 链路，对应 §1.4、§2.1 |
 | 4 | [microsoft/OmniParser](https://github.com/microsoft/OmniParser) | 25,578 | §2.1 OCR→VLM | 文档理解：版面检测+识别+VLM 端到端，对应 §2.1 |
 

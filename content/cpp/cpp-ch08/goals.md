@@ -31,9 +31,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [microsoft/STL](https://github.com/microsoft/STL) | 11,172 | §1.2 amortized 2×… | §1.2 的 2× 扩容：`stl/inc/vector` 的 `_Calculate_growth` 做 `max(size + size/2, requested)` 再对齐，`_Emplace_reallocate` 分配新块、搬移旧元素、释放旧块——三步全在这里；对照本章算的摊销 O(1)，能看出「1.5× 还是 2×」对重新分配次数的影响 |
+| 1 | [microsoft/STL](https://github.com/microsoft/STL) | 11,177 | §1.2 amortized 2×… | §1.2 的 2× 扩容：`stl/inc/vector` 的 `_Calculate_growth` 做 `max(size + size/2, requested)` 再对齐，`_Emplace_reallocate` 分配新块、搬移旧元素、释放旧块——三步全在这里；对照本章算的摊销 O(1)，能看出「1.5× 还是 2×」对重新分配次数的影响 |
 | 2 | [redis/redis](https://github.com/redis/redis) | 77,159 | §3.3 负载因子与再哈希 | §3.3 负载因子与 rehash：`src/dict.c` 的 `dictExpand` 建两张表，`dictRehash` 每次只搬 `n` 个桶（渐进式 rehash），查找时两张表都要看；这是「不一次性搬完以免卡顿」的工程答案，与 `unordered_map` 的一次性 rehash 形成对照 |
-| 3 | [TheAlgorithms/C-Plus-Plus](https://github.com/TheAlgorithms/C-Plus-Plus) | 34,813 | 全章 | 「选容器」的实例库：`data_structures/` 下同一个结构常有数组版与链表版两种实现，`sort/` 下也区分「适合 vector」与「只能链表做」的算法；把本章的容器选择决策树拿过来，逐目录验证一遍你的判断；本章先读与「与 Java 对照」「list / forwar…」相关的部分 |
+| 3 | [TheAlgorithms/C-Plus-Plus](https://github.com/TheAlgorithms/C-Plus-Plus) | 34,827 | 全章 | 「选容器」的实例库：`data_structures/` 下同一个结构常有数组版与链表版两种实现，`sort/` 下也区分「适合 vector」与「只能链表做」的算法；把本章的容器选择决策树拿过来，逐目录验证一遍你的判断；本章先读与「与 Java 对照」「list / forwar…」相关的部分 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

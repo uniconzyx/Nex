@@ -11,7 +11,7 @@
 
 | # | 仓库 | Star | 对应本章 | 读什么 |
 | --- | --- | ---: | --- | --- |
-| 1 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,266 | §1.1 schema · §1.8 标注规范 | 训练数据范式：chat template 与 instruction 格式，对应 §1.1、§1.8 |
+| 1 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §1.1 schema · §1.8 标注规范 | 训练数据范式：chat template 与 instruction 格式，对应 §1.1、§1.8 |
 | 2 | [huggingface/datasets](https://github.com/huggingface/datasets) | 22,091 | §2.2 语义去重 | 数据处理：map/dedup 算子，对应 §2.2 语义去重 |
 | 3 | [vllm-project/vllm](https://github.com/vllm-project/vllm) | 95,746 | §1.8 可追溯 | 推理侧数据契约：与训练数据 schema 对齐，对应 §1.8 |
 | 4 | [facebookresearch/llama](https://github.com/facebookresearch/llama) | 59,628 | §1.1 多轮格式 | 对话格式范本：官方 `llama-recipes` 的 instruction 数据，对应 §1.1 |
