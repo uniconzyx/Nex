@@ -81,7 +81,7 @@ for t in range(T - 1):
 | t+1（assistant） | 回答 | 真正要学 | 是 | 真实梯度 |
 | t（pad） | 填充 | — | 否（-100） | 不污染 |
 
-两个高频 bug（ex06 都复现了）：
+### 两个高频 bug
 
 1. **忘了 shift**：直接拿 `labels = ids` 且 mask 覆盖 assistant 本身，模型学到的是「复制输入」；
 2. **mask 起点错**：从 assistant 第一个 token 开始 mask，会漏掉它的首个预测位——正确做法是 mask
