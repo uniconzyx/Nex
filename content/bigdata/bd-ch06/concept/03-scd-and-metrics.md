@@ -59,6 +59,29 @@ U001    | 上海 | V2    | 2026-02-15  | 9999-12-31  | 1
 
 ---
 
+```python
+from delta.tables import DeltaTable
+
+# SCD Type 2：关闭旧版本 + 插入新版本，必须在同一事务内完成
+tgt = DeltaTable.forName(spark, "dws.dim_customer")
+(tgt.alias("t")
+    .merge(updates.alias("s"),
+           "t.cust_id = s.cust_id AND t.is_current = true")
+    .whenMatchedUpdate(condition="t.attr_hash <> s.attr_hash",
+                       set={"is_current": "false", "end_date": "s.dt"})
+    .whenNotMatchedInsert(values={
+        "cust_id": "s.cust_id", "attr_hash": "s.attr_hash",
+        "start_date": "s.dt", "end_date": "9999-12-31", "is_current": "true",
+    })
+    .execute())
+```
+
+用 `attr_hash` 判「是否有变化」而不是逐列比较：列一多，逐列比较的 SQL 会膨胀成
+几十个 `AND`，而后续其实并不需要知道**哪一列**变了，只需要知道「变了」。
+`end_date = '9999-12-31'` 是「当前有效」的哨兵约定，比用 NULL 更省事——
+所有区间查询都能写成同一个表达式，不用额外处理 NULL。
+
+
 # 二、指标口径治理：原子指标 / 派生指标与口径一致性
 
 （中立陈述）「两个报表上的 GMV 不一样」是数仓领域最经典的事故。根治办法是把指标**规范化定义**并集中管理。一套指标定义包含**四要素**：
@@ -101,6 +124,23 @@ U001    | 上海 | V2    | 2026-02-15  | 9999-12-31  | 1
 - **笔试计算口径**：给出若干订单与两个不同的口径定义，要求分别算出数值并给出差额。**先写 WHERE 生效后剩余哪些行，再聚合**，不要口算。
 
 ---
+
+```python
+def check_metric_drift(spark, a_sql: str, b_sql: str, dt: str) -> dict:
+    """同一指标被两处重写时，必须逐日对齐；差一点都是 bug，不是误差。"""
+    x = spark.sql(a_sql.format(dt=dt)).first()[0] or 0
+    y = spark.sql(b_sql.format(dt=dt)).first()[0] or 0
+    return {"a": x, "b": y, "diff": x - y, "ok": x == y}
+
+# 用法：把「报表 SQL」与「原子指标视图」跑同一天对比
+r = check_metric_drift(spark, REPORT_GMV, ATOMIC_GMV, "2026-10-01")
+assert r["ok"], f"口径已分叉：{r}"
+```
+
+口径治理的落点不是「写文档」，而是**让原子指标只存在一份 SQL**：
+报表、看板、BI 全部引用同一个视图。文档会过期，视图不会——
+一旦有人绕过视图重写，上面这个断言就会在第二天告警。
+
 
 ## 三视角小结
 

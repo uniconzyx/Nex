@@ -109,6 +109,39 @@ Physical Plan  →  ⑤ 代码生成 Codegen（Whole-Stage Codegen 把算子链�
 
 ---
 
+```python
+q = (spark.read.parquet("s3://bucket/orders")
+     .filter(F.col("dt") == "2026-10-01")
+     .select("user_id", "amount"))
+
+q.explain("formatted")
+
+```python
+small = spark.table("dim_city")        # 约 300 行
+big = spark.table("fact_order")        # 约 30 亿行
+
+# 显式广播：小表整份发到每个 executor，避免大表 shuffle
+joined = big.join(F.broadcast(small), "city_id", "left")
+
+# 自动广播阈值（默认 10MB）：小于它的表由优化器自行决定是否广播
+spark.conf.set("spark.sql.autoBroadcastJoinThreshold", 10 * 1024 * 1024)
+```
+
+广播的代价与收益都是线性的：省掉一次大表 shuffle，但每个 executor 都要驻留一份小表。
+当小表其实有几百万行（几十 MB）时，广播会把 executor 内存打爆——
+这时 `explain` 里出现 `BroadcastHashJoin` 反而是坏消息，应该调低阈值或改用 hint 关掉。
+
+# 期望在 Scan 节点上看到：
+#   PartitionFilters: [isnotnull(dt), (dt = 2026-10-01)]     <- 分区裁剪
+#   PushedFilters:    [IsNotNull(dt), EqualTo(dt, 2026-10-01)]
+#   ReadSchema:       struct<user_id:bigint, amount:decimal(10,2)>   <- 列裁剪
+```
+
+验证下推要看的是 **Scan 节点上的属性**，不是「计划里有没有 Filter」。
+如果 `PushedFilters` 是空数组而 `Filter` 挂在 Scan 之上，说明条件没下推——
+常见原因是 UDF 包裹、类型不匹配，或者文件格式不支持（如纯文本）。
+
+
 ## 三视角小结
 
 | 主题 | 程序员关注 | 博士生关注 | 考研/笔试口径 |

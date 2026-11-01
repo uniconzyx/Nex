@@ -43,6 +43,26 @@
 
 ---
 
+```python
+import time
+
+def wait_partition(spark, table: str, dt: str, timeout_s: int = 3600) -> bool:
+    """按「数据是否就绪」起跑，而不是按固定时间硬等。"""
+    t0 = time.time()
+    while time.time() - t0 < timeout_s:
+        if spark.catalog.tableExists(table):
+            parts = spark.sql(f"SHOW PARTITIONS {table}")
+            if parts.filter(parts.partition == dt).count():
+                return True
+        time.sleep(60)
+    raise TimeoutError(f"{table} 分区 {dt} 未就绪")
+```
+
+「按时间调度」在上游延迟时会读到旧分区（静默出错），「按数据就绪」最多是晚跑。
+前者错得无声，后者只是慢——所以关键链路要用后者兜底，
+而调度器上的时间配置退化为「最晚起跑时间」，不再是数据可见性的保证。
+
+
 # 二、数据倾斜调优、元数据与数据血缘
 
 （中立陈述）**数据倾斜**是指：shuffle 后少数分区的记录数碾压其余分区。由于某个 key 的所有记录必然落入同一个分区（哈希分区），热 key 会让对应 reducer 成为**唯一的长尾**——整作业的完成时间由它决定。
@@ -103,6 +123,36 @@ ods_user_log -> dwd_user_info -> dws_trade_user_1d -> ads_kpi_wide
 - **血缘/元数据类题**：「某张源表要下线，怎么评估影响？」——答案是通过**表级血缘做下游传递闭包**求影响面，逐层通知负责人；同时反过来说明「为什么必须要血缘」。
 
 ---
+
+```python
+import pyspark.sql.functions as F
+
+```python
+# 小文件合并：写之前先算目标文件数
+spark.conf.set("spark.sql.shuffle.partitions", 200)   # 默认 200，小数据要调小
+
+(spark.table("dws.agg_daily")
+      .repartition(8)                                  # 目标 ≈ 总量 / 128MB
+      .write.mode("overwrite")
+      .parquet("s3://warehouse/dws/agg_daily"))
+```
+
+`repartition` 会全量 shuffle，`coalesce` 不 shuffle 但只能减不能增。
+日增量很小却留着 200 个分区，结果就是几万个几十 KB 的小文件——
+下游每次扫描都要为每个文件付一次 open 开销，这部分成本在账单上往往比计算还高。
+
+
+# 倾斜治理的第一步是量化，不是立刻加盐
+skew = (spark.table("dwd.fact_order_item")
+        .groupBy("item_id").count()
+        .orderBy(F.desc("count")).limit(20))
+skew.show(truncate=False)
+```
+
+判断标准要写死：单个 key 占全量 >10%、或最大分区与中位数差一个数量级以上，才算倾斜。
+AQE 的 `skewJoin` 会把超大分区按目标大小自动拆成多个任务；只有 AQE 也压不住
+（例如单个 key 就上亿行）时才手动加盐，而加盐会让下游多一次 shuffle——先量化，再决定。
+
 
 ## 三视角小结
 

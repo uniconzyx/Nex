@@ -46,6 +46,26 @@
 
 ---
 
+```python
+spark.sql("""
+  CREATE TABLE dwd.fact_order_item (
+    order_id STRING COMMENT '订单号',
+    item_id  STRING COMMENT '订单行号',
+    amount   DECIMAL(12,2)
+  ) USING PARQUET
+  COMMENT '粒度：一行 = 一个订单行（order_id + item_id 唯一）'
+""")
+
+# 粒度声明必须可验证：声明的唯一键要真的唯一
+dup = (spark.table("dwd.fact_order_item")
+       .groupBy("order_id", "item_id").count().filter("count > 1"))
+assert dup.limit(1).count() == 0, "粒度声明与实际数据不符"
+```
+
+粒度写在建表注释里只是「文档」，用 `groupBy + count` 校验才是「约束」。
+没有校验的粒度声明，三个月后一定与实际数据不一致——而下游所有指标都会跟着错。
+
+
 # 二、星型模型 vs 雪花模型：JOIN 次数与存储的定量取舍
 
 （中立陈述）维度可以以两种形态落地：

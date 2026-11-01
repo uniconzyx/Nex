@@ -48,6 +48,19 @@ Tungsten 紧凑布局每行 112 字节（2.32 倍）；若再叠加列裁剪（�
 
 ---
 
+```python
+spark = (SparkSession.builder
+         .config("spark.memory.offHeap.enabled", "true")
+         .config("spark.memory.offHeap.size", "2g")     # 堆外内存，不受 GC 管辖
+         .config("spark.sql.tungsten.enabled", "true")
+         .getOrCreate())
+```
+
+堆外内存的意义是把「成千上万个小对象」换成「连续字节数组 + 偏移量」：
+GC 只需要扫少量大对象，扫描成本从 O(对象数) 降到 O(数组数)。代价是要自己管生命周期，
+以及 `spark.memory.offHeap.size` 必须显式配置——不配就等于没开。
+
+
 # 二、全阶段代码生成（Whole-Stage Codegen）
 
 （中立陈述）传统的**火山模型（Volcano Iterator Model）**里，每个算子实现 `next()`，
@@ -111,6 +124,20 @@ Tungsten 解决两件事：内存布局 + 代码生成
 
     代价：生成代码难调试；部分算子回退解释执行（explain 里带 * 的就是）
 ```
+
+```python
+df.filter(F.col("amount") > 100).select("user_id", "amount").explain("formatted")
+
+# 计划里出现带星号前缀的节点即为融合成功：
+#   *(1) Project [user_id#12, amount#13]
+#   +- *(1) Filter (isnotnull(amount#13) AND (amount#13 > 100))
+#      +- *(1) ColumnarToRow
+#         +- FileScan parquet ...
+```
+
+没有融合时，每个算子之间要走「虚函数调用 + 中间行对象」；融合之后生成的是一段
+紧凑的 Java 循环，中间结果留在 CPU 寄存器里。星号就是「这个 stage 被融合了」的标记。
+
 
 ## 三视角小结
 

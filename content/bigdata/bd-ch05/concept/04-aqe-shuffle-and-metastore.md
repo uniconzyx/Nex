@@ -185,6 +185,23 @@ AQE 用运行时统计纠正编译期误判（编译期只能靠可能过期的�
     定位：AQE 是运行期补救，不能替代「把统计信息收集好」
 ```
 
+```python
+spark.sql("""
+    CREATE TABLE IF NOT EXISTS dwd.fact_order
+    USING PARQUET
+    PARTITIONED BY (dt)
+    LOCATION 's3://warehouse/dwd/fact_order'
+""")
+
+# 计划里的 Scan 是否命中分区裁剪，看 PartitionFilters 而不是看有没有 Filter
+spark.sql("SELECT count(*) FROM dwd.fact_order WHERE dt = '2026-10-01'").explain("formatted")
+```
+
+Metastore 只存**元数据**（表名、列、分区位置），不存数据。所以「建表很快、查表很慢」
+不是 Metastore 的问题，而是扫描层的问题；反过来 `show partitions` 很慢，
+才是分区数过多导致 Metastore 压力大——这时该收敛分区粒度或改用分区发现。
+
+
 ## 三视角小结
 
 | 主题 | 程序员关注 | 博士生关注 | 考研/笔试口径 |

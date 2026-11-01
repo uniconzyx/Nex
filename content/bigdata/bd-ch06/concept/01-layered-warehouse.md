@@ -105,6 +105,26 @@ ads_gmv_overview           -- ADS，GMV 概览报表
 
 ---
 
+```python
+import re
+
+PATTERN = re.compile(r"^(ods|dwd|dws|ads)_[a-z0-9_]+$")
+
+def check_table_names(spark, db: str) -> list[str]:
+    """分层规范第一道门：表名前缀必须与所在库的层一致。"""
+    layer = db.split("_")[0]                     # ods / dwd / dws / ads
+    bad = []
+    for t in spark.catalog.listTables(db):
+        if not PATTERN.match(t.name) or not t.name.startswith(layer + "_"):
+            bad.append(f"{db}.{t.name}")
+    return bad
+```
+
+命名检查能自动化，是因为它是**纯语法规则**。「这张表该放哪一层」是语义判断，
+自动检查不了——所以才需要把规范写成 `ods_/dwd_/dws_/ads_` 前缀，
+让语义判断的结果以可校验的形式固化在表名里。
+
+
 ## 三视角小结
 
 | 主题 | 程序员关注 | 博士生关注 | 考研/笔试口径 |

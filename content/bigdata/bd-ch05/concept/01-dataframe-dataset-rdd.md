@@ -53,6 +53,25 @@ DataFrame 在 RDD 之上补了**两层信息**：
 
 ---
 
+```python
+from pyspark.sql import SparkSession, functions as F
+
+spark = SparkSession.builder.appName("api-compare").getOrCreate()
+df = spark.read.parquet("s3://bucket/orders")
+
+# RDD：只剩「元素」，没有 schema，优化器无从下手
+rdd = df.rdd.map(lambda r: (r.user_id, r.amount)).reduceByKey(lambda a, b: a + b)
+
+# DataFrame：只声明「要什么」，计划交给 Catalyst
+agg = df.groupBy("user_id").agg(F.sum("amount").alias("total"))
+
+agg.explain("formatted")   # 能看到列裁剪（ReadSchema 只有 2 列）与下推的 Filter
+```
+
+两者的差别不是「写法简洁」，而是**信息量**：RDD 里 lambda 是不透明函数，
+Catalyst 无法分析；DataFrame 保存了列名与类型，才能做下推、裁剪、重排。
+
+
 # 二、Dataset 的类型安全与编码器（Encoder）
 
 （中立陈述）`Dataset[T]` 在 `DataFrame`（即 `Dataset[Row]`）之上加了一层**编译期类型**：
@@ -110,6 +129,25 @@ DataFrame / Dataset 带 schema -> Catalyst 可做等价变换与代价优化
 
     仍需 RDD 的场合：非结构化数据、要精细控制分区与顺序、第三方库只吃 RDD
 ```
+
+```python
+import pyspark.sql.functions as F
+from pyspark.sql.types import DoubleType
+
+# 内置函数：全程在 JVM 内，可被 whole-stage codegen 融合
+fast = df.withColumn("net", F.col("amount") - F.col("discount"))
+
+# Python UDF：每一行都要序列化跨过 Py4J 边界，吞吐通常掉一个数量级
+@F.udf(DoubleType())
+def net_udf(amount, discount):
+    return amount - discount
+
+slow = df.withColumn("net", net_udf("amount", "discount"))
+```
+
+能用内置函数表达的逻辑，就不要写 UDF。Pandas UDF（`mapInPandas`）用 Arrow 批量传输，
+比逐行 UDF 快得多，但依然拿不到 codegen 的收益——它是「不得不写 Python 时」的次优解。
+
 
 ## 三视角小结
 
