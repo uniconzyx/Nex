@@ -1,5 +1,23 @@
 # 05 · Queue/Deque、fail-fast（modCount）与泛型集合的擦除影响
 
+```text
+Queue / Deque 的两套 API：
+    失败返回特殊值   offer / poll / peek
+    失败抛异常       add / remove / element
+    Deque 还能当栈：push/pop，当队列：offerFirst/offerLast
+    ArrayDeque：循环数组，头尾 O(1)，优于 LinkedList
+
+fail-fast 与 modCount：
+    迭代器创建时记 expectedModCount = modCount
+    每次 next() 前比对，不等即抛 ConcurrentModificationException
+    它是「尽力检测 bug」，不是线程安全保证
+    -> 并发修改下可能「检测不到」，绝不能拿它做并发控制
+
+泛型擦除的影响：
+    List<String> 与 List<Integer> 运行时都是 List
+    -> 不能 new T[]、不能 instanceof List<String>、静态成员不能用类类型参数
+```
+
 ## 一、Queue 与 Deque：双端抽象与 ArrayDeque
 
 `Queue` 定义 FIFO 语义（`offer`/`poll`/`peek`），`Deque`（双端队列）在此基础上加 `addFirst/removeLast` 等，既能当队列又能当栈。**`ArrayDeque` 是用循环数组实现的双端队列**，两端增删均摊 O(1)，且无链表节点的堆分配开销，因此**全面优于 `LinkedList` 与遗留的 `Stack`**——官方建议用 `ArrayDeque` 替代 `Stack`（见 `examples/ex09-deque-arraydeque.json`：同一 `Deque` 既能 `push/pop`（栈 LIFO）又能 `offer/poll`（队列 FIFO））。

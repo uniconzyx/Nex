@@ -1,5 +1,22 @@
 # 04 · equals 与 hashCode 契约：等价关系与散列分布
 
+```text
+等价关系三性质：自反、对称、传递（外加一致性）
+    状态不变时，多次调用结果必须相同
+
+为什么必须同时重写：
+    HashMap 先用 hashCode 定位桶，再用 equals 在桶内确认
+    ┌ hashCode 相同 ┬ equals 真 ─▶ 命中
+    │               └ equals 假 ─▶ 同桶不同键（链表/红黑树）
+    └ hashCode 不同 ─▶ 根本不去比较 -> put 进去就再也 get 不到
+
+    只重写 equals：两个「相等」对象 hashCode 不同 -> 直接丢数据
+
+契约：a.equals(b) 为真 => a.hashCode() == b.hashCode()（反向不要求）
+    可变字段做键 = 埋雷：改字段后 hashCode 变了，原桶里找不到
+    便捷实现：Objects.equals(...) / Objects.hash(...)
+```
+
 ## 一、理论根基：等价关系是数学约束
 
 `Object.equals` 的默认实现就是 `==`（比地址）。要让"逻辑相等"的对象被当作相等，必须重写 `equals`，且必须满足**等价关系（equivalence relation）**：

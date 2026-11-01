@@ -1,5 +1,26 @@
 # 03 · Spring Boot 启动流程与自动配置
 
+```text
+@SpringBootApplication 是三个注解的合成：
+    @SpringBootConfiguration   标记配置类（本质 @Configuration）
+    @EnableAutoConfiguration   触发自动配置
+    @ComponentScan             扫描当前包及子包
+
+SpringApplication.run 的阶段：
+    ① 准备 Environment（yml / 命令行 / 环境变量，后者优先级更高）
+    ② 创建 ApplicationContext（Servlet 或 Reactive）
+    ③ 加载 BeanDefinition（组件扫描 + 自动配置类）
+    ④ refresh：实例化单例、注入依赖、启动内嵌容器
+    ⑤ 发布 ApplicationReadyEvent
+
+自动配置的筛选链：
+    候选清单（AutoConfiguration.imports）
+      ─▶ @ConditionalOnClass        依赖类在不在
+      ─▶ @ConditionalOnMissingBean  用户没定义才生效
+      ─▶ @ConditionalOnProperty     开关是否打开
+    -> 自定义 Bean 总能覆盖默认配置，这就是「约定优于配置」
+```
+
 ## 一、@SpringBootApplication 是三个注解的合成
 
 ```java

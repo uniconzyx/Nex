@@ -1,5 +1,22 @@
 # 02 · 构建生命周期、插件与多模块工程
 
+```text
+三套生命周期，各走各的：
+    clean    pre-clean -> clean -> post-clean
+    default  validate -> compile -> test -> package -> verify -> install -> deploy
+    site     pre-site -> site -> post-site -> site-deploy
+
+phase 与 goal 不是同一层概念：
+    phase  生命周期上的检查点，本身什么都不做
+    goal   插件提供的具体任务（如 compiler:compile）
+    绑定：goal 绑到 phase，执行该 phase 时会先跑完它之前的所有 phase
+
+多模块：
+    <modules> 声明子模块 -> reactor 按依赖拓扑排序构建
+    dependencyManagement 统一版本（只声明，不引入依赖）
+    -> 避免版本漂移；真正引入仍需 <dependency>
+```
+
 ## 一、三套生命周期：各走各的，互不干扰
 
 Maven 有**三条相互独立**的生命周期，每条由若干 phase 组成：

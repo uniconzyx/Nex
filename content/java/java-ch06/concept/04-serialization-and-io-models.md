@@ -1,5 +1,20 @@
 # 序列化与 IO 模型选型
 
+```text
+Java 原生序列化的三个真相：
+    ① 类结构被写进字节流 -> 类一改，旧数据反序列化就炸（InvalidClassException）
+    ② readObject 等回调会被执行 -> 反序列化不可信数据是经典 RCE 面
+    ③ 体积大、速度慢（含完整类型元信息）
+
+    现代替代：JSON（可读、跨语言）、Protobuf/Avro（紧凑、可 schema 演进）
+
+IO 模型选型：
+    BIO   一连接一线程 -> 上千连接就崩（线程栈 MB 级）
+    NIO   多路复用 Selector + 非阻塞 -> 少量线程管大量连接
+    AIO   异步回调（Linux 上实现有限）
+    当下工程答案：Netty（NIO 封装）或 JDK 21 虚拟线程（BIO 写法 + 低开销）
+```
+
 ## 主题一：序列化机制的三个真相
 
 `Serializable` 是个**标记接口**（没有任何方法），但它真正做的事是：

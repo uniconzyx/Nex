@@ -1,5 +1,20 @@
 # 04 · 内存问题排查与 JVM 调优实战
 
+```text
+四类 OOM 与第一反应：
+    Java heap space                 对象太多或泄漏 -> 抓堆 dump，MAT 看支配树
+    Metaspace                       类加载过多（动态代理/CGLIB）-> 查类加载器泄漏
+    GC overhead limit exceeded      98% 时间在 GC 却只回收 <2% -> 本质还是内存不足
+    unable to create native thread  线程数超限 -> 查线程泄漏，或降 -Xss
+
+工具链（从现象到对象）：
+    jps 看进程 ─▶ jstat -gcutil 看 GC 趋势 ─▶ jmap -dump 抓堆
+      ─▶ MAT 分析支配树 ─▶ jstack 抓线程栈（死锁/卡住）
+      ─▶ async-profiler / JFR 看 CPU 与分配热点
+
+调优顺序：先测量（GC 日志 + 火焰图），再动参数；别凭感觉调 Xmx
+```
+
 ## 一、四类 OOM 与各自的第一反应
 
 | 错误 | 直接原因 | 第一反应 |

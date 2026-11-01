@@ -1,5 +1,23 @@
 # Path 与 Files：现代文件操作的唯一正确姿势
 
+```text
+File 与 Path 的差别：
+    File   老 API，拼接靠字符串，失败返回 false（拿不到原因）
+    Path   不可变对象，Path.of("a","b") 自动处理分隔符，支持 resolve/relativize
+
+路径拼接的正确算法：
+    p.resolve("b")       相对路径拼在后面
+    p.resolve("/abs")    绝对路径会「吃掉」前面（与 Python 同坑）
+    getParent() / getFileName() / getSuffix 结构化取段，别切字符串
+
+Files 一行替代老样板：
+    Files.readString(p, UTF_8) / Files.writeString(p, s, UTF_8)
+    Files.lines(p)                 惰性流，必须 try-with-resources 关闭
+    Files.walk(p) / Files.list(p)   目录遍历（默认不跟随符号链接）
+    Files.createDirectories(p)      幂等建目录
+    Files.move(tmp, dst, ATOMIC_MOVE)  原子替换
+```
+
 ## 主题一：File 与 Path 的差别，以及「路径拼接」的正确算法
 
 `java.io.File` 是 1995 年的设计：路径拼接靠字符串（`new File(dir, name)` 尚可，

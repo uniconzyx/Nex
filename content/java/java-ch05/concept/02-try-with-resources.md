@@ -1,5 +1,27 @@
 # 02 · try-with-resources 与 AutoCloseable：字节码展开、异常抑制与性能成本
 
+```text
+TWR 的字节码展开（编译器自动生成）：
+    try (R r = open()) { body }
+    ≈
+    R r = open();
+    Throwable primary = null;
+    try { body }
+    catch (Throwable t) { primary = t; throw t; }
+    finally {
+        if (r != null) {
+            if (primary != null) {
+                try { r.close(); } catch (Throwable s) { primary.addSuppressed(s); }
+            } else r.close();
+        }
+    }
+
+    关键：close 抛的异常进 addSuppressed，不覆盖主异常 -> getSuppressed() 可取
+    AutoCloseable.close() 声明 throws Exception；Closeable 收窄为 IOException
+
+异常的成本：fillInStackTrace 要抓整条栈快照，热路径上抛异常非常贵
+```
+
 ## 一、理论根基：资源的「获取即释放」契约
 
 任何持有外部资源（文件、连接、锁）的对象都面临一个问题：**无论成功还是异常，都必须释放**。手写 `try/finally` 容易在多个资源、且关闭本身也抛异常时写出既丑陋又丢异常的代码。`AutoCloseable` 把「释放」抽象成一个方法 `void close() throws Exception`，`try-with-resources`（TWR）把它与「作用域结束自动调用」绑定。

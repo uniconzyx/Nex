@@ -1,5 +1,24 @@
 # 02 · 方法重写与多态：invokevirtual 的动态分派
 
+```text
+override 是运行期行为替换；overload 是编译期选择
+    A a = new B();  a.f();
+    编译期按 A 找签名 -> 运行期按实际类型 B 分派
+
+invokevirtual 的动态分派：
+    对象头 ─▶ Klass ─▶ vtable（按签名槽位索引）
+    槽位在编译期确定，槽里放的是「实际类型的方法入口」
+    a ─▶ [Klass*] ─▶ vtable[3] = B.f     调用点只写「第 3 槽」
+
+四种调用指令：
+    invokevirtual   虚方法，走 vtable
+    invokespecial   私有 / 构造器 / super，静态绑定
+    invokeinterface 接口方法，运行时查 itable
+    invokestatic    静态方法
+
+不可 override：final / static / private（private 方法压根不是虚方法）
+```
+
 ## 一、理论根基：override 是运行期的行为替换
 
 - **重写（override）**：子类提供与父类**相同签名**的方法实现，运行期根据对象的实际类型选择版本。它体现的是"同一消息，不同实现"——面向对象多态的核心。

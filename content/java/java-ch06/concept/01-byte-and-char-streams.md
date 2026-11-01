@@ -1,5 +1,23 @@
 # 字节流与字符流：编码的边界在哪里
 
+```text
+字节与字符的分工：
+    InputStream / OutputStream   8 bit 字节，用于二进制（图片、压缩包、协议）
+    Reader / Writer              16 bit char，内部持有一个解码器
+
+编码边界就在这里：
+    字节流 ──CharsetDecoder──▶ 字符流 ──▶ String
+    new InputStreamReader(bin, UTF_8)
+    new OutputStreamWriter(bout, UTF_8)
+
+    多字节字符会被 buffer 边界切断 -> 必须用 Reader，别手工 new String(bytes)
+    （切在 UTF-8 三字节序列中间 -> 出现替换字符）
+
+几乎永远要包一层缓冲：
+    new BufferedReader(new InputStreamReader(in, UTF_8))
+    单字节 read 是系统调用级开销；Files.newBufferedReader 已含缓冲与默认 UTF-8
+```
+
 ## 主题一：字节与字符的分工
 
 `InputStream` / `OutputStream` 处理的是**字节**（`byte[]`），

@@ -1,5 +1,22 @@
 # 02 · List 的双实现：ArrayList 动态数组扩容 与 LinkedList 双向链表
 
+```text
+ArrayList = 动态数组：连续内存，随机访问 O(1)
+    [0][1][2][3][ ][ ][ ]      size=4, capacity=7
+    扩容：newCap = oldCap + (oldCap >> 1)   即 1.5 倍
+          Arrays.copyOf 搬整个数组（均摊 O(1) 的尾部 add）
+    中间插入/删除 O(n)：要移动后续所有元素
+
+LinkedList = 双向链表：头尾增删 O(1)，随机访问 O(n)
+    null ◀─ [prev|v|next] ◀─▶ [prev|v|next] ─▶ null
+    get(i) 从更近的一端遍历，最坏 n/2 步；每个节点额外两个引用开销
+
+选型：
+    默认 ArrayList（缓存友好，遍历与随机访问都更快）
+    只有「频繁头部增删 + 几乎不随机访问」才考虑 LinkedList
+    真正当队列/栈用时选 ArrayDeque（循环数组，快过 LinkedList）
+```
+
 ## 一、理论根基：两种「有序序列」的内存模型
 
 `List` 承诺「有序、可重复、支持下标」。但「有序」在内存里可以有两种完全不同的实现，对应两种时间/空间权衡：

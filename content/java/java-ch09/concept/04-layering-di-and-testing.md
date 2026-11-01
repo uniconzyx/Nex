@@ -1,5 +1,23 @@
 # 04 · 分层架构、依赖注入与测试
 
+```text
+分层：职责边界比技术选型更重要
+    Controller   协议层：参数绑定、校验、状态码、DTO 转换（不放业务规则）
+    Service      业务层：事务边界、领域规则、编排
+    Repository   持久层：只做数据存取，不写业务判断
+
+    依赖只能向下；Controller 直接调 Repository 是腐化的起点
+
+依赖注入：
+    构造器注入（推荐）  字段 final + 构造器参数 -> 不可变、易测、循环依赖立刻暴露
+    字段注入           隐藏依赖、无法 final、脱离容器即 NPE
+
+测试分层（越往下越慢）：
+    单元测试  mock 掉 Repository，只测 Service 规则（毫秒级）
+    切片测试  @WebMvcTest（只起 MVC）、@DataJpaTest（只起 JPA）
+    集成测试  @SpringBootTest 起完整上下文（覆盖装配问题，但慢）
+```
+
 ## 一、分层：职责边界比技术选型更重要
 
 ```java

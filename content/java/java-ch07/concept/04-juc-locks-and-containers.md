@@ -1,5 +1,25 @@
 # 04 · JUC 锁与并发容器：AQS、`ConcurrentHashMap` 与同步工具
 
+```text
+AQS 是 JUC 的「半成品锁」：
+    volatile int state   含义由子类定义（重入次数 / 许可数 / 计数）
+    + CLH 双向等待队列
+    + acquire/release 模板方法，子类只实现 tryAcquire / tryRelease
+
+    ReentrantLock   state = 重入次数（0 空闲）
+    Semaphore       state = 剩余许可
+    CountDownLatch  state = 计数（不可重置）
+
+ReentrantLock vs synchronized：
+    可中断等待 lockInterruptibly()      synchronized 不能
+    超时       tryLock(timeout)         不能
+    公平锁     构造参数 fair            不能
+    多条件队列 newCondition() 多个       只有一个 wait set
+    -> 需要上面任一条才用 Lock，否则 synchronized 更省心（JIT 会优化）
+
+并发容器：ConcurrentHashMap（CAS + 桶锁）/ CopyOnWriteArrayList（读多写极少）/ BlockingQueue
+```
+
 ## 一、理论根基：AQS —— JUC 的「半成品锁」
 
 `AbstractQueuedSynchronizer`（AQS）是 `ReentrantLock`、`Semaphore`、`CountDownLatch`、`ReadWriteLock` 的共同底座。它用两个零件撑起了整个 JUC 同步器家族：

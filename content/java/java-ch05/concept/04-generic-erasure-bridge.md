@@ -1,5 +1,23 @@
 # 04 · 泛型擦除与桥接方法（bridge method）
 
+```text
+类型擦除：泛型只活在编译期
+    List<String> 与 List<Integer> 运行时是同一个 Class
+    T 被擦成上界（默认 Object）-> 不能 new T()、不能 new T[]
+
+桥方法：擦除后如何保住多态
+    class Box<T>       { T get() { ... } }
+    class StringBox extends Box<String> { String get() { ... } }
+
+    擦除后父类是 Object get()，子类是 String get() -> 签名不匹配，override 失效
+    编译器在 StringBox 生成桥：
+        Object get() { return this.get(); }     // 桥 -> 真实实现
+
+    反射能看到两个 get()，isBridge() 为 true
+
+后果：不能重载「仅泛型参数不同」的方法（擦除后签名相同）
+```
+
 ## 一、理论根基：为什么 Java 选了「擦除」而非「具化」
 
 Java 5 引入泛型时，已有大量字节码与库（如 `ArrayList` 在 1.4 是 `Object` 容器）。为了**二进制向后兼容**（旧 class 文件仍能运行、泛型代码与非泛型代码互操作），Java 选择了**擦除法（type erasure）**：泛型类型参数只在**编译期**做类型检查与强转插入，编译后的字节码中类型参数被「擦除」为它的上界（无界时 `Object`），**不生成新的类**。

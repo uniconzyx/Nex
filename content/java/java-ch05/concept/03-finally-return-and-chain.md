@@ -1,5 +1,22 @@
 # 03 · finally 与 return 的执行顺序陷阱、异常链
 
+```text
+finally 与 return 的覆盖关系：
+    try { return 1; } finally { return 2; }      -> 返回 2（finally 吃掉返回值）
+    try { throw t; } finally { return 2; }       -> 异常被吞掉，返回 2
+
+    但：try { return x; } finally { x = 99; }    -> 返回原值
+        返回值在 finally 执行前已求值并暂存
+
+引用类型不同：
+    try { return list; } finally { list.add(1); }  -> 返回的 list 里已有 1
+    （改内容生效，改引用本身不生效）
+
+异常链：
+    throw new ServiceException("包装", e);   // 保留 cause
+    反例 catch (Exception e) { throw new RuntimeException(); }  丢掉原始栈
+```
+
 ## 一、理论根基：finally 的语义是「无论怎样都执行」
 
 `finally` 的设计意图是「清理代码必须运行」，与是否抛异常、是否 return 无关。但它的执行时机与返回值的交互，**是 Java 语义里最容易写错、也最常被追问的细节**。

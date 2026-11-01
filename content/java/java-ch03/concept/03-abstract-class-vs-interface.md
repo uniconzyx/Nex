@@ -1,5 +1,23 @@
 # 03 · 抽象类 vs 接口：语义差异与字节码真相
 
+```text
+两者回答的问题不同：
+    抽象类  「是什么」+ 共享状态（字段、构造器、protected 成员）
+    接口    「能做什么」+ 能力契约（可多实现）
+
+字节码真相：
+    abstract class A { abstract void f(); }   普通类 + ACC_ABSTRACT，可有实例字段
+    interface I { void f(); }                 ACC_INTERFACE|ACC_ABSTRACT
+                                              字段隐式 public static final
+                                              方法隐式 public abstract（default 除外）
+
+调用指令：
+    invokevirtual（类）    vs    invokeinterface（接口，查 itable）
+
+Java 8+ 演进：接口可有 default / static 方法，但不能有实例字段与构造器
+选型：需要状态与部分实现 -> 抽象类；只需能力契约且要多继承 -> 接口
+```
+
 ## 一、理论根基：两者回答不同的问题
 
 - **抽象类（abstract class）**："是什么"（is-a）的部分实现。可含抽象方法（无体，强制子类补完）、具体方法、实例字段、构造器。代表一组**紧密相关子类型的共享基类**。

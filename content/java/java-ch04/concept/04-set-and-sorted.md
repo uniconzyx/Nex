@@ -1,5 +1,21 @@
 # 04 · Set 与有序映射：HashSet/TreeSet/TreeMap 的本质
 
+```text
+Set 是「约束后的 Map」：元素就是 key，value 是占位对象
+    HashSet        -> HashMap          O(1)，无序，依赖 hashCode
+    LinkedHashSet  -> LinkedHashMap    保持插入顺序
+    TreeSet        -> TreeMap          红黑树，O(log n)，有序
+
+TreeSet 用 compareTo 判等，不是 equals！
+    compareTo 返回 0 的两个不同对象 -> 被当成同一元素（静默去重）
+    反例：BigDecimal 的 compareTo 忽略标度，1.0 与 1.00 被视为相同
+
+    所以：Comparator 必须与「你想要的相等语义」一致
+          不一致时 TreeSet 会「吞掉」你认为不同的元素
+
+正确姿势：不可变值对象 + equals/hashCode 一致；需排序再用 TreeSet + 显式 Comparator
+```
+
 ## 一、理论根基：Set 是「约束后的 Map」
 
 `Set` 承诺「元素不重复」。JDK 的实现极其务实：**`HashSet` 内部就是一个 `HashMap`，元素作键、value 是一个共享的空对象 `PRESENT`**；`add` 即 `map.put(e, PRESENT)`，靠 `HashMap` 的键唯一性保证去重。同理 `TreeSet` 内部是 `TreeMap`。

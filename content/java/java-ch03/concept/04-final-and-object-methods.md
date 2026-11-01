@@ -1,5 +1,22 @@
 # 04 · final 与 Object 基类：不可变语义与语言根基
 
+```text
+final 的三处语义：
+    final 类     不可继承（String 与不可变值对象）
+    final 方法   不可 override（也给 JIT 内联信号）
+    final 字段   只能赋值一次 -> 安全发布的前提（构造完成后一定可见）
+
+Object 的五个核心方法：
+    equals / hashCode   等价与散列契约
+    toString            默认是 Class@hash，日志里几乎必须重写
+    getClass            final，返回运行期类型
+    clone               protected 浅拷贝，需实现 Cloneable
+    finalize            已废弃，不要依赖
+
+不可变对象四要素：
+    类 final + 字段 private final + 无 setter + 可变成员做防御性拷贝
+```
+
 ## 一、理论根基：final 是"约束即契约"
 
 `final` 在 Java 里是"只能一次"的语义约束，但**作用于不同目标含义不同**：

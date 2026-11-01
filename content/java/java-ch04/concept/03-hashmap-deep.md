@@ -1,5 +1,23 @@
 # 03 · HashMap 深度：数组+链表+红黑树、扰动函数、扩容 rehash 与 ConcurrentHashMap
 
+```text
+JDK 8 的四层结构：
+    table[]（长度 2^n）
+      └ 桶：链表（长度 < 8）
+             └ 长度 ≥ 8 且 table.length ≥ 64 -> 转红黑树（查询 O(log n)）
+                    └ 退化到 ≤ 6 时退回链表
+
+扰动函数：(h = key.hashCode()) ^ (h >>> 16)
+    把高 16 位混进低位 -> 让下标 (n-1) & hash 分布更均匀
+
+扩容：threshold = capacity × 0.75
+    rehash 无需重算 hash：元素要么留原位 i，要么移到 i + oldCap
+    （2 的幂带来的性质，只需判断 hash & oldCap 是否为 0）
+
+ConcurrentHashMap（JDK 8）：CAS + 桶级 synchronized，读无锁
+键可变 = 埋雷：改字段后 hashCode 变了，原桶里再也找不到
+```
+
 ## 一、理论根基：哈希表的本质
 
 哈希表用「键 → 桶下标」的映射把查找从 O(n) 降到平均 O(1)。核心矛盾是：**键空间无限，桶数组有限**，必然冲突。HashMap 的解法是「链地址法」：每个桶挂一条冲突链（或树）。

@@ -1,5 +1,23 @@
 # 05 · 通配符 PECS、自限定类型、泛型方法与 @SuppressWarnings
 
+```text
+PECS：Producer Extends, Consumer Super
+                             能 get 出        能 add
+    List<? extends Number>   Number           ✗（连 Integer 都不行）
+    List<? super Integer>    Object           Integer
+    List<Number>             Number           Number
+
+    为什么 extends 不能 add：编译器不知道实际是 List<Integer> 还是 List<Double>
+    为什么 super 只能 get 到 Object：上界可能是任意父类型
+
+典型签名：
+    Collections.copy(List<? super T> dest, List<? extends T> src)
+                     └ 消费者(写)        生产者(读) ┘
+
+自限定泛型：class Enum<E extends Enum<E>>
+    -> 让 compareTo(E) 的参数类型精确为子类型，而不是 Enum
+```
+
 ## 一、理论根基：泛型不可协变与通配符的补偿
 
 `List<Integer>` 不是 `List<Number>` 的子类型（若允许，就能往 `List<Integer>` 塞 `Double`，破坏类型安全）。但很多 API 想表达「接受某种类型的任意子/超类型集合」——通配符 `? extends T` / `? super T` 正是为此而生，并用 **PECS**（Producer Extends, Consumer Super）规则约束其用法。
