@@ -3,6 +3,21 @@
 > 消费者组是 Kafka 的**并行消费单位**。理解它的关键是一句话：
 > **一个分区在同一时刻只能被组内的一个消费者消费** —— 这条不变式决定了并行度上限，也决定了 rebalance 的必要性。
 
+```text
+组模型：topic 的每个分区，同一时刻只被组内一个 consumer 消费
+    #partition > #consumer  -> 有 consumer 空闲
+    #partition < #consumer  -> 有 consumer 拿不到分区
+    group.id 相同 = 同一组（分摊）；不同 = 各自全量消费
+
+rebalance 触发：成员加入/离开、订阅变更、分区数变化
+    Eager（Stop-the-world）   全部撤销再重分配 -> 期间完全停消费
+    Cooperative（增量）       只迁移需要的分区 -> 抖动小（2.4+ 默认）
+
+    协作式仍要注意：位移提交要在分区被撤销前完成，否则会重复消费
+
+    静态成员（group.instance.id）：重启不触发 rebalance（滚动发布友好）
+```
+
 ## ① 组模型：分区与消费者的对应关系
 
 | 分区数 P | 消费者数 C | 结果 |

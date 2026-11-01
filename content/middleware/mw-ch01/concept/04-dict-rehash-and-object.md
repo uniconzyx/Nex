@@ -4,6 +4,23 @@
 
 ---
 
+```text
+dict 是 Redis 的心脏（所有 key 都在这），单线程下不能一次性 rehash
+    两张表：ht[0] 旧 / ht[1] 新（2 倍大小）
+    渐进式：每次增删查顺带搬 1 个桶 + 定时任务搬一批
+    查找：先 ht[0] 再 ht[1]；新增只写 ht[1]
+    rehashidx = 已搬迁到的桶下标；-1 表示当前未在 rehash
+
+    -> 把 O(n) 的搬迁摊到 O(1)/次，避免单次卡顿
+
+redisObject 头（所有 value 的外壳）：
+    ┌ type(4b) │ encoding(4b) │ lru(24b) │ refcount │ ptr ┐
+    type      string / list / set / zset / hash
+    encoding  int / embstr / raw / listpack / quicklist / skiplist ...
+    lru       空闲时间（maxmemory-policy 的 LRU/LFU 依据）
+    refcount  共享常用整数对象（0~9999）
+```
+
 ## ① dict：渐进式 rehash（不阻塞的单线程友好设计）
 
 （中立陈述）Redis 的 `dict` 用两张哈希表 `ht[0]`/`ht[1]`，负载因子超阈值（或 rehash 中）触发扩容/缩容。它**不一次性搬迁**全部 entry，而是用 `rehashidx` 记录进度，在执行增删改查及定时任务 `serverCron` 中**每次搬一个桶**，搬完才把 `ht[1]` 替换为 `ht[0]` 并清空 `ht[1]`。期间查找要查两张表。

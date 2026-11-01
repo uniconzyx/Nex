@@ -3,6 +3,21 @@
 > 「Kafka 会不会丢消息」这个问题问得太粗。正确问法是：
 > **在 acks 取什么值、`min.insync.replicas` 取什么值、重试开不开、幂等开不开的组合下，最坏会丢多少？**
 
+```text
+acks 三档与各自的丢失窗口：
+    acks=0       不等确认 -> 网络一抖就丢（吞吐最高）
+    acks=1       只等 leader 落盘 -> leader 崩溃且未同步则丢
+    acks=all     等 ISR 全部同步 -> 最安全（配 min.insync.replicas）
+
+    + enable.idempotence=true：broker 按 (PID, seq) 去重 -> 抵消重试造成的重复
+    + 事务：跨分区原子写，读端需 isolation.level=read_committed
+
+重试的三个约束：
+    重试可能重复 -> 必须业务幂等，或开启幂等生产者
+    重试会造成乱序 -> max.in.flight.requests 需为 1（或配幂等时 5）
+    retries 与 delivery.timeout.ms 要一起看，别让重试无限拖长尾
+```
+
 ## ① acks：三档语义与各自的丢失窗口
 
 | `acks` | 含义 | 什么时候算"成功" | 最坏丢失场景 |

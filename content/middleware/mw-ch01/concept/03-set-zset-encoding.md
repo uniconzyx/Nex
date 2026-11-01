@@ -4,6 +4,25 @@
 
 ---
 
+```text
+Set：
+    intset     全整数且元素少 -> 有序紧凑数组，查找用二分
+    hashtable  含非整数或超阈值（set-max-intset-entries）
+    （7.2 起小集合也可用 listpack）
+
+ZSet：
+    listpack          元素少且短 -> 按 score 有序的紧凑数组
+    skiplist + dict   超阈值 -> 跳表（按 score 有序）+ 字典（member -> score）
+                      为什么要两个结构：跳表管范围查询，字典管 O(1) 取分数
+
+    跳表期望 O(log n)，每层约 1/4 概率向上生长：
+    L3  ──────────●──────────────
+    L2  ────●─────●──────●───────
+    L1  ●─●─●─●─●─●─●─●─●─●─●─●
+
+    ZRANGEBYSCORE 走跳表    ZSCORE 走字典
+```
+
 ## ① Set：intset（整数集合）与 hashtable
 
 （中立陈述）Set 当**所有元素都是整数且元素个数 ≤ `set-max-intset-entries`（默认 512）**时编码为 `intset`（一块连续、按值升序排列的整数数组，按 `encoding` 字段统一用 16/32/64 位存储）；任一条件不满足即转成 `hashtable`（value 为 NULL 的字典）。intset 在插入更大范围整数时会**升级（upgrade）**编码位宽。

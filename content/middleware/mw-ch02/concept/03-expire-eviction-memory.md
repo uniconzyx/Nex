@@ -4,6 +4,25 @@
 
 ---
 
+```text
+过期键删除：两种策略都不完美，所以并用
+    惰性删除   访问时才判断是否过期 -> CPU 友好，但无人访问就永不释放
+    定期删除   每秒 10 次随机抽 20 个 key，过期比例 >25% 就继续抽（有上限）
+
+内存淘汰（maxmemory + maxmemory-policy）：
+    noeviction      写满直接报错（默认）
+    allkeys-lru     所有 key 淘汰最久未用
+    volatile-lru    只在设了过期时间的 key 里淘汰
+    allkeys-lfu     按访问频率淘汰（4.0+，抗扫描更稳）
+    volatile-ttl    优先淘汰剩余 TTL 最短的
+    random / volatile-random
+
+    LRU 是近似实现：redisObject.lru 字段 + 采样 N 个取最旧（不是精确 LRU）
+
+碎片：mem_fragmentation_ratio = RSS / used_memory
+    > 1.5 且持续增长 -> 考虑 activedefrag 或重启整理
+```
+
 ## ① 过期键删除：惰性删除 + 定期删除
 
 （中立陈述）给 key 设置 TTL 后，Redis 不会在到期瞬间自动删除，而是用两种策略配合：①**惰性删除（lazy expiration）**——访问 key 时检查是否过期，过期则删除并返回空；②**定期删除（active expire）**——`serverCron` 每秒约 10 次，每次随机抽取若干带 TTL 的 key，删除其中过期的，并自适应调整抽样力度。二者结合：惰性保证“不浪费 CPU 在无人访问的 key 上”，定期保证“过期 key 最终会被回收、不无限占内存”。见 `examples/ex08_expire_lazy.json`、`ex09_expire_active.json`。

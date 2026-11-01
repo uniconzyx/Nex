@@ -4,6 +4,22 @@
 
 ---
 
+```text
+AOF 三档 appendfsync（可靠性 vs 吞吐）：
+    always     每条命令都 fsync    最安全、最慢（写放大严重）
+    everysec   每秒 fsync 一次     默认；最多丢 1 秒数据
+    no         交给 OS 刷盘        最快，丢多少不可控
+
+AOF 重写（rewrite）：
+    命令日志会无限膨胀（同一 key 被反复 set）
+    重写 = 扫当前数据集，生成「最小等价命令集」
+    期间：子进程写新 AOF ＋ 父进程把新命令写入重写缓冲区 -> 完成后追加
+
+    混合持久化（4.0+）：前半段 RDB 快照 + 后半段增量命令 -> 加载更快
+
+对比 RDB：RDB 是时点快照（快、丢得多），AOF 是命令日志（细、可回放）
+```
+
 ## ① AOF 追加与 appendfsync 三策略
 
 （中立陈述）AOF（Append Only File）以**写命令日志**形式持久化：每执行一条写命令，就将其协议格式追加到 AOF 缓冲区，再按 `appendfsync` 策略刷盘。三种策略：`always`（每条命令 fsync）、`everysec`（每秒 fsync 一次，默认）、`no`（只写内核缓冲，由 OS 决定刷盘）。`fsync` 是把内核页缓存真正落到磁盘的同步系统调用，是耐久性与吞吐的分水岭。见 `examples/ex03_aof_always.json`、`ex04_aof_everysec.json`、`ex05_aof_no.json`。

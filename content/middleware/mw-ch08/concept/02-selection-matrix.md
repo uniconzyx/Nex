@@ -1,5 +1,20 @@
 # 选型对比矩阵：Kafka / RabbitMQ / RocketMQ / Pulsar（mw-ch08）
 
+```text
+五维对比框架（先定需求，再看矩阵）：
+    吞吐     Kafka > Pulsar ≈ RocketMQ > RabbitMQ
+    延迟     RabbitMQ / RocketMQ 低；Kafka 用批量换吞吐
+    顺序     都只保证「同 key / 同队列内」有序
+    可靠事务 Kafka 事务消息、RocketMQ 事务消息、RabbitMQ publisher confirm
+    运维     Kafka 需 KRaft/ZK；Pulsar 存算分离但组件更多
+
+定性选择：
+    日志 / 流式 / 大数据管道            -> Kafka
+    业务消息、延迟敏感、要事务           -> RocketMQ
+    复杂路由（exchange / routing key）  -> RabbitMQ
+    多租户、存算分离、分层存储           -> Pulsar
+```
+
 ## §1 五个维度的对比框架
 
 ### 1.1 吞吐

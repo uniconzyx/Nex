@@ -4,6 +4,21 @@
 
 ---
 
+```text
+主观下线 SDOWN：单个 Sentinel 认为某 master 超时无响应
+客观下线 ODOWN：≥ quorum 个 Sentinel 都判定下线 -> 才进入故障转移
+
+    每个 Sentinel 每 2s 向 master/slave 发 PING
+    down-after-milliseconds 内未回 -> 该 Sentinel 标记 SDOWN
+
+故障转移（由 leader Sentinel 执行，leader 靠 Raft 式投票产生）：
+    ① 从 slave 里挑新主：replica-priority 最小 -> 复制 offset 最大 -> runid 字典序最小
+    ② 其余 slave 指向新主（SLAVEOF new-master）
+    ③ 旧主恢复后被降级为 slave
+
+部署：哨兵数应为奇数且 ≥3，quorum 建议取多数（2/3），否则投票可能僵持
+```
+
 ## ① 主观下线 SDOWN 与客观下线 ODOWN（quorum 投票）
 
 （中立陈述）每个哨兵独立地以 `down-after-milliseconds` 为阈值：若在该时间内没收到主节点的有效心跳（PING 未回 PONG/LOADING/MASTERDOWN），该哨兵**单方面**认定主节点「主观下线（SDOWN）」。单个哨兵的 SDOWN 不足以触发故障转移——它向其他哨兵发送 `is-master-down-by-addr` 询问，当**确认下线的票数 ≥ quorum** 时，哨兵把主节点标记为「客观下线（ODOWN）」，ODOWN 才是真正启动故障转移的门槛。见 `examples/ex04_sdown.json`、`ex05_odown_quorum.json`。

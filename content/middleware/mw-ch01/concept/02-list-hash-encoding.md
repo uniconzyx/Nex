@@ -4,6 +4,20 @@
 
 ---
 
+```text
+List 的编码演进：
+    ziplist（小）+ linkedlist（大）  ->  quicklist（节点为 listpack 的双向链表，3.2+ / 7.0 换 listpack）
+    quicklist 是折中：一个节点装多条元素 -> 既省指针，又不必大块连续内存
+    分裂阈值：list-max-listpack-size（按元素数或单节点字节数）
+
+Hash：
+    listpack   字段少且短（hash-max-listpack-entries / -value）
+    hashtable  超阈值 -> 真字典（O(1) 查找，但每个字段多两份指针开销）
+
+    阈值存在的意义：小对象用紧凑编码省内存，大对象用哈希表保性能
+    注意：编码只「单向升级」——字段删回去也不会降级（避免反复转换抖动）
+```
+
 ## ① List：从 ziplist+linkedlist 到 quicklist
 
 （中立陈述）Redis 3.2 前 List 在元素少时用 `ziplist`、多时用 `linkedlist`；3.2 起统一为 `quicklist`——一个由**多个 listpack（Redis 7 起 ziplist 被 listpack 取代）节点**组成的双向链表，单个节点有大小上限（默认 `list-max-listpack-size = -2` 即 8KB），兼顾少量数据的紧凑与大量数据的分段。

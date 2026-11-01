@@ -4,6 +4,22 @@
 
 ---
 
+```text
+16384 个槽（位图仅 2KB，心跳包可携带完整槽位图）
+    槽 = CRC16(key) % 16384；{hashtag} 可把相关 key 强制同槽
+
+    MOVED   槽归属已永久变更 -> 客户端应更新本地槽表后重试
+    ASK     迁移中的临时重定向 -> 只对本次请求生效，客户端不更新槽表
+
+槽迁移（resharding）：
+    MIGRATING（源）/ IMPORTING（目标）-> 逐个 key MIGRATE -> 最后 SETSLOT 改归属
+
+脑裂防护：
+    min-replicas-to-write + min-replicas-max-lag
+    -> 可用从节点不足时主节点拒绝写入：宁可不可用，也不产生分叉数据
+    多数派原则：少数派分区里的主节点在 NODE_TIMEOUT 后停止服务
+```
+
 ## ① 16384 槽位、CRC16 键槽计算与 MOVED/ASK 重定向
 
 （中立陈述）Redis Cluster 把整个键空间划分为 **16384 个哈希槽（slot）**，每个 key 通过 `slot = CRC16(key) & 16383` 落到某个槽，槽再被分配给各主节点（每主负责一段连续或离散的槽）——这就是「预分片 + 槽路由」。客户端算出自家 key 的槽后，直连负责该槽的节点；若请求发错了节点，节点回 `MOVED <slot> <ip:port>` 让客户端重定向到正确节点并刷新本地槽映射；在**槽迁移进行中**，若 key 还在源节点但已归属目标节点，源节点回 `ASK <slot> <ip:port>`，客户端本次临时重定向、且不刷新本地映射（下一跳仍以 MOVED 为准）。见 `examples/ex08_slot_crc16.json`、`ex09_moved_ask.json`。
