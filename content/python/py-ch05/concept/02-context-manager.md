@@ -1,5 +1,28 @@
 # 上下文管理器：`with` 的三件事与自定义写法
 
+```text
+with 做的三件事：
+    ① __enter__()，返回值绑定到 as 后的名字
+    ② 执行 with 体
+    ③ 无论正常结束还是抛异常，都调 __exit__(exc_type, exc, tb)
+       __exit__ 返回 True -> 吞掉异常；返回 False/None -> 继续上抛
+
+两种写法：
+    class Ctx:
+        def __enter__(self): return resource
+        def __exit__(self, *exc): release(); return False
+
+    @contextlib.contextmanager
+    def ctx():
+        r = acquire()
+        try:
+            yield r          # yield 之前 = __enter__，之后 = __exit__
+        finally:
+            release()
+
+多资源：with a() as x, b() as y:    退出时按逆序释放（后进先出）
+```
+
 ## 1. `with` 究竟做了什么
 
 ```python

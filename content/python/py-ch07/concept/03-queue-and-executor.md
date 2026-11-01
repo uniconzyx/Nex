@@ -1,5 +1,24 @@
 # 03 · queue 与线程池：生产/消费与 Future
 
+```text
+queue.Queue 天生线程安全（内部自带锁 + 条件变量）
+    put / get / task_done / join
+    边界：maxsize 满时 put 阻塞；put_nowait 会抛 Full
+
+生产者-消费者：
+    生产者 ──put──▶ [ Queue ] ──get──▶ 消费者 ──task_done──▶ 未完成数归零 ──▶ join 返回
+
+ThreadPoolExecutor：
+    with ThreadPoolExecutor(max_workers=8) as ex:
+        futs = [ex.submit(fn, i) for i in range(20)]
+        for f in as_completed(futs): f.result()     # 谁先完成先拿
+    submit 返回 Future；result() 阻塞取结果，异常在此处重抛
+
+选型：
+    CPU 密集 -> ProcessPoolExecutor（绕开 GIL）
+    IO 密集  -> 线程池 / asyncio
+```
+
 ## 3.1 `queue.Queue`：天生线程安全
 
 `queue.Queue` 内部已经用锁 + 条件变量实现好了「入队阻塞 / 出队阻塞」，你不需要再加锁：

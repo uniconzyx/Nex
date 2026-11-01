@@ -1,5 +1,24 @@
 # 04 · asyncio：协程、事件循环与取消
 
+```text
+协程是「可暂停的函数」：await 处让出控制权给事件循环
+    async def fetch(): await asyncio.sleep(1)    # 不阻塞线程，只让出
+
+事件循环：单线程内轮转所有就绪任务
+    ┌───────────────────────────────────┐
+    │ ready 队列 ─▶ 执行到 await ─▶ 挂起  │
+    │      ▲                │           │
+    │      └── IO 就绪 ◀─────┘           │
+    └───────────────────────────────────┘
+
+三种编排：
+    gather(*aws)     并发跑；默认一个异常就外抛（return_exceptions=True 可收集）
+    TaskGroup()      结构化并发，退出时自动等全部，异常聚合成 ExceptionGroup
+    wait(...)        按 FIRST_COMPLETED / ALL_COMPLETED 精细控制
+
+取消：task.cancel() 在下一个 await 点抛 CancelledError -> 需 try/finally 清理
+```
+
 ## 4.1 协程是「可暂停的函数」
 
 `async def` 定义的函数调用后**不会执行**，而是返回一个协程对象；必须交给事件循环（`await`、`asyncio.run`、`create_task`）才会跑。

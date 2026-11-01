@@ -1,5 +1,21 @@
 # 05 · 可变默认参数陷阱与装饰器原理
 
+```text
+可变默认参数陷阱：
+    def add(x, acc=[]):        # [] 在 def 执行时创建一次，所有调用共用
+        acc.append(x); return acc
+    add(1) -> [1]   add(2) -> [1, 2]     <- 不是 [2]
+    正解：def add(x, acc=None): acc = [] if acc is None else acc
+
+装饰器 = 接受函数、返回函数的高阶函数（本质是闭包）
+    @log
+    def f(): ...
+    # 等价于 f = log(f)
+
+    f(...) ─▶ wrapper(*a, **kw) ─▶ 前置 ─▶ 原函数 ─▶ 后置 ─▶ 返回
+    必须用 functools.wraps 保留 __name__/__doc__，否则调试与文档全乱
+```
+
 ## 一、可变默认参数陷阱（坑源）
 
 默认参数在 `def` **执行时**求值并绑定一次，之后所有调用共享同一个默认对象。若默认值是可变对象（`list/dict/set`），`def f(x=[]): x.append(1)` 会让多次调用共享同一列表 → 累积污染。

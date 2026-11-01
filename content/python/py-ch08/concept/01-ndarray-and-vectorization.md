@@ -1,5 +1,19 @@
 # 01 · ndarray 与向量化
 
+```text
+ndarray 特殊在哪：
+    ┌ 连续内存块 + dtype + shape + strides ┐
+    同构（同一 dtype）-> 可整块 SIMD 运算，无需逐元素解释
+    list 存的是 PyObject 指针数组 -> 每个元素一次类型检查，慢两个数量级
+
+向量化 = 把循环交给编译好的 C 循环
+    [x*2 for x in lst]     Python 层循环，每次乘都要拆装箱
+    arr * 2                C 循环 + SIMD，无解释器开销
+
+经验：数组运算通常比等价 Python 循环快 10~100 倍
+     dtype 选小（int32 而非 int64、float32 而非 float64）可省一半内存与带宽
+```
+
 ## 主题一：ndarray 到底特殊在哪
 
 Python 的 `list` 是一串**指针**：每个元素都是一个独立的 `PyObject`，可以放任意类型，也可以随时换类型。代价是——遍历它必须逐个解引用、逐个做类型分派。

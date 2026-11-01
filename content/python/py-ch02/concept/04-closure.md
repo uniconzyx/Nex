@@ -1,5 +1,24 @@
 # 04 · 闭包：自由变量绑定、延迟绑定与 nonlocal
 
+```text
+闭包 = 函数 + 它携带的自由变量环境
+    def counter():
+        n = 0
+        def inc():
+            nonlocal n        # 声明 n 来自外层，否则会变成局部变量
+            n += 1
+            return n
+        return inc
+
+实现：自由变量存在 cell 对象里，函数通过 __closure__ 持有
+    inc.__closure__[0].cell_contents     -> 当前 n
+
+延迟绑定陷阱：
+    fs = [lambda: i for i in range(3)]
+    [f() for f in fs]     -> [2, 2, 2]    所有 lambda 共享同一个 i
+    修复：lambda i=i: i   用默认参数在定义时固化当前值
+```
+
 ## 一、理论根基：函数是携带环境的对象
 
 闭包 = 函数 + 其定义时所处的**词法环境**（外层作用域变量）。当内层函数引用了外层函数的局部变量（自由变量 free variable），这些变量不能被回收，被"冻结"进函数的 `__closure__`（一组 `cell` 对象）。这是函数式编程的核心抽象：把"数据"和"行为"打包带走。

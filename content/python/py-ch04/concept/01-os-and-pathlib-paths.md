@@ -1,5 +1,23 @@
 # os 与 pathlib：路径对象、目录遍历与跨平台
 
+```text
+路径不是字符串：pathlib 把路径变成一等对象
+    Path('/data') / 'a.csv'       # 用 / 拼接，自动处理分隔符
+    p.suffix  p.stem  p.parent    # 结构化取字段，不用字符串切割
+
+    绝对路径会「吃掉」前面部分：
+    os.path.join('a', '/b')  ->  '/b'
+    Path('a') / '/b'         ->  '/b'      同一语义，别以为是 bug
+
+跨平台差异：
+    Windows  \ 与 / 都接受，但大小写不敏感，且有盘符与保留名（CON/PRN/AUX）
+    POSIX    只有 /，大小写敏感，无盘符
+
+遍历：
+    os.walk     产出 (dirpath, dirnames, filenames)，可自顶/自底
+    Path.rglob  按 glob 模式递归，返回 Path 对象
+```
+
 ## 1. 路径不是字符串：`pathlib` 把路径变成一等对象
 
 早期 Python 用 `os.path` 把路径当**普通字符串**处理：

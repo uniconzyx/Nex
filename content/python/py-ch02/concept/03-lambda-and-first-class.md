@@ -1,5 +1,20 @@
 # 03 · lambda 与一等公民函数
 
+```text
+函数是一等对象：可赋值、可入参、可返回、可放进容器
+    ops = {'add': lambda a, b: a + b}
+    sorted(items, key=lambda x: x.age)      # key 只接受一个参数
+
+lambda 是匿名函数对象，不是「文本替换」：
+    f = lambda x: x * 2
+    # 等价于 def f(x): return x * 2      差别：lambda 体只能是单个表达式
+
+对比：
+    C++    lambda 生成唯一闭包类型，可 [=]/[&] 捕获，可编译期内联
+    Java   lambda 只能捕获 effectively final，须匹配函数式接口
+    Python 无类型检查、无捕获列表（直接读外层名字 -> 闭包）
+```
+
 ## 一、理论根基：函数作为值
 
 一等公民（first-class）意味着函数与其它值（int、对象）地位相同：能赋给变量、作参数、作返回值、存容器。高阶函数（`map`/`filter`/`sorted(key=)`）依赖此特性。

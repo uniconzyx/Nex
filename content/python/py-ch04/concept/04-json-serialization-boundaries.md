@@ -1,5 +1,24 @@
 # json：序列化边界、参数与自定义编码
 
+```text
+类型映射（能过 / 会炸）：
+    dict->object  list/tuple->array  str->string
+    int/float->number   True/False->true/false   None->null
+
+    ✗ set、bytes、datetime、Decimal、自定义类   -> not JSON serializable
+    ✗ dict 的非字符串键                          -> 被强转成字符串（1 与 "1" 撞车）
+
+三种扩展方式：
+    default=callable   遇到不支持对象时调用，返回可序列化值
+    cls=JSONEncoder    子类化，集中处理多类型
+    手写 to_dict       需要稳定 schema 时最可控
+
+    ensure_ascii=False  中文不转 \uXXXX（体积小、可读）
+    sort_keys=True      输出稳定 -> 便于 diff 与做缓存键
+
+反向：object_hook 定制解码；float 有二进制误差，金额别用 JSON float
+```
+
 ## 1. 类型映射表：什么能过、什么会炸
 
 `json` 模块只认识 JSON 规范里的 6 种类型。Python 类型到 JSON 的映射：

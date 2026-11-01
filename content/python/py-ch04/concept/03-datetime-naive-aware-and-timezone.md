@@ -1,5 +1,23 @@
 # datetime：naive / aware、时区与夏令时
 
+```text
+三种时间表示，别混着用：
+    naive datetime    无 tzinfo，含义取决于「你在哪」
+    aware datetime    带 tzinfo，绝对时刻明确
+    timestamp         自 epoch 的秒数，绝对、无歧义
+
+timestamp() 的坑：
+    naive_dt.timestamp()   按「本地时区」解释 -> 换台机器结果就不同
+    aware_dt.timestamp()   正确，绝对时刻
+
+时区实现：
+    datetime.timezone.utc   固定偏移，简单场景够用
+    zoneinfo.ZoneInfo       带 DST 规则（含「重复的 01:30」问题）
+
+DST 切换日的 02:30 可能不存在、也可能出现两次
+    -> 存储一律 UTC，只在展示层转本地；跨时区调度必须 aware + 明确规则
+```
+
 ## 1. 三种时间表示，别混着用
 
 Python 的 `datetime` 对象分两类：

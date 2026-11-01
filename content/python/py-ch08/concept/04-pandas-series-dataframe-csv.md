@@ -1,5 +1,25 @@
 # 04 · pandas：Series、DataFrame 与 CSV
 
+```text
+DataFrame = 一组共享索引的 Series（列）
+               index
+                ┌───┬────┬────┐
+                │   │ A  │ B  │   每列一个 dtype
+                ├───┼────┼────┤
+                │ 0 │ 1  │ 3  │
+                │ 1 │ 2  │ 4  │
+                └───┴────┴────┘
+
+索引对齐（比按位置更重要）：
+    s1 + s2     按索引标签对齐相加，不是按行号
+    缺失标签 -> NaN（不报错）-> 用 fill_value 或先 reindex
+
+CSV 读写：
+    pd.read_csv(p, dtype={'id': str}, parse_dates=['ts'], na_values=['', 'NA'])
+    -> id 必须显式 str，否则 001 变 1、大整数丢精度
+    to_csv(p, index=False, encoding='utf-8-sig')      # Excel 需要 BOM
+```
+
 ## 主题一：Series / DataFrame 与索引对齐
 
 `Series` 是「带标签的一维数组」，`DataFrame` 是「共享同一行索引的 Series 字典」。核心差别在于：**pandas 的运算默认按标签对齐，而不是按位置**。

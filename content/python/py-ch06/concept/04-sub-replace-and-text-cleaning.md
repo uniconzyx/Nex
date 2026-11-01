@@ -2,6 +2,23 @@
 
 替换是正则最常用的落地场景，但也是最容易被滥用的地方。
 
+```text
+re.sub 的三种替换形态：
+    字符串模板   re.sub(r'(\d+)-(\d+)', r'\2-\1', s)      \1 \2 或 \g<name>
+    函数回调     re.sub(pat, lambda m: m.group(0).upper(), s)
+    计数控制     re.sub(pat, repl, s, count=1)              只换第一处
+
+文本清洗配方（顺序有讲究）：
+    ① 统一空白    re.sub(r'\s+', ' ', s).strip()
+    ② 去零宽字符  re.sub(r'[\u200b-\u200d\ufeff]', '', s)
+    ③ 全角转半角  先 str.maketrans 建表，再 str.translate
+    ④ 结构提取    命名组取出需要的字段
+
+边界：能用解析库就别用正则
+    HTML -> lxml/bs4     JSON -> json     CSV -> csv
+    正则只适合「行内、结构简单、无嵌套」的文本
+```
+
 ## 4.1 `re.sub` 的三种替换形态
 
 | 形态 | 示例 | 说明 |

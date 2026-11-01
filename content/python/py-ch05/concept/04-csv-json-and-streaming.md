@@ -1,5 +1,25 @@
 # csv 与 json：结构化文件的读写与边界
 
+```text
+csv 为什么必须 newline=''：
+    csv 模块自己写 \r\n；若再经文本模式的换行转换
+    -> 行尾变成 \r\r\n，读回来多出空行
+
+    with open(p, newline='', encoding='utf-8') as f:
+        w = csv.DictWriter(f, fieldnames=cols)
+        w.writeheader(); w.writerows(rows)
+
+    delimiter / quotechar / quoting 显式指定，别赌 Excel 的默认
+
+json 的两种量级：
+    json.dump(obj, f)        先构造完整字符串 -> 大对象内存翻倍
+    JSONL（每行一个对象）     可流式读，内存 O(1)
+
+流式处理大数据：
+    for line in f: ...       按行流式，内存恒定
+    list(csv.reader(f))      全量进内存 O(n) -> 大文件会炸
+```
+
 ## 1. `csv`：为什么必须 `newline=""`
 
 `csv.writer` 自己负责写 `\r\n`（RFC 4180 规定行尾是 CRLF）。

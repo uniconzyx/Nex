@@ -1,5 +1,22 @@
 # sys：命令行参数、导入路径与标准流
 
+```text
+sys.argv：最原始的入参通道
+    python app.py --x 1     ->   sys.argv = ['app.py', '--x', '1']
+    argv[0] 是脚本名（相对/绝对取决于调用方式），真实参数从 argv[1] 开始
+    复杂参数交给 argparse，别手写解析
+
+sys.path：模块搜索路径（list，运行时可改）
+    ['', ...标准库..., ...site-packages...]
+    '' 表示当前工作目录 -> 换个目录运行，import 行为就变了
+    -> 工程上用包 + 入口脚本，不依赖 CWD
+
+标准流：
+    stdin/stdout/stderr 都是文本流；stderr 一般不缓冲
+    stdout 被重定向到文件时是块缓冲 -> 混用 print 与 stderr 会乱序
+    排查：print(..., flush=True) 或 logging
+```
+
 ## 1. `sys.argv`：最原始的入参通道
 
 `sys.argv` 是一个列表：`argv[0]` 是脚本名（或 `-c` / `-m` 时的占位），之后是用户给的参数，**全部是字符串**。

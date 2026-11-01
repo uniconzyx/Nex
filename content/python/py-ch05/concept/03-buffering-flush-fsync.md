@@ -1,5 +1,24 @@
 # 缓冲、flush、fsync：`write` 成功不等于数据安全
 
+```text
+三层存储，三次「提交」：
+    Python 缓冲 ──flush()──▶ OS 页缓存 ──fsync()──▶ 磁盘
+
+    f.write(b'x')          只进了 Python 缓冲区，磁盘上什么都没有
+    f.flush()              推给内核（页缓存），断电仍可能丢
+    os.fsync(f.fileno())   落到物理介质，每次几 ms
+
+    with 退出 -> 隐式 flush（但不 fsync！）
+
+缓冲策略：
+    buffering=0   仅二进制模式，完全无缓冲
+    buffering=1   行缓冲，仅文本模式
+    buffering=N   固定字节缓冲
+    默认          文本实际是块缓冲；重定向到文件时通常 4~8KB
+
+原子写：写临时文件 -> flush + fsync -> os.replace(tmp, dst)（同分区才原子）
+```
+
 ## 1. 三层存储，三次"提交"
 
 一次 `f.write("hello")` 到数据真正落在磁盘上，跨过三层：

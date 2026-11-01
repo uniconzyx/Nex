@@ -1,5 +1,22 @@
 # 文本模式与二进制模式：编码、换行与 BOM
 
+```text
+两种模式，两套世界：
+    文本模式   'r'/'w'    -> str，自动编解码，并做换行转换
+    二进制模式 'rb'/'wb'  -> bytes 原样进出，不做任何转换
+
+    文本模式 + 通用换行：读时 \r\n -> \n，写时 \n -> os.linesep
+    -> 校验和、协议、二进制格式必须走二进制模式
+
+编码：显式指定，别依赖 locale（Windows 常是 cp936）
+    open(f, encoding='utf-8')
+    UnicodeDecodeError 时 errors='replace' 会静默毁数据 -> 优先修编码
+
+BOM：
+    utf-8-sig  读写时吃掉 BOM；用 utf-8 读带 BOM 文件，首字段会多 \ufeff
+    Excel 导出的 CSV 常带 BOM -> 用 utf-8-sig
+```
+
 ## 1. 两种模式，两套世界
 
 `open()` 的 `mode` 决定了 Python 给你的是 **`str`** 还是 **`bytes`**：
