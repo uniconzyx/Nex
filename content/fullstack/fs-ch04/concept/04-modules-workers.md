@@ -1,6 +1,23 @@
 # fs-ch04 · 模块系统与并发
 
 
+```text
+CommonJS vs ESM：
+    CJS  require 同步、运行时解析、导出值拷贝（后续修改不同步）
+         module.exports 是对象；按路径缓存；循环依赖返回「未完成的对象」
+    ESM  import 静态提升、编译期解析、live binding（实时绑定）
+         循环依赖会得到暂时性死区 / 未初始化引用
+    同一文件被两种方式加载 -> 两个实例（双包危险）
+
+并发模型选型：
+    worker_threads   真多线程（独立 JS 堆），适合 CPU 密集
+                     postMessage 结构化克隆传值；共享内存用 SharedArrayBuffer
+    cluster          多进程，端口共享，横向吃满多核
+    child_process    外部进程，隔离最彻底、开销最大
+
+    CPU 密集 -> worker；IO 密集 -> 单线程事件循环就够
+```
+
 ## 一、CommonJS vs ESM（模块封装、循环依赖、require 缓存）
 
 CommonJS（require / module.exports）同步加载、有缓存；ESM（import / export）静态可分析、异步加载、严格模式。二者在循环依赖、缓存、语法上差异显著，Node 用 .cjs/.mjs 或 package.json 的 type 字段区分。

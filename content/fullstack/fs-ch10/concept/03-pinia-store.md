@@ -5,6 +5,28 @@ Pinia 是 Vue 官方推荐的状态管理库，定位是「Vuex 的继任者，�
 `actions`、`getters` 的割裂。理解 Pinia 的关键，是先理解它只是「把一组响应式状态 + 派生值 +
 修改方法，按模块封装，并保证全局单例」。
 
+```text
+defineStore 的两种写法：
+    Option 式   state / getters / actions          直观，像 Vuex
+    Setup 式    ref / computed / function           与组合式 API 一致，更灵活
+
+    export const useUser = defineStore('user', () => {
+      const profile = ref(null)
+      const isLogin = computed(() => !!profile.value)
+      async function login() { /* ... */ }
+      return { profile, isLogin, login }
+    })
+
+store 之间依赖：在 action 里调另一个 useXxxStore()
+    （不要放模块顶层，避免初始化顺序问题）
+    循环依赖 -> 拆出第三个 store，或用事件/回调解耦
+
+要点：
+    store 是单例，跨组件共享同一份状态
+    直接解构会丢响应性 -> 用 storeToRefs()
+    setup 式返回的 ref 在模板里自动解包
+```
+
 ## defineStore 的两种写法
 
 Pinia 提供两种定义 store 的风格：

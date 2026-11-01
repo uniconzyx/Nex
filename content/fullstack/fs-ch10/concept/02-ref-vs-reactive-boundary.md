@@ -4,6 +4,26 @@
 一条总纲：**把「一个会整体被替换的对象」交给 reactive；把「一个独立的原始值或需要被独立传递的值」
 交给 ref**。更实用的判断是——这个值会不会被解构、会不会被单独传给函数？会，就用 ref。
 
+```text
+ref 与 reactive 的边界：
+    ref(x)        包一层 { value }，任意类型都行（含原始值）
+    reactive(o)   只能代理对象 / 数组，且直接代理原对象
+
+    为什么需要 ref：JS 无法代理「原始值」-> 必须装箱
+
+解构会丢响应性：
+    const s = reactive({ a: 1 });
+    let { a } = s;                 // a 变成普通值，不再响应
+    补救：toRefs(s) -> 每个字段一个 ref，解构后仍响应
+
+    ref 在模板里自动解包，在 JS 里必须写 .value
+    shallowRef / shallowReactive 只代理第一层（大对象性能优化）
+
+口诀：
+    原始值、或需要整体替换 -> ref
+    固定形状对象、只改字段   -> reactive
+```
+
 ## 何时用 ref，何时用 reactive
 
 - **ref** 的适用场景：原始类型（`count`、`visible`、`name`）；需要被单独抽出来传给别处、或作为

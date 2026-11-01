@@ -1,5 +1,23 @@
 # 03 · 原型链、class 语法糖与继承
 
+```text
+原型链：属性查找沿 __proto__ 逐级上溯，直到 null
+    obj ─▶ Foo.prototype ─▶ Object.prototype ─▶ null
+    读：先查自身，未命中沿链上溯
+    写：永远写自身（除非原型上有 setter / 只读属性）
+
+class 是语法糖：
+    class Foo { m(){} }   ≈   function Foo(){}; Foo.prototype.m = function(){}
+    差异：不可当普通函数调用、方法不可枚举、默认严格模式、super 绑定
+
+两种继承：
+    Object.create(proto)   显式指定原型，最清晰
+    class B extends A      双链：B.__proto__ = A（静态继承）
+                                B.prototype.__proto__ = A.prototype（实例继承）
+
+instanceof 本质就是查链：A.prototype 是否出现在 obj 的原型链上
+```
+
 ## 一、原型链：JavaScript 的「类」真相
 
 JavaScript 的对象**没有真正的类**（ES6 `class` 只是语法糖）。每个对象都有一个内部槽 `[[Prototype]]`（可通过 `Object.getPrototypeOf(obj)` 读取，旧写法 `obj.__proto__`），指向它的**原型对象**。

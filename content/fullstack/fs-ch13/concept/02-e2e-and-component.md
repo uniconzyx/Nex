@@ -5,6 +5,24 @@ E2E（端到端）测试模拟真实用户在浏览器里点完整条路径，�
 异步渲染没完成、动画没结束、网络慢半拍、某个定时任务还没跑。本章的重点不是「怎么写一个 E2E」，
 而是「怎么让 E2E 稳定」。
 
+```text
+稳定性第一原则：等待条件，不要 sleep
+    ✗ await page.waitForTimeout(2000)        机器慢就随机失败
+    ✓ await expect(locator).toBeVisible()    轮询到条件成立或超时
+
+选择器优先级（越靠前越稳）：
+    role + name   getByRole('button', { name: '登录' })   贴近用户与无障碍树
+    label / placeholder / text                            语义稳定
+    data-testid                                           契约化，不怕改样式
+    CSS class / xpath                                     最脆，重构即碎
+
+组件测试 vs E2E：
+    组件测试  挂载单个组件 + mock 依赖，快、定位准，覆盖交互细节
+    E2E       真浏览器跑完整链路，慢、易抖，只覆盖关键路径
+
+分层比例：大量组件测试 + 少量关键路径 E2E，别拿 E2E 覆盖所有分支
+```
+
 ## 稳定性第一原则：等待条件，不要 sleep
 
 最经典的 flaky 来源是 `sleep(2000)`：慢一点就超时，快一点又白等。正确做法是用「**等待某个

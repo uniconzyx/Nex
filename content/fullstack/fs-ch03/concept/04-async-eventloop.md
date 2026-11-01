@@ -1,5 +1,23 @@
 # 04 · 事件循环、Promise 与 async/await
 
+```text
+单线程如何不卡死：把「等待」交给宿主（浏览器/Node），回调进队列
+    call stack 空 ──▶ 清空 microtask 队列
+                     ──▶ 取 1 个 macrotask ──▶ 再清空 microtask
+
+    microtask   Promise.then / queueMicrotask / MutationObserver
+    macrotask   setTimeout / setInterval / IO / UI 事件
+
+    setTimeout(f, 0) 不保证 0ms 后执行，只保证「下一轮才轮到」
+    微任务可以饿死渲染：无限 then 链 -> 页面完全无响应
+
+Promise 组合子：
+    all         全成功才成功，任一 reject 即整体 reject
+    allSettled  等全部落定，返回 {status, value|reason}
+    race        第一个落定（成功或失败都算）
+    any         第一个成功（全失败才 reject）
+```
+
 ## 一、事件循环：单线程如何不卡死
 
 JavaScript 是**单线程**，靠**事件循环（Event Loop）**调度异步任务。运行时有一条**调用栈（call stack）**和若干队列：

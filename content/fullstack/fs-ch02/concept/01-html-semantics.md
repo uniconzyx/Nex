@@ -1,5 +1,24 @@
 # 01 · HTML 语义化：从「机器可读」到「可访问」
 
+```text
+语义化 = 让「机器可读」，不是让「页面好看」
+    <div onclick>   无语义：无障碍树里只有「一个容器」
+    <button>        自带角色、键盘可达（Enter/Space）、焦点管理
+
+解析器产出两棵树：
+    HTML 文本 ─▶ DOM 树（结构）
+              └─▶ Accessibility Tree（角色 / 名称 / 状态）─▶ 屏幕阅读器、语音控制
+
+    所以 <h1> 的意义是「给无障碍树一个 heading 角色与层级」，不是「变大变粗」
+    想改样子 -> CSS；想让它成为标题 -> <h1>..<h6>
+
+语义元素的分工：
+    header / nav / main / footer   地标（landmark），可快速跳转
+    section + 标题                  有主题的分块；没有标题的 section 没有意义
+    article                         可独立分发的内容单元
+    label + input                   建立可访问名称（for/id 或包裹）
+```
+
 ## 一、理论根基：语义化不是「好看」，而是「机器可读」
 
 从计算机科学视角，**语义（semantics）** 指标记（markup）携带的*含义*，而非*呈现*。HTML 的设计目标是描述文档结构（类似 LaTeX 的 `\section`/`\emph`），呈现交给 CSS。语义化的本质是：

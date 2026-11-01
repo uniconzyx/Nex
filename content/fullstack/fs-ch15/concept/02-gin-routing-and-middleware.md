@@ -4,6 +4,23 @@ Gin 是 Go 里最主流的 Web 框架，它的两个核心抽象——**路由**
 「路由/拦截器」高度对应，但实现风格更轻。理解它们，等于理解了「一个 HTTP 请求在框架里是怎么
 被一层层处理的」。
 
+```text
+路由树（radix tree）：
+    /users/:id          参数节点
+    /users/:id/posts    同一前缀共享节点
+    /static/*filepath   通配节点，捕获剩余路径
+    冲突：/users/new 与 /users/:id 在同一层冲突 -> Gin 启动时 panic（好事，早暴露）
+
+中间件链：洋葱模型
+    r.Use(A, B)
+    A 前 ─▶ B 前 ─▶ handler ─▶ B 后 ─▶ A 后
+    c.Next()  显式进入下一环
+    c.Abort() 直接中断，不再调后续
+    c.Set("user", u) / c.Get 在链上传值（本质 map，注意类型断言）
+
+    gin.Recovery() 放最外层：panic 转 500，别让单个请求拖垮进程
+```
+
 ## 路由树（radix tree）
 
 Gin 的路由不是「正则挨个匹配」，而是基于 **radix tree（基数树/压缩前缀树）**。把 `/api/users/:id`

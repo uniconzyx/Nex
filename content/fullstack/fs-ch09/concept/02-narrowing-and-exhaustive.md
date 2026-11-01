@@ -19,6 +19,28 @@ function area(shape: Shape): number {
 `never`，赋值合法；一旦以后新增了 `Triangle` 而忘了加分支，这里立刻报错。
 **这是把「以后有人改代码」这件事也纳入类型系统。**
 
+```text
+收窄（narrowing）的来源：
+    typeof x === 'string'          原始类型
+    x instanceof Date              类实例
+    'k' in obj                     属性存在性
+    function isFoo(v): v is Foo    自定义类型谓词
+    判别联合的共同标签字段           最可靠
+
+    判别联合示例：
+    type R = { ok: true; data: T } | { ok: false; error: E }
+    if (r.ok) r.data; else r.error;
+
+穷尽性检查（让漏分支变成编译错误）：
+    switch (r.kind) {
+      case 'a': ...
+      case 'b': ...
+      default: const _never: never = r;    // 新增 kind 时这里立刻报错
+    }
+
+    never 是「不可能有值」的类型 -> 能赋值成功说明分支确实穷尽了
+```
+
 ## 收窄的几种来源
 
 | 手段 | 例子 | 编译器的判断依据 |

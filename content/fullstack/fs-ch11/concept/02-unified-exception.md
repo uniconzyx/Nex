@@ -5,6 +5,24 @@
 各处；② 有的方法忘了 catch，异常一路冒泡变成 Tomcat 的 500 白页；③ 最危险的是——**把异常信息
 甚至堆栈直接返给了前端**，既泄露内部实现（数据库表名、框架版本、代码路径）又给攻击者递刀子。
 
+```text
+@ControllerAdvice：一处收口，处处生效
+    @ExceptionHandler(BizException.class)                   -> 400 + 业务错误码
+    @ExceptionHandler(MethodArgumentNotValidException.class) -> 400 + 字段级错误
+    @ExceptionHandler(Exception.class)                      -> 500 兜底（不泄漏堆栈）
+
+统一响应体：
+    { "code": "USER_NOT_FOUND", "message": "...", "traceId": "..." }
+    code 给程序判断、message 给人看、traceId 用来串日志
+
+分层原则：
+    Service 抛领域异常（不关心 HTTP）
+    Advice 负责「领域异常 -> HTTP 状态码 + 响应体」的翻译
+    -> 业务代码里看不到 HttpServletResponse
+
+反面：catch 后 return null（丢原因）、把 e.getMessage() 直接透给前端
+```
+
 ## @ControllerAdvice：一处收口，处处生效
 
 Spring 提供 `@RestControllerAdvice`（=`@ControllerAdvice` + `@ResponseBody`），它能在**一个类里**

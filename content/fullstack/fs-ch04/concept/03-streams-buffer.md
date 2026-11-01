@@ -1,6 +1,23 @@
 # fs-ch04 · 流、背压与 Buffer 编码
 
 
+```text
+流的四种：Readable / Writable / Duplex / Transform（Transform 是双工特例）
+
+背压（backpressure）：写端比读端快时必须刹车
+    write(chunk) 返回 false  -> 缓冲区达到 highWaterMark，应暂停
+    等 'drain' 事件再继续
+    ┌ 读 ──write()=false──▶ 暂停读取 ──drain──▶ 继续读取 ┐
+    忽略返回值 = 内存无限增长（生产 OOM 的常见来源之一）
+
+pipe 已内建背压，但错误不会自动传播：
+    stream.pipeline(src, transform, dst, cb)     // 推荐
+
+Buffer 编码：
+    Buffer.from(str, 'utf8') / buf.toString('utf8')
+    按字节切片可能切在多字节字符中间 -> 用 StringDecoder 保住字符边界
+```
+
 ## 一、Stream 流控与背压（highWaterMark / write 返回值 / drain）
 
 流是处理「连续数据」的抽象：Readable 生产数据、Writable 消费数据、Transform 既是又是。背压是有界缓冲下的反馈机制：消费者慢于生产者时，靠 write() 的布尔返回值 + drain 事件形成负反馈，使内存占用有界。

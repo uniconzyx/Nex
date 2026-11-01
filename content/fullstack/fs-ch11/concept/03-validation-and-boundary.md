@@ -4,6 +4,22 @@
 `if (name.length() < 2)`、repository 里再查一遍。结果同一个规则出现三遍，改一处漏两处。收口
 的原则是：**校验发生在边界，且尽量声明式、集中化**。
 
+```text
+声明式约束（Jakarta Validation）：
+    @NotNull @Size(min=2,max=20) @Email @Min(1) @Pattern(regexp=...)
+    @Valid / @Validated 触发校验；嵌套对象要加 @Valid 才会级联
+    分组校验：@Validated(OnCreate.class) -> 新增与更新用不同规则
+    自定义：实现 ConstraintValidator<注解, 类型>
+
+边界三层收口（缺一不可）：
+    Controller  参数级：类型 / 格式 / 范围（快速失败，返回 400）
+    Service     业务级：状态机合法性、权限、唯一性（返回 409 / 403）
+    数据库      最终防线：NOT NULL / UNIQUE / FK / CHECK
+
+    只做 Controller 校验 -> 内部调用可绕过
+    只做 DB 校验       -> 错误信息不可读，且事务已开
+```
+
 ## Jakarta Validation：声明式约束
 
 Spring Boot 3 用 Jakarta Validation（规范，`jakarta.validation.*`，实现常用 Hibernate Validator）。

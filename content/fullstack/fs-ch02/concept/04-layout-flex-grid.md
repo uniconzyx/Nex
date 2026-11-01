@@ -1,5 +1,24 @@
 # 04 · 现代布局：Flexbox 与 Grid
 
+```text
+一维 vs 二维（选型第一判据）：
+    Flexbox  一维：一行或一列，分配剩余空间
+    Grid     二维：同时约束行与列，先定网格再放元素
+
+Flex 三段式：
+    flex: 1 1 0%    = grow 1 / shrink 1 / basis 0%
+    grow    超出基准后按比例分剩余空间
+    shrink  不够时按比例收缩（basis 为 0 时按内容宽度比例）
+    basis   起始尺寸（auto = 用 width）
+
+    .side { flex: 0 0 200px }   .main { flex: 1 1 0 }    经典三栏自适应
+
+Grid：
+    grid-template-columns: repeat(3, 1fr)
+    grid-template-areas 一次成型页面骨架（header / side / main / footer）
+    混用：Grid 定大骨架，Flex 管组件内部
+```
+
 ## 一、理论根基：一维 vs 二维
 
 - **Flexbox**：为一维布局设计（沿一条主轴排布，main axis + cross axis），擅长"把一组元素排成一行/一列并分配剩余空间"。

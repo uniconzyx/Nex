@@ -1,6 +1,23 @@
 # fs-ch04 · HTTP 服务与中间件
 
 
+```text
+从零手写 HTTP 的最小闭环：
+    net.createServer ─▶ 逐 chunk 拼接 body（不是一次到齐）
+      ─▶ 解析 start-line + headers（\r\n\r\n 是分界）
+      ─▶ 路由匹配（method + path 模板 / token）
+      ─▶ res.writeHead(status, headers) ─▶ res.end(body)
+
+中间件 = (req, res, next) 的洋葱链：
+    ┌ A 前 ─┬ B 前 ─┬ handler ┬ B 后 ┬ A 后 ┐
+    next() 向下走；返回时向上走；next(err) 直接跳到错误中间件
+
+必须处理的边界：
+    Content-Length 与实际 body 不一致 / chunked 传输编码
+    请求体大小上限（否则一个超大 body 打满内存）
+    未捕获异常 -> 统一 500，且不把堆栈泄漏给客户端
+```
+
 ## 一、从零手写 HTTP 服务器（路由 / 路径变量 / JSON body / 状态码）
 
 Node 内置 http 模块把 socket 字节流按 RFC 7230 解析为 req/res 对象；服务器 = 一个 createServer 回调，需在回调内做路由匹配、请求体解析与响应。状态码是三位数字，首位表类别。

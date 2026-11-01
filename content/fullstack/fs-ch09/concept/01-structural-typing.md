@@ -18,6 +18,22 @@ const r = { x: 1 };
 const s: Point = r;   // ✗ Property 'y' is missing in type '{ x: number; }'
 ```
 
+```text
+结构类型：形状对了就是对的（只看成员，不看名字）
+    interface Point { x: number; y: number }
+    const p = { x: 1, y: 2, z: 3 };
+    const q: Point = p;                         // 允许：多出的 z 不碍事
+
+    但字面量直传会触发「多余属性检查」：
+    const r: Point = { x: 1, y: 2, z: 3 };      // 报错
+
+为什么这样设计：贴合 JS 的鸭子类型生态，方便渐进式加类型
+代价：结构相同的两个类型可互相赋值（「意外兼容」），语义不同却混用
+    想区分 -> 加品牌字段 brand: 'UserId'（用 unique symbol 更彻底）
+
+对比：Java/C# 是名义类型（必须显式 implements），TS 是结构类型
+```
+
 ## 为什么这样设计
 
 JS 是鸭子类型（duck typing）语言：运行时只看对象有没有那个方法/属性，从不看它是谁 new 出来的。

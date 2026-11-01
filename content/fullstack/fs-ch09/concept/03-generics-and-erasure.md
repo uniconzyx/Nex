@@ -31,6 +31,24 @@ function identity<T>(x: T): T { return x; }
 console.log(identity<string>("hi"));   // 运行时看不到任何 <string>
 ```
 
+```text
+泛型只在编译期存在，运行时全部擦除
+    function id<T>(x: T): T   ->   编译后 function id(x)
+    -> 不能 new T()、不能 T instanceof、不能读 T 的静态成员
+    -> 想在运行时拿到类型，必须显式传值（class 引用或 schema）
+
+条件类型与分布式：
+    T extends U ? X : Y
+    对裸类型参数 T 做联合分发：('a'|'b') extends string ? X : Y 会逐成员分发再合并
+
+常用工具类型的本质：
+    Partial<T>    { [K in keyof T]?: T[K] }
+    Record<K,V>   { [P in K]: V }
+    ReturnType<F> F extends (...a: any) => infer R ? R : never
+
+    infer = 「在类型里捕获一个未知类型」，是 ReturnType / Awaited 的基石
+```
+
 ## 擦除（erasure）意味着什么
 
 类型在运行时不存在，因此：

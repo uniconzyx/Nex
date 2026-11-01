@@ -1,5 +1,23 @@
 # 02 · 作用域、闭包与 this 绑定
 
+```text
+作用域与提升：
+    var       提升到函数顶部并初始化为 undefined
+    let/const 提升但不初始化 -> 处于 TDZ，访问即 ReferenceError
+    块级作用域：{} 内的 let 不外泄（for 循环因此每次迭代都是新绑定）
+
+闭包捕获的是「变量」而不是「值的快照」：
+    for (var i=0;i<3;i++) setTimeout(()=>console.log(i))   -> 3 3 3
+    for (let i=0;i<3;i++) setTimeout(()=>console.log(i))   -> 0 1 2
+
+this 的五条绑定规则（优先级由高到低）：
+    new F()              新创建的对象
+    call / apply / bind  显式指定
+    obj.fn()             调用点前面的对象
+    fn()                 非严格 globalThis，严格模式 undefined
+    箭头函数              不吃上面四条，取定义处外层 this（词法 this）
+```
+
 ## 一、作用域、提升与 TDZ
 
 JavaScript 采用**词法作用域（lexical scope）**：函数能访问哪些变量由「定义时的位置」决定，而非调用位置。
