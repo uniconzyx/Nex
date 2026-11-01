@@ -2279,6 +2279,48 @@ html.lg-b .km-card {
   cursor: default;
 }
 
+/* ── 右栏凯喵：心情状态区 ───────────────────────────────────────── */
+.km-mood-state {
+  width: 100%;
+  margin-top: 8px;
+  padding: 11px 12px;
+  border-radius: 16px;
+  background: rgb(255 255 255 / 0.52);
+  border: 1px solid var(--km-glass-border);
+  box-shadow: var(--km-glass-inner), 0 0 22px var(--mood-aura, rgb(93 180 229 / 0.28));
+  text-align: left;
+}
+.km-mood-state-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.km-mood-state-title {
+  color: var(--km-ink-faint);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.km-mood-state-line {
+  margin: 8px 0 0;
+  color: var(--km-title);
+  font-size: 13.5px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+.km-mood-state-hint {
+  margin: 4px 0 0;
+  color: var(--km-body);
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+.km-mood-state .km-cat-say {
+  margin-top: 8px;
+  background: rgb(255 255 255 / 0.72);
+  border-color: var(--km-line2);
+}
+
 /* ── 隐藏台词气泡（连点搜索 5 次） ─────────────────────────────── */
 .km-secret-bubble {
   position: fixed;

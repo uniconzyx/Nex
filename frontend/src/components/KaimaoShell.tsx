@@ -30,6 +30,7 @@ import { useSession } from '../lib/session';
 import {
   MOODS,
   moodImage,
+  moodState,
   resolveMood,
   useMoodFlash,
   type MoodCtx,
@@ -614,6 +615,8 @@ function RightRail({
   onOpenAi,
 }: RightRailProps) {
   const affection = 64 + Math.min(doneChapters + doneProjects, 30);
+  /** 心情状态区的两行文案（状态 + 建议） */
+  const moodStateText = moodState(moodKey, moodCtx);
 
   return (
     <>
@@ -648,9 +651,20 @@ function RightRail({
           )}
         </div>
         <div className="km-cat-name">凯喵</div>
-        <div className="km-cat-mood">
-          <span aria-hidden="true">{mood.emoji}</span> {mood.label}
+
+        {/* 心情状态区：状态牌 + 客观状态 + 下一步建议 + 台词 */}
+        <div className="km-mood-state" style={{ '--mood-aura': mood.aura } as CSSProperties}>
+          <div className="km-mood-state-head">
+            <span className="km-mood-state-title">心情状态</span>
+            <span className="km-cat-mood">
+              <span aria-hidden="true">{mood.emoji}</span> {mood.label}
+            </span>
+          </div>
+          <p className="km-mood-state-line">{moodStateText.state}</p>
+          <p className="km-mood-state-hint">{moodStateText.hint}</p>
+          <div className="km-cat-say">{mood.say(moodCtx)}</div>
         </div>
+
         <div className="km-aff-row">
           <span>好感度</span>
           <b>{affection}%</b>
@@ -661,7 +675,6 @@ function RightRail({
         <svg className="km-aff-ecg" viewBox="0 0 120 26" preserveAspectRatio="none" aria-hidden="true">
           <polyline points="0,20 16,20 24,7 30,23 36,13 42,20 58,20 66,5 72,25 78,12 84,20 120,20" />
         </svg>
-        <div className="km-cat-say">{mood.say(moodCtx)}</div>
       </div>
 
       <div className="km-side-card">

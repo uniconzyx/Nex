@@ -138,6 +138,52 @@ export const MOODS: Record<MoodKey, MoodDef> = {
 
 export const moodImage = moodImg;
 
+/**
+ * 「心情状态区」的两行文案：此刻状态的客观描述 + 给玩家的下一步建议。
+ * 与 MOODS[].say 分工：say 是凯喵的口吻，这里是界面上的说明。
+ * 单独成函数而不是塞进 MoodDef，是为了不改动已有 7 条 MOODS 的结构。
+ */
+export function moodState(key: MoodKey, c: MoodCtx): { state: string; hint: string } {
+  switch (key) {
+    case 'celebrate':
+      return {
+        state: `今日试炼 ${c.dailyDone}/${c.dailyTotal} 已清空`,
+        hint: '趁手感好，再去题库刷一道保持节奏',
+      };
+    case 'aggrieved':
+      return {
+        state: `图鉴里压着 ${c.wild} 只野生怪物`,
+        hint: '去图鉴挑一只收掉，先解决失败次数最多的那只',
+      };
+    case 'shy':
+      return {
+        state: `连续签到 ${c.streak} 天，火苗很稳`,
+        hint: '保持连击，明天同一时间再来',
+      };
+    case 'happy':
+      return {
+        state: c.doneChapters > 0 ? `今天已签到，已掌握 ${c.doneChapters} 章` : '今天已签到，第一关还没开',
+        hint: '去今日试炼做三道新题',
+      };
+    case 'think':
+      return {
+        state: `在${pageLabel(c.page)}陪你思考`,
+        hint: '卡住了就把题丢给我，我陪你看思路',
+      };
+    case 'idle':
+      return {
+        state: c.hour >= 1 && c.hour < 5 ? '深夜档：今天还没打卡' : '今天还没签到，火苗要断了',
+        hint: '先去签到祭坛点一下，再回来做题',
+      };
+    case 'sleepy':
+    default:
+      return {
+        state: '今天还没开始',
+        hint: '随便做一道题，做一道我就醒了',
+      };
+  }
+}
+
 /* ---------------------------------------------------------------- 判定 */
 
 /**

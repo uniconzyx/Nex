@@ -89,10 +89,10 @@
     <line x1="103" y1="106" x2="97" y2="134"/>
   </g>
 
-  <!-- 塔门 -->
-  <polygon points="100,132 116,141 116,161 100,170 84,161 84,141" fill="#22323F" opacity="0.92"/>
-  <polygon points="100,137 111,143 111,158 100,164 89,158 89,143" fill="#16222C" opacity="0.7"/>
-  <circle cx="107" cy="151" r="1.8" fill="#8FD3FF" opacity="0.9"/>
+  <!-- 塔门：不画深色块（视觉上像中心黑块），改用一圈浅色门框 -->
+  <path d="M92 170 L92 150 Q100 141 108 150 L108 170" fill="none" stroke="#EAF6FF" stroke-opacity="0.75" stroke-width="2.4" stroke-linejoin="round"/>
+  <path d="M92 170 L92 150 Q100 141 108 150 L108 170" fill="#FFFFFF" fill-opacity="0.18"/>
+  <circle cx="104" cy="158" r="1.6" fill="#5DB4E5" opacity="0.85"/>
 
   <!-- 塔顶 -->
   <polygon points="72,26 128,26 152,43 128,60 72,60 48,43" fill="url(#tt-roof)" filter="url(#tt-glow)"/>
