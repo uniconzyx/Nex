@@ -168,6 +168,25 @@
       ],
       "source": "self",
       "source_ref": "本章 concept/01 第 3 节；示例 ex02、ex06"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 4,
+      "title": "RICE 打分与 Confidence 口径的敏感度",
+      "content_md": "两个需求：\n\n- A：Reach 2000 用户/季度，Impact 2，Confidence 80%，Effort 4 人周\n- B：Reach 5000 用户/季度，Impact 1，Confidence 50%，Effort 2 人周\n\nRICE = Reach × Impact × Confidence ÷ Effort。\n\n定量回答：① 两者 RICE 各是多少，谁优先？② 若把 A 的 Confidence 从 80% 改成「按样本量折算的 40%」，排序会变吗？③ 这说明 Confidence 该怎么定？",
+      "answer": {
+        "explain": "**① RICE**：\n- A = 2000 × 2 × 0.8 ÷ 4 = **800**\n- B = 5000 × 1 × 0.5 ÷ 2 = **1250**\n\nB 优先（1250 > 800）。\n\n**② 改口径后**：A = 2000 × 2 × 0.4 ÷ 4 = **400**，B 仍为 1250——排序不变，但差距从 1.56 倍拉到 3.1 倍，结论反而更稳。\n\n**③ 该怎样定 Confidence**：它必须来自**可复核的依据**，而不是主观感觉。惯例是：有历史数据/小样本实验支撑 → 0.8；有间接证据或类比 → 0.5；纯假设 → 0.2~0.3。写成「我觉得有把握」就等于把这条维度变成了情绪项——同一份需求两个人能打出 0.5 和 0.9，RICE 直接失真 80%。\n\n**更重要的观察**：RICE 是**排序工具不是决策工具**。它的价值在于把「争论哪个重要」变成「争论哪个参数填错了」，而参数错了可以拿数据纠正。所以打分表里每个数字旁边都该写一句「依据是什么」，否则这套分数经不起一次追问。"
+      },
+      "explanation": "Confidence 是 RICE 里唯一纯主观的维度，也正是最容易被灌水、最需要写下依据的一项。",
+      "tags": [
+        "RICE",
+        "优先级",
+        "Confidence"
+      ],
+      "source": "self",
+      "source_ref": "Intercom · RICE Prioritization 原始定义"
     }
   ]
 }
