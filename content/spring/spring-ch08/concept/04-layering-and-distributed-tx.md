@@ -5,7 +5,7 @@
 
 ## 1. 分层架构与 Entity / DTO / VO 的职责边界
 
-```
+```text
 Controller  --(DTO 入参 / VO 出参)-->  Service  --(Entity / 领域对象)-->  Mapper
    |                                     |
    |  参数校验、HTTP 语义                 |  事务边界（@Transactional 加在 Service）

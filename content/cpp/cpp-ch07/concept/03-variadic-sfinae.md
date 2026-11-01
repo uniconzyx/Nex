@@ -127,7 +127,7 @@ int main() {
 ```
 
 **输出**：
-```
+```text
 sum=10
 x=1 y=2.5
 integral:10

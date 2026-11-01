@@ -12,7 +12,7 @@
 
 ## 二、实现机制：接口如何落到具体类
 
-```
+```text
 Collection
  ├─ List      → ArrayList（动态数组） / LinkedList（双向链表） / Vector（线程安全但已过时）
  ├─ Set       → HashSet（哈希） / LinkedHashSet（哈希+插入序） / TreeSet（红黑树有序）

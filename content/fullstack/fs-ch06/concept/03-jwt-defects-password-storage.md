@@ -6,7 +6,7 @@
 
 三件套缓解（本章 ex07 / ex08 均有实跑）：
 
-```
+```text
 ① 短 TTL access token（5~15 min）  -> 把「失效窗口」压小
 ② Refresh token 单次使用 + 轮换     -> 旧 refresh 一旦被重放 -> 整族吊销
 ③ jti 黑名单（内存/Redis）+ TTL      -> 需要「立即失效」的高价值 token 才进黑名单

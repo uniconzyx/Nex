@@ -14,7 +14,7 @@ s = pd.Series([10, 20, 30], index=["a", "b", "c"])
 
 它的组成是**三个**部分，而不是两个：
 
-```
+```text
 values : [10, 20, 30]          <- 真正存数据的 ndarray
 index  : Index(['a','b','c'])  <- 标签
 name   : None                  <- 列名（Series 也有名字）

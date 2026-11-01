@@ -77,7 +77,7 @@ int main() {
 ```
 
 **输出**：
-```
+```text
 empty: size=0 cap=0
 after push 0: size=1 cap=1
 after push 1: size=2 cap=2

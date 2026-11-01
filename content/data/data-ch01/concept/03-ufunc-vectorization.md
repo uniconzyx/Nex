@@ -25,7 +25,7 @@ np.sqrt(a)   # ufunc
 
 实测（N = 10⁶，本机 3.13）：
 
-```
+```text
 Python for 循环      ~100 ms
 list comprehension   ~50 ms
 np.sum(a)            ~1 ms     ← 约 100 倍

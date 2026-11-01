@@ -12,7 +12,7 @@ ex13 用规则库（WF001–WF007）做静态校验，ex15/ex16 则处理流水�
 
 ex11 对示例流水线做分析，得到：
 
-```
+```text
 [拓扑序] build -> lint -> test -> package -> deploy
 [并行层] 层1=build,lint  层2=test  层3=package  层4=deploy
 [关键路径] 长度=4 路径=build -> test -> package -> deploy

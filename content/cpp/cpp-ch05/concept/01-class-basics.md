@@ -71,7 +71,7 @@ int main() {
 ```
 
 **输出**：
-```
+```text
 sizeof(Empty)=1
 sizeof(Bad)=24 sizeof(Good)=16
 sizeof(Counter)=4 (成员函数不占对象空间)

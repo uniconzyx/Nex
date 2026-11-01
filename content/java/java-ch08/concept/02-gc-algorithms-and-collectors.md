@@ -41,7 +41,7 @@
 
 ## 四、七种收集器与停顿模型
 
-```
+```text
 新生代          老年代            特点
 Serial          Serial Old        单线程，STW，客户端模式
 ParNew          CMS               JDK 8 的主流组合（CMS 已废弃）

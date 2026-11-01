@@ -52,7 +52,7 @@
 
 一个可复用的校验骨架（纯函数，前后端同源）：
 
-```
+```text
 validate(schema, value) -> errors[]        # 每个 error 带字段路径（$.field）
 ```
 

@@ -11,7 +11,7 @@
 
 本章 ex02 用分层哈希实测了这一点。基础文件内容固定为 `package.json=p1|package-lock.json=l1|src/app.js=a1|src/style.css=c1`：
 
-```
+```text
 === deps_first (layers=6) ===
   change=src/app.js     cached=4 rebuilt=2 npm_ci_layer_rebuild=False
   change=package.json   cached=2 rebuilt=4 npm_ci_layer_rebuild=True

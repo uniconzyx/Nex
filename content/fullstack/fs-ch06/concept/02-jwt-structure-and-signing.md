@@ -4,7 +4,7 @@
 
 JWT（RFC 7519）是一串 `A.B.C`：
 
-```
+```text
 A = base64url( {"alg":"HS256","typ":"JWT"} )      # header：算法与类型
 B = base64url( {"sub":"u1","role":"user","exp":...} )  # payload：claims
 C = base64url( HMAC-SHA256(secret, A + "." + B) ) # signature：对 A.B 的签名

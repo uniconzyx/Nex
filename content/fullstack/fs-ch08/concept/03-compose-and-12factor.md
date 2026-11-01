@@ -26,7 +26,7 @@ volumes:
 
 `depends_on` 的语义有两档：短语法（列表）只保证**启动顺序**；长语法带 `condition` 才提供**就绪门**（`service_started` / `service_healthy` / `service_completed_successfully`）。本章 ex07 用拓扑排序求解分层启动顺序，并检出循环依赖：
 
-```
+```text
 === compose(good) services=5 ===
 wave0=cache,db
 wave1=api,worker

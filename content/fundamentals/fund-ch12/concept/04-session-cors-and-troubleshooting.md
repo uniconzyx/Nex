@@ -27,7 +27,7 @@ HTTP 是**无状态**的：服务器不记得你上一次请求过什么。
 
 服务器通过 `Set-Cookie` 头下发，属性写在后面：
 
-```
+```text
 Set-Cookie: session_id=abc123; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=3600
 ```
 

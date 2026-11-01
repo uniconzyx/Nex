@@ -124,7 +124,7 @@ int main() {
 ```
 
 **输出**：
-```
+```text
 two types
 same type
 second is pointer

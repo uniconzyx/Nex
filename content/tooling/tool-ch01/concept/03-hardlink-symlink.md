@@ -143,7 +143,7 @@ namei -l /path/to/file       # 逐级显示路径上每一层的权限
 
 如果允许，就会出现**目录树中的环**：
 
-```
+```text
 dir A 包含条目 "up" → dir B
 dir B 包含条目 "down" → dir A
 ```

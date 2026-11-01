@@ -4,7 +4,7 @@
 
 鉴权是一个**链式职责**：每个中间件要么判定通过（返回空），要么短路返回一个响应（401/403）：
 
-```
+```text
 authenticate(ctx)             -> 无/坏凭证: 401, 并把 ctx.user 挂上
 authorize("article:write")    -> 已认证但无权: 403
 resourceGuard(ctx, article)   -> 不是你的资源: 404（隐藏存在性）

@@ -21,7 +21,7 @@ Spring 用 `Propagation` 枚举定义了 7 种取值，默认是 `REQUIRED`。
 
 嵌套的真实差异（本机 `ex02` / `ex03` / `ex04` 实测）：
 
-```
+```text
 REQUIRED      外层回滚 -> 内层一起没了        db=[]
 REQUIRES_NEW  外层回滚 -> 内层已提交仍在      db=[insert:item]
 NESTED        内层回滚 -> 外层仍可提交        db=[insert:order]

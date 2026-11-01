@@ -41,7 +41,7 @@ N+1 指：取「1」个列表后，对列表里的 N 个元素各发一次查询
 
 **判定判据必须是操作计数，而不是代码观感**。本章 ex08 的真实输出：
 
-```
+```text
 authors=5 posts=11
 nested_queries=6 joined_queries=1
 nested_is_1_plus_N=true

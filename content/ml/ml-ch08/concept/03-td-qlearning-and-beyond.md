@@ -30,7 +30,7 @@ TD 误差 `δ_t = r_{t+1} + γV(s_{t+1}) − V(s_t)` 是整个 TD 家族的心�
 
 把 TD 搬到 Q 表上，更新规则是同一族：
 
-```
+```text
 Q(s,a) ← Q(s,a) + α · [ target − Q(s,a) ]
 
 SARSA（on-policy）:   target = r + γ·Q(s', a')     其中 a' ~ π(·|s')   （实际走的动作）

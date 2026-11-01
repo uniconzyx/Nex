@@ -8,7 +8,7 @@
 
 把两层网络画成计算图（每个节点是一个张量运算）：
 
-```
+```text
 X ──► Z₁=XW₁+b₁ ──► A₁=g₁(Z₁) ──► Z₂=A₁W₂+b₂ ──► P=σ(Z₂) ──► L=BCE(P,Y)
        │                  │                  │
      cache Z₁          cache A₁          cache P

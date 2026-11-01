@@ -60,7 +60,7 @@ int main(void) {
 ```
 
 **输出**：
-```
+```text
 binary read: 6 bytes
 ```
 

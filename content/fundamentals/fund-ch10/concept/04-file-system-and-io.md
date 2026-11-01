@@ -80,7 +80,7 @@
 **零拷贝：`read` + `write` vs `sendfile`**
 
 传统 `read(file) + write(socket)` 的拷贝次数：
-```
+```text
 磁盘 --DMA--> 内核页缓存 --CPU拷贝--> 用户缓冲区 --CPU拷贝--> socket缓冲区 --DMA--> 网卡
 ```
 - **DMA 拷贝 2 次** + **CPU 拷贝 2 次** + **4 次上下文切换**（2 次 `read`/`write` 各一轮用户态/内核态往返）。

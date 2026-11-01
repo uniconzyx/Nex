@@ -8,7 +8,7 @@
 
 C++11 把表达式按「是否拥有身份（identity）」与「是否可被移动」分为三类：
 
-```
+```text
         可移动(move) ──┐
                        │
    lvalue ──── xvalue ─┤── 泛左值 glvalue（有身份）

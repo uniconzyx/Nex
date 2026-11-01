@@ -4,7 +4,7 @@
 
 "为什么页面会闪/卡/慢"的回答，必须落到**渲染管线**这一工程事实上。现代浏览器（Blink/WebKit/Gecko）把 HTML/CSS/JS 变成屏幕像素，主线是：
 
-```
+```text
 字节 → 字符 → Token → DOM        (HTML 解析)
 CSS  → CSSOM                     (样式解析)
 DOM + CSSOM → Render Tree        (样式计算)

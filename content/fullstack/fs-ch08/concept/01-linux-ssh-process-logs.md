@@ -4,7 +4,7 @@
 
 SSH（Secure Shell，IANA 分配的默认端口 22）在不可信网络上提供加密的远程登录与文件传输。认证方式有密码与公钥两类；**免密登录**指的是公钥（publickey）认证：客户端持有私钥，服务端在 `~/.ssh/authorized_keys` 里持有对应公钥。基本流程：
 
-```
+```text
 ssh-keygen -t ed25519 -C "deploy@ci"        # 生成密钥对（私钥留在本机，永不外传）
 ssh-copy-id -i ~/.ssh/id_ed25519.pub deploy@10.0.0.11
 ```

@@ -79,7 +79,7 @@ int main() {
 ```
 
 **输出**：
-```
+```text
 遍历（自动按 key 升序）:
 alice=90 bob=75 carol=88
 size after ["dave"]: 4

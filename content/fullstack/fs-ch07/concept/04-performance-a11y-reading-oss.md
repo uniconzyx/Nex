@@ -9,7 +9,7 @@
 
 **(1) 代码分割与懒加载。** 把 bundle 按路由/重组件切开，只在需要时加载对应的 chunk。ex12 对页面组件树做静态遍历，算出懒加载分割点：
 
-```
+```text
 lazy_chunks=PostList,CommentBox    # props.defer=true 的组件是分割点
 total_nodes=9
 ```

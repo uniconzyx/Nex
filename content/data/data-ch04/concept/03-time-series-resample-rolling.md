@@ -133,7 +133,7 @@ df.tz_localize(None)                                                    # 去掉
 ### 🧑‍💻 程序员视角
 **工程决策顺序（时间序列报错时照此排查）：**
 
-```
+```text
 ① df.dtypes 里 ts 是 datetime64 吗？   否 -> 先 parse_dates / to_datetime
 ② index 单调递增吗？                   否 -> sort_index()（rolling 会错！）
 ③ 频率别名用对了吗（ME vs MS）？         错 -> 标签整体错一个月，数字却不报警

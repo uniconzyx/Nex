@@ -34,7 +34,7 @@ jobs:
 
 本章 ex05 的静态校验器（自带极简 YAML 子集解析器）对合法与非法两份 workflow 给出判定：
 
-```
+```text
 === workflow(good) ===
 jobs=4  topo_order=build,test,image,deploy  issues=0  valid=True
 === workflow(bad) ===

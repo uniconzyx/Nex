@@ -22,7 +22,7 @@ new ThreadPoolExecutor(
 
 这是必背的**四步判定**：
 
-```
+```text
 提交任务
   ├─ 1. 运行中的线程数 < corePoolSize ?           → 新建核心线程执行
   ├─ 2. 否则尝试入队 workQueue.offer(task)  成功 ? → 进队列排队

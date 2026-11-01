@@ -88,7 +88,7 @@ int main() {
 ```
 
 **输出**：
-```
+```text
 my_max(3,7)=7
 my_max(2.5,1.2)=2.5
 my_max<double>(3,2.5)=3

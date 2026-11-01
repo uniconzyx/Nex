@@ -12,7 +12,7 @@ ER（Entity-Relationship）模型由 Chen 于 1976 年提出，三要素：
 
 ### 三种联系的映射规则
 
-```
+```text
 1:1  任选一端加外键 + UNIQUE 约束 (或让外键同时作主键)
      user(uid PK)  profile(uid PK FK -> user.uid, bio)
                 ^ 外键同时是主键 -> 天然保证一对一

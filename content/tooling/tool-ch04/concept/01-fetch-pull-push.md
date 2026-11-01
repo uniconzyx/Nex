@@ -7,7 +7,7 @@
 
 远端协作涉及**三类引用**，混淆它们是一切事故的起点：
 
-```
+```text
 本地仓库                                  远端仓库(origin)
 refs/heads/main       ──push──▶         refs/heads/main
 refs/remotes/origin/main ◀──fetch──      refs/heads/main   （快照，只在 fetch/push 时更新）

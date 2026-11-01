@@ -25,7 +25,7 @@ Spring Boot 官方 jar 里的配置类在 `org.springframework.boot.autoconfigur
 
 剥掉事件与日志，主干可以压缩成一条链：
 
-```
+```text
 SpringApplication.run()
  └─ new SpringApplication(...)                  /* 推断应用类型 SERVLET/REACTIVE/NONE */
  └─ run(args)

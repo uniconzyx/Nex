@@ -73,7 +73,7 @@ int main() {
 ```
 
 **输出（注意析构的逆序）**：
-```
+```text
 ctor a
 ctor b
 dtor b      ← 展开时按构造逆序析构

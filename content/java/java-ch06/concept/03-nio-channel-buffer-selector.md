@@ -4,7 +4,7 @@
 
 `ByteBuffer` 内建三个游标：
 
-```
+```text
 0            position      limit        capacity
 |---- 已读 ---|-- 可读写 ---|---- 空闲 ----|
 ```

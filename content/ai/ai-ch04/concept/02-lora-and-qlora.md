@@ -4,7 +4,7 @@
 
 LoRA（Low-Rank Adaptation）的核心假设是：**微调时的权重改变量 ΔW 是低秩的**。于是不去学整个 ΔW ∈ R^(d×k)，而是把它分解成两个小矩阵的乘积：
 
-```
+```text
 ΔW = B @ A,    A ∈ R^(r×k),  B ∈ R^(d×r),  r << min(d, k)
 前向：h = Wx + (alpha / r) · B(Ax)
 ```

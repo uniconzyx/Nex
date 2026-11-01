@@ -21,7 +21,7 @@ __attribute__((weak)) int config_value = 0;   /* 可被用户模块的强定义�
 
 ## 2. 未定义符号的诊断流程
 
-```
+```text
 undefined reference to `add'
 ```
 按顺序问四个问题：

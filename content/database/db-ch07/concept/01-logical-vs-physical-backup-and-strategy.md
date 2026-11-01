@@ -18,7 +18,7 @@
 | 单表恢复 | 容易（重放一张表） | 麻烦（需先 restore 到临时实例再导出） |
 | 一致性保证 | 靠 `--single-transaction`（仅 InnoDB）或全局读锁 | 靠工具的一致性快照能力（如 XtraBackup 的 redo 追赶） |
 
-```
+```text
 逻辑备份（sql 文本）                      物理备份（数据文件副本）
 +--------------------------+             +--------------------------+
 | CREATE TABLE `orders`... |             | ibdata1  orders.ibd      |

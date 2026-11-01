@@ -4,7 +4,7 @@
 
 RLHF 的第一步是把「人类觉得哪个回答更好」变成可优化的标量信号。做法是收集**成对偏好数据** (x, y_w, y_l)（w = winner，l = loser），用 Bradley-Terry 模型建模：
 
-```
+```text
 P(y_w ≻ y_l | x) = σ( r(x, y_w) - r(x, y_l) )
 损失：L_RM = -E[ log σ( r(x, y_w) - r(x, y_l) ) ]
 ```

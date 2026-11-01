@@ -175,7 +175,7 @@ df["city"] = df["city"].astype("category")
 ### 🧑‍💻 程序员视角
 **内存优化决策树**：
 
-```
+```text
 df.memory_usage(deep=True).sort_values(ascending=False)   # 先排序，看大户
 │
 ├─ 最大的是 object 列？

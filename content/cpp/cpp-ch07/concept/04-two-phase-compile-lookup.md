@@ -100,7 +100,7 @@ int main() {
 ```
 
 **输出**：
-```
+```text
 value_type size=4
 v[0]=7
 ```

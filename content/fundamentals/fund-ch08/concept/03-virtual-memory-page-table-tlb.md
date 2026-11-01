@@ -40,7 +40,7 @@ $$\text{虚拟地址} = \underbrace{\text{虚拟页号 VPN}}_{\text{查页表}} 
 
 ## 4. 一次访存的完整路径
 
-```
+```text
 CPU 给出虚拟地址
    │
    ├─ 拆成 VPN + offset

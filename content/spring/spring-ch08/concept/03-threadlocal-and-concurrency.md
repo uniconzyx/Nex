@@ -5,7 +5,7 @@ begin 在 A、commit 在 B，事务根本不成立。Spring 用 ThreadLocal 把�
 
 ## 1. ThreadLocal 与事务同步管理器
 
-```
+```text
 TransactionSynchronizationManager（每个线程一份）
   ThreadLocal<Map<Object, Object>> resources
         key   = DataSource 实例

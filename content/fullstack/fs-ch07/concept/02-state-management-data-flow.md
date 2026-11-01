@@ -20,7 +20,7 @@
 
 ex01 实跑结果印证了 reducer store 的两条关键性质：
 
-```
+```text
 renders_after_3_actions=3          # 3 次 dispatch -> 3 次订阅通知
 unknown_action_keeps_identity=true # default 分支返回同一引用 -> 不触发重渲染
 renders_after_noop_action=3        # 因为 identity 未变，订阅者没有被通知

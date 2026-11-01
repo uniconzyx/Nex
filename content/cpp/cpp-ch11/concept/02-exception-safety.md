@@ -67,7 +67,7 @@ struct Buf {
 见 `examples/ex10-noexcept-vector-move.json` 与 `examples/ex11-noexcept-vector-copy.json`：对照 `noexcept` 移动与否，vector 扩容时到底是"移动"还是"拷贝"——这正是异常安全等级驱动容器实现的直接证据。
 
 **ex03 输出要点**：
-```
+```text
 open
 work
 close      ← 异常后析构仍被调用：基本保证（资源不泄漏）

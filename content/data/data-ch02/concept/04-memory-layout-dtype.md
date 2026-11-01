@@ -6,7 +6,7 @@
 - **F order（列优先，Fortran/MATLAB/R 风格）**：第一个轴在内存中最连续；按列遍历最快。
 - `a.T` 交换 strides，**不搬数据**，但会破坏 C 连续性（变成 F 连续）。
 
-```
+```text
 a = np.arange(12).reshape(3,4)
 a.flags['C_CONTIGUOUS']       # True
 a.T.flags['F_CONTIGUOUS']     # True（转置后是 F 连续）

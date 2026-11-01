@@ -58,7 +58,7 @@ int main() {
 ```
 
 **输出**（路径随编译命令而变，文件名部分固定）：
-```
+```text
 c14_ex07.cpp:4 start
 c14_ex07.cpp:5 done
 ```

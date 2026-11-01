@@ -103,7 +103,7 @@ assert out_a.tolist() == out_b.tolist()      # 先确认两者语义一致
 ### 🧑‍💻 程序员视角
 **性能优化的正确顺序（不要跳步）：**
 
-```
+```text
 ① 先测量：这段代码占总耗时多少？（不要优化不到 5% 的路径）
 ② 找瓶颈：是 IO（read_csv）、是 apply、还是 merge 的键 dtype？
 ③ 换实现：向量化 > 内置聚合 > apply

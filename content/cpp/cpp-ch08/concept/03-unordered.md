@@ -73,7 +73,7 @@ int main() {
 ```
 
 **输出**（桶数随实现/质数表略有差异，示意）：
-```
+```text
 init: buckets=1 load=0
 after 11 inserts: size=8 buckets=11 load=0.727273
 freq["a"]=3

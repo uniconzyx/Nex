@@ -9,7 +9,7 @@ OpenAPI 3.1 是一份 JSON/YAML 文档，描述 `paths`、`operations`、`parame
 
 本章 ex11 演示「从路由表生成 OpenAPI 3.1 文档」，并输出一组可以自动化断言的判据：
 
-```
+```text
 operations=4
   GET /articles -> listArticles
   POST /articles -> createArticle

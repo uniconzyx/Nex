@@ -9,7 +9,7 @@ ex08 的 matrix `include` 里给 C++20 单元挂上了第三层的 `sanitizer: a
 
 ex17 用同一份源码做了两次编译对照：
 
-```
+```text
 [编译1] -Wall -Wextra            返回码=0 警告数=2
 [警告类别] -Wunused-parameter=1 -Wunused-variable=1
 [编译2] -Wall -Wextra -Werror    返回码=1 错误数=2

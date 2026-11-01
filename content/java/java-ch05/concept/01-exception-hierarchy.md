@@ -4,7 +4,7 @@
 
 大多数语言把错误当返回值或特殊值处理；Java 把「发生了什么」建模为一个**对象层次**，并通过编译器强制区分「必须处理」与「可选择处理」，从而把错误处理的纪律前移到编译期。`Throwable` 是唯一能被 `throw` 抛出的根类型，其下分两支：
 
-```
+```text
 Throwable
  ├─ Error          （非受检）严重系统错误：OutOfMemoryError / StackOverflowError
  └─ Exception

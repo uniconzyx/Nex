@@ -55,7 +55,7 @@ int main(void) {
 ```
 
 **输出**：
-```
+```text
 hello world
 ```
 

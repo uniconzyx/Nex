@@ -155,7 +155,7 @@ Kafka 的位移**不是存在 ZK 里**（0.9 之后已迁移），而是存在�
 2. 这就是「批量提交优于逐条提交」的硬理由 —— 不只是网络往返，还有**broker 端的写入压力**。
 
 **排查顺序**：查询消费 lag 的标准手段是：
-```
+```text
 kafka-consumer-groups.sh --bootstrap-server <broker> --describe --group <group>
 ```
 输出里的 `LAG = LOG-END-OFFSET - CURRENT-OFFSET` —— 注意 `CURRENT-OFFSET` 就是 `__consumer_offsets` 里的值。

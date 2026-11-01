@@ -12,7 +12,7 @@
 ## 二、实现机制：unique_ptr 为何"零开销"
 
 `unique_ptr` 只是一个**带删除器的裸指针包装**，典型布局：
-```
+```text
 unique_ptr<T, D> { T* ptr; /* D 若无状态则被空基类优化(EBCO)消除 */ }
 ```
 - 默认删除器 `default_delete<T>` 是**空类型**，C++ 的**空基类优化（EBBO）**让它的尺寸为 0。于是 `sizeof(unique_ptr<T>) == sizeof(T*)`，**与裸指针同大、零额外内存**。

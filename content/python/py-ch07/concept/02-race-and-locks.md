@@ -4,7 +4,7 @@
 
 `x += 1` 在 CPython 里被编译成四条字节码：
 
-```
+```text
 LOAD_FAST     x
 LOAD_CONST    1
 BINARY_OP     +=

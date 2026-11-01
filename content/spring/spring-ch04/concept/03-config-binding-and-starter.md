@@ -16,7 +16,7 @@
 
 **松散绑定的规范化规则**（把配置键统一成小写短横线的「规范形式」）：
 
-```
+```text
 my-name      → my-name
 myName       → my-name
 my_name      → my-name

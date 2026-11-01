@@ -27,7 +27,7 @@ C++ 的运行时类型信息（RTTI）依赖 vtable 中额外存放的 `std::typ
   - **引用版本**：失败抛 `std::bad_cast`（引用不能表示「空」）。
   - **前提**：基类**至少有一个虚函数**。若无虚函数，`dynamic_cast` 指针版本**编译通过但运行返回 null**（无 type_info 可查），引用版本**直接编译失败**。
 
-```
+```text
 dynamic_cast<Derived*>(base_ptr) 的运行期动作：
   取 base_ptr 指向对象的 vtable → 读取 type_info / 继承链
      ├─ 找到 Derived 在链上 → 计算 this 调整偏移 → 返回修正后的 Derived*

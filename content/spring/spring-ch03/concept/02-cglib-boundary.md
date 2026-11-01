@@ -6,7 +6,7 @@ CGLIB（Code Generation Library）通过**继承目标类、在运行时生成�
 子类重写父类的可覆写方法，在 `super.xxx()` 前后插入拦截器（`MethodInterceptor`）逻辑，
 再把方法调用委派给父类实现。因为「生成子类」而非「实现接口」，所以**目标类无需实现任何接口**。
 
-```
+```text
 真实对象 UserService
    ↑ extends
 UserService$$Enhancer (CGLIB 子类)  — 重写方法：before -> super.method() -> after

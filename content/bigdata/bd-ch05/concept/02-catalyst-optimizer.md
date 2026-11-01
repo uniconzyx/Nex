@@ -3,7 +3,7 @@
 （中立陈述）Catalyst 是 Spark SQL 的**可扩展查询优化器**。一条 SQL 或一个 DataFrame 操作链，
 要依次经过四个阶段才变成真正在 Executor 上跑的代码：
 
-```
+```text
 SQL / DataFrame API
    │  ① 解析 Parsing（ANTLR 语法分析，未解析的 AST，未知列名与类型）
    ▼

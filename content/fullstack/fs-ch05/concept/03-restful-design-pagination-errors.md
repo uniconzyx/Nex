@@ -17,7 +17,7 @@ REST 的核心约束是：**用 URI 标识资源、用 HTTP 方法表达对资�
 
 状态码映射（同样取自 ex01 实跑）：
 
-```
+```text
 GET    /articles          集合读取      -> 200 (2xx)
 POST   /articles          创建成功      -> 201 (2xx)
 DELETE /articles/42       删除成功      -> 204 (2xx)

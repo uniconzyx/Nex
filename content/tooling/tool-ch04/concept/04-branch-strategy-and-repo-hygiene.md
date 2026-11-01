@@ -28,7 +28,7 @@
 
 配套的**提交信息规范（Conventional Commits）**：
 
-```
+```text
 <type>[optional scope][!]: <description>
 
 [optional body]

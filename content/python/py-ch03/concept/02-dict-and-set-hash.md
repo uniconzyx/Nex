@@ -10,7 +10,7 @@ CPython 的 `dict`（`Objects/dictobject.c`）用**开放寻址（open addressin
 
 **3.6+（紧凑化）**：拆成两张表——
 
-```
+```text
 indices（稀疏索引表）：  [ 2 | - | 0 | - | 1 | ... ]   # 存 entries 中的下标，- 表示空
 entries（紧凑实体表）：   [ (h0,k0,v0), (h1,k1,v1), (h2,k2,v2) ]  # 按插入顺序紧密排列
 ```

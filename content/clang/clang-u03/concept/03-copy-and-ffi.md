@@ -68,7 +68,7 @@ int main(void) {
 ```
 
 **输出**：
-```
+```text
 returned: x=3 y=4
 in by_value: x=99
 after by_value: x=3

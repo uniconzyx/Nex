@@ -65,7 +65,7 @@ ISR 的动态性是把双刃剑：**它保证了「只要还有 1 个副本同�
 
 所以真正的「不丢」条件是三个参数的 **联合约束**：
 
-```
+```text
 acks = all
 min.insync.replicas = 2      # ISR 至少 2 个才允许写
 replication.factor = 3       # 保证有 3 份物理拷贝

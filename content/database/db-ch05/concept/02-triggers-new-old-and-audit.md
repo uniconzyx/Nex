@@ -5,7 +5,7 @@
 触发器（trigger）是**由数据修改事件自动激活**的一段过程化代码，用户**不能显式调用**它。
 教科书把它形式化为 **ECA 模型**：
 
-```
+```text
 E (Event)     : INSERT / UPDATE / DELETE  (可加 OF col 限定列)
 C (Condition) : WHEN 子句 (可选)
 A (Action)    : BEGIN ... END 内的过程化语句

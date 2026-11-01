@@ -4,7 +4,7 @@
 
 Maven 用**三元坐标**唯一标识一个构件：
 
-```
+```text
 groupId:artifactId:version        例：org.springframework.boot:spring-boot-starter-web:3.2.0
 ```
 

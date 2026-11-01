@@ -12,7 +12,7 @@
 - **重定向 > file**：open(file, O_WRONLY|O_CREAT|O_TRUNC) 拿到一个新 fd，然后 dup2(newfd, 1) 把 fd 1 **指向**这个新 file description，关闭原来的 fd 1 目标。
 - **管道 a | b**：内核建一对 pipe fd（读端 r、写端 w，共享一块环形缓冲）；a 的 fd 1 被 dup2 到 w，b 的 fd 0 被 dup2 到 r；于是 a 写 stdout 实际写入管道、b 读 stdin 实际从管道读。
 
-```
+```text
 ls | wc -l 的 fd 表（简化）
   ls : fd0=终端  fd1 ──┐      wc : fd0 ──┐  fd1=终端
                        │pipe 写端        │pipe 读端

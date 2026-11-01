@@ -15,7 +15,7 @@ com.example.BarAutoConfiguration
 
 **Spring Boot 2.7+ / 3.x**：自动配置独立成清单文件，**每行一个类名，无 key**：
 
-```
+```text
 # META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
 com.example.FooAutoConfiguration
 com.example.BarAutoConfiguration

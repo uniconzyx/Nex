@@ -4,7 +4,7 @@
 
 CSS 的基石是**盒模型（box model）**：文档流中的每个元素都被渲染为一个矩形盒子，由内到外四层：
 
-```
+```text
 margin(外边距) | border(边框) | padding(内边距) | content(内容)
 ```
 

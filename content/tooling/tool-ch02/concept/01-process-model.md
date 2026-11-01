@@ -17,7 +17,7 @@
 所以「bash 执行一条命令」的真实流程是：bash 先 fork() 出子进程，子进程 exec() 成 ls/grep 等；
 而 source script.sh 是**不 fork**，在当前 bash 进程里执行，所以变量改动会保留——这正是它与 bash script.sh 的本质区别。
 
-```
+```text
 进程树（概念示意，PID 为示意值）
 systemd(1)
   └─ bash(1000)               ← 交互 shell

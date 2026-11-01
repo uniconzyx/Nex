@@ -5,7 +5,7 @@
 旧式接口（`np.random.seed` / `np.random.rand` / `np.random.randn`）操作一个**进程级全局 RandomState**；
 新式接口（`np.random.default_rng()`）返回一个**独立的 `Generator` 实例**，底层是 `PCG64` 等 BitGenerator。
 
-```
+```text
 # 旧式：全局可变状态，任何地方调用都会推进同一条流
 np.random.seed(0)
 a = np.random.randn(3)

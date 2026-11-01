@@ -9,7 +9,7 @@
 外置的第一步，是停止在代码里写 `const timeout = 3000` 这种「看似常量、实则因环境而异」的东西。
 把它们抽到配置对象，由运行环境注入：
 
-```
+```text
 function makeService(config) {
   return {
     timeout: config.timeoutMs ?? 3000,   // 没传就用默认值，不报错

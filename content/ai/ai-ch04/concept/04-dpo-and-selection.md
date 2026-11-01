@@ -6,7 +6,7 @@ DPO（Direct Preference Optimization）的核心是：**把 PPO 的最优解代�
 
 出发点仍是那个带 KL 约束的目标：
 
-```
+```text
 max_π  E[ r(x, y) ] - β · KL( π || π_ref )
 ```
 

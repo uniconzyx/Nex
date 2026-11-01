@@ -4,7 +4,7 @@
 
 向量化把逐元素的 Python 循环「下沉」到 C 层的一个 ufunc 调用里，消除解释器开销、利用连续内存局部性与 SIMD。
 
-```
+```text
 # 慢：Python 解释器逐次执行 2e6 次
 s = 0.0
 for i in range(N):

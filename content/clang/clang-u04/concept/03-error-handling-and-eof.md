@@ -67,7 +67,7 @@ int main(void) {
 ```
 
 **输出**：
-```
+```text
 chars read=3 feof=1
 ```
 

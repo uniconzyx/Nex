@@ -85,7 +85,7 @@ int main(void) {
 ```
 
 **输出**：
-```
+```text
 float 1.0 的 IEEE754 位模式 = 0x3F800000
 ```
 

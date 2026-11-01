@@ -169,7 +169,7 @@ try (KafkaProducer<String, String> producer = new KafkaProducer<>(p)) {
 
 ## ③ 发送链路：从 send() 到 Broker
 
-```
+```text
 send(record)
   → Interceptor 链（onSend）
   → Serializer（key / value 序列化）
