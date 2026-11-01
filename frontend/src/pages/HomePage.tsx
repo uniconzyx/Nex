@@ -93,8 +93,35 @@ export function HomePage({ onNavigate }: { onNavigate: (p: KmPage) => void }) {
   const t4 = BUNDLE.projects.items.filter((i) => i.tier === 't4').length;
 
   return (
-    <div className="km-view">
-      <section className="km-card">
+    <div className="km-view km-home-view">
+      <section className="km-home-scene" aria-label="赛博冰蓝学院">
+        <div className="km-scene-city" aria-hidden="true">
+          <i /><i /><i /><i /><i />
+        </div>
+        <div className="km-scene-copy">
+          <span className="km-scene-weather"><i />{percent >= 70 ? '晴朗' : percent >= 30 ? '薄雾' : '晨露'} · 学习天气</span>
+          <h2>冰蓝学院，今日开塔</h2>
+          <p>{action.subtitle}</p>
+        </div>
+        <div className="km-scene-floats" aria-label="今日试炼状态">
+          <span><small>今日活跃</small><b>{dp.done}/{dp.total || 3}</b></span>
+          <span><small>本周秘境</small><b>{weekly ? `${weekly.solved}/${weekly.total}` : '未解锁'}</b></span>
+        </div>
+        <button type="button" className="km-trial-tower" onClick={() => onNavigate('learn')} aria-label="进入知识试炼章节列表">
+          <span className="km-tower-roof" />
+          <span className="km-tower-core">&lt;/&gt;</span>
+          <span className="km-tower-base" />
+          <em>进入试炼塔</em>
+        </button>
+        <img className="km-scene-cat" src="/assets/kaimao/mood-happy.png" alt="凯喵在学院门口迎接你" />
+        <div className="km-scene-notice">
+          <span>每日秘境</span>
+          <b>{action.title}</b>
+          <em>{dp.allCorrect ? '全对掉落已触发' : '今日错题双倍收容'}</em>
+        </div>
+      </section>
+
+      <section className="km-card km-home-progress">
         <div className="km-prog-row">
           <Ring percent={percent} />
           <div className="km-prog-info">

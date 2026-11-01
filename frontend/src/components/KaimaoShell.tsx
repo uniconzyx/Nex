@@ -26,6 +26,7 @@ import { masterySummary } from '../lib/graph';
 import { useCoinPulse } from '../lib/feedback';
 import { dailyProgress, useDaily } from '../lib/daily';
 import { useSubject } from '../lib/subject';
+import { useSession } from '../lib/session';
 import {
   MOODS,
   moodImage,
@@ -86,6 +87,7 @@ export interface ShellProps {
   onNavigate: (page: KmPage) => void;
   /** 点右侧凯喵立绘 → 打开 AI 对话框（替代桌面端那颗浮动按钮） */
   onOpenAi?: () => void;
+  onOpenAccount?: () => void;
   children: React.ReactNode;
 }
 
@@ -100,9 +102,22 @@ export function KaimaoShell({
   active,
   onNavigate,
   onOpenAi,
+  onOpenAccount,
   children,
 }: ShellProps) {
   const p = useProgress();
+  const session = useSession();
+  const accountName = session.account?.profile.nickname || '离线模式';
+  const openAccount = onOpenAccount ?? (() => onNavigate('me'));
+  const [codeRain, setCodeRain] = useState(false);
+  const logoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const rainTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** 升级时的冰蓝棱镜碎裂 */
+  const [burst, setBurst] = useState<number | null>(null);
+  const levelRef = useRef<number | null>(null);
+  /** 连点搜索 5 次的隐藏台词 */
+  const [secretLine, setSecretLine] = useState<string | null>(null);
+  const searchTaps = useRef(0);
   const [searchOpen, setSearchOpen] = useState(false);
   const [kw, setKw] = useState('');
   /** ≤1180 右栏隐藏后，凯喵/目标/快捷改从这里进来 */
@@ -204,13 +219,85 @@ export function KaimaoShell({
     box.scrollTo({ left: Math.max(0, el.offsetLeft - 14), behavior: 'smooth' });
   }, [active]);
 
+  useEffect(() => () => {
+    if (logoTimer.current) clearTimeout(logoTimer.current);
+    if (rainTimer.current) clearTimeout(rainTimer.current);
+  }, []);
+
+  const startLogoPress = () => {
+    if (logoTimer.current) clearTimeout(logoTimer.current);
+    logoTimer.current = setTimeout(() => {
+      setCodeRain(true);
+      rainTimer.current = setTimeout(() => setCodeRain(false), 4200);
+    }, 3000);
+  };
+  const stopLogoPress = () => {
+    if (logoTimer.current) clearTimeout(logoTimer.current);
+    logoTimer.current = null;
+  };
+
+  /** 升级：全屏冰蓝棱镜碎裂（等级只在 exp 跨过 300 的整数倍时变） */
+  useEffect(() => {
+    if (levelRef.current === null) {
+      levelRef.current = level;
+      return;
+    }
+    if (level > levelRef.current) {
+      levelRef.current = level;
+      setBurst(level);
+      const t = setTimeout(() => setBurst(null), 1900);
+      return () => clearTimeout(t);
+    }
+    levelRef.current = level;
+  }, [level]);
+
+  /** 连点搜索图标 5 次 → 凯喵说隐藏台词 */
+  const onSearchTap = () => {
+    searchTaps.current += 1;
+    if (searchTaps.current >= 5) {
+      searchTaps.current = 0;
+      setSecretLine('连点五次……凯喵捂脸：隐藏台词被你翻出来了喵～');
+      setTimeout(() => setSecretLine(null), 3200);
+    }
+    setSearchOpen((v) => !v);
+  };
+
   return (
-    <div className="km-app" data-km-theme={p.theme}>
-      <header className="km-topbar">
-        <div className="km-brand" role="button" tabIndex={0} onClick={() => onNavigate('home')}>
-          <img src="/assets/kaimao/mood-happy.png" alt="凯喵" />
-          <span>凯喵Code试炼录</span>
+    <div className="km-app" data-km-theme={p.theme} data-page={active}>
+      <div className="km-ambient" aria-hidden="true"><i /><i /></div>
+      {codeRain && (
+        <div className="km-code-rain" aria-hidden="true">
+          {Array.from({ length: 18 }, (_, i) => (
+            <span key={i} style={{ '--rain-i': i } as CSSProperties}>
+              {i % 3 === 0 ? 'const' : i % 3 === 1 ? '01' : '{ }'}
+            </span>
+          ))}
         </div>
+      )}
+      <header className="km-topbar">
+        <button
+          type="button"
+          className="km-brand"
+          onClick={() => onNavigate('home')}
+          onPointerDown={startLogoPress}
+          onPointerUp={stopLogoPress}
+          onPointerLeave={stopLogoPress}
+          onPointerCancel={stopLogoPress}
+          title="返回主城（长按 3 秒有彩蛋）"
+        >
+          <span className="km-brand-avatar">
+            <img src="/assets/kaimao/mood-happy.png" alt="凯喵" />
+            <b>{level}</b>
+          </span>
+          <span className="km-brand-word">凯喵Code试炼录</span>
+        </button>
+
+        <button type="button" className={`km-account-chip km-account-chip--top${session.account ? ' online' : ''}`} onClick={openAccount}>
+          <span className="km-ac-avatar">{session.account ? accountName.slice(0, 1) : '本'}</span>
+          <span>{accountName}</span>
+          <small>云端同步</small>
+          <i className="km-ac-dot" />
+        </button>
 
         <div className="km-xp">
           <div className="km-xp-label">
@@ -256,7 +343,7 @@ export function KaimaoShell({
             type="button"
             className="km-icon-btn"
             title="搜索（页面 / 项目）"
-            onClick={() => setSearchOpen((v) => !v)}
+            onClick={onSearchTap}
             aria-label="搜索"
           >
             <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -315,6 +402,11 @@ export function KaimaoShell({
       <div className={`km-main${focus ? ' km-main--focus' : ''}`}>
         <div className="km-nav-shell">
           <nav className="km-sidenav" aria-label="主导航" ref={navRef}>
+          <button type="button" className={`km-account-chip km-account-chip--side${session.account ? ' online' : ''}`} onClick={openAccount}>
+            <span className="km-ac-avatar">{session.account ? accountName.slice(0, 1) : '本'}</span>
+            <span className="km-side-account-copy"><b>{accountName}</b><small>Lv.{level} · {levelName}</small></span>
+            <i className="km-ac-dot" />
+          </button>
           {NAV_GROUPS.map((g) => (
             <div key={g.title} className="km-nav-group">
               <div className="km-nav-sep">{g.title}</div>
@@ -349,7 +441,12 @@ export function KaimaoShell({
           </button>
         </div>
 
-        <main className="km-content">
+        <main
+          className="km-content"
+          onScroll={(e) => {
+            e.currentTarget.style.setProperty('--km-parallax', `${Math.min(e.currentTarget.scrollTop * 0.06, 28)}px`);
+          }}
+        >
           <OfflineBanner onNavigate={onNavigate} />
           {children}
         </main>
@@ -446,6 +543,21 @@ export function KaimaoShell({
           </div>
         ))}
       </BottomSheet>
+      {coinPulse && <span key={coinPulse.id} className="km-reward-flight" aria-hidden="true">◆</span>}
+      {secretLine && (
+        <div className="km-secret-bubble" role="status">
+          <img src="/assets/kaimao/mood-happy.png" alt="" />
+          <span>{secretLine}</span>
+        </div>
+      )}
+      {burst && (
+        <div className="km-prism-burst" aria-hidden="true">
+          {Array.from({ length: 14 }, (_, i) => (
+            <i key={i} style={{ '--burst-i': i } as CSSProperties} />
+          ))}
+          <b>Lv.{burst} 突破</b>
+        </div>
+      )}
     </div>
   );
 }
@@ -544,6 +656,9 @@ function RightRail({
         <div className="km-aff-bar">
           <i style={{ width: `${affection}%` }} />
         </div>
+        <svg className="km-aff-ecg" viewBox="0 0 120 26" preserveAspectRatio="none" aria-hidden="true">
+          <polyline points="0,20 16,20 24,7 30,23 36,13 42,20 58,20 66,5 72,25 78,12 84,20 120,20" />
+        </svg>
         <div className="km-cat-say">{mood.say(moodCtx)}</div>
       </div>
 

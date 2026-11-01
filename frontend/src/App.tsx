@@ -195,7 +195,12 @@ export function App() {
 
   return (
     <>
-      <KaimaoShell active={page} onNavigate={navigate} onOpenAi={() => openAi()}>
+      <KaimaoShell
+        active={page}
+        onNavigate={navigate}
+        onOpenAi={() => openAi()}
+        onOpenAccount={() => setAccountOpen(true)}
+      >
         {/*
           key={page} 让每次切页都重新挂载，配合 .km-page 的入场动画：
           没有 key 时 React 会复用节点，动画只在首次出现，切换就变成"硬切"。
