@@ -1,0 +1,16 @@
+# 正确性审计的「实跑」依赖
+#
+# scripts/audit_correctness.py 会把 examples/*.json 里的 code 真正跑一遍，
+# 再与 expected_output 逐字符比对。内容侧大量示例用 numpy / pandas 实现，
+# 所以审计机必须装这些包，否则会出现成片的「运行失败(rc=1)」——
+# 那是环境缺包，不是内容有错。
+#
+#   server/.venv/Scripts/python.exe -m pip install -r server/requirements-audit.txt
+#
+# 注意：这些包只是「审计/校对」用，FastAPI 服务端运行时并不需要它们，
+# 因此没有并入 requirements.txt。
+
+numpy>=2.0
+pandas>=2.0
+beautifulsoup4>=4.12
+requests>=2.31

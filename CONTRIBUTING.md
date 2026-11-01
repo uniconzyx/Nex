@@ -96,8 +96,17 @@ content/<subject>/<id>/
 ## 8. 提交流程
 
 ```bash
+# 0) 一次性准备审计环境（新建 venv / 换机器时必须做）
+#    审计会把 examples 里的代码真正跑一遍；内容侧大量示例用 numpy/pandas，
+#    漏装会在 audit_correctness 里堆出成片「缺 Python 依赖」，那是环境问题不是内容问题。
+python -m pip install -r server/requirements-audit.txt
+
 # 1) 校验（必须全绿）
-python server/scripts/validate_content.py      # 门禁
+python server/scripts/validate_content.py      # 门禁：章节结构 / 三视角 / 八股模块
+python scripts/audit_sources.py                # 来源门禁：GitHub+B站 双来源与章节级锚点
+python scripts/audit_correctness.py --all --skip-net   # 实跑 examples/习题，stdout 逐字节比对
+python scripts/check_md_outputs.py             # 正文 ```text 输出块必须在 examples 里有出处
+python scripts/audit_depth.py --min-grade C    # 深度分级（A/B/C），C 级不阻塞但要记账
 python server/scripts/verify_examples.py       # 示例真实回放
 python server/scripts/verify_exercises.py      # 题集健康度
 python server/scripts/audit_learning_lines.py  # 学习线审计（可选）
@@ -108,11 +117,17 @@ python server/scripts/sync_github_resources.py
 # 3) 更新 manifest 状态
 python server/scripts/sync_manifest_status.py
 python server/scripts/sync_dart_manifest.py    # 同步前端 content_manifest.dart
+python server/scripts/gen_exercise_bundle.py   # 改过 exercises.json 必须重跑，产出 frontend/src/data/exercises.ts
+python scripts/gen_chapter_content.py          # 改过 pitfalls.md 必须重跑，产出 chapterContent.ts
 
 # 4) 提交（不要提交 .env / 大二进制）
 git add content/<subject>/<id> ...
 git commit -m "content(<subject>): 新增 <id> 三视角 + 双来源"
 ```
+
+> 门禁报错先怀疑门禁自己。历史上 `audit_correctness` 的 72 条「运行失败」全是 venv 缺 numpy，
+> 13 条「输出不一致」全是 `expected_output` 里残留的孤立 `\r`（CRLF 被截断），
+> 内容本身没有一处错。排查顺序：先确认依赖与数据形态，再改内容。
 
 > 凡要经 Bash 执行的生成脚本，请先 `Write` 落 `.py` 再执行（避免反引号命令替换吞掉内容）。
 > 跑完务必人眼核对关键数字，不能只看退出码 0。

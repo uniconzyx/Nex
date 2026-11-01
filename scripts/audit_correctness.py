@@ -40,6 +40,22 @@ VIEW_RE = re.compile(r'^\| *(\U0001F9D1\u200D\U0001F4BB|[\U0001F393\U0001F4DA])'
 DEFAULT_CHAPTERS = ['fund-ch%02d' % i for i in range(13, 24)]
 
 
+def _norm_std(raw, is_cpp: bool) -> str:
+    """把 content 里的 code_std 归一成编译器认识的标准名。
+
+    数据里同时存在 'c++17' / 'cpp17' / 'cpp20' 几种写法（还有 python 章的 '3.13'），
+    此前 C++ 分支硬编码 '-std=c++17'，导致声明了 cpp20 的 ranges / jthread 示例
+    一律「编译失败」——那是审计没有尊重数据，不是示例写错。
+    """
+    s = (raw or '').strip().lower()
+    if is_cpp:
+        s = s.replace('cpp', 'c++')
+        if not s.startswith('c++'):
+            s = 'c++' + s.lstrip('+') if s else 'c++17'
+        return s
+    return s or 'c11'
+
+
 class Report:
     def __init__(self) -> None:
         self.fails: list[str] = []
@@ -87,44 +103,85 @@ def check_examples(cdir: str, cid: str, rep: Report, tmp: str) -> None:
         if expect is None:
             rep.fail(cid + '/' + name, '缺 expected_output')
             continue
+        # 「可疑字样」是用来拦住「把崩溃/构建失败输出当成期望值」。
+        # 但 Tooling 等章会刻意演示真实报错（反例教学）：报错文本本身写在 code 里，
+        # 由被测程序正常打印出来。这种情况属于合法期望输出，降级为 warn。
         for bad in BAD_OUTPUT:
-            if bad in expect:
+            if bad not in expect:
+                continue
+            if bad in code:
+                rep.warn(cid + '/' + name,
+                         'expected_output 含 %r，但该串来自 code 中的样例数据（反例教学）' % bad)
+            else:
                 rep.fail(cid + '/' + name, 'expected_output 含可疑字样 %r' % bad)
 
         if lang in ('c', 'cpp', 'c++'):
-            src = os.path.join(tmp, 'm.c')
-            exe = os.path.join(tmp, 'm.exe')
-            io.open(src, 'w', encoding='utf-8', newline='\n').write(code)
-            std = obj.get('code_std') or 'c11'
-            cc = ['gcc', '-std=' + std, '-O2', '-o', exe, src]
-            if lang in ('cpp', 'c++'):
-                cc = ['g++', '-std=c++17', '-O2', '-o', exe, src]
+            is_cpp = lang in ('cpp', 'c++')
+            # 源文件名影响 __FILE__ / __FILE_NAME__，示例输出若引用它就靠 run_filename 对齐。
+            # 编译用「相对文件名 + cwd=tmp」：GCC 的 __FILE__ 取自命令行实参，
+            # 传绝对路径会把临时目录写进输出，导致示例永远对不上。
+            src_name = obj.get('run_filename') or ('m.cpp' if is_cpp else 'm.c')
+            io.open(os.path.join(tmp, src_name), 'w', encoding='utf-8',
+                    newline='\n').write(code)
+            std = _norm_std(obj.get('code_std'), is_cpp)
+            if is_cpp:
+                # 尊重 code_std（cpp20 的 ranges / jthread 在 c++17 下编不过）
+                cc = ['g++', '-std=' + std, '-O2', '-pthread', '-o', 'm.exe', src_name]
+            else:
+                cc = ['gcc', '-std=' + std, '-O2', '-o', 'm.exe', src_name]
             r = subprocess.run(cc, capture_output=True, text=True, encoding='utf-8',
-                               errors='replace')
+                               errors='replace', cwd=tmp)
             if r.returncode != 0:
                 rep.fail(cid + '/' + name, '编译失败: ' + (r.stderr or '')[-300:])
                 continue
-            run = subprocess.run([exe], input=stdin, capture_output=True, text=True,
-                                 encoding='utf-8', errors='replace', timeout=30)
+            run = subprocess.run([os.path.join(tmp, 'm.exe')], input=stdin, capture_output=True,
+                                 text=True, encoding='utf-8', errors='replace', timeout=30)
         elif lang in ('python', 'py', 'python3'):
-            src = os.path.join(tmp, 'm.py')
-            io.open(src, 'w', encoding='utf-8', newline='\n').write(code)
-            run = subprocess.run([sys.executable, src], input=stdin, capture_output=True,
-                                 text=True, encoding='utf-8', errors='replace', timeout=60)
+            # __file__ / sys.argv[0] 会进输出，示例可用 run_filename 指定脚本名
+            src_name = obj.get('run_filename') or 'm.py'
+            io.open(os.path.join(tmp, src_name), 'w', encoding='utf-8',
+                    newline='\n').write(code)
+            run = subprocess.run([sys.executable, src_name], input=stdin, capture_output=True,
+                                 text=True, encoding='utf-8', errors='replace',
+                                 timeout=60, cwd=tmp)
         else:
             rep.warn(cid + '/' + name, 'code_lang=%r 未支持，跳过实跑' % lang)
             continue
 
-        if run.returncode != 0:
-            rep.fail(cid + '/' + name,
-                     '运行失败(rc=%d): %s' % (run.returncode, (run.stderr or '')[-300:]))
+        # 示例可声明 expect_rc：'nonzero' 表示「故意崩溃」的演示（assert / 测试失败），
+        # 具体退出码跨平台不一致（Windows abort=3、Linux=134），所以不写死数字。
+        want_rc = obj.get('expect_rc')
+        if want_rc == 'nonzero':
+            rc_ok = run.returncode != 0
+            rc_desc = '非零'
+        elif want_rc is None:
+            rc_ok = run.returncode == 0
+            rc_desc = '0'
+        else:
+            rc_ok = run.returncode == int(want_rc)
+            rc_desc = str(want_rc)
+        if not rc_ok:
+            err = (run.stderr or '')[-400:]
+            miss = re.search(r"ModuleNotFoundError: No module named ['\"]([^'\".]+)", err)
+            if miss:
+                # 缺包是审计环境问题，不是内容错误。报清楚，别让它伪装成「运行失败」
+                rep.fail(cid + '/' + name,
+                         '缺 Python 依赖 %r —— 审计机先执行 '
+                         'pip install -r server/requirements-audit.txt'
+                         % miss.group(1))
+            else:
+                rep.fail(cid + '/' + name,
+                         '运行失败(rc=%d，期望 %s): %s'
+                         % (run.returncode, rc_desc, err[-300:]))
             continue
         got = (run.stdout or '').replace('\r\n', '\n')
-        want = expect.replace('\r\n', '\n')
+        # expected 侧同口径归一化：历史数据里存在 CRLF 被截断成孤立 '\r' 的情况，
+        # 若只替换 '\r\n'，残留的 '\r' 会让逐行 diff 显示成「两行一模一样却不等」
+        want = expect.replace('\r\n', '\n').replace('\r', '\n')
         if got == want:
             continue
         # 允许「末尾换行数不同」不算错，否则报差异首行
-        if got.rstrip('\n') == want.rstrip('\n'):
+        if got.rstrip('\r\n') == want.rstrip('\r\n'):
             rep.warn(cid + '/' + name, '仅末尾换行不同')
             continue
         gl, wl = got.split('\n'), want.split('\n')
