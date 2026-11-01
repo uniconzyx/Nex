@@ -242,15 +242,86 @@ def check_examples(cdir: str, cid: str, rep: Report, tmp: str) -> None:
 
 
 # ----------------------------------------------------------------- exercises
-def _looks_like_non_python(code: str) -> bool:
-    """粗略判断 answer.code 是否非 Python（C/C++/Java/Go 等）。
+def _detect_code_lang(code: str) -> str:
+    """按强特征判断 answer.code 的语言；无强特征时视为 python。
 
-    审计机只用 `python -c` 验证 Python 可运行；C/C++ 等参考实现被当 Python 跑
-    必然语法报错，属误报。这里用少量强特征跳过实跑，避免对非 Python 代码产生假 FAIL。
+    参考实现可能是 C / C++ / Java，用 `python -c` 跑必然语法报错（假 FAIL）。
+    这里先识别语言，再交给对应工具链真编译，而不是简单跳过。
     """
-    markers = ('#include', 'int main(', 'void main(', 'printf(', 'std::',
-               'public class', 'func main(', 'package main', 'defer ')
-    return any(m in code for m in markers)
+    if 'public class' in code or re.search(r'\bimport\s+java\.', code):
+        return 'java'
+    if re.search(r'\b(?:public|private|protected)\s+(?:static\s+)?(?:final\s+)?'
+                 r'(?:class|interface|enum|record)\s+\w+', code) or 'System.out.' in code:
+        return 'java'
+    if '#include' in code or '#define' in code:
+        if ('std::' in code or 'iostream' in code or 'template<' in code
+                or 'using namespace std' in code):
+            return 'cpp'
+        return 'c'
+    if 'func main(' in code or 'package main' in code:
+        return 'go'
+    return 'python'
+
+
+def _verify_answer_code(code: str, tag: str, rep: Report) -> None:
+    """按语言真编译/运行 answer.code。
+
+    - C/C++：有 main 就编译链接后运行；只有函数/片段则只编译（-c），仍能查出语法与类型错。
+    - Java：javac 编译；有 main 再运行。
+    - Python：`python -c` 直接跑。
+    - 其它语言：无法验证，告警（不谎称通过）。
+    """
+    lang = _detect_code_lang(code)
+    tmp = tempfile.mkdtemp(prefix='ans_')
+    try:
+        if lang in ('c', 'cpp'):
+            is_cpp = lang == 'cpp'
+            src_name = 'ans.cpp' if is_cpp else 'ans.c'
+            io.open(os.path.join(tmp, src_name), 'w', encoding='utf-8',
+                    newline='\n').write(code)
+            has_main = re.search(r'\bmain\s*\(', code) is not None
+            cc = ['g++' if is_cpp else 'gcc', '-std=' + _norm_std(None, is_cpp)]
+            cc += ['-o', 'ans.exe', src_name] if has_main else ['-c', '-o', 'ans.o', src_name]
+            r = subprocess.run(cc, capture_output=True, text=True, encoding='utf-8',
+                               errors='replace', cwd=tmp)
+            if r.returncode != 0:
+                rep.fail(tag, 'answer.code 编译失败: ' + (r.stderr or '')[-300:])
+                return
+            if has_main:
+                run = subprocess.run([os.path.join(tmp, 'ans.exe')], capture_output=True,
+                                     text=True, encoding='utf-8', errors='replace',
+                                     timeout=30, cwd=tmp)
+                if run.returncode != 0:
+                    rep.fail(tag, 'answer.code 运行失败: ' + (run.stderr or '')[-300:])
+        elif lang == 'java':
+            mcls = re.search(r'\b(?:public\s+)?(?:final\s+|abstract\s+|sealed\s+)?'
+                             r'(?:class|interface|enum|record)\s+(\w+)', code)
+            cls = mcls.group(1) if mcls else 'Ans'
+            src_name = cls + '.java'
+            io.open(os.path.join(tmp, src_name), 'w', encoding='utf-8',
+                    newline='\n').write(code)
+            r = subprocess.run(['javac', '-encoding', 'UTF-8', '-d', '.', src_name],
+                               capture_output=True, text=True, encoding='utf-8',
+                               errors='replace', cwd=tmp)
+            if r.returncode != 0:
+                rep.fail(tag, 'answer.code 编译失败: ' + (r.stderr or '')[-300:])
+                return
+            if 'static void main(' in code:
+                run = subprocess.run(['java', '-Dstdout.encoding=UTF-8',
+                                      '-Dstderr.encoding=UTF-8', '-cp', '.', cls],
+                                     capture_output=True, text=True, encoding='utf-8',
+                                     errors='replace', timeout=60, cwd=tmp)
+                if run.returncode != 0:
+                    rep.fail(tag, 'answer.code 运行失败: ' + (run.stderr or '')[-300:])
+        elif lang == 'python':
+            r = subprocess.run([sys.executable, '-c', code], capture_output=True,
+                               text=True, encoding='utf-8', errors='replace', timeout=60)
+            if r.returncode != 0:
+                rep.fail(tag, 'answer.code 运行失败: ' + (r.stderr or '')[-300:])
+        else:
+            rep.warn(tag, 'answer.code 语言 %r 暂无可验证工具链' % lang)
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
 
 
 def check_exercises(cdir: str, cid: str, rep: Report) -> None:
@@ -307,15 +378,7 @@ def check_exercises(cdir: str, cid: str, rep: Report) -> None:
                     rep.fail(tag, 'answer.correct=%r 不在 options %r 中' % (c, keys))
         code = ans.get('code')
         if code:
-            # answer.code 可能是 C/C++ 等语言的参考实现，审计机只验证 Python 可运行；
-            # 非 Python 代码用 python -c 跑必然语法报错，属误报，跳过实跑。
-            if _looks_like_non_python(code):
-                rep.warn(tag, 'answer.code 疑似非 Python（C/C++ 等），跳过实跑验证')
-            else:
-                r = subprocess.run([sys.executable, '-c', code], capture_output=True,
-                                   text=True, encoding='utf-8', errors='replace', timeout=60)
-                if r.returncode != 0:
-                    rep.fail(tag, 'answer.code 运行失败: ' + (r.stderr or '')[-300:])
+            _verify_answer_code(code, tag, rep)
 
 
 # --------------------------------------------------------------- interview/project
