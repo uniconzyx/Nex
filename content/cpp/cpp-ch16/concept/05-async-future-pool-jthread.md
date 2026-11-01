@@ -1,5 +1,22 @@
 # 05 · async / future / 线程池 与 jthread
 
+```text
+async 的启动策略：
+    std::launch::async      一定新开线程（真并行）
+    std::launch::deferred   延迟到 get()/wait() 才在当前线程执行
+    async(f) 默认 = async|deferred -> 可能根本没并行（经典陷阱）
+
+future / promise：
+    promise.set_value(x) ──共享状态──▶ future.get()（只能取一次，之后 valid()==false）
+    注意：async 返回的 future 若不 get/wait，析构会阻塞等待 -> 可能退化成串行
+
+线程池：固定 N 个 worker + 任务队列
+    submit ─▶ queue ─▶ worker 取任务 ─▶ 结果写回 packaged_task / future
+    为什么必要：建线程成本高（~10μs 级），线程数还必须受控
+
+jthread（C++20）：析构自动 join + 内置 stop_token 协作取消
+```
+
 ## 一、理论根基：高层并发抽象
 
 `std::async` 把「跑一个任务 + 取结果」封装成 `future`，比手动 `thread`+共享变量优雅；`promise`/`future` 是**一次性单向通道**，用来在线程间传递值或**异常**。

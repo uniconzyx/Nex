@@ -1,5 +1,22 @@
 # 02 · mutex 与 RAII 锁：lock_guard / unique_lock / scoped_lock
 
+```text
+互斥把「读-改-写」变成临界区
+    lock ─┬─ 临界区（同一时刻仅一个线程） ─┬─ unlock
+    mutex 只保证互斥，不保证公平，也不保证等待顺序
+
+三种 RAII 锁：
+    lock_guard    构造加锁、析构解锁；不可手动解锁、不可移动      最简单
+    unique_lock   可 lock/unlock、可移动、可配合 condition_variable   最灵活
+    scoped_lock   C++17，一次锁多个 mutex，内部用 std::lock 避免死锁   多锁首选
+
+死锁四个必要条件（缺一不成立）：
+    互斥 / 持有并等待 / 不可剥夺 / 循环等待
+    工程解法：
+      固定全局加锁顺序        打破「循环等待」
+      scoped_lock(lk1, lk2)   打破「持有并等待」
+```
+
 ## 一、理论根基：互斥为何能消除数据竞争
 
 互斥量（mutex）把「读-改-写」临界区变成**串行**：同一时刻只有一个线程持有锁，从而在被保护的操作之间建立 **happens-before**（释放锁 happens-before 后续获取锁）。数据竞争因此消除。

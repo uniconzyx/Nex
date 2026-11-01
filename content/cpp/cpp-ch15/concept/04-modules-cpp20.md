@@ -1,5 +1,24 @@
 # 04 · C++20 模块：import / export 与头文件文本包含的终结
 
+```text
+头文件的三个病：文本包含 -> 重复解析、宏泄漏、编译期爆炸
+    #include <vector> 在 N 个 TU 里各展开一次 -> 每次都重做词法/语法/模板实例化
+
+模块：
+    // math.cppm
+    export module math;
+    export int add(int, int);      // export 的部分对外可见
+    int helper(int);               // 未 export -> 模块私有，供内部使用
+
+    // main.cpp
+    import math;                   // 只编译一次，产物是 BMI（二进制模块接口）
+
+对比：
+    #include   文本粘贴  宏会泄漏  每 TU 重编  顺序敏感
+    import     语义导入  宏不泄漏  编译一次   顺序无关
+    现状：GCC14 / Clang18 / MSVC 支持度不一，跨编译器仍需谨慎
+```
+
 ## 一、理论根基：头文件到底有什么病
 
 传统 `#include` 是**文本包含**：预处理期把整个头文件原样拼进翻译单元。这带来三类顽疾：

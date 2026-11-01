@@ -1,5 +1,24 @@
 # 04 · 条件变量与虚假唤醒
 
+```text
+为什么需要：忙等烧 CPU，sleep 猜时间不可靠
+    while (!ready) { }        // 空转
+    cv.wait(lk, pred);        // 阻塞直到被通知且谓词为真
+
+wait 做的三件事（必须持 unique_lock）：
+    ① 原子地「解锁 + 进入等待」
+    ② 被 notify 唤醒后重新加锁
+    ③ 返回前重新检查谓词（while 循环包裹）
+
+虚假唤醒（spurious wakeup）：系统允许无通知返回
+    -> 必须用谓词版 wait(lk, []{ return !q.empty(); })
+       「if 判断 + wait」是经典 bug
+
+生产者-消费者：
+    生产者 { lock; q.push(x); }  cv.notify_one();
+    消费者 unique_lock lk(m); cv.wait(lk, [&]{ return !q.empty(); }); q.pop();
+```
+
 ## 一、理论根基：为什么需要条件变量
 
 mutex 只能「互斥」，不能「等待某条件成立」。条件变量（condition_variable）让线程**阻塞等待**直到被通知「条件可能变了」，配合 mutex 实现「生产者-消费者」「信号量」等同步。

@@ -1,5 +1,22 @@
 # 01 · `auto` 的类型推导规则（与模板推导一致）
 
+```text
+auto 推导 = 模板推导（默认丢掉引用与顶层 const）
+    T 推 auto，与 template<class T> f(T) 同一套规则
+
+声明               等价形参          结果（int& r; const int& cr;）
+    auto   x = r;   f(T)            int            拷贝，丢引用
+    auto&  y = r;   f(T&)           int&           必须绑定左值
+    const auto& z=r; f(const T&)    const int&     万能绑定、零拷贝
+    auto&& w = r;   f(T&&)          int&           转发引用，引用折叠决定
+
+decltype(auto) 保留精确类型：
+    decltype(auto) f() { return (x); }   -> int&   （括号使其成为左值表达式）
+    decltype(auto) g() { return  x ; }   -> int
+
+不该用 auto 的场合：需要隐式转换时（auto n = v.size() 得到 size_t 而非 int）
+```
+
 ## 一、理论根基：为什么 `auto` 的推导规则就是模板推导规则
 
 C++11 引入 `auto` 作为「类型占位符」：编译器在初始化时根据 `=` 右侧的表达式**推导**出类型。

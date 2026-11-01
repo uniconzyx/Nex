@@ -1,5 +1,24 @@
 # 03 · SFINAE / enable_if 与 C++20 concept
 
+```text
+SFINAE：替换失败不是错误 -> 重载决议时静默丢弃该候选
+    template<class T, class = std::enable_if_t<std::is_integral_v<T>>>
+    void f(T);        // T 非整型 -> 该候选被移除，而不是编译报错
+
+enable_if 的三个位置：
+    返回值    enable_if_t<cond, T> f()
+    参数      void f(enable_if_t<cond, int>* = nullptr)
+    模板参数  enable_if_t<cond, int> = 0            <- 最常用
+
+C++20 concept：把约束写成可读谓词
+    template<class T> concept Numeric = std::is_arithmetic_v<T>;
+    template<Numeric T> T add(T a, T b);
+
+报错质量：
+    enable_if 失败 -> "no matching function ... substitution failed"（难读）
+    concept 失败   -> "T does not satisfy Numeric"（直接指出违反哪条）
+```
+
 ## 一、SFINAE：替换失败不是错误
 
 SFINAE（Substitution Failure Is Not An Error）指：在模板实参替换过程中发生的失败**不视为硬错误**，而是简单地把该模板从重载候选集中移除。利用这一点，可以「按类型特征挑选重载」。

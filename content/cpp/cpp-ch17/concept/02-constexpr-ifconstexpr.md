@@ -1,5 +1,21 @@
 # 02 · constexpr 编译期计算 与 if constexpr 分支裁剪
 
+```text
+constexpr：把计算搬进编译期
+    constexpr int f(int n) { return n * n; }    // C++14 起允许循环/分支
+    int a[f(5)];                               // 数组维度须常量表达式 -> 编译期求值
+
+    C++20：consteval 强制编译期（不满足即报错）；constinit 保证静态初始化
+
+if constexpr：编译期分支裁剪（丢弃的一侧不求值、不实例化）
+    template<class T> void log(T v) {
+        if constexpr (std::is_pointer_v<T>) std::cout << *v;   // 只对指针实例化
+        else                                std::cout << v;
+    }
+
+对比普通 if：两边都必须能编译；if constexpr 丢弃的一侧直接被移除
+```
+
 ## 一、constexpr：把计算搬进编译期
 
 `constexpr` 函数/变量表示「可以在编译期求值」。编译期计算带来：零运行时开销、可用于需要编译期常量的语境（数组大小、`static_assert`、模板非类型参数）。

@@ -1,5 +1,22 @@
 # 02 · 常用算法与 lambda：sort/find/transform/accumulate 内部机理
 
+```text
+泛型算法 = 对「迭代器区间」施加的纯函数式操作
+    [first, last) ──▶ 算法 ──▶ 就地改写 / 返回新迭代器（算法不持有数据）
+
+std::sort 的 introsort（三段混合，兼顾最坏 O(n log n)）：
+    quicksort ──递归过深(2·log2 n)──▶ heapsort
+        └─ 区间 ≤ 16 ──▶ insertion_sort（小数组常数更小）
+
+比较器必须是「严格弱序」，否则是 UB：
+    合法  a < b   不对称、传递；两向都不可比才算等价
+    非法  a <= b  自反 -> 等价判定崩坏 -> 元素可能被丢弃
+
+lambda 与算法配合：
+    sort(v.begin(), v.end(), [](const A& a, const A& b){ return a.key < b.key; });
+                             ↑ 捕获: [] 空  [&] 引用  [=] 值  [x,&y] 混合
+```
+
 ## 一、理论根基：泛型算法 = 「对迭代器区间施加的纯函数式操作」
 
 STL 算法的第一性原理是 **「数据结构的操作」与「数据结构本身」正交**：`<algorithm>` 里几乎所有函数都形如 `f(first, last, ...)`，操作的是**半开区间 `[first, last)`**，与容器类型无关。这本质是函数式编程的 `map`/`filter`/`fold` 思想在 C++ 里的零开销落地（见 `examples/ex05`、`ex06`）。

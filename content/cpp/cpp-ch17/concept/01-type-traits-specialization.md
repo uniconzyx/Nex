@@ -1,5 +1,21 @@
 # 01 · 类型萃取 type_traits 与模板特化/偏特化
 
+```text
+type_traits = 编译期的类型查询与变换（全在类型系统里，零运行时开销）
+    std::is_integral_v<T>          查询：是整型吗
+    std::remove_reference_t<T>     变换：去引用
+    std::conditional_t<B, A, C>    选择：编译期三元
+
+特化层级：
+    主模板   template<class T> struct X { ... };
+    全特化   template<> struct X<int> { ... };          为某一具体类型定制
+    偏特化   template<class T> struct X<T*> { ... };    为一族类型（指针）定制
+
+is_destructible 的典型用途：
+    if constexpr (std::is_destructible_v<T>) { obj.~T(); }
+    -> 让泛型代码对「不可析构类型」也能编译
+```
+
 ## 一、<type_traits>：编译期的「类型查询与变换」
 
 `<type_traits>` 提供一组编译期常量/类型别名，用于在编译期询问或变换类型。

@@ -1,5 +1,20 @@
 # 03 · C++20 ranges：惰性求值与可组合管道
 
+```text
+ranges 管道描述计算，不搬运数据
+    v | views::filter(even) | views::transform(sq) | views::take(3)
+      └── 每个 | 只是包一层适配器，编译期展开为嵌套迭代器
+
+惰性如何发生（pull 模型）：
+    take(3) 要第 1 个 ──▶ transform 要输入 ──▶ filter 要输入 ──▶ v 的下一元素
+    每个元素只流过一遍，无中间 vector 分配
+
+对比：
+    for + 算法       立即执行，边界易写错
+    ranges 视图      惰性、零分配；但视图不拥有数据 -> 悬垂风险
+    std::ranges::sort 原地排序（不是视图，立即执行）
+```
+
 ## 一、理论根基：从「立即执行」到「惰性视图」
 
 C++98–17 的传统算法（如 `std::transform` / `std::copy_if`）是 **eager（立即执行）** 的：必须先把结果写进一个**已分配好的容器**里，再喂给下一个算法——于是产生大量中间 `vector` 与拷贝。`<ranges>`（基于 Eric Niebler 的 range-v3，见 manifest 资源）把**视图（view）**引入标准：视图是**对底层数据的轻量、非拥有、可组合的包装**，只在被消费时才真正计算每个元素。

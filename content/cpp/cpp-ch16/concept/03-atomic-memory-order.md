@@ -1,5 +1,22 @@
 # 03 · atomic 与内存序：无锁编程的边界
 
+```text
+atomic 解决：单个变量的读改写不被撕裂（无 torn read/write）
+    x.fetch_add(1, relaxed);      // 原子自增，但不建立与其他内存的可见性关系
+
+三种内存序：
+    relaxed   仅保证本操作原子性；不排序、不建立 happens-before
+    acquire   读侧屏障：之后的读写不能重排到它之前
+    release   写侧屏障：之前的读写不能重排到它之后
+    seq_cst   全局单一顺序（默认），最安全也最慢
+
+发布-订阅（最常用配对）：
+    A: data = 42;  flag.store(true, release);
+    B: while (!flag.load(acquire));  read(data);      // 保证看到 42
+
+边界：无锁只在「单变量 + 明确配对」场景可靠；多变量一致性仍需锁
+```
+
 ## 一、理论根基：原子操作解决什么
 
 `std::atomic<T>` 保证对它的操作是**不可分割**的（读-改-写一步完成，不被其他线程插入），从而**无数据竞争**。它比 mutex 轻：通常是单条 CPU 指令（`lock xadd` 等），且不会阻塞线程。

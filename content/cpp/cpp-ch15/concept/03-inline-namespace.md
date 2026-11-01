@@ -1,5 +1,21 @@
 # 03 · inline namespace：版本化、ABI 兼容与别名
 
+```text
+inline namespace = 内容对上层「透明」的命名空间
+    namespace lib { inline namespace v2 { void f(); } }
+    lib::f();        // 无需写 v2
+    lib::v2::f();    // 全名仍可用
+
+透明性来源：隐式 using-directive -> 名字被注入外层作用域
+
+ABI 兼容用法（切默认版本而不改符号名）：
+    旧代码链接到 lib::v1::f 的符号（名字里带 v1）
+    新增 v2 并设为 inline -> 新代码走 v2，旧二进制继续用 v1 -> 平滑升级
+
+注意：多版本并存会让重载决议「看到两份同名类型」
+      -> 公共数据类型慎放 inline namespace（易撞车）
+```
+
 ## 一、理论根基：为什么需要「inline namespace」
 
 库的演进常面临两难：**改了 API 想要新名字空间隔离（v1/v2），又不想让老用户每次都写 `mylib::v2::foo`**。C++11 的 `inline namespace` 让某个命名空间**「透明」**——其内部的名字可被外层命名空间**直接看到**（无需额外限定），同时保留版本隔离能力。

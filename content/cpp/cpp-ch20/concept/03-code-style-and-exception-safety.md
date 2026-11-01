@@ -2,6 +2,24 @@
 
 能跑和写专业之间，差的就是这几条可判断的标准。
 
+```text
+异常安全三等级：
+    Basic     异常后对象仍有效（不泄漏、不变式不破），但状态可能已改
+    Strong    强保证：失败即回滚，等价于「操作没发生」
+    No-throw  承诺不抛（析构 / swap / move），抛了就 terminate
+
+copy-and-swap 拿强保证：
+    T& operator=(T o) { swap(*this, o); return *this; }
+    // 传值即拷贝，失败发生在进入函数体之前 -> 本体永不半途而废
+
+RAII 与所有权：
+    资源获取即初始化 -> 释放钉死在析构（unique_ptr / lock_guard / 文件句柄）
+    const 正确性：能 const 就 const，编译期挡住误改，接口自解释
+
+    反面  new 后手动 delete（早退与异常路径必漏）
+    正面  unique_ptr 持有，所有权用 move 明确表达
+```
+
 ## 一、异常安全等级（Basic / Strong / No-throw）
 
 异常安全有三档（见 ex08）：

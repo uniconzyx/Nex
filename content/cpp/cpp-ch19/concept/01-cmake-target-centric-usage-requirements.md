@@ -4,6 +4,24 @@ CMake 本身不做编译，它是**构建系统生成器**（Makefile / Ninja / 
 因此你在 CMakeLists 里写的每一行，最终都要落成「某个目标用什么命令、带什么 flag、按什么顺序」。
 理解这一点，就能理解为什么现代 CMake 把表达方式从「变量」改成了「目标属性」。
 
+```text
+从目录级变量到目标级属性：
+    旧写法  include_directories(inc)   link_libraries(foo)   全局污染、顺序敏感
+    新写法  target_include_directories(t PUBLIC inc)         随 target 传播
+
+usage requirements 的传播：
+    target_link_libraries(app PRIVATE fmt)
+    -> fmt 的 INTERFACE_INCLUDE_DIRECTORIES / INTERFACE_COMPILE_FEATURES
+       自动进入 app 的编译命令行
+
+三个可见性关键字：
+    PUBLIC     自己用 + 传给依赖者     （接口的一部分）
+    PRIVATE    自己用，不传            （实现细节）
+    INTERFACE  自己不用，只传          （纯头文件库）
+
+    app ──PRIVATE──▶ libA ──PUBLIC──▶ libB      app 也继承 libB 的用法要求
+```
+
 ## 一、从「目录级变量」到「目标级属性」：现代 CMake 的分水岭
 
 **目录级命令**（旧式，directory-scope）：`include_directories()`、`link_directories()`、

@@ -3,6 +3,23 @@
 同样 O(n) 的遍历，为什么一个比另一个快十倍？差别往往不在算法而在**访存模式**。
 本主题给出可判定的对比方法：用自写缓存模型统计缓存行未命中数。
 
+```text
+AoS vs SoA（访问模式决定布局）：
+    AoS  struct P { float x, y, z; };  P a[N];      连续访问一个对象的所有字段
+    SoA  struct { float x[N], y[N], z[N]; };       只遍历 x 时命中率最高
+
+    只对 x 求和：
+      AoS 读 1 个 float 却拉入 12B（x,y,z）  -> 有效带宽 1/3
+      SoA 整条 cache line 都是 x              -> 有效带宽 ≈ 100%
+
+行优先 vs 列优先：
+    for i: for j: A[i][j]    连续访问 -> 友好
+    for j: for i: A[i][j]    跨行跳跃 -> 几乎每步都 miss
+
+结构体瘦身：热字段与冷字段拆开（hot/cold splitting）
+    同样的 64B 里装更多有用数据 = 更少的 miss
+```
+
 ## 一、AoS vs SoA，行优先 vs 列优先
 
 **中立陈述**：

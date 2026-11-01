@@ -1,5 +1,22 @@
 # 04 · 结构化绑定、`std::optional` 与 `std::string_view`
 
+```text
+结构化绑定：把聚合体拆成具名绑定
+    auto [a, b] = std::pair{1, 2.0};      // 拷贝：a:int, b:double
+    for (auto& [k, v] : m) v += 1;        // 引用：改 v 即改容器内元素
+
+optional<T>：表达「可能没有」，替代哨兵值与裸指针
+    has_value() ─┬─ 是 ─▶ *opt / opt.value()
+                 └─ 否 ─▶ value() 抛 bad_optional_access；value_or(d) 给默认
+
+string_view：指针 + 长度，零拷贝只读视图
+    std::string s = "hello world";
+    std::string_view sv{s.data() + 6, 5};   // "world"，不分配
+
+    危险：不拥有内存 -> 源 string 销毁/重分配后即悬垂
+          也不保证以 '\0' 结尾，不能直接传给要 C 字符串的接口
+```
+
 ## 一、结构化绑定（Structured Bindings，C++17）
 
 语法 `auto [a, b, c] = e;` 把 `e` 的「成员/元素」绑定到一组名字上。可用于：

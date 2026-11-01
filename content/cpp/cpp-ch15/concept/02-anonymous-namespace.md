@@ -1,5 +1,21 @@
 # 02 · 匿名命名空间：内部链接与「翻译单元私有」
 
+```text
+匿名命名空间 = 本翻译单元私有（内部链接）
+    namespace { int counter = 0; }     // 等价于 C 里的 static int counter = 0
+
+编译器做了什么：
+    namespace __unique_$$__ { int counter; }
+    using namespace __unique_$$__;
+    -> 源码里仍可无前缀访问，但符号带 TU 唯一后缀 -> 链接期不冲突
+
+与 static 的取舍：
+    static 变量/函数   可用，但 C 风格
+    匿名 namespace     推荐；且能容纳类与模板（static 做不到）
+
+陷阱：头文件里写匿名 namespace -> 每个包含者各得一份 -> ODR 违背 + 体积膨胀
+```
+
 ## 一、理论根基：从「外部链接」到「内部链接」
 
 C 时代用 `static` 把文件级函数/变量限制为**内部链接（internal linkage）**——即只在本翻译单元（.cpp）可见，不会被链接器暴露成全局符号。C++ 引入**匿名命名空间（unnamed namespace）**作为更优替代：
