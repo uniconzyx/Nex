@@ -6,7 +6,7 @@
   "items": [
     {
       "title": "销售数据清洗与分组分析流水线",
-      "requirement_md": "给定一份销售明细 CSV（含 `order_id`, `city`, `category`, `qty`, `unit_price`, `ts`），用 numpy + pandas 完成一条**端到端、可复现**的分析流水线：\n\n1. **加载**：`read_csv` 读入，显式指定 `dtype` 与 `parse_dates`，打印 `info()` 查看推断结果；\n2. **质量体检**：统计每列缺失率、重复行数、`qty<=0` 的异常行数，形成「问题清单」；\n3. **清洗**：按订单去重、剔除非法数量、缺失的 `unit_price` 用同 `category` 中位数回填（**并记录回填条数**）；\n4. **派生指标**：新增 `amount = qty * unit_price`，并用 `pd.cut` 把金额分箱；\n5. **分组分析**：按 `city` × `category` 求 `amount` 的 `sum/count/mean`，输出 TOP-3 城市与环比（用 `shift`/`pct_change` 按月份）；\n6. **导出**：把清洗后明细与汇总表分别写成 CSV，并断言「导出再读回内容一致」。\n\n**验收要求**：结果必须可复现（固定随机种子、不依赖当前时间）；每一步都要打印**确定性的数字**（缺失率、剔除行数、TOP-3 名单），不允许出现耗时或内存占用等机器相关量。",
+      "requirement_md": "### 背景\n\n给定一份销售明细 CSV（含 `order_id`, `city`, `category`, `qty`, `unit_price`, `ts`），用 numpy + pandas 完成一条**端到端、可复现**的分析流水线：\n\n### 功能要求\n\n1. **加载**：`read_csv` 读入，显式指定 `dtype` 与 `parse_dates`，打印 `info()` 查看推断结果；\n2. **质量体检**：统计每列缺失率、重复行数、`qty<=0` 的异常行数，形成「问题清单」；\n3. **清洗**：按订单去重、剔除非法数量、缺失的 `unit_price` 用同 `category` 中位数回填（**并记录回填条数**）；\n4. **派生指标**：新增 `amount = qty * unit_price`，并用 `pd.cut` 把金额分箱；\n5. **分组分析**：按 `city` × `category` 求 `amount` 的 `sum/count/mean`，输出 TOP-3 城市与环比（用 `shift`/`pct_change` 按月份）；\n6. **导出**：把清洗后明细与汇总表分别写成 CSV，并断言「导出再读回内容一致」。\n\n### 验收与约束\n\n**验收要求**：结果必须可复现（固定随机种子、不依赖当前时间）；每一步都要打印**确定性的数字**（缺失率、剔除行数、TOP-3 名单），不允许出现耗时或内存占用等机器相关量。",
       "tasks": [
         {
           "title": "构造样本数据并完成加载与质量体检",

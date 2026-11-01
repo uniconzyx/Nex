@@ -6,7 +6,7 @@
   "items": [
     {
       "title": "实现一个编译期类型列表与 traits 工具箱",
-      "requirement_md": "设计并实现一个小型头-only 元编程工具箱（参考本章 type_traits / 变参 / 特化 / constexpr）：\n1. `TypeList<Ts...>`：编译期类型列表，提供 `Size`（类型数）、`At<I>`（取第 I 个类型）、`Contains<T>`（是否含某类型）等元函数；\n2. `has_member_size<T>`：用 SFINAE/decltype 探测表达式 `std::declval<T>().size()` 是否良构，得到 `value` 编译期 bool；\n3. `constexpr` 函数 `gcd(a, b)` 计算最大公约数，并用 `static_assert` 在编译期验证若干组输入；\n4. `print_all(Ts&&...)`：用折叠表达式 + `std::forward` 转发并打印任意数量参数；\n5. （C++20 可选）用 `concept Container = requires{ {t.size()} -> std::convertible_to<size_t>; }` 约束 `print_all` 仅接受容器。\n6. 写 `main` 验证上述能力，确保编译通过且输出符合预期。",
+      "requirement_md": "### 背景\n\n设计并实现一个小型头-only 元编程工具箱（参考本章 type_traits / 变参 / 特化 / constexpr）：\n\n### 功能要求\n\n1. `TypeList<Ts...>`：编译期类型列表，提供 `Size`（类型数）、`At<I>`（取第 I 个类型）、`Contains<T>`（是否含某类型）等元函数；\n2. `has_member_size<T>`：用 SFINAE/decltype 探测表达式 `std::declval<T>().size()` 是否良构，得到 `value` 编译期 bool；\n3. `constexpr` 函数 `gcd(a, b)` 计算最大公约数，并用 `static_assert` 在编译期验证若干组输入；\n4. `print_all(Ts&&...)`：用折叠表达式 + `std::forward` 转发并打印任意数量参数；\n5. （C++20 可选）用 `concept Container = requires{ {t.size()} -> std::convertible_to<size_t>; }` 约束 `print_all` 仅接受容器。\n6. 写 `main` 验证上述能力，确保编译通过且输出符合预期。\n",
       "tasks": [
         {
           "title": "实现 TypeList 元函数",

@@ -3,7 +3,7 @@
   "items": [
     {
       "title": "迷你 Redis 持久化与内存管理器",
-      "requirement_md": "用 Python 从零实现一个「迷你 Redis 持久化与内存管理器」教学 Demo，覆盖本章核心机制并能打印真实运行结果（参考本章 examples/）：\n\n1. **RDB 快照（fork + COW）**：模拟 BGSAVE——fork 出子进程拿到一致性快照视图，父进程后续写入不影响快照；量化 COW 复制的页数。\n2. **save m n 触发**：实现多规则（或关系）的 BGSAVE 自动触发判定。\n3. **AOF 追加与三策略**：模拟 always/everysec/no 的 fsync 行为，演示崩溃时各自丢失的数据量。\n4. **AOF 重写与混合持久化**：实现 rewrite（抵消冗余命令）与混合文件（RDB 头 + AOF 增量尾）的载入恢复。\n5. **过期删除**：实现惰性删除（访问时删）+ 定期采样删除（随机抽取 N 个删过期）。\n6. **内存淘汰**：实现近似 LRU 与近似 LFU（随机采样 5 个候选，淘汰最久未用/最低频），并统计 mem_fragmentation_ratio。\n\n要求每个模块都可运行并打印结构化状态，最终对比 RDB 与 AOF 在「恢复速度/丢失数据量」上的差异。",
+      "requirement_md": "### 背景\n\n用 Python 从零实现一个「迷你 Redis 持久化与内存管理器」教学 Demo，覆盖本章核心机制并能打印真实运行结果（参考本章 examples/）：\n\n### 功能要求\n\n1. **RDB 快照（fork + COW）**：模拟 BGSAVE——fork 出子进程拿到一致性快照视图，父进程后续写入不影响快照；量化 COW 复制的页数。\n2. **save m n 触发**：实现多规则（或关系）的 BGSAVE 自动触发判定。\n3. **AOF 追加与三策略**：模拟 always/everysec/no 的 fsync 行为，演示崩溃时各自丢失的数据量。\n4. **AOF 重写与混合持久化**：实现 rewrite（抵消冗余命令）与混合文件（RDB 头 + AOF 增量尾）的载入恢复。\n5. **过期删除**：实现惰性删除（访问时删）+ 定期采样删除（随机抽取 N 个删过期）。\n6. **内存淘汰**：实现近似 LRU 与近似 LFU（随机采样 5 个候选，淘汰最久未用/最低频），并统计 mem_fragmentation_ratio。\n\n### 验收与约束\n\n要求每个模块都可运行并打印结构化状态，最终对比 RDB 与 AOF 在「恢复速度/丢失数据量」上的差异。\n",
       "tasks": [
         {
           "title": "实现 RDB fork+COW 快照与 save m n 触发",

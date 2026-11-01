@@ -3,7 +3,7 @@
   "items": [
     {
       "title": "迷你 Redis 内核：从零实现核心编码与结构",
-      "requirement_md": "用任意语言（建议 Python）从零实现一个「迷你 Redis 内核」教学 Demo，覆盖本章核心数据结构与编码逻辑，并能打印真实结构状态：\n\n1. **SDS**：实现带 len/alloc 的动态字符串，支持追加与二进制安全长度获取；\n2. **dict 渐进式 rehash**：双表 + rehashidx，模拟逐步搬迁与「迁移中写 ht[1]」；\n3. **对象编码判定**：对 String/Hash/Set/ZSet 实现 listpack/intset/embstr/raw/hashtable/skiplist 的阈值切换逻辑；\n4. **intset 升级**：插入超范围整数时整体升级位宽（16→32→64）且不回退；\n5. **skiplist**：实现带随机层数的跳表，支持按 score 范围查询；\n6. **quicklist / listpack**：模拟大列表分段为多个 8KB 节点。\n\n要求每个模块都有可运行示例并打印结构化状态（参考本章 examples/）。",
+      "requirement_md": "### 背景\n\n用任意语言（建议 Python）从零实现一个「迷你 Redis 内核」教学 Demo，覆盖本章核心数据结构与编码逻辑，并能打印真实结构状态：\n\n### 功能要求\n\n1. **SDS**：实现带 len/alloc 的动态字符串，支持追加与二进制安全长度获取；\n2. **dict 渐进式 rehash**：双表 + rehashidx，模拟逐步搬迁与「迁移中写 ht[1]」；\n3. **对象编码判定**：对 String/Hash/Set/ZSet 实现 listpack/intset/embstr/raw/hashtable/skiplist 的阈值切换逻辑；\n4. **intset 升级**：插入超范围整数时整体升级位宽（16→32→64）且不回退；\n5. **skiplist**：实现带随机层数的跳表，支持按 score 范围查询；\n6. **quicklist / listpack**：模拟大列表分段为多个 8KB 节点。\n\n### 验收与约束\n\n要求每个模块都有可运行示例并打印结构化状态（参考本章 examples/）。\n",
       "tasks": [
         {
           "title": "实现 SDS 与 String 编码判定",

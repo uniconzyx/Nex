@@ -6,7 +6,7 @@
   "items": [
     {
       "title": "从零搭建「短链服务」并完成工程治理",
-      "requirement_md": "以本机可用工具（JDK 17+、Maven 3.8+、无需外网仓库时可先用本地仓库离线演示）搭建一个可运行的最小 Web 服务，并完成依赖与构建层治理。目标是走通「**写代码 → 构建 → 打包 → 运行 → 测试**」全链路，而不是堆功能。\n\n**功能范围（保持最小）**\n- `POST /api/links` 提交长链接，返回短码\n- `GET /{code}` 302 跳转到原链接\n- `GET /api/links/{code}` 查询元数据（创建时间、访问次数）\n\n**工程要求**\n- 分层清晰：controller / service / repository 三层，DTO 与 Entity 分离\n- 全部使用**构造器注入**，依赖声明为 `final`\n- 参数校验用 `@Valid` + 全局异常处理（`@ControllerAdvice`），不在 controller 里写 try-catch\n- 用 Maven 管理依赖，父 POM 收敛版本，禁止在子模块散落 `<version>`\n- 测试分三层：service 单元测试（Mockito）、controller 切片测试、一条关键路径集成测试；集成测试命名 `*IT`",
+      "requirement_md": "### 背景\n\n以本机可用工具（JDK 17+、Maven 3.8+、无需外网仓库时可先用本地仓库离线演示）搭建一个可运行的最小 Web 服务，并完成依赖与构建层治理。目标是走通「**写代码 → 构建 → 打包 → 运行 → 测试**」全链路，而不是堆功能。\n\n### 功能范围（保持最小）\n\n- `POST /api/links` 提交长链接，返回短码\n- `GET /{code}` 302 跳转到原链接\n- `GET /api/links/{code}` 查询元数据（创建时间、访问次数）\n\n### 工程要求\n\n- 分层清晰：controller / service / repository 三层，DTO 与 Entity 分离\n- 全部使用**构造器注入**，依赖声明为 `final`\n- 参数校验用 `@Valid` + 全局异常处理（`@ControllerAdvice`），不在 controller 里写 try-catch\n- 用 Maven 管理依赖，父 POM 收敛版本，禁止在子模块散落 `<version>`\n- 测试分三层：service 单元测试（Mockito）、controller 切片测试、一条关键路径集成测试；集成测试命名 `*IT`\n",
       "tasks": [
         {
           "title": "初始化工程骨架与父 POM",

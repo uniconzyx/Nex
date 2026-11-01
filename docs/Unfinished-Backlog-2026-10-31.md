@@ -105,22 +105,24 @@ HEAD 仅跟踪 3707 个文件，但工作树里还有 **175 个已跟踪文件�
 
 ---
 
-## P1 · 审计可信度：`audit_correctness` 在 AI/ML/data 学科跑不动（新发现 2026-10-31）
+## P1 · 审计可信度：已修复 ✅（2026-10-31）
 
-对 27 章跑 `audit_correctness --chapters ... --skip-net`，共 119 条问题，**没有一条由本批改动引入**，但暴露了四类既有缺陷：
+原状态：`audit_correctness` 在 AI/ML/data 学科**根本跑不动**，门禁是半瞎的。对 27 章跑出 119 条问题，逐类查清后**没有一条是内容真错**，全是环境与数据形态问题。已全部闭环：
 
-| 类别 | 数量 | 根因 | 处置 |
+| 原问题 | 数量 | 根因 | 处置 |
 |---|---|---|---|
-| `运行失败(rc=1)` | 72 | `server/.venv` **没装 numpy**，而 ai/ml/data 的 examples 全是 numpy 实现 | `pip install numpy` 到 server/.venv（`no_proxy=*` 直连），或单列 `server/requirements-audit.txt` |
-| `输出不一致` | 13 | 全在 `cpp-ch20`，13 个 examples 的 `expected_output` 与真实 stdout 逐行不符 | 重跑 examples 校准声明输出 |
-| `缺字段 content_md/answer/explanation/difficulty` | 8+6+6+8 | `data-ch06/exercises.json` 的 8 条只有 `title` + `answer_md`，**没有题面与选项** | 需要真写题面（非机械改名） |
-| `可疑字样 'error:'/'Error:'` | 2 | `tool-ch04/ex08`、`tool-ch06/ex13` 的期望输出含 error 文本（可能是正常的 git/docker 报错演示） | 人工判定，必要时改措辞 |
+| `运行失败(rc=1)` | 72 | `server/.venv` 没装 numpy，而 ai/ml/data 的 examples 全是 numpy 实现 | 装 numpy 2.5.4 / pandas 3.1.0 / bs4 / requests；固化为 `server/requirements-audit.txt` |
+| `输出不一致` | 13 | 全在 `cpp-ch20`。**不是内容错**：`expected_output` 末尾是孤立 `\r`（CRLF 截断），与 stdout 的 `\n` 字节不等；逐行 diff 时 `\r` 不可见，看上去"两行一模一样" | 84 个 examples、890 处 `\r` 规整为 LF（仅改 `expected_output` 值内转义，文件行尾不动）→ 13 条全降为 warn，`AUDIT_OK` |
+| 习题缺 `content_md` 等 | 8 条 × 4 类字段 | `data-ch06/exercises.json` 只有 `title` + `answer_md`，**没有题面、没有 answer**：前端题干空白、选择题无法判分 | 真写 8 条题面 + answer + explanation；3 段参考代码用 400 组随机用例对照暴力解验证 |
+| 可疑字样 `error:`/`Error:` | 2 | `tool-ch04/ex08`（stash pop 被拒）、`tool-ch06/ex13`（端口占用）——**故意的反例教学**，报错文本来自 code 里的样例数据 | 改审计判据：若可疑串同时出现在 `code` 中，降级 warn 而非 FAIL |
 
-另有 **12 章**的 `exercises.json` 仍是不合规 schema（`stem_md`/`explanation_md` 或直接缺题面）：`mw-ch07`/`mw-ch08` 已在本批统一，剩余 `data-ch05`、`py-ch04~py-ch08`、`mw-ch02`、`mw-ch03`、`cpp-ch12` 待处理。
+**另外修掉的静默缺陷**：
+- `data-ch06/ex05` 打印 `最大误差 = 2.04e-14`，换 numpy 版本变成 `7.11e-15`（语义相同、字节不等）→ 改成布尔判据 `能精确还原 = True`，输出跨版本确定。
+- 审计脚本三处加固：① `ModuleNotFoundError` 不再伪装成"运行失败"，直接点名缺哪个包并指向 `requirements-audit.txt`；② `expected` 侧归一化补上孤立 `\r`，避免 CRLF 残留造成"看着一样却判不等"的假 FAIL；③ 反例教学白名单（见上表末行）。
 
-还有两类**不阻塞**的样式项：9 个 concept 文件「没有 ```text 图示块」、11 处「仅末尾换行不同」。
+**遗留**（不阻塞）：部分章 `concept/*.md` 没有 ```text 图示块；`data-ch05`、`py-ch04~py-ch08`、`mw-ch02`、`mw-ch03`、`cpp-ch12` 的 `exercises.json` 仍是旧 schema（`stem_md`/`explanation_md`，生成器兼容但审计会报缺字段）。
 
-> 结论：**审计脚本本身没错，是喂给它的环境与数据不全。** 想让 `audit_correctness` 成为可信门禁，必须先解决 numpy 缺失这一条，否则 AI/ML/data 三个学科 30+ 章的正确性永远无法验证。
+> 教训：**门禁报错先怀疑门禁自己。** 72 条"运行失败"里 0 条是内容问题，13 条"输出不一致"里 0 条是内容问题——如果不去查根因，就会花几天去"修"本来正确的示例。
 
 ---
 
@@ -182,7 +184,8 @@ HEAD 仅跟踪 3707 个文件，但工作树里还有 **175 个已跟踪文件�
 1. ~~**P0 提交**~~ ✅ 已完成（7 个 commit，工作区清零）。
 2. ~~**P1 深度·最薄 7 章**~~ ✅ 已完成（全部 C→B，`audit_correctness` 对新改章节 `AUDIT_OK`）。
 3. ~~**P1 深度·仅缺 `code_blocks` 的 27 章**~~ ✅ 已完成（C 86→52；同批把 26 个 project.json 的 `requirement_md` 补成 `###` 四小节）。
-4. **P1 审计可信度**：先给 `server/.venv` 装 numpy，让 ai/ml/data 的 examples 能真跑；再校准 `cpp-ch20` 的 13 个 `expected_output`、补 `data-ch06` 的 8 条题面。**这一步不做，后面任何「内容正确性通过」的结论都是空的。**
+4. ~~**P1 审计可信度**~~ ✅ 已完成（装 numpy/pandas 让 ai/ml/data 真跑；84 个 examples 的 CRLF 污染清零；`data-ch06` 8 条题面真写；审计脚本三处加固）。**这一步做完，「内容正确性通过」才第一次有意义。**
 5. **P1 深度·仅缺 `h3` 的 23 章**：拆 `###` 小节标题即可，成本最低。
 6. **P1 路线**：按学科逐个把 95 章改成章节级路线（fullstack 13 + fundamentals 12 + ai 11 最大块）。
 7. **P2 discrete-math**：补 dm-ch02/03 并接线（决定这个学科是否正式上线）。
+8. **P1 残余 schema**：`data-ch05`、`py-ch04~py-ch08`、`mw-ch02`、`mw-ch03`、`cpp-ch12` 的 `exercises.json` 统一到 `content_md`/`explanation`（生成器已兼容两种，改动风险低）。

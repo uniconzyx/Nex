@@ -6,7 +6,7 @@
   "items": [
     {
       "title": "搭建一个最小可用的 SFT 数据工程流水线（schema → 合成 → 过滤 → 去重 → 污染检测 → 一致性）",
-      "requirement_md": "用一个真实或仿真的任务（如「数学应用题解答」或「客服话术」），产出一条可复现的数据流水线脚本：\n\n1. 定义任务 schema：写 `system_template` 与 `user_template`（带占位符），并用 `.format(**sample)` 程序化生成至少 200 条样本；\n2. 实现规则过滤：长度门限 + 重复率门限，记录被砍掉的比例；\n3. 实现语义去重：3-gram Jaccard>=0.5 或 SimHash Hamming<=3，记录去重率；\n4. 实现污染检测：用一份冻结的「评测集」，计算候选池与评测集的 token 级重叠率，剔除超阈值样本，证明评测集零污染；\n5. 模拟两个标注员对同一批样本的标注，实现 `cohen_kappa`，计算首轮 Kappa；挑出分歧样本，补一条 rubric 判据，重标后 Kappa 提升；\n6. 在 README 里汇报：原始条数、过滤率、去重率、污染剔除数、首轮/二轮 Kappa，并贴出一条完整 messages 样本。",
+      "requirement_md": "### 背景\n\n用一个真实或仿真的任务（如「数学应用题解答」或「客服话术」），产出一条可复现的数据流水线脚本：\n\n### 功能要求\n\n1. 定义任务 schema：写 `system_template` 与 `user_template`（带占位符），并用 `.format(**sample)` 程序化生成至少 200 条样本；\n2. 实现规则过滤：长度门限 + 重复率门限，记录被砍掉的比例；\n3. 实现语义去重：3-gram Jaccard>=0.5 或 SimHash Hamming<=3，记录去重率；\n4. 实现污染检测：用一份冻结的「评测集」，计算候选池与评测集的 token 级重叠率，剔除超阈值样本，证明评测集零污染；\n5. 模拟两个标注员对同一批样本的标注，实现 `cohen_kappa`，计算首轮 Kappa；挑出分歧样本，补一条 rubric 判据，重标后 Kappa 提升；\n6. 在 README 里汇报：原始条数、过滤率、去重率、污染剔除数、首轮/二轮 Kappa，并贴出一条完整 messages 样本。\n",
       "tasks": [
         {
           "title": "schema 程序化生成 ≥200 条样本",

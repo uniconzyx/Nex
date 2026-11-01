@@ -3,7 +3,7 @@
   "items": [
     {
       "title": "迷你 Redis 高可用模拟器（主从 / 哨兵 / Cluster）",
-      "requirement_md": "用 Python 从零实现一个「迷你 Redis 高可用模拟器」教学 Demo，覆盖本章三大主题并能打印真实运行结果（参考本章 examples/）：\n\n1. **主从复制**：模拟全量同步 PSYNC（主节点 fork 生成 RDB 快照、从节点清空载入再补增量）与部分同步（repl_backlog 环形缓冲 + offset 续传）；模拟 REPLCONF ACK 心跳上报 offset 并计算 lag。\n2. **哨兵**：模拟 SDOWN（单哨兵心跳缺失判定）与 ODOWN（向其他哨兵 is-master-down-by-addr 询问、quorum 投票累计）；模拟类 Raft 的 leader 选举（epoch + 多数派 >N/2）与故障转移选主规则（replica-priority 最小 → offset 最大 → runid 最小）。\n3. **Cluster**：模拟 16384 槽位分配、CRC16 键槽计算、MOVED/ASK 重定向；模拟槽迁移（SETSLOT IMPORTING/MIGRATING + MIGRATE 逐 key）与集群总线 gossip（PING/PONG 传播拓扑）；模拟脑裂与 min-replicas-to-write 防护（从节点不足时主节点拒绝写入）。\n\n要求每个模块都可运行并打印结构化状态，最终演示：从节点断线 3 秒（落 backlog 窗口内）走部分同步、断线过久走全量；3 哨兵 quorum=2 触发 ODOWN 并选出 leader 完成故障转移；Cluster 下某 key 经 CRC16 路由、错节点收到 MOVED、迁移期收到 ASK；脑裂分区下 min-replicas 触发停写。",
+      "requirement_md": "### 背景\n\n用 Python 从零实现一个「迷你 Redis 高可用模拟器」教学 Demo，覆盖本章三大主题并能打印真实运行结果（参考本章 examples/）：\n\n### 功能要求\n\n1. **主从复制**：模拟全量同步 PSYNC（主节点 fork 生成 RDB 快照、从节点清空载入再补增量）与部分同步（repl_backlog 环形缓冲 + offset 续传）；模拟 REPLCONF ACK 心跳上报 offset 并计算 lag。\n2. **哨兵**：模拟 SDOWN（单哨兵心跳缺失判定）与 ODOWN（向其他哨兵 is-master-down-by-addr 询问、quorum 投票累计）；模拟类 Raft 的 leader 选举（epoch + 多数派 >N/2）与故障转移选主规则（replica-priority 最小 → offset 最大 → runid 最小）。\n3. **Cluster**：模拟 16384 槽位分配、CRC16 键槽计算、MOVED/ASK 重定向；模拟槽迁移（SETSLOT IMPORTING/MIGRATING + MIGRATE 逐 key）与集群总线 gossip（PING/PONG 传播拓扑）；模拟脑裂与 min-replicas-to-write 防护（从节点不足时主节点拒绝写入）。\n\n### 验收与约束\n\n要求每个模块都可运行并打印结构化状态，最终演示：从节点断线 3 秒（落 backlog 窗口内）走部分同步、断线过久走全量；3 哨兵 quorum=2 触发 ODOWN 并选出 leader 完成故障转移；Cluster 下某 key 经 CRC16 路由、错节点收到 MOVED、迁移期收到 ASK；脑裂分区下 min-replicas 触发停写。\n",
       "tasks": [
         {
           "title": "实现主从 PSYNC 全量/部分同步 + REPLCONF ACK",

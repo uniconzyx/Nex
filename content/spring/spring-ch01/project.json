@@ -6,7 +6,7 @@
   "items": [
     {
       "title": "迷你 IoC 容器（纯 JDK 实现）",
-      "requirement_md": "不依赖任何框架，用纯 JDK 实现一个最小可用的 IoC 容器，覆盖本章核心知识点：\n\n1. **注册与获取**：维护 `beanName -> BeanDefinition` 的注册表，支持按名称/类型获取单例。\n2. **组件扫描**：扫描指定包下带 `@Component` 的类并自动注册（可用 RUNTIME 保留的自定义注解）。\n3. **依赖注入**：支持构造器注入与字段注入（用反射把依赖填入），多候选时用 `@Qualifier` 按名称解析。\n4. **作用域**：至少支持 `singleton`（缓存同一实例）；可选实现 `prototype`（每次新建）。\n5. **循环依赖**：尝试用三级缓存（singletonObjects / earlySingletonObjects / singletonFactories）解决单例 Setter 注入的循环依赖，并验证构造器循环依赖会失败。\n\n验收：编写一个 `Main` 演示 A↔B 循环依赖被正确装配、单例共享同一实例、字段注入生效。",
+      "requirement_md": "### 背景\n\n不依赖任何框架，用纯 JDK 实现一个最小可用的 IoC 容器，覆盖本章核心知识点：\n\n### 功能要求\n\n1. **注册与获取**：维护 `beanName -> BeanDefinition` 的注册表，支持按名称/类型获取单例。\n2. **组件扫描**：扫描指定包下带 `@Component` 的类并自动注册（可用 RUNTIME 保留的自定义注解）。\n3. **依赖注入**：支持构造器注入与字段注入（用反射把依赖填入），多候选时用 `@Qualifier` 按名称解析。\n4. **作用域**：至少支持 `singleton`（缓存同一实例）；可选实现 `prototype`（每次新建）。\n5. **循环依赖**：尝试用三级缓存（singletonObjects / earlySingletonObjects / singletonFactories）解决单例 Setter 注入的循环依赖，并验证构造器循环依赖会失败。\n\n### 验收与约束\n\n验收：编写一个 `Main` 演示 A↔B 循环依赖被正确装配、单例共享同一实例、字段注入生效。\n",
       "tasks": [
         {
           "title": "定义注解与 BeanDefinition 注册表",

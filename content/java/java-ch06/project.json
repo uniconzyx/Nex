@@ -5,7 +5,7 @@
   "items": [
     {
       "title": "实现一个流式日志分析器（含目录扫描与安全路径校验）",
-      "requirement_md": "写一个命令行工具，扫描一个目录下的所有 `*.log`，以**流式**方式聚合统计并输出报告。必须综合运用本章全部四块知识：\n\n1. **路径与遍历**：接收用户传入的目录参数，用 `toRealPath()` + `startsWith()` 做安全校验；用 `Files.walk`（给 `maxDepth`）筛选出所有 `*.log`，按文件名排序保证输出确定。\n2. **字节/字符流**：每个文件用 `Files.newBufferedReader(p, UTF_8)` 读取；遇到非法字节序列时不计入统计并累加「坏文件」计数（用 `CharsetDecoder` 的 `onMalformedInput(REPORT)` 严格模式）。\n3. **流式聚合**：统计总行数、ERROR/WARN 行数、按小时（从行首时间戳 `yyyy-MM-dd HH:mm:ss` 提取）的日志量分布、出现次数前 5 的错误码。**内存占用必须与文件大小无关**。\n4. **结果落地**：用 `Files.move(tmp, target, ATOMIC_MOVE)` 原子写出报告，避免读者读到半截文件；输出用 `BufferedWriter` 并显式 `UTF_8`。\n\n限制：不得使用任何第三方库（无 Lombok、无 Jackson）；所有输出为 ASCII（Windows 控制台按 GBK 转码，中文会乱码）。",
+      "requirement_md": "### 背景\n\n写一个命令行工具，扫描一个目录下的所有 `*.log`，以**流式**方式聚合统计并输出报告。必须综合运用本章全部四块知识：\n\n### 功能要求\n\n1. **路径与遍历**：接收用户传入的目录参数，用 `toRealPath()` + `startsWith()` 做安全校验；用 `Files.walk`（给 `maxDepth`）筛选出所有 `*.log`，按文件名排序保证输出确定。\n2. **字节/字符流**：每个文件用 `Files.newBufferedReader(p, UTF_8)` 读取；遇到非法字节序列时不计入统计并累加「坏文件」计数（用 `CharsetDecoder` 的 `onMalformedInput(REPORT)` 严格模式）。\n3. **流式聚合**：统计总行数、ERROR/WARN 行数、按小时（从行首时间戳 `yyyy-MM-dd HH:mm:ss` 提取）的日志量分布、出现次数前 5 的错误码。**内存占用必须与文件大小无关**。\n4. **结果落地**：用 `Files.move(tmp, target, ATOMIC_MOVE)` 原子写出报告，避免读者读到半截文件；输出用 `BufferedWriter` 并显式 `UTF_8`。\n\n### 验收与约束\n\n限制：不得使用任何第三方库（无 Lombok、无 Jackson）；所有输出为 ASCII（Windows 控制台按 GBK 转码，中文会乱码）。\n",
       "tasks": [
         {
           "title": "安全路径校验与目录扫描",

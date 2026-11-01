@@ -6,7 +6,7 @@
   "items": [
     {
       "title": "把 fs-ch07 的项目改成 TypeScript：从 JS 迁移并加上端到端类型安全",
-      "requirement_md": "选一个此前用纯 JS 写的小项目（没有就做：任务清单 API + 前端页面），完成迁移：\n\n1. 打开 `strict` 全家桶（`strict: true`、`noUncheckedIndexedAccess`、`exactOptionalPropertyTypes`），逐项修掉报错，不许用 `as any` 绕过；\n2. 为所有 API 边界（请求体、响应、query 参数）写 Zod schema，类型由 `z.infer` 生成，删除手写 interface；\n3. 前端调用后端时，响应先 `parse` 再用；`parse` 失败要给出可读的错误路径；\n4. 挑两处真正需要穷尽性的地方（如状态机、消息类型），用可辨识联合 + `never` 做穷尽检查；\n5. 用 `tsc --noEmit` 接入 CI，并在 README 里写下迁移前后各修掉了哪类真实 bug。",
+      "requirement_md": "### 背景\n\n选一个此前用纯 JS 写的小项目（没有就做：任务清单 API + 前端页面），完成迁移：\n\n### 功能要求\n\n1. 打开 `strict` 全家桶（`strict: true`、`noUncheckedIndexedAccess`、`exactOptionalPropertyTypes`），逐项修掉报错，不许用 `as any` 绕过；\n2. 为所有 API 边界（请求体、响应、query 参数）写 Zod schema，类型由 `z.infer` 生成，删除手写 interface；\n3. 前端调用后端时，响应先 `parse` 再用；`parse` 失败要给出可读的错误路径；\n4. 挑两处真正需要穷尽性的地方（如状态机、消息类型），用可辨识联合 + `never` 做穷尽检查；\n5. 用 `tsc --noEmit` 接入 CI，并在 README 里写下迁移前后各修掉了哪类真实 bug。\n",
       "tasks": [
         {
           "title": "打开 strict 并把报错清零（记录每类报错的解法）",

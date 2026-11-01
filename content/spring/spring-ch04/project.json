@@ -6,7 +6,7 @@
   "items": [
     {
       "title": "实现一个迷你自动配置框架（MiniAutoConfig）",
-      "requirement_md": "用**纯 JDK**实现一个可运行的迷你自动配置框架，完整复现 SpringBoot 的核心机制，从而把本章抽象概念落到可调试的代码上。\n\n**功能要求**\n1. `Condition` 接口与三个实现：`OnClass`、`OnMissingBean`、`OnProperty`；\n2. `@MiniAutoConfiguration` 注解 + `@MiniConditional` 注解，由自写的注解处理器扫描并构建候选清单；\n3. 支持 `after` 属性声明相对顺序，做**拓扑排序**后按序评估（有环时告警并退化字典序）；\n4. 一个极简 IoC 容器：按顺序注册通过条件的 Bean，并支持「用户显式注册的 Bean 覆盖默认 Bean」；\n5. 启动时打印 **条件评估报告**（Positive / Negative matches，含未匹配原因），格式对齐 Spring Boot 的 `CONDITIONS EVALUATION REPORT`。\n\n**验收标准**\n- 编写至少 4 个自动配置类（其中 1 个依赖另一个），启动后输出顺序正确；\n- 用户显式注册同名 Bean 后，默认 Bean 不再注册；\n- 人为制造一个环，程序不崩溃，打印告警并给出兜底顺序；\n- 评估报告能区分 positive / negative 并给出原因。",
+      "requirement_md": "### 背景\n\n用**纯 JDK**实现一个可运行的迷你自动配置框架，完整复现 SpringBoot 的核心机制，从而把本章抽象概念落到可调试的代码上。\n\n### 功能要求\n\n1. `Condition` 接口与三个实现：`OnClass`、`OnMissingBean`、`OnProperty`；\n2. `@MiniAutoConfiguration` 注解 + `@MiniConditional` 注解，由自写的注解处理器扫描并构建候选清单；\n3. 支持 `after` 属性声明相对顺序，做**拓扑排序**后按序评估（有环时告警并退化字典序）；\n4. 一个极简 IoC 容器：按顺序注册通过条件的 Bean，并支持「用户显式注册的 Bean 覆盖默认 Bean」；\n5. 启动时打印 **条件评估报告**（Positive / Negative matches，含未匹配原因），格式对齐 Spring Boot 的 `CONDITIONS EVALUATION REPORT`。\n\n### 验收标准\n\n- 编写至少 4 个自动配置类（其中 1 个依赖另一个），启动后输出顺序正确；\n- 用户显式注册同名 Bean 后，默认 Bean 不再注册；\n- 人为制造一个环，程序不崩溃，打印告警并给出兜底顺序；\n- 评估报告能区分 positive / negative 并给出原因。\n",
       "tasks": [
         {
           "title": "定义 Condition 接口与三个条件实现",
