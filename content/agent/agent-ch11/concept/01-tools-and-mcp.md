@@ -76,6 +76,8 @@ def validate(call, schemas):
 | pattern 缺失 | `to: "no-at-sign"` | 拒发 | 邮箱格式不可猜 |
 | 语义错误 | `expr: "8450/0"` | schema 放行，执行期炸 | 形状合法 ≠ 语义合法 |
 
+### 工具描述也是 schema 的一部分
+
 工具描述本身也是 schema 的一部分：描述写得差，模型选错工具、传错参数的概率直线上升。
 工程判据是**「描述里能回答三个问题」**：这个工具什么时候用（触发条件）、
 输入每个字段的格式与示例、失败时返回什么（错误码要能被模型理解并换策略）。
@@ -104,6 +106,8 @@ def idem_key(tool, args, drop=("nonce", "ts")):
     return hashlib.sha256((tool + json.dumps(canon, sort_keys=True)).encode()).hexdigest()[:12]
 ```
 
+### 幂等键还要带 TTL 与租约
+
 真实系统里键还要带 **TTL 与租约**：无限回放缓存会让「过期的首次结果」被反复返回；
 跨服务的幂等则要把键落到共享存储（Redis/DB），不能只存在于进程内存。
 
@@ -128,6 +132,8 @@ MCP client（Agent）                MCP server（工具方）
       │── tools/call（带 schema 校验后参数）▶│
       │◀───── 结果 / 错误（回喂模型）───────│
 ```
+
+### 工程判据：工具清单按会话裁剪
 
 工程判据：工具清单要**按会话裁剪**（20 个工具全量塞给模型，选错率显著上升——
 经验判断，可按 top-k 相关检索裁）；`inputSchema` 就是第 1 节的 schema，
