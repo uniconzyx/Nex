@@ -15,6 +15,7 @@
  *      点一条直接进对应的判题台/题库。
  */
 import { useMemo } from 'react';
+import type { CSSProperties } from 'react';
 
 import { BUNDLE } from '../data/bundle';
 import { DIFF_META, TYPE_META, chapterTitle, exerciseById, focusChapter } from '../lib/exerciseBank';
@@ -25,6 +26,7 @@ import { nextAction } from '../lib/nextAction';
 import type { KmPage } from '../lib/nav';
 import { SUBJECTS, useSubject } from '../lib/subject';
 import { bestiaryStats, streakOf, todayKey, useProgress } from '../lib/progress';
+import { MOODS, moodImage, resolveMood, useMoodFlash, type MoodCtx } from '../lib/mood';
 import { useWeekly } from '../lib/weekly';
 
 const RING_R = 54;
@@ -92,32 +94,85 @@ export function HomePage({ onNavigate }: { onNavigate: (p: KmPage) => void }) {
 
   const t4 = BUNDLE.projects.items.filter((i) => i.tier === 't4').length;
 
+  /**
+   * 凯喵此刻的心情：跟右栏同一套判定（常态 resolveMood + 瞬时 flash 优先），
+   * 主城立绘直接换成对应表情图，并把它的台词搬到场景里。
+   */
+  const moodCtx: MoodCtx = {
+    checkedIn: p.checkins.includes(todayKey()),
+    streak,
+    dailyDone: dp.done,
+    dailyTotal: dp.total,
+    wild: bs.wild,
+    doneChapters: done,
+    doneProjects: p.doneProjects.length,
+    page: 'home',
+    hour: new Date().getHours(),
+  };
+  const moodFlash = useMoodFlash();
+  const moodKey = moodFlash?.key ?? resolveMood(moodCtx);
+  const mood = MOODS[moodKey];
+
   return (
     <div className="km-view km-home-view">
       <section className="km-home-scene" aria-label="赛博冰蓝学院">
         <div className="km-scene-city" aria-hidden="true">
-          <i /><i /><i /><i /><i />
+          <i /><i /><i /><i /><i /><i /><i />
         </div>
-        <div className="km-scene-copy">
-          <span className="km-scene-weather"><i />{percent >= 70 ? '晴朗' : percent >= 30 ? '薄雾' : '晨露'} · 学习天气</span>
-          <h2>冰蓝学院，今日开塔</h2>
-          <p>{action.subtitle}</p>
-        </div>
-        <div className="km-scene-floats" aria-label="今日试炼状态">
-          <span><small>今日活跃</small><b>{dp.done}/{dp.total || 3}</b></span>
-          <span><small>本周秘境</small><b>{weekly ? `${weekly.solved}/${weekly.total}` : '未解锁'}</b></span>
-        </div>
-        <button type="button" className="km-trial-tower" onClick={() => onNavigate('learn')} aria-label="进入知识试炼章节列表">
-          <span className="km-tower-roof" />
-          <span className="km-tower-core">&lt;/&gt;</span>
-          <span className="km-tower-base" />
-          <em>进入试炼塔</em>
-        </button>
-        <img className="km-scene-cat" src="/assets/kaimao/mood-happy.png" alt="凯喵在学院门口迎接你" />
-        <div className="km-scene-notice">
-          <span>每日秘境</span>
-          <b>{action.title}</b>
-          <em>{dp.allCorrect ? '全对掉落已触发' : '今日错题双倍收容'}</em>
+
+        <div className="km-scene-body">
+          <div className="km-scene-copy">
+            <span className="km-scene-weather"><i />{percent >= 70 ? '晴朗' : percent >= 30 ? '薄雾' : '晨露'} · 学习天气</span>
+            <h2>冰蓝学院，今日开塔</h2>
+            <p>{action.subtitle}</p>
+
+            <div className="km-scene-stats" aria-label="今日试炼状态">
+              <span className="km-scene-stat">
+                <small>今日活跃</small>
+                <b>{dp.done}/{dp.total || 3}</b>
+                <i className="km-scene-meter"><em style={{ width: `${dp.total ? (dp.done / dp.total) * 100 : 0}%` }} /></i>
+              </span>
+              <span className="km-scene-stat">
+                <small>本周秘境</small>
+                <b>{weekly ? `${weekly.solved}/${weekly.total}` : '未解锁'}</b>
+                <i className="km-scene-meter">
+                  <em style={{ width: `${weekly && weekly.total ? (weekly.solved / weekly.total) * 100 : 0}%` }} />
+                </i>
+              </span>
+            </div>
+
+            <div className="km-scene-notice">
+              <span className="km-scene-notice-k">每日秘境</span>
+              <b>{action.title}</b>
+              <em>{dp.allCorrect ? '全对掉落已触发' : '今日错题双倍收容'}</em>
+            </div>
+          </div>
+
+          <div className="km-scene-stage" style={{ '--mood-aura': mood.aura } as CSSProperties}>
+            <span className="km-scene-floor" aria-hidden="true" />
+            <span className="km-scene-rune r1" aria-hidden="true" />
+            <span className="km-scene-rune r2" aria-hidden="true" />
+            <span className="km-scene-rune r3" aria-hidden="true" />
+            <button
+              type="button"
+              className="km-trial-tower"
+              onClick={() => onNavigate('learn')}
+              aria-label="进入知识试炼章节列表"
+            >
+              <span className="km-tower-roof" />
+              <span className="km-tower-core">&lt;/&gt;</span>
+              <span className="km-tower-base" />
+              <em>进入试炼塔</em>
+            </button>
+            <div className="km-scene-cat-wrap">
+              <span className="km-scene-mood">
+                <i aria-hidden="true">{mood.emoji}</i>
+                {mood.label}
+              </span>
+              <p className="km-scene-bubble">{mood.say(moodCtx)}</p>
+              <img className="km-scene-cat" src={moodImage(moodKey)} alt={`凯喵此刻的表情：${mood.label}`} />
+            </div>
+          </div>
         </div>
       </section>
 

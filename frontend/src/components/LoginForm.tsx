@@ -146,39 +146,48 @@ export function LoginForm({ onSuccess }: Props) {
 
       <div className="km-login-fields">
         {mode === 'register' && (
+          <label className="km-login-field">
+            <span>昵称</span>
+            <input
+              className="km-input"
+              type="text"
+              placeholder="留空则取账号前缀"
+              aria-label="昵称"
+              value={nickname}
+              maxLength={32}
+              onChange={(e) => setNickname(e.target.value)}
+            />
+          </label>
+        )}
+        <label className="km-login-field">
+          <span>{isLocalAccount ? '用户名' : '邮箱'}</span>
           <input
             className="km-input"
-            type="text"
-            placeholder="昵称（留空则取邮箱前缀）"
-            aria-label="昵称"
-            value={nickname}
-            maxLength={32}
-            onChange={(e) => setNickname(e.target.value)}
+            // local 后端收的是用户名而不是邮箱。用 type="email" 会让部分移动端
+            // 键盘只出邮箱符号，输入 "dev" 这种账号很别扭，也与语义不符。
+            type={isLocalAccount ? 'text' : 'email'}
+            placeholder={isLocalAccount ? '你的用户名' : 'you@example.com'}
+            aria-label={isLocalAccount ? '用户名' : '邮箱'}
+            value={account}
+            autoComplete="username"
+            onChange={(e) => setAccount(e.target.value)}
           />
-        )}
-        <input
-          className="km-input"
-          // local 后端收的是用户名而不是邮箱。用 type="email" 会让部分移动端
-          // 键盘只出邮箱符号，输入 "dev" 这种账号很别扭，也与语义不符。
-          type={isLocalAccount ? 'text' : 'email'}
-          placeholder={isLocalAccount ? '用户名' : '邮箱'}
-          aria-label={isLocalAccount ? '用户名' : '邮箱'}
-          value={account}
-          autoComplete="username"
-          onChange={(e) => setAccount(e.target.value)}
-        />
-        <input
-          className="km-input"
-          type="password"
-          placeholder={mode === 'register' ? '密码（8–72 位）' : '密码'}
-          aria-label="密码"
-          value={password}
-          autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
-          onChange={(e) => setPassword(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') void submit();
-          }}
-        />
+        </label>
+        <label className="km-login-field">
+          <span>密码</span>
+          <input
+            className="km-input"
+            type="password"
+            placeholder={mode === 'register' ? '8–72 位' : '输入密码'}
+            aria-label="密码"
+            value={password}
+            autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
+            onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') void submit();
+            }}
+          />
+        </label>
       </div>
 
       <div className="km-login-actions">
@@ -188,7 +197,7 @@ export function LoginForm({ onSuccess }: Props) {
           disabled={s.pending || !account.trim() || !password}
           onClick={() => void submit()}
         >
-          {s.pending ? '连接中…' : mode === 'login' ? '登录' : '注册并登录'}
+          {s.pending ? '连接中…' : mode === 'login' ? '进入试炼塔' : '注册并进入'}
         </button>
         <span className={`km-login-hint ${msg ? 'is-error' : ''}`}>
           {msg ||

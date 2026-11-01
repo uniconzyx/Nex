@@ -54,6 +54,16 @@ export function BottomSheet({
     };
   }, [open]);
 
+  // Esc 关闭：弹层是模态，键盘用户必须能退出去（原来只有点遮罩和点叉）
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
+
   const onGrabDown = useCallback((e: React.PointerEvent) => {
     startY.current = e.clientY;
     setDragging(true);

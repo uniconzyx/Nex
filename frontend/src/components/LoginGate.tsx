@@ -17,19 +17,30 @@ interface Props {
 export function LoginGate({ onLocalMode }: Props) {
   return (
     <div className="km-gate" role="dialog" aria-modal="true" aria-label="登录以继续使用">
-      <div className="km-gate-card km-glass">
-        <div className="km-gate-brand">
-          <img src="/assets/kaimao/mood-happy.png" alt="凯喵" />
-          <div>
-            <b>凯喵Code试炼录</b>
-            <span>登录后即可同步进度、收服怪物、挑战 BOSS</span>
+      {/* 背景层：冰蓝弥散光晕 + 漂浮的六边形符文，纯装饰不参与阅读 */}
+      <div className="km-gate-bg" aria-hidden="true">
+        <i />
+        <i />
+        <span className="km-gate-rune r1" />
+        <span className="km-gate-rune r2" />
+        <span className="km-gate-rune r3" />
+        <span className="km-gate-rune r4" />
+      </div>
+
+      <div className="km-gate-card">
+        <div className="km-gate-hero">
+          <div className="km-gate-avatar">
+            <img src="/assets/kaimao/mood-happy.png" alt="凯喵" />
+            <span className="km-gate-ring" aria-hidden="true" />
           </div>
+          <h1>凯喵Code试炼录</h1>
+          <p>登录后同步进度、收服怪物、挑战周 BOSS</p>
         </div>
 
         <LoginForm onSuccess={() => { /* 状态变 online，外层会自动收起网关 */ }} />
 
         <button type="button" className="km-gate-skip" onClick={onLocalMode}>
-          稍后体验（本地模式）
+          先逛逛 · 本地模式
         </button>
         <p className="km-gate-note">
           本地模式下进度仅存本机，功能完整可用；随时可在「我的 → 账号管理」登录同步。
