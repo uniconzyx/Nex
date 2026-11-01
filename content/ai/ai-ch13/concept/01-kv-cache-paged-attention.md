@@ -6,7 +6,9 @@
 只需算当前 token 的 Q，再和缓存的 K、V 做注意力。这样每步复杂度从 O(n²) 降到 O(n)，代价是
 显存里要常驻一份随序列增长的 KV 缓存。
 
-## 显存账：KV Cache 到底吃多少
+## 一、显存账与碎片问题
+
+### 显存账：KV Cache 到底吃多少
 
 ```text
    请求A: [block0][block1][block2]     物理块池 (PagedAttention)
@@ -21,14 +23,30 @@ fp16（2 字节）下，**单条 4096 长度序列**就需要约 2 GB；batch=32
 这就是为什么长上下文 + 高并发时，显存往往不是被「模型权重」占满，而是被「KV Cache」占满。
 做部署预算时，权重是固定成本，KV Cache 是随并发与长度线性膨胀的变动成本，二者都要算。
 
-## 碎片问题：连续分配撑不住多请求
+```python
+def kv_cache_bytes(seq_len, n_layers=32, n_kv_heads=8, head_dim=128,
+                   batch=1, bytes_per_elem=2):
+    """2（K 与 V）× 层数 × kv 头数 × head_dim × 序列长 × batch × 每元素字节数"""
+    return (2 * n_layers * n_kv_heads * head_dim
+            * seq_len * batch * bytes_per_elem)
+
+print(kv_cache_bytes(4096) / 2**30)             # ≈ 0.50 GiB —— 单条 4k 序列
+print(kv_cache_bytes(4096, batch=32) / 2**30)   # ≈ 16.0 GiB —— 32 并发
+print(kv_cache_bytes(32768, batch=32) / 2**30)  # ≈ 128  GiB —— 长上下文直接爆
+```
+
+注意 `n_kv_heads` 是 **kv 头数**而不是注意力头数：GQA/MQA 正是靠把 kv 头数压到 8 甚至 1，才把上面这个数字缩小 4~32 倍。
+
+### 碎片问题：连续分配撑不住多请求
 
 传统实现给每条序列预分配「连续」的 KV 显存块，长度按最大可能 seq_len 预留。问题随之而来：
 ① **内部碎片**——多数序列用不到预留长度，空着也是浪费；② **外部碎片**——序列长短不一，
 连续大块申请/释放后留不连续的空洞，新请求申请不下；③ **无法复用**——多个请求共享同一段系统
 提示词（prefix），却各自存一份相同的 KV，白白翻倍。这正是 vLLM 提出 PagedAttention 的动机。
 
-## PagedAttention：像操作系统分页一样管 KV
+## 二、PagedAttention 与复用
+
+### PagedAttention：像操作系统分页一样管 KV
 
 PagedAttention 借用了虚拟内存的「分页」思想：把 KV Cache 切成固定大小的**块（block）**，每块
 存若干 token（如 4 个）的 K/V。序列的逻辑块号通过一张**块表（block table）**映射到物理块，
@@ -37,7 +55,7 @@ PagedAttention 借用了虚拟内存的「分页」思想：把 KV Cache 切成�
 的系统提示词只存一份物理块，块表指向同一块，省下大量重复 KV。这就把「每条序列独占一整段
 连续显存」变成了「所有序列从同一块池里按需取页」。
 
-## 复用是显存与延迟的双赢
+### 复用是显存与延迟的双赢
 
 前缀复用的收益不止省显存：共享 prompt 的请求不必各自重算那一段 KV，首 token 延迟（TTFT）
 显著下降。在「100 个请求都带同一段 512 token 系统提示」的场景里，不复用要算 100 份共 4096
