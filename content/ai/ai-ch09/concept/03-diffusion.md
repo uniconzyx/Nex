@@ -111,6 +111,25 @@ $$\varepsilon_\theta(x_t,t)=-\sqrt{1-\bar\alpha_t}\,\nabla_{x_t}\log q_t(x_t)$$
 - **常考**：$\mathcal{L}_{\text{simple}}$ 的形式与含义；反向一步的均值公式；$\sigma_t$ 的两个可选值（$\beta_t$ 或 $\tilde\beta_t$）；DDPM 与 VAE 的关系（层级 VAE）。
 - **易错**：把反向过程说成「一次去噪到清晰」——它是 $T$ 步迭代；把 $\mathcal{L}_{\text{simple}}$ 说成「ELBO 的等价形式」——它是**去掉权重的简化版**，不严格等价。
 
+```python
+import torch
+
+def q_sample(x0, t, betas):
+    """前向一步到位：x_t = sqrt(ᾱ_t)·x0 + sqrt(1-ᾱ_t)·ε，不必真的循环 t 次。"""
+    abar = torch.cumprod(1 - betas, dim=0)[t].view(-1, 1, 1, 1)
+    eps = torch.randn_like(x0)
+    return abar.sqrt() * x0 + (1 - abar).sqrt() * eps, eps
+
+def diffusion_loss(eps_net, x0, t, betas):
+    """训练目标就是「猜噪声」：预测 ε 与真实 ε 的 MSE。"""
+    xt, eps = q_sample(x0, t, betas)
+    return ((eps_net(xt, t) - eps) ** 2).mean()
+```
+
+「闭式可算」是扩散模型能落地的根本原因：若前向必须迭代 t 次才能得到 `x_t`，
+训练一个 batch 就要几百次前向，成本高到不可接受。重参数化把这个 O(T) 变成 O(1)。
+
+
 ## 3. 采样：DDPM → DDIM → 引导
 
 采样是扩散模型最大的工程成本：DDPM 要跑 $T$（通常 1000）次前向。三条加速路线：
@@ -149,6 +168,25 @@ $s=1$ 是无引导，$s>1$ 增强条件一致性但牺牲多样性（$s$ 太大�
 - **必背**：DDIM 与 DDPM 的区别（非马尔可夫、确定性、可跳步）；CFG 的公式与 $s$ 的作用；扩散采样的复杂度（$T$ 次前向 vs 自回归 $n$ 次、GAN 1 次）。
 - **高频问法**：① 为什么 DDIM 能减少步数而效果接近（同一前向边缘 + 确定性 ODE）；② CFG 为什么需要训练时丢条件（要同时有条件和无条件模型）；③ 扩散比 GAN 慢多少、怎么加速。
 - **易混**：DDIM 不是「另一个模型」，它与 DDPM **共用同一套权重**，只是采样过程不同——这是最常见的错答。
+
+```python
+@torch.no_grad()
+def ddim_sample(eps_net, shape, betas, steps=50):
+    """DDIM：只在时间步子集上走，确定性（eta=0），50 步即可出图。"""
+    abar = torch.cumprod(1 - betas, dim=0)
+    ts = torch.linspace(len(betas) - 1, 0, steps).long()
+    x = torch.randn(shape)
+    for i, t in enumerate(ts):
+        t_prev = ts[i + 1] if i + 1 < len(ts) else torch.tensor(0)
+        eps = eps_net(x, t)
+        x0 = (x - (1 - abar[t]).sqrt() * eps) / abar[t].sqrt()   # 反解出 x0 估计
+        x = abar[t_prev].sqrt() * x0 + (1 - abar[t_prev]).sqrt() * eps
+    return x
+```
+
+DDPM 需要 1000 步、DDIM 只要 20~50 步，差别不在「模型更好」而在**采样器换了**。
+同一组权重配不同采样器是常见的性价比调节手段：先换采样器，再考虑蒸馏。
+
 
 ## 4. 统一视角：SDE、概率流 ODE 与 Flow Matching
 

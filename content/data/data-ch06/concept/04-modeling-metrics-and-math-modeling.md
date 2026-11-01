@@ -66,6 +66,27 @@ R² 的定义 $\frac{SS_{res}}{SS_{tot}}$ 中 $SS_{tot}$ 用的是**测试集自
 
 易错口径：**R² 高不代表模型正确**（可能存在自相关、异方差、遗漏变量）；**加入无关变量 R² 只会不降**，所以比较模型要看**调整 R²**。
 
+```python
+import numpy as np
+
+def regression_metrics(y_true, y_pred) -> dict:
+    y_true, y_pred = np.asarray(y_true, float), np.asarray(y_pred, float)
+    err = y_true - y_pred
+    ss_res = float((err ** 2).sum())
+    ss_tot = float(((y_true - y_true.mean()) ** 2).sum())
+    return {
+        "MAE": float(np.abs(err).mean()),
+        "RMSE": float(np.sqrt((err ** 2).mean())),
+        "R2": 1 - ss_res / ss_tot if ss_tot else float("nan"),
+        # 分母为 0 的位置置 NaN，避免除零把 MAPE 拉成 inf
+        "MAPE": float((np.abs(err) / np.where(y_true == 0, np.nan, y_true)).mean() * 100),
+    }
+```
+
+`RMSE >= MAE` 恒成立，两者差距越大说明误差分布越偏（少数大误差在拉高平方项）。
+`R2` 可以为负——当模型比「直接取均值」还差时就是这样，此时不要以为算错了。
+
+
 ## 三、分类评价指标：准确率的陷阱
 
 ### 🧑‍💻 程序员视角
@@ -106,6 +127,26 @@ AUC 等价于 **Mann-Whitney U 统计量**归一化后的值，这是它"排序�
 
 易错口径：**精确率与召回率的分母不同**——$P$ 的分母是"预测为正的总数"，$R$ 的分母是"实际为正的总数"。互换分母是最常见的算错原因。
 
+```python
+from sklearn.metrics import precision_recall_fscore_support, roc_auc_score
+
+def best_threshold(y_true, y_score, beta: float = 1.0) -> dict:
+    """按业务取向选阈值：beta>1 偏召回，beta<1 偏精确，而不是默认 0.5。"""
+    best_thr, best_fb = None, -1.0
+    for thr in [i / 100 for i in range(1, 100)]:
+        pred = (y_score >= thr).astype(int)
+        p, r, _, _ = precision_recall_fscore_support(
+            y_true, pred, average="binary", zero_division=0)
+        fb = (1 + beta ** 2) * p * r / (beta ** 2 * p + r) if (p + r) else 0.0
+        if fb > best_fb:
+            best_thr, best_fb = thr, fb
+    return {"threshold": best_thr, "f_beta": round(best_fb, 4),
+            "auc": round(roc_auc_score(y_true, y_score), 4)}
+```
+
+选阈值的样本必须是**验证集**，不能用训练集（阈值会过拟合），也不能用测试集（等于偷看答案）。
+
+
 ## 四、数学建模：把开放题答成规范报告
 
 ### 🧑‍💻 程序员视角
@@ -135,6 +176,25 @@ AUC 等价于 **Mann-Whitney U 统计量**归一化后的值，这是它"排序�
 标准答法结构：**假设 → 符号 → 模型 → 求解 → 检验**，即所谓"三段式加两道关"。
 
 加分点：**明确写出模型适用边界**（假设立场），并指出"若放宽某假设，模型应如何修改"——这体现的是建模素养而非套公式能力。
+
+```python
+import numpy as np
+
+def residual_diagnosis(y_true, y_pred) -> dict:
+    """残差三看：均值是否为 0、是否随预测值扩散、是否有极端离群。"""
+    r = np.asarray(y_true, float) - np.asarray(y_pred, float)
+    corr = float(np.corrcoef(np.asarray(y_pred, float), np.abs(r))[0, 1])
+    q1, q3 = np.percentile(r, [25, 75])
+    iqr = q3 - q1
+    outliers = int(((r < q1 - 1.5 * iqr) | (r > q3 + 1.5 * iqr)).sum())
+    return {"mean": round(float(r.mean()), 4),
+            "hetero_corr": round(corr, 3),   # >0.3 提示异方差
+            "outliers": outliers}
+```
+
+`hetero_corr` 为正且不小，说明误差随预测值变大——这时该考虑对目标做对数变换，
+而不是继续调模型结构。残差图比任何单一指标都更能说明「模型错在哪里」。
+
 
 ## 三视角解析
 

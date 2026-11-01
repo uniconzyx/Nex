@@ -114,6 +114,34 @@ Function Calling（工具调用）的本质是**把「调用意图」从自然�
 - **易错点**：把 `bool` 当 `int`（Python 里 `True` 是 `int` 的子类，必须显式排除）；
   `enum` 大小写不统一导致误拒/误放。
 
+```python
+import json
+from jsonschema import validate, ValidationError
+
+TOOL_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "city": {"type": "string", "minLength": 1},
+        "unit": {"type": "string", "enum": ["c", "f"], "default": "c"},
+    },
+    "required": ["city"],
+    "additionalProperties": False,          # 多余字段一律拒绝，防止模型「自由发挥」
+}
+
+def call_tool(args_json: str) -> dict:
+    """模型给的是字符串，必须「解析 + 校验」之后才可执行。"""
+    try:
+        args = json.loads(args_json)
+        validate(args, TOOL_SCHEMA)
+    except (json.JSONDecodeError, ValidationError) as e:
+        return {"error": f"参数不合法：{e}"}   # 错误回给模型让它重试，不要抛给用户
+    return {"city": args["city"], "unit": args.get("unit", "c")}
+```
+
+`additionalProperties: False` 是最容易被忽略的一条：不加它，模型多给的字段会被静默忽略，
+你就永远发现不了「它其实理解错了这个工具在干什么」。
+
+
 ## 主题三：工具设计的七条原则
 
 | # | 原则 | 要点 | 反例 |

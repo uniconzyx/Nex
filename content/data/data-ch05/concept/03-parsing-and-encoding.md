@@ -73,6 +73,22 @@ XPath 是**完整的一阶路径语言**（W3C XPath 规范），支持谓词、
 关联考点：**DOM 树与树遍历**。抽"标签 → 值"本质是在树中做**路径查找**，与数据结构里的树搜索同构。
 高价值答题点：把"选择器定位"描述为"在解析得到的 DOM 树上做条件遍历"，并给出**复杂度**直觉（`//` 是深度优先的全树扫描，能用更具体的路径就别用 `//`）。
 
+```python
+from lxml import html
+
+def picks(markup: str, xpath: str = "//a/@href") -> list[str]:
+    """XPath 直接取属性/文本，比先取节点再取属性少一次往返。"""
+    doc = html.fromstring(markup)
+    return [v.strip() for v in doc.xpath(xpath) if v.strip()]
+
+# 同一件事的两种写法，结果一致但表达力不同
+#   XPath : //div[@class="item"]/span[2]/text()
+#   CSS   : div.item > span:nth-of-type(2)
+# 需要「按文本内容过滤」时只能用 XPath：
+#   //a[contains(text(), "下一页")]/@href
+```
+
+
 ## 三、编码与乱码：三步定位法
 
 ### 🧑‍💻 程序员视角
@@ -132,6 +148,28 @@ HTML 表达的是文档结构，不是表格语义。这也是为什么现代前
 
 关联考点：**结构化数据抽取的稳定性评价**——可以类比"模板依赖度"。用 `id` 抽取的模板依赖度低、稳健；用位置抽依赖度高、易碎。
 答题时给出"**定位表达式越具体越脆弱**"这一权衡，比单说"用 XPath 好"更有说服力。
+
+```python
+import pandas as pd
+from lxml import html
+
+def table_to_frame(markup: str, index: int = 0) -> pd.DataFrame:
+    """取第 index 个 <table>：有 <th> 用 th 作表头，否则退回首行。"""
+    doc = html.fromstring(markup)
+    tables = doc.xpath("//table")
+    if not tables:
+        raise ValueError("页面里没有 <table>")
+    rows = tables[index].xpath(".//tr")
+    has_th = bool(rows[0].xpath("./th"))
+    cells = [[c.text_content().strip() for c in r.xpath("./th|./td")] for r in rows]
+    cells = [r for r in cells if r]              # 丢掉空行/分隔行
+    header, body = (cells[0], cells[1:]) if has_th else (None, cells)
+    return pd.DataFrame(body, columns=header)
+```
+
+`columns=None` 时 pandas 会自动编号 `0..n-1`，这比硬塞一个假表头更诚实——
+后续任何按列名取数的操作都会立刻暴露「表头没识别出来」，而不是悄悄用错列。
+
 
 ## 三视角解析
 

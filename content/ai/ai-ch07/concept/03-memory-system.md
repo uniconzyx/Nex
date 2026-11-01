@@ -110,6 +110,36 @@
   「局部性原理」是 LRU 合理性的理论基础。
 - **易错点**：只做「写入」不做「遗忘」，导致长期记忆无限膨胀、检索精度与成本同时恶化。
 
+```python
+import math, time
+
+def memory_score(item: dict, query_vec, embed, now=None) -> float:
+    """三类信号加权：相关性、时间衰减、重要性。权重按业务调，不要拍脑袋固定。"""
+    now = now or time.time()
+    rel = float(sum(a * b for a, b in zip(query_vec, embed(item["text"]))))  # 向量需先归一化
+    age_h = max((now - item["ts"]) / 3600, 0)
+    rec = math.exp(-age_h / 24)          # 半衰期约 16.6 小时
+    imp = item.get("importance", 0.5)
+    return 0.6 * rel + 0.25 * rec + 0.15 * imp
+```
+
+```python
+def compact_memory(items, keep_top=50, summarize=None) -> list:
+    """长期记忆不能只增不减：保留头部，尾部交给摘要压缩。"""
+    ranked = sorted(items, key=lambda x: x["score"], reverse=True)
+    head, tail = ranked[:keep_top], ranked[keep_top:]
+    if tail and summarize is not None:
+        head.append({"text": summarize([x["text"] for x in tail]),
+                     "ts": max(x["ts"] for x in tail),
+                     "importance": 1.0, "score": 0.0})
+    return head
+```
+
+「遗忘」在工程上不是删除而是**降采样**：把一堆细节压成一条摘要，既不会无限膨胀，
+也不会丢掉「曾经发生过什么」这件事本身。直接物理删除的代价是模型反复踩同一个坑。
+
+
+
 ## 三视角小结
 
 | 视角 | 一句话抓法 |

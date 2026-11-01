@@ -59,6 +59,27 @@ HTTP 是**无状态**的请求-响应协议，其语义由 RFC 9110 定义：状
 - **302 是临时重定向**，`301` 才是永久；问"搜索引擎权重转移"答 `301`。
 - **HTTP 本身不保存状态**，会话是靠 `Cookie` 在应用层补上的（这句话常被用来引出 Session 与 JWT 的对比）。
 
+```python
+import requests
+
+def fetch_usable(url: str, timeout=(3.05, 10)) -> str | None:
+    """在采集里，「拿到响应」不等于「拿到能用的响应」。"""
+    resp = requests.get(url, timeout=timeout, allow_redirects=True)
+    if resp.status_code != 200:
+        return None                        # 4xx/5xx 就放弃，别硬解析错误页
+    ctype = resp.headers.get("Content-Type", "")
+    if not ctype.startswith(("text/html", "application/json", "text/xml")):
+        return None                        # 二进制（PDF/图片）走另一条链路
+    resp.encoding = resp.apparent_encoding  # 服务端不声明 charset 时兜底
+    text = resp.text
+    return text if text.strip() else None    # 空壳页（靠前端渲染）同样不可用
+```
+
+四道闸门的顺序不能换：**状态码 → 内容类型 → 编码 → 是否空壳**。
+先判状态码是因为错误页往往也返回 `text/html`，先判类型没有意义；
+先判类型是因为把 PDF 当 HTML 解析会得到一堆乱码而不是报错，失败得很隐蔽。
+
+
 ## 二、重定向链、Cookie 与"我到底请求了谁"
 
 ### 🧑‍💻 程序员视角

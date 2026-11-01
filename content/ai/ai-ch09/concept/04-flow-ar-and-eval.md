@@ -130,6 +130,29 @@ FID 的四个已知偏差，必须在报告里声明：
 - **常考问法**：① FID 与 IS 的区别（是否需要真样本、是否衡量多样性）；② 为什么 FID 不能跨数据集比较；③ 生成模型评估为什么难（似然与质量不单调、多目标）。
 - **易混**：FID 衡量的是**特征分布距离**，不是像素距离；「FID 低」不等于「图好看」，只是「统计上更接近真数据分布」。
 
+```python
+import numpy as np
+import torch
+from scipy.linalg import sqrtm
+
+def perplexity(logits, target) -> float:
+    """AR 模型的标准评估：交叉熵取指数。词表越大，同一困惑度的含金量越低。"""
+    logp = torch.log_softmax(logits, dim=-1)
+    nll = -logp.gather(-1, target.unsqueeze(-1)).squeeze(-1)
+    return float(torch.exp(nll.mean()))
+
+def fid(mu_r, cov_r, mu_g, cov_g) -> float:
+    """FID = ||μr-μg||² + Tr(Σr+Σg-2(ΣrΣg)^{1/2})，对特征尺度敏感。"""
+    diff = mu_r - mu_g
+    covmean = sqrtm(cov_r @ cov_g).real       # 数值上可能出现极小虚部，取实部
+    return float(diff @ diff + np.trace(cov_r + cov_g - 2 * covmean))
+```
+
+两个指标的可比性前提完全不同：困惑度要求**同一分词器 + 同一测试集**，
+FID 要求**同一特征提取器**（换 backbone 就不可比）。跨论文比较数字而不核对前提，
+是生成模型评估里最常见的误读来源。
+
+
 ## 4. 选型矩阵：什么任务用什么生成模型
 
 | 维度 | VAE | GAN | 扩散 | Flow | 自回归 |

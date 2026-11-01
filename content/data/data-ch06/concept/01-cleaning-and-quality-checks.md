@@ -123,6 +123,24 @@ MNAR 的形式化：设缺失指示 $R$ 与变量 $Y$ 的取值相关，则 $P(R
 
 易错口径：**填充后必须说明口径**——"填充后的均值"不等于"真实均值"。答题时区分"观测值的统计量"与"填充值的统计量"会显著加分。
 
+```python
+import pandas as pd
+
+def missing_report(df: pd.DataFrame) -> pd.DataFrame:
+    """缺失率只看比例会误判：还要区分 dtype 与「是否与目标相关」。"""
+    out = pd.DataFrame({
+        "missing": df.isna().sum(),
+        "ratio": df.isna().mean().round(4),
+        "dtype": df.dtypes.astype(str),
+    })
+    return out[out["missing"] > 0].sort_values("ratio", ascending=False)
+
+# 判机制的最小实验：缺失是否随机
+#   按「是否有缺失」分组，比较目标均值 —— 差异显著就不是 MCAR，不能直接删行
+#   df.assign(_miss=df["x"].isna()).groupby("_miss")["y"].agg(["mean", "size"])
+```
+
+
 ## 三、异常检测：三种判据及其假设
 
 ### 🧑‍💻 程序员视角

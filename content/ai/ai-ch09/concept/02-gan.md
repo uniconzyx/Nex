@@ -193,6 +193,27 @@ D 时反而学不动」的数学形态。非饱和版本在同一处的梯度接
 转成了「信息更充分的学习信号」。注意二者在 logit 较大时都会变小，所以真正的瓶颈仍在
 「D 与 G 的能力平衡」，换损失只是把**梯度消失的那一端**补上了。
 
+```python
+import torch
+
+def train_step_D(G, D, real, gp_lambda=10.0):
+    """WGAN-GP 的判别器一步：真伪分开打分 + 梯度惩罚。"""
+    z = torch.randn(real.size(0), G.z_dim, device=real.device)
+    fake = G(z).detach()
+    d_real, d_fake = D(real), D(fake)
+    loss = d_fake.mean() - d_real.mean()      # W 距离：拉大真伪差，注意符号方向
+
+    eps = torch.rand(real.size(0), 1, 1, 1, device=real.device)
+    interp = (eps * real + (1 - eps) * fake).requires_grad_(True)
+    grad = torch.autograd.grad(D(interp).sum(), interp, create_graph=True)[0]
+    gp = ((grad.flatten(1).norm(2, dim=1) - 1) ** 2).mean()   # 约束 ||∇D|| ≈ 1
+    return loss + gp_lambda * gp
+```
+
+梯度惩罚替代了权重裁剪：裁剪把判别器压成「只有少数几个饱和输出」的退化函数，
+而惩罚只是要求它在真实与生成样本之间的连线上**局部是 1-Lipschitz**，表达力保留得多得多。
+
+
 ## 三视角小结
 
 | 主题 | 程序员要会 | 博士生要会 | 考研/笔面要会 |

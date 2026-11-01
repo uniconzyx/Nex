@@ -122,6 +122,26 @@ Action: finish[中国人口约 14.12 亿，法国首都是巴黎]
 - **易错点**：认为「Thought 是必须对外输出的」。Thought 是实现细节，生产上可以隐藏或折叠；
   但**Action 与 Observation 必须结构化记录**，否则无法恢复与审计。
 
+```python
+def react_loop(goal, tools, llm, max_steps=8):
+    """ReAct 的最小骨架：想一步、做一步、看结果，再决定下一步。"""
+    scratch = [f"目标：{goal}"]
+    for _ in range(max_steps):
+        d = llm(scratch, tools=tools)        # -> {"thought":…, "action":…, "args":…}
+        if d["action"] == "finish":
+            return d["args"]["answer"]
+        obs = tools[d["action"]](**d["args"])
+        scratch += [f"Thought: {d['thought']}",
+                    f"Action: {d['action']}({d['args']})",
+                    f"Observation: {obs}"]
+    raise TimeoutError("超过最大步数仍未收敛")   # 硬上界：没有它会无限试错
+```
+
+`max_steps` 不是「保险丝」而是**设计参数**：步数上限决定单次任务的成本上限，
+也决定了「什么样的任务不该用 Agent」。经验值是 6~10 步；需要几十步的任务往往
+应该拆成工作流而不是放开步数。
+
+
 ## 主题三：四种架构模式与「能用工作流就别用 Agent」判据
 
 | 模式 | 控制流 | 适用 | 主要风险 |
@@ -173,6 +193,21 @@ Action: finish[中国人口约 14.12 亿，法国首都是巴黎]
   优先「工作流 + 少量 Agent 节点」的混合结构。
 - **易错点**：① 把「用 Agent」当成技术先进性指标，忽略可控性与成本；
   ② 认为多智能体一定强于单智能体——分工带来的通信开销与失败模式常常吃掉收益。
+
+```python
+MAX_OBS_CHARS = 2000
+
+def truncate_observation(obs: str, limit: int = MAX_OBS_CHARS) -> str:
+    """工具返回的大段内容必须截断，并且显式告诉模型「这里被省略了」。"""
+    if len(obs) <= limit:
+        return obs
+    half = limit // 2
+    return f"{obs[:half]}\n...（省略 {len(obs) - limit} 字符）...\n{obs[-half:]}"
+```
+
+保留头尾而不是只留开头：网页抓取的答案常在尾部（结论、页码），日志的错误栈也在尾部。
+中间的省略标记不能省——否则模型会以为自己看到了全文，从而编造没看到的细节。
+
 
 ## 三视角小结
 
