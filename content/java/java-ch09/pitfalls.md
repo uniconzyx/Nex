@@ -23,3 +23,12 @@
 11. **单例 Bean 里放可变字段** —— `singleton` 是整个容器共享一个实例，可变实例字段在多请求并发下就是**数据竞争**。要状态用方法局部变量或 `ThreadLocal`（且必须在 `finally` 里 `remove()`，否则线程池复用会泄漏）。
 
 12. **把集成测试命名成 `*Test`** —— `surefire` 会在 `mvn test` 阶段跑掉全部集成测试，构建从秒级变分钟级。约定：单元测试 `*Test`，集成测试 `*IT`（交给 `failsafe` 在 `verify` 阶段跑）。
+
+13. **把 `proxyBeanMethods=false` 当成纯优化，却在配置类里做 Bean 间调用**
+`@Configuration(proxyBeanMethods = false)` 是 Boot 2.2+ 的推荐写法（省掉 CGLIB 代理、启动更快），但代价是**配置类内部的方法调用不再被拦截**：`@Bean` 方法里直接 `otherBean()` 会真的 new 一个新对象，而不是取容器里的单例。判断标准很简单——配置类里是否有「一个 `@Bean` 方法调用另一个 `@Bean` 方法」。有就保持默认 `proxyBeanMethods = true`，或把依赖改成方法参数注入（推荐，两种模式下都正确）。
+
+14. **以为 `mvn install` 装的是当前源码**
+`install` 装进本地仓库的是 `target/` 里的**上一次打包产物**。IDE 编译输出（`out/`、`build/`）与 Maven 的 `target/classes` 是两套目录，改完代码只在 IDE 里运行过就 `install`，装进去的仍是旧 jar。多模块工程的表现是「改了 common、service 里还是旧行为」。本地验证一律 `mvn clean install`；只装单模块时用 `mvn install -pl common -am`，避免漏掉上游。
+
+15. **用 `@SpringBootTest` 测纯工具类**
+`@SpringBootTest` 会拉起**完整应用上下文**（含数据源、MVC、定时任务），一个上下文几秒到几十秒。纯函数/工具类测试直接 `new` 即可，根本不需要 Spring。确实需要容器但不需要 MVC 时，显式写 `webEnvironment = NONE` 比默认的 `MOCK` 更省。另外每个不同的配置组合会新建一个上下文，测试类之间配置越一致、上下文复用率越高——这是整包测试从 10 分钟降到 2 分钟的关键。

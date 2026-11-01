@@ -79,7 +79,7 @@ with open("from_excel.csv", "r", encoding="utf-8-sig") as f:
 
 反过来，如果**必须**产出带 BOM 的文件（给旧版 Excel 打开 CSV），就用 `utf-8-sig` 写。
 第一个字符是 `\ufeff` 是 BOM 污染最典型的表现，排查时先 `print(repr(text[:5]))`。
-### 🧑‍💻 程序员视角
+
 ## 5. `errors` 策略：遇到坏字节怎么办
 
 `open(..., errors=...)` 有五档，最常用三档：
@@ -93,7 +93,7 @@ with open("from_excel.csv", "r", encoding="utf-8-sig") as f:
 `"ignore"` 能"让程序跑通"，但它丢掉的字节在 CSV 里往往是一个分隔符，
 整行字段因此错位——排查成本极高。生产代码优先 `"strict"` + 显式报错，
 或 `"replace"` + 记录坏行数。
-### 🎓 博士生视角
+
 ## 6. 一次读写的内存代价
 
 `f.read()` 把整个文件读进内存：峰值内存 ≈ 文件大小 × (1 + 解码后膨胀系数)。
@@ -110,7 +110,28 @@ with open("big.log", "r", encoding="utf-8") as f:
 
 注意：`for line in f` 用的是内部缓冲区，**不要**在其内部再调用 `f.read()`，
 否则会读到位置错乱的数据。
-### 📚 考研者视角
+
+## 7. 文件名与路径的编码：`surrogateescape` 的用武之地
+
+前面讨论的都是「文件内容」的编码，但 Python 里还有一处更容易被忽略：**文件名本身的编码**。
+在 Linux 上文件名本质是一串字节，并不保证是合法 UTF-8；在 Windows 上则走 UTF-16 的宽字符 API。
+当你在 Linux 上遇到一个文件名含非法字节的文件，`os.listdir()` 返回的不可能是合法的 `str`，
+于是 Python 用了一套叫 `surrogateescape` 的方案：把无法按 UTF-8 解码的每个字节
+映射到 U+DC80–U+DCFF 这个「代理区」，形成一个虽然怪异但**可无损往返**的字符串。
+你看到 `'bad\udcff.txt'` 这样的名字，就是它干的。
+
+这套方案的妙处在于可逆：`os.fsencode()` 会把这些代理字符还原成原始字节，
+所以「列目录 → 处理 → 重命名」这一整条链不会把文件搞坏。危险之处则在于
+这些字符**不能**直接传给 `print()` 或写进 UTF-8 文本文件——那一步会抛
+`UnicodeEncodeError: surrogates not allowed`。正确做法是遇到这种名字时
+用 `os.fsencode()` 拿到字节，再用 `repr()` 或 `backslashreplace` 显示，
+或者干脆用 `errors='surrogateescape'` 的文本流做 I/O。
+
+顺带记住两个默认值：`sys.getfilesystemencoding()` 在现代 Linux 上返回 `utf-8`，
+Windows 上返回 `utf-8`（Python 3.6+ 起改用 `_wapi` 宽字符 API，不再依赖代码页）；
+而 `sys.stdout.encoding` 受 `PYTHONIOENCODING` 与终端 locale 影响，重定向到文件时
+常变成 `utf-8`，这也是「本地打印正常、写进 crontab 日志就乱码」的常见根因。
+
 ## 三视角解析
 
 ### 🧑‍💻 程序员视角

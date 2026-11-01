@@ -84,11 +84,33 @@ static String resolve(List<String[]> edges, List<String> declared) { ... }
 // 详见 examples/ex01-dependency-mediation.json
 ```
 
-## 三视角解析
+## 六、冲突排查的实战路径
 
-### 🧑‍💻 程序员视角
-### 🎓 博士生视角
-### 📚 考研者视角
+真到了线上报 `NoSuchMethodError`，光知道两条调解规则还不够，得有可执行的排查顺序。
+
+### 依赖树的三层读法
+
+`dependency:tree` 的输出要分三层看：最外层是你**直接声明**的依赖，中间层是它们**传递**进来的，
+最内层的 `omitted for conflict with X` 表示「这个节点被 `X` 顶掉了」。
+读法是**从被裁掉的节点往上找那个 `X`**，看它处在第几层——若比被裁的节点浅，就是「最近优先」生效；
+若同层，就说明是「先声明优先」把它挤掉的。只盯着 `omitted` 那行看不出结论，必须回到树上比较两者深度。
+
+### `dependency:analyze` 的两种输出
+
+这个 goal 报两类问题，处置方式完全相反。
+`Used undeclared` 指代码里 import 了、但 POM 没声明（靠上游传递「蹭」来的）——这是**隐患**，
+上游一升级或换版本就可能断掉，应当补成直接依赖。
+`Unused declared` 指声明了但没直接 import——这**未必**能删：JDBC 驱动、SLF4J 实现这类
+`runtime` 作用的依赖本就不会被 import，删掉会在运行期炸。看到它就删是新手最容易犯的错。
+
+### 私服缓存引发的「版本不存在」
+
+`Could not find artifact X:1.2.3` 而中央仓库明明有这个版本，八成是私服侧的代理配置问题：
+Nexus 的 `maven-central` 代理仓库没启用，或本地仓库里残留了一个指向错误仓库 id 的 `_remote.repositories`。
+判断方法很直接——用 `-U` 强制更新一次，若报错依旧，就是私服没配代理；
+若变成下载成功，就是本地缓存记录坏了，删掉该构件目录重下即可。
+
+## 三视角解析
 
 ### 🧑‍💻 程序员视角
 拿到 `NoSuchMethodError` / `ClassNotFoundException` 的第一反应不是改代码，而是**先看依赖树**：

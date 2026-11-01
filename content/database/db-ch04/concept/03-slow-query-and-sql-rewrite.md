@@ -33,6 +33,8 @@ SET GLOBAL log_queries_not_using_indexes = ON; -- 记录未走索引的查询（
 
 日志是纯文本，用 `mysqldumpslow -s t -t 10 slow.log` 排序取 Top10，
 或用 `pt-query-digest` 做**指纹聚合**（把字面值归一化成 `?` 后分组统计）。
+### 单条慢不可怕，要按 SQL 聚合看
+
 **聚合才有意义**：单条 `WHERE id = 123` 慢不可怕，
 可怕的是「同一种写法每分钟跑 5000 次」。
 
@@ -93,7 +95,7 @@ SELECT * FROM dept d JOIN emp e ON e.dept_id = d.id;
 
 ## 五、排序与分组：消灭 filesort 与 temporary
 
-**`ORDER BY` 能用索引有序性消除 `filesort` 的条件**：
+### ORDER BY 吃不到索引有序性的情况
 1. `ORDER BY` 的列顺序与索引顺序**一致**（或完全相反，可反向扫）；
 2. 排序方向一致（不能 `a ASC, b DESC` 混用，除非 8.0 的降序索引）；
 3. `WHERE` 也符合最左前缀（否则索引无法用来排序）。
@@ -104,6 +106,8 @@ SELECT * FROM t WHERE a = 1 ORDER BY b;        -- 可消除 filesort
 SELECT * FROM t WHERE b = 1 ORDER BY a;        -- 需要 filesort（缺左前缀 a）
 SELECT * FROM t ORDER BY a, b DESC;            -- 需要 filesort（方向不一致）
 ```
+
+### GROUP BY 的排序代价与优化
 
 **`GROUP BY` 的优化**：`GROUP BY` 隐含排序（MySQL 8.0 前），
 若 `GROUP BY` 的列能用索引有序性，则可同时消除 `temporary` 与 `filesort`；
@@ -121,10 +125,6 @@ SELECT * FROM t ORDER BY a, b DESC;            -- 需要 filesort（方向不一
 | 大事务里做 DDL/长查询 | 拆分事务 | 减少锁持有时间与 undo 膨胀 |
 
 ## 三视角解析
-
-### 🧑‍💻 程序员视角
-### 🎓 博士生视角
-### 📚 考研者视角
 
 ### 🧑‍💻 程序员视角
 深分页的两种改写各有硬前提，**选错会白忙**：延迟关联要求 `ORDER BY` 列上有索引

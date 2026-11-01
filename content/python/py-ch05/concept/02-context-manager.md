@@ -94,7 +94,7 @@ def timer(label):
 - `finally` 保证异常时也清理；
 - `yield` 的值就是 `as` 绑定的对象（不需要时可以不 yield 值）；
 - 生成器**必须且只能 yield 一次**，多 yield 会抛 `RuntimeError`。
-### 🧑‍💻 程序员视角
+
 ## 4. 一个真实的资源管理器：原子写入
 
 「写文件到一半崩了」会留下半截文件。工程做法是
@@ -124,7 +124,7 @@ def atomic_write_text(path, text, encoding="utf-8"):
 2. **`os.replace` 而不是 `os.rename`** —— 在 Windows 上 `os.rename` 目标存在会失败，
    `os.replace` 会覆盖。
 3. **`fsync` 是必需的** —— 否则断电后可能只剩一个空文件（元数据已提交、数据未落盘）。
-### 🎓 博士生视角
+
 ## 5. 契约层面的形式化
 
 上下文管理器实现的是**资源获取即初始化（RAII）**思想在 Python 中的投影：
@@ -144,7 +144,7 @@ def atomic_write_text(path, text, encoding="utf-8"):
 `with` 并不比 `try/finally` 更强，二者可互相翻译；
 `with` 的价值在于**把正确性从调用方搬到被封装的一侧**：
 `try/finally` 要求每个调用者都写对，`with` 只要求实现者写对一次。
-### 📚 考研者视角
+
 ## 6. 常见的错误用法
 
 ```python
@@ -168,6 +168,26 @@ try:
 except Exception:
     pass
 ```
+
+## 7. `ExitStack`：数量不定时怎么管资源
+
+前面写的都是「几个资源就写几个 `with`」的静态写法。但当资源数量在运行时才知道——
+比如同时打开用户上传的 N 个文件、或按配置动态建立若干连接——语法层面就没法写死了。
+`contextlib.ExitStack` 解决的正是这个问题：它自身是一个上下文管理器，
+内部维护一个「退出回调栈」，你往里压多少个，退出时就**按后进先出**依次调用多少个。
+
+用它的关键三步：进入一个 `with ExitStack() as stack`，然后对每个资源调用
+`stack.enter_context(cm)` 拿到资源对象，需要手动清理的东西则用 `stack.callback(fn, *args)` 注册。
+如果中途某个资源创建失败抛了异常，`ExitStack` 在退出时仍然会把**已经在栈里的**那些清理掉——
+这正是手写 `try/finally` 嵌套时最容易漏掉的一环。
+
+还有一个常被忽略的细节：`ExitStack.pop_all()` 会把当前栈整体「摘走」交给一个新对象，
+使原栈退出时不再清理。这个操作是**把清理责任转移出去**的标准手法，
+典型用途是把「进入阶段」和「清理阶段」拆到不同函数里（例如实现一个
+「先 prepare 再 activate」的两段式工厂），或者给测试写一个
+「默认不清理、失败时才清理」的 fixture。反过来，若你只想有条件地跳过清理，
+用 `stack.pop_all()` 之后不调用它的 `close()` 即可，但那种写法几乎总是代码坏味，
+优先考虑用 `contextlib.suppress` 或把条件判断放到注册之前。
 
 ## 三视角解析
 

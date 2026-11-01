@@ -102,11 +102,32 @@ repository 也不该管（无法覆盖多表操作）。
 // 详见 examples/ex09-di-three-ways.json、examples/ex10-layered-mock-test.json
 ```
 
-## 三视角解析
+## 七、测试切片的边界
 
-### 🧑‍💻 程序员视角
-### 🎓 博士生视角
-### 📚 考研者视角
+切片测试（slice test）能显著缩短反馈时间，但它的「装了什么、没装什么」必须清楚，否则会误判。
+
+### `@WebMvcTest` 到底装了什么
+
+它只装配 MVC 相关的一圈：`@Controller`、`@ControllerAdvice`、`Converter`、`Filter`、`Validator`，
+**不装** `@Service`、`@Repository` 和整个数据层。因此 Controller 依赖的 Service 必须用 `@MockBean` 补上，
+否则启动就报「找不到 Bean」。反过来，如果你的 Controller 里直接注入了 `JdbcTemplate`，
+切片测试就跑不起来——那不是测试框架的问题，而是分层被破坏了。
+
+### `@MockBean` 的替换语义与代价
+
+`@MockBean` 是**按类型替换**容器里已有的 Bean；同类型存在多个候选时会直接报错，需要配合 `@Qualifier` 或
+`@MockBean(name=...)` 指定。更值得注意的是它对**上下文缓存**的影响：Spring Test 按「配置组合」缓存上下文，
+每出现一种新的 mock 组合就新建一个上下文。一个工程里 mock 用得越随意，测试越慢，
+原因往往就在这里——而不是机器性能。
+
+### 事务回滚不等于数据隔离
+
+`@Transactional` 标在测试方法上会让测试结束后回滚，看起来很安全。但有三种情况回滚**不生效**：
+被测代码自己用 `REQUIRES_NEW` 开了独立事务；代码里起了异步线程（事务上下文没传过去）；
+或者用的是需要手动提交的客户端（如某些 NoSQL）。这几种情况下脏数据会真实留在库里，
+在共享测试库上表现为「单独跑通过、全量跑偶发失败」。要彻底隔离，还是得每类测试用独立 schema 或容器化数据库。
+
+## 三视角解析
 
 ### 🧑‍💻 程序员视角
 分层落地时的实操细节：**DTO 用 record**（不可变、自带 `equals/hashCode`），

@@ -24,6 +24,8 @@
 | `filtered` | 过滤后剩余百分比 | 与 `rows` 相乘可估最终结果行数 |
 | **`Extra`** | **补充信息（第二重要）** | 见下文 |
 
+### key_len 的算法：反推用到了几列
+
 **`key_len` 的算法**（`utf8mb4` 下）：`int` = 4 字节；`bigint` = 8；`datetime` = 5~8；
 `varchar(n)` = `4n + 2`（可变长 + 长度前缀）；`char(n)` = `4n`；
 **可为 NULL 的列额外 +1 字节**。例：`KEY(a int NOT NULL, b varchar(20))`，
@@ -45,6 +47,8 @@ system > const > eq_ref > ref > fulltext > ref_or_null > index_merge
 | `range` | 索引范围扫描 | `WHERE id BETWEEN 1 AND 100`、`> <`、`IN` | 尚可 |
 | `index` | **全索引扫描**（扫整棵索引树，不回表但仍是全扫） | 覆盖索引全扫 | 偏差 |
 | **`ALL`** | **全表扫描** | 无索引或无可用索引 | 最差，必须整改 |
+
+### 判据：type 到哪一档才算合格
 
 **判据**：线上核心 SQL 的 `type` **至少要达到 `range`**，单点查询必须到 `ref` 及以上；
 出现 `index` 或 `ALL` 且 `rows` 很大时，就是优化目标。
@@ -69,6 +73,8 @@ system > const > eq_ref > ref > fulltext > ref_or_null > index_merge
 - 数据分布倾斜严重（如 99% 的行 `status = 0`）→ 直方图能改善
 - 条件里有函数或隐式转换，优化器无法估算选择性
 
+### rows 只是估算，rows × filtered 才是结果行数
+
 **`rows × filtered / 100`** 才是估算的最终行数；只看 `rows` 会误判。
 当优化器选错索引（明明有更好的索引却选了差的），可以用 `FORCE INDEX` 强制，
 但那是**症状治疗**，根因通常是统计信息不准或查询写法让代价估算失真。
@@ -86,10 +92,6 @@ SHOW STATUS LIKE 'Last_query_cost';      -- 上一条查询的估算代价
 差异巨大处就是优化器判断失误的地方。
 
 ## 三视角解析
-
-### 🧑‍💻 程序员视角
-### 🎓 博士生视角
-### 📚 考研者视角
 
 ### 🧑‍💻 程序员视角
 标准排查动作：先 `EXPLAIN` 看 `type` 与 `key`，再看 `Extra`，最后看 `rows`。

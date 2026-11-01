@@ -107,11 +107,34 @@ public static ConfigurableApplicationContext run(Class<?> primarySource, String.
 // 详见 examples/ex07-boot-startup-phases.json、examples/ex08-config-priority.json
 ```
 
-## 三视角解析
+## 七、自动配置排障：`--debug` 之后看什么
 
-### 🧑‍💻 程序员视角
-### 🎓 博士生视角
-### 📚 考研者视角
+自动配置「没生效」是最常见的求助场景，而它几乎总能靠一份报告定位。
+
+### CONDITIONS EVALUATION REPORT
+
+加 `--debug` 启动后，日志里会出现正匹配（`Positive matches`）与负匹配（`Negative matches`）两张清单。
+正确用法不是通读，而是**先在负匹配里搜你期望生效的那个配置类**，看它被哪个条件否掉了
+（`@ConditionalOnClass` 缺类、`@ConditionalOnProperty` 值不匹配、`@ConditionalOnMissingBean` 已有实例）。
+这一步能把「猜」变成「读」。
+
+### `@ConditionalOnMissingBean` 的覆盖语义
+
+它的语义是「容器里没有这个类型的 Bean 时才注册」，因此**用户自定义的 Bean 永远优先**，
+这也是 Spring Boot 允许你「只写一个 @Bean 就换掉默认实现」的机制。
+但它对**顺序**敏感：同一配置类内部，`@Bean` 方法之间的调用会被 CGLIB 拦截以保证单例，
+而条件判断发生在更早的阶段——如果两个配置类互相依赖对方的 Bean 存在性，结论会随加载顺序变化。
+需要确定性时，把「是否注册」的判断改成显式的 `@ConditionalOnProperty`。
+
+### 自动配置类不该被组件扫描到
+
+自动配置类应通过 `META-INF/spring/...AutoConfiguration.imports` 注册，
+由 Spring Boot 在**特定阶段**统一处理。若它同时落在 `@ComponentScan` 的扫描范围内，
+会被当成普通组件再注册一次，此时条件注解的求值时机与自动配置阶段不同，
+容易出现「明明写了 `@ConditionalOnMissingBean` 却覆盖不掉」的现象。
+判断方法：看该配置类是否在 `--debug` 报告的两个清单里**同时**以不同身份出现。
+
+## 三视角解析
 
 ### 🧑‍💻 程序员视角
 启动问题的排查顺序是固定的：先看**有没有打出 `Started App in Xs`**（有 → 应用已就绪，

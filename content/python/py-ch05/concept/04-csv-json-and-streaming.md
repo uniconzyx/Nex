@@ -59,7 +59,7 @@ with open("s.csv", encoding="utf-8-sig", newline="") as f:
 现实中的"CSV"可能是 TSV、分号分隔、带注释头。
 `csv.Sniffer` 能做启发式探测，但它**不保证正确**，生产代码应当
 **优先用显式配置**，探测只作为兜底并记录日志。
-### 🧑‍💻 程序员视角
+
 ## 2. `json`：`ensure_ascii` 与编码
 
 ```python
@@ -90,7 +90,7 @@ JSON 只有 string / number / boolean / null / array / object 六种类型：
 | `float('nan')` | `NaN`（非法 JSON） | 其它语言解析器会报错 |
 
 因此不要拿 JSON 当"通用对象持久化"，它只是**数据交换格式**。
-### 🎓 博士生视角
+
 ## 3. 序列化格式的取舍
 
 | 格式 | 可读性 | 类型保真 | 体积/速度 | 安全 |
@@ -109,7 +109,7 @@ Parquet（列存）、MessagePack、或 JSON + 显式 schema 校验。
 CSV 的"无类型"使它在异构系统间**最不容易产生歧义**（代价是解析方必须自己定 schema）。
 这也是数据分析场景下 CSV 长盛不衰的原因——类型推断交给读取方，
 而不是隐含在文件里。
-### 📚 考研者视角
+
 ## 4. 流式处理与内存
 
 ### 逐行读 CSV
@@ -149,6 +149,23 @@ with open("events.ndjson", "w", encoding="utf-8", newline="") as f:
 | 自己平台内部流转 | `encoding="utf-8"`, `newline=""` |
 | 交给 Excel / Windows 软件 | 写 `utf-8-sig`（带 BOM），读 `utf-8-sig`（自动剥 BOM） |
 | 与旧系统交换 | 显式 `gbk`，并 `errors="replace"` + 记录坏行 |
+
+## 5. 半行 JSON：流式解析时的错误恢复
+
+按行读取 JSONL（每行一个独立 JSON）时，一定会遇到「读到半行」的情况：
+写入方进程被 kill、磁盘写满、或网络传输中断，都会留下一个不完整的末行。
+如果直接 `json.loads(line)`，整个导入流程会被最后一行搞崩，前面几万条已经解析成功的数据也白读了。
+
+工程上的处理顺序是：先按 `\n` 切分并**丢弃末尾不完整的片段**（判断依据是这一行有没有以换行符结尾），
+再逐行解析；对解析失败的行，用 `json.JSONDecodeError` 的 `pos`、`lineno`、`colno` 三个属性
+定位到具体字符位置，把「行号 + 原始片段 + 错误位置」一起写进拒绝清单，而不是简单 `continue` 跳过。
+跳过等于静默丢数据，而这在数据管道里是最难排查的一类故障。
+
+还有一个边界值得单独记住：`json.loads` 接受 `NaN`、`Infinity`、`-Infinity` 这三个**非法 JSON** 字面量，
+这是 Python 的历史兼容行为。跨语言交换数据时必须显式关掉它——`json.loads(s, parse_constant=...)`
+抛异常，或在 `json.dumps` 侧用 `allow_nan=False` 让写出阶段就失败。
+否则你会得到一份「Python 能读、JavaScript 和 Go 都读不了」的数据文件，
+而问题往往要等到下游接入时才暴露。
 
 ## 三视角解析
 
