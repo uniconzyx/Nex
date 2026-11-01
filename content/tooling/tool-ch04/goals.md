@@ -76,7 +76,7 @@ Git 是一个**内容寻址的对象库**、分支只是指向 commit 的指针�
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [trimstray/the-book-of-secret-knowledge](https://github.com/trimstray/the-book-of-secret-knowledge) | 248,407 | 全章 | 运维与工程工具知识合集：Linux、网络、排障命令速查；本章先读与「`pull` 不是「拉取」」「push 为什么被拒绝，以…」相关的部分 |
+| 1 | [trimstray/the-book-of-secret-knowledge](https://github.com/trimstray/the-book-of-secret-knowledge) | 254,934 | 全章 | 运维与工程工具知识合集：Linux、网络、排障命令速查；本章先读与「`pull` 不是「拉取」」「push 为什么被拒绝，以…」相关的部分 |
 | 2 | [ohmyzsh/ohmyzsh](https://github.com/ohmyzsh/ohmyzsh) | 190,274 | 全章 | Shell 生产力框架（工程效率的入门必装）；本章先读与「`pull` 不是「拉取」」「push 为什么被拒绝，以…」相关的部分 |
 | 3 | [jlevy/the-art-of-command-line](https://github.com/jlevy/the-art-of-command-line) | 162,646 | 全章 | 命令行艺术：Linux 命令的体系化进阶指南；本章先读与「`pull` 不是「拉取」」「push 为什么被拒绝，以…」相关的部分 |
 | 4 | [bregman-arie/devops-exercises](https://github.com/bregman-arie/devops-exercises) | 86,127 | 全章 | DevOps 练习题集：Linux/Docker/K8s/Git/CI 全覆盖；本章先读与「`pull` 不是「拉取」」「push 为什么被拒绝，以…」相关的部分 |

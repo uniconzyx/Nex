@@ -50,9 +50,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [torvalds/linux](https://github.com/torvalds/linux) | 253833 | §中断上下半部 + §块层调度 + §DMA | 三处对照：`kernel/irq/manage.c` 的 `request_threaded_irq` 把"上半部只做最少的事、下半部交给线程"写成了 API；`block/mq-deadline.c` 是本章 SCAN 思想在 blk-mq 上的现代实现（deadline + fifo 双队列）；`block/blk-mq.c` 看一次 `submit_bio` 到设备队列的完整路径 |
+| 1 | [torvalds/linux](https://github.com/torvalds/linux) | 254007 | §中断上下半部 + §块层调度 + §DMA | 三处对照：`kernel/irq/manage.c` 的 `request_threaded_irq` 把"上半部只做最少的事、下半部交给线程"写成了 API；`block/mq-deadline.c` 是本章 SCAN 思想在 blk-mq 上的现代实现（deadline + fifo 双队列）；`block/blk-mq.c` 看一次 `submit_bio` 到设备队列的完整路径 |
 | 2 | [mit-pdos/xv6-public](https://github.com/mit-pdos/xv6-public) | 9716 | §驱动与缓冲的最小实现 | `bio.c` 只有一百多行：`bget`/`bread`/`bwrite` 就是一个**双链表 LRU 缓冲池**，比任何教材图都直观；`ide.c` 是极简的磁盘驱动（含中断处理），能看清"发命令-等中断-取数据"的完整握手 |
-| 3 | [remzi-arpacidusseau/ostep-code](https://github.com/remzi-arpacidusseau/ostep-code) | 4474 | §磁盘调度实验 | 《操作系统导论》配套的 `disksched.py`：改几行参数就能观察 FCFS/SSTF/SCAN 的总寻道距离差异，计算题从此不用背 |
+| 3 | [remzi-arpacidusseau/ostep-code](https://github.com/remzi-arpacidusseau/ostep-code) | 4479 | §磁盘调度实验 | 《操作系统导论》配套的 `disksched.py`：改几行参数就能观察 FCFS/SSTF/SCAN 的总寻道距离差异，计算题从此不用背 |
 | 4 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186408 | §考前速记 | 中文「设备管理 / 磁盘」几节：四种 I/O 方式对比表、磁盘调度例题、RAID 对比，适合考前过一遍 |
 
 ## 本章 B 站视频路线

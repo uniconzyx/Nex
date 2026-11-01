@@ -54,7 +54,7 @@
 |---|---|---|---|---|
 | 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | 全章 | 含 Redis 与消息队列的高频面试知识；本章先读与「① 生产端」「② 存储端」相关的部分 |
 | 2 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | 全章 | 高并发与分布式：缓存、消息队列、分库分表专题；本章先读与「① 生产端」「② 存储端」相关的部分 |
-| 3 | [redis/redis](https://github.com/redis/redis) | 77,159 | 全章 | Redis 官方源码仓库：数据结构与命令实现的权威来源；本章先读与「① 生产端」「② 存储端」相关的部分 |
+| 3 | [redis/redis](https://github.com/redis/redis) | 77,127 | 全章 | Redis 官方源码仓库：数据结构与命令实现的权威来源；本章先读与「① 生产端」「② 存储端」相关的部分 |
 | 4 | [apache/kafka](https://github.com/apache/kafka) | 34,105 | 全章 | Apache Kafka 官方仓库：架构与协议实现；本章先读与「① 生产端」「② 存储端」相关的部分 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）

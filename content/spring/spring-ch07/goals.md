@@ -55,7 +55,7 @@
 | 仓库 | Star | 用途 |
 |---|---|---|
 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84995 | 完整的 MyBatis + SpringBoot 电商工程，动态 SQL 与分页插件的真实用法 |
-| [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81772 | `mybatis-spring-boot-starter` 的自动配置与 `<settings>` 映射 |
+| [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81722 | `mybatis-spring-boot-starter` 的自动配置与 `<settings>` 映射 |
 | [YunaiV/ruoyi-vue-pro](https://github.com/YunaiV/ruoyi-vue-pro) | 40149 | 企业级 MyBatis-Plus 用法：多数据源、逻辑删除、分页与缓存实践 |
 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37308 | 大量 MyBatis 独立小例（动态 SQL、缓存、TypeHandler、插件） |
 ## 本章 GitHub 学习路线（按阅读顺序）
@@ -66,7 +66,7 @@
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
 | 1 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | 全章 | SpringBoot + MyBatis 完整电商项目，最佳工程范例；本章先读与「条件标签」「智能修剪」相关的部分 |
-| 2 | [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81,772 | 全章 | Spring Boot 官方仓库：源码、文档与示例；本章先读与「条件标签」「智能修剪」相关的部分 |
+| 2 | [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81,722 | 全章 | Spring Boot 官方仓库：源码、文档与示例；本章先读与「条件标签」「智能修剪」相关的部分 |
 | 3 | [YunaiV/ruoyi-vue-pro](https://github.com/YunaiV/ruoyi-vue-pro) | 40,149 | 全章 | 企业级快速开发平台：Spring Boot + MyBatis Plus 全栈实现；本章先读与「条件标签」「智能修剪」相关的部分 |
 | 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | 全章 | Spring 生态系统化教程代码；本章先读与「条件标签」「智能修剪」相关的部分 |
 

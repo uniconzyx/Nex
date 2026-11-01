@@ -62,7 +62,7 @@
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
 | 1 | [dmlc/xgboost](https://github.com/dmlc/xgboost) | 28,916 | 全章 | 课程 W4 直接讲到 XGBoost；这里看二阶泰勒与分裂增益的权威实现；本章先读与「不纯度与分裂准则」「连续特征的切分点」相关的部分 |
-| 2 | [shap/shap](https://github.com/shap/shap) | 25,823 | 全章 | TreeSHAP：树模型解释的工业标配；本章先读与「不纯度与分裂准则」「连续特征的切分点」相关的部分 |
+| 2 | [shap/shap](https://github.com/shap/shap) | 25,840 | 全章 | TreeSHAP：树模型解释的工业标配；本章先读与「不纯度与分裂准则」「连续特征的切分点」相关的部分 |
 | 3 | [lightgbm-org/LightGBM](https://github.com/lightgbm-org/LightGBM) | 18,897 | 全章 | 直方图分箱 + leaf-wise + GOSS/EFB，大规模数据的工程解法；本章先读与「不纯度与分裂准则」「连续特征的切分点」相关的部分 |
 | 4 | [catboost/catboost](https://github.com/catboost/catboost) | 9,178 | 全章 | 有序目标统计解决类别特征泄漏；本章先读与「不纯度与分裂准则」「连续特征的切分点」相关的部分 |
 

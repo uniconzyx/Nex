@@ -39,8 +39,8 @@
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
 | 1 | [DaveGamble/cJSON](https://github.com/DaveGamble/cJSON) | 13,063 | §1.2 声明 vs 定义 | §1.2/§1.4 声明与定义分离的标准形态：`cJSON.h` 只有声明与 `CJSON_PUBLIC`，`cJSON.c` 里才有定义；头文件里没有任何 `static` 变量——这就是「头文件该放什么」的答案 |
-| 2 | [redis/redis](https://github.com/redis/redis) | 77,159 | §3.3 链接顺序敏感性 | §3.3 链接顺序的实物：`src/Makefile` 里 `REDIS_SERVER_OBJ` 把几十个 `.o` 列成一串再交给链接器，顺序变了就可能出现未定义符号——对照那节的「被依赖者放后面」 |
-| 3 | [rswier/c4](https://github.com/rswier/c4) | 10,819 | §2.1 目标文件里有什么 | §2.1/§2.2 反例对照：`c4` 只有一个翻译单元，`nm c4` 看到的几乎全是本地符号；拿它和 cJSON 的 `nm cJSON.o` 对比，`U`（未定义）与 `T`（已定义）的区别一下就清楚了 |
+| 2 | [redis/redis](https://github.com/redis/redis) | 77,127 | §3.3 链接顺序敏感性 | §3.3 链接顺序的实物：`src/Makefile` 里 `REDIS_SERVER_OBJ` 把几十个 `.o` 列成一串再交给链接器，顺序变了就可能出现未定义符号——对照那节的「被依赖者放后面」 |
+| 3 | [rswier/c4](https://github.com/rswier/c4) | 10,825 | §2.1 目标文件里有什么 | §2.1/§2.2 反例对照：`c4` 只有一个翻译单元，`nm c4` 看到的几乎全是本地符号；拿它和 cJSON 的 `nm cJSON.o` 对比，`U`（未定义）与 `T`（已定义）的区别一下就清楚了 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

@@ -37,9 +37,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [rswier/c4](https://github.com/rswier/c4) | 10,819 | §2.1 一条规则的三要素 | §2.1 规则三要素的最小样例：仓库根的 `Makefile` 只有「目标: 依赖 + 命令」的几条规则，没有变量、没有模式规则；先把它读懂，再去看复杂工程的 Makefile 才不会迷路 |
+| 1 | [rswier/c4](https://github.com/rswier/c4) | 10,825 | §2.1 一条规则的三要素 | §2.1 规则三要素的最小样例：仓库根的 `Makefile` 只有「目标: 依赖 + 命令」的几条规则，没有变量、没有模式规则；先把它读懂，再去看复杂工程的 Makefile 才不会迷路 |
 | 2 | [antirez/kilo](https://github.com/antirez/kilo) | 9,212 | §2.3 变量 | §2.3 变量与自动变量：`kilo` 的 `Makefile` 用 `$(CC)`、`$(CFLAGS)` 拼命令，把 `CFLAGS = -O2` 改成 `CFLAGS := -O2` 再 `make -n`，能直接看出 `=` 与 `:=` 的展开时机差异 |
-| 3 | [redis/redis](https://github.com/redis/redis) | 77,159 | §3.4 构建系统的演进 | §3.4 为什么大家不再手写：`src/Makefile` 是上千行手写构建（带 `$(REDIS_SERVER_OBJ)` 这类目标文件列表），读完就知道 CMake/Meson/Bazel 想解决的到底是什么问题 |
+| 3 | [redis/redis](https://github.com/redis/redis) | 77,127 | §3.4 构建系统的演进 | §3.4 为什么大家不再手写：`src/Makefile` 是上千行手写构建（带 `$(REDIS_SERVER_OBJ)` 这类目标文件列表），读完就知道 CMake/Meson/Bazel 想解决的到底是什么问题 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

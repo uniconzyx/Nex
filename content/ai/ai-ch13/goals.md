@@ -11,7 +11,7 @@
 
 | # | 仓库 | Star | 对应本章 | 读什么 |
 | --- | --- | ---: | --- | --- |
-| 1 | [vllm-project/vllm](https://github.com/vllm-project/vllm) | 95,746 | §1.1 显存账 · §2.2 连续批 | 推理引擎：读 `vllm/core/scheduler.py` 的 continuous batching，对应 §1.1、§2.2 |
+| 1 | [vllm-project/vllm](https://github.com/vllm-project/vllm) | 96,022 | §1.1 显存账 · §2.2 连续批 | 推理引擎：读 `vllm/core/scheduler.py` 的 continuous batching，对应 §1.1、§2.2 |
 | 2 | [ggerganov/llama.cpp](https://github.com/ggerganov/llama.cpp) | 132,583 | §3.4 GGUF | 本地推理与 GGUF 格式：量化权重加载，对应 §3.4 |
 | 3 | [mlc-ai/mlc-llm](https://github.com/mlc-ai/mlc-llm) | 23,284 | §3.1 量化 · §3.5 选型 | 端侧推理与量化后端，对应 §3.1、§3.5 |
 | 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §3.1 GPTQ/AWQ 加载 | 量化模型加载：bitsandbytes/GPTQ 集成，对应 §3.1 |

@@ -39,7 +39,7 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [simdjson/simdjson](https://github.com/simdjson/simdjson) | 24,473 | §1.1 对齐规则与填充 | §1.1 对齐与 §1.2 显式对齐：`src/generic/stage1/json_structural_indexer.h` 每次吃 64 字节块，用 `SIMDJSON_ALIGNED` 保证输入指针对齐到 64 字节边界（否则 AVX2 加载会慢甚至崩）；这是「对齐不是学究问题，是 SIMD 的硬要求」的第一手证据 |
+| 1 | [simdjson/simdjson](https://github.com/simdjson/simdjson) | 24,491 | §1.1 对齐规则与填充 | §1.1 对齐与 §1.2 显式对齐：`src/generic/stage1/json_structural_indexer.h` 每次吃 64 字节块，用 `SIMDJSON_ALIGNED` 保证输入指针对齐到 64 字节边界（否则 AVX2 加载会慢甚至崩）；这是「对齐不是学究问题，是 SIMD 的硬要求」的第一手证据 |
 | 2 | [google/benchmark](https://github.com/google/benchmark) | 10,486 | §3.2 链表 vs 数组，指针追逐… | 配 §3.2 的测量方法：`include/benchmark/benchmark.h` 的 `DoNotOptimize` 阻止编译器把结果删掉、`ClobberMemory` 强制刷新内存可见性；本章讲「链表 vs 数组」时，没有这两个工具测出来的数字基本不可信 |
 | 3 | [ClickHouse/ClickHouse](https://github.com/ClickHouse/ClickHouse) | 50,637 | §3.1 AoS vs SoA，行优… | §3.1 AoS vs SoA 的极致：`src/Columns/ColumnVector.cpp` 每个数值列就是一条连续 `PODArray`，`src/Common/PODArray.h` 负责带 padding 的增长；读 `ColumnVector::getData()` 直接返回裸指针——因为列存的前提就是「同类型紧挨着」，这正是本章要论证的局部性收益 |
 

@@ -74,7 +74,7 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,297 | 全章 | 吴恩达课程用 TensorFlow 演示；看 Keras 层的实现与自动微分；本章先读与「一个神经元」「为什么必须有非线性」相关的部分 |
+| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,257 | 全章 | 吴恩达课程用 TensorFlow 演示；看 Keras 层的实现与自动微分；本章先读与「一个神经元」「为什么必须有非线性」相关的部分 |
 | 2 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,917 | 全章 | 微软 12 周 ML 课程，含神经网络与分类的配套 Notebook；本章先读与「一个神经元」「为什么必须有非线性」相关的部分 |
 | 3 | [GokuMohandas/Made-With-ML](https://github.com/GokuMohandas/Made-With-ML) | 49,873 | 全章 | 把「训练一个网络」放进完整工程链路里看；本章先读与「一个神经元」「为什么必须有非线性」相关的部分 |
 

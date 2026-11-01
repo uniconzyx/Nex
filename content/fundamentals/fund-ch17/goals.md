@@ -39,8 +39,8 @@
 | 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376373 | §I/O 与背压 | 读异步 I/O 与队列/背压那一节：外设永远是慢速生产者，本章的四种 I/O 方式就是「怎么让快 CPU 不被慢外设拖死」的四代答案 |
 | 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363641 | §中断与 DMA | 看 OS 部分的 interrupts 与 I/O 条目，把「中断 / DMA / 缓冲」三件套当成一个整体来记 |
 | 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186408 | §I/O 高频考点 | 中文速记：计组 I/O 与 OS 设备管理两节交叉看，重点是四种 I/O 方式的 CPU 占用对比表 |
-| 4 | [torvalds/linux](https://github.com/torvalds/linux) | 253833 | §中断处理 | 读 `kernel/irq/manage.c` 与 `request_threaded_irq`：上半部（硬中断）与下半部（软中断/线程化）的分工，正是本章「中断处理过程」的工程版 |
-| 5 | [qemu/qemu](https://github.com/qemu/qemu) | 13951 | §DMA 与设备 | 看 `hw/block/virtio-blk.c`：一次 virtio 请求如何经 DMA 搬数据并注入中断，是本章 DMA 三阶段最完整的真实样本 |
+| 4 | [torvalds/linux](https://github.com/torvalds/linux) | 254007 | §中断处理 | 读 `kernel/irq/manage.c` 与 `request_threaded_irq`：上半部（硬中断）与下半部（软中断/线程化）的分工，正是本章「中断处理过程」的工程版 |
+| 5 | [qemu/qemu](https://github.com/qemu/qemu) | 13968 | §DMA 与设备 | 看 `hw/block/virtio-blk.c`：一次 virtio 请求如何经 DMA 搬数据并注入中断，是本章 DMA 三阶段最完整的真实样本 |
 | 6 | [chipsalliance/rocket-chip](https://github.com/chipsalliance/rocket-chip) | 3895 | §接口编址 | 读 `src/main/scala/diplomacy/`：外设地址映射与中断线如何在生成 RTL 时被自动连线，理解「统一编址」在硬件侧的落地 |
 | 7 | [zephyrproject-rtos/zephyr](https://github.com/zephyrproject-rtos/zephyr) | 16942 | §中断控制器 | 读 `drivers/interrupt_controller/`：GIC/NVIC 的优先级、屏蔽、嵌套是怎么被抽象成 `irq_enable/irq_lock` 的，最贴近「I/O 软件四层」 |
 

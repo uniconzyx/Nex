@@ -40,9 +40,9 @@
 | 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376373 | §互连与瓶颈 | 读「瓶颈在哪」的讨论方式：总线的带宽就是整机最典型的共享瓶颈，和分布式系统里的单点带宽同理 |
 | 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363641 | §体系结构互连 | 看 Computer Architecture 清单里 bus/interconnect 相关条目，作为「五大部件靠什么连接」的索引 |
 | 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186408 | §总线速查 | 中文速记：计组总线一节，重点背三种集中仲裁的线数与优先级、同步/异步定时的区别 |
-| 4 | [torvalds/linux](https://github.com/torvalds/linux) | 253833 | §总线标准/设备模型 | 读 `drivers/pci/` 与 `include/linux/device.h` 的 `struct bus_type`：`match`/`probe` 就是「总线如何发现并绑定设备」的软件实现 |
+| 4 | [torvalds/linux](https://github.com/torvalds/linux) | 254007 | §总线标准/设备模型 | 读 `drivers/pci/` 与 `include/linux/device.h` 的 `struct bus_type`：`match`/`probe` 就是「总线如何发现并绑定设备」的软件实现 |
 | 5 | [chipsalliance/rocket-chip](https://github.com/chipsalliance/rocket-chip) | 3895 | §AXI 突发 | 读 `src/main/scala/amba/axi4/`：`arlen`/`arsize` 如何表达突发长度与每拍字节数，直接对应本章 burst 传送 |
-| 6 | [qemu/qemu](https://github.com/qemu/qemu) | 13951 | §总线事务追踪 | 用 `-trace` 打开 `memory_region_ops` 相关事件，跑一次设备读写，看一条总线事务在模拟器里被拆成哪些阶段 |
+| 6 | [qemu/qemu](https://github.com/qemu/qemu) | 13968 | §总线事务追踪 | 用 `-trace` 打开 `memory_region_ops` 相关事件，跑一次设备读写，看一条总线事务在模拟器里被拆成哪些阶段 |
 | 7 | [raspberrypi/linux](https://github.com/raspberrypi/linux) | 13282 | §板级总线 | 读 `arch/arm/boot/dts/` 下树莓派的设备树：I²C/SPI/USB 控制器挂在哪个地址、走哪条总线，全在 DTS 里写着 |
 
 ## 本章 B 站视频路线

@@ -53,7 +53,7 @@
 | 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | 全章 | model_selection 与 metrics：交叉验证、学习曲线、指标口径；本章先读与「交叉验证」「切分策略必须匹配数据的依赖…」相关的部分 |
 | 2 | [GokuMohandas/Made-With-ML](https://github.com/GokuMohandas/Made-With-ML) | 49,873 | 全章 | 误差分析与上线前检查的工程范例；本章先读与「交叉验证」「切分策略必须匹配数据的依赖…」相关的部分 |
 | 3 | [optuna/optuna](https://github.com/optuna/optuna) | 14,945 | 全章 | 贝叶斯超参搜索：比手工网格更接近「应用建议」的自动化版本；本章先读与「交叉验证」「切分策略必须匹配数据的依赖…」相关的部分 |
-| 4 | [shap/shap](https://github.com/shap/shap) | 25,823 | 全章 | 特征重要性的可解释替代，避免只看树模型 importance；本章先读与「交叉验证」「切分策略必须匹配数据的依赖…」相关的部分 |
+| 4 | [shap/shap](https://github.com/shap/shap) | 25,840 | 全章 | 特征重要性的可解释替代，避免只看树模型 importance；本章先读与「交叉验证」「切分策略必须匹配数据的依赖…」相关的部分 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

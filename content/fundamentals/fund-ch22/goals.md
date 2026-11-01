@@ -50,9 +50,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [torvalds/linux](https://github.com/torvalds/linux) | 253833 | §物理层设备与驱动 + §链路统计 | 两处对照：`drivers/net/phy/phy_device.c` 看内核如何读取 PHY 的链路状态/自协商结果（这就是"物理层真的连上了吗"的判据来源）；`net/core/dev.c` 里 `dev_get_stats` 把 `rx_crc_errors`、`rx_length_errors` 暴露给 `ethtool -S`，是现场排查物理层故障的入口 |
+| 1 | [torvalds/linux](https://github.com/torvalds/linux) | 254007 | §物理层设备与驱动 + §链路统计 | 两处对照：`drivers/net/phy/phy_device.c` 看内核如何读取 PHY 的链路状态/自协商结果（这就是"物理层真的连上了吗"的判据来源）；`net/core/dev.c` 里 `dev_get_stats` 把 `rx_crc_errors`、`rx_length_errors` 暴露给 `ethtool -S`，是现场排查物理层故障的入口 |
 | 2 | [lwip-tcpip/lwip](https://github.com/lwip-tcpip/lwip) | 1773 | §以太网帧与物理层接口 | `src/netif/ethernet.c` 只有几百行：`ethernet_input` 如何从"一块原始字节"解析出帧类型并分发 —— 看清"物理层交上来的是比特，链路层才开始认帧"这条边界 |
-| 3 | [wireshark/wireshark](https://github.com/wireshark/wireshark) | 10117 | §编码与帧结构验证 | `epan/dissectors/packet-eth.c` 是"教材帧格式"的权威对照物：抓一个包，逐字段对照本章的"前导码/帧首定界符/目的 MAC/类型/数据/FCS" |
+| 3 | [wireshark/wireshark](https://github.com/wireshark/wireshark) | 10134 | §编码与帧结构验证 | `epan/dissectors/packet-eth.c` 是"教材帧格式"的权威对照物：抓一个包，逐字段对照本章的"前导码/帧首定界符/目的 MAC/类型/数据/FCS" |
 | 4 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186408 | §考前速记 | 中文「计算机网络 / 物理层」一节：奈氏与香农公式、编码波形图、复用方式对比，适合考前 20 分钟过一遍 |
 
 ## 本章 B 站视频路线

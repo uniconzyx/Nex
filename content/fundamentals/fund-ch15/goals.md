@@ -34,8 +34,8 @@
 | 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186408 | §CPU 高频考点 | 中文速记：CPU 结构与流水线一节，考前背「五段流水时空图 + 加速比公式 + 三类冒险」三件套 |
 | 4 | [llvm/llvm-project](https://github.com/llvm/llvm-project) | 41282 | §消除冒险 | 读 `MachineScheduler` 与 `llvm-mca`：`llvm-mca` 能直接对一段汇编出「周期表 + 停顿原因」，是本章模型最实用的工业级对照 |
 | 5 | [chipsalliance/rocket-chip](https://github.com/chipsalliance/rocket-chip) | 3895 | §数据通路 | 读 `src/main/scala/rocket/RocketCore.scala`：五级流水、旁路网络、stall 信号是怎么用几百行硬件描述写出来的 |
-| 6 | [riscv/riscv-isa-manual](https://github.com/riscv/riscv-isa-manual) | 4869 | §流水线相关 | 看 RISC-V 对 load-use 与分支延迟槽（无延迟槽）的规定：规范层面就把「哪些冒险必须由硬件处理」定死了 |
-| 7 | [qemu/qemu](https://github.com/qemu/qemu) | 13951 | §多发射建模 | 读 `accel/tcg/`：TCG 动态翻译如何把目标指令拆成微操作并重排——这是「多发射 + 乱序」在软件层的等价实现 |
+| 6 | [riscv/riscv-isa-manual](https://github.com/riscv/riscv-isa-manual) | 4872 | §流水线相关 | 看 RISC-V 对 load-use 与分支延迟槽（无延迟槽）的规定：规范层面就把「哪些冒险必须由硬件处理」定死了 |
+| 7 | [qemu/qemu](https://github.com/qemu/qemu) | 13968 | §多发射建模 | 读 `accel/tcg/`：TCG 动态翻译如何把目标指令拆成微操作并重排——这是「多发射 + 乱序」在软件层的等价实现 |
 
 ## 本章 B 站视频路线
 | # | 系列 / UP 主 | 视频 | 对应本章 | 看什么 |

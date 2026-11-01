@@ -40,9 +40,9 @@
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
 | 1 | [lwip-tcpip/lwip](https://github.com/lwip-tcpip/lwip) | 1773 | §1.2 组帧 / §4.4 以太网帧 | 读 `src/netif/ethernet.c` 的 `ethernet_input`：它先检查 `len >= SIZEOF_ETH_HDR`，再按 type 分发——「帧太短直接丢」在代码里只有一行，却对应本章的最小帧长约束；配套看 `src/core/ipv4/etharp.c` 的 ARP 表，就是「MAC 地址怎么被学出来」 |
-| 2 | [wireshark/wireshark](https://github.com/wireshark/wireshark) | 10117 | §4.4 以太网帧结构 | 读 `epan/dissectors/packet-eth.c`：字段注册顺序就是教材帧格式的顺序（dst/src/type），VLAN 用 `packet-vlan.c` 单独一层 dissector 插进去——「4 字节 Tag 插在哪」一看便知 |
+| 2 | [wireshark/wireshark](https://github.com/wireshark/wireshark) | 10134 | §4.4 以太网帧结构 | 读 `epan/dissectors/packet-eth.c`：字段注册顺序就是教材帧格式的顺序（dst/src/type），VLAN 用 `packet-vlan.c` 单独一层 dissector 插进去——「4 字节 Tag 插在哪」一看便知 |
 | 3 | [the-tcpdump-group/tcpdump](https://github.com/the-tcpdump-group/tcpdump) | 3256 | §4.4 帧解析与截断 | 读 `print-ether.c` 的 `ether_print`：它先打印长度、再判 `caplen < ETHER_HDRLEN` 就报 `[|ether]`——这正是「抓包丢失尾部导致无法校验 FCS」的现场 |
-| 4 | [torvalds/linux](https://github.com/torvalds/linux) | 253833 | §4.5 交换机与网桥 | 读 `net/core/dev.c` 的 `netif_receive_skb` 与 `net/bridge/br_fdb.c`：前者是「帧进入协议栈的总入口」，后者是**软件交换机 MAC 表**（`br_fdb_update` 更新、老化由 `br_fdb_cleanup` 定时器做）——交换机自学习在这里是几十行 C |
+| 4 | [torvalds/linux](https://github.com/torvalds/linux) | 254007 | §4.5 交换机与网桥 | 读 `net/core/dev.c` 的 `netif_receive_skb` 与 `net/bridge/br_fdb.c`：前者是「帧进入协议栈的总入口」，后者是**软件交换机 MAC 表**（`br_fdb_update` 更新、老化由 `br_fdb_cleanup` 定时器做）——交换机自学习在这里是几十行 C |
 | 5 | [mininet/mininet](https://github.com/mininet/mininet) | 5875 | §4.5 冲突域与实验 | 读 `mininet/link.py` 与 `mininet/node.py` 的 `OVSBridge`：用 `tc` 给链路注入带宽/延迟/丢包，用 OVS 做交换机——把本章的「最小帧长、争用期、退避」放进可控环境里实测 |
 
 ## 本章 B 站视频路线

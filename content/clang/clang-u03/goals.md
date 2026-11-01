@@ -34,7 +34,7 @@
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
 | 1 | [DaveGamble/cJSON](https://github.com/DaveGamble/cJSON) | 13,063 | §2.3 tagged union | §2.3 tagged union 的工业写法：`struct cJSON` 是 `int type` 加一个 union（valuedouble/valuestring/…），读的时候先用 `cJSON_IsNumber` 判 type 再取成员——正是「把 UB 关进笼子」那节的做法 |
-| 2 | [redis/redis](https://github.com/redis/redis) | 77,159 | §3.4 柔性数组成员 | §3.4 柔性数组 + 对齐省字节：`sds.h` 的 `sdshdr8/16/32/64` 末尾都是 `char buf[]`，外层用 `__attribute__((__packed__))` 压掉填充；把它和 §1.2 手算的 sizeof 对照，能看清「填充是 ABI 契约」 |
+| 2 | [redis/redis](https://github.com/redis/redis) | 77,127 | §3.4 柔性数组成员 | §3.4 柔性数组 + 对齐省字节：`sds.h` 的 `sdshdr8/16/32/64` 末尾都是 `char buf[]`，外层用 `__attribute__((__packed__))` 压掉填充；把它和 §1.2 手算的 sizeof 对照，能看清「填充是 ABI 契约」 |
 | 3 | [antirez/kilo](https://github.com/antirez/kilo) | 9,212 | §3.1 结构体赋值 | §3.1 逐成员浅拷贝：`struct erow` 里 `int size; char *chars; char *render;` 混着指针，赋值时只拷指针不拷内容——`editorRowInsertChar` 之后两处都要改，否则就是浅拷贝的经典 bug |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
