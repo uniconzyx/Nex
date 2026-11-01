@@ -2,6 +2,26 @@
 
 > 博士看"并发控制的抽象（可串行化、快照隔离）"，程序员看"InnoDB 怎么让我的事务既能并发又不打架"。
 
+```text
+ACID 靠什么落地：
+    A 原子性   undo log（回滚）
+    C 一致性   约束 + 应用逻辑（其余三项共同保证）
+    I 隔离性   锁 + MVCC
+    D 持久性   redo log（WAL：先写日志，再刷数据页）
+
+隔离级别与三类现象：
+                     脏读  不可重复读  幻读
+    READ UNCOMMITTED  ✔      ✔       ✔
+    READ COMMITTED    ✘      ✔       ✔
+    REPEATABLE READ   ✘      ✘       ✔*     *InnoDB 用间隙锁基本消除
+    SERIALIZABLE      ✘      ✘       ✘
+
+MVCC：每行带 trx_id + roll_pointer，读时沿 undo 链找可见版本
+    ReadView 决定可见性（本事务 id + 活跃事务列表）
+    RC  每条语句新建 ReadView
+    RR  事务内复用同一个 ReadView
+```
+
 ## 1. ACID 的落地机制（一句话版）
 
 - **A 原子性（Atomicity）**：事务要么全做要么全不做 → 靠 **undo log**：修改前先把旧值写入 undo log，回滚时按 undo log 反向恢复。

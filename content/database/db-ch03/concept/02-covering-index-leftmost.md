@@ -2,6 +2,22 @@
 
 > 博士看"访问路径代价模型"，程序员看"如何让一条 SQL 只走索引、不碰聚簇索引"。
 
+```text
+回表（bookmark lookup）：
+    二级索引叶子存的是「主键值」，不是整行
+    idx(name) 执行 select * where name='a'
+      -> 走 idx 拿到主键 -> 再回主键索引取整行（两次 B+ 树查找）
+
+覆盖索引：查询所需列全在索引里 -> 不用回表
+    select name, age from t where name='a' + index(name, age) -> Using index
+
+最左前缀：index(a, b, c) 等价于按 (a) / (a,b) / (a,b,c) 有序
+    ✔ where a=?          ✔ where a=? and b=?
+    ✔ where a=? and b>?   （c 用不上，范围列之后的列失效）
+    ✘ where b=?          ✘ where b=? and c=?
+    ✔ order by a, b（免排序）    ✘ order by b
+```
+
 ## 1. 回表（Bookmark Lookup）：二级索引的隐含成本
 
 二级索引叶子只存 `(索引列, 主键值)`。当查询还需要其它列时，InnoDB 用拿到的主键**回聚簇索引再查一次**取完整行。回表次数 = 二级索引命中的行数。命中 1 行回表 1 次；命中 10 万行就回表 10 万次——这就是为什么"大结果集 + 二级索引 + SELECT *"有时不如直接全表扫描。

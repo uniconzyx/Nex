@@ -2,6 +2,25 @@
 
 > 子查询是"把查询结果当值/集合/表再用"的能力。博士看语义（标量/表/存在量词），程序员看执行计划（物化/半连接）。
 
+```text
+子查询的四种形态：
+    标量子查询   返回单值        where x = (select max(...) ...)
+    列子查询     返回一列        where x in (select id ...)
+    行子查询     返回一行多列     where (a, b) = (select ...)
+    表子查询     多行多列        from (select ...) t
+
+相关 vs 非相关：
+    非相关  与外层无关 -> 可先算一次（物化 / 半连接）
+    相关    引用外层列 -> 逻辑上每行执行一次（性能杀手）
+
+    ✘ where id in (select id from s where s.k = t.k)      相关子查询
+    ✔ join s on s.k = t.k group by t.id                    改写为连接
+
+两个必踩的坑：
+    IN 子查询常被改写为 semi-join
+    NOT IN + 子查询列含 NULL -> 整体返回空结果 -> 改用 NOT EXISTS 或保证 NOT NULL
+```
+
 ## 1. 理论根基：子查询的四种形态
 
 | 形态 | 返回 | 出现位置 | 例子 |

@@ -1,5 +1,24 @@
 # 03 · 慢查询定位与 SQL 改写实战
 
+```text
+先把慢 SQL 找出来：
+    slow_query_log + long_query_time
+    performance_schema / sys.statement_analysis（按总耗时排序）
+    show processlist（看正在跑的长事务与锁等待）
+
+定位：
+    EXPLAIN 看 type（ALL / index / range / ref / eq_ref）、rows、Extra
+    EXPLAIN ANALYZE（8.0.18+）拿真实耗时与循环次数
+    type=ALL 且 rows 大 -> 缺索引，或索引未被选中
+
+改写手法：
+    相关子查询 -> join / semi-join
+    深分页 limit 100000, 20 -> 游标式 where id > ? limit 20
+    OR -> UNION ALL
+    大批量删除/更新 -> 按主键区间分批（避免长事务与锁膨胀）
+    先过滤再聚合，避免 select *
+```
+
 ## 一、先把慢 SQL 找出来
 
 ```sql

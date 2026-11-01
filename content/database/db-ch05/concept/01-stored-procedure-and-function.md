@@ -1,5 +1,21 @@
 # 01 · 存储过程与自定义函数：定义、DELIMITER 与参数模式
 
+```text
+存储过程 vs 自定义函数：
+    调用   CALL p(...)             SELECT f(...)（可嵌在 SQL 表达式里）
+    返回   可用 OUT/INOUT 多返回   必须 RETURN 单值
+    事务   可自行 BEGIN/COMMIT     函数内不能控制事务
+    用途   批量过程化逻辑          行内计算与转换
+
+DELIMITER 为什么必须改：
+    客户端默认按 ; 切分语句 -> 过程体里的每个 ; 都会被提前提交
+    DELIMITER $$
+    CREATE PROCEDURE ... BEGIN ... END$$
+    DELIMITER ;
+
+参数模式：IN（默认，传值）/ OUT（回填）/ INOUT（传入并回填）
+```
+
 ## 一、存储过程与自定义函数：定义、调用与差异
 
 **存储过程（stored procedure）** 是**在数据库服务器内命名保存、由客户端显式调用**的一组 SQL/过程化语句；

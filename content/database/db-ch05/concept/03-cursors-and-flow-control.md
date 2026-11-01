@@ -1,5 +1,24 @@
 # 03 · 游标与流程控制：一次一记录的过程化补偿
 
+```text
+游标四步：DECLARE -> OPEN -> FETCH -> CLOSE（逐行处理的最后手段）
+
+    DECLARE done INT DEFAULT 0;
+    DECLARE cur CURSOR FOR SELECT id FROM t;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+    OPEN cur;
+    read_loop: LOOP
+      FETCH cur INTO v;
+      IF done THEN LEAVE read_loop; END IF;
+      ...
+    END LOOP;
+    CLOSE cur;
+
+    CONTINUE HANDLER 是必需的：否则 FETCH 到末尾会直接报错中断
+    性能：逐行 = 逐次上下文切换，通常比集合操作慢一到两个数量级
+    -> 能用 UPDATE ... JOIN 解决的，不要用游标
+```
+
 ## 一、游标：DECLARE / OPEN / FETCH / CLOSE 与 CONTINUE HANDLER
 
 关系模型的原则是**一次一集合（set-at-a-time）**——你描述「要什么」，不描述「怎么一行行取」。

@@ -2,6 +2,24 @@
 
 > 关系代数里的 ∪（并）、∩（交）、−（差）。博士看"多重集语义"，程序员看"去重是否触发排序"。
 
+```text
+SQL 的集合操作默认是「多重集」语义（保留重复），除非显式去重
+    UNION / UNION ALL        并（去重 / 保留重复）
+    INTERSECT / ... ALL      交
+    EXCEPT / ... ALL         差
+
+    A = {1,1,2}   B = {1,3}
+    A UNION B       -> {1,2,3}
+    A UNION ALL B   -> {1,1,2,1,3}
+    A INTERSECT B   -> {1}
+    A EXCEPT B      -> {2}
+
+约束：
+    两侧列数必须相同、类型需可比较；结果列名取第一个查询
+    UNION 去重要排序 -> 有开销；确定无重复时优先 UNION ALL
+    MySQL 8.0 之前不支持 INTERSECT / EXCEPT -> 用 JOIN / NOT EXISTS 模拟
+```
+
 ## 1. 理论根基：多重集（Multiset）语义
 
 SQL 表是**多重集**（允许重复行），集合操作默认带 `DISTINCT` 去重：
