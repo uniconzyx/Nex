@@ -1,7 +1,7 @@
 {
   "meta": {
     "chapter": "bd-ch06",
-    "note": "8 题，基础题 5 + 算法题 3（LeetCode 2 + GitHub 实战 1）。覆盖四层职责与调用约束、SCD Type 2 拉链表、事实表粒度与扇出、星型/雪花取舍、幂等重跑（OVERWRITE vs INTO）、循环依赖检测、拓扑排序、关键路径与最大并行度。"
+    "note": "10 题，基础题 6 + 算法题 4。题型含 选择 5 / 编程 3 / 输出预测 1 / 改错 1。覆盖四层职责与调用约束、SCD Type 2 拉链表、事实表粒度与扇出、INSERT OVERWRITE 幂等、星型与雪花取舍、调度依赖与关键路径；新增 join 扇出倍数估算与分区写入幂等改写。"
   },
   "items": [
     {
@@ -341,6 +341,45 @@
         }
       ],
       "judge_note": "本题参考实现是「函数 + 自测脚本」，没有 stdin 接口，离线不做自动判分。请对照 samples 与参考实现自评。"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "先 join 明细再聚合，金额被放大几倍",
+      "content_md": "订单事实表 `dwd_order` 1000 万行（每行一单，含 `amount`）；订单明细表 `dwd_order_item` 5000 万行（每单平均 5 条明细）。\n\n有人这样算「每日订单总额」：\n\n```sql\nSELECT dt, SUM(o.amount)\nFROM dwd_order o JOIN dwd_order_item i ON o.order_id = i.order_id\nWHERE o.dt = '2026-10-31'\nGROUP BY dt;\n```\n\n问：结果与真实总额的倍数关系是多少？为什么？正确的写法有哪两种？",
+      "answer": {
+        "explain": "**倍数 = 每单平均明细条数 = 5**。因为 join 把一行订单复制成 5 行（每行仍带完整的 `amount`），`SUM` 就把同一笔金额加了 5 次。这就是**事实表粒度被破坏导致的扇出（fan-out）**。\n\n**正确写法一：在订单粒度直接聚合，不 join 明细**\n```sql\nSELECT dt, SUM(amount) FROM dwd_order\nWHERE dt = '2026-10-31' GROUP BY dt;\n```\n\n**正确写法二：若必须用明细，就先在明细粒度聚合，再回到订单粒度**\n```sql\nSELECT o.dt, SUM(i.line_amount)\nFROM dwd_order o\nJOIN (SELECT order_id, SUM(line_amount) AS line_amount\n      FROM dwd_order_item GROUP BY order_id) i\n  ON o.order_id = i.order_id\nWHERE o.dt = '2026-10-31'\nGROUP BY o.dt;\n```\n\n判断标准很简单：**聚合前先问「当前这一行的粒度是什么」**。只要 join 之后某张事实表的度量列出现重复计数，就必须先在自己的粒度上聚合，或者改用 `SUM(DISTINCT)`/预聚合表——后者是数仓分层（DWS 层）存在的直接理由。"
+      },
+      "explanation": "扇出不是 SQL 语法错误，而是粒度错误：行数变了，金额就被重复累加。",
+      "tags": [
+        "粒度",
+        "扇出",
+        "维度建模"
+      ],
+      "source": "self",
+      "source_ref": "Kimball《The Data Warehouse Toolkit》· 事实表粒度"
+    },
+    {
+      "type": "fix_error",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": "hard",
+      "title": "重跑一次数据就翻倍的分区写入",
+      "content_md": "下面的日批任务第一次跑没问题，但补数时重跑同一天，`dwd_order` 的 `dt='2026-10-31'` 分区行数直接变成两倍。指出根因并给出两种幂等写法：\n\n```sql\nINSERT INTO TABLE dwd_order PARTITION (dt = '2026-10-31')\nSELECT order_id, user_id, amount\nFROM ods_order\nWHERE dt = '2026-10-31';\n```",
+      "answer": {
+        "reference_code": "-- 写法一：分区级覆盖（最常用，要求该分区数据可整段重算）\nINSERT OVERWRITE TABLE dwd_order PARTITION (dt = '2026-10-31')\nSELECT order_id, user_id, amount\nFROM ods_order\nWHERE dt = '2026-10-31';\n\n-- 写法二：按主键合并（上游只有少量增量、或分区粒度太粗时用）\nMERGE INTO dwd_order t\nUSING (SELECT order_id, user_id, amount FROM ods_order WHERE dt = '2026-10-31') s\nON t.order_id = s.order_id AND t.dt = '2026-10-31'\nWHEN MATCHED THEN UPDATE SET t.user_id = s.user_id, t.amount = s.amount\nWHEN NOT MATCHED THEN INSERT (order_id, user_id, amount, dt)\n  VALUES (s.order_id, s.user_id, s.amount, '2026-10-31');",
+        "explain": "根因是 `INSERT INTO` 的语义：**追加**。它不检查分区里已有数据，重跑一次就再追加一份，所以行数翻倍、下游指标全线偏高——而且不会报错，是最难发现的一类数据事故。\n\n两种幂等写法各有适用面：\n\n① **`INSERT OVERWRITE ... PARTITION`**：先清空该分区再写入，重跑任意次结果一致。前提是「该分区的数据能被上游一次性完整重算」，绝大多数 T+1 离线任务是这个形态，所以它是默认选择。\n\n② **`MERGE INTO`**：按主键 upsert，只动受影响的行；适合上游只给增量、或分区粒度太粗（比如按 `dt` 分区但要补某个小时）的场景。代价是需要能定位主键、且要求表支持 ACID（Hive 事务表 / Delta / Hudi / Iceberg）。\n\n工程上还要配套两点：**重跑前先备份或可回滚**（覆盖写一旦上游数据不全，等于把好数据也覆盖掉）；**把 `INSERT INTO` 分区表列入评审红线**——除非明确是「只追加不可变日志」。"
+      },
+      "explanation": "「重跑无害」是数仓的基本要求：所有写入都必须能被重复执行，否则补数就是一次事故。",
+      "tags": [
+        "幂等",
+        "INSERT OVERWRITE",
+        "数据质量"
+      ],
+      "source": "self",
+      "source_ref": "Hive DML · INSERT OVERWRITE / MERGE 官方文档"
     }
   ]
 }

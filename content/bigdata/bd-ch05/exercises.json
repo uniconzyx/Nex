@@ -1,7 +1,7 @@
 {
   "meta": {
     "chapter": "bd-ch05",
-    "note": "8 题，基础题 6 + 算法题 2（LeetCode 1 + GitHub 实战 1）。覆盖 RDD/DataFrame/Dataset 取舍、Catalyst 四阶段、谓词下推与列裁剪、常量折叠、CBO JOIN 重排、AQE 与倾斜判定、广播 JOIN 触发条件、Tungsten 与全阶段代码生成。"
+    "note": "10 题，基础题 7 + 算法题 3。题型含 选择 5 / 编程 3 / 输出预测 1 / 改错 1。覆盖 RDD/DataFrame/Dataset 取舍、Catalyst 四阶段、谓词下推与列裁剪、常量折叠、CBO JOIN 重排、AQE 与倾斜判定、广播 JOIN 触发条件、Tungsten 与全阶段代码生成；新增列裁剪扫描量估算与驱动端循环改写。"
   },
   "items": [
     {
@@ -306,6 +306,45 @@
         }
       ],
       "judge_note": "本题参考实现是「函数 + 自测脚本」，没有 stdin 接口，离线不做自动判分。请对照 samples 与参考实现自评。"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "列裁剪把扫描量降到多少",
+      "content_md": "一张宽表：1 亿行 × 50 列 × 平均 8 字节，列存（parquet）+ snappy 压缩比约 5:1。\n\n现在只查询其中 3 列并做聚合。定量说明：① 整表在磁盘上约多大；② 若列裁剪生效，实际读取约多少；③ 相比「读全部列」下降多少？并解释「为什么列裁剪是优化器里 ROI 最高的一条规则」。",
+      "answer": {
+        "explain": "**① 整表体积**：1e8 × 50 × 8 B = 4e10 B ≈ **37.3 GiB**（按原始未压缩算），压缩 5:1 后落盘约 **7.5 GiB**。\n\n**② 只读 3 列**：3/50 = 6%，压缩后约 **0.45 GiB**。\n\n**③ 下降幅度**：读取量降到 6%，即**下降 94%**。\n\n**为什么 ROI 最高**：列裁剪不改语义、不引入额外 shuffle、不依赖数据分布，只改「Scan 读哪些 column chunk」，因此收益是确定的、与数据倾斜无关；而它直接作用在 IO 上——IO 常常是分析型查询的第一瓶颈（CPU 往往还没打满，磁盘/网络带宽先到顶）。相比之下，谓词下推、Join 重排都可能因统计信息不准而失效，列裁剪只要投影集能算出来就一定生效。"
+      },
+      "explanation": "列裁剪是「少读」而不是「算得快」：它省的是 IO，而 IO 通常是分析查询的第一瓶颈。",
+      "tags": [
+        "列裁剪",
+        "列存",
+        "Spark SQL"
+      ],
+      "source": "self",
+      "source_ref": "Spark SQL Catalyst Optimizer · ColumnPruning 规则"
+    },
+    {
+      "type": "fix_error",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": "hard",
+      "title": "按类目取 Top10：驱动端循环的三处错误",
+      "content_md": "下面的代码能跑出结果，但集群上要跑十几分钟。指出所有问题并给出正解：\n\n```python\ncates = [r[0] for r in df.select('category').distinct().collect()]\nfor c in cates:\n    sub = df.filter(df.category == c).toPandas()\n    top10 = sub.nlargest(10, 'sales')\n    top10.to_parquet(f'out/{c}.parquet')\n```",
+      "answer": {
+        "reference_code": "from pyspark.sql import Window, functions as F\n\nw = Window.partitionBy('category').orderBy(F.desc('sales'))\nres = (df.withColumn('rk', F.row_number().over(w))\n         .filter(F.col('rk') <= 10)\n         .drop('rk'))\nres.write.mode('overwrite').parquet('out/top10')\n\n# 备选（类目多、单类目数据大时更均衡）：\n# res = df.repartition('category').sortWithinPartitions(F.desc('sales'))",
+        "explain": "三处问题都属「能跑但很慢」，不会报错：\n\n① **驱动端循环触发 N 次 job**：每个类目一次 `filter` + 一次聚合，等于把全表扫了 N 遍；且 `distinct().collect()` 先把类目拉回驱动端，driver 成了单点。\n\n② **`toPandas()` 把整类目数据拉回驱动**：明细量级的数据过网络到单机，既慢又极易 OOM——这是最常见的「小数据能跑、全量就炸」。\n\n③ **逐类写文件**：产出 N 个零散文件，下游还要再合并；且没有一次 shuffle 复用。\n\n正解用**窗口函数一次算完**：一次 `partitionBy('category')` shuffle，按 `sales` 排序后取 `row_number() <= 10`，全程在 executor 侧完成，driver 只收元数据。类目极多（上万）且单类目很大时，`repartition` + `sortWithinPartitions` 能让每个 task 只处理自己分区内的排序，避免单分区过大。"
+      },
+      "explanation": "「驱动端循环 + toPandas」是 Spark 里最典型的伪并行写法：看似在处理分布式数据，实际把计算串行化并压到单机上。",
+      "tags": [
+        "窗口函数",
+        "Driver OOM",
+        "Spark 调优"
+      ],
+      "source": "self",
+      "source_ref": "Spark SQL · Window Functions 官方文档"
     }
   ]
 }

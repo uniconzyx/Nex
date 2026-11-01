@@ -53,6 +53,25 @@ AQE 落地为三大能力：
 
 ---
 
+三项能力各自对应一个开关，动手前先确认真的开了（3.2+ 默认开，但不少集群仍显式写死关掉）：
+
+```python
+from pyspark.sql import SparkSession
+
+spark = (SparkSession.builder
+         .config("spark.sql.adaptive.enabled", "true")
+         .config("spark.sql.adaptive.coalescePartitions.enabled", "true")
+         # 单分区目标大小：太大退化成倾斜，太小增加 task 调度开销
+         .config("spark.sql.adaptive.advisoryPartitionSizeInBytes", "64m")
+         # 倾斜合并：单个分区超过中位数 factor 倍即拆分
+         .config("spark.sql.adaptive.skewJoin.enabled", "true")
+         .config("spark.sql.adaptive.skewJoin.skewedPartitionFactor", "5")
+         .getOrCreate())
+
+# 验证是否真生效：计划里应出现 AdaptiveSparkPlan
+spark.sql("SELECT /*+ REPARTITION(8) */ 1").explain("formatted")
+```
+
 # 二、宽依赖 / 窄依赖与 Shuffle 边界
 
 （中立陈述）沿用 bd-ch04 的定义：**窄依赖** = 一个父分区只被子分区中的一个使用
