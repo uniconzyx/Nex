@@ -3,6 +3,23 @@
 
 ---
 
+```text
+三种「复制 / 抵消」语义：
+    cherry-pick <commit>  把该提交的改动复制到当前分支（生成新 commit，hash 不同）
+    revert <commit>       生成反向提交抵消它（历史保留，适合已推送）
+    rebase                把一串提交搬到新基底（重写历史，勿用于已共享分支）
+
+    cherry-pick 典型场景：把 hotfix 从 release 拉到 main
+    代价：同样内容在未来合并时可能再次冲突
+
+stash：临时收起未提交改动
+    git stash push -m "msg" / list / pop / apply
+    默认不含未跟踪文件（需 -u）；stash 是本地栈，不会推送
+
+reflog 救援：误 rebase / 误 reset 后
+    git reflog -> 找 rebase 前的 HEAD -> git reset --hard HEAD@{n}
+```
+
 ## 一、cherry-pick / revert / rebase：三种「复制/抵消」语义
 
 三者都会对**已有的改动**做文章，但语义完全不同：

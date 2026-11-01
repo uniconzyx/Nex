@@ -6,6 +6,26 @@
 
 ---
 
+```text
+restart 策略：
+    no              不自动重启（默认）
+    on-failure[:n]  非零退出才重启，可限次数
+    always          总是重启（含宿主重启后）
+    unless-stopped  除手动 stop 外都重启
+
+    连续失败会指数退避，避免「崩溃-重启」风暴
+    注意：restart 只看进程退出码，业务探活要靠 healthcheck / 编排
+
+日志驱动：
+    json-file（默认）-> 必须配 max-size / max-file，否则磁盘会被写满
+    local / journald / syslog / fluentd
+    生产：限制大小 + 集中采集（ELK / Loki）
+
+镜像仓库与 CI 最小链路：
+    build -> tag（含 git sha）-> push -> 部署引用不可变 tag
+    绝不用 latest 部署：不可追溯、不可回滚
+```
+
 ## 一、restart 策略与日志驱动：退避、熔断与磁盘风险
 
 compose 的 `restart` 有四种取值：

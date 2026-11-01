@@ -2,6 +2,22 @@
 
 一个能跑的采集脚本和一个能上线的采集脚本，差别几乎全在**超时、重试、会话、限速**这四件事上。
 
+```text
+把「能跑」变成「稳定」：
+    超时要设两个：timeout=(connect, read)
+    -> 默认无超时，线程可能永久阻塞；只给一个值会同时作用于两者
+
+    连接复用：Session() 复用 TCP/TLS，显著降延迟
+    with requests.Session() as s: s.get(...)
+
+    重试：HTTPAdapter + Retry，只对幂等方法与 429/5xx 重试
+    Retry(total=3, backoff_factor=0.5, status_forcelist=[429,500,502,503,504])
+
+    大文件：stream=True + iter_content，避免整个响应进内存
+    编码：resp.encoding 可能猜错（响应头缺 charset）
+    -> 用 resp.apparent_encoding 或显式指定，否则中文乱码
+```
+
 ## 一、超时：必须显式设置，而且要设两个
 
 ### 🧑‍💻 程序员视角

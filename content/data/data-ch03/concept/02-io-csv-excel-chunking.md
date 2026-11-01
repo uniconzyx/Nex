@@ -3,6 +3,24 @@
 > 本章要点：IO 是数据流水线里**最容易出错也最容易被忽视**的一环。
 > 编码、分隔符、`dtype`、分块——四件事决定后面所有分析是否可信。
 
+```text
+read_csv 的关键参数：
+    dtype={'id': str}        防止 001 -> 1、大整数丢精度
+    parse_dates=['ts']       直接解析为 datetime
+    na_values=['', 'NA']     自定义缺失标记
+    usecols=[...]            只读需要的列（大文件必备）
+    encoding='utf-8'/'gbk'   中文编码（Windows 常见 gbk）
+    sep / quotechar / escapechar   非标准分隔与转义
+
+分块处理（内存装不下）：
+    for chunk in pd.read_csv(p, chunksize=100_000):
+        agg.append(chunk.groupby('k').size())
+    -> 内存恒定 O(chunksize)，最后合并聚合结果
+
+    Excel 不支持流式：read_excel 必须整本载入
+    -> 大表先转 CSV 或 Parquet 再处理
+```
+
 ## 1. `read_csv` 的关键参数
 
 ### 1.1 最小可用的读入

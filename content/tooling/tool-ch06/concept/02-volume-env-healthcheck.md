@@ -6,6 +6,25 @@
 
 ---
 
+```text
+数据卷三种：
+    命名卷（named volume）  docker 管理，位于 /var/lib/docker/volumes，可跨容器复用
+    绑定挂载（bind mount）  直接映射宿主路径，开发时改代码即时生效
+    tmpfs                  内存盘，容器停止即消失（放敏感临时数据）
+
+    备份：起一个临时容器挂载该卷 -> tar 打包 -> 存到宿主或对象存储
+
+环境变量：
+    -e KEY=VALUE / --env-file .env
+    注意：env 会出现在 docker inspect 里 -> 密钥要用 secret 机制，别塞 env
+
+健康检查：
+    HEALTHCHECK CMD curl -f http://localhost/health || exit 1
+    --interval / --timeout / --retries / --start-period
+    -> 状态变 unhealthy 后，编排系统才能据此重启或摘流量
+      （restart 策略只看进程退出，不感知业务健康）
+```
+
 ## 一、数据卷：命名卷 vs 绑定挂载，持久化与备份
 
 容器**可写层**与容器同生共死（`docker rm` 即丢），所以一切要留存的数据都必须写到卷里。

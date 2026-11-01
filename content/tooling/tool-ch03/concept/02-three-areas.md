@@ -3,6 +3,25 @@
 
 ---
 
+```text
+三区模型：
+    工作区（Working Directory）  你正在编辑的文件
+    暂存区（Index / Stage）      下一次提交的快照内容
+    版本库（Repository）         .git 中的提交历史（对象 + 引用）
+
+    git add     工作区 -> 暂存区
+    git commit  暂存区 -> 版本库（生成 tree 与 commit 对象）
+
+分支与指针：
+    HEAD -> refs/heads/main -> commit
+    切分支 = 移动 HEAD；提交 = 当前分支指针前移
+
+    git status 的三栏就是三区之间的差异：
+      Changes to be committed    index vs HEAD
+      Changes not staged         工作区 vs index
+      Untracked                  不在 index 里的新文件
+```
+
 ## 第1节 一、工作区 / 暂存区 / 版本库（三区模型）
 
 Git 把文件状态分散在三个区域：**工作区（working tree）**是你直接编辑的目录；**暂存区（index / stage）**是「下一次 commit 的候选清单」，本质是待序列化成 tree 的草稿；**版本库（repository）**= 对象数据库（`.git/objects`）+ 引用（`.git/refs`、HEAD），即已固化的历史。

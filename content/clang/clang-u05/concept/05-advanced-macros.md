@@ -1,5 +1,26 @@
 # 05 · 进阶宏技巧：X-Macro、`_Generic`、`_Static_assert`
 
+```text
+X-Macro：用「一张表」生成多份代码，保证它们永不脱节
+    #define COLORS(X) X(RED) X(GREEN) X(BLUE)
+
+    enum { #define AS_ENUM(n) n,
+           COLORS(AS_ENUM)
+           #undef AS_ENUM };
+
+    const char *names[] = { #define AS_STR(n) #n,
+                            COLORS(AS_STR)
+                            #undef AS_STR };
+    -> 新增一个颜色只改一行，枚举与字符串表自动同步
+
+_Generic（C11）：按实参类型选择表达式 -> 宏的「轻量重载」
+    #define ABS(x) _Generic((x), int: abs, double: fabs)(x)
+
+_Static_assert：编译期断言
+    _Static_assert(sizeof(int) == 4, "assume 32-bit int");
+    -> 平台假设不成立时编译就失败，而不是运行时才出错
+```
+
 ## 一、X-Macro：用「一张表」生成多份代码
 
 X-Macro 不是标准特性，而是一种**惯用法**：先定义一张「数据表」宏，再多次用不同的「展开器」宏把它展开成枚举、字符串表、函数表等，保证它们**永远同步**。

@@ -1,5 +1,22 @@
 # malloc / calloc / realloc / free 的契约
 
+```text
+四个函数的契约：
+    malloc(n)        分配 n 字节，内容未初始化（脏数据）
+    calloc(k, n)     分配 k*n 字节并清零（有清零开销）
+    realloc(p, n)    调整大小：可能原地扩展，也可能整体搬迁
+                     搬迁时旧内容被复制，旧指针立即失效
+    free(p)          释放；p 必须来自这几个函数，且只能释放一次
+
+    realloc 的正确写法：
+    void *tmp = realloc(p, n);
+    if (!tmp) { /* 失败，p 仍有效，需自行处理 */ } else { p = tmp; }
+
+    常见错误：
+    free 后继续用（悬垂）、double free（堆元数据被破坏）
+    free 栈/静态地址、malloc 与 new 混用、越界写坏堆头
+```
+
 ## 一、四个函数的语义
 
 | 函数 | 是否清零 | 说明 |

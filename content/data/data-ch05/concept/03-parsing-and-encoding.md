@@ -2,6 +2,23 @@
 
 采集的"最后一公里"是**提取**。这一步的难点不在语法，而在**容错**：真实网页的 HTML 大多不合法。
 
+```text
+解析三件套：
+    lxml            快，支持 XPath / CSS，容错好（首选）
+    BeautifulSoup   容错最强、API 友好，速度较慢
+    正则            只适合行内、结构简单的补充提取
+
+    选择器稳定性：id / data-* > 语义 class > 层级结构 > 位置序号
+    依赖 nth-child 的规则最易碎（页面一改版就全崩）
+
+编码链路：
+    bytes ──(声明或猜测的 charset)──▶ str ──▶ DOM
+    resp.encoding 猜错（声明 iso-8859-1 实际 utf-8）-> 中文乱码
+    修法：用 resp.content 交给 BeautifulSoup(..., from_encoding='utf-8')
+
+    输出统一成 dict -> DataFrame，字段缺失用 None 而不是跳过（否则行错位）
+```
+
 ## 一、解析三件套：lxml / BeautifulSoup / 正则
 
 ### 🧑‍💻 程序员视角

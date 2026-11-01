@@ -3,6 +3,24 @@
 
 ---
 
+```text
+reset 三模式（重置范围逐级扩大）：
+    --soft    只移分支指针，index 与工作区不动 -> 改动仍在暂存区（想重新提交）
+    --mixed   移指针 + 重置 index              -> 改动留在工作区（默认）
+    --hard    指针 + index + 工作区全重置       -> 改动丢失（危险）
+
+    HEAD~1 = 上一个提交；reset 是「移动分支」，revert 是「新增反向提交」
+
+checkout / restore / revert：
+    checkout <branch>   切分支（会覆盖工作区）
+    restore <file>      丢弃工作区改动（不动 HEAD）
+    revert <commit>     生成抵消该提交的新提交（历史保留，适合已推送）
+
+reflog：本地 HEAD 移动日志，误操作后的救援入口
+    git reflog -> 找到旧 commit -> reset --hard <hash> / branch recover <hash>
+    reflog 是本地的且有保留期（默认 90 天）
+```
+
 ## 第1节 一、reset 三模式 + checkout/restore/revert 的区别
 
 `git reset` 移动 HEAD（并可顺带重置 index、工作树）；`git checkout`/`git switch` 切换分支或恢复文件；`git restore` 是更聚焦的文件级恢复（可指定 source 与 destination）；`git revert` **生成一个新的反向提交**来抵消某次提交，不改写历史。

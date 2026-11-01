@@ -6,6 +6,28 @@
 
 ---
 
+```text
+资源限制与 OOM：
+    --memory / --cpus / --memory-swap
+    超过内存限制 -> 内核 OOM Killer 杀掉容器主进程 -> 退出码 137（128 + 9）
+
+    退出码对照：
+      137  SIGKILL（多为 OOM）
+      143  SIGTERM（正常停止）
+      1    应用自身错误
+
+配置外置：--env-file / ConfigMap / 挂载配置文件
+    同一镜像跨环境复用，镜像里不放环境相关配置
+
+排查顺序：
+    docker ps -a 看状态与退出码
+      -> docker logs --tail 200（先看应用侧）
+      -> docker inspect（配置、挂载、网络、健康状态）
+      -> docker stats（实时 CPU / 内存 / IO）
+      -> docker exec -it sh（进容器看进程、文件、DNS）
+    K8s：kubectl describe pod（事件信息量最大）-> logs --previous（看上次崩溃）
+```
+
 ## 一、资源限制与 OOM：`mem_limit`/`cpus` 与退出码 137
 
 compose 用 `mem_limit`（或新版 `deploy.resources.limits.memory`）与 `cpus` 限制容器用量，

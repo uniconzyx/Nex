@@ -3,6 +3,24 @@
 
 ---
 
+```text
+镜像是类，容器是对象：
+    镜像 = 只读层堆叠（每条 Dockerfile 指令一层）
+    容器 = 镜像 + 一个可写层（container layer）
+
+    容器删除 -> 可写层一起删（数据随之丢失）
+    -> 需要保留的数据必须放 volume（命名卷或绑定挂载）
+
+生命周期：created -> running ->（paused）-> exited -> removed
+    docker run 新建容器；docker start 复用已有容器（保留可写层）
+
+网络模式：
+    bridge（默认）  容器有独立 IP，端口需 -p 映射
+    host            共享宿主网络栈（性能最好，端口易冲突）
+    none            只有 loopback
+    自定义 bridge   内建 DNS，可用容器名互访（生产推荐）
+```
+
 ## 一、镜像是类，容器是对象：可写层的归属
 
 - **镜像（image）**：只读的分层模板，不含任何运行时状态；可以被无数容器同时引用。

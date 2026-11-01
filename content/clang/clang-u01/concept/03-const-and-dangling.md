@@ -1,5 +1,22 @@
 # const 修饰指针、野指针与悬垂指针
 
+```text
+const 修饰指针的三种形态（从右往左读）：
+    const int *p;          p 可变，*p 不可变（指向常量的指针）
+    int * const p = &x;    p 不可变，*p 可变（常量指针）
+    const int * const p;   两者都不可变
+
+两类坏指针：
+    野指针    未初始化的指针（指向随机地址）
+    悬垂指针  指向已释放或已失效的内存
+              int *p = malloc(4); free(p); *p = 1;    // UB
+              char *buf = local_array();              // 返回局部数组 -> 栈已回收
+
+防御：
+    初始化 NULL、free 后立即置 NULL、使用前判空
+    但 NULL 检查挡不住悬垂 -> 生命周期交给 RAII / 智能指针（C++）
+```
+
 ## 一、const 修饰指针的三种形态
 
 **读法：从右往左**（`const` 修饰它左边紧邻的部分）。

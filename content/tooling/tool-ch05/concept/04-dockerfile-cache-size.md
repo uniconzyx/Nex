@@ -3,6 +3,24 @@
 
 ---
 
+```text
+指令语义对比：
+    CMD         默认命令，可被 docker run 尾随参数覆盖；只有一个生效
+    ENTRYPOINT  固定入口，run 的参数追加为它的参数（常配 CMD 提供默认值）
+    COPY        只复制本地文件
+    ADD         额外支持 URL 与自动解压 tar（副作用多，优先用 COPY）
+
+构建缓存：
+    每层按「指令 + 上下文校验和」缓存；某层失效，其后所有层都要重建
+    -> 变化少的放前面：先 COPY 依赖清单装依赖，再 COPY 源码
+
+瘦身四招：
+    多阶段构建（builder 编译，final 阶段只拷产物）
+    合并 RUN 并清理缓存（apt clean / rm -rf ~/.cache）
+    .dockerignore 排除 node_modules、.git
+    slim / alpine 基础镜像（注意 glibc 与 musl 兼容性）
+```
+
 ## 一、指令语义：CMD vs ENTRYPOINT、COPY vs ADD
 
 | 指令 | 作用 |

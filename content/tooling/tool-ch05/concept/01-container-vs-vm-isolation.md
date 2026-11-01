@@ -3,6 +3,24 @@
 
 ---
 
+```text
+容器 = namespace（隔离视图）+ cgroup（限制用量）+ 共享宿主内核
+虚拟机 = 独立内核 + 硬件虚拟化（Hypervisor）
+
+    ┌ 容器 ──────────────┐        ┌ 虚拟机 ───────────┐
+    │ app A │ app B       │        │ guest OS + app    │
+    │ ── 共享宿主内核 ──   │        │ 独立 guest 内核    │
+    │ 宿主操作系统         │        │ Hypervisor        │
+    └────────────────────┘        └──────────────────┘
+
+    启动：容器毫秒级，VM 秒级
+    体积：容器镜像 MB 级，VM 镜像 GB 级
+    隔离强度：VM 强于容器（共享内核 -> 内核漏洞可逃逸）
+
+namespace 负责「看不见」：pid / net / mnt / uts / ipc / user
+cgroup 负责「用不多」：cpu / memory / io 的配额与统计
+```
+
 ## 一、容器 = namespace（隔离视图）+ cgroup（限制用量）+ 共享内核
 
 容器并不是一项新技术，而是 Linux 内核三个能力的组合封装：
