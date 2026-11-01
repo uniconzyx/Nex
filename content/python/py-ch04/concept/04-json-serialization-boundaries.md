@@ -65,6 +65,8 @@ json.dumps(data, sort_keys=True)         # 键排序（让 diff 稳定）
 json.dumps(data, separators=(",", ":"))  # 紧凑：去掉空格，省带宽
 ```
 
+### 让 JSON 可 diff 的两个参数
+
 两个工程要点：
 
 - **`ensure_ascii=False`**：默认 `True` 会把所有非 ASCII 转义成 `\uXXXX`，文件体积大 6 倍且人不可读。写文件/传给现代前端时都该关掉（需保证编码为 UTF-8）。
@@ -91,6 +93,8 @@ json.dumps({"t": datetime.now(timezone.utc), "tags": {"b", "a"}}, default=enc, e
 # '{"t": "2026-10-07T...", "tags": ["a", "b"]}'
 ```
 
+### default 回调的三点注意
+
 三点必须注意：
 
 1. **`set` 转 list 前一定要 `sorted()`**。`set` 迭代顺序依赖哈希，同一份数据在不同进程（`PYTHONHASHSEED` 随机）里顺序可能不同 → 输出不可复现 → 测试偶发失败。
@@ -112,6 +116,15 @@ json.dumps({"t": datetime.now(timezone.utc), "tags": {"b", "a"}}, default=enc, e
 - **跨进程/跨网络/落盘的数据一律 `json`**（或 msgpack / protobuf）；
 - `pickle` 只用于**同机、同版本、可信来源**的临时缓存（如 `multiprocessing` 内部通信）；
 - 存模型权重那种场景用专门的格式（`safetensors` 等），不要用 `pickle` 直接 dump。另外，`json` 也不支持循环引用（`a["self"] = a` 会 `ValueError`），`pickle` 支持——但需要循环引用的数据本来就不适合序列化。
+
+**版本耦合比想象中更脆弱**：`pickle` 存的是「类的模块路径 + 属性字典」，
+把 `pkg.User` 改名成 `pkg.models.User`、或删掉一个属性，旧缓存就再也读不回来，
+而且报错发生在**反序列化时**而不是写入时——往往要等生产环境的冷启动路径才炸。
+所以即使同一个服务内部用 `pickle` 当缓存，也要给缓存加版本号与过期时间，
+并接受「升级即全量失效」。相比之下 `json` 的字段是可加可缺的：多出来的键被忽略、
+缺失的键用默认值补上，这种向前/向后兼容才是它成为事实标准的真正原因，
+不只是「人类可读」这一条。这也是为什么对外接口的字段只增不删，是一条值得写进
+评审清单的硬规矩。
 
 ## 5. 速记
 

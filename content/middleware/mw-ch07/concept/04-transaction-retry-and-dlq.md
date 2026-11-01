@@ -32,6 +32,22 @@ DLQ 必须可查、可回放、有告警，否则就是个黑洞
 
 **判断口径**：如果输出目标不是 Kafka（而是数据库、缓存、第三方接口），**不要指望事务消息**，直接上业务幂等。
 
+```java
+// 事务生产者的骨架：关键在「位移提交与输出在同一个事务里」
+producer.initTransactions();                    // transactional.id 必须唯一且稳定
+try {
+    producer.beginTransaction();
+    producer.send(new ProducerRecord<>("out", key, result));
+    consumer.commitSync();                      // 位移提交也进事务 -> 不再重复
+    producer.commitTransaction();
+} catch (ProducerFencedException e) {
+    producer.close();                           // 被新实例接管，旧实例必须退出
+} catch (KafkaException e) {
+    producer.abortTransaction();                // 回滚：位移与输出一起撤销
+}
+// 消费侧必须配 isolation.level=read_committed，否则读得到未提交消息
+```
+
 ### 🎓 博士生视角
 事务消息在理论上的定位是「**把两个副作用纳入同一个原子边界**」。这个边界的大小直接决定了方案能力：
 

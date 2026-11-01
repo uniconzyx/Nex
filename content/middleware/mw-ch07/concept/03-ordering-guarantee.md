@@ -63,6 +63,17 @@ Kafka 提供的折中是：**可选的顺序粒度**。调用方通过 key 选�
 
 **检查清单**：生产者 `max.in.flight` + 幂等开关；分区数是否为 1 或 key 是否稳定；消费者是否单线程/按分区串行。
 
+```java
+// 保序 + 可重试的最小生产者配置
+props.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);          // 重试不再乱序
+props.put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, 5); // 幂等下的上限，>5 会被拒
+props.put(ProducerConfig.ACKS_CONFIG, "all");
+props.put(ProducerConfig.RETRIES_CONFIG, Integer.MAX_VALUE);
+// 分区器必须稳定：不要用依赖随机数/时间戳的自定义分区器，
+// 也不要在运行期增加分区数——两者都会让同一个 key 换到别的分区
+producer.send(new ProducerRecord<>("orders", orderId, payload));    // key 决定分区
+```
+
 ### 🎓 博士生视角
 关键洞察是：**顺序保证的实现成本几乎全在「重试」上**。无故障时，单分区内顺序由 offset 天然保证；
 一旦发生重试，客户端与服务端对「消息顺序」的认知就可能分叉（broker 可能先收到重试的旧消息）。
@@ -95,6 +106,31 @@ Kafka 提供的折中是：**可选的顺序粒度**。调用方通过 key 选�
 
 **替代方案**：若只需「最终有序」，可用**状态机 + 版本号**在业务侧恢复顺序（乱序到达时先缓存，等前序版本到达再应用）；
 若只需「同实体有序」，可把顺序粒度收到 key 级（多数场景已经足够）。
+
+```python
+class ReorderBuffer:
+    """按版本号吸收乱序：只有前序到齐才放行，缺号就等"""
+
+    def __init__(self):
+        self.want = {}      # key -> 期望的下一个 seq
+        self.buf = {}       # key -> {seq: msg}
+
+    def push(self, key, seq, msg):
+        want = self.want.get(key, 1)
+        if seq < want:
+            return []                       # 已处理过的旧消息，丢弃
+        self.buf.setdefault(key, {})[seq] = msg
+        out = []
+        while want in self.buf[key]:
+            out.append(self.buf[key].pop(want))
+            want += 1
+        self.want[key] = want
+        return out                          # 连续可放行的消息，按序返回
+```
+
+注意这份缓冲的代价：**缺号的 key 会一直卡住后续消息**，所以必须配套超时与上限
+（超过 N 秒或 M 条就落盘告警，而不是无限等）——否则一条永久丢失的消息会把整条
+链路堵死，这比乱序更难排查。
 
 ### 🎓 博士生视角
 顺序方案的选择可以统一为**顺序粒度 vs 并行度的权衡曲线**：

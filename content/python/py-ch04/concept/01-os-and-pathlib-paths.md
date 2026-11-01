@@ -43,6 +43,8 @@ p.parts       # ('data', 'raw', 'a.csv')
 p.is_absolute()
 ```
 
+### pathlib 的三条关键差异
+
 三条关键差异：
 
 1. **`/` 运算符是跨平台安全的**。`Path("a") / "b"` 在 Windows 上用 `\`，在 Linux 上用 `/`；手写 `"a" + "/" + "b"` 在 Windows 的部分 API 上会碎。
@@ -56,6 +58,8 @@ p.is_absolute()
 | 只列本层（文件 + 目录） | `Path(d).iterdir()` | 返回迭代器，**不排序**；要顺序稳定需自己 `sorted()` |
 | 递归匹配模式 | `Path(d).rglob("*.csv")` | 等价 `glob("**/*.csv")`，只匹配文件与目录名 |
 | 自顶向下逐层处理 | `os.walk(d)` | 返回 `(root, dirs, files)` 三元组，**可以原地修改 `dirs` 来剪枝** |
+
+### 只有 os.walk 能做剪枝
 
 `os.walk` 独有的价值是**剪枝**：
 

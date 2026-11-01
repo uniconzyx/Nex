@@ -44,7 +44,11 @@ ap.add_argument("--min-level", choices=["INFO", "WARN", "ERROR"], default="INFO"
 args = ap.parse_args()
 ```
 
+### argparse 替你处理的四件事
+
 `argparse` 自动处理 `-h/--help`、类型转换、`choices` 校验、缺参数时的错误码（**退出码 2**）。手工解析的代码通常长 3 倍，且错误码随手写 1，与 POSIX 约定不符。
+
+### 退出码约定（面试常问）
 
 **退出码约定**（面试常问）：
 
