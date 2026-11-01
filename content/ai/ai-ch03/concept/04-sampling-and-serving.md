@@ -2,6 +2,23 @@
 
 > 视角覆盖：程序员（采样参数/KV 账）/ 博士生（温度形式化、O(n²) 来源）/ 考研者（PPL、参数量估算）。三者互补、不重复。
 
+```text
+从 logits 到 token：
+    logits ──/T──▶ softmax ──┬──▶ argmax        贪心，确定但易重复
+                             ├──▶ top-k / top-p 截断长尾再按概率抽
+                             └──▶ T↓ 更确定，T↑ 更发散（T→0 退化为 argmax）
+
+KV Cache：自回归每步只算新 token
+    无 cache：每步重算全部历史 K,V   -> 累计 O(n²)
+    有 cache：只算第 n+1 个，历史直接读 -> 每步 O(n)，显存 ∝ 层数×n×d
+
+    每 token 每层显存 = 2(K,V) · d_model · 2 字节(fp16)
+    7B / 32 层 / d=4096 -> 2·4096·2·32 ≈ 0.5 MB/token -> 4k 上下文 ≈ 2 GB
+
+MQA / GQA：多个 Q 头共享 1 组（MQA）或 G 组（GQA）K,V
+    -> KV 显存降为 1/h 或 G/h，长上下文才跑得动
+```
+
 ## 1. 采样策略：怎么控制生成
 
 给定末层 logits z，先 softmax 得概率分布，再决定取哪个 token：贪心取 argmax；温度重缩放；top-k / top-p 先做候选截断。

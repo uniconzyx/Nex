@@ -1,6 +1,25 @@
 # 注意力机制：缩放点积、多头、位置编码与复杂度
 > 注意力用「内容寻址」替代「位置递推」：每个位置直接 attend 到任意历史位置，从根上绕开了 RNN 的长程梯度连乘。这是 Transformer 的全部前提。
 
+```text
+缩放点积注意力：
+    Q (n×d) ─┐
+    K (m×d) ─┼─▶ S = QKᵀ/√d ─▶ softmax(行) ─▶ A (n×m) ─▶ A·V (n×dv)
+    V (m×dv)─┘        ↑
+              除以 √d：否则 d 大时点积方差 ≈ d，softmax 进入饱和区 -> 梯度 ≈ 0
+
+    Decoder 单向 mask         Encoder 双向
+    ■ □ □ □                   ■ ■ ■ ■
+    ■ ■ □ □                   ■ ■ ■ ■
+    ■ ■ ■ □                   ■ ■ ■ ■
+
+多头：在 d_model 上切 h 份并行，各学一种关系，最后拼接投影
+    [head1 | head2 | ... | headh] · W_O
+
+复杂度 O(n²·d)，平方项就是长上下文的成本上限：
+    n=1k -> 1e6    n=8k -> 6.4e7    n=32k -> 1e9
+```
+
 ## 1. 缩放点积注意力与缩放动机
 
 缩放点积注意力：给定 Q,K,V（维度 d_k），Attention(Q,K,V) = softmax(QK^T / sqrt(d_k)) · V。QK^T 衡量「查询与键的相似度」，softmax 归一化成权重，再对 V 加权求和。

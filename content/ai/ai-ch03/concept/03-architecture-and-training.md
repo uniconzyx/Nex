@@ -2,6 +2,21 @@
 
 > 视角覆盖：程序员（上下文/工程）/ 博士生（梯度路径、Scaling Law）/ 考研者（LN vs BN、GPT 目标）。三者互补、不重复。
 
+```text
+三种架构的分工：
+    Encoder-Decoder   [双向编码器] ──交叉注意力──▶ [单向解码器]   翻译 / T5
+    Decoder-only      [单向自注意力 × N 层]                     GPT / LLaMA
+    Encoder-only      [双向] ─▶ 只出表征，不生成                  BERT
+
+残差 + LayerNorm 的梯度路径：
+    x ──┬──────────────────▶ (+) ──▶ LN ──▶ 下一层
+        └──▶ 子层 F(x) ─────▶
+    dL/dx = dL/dout · (1 + dF/dx)   <- 恒等项 1 让梯度始终有直通路
+
+    Pre-LN  : x -> LN -> F -> (+)   训练稳、可深堆（GPT 系）
+    Post-LN : x -> F -> (+) -> LN   原始 Transformer，必须 warmup
+```
+
 ## 1. Encoder-Decoder vs Decoder-only
 
 Encoder 双向编码上下文（BERT/翻译源端），Decoder-only 自回归生成（GPT 系列），Encoder-Decoder 二者结合（原始 Transformer 翻译、T5）。

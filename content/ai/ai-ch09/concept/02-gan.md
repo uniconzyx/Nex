@@ -2,6 +2,22 @@
 
 > 视角覆盖：程序员（工程决策）/ 博士生（第一性原理）/ 考研者（笔面口径）。三者互补、不重复。
 
+```text
+对抗目标（minimax）：
+    min_G max_D  E[log D(x)] + E[log(1 - D(G(z)))]
+    D 让真样本得分高、假样本得分低；G 让 D 把假判成真
+
+最优 D 之下，G 的损失等价于最小化 JS 散度：
+    当 P_data 与 P_model 几乎不重叠时，JS 恒为 log2 -> 梯度消失
+
+三种崩法：
+    mode collapse   G 只产少数样本         -> minibatch discrimination / 换损失
+    D 太强          G 梯度消失             -> 限 D 容量或更新频率
+    D 太弱          学不到有效信号          -> 提高 D 步数
+
+稳定手段：WGAN-GP（Wasserstein + 梯度惩罚）、谱归一化、TTUR（D/G 不同 lr）
+```
+
 ## 1. 对抗训练的目标：minimax 与 JS 散度
 
 GAN 把「学会数据分布」变成一个**二人零和博弈**：生成器 $G$ 试图骗过判别器，判别器 $D$ 试图分辨真假。
