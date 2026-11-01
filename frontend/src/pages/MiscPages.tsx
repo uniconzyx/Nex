@@ -30,6 +30,8 @@ import { MonsterSprite } from '../components/MonsterSprite';
 import { LongPressPreview } from '../components/LongPressPreview';
 import { useParticles } from '../components/Particles';
 import { usePageFade } from '../lib/hooks/usePageFade';
+import { BottomSheet } from '../components/BottomSheet';
+import { MemoryGame, MonsterMatchGame, PuzzleGame } from '../components/MiniGames';
 import { OUTFITS } from './DressPage';
 
 /* ── 签到祭坛 ─────────────────────────────────────────────────────────── */
@@ -268,6 +270,8 @@ export function MiniPage() {
   const p = useProgress();
   const bs = bestiaryStats(p);
   const dailyDone = p.daily?.done.length ?? 0;
+  /** 当前打开的小游戏：null = 都没开 */
+  const [game, setGame] = useState<'puzzle' | 'memory' | 'match' | null>(null);
   const tasks = [
     {
       id: 'daily',
@@ -312,6 +316,54 @@ export function MiniPage() {
           ))}
         </div>
       </section>
+
+      {/* 支线小游戏：内容全部取自真实数据，玩法不影响进度 */}
+      <section className="km-card">
+        <h3>桌面上的三件玩具</h3>
+        <p className="km-hint" style={{ marginTop: 0 }}>
+          拼图盒还原真实项目的实施步骤，翻牌配对章节与它的主读书目，消消乐清理真实错题。玩坏了不扣任何东西。
+        </p>
+        <div className="kg-desk">
+          <button type="button" className="kg-desk-item" onClick={() => setGame('puzzle')}>
+            <span className="kg-desk-ico kg-ico-puzzle" aria-hidden="true" />
+            <span className="kg-desk-text">
+              <b>代码拼图盒</b>
+              <em>把开源项目的实施步骤排回原位</em>
+            </span>
+            <span className="kg-desk-go" aria-hidden="true">→</span>
+          </button>
+          <button type="button" className="kg-desk-item" onClick={() => setGame('memory')}>
+            <span className="kg-desk-ico kg-ico-memory" aria-hidden="true" />
+            <span className="kg-desk-text">
+              <b>记忆翻牌</b>
+              <em>章节标题 ↔ 它的标志性资源</em>
+            </span>
+            <span className="kg-desk-go" aria-hidden="true">→</span>
+          </button>
+          <button type="button" className="kg-desk-item" onClick={() => setGame('match')}>
+            <span className="kg-desk-ico kg-ico-match" aria-hidden="true" />
+            <span className="kg-desk-text">
+              <b>错题消消乐</b>
+              <em>题面 ↔ 所属章节，错题优先登场</em>
+            </span>
+            <span className="kg-desk-go" aria-hidden="true">→</span>
+          </button>
+        </div>
+      </section>
+
+      <BottomSheet
+        open={game !== null}
+        onClose={() => setGame(null)}
+        title={
+          game === 'puzzle' ? '代码拼图盒' : game === 'memory' ? '记忆翻牌' : '错题消消乐'
+        }
+        ariaLabel="支线小游戏"
+        className="kg-sheet"
+      >
+        {game === 'puzzle' && <PuzzleGame />}
+        {game === 'memory' && <MemoryGame />}
+        {game === 'match' && <MonsterMatchGame />}
+      </BottomSheet>
     </div>
   );
 }

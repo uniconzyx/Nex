@@ -661,9 +661,27 @@ html.lg-b .km-card {
   background: linear-gradient(90deg, rgb(93 180 229 / 0.26), rgb(93 180 229 / 0.08));
 }
 
-/* ── 主城场景：赛博冰蓝学院 ───────────────────────────────────────── */
+/* 页面内容不参与撑宽：网格子项默认 min-width:auto，长标题/长单词会把整列顶宽 */
+.km-page,
+.km-view {
+  min-width: 0;
+}
+/* 外壳只有一列且不许被内容顶宽：横向导航条（15 项）在窄屏比屏幕宽，
+   若列宽跟着内容走，整页会横向溢出并被裁掉右侧（此前 APK 一直如此）。 */
+.km-app {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* ── 主城场景：赛博冰蓝学院（A 版骨架） ─────────────────────────── */
 .km-home-scene {
   position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.82fr);
+  grid-template-areas:
+    'hero stage'
+    'meta stage';
+  align-items: start;
+  gap: 14px 28px;
   min-height: 360px;
   padding: 26px 28px;
   overflow: hidden;
@@ -674,15 +692,49 @@ html.lg-b .km-card {
     radial-gradient(120% 90% at 78% 6%, rgb(197 228 255 / 0.8), transparent 62%);
   box-shadow: var(--km-glass-inner), var(--km-glass-shadow);
 }
-/* 两栏：左侧信息，右侧舞台（试炼塔 + 凯喵） */
-.km-scene-body {
+.km-scene-hero {
+  grid-area: hero;
   position: relative;
   z-index: 2;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.86fr);
+  max-width: 480px;
+}
+.km-scene-meta {
+  grid-area: meta;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.km-scene-cta {
+  /* A 版的「进入试炼塔」主行动只出现在窄屏；桌面版沿用塔自身的入口，不动 EXE 布局 */
+  display: none;
   align-items: center;
-  gap: 28px;
-  min-height: 306px;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 11px 18px;
+  border: 1px solid var(--km-glass-border);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.82);
+  color: var(--km-accent-ink);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--km-glass-inner), 0 8px 20px rgb(114 148 180 / 0.14);
+  transition: transform var(--km-spring-dur) var(--km-spring), box-shadow var(--km-spring-dur) var(--km-spring);
+}
+.km-scene-cta span {
+  transition: transform var(--km-spring-dur) var(--km-spring);
+}
+.km-scene-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--km-glass-inner), 0 12px 26px rgb(114 148 180 / 0.2);
+}
+.km-scene-cta:hover span {
+  transform: translateX(3px);
+}
+.km-scene-cta:active {
+  transform: scale(0.96);
 }
 .km-scene-city {
   position: absolute;
@@ -721,11 +773,6 @@ html.lg-b .km-card {
 .km-scene-city i:nth-child(7) {
   height: 30%;
 }
-.km-scene-copy {
-  position: relative;
-  z-index: 2;
-  max-width: 480px;
-}
 .km-scene-weather {
   display: inline-flex;
   align-items: center;
@@ -746,14 +793,14 @@ html.lg-b .km-card {
   box-shadow: 0 0 10px rgb(251 191 36 / 0.9);
   animation: km-sway 3.2s ease-in-out infinite;
 }
-.km-scene-copy h2 {
+.km-scene-hero h2 {
   margin: 14px 0 6px;
   font-size: clamp(26px, 3.4vw, 40px);
   line-height: 1.12;
   letter-spacing: -0.02em;
   color: var(--km-title);
 }
-.km-scene-copy p {
+.km-scene-hero p {
   margin: 0;
   max-width: 38ch;
   color: var(--km-body);
@@ -766,7 +813,6 @@ html.lg-b .km-card {
   z-index: 2;
   display: flex;
   gap: 10px;
-  margin-top: 18px;
 }
 .km-scene-stat {
   display: flex;
@@ -804,21 +850,22 @@ html.lg-b .km-card {
   background: linear-gradient(90deg, var(--km-primary-deep), var(--km-primary-lift));
 }
 
-/* 舞台：试炼塔 + 凯喵 + 地面光圈 */
+/* 舞台：试炼塔 + 凯喵（桌面：塔在左、凯喵在右；窄屏由 display:contents 拆开排版） */
 .km-scene-stage {
+  grid-area: stage;
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 0.92fr);
   align-items: end;
   gap: 6px;
-  min-height: 300px;
+  min-height: 250px;
 }
 .km-scene-floor {
   position: absolute;
   left: 26%;
-  bottom: 22px;
+  bottom: 18px;
   width: 48%;
-  height: 54px;
+  height: 52px;
   transform: translateX(-50%);
   border-radius: 50%;
   background: radial-gradient(ellipse at center, rgb(110 198 255 / 0.42), transparent 70%);
@@ -889,15 +936,22 @@ html.lg-b .km-card {
   transform: scale(0.95);
 }
 /* 凯喵：表情 + 心情牌 + 台词气泡 */
-.km-scene-cat-wrap {
+.km-scene-mood-card {
   position: relative;
   z-index: 4;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 6px;
-  max-width: 230px;
-  padding-bottom: 6px;
+  max-width: 100%;
+  padding-bottom: 4px;
+}
+.km-scene-mood-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  max-width: 260px;
 }
 .km-scene-mood {
   display: inline-flex;
@@ -948,10 +1002,10 @@ html.lg-b .km-card {
 .km-scene-stage::after {
   content: '';
   position: absolute;
-  left: 26%;
-  bottom: 10px;
-  width: 48%;
-  height: 120px;
+  left: 50%;
+  bottom: 8px;
+  width: 66%;
+  height: 116px;
   transform: translateX(-50%);
   border-radius: 50%;
   background: radial-gradient(ellipse at center, var(--mood-aura, rgb(93 180 229 / 0.45)), transparent 70%);
@@ -1302,51 +1356,84 @@ html.lg-b .km-card {
   .km-win {
     display: none;
   }
-  /* 主城场景：单列堆叠——信息在上，舞台在下 */
+  /* 主城场景（A 版窄屏）：左文案 + 右塔，凯喵情绪与状态卡依次向下 */
   .km-home-scene {
+    grid-template-columns: minmax(0, 1fr) 92px;
+    grid-template-areas:
+      'hero stage'
+      'mood mood'
+      'meta meta';
+    gap: 12px;
     min-height: 0;
-    padding: 18px;
+    padding: 16px;
   }
-  .km-scene-body {
-    grid-template-columns: 1fr;
-    gap: 16px;
-    min-height: 0;
+  .km-scene-hero,
+  .km-scene-meta,
+  .km-scene-mood-card,
+  .km-scene-stats {
+    min-width: 0;
   }
-  .km-scene-copy h2 {
-    font-size: 26px;
+  /* 舞台在窄屏拆开：塔单独占右格，心情卡整行，情绪卡与状态卡依次向下 */
+  .km-scene-stage {
+    display: contents;
+  }
+  .km-scene-floor,
+  .km-scene-rune {
+    display: none;
+  }
+  .km-trial-tower {
+    grid-area: stage;
+    align-self: end;
+    justify-self: center;
+  }
+  .km-scene-mood-card {
+    grid-area: mood;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 0;
+  }
+  .km-scene-mood-text {
+    align-items: flex-start;
+    max-width: none;
+  }
+  .km-scene-cta {
+    display: inline-flex;
+  }
+  .km-scene-hero h2 {
+    font-size: 22px;
+    /* 标题在窄屏折成两行（A 版：冰蓝学院 / 今日开塔），顺带压住最小宽度 */
+    max-width: 7.6em;
+  }
+  .km-scene-hero p {
+    font-size: 13px;
+    max-width: 100%;
+  }
+  .km-scene-cta {
+    margin-top: 12px;
+    padding: 9px 14px;
+    font-size: 13px;
+  }
+  .km-scene-stage {
+    min-height: 186px;
+  }
+  .km-trial-tower-img {
+    width: 102px;
+  }
+  .km-scene-bubble {
+    border-radius: 16px 16px 16px 4px;
+  }
+  .km-scene-cat {
+    width: 88px;
   }
   .km-scene-stats {
-    margin-top: 14px;
+    margin-top: 0;
   }
   .km-scene-stat {
     padding: 9px 12px;
   }
   .km-scene-stat b {
     font-size: 17px;
-  }
-  .km-scene-stage {
-    grid-template-columns: 1fr;
-    justify-items: center;
-    min-height: 230px;
-  }
-  .km-scene-floor,
-  .km-scene-stage::after {
-    left: 50%;
-    width: 62%;
-  }
-  .km-scene-cat-wrap {
-    position: static;
-    align-items: center;
-    max-width: none;
-    margin-top: 6px;
-    padding-bottom: 0;
-  }
-  .km-scene-bubble {
-    border-radius: 16px 16px 16px 4px;
-    text-align: center;
-  }
-  .km-scene-cat {
-    width: 92px;
   }
   .km-scene-city {
     height: 40%;
@@ -1924,6 +2011,272 @@ html.lg-b .km-card {
 .km-win-btn.is-close:hover {
   background: rgb(248 113 113 / 0.18);
   color: #d64545;
+}
+
+/* ============================================================================
+ * 支线小屋 · 三个小游戏（拼图盒 / 记忆翻牌 / 错题消消乐）
+ * ========================================================================== */
+.kg-desk {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+.kg-desk-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 13px 14px;
+  border-radius: 16px;
+  border: 1px solid var(--km-glass-border);
+  background: rgb(255 255 255 / 0.55);
+  box-shadow: var(--km-glass-inner);
+  color: var(--km-title);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform var(--km-spring-dur) var(--km-spring), box-shadow var(--km-spring-dur) var(--km-spring);
+}
+.kg-desk-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--km-glass-inner), 0 12px 26px rgb(114 148 180 / 0.16);
+}
+.kg-desk-item:active {
+  transform: scale(0.98);
+}
+.kg-desk-ico {
+  width: 30px;
+  height: 34px;
+  flex: none;
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+}
+.kg-ico-puzzle {
+  background: linear-gradient(135deg, var(--km-secondary), var(--km-primary));
+}
+.kg-ico-memory {
+  background: linear-gradient(135deg, #9ce8d6, var(--km-highlight));
+}
+.kg-ico-match {
+  background: linear-gradient(135deg, #c4b5fd, var(--km-epic));
+}
+.kg-desk-text {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.45;
+}
+.kg-desk-text b {
+  display: block;
+  font-size: 14.5px;
+}
+.kg-desk-text em {
+  font-style: normal;
+  color: var(--km-body);
+  font-size: 12.5px;
+}
+.kg-desk-go {
+  color: var(--km-primary);
+  font-size: 16px;
+}
+.kg-sheet {
+  width: min(560px, 100%);
+}
+.kg {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.kg-desc {
+  margin: 0;
+  color: var(--km-body);
+  font-size: 13px;
+  line-height: 1.65;
+}
+.kg-desc b {
+  color: var(--km-title);
+}
+.kg-empty {
+  margin: 0;
+  color: var(--km-caption);
+  font-size: 13px;
+}
+/* 拼图盒 */
+.kg-puzzle {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.kg-puzzle li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 11px;
+  border-radius: 13px;
+  background: rgb(255 255 255 / 0.6);
+  border: 1px solid var(--km-glass-border);
+  box-shadow: var(--km-glass-inner);
+}
+.kg-puzzle li.ok {
+  border-color: rgb(52 211 153 / 0.5);
+  background: rgb(52 211 153 / 0.1);
+}
+.kg-no {
+  width: 22px;
+  height: 24px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(135deg, var(--km-primary), var(--km-primary-deep));
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+}
+.kg-text {
+  flex: 1;
+  min-width: 0;
+  color: var(--km-title);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.kg-ops {
+  display: flex;
+  gap: 4px;
+  flex: none;
+}
+.kg-ops button {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  border: 1px solid var(--km-line2);
+  background: rgb(255 255 255 / 0.7);
+  color: var(--km-accent-ink);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.14s var(--km-spring), background-color 0.14s ease;
+}
+.kg-ops button:hover:not(:disabled) {
+  background: rgb(93 180 229 / 0.18);
+}
+.kg-ops button:active:not(:disabled) {
+  transform: scale(0.92);
+}
+.kg-ops button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.kg-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.kg-verdict {
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+.kg-verdict.ok {
+  color: #1f9d6a;
+}
+.kg-verdict.bad {
+  color: var(--km-danger);
+}
+/* 记忆翻牌 */
+.kg-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.kg-card {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  transition: transform 0.45s var(--km-spring);
+  perspective: 700px;
+}
+.kg-card::before {
+  content: '?';
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgb(162 210 255 / 0.9), rgb(93 180 229 / 0.85));
+  box-shadow: var(--km-glass-inner), 0 6px 14px rgb(114 148 180 / 0.16);
+  color: #fff;
+  font-size: 22px;
+  font-weight: 800;
+  backface-visibility: hidden;
+}
+.kg-card-face {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 8px;
+  border-radius: 14px;
+  background: rgb(255 255 255 / 0.9);
+  border: 1px solid var(--km-glass-border);
+  box-shadow: var(--km-glass-inner);
+  color: var(--km-title);
+  font-size: 12px;
+  line-height: 1.35;
+  text-align: center;
+  word-break: break-word;
+  backface-visibility: hidden;
+  transform: rotateY(180deg);
+}
+.kg-card.open {
+  transform: rotateY(180deg);
+}
+.kg-card.done .kg-card-face {
+  border-color: rgb(52 211 153 / 0.55);
+  background: rgb(52 211 153 / 0.12);
+}
+/* 错题消消乐 */
+.kg-tiles {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+.kg-tile {
+  min-height: 62px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--km-glass-border);
+  background: rgb(255 255 255 / 0.62);
+  box-shadow: var(--km-glass-inner);
+  color: var(--km-title);
+  font: inherit;
+  font-size: 12.5px;
+  line-height: 1.45;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.18s var(--km-spring), background-color 0.18s ease, opacity 0.3s ease;
+}
+.kg-tile:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+.kg-tile.kind-q {
+  border-left: 3px solid var(--km-primary);
+}
+.kg-tile.kind-ch {
+  border-left: 3px solid var(--km-highlight);
+}
+.kg-tile.on {
+  background: rgb(93 180 229 / 0.16);
+}
+.kg-tile.gone {
+  opacity: 0.18;
+  transform: scale(0.96);
+  cursor: default;
 }
 
 /* ── 隐藏台词气泡（连点搜索 5 次） ─────────────────────────────── */

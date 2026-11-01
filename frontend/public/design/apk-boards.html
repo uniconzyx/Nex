@@ -96,6 +96,25 @@
   .a-hero .copy b{display:block;font-size:22px;line-height:1.16;letter-spacing:-.02em}
   .a-hero .copy span{font-size:12px;color:var(--body)}
   .a-hero .cta{position:absolute;left:12px;bottom:-16px}
+  .a-cta{
+    position:absolute;left:12px;bottom:12px;display:inline-flex;align-items:center;gap:6px;
+    padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.9);
+    box-shadow:inset 0 1px 2px rgba(255,255,255,.9),0 8px 18px rgba(114,148,180,.16);
+    color:#2F6494;font-size:12.5px;font-weight:700;
+  }
+  .a-cta i{font-style:normal;color:#5DB4E5}
+  .a-mood{
+    display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:16px;margin-top:10px;
+    background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.85);
+    box-shadow:inset 0 1px 2px rgba(255,255,255,.9),0 10px 22px rgba(114,148,180,.12);
+  }
+  .a-mood img{width:46px;height:46px;border-radius:50%;object-fit:cover;flex:none}
+  .a-mood-text{display:flex;flex-direction:column;gap:5px;align-items:flex-start;min-width:0}
+  .a-mood-chip{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;background:rgba(255,255,255,.85);
+    border:1px solid rgba(255,255,255,.9);font-size:11px;color:#4A6076;box-shadow:0 0 12px rgba(93,180,229,.35)}
+  .a-mood-chip i{font-style:normal;font-size:12px}
+  .a-mood-bubble{position:relative;padding:7px 11px;border-radius:14px 14px 14px 4px;background:rgba(255,255,255,.9);
+    border:1px solid rgba(255,255,255,.85);font-size:11.5px;line-height:1.5;color:#2B3E50}
   .a-next{padding:16px 16px 14px;border-radius:20px;background:linear-gradient(135deg,rgba(110,198,255,.92),rgba(74,144,226,.9));color:#fff;box-shadow:0 12px 26px rgba(74,144,226,.3)}
   .a-next small{font-size:11.5px;opacity:.85}
   .a-next b{display:block;font-size:18px;margin:4px 0 2px}
@@ -198,6 +217,14 @@
           <span class="weather"><i></i>晨露 · 学习天气</span>
           <span class="tower"><img src="/assets/kaimao/trial-tower.svg" alt="" style="width:100%;display:block"></span>
           <span class="copy"><b>冰蓝学院<br>今日开塔</b><span>三道新题，按当前学科由浅入深排好</span></span>
+          <span class="a-cta">进入试炼塔 <i>→</i></span>
+        </div>
+        <div class="a-mood">
+          <img src="/assets/kaimao/mood-sleepy.png" alt="">
+          <span class="a-mood-text">
+            <span class="a-mood-chip"><i>😴</i>待唤醒</span>
+            <span class="a-mood-bubble">今天还没开始呢…随便挑一道题，做一道我就醒了。</span>
+          </span>
         </div>
         <div class="a-next" style="margin-top:12px">
           <small>现在只做一件事</small>
@@ -217,14 +244,14 @@
       <div class="p-nav"><span class="on">主城</span><span>知识试炼</span><span>题库</span><span>图鉴</span><span>我的</span></div>
     </div>
     <div>
-      <div class="b-title"><h3>A · 学院门厅</h3><span>Hero 优先 · 场景先行</span></div>
+      <div class="b-title"><h3>A · 学院门厅</h3><span class="tag-A" style="padding:2px 9px;border-radius:999px;font-size:11.5px">已定稿</span></div>
       <p class="b-idea">把「冰蓝学院 + 试炼塔」做成真正的门面，首屏一半是画面，一半是唯一该做的动作。</p>
       <ul class="b-notes">
-        <li>塔用重绘插画（<code>trial-tower.svg</code>），带呼吸缩放与光晕。</li>
-        <li>主行动只有一颗：<b>开始今日试炼</b>；其余内容降为玻璃卡。</li>
+        <li>塔用重绘插画（<code>trial-tower.svg</code>），带呼吸缩放与光晕；文案在左、塔在右。</li>
+        <li>主行动只有一颗：<b>进入试炼塔</b>；下方接凯喵心情卡（表情 + 心情牌 + 台词）。</li>
         <li>视觉冲击最强，但首屏信息量最少，适合「每天打开看一眼就开干」。</li>
       </ul>
-      <div class="b-meta"><i>推荐度 ★★★★★</i><i>实现成本 中</i><i>适配现有数据结构 佳</i></div>
+      <div class="b-meta"><i>推荐度 ★★★★★</i><i>实现成本 中</i><i>适配现有数据结构 佳</i><i>已按此改造 APK 主城</i></div>
     </div>
   </section>
 
@@ -415,9 +442,9 @@
 
 <div class="note">
   <h2>怎么定？</h2>
-  <p>· <b>想要记忆点</b>（塔、插画、凯喵） → 选 <b>A</b> 或 <b>D</b>；<b>想要效率</b>（一眼看到该做什么） → 选 <b>B</b> 或 <b>C</b>；<b>想要耐看与统一</b> → 选 <b>E</b>。</p>
-  <p>· 也可以组合，比如「<b>A 的塔 + B 的任务卡 + E 的时间线</b>」。回复版本号（如「A」或「A+B」）我按它改造现有 HomePage 与导航，保持登录页那套 token 不动。</p>
-  <p>· 试炼塔插画已重绘为 <code>frontend/public/assets/kaimao/trial-tower.svg</code>（矢量，含塔门、光晕、漂浮碎片），确认版本后可再按风格调色。</p>
+  <p>· <b>A 版已定稿</b>：APK 主城按「学院门厅」改造——文案在左、塔在右、单一 CTA、凯喵心情卡固定在场景里；EXE 桌面版保持现状不动。</p>
+  <p>· 其余四版留作备选：<b>B</b> 效率向、<b>C</b> 进度向、<b>D</b> 叙事向、<b>E</b> 统一耐看向。哪天想换，只换骨架，token 与数据层不动。</p>
+  <p>· 试炼塔插画已重绘为 <code>frontend/public/assets/kaimao/trial-tower.svg</code>（矢量：塔顶/塔身/塔窗/塔门/台阶/双层塔基、漂浮碎片、两侧小尖塔、星光与光斑）。</p>
 </div>
 
 </body>
