@@ -205,6 +205,17 @@ def check_examples(cdir: str, cid: str, rep: Report, tmp: str) -> None:
 
 
 # ----------------------------------------------------------------- exercises
+def _looks_like_non_python(code: str) -> bool:
+    """粗略判断 answer.code 是否非 Python（C/C++/Java/Go 等）。
+
+    审计机只用 `python -c` 验证 Python 可运行；C/C++ 等参考实现被当 Python 跑
+    必然语法报错，属误报。这里用少量强特征跳过实跑，避免对非 Python 代码产生假 FAIL。
+    """
+    markers = ('#include', 'int main(', 'void main(', 'printf(', 'std::',
+               'public class', 'func main(', 'package main', 'defer ')
+    return any(m in code for m in markers)
+
+
 def check_exercises(cdir: str, cid: str, rep: Report) -> None:
     fp = os.path.join(cdir, 'exercises.json')
     if not os.path.exists(fp):
@@ -259,10 +270,15 @@ def check_exercises(cdir: str, cid: str, rep: Report) -> None:
                     rep.fail(tag, 'answer.correct=%r 不在 options %r 中' % (c, keys))
         code = ans.get('code')
         if code:
-            r = subprocess.run([sys.executable, '-c', code], capture_output=True,
-                               text=True, encoding='utf-8', errors='replace', timeout=60)
-            if r.returncode != 0:
-                rep.fail(tag, 'answer.code 运行失败: ' + (r.stderr or '')[-300:])
+            # answer.code 可能是 C/C++ 等语言的参考实现，审计机只验证 Python 可运行；
+            # 非 Python 代码用 python -c 跑必然语法报错，属误报，跳过实跑。
+            if _looks_like_non_python(code):
+                rep.warn(tag, 'answer.code 疑似非 Python（C/C++ 等），跳过实跑验证')
+            else:
+                r = subprocess.run([sys.executable, '-c', code], capture_output=True,
+                                   text=True, encoding='utf-8', errors='replace', timeout=60)
+                if r.returncode != 0:
+                    rep.fail(tag, 'answer.code 运行失败: ' + (r.stderr or '')[-300:])
 
 
 # --------------------------------------------------------------- interview/project
