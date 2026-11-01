@@ -3,6 +3,6 @@
   "code_lang": "python",
   "code_std": "3.11",
   "stdin": "",
-  "expected_output": "None\nTypeError: unhashable type: 'NoHash'",
+  "expected_output": "None\nTypeError: unhashable type: 'NoHash'\n",
   "code": "class NoHash:\n    def __init__(self, x):\n        self.x = x\n\n    def __eq__(self, other):\n        return isinstance(other, NoHash) and self.x == other.x\n\nprint(NoHash.__hash__)\ntry:\n    {NoHash(1)}\nexcept TypeError as e:\n    print(\"TypeError:\", e)\n"
 }

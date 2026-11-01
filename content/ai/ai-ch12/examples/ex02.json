@@ -3,6 +3,6 @@
   "code_lang": "python",
   "code_std": "3.11",
   "stdin": "",
-  "expected_output": "5\n1+1等于几？ 等于2。\n那它加3呢？ 2+3=5。",
+  "expected_output": "5\n1+1等于几？ 等于2。\n那它加3呢？ 2+3=5。\n",
   "code": "def build_multiturn(history):\n    msgs = [{\"role\": \"system\", \"content\": \"你是有帮助的助手。\"}]\n    for turn in history:\n        msgs.append({\"role\": \"user\", \"content\": turn[\"q\"]})\n        msgs.append({\"role\": \"assistant\", \"content\": turn[\"a\"]})\n    return msgs\n\nconv = build_multiturn([\n    {\"q\": \"1+1等于几？\", \"a\": \"等于2。\"},\n    {\"q\": \"那它加3呢？\", \"a\": \"2+3=5。\"},\n])\nprint(len(conv))\nprint(conv[1][\"content\"], conv[2][\"content\"])\nprint(conv[-2][\"content\"], conv[-1][\"content\"])\n"
 }

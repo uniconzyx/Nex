@@ -3,6 +3,6 @@
   "code_lang": "python",
   "code_std": "python3",
   "stdin": "",
-  "expected_output": "[1, 4, 9]",
+  "expected_output": "[1, 4, 9]\n",
   "code": "sq = [x * x for x in range(1, 4)]\nprint(sq)"
 }

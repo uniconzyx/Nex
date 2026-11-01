@@ -3,6 +3,6 @@
   "code_lang": "c",
   "code_std": "c11",
   "stdin": "",
-  "expected_output": "文本: GCATCGCAGAGAGT\r\n模式: GCAGAGAG\r\n失配于模式位 7(文本字符 'A')，坏字符右移量 = 1\r\n失配于模式位 5(文本字符 'C')，坏字符右移量 = 4\r\n坏字符规则命中：模式在文本位置 5 完整匹配\r\n",
+  "expected_output": "文本: GCATCGCAGAGAGT\n模式: GCAGAGAG\n失配于模式位 7(文本字符 'A')，坏字符右移量 = 1\n失配于模式位 5(文本字符 'C')，坏字符右移量 = 4\n坏字符规则命中：模式在文本位置 5 完整匹配\n",
   "code": "#include <stdio.h>\n#include <string.h>\nvoid badCharHeuristic(const char *pat, int m, int bad[256]){\n    for(int i=0;i<256;i++) bad[i]=-1;\n    for(int i=0;i<m;i++) bad[(unsigned char)pat[i]]=i;\n}\nvoid searchBM(const char *txt, const char *pat){\n    int n=(int)strlen(txt), m=(int)strlen(pat);\n    int bad[256]; badCharHeuristic(pat,m,bad);\n    int s=0;\n    printf(\"文本: %s\\n模式: %s\\n\", txt, pat);\n    while(s<=n-m){\n        int j=m-1;\n        while(j>=0 && pat[j]==txt[s+j]) j--;\n        if(j<0){\n            printf(\"坏字符规则命中：模式在文本位置 %d 完整匹配\\n\", s);\n            s += (s+m<n)? m-bad[(unsigned char)txt[s+m]] : 1;\n        } else {\n            int shift = j - bad[(unsigned char)txt[s+j]];\n            printf(\"失配于模式位 %d(文本字符 '%c')，坏字符右移量 = %d\\n\",\n                   j, txt[s+j], shift>1?shift:1);\n            s += (shift>1)? shift : 1;\n        }\n    }\n}\nint main(void){\n    searchBM(\"GCATCGCAGAGAGT\",\"GCAGAGAG\");\n    return 0;\n}\n"
 }

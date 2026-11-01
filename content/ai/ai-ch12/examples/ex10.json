@@ -3,6 +3,6 @@
   "code_lang": "python",
   "code_std": "3.11",
   "stdin": "",
-  "expected_output": "阈值: 4.0\n保留 id=1 均分=4.75\n保留 id=3 均分=4.75",
+  "expected_output": "阈值: 4.0\n保留 id=1 均分=4.75\n保留 id=3 均分=4.75\n",
   "code": "rubric = [\"相关性\", \"正确性\", \"完整性\", \"无害性\"]\nsamples = [\n    {\"id\": 1, \"scores\": [5,5,4,5]},\n    {\"id\": 2, \"scores\": [2,5,1,5]},\n    {\"id\": 3, \"scores\": [4,5,5,5]},\n]\nTHRESHOLD = 4.0\nkept = []\nfor s in samples:\n    avg = sum(s[\"scores\"]) / len(s[\"scores\"])\n    if avg >= THRESHOLD:\n        kept.append((s[\"id\"], avg))\nprint(\"阈值:\", THRESHOLD)\nfor sid, avg in kept:\n    print(f\"保留 id={sid} 均分={avg:.2f}\")\n"
 }

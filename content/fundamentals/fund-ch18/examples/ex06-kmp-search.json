@@ -3,6 +3,6 @@
   "code_lang": "c",
   "code_std": "c11",
   "stdin": "",
-  "expected_output": "文本: ababcabcacbab\r\n模式: abcac\r\n匹配起始位置(0基): 5\r\n",
+  "expected_output": "文本: ababcabcacbab\n模式: abcac\n匹配起始位置(0基): 5\n",
   "code": "#include <stdio.h>\n#include <string.h>\nvoid buildNext(const char *p,int m,int next[]){\n    next[1]=0;\n    for(int j=1,k=0;j<m;){\n        if(k==0 || p[j-1]==p[k-1]){ j++; k++; next[j]=k; }\n        else k=next[k];\n    }\n}\nint main(void){\n    const char *t=\"ababcabcacbab\", *p=\"abcac\";\n    int n=(int)strlen(t), m=(int)strlen(p), next[64];\n    buildNext(p,m,next);\n    printf(\"文本: %s\\n模式: %s\\n\", t, p);\n    int i=1,j=1;\n    printf(\"匹配起始位置(0基):\");\n    int found=0;\n    while(i<=n){\n        if(j==0 || t[i-1]==p[j-1]){ i++; j++; }\n        if(j>m){ printf(\" %d\", i-m-1); found=1; j=next[j]; }\n        else if(i<=n && t[i-1]!=p[j-1]){\n            if(j>0) j=next[j]; else i++;\n        }\n    }\n    if(!found) printf(\" 无\");\n    printf(\"\\n\");\n    return 0;\n}\n"
 }

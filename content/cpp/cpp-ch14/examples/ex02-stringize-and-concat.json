@@ -3,6 +3,6 @@
   "code_lang": "cpp",
   "code_std": "cpp17",
   "stdin": "",
-  "expected_output": "hello world\n42",
+  "expected_output": "hello world\n42\n",
   "code": "#include <iostream>\n#define STR(x) #x\n#define CONCAT(a,b) a##b\nint main() {\n    std::cout << STR(hello world) << '\\n';    // 字符串化：\"hello world\"\n    int CONCAT(my,Var) = 42;                   // 记号拼接：myVar\n    std::cout << myVar << '\\n';\n}"
 }

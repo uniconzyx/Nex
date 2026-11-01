@@ -3,6 +3,6 @@
   "code_lang": "python",
   "code_std": "3.11",
   "stdin": "",
-  "expected_output": "流水线步骤耗时(ms):\n  版面检测: 120ms (24%)\n  文本识别: 300ms (60%)\n  后处理/纠错: 80ms (16%)\n端到端: 500 ms",
+  "expected_output": "流水线步骤耗时(ms):\n  版面检测: 120ms (24%)\n  文本识别: 300ms (60%)\n  后处理/纠错: 80ms (16%)\n端到端: 500 ms\n",
   "code": "STEPS = [(\"版面检测\", 120), (\"文本识别\", 300), (\"后处理/纠错\", 80)]\ntotal = sum(t for _, t in STEPS)\nprint(\"流水线步骤耗时(ms):\")\nfor name, t in STEPS:\n    print(f\"  {name}: {t}ms ({t/total:.0%})\")\nprint(\"端到端:\", total, \"ms\")\n"
 }

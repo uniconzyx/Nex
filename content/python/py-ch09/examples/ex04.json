@@ -3,6 +3,6 @@
   "code_lang": "python",
   "code_std": "3.11",
   "stdin": "",
-  "expected_output": "C\nA\nB\nBase",
+  "expected_output": "C\nA\nB\nBase\n",
   "code": "class Base:\n    def __init__(self):\n        print(\"Base\")\n\nclass A2(Base):\n    def __init__(self):\n        print(\"A\")\n        super().__init__()\n\nclass B2(Base):\n    def __init__(self):\n        print(\"B\")\n        super().__init__()\n\nclass C2(A2, B2):\n    def __init__(self):\n        print(\"C\")\n        super().__init__()\n\nC2()\n"
 }

@@ -3,6 +3,6 @@
   "code_lang": "python",
   "code_std": "3.11",
   "stdin": "",
-  "expected_output": "magic: GGUF\nversion: 3\ntensors: 16 kv: 4\n头大小(字节): 16",
+  "expected_output": "magic: GGUF\nversion: 3\ntensors: 16 kv: 4\n头大小(字节): 16\n",
   "code": "def parse_gguf(header):\n    magic = header[:4]\n    version = int.from_bytes(header[4:8], \"little\")\n    n_tensors = int.from_bytes(header[8:12], \"little\")\n    n_kv = int.from_bytes(header[12:16], \"little\")\n    return {\"magic\": magic.decode(), \"version\": version,\n            \"n_tensors\": n_tensors, \"n_kv\": n_kv}\n\nraw = b\"GGUF\" + (3).to_bytes(4,\"little\") + (16).to_bytes(4,\"little\") + (4).to_bytes(4,\"little\")\nmeta = parse_gguf(raw)\nprint(\"magic:\", meta[\"magic\"])\nprint(\"version:\", meta[\"version\"])\nprint(\"tensors:\", meta[\"n_tensors\"], \"kv:\", meta[\"n_kv\"])\nprint(\"头大小(字节):\", len(raw))\n"
 }

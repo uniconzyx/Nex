@@ -3,6 +3,6 @@
   "code_lang": "python",
   "code_std": "3.11",
   "stdin": "",
-  "expected_output": "归一化缩放因子: [0.427, 0.153, 0.343, 0.077]\n缩放后权重(显著通道权重被放大): [0.132, -0.141, 0.504, -0.004]\n最显著通道索引: 0",
+  "expected_output": "归一化缩放因子: [0.427, 0.153, 0.343, 0.077]\n缩放后权重(显著通道权重被放大): [0.132, -0.141, 0.504, -0.004]\n最显著通道索引: 0\n",
   "code": "W = [0.31, -0.92, 1.47, -0.05]\nact = [3.1, 0.4, 2.0, 0.1]\ndef awq_scale(w, act, alpha=0.5):\n    sig = [a**alpha for a in act]\n    s = sum(sig)\n    scales = [x / s for x in sig]\n    return [w[i]*scales[i] for i in range(len(w))], scales\nsw, scales = awq_scale(W, act)\nprint(\"归一化缩放因子:\", [round(x,3) for x in scales])\nprint(\"缩放后权重(显著通道权重被放大):\", [round(x,3) for x in sw])\nprint(\"最显著通道索引:\", act.index(max(act)))\n"
 }

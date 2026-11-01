@@ -3,6 +3,6 @@
   "code_lang": "cpp",
   "code_std": "cpp17",
   "stdin": "100 25",
-  "expected_output": "125",
+  "expected_output": "125\n",
   "code": "#include <iostream>\nint main() {\n    std::ios::sync_with_stdio(false);\n    std::cin.tie(nullptr);\n    int a, b;\n    std::cin >> a >> b;\n    std::cout << a + b << '\\n';\n}"
 }

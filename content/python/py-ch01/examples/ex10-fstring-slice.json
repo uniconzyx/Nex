@@ -3,6 +3,6 @@
   "code_lang": "python",
   "code_std": "python3",
   "stdin": "",
-  "expected_output": "Hi Python\nPy",
+  "expected_output": "Hi Python\nPy\n",
   "code": "name = 'Python'\nprint(f'Hi {name}')\nprint(name[0:2])"
 }

@@ -4,5 +4,6 @@
   "code_std": "cpp17",
   "stdin": "",
   "expected_output": "c14_ex07.cpp:4 start\nc14_ex07.cpp:5 done",
-  "code": "#include <iostream>\n#define LOG(msg) std::cout << __FILE__ << \":\" << __LINE__ << \" \" << msg << '\\n'\nint main() {\n    LOG(\"start\");\n    LOG(\"done\");\n}"
+  "code": "#include <iostream>\n#define LOG(msg) std::cout << __FILE__ << \":\" << __LINE__ << \" \" << msg << '\\n'\nint main() {\n    LOG(\"start\");\n    LOG(\"done\");\n}",
+  "run_filename": "c14_ex07.cpp"
 }

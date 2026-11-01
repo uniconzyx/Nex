@@ -3,6 +3,6 @@
   "code_lang": "python",
   "code_std": "3.11",
   "stdin": "",
-  "expected_output": "12.57 4\nTrue\nAttributeError: property 'area' of 'Circle' object has no setter",
+  "expected_output": "12.57 4\nTrue\nAttributeError: property 'area' of 'Circle' object has no setter\n",
   "code": "class Circle:\n    def __init__(self, r):\n        self.r = r\n\n    @property\n    def area(self):\n        return round(3.14159 * self.r ** 2, 2)\n\n    @property\n    def diameter(self):\n        return self.r * 2\n\nc = Circle(2)\nprint(c.area, c.diameter)\nprint(isinstance(Circle.area, property))\ntry:\n    c.area = 10\nexcept AttributeError as e:\n    print(\"AttributeError:\", e)\n"
 }

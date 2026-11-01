@@ -3,6 +3,6 @@
   "code_lang": "c",
   "code_std": "c11",
   "stdin": "",
-  "expected_output": "插入: cat, car, dog, do\r\n查询 car -> 存在\r\n查询 ca  -> 不存在(仅前缀)（ca 是 cat/car 的前缀但不是完整单词）\r\n查询 bat -> 不存在\r\n",
+  "expected_output": "插入: cat, car, dog, do\n查询 car -> 存在\n查询 ca  -> 不存在(仅前缀)（ca 是 cat/car 的前缀但不是完整单词）\n查询 bat -> 不存在\n",
   "code": "#include <stdio.h>\n#include <string.h>\n#include <stdlib.h>\n#define AL 26\ntypedef struct Node { int end; struct Node *ch[AL]; } Node;\nNode *newnode(void){ Node *p=(Node*)calloc(1,sizeof(Node)); return p; }\nvoid insert(Node *root, const char *s){\n    Node *cur=root;\n    for(int i=0;s[i];i++){ int c=s[i]-'a';\n        if(!cur->ch[c]) cur->ch[c]=newnode();\n        cur=cur->ch[c]; }\n    cur->end=1;\n}\nint search(Node *root, const char *s){\n    Node *cur=root;\n    for(int i=0;s[i];i++){ int c=s[i]-'a';\n        if(!cur->ch[c]) return 0; cur=cur->ch[c]; }\n    return cur->end;\n}\nint main(void){\n    Node *root=newnode();\n    const char *words[]={\"cat\",\"car\",\"dog\",\"do\"};\n    for(int i=0;i<4;i++) insert(root, words[i]);\n    printf(\"插入: cat, car, dog, do\\n\");\n    printf(\"查询 car -> %s\\n\", search(root,\"car\")?\"存在\":\"不存在\");\n    printf(\"查询 ca  -> %s（ca 是 cat/car 的前缀但不是完整单词）\\n\",\n           search(root,\"ca\")?\"存在\":\"不存在(仅前缀)\");\n    printf(\"查询 bat -> %s\\n\", search(root,\"bat\")?\"存在\":\"不存在\");\n    return 0;\n}\n"
 }

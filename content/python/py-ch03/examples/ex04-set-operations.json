@@ -3,6 +3,6 @@
   "code_lang": "python",
   "code_std": "python3.11",
   "stdin": "",
-  "expected_output": "union: {1, 2, 3, 4, 5, 6}\nintersection: {3, 4}\ndifference: {1, 2}\nsymmetric: {1, 2, 5, 6}\nsubset: True",
+  "expected_output": "union: {1, 2, 3, 4, 5, 6}\nintersection: {3, 4}\ndifference: {1, 2}\nsymmetric: {1, 2, 5, 6}\nsubset: True\n",
   "code": "a = {1, 2, 3, 4}\nb = {3, 4, 5, 6}\nprint(\"union:\", a | b)\nprint(\"intersection:\", a & b)\nprint(\"difference:\", a - b)\nprint(\"symmetric:\", a ^ b)\nprint(\"subset:\", {3, 4}.issubset(a))"
 }

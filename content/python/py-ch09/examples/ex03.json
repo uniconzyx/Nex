@@ -3,6 +3,6 @@
   "code_lang": "python",
   "code_std": "3.11",
   "stdin": "",
-  "expected_output": "B\n['D', 'B', 'C', 'A', 'object']",
+  "expected_output": "B\n['D', 'B', 'C', 'A', 'object']\n",
   "code": "class A:\n    def hello(self): return \"A\"\nclass B(A):\n    def hello(self): return \"B\"\nclass C(A):\n    def hello(self): return \"C\"\nclass D(B, C):\n    pass\n\nprint(D().hello())\nprint([x.__name__ for x in D.__mro__])\n"
 }

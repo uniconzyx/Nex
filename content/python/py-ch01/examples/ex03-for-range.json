@@ -3,6 +3,6 @@
   "code_lang": "python",
   "code_std": "python3",
   "stdin": "",
-  "expected_output": "0\n1\n2",
+  "expected_output": "0\n1\n2\n",
   "code": "for i in range(3):\n    print(i)"
 }

@@ -3,6 +3,6 @@
   "code_lang": "python",
   "code_std": "python3.11",
   "stdin": "",
-  "expected_output": "[1]\n[1, 2]\n[1, 2, 3]",
+  "expected_output": "[1]\n[1, 2]\n[1, 2, 3]\n",
   "code": "def collect(x, buf=[]):\n    buf.append(x)\n    return buf\n\nprint(collect(1))\nprint(collect(2))\nprint(collect(3))"
 }

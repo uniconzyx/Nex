@@ -3,6 +3,6 @@
   "code_lang": "python",
   "code_std": "python3.11",
   "stdin": "",
-  "expected_output": "created, not yet computed\nyield 0\nfirst: 0\nyield 1\nsecond: 1",
+  "expected_output": "created, not yet computed\nyield 0\nfirst: 0\nyield 1\nsecond: 1\n",
   "code": "def gen():\n    for i in range(3):\n        print(f\"yield {i}\")\n        yield i * i\n\ng = gen()\nprint(\"created, not yet computed\")\nprint(\"first:\", next(g))\nprint(\"second:\", next(g))"
 }

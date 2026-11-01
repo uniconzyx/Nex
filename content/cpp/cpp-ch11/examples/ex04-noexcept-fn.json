@@ -3,6 +3,6 @@
   "code_lang": "cpp",
   "code_std": "c++17",
   "stdin": "",
-  "expected_output": "noexcept f\nok",
+  "expected_output": "noexcept f\nok\n",
   "code": "#include <iostream>\n\nvoid f() noexcept { std::cout << \"noexcept f\\n\"; }\n\nint main() {\n    f();\n    std::cout << \"ok\\n\";\n}"
 }

@@ -3,6 +3,6 @@
   "code_lang": "c",
   "code_std": "c11",
   "stdin": "",
-  "expected_output": "加入边 (1,4) 时 1 与 4 已连通 -> 成环，为冗余边\r\n冗余连接 = (1, 4)\r\n",
+  "expected_output": "加入边 (1,4) 时 1 与 4 已连通 -> 成环，为冗余边\n冗余连接 = (1, 4)\n",
   "code": "#include <stdio.h>\n#define MAXN 16\nint parent[MAXN], rk[MAXN];\nint find(int x){ int r=x; while(parent[r]!=r) r=parent[r];\n    while(parent[x]!=r){ int t=parent[x]; parent[x]=r; x=t; } return r; }\nvoid unite(int a,int b){ int ra=find(a),rb=find(b); if(ra==rb) return;\n    if(rk[ra]<rk[rb]) parent[ra]=rb; else if(rk[ra]>rk[rb]) parent[rb]=ra;\n    else { parent[rb]=ra; rk[ra]++; } }\nint main(void){\n    int n=5;\n    for(int i=0;i<n;i++){ parent[i]=i; rk[i]=0; }\n    int edges[][2]={{1,2},{2,3},{3,4},{1,4},{4,5}};\n    int E=5, ba=-1, bb=-1;\n    for(int i=0;i<E;i++){\n        int a=edges[i][0]-1, b=edges[i][1]-1;\n        int ra=find(a), rb=find(b);\n        if(ra==rb){\n            ba=edges[i][0]; bb=edges[i][1];\n            printf(\"加入边 (%d,%d) 时 %d 与 %d 已连通 -> 成环，为冗余边\\n\",\n                   edges[i][0],edges[i][1],edges[i][0],edges[i][1]);\n            break;\n        }\n        unite(a,b);\n    }\n    printf(\"冗余连接 = (%d, %d)\\n\", ba, bb);\n    return 0;\n}\n"
 }

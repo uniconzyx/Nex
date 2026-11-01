@@ -3,6 +3,6 @@
   "code_lang": "python",
   "code_std": "3.11",
   "stdin": "",
-  "expected_output": "静态批处理总步数: 8\n连续批处理总步数(简化): 5\n加速比: 1.60x",
+  "expected_output": "静态批处理总步数: 8\n连续批处理总步数(简化): 5\n加速比: 1.60x\n",
   "code": "REQ_LAT = 4\nBATCH = 4\nstatic_steps = (8 // BATCH) * REQ_LAT\ncontinuous_steps = REQ_LAT + (8 // BATCH) - 1\nprint(\"静态批处理总步数:\", static_steps)\nprint(\"连续批处理总步数(简化):\", continuous_steps)\nprint(\"加速比:\", f\"{static_steps/continuous_steps:.2f}x\")\n"
 }

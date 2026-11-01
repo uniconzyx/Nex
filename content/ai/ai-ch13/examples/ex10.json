@@ -3,6 +3,6 @@
   "code_lang": "python",
   "code_std": "3.11",
   "stdin": "",
-  "expected_output": "attention 分数(历史长度=缓存行数): 3\n分数: [0.08, 0.09, 0.16]\n减最大值后的 logits: [-0.08, -0.07, 0.0]",
+  "expected_output": "attention 分数(历史长度=缓存行数): 3\n分数: [0.08, 0.09, 0.16]\n减最大值后的 logits: [-0.08, -0.07, 0.0]\n",
   "code": "def matmul_vec(q, M):\n    return [sum(q[k]*M[r][k] for k in range(len(q))) for r in range(len(M))]\n\nK_cache = [[0.1,0.2],[0.3,0.1],[0.2,0.4]]\nV_cache = [[1.0,0.0],[0.0,1.0],[0.5,0.5]]\nq = [0.2, 0.3]\nscores = matmul_vec(q, K_cache)\nprint(\"attention 分数(历史长度=缓存行数):\", len(scores))\nprint(\"分数:\", [round(s,3) for s in scores])\nmx = max(scores)\nw = [s - mx for s in scores]\nprint(\"减最大值后的 logits:\", [round(x,3) for x in w])\n"
 }

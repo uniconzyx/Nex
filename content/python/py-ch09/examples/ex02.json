@@ -3,6 +3,6 @@
   "code_lang": "python",
   "code_std": "3.11",
   "stdin": "",
-  "expected_output": "[1, 2] [1, 2]\nTrue",
+  "expected_output": "[1, 2] [1, 2]\nTrue\n",
   "code": "class Box:\n    items = []\n\n    def add(self, x):\n        self.items.append(x)\n\na, b = Box(), Box()\na.add(1)\nb.add(2)\nprint(a.items, b.items)\nprint(a.items is b.items)\n"
 }

@@ -3,6 +3,6 @@
   "code_lang": "python",
   "code_std": "3.11",
   "stdin": "",
-  "expected_output": "序列长度: 10\n分配块号: [0, 1, 2]\n最后一块占用 2/4 槽\nreq_a 块: [0, 1]  req_b 块: [0]\n可复用前缀块: {0}",
+  "expected_output": "序列长度: 10\n分配块号: [0, 1, 2]\n最后一块占用 2/4 槽\nreq_a 块: [0, 1]  req_b 块: [0]\n可复用前缀块: {0}\n",
   "code": "BLOCK_SIZE = 4\ndef allocate_blocks(seq_len):\n    n = (seq_len + BLOCK_SIZE - 1) // BLOCK_SIZE\n    return list(range(n))\n\nseq = list(range(10))\nblocks = allocate_blocks(len(seq))\nprint(\"序列长度:\", len(seq))\nprint(\"分配块号:\", blocks)\nlast_used = len(seq) - (len(blocks)-1)*BLOCK_SIZE\nprint(f\"最后一块占用 {last_used}/{BLOCK_SIZE} 槽\")\nreq_a = allocate_blocks(6)\nreq_b = allocate_blocks(4)\nprint(\"req_a 块:\", req_a, \" req_b 块:\", req_b)\nprint(\"可复用前缀块:\", set(req_a) & set(req_b))\n"
 }

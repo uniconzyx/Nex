@@ -3,6 +3,6 @@
   "code_lang": "python",
   "code_std": "3.11",
   "stdin": "",
-  "expected_output": "不复用 KV tokens: 4096\n复用后 KV tokens: 512\n节省比例: 87.5%",
+  "expected_output": "不复用 KV tokens: 4096\n复用后 KV tokens: 512\n节省比例: 87.5%\n",
   "code": "PROMPT_KV = 512\ndef saving(n_requests):\n    no_reuse = PROMPT_KV * n_requests\n    reuse = PROMPT_KV\n    return no_reuse, reuse, (no_reuse - reuse) / no_reuse\nnr, r, sv = saving(8)\nprint(f\"不复用 KV tokens: {nr}\")\nprint(f\"复用后 KV tokens: {r}\")\nprint(f\"节省比例: {sv:.1%}\")\n"
 }

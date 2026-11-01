@@ -3,6 +3,6 @@
   "code_lang": "python",
   "code_std": "3.11",
   "stdin": "",
-  "expected_output": "迭代调度日志 (步, 批内请求):\n  step 0: [0, 1]\n  step 1: [1, 2]\n  step 2: [2, 3, 4]\n  step 3: [3, 4]\n  step 4: [4]\n已完成请求数: 5",
+  "expected_output": "迭代调度日志 (步, 批内请求):\n  step 0: [0, 1]\n  step 1: [1, 2]\n  step 2: [2, 3, 4]\n  step 3: [3, 4]\n  step 4: [4]\n已完成请求数: 5\n",
   "code": "arrivals = [0, 0, 1, 2, 2]\nsteps = 6\nactive = []\nfinished = set()\nlog = []\nfor t in range(steps):\n    for rid, a in enumerate(arrivals):\n        if a == t:\n            active.append(rid)\n    batch = [r for r in active if r not in finished]\n    if batch:\n        log.append((t, list(batch)))\n    if batch:\n        finished.add(batch[0])\nprint(\"迭代调度日志 (步, 批内请求):\")\nfor step, b in log:\n    print(f\"  step {step}: {b}\")\nprint(\"已完成请求数:\", len(finished))\n"
 }

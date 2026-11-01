@@ -3,6 +3,6 @@
   "code_lang": "python",
   "code_std": "3.11",
   "stdin": "",
-  "expected_output": "召回候选(按图像相似度): [('doc_b', 0.81), ('doc_d', 0.74), ('doc_a', 0.62), ('doc_c', 0.55)]\n重排后 Top-3: [('doc_b', 0.81), ('doc_d', 0.74), ('doc_a', 0.62)]",
+  "expected_output": "召回候选(按图像相似度): [('doc_b', 0.81), ('doc_d', 0.74), ('doc_a', 0.62), ('doc_c', 0.55)]\n重排后 Top-3: [('doc_b', 0.81), ('doc_d', 0.74), ('doc_a', 0.62)]\n",
   "code": "candidates = [(\"doc_a\", 0.62), (\"doc_b\", 0.81), (\"doc_c\", 0.55), (\"doc_d\", 0.74)]\ncandidates.sort(key=lambda x: x[1], reverse=True)\ntopk = candidates[:3]\nprint(\"召回候选(按图像相似度):\", candidates)\nprint(\"重排后 Top-3:\", topk)\n"
 }

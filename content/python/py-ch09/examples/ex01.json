@@ -3,6 +3,6 @@
   "code_lang": "python",
   "code_std": "3.11",
   "stdin": "",
-  "expected_output": "meow\nmeow nya\nTrue True",
+  "expected_output": "meow\nmeow nya\nTrue True\n",
   "code": "class Cat:\n    sound = \"meow\"\n\nc = Cat()\nprint(c.sound)\nc.sound = \"nya\"\nprint(Cat.sound, c.sound)\nprint(\"sound\" in vars(c), \"sound\" in vars(Cat))\n"
 }

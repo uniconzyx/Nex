@@ -3,6 +3,6 @@
   "code_lang": "python",
   "code_std": "python3.11",
   "stdin": "",
-  "expected_output": "5\n6\n42",
+  "expected_output": "5\n6\n42\n",
   "code": "def add(a, b):\n    return a + b\n\ndef mul(a, b):\n    return a * b\n\nops = {\"+\": add, \"*\": mul}\nprint(ops[\"+\"](2, 3))\nprint(ops[\"*\"](2, 3))\n\ndef apply(fn, x):\n    return fn(x)\nprint(apply(lambda v: v * 2, 21))"
 }

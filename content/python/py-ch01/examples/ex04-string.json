@@ -3,6 +3,6 @@
   "code_lang": "python",
   "code_std": "python3",
   "stdin": "",
-  "expected_output": "HELLO\nh",
+  "expected_output": "HELLO\nh\n",
   "code": "s = 'hello'\nprint(s.upper())\nprint(s[0])"
 }

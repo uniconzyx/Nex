@@ -3,6 +3,6 @@
   "code_lang": "python",
   "code_std": "python3.11",
   "stdin": "",
-  "expected_output": "1 2",
+  "expected_output": "1 2\n",
   "code": "counter = 0\n\ndef bump():\n    global counter\n    counter += 1\n    return counter\n\nprint(bump(), bump())"
 }

@@ -3,6 +3,6 @@
   "code_lang": "python",
   "code_std": "3.11",
   "stdin": "",
-  "expected_output": "文档页数: 100\n单张成本: $0.002\n预处理总成本: $0.20\n每张平均 token 预算: 512",
+  "expected_output": "文档页数: 100\n单张成本: $0.002\n预处理总成本: $0.20\n每张平均 token 预算: 512\n",
   "code": "PAGES = 100\nCOST_PER_IMG = 0.002\ntotal = PAGES * COST_PER_IMG\nprint(f\"文档页数: {PAGES}\")\nprint(f\"单张成本: ${COST_PER_IMG}\")\nprint(f\"预处理总成本: ${total:.2f}\")\nprint(f\"每张平均 token 预算: 512\")\n"
 }

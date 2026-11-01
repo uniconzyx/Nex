@@ -3,6 +3,6 @@
   "code_lang": "c",
   "code_std": "c11",
   "stdin": "",
-  "expected_output": "模式串: aaaa\r\n位置  : 1 2 3 4\r\n字符  : a a a a\r\nnext  : 0 1 2 3\r\nnextval: 0 0 0 0\r\n说明：第 i 位与回退位字符相同，则 nextval[i]=nextval[next[i]]，\r\n'aaaa' 因此全部塌缩为 0，失配时一次回退到位。\r\n",
+  "expected_output": "模式串: aaaa\n位置  : 1 2 3 4\n字符  : a a a a\nnext  : 0 1 2 3\nnextval: 0 0 0 0\n说明：第 i 位与回退位字符相同，则 nextval[i]=nextval[next[i]]，\n'aaaa' 因此全部塌缩为 0，失配时一次回退到位。\n",
   "code": "#include <stdio.h>\n#include <string.h>\nint main(void){\n    const char *p=\"aaaa\";\n    int m=(int)strlen(p);\n    int next[16], nextval[16];\n    next[1]=0;\n    for(int j=1,k=0;j<m;){\n        if(k==0 || p[j-1]==p[k-1]){ j++; k++; next[j]=k; }\n        else k=next[k];\n    }\n    nextval[1]=0;\n    for(int i=2;i<=m;i++){\n        if(p[i-1]==p[next[i]-1]) nextval[i]=nextval[next[i]];\n        else nextval[i]=next[i];\n    }\n    printf(\"模式串: %s\\n\", p);\n    printf(\"位置  :\"); for(int i=1;i<=m;i++) printf(\" %d\",i); printf(\"\\n\");\n    printf(\"字符  :\"); for(int i=0;i<m;i++) printf(\" %c\",p[i]); printf(\"\\n\");\n    printf(\"next  :\"); for(int i=1;i<=m;i++) printf(\" %d\",next[i]); printf(\"\\n\");\n    printf(\"nextval:\"); for(int i=1;i<=m;i++) printf(\" %d\",nextval[i]); printf(\"\\n\");\n    printf(\"说明：第 i 位与回退位字符相同，则 nextval[i]=nextval[next[i]]，\\n\");\n    printf(\"'aaaa' 因此全部塌缩为 0，失配时一次回退到位。\\n\");\n    return 0;\n}\n"
 }

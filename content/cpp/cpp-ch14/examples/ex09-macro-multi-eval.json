@@ -3,6 +3,6 @@
   "code_lang": "cpp",
   "code_std": "cpp17",
   "stdin": "",
-  "expected_output": "m=6 x=4",
+  "expected_output": "m=6 x=4\n",
   "code": "#include <iostream>\n#define SQUARE(x) ((x) * (x))\nint main() {\n    int x = 2;\n    int m = SQUARE(x++);   // x++ 被求值两次：((x++) * (x++))\n    std::cout << \"m=\" << m << \" x=\" << x << '\\n';\n}"
 }

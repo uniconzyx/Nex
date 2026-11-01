@@ -4,5 +4,6 @@
   "code_std": "cpp17",
   "stdin": "",
   "expected_output": "__cplusplus=201703\n__LINE__=4\n__FILE__=c14_ex10.cpp",
-  "code": "#include <iostream>\nint main() {\n    std::cout << \"__cplusplus=\" << __cplusplus << '\\n';\n    std::cout << \"__LINE__=\" << __LINE__ << '\\n';\n    std::cout << \"__FILE__=\" << __FILE__ << '\\n';\n}"
+  "code": "#include <iostream>\nint main() {\n    std::cout << \"__cplusplus=\" << __cplusplus << '\\n';\n    std::cout << \"__LINE__=\" << __LINE__ << '\\n';\n    std::cout << \"__FILE__=\" << __FILE__ << '\\n';\n}",
+  "run_filename": "c14_ex10.cpp"
 }

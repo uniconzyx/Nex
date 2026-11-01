@@ -3,6 +3,6 @@
   "code_lang": "python",
   "code_std": "python3.11",
   "stdin": "",
-  "expected_output": "[1, 9, 25]\n[1, 2, 3, 4]",
+  "expected_output": "[1, 9, 25]\n[1, 2, 3, 4]\n",
   "code": "nums = [1, 2, 3, 4, 5]\nsquares = [x * x for x in nums if x % 2 == 1]\nprint(squares)\nmatrix = [[1, 2], [3, 4]]\nflat = [v for row in matrix for v in row]\nprint(flat)"
 }

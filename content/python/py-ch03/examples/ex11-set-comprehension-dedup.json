@@ -3,6 +3,6 @@
   "code_lang": "python",
   "code_std": "python3.11",
   "stdin": "",
-  "expected_output": "['a', 'b', 'c', 'd', 'r']\ncount: 5",
+  "expected_output": "['a', 'b', 'c', 'd', 'r']\ncount: 5\n",
   "code": "text = \"abracadabra\"\nuniq = sorted({ch for ch in text})\nprint(uniq)\nprint(\"count:\", len({ch for ch in text}))"
 }
