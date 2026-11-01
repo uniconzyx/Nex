@@ -120,7 +120,21 @@ HEAD 仅跟踪 3707 个文件，但工作树里还有 **175 个已跟踪文件�
 - `data-ch06/ex05` 打印 `最大误差 = 2.04e-14`，换 numpy 版本变成 `7.11e-15`（语义相同、字节不等）→ 改成布尔判据 `能精确还原 = True`，输出跨版本确定。
 - 审计脚本三处加固：① `ModuleNotFoundError` 不再伪装成"运行失败"，直接点名缺哪个包并指向 `requirements-audit.txt`；② `expected` 侧归一化补上孤立 `\r`，避免 CRLF 残留造成"看着一样却判不等"的假 FAIL；③ 反例教学白名单（见上表末行）。
 
-**遗留**（不阻塞）：部分章 `concept/*.md` 没有 ```text 图示块；`data-ch05`、`py-ch04~py-ch08`、`mw-ch02`、`mw-ch03`、`cpp-ch12` 的 `exercises.json` 仍是旧 schema（`stem_md`/`explanation_md`，生成器兼容但审计会报缺字段）。
+**原遗留项已全部闭环（2026-11-01）**：
+
+| 原遗留 | 规模 | 处置 | 结果 |
+|---|---|---|---|
+| `concept/*.md` 缺 ```` ```text ```` 图示块 | 403 / 605 文件 | ① 184 个本有无标识围栏（ASCII 图/公式/输出）只补 `text` 标签，正文零改动；② 219 个确无围栏，按章主题原创 ASCII 概念图并插入标题/引言后 | **605 / 605，0 缺失** |
+| 旧 schema 习题（`stem_md`/`explanation_md`；`explanation` 误塞进 `answer` 内部；缺 `answer` 对象） | 全库 12+ 文件 | 一次性确定式迁移到 canonical 八字段；`choices` 只认 `{key,text}` 对象数组，`answer.correct` 为字母键 | 1165 题 **0 问题** |
+| `interview.json` 字段 outlier（`q`/`level`，缺 `follow_ups`） | `ai-ch11` 5 条（全库唯一） | 对齐全库 canonical：`question`/`difficulty`/`company_tags`/`follow_ups` | 全库 786 条统一 |
+| `answer.code` 非 Python（C/C++/Java）被当 Python 跑 → 假 FAIL | 4 条 | 审计改为按语言**真编译**：C/C++ 有 main 就跑到完、无 main 走 `-c`；Java 走 `javac`；仅无法识别的语言才告警 | FAIL 清零，且 4 段参考实现首次获得真实编译验证 |
+
+**审计能力同时升级**（可信度不只是"少报错"，而是"多验证"）：
+- 新增 **Java / JavaScript 实跑分支**（javac + `-Dstdout.encoding=UTF-8`；托管 node）→ 320 个原本「未支持语言，跳过实跑」的示例进入真实校验。
+- 「仅末尾换行不同」（已按通过处理）与「未支持语言」从逐条 warn 改为 `[info]` 聚合计数，避免数百条噪声淹没真 FAIL。
+- 新增 `--warn-out`：完整 warn 清单落盘。此前控制台只打印前 20 条，导致把 `798 条 warn` 误读成 `20 条`，进而误判"已清零"。
+
+> 最终基线：`--all --skip-net` → **158 章 / 2016 检查项 / FAIL 0 / WARN 0**。
 
 > 教训：**门禁报错先怀疑门禁自己。** 72 条"运行失败"里 0 条是内容问题，13 条"输出不一致"里 0 条是内容问题——如果不去查根因，就会花几天去"修"本来正确的示例。
 
@@ -188,4 +202,6 @@ HEAD 仅跟踪 3707 个文件，但工作树里还有 **175 个已跟踪文件�
 5. **P1 深度·仅缺 `h3` 的 23 章**：拆 `###` 小节标题即可，成本最低。
 6. **P1 路线**：按学科逐个把 95 章改成章节级路线（fullstack 13 + fundamentals 12 + ai 11 最大块）。
 7. **P2 discrete-math**：补 dm-ch02/03 并接线（决定这个学科是否正式上线）。
-8. **P1 残余 schema**：`data-ch05`、`py-ch04~py-ch08`、`mw-ch02`、`mw-ch03`、`cpp-ch12` 的 `exercises.json` 统一到 `content_md`/`explanation`（生成器已兼容两种，改动风险低）。
+8. ~~**P1 残余 schema**~~ ✅ 已完成（2026-10-31）：`data-ch05`、`py-ch04~py-ch08`、`mw-ch02`、`mw-ch03`、`cpp-ch12` 全部迁到 canonical 八字段；顺带全库扫描修掉 14 处嵌套 `explanation`，1165 题 0 问题。
+9. ~~**图示例题库**~~ ✅ 已完成（2026-11-01）：605 个 concept 文件 ```` ```text ```` 覆盖 100%；14 个跨章仓库 star 归一化 + 77 个刷新为 GitHub API 实时值。
+10. **下一步候选**：P1 深度·仅缺 `h3` 的 23 章 / P1 路线颗粒度 95 章 / P2 discrete-math 接线。
