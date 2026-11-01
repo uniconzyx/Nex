@@ -110,6 +110,21 @@ replication.factor = 3       # 保证有 3 份物理拷贝
 - **问**：怎么保证消息不丢？**答**：三层——**生产端** `acks=all` + `retries` + 幂等；**broker 端** `min.insync.replicas>=2` + `replication.factor>=3` + `unclean.leader.election.enable=false`；**消费端** 处理完成后手动提交位点。
 - **易错**：只答「acks=all」。面试官问「为什么」时答不上 `min.insync.replicas`，基本会被判定为只背了结论。
 
+```properties
+# 生产端
+acks=all                        # 等 ISR 全部落盘才返回
+enable.idempotence=true         # 重试不产生重复（隐含要求 acks=all）
+retries=2147483647
+
+# broker 端
+min.insync.replicas=2           # ISR 少于 2 时直接拒绝写入
+```
+
+这两处必须成对配置。只写 `acks=all` 而 `min.insync.replicas=1`，
+语义就退化成「只剩 leader 也照写」——leader 一挂数据就丢，
+而客户端还以为自己拿到了 `all` 的确认。这是最典型的「配了但没生效」。
+
+
 ## ③ LEO / HW / LSO：三个 offset 撑起一致性
 
 | 名称 | 全称 | 含义 |

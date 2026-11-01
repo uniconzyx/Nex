@@ -198,6 +198,20 @@ BoundSql { sql: "SELECT ... WHERE name = ? AND status = ?", parameterMappings: [
   `<sql>` 不会注册进 `mappedStatements`，因此**不参与 statementId 冲突检测**。
   真正会冲突的是两个同 `namespace` + 同 `id` 的 `<select>`。
 
+```xml
+<insert id="batchInsert" parameterType="java.util.List">
+  INSERT INTO t_order (order_id, user_id, amount) VALUES
+  <foreach collection="list" item="it" separator=",">
+    (#{it.orderId}, #{it.userId}, #{it.amount})
+  </foreach>
+</insert>
+```
+
+一条批量 INSERT 比循环单条插入快一个数量级（省掉 N 次网络往返与 N 次事务开销），
+但语句长度受 `max_allowed_packet` 约束。实践上按 500~1000 条一批切分，
+既不会撞包大小上限，也能让单条语句的执行计划保持稳定。
+
+
 ## 三视角小结
 
 | 视角 | 一句话结论 |

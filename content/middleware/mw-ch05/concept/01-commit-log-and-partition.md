@@ -163,3 +163,17 @@ Kafka 默认分区器用 **murmur2(key) % numPartitions**（对 Java 客户端�
 - **问**：分区数是不是越多越好？**答**：不是。分区多会增加 broker 的文件句柄/内存开销、副本同步开销，并延长故障恢复与 rebalance 时间；此外分区数超过消费者数就是纯浪费。
 - **问**：分区数怎么估算？**答**：`max(目标吞吐/单分区吞吐, 消费者数, broker 数)`，再取整数倍留余量；**只能增不能减**，所以宁可一次规划到位。
 - **易错**：把「分区数」当成可以随便调整的参数。增加分区会破坏 key 到分区的映射，导致原本同一 key 的历史数据与新数据落在不同分区，**顺序性断裂**。
+
+```python
+from kafka.admin import KafkaAdminClient, NewTopic
+
+admin = KafkaAdminClient(bootstrap_servers="localhost:9092")
+# 分区数 = 同组消费并行度的上限（一个分区同时只能被同组的一个消费者持有）
+admin.create_topics([NewTopic("orders", num_partitions=12, replication_factor=3)])
+```
+
+分区只能增不能减，而**增加分区会改变 `hash(key) % 分区数` 的路由**——
+同一个 key 在扩容前后会落到不同分区，该 key 上的消息顺序保证立刻失效。
+所以分区数要在建模阶段一次性定够：按「峰值吞吐 / 单分区吞吐」估，
+再乘以 1.5~2 留余量，比事后扩容便宜得多。
+

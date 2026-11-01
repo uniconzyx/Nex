@@ -218,6 +218,31 @@ MyBatis 的缓存不是「一层可选的加速器」，而是**两个作用域�
   `<select>` 默认 `useCache=true` / `flushCache=false`；
   `<insert|update|delete>` 默认 `flushCache=true`（且 `useCache` 无意义）。
 
+```java
+// 同一个 SqlSession 内，两条完全相同的查询只发一次 SQL
+try (SqlSession s = sqlSessionFactory.openSession()) {
+    UserMapper m = s.getMapper(UserMapper.class);
+    m.selectById(1L);   // 发 SQL
+    m.selectById(1L);   // 命中一级缓存，不发 SQL
+}
+```
+
+一级缓存失效的条件比想象中多：执行任何 `insert/update/delete` 都会**清空整个一级缓存**
+（不是只清相关表）；`sqlSession.clearCache()` 手动清；以及最隐蔽的一条——
+Spring 下若方法没有事务，每次 mapper 调用可能是**不同的 SqlSession**，
+缓存自然不复用。所以「加了一级缓存但没生效」多数不是配置问题，而是会话边界问题。
+
+```xml
+<cache eviction="LRU" flushInterval="60000" size="1024" readOnly="false"/>
+```
+
+二级缓存是 **namespace 级**、跨 SqlSession 共享。它只在本 namespace 的写操作时失效，
+**感知不到别的 namespace 对同一张表的修改**。所以只要存在多表关联查询，
+就必然出现「A 表被别的 mapper 改了、B 的缓存还是旧的」这种脏读。
+生产环境通常直接关掉它、改用 Redis 显式控制失效——可预期的延迟比不可预期的脏数据划算。
+
+
+
 ## 三视角小结
 
 | 视角 | 一句话结论 |

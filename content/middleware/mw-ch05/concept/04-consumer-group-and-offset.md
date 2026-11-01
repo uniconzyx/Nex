@@ -124,6 +124,22 @@ minimize( 负载不均衡 + λ · 迁移量 )
 
 ```properties
 enable.auto.commit=false
+
+```python
+from kafka import KafkaConsumer
+
+consumer = KafkaConsumer("orders", group_id="g1",
+                         enable_auto_commit=False,       # 手动提交才能控制语义
+                         auto_offset_reset="earliest")
+for msg in consumer:
+    handle(msg)          # 先处理业务
+    consumer.commit()    # 再提交位点
+```
+
+顺序反过来就变成「最多一次」：先提交再处理，进程在两步之间崩溃，这条消息永远丢了。
+「至少一次」的代价是重复投递，所以真正要保证不重，得靠下游幂等（唯一键 + upsert），
+而不是靠调整提交时机——后者只能在「丢」和「重」之间选。
+
 # 处理完一批后手动提交
 consumer.commitSync()          // 同步提交：可靠但慢
 // 或 consumer.commitAsync()   // 异步提交：快但可能失败

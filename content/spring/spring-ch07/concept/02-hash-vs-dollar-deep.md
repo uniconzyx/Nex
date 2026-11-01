@@ -192,6 +192,23 @@ if (!SORTABLE.contains(sortColumn)) throw new IllegalArgumentException("illegal 
 - 易混点：`Statement`（拼接）、`PreparedStatement`（参数化）、
   `CallableStatement`（存储过程调用）三者的关系与适用场景，常以选择题形式出现。
 
+```java
+// #{} -> PreparedStatement 的 ?，参数走二进制协议，永不参与 SQL 解析
+String sql = "SELECT * FROM t_user WHERE name = ?";
+try (PreparedStatement ps = conn.prepareStatement(sql)) {
+    ps.setString(1, userInput);     // 传 "a' OR '1'='1" 也只是个字符串
+    try (ResultSet rs = ps.executeQuery()) { /* ... */ }
+}
+
+// ${} -> 字符串拼接，参数直接改写 SQL 语义
+String bad = "SELECT * FROM " + tableName + " WHERE id = ?";
+```
+
+表名、列名、`ORDER BY` 的方向这类**SQL 结构**无法用 `?` 占位，这是 `${}` 唯一无法被替代的场景。
+正确做法是**白名单校验**（枚举允许的表名/列名），而不是靠转义——
+转义在结构位置上是无解的，因为「表名」本身没有引用语义。
+
+
 ## 三视角小结
 
 | 视角 | 一句话结论 |
