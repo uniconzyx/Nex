@@ -13,3 +13,11 @@
 6. **prototype + 互相注入必然失败** —— prototype 每次新建且不缓存早期引用，循环依赖直接 `BeanCurrentlyInCreationException`，没有任何缓存能救。**正确写法**：改为单例协作，或抽一个被双方依赖的第三方 bean。
 
 7. **误以为 ApplicationContext 比 BeanFactory「运行更快」** —— 二者单例获取都是 Map 查找，差异只在启动期是否预实例化；ApplicationContext 启动更慢但 fail-fast、运行期无差别。**正确写法**：按「是否需要国际化/事件/AOP/更早暴露装配错误」选 ApplicationContext，不要以性能为由选 BeanFactory。
+
+8. **字段注入 `@Autowired` 让类无法脱离容器测试**
+   字段注入的对象只能靠反射塞进去，单元测试要么起半个 Spring 上下文（慢），要么用 `ReflectionTestUtils`（脆）。字段还不能 `final`，等于放弃了「依赖不可变」。
+   ✅ 构造器注入（只有一个构造器时可省注解）；字段声明 `final`，依赖缺失在编译/启动期就暴露。
+
+9. **同类型多 Bean 时靠字段名「猜」实现**
+   `@Autowired private UserService userService;` 在存在两个 `UserService` 实现时，Spring 会退化成**按字段名匹配 Bean 名**。改个字段名就换了实现，不报错、行为静默改变。
+   ✅ 显式 `@Qualifier("beanName")` 或 `@Primary`；需要遍历所有实现时注入 `Map<String, UserService>`。

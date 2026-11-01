@@ -13,3 +13,11 @@
 6. **UPDATE/DELETE 没走索引 → 行锁升级为全表锁** —— InnoDB 锁加在索引记录上，若 `WHERE` 条件列无索引，会锁住全表（或退化为逐行锁全表），瞬间卡死并发。正确写法：务必在 `WHERE` 列上建索引再改。
 
 7. **`FOR UPDATE` 范围查询会锁间隙，别在事务里长时间持有** —— `SELECT ... FOR UPDATE WHERE id BETWEEN 10 AND 20` 加 Next-Key Lock，锁住 (10,20) 间隙，别的事务插入该区间会阻塞甚至死锁。正确写法：锁粒度尽量小、锁完立即处理并尽快提交。
+
+8. **在索引列上套函数或隐式类型转换 → 索引失效**
+   `WHERE DATE(created_at) = '2026-10-31'`、`WHERE varchar_col = 123`（字符串列与数字比较会隐式转换）都会让 B+ 树无法按序定位，退化成全表扫。`EXPLAIN` 里表现为 `type=ALL` 或 `key=NULL`。
+   ✅ 改写成范围：`created_at >= '2026-10-31' AND created_at < '2026-11-01'`；类型严格对齐，把 `123` 写成 `'123'`。
+
+9. **在 RR 隔离级别下以为完全没有幻读**
+   InnoDB 的 RR 用 MVCC 解决了**快照读**的幻读，但**当前读**（`SELECT ... FOR UPDATE` / `UPDATE` / `DELETE`）走的是 Next-Key Lock，加锁读仍可能看到新插入的行，或彼此因间隙锁阻塞。
+   ✅ 分清快照读与当前读；需要严格串行语义时用 `SERIALIZABLE` 或应用层锁，不要靠「RR 就安全」的直觉。

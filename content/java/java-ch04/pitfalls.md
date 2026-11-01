@@ -13,3 +13,11 @@
 6. **依赖 HashSet/HashMap 的迭代顺序** —— 哈希集合的迭代顺序受 hash 种子随机化影响，跨版本/运行不保证一致。正确：需要有序用 `LinkedHashSet`（插入序）或 `TreeMap/TreeSet`（排序）。
 
 7. **认为 fail-fast 等于线程安全** —— `ConcurrentModificationException` 只是单线程误改时的调试辅助，存在竞态「遗漏更新」，无法保证一定能检测到。正确：多线程场景用 `ConcurrentHashMap`/`CopyOnWriteArrayList` 等并发容器，而非依赖 fail-fast。
+
+8. **对 `Arrays.asList(...)` 的结果做 `add` / `remove`**
+   它返回的是 `Arrays` 内部的固定大小视图，`add` / `remove` 抛 `UnsupportedOperationException`；`set` 却是允许的，于是「有时候能改有时候不能改」更让人迷惑。
+   ✅ `new ArrayList<>(Arrays.asList(...))` 要可变；要不可变就用 `List.of(...)`（Java 9+），语义明确且拒绝一切修改。
+
+9. **遍历集合时直接 `list.remove(x)` → `ConcurrentModificationException`**
+   foreach 底层是迭代器，结构性修改会让 `modCount` 与迭代器持有的 `expectedModCount` 不一致，下一次 `next()` 即抛异常（单线程也会抛，名字有误导性）。
+   ✅ 用 `Iterator.remove()`；或用 `list.removeIf(pred)`；或先收集待删元素再 `removeAll`。

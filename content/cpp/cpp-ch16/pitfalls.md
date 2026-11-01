@@ -27,3 +27,11 @@
 7. **`std::async` 默认策略的意外同步执行**
    `std::async(task)` 默认策略是 `async | deferred`，实现**可能选择 deferred**——`get()` 时就在**调用线程同步执行**，根本没有并行。依赖并行提速的代码会「看起来没并发」。
    ✅ 需要真并行时显式写 `std::async(std::launch::async, task)`。
+
+8. **`std::thread` 析构时仍 joinable → 直接 `std::terminate`**
+   线程对象析构前若既没 `join()` 也没 `detach()`，标准要求调用 `std::terminate()`——程序立刻终止，**抛不出也捕不到任何异常**，栈上清理逻辑全部跳过。
+   ✅ 用 RAII 包装线程（C++20 `std::jthread` 析构自动 join）；每个 `thread` 变量都要有明确归宿，不要「创建后就忘」。
+
+9. **以为「都用了 atomic 就线程安全」**
+   原子性只保证**单个操作**不可分割。两个原子变量组成的不变式在中间状态仍可被其他线程看到（撕裂），`a.load()` 与 `b.load()` 之间也能被插队。
+   ✅ 多变量需要一致时用锁保护整段；单变量计数/标志才用 `atomic`，纯计数场景 `memory_order_relaxed` 足够。

@@ -13,3 +13,11 @@
 6. **多表 JOIN 连接列类型/字符集不一致导致索引失效退化 BNL** —— `a.uid(VARCHAR)` JOIN `b.user_id(INT)` 或两边字符集（utf8 vs utf8mb4）不同，会触发隐式转换，内表索引用不上，退化成 Block Nested Loop 全表扫描。正确写法：统一连接列的类型与字符集、加索引。
 
 7. **IN 列表过长被优化器放弃** —— `col IN (上千个常量)` 超过 `range_optimizer_max_mem_size` 会退化为全表扫描。正确写法：把列表落成临时表再 `JOIN`，或改用 `EXISTS` 子查询。
+
+8. **`NOT IN` 的子查询里出现 NULL，结果集直接变空**
+   `WHERE id NOT IN (SELECT fk FROM t2)` 只要子查询返回**一个 NULL**，整体就恒为空——三值逻辑下 `id <> NULL` 是 UNKNOWN，永远不满足 TRUE。这类 bug 表现为「数据明明存在却查不出来」。
+   ✅ 改用 `NOT EXISTS`（对 NULL 安全）；或子查询里加 `WHERE fk IS NOT NULL`。
+
+9. **`LEFT JOIN` 之后在 `WHERE` 里过滤右表字段，悄悄退化成内连接**
+   `LEFT JOIN t2 ON ... WHERE t2.status = 'ok'`：右表没匹配上的行 `t2.status` 为 NULL，被 `WHERE` 滤掉，左连接保住「无匹配行」的意义完全消失。
+   ✅ 过滤条件写进 `ON`（`ON ... AND t2.status='ok'`），或显式允许空值 `OR t2.status IS NULL`。

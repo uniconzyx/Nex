@@ -20,3 +20,11 @@
 
 7. **constexpr 函数并非「一定在编译期执行」** —— `constexpr` 表示「可以在编译期求值」；只有在需要编译期常量的语境（数组大小、`static_assert`、用 `constexpr` 变量接收、模板非类型参数）使用时才会真正编译期求值，普通运行时调用仍是运行时。
    ✅ 想强制编译期求值：用 `constexpr` 变量接收或放进 `static_assert`；C++20 可用 `consteval` 强制编译期。
+
+8. **把 `enable_if` 全塞进返回类型**
+   多个重载只在返回类型上有 `enable_if` 差异时，签名差异被埋进返回类型，模板实参推导与重载决议的报错会互相纠缠，错误信息动辄几百行、指向完全无关的行。
+   ✅ C++20 用 `requires` / `concept` 表达约束；C++17 及以前把条件放到模板参数默认值（`typename = enable_if_t<...>`），可读性差一个量级。
+
+9. **`constexpr` 函数里的 UB 只在编译期被抓**
+   同一个 `constexpr` 函数：常量求值时 UB 会报错，运行期调用时 UB **不检查**（越界读、有符号溢出照样静默出结果），于是「编译过了」被误当成「没问题」。
+   ✅ 能只在编译期求值就用 `consteval`；确实要运行期分支时用 `std::is_constant_evaluated()` 分开写；测试开 `-fsanitize=undefined,address`。
