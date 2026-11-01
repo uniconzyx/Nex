@@ -140,6 +140,20 @@
 用三条命令就能验证这个归属差异：
 
 ```bash
+
+```bash
+# 用一次性容器挂载具名卷做备份，不需要停业务
+docker run --rm -v appdata:/data -v "$PWD:/backup" alpine \
+  tar czf /backup/appdata.tgz -C /data .
+
+# 恢复同理；解包前必须先停写入方，否则会恢复出一半数据
+docker run --rm -v appdata:/data -v "$PWD:/backup" alpine \
+  sh -c 'rm -rf /data/* && tar xzf /backup/appdata.tgz -C /data'
+```
+
+具名卷在删容器后仍然存在（`docker volume ls` 能看到），绑定挂载则直接映射宿主目录。
+前者可移植、适合数据；后者方便开发时改文件即时生效，但跨机器迁移会依赖宿主目录结构。
+
 # 匿名卷：删容器后数据仍在
 docker run -d --name db -v /var/lib/mysql mysql:8.0
 docker inspect -f '{{json .Mounts}}' db

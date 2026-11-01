@@ -38,6 +38,22 @@ cgroup 负责「用不多」：cpu / memory / io 的配额与统计
 这两句话都能在裸 Linux 上手工复现——**不需要 Docker**，因为 Docker 只是它们的外壳：
 
 ```bash
+
+```bash
+# 容器内看 PID：从 1 开始 —— PID namespace 生效
+docker run --rm alpine ps -o pid,comm
+
+# 宿主机上看同一个容器进程：只是一个普通的高位 PID
+docker inspect -f '{{.State.Pid}}' mycontainer
+
+# 直接读 cgroup 上限：容器内看到的就是配置值
+docker run --rm -m 256m alpine cat /sys/fs/cgroup/memory.max
+```
+
+「隔离」是三件事的叠加：**namespace 给视图**（看不见别人的进程/网络/挂载点）、
+**cgroup 给配额**（内存/CPU 用不超）、**capabilities 给权限**（不是 root）。
+缺任何一项都不能叫隔离——只配了 namespace 的容器，一个 fork 炸弹照样能把宿主机拖死。
+
 # 宿主：PID 是全局连续编号
 ps -eo pid,comm | head -3
 

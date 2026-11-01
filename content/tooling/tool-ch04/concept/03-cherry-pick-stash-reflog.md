@@ -112,6 +112,20 @@ git stash drop stash@{1}             # 删除指定条目
 
 ---
 
+```bash
+# reflog：唯一能救回「reset --hard 掉的提交」的东西
+git reflog
+# a1b2c3d HEAD@{3}: reset: moving to HEAD~3
+
+git reset --hard HEAD@{3}      # 回到 reset 之前
+git cherry-pick a1b2c3d        # 或只把丢掉的那笔捡回来
+```
+
+reflog 是**本地**记录，默认保留 90 天（`gc.reflogExpire`），且不随 `push` 上传。
+所以它能救「手滑」，救不了「硬盘坏了」——不要把它当备份。
+真正重要的东西要靠远程分支或标签固定住。
+
+
 ## 三视角小结
 
 | 视角 | 关注 | 本节落点 |

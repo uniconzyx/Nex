@@ -21,6 +21,30 @@ googletest / Catch2 / doctest 并没有魔法，它们只是把这套内核做�
     典型替身对象：时间、随机数、网络、文件系统
 ```
 
+```cpp
+#include <cstdio>
+#include <cstdlib>
+
+#define CHECK(cond)                                                     \
+  do {                                                                  \
+    if (!(cond)) {                                                      \
+      std::fprintf(stderr, "%s:%d: CHECK failed: %s\n",                  \
+                   __FILE__, __LINE__, #cond);                           \
+      std::exit(1);                                                     \
+    }                                                                   \
+  } while (0)
+
+int main() {
+  CHECK(1 + 1 == 2);
+  return 0;   // 只有 0 才算通过，CI 只看这个
+}
+```
+
+所有测试框架最终都归结为「退出码」。`do { } while (0)` 的包裹不是为了循环，
+而是让 `CHECK(x);` 在 `if (a) CHECK(x); else ...` 里作为**单条语句**安全工作——
+直接写 `if (!(c)) {...}` 的宏会在这里断成两半。
+
+
 ## 一、测试框架的最小内核与退出码语义
 
 一个能接进 CI 的测试框架，最小实现只需四个部件（ex01）：

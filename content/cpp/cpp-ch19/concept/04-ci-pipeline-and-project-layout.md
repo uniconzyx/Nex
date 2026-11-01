@@ -59,6 +59,33 @@ ex11 对示例流水线做分析，得到：
 - **易混点**：**拓扑序列不唯一**（入度为 0 的顶点有多个时），
   ex11 用 `ready.sort()` 固定字典序，只是为了让输出**可复现**，不是算法要求。
 
+```yaml
+name: ci
+on: [push, pull_request]
+jobs:
+  build:
+    strategy:
+      fail-fast: false            # 一个组合失败不要取消其他，否则看不到全貌
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        std: [17, 20]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ccache
+          key: ccache-${{ matrix.os }}-${{ matrix.std }}-${{ hashFiles('**/*.cpp','**/*.h') }}
+      - run: cmake -B build -DCMAKE_CXX_STANDARD=${{ matrix.std }} -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+      - run: cmake --build build -j
+      - run: ctest --test-dir build --output-on-failure
+```
+
+缓存 key 里放 `hashFiles` 是「内容变了才失效」；放分支名会让每个分支各存一份、
+命中率极低，反而把缓存配额耗光。`fail-fast: false` 则是因为矩阵构建的价值就在于
+「一次看到全部失败组合」——默认的快速失败恰好把这个价值取消了。
+
+
 ## 二、矩阵构建、缓存与 artifact：用组合换覆盖，用指纹换正确性
 
 ex12 把矩阵展开的语义算清楚了。给定 `os(3) × std(2) × build_type(2)`：

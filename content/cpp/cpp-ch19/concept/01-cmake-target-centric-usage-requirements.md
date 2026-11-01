@@ -72,6 +72,21 @@ ex07 则给出了一份可直接落地的现代 CMakeLists：核心库 `core`、
   vs `CMAKE_SOURCE_DIR`（顶层源目录，写进 install 导出后就失效）——这是 ex09 的 CM008。
   另：`add_subdirectory` 建的是**目录树**，`target_link_libraries` 建的是**依赖图**，二者不是一回事。
 
+```cmake
+add_library(mylib src/a.cpp src/b.cpp)
+
+target_include_directories(mylib PUBLIC  include)   # 使用者也需要这个路径
+target_include_directories(mylib PRIVATE src)       # 仅内部实现用
+target_compile_features(mylib PUBLIC cxx_std_20)
+target_link_libraries(mylib PUBLIC fmt::fmt PRIVATE spdlog::spdlog)
+```
+
+`PUBLIC` 的路径会被写进导出的 `INTERFACE_INCLUDE_DIRECTORIES`，`PRIVATE` 不会。
+把内部实现目录错写成 `PUBLIC`，下游就会拿到一堆不该暴露的头文件；
+反过来把公共头目录写成 `PRIVATE`，装到别人机器上就编译不过——
+这两类错误在本地构建时都不会暴露，只在 `find_package` 之后才炸。
+
+
 ## 二、`PUBLIC` / `PRIVATE` / `INTERFACE`：使用要求的三种传播强度
 
 CMake 把「使用一个目标所需的一切」称为 **usage requirements（使用要求）**，
@@ -170,6 +185,18 @@ ex10 用求解器把这套语义算了一遍：**图 A**（`math` 以 `PUBLIC` �
   前者生成导入目标（`IMPORTED`），后者生成普通目标——只有普通目标会被你的全局设置污染。
 
 ---
+
+```cmake
+install(TARGETS mylib EXPORT mylibTargets
+        ARCHIVE DESTINATION lib LIBRARY DESTINATION lib RUNTIME DESTINATION bin)
+install(DIRECTORY include/ DESTINATION include)
+install(EXPORT mylibTargets NAMESPACE mylib:: DESTINATION lib/cmake/mylib)
+```
+
+三件套缺一不可。只装头文件和库、不装 `EXPORT`，下游就无法 `find_package(mylib CONFIG)`，
+只能手写 `include_directories` 和 `link_directories`——等于把使用要求（usage requirements）
+又退化回目录级变量，前面所有 target 化的收益全部作废。
+
 
 ## 三视角小结
 

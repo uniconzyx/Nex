@@ -181,6 +181,20 @@ examples/ex12 实测：同一个 `latest` 两次部署得到**不同**镜像、�
 
 ---
 
+```bash
+# 用 git 短 SHA 作标签：任一线上镜像都能反查到源码
+TAG=$(git rev-parse --short HEAD)
+docker build \
+  -t registry.example.com/app:$TAG \
+  -t registry.example.com/app:latest .
+docker push registry.example.com/app:$TAG
+```
+
+只推 `latest` 会带来一个具体后果：**回滚动作不可执行**。
+出了问题想问「上一个版本是哪个」，答案已经被覆盖掉了。
+生产标签必须是不可变的（SHA 或语义化版本），`latest` 只留给本地开发。
+
+
 ## 三视角小结
 
 | 视角 | 一句话结论 |

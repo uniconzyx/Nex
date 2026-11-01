@@ -146,6 +146,28 @@ examples/ex10 实测：同一宿主端口被两个服务同时发布会被判为
 ---
 
 <!-- injected-code -->
+
+```yaml
+services:
+  api:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy     # 等就绪，不只是等启动
+    environment:
+      DB_HOST: db                      # 服务名即 DNS 名，同网络内直接解析
+  db:
+    image: postgres:16
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      retries: 10
+```
+
+`depends_on` 的默认 condition 是 `service_started`——只保证「容器起来了」，
+而 Postgres 从容器起来到能接受连接还有几秒。不显式写 `service_healthy`，
+应用就会稳定地在启动时撞一次「连接被拒绝」，然后靠重试掩盖掉这个设计缺陷。
+
 ## 可运行代码：把上面的说法跑一遍
 
 下面两段直接取自本章示例库（`examples/`），期望输出就是判题台里判定的那串字符串，不是事后补写的说明。读完正文后先照着跑一遍，再回去看「三视角解析」里对应的那条。

@@ -152,6 +152,22 @@ sanitizer: address,undefined` 的单元，而不是让所有 12 个矩阵单元�
 
 ---
 
+```bash
+# 三层门禁：编译告警 -> 静态分析 -> sanitizer
+g++ -std=c++20 -Wall -Wextra -Werror -c src/a.cpp -o /dev/null
+
+clang-tidy src/a.cpp -- -std=c++20 -Iinclude
+
+# ASan/UBSan 只在调试构建开：约 2x 内存、2-3x 时间
+g++ -std=c++20 -fsanitize=address,undefined -fno-omit-frame-pointer \
+    -g src/a.cpp -o a_asan
+```
+
+`-fsanitize=undefined` 默认是「打印一条警告然后继续」，所以 CI 里它会一路报错却返回 0。
+要让它真的阻断构建，必须加 `-fno-sanitize-recover=all`（或用 `UBSAN_OPTIONS=halt_on_error=1`）。
+这是「开了 sanitizer 但什么都没拦住」的最常见原因。
+
+
 ## 三视角小结
 
 | 主题 | 程序员视角 | 博士生视角 | 考研者视角 |

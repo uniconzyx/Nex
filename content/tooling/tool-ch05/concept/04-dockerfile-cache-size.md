@@ -191,6 +191,23 @@ ENTRYPOINT ["/app"]
 - 易错点：以为 `RUN rm` 能删掉密钥（**不能，层里还在**）；
   以为 `alpine` 一定更好（musl 与 glibc 有行为差异，需验证）。
 
+```bash
+# CI 里的缓存是另一回事：每次都是全新机器，本机层缓存根本不存在
+# 必须显式把缓存「推出去、再拉回来」
+docker buildx build \
+  --cache-from type=registry,ref=registry.example.com/app:buildcache \
+  --cache-to   type=registry,ref=registry.example.com/app:buildcache,mode=max \
+  --push -t registry.example.com/app:$TAG .
+
+# 排查「这一层为什么没命中」：看构建日志里的 CACHED 标记
+docker build --progress=plain -t myapp:1.0 . 2>&1 | grep -E "CACHED|RUN|COPY"
+```
+
+`mode=max` 会连中间层一起缓存，代价是缓存镜像本身可能比业务镜像大几倍。
+更常见的隐形杀手是 `.dockerignore` 漏写 `node_modules`/`.git`——
+`COPY . .` 的上下文哈希每次构建都变，缓存从第一层就失效，而日志里只会平静地显示「全部重建」。
+
+
 ## 三视角小结
 
 | 视角 | 一句话结论 |

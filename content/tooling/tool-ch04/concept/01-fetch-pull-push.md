@@ -62,6 +62,21 @@ refs/remotes/origin/main ◀──fetch──      refs/heads/main   （快照�
 
 ---
 
+```bash
+# fetch 只更新远程跟踪分支，不碰工作区
+git fetch origin
+git log --oneline HEAD..origin/main       # 远程多了什么（还没合并）
+
+# pull = fetch + merge（或 rebase），行为取决于配置
+git config pull.rebase true               # 显式设定，别让默认值随版本漂移
+git pull --ff-only origin main            # 更安全：不能快进就报错
+```
+
+`--ff-only` 值得作为团队默认：它把「历史分叉」从静默变成显式。
+默认的 `pull` 会悄悄生成一个 merge commit，等发现时主干已经被无数个
+「Merge branch 'main' of ...」污染了。
+
+
 ## 二、push 为什么被拒绝，以及 `--force-with-lease` 为什么比 `--force` 安全
 
 push 被拒的唯一常见原因是 **non-fast-forward**：你要写入的目标引用当前值不是你新值的祖先，
@@ -105,6 +120,23 @@ push 被拒的唯一常见原因是 **non-fast-forward**：你要写入的目标
 - 可能与计网结合的提问点：把 lease 类比为 HTTP 的 `If-Match`/ETag 乐观并发控制，属于**乐观锁**而非悲观锁。
 
 ---
+
+```bash
+git push origin main
+#  ! [rejected]  main -> main (fetch first)   <- 远程有你本地没有的提交
+
+git fetch origin
+git log --oneline HEAD..origin/main       # 远程多出来的
+git log --oneline origin/main..HEAD       # 本地多出来的
+
+# 确实需要强推时用 --force-with-lease
+git push --force-with-lease origin feature/x
+```
+
+`--force` 会无条件覆盖远程，把同事刚推的提交直接抹掉，而且**无法从远程恢复**。
+`--force-with-lease` 会先校验「远程当前指针是否仍等于我上次看到的值」，
+若别人在此期间推过，它就拒绝——把「覆盖别人」变成「先看到别人的改动」。
+
 
 ## 三视角小结
 

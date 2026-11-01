@@ -321,6 +321,20 @@ compose 解决的是**单机多容器**，K8s 解决的是**多机编排**。
 
 ---
 
+```bash
+# 退出码 137 = 128 + 9，即被 SIGKILL；容器语境下九成是 OOM
+docker inspect -f '{{.State.OOMKilled}} {{.State.ExitCode}}' mycontainer
+# 输出 true 137  -> 确认是内存超限
+
+# 再看限制与实际占用
+docker stats --no-stream mycontainer
+```
+
+先看 `OOMKilled` 再看退出码：同样是 137，`OOMKilled=false` 说明不是内存问题，
+而是被外部杀掉（例如 K8s 的 livenessProbe 连续失败后由 kubelet 终止）。
+这两个分支的处理方式完全不同——前者调 `mem_limit` 或查内存泄漏，后者要修健康检查。
+
+
 ## 三视角小结
 
 | 视角 | 一句话结论 |

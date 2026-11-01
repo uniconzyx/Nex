@@ -233,6 +233,30 @@ examples/ex07、ex08 实测了全部组合。
 
 ---
 
+```yaml
+services:
+  api:
+    image: myapp:1.0
+    env_file: [.env]                    # 优先级低于 environment
+    environment:
+      LOG_LEVEL: ${LOG_LEVEL:-info}     # 未设置时取默认值
+    volumes:
+      - appdata:/var/lib/app
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/healthz"]
+      interval: 10s
+      timeout: 2s
+      start_period: 30s                 # 启动期不计失败
+      retries: 3
+volumes:
+  appdata:
+```
+
+`start_period` 是最常被漏掉的一项。没有它，JVM 应用冷启动 40 秒会被判 unhealthy，
+进而触发 `restart` 策略重启，形成「越重启越起不来」的循环。
+`-fsS` 三个参数也有讲究：让 curl 在 4xx/5xx 时返回非零，否则健康检查永远通过。
+
+
 ## 可运行代码：一份带卷、环境变量与健康检查的 compose
 
 这几个字段互相牵连：卷决定数据活多久，`env_file` 决定敏感值进不进 git，

@@ -134,6 +134,23 @@ ls -l /tmp/ovl/upper            # ③ 删：upper 里剩一个 c 0,0 的字符�
 - 易错点：把「容器可写层」和「数据卷」混为一谈——可写层随容器删除而丢失，
   数据卷由 Docker 管理、独立于容器生命周期。
 
+```bash
+# 看镜像的层与每层对应的构建指令
+docker history --no-trunc myapp:1.0
+
+# 反例：先拷全量源码再装依赖 —— 改一行代码就让依赖层全部失效
+#   COPY . .
+#   RUN pip install -r requirements.txt
+# 正解：先只拷依赖清单，让依赖层稳定命中缓存
+#   COPY requirements.txt .
+#   RUN pip install -r requirements.txt
+#   COPY . .
+```
+
+层缓存按「指令 + 输入内容哈希」命中，**一旦某一层失效，它之后的所有层都要重建**。
+所以 Dockerfile 里的指令顺序本质上是在排「变化频率」：越稳定的越靠前。
+
+
 ## 三视角小结
 
 | 视角 | 一句话结论 |

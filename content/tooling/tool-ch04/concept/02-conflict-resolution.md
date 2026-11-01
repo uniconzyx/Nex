@@ -3,6 +3,24 @@
 
 ---
 
+```bash
+git merge feature/x
+# CONFLICT (content): Merge conflict in src/app.py
+
+# 记住解决过的冲突：同样的冲突下次自动复用解法
+git config rerere.enabled true
+
+# 收尾：标记已解决，再按当前操作继续
+git add src/app.py
+git commit                 # merge 流程
+git rebase --continue      # rebase 流程
+```
+
+`git checkout --ours/--theirs` 在 rebase 时**方向是反的**：
+`ours` 指上游（你正在 rebase 到的那条线），`theirs` 才是你自己那笔提交。
+这是 rebase 冲突里最容易搞错的一点，选反了就等于静默丢弃自己的修改。
+
+
 ## 一、冲突的充要条件与三方合并（three-way merge）
 
 Git 的合并不是「比较两份文件的异同」，而是**三方合并**：给定

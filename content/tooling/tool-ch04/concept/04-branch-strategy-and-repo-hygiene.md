@@ -3,6 +3,21 @@
 
 ---
 
+```bash
+# 把行尾规则写进仓库，而不是靠每个人配本地
+cat .gitattributes
+# * text=auto eol=lf
+# *.png binary
+# *.bat text eol=crlf
+
+git config core.autocrlf false    # 显式关掉，规则交给 .gitattributes
+```
+
+`core.autocrlf` 是**本地配置**，谁没配谁就和别人产生「整文件都改了」的假 diff。
+`.gitattributes` 是**仓库内配置**，clone 下来即生效——这是它比 `core.autocrlf` 更该用的原因。
+`*.bat` 单独指定 CRLF，是因为 Windows 批处理对 LF 行尾有兼容问题。
+
+
 ## 一、分支策略选型（Git Flow / GitHub Flow / Trunk Based）与 PR 流程
 
 三种主流策略的本质差异是**长期分支数量**与**发布单元**：
@@ -69,6 +84,19 @@
 - 常见笔试/面试问法：「三种分支策略的区别与选型依据」「`v1.2.3` 各段什么时候递增」。
 
 ---
+
+```bash
+# 主干保护：必须走 PR、必须过检查、必须不落后主干
+gh api repos/{owner}/{repo}/branches/main/protection -X PUT \
+  -f required_status_checks.strict=true \
+  -f required_pull_request_reviews.required_approving_review_count=1 \
+  -f enforce_admins=true
+```
+
+`strict=true` 的含义是「分支落后于主干时必须先更新才能合并」。
+不设它就会出现：PR 的 CI 全绿、合并进主干后主干 CI 红了——
+因为两个分支各自通过、合起来冲突。`enforce_admins` 则堵住「管理员绕过」这个后门。
+
 
 ## 二、仓库卫生：`.gitignore`、`.gitattributes` 与 Git LFS
 
