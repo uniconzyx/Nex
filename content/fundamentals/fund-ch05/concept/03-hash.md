@@ -56,6 +56,73 @@
 - **常考计算**：给定 key 集合与表长 m、素数 p，手算线性探测的插入地址序列与查找 ASL（逐个 key 递推 hᵢ）。
 - **易混点**：开放定址的「失败 ASL」要沿探测序列查到第一个空位才算失败（步数计入），不是简单 n+1。
 
+```c
+#include <stdio.h>
+
+/* 开放定址 + 墓碑删除：删掉的槽不能直接置空，否则会截断探测链 */
+#define M 11
+#define EMPTY   (-2)
+#define DELETED (-1)
+
+static int tbl[M];
+
+static int probe(int k) { return ((k % M) + M) % M; }
+
+int insert(int k)
+{
+    int i = probe(k), step = 0;
+    while (step < M) {
+        int j = (i + step) % M;
+        /* 空槽或墓碑都可以复用 */
+        if (tbl[j] == EMPTY || tbl[j] == DELETED) { tbl[j] = k; return 1; }
+        if (tbl[j] == k) return 0;              /* 已存在 */
+        step++;
+    }
+    return -1;                                   /* 表满 */
+}
+
+int find(int k)
+{
+    int i = probe(k), step = 0;
+    while (step < M) {
+        int j = (i + step) % M;
+        if (tbl[j] == EMPTY) return 0;           /* 真空槽：探测链到此结束 */
+        if (tbl[j] == k)     return 1;           /* 墓碑要继续往后找 */
+        step++;
+    }
+    return 0;
+}
+
+int erase(int k)
+{
+    int i = probe(k), step = 0;
+    while (step < M) {
+        int j = (i + step) % M;
+        if (tbl[j] == EMPTY) return 0;
+        if (tbl[j] == k) { tbl[j] = DELETED; return 1; }   /* 关键：标记而非置空 */
+        step++;
+    }
+    return 0;
+}
+
+int main(void)
+{
+    for (int i = 0; i < M; i++) tbl[i] = EMPTY;
+    /* 11 与 22 在 M=11 时同余，必然冲突 */
+    insert(11); insert(22);
+    printf("删 11 前: find(22)=%d\n", find(22));
+    erase(11);
+    printf("删 11 后: find(22)=%d  (置空会变 0)\n", find(22));
+    insert(33);   /* 复用墓碑槽 */
+    printf("插入 33 后: find(22)=%d find(33)=%d\n", find(22), find(33));
+    return 0;
+}
+```
+
+实测输出（`gcc -std=c11 -O2`）：删 11 前 find(22)=1；删 11 后 find(22)=1；插入 33 后两者均为 1。
+把 `tbl[j] = DELETED;` 改成 `tbl[j] = EMPTY;`，第二行就会变成 `find(22)=0` ——
+数据还在表里却查不到，这正是「墓碑」存在的唯一理由。
+
 ## 3. 装填因子与 ASL：一切回到负载
 
 装填因子 `α = n / m`（n 已存关键字数，m 表长）是衡量哈希表「满不满」的核心量：

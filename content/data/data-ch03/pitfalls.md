@@ -55,3 +55,12 @@
     于是相关性、回归系数全部失真。更严重的是：若用**含填充值**的均值去填充，
     会被反复计入，形成自我强化的偏差。
     正解：用**训练集**统计量填充以避免数据泄漏，或改用能原生处理缺失的模型。
+
+13. **以为 `groupby(...).apply()` 和 `agg()` 等价**
+`agg` 走的是**聚合器的 C 实现**，输入一列、输出一个标量，结果形状可预期；`apply` 是「把每个分组当成一个小 DataFrame 交给你」的通用入口，返回类型由你的函数决定——返回标量得到 Series，返回 Series 得到 DataFrame，长度不一致还会产生多级索引或直接报错。两个实际后果：① 同样的逻辑 `apply` 往往慢一个数量级（Python 层逐组调用）；② `apply` 返回的形状不稳定，换一份数据就可能从 Series 变 DataFrame，下游代码静默出错。规则：能用 `agg` / `transform` / `sum` 等内置聚合就别用 `apply`；确实需要多列联合计算时，优先 `assign` 出新列再用内置聚合。
+
+14. **把 `inplace=True` 当成「省内存」**
+多数 `inplace=True` 的实现**并不省内存**——它经常先算出完整结果再替换引用，峰值内存反而更高；而且它**返回 `None`**，`df = df.dropna(inplace=True)` 这种写法会把变量直接变成 `None`，报错还很难定位。更麻烦的是链式调用：`df.dropna(inplace=True).reset_index()`必然崩。Pandas 2.x 起大量 `inplace` 参数已被标记弃用（Copy-on-Write 成为默认语义），官方建议一律用「重新赋值」形式：`df = df.dropna()`。真要省内存就选 dtype 与列裁剪（`category`、`astype`、只读需要的列），而不是指望 `inplace`。
+
+15. **用 `iterrows()` 遍历并试图修改数据**
+`iterrows()` 每行返回的是**新建的 Series 副本**，改它不影响原 `DataFrame`——「遍历赋值」写完不报错、结果全没变，是最典型的静默失败。同时它极慢：每行都要构造 Series 对象，百万行级别通常是向量化写法的几十到上百倍耗时。正确选择：① 纯读取用 `itertuples()`（返回 namedtuple，快 10 倍以上）；② 需要计算新列就用向量化表达式或 `np.where` / `assign`；③ 确实要按行改（如调用外部 API）就先收集成 `list` 再一次性构造 `DataFrame`，而不是逐行写回原表。
