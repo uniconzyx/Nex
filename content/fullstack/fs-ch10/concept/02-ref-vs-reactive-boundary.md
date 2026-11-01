@@ -24,7 +24,9 @@ ref 与 reactive 的边界：
     固定形状对象、只改字段   -> reactive
 ```
 
-## 何时用 ref，何时用 reactive
+## 一、选型与两个高频坑
+
+### 何时用 ref，何时用 reactive
 
 - **ref** 的适用场景：原始类型（`count`、`visible`、`name`）；需要被单独抽出来传给别处、或作为
   函数返回值/参数独立流动的状态；以及「这个状态未来可能被整体替换但你还想保持引用」的情况。
@@ -36,17 +38,32 @@ ref 与 reactive 的边界：
 的 `name` 是当时的值快照，和代理脱钩了。而 ref 解构不会丢——因为 ref 本身是个带 `.value` 的
 对象，`toRefs` 之类手段能保证解出来仍是 ref。所以「会被解构/传递」这个判据，几乎总是指向 ref。
 
-## 解构丢响应性，toRefs 来补救
+### 解构丢响应性，toRefs 来补救
 
 当你确实有一个 reactive 对象，又需要把它拆开传给子组件或解构到局部变量时，用 `toRefs(obj)`：
 它会遍历对象的每个属性，为每个属性生成一个 `ref`，这个 ref 的 `.value` getter/setter 直接读写
 原始 reactive 对象的对应字段。于是解构后拿到的仍是 ref，`ref.value` 的读写会**原路回到原对象**，
 响应性链路不断。
 
+```js
+import { reactive, toRefs } from 'vue'
+
+const state = reactive({ count: 0, name: 'a' })
+
+// ❌ 直接解构：count 变成普通数字，后续 state.count++ 不会同步到它
+const { count } = state
+
+// ✅ toRefs：解构出来仍是 ref，读写原路回到 state
+const { count: countRef } = toRefs(state)
+console.log(countRef.value)     // 0
+countRef.value = 1              // 等价于 state.count = 1
+console.log(state.count)        // 1
+```
+
 注意 `toRefs` 只处理「对象上已存在的自有属性」。如果是 props 里需要把某个字段单独拎出来并保留
 响应性，用 `toRef(props, 'key')` 更合适，它能处理「可能还不存在」的 key。
 
-## 数组与 Map 的响应性
+### 数组与 Map 的响应性
 
 数组在 reactive 下是支持的：`list.push(x)`、`list[i] = y` 都能触发。但底层机制有个坑值得知道：
 `Array.prototype.push` 这类内建方法在 V8 里有快速路径，对 `length` 的改写有时会**绕过 Proxy 的
@@ -59,7 +76,9 @@ Proxy 写个玩具响应式、发现 `push` 不触发时，不是你写错了，
 让 `map.set(k, v)`、`set.add(x)` 能正确派发。用普通 `{}` 当字典时也要注意：以响应式对象自身
 作 key（而不是它的 id）会绕过代理，应当用 `Map` 的响应式版本或存 id。
 
-## shallowRef 与 shallowReactive：明确拒绝深层追踪
+## 二、shallow 边界与拆包规则
+
+### shallowRef 与 shallowReactive：明确拒绝深层追踪
 
 默认 reactive 是「深层」的——任何一层子对象都被代理。但有时候你**不想要**深层，典型是：这个
 对象很大、你只关心它的引用是否被整体替换（比如一个用第三方库渲染的 `THREE.Scene` 实例，或一块
@@ -73,23 +92,25 @@ Proxy 写个玩具响应式、发现 `push` 不触发时，不是你写错了，
 它们不是「性能优化开关」那么简单，而是「明确声明响应边界」：我只在哪一层接通知。滥用会让
 子字段改动静默失效，所以只在你清楚自己在做什么时用。
 
-## ref 的「自动拆包」规则
+### ref 的「自动拆包」规则
 
 `.value` 不是在所有地方都强制手写。Vue 有两处自动拆包：① 在模板里，顶层 ref 会被自动拆开，所以 `<script setup>` 里 `const count = ref(0)`，模板写 `{{ count }}` 即可；② 当一个 ref 作为 `reactive` 对象的属性时，访问 `state.count` 会自动拆成它的值（而不是 ref 对象）。但如果 ref 被放进**数组或 Map**，就不会自动拆包——你得手写 `.value`。这条不对称常坑人：从 reactive 对象里解构出 ref、再放进普通数组，丢失自动拆包，读的时候又得 `.value`。记住一句话：自动拆包只发生在「模板顶层」和「reactive 对象的属性位置」两处，其余皆手写。
 
-## 决策表：到底用 ref 还是 reactive
+### 决策表：到底用 ref 还是 reactive
 
 给一个可操作的判断：① 这个状态是独立原始值（计数、开关、ID）？→ ref。② 这个状态会被单独传给函数、被解构、被 return？→ ref（因为 reactive 解构会丢响应性）。③ 这块数据是一整块表单或配置、基本整体使用、几乎不解构？→ reactive。④ 不确定？→ 默认 ref，因为 ref 更安全、可任意流动。经验法则：**宁可都 ref，也别在会被解构的对象上用 reactive**——前者最多多写几次 `.value`，后者一旦解构就静默失效，更难查。
 
-## 为什么 Vue 不干脆隐去 .value（ref 语法糖的兴衰）
+## 三、设计取舍与跨框架对照
+
+### 为什么 Vue 不干脆隐去 .value（ref 语法糖的兴衰）
 
 社区曾有过 `<script setup>` 里的 `$ref` 语法糖（`$ref` 让你写 `count++` 而非 `count.value++`），通过编译期转换隐去 `.value`。但它在 3.3 被官方标记为不再推荐，原因是：语法糖让 ref 和 reactive 的边界在代码里消失，新人更难理解「为什么有时候要 `.value`、有时候不用」，调试时看到的编译产物又和源码不一致，反而增加了认知负担。结论回到了原点：**`.value` 是 ref 的诚实标记，它提醒你「这里有个容器」**，保留它利大于弊。
 
-## 响应式边界与性能：何时该 shallow
+### 响应式边界与性能：何时该 shallow
 
 深层代理不是免费午餐：每个被访问的对象都多一层包装、多一份依赖索引。对一个由第三方库创建、内含成千上万个子节点的数据结构（如可视化库的场景图、富文本内部模型），深层代理既用不上又拖慢首次访问。这时 `shallowRef`/`shallowReactive` 的「明确声明响应边界」就值钱了：你告诉 Vue「只在这层通知我」，内部变更由你（或那个库）自己负责触发。它本质是性能与语义的显式权衡，而不是默认行为；滥用会让子字段改动静默失效，所以务必在注释里写清预期。
 
-## 与 SolidJS signal 的对照
+### 与 SolidJS signal 的对照
 
 SolidJS 用 `createSignal` 返回 `[getter, setter]`，读用 `count()`、写用 `setCount(v)`，和 Vue 的 `ref.value` 异曲同工——都是「把会变的值包成函数或对象以拦截读写」。区别在粒度：Solid 的 signal 本身就是通知单元，组件不会因 signal 变而整体重渲染，只重跑用到它的那段 JSX；Vue 以 effect（含渲染 effect）为粒度，一个组件内的多个响应式字段共享一次组件级更新。两种都优于「不可变 + 全量重渲染」，只是权衡点不同：Solid 在极端高频更新下更省，Vue 的生态与开发体验更成熟。
 
