@@ -164,15 +164,26 @@ def check_examples(cdir: str, cid: str, rep: Report, tmp: str) -> None:
                                  text=True, encoding='utf-8', errors='replace',
                                  timeout=60, cwd=tmp)
         elif lang in ('java',):
-            # 源文件名必须与 public class 同名，否则 javac 直接拒绝编译
-            mcls = re.search(r'\b(?:public\s+)?(?:final\s+|abstract\s+|sealed\s+)?'
+            # 源文件名必须与 public class 同名，否则 javac 直接拒绝编译。
+            # 注意优先级：public 类名 > run_filename > 首个类型名。
+            # （run_filename 只是给人看的描述名，如 UserService.java，而代码里
+            #  往往写的是 public class Main —— 用它命名会编译失败。）
+            mpub = re.search(r'\bpublic\s+(?:final\s+|abstract\s+|sealed\s+|static\s+)*'
                              r'(?:class|interface|enum|record)\s+(\w+)', code)
-            cls = (obj.get('run_filename') or '').rsplit('.', 1)[0] or \
-                  (mcls.group(1) if mcls else 'Main')
+            many = re.search(r'\b(?:class|interface|enum|record)\s+(\w+)', code)
+            if mpub:
+                cls = mpub.group(1)
+            else:
+                cls = (obj.get('run_filename') or '').rsplit('.', 1)[0] or \
+                      (many.group(1) if many else 'Main')
+                cls = cls or 'Main'
             src_name = cls + '.java'
             io.open(os.path.join(tmp, src_name), 'w', encoding='utf-8',
                     newline='\n').write(code)
-            r = subprocess.run(['javac', '-encoding', 'UTF-8', '-d', '.', src_name],
+            # -J-Duser.language=en：中文 Windows 上 javac 诊断是 GBK，直接按 UTF-8
+            # 读会变乱码；强制英文可保证诊断信息可读。
+            r = subprocess.run(['javac', '-J-Duser.language=en', '-J-Duser.country=US',
+                                '-encoding', 'UTF-8', '-d', '.', src_name],
                                capture_output=True, text=True, encoding='utf-8',
                                errors='replace', cwd=tmp)
             if r.returncode != 0:
@@ -300,7 +311,8 @@ def _verify_answer_code(code: str, tag: str, rep: Report) -> None:
             src_name = cls + '.java'
             io.open(os.path.join(tmp, src_name), 'w', encoding='utf-8',
                     newline='\n').write(code)
-            r = subprocess.run(['javac', '-encoding', 'UTF-8', '-d', '.', src_name],
+            r = subprocess.run(['javac', '-J-Duser.language=en', '-J-Duser.country=US',
+                                '-encoding', 'UTF-8', '-d', '.', src_name],
                                capture_output=True, text=True, encoding='utf-8',
                                errors='replace', cwd=tmp)
             if r.returncode != 0:
