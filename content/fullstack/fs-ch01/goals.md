@@ -48,8 +48,8 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 375,800 | 全章 | 系统设计入门：HTTP/API/缓存/CDN/负载均衡的工程视角（英文） |
-| 2 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,353 | 全章 | 技术面试必备基础知识：计算机网络与 HTTP 专题的中文精华笔记 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,022 | 全章 | 系统设计入门：HTTP/API/缓存/CDN/负载均衡的工程视角（英文） |
+| 2 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,375 | 全章 | 技术面试必备基础知识：计算机网络与 HTTP 专题的中文精华笔记 |
 | 3 | [nodejs/node](https://github.com/nodejs/node) | 122,410 | 全章 | Node.js 运行时：lib/http.js 为标准库 HTTP 实现，本章示例即基于其公开 API |
 | 4 | [hoppscotch/hoppscotch](https://github.com/hoppscotch/hoppscotch) | 80,699 | 全章 | 开源 API 调试工具：可直接观察请求头/响应头，配合本章 Network 面板学习 |
 

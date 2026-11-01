@@ -42,9 +42,9 @@
 | 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,297 | 全章 | 深度学习框架官方仓库，工业级模型工程范例；本章先读与「自注意力」「多头注意力」相关的部分 |
 | 2 | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 195,953 | 全章 | 为 AI Agent 提供网页数据：抓取到结构化数据的工程实现；本章先读与「自注意力」「多头注意力」相关的部分 |
 | 3 | [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) | 187,785 | 全章 | 自主 Agent 的开创性项目，Agent 架构与工具循环的经典参考；本章先读与「自注意力」「多头注意力」相关的部分 |
-| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,241 | 全章 | Transformer 模型定义框架：从 BERT/GPT 到多模态的全量实现；本章先读与「自注意力」「多头注意力」相关的部分 |
+| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,266 | 全章 | Transformer 模型定义框架：从 BERT/GPT 到多模态的全量实现；本章先读与「自注意力」「多头注意力」相关的部分 |
 | 5 | [langgenius/dify](https://github.com/langgenius/dify) | 159,119 | 全章 | Agentic 工作流与 RAG 流水线平台：生产级 LLM 应用工程范例；本章先读与「自注意力」「多头注意力」相关的部分 |
-| 6 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,187 | 全章 | Agent 工程平台：工具、记忆、检索与编排的工业实现；本章先读与「自注意力」「多头注意力」相关的部分 |
+| 6 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,600 | 全章 | Agent 工程平台：工具、记忆、检索与编排的工业实现；本章先读与「自注意力」「多头注意力」相关的部分 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

@@ -43,9 +43,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [vllm-project/vllm](https://github.com/vllm-project/vllm) | 94,640 | §2.1 把卡喂满 | 生产级推理引擎：PagedAttention/连续批处理，部署章的性能基线 |
+| 1 | [vllm-project/vllm](https://github.com/vllm-project/vllm) | 95,746 | §2.1 把卡喂满 | 生产级推理引擎：PagedAttention/连续批处理，部署章的性能基线 |
 | 2 | [sgl-project/sglang](https://github.com/sgl-project/sglang) | 37,561 | 全章 | 高吞吐推理框架，对比 vLLM 的调度与缓存策略；本章先读与「显存的四笔账」「把卡喂满」相关的部分 |
-| 3 | [ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp) | 131,891 | 全章 | CPU/量化推理的参考实现，理解 GGUF 与显存账本；本章先读与「显存的四笔账」「把卡喂满」相关的部分 |
+| 3 | [ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp) | 132,584 | 全章 | CPU/量化推理的参考实现，理解 GGUF 与显存账本；本章先读与「显存的四笔账」「把卡喂满」相关的部分 |
 | 4 | [ollama/ollama](https://github.com/ollama/ollama) | 184,126 | 全章 | 本地一键跑模型，验证「私有化」可行性最快的路径；本章先读与「显存的四笔账」「把卡喂满」相关的部分 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）

@@ -34,7 +34,7 @@
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
 | 1 | [antirez/kilo](https://github.com/antirez/kilo) | 9,187 | §2.1 fopen 模式 | §2.1 模式表的最小用法：`editorOpen` 用 `fopen(path, \"r\")` + `getline` 逐行读，`editorSave` 用 `fopen(..., \"w\")` + `fwrite`；注意它对 `fopen` 返回 NULL 立刻报错退出（§3.1） |
-| 2 | [redis/redis](https://github.com/redis/redis) | 76,964 | §3.2 fread/fwrite… | §3.2 短读：`src/rio.c` 是对「一次读写可能只走一部分」的抽象层，`rioRead`/`rioWrite` 都返回实际字节数，调用方必须循环补满——这正是核对 `fread` 返回值的通用做法 |
+| 2 | [redis/redis](https://github.com/redis/redis) | 77,159 | §3.2 fread/fwrite… | §3.2 短读：`src/rio.c` 是对「一次读写可能只走一部分」的抽象层，`rioRead`/`rioWrite` 都返回实际字节数，调用方必须循环补满——这正是核对 `fread` 返回值的通用做法 |
 | 3 | [rswier/c4](https://github.com/rswier/c4) | 10,819 | §1.3 用户态缓冲 vs 内核缓冲 | §1.3 用户态缓冲 vs 系统调用次数：`c4.c` 不用 stdio，直接用 `read()` 把整个源文件一次性读进 `src`，系统调用只发生一次——对照 §1.2 的三种缓冲模式就明白 stdio 在替你做什么 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）

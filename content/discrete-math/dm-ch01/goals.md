@@ -48,7 +48,7 @@
 | 2 | [Z3Prover/z3](https://github.com/Z3Prover/z3) | 12856 | §SAT 到 SMT | `src/smt/smt_context.cpp` 是工业级 CDCL 的核心循环：单元传播、冲突分析、非时序回溯都在这里，比任何伪代码都真实 |
 | 3 | [arminbiere/cadical](https://github.com/arminbiere/cadical) | 626 | §归结与 CDCL | `src/cadical.cpp` 只有几千行却是 SAT Competition 冠军级实现，适合对照本章的"归结 + 学习子句"理解为什么纯归结不够快 |
 | 4 | [google/or-tools](https://github.com/google/or-tools) | 14298 | §约束落地 | `ortools/sat/cp_model.cc` 把业务约束编译成子句，可直接看到"排班/路径/打包"问题如何变成 SAT |
-| 5 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363502 | §复习清单 | 用它核对"离散数学里哪些点会在面试里被追问"（布尔逻辑、位运算、复杂度） |
+| 5 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363505 | §复习清单 | 用它核对"离散数学里哪些点会在面试里被追问"（布尔逻辑、位运算、复杂度） |
 
 ## 本章 B 站视频路线
 

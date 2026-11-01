@@ -64,7 +64,7 @@
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
 | 1 | [huggingface/diffusers](https://github.com/huggingface/diffusers) | 34,819 | 全章 | 扩散模型标准库，多模态章的图像生成基线；本章先读与「图像分块与 patch e…」「分辨率、长宽比与 toke…」相关的部分 |
-| 2 | [openai/CLIP](https://github.com/openai/CLIP) | 34,501 | 全章 | 图文对齐的经典实现，理解「多模态检索」为什么能跨模态；本章先读与「图像分块与 patch e…」「分辨率、长宽比与 toke…」相关的部分 |
+| 2 | [openai/CLIP](https://github.com/openai/CLIP) | 34,539 | 全章 | 图文对齐的经典实现，理解「多模态检索」为什么能跨模态；本章先读与「图像分块与 patch e…」「分辨率、长宽比与 toke…」相关的部分 |
 | 3 | [AUTOMATIC1111/stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) | 165,088 | 全章 | 最流行的 SD 前端，看插件生态如何把模型变成产品；本章先读与「图像分块与 patch e…」「分辨率、长宽比与 toke…」相关的部分 |
 | 4 | [QwenLM/Qwen3-VL](https://github.com/QwenLM/Qwen3-VL) | 20,000 | 全章 | 国产多模态模型，中文场景的视觉问答/文档理解首选；本章先读与「图像分块与 patch e…」「分辨率、长宽比与 toke…」相关的部分 |
 

@@ -70,7 +70,7 @@
 |---|---|---|---|---|
 | 1 | [google/googletest](https://github.com/google/googletest) | 39,670 | §2.1 测试框架的最小内核与退出码… | §2.1 测试框架的最小内核：`googletest/src/gtest.cc` 的 `RUN_ALL_TESTS` → `UnitTest::Run` → 逐个 `TestInfo::Run`，最后把失败数折成进程退出码；看清「退出码即结论」这条链，CI 里的 `ctest` 才知道该不该红 |
 | 2 | [catchorg/Catch2](https://github.com/catchorg/Catch2) | 21,538 | §2.1 测试框架的最小内核与退出码… | §2.1 的另一种内核与 §1.2 的 CMake 用法：`src/catch2/catch_session.cpp` 的 `Session::run` 返回失败用例数，`CMakeLists.txt` 里 `catch_discover_tests` 把用例注册成独立测试；对照 googletest 的「一次跑完」与 Catch2 的「逐用例发现」，能看出两种框架对 CI 并行粒度的不同假设 |
-| 3 | [cpp-best-practices/gui_starter_template](https://github.com/cpp-best-practices/gui_starter_template) | — | §1.2 `PUBLIC` / `P… | §1.2、§1.3 与 §4.1 的整体样板：根 `CMakeLists.txt` 用 target-based 写法，`cmake/` 放自写模块，`.github/workflows/` 里是完整的矩阵构建 + 缓存 + artifact；把它当作本章的参考实现逐条对照——这是少数把「现代 CMake + 测试 + CI」串成一条线的小型仓库 |
+| 3 | [cpp-best-practices/gui_starter_template](https://github.com/cpp-best-practices/gui_starter_template) | 2,579 | §1.2 `PUBLIC` / `P… | §1.2、§1.3 与 §4.1 的整体样板：根 `CMakeLists.txt` 用 target-based 写法，`cmake/` 放自写模块，`.github/workflows/` 里是完整的矩阵构建 + 缓存 + artifact；把它当作本章的参考实现逐条对照——这是少数把「现代 CMake + 测试 + CI」串成一条线的小型仓库 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

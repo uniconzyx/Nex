@@ -76,7 +76,7 @@
 | 1 | [alirezadir/Machine-Learning-Interviews](https://github.com/alirezadir/Machine-Learning-Interviews) | 9,900 | 全章 | ML/LLM 岗位面试题分类整理，含系统设计；本章先读与「一页纸结构与 STAR-R」「量化指标四要素」相关的部分 |
 | 2 | [chiphuyen/ml-interviews-book](https://github.com/chiphuyen/ml-interviews-book) | 4,788 | 全章 | 《Machine Learning Interviews》开源书，面试官视角的评分逻辑；本章先读与「一页纸结构与 STAR-R」「量化指标四要素」相关的部分 |
 | 3 | [GokuMohandas/Made-With-ML](https://github.com/GokuMohandas/Made-With-ML) | 49,828 | 全章 | 从数据校验到部署监控的完整工程流水线，补「只会调 API」的短板；本章先读与「一页纸结构与 STAR-R」「量化指标四要素」相关的部分 |
-| 4 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 375,800 | 全章 | 系统设计面试基础，Agent 服务也要过容量与一致性这关；本章先读与「一页纸结构与 STAR-R」「量化指标四要素」相关的部分 |
+| 4 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,022 | 全章 | 系统设计面试基础，Agent 服务也要过容量与一致性这关；本章先读与「一页纸结构与 STAR-R」「量化指标四要素」相关的部分 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 
