@@ -35,7 +35,13 @@ TRI_VIEWS = [
     '### \U0001F393 博士生视角',
     '### \U0001F4DA 考研者视角',
 ]
-BAD_OUTPUT = ['Traceback', 'bash:', 'command not found', 'error:', 'Error:']
+# 强信号：几乎只出现在「把崩溃/构建失败输出当成期望值」的造假场景，直接 FAIL。
+# Python 崩溃转储必带 Traceback；shell 失败带 bash:/command not found。
+BAD_OUTPUT_FAIL = ['Traceback', 'bash:', 'command not found']
+# 弱信号：error:/Error: 在合法教学示例里高频出现（argparse 的 "prog: error:"、
+# RuntimeError/ValueError 等异常演示、HTTPError 等），单独出现不足以判定造假，
+# 降级为 WARN 提示人工复核，避免对正确内容产生误报。
+BAD_OUTPUT_WARN = ['error:', 'Error:']
 VIEW_RE = re.compile(r'^\| *(\U0001F9D1\u200D\U0001F4BB|[\U0001F393\U0001F4DA])', re.M)
 DEFAULT_CHAPTERS = ['fund-ch%02d' % i for i in range(13, 24)]
 
@@ -106,7 +112,7 @@ def check_examples(cdir: str, cid: str, rep: Report, tmp: str) -> None:
         # 「可疑字样」是用来拦住「把崩溃/构建失败输出当成期望值」。
         # 但 Tooling 等章会刻意演示真实报错（反例教学）：报错文本本身写在 code 里，
         # 由被测程序正常打印出来。这种情况属于合法期望输出，降级为 warn。
-        for bad in BAD_OUTPUT:
+        for bad in BAD_OUTPUT_FAIL:
             if bad not in expect:
                 continue
             if bad in code:
@@ -114,6 +120,10 @@ def check_examples(cdir: str, cid: str, rep: Report, tmp: str) -> None:
                          'expected_output 含 %r，但该串来自 code 中的样例数据（反例教学）' % bad)
             else:
                 rep.fail(cid + '/' + name, 'expected_output 含可疑字样 %r' % bad)
+        for bad in BAD_OUTPUT_WARN:
+            if bad in expect:
+                rep.warn(cid + '/' + name,
+                         'expected_output 含 %r，请确认它不是「崩溃输出误当期望值」（argparse/异常演示属正常）' % bad)
 
         if lang in ('c', 'cpp', 'c++'):
             is_cpp = lang in ('cpp', 'c++')
