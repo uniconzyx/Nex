@@ -875,53 +875,15 @@ html.lg-b .km-card {
   color: var(--km-body);
   letter-spacing: 0.04em;
 }
-.km-tower-roof,
-.km-tower-base {
-  width: 128px;
-  height: 26px;
-  background: linear-gradient(135deg, rgb(110 198 255 / 0.85), rgb(74 144 226 / 0.75));
-  clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
-  filter: drop-shadow(0 6px 16px rgb(74 144 226 / 0.35));
+/* 试炼塔：重绘后的冰晶塔插画（public/assets/kaimao/trial-tower.svg） */
+.km-trial-tower-img {
+  display: block;
+  width: 148px;
+  filter: drop-shadow(0 10px 22px rgb(74 144 226 / 0.32));
+  animation: km-breathe 4.2s ease-in-out infinite;
 }
-.km-tower-roof {
-  width: 70px;
-  height: 20px;
-  background: linear-gradient(135deg, rgb(93 180 229 / 0.95), rgb(74 144 226 / 0.9));
-  filter: drop-shadow(0 4px 10px rgb(74 144 226 / 0.45));
-}
-.km-tower-base {
-  background: linear-gradient(135deg, rgb(93 180 229 / 0.75), rgb(74 144 226 / 0.6));
-  filter: drop-shadow(0 6px 16px rgb(74 144 226 / 0.35));
-}
-.km-tower-core {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 86px;
-  height: 108px;
-  color: #fff;
-  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
-  font-size: 22px;
-  font-weight: 700;
-  background: linear-gradient(180deg, rgb(93 180 229 / 0.95), rgb(74 144 226 / 0.9));
-  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
-  box-shadow: 0 0 30px rgb(93 180 229 / 0.55);
-  animation: km-breathe 3.4s ease-in-out infinite;
-}
-/* 塔门：底部一枚深色小六边形，让「塔」读起来是塔而不是一枚图标 */
-.km-tower-core::after {
-  content: '';
-  position: absolute;
-  bottom: 6px;
-  left: 50%;
-  width: 26px;
-  height: 30px;
-  transform: translateX(-50%);
-  background: linear-gradient(180deg, rgb(43 62 80 / 0.85), rgb(43 62 80 / 0.55));
-  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
-}
-.km-trial-tower:hover .km-tower-core {
-  animation-duration: 1.8s;
+.km-trial-tower:hover .km-trial-tower-img {
+  animation-duration: 2s;
 }
 .km-trial-tower:active {
   transform: scale(0.95);
@@ -1336,6 +1298,10 @@ html.lg-b .km-card {
   .km-account-chip--side {
     display: none;
   }
+  /* APK 没有系统窗口，窗口控件不显示 */
+  .km-win {
+    display: none;
+  }
   /* 主城场景：单列堆叠——信息在上，舞台在下 */
   .km-home-scene {
     min-height: 0;
@@ -1408,7 +1374,7 @@ html.lg-b .km-card {
   }
   .km-scene-floats span,
   .km-scene-cat,
-  .km-tower-core,
+  .km-trial-tower-img,
   .km-scene-weather i,
   .km-brand-avatar b {
     animation: none !important;
@@ -1782,6 +1748,184 @@ html.lg-b .km-card {
 .km-login-divider {
   color: var(--km-caption);
 }
+/* ============================================================================
+ * 结算仪式 + EXE 窗口控件
+ * ========================================================================== */
+.km-settle {
+  position: fixed;
+  inset: 0;
+  z-index: 220;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+.km-settle-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 40, 60, 0.34);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  animation: km-fade-in 0.28s ease both;
+}
+.km-settle-card {
+  position: relative;
+  z-index: 1;
+  width: min(360px, 100%);
+  padding: 26px 24px 20px;
+  border-radius: 26px;
+  text-align: center;
+  /* 结算面板要压住底下的页面内容，用更实的玻璃而不是全透 */
+  background: rgb(255 255 255 / 0.86);
+  border: 1px solid var(--km-glass-border);
+  box-shadow: var(--km-glass-inner), 0 30px 70px rgb(60 95 135 / 0.3);
+  -webkit-backdrop-filter: blur(var(--km-glass-blur)) saturate(var(--km-glass-sat));
+  backdrop-filter: blur(var(--km-glass-blur)) saturate(var(--km-glass-sat));
+  animation: km-pop-in 0.5s var(--km-spring) both;
+}
+.km-settle-stars {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.km-settle-stars span {
+  font-size: 34px;
+  line-height: 1;
+  color: var(--km-disabled);
+  opacity: 0.35;
+  transform: translateY(-46px) scale(0.5);
+  animation: km-star-drop 0.62s var(--km-spring) both;
+}
+.km-settle-stars span.on {
+  color: var(--km-warning);
+  text-shadow: 0 0 18px rgb(251 191 36 / 0.85);
+}
+@keyframes km-star-drop {
+  0% {
+    transform: translateY(-46px) scale(0.5);
+    opacity: 0;
+  }
+  62% {
+    transform: translateY(5px) scale(1.14);
+    opacity: 1;
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+.km-settle-card h3 {
+  margin: 0;
+  color: var(--km-title);
+  font-size: 22px;
+  letter-spacing: -0.01em;
+}
+.km-settle-desc {
+  margin: 6px 0 16px;
+  color: var(--km-body);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.km-settle-exp {
+  position: relative;
+  height: 16px;
+  border-radius: 10px;
+  background: var(--km-track);
+  overflow: hidden;
+}
+.km-settle-exp-fill {
+  position: relative;
+  height: 100%;
+  border-radius: 10px;
+  background: linear-gradient(90deg, var(--km-primary-deep), var(--km-primary-lift));
+  transition: width 1.1s cubic-bezier(0.2, 0.8, 0.2, 1);
+  overflow: hidden;
+}
+/* 波浪液面：斜向条纹滚动，读起来像液体在注入 */
+.km-settle-exp-fill i {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.3) 0 10px, transparent 10px 22px);
+  animation: km-wave 1.1s linear infinite;
+}
+@keyframes km-wave {
+  to {
+    background-position: 22px 0;
+  }
+}
+.km-settle-exp-text {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #1e3a5f;
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 3px #fff, 0 1px 0 #fff;
+}
+.km-settle-coin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin: 16px 0 18px;
+}
+.km-settle-coin-ico {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #f6d78a, #c9971f);
+  box-shadow: 0 0 8px rgb(201 151 31 / 0.55);
+}
+.km-settle-coin b {
+  color: var(--km-title);
+  font-size: 28px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.km-settle-coin em {
+  color: var(--km-caption);
+  font-size: 12px;
+  font-style: normal;
+}
+@keyframes km-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* EXE 窗口控件 */
+.km-win {
+  display: flex;
+  gap: 2px;
+  margin-left: 4px;
+}
+.km-win-btn {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  color: var(--km-ink-soft);
+  transition: background-color 0.16s ease, color 0.16s ease, transform 0.16s var(--km-spring);
+}
+.km-win-btn:hover {
+  background: rgb(93 180 229 / 0.16);
+  color: var(--km-accent-deep);
+}
+.km-win-btn:active {
+  transform: scale(0.94);
+}
+.km-win-btn.is-close:hover {
+  background: rgb(248 113 113 / 0.18);
+  color: #d64545;
+}
+
 /* ── 隐藏台词气泡（连点搜索 5 次） ─────────────────────────────── */
 .km-secret-bubble {
   position: fixed;

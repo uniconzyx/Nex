@@ -159,9 +159,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: KmPage) => void }) {
               onClick={() => onNavigate('learn')}
               aria-label="进入知识试炼章节列表"
             >
-              <span className="km-tower-roof" />
-              <span className="km-tower-core">&lt;/&gt;</span>
-              <span className="km-tower-base" />
+              <img className="km-trial-tower-img" src="/assets/kaimao/trial-tower.svg" alt="" />
               <em>进入试炼塔</em>
             </button>
             <div className="km-scene-cat-wrap">

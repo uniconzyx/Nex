@@ -47,7 +47,7 @@ import {
 } from './gameTypes';
 import { chapterStages, STAGE_META } from './stages';
 import { chapterName } from './graph';
-import { pulseCoins, pushEncounter, pushToast } from './feedback';
+import { pulseCoins, pushEncounter, pushSettlement, pushToast } from './feedback';
 import { flashMood } from './mood';
 
 export type { Theme, ProgressState, AnswerResult } from './gameTypes';
@@ -851,6 +851,16 @@ function applyAnswer(e: Extract<ProgressEvent, { type: 'answer' }>): AnswerResul
       icon: '★',
       ttl: 4200,
     });
+    // 值得停下来看一眼的里程碑 → 全屏结算
+    pushSettlement({
+      title: '三关全通',
+      desc: `${chapterNameSafe(chapterId)} · 这一章进了图鉴目录`,
+      stars: 3,
+      coins: 60,
+      exp: 20,
+      expGoal: 300,
+      kind: 'chapter',
+    });
   }
 
   return {
@@ -932,6 +942,15 @@ function applyProject(slug: string, ok: boolean): AnswerResult | null {
     const after = withCoins(next, 30, `通关项目 ${slug}`);
     if (after) next = after;
     pushToast({ kind: 'ok', title: '项目通关', desc: `+30 结晶 · ${slug}`, icon: '🏆' });
+    pushSettlement({
+      title: '项目通关',
+      desc: `${slug} · 战利品已入库`,
+      stars: 3,
+      coins: 30,
+      exp: 30,
+      expGoal: 300,
+      kind: 'project',
+    });
   }
   commit(normalize(next));
   return null;
@@ -948,6 +967,15 @@ function applyCheckin(date: string): AnswerResult | null {
   const after = withCoins(next, reward, `签到 · 连续 ${streak} 天`);
   if (after) next = after;
   pushToast({ kind: 'coin', title: `签到 +${reward}`, desc: `连续 ${streak} 天，明天继续`, icon: '🕯️' });
+  pushSettlement({
+    title: '签到成功',
+    desc: `连续 ${streak} 天 · 明天继续`,
+    stars: 1,
+    coins: reward,
+    exp: 50,
+    expGoal: 300,
+    kind: 'checkin',
+  });
   commit(normalize(next));
   return null;
 }

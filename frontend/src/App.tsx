@@ -18,6 +18,7 @@ import { AccountDrawer } from './components/AccountDrawer';
 import { LoginGate } from './components/LoginGate';
 import { CppCatFab } from './components/CppCatFab';
 import { ToastHost } from './components/ToastHost';
+import { SettlementOverlay } from './components/SettlementOverlay';
 import { AiPanel, type AiMode } from './components/AiPanel';
 import { HomePage } from './pages/HomePage';
 import { LearnPage } from './pages/LearnPage';
@@ -234,6 +235,7 @@ export function App() {
 
       {/* 全局反馈层：toast + 怪物遭遇，任何页面的动作都从这里出声 */}
       <ToastHost />
+      <SettlementOverlay />
 
       <CppCatFab onClick={() => openAi()} onPress={onFabPress} active={ai.open} />
       {ai.open && (

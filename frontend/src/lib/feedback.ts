@@ -161,3 +161,55 @@ export function useCoinPulse(): { id: string; delta: number } | null {
   }, []);
   return v;
 }
+
+/* ------------------------------------------------------------- 结算面板 */
+
+/**
+ * 一次「值得停下来看一眼」的结算：章节三关全通、项目通关、签到。
+ * 与 toast 的区别：toast 是瞬时提示，结算是全屏仪式（有星级、有进度注入、有数字滚动）。
+ */
+export interface Settlement {
+  id: string;
+  title: string;
+  desc: string;
+  /** 1~3 颗星：完成度 */
+  stars: number;
+  /** 本次获得的结晶 */
+  coins: number;
+  /** 本次获得的经验（用于进度条注入） */
+  exp: number;
+  /** 经验条目标值（用于算百分比） */
+  expGoal: number;
+  kind: 'chapter' | 'project' | 'checkin';
+}
+
+let settlement: Settlement | null = null;
+const settlementListeners = new Set<(s: Settlement | null) => void>();
+
+function emitSettlement(): void {
+  for (const fn of settlementListeners) fn(settlement);
+}
+
+/** 推一次结算；同一时刻只保留最后一次（连点多个奖励不叠面板） */
+export function pushSettlement(s: Omit<Settlement, 'id'>): void {
+  settlement = { ...s, id: nextId() };
+  emitSettlement();
+}
+
+export function dismissSettlement(): void {
+  if (!settlement) return;
+  settlement = null;
+  emitSettlement();
+}
+
+export function useSettlement(): Settlement | null {
+  const [v, setV] = useState<Settlement | null>(settlement);
+  useEffect(() => {
+    settlementListeners.add(setV);
+    setV(settlement);
+    return () => {
+      settlementListeners.delete(setV);
+    };
+  }, []);
+  return v;
+}

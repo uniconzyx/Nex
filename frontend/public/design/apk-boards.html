@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>凯喵Code试炼录 · APK 界面方案 A–E</title>
+<style>
+  :root{
+    --env1:#EBF4FA; --env2:#F6F9FC; --env3:#E2EEF8;
+    --glow-a:#C5E4FF; --glow-b:#E3DEFF;
+    --primary:#5DB4E5; --deep:#4A90E2; --lift:#6EC6FF; --secondary:#A2D2FF;
+    --mint:#31D0AA; --violet:#8B5CF6;
+    --title:#2B3E50; --body:#4A6076; --caption:#7B93A8; --disabled:#B0C4D4;
+    --glass:rgba(255,255,255,.55); --glass-b:rgba(255,255,255,.85);
+    --shadow:0 12px 32px rgba(114,148,180,.12);
+    --spring:cubic-bezier(.175,.885,.32,1.275);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; padding:32px 28px 64px;
+    font-family:"PingFang SC","Microsoft YaHei","Noto Sans SC",system-ui,sans-serif;
+    color:var(--title);
+    background:
+      radial-gradient(900px 600px at 12% -8%, rgba(197,228,255,.75), transparent 60%),
+      radial-gradient(700px 500px at 88% 4%, rgba(227,222,255,.7), transparent 62%),
+      linear-gradient(135deg,var(--env1) 0%,var(--env2) 48%,var(--env3) 100%);
+    min-height:100vh;
+  }
+  header.board{max-width:1560px;margin:0 auto 34px}
+  header.board h1{margin:0 0 8px;font-size:30px;letter-spacing:-.02em}
+  header.board p{margin:0;color:var(--body);font-size:15px;line-height:1.7;max-width:74ch}
+  .swatches{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+  .swatches i{display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.6);border:1px solid var(--glass-b);font-size:12px;color:var(--body)}
+  .swatches i b{width:14px;height:14px;border-radius:4px;display:block}
+  .grid{max-width:1560px;margin:0 auto;display:grid;gap:30px;grid-template-columns:repeat(auto-fit,minmax(372px,1fr));align-items:start}
+  .board-item{display:flex;flex-direction:column;gap:14px}
+  .phone{
+    position:relative;width:100%;max-width:390px;aspect-ratio:390/844;border-radius:34px;overflow:hidden;
+    background:linear-gradient(180deg,rgba(255,255,255,.25),rgba(226,238,248,.92)),radial-gradient(120% 80% at 70% 0%,rgba(197,228,255,.8),transparent 60%);
+    border:1px solid var(--glass-b);
+    box-shadow:inset 0 1px 2px rgba(255,255,255,.9),0 26px 60px rgba(114,148,180,.22);
+    display:flex;flex-direction:column;
+  }
+  .phone::before,.phone::after{content:'';position:absolute;border-radius:50%;filter:blur(60px);z-index:0}
+  .phone::before{width:220px;height:220px;top:-70px;right:-60px;background:radial-gradient(circle,var(--glow-a),transparent 70%);opacity:.7}
+  .phone::after{width:190px;height:190px;bottom:-70px;left:-50px;background:radial-gradient(circle,var(--glow-b),transparent 70%);opacity:.6}
+  .p-top{
+    position:relative;z-index:2;display:flex;align-items:center;gap:10px;padding:14px 14px 10px;
+  }
+  .avatar{position:relative;width:40px;height:40px;flex:none}
+  .avatar img{width:40px;height:40px;border-radius:50%;object-fit:cover;border:1px solid var(--glass-b);box-shadow:0 2px 10px rgba(93,180,229,.38)}
+  .avatar::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:1px dashed rgba(93,180,229,.45)}
+  .avatar b{position:absolute;right:-6px;bottom:-4px;min-width:19px;height:19px;border-radius:10px;background:linear-gradient(135deg,var(--lift),var(--deep));color:#fff;font-size:11px;line-height:19px;text-align:center;box-shadow:0 0 0 2px rgba(255,255,255,.85)}
+  .p-title{font-size:14px;font-weight:700;letter-spacing:.01em}
+  .p-title small{display:block;font-weight:500;font-size:11.5px;color:var(--caption);margin-top:2px}
+  .chip{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:15px;background:var(--glass);border:1px solid var(--glass-b);font-size:12px;color:var(--body);box-shadow:inset 0 1px 2px rgba(255,255,255,.9)}
+  .chip .dot{width:7px;height:7px;border-radius:50%;background:var(--disabled)}
+  .chip.on .dot{background:#34D399;box-shadow:0 0 8px rgba(52,211,153,.7)}
+  .p-body{position:relative;z-index:2;flex:1;overflow:hidden;padding:4px 14px 12px;display:flex;flex-direction:column;gap:10px}
+  .glass{background:var(--glass);border:1px solid var(--glass-b);border-radius:18px;box-shadow:inset 0 1px 2px rgba(255,255,255,.9),var(--shadow)}
+  .p-nav{
+    position:relative;z-index:2;display:flex;gap:6px;padding:8px 12px calc(12px + env(safe-area-inset-bottom,0px));
+    background:rgba(255,255,255,.55);border-top:1px solid var(--glass-b);backdrop-filter:blur(16px) saturate(160%);
+  }
+  .p-nav span{flex:1;text-align:center;font-size:11.5px;color:var(--caption);padding:7px 0;border-radius:12px}
+  .p-nav span.on{background:linear-gradient(135deg,var(--lift),var(--deep));color:#fff;box-shadow:0 4px 12px rgba(74,144,226,.3)}
+  .hex{width:22px;height:26px;background:linear-gradient(135deg,var(--secondary),var(--primary));clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
+  .hex.ghost{background:rgba(176,196,212,.5)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 16px;border-radius:14px;border:0;background:linear-gradient(135deg,var(--lift),var(--deep));color:#fff;font-size:14px;font-weight:700;box-shadow:0 8px 20px rgba(74,144,226,.3)}
+  .btn.ghost{background:rgba(255,255,255,.6);border:1px solid var(--glass-b);color:var(--body);box-shadow:none}
+  .meter{height:5px;border-radius:5px;background:#E2E8F0;overflow:hidden}
+  .meter i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,var(--deep),var(--lift))}
+  .muted{color:var(--caption)}
+  .b-title{display:flex;align-items:baseline;gap:10px;margin-bottom:2px}
+  .b-title h3{margin:0;font-size:19px;letter-spacing:-.01em}
+  .b-title span{font-size:12.5px;color:var(--caption)}
+  .b-idea{margin:0;font-size:13.5px;color:var(--body);line-height:1.65}
+  .b-notes{margin:0;padding-left:18px;font-size:12.5px;color:var(--body);line-height:1.85}
+  .b-notes li::marker{color:var(--primary)}
+  .b-meta{display:flex;flex-wrap:wrap;gap:6px}
+  .b-meta i{font-style:normal;font-size:11.5px;padding:3px 9px;border-radius:999px;background:rgba(93,180,229,.12);color:#2F6494}
+  .tag-A{background:linear-gradient(135deg,#5DB4E5,#4A90E2);color:#fff}
+  .tag-B{background:linear-gradient(135deg,#31D0AA,#2FA8C9);color:#fff}
+  .tag-C{background:linear-gradient(135deg,#8B5CF6,#6D4BD8);color:#fff}
+  .tag-D{background:linear-gradient(135deg,#FBBF24,#F59E0B);color:#fff}
+  .tag-E{background:linear-gradient(135deg,#F472B6,#EC4899);color:#fff}
+
+  /* ── A 学院门厅 ─────────────────────────────── */
+  .a-hero{position:relative;height:250px;border-radius:20px;overflow:hidden;border:1px solid var(--glass-b);
+    background:linear-gradient(180deg,rgba(255,255,255,.2),rgba(226,238,248,.9)),radial-gradient(120% 90% at 70% 4%,rgba(197,228,255,.85),transparent 62%);
+    box-shadow:inset 0 1px 2px rgba(255,255,255,.9),var(--shadow);display:flex;flex-direction:column}
+  .a-hero .weather{position:absolute;left:12px;top:12px;display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.72);border:1px solid var(--glass-b);font-size:11.5px;color:var(--body)}
+  .a-hero .weather i{width:8px;height:8px;border-radius:50%;background:#FBBF24;box-shadow:0 0 8px rgba(251,191,36,.9)}
+  .a-hero .tower{position:absolute;right:6px;bottom:0;width:132px}
+  .a-hero .copy{position:absolute;left:12px;bottom:14px;max-width:190px}
+  .a-hero .copy b{display:block;font-size:22px;line-height:1.16;letter-spacing:-.02em}
+  .a-hero .copy span{font-size:12px;color:var(--body)}
+  .a-hero .cta{position:absolute;left:12px;bottom:-16px}
+  .a-next{padding:16px 16px 14px;border-radius:20px;background:linear-gradient(135deg,rgba(110,198,255,.92),rgba(74,144,226,.9));color:#fff;box-shadow:0 12px 26px rgba(74,144,226,.3)}
+  .a-next small{font-size:11.5px;opacity:.85}
+  .a-next b{display:block;font-size:18px;margin:4px 0 2px}
+  .a-next p{margin:0 0 10px;font-size:12.5px;opacity:.9}
+  .a-next .btn{background:#fff;color:#2F6494;box-shadow:0 6px 16px rgba(0,0,0,.12)}
+
+  /* ── B 任务清单 ─────────────────────────────── */
+  .b-head{padding:4px 2px 2px}
+  .b-head h2{margin:2px 0 4px;font-size:23px;letter-spacing:-.02em}
+  .b-head p{margin:0;font-size:12.5px;color:var(--caption)}
+  .b-task{display:flex;gap:12px;padding:14px 15px;align-items:flex-start}
+  .b-task .ico{width:34px;height:40px;flex:none;display:grid;place-items:center}
+  .b-task .txt{flex:1;min-width:0}
+  .b-task .txt b{display:block;font-size:15px;margin-bottom:3px}
+  .b-task .txt span{display:block;font-size:12px;color:var(--body);line-height:1.55}
+  .b-task .num{font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--title)}
+  .b-task .meter{margin-top:9px}
+
+  /* ── C 仪表盘 ─────────────────────────────── */
+  .c-ring{display:flex;align-items:center;gap:16px;padding:16px}
+  .c-ring .ring{position:relative;width:92px;height:92px;flex:none}
+  .c-ring .ring svg{transform:rotate(-90deg)}
+  .c-ring .ring b{position:absolute;inset:0;display:grid;place-items:center;font-size:19px;font-variant-numeric:tabular-nums}
+  .c-ring .ring b small{display:block;font-size:10px;color:var(--caption);font-weight:500;margin-top:2px}
+  .c-tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .c-tile{padding:13px 14px;border-radius:16px}
+  .c-tile .k{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--caption)}
+  .c-tile .v{font-size:21px;font-weight:800;margin:6px 0 8px;font-variant-numeric:tabular-nums}
+  .c-bar{display:flex;align-items:center;gap:8px;padding:11px 13px}
+  .c-bar .meter{flex:1}
+  .c-bar b{font-size:12px;font-variant-numeric:tabular-nums}
+
+  /* ── D 分镜漫画 ─────────────────────────────── */
+  .d-banner{position:relative;height:172px;border-radius:20px;overflow:hidden;border:1px solid var(--glass-b);
+    background:linear-gradient(180deg,rgba(197,228,255,.75),rgba(255,255,255,.35)),radial-gradient(90% 70% at 30% 20%,rgba(255,255,255,.85),transparent 60%);
+    box-shadow:var(--shadow)}
+  .d-banner .sky{position:absolute;left:0;right:0;bottom:0;height:46%;display:flex;align-items:flex-end;gap:8px;padding:0 14px;opacity:.5}
+  .d-banner .sky i{flex:1;border-radius:8px 8px 0 0;background:linear-gradient(180deg,rgba(162,210,255,.2),rgba(93,180,229,.5))}
+  .d-banner .tower{position:absolute;right:10px;bottom:0;width:120px}
+  .d-banner .cap{position:absolute;left:12px;top:12px;font-size:11.5px;color:var(--body);background:rgba(255,255,255,.72);border:1px solid var(--glass-b);padding:4px 10px;border-radius:999px}
+  .d-panel{padding:13px 15px;border-radius:18px;position:relative}
+  .d-panel .no{font-size:11px;color:var(--caption);display:flex;align-items:center;gap:6px}
+  .d-panel b{display:block;font-size:15px;margin:5px 0 3px}
+  .d-panel p{margin:0;font-size:12.5px;color:var(--body);line-height:1.6}
+  .d-bubble{position:absolute;right:-6px;top:-14px;max-width:172px;padding:8px 11px;border-radius:14px 14px 4px 14px;background:rgba(255,255,255,.9);border:1px solid var(--glass-b);box-shadow:var(--shadow);font-size:11.5px;color:var(--title);line-height:1.5}
+
+  /* ── E 极简单栏 ─────────────────────────────── */
+  .e-body{display:flex;gap:12px;flex:1;min-height:0}
+  .e-rail{display:flex;flex-direction:column;gap:10px;align-items:center;padding-top:6px}
+  .e-rail .dot{width:34px;height:40px;display:grid;place-items:center}
+  .e-timeline{position:relative;flex:1;padding-left:26px;display:flex;flex-direction:column;gap:10px}
+  .e-timeline::before{content:'';position:absolute;left:7px;top:10px;bottom:10px;width:2px;border-radius:2px;background:linear-gradient(180deg,rgba(110,198,255,.9),rgba(139,92,246,.45))}
+  .e-node{position:relative;padding:13px 15px;border-radius:16px}
+  .e-node::before{content:'';position:absolute;left:-24px;top:16px;width:12px;height:14px;background:var(--primary);clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);box-shadow:0 0 10px rgba(93,180,229,.6)}
+  .e-node.done::before{background:#34D399}
+  .e-node.locked::before{background:var(--disabled);box-shadow:none}
+  .e-node b{display:block;font-size:14.5px;margin-bottom:4px}
+  .e-node p{margin:0;font-size:12px;color:var(--body);line-height:1.55}
+  .e-node .k{position:absolute;right:12px;top:12px;font-size:11px;color:var(--caption)}
+  .e-fab{position:absolute;right:16px;bottom:76px;width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.75);border:1px solid var(--glass-b);box-shadow:0 8px 20px rgba(114,148,180,.24);overflow:hidden;z-index:3}
+  .e-fab img{width:100%;height:100%;object-fit:cover}
+  .note{max-width:1560px;margin:40px auto 0;padding:20px 22px;border-radius:20px;background:rgba(255,255,255,.5);border:1px solid var(--glass-b);box-shadow:var(--shadow)}
+  .note h2{margin:0 0 8px;font-size:17px}
+  .note p{margin:0 0 6px;font-size:13.5px;color:var(--body);line-height:1.75}
+</style>
+</head>
+<body>
+
+<header class="board">
+  <h1>《凯喵Code试炼录》APK 界面 · 5 版方案</h1>
+  <p>
+    五版都以 <b>11-login（登录页）</b> 为视觉母版：冰蓝奶白液态玻璃、六边形母题、圆体字阶、居中大标题 + 副标题 + 单一主行动。
+    区别只在<b>信息骨架</b>——首屏把什么放在最前面。内容全部为真实数据口径（今日试炼 0/3、本周 BOSS、图鉴 0 只、项目 T1–T4）。
+    选定后我按该版改造 <code>HomePage</code> / 导航 / 卡片，并沿用同一套 token。
+  </p>
+  <div class="swatches">
+    <i><b style="background:#EBF4FA"></b>环境 #EBF4FA</i>
+    <i><b style="background:#5DB4E5"></b>品牌 #5DB4E5</i>
+    <i><b style="background:#4A90E2"></b>深色 #4A90E2</i>
+    <i><b style="background:#31D0AA"></b>点缀 #31D0AA</i>
+    <i><b style="background:#8B5CF6"></b>史诗 #8B5CF6</i>
+    <i><b style="background:#2B3E50"></b>标题 #2B3E50</i>
+    <i><b style="background:#4A6076"></b>正文 #4A6076</i>
+    <i><b style="background:#7B93A8"></b>次要 #7B93A8</i>
+  </div>
+</header>
+
+<div class="grid">
+
+  <!-- ══════════ A ══════════ -->
+  <section class="board-item">
+    <div class="phone">
+      <div class="p-top">
+        <span class="avatar"><img src="/assets/kaimao/mood-happy.png" alt=""><b>1</b></span>
+        <span class="p-title">凯喵Code试炼录<small>Lv.1 初入试炼 · 0/300 EXP</small></span>
+        <span class="chip on" style="margin-left:auto"><span class="dot"></span>离线模式</span>
+      </div>
+      <div class="p-body">
+        <div class="a-hero">
+          <span class="weather"><i></i>晨露 · 学习天气</span>
+          <span class="tower"><img src="/assets/kaimao/trial-tower.svg" alt="" style="width:100%;display:block"></span>
+          <span class="copy"><b>冰蓝学院<br>今日开塔</b><span>三道新题，按当前学科由浅入深排好</span></span>
+        </div>
+        <div class="a-next" style="margin-top:12px">
+          <small>现在只做一件事</small>
+          <b>今日试炼 0 / 3</b>
+          <p>错题里失败最多的 2 道 + 当前学科一道新题</p>
+          <span class="btn">开始今日试炼</span>
+        </div>
+        <div class="glass" style="padding:14px 15px">
+          <b style="font-size:14px">今日试炼 · 0/3</b>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
+            <div style="display:flex;align-items:center;gap:9px"><span class="hex ghost"></span><span style="font-size:13px">指针与数组的边界</span></div>
+            <div style="display:flex;align-items:center;gap:9px"><span class="hex ghost"></span><span style="font-size:13px">const 与 volatile 的取舍</span></div>
+            <div style="display:flex;align-items:center;gap:9px"><span class="hex ghost"></span><span style="font-size:13px">时间复杂度里的摊还</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="p-nav"><span class="on">主城</span><span>知识试炼</span><span>题库</span><span>图鉴</span><span>我的</span></div>
+    </div>
+    <div>
+      <div class="b-title"><h3>A · 学院门厅</h3><span>Hero 优先 · 场景先行</span></div>
+      <p class="b-idea">把「冰蓝学院 + 试炼塔」做成真正的门面，首屏一半是画面，一半是唯一该做的动作。</p>
+      <ul class="b-notes">
+        <li>塔用重绘插画（<code>trial-tower.svg</code>），带呼吸缩放与光晕。</li>
+        <li>主行动只有一颗：<b>开始今日试炼</b>；其余内容降为玻璃卡。</li>
+        <li>视觉冲击最强，但首屏信息量最少，适合「每天打开看一眼就开干」。</li>
+      </ul>
+      <div class="b-meta"><i>推荐度 ★★★★★</i><i>实现成本 中</i><i>适配现有数据结构 佳</i></div>
+    </div>
+  </section>
+
+  <!-- ══════════ B ══════════ -->
+  <section class="board-item">
+    <div class="phone">
+      <div class="p-top">
+        <span class="avatar"><img src="/assets/kaimao/mood-happy.png" alt=""><b>1</b></span>
+        <span class="p-title">凯喵Code试炼录<small>Lv.1 初入试炼 · 0/300 EXP</small></span>
+        <span class="chip on" style="margin-left:auto"><span class="dot"></span>离线模式</span>
+      </div>
+      <div class="p-body">
+        <div class="b-head">
+          <h2>今天做这三件事</h2>
+          <p>凯喵按你的错题排好了顺序</p>
+        </div>
+        <div class="glass b-task">
+          <span class="ico"><span class="hex"></span></span>
+          <span class="txt"><b>今日试炼</b><span>3 道真题，一半来自错题</span><span class="meter" style="margin-top:9px"><i style="width:0%"></i></span></span>
+          <span class="num">0/3</span>
+        </div>
+        <div class="glass b-task">
+          <span class="ico"><span class="hex"></span></span>
+          <span class="txt"><b>本周 BOSS · Linux 基础</b><span>三道全对才清空，每周一次</span><span class="meter" style="margin-top:9px"><i style="width:0%"></i></span></span>
+          <span class="num">0/3</span>
+        </div>
+        <div class="glass b-task">
+          <span class="ico"><span class="hex ghost"></span></span>
+          <span class="txt"><b>顺手项目 · cJSON</b><span>T1 · 1500 行 · 读懂第一个 C 工程库</span><span class="meter" style="margin-top:9px"><i style="width:12%"></i></span></span>
+          <span class="num">T1</span>
+        </div>
+        <div class="glass b-task">
+          <span class="ico"><span class="hex ghost"></span></span>
+          <span class="txt"><b>去签到</b><span>连续 0 天，签到 +20 结晶</span></span>
+          <span class="num muted">＋</span>
+        </div>
+      </div>
+      <div class="p-nav"><span class="on">主城</span><span>知识试炼</span><span>题库</span><span>图鉴</span><span>我的</span></div>
+    </div>
+    <div>
+      <div class="b-title"><h3>B · 任务清单</h3><span>List 优先 · 决定导向</span></div>
+      <p class="b-idea">首屏就是一份待办清单：每张卡一个任务、一句理由、一条进度，和登录页一样是「一句话说清 + 一个动作」。</p>
+      <ul class="b-notes">
+        <li>完全复用现有 <code>nextAction</code> / <code>daily</code> / <code>weekly</code> 数据，不新增逻辑。</li>
+        <li>把「今日试炼 / 周 BOSS / 顺手项目 / 签到」四件事视觉等权，弱化视觉冲击。</li>
+        <li>最省事、最不容易做错；缺点是缺少记忆点。</li>
+      </ul>
+      <div class="b-meta"><i>推荐度 ★★★★☆</i><i>实现成本 低</i><i>适配现有数据结构 极佳</i></div>
+    </div>
+  </section>
+
+  <!-- ══════════ C ══════════ -->
+  <section class="board-item">
+    <div class="phone">
+      <div class="p-top">
+        <span class="avatar"><img src="/assets/kaimao/mood-happy.png" alt=""><b>1</b></span>
+        <span class="p-title">凯喵Code试炼录<small>Lv.1 初入试炼 · 0/300 EXP</small></span>
+        <span class="chip on" style="margin-left:auto"><span class="dot"></span>离线模式</span>
+      </div>
+      <div class="p-body">
+        <div class="glass c-ring">
+          <span class="ring">
+            <svg width="92" height="92" viewBox="0 0 92 92">
+              <circle cx="46" cy="46" r="38" fill="none" stroke="rgba(93,180,229,.18)" stroke-width="9"/>
+              <circle cx="46" cy="46" r="38" fill="none" stroke="#5DB4E5" stroke-width="9" stroke-linecap="round" stroke-dasharray="238.8" stroke-dashoffset="238.8"/>
+            </svg>
+            <b style="display:block">0%<small>平均掌握</small></b>
+          </span>
+          <span style="flex:1">
+            <b style="display:block;font-size:15px">冒险才刚刚开始</b>
+            <span style="font-size:12px;color:var(--body);line-height:1.6;display:block;margin-top:4px">0 / 157 章节 · 图鉴暂时干净</span>
+            <span class="meter" style="display:block;margin-top:10px"><i style="width:2%"></i></span>
+          </span>
+        </div>
+        <div class="c-tiles">
+          <div class="glass c-tile"><span class="k"><span class="hex" style="width:16px;height:19px"></span>今日试炼</span><span class="v">0/3</span><span class="meter"><i style="width:0%"></i></span></div>
+          <div class="glass c-tile"><span class="k"><span class="hex" style="width:16px;height:19px"></span>本周 BOSS</span><span class="v">0/3</span><span class="meter"><i style="width:0%"></i></span></div>
+          <div class="glass c-tile"><span class="k"><span class="hex ghost" style="width:16px;height:19px"></span>图鉴</span><span class="v">0</span><span class="meter"><i style="width:0%"></i></span></div>
+          <div class="glass c-tile"><span class="k"><span class="hex ghost" style="width:16px;height:19px"></span>项目</span><span class="v">110</span><span class="meter"><i style="width:64%"></i></span></div>
+        </div>
+        <div class="glass c-bar"><span style="font-size:12.5px">连续签到</span><span class="meter"><i style="width:6%"></i></span><b>0 天</b></div>
+        <div class="glass c-bar"><span style="font-size:12.5px">经验</span><span class="meter"><i style="width:12%"></i></span><b>0 / 300</b></div>
+        <div class="glass" style="padding:13px 15px">
+          <span style="font-size:12.5px;color:var(--caption)">凯喵此刻</span>
+          <p style="margin:6px 0 0;font-size:13px;line-height:1.6">今天还没开始呢…随便挑一道题，做一道我就醒了。</p>
+        </div>
+      </div>
+      <div class="p-nav"><span class="on">主城</span><span>知识试炼</span><span>题库</span><span>图鉴</span><span>我的</span></div>
+    </div>
+    <div>
+      <div class="b-title"><h3>C · 仪表盘</h3><span>Data 优先 · 进度可见</span></div>
+      <p class="b-idea">首屏是一块仪表：掌握度环 + 四枚六边形数据瓦片 + 两条细进度条，适合「长期用户回来看进度」。</p>
+      <ul class="b-notes">
+        <li>数字全部来自 <code>masterySummary</code> / <code>daily</code> / <code>weekly</code> / <code>BUNDLE</code>，零假数据。</li>
+        <li>把凯喵台词放进一块固定卡，保留「宠物感」。</li>
+        <li>信息密度最高，首屏偏冷、对新用户不够有吸引力。</li>
+      </ul>
+      <div class="b-meta"><i>推荐度 ★★★☆☆</i><i>实现成本 中</i><i>适配现有数据结构 极佳</i></div>
+    </div>
+  </section>
+
+  <!-- ══════════ D ══════════ -->
+  <section class="board-item">
+    <div class="phone">
+      <div class="p-top">
+        <span class="avatar"><img src="/assets/kaimao/mood-happy.png" alt=""><b>1</b></span>
+        <span class="p-title">凯喵Code试炼录<small>Lv.1 初入试炼 · 0/300 EXP</small></span>
+        <span class="chip on" style="margin-left:auto"><span class="dot"></span>离线模式</span>
+      </div>
+      <div class="p-body">
+        <div class="d-banner">
+          <span class="cap">第一幕 · 冰蓝学院</span>
+          <span class="sky"><i></i><i></i><i></i><i></i><i></i></span>
+          <span class="tower"><img src="/assets/kaimao/trial-tower.svg" alt="" style="width:100%;display:block"></span>
+        </div>
+        <div class="d-panel glass">
+          <span class="no"><span class="hex" style="width:14px;height:17px"></span>今天的第一件事</span>
+          <b>今日试炼 0 / 3</b>
+          <p>三道新题，按当前学科由浅入深排好</p>
+          <span class="d-bubble">今天正确率不错喵~ 先做第一道热热手！</span>
+        </div>
+        <div class="d-panel glass" style="margin-left:16px">
+          <span class="no"><span class="hex ghost" style="width:14px;height:17px"></span>本周的硬仗</span>
+          <b>BOSS · Linux 基础</b>
+          <p>三道全对才清空，每周一次</p>
+        </div>
+        <div class="d-panel glass" style="margin-left:32px">
+          <span class="no"><span class="hex ghost" style="width:14px;height:17px"></span>顺手能做的事</span>
+          <b>cJSON · 读懂第一个 C 工程库</b>
+          <p>T1 · 8 小时 · ★13,040</p>
+        </div>
+      </div>
+      <div class="p-nav"><span class="on">主城</span><span>知识试炼</span><span>题库</span><span>图鉴</span><span>我的</span></div>
+    </div>
+    <div>
+      <div class="b-title"><h3>D · 分镜漫画</h3><span>Narrative 优先 · 剧情感</span></div>
+      <p class="b-idea">首屏是「一格一格往下读」的漫画分镜：横幅插画 + 错位玻璃分镜卡 + 凯喵台词气泡，和剧情日志页同源。</p>
+      <ul class="b-notes">
+        <li>复用现有 <code>content/_story/acts.json</code>（41 幕）的语气与结构，接入成本低。</li>
+        <li>错位排布有手绘感，但玻璃卡片错位会牺牲可点区域的规整度。</li>
+        <li>最有辨识度，适合喜欢「被讲述」的用户。</li>
+      </ul>
+      <div class="b-meta"><i>推荐度 ★★★★☆</i><i>实现成本 中高</i><i>适配现有数据结构 好</i></div>
+    </div>
+  </section>
+
+  <!-- ══════════ E ══════════ -->
+  <section class="board-item">
+    <div class="phone">
+      <div class="p-top">
+        <span class="avatar"><img src="/assets/kaimao/mood-happy.png" alt=""><b>1</b></span>
+        <span class="p-title">凯喵Code试炼录<small>Lv.1 初入试炼</small></span>
+        <span class="chip on" style="margin-left:auto"><span class="dot"></span>离线</span>
+      </div>
+      <div class="p-body" style="padding-bottom:64px">
+        <div class="e-body">
+          <div class="e-rail">
+            <span class="dot"><span class="hex"></span></span>
+            <span class="dot"><span class="hex ghost"></span></span>
+            <span class="dot"><span class="hex ghost"></span></span>
+            <span class="dot"><span class="hex ghost"></span></span>
+            <span class="dot"><span class="hex ghost"></span></span>
+          </div>
+          <div class="e-timeline">
+            <div class="e-node glass"><span class="k">0/3</span><b>今日试炼</b><p>三道新题，按当前学科由浅入深排好</p></div>
+            <div class="e-node glass locked"><span class="k">0/3</span><b>本周 BOSS</b><p>先在今日试炼里答对 6 题解锁</p></div>
+            <div class="e-node glass locked"><span class="k">T1</span><b>顺手项目 · cJSON</b><p>前置章节达标后开启</p></div>
+            <div class="e-node glass"><span class="k">＋20</span><b>去签到</b><p>连续 0 天，断签归零但结晶不收回</p></div>
+          </div>
+        </div>
+      </div>
+      <span class="e-fab"><img src="/assets/kaimao/mood-happy.png" alt=""></span>
+      <div class="p-nav"><span class="on">主城</span><span>试炼</span><span>题库</span><span>图鉴</span><span>我的</span></div>
+    </div>
+    <div>
+      <div class="b-title"><h3>E · 极简单栏</h3><span>Focus 优先 · 一条线</span></div>
+      <p class="b-idea">左侧竖排六边形图标 + 右侧一条光纤时间线，所有待办顺着线往下排；凯喵缩成右下角一颗悬浮球。</p>
+      <ul class="b-notes">
+        <li>和剧情页的「光纤时间轴」是同一种语言，整体最统一。</li>
+        <li>竖排图标在 APK 上要留出 56px 侧栏，横屏 EXE 版几乎不用改。</li>
+        <li>最安静、最耐看，但首屏的情绪冲击弱于 A/D。</li>
+      </ul>
+      <div class="b-meta"><i>推荐度 ★★★★☆</i><i>实现成本 中</i><i>适配 EXE 极佳</i></div>
+    </div>
+  </section>
+
+</div>
+
+<div class="note">
+  <h2>怎么定？</h2>
+  <p>· <b>想要记忆点</b>（塔、插画、凯喵） → 选 <b>A</b> 或 <b>D</b>；<b>想要效率</b>（一眼看到该做什么） → 选 <b>B</b> 或 <b>C</b>；<b>想要耐看与统一</b> → 选 <b>E</b>。</p>
+  <p>· 也可以组合，比如「<b>A 的塔 + B 的任务卡 + E 的时间线</b>」。回复版本号（如「A」或「A+B」）我按它改造现有 HomePage 与导航，保持登录页那套 token 不动。</p>
+  <p>· 试炼塔插画已重绘为 <code>frontend/public/assets/kaimao/trial-tower.svg</code>（矢量，含塔门、光晕、漂浮碎片），确认版本后可再按风格调色。</p>
+</div>
+
+</body>
+</html>

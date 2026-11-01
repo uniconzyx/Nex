@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 268" width="200" height="268" role="img" aria-label="冰蓝试炼塔">
+  <title>冰蓝试炼塔</title>
+  <defs>
+    <linearGradient id="tt-body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9BDBFF"/>
+      <stop offset="0.55" stop-color="#5DB4E5"/>
+      <stop offset="1" stop-color="#3E7FCB"/>
+    </linearGradient>
+    <linearGradient id="tt-roof" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#C9EAFF"/>
+      <stop offset="1" stop-color="#6EC6FF"/>
+    </linearGradient>
+    <linearGradient id="tt-base" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7CC6F2"/>
+      <stop offset="1" stop-color="#4A90E2"/>
+    </linearGradient>
+    <linearGradient id="tt-shard" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#E6F5FF"/>
+      <stop offset="1" stop-color="#7CC6F2"/>
+    </linearGradient>
+    <radialGradient id="tt-aura" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#C5E4FF" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#C5E4FF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="tt-floor" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#8FD3FF" stop-opacity="0.75"/>
+      <stop offset="1" stop-color="#8FD3FF" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="tt-glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="6" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="tt-soft" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+  </defs>
+
+  <!-- 背景光晕与地面 -->
+  <ellipse cx="100" cy="150" rx="92" ry="112" fill="url(#tt-aura)" opacity="0.6"/>
+  <ellipse cx="100" cy="248" rx="78" ry="13" fill="url(#tt-floor)"/>
+
+  <!-- 背后的漂浮碎片 -->
+  <g opacity="0.55" filter="url(#tt-soft)">
+    <polygon points="26,60 40,68 40,84 26,92 12,84 12,68" fill="url(#tt-shard)"/>
+    <polygon points="176,44 188,51 188,65 176,72 164,65 164,51" fill="url(#tt-shard)"/>
+    <polygon points="182,120 192,126 192,138 182,144 172,138 172,126" fill="url(#tt-shard)"/>
+    <polygon points="20,134 30,140 30,152 20,158 10,152 10,140" fill="url(#tt-shard)"/>
+  </g>
+
+  <!-- 塔基（最宽） -->
+  <polygon points="56,196 144,196 172,214 144,232 56,232 28,214"
+           fill="url(#tt-base)" opacity="0.92" filter="url(#tt-glow)"/>
+  <polygon points="56,196 144,196 158,205 42,205" fill="#C9EAFF" opacity="0.45"/>
+
+  <!-- 塔身 -->
+  <polygon points="100,58 146,86 146,140 100,168 54,140 54,86"
+           fill="url(#tt-body)" filter="url(#tt-glow)"/>
+  <!-- 塔身高光 -->
+  <polygon points="100,58 146,86 146,98 100,70 54,98 54,86" fill="#FFFFFF" opacity="0.28"/>
+
+  <!-- 塔门 -->
+  <polygon points="100,120 116,129 116,149 100,158 84,149 84,129" fill="#2B3E50" opacity="0.9"/>
+  <polygon points="100,125 111,131 111,146 100,152 89,146 89,131" fill="#1B2836" opacity="0.65"/>
+
+  <!-- 代码符号 -->
+  <g fill="none" stroke="#FFFFFF" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" opacity="0.95">
+    <polyline points="88,96 76,106 88,116"/>
+    <polyline points="112,96 124,106 112,116"/>
+    <line x1="104" y1="92" x2="96" y2="120"/>
+  </g>
+
+  <!-- 塔顶 -->
+  <polygon points="74,28 126,28 150,44 126,60 74,60 50,44"
+           fill="url(#tt-roof)" filter="url(#tt-glow)"/>
+  <polygon points="100,10 118,20 100,30 82,20" fill="#C9EAFF" opacity="0.95"/>
+  <circle cx="100" cy="6" r="3.4" fill="#FFFFFF" opacity="0.9"/>
+
+  <!-- 环绕光圈 -->
+  <ellipse cx="100" cy="120" rx="76" ry="96" fill="none" stroke="#9BDBFF" stroke-opacity="0.35" stroke-width="1.2"/>
+</svg>

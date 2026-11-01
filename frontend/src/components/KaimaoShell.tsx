@@ -39,6 +39,7 @@ import {
 import { ConnectionBadge } from './ConnectionBadge';
 import { OfflineBanner } from './OfflineBanner';
 import { BottomSheet } from './BottomSheet';
+import { WindowControls } from './WindowControls';
 
 function Icon({ paths, size = 18 }: { paths: string[]; size?: number }) {
   return (
@@ -360,6 +361,7 @@ export function KaimaoShell({
           >
             <Icon size={19} paths={NAV_FLAT.find((n) => n.key === 'settings')?.paths ?? []} />
           </button>
+          <WindowControls />
         </div>
 
         {searchOpen && (
