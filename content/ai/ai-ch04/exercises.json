@@ -189,7 +189,6 @@
       "title": "用 PEFT 库实践一次 LoRA 微调",
       "content_md": "在真实工程中一般直接使用社区库而非手写。请在本地跑通 HuggingFace PEFT 的最小 LoRA 微调流程：\n\n1. 配置 `LoraConfig`（指定 target_modules、r、lora_alpha、lora_dropout）；\n2. 用 `get_peft_model` 包装基座模型；\n3. 打印可训练参数量与总参数量之比；\n4. 微调后用 `merge_and_unload()` 合并回基座权重并验证输出一致。\n\n题面与解答请见仓库文档，此处仅提供入口链接。",
       "answer": {
-        "explanation": "工程实践题：重点是把「手写原理」与「库用法」对上，并理解 target_modules 与 alpha/r 的实际含义。注意合并前后输出一致性验证。",
         "external_note": "入口：huggingface/peft 官方仓库与 LoRA 示例文档"
       },
       "explanation": "从原理到工程库的映射能力是 AI 岗的核心考察点。",

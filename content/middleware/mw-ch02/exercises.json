@@ -79,7 +79,8 @@
       },
       "reference_code": "",
       "source": "self",
-      "source_ref": "mw-ch02 §2 RDB 触发条件（save m n 语义）"
+      "source_ref": "mw-ch02 §2 RDB 触发条件（save m n 语义）",
+      "explanation": "save m n 三条规则是「或」关系：任意一条满足即触发一次 BGSAVE，不是「且」、也不会每条各存一份。BGSAVE 触发后重置脏页计数与 lastsave 时间戳，只生成一份 RDB 快照。理解这点才能正确估算快照频率与数据丢失窗口。"
     },
     {
       "type": "coding",

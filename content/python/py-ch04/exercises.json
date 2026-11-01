@@ -98,8 +98,7 @@
       "answer": {
         "correct": [
           "`[1, 2]`\\n`{\"1\": \"a\"}`\\n`NaN`\\n`\"\\\\u4e2d\\\\u6587\"`"
-        ],
-        "explanation": "① tuple 被序列化为 **JSON 数组**（`[1, 2]`）——json 没有 tuple 类型，往返 `loads` 后变成 list；② JSON 的键**必须是字符串**，整数键被 `int→str` 转换，往返后 `{1: 'a'}` 变成 `{'1': 'a'}`，这是「往返不保真」的经典来源；③ `NaN` 是 Python 扩展，标准 JSON 不允许（`allow_nan=False` 会抛 `ValueError`），跨语言传参会失败；④ `ensure_ascii=True`（默认）把非 ASCII 转成 `\\uXXXX` 转义，字节数膨胀但兼容性最好。"
+        ]
       },
       "tags": [
         "json",
@@ -109,7 +108,8 @@
       "source": "self",
       "source_ref": "Python 官方文档 json",
       "category": "基础题",
-      "platform": "book"
+      "platform": "book",
+      "explanation": "① tuple 被序列化为 **JSON 数组**（`[1, 2]`）——json 没有 tuple 类型，往返 `loads` 后变成 list；② JSON 的键**必须是字符串**，整数键被 `int→str` 转换，往返后 `{1: 'a'}` 变成 `{'1': 'a'}`，这是「往返不保真」的经典来源；③ `NaN` 是 Python 扩展，标准 JSON 不允许（`allow_nan=False` 会抛 `ValueError`），跨语言传参会失败；④ `ensure_ascii=True`（默认）把非 ASCII 转成 `\\uXXXX` 转义，字节数膨胀但兼容性最好。"
     },
     {
       "id": "py4-ex04",
@@ -121,8 +121,7 @@
         "correct": [
           "根因：未显式指定 `encoding`，Python 会使用 `locale.getpreferredencoding(False)`。Linux/容器（`LANG=C`）下常是 ASCII 或 UTF-8，\nWindows 简中下是 GBK/cp936——同一份含中文的 UTF-8 配置文件，在 GBK 环境下解码必然抛 `UnicodeDecodeError`。",
           "修复：`open(path, encoding='utf-8')`；写入同理显式 `encoding='utf-8'`。若文件可能带 BOM，用 `encoding='utf-8-sig'`。"
-        ],
-        "explanation": "教科书示例为简短省略 `encoding`，但**任何进仓库的 IO 代码都必须显式指定编码**。配套要点：`newline=''` 交给 `csv` 模块处理换行；二进制场景用 `'rb'` 避免任何解码。"
+        ]
       },
       "tags": [
         "open",
@@ -132,7 +131,8 @@
       "source": "self",
       "source_ref": "Python 官方文档 io / locale",
       "category": "基础题",
-      "platform": "book"
+      "platform": "book",
+      "explanation": "教科书示例为简短省略 `encoding`，但**任何进仓库的 IO 代码都必须显式指定编码**。配套要点：`newline=''` 交给 `csv` 模块处理换行；二进制场景用 `'rb'` 避免任何解码。"
     },
     {
       "id": "py4-ex05",
@@ -181,8 +181,7 @@
       "title": "用 pathlib 递归统计目录中的文件类型分布",
       "content_md": "实现 `ext_stats(root)`，递归统计 `root` 下所有**文件**的扩展名分布，返回 `dict[ext, count]`。要求：\n\n1. 用 `pathlib.Path.rglob('*')` 遍历，只用 `is_file()` 判定；\n2. 无扩展名的文件归入 `'<none>'`；\n3. 扩展名统一**小写**（`README.MD` 与 `a.md` 合并）；\n4. 结果按**数量降序、同数量按扩展名字典序**排序后返回。",
       "answer": {
-        "reference_code": "from pathlib import Path\n\n\ndef ext_stats(root):\n    counts = {}\n    for p in Path(root).rglob('*'):\n        if not p.is_file():\n            continue\n        ext = p.suffix.lower() or '<none>'\n        counts[ext] = counts.get(ext, 0) + 1\n    return dict(sorted(counts.items(), key=lambda kv: (-kv[1], kv[0])))\n\n\nif __name__ == '__main__':\n    import tempfile\n    with tempfile.TemporaryDirectory() as d:\n        d = Path(d)\n        for rel in ('a.md', 'sub/b.md', 'sub/c.txt', 'README', 'sub/DEEP/e.MD'):\n            f = d / rel\n            f.parent.mkdir(parents=True, exist_ok=True)\n            f.write_text('x', encoding='utf-8')\n        print(ext_stats(d))",
-        "explanation": "`rglob('*')` 一次性产出所有层级的条目（含目录），必须用 `is_file()` 过滤。`p.suffix` 只取**最后一个**后缀（`a.tar.gz` → `.gz`），要取全部后缀用 `p.suffixes`。排序用 `(-count, ext)` 双键实现「数量降序 + 名字升序」，注意用元组排序而不是先按 count 排再二次排。"
+        "reference_code": "from pathlib import Path\n\n\ndef ext_stats(root):\n    counts = {}\n    for p in Path(root).rglob('*'):\n        if not p.is_file():\n            continue\n        ext = p.suffix.lower() or '<none>'\n        counts[ext] = counts.get(ext, 0) + 1\n    return dict(sorted(counts.items(), key=lambda kv: (-kv[1], kv[0])))\n\n\nif __name__ == '__main__':\n    import tempfile\n    with tempfile.TemporaryDirectory() as d:\n        d = Path(d)\n        for rel in ('a.md', 'sub/b.md', 'sub/c.txt', 'README', 'sub/DEEP/e.MD'):\n            f = d / rel\n            f.parent.mkdir(parents=True, exist_ok=True)\n            f.write_text('x', encoding='utf-8')\n        print(ext_stats(d))"
       },
       "tags": [
         "pathlib",
@@ -193,7 +192,8 @@
       "source_ref": "Python 官方文档 pathlib.Path.rglob",
       "category": "算法题",
       "platform": "github",
-      "external_url": "https://docs.python.org/3/library/pathlib.html"
+      "external_url": "https://docs.python.org/3/library/pathlib.html",
+      "explanation": "`rglob('*')` 一次性产出所有层级的条目（含目录），必须用 `is_file()` 过滤。`p.suffix` 只取**最后一个**后缀（`a.tar.gz` → `.gz`），要取全部后缀用 `p.suffixes`。排序用 `(-count, ext)` 双键实现「数量降序 + 名字升序」，注意用元组排序而不是先按 count 排再二次排。"
     },
     {
       "id": "py4-ex07",
@@ -205,7 +205,6 @@
         "correct": [
           "题面见 https://leetcode.cn/problems/simplify-path/"
         ],
-        "explanation": "典型解法：按 `/` 切分，用列表当栈——`''` 与 `'.'` 跳过；`'..'` 时若栈非空则 `pop()`（栈空则忽略，因为根目录的上一级还是根）；其余 `push`。最后 `'/' + '/'.join(stack)`。进阶：可对照本题与 `pathlib.PurePosixPath` 的行为差异——`PurePosixPath` **不折叠** `..`，`resolve()` 才折叠且会访问文件系统，这也解释了为什么这类题不能直接用 `pathlib` 一行解决。",
         "reference_code": "import sys\n\n\ndef simplify_path(path):\n    stack = []\n    for part in path.split('/'):\n        if part == '' or part == '.':\n            continue\n        if part == '..':\n            if stack:\n                stack.pop()\n        else:\n            stack.append(part)\n    return '/' + '/'.join(stack)\n\n\nif __name__ == '__main__':\n    print(simplify_path(sys.stdin.readline().strip()))\n"
       },
       "tags": [
@@ -239,7 +238,8 @@
           "expected_output": "/c",
           "is_sample": false
         }
-      ]
+      ],
+      "explanation": "典型解法：按 `/` 切分，用列表当栈——`''` 与 `'.'` 跳过；`'..'` 时若栈非空则 `pop()`（栈空则忽略，因为根目录的上一级还是根）；其余 `push`。最后 `'/' + '/'.join(stack)`。进阶：可对照本题与 `pathlib.PurePosixPath` 的行为差异——`PurePosixPath` **不折叠** `..`，`resolve()` 才折叠且会访问文件系统，这也解释了为什么这类题不能直接用 `pathlib` 一行解决。"
     },
     {
       "id": "py4-ex08",
@@ -248,8 +248,7 @@
       "title": "安全的原子写入：临时文件 + `os.replace`",
       "content_md": "实现 `atomic_write(path, text)`：写文件的过程中若进程被杀，**不能留下半截文件**，且不能留下临时文件残留。\n\n要求：\n\n1. 先写入同目录下的临时文件（同目录才能保证 `os.replace` 是同一文件系统内的原子 rename）；\n2. 显式 `encoding='utf-8'`；\n3. 成功后用 `os.replace` 覆盖目标（Windows 与 POSIX 都原子）；\n4. 失败时清理临时文件并**重新抛出**原异常。",
       "answer": {
-        "reference_code": "import os\nimport tempfile\nfrom pathlib import Path\n\n\ndef atomic_write(path, text):\n    path = Path(path)\n    path.parent.mkdir(parents=True, exist_ok=True)\n    fd, tmp = tempfile.mkstemp(dir=str(path.parent), prefix='.tmp-', suffix='.swp')\n    try:\n        with os.fdopen(fd, 'w', encoding='utf-8') as f:\n            f.write(text)\n            f.flush()\n            os.fsync(f.fileno())\n        os.replace(tmp, path)\n    except BaseException:\n        try:\n            os.unlink(tmp)\n        except OSError:\n            pass\n        raise\n\n\nif __name__ == '__main__':\n    with tempfile.TemporaryDirectory() as d:\n        target = Path(d) / 'cfg.json'\n        atomic_write(target, '{\"k\": 1}')\n        print('content =', target.read_text(encoding='utf-8'))\n        atomic_write(target, '{\"k\": 2}')\n        print('content =', target.read_text(encoding='utf-8'))\n        print('residue =', sorted(p.name for p in Path(d).iterdir() if p.name != 'cfg.json'))",
-        "explanation": "要点三处：① 临时文件必须与目标**同目录**（`mkstemp(dir=...)`），跨文件系统的 `replace` 退化成「复制+删除」就不再原子；② `flush()` + `os.fsync()` 保证数据落到磁盘而非只到页缓存，否则掉电仍可能丢；③ 用 `except BaseException` 而非 `except Exception`，`KeyboardInterrupt` 也要走清理分支。`os.replace` 会覆盖已存在目标，`os.rename` 在 Windows 上则会报错——这是选它的原因。"
+        "reference_code": "import os\nimport tempfile\nfrom pathlib import Path\n\n\ndef atomic_write(path, text):\n    path = Path(path)\n    path.parent.mkdir(parents=True, exist_ok=True)\n    fd, tmp = tempfile.mkstemp(dir=str(path.parent), prefix='.tmp-', suffix='.swp')\n    try:\n        with os.fdopen(fd, 'w', encoding='utf-8') as f:\n            f.write(text)\n            f.flush()\n            os.fsync(f.fileno())\n        os.replace(tmp, path)\n    except BaseException:\n        try:\n            os.unlink(tmp)\n        except OSError:\n            pass\n        raise\n\n\nif __name__ == '__main__':\n    with tempfile.TemporaryDirectory() as d:\n        target = Path(d) / 'cfg.json'\n        atomic_write(target, '{\"k\": 1}')\n        print('content =', target.read_text(encoding='utf-8'))\n        atomic_write(target, '{\"k\": 2}')\n        print('content =', target.read_text(encoding='utf-8'))\n        print('residue =', sorted(p.name for p in Path(d).iterdir() if p.name != 'cfg.json'))"
       },
       "tags": [
         "原子写",
@@ -260,7 +259,8 @@
       "source_ref": "Python 官方文档 os.replace / tempfile.mkstemp",
       "category": "算法题",
       "platform": "github",
-      "external_url": "https://docs.python.org/3/library/os.html#os.replace"
+      "external_url": "https://docs.python.org/3/library/os.html#os.replace",
+      "explanation": "要点三处：① 临时文件必须与目标**同目录**（`mkstemp(dir=...)`），跨文件系统的 `replace` 退化成「复制+删除」就不再原子；② `flush()` + `os.fsync()` 保证数据落到磁盘而非只到页缓存，否则掉电仍可能丢；③ 用 `except BaseException` 而非 `except Exception`，`KeyboardInterrupt` 也要走清理分支。`os.replace` 会覆盖已存在目标，`os.rename` 在 Windows 上则会报错——这是选它的原因。"
     }
   ]
 }

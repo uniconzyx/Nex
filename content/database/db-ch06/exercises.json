@@ -154,8 +154,7 @@
       "title": "修复违反 2NF 与 3NF 的订单表",
       "content_md": "下面的宽表既存在部分依赖也存在传递依赖：\n\n```sql\nCREATE TABLE order_flat (\n  order_id      BIGINT,\n  product_name  VARCHAR(64),\n  qty           INT,\n  user_id       BIGINT,\n  user_name     VARCHAR(64),\n  product_price DECIMAL(10,2),\n  PRIMARY KEY (order_id, product_name)\n);\n```\n\n业务规则：`order_id → user_id`；`user_id → user_name`；`product_name → product_price`；`(order_id, product_name) → qty`。\n\n请指出违反的范式，并给出规范化后的建表语句（拆成 4 张表，注明主外键）。",
       "answer": {
-        "reference_code": "CREATE TABLE users (\n  user_id   BIGINT PRIMARY KEY,\n  user_name VARCHAR(64) NOT NULL\n);\n\nCREATE TABLE products (\n  product_name  VARCHAR(64) PRIMARY KEY,\n  product_price DECIMAL(10,2) NOT NULL\n);\n\nCREATE TABLE orders (\n  order_id BIGINT PRIMARY KEY,\n  user_id  BIGINT NOT NULL,\n  FOREIGN KEY (user_id) REFERENCES users(user_id)\n);\n\nCREATE TABLE order_item (\n  order_id     BIGINT NOT NULL,\n  product_name VARCHAR(64) NOT NULL,\n  qty          INT NOT NULL,\n  PRIMARY KEY (order_id, product_name),\n  FOREIGN KEY (order_id)     REFERENCES orders(order_id),\n  FOREIGN KEY (product_name) REFERENCES products(product_name)\n);",
-        "explanation": "候选键为 `(order_id, product_name)`。`order_id → user_id` 与 `product_name → product_price` 都是对候选键真子集的依赖 → **部分依赖，违反 2NF**（`user_name`、`product_price` 只由候选键的一部分决定）。进一步 `order_id → user_id → user_name` 是**传递依赖 → 违反 3NF**。规范化后：users 与 products 各成维度表，orders 只保留 `order_id → user_id`，order_item 保留 `(order_id, product_name) → qty`。四张表均满足 BCNF。"
+        "reference_code": "CREATE TABLE users (\n  user_id   BIGINT PRIMARY KEY,\n  user_name VARCHAR(64) NOT NULL\n);\n\nCREATE TABLE products (\n  product_name  VARCHAR(64) PRIMARY KEY,\n  product_price DECIMAL(10,2) NOT NULL\n);\n\nCREATE TABLE orders (\n  order_id BIGINT PRIMARY KEY,\n  user_id  BIGINT NOT NULL,\n  FOREIGN KEY (user_id) REFERENCES users(user_id)\n);\n\nCREATE TABLE order_item (\n  order_id     BIGINT NOT NULL,\n  product_name VARCHAR(64) NOT NULL,\n  qty          INT NOT NULL,\n  PRIMARY KEY (order_id, product_name),\n  FOREIGN KEY (order_id)     REFERENCES orders(order_id),\n  FOREIGN KEY (product_name) REFERENCES products(product_name)\n);"
       },
       "explanation": "修复的核心是把「不同粒度的实体」分开：用户、商品是独立实体（维度），订单是交易粒度，订单明细是「订单×商品」的 M:N 联系（联系自身属性 qty）。注意 `order_item` 的复合主键同时承担「不重复同一商品」的唯一约束与访问路径职能。可用 examples/ex12 的判定器实测：拆表前 2NF=NO、3NF=NO，拆表后四张表全部 BCNF。",
       "tags": [
@@ -177,8 +176,7 @@
       "title": "LeetCode 596 · 超过 5 名学生的课（M:N 中间表建模）",
       "content_md": "给定 `courses(student, class)` 形式的选课表，找出学生数不少于 5 人的课程。\n\n本题是本章 M:N 联系的标准形态：学生与课程是多对多，选课关系本身就是中间表，`(student, class)` 就是它的复合主键。请用聚合 + HAVING 完成。",
       "answer": {
-        "reference_code": "SELECT class\nFROM courses\nGROUP BY class\nHAVING COUNT(DISTINCT student) >= 5;",
-        "explanation": "M:N 中间表上做「按一端分组计数」是最典型的聚合查询。用 `COUNT(DISTINCT student)` 而不是 `COUNT(*)` 更稳：即便上游遗漏了复合主键约束（允许重复选课），统计结果也不会被重复行污染 —— 这正是本章 pitfalls 第 13 条强调「中间表必须设复合主键」的工程意义。"
+        "reference_code": "SELECT class\nFROM courses\nGROUP BY class\nHAVING COUNT(DISTINCT student) >= 5;"
       },
       "explanation": "建模视角：`courses` 就是 ER 图中「学生—选课—课程」这个 M:N 联系落成的中间表，字段为两端主键。若题目还要求给出成绩，成绩就属于**联系自身的属性**，应放在中间表里，而不是放到 `student` 或 `class` 表。",
       "tags": [
@@ -208,8 +206,7 @@
       "title": "LeetCode 184 · 部门工资最高的员工（1:N 连接的范式含义）",
       "content_md": "给定 `Employee(id, name, salary, departmentId)` 与 `Department(id, name)`，找出每个部门工资最高的员工。\n\n请思考：为什么这里用两张表 + JOIN，而不是把部门名直接冗余在 Employee 里？",
       "answer": {
-        "reference_code": "SELECT d.name AS Department, e.name AS Employee, e.salary AS Salary\nFROM Employee e\nJOIN Department d ON e.departmentId = d.id\nWHERE (e.departmentId, e.salary) IN (\n    SELECT departmentId, MAX(salary)\n    FROM Employee\n    GROUP BY departmentId\n);",
-        "explanation": "这是标准 1:N 落表：外键 `departmentId` 放在 N 端（Employee）。若把 `department_name` 冗余进 Employee，则存在 `departmentId → department_name` 这一**传递依赖**（Employee 的主键 → departmentId → department_name），部门改名时需更新该部门全部员工行，漏改即产生「同一部门两个名字」的不一致。因此范式化后用 JOIN 取部门名，是本处正确的设计。"
+        "reference_code": "SELECT d.name AS Department, e.name AS Employee, e.salary AS Salary\nFROM Employee e\nJOIN Department d ON e.departmentId = d.id\nWHERE (e.departmentId, e.salary) IN (\n    SELECT departmentId, MAX(salary)\n    FROM Employee\n    GROUP BY departmentId\n);"
       },
       "explanation": "延伸考点：`(departmentId, salary) IN (子查询)` 是「行值构造器」比较，等价于按部门分组取最大工资再连接。若部门内最高工资并列，本写法会返回全部并列者 —— 这也是「用子查询而非窗口函数」时的经典陷阱（如需每组仅一行，应改用 `ROW_NUMBER() OVER (PARTITION BY ...)`）。",
       "tags": [
@@ -238,8 +235,7 @@
       "title": "LeetCode 1084 · 销售分析 III（事实表 / 维度表建模）",
       "content_md": "给定 `Product(product_id, product_name, unit_price)`、`Sales(product_id, year, quantity, price)`，找出仅在 2019-01-01 至 2019-03-31 期间售出的产品。\n\n请思考两张表的角色划分，以及为什么产品名不应冗余进 Sales 表。",
       "answer": {
-        "reference_code": "SELECT p.product_id, p.product_name\nFROM Product p\nJOIN Sales s ON p.product_id = s.product_id\nGROUP BY p.product_id, p.product_name\nHAVING SUM(CASE WHEN s.sale_date BETWEEN '2019-01-01' AND '2019-03-31'\n                THEN 1 ELSE 0 END) = COUNT(*);",
-        "explanation": "`Product` 是维度表（主键 product_id，属性为产品的静态描述），`Sales` 是事实表（外键 product_id + 度量 quantity/price + 时间）。作者刻意把 `product_name`、`unit_price` 放在 Product 而非 Sales：若冗余进 Sales，则 `product_id → product_name` 成为事实表上的传递依赖（违反 3NF），商品改名会污染历史销售记录的口径。"
+        "reference_code": "SELECT p.product_id, p.product_name\nFROM Product p\nJOIN Sales s ON p.product_id = s.product_id\nGROUP BY p.product_id, p.product_name\nHAVING SUM(CASE WHEN s.sale_date BETWEEN '2019-01-01' AND '2019-03-31'\n                THEN 1 ELSE 0 END) = COUNT(*);"
       },
       "explanation": "注意 `Sales.price` 是**成交价快照**（事实），与 `Product.unit_price`（当前标价，维度）语义不同 —— 这正是本章「反范式」一节强调的：**下单快照类冗余是业务需求，不是性能优化**，两者必须区分。HAVING 中 `SUM(CASE WHEN...) = COUNT(*)` 的写法表示「全部销售记录都落在该区间」。",
       "tags": [

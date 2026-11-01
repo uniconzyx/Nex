@@ -201,8 +201,7 @@
       "title": "LeetCode 1741 · 每名员工花费的总时间（事件日志聚合）",
       "content_md": "给定一张记录员工「进入/离开」事件的事件表，请按「员工 × 日期」聚合出每人每天停留的总时长。\n\n本题与本章的**审计日志**主题同构：审计表记录的是「谁在什么时刻做了什么」，而把事件流按主体与时间窗聚合，是审计分析（如在岗时长、操作频次异常检测）最常见的下游查询。请用聚合 + 分组完成。",
       "answer": {
-        "reference_code": "SELECT event_day AS day, emp_id, SUM(out_time - in_time) AS total_time\nFROM Employees\nGROUP BY event_day, emp_id;",
-        "explanation": "事件流聚合的标准形态：`GROUP BY (维度1, 维度2)` + 对区间长度的 `SUM`。审计场景里同样的写法可用来统计「每个操作人在每个时间窗内的操作次数」，并与基线比较以发现异常（如非工作时段批量删除）。注意聚合键必须包含全部非聚合维度列，在 `ONLY_FULL_GROUP_BY` 开启时漏列会直接报错。"
+        "reference_code": "SELECT event_day AS day, emp_id, SUM(out_time - in_time) AS total_time\nFROM Employees\nGROUP BY event_day, emp_id;"
       },
       "explanation": "与本章的呼应有两层：① 审计日志本质上就是一张事件表，「按主体 + 时间窗聚合」是它最典型的分析查询；② 审计表设计时若把操作人与时间做成独立列（而不是塞进一个字符串字段），下游聚合才不需要解析文本 —— 这是「审计表字段设计要为查询服务」的直接体现。",
       "tags": [

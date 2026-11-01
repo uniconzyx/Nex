@@ -7,11 +7,13 @@
   "items": [
     {
       "type": "choice",
+      "difficulty": "easy",
       "category": "基础题",
       "platform": "self",
       "source": "self",
       "source_ref": "data-ch06 concept 01",
       "title": "关于缺失值机制，正确的是",
+      "content_md": "某订单表「收货城市」字段缺失 12%。业务核查后确认：缺失与否与订单金额、用户等级、下单时间、注册渠道**均无关**，也无法由任何已观测字段预测。团队准备直接删除这 12% 的行。\n\n关于该缺失机制与「直接删除」的后果，下列说法正确的是？",
       "options": [
         {
           "key": "A",
@@ -39,11 +41,13 @@
     },
     {
       "type": "choice",
+      "difficulty": "easy",
       "category": "基础题",
       "platform": "self",
       "source": "self",
       "source_ref": "data-ch06 concept 02",
       "title": "下列哪个模型不必须做特征缩放",
+      "content_md": "一份含 20 个特征的数据集里，有的特征量级是 $10^5$（金额），有的是 $10^{-2}$（比率）。现在用同一份数据分别训练 KNN、RBF 核 SVM、决策树、PCA，**不删特征、只考虑要不要先做缩放**。\n\n下列判断中，正确的是？",
       "options": [
         {
           "key": "A",
@@ -71,60 +75,96 @@
     },
     {
       "type": "output",
+      "difficulty": "mid",
       "category": "基础题",
       "platform": "self",
       "source": "self",
       "source_ref": "data-ch06 concept 04",
       "title": "某二分类任务正类占 1%，模型把所有样本判为负类，准确率、召回率、F1 分别是多少",
-      "answer_md": "设总样本 $n=1000$，正类 10 个，负类 990 个。全判负类：\n\n- $TP=0$，$FN=10$，$FP=0$，$TN=990$\n- 准确率 $=(TP+TN)/n=990/1000=\\mathbf{0.99}$\n- 召回率 $=TP/(TP+FN)=0/10=\\mathbf{0}$\n- 精确率 $=TP/(TP+FP)=0/0$ → 未定义（无正预测），实践约定为 0\n- $F1=2PR/(P+R)=0$\n\n结论：**准确率 99% 但模型毫无价值**。不平衡场景应看召回率 / F1 / PR-AUC。"
+      "content_md": "某二分类任务共 1000 个样本，正类占 1%（10 个），负类 990 个。模型把**全部样本判为负类**。\n\n请给出准确率、召回率、精确率、F1 四个值（精确率按工程约定处理），并判断这个模型能否上线。",
+      "answer": {
+        "text": "设 TP=0、FN=10、FP=0、TN=990。\n- 准确率 = (TP+TN)/n = 990/1000 = 0.99\n- 召回率 = TP/(TP+FN) = 0/10 = 0\n- 精确率 = TP/(TP+FP) = 0/0，未定义，工程约定取 0\n- F1 = 2PR/(P+R) = 0\n结论：准确率 99% 但召回率为 0，模型没有任何检出能力，不能上线。"
+      },
+      "answer_md": "设总样本 $n=1000$，正类 10 个，负类 990 个。全判负类：\n\n- $TP=0$，$FN=10$，$FP=0$，$TN=990$\n- 准确率 $=(TP+TN)/n=990/1000=\\mathbf{0.99}$\n- 召回率 $=TP/(TP+FN)=0/10=\\mathbf{0}$\n- 精确率 $=TP/(TP+FP)=0/0$ → 未定义（无正预测），实践约定为 0\n- $F1=2PR/(P+R)=0$\n\n结论：**准确率 99% 但模型毫无价值**。不平衡场景应看召回率 / F1 / PR-AUC。",
+      "explanation": "这是「准确率陷阱」的标准形态：98% 的负类让常数预测器也有 99% 准确率。不平衡场景应看召回率、F1 或 PR-AUC；精确率的分母是「预测为正的总数」，本题为 0，所以按约定记 0 而不是报错。"
     },
     {
       "type": "fix_error",
+      "difficulty": "mid",
       "category": "基础题",
       "platform": "self",
       "source": "self",
       "source_ref": "data-ch06 concept 02 / pitfalls 10",
       "title": "下面的特征工程流程存在数据泄漏，请指出并修正",
+      "content_md": "下面的特征工程 + 建模流程能跑通，但存在**数据泄漏**。`X` 是特征矩阵、`y` 是标签：\n\n```python\nmu = X.mean(axis=0)\nsd = X.std(axis=0)\nX_scaled = (X - mu) / sd\nX_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.3)\nmodel.fit(X_train, y_train)\n```\n\n请：(1) 指出泄漏点；(2) 说明它对评估指标的方向性影响；(3) 给出修正后的顺序，并列出同一原则还适用于哪些预处理步骤。",
       "code": "mu = X.mean(axis=0)\nsd = X.std(axis=0)\nX_scaled = (X - mu) / sd\nX_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.3)\nmodel.fit(X_train, y_train)",
-      "answer_md": "**泄漏点**：标准化参数 $\\mu,\\sigma$ 是用**全量数据**（含测试集）计算的，测试集的分布信息泄漏进了训练流程，导致评估指标被系统性高估。\n\n**正确顺序**：先划分，再 fit 缩放器；`fit` 只用训练集，`transform` 分别作用于训练集与测试集。\n\n```python\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)\nmu = X_train.mean(axis=0)          # 只用训练集\nsd = X_train.std(axis=0)\nX_train = (X_train - mu) / sd\nX_test  = (X_test - mu) / sd       # 用训练集的 mu/sd\n```\n\n同理适用于缺失值填充、特征选择、目标编码——**一切 `fit` 都只能在训练集上发生**。"
+      "answer": {
+        "reference_code": "from sklearn.model_selection import train_test_split   # 需 scikit-learn\n\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)\nmu = X_train.mean(axis=0)          # 只用训练集估计参数\nsd = X_train.std(axis=0)\nX_train = (X_train - mu) / sd\nX_test = (X_test - mu) / sd        # 复用训练集的 mu/sd\nmodel.fit(X_train, y_train)\nscore = model.score(X_test, y_test)"
+      },
+      "answer_md": "**泄漏点**：标准化参数 $\\mu,\\sigma$ 是用**全量数据**（含测试集）计算的，测试集的分布信息泄漏进了训练流程，导致评估指标被系统性高估。\n\n**正确顺序**：先划分，再 fit 缩放器；`fit` 只用训练集，`transform` 分别作用于训练集与测试集。\n\n```python\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)\nmu = X_train.mean(axis=0)          # 只用训练集\nsd = X_train.std(axis=0)\nX_train = (X_train - mu) / sd\nX_test  = (X_test - mu) / sd       # 用训练集的 mu/sd\n```\n\n同理适用于缺失值填充、特征选择、目标编码——**一切 `fit` 都只能在训练集上发生**。",
+      "explanation": "泄漏点是 mu/sd 用了全量数据（含测试集），测试集的分布信息提前进入训练流程，离线指标被系统性高估、线上会掉。正确顺序是先划分再 fit。同一原则适用于缺失值填充、类别编码（目标编码尤甚）、特征选择、降采样/过采样——凡是「需要用数据估计参数」的步骤，参数只能在训练集上 fit。"
     },
     {
       "type": "coding",
+      "difficulty": "mid",
       "category": "基础题",
       "platform": "self",
       "source": "self",
       "source_ref": "data-ch06 concept 03",
       "title": "手写 IQR 异常检测函数，返回上下界与异常掩码",
-      "answer_md": "```python\nimport pandas as pd\n\ndef iqr_outliers(s: pd.Series, k: float = 1.5):\n    q1, q3 = s.quantile(0.25), s.quantile(0.75)\n    iqr = q3 - q1\n    lo, hi = q1 - k * iqr, q3 + k * iqr\n    return lo, hi, (s < lo) | (s > hi)\n```\n\n要点：\n1. $k=1.5$ 是 Tukey 的经验选择，正态下越界概率约 **0.7%**（等价于 $|z|\\approx2.7$）；\n2. IQR 用分位数替代均值/标准差，因此**对偏态与异常值稳健**，这是它优于 Z-score 的原因；\n3. 返回**上下界**而不只是掩码，便于后续做截断或写入报告。"
+      "content_md": "用 pandas 实现异常检测函数 `iqr_outliers(s, k=1.5)`：\n\n- 输入：数值型 `pandas.Series` 与系数 `k`；\n- 输出：`(lo, hi, mask)`，`mask` 为布尔 Series，标记越界点；\n- 边界取 Q1 - k*IQR 与 Q3 + k*IQR，**必须用分位数，不得用均值/标准差**。\n\n并回答：k=1.5 在正态分布下的越界概率约为多少？为什么右偏分布上 IQR 比 Z-score 稳健？",
+      "answer": {
+        "reference_code": "import pandas as pd\n\ndef iqr_outliers(s, k=1.5):\n    q1, q3 = s.quantile(0.25), s.quantile(0.75)\n    iqr = q3 - q1\n    lo, hi = q1 - k * iqr, q3 + k * iqr\n    return lo, hi, (s < lo) | (s > hi)\n"
+      },
+      "answer_md": "```python\nimport pandas as pd\n\ndef iqr_outliers(s: pd.Series, k: float = 1.5):\n    q1, q3 = s.quantile(0.25), s.quantile(0.75)\n    iqr = q3 - q1\n    lo, hi = q1 - k * iqr, q3 + k * iqr\n    return lo, hi, (s < lo) | (s > hi)\n```\n\n要点：\n1. $k=1.5$ 是 Tukey 的经验选择，正态下越界概率约 **0.7%**（等价于 $|z|\\approx2.7$）；\n2. IQR 用分位数替代均值/标准差，因此**对偏态与异常值稳健**，这是它优于 Z-score 的原因；\n3. 返回**上下界**而不只是掩码，便于后续做截断或写入报告。",
+      "explanation": "k=1.5 是 Tukey 的经验取值，正态下越界概率约 0.7%（约等于 |z|>2.7）。IQR 用分位数替代均值与标准差，而均值/标准差会被极端值本身拉大（掩蔽效应），导致重尾分布上极端点反而不超阈值；分位数不受此影响，所以对偏态更稳健。返回上下界而不只是掩码，便于后续截断或写报告。"
     },
     {
       "type": "coding",
+      "difficulty": "mid",
       "category": "算法题",
       "platform": "leetcode",
       "source": "leetcode",
       "source_ref": "LeetCode 53 / 最大子数组和（异常区间检测的 DP 同构）",
       "external_url": "https://leetcode.cn/problems/maximum-subarray/",
       "title": "异常区间的最大和检测（关联练习）",
-      "answer_md": "时间序列的**异常区间检测**与「最大子数组和」共享同一个 DP 骨架：\n\n- 把「偏离基线的程度」（如 $x_t-\\bar x$）当作数组元素；\n- 求最大子数组和 → 找到偏离最严重的**连续区间**；\n- 求最小子数组和 → 找到最负向偏离的区间（如系统故障期）。\n\n与「逐点异常检测」（Z-score/IQR）的区别在于：区间方法能识别**持续性的整体偏移**，而逐点方法会把每一点都判为轻度异常从而淹没信号。\n\n（题目仅提供链接与元数据，不搬运题面。）"
+      "content_md": "「异常区间检测」与「最大子数组和」是同构问题：把每个时刻相对基线的偏离 d_t = x_t - mean(x) 当作数组元素，求最大子数组和即得到偏离最严重的**连续区间**。\n\n请回答：\n1. 写出映射关系：数组元素、目标、边界条件分别对应什么；\n2. 给出 O(n) 时间、O(1) 空间的 Kadane 实现，并说明它为什么不需要额外数组；\n3. 比较区间方法与逐点方法（Z-score / IQR）：什么场景必须用区间方法？逐点方法在什么情况下会失效？\n\n在线练习：LeetCode 53 · 最大子数组和（仅提供链接，不搬运题面）。",
+      "answer": {
+        "reference_code": "def max_offset_window(xs):\n    \"\"\"返回 (最大偏离和, (起, 止))；偏离 = 相对均值的差。\"\"\"\n    n = len(xs)\n    if n == 0:\n        return 0.0, (0, 0)\n    m = sum(xs) / n\n    d0 = xs[0] - m\n    best = cur = d0\n    best_start = best_end = 0\n    cur_start = 0\n    for i in range(1, n):\n        d = xs[i] - m\n        if cur < 0:            # 前面的累加为负，丢掉，从 i 重新起\n            cur, cur_start = d, i\n        else:\n            cur += d\n        if cur > best:\n            best, best_start, best_end = cur, cur_start, i\n    return best, (best_start, best_end)\n"
+      },
+      "answer_md": "时间序列的**异常区间检测**与「最大子数组和」共享同一个 DP 骨架：\n\n- 把「偏离基线的程度」（如 $x_t-\\bar x$）当作数组元素；\n- 求最大子数组和 → 找到偏离最严重的**连续区间**；\n- 求最小子数组和 → 找到最负向偏离的区间（如系统故障期）。\n\n与「逐点异常检测」（Z-score/IQR）的区别在于：区间方法能识别**持续性的整体偏移**，而逐点方法会把每一点都判为轻度异常从而淹没信号。\n\n（题目仅提供链接与元数据，不搬运题面。）",
+      "explanation": "Kadane 的关键是「以 i 结尾的最大和」只依赖「以 i-1 结尾的最大和」，所以一个滚动变量就够，不需要 DP 数组，空间 O(1)。区间方法识别的是**持续性整体偏移**（系统性偏高/偏低一段），逐点方法只看单点偏离，遇到「每点轻微偏高但都不超阈值」时会整段漏报，同时也更容易被单点尖峰占满告警。"
     },
     {
       "type": "coding",
+      "difficulty": "mid",
       "category": "算法题",
       "platform": "nowcoder",
       "source": "nowcoder",
       "source_ref": "牛客网 / 第 K 大与分位数计算",
       "external_url": "https://www.nowcoder.com/practice/search?q=%E7%AC%ACk%E5%A4%A7",
       "title": "分位数的高效计算（关联练习）",
-      "answer_md": "分位数是 IQR 异常检测与箱线图的基础，其计算与「第 K 大」同源：\n\n- 排序后取对应位置 → $O(n\\log n)$；\n- 快速选择（quickselect）→ 期望 $O(n)$；\n- 数据流场景用 P² 算法或 t-digest 做近似分位数，单遍 $O(1)$ 空间。\n\n采集/清洗管道常需要流式分位数（内存放不下全量数据），此时**近似算法是唯一选择**——这类「精度换资源」的取舍是数据工程的常态。\n\n（题目仅提供链接与元数据，不搬运题面。）"
+      "content_md": "分位数是 IQR 异常检测与箱线图的基础，它的计算与「第 K 大」同源。请回答：\n\n1. 三种实现路线（完整排序、快速选择 quickselect、流式近似 P²/t-digest）的复杂度与适用场景；\n2. 为什么数据采集/清洗管道常**必须**用流式近似分位数；\n3. 实现 `kth_largest(xs, k)`（k 从 1 开始），要求平均 O(n) 且**不使用 sorted**。\n\n在线练习：牛客网 · 第 K 大（仅提供链接，不搬运题面）。",
+      "answer": {
+        "reference_code": "import random\n\ndef kth_largest(xs, k):\n    \"\"\"第 k 大（k=1 即最大值），平均 O(n)。\"\"\"\n    if not 1 <= k <= len(xs):\n        raise ValueError('k 越界')\n    target = len(xs) - k          # 转成第 target 小\n    a = list(xs)\n    lo, hi = 0, len(a) - 1\n    while True:\n        p = random.randint(lo, hi)\n        a[p], a[hi] = a[hi], a[p]\n        pivot, store = a[hi], lo\n        for i in range(lo, hi):\n            if a[i] < pivot:\n                a[store], a[i] = a[i], a[store]\n                store += 1\n        a[store], a[hi] = a[hi], a[store]\n        if store == target:\n            return a[store]\n        if store < target:\n            lo = store + 1\n        else:\n            hi = store - 1\n"
+      },
+      "answer_md": "分位数是 IQR 异常检测与箱线图的基础，其计算与「第 K 大」同源：\n\n- 排序后取对应位置 → $O(n\\log n)$；\n- 快速选择（quickselect）→ 期望 $O(n)$；\n- 数据流场景用 P² 算法或 t-digest 做近似分位数，单遍 $O(1)$ 空间。\n\n采集/清洗管道常需要流式分位数（内存放不下全量数据），此时**近似算法是唯一选择**——这类「精度换资源」的取舍是数据工程的常态。\n\n（题目仅提供链接与元数据，不搬运题面。）",
+      "explanation": "排序 O(n log n) 简单但要对全量数据排序；quickselect 每次只递归一半，期望 O(n)、最坏 O(n^2)（可用随机枢轴或 median-of-medians 压住）；流式近似单遍扫描、O(1) 或 O(1/eps) 空间，用精度换资源。管道里数据量超出内存、且要求单遍到达即出结果，所以只能选近似算法。第 k 大转成第 (n-k) 小后套 quickselect，注意 k 从 1 开始时下标换算。"
     },
     {
       "type": "output",
+      "difficulty": "mid",
       "category": "基础题",
       "platform": "self",
       "source": "self",
       "source_ref": "data-ch06 concept 04",
       "title": "为什么最小化 MAE 得到的是中位数，最小化 RMSE 得到的是均值",
-      "answer_md": "两者对应**不同的损失函数**，其最优常数预测不同：\n\n- **MAE**：$L(c)=\\frac1n\\sum\\lvert y_i-c\\rvert$，对 $c$ 求导得符号项之和为 0，即**正负偏差个数相等** → $c$ 为**中位数**。\n- **MSE/RMSE**：$L(c)=\\frac1n\\sum(y_i-c)^2$，求导得 $\\frac{2}{n}\\sum(y_i-c)=0$ → $c=\\bar y$，即**均值**。\n\n推论（工程含义）：\n1. 右偏目标（金额、时长）下，**用 MAE 优化的模型会偏向低估**（更接近中位数）；\n2. 指标选择即**目标函数选择**，也就决定了你在预测**哪个条件统计量**；\n3. 业务上要「平均消耗」就用 RMSE 系，要「典型值」就用 MAE 系——两者不可混报。"
+      "content_md": "同一个回归任务，把损失从 MSE 换成 MAE，最优的**常数预测**会从均值变成中位数。\n\n请回答：\n1. 用求导说明：为什么最小化 MAE 得到中位数、最小化 MSE 得到均值；\n2. 若目标变量右偏（订单金额、会话时长），这两个选择分别会导致系统性高估还是低估；\n3. 业务方说「要看平均消耗」时，应该选哪个损失与指标？",
+      "answer": {
+        "text": "对常数预测 c：\n1) MAE: L(c) = (1/n) * sum |y_i - c|，在 c 不等于任何 y_i 处导数为 (负数个数 - 正数个数)/n，令其为 0 得两侧样本数相等，故 c 为中位数。\n2) MSE: L(c) = (1/n) * sum (y_i - c)^2，导数为 (2/n) * sum (y_i - c)，令其为 0 得 c = 均值。\n右偏数据上均值 > 中位数，所以 MAE 优化出的预测更小，相对均值口径是**系统性低估**；MSE 优化出的预测贴近均值，对典型值（中位数）而言是**高估**。\n业务要「平均消耗」就用 MSE/RMSE 系；要「典型值」用 MAE 系。两者不可混报。"
+      },
+      "answer_md": "两者对应**不同的损失函数**，其最优常数预测不同：\n\n- **MAE**：$L(c)=\\frac1n\\sum\\lvert y_i-c\\rvert$，对 $c$ 求导得符号项之和为 0，即**正负偏差个数相等** → $c$ 为**中位数**。\n- **MSE/RMSE**：$L(c)=\\frac1n\\sum(y_i-c)^2$，求导得 $\\frac{2}{n}\\sum(y_i-c)=0$ → $c=\\bar y$，即**均值**。\n\n推论（工程含义）：\n1. 右偏目标（金额、时长）下，**用 MAE 优化的模型会偏向低估**（更接近中位数）；\n2. 指标选择即**目标函数选择**，也就决定了你在预测**哪个条件统计量**；\n3. 业务上要「平均消耗」就用 RMSE 系，要「典型值」就用 MAE 系——两者不可混报。",
+      "explanation": "核心是「指标选择即目标函数选择，也就决定了你在预测哪个条件统计量」。右偏分布下均值被长尾拉高，中位数不受影响，因此同一份数据用两种损失训练，常数预测会差出一个可观的距离。报告时必须写清口径，否则同一模型会被算出两套互相矛盾的结论。"
     }
   ]
 }

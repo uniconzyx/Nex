@@ -94,7 +94,10 @@
         "eof"
       ],
       "source": "book",
-      "source_ref": "《Java 核心技术 卷II》第 1 章 流与文件 / class InputStream"
+      "source_ref": "《Java 核心技术 卷II》第 1 章 流与文件 / class InputStream",
+      "answer": {
+        "text": "会**多统计 1 个字节**：`read()` 返回 `int` 类型的 -1 表示 EOF，强转成 `byte` 后 -1 变成 0xFF（即 -1 的 byte 表示），但 `b != -1` 这个比较依然成立（因为 byte 比较仍是有符号），实际更危险的写法是`if ((byte) in.read() != -1)` 在只比较低 8 位时把数据字节 0xFF 误判为 EOF —— 即文件中…"
+      }
     },
     {
       "type": "fix_error",
@@ -110,7 +113,10 @@
         "flip"
       ],
       "source": "self",
-      "source_ref": "CppMind java-ch06 concept 03 / examples/ex06-bytebuffer-state.json"
+      "source_ref": "CppMind java-ch06 concept 03 / examples/ex06-bytebuffer-state.json",
+      "answer": {
+        "reference_code": "b.put(\"hello\".getBytes(StandardCharsets.US_ASCII));\nb.flip();            // limit = position; position = 0\nch.write(b);"
+      }
     },
     {
       "type": "output",
@@ -126,7 +132,10 @@
         "decorator"
       ],
       "source": "book",
-      "source_ref": "《Java 核心技术 卷II》第 1 章 流与文件 / 装饰器"
+      "source_ref": "《Java 核心技术 卷II》第 1 章 流与文件 / 装饰器",
+      "answer": {
+        "text": "A 正确。`BufferedReader` 的构造器接收 `Reader`，`FileReader` 是 `Reader` 子类，所以可以包在外面；语义是「在底层字符源之上加缓冲」。"
+      }
     },
     {
       "type": "coding",
@@ -142,7 +151,10 @@
         "streaming"
       ],
       "source": "self",
-      "source_ref": "CppMind java-ch06 concept 01 / examples/ex02-buffered-call-counts.json"
+      "source_ref": "CppMind java-ch06 concept 01 / examples/ex02-buffered-call-counts.json",
+      "answer": {
+        "reference_code": "record Stats(long lines, long nonEmpty, int maxLen, List<String> top3) {}\n\nstatic Stats scan(Path p) throws IOException {\n    long lines = 0, nonEmpty = 0; int maxLen = 0;\n    Map<String, Integer> freq = new HashMap<>();\n    try (BufferedReader r = Files.newBufferedReader(p, StandardCharsets.UTF_8)) {\n        String line;\n        while ((line = r.readLine()) != null) {   // null 才是 EOF\n            lines++;\n            if (!line.isBlank()) nonEmpty++;\n            maxLen = Math.max(maxLen, line.length());\n            for (String w : line.toLowerCase().split(\"\\\\W+\"))\n                if (!w.isEmpty()) freq.merge(w, 1, Integer::sum);\n        }\n    }\n    List<String> top3 = freq.entrySet().stream()\n            .sorted(Map.Entry.<String,Integer>comparingByValue().reversed()\n                    .thenComparing(Map.Entry.comparingByKey()))\n            .limit(3).map(Map.Entry::getKey).toList();\n    return new Stats(lines, nonEmpty, maxLen, top3);\n}"
+      }
     },
     {
       "type": "coding",
@@ -159,7 +171,11 @@
       ],
       "source": "leetcode",
       "source_ref": "LeetCode 622（design-circular-queue）",
-      "external_url": "https://leetcode.cn/problems/design-circular-queue/"
+      "external_url": "https://leetcode.cn/problems/design-circular-queue/",
+      "answer": {
+        "reference_code": "",
+        "text": "核心是维护 `head`、`size`、`capacity` 三个量：\n- `enQueue`：若 `size == capacity` 返回 false；否则写入 `(head + size) % capacity`，`size++`。\n- `deQueue`：若 `size == 0` 返回 false；否则 `head = (head + 1) % capacity`，`size--`。\n-"
+      }
     },
     {
       "type": "coding",
@@ -176,7 +192,11 @@
       ],
       "source": "leetcode",
       "source_ref": "LeetCode 394（decode-string）",
-      "external_url": "https://leetcode.cn/problems/decode-string/"
+      "external_url": "https://leetcode.cn/problems/decode-string/",
+      "answer": {
+        "reference_code": "",
+        "text": "栈解法（一次遍历）：\n- 维护 `countStack` 与 `strStack`；当前重复次数 `k` 与当前串 `cur`。\n- 遇数字：累积到 `k`（注意多位数）。\n- 遇 `[`：把 `k` 与 `cur` 压栈，重置 `k = 0`、`cur = \"\"`。\n- 遇 `]`：弹出父串与次数，`cur = parent + cur.repeat(k)`。\n- 遇字母：追加到 `cur`。\n"
+      }
     }
   ]
 }

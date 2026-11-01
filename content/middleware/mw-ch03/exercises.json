@@ -141,7 +141,8 @@
       },
       "reference_code": "",
       "source": "self",
-      "source_ref": "mw-ch03 §3 Cluster 故障转移选主规则"
+      "source_ref": "mw-ch03 §3 Cluster 故障转移选主规则",
+      "explanation": "故障转移选新主按三层优先级：① replica-priority 最小优先（可手动调权）；② 复制 offset 最大（数据最新）优先；③ runid 字典序最小优先（兜底确定性）。三者依次比较，前一层相等才进入下一层，保证结果唯一且可复现。"
     },
     {
       "type": "coding",

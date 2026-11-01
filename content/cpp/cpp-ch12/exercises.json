@@ -164,22 +164,19 @@
       "title": "LeetCode 146 · LRU 缓存",
       "content_md": "设计并实现一个满足 LRU（最近最少使用）淘汰策略的缓存，支持 O(1) 查询与更新。建议用 `std::list` 维护使用序 + `std::unordered_map<key, list::iterator>` 定位，移动/插入时利用现代 C++ 的移动语义与 `emplace`（题面详见 external_url，不在此复述）。",
       "answer": {
-        "reference_code": "// 结构：list<pair<key,value>> 维护「最近使用在前」；unordered_map<key, list iterator> O(1) 定位。\n// get 命中：把节点 splice 到表头（O(1) 移动，无需拷贝）；put 超容量：erase 表尾并同步删 map。\n// 完整实现见 external_url 原题要求。",
-        "explanation": "核心是「哈希 O(1) 定位 + 双向链表维护冷热序」。list 的 splice 是移动节点（常数时间、不拷贝），正契合移动语义思想；用 emplace 原地构造节点减少分配。",
-        "tags": [
-          "设计",
-          "LRU",
-          "移动语义"
-        ],
-        "source": "leetcode",
-        "source_ref": "LeetCode 146（lru-cache）",
-        "external_url": "https://leetcode.cn/problems/lru-cache/",
-        "time_limit_ms": 2000,
-        "memory_limit_mb": 256
+        "reference_code": "// 结构：list<pair<key,value>> 维护「最近使用在前」；unordered_map<key, list iterator> O(1) 定位。\n// get 命中：把节点 splice 到表头（O(1) 移动，无需拷贝）；put 超容量：erase 表尾并同步删 map。\n// 完整实现见 external_url 原题要求。"
       },
-      "external_url": "https://leetcode.cn/problems/lru-cache/",
+      "explanation": "核心是「哈希 O(1) 定位 + 双向链表维护冷热序」。list 的 splice 是移动节点（常数时间、不拷贝），正契合移动语义思想；用 emplace 原地构造节点减少分配。",
+      "tags": [
+        "设计",
+        "LRU",
+        "移动语义"
+      ],
+      "source": "leetcode",
       "source_ref": "LeetCode 146（lru-cache）",
-      "source": "leetcode"
+      "external_url": "https://leetcode.cn/problems/lru-cache/",
+      "time_limit_ms": 2000,
+      "memory_limit_mb": 256
     },
     {
       "type": "design",
@@ -189,22 +186,19 @@
       "title": "LeetCode 380 · 常数时间插入删除随机访问",
       "content_md": "实现 `RandomizedSet`：支持平均 O(1) 的插入、删除、随机返回。建议用 `vector` 存元素 + `unordered_map<value, index>` 定位；删除时用「与末尾交换 + pop_back」配合移动语义，避免 O(n) 搬移（题面详见 external_url，不在此复述）。",
       "answer": {
-        "reference_code": "// vector<T> vals 存元素，unordered_map<T,size_t> pos 记录下标。\n// 删除 x：idx=pos[x]; 与 vals.back() 交换; pop_back(); 更新 pos[vals[idx]]=idx; erase pos[x]。\n// 完整实现见 external_url 原题要求。",
-        "explanation": "「末尾交换 + pop_back」把删除从 O(n) 降到 O(1)；交换/构造元素时利用移动语义减少拷贝。emplace_back 用于插入新元素。",
-        "tags": [
-          "设计",
-          "vector",
-          "移动语义"
-        ],
-        "source": "leetcode",
-        "source_ref": "LeetCode 380（insert-delete-getrandom-o1）",
-        "external_url": "https://leetcode.cn/problems/insert-delete-getrandom-o1/",
-        "time_limit_ms": 2000,
-        "memory_limit_mb": 256
+        "reference_code": "// vector<T> vals 存元素，unordered_map<T,size_t> pos 记录下标。\n// 删除 x：idx=pos[x]; 与 vals.back() 交换; pop_back(); 更新 pos[vals[idx]]=idx; erase pos[x]。\n// 完整实现见 external_url 原题要求。"
       },
-      "external_url": "https://leetcode.cn/problems/insert-delete-getrandom-o1/",
+      "explanation": "「末尾交换 + pop_back」把删除从 O(n) 降到 O(1)；交换/构造元素时利用移动语义减少拷贝。emplace_back 用于插入新元素。",
+      "tags": [
+        "设计",
+        "vector",
+        "移动语义"
+      ],
+      "source": "leetcode",
       "source_ref": "LeetCode 380（insert-delete-getrandom-o1）",
-      "source": "leetcode"
+      "external_url": "https://leetcode.cn/problems/insert-delete-getrandom-o1/",
+      "time_limit_ms": 2000,
+      "memory_limit_mb": 256
     }
   ]
 }
