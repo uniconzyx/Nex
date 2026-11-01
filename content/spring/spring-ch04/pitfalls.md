@@ -37,3 +37,11 @@
    自定义 starter 应拆成 `autoconfigure` 模块（含自动配置源码，依赖 `spring-boot-autoconfigure`
    且标 `optional`）与 `starter` 模块（只做 `autoconfigure` + 具体实现的聚合依赖）。
    写成单模块会把自动配置类暴露给使用者并被组件扫描到，破坏「自动配置由 SPI 驱动」的约定。
+
+7. **`@ConditionalOnProperty` 的 `havingValue` 是精确字符串比较**
+   不带 `havingValue` 时只要属性存在且不等于 `false` 就生效；一旦写了 `havingValue="true"`，值必须**恰好**是 `"true"`——配成 `1`、`TRUE`、`yes` 都不匹配，条件静默不成立，Bean 就是不注册，日志里也未必有痕迹。
+   ✅ 布尔开关统一写 `havingValue="true"` + `matchIfMissing=false`，并在文档里固定写法；启动后用 `/actuator/conditions` 确认条件是否命中。
+
+8. **BOM 与 parent 混用，版本被自己写死的号覆盖**
+   `spring-boot-starter-parent` 与 `spring-boot-dependencies` 同时引入时，`<dependencyManagement>` 的 import 顺序决定最终版本（后者覆盖前者）；而在 `<dependencies>` 里手写版本号会直接让 BOM 失效，于是同一项目里 Spring 各组件的版本悄悄分叉。
+   ✅ 二选一：用 parent，或只 import `dependencies` 这个 BOM；被 BOM 管理的依赖一律不写 `<version>`。

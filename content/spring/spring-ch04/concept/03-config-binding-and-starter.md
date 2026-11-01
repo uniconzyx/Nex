@@ -35,7 +35,7 @@ application.properties          ← 通用
 application-prod.properties     ← 激活 prod 时覆盖上面的同名键
 ```
 
-但跨层级时，**位置优先于 profile**（从高到低）：
+### 跨层级时位置优先于 profile
 
 ```
 命令行参数 --server.port=9090

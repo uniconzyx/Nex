@@ -23,7 +23,7 @@ Spring Boot 官方 jar 里的配置类在 `org.springframework.boot.autoconfigur
 
 ## 2. `SpringApplication.run` 的启动主干
 
-剥掉事件与日志，主干可以压缩成一条链：
+### 启动主干：压缩成一条链
 
 ```text
 SpringApplication.run()
