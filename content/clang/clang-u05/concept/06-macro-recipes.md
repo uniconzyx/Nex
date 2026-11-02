@@ -1,0 +1,71 @@
+# clang-u05 · 预处理与宏实战：凯喵的宏卫生清单
+
+> §1–§5 讲机制，这一节把「宏最容易出事」的几条用真代码钉死。C/C++ 宏的坑，几乎都来自「它只是文本替换」这一事实。
+
+### 宏只是文本替换，不是函数
+
+`#define SQR(x) x*x` 调 `SQR(a+1)` 会展开成 `a+1*a+1`，优先级全错。凯喵的规矩：宏参数和整体都加括号。
+
+```c
+#define SQR(x) ((x)*(x))     // 参数和整体都括起来
+int y = SQR(a+1);            // ((a+1)*(a+1))，正确
+```
+
+### 宏卫生：括号与 do-while(0)
+
+多语句宏直接展开会破坏 `if/else` 配对。标准写法是用 `do { ... } while(0)`，让它成为一个语句块，既能加分号又能正确嵌进 if。
+
+```c
+#define SAFE_FREE(p) do { free(p); (p) = NULL; } while(0)
+if (cond) SAFE_FREE(ptr);    // 不会因为缺大括号而少执行
+else { /* ... */ }
+```
+
+### # 与 ## 运算符
+
+`#` 把参数变成字符串字面量（字符串化），`##` 把两段拼成标识符（记号粘贴）。日志宏常用 `#` 打印参数名。
+
+```c
+#define LOG(x) printf(#x " = %d\n", (x))
+LOG(count);    // 展开成 printf("count = %d\n", count);
+```
+
+### 条件编译的开关自检
+
+关键开关用 `#ifdef` / `defined()` 显式判断，避免宏名拼错静默走 else。配合 `#pragma message` 或 `_Static_assert` 在编译期暴露配置错误。
+
+```c
+#ifdef ENABLE_FOO
+    /* 开启路径 */
+#else
+    #pragma message("ENABLE_FOO not defined, using fallback")
+#endif
+```
+
+### 头文件守卫的两种写法
+
+传统 `#ifndef X_H / #define X_H / #endif` 防重复包含；现代用 `#pragma once`（编译器原生、更快、不受命名冲突影响）。两者等价，新项目优先 `#pragma once`。
+
+### 头文件守卫忘了会怎样
+
+同一头文件被包含两次，里面的类型/函数定义重复，链接期报「重定义」。凯喵强调：每个头文件**第一行**就写守卫，别等报错才补。
+
+### 宏名拼错的静默 else
+
+`#if ENABLE_FOO` 里 `ENABLE_FOO` 拼错会被当作 `0`，条件静默为假，逻辑悄悄改变且无任何报错。用 `#ifdef` 或 `defined()` 至少能区分「未定义」。
+
+### 多行宏与反斜杠续行
+
+多行宏每行末尾要加 `\` 续行（最后一行不用）。编辑器若把 `\` 后带了空格，续行就断，宏残缺。凯喵用 `do-while(0)` 块减少续行需求。
+
+### 用 _Static_assert 兜底常量
+
+编译期就能查的约束，用 `_Static_assert`（C11）写死，比运行时崩在客户机器强。
+
+```c
+_Static_assert(sizeof(int) == 4, "int must be 4 bytes here");
+```
+
+### 现代 C++ 替代宏的清单
+
+C++ 里能不用宏就别用：`constexpr`/`enum` 代替常量宏，`inline`/`template` 代替函数宏，`using` 代替类型宏。宏只在「需要字符串化、条件编译、跨翻译单元代码生成」时保留——并且务必守卫生。

@@ -15,3 +15,17 @@
 7. **AM 是常驻全局服务、和 RM 一样只有一个** —— 错。ApplicationMaster 是**每作业一个、随作业生死**，负责任务级调度与容错；RM 才是全局唯一。AM 挂了 RM 会重启用新容器拉起（作业不丢），但 RM 挂了（未配 HA）则全集群无法提交/调度新作业。正确写法：区分「作业级角色 AM」与「集群级角色 RM」；生产环境 RM 必须上 HA（ZKFC + ZK），否则单点。
 
 8. **Capacity 调度器的 `capacity` 是「上限」、Fair 调度器默认就完全公平** —— 错。`capacity` 是队列的**保底（min-guarantee）占比**，`maximum-capacity` 才是弹性上限；不设 `maximum-capacity=100%` 队列借不到别人空闲资源。Fair 里若不设 `weight`，各队列才平分；设了权重则按权重分，且「公平」指 max-min 公平而非绝对平分，还要靠 preemption _timeout 才抢资源。正确写法：用 Capacity 时想清楚保底 vs 借用边界；用 Fair 时显式配权重与抢占超时，别以为「切换就自动公平」。
+
+9. **以为 map 输出顺序会原样到 reducer** —— map 输出在进入 reducer 前会按「分区 + 排序」重排，你不保证 map 内顺序。想利用顺序就用二次排序（Secondary Sort），别假设 map 写出来啥样 reducer 就收到啥样。
+
+10. **一个大文件 = 一个 map 任务，块大小配错** —— 输入按 HDFS 块切分，块过大 map 太少并行度低，过小 map 数爆炸、调度开销大。按文件规模调 split size 平衡吞吐与并发。
+
+11. **Combiner 复用了不满足结合的 reducer** —— Combiner 在 map 端先聚合，若你的「reduce」对次数/顺序敏感（如求平均、取首个），错误复用会算错。平均类要先求和再求平均，绝不直接对部分结果平均。
+
+12. **reduce 阶段 shuffle 拉取过慢干等** —— reducer 启动后要从各 map 拉数据，map 已结束且被回收就迫使重算。调 `mapreduce.job.reduce.shuffle.*` 的并行拉取与缓冲，别让 reducer 空等。
+
+13. **JVM 堆配太小触发频繁 GC / OOM** —— map/reduce 处理大对象、缓存多时堆不够会频繁 Full GC 甚至被杀。按数据量调 `mapreduce.map/reduce.memory.mb` 及堆比例，而不是默认硬扛。
+
+14. **小文件直接喂导致 NameNode 内存爆** —— 海量小文件让元数据占满 NameNode 内存、split 数爆炸。上游合并或用 HAR / `CombineFileInputFormat`，别拿原始小文件直接跑。
+
+15. **开推测执行反而更慢** —— 倾斜作业里慢任务本就被数据拖，起推测副本又占一份资源还可能两边争同一热点。对已知倾斜作业先治倾斜、再考虑关掉推测执行。

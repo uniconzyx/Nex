@@ -41,3 +41,17 @@
 8. **把 list 当 vector 用追求「O(1) 插入」却牺牲缓存**
    仅因「中间插入 O(1)」就选 `list`，但场景其实是「建好后遍历多次」——结果比 `vector` 慢数倍（见 concept/04）。
    ✅ 先算访问模式；绝大多数情况 `vector` 是更优解，`list` 仅留给「频繁中部增删 + 持有迭代器不失效」场景。
+
+9. **用 `[]` 下标访问越界不报错** —— `vector`/`array` 的 `operator[]` 不做边界检查，越界是未定义行为，可能读到脏数据或崩溃且无提示。需要安全时用 `at()`（越界抛 `out_of_range`）。
+
+10. **`vector<bool>` 不是真正的容器** —— 它被特化成位压缩存储，返回的不是 `bool&` 而是代理对象；不能对它取地址、不能用 `auto& x = v[0]` 绑定，某些泛型算法会编译失败。需要真 bool 时用 `vector<char>` 或 `deque<bool>`。
+
+11. **范围 for 里 erase 导致迭代器失效** —— 在 range-for 中调用 `erase` 会让底层迭代器失效，继续遍历是 UB。应在普通 `for` 里用 `erase` 的返回值拿到下一有效迭代器。
+
+12. **`reserve` 不改变 `size`** —— `reserve(n)` 只改 `capacity`，`size()` 仍为 0；有人以为 reserve 后 `v[i]` 可用，结果越界。想预填元素用 `resize(n)`。
+
+13. **`unordered_map` 桶太少退化成链表** —— 负载因子过高时哈希冲突激增，查找从 O(1) 退化。用 `max_load_factor` + `reserve` 保持稀疏，rehash 频繁也会让迭代器失效。
+
+14. **`emplace` 与 `push_back` 混用传错参数** —— `emplace_back(args...)` 接受构造参数，若误传已构造对象会被尝试再构造一次（可能编译错或语义错）。分清「构造参数」与「对象本身」。
+
+15. **嵌套容器 `vector<vector<int>>` 缓存不连续** —— 外层 vector 存的是各自独立分配的内层 vector，内存不连续，遍历不如扁平 `vector<int>` + 一维索引换算缓存友好；大矩阵优先扁平存储。
