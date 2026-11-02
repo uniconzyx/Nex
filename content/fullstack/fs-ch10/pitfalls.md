@@ -59,3 +59,33 @@
    *为什么*：reactive 只接受对象/数组/集合。传入原始值会被直接原样返回（非代理），此后读写都不具备响应性，等于白写。
 
    *怎么改*：原始值一律用 `ref`：`const x = ref(5)`。需要「可能是值也可能是对象」的匀质处理时，也优先 ref（ref 可以装对象）。
+
+11. **在 `async setup` 里忘了 `await` 导致 store 状态未初始化** —— 错在：`setup` 里 `await fetchUser()` 但组件没标异步，或用了 `<Suspense>` 却没包住异步组件。
+
+   *为什么*：没 await 时组件同步渲染，store 还是初始空值，模板拿到 undefined；若父组件没 `<Suspense>`，async setup 的 Promise 不会阻塞渲染，等于白等。
+
+   *怎么改*：要么用 `await` + 顶层 `<Suspense>` 包裹异步组件，要么不在 setup 顶层 await，改用 `onMounted` + loading 状态驱动。
+
+12. **对 `ref` 数组/对象忘记 `.value` 而操作了 ref 对象本身** —— 错在：`items.value[i] = newVal` 本想改值，却写成 `items[i] = newVal`，实际改的是 ref 容器而非内部数组。
+
+   *为什么*：`items` 是 ref 对象，不带 `.value` 时你操作的是容器本身；Vue 3 的响应式代理在 `.value` 内部，绕开它就完全没追踪。
+
+   *怎么改*：始终通过 `.value` 访问 ref 内部；用 `ref([])` / `reactive([])` 表达响应式数组，避免直接对 ref 对象下标赋值。
+
+13. **`watch` 监听整个 `reactive` 对象却没用 getter** —— 错在：`watch(state, cb)` 想监听 `state.count` 变化，但只传了对象，深层属性变更不触发（除非 `deep: true`）。
+
+   *为什么*：watch 第一个参数是「源」，传整个 reactive 对象默认只追踪引用变化，深层属性变更被忽略；`deep:true` 才有性能开销。
+
+   *怎么改*：精确监听用 getter：`watch(() => state.count, cb)`；只关心某字段就别 `deep`。
+
+14. **`computed` 里写副作用** —— 错在：在 `computed(() => { doSomething(); return x })` 里发请求或修改其他状态。
+
+   *为什么*：computed 是「纯派生」，可能被多次/缓存调用，副作用时机不可控，还会造成无限循环（computed 改了又被自己依赖）。
+
+   *怎么改*：副作用放 `watch` / `watchEffect`；computed 保持纯函数，只返回派生值。
+
+15. **Pinia 的 `getters` 里修改 state** —— 错在：在 getter 里 `this.items.push(...)`，把 getter 当 action 用。
+
+   *为什么*：getter 应只读派生；修改 state 应在 action 里，否则语义混乱，且 getter 被缓存后修改不触发重算，状态与视图不一致。
+
+   *怎么改*：getter 只读并返回派生值；任何写操作放进 `actions`。

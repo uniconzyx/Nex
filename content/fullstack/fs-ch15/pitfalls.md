@@ -53,3 +53,39 @@
    *为什么*：Go 的惯用法是「消费者定义小接口」，大接口强迫实现方暴露它根本用不到的方法，耦合度高、难 mock、难替换。
 
    *怎么改*：把接口拆小、在使用方按「只用到的方法」定义；任何满足方法集的类型自动可用，无需 implements 声明。
+
+10. **goroutine 里 panic 没 recover 炸整个进程** —— 错在：在 `go func(){ ... }()` 里直接 panic，外层没 `defer recover()`。
+
+   *为什么*：goroutine 的 panic 不会被主 goroutine 的 recover 捕获，会一路冒泡到 runtime 导致进程退出（除非该 goroutine 自己 recover）。
+
+   *怎么改*：在 goroutine 入口 `defer func(){ if r:=recover(); r!=nil { log.Println(r) } }()`；或确保只在主流程用 panic。
+
+11. **`context` 用 `Background()` 又没传超时** —— 错在：所有请求都 `context.Background()`，下游超时/取消信号传不进来。
+
+   *为什么*：`Background` 是不可取消的根；若不基于它派生带 `WithTimeout`/`WithCancel` 的 child，整个调用链无法超时，容易 goroutine 与连接堆积。
+
+   *怎么改*：请求入口用 `context.WithTimeout(ctx, 3*time.Second)` 派生；把 ctx 一路透传，不在中间随意 `Background()`。
+
+12. **`sync.WaitGroup.Add` 放在 goroutine 内部** —— 错在：`go func(){ wg.Add(1); do() }()`，main 在 `wg.Wait()` 时可能 Add 还没执行。
+
+   *为什么*：`Add` 必须在启动 goroutine 之前（或已持有 WaitGroup 引用时）调用，否则 `Wait` 可能在计数器仍 0 时就返回，或发生并发 Add 竞争。
+
+   *怎么改*：在 `go` 之前 `wg.Add(1)`；或在已知固定数量时用循环先 Add 完再启动。
+
+13. **`defer` 在循环里堆积** —— 错在：`for { defer f.Close() }` 把成百上千个 defer 推到函数返回时才执行，文件描述符耗尽。
+
+   *为什么*：defer 在函数退出时统一执行，循环里不断追加会撑爆 fd/内存，且顺序 LIFO 难预期。
+
+   *怎么改*：把循环体抽成函数，让 defer 在每次迭代的函数返回时立即生效；或显式 `Close()` 不依赖 defer。
+
+14. **`range` 遍历时取地址拿到同一变量** —— 错在：`for _, v := range slice { go func(){ use(&v) }() }`，所有 goroutine 共享同一个 `v` 地址，拿到最后的值。
+
+   *为什么*：`range` 的循环变量在每次迭代复用同一地址，goroutine 异步读时循环已结束，`v` 是末值。
+
+   *怎么改*：循环内 `v := v`（或传参 `go func(v T){...}(v)`），让每个 goroutine 捕获各自的副本。
+
+15. **`http.Response.Body` 没关导致连接泄漏** —— 错在：`resp, _ := http.Get(url)` 拿到 resp 后直接用，没 `defer resp.Body.Close()`。
+
+   *为什么*：不关 Body 会让底层 TCP 连接无法复用/释放，高并发下 fd 耗尽、请求卡住。即使不读 body 也要关。
+
+   *怎么改*：`defer resp.Body.Close()` 紧跟 `http.Get`；读完后也确保关闭，或用 `io.Copy(io.Discard, resp.Body)` 排空再关。

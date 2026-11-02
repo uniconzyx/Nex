@@ -1,0 +1,95 @@
+# clang-u06 · 调试 Make 与构建系统演进
+
+> 编译四阶段、`make` 规则模型、`-j` 并行都懂了，但实际工程里 90% 的时间是花在「为什么它不按我想的构建」。这一节给一套可落手的调试手段，并说清手写 Makefile 为什么终会被现代构建系统取代。
+
+### 用 `make -n` / `--dry-run` 预览命令
+
+不改任何东西，只打印将要执行的 recipe。改了变量或规则后，先 `-n` 看一眼是不是你想跑的那条命令，再真跑。
+
+```make
+make -n all            # 打印 recipe，不执行
+make -n CFLAGS=-O2     # 配合变量覆盖，预演效果
+```
+
+### 用 `make -d` / `--debug` 追踪「为什么某目标被认为最新」
+
+当 `make` 啥也不做（你说该重编却没重编），`-d` 会逐条打印「X 比 Y 新，跳过」「无配方，跳过」的判断依据。输出很长，通常配合 `grep` 看具体目标。
+
+```bash
+make -d 2>&1 | grep -i "main.o"
+```
+
+### 用 `make -p` 打印完整规则库（含隐式规则）
+
+`-p` 在结束前把**所有**内置和自定义的显式/隐式规则、变量全打印出来。看某个 `.o` 到底匹配了哪条规则，靠它最准。
+
+```bash
+make -p -f /dev/null     # 只看内置规则，不读当前 Makefile
+make -p | grep -A3 "main.o"  # 查某目标的规则来源
+```
+
+### 用 `make -t` / `--touch` 假装构建
+
+只把目标的时间戳更新到「最新」，不真正编译。常用于「我想让 make 暂时认为这些都编过了」，调试依赖图时快速跳过昂贵步骤。
+
+```bash
+make -t            # 把所有目标 touch 成最新
+make -t clean      # 仅 touch clean（无害）
+```
+
+### 用 `make -k` / `--keep-going` 一个失败也继续
+
+默认 `make` 遇到第一个错误就停。多目标构建时用 `-k`，让它把能编的都编了，最后一次性报所有失败，省去「改一个跑一次」的循环。
+
+```bash
+make -k all
+```
+
+### 用 `make -w` / `--print-directory` 看目录切换
+
+递归 make（`$(MAKE) -C sub`）时，`-w` 打印「进入/离开目录」，定位「某条命令到底在哪个目录跑的」最直观。
+
+### 用 `$(info)` / `$(warning)` / `$(error)` 插桩变量
+
+在 Makefile 里插一行 `$(info CC=$(CC))`，解析阶段就打印变量当前值。`warning` 带文件名行号，`error` 直接终止（可用于强制检查必填变量）。
+
+```make
+$(info BUILD_DIR=$(BUILD_DIR))
+$(warning CFLAGS is $(CFLAGS))
+# $(error "CC not set")  # 需要时取消注释
+```
+
+### `.DEFAULT` 规则兜底未知目标
+
+当 make 遇到一个没有任何规则匹配的目标，会尝试 `.DEFAULT` 里的 recipe。常用来做「万能编译」或给出友好报错。
+
+```make
+.DEFAULT:
+	@echo "no rule to make $@" && exit 1
+```
+
+### `$(MAKE)` 变量递归调用子 make
+
+父 make 调用子目录时必须用 `$(MAKE)` 而非裸 `make`，否则 `-j` 并行旗标、jobserver 令牌不会下传，子目录退回串行甚至僵死。
+
+```make
+sub:
+	$(MAKE) -C src        # 正确：透传 -j / jobserver
+#	make -C src          # 错误：丢失并行语义
+```
+
+### 用 `remake -x` 反向追踪某产物由哪些规则生成
+
+GNU `remake`（make 的增强版）的 `-x` 能打印「这个文件是被哪条规则、因为哪些依赖生成的」，比 `-d` 易读，适合排查「为什么这个 .o 是旧的」。
+
+```bash
+remake -x main.o
+```
+
+### 模式规则与隐式规则的优先级之争
+
+你写的 `%.o: %.c` 是「模式规则」，make 还有内置的 `.c.o:` 隐式规则。当两者共存，make 按「后缀规则/模式规则优先级 + 先决条件新旧」选一条，行为未必是你预期的。用 `make -p` 比对实际命中。
+
+### 现代构建系统为什么取代手写 Makefile
+
+手写 Makefile 的三座大山：依赖要靠 `-MMD` 手工维护、跨平台工具链差异大、`-j` 正确性全凭人写对依赖边。CMake/Meson/Ninja/Bazel 把「依赖探测、增量判定、并行调度」交给工具，开发者只描述「要什么」而非「怎么编」。读 `redis/src/Makefile` 上千行手写规则，就能体会为什么大家迁移。

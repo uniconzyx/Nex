@@ -59,3 +59,33 @@
    *为什么*：错误码散落字符串字面量，拼写错一个前端就匹配不到；文案写死在后端，多语言切换要改后端。错误码没有统一命名空间，时间一长重复、冲突、无人维护。
 
    *怎么改*：把错误码定义成枚举（如 `UserError.USER_NOT_FOUND`，带 code/httpStatus/message），前后端共享一份契约；前端按 code 映射本地化文案，后端只给 code。
+
+11. **`@Transactional` 标注在 private / 内部调用方法上不生效** —— 错在：类内部 `this.save()` 调用另一个带 `@Transactional` 的方法，事务没开启。
+
+   *为什么*：Spring 事务靠代理，自调用绕过了代理，注解被直接调用忽略。结果没事务边界，异常不回滚。
+
+   *怎么改*：通过注入的 bean 自己（或拆到另一个 service）调用；或用 AspectJ 模式让自调用也走增强。
+
+12. **异常被 `@Transactional` 吞掉没回滚** —— 错在：catch 了异常又 `throw new RuntimeException` 或啥也不抛，事务以为成功提交了。
+
+   *为什么*：Spring 默认只对 `RuntimeException`/`Error` 回滚；checked exception 默认提交。catch 后静默吞掉更是连回滚信号都没了。
+
+   *怎么改*：明确 `rollbackFor = Exception.class`；或在 catch 里抛一个会触发回滚的异常，不要静默吞。
+
+13. **`@Validated` 用在字段而非方法参数上** —— 错在：在 controller 字段或类上标 `@Validated` 期望校验生效，结果请求进来没校验。
+
+   *为什么*：方法级校验需要在 controller 类上标 `@Validated`（开启方法校验切面），并在入参前加 `@Valid`/`@NotNull` 等；仅标在字段不触发。
+
+   *怎么改*：controller 类加 `@Validated`，方法参数前加 `@Valid @RequestBody Dto dto`，让框架在绑定参数时校验。
+
+14. **Advice 顺序乱导致异常处理被别的 Advice 截胡** —— 错在：多个 `@ControllerAdvice` 或 `@Order` 没排好，业务异常先被兜底 advice 当成 500 处理。
+
+   *为什么*：`@ControllerAdvice` 有多个时默认顺序不定（或按 bean 名），兜底 500 的 advice 可能先于业务 advice 匹配，把业务码覆盖。
+
+   *怎么改*：用 `@Order(Ordered.HIGHEST_PRECEDENCE)` 让「最具体」的 advice 优先；或合并到一个 advice 用 `@ExceptionHandler` 精确匹配优先级。
+
+15. **DTO 上 `@NotNull` 用在基本类型 `int` 上无效** —— 错在：`private int age; @NotNull` 期望拦住「不传 age」，但基本类型永远有默认值 0。
+
+   *为什么*：`@NotNull` 只检查非 null，而 `int` 不可能为 null（默认 0）；前端不传时绑定成 0，校验通过，脏数据进库。
+
+   *怎么改*：用包装类型 `Integer` + `@NotNull`/`@Min(0)`；需要「必传」语义就用 `Integer` 而非 `int`。
