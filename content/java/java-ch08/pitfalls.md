@@ -23,3 +23,7 @@
 11. **混淆 `ClassNotFoundException` 与 `NoClassDefFoundError`** —— 前者是**受检异常**，`Class.forName`/`loadClass` 在**加载阶段**找不到类时抛出；后者是 **`Error`**，在**链接或初始化阶段**找不到（典型：编译通过但运行缺依赖、静态块抛异常导致后续初始化失败）。**一个能被 `catch (Exception)` 抓到，一个不能**。
 
 12. **只看堆不看「类加载器」定位内存泄漏** —— 热部署/动态代理场景下，泄漏往往表现为**某个自定义 `ClassLoader` 及其加载的整片类无法回收**。MAT 里要看 **`ClassLoader` 的 retained heap**，而不是只看对象数 Top；修法通常是**清理静态缓存 + 保证没有线程/`ThreadLocal` 持有该加载器**。
+
+13. **把 `-Xss` 调大当栈溢出解药** —— `StackOverflowError` 根因多是无限递归或过大栈帧，调大栈只是推迟爆炸、更费内存；先修递归终止条件，再谈栈大小。
+14. **认为 G1 不会 Full GC** —— G1 在「晋升失败 / 大对象分配失败 / 元空间耗尽」时仍会 Full GC（通常单线程、长停顿）；它不是无 Full GC 的收集器，只是尽量用混合回收规避。
+15. **用 `System.gc()` 强制回收解决泄漏** —— `System.gc()` 只是「建议」，且会触发 STW 全堆扫描，不能修泄漏只会雪上加霜；泄漏靠定位并切断引用（MAT 看 retained heap）解决。
