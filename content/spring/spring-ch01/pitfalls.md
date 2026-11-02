@@ -21,3 +21,10 @@
 9. **同类型多 Bean 时靠字段名「猜」实现**
    `@Autowired private UserService userService;` 在存在两个 `UserService` 实现时，Spring 会退化成**按字段名匹配 Bean 名**。改个字段名就换了实现，不报错、行为静默改变。
    ✅ 显式 `@Qualifier("beanName")` 或 `@Primary`；需要遍历所有实现时注入 `Map<String, UserService>`。
+
+10. **字段注入导致必填依赖启动不校验** —— `@Autowired` 字段在运行时才填，缺依赖启动不报错、运行 NPE。✅ 必填不可变依赖用构造器注入，启动即校验。
+11. **自己 new Bean 导致 @Autowired 全为 null** —— `new UserService()` 不被容器管理，里面的依赖不注入。✅ 让容器创建（注入或 getBean）。
+12. **prototype 被 singleton 持有没真多例** —— prototype 只在直接 getBean / ObjectProvider.getObject 时每次新建。✅ 需要每次新实例用 ObjectProvider。
+13. **@Value 取不到配置** —— key 没配或类型不符。✅ 用 `:默认值` 兜底，复杂配置用 `@ConfigurationProperties` 绑定对象。
+14. **singleton 里存可变状态致线程不安全** —— 并发请求互相串号。✅ 请求数据走方法参数或 RequestContextHolder，或 @Scope("request")。
+15. **@Lazy 掩盖真正的循环依赖** —— 启动报错被压到首次请求才炸，更难定位。✅ 优先重构依赖方向而非一路 @Lazy。

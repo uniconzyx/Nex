@@ -31,3 +31,11 @@
 8. **make_shared 与私有构造 / 单独控制块释放的权衡**
    `make_shared` 把对象与控制块合并一次分配，但只要有 `weak_ptr` 存活，控制块（及合并分配）就一直不释放，哪怕对象本身已析构。
    ✅ 需要"对象析构后立刻回收内存"或构造可能抛异常需隔离时，才用 `shared_ptr<T>(new T(...), deleter)` 分开分配。
+
+9. **裸指针交给两个智能指针，双重释放** —— 同一 `new` 结果进两个独立控制块，析构各 delete 一次。✅ 一个裸指针只进一个智能指针；共享用同一 shared_ptr 拷贝。
+10. **shared_ptr 循环引用，内存永不释放** —— 环两侧都 shared_ptr，计数永远≥1。✅ 环的一侧改用 `weak_ptr` 打破环。
+11. **用 this 直接构造 shared_ptr 自引用炸裂** —— 等于裸 this 进新控制块，与外部不是同一个。✅ 用 `enable_shared_from_this::shared_from_this()`。
+12. **shared_ptr 与裸指针混用，生命周期失控** —— `.get()` 返回的指针在 sp 析构后悬垂。✅ `.get()` 只紧邻传给 C 接口，长期共享再拷一个 shared_ptr。
+13. **栈对象地址塞进智能指针** —— 析构时 `delete` 栈地址，直接崩。✅ 智能指针只接管堆对象（或自定义 deleter 资源）。
+14. **数组用 shared_ptr<T> 而非 shared_ptr<T[]>** —— 析构用 `delete` 而非 `delete[]`，UB。✅ 用 `shared_ptr<T[]>` / `unique_ptr<T[]>` 或 vector。
+15. **weak_ptr 没 lock 就直接解引用** —— weak_ptr 不能 `->` 访问。✅ 先 `lock()` 拿 shared_ptr，判空后再用。

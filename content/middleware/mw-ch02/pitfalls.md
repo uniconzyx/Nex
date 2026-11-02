@@ -25,3 +25,10 @@
 9. **忽略 RDB fork 的 COW 放大**
    `bgsave` 靠 fork 出子进程写盘，期间父进程的写操作触发 copy-on-write 复制页。写入量大时 RSS 可接近翻倍，容易撞上容器内存上限被 OOM kill，恢复又要重放 AOF。
    ✅ 单实例内存控制在物理内存一半以内；关掉 THP（`transparent_hugepage=never`）；快照错峰；用副本执行持久化，主库只保 `everysec`。
+
+10. **AOF 用 always 把吞吐打到地板** —— 每条写都 fsync，QPS 从十万掉到几千。✅ 绝大多数场景用 `appendfsync everysec`，最多丢 1 秒。
+11. **bigkey 一把 DEL 卡死主线程** —— 几百万字段的 hash 删除阻塞秒级，全请求超时。✅ 用 `UNLINK` 异步删或 `HSCAN` 分批清。
+12. **生产跑 KEYS \* 全量遍历** —— 几百万 key 一次性遍历，主线程卡几十秒。✅ 一律用 `SCAN` 游标分批。
+13. **maxmemory 不设，内存被打满被 OS 杀** —— Redis 不背内存上限责任，必须显式配 `maxmemory` + 淘汰策略。✅ `maxmemory 8gb` + `allkeys-lru` 之类。
+14. **把 Redis 当持久库，重启数据没了** —— 默认 RDB 周期快照可能丢间隔内数据。✅ 重要数据双写 DB 或开 AOF+副本。
+15. **热点 key 打爆单线程** —— 单 key 被狂访问，整体变慢。✅ 本地缓存挡一层、key 加随机后缀分片、读走从节点。

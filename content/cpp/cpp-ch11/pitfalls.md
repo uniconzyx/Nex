@@ -40,3 +40,11 @@
 8. **异常对象用 `throw new MyErr()`（抛指针）**
    抛指针后必须 `catch (MyErr*)` 且调用方负责 `delete`，极易泄漏，且与标准体系（`catch (const std::exception&)`）不兼容。
    ✅ 抛**值或引用指向的栈对象**（如 `throw std::runtime_error("...")`），`catch` 用 `const` 引用接。
+
+9. **catch 按值接导致对象 slicing** —— `catch (std::exception e)` 派生信息被切片丢失。✅ 一律 `catch (const std::exception& e)` 引用接，保留动态类型。
+10. **catch 顺序写反，窄分支成死代码** —— 基类在前把派生类一并接走。✅ 从最派生前到最基类后排列。
+11. **析构函数里抛异常直接 terminate** —— 栈展开途中再抛，C++ 规定直接终止。✅ 析构内 try/catch 记日志，绝不外抛。
+12. **用 assert 做运行期参数校验** —— release（NDEBUG）下 assert 整段消失，校验失效。✅ assert 只查内部不变式，对外校验用 if+throw。
+13. **noexcept 函数里抛异常直接终止** —— noexcept 是「绝不抛」承诺。✅ 不确定内部是否抛就别标，或确保不抛。
+14. **跨 ABI / C 边界抛异常崩栈** —— 对方无法 catch，栈损坏。✅ 接口层捕获转错误码，异常不跨边界。
+15. **catch(...) 静默吞掉一切** —— 排错时不知发生了什么。✅ 至少记日志，或 `throw;` 重新抛出给上层。
