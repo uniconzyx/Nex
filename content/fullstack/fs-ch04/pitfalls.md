@@ -27,3 +27,4 @@
 13. **JSON body 不限制大小 / 不 try-catch JSON.parse** —— 大 body 致内存溢出，非法 JSON 致 500。✅ 限制请求体大小、用 try/catch 包裹解析、失败返回 400。
 
 14. **认为 Node 是多线程或全程单线程** —— JS 在单调用栈执行，但 libuv 有线程池处理文件/DNS/crypto，worker_threads 还能跑并行 JS。✅ 理解「JS 单线程 + 底层线程池」分工，CPU 任务用 worker_threads。
+15. **在请求处理里用 `readFileSync` 读大文件** —— 同步 IO 阻塞事件循环，期间所有请求排队，QPS 断崖式下跌。✅ 请求路径里一律用异步 API（`fs.promises.readFile` 或流），启动脚本才允许同步读配置。

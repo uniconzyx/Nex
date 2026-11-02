@@ -27,3 +27,4 @@
 13. **POST 不做幂等，前端重试导致重复下单/重复扣款** —— 网络抖动时浏览器/网关自动重试 POST，没有去重就多次执行业务。正确写法：用「唯一请求号 / 资源版本号 / 去重表」保证重复请求得到同一结果；或改用幂等的 PUT 表达「创建或更新」。
 
 14. **CORS 预检 OPTIONS 被拦截器/鉴权拦掉，跨域失败** —— 浏览器先发 `OPTIONS` 预检，若被登录拦截器拦下（因没带 token），正式请求永远发不出。正确写法：拦截器对 `OPTIONS` 方法直接放行，或在 `@CrossOrigin`/`WebMvcConfigurer` 里正确配置 `allowedMethods` 含 OPTIONS。
+15. **Controller 直接返回 JPA 实体** —— 一方面把密码、内部字段、关联对象全暴露出去，另一方面在序列化时触发懒加载，抛 `LazyInitializationException`。正确写法：响应统一用 VO/DTO，只挑需要暴露的字段，关联数据在事务内查好或用 `@EntityGraph` 预取。
