@@ -28,3 +28,27 @@
 9. **`constexpr` 函数里的 UB 只在编译期被抓**
    同一个 `constexpr` 函数：常量求值时 UB 会报错，运行期调用时 UB **不检查**（越界读、有符号溢出照样静默出结果），于是「编译过了」被误当成「没问题」。
    ✅ 能只在编译期求值就用 `consteval`；确实要运行期分支时用 `std::is_constant_evaluated()` 分开写；测试开 `-fsanitize=undefined,address`。
+
+10. **判断类型前忘了去掉引用与 cv 限定**
+   `template <typename T> void f(T&& v)` 里 `std::is_integral_v<T>` 在传入左值 int 时为 false，因为 `T` 被推导成 `int&`。
+   ✅ 判断前先 `std::remove_reference_t<T>` 或直接 `std::decay_t<T>`（同时去引用、cv、数组/函数退化）。
+
+11. **以为 SFINAE 能兜住任意失败**
+   SFINAE 只对「立即上下文」里的替换失败生效；函数体内或已实例化类模板深处的失败是硬错误，照样报一堆。
+   ✅ 把约束写在签名上（模板默认实参 / 返回类型 / concept），不要在函数体里指望「失败就放弃」。
+
+12. **用普通 if 做按类型分支**
+   `if (std::is_integral_v<T>)` 的两个分支都会被实例化，不适用的那支立刻报错。
+   ✅ 一律用 `if constexpr`，它在编译期裁剪分支，假分支完全不实例化。
+
+13. **函数模板做偏特化**
+   写 `template <typename T> void f(std::vector<T>)` 期望偏特化，实际是重载，且与主模板的优先级常常出乎意料。
+   ✅ 函数模板不能偏特化（语言规则）。把逻辑转发到一个类模板上做偏特化，再由一层薄函数调用它。
+
+14. **以为 constexpr 函数一定在编译期执行**
+   `constexpr` 只是「允许」编译期求值；传运行期变量时照样运行期算，性能预期落空。
+   ✅ 必须编译期就用 `consteval`；需要在两种场景下都可用时，用 `std::is_constant_evaluated()` 分别实现。
+
+15. **漏写 std::forward，右值退化成左值**
+   `T&& v` 一旦具名就是左值，`inner(v)` 调用的是拷贝而不是移动，性能静默损失。
+   ✅ 完美转发两层都要：参数写 `T&&`，传递写 `std::forward<T>(v)`。发现「临时对象却调了拷贝构造」时先查这里。

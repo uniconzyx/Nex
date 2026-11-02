@@ -27,3 +27,5 @@
 13. **在 Driver 端 collect 超大结果集，导致 Driver OOM** —— 错。`collect()` 把所有分区数据拉回 Driver 单点，数据大必炸。正确写法：结果大时用 `saveAsTextFile`/写数仓；只取样用 `take`/`sample`；确需全量时在 executor 侧用 `foreach`/`mapPartitions` 处理。
 
 14. **过度 repartition 制造无谓 Shuffle** —— 错。`repartition` 必触发一次宽依赖 + 全量 shuffle，只为调分区数却付出网络代价。正确写法：能用 `coalesce`（窄依赖合并、减少分区）就别用 `repartition`（增/减都 shuffle）；确要增多分区再考虑 repartition，且评估 shuffle 成本。
+
+15. **在循环里反复触发 action 做进度显示** —— 错。`while (...) { rdd.count(); }` 每轮都完整重算整条血缘链，作业从 40 分钟变 6 小时。正确写法：需要复用就 `persist`，或用 Spark UI 看进度，不要在代码里对同一 RDD 反复 count。

@@ -27,3 +27,5 @@
 13. **`async` 函数被当同步返回** —— `async function f(){ return 1 }` 返回的是 `Promise`，调用处拿到的是 Promise 而非 `1`。✅ 用 `await f()` 取值，或对结果 `.then`。
 
 14. **`JSON.parse(JSON.stringify(x))` 深拷贝丢信息** —— `undefined`、函数、`Symbol` 键会被丢弃，`Date` 变字符串、`RegExp` 变 `{}`，循环引用直接报错。✅ 结构化数据用 `structuredClone`，特殊类型用专用库（如 lodash.cloneDeep）。
+
+15. **把 ES module 的顶层 await 当成同步等待** —— `await` 之后的代码始终进微任务队列，即使是 `await null` 也会让后续语句推迟。✅ 预测输出时把 `await` 之后的每一行都当作微任务；`async` 函数永远返回 Promise，取值必须再 `await` 一次。
