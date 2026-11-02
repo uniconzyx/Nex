@@ -21,3 +21,9 @@
 9. **`LEFT JOIN` 之后在 `WHERE` 里过滤右表字段，悄悄退化成内连接**
    `LEFT JOIN t2 ON ... WHERE t2.status = 'ok'`：右表没匹配上的行 `t2.status` 为 NULL，被 `WHERE` 滤掉，左连接保住「无匹配行」的意义完全消失。
    ✅ 过滤条件写进 `ON`（`ON ... AND t2.status='ok'`），或显式允许空值 `OR t2.status IS NULL`。
+10. **忘写 JOIN 的 ON 条件 → 意外笛卡尔积** —— 多表 JOIN 漏掉 `ON` 会产出 N×M 行，结果翻倍又翻倍且极慢。修法：每个连接都显式写 `ON`/`USING`；确实需要笛卡尔积时用 `CROSS JOIN` 表明意图，避免误写。
+11. **`NOT IN (子查询)` 遇 NULL 永远为假** —— 子查询结果含 NULL 时，`x NOT IN (..., NULL)` 整体判定为 unknown，行被静默丢掉。修法：改用 `NOT EXISTS`，或对子查询加 `WHERE col IS NOT NULL`；需要差集优先 `EXCEPT`。
+12. **用 `UNION` 当 `UNION ALL`** —— `UNION` 隐式去重排序，代价高；确定无重复或不需要去重时应用 `UNION ALL`。修法：能确认无重复就一律 `UNION ALL`，大数据量下常快一倍。
+13. **GROUP BY 后 SELECT 裸列（非分组非聚合）** —— `SELECT dept, name, MAX(salary) ... GROUP BY dept`，`name` 是该部门多个名字之一，数据库任取一个，结果无意义。修法：要「最高薪者姓名」用窗口函数或子查询，别直接 SELECT 非分组列。
+14. **相关子查询对每行重算，量级放大 N 倍** —— 内层引用外层列的相关子查询，外层每行都重跑一次内层。修法：能用 JOIN + 预聚合（派生表）改写的优先改写；判断是否「相关」看内层是否引用了外层列。
+15. **把窗口函数当 GROUP BY 用** —— 窗口函数（带 `OVER`）**不缩减行数**，在原行上附加聚合结果；`GROUP BY` 才把每组聚成一行。修法：要「每组 Top-N / 每组累计」用窗口函数 + `WHERE rn<=N`；要「每组一行汇总」才用 GROUP BY。
