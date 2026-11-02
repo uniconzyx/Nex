@@ -58,3 +58,27 @@
    ```
    返回类型由**初值**推导，且每一步都按初值类型运算——浮点被逐次截断，不是在最后才转换；大整数则会中途溢出。
    ✅ 初值写对类型：`std::accumulate(v.begin(), v.end(), 0.0)`；累加大整数用 `0LL`，累加字符串用 `std::string{}`。
+
+10. **给 `sort` 传 `<=` 作比较器**
+   `[](int a, int b){ return a <= b; }` 违反严格弱序的非自反要求（`a <= a` 为真），行为是未定义，libstdc++ 上常直接崩。
+   ✅ 比较器里只允许出现 `<`；多字段比较时每一级都用 `<`，最后一级也不要写成 `<=`。
+
+11. **降序排序后仍用默认 `lower_bound`**
+   用 `greater<>` 排成降序，查找时传默认的 `less<>`，二分方向反了，结果无意义且不报错。
+   ✅ 排序与查找必须用同一个比较器：`lower_bound(first, last, v, std::greater<>{})`。
+
+12. **循环里 `erase` 后用 `++it`**
+   `v.erase(it); ++it;` 中 `it` 已失效，`++it` 是 UB，还会跳过紧跟的元素。
+   ✅ 用返回值续接：`it = v.erase(it);`；或直接用 C++20 的 `std::erase_if(v, pred)`。
+
+13. **`std::remove` 之后忘了 `erase`**
+   `std::remove` 只把保留元素前移并返回新逻辑结尾，容器大小不变，尾部残留旧值。
+   ✅ 用 erase-remove 惯用法：`v.erase(std::remove(v.begin(), v.end(), x), v.end())`；C++20 用 `std::erase(v, x)`。
+
+14. **`accumulate` 初值写成 `0` 去累加浮点**
+   类型由初值决定，`accumulate(v.begin(), v.end(), 0)` 对 `vector<double>` 会截断成整数，静默丢精度。
+   ✅ 初值类型与期望结果一致：浮点用 `0.0`，大整数用 `0LL`，字符串用 `std::string{}`。
+
+15. **ranges 管道被遍历多次，惰性计算重复执行**
+   `auto r = data | filter | transform;` 之后 `for (x : r)` 两次，`transform` 里的昂贵逻辑就执行两遍。
+   ✅ 需要多次访问就先物化成一个容器；只遍历一次时才用惰性管道，并把 `take` 尽量前置以短路上游计算。
