@@ -57,6 +57,12 @@ THRESH = {
     "exercise_types": (3, 4),
 }
 
+# 必须与 server/scripts/gen_exercise_bundle.py 的 TYPE_ALIAS 保持一致。
+# 生成器会把前端不认识的题型别名归一（judge -> explain、fix -> fix_error），
+# 所以「题型种类数」也要按归一后的集合来数，否则像「同时有 explain 和 judge」
+# 的章节会被算成 5 种、实际前端只看到 4 种 —— 审计虚高，一章本该补题却被判达标。
+TYPE_ALIAS = {"judge": "explain", "fix": "fix_error"}
+
 
 def read(p: Path) -> str:
     try:
@@ -105,7 +111,7 @@ def audit_chapter(ch: Path) -> dict:
         items = ej.get("exercises") or ej.get("items") or (ej if isinstance(ej, list) else [])
         for it in items:
             if isinstance(it, dict) and it.get("type"):
-                types.add(it["type"])
+                types.add(TYPE_ALIAS.get(it["type"], it["type"]))
     except json.JSONDecodeError:
         pass
 
