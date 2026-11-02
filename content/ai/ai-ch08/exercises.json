@@ -2,7 +2,7 @@
   "meta": {
     "chapter": "ai-ch08",
     "title": "LLM 应用工程：推理优化、评测、可观测性与安全 —— 习题集",
-    "count": 8,
+    "count": 9,
     "note": "8 题，基础题 6 + 算法题 2（含 LeetCode 2），仅存元数据与链接不复述题面"
   },
   "items": [
@@ -268,6 +268,27 @@
       "source": "leetcode",
       "source_ref": "LeetCode 621（task-scheduler）",
       "external_url": "https://leetcode.cn/problems/task-scheduler/"
+    },
+    {
+      "id": "ai-ch08-q9",
+      "type": "judge",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "判断：把温度设为 0 就能保证同一请求每次返回完全相同的结果。",
+      "content_md": "题干：某同学认为只要把 `temperature` 设为 0，同一个 prompt 每次调用都会得到逐字符相同的输出，因此可以直接用输出做缓存键。这句话对吗？请判断正误并说明。",
+      "answer": {
+        "correct": false,
+        "explain": "错误。温度设为 0 只表示「取概率最高的 token」（贪心解码），消除的是采样随机性，但输出仍可能不同：① 浮点累加顺序、并行归约、不同 GPU/驱动版本会造成 logits 的微小差异，当 top-1 与 top-2 差距极小时可能翻转；② 服务方可能启用 continuous batching，同一请求在不同批次中的数值结果不完全一致；③ 部分厂商会在温度 0 时仍做 top-p/top-k 截断或加入内部约束。所以要缓存就必须接受「近似命中」，或者用「prompt 哈希 + 模型版本 + 参数」作为键并允许少量重算，不能假设输出确定。"
+      },
+      "explanation": "温度 0 只消除采样随机性，不保证跨调用的比特级一致。",
+      "tags": [
+        "temperature",
+        "缓存",
+        "可复现性"
+      ],
+      "source": "self",
+      "source_ref": "ai-ch08/concept/04-observability-eval.md"
     }
   ]
 }

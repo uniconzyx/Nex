@@ -2,7 +2,7 @@
   "meta": {
     "chapter": "ai-ch10",
     "title": "训练工程与规模化 —— 习题集",
-    "count": 8,
+    "count": 9,
     "note": "8 题，基础题 4 + 算法题 4（平台题仅存元数据与链接，不复述题面）"
   },
   "items": [
@@ -242,6 +242,26 @@
       ],
       "source": "self",
       "source_ref": "梯度累积的等价性条件"
+    },
+    {
+      "type": "judge",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "判断：用梯度累积模拟大 batch 时，每个 micro-batch 的 loss 直接 backward 累加，与真正的大 batch 完全等价。",
+      "content_md": "题干：显存不足时用梯度累积（accum=N）模拟大 batch。某同学把每个 micro-batch 的 loss 直接 `backward()` 累加，认为这与把 batch 放大 N 倍完全等价。这句话对吗？",
+      "answer": {
+        "correct": false,
+        "explain": "错误。直接累加得到的梯度是各 micro-batch 梯度之和，而真正大 batch 的 loss 是**平均值**，因此梯度也应是平均值——累加版本相当于把学习率放大了 N 倍，容易发散。正确写法是每个 micro-batch 的 loss 先除以 N 再 backward（`loss = loss / accum`）。此外还有两处不完全等价：① BatchNorm 的统计量按 micro-batch 计算而非全 batch；② Dropout 的随机掩码在 micro-batch 之间独立。所以「等价」只在「梯度方向缩放」这一层成立，涉及批统计与随机性的层并不严格等价。"
+      },
+      "explanation": "必须除以累积步数，且 BN/Dropout 与真大 batch 不完全等价。",
+      "tags": [
+        "梯度累积",
+        "学习率",
+        "BatchNorm"
+      ],
+      "source": "self",
+      "source_ref": "ai-ch10/concept/03-precision-and-parallel.md"
     }
   ]
 }

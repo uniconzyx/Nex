@@ -2,7 +2,7 @@
   "meta": {
     "chapter": "tool-ch02",
     "title": "Linux 进程、管道与 Shell 脚本 —— 习题集",
-    "count": 8,
+    "count": 9,
     "note": "8 题，基础题 4 + 算法题 4（LeetCode Shell 题库，仅存元数据与链接，不含题面正文）"
   },
   "items": [
@@ -233,6 +233,27 @@
       "source": "leetcode",
       "source_ref": "LeetCode 195. Tenth Line",
       "external_url": "https://leetcode.cn/problems/tenth-line/"
+    },
+    {
+      "id": "q9",
+      "type": "judge",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "判断：`kill -9` 能终止任何进程，包括处于 D 状态的进程。",
+      "content_md": "题干：磁盘 IO 卡住时，某进程处于 `D`（不可中断睡眠）状态，用 `kill -9` 就能把它杀掉。这句话对吗？",
+      "answer": {
+        "correct": false,
+        "explain": "错误。`SIGKILL` 虽然不可被捕获、不可被忽略，但它仍然要在进程「可被调度并处理信号」的时机才生效。处于 `D` 状态（不可中断睡眠）的进程正卡在内核态等待 IO，内核不会在它返回用户态或可中断点之前处理信号，因此 `kill -9` 会一直挂起直到 IO 完成或超时。这也是为什么 `kill -9` 之后 `ps` 里还能看到它。处理方式不是反复 kill，而是排查底层 IO（磁盘故障、NFS 挂载失联、块设备错误）。"
+      },
+      "explanation": "D 状态进程不响应信号，需要从底层 IO 层面解决。",
+      "tags": [
+        "kill",
+        "进程状态",
+        "D 状态"
+      ],
+      "source": "self",
+      "source_ref": "tool-ch02/concept/02-signals.md"
     }
   ]
 }

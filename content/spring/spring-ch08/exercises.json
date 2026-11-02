@@ -301,6 +301,27 @@
       "source": "leetcode",
       "source_ref": "LeetCode 1226 The Dining Philosophers",
       "external_url": "https://leetcode.cn/problems/the-dining-philosophers/"
+    },
+    {
+      "id": "ex9",
+      "type": "judge",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "判断：`@Transactional` 方法抛出受检异常（如 IOException）时，事务会自动回滚。",
+      "content_md": "题干：某 Service 方法标了 `@Transactional`，内部抛出了 `IOException`（受检异常），由于异常向上抛出了方法边界，Spring 会自动回滚事务。这句话对吗？",
+      "answer": {
+        "correct": false,
+        "explain": "错误。Spring 的默认回滚规则是「只对 `RuntimeException` 与 `Error` 回滚」，受检异常（`Exception` 的子类但不是 `RuntimeException`）默认**不回滚**——事务会被提交。这是最高频的误解，也是「明明抛异常了数据却写进去了」的典型原因。修法有两种：显式声明 `@Transactional(rollbackFor = Exception.class)`，或者在方法内把受检异常包装成运行时异常再抛。注意 `rollbackFor` 要写在真正开启事务的那个方法上，写在自调用的内层方法是无效的。"
+      },
+      "explanation": "默认只回滚 RuntimeException/Error，受检异常需显式 rollbackFor。",
+      "tags": [
+        "@Transactional",
+        "回滚规则",
+        "受检异常"
+      ],
+      "source": "self",
+      "source_ref": "spring-ch08/concept/01-transactional-semantics.md"
     }
   ]
 }

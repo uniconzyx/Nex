@@ -1,0 +1,98 @@
+# Linux 进程与管道代码速查：凯喵的七段可直接用的片段
+
+> 这一篇是配套速查。前四篇讲清了进程模型、信号、管道与重定向、Shell 脚本，这一篇把它们变成能直接粘进终端的命令。凯喵的用法是遇到运维或排障场景直接取用，再按自己的路径和进程名调整。
+
+## 一、查看进程树与真实父进程
+
+`ps` 的默认输出看不出层级，`--forest` 才能看清谁是谁的孩子。
+
+```bash
+ps -eo pid,ppid,stat,etime,rss,cmd --forest | head -40
+```
+
+几个标志值得记：`pid` 进程号、`ppid` 父进程号、`stat` 状态（`S` 睡眠、`R` 运行、`Z` 僵尸、`D` 不可中断睡眠）、`etime` 已运行时长、`rss` 常驻内存。`D` 状态值得警惕——它通常意味着卡在 IO 上，`kill -9` 也杀不掉。
+
+## 二、按端口找进程
+
+排障时最常见的问题：某个端口被占用了，不知道是谁。
+
+```bash
+ss -lntp | grep ':8080'
+# 或
+lsof -i TCP:8080 -sTCP:LISTEN
+```
+
+`ss` 比 `netstat` 快得多（它直接从内核读，不遍历 `/proc`）。`-l` 只看监听，`-n` 不解析服务名，`-t` TCP，`-p` 显示进程。
+
+## 三、信号的正确发送方式
+
+```bash
+kill -TERM <pid>      # 请它优雅退出（可被捕获）
+kill -INT <pid>       # 相当于 Ctrl-C
+kill -KILL <pid>      # 强杀，不可捕获、不给清理机会
+kill -HUP <pid>       # 常用于让守护进程重读配置
+```
+
+顺序永远是「先 TERM，等几秒，再看情况 KILL」。直接 KILL 会跳过所有清理逻辑，可能留下锁文件、临时文件、半写的数据。
+
+```bash
+kill -TERM $pid; for i in $(seq 1 10); do kill -0 $pid 2>/dev/null || break; sleep 1; done
+kill -KILL $pid 2>/dev/null
+```
+
+`kill -0` 不发信号，只检查进程是否还存在——这是判断「是否已退出」的标准手法。
+
+## 四、管道的退出码陷阱
+
+```bash
+set -o pipefail     # 让管道返回最右侧失败命令的退出码
+```
+
+默认情况下 `a | b` 的退出码是 `b` 的退出码，`a` 失败了也看不出来。`pipefail` 会取整条管道中最先失败的那个，这是脚本里必须开的一项。
+
+```bash
+if ! grep -q "ERROR" app.log | head -1; then
+    echo "no error found"
+fi
+```
+
+还要注意 `head` 会提早关闭管道，导致上游收到 `SIGPIPE`——在 `set -e` 下可能误判为失败。
+
+## 五、进程替换避免临时文件
+
+有些命令只接受文件名不接受 stdin，进程替换能免掉临时文件。
+
+```bash
+diff <(sort a.txt) <(sort b.txt)
+comm -12 <(sort a.txt) <(sort b.txt)      # 求交集
+```
+
+`<(cmd)` 会被替换成一个 `/dev/fd/N` 路径，命令读到的是 `cmd` 的输出。比「先写临时文件再删」干净得多，也不会有并发写同名文件的竞争。
+
+## 六、按条件批量处理文件
+
+```bash
+find . -name '*.log' -size +100M -mtime +7 -print0 \
+  | xargs -0 -r -n 20 gzip -9
+```
+
+三个细节：`-print0` 配 `xargs -0` 处理含空格和换行的文件名；`-r` 表示没有输入时不执行（避免 `gzip` 因为没参数而报错）；`-n 20` 每批 20 个，避免命令行过长。
+
+凯喵的提醒：永远不要写 `for f in $(find ...)`，文件名里有空格就会断开。
+
+## 七、后台任务与作业控制
+
+```bash
+cmd > out.log 2>&1 &
+jobs -l
+disown -h %1
+nohup cmd > out.log 2>&1 &
+```
+
+区别：`&` 只是放后台，shell 退出时可能收到 `SIGHUP`；`nohup` 让进程忽略 `SIGHUP`；`disown` 把作业从 shell 的作业表里移除，之后 shell 退出不再通知它。
+
+`2>&1` 的位置很关键：`> out.log 2>&1` 是先重定向 stdout 到文件、再把 stderr 指向 stdout 的当前位置（文件），所以两者都进文件；写成 `2>&1 > out.log` 则 stderr 指向的是原来的终端。
+
+## 收尾
+
+这七段命令覆盖了 Linux 日常排障与运维的高频场景：看进程树、找端口、发信号、处理管道退出码、进程替换、批量处理、后台任务。凯喵的体会是，这些命令的价值不在于「知道有这个命令」，而在于知道每个选项对应的具体行为——比如 `kill -0` 是探测、`pipefail` 是改退出码语义、`-print0` 是处理特殊文件名。把这些细节记住，排障时就不用一边百度一边试。
