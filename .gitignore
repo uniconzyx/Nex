@@ -119,3 +119,6 @@ frontend/vite.config.ts.timestamp-*.mjs
 # ---------- Tauri 生成的平台工程（gen/schemas、gen/android）----------
 src-tauri/gen/
 
+
+# 概念图解数据（由 scripts/gen_concept_viz.py 生成，不入库）
+viz/data.js
