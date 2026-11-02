@@ -21,3 +21,10 @@
 9. **在 `BeanPostProcessor` 里注入业务 Bean**
    BPP 会被极早创建，它依赖的业务 Bean 因此被**提前初始化**，绕过正常后处理链——AOP 代理可能还没织入，`@Transactional`、`@Async` 静默失效，排查起来极其反直觉。
    ✅ BPP 里只依赖基础设施 Bean；需要「所有 Bean 就绪后」的动作放到 `SmartInitializingSingleton` 或 `ApplicationListener<ContextRefreshedEvent>`。
+
+10. **prototype 注入 singleton，每次拿到的还是同一个** —— singleton 只初始化一次，把 prototype 的固定引用存进去了，调一次就缓存。✅ 每次要新实例用 `ObjectProvider.getObject()` 或 `ApplicationContext.getBean()`。
+11. **@Lazy 掩盖真正的循环依赖** —— 用 `@Lazy` 把启动报错压到首次请求才炸，更难定位。✅ 优先重构依赖方向，@Lazy 只用于真要延迟创建。
+12. **@ComponentScan 漏掉别的顶层包** —— `@SpringBootApplication` 只扫自己所在包及其子包，新模块在别的包就被漏注册，注入 null。✅ 显式 `@ComponentScan("com.x")` 扩大范围。
+13. **singleton 里存请求级可变状态** —— 并发请求互相串号（线程不安全）。✅ 请求数据走方法参数或 `RequestContextHolder`，或 `@Scope("request")`。
+14. **@Bean 内部互相调用想拿代理却拿到原始对象** —— 写在 `@Component` 普通类里 `this.bean()` 是普通调用，绕过容器；写在 `@Configuration`（CGLIB 代理）里才走容器。✅ 统一用 `@Configuration`。
+15. **销毁方法没配，连接池/资源泄漏** —— 有 `AutoCloseable` 的 Bean 容器会自动 `close()`，自定义资源要显式 `destroyMethod`。✅ `@Bean(destroyMethod="close")` 释放连接池等。

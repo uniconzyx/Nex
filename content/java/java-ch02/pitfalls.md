@@ -26,3 +26,10 @@
 9. **在构造器里调用可被重写的方法**
    父类构造器先执行，此时子类字段还全是默认值（`0` / `null`）。如果构造器调用了一个被子类重写过的方法，子类版本会读到**尚未初始化**的状态，表现为莫名其妙的 NPE 或「配置没生效」。
    ✅ 构造器只调用 `private` / `final` 方法；需要扩展点就让子类显式调 `init()`。
+
+10. **== 比较对象比的是地址不是内容** —— `new String("a") == new String("a")` 为 false；引用类型 `==` 比地址，值比较用 `equals`。✅ 包装类型也别用 `==`，一律 `equals`。
+11. **可变对象当 HashMap 的 key** —— 存进去后改了 key 的内容，hashCode 变，再 get 返回 null。✅ Map 的 key 必须不可变（String/Integer 或字段全 final 的类）。
+12. **字段没封装，外部直接改破坏不变量** —— `public balance` 被改成负数，业务约束形同虚设。✅ 字段 private，经 setter 校验，对象始终合法。
+13. **内部类里 this 指向混淆** —— 匿名内部类的 `this` 指内部类自己，访问外部用 `Outer.this`；lambda 的 `this` 指包围实例（不引入新作用域）。✅ 明确作用域再引用。
+14. **重写 equals 参数写错漏 @Override** —— `equals(User u)` 是重载不是重写，HashSet.contains 仍走 Object.equals 比地址。✅ 参数必须 `Object` 且加 `@Override`。
+15. **static 字段当实例状态** —— `static int n` 被所有实例共享，计数互相影响。✅ 实例状态用普通字段，static 只放类级常量/工具。

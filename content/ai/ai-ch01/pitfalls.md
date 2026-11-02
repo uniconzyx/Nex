@@ -23,3 +23,7 @@
 11. **用 MSE 做多分类** —— 多分类应配交叉熵（对应 Categorical 分布假设）。MSE 配合 softmax 会导致梯度在饱和区极小，收敛极慢。
 
 12. **BatchNorm 与 Dropout 顺序随意放置** —— Dropout 的随机置零会破坏 BN 的统计量估计。常见做法是把 Dropout 放在 BN 之后，或改用 LayerNorm（Transformer 的标准做法）。
+
+13. **训练/推理不分 model.train() 与 model.eval()** —— 测试时若忘了 `eval()`，BN 用当前 batch 统计量、Dropout 仍在丢神经元，ACC 虚高或暴跌。✅ 推理前 `model.eval()` + `torch.no_grad()`，训练前 `model.train()`。
+14. **梯度不清零导致累加** —— 每个 step 前不 `optimizer.zero_grad()`，梯度跨 batch 累加，更新步长失控、loss 爆炸。✅ 训练循环固定三步：清梯度 → backward → step。
+15. **数据泄漏：先全量 fit 再切分** —— 对整个数据集做 StandardScaler / 编码再切分，测试集信息混进训练，指标虚高。✅ 只在训练集 fit，再 transform 验证/测试集。
