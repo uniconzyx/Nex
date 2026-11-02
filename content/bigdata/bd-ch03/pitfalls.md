@@ -15,3 +15,11 @@
 7. **以为列式存储「自动」就快，不写谓词下推/列裁剪** —— 错。ORC/Parquet 的收益来自**列裁剪**（只物化 `SELECT` 的列）与**谓词下推**（过滤下推到 Scan 层，尽量少读、尽早过滤）。若 `SELECT *` 或过滤列不在存储统计里，列存优势大打折扣。正确写法：只 `SELECT` 需要的列；把过滤条件写在能下推的列上（分区列、排序列、有 min/max 统计的列）；避免对列做函数包裹破坏下推。
 
 8. **窗口函数和 GROUP BY 混为一谈** —— 错。`GROUP BY` **缩减行数**（每组聚成一行）；窗口函数（含 `OVER (PARTITION BY ... ORDER BY ...)`）**不缩减行数**，在原行上附加聚合/排名结果。正确写法：要「每组 Top-N」用 `ROW_NUMBER() ... WHERE rn<=N`；要「每组聚合后拼回明细」用窗口聚合而非 GROUP BY；注意窗口函数通常在 Reduce 端计算，数据量大时同样会倾斜。
+
+9. **`COUNT(DISTINCT)` 比 `COUNT` 慢很多却照用** —— DISTINCT 难在 map 端去重，常需额外 shuffle；大基数精确去重代价高。✅ 先子查询去重再 COUNT，或用 HyperLogLog 近似。
+10. **`SELECT *` 让列式存储优势归零** —— ORC/Parquet 靠列裁剪和谓词下推省 I/O，`SELECT *` 读全部列等于白上。✅ 只 SELECT 需要的列。
+11. **分区列套函数导致分区裁剪失效** —— `substr(dt,1,7)` 让优化器无法裁剪分区，全分区扫描。✅ 分区列原样比较，别包裹函数。
+12. **小文件海量拖垮 NameNode 与 Map 数** —— 每文件在 NN 占约 150B 元数据，几万小文件读时起几万 Map。✅ 合并小文件 / ORC 大 block / `DISTRIBUTE BY` 控输出数。
+13. **分桶表没按 join key 分桶，SMB Join 不生效** —— 两表桶数不成倍数或没按 join key 分桶，仍走普通 shuffle join。✅ 两边同 key 同桶数才触发 Sort-Merge-Bucket Join。
+14. **`LATERAL VIEW explode` 先想基数，否则行数爆炸** —— 数组炸开一行变几千行，下游聚合爆内存。✅ 炸前过滤、评估 `size`、超大数组先采样。
+15. **内部表 DROP 顺手删了数据** —— MANAGED 表 DROP 时元数据+数据一起删；对接外部系统的数据丢了找不回。✅ 防误删、对接外部系统用 EXTERNAL 表。

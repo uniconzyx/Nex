@@ -32,3 +32,11 @@
 8. **`AopContext.currentProxy()` 忘记开 `exposeProxy`** —— 想用 `currentProxy()` 解决自调用，
    却没在 `@EnableAspectJAutoProxy(exposeProxy = true)`，运行拿到 `null` 抛异常。
    正确写法：显式开启，或更推荐「拆 Bean」的方案。
+
+9. **`@Transactional` 加在 private 方法上不生效** —— 代理只能拦截外部 public 调用，private 方法进不了拦截逻辑，注解等于白写。✅ 事务注解放 public 方法；需要内部增强就拆 Bean 或用 AspectJ 编译织入。
+10. **`@Around` 不调 `proceed()` 导致原方法被吞** —— Around 必须手动 `joinPoint.proceed()` 才把控制交还原方法，漏写则请求返回 null、业务不执行。✅ 永远在 try/finally 里调 proceed 并 return 其结果。
+11. **多切面顺序不定导致日志/事务谁先谁后混乱** —— 没指定 `@Order` 时切面顺序由扫描顺序决定，可能事务回滚了日志却记成功。✅ 用 `@Order` 明确：越小的越外层（如日志 1、事务 10）。
+12. **`this` 与 `target` 混淆导致切点匹配错对象** —— `this` 匹配代理对象类型，`target` 匹配真实被代理对象；接口代理时二者不同，权限类应切真实类型用 `target`。✅ 明确要切的是代理还是目标，别混用。
+13. **切点表达式过宽把 `toString`/`hashCode` 也织入** —— `execution(* com.x..*.*(..))` 连 getter、toString 都包了，日志刷屏甚至递归死循环。✅ 限定 service 包或改用 `@annotation` 只切标记方法。
+14. **在业务里吞掉异常导致事务无法回滚** —— try/catch 不重抛，代理层收不到异常，`@Transactional` 默认只认抛到代理的异常才回滚。✅ catch 里 `setRollbackOnly()` 或重抛。
+15. **只切 Controller 做鉴权被 Service 直调绕过** —— AOP 只拦截切面覆盖的入口，不是全局防火墙；有人直接调 Service 就绕过了鉴权。✅ 切到业务入口并配合网关纵深防御。

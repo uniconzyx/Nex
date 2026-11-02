@@ -21,3 +21,10 @@
 9. **遍历集合时直接 `list.remove(x)` → `ConcurrentModificationException`**
    foreach 底层是迭代器，结构性修改会让 `modCount` 与迭代器持有的 `expectedModCount` 不一致，下一次 `next()` 即抛异常（单线程也会抛，名字有误导性）。
    ✅ 用 `Iterator.remove()`；或用 `list.removeIf(pred)`；或先收集待删元素再 `removeAll`。
+
+10. **`Integer` 自动装箱缓存误当全局相等** —— 只缓存 -128~127，超出范围是不同对象，`==` 比地址必 false；在集合里用 `==` 比对元素会漏判。✅ 比较值一律用 `equals`，别依赖缓存区间。
+11. **`Collections.sort` 后忘了它原地改原列表** —— `sort` 是原地排序（返回 void 或仍是原引用），有人接了返回值又用原引用，误以为得到新列表。✅ 要不可变副本先 `new ArrayList<>(...)` 再 sort。
+12. **把 `subList` 当独立 List 修改导致原列表异常** —— subList 是视图，对原列表结构性修改后再用 subList 抛 `ConcurrentModificationException`。✅ 需要独立副本用 `new ArrayList<>(list.subList(a,b))`。
+13. **`PriorityQueue` 的 iterator 不保证有序** —— 只有 `poll` 出队才维持堆序，直接遍历打印是堆内部数组顺序，看着像「没排序」。✅ 要全排序用 `List.sort`，别信迭代器顺序。
+14. **把 `HashMap` 当线程安全用** —— 并发 `put` 可能丢数据或死循环（旧版本扩容时），靠「偶尔没出问题」蒙混。✅ 并发场景用 `ConcurrentHashMap`，别裸用 `HashMap`。
+15. **`removeIf` / `replaceAll` 在多线程并发下仍不安全** —— 它们基于 `Iterator.remove` 只保证单线程遍历安全，多线程并发改同一集合照样崩。✅ 多线程改用并发容器或在外部加锁。

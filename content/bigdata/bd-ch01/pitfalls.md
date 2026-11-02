@@ -26,3 +26,10 @@
 9. **单 NameNode 且不做 checkpoint → editlog 无限增长、重启小时级**
    只部署一个 NameNode，又没有 SecondaryNameNode / Standby 定期合并 fsimage，`edits` 文件会一直涨。重启时要回放几个月的 editlog，启动时间从小秒级变成小时级。
    ✅ QJM + ZKFC 做 HA（Standby 自动 checkpoint），或至少部署 SecondaryNameNode 并监控 `Last checkpoint` 时间。
+
+10. **把 SecondaryNameNode 当热备，主 NN 挂了没法接管** —— SNN 只做 fsimage+edits 合并，不接管服务、不存最新 edits；真热备是 HA 的 Standby NN。✅ 生产上 QJM+ZKFC HA，别指望 SNN 容灾。
+11. **小文件海量撑爆 NameNode 内存** —— 每个文件/块约 150B 元数据，几百万小文件直接 OOM。✅ HAR 归档、对象存储存小文件、写时合并大 block。
+12. **机架感知没配，3 副本全落同机柜** —— 副本策略依赖机架路径，没配则「同机架 2+跨机架 1」退化成同机柜 3，整柜断电即丢块。✅ 配 `net.topology.script` 返回机架路径。
+13. **安全模式下狂写报「NameNode in safe mode」** —— 启动保护态只只读不写，等块上报比例达标自动退出；强离会丢数据。✅ 等它自动退出，确认数据齐再 `leave`。
+14. **短路读没开，本地读也走网络回路** —— client 与 DN 同机却走 TCP 回路，延迟高。✅ 开 `dfs.client.read.shortcircuit=true` + unix socket。
+15. **fsimage 从不备份，元数据损坏即全损** —— NN 元数据是命根子，单盘坏道即集群起不来。✅ HA 共享存储 + 定期异地备份 + `name.dir` 多目录冗余。

@@ -25,3 +25,5 @@
 13. **把用户可控路径直接 `resolve` 后使用** —— `normalize()` **不解析符号链接**，只做语法化简，因此 `normalize` 不能防目录穿越。正确做法：`toRealPath()` 后校验 `startsWith(允许的根)`。
 
 14. **用 `ObjectInputStream` 读来自网络/MQ/缓存的数据** —— `readObject()` 会实例化输入流里出现的任意可加载类，是直接的 RCE 攻击面。正确做法：对外交换改用 JSON/Protobuf；必须用时加 `ObjectInputFilter` 白名单。
+
+15. **`BufferedReader.readLine()` 不含换行符且遇 null 结束** —— 新人拿 `line != null` 当循环条件却忘了 `readLine` 返回 null 表示 EOF（不是空行），或误以为行里带 `\n`。✅ 用 `while ((line = br.readLine()) != null)`，别把 null 和空串混为一谈。
