@@ -29,3 +29,5 @@
 13. **在错误分支上提交，没有及时迁移** —— 现象：把功能提交到了 main，feature 分支没有这些改动。根因：提交落到当前 HEAD 指向的分支，切到正确分支不会自动带过去。正确做法：未 push 时 `git reset --soft` 退回改动到工作区，切分支后重新提交；已提交则用 `git cherry-pick <sha>` 把该提交摘到正确分支。
 
 14. **把密码/token 提交进历史，`--amend` 删不掉** —— 现象：提交后发现含密钥，`git commit --amend` 改了最新提交，但旧提交（含密钥）仍在历史里。根因：`amend` 只是用新提交替换，旧对象仍在对象库中，且可能已被 push。正确做法：立即轮换泄露的密钥；用 `git filter-repo`/`BFG` 从整个历史清除，并加 `.gitignore` 与预提交钩子（如 gitleaks）防再犯。
+
+15. **`git rebase` 之后用 `git push --force` 覆盖远端** —— `--force` 会无条件覆盖，如果远端在你不注意时已有别人的提交，会直接抹掉。正确做法：用 `git push --force-with-lease`（远端与本地记录不一致时拒绝推送），并提前通知协作者；共享分支（main/develop）本身就不该 rebase。

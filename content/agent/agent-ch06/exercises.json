@@ -2,7 +2,7 @@
   "meta": {
     "chapter": "agent-ch06",
     "title": "私有化部署与推理服务 —— 习题集",
-    "count": 6,
+    "count": 7,
     "note": "2 道基础选择 + 1 道判断 + 3 道算法实践题，均为原创题干"
   },
   "items": [
@@ -165,6 +165,28 @@
       ],
       "source": "self",
       "source_ref": "agent-ch06/concept/03-deployment-engineering.md"
+    },
+    {
+      "id": "agent-ch06-q7",
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "手算 GQA 模型的单请求 KV Cache 显存",
+      "content_md": "某 7B 模型：层数 L=32，注意力头 32，**KV 头 8**（GQA），head_dim=128，fp16 推理（每元素 2B），单请求上下文 S=4096，batch=1。\n\n按 `2 × L × H_kv × head_dim × S × B × 2B` 计算 KV Cache 大小，单位 GiB（1 GiB = 2³⁰ B），保留 2 位小数。",
+      "answer": {
+        "output": "0.50",
+        "reference_code": "GB = 1024 ** 3\nkv = 2 * 32 * 8 * 128 * 4096 * 1 * 2\nprint(kv, round(kv / GB, 2))     # 536870912 -> 0.5\n",
+        "explain": "2 × 32 × 8 × 128 × 4096 × 1 × 2 = 536,870,912 B = 0.5 GiB。三处必查：① 用 **KV 头数 8** 而不是注意力头数 32（用 32 会算出 2 GiB，高估 4 倍）；② 别忘了最前面的 2（K 和 V 各一份）；③ 最后的 2 是 fp16 的字节数。若换成 MHA（32 个 KV 头）就是 2 GiB，这也是 GQA 能把并发提高 4 倍的原因。"
+      },
+      "explanation": "2·32·8·128·4096·1·2 = 0.5 GiB。注意用 KV 头数、乘 2（K/V）、乘 2B（fp16）。",
+      "tags": [
+        "KV Cache",
+        "GQA",
+        "显存"
+      ],
+      "source": "self",
+      "source_ref": "agent-ch06/concept/01-vram-ledger.md"
     }
   ]
 }

@@ -2,7 +2,7 @@
   "meta": {
     "chapter": "tool-ch03",
     "title": "Git 核心：对象模型与分支 —— 习题集",
-    "count": 8,
+    "count": 9,
     "note": "8 题，基础题 6 + 算法题 2（均为 self 平台；参考代码覆盖内容寻址 SHA 计算、Merkle DAG、merge-base LCA、内容去重，均可独立运行）"
   },
   "items": [
@@ -254,6 +254,28 @@
       ],
       "source": "self",
       "source_ref": "tool-ch03 concept/01；examples/ex02"
+    },
+    {
+      "id": "tool-ch03-q9",
+      "type": "explain",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "为什么删除分支后代码还能救回来，而 reset --hard 丢掉的工作区改动救不回来",
+      "content_md": "请从 Git 的对象模型出发解释两件事：\n1. `git branch -D feature` 之后，feature 分支上的提交为什么通常还能通过 `reflog` 找回来？\n2. `git reset --hard` 会丢掉工作区里**从未 add 过**的改动，为什么这部分无法找回？\n\n并说明：什么情况下第 1 种情况也会真的丢数据？",
+      "answer": {
+        "reference_code": "1) 删除分支只是删掉 .git/refs/heads/feature 这个指针文件。分支上的 commit 对象、tree 对象、blob 对象都还在 .git/objects 里，只是暂时「没有引用指向它们」（不可达对象）。而 HEAD 和分支的移动历史被记在 .git/logs/HEAD 与 .git/logs/refs/heads/* 里，所以可以用 git reflog 找到那条 commit 的 SHA-1，再用 git branch feature <sha> 重建指针。默认 reflog 保留 90 天。\n\n2) reset --hard 的三个动作：移动分支指针、重置暂存区、覆盖工作区文件。前两个只改引用和索引，旧值仍在 reflog 里；但工作区文件从未被 Git 记录过（没 add 就没有 blob 对象），所以没有任何对象可供恢复——文件被直接覆盖，内容就永久丢失。\n\n结论：能被 Git「记住」的东西（commit / 暂存区内容）几乎都能救；从未进入对象库的工作区改动救不回来。所以重要改动要尽早 add（哪怕不 commit），这样至少进了暂存区、有了 blob 对象。\n\n3) 第 1 种情况真正丢数据的条件：执行过 git gc --prune=now（或 reflog 已过期被清理），不可达对象被物理删除。这是唯一不可逆的场景。",
+        "section": "对象模型 / 数据恢复"
+      },
+      "explanation": "考点：区分「引用（指针）」与「对象（数据）」；worktree 内容不在对象库里，因此无法恢复；gc --prune 是不可逆的分界线。",
+      "tags": [
+        "Git",
+        "对象模型",
+        "reflog",
+        "reset"
+      ],
+      "source": "self",
+      "source_ref": "tool-ch03/concept/01-object-model.md"
     }
   ]
 }

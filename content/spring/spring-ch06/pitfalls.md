@@ -27,3 +27,5 @@
 13. **二级缓存返回的是对象引用，被修改后污染缓存** —— 二级缓存（namespace 级）跨 SqlSession 共享；若把取出的对象改了，缓存里的同一引用也变。正确写法：二级缓存对象需可序列化且建议只读；或返回后做防御性拷贝。
 
 14. **Mapper 接口方法重载导致 statement 绑定歧义** —— MyBatis 用「全限定名 + 方法名」做 statementId，不支持按参数类型区分重载，重载方法会产生相同 id 冲突。正确写法：方法名唯一（如 `selectById` / `selectByCode`），不要用重载。
+
+15. **把 `mybatis.configuration` 写成 `mybatis.configuration.map-underscore-to-camel-case` 却仍不生效** —— 自定义了 `SqlSessionFactoryBean` 时，starter 的 `mybatis.configuration.*` 会被完全覆盖。正确做法：要么不自定义工厂，要么在代码里显式 `configuration.setMapUnderscoreToCamelCase(true)`，并在启动日志打印 `isMapUnderscoreToCamelCase()` 确认生效。

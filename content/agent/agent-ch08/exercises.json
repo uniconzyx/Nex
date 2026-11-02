@@ -2,7 +2,7 @@
   "meta": {
     "chapter": "agent-ch08",
     "title": "Transformer 核心机理：能白板推一遍才算懂 —— 习题集",
-    "count": 6,
+    "count": 7,
     "note": "3 道概念题（缩放、KV 结构、因果 mask 顺序）+ 3 道算法实践题（手写注意力、KV 显存账本、loss 曲线诊断），全部为原创题干。"
   },
   "items": [
@@ -168,6 +168,28 @@
       ],
       "source": "self",
       "source_ref": "本章 concept/03 第 4 节；交付物二、示例 ex10"
+    },
+    {
+      "id": "agent-ch08-q7",
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "手算 Transformer 参数量（含词嵌入）",
+      "content_md": "某模型配置：词表 vocab=128256，d_model=4096，层数 L=32，FFN 中间维 d_ff=14336，无 bias，每层 2 个 RMSNorm（各 d_model 个参数），词嵌入与输出层共享权重。\n\n按以下口径计算总参数量：\n- 词嵌入：`vocab × d_model`\n- 每层：注意力 `4 × d_model²` + FFN `2 × d_model × d_ff` + 两个 RMSNorm `2 × d_model`\n\n输出总参数量除以 1e9 后的值（保留 2 位小数，单位 B）。",
+      "answer": {
+        "output": "6.43",
+        "reference_code": "vocab, d, L, dff = 128256, 4096, 32, 14336\nembed = vocab * d\nper_layer = 4*d*d + 2*d*dff + 2*d\ntotal = embed + L * per_layer\nprint(total, round(total/1e9, 2))     # 6431178752 -> 6.43\n",
+        "explain": "词嵌入 = 128256 × 4096 = 525,336,576；每层 = 4×4096² + 2×4096×14336 + 2×4096 = 67,108,864 + 117,440,512 + 8,192 = 184,557,568；32 层 = 5,905,842,176；合计 6,431,178,752 ≈ 6.43B。两点值得注意：① **FFN 占每层参数的 64%**（117M / 184M），远大于注意力——这就是 MoE 只拆 FFN 就能大幅扩容的原因；② 词嵌入占了总参数的 8%，大词表下不能忽略。"
+      },
+      "explanation": "embed 0.525B + 32×0.1846B ≈ 6.43B；FFN 占每层 64%。",
+      "tags": [
+        "Transformer",
+        "参数量",
+        "FFN"
+      ],
+      "source": "self",
+      "source_ref": "agent-ch08/concept/03-params-inference.md"
     }
   ]
 }

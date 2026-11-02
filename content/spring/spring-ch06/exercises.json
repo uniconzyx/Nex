@@ -295,6 +295,28 @@
       "source": "leetcode",
       "source_ref": "LeetCode 175 Combine Two Tables",
       "external_url": "https://leetcode.cn/problems/combine-two-tables/"
+    },
+    {
+      "id": "spring-ch06-q9",
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "数出 <collection select> 延迟加载会发几条 SQL",
+      "content_md": "`UserMapper.findUsers()` 查出 100 个用户；`<resultMap>` 里用 `<collection property=\"orders\" column=\"id\" select=\"selectOrdersByUserId\" fetchType=\"lazy\"/>` 延迟加载订单。业务代码遍历这 100 个用户，并**逐个访问** `u.getOrders().size()`。\n\n假设缓存未命中、且访问每个用户的 orders 都会触发一次查询，总共会执行多少条 SQL（含最初那条查用户的）？输出该整数。",
+      "answer": {
+        "output": "101",
+        "reference_code": "# 1 条查用户 + 每个用户 1 条查订单\nn_users = 100\ntotal = 1 + n_users\nprint(total)      # 101\n",
+        "explain": "1 + 100 = 101 条，这就是典型的 **N+1 查询问题**。`fetchType=\"lazy\"` 只是把查询推迟到「真正访问时」，并没有减少次数——反而因为分散在各个访问点，更难在日志里一眼看出来。三种修法：① 改成 JOIN + `<collection>` 嵌套结果（1 条 SQL，但会产生重复行）；② 保留分离查询但开启批量加载（`@BatchSize(50)` 或 `fetchType` 配 `lazyLoadingEnabled` + `aggressiveLazyLoading=false`），100 个用户变成 1 + 2 条；③ 显式写一条 `WHERE user_id IN (...)` 的批量查询自己在 Java 层组装。"
+      },
+      "explanation": "1 + 100 = 101 条，典型 N+1；lazy 只改时机不改次数。",
+      "tags": [
+        "MyBatis",
+        "N+1",
+        "延迟加载"
+      ],
+      "source": "self",
+      "source_ref": "spring-ch06/concept/03-resultmap-and-camel.md"
     }
   ]
 }
