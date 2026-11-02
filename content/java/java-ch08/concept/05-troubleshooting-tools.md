@@ -41,3 +41,17 @@ Arthas 能在不重启的情况下 `watch`/`trace` 方法耗时、`jad` 反编�
 ```
 
 理由：固定堆减少扩容停顿；G1 用停顿目标驱动而非固定新生代；OOM 自动留证便于事后定位。参数没有银弹，必须结合 GC 日志迭代。
+
+## 三视角解析
+### 🧑‍💻 程序员视角
+堆 OOM 的第一步不是加内存，而是 `-XX:+HeapDumpOnOutOfMemoryError` 拿到 dump，再用 MAT 看「谁持有了最大的对象图」——多数情况是一个静态集合只增不减。元空间 OOM 通常是动态生成类过多（CGLIB 代理、热部署），要限制 `-XX:MaxMetaspaceSize` 并排查类加载器泄漏。线程死锁用 `jstack` 一次就能看到「Found one Java-level deadlock」，比猜快一百倍；线上不方便重启时用 Arthas 的 `watch`/`trace` 直接观测方法入参与耗时。
+
+### 🎓 博士生视角
+JVM 内存分区的排查工具是一一对应的：堆用 `jmap`/MAT，元空间用 `jstat -gc` 看 `MC/MU`，线程用 `jstack`，GC 用 `-Xlog:gc*` 或 GCViewer。这些工具的共同前提是「先分类、再定位」——OOM 有「堆溢出、元空间溢出、直接内存溢出、栈溢出、GC overhead limit」多种，盲目加 `-Xmx` 只会把问题推迟。Arthas 这类在线诊断工具的价值在于「不停机观测」，其原理是字节码增强（instrument），代价是轻微性能损耗与类加载器污染风险。
+
+### 📚 考研者视角
+面试与实战：
+1. **OOM 的类型与定位**：`Java heap space`、`Metaspace`、`Direct buffer memory`、`unable to create new native thread`。
+2. **常用命令**：`jps`、`jstat`、`jmap`、`jstack`、`jinfo` 各自的作用。
+3. **GC 日志分析**：`Young GC` 频率高说明新生代小或对象晋升快；`Full GC` 频繁要查大对象与内存泄漏。
+4. **CPU 100% 排查**：`top -Hp` 找线程 → `printf %x` 转十六进制 → `jstack` 搜 nid。

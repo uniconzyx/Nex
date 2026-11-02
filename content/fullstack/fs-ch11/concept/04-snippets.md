@@ -112,3 +112,17 @@ public @interface Phone {
 }
 // PhoneValidator 只校验格式，不查库（查重放 Service）
 ```
+
+## 三视角解析
+### 🧑‍💻 程序员视角
+Controller 只做「参数校验 + 调用 Service + 组装响应」，业务逻辑一律下沉到 Service——Controller 里写 SQL 是分层腐化的第一步。异常要分「业务异常」（可预期，带错误码）与「系统异常」（不可预期，记日志 + 500），用统一异常处理器转换，避免每个接口写一遍 `try/catch`。入站 DTO 必须加 `@Valid` 才生效，且校验注解只覆盖「格式」，业务规则（如「余额充足」）仍要在 Service 里判断。
+
+### 🎓 博士生视角
+分层的价值在于「依赖方向单一」：Controller → Service → Repository，反向依赖通过接口（依赖倒置）实现。这一结构让「业务逻辑可测试、基础设施可替换」。DTO/VO/Entity 的区分不是形式主义——Entity 映射数据库、DTO 承载入站契约、VO 承载出站视图，混用会把数据库结构泄漏到 API 契约里，导致「改表就要改前端」。
+
+### 📚 考研者视角
+后端面试高频：
+1. **分层职责**：Controller、Service、Repository 各管什么，为什么不能跨层调用。
+2. **DTO 与 Entity**：为什么不能直接把 Entity 返回给前端（敏感字段、循环引用、耦合）。
+3. **统一异常**：`@ControllerAdvice` + 自定义异常 + 错误码设计。
+4. **参数校验**：`@Valid` 与 `@Validated` 的区别、分组校验、自定义校验注解。

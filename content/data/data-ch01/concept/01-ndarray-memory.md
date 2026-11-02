@@ -1,4 +1,5 @@
 # ndarray 的内存布局：为什么它比 list 快两个数量级
+
 > ndarray 本质是「一块连续同质内存」加「shape/strides 视图」：逻辑维度由 strides 决定，很多操作（转置、reshape）只改视图不复制数据；广播（broadcasting）按尾部对齐、长度为1的轴复制，让不同形状数组也能逐元素运算，是 NumPy 向量化提速的核心。
 
 ```text

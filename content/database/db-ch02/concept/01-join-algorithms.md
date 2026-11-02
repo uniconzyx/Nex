@@ -1,4 +1,5 @@
 # 01 · JOIN 的执行算法：从"双重循环"到 Hash/Merge Join
+
 > 三类 Join 的本质是「如何为左右两边每一行找匹配」。Nested Loop 朴素双循环（小表驱动）；Hash Join 建哈希表（适合大数据、等值）；Merge Join 先排序再指针合并（已排序时最优）。
 
 ```text

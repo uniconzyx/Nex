@@ -122,3 +122,17 @@ function cors(origin) {
 
 **CORS 是浏览器的策略，不是服务端鉴权**：`curl` 不受它限制，所以跨域配置再松也不会成为
 "绕过鉴权"的漏洞——真正的防线在 token 校验与权限判定上。
+
+## 三视角解析
+### 🧑‍💻 程序员视角
+带 `If-None-Match` 的第二次请求返回 304，响应体为空但仍消耗一次往返——静态资源用 `Cache-Control: max-age` + 内容哈希文件名，比协商缓存更省。`POST` 重试不等于「安全」：网关超时重试会造成重复下单，必须用幂等键（`Idempotency-Key`）在服务端去重。CORS 的预检请求（`OPTIONS`）只在「非简单请求」时发出，且 `Access-Control-Allow-Origin` 不能同时为 `*` 又带 `credentials`——这是前端「登录后跨域突然失败」的常见原因。
+
+### 🎓 博士生视角
+HTTP 的语义核心是「方法 + 状态码 + 头字段」三者共同表达意图：GET 安全幂等、PUT 幂等、POST 非幂等、DELETE 幂等。缓存分「强缓存」（`Cache-Control`/`Expires`）与「协商缓存」（`ETag`/`Last-Modified`），前者不发请求、后者发请求但可能 304。HTTP/1.1 的队头阻塞与连接复用限制催生了 HTTP/2 的多路复用与 HTTP/3 的 QUIC（基于 UDP，解决 TCP 层队头阻塞）。
+
+### 📚 考研者视角
+全栈面试高频：
+1. **状态码**：2xx/3xx/4xx/5xx 的语义，301 与 302、304、401 与 403 的区别。
+2. **缓存**：强缓存与协商缓存的头字段、命中顺序、`no-cache` 与 `no-store` 的差异。
+3. **跨域**：同源策略、CORS 的预检与凭证要求、JSONP 的局限。
+4. **连接管理**：`Connection: keep-alive`、HTTP/2 多路复用、HTTP/3 的 QUIC。

@@ -1,4 +1,4 @@
-# 一、Catalyst 优化器：四个阶段与规则批机制
+# Catalyst 优化器：四个阶段与规则批机制
 
 （中立陈述）Catalyst 是 Spark SQL 的**可扩展查询优化器**。一条 SQL 或一个 DataFrame 操作链，
 要依次经过四个阶段才变成真正在 Executor 上跑的代码：
@@ -60,7 +60,7 @@ Physical Plan  →  ⑤ 代码生成 Codegen（Whole-Stage Codegen 把算子链�
 
 ---
 
-# 二、谓词下推、列裁剪、常量折叠与 JOIN 重排
+## 二、谓词下推、列裁剪、常量折叠与 JOIN 重排
 
 （中立陈述）逻辑优化阶段最有代表性的四条规则：
 
@@ -116,6 +116,7 @@ q = (spark.read.parquet("s3://bucket/orders")
 
 q.explain("formatted")
 
+```
 ```python
 small = spark.table("dim_city")        # 约 300 行
 big = spark.table("fact_order")        # 约 30 亿行
@@ -128,6 +129,7 @@ spark.conf.set("spark.sql.autoBroadcastJoinThreshold", 10 * 1024 * 1024)
 ```
 
 广播的代价与收益都是线性的：省掉一次大表 shuffle，但每个 executor 都要驻留一份小表。
+```text
 当小表其实有几百万行（几十 MB）时，广播会把 executor 内存打爆——
 这时 `explain` 里出现 `BroadcastHashJoin` 反而是坏消息，应该调低阈值或改用 hint 关掉。
 

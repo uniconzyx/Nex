@@ -130,3 +130,17 @@ SELECT COUNT(*) FROM (SELECT DISTINCT user_id FROM pv) t;
 ```
 
 > 凯喵总结：Hive 慢的锅 90% 不在 SQL 写法难看，而在「Join 没广播」「倾斜没加盐」「列存被 SELECT * 废掉」「分区被函数包裹」。把这 12 个现场过一遍，报表从一夜变几分钟。
+
+## 三视角解析
+### 🧑‍💻 程序员视角
+大表 Join 小表不写 MapJoin，会走 CommonJoin 触发全量 shuffle——小表几 MB 却要搬几十 GB 的大表，慢十倍。数据倾斜靠「加 Reduce 数」是无效的：热 key 还是落在一个 Reduce 上，必须加盐（给热 key 加随机后缀）做两阶段聚合。`SELECT *` 让列式存储的优势归零：ORC/Parquet 只读需要的列，`*` 会把所有列都读出来。分区裁剪失效（如对分区字段用函数）也会导致全表扫描。
+
+### 🎓 博士生视角
+Hive 的本质是「把 SQL 编译成 MapReduce/Tez/Spark 作业」，因此 SQL 的写法直接决定物理计划。列式存储（ORC/Parquet）的优势来自「按列读取 + 谓词下推 + 更高的压缩率」，这要求查询只触及必要列。Hive 的元数据存在 Metastore（通常是 MySQL），它使「表结构」与「数据文件」解耦，这是 Lakehouse 架构的雏形。
+
+### 📚 考研者视角
+大数据面试高频：
+1. **内部表与外部表**：删除时的行为差异（外部表只删元数据）。
+2. **分区与分桶**：目录级裁剪 vs 文件级哈希，各自适用场景。
+3. **Join 策略**：MapJoin（小表广播）、CommonJoin（shuffle）、SMB Join（排序合并）。
+4. **数据倾斜**：加盐两阶段聚合、热点 key 单独处理。

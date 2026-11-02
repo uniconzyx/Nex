@@ -139,7 +139,6 @@ def compact_memory(items, keep_top=50, summarize=None) -> list:
 也不会丢掉「曾经发生过什么」这件事本身。直接物理删除的代价是模型反复踩同一个坑。
 
 
-
 ## 三视角小结
 
 | 视角 | 一句话抓法 |

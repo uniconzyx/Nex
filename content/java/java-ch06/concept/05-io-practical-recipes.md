@@ -172,3 +172,17 @@ try (ObjectInputStream ois = new ObjectInputStream(in)) {
 ```
 
 > 凯喵总结：IO 的事故八成是「资源忘了关」「编码默认了」「边界没判 -1」「不可信数据当可信读」。把这 12 个现场过一遍，线上少背三回锅。
+
+## 三视角解析
+### 🧑‍💻 程序员视角
+忘记关流不是「小疏忽」：文件句柄是有限资源，泄漏几天后服务直接 `Too many open files`。`FileReader` 用平台默认编码，跨环境读中文必乱码——编码发生在「字节到字符的桥接点」，必须显式指定 `StandardCharsets.UTF_8`。`read()` 返回 `-1` 才是结束，漏判就死循环。大文件一次性 `readAllBytes` 直接 OOM，正确做法是缓冲区分块读或 `Files.lines` 流式处理。
+
+### 🎓 博士生视角
+Java IO 分两条脉络：字节流（`InputStream`/`OutputStream`）处理原始字节，字符流（`Reader`/`Writer`）处理编码后的文本，二者通过 `InputStreamReader` 桥接。NIO 引入 `Channel` + `Buffer` + `Selector`，把「阻塞读写」换成「就绪事件驱动」，是 Netty 等高性能框架的基础。`try-with-resources` 依赖 `AutoCloseable`，其语义是「按声明的逆序关闭，且关闭异常作为 suppressed 附加而非覆盖主异常」，这解决了 `finally` 里 `close` 抛异常掩盖业务异常的经典问题。
+
+### 📚 考研者视角
+笔试高频：
+1. **字节流与字符流**：四个抽象基类、桥接流 `InputStreamReader`/`OutputStreamWriter` 的作用。
+2. **BIO/NIO/AIO**：同步阻塞、同步非阻塞（多路复用）、异步回调的区别。
+3. **`try-with-resources`**：要求资源实现 `AutoCloseable`，关闭顺序与异常抑制。
+4. **序列化**：`Serializable` 的作用、`serialVersionUID` 的意义、`transient` 关键字。

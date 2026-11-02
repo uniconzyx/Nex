@@ -1,4 +1,4 @@
-# 一、Map/Shuffle/Reduce 三阶段数据流
+# Map/Shuffle/Reduce 三阶段数据流
 
 （中立陈述）一次 MapReduce 作业由三类进程协作完成：**MapTask** 读输入分片、把每条记录映射成 `(key, value)` 中间对；**Shuffle** 负责把同 key 的 value「搬运并排序」到同一个 ReduceTask；**ReduceTask** 按 key 聚合 value 得到最终结果。三者构成「分而治之 + 归并」的经典批处理范式，输入/输出都落在 HDFS（或兼容存储）上。
 
@@ -92,7 +92,7 @@ spark      -> reducer 2
 
 ---
 
-# 二、WordCount 端到端走读
+## 二、WordCount 端到端走读
 
 > MapReduce 把「计算」搬近「数据」，避免搬大盘：Map 在本地切片并行处理，Shuffle 按 key 归并到同 reducer，Reduce 聚合输出。YARN 负责把任务调度到数据所在的节点，做到「数据不动、计算动」。
 

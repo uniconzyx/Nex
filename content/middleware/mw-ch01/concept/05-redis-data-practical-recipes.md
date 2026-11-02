@@ -107,3 +107,17 @@ MEMORY USAGE bigkey SAMPLES 0
 ### 凯喵叮嘱：先观测，再判断，最后才优化
 
 最后叮嘱一句：排查内存问题前，先别急着加机器或调淘汰策略，先跑一遍 `OBJECT ENCODING` 和 `MEMORY USAGE`，把每个大 key 的编码与真实占用列出来。大多数所谓内存暴涨，其实就是某几个 key 悄悄换了编码、或者某个集合无限膨胀。看清现状再动手，比任何优化技巧都有效。这也是凯喵带团队时反复强调的顺序：先观测，再判断，最后才优化。跳过观测直接调参，往往越调越乱，还把真正的原因掩盖掉。养成先量后调的习惯，你对 Redis 内存的掌控会稳得多。
+
+## 三视角解析
+### 🧑‍💻 程序员视角
+Redis 不用 C 字符串而用 SDS：C 字符串取长度要 `strlen` 是 O(n)，且二进制不安全（遇 `\0` 截断）。SDS 头部记录 `len` 与 `alloc`，取长度 O(1)、可存二进制、扩容有预分配策略。字符串有三种编码：短整数用 `int`、≤44 字节用 `embstr`（与 `redisObject` 一次分配）、更长的用 `raw`。这就是为什么「存 45 字节的 key」比「存 44 字节」多一次内存分配——批量 key 设计时值得卡在这个边界内。
+
+### 🎓 博士生视角
+Redis 的对象模型是「`redisObject` + 编码」：同一逻辑类型（string/list/hash/set/zset）按数据规模与内容切换底层编码（如 hash 在小规模时用 `listpack`，超阈值转 `hashtable`）。这种「自适应编码」把「小对象的空间效率」与「大对象的时间效率」统一起来，代价是转换不可逆（一旦转成 hashtable 就不会退回）。理解编码边界（如 `hash-max-listpack-entries`）是排查「内存突然翻倍」的关键。
+
+### 📚 考研者视角
+后端面试高频：
+1. **五大数据类型与底层编码**：string（int/embstr/raw）、list（listpack/quicklist）、hash（listpack/hashtable）、set（intset/listpack/hashtable）、zset（listpack/skiplist）。
+2. **SDS 的优势**：O(1) 取长度、二进制安全、预分配减少重分配。
+3. **过期与淘汰**：惰性删除 + 定期删除，八种淘汰策略（`allkeys-lru`、`volatile-lfu` 等）。
+4. **持久化**：RDB 快照与 AOF 日志的取舍，混合持久化。

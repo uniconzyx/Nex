@@ -60,3 +60,18 @@ merged["_merge"].value_counts()   # 检查 right_only 是否异常多
 ### 9. 大数据下的分块与类型优化
 
 超过内存的数据用 `pd.read_csv(chunksize=...)` 分块处理，每块 `groupby` 后再合并中间结果；把整数列显式指定 `dtype`、日期列 `parse_dates`，能避免反复类型推断带来的额外开销与内存膨胀。
+
+## 三视角解析
+### 🧑‍💻 程序员视角
+凯喵做订单聚合，`groupby` 之后 `merge` 总是多出几行，最后发现是分组键里有 `NaN`——`groupby` 默认丢弃 `NaN` 组，而 `merge` 会把 `NaN` 当普通值匹配，两边口径不一致就炸了，必须显式 `dropna=False`。`merge` 的 `validate` 参数是被低估的工具：`validate='one_to_one'` 会在键重复时直接抛错，比事后对数快一百倍。`categorical` 类型能把百万级字符串列的内存砍掉 90%，但代价是「不能直接加新类别」，`loc` 赋值一个未声明的类别会静默变成 `NaN`。
+
+### 🎓 博士生视角
+`groupby` 的实现是「哈希分组 + 聚合」，其复杂度为 O(n)，但常数受键的基数与哈希冲突影响；`categorical` 本质是字典编码（dictionary encoding），把字符串映射为整数码，聚合时比较整数而非字符串，这是列式存储（Parquet/Arrow）普遍采用的技术。`rolling` 的 `min_periods` 决定窗口未满时是否输出，`center` 决定窗口是否居中——这两个参数在时间序列对齐时直接决定结果的语义，误用会导致「未来信息泄漏」或「前期全 NaN」。
+
+### 📚 考研者视角
+数据分析面试常见：
+1. **merge 的四种连接**：inner/left/right/outer 的结果行数如何变化；`indicator=True` 查未匹配行。
+2. **groupby 的 agg 写法**：`agg({'col': ['mean', 'max']})` 与 `named_agg` 的区别，后者能命名输出列。
+3. **缺失值处理**：`dropna` 的 `how`/`thresh` 参数、`fillna` 的前向/后向填充。
+4. **内存优化**：`astype('category')`、降精度（`float64 → float32`）、分块读取 `chunksize`。
+答题时给出「数据量级 + 具体做法 + 预期收益」三件套，比罗列 API 更能体现工程能力。

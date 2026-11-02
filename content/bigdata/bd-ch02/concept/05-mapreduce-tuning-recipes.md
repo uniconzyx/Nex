@@ -72,3 +72,17 @@ map 输出在内存里排序，内存太小会频繁 spill 到磁盘再 merge。
   <value>512</value>
 </property>
 ```
+
+## 三视角解析
+### 🧑‍💻 程序员视角
+Combiner 是「本地 reduce」，能大幅减少 shuffle 数据量，但它只能用于「满足结合律与交换律」的聚合（求和可以，求平均不行——除非传 (sum, count)）。Partitioner 决定数据去哪个 Reduce，默认哈希可能导致倾斜，自定义分区要保证「热点 key 被打散」。Shuffle 的溢写（spill）次数由缓冲区大小与溢写阈值决定，调大缓冲区能减少磁盘 IO。YARN 的 RM/AM/NM 三角色里，AM 是「每个作业的管家」，它挂了作业就失败。
+
+### 🎓 博士生视角
+MapReduce 的性能瓶颈几乎总在 shuffle：`map 输出 → 分区 → 排序 → 溢写 → 归并 → reduce 拉取`，每一段都涉及磁盘与网络。优化的本质是「减少数据搬运」：Combiner 在 map 端预聚合、Partitioner 均衡分区、压缩中间结果。YARN 把「资源管理」与「作业调度」分离，RM 只管资源、AM 管作业生命周期，这一设计使多种计算框架（MR/Spark/Flink）能共享同一集群。
+
+### 📚 考研者视角
+大数据面试高频：
+1. **MapReduce 流程**：split → map → shuffle（分区/排序/溢写/归并）→ reduce。
+2. **Combiner 的前提**：结合律与交换律，为什么求平均不能直接用。
+3. **数据倾斜**：表现（少数 Reduce 慢）、解法（加盐、自定义分区、MapJoin）。
+4. **YARN 架构**：RM/AM/NM/Container 的职责与交互流程。

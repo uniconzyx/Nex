@@ -70,3 +70,17 @@ while (!Thread.currentThread().isInterrupted()) {
 ### 死锁四个必要条件
 
 互斥、占有且等待、不可抢占、循环等待。破坏任一即可避免：按固定顺序加锁、用 `tryLock`、一次性申请全部资源。
+
+## 三视角解析
+### 🧑‍💻 程序员视角
+`volatile` 只保证可见性与禁止重排序，不保证原子性——`count++` 用它依然会丢更新，得用 `AtomicInteger`。线程池参数不设队列上限，任务堆积到 OOM 才暴露；`Executors.newFixedThreadPool` 用的是无界队列，生产环境应手动 `new ThreadPoolExecutor` 并指定有界队列与拒绝策略。`ThreadLocal` 用完不 `remove`，线程池复用线程时会把上一个请求的数据带给下一个请求，这是最隐蔽的数据串号。
+
+### 🎓 博士生视角
+Java 内存模型（JMM）用 `happens-before` 定义跨线程可见性：`volatile` 写与读建立同步边、`synchronized` 的解锁与加锁建立同步边、`final` 字段的正确构造保证安全发布。`CAS` 是 `AtomicInteger` 的底层，依赖 CPU 的 `cmpxchg` 指令，失败时自旋重试；高竞争下自旋浪费 CPU，Java 8 的 `LongAdder` 用分段累加缓解。线程池的核心是「核心线程 → 队列 → 最大线程 → 拒绝策略」的四级决策，理解这个顺序才能解释「为什么任务先排队而不是先扩容」。
+
+### 📚 考研者视角
+笔试高频：
+1. **线程状态**：`NEW`/`RUNNABLE`/`BLOCKED`/`WAITING`/`TIMED_WAITING`/`TERMINATED` 六态与转换。
+2. **`synchronized` 与 `Lock`**：前者自动释放、后者需 `finally` 解锁但支持可中断、超时、公平锁。
+3. **线程池七参数**：核心数、最大数、空闲存活、时间单位、工作队列、线程工厂、拒绝策略。
+4. **`volatile` 的两个语义**：可见性、有序性（禁止指令重排），不含原子性。

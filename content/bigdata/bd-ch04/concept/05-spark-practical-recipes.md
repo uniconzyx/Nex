@@ -208,6 +208,20 @@ val c = a.map { case (k, v) => (v, k) }       // 键变了，分区器失效
 
 另一个相关坑是：两个用相同 `HashPartitioner` 且分区数相同的 RDD 做 join，可以不触发 Shuffle（叫「map-side join」）；分区数不同就必须 Shuffle。这个细节在大作业里能省下几十分钟。
 
+## 三视角解析
+### 🧑‍💻 程序员视角
+RDD 的五大特性里，真正重要的是「分区列表」与「计算函数」，其余是优化信息。不可变 + 血缘是容错方案：丢了分区就按血缘重算，代价是「长血缘重算慢」，所以要 checkpoint 截断。惰性求值不是「延迟执行」，而是「延迟到看见全貌再优化」——这给 Catalyst 留出了重写计划的空间。窄依赖（父分区只被一个子分区用）可以流水线执行，宽依赖（需要 shuffle）才是 Stage 的边界。
+
+### 🎓 博士生视角
+Spark 的性能模型可以概括为「减少 shuffle + 提高并行度 + 避免数据倾斜」。Catalyst 优化器分四阶段（分析、逻辑优化、物理计划、代码生成），AQE 在运行时用统计信息纠正编译期的误判（如把 sort-merge join 转成 broadcast join）。Tungsten 用堆外内存与全阶段代码生成（whole-stage codegen）把「虚函数调用」编译成「紧凑循环」，这是 Spark 比 MapReduce 快的核心原因之一。
+
+### 📚 考研者视角
+大数据面试高频：
+1. **RDD/DataFrame/Dataset**：类型安全、优化空间、适用场景的差异。
+2. **宽窄依赖与 Stage**：Stage 划分依据、Task 数量计算。
+3. **Shuffle**：`repartition` 与 `coalesce` 的区别、shuffle 文件数的影响。
+4. **调优**：广播小表、避免 `groupByKey`（用 `reduceByKey`）、处理数据倾斜（加盐、AQE）。
+
 ## 收尾：Spark 调优就是守住那三条前提
 
 凯喵最后总结：Spark 快的三条前提——**窄依赖融合、惰性求值看见全貌、缓存避免重算**——对应三类调优动作：

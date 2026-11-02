@@ -68,3 +68,17 @@ void copy(List<? extends Number> src, List<? super Number> dst) {
 ### 自定义异常的设计清单
 
 异常要携带可操作信息：稳定错误码、是否可重试、是否需告警。别只传 message 字符串；把分类（如 `Retryable` / `Fatal`）做成接口或基类标记，调用方按类型决策而非解析文案。
+
+## 三视角解析
+### 🧑‍💻 程序员视角
+受检异常不是敌人，它是「调用方必须处理」的契约声明；把它一律包成 `RuntimeException` 抛出去，等于把「必须处理」降级成「可能忘记」。异常链最容易被丢掉：`catch (IOException e) { throw new ServiceException("失败"); }` 丢掉了 cause，线上排查时看不到根因，必须写 `new ServiceException("失败", e)`。`finally` 里 `return` 会吞掉 `try` 里的异常与返回值，`try-with-resources` 则能保证资源关闭且不掩盖原始异常。
+
+### 🎓 博士生视角
+Java 的异常体系分 `Throwable` 下两支：`Error`（JVM 级，不应捕获）与 `Exception`（其中 `RuntimeException` 为非受检）。受检异常把「错误处理」编码进方法签名，理论上强制调用方决策，实践中在 lambda 与 stream 里会造成大量包装样板，这也是 Kotlin 取消受检异常的原因。泛型的类型擦除使「运行时无法判断 `List<String>` 与 `List<Integer>`」，只能在编译期检查；通配符 `? extends`（协变、只读）与 `? super`（逆变、只写）遵循 PECS 原则。
+
+### 📚 考研者视角
+笔试高频：
+1. **受检 vs 非受检**：`IOException` 受检、`NullPointerException` 非受检；`finally` 一定执行（除 `System.exit`）。
+2. **`try-catch-finally` 的返回值**：`finally` 里的 `return` 覆盖 `try` 的返回值，且会吞异常。
+3. **泛型擦除**：为什么不能 `new T[]`、为什么静态方法不能用类的类型参数。
+4. **PECS**：`Producer Extends, Consumer Super`，给 `List<? extends Number>` 只能读不能写。

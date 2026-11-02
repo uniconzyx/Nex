@@ -164,3 +164,17 @@ for (Map.Entry<String, Integer> e : m.entrySet()) {
 ```
 
 > 凯喵总结：集合框架的坑 90% 来自「把视图当副本」「把遍历当锁」「把可变对象当键」。把这 12 个现场刻进肌肉记忆，面试和上线都少挨两顿批。
+
+## 三视角解析
+### 🧑‍💻 程序员视角
+`ArrayList` 扩容是 `oldCapacity + (oldCapacity >> 1)`，即 1.5 倍而不是翻倍——频繁添加时预估容量 `new ArrayList<>(n)` 能省掉多次复制。`foreach` 里 `remove` 会抛 `ConcurrentModificationException`：迭代器维护 `modCount`，结构性修改与预期不符就快速失败；正确做法是 `iterator.remove()` 或 `removeIf`。`LinkedList` 当队列用没问题，但 `get(i)` 是 O(n)，循环 `get` 会退化成 O(n²)。
+
+### 🎓 博士生视角
+集合框架的设计是「接口分层 + 实现可选」：`Collection` 下分 `List`/`Set`/`Queue`，`Map` 独立成支。`ArrayList` 用连续数组，随机访问 O(1)、中间插入 O(n)；`LinkedList` 用双向链表，头尾操作 O(1)、随机访问 O(n)；`HashMap` 用「数组 + 链表/红黑树」，Java 8 起链表长度超过 8 且桶数 ≥ 64 时树化，把最坏 O(n) 降到 O(log n)。这些选择背后都是「访问模式决定数据结构」的同一原则。
+
+### 📚 考研者视角
+笔试高频：
+1. **各集合的底层结构**：`ArrayList`（数组）、`LinkedList`（双向链表）、`HashMap`（数组+链表+红黑树）、`TreeMap`（红黑树）。
+2. **`HashMap` 的扩容**：负载因子 0.75、容量为 2 的幂、扩容后元素「要么原位、要么原位+旧容量」。
+3. **`ConcurrentModificationException`**：快速失败机制与 `modCount`。
+4. **`ArrayList` 与 `LinkedList` 的选型**：随机访问多选前者，头尾增删多选后者。

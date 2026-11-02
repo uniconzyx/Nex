@@ -1,4 +1,4 @@
-# 一、Tungsten：堆外内存管理与紧凑二进制布局
+# Tungsten：堆外内存管理与紧凑二进制布局
 
 （中立陈述）Tungsten 是 Spark 1.4 起引入的**执行引擎改造计划**，目标很直白：
 Spark 的瓶颈已经从 I/O 变成了 **CPU 与内存**（尤其是 JVM 对象模型与 GC）。
@@ -61,7 +61,7 @@ GC 只需要扫少量大对象，扫描成本从 O(对象数) 降到 O(数组数
 以及 `spark.memory.offHeap.size` 必须显式配置——不配就等于没开。
 
 
-# 二、全阶段代码生成（Whole-Stage Codegen）
+## 二、全阶段代码生成（Whole-Stage Codegen）
 
 （中立陈述）传统的**火山模型（Volcano Iterator Model）**里，每个算子实现 `next()`，
 父算子的 `next()` 调用子算子的 `next()`。代价是：处理一行要经过 N 次**虚函数调用**

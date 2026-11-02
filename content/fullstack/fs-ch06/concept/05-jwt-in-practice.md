@@ -140,3 +140,17 @@ res.setHeader('Content-Security-Policy', csp);
 把 token 放 HttpOnly Cookie 后，XSS 偷不到了，但 CSRF 风险上升 → 于是要 SameSite + CSRF token。
 两者是配套设计，不能只做一半。
 ```
+
+## 三视角解析
+### 🧑‍💻 程序员视角
+JWT 是无状态的，签发后无法单方面作废——「登出即失效」必须补状态：维护一个短 TTL 的黑名单（Redis），或用「短 access token + 长 refresh token + 版本号」。`alg: none` 攻击是老问题，校验时必须显式限定算法，不能信任 header 里的 `alg`。把 JWT 放 `localStorage` 会被 XSS 偷走，放 `HttpOnly` Cookie 又要防 CSRF——「双保险」是 Cookie + `SameSite` + CSRF token。密钥绝不能硬编码在代码里，且 HS256 的密钥要足够长（≥256 位）。
+
+### 🎓 博士生视角
+JWT 的安全性建立在「签名不可伪造」上，它提供的是「完整性 + 认证」，**不提供机密性**——payload 是 Base64 编码而非加密，任何人都能解开看。因此敏感信息不能放进去。无状态令牌与「可撤销」本质冲突：要撤销就必须引入服务端状态，这与 JWT 的初衷相悖，工程上用「短 TTL 缩小窗口 + 黑名单兜底」折中。OIDC 在 OAuth2 之上加了身份层，`id_token` 才是「你是谁」，`access_token` 只是「能做什么」。
+
+### 📚 考研者视角
+全栈面试高频：
+1. **JWT 结构**：header.payload.signature 三段，签名算法与校验流程。
+2. **无状态的代价**：无法主动失效、令牌体积大、续期方案（refresh token）。
+3. **存储位置**：localStorage（XSS 风险）vs HttpOnly Cookie（CSRF 风险）的权衡。
+4. **OAuth2 与 OIDC**：四种授权模式（授权码 + PKCE 是主流）、`id_token` 与 `access_token` 的区别。

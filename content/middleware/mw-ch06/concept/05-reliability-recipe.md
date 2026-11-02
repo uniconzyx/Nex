@@ -136,3 +136,17 @@ consumer_config = {
 □ max.poll.interval.ms 大于单批耗时 P99 吗
 □ 监控：lag、producer error rate、rebalance 频次、DLQ 速率
 ```
+
+## 三视角解析
+### 🧑‍💻 程序员视角
+生产者「不丢」要同时满足三个条件：`acks=all`（所有 ISR 确认）、`retries` 足够大、`enable.idempotence=true`（幂等生产者防重试重复）。只设 `acks=all` 而不开幂等，重试仍会产生重复消息——这是「至少一次」语义的必然结果。消费端要做到「不重」，必须靠业务幂等（唯一键 + upsert 或去重表），而不是靠「提交位点的时机」。「有序」只在单分区内成立，跨分区有序需要按业务键路由到同一分区。
+
+### 🎓 博士生视角
+消息系统的可靠性分三个层面：生产端（不丢）、存储端（副本 + ISR）、消费端（幂等）。Kafka 的 `acks` 与 `min.insync.replicas` 共同决定「写成功」的含义，`acks=all` + `min.insync.replicas=2` 才能容忍一个 broker 故障而不丢。幂等生产者用「PID + 序列号」在 broker 侧去重，但它只在单会话内有效，跨会话仍可能重复。rebalance 是「分区所有权重新分配」，期间消费暂停，`max.poll.interval.ms` 设置不当会触发「消费超时被踢出组」的循环。
+
+### 📚 考研者视角
+后端面试高频：
+1. **三种语义**：至多一次、至少一次、恰好一次，各自的实现代价。
+2. **Kafka 不丢配置**：`acks=all`、`retries`、`enable.idempotence`、`min.insync.replicas`、关闭 `unclean.leader.election`。
+3. **消费幂等**：唯一键去重、状态机、版本号。
+4. **rebalance**：触发条件、` CooperativeStickyAssignor` 的优势、如何减少 rebalance。

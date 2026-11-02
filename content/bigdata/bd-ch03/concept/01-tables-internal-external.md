@@ -1,4 +1,4 @@
-# 一、内部表（MANAGED）vs 外部表（EXTERNAL）
+# 内部表（MANAGED）vs 外部表（EXTERNAL）
 
 （中立陈述）Hive 的表在 Metastore 中记录**元数据**（库/表名、列类型、SerDe、存储位置 `LOCATION`）；数据本身落在 HDFS。表的「托管关系」由建表时是否带 `EXTERNAL` 决定：**内部表**由 Hive 全托管——`DROP` 时元数据与 HDFS 数据**一起删除**；**外部表**仅由 Hive 记录元数据——`DROP` 时**只删元数据、保留 HDFS 数据**。二者查数据、写 SQL 的方式完全一致，区别只在 `DROP`/表重建时的数据去留。
 
@@ -131,7 +131,7 @@ print("分区裁剪收益: 少扫描", len(sc) - len(sc2), "个分区, I/O 按�
 
 ---
 
-# 二、表的生命周期与 LOCATION / EXTERNAL 工程约定
+## 二、表的生命周期与 LOCATION / EXTERNAL 工程约定
 
 （中立陈述）建表语句中 `LOCATION` 指定数据在 HDFS 的绝对路径；不指定时内部表落在 `hive.metastore.warehouse.dir`（默认 `/user/hive/warehouse`）。`EXTERNAL` 关键字让表与数据解绑。表还可以用 `TBLPROPERTIES` 记录 owner、注释、是否可被查询等元信息。表的生命周期管理本质是「**元数据操作**」与「**数据操作**」的配对纪律。
 

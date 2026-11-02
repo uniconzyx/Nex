@@ -1,4 +1,4 @@
-# 一、惰性求值（Lazy Evaluation）语义
+# 惰性求值（Lazy Evaluation）语义
 
 （中立陈述）Spark 中 **transformation（如 map/filter/reduceByKey）只记录「要做什么」，不立即执行**；只有遇到 **action（如 collect/count/saveAsTextFile）** 才真正触发从源 RDD 到结果的整条血缘计算。这种「**先记后算**」就是惰性求值，它让 Spark 有机会把多个连续 transformation **融合(pipline)进同一个 Stage、合并算子、削减中间物化**。
 
@@ -31,7 +31,7 @@ collect 之后的 compute_calls = 1
 
 ---
 
-# 二、Transformation 与 Action 的判别
+## 二、Transformation 与 Action 的判别
 
 （中立陈述）**Transformation** 接收 RDD、返回新 RDD，是惰性的（如 `map`、`filter`、`flatMap`、`groupByKey`、`reduceByKey`、`join`、`union`、`distinct`、`sortBy`、`persist`）。**Action** 触发实际计算并返回**非 RDD** 结果（如 `collect`、`count`、`take`、`saveAsTextFile`、`reduce`、`foreach`、`first`）。
 

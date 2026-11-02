@@ -1,3 +1,5 @@
+# HQL 的编译：AST → 逻辑计划 → 物理计划
+
 ```text
 编译链：
     SQL ─▶ AST（Antlr）─▶ 逻辑计划（TS / FILTER / JOIN / AGG 算子树）
@@ -13,7 +15,6 @@
     用 EXPLAIN 看执行计划，不要靠猜
 ```
 
-# 一、HQL 的编译：AST → 逻辑计划 → 物理计划
 
 （中立陈述）一条 HQL 经过：① **词法/语法分析（Antlr）** 生成 AST；② **语义分析（SemanticAnalyzer）** 绑定元数据、做类型检查，生成**逻辑计划**（Relation 代数树：TableScan / Filter / Aggregate / Project）；③ **逻辑优化器**（谓词下推、列裁剪、常量折叠、CBO 基于代价重写）得到优化后逻辑计划；④ 翻译成**物理计划**（具体算子与执行引擎：Map → Shuffle → Reduce，或 Tez DAG / Spark RDD），最终提交执行。整条链路是「声明式 SQL → 等价、更优的执行方案」的自动转换。
 
@@ -34,7 +35,7 @@
 
 ---
 
-# 二、执行引擎与 JOIN 策略选择（MapJoin vs CommonJoin）
+## 二、执行引擎与 JOIN 策略选择（MapJoin vs CommonJoin）
 
 （中立陈述）Hive 早期只把 SQL 翻成 MapReduce；现支持 Tez / Spark。JOIN 是核心算：当一张表足够小（默认 ≤ 约 25MB，由 `hive.mapjoin.smalltable.filesize` 控制）时，优化器自动选 **MapJoin**——把小表广播到各 Map 任务的内存，大表在 Map 端直接关联，**彻底没有 Shuffle/Reducer 阶段**；否则走 **CommonJoin（Reduce 端 Shuffle Join）**：两表按 join key 哈希分区、跨网络 shuffle、Reducer 端做关联。
 

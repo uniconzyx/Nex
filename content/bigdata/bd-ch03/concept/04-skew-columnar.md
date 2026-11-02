@@ -1,3 +1,5 @@
+# 数据倾斜与加盐两阶段聚合
+
 ```text
 数据倾斜：少数 key 承载大半数据 -> 单个 reduce 长尾
     识别：某个 reduce 的输入量/耗时远高于其他
@@ -16,7 +18,6 @@
     代价：整行点查反而更慢（要拼多列）
 ```
 
-# 一、数据倾斜与加盐两阶段聚合
 
 （中立陈述）数据倾斜指「少数 key 的数据量碾压其余 key」（幂律分布：如 `vip_user`、空值、某省份）。在 MapReduce/Shuffle 中，相同 key 必落同一 Reducer，于是承载热 key 的 Reducer 数据量爆炸、长尾卡在 99%，其余早已完成。处理手段：**MapJoin**（小表侧消除 shuffle）、**加盐（salting）**（给热 key 加随机/枚举后缀打散到多 Reduce，先局部聚合、再二次聚合）、**自定义 Partitioner**（热 key 单独路由）、以及 `hive.optimize.skewjoin` 自动处理。加盐 + 两阶段聚合是「大表自身热 key」的通用解法。
 
@@ -37,7 +38,7 @@
 
 ---
 
-# 二、ORC/Parquet 列式存储与谓词下推
+## 二、ORC/Parquet 列式存储与谓词下推
 
 （中立陈述）ORC 与 Parquet 是 Hadoop 生态主流**列式存储**：数据按**列**连续存放（而非按行），每列块带 min/max/布隆等统计与编码（RLE、字典）。两大提速机制：**列裁剪**（只物化 `SELECT` 需要的列，跳过无关列字节）与**谓词下推**（把 `WHERE` 过滤下推到 Scan 层，利用列统计尽早/尽量少读数据）。行存（TextFile/SequenceFile）则必须整行读出再过滤。
 

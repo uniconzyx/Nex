@@ -123,3 +123,17 @@ public DataSource ds() { return new HikariDataSource(); }
 ```
 
 > 凯喵总结：IoC 的坑几乎都在「作用域」「初始化顺序」「循环依赖」「代理时机」。把这 12 个现场刻进配置手感，启动失败少一半。
+
+## 三视角解析
+### 🧑‍💻 程序员视角
+`prototype` 的 Bean 注入到 `singleton` 里，只会创建一次——因为注入发生在单例初始化时，之后不再重新获取。要每次拿到新实例，得注入 `ObjectProvider` 或 `@Lookup`。`@Lazy` 能「解决」循环依赖，但多数时候只是把问题推迟到第一次调用时暴露，掩盖了真正的设计问题。Bean 名字冲突时 Spring 默认允许覆盖（Boot 2.1 起默认禁止），升级后突然启动失败往往就是两个同名 `@Bean`。
+
+### 🎓 博士生视角
+Spring 的 Bean 创建流程可以概括为「推断构造器 → 实例化 → 属性填充 → 初始化 → 后置处理」，其中 `BeanPostProcessor` 是最大的扩展点：AOP 代理、`@Autowired` 注入、`@PostConstruct` 都由它驱动。循环依赖的三级缓存本质是「提前引用暴露」，它只对「单例 + setter/字段注入」有效，对原型与构造器注入无效。理解这一点，就能解释「为什么加了 `@Async` 之后循环依赖突然报错」——代理对象的创建时机变了。
+
+### 📚 考研者视角
+面试高频：
+1. **循环依赖**：三级缓存的三个 Map 各存什么、为什么需要第三级（AOP 代理）。
+2. **Bean 作用域与生命周期**：`singleton` 容器级、`prototype` 每次新建，销毁回调对 `prototype` 不生效。
+3. **`@Autowired` 与 `@Resource`**：前者按类型（可配 `@Qualifier`），后者按名称。
+4. **`FactoryBean` 与 `BeanFactory`**：前者是「生产 Bean 的 Bean」，后者是容器本身。

@@ -1,4 +1,4 @@
-# 一、从 RDD 到 DataFrame：结构化信息就是优化空间
+# 从 RDD 到 DataFrame：结构化信息就是优化空间
 
 （中立陈述）RDD 的核心抽象是「分区 + 对每个分区的计算函数 + 依赖」。当你写下 `rdd.map(lambda x: x.split(',')[2])`，
 Spark **只看到一个不透明的闭包**：它不知道你取了第几列、不知道类型、不知道你最终只用了两个字段。
@@ -72,7 +72,7 @@ agg.explain("formatted")   # 能看到列裁剪（ReadSchema 只有 2 列）与�
 Catalyst 无法分析；DataFrame 保存了列名与类型，才能做下推、裁剪、重排。
 
 
-# 二、Dataset 的类型安全与编码器（Encoder）
+## 二、Dataset 的类型安全与编码器（Encoder）
 
 （中立陈述）`Dataset[T]` 在 `DataFrame`（即 `Dataset[Row]`）之上加了一层**编译期类型**：
 每行是一个 JVM 对象 `T`（case class / Java Bean），列访问变成字段访问，字段名写错**编译不通过**。

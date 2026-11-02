@@ -1,4 +1,5 @@
 # 一、REST 控制器与请求映射
+
 ## 1. @RestController 的语义与请求映射
 
 `@RestController` 是 `@Controller` 与 `@ResponseBody` 的组合注解；`@RequestMapping` 在类级定义基准路径前缀，在方法级定义子路径与 HTTP method（`@GetMapping` 等是它的快捷形式），并可用 `produces`/`consumes` 约束媒体类型。请求进入后由 `RequestMappingHandlerMapping` 把「请求条件」映射到 `HandlerMethod`。

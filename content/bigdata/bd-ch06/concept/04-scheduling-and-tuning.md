@@ -1,4 +1,4 @@
-# 一、任务依赖与调度：DAG、补数、SLA、幂等
+# 任务依赖与调度：DAG、补数、SLA、幂等
 
 （中立陈述）当数仓有几百张表时，「谁先跑谁后跑」必须由**调度系统**（Airflow / DolphinScheduler / 阿里 DataWorks / Instance Scheduler）统一管理。调度系统的核心抽象是一张**有向无环图（DAG，Directed Acyclic Graph）**：节点是任务（task），边是依赖关系（`A → B` 表示 B 必须等 A 成功）。
 
@@ -63,7 +63,7 @@ def wait_partition(spark, table: str, dt: str, timeout_s: int = 3600) -> bool:
 而调度器上的时间配置退化为「最晚起跑时间」，不再是数据可见性的保证。
 
 
-# 二、数据倾斜调优、元数据与数据血缘
+## 二、数据倾斜调优、元数据与数据血缘
 
 （中立陈述）**数据倾斜**是指：shuffle 后少数分区的记录数碾压其余分区。由于某个 key 的所有记录必然落入同一个分区（哈希分区），热 key 会让对应 reducer 成为**唯一的长尾**——整作业的完成时间由它决定。
 
@@ -127,6 +127,7 @@ ods_user_log -> dwd_user_info -> dws_trade_user_1d -> ads_kpi_wide
 ```python
 import pyspark.sql.functions as F
 
+```
 ```python
 # 小文件合并：写之前先算目标文件数
 spark.conf.set("spark.sql.shuffle.partitions", 200)   # 默认 200，小数据要调小
@@ -142,6 +143,7 @@ spark.conf.set("spark.sql.shuffle.partitions", 200)   # 默认 200，小数据�
 下游每次扫描都要为每个文件付一次 open 开销，这部分成本在账单上往往比计算还高。
 
 
+```python
 # 倾斜治理的第一步是量化，不是立刻加盐
 skew = (spark.table("dwd.fact_order_item")
         .groupBy("item_id").count()

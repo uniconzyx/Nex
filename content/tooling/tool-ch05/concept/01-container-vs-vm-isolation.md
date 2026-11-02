@@ -1,4 +1,5 @@
 # 隔离原理：namespace、cgroup 与「容器不是虚拟机」
+
 > 本节目标：把「容器」还原成 Linux 内核的两个原语。每个主题按 🧑‍💻 程序员 / 🎓 博士生 / 📚 考研者 三视角解析。
 
 ---
@@ -37,7 +38,6 @@ cgroup 负责「用不多」：cpu / memory / io 的配额与统计
 
 这两句话都能在裸 Linux 上手工复现——**不需要 Docker**，因为 Docker 只是它们的外壳：
 
-```bash
 
 ```bash
 # 容器内看 PID：从 1 开始 —— PID namespace 生效
@@ -54,6 +54,7 @@ docker run --rm -m 256m alpine cat /sys/fs/cgroup/memory.max
 **cgroup 给配额**（内存/CPU 用不超）、**capabilities 给权限**（不是 root）。
 缺任何一项都不能叫隔离——只配了 namespace 的容器，一个 fork 炸弹照样能把宿主机拖死。
 
+```bash
 # 宿主：PID 是全局连续编号
 ps -eo pid,comm | head -3
 

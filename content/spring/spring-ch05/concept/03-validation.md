@@ -1,4 +1,5 @@
 # 三、参数校验：Bean Validation 的元数据模型
+
 ```text
 JSR-303/380 元数据模型：约束注解 + ConstraintValidator
     @NotNull(message="...") 由 NotNullValidator 实现

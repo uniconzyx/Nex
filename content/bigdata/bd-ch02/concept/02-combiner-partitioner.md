@@ -1,3 +1,5 @@
+# Combiner：本地 Reduce 与它的语义边界
+
 ```text
 Combiner = map 端本地 reduce（预聚合）
     map 输出 ─▶ Combiner 局部聚合 ─▶ shuffle ─▶ Reducer 全局聚合
@@ -14,7 +16,6 @@ Partitioner 决定 key 落到哪个 reduce：
     改变 reduce 数会改变分区映射 -> 输出目录不能直接复用
 ```
 
-# 一、Combiner：本地 Reduce 与它的语义边界
 
 （中立陈述）Combiner 是 Map 端可选的「本地聚合函数」，逻辑上与 Reducer 相同，但在**每个 MapTask 内部、溢写前/归并后**对 `(key, [v])` 先做一轮聚合，从而削减需要跨网络 shuffle 的 kv 数量。它必须满足**可结合、可交换**，否则会改变最终结果。
 
@@ -36,7 +37,7 @@ Partitioner 决定 key 落到哪个 reduce：
 
 ---
 
-# 二、Partitioner：决定 Reduce 数与数据分布
+## 二、Partitioner：决定 Reduce 数与数据分布
 
 （中立陈述）Partitioner 在 Map 端对每个 `(key, value)` 计算目标 reduce 编号 `p = getPartition(key, value, R)`，默认实现是 `hash(key) % R`。它同时决定了两件事：**作业有几个 Reduce（由 `R` 指定）**，以及**每个 key 去哪个 Reduce（由分区函数决定）**。分区不均匀直接造成数据倾斜。
 

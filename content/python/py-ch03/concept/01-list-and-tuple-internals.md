@@ -1,4 +1,5 @@
 # list 与 tuple 的底层：动态指针数组 vs 定长引用数组
+
 > Python dict 是「开地址哈希表」：底层是 entries 数组，每个槽存 hash、key、value。删除不真删而是打「哑元」标记，插入时复用；负载过高触发扩容并重新散列，查找平均接近 O(1)。
 
 ```text

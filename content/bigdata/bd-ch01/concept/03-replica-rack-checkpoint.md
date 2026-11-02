@@ -1,3 +1,5 @@
+# 副本放置策略与机架感知（rack awareness）
+
 ```text
 三副本的机架感知放置：
     副本1  写端所在节点
@@ -14,7 +16,6 @@ Checkpoint（SecondaryNameNode / StandbyCheckpointer）：
     HA 场景由 Standby NN 承担，不再需要 SecondaryNameNode
 ```
 
-# 一、副本放置策略与机架感知（rack awareness）
 
 （中立陈述）HDFS 默认副本因子为 3，放置规则为：**第 1 副本放在客户端所在节点（或随机节点）；第 2 副本放在「不同机架」的节点；第 3 副本放在「与第 2 副本同机架但不同节点」**。机架感知依赖管理员配置的 `rack topology`（网络位置脚本），使 NameNode 知道每个 DataNode 属于哪个机架（如 `/rack1/dn1`）。
 
@@ -35,7 +36,7 @@ Checkpoint（SecondaryNameNode / StandbyCheckpointer）：
 
 ---
 
-# 二、fsimage / edits 与 checkpoint（安全模式）
+## 二、fsimage / edits 与 checkpoint（安全模式）
 
 （中立陈述）NameNode 启动时先加载 `fsimage`（命名空间快照），再重放 `edits`（增量日志）得到最新状态。随运行 edits 越来越大，**Secondary NameNode（或 Standby 的 Checkpointer）** 周期性把「旧 fsimage + 新 edits」合并成新 fsimage（checkpoint），避免 edits 无限增长。刚启动时，由于**块到 DataNode 的映射尚未从块报告收齐**，集群进入**安全模式（safe mode）**——只读不写，直到满足条件的块比例达标才自动退出。
 

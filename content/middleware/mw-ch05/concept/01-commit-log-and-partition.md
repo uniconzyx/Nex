@@ -1,4 +1,5 @@
 # 一、提交日志模型：Kafka 为什么不是「队列」
+
 > Kafka 用「一个 Topic 切成多个 Partition（并行单位）+ 每个 Partition 多 Replica（容错单位）」同时拿到吞吐与高可用：Producer 按 key 哈希落 Partition 保顺序，Consumer Group 每组每 Partition 至多一个消费者。
 
 ```text

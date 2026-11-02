@@ -1,4 +1,4 @@
-# 一、AQE 自适应执行：用运行时统计纠正编译期误判
+# AQE 自适应执行：用运行时统计纠正编译期误判
 
 （中立陈述）**AQE（Adaptive Query Execution，Spark 3.0 引入、3.2 起默认开启）**的核心思想是：
 优化器在**编译期**只能靠统计信息猜，而 Shuffle 之后我们能拿到**真实的分区大小**。
@@ -72,7 +72,7 @@ spark = (SparkSession.builder
 spark.sql("SELECT /*+ REPARTITION(8) */ 1").explain("formatted")
 ```
 
-# 二、宽依赖 / 窄依赖与 Shuffle 边界
+## 二、宽依赖 / 窄依赖与 Shuffle 边界
 
 （中立陈述）沿用 bd-ch04 的定义：**窄依赖** = 一个父分区只被子分区中的一个使用
 （`map`/`filter`/`union`/`coalesce`），可以 pipeline 进同一个 Stage；
@@ -120,7 +120,7 @@ spark.sql("SELECT /*+ REPARTITION(8) */ 1").explain("formatted")
 
 ---
 
-# 三、执行计划读法与 Hive Metastore 集成
+## 三、执行计划读法与 Hive Metastore 集成
 
 （中立陈述）**读计划的固定顺序**：① 找所有 `Scan`（读了哪些表、哪些列、估计多少行）；
 ② 数 `Exchange`（= Shuffle 次数 = Stage 边界）；③ 看 `*Join` 的类型与 build 侧；

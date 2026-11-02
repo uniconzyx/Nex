@@ -1,4 +1,4 @@
-# 一、RDD 的本质与五大特性
+# RDD 的本质与五大特性
 
 （中立陈述）RDD（Resilient Distributed Dataset，弹性分布式数据集）是 Spark 的核心抽象：一个**只读、分区、可并行计算**的数据集合。Spark 官方给出的五大特性是：① 一组**分区**（partition）列表，即数据集的并行度单元；② 对每个分区施加的**计算函数**（compute）；③ 对其他 RDD 的**依赖**列表（lineage）；④（键值 RDD）一个**分区器**（Partitioner，如 hash / range）；⑤ 每个分区优先的**数据位置**（preferred locations，移动计算而非数据）。RDD 本身是**不可变**的：任何 transformation 都返回一个**新** RDD，而不修改旧 RDD。
 
@@ -19,7 +19,7 @@
 
 ---
 
-# 二、不可变性与血缘（lineage）容错
+## 二、不可变性与血缘（lineage）容错
 
 （中立陈述）每个 RDD 只记录「我是怎么由父 RDD 算出来的」（依赖 + 算子），这个谱系称为 **lineage / DAG**。因为 RDD 不可变，lineage 是一条**单向、无环、可重放**的因果链：出错时沿链回溯即可精确重算丢失的分区，而不必做全量 checkpoint。
 

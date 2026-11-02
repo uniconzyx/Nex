@@ -1,4 +1,4 @@
-# 一、窄依赖 vs 宽依赖（依赖模型）
+# 窄依赖 vs 宽依赖（依赖模型）
 
 （中立陈述）RDD 间的依赖分为两类：**窄依赖（narrow dependency）**——子 RDD 的每个分区只依赖父 RDD 的**至多一个**分区（如 `map`、`filter`、`union`、`mapPartitions`）；**宽依赖（wide/shuffle dependency）**——子 RDD 的每个分区依赖父 RDD 的**所有**分区（如 `reduceByKey`、`groupByKey`、`join`（未广播时）、`distinct`、`sortBy`、`repartition`）。宽依赖必然发生 **Shuffle**：数据按 key 跨节点重新分区。
 
@@ -33,7 +33,7 @@ sample       -> 窄依赖 无Shuffle
 
 ---
 
-# 二、Stage 划分与 Task 数量计算
+## 二、Stage 划分与 Task 数量计算
 
 （中立陈述）Spark 以 **宽依赖（及最终的 action）为边界** 把 DAG 切成一个个 **Stage**：一个 Stage 内的所有算子都是窄依赖，可流水线执行；遇到宽依赖就切断，前后分属不同 Stage（宽依赖两端各形成一个 Shuffle 边界）。**每个 Stage 内的 Task 数 = 该 Stage 最后一个 RDD 的分区数**；一个 job 的总 Task 数 = 各 Stage Task 数之和。
 

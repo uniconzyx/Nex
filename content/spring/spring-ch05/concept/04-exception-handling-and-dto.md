@@ -1,4 +1,5 @@
 # 四、全局异常处理与 DTO 隔离
+
 ```text
 @ControllerAdvice 把异常统一翻译成响应
     @ExceptionHandler(BizException)                     -> 400 + 业务码

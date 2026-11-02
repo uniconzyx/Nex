@@ -237,6 +237,20 @@ Negative matches:
 
 凯喵的习惯是：**每次遇到「Bean 找不到」，第一件事就是开 debug 看报告**。它能直接告诉你哪个条件没满足，比猜快一百倍。这个技能在排查第三方 starter 问题时尤其有用。
 
+## 三视角解析
+### 🧑‍💻 程序员视角
+`@SpringBootApplication` 是三个注解的组合：`@SpringBootConfiguration`、`@EnableAutoConfiguration`、`@ComponentScan`——少一个都会导致「Bean 没装上」。自动配置类的注册方式在 Boot 2.7 前后变了：老版靠 `spring.factories`，新版用 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`，升级后自定义 starter 失效多半是这个原因。`@ConditionalOnMissingBean` 的顺序很关键：它必须排在同类型 `@Bean` 之后评估，否则会「自己把自己判成缺失」。
+
+### 🎓 博士生视角
+自动配置的核心是「条件装配」：`@Conditional` 家族在容器启动时评估类路径、已有 Bean、配置属性等条件，决定是否注册。这套机制把「约定优于配置」落成可执行的规则——用户显式定义的 Bean 优先于自动配置（`@ConditionalOnMissingBean` 的顺序保证）。Boot 3 的 `AutoConfiguration.imports` 文件替代 `spring.factories`，是为了把「自动配置」与「其他扩展点」解耦，同时支持 AOT 编译（GraalVM native image）时的静态分析。
+
+### 📚 考研者视角
+面试高频：
+1. **自动配置原理**：`@EnableAutoConfiguration` → `ImportSelector` → 读取 imports 文件 → 条件过滤 → 注册 Bean。
+2. **条件注解**：`@ConditionalOnClass`、`@ConditionalOnMissingBean`、`@ConditionalOnProperty` 的典型用法。
+3. **starter 的组成**：`autoconfigure` 模块（逻辑）+ `starter` 模块（依赖聚合）。
+4. **配置优先级**：命令行 > 环境变量 > `application-{profile}.yml` > `application.yml`。
+
 ## 收尾：自动配置是「有条件生效的默认值」
 
 凯喵最后总结：SpringBoot 自动配置的本质是**给出一套合理的默认值，并允许你在任何一点覆盖它**。三个机制共同实现这件事：

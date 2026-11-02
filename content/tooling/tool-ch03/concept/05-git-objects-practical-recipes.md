@@ -276,6 +276,20 @@ git bisect run ./test.sh          # 脚本返回 0 = good，1 = bad
 
 凯喵的经验：只要有一个能复现问题的脚本（哪怕是 curl + grep），就该用 `bisect run`。它把"两小时手工排查"变成"五分钟机器跑完"，是所有 Git 命令里性价比最高的一个。
 
+## 三视角解析
+### 🧑‍💻 程序员视角
+`git branch -d` 删掉分支后，提交对象其实还在（只要 reflog 没被清理），`git reflog` 找到那个 SHA 再 `git branch recover <sha>` 就能救回来。但 `reflog` 只记录 HEAD 的移动，分支自己的 reflog 也要看（`git reflog show <branch>`）。`reset --hard` 之后工作区代码没进过暂存区就真的找不回，除非用过 `git add`（那就在对象库里）。`checkout` 与 `switch` 的差别在于前者兼管文件恢复，容易误伤未提交改动。
+
+### 🎓 博士生视角
+Git 的核心是「内容寻址的对象库」：blob（文件内容）、tree（目录）、commit（快照 + 父指针）、tag。所有对象以 SHA-1 命名，内容不变则哈希不变，天然去重。分支只是「指向 commit 的可移动指针」，因此创建/切换分支是 O(1)。`reflog` 是「HEAD 与分支引用的本地日志」，是误操作恢复的最后一道保险，但它只在本地、有保留期（默认 90 天），且不会随 `push` 传播。
+
+### 📚 考研者视角
+工程岗高频：
+1. **三种对象与引用**：blob/tree/commit 的关系，分支与 HEAD 的本质。
+2. **`merge` 与 `rebase`**：前者保留分叉历史、后者线性化但改写提交；「不要 rebase 已推送的公共分支」。
+3. **`reset` 三种模式**：`--soft`（只移动 HEAD）、`--mixed`（默认，重置暂存区）、`--hard`（连工作区一起重置）。
+4. **误操作恢复**：`reflog` + `cherry-pick`/`branch` 找回丢失提交。
+
 ## 收尾：凯喵的 Git 急救五招
 
 出事时按顺序想这五件事：

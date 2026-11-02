@@ -1,3 +1,5 @@
+# Shuffle 的排序与溢写（spill）
+
 ```text
 Map 端：
     map 输出先进环形缓冲（默认 100MB，80% 阈值触发）
@@ -13,7 +15,6 @@ Reduce 端：
     倾斜会放大这里：超大 key -> 单个 reduce 长时间卡在 merge
 ```
 
-# 一、Shuffle 的排序与溢写（spill）
 
 （中立陈述）Map 端并不边算边发网络——它先把 kv 写入**内存环形缓冲区（io.sort.mb，默认 100MB）**。缓冲区按 `spill.percent`（默认 0.8）阈值触发**溢写（spill）**：先按 partition 排序、partition 内按 key 排序（快速排序），再把有序数据写到本地磁盘的一个 spill 文件。Map 结束前，这些 spill 文件会被**归并**成一个大文件供 Reduce 拉取。
 
@@ -35,7 +36,7 @@ Reduce 端：
 
 ---
 
-# 二、归并（merge）与 Reduce 端的 fetch
+## 二、归并（merge）与 Reduce 端的 fetch
 
 （中立陈述）Reduce 端通过 **copy/fetch 线程** 并行地从各个 MapTask 拉取属于自己的 partition 数据。数据先落「内存缓冲区」，溢满后也 spill 到本地磁盘；所有 map 数据到齐后，Reduce 端把**内存片段 + 磁盘 spill** 做一次**多路归并**，得到全局按 key 有序的流，再逐 key 喂给用户的 reduce 函数。
 

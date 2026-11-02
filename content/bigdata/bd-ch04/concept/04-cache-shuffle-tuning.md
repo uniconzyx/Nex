@@ -1,4 +1,4 @@
-# 一、缓存（cache/persist）与 checkpoint 的取舍
+# 缓存（cache/persist）与 checkpoint 的取舍
 
 （中立陈述）**缓存 `cache/persist`** 把 RDD 的计算结果**物化到内存/磁盘并保留其 lineage**——后续多个 action 直接命中缓存，不必重算整条血缘；但缓存丢失（executor 失效）后仍靠 lineage 重算。**checkpoint** 则把 RDD 物化到**可靠存储（如 HDFS）并截断其 lineage**——后续重算从 checkpoint 文件恢复，不再回溯源头，代价是一次额外写入。
 
@@ -35,7 +35,7 @@ checkpoint 把血缘从 6 截断到 2, 故障重算只需从 checkpoint 文件�
 
 ---
 
-# 二、算子选择与数据倾斜（工程调优三板斧）
+## 二、算子选择与数据倾斜（工程调优三板斧）
 
 （中立陈述）同一语义可用不同算子实现，Shuffle 代价天差地别：**`reduceByKey` 在 map 端先做本地预聚合**，只把「key→局部聚合值」搬过网络；**`groupByKey` 把全量记录原样搬过网络**再聚合，Shuffle 量远大于前者。**`mapPartitions`** 每个分区只调一次函数（适合建连接/大对象初始化），而 `map` 逐元素调用。**数据倾斜**指少数 key 的数据量碾压其余，使个别 Reducer 长尾。**并行度（分区数）** 直接决定每个 Stage 的 Task 数。
 
