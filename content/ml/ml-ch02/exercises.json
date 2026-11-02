@@ -2,7 +2,7 @@
   "meta": {
     "chapter": "ml-ch02",
     "title": "线性模型：最小二乘、正则化与逻辑回归 —— 习题集",
-    "count": 6,
+    "count": 7,
     "note": "3 道概念题（最小二乘的统计前提 / 共线性 / L1 vs L2）+ 3 道算法实践题（手写坐标下降 Lasso、岭回归谱滤波数值验证、类别不平衡阈值诊断），全部为原创题干。"
   },
   "items": [
@@ -168,6 +168,28 @@
       ],
       "source": "self",
       "source_ref": "《机器学习》周志华 第3章；sklearn class_weight 文档"
+    },
+    {
+      "id": "ml-ch02-q7",
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "手算一维 Ridge 闭式解（λ=1）",
+      "content_md": "数据：`X = [[1], [2], [3]]`，`y = [1, 2, 4]`，模型为 `y = w·x + b` 但**已中心化**（等价于无截距）。Ridge 目标为 `‖y − Xw‖² + λ‖w‖²`，取 `λ = 1`。求 `w`（保留 3 位小数）。",
+      "answer": {
+        "output": "1.133",
+        "reference_code": "import numpy as np\nX = np.array([[1.], [2.], [3.]])\ny = np.array([1., 2., 4.])\nlam = 1.0\nw = np.linalg.solve(X.T @ X + lam * np.eye(1), X.T @ y)\nprint(w, round(float(w[0]), 3))     # 1.1333333... -> 1.133\n# 手算：Σx²=14, Σxy=1+4+12=17 -> w = 17/(14+1) = 17/15\n",
+        "explain": "闭式解 `w = (XᵀX + λI)⁻¹Xᵀy`。一维时退化为标量：`w = Σxᵢyᵢ / (Σxᵢ² + λ)`。Σxᵢyᵢ = 1×1 + 2×2 + 3×4 = 17，Σxᵢ² = 1+4+9 = 14，故 w = 17/(14+1) = 17/15 ≈ 1.1333 → 1.133。对照无正则的 OLS：w = 17/14 ≈ 1.214，可见 λ=1 把系数从 1.214 收缩到 1.133，收缩比 = 14/15 = 0.933——这正是「特征值方向缩放 λᵢ/(λᵢ+λ)」在一维下的体现。"
+      },
+      "explanation": "w = Σxy/(Σx²+λ) = 17/15 ≈ 1.133。",
+      "tags": [
+        "Ridge",
+        "闭式解",
+        "正则化"
+      ],
+      "source": "self",
+      "source_ref": "ml-ch02/concept/02-ridge-lasso-elastic-net.md"
     }
   ]
 }

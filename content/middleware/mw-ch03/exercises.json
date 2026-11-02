@@ -212,6 +212,27 @@
       "source": "nowcoder",
       "source_ref": "牛客 分布式/Raft 选主笔试题",
       "external_url": "https://www.nowcoder.com/"
+    },
+    {
+      "id": "mw-ch03-q8",
+      "type": "explain",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "主从切换为什么会丢数据，min-replicas 如何把「静默丢失」变成「显式失败」",
+      "content_md": "请解释：\n1. Redis 主从复制在故障转移时，丢失的写入是哪一部分？为什么无法完全避免？\n2. `min-replicas-to-write` 与 `min-replicas-max-lag` 分别限制什么？开启后故障表现会怎么变化？\n3. 为什么说「宁可短暂不可写，也不要接受一个已经和数据流断开的主库继续接写」？",
+      "answer": {
+        "reference_code": "1) 丢的是「主库已确认写入、但尚未传播到从库」的那一段。复制是异步的：主库写内存后立刻返回成功，再异步通过 replication backlog 发给从库。主库此刻崩溃/被判定下线时，backlog 中未送达的部分就永久丢失。无法完全避免，因为同步复制（等所有从库确认）会把写延迟抬到网络 RTT 量级，与 Redis 的低延迟定位冲突。\n\n2) `min-replicas-to-write N`：健康从库数量少于 N 时主库拒绝写；`min-replicas-max-lag S`：从库上次确认距今超过 S 秒即视为不健康。两者需同时配置才生效。开启后的变化：网络分区导致主库孤立时，主库从「继续接受写并静默丢失」变成「明确返回错误」。\n\n3) 静默丢失最危险的地方是不可观测——业务以为写成功了，监控没有异常，直到切换后对账才发现数据缺口，此时已无法补救。显式报错则能被日志、告警、业务重试捕获，把「数据事故」降级为「可用性抖动」。短期不可写是有界的、可恢复的；静默丢数据是无界的、不可恢复的。"
+      },
+      "explanation": "考点：异步复制的 RPO、两个 min-replicas 参数的语义、以及「可观测的失败优于不可观测的丢失」。",
+      "tags": [
+        "主从复制",
+        "脑裂",
+        "RPO",
+        "min-replicas"
+      ],
+      "source": "self",
+      "source_ref": "mw-ch03/concept/01-master-slave-replication.md"
     }
   ]
 }
