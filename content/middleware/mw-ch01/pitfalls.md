@@ -25,3 +25,9 @@
 9. **没算编码阈值，内存突然翻倍且不可逆**
    `hash-max-listpack-entries`（默认 128）、`list-max-listpack-size`、`set-max-intset-entries` 等阈值一超，紧凑编码（listpack/intset）立刻转成 hashtable/quicklist，单 key 内存可跳一个量级；**删元素也不会转回去**。
    ✅ 设计时就限制单 key 的元素个数与 value 长度；超大 hash 按业务维度拆成多个 key（分桶）；调整阈值前先用 `OBJECT ENCODING` 确认现状。
+10. **把大 hash 当「万能存储」不分桶** —— 一个 hash 塞几十万字段，编码早转 hashtable，单 key 内存巨大，`HDEL`/`HGETALL` 还会阻塞主线程。正确写法：按业务维度拆成多个 key，大 key 用 `HSCAN` 分批处理，删除用 `UNLINK`。
+11. **线上跑 `KEYS *` / `FLUSHALL`** —— `KEYS` 会遍历全库阻塞主线程，`FLUSHALL` 直接清空数据。正确写法：用 `SCAN` 游标迭代代替 `KEYS`；清库只在确认的测试环境做。
+12. **阻塞队列 `BLPOP` 忘了设超时** —— 不设超时会永久阻塞，客户端连接泄漏。正确写法：`BLPOP key 5` 显式给秒级超时，循环里处理超时继续等。
+13. **以为 set 存字符串还走 intset** —— intset 只能存整数，一旦混入一个字符串，整个 set 转 hashtable 且不可逆。正确写法：全整数集合才用 intset 预期，混类型场景直接按 hashtable 估算内存。
+14. **zset 用 `ZRANGE 0 -1` 拉全量** —— 成员几十万时一次性取回，网络与内存双爆。正确写法：分页 `ZRANGE start stop`，或按分数 `ZRANGEBYSCORE` 限定范围，配合 `LIMIT`。
+15. **把序列化大对象整块塞进单个 String** —— JSON/Protobuf 动辄几 MB，读一次整块加载，改一个字段要全量重写。正确写法：拆成 hash 字段或按业务拆 key，只读写需要的部分。

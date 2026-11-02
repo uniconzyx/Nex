@@ -23,3 +23,6 @@
 11. **因果掩码用 0 而非 -inf 填充未来位置** —— 把未来位置置 0 后 softmax 仍会给它分一个非零概率（被「看见」）。正确写法：加性掩码用 `-inf`（或足够大的负数），使 exp 后为 0；实现里常 `scores = np.where(mask, -1e9, scores)`。
 
 12. **位置编码加错位置或加错对象** —— 正弦/可学习位置编码应**加到 token 嵌入上**（在进注意力前），而非加到 Q/K/V 之后；加错会丢失顺序信息或破坏注意力对称性。正确写法：在 embedding 层之后、第一个注意力之前把位置编码相加（广播到 batch）。
+13. **softmax 前忘了数值稳定** —— 直接对大幅值 logits 做 exp 会溢出成 inf，softmax 变成 NaN。正确写法：先减去每行最大值再 exp（`scores - scores.max(dim=-1, keepdim=True).values`），这是数值稳定的标准操作。
+14. **变长序列未用 `pack_padded_sequence`** —— 填充位置照常参与 RNN 状态更新与损失计算，模型学到的是填充噪声。正确写法：先按长度排序、`pack_padded_sequence`，跑完再 `pad_packed_sequence`，损失对填充位置做 mask。
+15. **多头注意力的 head_dim 不整除** —— `d_model` 不能被 `num_heads` 整除时切分报错或静默截断，最后一维对不上。正确写法：保证 `d_model % num_heads == 0`，切分后每头维度 `d_model // num_heads`。
