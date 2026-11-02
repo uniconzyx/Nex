@@ -2,7 +2,7 @@
   "meta": {
     "chapter": "agent-ch09",
     "title": "多模态应用开发：图像、文档与语音的工程接口 —— 习题集",
-    "count": 6,
+    "count": 8,
     "note": "3 道概念题（token 账本、字段级准确率、CFG 可控性）+ 3 道算法实践题（patch/token 账本计算器、CLIP 检索与断层判定、字段级准确率与混淆矩阵），全部为原创题干。"
   },
   "items": [
@@ -167,6 +167,49 @@
       ],
       "source": "self",
       "source_ref": "本章 concept/02 第 2 节；示例 ex05"
+    },
+    {
+      "type": "judge",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "判断：把整页 300dpi 扫描件直接送入 VLM，是保证识别准确率的最佳做法。",
+      "content_md": "题干：为了保证文档识别准确，某同学把 PDF 每页按 300dpi 转成图片后整页送入视觉模型，认为分辨率越高、信息越全，效果一定越好。这个做法合适吗？",
+      "answer": {
+        "correct": "错",
+        "explain": "不合适。视觉 token 数随分辨率平方增长：A4@300dpi 约 2480×3508 像素，按 14px patch 切分约 4.4 万个视觉 token，即使 2×2 下采样仍有约 1.1 万/页，几十页就超出上下文且成本极高。正确做法是分档：页级摘要用长边 1024px（约 600 token/页），正文抽取用 1600px 按结构切块，表格/公式细节单独裁剪局部高分辨率重识别。核心认知是「视觉 token 是可调成本」，先确定任务需要多细，再决定分辨率与切块粒度。"
+      },
+      "explanation": "视觉 token 随分辨率平方增长，应按任务分档控制，而非一律最高分辨率。",
+      "tags": [
+        "视觉 token",
+        "分辨率",
+        "文档理解"
+      ],
+      "source": "self",
+      "source_ref": "agent-ch09/concept/01-vision-tokens.md",
+      "id": "q7"
+    },
+    {
+      "id": "agent-ch09-q7",
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "手算一张页面图的视觉 token 数",
+      "content_md": "一张 A4 扫描件按 300dpi 转图后为 2480×3508 像素。模型用 14×14 像素的 patch 切分（不足一个 patch 的部分向上取整为一格），产生的视觉 token 数为 patch 网格总数。再做 2×2 下采样（token 数除以 4 后向上取整）。求下采样后的视觉 token 数。",
+      "answer": {
+        "output": "11170",
+        "reference_code": "import math\nw,h,p=2480,3508,14\ntok=math.ceil(w/p)*math.ceil(h/p)\nprint(math.ceil(tok/4))\n",
+        "explain": "ceil(2480/14)=178，ceil(3508/14)=251，网格 178×251=44678 个视觉 token；2×2 下采样后 ceil(44678/4)=11170。若先分别对两个维度减半（89×126=11214）结果会不同——正确做法是先算总 token 数再除以 4。这个量级说明整页高分辨率送入会迅速吃光上下文，必须分档控制分辨率。"
+      },
+      "explanation": "178×251=44678 token，下采样 2×2 后约 1.1 万/页。",
+      "tags": [
+        "视觉 token",
+        "patch",
+        "分辨率"
+      ],
+      "source": "self",
+      "source_ref": "agent-ch09/concept/01-vision-tokens.md"
     }
   ]
 }

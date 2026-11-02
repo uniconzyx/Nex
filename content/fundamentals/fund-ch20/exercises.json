@@ -243,6 +243,27 @@
       ],
       "source": "self",
       "source_ref": "408 统考 操作系统 文件管理"
+    },
+    {
+      "type": "judge",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "判断：只要启用了日志（journaling），掉电后最近写入的数据一定不会丢失。",
+      "content_md": "题干：`ext4` 挂了日志，所以服务器突然掉电时，已经 `write` 成功的数据一定能保住。这句话对吗？",
+      "answer": {
+        "correct": "错",
+        "explain": "错误。日志（journaling）保证的是**元数据更新的一致性**——掉电后文件系统能通过重放日志恢复到一致状态、不会被 `fsck` 判为损坏，但它不保证数据内容完整。`ext4` 默认 `data=ordered` 只保证「数据块先落、元数据后提交」，掉电后最近几秒的数据内容可能丢失，而文件长度与元数据是一致的。要保证数据落盘必须由应用显式 `fsync`（还要 `fsync` 父目录以保证目录项落盘）。一句话：日志防损坏，`fsync` 防丢失。"
+      },
+      "explanation": "journaling 只保证元数据一致性，数据完整性需应用层 fsync。",
+      "tags": [
+        "journaling",
+        "fsync",
+        "一致性"
+      ],
+      "source": "self",
+      "source_ref": "fund-ch20/concept/04-free-space-and-journaling.md",
+      "id": "q8"
     }
   ]
 }

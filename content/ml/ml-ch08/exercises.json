@@ -2,7 +2,7 @@
   "meta": {
     "chapter": "ml-ch08",
     "title": "强化学习：MDP 与 Q-learning —— 习题集",
-    "count": 6,
+    "count": 8,
     "note": "3 道基础题（MDP 定义/Bellman 最优方程/on-off-policy 分野）+ 3 道算法实践题（手写价值迭代、Bellman 残差收敛实测、ε 衰减诊断实验），全部为原创题干。"
   },
   "items": [
@@ -169,6 +169,49 @@
       ],
       "source": "self",
       "source_ref": "Sutton & Barto 第6章；Gymnasium CliffWalking 环境设定"
+    },
+    {
+      "type": "judge",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "判断：Q-learning 是 on-policy 算法，因为它用当前策略采样数据。",
+      "content_md": "题干：某同学认为 Q-learning 用 ε-greedy 策略采样、又用采到的样本更新，所以它是 on-policy 算法。这句话对吗？",
+      "answer": {
+        "correct": "错",
+        "explain": "错误。on/off-policy 的判据不是「数据怎么来」，而是「更新目标里的策略是不是行为策略」。Q-learning 的更新目标是 `r + γ·max_a Q(s',a)`，这个 max 对应的是**贪心目标策略**，与用来采样 ε-greedy 的行为策略不同，因此是 off-policy。SARSA 的目标是 `r + γ·Q(s',a')`，其中 a' 正是行为策略实际选出的动作，所以是 on-policy。一句话记法：目标里出现 max/argmax 就是 off-policy。"
+      },
+      "explanation": "判据是更新目标所用策略是否等于行为策略；Q-learning 目标是贪心策略 → off-policy。",
+      "tags": [
+        "Q-learning",
+        "on-policy",
+        "off-policy"
+      ],
+      "source": "self",
+      "source_ref": "ml-ch08/concept/03-td-qlearning-and-beyond.md",
+      "id": "q7"
+    },
+    {
+      "id": "ml-ch08-q8",
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "mid",
+      "title": "手算 3 步折扣回报（γ=0.9）",
+      "content_md": "某回合在第 t 步之后收到的即时奖励依次为 r=[2, 0, 5]，折扣因子 γ=0.9，之后回合结束（无后续奖励）。求第 t 步的折扣回报 G_t（保留 3 位小数）。",
+      "answer": {
+        "output": "6.05",
+        "reference_code": "rs=[2,0,5]; g=0.9\nG=sum(r*(g**i) for i,r in enumerate(rs))\nprint(round(G,3))\n",
+        "explain": "G_t = 2 + 0.9×0 + 0.9²×5 = 2 + 0 + 4.05 = 6.05。注意折扣是按「离当前步的距离」幂次施加：当前步不折扣，下一步乘 γ，第 k 步乘 γ^k。常见错误是把 γ 乘在总和的整体上（得 5.445）或漏掉 0.9² 用 0.9×5。"
+      },
+      "explanation": "G_t = Σ γ^k·r_{t+k} = 2 + 0 + 0.81×5 = 6.05。",
+      "tags": [
+        "折扣回报",
+        "γ",
+        "MDP"
+      ],
+      "source": "self",
+      "source_ref": "ml-ch08/concept/01-mdp-and-value-functions.md"
     }
   ]
 }

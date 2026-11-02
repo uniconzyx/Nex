@@ -40,6 +40,14 @@ DERIVED = CONTENT / "_derived_cases.json"
 TYPES = ("choice", "coding", "output", "fix_error", "explain", "design")
 DIFFS = ("easy", "medium", "hard")
 
+# 历史内容里用过一些不在 TYPES 里的题型名，它们若直接落到兜底的 "coding"，
+# 前端题库的题型筛选条会显示错标签（判断题被标成编程题），且「看码写输出」
+# 的文本框判定分支也走不到。这里做一次显式归一，语义上等价于已有题型：
+#   judge（判断正误并说明理由） -> explain（自评/看解析）
+#   fix（找错改错，多为无代码的文本题） -> fix_error
+# 注意：content/*/exercises.json 里保留原名（描述更准确），只在生成产物时归一。
+TYPE_ALIAS = {"judge": "explain", "fix": "fix_error"}
+
 # 方案 A：agent(16 章) 与 ml(8 章) 挂到 ai 学科下（见 scripts/merge_agent_ml_into_ai.py）。
 # 这里必须在打题时就把 subj 归一，否则前端按 SUBJECTS 过滤题库时这 144 道题
 # 会因为 subj="agent"/"ml" 而永远筛不出来。
@@ -355,7 +363,9 @@ def build() -> tuple[list[dict], dict]:
         for i, it in enumerate(raw_items):
             if not isinstance(it, dict):
                 continue
-            etype = it.get("type") if it.get("type") in TYPES else "coding"
+            _raw_type = it.get("type")
+            _mapped = TYPE_ALIAS.get(_raw_type, _raw_type)
+            etype = _mapped if _mapped in TYPES else "coding"
             diff = it.get("difficulty") if it.get("difficulty") in DIFFS else "medium"
 
             eid = str(it.get("id") or f"{ch}-{i + 1:02d}")

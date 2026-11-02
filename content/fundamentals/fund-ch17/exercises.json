@@ -12,14 +12,34 @@
       "title": "I/O 端口编址方式辨析",
       "content_md": "关于 I/O 端口编址，下列说法正确的是？",
       "options": [
-        { "key": "A", "text": "统一编址（MMIO）下 CPU 用专用的 IN/OUT 指令访问设备寄存器" },
-        { "key": "B", "text": "独立编址把 I/O 端口映射到内存地址空间，与内存共用一套地址" },
-        { "key": "C", "text": "独立编址有独立于内存的 I/O 地址空间，需专用 I/O 指令（如 x86 的 IN/OUT）" },
-        { "key": "D", "text": "x86 架构采用统一编址" }
+        {
+          "key": "A",
+          "text": "统一编址（MMIO）下 CPU 用专用的 IN/OUT 指令访问设备寄存器"
+        },
+        {
+          "key": "B",
+          "text": "独立编址把 I/O 端口映射到内存地址空间，与内存共用一套地址"
+        },
+        {
+          "key": "C",
+          "text": "独立编址有独立于内存的 I/O 地址空间，需专用 I/O 指令（如 x86 的 IN/OUT）"
+        },
+        {
+          "key": "D",
+          "text": "x86 架构采用统一编址"
+        }
       ],
-      "answer": { "correct": ["C"] },
+      "answer": {
+        "correct": [
+          "C"
+        ]
+      },
       "explanation": "独立编址（Isolated I/O）有独立于内存的 I/O 地址空间，必须用专用 I/O 指令访问，x86 即此例；统一编址（MMIO）是把端口映射到内存地址、用普通访存指令访问（ARM/RISC-V 多用）。A、B 把两者说反，D 错（x86 是独立编址）。",
-      "tags": ["io-addressing", "mmio", "isolated-io"],
+      "tags": [
+        "io-addressing",
+        "mmio",
+        "isolated-io"
+      ],
       "source": "book",
       "source_ref": "《计算机组成原理》唐朔飞 第 8 章 I/O 系统"
     },
@@ -31,14 +51,34 @@
       "title": "中断响应的第一步",
       "content_md": "CPU 响应可屏蔽中断时，硬件自动执行的第一步动作是？",
       "options": [
-        { "key": "A", "text": "保存断点（把 PC 压栈）" },
-        { "key": "B", "text": "关中断（置中断屏蔽标志）" },
-        { "key": "C", "text": "引出中断服务程序（取向量跳转到 ISR）" },
-        { "key": "D", "text": "保护现场（把通用寄存器压栈）" }
+        {
+          "key": "A",
+          "text": "保存断点（把 PC 压栈）"
+        },
+        {
+          "key": "B",
+          "text": "关中断（置中断屏蔽标志）"
+        },
+        {
+          "key": "C",
+          "text": "引出中断服务程序（取向量跳转到 ISR）"
+        },
+        {
+          "key": "D",
+          "text": "保护现场（把通用寄存器压栈）"
+        }
       ],
-      "answer": { "correct": ["B"] },
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
       "explanation": "标准中断响应五步：① 关中断 → ② 保存断点 → ③ 引出 ISR → ④ 执行 ISR（软件保护现场/开中断/处理/恢复现场）→ ⑤ 中断返回。第一步必须是关中断，否则断点还没存完就可能被新的中断打乱。注意：保存断点由硬件自动完成，保护现场是 ISR 开头软件做的事，两者不同。",
-      "tags": ["interrupt", "response", "关中断"],
+      "tags": [
+        "interrupt",
+        "response",
+        "关中断"
+      ],
       "source": "book",
       "source_ref": "《计算机组成原理》唐朔飞 第 8 章 I/O 系统"
     },
@@ -50,14 +90,34 @@
       "title": "DMA 方式与 CPU 的关系",
       "content_md": "关于 DMA 方式，下列说法正确的是？",
       "options": [
-        { "key": "A", "text": "DMA 方式完全不需要 CPU 参与，连开始和结束都不要" },
-        { "key": "B", "text": "DMA 传送的数据由 CPU 在中断服务程序里逐字搬移" },
-        { "key": "C", "text": "DMA 的数据传送阶段由 DMA 控制器完成；传送结束通常由中断通知 CPU 做后处理" },
-        { "key": "D", "text": "DMA 期间 CPU 完全不能访问内存" }
+        {
+          "key": "A",
+          "text": "DMA 方式完全不需要 CPU 参与，连开始和结束都不要"
+        },
+        {
+          "key": "B",
+          "text": "DMA 传送的数据由 CPU 在中断服务程序里逐字搬移"
+        },
+        {
+          "key": "C",
+          "text": "DMA 的数据传送阶段由 DMA 控制器完成；传送结束通常由中断通知 CPU 做后处理"
+        },
+        {
+          "key": "D",
+          "text": "DMA 期间 CPU 完全不能访问内存"
+        }
       ],
-      "answer": { "correct": ["C"] },
+      "answer": {
+        "correct": [
+          "C"
+        ]
+      },
       "explanation": "DMA 三阶段：预处理（CPU 设地址/计数/方向并启动）、数据传送（DMAC 接管总线批量搬，CPU 不参与）、后处理（传送结束发中断，CPU 收尾）。所以 DMA 不是完全不要 CPU，只是省下了「数据传送」这一阶段；结束仍需一次中断。D 也不对——「停止 CPU 访存」只是三种总线仲裁方式之一，并非 DMA 必然冻结 CPU。",
-      "tags": ["dma", "三阶段", "中断"],
+      "tags": [
+        "dma",
+        "三阶段",
+        "中断"
+      ],
       "source": "book",
       "source_ref": "《计算机组成原理》唐朔飞 第 8 章 I/O 系统"
     },
@@ -69,14 +129,34 @@
       "title": "通道与 DMA 的区别",
       "content_md": "通道（Channel）与 DMA 的主要区别在于？",
       "options": [
-        { "key": "A", "text": "通道位于 CPU 内部，DMA 是外部芯片" },
-        { "key": "B", "text": "通道能执行「通道程序（CCW）」完成带格式/带跳转的复杂 I/O；DMA 主要只做内存与外设间的数据搬运" },
-        { "key": "C", "text": "通道需要 CPU 逐字节干预，DMA 不需要" },
-        { "key": "D", "text": "DMA 是 I/O 处理器，通道只是简单搬运电路" }
+        {
+          "key": "A",
+          "text": "通道位于 CPU 内部，DMA 是外部芯片"
+        },
+        {
+          "key": "B",
+          "text": "通道能执行「通道程序（CCW）」完成带格式/带跳转的复杂 I/O；DMA 主要只做内存与外设间的数据搬运"
+        },
+        {
+          "key": "C",
+          "text": "通道需要 CPU 逐字节干预，DMA 不需要"
+        },
+        {
+          "key": "D",
+          "text": "DMA 是 I/O 处理器，通道只是简单搬运电路"
+        }
       ],
-      "answer": { "correct": ["B"] },
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
       "explanation": "通道是专门的 I/O 处理器，执行由通道命令字（CCW）组成的通道程序，能处理复杂、多设备、带分支的 I/O；DMA 更像「自动搬运工」，负责内存↔外设的批量数据移动，控制面仍较简单。A、C、D 均把二者的角色说反或归错位置。",
-      "tags": ["channel", "dma", "ccw"],
+      "tags": [
+        "channel",
+        "dma",
+        "ccw"
+      ],
       "source": "book",
       "source_ref": "《计算机组成与设计》Patterson & Hennessy 第 6 章"
     },
@@ -88,14 +168,33 @@
       "title": "I/O 软件层次顺序",
       "content_md": "I/O 软件层次自底向上（从最贴近硬件到最贴近用户）依次是？",
       "options": [
-        { "key": "A", "text": "用户层 I/O 软件 → 与设备无关 OS 软件 → 设备驱动程序 → 中断处理程序" },
-        { "key": "B", "text": "中断处理程序 → 设备驱动程序 → 与设备无关 OS 软件 → 用户层 I/O 软件" },
-        { "key": "C", "text": "设备驱动程序 → 中断处理程序 → 与设备无关 OS 软件 → 用户层 I/O 软件" },
-        { "key": "D", "text": "与设备无关 OS 软件 → 设备驱动程序 → 中断处理程序 → 用户层 I/O 软件" }
+        {
+          "key": "A",
+          "text": "用户层 I/O 软件 → 与设备无关 OS 软件 → 设备驱动程序 → 中断处理程序"
+        },
+        {
+          "key": "B",
+          "text": "中断处理程序 → 设备驱动程序 → 与设备无关 OS 软件 → 用户层 I/O 软件"
+        },
+        {
+          "key": "C",
+          "text": "设备驱动程序 → 中断处理程序 → 与设备无关 OS 软件 → 用户层 I/O 软件"
+        },
+        {
+          "key": "D",
+          "text": "与设备无关 OS 软件 → 设备驱动程序 → 中断处理程序 → 用户层 I/O 软件"
+        }
       ],
-      "answer": { "correct": ["B"] },
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
       "explanation": "自底向上四层：中断处理程序（最贴近硬件，清中断、收数据）→ 设备驱动程序（寄存器操作、命令序列）→ 与设备无关 OS 软件（统一命名、缓冲、保护）→ 用户层 I/O 软件（库函数、SPOOLING）。缓冲、设备命名、保护等落在「与设备无关」层。",
-      "tags": ["io-software", "层次"],
+      "tags": [
+        "io-software",
+        "层次"
+      ],
       "source": "book",
       "source_ref": "《操作系统概念》Silberschatz 第 13 章 I/O 系统"
     },
@@ -107,11 +206,18 @@
       "title": "给定屏蔽字求中断实际响应顺序",
       "content_md": "系统有 4 级中断，优先级 1 > 2 > 3 > 4（数字越小越高）。处理级别 i 时的屏蔽字（1=屏蔽，0=允许）为：\n\n```\n级别 1: [1,1,1,1]\n级别 2: [0,1,1,1]\n级别 3: [0,0,1,1]\n级别 4: [0,0,0,1]\n```\n\n到达序列（时刻, 级别）：`(0,2), (1,3), (2,1), (4,4)`。多个中断按「优先级更高且屏蔽位=0 才允许嵌套（ISR 内开中断后）」的规则响应。\n\n请写出**实际完成顺序**（用级别序列表示，如 `1→2→3→4`）。",
       "answer": {
-        "correct": ["1→2→3→4"],
+        "correct": [
+          "1→2→3→4"
+        ],
         "text": "实际完成顺序为 1 → 2 → 3 → 4。解析：t=0 启动 ISR2；t=1 级别3 到达，但被级别2 屏蔽（mask2[3]=1）只能等待；t=2 级别1 到达，优先级高于2 且 mask2[1]=0 允许，嵌套进入；t=5 ISR1 完成，回到 ISR2（t=6 完成），随后按优先级启动等待中的 3（t=9 完成），最后 4（t=12 完成）。"
       },
       "explanation": "这是 408 经典分析题。关键是「响应顺序 ≠ 静态优先级顺序」：被屏蔽的高优先级也进不来；ISR 内部必须开中断才可能发生嵌套。本题级别1 虽最后到，却因可嵌套而最先完成。",
-      "tags": ["interrupt", "mask", "嵌套", "分析"],
+      "tags": [
+        "interrupt",
+        "mask",
+        "嵌套",
+        "分析"
+      ],
       "source": "book",
       "source_ref": "《计算机组成原理》唐朔飞 第 8 章 I/O 系统"
     },
@@ -127,7 +233,12 @@
         "code": "def interrupt_order(mask, arrivals):\n    # mask: list of list, mask[i][j] 处理级别(i+1)时是否屏蔽级别(j+1); 1屏蔽 0允许\n    # arrivals: list of (time, level), level 从 1 开始\n    MASK = {i + 1: mask[i] for i in range(len(mask))}\n    DUR = {lv: 1 for lv in range(1, len(mask) + 1)}  # 每个 ISR 时长设为 1, 不影响顺序\n    ai = 0\n    t_last = 0\n    stack = []        # [level, remaining]\n    pending = []      # (time, level)\n    done = []\n    while True:\n        na = arrivals[ai][0] if ai < len(arrivals) else float('inf')\n        ne = (t_last + stack[-1][1]) if stack else float('inf')\n        if na == float('inf') and ne == float('inf'):\n            break\n        if ne <= na:\n            if stack:\n                stack[-1][1] -= (ne - t_last)\n            t_last = ne\n            done.append(stack[-1][0])\n            stack.pop()\n            if not stack and pending:           # 栈空, 启动等待中最高优先级\n                cand = min(pending, key=lambda x: x[1])\n                pending.remove(cand)\n                stack.append([cand[1], DUR[cand[1]]])\n        else:\n            if stack:\n                stack[-1][1] -= (na - t_last)\n            t_last = na\n            lvl = arrivals[ai][1]\n            ai += 1\n            pending.append((t_last, lvl))\n            if not stack:\n                cand = min(pending, key=lambda x: x[1])\n                pending.remove(cand)\n                stack.append([cand[1], DUR[cand[1]]])\n            else:\n                top = stack[-1][0]\n                cands = [p for p in pending if p[1] < top and MASK[top][p[1] - 1] == 0]\n                if cands:\n                    cand = min(cands, key=lambda x: x[1])\n                    pending.remove(cand)\n                    stack.append([cand[1], DUR[cand[1]]])\n    return done\n\n\nif __name__ == '__main__':\n    mask = [[1,1,1,1],[0,1,1,1],[0,0,1,1],[0,0,0,1]]\n    arrivals = [(0,2),(1,3),(2,1),(4,4)]\n    print(interrupt_order(mask, arrivals))  # 输出 [1, 2, 3, 4]"
       },
       "explanation": "考点是把「屏蔽字 + 优先级 + 嵌套」规则落成确定性的事件模拟。注意只比较优先级与屏蔽位，不依赖具体时长（DUR 取 1 不影响顺序），避免把时间参数化的陷阱。",
-      "tags": ["interrupt", "mask", "simulation", "算法"],
+      "tags": [
+        "interrupt",
+        "mask",
+        "simulation",
+        "算法"
+      ],
       "source": "self",
       "source_ref": "408 统考 计组 I/O"
     },
@@ -139,13 +250,42 @@
       "title": "DMA 方式节省的 CPU 周期计算",
       "content_md": "某外设要传送 N=8192 字节。\n- 程序中断方式：每收到 1 字节触发一次中断，每次中断服务程序（含保护/恢复现场、搬 1 字节）耗 CPU 120 个时钟周期。\n- DMA 方式：预处理（CPU 设 DMAC）耗 200 周期，数据传送由 DMAC 完成（CPU 不耗周期），结束中断后处理耗 200 周期。\n\n请计算：两种方式各自消耗多少 CPU 时钟周期？DMA 相比中断方式节省了多少比例（百分比，保留整数）？",
       "answer": {
-        "correct": ["中断方式 983040 周期", "DMA 方式 400 周期", "节省约 99%"],
+        "correct": [
+          "中断方式 983040 周期",
+          "DMA 方式 400 周期",
+          "节省约 99%"
+        ],
         "text": "中断方式 CPU 周期 = 8192 × 120 = 983040；DMA 方式 CPU 周期 = 200 + 200 = 400；节省比例 = (983040 − 400) / 983040 ≈ 99.96% ≈ 99%。可见大数据量下 DMA 对解放 CPU 的优势极大。"
       },
       "explanation": "核心公式：中断方式 CPU 开销 ≈ N × 单次 ISR 周期；DMA 方式 CPU 开销 ≈ 预处理 + 后处理（与 N 无关）。数据量越大，DMA 优势越明显，这也解释了为什么磁盘/网卡都用 DMA。",
-      "tags": ["dma", "cpu-cycle", "计算"],
+      "tags": [
+        "dma",
+        "cpu-cycle",
+        "计算"
+      ],
       "source": "self",
       "source_ref": "408 统考 计组 I/O"
+    },
+    {
+      "type": "judge",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": 2,
+      "title": "判断：DMA 方式下 CPU 完全不参与数据传输，所以可以完全不管 Cache 一致性。",
+      "content_md": "题干：使用 DMA 传送数据时，数据不经过 CPU，由 DMA 控制器直接在内存与外设之间搬运。因此软件无需关心 Cache 一致性。这句话对吗？",
+      "answer": {
+        "correct": "错",
+        "explain": "错误。DMA 绕过 CPU 但不绕过 Cache 的存在：DMA 写内存时，如果 CPU 的 Cache 里还留着该地址的旧副本，CPU 后续读到的是脏数据；反过来 CPU 改了数据还在 Cache 里没写回，DMA 送出去的就是旧内容。软件必须在传输前后做 `cache flush/invalidate`，或把 DMA 缓冲区建在非缓存（uncached）内存上。表现是「收包内容偶尔错乱」「发出数据偶发旧值」，极难复现，是嵌入式与驱动开发的典型 bug 源。"
+      },
+      "explanation": "DMA 绕过 CPU 但不保证与 Cache 一致，需 flush/invalidate 或用非缓存内存。",
+      "tags": [
+        "DMA",
+        "Cache 一致性",
+        "嵌入式"
+      ],
+      "source": "self",
+      "source_ref": "fund-ch17/concept/04-dma-and-channel.md",
+      "id": "q9"
     }
   ]
 }
