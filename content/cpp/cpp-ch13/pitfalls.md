@@ -31,3 +31,10 @@
 8. **`ofstream` 默认截断清空文件**
    `ofstream f("log.txt")` 等价于 `ios::out | ios::trunc`，会直接清空已有文件；误以为「打开即可追加」。
    ✅ 需要追加用 `ios::app`；需要读写不破坏用 `ios::in | ios::out`（不要加 trunc）。
+9. **不检查文件是否打开成功** —— `ofstream f("C:/no/such/dir/x.txt"); f << "d";` 目录不存在时流静默失败、数据丢失。正确写法：打开后立刻 `if (!f) { /* 报错 */ }`。
+10. **`getline` 与 `>>` 混用残留换行** —— `cin >> n` 留下 `\n`，紧接着 `getline` 读到空行。正确写法：混用前 `cin.ignore()` 丢弃残留换行。
+11. **`endl` 每次都 flush 拖慢 IO** —— `endl` = 换行 + 强制 flush，大循环能慢几十倍。正确写法：普通换行用 `'\n'`，仅需立刻落盘才 `flush`/`endl`。
+12. **流状态位未 clear 导致后续全失效** —— 读失败置 `failbit` 后所有操作被忽略。正确写法：出错 `clear()` 再 `ignore()` 丢弃坏输入，才能继续。
+13. **文本模式读写二进制被篡改** —— Windows 下文本模式把 `\n`→`\r\n`、遇 `0x1A` 当 EOF。正确写法：二进制必须开 `std::ios::binary`。
+14. **`stringstream` 复用前未双清** —— 只 `str("")` 不清状态位会残留失败标记。正确写法：每次复用前 `ss.str(""); ss.clear();`。
+15. **locale 影响数字/日期格式导致解析错** —— `imbue(locale)` 改变千位符、小数点。正确写法：处理机器数据用 `std::locale::classic()`（C locale）。
