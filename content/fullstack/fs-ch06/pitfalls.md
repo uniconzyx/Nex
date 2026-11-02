@@ -27,3 +27,7 @@
 13. **Cookie 不设 `HttpOnly` / `Secure` / `SameSite`** —— 会话凭证暴露给 JS（XSS 可窃取）且跨站请求自动携带（CSRF）。✅ 三属性齐上；ex13 `strict/lax_blocks_cross_site_post=true`，而 `SameSite=None` 且不校 CSRF token 时跨站 POST 直接 `status=200`（真实漏洞）。
 
 14. **把 token 放进 URL、日志或 `localStorage`** —— URL 会进浏览器历史/Referer/服务器日志，`localStorage` 一次 XSS 即被读走。✅ 放 `HttpOnly` Cookie 或内存 + 短 TTL；日志对 token 打码；同时给状态变更接口加 CSRF 校验。
+
+15. **以为 JWT「无状态」就等于「可以撤销」** —— 签发出去的 token 在有效期内**无法收回**：用户登出、改密码、被封禁之后，旧 token 依然能通过校验，除非服务端额外查黑名单或版本号——那就又变回有状态了。
+   ✅ 折中做法：访问令牌用**短 TTL**（5~15 分钟）+ 刷新令牌（长 TTL、可撤销、只存哈希）；需要立刻踢下线时，服务端维护 `tokenVersion` 或黑名单（Redis 里放 jti），校验时查一次。
+   面试里若被问"JWT 怎么登出"，只回答"清 Cookie"是不及格的——那只是把浏览器那份删了，**已经发出去的 token 仍然有效**。

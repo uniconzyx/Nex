@@ -29,3 +29,7 @@
 13. **从 Eager 策略直接切到 `CooperativeStickyAssignor`** —— 直接改 `partition.assignment.strategy` 会导致消费者之间协议不一致，陷入**反复 rebalance**。必须用 `upgrade.from` 走一次滚动升级。
 
 14. **`auto.offset.reset=latest` 配 `enable.auto.commit=false` 的新组首次启动** —— 新消费者组（`__consumer_offsets` 无记录）会从 `latest` 开始，**历史消息全部跳过**。要么用 `earliest`，要么在启动前确认组内已有有效位移。
+
+15. **以为 `acks=all` 就等于"绝不丢消息"** —— `acks=all` 只保证**所有 ISR 副本**都写成功；但如果 `min.insync.replicas=1`（甚至 topic 只有 1 副本），"所有 ISR"就是那一个副本，节点一挂数据就没了。
+   另外 `unclean.leader.election.enable=true` 时，落后副本也会被选为 leader，等于承认丢数据。
+   ✅ 生产上三件套：`replication.factor≥3`、`min.insync.replicas=2`、`unclean.leader.election=false`；再配合生产者幂等与事务，把"至少一次 + 消费端去重"或"恰好一次"落到具体语义上。

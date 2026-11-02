@@ -11,6 +11,8 @@
 
 ## 2. 定义/要点
 
+### 两个公式：一个是码元上限，一个是信息上限
+
 $$\text{奈氏（无噪声）}: \quad C = 2W\log_2 V \quad\text{(bps)}$$
 
 $$\text{香农（有噪声）}: \quad C = W\log_2\left(1 + \frac{S}{N}\right) \quad\text{(bps)}$$
@@ -20,6 +22,8 @@ $$\text{香农（有噪声）}: \quad C = W\log_2\left(1 + \frac{S}{N}\right) \q
 | $W$ | 信道带宽（Hz） | 电话线 3kHz、WiFi 20/40/80MHz |
 | $V$ | 码元的离散电平数（星座点数） | 2（NRZ）、4（QPSK）、16（16-QAM） |
 | $S/N$ | 信噪比（**功率比，无量纲**） | 30dB → 1000 倍 |
+
+### dB 与倍数：考场上最常错的一步
 
 **dB 换算是必考点**：
 
