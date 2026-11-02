@@ -24,6 +24,7 @@ import { useMemo, useState } from 'react';
 import { BUNDLE, type BundleChapter } from '../data/bundle';
 import { CLANG_CHAPTERS } from '../data/clangUnits';
 import { SubjectSwitch } from '../components/SubjectSwitch';
+import { ConceptViz } from '../components/ConceptViz';
 import { subjectLabel, useSubject } from '../lib/subject';
 import { chapterMastery, resetChapter, useProgress } from '../lib/progress';
 import { STORY_BY_CHAPTER, isTeaser } from '../data/story';
@@ -309,6 +310,13 @@ export function LearnPage({ onNavigate }: { onNavigate?: (p: KmPage) => void }) 
                   })}
                 </p>
               )}
+
+              {/* ── 机制图解（按章节就地展开） ────────────────────────
+                  图不是另画的一套结构：节点就是 concept 里的 `##` 小节，
+                  所以正文写「见 §2.3」时，图上第 2 个文件第 3 节就是它。
+                  场景灯（考试/事故/面谈）只改配色不改拓扑——同一个机制
+                  被三种场景击中，才看得出哪一节最贵。真题只读，不写回。 */}
+              <ConceptViz subject={subject} chapterId={c.id} />
 
               {/* ── 三关 ─────────────────────────────────────────────── */}
               <div className="km-stages">
