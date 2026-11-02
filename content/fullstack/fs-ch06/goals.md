@@ -20,14 +20,14 @@
 - 无。本章 `prerequisites` 仅引用本学科已完成章节 fs-ch04、fs-ch05；密码学背景本章从零讲到够用，不要求额外的密码学先修。
 ## 本章 GitHub 学习路线（按阅读顺序）
 
-> ★ 为 **2026-10-27** 的 GitHub API 快照（已逐条验证仓库存在）。
+> ★ 为 **2026-11-02** 的 GitHub API 快照（已逐条验证仓库存在）。
 > 顺序即路线：**先读能跑的最小实现 → 再读同章对照实现 → 最后读工业级库**。「对应本章」写 `§x.y` 的，说明这份仓库与本章那一节直接对应，先读那里；写「全章」的，按右侧「读什么」给的入口文件读，不要从 README 通读。
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [trekhleb/javascript-algorithms](https://github.com/trekhleb/javascript-algorithms) | 196,715 | 全章 | JavaScript 算法与数据结构，含英文详解；本章先读与「JWT 三段结构与签名算法」「校验清单与 alg」相关的部分 |
-| 2 | [Chalarangelo/30-seconds-of-code](https://github.com/Chalarangelo/30-seconds-of-code) | 129,384 | 全章 | 短小精悍的 JS/CSS/HTML 代码片段集，覆盖日常前端技巧；本章先读与「JWT 三段结构与签名算法」「校验清单与 alg」相关的部分 |
-| 3 | [yangshun/front-end-interview-handbook](https://github.com/yangshun/front-end-interview-handbook) | 44,006 | 全章 | 前端面试手册：HTML/CSS/JS/浏览器/性能；本章先读与「JWT 三段结构与签名算法」「校验清单与 alg」相关的部分 |
+| 1 | [panva/jose](https://github.com/panva/jose) | 7,859 | §2.1 三段结构与签名 | 规范级实现：`docs/jws/flattened/sign/README.md`、`docs/jws/compact/verify/functions/compactVerify.md` 说明签名的输入是 `BASE64URL(header).BASE64URL(payload)` 这串字节，不是解析后的 JSON——§2.1「签的是串不是对象」由此而来 |
+| 2 | [auth0/node-jsonwebtoken](https://github.com/auth0/node-jsonwebtoken) | 18,182 | §2.2 alg 混淆 · §3.1 无法主动失效 | 坑位本体：`verify.js` 的 `options.algorithms` 白名单是唯一能挡住 `alg:none` 的地方（不传就按 header 里声明的算法验）；`sign.js` 的 `expiresIn` 只写进 exp，服务端不查黑名单就撤不掉——§3.1 的固有缺陷 |
+| 3 | [OWASP/CheatSheetSeries](https://github.com/OWASP/CheatSheetSeries) | 33,847 | §3.2 密码存储 · §4.2 CSRF/XSS | 权威基线：`cheatsheets/Password_Storage_Cheat_Sheet.md` 给了 argon2id 的参数下限与「不加盐等于送彩虹表」；`Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.md`、`Cross_Site_Scripting_Prevention_Cheat_Sheet.md` 分别对应 §4.2 的两类漏洞 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 
@@ -55,7 +55,7 @@
 > 全部链接由 `scripts/collect_links.py` + `scripts/audit_sources.py` 定期复核，失效链接会被审计器标红。
 
 ## 真题依据（真实可查，仅存元数据）
-- GitHub 资源（见 `_manifest.json`）：trekhleb/javascript-algorithms（196855★）、Chalarangelo/30-seconds-of-code（129326★）、yangshun/front-end-interview-handbook（44008★）。本章算法题引用 `src/algorithms/cryptography/caesar-cipher`（用于说明古典密码为何不安全）。
+- GitHub 资源（见 `_manifest.json`）：panva/jose（7859★）、auth0/node-jsonwebtoken（18182★）、OWASP/CheatSheetSeries（33847★）。
 - 规范原文：RFC 7519（JWT）、RFC 7515（JWS）、RFC 7636（PKCE）、RFC 6749（OAuth2）、OWASP API Security Top 10（BOLA/IDOR）。
 - LeetCode 题仅存元数据与链接，不搬运题面正文，详见 `exercises.json`。
 

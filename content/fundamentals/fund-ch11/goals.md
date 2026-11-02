@@ -27,9 +27,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | 全章 | 系统设计入门：性能、一致性、可用性与面试题（408 之上的系统视野）；本章先读与「OSI 七层 vs TCP…」「封装与分用」相关的部分 |
-| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | 全章 | 完整的计算机科学自学计划：数据结构、算法、OS、网络全覆盖；本章先读与「OSI 七层 vs TCP…」「封装与分用」相关的部分 |
-| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | 全章 | 中文技术面试必备：操作系统、计算机网络、组成原理、算法、数据库；本章先读与「OSI 七层 vs TCP…」「封装与分用」相关的部分 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §3.1 | 讲「TCP 与 UDP 的选择」时读 `solutions/` 的实时通信设计：可靠 vs 低延迟的取舍，与本章「拥塞控制的代价」是同一权衡 |
+| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | §2.3 | 讲「分层模型」时读 README 的 Networking 清单：每层的职责与典型协议，用来校准「哪个问题该在哪一层解决」 |
+| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §1.2 | 讲「TCP 三次握手」时读 `docs/计算机网络/` 的传输层篇：SYN/ACK 的序号变化配了状态迁移图，重点是「为什么是三次而不是两次」 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

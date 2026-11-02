@@ -36,9 +36,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | 全章 | 系统设计入门：性能、一致性、可用性与面试题（408 之上的系统视野）；本章先读与「八种内部排序的「时间·空间…」「比较排序的 Ω」相关的部分 |
-| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | 全章 | 完整的计算机科学自学计划：数据结构、算法、OS、网络全覆盖；本章先读与「八种内部排序的「时间·空间…」「比较排序的 Ω」相关的部分 |
-| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | 全章 | 中文技术面试必备：操作系统、计算机网络、组成原理、算法、数据库；本章先读与「八种内部排序的「时间·空间…」「比较排序的 Ω」相关的部分 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §4.3 | 讲「外部排序的动机」时读 `solutions/` 的大数据处理题：内存装不下时先分块排序再归并，是「排序不止在内存里做」的直接案例 |
+| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | §3.2 | 讲「排序算法的选择」时读 README 的 Sorting 一节：小数据用插入、大数据用快排/归并、要求稳定用归并——选择依据与本章一致 |
+| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §2.1 | 讲「八种排序的复杂度表」时读 `docs/算法/` 的排序篇：时间/空间/稳定性三列齐全，重点看它对「快排最坏 O(n²) 与不稳定」的标注 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

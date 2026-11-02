@@ -34,10 +34,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | 全章 | 经典机器学习库官方仓库：算法实现与最佳实践；本章先读与「先看一个反直觉的事实」「list 的内存模型」相关的部分 |
-| 2 | [jakevdp/PythonDataScienceHandbook](https://github.com/jakevdp/PythonDataScienceHandbook) | 50,277 | 全章 | 《Python 数据科学手册》全书 Jupyter Notebook（NumPy/Pandas/Matplotlib）；本章先读与「先看一个反直觉的事实」「list 的内存模型」相关的部分 |
-| 3 | [pandas-dev/pandas](https://github.com/pandas-dev/pandas) | 50,278 | 全章 | Pandas 官方仓库：API 与内部机制权威来源；本章先读与「先看一个反直觉的事实」「list 的内存模型」相关的部分 |
-| 4 | [microsoft/Data-Science-For-Beginners](https://github.com/microsoft/Data-Science-For-Beginners) | 37,860 | 全章 | 微软官方 10 周数据科学课程；本章先读与「先看一个反直觉的事实」「list 的内存模型」相关的部分 |
+| 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | §3.1 | 讲「向量化与 BLAS」时读 `sklearn/utils/extmath.py`：所有矩阵运算最后都落到 `numpy.dot`（底层 BLAS），所以「特征矩阵按行存」不是风格问题，而是让 BLAS 能走连续内存 |
+| 2 | [jakevdp/PythonDataScienceHandbook](https://github.com/jakevdp/PythonDataScienceHandbook) | 50,277 | §1.1 | 讲「ndarray 是数据 + 形状 + 步长」时读 `notebooks/02.02-The-Basics-Of-NumPy-Arrays.ipynb`：它用 `flags`、`strides`、`nbytes` 三个属性把「一块内存 + 元信息」直接打出来，比画图更直观 |
+| 3 | [pandas-dev/pandas](https://github.com/pandas-dev/pandas) | 50,278 | §2.3 | 讲「连续内存与缓存」时读 `pandas/core/internals/` 下的 Block 管理：pandas 按 dtype 把同类型列聚成 Block，就是为了「连续访问 + 向量化」，与 ndarray 的 C 顺序是同一个动机 |
+| 4 | [microsoft/Data-Science-For-Beginners](https://github.com/microsoft/Data-Science-For-Beginners) | 37,860 | §2.1 | 讲「数据准备的第一步」时看 `2-Working-With-Data/`：先把数据读成 ndarray/DataFrame 再谈建模，形状与 dtype 没对齐时后面全是错 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

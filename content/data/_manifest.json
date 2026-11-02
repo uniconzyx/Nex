@@ -33,10 +33,10 @@
           37525
         ],
         "github_notes": [
-          "经典机器学习库官方仓库：算法实现与最佳实践",
-          "《Python 数据科学手册》全书 Jupyter Notebook（NumPy/Pandas/Matplotlib）",
-          "Pandas 官方仓库：API 与内部机制权威来源",
-          "微软官方 10 周数据科学课程"
+          "§3.1 讲「向量化与 BLAS」时读 `sklearn/utils/extmath.py`：所有矩阵运算最后都落到 `numpy.dot`（底层 BLAS），所以「特征矩阵按行存」不是风格问题，而是让 BLAS 能走连续内存",
+          "§1.1 讲「ndarray 是数据 + 形状 + 步长」时读 `notebooks/02.02-The-Basics-Of-NumPy-Arrays.ipynb`：它用 `flags`、`strides`、`nbytes` 三个属性把「一块内存 + 元信息」直接打出来，比画图更直观",
+          "§2.3 讲「连续内存与缓存」时读 `pandas/core/internals/` 下的 Block 管理：pandas 按 dtype 把同类型列聚成 Block，就是为了「连续访问 + 向量化」，与 ndarray 的 C 顺序是同一个动机",
+          "§2.1 讲「数据准备的第一步」时看 `2-Working-With-Data/`：先把数据读成 ndarray/DataFrame 再谈建模，形状与 dtype 没对齐时后面全是错"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -105,10 +105,10 @@
           37525
         ],
         "github_notes": [
-          "经典机器学习库官方仓库：算法实现与最佳实践",
-          "《Python 数据科学手册》全书 Jupyter Notebook（NumPy/Pandas/Matplotlib）",
-          "Pandas 官方仓库：API 与内部机制权威来源",
-          "微软官方 10 周数据科学课程"
+          "§3.2 讲「向量化不是银弹」时读 `sklearn/utils/` 里的分块处理：大数据集要先 `train_test_split` 或分块，否则一次性构造的距离矩阵会直接 OOM——这正是广播隐式物化的风险",
+          "§2.1 讲「广播从尾轴对齐」时读 `notebooks/02.05-Computation-on-arrays-broadcasting.ipynb`：它用 `(3,1)` 与 `(1,4)` 相加得到 `(3,4)` 的例子，把「缺的维补 1、1 可以拉伸」讲成一张图",
+          "§1.2 讲「einsum 与矩阵乘」时读 `pandas/core/array_algos/`：底层把「按轴求和」翻译成 `einsum`/`dot`，走的是同一套 BLAS 路径，所以「向量化写法性能接近」不是巧合",
+          "§4.1 讲「随机可复现」时看课程里的建模脚本：所有 `train_test_split` 都带 `random_state`，否则「同一份代码两次结果不同」无法排查"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -171,10 +171,10 @@
           37525
         ],
         "github_notes": [
-          "经典机器学习库官方仓库：算法实现与最佳实践",
-          "《Python 数据科学手册》全书 Jupyter Notebook（NumPy/Pandas/Matplotlib）",
-          "Pandas 官方仓库：API 与内部机制权威来源",
-          "微软官方 10 周数据科学课程"
+          "§3.1 讲「缺失值处理」时读 `sklearn/impute/`：`SimpleImputer` 的 `strategy` 与 pandas 的 `fillna` 是两套语义（前者在管道内、后者在数据上），混用时要注意「训练/推理口径一致」",
+          "§2.2 讲「索引与切片」时读 `notebooks/03.02-Data-Indexing-and-Selection.ipynb`：`loc` 闭区间、`iloc` 左闭右开——两种切片的边界规则不同，混用就是「取出来的行数不对」",
+          "§1.1 讲「DataFrame 的列式存储」时读 `pandas/core/frame.py` 与 `internals/managers.py`：DataFrame 不是「行列表」，而是「按 dtype 分块的二维结构」，这解释了「混类型列会让操作变慢」",
+          "§4.2 讲「数据清洗的顺序」时看 `2-Working-With-Data/`：先处理类型与缺失、再做衍生特征，顺序反了会得到「用脏数据算出来的特征」"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -237,10 +237,10 @@
           37525
         ],
         "github_notes": [
-          "经典机器学习库官方仓库：算法实现与最佳实践",
-          "《Python 数据科学手册》全书 Jupyter Notebook（NumPy/Pandas/Matplotlib）",
-          "Pandas 官方仓库：API 与内部机制权威来源",
-          "微软官方 10 周数据科学课程"
+          "§3.3 讲「时间序列的特征工程」时读 `sklearn/preprocessing/`：`rolling` 的窗口统计必须用「过去的数据」，否则就是未来信息泄漏——sklearn 的 pipeline 能强制这个边界",
+          "§2.3 讲「merge 的四种连接」时读 `notebooks/03.07-Merge-and-Join.ipynb`：inner/left/right/outer 的行数变化配了对照表，`indicator=True` 用来查「哪边没匹配上」",
+          "§1.2 讲「groupby 的实现」时读 `pandas/core/groupby/`：先按键做哈希分组、再对每组应用聚合，`as_index=False` 与 `reset_index()` 的差别就出在「分组键是否进索引」",
+          "§4.3 讲「聚合后的口径」时看课程里的分组分析：`count`/`nunique` 混用会把「订单数」算成「商品数」，指标定义要先写清再写代码"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -303,10 +303,10 @@
           37525
         ],
         "github_notes": [
-          "经典机器学习库官方仓库：算法实现与最佳实践",
-          "《Python 数据科学手册》全书 Jupyter Notebook（NumPy/Pandas/Matplotlib）",
-          "Pandas 官方仓库：API 与内部机制权威来源",
-          "微软官方 10 周数据科学课程"
+          "§4.1 讲「采集数据的质量校验」时读 `sklearn/utils/validation.py` 的 `check_array`：形状、dtype、NaN 的检查顺序，可以直接照搬成采集后的自检清单",
+          "§1.1 讲「数据来源与格式」时读 `notebooks/03.03-Hierarchy-Indexing.ipynb`：层级索引能把「多来源数据」压进一个 DataFrame，比手工拼列更不容易错位",
+          "§3.1 讲「解析后落表」时读 `pandas/io/json/`：`json_normalize` 把嵌套 JSON 拍平成表，是「采集 → 结构化」最常用的一步",
+          "§2.2 讲「采集的合规边界」时看 `1-Introduction/` 里的数据伦理一课：只采公开且允许抓取的数据、遵守 robots.txt 与频率限制——这条在本章有明确约束"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -377,10 +377,10 @@
           37525
         ],
         "github_notes": [
-          "经典机器学习库官方仓库：算法实现与最佳实践",
-          "《Python 数据科学手册》全书 Jupyter Notebook（NumPy/Pandas/Matplotlib）",
-          "Pandas 官方仓库：API 与内部机制权威来源",
-          "微软官方 10 周数据科学课程"
+          "§1.1 讲「建模流程」时读 `sklearn/pipeline.py`：`Pipeline` 把「预处理 + 模型」串成一步，`fit` 只在训练集上调用——这是防泄漏的结构性保证，不是纪律问题",
+          "§2.2 讲「特征与目标的关系」时读 `notebooks/05.xx` 系列（机器学习篇）：先用散点图看关系再选模型，比盲试模型更快排除方向性错误",
+          "§3.2 讲「结果汇总」时读 `pandas/core/reshape/`：`pivot_table` 把「模型 × 指标」摊成矩阵，是写实验报告最省事的结构",
+          "§4.1 讲「从问题到方案」时看 `4-Data-Science-Lifecycle/`：先定义「成功标准」再选指标，否则模型分数再高也可能答错了问题"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [

@@ -19,14 +19,14 @@
 - 无。本章 `prerequisites` 仅引用本学科已完成章节 fs-ch04；SQL 语法本章从零讲到够用为止，不需要额外的数据库先修课。
 ## 本章 GitHub 学习路线（按阅读顺序）
 
-> ★ 为 **2026-10-27** 的 GitHub API 快照（已逐条验证仓库存在）。
+> ★ 为 **2026-11-02** 的 GitHub API 快照（已逐条验证仓库存在）。
 > 顺序即路线：**先读能跑的最小实现 → 再读同章对照实现 → 最后读工业级库**。「对应本章」写 `§x.y` 的，说明这份仓库与本章那一节直接对应，先读那里；写「全章」的，按右侧「读什么」给的入口文件读，不要从 README 通读。
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [trekhleb/javascript-algorithms](https://github.com/trekhleb/javascript-algorithms) | 196,715 | 全章 | JavaScript 算法与数据结构，含英文详解；本章先读与「关系型」「ORM / ODM」相关的部分 |
-| 2 | [Chalarangelo/30-seconds-of-code](https://github.com/Chalarangelo/30-seconds-of-code) | 129,384 | 全章 | 短小精悍的 JS/CSS/HTML 代码片段集，覆盖日常前端技巧；本章先读与「关系型」「ORM / ODM」相关的部分 |
-| 3 | [yangshun/front-end-interview-handbook](https://github.com/yangshun/front-end-interview-handbook) | 44,006 | 全章 | 前端面试手册：HTML/CSS/JS/浏览器/性能；本章先读与「关系型」「ORM / ODM」相关的部分 |
+| 1 | [sqlite/sqlite](https://github.com/sqlite/sqlite) | 10,890 | §1.2 索引结构 · 最左前缀 | 存储引擎本体：`src/btree.c` 的 `sqlite3BtreeInsert` 与 `balance()` 演示 B+ 树怎么分裂合并，`src/where.c` 的 `whereBegin` 决定能用哪个索引前缀——「最左前缀」在这里是可用性判定，不是口诀 |
+| 2 | [graphql/dataloader](https://github.com/graphql/dataloader) | 13,391 | §2.2 N+1 | 修复范式：`src/index.js` 的 `enqueuePostPromiseJob` 把一个 tick 内的 key 全攒进 `_batch`，再一次性调 `batchLoadFn`——「用操作计数发现、用批量合并修复」的教科书实现 |
+| 3 | [OAI/OpenAPI-Specification](https://github.com/OAI/OpenAPI-Specification) | 31,291 | §4.1 契约优先 | 规范原文：`versions/3.1.0.md` 里 `paths` / `components/schemas` 的结构与 `$ref` 复用规则，`versions/3.0.3.md` 的 `nullable` 写法差异——先写契约再生成类型时，这两份是唯一权威 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 
@@ -54,7 +54,7 @@
 > 全部链接由 `scripts/collect_links.py` + `scripts/audit_sources.py` 定期复核，失效链接会被审计器标红。
 
 ## 真题依据（真实可查，仅存元数据）
-- GitHub 资源（见 `_manifest.json`）：trekhleb/javascript-algorithms（196855★）、Chalarangelo/30-seconds-of-code（129326★）、yangshun/front-end-interview-handbook（44008★）。
+- GitHub 资源（见 `_manifest.json`）：sqlite/sqlite（10890★）、graphql/dataloader（13391★）、OAI/OpenAPI-Specification（31291★）。
 - LeetCode 题仅存元数据与链接，不搬运题面正文，详见 `exercises.json`。
 - 规范原文：RFC 9457（Problem Details for HTTP APIs）、RFC 9110（HTTP Semantics）、OpenAPI Specification 3.1.0。
 

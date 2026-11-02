@@ -42,9 +42,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | 全章 | 系统设计入门：性能、一致性、可用性与面试题（408 之上的系统视野）；本章先读与「一个无法回避的矛盾」「两种局部性」相关的部分 |
-| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | 全章 | 完整的计算机科学自学计划：数据结构、算法、OS、网络全覆盖；本章先读与「一个无法回避的矛盾」「两种局部性」相关的部分 |
-| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | 全章 | 中文技术面试必备：操作系统、计算机网络、组成原理、算法、数据库；本章先读与「一个无法回避的矛盾」「两种局部性」相关的部分 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §4.2 | 讲「多级缓存的设计」时读 `solutions/` 的缓存层设计：L1/L2/CDN 各挡一层，与 CPU 的 L1/L2/L3 是同一套「用容量换延迟」的思路 |
+| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | §3.1 | 讲「缓存局部性」时读 README 的 Cache 部分：时间局部性与空间局部性的定义、以及「按行遍历比按列快」的解释，与本章的实测结论一致 |
+| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §2.1 | 讲「地址字段划分」时读 `docs/计算机组成原理/` 的存储系统篇：标记/组索引/块内偏移的切分算法配了例题，重点是「组数 = 容量 /(块大小 × 路数)」 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

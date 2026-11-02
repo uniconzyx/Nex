@@ -32,12 +32,12 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,257 | 全章 | 深度学习框架官方仓库，工业级模型工程范例；本章先读与「张量不是「多维数组」这么简单」「计算图」相关的部分 |
-| 2 | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 197,476 | 全章 | 为 AI Agent 提供网页数据：抓取到结构化数据的工程实现；本章先读与「张量不是「多维数组」这么简单」「计算图」相关的部分 |
-| 3 | [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) | 187,852 | 全章 | 自主 Agent 的开创性项目，Agent 架构与工具循环的经典参考；本章先读与「张量不是「多维数组」这么简单」「计算图」相关的部分 |
-| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | 全章 | Transformer 模型定义框架：从 BERT/GPT 到多模态的全量实现；本章先读与「张量不是「多维数组」这么简单」「计算图」相关的部分 |
-| 5 | [langgenius/dify](https://github.com/langgenius/dify) | 160,127 | 全章 | Agentic 工作流与 RAG 流水线平台：生产级 LLM 应用工程范例；本章先读与「张量不是「多维数组」这么简单」「计算图」相关的部分 |
-| 6 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | 全章 | Agent 工程平台：工具、记忆、检索与编排的工业实现；本章先读与「张量不是「多维数组」这么简单」「计算图」相关的部分 |
+| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,257 | §1.2 | 讲「反向传播」时读 `tensorflow/python/eager/backprop.py`：`GradientTape` 记录前向的每个算子、反向按链式法则逐层求导，本章公式里的「链式相乘」就是这里的 `gradient` 调用链 |
+| 2 | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 197,476 | §3.3 | 讲「训练数据的来源」时读 `apps/api/src/` 的抓取与转换逻辑：网页 → markdown → 文本块，这条链路就是「原始数据变成可训练文本」的最小实现 |
+| 3 | [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) | 187,852 | §4.3 | 讲「端到端的 AI 应用长什么样」时看仓库里的 agent 主循环：它把「LLM 调用 + 工具执行 + 结果回填」串成 while 循环，是本章「前向一次」在应用层的放大版 |
+| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §2.1 | 讲「张量的形状语义」时读 `src/transformers/models/` 下任一模型的 `forward`：`(batch, seq, hidden)` 这条约定贯穿所有模型，形状对不上时第一眼看的就是这里 |
+| 5 | [langgenius/dify](https://github.com/langgenius/dify) | 160,127 | §4.1 | 讲「模型接入的工程形态」时读 `api/core/model_runtime/`：把不同厂商的 API 统一成 `invoke` 接口，本章讲的「张量在前向里流动」到了应用层就变成「消息在 provider 之间转换」 |
+| 6 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | §3.1 | 讲「训练循环的骨架」时读 `libs/core/langchain_core/` 的 Runnable 接口：`invoke`/`batch`/`stream` 三件套是「推理调用」的抽象，对照本章的训练循环能看清「训练与推理的差异在哪一层 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

@@ -30,10 +30,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | 全章 | Java 面试与后端通用指南：计算机基础、数据库、分布式、高并发、系统设计；本章先读与「五块运行时数据区」「堆的分代结构」相关的部分 |
-| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | 全章 | SpringBoot + MyBatis 电商实战项目，含 Docker 部署，工程范例；本章先读与「五块运行时数据区」「堆的分代结构」相关的部分 |
-| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | 全章 | 互联网 Java 工程师进阶知识：高并发、分布式、微服务；本章先读与「五块运行时数据区」「堆的分代结构」相关的部分 |
-| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | 全章 | Spring 官方生态的系统化代码教程仓库；本章先读与「五块运行时数据区」「堆的分代结构」相关的部分 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §1.1 | 讲「五块运行时数据区」时读 `docs/java/jvm/` 的内存区域篇：堆分代、方法区（元空间）、虚拟机栈的职责边界，它配了「哪块会 OOM、哪块不会」的对照表 |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §2.1 | 讲「GC 与容器内存限制」时看 `mall-admin` 的 Dockerfile：容器里必须显式给 `-Xmx`，否则 JVM 按宿主机内存算堆，容器被 OOMKill 时日志里连 OOM 都不一定有 |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §2.2 | 讲「七种收集器与停顿模型」时对照 `docs/high-concurrency/` 的 JVM 系列：CMS 的并发失败、G1 的 Region 与 Mixed GC、ZGC 的染色指针，三条线索能解释「为什么低延迟场景要换收集器」 |
+| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §3.1 | 讲「双亲委派」时看 `core-java` 的 ClassLoader 示例：自定义 ClassLoader 覆写 `findClass` 而不是 `loadClass`，才能保留委派链——这是「打破双亲委派」的正确姿势 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

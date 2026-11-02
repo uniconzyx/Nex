@@ -14,10 +14,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | 全章 | Java 面试与后端通用指南：计算机基础、数据库、分布式、高并发、系统设计；本章先读与「八种基本类型」「变量与常量」相关的部分 |
-| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | 全章 | SpringBoot + MyBatis 电商实战项目，含 Docker 部署，工程范例；本章先读与「八种基本类型」「变量与常量」相关的部分 |
-| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | 全章 | 互联网 Java 工程师进阶知识：高并发、分布式、微服务；本章先读与「八种基本类型」「变量与常量」相关的部分 |
-| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | 全章 | Spring 官方生态的系统化代码教程仓库；本章先读与「八种基本类型」「变量与常量」相关的部分 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §2.1 | 讲「八种基本类型的固定位宽」时读 `docs/java/basis/` 下的基本类型问答：它把 `byte` 恒为有符号、`char` 是 16 位无符号 UTF-16 码元这两条一次讲透，正好解释「Java 没有无符号整型」为什么会让 `byte b = 200` 编译失败 |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §1.4 | 讲「classpath 与包」时看 `mall-common` 模块的 `com.macro.mall.common` 包结构：一个被其余模块依赖的公共包必须只放「无业务状态」的工具与统一返回体，这比背 classpath 定义更能说明「包边界 = 依赖方向」 |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §1.3 | 讲「JIT 让 Java 越跑越快」时对照 `docs/high-concurrency/` 里的 JVM 系列文章：它解释了「解释执行 → C1 → C2」的分层编译与逃逸分析，回读本章四步流程就能说清「为什么预热前后同一段循环耗时差一个数量级」 |
+| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §3.1 | 讲「if 与布尔条件」时看 `core-java` 模块的语法示例：Java 的 `if` 只接受 `boolean`，不存在 C 的「非零即真」，这份仓库用最小样例把这条差异固定下来，可直接拿来对照自己的写法 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

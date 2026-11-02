@@ -29,12 +29,12 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,257 | 全章 | 深度学习框架官方仓库，工业级模型工程范例；本章先读与「主题一」「主题二」相关的部分 |
-| 2 | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 197,476 | 全章 | 为 AI Agent 提供网页数据：抓取到结构化数据的工程实现；本章先读与「主题一」「主题二」相关的部分 |
-| 3 | [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) | 187,852 | 全章 | 自主 Agent 的开创性项目，Agent 架构与工具循环的经典参考；本章先读与「主题一」「主题二」相关的部分 |
-| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | 全章 | Transformer 模型定义框架：从 BERT/GPT 到多模态的全量实现；本章先读与「主题一」「主题二」相关的部分 |
-| 5 | [langgenius/dify](https://github.com/langgenius/dify) | 160,127 | 全章 | Agentic 工作流与 RAG 流水线平台：生产级 LLM 应用工程范例；本章先读与「主题一」「主题二」相关的部分 |
-| 6 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | 全章 | Agent 工程平台：工具、记忆、检索与编排的工业实现；本章先读与「主题一」「主题二」相关的部分 |
+| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,257 | §3.3 | 讲「嵌入模型的训练」时读 `tensorflow/python/keras/` 的对比学习示例：双塔 + 对比损失，与本章「余弦相似度排序」的用法对应 |
+| 2 | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 197,476 | §1.3 | 讲「文档解析的质量」时读 `apps/api/src/` 的 HTML → markdown：解析质量直接决定「切出来的块是否有语义完整性」，这是 RAG 效果的第一道闸 |
+| 3 | [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) | 187,852 | §4.1 | 讲「检索结果怎么进 prompt」时看 agent 的记忆检索：Top-K 片段拼接、带来源标注，与本章「检索不到必然答错」的判断一致 |
+| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §3.1 | 讲「向量检索的近似算法」时读 `src/transformers/` 与 `datasets` 的 FAISS 集成：HNSW/IVF 用「近似」换速度，召回率与延迟的权衡在这里可调 |
+| 5 | [langgenius/dify](https://github.com/langgenius/dify) | 160,127 | §1.1 | 讲「RAG 的四段流程」时读 `api/core/rag/`：`indexing`（分块+嵌入）、`retrieval`（向量+关键词）、`rerank`、`generate` 四个子目录就是本章流程的代码化 |
+| 6 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | §2.2 | 讲「分块策略」时读 `libs/langchain/langchain/text_splitter.py`：按字符/递归/按 token 三种切法各有实现，`chunk_overlap` 的作用在源码注释里写得很清楚 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

@@ -11,10 +11,10 @@
 
 | # | 仓库 | Star | 对应本章 | 读什么 |
 | --- | --- | ---: | --- | --- |
-| 1 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §1.1 schema · §1.8 标注规范 | 训练数据范式：chat template 与 instruction 格式，对应 §1.1、§1.8 |
-| 2 | [huggingface/datasets](https://github.com/huggingface/datasets) | 22,091 | §2.2 语义去重 | 数据处理：map/dedup 算子，对应 §2.2 语义去重 |
-| 3 | [vllm-project/vllm](https://github.com/vllm-project/vllm) | 96,022 | §1.8 可追溯 | 推理侧数据契约：与训练数据 schema 对齐，对应 §1.8 |
-| 4 | [facebookresearch/llama](https://github.com/facebookresearch/llama) | 59,628 | §1.1 多轮格式 | 对话格式范本：官方 `llama-recipes` 的 instruction 数据，对应 §1.1 |
+| 1 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §1.2 | 讲「对话模板与 loss mask」时读 `src/transformers/models/*/tokenizer` 的 `apply_chat_template`：它按角色拼 token，非 assistant 部分要置 -100 不参与损失，本章的「移位一位」在这里落地 |
+| 2 | [huggingface/datasets](https://github.com/huggingface/datasets) | 22,091 | §2.1 | 讲「数据集的组织」时读 `src/datasets/` 的 `map`/`filter`：合成数据要先去重、再按长度/质量过滤，`filter` 的批处理模式能把这步跑得很快 |
+| 3 | [vllm-project/vllm](https://github.com/vllm-project/vllm) | 96,022 | §3.2 | 讲「合成数据的验证」时读 `vllm/` 的批量推理入口：用强模型生成、用规则或弱模型打分，是「合成数据规模化」的常见流水线 |
+| 4 | [facebookresearch/llama](https://github.com/facebookresearch/llama) | 59,628 | §4.1 | 讲「SFT 的数据格式」时读仓库里的训练脚本：`(prompt, response)` 对的组织方式决定了模型学到的是「补全」还是「对话」 |
 
 > 全部为工业级真实仓库；Star 数为本会话经 GitHub API 实取快照，仅供路线排序参考。
 

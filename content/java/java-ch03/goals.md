@@ -13,10 +13,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | 全章 | Java 面试与后端通用指南：计算机基础、数据库、分布式、高并发、系统设计；本章先读与「可运行代码」相关的部分 |
-| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | 全章 | SpringBoot + MyBatis 电商实战项目，含 Docker 部署，工程范例；本章先读与「可运行代码」相关的部分 |
-| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | 全章 | 互联网 Java 工程师进阶知识：高并发、分布式、微服务；本章先读与「可运行代码」相关的部分 |
-| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | 全章 | Spring 官方生态的系统化代码教程仓库；本章先读与「可运行代码」相关的部分 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §2.1 | 讲「方法重写的动态分派」时读 `docs/java/basis/` 的面向对象问答：它把「重载看编译期、重写看运行期」用一段代码跑出两种结果，正好对应本章 `invokevirtual` 的分派逻辑 |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §3.2 | 讲「抽象类与模板方法」时看 `mall-security` 的 `JwtAuthenticationTokenFilter`：它继承 `OncePerRequestFilter` 只填 `doFilterInternal`，父类负责「只执行一次」的骨架——这是「抽象类给骨架、子类填一步」的工业样本 |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §3.1 | 讲「抽象类 vs 接口」时对照 `docs/high-concurrency/` 与 `docs/micro-services/` 里的接口设计讨论：什么时候该用接口做「能力声明」、什么时候用抽象类做「骨架复用」，它的取舍标准和本章一致 |
+| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §4.1 | 讲「final 与不可变」时看 `core-java` 的 final 示例：final 字段必须在构造器结束前赋值、final 类不可继承，两个限制各有一个能编译失败的对照样例 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

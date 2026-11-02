@@ -32,12 +32,12 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,257 | 全章 | 深度学习框架官方仓库，工业级模型工程范例；本章先读与「主题一」「主题二」相关的部分 |
-| 2 | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 197,476 | 全章 | 为 AI Agent 提供网页数据：抓取到结构化数据的工程实现；本章先读与「主题一」「主题二」相关的部分 |
-| 3 | [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) | 187,852 | 全章 | 自主 Agent 的开创性项目，Agent 架构与工具循环的经典参考；本章先读与「主题一」「主题二」相关的部分 |
-| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | 全章 | Transformer 模型定义框架：从 BERT/GPT 到多模态的全量实现；本章先读与「主题一」「主题二」相关的部分 |
-| 5 | [langgenius/dify](https://github.com/langgenius/dify) | 160,127 | 全章 | Agentic 工作流与 RAG 流水线平台：生产级 LLM 应用工程范例；本章先读与「主题一」「主题二」相关的部分 |
-| 6 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | 全章 | Agent 工程平台：工具、记忆、检索与编排的工业实现；本章先读与「主题一」「主题二」相关的部分 |
+| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,257 | §3.3 | 讲「记忆的向量化存储」时读 `tensorflow/python/ops/` 的嵌入运算：短期记忆放上下文、长期记忆进向量库，与本章「两层记忆」的分工一致 |
+| 2 | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 197,476 | §2.3 | 讲「工具的实际形态」时读 `apps/api/src/` 的抓取接口：输入 URL、输出 markdown，是 Agent 最常用的工具之一，也最容易「超时/被墙」 |
+| 3 | [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) | 187,852 | §2.2 | 讲「Agent 主循环」时看仓库里的 `run` 循环：规划 → 调工具 → 观察 → 再规划，直到「无需再调用工具」为止，本章的「状态机」就是它的形式化 |
+| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §4.2 | 讲「函数调用的模型侧支持」时读 `src/transformers/` 的 chat template：`tools` 字段被渲染成模型认识的格式，各家模板不同，这是「同一个工具定义换个模型就不work」的原因 |
+| 5 | [langgenius/dify](https://github.com/langgenius/dify) | 160,127 | §3.1 | 讲「工作流编排」时读 `api/core/workflow/`：节点 + 边 + 变量传递，把「多步 Agent」画成图，比纯 prompt 更可控 |
+| 6 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | §1.1 | 讲「工具调用的抽象」时读 `libs/core/langchain_core/tools/`：工具 = 名称 + 描述 + 参数 schema + 执行函数，模型只负责「选哪个、传什么」，执行永远在服务端 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

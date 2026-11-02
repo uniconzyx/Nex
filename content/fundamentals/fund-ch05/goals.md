@@ -30,9 +30,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | 全章 | 系统设计入门：性能、一致性、可用性与面试题（408 之上的系统视野）；本章先读与「查找的基本概念」「顺序查找」相关的部分 |
-| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | 全章 | 完整的计算机科学自学计划：数据结构、算法、OS、网络全覆盖；本章先读与「查找的基本概念」「顺序查找」相关的部分 |
-| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | 全章 | 中文技术面试必备：操作系统、计算机网络、组成原理、算法、数据库；本章先读与「查找的基本概念」「顺序查找」相关的部分 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §3.3 | 讲「哈希在缓存里的作用」时读 `solutions/` 的 key-value 存储设计：哈希把 O(n) 查找变 O(1)，但代价是「不支持范围查询」——这正是要加有序索引的原因 |
+| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | §2.1 | 讲「二分的边界」时读 README 的 Binary Search 一节：`left <= right` 还是 `left < right`、`mid` 要不要 +1，这些「差一」错误在练习题里被逐个覆盖 |
+| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §1.2 | 讲「哈希冲突的处理」时读 `docs/算法/` 的查找篇：链地址法 vs 开放寻址的取舍，重点看「负载因子超过阈值就扩容」这条工程约定 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

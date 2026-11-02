@@ -28,12 +28,12 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,257 | 全章 | 深度学习框架官方仓库，工业级模型工程范例；本章先读与「主题一」「主题二」相关的部分 |
-| 2 | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 197,476 | 全章 | 为 AI Agent 提供网页数据：抓取到结构化数据的工程实现；本章先读与「主题一」「主题二」相关的部分 |
-| 3 | [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) | 187,852 | 全章 | 自主 Agent 的开创性项目，Agent 架构与工具循环的经典参考；本章先读与「主题一」「主题二」相关的部分 |
-| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | 全章 | Transformer 模型定义框架：从 BERT/GPT 到多模态的全量实现；本章先读与「主题一」「主题二」相关的部分 |
+| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,257 | §2.3 | 讲「RLHF 的奖励建模」时读 `tensorflow/python/keras/` 的自定义 loss 写法：奖励模型的训练目标是「偏好对排序」，loss 形式与本章的 Bradley-Terry 一致 |
+| 2 | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 197,476 | §4.1 | 讲「指令微调数据的来源」时读 `apps/api/src/` 的抓取与清洗：把网页转成 markdown 后还要做质量过滤，否则 SFT 会学到大量模板化噪声 |
+| 3 | [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) | 187,852 | §3.3 | 讲「对齐后模型的行为边界」时看 agent 的工具权限控制：即便模型被对齐过，也要在工具层加白名单与确认，不能把「模型不会做坏事」当作安全边界 |
+| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §1.2 | 讲「LoRA 的低秩分解」时读 `src/peft/`（PEFT 已并入 transformers 生态）的 `LoraLayer`：`A` 随机初始化、`B` 零初始化让「训练开始时等价于原模型」，这是 LoRA 能即插即用的关键 |
 | 5 | [langgenius/dify](https://github.com/langgenius/dify) | 160,127 | 全章 | Agentic 工作流与 RAG 流水线平台：生产级 LLM 应用工程范例；本章先读与「主题一」「主题二」相关的部分 |
-| 6 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | 全章 | Agent 工程平台：工具、记忆、检索与编排的工业实现；本章先读与「主题一」「主题二」相关的部分 |
+| 6 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | §3.2 | 讲「DPO 与 RLHF 的差别」时读 `libs/langchain/langchain/chains/` 里的偏好优化封装：DPO 直接用偏好对做监督式优化，省掉「训练奖励模型 + PPO」两步 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

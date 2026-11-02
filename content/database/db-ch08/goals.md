@@ -38,9 +38,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | 全章 | 含 MySQL 索引、事务、锁与调优的系统讲解；本章先读与「复制链路」「复制模式」相关的部分 |
-| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | 全章 | 真实业务库表设计范例与 SQL 实践；本章先读与「复制链路」「复制模式」相关的部分 |
-| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | 全章 | 含分库分表、读写分离与分布式事务；本章先读与「复制链路」「复制模式」相关的部分 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §1.1 | 讲「复制链路」时读 `docs/database/mysql/` 的主从章节：`binlog dump → IO 线程写 relay log → SQL 线程重放`，三个环节各自的延迟来源不同，排查要分开看 |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §1.2 | 讲「读写分离」时看 `mall` 的单库配置：这个项目没有分库分表，正好用来对照「什么规模不需要拆」——单表千万级以内、QPS 几千，加索引与缓存比拆库划算得多 |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §2.1 | 讲「分片键与扩容」时对照 `docs/high-concurrency/mysql-sharding.md`：哈希分片扩容要「翻倍 + 迁移一半」，范围分片扩容简单但会热点——选哪种取决于「写入是否均匀」而不只是「查询方便」 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

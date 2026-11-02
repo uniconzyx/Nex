@@ -108,10 +108,10 @@ Compose 是把「一组容器的声明式期望状态」写进 YAML 的工具；
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [trimstray/the-book-of-secret-knowledge](https://github.com/trimstray/the-book-of-secret-knowledge) | 254,934 | 全章 | 运维与工程工具知识合集：Linux、网络、排障命令速查；本章先读与「服务定义与依赖顺序」「数据卷」相关的部分 |
-| 2 | [ohmyzsh/ohmyzsh](https://github.com/ohmyzsh/ohmyzsh) | 190,274 | 全章 | Shell 生产力框架（工程效率的入门必装）；本章先读与「服务定义与依赖顺序」「数据卷」相关的部分 |
-| 3 | [jlevy/the-art-of-command-line](https://github.com/jlevy/the-art-of-command-line) | 162,646 | 全章 | 命令行艺术：Linux 命令的体系化进阶指南；本章先读与「服务定义与依赖顺序」「数据卷」相关的部分 |
-| 4 | [bregman-arie/devops-exercises](https://github.com/bregman-arie/devops-exercises) | 86,127 | 全章 | DevOps 练习题集：Linux/Docker/K8s/Git/CI 全覆盖；本章先读与「服务定义与依赖顺序」「数据卷」相关的部分 |
+| 1 | [trimstray/the-book-of-secret-knowledge](https://github.com/trimstray/the-book-of-secret-knowledge) | 254,934 | §2.3 | 讲「部署的排障顺序」时看「Sysadmin」分类：先看端口是否监听（`ss -lntp`）、再看进程是否活着、最后看日志，三步定位比盲查快 |
+| 2 | [ohmyzsh/ohmyzsh](https://github.com/ohmyzsh/ohmyzsh) | 190,274 | §4.1 | 讲「环境变量与配置注入」时读 `lib/` 里对 `PATH` 的处理：容器里同样靠环境变量注入配置，理解 Shell 的变量作用域能避免「变量在容器里读不到」 |
+| 3 | [jlevy/the-art-of-command-line](https://github.com/jlevy/the-art-of-command-line) | 162,646 | §3.1 | 讲「网络与端口」时读「网络」一节：`curl -v`、`ss`、`tcpdump` 的分工——分别回答「应用层通不通」「端口开没开」「包到没到」 |
+| 4 | [bregman-arie/devops-exercises](https://github.com/bregman-arie/devops-exercises) | 86,127 | §1.3 | 讲「Compose 的编排模型」时看 `topics/docker/` 的多容器练习：`depends_on` 只管启动顺序不管就绪，所以健康检查要单独配——这是「服务起来了但连不上」的常见原因 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

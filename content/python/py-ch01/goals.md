@@ -13,9 +13,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 225,745 | 全章 | Python 实现的全部经典算法，含详细注释 |
-| 2 | [jackfrued/Python-100-Days](https://github.com/jackfrued/Python-100-Days) | 187,609 | 全章 | Python 100 天从新手到大师（中文系统教程） |
-| 3 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,917 | 全章 | 微软官方 12 周机器学习入门课程，含 26 课与测验 |
+| 1 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 225,745 | §1.2 | 讲「流程控制与分支」时读 `maths/` 与 `conversions/` 下的单文件脚本：它们只用 if/for 与内建类型，没有框架依赖，适合用来对照「同一段逻辑用推导式写与用循环写」的差别 |
+| 2 | [jackfrued/Python-100-Days](https://github.com/jackfrued/Python-100-Days) | 187,609 | §2.1 | 讲「变量与类型」时看 `Day01-15/` 的基础语法篇：中文讲解配可运行片段，重点看它对「可变/不可变」的表述——这决定了后面默认参数与浅拷贝的坑 |
+| 3 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,917 | §3.3 | 讲「列表与字典的实际用途」时看入门课的数据准备一节：特征用列表、样本用字典，这种「列表套字典」的结构是读 CSV/JSON 时最常见的内存形态 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

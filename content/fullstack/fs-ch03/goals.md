@@ -25,14 +25,14 @@
 - 能独立写出一个带事件委托的小练习（用 Python 模拟亦可）。
 ## 本章 GitHub 学习路线（按阅读顺序）
 
-> ★ 为 **2026-10-27** 的 GitHub API 快照（已逐条验证仓库存在）。
+> ★ 为 **2026-11-02** 的 GitHub API 快照（已逐条验证仓库存在）。
 > 顺序即路线：**先读能跑的最小实现 → 再读同章对照实现 → 最后读工业级库**。「对应本章」写 `§x.y` 的，说明这份仓库与本章那一节直接对应，先读那里；写「全章」的，按右侧「读什么」给的入口文件读，不要从 README 通读。
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [trekhleb/javascript-algorithms](https://github.com/trekhleb/javascript-algorithms) | 196,715 | 全章 | JavaScript 算法与数据结构，含英文详解；本章先读与「值与类型」「相等性三兄弟」相关的部分 |
-| 2 | [Chalarangelo/30-seconds-of-code](https://github.com/Chalarangelo/30-seconds-of-code) | 129,384 | 全章 | 短小精悍的 JS/CSS/HTML 代码片段集，覆盖日常前端技巧；本章先读与「值与类型」「相等性三兄弟」相关的部分 |
-| 3 | [yangshun/front-end-interview-handbook](https://github.com/yangshun/front-end-interview-handbook) | 44,006 | 全章 | 前端面试手册：HTML/CSS/JS/浏览器/性能；本章先读与「值与类型」「相等性三兄弟」相关的部分 |
+| 1 | [tc39/ecma262](https://github.com/tc39/ecma262) | 15,705 | §1.2 相等性三兄弟 · §3.1 原型链 | 规范原文：`spec.html` 搜 `IsLooselyEqual` 与 `IsStrictlyEqual` 两段算法，`==` 的转换顺序（先 ToPrimitive，valueOf 优先于 toString）是逐条写死的，`[] == ![]` 可以照算法走一遍 |
+| 2 | [getify/You-Dont-Know-JS](https://github.com/getify/You-Dont-Know-JS) | 184,837 | §2.1 TDZ · §2.2 this 五条规则 | 书稿源码：`scope-closures/` 卷把提升与 TDZ 按「编译期 / 执行期」两段讲透，`objects-classes/` 卷把 this 的四类绑定排成判定树——对应 §2.1、§2.2，比背口诀可靠 |
+| 3 | [yangshun/front-end-interview-handbook](https://github.com/yangshun/front-end-interview-handbook) | 44,008 | §1.1 原始类型 · §4.2 组合子取舍 | 题库：`questions/javascript-questions.md` 把 `typeof null`、`NaN !== NaN`、装箱拆箱列成快问快答；Promise 串行/并行/竞速的选择题对应 §4.2 的组合子取舍 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

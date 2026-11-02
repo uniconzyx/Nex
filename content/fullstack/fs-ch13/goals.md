@@ -11,10 +11,10 @@
 
 | # | 仓库 | Star | 对应本章 | 读什么 |
 | --- | --- | ---: | --- | --- |
-| 1 | [microsoft/playwright](https://github.com/microsoft/playwright) | 98,704 | §2.1 等待条件 · §2.2 选择器 | E2E 框架：读 `docs` 的 auto-waiting 与 locator 策略，对应 §2.1、§2.2 |
-| 2 | [cypress-io/cypress](https://github.com/cypress-io/cypress) | 51,015 | §2.8 选型 | 另一 E2E 实现：对比 Playwright 的时间旅行调试，对应 §2.8 |
-| 3 | [pact-foundation/pact-js](https://github.com/pact-foundation/pact-js) | 1,825 | §3.1 消费者驱动契约 | 契约测试：读 `packages/.../message` 看 CDC 工作流，对应 §3.1 |
-| 4 | [facebook/react](https://github.com/facebook/react) | 251,766 | §1 测试金字塔 | 组件测试范式：Testing Library 思路对应 §1、§2.3 组件测试 |
+| 1 | [microsoft/playwright](https://github.com/microsoft/playwright) | 98,704 | §2.1 稳定的两条铁律 | `docs` 的 auto-waiting 与 actionability checks：可见、稳定、可接收事件三个条件同时满足才动手，等于把 `sleep` 换成「等状态」；`packages/playwright-core/src/server` 里每个 action 都过这套检查 |
+| 2 | [cypress-io/cypress](https://github.com/cypress-io/cypress) | 51,015 | §2.3 工具差异与可观测 | 时间旅行调试靠命令队列快照：`packages/driver/src/cy` 把每条命令执行后的 DOM 存下来，失败时能回放到出错那一步——与 Playwright 用 trace 达到的是同一目的 |
+| 3 | [pact-foundation/pact-js](https://github.com/pact-foundation/pact-js) | 1,825 | §3.1 消费者驱动契约 · §3.3 Pact 工作流 | `packages/core` 的 mock server 按消费者写的期望返回并生成 pact 文件，提供方用 `Verifier` 回放同一份契约——「契约是产物，不是文档」 |
+| 4 | [facebook/react](https://github.com/facebook/react) | 251,766 | §1.1 分层与测试替身 · §2.2 组件测试 | 框架自身的测试基建：`packages/react/src/__tests__` 配 `scripts/jest` 的自定义环境，断言的是渲染出来的树而非实现细节——这正是 §2.2 组件测试该断言的层次 |
 
 > 全部为工业级真实仓库；Star 数为本会话经 GitHub API 实取快照，仅供路线排序参考。
 

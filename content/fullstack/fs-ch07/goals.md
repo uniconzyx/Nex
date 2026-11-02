@@ -22,14 +22,14 @@
 - 无。本章 `prerequisites` 仅引用本学科已完成章节 fs-ch03 与 fs-ch05；不要求预先掌握任何具体前端框架（React/Vue 等），所有示例用**纯函数与纯 JS 数据流**表达框架无关的工程模式，装不上框架也能跑。
 ## 本章 GitHub 学习路线（按阅读顺序）
 
-> ★ 为 **2026-10-27** 的 GitHub API 快照（已逐条验证仓库存在）。
+> ★ 为 **2026-11-02** 的 GitHub API 快照（已逐条验证仓库存在）。
 > 顺序即路线：**先读能跑的最小实现 → 再读同章对照实现 → 最后读工业级库**。「对应本章」写 `§x.y` 的，说明这份仓库与本章那一节直接对应，先读那里；写「全章」的，按右侧「读什么」给的入口文件读，不要从 README 通读。
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [trekhleb/javascript-algorithms](https://github.com/trekhleb/javascript-algorithms) | 196,715 | 全章 | JavaScript 算法与数据结构，含英文详解；本章先读与「分层与目录组织」「契约优先」相关的部分 |
-| 2 | [Chalarangelo/30-seconds-of-code](https://github.com/Chalarangelo/30-seconds-of-code) | 129,384 | 全章 | 短小精悍的 JS/CSS/HTML 代码片段集，覆盖日常前端技巧；本章先读与「分层与目录组织」「契约优先」相关的部分 |
-| 3 | [yangshun/front-end-interview-handbook](https://github.com/yangshun/front-end-interview-handbook) | 44,006 | 全章 | 前端面试手册：HTML/CSS/JS/浏览器/性能；本章先读与「分层与目录组织」「契约优先」相关的部分 |
+| 1 | [realworld-apps/realworld](https://github.com/realworld-apps/realworld) | 84,363 | §1 分层与契约 · §3.3 三态呈现 | 全栈样板：`docs/src/content/docs/specifications/frontend/api.md` 把「页面 → 数据层 → API」的边界写成契约，`backend/error-handling.md` 规定统一错误体——十几种语言实现共用同一份契约，正是 §1.2 的实物 |
+| 2 | [TanStack/query](https://github.com/TanStack/query) | 50,520 | §2.2 服务端状态 · 乐观更新 | 状态层本体：`packages/query-core/src/query.ts` 的 `staleTime` 与 `gcTime` 两个时钟把「新鲜度」和「回收」拆开；`mutation.ts` 的 `onMutate` / `onError` 回滚就是 §2.2 乐观更新的标准写法 |
+| 3 | [vercel/next.js](https://github.com/vercel/next.js) | 143,463 | §4.1 懒加载与代码分割 | 框架实现：`packages/next/src/client/` 的 `dynamic` 与路由级 chunk——构建期按入口拆 bundle、运行期按需拉，「首屏只付首屏的钱」在框架里是编译期决定，不是运行时的 `lazy()` |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 
@@ -57,7 +57,7 @@
 > 全部链接由 `scripts/collect_links.py` + `scripts/audit_sources.py` 定期复核，失效链接会被审计器标红。
 
 ## 真题依据（真实可查，仅存元数据）
-- GitHub 资源（见 `_manifest.json`）：trekhleb/javascript-algorithms（196855★）、Chalarangelo/30-seconds-of-code（129326★）、yangshun/front-end-interview-handbook（44008★）。
+- GitHub 资源（见 `_manifest.json`）：realworld-apps/realworld（84363★）、TanStack/query（50520★）、vercel/next.js（143463★）。
 - LeetCode 题仅存元数据与链接，不搬运题面正文，详见 `exercises.json`。
 - 规范原文：RFC 9457（Problem Details for HTTP APIs）、RFC 9110（HTTP Semantics）、OpenAPI Specification 3.1.0、WCAG 2.2（WAI-ARIA 1.2）。
 

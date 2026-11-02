@@ -20,10 +20,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | 全章 | 含 Redis 与消息队列的高频面试知识；本章先读与「① 布隆过滤器」「② 空值缓存」相关的部分 |
-| 2 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | 全章 | 高并发与分布式：缓存、消息队列、分库分表专题；本章先读与「① 布隆过滤器」「② 空值缓存」相关的部分 |
-| 3 | [redis/redis](https://github.com/redis/redis) | 77,127 | 全章 | Redis 官方源码仓库：数据结构与命令实现的权威来源；本章先读与「① 布隆过滤器」「② 空值缓存」相关的部分 |
-| 4 | [apache/kafka](https://github.com/apache/kafka) | 34,105 | 全章 | Apache Kafka 官方仓库：架构与协议实现；本章先读与「① 布隆过滤器」「② 空值缓存」相关的部分 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §1.1 | 讲「缓存穿透/击穿/雪崩」时读 `docs/database/redis/` 的缓存专题：三者的触发条件不同（不存在 / 热点失效 / 批量同时失效），解法也不同（空值缓存+布隆 / 互斥重建 / TTL 抖动），混着答是面试扣分点 |
+| 2 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §4.2 | 讲「先更库再删缓存」时对照 `docs/high-concurrency/` 的缓存一致性文章：并发下「读请求把旧值写回缓存」的窗口无法完全消除，延迟双删只能降低概率，强一致必须加锁或串行化 |
+| 3 | [redis/redis](https://github.com/redis/redis) | 77,127 | §3.1 | 讲「过期与淘汰的边界」时读 `src/expire.c` 与 `src/evict.c`：过期键是「到点删除」，淘汰是「内存满了赶人」，两套逻辑独立；`volatile-*` 策略只对设了 TTL 的键生效，全都没 TTL 时它会退化成「不淘汰、直接报错」 |
+| 4 | [apache/kafka](https://github.com/apache/kafka) | 34,105 | §2.1 | 讲「缓存穿透的兜底」时对照 `core/src/main/scala/kafka/log/Log.scala` 的「读不存在返回空」：存储层对「查不到」与「出错」必须区分，否则缓存层会把「暂时查不到」也缓存成空值，把一次抖动放大成一片空白 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

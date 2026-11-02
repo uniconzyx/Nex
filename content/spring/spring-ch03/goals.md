@@ -30,10 +30,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | 全章 | SpringBoot + MyBatis 完整电商项目，最佳工程范例；本章先读与「JDK 动态代理的工作机制」「InvocationHan…」相关的部分 |
-| 2 | [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81,722 | 全章 | Spring Boot 官方仓库：源码、文档与示例；本章先读与「JDK 动态代理的工作机制」「InvocationHan…」相关的部分 |
-| 3 | [YunaiV/ruoyi-vue-pro](https://github.com/YunaiV/ruoyi-vue-pro) | 40,149 | 全章 | 企业级快速开发平台：Spring Boot + MyBatis Plus 全栈实现；本章先读与「JDK 动态代理的工作机制」「InvocationHan…」相关的部分 |
-| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | 全章 | Spring 生态系统化教程代码；本章先读与「JDK 动态代理的工作机制」「InvocationHan…」相关的部分 |
+| 1 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §2.1 | 讲「自调用导致通知失效」时看 `mall-admin` 的 Service 实现：同类方法内部互调不经过代理，`@Transactional`/`@Cacheable` 直接失效，解法是注入自身或拆到另一个 Bean |
+| 2 | [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81,722 | §1.2 | 讲「AOP 的代理边界」时读 `spring-boot` 的 `@ConditionalOnMissingBean` 与 `AopAutoConfiguration`：`proxyTargetClass` 决定用 CGLIB 还是 JDK 代理，而 CGLIB 无法代理 `final` 类/方法——这就是「注解失效」的框架级原因 |
+| 3 | [YunaiV/ruoyi-vue-pro](https://github.com/YunaiV/ruoyi-vue-pro) | 40,149 | §3.2 | 讲「自定义切面」时看 `yudao-framework/yudao-spring-boot-starter-*` 里的日志与权限切面：用 `@Around` 包住方法、用 `@Order` 控制顺序，比散落的拦截器更好维护 |
+| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §4.1 | 讲「JDK 动态代理 vs CGLIB」时看 `spring-boot-tutorials` 的 AOP 示例：目标类实现接口时默认走 JDK 代理，注入时必须按接口类型，否则 `ClassCastException` |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

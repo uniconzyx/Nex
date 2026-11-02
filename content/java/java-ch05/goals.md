@@ -28,10 +28,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | 全章 | Java 面试与后端通用指南：计算机基础、数据库、分布式、高并发、系统设计；本章先读与「受检异常的调用方契约与函数…」「可运行代码」相关的部分 |
-| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | 全章 | SpringBoot + MyBatis 电商实战项目，含 Docker 部署，工程范例；本章先读与「受检异常的调用方契约与函数…」「可运行代码」相关的部分 |
-| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | 全章 | 互联网 Java 工程师进阶知识：高并发、分布式、微服务；本章先读与「受检异常的调用方契约与函数…」「可运行代码」相关的部分 |
-| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | 全章 | Spring 官方生态的系统化代码教程仓库；本章先读与「受检异常的调用方契约与函数…」「可运行代码」相关的部分 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §1.1 | 讲「受检与非受检异常」时读 `docs/java/basis/` 的异常问答：`Error`/`Exception`/`RuntimeException` 三分与「受检异常强制调用方决策」的取舍，它给出了「什么时候该包成运行时异常」的判断口径 |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §3.1 | 讲「异常链与根因保留」时看 `mall-common` 的统一返回体与业务异常：`ApiException` 携带错误码、原异常挂在 cause 上，缺了 cause 线上就只能看到「操作失败」四个字 |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §2.1 | 讲「try-with-resources」时对照 `docs/distributed-system/` 里对「资源泄漏导致雪崩」的描述：连接/句柄不释放最终表现为「Too many open files」，TWR 的 suppressed 语义正是为了防止 close 异常掩盖主异常 |
+| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §4.1 | 讲「泛型擦除」时看 `core-java` 的泛型示例：`List<String>` 与 `List<Integer>` 在运行期是同一个类，所以不能 `new T[]`、不能对泛型做 `instanceof`——样例里有一条能编译失败的反例 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

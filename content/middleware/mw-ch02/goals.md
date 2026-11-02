@@ -18,10 +18,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | 全章 | 含 Redis 与消息队列的高频面试知识；本章先读与「① RDB 快照与 for…」「② save m n」相关的部分 |
-| 2 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | 全章 | 高并发与分布式：缓存、消息队列、分库分表专题；本章先读与「① RDB 快照与 for…」「② save m n」相关的部分 |
-| 3 | [redis/redis](https://github.com/redis/redis) | 77,127 | 全章 | Redis 官方源码仓库：数据结构与命令实现的权威来源；本章先读与「① RDB 快照与 for…」「② save m n」相关的部分 |
-| 4 | [apache/kafka](https://github.com/apache/kafka) | 34,105 | 全章 | Apache Kafka 官方仓库：架构与协议实现；本章先读与「① RDB 快照与 for…」「② save m n」相关的部分 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §2.2 | 讲「AOF 重写」时读 `docs/database/redis/` 的持久化篇：重写不是读旧 AOF，而是「按当前内存状态生成最小命令集」，因此重写后的文件与历史无关——这也解释了混合持久化为什么能兼顾恢复速度与安全性 |
+| 2 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §3.1 | 讲「过期键删除与淘汰」时对照 `docs/high-concurrency/` 的 Redis 内存篇：惰性删除 + 定期删除两条腿走路，`maxmemory-policy` 的八种策略里 `allkeys-lru` 与 `volatile-lru` 的差别是「要不要保护无 TTL 的键」 |
+| 3 | [redis/redis](https://github.com/redis/redis) | 77,127 | §1.1 | 讲「RDB 与 fork + COW」时读 `src/rdb.c` 的 `rdbSaveBackground`：`fork()` 之后子进程持有快照视图，父进程写入触发缺页复制——「fork 瞬间内存翻倍」不是估算，而是 COW 的必然代价 |
+| 4 | [apache/kafka](https://github.com/apache/kafka) | 34,105 | §2.2 | 讲「AOF 与预写日志」时对照 `core/src/main/scala/kafka/log/Log.scala`：Kafka 用「追加日志 + 段文件」实现持久化，与 AOF 的 append-only 同源，区别在于 Kafka 靠「保留策略」删除旧段而不是重写 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

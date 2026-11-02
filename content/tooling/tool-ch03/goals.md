@@ -68,10 +68,10 @@ Linux 文件系统与进程模型；本章把版本控制的「底层模型」�
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [trimstray/the-book-of-secret-knowledge](https://github.com/trimstray/the-book-of-secret-knowledge) | 254,934 | 全章 | 运维与工程工具知识合集：Linux、网络、排障命令速查；本章先读与「第1节 一、三类核心对象」「第2节 二、tree 与…」相关的部分 |
-| 2 | [ohmyzsh/ohmyzsh](https://github.com/ohmyzsh/ohmyzsh) | 190,274 | 全章 | Shell 生产力框架（工程效率的入门必装）；本章先读与「第1节 一、三类核心对象」「第2节 二、tree 与…」相关的部分 |
-| 3 | [jlevy/the-art-of-command-line](https://github.com/jlevy/the-art-of-command-line) | 162,646 | 全章 | 命令行艺术：Linux 命令的体系化进阶指南；本章先读与「第1节 一、三类核心对象」「第2节 二、tree 与…」相关的部分 |
-| 4 | [bregman-arie/devops-exercises](https://github.com/bregman-arie/devops-exercises) | 86,127 | 全章 | DevOps 练习题集：Linux/Docker/K8s/Git/CI 全覆盖；本章先读与「第1节 一、三类核心对象」「第2节 二、tree 与…」相关的部分 |
+| 1 | [trimstray/the-book-of-secret-knowledge](https://github.com/trimstray/the-book-of-secret-knowledge) | 254,934 | §3.2 | 讲「分支与合并」时看「Git」分类里的速查：`rebase` 与 `merge` 的取舍、`reflog` 救回误删分支，都是高频操作 |
+| 2 | [ohmyzsh/ohmyzsh](https://github.com/ohmyzsh/ohmyzsh) | 190,274 | §4.1 | 讲「别名与效率」时读 `plugins/git/git.plugin.zsh`：几十个别名把长命令压成两三个字母，理解它们等于理解「日常 Git 的主力命令是哪些」 |
+| 3 | [jlevy/the-art-of-command-line](https://github.com/jlevy/the-art-of-command-line) | 162,646 | §1.1 | 讲「Git 的日常操作」时读 `README.md` 的「版本控制」一节：`add`/`commit`/`log`/`diff` 的最小闭环，配 `git log --oneline --graph` 看历史形状 |
+| 4 | [bregman-arie/devops-exercises](https://github.com/bregman-arie/devops-exercises) | 86,127 | §2.1 | 讲「对象模型」时看 `topics/git/` 的练习：`git cat-file -p` 查看 blob/tree/commit 的内容，能把「三个对象」从概念变成可见的文本 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

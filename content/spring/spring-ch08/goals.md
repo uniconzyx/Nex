@@ -49,10 +49,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | 全章 | SpringBoot + MyBatis 完整电商项目，最佳工程范例；本章先读与「传播行为」「隔离级别、readOnly…」相关的部分 |
-| 2 | [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81,722 | 全章 | Spring Boot 官方仓库：源码、文档与示例；本章先读与「传播行为」「隔离级别、readOnly…」相关的部分 |
-| 3 | [YunaiV/ruoyi-vue-pro](https://github.com/YunaiV/ruoyi-vue-pro) | 40,149 | 全章 | 企业级快速开发平台：Spring Boot + MyBatis Plus 全栈实现；本章先读与「传播行为」「隔离级别、readOnly…」相关的部分 |
-| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | 全章 | Spring 生态系统化教程代码；本章先读与「传播行为」「隔离级别、readOnly…」相关的部分 |
+| 1 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §3.1 | 讲「传播行为」时看 `mall` 的下单流程：主流程用 `REQUIRED`、记流水用 `REQUIRES_NEW`，后者会挂起外层事务并占用第二个连接，嵌套深了会打满连接池 |
+| 2 | [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81,722 | §1.1 | 讲「声明式事务的实现」时读 `spring-boot` 的 `TransactionAutoConfiguration`：`@EnableTransactionManagement` 加 AOP 代理，代理边界决定「哪些方法真的在事务里」——自调用不生效就出在这 |
+| 3 | [YunaiV/ruoyi-vue-pro](https://github.com/YunaiV/ruoyi-vue-pro) | 40,149 | §2.2 | 讲「多数据源事务」时看 `yudao-framework` 的多数据源配置：每个 `DataSource` 要配独立的事务管理器，`@Transactional` 必须指定 `transactionManager`，否则只对默认库生效 |
+| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §4.3 | 讲「`rollbackFor`」时看 `spring-boot-tutorials` 的事务示例：默认只回滚 `RuntimeException`，受检异常必须显式 `rollbackFor = Exception.class`，样例里有能复现的对照 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

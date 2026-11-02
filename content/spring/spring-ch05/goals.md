@@ -49,10 +49,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | 全章 | SpringBoot + MyBatis 完整电商项目，最佳工程范例；本章先读与「@RestControll…」「状态码选择与第一性的幂等性」相关的部分 |
-| 2 | [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81,722 | 全章 | Spring Boot 官方仓库：源码、文档与示例；本章先读与「@RestControll…」「状态码选择与第一性的幂等性」相关的部分 |
-| 3 | [YunaiV/ruoyi-vue-pro](https://github.com/YunaiV/ruoyi-vue-pro) | 40,149 | 全章 | 企业级快速开发平台：Spring Boot + MyBatis Plus 全栈实现；本章先读与「@RestControll…」「状态码选择与第一性的幂等性」相关的部分 |
-| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | 全章 | Spring 生态系统化教程代码；本章先读与「@RestControll…」「状态码选择与第一性的幂等性」相关的部分 |
+| 1 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §1.3 | 讲「统一返回体」时看 `mall-common` 的 `CommonResult`：`code/message/data` 三字段 + 静态工厂方法，配合 `@RestControllerAdvice` 把异常也转成同一结构，前端只需处理一种形状 |
+| 2 | [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81,722 | §2.1 | 讲「参数绑定与消息转换」时读 `spring-boot` 的 `HttpMessageConvertersAutoConfiguration`：`Content-Type` 决定选哪个转换器，选不到就报 415——这个错误码的根因在自动配置而非 Controller |
+| 3 | [YunaiV/ruoyi-vue-pro](https://github.com/YunaiV/ruoyi-vue-pro) | 40,149 | §3.2 | 讲「校验分组」时看 `yudao-module-system` 的 DTO：新增与修改用不同 group，`@Validated(AddGroup.class)` 才生效——不加 `@Valid` 的校验注解等于没写 |
+| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §4.1 | 讲「`@PathVariable` 与 `@RequestParam`」时看 `spring-boot-tutorials` 的 REST 示例：路径段用前者、查询串用后者，混用会导致 404 而不是 400，排查时容易误判 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

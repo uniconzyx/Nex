@@ -36,9 +36,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 225,745 | 全章 | Python 实现的全部经典算法，含详细注释；本章先读与「list 不是链表，是「过…」「复杂度」相关的部分 |
-| 2 | [jackfrued/Python-100-Days](https://github.com/jackfrued/Python-100-Days) | 187,609 | 全章 | Python 100 天从新手到大师（中文系统教程）；本章先读与「list 不是链表，是「过…」「复杂度」相关的部分 |
-| 3 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,917 | 全章 | 微软官方 12 周机器学习入门课程，含 26 课与测验；本章先读与「list 不是链表，是「过…」「复杂度」相关的部分 |
+| 1 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 225,745 | §1.2 | 讲「字典的哈希实现」时读 `hashes/` 目录：`hash_table.py` 用「桶数组 + 链地址」实现，能直接看到「冲突怎么处理、扩容怎么触发」——比背复杂度直观 |
+| 2 | [jackfrued/Python-100-Days](https://github.com/jackfrued/Python-100-Days) | 187,609 | §3.1 | 讲「深浅拷贝」时看 `Day01-15/` 的容器篇：`copy.copy` 只复制外层、`deepcopy` 递归复制，嵌套列表的例子能把「改内层影响原对象」演示清楚 |
+| 3 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,917 | §4.2 | 讲「集合去重」时看入门课的数据清洗一节：用 `set` 找重复样本、用 `Counter` 统计类别分布，这两个操作是数据准备阶段的高频动作 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

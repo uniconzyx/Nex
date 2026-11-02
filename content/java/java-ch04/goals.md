@@ -30,10 +30,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | 全章 | Java 面试与后端通用指南：计算机基础、数据库、分布式、高并发、系统设计；本章先读与「可运行代码」「equals/hashCo…」相关的部分 |
-| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | 全章 | SpringBoot + MyBatis 电商实战项目，含 Docker 部署，工程范例；本章先读与「可运行代码」「equals/hashCo…」相关的部分 |
-| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | 全章 | 互联网 Java 工程师进阶知识：高并发、分布式、微服务；本章先读与「可运行代码」「equals/hashCo…」相关的部分 |
-| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | 全章 | Spring 官方生态的系统化代码教程仓库；本章先读与「可运行代码」「equals/hashCo…」相关的部分 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §2.1 | 讲「ArrayList 扩容」时读 `docs/java/collection/` 下的 ArrayList 源码分析：`oldCapacity + (oldCapacity >> 1)` 的 1.5 倍增长与 `Arrays.copyOf` 的整段复制，解释了「为什么预估容量能省掉多次复制」 |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §5.1 | 讲「Queue/Deque 与批处理」时看 `mall-admin` 里批量导入的写法：一次查询取出 `List` 再分批处理，而不是循环单条查库——这是「集合选择决定 IO 次数」的直接证据 |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §3.1 | 讲「HashMap 的四层结构」时对照 `docs/high-concurrency/` 的 HashMap 深挖系列：数组 + 链表 + 红黑树、树化阈值 8 与退化阈值 6、扩容时的「原位或原位+旧容量」，这三条是面试追问的固定落点 |
+| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §4.1 | 讲「Set 去重」时看 `core-java` 的集合示例：`HashSet` 去重依赖 `hashCode` + `equals`，`TreeSet` 依赖 `compareTo`，两份样例放在一起就能看出「去重判据被换掉了」 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

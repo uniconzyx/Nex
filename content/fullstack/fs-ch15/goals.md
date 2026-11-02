@@ -11,10 +11,10 @@
 
 | # | 仓库 | Star | 对应本章 | 读什么 |
 | --- | --- | ---: | --- | --- |
-| 1 | [gin-gonic/gin](https://github.com/gin-gonic/gin) | 89,466 | §2.1 路由树 · §2.2 中间件 | Web 框架：读 `routergroup.go` 与 `context.go` 的 `Next()`，对应 §2.1、§2.2 |
-| 2 | [gofiber/fiber](https://github.com/gofiber/fiber) | 40,232 | §2 对照 | Express 风格对照：与 Gin 中间件模型对比，对应 §2.6 |
-| 3 | [golang/go](https://github.com/golang/go) | 139,482 | §1.1 goroutine · §3.1 error | 语言本体：读 `src/runtime` 的 GMP 调度，对应 §1.1；error 即值对应 §3.1 |
-| 4 | [spring-projects/spring-framework](https://github.com/spring-projects/spring-framework) | 60,307 | §2.5 对照 · §3.4 对照 | Java 路线对照：拦截器/受检异常对照，对应 §2.5、§3.4 |
+| 1 | [gin-gonic/gin](https://github.com/gin-gonic/gin) | 89,466 | §2.1 路由树 · §2.2 中间件 | `tree.go` 是压缩前缀树，`routergroup.go` 的 `Use` 把 handler 拼成 `HandlersChain`，`context.go` 的 `Next()` 用索引往前走——与 Express 的数组栈是同一模型 |
+| 2 | [gofiber/fiber](https://github.com/gofiber/fiber) | 40,232 | §2.3 框架对照 | `app.go` 的路由与 `ctx.go` 的 `Next()` 形状和 Gin 几乎一样，但底层跑在 `fasthttp` 上、复用 `RequestCtx` 减少分配——对照点在于「API 相同、内存模型不同」 |
+| 3 | [golang/go](https://github.com/golang/go) | 139,482 | §1.1 goroutine 与 channel · §3.1 error 即值 | `src/runtime/proc.go` 的 GMP 调度与 `src/runtime/chan.go` 的 `hchan` 环形缓冲：channel 满时 `send` 阻塞并挂进 `sendq`——「不要通过共享内存通信」的机器实现 |
+| 4 | [spring-projects/spring-framework](https://github.com/spring-projects/spring-framework) | 60,307 | §2.3 中间件对照 · §3.3 契约对照 | `spring-web` 的 `ResponseEntityExceptionHandler` 把异常统一映射成 `ProblemDetail`（RFC 9457），和 Go 侧「error 作为值、显式返回」是两条路：一个靠容器兜底，一个靠调用方检查 |
 
 > 全部为工业级真实仓库；Star 数为本会话经 GitHub API 实取快照，仅供路线排序参考。
 

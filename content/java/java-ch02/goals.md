@@ -13,10 +13,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | 全章 | Java 面试与后端通用指南：计算机基础、数据库、分布式、高并发、系统设计；本章先读与「可运行代码」相关的部分 |
-| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | 全章 | SpringBoot + MyBatis 电商实战项目，含 Docker 部署，工程范例；本章先读与「可运行代码」相关的部分 |
-| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | 全章 | 互联网 Java 工程师进阶知识：高并发、分布式、微服务；本章先读与「可运行代码」相关的部分 |
-| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | 全章 | Spring 官方生态的系统化代码教程仓库；本章先读与「可运行代码」相关的部分 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §4.1 | 讲「equals 与 hashCode 契约」时读 `docs/java/basis/` 的对象基础问答：等价关系必须自反/对称/传递，哈希值必须与 equals 一致——它用 `HashMap` 查不到键的现场说明违反契约的后果 |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §1.1 | 讲「对象内存布局」时看 `mall-common` 里的 `CommonResult`：一个只有 `code/message/data` 三个字段的返回体，字段顺序与类型决定对象头之后的内存排布，也是「为什么 DTO 要小而扁平」的现成样本 |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §4.2 | 讲「哈希分布」时对照 `docs/high-concurrency/` 的 HashMap 系列：它把「扰动函数 + 扩容 rehash」讲到面试深度，能解释为什么自定义 key 的 `hashCode` 分布不均会让链表变长 |
+| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §3.2 | 讲「构造器与 this」时看 `core-java` 的构造器重载示例：`this(...)` 必须首行、`super(...)` 与它互斥，这两条限制在这份仓库里各有一个最小反例，比文字描述好记 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

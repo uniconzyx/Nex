@@ -27,9 +27,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | 全章 | 含 MySQL 索引、事务、锁与调优的系统讲解；本章先读与「EXPLAIN 的每一列在…」「type 的优劣阶梯」相关的部分 |
-| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | 全章 | 真实业务库表设计范例与 SQL 实践；本章先读与「EXPLAIN 的每一列在…」「type 的优劣阶梯」相关的部分 |
-| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | 全章 | 含分库分表、读写分离与分布式事务；本章先读与「EXPLAIN 的每一列在…」「type 的优劣阶梯」相关的部分 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §1.2 | 讲「type 的优劣阶梯」时读 `docs/database/mysql/` 的 EXPLAIN 专题：`system > const > eq_ref > ref > range > index > ALL` 这条链要能背，且要知道 `ALL` 出现在大表上就意味着全表扫描 |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §3.1 | 讲「索引失效」时看 `mall-admin` 的商品搜索实现：`LIKE "%关键词%"` 前导通配符让索引失效，真实工程用「ES 检索 + 主键回表」绕开，而不是硬调 SQL |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §3.2 | 讲「深分页与 JOIN 优化」时对照 `docs/high-concurrency/` 的慢查询文章：`LIMIT 1000000, 20` 要先扫掉一百万行，正确写法是「延迟关联」或「游标分页（记住上一页最后一行的 id）」 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

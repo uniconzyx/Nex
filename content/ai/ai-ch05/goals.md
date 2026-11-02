@@ -27,12 +27,12 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,257 | 全章 | 深度学习框架官方仓库，工业级模型工程范例；本章先读与「零样本 / 单样本 / 少…」「示例的顺序与标签分布偏差」相关的部分 |
-| 2 | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 197,476 | 全章 | 为 AI Agent 提供网页数据：抓取到结构化数据的工程实现；本章先读与「零样本 / 单样本 / 少…」「示例的顺序与标签分布偏差」相关的部分 |
-| 3 | [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) | 187,852 | 全章 | 自主 Agent 的开创性项目，Agent 架构与工具循环的经典参考；本章先读与「零样本 / 单样本 / 少…」「示例的顺序与标签分布偏差」相关的部分 |
-| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | 全章 | Transformer 模型定义框架：从 BERT/GPT 到多模态的全量实现；本章先读与「零样本 / 单样本 / 少…」「示例的顺序与标签分布偏差」相关的部分 |
-| 5 | [langgenius/dify](https://github.com/langgenius/dify) | 160,127 | 全章 | Agentic 工作流与 RAG 流水线平台：生产级 LLM 应用工程范例；本章先读与「零样本 / 单样本 / 少…」「示例的顺序与标签分布偏差」相关的部分 |
-| 6 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | 全章 | Agent 工程平台：工具、记忆、检索与编排的工业实现；本章先读与「零样本 / 单样本 / 少…」「示例的顺序与标签分布偏差」相关的部分 |
+| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,257 | §2.3 | 讲「温度与采样的影响」时读 `tensorflow/python/ops/` 的 `top_k`/`top_p` 实现：它们改的是分布形状，不是「准确性」——低温更确定但不一定更对 |
+| 2 | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 197,476 | §4.2 | 讲「提示注入的防护」时读 `apps/api/src/` 的内容清洗：抓来的网页文本可能含指令，必须与系统提示隔离，否则「数据」会被当成「命令」 |
+| 3 | [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) | 187,852 | §3.1 | 讲「CoT 与自洽性」时看 agent 的思考链：它把「先计划再执行」写进提示，与 CoT 的「显式中间步骤」是同一机制在不同尺度上的应用 |
+| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §4.1 | 讲「结构化输出的可靠性」时读 `src/transformers/generation/` 的约束解码相关实现：用语法约束 token 采样，比「请在 JSON 里回答」可靠得多 |
+| 5 | [langgenius/dify](https://github.com/langgenius/dify) | 160,127 | §2.2 | 讲「少样本示例的组织」时读 `api/core/` 下的 prompt 编排模块：示例与指令分段存放、按场景组装，本章「例子要覆盖边界」在这里变成「示例集合的维护」 |
+| 6 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | §1.1 | 讲「提示模板的工程化」时读 `libs/core/langchain_core/prompts/`：`PromptTemplate` 把变量槽位与格式约束分开，避免「字符串拼接到处飞」 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

@@ -67,10 +67,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | 全章 | 经典机器学习库官方仓库：算法实现与最佳实践；本章先读与「心智模型」「四种聚合器」相关的部分 |
-| 2 | [jakevdp/PythonDataScienceHandbook](https://github.com/jakevdp/PythonDataScienceHandbook) | 50,277 | 全章 | 《Python 数据科学手册》全书 Jupyter Notebook（NumPy/Pandas/Matplotlib）；本章先读与「心智模型」「四种聚合器」相关的部分 |
-| 3 | [pandas-dev/pandas](https://github.com/pandas-dev/pandas) | 50,278 | 全章 | Pandas 官方仓库：API 与内部机制权威来源；本章先读与「心智模型」「四种聚合器」相关的部分 |
-| 4 | [microsoft/Data-Science-For-Beginners](https://github.com/microsoft/Data-Science-For-Beginners) | 37,860 | 全章 | 微软官方 10 周数据科学课程；本章先读与「心智模型」「四种聚合器」相关的部分 |
+| 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | §3.3 | 讲「时间序列的特征工程」时读 `sklearn/preprocessing/`：`rolling` 的窗口统计必须用「过去的数据」，否则就是未来信息泄漏——sklearn 的 pipeline 能强制这个边界 |
+| 2 | [jakevdp/PythonDataScienceHandbook](https://github.com/jakevdp/PythonDataScienceHandbook) | 50,277 | §2.3 | 讲「merge 的四种连接」时读 `notebooks/03.07-Merge-and-Join.ipynb`：inner/left/right/outer 的行数变化配了对照表，`indicator=True` 用来查「哪边没匹配上」 |
+| 3 | [pandas-dev/pandas](https://github.com/pandas-dev/pandas) | 50,278 | §1.2 | 讲「groupby 的实现」时读 `pandas/core/groupby/`：先按键做哈希分组、再对每组应用聚合，`as_index=False` 与 `reset_index()` 的差别就出在「分组键是否进索引」 |
+| 4 | [microsoft/Data-Science-For-Beginners](https://github.com/microsoft/Data-Science-For-Beginners) | 37,860 | §4.3 | 讲「聚合后的口径」时看课程里的分组分析：`count`/`nunique` 混用会把「订单数」算成「商品数」，指标定义要先写清再写代码 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

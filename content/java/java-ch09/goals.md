@@ -25,10 +25,10 @@ Spring Boot 负责**装配与启动**。两者共同构成后端工程的最小�
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | 全章 | Java 面试与后端通用指南：计算机基础、数据库、分布式、高并发、系统设计；本章先读与「坐标与仓库」「传递依赖与依赖调解」相关的部分 |
-| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | 全章 | SpringBoot + MyBatis 电商实战项目，含 Docker 部署，工程范例；本章先读与「坐标与仓库」「传递依赖与依赖调解」相关的部分 |
-| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | 全章 | 互联网 Java 工程师进阶知识：高并发、分布式、微服务；本章先读与「坐标与仓库」「传递依赖与依赖调解」相关的部分 |
-| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | 全章 | Spring 官方生态的系统化代码教程仓库；本章先读与「坐标与仓库」「传递依赖与依赖调解」相关的部分 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §1.1 | 讲「Maven 依赖调解」时读 `docs/java/basis/` 的工程化章节：最短路径优先 + 先声明优先，两条规则决定了「为什么你的 jar 版本被别人带偏」，本章的冲突排查步骤与它一致 |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §1.3 | 讲「dependencyManagement 与 BOM」时看 `mall` 根 `pom.xml`：子模块只写 `groupId/artifactId` 不写版本，版本统一在父 POM 管——这就是「只声明版本、不引入依赖」的现成用法 |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §3.1 | 讲「自动配置」时对照 `docs/micro-services/` 的微服务落地文章：条件装配 + SPI 让「引入依赖即生效」，这也是 Spring Cloud starter 的组织方式 |
+| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §3.2 | 讲「SpringApplication.run 的启动阶段」时看 `spring-boot-tutorials` 模块：一个最小 `@SpringBootApplication` 类加一个 `CommandLineRunner`，就能观察到「容器刷新完成 → 回调执行」的时序 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

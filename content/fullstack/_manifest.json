@@ -89,19 +89,19 @@
       "status": "complete",
       "resources": {
         "github": [
-          "trekhleb/javascript-algorithms",
+          "w3c/csswg-drafts",
           "Chalarangelo/30-seconds-of-code",
           "yangshun/front-end-interview-handbook"
         ],
         "github_stars": [
-          196855,
+          4901,
           129352,
           44008
         ],
         "github_notes": [
-          "JavaScript 算法与数据结构，含英文详解",
-          "短小精悍的 JS/CSS/HTML 代码片段集，覆盖日常前端技巧",
-          "前端面试手册：HTML/CSS/JS/浏览器/性能"
+          "§2.2 box-sizing · §2.3 格式化上下文 规范原文：`css-box-3/Overview.bs` 里 box-sizing 与 margin 合并的定义、`css-display-3/Overview.bs` 里 flow-root 生成 BFC 的条文——「margin 为什么穿透父元素」在这里是规范，不是经验",
+          "§5 实用片段 片段库：读 `snippets/` 下带 `css` / `browser` 标签的条目（水平垂直居中、等分布局、清除浮动），每条都是可直接粘的最小实现，正好对照 §5 那四行 CSS 改了三天的那件事",
+          "§1.1 语义化 · §3.3 重排与重绘 题库：`questions/html-questions.md` 用「全 div 堆出来的页面哪里坏了」讲语义化，`questions/css-questions.md` 把 reflow / repaint / 合成层分开问——与 §1.1、§3.3 的判据一一对应"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -152,19 +152,19 @@
       "status": "complete",
       "resources": {
         "github": [
-          "trekhleb/javascript-algorithms",
-          "Chalarangelo/30-seconds-of-code",
+          "tc39/ecma262",
+          "getify/You-Dont-Know-JS",
           "yangshun/front-end-interview-handbook"
         ],
         "github_stars": [
-          196855,
-          129352,
+          15705,
+          184837,
           44008
         ],
         "github_notes": [
-          "JavaScript 算法与数据结构，含英文详解",
-          "短小精悍的 JS/CSS/HTML 代码片段集，覆盖日常前端技巧",
-          "前端面试手册：HTML/CSS/JS/浏览器/性能"
+          "§1.2 相等性三兄弟 · §3.1 原型链 规范原文：`spec.html` 搜 `IsLooselyEqual` 与 `IsStrictlyEqual` 两段算法，`==` 的转换顺序（先 ToPrimitive，valueOf 优先于 toString）是逐条写死的，`[] == ![]` 可以照算法走一遍",
+          "§2.1 TDZ · §2.2 this 五条规则 书稿源码：`scope-closures/` 卷把提升与 TDZ 按「编译期 / 执行期」两段讲透，`objects-classes/` 卷把 this 的四类绑定排成判定树——对应 §2.1、§2.2，比背口诀可靠",
+          "§1.1 原始类型 · §4.2 组合子取舍 题库：`questions/javascript-questions.md` 把 `typeof null`、`NaN !== NaN`、装箱拆箱列成快问快答；Promise 串行/并行/竞速的选择题对应 §4.2 的组合子取舍"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -215,19 +215,22 @@
       "status": "complete",
       "resources": {
         "github": [
-          "yangshun/front-end-interview-handbook",
-          "Chalarangelo/30-seconds-of-code",
-          "trekhleb/javascript-algorithms"
+          "microsoft/TypeScript",
+          "type-challenges/type-challenges",
+          "colinhacks/zod",
+          "sindresorhus/type-fest"
         ],
         "github_stars": [
-          44008,
-          129352,
-          196855
+          111640,
+          48544,
+          44212,
+          17473
         ],
         "github_notes": [
-          "前端面试手册：HTML/CSS/JS/浏览器/性能，TS 与工程化章节可对照其类型与构建部分",
-          "短小代码片段集：读别人怎么写类型收窄与工具函数，比读规范快",
-          "算法与数据结构（JS 实现），本章的 groupBy/穷尽检查可与其中的类型标注对照"
+          "§1.1 结构 · §2.1 收窄 · §3.1 擦除 语言本体：读 `src/compiler/checker.ts` 的 `getPropertyAccessType` 与结构类型判定，直接对应 §1.1；`narrowTypeByKind` 对应 §2.1",
+          "§3.1 擦除 · §3.2 泛型 类型体操题库：从 `easy` 到 `extreme`，直接练条件类型与递归泛型，对应 §3.2 的「泛型不能越抽象越好」",
+          "§2.1 收窄 运行时校验 + 类型推断的工业样板：`z.infer` 把校验结果回推成静态类型，正是 §2.1「收窄」的运行时对应物",
+          "§3.2 泛型 几百个工具类型的源码合集，读 `PartialDeep` / `PackageJson` 理解条件类型与映射类型的实战写法，对应 §3.2"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -266,10 +269,10 @@
           4926
         ],
         "github_notes": [
-          "按本章小节定位相关目录",
-          "按本章小节定位相关目录",
-          "按本章小节定位相关目录",
-          "按本章小节定位相关目录"
+          "§1.1 Proxy 依赖收集 · §1.2 computed 派发 `packages/reactivity/src` 的 `effect.ts` 建 effect 树、`dep.ts` 用 Set 存订阅者、`baseHandlers.ts` 在 get 时 `track`、set 时 `trigger`；`computed.ts` 的 dirty 标记回答 §1.2「computed 什么时候才重算」",
+          "§3.1 两种写法 · §3.3 反模式 `src/store.ts` 的 `defineStore` 同时接受对象与函数两种入参，内部都归一成 reactive state + actions——§3.1「两种写法不是两套机制」的源码依据；`mapHelpers` 里的 `storeToRefs` 是 §3.3 解构丢响应式的正解",
+          "§2.1 ref 与生命周期边界 `src/router.ts` 的守卫按 `beforeEach → 组件内钩子 → afterEach` 排序；路由切换后 store 该不该重置，取决于你把 store 放进守卫还是放进组件——§2.1 的边界问题在这里有明确答案",
+          "§1.3 .value 的由来 · §2.3 设计取舍 `active-rfcs/` 里响应式相关提案（ref 拆包、reactivity transform）的讨论解释了为什么模板里不写 `.value`、JS 里必须写——§1.3 与 §2.3 的边界是设计决议，不是实现巧合"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -308,10 +311,10 @@
           23477
         ],
         "github_notes": [
-          "按本章小节定位相关目录",
-          "按本章小节定位相关目录",
-          "按本章小节定位相关目录",
-          "按本章小节定位相关目录"
+          "§1.1 三层与依赖方向 `spring-boot-autoconfigure` 的 `AutoConfiguration.imports` + `@ConditionalOnMissingBean`：starter 只在你没自己声明时才装配——分层边界在框架里的落地方式",
+          "§2.1 统一异常收口 · §2.2 匹配顺序 `spring-webmvc` 的 `ExceptionHandlerExceptionResolver` 按 `@ExceptionHandler` 的匹配精度挑方法，`@ControllerAdvice` 的 `basePackages` / `assignableTypes` 决定它盖住哪些 Controller——§2.2 的作用域规则",
+          "§2.3 可观测性 · §1.2 职责边界 `FilterChainProxy` 在 DispatcherServlet 之前就拦掉未认证请求，`AuthenticationEntryPoint` 决定 401/403 的响应体——业务层拿不到原始异常，堆栈自然不会漏到前端（§2.4）",
+          "§3.2 边界与性能 `java.util.regex.Pattern` 的回溯实现：`(a+)+$` 这类嵌套量词能把校验入口的 CPU 打满（ReDoS）——§3.2「校验也要限长限深」不是洁癖"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -337,22 +340,22 @@
       "status": "complete",
       "resources": {
         "github": [
-          "spring-projects/spring-cloud-gateway",
+          "spring-cloud/spring-cloud-gateway",
           "nestjs/nest",
           "vercel/next.js",
           "google/guava"
         ],
         "github_stars": [
-          0,
+          4917,
           76927,
           143173,
           51918
         ],
         "github_notes": [
-          "按本章小节定位相关目录",
-          "按本章小节定位相关目录",
-          "按本章小节定位相关目录",
-          "按本章小节定位相关目录"
+          "§2.1 网关该管什么 · §2.3 路由 网关实现：读 `RoutePredicateHandlerMapping` 与过滤器链，对应 §2.1、§2.3",
+          "§1 拆分 · §2 网关 模块化后端框架：module/provider 的边界设计与 §1 分层异曲同工",
+          "§2.6 BFF BFF 范式：前端定制的聚合层，对应 §2.6 BFF 模式",
+          "§3.5 配置中心 限流与缓存原语：RateLimiter 思路对应 §2.5 限流、§3.5 配置推送"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -391,10 +394,10 @@
           251766
         ],
         "github_notes": [
-          "按本章小节定位相关目录",
-          "按本章小节定位相关目录",
-          "按本章小节定位相关目录",
-          "按本章小节定位相关目录"
+          "§2.1 稳定的两条铁律 `docs` 的 auto-waiting 与 actionability checks：可见、稳定、可接收事件三个条件同时满足才动手，等于把 `sleep` 换成「等状态」；`packages/playwright-core/src/server` 里每个 action 都过这套检查",
+          "§2.3 工具差异与可观测 时间旅行调试靠命令队列快照：`packages/driver/src/cy` 把每条命令执行后的 DOM 存下来，失败时能回放到出错那一步——与 Playwright 用 trace 达到的是同一目的",
+          "§3.1 消费者驱动契约 · §3.3 Pact 工作流 `packages/core` 的 mock server 按消费者写的期望返回并生成 pact 文件，提供方用 `Verifier` 回放同一份契约——「契约是产物，不是文档」",
+          "§1.1 分层与测试替身 · §2.2 组件测试 框架自身的测试基建：`packages/react/src/__tests__` 配 `scripts/jest` 的自定义环境，断言的是渲染出来的树而非实现细节——这正是 §2.2 组件测试该断言的层次"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -434,10 +437,10 @@
           168266
         ],
         "github_notes": [
-          "按本章小节定位相关目录",
-          "按本章小节定位相关目录",
-          "按本章小节定位相关目录",
-          "按本章小节定位相关目录"
+          "§1.1 SSE · §3.1 callId `packages/ai/core/generate-text/stream-text.ts` 把模型增量转成 data stream 协议（`0:\"文本\"` 这种带前缀的行），工具调用带 `toolCallId`——§3.1 唯一 id 的来源就是协议本身",
+          "§2.5 幂等恢复 · §3.2 重试幂等 `libs/core` 的 `Runnable` 组合子与 `with_retry`：重试只重放同一次调用，跨轮状态由外层 graph / checkpoint 保存，对应 §2.5「同一个 id 可以重入」",
+          "§1.2 网关透传流式 · §4.3 限流 `context.go` 的 `Stream` 与 `sse.go` 的 `SSEvent` 是逐块 flush 的最小实现（不设 `Content-Length`、显式 `Flush`）；`middleware/` 里挂限流中间件正是 §4.3 的落地位置",
+          "§4.1 token 计量 `src/transformers/tokenization_utils.py` 的 `encode` / `decode` 决定「一段文本值多少 token」，同一句中文不同 tokenizer 能差一倍——§4.1 输入输出分开算的前提"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -476,10 +479,10 @@
           60300
         ],
         "github_notes": [
-          "按本章小节定位相关目录",
-          "按本章小节定位相关目录",
-          "按本章小节定位相关目录",
-          "按本章小节定位相关目录"
+          "§2.1 路由树 · §2.2 中间件 `tree.go` 是压缩前缀树，`routergroup.go` 的 `Use` 把 handler 拼成 `HandlersChain`，`context.go` 的 `Next()` 用索引往前走——与 Express 的数组栈是同一模型",
+          "§2.3 框架对照 `app.go` 的路由与 `ctx.go` 的 `Next()` 形状和 Gin 几乎一样，但底层跑在 `fasthttp` 上、复用 `RequestCtx` 减少分配——对照点在于「API 相同、内存模型不同」",
+          "§1.1 goroutine 与 channel · §3.1 error 即值 `src/runtime/proc.go` 的 GMP 调度与 `src/runtime/chan.go` 的 `hchan` 环形缓冲：channel 满时 `send` 阻塞并挂进 `sendq`——「不要通过共享内存通信」的机器实现",
+          "§2.3 中间件对照 · §3.3 契约对照 `spring-web` 的 `ResponseEntityExceptionHandler` 把异常统一映射成 `ProblemDetail`（RFC 9457），和 Go 侧「error 作为值、显式返回」是两条路：一个靠容器兜底，一个靠调用方检查"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -506,19 +509,19 @@
       "status": "complete",
       "resources": {
         "github": [
-          "trekhleb/javascript-algorithms",
-          "Chalarangelo/30-seconds-of-code",
-          "yangshun/front-end-interview-handbook"
+          "nodejs/node",
+          "expressjs/express",
+          "koajs/koa"
         ],
         "github_stars": [
-          196855,
-          129352,
-          44008
+          123194,
+          69585,
+          35683
         ],
         "github_notes": [
-          "JavaScript 算法与数据结构，含英文详解",
-          "短小精悍的 JS/CSS/HTML 代码片段集，覆盖日常前端技巧",
-          "前端面试手册：HTML/CSS/JS/浏览器/性能"
+          "§1.2 队列顺序 · §3.1 背压 运行时本体：`lib/internal/process/task_queues.js` 是 nextTick 与微任务队列的真实调度，`lib/internal/streams/readable.js` 里 `highWaterMark` 与 `readableFlowing` 的状态迁移就是 §3.1 背压的机器版本",
+          "§2.1 手写 HTTP 服务 · §2.3 中间件 工业实现：`lib/application.js` 的 `app.use` 把中间件压进栈、`app.handle` 作为 `http.createServer` 的回调把 req/res 交出去；四参数错误中间件的识别就发生在这一层",
+          "§2.3 洋葱模型 对照实现：`lib/application.js` 的 `callback()` 用 `compose(this.middleware)` 把数组折成嵌套函数，`await next()` 前后各写一段——这就是 §2.3「进去一层、出来一层」的原始代码"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -571,19 +574,19 @@
       "status": "complete",
       "resources": {
         "github": [
-          "trekhleb/javascript-algorithms",
-          "Chalarangelo/30-seconds-of-code",
-          "yangshun/front-end-interview-handbook"
+          "sqlite/sqlite",
+          "graphql/dataloader",
+          "OAI/OpenAPI-Specification"
         ],
         "github_stars": [
-          196855,
-          129352,
-          44008
+          10890,
+          13391,
+          31291
         ],
         "github_notes": [
-          "JavaScript 算法与数据结构，含英文详解",
-          "短小精悍的 JS/CSS/HTML 代码片段集，覆盖日常前端技巧",
-          "前端面试手册：HTML/CSS/JS/浏览器/性能"
+          "§1.2 索引结构 · 最左前缀 存储引擎本体：`src/btree.c` 的 `sqlite3BtreeInsert` 与 `balance()` 演示 B+ 树怎么分裂合并，`src/where.c` 的 `whereBegin` 决定能用哪个索引前缀——「最左前缀」在这里是可用性判定，不是口诀",
+          "§2.2 N+1 修复范式：`src/index.js` 的 `enqueuePostPromiseJob` 把一个 tick 内的 key 全攒进 `_batch`，再一次性调 `batchLoadFn`——「用操作计数发现、用批量合并修复」的教科书实现",
+          "§4.1 契约优先 规范原文：`versions/3.1.0.md` 里 `paths` / `components/schemas` 的结构与 `$ref` 复用规则，`versions/3.0.3.md` 的 `nullable` 写法差异——先写契约再生成类型时，这两份是唯一权威"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -637,19 +640,19 @@
       "status": "complete",
       "resources": {
         "github": [
-          "trekhleb/javascript-algorithms",
-          "Chalarangelo/30-seconds-of-code",
-          "yangshun/front-end-interview-handbook"
+          "panva/jose",
+          "auth0/node-jsonwebtoken",
+          "OWASP/CheatSheetSeries"
         ],
         "github_stars": [
-          196855,
-          129352,
-          44008
+          7859,
+          18182,
+          33847
         ],
         "github_notes": [
-          "JavaScript 算法与数据结构，含英文详解",
-          "短小精悍的 JS/CSS/HTML 代码片段集，覆盖日常前端技巧",
-          "前端面试手册：HTML/CSS/JS/浏览器/性能"
+          "§2.1 三段结构与签名 规范级实现：`docs/jws/flattened/sign/README.md`、`docs/jws/compact/verify/functions/compactVerify.md` 说明签名的输入是 `BASE64URL(header).BASE64URL(payload)` 这串字节，不是解析后的 JSON——§2.1「签的是串不是对象」由此而来",
+          "§2.2 alg 混淆 · §3.1 无法主动失效 坑位本体：`verify.js` 的 `options.algorithms` 白名单是唯一能挡住 `alg:none` 的地方（不传就按 header 里声明的算法验）；`sign.js` 的 `expiresIn` 只写进 exp，服务端不查黑名单就撤不掉——§3.1 的固有缺陷",
+          "§3.2 密码存储 · §4.2 CSRF/XSS 权威基线：`cheatsheets/Password_Storage_Cheat_Sheet.md` 给了 argon2id 的参数下限与「不加盐等于送彩虹表」；`Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.md`、`Cross_Site_Scripting_Prevention_Cheat_Sheet.md` 分别对应 §4.2 的两类漏洞"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -701,19 +704,19 @@
       "status": "complete",
       "resources": {
         "github": [
-          "trekhleb/javascript-algorithms",
-          "Chalarangelo/30-seconds-of-code",
-          "yangshun/front-end-interview-handbook"
+          "realworld-apps/realworld",
+          "TanStack/query",
+          "vercel/next.js"
         ],
         "github_stars": [
-          196855,
-          129352,
-          44008
+          84363,
+          50520,
+          143463
         ],
         "github_notes": [
-          "JavaScript 算法与数据结构，含英文详解",
-          "短小精悍的 JS/CSS/HTML 代码片段集，覆盖日常前端技巧",
-          "前端面试手册：HTML/CSS/JS/浏览器/性能"
+          "§1 分层与契约 · §3.3 三态呈现 全栈样板：`docs/src/content/docs/specifications/frontend/api.md` 把「页面 → 数据层 → API」的边界写成契约，`backend/error-handling.md` 规定统一错误体——十几种语言实现共用同一份契约，正是 §1.2 的实物",
+          "§2.2 服务端状态 · 乐观更新 状态层本体：`packages/query-core/src/query.ts` 的 `staleTime` 与 `gcTime` 两个时钟把「新鲜度」和「回收」拆开；`mutation.ts` 的 `onMutate` / `onError` 回滚就是 §2.2 乐观更新的标准写法",
+          "§4.1 懒加载与代码分割 框架实现：`packages/next/src/client/` 的 `dynamic` 与路由级 chunk——构建期按入口拆 bundle、运行期按需拉，「首屏只付首屏的钱」在框架里是编译期决定，不是运行时的 `lazy()`"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -766,19 +769,22 @@
       "status": "complete",
       "resources": {
         "github": [
-          "trekhleb/javascript-algorithms",
-          "Chalarangelo/30-seconds-of-code",
-          "yangshun/front-end-interview-handbook"
+          "moby/buildkit",
+          "docker/compose",
+          "systemd/systemd",
+          "nektos/act"
         ],
         "github_stars": [
-          196855,
-          129352,
-          44008
+          10353,
+          38568,
+          16979,
+          72516
         ],
         "github_notes": [
-          "JavaScript 算法与数据结构，含英文详解",
-          "短小精悍的 JS/CSS/HTML 代码片段集，覆盖日常前端技巧",
-          "前端面试手册：HTML/CSS/JS/浏览器/性能"
+          "§2.1 缓存是前缀链 · §2.2 多阶段 构建器本体：`frontend/dockerfile/dockerfile2llb/convert.go` 把 Dockerfile 逐指令翻译成 LLB 图，`cache/manager.go` 按指令 + 输入摘要判命中——某层失效则其后全部重建，这条规律在这里是数据结构",
+          "§3.1 服务依赖与健康门 编排实现：`pkg/compose/create.go` 按 `depends_on` 与 `condition` 建依赖图并定启动顺序，`up.go` 负责等 healthcheck 通过再往下走——「死等 vs 直接报错」的循环依赖检测发生在建图阶段",
+          "§1.2 unit 文件 · §1.3 日志 语义权威：`man/systemd.service.xml` 规定 `Restart=` / `RestartSec=` / `StartLimitBurst=` 的精确含义（连重启节流都写在里面），`src/journal/journald.c` 说明结构化日志从哪来，`src/shared/logs-show.c` 是 `--since` / `--priority` 的过滤实现",
+          "§4.1 workflow → job → step 本地执行器：`pkg/model/workflow.go` 是 YAML 到结构体的映射（缺 `on` / `runs-on` 在这里就露馅），`pkg/model/planner.go` 按 `needs` 建 DAG 并算出可并行的层——「needs 指向不存在的 job」本地一跑就复现"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [

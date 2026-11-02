@@ -28,10 +28,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [DataTalksClub/data-engineering-zoomcamp](https://github.com/DataTalksClub/data-engineering-zoomcamp) | 46,562 | 全章 | 免费 9 周数据工程课程：含 Hadoop/Spark/数仓实践 |
-| 2 | [apache/spark](https://github.com/apache/spark) | 44,379 | 全章 | Apache Spark 官方仓库：RDD/SQL/调优权威来源 |
-| 3 | [heibaiying/BigData-Notes](https://github.com/heibaiying/BigData-Notes) | 16,993 | 全章 | 中文大数据入门指南：Hadoop/Hive/Spark/Flink 系统笔记 |
-| 4 | [apache/hadoop](https://github.com/apache/hadoop) | 15,705 | 全章 | Apache Hadoop 官方仓库：HDFS/YARN/MapReduce 实现 |
+| 1 | [DataTalksClub/data-engineering-zoomcamp](https://github.com/DataTalksClub/data-engineering-zoomcamp) | 46,562 | §1.2 | 讲「ODS/DWD/DWS/ADS 四层」时看 `week4-analytics/` 的数仓作业：从原始 JSON 到宽表再聚合到指标表，每一层的输入输出都是独立的表，层与层的调用关系就是分层规范的落地 |
+| 2 | [apache/spark](https://github.com/apache/spark) | 44,379 | §4.3 | 讲「小文件合并」时读 `sql/core/src/main/scala/org/apache/spark/sql/execution/datasources/` 的写入路径：`repartition` 与 `coalesce` 在写出前决定文件数，分区数乘作业批次就是「每天新增多少小文件」 |
+| 3 | [heibaiying/BigData-Notes](https://github.com/heibaiying/BigData-Notes) | 16,993 | §2.2 | 讲「维度建模与粒度」时读 `BigData-Notes` 里的数仓篇：「先声明粒度再选维度」这条顺序错了，后面所有指标口径都会漂移——文档给了「订单事实表」的完整推演 |
+| 4 | [apache/hadoop](https://github.com/apache/hadoop) | 15,705 | §3.1 | 讲「调度与 SLA」时对照 `hadoop-yarn-project/` 的队列与容量调度：YARN 的 `CapacityScheduler` 决定「哪个队列先跑」，数仓的基线任务要放在高优先级队列，否则被离线任务挤掉 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

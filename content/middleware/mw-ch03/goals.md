@@ -19,10 +19,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | 全章 | 含 Redis 与消息队列的高频面试知识；本章先读与「① 全量同步 PSYNC」「② 部分同步 repl_b…」相关的部分 |
-| 2 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | 全章 | 高并发与分布式：缓存、消息队列、分库分表专题；本章先读与「① 全量同步 PSYNC」「② 部分同步 repl_b…」相关的部分 |
-| 3 | [redis/redis](https://github.com/redis/redis) | 77,127 | 全章 | Redis 官方源码仓库：数据结构与命令实现的权威来源；本章先读与「① 全量同步 PSYNC」「② 部分同步 repl_b…」相关的部分 |
-| 4 | [apache/kafka](https://github.com/apache/kafka) | 34,105 | 全章 | Apache Kafka 官方仓库：架构与协议实现；本章先读与「① 全量同步 PSYNC」「② 部分同步 repl_b…」相关的部分 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §2.1 | 讲「哨兵的主观/客观下线」时读 `docs/database/redis/` 的高可用篇：单个哨兵判 SDOWN 只是「我觉得」，凑够 quorum 才升 ODOWN，`majority` 与 `quorum` 是两个不同的数——配错就会「以为三个哨兵就安全」 |
+| 2 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §3.2 | 讲「脑裂与 min-replicas-to-write」时对照 `docs/high-concurrency/` 的 Redis 集群文章：老主库网络分区后仍接受写入，恢复时这部分数据被覆盖，`min-replicas-to-write` 用「写成功必须至少 N 个从库确认」把风险压到配置层面 |
+| 3 | [redis/redis](https://github.com/redis/redis) | 77,127 | §1.1 | 讲「全量同步 PSYNC」时读 `src/replication.c`：`repl_backlog` 环形缓冲区 + `master_repl_offset` 让「断线重连只补差额」成为可能，缓冲区太小就只能退回全量同步——这是「主从频繁全量」的第一排查点 |
+| 4 | [apache/kafka](https://github.com/apache/kafka) | 34,105 | §2.2 | 讲「选主与多数派」时对照 `core/src/main/scala/kafka/controller/` 的选举逻辑：Kafka 用 Controller + ZK/KRaft 选 leader，Redis Sentinel 用 Raft 式投票，两者的共同前提都是「多数派还活着」 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

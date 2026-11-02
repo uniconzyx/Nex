@@ -31,12 +31,12 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,257 | 全章 | 深度学习框架官方仓库，工业级模型工程范例；本章先读与「主题一」「主题二」相关的部分 |
-| 2 | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 197,476 | 全章 | 为 AI Agent 提供网页数据：抓取到结构化数据的工程实现；本章先读与「主题一」「主题二」相关的部分 |
-| 3 | [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) | 187,852 | 全章 | 自主 Agent 的开创性项目，Agent 架构与工具循环的经典参考；本章先读与「主题一」「主题二」相关的部分 |
-| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | 全章 | Transformer 模型定义框架：从 BERT/GPT 到多模态的全量实现；本章先读与「主题一」「主题二」相关的部分 |
-| 5 | [langgenius/dify](https://github.com/langgenius/dify) | 160,127 | 全章 | Agentic 工作流与 RAG 流水线平台：生产级 LLM 应用工程范例；本章先读与「主题一」「主题二」相关的部分 |
-| 6 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | 全章 | Agent 工程平台：工具、记忆、检索与编排的工业实现；本章先读与「主题一」「主题二」相关的部分 |
+| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,257 | §2.1 | 讲「推理与训练的资源差异」时读 `tensorflow/python/eager/` 的执行模式：推理不需要保留中间激活，显存占用远小于训练——本章的显存账本要分开算 |
+| 2 | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 197,476 | §3.3 | 讲「可观测性的输入侧」时读 `apps/api/src/` 的抓取日志：记录「抓了什么、耗时多少、失败原因」，是排查「RAG 突然答不准」的第一手材料 |
+| 3 | [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) | 187,852 | §4.3 | 讲「Agent 的失败模式」时看主循环的超时与重试：没有步数上限与超时就会无限循环烧 token，这是 LLM 应用最常见的成本事故 |
+| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §3.2 | 讲「评测与可观测」时读 `src/transformers/trainer.py` 的 `evaluate`：指标计算与日志记录绑在训练循环上，推理侧要自己搭一套对应的观测 |
+| 5 | [langgenius/dify](https://github.com/langgenius/dify) | 160,127 | §4.2 | 讲「提示缓存与成本」时读 `api/core/model_runtime/` 的调用封装：同样的系统提示重复发送可以命中上游缓存，这是「成本控制」最直接的一条 |
+| 6 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | §4.1 | 讲「LLM 应用的安全边界」时读 `libs/langchain/langchain/` 的 output parser 与 guard：解析失败要兜底、输出要过滤，不能假设模型一定守规矩 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

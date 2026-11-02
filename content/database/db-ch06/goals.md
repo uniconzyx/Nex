@@ -29,9 +29,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | 全章 | 含 MySQL 索引、事务、锁与调优的系统讲解；本章先读与「函数依赖」「属性闭包 X+ 与候选键求解」相关的部分 |
-| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | 全章 | 真实业务库表设计范例与 SQL 实践；本章先读与「函数依赖」「属性闭包 X+ 与候选键求解」相关的部分 |
-| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | 全章 | 含分库分表、读写分离与分布式事务；本章先读与「函数依赖」「属性闭包 X+ 与候选键求解」相关的部分 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §2.1 | 讲「1NF 与 2NF」时读 `docs/database/mysql/` 的范式专题：属性原子性与「非主属性完全依赖候选键」是两个独立的判据，把「多值字段存逗号串」当 1NF 违规是最常见的误判 |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §4.3 | 讲「何时故意反范式」时看 `pms_product` 与 `pms_sku_stock`：商品名、价格在 SKU 表里冗余一份，是为了「列表页一次查询拿全」而不做 JOIN——冗余的代价是「改商品名要同步更新所有 SKU」 |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §3.2 | 讲「反范式与分库分表」时对照 `docs/high-concurrency/mysql-sharding.md`：分片后跨库 JOIN 不可用，只能靠「冗余字段 + 异步补偿」，这时范式让位于「查询能不能一次走完」 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

@@ -60,10 +60,10 @@ Java 的 IO 是**面试密度最高、工程出事最多**的一块：
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | 全章 | Java 面试与后端通用指南：计算机基础、数据库、分布式、高并发、系统设计；本章先读与「主题一」「主题二」相关的部分 |
-| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | 全章 | SpringBoot + MyBatis 电商实战项目，含 Docker 部署，工程范例；本章先读与「主题一」「主题二」相关的部分 |
-| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | 全章 | 互联网 Java 工程师进阶知识：高并发、分布式、微服务；本章先读与「主题一」「主题二」相关的部分 |
-| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | 全章 | Spring 官方生态的系统化代码教程仓库；本章先读与「主题一」「主题二」相关的部分 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §1.1 | 讲「字节流与字符流的边界」时读 `docs/java/io/` 的基础篇：编码发生在 `InputStreamReader` 这个桥接点，`FileReader` 用平台默认编码所以跨环境必乱码——这条结论在本章有对应的可运行代码 |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §2.1 | 讲「Path 与 Files」时看 `mall-admin` 的文件上传实现：`Files.copy`/`Files.createDirectories` 替代了 `File` 的布尔返回值风格，异常直接抛出而不是静默返回 false |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §3.1 | 讲「Selector 多路复用」时对照 `docs/high-concurrency/` 里「为什么 Redis 单线程还快」的分析：IO 多路复用把「等待」从线程里拿掉，与本章 Channel/Buffer/Selector 的模型是同一套思路 |
+| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §4.1 | 讲「序列化」时看 `core-java` 的序列化示例：`serialVersionUID` 不一致会抛 `InvalidClassException`、`transient` 字段不参与序列化，两个坑各有一条最小复现 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

@@ -52,10 +52,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | 全章 | 含 Redis 与消息队列的高频面试知识；本章先读与「§1 三大价值」「§2 引入 MQ 的代价」相关的部分 |
-| 2 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | 全章 | 高并发与分布式：缓存、消息队列、分库分表专题；本章先读与「§1 三大价值」「§2 引入 MQ 的代价」相关的部分 |
-| 3 | [redis/redis](https://github.com/redis/redis) | 77,127 | 全章 | Redis 官方源码仓库：数据结构与命令实现的权威来源；本章先读与「§1 三大价值」「§2 引入 MQ 的代价」相关的部分 |
-| 4 | [apache/kafka](https://github.com/apache/kafka) | 34,105 | 全章 | Apache Kafka 官方仓库：架构与协议实现；本章先读与「§1 三大价值」「§2 引入 MQ 的代价」相关的部分 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §1.1 | 讲「MQ 的三大价值」时读 `docs/database/kafka/` 的入门篇：削峰、解耦、异步——三者都成立的前提是「允许最终一致」，如果业务要求强一致，引入 MQ 只会把问题变成「分布式事务」 |
+| 2 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §2.2 | 讲「选型矩阵」时对照 `docs/high-concurrency/` 的消息队列对比文章：吞吐（Kafka/RocketMQ 高）、路由灵活度（RabbitMQ 强）、事务与延迟消息（RocketMQ 有）——先过硬约束再加权打分，不要一上来比 benchmark |
+| 3 | [redis/redis](https://github.com/redis/redis) | 77,127 | §1.3 | 讲「什么时候用 Redis Stream 而不是 MQ」时对照 `src/t_stream.c`：Stream 有消费组与 ACK，但没有分区与副本，「轻量队列」够用；一旦要「百万级积压 + 多副本」，就超出它的设计边界 |
+| 4 | [apache/kafka](https://github.com/apache/kafka) | 34,105 | §3.1 | 讲「积压的数学」时读 `core/src/main/scala/kafka/log/Log.scala` 的分区模型：单个分区只能被一个消费者消费，所以「加消费者」的上限就是分区数——积压时先扩分区再扩实例，顺序反了就白扩 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

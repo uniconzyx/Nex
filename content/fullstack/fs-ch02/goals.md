@@ -22,14 +22,14 @@
 - 能指出一段布局代码里的「强制同步布局（layout thrashing）」并给出修复。
 ## 本章 GitHub 学习路线（按阅读顺序）
 
-> ★ 为 **2026-10-27** 的 GitHub API 快照（已逐条验证仓库存在）。
+> ★ 为 **2026-11-02** 的 GitHub API 快照（已逐条验证仓库存在）。
 > 顺序即路线：**先读能跑的最小实现 → 再读同章对照实现 → 最后读工业级库**。「对应本章」写 `§x.y` 的，说明这份仓库与本章那一节直接对应，先读那里；写「全章」的，按右侧「读什么」给的入口文件读，不要从 README 通读。
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [trekhleb/javascript-algorithms](https://github.com/trekhleb/javascript-algorithms) | 196,715 | 全章 | JavaScript 算法与数据结构，含英文详解；本章先读与「BFC」「Reflow / Repa…」相关的部分 |
-| 2 | [Chalarangelo/30-seconds-of-code](https://github.com/Chalarangelo/30-seconds-of-code) | 129,384 | 全章 | 短小精悍的 JS/CSS/HTML 代码片段集，覆盖日常前端技巧；本章先读与「BFC」「Reflow / Repa…」相关的部分 |
-| 3 | [yangshun/front-end-interview-handbook](https://github.com/yangshun/front-end-interview-handbook) | 44,006 | 全章 | 前端面试手册：HTML/CSS/JS/浏览器/性能；本章先读与「BFC」「Reflow / Repa…」相关的部分 |
+| 1 | [w3c/csswg-drafts](https://github.com/w3c/csswg-drafts) | 4,901 | §2.2 box-sizing · §2.3 格式化上下文 | 规范原文：`css-box-3/Overview.bs` 里 box-sizing 与 margin 合并的定义、`css-display-3/Overview.bs` 里 flow-root 生成 BFC 的条文——「margin 为什么穿透父元素」在这里是规范，不是经验 |
+| 2 | [Chalarangelo/30-seconds-of-code](https://github.com/Chalarangelo/30-seconds-of-code) | 129,352 | §5 实用片段 | 片段库：读 `snippets/` 下带 `css` / `browser` 标签的条目（水平垂直居中、等分布局、清除浮动），每条都是可直接粘的最小实现，正好对照 §5 那四行 CSS 改了三天的那件事 |
+| 3 | [yangshun/front-end-interview-handbook](https://github.com/yangshun/front-end-interview-handbook) | 44,008 | §1.1 语义化 · §3.3 重排与重绘 | 题库：`questions/html-questions.md` 用「全 div 堆出来的页面哪里坏了」讲语义化，`questions/css-questions.md` 把 reflow / repaint / 合成层分开问——与 §1.1、§3.3 的判据一一对应 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

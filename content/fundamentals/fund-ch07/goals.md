@@ -40,9 +40,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | 全章 | 系统设计入门：性能、一致性、可用性与面试题（408 之上的系统视野）；本章先读与「为什么要发明补码」「四种表示的定义」相关的部分 |
-| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | 全章 | 完整的计算机科学自学计划：数据结构、算法、OS、网络全覆盖；本章先读与「为什么要发明补码」「四种表示的定义」相关的部分 |
-| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | 全章 | 中文技术面试必备：操作系统、计算机网络、组成原理、算法、数据库；本章先读与「为什么要发明补码」「四种表示的定义」相关的部分 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §3.1 | 讲「浮点精度对业务的影响」时读 `solutions/` 里涉及计数的设计：金额必须用整数或定点数，浮点的非结合性会让「累加顺序不同结果不同」 |
+| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | §2.3 | 讲「位运算技巧」时读 README 的 Bit Manipulation 一节：`x & (x-1)` 清最低位 1、`x & -x` 取最低位 1，两道练习把这两个技巧练熟 |
+| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §1.1 | 讲「补码为什么统一加减法」时读 `docs/计算机组成原理/` 的数据表示篇：模 2^n 剩余类的角度解释了「取反加一」，比「记住规则」更能推导出范围 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

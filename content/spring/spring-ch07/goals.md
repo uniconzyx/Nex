@@ -65,10 +65,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | 全章 | SpringBoot + MyBatis 完整电商项目，最佳工程范例；本章先读与「条件标签」「智能修剪」相关的部分 |
-| 2 | [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81,722 | 全章 | Spring Boot 官方仓库：源码、文档与示例；本章先读与「条件标签」「智能修剪」相关的部分 |
-| 3 | [YunaiV/ruoyi-vue-pro](https://github.com/YunaiV/ruoyi-vue-pro) | 40,149 | 全章 | 企业级快速开发平台：Spring Boot + MyBatis Plus 全栈实现；本章先读与「条件标签」「智能修剪」相关的部分 |
-| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | 全章 | Spring 生态系统化教程代码；本章先读与「条件标签」「智能修剪」相关的部分 |
+| 1 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §1.2 | 讲「动态 SQL」时看 `mall-mbg` 的 `Example` 生成的 `<if>`/`<foreach>`：条件越多 SQL 越不可控，复杂查询应手写 XML 而不是让代码生成器堆条件 |
+| 2 | [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81,722 | §2.2 | 讲「一级/二级缓存」时读 `spring-boot` 的事务同步机制：MyBatis 的一级缓存挂在 `SqlSession` 上，而 `SqlSession` 与事务绑定——所以「同一事务内改完再查仍是旧值」是缓存语义而非 bug |
+| 3 | [YunaiV/ruoyi-vue-pro](https://github.com/YunaiV/ruoyi-vue-pro) | 40,149 | §3.3 | 讲「插件机制」时看 `yudao-framework/yudao-spring-boot-starter-mybatis` 的分页与数据权限插件：拦截 `Executor.query` 改写 SQL，比在业务层手写 `limit` 更统一 |
+| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §4.1 | 讲「resultMap 关联查询」时看 `spring-boot-tutorials` 的 MyBatis 示例：`association`（一对一）与 `collection`（一对多）的嵌套映射，配 `fetchType="lazy"` 可延迟加载 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

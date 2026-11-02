@@ -41,9 +41,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | 全章 | 系统设计入门：性能、一致性、可用性与面试题（408 之上的系统视野）；本章先读与「两种结构的内存布局」「访问与修改的代价」相关的部分 |
-| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | 全章 | 完整的计算机科学自学计划：数据结构、算法、OS、网络全覆盖；本章先读与「两种结构的内存布局」「访问与修改的代价」相关的部分 |
-| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | 全章 | 中文技术面试必备：操作系统、计算机网络、组成原理、算法、数据库；本章先读与「两种结构的内存布局」「访问与修改的代价」相关的部分 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §3.1 | 讲「为什么基础结构影响系统设计」时读 `solutions/` 里的缓存设计题：LRU 用哈希表 + 双向链表实现，本章的「已知位置才能 O(1) 删除」正是它成立的前提 |
+| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | §2.1 | 讲「双指针与链表操作」时读 README 里 Data Structures 的 Linked Lists 一节：给的练习题（逆置、找环、合并有序链表）与本章「一写就错」的清单高度重合 |
+| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §1.2 | 讲「顺序表与链表的取舍」时读 `docs/算法/` 下的线性表篇：它用「随机访问 vs 插入删除」两列对比，重点看它对「链表每结点多一个指针域」的空间代价的量化 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

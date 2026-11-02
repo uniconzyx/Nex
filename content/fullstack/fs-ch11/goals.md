@@ -11,10 +11,10 @@
 
 | # | 仓库 | Star | 对应本章 | 读什么 |
 | --- | --- | ---: | --- | --- |
-| 1 | [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81,722 | §1 分层 · §3 校验 | 脚手架与自动配置：读 `spring-boot-autoconfigure` 理解 starter 如何收口分层 |
-| 2 | [spring-projects/spring-framework](https://github.com/spring-projects/spring-framework) | 60,307 | §2 异常 · §3 校验 | 核心容器与 AOP：读 `web` 模块 `@ControllerAdvice`、Jakarta Validation 集成，对应 §2、§3 |
-| 3 | [spring-projects/spring-security](https://github.com/spring-projects/spring-security) | 9,653 | §2.4 不返堆栈 | 安全与异常处理：认证失败响应结构，对应 §2.4 绝不要把堆栈返前端 |
-| 4 | [openjdk/jdk](https://github.com/openjdk/jdk) | 23,477 | §3 校验 | Jakarta Validation 源自 Bean Validation（`java.validation`），对应 §3.1 |
+| 1 | [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81,722 | §1.1 三层与依赖方向 | `spring-boot-autoconfigure` 的 `AutoConfiguration.imports` + `@ConditionalOnMissingBean`：starter 只在你没自己声明时才装配——分层边界在框架里的落地方式 |
+| 2 | [spring-projects/spring-framework](https://github.com/spring-projects/spring-framework) | 60,307 | §2.1 统一异常收口 · §2.2 匹配顺序 | `spring-webmvc` 的 `ExceptionHandlerExceptionResolver` 按 `@ExceptionHandler` 的匹配精度挑方法，`@ControllerAdvice` 的 `basePackages` / `assignableTypes` 决定它盖住哪些 Controller——§2.2 的作用域规则 |
+| 3 | [spring-projects/spring-security](https://github.com/spring-projects/spring-security) | 9,653 | §2.3 可观测性 · §1.2 职责边界 | `FilterChainProxy` 在 DispatcherServlet 之前就拦掉未认证请求，`AuthenticationEntryPoint` 决定 401/403 的响应体——业务层拿不到原始异常，堆栈自然不会漏到前端（§2.4） |
+| 4 | [openjdk/jdk](https://github.com/openjdk/jdk) | 23,477 | §3.2 边界与性能 | `java.util.regex.Pattern` 的回溯实现：`(a+)+$` 这类嵌套量词能把校验入口的 CPU 打满（ReDoS）——§3.2「校验也要限长限深」不是洁癖 |
 
 > 全部为工业级真实仓库；Star 数为本会话经 GitHub API 实取快照，仅供路线排序参考。
 

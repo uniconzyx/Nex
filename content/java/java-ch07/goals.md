@@ -34,10 +34,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | 全章 | Java 面试与后端通用指南：计算机基础、数据库、分布式、高并发、系统设计；本章先读与「`start」「六种状态与迁移条件」相关的部分 |
-| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | 全章 | SpringBoot + MyBatis 电商实战项目，含 Docker 部署，工程范例；本章先读与「`start」「六种状态与迁移条件」相关的部分 |
-| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | 全章 | 互联网 Java 工程师进阶知识：高并发、分布式、微服务；本章先读与「`start」「六种状态与迁移条件」相关的部分 |
-| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | 全章 | Spring 官方生态的系统化代码教程仓库；本章先读与「`start」「六种状态与迁移条件」相关的部分 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §2.1 | 讲「JMM 与 happens-before」时读 `docs/java/concurrent/` 的并发基础问答：`volatile` 给可见性与有序性、不给原子性，`count++` 用它照样丢更新——本章的可运行代码会把这个结论跑出来 |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §3.1 | 讲「线程池七参数」时看 `mall-portal` 里的异步任务配置：核心数、队列、拒绝策略三者的组合决定了「任务堆积时是先扩容还是先拒绝」，无界队列会让 OOM 来得更晚但更猛 |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §3.2 | 讲「线程池任务流程」时对照 `docs/high-concurrency/threadpool.md`：核心线程 → 队列 → 最大线程 → 拒绝策略的四级判定，它用图示说明了「为什么不是先扩容」 |
+| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §4.1 | 讲「AQS 与 ReentrantLock」时看 `core-java` 的锁示例：公平锁与非公平锁的吞吐差异、`tryLock` 的超时语义，样例里能直接改参数对比 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

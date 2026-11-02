@@ -37,9 +37,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | 全章 | 系统设计入门：性能、一致性、可用性与面试题（408 之上的系统视野）；本章先读与「树的递归定义，就是遍历的模板」「为什么中序对 BST 是「…」相关的部分 |
-| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | 全章 | 完整的计算机科学自学计划：数据结构、算法、OS、网络全覆盖；本章先读与「树的递归定义，就是遍历的模板」「为什么中序对 BST 是「…」相关的部分 |
-| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | 全章 | 中文技术面试必备：操作系统、计算机网络、组成原理、算法、数据库；本章先读与「树的递归定义，就是遍历的模板」「为什么中序对 BST 是「…」相关的部分 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §3.2 | 讲「树在系统设计里的位置」时读 `solutions/` 的索引设计：B 树/B+ 树把「有序 + 多叉」结合，是「树的高度决定磁盘 IO 次数」的工业应用 |
+| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | §2.2 | 讲「BST 与堆的区别」时读 README 的 Trees 一节：BST 保证「中序有序」、堆只保证「父大于子」，两者的不变量不同，适用的题也不同 |
+| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §1.1 | 讲「遍历序列互推」时读 `docs/算法/` 的二叉树篇：前序 + 中序能唯一确定、前序 + 后序不能——文档给了两组对照例子，把「为什么不能」演示清楚 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

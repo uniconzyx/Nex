@@ -24,10 +24,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | 全章 | SpringBoot + MyBatis 完整电商项目，最佳工程范例；本章先读与「完整生命周期阶段」「初始化与销毁的三种方式及顺序」相关的部分 |
-| 2 | [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81,722 | 全章 | Spring Boot 官方仓库：源码、文档与示例；本章先读与「完整生命周期阶段」「初始化与销毁的三种方式及顺序」相关的部分 |
-| 3 | [YunaiV/ruoyi-vue-pro](https://github.com/YunaiV/ruoyi-vue-pro) | 40,149 | 全章 | 企业级快速开发平台：Spring Boot + MyBatis Plus 全栈实现；本章先读与「完整生命周期阶段」「初始化与销毁的三种方式及顺序」相关的部分 |
-| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | 全章 | Spring 生态系统化教程代码；本章先读与「完整生命周期阶段」「初始化与销毁的三种方式及顺序」相关的部分 |
+| 1 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §1.3 | 讲「Aware 回调与初始化顺序」时看 `mall` 里实现 `ApplicationRunner` 的启动任务：它比 `@PostConstruct` 更晚，适合「容器就绪后才执行」的预热逻辑 |
+| 2 | [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81,722 | §2.2 | 讲「Bean 生命周期」时读 `spring-boot/src/main/java/org/springframework/boot/SpringApplication.java` 的 `run` 方法：`prepareContext` → `refreshContext` → `afterRefresh`，`BeanPostProcessor` 的介入点就藏在这三步之间 |
+| 3 | [YunaiV/ruoyi-vue-pro](https://github.com/YunaiV/ruoyi-vue-pro) | 40,149 | §3.2 | 讲「多模块下的 Bean 覆盖」时看 `yudao-module-system` 对 framework 里默认 Bean 的替换：靠 `@ConditionalOnMissingBean` 让业务方可以覆盖，这是 starter 设计的通用约定 |
+| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §4.2 | 讲「循环依赖」时看 `spring-boot-tutorials` 里的构造器注入案例：两个 Bean 互相构造器依赖会直接抛 `BeanCurrentlyInCreationException`，三级缓存救不了它 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

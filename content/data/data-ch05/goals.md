@@ -52,10 +52,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | 全章 | 经典机器学习库官方仓库：算法实现与最佳实践；本章先读与「请求方法、状态码与"这份响…」「重定向链、Cookie 与…」相关的部分 |
-| 2 | [jakevdp/PythonDataScienceHandbook](https://github.com/jakevdp/PythonDataScienceHandbook) | 50,277 | 全章 | 《Python 数据科学手册》全书 Jupyter Notebook（NumPy/Pandas/Matplotlib）；本章先读与「请求方法、状态码与"这份响…」「重定向链、Cookie 与…」相关的部分 |
-| 3 | [pandas-dev/pandas](https://github.com/pandas-dev/pandas) | 50,278 | 全章 | Pandas 官方仓库：API 与内部机制权威来源；本章先读与「请求方法、状态码与"这份响…」「重定向链、Cookie 与…」相关的部分 |
-| 4 | [microsoft/Data-Science-For-Beginners](https://github.com/microsoft/Data-Science-For-Beginners) | 37,860 | 全章 | 微软官方 10 周数据科学课程；本章先读与「请求方法、状态码与"这份响…」「重定向链、Cookie 与…」相关的部分 |
+| 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | §4.1 | 讲「采集数据的质量校验」时读 `sklearn/utils/validation.py` 的 `check_array`：形状、dtype、NaN 的检查顺序，可以直接照搬成采集后的自检清单 |
+| 2 | [jakevdp/PythonDataScienceHandbook](https://github.com/jakevdp/PythonDataScienceHandbook) | 50,277 | §1.1 | 讲「数据来源与格式」时读 `notebooks/03.03-Hierarchy-Indexing.ipynb`：层级索引能把「多来源数据」压进一个 DataFrame，比手工拼列更不容易错位 |
+| 3 | [pandas-dev/pandas](https://github.com/pandas-dev/pandas) | 50,278 | §3.1 | 讲「解析后落表」时读 `pandas/io/json/`：`json_normalize` 把嵌套 JSON 拍平成表，是「采集 → 结构化」最常用的一步 |
+| 4 | [microsoft/Data-Science-For-Beginners](https://github.com/microsoft/Data-Science-For-Beginners) | 37,860 | §2.2 | 讲「采集的合规边界」时看 `1-Introduction/` 里的数据伦理一课：只采公开且允许抓取的数据、遵守 robots.txt 与频率限制——这条在本章有明确约束 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

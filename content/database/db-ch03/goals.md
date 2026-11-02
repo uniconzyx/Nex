@@ -14,9 +14,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | 全章 | 含 MySQL 索引、事务、锁与调优的系统讲解；本章先读与「可运行代码」「覆盖索引」相关的部分 |
-| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | 全章 | 真实业务库表设计范例与 SQL 实践；本章先读与「可运行代码」「覆盖索引」相关的部分 |
-| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | 全章 | 含分库分表、读写分离与分布式事务；本章先读与「可运行代码」「覆盖索引」相关的部分 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §1.1 | 讲「为什么是 B+ 树」时读 `docs/database/mysql/mysql-index.md`：B+ 树把数据全放叶子、非叶子只存键，因此一个 16KB 页能装更多键、树更矮——磁盘 IO 次数稳定在 3~4 次，这是它胜过二叉树与哈希的根本原因 |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §2.1 | 讲「聚簇索引与二级索引」时看 `document/sql/mall.sql` 里每张表的 `PRIMARY KEY (id)` 与业务唯一键：InnoDB 的二级索引叶子存主键，所以「按业务键查」要回表一次，这解释了「为什么覆盖索引能把这次回表省掉」 |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §3.3 | 讲「MVCC 与当前读」时对照 `docs/high-concurrency/mysql-lock.md`：快照读靠 undo 版本链 + ReadView，当前读（`SELECT ... FOR UPDATE`）才加锁——「可重复读下仍会幻读」的现场就出在这两者的边界上 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

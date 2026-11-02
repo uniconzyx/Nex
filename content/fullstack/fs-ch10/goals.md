@@ -11,10 +11,10 @@
 
 | # | 仓库 | Star | 对应本章 | 读什么 |
 | --- | --- | ---: | --- | --- |
-| 1 | [vuejs/core](https://github.com/vuejs/core) | 54,801 | §1.1 Proxy · §1.6 心智模型 | 响应式内核：读 `packages/reactivity/src` 的 `effect.ts` 与 `dep.ts`，依赖收集与触发正是 §1.1、§1.6 讲的那套 |
-| 2 | [vuejs/pinia](https://github.com/vuejs/pinia) | 14,755 | §3.1 两种写法 | 状态管理实现：读 `src/store.ts` 的 `defineStore`，options 与 setup 两套入口对应 §3.1 |
-| 3 | [vuejs/router](https://github.com/vuejs/router) | 4,706 | §2.1 路由 | 前端路由：历史模式与导航守卫，对应 §2.1 的路由边界 |
-| 4 | [vuejs/rfcs](https://github.com/vuejs/rfcs) | 4,926 | §1.3 ref.value · §2.1 | RFC 文本：ref 必须 .value、响应式边界的设计讨论，直接对应 §1.3、§2.1 |
+| 1 | [vuejs/core](https://github.com/vuejs/core) | 54,801 | §1.1 Proxy 依赖收集 · §1.2 computed 派发 | `packages/reactivity/src` 的 `effect.ts` 建 effect 树、`dep.ts` 用 Set 存订阅者、`baseHandlers.ts` 在 get 时 `track`、set 时 `trigger`；`computed.ts` 的 dirty 标记回答 §1.2「computed 什么时候才重算」 |
+| 2 | [vuejs/pinia](https://github.com/vuejs/pinia) | 14,755 | §3.1 两种写法 · §3.3 反模式 | `src/store.ts` 的 `defineStore` 同时接受对象与函数两种入参，内部都归一成 reactive state + actions——§3.1「两种写法不是两套机制」的源码依据；`mapHelpers` 里的 `storeToRefs` 是 §3.3 解构丢响应式的正解 |
+| 3 | [vuejs/router](https://github.com/vuejs/router) | 4,706 | §2.1 ref 与生命周期边界 | `src/router.ts` 的守卫按 `beforeEach → 组件内钩子 → afterEach` 排序；路由切换后 store 该不该重置，取决于你把 store 放进守卫还是放进组件——§2.1 的边界问题在这里有明确答案 |
+| 4 | [vuejs/rfcs](https://github.com/vuejs/rfcs) | 4,926 | §1.3 .value 的由来 · §2.3 设计取舍 | `active-rfcs/` 里响应式相关提案（ref 拆包、reactivity transform）的讨论解释了为什么模板里不写 `.value`、JS 里必须写——§1.3 与 §2.3 的边界是设计决议，不是实现巧合 |
 
 > 全部为工业级真实仓库；Star 数为本会话经 GitHub API 实取快照，仅供路线排序参考。
 

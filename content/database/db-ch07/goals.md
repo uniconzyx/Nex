@@ -31,9 +31,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | 全章 | 含 MySQL 索引、事务、锁与调优的系统讲解；本章先读与「逻辑备份与物理备份」「备份策略」相关的部分 |
-| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | 全章 | 真实业务库表设计范例与 SQL 实践；本章先读与「逻辑备份与物理备份」「备份策略」相关的部分 |
-| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | 全章 | 含分库分表、读写分离与分布式事务；本章先读与「逻辑备份与物理备份」「备份策略」相关的部分 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §1.1 | 讲「逻辑备份 vs 物理备份」时读 `docs/database/mysql/` 的运维章节：`mysqldump` 导出的是 SQL 文本（可跨版本、慢），`xtrabackup` 拷的是数据文件（快、要同版本），两者的恢复时间差一个数量级 |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §3.1 | 讲「最小权限」时看 `mall` 的 `application.yml` 里的数据源账号：业务账号只需要 `SELECT/INSERT/UPDATE/DELETE`，给 `DROP` 权限等于把「一次注入」升级成「删库」 |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §2.2 | 讲「binlog 与 PITR」时对照 `docs/high-concurrency/` 的 MySQL 文章：`ROW` 格式记的是行变更前后镜像，所以能做「精确到秒的时间点恢复」，`STATEMENT` 格式在 `NOW()`/`UUID()` 上无法重现 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

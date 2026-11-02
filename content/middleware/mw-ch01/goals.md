@@ -17,10 +17,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | 全章 | 含 Redis 与消息队列的高频面试知识；本章先读与「① SDS」「② String 对象的三…」相关的部分 |
-| 2 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | 全章 | 高并发与分布式：缓存、消息队列、分库分表专题；本章先读与「① SDS」「② String 对象的三…」相关的部分 |
-| 3 | [redis/redis](https://github.com/redis/redis) | 77,127 | 全章 | Redis 官方源码仓库：数据结构与命令实现的权威来源；本章先读与「① SDS」「② String 对象的三…」相关的部分 |
-| 4 | [apache/kafka](https://github.com/apache/kafka) | 34,105 | 全章 | Apache Kafka 官方仓库：架构与协议实现；本章先读与「① SDS」「② String 对象的三…」相关的部分 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §1.3 | 讲「string 的三种编码」时读 `docs/database/redis/` 的底层数据结构篇：`int`/`embstr`/`raw` 的分界点是 44 字节，embstr 与 redisObject 一次分配、raw 两次——这解释了「45 字节的 key 比 44 字节多一次内存分配」 |
+| 2 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §4.1 | 讲「渐进式 rehash」时对照 `docs/high-concurrency/` 的 Redis 系列：`ht[0]`/`ht[1]` 双表 + `rehashidx` 游标 + 每次操作搬一个桶，把 O(n) 的扩容摊到多次操作上，这是「不阻塞单线程」的关键设计 |
+| 3 | [redis/redis](https://github.com/redis/redis) | 77,127 | §1.1 | 讲「为什么不用 C 字符串」时读 `src/sds.c`：`sdsnewlen` 按长度分 sdshdr5/8/16/32/64 五种头部、`len`/`alloc` 两个字段让取长度变成 O(1)、`sdscatlen` 按需预分配——三处细节合起来就是「二进制安全 + 免 strlen」的完整答案 |
+| 4 | [apache/kafka](https://github.com/apache/kafka) | 34,105 | §3.2 | 讲「编码转换的触发条件」时对照 `clients/src/main/java/org/apache/kafka/common/utils/` 下的集合实现：Kafka 用自定义 `Bytes`/`ByteBuffer` 包装避免装箱，与 Redis「小对象用紧凑编码」是同一种「按规模选表示」的思路 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

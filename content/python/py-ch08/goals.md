@@ -54,9 +54,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 225,745 | 全章 | Python 实现的全部经典算法，含详细注释；本章先读与「主题一」「主题二」相关的部分 |
-| 2 | [jackfrued/Python-100-Days](https://github.com/jackfrued/Python-100-Days) | 187,609 | 全章 | Python 100 天从新手到大师（中文系统教程）；本章先读与「主题一」「主题二」相关的部分 |
-| 3 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,917 | 全章 | 微软官方 12 周机器学习入门课程，含 26 课与测验；本章先读与「主题一」「主题二」相关的部分 |
+| 1 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 225,745 | §1.1 | 讲「纯 Python 与向量化的差距」时读 `sorts/` 的实现：纯 Python 循环排序在十万级数据上比 `numpy.sort` 慢两个数量级，这是「为什么数值计算要用 ndarray」的最直观对照 |
+| 2 | [jackfrued/Python-100-Days](https://github.com/jackfrued/Python-100-Days) | 187,609 | §3.1 | 讲「pandas 的索引与切片」时看 `Day41-55/` 的数据分析篇：`loc` 按标签、`iloc` 按位置，混用是「取出来的数据不对」的头号原因 |
+| 3 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,917 | §2.2 | 讲「特征矩阵的形状」时看入门课的回归案例：`X` 是 `(样本数, 特征数)`、`y` 是 `(样本数,)`，形状对不上是 `fit` 报错的第一排查点 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

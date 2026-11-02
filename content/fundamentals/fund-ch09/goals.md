@@ -42,9 +42,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | 全章 | 系统设计入门：性能、一致性、可用性与面试题（408 之上的系统视野）；本章先读与「进程控制原语与上下文切换」「调度的三个层次与评价指标」相关的部分 |
-| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | 全章 | 完整的计算机科学自学计划：数据结构、算法、OS、网络全覆盖；本章先读与「进程控制原语与上下文切换」「调度的三个层次与评价指标」相关的部分 |
-| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | 全章 | 中文技术面试必备：操作系统、计算机网络、组成原理、算法、数据库；本章先读与「进程控制原语与上下文切换」「调度的三个层次与评价指标」相关的部分 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §3.2 | 讲「并发在系统设计里的位置」时读 `solutions/` 的限流与线程池设计：线程数、队列、拒绝策略三者的取舍，与本章「时间片与上下文切换」同源 |
+| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | §2.1 | 讲「进程与线程的区别」时读 README 的 Operating Systems 清单：地址空间、切换代价、通信方式三条，是面试追问的固定落点 |
+| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §1.3 | 讲「调度算法的周转时间」时读 `docs/计算机操作系统/` 的进程管理篇：FCFS/SJF/SRTN/时间片轮转的甘特图画法，配「平均周转时间」的计算示例 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

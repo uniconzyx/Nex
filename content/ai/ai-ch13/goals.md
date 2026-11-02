@@ -11,10 +11,10 @@
 
 | # | 仓库 | Star | 对应本章 | 读什么 |
 | --- | --- | ---: | --- | --- |
-| 1 | [vllm-project/vllm](https://github.com/vllm-project/vllm) | 96,022 | §1.1 显存账 · §2.2 连续批 | 推理引擎：读 `vllm/core/scheduler.py` 的 continuous batching，对应 §1.1、§2.2 |
-| 2 | [ggerganov/llama.cpp](https://github.com/ggerganov/llama.cpp) | 132,583 | §3.4 GGUF | 本地推理与 GGUF 格式：量化权重加载，对应 §3.4 |
-| 3 | [mlc-ai/mlc-llm](https://github.com/mlc-ai/mlc-llm) | 23,284 | §3.1 量化 · §3.5 选型 | 端侧推理与量化后端，对应 §3.1、§3.5 |
-| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §3.1 GPTQ/AWQ 加载 | 量化模型加载：bitsandbytes/GPTQ 集成，对应 §3.1 |
+| 1 | [vllm-project/vllm](https://github.com/vllm-project/vllm) | 96,022 | §1.1 | 讲「PagedAttention」时读 `vllm/attention/ops/paged_attn.py`：KV Cache 按固定大小块分配、用块表映射逻辑位置，消除「预留最大长度」造成的碎片——这是吞吐高的关键 |
+| 2 | [ggerganov/llama.cpp](https://github.com/ggerganov/llama.cpp) | 132,583 | §2.2 | 讲「GGUF 与端侧部署」时读 `ggml/src/`：内存映射加载、按层量化，让 7B 模型能在消费级硬件上跑，本章的显存公式在端侧要换成「内存 + 带宽」 |
+| 3 | [mlc-ai/mlc-llm](https://github.com/mlc-ai/mlc-llm) | 23,284 | §3.1 | 讲「编译式推理」时读仓库里的 TVM 编译流程：把模型编译成目标硬件上的 kernel，与「通用 runtime 解释执行」是两条路线 |
+| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §4.2 | 讲「推理引擎的接口统一」时读 `src/transformers/generation/` 的 `generate`：参数的语义（`max_new_tokens`/`temperature`/`top_p`）在各引擎间要对齐，否则「换个引擎效果就变」 |
 
 > 全部为工业级真实仓库；Star 数为本会话经 GitHub API 实取快照，仅供路线排序参考。
 

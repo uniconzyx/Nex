@@ -76,10 +76,10 @@ fd（文件描述符）是访问资源的统一句柄；本章把这条主线推
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [trimstray/the-book-of-secret-knowledge](https://github.com/trimstray/the-book-of-secret-knowledge) | 254,934 | 全章 | 运维与工程工具知识合集：Linux、网络、排障命令速查；本章先读与「进程是什么」「进程状态机」相关的部分 |
-| 2 | [ohmyzsh/ohmyzsh](https://github.com/ohmyzsh/ohmyzsh) | 190,274 | 全章 | Shell 生产力框架（工程效率的入门必装）；本章先读与「进程是什么」「进程状态机」相关的部分 |
-| 3 | [jlevy/the-art-of-command-line](https://github.com/jlevy/the-art-of-command-line) | 162,646 | 全章 | 命令行艺术：Linux 命令的体系化进阶指南；本章先读与「进程是什么」「进程状态机」相关的部分 |
-| 4 | [bregman-arie/devops-exercises](https://github.com/bregman-arie/devops-exercises) | 86,127 | 全章 | DevOps 练习题集：Linux/Docker/K8s/Git/CI 全覆盖；本章先读与「进程是什么」「进程状态机」相关的部分 |
+| 1 | [trimstray/the-book-of-secret-knowledge](https://github.com/trimstray/the-book-of-secret-knowledge) | 254,934 | §4.2 | 讲「一行命令解决一件事」时看「Shell one-liners」分类：把常见运维动作压成单行，是「管道思维」的最好训练材料 |
+| 2 | [ohmyzsh/ohmyzsh](https://github.com/ohmyzsh/ohmyzsh) | 190,274 | §1.2 | 讲「Shell 脚本的健壮性」时读 `oh-my-zsh.sh` 开头的选项设置：`setopt` 系列让脚本遇错即停、未定义变量报错——这是「脚本别默默跑错」的开关 |
+| 3 | [jlevy/the-art-of-command-line](https://github.com/jlevy/the-art-of-command-line) | 162,646 | §2.2 | 讲「进程管理」时读 `README.md` 的「进程管理」一节：`ps`/`top`/`kill` 的组合，以及「先找 PID 再发信号」的顺序，避免 `kill -9` 乱杀 |
+| 4 | [bregman-arie/devops-exercises](https://github.com/bregman-arie/devops-exercises) | 86,127 | §3.1 | 讲「管道与重定向」时看 `topics/linux/` 的练习题：`|`、`>`、`2>`、`tee` 的差别在题里被拆成若干小问，答错会立刻暴露理解漏洞 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

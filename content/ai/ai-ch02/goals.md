@@ -27,12 +27,12 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,257 | 全章 | 深度学习框架官方仓库，工业级模型工程范例；本章先读与「卷积运算」「感受野与尺寸递推」相关的部分 |
-| 2 | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 197,476 | 全章 | 为 AI Agent 提供网页数据：抓取到结构化数据的工程实现；本章先读与「卷积运算」「感受野与尺寸递推」相关的部分 |
-| 3 | [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) | 187,852 | 全章 | 自主 Agent 的开创性项目，Agent 架构与工具循环的经典参考；本章先读与「卷积运算」「感受野与尺寸递推」相关的部分 |
-| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | 全章 | Transformer 模型定义框架：从 BERT/GPT 到多模态的全量实现；本章先读与「卷积运算」「感受野与尺寸递推」相关的部分 |
-| 5 | [langgenius/dify](https://github.com/langgenius/dify) | 160,127 | 全章 | Agentic 工作流与 RAG 流水线平台：生产级 LLM 应用工程范例；本章先读与「卷积运算」「感受野与尺寸递推」相关的部分 |
-| 6 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | 全章 | Agent 工程平台：工具、记忆、检索与编排的工业实现；本章先读与「卷积运算」「感受野与尺寸递推」相关的部分 |
+| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,257 | §1.1 | 讲「卷积的计算量」时读 `tensorflow/python/keras/layers/convolutional/`：`Conv2D` 的 `call` 里就是「滑窗 + 乘加」，参数量 `k²·C_in·C_out` 与计算量 `k²·C_in·C_out·H·W` 的差别在这里能直接看出来 |
+| 2 | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 197,476 | §2.3 | 讲「图文数据的采集」时读 `apps/api/src/` 的抓取输出：markdown 里保留图片链接，是「图文对」最廉价的来源，也解释了为什么多模态数据质量参差 |
+| 3 | [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) | 187,852 | §4.2 | 讲「序列决策」时看 agent 的「观察 → 思考 → 行动」循环：与 RNN 的「隐状态随步更新」结构同构，区别是隐状态换成了上下文窗口 |
+| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §2.2 | 讲「从 RNN 到注意力」时读 `src/transformers/models/bert/` 与任一 RNN 模型的实现对比：注意力没有递归、整段并行，这是「训练能规模化」的根本原因 |
+| 5 | [langgenius/dify](https://github.com/langgenius/dify) | 160,127 | §4.1 | 讲「视觉模型在应用里的位置」时读 `api/core/model_runtime/model_providers/`：多模态 provider 把图片转成 base64 或 URL 再送模型，本章「视觉 token 数决定成本」在这里变成计费口径 |
+| 6 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | §3.2 | 讲「序列建模的输入表示」时读 `libs/core/langchain_core/messages/`：把对话压成 token 序列时「角色 + 内容」的拼接方式，决定了模型看到的是什么 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

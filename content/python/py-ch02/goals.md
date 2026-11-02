@@ -16,9 +16,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 225,745 | 全章 | Python 实现的全部经典算法，含详细注释；本章先读与「命名空间与作用域」「可运行代码」相关的部分 |
-| 2 | [jackfrued/Python-100-Days](https://github.com/jackfrued/Python-100-Days) | 187,609 | 全章 | Python 100 天从新手到大师（中文系统教程）；本章先读与「命名空间与作用域」「可运行代码」相关的部分 |
-| 3 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,917 | 全章 | 微软官方 12 周机器学习入门课程，含 26 课与测验；本章先读与「命名空间与作用域」「可运行代码」相关的部分 |
+| 1 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 225,745 | §2.3 | 讲「闭包与高阶函数」时读 `dynamic_programming/` 里的记忆化实现：用字典缓存 + 嵌套函数把递归复杂度从指数压到多项式，是闭包最实用的场景 |
+| 2 | [jackfrued/Python-100-Days](https://github.com/jackfrued/Python-100-Days) | 187,609 | §4.1 | 讲「参数解包」时看 `Day01-15/` 的函数篇：`*args`/`**kwargs` 与「关键字参数必须写在位置参数之后」的规则，它给了能直接跑的反例 |
+| 3 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,917 | §1.2 | 讲「函数作为一等对象」时看入门课的特征工程脚本：把「清洗函数」作为参数传给 `apply`，这是「函数即值」在数据处理里的日常用法 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

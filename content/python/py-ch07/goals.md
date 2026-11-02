@@ -51,9 +51,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 225,745 | 全章 | Python 实现的全部经典算法，含详细注释；本章先读与「1 GIL 是什么」「2 GIL 什么时候释放」相关的部分 |
-| 2 | [jackfrued/Python-100-Days](https://github.com/jackfrued/Python-100-Days) | 187,609 | 全章 | Python 100 天从新手到大师（中文系统教程）；本章先读与「1 GIL 是什么」「2 GIL 什么时候释放」相关的部分 |
-| 3 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,917 | 全章 | 微软官方 12 周机器学习入门课程，含 26 课与测验；本章先读与「1 GIL 是什么」「2 GIL 什么时候释放」相关的部分 |
+| 1 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 225,745 | §3.2 | 讲「GIL 的边界」时读仓库里的并行示例：CPU 密集用多进程、IO 密集用多线程，这个目录的脚本大多是「纯计算」，正好说明「为什么它们不能靠 threading 提速」 |
+| 2 | [jackfrued/Python-100-Days](https://github.com/jackfrued/Python-100-Days) | 187,609 | §2.3 | 讲「asyncio 的事件循环」时看 `Day31-35/` 的并发篇：`async def` + `await` 把「等待」让出去，写法与线程池完全不同，别混着用 |
+| 3 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,917 | §4.1 | 讲「并发下载/预处理」时看入门课的批量处理脚本：用线程池做 IO 密集的图片下载，注意「线程数不是越多越好」——上下文切换会吃掉收益 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

@@ -18,10 +18,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [DataTalksClub/data-engineering-zoomcamp](https://github.com/DataTalksClub/data-engineering-zoomcamp) | 46,562 | 全章 | 免费 9 周数据工程课程：含 Hadoop/Spark/数仓实践 |
-| 2 | [apache/spark](https://github.com/apache/spark) | 44,379 | 全章 | Apache Spark 官方仓库：RDD/SQL/调优权威来源 |
-| 3 | [heibaiying/BigData-Notes](https://github.com/heibaiying/BigData-Notes) | 16,993 | 全章 | 中文大数据入门指南：Hadoop/Hive/Spark/Flink 系统笔记 |
-| 4 | [apache/hadoop](https://github.com/apache/hadoop) | 15,705 | 全章 | Apache Hadoop 官方仓库：HDFS/YARN/MapReduce 实现 |
+| 1 | [DataTalksClub/data-engineering-zoomcamp](https://github.com/DataTalksClub/data-engineering-zoomcamp) | 46,562 | §1.3 | 讲「从单机到分布式的动机」时看 `week5-batch/` 的批处理作业脚本：同一份数据在单机 pandas 与集群 Spark 上的耗时对比，是「容量与吞吐」这两个动机的实测证据 |
+| 2 | [apache/spark](https://github.com/apache/spark) | 44,379 | §3.1 | 讲「HDFS 与计算引擎的分层」时读 `core/src/main/scala/org/apache/spark/rdd/` 里对 `HadoopRDD` 的实现：Spark 把 HDFS 的 split 直接当分区，不搬数据只搬计算——这就是「计算向数据靠拢」 |
+| 3 | [heibaiying/BigData-Notes](https://github.com/heibaiying/BigData-Notes) | 16,993 | §2.1 | 讲「写入 pipeline」时读根目录的 `HDFS.md`：它用一张流程图画出「客户端 → DN1 → DN2 → DN3 → ack 回传」，配本章的 pipeline 章节对照看，能把「哪个环节挂掉会重试」串起来 |
+| 4 | [apache/hadoop](https://github.com/apache/hadoop) | 15,705 | §1.2 | 讲「NameNode 元数据常驻内存」时读 `hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/` 下的 `FSDirectory` 与 `INodeFile`：目录树与块列表就是这两个类，内存占用随「文件数」而非「数据量」增长——小文件问题的物理根源在这 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

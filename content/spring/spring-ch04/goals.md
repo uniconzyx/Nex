@@ -54,10 +54,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | 全章 | SpringBoot + MyBatis 完整电商项目，最佳工程范例；本章先读与「一个注解，三个职责」「`SpringApplic…」相关的部分 |
-| 2 | [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81,722 | 全章 | Spring Boot 官方仓库：源码、文档与示例；本章先读与「一个注解，三个职责」「`SpringApplic…」相关的部分 |
-| 3 | [YunaiV/ruoyi-vue-pro](https://github.com/YunaiV/ruoyi-vue-pro) | 40,149 | 全章 | 企业级快速开发平台：Spring Boot + MyBatis Plus 全栈实现；本章先读与「一个注解，三个职责」「`SpringApplic…」相关的部分 |
-| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | 全章 | Spring 生态系统化教程代码；本章先读与「一个注解，三个职责」「`SpringApplic…」相关的部分 |
+| 1 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §1.2 | 讲「`@SpringBootApplication` 的三合一」时看 `mall-admin` 的启动类：它只加这一个注解，扫描范围就是启动类所在包——所以 Controller 必须放在子包里，放外面就「找不到 Bean」 |
+| 2 | [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81,722 | §3.1 | 讲「自动配置的加载方式」时读 `spring-boot-project/spring-boot-autoconfigure/src/main/resources/META-INF/spring/` 下的 `AutoConfiguration.imports`：2.7 起用它替代 `spring.factories`，条件装配类按顺序列出 |
+| 3 | [YunaiV/ruoyi-vue-pro](https://github.com/YunaiV/ruoyi-vue-pro) | 40,149 | §4.1 | 讲「起步依赖怎么封」时看 `yudao-framework` 的模块组织：`starter` 只放依赖与自动配置类、具体实现在同级的 `-core` 模块，这是「依赖聚合与实现分离」的标准做法 |
+| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §2.2 | 讲「`@ConditionalOnProperty`」时看 `spring-boot-tutorials` 的条件装配示例：一个开关决定 Bean 是否注册，比在代码里写 if 更符合「配置驱动」的设计 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

@@ -40,9 +40,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | 全章 | 系统设计入门：性能、一致性、可用性与面试题（408 之上的系统视野）；本章先读与「LIFO 不是「一种规定」…」「调用栈的硬件支撑」相关的部分 |
-| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | 全章 | 完整的计算机科学自学计划：数据结构、算法、OS、网络全覆盖；本章先读与「LIFO 不是「一种规定」…」「调用栈的硬件支撑」相关的部分 |
-| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | 全章 | 中文技术面试必备：操作系统、计算机网络、组成原理、算法、数据库；本章先读与「LIFO 不是「一种规定」…」「调用栈的硬件支撑」相关的部分 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §4.2 | 讲「消息队列为什么需要缓冲区」时读 `solutions/` 的队列相关设计：队列把「生产速率」与「消费速率」解耦，这与本章「先进先出保证公平」是同一件事的两个层面 |
+| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | §1.3 | 讲「栈与队列的适用场景」时读 README 里 Stack/Queue 的练习清单：括号匹配用栈、BFS 用队列，两条对应关系在清单里被反复强调 |
+| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §2.1 | 讲「循环队列」时读 `docs/算法/` 的栈与队列篇：牺牲一个单元判满、`(rear+1)%MaxSize==front` 的写法与本章一致，配了元素个数公式的推导 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

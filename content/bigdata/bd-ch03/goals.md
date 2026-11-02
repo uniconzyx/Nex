@@ -18,10 +18,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [DataTalksClub/data-engineering-zoomcamp](https://github.com/DataTalksClub/data-engineering-zoomcamp) | 46,562 | 全章 | 免费 9 周数据工程课程：含 Hadoop/Spark/数仓实践 |
-| 2 | [apache/spark](https://github.com/apache/spark) | 44,379 | 全章 | Apache Spark 官方仓库：RDD/SQL/调优权威来源 |
-| 3 | [heibaiying/BigData-Notes](https://github.com/heibaiying/BigData-Notes) | 16,993 | 全章 | 中文大数据入门指南：Hadoop/Hive/Spark/Flink 系统笔记 |
-| 4 | [apache/hadoop](https://github.com/apache/hadoop) | 15,705 | 全章 | Apache Hadoop 官方仓库：HDFS/YARN/MapReduce 实现 |
+| 1 | [DataTalksClub/data-engineering-zoomcamp](https://github.com/DataTalksClub/data-engineering-zoomcamp) | 46,562 | §3.2 | 讲「列式存储的收益」时看 `week4-analytics/` 的查询对比：同一份数据存 CSV 与 Parquet，扫描列数少时后者快一个数量级——谓词下推与列裁剪的实测 |
+| 2 | [apache/spark](https://github.com/apache/spark) | 44,379 | §4.1 | 讲「HQL 到物理计划的映射」时读 `sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/optimizer/`：`PushPredicateThroughJoin`、`ColumnPruning` 这些规则就是「谓词下推、列裁剪」在 Spark 侧的等价物 |
+| 3 | [heibaiying/BigData-Notes](https://github.com/heibaiying/BigData-Notes) | 16,993 | §2.1 | 讲「内部表 vs 外部表」时读 `Hive.md`：删内部表连数据一起删、删外部表只删元数据，这条差异在文档里配了 `LOCATION` 的对照实验，比背定义好记 |
+| 4 | [apache/hadoop](https://github.com/apache/hadoop) | 15,705 | §1.3 | 讲「Hive 与 Hadoop 的关系」时读 `hive/` 模块（在 `apache/hive` 而非 hadoop 仓库）的执行计划接口：Hive 只负责把 HQL 编译成 MR/Tez 作业，真正的执行仍由 Hadoop 完成 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

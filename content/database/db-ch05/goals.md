@@ -28,9 +28,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | 全章 | 含 MySQL 索引、事务、锁与调优的系统讲解；本章先读与「存储过程与自定义函数」「参数模式 IN / OUT…」相关的部分 |
-| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | 全章 | 真实业务库表设计范例与 SQL 实践；本章先读与「存储过程与自定义函数」「参数模式 IN / OUT…」相关的部分 |
-| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | 全章 | 含分库分表、读写分离与分布式事务；本章先读与「存储过程与自定义函数」「参数模式 IN / OUT…」相关的部分 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §1.1 | 讲「存储过程与函数的差异」时读 `docs/database/mysql/` 的过程化编程章节：函数必须 RETURN 一个值、过程靠 OUT 参数，二者的调用位置（表达式 vs CALL）决定了它们不能互换 |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §4.1 | 讲「存储过程与应用的边界」时看 `mall` 的 Service 层：业务规则全在 Java 里、SQL 只出现在 mapper XML 中，这是「存储过程不适合互联网团队」的直接证据——版本管理、单测、灰度发布都做不了 |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §1.3 | 讲「触发器与审计」时对照 `docs/high-concurrency/` 的数据库设计文章：触发器把逻辑藏进数据库，排查时「看不见调用方」，审计场景更推荐 binlog 订阅（Canal）而非触发器 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

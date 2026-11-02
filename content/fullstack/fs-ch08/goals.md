@@ -21,14 +21,15 @@
 - 无。本章 `prerequisites` 仅引用本学科已完成章节 fs-ch04。Linux 命令、Docker、GitHub Actions 均从零讲到够用为止，不假设读者有运维经验。
 ## 本章 GitHub 学习路线（按阅读顺序）
 
-> ★ 为 **2026-10-27** 的 GitHub API 快照（已逐条验证仓库存在）。
+> ★ 为 **2026-11-02** 的 GitHub API 快照（已逐条验证仓库存在）。
 > 顺序即路线：**先读能跑的最小实现 → 再读同章对照实现 → 最后读工业级库**。「对应本章」写 `§x.y` 的，说明这份仓库与本章那一节直接对应，先读那里；写「全章」的，按右侧「读什么」给的入口文件读，不要从 README 通读。
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [trekhleb/javascript-algorithms](https://github.com/trekhleb/javascript-algorithms) | 196,715 | 全章 | JavaScript 算法与数据结构，含英文详解；本章先读与「SSH 与免密登录」「进程管理」相关的部分 |
-| 2 | [Chalarangelo/30-seconds-of-code](https://github.com/Chalarangelo/30-seconds-of-code) | 129,384 | 全章 | 短小精悍的 JS/CSS/HTML 代码片段集，覆盖日常前端技巧；本章先读与「SSH 与免密登录」「进程管理」相关的部分 |
-| 3 | [yangshun/front-end-interview-handbook](https://github.com/yangshun/front-end-interview-handbook) | 44,006 | 全章 | 前端面试手册：HTML/CSS/JS/浏览器/性能；本章先读与「SSH 与免密登录」「进程管理」相关的部分 |
+| 1 | [moby/buildkit](https://github.com/moby/buildkit) | 10,353 | §2.1 缓存是前缀链 · §2.2 多阶段 | 构建器本体：`frontend/dockerfile/dockerfile2llb/convert.go` 把 Dockerfile 逐指令翻译成 LLB 图，`cache/manager.go` 按指令 + 输入摘要判命中——某层失效则其后全部重建，这条规律在这里是数据结构 |
+| 2 | [docker/compose](https://github.com/docker/compose) | 38,568 | §3.1 服务依赖与健康门 | 编排实现：`pkg/compose/create.go` 按 `depends_on` 与 `condition` 建依赖图并定启动顺序，`up.go` 负责等 healthcheck 通过再往下走——「死等 vs 直接报错」的循环依赖检测发生在建图阶段 |
+| 3 | [systemd/systemd](https://github.com/systemd/systemd) | 16,979 | §1.2 unit 文件 · §1.3 日志 | 语义权威：`man/systemd.service.xml` 规定 `Restart=` / `RestartSec=` / `StartLimitBurst=` 的精确含义（连重启节流都写在里面），`src/journal/journald.c` 说明结构化日志从哪来，`src/shared/logs-show.c` 是 `--since` / `--priority` 的过滤实现 |
+| 4 | [nektos/act](https://github.com/nektos/act) | 72,516 | §4.1 workflow → job → step | 本地执行器：`pkg/model/workflow.go` 是 YAML 到结构体的映射（缺 `on` / `runs-on` 在这里就露馅），`pkg/model/planner.go` 按 `needs` 建 DAG 并算出可并行的层——「needs 指向不存在的 job」本地一跑就复现 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 
@@ -52,11 +53,11 @@
 | 2 | 《深入浅出 Node.js》朴灵 |
 | 3 | 《CSS 世界》张鑫旭 |
 
-> 图例：`§3.2` = 本章第 3 篇 concept 文件的第 2 节。共 3 个 GitHub 来源、4 条 B 站视频、3 条文献；
+> 图例：`§3.2` = 本章第 3 篇 concept 文件的第 2 节。共 4 个 GitHub 来源、4 条 B 站视频、3 条文献；
 > 全部链接由 `scripts/collect_links.py` + `scripts/audit_sources.py` 定期复核，失效链接会被审计器标红。
 
 ## 真题依据（真实可查，仅存元数据）
-- GitHub 资源（见 `_manifest.json`）：trekhleb/javascript-algorithms（196855★）、Chalarangelo/30-seconds-of-code（129326★）、yangshun/front-end-interview-handbook（44008★）。
+- GitHub 资源（见 `_manifest.json`）：moby/buildkit（10353★）、docker/compose（38568★）、systemd/systemd（16979★）、nektos/act（72516★）。
 - LeetCode 题仅存元数据与链接，不搬运题面正文，详见 `exercises.json`。
 - 参考书籍：《Docker 深入浅出》；规范与官方文档：The Twelve-Factor App、Docker 官方构建最佳实践、GitHub Actions 语法参考、systemd.exec/unit 手册、logrotate(8)、Kubernetes 探针文档。
 

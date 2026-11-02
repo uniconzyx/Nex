@@ -25,14 +25,14 @@
 - 能口述 CommonJS 循环依赖为何拿到 undefined、ESM 为何更安全。
 ## 本章 GitHub 学习路线（按阅读顺序）
 
-> ★ 为 **2026-10-27** 的 GitHub API 快照（已逐条验证仓库存在）。
+> ★ 为 **2026-11-02** 的 GitHub API 快照（已逐条验证仓库存在）。
 > 顺序即路线：**先读能跑的最小实现 → 再读同章对照实现 → 最后读工业级库**。「对应本章」写 `§x.y` 的，说明这份仓库与本章那一节直接对应，先读那里；写「全章」的，按右侧「读什么」给的入口文件读，不要从 README 通读。
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [trekhleb/javascript-algorithms](https://github.com/trekhleb/javascript-algorithms) | 196,715 | 全章 | JavaScript 算法与数据结构，含英文详解；本章先读与「Node 单线程模型与 l…」「process.nextT…」相关的部分 |
-| 2 | [Chalarangelo/30-seconds-of-code](https://github.com/Chalarangelo/30-seconds-of-code) | 129,384 | 全章 | 短小精悍的 JS/CSS/HTML 代码片段集，覆盖日常前端技巧；本章先读与「Node 单线程模型与 l…」「process.nextT…」相关的部分 |
-| 3 | [yangshun/front-end-interview-handbook](https://github.com/yangshun/front-end-interview-handbook) | 44,006 | 全章 | 前端面试手册：HTML/CSS/JS/浏览器/性能；本章先读与「Node 单线程模型与 l…」「process.nextT…」相关的部分 |
+| 1 | [nodejs/node](https://github.com/nodejs/node) | 123,194 | §1.2 队列顺序 · §3.1 背压 | 运行时本体：`lib/internal/process/task_queues.js` 是 nextTick 与微任务队列的真实调度，`lib/internal/streams/readable.js` 里 `highWaterMark` 与 `readableFlowing` 的状态迁移就是 §3.1 背压的机器版本 |
+| 2 | [expressjs/express](https://github.com/expressjs/express) | 69,585 | §2.1 手写 HTTP 服务 · §2.3 中间件 | 工业实现：`lib/application.js` 的 `app.use` 把中间件压进栈、`app.handle` 作为 `http.createServer` 的回调把 req/res 交出去；四参数错误中间件的识别就发生在这一层 |
+| 3 | [koajs/koa](https://github.com/koajs/koa) | 35,683 | §2.3 洋葱模型 | 对照实现：`lib/application.js` 的 `callback()` 用 `compose(this.middleware)` 把数组折成嵌套函数，`await next()` 前后各写一段——这就是 §2.3「进去一层、出来一层」的原始代码 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

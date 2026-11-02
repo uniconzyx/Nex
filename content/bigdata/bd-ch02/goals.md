@@ -18,10 +18,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [DataTalksClub/data-engineering-zoomcamp](https://github.com/DataTalksClub/data-engineering-zoomcamp) | 46,562 | 全章 | 免费 9 周数据工程课程：含 Hadoop/Spark/数仓实践 |
-| 2 | [apache/spark](https://github.com/apache/spark) | 44,379 | 全章 | Apache Spark 官方仓库：RDD/SQL/调优权威来源 |
-| 3 | [heibaiying/BigData-Notes](https://github.com/heibaiying/BigData-Notes) | 16,993 | 全章 | 中文大数据入门指南：Hadoop/Hive/Spark/Flink 系统笔记 |
-| 4 | [apache/hadoop](https://github.com/apache/hadoop) | 15,705 | 全章 | Apache Hadoop 官方仓库：HDFS/YARN/MapReduce 实现 |
+| 1 | [DataTalksClub/data-engineering-zoomcamp](https://github.com/DataTalksClub/data-engineering-zoomcamp) | 46,562 | §2.1 | 讲「Shuffle 的磁盘溢出」时看 `week5-batch/` 的作业调优笔记：「分区数设太大 → 大量小文件」「设太小 → 单分区 OOM」这两条经验在本章有对应的计算式 |
+| 2 | [apache/spark](https://github.com/apache/spark) | 44,379 | §3.1 | 讲「YARN 的资源模型」时读 `resource-managers/yarn/src/main/scala/org/apache/spark/deploy/yarn/`：`ApplicationMaster` 申请 Container、`ExecutorAllocationManager` 动态伸缩，都是「RM 管资源、AM 管作业」的落地 |
+| 3 | [heibaiying/BigData-Notes](https://github.com/heibaiying/BigData-Notes) | 16,993 | §2.2 | 讲「Combiner 的语义边界」时读 `MapReduce.md`：它用 WordCount 演示「加 Combiner 前后 shuffle 数据量差多少」，并强调「求平均必须传 (sum, count)」这条限制 |
+| 4 | [apache/hadoop](https://github.com/apache/hadoop) | 15,705 | §1.1 | 讲「MapReduce 三阶段」时读 `hadoop-mapreduce-project/hadoop-mapreduce-client/` 下的 `MapTask`/`ReduceTask`：`MapTask` 的 `runNewMapper` 里就是 map → partition → sort → spill 的实际顺序，与本章数据流图一一对应 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

@@ -73,10 +73,10 @@ Pandas 的两次抽象升级正好对应这些需求：
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | 全章 | 经典机器学习库官方仓库：算法实现与最佳实践；本章先读与「两个核心数据结构」「自动对齐」相关的部分 |
-| 2 | [jakevdp/PythonDataScienceHandbook](https://github.com/jakevdp/PythonDataScienceHandbook) | 50,277 | 全章 | 《Python 数据科学手册》全书 Jupyter Notebook（NumPy/Pandas/Matplotlib）；本章先读与「两个核心数据结构」「自动对齐」相关的部分 |
-| 3 | [pandas-dev/pandas](https://github.com/pandas-dev/pandas) | 50,278 | 全章 | Pandas 官方仓库：API 与内部机制权威来源；本章先读与「两个核心数据结构」「自动对齐」相关的部分 |
-| 4 | [microsoft/Data-Science-For-Beginners](https://github.com/microsoft/Data-Science-For-Beginners) | 37,860 | 全章 | 微软官方 10 周数据科学课程；本章先读与「两个核心数据结构」「自动对齐」相关的部分 |
+| 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | §3.1 | 讲「缺失值处理」时读 `sklearn/impute/`：`SimpleImputer` 的 `strategy` 与 pandas 的 `fillna` 是两套语义（前者在管道内、后者在数据上），混用时要注意「训练/推理口径一致」 |
+| 2 | [jakevdp/PythonDataScienceHandbook](https://github.com/jakevdp/PythonDataScienceHandbook) | 50,277 | §2.2 | 讲「索引与切片」时读 `notebooks/03.02-Data-Indexing-and-Selection.ipynb`：`loc` 闭区间、`iloc` 左闭右开——两种切片的边界规则不同，混用就是「取出来的行数不对」 |
+| 3 | [pandas-dev/pandas](https://github.com/pandas-dev/pandas) | 50,278 | §1.1 | 讲「DataFrame 的列式存储」时读 `pandas/core/frame.py` 与 `internals/managers.py`：DataFrame 不是「行列表」，而是「按 dtype 分块的二维结构」，这解释了「混类型列会让操作变慢」 |
+| 4 | [microsoft/Data-Science-For-Beginners](https://github.com/microsoft/Data-Science-For-Beginners) | 37,860 | §4.2 | 讲「数据清洗的顺序」时看 `2-Working-With-Data/`：先处理类型与缺失、再做衍生特征，顺序反了会得到「用脏数据算出来的特征」 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

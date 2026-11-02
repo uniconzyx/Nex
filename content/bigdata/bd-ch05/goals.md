@@ -26,10 +26,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [DataTalksClub/data-engineering-zoomcamp](https://github.com/DataTalksClub/data-engineering-zoomcamp) | 46,562 | 全章 | 免费 9 周数据工程课程：含 Hadoop/Spark/数仓实践 |
-| 2 | [apache/spark](https://github.com/apache/spark) | 44,379 | 全章 | Apache Spark 官方仓库：RDD/SQL/调优权威来源 |
-| 3 | [heibaiying/BigData-Notes](https://github.com/heibaiying/BigData-Notes) | 16,993 | 全章 | 中文大数据入门指南：Hadoop/Hive/Spark/Flink 系统笔记 |
-| 4 | [apache/hadoop](https://github.com/apache/hadoop) | 15,705 | 全章 | Apache Hadoop 官方仓库：HDFS/YARN/MapReduce 实现 |
+| 1 | [DataTalksClub/data-engineering-zoomcamp](https://github.com/DataTalksClub/data-engineering-zoomcamp) | 46,562 | §3.1 | 讲「AQE 纠正误判」时看 `week5-batch/` 的 Spark SQL 作业日志：`spark.sql.adaptive.enabled=true` 后，`SortMergeJoin` 会被运行时统计改成 `BroadcastHashJoin`，日志里能看到 `Plan changed` |
+| 2 | [apache/spark](https://github.com/apache/spark) | 44,379 | §2.1 | 讲「Catalyst 四阶段」时读 `sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/`：`analyzer/`（解析）→ `optimizer/`（逻辑优化）→ `planner/`（物理计划）→ `codegen`（生成字节码），目录结构本身就是四阶段的证据 |
+| 3 | [heibaiying/BigData-Notes](https://github.com/heibaiying/BigData-Notes) | 16,993 | §1.3 | 讲「DataFrame 与 RDD 的差别」时读 `Spark.md` 的 Spark SQL 篇：DataFrame 携带 schema、能进优化器，RDD 是黑盒函数——「结构化信息就是优化空间」这句话的来源 |
+| 4 | [apache/hadoop](https://github.com/apache/hadoop) | 15,705 | §4.1 | 讲「Metastore 的作用」时对照 `hive/` 的元数据表设计：库/表/分区/列都存 MySQL，Spark SQL 通过 `HiveExternalCatalog` 读写同一份元数据——这就是「湖仓共用 Metastore」的由来 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

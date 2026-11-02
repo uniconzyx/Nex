@@ -50,10 +50,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | 全章 | 含 Redis 与消息队列的高频面试知识；本章先读与「① 分区器」「② 攒批与吞吐」相关的部分 |
-| 2 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | 全章 | 高并发与分布式：缓存、消息队列、分库分表专题；本章先读与「① 分区器」「② 攒批与吞吐」相关的部分 |
-| 3 | [redis/redis](https://github.com/redis/redis) | 77,127 | 全章 | Redis 官方源码仓库：数据结构与命令实现的权威来源；本章先读与「① 分区器」「② 攒批与吞吐」相关的部分 |
-| 4 | [apache/kafka](https://github.com/apache/kafka) | 34,105 | 全章 | Apache Kafka 官方仓库：架构与协议实现；本章先读与「① 分区器」「② 攒批与吞吐」相关的部分 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §2.2 | 讲「幂等生产者」时读 `docs/database/kafka/` 的生产者篇：PID + 序列号让 broker 能识别「同一会话内的重试」，但它只管单分区单会话，跨会话仍会重复，所以业务幂等仍不可省 |
+| 2 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §4.1 | 讲「位移提交的四种方式」时对照 `docs/high-concurrency/` 的 Kafka 消费篇：自动提交是「按时间」、手动提交是「按处理进度」，前者在 rebalance 时会重复消费一批——「至少一次」的重复量级就由这个选择决定 |
+| 3 | [redis/redis](https://github.com/redis/redis) | 77,127 | §2.3 | 讲「幂等与去重」时对照 `src/db.c` 的 `setKey` 覆盖语义：Redis 的写是「后写覆盖」，天然不产生重复，而消息队列必须自己实现「重复消息只生效一次」——这就是为什么消费端幂等不能指望中间件 |
+| 4 | [apache/kafka](https://github.com/apache/kafka) | 34,105 | §1.3 | 讲「从 send() 到 Broker」时读 `clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java` 与 `internals/Sender.java`：消息先进 `RecordAccumulator` 按分区攒批，Sender 线程按 broker 聚合请求——「batch.size 与 linger.ms 决定吞吐」就发生在这两层 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

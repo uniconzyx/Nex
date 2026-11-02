@@ -12,10 +12,10 @@
 
 | # | 仓库 | Star | 对应本章 | 读什么 |
 | --- | --- | ---: | --- | --- |
-| 1 | [vercel/ai](https://github.com/vercel/ai) | 27,560 | §1.1 SSE · §3.1 callId | AI 流式 SDK：读 `packages/ai` 的 `stream`/`tool` 实现，对应 §1.1、§3.1 |
-| 2 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | §1.1 流式 · §3 工具调用 | Agent 框架：LCEL 流式与 tool calling，对应 §1.1、§3 |
-| 3 | [gin-gonic/gin](https://github.com/gin-gonic/gin) | 89,466 | §2 长任务 · §4 限流 | 网关侧实现参考：中间件链与限流，对应 §2、§4 |
-| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §3.5 审计边界 | 推理服务内 tool/函数调用范式，对应 §3.5 |
+| 1 | [vercel/ai](https://github.com/vercel/ai) | 27,560 | §1.1 SSE · §3.1 callId | `packages/ai/core/generate-text/stream-text.ts` 把模型增量转成 data stream 协议（`0:"文本"` 这种带前缀的行），工具调用带 `toolCallId`——§3.1 唯一 id 的来源就是协议本身 |
+| 2 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | §2.5 幂等恢复 · §3.2 重试幂等 | `libs/core` 的 `Runnable` 组合子与 `with_retry`：重试只重放同一次调用，跨轮状态由外层 graph / checkpoint 保存，对应 §2.5「同一个 id 可以重入」 |
+| 3 | [gin-gonic/gin](https://github.com/gin-gonic/gin) | 89,466 | §1.2 网关透传流式 · §4.3 限流 | `context.go` 的 `Stream` 与 `sse.go` 的 `SSEvent` 是逐块 flush 的最小实现（不设 `Content-Length`、显式 `Flush`）；`middleware/` 里挂限流中间件正是 §4.3 的落地位置 |
+| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §4.1 token 计量 | `src/transformers/tokenization_utils.py` 的 `encode` / `decode` 决定「一段文本值多少 token」，同一句中文不同 tokenizer 能差一倍——§4.1 输入输出分开算的前提 |
 
 > 全部为工业级真实仓库；Star 数为本会话经 GitHub API 实取快照，仅供路线排序参考。
 

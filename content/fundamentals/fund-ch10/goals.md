@@ -28,9 +28,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | 全章 | 系统设计入门：性能、一致性、可用性与面试题（408 之上的系统视野）；本章先读与「连续分配的三种方式」「动态分区的四类放置算法」相关的部分 |
-| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | 全章 | 完整的计算机科学自学计划：数据结构、算法、OS、网络全覆盖；本章先读与「连续分配的三种方式」「动态分区的四类放置算法」相关的部分 |
-| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | 全章 | 中文技术面试必备：操作系统、计算机网络、组成原理、算法、数据库；本章先读与「连续分配的三种方式」「动态分区的四类放置算法」相关的部分 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §4.1 | 讲「文件系统在存储设计里的取舍」时读 `solutions/` 的对象存储设计：元数据与数据分离、块大小影响寻址开销，与本章 inode 的设计动机一致 |
+| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | §3.3 | 讲「虚拟内存的意义」时读 README 的 Virtual Memory 一节：隔离、超额分配、按需调页三个目标，与本章「页表是间接层」的表述对应 |
+| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §2.2 | 讲「页面置换」时读 `docs/计算机操作系统/` 的内存管理篇：OPT/FIFO/LRU 的缺页次数逐个手算，Belady 异常只在 FIFO 出现这一点被单独标注 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

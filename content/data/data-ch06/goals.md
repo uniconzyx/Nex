@@ -57,10 +57,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | 全章 | 经典机器学习库官方仓库：算法实现与最佳实践；本章先读与「质量体检清单」「缺失值」相关的部分 |
-| 2 | [jakevdp/PythonDataScienceHandbook](https://github.com/jakevdp/PythonDataScienceHandbook) | 50,277 | 全章 | 《Python 数据科学手册》全书 Jupyter Notebook（NumPy/Pandas/Matplotlib）；本章先读与「质量体检清单」「缺失值」相关的部分 |
-| 3 | [pandas-dev/pandas](https://github.com/pandas-dev/pandas) | 50,278 | 全章 | Pandas 官方仓库：API 与内部机制权威来源；本章先读与「质量体检清单」「缺失值」相关的部分 |
-| 4 | [microsoft/Data-Science-For-Beginners](https://github.com/microsoft/Data-Science-For-Beginners) | 37,860 | 全章 | 微软官方 10 周数据科学课程；本章先读与「质量体检清单」「缺失值」相关的部分 |
+| 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | §1.1 | 讲「建模流程」时读 `sklearn/pipeline.py`：`Pipeline` 把「预处理 + 模型」串成一步，`fit` 只在训练集上调用——这是防泄漏的结构性保证，不是纪律问题 |
+| 2 | [jakevdp/PythonDataScienceHandbook](https://github.com/jakevdp/PythonDataScienceHandbook) | 50,277 | §2.2 | 讲「特征与目标的关系」时读 `notebooks/05.xx` 系列（机器学习篇）：先用散点图看关系再选模型，比盲试模型更快排除方向性错误 |
+| 3 | [pandas-dev/pandas](https://github.com/pandas-dev/pandas) | 50,278 | §3.2 | 讲「结果汇总」时读 `pandas/core/reshape/`：`pivot_table` 把「模型 × 指标」摊成矩阵，是写实验报告最省事的结构 |
+| 4 | [microsoft/Data-Science-For-Beginners](https://github.com/microsoft/Data-Science-For-Beginners) | 37,860 | §4.1 | 讲「从问题到方案」时看 `4-Data-Science-Lifecycle/`：先定义「成功标准」再选指标，否则模型分数再高也可能答错了问题 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

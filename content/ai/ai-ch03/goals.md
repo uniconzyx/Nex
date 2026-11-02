@@ -39,12 +39,12 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,257 | 全章 | 深度学习框架官方仓库，工业级模型工程范例；本章先读与「自注意力」「多头注意力」相关的部分 |
-| 2 | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 197,476 | 全章 | 为 AI Agent 提供网页数据：抓取到结构化数据的工程实现；本章先读与「自注意力」「多头注意力」相关的部分 |
-| 3 | [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) | 187,852 | 全章 | 自主 Agent 的开创性项目，Agent 架构与工具循环的经典参考；本章先读与「自注意力」「多头注意力」相关的部分 |
-| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | 全章 | Transformer 模型定义框架：从 BERT/GPT 到多模态的全量实现；本章先读与「自注意力」「多头注意力」相关的部分 |
-| 5 | [langgenius/dify](https://github.com/langgenius/dify) | 160,127 | 全章 | Agentic 工作流与 RAG 流水线平台：生产级 LLM 应用工程范例；本章先读与「自注意力」「多头注意力」相关的部分 |
-| 6 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | 全章 | Agent 工程平台：工具、记忆、检索与编排的工业实现；本章先读与「自注意力」「多头注意力」相关的部分 |
+| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,257 | §2.2 | 讲「缩放点积的数值行为」时读 `tensorflow/python/ops/nn_ops.py` 的 `softmax`：数值稳定实现会先减去最大值，这解释了「不缩放时 softmax 饱和」为什么会让梯度消失 |
+| 2 | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 197,476 | §2.1 | 讲「预处理对模型输入的影响」时读 `apps/api/src/` 的 markdown 清洗：去掉导航与广告后，进入上下文的 token 才是「有效信息」，这直接影响注意力的信噪比 |
+| 3 | [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) | 187,852 | §4.1 | 讲「长上下文的工程约束」时看 agent 的记忆管理：历史太长就摘要、关键信息单独存，与本章「KV Cache 随序列线性增长」是同一个约束的两种应对 |
+| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §1.1 | 讲「自注意力的实现」时读 `src/transformers/models/bert/modeling_bert.py` 的 `BertSelfAttention`：`query/key/value` 三个线性层 + `softmax(QKᵀ/√d)V`，与本章公式逐行对应 |
+| 5 | [langgenius/dify](https://github.com/langgenius/dify) | 160,127 | §4.3 | 讲「Transformer 在 RAG 里的位置」时读 `api/core/rag/`：检索出的片段被拼进 prompt，模型用注意力在这些片段上做「软对齐」——RAG 的效果上限由这一步决定 |
+| 6 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | §3.1 | 讲「上下文窗口的代价」时读 `libs/core/langchain_core/` 的消息裁剪逻辑：超长上下文要做截断或摘要，本质是「注意力 O(n²) 的成本」在应用层的体现 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

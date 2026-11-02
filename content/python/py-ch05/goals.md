@@ -50,9 +50,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 225,745 | 全章 | Python 实现的全部经典算法，含详细注释；本章先读与「两种模式，两套世界」「`encoding` 必须…」相关的部分 |
-| 2 | [jackfrued/Python-100-Days](https://github.com/jackfrued/Python-100-Days) | 187,609 | 全章 | Python 100 天从新手到大师（中文系统教程）；本章先读与「两种模式，两套世界」「`encoding` 必须…」相关的部分 |
-| 3 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,917 | 全章 | 微软官方 12 周机器学习入门课程，含 26 课与测验；本章先读与「两种模式，两套世界」「`encoding` 必须…」相关的部分 |
+| 1 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 225,745 | §2.1 | 讲「上下文管理器」时读仓库里读文件的工具函数：显式 `with open(...)` 而不是手动 `close`，异常路径下也能保证句柄释放 |
+| 2 | [jackfrued/Python-100-Days](https://github.com/jackfrued/Python-100-Days) | 187,609 | §3.1 | 讲「文件编码」时看 `Day16-20/` 的文件篇：`open(..., encoding="utf-8")` 必须显式写，Windows 默认 GBK 会让中文读写互崩 |
+| 3 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,917 | §2.3 | 讲「大文件分块读」时看入门课处理数据集的方式：逐行迭代而不是 `readlines()` 全量入内存，这是「数据比内存大」时的基本写法 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

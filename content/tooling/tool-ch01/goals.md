@@ -62,10 +62,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [trimstray/the-book-of-secret-knowledge](https://github.com/trimstray/the-book-of-secret-knowledge) | 254,934 | 全章 | 运维与工程工具知识合集：Linux、网络、排障命令速查；本章先读与「先破除一个「日常直觉」」「inode 里到底有什么」相关的部分 |
-| 2 | [ohmyzsh/ohmyzsh](https://github.com/ohmyzsh/ohmyzsh) | 190,274 | 全章 | Shell 生产力框架（工程效率的入门必装）；本章先读与「先破除一个「日常直觉」」「inode 里到底有什么」相关的部分 |
-| 3 | [jlevy/the-art-of-command-line](https://github.com/jlevy/the-art-of-command-line) | 162,646 | 全章 | 命令行艺术：Linux 命令的体系化进阶指南；本章先读与「先破除一个「日常直觉」」「inode 里到底有什么」相关的部分 |
-| 4 | [bregman-arie/devops-exercises](https://github.com/bregman-arie/devops-exercises) | 86,127 | 全章 | DevOps 练习题集：Linux/Docker/K8s/Git/CI 全覆盖；本章先读与「先破除一个「日常直觉」」「inode 里到底有什么」相关的部分 |
+| 1 | [trimstray/the-book-of-secret-knowledge](https://github.com/trimstray/the-book-of-secret-knowledge) | 254,934 | §3.1 | 讲「排障入口」时看分类里的「Sysadmin」一节：`df`/`du`/`lsof`/`ss` 这几个命令的定位分工，正好对应本章「先看哪一层」的顺序 |
+| 2 | [ohmyzsh/ohmyzsh](https://github.com/ohmyzsh/ohmyzsh) | 190,274 | §4.1 | 讲「Shell 环境」时读 `lib/` 下的主题与补全脚本：`PATH`、别名、补全函数的加载顺序，决定了「为什么我的命令找不到」 |
+| 3 | [jlevy/the-art-of-command-line](https://github.com/jlevy/the-art-of-command-line) | 162,646 | §1.2 | 讲「文件与目录操作」时读 `README.md` 的「文件及数据处理」一节：`find`/`xargs`/`grep` 的组合用法给了可直接抄的一行命令，比 man 手册好上手 |
+| 4 | [bregman-arie/devops-exercises](https://github.com/bregman-arie/devops-exercises) | 86,127 | §2.1 | 讲「权限位」时看 `topics/linux/` 的权限练习：`chmod 755` 与 `chmod u+x` 的等价关系、`umask` 如何影响新建文件，题后有答案可自测 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

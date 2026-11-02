@@ -29,10 +29,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | 全章 | 经典机器学习库官方仓库：算法实现与最佳实践；本章先读与「广播的三条规则与形状推导」「广播的内存零拷贝本质与「内…」相关的部分 |
-| 2 | [jakevdp/PythonDataScienceHandbook](https://github.com/jakevdp/PythonDataScienceHandbook) | 50,277 | 全章 | 《Python 数据科学手册》全书 Jupyter Notebook（NumPy/Pandas/Matplotlib）；本章先读与「广播的三条规则与形状推导」「广播的内存零拷贝本质与「内…」相关的部分 |
-| 3 | [pandas-dev/pandas](https://github.com/pandas-dev/pandas) | 50,278 | 全章 | Pandas 官方仓库：API 与内部机制权威来源；本章先读与「广播的三条规则与形状推导」「广播的内存零拷贝本质与「内…」相关的部分 |
-| 4 | [microsoft/Data-Science-For-Beginners](https://github.com/microsoft/Data-Science-For-Beginners) | 37,860 | 全章 | 微软官方 10 周数据科学课程；本章先读与「广播的三条规则与形状推导」「广播的内存零拷贝本质与「内…」相关的部分 |
+| 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | §3.2 | 讲「向量化不是银弹」时读 `sklearn/utils/` 里的分块处理：大数据集要先 `train_test_split` 或分块，否则一次性构造的距离矩阵会直接 OOM——这正是广播隐式物化的风险 |
+| 2 | [jakevdp/PythonDataScienceHandbook](https://github.com/jakevdp/PythonDataScienceHandbook) | 50,277 | §2.1 | 讲「广播从尾轴对齐」时读 `notebooks/02.05-Computation-on-arrays-broadcasting.ipynb`：它用 `(3,1)` 与 `(1,4)` 相加得到 `(3,4)` 的例子，把「缺的维补 1、1 可以拉伸」讲成一张图 |
+| 3 | [pandas-dev/pandas](https://github.com/pandas-dev/pandas) | 50,278 | §1.2 | 讲「einsum 与矩阵乘」时读 `pandas/core/array_algos/`：底层把「按轴求和」翻译成 `einsum`/`dot`，走的是同一套 BLAS 路径，所以「向量化写法性能接近」不是巧合 |
+| 4 | [microsoft/Data-Science-For-Beginners](https://github.com/microsoft/Data-Science-For-Beginners) | 37,860 | §4.1 | 讲「随机可复现」时看课程里的建模脚本：所有 `train_test_split` 都带 `random_state`，否则「同一份代码两次结果不同」无法排查 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

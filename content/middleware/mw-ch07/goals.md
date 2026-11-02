@@ -52,10 +52,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | 全章 | 含 Redis 与消息队列的高频面试知识；本章先读与「① 生产端」「② 存储端」相关的部分 |
-| 2 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | 全章 | 高并发与分布式：缓存、消息队列、分库分表专题；本章先读与「① 生产端」「② 存储端」相关的部分 |
-| 3 | [redis/redis](https://github.com/redis/redis) | 77,127 | 全章 | Redis 官方源码仓库：数据结构与命令实现的权威来源；本章先读与「① 生产端」「② 存储端」相关的部分 |
-| 4 | [apache/kafka](https://github.com/apache/kafka) | 34,105 | 全章 | Apache Kafka 官方仓库：架构与协议实现；本章先读与「① 生产端」「② 存储端」相关的部分 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §3.1 | 讲「三种顺序」时读 `docs/database/kafka/` 的顺序篇：分区内有序、分区之间无序、跨 topic 更无序，所谓「保证顺序」永远要附加「在哪个范围内」这个限定语 |
+| 2 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §4.2 | 讲「事务消息」时对照 `docs/high-concurrency/` 的分布式事务文章：Kafka 事务只保证「多条消息原子写入 + 消费端读已提交」，它不保证「业务操作与发消息」的原子性，后者要靠本地消息表或 Outbox |
+| 3 | [redis/redis](https://github.com/redis/redis) | 77,127 | §1.2 | 讲「存储端不丢」时对照 `src/rdb.c` 与 `src/aof.c` 的落盘时机：Redis 的 `appendfsync everysec` 最多丢 1 秒，Kafka 的 `acks=all` 不丢已确认消息——「不丢」的强度取决于「什么时候算成功」 |
+| 4 | [apache/kafka](https://github.com/apache/kafka) | 34,105 | §2.1 | 讲「重复从哪里来」时读 `internals/Sender.java` 的重试分支：网络超时后重发、但 broker 其实已写入，这是「生产者侧重复」的典型来源；`enable.idempotence=true` 用序列号把这类重复挡在 broker 侧 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

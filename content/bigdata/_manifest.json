@@ -34,10 +34,10 @@
           15699
         ],
         "github_notes": [
-          "免费 9 周数据工程课程：含 Hadoop/Spark/数仓实践",
-          "Apache Spark 官方仓库：RDD/SQL/调优权威来源",
-          "中文大数据入门指南：Hadoop/Hive/Spark/Flink 系统笔记",
-          "Apache Hadoop 官方仓库：HDFS/YARN/MapReduce 实现"
+          "§1.3 讲「从单机到分布式的动机」时看 `week5-batch/` 的批处理作业脚本：同一份数据在单机 pandas 与集群 Spark 上的耗时对比，是「容量与吞吐」这两个动机的实测证据",
+          "§3.1 讲「HDFS 与计算引擎的分层」时读 `core/src/main/scala/org/apache/spark/rdd/` 里对 `HadoopRDD` 的实现：Spark 把 HDFS 的 split 直接当分区，不搬数据只搬计算——这就是「计算向数据靠拢」",
+          "§2.1 讲「写入 pipeline」时读根目录的 `HDFS.md`：它用一张流程图画出「客户端 → DN1 → DN2 → DN3 → ack 回传」，配本章的 pipeline 章节对照看，能把「哪个环节挂掉会重试」串起来",
+          "§1.2 讲「NameNode 元数据常驻内存」时读 `hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/` 下的 `FSDirectory` 与 `INodeFile`：目录树与块列表就是这两个类，内存占用随「文件数」而非「数据量」增长——小文件问题的物理根源在这"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -100,10 +100,10 @@
           15699
         ],
         "github_notes": [
-          "免费 9 周数据工程课程：含 Hadoop/Spark/数仓实践",
-          "Apache Spark 官方仓库：RDD/SQL/调优权威来源",
-          "中文大数据入门指南：Hadoop/Hive/Spark/Flink 系统笔记",
-          "Apache Hadoop 官方仓库：HDFS/YARN/MapReduce 实现"
+          "§2.1 讲「Shuffle 的磁盘溢出」时看 `week5-batch/` 的作业调优笔记：「分区数设太大 → 大量小文件」「设太小 → 单分区 OOM」这两条经验在本章有对应的计算式",
+          "§3.1 讲「YARN 的资源模型」时读 `resource-managers/yarn/src/main/scala/org/apache/spark/deploy/yarn/`：`ApplicationMaster` 申请 Container、`ExecutorAllocationManager` 动态伸缩，都是「RM 管资源、AM 管作业」的落地",
+          "§2.2 讲「Combiner 的语义边界」时读 `MapReduce.md`：它用 WordCount 演示「加 Combiner 前后 shuffle 数据量差多少」，并强调「求平均必须传 (sum, count)」这条限制",
+          "§1.1 讲「MapReduce 三阶段」时读 `hadoop-mapreduce-project/hadoop-mapreduce-client/` 下的 `MapTask`/`ReduceTask`：`MapTask` 的 `runNewMapper` 里就是 map → partition → sort → spill 的实际顺序，与本章数据流图一一对应"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -166,10 +166,10 @@
           15699
         ],
         "github_notes": [
-          "免费 9 周数据工程课程：含 Hadoop/Spark/数仓实践",
-          "Apache Spark 官方仓库：RDD/SQL/调优权威来源",
-          "中文大数据入门指南：Hadoop/Hive/Spark/Flink 系统笔记",
-          "Apache Hadoop 官方仓库：HDFS/YARN/MapReduce 实现"
+          "§3.2 讲「列式存储的收益」时看 `week4-analytics/` 的查询对比：同一份数据存 CSV 与 Parquet，扫描列数少时后者快一个数量级——谓词下推与列裁剪的实测",
+          "§4.1 讲「HQL 到物理计划的映射」时读 `sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/optimizer/`：`PushPredicateThroughJoin`、`ColumnPruning` 这些规则就是「谓词下推、列裁剪」在 Spark 侧的等价物",
+          "§2.1 讲「内部表 vs 外部表」时读 `Hive.md`：删内部表连数据一起删、删外部表只删元数据，这条差异在文档里配了 `LOCATION` 的对照实验，比背定义好记",
+          "§1.3 讲「Hive 与 Hadoop 的关系」时读 `hive/` 模块（在 `apache/hive` 而非 hadoop 仓库）的执行计划接口：Hive 只负责把 HQL 编译成 MR/Tez 作业，真正的执行仍由 Hadoop 完成"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -232,10 +232,10 @@
           15699
         ],
         "github_notes": [
-          "免费 9 周数据工程课程：含 Hadoop/Spark/数仓实践",
-          "Apache Spark 官方仓库：RDD/SQL/调优权威来源",
-          "中文大数据入门指南：Hadoop/Hive/Spark/Flink 系统笔记",
-          "Apache Hadoop 官方仓库：HDFS/YARN/MapReduce 实现"
+          "§2.3 讲「惰性求值」时看 `week5-batch/` 的 Spark 作业：`df.filter(...)` 之后不打 `show()`/`count()` 就什么都不执行，脚本里加不加 action 决定「有没有真的跑」",
+          "§1.1 讲「RDD 的五大特性」时读 `core/src/main/scala/org/apache/spark/rdd/RDD.scala`：`getPartitions`/`compute`/`getDependencies` 三个抽象方法就是「分区列表 + 计算函数 + 依赖」的代码化，其余两个是优化信息",
+          "§3.1 讲「宽窄依赖与 Stage」时读 `Spark.md`：它画了「窄依赖可流水线、宽依赖要 shuffle」的依赖图，并给出「Stage 数 = 宽依赖数 + 1」的算式",
+          "§4.2 讲「血缘容错 vs 副本容错」时对照 `hadoop-hdfs-project/` 的副本机制：HDFS 靠「多存几份」，Spark 靠「重算丢失分区」——前者贵在存储、后者贵在计算，这是两种容错哲学"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -298,10 +298,10 @@
           15699
         ],
         "github_notes": [
-          "免费 9 周数据工程课程：含 Hadoop/Spark/数仓实践",
-          "Apache Spark 官方仓库：RDD/SQL/调优权威来源",
-          "中文大数据入门指南：Hadoop/Hive/Spark/Flink 系统笔记",
-          "Apache Hadoop 官方仓库：HDFS/YARN/MapReduce 实现"
+          "§3.1 讲「AQE 纠正误判」时看 `week5-batch/` 的 Spark SQL 作业日志：`spark.sql.adaptive.enabled=true` 后，`SortMergeJoin` 会被运行时统计改成 `BroadcastHashJoin`，日志里能看到 `Plan changed`",
+          "§2.1 讲「Catalyst 四阶段」时读 `sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/`：`analyzer/`（解析）→ `optimizer/`（逻辑优化）→ `planner/`（物理计划）→ `codegen`（生成字节码），目录结构本身就是四阶段的证据",
+          "§1.3 讲「DataFrame 与 RDD 的差别」时读 `Spark.md` 的 Spark SQL 篇：DataFrame 携带 schema、能进优化器，RDD 是黑盒函数——「结构化信息就是优化空间」这句话的来源",
+          "§4.1 讲「Metastore 的作用」时对照 `hive/` 的元数据表设计：库/表/分区/列都存 MySQL，Spark SQL 通过 `HiveExternalCatalog` 读写同一份元数据——这就是「湖仓共用 Metastore」的由来"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -365,10 +365,10 @@
           15699
         ],
         "github_notes": [
-          "免费 9 周数据工程课程：含 Hadoop/Spark/数仓实践",
-          "Apache Spark 官方仓库：RDD/SQL/调优权威来源",
-          "中文大数据入门指南：Hadoop/Hive/Spark/Flink 系统笔记",
-          "Apache Hadoop 官方仓库：HDFS/YARN/MapReduce 实现"
+          "§1.2 讲「ODS/DWD/DWS/ADS 四层」时看 `week4-analytics/` 的数仓作业：从原始 JSON 到宽表再聚合到指标表，每一层的输入输出都是独立的表，层与层的调用关系就是分层规范的落地",
+          "§4.3 讲「小文件合并」时读 `sql/core/src/main/scala/org/apache/spark/sql/execution/datasources/` 的写入路径：`repartition` 与 `coalesce` 在写出前决定文件数，分区数乘作业批次就是「每天新增多少小文件」",
+          "§2.2 讲「维度建模与粒度」时读 `BigData-Notes` 里的数仓篇：「先声明粒度再选维度」这条顺序错了，后面所有指标口径都会漂移——文档给了「订单事实表」的完整推演",
+          "§3.1 讲「调度与 SLA」时对照 `hadoop-yarn-project/` 的队列与容量调度：YARN 的 `CapacityScheduler` 决定「哪个队列先跑」，数仓的基线任务要放在高优先级队列，否则被离线任务挤掉"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [

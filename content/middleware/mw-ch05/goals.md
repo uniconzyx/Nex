@@ -46,10 +46,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | 全章 | 含 Redis 与消息队列的高频面试知识；本章先读与「① 从「队列」到「分布式提…」「② Topic / Par…」相关的部分 |
-| 2 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | 全章 | 高并发与分布式：缓存、消息队列、分库分表专题；本章先读与「① 从「队列」到「分布式提…」「② Topic / Par…」相关的部分 |
-| 3 | [redis/redis](https://github.com/redis/redis) | 77,127 | 全章 | Redis 官方源码仓库：数据结构与命令实现的权威来源；本章先读与「① 从「队列」到「分布式提…」「② Topic / Par…」相关的部分 |
-| 4 | [apache/kafka](https://github.com/apache/kafka) | 34,105 | 全章 | Apache Kafka 官方仓库：架构与协议实现；本章先读与「① 从「队列」到「分布式提…」「② Topic / Par…」相关的部分 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §2.2 | 讲「ISR 与 acks」时读 `docs/database/kafka/` 的副本篇：`acks=all` 只是「等 ISR 全部确认」，还要配 `min.insync.replicas` 才有意义——只设前者，ISR 缩到一个副本时等于 `acks=1` |
+| 2 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §4.1 | 讲「消费者组与 rebalance」时对照 `docs/high-concurrency/` 的消息队列文章：rebalance 期间全组停止消费，`session.timeout.ms` 与 `max.poll.interval.ms` 配小了会「反复踢人」，这是「消费明明没挂却一直 rebalance」的根因 |
+| 3 | [redis/redis](https://github.com/redis/redis) | 77,127 | §3.2 | 讲「零拷贝」时对照 `src/networking.c` 的 `writev`/`sendfile` 用法：Redis 与 Kafka 都靠「不让数据经过用户态」省掉两次拷贝，区别在于 Kafka 还叠加了页缓存与批量发送 |
+| 4 | [apache/kafka](https://github.com/apache/kafka) | 34,105 | §1.2 | 讲「从队列到分布式提交日志」时读 `core/src/main/scala/kafka/log/Log.scala`：每个分区就是一个 append-only 的段文件序列，消费位点只是「读到哪个 offset」，所以消息可以被多个消费者组各自重放——这是「日志」与「队列」的本质差别 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

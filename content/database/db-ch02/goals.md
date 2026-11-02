@@ -13,9 +13,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | 全章 | 含 MySQL 索引、事务、锁与调优的系统讲解；本章先读与「可运行代码」「`IN` vs `EXIS…」相关的部分 |
-| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | 全章 | 真实业务库表设计范例与 SQL 实践；本章先读与「可运行代码」「`IN` vs `EXIS…」相关的部分 |
-| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | 全章 | 含分库分表、读写分离与分布式事务；本章先读与「可运行代码」「`IN` vs `EXIS…」相关的部分 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §4.1 | 讲「子查询的三种形态」时读 `docs/database/mysql/` 的 SQL 优化篇：标量子查询、`IN`、`EXISTS` 在执行计划里的差异是「是否被改写成半连接」，这决定了相关子查询会不会被逐行执行 |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §3.1 | 讲「JOIN 与聚合」时看 `mall-mbg` 生成的 Example/Criteria 类：它把「动态 WHERE + ORDER BY」拼成 SQL，能直观看到「条件组合爆炸」是怎么发生的，也能理解为什么复杂查询要手写 XML |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §2.2 | 讲「IN vs EXISTS」时对照 `docs/high-concurrency/` 的 MySQL 优化文章：小表驱动大表、`EXISTS` 在外层小的时候更快，这条结论来自「谁做驱动表」而非语法本身 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

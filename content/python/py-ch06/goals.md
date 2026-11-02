@@ -47,9 +47,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 225,745 | 全章 | Python 实现的全部经典算法，含详细注释；本章先读与「1 入口对照表」「2 `findall` 的…」相关的部分 |
-| 2 | [jackfrued/Python-100-Days](https://github.com/jackfrued/Python-100-Days) | 187,609 | 全章 | Python 100 天从新手到大师（中文系统教程）；本章先读与「1 入口对照表」「2 `findall` 的…」相关的部分 |
-| 3 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,917 | 全章 | 微软官方 12 周机器学习入门课程，含 26 课与测验；本章先读与「1 入口对照表」「2 `findall` 的…」相关的部分 |
+| 1 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 225,745 | §1.2 | 讲「正则的字符类与量词」时读 `strings/` 目录下的校验脚本：邮箱/手机号的正则各一版，能对照出「什么时候该用正则、什么时候该写解析」 |
+| 2 | [jackfrued/Python-100-Days](https://github.com/jackfrued/Python-100-Days) | 187,609 | §2.1 | 讲「分组与替换」时看 `Day21-30/` 的文本处理篇：`re.sub` 配 `` 反向引用做「调换两段」的改写，比字符串切分稳 |
+| 3 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,917 | §3.4 | 讲「灾难性回溯」时看入门课的文本清洗：对长文本用简单字符类而不是嵌套量词 `(a+)+`，后者在异常输入上会指数级回溯 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 
