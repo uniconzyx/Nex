@@ -22,7 +22,7 @@
         {
           "id": 1,
           "left": "@SpringBootApplication 的扫描范围只覆盖主类所在包及其子包",
-          "right": "把主类放在所有业务包的最外层 （如 com.example），或显式 @ComponentScan(basePackages = \"com.example\")。 这不是自动配置问题，是组件扫描问题，两者要分清。"
+          "right": "把主类放在所有业务包的最外层 （如 com.example），或显式 @ComponentScan(basePackages = \"com.example\")"
         },
         {
           "id": 2,
@@ -33,6 +33,11 @@
           "id": 3,
           "left": "@ConfigurationProperties 绑定失败不报错，只是静默为 null",
           "right": "加 @Validated + @NotNull/@NotBlank 校验，或用 spring-boot-configuration-processor 生成元数据让 IDE 提示；"
+        },
+        {
+          "id": 4,
+          "left": "@ConditionalOnProperty 的 havingValue 是精确字符串比较",
+          "right": "布尔开关统一写 havingValue=\"true\" + matchIfMissing=false，并在文档里固定写法；启动后用 /actuator/conditions 确认条件是否命中。"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"

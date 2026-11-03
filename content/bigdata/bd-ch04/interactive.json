@@ -22,22 +22,22 @@
         {
           "id": 1,
           "left": "以为 transformation 会立即执行（忘了惰性求值）",
-          "right": "需要触发计算时显式调用 action；别在 transformation 链里期待「马上看到结果」，调试用 toDebugString 看计划而非随手 collect。"
+          "right": "需要触发计算时显式调用 action；别在 transformation 链里期待「马上看到结果」，调试用 toDebugString 看计划而非随手 collect"
         },
         {
           "id": 2,
           "left": "把 reduceByKey 当 groupByKey 用，导致 Shuffle 数据量爆炸",
-          "right": "聚合优先 reduceByKey/aggregateByKey/combineByKey，map 端 combiner 能把 Shuffle 量从「总记录数」压到「不同 key 数」。"
+          "right": "聚合优先 reduceByKey/aggregateByKey/combineByKey，map 端 combiner 能把 Shuffle 量从「总记录数」压到「不同 key 数」"
         },
         {
           "id": 3,
           "left": "在超大 key 上滥用 groupByKey",
-          "right": "可结合/可交换的聚合一律用 reduceByKey；不可结合的（如取 Top-N）用 reduceByKey+ 本地堆或 aggregateByKey 控制每 key 内存。"
+          "right": "可结合/可交换的聚合一律用 reduceByKey；不可结合的（如取 Top-N）用 reduceByKey+ 本地堆或 aggregateByKey 控制每 key 内存"
         },
         {
           "id": 4,
           "left": "缓存用错级别 / 物化后不释放",
-          "right": "内存紧张用 MEMORYANDDISK；复用结束立即 unpersist()；只缓存「被多个 action 复用」的中间结果，而非一上来就缓存所有 RDD。"
+          "right": "内存紧张用 MEMORY_AND_DISK；复用结束立即 unpersist()；只缓存「被多个 action 复用」的中间结果，而非一上来就缓存所有 RDD"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"

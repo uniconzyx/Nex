@@ -22,22 +22,22 @@
         {
           "id": 1,
           "left": "把 SDS 的二进制安全归功于 \\0 结尾",
-          "right": "回答「SDS 优点」时把「二进制安全」的解释锚定在 len 字段上，并说明保留 \\0 仅为复用 strlen 类 C 函数。"
+          "right": "回答「SDS 优点」时把「二进制安全」的解释锚定在 len 字段上，并说明保留 \\0 仅为复用 strlen 类 C 函数"
         },
         {
           "id": 2,
           "left": "记错 Hash/ZSet/Set 编码切换的「且/或」关系",
-          "right": "被问阈值时一律按「且」表述；排查「热 Hash 突然变 hashtable」优先查是否有某个 value 超过 hash-max-listpack-value=64 字节。"
+          "right": "被问阈值时一律按「且」表述；排查「热 Hash 突然变 hashtable」优先查是否有某个 value 超过 hash-max-listpack-value=64 字节"
         },
         {
           "id": 3,
           "left": "以为 embstr 是可原地修改的紧凑串",
-          "right": "高频写短串直接用 SET 覆盖或接受 embstr→raw 的转换；解释 44 字节分界时说明它来自 64B jemalloc 块减去 robj(16)+sdshdr8(3)+\\0(1)。"
+          "right": "高频写短串直接用 SET 覆盖或接受 embstr→raw 的转换；解释 44 字节分界时说明它来自 64B jemalloc 块减去 robj(16)+sdshdr8(3)+\\0(1)"
         },
         {
           "id": 4,
           "left": "渐进式 rehash 期间仍向 ht[0] 写数据",
-          "right": "描述 rehash 时明确「新增走 ht[1]、查找查两张表、搬完才互换」，避免写成「边搬边写旧表」。"
+          "right": "描述 rehash 时明确「新增走 ht[1]、查找查两张表、搬完才互换」，避免写成「边搬边写旧表」"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"

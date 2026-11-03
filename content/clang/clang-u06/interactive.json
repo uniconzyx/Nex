@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "编译四阶段：-E / -S / -c / 链接 各自的产物",
-      "body": "Make 判断「要不要重建」的唯一依据"
+      "body": "recipe 用空格缩进 → missing separator"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "recipe 用空格缩进 → missing separator",
+          "right": "把 Makefile 的缩进设为「制表符」；cat -A Makefile 可看到 ^I（Tab）与空格的区别"
+        },
+        {
+          "id": 2,
+          "left": "只声明 .c 依赖、漏掉 .h",
+          "right": "-MMD -MP 生成 .d 并 -include"
+        },
+        {
+          "id": 3,
+          "left": "make -j 并行构建出现随机的产物损坏",
+          "right": "补全依赖边；生成头文件的规则必须显式声明为依赖"
+        },
+        {
+          "id": 4,
+          "left": "make 递归调用要写 $(MAKE) 而非裸 make",
+          "right": "在所有递归规则里用 $(MAKE) -C sub，而不是 make -C sub"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [

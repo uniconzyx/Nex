@@ -22,17 +22,17 @@
         {
           "id": 1,
           "left": "把 softmax 温度写成乘在 logits 外面",
-          "right": "「除以温度」：$pi=exp(zi/T)/Σexp(zj/T)$。写成 $exp(T·zi)$ 会把方向搞反（T 大反而更尖锐），温度失去「平滑」语义。"
+          "right": "「除以温度」：p_i=exp(z_i/T)/Σexp(z_j/T)"
         },
         {
           "id": 2,
           "left": "因果掩码用 diagonal=0，把当前位置也遮掉",
-          "right": "diagonal=1，只遮严格上三角。"
+          "right": "diagonal=1，只遮严格上三角"
         },
         {
           "id": 3,
           "left": "多头注意力的 reshape/permute 顺序错，头被搅乱",
-          "right": "用已知输入（如 arange）单步验证「拆分再拼回是否还原」，并确认 permute 后的维度顺序与注意力计算假设一致。"
+          "right": "用已知输入（如 arange）单步验证「拆分再拼回是否还原」，并确认 permute 后的维度顺序与注意力计算假设一致"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
@@ -74,7 +74,7 @@
           "options": [
             {
               "key": "A",
-              "text": "LayerNorm 沿 batch 维归一化，推理期用 runningmean"
+              "text": "LayerNorm 沿 batch 维归一化，推理期用 running_mean"
             },
             {
               "key": "B",

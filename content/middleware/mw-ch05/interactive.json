@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "分区器：murmur2 映射与分布均匀度检验",
-      "body": "Kafka 的「消息消费」与传统队列的本质差异"
+      "body": "以为分区数可以随便增减"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "以为分区数可以随便增减",
+          "right": "上线前按 max(目标吞吐/单分区吞吐, 消费者数, broker 数) 规划到位并留余量"
+        },
+        {
+          "id": 2,
+          "left": "消费者数超过分区数，以为能提速",
+          "right": "先把分区数提上去（或按分区数规划消费者实例数），再谈扩容"
+        },
+        {
+          "id": 3,
+          "left": "用默认的自动提交位点，却期望「处理完才算消费成功」",
+          "right": "enable.auto.commit=false，处理完成后手动提交"
+        },
+        {
+          "id": 4,
+          "left": "以为「先处理再提交」就不会重复",
+          "right": "消费端必须幂等（唯一键、去重表、upsert），或在上游保证「同 key 同分区」后用状态去重"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [
@@ -44,7 +70,7 @@
           "correct": [
             "B"
           ],
-          "explain": "Kafka 是「提交日志（commit log）」而非「队列」：消息写入后按 append-only 顺序持久化，只有当 retention.ms / retention.bytes 到期或触发 log compaction 时才被清理，与消费者是否读过无关。这正是「可重放」的根基——重置 offset 就能重读历史。C 错在多个消费者组各自维护独立进度、互不干扰；D 错在 offset 由客户端提交（broker 只存储 consumeroffsets 这一特殊 topic 里的提交记录）。"
+          "explain": "Kafka 是「提交日志（commit log）」而非「队列」：消息写入后按 append-only 顺序持久化，只有当 retention.ms / retention.bytes 到期或触发 log compaction 时才被清理，与消费者是否读过无关。这正是「可重放」的根基——重置 offset 就能重读历史。C 错在多个消费者组各自维护独立进度、互不干扰；D 错在 offset 由客户端提交（broker 只存储 __consumer_offsets 这一特殊 topic 里的提交记录）。"
         },
         {
           "id": "q1",

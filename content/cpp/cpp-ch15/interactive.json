@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "命名空间嵌套与 using 声明",
-      "body": "头文件里写 using namespace std;"
+      "body": "头文件里写 using namespace std; 污染全局"
     },
     "exam": {
       "tag": "考场视角",
@@ -21,23 +21,23 @@
       "pairs": [
         {
           "id": 1,
-          "left": "头文件里写 using namespace std;",
-          "right": "头文件用完整限定名 std::，using 只放源文件或函数内部。"
+          "left": "头文件里写 using namespace std; 污染全局",
+          "right": "头文件中只用限定名（std::vector）或局部 using 声明（如只 using std::size_t;）；using namespace 仅限 .cpp 内且作用域尽量小。"
         },
         {
           "id": 2,
-          "left": "把类型定义在匿名命名空间里放头文件",
-          "right": "匿名命名空间只用于源文件的内部实现，头文件里别用。"
+          "left": "ADL 意外选中别处的重载",
+          "right": "调用库函数时尽量显式限定（ns::foo(x)）；或为自定义类型提供同命名空间的友元/自由函数，让 ADL 可控。"
         },
         {
           "id": 3,
-          "left": "头文件里定义非 inline 函数或全局变量",
-          "right": "头文件只放声明，定义放源文件或用 inline。"
+          "left": "匿名命名空间误当「全局可见」",
+          "right": "仅本文件私有逻辑才用匿名命名空间；跨 TU 共享必须放头文件 + inline/普通定义。"
         },
         {
           "id": 4,
-          "left": "自定义运算符放错命名空间",
-          "right": "运算符重载与类型放在同一命名空间。"
+          "left": "using namespace std; 进头文件（同一坑的极端版）",
+          "right": "严守「头文件禁用 using namespace」铁律；代码评审把这当红线。"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"

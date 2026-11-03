@@ -33,22 +33,22 @@
         {
           "id": 1,
           "left": "\"C:\\new\\test\" 里的 \\n 是换行符",
-          "right": "r\"C:\\new\\test\"、Path(r\"C:/new/test\")，或用正斜杠 \"C:/new/test\"（Windows API 同样接受）。"
+          "right": "r\"C:\\new\\test\"、Path(r\"C:/new/test\")，或用正斜杠 \"C:/new/test\"（Windows API 同样接受）"
         },
         {
           "id": 2,
           "left": "用 os.environ[\"KEY\"] 读配置",
-          "right": "os.environ.get(\"KEY\", default) 或 os.getenv(\"KEY\", default)，默认值必须显式给出。"
+          "right": "os.environ.get(\"KEY\", default) 或 os.getenv(\"KEY\", default)，默认值必须显式给出"
         },
         {
           "id": 3,
           "left": "dirs = [...] 想剪枝却没生效",
-          "right": "dirs[:] = [d for d in dirs if ...]，切片赋值才是原地替换。"
+          "right": "dirs[:] = [d for d in dirs if ...]，切片赋值才是原地替换"
         },
         {
           "id": 4,
-          "left": "list(Path(d).rglob(\"\")) 在大目录上吃爆内存",
-          "right": "直接迭代生成器 for p in Path(d).rglob(\"\")，需要顺序时才 sorted()（且评估规模）。"
+          "left": "list(Path(d).rglob(\"*\")) 在大目录上吃爆内存",
+          "right": "直接迭代生成器 for p in Path(d).rglob(\"*\")，需要顺序时才 sorted()（且评估规模）"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"

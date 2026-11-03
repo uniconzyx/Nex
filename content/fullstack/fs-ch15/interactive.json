@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "Goroutine 并发：N 个 goroutine 经 channel 汇总（无…",
-      "body": "关于 Goroutine 与 Channel，正确的是"
+      "body": "goroutine 泄漏：开了没退出条件"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "goroutine 泄漏：开了没退出条件",
+          "right": "给 goroutine 配退出信号：用 context.Context 的 Done() 或关闭的 channel 来通知退出；长驻 goroutine 必须有「何时结束」的明确路径"
+        },
+        {
+          "id": 2,
+          "left": "多个 goroutine 共享变量却不上锁",
+          "right": "把「+1」作为事件发到 channel，由一个汇总 goroutine 收；或者确需共享时用 sync.Mutex/atomic，但优先用 channel"
+        },
+        {
+          "id": 3,
+          "left": "无缓冲 channel 没人接收导致永久阻塞",
+          "right": "明确收发双方的生命周期；用 select + default 或带超时的 time.After 避免永久阻塞；发送前确认接收方已就绪或会用 close 收尾"
+        },
+        {
+          "id": 4,
+          "left": "A Tour of Go 式误用：向已关闭的 channel 发送",
+          "right": "关闭 channel 的责任要唯一：只让「唯一的发送方」或「协调者」关闭；多生产者场景用 sync.WaitGroup 等全部发完再由唯一方关闭"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [

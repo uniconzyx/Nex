@@ -6,45 +6,71 @@
   "scenario": {
     "work": {
       "tag": "工作现场",
-      "head": "uniqueptr 独占所有权（移动而非拷贝）",
-      "body": "关于 uniqueptr 与 sharedptr 的所有权语义，正确的是"
+      "head": "unique_ptr 独占所有权（移动而非拷贝）",
+      "body": "循环引用导致 shared_ptr 泄漏"
     },
     "exam": {
       "tag": "考场视角",
-      "head": "关于 uniqueptr 与 sharedptr 的所有权语义，正确的是",
+      "head": "关于 unique_ptr 与 shared_ptr 的所有权语义，正确的是",
       "body": "cpp-ch10 · 本章真题口径"
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "循环引用导致 shared_ptr 泄漏",
+          "right": "把其中一侧改为 weak_ptr（见 concept/03-weak-circular.md）。"
+        },
+        {
+          "id": 2,
+          "left": "enable_shared_from_this 在构造函数中调用 shared_from_…",
+          "right": "只在已由 shared_ptr 管理的成员函数里（如 init()、回调）调用 shared_from_this()，绝不在构造函数体里调用。"
+        },
+        {
+          "id": 3,
+          "left": "把 this 直接交给新 shared_ptr（重复控制块 / 双重释放）",
+          "right": "让类继承 std::enable_shared_from_this<Self>，统一用 shared_from_this() 取共享所有权。"
+        },
+        {
+          "id": 4,
+          "left": "混用 get() 返回的裸指针构造第二个 shared_ptr / unique_ptr",
+          "right": "get() 只用于\"借用\"交给不接管所有权的 C API；绝不基于它再构造智能指针。若需共享，复制原 shared_ptr 或用 weak_ptr::lock()。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [
         {
           "id": "q0",
           "stem": "以下描述中，选出**正确**的一项。",
-          "title": "关于 uniqueptr 与 sharedptr 的所有权语义，正确的是",
+          "title": "关于 unique_ptr 与 shared_ptr 的所有权语义，正确的是",
           "options": [
             {
               "key": "A",
-              "text": "uniqueptr 可以随意拷贝，多个 uniqueptr 指向同一对象"
+              "text": "unique_ptr 可以随意拷贝，多个 unique_ptr 指向同一对象"
             },
             {
               "key": "B",
-              "text": "sharedptr 的引用计数存放在 sharedptr 对象本身里"
+              "text": "shared_ptr 的引用计数存放在 shared_ptr 对象本身里"
             },
             {
               "key": "C",
-              "text": "uniqueptr 默认删除器为空类型，经空基类优化后与裸指针同尺寸、零额外开销"
+              "text": "unique_ptr 默认删除器为空类型，经空基类优化后与裸指针同尺寸、零额外开销"
             },
             {
               "key": "D",
-              "text": "sharedptr 能自动回收循环引用，无需 weakptr"
+              "text": "shared_ptr 能自动回收循环引用，无需 weak_ptr"
             }
           ],
           "correct": [
             "C"
           ],
-          "explain": "uniqueptr 独占、不可拷贝（A 错）；引用计数在独立的控制块里，不在 sharedptr 对象里（B 错）；sharedptr 无法自动回收循环引用，需把环的一侧改为 weakptr（D 错）。uniqueptr 的默认删除器是空类型，EBCO 后 sizeof(uniqueptr<T>)==sizeof(T)，零额外内存、删除调用可内联（C 对）。"
+          "explain": "unique_ptr 独占、不可拷贝（A 错）；引用计数在独立的控制块里，不在 shared_ptr 对象里（B 错）；shared_ptr 无法自动回收循环引用，需把环的一侧改为 weak_ptr（D 错）。unique_ptr 的默认删除器是空类型，EBCO 后 sizeof(unique_ptr<T>)==sizeof(T*)，零额外内存、删除调用可内联（C 对）。"
         }
       ]
     },

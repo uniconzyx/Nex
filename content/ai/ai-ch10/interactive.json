@@ -22,22 +22,22 @@
         {
           "id": 1,
           "left": "把所有参数初始化成同一个值（包括全 0）",
-          "right": "随机初始化（He/Xavier），并保证每层方差约等于输入方差。"
+          "right": "随机初始化（He/Xavier），并保证每层方差约等于输入方差"
         },
         {
           "id": 2,
           "left": "用 Xavier 配 ReLU、或用 He 配 tanh",
-          "right": "tanh/sigmoid → Xavier，ReLU/GELU → He。"
+          "right": "tanh/sigmoid → Xavier，ReLU/GELU → He"
         },
         {
           "id": 3,
           "left": "以为「有 BN/LN 了就不用管初始化」",
-          "right": "归一化 + 合适初始化 + scaled init（残差末层乘 $1/\\sqrt{2N}$）三者并用。"
+          "right": "归一化 + 合适初始化 + scaled init（残差末层乘 1/√(2N)）三者并用"
         },
         {
           "id": 4,
           "left": "Transformer 用 BatchNorm",
-          "right": "LN / RMSNorm。"
+          "right": "LN / RMSNorm"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
@@ -83,11 +83,11 @@
             },
             {
               "key": "B",
-              "text": "$\\lambda\\theta$ 会让梯度上溢成 inf"
+              "text": "λ\\theta 会让梯度上溢成 inf"
             },
             {
               "key": "C",
-              "text": "衰减项被 $\\sqrt{\\hat v}$ 归一化，导致不同参数的衰减强度不一致"
+              "text": "衰减项被 √(\\hat v) 归一化，导致不同参数的衰减强度不一致"
             },
             {
               "key": "D",

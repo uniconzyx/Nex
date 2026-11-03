@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "KV Cache 显存账：随 batch 与长度线性膨胀",
-      "body": "关于 PagedAttention，正确的是"
+      "body": "部署预算只算模型权重，漏掉 KV Cache"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "部署预算只算模型权重，漏掉 KV Cache",
+          "right": "显存账要算两项：权重（固定）+ KV Cache（层数×头×维度×2×长度×batch×字节，变动）"
+        },
+        {
+          "id": 2,
+          "left": "用连续分配 KV，长上下文直接 OOM",
+          "right": "用 PagedAttention 切块+块表+物理块池，按需分配并支持前缀复用，碎片与重复存储问题一并解决"
+        },
+        {
+          "id": 3,
+          "left": "静态批处理拖垮尾延迟",
+          "right": "改用 continuous batching：以 decode 步为调度单位，出 EOS 即释放、空位补新请求，把利用率从批级提到步级"
+        },
+        {
+          "id": 4,
+          "left": "把 continuous batching 当「免费午餐」",
+          "right": "连续批处理必须与 PagedAttention 配套：块表管理让请求动态进出、长度不一时显存高效复用，否则调度收益被内存管理拖垮"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [

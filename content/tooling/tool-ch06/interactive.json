@@ -7,11 +7,11 @@
     "work": {
       "tag": "工作现场",
       "head": "Compose 服务解析器：依赖图构建、拓扑排序与循环依赖检测（正反两组）",
-      "body": "用短语法 dependson 以为能保证依赖就绪"
+      "body": "用短语法 depends_on 以为能保证依赖就绪"
     },
     "exam": {
       "tag": "考场视角",
-      "head": "dependson 的局限与 condition: servicehealthy",
+      "head": "depends_on 的局限与 condition: service_healthy",
       "body": "tool-ch06 · 本章真题口径"
     }
   },
@@ -21,23 +21,23 @@
       "pairs": [
         {
           "id": 1,
-          "left": "用短语法 dependson 以为能保证依赖就绪",
-          "right": "被依赖方配 healthcheck，依赖方写 dependson: {db: {condition: servicehealthy}}；同时应用侧仍要有连接重试与退避。"
+          "left": "用短语法 depends_on 以为能保证依赖就绪",
+          "right": "被依赖方配 healthcheck，依赖方写 depends_on: {db: {condition: service_healthy}}；同时应用侧仍要有连接重试与退避"
         },
         {
           "id": 2,
-          "left": "写了 condition: servicehealthy 却忘了给被依赖方配 health…",
-          "right": "健康检查要成对配置——db 有、api 依赖 db；api 自己也必须有，才能供 web 依赖。"
+          "left": "写了 condition: service_healthy 却忘了给被依赖方配 healt…",
+          "right": "健康检查要成对配置——db 有、api 依赖 db；api 自己也必须有，才能供 web 依赖"
         },
         {
           "id": 3,
           "left": "依赖图里出现环",
-          "right": "抽第三个服务、或改成消息队列异步解耦；绝不能靠 restart: always 掩盖——那只会变成两个服务互相等待的崩溃循环。（ex01 实测：三节点环与自环均无法排出拓扑序）"
+          "right": "抽第三个服务、或改成消息队列异步解耦；绝不能靠 restart: always 掩盖——那只会变成两个服务互相等待的崩溃循环"
         },
         {
           "id": 4,
-          "left": "健康检查不设 startperiod 导致慢启动服务被反复杀",
-          "right": "设 startperiod（如 30s~60s）覆盖初始化窗口；经验值 interval=10s timeout=3s retries=3 startperiod=30s。"
+          "left": "健康检查不设 start_period 导致慢启动服务被反复杀",
+          "right": "设 start_period（如 30s~60s）覆盖初始化窗口；经验值 interval=10s timeout=3s retries=3 start_period=30s"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
@@ -48,7 +48,7 @@
         {
           "id": "q1",
           "stem": "一个 compose 文件里 `api` 依赖 `db`，写法是短语法 `depends_on: [db]`。`docker compose up` 之后一切正常，但 api 日志的第一行是 `connection refused to db`。 下列说法正确的是？（多选） A. 短语法 `depends_on` 等价于 `condition: service_started`，只保证 db 的**容器进程已创建** B. `service_started` 意味着数据库一定能接受连接 C. 要保证就绪，应写 `condition: service_healthy`，且 db 自己必须定义 `healthcheck` D. 即使编排层保证了依赖就绪，应用侧仍应有连接重试与退避 请选出全部正确选项。",
-          "title": "dependson 的局限与 condition: servicehealthy",
+          "title": "depends_on 的局限与 condition: service_healthy",
           "options": [
             {
               "key": "A",
@@ -56,11 +56,11 @@
             },
             {
               "key": "B",
-              "text": "servicestarted 意味着能接受连接"
+              "text": "service_started 意味着能接受连接"
             },
             {
               "key": "C",
-              "text": "改用 servicehealthy 且被依赖方配 healthcheck"
+              "text": "改用 service_healthy 且被依赖方配 healthcheck"
             },
             {
               "key": "D",
@@ -72,7 +72,7 @@
             "C",
             "D"
           ],
-          "explain": "考 dependson 的两种 condition 语义，是本章第一考点。"
+          "explain": "考 depends_on 的两种 condition 语义，是本章第一考点。"
         },
         {
           "id": "q2",

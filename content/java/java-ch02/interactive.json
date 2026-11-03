@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "类与对象：定义、实例化与字段访问",
-      "body": "关于 Java 对象内存布局与参数传递，正确的是"
+      "body": "把\"对象参数传递\"说成引用传递"
     },
     "exam": {
       "tag": "考场视角",
@@ -27,6 +27,32 @@
         "子类构造器体"
       ],
       "file": "03-constructor-and-this.md"
+    },
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "把\"对象参数传递\"说成引用传递",
+          "right": "理解\"引用的副本\"语义（examples/ex07-pass-by-value-reference.json 实证）"
+        },
+        {
+          "id": 2,
+          "left": "字段不加 private、setter 不校验",
+          "right": "字段 private + setter 内校验（examples/ex05-encapsulation-getter-setter.json）"
+        },
+        {
+          "id": 3,
+          "left": "重写 equals 却不重写 hashCode",
+          "right": "成对重写；hashCode 用 Objects.hash(...)，且参与 equals 的字段必须与 hashCode 完全一致；能用 record 就让编译器生成。"
+        },
+        {
+          "id": 4,
+          "left": "equals 的参数写成具体类型而不是 Object",
+          "right": "参数必须写 Object，并加 @Override 让编译器替你抓这类签名错误（@Override 是最便宜的防线）。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
     },
     {
       "kind": "boss",

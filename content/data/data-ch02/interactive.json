@@ -22,22 +22,22 @@
         {
           "id": 1,
           "left": "(3,) 想按列广播到 (3,4) 却报错",
-          "right": "在尾部插维：v[:, None]（得 (3,1)）或 v.reshape(3,1)，再参与 (3,4) 运算。"
+          "right": "在尾部插维：v[:, None]（得 (3,1)）或 v.reshape(3,1)，再参与 (3,4) 运算"
         },
         {
           "id": 2,
-          "left": "用 np.random.seed 给 defaultrng 设种子",
-          "right": "rng = np.random.defaultrng(seed)，并把 rng 作为显式依赖传入，禁止依赖全局随机态（多线程会互相踩踏）。"
+          "left": "用 np.random.seed 给 default_rng 设种子",
+          "right": "rng = np.random.default_rng(seed)，并把 rng 作为显式依赖传入，禁止依赖全局随机态（多线程会互相踩踏）"
         },
         {
           "id": 3,
-          "left": "asstrided 造出重叠视图后写数据，隔山打牛",
-          "right": "优先用官方封装 slidingwindowview；必须手写时只读不写，或确认无重叠。"
+          "left": "as_strided 造出重叠视图后写数据，隔山打牛",
+          "right": "优先用官方封装 sliding_window_view；必须手写时只读不写，或确认无重叠"
         },
         {
           "id": 4,
           "left": "按列遍历 C 顺序大数组导致 cache 命中率骤降",
-          "right": "按行遍历，或转 F order，或一次性 A.sum(axis=0)（ufunc 内部已针对布局优化）。"
+          "right": "按行遍历，或转 F order，或一次性 A.sum(axis=0)（ufunc 内部已针对布局优化）"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
@@ -91,7 +91,7 @@
             },
             {
               "key": "D",
-              "text": "np.float64(1.7e308) 10 结果是 nan"
+              "text": "np.float64(1.7e308) * 10 结果是 nan"
             }
           ],
           "correct": [

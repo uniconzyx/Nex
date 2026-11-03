@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "RESTful 资源命名、HTTP 方法语义（安全/幂等）与状态码映射表（纯函数，…",
-      "body": "什么场景更适合选文档型（MongoDB）"
+      "body": "用 offset 深分页，还在并发写入下翻页"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "用 offset 深分页，还在并发写入下翻页",
+          "right": "翻页用游标（keyset）：WHERE (sort_key, id) < (cursor_key, cursor_id)，且游标必须包含完整排序键（含唯一键）。"
+        },
+        {
+          "id": 2,
+          "left": "复合索引列序按「选择性高到低」排",
+          "right": "按最左前缀的实际查询组合排：等值条件列在前、范围条件列在后；ex09 的 (tenant_id, kind) 同时支持 tenant_id=? AND kind=? 与 tenant_id=? AND kind>?。"
+        },
+        {
+          "id": 3,
+          "left": "以为「建了索引就一定走索引」",
+          "right": "以计划串为唯一判据：出现 SEARCH ... USING INDEX 才是走了索引，SCAN 就是没走；建索引后必须复查计划。"
+        },
+        {
+          "id": 4,
+          "left": "以为「只查主键就一定覆盖」或「有索引就一定覆盖」",
+          "right": "覆盖的判定是「查询涉及的所有列 ⊆ 索引列 ∪ 主键」，多一个非索引列就需要回表。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [
@@ -49,19 +75,19 @@
         {
           "id": "fs-ch05-ex02",
           "stem": "表 events 上有复合索引 idx_tenant_kind(tenant_id, kind)。查询需要返回列 tenant_id、kind 以外的 payload 列时，下列哪条 WHERE 无法利用该索引的最左前缀定位行？",
-          "title": "复合索引 (tenantid, kind) 上哪条查询无法用索引定位",
+          "title": "复合索引 (tenant_id, kind) 上哪条查询无法用索引定位",
           "options": [
             {
               "key": "A",
-              "text": "WHERE tenantid = ?"
+              "text": "WHERE tenant_id = ?"
             },
             {
               "key": "B",
-              "text": "WHERE tenantid = ? AND kind = ?"
+              "text": "WHERE tenant_id = ? AND kind = ?"
             },
             {
               "key": "C",
-              "text": "WHERE tenantid = ? AND kind > ?"
+              "text": "WHERE tenant_id = ? AND kind > ?"
             },
             {
               "key": "D",
@@ -71,7 +97,7 @@
           "correct": [
             "D"
           ],
-          "explain": "索引只在 (tenantid, kind) 这个列序上有序，(kind) 单独不是任何前缀，无法定位起点。本章 ex09 实跑显示该查询的计划退化为 SCAN events（usesindex=False）。"
+          "explain": "索引只在 (tenant_id, kind) 这个列序上有序，(kind) 单独不是任何前缀，无法定位起点。本章 ex09 实跑显示该查询的计划退化为 SCAN events（uses_index=False）。"
         },
         {
           "id": "fs-ch05-ex07",

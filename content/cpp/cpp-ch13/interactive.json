@@ -7,11 +7,11 @@
     "work": {
       "tag": "工作现场",
       "head": "cin 读取多类型并检查流状态位",
-      "body": "不检查文件是否打开成功"
+      "body": "输入失败后不 clear() 导致后续读取全废"
     },
     "exam": {
       "tag": "考场视角",
-      "head": "关于 syncwithstdio 与流状态，正确的是",
+      "head": "关于 sync_with_stdio 与流状态，正确的是",
       "body": "cpp-ch13 · 本章真题口径"
     }
   },
@@ -21,23 +21,23 @@
       "pairs": [
         {
           "id": 1,
-          "left": "不检查文件是否打开成功",
-          "right": "打开后立刻 if (!f) { / 报错 / }。"
+          "left": "输入失败后不 clear() 导致后续读取全废",
+          "right": "先 cin.clear() 清状态位，再 cin.ignore(n, '\\n') 丢弃坏字符后才能继续读取。"
         },
         {
           "id": 2,
-          "left": "getline 与 >> 混用残留换行",
-          "right": "混用前 cin.ignore() 丢弃残留换行。"
+          "left": "误用 eof() 作为循环条件",
+          "right": "写成 while (cin >> x) { ... }：提取成功才进循环，到 EOF 自然终止。"
         },
         {
           "id": 3,
-          "left": "endl 每次都 flush 拖慢 IO",
-          "right": "普通换行用 '\\n'，仅需立刻落盘才 flush/endl。"
+          "left": "getline 与 >> 混用留下换行",
+          "right": "在 >> 之后、getline 之前调用 cin.ignore() 吃掉换行；或统一用 getline + istringstream 解析。"
         },
         {
           "id": 4,
-          "left": "流状态位未 clear 导致后续全失效",
-          "right": "出错 clear() 再 ignore() 丢弃坏输入，才能继续。"
+          "left": "浮点默认精度丢失的错觉",
+          "right": "用 cout << fixed << setprecision(n) 显式控制位数；注意 setprecision 在默认模式下表示有效数字。"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
@@ -48,11 +48,11 @@
         {
           "id": "q0",
           "stem": "选择**正确**的描述。",
-          "title": "关于 syncwithstdio 与流状态，正确的是",
+          "title": "关于 sync_with_stdio 与流状态，正确的是",
           "options": [
             {
               "key": "A",
-              "text": "std::ios::syncwithstdio(false) 之后仍可安全混用 cin 与 scanf"
+              "text": "std::ios::sync_with_stdio(false) 之后仍可安全混用 cin 与 scanf"
             },
             {
               "key": "B",
@@ -70,7 +70,7 @@
           "correct": [
             "B"
           ],
-          "explain": "syncwithstdio(false) 解除 C++ 流与 C stdio 的同步，之后混用顺序无保证，故 A 错；failbit 置位后该流后续提取/插入均为 no-op，必须 clear() 才能恢复，B 对；到达 EOF 时 eof() 与 fail() 常同时为真，good() 为假，C 错；setw 只影响下一次字段，是一次性操纵符，D 错。"
+          "explain": "sync_with_stdio(false) 解除 C++ 流与 C stdio 的同步，之后混用顺序无保证，故 A 错；failbit 置位后该流后续提取/插入均为 no-op，必须 clear() 才能恢复，B 对；到达 EOF 时 eof() 与 fail() 常同时为真，good() 为假，C 错；setw 只影响下一次字段，是一次性操纵符，D 错。"
         }
       ]
     },

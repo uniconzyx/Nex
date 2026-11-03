@@ -22,22 +22,22 @@
         {
           "id": 1,
           "left": "把容器当成轻量虚拟机，以为它有独立内核",
-          "right": "需要不同内核/内核模块/强隔离时用虚拟机或 Kata/gVisor；不要把容器当作完整的独立机器。"
+          "right": "需要不同内核/内核模块/强隔离时用虚拟机或 Kata/gVisor；不要把容器当作完整的独立机器"
         },
         {
           "id": 2,
           "left": "只设了 memory.max 却不管应用感知",
-          "right": "开启容器感知（JVM UseContainerSupport、MaxRAMPercentage；Node --max-old-space-size），并用 docker stats 观察实际用量。"
+          "right": "开启容器感知（JVM UseContainerSupport、MaxRAMPercentage；Node --max-old-space-size），并用 docker stats 观察实际用量"
         },
         {
           "id": 3,
           "left": "把数据写在容器可写层",
-          "right": "数据库数据、上传文件、需要留存的日志一律挂 volume 或 bind mount；容器保持无状态。"
+          "right": "数据库数据、上传文件、需要留存的日志一律挂 volume 或 bind mount；容器保持无状态"
         },
         {
           "id": 4,
           "left": "用 RUN rm -rf 想减小镜像体积",
-          "right": "用多阶段构建让这些文件根本不进入最终镜像；这是唯一能真正排除体积的方法。"
+          "right": "用多阶段构建让这些文件根本不进入最终镜像；这是唯一能真正排除体积的方法"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"

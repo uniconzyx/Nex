@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "状态容器：reducer 风格 store（dispatch -> 新状态，不可变…",
-      "body": "下列哪一项属于「服务端状态」而非「客户端状态」"
+      "body": "把服务端状态和客户端状态一锅端进全局 store"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "把服务端状态和客户端状态一锅端进全局 store",
+          "right": "分两类：服务端状态交给专用数据层（本章 ex04 的 TTL/SWR、ex02 的去重取消、ex09 的分页合并），客户端状态用组件本地 state 或轻量 store（ex01）。"
+        },
+        {
+          "id": 2,
+          "left": "以为「状态变了才重渲染」是自动的",
+          "right": "未知 action 必须原样返回旧引用：本章 ex01 实跑 unknown_action_keeps_identity=true 且 renders_after_noop_action=3（3 次真实变更对应 3 次…"
+        },
+        {
+          "id": 3,
+          "left": "乐观更新只写「成功路径」，不写回滚",
+          "right": "乐观更新必须具备三件套：临时 id、失败回滚、并发有序结算。本章 ex03 用正反两组证明：成功 success_count_kept=true（保留且 id 由 tmp-1 变 101）…"
+        },
+        {
+          "id": 4,
+          "left": "并发请求同一资源重复发出、且不取消过期请求",
+          "right": "in-flight map 去重 + 取消过期请求。ex02 实跑：3 个并发同 key 只发 1 次（sent_while_inflight=1，deduped_flags=false,true,true）…"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [

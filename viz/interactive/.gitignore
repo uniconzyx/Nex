@@ -1,5 +1,7 @@
 node_modules/
 dist/
 .shots/
+# vite 每次改 config 都会吐出一份临时时间戳文件
+vite.config.ts.timestamp-*.mjs
 # 生成物：由 scripts/gen_interactive.py 从 content/**/interactive.json 复制而来
 src/data/labs/

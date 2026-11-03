@@ -6,8 +6,8 @@
   "scenario": {
     "work": {
       "tag": "工作现场",
-      "head": "auto / auto& / const auto& 的推导差异（issamev …",
-      "body": "auto 按值默默拷贝大对象"
+      "head": "auto / auto& / const auto& 的推导差异（is_same_…",
+      "body": "auto 丢失引用/const 导致意外拷贝"
     },
     "exam": {
       "tag": "考场视角",
@@ -21,23 +21,23 @@
       "pairs": [
         {
           "id": 1,
-          "left": "auto 按值默默拷贝大对象",
-          "right": "遍历大对象用 const auto&/auto&，只读不拷贝。"
+          "left": "auto 丢失引用/const 导致意外拷贝",
+          "right": "只读大对象用 const auto&，要改原对象用 auto&，转发返回值用 decltype(auto)。"
         },
         {
           "id": 2,
-          "left": "移动后误读对象内容",
-          "right": "移动后只重新赋值/析构，不假设其值为空或原值。"
+          "left": "std::move 之后继续使用源对象的值",
+          "right": "移动后只允许「重新赋值 / 析构 / 判空」；不要依赖其值。"
         },
         {
           "id": 3,
-          "left": "emplace 意外命中 initializerlist",
-          "right": "歧义时显式构造再传，或用 v.pushback(T{1,2})。"
+          "left": "移动构造未标 noexcept 导致 vector 扩容退化成拷贝",
+          "right": "写移动构造/移动赋值一律加 noexcept（只要内部不抛）。"
         },
         {
           "id": 4,
-          "left": "结构化绑定的值类别陷阱",
-          "right": "需修改元素绑定到引用。"
+          "left": "在范围 for 中修改容器导致迭代器失效",
+          "right": "删除用显式迭代器循环 + it = v.erase(it) 推进；新增用 push_back 后重新取迭代器。"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
@@ -83,11 +83,11 @@
             },
             {
               "key": "B",
-              "text": "循环体里 pushback 总是安全的"
+              "text": "循环体里 push_back 总是安全的"
             },
             {
               "key": "C",
-              "text": "range 绑定到 auto&&，end 只求值一次"
+              "text": "range 绑定到 auto&&，__end 只求值一次"
             },
             {
               "key": "D",
@@ -97,7 +97,7 @@
           "correct": [
             "C"
           ],
-          "explain": "范围 for 等价于 auto&& range = range; for (auto b=begin,e=end; b!=e; ++b)，end 只算一次。因此在循环内增删 vector 会令已持有的迭代器失效（UB）。删除应改用迭代器循环 + erase 返回值（见 concept/03、ex07）。"
+          "explain": "范围 for 等价于 auto&& __range = range; for (auto b=begin,e=end; b!=e; ++b)，__end 只算一次。因此在循环内增删 vector 会令已持有的迭代器失效（UB）。删除应改用迭代器循环 + erase 返回值（见 concept/03、ex07）。"
         }
       ]
     }

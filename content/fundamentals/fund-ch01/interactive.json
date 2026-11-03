@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "顺序表插入的搬移次数（确定性计数）",
-      "body": "顺序表插入的复杂度判断"
+      "body": "链表插入/删除忘记维护前驱指针 → 断链"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "链表插入/删除忘记维护前驱指针 → 断链",
+          "right": "先接后断（先让新节点指向原后继，再让前驱指向新节点）： ``c newnode->next = p->next; p->next = newnode; ``"
+        },
+        {
+          "id": 2,
+          "left": "删除节点后继续使用它（悬垂指针）",
+          "right": "free 后立即置空别名指针（能做多少做多少），并使用 -fsanitize=address 在 CI 里捕获"
+        },
+        {
+          "id": 3,
+          "left": "循环里对顺序表头插 → 悄悄退化成 O(N²)",
+          "right": "改为尾插后一次性反转；或改用链表；或反向遍历源数据直接尾插"
+        },
+        {
+          "id": 4,
+          "left": "sizeof(arr)/sizeof(arr[0]) 在函数里失效",
+          "right": "显式传长度；C++ 用 std::span / 模板 template<size_t N> void f(int (&a)[N])"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [

@@ -22,22 +22,22 @@
         {
           "id": 1,
           "left": "把深度学习的「卷积」当成严格数学卷积",
-          "right": "把它当作互相关来理解，论文公式若写翻转卷积要手动对应。"
+          "right": "把它当作互相关来理解，论文公式若写翻转卷积要手动对应"
         },
         {
           "id": 2,
           "left": "输出尺寸公式漏掉向下取整",
-          "right": "用 floor 计算 valid，用 ceil 计算 same；写代码用 (n + 2p − k) // s + 1。"
+          "right": "用 floor 计算 valid，用 ceil 计算 same；写代码用 (n + 2p − k) // s + 1"
         },
         {
           "id": 3,
           "left": "感受野误算成 (k−1)×L 直接相加",
-          "right": "严格按递推式逐层累加，或把 stride=1 的层先合并成等效 stride 再算。"
+          "right": "严格按递推式逐层累加，或把 stride=1 的层先合并成等效 stride 再算"
         },
         {
           "id": 4,
           "left": "padding='same' 在 stride>1 时以为输出等于输入",
-          "right": "明确 'same' = ceil(n/s)，'valid' = floor((n−k)/s)+1。"
+          "right": "明确 'same' = ceil(n/s)，'valid' = floor((n−k)/s)+1"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"

@@ -34,22 +34,22 @@
         {
           "id": 1,
           "left": "把 git pull 当成「只是把远端拉取下来」",
-          "right": "先 git fetch，用 git log --oneline main..origin/main 看清差异，再自己决定 merge 还是 rebase；个人分支可配 pull.rebase=true。"
+          "right": "先 git fetch，用 git log --oneline main..origin/main 看清差异，再自己决定 merge 还是 rebase；个人分支可配 pull.rebase=true"
         },
         {
           "id": 2,
           "left": "push 被拒就加 --force",
-          "right": "git fetch → git rebase origin/main（或 merge）→ 解决冲突 → 再 push；确需强推时用 --force-with-lease，且仅限已沟通的个人分支。"
+          "right": "git fetch → git rebase origin/main（或 merge）→ 解决冲突 → 再 push；确需强推时用 --force-with-lease，且仅限已沟通的个人分支"
         },
         {
           "id": 3,
           "left": "以为 --force-with-lease 是「安全的强推」，于是放心地改写共享分支",
-          "right": "共享分支回滚一律用 git revert（追加历史）；把 main/release 设为保护分支，从平台层面禁止强推。"
+          "right": "共享分支回滚一律用 git revert（追加历史）；把 main/release 设为保护分支，从平台层面禁止强推"
         },
         {
           "id": 4,
           "left": "对已经 push 的分支做 rebase 再推",
-          "right": "黄金法则——只对本地尚未推送的提交 rebase；已共享就用 merge。确需整理时全组沟通，重排后所有人 git reset --hard origin/<branch> 对齐。"
+          "right": "黄金法则——只对本地尚未推送的提交 rebase；已共享就用 merge"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
@@ -68,7 +68,7 @@
             },
             {
               "key": "B",
-              "text": "git fetch 只更新远端跟踪引用 refs/remotes/origin/，不碰本地分支与工作区"
+              "text": "git fetch 只更新远端跟踪引用 refs/remotes/origin/*，不碰本地分支与工作区"
             },
             {
               "key": "C",

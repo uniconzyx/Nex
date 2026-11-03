@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "事件循环阶段顺序：sync → nextTick → microtask → se…",
-      "body": "Node.js 最适合哪类场景？"
+      "body": "在顶层脚本里认为 setTimeout(0) 一定先于 setImmediate"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "在顶层脚本里认为 setTimeout(0) 一定先于 setImmediate",
+          "right": "需要「下一轮 check 阶段立即执行」用 setImmediate；只在 I/O 回调内顺序才稳定为 setImmediate 先。"
+        },
+        {
+          "id": 2,
+          "left": "process.nextTick 里无限递归导致微任务饥饿",
+          "right": "让出事件循环改用 setImmediate，避免无限递归推入 nextTick。"
+        },
+        {
+          "id": 3,
+          "left": "用 fs.readFileSync 等同步 API 阻塞主线程",
+          "right": "用异步 API，或把重 I/O 放 worker_threads / 改用流分块读取。"
+        },
+        {
+          "id": 4,
+          "left": "HTTP 响应忘了 res.end()",
+          "right": "任何分支都必须 res.end()（或 write 后 end），错误分支也要 end。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [
@@ -44,7 +70,7 @@
           "correct": [
             "B"
           ],
-          "explain": "Node 单线程事件循环擅长非阻塞 I/O，适合高并发网络服务；CPU 密集任务会饿死事件循环，应放 workerthreads。"
+          "explain": "Node 单线程事件循环擅长非阻塞 I/O，适合高并发网络服务；CPU 密集任务会饿死事件循环，应放 worker_threads。"
         },
         {
           "id": "q1",

@@ -22,22 +22,22 @@
         {
           "id": 1,
           "left": "以为 DataFrame 的 filter/select 会立刻执行",
-          "right": "调试用 df.explain() 看计划，别在链式调用中间插 print(df.count()) 之类的 action，那会重复触发整条计划。"
+          "right": "调试用 df.explain() 看计划，别在链式调用中间插 print(df.count()) 之类的 action，那会重复触发整条计划"
         },
         {
           "id": 2,
           "left": "把 RDD 的 map(lambda ...) 习惯带进 DataFrame，用 UDF …",
-          "right": "优先用内置函数（when/col/upper/substring 等）；必须用 UDF 时优先 Scala/Java UDF 或 Pandas UDF（向量化），并把它放在计划的最后以减少输入行数。"
+          "right": "优先用内置函数（when/col/upper/substring 等）；必须用 UDF 时优先 Scala/Java UDF 或 Pandas UDF（向量化），并把它放在计划的最后以减少输入行数"
         },
         {
           "id": 3,
           "left": "以为谓词下推一定会发生",
-          "right": "把过滤尽量贴着数据源写，别先 select 掉过滤列再 filter。"
+          "right": "把过滤尽量贴着数据源写，别先 select 掉过滤列再 filter"
         },
         {
           "id": 4,
           "left": "把 where 写在子查询/视图之外，指望优化器救你",
-          "right": "过滤条件尽量写在最靠近数据源的那一层；LEFT JOIN 里对右表的过滤条件写在 ON 后与写在 WHERE 后语义不同（后者会把外连接退化成内连接）。"
+          "right": "过滤条件尽量写在最靠近数据源的那一层；LEFT JOIN 里对右表的过滤条件写在 ON 后与写在 WHERE 后语义不同（后者会把外连接退化成内连接）"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
@@ -124,7 +124,7 @@
           "correct": [
             "A"
           ],
-          "explain": "两条硬约束：① 谓词必须确定性（含 rand()、currenttimestamp() 的不下推，因为下推会改变每行求值次数）；② 谓词引用的列必须在下方算子输出列内——若 Project 已经把该列投影掉，就推不下去。B/C/D 都是可以下推的典型场景（C 还能进一步触发分区裁剪）。"
+          "explain": "两条硬约束：① 谓词必须确定性（含 rand()、current_timestamp() 的不下推，因为下推会改变每行求值次数）；② 谓词引用的列必须在下方算子输出列内——若 Project 已经把该列投影掉，就推不下去。B/C/D 都是可以下推的典型场景（C 还能进一步触发分区裁剪）。"
         },
         {
           "id": "q4",

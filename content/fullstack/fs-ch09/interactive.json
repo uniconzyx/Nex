@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "结构类型：多一个成员不报错，少一个报错",
-      "body": "关于 TypeScript 的结构类型，正确的是"
+      "body": "把 any 当「先跑通再说」"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "把 any 当「先跑通再说」",
+          "right": "外部入口用 unknown，进门第一步收窄或 schema 校验"
+        },
+        {
+          "id": 2,
+          "left": "用 as 代替类型守卫",
+          "right": "改成 const user = UserSchema.parse(data)（Zod）"
+        },
+        {
+          "id": 3,
+          "left": "以为泛型能约束运行时",
+          "right": "要么传入构造函数做 instanceof，要么传入 schema 做运行时校验"
+        },
+        {
+          "id": 4,
+          "left": "用 interface 期望拦住多余字段",
+          "right": "需要严格排他时用可辨识联合 + never 检查，或在边界处用 schema 的 .strict()"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [

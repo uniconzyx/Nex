@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "sizeof：数组与指针的根本差异",
-      "body": "数组退化的例外"
+      "body": "把数组名当指针用 sizeof"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "把数组名当指针用 sizeof",
+          "right": "把长度作为参数显式传入 void f(int *a, size_t n)"
+        },
+        {
+          "id": 2,
+          "left": "混淆 a、&a、&a[0] 的步长",
+          "right": "需要逐元素遍历用 a + i；需要「跳到数组之后」用 &a + 1"
+        },
+        {
+          "id": 3,
+          "left": "二维数组用 `int",
+          "right": "用数组指针 int (*p)[4] = m;，或函数参数写 void f(int p[][4])"
+        },
+        {
+          "id": 4,
+          "left": "free 之后不置 NULL",
+          "right": "free(p); p = NULL;——free(NULL) 是安全空操作"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [
@@ -45,7 +71,7 @@
             "A",
             "B"
           ],
-          "explain": "数组名退化的例外只有 sizeof 与取地址 & 两个上下文。sizeof(a) 得整个数组字节数；&a 得数组指针 int()[10]。a + 1 与 a[3]（等价 (a+3)）都发生退化为 int。"
+          "explain": "数组名退化的例外只有 sizeof 与取地址 & 两个上下文。sizeof(a) 得整个数组字节数；&a 得数组指针 int(*)[10]。a + 1 与 a[3]（等价 *(a+3)）都发生退化为 int*。"
         },
         {
           "id": "q2",
@@ -54,7 +80,7 @@
           "options": [
             {
               "key": "A",
-              "text": "p = 10;"
+              "text": "*p = 10;"
             },
             {
               "key": "B",
@@ -62,13 +88,13 @@
             },
             {
               "key": "C",
-              "text": "printf 读取 p"
+              "text": "printf 读取 *p"
             }
           ],
           "correct": [
             "B"
           ],
-          "explain": "const 在 右侧，锁住的是指针本身：p 不能重新指向，但 p 可改。所以改 p 与读取都合法，p = &y; 编译错误。"
+          "explain": "const 在 * 右侧，锁住的是指针本身：p 不能重新指向，但 *p 可改。所以改 *p 与读取都合法，p = &y; 编译错误。"
         }
       ]
     }

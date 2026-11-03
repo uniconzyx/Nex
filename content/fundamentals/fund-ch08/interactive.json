@@ -2,12 +2,12 @@
   "chapter": "fund-ch08",
   "subject": "fundamentals",
   "title": "计组：存储系统与 CPU",
-  "fingerprint": "096dafa6ca",
+  "fingerprint": "c94ca3a524",
   "scenario": {
     "work": {
       "tag": "工作现场",
       "head": "结构体对齐、填充与缓存行占用",
-      "body": "Cache 的组数与相联度"
+      "body": "把 Cache 的\"组数\"当成\"行数\""
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "把 Cache 的\"组数\"当成\"行数\"",
+          "right": "先用总行数 ÷ k 算出组数，再用组数定 index 位"
+        },
+        {
+          "id": 2,
+          "left": "AMAT 里漏掉或重复计入命中时间",
+          "right": "AMAT = T_hit + m × T_miss，多级必须嵌套展开，不能把各级命中时间相加"
+        },
+        {
+          "id": 3,
+          "left": "用平均段长作为流水线节拍",
+          "right": "节拍取最慢段的 T_max，总时间 = T_max × (k + n - 1)"
+        },
+        {
+          "id": 4,
+          "left": "load-use 冒险判成 0 停顿",
+          "right": "load-use 冒险必须停 1 拍；ALU 结果走旁路可 0 停顿"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [

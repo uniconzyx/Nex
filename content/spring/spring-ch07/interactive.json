@@ -22,22 +22,22 @@
         {
           "id": 1,
           "left": "手写 WHERE 1=1 拼接，条件全空时残留悬空 AND/OR",
-          "right": "一律用 <where>（等价于 <trim prefix=\"WHERE\" prefixOverrides=\"AND |OR \">），内容为空时整条子句不生成、非空时自动加 WHERE 并剔除前导 AND/OR。"
+          "right": "一律用 <where>（等价于 <trim prefix=\"WHERE\" prefixOverrides=\"AND |OR \">），内容为空时整条子句不生成、非空时自动加 WHERE 并剔除前导 AND/OR"
         },
         {
           "id": 2,
           "left": "<trim> 的 prefixOverrides 漏写空格导致修剪失效",
-          "right": "prefixOverrides=\"AND |OR \"（带尾空格），并保证条件片段内部自身完整。"
+          "right": "prefixOverrides=\"AND |OR \"（带尾空格），并保证条件片段内部自身完整"
         },
         {
           "id": 3,
           "left": "多参数时 <if test> 里直接用属性名，取值恒为 null",
-          "right": "接口方法签名加 @Param(\"name\")，XML 里 <if test=\"name != null and name != ''\">；逻辑与用 and（不是 &&），字符串相等用 eq（不是 ==）。"
+          "right": "接口方法签名加 @Param(\"name\")，XML 里 <if test=\"name != null and name != ''\">；逻辑与用 and（不是 &&），字符串相等用 eq（不是 ==）"
         },
         {
           "id": 4,
           "left": "${} 拼接用户输入造成 SQL 注入，且以为「只是排序」就安全",
-          "right": "值一律 #{}；表名/列名/排序这类结构性位置不得不用 ${} 时，取值必须来自白名单枚举并在 Java 侧校验，禁止用「过滤 -- 和 ;」这类黑名单。"
+          "right": "值一律 #{}；表名/列名/排序这类结构性位置不得不用 ${} 时，取值必须来自白名单枚举并在 Java 侧校验，禁止用「过滤 -- 和 ;」这类黑名单"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
@@ -97,7 +97,7 @@
           "correct": [
             "B"
           ],
-          "explain": "<foreach> 只负责把集合展开成占位符列表，不提供空集合保护：open=\"(\" close=\")\" 属于 <foreach> 自身的常量，无论集合是否为空都会输出，于是得到 ... WHERE id IN () —— MySQL 报 You have an error in your SQL syntax（见 ex02 的 empty IN : SELECT FROM tuser WHERE id IN () 与 empty in ok : false）。<where> 管不到它（这里也没有 <where>），MyBatis 更不会提前拦截。修法：Java 侧判空后直接返回空列表，或套…"
+          "explain": "<foreach> 只负责把集合展开成占位符列表，不提供空集合保护：open=\"(\" close=\")\" 属于 <foreach> 自身的常量，无论集合是否为空都会输出，于是得到 ... WHERE id IN () —— MySQL 报 You have an error in your SQL syntax（见 ex02 的 empty IN : SELECT * FROM t_user WHERE id IN () 与 empty in ok : false）。<where> 管不到它（这里也没有 <where>），MyBatis 更不会提前拦截。修法：Java 侧判空后直接返回空列表…"
         },
         {
           "id": "ex4",

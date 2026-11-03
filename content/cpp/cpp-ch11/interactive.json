@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "try/catch 多重捕获与匹配顺序（派生类须在前）",
-      "body": "关于栈展开（stack unwinding），正确的是"
+      "body": "在析构函数里抛异常 —— 可能导致 std::terminate"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "在析构函数里抛异常 —— 可能导致 std::terminate",
+          "right": "析构函数一律标 noexcept（默认即如此），内部任何可能失败的操作要吞掉并记录日志，绝不向外 throw。"
+        },
+        {
+          "id": 2,
+          "left": "catch 按值捕获导致切片（slicing）",
+          "right": "永远 catch (const std::exception& e)（引用捕获，零拷贝、保留动态类型）。"
+        },
+        {
+          "id": 3,
+          "left": "catch(...) 或空 catch 静默吞掉异常",
+          "right": "至少要记录日志再决定；若确实要忽略，写明注释说明\"此异常已知且安全\"。更常见的是捕获后做清理再 throw; 重抛。"
+        },
+        {
+          "id": 4,
+          "left": "noexcept 函数内仍抛异常 → 直接 std::terminate",
+          "right": "只在\"确实绝不抛\"时标 noexcept；标准库特殊成员函数在满足条件时自动 noexcept，勿破坏。移动构造/赋值几乎总应 noexcept（见 concept 03）。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [

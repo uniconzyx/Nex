@@ -2,12 +2,12 @@
   "chapter": "fund-ch20",
   "subject": "fundamentals",
   "title": "文件管理",
-  "fingerprint": "070de328aa",
+  "fingerprint": "e344caa019",
   "scenario": {
     "work": {
       "tag": "工作现场",
       "head": "连续分配的块地址换算与越界判定",
-      "body": "索引文件与索引分配的区别"
+      "body": "算「读某偏移要几次 I/O」时忘记 inode 本身"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,27 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "算「读某偏移要几次 I/O」时忘记 inode 本身",
+          "right": "答题先写清前提（目录项与 inode 是否在内存），再按「读索引块 1 次 + 读数据块 1 次」计数"
+        },
+        {
+          "id": 2,
+          "left": "位示图的字号/位号算反",
+          "right": "块号从 0 起：字号 = b / 字长（整除），位号 = b % 字长；块号从 1 起要先减 1"
+        },
+        {
+          "id": 3,
+          "left": "以为删文件就释放磁盘",
+          "right": "lsof +L1 列出 link count 为 0 的已打开文件，重启对应进程才真正释放空间"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [
@@ -111,7 +132,7 @@
             },
             {
               "key": "B",
-              "text": "目录项被移除、linkcount 减 1，但因进程仍持有该文件，数据块不回收"
+              "text": "目录项被移除、link_count 减 1，但因进程仍持有该文件，数据块不回收"
             },
             {
               "key": "C",
@@ -125,7 +146,7 @@
           "correct": [
             "B"
           ],
-          "explain": "rm 做两件事：移除目录项、linkcount--。但内核还会维护打开文件引用计数，只要还有进程持有 fd，inode 与数据块就不释放（此时 lsof | grep deleted 能看到 (deleted)）。真正释放发生在最后一个 fd 关闭之后。这也是「df 满了但 du 找不到大文件」的经典成因。"
+          "explain": "rm 做两件事：移除目录项、link_count--。但内核还会维护打开文件引用计数，只要还有进程持有 fd，inode 与数据块就不释放（此时 lsof | grep deleted 能看到 (deleted)）。真正释放发生在最后一个 fd 关闭之后。这也是「df 满了但 du 找不到大文件」的经典成因。"
         }
       ]
     }

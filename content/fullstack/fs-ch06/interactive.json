@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "JWT 三段结构与 base64url 编解码（Node 内置 Buffer）",
-      "body": "401 与 403 的语义边界"
+      "body": "把「认证」和「鉴权」混为一谈，失败码一律 401"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "把「认证」和「鉴权」混为一谈，失败码一律 401",
+          "right": "按 ex11 的链式职责分流：no_token/bad_scheme → 401，valid_but_no_perm → 403，valid_with_perm → 200；前端据此分别「跳登录」与「提示无权限」。"
+        },
+        {
+          "id": 2,
+          "left": "只做接口级鉴权，不做资源级校验（水平越权 / IDOR / BOLA）",
+          "right": "在授权中间件之后再加资源级校验：比对 resource.ownerId === actor.id；ex12 中 editor_delete_others=false…"
+        },
+        {
+          "id": 3,
+          "left": "JWT 校验只验签名，不验 exp/nbf/aud/iss",
+          "right": "上全清单：段数、alg 白名单、常量时间验签、exp、nbf、aud、iss。ex06 实跑：expired、nbf_future、aud_wrong、iss_wrong、missing_exp 全部被拒。"
+        },
+        {
+          "id": 4,
+          "left": "让 token 头里的 alg 决定验签算法（或接受 alg: none）",
+          "right": "alg 由服务端写死/白名单；ex05 中朴素实现 alg_none_naive_accepts=true 被打穿，安全实现 alg_none_secure=alg-pinned-reject。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [
@@ -44,7 +70,7 @@
           "correct": [
             "B"
           ],
-          "explain": "401 Unauthorized 的真实含义是「未认证」（缺或坏的凭证，须带 WWW-Authenticate）；403 Forbidden 才是「已认证但无权」。本例凭证合法、仅权限不足，故为 403。本章 ex11 实跑 validbutnoperm status=403。"
+          "explain": "401 Unauthorized 的真实含义是「未认证」（缺或坏的凭证，须带 WWW-Authenticate）；403 Forbidden 才是「已认证但无权」。本例凭证合法、仅权限不足，故为 403。本章 ex11 实跑 valid_but_no_perm status=403。"
         },
         {
           "id": "fs-ch06-ex02",

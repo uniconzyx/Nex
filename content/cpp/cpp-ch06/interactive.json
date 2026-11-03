@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "公有/保护/私有继承下的成员可见性",
-      "body": "基类缺虚析构，多态删除泄漏"
+      "body": "对象切片（Slicing）：用值传递多态对象"
     },
     "exam": {
       "tag": "考场视角",
@@ -21,23 +21,23 @@
       "pairs": [
         {
           "id": 1,
-          "left": "基类缺虚析构，多态删除泄漏",
-          "right": "任何打算经基类指针释放的类，virtual ~Base() = default;。"
+          "left": "对象切片（Slicing）：用值传递多态对象",
+          "right": "多态一律用引用或指针（Animal& / Animal*）传递；容器里存 Base* 或 std::unique_ptr<Base>。"
         },
         {
           "id": 2,
-          "left": "漏写 override 导致「假重写」",
-          "right": "所有重写加 override，编译器替你校验签名。"
+          "left": "基类析构函数未声明 virtual → 派生部分泄漏 / UB",
+          "right": "凡是打算被多态继承的基类，析构函数一律 virtual（C++11 起可 = default）。"
         },
         {
           "id": 3,
-          "left": "按值传参触发对象切片",
-          "right": "多态类型只用指针/引用（含智能指针）传递。"
+          "left": "忘记 override：签名写错却「默默新增重载」",
+          "right": "所有意图覆盖的虚函数都加 override，让编译器替你校验签名一致性。"
         },
         {
           "id": 4,
-          "left": "菱形继承产生两份基类子对象",
-          "right": "需要共享用 virtual 继承 B : virtual A。"
+          "left": "多重继承的菱形二义性",
+          "right": "用虚继承 struct B : virtual A 让 D 中只有一份 A；或显式 d.B::f() 消歧（治标）。"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"

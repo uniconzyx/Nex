@@ -22,22 +22,22 @@
         {
           "id": 1,
           "left": "用 ${} 拼接前端字符串导致 SQL 注入",
-          "right": "值是 #{} 占位符；只有表名/列名/排序字段这类不能作为占位符的才用 ${}，且 ${} 的取值必须来自白名单。"
+          "right": "值是 #{} 占位符；只有表名/列名/排序字段这类不能作为占位符的才用 ${}，且 ${} 的取值必须来自白名单"
         },
         {
           "id": 2,
           "left": "列名与属性名不一致又没开驼峰也没写 resultMap，字段查出 null",
-          "right": "开驼峰，或用 resultMap 显式 <result column=\"username\" property=\"userName\"/>。"
+          "right": "开驼峰，或用 resultMap 显式 <result column=\"user_name\" property=\"userName\"/>"
         },
         {
           "id": 3,
           "left": "把 insert 返回值当主键",
-          "right": "用 useGeneratedKeys=\"true\" keyProperty=\"id\"，插入后从传入实体对象 user.getId() 取回自增主键。"
+          "right": "用 useGeneratedKeys=\"true\" keyProperty=\"id\"，插入后从传入实体对象 user.getId() 取回自增主键"
         },
         {
           "id": 4,
           "left": "在 Oracle 上用 useGeneratedKeys 期望自增",
-          "right": "用 <selectKey order=\"BEFORE\" keyProperty=\"id\">SELECT seq.nextval FROM dual</selectKey> 先取序列号再插入。"
+          "right": "用 <selectKey order=\"BEFORE\" keyProperty=\"id\">SELECT seq.nextval FROM dual</selectKey> 先取序列号再插入"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"

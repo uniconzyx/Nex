@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "函数模板基本用法（max）",
-      "body": "关于函数模板实例化与头文件，正确的是"
+      "body": "模板声明与定义分离到不同文件导致链接错误（undefined reference）"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "模板声明与定义分离到不同文件导致链接错误（undefined reference）",
+          "right": "模板定义应放在头文件（包含模型）；若坚持分离，需在 .cpp 用 template void f<int>(int); 显式实例化导出。"
+        },
+        {
+          "id": 2,
+          "left": "依赖名前漏写 typename / template 关键字",
+          "right": "嵌套依赖类型名前加 typename（typename T::value_type）；成员模板调用前加 template（c.template push_back<X>(...)）。"
+        },
+        {
+          "id": 3,
+          "left": "模板特化优先级理解错导致选中错误版本 / 歧义",
+          "right": "记牢顺序：全特化 > 越具体的偏特化 > 主模板；偏序规则是\"能把 A 的参数代入 B、反之不行，则 B 更特化\"。避免写出无法比较的重叠偏特化。"
+        },
+        {
+          "id": 4,
+          "left": "误入\"非推导上下文\"却指望自动推导",
+          "right": "把需要推导的参数放在\"非嵌套\"位置；或在调用处显式指定模板实参。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [
@@ -49,7 +75,7 @@
         {
           "id": "q5",
           "stem": "选择**正确**的描述。",
-          "title": "关于 SFINAE 与 std::enableif，正确的是",
+          "title": "关于 SFINAE 与 std::enable_if，正确的是",
           "options": [
             {
               "key": "A",
@@ -57,21 +83,21 @@
             },
             {
               "key": "B",
-              "text": "把 enableif 检查写进函数体，类型不满足时该候选会被悄悄丢弃"
+              "text": "把 enable_if 检查写进函数体，类型不满足时该候选会被悄悄丢弃"
             },
             {
               "key": "C",
-              "text": "SFINAE = 替换失败并非错误；enableif 放在签名位置可在编译期按类型属性筛选重载"
+              "text": "SFINAE = 替换失败并非错误；enable_if 放在签名位置可在编译期按类型属性筛选重载"
             },
             {
               "key": "D",
-              "text": "std::enableif 的两个条件无需互斥，编译器会自动选更优的一个"
+              "text": "std::enable_if 的两个条件无需互斥，编译器会自动选更优的一个"
             }
           ],
           "correct": [
             "C"
           ],
-          "explain": "SFINAE 是“替换失败并非错误”，候选出局而非报错（A 错）；enableif 必须放在签名位置（返回类型/默认模板参数），写在函数体里是硬错误（B 错）；多个 enableif 条件必须互斥，否则同时启用会歧义（D 错）。"
+          "explain": "SFINAE 是“替换失败并非错误”，候选出局而非报错（A 错）；enable_if 必须放在签名位置（返回类型/默认模板参数），写在函数体里是硬错误（B 错）；多个 enable_if 条件必须互斥，否则同时启用会歧义（D 错）。"
         }
       ]
     },

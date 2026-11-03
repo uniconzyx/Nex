@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "建二级索引并用 EXPLAIN 验证走索引（type=ref）",
-      "body": "SELECT + 二级索引必然回表，大结果集时优化器会放弃索引"
+      "body": "SELECT * + 二级索引必然回表，大结果集时优化器会放弃索引"
     },
     "exam": {
       "tag": "考场视角",
@@ -32,23 +32,23 @@
       "pairs": [
         {
           "id": 1,
-          "left": "SELECT + 二级索引必然回表，大结果集时优化器会放弃索引",
-          "right": "只查需要的列，或建覆盖索引（Extra: Using index）避免回表。"
+          "left": "SELECT * + 二级索引必然回表，大结果集时优化器会放弃索引",
+          "right": "只查需要的列，或建覆盖索引（Extra: Using index）避免回表"
         },
         {
           "id": 2,
           "left": "违反最左前缀：跳列 / 前导通配 / 对列套函数，索引直接失效",
-          "right": "等值列放最左、范围列放中、用 createdat BETWEEN ... AND ... 替代函数包裹、前缀匹配才用 LIKE '明%'。"
+          "right": "等值列放最左、范围列放中、用 created_at BETWEEN ... AND ... 替代函数包裹、前缀匹配才用 LIKE '明%'"
         },
         {
           "id": 3,
           "left": "隐式类型转换导致索引失效",
-          "right": "WHERE phone='13800138000'（字符串加引号），并保证连接/比较两边类型一致。"
+          "right": "WHERE phone='13800138000'（字符串加引号），并保证连接/比较两边类型一致"
         },
         {
           "id": 4,
           "left": "长事务：持有 ReadView 不释放，undo 版本无法 purge",
-          "right": "事务尽量短、autocommit=1 默认开启；批量任务分批提交。"
+          "right": "事务尽量短、autocommit=1 默认开启；批量任务分批提交"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"

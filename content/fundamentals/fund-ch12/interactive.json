@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "DNS 递归/迭代查询与分层缓存、TTL 过期",
-      "body": "HTTP/1.1 的持久连接与队头阻塞"
+      "body": "把 Cache-Control: no-cache 当成「不缓存」"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "把 Cache-Control: no-cache 当成「不缓存」",
+          "right": "要求「不留副本」用 no-store；要求「每次都验证」用 no-cache；要求「一段时间内直接用」才用 max-age。"
+        },
+        {
+          "id": 2,
+          "left": "给 304 Not Modified 塞响应体",
+          "right": "304 只回 ETag/Date/Cache-Control 等头部；Content-Length 也不要写。"
+        },
+        {
+          "id": 3,
+          "left": "以为 HTTP/2 的多路复用消除了队头阻塞",
+          "right": "真正要消除传输层队头阻塞需要 QUIC/HTTP3（以 UDP 为承载、按 stream 独立重传）；HTTP/2 的收益主要是省连接与省头部，不是抗丢包。"
+        },
+        {
+          "id": 4,
+          "left": "漏写 Vary，让 CDN 缓存串味",
+          "right": "只要响应内容依赖某个请求头，就必须在 Vary 里列出它；含 Cookie 的个性化响应通常应 private + no-store，不交给共享缓存。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [
@@ -107,11 +133,11 @@
           "options": [
             {
               "key": "A",
-              "text": "Session 数据保存在客户端，Cookie 保存 sessionid"
+              "text": "Session 数据保存在客户端，Cookie 保存 session_id"
             },
             {
               "key": "B",
-              "text": "Session 数据保存在服务端，客户端只保存 sessionid"
+              "text": "Session 数据保存在服务端，客户端只保存 session_id"
             },
             {
               "key": "C",
@@ -125,7 +151,7 @@
           "correct": [
             "B"
           ],
-          "explain": "最核心的一句区分：Session 数据存在服务端（内存/Redis/DB），客户端只持有 sessionid（通常放在 Cookie 里）。A 说反了。C 错在客户端必然要存 sessionid 或 token。D 错：单个 Cookie 约 4KB 上限，且同域下的 Cookie 数量也有限制。"
+          "explain": "最核心的一句区分：Session 数据存在服务端（内存/Redis/DB），客户端只持有 session_id（通常放在 Cookie 里）。A 说反了。C 错在客户端必然要存 session_id 或 token。D 错：单个 Cookie 约 4KB 上限，且同域下的 Cookie 数量也有限制。"
         }
       ]
     }

@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "对象宏 vs 函数宏与括号陷阱",
-      "body": "关于宏替换发生的阶段，正确的是"
+      "body": "宏参数不加括号，被外层运算符优先级「吃掉」"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "宏参数不加括号，被外层运算符优先级「吃掉」",
+          "right": "参数与整体都加括号：#define SQUARE(x) ((x) * (x))。"
+        },
+        {
+          "id": 2,
+          "left": "宏参数带副作用导致多重求值",
+          "right": "先把值算进局部变量再传，或改用 static inline 函数；绝不给宏传自增/赋值等带副作用的实参。"
+        },
+        {
+          "id": 3,
+          "left": "多语句宏未用 do { } while (0) 包裹",
+          "right": "一律写成 #define LOG(x) do { printf(\"A\\n\"); printf(\"B\\n\"); } while (0)。参见 examples/ex03.json。"
+        },
+        {
+          "id": 4,
+          "left": "头文件缺守卫导致重复定义",
+          "right": "每个头文件加 #ifndef XXX_H / #define XXX_H / #endif（或 #pragma once）。参见 examples/ex07.json。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [

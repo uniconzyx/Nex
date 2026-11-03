@@ -112,13 +112,65 @@ def clip_sentence(s: str, n: int = 110) -> str:
     return s[: n - 1] + "…"
 
 
+SUB_DIGIT = "₀₁₂₃₄₅₆₇₈₉"
+LATEX_MAP = {
+    r"\times": "×", r"\cdot": "·", r"\div": "÷", r"\le": "≤", r"\leq": "≤",
+    r"\ge": "≥", r"\geq": "≥", r"\neq": "≠", r"\approx": "≈", r"\oplus": "⊕",
+    r"\bmod": " mod ", r"\log": " log", r"\ln": " ln", r"\max": " max",
+    r"\min": " min", r"\sum": "Σ", r"\Sigma": "Σ", r"\tau": "τ", r"\Phi": "Φ",
+    r"\phi": "φ", r"\alpha": "α", r"\beta": "β", r"\lambda": "λ", r"\mu": "μ",
+    r"\to": "→", r"\rightarrow": "→", r"\Rightarrow": "⇒", r"\quad": " ",
+    r"\qquad": "  ", r"\ldots": "…", r"\dots": "…", r"\infty": "∞",
+    r"\sigma": "σ", r"\exp": "exp", r"\top": "ᵀ", r"\|": "‖", r"\Delta": "Δ",
+}
+
+
+def delatex(s: str) -> str:
+    """把行内 LaTeX 降级成前端能直接读的纯文本。
+
+    InteractiveLab 的配对右栏 / 时序卡片是纯文本节点（不走 KaTeX），
+    原样保留 `$\\log_2 V$` 会让 408、数学那几科整片显示 LaTeX 源码。
+    """
+    s = re.sub(r"\\(?:text|mathrm|operatorname|mathbf)\{([^{}]*)\}", r"\1", s)
+    s = re.sub(r"\\sqrt\{([^{}]*)\}", r"√(\1)", s)
+    s = re.sub(r"\\frac\{([^{}]*)\}\{([^{}]*)\}", r"\1/\2", s)
+    for k in sorted(LATEX_MAP, key=len, reverse=True):
+        # 长命令先替换，`\leq` 才不会被 `\le` 抢走；不加 lookahead，
+        # 否则 `\cdotlogvar` 这种紧贴标识符的写法会漏掉
+        s = s.replace(k, LATEX_MAP[k])
+    s = re.sub(r"_\{([^{}]*)\}", r"_\1", s)
+    s = re.sub(r"\^\{([^{}]*)\}", r"^(\1)", s)
+    # 数字下标换成 Unicode：`log_2` → `log₂`
+    s = re.sub(r"_(\d)", lambda m: SUB_DIGIT[int(m.group(1))], s)
+    return re.sub(r"\s+", " ", s.replace("$", "")).strip()
+
+
 def strip_md(s: str) -> str:
-    """去掉行内 markdown 强调/代码/链接，保留文字。"""
+    """去掉行内 markdown 强调/代码/链接，保留文字。
+
+    关键：代码段与 `$...$` 公式要先「存起来」再处理，否则 `[*_]{1,2}` 会把
+    `lora_B` / `node_modules` / `std::erase_if` / `$\\log_2 V$` 里的下划线一起删掉，
+    前端看到的就是 `loraB`、`nodemodules`——比丢字更糟，是悄悄改写了标识符。
+    """
+    keep: List[str] = []
+
+    def stash_code(m: "re.Match[str]") -> str:
+        keep.append(m.group(1))
+        return f"\x00{len(keep) - 1}\x00"
+
+    def stash_tex(m: "re.Match[str]") -> str:
+        keep.append(delatex(m.group(1)))
+        return f"\x00{len(keep) - 1}\x00"
+
+    s = re.sub(r"`([^`]+)`", stash_code, s)      # 行内代码：原样保留
+    s = re.sub(r"\$([^$]+)\$", stash_tex, s)     # 行内公式：降级成纯文本
     s = re.sub(r"\[([^\]]+)\]\([^)]*\)", r"\1", s)
     s = re.sub(r"\*\*(.+?)\*\*", r"\1", s)
-    s = re.sub(r"`([^`]+)`", r"\1", s)
-    s = re.sub(r"[*_]{1,2}", "", s)
-    return re.sub(r"\s+", " ", s).strip()
+    # 斜体只认成对的单个 `*`（`*怎么改*`）；孤立 `_` 多半是标识符，不碰
+    s = re.sub(r"(?<![\w*])\*([^*\s][^*]*?)\*(?![\w*])", r"\1", s)
+    s = re.sub(r"(?<![\w])_([^_\s][^_]*?)_(?![\w])", r"\1", s)
+    s = re.sub(r"\s+", " ", s).strip()
+    return re.sub(r"\x00(\d+)\x00", lambda m: keep[int(m.group(1))], s)
 
 
 def subject_dirs() -> List[str]:
@@ -218,15 +270,25 @@ PIT_ITEM = re.compile(
 )
 # `- **现象**：` 这种是块内小标题，不是陷阱标题
 PIT_SUBHEAD = re.compile(r"^(现象|根因|原因|表现|后果|正确|说明|解法|修复|影响|判据|触发)")
-FIX_RE = re.compile(
-    # 「正确写法：」「正确口径是」「正确：」「正解：」「应该这样：」「改为」——语料里全有
+FIX_STRONG = (
+    # 这些词本身已经指明「正确做法」，后面就算不写冒号（`正确写法 \`(a>0)&(a<5)\``）也算
     r"(?:正确(?:的)?(?:写法|做法|姿势|方式|解法|改法|用法|口径|答案|方向|顺序)"
-    r"|正确|正解|应该(?:这样|是)|改为)"
-    r"\s*(?:(?:是|为)\s*|[:：，]\s*)"
+    r"|正解|修法|怎么改|如何改|怎么避免|如何避免|改正)"
+)
+FIX_WEAK = r"(?:正确|应该(?:这样|是)|改为)"
+FIX_RE = re.compile(
+    # 语料里有三种写法：「正确写法：」「**正确做法** 是」「正确写法 `code`」
+    r"(?:" + FIX_STRONG + r"\*{0,2}\s*(?:(?:是|为)\s*|[:：，]\s*|\s+)"
+    # 弱标记必须带冒号/是/为，否则「正确反例」这类普通行文会被误当成正解
+    r"|" + FIX_WEAK + r"\*{0,2}\s*(?:(?:是|为)\s*|[:：，]\s*))"
     r"(?P<fix>.+?)"
-    r"(?=\n\s*(?:#{2,4}\s|[-*]\s|\d{1,2}[.、)])|\Z)",
+    # 到第一个句号就收：否则「正确做法是 X。**正确做法**：Y」会把后面加的那行一起吞掉
+    r"(?=。|\n\s*(?:#{2,4}\s|[-*]\s|\d{1,2}[.、)])|\Z)",
     re.S,
 )
+# 后半代语料更爱用 ✅ 标正解（cpp 全家、fullstack、db-ch04…）：它本身就是「这条该怎么写」，
+# 不是猜出来的，可以直接当右栏。❌ 反过来标错法，绝不能取。
+CHECK_RE = re.compile(r"✅\s*(?P<fix>[^\n]+)")
 
 
 def build_match(chap_path: str, limit: int = 4) -> Optional[Dict[str, Any]]:
@@ -243,9 +305,17 @@ def build_match(chap_path: str, limit: int = 4) -> Optional[Dict[str, Any]]:
         block = (m.group("rest") or "") + "\n" + txt[m.end():end]
         fm = FIX_RE.search(block)
         if not fm:
+            fm = CHECK_RE.search(block)  # 退到 ✅ 标记
+        if not fm:
             continue  # 没写正解的条目宁可不收，也不要拿「现象」冒充解法
         right = clip_sentence(strip_md(fm.group("fix")), 110)
+        # 右栏是「现象描述」还是「做法」肉眼难辨，但括号不平衡一眼能看出是半句残片：
+        # 「（正确是 8000×8 = 64kbps）」被从中间切开就会只剩 `8000×8 = 64kbps）。`
         if len(right) < 10:
+            continue
+        if right.count("）") > right.count("（") or right.count(")") > right.count("("):
+            continue
+        if right.startswith(("）", ")", "。", "，", "、", "；", "：")):
             continue
         pairs.append({"id": len(pairs) + 1, "left": clip(title, 46), "right": right})
         if len(pairs) >= limit:

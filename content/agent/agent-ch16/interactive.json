@@ -22,17 +22,17 @@
         {
           "id": 1,
           "left": "简历上写「准确率提升 20%」，面试官一句「基线是多少、怎么测的」就整条塌掉",
-          "right": "每个数字过四要素自检（concept/01 §2 的 metricscore）： 「300 条标注查询上召回率 71%→89%，A/B 同流量两周，高于开源默认配置 6 个点」；"
+          "right": "每个数字过四要素自检（concept/01 §2 的 metric_score）： 「300 条标注查询上召回率 71%→89%，A/B 同流量两周，高于开源默认配置 6 个点」；"
         },
         {
           "id": 2,
           "left": "白板手写 ReAct 只写循环不写终止条件，跑两步就死循环当场翻车",
-          "right": "白板上先画状态机再写代码：四态循环 + 三终态，终止条件写成 while state not in (FINISH, ABORT) and steps < maxsteps and tokens < budget:；"
+          "right": "白板上先画状态机再写代码：四态循环 + 三终态，终止条件写成 while state not in (FINISH, ABORT) and steps < max_steps and tokens < budget:；"
         },
         {
           "id": 3,
           "left": "BM25 白板题遇到「查询词全库缺失」直接抛 KeyError，或静默返回空数组不解释",
-          "right": "查询词逐个 f.get(q, 0) 与 idf.get(q, 0.0)，缺失词跳过而非崩溃； 输出里区分「无结果」与「部分命中」；"
+          "right": "查询词逐个 f.get(q, 0) 与 idf.get(q, 0.0)，缺失词跳过而非崩溃； 输出里区分「无结果」与「部分命中」；白板自毁测试先写这个 case 再写正例—— 面试官现场构造边界输入的成本是零，别赌他不问"
         },
         {
           "id": 4,

@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "张量的形状、strides 与广播（深度学习的内存基础）",
-      "body": "反向模式 AD 为什么比前向模式快"
+      "body": "手写 Softmax 没有减去最大值"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "手写 Softmax 没有减去最大值",
+          "right": "exp(x − max(x))，利用平移不变性；且应与交叉熵融合为 log_softmax 计算"
+        },
+        {
+          "id": 2,
+          "left": "训练/推理不分 model.train() 与 model.eval()",
+          "right": "推理前 model.eval() + torch.no_grad()，训练前 model.train()。"
+        },
+        {
+          "id": 3,
+          "left": "梯度不清零导致累加",
+          "right": "训练循环固定三步：清梯度 → backward → step。"
+        },
+        {
+          "id": 4,
+          "left": "数据泄漏：先全量 fit 再切分",
+          "right": "只在训练集 fit，再 transform 验证/测试集。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [

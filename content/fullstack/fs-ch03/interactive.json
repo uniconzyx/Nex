@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "typeof 对 7 种原始类型与对象/函数的结果",
-      "body": "typeof 对 null 的结果是什么？"
+      "body": "typeof null === 'object'"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "typeof null === 'object'",
+          "right": "判对象用 x !== null && typeof x === 'object' && !Array.isArray(x)。"
+        },
+        {
+          "id": 2,
+          "left": "用 == 做宽松比较引发隐式转换",
+          "right": "默认用 ===，需要容错用 Object.is 或 ??/?.。"
+        },
+        {
+          "id": 3,
+          "left": "把 NaN 当普通值比较",
+          "right": "用 Number.isNaN(x)（不会把非数字误判成 NaN）。"
+        },
+        {
+          "id": 4,
+          "left": "var 循环闭包打印「最后一项」",
+          "right": "用 let（每块新绑定）或在循环内 bind(i)。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [

@@ -22,22 +22,22 @@
         {
           "id": 1,
           "left": "@RestController 与 @Controller 混用，返回 JSON 变成视图…",
-          "right": "要么类上用 @RestController，要么在方法上加 @ResponseBody；返回对象让消息转换器序列化。"
+          "right": "要么类上用 @RestController，要么在方法上加 @ResponseBody；返回对象让消息转换器序列化"
         },
         {
           "id": 2,
           "left": "@RequestParam 默认 required=true，缺参会直接 400 而非拿到…",
-          "right": "可选参数显式 required = false，或用 defaultValue；真正可空的字段就别依赖隐式 null。"
+          "right": "可选参数显式 required = false，或用 defaultValue；真正可空的字段就别依赖隐式 null"
         },
         {
           "id": 3,
           "left": "@PathVariable 与 @RequestParam 混淆",
-          "right": "路径模板变量用 @PathVariable，查询串/表单用 @RequestParam，位置决定注解。"
+          "right": "路径模板变量用 @PathVariable，查询串/表单用 @RequestParam，位置决定注解"
         },
         {
           "id": 4,
           "left": "@RequestBody 只能读一次，拦截器/过滤器读过流后 Controller 收空体",
-          "right": "用 ContentCachingRequestWrapper 缓存请求体，或把读体逻辑放到最里层只读取一次。"
+          "right": "用 ContentCachingRequestWrapper 缓存请求体，或把读体逻辑放到最里层只读取一次"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"

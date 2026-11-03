@@ -22,22 +22,22 @@
         {
           "id": 1,
           "left": "LEFT JOIN 把右表过滤条件写进 WHERE 反而变 INNER JOIN",
-          "right": "把右表过滤放进 ON（ON A.id=B.aid AND B.status='ok'），或显式 WHERE B.aid IS NULL 找\"无匹配\"。"
+          "right": "把右表过滤放进 ON（ON A.id=B.aid AND B.status='ok'），或显式 WHERE B.aid IS NULL 找\"无匹配\""
         },
         {
           "id": 2,
           "left": "NOT IN 子查询含 NULL 返回空集",
-          "right": "用 NOT EXISTS (SELECT 1 FROM t WHERE t.mid = a.id) 或 LEFT JOIN t ON ... WHERE t.mid IS NULL，二者对 NULL 安全。"
+          "right": "用 NOT EXISTS (SELECT 1 FROM t WHERE t.mid = a.id) 或 LEFT JOIN t ON ... WHERE t.mid IS NULL，二者对 NULL 安全"
         },
         {
           "id": 3,
           "left": "相关子查询写在 SELECT 列表引发 N+1",
-          "right": "改写成 LEFT JOIN + GROUP BY 一次聚合出计数。"
+          "right": "改写成 LEFT JOIN + GROUP BY 一次聚合出计数"
         },
         {
           "id": 4,
           "left": "盲目用 UNION 而非 UNION ALL 触发隐式排序去重",
-          "right": "确认无重叠时用 UNION ALL；需要去重才用 UNION。"
+          "right": "确认无重叠时用 UNION ALL；需要去重才用 UNION"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"

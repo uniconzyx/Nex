@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "实例属性遮蔽类属性",
-      "body": "关于 super()，正确的是"
+      "body": "可变默认参数 / 可变类属性"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "可变默认参数 / 可变类属性",
+          "right": "类里改成在 __init__ 中 self.items = []；函数里用 def f(x, acc=None) 再 if acc is None: acc = []"
+        },
+        {
+          "id": 2,
+          "left": "super() 用错对象",
+          "right": "一律写 super().__init__(*args, **kwargs)，让 Python 按实际 MRO 走；每个参与协作的类都要接受并透传 **kwargs"
+        },
+        {
+          "id": 3,
+          "left": "__eq__ 返回 False 而不是 NotImplemented",
+          "right": "先 if not isinstance(other, type(self)): return NotImplemented，再比较字段"
+        },
+        {
+          "id": 4,
+          "left": "重写 __eq__ 后忘了 __hash__",
+          "right": "要可 hash 就显式实现 __hash__，且只 hash 不可变字段；或者直接用 @dataclass(frozen=True) 让它自动生成正确的 __eq__ 与 __hash__"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [
@@ -34,7 +60,7 @@
             },
             {
               "key": "C",
-              "text": "type(self).mro 中 B 之后的下一个类，可能是 C"
+              "text": "type(self).__mro__ 中 B 之后的下一个类，可能是 C"
             },
             {
               "key": "D",
@@ -61,7 +87,7 @@
             },
             {
               "key": "C",
-              "text": "普通实例方法，在外部先 new 一个空对象"
+              "text": "普通实例方法，在外部先 __new__ 一个空对象"
             },
             {
               "key": "D",

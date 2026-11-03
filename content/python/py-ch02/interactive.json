@@ -6,8 +6,8 @@
   "scenario": {
     "work": {
       "tag": "工作现场",
-      "head": "函数定义与参数：位置/默认/args/kwargs",
-      "body": "类属性可变对象被所有实例共享"
+      "head": "函数定义与参数：位置/默认/*args/**kwargs",
+      "body": "可变默认参数（最经典的坑）"
     },
     "exam": {
       "tag": "考场视角",
@@ -21,23 +21,23 @@
       "pairs": [
         {
           "id": 1,
-          "left": "类属性可变对象被所有实例共享",
-          "right": "可变状态放 init 里 self.items = []。"
+          "left": "可变默认参数（最经典的坑）",
+          "right": "用 None 哨兵惰性初始化 def add(x, lst=None): lst = [] if lst is None else lst"
         },
         {
           "id": 2,
-          "left": "LEGB 作用域误解，内层遮蔽外层",
-          "right": "必要时 global/nonlocal 声明，或改名避免遮蔽。"
+          "left": "闭包延迟绑定（循环里创建 lambda/函数）",
+          "right": "用默认参数固化当时值 lambda i=i: i，或 functools.partial"
         },
         {
           "id": 3,
-          "left": "深浅拷贝边界不清",
-          "right": "需完全独立用 copy.deepcopy，注意循环引用它自带备忘录能处理。"
+          "left": "global / nonlocal 误用导致 UnboundLocalError",
+          "right": "要改外层用 global（模块级）或 nonlocal（闭包外层，Python 3 专属，且外层必须已绑定）"
         },
         {
           "id": 4,
-          "left": "缺 global/nonlocal 导致 UnboundLocalError",
-          "right": "要改外层用 global/nonlocal 声明。"
+          "left": "lambda 里塞语句 / 多表达式",
+          "right": "用条件表达式 lambda x: x if x > 0 else -x，或改用 def"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
@@ -70,7 +70,7 @@
           "correct": [
             "B"
           ],
-          "explain": "默认参数 [] 在 def 执行时求值一次，被后续所有调用共享（存于函数对象的 defaults）。因此两次调用累积成 [1, 2]。正确写法用 None 哨兵惰性初始化。"
+          "explain": "默认参数 [] 在 def 执行时求值一次，被后续所有调用共享（存于函数对象的 __defaults__）。因此两次调用累积成 [1, 2]。正确写法用 None 哨兵惰性初始化。"
         },
         {
           "id": "q4",

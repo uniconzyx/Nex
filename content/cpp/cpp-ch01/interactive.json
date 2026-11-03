@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "引用交换两个数",
-      "body": "关于引用，下列说法正确的是"
+      "body": "迭代器/引用在 erase 或扩容后失效"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "迭代器/引用在 erase 或扩容后失效",
+          "right": "erase 用返回值续迭代器；要稳定地址用 list/deque 或存下标。"
+        },
+        {
+          "id": 2,
+          "left": "string 拼接 \"\" + char 类型错乱",
+          "right": "至少一侧是 std::string：std::string(\"x\") + 'c' 或 s += 'c'。"
+        },
+        {
+          "id": 3,
+          "left": "未初始化局部变量读到随机垃圾",
+          "right": "定义即初始化，优先 T x{}。"
+        },
+        {
+          "id": 4,
+          "left": "vector 扩容搬迁使旧指针全废",
+          "right": "需要稳定地址用 list/deque，或存索引而非引用。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [

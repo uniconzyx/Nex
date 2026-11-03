@@ -22,22 +22,22 @@
         {
           "id": 1,
           "left": "把 git commit 当成「提交工作区所有改动」",
-          "right": "提交前用 git status 确认待提交项；需要全部提交用 git add -A 再 commit，或用 git commit -a（仅已 tracked 文件）。"
+          "right": "提交前用 git status 确认待提交项；需要全部提交用 git add -A 再 commit，或用 git commit -a（仅已 tracked 文件）"
         },
         {
           "id": 2,
           "left": "git reset --hard 把未提交的改动全抹掉",
-          "right": "不确定时用 --soft/--mixed；确需 --hard 前先 git stash 或确认改动已提交。"
+          "right": "不确定时用 --soft/--mixed；确需 --hard 前先 git stash 或确认改动已提交"
         },
         {
           "id": 3,
           "left": "对已经 push 的分支做 reset --hard + 强推",
-          "right": "共享分支永远用 git revert 做可协作回滚；必须强推时用 --force-with-lease 且先沟通。"
+          "right": "共享分支永远用 git revert 做可协作回滚；必须强推时用 --force-with-lease 且先沟通"
         },
         {
           "id": 4,
           "left": "在 detached HEAD 下提交后切走「提交丢了」",
-          "right": "提交后立即 git branch rescue <sha> 或 git checkout -b rescue 收编；若已切走，用 git reflog 找到旧 SHA 再建分支。"
+          "right": "提交后立即 git branch rescue <sha> 或 git checkout -b rescue 收编；若已切走，用 git reflog 找到旧 SHA 再建分支"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"

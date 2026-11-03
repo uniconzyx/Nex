@@ -22,22 +22,22 @@
         {
           "id": 1,
           "left": "不写 encoding",
-          "right": "任何文本文件读写都显式写 encoding=\"utf-8\"。"
+          "right": "任何文本文件读写都显式写 encoding=\"utf-8\""
         },
         {
           "id": 2,
           "left": "用文本模式读写二进制内容",
-          "right": "\"rb\" / \"wb\"。"
+          "right": "\"rb\" / \"wb\""
         },
         {
           "id": 3,
           "left": "csv 不加 newline=\"\"",
-          "right": "open(..., newline=\"\")。"
+          "right": "open(..., newline=\"\")"
         },
         {
           "id": 4,
           "left": "把 \\ufeff 当成数据",
-          "right": "读 utf-8-sig；排查时先 print(repr(text[:5]))。"
+          "right": "读 utf-8-sig；排查时先 print(repr(text[:5]))"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
@@ -75,7 +75,7 @@
         {
           "id": "py5-ex02",
           "stem": "自定义上下文管理器的 `__exit__(self, exc_type, exc, tb)` **返回 True** 意味着什么？",
-          "title": "exit 的返回值语义",
+          "title": "__exit__ 的返回值语义",
           "options": [
             {
               "key": "A",

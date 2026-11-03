@@ -22,22 +22,22 @@
         {
           "id": 1,
           "left": "把 TTFT 与 TPOT 混成一个「延迟」",
-          "right": "先分清是首 token 慢（Prefill/排队）还是逐 token 慢（Decode/带宽），两阶段药方完全不同（见 ex03）。"
+          "right": "先分清是首 token 慢（Prefill/排队）还是逐 token 慢（Decode/带宽），两阶段药方完全不同（见 ex03）"
         },
         {
           "id": 2,
           "left": "只看平均延迟做 SLA",
-          "right": "用 P95/P99 定义 SLO，并按阶段拆出 TTFT/TPOT 分位。"
+          "right": "用 P95/P99 定义 SLO，并按阶段拆出 TTFT/TPOT 分位"
         },
         {
           "id": 3,
           "left": "估算显存时只算权重、不算 KV Cache",
-          "right": "用 2×L×Hkv×dhead×S×B×字节 先算 KV 再选卡（见 ex01）。"
+          "right": "用 2×L×H_kv×d_head×S×B×字节 先算 KV 再选卡（见 ex01）"
         },
         {
           "id": 4,
           "left": "把「注意力头数」当「KV 头数」",
-          "right": "查模型 config 里的 numkeyvalueheads。"
+          "right": "查模型 config 里的 num_key_value_heads"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
@@ -79,25 +79,25 @@
           "options": [
             {
               "key": "A",
-              "text": "L × Hkv × d × S × B × b"
+              "text": "L × H_kv × d × S × B × b"
             },
             {
               "key": "B",
-              "text": "2 × L × Hkv × d × S × B × b"
+              "text": "2 × L × H_kv × d × S × B × b"
             },
             {
               "key": "C",
-              "text": "L × (Hkv × d)² × S × b"
+              "text": "L × (H_kv × d)² × S × b"
             },
             {
               "key": "D",
-              "text": "2 × L × Hkv × d × S × b（不含批）"
+              "text": "2 × L × H_kv × d × S × b（不含批）"
             }
           ],
           "correct": [
             "B"
           ],
-          "explain": "KVbytes = 2·L·Hkv·dhead·S·B·bytesdtype。"
+          "explain": "KV_bytes = 2·L·H_kv·d_head·S·B·bytes_dtype。"
         },
         {
           "id": "ai-ch08-q5",

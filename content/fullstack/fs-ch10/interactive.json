@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "响应式入门：Proxy 代理读取收集依赖、修改触发副作用",
-      "body": "关于 Vue 3 响应式的依赖收集，正确的是"
+      "body": "解构 reactive 对象导致响应性丢失"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "解构 reactive 对象导致响应性丢失",
+          "right": "需要解构并保响应性时，用 toRefs(state)（或 Pinia 的 storeToRefs(store)）把每个字段转成 ref；props 用 toRef(props, 'key')"
+        },
+        {
+          "id": 2,
+          "left": "在响应式对象上整体替换却指望旧引用更新",
+          "right": "原地修改而非替换：Object.assign(state, newObj) 或 state.a = newObj.a"
+        },
+        {
+          "id": 3,
+          "left": "忘记 ref 要写 .value",
+          "right": "逻辑代码里一律 count.value 读写"
+        },
+        {
+          "id": 4,
+          "left": "对 Proxy 手写的玩具响应式发现 push 不触发",
+          "right": "若自研响应式，必须在 get 拦截里对数组方法包一层：调用原方法后手动派发 length 及索引"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [

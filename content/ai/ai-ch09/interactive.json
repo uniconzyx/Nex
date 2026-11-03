@@ -22,22 +22,22 @@
         {
           "id": 1,
           "left": "VAE 的网络输出 sigma 而不是 logvar",
-          "right": "输出 logvar，$\\sigma=\\exp(0.5\\cdot\\text{logvar})$；KL 项直接写成 0.5(mu2+logvar.exp()-1-logvar)。"
+          "right": "输出 logvar，σ=exp(0.5·logvar)；KL 项直接写成 0.5*(mu**2+logvar.exp()-1-logvar)"
         },
         {
           "id": 2,
           "left": "VAE 损失只用 MSE 不加 KL，或 KL 权重给得过大",
-          "right": "从 KL 退火（前若干步 β=0 再线性升到 1）起步，并监控 KL 是否贴 0（后验坍塌）。"
+          "right": "从 KL 退火（前若干步 β=0 再线性升到 1）起步，并监控 KL 是否贴 0（后验坍塌）"
         },
         {
           "id": 3,
           "left": "GAN 判别器用 BatchNorm",
-          "right": "用 InstanceNorm/LayerNorm 或不做归一化。"
+          "right": "用 InstanceNorm/LayerNorm 或不做归一化"
         },
         {
           "id": 4,
-          "left": "用原始饱和损失 $\\log(1-D(G(z)))$ 训练生成器",
-          "right": "改非饱和形式 $-\\log D(G(z))$，两者在最优 $D$ 附近方向一致但后者梯度充足。"
+          "left": "用原始饱和损失 log(1-D(G(z))) 训练生成器",
+          "right": "改非饱和形式 - log D(G(z))，两者在最优 D 附近方向一致但后者梯度充足"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
@@ -79,19 +79,19 @@
           "options": [
             {
               "key": "A",
-              "text": "$D^(x)=1$（把所有样本判为真）"
+              "text": "D^*(x)=1（把所有样本判为真）"
             },
             {
               "key": "B",
-              "text": "$D^(x)=\\dfrac{p{data}(x)}{p{data}(x)+pg(x)}$"
+              "text": "D^*(x)=\\dfrac{p_data(x)}{p_data(x)+p_g(x)}"
             },
             {
               "key": "C",
-              "text": "$D^(x)=\\dfrac{p{data}(x)}{p{data}(x)-pg(x)}$"
+              "text": "D^*(x)=\\dfrac{p_data(x)}{p_data(x)-p_g(x)}"
             },
             {
               "key": "D",
-              "text": "$D^(x)$ 由判别器参数量决定，越大越接近最优"
+              "text": "D^*(x) 由判别器参数量决定，越大越接近最优"
             }
           ],
           "correct": [
@@ -106,19 +106,19 @@
           "options": [
             {
               "key": "A",
-              "text": "干净样本 $x0$"
+              "text": "干净样本 x₀"
             },
             {
               "key": "B",
-              "text": "前向过程加入的标准高斯噪声 $\\varepsilon$"
+              "text": "前向过程加入的标准高斯噪声 \\varepsilon"
             },
             {
               "key": "C",
-              "text": "时间步 $t$ 的类别标签"
+              "text": "时间步 t 的类别标签"
             },
             {
               "key": "D",
-              "text": "加噪后的样本 $xt$ 本身"
+              "text": "加噪后的样本 x_t 本身"
             }
           ],
           "correct": [

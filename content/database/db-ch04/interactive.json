@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "B+ 树扇出、树高与等值查询 I/O 次数",
-      "body": "关于 EXPLAIN 的 rows 与 filtered 列，下列说法正确的是"
+      "body": "给低基数列单独建索引"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "给低基数列单独建索引",
+          "right": "放进组合索引的后缀列，或做成覆盖索引"
+        },
+        {
+          "id": 2,
+          "left": "以为 type=ALL 一定比 ref 慢",
+          "right": "判断慢不慢看三件事：rows 的量级、是否回表、filtered；小表 + ALL 不是问题。"
+        },
+        {
+          "id": 3,
+          "left": "把 filtered 列当装饰",
+          "right": "读计划时把 rows × filtered 当「有效行数」，尤其在被驱动表上。"
+        },
+        {
+          "id": 4,
+          "left": "OR 两侧各建单列索引就以为万事大吉",
+          "right": "改写成 SELECT ... WHERE a = 1 UNION SELECT ... WHERE b = 2，两侧各自稳定走索引；仅当两侧条件互斥（同一行不可能同时满足）时才可用 UNION ALL 省掉去重。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [
@@ -71,7 +97,7 @@
           "correct": [
             "B"
           ],
-          "explain": "阶梯为 system > const > eqref > ref > range > index > ALL。const 表示通过主键/唯一索引等值定位到最多一行；ALL 是全表扫描。特别注意 index 虽然带「index」字样，其实是扫整棵索引树，通常仍属需优化项。"
+          "explain": "阶梯为 system > const > eq_ref > ref > range > index > ALL。const 表示通过主键/唯一索引等值定位到最多一行；ALL 是全表扫描。特别注意 index 虽然带「index」字样，其实是扫整棵索引树，通常仍属需优化项。"
         }
       ]
     }

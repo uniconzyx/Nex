@@ -69,7 +69,7 @@
             },
             {
               "key": "B",
-              "text": "用 ROW，重放结果确定、可精确到行；同时应显式配置 binlogexpirelogsseconds（决定能回退多远）与 syncbinlog（决定故障时是否丢事件）"
+              "text": "用 ROW，重放结果确定、可精确到行；同时应显式配置 binlog_expire_logs_seconds（决定能回退多远）与 sync_binlog（决定故障时是否丢事件）"
             },
             {
               "key": "C",
@@ -83,7 +83,7 @@
           "correct": [
             "B"
           ],
-          "explain": "A 错：STATEMENT 记录语句原文，遇到 NOW()、UUID()、RAND()、无 ORDER BY 的 LIMIT 等非确定性语句时，重放结果可能不同，会造成静默不一致。B 正确：ROW 记录行镜像，重放确定；同时日志保留期决定 PITR 的可回退范围，syncbinlog=1 才能在故障时不丢事件（对应 RPO=0 的诉求）。C 错：MIXED 是「按语句」而非按表切换，且仍需同时理解两种语义。D 错：只有全量备份无法恢复到任意时间点，必须依靠日志区间重放。"
+          "explain": "A 错：STATEMENT 记录语句原文，遇到 NOW()、UUID()、RAND()、无 ORDER BY 的 LIMIT 等非确定性语句时，重放结果可能不同，会造成静默不一致。B 正确：ROW 记录行镜像，重放确定；同时日志保留期决定 PITR 的可回退范围，sync_binlog=1 才能在故障时不丢事件（对应 RPO=0 的诉求）。C 错：MIXED 是「按语句」而非按表切换，且仍需同时理解两种语义。D 错：只有全量备份无法恢复到任意时间点，必须依靠日志区间重放。"
         }
       ]
     },

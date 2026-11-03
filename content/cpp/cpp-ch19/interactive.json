@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "自研极简单元测试框架：TEST 宏 + 断言计数 + 失败定位（实测全通过）",
-      "body": "PUBLIC / PRIVATE / INTERFACE 的传播判定"
+      "body": "用 include_directories() 做全局包含"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "用 include_directories() 做全局包含",
+          "right": "改用 target_include_directories(core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)…"
+        },
+        {
+          "id": 2,
+          "left": "target_link_libraries() 漏写关键字",
+          "right": "永远显式写 PUBLIC / PRIVATE / INTERFACE（ex09 的 CM006/CM007）。"
+        },
+        {
+          "id": 3,
+          "left": "把实现头写成 PUBLIC，把接口头写成 PRIVATE",
+          "right": "判据只有一条：这个头出现在我自己的公开头文件里吗？是 → PUBLIC，只在 .cpp 里用 → PRIVATE（ex10、ex15 的 HS001）。"
+        },
+        {
+          "id": 4,
+          "left": "用 set(CMAKE_CXX_STANDARD 17) 或 set(CMAKE_CXX_…",
+          "right": "用 target_compile_features(core PUBLIC cxx_std_17) 表达「我需要 C++17」，由构建系统挑 flag；"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [
@@ -44,7 +70,7 @@
           "correct": [
             "B"
           ],
-          "explain": "PRIVATE 的含义是「依赖只对自己可见，不作为使用要求导出」。因此 math 的 INTERFACEINCLUDEDIRECTORIES 为空，app 链接 math 时不会继承到 core/include，直接包含必然报 No such file or directory。这正是 ex10 图 B 的结论：把 PRIVATE 改回 PUBLIC，app 才能看到。A 错在把 PRIVATE 理解成「只对 core 自己生效」，忽略了「不向消费者传播」这层；C 错在 install(EXPORT) 不创造可见性，它只是把已有的使用要求写进导出文件；D 错在可见性由依赖边的关键字决定，与目…"
+          "explain": "PRIVATE 的含义是「依赖只对自己可见，不作为使用要求导出」。因此 math 的 INTERFACE_INCLUDE_DIRECTORIES 为空，app 链接 math 时不会继承到 core/include，直接包含必然报 No such file or directory。这正是 ex10 图 B 的结论：把 PRIVATE 改回 PUBLIC，app 才能看到。A 错在把 PRIVATE 理解成「只对 core 自己生效」，忽略了「不向消费者传播」这层；C 错在 install(EXPORT) 不创造可见性，它只是把已有的使用要求写进导出文件；D 错在可见性由依赖边的关键字决定，…"
         },
         {
           "id": "cpp-ch19-ex05",
@@ -57,7 +83,7 @@
             },
             {
               "key": "B",
-              "text": "甲中 addtwice 会失败，因为夹具实例在用例之间共享"
+              "text": "甲中 add_twice 会失败，因为夹具实例在用例之间共享"
             },
             {
               "key": "C",
@@ -71,7 +97,7 @@
           "correct": [
             "A"
           ],
-          "explain": "TESTF 宏在每次执行前构造一个全新的 CounterFixture 并调用 SetUp() 复位，所以两个用例各自从 0 开始、都通过（B 错）。乙的 static int sharedtotal 是跨用例存活的状态，第二次执行时读到的是上一次留下的值（10 而非 5），这就是典型的「单独跑通过、整包跑失败」（C 错）。这类假失败与执行顺序、用例名排序无关，只与「谁在用例之间活下来」有关（D 错）。排查顺序：静态/全局变量、单例、临时文件、环境变量、全局 locale。"
+          "explain": "TEST_F 宏在每次执行前构造一个全新的 CounterFixture 并调用 SetUp() 复位，所以两个用例各自从 0 开始、都通过（B 错）。乙的 static int shared_total 是跨用例存活的状态，第二次执行时读到的是上一次留下的值（10 而非 5），这就是典型的「单独跑通过、整包跑失败」（C 错）。这类假失败与执行顺序、用例名排序无关，只与「谁在用例之间活下来」有关（D 错）。排查顺序：静态/全局变量、单例、临时文件、环境变量、全局 locale。"
         }
       ]
     }

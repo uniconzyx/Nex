@@ -2,12 +2,12 @@
   "chapter": "data-ch04",
   "subject": "data",
   "title": "Pandas 进阶：分组聚合、合并与时间序列",
-  "fingerprint": "9e5708273d",
+  "fingerprint": "e426f2163c",
   "scenario": {
     "work": {
       "tag": "工作现场",
       "head": "四种聚合器的返回形状：agg / transform / apply / filt…",
-      "body": "agg 与 transform 的返回形状"
+      "body": "agg 当 transform 用"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "agg 当 transform 用",
+          "right": "要广播回原表用 groupby(\"k\")[\"v\"].transform(\"mean\")，结果与原表同长同索引"
+        },
+        {
+          "id": 2,
+          "left": "多对多 merge 导致的静默行数膨胀",
+          "right": "merge 前用 validate=\"one_to_many\" 声明基数，或先 drop_duplicates 再合并"
+        },
+        {
+          "id": 3,
+          "left": "索引不单调就跑 rolling",
+          "right": "时间操作前先 sort_index()，并断言 index.is_monotonic_increasing"
+        },
+        {
+          "id": 4,
+          "left": "把机器相关的耗时写进 expected_output",
+          "right": "性能判据只写布尔量（加速比>1: True）或确定性计数，不写机器相关耗时"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [
@@ -71,7 +97,7 @@
           "correct": [
             "C"
           ],
-          "explain": "连接的定义是笛卡尔积再筛选：$L \\bowtie R = \\sigma{L.k=R.k}(L \\times R)$。对每个键 $k$，它贡献 $\\text{cnt}L(k) \\times \\text{cnt}R(k)$ 行。键 1：$2 \\times 2 = 4$ 行；键 2 只在左、键 3 只在右，inner 下都被丢弃。所以结果是 4 行。D 项的 9 行是把「全部键都做笛卡尔积」的错误理解——筛选条件必须先起作用。"
+          "explain": "连接的定义是笛卡尔积再筛选：L \\bowtie R = σ_L.k=R.k(L × R)。对每个键 k，它贡献 cnt_L(k) × cnt_R(k) 行。键 1：2 × 2 = 4 行；键 2 只在左、键 3 只在右，inner 下都被丢弃。所以结果是 4 行。D 项的 9 行是把「全部键都做笛卡尔积」的错误理解——筛选条件必须先起作用。"
         },
         {
           "id": "q4",

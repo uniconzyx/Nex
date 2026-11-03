@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "继承与 super：构造器链与方法调用",
-      "body": "关于方法重写（override）与方法重载（overload），正确的是"
+      "body": "以为 static 方法能被「重写」"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "以为 static 方法能被「重写」",
+          "right": "需要多态就用实例方法；工具类的 static 方法不要指望被覆盖，也无法通过接口抽象。"
+        },
+        {
+          "id": 2,
+          "left": "以为字段访问是多态的",
+          "right": "字段一律 private，对外用 getter——方法才会多态。"
+        },
+        {
+          "id": 3,
+          "left": "父类 private 方法被同名方法「重写」的错觉",
+          "right": "需要扩展点用 protected（或 protected abstract）；不想被扩展就 final，并在命名上避开父类的私有实现名。"
+        },
+        {
+          "id": 4,
+          "left": "静态方法被当成可重写",
+          "right": "要多态必须用实例方法，静态方法只做工具。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [

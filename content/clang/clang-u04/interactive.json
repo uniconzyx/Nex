@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "文本模式：fprintf 写盘再用 fscanf 读回",
-      "body": "fopen 模式的截断行为"
+      "body": "二进制数据用文本模式读写导致损坏"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "二进制数据用文本模式读写导致损坏",
+          "right": "任何非文本字节一律用 \"b\" 模式（rb/wb），且读写两端模式一致"
+        },
+        {
+          "id": 2,
+          "left": "fopen 不判 NULL 就解引用",
+          "right": "每次 fopen 后 if (!fp) { perror(...); return ...; }"
+        },
+        {
+          "id": 3,
+          "left": "把 w/w+ 当「存在则报错」用",
+          "right": "想「不存在才创建、存在则报错」用 POSIX open(path, O_CREAT|O_EXCL, 0600)，或先 fopen \"r\" 探测存在性"
+        },
+        {
+          "id": 4,
+          "left": "用 feof 当循环条件导致多读一次",
+          "right": "以 fread/fgetc/fscanf 的返回值/EOF 为终止条件，结束后才用 feof/ferror 区分原因"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [
@@ -44,7 +70,7 @@
           "correct": [
             "B"
           ],
-          "explain": "w 模式语义是「写 + 若存在则截断为 0」。要保留内容并覆盖应从头写用 r+，要在末尾追加用 a。想「存在则报错」需 POSIX 的 OEXCL。"
+          "explain": "w 模式语义是「写 + 若存在则截断为 0」。要保留内容并覆盖应从头写用 r+，要在末尾追加用 a。想「存在则报错」需 POSIX 的 O_EXCL。"
         },
         {
           "id": "q4",

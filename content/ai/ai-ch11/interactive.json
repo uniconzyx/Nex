@@ -7,22 +7,48 @@
     "work": {
       "tag": "工作现场",
       "head": "批处理耗时曲线：固定开销如何被摊销",
-      "body": "maxbatchsize 与 maxwaitms 的关系"
+      "body": "把 predict() 套一层 FastAPI 就当上线"
     },
     "exam": {
       "tag": "考场视角",
-      "head": "maxbatchsize 与 maxwaitms 的关系",
+      "head": "max_batch_size 与 max_wait_ms 的关系",
       "body": "ai-ch11 · 本章真题口径"
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "把 predict() 套一层 FastAPI 就当上线",
+          "right": "用「七个问题」自检——输入不合法怎么办、并发超了怎么办、处理太慢怎么办、模型加载失败怎么办、怎么知道是哪个模型版本答的、效果变差怎么回滚、显存够几个并发"
+        },
+        {
+          "id": 2,
+          "left": "只调 max_batch_size 不调 max_wait_ms",
+          "right": "先由 SLO 倒推等待窗口（SLO − 计算耗时 − 网络开销），再把批上限设成「窗口内可能到达的请求数」与「显存允许的批大小」的较小值"
+        },
+        {
+          "id": 3,
+          "left": "用 any / 无校验接口接外部输入",
+          "right": "入口做形状 + 数值 + 长度 + 白名单四类校验，专门拦 isinstance(v, bool)（Python 里 True 是 int 子类），用 math.isfinite 而不是 x == x 判 NaN"
+        },
+        {
+          "id": 4,
+          "left": "超时后立刻无退避重试",
+          "right": "指数退避 + 随机抖动 + 有限次数（通常 3 次）"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [
         {
           "id": "ai-ch11-q1",
           "stem": "某服务把 `max_batch_size` 从 8 调到 128，但 `max_wait_ms` 仍是 20ms，观察到的平均批大小几乎没变化。最合理的解释是？",
-          "title": "maxbatchsize 与 maxwaitms 的关系",
+          "title": "max_batch_size 与 max_wait_ms 的关系",
           "options": [
             {
               "key": "A",
@@ -34,7 +60,7 @@
             },
             {
               "key": "C",
-              "text": "maxbatchsize 只影响显存分配，不影响实际批大小"
+              "text": "max_batch_size 只影响显存分配，不影响实际批大小"
             },
             {
               "key": "D",

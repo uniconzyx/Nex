@@ -23,7 +23,7 @@
         "头文件包含了吗？ —— 若报的是 implicit declaration，问题在编译期，与链接无关。",
         "对应的 .c 编译了吗、.o 加进链接了吗？ —— 最常被漏掉：只编译了 main.c。",
         "符号被 static 藏了吗？ —— nm util.o 看是 t（内部链接）还是 T。",
-        "C/C++ 混编的符号名对吗？ —— nm main.o 里是 add 还是 Z3addii。"
+        "C/C++ 混编的符号名对吗？ —— nm main.o 里是 add 还是 _Z3addii。"
       ],
       "file": "04-strong-weak-symbols-and-diagnostics.md"
     },
@@ -33,22 +33,22 @@
         {
           "id": 1,
           "left": "把头文件当「公共变量区」",
-          "right": "头文件写 extern int counter;， 在某一个 .c 里写 int counter = 0;。"
+          "right": "头文件写 extern int counter;， 在某一个 .c 里写 int counter = 0;"
         },
         {
           "id": 2,
           "left": "用 -Wl,--as-needed 之后发现依赖库没链进来",
-          "right": "确实需要保留时用 -Wl,--no-as-needed 包裹该库，或改成显式 dlopen 而不链接。"
+          "right": "确实需要保留时用 -Wl,--no-as-needed 包裹该库，或改成显式 dlopen 而不链接"
         },
         {
           "id": 3,
           "left": "认为「链接成功就说明符号都对」",
-          "right": "库与调用方共用同一份头文件，并给 .so 打 SONAME + 版本号。"
+          "right": "库与调用方共用同一份头文件，并给 .so 打 SONAME + 版本号"
         },
         {
           "id": 4,
           "left": "静态库里的目标文件没被拉进来，初始化代码不执行",
-          "right": "显式引用一个符号（如 extern void forcelink(); forcelink();），或用 -Wl,--whole-archive 强制整库载入。"
+          "right": "显式引用一个符号（如 extern void force_link(); force_link();），或用 -Wl,--whole-archive 强制整库载入"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"

@@ -39,7 +39,7 @@ viz/interactive/
 | kind | 玩法 | 判定 | 数据来源 |
 |---|---|---|---|
 | `sequence` | **时序连线**：拖事件卡进时间轴槽，按序回放，走到尽头才判对错 | 槽位编号 === 步骤编号 | concept 里「步骤 / 流程 / 阶段 / 生命周期 / 握手」小节的有序列表 |
-| `match` | **配对连线**：左「出事的写法」↔ 右「正确做法」，点左再点右，真画贝塞尔线 | 一对一 id 相等 | `pitfalls.md` 每条陷阱的「正确写法 / 正确做法 / 正确口径是」 |
+| `match` | **配对连线**：左「出事的写法」↔ 右「正确做法」，点左再点右，真画贝塞尔线 | 一对一 id 相等 | `pitfalls.md` 每条陷阱显式标出的正解（「正确做法 / 怎么改 / ✅」三套写法都认） |
 | `boss` | **真题打靶**：答对削一层护甲，连答通关 | `answer.correct` 字母键 | `exercises.json` 的 choice 题（只读，文件不改） |
 | `fill` | **代码挖空**：把缺失的标识符拖回代码空位 | token === 该空答案 | concept 代码块里的关键标识符（同块唯一、非内建、小写开头） |
 | `sandbox` | 沙盒推演（手工精修） | 参数 → 实测曲线 | `examples/*.json` 的确定性输出 |
@@ -100,13 +100,14 @@ python scripts/gen_interactive.py --only middleware/mw-ch04 -v
 | 指标 | 数值 |
 |---|---|
 | 章节 | **165 / 165**（16 学科，全部有可交互模块） |
-| 模块总数 | 366，平均 2.22 / 章 |
+| 模块总数 | **428**，平均 2.59 / 章 |
 | boss | 165 章（每章 1~6 题，从 choice 真题抽） |
+| match | **151 章**（595 对） |
 | fill | 99 章 |
-| match | 89 章 |
 | sequence | 13 章 |
 
-每章模块数分布：1 个 → 29 章，2 个 → 75 章，3 个 → 57 章，4 个 → 4 章。
+每章模块数分布：**1 个 → 0 章**，2 个 → 74 章，3 个 → 84 章，4 个 → 7 章。
+**任何一章都至少「配对 + 打靶」两种玩法。**
 
 ### 为什么 sequence 只有 13 章（不是 165）
 
@@ -118,13 +119,30 @@ python scripts/gen_interactive.py --only middleware/mw-ch04 -v
 剩下 17 章再人工复核，剔除 4 章（`SEQ_BLOCK`：标题像时序、内容是清单）。
 **宁缺毋滥** —— 排序题错了比没有更糟。
 
-### 为什么 match 只有 89 章
+### match 的右栏是怎么认出来的（151 章）
 
-配对题的右栏必须是**真正的解**。第一版用「破折号后面的内容」当右栏，结果
-`**标题**\n- 现象：…` 这种块格式被 `\s*` 吃掉了换行，把「现象」当成了「正解」——
-89 章里绝大多数右栏都是现象。现在改成按条目切块、只认
-`正确写法|正确做法|正确口径是|正确：|正解：|改为` 之后的正文，
-抽不到的条目直接丢弃（不用现象冒充解法），所以覆盖率从 158 章降到 89 章。
+配对题的右栏必须是**真正的解**，不能是现象描述。第一版用「破折号后面的内容」当右栏，
+结果 `**标题**` 换行后接 `- 现象：…` 的块格式被 `\s*` 吃掉换行，把「现象」当成了「正解」，
+覆盖率一度跌到 89 章。现在按条目切块，只认三套**显式标记**：
+
+| 写法 | 出现范围 | 处理 |
+|---|---|---|
+| `正确写法` / `正确做法` / `正确口径是` / `正解：` / `改为` | 全站 | 取关键词后到第一个句号 |
+| `*怎么改*：` / `怎么避免：` | fullstack 系列 | 同上，等价标记 |
+| `✅ …` | cpp 全家、fs-ch05/07/08 | 取勾号后整行 |
+
+都没有的条目直接丢弃。剩下 10 章（`ai-ch04`、`fund-ch07/08/20/22/23`、`py-ch06/08`、
+`data-ch04`、`db-ch06`）一条标记都没写，用 `scripts/patch_pitfalls_fixline.py`
+在各条目末尾补一行 `**正确做法**：…`（内容取自该条自己的结论，不新增知识点），
+覆盖率 89 → **151 章 / 595 对**，逐条扫过，没有一对是现象冒充的。
+
+两个必须记住的坑：
+
+- **`_` 是标识符的一部分**。原来那句 `re.sub(r"[*_]{1,2}", "", s)` 会把 `lora_B` 变成 `loraB`、
+  `node_modules` 变成 `nodemodules`、`std::erase_if` 变成 `std::eraseif` —— 数据看着齐全，
+  只有读内容才发现标识符被悄悄改写。现在代码段与 `$…$` 先占位、再清洗，孤立 `_` 不碰。
+- **右栏要按句号截断**。否则「正确做法是 X。**正确做法**：Y」会把后一句一起吞掉，
+  前端显示成一整段带 `正确做法：` 前缀的怪句子；括号不平衡的残片（`8000×8 = 64kbps）。`）直接丢弃。
 
 ### fill 的挖空规则
 
@@ -194,8 +212,11 @@ npm run build     # 首页 361KB（gzip 120KB）+ 每章 2.7~4.9KB 独立 chunk
 ```bash
 cd viz/interactive && npm run build
 cd ../.. && npx vite preview --port 5190   # vite preview 只监听 [::1]，必须用 localhost
-node .scratch/verify_lab.mjs http://localhost:5190   # 全量：索引 + 通用版三玩法 + 时序模块
-node .scratch/verify_all.mjs                         # mw-ch04 精修版回归
+
+# 脚本已入库，路径相对仓库根；依赖 playwright-core + 系统 Edge（可用 EDGE_PATH 覆盖）
+node viz/interactive/verify/verify_lab.mjs http://localhost:5190   # 全量：索引 + 三玩法 + 时序
+node viz/interactive/verify/audit_labs.mjs                          # 8 章 × 2 视口逐个 tab 量溢出
+node .scratch/verify_all.mjs                                        # mw-ch04 精修版回归
 ```
 
 最近一次结果（Edge headless，1280×900 / 420×900）：
@@ -229,6 +250,15 @@ node .scratch/verify_all.mjs                         # mw-ch04 精修版回归
 8. **`splitMarker` 自造正则转义**：把 `‹n›` 占位符用 `new RegExp` 拼转义字符，`(` 与 `\` 的处理互相干扰；
    改成 `indexOf` 找开闭符号，稳定得多。
 9. **420px 下横向溢出 14px**：时序槽 `flex:1` 没给 `minWidth: 0`，一个 `$k+(n-1)$` 长 token 就把整行撑出视口。
+10. **`ScenarioBar` 在 420px 把整页撑宽 14px**：场景标题里有 `header/nav/main/article/aside/footer`
+    这种**不含空格的长 token**，flex 子项按 min-content 取宽（226px > 卡片 166px）。
+    修法：文案列 `flex: '1 1 240px'` + 长 token 的 span 加 `overflowWrap: 'anywhere'`，
+    外层 `flexWrap: 'wrap'` 让它在窄屏整列换行；换行后那条竖分隔线会孤零零留在第一行末尾，
+    用 `@media (max-width:560px){.km-sb-div{display:none}}` 收掉（`GlobalStyle` 与 `LabStyle` 两处都要写，
+    因为 `lab/` 视图不渲染 `GlobalStyle`）。
+11. **审计脚本会「错位认账」**：`_audit_labs.mjs` 是按章循环里取 `scrollWidth-clientWidth`，
+    出现非零时先单独复现那**一章**——我第一次照着输出追到了下一章（`db-ch05`），
+    真正溢出的是上一章（`fs-ch02`）。定位用 `document.querySelectorAll('body *')` 找 `getBoundingClientRect().right` 最大者，比猜快。
 
 ---
 
@@ -236,7 +266,10 @@ node .scratch/verify_all.mjs                         # mw-ch04 精修版回归
 
 - **`sandbox` / `debug` 只有 mw-ch04 有**：这两种需要「连续参数 + 实测曲线」「语义化拼装」，
   自动抽取做不可靠，目前是手工精修。要铺到别的章，按 mw-ch04 的写法加一份即可，组件层不用改。
-- **29 章只有 1 个模块**（只有 boss）：这些章没有可用的 pitfall 正解结构、也没有合格代码块。
-  补齐的路径是把 `pitfalls.md` 写成「现象 / 根因 / 正确做法」三段式，`match` 会自动长出来。
+- **「只有打靶」的章节已清零**（2026-11-03）。原来有 29 章只挂了一个 boss 模块，
+  因为这些章既没有可用的 pitfall 正解结构、也没有合格代码块。补齐分两步：
+  先让抽取器认 `✅` 与 `*怎么改*：` 两套等价标记（自动补回 19 章，不用改内容），
+  再给剩下 10 章在各条目末尾补一行 `**正确做法**：`（`scripts/patch_pitfalls_fixline.py`，
+  幂等，重复跑不会叠加）。现在 **165 章全部 ≥ 2 个模块**。
 - **`sequence` 的步骤可能不是完整流程**：例如「类加载五阶段」小节只列了 3 项，
   模块顶部如实写「3 步」，不会假装是全部。

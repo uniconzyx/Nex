@@ -22,22 +22,22 @@
         {
           "id": 1,
           "left": "忘记清零梯度，第二次迭代开始梯度越滚越大",
-          "right": "每个训练 step 固定顺序 zerograd → forward → loss → backward → step；手写时每轮重新创建梯度数组，或显式 dW.fill(0)。"
+          "right": "每个训练 step 固定顺序 zero_grad → forward → loss → backward → step；手写时每轮重新创建梯度数组，或显式 dW.fill(0)"
         },
         {
           "id": 2,
           "left": "softmax / sigmoid 直接算 exp，遇到大 logits 输出 nan",
-          "right": "softmax 先减最大值 z - z.max()；交叉熵用 log-sum-exp 形式，或把概率 clip 到 [1e−12, 1−1e−12]；混合精度训练时把 softmax/CE 放在 float32。"
+          "right": "softmax 先减最大值 z - z.max()；交叉熵用 log-sum-exp 形式，或把概率 clip 到 [1e−12, 1−1e−12]；混合精度训练时把 softmax/CE 放在 float32"
         },
         {
           "id": 3,
           "left": "输出层与损失错配：回归套 sigmoid、分类用 MSE",
-          "right": "按任务配对——回归 linear + MSE/MAE，二分类 sigmoid + BCE，多分类 softmax + CE，多标签每维 sigmoid + BCE。"
+          "right": "按任务配对——回归 linear + MSE/MAE，二分类 sigmoid + BCE，多分类 softmax + CE，多标签每维 sigmoid + BCE"
         },
         {
           "id": 4,
           "left": "训练时开 Dropout，推理时忘了关",
-          "right": "把「训练/推理模式」做成显式参数并在验证前切换；为模型加一个单元测试：eval 模式下同一输入两次前向必须逐位相同。BatchNorm 的 running stats 同理，冻结层时也要冻结它的统计量。"
+          "right": "把「训练/推理模式」做成显式参数并在验证前切换；为模型加一个单元测试：eval 模式下同一输入两次前向必须逐位相同"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"

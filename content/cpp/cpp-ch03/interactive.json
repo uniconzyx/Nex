@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "C 数组遍历求和",
-      "body": "cstr() 返回的指针在修改后失效"
+      "body": "c_str() 返回的指针在修改后失效"
     },
     "exam": {
       "tag": "考场视角",
@@ -21,18 +21,18 @@
       "pairs": [
         {
           "id": 1,
-          "left": "cstr() 返回的指针在修改后失效",
-          "right": "要长期持有就 strdup/拷贝，别存裸指针。"
+          "left": "c_str() 返回的指针在修改后失效",
+          "right": "要长期持有就 strdup/拷贝，别存裸指针"
         },
         {
           "id": 2,
           "left": "operator[] 越界不抛异常、at() 才抛",
-          "right": "需要边界检查用 at()，性能敏感且已确信安全才用 []。"
+          "right": "需要边界检查用 at()，性能敏感且已确信安全才用 []"
         },
         {
           "id": 3,
           "left": "用 sprintf/C 串函数导致缓冲区溢出",
-          "right": "用 snprintf(buf, sizeof buf, ...) 限长，或干脆用 std::string/std::format 完全避开手写缓冲。"
+          "right": "用 snprintf(buf, sizeof buf, ...) 限长，或干脆用 std::string/std::format 完全避开手写缓冲"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
@@ -51,21 +51,21 @@
             },
             {
               "key": "B",
-              "text": "a[i] 等价于 (a + i)"
+              "text": "a[i] 等价于 *(a + i)"
             },
             {
               "key": "C",
-              "text": "stringview 拥有底层字符存储"
+              "text": "string_view 拥有底层字符存储"
             },
             {
               "key": "D",
-              "text": "std::string 的 cstr() 不保证以 \\0 结尾"
+              "text": "std::string 的 c_str() 不保证以 \\0 结尾"
             }
           ],
           "correct": [
             "B"
           ],
-          "explain": "数组传参退化为指针丢失长度；stringview 不拥有存储；cstr() 以 \\0 结尾。"
+          "explain": "数组传参退化为指针丢失长度；string_view 不拥有存储；c_str() 以 \\0 结尾。"
         }
       ]
     },

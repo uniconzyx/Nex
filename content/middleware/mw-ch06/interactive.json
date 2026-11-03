@@ -22,17 +22,22 @@
         {
           "id": 1,
           "left": "acks 只在生产者设，忘了 min.insync.replicas",
-          "right": "生产端 acks=all 必须配 broker/Topic 端 min.insync.replicas ≥ 2（3 副本场景）。"
+          "right": "生产端 acks=all 必须配 broker/Topic 端 min.insync.replicas ≥ 2（3 副本场景）"
         },
         {
           "id": 2,
           "left": "enable.auto.commit=true 却不处理业务失败",
-          "right": "生产环境设 enable.auto.commit=false，处理成功后手动提交。"
+          "right": "生产环境设 enable.auto.commit=false，处理成功后手动提交"
         },
         {
           "id": 3,
           "left": "commitSync() 写在业务处理之前",
-          "right": "先处理、成功后再提交（at-least-once），重复由业务幂等消化。"
+          "right": "先处理、成功后再提交（at-least-once），重复由业务幂等消化"
+        },
+        {
+          "id": 4,
+          "left": "以为 acks=all 就等于\"绝不丢消息\"",
+          "right": "生产上三件套：replication.factor≥3、min.insync.replicas=2、unclean.leader.election=false；"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"

@@ -22,7 +22,7 @@
       "steps": [
         "先 SELECT 同条件，确认行数与内容符合预期。",
         "加 LIMIT 试跑（UPDATE ... WHERE ... LIMIT 10）。",
-        "生产环境开启 SQLSAFEUPDATES（禁止无 WHERE 或无 LIMIT 的更新）。",
+        "生产环境开启 SQL_SAFE_UPDATES（禁止无 WHERE 或无 LIMIT 的更新）。",
         "大表分批处理（按主键范围切批），避免长事务与主从延迟。",
         "DELETE 之后 TRUNCATE 不能反悔，重要数据先 CREATE TABLE ... AS SELECT 备份。"
       ],
@@ -34,22 +34,22 @@
         {
           "id": 1,
           "left": "UPDATE/DELETE 忘写 WHERE",
-          "right": "先 SELECT 确认影响集，再补 WHERE empid=...；生产建议开启 SQLSAFEUPDATES。"
+          "right": "先 SELECT 确认影响集，再补 WHERE emp_id=...；生产建议开启 SQL_SAFE_UPDATES"
         },
         {
           "id": 2,
           "left": "SELECT 非聚合列未进 GROUP BY",
-          "right": "把 name 加入 GROUP BY，或对 name 使用 MAX()/GROUPCONCAT() 等聚合。"
+          "right": "把 name 加入 GROUP BY，或对 name 使用 MAX()/GROUP_CONCAT() 等聚合"
         },
         {
           "id": 3,
           "left": "用 WHERE 过滤聚合结果",
-          "right": "改用 HAVING AVG(salary) > 7000。"
+          "right": "改用 HAVING AVG(salary) > 7000"
         },
         {
           "id": 4,
           "left": "混淆 INNER JOIN 与 LEFT JOIN 的 NULL 语义",
-          "right": "把右表过滤条件放进 ON（如 ON e.deptid=d.deptid AND d.location='Beijing'），或显式 WHERE right.col IS NULL 查找「无匹配」。"
+          "right": "把右表过滤条件放进 ON（如 ON e.dept_id=d.dept_id AND d.location='Beijing'），或显式 WHERE right.col IS NULL 查找「无匹配」"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"

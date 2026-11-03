@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "Maven 依赖调解：最近优先，同层先声明优先",
-      "body": "依赖调解的两条规则"
+      "body": "写 @Transactional 却在同类内部自调用"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,27 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "写 @Transactional 却在同类内部自调用",
+          "right": "把方法挪到另一个 Bean，或注入自身代理（AopContext.currentProxy()，需 exposeProxy=true，不推荐）"
+        },
+        {
+          "id": 2,
+          "left": "受检异常导致事务不回滚",
+          "right": "@Transactional(rollbackFor = Exception.class)"
+        },
+        {
+          "id": 3,
+          "left": "filtering 把不该替换的 ${} 也替换了",
+          "right": "<nonFilteredFileExtensions> 排除，或把这类文件放到不做 filtering 的资源目录"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [

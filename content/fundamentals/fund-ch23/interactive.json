@@ -2,12 +2,12 @@
   "chapter": "fund-ch23",
   "subject": "fundamentals",
   "title": "数据链路层",
-  "fingerprint": "073da1054c",
+  "fingerprint": "b87f5e587b",
   "scenario": {
     "work": {
       "tag": "工作现场",
       "head": "CRC 模 2 除法求 FCS",
-      "body": "哪种组帧方法无法自恢复"
+      "body": "把「组帧」当成「封装」"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "把「组帧」当成「封装」",
+          "right": "先想「定界符/长度字段怎么保证数据里不出现」，再谈首部字段"
+        },
+        {
+          "id": 2,
+          "left": "零比特填充的规则记反",
+          "right": "发送方每见 5 个连续 1 就插一个 0；接收方对称地每见 5 个 1 删掉后面那个 0"
+        },
+        {
+          "id": 3,
+          "left": "以为 GBN 的窗口能取 2^n",
+          "right": "GBN 取 W ≤ 2^n - 1，SR 取 W ≤ 2^(n-1)"
+        },
+        {
+          "id": 4,
+          "left": "最小帧长公式忘了「2τ 是往返」",
+          "right": "最小帧长 = 速率 × 2τ，2τ 是往返时延（10Mbps 下 51.2μs → 64B）"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [

@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "一致性哈希环：虚拟节点与增删节点的 key 迁移率实测",
-      "body": "只看 SecondsBehindMaster 判断复制健康"
+      "body": "只看 Seconds_Behind_Master 判断复制健康"
     },
     "exam": {
       "tag": "考场视角",
@@ -21,18 +21,18 @@
       "pairs": [
         {
           "id": 1,
-          "left": "只看 SecondsBehindMaster 判断复制健康",
-          "right": "额外上报 GTID 缺口（RetrievedGtidSet 与 ExecutedGtidSet 的差集）与「按业务表埋时间戳算出的真实延迟」。"
+          "left": "只看 Seconds_Behind_Master 判断复制健康",
+          "right": "额外上报 GTID 缺口（Retrieved_Gtid_Set 与 Executed_Gtid_Set 的差集）与「按业务表埋时间戳算出的真实延迟」"
         },
         {
           "id": 2,
-          "left": "从库不开 readonly，或只开 readonly 不开 superreadonly",
-          "right": "两个都开，并禁止绕过主库写从库的脚本存在。"
+          "left": "从库不开 read_only，或只开 read_only 不开 super_read_on…",
+          "right": "两个都开，并禁止绕过主库写从库的脚本存在"
         },
         {
           "id": 3,
           "left": "把机器号取成 Pod IP 的哈希",
-          "right": "StatefulSet 有序序号，或集中式分配器 + 租约（lease）。同理，容器化环境下不要用物理机名做机器号。"
+          "right": "StatefulSet 有序序号，或集中式分配器 + 租约（lease）"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
@@ -65,7 +65,7 @@
           "correct": [
             "B"
           ],
-          "explain": "A 错：半同步的 ACK 语义是「事务已到达至少一个从库（relay log / 已提交）」，不保证从库已重放可见，因此半同步不提供读己之写，会话级修复仍然必需。B 对：等待数等于从库数时，任一从库抖动都会让主库写入卡在 rplsemisyncmastertimeout 上，表现为「写入超时」而慢查询日志里查不到；等待数必须严格小于可用从库数。C 错：超时后确实会退化为异步（这是「静默降级」的坑），但 8.0 会在从库恢复后自动恢复半同步状态，不需要重启主库。D 错：MGR 用的是多数派共识提交协议（Paxos 变体），与半同步的「等固定个 ACK」在提交协议、容错度（⌊(N-1)/2⌋）与…"
+          "explain": "A 错：半同步的 ACK 语义是「事务已到达至少一个从库（relay log / 已提交）」，不保证从库已重放可见，因此半同步不提供读己之写，会话级修复仍然必需。B 对：等待数等于从库数时，任一从库抖动都会让主库写入卡在 rpl_semi_sync_master_timeout 上，表现为「写入超时」而慢查询日志里查不到；等待数必须严格小于可用从库数。C 错：超时后确实会退化为异步（这是「静默降级」的坑），但 8.0 会在从库恢复后自动恢复半同步状态，不需要重启主库。D 错：MGR 用的是多数派共识提交协议（Paxos 变体），与半同步的「等固定个 ACK」在提交协议、容错度（⌊(N-1)/…"
         },
         {
           "id": "db-ch08-ex02",

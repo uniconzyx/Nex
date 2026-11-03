@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "结构体 sizeof 与填充验证（char-double-char）",
-      "body": "结构体对齐与 sizeof"
+      "body": "忘记对齐导致 sizeof 远超字段之和"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "忘记对齐导致 sizeof 远超字段之和",
+          "right": "按对齐从大到小排（大成员在前、小成员聚尾），必要时用 _Static_assert(sizeof(S)==N, ...) 固化布局"
+        },
+        {
+          "id": 2,
+          "left": "用位域写可移植二进制协议",
+          "right": "协议字段一律用「位移 + 掩码」显式编码，如 (raw >> 3) & 0xF，并把字段宽/偏移写成常量"
+        },
+        {
+          "id": 3,
+          "left": "用 union 读非活跃成员当类型双关（UB）",
+          "right": "用 memcpy(&dst, &src, sizeof) 或 unsigned char 逐字节观察（C11 §6.2.6.1），可移植且避开活性成员限制"
+        },
+        {
+          "id": 4,
+          "left": "结构体浅拷贝分裂指针所有权",
+          "right": "含指针的结构体要么显式深拷贝、要么明确「谁分配谁释放」的所有权、要么禁止拷贝"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [

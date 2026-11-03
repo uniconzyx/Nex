@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "sizeof / alignof / offsetof 实测结构体布局与填充",
-      "body": "关于内存对齐与填充，下列说法正确的是"
+      "body": "把带填充的结构体直接 memcpy/memcmp"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "把带填充的结构体直接 memcpy/memcmp",
+          "right": "显式逐字段序列化；或用 #pragma pack(1) 并固定字节序；比较时逐字段比较。"
+        },
+        {
+          "id": 2,
+          "left": "对含 std::atomic / SIMD / 指针的\"业务结构体\"用 #pragma p…",
+          "right": "pack 只用于纯数据协议结构；对齐敏感的成员要么不 pack，要么逐字段拷贝进 packed 结构。"
+        },
+        {
+          "id": 3,
+          "left": "以为 alignas 可以降低对齐",
+          "right": "记住方向：alignas 抬、pack 降，二者作用于不同层级。"
+        },
+        {
+          "id": 4,
+          "left": "以为字段重排总能减小 sizeof",
+          "right": "先实测 sizeof 与偏移再决定；对外接口的结构体一旦发布就不许重排。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [

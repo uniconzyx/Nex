@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "分层封装与有效载荷率：MTU/MSS 与每层首部开销",
-      "body": "OSI 与 TCP/IP 模型的层次差异"
+      "body": "把 MAC 地址和 IP 地址的职责搞反"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,27 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "把 MAC 地址和 IP 地址的职责搞反",
+          "right": "IP 是「全局逻辑地址、跨网络不变」，MAC 是「本地物理地址、每跳重写」；ARP 在本地把 IP 解析成下一跳 MAC"
+        },
+        {
+          "id": 2,
+          "left": "混淆 TCP 与 UDP 的适用场景",
+          "right": "文件传输、网页用 TCP/HTTP；实时音视频、游戏状态同步常选 UDP + 应用层可靠；新技术看 QUIC"
+        },
+        {
+          "id": 3,
+          "left": "以为 NAT 只用于省 IP",
+          "right": "NAT 是「隔离 + 复用」的折中，P2P/内嵌地址协议需 STUN/TURN 或 ALG 配合，不能只当省 IP 工具"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [

@@ -22,22 +22,22 @@
         {
           "id": 1,
           "left": "混淆全量同步与部分同步、以为从节点重启一定走全量",
-          "right": "答「部分同步可行性取决于 offset 是否仍在 backlog 窗口」，并强调 backlog 是固定大小环形缓冲，写入过快/断线过久会退化全量。"
+          "right": "答「部分同步可行性取决于 offset 是否仍在 backlog 窗口」，并强调 backlog 是固定大小环形缓冲，写入过快/断线过久会退化全量"
         },
         {
           "id": 2,
           "left": "把哨兵的 quorum 当成 Raft 的多数派",
-          "right": "明确区分「ODOWN 的 quorum」与「leader 选举的多数派」，二者独立配置、语义不同。"
+          "right": "明确区分「ODOWN 的 quorum」与「leader 选举的多数派」，二者独立配置、语义不同"
         },
         {
           "id": 3,
           "left": "选主规则记反优先级",
-          "right": "priority 小优先（数值越小越想当主）、offset 大优先（数据越新越优先），别把方向记反。"
+          "right": "priority 小优先（数值越小越想当主）、offset 大优先（数据越新越优先），别把方向记反"
         },
         {
           "id": 4,
           "left": "MOVED 与 ASK 不分、以为都刷新路由表",
-          "right": "答「MOVED 刷新、ASK 不刷新」，并说明 ASK 只管该 key 本次去目标节点拿。"
+          "right": "答「MOVED 刷新、ASK 不刷新」，并说明 ASK 只管该 key 本次去目标节点拿"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
@@ -60,7 +60,7 @@
             },
             {
               "key": "C",
-              "text": "replbacklog 无限增长"
+              "text": "repl_backlog 无限增长"
             },
             {
               "key": "D",
@@ -70,7 +70,7 @@
           "correct": [
             "B"
           ],
-          "explain": "从节点断线重连时若上报的 offset 仍在 replbacklog 窗口内则走部分同步（CONTINUE）只补缺失区间；只有首次/换主/窗口被覆盖才 FULLRESYNC。replbacklog 是固定大小环形缓冲会被覆盖；REPLCONF ACK 上报的是复制 offset，用于计算 lag 与 min-replicas 保护。"
+          "explain": "从节点断线重连时若上报的 offset 仍在 repl_backlog 窗口内则走部分同步（CONTINUE）只补缺失区间；只有首次/换主/窗口被覆盖才 FULLRESYNC。repl_backlog 是固定大小环形缓冲会被覆盖；REPLCONF ACK 上报的是复制 offset，用于计算 lag 与 min-replicas 保护。"
         },
         {
           "id": "q1",

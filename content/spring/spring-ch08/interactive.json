@@ -11,7 +11,7 @@
     },
     "exam": {
       "tag": "考场视角",
-      "head": "REQUIRED 与 REQUIRESNEW 的嵌套行为",
+      "head": "REQUIRED 与 REQUIRES_NEW 的嵌套行为",
       "body": "spring-ch08 · 本章真题口径"
     }
   },
@@ -22,22 +22,22 @@
         {
           "id": 1,
           "left": "以为加了 @Transactional 就一定会回滚",
-          "right": "需要 checked 异常也回滚时显式声明 @Transactional(rollbackFor = Exception.class)。"
+          "right": "需要 checked 异常也回滚时显式声明 @Transactional(rollbackFor = Exception.class)"
         },
         {
           "id": 2,
           "left": "同类方法自调用导致事务失效",
-          "right": "把被调方法拆到另一个 Bean、注入自身代理，或用 @EnableAspectJAutoProxy(exposeProxy = true) + AopContext.currentProxy()。"
+          "right": "把被调方法拆到另一个 Bean、注入自身代理，或用 @EnableAspectJAutoProxy(exposeProxy = true) + AopContext.currentProxy()"
         },
         {
           "id": 3,
           "left": "把 @Transactional 加在非 public（private / package…",
-          "right": "事务方法必须是 public，且从代理进入。"
+          "right": "事务方法必须是 public，且从代理进入"
         },
         {
           "id": 4,
           "left": "异常被 catch 吞掉，方法正常返回",
-          "right": "要么把异常抛出去，要么在 catch 里手动 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly()。"
+          "right": "要么把异常抛出去，要么在 catch 里手动 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly()"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
@@ -48,7 +48,7 @@
         {
           "id": "ex1",
           "stem": "外层方法标注 `@Transactional`（默认 REQUIRED），它调用内层方法也标注 `@Transactional(propagation = REQUIRES_NEW)`。内层成功提交后，外层抛出 RuntimeException。最终数据库里内层写入的数据会怎样？",
-          "title": "REQUIRED 与 REQUIRESNEW 的嵌套行为",
+          "title": "REQUIRED 与 REQUIRES_NEW 的嵌套行为",
           "options": [
             {
               "key": "A",
@@ -70,7 +70,7 @@
           "correct": [
             "B"
           ],
-          "explain": "REQUIRESNEW 会挂起外层事务并新建一个独立事务，内层提交后即持久化；外层随后回滚只撤销外层自己的改动，不会影响已提交的内层事务。参考 examples/ex03 实测输出 db after outer rollback: [insert:item]。"
+          "explain": "REQUIRES_NEW 会挂起外层事务并新建一个独立事务，内层提交后即持久化；外层随后回滚只撤销外层自己的改动，不会影响已提交的内层事务。参考 examples/ex03 实测输出 db after outer rollback: [insert:item]。"
         },
         {
           "id": "ex2",

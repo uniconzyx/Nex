@@ -22,22 +22,22 @@
         {
           "id": 1,
           "left": "把 Reducer 的输入当成单值 (k, v)",
-          "right": "在 reduce 里遍历 values 累加/汇总；在 SQL 里理解成「GROUP BY key 后对该组多行做聚合」。"
+          "right": "在 reduce 里遍历 values 累加/汇总；在 SQL 里理解成「GROUP BY key 后对该组多行做聚合」"
         },
         {
           "id": 2,
           "left": "认为 Combiner 一定能用、或把它当 Reducer 的替代",
-          "right": "可结合的 sum/count/min/max 才配 Combiner；求均值应传 (sum,count) 由 Reducer 相除；绝不能把有副作用（发消息、全局计数）的逻辑放进 Combiner。"
+          "right": "可结合的 sum/count/min/max 才配 Combiner；求均值应传 (sum,count) 由 Reducer 相除；绝不能把有副作用（发消息、全局计数）的逻辑放进 Combiner"
         },
         {
           "id": 3,
           "left": "默认哈希分区会自动均衡、不会倾斜",
-          "right": "识别热 key（看 counters 里某 reduce 输入远大于均值）；手写 Partitioner 把热 key 单独路由，或用「加盐（salting）：热 key 加随机后缀打散到多 reduce，再二次聚合」。"
+          "right": "识别热 key（看 counters 里某 reduce 输入远大于均值）；手写 Partitioner 把热 key 单独路由，或用「加盐（salting）：热 key 加随机后缀打散到多 reduce，再二次聚合」"
         },
         {
           "id": 4,
           "left": "reduce 数随便设，越大越快",
-          "right": "按 输入量 / 256MB~1GB 估；且 reduce 数一旦定下，因为默认哈希是取模而非一致性哈希，改 R 会让几乎所有 key 重新分区（全量 shuffle），所以上线前就要估准。"
+          "right": "按 输入量 / 256MB~1GB 估；且 reduce 数一旦定下，因为默认哈希是取模而非一致性哈希，改 R 会让几乎所有 key 重新分区（全量 shuffle），所以上线前就要估准"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"

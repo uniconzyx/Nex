@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "Dockerfile 静态检查器：指令顺序合理性、fixed tag、多阶段 --…",
-      "body": "改一行源码会重建几层：deps-first 与 COPY . . 反模式对照"
+      "body": "把 apt-get update 与 apt-get install 拆成两条 RUN"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "把 apt-get update 与 apt-get install 拆成两条 RUN",
+          "right": "写在同一 RUN：RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*；"
+        },
+        {
+          "id": 2,
+          "left": "基础镜像用 node:latest 或不带 tag",
+          "right": "固定到具体版本（node:22.11-bookworm）或直接固定 digest；ex01 对 node:latest 报 base_image_latest:node:latest。"
+        },
+        {
+          "id": 3,
+          "left": "先 COPY . . 再 RUN npm ci（依赖安装顺序倒置）",
+          "right": "先 COPY package.json package-lock.json ./ → RUN npm ci → 再 COPY . .。"
+        },
+        {
+          "id": 4,
+          "left": "不写 .dockerignore",
+          "right": "用 .dockerignore 排除（ex04 实测 node_modules/dist/.git/**/*.log/coverage/ 被排除）；注意取反规则 !"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [
@@ -44,7 +70,7 @@
           "correct": [
             "A"
           ],
-          "explain": "构建缓存是前缀链：某层失效则其后全部重建，因此「失效点之后的层数」就是重建层数。ex02 实测：A 的 COPY . . 是第 5 层，命中前 4 层、重建 2 层，且 npmcilayerrebuild=False；B 的 COPY . . 是第 3 层，后面还有两条 RUN，命中 2 层、重建 3 层，且 npmcilayerrebuild=True（最贵的依赖安装被反复触发）。缓存键是「父层哈希 + 指令 + 该指令用到的上下文内容」，不是整份上下文的哈希，所以 D 错。"
+          "explain": "构建缓存是前缀链：某层失效则其后全部重建，因此「失效点之后的层数」就是重建层数。ex02 实测：A 的 COPY . . 是第 5 层，命中前 4 层、重建 2 层，且 npm_ci_layer_rebuild=False；B 的 COPY . . 是第 3 层，后面还有两条 RUN，命中 2 层、重建 3 层，且 npm_ci_layer_rebuild=True（最贵的依赖安装被反复触发）。缓存键是「父层哈希 + 指令 + 该指令用到的上下文内容」，不是整份上下文的哈希，所以 D 错。"
         },
         {
           "id": "fs-ch08-ex02",
@@ -53,25 +79,25 @@
           "options": [
             {
               "key": "A",
-              "text": "把 LOGLEVEL 放在外部配置文件 config/default.json，由代码读取"
+              "text": "把 LOG_LEVEL 放在外部配置文件 config/default.json，由代码读取"
             },
             {
               "key": "B",
-              "text": "把数据库连接串从环境变量 process.env.DATABASEURL 读取"
+              "text": "把数据库连接串从环境变量 process.env.DATABASE_URL 读取"
             },
             {
               "key": "C",
-              "text": "把 STRIPESECRETKEY 直接写在 src/pay.js 源码里"
+              "text": "把 STRIPE_SECRET_KEY 直接写在 src/pay.js 源码里"
             },
             {
               "key": "D",
-              "text": "把特性开关 FEATURENEWUI 从环境变量读取"
+              "text": "把特性开关 FEATURE_NEW_UI 从环境变量读取"
             }
           ],
           "correct": [
             "C"
           ],
-          "explain": "12-Factor 的「配置」指会因部署环境而不同的东西，必须与代码分离。环境变量是推荐形态（B、D 合规）；外部配置文件属于「已外置但不如环境变量」（A 记 okexternalizedbutpreferenv，可接受）；写死在源码里是违规，若该项还是密钥则升级为 critical——因为密钥会随 Git 历史永久存在，且轮换前一直有效。ex11 对 C 这类项输出 VIOLATIONCRITICALHARDCODEDSECRET，最终 compliant=5 violations=3 critical=2。"
+          "explain": "12-Factor 的「配置」指会因部署环境而不同的东西，必须与代码分离。环境变量是推荐形态（B、D 合规）；外部配置文件属于「已外置但不如环境变量」（A 记 ok_externalized_but_prefer_env，可接受）；写死在源码里是违规，若该项还是密钥则升级为 critical——因为密钥会随 Git 历史永久存在，且轮换前一直有效。ex11 对 C 这类项输出 VIOLATION_CRITICAL_HARDCODED_SECRET，最终 compliant=5 violations=3 critical=2。"
         }
       ]
     }

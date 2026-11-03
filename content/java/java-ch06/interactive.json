@@ -22,22 +22,22 @@
         {
           "id": 1,
           "left": "用 FileReader/FileWriter 读线上文件",
-          "right": "Files.newBufferedReader(p, StandardCharsets.UTF8)。"
+          "right": "Files.newBufferedReader(p, StandardCharsets.UTF_8)"
         },
         {
           "id": 2,
           "left": "忘了给 Serializable 类声明 serialVersionUID",
-          "right": "显式 private static final long serialVersionUID = 1L;。"
+          "right": "显式 private static final long serialVersionUID = 1L;"
         },
         {
           "id": 3,
           "left": "ByteBuffer 写完不 flip() 就读",
-          "right": "put 完 → flip() → get 到 !hasRemaining() → clear()/compact()。"
+          "right": "put 完 → flip() → get 到 !hasRemaining() → clear()/compact()"
         },
         {
           "id": 4,
-          "left": "无条件注册 OPWRITE",
-          "right": "真写不进去时才注册，写完立即 cancel() 并重新只注册 OPREAD。"
+          "left": "无条件注册 OP_WRITE",
+          "right": "真写不进去时才注册，写完立即 cancel() 并重新只注册 OP_READ"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"

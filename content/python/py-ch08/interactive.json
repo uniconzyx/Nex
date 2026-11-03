@@ -2,12 +2,12 @@
   "chapter": "py-ch08",
   "subject": "python",
   "title": "数据分析：numpy/pandas 入门",
-  "fingerprint": "50c84bd0c2",
+  "fingerprint": "87c1a3b83b",
   "scenario": {
     "work": {
       "tag": "工作现场",
       "head": "ndarray 创建、dtype 推导与内存占用",
-      "body": "np.array([1, 2, 3.5]) 的 dtype 是什么"
+      "body": "用 and / or 连接布尔条件"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "用 and / or 连接布尔条件",
+          "right": "(a > 0) & (a < 5)，两个条件都要加括号"
+        },
+        {
+          "id": 2,
+          "left": "忘记 keepdims 导致广播失败",
+          "right": "a - a.mean(axis=1, keepdims=True)，让被减向量的轴长保留下来"
+        },
+        {
+          "id": 3,
+          "left": "链式赋值静默失效",
+          "right": "df.loc[df.a > 0, \"b\"] = 1（单次 loc）"
+        },
+        {
+          "id": 4,
+          "left": "CSV 的 dtype 推断毁掉前导零",
+          "right": "编号/电话/身份证列在 read_csv 时显式 dtype=str"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [
@@ -71,7 +97,7 @@
           "correct": [
             "D"
           ],
-          "explain": "判定标准是能否用「起始指针 + strides」表达结果： - 能 -> 视图：基本切片、reshape、ravel、transpose、broadcastto - 不能 -> 副本：花式索引、布尔索引、astype（换 dtype）、copy()、算术运算结果 用 np.sharesmemory(a, b) 可一行验证。这是排查「改了 b 为什么 a 也变了」类 bug 的第一诊断工具。"
+          "explain": "判定标准是能否用「起始指针 + strides」表达结果： - 能 -> 视图：基本切片、reshape、ravel、transpose、broadcast_to - 不能 -> 副本：花式索引、布尔索引、astype（换 dtype）、copy()、算术运算结果 用 np.shares_memory(a, b) 可一行验证。这是排查「改了 b 为什么 a 也变了」类 bug 的第一诊断工具。"
         },
         {
           "id": "py8-ex05",

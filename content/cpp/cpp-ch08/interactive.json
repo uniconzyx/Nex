@@ -6,8 +6,8 @@
   "scenario": {
     "work": {
       "tag": "工作现场",
-      "head": "vector 扩容观察：capacity 随 pushback 指数增长（约 2x）",
-      "body": "关于 vector 的扩容与迭代器失效，正确的是"
+      "head": "vector 扩容观察：capacity 随 push_back 指数增长（约 2…",
+      "body": "vector 扩容导致迭代器/引用/指针全部失效"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "vector 扩容导致迭代器/引用/指针全部失效",
+          "right": "若循环中要增删且保留迭代器：用 it = v.insert(it, x); ++it; 的返回值推进；或先 reserve 预分配避免扩容；或改用下标 i。"
+        },
+        {
+          "id": 2,
+          "left": "erase 循环中迭代器失效（最经典的段错误来源）",
+          "right": "用返回值推进：for (auto it = v.begin(); it != v.end(); ) it = (*it % 2 == 0) ? v.erase(it) : std::next(it);"
+        },
+        {
+          "id": 3,
+          "left": "range-for 中修改容器导致失效 / 无限循环",
+          "right": "range-for 期间不要插入/删除使迭代器失效；要改就把原容器内容先拷出，或改用带返回值的普通循环。"
+        },
+        {
+          "id": 4,
+          "left": "unordered_map 哈希质量差 → 最坏 O(n)",
+          "right": "用高质量哈希（如组合各字段的 FNV-1a / 标准 std::hash 组合）；不可信输入用实现自带的盐化哈希；reserve 降低负载因子。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [
@@ -26,11 +52,11 @@
           "options": [
             {
               "key": "A",
-              "text": "vector 每次 pushback 都会重新分配内存"
+              "text": "vector 每次 push_back 都会重新分配内存"
             },
             {
               "key": "B",
-              "text": "pushback 发生扩容时，所有已有的迭代器/引用/指针都会失效"
+              "text": "push_back 发生扩容时，所有已有的迭代器/引用/指针都会失效"
             },
             {
               "key": "C",

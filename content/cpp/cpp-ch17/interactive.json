@@ -6,8 +6,8 @@
   "scenario": {
     "work": {
       "tag": "工作现场",
-      "head": "std::enableif 与 SFINAE 重载选择（整型 vs 非整型）",
-      "body": "关于 SFINAE，下列说法正确的是"
+      "head": "std::enable_if 与 SFINAE 重载选择（整型 vs 非整型）",
+      "body": "SFINAE 只发生在「模板参数替换」阶段"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "SFINAE 只发生在「模板参数替换」阶段",
+          "right": "约束表达式必须放在能参与替换的位置（返回类型、std::enable_if_t 默认模板参数、或函数参数），不要写在函数体里。"
+        },
+        {
+          "id": 2,
+          "left": "enable_if 约束位置/条件写错导致两重载都匹配或都不匹配",
+          "right": "用 std::enable_if_t<cond> 放在返回类型或最后一个默认模板参数，并保证条件互斥且完备（覆盖所有可能的类型）。"
+        },
+        {
+          "id": 3,
+          "left": "if constexpr 的条件必须是编译期常量，且被裁剪分支仍需语法合法",
+          "right": "用类型 trait（is_integral_v 等）作条件；不要把「另一分支类型非法」的代码放进被裁剪分支后还指望它能通过编译。"
+        },
+        {
+          "id": 4,
+          "left": "std::decay 会退化数组/函数/引用/const，与 remove_referen…",
+          "right": "按意图选：仅去引用用 remove_reference / remove_cvref；「像按值传参一样退化」才用 decay。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [
@@ -34,7 +60,7 @@
             },
             {
               "key": "C",
-              "text": "enableif 的条件不必互斥，编译器会自动补全"
+              "text": "enable_if 的条件不必互斥，编译器会自动补全"
             },
             {
               "key": "D",
@@ -44,7 +70,7 @@
           "correct": [
             "B"
           ],
-          "explain": "SFINAE 仅作用于替换阶段；函数体错误是硬错误。enableif 条件需互斥且完备；函数模板不支持偏特化（只能重载/全特化）。"
+          "explain": "SFINAE 仅作用于替换阶段；函数体错误是硬错误。enable_if 条件需互斥且完备；函数模板不支持偏特化（只能重载/全特化）。"
         }
       ]
     },

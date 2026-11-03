@@ -49,7 +49,7 @@
         {
           "id": "cpp20-q2",
           "stem": "对象 A 持有 `shared_ptr<B>`，对象 B 持有 `shared_ptr<A>`，二者无其他外部引用。",
-          "title": "两个对象互相持有对方的 std::sharedptr，会导致什么？",
+          "title": "两个对象互相持有对方的 std::shared_ptr，会导致什么？",
           "options": [
             {
               "key": "A",
@@ -61,7 +61,7 @@
             },
             {
               "key": "C",
-              "text": "编译期报错，因为 sharedptr 不允许互相持有"
+              "text": "编译期报错，因为 shared_ptr 不允许互相持有"
             },
             {
               "key": "D",
@@ -71,7 +71,7 @@
           "correct": [
             "B"
           ],
-          "explain": "循环引用使双方 usecount 都 >=1，控制块引用计数无法归零，析构不被调用，内存泄漏。打破手段是改用 weakptr。对应 ex04。"
+          "explain": "循环引用使双方 use_count 都 >=1，控制块引用计数无法归零，析构不被调用，内存泄漏。打破手段是改用 weak_ptr。对应 ex04。"
         },
         {
           "id": "cpp20-q4",
@@ -115,7 +115,7 @@
             },
             {
               "key": "C",
-              "text": "运行期抛出 std::badcast"
+              "text": "运行期抛出 std::bad_cast"
             },
             {
               "key": "D",

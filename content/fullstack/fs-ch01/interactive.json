@@ -22,22 +22,22 @@
         {
           "id": 1,
           "left": "用 GET 触发副作用",
-          "right": "写操作一律用 POST/PUT/PATCH/DELETE。"
+          "right": "写操作一律用 POST/PUT/PATCH/DELETE"
         },
         {
           "id": 2,
           "left": "把错误塞进 200 OK",
-          "right": "状态码表达协议级结果，错误详情放响应体。"
+          "right": "状态码表达协议级结果，错误详情放响应体"
         },
         {
           "id": 3,
           "left": "302 后被浏览器把 POST 变 GET",
-          "right": "POST 成功后返回 303（POST-Redirect-GET 模式）让客户端用 GET 取结果页。"
+          "right": "POST 成功后返回 303（POST-Redirect-GET 模式）让客户端用 GET 取结果页"
         },
         {
           "id": 4,
           "left": "静态资源不用指纹文件名 + 长强缓存",
-          "right": "内容哈希进文件名（app.3f2a1b.js）+ max-age=1y, immutable，更新时文件名变化即天然失效。"
+          "right": "内容哈希进文件名（app.3f2a1b.js）+ max-age=1y, immutable，更新时文件名变化即天然失效"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"

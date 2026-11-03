@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "thread 启动与 join（无共享状态）",
-      "body": "cv.wait 不带谓词"
+      "body": "忘记 join/detach 导致 terminate"
     },
     "exam": {
       "tag": "考场视角",
@@ -21,23 +21,23 @@
       "pairs": [
         {
           "id": 1,
-          "left": "cv.wait 不带谓词",
-          "right": "cv.wait(lk, [&]{ return ready; })，唤醒后重新检查谓词。"
+          "left": "忘记 join/detach 导致 terminate",
+          "right": "启动线程后立刻规划生命周期：要么 join，要么 detach（并确保引用对象活得够久）；或直接用 std::jthread（析构自动 join）。"
         },
         {
           "id": 2,
-          "left": "线程池任务用 [&] 捕获栈变量",
-          "right": "按值捕获或用 sharedptr 共享所有权。"
+          "left": "按值捕获/传引用导致悬垂",
+          "right": "用 std::ref 时需确保生命周期覆盖线程；更稳妥是按值捕获或 std::move 所有权（如 shared_ptr）。"
         },
         {
           "id": 3,
-          "left": "把 atomic 的 ++ 当成组合原子操作",
-          "right": "需要「判断再改」的复合逻辑用锁或 compareexchange 循环。"
+          "left": "死锁：两把锁顺序不一致",
+          "right": "所有线程按同一顺序加锁；或用 std::lock(m1, m2) / std::scoped_lock（一次性安全获取多锁，标准保证不死锁）。"
         },
         {
           "id": 4,
-          "left": "锁内做阻塞 IO 或调回调",
-          "right": "锁内只保护共享数据的读写，IO、日志、回调移到锁外。"
+          "left": "volatile 误当同步原语",
+          "right": "多线程共享变量一律用 std::atomic 或 mutex 保护；volatile 只用于内存映射 IO 等场景。"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"

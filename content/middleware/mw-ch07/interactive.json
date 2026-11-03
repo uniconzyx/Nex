@@ -80,11 +80,11 @@
           "options": [
             {
               "key": "A",
-              "text": "先 SELECT 判断 orderno 是否存在，不存在再 INSERT"
+              "text": "先 SELECT 判断 order_no 是否存在，不存在再 INSERT"
             },
             {
               "key": "B",
-              "text": "INSERT ... ON CONFLICT (orderno) DO NOTHING，把原子性下沉到存储引擎"
+              "text": "INSERT ... ON CONFLICT (order_no) DO NOTHING，把原子性下沉到存储引擎"
             },
             {
               "key": "C",

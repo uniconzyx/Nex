@@ -2,12 +2,12 @@
   "chapter": "ai-ch04",
   "subject": "ai",
   "title": "高效微调与对齐：LoRA、RLHF 与 DPO",
-  "fingerprint": "e2353e74dc",
+  "fingerprint": "d5895e923d",
   "scenario": {
     "work": {
       "tag": "工作现场",
       "head": "LoRA 参数量：rank 与占比的定量关系",
-      "body": "LoRA 的参数量与 rank 的关系"
+      "body": "把优化器状态算成 8Φ"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "把优化器状态算成 8Φ",
+          "right": "12Φ（一阶 4Φ + 二阶 4Φ + 主权重 4Φ），加上权重 2Φ 与梯度 2Φ，全参训练总共约 16Φ 字节"
+        },
+        {
+          "id": 2,
+          "left": "LoRA 的 A 和 B 都做随机初始化",
+          "right": "lora_B 初始化为全零（lora_A 用 Kaiming 或高斯），训练第一步的 ΔW 必须严格等于 0"
+        },
+        {
+          "id": 3,
+          "left": "调大 r 却忘了同步 alpha",
+          "right": "调 r 时按 alpha = 2r 同步缩放，保持有效缩放 alpha/r 不变"
+        },
+        {
+          "id": 4,
+          "left": "SFT 时对整条序列算损失",
+          "right": "把指令段的 label 置为 -100，包括 pad 位置"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [
@@ -26,19 +52,19 @@
           "options": [
             {
               "key": "A",
-              "text": "din x dout"
+              "text": "d_in x d_out"
             },
             {
               "key": "B",
-              "text": "r x din x dout"
+              "text": "r x d_in x d_out"
             },
             {
               "key": "C",
-              "text": "r x (din + dout)"
+              "text": "r x (d_in + d_out)"
             },
             {
               "key": "D",
-              "text": "(din + dout) / r"
+              "text": "(d_in + d_out) / r"
             }
           ],
           "correct": [

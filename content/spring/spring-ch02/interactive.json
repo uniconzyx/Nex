@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "BeanDefinition 注册与反射实例化（容器骨架）",
-      "body": "Bean 初始化三方式的调用顺序"
+      "body": "prototype 注入 singleton 不是每次新实例"
     },
     "exam": {
       "tag": "考场视角",
@@ -28,6 +28,32 @@
         "销毁：容器关闭时，@PreDestroy → DisposableBean.destroy() → destroy-method。"
       ],
       "file": "01-lifecycle.md"
+    },
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "prototype 注入 singleton 不是每次新实例",
+          "right": "@Autowired ObjectProvider<Proto> provider; 用时 provider.getObject()"
+        },
+        {
+          "id": 2,
+          "left": "@PostConstruct / @PreDestroy 方法必须无参且返回 void、且…",
+          "right": "@PostConstruct void init(){} 且类带 @Component/@@Service 等被扫描"
+        },
+        {
+          "id": 3,
+          "left": "初始化方法抛异常时，半成品 bean 不会走销毁回调",
+          "right": "初始化逻辑用 try/finally 兜底资源，或把易失败步骤推迟到 ApplicationRunner（所有单例就绪后、且异常可被容器统一处理）"
+        },
+        {
+          "id": 4,
+          "left": "BeanPostProcessor.postProcessAfterInitializat…",
+          "right": "两个钩子都必须 return bean;（或返回包装后的代理），不要返回 null"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
     },
     {
       "kind": "boss",

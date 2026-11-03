@@ -98,6 +98,8 @@ const GlobalStyle: React.FC = () => (
 .kmlab .km-scroll::-webkit-scrollbar-thumb{ background:rgba(93,180,229,.35); border-radius:3px; }
 .kmlab .km-scroll::-webkit-scrollbar-track{ background:transparent; }
 @keyframes km-pulse{ 0%,100%{ opacity:.45 } 50%{ opacity:1 } }
+/* 场景条在窄屏换行后，那条竖分隔线会孤零零挂在第一行末尾 —— 直接收掉 */
+@media (max-width: 560px){ .kmlab .km-sb-div{ display:none } }
 `}</style>
 );
 
@@ -246,6 +248,9 @@ export const ScenarioBar: React.FC<{ work: Scenario; exam: Scenario }> = ({ work
         display: 'flex',
         alignItems: 'center',
         gap: 10,
+        // 窄屏（≤420）放不下一行：按钮组固定宽、文案列给 240 的 flex-basis，
+        // 挤不下时整列换到第二行占满宽度，而不是被压成 166px 的窄条
+        flexWrap: 'wrap',
         background: 'rgba(255,255,255,0.52)',
       })}
     >
@@ -287,14 +292,14 @@ export const ScenarioBar: React.FC<{ work: Scenario; exam: Scenario }> = ({ work
         })}
       </div>
 
-      <div style={{ width: 1, height: 26, background: C.line, flex: '0 0 auto' }} />
+      <div className="km-sb-div" style={{ width: 1, height: 26, background: C.line, flex: '0 0 auto' }} />
 
       <motion.div
         key={mode}
         initial={{ opacity: 0, x: 6 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.16 }}
-        style={{ minWidth: 0 }}
+        style={{ minWidth: 0, flex: '1 1 240px' }}
       >
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
             <span
@@ -311,7 +316,11 @@ export const ScenarioBar: React.FC<{ work: Scenario; exam: Scenario }> = ({ work
             >
               {cur.tag}
             </span>
-            <span style={{ fontSize: 13, fontWeight: 500, color: C.slate }}>{cur.head}</span>
+            {/* 场景标题里会带 `header/nav/main/article/aside/footer` 这类无空格长 token，
+                不给 anywhere 会在 420px 下按 min-content 撑出卡片外 */}
+            <span style={{ fontSize: 13, fontWeight: 500, color: C.slate, minWidth: 0, overflowWrap: 'anywhere' }}>
+              {cur.head}
+            </span>
           </div>
         <div style={{ fontSize: 12, color: C.mute, marginTop: 2, lineHeight: 1.5 }}>{cur.body}</div>
       </motion.div>

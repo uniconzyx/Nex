@@ -219,7 +219,7 @@ export const SequenceLine: React.FC<SeqProps> = ({ heading, steps, seed }) => {
   const firstBad = phase === 'bad' ? order.findIndex((v, i) => v !== i) : -1;
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div style={{ position: 'relative', paddingBottom: 54 }}>
       <div style={glass({ padding: '10px 12px', marginBottom: 10, background: 'rgba(255,255,255,0.5)' })}>
         <div style={{ fontSize: 12, color: C.mute, lineHeight: 1.6 }}>
           时序来源：<span style={{ color: C.iceDeep, fontWeight: 500 }}>{heading}</span>
@@ -481,7 +481,7 @@ export const PairLink: React.FC<MatchProps> = ({ pairs, seed, tip }) => {
   const colW = '47%';
 
   return (
-    <motion.div style={{ position: 'relative' }} ref={box} animate={shake}>
+    <motion.div style={{ position: 'relative', paddingBottom: 54 }} ref={box} animate={shake}>
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 6 }}>
         <div style={{ width: colW, fontSize: 11, color: C.coralDeep, letterSpacing: 0.3 }}>出事的写法</div>
         <div style={{ width: colW, fontSize: 11, color: C.mintDeep, letterSpacing: 0.3, textAlign: 'right' }}>
@@ -646,7 +646,7 @@ export const LabBossRaid: React.FC<BossProps> = ({ questions, seed }) => {
   };
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div style={{ position: 'relative', paddingBottom: 54 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
         <div style={{ display: 'flex', gap: 4 }} data-armor={armor}>
           {Array.from({ length: questions.length }, (_, i) => (
@@ -815,7 +815,7 @@ export const CodeFill: React.FC<FillProps> = ({ code, marker, blanks, distractor
   const lines = code.split('\n');
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div style={{ position: 'relative', paddingBottom: 54 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
         <span
           style={{
@@ -953,6 +953,8 @@ const LabStyle: React.FC = () => (
 .kmlab .km-scroll::-webkit-scrollbar-thumb{ background:rgba(93,180,229,.35); border-radius:4px; }
 .kmlab .km-scroll::-webkit-scrollbar-track{ background:transparent; }
 .kmlab, .kmlab *{ box-sizing:border-box; }
+/* 同 CacheDesignLab/GlobalStyle：窄屏场景条换行后隐藏竖分隔线 */
+@media (max-width: 560px){ .kmlab .km-sb-div{ display:none } }
 `}</style>
 );
 
@@ -1057,7 +1059,21 @@ export const InteractiveLab: React.FC<InteractiveLabProps> = ({ data, only }) =>
         <span style={{ fontFamily: MONO, fontSize: 11, color: C.iceDeep, letterSpacing: 0.4 }}>
           {data.chapter.toUpperCase()}
         </span>
-        <span style={{ fontSize: 15, fontWeight: 600, color: C.slate }}>{data.title}</span>
+        {/* 标题里常有 `header/nav/main/section` 这类不含空格的长 token，
+            不给 minWidth:0 + anywhere 会在 420px 下把整页撑出横向滚动条 */}
+        <span
+          style={{
+            fontSize: 15,
+            fontWeight: 600,
+            color: C.slate,
+            minWidth: 0,
+            flex: '1 1 auto',
+            overflowWrap: 'anywhere',
+          }}
+          data-lab-title
+        >
+          {data.title}
+        </span>
         <span style={{ fontSize: 11.5, color: C.mute }}>
           {mods.length} 个模块 · 可点可拖，判定在本地
         </span>

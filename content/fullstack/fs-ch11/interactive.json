@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "分层调用：controller -> service -> repository …",
-      "body": "关于 Spring Boot 的分层依赖方向"
+      "body": "在 Controller 里直接写 SQL / 调 Repository"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "在 Controller 里直接写 SQL / 调 Repository",
+          "right": "Controller 只注入 Service，由 Service 注入 Repository"
+        },
+        {
+          "id": 2,
+          "left": "业务异常被当系统异常处理、堆栈返前端",
+          "right": "区分 BizException（带 code+userMessage，可安全展示）与系统异常（只返「系统繁忙」+记日志，响应体不含 e 的任何内容）"
+        },
+        {
+          "id": 3,
+          "left": "把 Entity 直接当 DTO 序列化返前端",
+          "right": "定义专门的出站 VO/DTO，只含前端该看的字段，在转换层（converter/MapStruct）显式映射；用 @JsonIgnore 兜底隐藏敏感字段"
+        },
+        {
+          "id": 4,
+          "left": "校验写在 service 里而非边界 DTO",
+          "right": "把格式约束放到入站 DTO 的 Jakarta 注解上（@NotNull/@Size/@Pattern），controller 用 @Validated 触发，advice 统一收集 fieldErrors 返回"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [

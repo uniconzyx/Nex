@@ -22,22 +22,22 @@
         {
           "id": 1,
           "left": "同类方法内部自调用绕过代理（最经典）",
-          "right": "把 update() 拆到另一个 Bean 注入调用，或用 AopContext.currentProxy() / 自注入拿到代理再调。"
+          "right": "把 update() 拆到另一个 Bean 注入调用，或用 AopContext.currentProxy() / 自注入拿到代理再调"
         },
         {
           "id": 2,
           "left": "反射异常被 InvocationTargetException 包多层",
-          "right": "捕获后取 e.getCause() 得到真实异常（见 ex03）。"
+          "right": "捕获后取 e.getCause() 得到真实异常（见 ex03）"
         },
         {
           "id": 3,
           "left": "CGLIB 无法代理 final 类 / final、private 方法",
-          "right": "去掉 final，或改用基于接口的 JDK 代理。"
+          "right": "去掉 final，或改用基于接口的 JDK 代理"
         },
         {
           "id": 4,
           "left": "切点写得过宽导致全量拦截",
-          "right": "收窄到具体包/类/方法，或改用 @annotation 注解切点。"
+          "right": "收窄到具体包/类/方法，或改用 @annotation 注解切点"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"

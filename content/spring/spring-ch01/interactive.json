@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "迷你 IoC 容器：容器接管对象装配",
-      "body": "IoC 与 DI 的关系"
+      "body": "字段注入破坏可测试性"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "字段注入破坏可测试性",
+          "right": "强制依赖改用构造器注入，private final Repo repo; 并在构造器上 @Autowired（单构造器时可省略）"
+        },
+        {
+          "id": 2,
+          "left": "扫不到 bean（包不在扫描根包下）",
+          "right": "把启动类放在最外层根包，或用 @ComponentScan(\"com.xxx\") 显式指定基础包"
+        },
+        {
+          "id": 3,
+          "left": "构造器循环依赖启动即崩",
+          "right": "重构拆解依赖（抽接口/搬逻辑），或在一方加 @Lazy 延迟注入打破环"
+        },
+        {
+          "id": 4,
+          "left": "@Component 里的 @Bean 方法互调产生多例",
+          "right": "装配 bean 的配置类标 @Configuration，让 CGLIB 增强保证单例共享"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [

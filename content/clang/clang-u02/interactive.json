@@ -7,7 +7,7 @@
     "work": {
       "tag": "工作现场",
       "head": "malloc 申请一维数组并读写",
-      "body": "哪个函数会清零"
+      "body": "malloc 后不判空"
     },
     "exam": {
       "tag": "考场视角",
@@ -16,6 +16,32 @@
     }
   },
   "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "malloc 后不判空",
+          "right": "分配后立即 if (!p) { /* 处理或向上传播 */ }"
+        },
+        {
+          "id": 2,
+          "left": "realloc 直接赋值给原指针",
+          "right": "void *tmp = realloc(p, n); if (!tmp) { ... } p = tmp;"
+        },
+        {
+          "id": 3,
+          "left": "free 后继续使用（use-after-free）",
+          "right": "free(p); p = NULL;"
+        },
+        {
+          "id": 4,
+          "left": "重复释放（double free）",
+          "right": "释放后立即置 NULL（free(NULL) 是安全的），或明确所有权让释放只发生一次"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
     {
       "kind": "boss",
       "questions": [

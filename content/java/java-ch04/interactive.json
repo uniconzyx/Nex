@@ -22,22 +22,22 @@
         {
           "id": 1,
           "left": "只重写 equals 不重写 hashCode",
-          "right": "用同一组字段成对重写 equals/hashCode，优先 record 或 Objects.hash。"
+          "right": "用同一组字段成对重写 equals/hashCode，优先 record 或 Objects.hash"
         },
         {
           "id": 2,
           "left": "用可变对象做 HashMap 的键",
-          "right": "键必须不可变（String/Integer/record 或 final 字段）。"
+          "right": "键必须不可变（String/Integer/record 或 final 字段）"
         },
         {
           "id": 3,
           "left": "for-each 遍历时调用 list.remove(...)",
-          "right": "用 iterator.remove() 或 removeIf。"
+          "right": "用 iterator.remove() 或 removeIf"
         },
         {
           "id": 4,
           "left": "误以为 LinkedList 比 ArrayList 快",
-          "right": "默认用 ArrayList；只在「已知节点处 O(1) 增删且几乎不随机访问」时用 LinkedList。"
+          "right": "默认用 ArrayList；只在「已知节点处 O(1) 增删且几乎不随机访问」时用 LinkedList"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"

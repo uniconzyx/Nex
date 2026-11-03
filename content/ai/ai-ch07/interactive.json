@@ -22,22 +22,22 @@
         {
           "id": 1,
           "left": "把「Agent」当成「更高级的 Chain」",
-          "right": "Chain 的步骤在编码期写死，Agent 的下一步在运行期由模型依据观察动态决定，且必须有可判定的终止条件。"
+          "right": "Chain 的步骤在编码期写死，Agent 的下一步在运行期由模型依据观察动态决定，且必须有可判定的终止条件"
         },
         {
           "id": 2,
           "left": "没有可判定的终止条件",
-          "right": "终止条件必须是可判定的布尔谓词（如「拿到 final answer」或「达到 maxsteps」），并写进代码而非提示词。"
+          "right": "终止条件必须是可判定的布尔谓词（如「拿到 final answer」或「达到 max_steps」），并写进代码而非提示词"
         },
         {
           "id": 3,
-          "left": "只设 maxsteps 一道熔断",
-          "right": "至少同时设「步数 + 累计 token + 重复动作」三重熔断，任一触发即停止并返回部分结果（见 ex10）。"
+          "left": "只设 max_steps 一道熔断",
+          "right": "至少同时设「步数 + 累计 token + 重复动作」三重熔断，任一触发即停止并返回部分结果（见 ex10）"
         },
         {
           "id": 4,
           "left": "能写工作流却硬上 Agent",
-          "right": "先问「步骤是否事先可枚举」，可枚举就用确定性 DAG。"
+          "right": "先问「步骤是否事先可枚举」，可枚举就用确定性 DAG"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
@@ -114,7 +114,7 @@
             },
             {
               "key": "C",
-              "text": "写操作工具带 idempotencykey，危险工具标记 requiresconfirmation"
+              "text": "写操作工具带 idempotency_key，危险工具标记 requires_confirmation"
             },
             {
               "key": "D",

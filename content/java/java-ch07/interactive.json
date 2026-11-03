@@ -6,7 +6,7 @@
   "scenario": {
     "work": {
       "tag": "工作现场",
-      "head": "六种线程状态实测：NEW / TIMEDWAITING / BLOCKED / W…",
+      "head": "六种线程状态实测：NEW / TIMED_WAITING / BLOCKED / …",
       "body": "把 volatile 当原子变量用"
     },
     "exam": {
@@ -22,22 +22,22 @@
         {
           "id": 1,
           "left": "把 volatile 当原子变量用",
-          "right": "AtomicInteger.incrementAndGet()，或把复合操作放进 synchronized。"
+          "right": "AtomicInteger.incrementAndGet()，或把复合操作放进 synchronized"
         },
         {
           "id": 2,
           "left": "用 Executors.newFixedThreadPool 处理无界任务",
-          "right": "new ThreadPoolExecutor(n, n, 0, MS, new ArrayBlockingQueue<>(1000), factory, handler)。"
+          "right": "new ThreadPoolExecutor(n, n, 0, MS, new ArrayBlockingQueue<>(1000), factory, handler)"
         },
         {
           "id": 3,
           "left": "用 Executors.newCachedThreadPool 处理突发流量",
-          "right": "显式给 max 加上界。"
+          "right": "显式给 max 加上界"
         },
         {
           "id": 4,
           "left": "ReentrantLock 忘记在 finally 中 unlock()",
-          "right": "lock.lock(); try { ... } finally { lock.unlock(); }。"
+          "right": "lock.lock(); try { ... } finally { lock.unlock(); }"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"

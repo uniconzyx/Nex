@@ -22,17 +22,22 @@
         {
           "id": 1,
           "left": "忘记 DELIMITER，过程体被分号切碎",
-          "right": "DELIMITER $$ 定义、END$$ 收尾、最后 DELIMITER ; 恢复。"
+          "right": "DELIMITER $$ 定义、END$$ 收尾、最后 DELIMITER ; 恢复"
         },
         {
           "id": 2,
           "left": "把 OUT/INOUT 的实参写成常量",
-          "right": "CALL p(1, 2, @out); SELECT @out;。"
+          "right": "CALL p(1, 2, @out); SELECT @out;"
         },
         {
           "id": 3,
           "left": "以为「存储过程能防 SQL 注入」",
-          "right": "值用 ? 占位符 + EXECUTE ... USING，标识符（表名/列名/排序方向）走枚举白名单。"
+          "right": "值用 ? 占位符 + EXECUTE ... USING，标识符（表名/列名/排序方向）走枚举白名单"
+        },
+        {
+          "id": 4,
+          "left": "在存储函数里做写操作",
+          "right": "函数只做「给定输入算出一个值」；要改数据用存储过程（显式 CALL）或触发器（由 DML 事件驱动），三者职责别混。"
         }
       ],
       "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
