@@ -1,0 +1,105 @@
+{
+  "chapter": "bd-ch01",
+  "subject": "bigdata",
+  "title": "Hadoop 生态与 HDFS 架构（bd-ch01）",
+  "fingerprint": "2a8f24eda6",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "NameNode 元数据：INode 与块映射",
+      "body": "Secondary NameNode 是 NameNode 的热备"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "HDFS 默认三副本的放置顺序，下列哪项正确？",
+      "body": "bd-ch01 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "Secondary NameNode 是 NameNode 的热备",
+          "right": "把「高可用」与「检查点」两个职责分清，生产环境务必启用 HA，不要用 Secondary NameNode 当备份。"
+        },
+        {
+          "id": 2,
+          "left": "块到 DataNode 的映射持久化在 fsimage 里",
+          "right": "回答「元数据包含哪些内容」时，明确块位置映射是运行时态、非持久化，并由此推出安全模式的存在原因。"
+        },
+        {
+          "id": 3,
+          "left": "三副本放置是「本地 + 同机架 + 跨机架」",
+          "right": "按《Hadoop 权威指南》原话背，别把顺序搞反；并说明为何不全放不同机架（避免写放大）。"
+        },
+        {
+          "id": 4,
+          "left": "HDFS 写数据时客户端同时向三个 DataNode 各发一份",
+          "right": "讲清 pipeline 的「单发多传」与 ACK 回传机制，以及节点失效时剔除并重选的容错流程。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "关于 HDFS 默认副本因子为 3 时的放置策略，哪一项符合官方口径？",
+          "title": "HDFS 默认三副本的放置顺序，下列哪项正确？",
+          "options": [
+            {
+              "key": "A",
+              "text": "第1副本本地，第2副本同机架，第3副本跨机架"
+            },
+            {
+              "key": "B",
+              "text": "第1副本本地，第2副本跨机架，第3副本与第2同机架的另一节点"
+            },
+            {
+              "key": "C",
+              "text": "三副本随机分散在三台机器，不区分机架"
+            },
+            {
+              "key": "D",
+              "text": "第1副本本地，其余两份都放在与第1同机架的不同节点"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "官方策略：第1副本在客户端本地节点；第2副本放在不同机架；第3副本放在与第2同机架的另一节点。第2副本即已跨机架，兼顾容灾与写带宽。"
+        },
+        {
+          "id": "q5",
+          "stem": "NameNode 重启后，集群会先进入安全模式（只读不写），直到满足阈值才自动退出。其根本原因是什么？",
+          "title": "HDFS 刚启动后处于安全模式（Safe Mode），原因是什么？",
+          "options": [
+            {
+              "key": "A",
+              "text": "NameNode 在等待所有 DataNode 全部重启完成"
+            },
+            {
+              "key": "B",
+              "text": "块到 DataNode 的映射需由 DataNode 块报告动态重建，未收齐前数据完整性无法保证"
+            },
+            {
+              "key": "C",
+              "text": "edits 日志损坏需要人工修复"
+            },
+            {
+              "key": "D",
+              "text": "HDFS 默认启动就是只读模式，与状态无关"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "块位置映射不持久化在 fsimage，而是启动后由块报告重建；安全模式是『数据完整性闸门』，待达到最小副本比例的块数达标才退出。"
+        }
+      ]
+    }
+  ]
+}

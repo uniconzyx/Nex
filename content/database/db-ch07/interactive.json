@@ -1,0 +1,110 @@
+{
+  "chapter": "db-ch07",
+  "subject": "database",
+  "title": "备份恢复与权限安全",
+  "fingerprint": "bd4ed766d7",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "sqlite 在线备份（Connection.backup）+ 恢复一致性校验",
+      "body": "关于逻辑备份与物理备份的取舍，下列说法正确的是"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于逻辑备份与物理备份的取舍，下列说法正确的是",
+      "body": "db-ch07 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "sequence",
+      "heading": "二、时间点恢复（PITR）的完整流程",
+      "steps": [
+        "确认全量备份的位点：mysqldump --source-data=2 会在文件头写入",
+        "确定目标时间点：优先用位点（精确），其次用时间戳（好读但边界受事件写入时间影响）。",
+        "截取并重放：mysqlbinlog --start-position/--stop-position",
+        "核对：比对表名集合、行数、内容校验和（本章 examples/ex04 就是这一步的模型）。",
+        "放流量：核对无误后再把写流量切回，并在应用层提示「该时间点之后的数据丢失」。"
+      ],
+      "file": "02-binlog-formats-and-pitr.md"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "db-ch07-ex01",
+          "stem": "某业务库 800 GB，全部使用 InnoDB；业务要求 RTO 不超过 2 小时，并且偶发需要「只恢复其中一张表」。 下面哪一项描述最准确？",
+          "title": "关于逻辑备份与物理备份的取舍，下列说法正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "物理备份体积小、可跨版本恢复，因此应当只做物理备份"
+            },
+            {
+              "key": "B",
+              "text": "逻辑备份便于单表恢复与跨版本迁移，但大库恢复慢；RTO 紧张时应以物理备份为主，同时保留逻辑备份或 binlog 承担单表恢复与 PITR"
+            },
+            {
+              "key": "C",
+              "text": "只要备份命令退出码为 0，就说明备份可用于恢复，无需还原演练"
+            },
+            {
+              "key": "D",
+              "text": "物理备份必须停库（冷备），无法在线执行"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "A 错：物理备份是页/文件级二进制副本，体积大、与版本强相关，跨版本恢复能力差。C 错：退出码 0 只说明命令跑完，是否可恢复必须靠校验（表名集合/行数/校验和）与真实还原演练来证明。D 错：XtraBackup 属于热备路线，通过拷贝期间记录 LSN、拷完用 redo 前滚收敛到一致状态，不需要停库。B 描述了正确的工程取舍：大库 + 紧 RTO 以物理备份为主，逻辑备份/binlog 用于单表恢复与 PITR。"
+        },
+        {
+          "id": "db-ch07-ex02",
+          "stem": "团队需要把 binlog 用于两件事：① 从库复制；② 误删之后把主库恢复到误操作前一秒。 关于 `binlog_format` 与相关配置，下列说法正确的是",
+          "title": "用于时间点恢复（PITR）的 binlog，格式与配置应如何选择",
+          "options": [
+            {
+              "key": "A",
+              "text": "用 STATEMENT 最省空间，且重放结果与原始执行结果一定相同，适合 PITR"
+            },
+            {
+              "key": "B",
+              "text": "用 ROW，重放结果确定、可精确到行；同时应显式配置 binlogexpirelogsseconds（决定能回退多远）与 syncbinlog（决定故障时是否丢事件）"
+            },
+            {
+              "key": "C",
+              "text": "用 MIXED 可以在 STATEMENT 与 ROW 之间按表切换，从而同时获得两者的优点"
+            },
+            {
+              "key": "D",
+              "text": "格式无所谓，只要定期做全量备份就能恢复到任意时间点"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "A 错：STATEMENT 记录语句原文，遇到 NOW()、UUID()、RAND()、无 ORDER BY 的 LIMIT 等非确定性语句时，重放结果可能不同，会造成静默不一致。B 正确：ROW 记录行镜像，重放确定；同时日志保留期决定 PITR 的可回退范围，syncbinlog=1 才能在故障时不丢事件（对应 RPO=0 的诉求）。C 错：MIXED 是「按语句」而非按表切换，且仍需同时理解两种语义。D 错：只有全量备份无法恢复到任意时间点，必须依靠日志区间重放。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "sql",
+      "file": "03-users-and-privileges-least-privilege.md",
+      "code": "-- 建账号（限制来源主机，不用 '%'）\nCREATE USER 'app'@'10.0.0.%' IDENTIFIED BY '<strong-password>';\n\n-- 只授业务库的必要动作\nGRANT SELECT, INSERT, UPDATE, DELETE ON shop.* TO 'app'@'10.0.0.%';\n\n-- 只读报表账号：库级 SELECT + 显式禁止写\nGRANT SELECT ON shop.* TO '‹1›'@'10.0.0.%';\n\n-- 备份账号：备份专用，不给 ALL\nGRANT SELECT, LOCK TABLES, SHOW VIEW, TRIGGER, EVENT, PROCESS, RELOAD\n  ON *.* TO 'backup'@'10.0.0.%';\n\n-- 回收：必须覆盖所有粒度\nREVOKE DELETE ON shop.* FROM 'app'@'10.0.0.%';",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "report",
+          "line": 8
+        }
+      ],
+      "distractors": [
+        "employee",
+        "name"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

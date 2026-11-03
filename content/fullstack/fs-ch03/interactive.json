@@ -1,0 +1,125 @@
+{
+  "chapter": "fs-ch03",
+  "subject": "fullstack",
+  "title": "JavaScript 核心：类型、原型链、DOM 与事件、异步(Promise/async)",
+  "fingerprint": "d08c31594d",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "typeof 对 7 种原始类型与对象/函数的结果",
+      "body": "typeof 对 null 的结果是什么？"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "typeof 对 null 的结果是什么？",
+      "body": "fs-ch03 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "在 JavaScript 中，`typeof null` 的返回值是什么？",
+          "title": "typeof 对 null 的结果是什么？",
+          "options": [
+            {
+              "key": "A",
+              "text": "null"
+            },
+            {
+              "key": "B",
+              "text": "object"
+            },
+            {
+              "key": "C",
+              "text": "undefined"
+            },
+            {
+              "key": "D",
+              "text": "number"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "typeof null 返回 'object' 是历史包袱（初版 32 位 tag 中 null 的低位标识与对象相同），因此不能用于区分 null 与对象。"
+        },
+        {
+          "id": "q1",
+          "stem": "只凭隐式转换规则判断，下列哪个表达式求值为 true？",
+          "title": "下面哪条比较结果为 true？",
+          "options": [
+            {
+              "key": "A",
+              "text": "1 === '1'"
+            },
+            {
+              "key": "B",
+              "text": "null == undefined"
+            },
+            {
+              "key": "C",
+              "text": "NaN === NaN"
+            },
+            {
+              "key": "D",
+              "text": "[] === false"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "null == undefined 为 true 是规范特例；其余：A 严格相等类型不同为 false；C NaN 不等于自身；D 不同类型无转换直接 false。"
+        },
+        {
+          "id": "q4",
+          "stem": "`const obj = { name: 'o', fn() { const g = () => this.name; return g(); } }; obj.fn()` 的返回值是？",
+          "title": "箭头函数里的 this 来自哪里？",
+          "options": [
+            {
+              "key": "A",
+              "text": "undefined（箭头没有 this）"
+            },
+            {
+              "key": "B",
+              "text": "String 'o'（捕获了 fn 的 this 即 obj）"
+            },
+            {
+              "key": "C",
+              "text": "全局对象的 name"
+            },
+            {
+              "key": "D",
+              "text": "运行时报错"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "箭头函数没有自己的 this，取定义时外层词法作用域（fn 调用时的 this=obj）的 this，因此返回 'o'。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "js",
+      "file": "01-types-coercion.md",
+      "code": "const samples = [\n  ['number', 1],\n  ['string', 'a'],\n  ['boolean', true],\n  ['null', null],\n  ['undefined', undefined],\n  ['symbol', Symbol('s')],\n  ['bigint', 10n],\n  ['object', {}],\n  ['array', []],\n  ['function', function(){}],\n];\nfor (const [name, v] of samples) {\n  ‹1›.log(name, '=>', typeof v);\n}",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "console",
+          "line": 14
+        }
+      ],
+      "distractors": [
+        "status",
+        "stringify"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

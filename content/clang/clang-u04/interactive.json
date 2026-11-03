@@ -1,0 +1,98 @@
+{
+  "chapter": "clang-u04",
+  "subject": "clang",
+  "title": "文件 IO 与二进制",
+  "fingerprint": "574363b0e8",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "文本模式：fprintf 写盘再用 fscanf 读回",
+      "body": "fopen 模式的截断行为"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "fopen 模式的截断行为",
+      "body": "clang-u04 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "用 `fopen(\"data.txt\", \"w\")` 打开一个**已存在且非空**的文件，会发生什么？",
+          "title": "fopen 模式的截断行为",
+          "options": [
+            {
+              "key": "A",
+              "text": "在原内容末尾追加"
+            },
+            {
+              "key": "B",
+              "text": "文件被立即截断为 0 字节"
+            },
+            {
+              "key": "C",
+              "text": "打开失败返回 NULL"
+            },
+            {
+              "key": "D",
+              "text": "保留原内容，覆盖式写入"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "w 模式语义是「写 + 若存在则截断为 0」。要保留内容并覆盖应从头写用 r+，要在末尾追加用 a。想「存在则报错」需 POSIX 的 OEXCL。"
+        },
+        {
+          "id": "q4",
+          "stem": "在 Windows 上，用文本模式 `fopen(f,\"w\")` 写入字节序列 `AB 0A CD`（即字符串 \"AB\\nCD\"），再用二进制模式 `\"rb\"` 读回，会得到多少字节？",
+          "title": "文本 vs 二进制模式（Windows 换行陷阱）",
+          "options": [
+            {
+              "key": "A",
+              "text": "5 字节（0A 不变）"
+            },
+            {
+              "key": "B",
+              "text": "6 字节（0A 被扩展为 0D 0A）"
+            },
+            {
+              "key": "C",
+              "text": "4 字节（换行被吞掉）"
+            },
+            {
+              "key": "D",
+              "text": "取决于编译器，标准未规定"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "文本模式写会把 \\n(0A) 翻译成 \\r\\n(0D 0A) 落盘，于是磁盘上 6 字节；二进制读原样读出 6 字节。这正是「二进制数据误用文本模式会损坏」的根因。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "c",
+      "file": "03-error-handling-and-eof.md",
+      "code": "#include <stdio.h>\nint main(void) {\n    FILE *w = fopen(\"e.txt\", \"w\");\n    fputs(\"AB\\n\", w);\n    fclose(w);\n    FILE *r = fopen(\"e.txt\", \"r\");\n    int c; int count = 0;\n    while ((c = ‹1›(r)) != EOF) { count++; }   /* 以读失败为结束 */\n    printf(\"chars read=%d feof=%d\\n\", count, feof(r) ? 1 : 0);\n    fclose(r);\n    return 0;\n}",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "fgetc",
+          "line": 8
+        }
+      ],
+      "distractors": [
+        "head",
+        "init"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

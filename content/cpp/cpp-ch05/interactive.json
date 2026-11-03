@@ -1,0 +1,71 @@
+{
+  "chapter": "cpp-ch05",
+  "subject": "cpp",
+  "title": "类与对象：封装、构造/析构、拷贝与运算符重载",
+  "fingerprint": "0ff1538ddd",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "基本类定义与成员访问",
+      "body": "关于 const 成员函数，正确的是"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于 const 成员函数，正确的是",
+      "body": "cpp-ch05 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "选择**正确**的描述。",
+          "title": "关于 const 成员函数，正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "const 成员函数可以修改成员变量"
+            },
+            {
+              "key": "B",
+              "text": "const 对象只能调用 const 成员函数"
+            },
+            {
+              "key": "C",
+              "text": "成员函数加 const 只影响返回值类型"
+            },
+            {
+              "key": "D",
+              "text": "const 与非 const 版本不能构成重载"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "const 对象的状态不可改，只能调用承诺不改状态的 const 成员函数；const/非 const 成员函数可重载（按对象常量性区分）。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "cpp",
+      "file": "04-class-practical-recipes.md",
+      "code": "class Report {\npublic:\n    int score() const {          // 逻辑上只读\n        ++queryCount_;           // 合法：mutable\n        return ‹1›();        // 合法：只读计算\n    }\n\n    void bump() const {\n        // cache_->dirty = true; // 编译期不报错，但语义上破坏了 const 契约\n    }\n\nprivate:\n    mutable int queryCount_ = 0;\n    struct Cache { bool dirty = false; };\n    Cache* cache_ = nullptr;     // 指针：const 挡不住它指向的对象\n};",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "compute",
+          "line": 5
+        }
+      ],
+      "distractors": [
+        "make",
+        "make_shared"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

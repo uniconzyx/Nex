@@ -1,0 +1,178 @@
+{
+  "chapter": "py-ch05",
+  "subject": "python",
+  "title": "文件与 IO：读写 / 上下文管理器 / 序列化",
+  "fingerprint": "9b2ffdd43d",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "文本模式 vs 二进制模式：字符数与字节数",
+      "body": "不写 encoding"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "open 的 mode 参数语义",
+      "body": "py-ch05 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "不写 encoding",
+          "right": "任何文本文件读写都显式写 encoding=\"utf-8\"。"
+        },
+        {
+          "id": 2,
+          "left": "用文本模式读写二进制内容",
+          "right": "\"rb\" / \"wb\"。"
+        },
+        {
+          "id": 3,
+          "left": "csv 不加 newline=\"\"",
+          "right": "open(..., newline=\"\")。"
+        },
+        {
+          "id": 4,
+          "left": "把 \\ufeff 当成数据",
+          "right": "读 utf-8-sig；排查时先 print(repr(text[:5]))。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "py5-ex01",
+          "stem": "关于 `open(path, mode)`，下列说法**错误**的是？",
+          "title": "open 的 mode 参数语义",
+          "options": [
+            {
+              "key": "A",
+              "text": "encoding 只在文本模式下合法，二进制模式传入会抛 ValueError"
+            },
+            {
+              "key": "B",
+              "text": "'a' 模式在文件不存在时会创建新文件"
+            },
+            {
+              "key": "C",
+              "text": "'a' 模式会把写指针定位到文件开头，从而覆盖原有内容"
+            },
+            {
+              "key": "D",
+              "text": "'r+' 要求文件必须已存在，否则抛 FileNotFoundError"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "区分 w（截断）与 a（末尾追加）是日常最容易踩的坑：用 w 重跑一次任务就把上次结果清空。"
+        },
+        {
+          "id": "py5-ex02",
+          "stem": "自定义上下文管理器的 `__exit__(self, exc_type, exc, tb)` **返回 True** 意味着什么？",
+          "title": "exit 的返回值语义",
+          "options": [
+            {
+              "key": "A",
+              "text": "异常会被重新抛出，返回 True 只是记录日志"
+            },
+            {
+              "key": "B",
+              "text": "异常被视为已处理，不再向外传播"
+            },
+            {
+              "key": "C",
+              "text": "只对 KeyboardInterrupt 生效，其它异常照常抛出"
+            },
+            {
+              "key": "D",
+              "text": "返回 True 是非法的，解释器会抛 TypeError"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "对比 C：细节上返回真值后 traceback 也就丢了，所以吞噬异常要非常克制，通常只吞特定异常类型。"
+        },
+        {
+          "id": "py5-ex07",
+          "stem": "字节串 `b'caf\\xe9 ok'`（本意是 latin-1 的 `café ok`）用 `decode('utf-8', errors='replace')` 再 `encode('utf-8')`，结果是？",
+          "title": "解码错误的不可逆性",
+          "options": [
+            {
+              "key": "A",
+              "text": "可以完整恢复为原来的 b'caf\\xe9 ok'"
+            },
+            {
+              "key": "B",
+              "text": "得到 b'caf\\xef\\xbf\\xbd ok'：\\xe9 已被 U+FFFD 替换，原字节永久丢失"
+            },
+            {
+              "key": "C",
+              "text": "第一步 decode 就会抛 UnicodeDecodeError，因为指定了 errors='replace' 也不生效"
+            },
+            {
+              "key": "D",
+              "text": "得到 UTF-8 编码的 b'café ok'，与原始字节一致"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "所以排错顺序永远是：先确认真实编码（看响应头/文件声明/嗅探），再决定是否用宽松策略；宽松策略只用于「宁可丢几个字也要跑通」的场景。"
+        },
+        {
+          "id": "py5-ex08",
+          "stem": "关于 `f.flush()` 与 `os.fsync(f.fileno())`，正确的是？",
+          "title": "flush 与 fsync 的边界",
+          "options": [
+            {
+              "key": "A",
+              "text": "flush() 已经把数据写到磁盘，进程崩溃或断电都不会丢"
+            },
+            {
+              "key": "B",
+              "text": "flush() 只把数据交给 OS 页缓存（进程崩溃可保、断电不可保）；fsync() 才触发落盘，两者都做才算断电安全"
+            },
+            {
+              "key": "C",
+              "text": "fsync() 只同步元数据，文件内容仍可能丢失"
+            },
+            {
+              "key": "D",
+              "text": "flush() 与 fsync() 是同一件事的两个名字"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "代价是 fsync 要等磁盘，QPS 敏感场景常改成 append + 定期 fsync；数据库的 WAL 就是在这个矛盾上做折中。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "02-context-manager.md",
+      "code": "mgr = open(\"a.txt\")\nf = mgr.__enter__()\ntry:\n    data = f.read()\nexcept BaseException:\n    if not mgr.__exit__(*sys.‹1›()):\n        raise                 # __exit__ 返回假值 -> 异常继续往外抛\nelse:\n    mgr.__exit__(None, None, None)",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "exc_info",
+          "line": 6
+        }
+      ],
+      "distractors": [
+        "default_rng",
+        "defaultdict"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

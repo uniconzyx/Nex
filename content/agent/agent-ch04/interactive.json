@@ -1,0 +1,124 @@
+{
+  "chapter": "agent-ch04",
+  "subject": "agent",
+  "title": "需求洞察：用户故事与 AI 产品画布",
+  "fingerprint": "ed1e992ee6",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "用户故事评分器：把「写得好不好」拆成四个可检查的维度",
+      "body": "把技术演示当需求验证，Demo 惊艳、上线没人用"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "RICE 打分时 Confidence 的正确口径是什么",
+      "body": "agent-ch04 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "把技术演示当需求验证，Demo 惊艳、上线没人用",
+          "right": "立项前先回答三个问题：用户现在怎么完成这个任务（访谈 ≥5 人）、 这个任务多久发生一次（频次决定值不值得做）、做错了会怎样（代价决定兜底等级）。"
+        },
+        {
+          "id": 2,
+          "left": "用户故事缺验收条件，AI 项目永远停在 Demo 期",
+          "right": "每条故事配 ≥2 条 Given-When-Then，每条必须含阈值 + 测量对象 + 失败判定 （例：500 条分层测试集上宏平均 F1 ≥ 0.90，低于 0.85 自动转人工）。"
+        },
+        {
+          "id": 3,
+          "left": "什么都上 Agent：把分类做成生成，一次请求贵 20 倍还不稳",
+          "right": "立项时走一遍决策树——输出能否由固定规则无歧义判定？是封闭标签集且有 标注样本吗？需要多步执行、调用工具、维护状态吗？三个「否」就用不到 Agent。"
+        },
+        {
+          "id": 4,
+          "left": "RICE 打分全员拍脑袋，一次会议让优先级整体翻转",
+          "right": "每个维度固定口径并写进模板（Reach=季度活跃用户数、Confidence 按调研程度 分 0.5/0.8/1.0 三档且必须附证据）；对 Top1 输出「排序稳定区间」——置信度下调多少 会被超过；"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "团队用 RICE 排期，四个需求打分如下（R= Reach，I= Impact，C= Confidence，E= Effort/人周）。哪种打法符合 RICE 的正规定义与工程口径？ | 需求 | R | I | C | E | |---|---|---|---|---| | 甲 | 8000 | 2 | 80 | 3 | | 乙 | 5000 | 2 | 0.8 | 3 |",
+          "title": "RICE 打分时 Confidence 的正确口径是什么",
+          "options": [
+            {
+              "key": "A",
+              "text": "甲的打法对：Confidence 用百分制 0~100，甲乙可比"
+            },
+            {
+              "key": "B",
+              "text": "乙的打法对：Confidence 是 0~1 小数（0.5/0.8/1.0 三档），且必须附调研证据；甲用 80 会让分数虚增 80 倍，破坏可比性"
+            },
+            {
+              "key": "C",
+              "text": "Confidence 填 1 表示团队很有信心，能提高优先级，应该尽量填大"
+            },
+            {
+              "key": "D",
+              "text": "Confidence 与 Effort 都在分母方向，填小都能提高分数，可以互相替代"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "考点：RICE 四维度的口径统一与 Confidence 的 0~1 小数制。"
+        },
+        {
+          "id": "q1",
+          "stem": "下面四条 AI 功能的验收条件，只有一条同时含「阈值 + 测量对象 + 失败判定」。它是：",
+          "title": "哪条验收条件是可测的",
+          "options": [
+            {
+              "key": "A",
+              "text": "回答要友好且专业，用户满意度明显提升"
+            },
+            {
+              "key": "B",
+              "text": "识别要准确，争取达到行业先进水平"
+            },
+            {
+              "key": "C",
+              "text": "在 500 条分层测试集上宏平均 F1 ≥ 0.90 且单类召回 ≥ 0.85；连续两天低于 0.85 时自动切换为拒答 + 转人工"
+            },
+            {
+              "key": "D",
+              "text": "响应要快，不能卡顿，超时要给用户提示"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "考点：验收条件 = 阈值 + 测量对象 + 失败判定，三者缺一即不可测。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "01-user-story-and-scope.md",
+      "code": "def ‹1›(rule_ok: bool, labeled: bool, needs_tool: bool) -> str:\n    if rule_ok:\n        return \"规则\"\n    if labeled:\n        return \"分类\"\n    if needs_tool:\n        return \"Agent\"\n    return \"生成\"",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "fit_tier",
+          "line": 1
+        }
+      ],
+      "distractors": [
+        "setdefault",
+        "sha256"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

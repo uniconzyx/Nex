@@ -1,0 +1,76 @@
+{
+  "chapter": "cpp-ch02",
+  "subject": "cpp",
+  "title": "函数：声明/定义、重载、默认参数与 lambda",
+  "fingerprint": "1d9be9aad0",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "函数定义与调用",
+      "body": "关于函数重载，正确的是"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于函数重载，正确的是",
+      "body": "cpp-ch02 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "选择**正确**的描述。",
+          "title": "关于函数重载，正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "仅返回类型不同的两个同名函数可以重载"
+            },
+            {
+              "key": "B",
+              "text": "重载决议优先精确匹配，其次类型提升，再标准转换"
+            },
+            {
+              "key": "C",
+              "text": "默认参数可不连续地从任意位置开始"
+            },
+            {
+              "key": "D",
+              "text": "函数声明可以写多次，定义也可以写多次"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "重载看参数列表不看返回类型；默认参数须从右连续；定义只能一处。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "cpp",
+      "file": "03-lambda-captures.md",
+      "code": "#include <functional>\n#include <iostream>\n#include <vector>\n\nint main() {\n    int total = 0;\n    std::vector<int> v{1, 2, 3};\n\n    auto by_ref  = [&total](int x) { total += x; };\n    auto by_val  = [total](int) ‹1› { return ++total; };   // 改的是副本\n\n    for (int x : v) by_ref(x);\n    std::cout << \"after_ref=\" << total << \"\\n\";       // 6\n\n    std::cout << \"copy=\" << by_val(0) << \" \" << by_val(0) << \"\\n\";  // 7 8\n    std::cout << \"total_unchanged=\" << total << \"\\n\";               // 6\n\n    int (*fp)(int) = [](int x) { return x * x; };     // 无捕获 → 函数指针\n    std::cout << \"fp=\" << fp(5) << \"\\n\";\n\n    std::‹2›<int(int)> erased = [base = total](int x) { return base + x; };\n    std::cout << \"erased=\" << erased(10) << \"\\n\";\n}",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "mutable",
+          "line": 10
+        },
+        {
+          "id": "b2",
+          "answer": "function",
+          "line": 21
+        }
+      ],
+      "distractors": [
+        "move",
+        "mutex"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "chapter": "cpp-ch01",
+  "subject": "cpp",
+  "title": "C++ 基础语法",
+  "fingerprint": "dbe58fb658",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "引用交换两个数",
+      "body": "关于引用，下列说法正确的是"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于引用，下列说法正确的是",
+      "body": "cpp-ch01 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "选择所有**正确**的描述。",
+          "title": "关于引用，下列说法正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "引用定义后可以不初始化"
+            },
+            {
+              "key": "B",
+              "text": "引用一旦绑定就不能改绑其他对象"
+            },
+            {
+              "key": "C",
+              "text": "const 引用可以绑定到临时对象"
+            },
+            {
+              "key": "D",
+              "text": "引用占用独立的存储空间，与指针完全相同"
+            }
+          ],
+          "correct": [
+            "B",
+            "C"
+          ],
+          "explain": "引用必须初始化且不可改绑；const 引用可延长临时对象生命周期；引用是否占存储是实现细节，语义上是别名。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "cpp",
+      "file": "01-types-and-references.md",
+      "code": "#include <iostream>\n#include <string>\n\nstruct Probe {\n    std::string tag;\n    explicit Probe(std::string t) : tag(std::move(t)) { std::cout << \"ctor \" << tag << \"\\n\"; }\n    ~Probe() { std::cout << \"dtor \" << tag << \"\\n\"; }\n};\n\nint main() {\n    int a = 1;\n    int& r = a;          // r 是 a 的别名\n    r = 2;\n    std::cout << \"a=\" << a << \" ‹1›=\" << (&a == &r) << \"\\n\";\n\n    {\n        const Probe& p = Probe(\"temp\");   // 生命周期延长到此作用域结束\n        std::cout << \"inside \" << p.tag << \"\\n\";\n    }                                     // 此处才 dtor\n\n    std::cout << \"unsigned_cmp=\" << (-1 > 0u) << \"\\n\";\n    std::cout << \"int_div=\" << (7 / 2) << \" real_div=\" << (7 / 2.0) << \"\\n\";\n}",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "same_addr",
+          "line": 14
+        }
+      ],
+      "distractors": [
+        "operator",
+        "override"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

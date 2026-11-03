@@ -1,0 +1,162 @@
+{
+  "chapter": "ml-ch09",
+  "subject": "ml",
+  "title": "支持向量机与核方法",
+  "fingerprint": "16711ec4e5",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "函数间隔、几何间隔与间隔宽度",
+      "body": "把函数间隔当几何间隔用"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "函数间隔与几何间隔",
+      "body": "ml-ch09 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "sequence",
+      "heading": "🧑‍💻 程序员的判断流程图",
+      "steps": [
+        "$n$ 是否 > 5 万？是 → 放弃核 SVM。",
+        "是否需要概率/特征重要性？是 → 逻辑回归或 GBDT。",
+        "是否小样本（$n<2000$）且非线性？是 → 核 SVM（RBF），配嵌套 CV。",
+        "以上都不是 → 先跑线性 SVM 与 GBDT 两个基线，谁好用谁。"
+      ],
+      "file": "03-svm-in-practice.md"
+    },
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "把函数间隔当几何间隔用",
+          "right": "先规范化 $yi(w^\\top xi+b)\\ge1$，再用 $2/\\|w\\|$ 算间隔宽度。"
+        },
+        {
+          "id": 2,
+          "left": "以为可以不规范化就说「最小化 $\\|w\\|$」",
+          "right": "保留 $yi(w^\\top xi+b)\\ge1$ 这条尺度规范约束。"
+        },
+        {
+          "id": 3,
+          "left": "认为「支持向量 = 误分类样本」",
+          "right": "用 KKT 的 $yif(xi)$ 与 $\\alphai$ 同时判断。"
+        },
+        {
+          "id": 4,
+          "left": "以为 $w$ 只能是原始形式、核 SVM 也算得出 $w$",
+          "right": "核 SVM 不要试图取 coef。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "关于 SVM 的两种间隔，下列说法正确的是：",
+          "title": "函数间隔与几何间隔",
+          "options": [
+            {
+              "key": "A",
+              "text": "函数间隔与几何间隔总是相等"
+            },
+            {
+              "key": "B",
+              "text": "几何间隔会随 $w$ 的缩放而同比变化"
+            },
+            {
+              "key": "C",
+              "text": "函数间隔可被缩放改变，几何间隔才是真实距离"
+            },
+            {
+              "key": "D",
+              "text": "SVM 的最小化目标是直接最小化几何间隔"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "尺度规范化是「最大化间隔 ⇔ 最小化 ||w||²」得以成立的前提。"
+        },
+        {
+          "id": "q1",
+          "stem": "软间隔 SVM 的对偶约束是 $0\\le\\alpha_i\\le C$。上界 $C$ 的来源是：",
+          "title": "对偶问题里 0 ≤ α ≤ C 从哪来",
+          "options": [
+            {
+              "key": "A",
+              "text": "由样本数量 $n$ 决定"
+            },
+            {
+              "key": "B",
+              "text": "由 $\\partial L/\\partial\\xii=0$ 得 $\\alphai+\\mui=C$，且 $\\mui\\ge0$"
+            },
+            {
+              "key": "C",
+              "text": "由等式约束 $\\sumi\\alphaiyi=0$ 推出"
+            },
+            {
+              "key": "D",
+              "text": "由核函数的选择决定"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "α 的上界来自「ξ 的乘子非负」这一条 KKT 条件，是软间隔推导的必经一步。"
+        },
+        {
+          "id": "q2",
+          "stem": "核技巧之所以能不显式构造 $\\phi$ 就完成升维，最关键的原因是：",
+          "title": "核技巧能成立的关键前提",
+          "options": [
+            {
+              "key": "A",
+              "text": "原始问题中的 $w$ 可以直接用核函数表示"
+            },
+            {
+              "key": "B",
+              "text": "核函数必须是无限维的"
+            },
+            {
+              "key": "C",
+              "text": "对偶问题与决策函数中数据只以内积出现，可整体替换为核"
+            },
+            {
+              "key": "D",
+              "text": "因为核函数一定满足 Mercer 条件"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "「只用内积」是核化的前提，这也是为什么要先推到对偶形式。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "02-kernel-methods.md",
+      "code": "import numpy as np\n\nrng = np.random.default_rng(0)\nX = rng.normal(size=(5, 2))\n\ndef poly(A, B, d=2):\n    return (A @ B.T + 1) ** d          # K(x, y) = (x·y + 1)^d\n\ndef feat(X):                            # 显式映射：1, x1, x2, x1², x2², √2·x1x2\n    x1, x2 = X[:, 0], X[:, 1]\n    return np.‹1›([np.ones(len(X)), x1, x2, x1 ** 2, x2 ** 2,\n                            np.sqrt(2) * x1 * x2])\n\nZ = feat(X)\nprint(\"poly 核 == 显式特征内积:\", np.allclose(poly(X, X), Z @ Z.T))   # True\nprint(\"特征维度:\", Z.shape[1])                                         # 6，而原维度是 2\n\ndef rbf(A, B, gamma=1.0):\n    d2 = ((A[:, None, :] - B[None, :, :]) ** 2).sum(-1)\n    return np.exp(-gamma * d2)          # 隐式映射到无限维，K 仍然只是 n×n 矩阵\n\nK = rbf(X, X)\nprint(\"RBF 对称:\", np.allclose(K, K.T))\nprint(\"对角为 1:\", np.allclose(np.diag(K), 1.0))\nprint(\"半正定:\", np.linalg.eigvalsh(K).min() >= -1e-12)",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "column_stack",
+          "line": 11
+        }
+      ],
+      "distractors": [
+        "max_batch",
+        "max_norm"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

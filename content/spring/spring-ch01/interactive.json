@@ -1,0 +1,98 @@
+{
+  "chapter": "spring-ch01",
+  "subject": "spring",
+  "title": "Spring 核心：IoC 容器与依赖注入",
+  "fingerprint": "5e8ba5c986",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "迷你 IoC 容器：容器接管对象装配",
+      "body": "IoC 与 DI 的关系"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "IoC 与 DI 的关系",
+      "body": "spring-ch01 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "下列关于 IoC（控制反转）与 DI（依赖注入）的说法，正确的是？",
+          "title": "IoC 与 DI 的关系",
+          "options": [
+            {
+              "key": "A",
+              "text": "IoC 是依赖注入的一种具体实现"
+            },
+            {
+              "key": "B",
+              "text": "DI 是 IoC 最常用的实现手段，容器把依赖注入对象"
+            },
+            {
+              "key": "C",
+              "text": "IoC 等同于工厂模式"
+            },
+            {
+              "key": "D",
+              "text": "DI 与 IoC 是完全无关的两个概念"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "IoC 是设计原则（把创建/装配控制权交给容器），DI 是实现手段；工厂模式只是 IoC 的载体之一，不能等同。"
+        },
+        {
+          "id": "q5",
+          "stem": "关于 BeanFactory 与 ApplicationContext，下列说法准确的是？",
+          "title": "BeanFactory 与 ApplicationContext 差异",
+          "options": [
+            {
+              "key": "A",
+              "text": "ApplicationContext 运行期获取单例比 BeanFactory 快"
+            },
+            {
+              "key": "B",
+              "text": "ApplicationContext 继承 BeanFactory，并在启动期预实例化单例，额外提供国际化/事件/AOP 等能力"
+            },
+            {
+              "key": "C",
+              "text": "BeanFactory 也默认提供 ApplicationEvent 事件发布"
+            },
+            {
+              "key": "D",
+              "text": "两者没有任何关系，是独立的两套容器"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "ApplicationContext 是 BeanFactory 的超集，预实例化单例（fail-fast）、提供国际化/事件/AOP；运行期单例获取两者都是 Map 查找，无快慢之分。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "java",
+      "file": "01-ioc-basics.md",
+      "code": "import java.util.*;\n\npublic class Ex01 {\n    static class Container {\n        private final Map<String, Object> beans = new HashMap<>();\n        public void register(String name, Object bean) { beans.put(name, bean); }\n        public Object get(String name) { return beans.get(name); }\n    }\n    static class Service { String hello() { return \"hello from service\"; } }\n    static class Controller {\n        private final Service service;\n        Controller(Service s) { this.service = s; }\n        String handle() { return service.hello(); }\n    }\n    public static void main(String[] args) {\n        Container c = new Container();\n        // 容器负责装配：程序员不再手动 new Controller(new Service())\n        Service s = new Service();\n        c.register(\"service\", s);\n        c.register(\"controller\", new Controller(s));\n        Controller ctrl = (Controller) c.get(\"controller\");\n        System.out.println(ctrl.handle());\n        System.out.println(\"controller ‹1›: \" + (ctrl != null));\n    }\n}",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "wired",
+          "line": 23
+        }
+      ],
+      "distractors": [
+        "implements",
+        "init"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

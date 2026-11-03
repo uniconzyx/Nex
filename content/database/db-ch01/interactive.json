@@ -1,0 +1,119 @@
+{
+  "chapter": "db-ch01",
+  "subject": "database",
+  "title": "关系模型与 SQL 基础（DDL/DML/SELECT/JOIN/聚合/分组）",
+  "fingerprint": "cd81c61cc5",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "DDL 建表与 DML 插入部门表",
+      "body": "UPDATE/DELETE 忘写 WHERE"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于 INNER JOIN 与 LEFT JOIN 的描述，正确的是",
+      "body": "db-ch01 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "sequence",
+      "heading": "五、UPDATE / DELETE 的安全流程",
+      "steps": [
+        "先 SELECT 同条件，确认行数与内容符合预期。",
+        "加 LIMIT 试跑（UPDATE ... WHERE ... LIMIT 10）。",
+        "生产环境开启 SQLSAFEUPDATES（禁止无 WHERE 或无 LIMIT 的更新）。",
+        "大表分批处理（按主键范围切批），避免长事务与主从延迟。",
+        "DELETE 之后 TRUNCATE 不能反悔，重要数据先 CREATE TABLE ... AS SELECT 备份。"
+      ],
+      "file": "02-sql-ddl-dml.md"
+    },
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "UPDATE/DELETE 忘写 WHERE",
+          "right": "先 SELECT 确认影响集，再补 WHERE empid=...；生产建议开启 SQLSAFEUPDATES。"
+        },
+        {
+          "id": 2,
+          "left": "SELECT 非聚合列未进 GROUP BY",
+          "right": "把 name 加入 GROUP BY，或对 name 使用 MAX()/GROUPCONCAT() 等聚合。"
+        },
+        {
+          "id": 3,
+          "left": "用 WHERE 过滤聚合结果",
+          "right": "改用 HAVING AVG(salary) > 7000。"
+        },
+        {
+          "id": 4,
+          "left": "混淆 INNER JOIN 与 LEFT JOIN 的 NULL 语义",
+          "right": "把右表过滤条件放进 ON（如 ON e.deptid=d.deptid AND d.location='Beijing'），或显式 WHERE right.col IS NULL 查找「无匹配」。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "给定 `employee`（emp_id, dept_id）与 `department`（dept_id, dept_name），选择**正确**的描述。",
+          "title": "关于 INNER JOIN 与 LEFT JOIN 的描述，正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "LEFT JOIN 只返回两表都能匹配上的行"
+            },
+            {
+              "key": "B",
+              "text": "INNER JOIN 只返回两表都能匹配上的行；LEFT JOIN 还会保留左表中无匹配的行（右表列补 NULL）"
+            },
+            {
+              "key": "C",
+              "text": "LEFT JOIN 与 RIGHT JOIN 在交换两表顺序后结果一定相同"
+            },
+            {
+              "key": "D",
+              "text": "JOIN 默认是 LEFT JOIN"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "INNER JOIN 取交集；LEFT JOIN 以左表为基准保留全部左表行，右表无匹配补 NULL；JOIN 默认是 INNER JOIN。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "sql",
+      "file": "02-sql-ddl-dml.md",
+      "code": "-- 插入（显式列名最稳妥：加列后旧语句不会错位）\nINSERT INTO employee (emp_id, name, ‹1›, salary)\nVALUES (1, 'Alice', 10, 6000.00),\n       (2, 'Bob',   20, 8000.00);\n\n-- 从查询结果插入\nINSERT INTO ‹2› (emp_id, name)\nSELECT emp_id, name FROM employee WHERE ‹3› = 0;\n\n-- 更新（务必带 WHERE）\nUPDATE employee SET salary = 6500.00 WHERE emp_id = 1;\n\n-- 删除（务必带 WHERE）\nDELETE FROM employee WHERE emp_id = 2;",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "dept_id",
+          "line": 2
+        },
+        {
+          "id": "b2",
+          "answer": "employee_archive",
+          "line": 7
+        },
+        {
+          "id": "b3",
+          "answer": "status",
+          "line": 8
+        }
+      ],
+      "distractors": [
+        "amount",
+        "orders"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "chapter": "java-ch02",
+  "subject": "java",
+  "title": "类与对象：封装、构造器、this",
+  "fingerprint": "1c7aa377a5",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "类与对象：定义、实例化与字段访问",
+      "body": "关于 Java 对象内存布局与参数传递，正确的是"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于 Java 对象内存布局与参数传递，正确的是",
+      "body": "java-ch02 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "sequence",
+      "heading": "二、实现机制：重载、this() 链与初始化顺序",
+      "steps": [
+        "父类静态字段/静态块（按文本序）",
+        "子类静态字段/静态块",
+        "父类实例字段初始化 + 实例块（按文本序）",
+        "子类实例字段初始化 + 实例块",
+        "子类构造器体"
+      ],
+      "file": "03-constructor-and-this.md"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "选择**正确**的描述。",
+          "title": "关于 Java 对象内存布局与参数传递，正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "对象字段直接存储在局部变量所在的栈帧中"
+            },
+            {
+              "key": "B",
+              "text": "Java 对象参数传递是引用传递，方法内重指形参会影响调用方"
+            },
+            {
+              "key": "C",
+              "text": "Java 只有值传递：对象参数传递的是引用的副本，方法内重指形参不影响调用方，但修改对象状态可见"
+            },
+            {
+              "key": "D",
+              "text": "this 是可在方法内做指针运算的地址"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "对象在堆上，局部变量只存引用；Java 严格值传递，对象参数传的是引用副本，故方法内重指形参不影响调用方，但改对象状态可见；this 是引用不可运算。"
+        },
+        {
+          "id": "q4",
+          "stem": "选择**正确**的描述。",
+          "title": "关于 equals 与 hashCode 契约，正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "只重写 equals 不重写 hashCode 不影响 HashMap 使用"
+            },
+            {
+              "key": "B",
+              "text": "相等的对象必须有相等的 hashCode；但 hashCode 相等的两个对象不一定 equals"
+            },
+            {
+              "key": "C",
+              "text": "hashCode 相等则 equals 一定为 true"
+            },
+            {
+              "key": "D",
+              "text": "重写了 equals 后无需关心 hashCode"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "契约只要求相等⇒同码，不要求同码⇒相等（允许哈希冲突）；只重写 equals 会让 HashMap 找不到相等对象。"
+        }
+      ]
+    }
+  ]
+}

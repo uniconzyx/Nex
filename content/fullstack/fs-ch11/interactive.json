@@ -1,0 +1,125 @@
+{
+  "chapter": "fs-ch11",
+  "subject": "fullstack",
+  "title": "Spring Boot 3 工程骨架：分层边界、异常与校验收口",
+  "fingerprint": "99cf6be6ff",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "分层调用：controller -> service -> repository …",
+      "body": "关于 Spring Boot 的分层依赖方向"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于 Spring Boot 的分层依赖方向",
+      "body": "fs-ch11 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "正确的是",
+          "title": "关于 Spring Boot 的分层依赖方向",
+          "options": [
+            {
+              "key": "A",
+              "text": "Repository 可以依赖 Service，以便复用业务逻辑"
+            },
+            {
+              "key": "B",
+              "text": "依赖方向应单向向下：Controller -> Service -> Repository，反向禁止"
+            },
+            {
+              "key": "C",
+              "text": "Controller 直接调 Repository 没关系，只要能跑通"
+            },
+            {
+              "key": "D",
+              "text": "Service 应当依赖 Controller，因为请求是从 Controller 进来的"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "分层依赖必须单向向下：controller 依赖 service，service 依赖 repository，反向/跨层会破坏抽象、让事务与测试失控。A/C/D 都颠倒了方向，是典型的腐化起点。"
+        },
+        {
+          "id": "q3",
+          "stem": "「用户名长度 2-10、手机号符合正则」这类格式约束，最合理的落点是",
+          "title": "Jakarta 校验应放在哪一层",
+          "options": [
+            {
+              "key": "A",
+              "text": "写在 Service 方法开头的一堆 if 里"
+            },
+            {
+              "key": "B",
+              "text": "写在 Repository 的 SQL 里"
+            },
+            {
+              "key": "C",
+              "text": "写在入站 DTO 的 Jakarta 注解上，由 Controller 的 @Validated 触发"
+            },
+            {
+              "key": "D",
+              "text": "写在 Vue 前端，后端不用管"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "格式类约束是「边界问题」，应声明式地写在入站 DTO 的注解（@NotNull/@Size/@Pattern）上，controller 用 @Validated 触发，框架在进方法体前统一校验并收集 fieldErrors。写在 service 的 if 会重复且绕过统一错误结构；只放前端则后端失去防护。"
+        },
+        {
+          "id": "q7",
+          "stem": "关于二者在统一异常里的处理，正确的是",
+          "title": "业务异常 vs 系统异常的处理",
+          "options": [
+            {
+              "key": "A",
+              "text": "都直接把 e.getMessage() 返给前端，方便排查"
+            },
+            {
+              "key": "B",
+              "text": "业务异常给业务码+友好提示（可展示），系统异常只返中性提示并记日志（藏堆栈）"
+            },
+            {
+              "key": "C",
+              "text": "系统异常比业务异常严重，所以也不该记录日志"
+            },
+            {
+              "key": "D",
+              "text": "二者应该合并成一个异常类，用布尔字段区分"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "业务异常是「请求在业务上不成立」，可预期、要给用户友好提示+业务码；系统异常是故障，用户看不懂也不该看，前端只收「系统繁忙」，真实原因写服务端日志供排查。A 泄露敏感信息；C 说反了（系统异常更要记日志告警）；D 把两类语义混在一起，不利分类处理。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "java",
+      "file": "02-unified-exception.md",
+      "code": "@RestControllerAdvice\npublic class GlobalExceptionHandler {\n    @ExceptionHandler(BizException.class)\n    public ResponseEntity<ApiError> handleBiz(BizException e) {\n        return ResponseEntity.status(e.‹1›())\n               .body(new ApiError(e.getCode(), e.getMessage()));\n    }\n    @ExceptionHandler(Exception.class)\n    public ResponseEntity<ApiError> handleOther(Exception e) {\n        // 系统异常：只给模糊提示，详情记日志\n        log.error(\"unexpected\", e);\n        return ResponseEntity.status(500)\n               .body(new ApiError(5000, \"系统繁忙，请稍后再试\"));\n    }\n}",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "getHttpStatus",
+          "line": 5
+        }
+      ],
+      "distractors": [
+        "implements",
+        "instanceof"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

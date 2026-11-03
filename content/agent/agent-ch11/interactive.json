@@ -1,0 +1,134 @@
+{
+  "chapter": "agent-ch11",
+  "subject": "agent",
+  "title": "Agent 系统开发：工具、记忆、规划与多智能体",
+  "fingerprint": "0523c6f099",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "ReAct 循环的状态机实现与 trace 回放",
+      "body": "重试 + 无幂等键 = 重复副作用：客户一晚上收到三封同样的告警邮件"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "给工具调用设计幂等键，哪种做法最合理",
+      "body": "agent-ch11 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "重试 + 无幂等键 = 重复副作用：客户一晚上收到三封同样的告警邮件",
+          "right": "副作用工具强制带幂等键（工具名 + 归一化参数哈希，nonce/时间戳剔除）， 命中已有键返回首次结果（示例 ex03 的判据）；重试策略按工具分级—— 查询类可重试、写操作必须幂等后才可重试；"
+        },
+        {
+          "id": 2,
+          "left": "参数校验靠「猜」：模型缺了必填字段，代码用默认值补上，邮件发给错的人",
+          "right": "校验器把错误分三类，只对「语义等价」类做修复； 不可猜的一律拒发，并把 {\"error\": \"缺必填字段 to\"} 回喂给模型重试 （这是 ReAct 的 observation，见 ex01）；"
+        },
+        {
+          "id": 3,
+          "left": "上下文静默超窗：任务后半程「不报错但什么都不做」",
+          "right": "入口做 token 预算门（历史 + 系统提示 + 输出预算 ≤ 窗口）， 超预算走压缩：旧轮次摘要化（保留键值事实）+ 最近 K 轮原文（ex04 的对比判据）；"
+        },
+        {
+          "id": 4,
+          "left": "无进展检测缺位：Agent 空转一整夜，早上看到 $500 的账单",
+          "right": "三检测器配齐且默认开启：步数上限、预算上限（token/金额双口径）、 无进展检测（最近 K 个 observation 相似度 ≥ 0.9 或连续 K 步无 action）；"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "一个 Agent 的重试 middleware 要保证「同一语义的工具调用被重放多次，副作用只发生一次」。以下哪种幂等键设计最合理？",
+          "title": "给工具调用设计幂等键，哪种做法最合理",
+          "options": [
+            {
+              "key": "A",
+              "text": "用 md5(json.dumps(args))，参数原样序列化后直接哈希"
+            },
+            {
+              "key": "B",
+              "text": "用 hash(工具名 + 剔除 nonce/ts 后按键名排序归一化的参数)"
+            },
+            {
+              "key": "C",
+              "text": "用「时间戳 + 工具名」当键，保证每次调用的键都不同"
+            },
+            {
+              "key": "D",
+              "text": "在工具内部维护一个调用计数器，按第几次调用编号"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "考点：幂等键的构造原则——语义等价归一化、顺序无关、剔除易变字段。"
+        },
+        {
+          "id": "q1",
+          "stem": "在 40 个「第 1/5/9 轮随机植入订单号事实、第 10 轮末轮追问」的任务上（token 口径：约 2 字符 1 token），四种策略实测结果如下，哪项描述正确？ | 策略 | 成功率 | 平均 token | |---|---|---| | 全量上下文 | 100% | 133 | | 滑动窗口 k=4 | 30% | 48 | | 摘要压缩（抽取全部关键事实） | 100% | 62 | | 摘要压缩（只摘要最近一块） | 62.5% | 58 |",
+          "title": "40 个「早期植入、末轮追问」任务上，四种上下文策略的实测对比",
+          "options": [
+            {
+              "key": "A",
+              "text": "全量上下文成功率最高且 token 最少，应作为默认策略"
+            },
+            {
+              "key": "B",
+              "text": "滑动窗口 token 最省，但它把早期植入的事实整体挤出窗口，末轮追问类任务几乎全灭"
+            },
+            {
+              "key": "C",
+              "text": "两种摘要压缩都是无损的，token 差异来自摘要长度，与覆盖范围无关"
+            },
+            {
+              "key": "D",
+              "text": "四种策略成功率相同，压缩只影响速度、不影响正确性"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "考点：上下文压缩不是无损操作，「丢什么」比「省多少」更决定成败。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "01-tools-and-mcp.md",
+      "code": "def ‹1›(call, schemas):\n    errs = []\n    if call[\"tool\"] not in schemas:            # 工具白名单：防幻觉工具名\n        return [f\"未知工具 {call['tool']}\"]\n    spec = schemas[call[\"tool\"]]\n    for f in spec[\"‹2›\"]:                 # 必填缺失不可猜 → 拒发\n        if f not in call[\"args\"]:\n            errs.append(f\"缺必填 {f}\")\n    for f, v in call[\"args\"].items():\n        rule = spec[\"properties\"].get(f)\n        if rule is None:\n            errs.append(f\"未知字段 {f}\")\n        elif rule[\"‹3›\"] == \"string\" and not isinstance(v, str):\n            errs.append(f\"{f} 应为 string\")\n        if \"enum\" in rule and v not in rule[\"enum\"]:\n            errs.append(f\"{f}={v} 不在枚举 {rule['enum']}\")\n    return errs",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "validate",
+          "line": 1
+        },
+        {
+          "id": "b2",
+          "answer": "required",
+          "line": 6
+        },
+        {
+          "id": "b3",
+          "answer": "type",
+          "line": 13
+        }
+      ],
+      "distractors": [
+        "confidence",
+        "consumer"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

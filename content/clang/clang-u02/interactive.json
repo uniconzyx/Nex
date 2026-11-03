@@ -1,0 +1,98 @@
+{
+  "chapter": "clang-u02",
+  "subject": "clang",
+  "title": "内存与动态分配（malloc/free）",
+  "fingerprint": "85a3defe98",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "malloc 申请一维数组并读写",
+      "body": "哪个函数会清零"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "哪个函数会清零",
+      "body": "clang-u02 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "下列哪个函数申请的内存**保证初始化为 0**？",
+          "title": "哪个函数会清零",
+          "options": [
+            {
+              "key": "A",
+              "text": "malloc"
+            },
+            {
+              "key": "B",
+              "text": "calloc"
+            },
+            {
+              "key": "C",
+              "text": "realloc"
+            },
+            {
+              "key": "D",
+              "text": "alloca"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "只有 calloc 保证清零。malloc 与 realloc 都是脏数据（realloc 原数据保留、新增部分不清零）；alloca 是栈分配，内容不确定。"
+        },
+        {
+          "id": "q3",
+          "stem": "关于 `free(p)`，下列说法**正确**的是？",
+          "title": "free 之后的行为",
+          "options": [
+            {
+              "key": "A",
+              "text": "free 会置 p 为 NULL"
+            },
+            {
+              "key": "B",
+              "text": "free(NULL) 会崩溃"
+            },
+            {
+              "key": "C",
+              "text": "free 后 p 的值不变，是悬垂指针"
+            },
+            {
+              "key": "D",
+              "text": "free 会立即归还内存给内核"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "free 只把块交还分配器，不修改传入的指针变量（C 是值传递），所以 p 成为悬垂指针。free(NULL) 是标准规定的安全空操作。小块 free 后内存进入分配器的空闲链表，通常不归还内核，所以进程 RSS 不下降是正常的。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "c",
+      "file": "03-leaks-and-tooling.md",
+      "code": "int f(void) {\n    char *buf = malloc(1024);\n    if (‹1›()) {\n        return -1;          /* ❌ buf 泄漏 */\n    }\n    free(buf);\n    return 0;\n}",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "some_error",
+          "line": 3
+        }
+      ],
+      "distractors": [
+        "memcpy",
+        "single"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

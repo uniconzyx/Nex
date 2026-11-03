@@ -1,0 +1,124 @@
+{
+  "chapter": "agent-ch13",
+  "subject": "agent",
+  "title": "前沿技术追踪：建立自己的信息过滤系统",
+  "fingerprint": "d22d4987c8",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "信息源分层：四层来源的「可信度 × 时效 × 相关度」打分与排序",
+      "body": "「全都要读」策略第三周崩溃：没有止损的信息订阅等于自我欺骗"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "同一条「重大发布」在四个信息层级、不同天数下的打分排序",
+      "body": "agent-ch13 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "「全都要读」策略第三周崩溃：没有止损的信息订阅等于自我欺骗",
+          "right": "给每遍设硬性时间盒（10 / 30 / 120 分钟）与明确的「继续/止损」阈值； 每周固定预算（如 4 小时），先分配预算再订阅来源，超预算的来源进「稍后读」 而不是「本周读」。第一遍只读标题摘要结论，闹钟响就停。"
+        },
+        {
+          "id": 2,
+          "left": "拿社区热帖当结论依据：三手信息没有溯源，错了你都不知道错在哪",
+          "right": "任何进入选型/复现决策的结论，必须溯源到 L1/L2 原文（论文或官方博客）， 社区信息只作「线索」；打分排序时层级权重 0.5，时效权重仅 0.3—— 层级差是时效追不回来的（示例 ex01 的量化口径）。"
+        },
+        {
+          "id": 3,
+          "left": "复现直接缩样还不报方差：把噪声当差距，花三天「修」一个不存在的 bug",
+          "right": "裁剪顺序先缩步数、再缩参、最后才缩样；必须缩样时跑 5 个种子 报「均值 ± 标准差」，先判断差距是否超出噪声带再谈归因（示例 ex04 的判据）。"
+        },
+        {
+          "id": 4,
+          "left": "指标口径没对齐就宣布「复现失败」：macro/micro 混用、验证集当测试集",
+          "right": "跑分前逐项打勾对齐清单；先用「同一预测、两种口径」验证评测代码本身 （如 macro/micro 在同一输出上各算一遍）；复现脚本的参数化里把 「评测口径」做成显式开关，归因表才能拆到这一层。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "某打分公式为 `score = 0.5·credibility + 0.3·freshness + 0.2·relevance`，其中 `freshness = 0.5^(days/14)`（半衰期 14 天）。两条信息：甲是 60 天前发表的 L1 顶会论文（credibility=0.95，relevance=0.8）；乙是当天刷屏的 L4 社区热帖（credibility=0.40，relevance=0.6）。下列哪一项判断正确？",
+          "title": "同一条「重大发布」在四个信息层级、不同天数下的打分排序",
+          "options": [
+            {
+              "key": "A",
+              "text": "乙的分数高于甲，因为热帖当天发布，时效项满分"
+            },
+            {
+              "key": "B",
+              "text": "甲的分数（约 0.650）仍高于乙（约 0.606），可信度权重 0.5 大于时效权重 0.3，层级差不是时效能追回来的"
+            },
+            {
+              "key": "C",
+              "text": "甲和乙分数必然相同，因为公式里三个权重相加为 1"
+            },
+            {
+              "key": "D",
+              "text": "乙的 relevance 更低但 credibility 差距更大，所以乙分数一定更高"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "考点：加权打分公式的代入计算与「层级优先于时效」的过滤直觉。"
+        },
+        {
+          "id": "q2",
+          "stem": "某论文用 100 万训练样本报出测试准确率 94.5%（多次实验均值）。你在单机上把训练样本缩到 1 万复现，得到 91.2%。关于这两个数字的关系，下列哪一项分析**最合理**？",
+          "title": "训练样本从 100 万缩到 1 万，复现指标的噪声会怎么变",
+          "options": [
+            {
+              "key": "A",
+              "text": "一定是你抄错了论文超参，指标差异只能来自实现 bug"
+            },
+            {
+              "key": "B",
+              "text": "缩样后估计量的标准误约放大 10 倍（1/√N 效应），单次跑分的噪声可能就有几个点，应先判断差距是否超出噪声带再谈归因"
+            },
+            {
+              "key": "C",
+              "text": "样本越少准确率必然越高，因为小数据集更好拟合"
+            },
+            {
+              "key": "D",
+              "text": "只要固定随机种子，缩样复现的指标就应该和原文一致，不一致就是论文造假"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "考点：样本量与估计方差的 1/√N 关系、噪声带先于归因的判断纪律。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "02-minimal-reproduction.md",
+      "code": "import numpy as np\n\ndef make_data(rng, n, d=32, flip=0.05, noise=0.7):\n    \"\"\"四簇 XOR：类0 = (±2,0)，类1 = (0,±2)——线性不可分但簇结构明确。\"\"\"\n    y = rng.integers(0, 2, n)\n    offs = np.array([[2.,0.],[-2.,0.],[0.,2.],[0.,-2.]])\n    X = rng.normal(size=(n, d))\n    X[:, :2] = offs[y * 2 + rng.integers(0, 2, n)] + rng.normal(scale=noise, size=(n, 2))\n    return X, np.where(rng.random(n) < flip, 1 - y, y)\n\ndef train_mlp(rng, n, hidden=8, epochs=100, d=32, lr=0.01):\n    \"\"\"one-hidden-layer MLP + 全批量 Adam，返回固定测试集上的准确率。\"\"\"\n    X, y = make_data(rng, n, d)\n    W1 = rng.normal(0, np.sqrt(2/d), size=(d, hidden)); b1 = np.zeros(hidden)\n    W2 = rng.normal(0, np.sqrt(2/hidden), size=(hidden,)); b2 = 0.0\n    ps = [W1, b1, W2, b2]; ms = [np.zeros_like(p) for p in ps]; vs = [np.zeros_like(p) for p in ps]\n    for t in range(1, epochs + 1):\n        H = np.maximum(0, X @ W1 + b1)\n        P = 1 / (1 + np.exp(-(H @ W2 + b2)))\n        G = (P - y) / n\n        dH = np.outer(G, W2) * (H > 0)\n        for p, g, m, v in zip(ps, [X.T @ dH, dH.sum(0), H.T @ G, G.sum()], ms, vs):\n            m[...] = 0.9*m + 0.1*g; v[...] = 0.999*v + 0.001*g*g\n            p -= lr * (m/(1-0.9**t)) / (np.sqrt(v/(1-0.999**t)) + 1e-8)\n    Xte, yte = TEST\n    Pte = 1 / (1 + np.exp(-(np.maximum(0, Xte @ W1 + b1) @ W2 + b2)))\n    return float((((Pte > 0.5).‹1›(int)) == yte).mean())\n\nTEST = make_data(np.random.default_rng(999), 1000)   # 固定测试集\nfor n in (200, 1000, 2000):                          # 5 个种子报均值±标准差\n    accs = [train_mlp(np.random.default_rng(s), n) for s in range(5)]\n    print(f\"训练 N={n:5d}: 平均准确率 {np.mean(accs):.4f}，跨种子标准差 {np.std(accs):.4f}\")\n# 训练 N=  200: 平均准确率 0.5960，跨种子标准差 0.0291\n# 训练 N= 1000: 平均准确率 0.8518，跨种子标准差 0.0106\n# 训练 N= 2000: 平均准确率 0.8832，跨种子标准差 0.0023",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "astype",
+          "line": 27
+        }
+      ],
+      "distractors": [
+        "done",
+        "dtype"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

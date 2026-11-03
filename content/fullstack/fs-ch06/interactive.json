@@ -1,0 +1,103 @@
+{
+  "chapter": "fs-ch06",
+  "subject": "fullstack",
+  "title": "用户认证 / JWT / 鉴权",
+  "fingerprint": "0951560d3a",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "JWT 三段结构与 base64url 编解码（Node 内置 Buffer）",
+      "body": "401 与 403 的语义边界"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "401 与 403 的语义边界",
+      "body": "fs-ch06 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "fs-ch06-ex01",
+          "stem": "一个已登录用户（token 合法）请求 `DELETE /articles/42`，但缺少 `article:delete` 权限。服务端应返回哪个状态码，为什么？",
+          "title": "401 与 403 的语义边界",
+          "options": [
+            {
+              "key": "A",
+              "text": "401，因为用户无权执行该操作"
+            },
+            {
+              "key": "B",
+              "text": "403，因为凭证有效但授权不足"
+            },
+            {
+              "key": "C",
+              "text": "400，因为请求非法"
+            },
+            {
+              "key": "D",
+              "text": "500，因为服务端无法处理"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "401 Unauthorized 的真实含义是「未认证」（缺或坏的凭证，须带 WWW-Authenticate）；403 Forbidden 才是「已认证但无权」。本例凭证合法、仅权限不足，故为 403。本章 ex11 实跑 validbutnoperm status=403。"
+        },
+        {
+          "id": "fs-ch06-ex02",
+          "stem": "关于 Session + Cookie 与 JWT 的对比，下列说法正确的是：",
+          "title": "Session 与 JWT 在「主动失效 / 水平扩展」上的取舍",
+          "options": [
+            {
+              "key": "A",
+              "text": "JWT 天然支持服务端即时撤销，Session 不行"
+            },
+            {
+              "key": "B",
+              "text": "Session 可即时撤销但需共享会话存储，JWT 无需共享状态但无法主动失效"
+            },
+            {
+              "key": "C",
+              "text": "两者都把状态存在客户端，因此都能水平扩展"
+            },
+            {
+              "key": "D",
+              "text": "JWT 的内容是加密的，所以可以安全地存放敏感信息"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "Session 状态在服务端，撤销即时，但多实例要共享存储（Redis）或粘性会话；JWT 状态在客户端（自包含），验签即可横向扩展，但签发后到 exp 之前无法主动失效（缓解见 concept/03）。C 错在 Session 状态不在客户端；D 错在 JWT 只是 base64url 编码，不是加密。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "js",
+      "file": "05-jwt-in-practice.md",
+      "code": "// 令牌版本号：用户改密码/封禁时 +1，旧令牌全部作废（不用逐条存黑名单）\nasync function issueTokens(user, store) {\n  const tokenVersion = await store.getTokenVersion(user.id);\n  const access = sign({ sub: user.id, name: user.nickname, tv: tokenVersion });\n  const refresh = sign({ sub: user.id, kind: 'refresh', tv: tokenVersion }, { expiresIn: '30d' });\n  // 刷新令牌只存哈希，落库/Redis\n  await store.saveRefreshHash(user.id, hash(refresh));\n  return { access, refresh };\n}\n\nasync function authenticate(req, store) {\n  const claims = verify(req.headers.authorization?.replace('Bearer ', '') || req.cookies.access);\n  const user = await store.findById(claims.sub);\n  if (!user || user.‹1›) throw new Error('user invalid');\n  const current = await store.getTokenVersion(user.id);\n  if (current !== claims.tv) throw new Error('‹2› revoked');   // 改密/登出后失效\n  return user;\n}",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "disabled",
+          "line": 14
+        },
+        {
+          "id": "b2",
+          "answer": "token",
+          "line": 16
+        }
+      ],
+      "distractors": [
+        "data",
+        "error"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

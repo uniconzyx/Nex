@@ -1,0 +1,152 @@
+{
+  "chapter": "cpp-ch20",
+  "subject": "cpp",
+  "title": "综合项目与面试冲刺：系统设计、代码规范与复盘",
+  "fingerprint": "e14837fea9",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "迷你 vector：容量倍增策略与 reserve",
+      "body": "对 std::vector 调用 reserve(n) 之后，下列哪项一定成立？"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "对 std::vector 调用 reserve(n) 之后，下列哪项一定成立？",
+      "body": "cpp-ch20 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "cpp20-q1",
+          "stem": "已知 `std::vector<int> v; v.reserve(100);`，随后 `auto* p = v.data();` 并执行若干次 `push_back`。关于 `p` 与 `capacity`，哪项正确？",
+          "title": "对 std::vector 调用 reserve(n) 之后，下列哪项一定成立？",
+          "options": [
+            {
+              "key": "A",
+              "text": "capacity() 恒为 100，p 始终有效"
+            },
+            {
+              "key": "B",
+              "text": "size() 不超过 100 时 p 有效；一旦扩容，旧内存被释放，p 悬空"
+            },
+            {
+              "key": "C",
+              "text": "reserve 之后 p 永远有效，因为 vector 不再搬移内存"
+            },
+            {
+              "key": "D",
+              "text": "reserve(n) 会把 size() 也设为 n，因此 p 指向已构造的元素"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "reserve(n) 只保证 capacity()>=n，不保证地址不变；一旦 size 超过已分配容量触发扩容，data() 指向的旧内存被释放，p 悬空。对应 ex01。"
+        },
+        {
+          "id": "cpp20-q2",
+          "stem": "对象 A 持有 `shared_ptr<B>`，对象 B 持有 `shared_ptr<A>`，二者无其他外部引用。",
+          "title": "两个对象互相持有对方的 std::sharedptr，会导致什么？",
+          "options": [
+            {
+              "key": "A",
+              "text": "引用计数仍能归零，两个对象都正常析构"
+            },
+            {
+              "key": "B",
+              "text": "引用计数无法归零，两个对象都不析构，内存泄漏"
+            },
+            {
+              "key": "C",
+              "text": "编译期报错，因为 sharedptr 不允许互相持有"
+            },
+            {
+              "key": "D",
+              "text": "只有先构造的那个对象泄漏，另一个正常析构"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "循环引用使双方 usecount 都 >=1，控制块引用计数无法归零，析构不被调用，内存泄漏。打破手段是改用 weakptr。对应 ex04。"
+        },
+        {
+          "id": "cpp20-q4",
+          "stem": "函数需要返回一个局部构造的大对象 `obj`。",
+          "title": "关于返回局部对象，下列哪种写法最推荐？",
+          "options": [
+            {
+              "key": "A",
+              "text": "return std::move(obj);"
+            },
+            {
+              "key": "B",
+              "text": "return obj;"
+            },
+            {
+              "key": "C",
+              "text": "return std::ref(obj);"
+            },
+            {
+              "key": "D",
+              "text": "return new Obj(obj);"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "return obj;（有名局部对象）允许 NRVO/复制消除，编译器可在调用方栈帧直接构造；return std::move(obj) 反而强制移动构造、丧失 NRVO。对应 ex10。"
+        },
+        {
+          "id": "cpp20-q5",
+          "stem": "```cpp struct Base { ~Base(){} }; struct Derived : Base { int* p = new int[1024]; ~Derived(){ delete[] p; } }; Base* b = new Derived(); delete b; ```",
+          "title": "基类析构函数非 virtual 时，经基类指针 delete 派生对象会发生什么？",
+          "options": [
+            {
+              "key": "A",
+              "text": "编译失败，因为基类析构函数不是 virtual"
+            },
+            {
+              "key": "B",
+              "text": "未定义行为：只调用 Base 的析构，Derived 的析构与 p 的释放都不执行，内存泄漏"
+            },
+            {
+              "key": "C",
+              "text": "运行期抛出 std::badcast"
+            },
+            {
+              "key": "D",
+              "text": "编译器会自动补一个虚析构，行为与加了 virtual 相同"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "非 virtual 析构经基类指针 delete 只调静态类型（Base）的析构，Derived 部分不被析构，p 泄漏。类若会被继承并经基类指针释放，析构必须 virtual。对应 ex11。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "cpp",
+      "file": "06-project-interview-practical-recipes.md",
+      "code": "template <typename T>\nvoid Vector<T>::push_back(const T& v) {\n    if (size_ == cap_) {\n        T* p = allocator_.allocate(cap_ ? cap_ * 2 : 1);\n        for (‹1› i = 0; i < size_; ++i) p[i] = std::move(data_[i]);  // ← 可能抛异常\n        allocator_.deallocate(data_, cap_);\n        data_ = p;\n        cap_ = cap_ ? cap_ * 2 : 1;\n    }\n    new (data_ + size_) T(v);      // ← 这一步抛异常，容器状态已破坏\n    ++size_;\n}",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "size_t",
+          "line": 5
+        }
+      ],
+      "distractors": [
+        "constexpr",
+        "copy"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

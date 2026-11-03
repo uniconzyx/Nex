@@ -1,0 +1,79 @@
+{
+  "chapter": "py-ch06",
+  "subject": "python",
+  "title": "正则与文本处理：re / 分组 / 替换",
+  "fingerprint": "dad633337d",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "match / search / fullmatch 的起点与终点差异（含 IPv…",
+      "body": "re.match 与 re.fullmatch 的行为差异"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "re.match 与 re.fullmatch 的行为差异",
+      "body": "py-ch06 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "py6-ex01",
+          "stem": "给定模式 `r\"\\d+\"`，对字符串 `\"abc123\"` 调用 `re.match` 与 `re.fullmatch`，结果分别是什么？",
+          "title": "re.match 与 re.fullmatch 的行为差异",
+          "options": [
+            {
+              "key": "A",
+              "text": "re.match 返回 None，re.fullmatch 也返回 None"
+            },
+            {
+              "key": "B",
+              "text": "re.match 返回 '123'，re.fullmatch 返回 None"
+            },
+            {
+              "key": "C",
+              "text": "re.match 返回 None，re.fullmatch 返回 '123'"
+            },
+            {
+              "key": "D",
+              "text": "两者都返回 '123'"
+            }
+          ],
+          "correct": [
+            "A"
+          ],
+          "explain": "match 只从字符串开头尝试，abc 不以数字开头，所以直接返回 None；fullmatch 还要求整串匹配，同样不满足。若换成 re.search(r\"\\d+\", \"abc123\") 才会命中 123。"
+        },
+        {
+          "id": "py6-ex05",
+          "stem": "下列哪个正则可以被成功编译？",
+          "title": "后行断言的长度约束",
+          "options": [
+            {
+              "key": "A",
+              "text": "(?<=a+)b"
+            },
+            {
+              "key": "B",
+              "text": "(?<=\\d)x"
+            },
+            {
+              "key": "C",
+              "text": "(?<=abc)d"
+            },
+            {
+              "key": "D",
+              "text": "(?<=a|bc)e"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "Python 的 re 要求后行断言（lookbehind）定宽：a+、a、a{1,3} 都是变长，编译即报 look-behind requires fixed-width pattern。只有 (?<=aa) 这类固定长度可用。若确实需要变长，改用分组捕获：re.findall(r\"a+(b)\", s)。"
+        }
+      ]
+    }
+  ]
+}

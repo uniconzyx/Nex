@@ -1,0 +1,183 @@
+{
+  "chapter": "spring-ch07",
+  "subject": "spring",
+  "title": "MyBatis 进阶：动态 SQL、缓存与插件",
+  "fingerprint": "c34f8832e5",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "复刻 <if> 与 <where>：空条件不生成 WHERE，前导 AND 被剔除",
+      "body": "手写 WHERE 1=1 拼接，条件全空时残留悬空 AND/OR"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "<where> 的三条保证：哪一项是错的",
+      "body": "spring-ch07 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "手写 WHERE 1=1 拼接，条件全空时残留悬空 AND/OR",
+          "right": "一律用 <where>（等价于 <trim prefix=\"WHERE\" prefixOverrides=\"AND |OR \">），内容为空时整条子句不生成、非空时自动加 WHERE 并剔除前导 AND/OR。"
+        },
+        {
+          "id": 2,
+          "left": "<trim> 的 prefixOverrides 漏写空格导致修剪失效",
+          "right": "prefixOverrides=\"AND |OR \"（带尾空格），并保证条件片段内部自身完整。"
+        },
+        {
+          "id": 3,
+          "left": "多参数时 <if test> 里直接用属性名，取值恒为 null",
+          "right": "接口方法签名加 @Param(\"name\")，XML 里 <if test=\"name != null and name != ''\">；逻辑与用 and（不是 &&），字符串相等用 eq（不是 ==）。"
+        },
+        {
+          "id": 4,
+          "left": "${} 拼接用户输入造成 SQL 注入，且以为「只是排序」就安全",
+          "right": "值一律 #{}；表名/列名/排序这类结构性位置不得不用 ${} 时，取值必须来自白名单枚举并在 Java 侧校验，禁止用「过滤 -- 和 ;」这类黑名单。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "ex1",
+          "stem": "关于 MyBatis 的 `<where>` 标签，业界总结的四条说法中**有一条是错的**，请选出来。 - A. 内部所有条件都不成立时，`<where>` 整体不生成 `WHERE` 关键字 - B. 内部有内容时，自动加上 `WHERE` 并剔除片段开头多余的 `AND` / `OR` - C. 它等价于 `<trim prefix=\"WHERE\" prefixOverrides=\"AND |OR \">` - D. 它会同时剔除片段**中间**重复出现的 `AND`",
+          "title": "<where> 的三条保证：哪一项是错的",
+          "options": [
+            {
+              "key": "A",
+              "text": "内部所有条件都不成立时，整体不生成 WHERE 关键字"
+            },
+            {
+              "key": "B",
+              "text": "有内容时自动加 WHERE 并剔除开头多余的 AND / OR"
+            },
+            {
+              "key": "C",
+              "text": "等价于 <trim prefix=\"WHERE\" prefixOverrides=\"AND |OR \">"
+            },
+            {
+              "key": "D",
+              "text": "会同时剔除片段中间重复出现的 AND"
+            }
+          ],
+          "correct": [
+            "D"
+          ],
+          "explain": "D 错。TrimSqlNode 的算法是「先拼完整串、再只剪首尾」： startsWith(override) 命中则 substring(length)，尾部由 suffixOverrides 回退，因此 4=4 AND AND name = ? 这种中间残留它管不了（中间多写了 AND 只能靠把每个条件的 AND 写在片段开头来保证局部性）。A/B 是 <where> 的两条核心保证，可视 ex01 的 case2 where broken : false 与 case3 has WHERE : false；C 是它的定义形式，注意 AND |OR 末尾的空格属于匹配内容，写成 AND|…"
+        },
+        {
+          "id": "ex3",
+          "stem": "Mapper 中写： ```xml <select id=\"findByIds\" resultType=\"User\"> SELECT id, name FROM t_user WHERE id IN <foreach collection=\"ids\" item=\"id\" open=\"(\" separator=\",\" close=\")\"> #{id} </foreach> </select> ``` 调用时传入 `List.of()`（空集合），MyBatis 的行为是哪一项？",
+          "title": "<foreach> 传入空集合会发生什么",
+          "options": [
+            {
+              "key": "A",
+              "text": "自动展开成 IN (NULL)，查询正常执行但返回 0 行"
+            },
+            {
+              "key": "B",
+              "text": "<foreach> 不产出任何内容，最终 SQL 是 ... WHERE id IN ()，MySQL 直接报语法错误"
+            },
+            {
+              "key": "C",
+              "text": "外层的 <where> 会识别到空的 IN 子句并自动整条剔除"
+            },
+            {
+              "key": "D",
+              "text": "MyBatis 在参数绑定阶段抛 BindingException 拦截下来"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "<foreach> 只负责把集合展开成占位符列表，不提供空集合保护：open=\"(\" close=\")\" 属于 <foreach> 自身的常量，无论集合是否为空都会输出，于是得到 ... WHERE id IN () —— MySQL 报 You have an error in your SQL syntax（见 ex02 的 empty IN : SELECT FROM tuser WHERE id IN () 与 empty in ok : false）。<where> 管不到它（这里也没有 <where>），MyBatis 更不会提前拦截。修法：Java 侧判空后直接返回空列表，或套…"
+        },
+        {
+          "id": "ex4",
+          "stem": "在同一个 `SqlSession` 内（在 Spring 中即同一个事务内），下列哪种操作**不会**让一级缓存失效？",
+          "title": "一级缓存的失效触发点",
+          "options": [
+            {
+              "key": "A",
+              "text": "在会话内执行任意一条 insert / update / delete（哪怕写的表与本次查询无关）"
+            },
+            {
+              "key": "B",
+              "text": "调用 sqlSession.commit() 或 rollback()"
+            },
+            {
+              "key": "C",
+              "text": "在会话内再执行一次相同 statementId + 相同 SQL + 相同参数的查询"
+            },
+            {
+              "key": "D",
+              "text": "该语句上配置了 flushCache=\"true\""
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "C 是命中路径而不是失效路径：CacheKey 由 statementId + offset + limit + SQL 文本 + 参数列表构成，三者相同即命中（见 ex06 的 s1 select#2 : dbQueries=1 l1Hits=1）。另外三项都会失效：写操作走 BaseExecutor.update() → clearLocalCache()，清空的是整个会话缓存（CacheKey 里没有表名，故无法按表失效）；commit/rollback 同样清；flushCache=\"true\" 是语句级的显式清空（<select> 默认为 false，写语句默认为 true）。注意…"
+        },
+        {
+          "id": "ex6",
+          "stem": "关于 MyBatis 分页插件（以 PageHelper 为代表）的 `count` 查询与生效范围，哪一项说法是**正确的**？",
+          "title": "分页插件：startPage 的生效范围与 count 改写",
+          "options": [
+            {
+              "key": "A",
+              "text": "startPage() 调用后对本次线程随后执行的所有查询都生效，中间穿插其他 mapper 调用也不影响"
+            },
+            {
+              "key": "B",
+              "text": "startPage() 依赖 ThreadLocal 传递分页参数，只对紧随其后的那一次查询生效，中间插入别的查询会让分页落到错误的语句上或直接失效"
+            },
+            {
+              "key": "C",
+              "text": "count 查询一定是对原 SQL 的 select 列直接替换成 count(0)，所以原 SQL 带有 ORDER BY 也完全不影响"
+            },
+            {
+              "key": "D",
+              "text": "对带有 GROUP BY 的原 SQL，直接把列换成 count(0) 得到的就是正确的总记录数"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "B 正确。startPage() 把分页参数放在 ThreadLocal 里，拦截器在下一次 StatementHandler#prepare 处消费它，而它只对「紧随其后」的那一次查询才生效—— 所以调用必须与目标 mapper 查询紧邻（同一方法内、中间不插其他查询）， 中间只要多一次查询就会被提前消费；线程池复用线程时还可能带上一次请求的残余参数，因此规范的写法要在 finally 中 PageHelper.clearPage()。 C/D 都错在 count 改写：对 GROUP BY / DISTINCT / UNION 的复杂 SQL，直接替换列得到的是分组行数而非总记录数，正确…"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "java",
+      "file": "02-hash-vs-dollar-deep.md",
+      "code": "// #{} -> PreparedStatement 的 ?，参数走二进制协议，永不参与 SQL 解析\nString sql = \"SELECT * FROM ‹1› WHERE name = ?\";\ntry (PreparedStatement ps = conn.prepareStatement(sql)) {\n    ps.setString(1, userInput);     // 传 \"a' OR '1'='1\" 也只是个字符串\n    try (ResultSet rs = ps.executeQuery()) { /* ... */ }\n}\n\n// ${} -> 字符串拼接，参数直接改写 SQL 语义\nString bad = \"SELECT * FROM \" + ‹2› + \" WHERE id = ?\";",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "t_user",
+          "line": 2
+        },
+        {
+          "id": "b2",
+          "answer": "tableName",
+          "line": 9
+        }
+      ],
+      "distractors": [
+        "implements",
+        "init"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

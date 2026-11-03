@@ -1,0 +1,146 @@
+{
+  "chapter": "db-ch05",
+  "subject": "database",
+  "title": "存储过程 / 触发器 / 自定义函数",
+  "fingerprint": "ea9e333c38",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "用 Python 值语义模拟存储过程参数模式 IN / OUT / INOUT",
+      "body": "忘记 DELIMITER，过程体被分号切碎"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于存储过程 OUT 参数模式，下列说法正确的是",
+      "body": "db-ch05 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "忘记 DELIMITER，过程体被分号切碎",
+          "right": "DELIMITER $$ 定义、END$$ 收尾、最后 DELIMITER ; 恢复。"
+        },
+        {
+          "id": 2,
+          "left": "把 OUT/INOUT 的实参写成常量",
+          "right": "CALL p(1, 2, @out); SELECT @out;。"
+        },
+        {
+          "id": 3,
+          "left": "以为「存储过程能防 SQL 注入」",
+          "right": "值用 ? 占位符 + EXECUTE ... USING，标识符（表名/列名/排序方向）走枚举白名单。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "存储过程 `p(IN a INT, OUT b INT, INOUT c INT)` 中，关于形参在过程体入口处的状态，正确的是：",
+          "title": "关于存储过程 OUT 参数模式，下列说法正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "b 保留调用者传入的值，过程内可读；c 被置为 NULL"
+            },
+            {
+              "key": "B",
+              "text": "b 在入口被重置为 NULL，只能由过程写回；c 保留调用者传入的初值，可读可写并回传"
+            },
+            {
+              "key": "C",
+              "text": "b 与 c 都必须由调用者传入非空值，否则报错"
+            },
+            {
+              "key": "D",
+              "text": "b 与 c 等价，都是值传递，过程内的修改都不会回传"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "IN 是值传递的只读副本（默认模式，过程内改写不回传）；OUT 在进入过程时被重置为 NULL，只负责把结果带出；INOUT 兼具两者：保留初值、可读可写、最终回传。因此调用端 CALL p(1, @b, @c) 里的 @b、@c 必须是用户变量或局部变量，不能写字面量。"
+        },
+        {
+          "id": "q1",
+          "stem": "定义存储过程时为什么要先写 `DELIMITER $$`？",
+          "title": "关于 DELIMITER，下列说法正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "DELIMITER 是 MySQL 服务器语法，服务器靠它识别复合语句的边界"
+            },
+            {
+              "key": "B",
+              "text": "DELIMITER 是客户端指令（如 mysql 命令行），用于临时改变语句结束符，使 BEGIN...END 内部分号不被误判为语句结束；它不会提交给服务器"
+            },
+            {
+              "key": "C",
+              "text": "DELIMITER 用于设置字符集，与语句边界无关"
+            },
+            {
+              "key": "D",
+              "text": "DELIMITER 只对存储函数无效，存储过程必须用分号收尾"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "客户端默认以 ; 判定「语句结束、可以发送」。BEGIN ... END 内部自带 ;，不加 DELIMITER 会在第一个内部分号处把半截语句发出去，服务器报 ERROR 1064。DELIMITER 是客户端解析约定、不发给服务器，所以「命令行报错、JDBC 可能通过」并不矛盾。定义完成后必须 DELIMITER ; 恢复。"
+        },
+        {
+          "id": "q2",
+          "stem": "在行级触发器中，`NEW` 与 `OLD` 行镜像的可用性正确的是：",
+          "title": "触发器里 NEW / OLD 的可用性",
+          "options": [
+            {
+              "key": "A",
+              "text": "INSERT 两者都可用；DELETE 两者都可用"
+            },
+            {
+              "key": "B",
+              "text": "INSERT 只有 NEW；UPDATE 两者都有；DELETE 只有 OLD"
+            },
+            {
+              "key": "C",
+              "text": "INSERT 只有 OLD；DELETE 只有 NEW"
+            },
+            {
+              "key": "D",
+              "text": "三种事件下 NEW 与 OLD 都始终可用"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "矩阵由「行版本数量」决定：INSERT 引入一个新版本（无旧版本）→ 只有 NEW；DELETE 移除一个旧版本（无新版本）→ 只有 OLD；UPDATE 是新旧替换 → 两者都有。在 DELETE 触发器里引用 NEW.col 会报无定义。另外只有 BEFORE 型触发器可以改写 NEW。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "sql",
+      "file": "01-stored-procedure-and-function.md",
+      "code": "DELIMITER $$\nCREATE PROCEDURE p_add_employee(\n    IN  p_name   VARCHAR(20),\n    IN  p_salary DECIMAL(10,2),\n    OUT p_new_id BIGINT\n)\nBEGIN\n    INSERT INTO ‹1›(name, salary) VALUES (p_name, p_salary);\n    SET p_new_id = LAST_INSERT_ID();\nEND$$\nDELIMITER ;\n\nCALL p_add_employee('Tom', 8000.00, @uid);\nSELECT @uid;",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "employee",
+          "line": 8
+        }
+      ],
+      "distractors": [
+        "amount",
+        "dept_id"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

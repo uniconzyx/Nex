@@ -1,0 +1,98 @@
+{
+  "chapter": "ml-ch08",
+  "subject": "ml",
+  "title": "强化学习：马尔可夫决策过程与 Q-learning",
+  "fingerprint": "254dd1c1c7",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "MDP 五元组：把一个 4×4 网格世界写成矩阵",
+      "body": "下列哪一组元素不构成 MDP 五元组"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "下列哪一组元素不构成 MDP 五元组",
+      "body": "ml-ch08 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "一个（折扣的、有限的）马尔可夫决策过程标准地由五元组定义。下列哪一组里**混进了不属于五元组的元素**：",
+          "title": "下列哪一组元素不构成 MDP 五元组",
+          "options": [
+            {
+              "key": "A",
+              "text": "状态空间 S、动作空间 A、转移核 P、奖励函数 R、折扣因子 γ"
+            },
+            {
+              "key": "B",
+              "text": "状态空间 S、动作空间 A、策略 π、奖励函数 R、折扣因子 γ"
+            },
+            {
+              "key": "C",
+              "text": "状态空间 S、动作空间 A、转移核 P、即时奖励 R、折扣因子 γ"
+            },
+            {
+              "key": "D",
+              "text": "状态空间 S、动作空间 A、转移核 P(s'|s,a)、奖励函数 R(s,a)、折扣因子 γ"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "区分「环境（MDP）」与「决策者（策略）」是 RL 形式化的第一课。"
+        },
+        {
+          "id": "q1",
+          "stem": "对比下面两个方程： ``` (1) V^π(s) = Σ_a π(a|s) [ R(s,a) + γ Σ_{s'} P(s'|s,a) V^π(s') ] (2) V*(s) = max_a [ R(s,a) + γ Σ_{s'} P(s'|s,a) V*(s') ] ``` 关于两者的差别与后果，下列说法**正确**的是：",
+          "title": "Bellman 期望方程与最优方程的唯一结构差别",
+          "options": [
+            {
+              "key": "A",
+              "text": "两者都是线性方程，差别只在右端系数"
+            },
+            {
+              "key": "B",
+              "text": "(1) 是线性算子（可解线性方程组），(2) 因 max 非线性、一般只能迭代"
+            },
+            {
+              "key": "C",
+              "text": "(2) 比 (1) 更容易解析求解，因为 max 消掉了对策略的依赖"
+            },
+            {
+              "key": "D",
+              "text": "两个方程的解都可能不唯一，需要额外条件挑选"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "「一个 max 让问题从线性代数变成泛函分析」是本章核心认知。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "04-rl-snippets.md",
+      "code": "def policy_eval(env, policy, gamma=0.9, theta=1e-6):\n    V = {s: 0.0 for s in [(r, c) for r in range(env.n) for c in range(env.n)]}\n    while True:\n        delta = 0.0\n        for s in V:\n            if s in (env.‹1›, env.trap):\n                continue\n            v = 0.0\n            for a, p in enumerate(policy[s]):\n                if p == 0: continue\n                env.state = s\n                ns, r, _ = env.step(a)\n                v += p * (r + gamma * V[ns])\n            delta = max(delta, abs(v - V[s]))\n            V[s] = v\n        if delta < theta:\n            return V",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "goal",
+          "line": 6
+        }
+      ],
+      "distractors": [
+        "object",
+        "ones"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

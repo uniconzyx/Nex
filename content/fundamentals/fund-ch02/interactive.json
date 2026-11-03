@@ -1,0 +1,71 @@
+{
+  "chapter": "fund-ch02",
+  "subject": "fundamentals",
+  "title": "栈、队列与串",
+  "fingerprint": "74820a12de",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "括号匹配：栈的嵌套校验",
+      "body": "循环队列的判满条件"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "循环队列的判满条件",
+      "body": "fund-ch02 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "循环队列容量为 `cap`，采用「牺牲一个空位」的方案区分空与满。设队首下标为 `front`、队尾（下一个可写入位置）下标为 `rear`，则**队列已满**的条件是？",
+          "title": "循环队列的判满条件",
+          "options": [
+            {
+              "key": "A",
+              "text": "front == rear"
+            },
+            {
+              "key": "B",
+              "text": "(rear + 1) % cap == front"
+            },
+            {
+              "key": "C",
+              "text": "rear == cap - 1"
+            },
+            {
+              "key": "D",
+              "text": "(front + 1) % cap == rear"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "空的条件是 front == rear（两者重合且无元素）。若满也用同一条件就无法区分，所以让队尾永远不追上队首：写入 cap-1 个元素后 (rear+1)%cap == front，此时判满。代价是最多只能存 cap-1 个元素。选项 D 是「只剩一个空位」的镜像写法，方向反了——判满看的是 rear 追 front，不是 front 追 rear。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "05-ds-practical-recipes.md",
+      "code": "# 双端队列存下标，队首始终是当前窗口最大值的下标\nfrom collections import deque\nq = deque()\nfor i, x in enumerate(nums):\n    while q and nums[q[-1]] <= x: q.pop()\n    q.append(i)\n    if q[0] == i - k: q.‹1›()   # 移出窗口\n    if i >= k-1: res.append(nums[q[0]])",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "popleft",
+          "line": 7
+        }
+      ],
+      "distractors": [
+        "commit",
+        "compile"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

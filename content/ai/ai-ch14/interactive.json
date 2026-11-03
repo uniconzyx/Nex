@@ -1,0 +1,81 @@
+{
+  "chapter": "ai-ch14",
+  "subject": "ai",
+  "title": "多模态落地：图文对齐、OCR→VLM 流水线、多模态 RAG、成本与延迟",
+  "fingerprint": "2dc400e8a3",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "余弦相似度跨模态检索：以文搜图 Top-1",
+      "body": "关于投影层与图文对齐"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于投影层与图文对齐",
+      "body": "ai-ch14 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "sequence",
+      "heading": "链路拆解：版面检测 → 文本识别 →",
+      "steps": [
+        "版面检测（layout detection）：检测出文档里的版面块——标题、段落、表格、页脚、印章的位置与",
+        "文本识别（text recognition / OCR）：对每个版面块做 OCR，把图像里的字变成字符串。表格块",
+        "问答/理解（VLM 或直接交给 LLM）：把结构化出来的文字（含版面顺序）喂给 VLM/LLM，回答"
+      ],
+      "file": "02-ocr-vlm-pipeline.md"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q2",
+          "stem": "下列说法正确的是",
+          "title": "关于投影层与图文对齐",
+          "options": [
+            {
+              "key": "A",
+              "text": "图像和文本编码器输出维度相同，因此可以直接算相似度，无需投影层"
+            },
+            {
+              "key": "B",
+              "text": "投影层把图像/文本嵌入映射到同一 hiddendim 空间，旨在抹平模态偏置实现语义对齐"
+            },
+            {
+              "key": "C",
+              "text": "CLIP 训练需要大量「图像包围框」标注才能对齐图文"
+            },
+            {
+              "key": "D",
+              "text": "跨模态检索用点积时不需要归一化，模长不影响排序"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "投影层把异构模态映射到同一空间并抹平模态偏置，是对齐的关键（B 正确）。A 错：维度相同≠语义对齐，仍要投影；C 错：CLIP 用「图文配对」弱监督，不需要包围框标注；D 错：点积会被模长主导，必须先 L2 归一化使点积等价于余弦。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "01-image-text-alignment.md",
+      "code": "import numpy as np\n\ndef l2norm(x):\n    return x / np.‹1›.norm(x, axis=-1, keepdims=True)\n\ndef topk_text_for_image(img_emb, text_embs, k=5):\n    \"\"\"img_emb: (D,)；text_embs: (N, D)；两者都已通过各自的投影层\"\"\"\n    sims = l2norm(text_embs) @ l2norm(img_emb)      # 余弦相似 = 归一化后内积\n    idx = np.argsort(-sims)[:k]\n    return idx, sims[idx]\n\n# 批量检索时不要逐条循环：一次矩阵乘得到 (N_text, N_image) 的相似度矩阵\nsims = l2norm(text_embs) @ l2norm(img_embs).T",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "linalg",
+          "line": 4
+        }
+      ],
+      "distractors": [
+        "time",
+        "timeout"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

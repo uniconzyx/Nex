@@ -1,0 +1,118 @@
+{
+  "chapter": "clang-u07",
+  "subject": "clang",
+  "title": "多文件编译与链接",
+  "fingerprint": "89011e0e1a",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "分离编译：编译单元独立编译后再链接",
+      "body": "把头文件当「公共变量区」"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "编译错误还是链接错误",
+      "body": "clang-u07 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "sequence",
+      "heading": "2. 未定义符号的诊断流程",
+      "steps": [
+        "头文件包含了吗？ —— 若报的是 implicit declaration，问题在编译期，与链接无关。",
+        "对应的 .c 编译了吗、.o 加进链接了吗？ —— 最常被漏掉：只编译了 main.c。",
+        "符号被 static 藏了吗？ —— nm util.o 看是 t（内部链接）还是 T。",
+        "C/C++ 混编的符号名对吗？ —— nm main.o 里是 add 还是 Z3addii。"
+      ],
+      "file": "04-strong-weak-symbols-and-diagnostics.md"
+    },
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "把头文件当「公共变量区」",
+          "right": "头文件写 extern int counter;， 在某一个 .c 里写 int counter = 0;。"
+        },
+        {
+          "id": 2,
+          "left": "用 -Wl,--as-needed 之后发现依赖库没链进来",
+          "right": "确实需要保留时用 -Wl,--no-as-needed 包裹该库，或改成显式 dlopen 而不链接。"
+        },
+        {
+          "id": 3,
+          "left": "认为「链接成功就说明符号都对」",
+          "right": "库与调用方共用同一份头文件，并给 .so 打 SONAME + 版本号。"
+        },
+        {
+          "id": 4,
+          "left": "静态库里的目标文件没被拉进来，初始化代码不执行",
+          "right": "显式引用一个符号（如 extern void forcelink(); forcelink();），或用 -Wl,--whole-archive 强制整库载入。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "下面两个报错分别发生在哪个阶段，根因是什么？ ① `error: implicit declaration of function 'add'` ② `undefined reference to 'add'`",
+          "title": "编译错误还是链接错误",
+          "options": [
+            {
+              "key": "A",
+              "text": "都是链接错误"
+            },
+            {
+              "key": "B",
+              "text": "① 编译错误（缺声明）② 链接错误（缺定义）"
+            },
+            {
+              "key": "C",
+              "text": "① 链接错误（缺声明）② 编译错误（缺定义）"
+            },
+            {
+              "key": "D",
+              "text": "都是编译错误"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "考察对「编译期/链接期职责边界」的理解，是本节最核心的一条线。"
+        },
+        {
+          "id": "q1",
+          "stem": "下列关于 `static` 的说法，**正确**的是（多选）：",
+          "title": "文件作用域 static 与块作用域 static",
+          "options": [
+            {
+              "key": "A",
+              "text": "文件作用域的 static int n; 具有内部链接，其他翻译单元无法引用"
+            },
+            {
+              "key": "B",
+              "text": "块作用域的 static int n; 具有内部链接，跨函数共享"
+            },
+            {
+              "key": "C",
+              "text": "块作用域的 static int n; 具有静态存储期，但无链接"
+            },
+            {
+              "key": "D",
+              "text": "文件作用域的 static 函数无法被本翻译单元以外的代码调用"
+            }
+          ],
+          "correct": [
+            "A",
+            "C",
+            "D"
+          ],
+          "explain": "考察 static 的双重语义（内部链接 vs 静态存储期），极易混淆。"
+        }
+      ]
+    }
+  ]
+}

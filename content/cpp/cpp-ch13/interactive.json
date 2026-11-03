@@ -1,0 +1,97 @@
+{
+  "chapter": "cpp-ch13",
+  "subject": "cpp",
+  "title": "输入/输出与文件：iostream、fstream 与格式化",
+  "fingerprint": "7ec5ea5a8d",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "cin 读取多类型并检查流状态位",
+      "body": "不检查文件是否打开成功"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于 syncwithstdio 与流状态，正确的是",
+      "body": "cpp-ch13 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "不检查文件是否打开成功",
+          "right": "打开后立刻 if (!f) { / 报错 / }。"
+        },
+        {
+          "id": 2,
+          "left": "getline 与 >> 混用残留换行",
+          "right": "混用前 cin.ignore() 丢弃残留换行。"
+        },
+        {
+          "id": 3,
+          "left": "endl 每次都 flush 拖慢 IO",
+          "right": "普通换行用 '\\n'，仅需立刻落盘才 flush/endl。"
+        },
+        {
+          "id": 4,
+          "left": "流状态位未 clear 导致后续全失效",
+          "right": "出错 clear() 再 ignore() 丢弃坏输入，才能继续。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "选择**正确**的描述。",
+          "title": "关于 syncwithstdio 与流状态，正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "std::ios::syncwithstdio(false) 之后仍可安全混用 cin 与 scanf"
+            },
+            {
+              "key": "B",
+              "text": "cin 提取失败后，若不 clear()，后续 cin 操作会继续失败"
+            },
+            {
+              "key": "C",
+              "text": "good() 返回 true 代表一定还没读到文件末尾"
+            },
+            {
+              "key": "D",
+              "text": "setw 是持久状态，设置一次对后续所有字段都生效"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "syncwithstdio(false) 解除 C++ 流与 C stdio 的同步，之后混用顺序无保证，故 A 错；failbit 置位后该流后续提取/插入均为 no-op，必须 clear() 才能恢复，B 对；到达 EOF 时 eof() 与 fail() 常同时为真，good() 为假，C 错；setw 只影响下一次字段，是一次性操纵符，D 错。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "cpp",
+      "file": "03-fstream.md",
+      "code": "#include <iostream>\n#include <fstream>\n#include <string>\nint main() {\n    // 文本写读\n    {\n        std::ofstream out(\"demo.txt\");\n        out << \"hello\\nworld\\n\";           // 文本模式\n    }\n    std::ifstream in(\"demo.txt\");\n    std::string line;\n    int n = 0;\n    while (std::‹1›(in, line)) ++n;     // 正确：读到 EOF 自然结束\n    std::cout << \"文本行数=\" << n << '\\n';\n\n    // 二进制写读一个 int 数组\n    {\n        std::ofstream bout(\"demo.bin\", std::ios::binary);\n        int a[3] = {10, 20, 30};\n        bout.write(reinterpret_cast<const char*>(a), sizeof(a));\n    }\n    std::ifstream bin(\"demo.bin\", std::ios::binary);\n    int b[3];\n    bin.read(reinterpret_cast<char*>(b), sizeof(b));\n    std::cout << \"二进制: \" << b[0] << ' ' << b[1] << ' ' << b[2] << '\\n';\n}",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "getline",
+          "line": 13
+        }
+      ],
+      "distractors": [
+        "forward",
+        "free"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

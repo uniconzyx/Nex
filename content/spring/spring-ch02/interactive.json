@@ -1,0 +1,111 @@
+{
+  "chapter": "spring-ch02",
+  "subject": "spring",
+  "title": "Bean 生命周期与作用域",
+  "fingerprint": "103e37c86f",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "BeanDefinition 注册与反射实例化（容器骨架）",
+      "body": "Bean 初始化三方式的调用顺序"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "Bean 初始化三方式的调用顺序",
+      "body": "spring-ch02 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "sequence",
+      "heading": "一、完整生命周期阶段（中立陈述）",
+      "steps": [
+        "实例化（Instantiation）：反射调用构造器 ctor.newInstance() 得到一个「半成品」对象。",
+        "属性填充（Populate）：按注入方式把依赖 set 进字段/Setter（DI 的核心动作）。",
+        "BeanPostProcessor 前置：所有 BPP 的 postProcessBeforeInitialization 依次执行。",
+        "BeanPostProcessor 后置：postProcessAfterInitialization（AOP 代理常在此生成）。",
+        "就绪使用：bean 进入 singletonObjects 一级缓存，对外提供服务。",
+        "销毁：容器关闭时，@PreDestroy → DisposableBean.destroy() → destroy-method。"
+      ],
+      "file": "01-lifecycle.md"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "关于 `@PostConstruct`、`InitializingBean.afterPropertiesSet()`、`init-method` 的初始化顺序，正确的是？",
+          "title": "Bean 初始化三方式的调用顺序",
+          "options": [
+            {
+              "key": "A",
+              "text": "afterPropertiesSet -> @PostConstruct -> init-method"
+            },
+            {
+              "key": "B",
+              "text": "@PostConstruct -> afterPropertiesSet -> init-method"
+            },
+            {
+              "key": "C",
+              "text": "init-method -> @PostConstruct -> afterPropertiesSet"
+            },
+            {
+              "key": "D",
+              "text": "三者顺序由配置决定，没有固定先后"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "固定顺序：@PostConstruct（BPP 前置阶段）最早，其次 InitializingBean.afterPropertiesSet（invokeInitMethods），最后 init-method（反射调用）。"
+        },
+        {
+          "id": "q2",
+          "stem": "关于 Spring 作用域，下列说法准确的是？",
+          "title": "singleton 与 prototype 的作用域语义",
+          "options": [
+            {
+              "key": "A",
+              "text": "prototype 每次 getBean 新建且容器负责其销毁"
+            },
+            {
+              "key": "B",
+              "text": "singleton 是默认作用域，容器内唯一实例，容器关闭才销毁"
+            },
+            {
+              "key": "C",
+              "text": "request 作用域跨请求共享同一实例"
+            },
+            {
+              "key": "D",
+              "text": "prototype 注入 singleton 后每次使用都拿到新实例"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "singleton 为默认、唯一、容器管销毁；prototype 不缓存不销毁；request 同一请求内共享；prototype 注入 singleton 只在创建时注入一次，之后不变。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "java",
+      "file": "01-lifecycle.md",
+      "code": "import java.util.*;\n\npublic class Main {\n    static class BeanDefinition {\n        String beanName;\n        String className;\n        String scope = \"singleton\";\n        BeanDefinition(String n, String c) { beanName = n; className = c; }\n    }\n\n    static class UserService { UserService() {} String hi() { return \"hi\"; } }\n\n    public static void main(String[] args) throws Exception {\n        Map<String, BeanDefinition> registry = new HashMap<>();\n        registry.put(\"userService\", new BeanDefinition(\"userService\", \"Main$UserService\"));\n        System.out.println(\"registered beans: \" + registry.size());\n        BeanDefinition bd = registry.get(\"userService\");\n        Class<?> cls = Class.forName(bd.className);\n        Object bean = cls.getDeclaredConstructor().newInstance();\n        System.out.println(\"‹1›: \" + (bean != null));\n        System.out.println(\"bean class: \" + bean.getClass().getSimpleName());\n    }\n}",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "instantiated",
+          "line": 20
+        }
+      ],
+      "distractors": [
+        "consumer",
+        "controller"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

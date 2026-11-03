@@ -1,0 +1,183 @@
+{
+  "chapter": "ai-ch07",
+  "subject": "ai",
+  "title": "Agent 开发：工具调用、记忆与多智能体",
+  "fingerprint": "6cd688b3bf",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "ReAct 循环骨架：Thought-Action-Observation（stu…",
+      "body": "把「Agent」当成「更高级的 Chain」"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "Agent 三要素与 ReAct 循环",
+      "body": "ai-ch07 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "把「Agent」当成「更高级的 Chain」",
+          "right": "Chain 的步骤在编码期写死，Agent 的下一步在运行期由模型依据观察动态决定，且必须有可判定的终止条件。"
+        },
+        {
+          "id": 2,
+          "left": "没有可判定的终止条件",
+          "right": "终止条件必须是可判定的布尔谓词（如「拿到 final answer」或「达到 maxsteps」），并写进代码而非提示词。"
+        },
+        {
+          "id": 3,
+          "left": "只设 maxsteps 一道熔断",
+          "right": "至少同时设「步数 + 累计 token + 重复动作」三重熔断，任一触发即停止并返回部分结果（见 ex10）。"
+        },
+        {
+          "id": 4,
+          "left": "能写工作流却硬上 Agent",
+          "right": "先问「步骤是否事先可枚举」，可枚举就用确定性 DAG。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "ai07-q1",
+          "stem": "关于 Agent 的三要素与 ReAct 范式，下列说法正确的是？",
+          "title": "Agent 三要素与 ReAct 循环",
+          "options": [
+            {
+              "key": "A",
+              "text": "只要接入了大模型就是 Agent，不需要工具与循环"
+            },
+            {
+              "key": "B",
+              "text": "三要素是 目标（可判定的终止条件）、工具（动作集合）、循环（观察-思考-行动迭代）；ReAct 的标准循环是 Thought -> Action -> Observation 直到 Final Answer"
+            },
+            {
+              "key": "C",
+              "text": "ReAct 与 CoT 完全等价，都是纯语言推理、不调用任何外部工具"
+            },
+            {
+              "key": "D",
+              "text": "Agent 的终止条件应由模型凭自觉判断，无需写进代码"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "Agent = 目标 + 工具 + 循环；ReAct = Thought/Action/Observation 交替。"
+        },
+        {
+          "id": "ai07-q2",
+          "stem": "团队要实现「读表 -> 校验 -> 写库 -> 发通知」四步固定流程，最合适的架构是？",
+          "title": "四种架构模式的选型判据",
+          "options": [
+            {
+              "key": "A",
+              "text": "自由 ReAct，把控制权完全交给模型以提高灵活性"
+            },
+            {
+              "key": "B",
+              "text": "多智能体辩论，让四个 Agent 分别负责一步"
+            },
+            {
+              "key": "C",
+              "text": "确定性工作流（DAG）：步骤事先可枚举，就不该把控制权交给模型"
+            },
+            {
+              "key": "D",
+              "text": "Plan-Execute 两段式，先让模型生成计划再执行"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "能用工作流就别用 Agent：步骤可枚举即用确定性 DAG。"
+        },
+        {
+          "id": "ai07-q3",
+          "stem": "下列哪一组做法**违反**了工具设计的七条原则？",
+          "title": "工具设计的七条原则",
+          "options": [
+            {
+              "key": "A",
+              "text": "description 写清「仅当用户明确询问天气时调用」，参数 days 限定 1~7"
+            },
+            {
+              "key": "B",
+              "text": "工具返回时把整页 HTML 原样回填上下文，错误时抛裸 KeyError 让模型自己猜"
+            },
+            {
+              "key": "C",
+              "text": "写操作工具带 idempotencykey，危险工具标记 requiresconfirmation"
+            },
+            {
+              "key": "D",
+              "text": "只读工具与写工具分注册、凭据按工具注入"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "返回精简 + 错误可行动 是工具设计的关键红线。"
+        },
+        {
+          "id": "ai07-q4",
+          "stem": "关于 Agent 记忆三层（工作 / 短期 / 长期），下列对应关系正确的是？",
+          "title": "记忆三层的分工",
+          "options": [
+            {
+              "key": "A",
+              "text": "工作记忆存跨会话的用户偏好，长期记忆存当前任务的中间状态"
+            },
+            {
+              "key": "B",
+              "text": "工作记忆 = 当前任务的结构化状态草稿；短期记忆 = 会话消息滑动窗口（溢出压成摘要）；长期记忆 = 跨会话事实，靠检索与遗忘管理"
+            },
+            {
+              "key": "C",
+              "text": "三层都等价于「把历史消息全部拼进上下文窗口」"
+            },
+            {
+              "key": "D",
+              "text": "长期记忆只要不断写入即可，不需要遗忘或去重"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "记忆分层的本质是存储层级：越近越快越小越易失。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "01-agent-loop-react.md",
+      "code": "def react_loop(goal, tools, llm, max_steps=8):\n    \"\"\"ReAct 的最小骨架：想一步、做一步、看结果，再决定下一步。\"\"\"\n    scratch = [f\"目标：{goal}\"]\n    for _ in range(max_steps):\n        d = llm(scratch, tools=tools)        # -> {\"thought\":…, \"action\":…, \"args\":…}\n        if d[\"action\"] == \"‹1›\":\n            return d[\"args\"][\"‹2›\"]\n        obs = tools[d[\"action\"]](**d[\"args\"])\n        scratch += [f\"Thought: {d['thought']}\",\n                    f\"Action: {d['action']}({d['args']})\",\n                    f\"Observation: {obs}\"]\n    raise TimeoutError(\"超过最大步数仍未收敛\")   # 硬上界：没有它会无限试错",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "finish",
+          "line": 6
+        },
+        {
+          "id": "b2",
+          "answer": "answer",
+          "line": 7
+        }
+      ],
+      "distractors": [
+        "collections",
+        "cols"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

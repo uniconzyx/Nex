@@ -1,0 +1,105 @@
+{
+  "chapter": "data-ch02",
+  "subject": "data",
+  "title": "NumPy 进阶：广播、随机与性能",
+  "fingerprint": "24f9b559d5",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "广播规则：从尾维对齐推导 shape",
+      "body": "(3,) 想按列广播到 (3,4) 却报错"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "广播后的 shape 推导",
+      "body": "data-ch02 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "(3,) 想按列广播到 (3,4) 却报错",
+          "right": "在尾部插维：v[:, None]（得 (3,1)）或 v.reshape(3,1)，再参与 (3,4) 运算。"
+        },
+        {
+          "id": 2,
+          "left": "用 np.random.seed 给 defaultrng 设种子",
+          "right": "rng = np.random.defaultrng(seed)，并把 rng 作为显式依赖传入，禁止依赖全局随机态（多线程会互相踩踏）。"
+        },
+        {
+          "id": 3,
+          "left": "asstrided 造出重叠视图后写数据，隔山打牛",
+          "right": "优先用官方封装 slidingwindowview；必须手写时只读不写，或确认无重叠。"
+        },
+        {
+          "id": 4,
+          "left": "按列遍历 C 顺序大数组导致 cache 命中率骤降",
+          "right": "按行遍历，或转 F order，或一次性 A.sum(axis=0)（ufunc 内部已针对布局优化）。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "给定 `A.shape == (2, 1, 3)`、`B.shape == (4, 3)`，执行 `C = A + B`，`C.shape` 是多少？",
+          "title": "广播后的 shape 推导",
+          "options": [
+            {
+              "key": "A",
+              "text": "(2, 1, 3)"
+            },
+            {
+              "key": "B",
+              "text": "(2, 4, 1)"
+            },
+            {
+              "key": "C",
+              "text": "(2, 4, 3)"
+            },
+            {
+              "key": "D",
+              "text": "抛出 ValueError，两者形状不兼容"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "广播对齐方向是「从最后一个维度向前」，这是本章第一性规则。"
+        },
+        {
+          "id": "q5",
+          "stem": "在 NumPy 中（继承 C 语义），下列说法正确的是？",
+          "title": "dtype 溢出与精度",
+          "options": [
+            {
+              "key": "A",
+              "text": "np.int8(127) + np.int8(1) 会抛出 OverflowError"
+            },
+            {
+              "key": "B",
+              "text": "np.uint8(255) + np.int8(1) 结果是 0"
+            },
+            {
+              "key": "C",
+              "text": "对 1e7 个 float32 求和，误差通常可忽略（< 1e-6）"
+            },
+            {
+              "key": "D",
+              "text": "np.float64(1.7e308) 10 结果是 nan"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "dtype 精度与溢出是数值计算岗的高频隐蔽坑。"
+        }
+      ]
+    }
+  ]
+}

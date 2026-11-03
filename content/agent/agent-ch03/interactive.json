@@ -1,0 +1,134 @@
+{
+  "chapter": "agent-ch03",
+  "subject": "agent",
+  "title": "模型接入与 DeepSeek 实操：第一次让程序真的说话",
+  "fingerprint": "63589a3b0b",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "令牌桶限流器：突发流量不是「拒绝」，而是「用容量换平滑」",
+      "body": "流式响应按网络包解析 JSON，解析成功率掉到 70%"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "401、429、503 应该用同一套重试策略吗",
+      "body": "agent-ch03 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "流式响应按网络包解析 JSON，解析成功率掉到 70%",
+          "right": "维护行缓冲（buf += chunk，按 \\n 切行），再维护事件缓冲 （多行 data: 用 \\n 拼接），空行才 dispatch。为跨包场景写单测： 把同一段流按 1/3/7/13 字符切分，断言解析结果一致。"
+        },
+        {
+          "id": 2,
+          "left": "所有错误统一重试 3 次，401 把 300ms 的失败拖成 3 秒",
+          "right": "先分类再重试——鉴权/入参/策略错误快速失败并告警； 429 看 Retry-After；5xx/超时有限次退避；非幂等写操作必须带幂等键才允许重试。"
+        },
+        {
+          "id": 3,
+          "left": "系统提示里塞了时间戳，前缀缓存命中率归零，账单涨 40%",
+          "right": "稳定前缀（角色、规则、工具定义、few-shot）放在最前且不含任何动态字段； 时间、用户名、会话 ID 放到用户消息或末尾。缓存命中率要打点，按 cachedtokens / prompttokens 监控。"
+        },
+        {
+          "id": 4,
+          "left": "用「字符数 ÷ 4」估算中文 token，请求超窗或截断丢关键信息",
+          "right": "中文按「1 字 ≈ 1 token」估并留 15%~20% 余量；请求后用厂商返回的 usage 校准； 截断时系统提示与安全规则固定保留、不参与截断。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "某客户端把所有非 2xx 响应都按「重试 3 次、固定间隔 200ms」处理。下列哪种改法最合理？",
+          "title": "401、429、503 应该用同一套重试策略吗",
+          "options": [
+            {
+              "key": "A",
+              "text": "三类错误都重试 3 次，但把间隔改成指数退避"
+            },
+            {
+              "key": "B",
+              "text": "401 快速失败并告警；429 读取 Retry-After 后等待；503 有限次退避并触发熔断"
+            },
+            {
+              "key": "C",
+              "text": "400 也重试 2 次，因为可能是网络抖动导致参数丢失"
+            },
+            {
+              "key": "D",
+              "text": "所有错误都降级到本地 Ollama，保证有返回"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "考点：可重试性由错误语义决定，不由 HTTP 状态码的「是不是 5xx」单独决定。"
+        },
+        {
+          "id": "q1",
+          "stem": "某客服系统 85% 的请求命中前缀缓存。上线一次改动后，命中率跌到 1% 以下，但请求总量和输出长度都没变。最可能的原因是：",
+          "title": "哪次改动会让前缀缓存命中率从 85% 掉到接近 0",
+          "options": [
+            {
+              "key": "A",
+              "text": "把 few-shot 示例从 4 条精简为 2 条"
+            },
+            {
+              "key": "B",
+              "text": "在 system prompt 的第一行加入 当前时间：{now}"
+            },
+            {
+              "key": "C",
+              "text": "把用户问题从平均 100 字扩展到 300 字"
+            },
+            {
+              "key": "D",
+              "text": "把 maxtokens 从 800 调到 400"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "考点：缓存命中的条件是前缀逐字节稳定，不是「语义相同」。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "01-api-integration.md",
+      "code": "# 启动时校验，缺失就 fail fast，不要等到第一个请求才 401\nimport os\n\ndef ‹1›(env: str) -> str:\n    key = os.environ.get(f\"LLM_API_KEY_{env.upper()}\")\n    if not key or not key.startswith(\"sk-\"):\n        raise RuntimeError(f\"‹2›/invalid key for env={env}\")\n    return key\n\n# 日志里只留指纹\nimport hashlib\ndef ‹3›(key: str) -> str:\n    return hashlib.sha256(key.encode()).hexdigest()[:8]",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "load_key",
+          "line": 4
+        },
+        {
+          "id": "b2",
+          "answer": "missing",
+          "line": 7
+        },
+        {
+          "id": "b3",
+          "answer": "fingerprint",
+          "line": 12
+        }
+      ],
+      "distractors": [
+        "collections",
+        "cols"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

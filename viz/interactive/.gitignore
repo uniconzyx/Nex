@@ -1,3 +1,5 @@
 node_modules/
 dist/
 .shots/
+# 生成物：由 scripts/gen_interactive.py 从 content/**/interactive.json 复制而来
+src/data/labs/

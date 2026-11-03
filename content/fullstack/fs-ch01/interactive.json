@@ -1,0 +1,151 @@
+{
+  "chapter": "fs-ch01",
+  "subject": "fullstack",
+  "title": "Web 工作原理：HTTP 与浏览器-服务器交互",
+  "fingerprint": "2329247b1c",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "URL 的解剖：协议、主机、端口、路径、查询与片段",
+      "body": "用 GET 触发副作用"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "HTTP 方法的安全性与幂等性",
+      "body": "fs-ch01 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "用 GET 触发副作用",
+          "right": "写操作一律用 POST/PUT/PATCH/DELETE。"
+        },
+        {
+          "id": 2,
+          "left": "把错误塞进 200 OK",
+          "right": "状态码表达协议级结果，错误详情放响应体。"
+        },
+        {
+          "id": 3,
+          "left": "302 后被浏览器把 POST 变 GET",
+          "right": "POST 成功后返回 303（POST-Redirect-GET 模式）让客户端用 GET 取结果页。"
+        },
+        {
+          "id": 4,
+          "left": "静态资源不用指纹文件名 + 长强缓存",
+          "right": "内容哈希进文件名（app.3f2a1b.js）+ max-age=1y, immutable，更新时文件名变化即天然失效。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "关于 HTTP 方法的**安全性（safe）**与**幂等性（idempotent）**，下列说法正确的是？",
+          "title": "HTTP 方法的安全性与幂等性",
+          "options": [
+            {
+              "key": "A",
+              "text": "GET 是安全的且幂等的，因此网络超时可以放心重试"
+            },
+            {
+              "key": "B",
+              "text": "POST 是幂等的，重复提交不会产生副作用"
+            },
+            {
+              "key": "C",
+              "text": "PUT 是安全的，因为它只修改资源不创建资源"
+            },
+            {
+              "key": "D",
+              "text": "DELETE 不安全但也不幂等，重试会报错"
+            }
+          ],
+          "correct": [
+            "A"
+          ],
+          "explain": "GET 安全（不改服务端状态）且幂等（执行多次效果相同），因此可被预取、缓存，网络层也可自动重试。 B 错：POST 既不安全也不幂等，重复提交会重复创建，必须靠幂等键去重。 C 错：PUT 不安全（会改变状态），但幂等（同一份内容重复 PUT 结果相同）。 D 错：DELETE 不安全，但幂等——删同一个资源，删一次和删多次的最终状态相同。"
+        },
+        {
+          "id": "q1",
+          "stem": "某站把 `/old` 临时迁移到 `/new`（几周后会迁回），但有工程师写成了 `301`。另一个接口在 POST 成功后返回 `302` 跳到结果页，导致部分客户端把 POST 变成了 GET。下列判断**正确**的是？",
+          "title": "301 / 302 / 307 的差别",
+          "options": [
+            {
+              "key": "A",
+              "text": "写成 301 没问题，301 和 302 只差一个数字"
+            },
+            {
+              "key": "B",
+              "text": "临时迁移应使用 302 或 307；301 会被浏览器长期缓存，难以回滚"
+            },
+            {
+              "key": "C",
+              "text": "302 保证方法不变，问题出在客户端实现有 bug"
+            },
+            {
+              "key": "D",
+              "text": "POST 后应返回 301 以形成 POST-Redirect-GET 模式"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "A 错、B 对：301 是永久重定向，浏览器/CDN 会长期缓存，临时迁移用 301 一旦要迁回极难生效。 C 错：302 在历史实现中允许把 POST 改写为 GET，这不是客户端 bug 而是规范遗留；要保证方法不变必须用 307/308。 D 错：POST-Redirect-GET 模式应返回 303 See Other（明确要求用 GET 取新地址），不是 301。"
+        },
+        {
+          "id": "q2",
+          "stem": "服务端在一个含用户隐私数据的接口上写了 `Cache-Control: no-cache`，认为这样就「不会缓存、数据不会泄露」。这个判断的问题是？",
+          "title": "no-cache 与 no-store 的区别",
+          "options": [
+            {
+              "key": "A",
+              "text": "没问题，no-cache 就是完全不缓存"
+            },
+            {
+              "key": "B",
+              "text": "no-cache 表示「可缓存但每次必须校验」，仍可能被存下来；禁止存储应用 no-store"
+            },
+            {
+              "key": "C",
+              "text": "no-cache 等价于 max-age=0，两者完全一致，写法没错"
+            },
+            {
+              "key": "D",
+              "text": "隐私数据只需把 max-age 设为 0 即可"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "A 错、B 对：no-cache 的语义是「可以缓存，但每次使用前必须向服务端校验」，副本仍会被写入缓存；真正「任何情况下都不存储」是 no-store。 C 错：no-cache 与 max-age=0 语义相近但不等价（前者更强制、不依赖启发式新鲜度）。 D 错：隐私数据不仅要禁存储，还应配合 private（避免共享缓存/代理缓存造成越权），更稳妥的是 no-store。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "js",
+      "file": "05-http-in-practice.md",
+      "code": "// 服务端：给出可缓存的响应，带 ETag；客户端带 If-None-Match，命中就回 304\nconst crypto = require('node:crypto');\n\nconst PAYLOAD = JSON.stringify({ items: [{ id: 'cpp-ch01-01', title: '指针与数组' }] });\nconst etag = '\"' + crypto.createHash('sha1').update(PAYLOAD).digest('hex').slice(0, 8) + '\"';\n\nfunction handle(req, res) {\n  if (req.‹1›['if-none-match'] === etag) {\n    res.writeHead(304, { ETag: etag });\n    return res.end();               // 304 无响应体，省带宽\n  }\n  res.writeHead(200, {\n    'Content-Type': 'application/json; charset=utf-8',\n    'Cache-Control': 'private, max-age=60',\n    ETag: etag,\n  });\n  res.end(PAYLOAD);\n}\n\nmodule.exports = { handle, etag };",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "headers",
+          "line": 8
+        }
+      ],
+      "distractors": [
+        "body",
+        "console"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

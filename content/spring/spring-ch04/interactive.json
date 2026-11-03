@@ -1,0 +1,119 @@
+{
+  "chapter": "spring-ch04",
+  "subject": "spring",
+  "title": "SpringBoot 自动配置与起步依赖",
+  "fingerprint": "a20e76df27",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "条件装配的核心：Condition 接口与 @ConditionalOnXxx 的…",
+      "body": "@SpringBootApplication 的扫描范围只覆盖主类所在包及其子包"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "@SpringBootApplication 的组成",
+      "body": "spring-ch04 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "@SpringBootApplication 的扫描范围只覆盖主类所在包及其子包",
+          "right": "把主类放在所有业务包的最外层 （如 com.example），或显式 @ComponentScan(basePackages = \"com.example\")。 这不是自动配置问题，是组件扫描问题，两者要分清。"
+        },
+        {
+          "id": 2,
+          "left": "spring.factories 与 AutoConfiguration.imports …",
+          "right": "3.x 项目只保留 AutoConfiguration.imports，spring.factories 只用于 其他扩展点（如 ApplicationContextInitializer…"
+        },
+        {
+          "id": 3,
+          "left": "@ConfigurationProperties 绑定失败不报错，只是静默为 null",
+          "right": "加 @Validated + @NotNull/@NotBlank 校验，或用 spring-boot-configuration-processor 生成元数据让 IDE 提示；"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "`@SpringBootApplication` 等价于以下哪组注解的组合？",
+          "title": "@SpringBootApplication 的组成",
+          "options": [
+            {
+              "key": "A",
+              "text": "@SpringBootConfiguration + @EnableAutoConfiguration + @ComponentScan"
+            },
+            {
+              "key": "B",
+              "text": "@Configuration + @EnableWebMvc + @ComponentScan"
+            },
+            {
+              "key": "C",
+              "text": "@SpringBootConfiguration + @EnableAutoConfiguration + @MapperScan"
+            },
+            {
+              "key": "D",
+              "text": "@Configuration + @EnableTransactionManagement + @ComponentScan"
+            }
+          ],
+          "correct": [
+            "A"
+          ],
+          "explain": "三者分工：@SpringBootConfiguration 标记主配置类（本质是特殊 @Configuration）、@EnableAutoConfiguration 通过 SPI 引入自动配置类、@ComponentScan 扫描当前包及子包。注意 @ComponentScan 只扫自己的包，官方自动配置类不在其中，靠 SPI 加载。"
+        },
+        {
+          "id": "q1",
+          "stem": "在**用户自己的** `@Configuration` 类中标注 `@ConditionalOnMissingBean` 时，经常出现「判定结果不符合预期」的情况。最本质的原因是？",
+          "title": "@ConditionalOnMissingBean 失效的根因",
+          "options": [
+            {
+              "key": "A",
+              "text": "该注解只对 @Bean 方法有效，对类无效"
+            },
+            {
+              "key": "B",
+              "text": "判定依赖注册顺序，而用户的配置类与自动配置类的处理次序不确定"
+            },
+            {
+              "key": "C",
+              "text": "该注解只能用于 @Component，不能用于 @Configuration"
+            },
+            {
+              "key": "D",
+              "text": "它需要配合 @DependsOn 才能生效"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "@ConditionalOnMissingBean 在 BeanDefinition 阶段求值，结论取决于「此刻容器里已有什么」。自动配置类被约定为最后处理，因此在该处使用是安全的；在用户配置类中使用则受顺序影响，结论不可靠。需要控制顺序时用 @AutoConfigureBefore/After。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "java",
+      "file": "04-autoconfig-practical-recipes.md",
+      "code": "@AutoConfiguration\n@ConditionalOnClass(DataSource.class)\npublic class MyDataSourceAutoConfig {\n\n    @Bean\n    @ConditionalOnMissingBean\n    public MyDataSource myDataSource(DataSourceProperties props) {\n        return new MyDataSource(props.‹1›());\n    }\n}",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "getUrl",
+          "line": 8
+        }
+      ],
+      "distractors": [
+        "data",
+        "equals"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

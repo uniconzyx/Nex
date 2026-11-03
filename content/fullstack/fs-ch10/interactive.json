@@ -1,0 +1,130 @@
+{
+  "chapter": "fs-ch10",
+  "subject": "fullstack",
+  "title": "Vue 3 + TypeScript + Pinia：响应式原理与 ref/reactive 边界",
+  "fingerprint": "4dc4bc63f5",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "响应式入门：Proxy 代理读取收集依赖、修改触发副作用",
+      "body": "关于 Vue 3 响应式的依赖收集，正确的是"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于 Vue 3 响应式的依赖收集，正确的是",
+      "body": "fs-ch10 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "选择**正确**的描述。",
+          "title": "关于 Vue 3 响应式的依赖收集，正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "依赖关系在组件创建时一次性固定，之后不再变化"
+            },
+            {
+              "key": "B",
+              "text": "effect 运行时会把读过的字段登记到 (对象, 字段) -> effect 集合 的索引里（track），字段改写时再通知这些 effect（trigger）"
+            },
+            {
+              "key": "C",
+              "text": "Vue 3 仍用 Object.defineProperty，只是做了性能优化"
+            },
+            {
+              "key": "D",
+              "text": "只有模板渲染函数会被收集为依赖，watch 和 computed 不受影响"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "Vue 3 用 Proxy + 全局 activeEffect：effect 运行时读字段触发 get 拦截执行 track，把 activeEffect 登记进 (target,key)->Set(effects) 的 WeakMap；字段改写触发 set 拦截执行 trigger 通知。依赖是随控制流动态重收集的（每次重跑先 cleanup 再收集），故 A 错。Vue 3 用 Proxy 而非 defineProperty，C 错。watch/computed 也是 effect，都会被收集，D 错。"
+        },
+        {
+          "id": "q3",
+          "stem": "关于 shallowRef，正确的是",
+          "title": "shallowRef 与 ref 的差别",
+          "options": [
+            {
+              "key": "A",
+              "text": "shallowRef 完全不能触发，等于普通变量"
+            },
+            {
+              "key": "B",
+              "text": "shallowRef 只对 .value 的整体替换做响应，内部对象的字段改动不触发"
+            },
+            {
+              "key": "C",
+              "text": "shallowRef 比 ref 更深，会递归代理内部所有层级"
+            },
+            {
+              "key": "D",
+              "text": "shallowRef 是 ref 的语法糖，二者运行时完全一致"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "shallowRef 只对 .value 被整体替换（x.value = newObj）做响应，内部对象不被递归代理，所以 x.value.field = 1 不会触发更新。它是用来明确「只关心引用替换、不关心内部」的边界声明，不是语法糖也不是完全无效。需要强制派发可用 triggerRef。"
+        },
+        {
+          "id": "q7",
+          "stem": "关于 Pinia 的 Setup 写法，正确的是",
+          "title": "Pinia Setup 写法的描述，正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "必须在 store 里写 mutations 才能改状态"
+            },
+            {
+              "key": "B",
+              "text": "store 内部直接用 ref/computed/function 定义状态、派生与行为，返回要暴露的成员即可"
+            },
+            {
+              "key": "C",
+              "text": "Setup 写法无法在一个 store 里调用另一个 store"
+            },
+            {
+              "key": "D",
+              "text": "Setup 写法不支持 TypeScript 类型推导"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "Setup 写法复用 Vue 组合式 API：用 ref 定义状态、computed 定义派生、function 定义 action，return 出要暴露的成员，没有 mutation 概念（A 错）。store 间可相互 useOtherStore() 调用（C 错），且基于 TS 原生推断、类型推导很好（D 错）。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "ts",
+      "file": "04-snippets.md",
+      "code": "import { defineStore } from 'pinia'\nexport const useCartStore = defineStore('cart', {\n  ‹1›: () => ({ items: [] as string[] }),\n  ‹2›: { count: (s) => s.items.length },\n  actions: { add(i: string) { this.items.push(i) } },\n})",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "state",
+          "line": 3
+        },
+        {
+          "id": "b2",
+          "answer": "getters",
+          "line": 4
+        }
+      ],
+      "distractors": [
+        "name",
+        "number"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

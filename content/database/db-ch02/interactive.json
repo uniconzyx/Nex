@@ -1,0 +1,102 @@
+{
+  "chapter": "db-ch02",
+  "subject": "database",
+  "title": "表连接与子查询：JOIN、子查询、集合操作",
+  "fingerprint": "b60887e44f",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "INNER JOIN 关联员工与部门（仅返回可匹配的行）",
+      "body": "LEFT JOIN 把右表过滤条件写进 WHERE 反而变 INNER JOIN"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于 JOIN 执行算法，下列说法正确的是",
+      "body": "db-ch02 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "LEFT JOIN 把右表过滤条件写进 WHERE 反而变 INNER JOIN",
+          "right": "把右表过滤放进 ON（ON A.id=B.aid AND B.status='ok'），或显式 WHERE B.aid IS NULL 找\"无匹配\"。"
+        },
+        {
+          "id": 2,
+          "left": "NOT IN 子查询含 NULL 返回空集",
+          "right": "用 NOT EXISTS (SELECT 1 FROM t WHERE t.mid = a.id) 或 LEFT JOIN t ON ... WHERE t.mid IS NULL，二者对 NULL 安全。"
+        },
+        {
+          "id": 3,
+          "left": "相关子查询写在 SELECT 列表引发 N+1",
+          "right": "改写成 LEFT JOIN + GROUP BY 一次聚合出计数。"
+        },
+        {
+          "id": 4,
+          "left": "盲目用 UNION 而非 UNION ALL 触发隐式排序去重",
+          "right": "确认无重叠时用 UNION ALL；需要去重才用 UNION。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "给定两表 `A`（10 万行，无连接索引）与 `B`（100 行，连接列有索引），以下说法哪项正确？",
+          "title": "关于 JOIN 执行算法，下列说法正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "Hash Join 只能用于非等值连接（如 a.x < b.y）"
+            },
+            {
+              "key": "B",
+              "text": "Nested Loop Join 对外表每行都去内表逐行比对，复杂度约 O(|A|·|B|)；若内表连接列有索引，Index Nested Loop 复杂度降为约 O(|A|·log|B|)"
+            },
+            {
+              "key": "C",
+              "text": "Block Nested Loop Join 是把整张内表常驻内存，永远比 Hash Join 快"
+            },
+            {
+              "key": "D",
+              "text": "无论数据量如何，MySQL 永远优先选择 Merge Join"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "Hash Join 仅支持等值连接（A 错）；BNL 是把驱动表一批行放进 join buffer 批量探测内表，减少的是对内表的扫描轮数，并非永远快于 Hash Join（C 错）；优化器按代价选型，并非永远 Merge Join（D 错）。Index Nested Loop（内表走索引）是 O(|A|·log|B|)，是带索引 NLJ 的准确复杂度（B 对）。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "sql",
+      "file": "05-sql-practical-recipes.md",
+      "code": "-- 逻辑执行顺序：FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY\nSELECT ‹1› AS d, COUNT(*) c\nFROM emp\nWHERE ‹2› > 1000        -- WHERE 在 SELECT 前，不能用 c 或 d 别名\nGROUP BY d                  -- GROUP BY 多数库能用 SELECT 别名，但不完全通用\nORDER BY c DESC;            -- ORDER BY 在最后，能用别名",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "dept",
+          "line": 2
+        },
+        {
+          "id": "b2",
+          "answer": "salary",
+          "line": 4
+        }
+      ],
+      "distractors": [
+        "user_id",
+        "amount"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

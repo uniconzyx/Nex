@@ -1,0 +1,133 @@
+{
+  "chapter": "mw-ch05",
+  "subject": "middleware",
+  "title": "Kafka 架构：Topic、Partition 与 Replica（mw-ch05）",
+  "fingerprint": "ecbe76a647",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "分区器：murmur2 映射与分布均匀度检验",
+      "body": "Kafka 的「消息消费」与传统队列的本质差异"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "Kafka 的「消息消费」与传统队列的本质差异",
+      "body": "mw-ch05 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "关于 Kafka 的消息删除与消费进度，下列说法正确的是？",
+          "title": "Kafka 的「消息消费」与传统队列的本质差异",
+          "options": [
+            {
+              "key": "A",
+              "text": "ack 即删除"
+            },
+            {
+              "key": "B",
+              "text": "只由 retention/compaction 决定"
+            },
+            {
+              "key": "C",
+              "text": "分区同时只能一个组消费"
+            },
+            {
+              "key": "D",
+              "text": "位置由 broker 维护"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "Kafka 是「提交日志（commit log）」而非「队列」：消息写入后按 append-only 顺序持久化，只有当 retention.ms / retention.bytes 到期或触发 log compaction 时才被清理，与消费者是否读过无关。这正是「可重放」的根基——重置 offset 就能重读历史。C 错在多个消费者组各自维护独立进度、互不干扰；D 错在 offset 由客户端提交（broker 只存储 consumeroffsets 这一特殊 topic 里的提交记录）。"
+        },
+        {
+          "id": "q1",
+          "stem": "某 topic 配置 `min.insync.replicas=2`、副本因子 3。关于 `acks` 的耐久性，下列说法正确的是？",
+          "title": "acks 取值与耐久性边界",
+          "options": [
+            {
+              "key": "A",
+              "text": "acks=1 等所有 follower"
+            },
+            {
+              "key": "B",
+              "text": "acks=all == acks=-1，等 ISR 全部"
+            },
+            {
+              "key": "C",
+              "text": "acks=0 是 leader 落盘即应答"
+            },
+            {
+              "key": "D",
+              "text": "acks=all 绝不丢"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "acks=0 是「发出即认为成功」，连 leader 是否收到都不保证；acks=1 只等 leader 本地落盘；acks=all（等价 acks=-1）等 ISR 中全部副本写入。注意 acks=all 的保证以「ISR 至少还有 min.insync.replicas 个副本」为前提：若 ISR 收缩到 1 个副本（其余被踢出同步），acks=all 会退化为 acks=1 的效果，所以 min.insync.replicas 必须与 acks=all 配合使用；且 unclean.leader.election 开启时仍可能因选到落后副本而丢数据。"
+        },
+        {
+          "id": "q3",
+          "stem": "一个 topic 有 3 个分区，消费者组起了 6 个消费者实例。下列说法正确的是？",
+          "title": "分区数与顺序性、并行度的三方取舍",
+          "options": [
+            {
+              "key": "A",
+              "text": "6 个都分到分区"
+            },
+            {
+              "key": "B",
+              "text": "3 个干活 3 个空闲，分区内有序"
+            },
+            {
+              "key": "C",
+              "text": "加消费者必然提吞吐"
+            },
+            {
+              "key": "D",
+              "text": "分区可随意减少"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "一个分区在同一时刻只能被同组内的一个消费者消费，所以并行度上限 = min(分区数, 消费者数) = min(3, 6) = 3，多出的 3 个实例处于空闲（仅作为故障时的备位）。Kafka 只保证单分区内的顺序，跨分区无序；要保序必须让相关消息带同一个 key 落到同一分区。分区数只能增加不能减少（减少会破坏 key→分区 的稳定映射与已有数据归属），且增加分区同样会改变映射，导致同一 key 的历史与新消息分处不同分区。"
+        },
+        {
+          "id": "q5",
+          "stem": "关于 Kafka 的零拷贝（`sendfile` / `FileChannel.transferTo`），下列说法正确的是？",
+          "title": "零拷贝的成立前提",
+          "options": [
+            {
+              "key": "A",
+              "text": "数据完全不经内核"
+            },
+            {
+              "key": "B",
+              "text": "2 次切换、3 次拷贝"
+            },
+            {
+              "key": "C",
+              "text": "SSL 下完全生效"
+            },
+            {
+              "key": "D",
+              "text": "必须先反序列化"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "传统路径：read 把数据从磁盘 DMA 到内核页缓存、再从内核拷贝到用户缓冲（4 次切换 / 4 次拷贝）；sendfile 让数据「磁盘→页缓存→socket 缓冲→网卡」，内核页缓存到 socket 缓冲仍有 1 次 CPU 拷贝，共 2 次上下文切换、3 次拷贝（其中 2 次为 DMA）。前提是数据不需要在用户态加工——所以一旦开启 SSL/TLS（需在用户态加密）或做 broker 端格式转换/压缩变更，零拷贝就失效并退化为普通拷贝路径。"
+        }
+      ]
+    }
+  ]
+}

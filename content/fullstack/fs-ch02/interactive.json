@@ -1,0 +1,110 @@
+{
+  "chapter": "fs-ch02",
+  "subject": "fullstack",
+  "title": "前端基础：HTML 语义化与 CSS 盒模型/布局",
+  "fingerprint": "d06d64439b",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "语义化页面骨架：header/nav/main/article/aside/foo…",
+      "body": "CSS 中 box-sizing 的默认值是什么？"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "CSS 中 box-sizing 的默认值是什么？",
+      "body": "fs-ch02 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "sequence",
+      "heading": "二、实现机制（按线程与阶段拆解）",
+      "steps": [
+        "解析（Parse）",
+        "样式计算（Style / Recalc）",
+        "布局（Layout / Reflow）",
+        "绘制（Paint）",
+        "合成（Composite）"
+      ],
+      "file": "03-rendering-pipeline.md"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "选择 `box-sizing` 的初始值（未显式设置时）。",
+          "title": "CSS 中 box-sizing 的默认值是什么？",
+          "options": [
+            {
+              "key": "A",
+              "text": "border-box"
+            },
+            {
+              "key": "B",
+              "text": "content-box"
+            },
+            {
+              "key": "C",
+              "text": "padding-box"
+            },
+            {
+              "key": "D",
+              "text": "margin-box"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "CSS 规范中 box-sizing 初始值为 content-box：width/height 仅含内容区，padding 与 border 额外撑大元素。"
+        },
+        {
+          "id": "q1",
+          "stem": "多选思路（本题单选最干净的触发方式）：哪个声明**专门**用于建立 BFC 且无裁切/定位副作用？",
+          "title": "以下哪些做法会触发 BFC（块级格式化上下文）？",
+          "options": [
+            {
+              "key": "A",
+              "text": "display: flow-root"
+            },
+            {
+              "key": "B",
+              "text": "color: red"
+            },
+            {
+              "key": "C",
+              "text": "font-size: 16px"
+            },
+            {
+              "key": "D",
+              "text": "text-align: center"
+            }
+          ],
+          "correct": [
+            "A"
+          ],
+          "explain": "display:flow-root 是语义上最纯粹的 BFC 触发方式，不会导致 overflow:hidden 的裁切或 absolute 的脱离文档流等副作用。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "js",
+      "file": "03-rendering-pipeline.md",
+      "code": "// 错误：循环里交替读 offsetHeight（强制 reflow）与写 width → 每轮都重排\nfor (const el of boxes) {\n  const h = el.offsetHeight;   // 读：强制同步布局\n  el.style.width = h + 10 + 'px'; // 写：下一轮读前又 reflow\n}\n// 修复：先批量读，再批量写\nconst hs = boxes.map(el => el.offsetHeight);\nboxes.‹1›((el, i) => { el.style.width = hs[i] + 10 + 'px'; });",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "forEach",
+          "line": 8
+        }
+      ],
+      "distractors": [
+        "json",
+        "name"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

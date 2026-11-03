@@ -1,0 +1,134 @@
+{
+  "chapter": "java-ch06",
+  "subject": "java",
+  "title": "IO 与 NIO",
+  "fingerprint": "f64c617a8d",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "字节流与字符流：编码边界与乱码实证",
+      "body": "用 FileReader/FileWriter 读线上文件"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于 Java 流的分类与编码边界",
+      "body": "java-ch06 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "用 FileReader/FileWriter 读线上文件",
+          "right": "Files.newBufferedReader(p, StandardCharsets.UTF8)。"
+        },
+        {
+          "id": 2,
+          "left": "忘了给 Serializable 类声明 serialVersionUID",
+          "right": "显式 private static final long serialVersionUID = 1L;。"
+        },
+        {
+          "id": 3,
+          "left": "ByteBuffer 写完不 flip() 就读",
+          "right": "put 完 → flip() → get 到 !hasRemaining() → clear()/compact()。"
+        },
+        {
+          "id": 4,
+          "left": "无条件注册 OPWRITE",
+          "right": "真写不进去时才注册，写完立即 cancel() 并重新只注册 OPREAD。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "关于 Java 的字节流与字符流，选出**正确**的描述。",
+          "title": "关于 Java 流的分类与编码边界",
+          "options": [
+            {
+              "key": "A",
+              "text": "FileReader 使用 UTF-8 编码，因此跨平台一致"
+            },
+            {
+              "key": "B",
+              "text": "InputStreamReader 是字节流到字符流的桥接点，可显式指定字符集"
+            },
+            {
+              "key": "C",
+              "text": "Reader.read() 返回 char，用 byte 也能接住"
+            },
+            {
+              "key": "D",
+              "text": "available() 返回文件总长度，可用于分配缓冲区"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "FileReader 使用平台默认字符集（Windows 常为 GBK），跨平台不一致，A 错。Reader.read() 返回 int，-1 表示 EOF，用 byte 接会丢失 EOF 判断，C 错。available() 只保证「不阻塞能读到的字节数」，不是文件长度，D 错。InputStreamReader 是唯一可显式控制编码的字节→字符转换入口（Files.newBufferedReader 内部封装了它）。"
+        },
+        {
+          "id": "q1",
+          "stem": "对 `ByteBuffer.allocate(16)` 连续执行：`put(5 字节)` → `flip()` → `get()` 两次。此时 `position`、`limit`、`remaining()` 分别是多少？",
+          "title": "ByteBuffer 的游标与模式切换",
+          "options": [
+            {
+              "key": "A",
+              "text": "position=5, limit=16, remaining=11"
+            },
+            {
+              "key": "B",
+              "text": "position=2, limit=5, remaining=3"
+            },
+            {
+              "key": "C",
+              "text": "position=7, limit=16, remaining=9"
+            },
+            {
+              "key": "D",
+              "text": "position=0, limit=5, remaining=5"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "put 后 position=5；flip 令 limit=position=5、position=0；两次 get 后 position=2；remaining = limit - position = 3。flip 的等价写法是 limit(position()); position(0)。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "java",
+      "file": "03-nio-channel-buffer-selector.md",
+      "code": "while (‹1›) {\n    selector.select();                       // 阻塞直到有就绪事件\n    Iterator<SelectionKey> it = selector.selectedKeys().iterator();\n    while (it.‹2›()) {\n        SelectionKey key = it.next();\n        it.remove();                          // 必须先移除，否则下次重复处理\n        if (key.‹3›()) { /* accept + register */ }\n        else if (key.isReadable()) { /* read */ }\n        else if (key.isWritable()) { /* write */ }\n    }\n}",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "running",
+          "line": 1
+        },
+        {
+          "id": "b2",
+          "answer": "hasNext",
+          "line": 4
+        },
+        {
+          "id": "b3",
+          "answer": "isAcceptable",
+          "line": 7
+        }
+      ],
+      "distractors": [
+        "extends",
+        "find"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

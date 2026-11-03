@@ -1,0 +1,161 @@
+{
+  "chapter": "mw-ch04",
+  "subject": "middleware",
+  "title": "缓存设计与三大经典问题（mw-ch04）",
+  "fingerprint": "02ef55dee8",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "布隆过滤器：bit 数组与多哈希的基本判定",
+      "body": "把布隆过滤器当成「精确判存在」结构"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "缓存穿透的成因与布隆过滤器的定位",
+      "body": "mw-ch04 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "把布隆过滤器当成「精确判存在」结构",
+          "right": "把它定位为穿透防护的「拦截器」而非数据源，对判定为「可能存在」的 key 仍要查缓存 / 查库；误判率公式 (1 - e^{-kn/m})^k，降低误判靠增大 m（bit 数）或增多 k（哈希个数，但过多反而升高误判）…"
+        },
+        {
+          "id": 2,
+          "left": "用布隆过滤器却忽略了「元素删除」难题",
+          "right": "需要删除时用 Counting Bloom Filter（bit 换成计数器）；或业务上缓存是「只增不删 key 集合」时再上普通布隆，删除走重建过滤器。"
+        },
+        {
+          "id": 3,
+          "left": "缓存击穿用「查库前加锁」却没做单飞，并发仍全部回源",
+          "right": "用单飞（singleflight）或「带令牌的互斥锁」——同一 key 同一时刻只允许一个线程回源，其余等待并复用结果（实测 200 并发回源 1 次）。"
+        },
+        {
+          "id": 4,
+          "left": "逻辑过期（异步重建）忘了兜底，热点 key 重建失败导致长期无值",
+          "right": "重建失败要重试 / 保留旧值 / 降级到同步回源，并监控重建成功率。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "关于缓存穿透与布隆过滤器，下列说法正确的是？",
+          "title": "缓存穿透的成因与布隆过滤器的定位",
+          "options": [
+            {
+              "key": "A",
+              "text": "布隆能确定一定存在"
+            },
+            {
+              "key": "B",
+              "text": "无假阴性、有假阳性"
+            },
+            {
+              "key": "C",
+              "text": "支持直接删除"
+            },
+            {
+              "key": "D",
+              "text": "只能用布隆，空值无意义"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "布隆过滤器的 bit 由多个元素共享：某元素插入过的所有 bit 都为 1 才判「可能存在」，因此不存在假阴性（漏判），但存在假阳性（误判）。bit 共享也导致无法直接删除（清零会影响他元素），需 Counting Bloom Filter。缓存空值（短 TTL）是对穿透的有效兜底，二者常组合使用。"
+        },
+        {
+          "id": "q1",
+          "stem": "关于击穿与雪崩，下列判断正确的是？",
+          "title": "缓存击穿与缓存雪崩的区别",
+          "options": [
+            {
+              "key": "A",
+              "text": "击穿是大量 key 同时失效"
+            },
+            {
+              "key": "B",
+              "text": "击穿=单 key 热点；雪崩=大批 key 集体失效"
+            },
+            {
+              "key": "C",
+              "text": "雪崩只能加锁，与 TTL 无关"
+            },
+            {
+              "key": "D",
+              "text": "逻辑过期只能用于雪崩"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "击穿（breakdown / hot-key invalid）指单个被高频访问的热点 key 过期，瞬间大量请求同时回源；雪崩（avalanche）指大批 key 因统一 TTL 在同一时刻集体失效，DB 被整体打垮。雪崩的正解是 TTL 加随机抖动摊平失效 + 多级缓存 + 熔断降级，加锁并不对症；逻辑过期正是击穿的典型解法之一（不阻塞请求、异步重建）。"
+        },
+        {
+          "id": "q4",
+          "stem": "关于 Write-Through / Write-Behind / Cache-Aside，下列说法正确的是？",
+          "title": "三种更新策略的一致性取舍",
+          "options": [
+            {
+              "key": "A",
+              "text": "Write-Behind 强一致"
+            },
+            {
+              "key": "B",
+              "text": "Write-Through 一致性最好但写延迟高"
+            },
+            {
+              "key": "C",
+              "text": "Cache-Aside 写时更新缓存"
+            },
+            {
+              "key": "D",
+              "text": "三者写延迟相同"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "Write-Through 同步双写缓存与库，一致性最强但每次写都要落库、延迟高；Write-Behind 先写缓存、异步批量刷盘，吞吐最高但崩溃会丢未刷盘的写，只适合可重建的计数类数据；Cache-Aside 由应用层维护，写时推荐「删除缓存」而非「更新缓存」——更新缓存在并发写下会产生乱序覆盖，且可能写进很少被读的冷数据。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "04-cache-design-practical-recipes.md",
+      "code": "# 方案一：缓存空值（最简单，适合 id 有限的场景）\ndef get_user(uid):\n    key = f\"user:{uid}\"\n    val = redis.get(key)\n    if val is not None:\n        return None if val == \"__NULL__\" else json.‹1›(val)\n    row = db.‹2›(\"SELECT * FROM user WHERE id=%s\", uid)\n    if row is None:\n        redis.setex(key, 300, \"__NULL__\")   # 短 TTL，防止长期占用\n        return None\n    redis.setex(key, 3600, json.dumps(row))\n    return row\n\n# 方案二：布隆过滤器（适合 id 空间巨大、只关心「存在性」）\n# 初始化时把所有合法 id 灌进布隆过滤器，查询前先过一遍\nif not ‹3›.exists(f\"user:{uid}\"):\n    return None          # 一定不存在，直接短路，不查库\n\n# 方案三：参数校验 + 限流（治标但必做）\nif not (0 < uid < MAX_UID) or rate_limit(uid):\n    return None",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "loads",
+          "line": 6
+        },
+        {
+          "id": "b2",
+          "answer": "query",
+          "line": 7
+        },
+        {
+          "id": "b3",
+          "answer": "bloom",
+          "line": 16
+        }
+      ],
+      "distractors": [
+        "naive",
+        "name"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+{
+  "chapter": "cpp-ch14",
+  "subject": "cpp",
+  "title": "预处理与宏：include/define/条件编译/头文件守卫",
+  "fingerprint": "05aded53a0",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "对象宏 vs 函数宏的括号陷阱",
+      "body": "宏里用 #x 却传了带逗号的表达式"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于头文件守卫与 #pragma once，正确的是",
+      "body": "cpp-ch14 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "宏里用 #x 却传了带逗号的表达式",
+          "right": "先用 typedef 或括号包成一个整体再传；或改用变参宏 VAARGS。"
+        },
+        {
+          "id": 2,
+          "left": "头文件里定义变量导致重复定义",
+          "right": "头文件用 extern int g; 声明，定义放某一个源文件；C++17 起可用 inline 变量。"
+        },
+        {
+          "id": 3,
+          "left": "assert 里写有副作用的表达式",
+          "right": "副作用代码写到 assert 外面，先执行再断言结果。"
+        },
+        {
+          "id": 4,
+          "left": "#include 尖括号与引号混用",
+          "right": "自己的头文件用 \"\"，标准库与第三方用 <>，别让搜索路径决定成败。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "选择**正确**的描述。",
+          "title": "关于头文件守卫与 #pragma once，正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "#pragma once 由 C++ 标准规定，所有编译器必须支持"
+            },
+            {
+              "key": "B",
+              "text": "头文件守卫靠宏名判重，宏名冲突可能导致该包含的内容被错误跳过"
+            },
+            {
+              "key": "C",
+              "text": "#include 会做类型检查后再插入头文件内容"
+            },
+            {
+              "key": "D",
+              "text": "#pragma once 按宏名判重，与 #ifndef 守卫机制相同"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "#pragma once 非标准，靠「同一物理文件」判重（A 错）；#include 是预处理期的纯文本替换，不做类型检查（C 错）；#pragma once 按物理文件去重，与传统 #ifndef 按宏名去重不同（D 错）；守卫宏名若与其他头文件撞名，会错误地跳过本该包含的内容（B 对）。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "cpp",
+      "file": "03-conditional-compilation-xmacro.md",
+      "code": "#define COLORS \\\n    X(Red,   1) \\\n    X(Green, 2) \\\n    X(Blue,  4)\nenum class Color { #define X(n,v) n = v, COLORS #undef X };\nconst char* ‹1›(int v){ switch(v){\n    #define X(n,v) case v: return #n; COLORS #undef X\n    default: return \"Unknown\"; } }",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "name",
+          "line": 6
+        }
+      ],
+      "distractors": [
+        "copy",
+        "count"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

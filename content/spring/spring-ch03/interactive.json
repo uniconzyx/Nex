@@ -1,0 +1,105 @@
+{
+  "chapter": "spring-ch03",
+  "subject": "spring",
+  "title": "AOP 与代理机制",
+  "fingerprint": "ff480d8235",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "JDK 动态代理：前置通知（InvocationHandler）",
+      "body": "同类方法内部自调用绕过代理（最经典）"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "JDK 动态代理的实现前提",
+      "body": "spring-ch03 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "同类方法内部自调用绕过代理（最经典）",
+          "right": "把 update() 拆到另一个 Bean 注入调用，或用 AopContext.currentProxy() / 自注入拿到代理再调。"
+        },
+        {
+          "id": 2,
+          "left": "反射异常被 InvocationTargetException 包多层",
+          "right": "捕获后取 e.getCause() 得到真实异常（见 ex03）。"
+        },
+        {
+          "id": 3,
+          "left": "CGLIB 无法代理 final 类 / final、private 方法",
+          "right": "去掉 final，或改用基于接口的 JDK 代理。"
+        },
+        {
+          "id": 4,
+          "left": "切点写得过宽导致全量拦截",
+          "right": "收窄到具体包/类/方法，或改用 @annotation 注解切点。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "关于 JDK 动态代理 `Proxy.newProxyInstance`，下列说法正确的是？",
+          "title": "JDK 动态代理的实现前提",
+          "options": [
+            {
+              "key": "A",
+              "text": "可以代理任意普通类（无需接口）"
+            },
+            {
+              "key": "B",
+              "text": "必须传入接口数组，生成的代理类实现这些接口"
+            },
+            {
+              "key": "C",
+              "text": "生成的代理类 extends 业务类以重写方法"
+            },
+            {
+              "key": "D",
+              "text": "InvocationHandler.invoke 的第一个参数是被代理的真实对象"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "JDK 动态代理要求传入接口数组，生成的 $Proxy 实现这些接口；因已 extends Proxy 受单继承限制，无法再继承业务类；invoke 第一个参数是代理对象而非 target。"
+        },
+        {
+          "id": "q2",
+          "stem": "关于 CGLIB 子类代理，下列说法准确的是？",
+          "title": "CGLIB 代理的限制",
+          "options": [
+            {
+              "key": "A",
+              "text": "CGLIB 通过实现接口生成代理，与 JDK 动态代理原理相同"
+            },
+            {
+              "key": "B",
+              "text": "CGLIB 无法代理 final 类与 final/private 方法（无法继承/重写）"
+            },
+            {
+              "key": "C",
+              "text": "CGLIB 代理的目标类必须实现至少一个接口"
+            },
+            {
+              "key": "D",
+              "text": "CGLIB 生成的代理类调用目标方法时走反射 method.invoke"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "CGLIB 通过继承目标类、重写方法实现；final 类不可继承、final/private 方法不可重写，故无法代理；它不要求接口，且方法为直接调用（非反射）。"
+        }
+      ]
+    }
+  ]
+}

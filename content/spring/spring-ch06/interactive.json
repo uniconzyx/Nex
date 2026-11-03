@@ -1,0 +1,178 @@
+{
+  "chapter": "spring-ch06",
+  "subject": "spring",
+  "title": "MyBatis 基础：映射与 CRUD",
+  "fingerprint": "2425df3157",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "ex01-xml-mapper-parse",
+      "body": "用 ${} 拼接前端字符串导致 SQL 注入"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "#{} 与 ${} 的区别",
+      "body": "spring-ch06 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "用 ${} 拼接前端字符串导致 SQL 注入",
+          "right": "值是 #{} 占位符；只有表名/列名/排序字段这类不能作为占位符的才用 ${}，且 ${} 的取值必须来自白名单。"
+        },
+        {
+          "id": 2,
+          "left": "列名与属性名不一致又没开驼峰也没写 resultMap，字段查出 null",
+          "right": "开驼峰，或用 resultMap 显式 <result column=\"username\" property=\"userName\"/>。"
+        },
+        {
+          "id": 3,
+          "left": "把 insert 返回值当主键",
+          "right": "用 useGeneratedKeys=\"true\" keyProperty=\"id\"，插入后从传入实体对象 user.getId() 取回自增主键。"
+        },
+        {
+          "id": 4,
+          "left": "在 Oracle 上用 useGeneratedKeys 期望自增",
+          "right": "用 <selectKey order=\"BEFORE\" keyProperty=\"id\">SELECT seq.nextval FROM dual</selectKey> 先取序列号再插入。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "ex1",
+          "stem": "下列关于 MyBatis 中 `#{}` 与 `${}` 的说法，哪一项是正确的？",
+          "title": "#{} 与 ${} 的区别",
+          "options": [
+            {
+              "key": "A",
+              "text": "${} 会被替换成 ? 占位符并预编译，#{} 是直接字符串拼接"
+            },
+            {
+              "key": "B",
+              "text": "#{} 被替换成 ? 占位符，参数经 PreparedStatement 预编译绑定，可防 SQL 注入；${} 是直接字符串拼接，有注入风险"
+            },
+            {
+              "key": "C",
+              "text": "#{} 与 ${} 只是写法不同，底层完全等价"
+            },
+            {
+              "key": "D",
+              "text": "只有 ${} 能防 SQL 注入，#{} 不能"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "#{} 在解析阶段被替换成 JDBC 的 ? 占位符，参数通过 PreparedStatement 单独绑定（预编译），数据库区分代码与数据，因此防注入；${} 是文本插值，把值直接拼进 SQL 文本，存在注入风险，仅用于表名/列名/排序等非值场景。"
+        },
+        {
+          "id": "ex2",
+          "stem": "下列关于 `resultType` 与 `resultMap` 的说法，正确的是？",
+          "title": "resultType 与 resultMap 的区别",
+          "options": [
+            {
+              "key": "A",
+              "text": "resultMap 比 resultType 更快，应该一律用 resultMap"
+            },
+            {
+              "key": "B",
+              "text": "resultType 靠自动映射（同名/驼峰），简单快捷；resultMap 显式声明列-字段映射，支持别名、嵌套、关联，处理列名不一致与复杂结构"
+            },
+            {
+              "key": "C",
+              "text": "列名与属性名不一致时，开驼峰也查不出，必须用 JDBC 改名"
+            },
+            {
+              "key": "D",
+              "text": "resultType 无法使用，MyBatis 只支持 resultMap"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "resultType 依赖自动映射（同名或驼峰），适合简单 CRUD；resultMap 显式声明 column→property 映射，支持嵌套对象与关联（association/collection），用于处理列名不一致与复杂结果。简单场景手写 resultMap 是过度设计。"
+        },
+        {
+          "id": "ex3",
+          "stem": "为什么 `#{}` 能防止 SQL 注入？最准确的一项是？",
+          "title": "#{} 防 SQL 注入的底层原理",
+          "options": [
+            {
+              "key": "A",
+              "text": "MyBatis 对参数做了单引号转义，所以注入失效"
+            },
+            {
+              "key": "B",
+              "text": "#{} 被替换成 ? 占位符，SQL 模板先预编译，参数作为数据单独绑定，数据库区分指令与数据"
+            },
+            {
+              "key": "C",
+              "text": "#{} 会自动过滤掉 OR 和单引号等关键字"
+            },
+            {
+              "key": "D",
+              "text": "因为 MyBatis 默认开启了防火墙"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "核心机制是参数化查询（预编译）：带 ? 的 SQL 先发给数据库编译成执行计划，参数在 setXxx 阶段作为数据传入，数据库无法把数据当 SQL 指令执行。转义单引号是黑名单思维，预编译是白名单（结构固定、参数只是数据），更彻底。"
+        },
+        {
+          "id": "ex4",
+          "stem": "关于 MyBatis 一级缓存与二级缓存的范围，正确的是？",
+          "title": "一级缓存与二级缓存的范围",
+          "options": [
+            {
+              "key": "A",
+              "text": "一级缓存是 namespace 级，跨 SqlSession 共享"
+            },
+            {
+              "key": "B",
+              "text": "一级缓存是 SqlSession 级，同一会话内相同查询命中；二级缓存是 namespace（Mapper）级，跨 SqlSession 共享，需显式开启且对象可序列化"
+            },
+            {
+              "key": "C",
+              "text": "二级缓存默认开启，无需任何配置"
+            },
+            {
+              "key": "D",
+              "text": "一级缓存在 SqlSession 关闭后依然存在"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "一级缓存（local cache）默认开启，作用域是 SqlSession，同一会话内相同查询命中；二级缓存作用域是 Mapper 的 namespace，跨 SqlSession 共享，需显式 <cache/> 开启且缓存对象需可序列化；SqlSession 关闭/提交后一级缓存清空或晋升二级。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "01-orm-positioning-and-mapper.md",
+      "code": "import xml.etree.ElementTree as ET\nimport re\n\nXML = \"\"\"<mapper namespace=\"com.demo.UserMapper\">\n  <select id=\"selectById\" resultType=\"User\">\n    SELECT id, user_name, age FROM t_user WHERE id = #{id}\n  </select>\n  <insert id=\"insertUser\" useGeneratedKeys=\"true\" keyProperty=\"id\">\n    INSERT INTO t_user(user_‹1›, age) VALUES(#{name}, #{age})\n  </insert>\n</mapper>\"\"\"\n\ntree = ET.fromstring(XML)\nprint(\"namespace:\", tree.get(\"namespace\"))\nfor stmt in tree:\n    if not isinstance(stmt.tag, str):\n        continue\n    text = \" \".join(stmt.text.split())\n    params = re.findall(r\"#\\{([^}]+)\\}\", text)\n    print(stmt.tag, \"id=\" + stmt.get(\"id\"), \"params=\" + str(params))",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "name",
+          "line": 9
+        }
+      ],
+      "distractors": [
+        "groupby",
+        "handle"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

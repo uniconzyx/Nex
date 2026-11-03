@@ -1,0 +1,162 @@
+{
+  "chapter": "fund-ch11",
+  "subject": "fundamentals",
+  "title": "计算机网络：分层模型与 TCP/IP",
+  "fingerprint": "5ba0759725",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "分层封装与有效载荷率：MTU/MSS 与每层首部开销",
+      "body": "OSI 与 TCP/IP 模型的层次差异"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "OSI 与 TCP/IP 模型的层次差异",
+      "body": "fund-ch11 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "关于 OSI 七层模型与 TCP/IP 四层模型，下列说法**正确**的是？",
+          "title": "OSI 与 TCP/IP 模型的层次差异",
+          "options": [
+            {
+              "key": "A",
+              "text": "TCP/IP 的网际层对应 OSI 的网络层，TCP/IP 的应用层合并了 OSI 的会话层与表示层"
+            },
+            {
+              "key": "B",
+              "text": "TCP/IP 没有传输层"
+            },
+            {
+              "key": "C",
+              "text": "OSI 的表示层在 TCP/IP 中独立存在"
+            },
+            {
+              "key": "D",
+              "text": "APR 属于表示层"
+            }
+          ],
+          "correct": [
+            "A"
+          ],
+          "explain": "TCP/IP 四层 = 应用层 + 传输层 + 网际层 + 网络接口层。应用层合并了 OSI 的会话层与表示层（这是两者最大的差异）。网际层对应 OSI 的网络层。TCP/IP 明确有传输层（TCP/UDP），B 错；表示层在 TCP/IP 中不独立存在，C 错；ARP 是网络层协议（把 IP 解析为 MAC），D 错。"
+        },
+        {
+          "id": "q1",
+          "stem": "以太网规定最小帧长为 64 字节（不含前导码），其根本原因是什么？",
+          "title": "以太网最小帧长",
+          "options": [
+            {
+              "key": "A",
+              "text": "为了保证数据字段至少能装下一个 IP 首部"
+            },
+            {
+              "key": "B",
+              "text": "为了在 CSMA/CD 下保证发送方在收到最远端冲突信号之前仍在发送，即 L ≥ 2τC"
+            },
+            {
+              "key": "C",
+              "text": "为了让交换机能够缓存整帧再转发"
+            },
+            {
+              "key": "D",
+              "text": "为了与令牌环网兼容"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "最小帧长的判据是冲突检测的可行性：发送方必须在「最远端信号往返」的时间 2τ 内持续发送，才能检测到冲突，于是 L ≥ 2τC。以太网取 2τ = 51.2 μs、C = 10 Mbps ⇒ L ≥ 512 bit = 64 B。这也是「提高带宽必须缩短网段」（或引入载波延伸）的原因。注意前导码是物理层同步序列，不计入帧长。"
+        },
+        {
+          "id": "q2",
+          "stem": "某主机地址为 `192.168.10.130/26`。该子网的**网络地址**、**广播地址**与**可用主机数**分别是？",
+          "title": "子网划分：可用主机数",
+          "options": [
+            {
+              "key": "A",
+              "text": "192.168.10.0 / 192.168.10.255 / 254"
+            },
+            {
+              "key": "B",
+              "text": "192.168.10.128 / 192.168.10.191 / 62"
+            },
+            {
+              "key": "C",
+              "text": "192.168.10.128 / 192.168.10.255 / 126"
+            },
+            {
+              "key": "D",
+              "text": "192.168.10.130 / 192.168.10.191 / 64"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "主机位数 h = 32 − 26 = 6，块大小 2^6 = 64，因此子网按 64 分段：0~63、64~127、128~191、192~255。130 落在 128~191。网络地址（主机位全 0）= 192.168.10.128；广播地址（主机位全 1）= 192.168.10.191；可用主机数 = 2^6 − 2 = 62（减掉网络地址与广播地址）。注意网络地址不等于主机地址（D 错）。"
+        },
+        {
+          "id": "q3",
+          "stem": "主机 A（`192.168.1.10/24`）要与 `10.2.3.4` 通信。关于 A 的 ARP 行为，下列说法**正确**的是？",
+          "title": "ARP 的作用范围",
+          "options": [
+            {
+              "key": "A",
+              "text": "A 广播 ARP 请求解析 10.2.3.4 的 MAC，路由器会转发该 ARP 请求"
+            },
+            {
+              "key": "B",
+              "text": "A 解析其网关（192.168.1.1）的 MAC，帧的目的 MAC 是网关的，而 IP 首部的目的 IP 仍是 10.2.3.4"
+            },
+            {
+              "key": "C",
+              "text": "A 直接把自己的 MAC 填为目的 MAC，因为路由由 IP 层负责"
+            },
+            {
+              "key": "D",
+              "text": "A 无需 ARP，因为目的不在同一网段"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "跨网段通信时，A 不会去解析最终目的主机的 MAC（那在另一个广播域，ARP 根本到不了）。A 用自己的掩码判断目的地址不同网段，于是把数据报交给网关，因此解析的是网关的 MAC。此时：帧的目的 MAC = 网关 MAC，但IP 首部的目的 IP 仍是最终目的主机 10.2.3.4。路由器不转发 ARP（A 错）；C 会破坏链路层寻址；D 错，跨网段更需要 ARP（解析网关）。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "02-data-link-and-ethernet.md",
+      "code": "def crc_remainder(data_bits: str, poly_bits: str) -> str:\n    r = len(poly_bits) - 1\n    bits = list(data_bits + \"0\" * r)\n    for i in range(len(data_bits)):\n        if bits[i] == \"1\":\n            for j in range(len(poly_bits)):\n                bits[i + j] = \"1\" if bits[i + j] != poly_bits[j] else \"0\"\n    return \"\".join(bits[-r:])\n\nprint(\"=== CRC (mod-2 ‹1›) ===\")\ndata = \"1101011111\"\npoly = \"10011\"                      # x^4 + x + 1, r = 4\nrem = crc_remainder(data, poly)\nprint(f\"data = {data}, generator = {poly} (r={len(poly)-1})\")\nprint(f\"FCS  = {rem}\")\nprint(f\"transmitted = {data}{rem}\")\nprint(f\"‹2› remainder = {crc_remainder(data + rem, poly)}  (all zeros => no error)\")\ncorrupt = data + rem[:-1] + (\"0\" if rem[-1] == \"1\" else \"1\")\nprint(f\"one bit ‹3›  = {crc_remainder(corrupt, poly)}  (non-zero => error detected)\")\n\nprint()\nprint(\"=== switch self-learning + flooding ===\")\nclass Switch:\n    def __init__(self, ports):\n        self.ports = ports\n        self.table = {}                      # mac -> port\n    def receive(self, src, dst, in_port):\n        self.table[src] = in_port            # 自学习：源 MAC 绑定入端口\n        if dst in self.table:\n            out = self.table[dst]\n            if out == in_port:\n                action = f\"DROP (dst already on in-port {in_port})\"\n            else:\n                action = f\"UNICAST -> port {out}\"\n        else:\n            outs = [p for p in self.ports if p != in_port]\n            action = f\"FLOOD -> {outs}\"\n        print(f\"  src={src} dst={dst} in={in_port}  -> {action}\")\n        print(f\"    mac table now: {dict(sorted(self.table.items()))}\")\n\nsw = Switch([1, 2, 3, 4])\nsw.receive(\"AA\", \"BB\", 1)     # 未知目的 -> 泛洪\nsw.receive(\"BB\", \"AA\", 2)     # BB 学习了, AA 已知 -> 单播\nsw.receive(\"AA\", \"BB\", 1)     # 都已知 -> 单播\nprint(\"broadcast domain: NOT separated by a switch (needs VLAN)\")",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "division",
+          "line": 10
+        },
+        {
+          "id": "b2",
+          "answer": "verify",
+          "line": 17
+        },
+        {
+          "id": "b3",
+          "answer": "flipped",
+          "line": 19
+        }
+      ],
+      "distractors": [
+        "most_common",
+        "naive"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

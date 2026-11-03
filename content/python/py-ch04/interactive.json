@@ -1,0 +1,167 @@
+{
+  "chapter": "py-ch04",
+  "subject": "python",
+  "title": "标准库：os / sys / re / datetime / json",
+  "fingerprint": "7c1bf5efd5",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "PurePath 语义：不折叠 ..、/ 运算符拼接与 parts 结构",
+      "body": "\"C:\\new\\test\" 里的 \\n 是换行符"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "PurePosixPath('/a/b/../c') 的 parts 与字符串形态",
+      "body": "py-ch04 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "sequence",
+      "heading": "2. sys.path 与导入解析顺序",
+      "steps": [
+        "脚本所在目录（或 -c 时是 cwd，-m 时是 cwd）；",
+        "PYTHONPATH 环境变量里的目录；",
+        "标准库目录；",
+        "site-packages（第三方包）。"
+      ],
+      "file": "02-sys-cli-and-import-path.md"
+    },
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "\"C:\\new\\test\" 里的 \\n 是换行符",
+          "right": "r\"C:\\new\\test\"、Path(r\"C:/new/test\")，或用正斜杠 \"C:/new/test\"（Windows API 同样接受）。"
+        },
+        {
+          "id": 2,
+          "left": "用 os.environ[\"KEY\"] 读配置",
+          "right": "os.environ.get(\"KEY\", default) 或 os.getenv(\"KEY\", default)，默认值必须显式给出。"
+        },
+        {
+          "id": 3,
+          "left": "dirs = [...] 想剪枝却没生效",
+          "right": "dirs[:] = [d for d in dirs if ...]，切片赋值才是原地替换。"
+        },
+        {
+          "id": 4,
+          "left": "list(Path(d).rglob(\"\")) 在大目录上吃爆内存",
+          "right": "直接迭代生成器 for p in Path(d).rglob(\"\")，需要顺序时才 sorted()（且评估规模）。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "py4-ex01",
+          "stem": "关于 `pathlib.PurePosixPath('/a/b/../c')`，下列说法正确的是？",
+          "title": "PurePosixPath('/a/b/../c') 的 parts 与字符串形态",
+          "options": [
+            {
+              "key": "A",
+              "text": "parts 为 ('/', 'a', 'c')，字符串为 /a/c（自动规范化掉 ..）"
+            },
+            {
+              "key": "B",
+              "text": "parts 为 ('/', 'a', 'b', '..', 'c')，字符串保留 /a/b/../c（不做规范化）"
+            },
+            {
+              "key": "C",
+              "text": "构造时直接抛 ValueError"
+            },
+            {
+              "key": "D",
+              "text": "parts 为 ('a', 'b', '..', 'c')（首部斜杠被丢弃）"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "pathlib 的 PurePath 只做语法处理，不会去访问文件系统，也不折叠 ..——.. 作为普通名字片段保留在 parts 里。要折叠必须显式调用 resolve()（会访问文件系统、解析符号链接）或无参的 os.path.normpath。很多人的直觉是「路径都该被规范化」，这是 pathlib 最常被误解的一点。"
+        },
+        {
+          "id": "py4-ex02",
+          "stem": "`datetime(2026, 1, 1) - datetime(2026, 1, 1, tzinfo=timezone.utc)` 的结果是？",
+          "title": "naive 与 aware datetime 相减",
+          "options": [
+            {
+              "key": "A",
+              "text": "timedelta(days=0)，因为两者时刻相同"
+            },
+            {
+              "key": "B",
+              "text": "timedelta(hours=-8)，按 UTC+8 本地时区自动换算"
+            },
+            {
+              "key": "C",
+              "text": "抛 TypeError: can't subtract offset-naive and offset-aware datetimes"
+            },
+            {
+              "key": "D",
+              "text": "抛 ValueError"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "Python 拒绝在 naive 与 aware 之间做算术，因为无法确定 naive 到底代表哪个时区，静默猜测会埋下 8 小时级的事故。正确做法：全链路统一用 aware（推荐 UTC 存储，展示时再转本地），或在边界处显式 replace(tzinfo=...) / astimezone(...) 明确语义。"
+        },
+        {
+          "id": "py4-ex05",
+          "stem": "执行 `python script.py` 时，`import mymod` 的搜索顺序是？",
+          "title": "sys.path 的搜索顺序",
+          "options": [
+            {
+              "key": "A",
+              "text": "当前工作目录 → 标准库 → site-packages"
+            },
+            {
+              "key": "B",
+              "text": "脚本所在目录（sys.path[0]）→ PYTHONPATH → 标准库 → site-packages"
+            },
+            {
+              "key": "C",
+              "text": "标准库 → 脚本所在目录 → site-packages"
+            },
+            {
+              "key": "D",
+              "text": "只搜索 site-packages"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "关键点：sys.path[0] 在脚本模式下是脚本所在目录，而 python -c 或交互式下才是当前工作目录（cwd）。这一差异导致「开发机上 python src/app.py 正常、装成包后 import 失败」的经典事故。此外 -m 模式会把 cwd 插到最前，进一步改变结果。排查手段：import sys; print(sys.path) 与 python -X importtime。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "04-json-serialization-boundaries.md",
+      "code": "import json\nfrom datetime import datetime, timezone\n\ndef enc(o):\n    if isinstance(o, datetime):\n        return o.‹1›()\n    if isinstance(o, (set, ‹2›)):\n        return sorted(o)              # 排序保证确定性！\n    raise TypeError(f\"不可序列化: {type(o).__name__}\")\n\njson.dumps({\"t\": datetime.now(timezone.utc), \"tags\": {\"b\", \"a\"}}, default=enc, ensure_ascii=False)\n# '{\"t\": \"2026-10-07T...\", \"tags\": [\"a\", \"b\"]}'",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "isoformat",
+          "line": 6
+        },
+        {
+          "id": "b2",
+          "answer": "frozenset",
+          "line": 7
+        }
+      ],
+      "distractors": [
+        "preprocessing",
+        "properties"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

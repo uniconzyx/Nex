@@ -1,0 +1,124 @@
+{
+  "chapter": "bd-ch02",
+  "subject": "bigdata",
+  "title": "MapReduce 原理与 YARN 调度（bd-ch02）",
+  "fingerprint": "387061c9ab",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "Map 阶段：文本 -> (word, 1) 中间 kv 流",
+      "body": "把 Reducer 的输入当成单值 (k, v)"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于 MapReduce 中 Shuffle 阶段的描述，下列哪项正确？",
+      "body": "bd-ch02 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "把 Reducer 的输入当成单值 (k, v)",
+          "right": "在 reduce 里遍历 values 累加/汇总；在 SQL 里理解成「GROUP BY key 后对该组多行做聚合」。"
+        },
+        {
+          "id": 2,
+          "left": "认为 Combiner 一定能用、或把它当 Reducer 的替代",
+          "right": "可结合的 sum/count/min/max 才配 Combiner；求均值应传 (sum,count) 由 Reducer 相除；绝不能把有副作用（发消息、全局计数）的逻辑放进 Combiner。"
+        },
+        {
+          "id": 3,
+          "left": "默认哈希分区会自动均衡、不会倾斜",
+          "right": "识别热 key（看 counters 里某 reduce 输入远大于均值）；手写 Partitioner 把热 key 单独路由，或用「加盐（salting）：热 key 加随机后缀打散到多 reduce，再二次聚合」。"
+        },
+        {
+          "id": 4,
+          "left": "reduce 数随便设，越大越快",
+          "right": "按 输入量 / 256MB~1GB 估；且 reduce 数一旦定下，因为默认哈希是取模而非一致性哈希，改 R 会让几乎所有 key 重新分区（全量 shuffle），所以上线前就要估准。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "下列关于 MapReduce Shuffle 的说法，哪一项是正确的？",
+          "title": "关于 MapReduce 中 Shuffle 阶段的描述，下列哪项正确？",
+          "options": [
+            {
+              "key": "A",
+              "text": "Shuffle 只在 Map 阶段发生，Reduce 阶段不再涉及磁盘 IO"
+            },
+            {
+              "key": "B",
+              "text": "Shuffle 横跨 Map 输出与 Reduce 输入：Map 端排序+溢写，Reduce 端 copy+归并"
+            },
+            {
+              "key": "C",
+              "text": "Shuffle 是 Map 执行完毕之后才开始把数据发给 Reduce"
+            },
+            {
+              "key": "D",
+              "text": "Shuffle 只对 value 排序，不对 key 排序"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "Shuffle 横跨两端：Map 端把 kv 写环形缓冲区、达到阈值排序并溢写(spill)、结束前归并；Reduce 端 copy 拉取、merge 归并、再喂给 reduce。它不是 Map 之后才发生，也需要磁盘 IO，且是 (partition, key) 两级排序。"
+        },
+        {
+          "id": "q3",
+          "stem": "在 YARN 架构里，提交一个 MapReduce 作业后，由哪一个组件负责：向 ResourceManager 申请资源容器、在 NodeManager 上启动/监控 Task、并向 RM 汇报作业进度？",
+          "title": "YARN 中哪个角色负责「每作业一个、向 RM 申请容器并启停 Task」？",
+          "options": [
+            {
+              "key": "A",
+              "text": "ResourceManager"
+            },
+            {
+              "key": "B",
+              "text": "NodeManager"
+            },
+            {
+              "key": "C",
+              "text": "ApplicationMaster"
+            },
+            {
+              "key": "D",
+              "text": "SecondaryNameNode"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "ApplicationMaster 是每作业一个的角色，负责应用级调度与容错：向 RM 申请容器、在 NM 上启停 task、盯进度。RM 做全局调度，NM 只管容器生命周期，SecondaryNameNode 属于 HDFS 而非 YARN。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "01-mapreduce-dataflow.md",
+      "code": "def partition(key, num_reduce):\n    h = 0\n    for ch in key:\n        h = (h * 31 + ord(ch)) & 0x7fffffff\n    return h % num_reduce\n\nR = 3\nwords = [\"hello\", \"world\", \"bigdata\", \"of\", \"data\", \"map\", \"reduce\", \"spark\"]\nfor w in words:\n    print(f\"{w:10s} -> ‹1› {partition(w, R)}\")\nprint(f\"--num_reducers={R}\")",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "reducer",
+          "line": 10
+        }
+      ],
+      "distractors": [
+        "history",
+        "hits"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

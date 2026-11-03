@@ -1,0 +1,76 @@
+{
+  "chapter": "cpp-ch17",
+  "subject": "cpp",
+  "title": "元编程与类型萃取：type_traits / constexpr / SFINAE / concept",
+  "fingerprint": "eeec9828f8",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "std::enableif 与 SFINAE 重载选择（整型 vs 非整型）",
+      "body": "关于 SFINAE，下列说法正确的是"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于 SFINAE，下列说法正确的是",
+      "body": "cpp-ch17 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "选择**正确**的描述。",
+          "title": "关于 SFINAE，下列说法正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "SFINAE 能把函数体内的任何错误都变成软失败"
+            },
+            {
+              "key": "B",
+              "text": "模板参数替换阶段发生的失败会被忽略，该模板从候选集移除"
+            },
+            {
+              "key": "C",
+              "text": "enableif 的条件不必互斥，编译器会自动补全"
+            },
+            {
+              "key": "D",
+              "text": "函数模板支持偏特化来模拟约束"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "SFINAE 仅作用于替换阶段；函数体错误是硬错误。enableif 条件需互斥且完备；函数模板不支持偏特化（只能重载/全特化）。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "cpp",
+      "file": "05-template-meta-practical-recipes.md",
+      "code": "#include <type_traits>\n\ntemplate <typename T>\nvoid process(T&& v) {\n    if constexpr (std::‹1›<std::remove_reference_t<T>>) {\n        // 整数走这条路\n    } else if constexpr (std::‹2›<std::remove_reference_t<T>>) {\n        // 浮点走这条\n    } else {\n        // 其他\n    }\n}",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "is_integral_v",
+          "line": 5
+        },
+        {
+          "id": "b2",
+          "answer": "is_floating_point_v",
+          "line": 7
+        }
+      ],
+      "distractors": [
+        "capacity",
+        "emplace_back"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

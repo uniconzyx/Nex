@@ -1,0 +1,129 @@
+{
+  "chapter": "agent-ch07",
+  "subject": "agent",
+  "title": "轻量化微调：LoRA / QLoRA 与数据工程",
+  "fingerprint": "7373bfa477",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "低秩近似的参数量与误差：LoRA 的数学前提",
+      "body": "训练 loss 很低但线上一测就露馅，模型在「背输入」而不是学回答"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "α=32、r=16 时把 rank 调到 32 但 α 不变，增量幅度和有效学习率怎么变",
+      "body": "agent-ch07 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "训练 loss 很低但线上一测就露馅，模型在「背输入」而不是学回答",
+          "right": "标签整体右移一位，非 assistant 位置全部置 -100（含 pad）；上训练前打印前 3 条样本的 labels，肉眼确认 prompt 段全是 -100。只把 assistant 段的预测位放进损失。"
+        },
+        {
+          "id": 2,
+          "left": "留出集准确率 92%，上线却不如 RAG 基线，指标是「虚高」的",
+          "right": "先 MinHash+LSH 找候选，再用精确 Jaccard + 人工抽 30 对校准阈值去重； 留出集必须与训练集严格分离（按会话/按来源切，而不是随机行切）；评估前先复查有无泄漏。"
+        },
+        {
+          "id": 3,
+          "left": "按来源 5:4:1 配比，训练完发现「发票」类几乎全错",
+          "right": "在「来源 × 类别」的可行域里搜索混合比例，不是凭手感拍来源权重； 报表同时给「来源比例 / 类别比例 / 唯一率」，小类池样本不足时先补数据，而不是硬拉比例（会重复）。"
+        },
+        {
+          "id": 4,
+          "left": "24GB 单卡一开训就 OOM，第一反应是降 rank，结果表达力砍没了",
+          "right": "救 OOM 的顺序是「先开梯度检查点（8GB→1GB）→ 降 seq/降 batch → 最后才降 rank」； 再不行用 paged optimizer 把 Adam 状态分页到 CPU。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "LoRA 前向为 h = W0·x + (α/r)·B·A·x。当前 α=32、r=16（缩放=2.0）。若只把 r 调到 32、α 保持 32 不变，下列说法正确的是？",
+          "title": "α=32、r=16 时把 rank 调到 32 但 α 不变，增量幅度和有效学习率怎么变",
+          "options": [
+            {
+              "key": "A",
+              "text": "缩放变为 1.0，增量幅度减半，但适配器容量翻倍，整体表达力必提升"
+            },
+            {
+              "key": "B",
+              "text": "缩放变为 0.5，增量幅度减半；若学习率不变，等效学习率也跟着减半，可能欠拟合"
+            },
+            {
+              "key": "C",
+              "text": "缩放变为 1.0，与容量无关，因此调 rank 不会影响训练动态"
+            },
+            {
+              "key": "D",
+              "text": "缩放变为 0.5，但 B/A 初始化会自适应补偿，等效学习率不变"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "考点：α/r 缩放与有效学习率的关系，以及「改 rank 也要改 α」的工程惯例。"
+        },
+        {
+          "id": "q1",
+          "stem": "某业务要做一个「公司制度问答」助手：制度每周更新、回答必须能指向具体条款原文（可审计）、月请求量约 3 万。下列哪种方案最合适？",
+          "title": "知识每天变且需引用出处的场景，该微调还是 RAG",
+          "options": [
+            {
+              "key": "A",
+              "text": "每周重训一次 LoRA，把最新制度塞进权重，省掉检索"
+            },
+            {
+              "key": "B",
+              "text": "全参微调一个专用小模型，靠模型记忆条款"
+            },
+            {
+              "key": "C",
+              "text": "用 RAG：每周重新索引，检索片段作为出处直接展示"
+            },
+            {
+              "key": "D",
+              "text": "先微调学「语气」，再用 RAG 供「知识」，两者组合"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "考点：微调 vs RAG 判定树的顺序——先问知识频率与溯源，再算成本。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "01-decision.md",
+      "code": "# 决策函数的骨架：先问知识频率与溯源，再问改的是知识还是行为\ndef route(knowledge_freq: str, need_citation: bool,\n          change: str, monthly_q: int) -> str:\n    if knowledge_freq in (\"‹1›\", \"weekly\") or need_citation:\n        return \"RAG\"\n    if change == \"‹2›\":                     # 格式/语气/工具协议\n        return \"FT\" if monthly_q >= 100_000 else \"RAG+Prompt\"  # 低频先别硬上\n    # 剩下是「知识但稳定」的情况\n    return \"RAG\" if monthly_q < 100_000 else \"FT\"  # 高频稳定才摊得回成本",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "daily",
+          "line": 4
+        },
+        {
+          "id": "b2",
+          "answer": "behavior",
+          "line": 6
+        }
+      ],
+      "distractors": [
+        "grad",
+        "groupby"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

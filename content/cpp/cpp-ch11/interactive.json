@@ -1,0 +1,52 @@
+{
+  "chapter": "cpp-ch11",
+  "subject": "cpp",
+  "title": "异常处理与断言：try/catch、noexcept 与契约",
+  "fingerprint": "abbaf8243a",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "try/catch 多重捕获与匹配顺序（派生类须在前）",
+      "body": "关于栈展开（stack unwinding），正确的是"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于栈展开（stack unwinding），正确的是",
+      "body": "cpp-ch11 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "选择**正确**的描述。",
+          "title": "关于栈展开（stack unwinding），正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "异常发生时，只有抛异常的那个函数里的对象会被析构"
+            },
+            {
+              "key": "B",
+              "text": "栈展开期间，从 throw 点到 catch 之间沿途的局部对象按其构造逆序被析构"
+            },
+            {
+              "key": "C",
+              "text": "try 块本身在运行时会产生异常检测指令，因此有性能开销"
+            },
+            {
+              "key": "D",
+              "text": "catch 子句按派生类在前、基类在后的顺序匹配，与书写顺序无关"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "栈展开从 throw 点逐帧向上，逆序析构沿途局部对象（RAII 异常安全的基础）。异常路径才有成本，正常路径无异常检测指令（零开销原则）；catch 匹配按书写顺序取第一个可转换的子句，故派生类应写在基类前。"
+        }
+      ]
+    }
+  ]
+}

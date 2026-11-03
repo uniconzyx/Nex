@@ -1,0 +1,79 @@
+{
+  "chapter": "cpp-ch19",
+  "subject": "cpp",
+  "title": "工程化与测试：CMake、单元测试与 CI",
+  "fingerprint": "6f23089c4d",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "自研极简单元测试框架：TEST 宏 + 断言计数 + 失败定位（实测全通过）",
+      "body": "PUBLIC / PRIVATE / INTERFACE 的传播判定"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "PUBLIC / PRIVATE / INTERFACE 的传播判定",
+      "body": "cpp-ch19 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "cpp-ch19-ex01",
+          "stem": "已知三个目标的关系如下（`core` 的公开头目录为 `core/include`）： ```cmake cmake_minimum_required(VERSION 3.20) project(demo LANGUAGES CXX) add_library(core STATIC src/core.cpp) target_include_directories(core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include) add_library(math STATIC src/math.cpp) target_include_directories(math PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/math/include) target_link_libraries(math PRIVATE core) add_exe…",
+          "title": "PUBLIC / PRIVATE / INTERFACE 的传播判定",
+          "options": [
+            {
+              "key": "A",
+              "text": "能编译通过：PRIVATE 只影响 core 自己，math 是 core 的使用者，使用要求照常传给 math，再由 math 传给 app"
+            },
+            {
+              "key": "B",
+              "text": "编译失败：math 以 PRIVATE 链接 core，使用要求不再向 math 的消费者传播，app 的 include 路径里没有 core/include"
+            },
+            {
+              "key": "C",
+              "text": "能编译通过：只要 install(EXPORT) 导出过 core，任何目标都能看到 core 的头文件"
+            },
+            {
+              "key": "D",
+              "text": "取决于 app 是不是 STATIC 库：可执行文件看不到，静态库能看到"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "PRIVATE 的含义是「依赖只对自己可见，不作为使用要求导出」。因此 math 的 INTERFACEINCLUDEDIRECTORIES 为空，app 链接 math 时不会继承到 core/include，直接包含必然报 No such file or directory。这正是 ex10 图 B 的结论：把 PRIVATE 改回 PUBLIC，app 才能看到。A 错在把 PRIVATE 理解成「只对 core 自己生效」，忽略了「不向消费者传播」这层；C 错在 install(EXPORT) 不创造可见性，它只是把已有的使用要求写进导出文件；D 错在可见性由依赖边的关键字决定，与目…"
+        },
+        {
+          "id": "cpp-ch19-ex05",
+          "stem": "某同学写了两个「看起来一样」的用例： 写法甲（夹具）： ```cpp // 夹具：每个用例一个全新实例 struct CounterFixture { int value = -1; // 故意给个脏初值，验证 SetUp 一定被调用 void SetUp() { value = 0; } void TearDown() {} }; #define TEST_F(Fx, name) \\ static void name(Fx& self); \\ static mini::Registrar mini_freg_##name(#name, [] { \\ Fx self; self.SetUp(); name(self); self.TearDown(); \\ }); \\ static void name(Fx& self) TEST_F(CounterFixture, add_once) …",
+          "title": "夹具隔离与静态状态泄漏",
+          "options": [
+            {
+              "key": "A",
+              "text": "甲中两个用例都会通过；乙中第二个断言失败，因为 static 变量的修改会跨用例保留"
+            },
+            {
+              "key": "B",
+              "text": "甲中 addtwice 会失败，因为夹具实例在用例之间共享"
+            },
+            {
+              "key": "C",
+              "text": "乙的问题只在于命名不规范，整包跑和单跑结果一致"
+            },
+            {
+              "key": "D",
+              "text": "两种写法等价，只要测试框架按用例名排序执行就没有区别"
+            }
+          ],
+          "correct": [
+            "A"
+          ],
+          "explain": "TESTF 宏在每次执行前构造一个全新的 CounterFixture 并调用 SetUp() 复位，所以两个用例各自从 0 开始、都通过（B 错）。乙的 static int sharedtotal 是跨用例存活的状态，第二次执行时读到的是上一次留下的值（10 而非 5），这就是典型的「单独跑通过、整包跑失败」（C 错）。这类假失败与执行顺序、用例名排序无关，只与「谁在用例之间活下来」有关（D 错）。排查顺序：静态/全局变量、单例、临时文件、环境变量、全局 locale。"
+        }
+      ]
+    }
+  ]
+}

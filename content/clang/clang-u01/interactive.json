@@ -1,0 +1,76 @@
+{
+  "chapter": "clang-u01",
+  "subject": "clang",
+  "title": "指针与地址运算",
+  "fingerprint": "17379a5043",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "sizeof：数组与指针的根本差异",
+      "body": "数组退化的例外"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "数组退化的例外",
+      "body": "clang-u01 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "对于 `int a[10];`，下列哪些表达式中 `a` **不会**退化为指针？（多选）",
+          "title": "数组退化的例外",
+          "options": [
+            {
+              "key": "A",
+              "text": "sizeof(a)"
+            },
+            {
+              "key": "B",
+              "text": "&a"
+            },
+            {
+              "key": "C",
+              "text": "a + 1"
+            },
+            {
+              "key": "D",
+              "text": "a[3]"
+            }
+          ],
+          "correct": [
+            "A",
+            "B"
+          ],
+          "explain": "数组名退化的例外只有 sizeof 与取地址 & 两个上下文。sizeof(a) 得整个数组字节数；&a 得数组指针 int()[10]。a + 1 与 a[3]（等价 (a+3)）都发生退化为 int。"
+        },
+        {
+          "id": "q2",
+          "stem": "`int * const p = &x;` 之后，下列哪项是**非法**的？",
+          "title": "const 的位置",
+          "options": [
+            {
+              "key": "A",
+              "text": "p = 10;"
+            },
+            {
+              "key": "B",
+              "text": "p = &y;"
+            },
+            {
+              "key": "C",
+              "text": "printf 读取 p"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "const 在 右侧，锁住的是指针本身：p 不能重新指向，但 p 可改。所以改 p 与读取都合法，p = &y; 编译错误。"
+        }
+      ]
+    }
+  ]
+}

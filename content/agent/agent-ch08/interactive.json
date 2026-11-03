@@ -1,0 +1,124 @@
+{
+  "chapter": "agent-ch08",
+  "subject": "agent",
+  "title": "Transformer 核心机理：能白板推一遍才算懂",
+  "fingerprint": "b9be0c19ff",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "手写单头缩放点积注意力：形状、权重归一与缩放的作用",
+      "body": "上线长上下文直接 OOM，因为只算了模型权重没算 KV Cache"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "缩放因子 √dk 到底在解决什么问题",
+      "body": "agent-ch08 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "上线长上下文直接 OOM，因为只算了模型权重没算 KV Cache",
+          "right": "上线前用 KV 账本计算器按「最大上下文 × 峰值并发 × MHA/GQA/MQA」先估一遍； 优先选 GQA/MQA 或 fp8 的 KV；"
+        },
+        {
+          "id": 2,
+          "left": "训练初期 loss 纹丝不动，忘了除以 √dk",
+          "right": "所有缩放点积注意力必带 / √dk；用 numpy 自检时打印分数矩阵的方差， 确认它没有被推到几百分的量级；若观察到早期不收敛，先查缩放与初始化，再调学习率。"
+        },
+        {
+          "id": 3,
+          "left": "因果 mask 加在 softmax 之后，前缀输出随未来 token 变化",
+          "right": "用上三角 -inf 偏置在 softmax 前注入；写单测验证「遮掉未来 token 后前缀输出 完全不变」（示例 ex03 的判据）。任何自回归结构（含 cross-attention 的因果变体）都先过这关。"
+        },
+        {
+          "id": 4,
+          "left": "可学习位置编码直接用到更长的序列，越界报错或静默退化",
+          "right": "若用可学习位置编码，推理长度必须 ≤ 训练长度，超出要截断或滑窗； 需要长上下文外推优先选正弦或 RoPE（并配合 NTK 缩放等技巧）；上线前用超长输入做边界测试。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "在缩放点积注意力 `softmax(QKᵀ/√d_k)V` 中，除以 √d_k 的主要作用是什么？",
+          "title": "缩放因子 √dk 到底在解决什么问题",
+          "options": [
+            {
+              "key": "A",
+              "text": "让注意力权重更集中在最相似的 Token 上，从而提升准确率"
+            },
+            {
+              "key": "B",
+              "text": "把点积的方差从约 dk 拉回到约 1，防止高维下 softmax 进入饱和区、梯度消失"
+            },
+            {
+              "key": "C",
+              "text": "保证每行注意力权重之和恰好等于 1"
+            },
+            {
+              "key": "D",
+              "text": "减少 Q/K/V 投影矩阵的参数量"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "考点：缩放因子是稳定性手段而非准确性修正，根因是高维点积方差爆炸。"
+        },
+        {
+          "id": "q1",
+          "stem": "某模型用 MHA 时 32k 上下文单条请求 KV Cache 约 16GB，改用 GQA（h_g=8，原 h=32）后显存大幅下降。下降主要来自哪一项？",
+          "title": "GQA 相比 MHA 为什么更省显存",
+          "options": [
+            {
+              "key": "A",
+              "text": "GQA 把注意力头数从 32 减到 8，计算量变小"
+            },
+            {
+              "key": "B",
+              "text": "GQA 让多个 Query 头共享同一套 K/V，每 Token 缓存的 KV 头数从 h 降到 hg"
+            },
+            {
+              "key": "C",
+              "text": "GQA 把词表嵌入也压缩了"
+            },
+            {
+              "key": "D",
+              "text": "GQA 把 FFN 的 dff 减小了"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "考点：KV Cache 显存随缓存的 KV 头数线性增长，GQA/MQA 通过共享 K/V 削减它。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "03-params-inference.md",
+      "code": "def sample(logits, T=1.0, top_p=1.0, rng=np.random):\n    z = (logits - logits.max()) / T\n    p = np.exp(z); p /= p.sum()\n    if top_p < 1.0:                         # 核采样：按概率降序累加截到 p\n        order = np.argsort(-p)\n        cum = np.cumsum(p[order])\n        keep = order[cum <= top_p]\n        mask = np.zeros_like(p); mask[keep] = 1\n        p *= mask; p /= p.sum()\n    return rng.‹1›(len(p), p=p)           # 示例 ex09：固定种子可复现",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "choice",
+          "line": 10
+        }
+      ],
+      "distractors": [
+        "target",
+        "tensor"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

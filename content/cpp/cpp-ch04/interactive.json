@@ -1,0 +1,71 @@
+{
+  "chapter": "cpp-ch04",
+  "subject": "cpp",
+  "title": "指针与内存管理：指针运算、new/delete 与悬垂",
+  "fingerprint": "5c6db44a5d",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "取地址与解引用",
+      "body": "关于指针与内存，正确的是"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于指针与内存，正确的是",
+      "body": "cpp-ch04 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "选择**正确**的描述。",
+          "title": "关于指针与内存，正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "new int[3] 必须用 delete 释放"
+            },
+            {
+              "key": "B",
+              "text": "delete 后的指针应立即置 nullptr 更安全，且最好用智能指针消除手动管理"
+            },
+            {
+              "key": "C",
+              "text": "返回局部变量的地址是安全的"
+            },
+            {
+              "key": "D",
+              "text": "未初始化的裸指针默认指向 0"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "new[] 配 delete[]；返回局部地址悬垂；未初始化指针指向随机地址。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "cpp",
+      "file": "02-dynamic-memory.md",
+      "code": "#include <cstddef>\n#include <iostream>\n#include <memory>\n\nstruct Tracked {\n    int v;\n    explicit Tracked(int x) : v(x) { std::cout << \"ctor \" << v << \"\\n\"; }\n    ~Tracked() { std::cout << \"dtor \" << v << \"\\n\"; }\n};\n\nint main() {\n    Tracked* one = new Tracked(1);\n    delete one;                                  // ctor 1 / dtor 1\n\n    Tracked* arr = new Tracked[3]{Tracked(10), Tracked(11), Tracked(12)};\n    delete[] arr;                                // 每个元素各析构一次（共 3 次 dtor）\n\n    {\n        auto up = std::make_unique<Tracked>(99); // 异常安全：栈展开时自动 delete\n        std::cout << \"‹1›=\" << up->v << \"\\n\";\n    }                                            // 此处 dtor 99\n\n    std::cout << \"raw_size=\" << sizeof(Tracked) << \"\\n\";\n}",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "inside",
+          "line": 20
+        }
+      ],
+      "distractors": [
+        "data",
+        "data_"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

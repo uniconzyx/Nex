@@ -1,0 +1,105 @@
+{
+  "chapter": "ml-ch03",
+  "subject": "ml",
+  "title": "神经网络：推理、训练与多分类",
+  "fingerprint": "38cfb39933",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "前向传播手算：一个神经元到底在算什么",
+      "body": "忘记清零梯度，第二次迭代开始梯度越滚越大"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "哪种改动真正引入了非线性",
+      "body": "ml-ch03 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "忘记清零梯度，第二次迭代开始梯度越滚越大",
+          "right": "每个训练 step 固定顺序 zerograd → forward → loss → backward → step；手写时每轮重新创建梯度数组，或显式 dW.fill(0)。"
+        },
+        {
+          "id": 2,
+          "left": "softmax / sigmoid 直接算 exp，遇到大 logits 输出 nan",
+          "right": "softmax 先减最大值 z - z.max()；交叉熵用 log-sum-exp 形式，或把概率 clip 到 [1e−12, 1−1e−12]；混合精度训练时把 softmax/CE 放在 float32。"
+        },
+        {
+          "id": 3,
+          "left": "输出层与损失错配：回归套 sigmoid、分类用 MSE",
+          "right": "按任务配对——回归 linear + MSE/MAE，二分类 sigmoid + BCE，多分类 softmax + CE，多标签每维 sigmoid + BCE。"
+        },
+        {
+          "id": 4,
+          "left": "训练时开 Dropout，推理时忘了关",
+          "right": "把「训练/推理模式」做成显式参数并在验证前切换；为模型加一个单元测试：eval 模式下同一输入两次前向必须逐位相同。BatchNorm 的 running stats 同理，冻结层时也要冻结它的统计量。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "一个两层全连接网络，隐藏层与输出层都不带激活函数。以下哪种改动会让它的假设空间**不再等价于单层线性模型**？",
+          "title": "哪种改动真正引入了非线性",
+          "options": [
+            {
+              "key": "A",
+              "text": "把所有权重初始化为 0"
+            },
+            {
+              "key": "B",
+              "text": "在隐藏层后加一个 ReLU"
+            },
+            {
+              "key": "C",
+              "text": "把偏置 b 全部设为 0"
+            },
+            {
+              "key": "D",
+              "text": "把隐藏层宽度从 16 增加到 1024"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "考「仿射复合仍是仿射」这一证明，以及非线性来自哪里。"
+        },
+        {
+          "id": "q2",
+          "stem": "关于输出层激活与损失函数的配对，下列哪一项是**错误**的？",
+          "title": "输出层与损失的匹配",
+          "options": [
+            {
+              "key": "A",
+              "text": "回归任务：输出层用恒等（linear），损失用 MSE 或 MAE"
+            },
+            {
+              "key": "B",
+              "text": "二分类：输出层用 sigmoid，损失用二元交叉熵"
+            },
+            {
+              "key": "C",
+              "text": "多分类互斥任务：输出层用 softmax，损失用分类交叉熵"
+            },
+            {
+              "key": "D",
+              "text": "回归任务：输出层用 sigmoid，损失用 MSE，可以把预测压到 0~1 更稳定"
+            }
+          ],
+          "correct": [
+            "D"
+          ],
+          "explain": "考输出层、损失、标签形状三者必须作为一组匹配。"
+        }
+      ]
+    }
+  ]
+}

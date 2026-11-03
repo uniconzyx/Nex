@@ -1,0 +1,97 @@
+{
+  "chapter": "mw-ch01",
+  "subject": "middleware",
+  "title": "Redis 数据结构与底层编码（mw-ch01）",
+  "fingerprint": "df3b743ccc",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "SDS 动态字符串：长度前缀、预分配与二进制安全",
+      "body": "把 SDS 的二进制安全归功于 \\0 结尾"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "SDS 相比 C 字符串的核心优势",
+      "body": "mw-ch01 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "把 SDS 的二进制安全归功于 \\0 结尾",
+          "right": "回答「SDS 优点」时把「二进制安全」的解释锚定在 len 字段上，并说明保留 \\0 仅为复用 strlen 类 C 函数。"
+        },
+        {
+          "id": 2,
+          "left": "记错 Hash/ZSet/Set 编码切换的「且/或」关系",
+          "right": "被问阈值时一律按「且」表述；排查「热 Hash 突然变 hashtable」优先查是否有某个 value 超过 hash-max-listpack-value=64 字节。"
+        },
+        {
+          "id": 3,
+          "left": "以为 embstr 是可原地修改的紧凑串",
+          "right": "高频写短串直接用 SET 覆盖或接受 embstr→raw 的转换；解释 44 字节分界时说明它来自 64B jemalloc 块减去 robj(16)+sdshdr8(3)+\\0(1)。"
+        },
+        {
+          "id": 4,
+          "left": "渐进式 rehash 期间仍向 ht[0] 写数据",
+          "right": "描述 rehash 时明确「新增走 ht[1]、查找查两张表、搬完才互换」，避免写成「边搬边写旧表」。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "关于 Redis 的 SDS（简单动态字符串），下列说法正确的是？",
+          "title": "SDS 相比 C 字符串的核心优势",
+          "options": [
+            {
+              "key": "A",
+              "text": "SDS 以 \\0 结尾，因此实现二进制安全"
+            },
+            {
+              "key": "B",
+              "text": "获取字符串长度需要 O(n) 扫描"
+            },
+            {
+              "key": "C",
+              "text": "SDS 用 len 字段记录长度，获取长度 O(1) 且二进制安全"
+            },
+            {
+              "key": "D",
+              "text": "SDS 不支持预分配，每次修改都重新分配内存"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "SDS 的二进制安全来自 len 字段（按字节数解析），而非 \\0 结尾；\\0 仅为兼容 C 函数。获取长度 O(1)；SDS 通过预分配与惰性释放减少重分配次数。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "01-sds-and-string.md",
+      "code": "class SDS:\n    def __init__(self, s):\n        self.buf = bytearray(s.encode(\"utf-8\", \"surrogatepass\"))\n        self.len = len(self.buf)\n        self.alloc = self.len\n    def _ensure(self, need):\n        if self.alloc >= need:\n            return\n        if self.len < 1024 * 1024:\n            newalloc = need * 2\n        else:\n            newalloc = self.alloc + 1024 * 1024\n        if newalloc < need:\n            newalloc = need\n        self.alloc = newalloc\n    def append(self, s):\n        b = s.encode(\"utf-8\", \"surrogatepass\")\n        self._ensure(self.len + len(b))\n        self.buf.extend(b)\n        self.len = len(self.buf)\n    def __repr__(self):\n        return \"len=%d alloc=%d ‹1›=%d bytes=%s\" % (self.len, self.alloc, self.alloc - self.len, list(self.buf))\n\ns = SDS(\"hi\")\nprint(\"init:\", s)\ns.append(\"A\")          # len 2 -> need 3 (<1MB) -> alloc = 6\nprint(\"after append 'A':\", s)\ns.append(\"B\" * 10)\nprint(\"after append 10B:\", s)\ns2 = SDS(\"a\\x00b\")     # 含 NUL，二进制安全\nprint(\"binary-safe len (should be 3):\", s2.len)\nprint(\"c-string strlen would be:\", len(s2.buf.split(b\"\\x00\")[0]))",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "free",
+          "line": 22
+        }
+      ],
+      "distractors": [
+        "max_batch",
+        "max_norm"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

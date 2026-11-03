@@ -6,15 +6,17 @@
  *  依赖：react >= 18、framer-motion >= 10
  *  视觉：液态玻璃 · 冰蓝奶白（底 #EBF4FA，卡 bg-white/60 + blur(12px)）
  *
- *  三个模块
+ *  四个模块
  *    01  AvalancheSandbox   沙盒推演  TTL 抖动 vs 缓存雪崩
  *    02  SingleflightDebug  代码 Debug  singleflight 补全
- *    03  CacheBossRaid      闯关试炼  三道真题 BOSS 战
+ *    03  DoubleDeleteSeq    时序连线  延迟双删的脏窗口（playbook B）
+ *    04  CacheBossRaid      闯关试炼  三道真题 BOSS 战
  *
  *  数据锚点（全部可回溯，不自创数值）
  *    01 → content/middleware/mw-ch04/examples/ex08-ttl-jitter-benchmark.json
  *    02 → examples/ex04 / ex05（已勘误的屏障式并发模型：200 → 1，−99.5%）
- *    03 → exercises.json（只读取题干，**文件不修改**；选项运行时确定性洗牌）
+ *    03 → concept/03-consistency-update.md（延迟双删六步 + 回填竞态）
+ *    04 → exercises.json（只读取题干，**文件不修改**；选项运行时确定性洗牌）
  *
  *  为什么玻璃质感写内联 style 而不是 Tailwind 类
  *    为了让这个文件在没有装 Tailwind 的工程里也能跑起来。等价的 Tailwind 写法：
@@ -1945,6 +1947,584 @@ export const CacheBossRaid: React.FC = () => {
   );
 };
 
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  04 · 时序连线   延迟双删：把并发交错排成时间轴，看脏数据怎么产生又怎么自愈
+ *  ─────────────────────────────────────────────────────────────────────────
+ *  数据锚点：content/middleware/mw-ch04/concept/03-consistency-update.md
+ *    「延迟双删补救顺序 A：删缓存 → 更新库 → 休眠一小段时间 → 再删一次缓存」
+ *    「回填竞态：读 miss → 查 DB → 写缓存三步非原子，中间发生的写会让回填的是旧值」
+ *  玩法 B：拖事件卡进时间轴 → 按时序回放 → 缓存/库两格逐帧变化 → 终态判定
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+interface Ev {
+  id: number;
+  who: 'A' | 'B';
+  title: string;
+  detail: string;
+  /** 该步执行后缓存里的值：∅ 表示已失效 */
+  cache: string;
+  /** 该步执行后库里的值 */
+  db: string;
+  /** 关键节点才给判词 */
+  note?: string;
+  tone?: string;
+}
+
+/**
+ * 最坏情形下的六步。B 的回填落在「删缓存之后、第二次删除之前」——
+ * 这正是延迟双删要覆盖的窗口，所以第 3、4 步的先后不能调换。
+ */
+const DD_EVENTS: Ev[] = [
+  { id: 1, who: 'A', title: 'A 删除缓存 key', detail: '写线程让缓存先失效', cache: '∅', db: 'v1' },
+  { id: 2, who: 'B', title: 'B 缓存 miss，读到库里的 v1', detail: '读线程此刻拿到旧值', cache: '∅', db: 'v1' },
+  { id: 3, who: 'A', title: 'A 把库更新成 v2', detail: '新值落库', cache: '∅', db: 'v2' },
+  {
+    id: 4,
+    who: 'B',
+    title: 'B 把 v1 回填进缓存',
+    detail: '最坏情形：回填正好落在写库之后',
+    cache: 'v1',
+    db: 'v2',
+    note: '此刻已脏：缓存 v1，库 v2',
+    tone: C.coral,
+  },
+  {
+    id: 5,
+    who: 'A',
+    title: '延迟 ~500ms 后再删一次缓存',
+    detail: '第二次删除专门清这次回填的旧值',
+    cache: '∅',
+    db: 'v2',
+    note: '脏值被清掉',
+    tone: C.amber,
+  },
+  {
+    id: 6,
+    who: 'B',
+    title: '下一次读 miss，回填 v2',
+    detail: '读到的已经是新值',
+    cache: 'v2',
+    db: 'v2',
+    note: '自愈完成',
+    tone: C.mint,
+  },
+];
+
+/** 干扰卡：把「删缓存」换成「更新缓存」——文档明说这样会引入并发写覆盖 */
+const DD_DECOY: Ev = {
+  id: 9,
+  who: 'A',
+  title: 'A 直接把缓存更新成 v2（不删）',
+  detail: '看似更快，实则埋了并发写乱序',
+  cache: 'v2',
+  db: 'v2',
+};
+
+const DD_ALL = [...DD_EVENTS, DD_DECOY];
+const DD_N = DD_EVENTS.length;
+
+const StoreCell: React.FC<{ name: string; val: string; accent: string; flash: number }> = ({
+  name,
+  val,
+  accent,
+  flash,
+}) => {
+  const stale = val === 'v1';
+  return (
+    <div
+      style={glass({
+        flex: 1,
+        minWidth: 0,
+        padding: '8px 11px',
+        borderLeft: `3px solid ${val === '∅' ? C.line : stale ? C.coral : accent}`,
+        background: val === '∅' ? 'rgba(255,255,255,0.42)' : 'rgba(255,255,255,0.74)',
+      })}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+        <span style={{ fontFamily: MONO, fontSize: 10, color: C.mute, letterSpacing: 0.4 }}>{name}</span>
+        <motion.span
+          key={`${name}-${val}-${flash}`}
+          initial={{ scale: 1.18, opacity: 0.4 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={SPRING}
+          style={{
+            marginLeft: 'auto',
+            fontFamily: MONO,
+            fontSize: 13,
+            fontWeight: 600,
+            color: val === '∅' ? C.mute : stale ? C.coralDeep : C.mintDeep,
+          }}
+        >
+          {val}
+        </motion.span>
+      </div>
+      <div style={{ fontSize: 10.5, color: C.mute, marginTop: 2 }}>
+        {val === '∅' ? '已失效（下次读会回源）' : stale ? '旧值 —— 脏数据' : '新值'}
+      </div>
+    </div>
+  );
+};
+
+export const DoubleDeleteSeq: React.FC = () => {
+  const [order, setOrder] = useState<(number | null)[]>(() => Array(DD_N).fill(null));
+  const [tray, setTray] = useState<number[]>(() => [1, 6, 4, 2, 9, 5, 3]);
+  const [phase, setPhase] = useState<'edit' | 'run' | 'done'>('edit');
+  const [cursor, setCursor] = useState(-1);
+  const [cache, setCache] = useState('v1');
+  const [db, setDb] = useState('v1');
+  const [flash, setFlash] = useState(0);
+  const [burstAt, setBurstAt] = useState(0);
+  const { line, say } = useKaimao('写线程 A 和读线程 B 是并发的 —— 把六件事排成一条时间轴。');
+
+  const slots = useRef<Record<string, HTMLElement | null>>({});
+  const slotKeys = useMemo(() => Array.from({ length: DD_N }, (_, i) => `d${i}`), []);
+  const filled = order.every((x) => x !== null);
+
+  /** 回放：按「用户排的顺序」逐步改写缓存/库，让错序的后果自然显现 */
+  useEffect(() => {
+    if (phase !== 'run') return;
+    if (cursor >= DD_N) {
+      setPhase('done');
+      return;
+    }
+    if (cursor >= 0) {
+      const evId = order[cursor];
+      const ev = DD_ALL.find((e) => e.id === evId);
+      if (ev) {
+        setCache(ev.cache);
+        setDb(ev.db);
+        setFlash((x) => x + 1);
+      }
+    }
+    const t = window.setTimeout(() => setCursor((c) => c + 1), 560);
+    return () => window.clearTimeout(t);
+  }, [phase, cursor, order]);
+
+  const finalDirty = phase === 'done' && cache === 'v1' && db === 'v2';
+  const healed = phase === 'done' && !finalDirty;
+
+  // 回放结束后判定：槽位顺序必须与真实时序一致
+  const firstBad = useMemo(() => {
+    if (phase !== 'done') return -1;
+    return order.findIndex((v, i) => v !== DD_EVENTS[i].id);
+  }, [phase, order]);
+
+  /** 只有顺序全对，「一致」才是这条时序挣来的结论 */
+  const orderOk = phase === 'done' && firstBad < 0;
+
+  useEffect(() => {
+    if (phase !== 'done') return;
+    if (firstBad < 0) {
+      setBurstAt((x) => x + 1);
+      say(
+        'ddok',
+        '时序排对了 —— 第二次删除正好卡在回填之后。',
+        '延迟双删的「延迟」不是拍脑袋：它必须 ≥「读线程读库 + 回填」的耗时，否则第二次删除删不掉脏值。',
+        'ok',
+      );
+    } else {
+      say(
+        'ddbad',
+        `第 ${firstBad + 1} 格就错位了，脏数据窗口没盖住。`,
+        '顺序 A 的脏值是「持久」的：只有第二次删除能清它。所以「删 → 写库 → 等回填 → 再删」这四步的因果不能换。',
+        'warn',
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase]);
+
+  const place = (evId: number, slotIdx: number) => {
+    setOrder((prev) => {
+      const next = prev.slice();
+      const from = next.indexOf(evId);
+      if (from >= 0) next[from] = null;
+      const evicted = next[slotIdx];
+      next[slotIdx] = evId;
+      if (evicted !== null && evicted !== evId) {
+        setTray((t) => (t.includes(evicted) ? t : [...t, evicted]));
+      }
+      return next;
+    });
+    setTray((t) => t.filter((x) => x !== evId));
+    setPhase('edit');
+    setCursor(-1);
+    setCache('v1');
+    setDb('v1');
+    // TODO: play drop_snap.mp3
+  };
+
+  const pullOut = (slotIdx: number) => {
+    if (phase === 'run') return;
+    const v = order[slotIdx];
+    if (v === null) return;
+    setOrder((prev) => {
+      const next = prev.slice();
+      next[slotIdx] = null;
+      return next;
+    });
+    setTray((t) => (t.includes(v) ? t : [...t, v]));
+    setPhase('edit');
+    setCursor(-1);
+    setCache('v1');
+    setDb('v1');
+  };
+
+  const onDragEnd = (evId: number) => (_: unknown, info: PanInfo) => {
+    const k = hitTestZone(slots, info.point, slotKeys);
+    if (k) place(evId, Number(k.slice(1)));
+    else
+      say(
+        'ddmiss',
+        '没落在时间轴上，再拖一次。',
+        '落点按松手时的指针位置算 —— 松手前先看清目标格。',
+        'idle',
+      );
+  };
+
+  const reset = () => {
+    setOrder(Array(DD_N).fill(null));
+    setTray([1, 6, 4, 2, 9, 5, 3]);
+    setPhase('edit');
+    setCursor(-1);
+    setCache('v1');
+    setDb('v1');
+  };
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <div style={{ display: 'flex', gap: 9, marginBottom: 11 }}>
+        <StoreCell name="CACHE" val={cache} accent={C.iceDeep} flash={flash} />
+        <StoreCell name="DB" val={db} accent={C.mintDeep} flash={flash} />
+        <div
+          style={glass({
+            flex: '0 0 auto',
+            minWidth: 64,
+            padding: '8px 12px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            background: 'rgba(255,255,255,0.42)',
+          })}
+        >
+          <span style={{ fontSize: 10, color: C.mute }}>
+            {orderOk ? '一致·自愈' : '状态'}
+          </span>
+          <motion.span
+            key={`m-${cache}-${db}-${orderOk}`}
+            initial={{ scale: 1.12, opacity: 0.5 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={SPRING}
+            style={{
+              fontSize: 12.5,
+              fontWeight: 700,
+              // 顺序没排对时不能用绿色说「一致」——那不是这条时序的功劳
+              color: !orderOk ? C.mute : cache === db ? C.mintDeep : C.coralDeep,
+            }}
+          >
+            {cache === db ? '一致' : '脏'}
+          </motion.span>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+        <span style={{ fontSize: 12, color: C.mute }}>
+          时间轴 · 拖事件卡到对应时刻（{DD_N} 格，卡片共 {DD_ALL.length} 张）
+        </span>
+      </div>
+
+      {/*
+        轨道：一条横线 + 每格中心的六边形节点。
+        回放时进度条从左往右推 —— 这就是「连线」的部分，
+        所以槽位不能换行（换行后节点与格子对不上），窄屏改成横向滚动。
+      */}
+      <div style={{ position: 'relative', height: 14, margin: '2px 8px 6px' }} aria-hidden="true">
+        <div
+          style={{
+            position: 'absolute',
+            top: 6,
+            left: 0,
+            right: 0,
+            height: 2,
+            borderRadius: 1,
+            background: `repeating-linear-gradient(90deg, ${C.line} 0 5px, transparent 5px 9px)`,
+          }}
+        />
+        <motion.div
+          style={{
+            position: 'absolute',
+            top: 6,
+            left: 0,
+            height: 2,
+            borderRadius: 1,
+            background: `linear-gradient(90deg, ${C.iceSoft}, ${C.ice} 60%, ${C.mint})`,
+          }}
+          animate={{
+            width: `${((phase === 'done' && firstBad < 0 ? DD_N : Math.max(cursor + 1, 0)) / DD_N) * 100}%`,
+          }}
+          transition={{ duration: 0.32, ease: 'easeOut' }}
+        />
+        {Array.from({ length: DD_N }, (_, i) => {
+          const on = phase !== 'edit' && (cursor >= i || (phase === 'done' && firstBad < 0));
+          const bad = phase === 'done' && i === firstBad;
+          return (
+            <span
+              key={i}
+              style={{
+                position: 'absolute',
+                left: `${((i + 0.5) / DD_N) * 100}%`,
+                top: 1,
+                width: 11,
+                height: 11,
+                marginLeft: -5.5,
+                background: bad ? C.coral : on ? C.mint : 'rgba(255,255,255,0.92)',
+                border: `1.5px solid ${bad ? C.coral : on ? C.mint : C.line}`,
+                clipPath: 'polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)',
+                transition: 'background .18s, border-color .18s',
+              }}
+            />
+          );
+        })}
+      </div>
+
+      {/* 时间轴：横向六格，窄屏横向滚动（不换行，否则和上面的轨道错位） */}
+      <div
+        style={{ display: 'flex', flexWrap: 'nowrap', gap: 7, overflowX: 'auto', paddingBottom: 3 }}
+        className="km-scroll"
+        data-dd-track
+      >
+        {Array.from({ length: DD_N }, (_, i) => {
+          const v = order[i];
+          const ev = v !== null ? DD_ALL.find((e) => e.id === v) : undefined;
+          const active = phase !== 'edit' && cursor === i;
+          const passed = phase === 'done' || (phase === 'run' && cursor > i);
+          const wrong = phase === 'done' && i === firstBad;
+          return (
+            <div
+              key={i}
+              ref={(el) => {
+                slots.current[`d${i}`] = el;
+              }}
+              data-dd-slot={i}
+              data-dd-filled={v !== null ? '1' : '0'}
+              onClick={() => pullOut(i)}
+              style={{
+                flex: '1 0 148px',
+                minWidth: 132,
+                minHeight: 84,
+                padding: '7px 9px',
+                borderRadius: 12,
+                border: `1.5px ${v !== null ? 'solid' : 'dashed'} ${
+                  wrong ? C.coral : active ? C.ice : ev ? C.iceSoft : C.line
+                }`,
+                background: wrong
+                  ? 'rgba(248,113,113,0.10)'
+                  : active
+                    ? 'rgba(93,180,229,0.12)'
+                    : v !== null
+                      ? 'rgba(255,255,255,0.78)'
+                      : 'rgba(255,255,255,0.32)',
+                cursor: v !== null ? 'pointer' : 'default',
+                transition: 'border-color .16s, background .16s',
+                position: 'relative',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 3 }}>
+                <span style={{ fontFamily: MONO, fontSize: 9.5, color: C.mute }}>
+                  t{String(i + 1).padStart(2, '0')}
+                </span>
+                {ev && (
+                  <span
+                    style={{
+                      fontFamily: MONO,
+                      fontSize: 9,
+                      color: ev.who === 'A' ? C.coralDeep : C.iceDeep,
+                      border: `1px solid ${ev.who === 'A' ? C.coral : C.ice}`,
+                      borderRadius: 3,
+                      padding: '0 3px',
+                    }}
+                  >
+                    {ev.who}
+                  </span>
+                )}
+                {passed && !wrong && <span style={{ marginLeft: 'auto', fontSize: 10, color: C.mint }}>✓</span>}
+              </div>
+              {ev ? (
+                <div style={{ fontSize: 11.5, lineHeight: 1.45, color: C.slate }}>{ev.title}</div>
+              ) : (
+                <div style={{ fontSize: 11, color: C.mute, opacity: 0.8 }}>等待事件…</div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* 托盘 */}
+      {tray.length > 0 && (
+        <div style={{ marginTop: 10 }}>
+          <div style={{ fontSize: 10.5, color: C.mute, marginBottom: 5 }}>
+            事件卡 · {tray.length} 张待放（有一张是错的）
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }} data-dd-tray>
+            {tray.map((id) => {
+              const ev = DD_ALL.find((e) => e.id === id)!;
+              return (
+                <motion.div
+                  key={id}
+                  drag
+                  dragElastic={DRAG_ELASTIC}
+                  dragSnapToOrigin
+                  whileDrag={{ scale: 1.05, zIndex: 30, cursor: 'grabbing' }}
+                  whileTap={TAP}
+                  onDragEnd={onDragEnd(id)}
+                  data-dd-card={id}
+                  style={{
+                    ...glass({
+                      padding: '6px 10px',
+                      cursor: 'grab',
+                      maxWidth: 250,
+                      borderLeft: `3px solid ${ev.who === 'A' ? C.coral : C.ice}`,
+                    }),
+                    fontSize: 11.5,
+                    lineHeight: 1.45,
+                    color: C.slate,
+                  }}
+                >
+                  <span style={{ fontFamily: MONO, fontSize: 9.5, color: C.mute, marginRight: 4 }}>{ev.who}</span>
+                  {ev.title}
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* 操作 */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginTop: 11, flexWrap: 'wrap' }}>
+        <motion.button
+          type="button"
+          whileTap={TAP}
+          onClick={() => {
+            if (!filled) {
+              say('ddneed', '六格还没放满。', '漏一格就等于漏掉一个时间点，脏窗口算不准。', 'warn');
+              return;
+            }
+            setCache('v1');
+            setDb('v1');
+            setCursor(-1);
+            setPhase('run');
+            // TODO: play run_timeline.mp3
+          }}
+          data-dd-run
+          style={{
+            border: 'none',
+            borderRadius: 10,
+            padding: '7px 15px',
+            fontSize: 12.5,
+            fontWeight: 600,
+            color: '#fff',
+            cursor: 'pointer',
+            fontFamily: SANS,
+            background: filled ? `linear-gradient(135deg, ${C.ice}, ${C.iceDeep})` : C.iceSoft,
+          }}
+        >
+          {phase === 'run' ? `回放中 t${Math.max(cursor, 0) + 1}/${DD_N}` : '按时序回放'}
+        </motion.button>
+        <motion.button
+          type="button"
+          whileTap={TAP}
+          onClick={reset}
+          style={{
+            border: `1px solid ${C.line}`,
+            borderRadius: 10,
+            padding: '7px 13px',
+            fontSize: 12,
+            color: C.mute,
+            cursor: 'pointer',
+            background: 'rgba(255,255,255,0.6)',
+            fontFamily: SANS,
+          }}
+        >
+          重来
+        </motion.button>
+
+        {phase === 'done' && (
+          <motion.span
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{
+              fontSize: 12.5,
+              fontWeight: 600,
+              color: firstBad < 0 ? C.mintDeep : C.coralDeep,
+            }}
+          >
+            {firstBad < 0
+              ? '✓ 时序正确 · 脏窗口被第二次删除覆盖'
+              : finalDirty
+                ? '终态：缓存 v1 / 库 v2 —— 持久脏，且不会自愈'
+                : '顺序错了 · 上方 CACHE/DB 只是参考，不是真实时序'}
+          </motion.span>
+        )}
+        <Burst play={burstAt} color={C.mint} />
+      </div>
+
+      {/* 回放中逐步解释 */}
+      {phase !== 'edit' && cursor >= 0 && cursor < DD_N && order[cursor] !== null && (
+        <motion.div
+          key={`n-${cursor}`}
+          initial={{ opacity: 0, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.18 }}
+          style={glass({
+            marginTop: 9,
+            padding: '8px 12px',
+            borderLeft: `3px solid ${
+              DD_ALL.find((e) => e.id === order[cursor])?.tone || C.iceSoft
+            }`,
+            background: 'rgba(255,255,255,0.55)',
+          })}
+        >
+          <span style={{ fontFamily: MONO, fontSize: 10, color: C.mute, marginRight: 6 }}>
+            t{cursor + 1}
+          </span>
+          <span style={{ fontSize: 12, color: C.slate }}>
+            {DD_ALL.find((e) => e.id === order[cursor])?.detail}
+          </span>
+          {(() => {
+            const nt = DD_ALL.find((e) => e.id === order[cursor])?.note;
+            return nt ? (
+              <span style={{ fontSize: 12, fontWeight: 600, color: C.coralDeep, marginLeft: 8 }}>{nt}</span>
+            ) : null;
+          })()}
+        </motion.div>
+      )}
+
+      {healed && (
+        <div style={{ marginTop: 8, fontSize: 12, color: C.mintDeep, lineHeight: 1.6 }}>
+          自愈成立的前提：延迟 ≥ 读线程「读库 + 回填」的耗时。延迟太短，第二次删除会赶在回填之前，
+          脏值照样留下。
+        </div>
+      )}
+
+      <KaimaoBubble line={line} />
+    </div>
+  );
+};
+
+/** 与通用 lab 模块同算法的落点判定（本文件不 import lab，保持单文件可拷走） */
+function hitTestZone(
+  refs: React.MutableRefObject<Record<string, HTMLElement | null>>,
+  point: { x: number; y: number },
+  keys: string[],
+): string | null {
+  for (const k of keys) {
+    const el = refs.current[k];
+    if (!el) continue;
+    const r = el.getBoundingClientRect();
+    if (point.x >= r.left && point.x <= r.right && point.y >= r.top && point.y <= r.bottom) return k;
+  }
+  return null;
+}
+
 const Star: React.FC<{ on: boolean }> = ({ on }) => (
   <svg width="16" height="16" viewBox="0 0 20 20" aria-hidden="true">
     <path
@@ -1963,7 +2543,8 @@ const Star: React.FC<{ on: boolean }> = ({ on }) => (
 const TABS = [
   { id: 's1', label: '沙盒推演', sub: 'TTL 抖动 vs 雪崩', node: <AvalancheSandbox /> },
   { id: 's2', label: '代码 Debug', sub: 'singleflight 补全', node: <SingleflightDebug /> },
-  { id: 's3', label: '闯关试炼', sub: '三道真题 BOSS', node: <CacheBossRaid /> },
+  { id: 's3', label: '时序连线', sub: '延迟双删的脏窗口', node: <DoubleDeleteSeq /> },
+  { id: 's4', label: '闯关试炼', sub: '三道真题 BOSS', node: <CacheBossRaid /> },
 ];
 
 export const CacheDesignLab: React.FC = () => {

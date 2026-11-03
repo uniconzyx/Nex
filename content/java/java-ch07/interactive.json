@@ -1,0 +1,151 @@
+{
+  "chapter": "java-ch07",
+  "subject": "java",
+  "title": "并发：Thread、线程池与 JUC 并发容器",
+  "fingerprint": "4bcab6ee28",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "六种线程状态实测：NEW / TIMEDWAITING / BLOCKED / W…",
+      "body": "把 volatile 当原子变量用"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于线程的 start() 与 run()",
+      "body": "java-ch07 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "把 volatile 当原子变量用",
+          "right": "AtomicInteger.incrementAndGet()，或把复合操作放进 synchronized。"
+        },
+        {
+          "id": 2,
+          "left": "用 Executors.newFixedThreadPool 处理无界任务",
+          "right": "new ThreadPoolExecutor(n, n, 0, MS, new ArrayBlockingQueue<>(1000), factory, handler)。"
+        },
+        {
+          "id": 3,
+          "left": "用 Executors.newCachedThreadPool 处理突发流量",
+          "right": "显式给 max 加上界。"
+        },
+        {
+          "id": 4,
+          "left": "ReentrantLock 忘记在 finally 中 unlock()",
+          "right": "lock.lock(); try { ... } finally { lock.unlock(); }。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "下面关于 `Thread.start()` 与 `Thread.run()` 的描述，**正确**的是？",
+          "title": "关于线程的 start() 与 run()",
+          "options": [
+            {
+              "key": "A",
+              "text": "直接调用 run() 也会启动一个新线程，只是不返回线程句柄"
+            },
+            {
+              "key": "B",
+              "text": "start() 会创建新线程并由新线程回调 run()；直接调用 run() 只是普通方法调用，仍在当前线程执行"
+            },
+            {
+              "key": "C",
+              "text": "同一个 Thread 对象可以多次调用 start() 反复重启线程"
+            },
+            {
+              "key": "D",
+              "text": "start() 与 run() 在字节码层面完全等价"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "start() 内部调用 native 的 start0() 创建内核线程（HotSpot 中 Java 线程与内核线程 1:1），由新线程回调 run()。直接调 run() 只是普通方法调用，线程名仍是调用者线程（如 main）。同一个 Thread 对象 start() 两次会抛 IllegalThreadStateException——线程结束后进入 TERMINATED，不可复活，想「重启」只能 new 一个新线程。"
+        },
+        {
+          "id": "q1",
+          "stem": "下面关于 `volatile` 的描述，**正确**的是？",
+          "title": "关于 volatile 的语义边界",
+          "options": [
+            {
+              "key": "A",
+              "text": "volatile 保证可见性与有序性，但不保证复合操作（如 count++）的原子性"
+            },
+            {
+              "key": "B",
+              "text": "volatile 等价于轻量级锁，可以替代 synchronized"
+            },
+            {
+              "key": "C",
+              "text": "volatile 字段的写不会被其他线程立即看到，因为仍在 CPU 缓存中"
+            },
+            {
+              "key": "D",
+              "text": "volatile 能保证 i++ 这样的自增操作在多线程下不丢失更新"
+            }
+          ],
+          "correct": [
+            "A"
+          ],
+          "explain": "volatile 提供两条语义：写立即刷回主存并使其他缓存行失效（可见性），以及在写前后插入 StoreLoad 屏障禁止重排序（有序性）。但它不提供互斥，因此 count++ 这种「读-加-写」复合操作依然会丢失更新。volatile 的两个典型正确用法是「一写多读的状态标志位」与「双重检查锁定的实例字段」。"
+        },
+        {
+          "id": "q2",
+          "stem": "`ThreadPoolExecutor(corePoolSize=2, maximumPoolSize=4, workQueue=ArrayBlockingQueue(capacity=3))`，当 7 个任务瞬间提交且都长时间不结束，第 8 个任务提交时会发生什么？**正确**的描述是？",
+          "title": "关于 ThreadPoolExecutor 的任务提交流程",
+          "options": [
+            {
+              "key": "A",
+              "text": "进入队列排队，因为线程池会优先排队而不是建线程"
+            },
+            {
+              "key": "B",
+              "text": "触发拒绝策略，因为此时已有 4 个线程在跑且队列已满 3 个任务"
+            },
+            {
+              "key": "C",
+              "text": "线程池扩容到 5 个线程执行"
+            },
+            {
+              "key": "D",
+              "text": "抛出 IllegalStateException"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "提交流程是四步判定：① 运行线程数 < corePoolSize → 建核心线程；② 否则入队；③ 队满且线程数 < maximumPoolSize → 建非核心线程；④ 否则拒绝。7 个任务后：核心 2 个在跑、队列 3 个、非核心又建 2 个（共 4 个线程在跑），资源用尽，第 8 个任务触发 AbortPolicy 抛 RejectedExecutionException。注意若队列换成无界的 LinkedBlockingQueue，第 2 步永远成功，maximumPoolSize 将形同虚设。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "java",
+      "file": "02-jmm-visibility-and-atomicity.md",
+      "code": "public final int incrementAndGet() {\n    while (true) {\n        int cur = get();\n        int next = cur + 1;\n        if (‹1›(cur, next)) return next;   // 失败就重来\n    }\n}",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "compareAndSet",
+          "line": 5
+        }
+      ],
+      "distractors": [
+        "synchronized",
+        "consumer"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

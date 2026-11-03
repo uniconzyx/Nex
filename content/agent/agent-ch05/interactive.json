@@ -1,0 +1,134 @@
+{
+  "chapter": "agent-ch05",
+  "subject": "agent",
+  "title": "RAG 技术精讲：检索质量决定回答上限",
+  "fingerprint": "9874cc3642",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "两种切块的对照：Recall@3 都是 8/8，答案完整率是 6/8 对 8/8",
+      "body": "切块用字符数估 token，中文块被切大 3 倍，索引变慢、上下文溢出"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "用户总问「E1234 错误怎么处理」「maxconnections 配多少」，纯向量检…",
+      "body": "agent-ch05 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "切块用字符数估 token，中文块被切大 3 倍，索引变慢、上下文溢出",
+          "right": "中文按「1 字 ≈ 1 token」估算并留 10%~20% 余量；或在切之前真的调用一次 tokenizer 拿到精确 token 数再切。监控「平均块 token 数」而非「平均块字符数」，避免配置名与实物脱节。"
+        },
+        {
+          "id": 2,
+          "left": "纯向量检索上线，错误码、编号类问题全答错，召回率却显示很高",
+          "right": "上混合检索（BM25 + 向量），用 RRF 融合而非分值加权；专业术语密集的语料， 中文 BM25 用二元组分词比通用分词器更稳。先把「精确词面」这半边补齐，再谈语义召回。"
+        },
+        {
+          "id": 3,
+          "left": "重排忘了截断 Top-N，cross-encoder 对全库打分，P95 从 200ms …",
+          "right": "融合后硬截断 Top-20（至多 50）再进重排；把重排延迟单独打点， 确认它只作用在 N 个候选上。记住分工：双塔召回（可预计算、快）、cross-encoder 精排（慢、只管 Top-N）。"
+        },
+        {
+          "id": 4,
+          "left": "权限过滤写在「召回之后」，用户 A 查到自己工单却召回一堆用户 B 的，删完 Top-K …",
+          "right": "前置过滤（pre-filter）——索引里每块带 tenant/role/expired 标签， 检索第一步就按标签过滤，保证召回的每一步都受过权；缓存键也要带租户与权限版本，杜绝串租户。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "某知识库上线纯向量检索后，语义类问题答得不错，但大量「错误码/配置项」类精确术语问题频繁答错或编造。下列哪种改法最直接有效？",
+          "title": "用户总问「E1234 错误怎么处理」「maxconnections 配多少」，纯向量检索答不准，应优先补哪一路",
+          "options": [
+            {
+              "key": "A",
+              "text": "把 embedding 模型换大十倍，提升语义表征"
+            },
+            {
+              "key": "B",
+              "text": "加一路 BM25 做混合检索，用 RRF 融合"
+            },
+            {
+              "key": "C",
+              "text": "把生成模型的 temperature 调到 0，强制不编造"
+            },
+            {
+              "key": "D",
+              "text": "增大切块 size，让每块包含更多上下文"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "考点：向量检索与 BM25 的能力边界，以及「答错/编造」往往根在检索而非生成。"
+        },
+        {
+          "id": "q2",
+          "stem": "一个多租户 RAG 系统，某租户查询时希望绝看不到其他租户的数据。下列哪种权限过滤实现最安全？",
+          "title": "多租户 RAG 的权限过滤应该放在哪一步",
+          "options": [
+            {
+              "key": "A",
+              "text": "先召回 Top-20，再删掉不属于当前租户的块"
+            },
+            {
+              "key": "B",
+              "text": "把「你不能看别人数据」写进系统提示词，让模型自觉遵守"
+            },
+            {
+              "key": "C",
+              "text": "索引每块带 tenant 标签，检索入口即按标签过滤（pre-filter）"
+            },
+            {
+              "key": "D",
+              "text": "生成答案后，用 LLM 判断哪些引用属于其他租户再删掉"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "考点：权限过滤前置 vs 后置的机制差异与合规后果。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "01_data_side.md",
+      "code": "def ‹1›(extracted_text: str, golden_fields: list[str]) -> float:\n    hit = sum(1 for f in golden_fields if f in extracted_text)\n    return hit / max(1, len(golden_fields))\n\n# 用正则把「标题行」从正文里挑出来（简化版版面恢复）\nimport re\ndef ‹2›(text: str) -> list[str]:\n    # 形如 \"2.1 模型接入\" 或 \"# 概述\"\n    return re.‹3›(r'(?m)^(#{1,3}\\s+.+|^\\d+(\\.\\d+)*\\s+[一-龥].+)$', text)",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "parse_recall",
+          "line": 1
+        },
+        {
+          "id": "b2",
+          "answer": "extract_headings",
+          "line": 7
+        },
+        {
+          "id": "b3",
+          "answer": "findall",
+          "line": 9
+        }
+      ],
+      "distractors": [
+        "dtype",
+        "dumps"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

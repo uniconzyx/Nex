@@ -1,0 +1,80 @@
+{
+  "chapter": "data-ch01",
+  "subject": "data",
+  "title": "NumPy 基础：ndarray 与向量化",
+  "fingerprint": "ae37da750e",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "list 与 ndarray 的内存占用对比（对象开销的实证）",
+      "body": "a[idx] += 1 在 idx 有重复时结果偏小"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "哪些操作返回视图",
+      "body": "data-ch01 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "a[idx] += 1 在 idx 有重复时结果偏小",
+          "right": "np.add.at(a, idx, 1)。"
+        },
+        {
+          "id": 2,
+          "left": "切片改值影响了原数组",
+          "right": "要独立副本显式 .copy()，改副本才不会动到原数组。"
+        },
+        {
+          "id": 3,
+          "left": "布尔索引筛选后改值原数组不变",
+          "right": "要改原数组用 np.where 或对原数组按掩码赋值 a[mask] = 0。"
+        },
+        {
+          "id": 4,
+          "left": "对小数组盲目向量化",
+          "right": "小数据先测，别迷信「向量化一定快」。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "对二维数组 `a = np.arange(12).reshape(3,4)`，下列哪些操作**一定**返回视图（与 a 共享内存）？",
+          "title": "哪些操作返回视图",
+          "options": [
+            {
+              "key": "A",
+              "text": "a[0]"
+            },
+            {
+              "key": "B",
+              "text": "a[:, 0]"
+            },
+            {
+              "key": "C",
+              "text": "a[a > 5]"
+            },
+            {
+              "key": "D",
+              "text": "a.T"
+            }
+          ],
+          "correct": [
+            "A",
+            "B",
+            "D"
+          ],
+          "explain": "视图 vs 拷贝是 NumPy 内存正确性的第一道关。"
+        }
+      ]
+    }
+  ]
+}

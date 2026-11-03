@@ -1,0 +1,71 @@
+{
+  "chapter": "java-ch01",
+  "subject": "java",
+  "title": "环境与基础语法",
+  "fingerprint": "e174db3e6a",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "第一个 Java 程序",
+      "body": "关于 Java 八种基本类型，正确的是"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于 Java 八种基本类型，正确的是",
+      "body": "java-ch01 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "选择**正确**的描述。",
+          "title": "关于 Java 八种基本类型，正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "String 是 Java 的基本类型之一"
+            },
+            {
+              "key": "B",
+              "text": "long 类型字面量必须加后缀 L（或小写 l）"
+            },
+            {
+              "key": "C",
+              "text": "boolean 类型可以用 0 和 1 表示真假"
+            },
+            {
+              "key": "D",
+              "text": "char 类型占用 1 个字节"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "基本类型只有八种，String 是引用类型；boolean 只有 true/false；char 占 2 字节（UTF-16）；long 字面量必须加 L。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "java",
+      "file": "02-primitive-types-variables.md",
+      "code": "public class Main {\n    public static void main(String[] args) {\n        int max = Integer.MAX_VALUE;\n        System.out.println(\"overflow = \" + (max + 1));          // -2147483648（回绕）\n\n        System.out.println(\"div = \" + (10 / 4) + \" / \" + (10.0 / 4));\n        System.out.println(\"trunc = \" + (int) -2.7);            // -2（向零截断）\n\n        Integer a = 127, b = 127, c = 128, d = 128;\n        System.out.println(\"‹1› = \" + (a == b) + \" uncached = \" + (c == d));\n        System.out.println(\"equals = \" + c.equals(d));\n\n        System.out.println(\"fp = \" + (0.1 + 0.2));              // 0.30000000000000004\n        System.out.println(\"char_add = \" + (char) ('a' + 1));   // b\n\n        String s = \"𝄞\";\n        System.out.println(\"len = \" + s.length() + \" cp = \" + s.codePointCount(0, s.length()));\n    }\n}",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "cached",
+          "line": 10
+        }
+      ],
+      "distractors": [
+        "repo",
+        "resolve"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

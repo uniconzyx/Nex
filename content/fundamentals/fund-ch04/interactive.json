@@ -1,0 +1,71 @@
+{
+  "chapter": "fund-ch04",
+  "subject": "fundamentals",
+  "title": "fund-ch04",
+  "fingerprint": "41e19fa139",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "邻接矩阵的构建、度统计与空间代价",
+      "body": "稀疏图该选哪种存储结构"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "稀疏图该选哪种存储结构",
+      "body": "fund-ch04 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "一个有 10^5 个顶点、2×10^5 条边的稀疏图，需要反复做「遍历某点的所有出边」。下列哪种存储结构最合适？",
+          "title": "稀疏图该选哪种存储结构",
+          "options": [
+            {
+              "key": "A",
+              "text": "邻接矩阵（int）"
+            },
+            {
+              "key": "B",
+              "text": "邻接矩阵（bit 位图）"
+            },
+            {
+              "key": "C",
+              "text": "邻接表"
+            },
+            {
+              "key": "D",
+              "text": "十字链表"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "存储结构选择的两个判据：边的稠密程度、是否需要反向遍历。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "java",
+      "file": "05-graph-practical-recipes.md",
+      "code": "int[] dist = new int[n];\nArrays.fill(dist, -1);\nQueue<Integer> q = new ArrayDeque<>();\ndist[0] = 0; q.offer(0);\nwhile (!q.‹1›()) {\n    int u = q.poll();\n    for (int v : g[u]) {\n        if (dist[v] == -1) {\n            dist[v] = dist[u] + 1;   // ✅ 入队时定距离\n            q.offer(v);\n        }\n    }\n}",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "isEmpty",
+          "line": 5
+        }
+      ],
+      "distractors": [
+        "java",
+        "lang"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

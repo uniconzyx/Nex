@@ -1,0 +1,134 @@
+{
+  "chapter": "agent-ch02",
+  "subject": "agent",
+  "title": "Prompt 工程与结构化输出：把自然语言当接口设计",
+  "fingerprint": "4f4176e999",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "提示模板渲染与变量校验：把 prompt 当成有类型的接口",
+      "body": "用 str.replace 顺序渲染模板，用户值被二次求值"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "JSON 合法率 99.5%，为什么业务投诉不断",
+      "body": "agent-ch02 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "用 str.replace 顺序渲染模板，用户值被二次求值",
+          "right": "单次扫描替换（re.sub 一次性完成），循环/条件块先展开； 未声明变量直接报错；渲染后再断言「无残留占位符」。"
+        },
+        {
+          "id": 2,
+          "left": "JSON 解析成功就认为输出正确",
+          "right": "三层分开监控——语法合法率、schema 通过率、任务准确率； 语义层用黄金集 + 规则 + 抽样复核，任何一层都不能用另一层的指标代替。"
+        },
+        {
+          "id": 3,
+          "left": "流式响应等完整 JSON 再渲染",
+          "right": "用状态机跟踪深度/字符串/转义，做前缀修补；已完成字段先渲染， 未完成字段显示「生成中」；对已展示内容打版本号，避免后续修正导致跳变。"
+        },
+        {
+          "id": 4,
+          "left": "只用关键词黑名单防注入",
+          "right": "分层防御——来源隔离（外部内容独立角色 + trust 标签）、工具权限白名单、 破坏性操作二次确认、输出敏感信息检测；关键词扫描只作为第一层，并持续回流红队样本。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "某工单系统用 JSON 模式 + `json.loads` 做解析，线上监控显示「合法率 99.5%」，但业务方持续投诉「等级字段缺失、优先级出现 5、tags 里混进数字」。下列判断与改法哪组最合理？",
+          "title": "JSON 合法率 99.5%，为什么业务投诉不断",
+          "options": [
+            {
+              "key": "A",
+              "text": "合法率已接近 100%，投诉应归结为用户不会用"
+            },
+            {
+              "key": "B",
+              "text": "JSON 模式只保证语法合法，不保证必填/枚举/类型；应改用严格 Schema，或在应用层加 schema 校验 + 带字段路径的修复轮"
+            },
+            {
+              "key": "C",
+              "text": "把 temperature 调到 0 就能消除字段缺失与枚举越界"
+            },
+            {
+              "key": "D",
+              "text": "在 prompt 里加一句「必须输出所有字段且不得越界」即可解决"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "考点：语法合法 ≠ 结构合规 ≠ 语义正确，三层失败三种手段。"
+        },
+        {
+          "id": "q1",
+          "stem": "同一个分类任务、同一批 4 条 few-shot，只调整示例排列顺序，输出格式漂移率从 3% 升到 11%，准确率基本不变。最可能的原因与对策是：",
+          "title": "交换 few-shot 顺序后格式漂移率从 3% 涨到 11%",
+          "options": [
+            {
+              "key": "A",
+              "text": "模型存在随机性，多跑几次取多数即可"
+            },
+            {
+              "key": "B",
+              "text": "模型对靠近生成位置的示例更敏感（近因效应），应把最接近当前输入、格式最标准的示例放到最后，并用固定回归集验证顺序"
+            },
+            {
+              "key": "C",
+              "text": "把 few-shot 从 user 消息移到 system 消息即可消除顺序影响"
+            },
+            {
+              "key": "D",
+              "text": "把示例从 4 条增加到 16 条，稀释单条示例的影响"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "考点：位置偏置是机制不是bug；顺序要用回归集管理。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "02-structured-output.md",
+      "code": "for round in range(MAX_REPAIR):          # 通常 2 轮\n    raw = ‹1›(prompt + last_error_feedback)\n    obj, err = validate(raw, SCHEMA)\n    if obj is not None:\n        return obj\n    if err.‹2› == \"syntax\" and round == 0:\n        raw = repair_truncated(raw)      # 先尝试结构修补，不花模型调用\n        obj, err = validate(raw, SCHEMA)\n        if obj is not None:\n            return obj\n    last_error_feedback = err.message     # 只回传错误，不回传整段历史\nreturn ‹3›()                         # 模板 / 人工 / 明确拒答",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "call",
+          "line": 2
+        },
+        {
+          "id": "b2",
+          "answer": "kind",
+          "line": 6
+        },
+        {
+          "id": "b3",
+          "answer": "fallback",
+          "line": 12
+        }
+      ],
+      "distractors": [
+        "spark",
+        "spec"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

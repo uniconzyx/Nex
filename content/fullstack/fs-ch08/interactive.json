@@ -1,0 +1,79 @@
+{
+  "chapter": "fs-ch08",
+  "subject": "fullstack",
+  "title": "部署 / CI-CD / Docker",
+  "fingerprint": "4537d066a8",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "Dockerfile 静态检查器：指令顺序合理性、fixed tag、多阶段 --…",
+      "body": "改一行源码会重建几层：deps-first 与 COPY . . 反模式对照"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "改一行源码会重建几层：deps-first 与 COPY . . 反模式对照",
+      "body": "fs-ch08 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "fs-ch08-ex01",
+          "stem": "Dockerfile A 的顺序是 `FROM` → `WORKDIR` → `COPY package.json package-lock.json ./` → `RUN npm ci` → `COPY . .` → `RUN npm run build`（共 6 层）；Dockerfile B 把 `COPY . .` 提前到 `RUN npm ci` 之前（共 5 层）。现在只修改 `src/app.js` 一行并重新构建（不改 `package.json`）。下列说法哪一项与本章实跑结果一致？",
+          "title": "改一行源码会重建几层：deps-first 与 COPY . . 反模式对照",
+          "options": [
+            {
+              "key": "A",
+              "text": "A 重建 2 层且 npm ci 层命中缓存；B 重建 3 层且 npm ci 层被迫重跑"
+            },
+            {
+              "key": "B",
+              "text": "A 重建 3 层；B 重建 2 层"
+            },
+            {
+              "key": "C",
+              "text": "两者都只重建 1 层（只有 COPY . . 那一层失效）"
+            },
+            {
+              "key": "D",
+              "text": "两者都会让全部层重建，因为构建缓存按整份上下文哈希"
+            }
+          ],
+          "correct": [
+            "A"
+          ],
+          "explain": "构建缓存是前缀链：某层失效则其后全部重建，因此「失效点之后的层数」就是重建层数。ex02 实测：A 的 COPY . . 是第 5 层，命中前 4 层、重建 2 层，且 npmcilayerrebuild=False；B 的 COPY . . 是第 3 层，后面还有两条 RUN，命中 2 层、重建 3 层，且 npmcilayerrebuild=True（最贵的依赖安装被反复触发）。缓存键是「父层哈希 + 指令 + 该指令用到的上下文内容」，不是整份上下文的哈希，所以 D 错。"
+        },
+        {
+          "id": "fs-ch08-ex02",
+          "stem": "按 12-Factor 的「配置」因子，下列哪种做法属于**违规**（而不是「可接受但可改进」）？",
+          "title": "12-Factor 视角下哪种做法违规",
+          "options": [
+            {
+              "key": "A",
+              "text": "把 LOGLEVEL 放在外部配置文件 config/default.json，由代码读取"
+            },
+            {
+              "key": "B",
+              "text": "把数据库连接串从环境变量 process.env.DATABASEURL 读取"
+            },
+            {
+              "key": "C",
+              "text": "把 STRIPESECRETKEY 直接写在 src/pay.js 源码里"
+            },
+            {
+              "key": "D",
+              "text": "把特性开关 FEATURENEWUI 从环境变量读取"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "12-Factor 的「配置」指会因部署环境而不同的东西，必须与代码分离。环境变量是推荐形态（B、D 合规）；外部配置文件属于「已外置但不如环境变量」（A 记 okexternalizedbutpreferenv，可接受）；写死在源码里是违规，若该项还是密钥则升级为 critical——因为密钥会随 Git 历史永久存在，且轮换前一直有效。ex11 对 C 这类项输出 VIOLATIONCRITICALHARDCODEDSECRET，最终 compliant=5 violations=3 critical=2。"
+        }
+      ]
+    }
+  ]
+}

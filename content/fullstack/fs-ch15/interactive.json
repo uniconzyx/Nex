@@ -1,0 +1,79 @@
+{
+  "chapter": "fs-ch15",
+  "subject": "fullstack",
+  "title": "Go + Gin 后端：并发模型、接口契约与 Java 路线对照",
+  "fingerprint": "5e1365ac81",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "Goroutine 并发：N 个 goroutine 经 channel 汇总（无…",
+      "body": "关于 Goroutine 与 Channel，正确的是"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于 Goroutine 与 Channel，正确的是",
+      "body": "fs-ch15 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "选择**正确**的描述。",
+          "title": "关于 Goroutine 与 Channel，正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "goroutine 初始栈约 1MB，和 Java 线程一样重"
+            },
+            {
+              "key": "B",
+              "text": "无缓冲 channel 的 send 会一直阻塞，直到有 receive 接住（会合语义）"
+            },
+            {
+              "key": "C",
+              "text": "多个 goroutine 直接共享变量 count++ 是安全的，不需要任何同步"
+            },
+            {
+              "key": "D",
+              "text": "channel 只能传数据，不能用作同步原语"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "goroutine 初始栈仅约 2KB（A 错）；无缓冲 channel 的 send 必须等 receive 接住才返回，这是会合语义（B 对）。共享变量 count++ 在 Go 里仍是数据竞争（C 错）；channel 本身就是语言内建的同步原语（D 错）。"
+        },
+        {
+          "id": "q4",
+          "stem": "关于 Go 的错误处理，正确的是",
+          "title": "Go 的 error 与 Java 异常对照，正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "Go 用异常机制捕获错误，和 Java try/catch 一样"
+            },
+            {
+              "key": "B",
+              "text": "Go 把错误作为普通返回值，调用方需显式 if err != nil 检查"
+            },
+            {
+              "key": "C",
+              "text": "可预期的失败（网络超时）应该用 panic 抛出让 recover 兜住"
+            },
+            {
+              "key": "D",
+              "text": "Go 接口必须由实现方声明 implements 才算实现"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "Go 没有异常（panic 只给不可恢复状态），错误是普通返回值，调用点必须显式检查（B 对）。可预期失败要用 error 返回而非 panic（C 错）；Go 接口是结构化的、由消费者定义、满足方法集即实现，无需 implements（D 错）。"
+        }
+      ]
+    }
+  ]
+}

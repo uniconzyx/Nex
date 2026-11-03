@@ -1,0 +1,97 @@
+{
+  "chapter": "data-ch03",
+  "subject": "data",
+  "title": "Pandas 基础：Series 与 DataFrame",
+  "fingerprint": "df3ac2d2da",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "自动对齐：按标签取并集，以及 dtype 传染",
+      "body": "用 df[df[\"v\"] == np.nan] 找缺失行"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "自动对齐后的结果与 dtype",
+      "body": "data-ch03 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "用 df[df[\"v\"] == np.nan] 找缺失行",
+          "right": "df[df[\"v\"].isna()]（isnull() 是别名）。 同理，df[\"v\"].fillna(...) 之后想校验是否还有缺失，要用 isna().any() 而不是 == np.nan。"
+        },
+        {
+          "id": 2,
+          "left": "分块算平均值时「平均的平均」",
+          "right": "累加 (sum, count) 再相除。 根源：mean 不满足结合律，分块只能使用可结合的统计量（sum/count/min/max）。"
+        },
+        {
+          "id": 3,
+          "left": "用均值填充缺失后直接算方差/相关性",
+          "right": "用训练集统计量填充以避免数据泄漏，或改用能原生处理缺失的模型。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "执行下面的代码，`(a + b)` 的结果是什么？ ```python a = pd.Series([1, 2], index=[\"x\", \"y\"]) b = pd.Series([10], index=[\"y\"]) print((a + b).to_dict()) print((a + b).dtype) ```",
+          "title": "自动对齐后的结果与 dtype",
+          "options": [
+            {
+              "key": "A",
+              "text": "{'x': 1, 'y': 12}，dtype 为 int64"
+            },
+            {
+              "key": "B",
+              "text": "{'x': nan, 'y': 12.0}，dtype 为 float64"
+            },
+            {
+              "key": "C",
+              "text": "{'y': 12}，dtype 为 int64（只保留交集）"
+            },
+            {
+              "key": "D",
+              "text": "抛 ValueError，因为索引长度不一致"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "Pandas 的加法按标签对齐并取并集：标签 x 只在 a 里有值，b 里没有，因此结果为 NaN；y 两边都有，得 1 + 10 = 12。由于出现了 NaN，而 int64 无法表示缺失，整列被提升为 float64，12 显示为 12.0。C 是 join='inner' 的语义，不是默认行为。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "02-io-csv-excel-chunking.md",
+      "code": "from collections import defaultdict\ngsum, gcnt = defaultdict(float), defaultdict(int)\nfor c in pd.‹1›(\"f.csv\", chunksize=100_000, usecols=[\"city\", \"amount\"]):\n    for city, grp in c.‹2›(\"city\")[\"amount\"]:\n        gsum[city] += grp.sum()\n        gcnt[city] += grp.count()",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "read_csv",
+          "line": 3
+        },
+        {
+          "id": "b2",
+          "answer": "groupby",
+          "line": 4
+        }
+      ],
+      "distractors": [
+        "fast",
+        "file"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

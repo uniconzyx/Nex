@@ -1,0 +1,108 @@
+{
+  "chapter": "fs-ch09",
+  "subject": "fullstack",
+  "title": "TypeScript：结构化类型、泛型与类型收窄",
+  "fingerprint": "508eb340b4",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "结构类型：多一个成员不报错，少一个报错",
+      "body": "关于 TypeScript 的结构类型，正确的是"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于 TypeScript 的结构类型，正确的是",
+      "body": "fs-ch09 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "选择**正确**的描述。",
+          "title": "关于 TypeScript 的结构类型，正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "结构类型要求两个类型声明继承自同一个父类型才能互相赋值"
+            },
+            {
+              "key": "B",
+              "text": "结构类型只比较成员形状：多出成员合法，缺少必需成员不合法"
+            },
+            {
+              "key": "C",
+              "text": "结构类型在运行时也会检查对象形状，因此能替代数据校验"
+            },
+            {
+              "key": "D",
+              "text": "结构类型下 { id: string } 与 { orderId: string } 不能互相赋值"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "结构类型比形状不比名字：具备所需成员即可赋值，多出的成员不报错、缺少必需成员报错。类型在运行时被擦除，不做任何检查，因此不能替代数据校验。A 描述的是名义类型；D 恰好说反了——同形状不同类型在结构类型下可以互相赋值，这正是需要品牌类型的原因。"
+        },
+        {
+          "id": "q3",
+          "stem": "关于 `unknown`，正确的是",
+          "title": "unknown 与 any 的差别",
+          "options": [
+            {
+              "key": "A",
+              "text": "unknown 与 any 完全等价，只是写法不同"
+            },
+            {
+              "key": "B",
+              "text": "unknown 能接受任何值，但使用前必须先收窄，否则编译报错"
+            },
+            {
+              "key": "C",
+              "text": "unknown 只能用于函数参数，不能用于变量"
+            },
+            {
+              "key": "D",
+              "text": "unknown 会在运行时做类型检查，any 不会"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "unknown 是类型系统的「安全顶」：任何值都能赋给它，但它不能直接参与运算或取属性，必须先收窄（typeof / 守卫 / 断言）。any 则双向通行、跳过所有检查。二者在运行时都不存在，所以 D 错误。C 也错——let x: unknown 完全合法。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "ts",
+      "file": "02-narrowing-and-exhaustive.md",
+      "code": "function area(shape: Shape): number {\n  switch (shape.‹1›) {\n    case \"‹2›\":    return Math.PI * shape.r ** 2;   // 这里 shape 是 Circle\n    case \"‹3›\":    return shape.side ** 2;          // 这里 shape 是 Square\n    default:\n      const never_: never = shape;   // 如果漏了一种，这行编译报错\n      throw new Error(`未处理的形状: ${JSON.stringify(never_)}`);\n  }\n}",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "kind",
+          "line": 2
+        },
+        {
+          "id": "b2",
+          "answer": "circle",
+          "line": 3
+        },
+        {
+          "id": "b3",
+          "answer": "square",
+          "line": 4
+        }
+      ],
+      "distractors": [
+        "state",
+        "user"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "chapter": "data-ch04",
+  "subject": "data",
+  "title": "Pandas 进阶：分组聚合、合并与时间序列",
+  "fingerprint": "9e5708273d",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "四种聚合器的返回形状：agg / transform / apply / filt…",
+      "body": "agg 与 transform 的返回形状"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "agg 与 transform 的返回形状",
+      "body": "data-ch04 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "要把「每个城市销售额的组内均值」加成一列（与 df 行数相同），下面哪个写法是正确的？",
+          "title": "agg 与 transform 的返回形状",
+          "options": [
+            {
+              "key": "A",
+              "text": "df[\"m\"] = df.groupby(\"city\")[\"sales\"].agg(\"mean\")"
+            },
+            {
+              "key": "B",
+              "text": "df[\"m\"] = df.groupby(\"city\")[\"sales\"].transform(\"mean\")"
+            },
+            {
+              "key": "C",
+              "text": "df[\"m\"] = df.groupby(\"city\")[\"sales\"].apply(\"mean\")"
+            },
+            {
+              "key": "D",
+              "text": "df[\"m\"] = df.groupby(\"city\")[\"sales\"].filter(\"mean\")"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "transform 的契约是「输入 n 行、输出 n 行」，第 i 行的值由它所属的组决定，因此返回与 df 同长、索引一致的 Series，可以直接赋值成新列。agg 每组只返回一行（长度 = 组数），赋值会因长度不匹配而对不齐；apply 返回什么取决于函数（返回标量时同样不是同长序列）；filter 返回的是行的子集，语义完全不同。"
+        },
+        {
+          "id": "q1",
+          "stem": "左表 `id` 取值为 `[1, 1, 2]`（3 行），右表 `id` 取值为 `[1, 1, 3]`（3 行）。`pd.merge(left, right, on=\"id\", how=\"inner\")` 的结果有多少行？",
+          "title": "多对多合并后的行数",
+          "options": [
+            {
+              "key": "A",
+              "text": "2 行（只保留两边都有的键 1）"
+            },
+            {
+              "key": "B",
+              "text": "3 行（与左表相同）"
+            },
+            {
+              "key": "C",
+              "text": "4 行（键 1 在左 2 行 × 右 2 行）"
+            },
+            {
+              "key": "D",
+              "text": "9 行（3 × 3 笛卡尔积）"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "连接的定义是笛卡尔积再筛选：$L \\bowtie R = \\sigma{L.k=R.k}(L \\times R)$。对每个键 $k$，它贡献 $\\text{cnt}L(k) \\times \\text{cnt}R(k)$ 行。键 1：$2 \\times 2 = 4$ 行；键 2 只在左、键 3 只在右，inner 下都被丢弃。所以结果是 4 行。D 项的 9 行是把「全部键都做笛卡尔积」的错误理解——筛选条件必须先起作用。"
+        },
+        {
+          "id": "q4",
+          "stem": "对 2026 年 1 月的日频数据，`s.resample(\"M\").sum()` 与 `s.resample(\"MS\").sum()` 的区别是什么？",
+          "title": "resample 的 M 与 MS",
+          "options": [
+            {
+              "key": "A",
+              "text": "完全一样，两个别名等价"
+            },
+            {
+              "key": "B",
+              "text": "M 按月末对齐（标签是 01-31），MS 按月初对齐（标签是 01-01）"
+            },
+            {
+              "key": "C",
+              "text": "M 是月度、MS 是季度，聚合区间不同"
+            },
+            {
+              "key": "D",
+              "text": "MS 会多出一行，因为它包含了 1 月之前的数据"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "M = month end，把整月数据归到月末那一天（2026-01-31）；MS = month start，归到月初（2026-01-01）。两者的数值完全相同，只有时间标签位置不同——这正是它危险的地方：数字全对，时间标签错位，肉眼很难发现。C 项的季度别名是 Q/QS，D 项无此性质。"
+        }
+      ]
+    }
+  ]
+}

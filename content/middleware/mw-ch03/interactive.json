@@ -1,0 +1,156 @@
+{
+  "chapter": "mw-ch03",
+  "subject": "middleware",
+  "title": "Redis 高可用：主从、哨兵与 Cluster（mw-ch03）",
+  "fingerprint": "1c831257ae",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "主从全量同步 PSYNC（fork RDB + 从节点载入 + 补增量）",
+      "body": "混淆全量同步与部分同步、以为从节点重启一定走全量"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "主从复制中全量同步与部分同步的触发条件",
+      "body": "mw-ch03 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "混淆全量同步与部分同步、以为从节点重启一定走全量",
+          "right": "答「部分同步可行性取决于 offset 是否仍在 backlog 窗口」，并强调 backlog 是固定大小环形缓冲，写入过快/断线过久会退化全量。"
+        },
+        {
+          "id": 2,
+          "left": "把哨兵的 quorum 当成 Raft 的多数派",
+          "right": "明确区分「ODOWN 的 quorum」与「leader 选举的多数派」，二者独立配置、语义不同。"
+        },
+        {
+          "id": 3,
+          "left": "选主规则记反优先级",
+          "right": "priority 小优先（数值越小越想当主）、offset 大优先（数据越新越优先），别把方向记反。"
+        },
+        {
+          "id": 4,
+          "left": "MOVED 与 ASK 不分、以为都刷新路由表",
+          "right": "答「MOVED 刷新、ASK 不刷新」，并说明 ASK 只管该 key 本次去目标节点拿。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "关于 Redis 主从复制，下列说法正确的是？",
+          "title": "主从复制中全量同步与部分同步的触发条件",
+          "options": [
+            {
+              "key": "A",
+              "text": "每次重连都全量同步"
+            },
+            {
+              "key": "B",
+              "text": "backlog 窗口内重连走部分同步"
+            },
+            {
+              "key": "C",
+              "text": "replbacklog 无限增长"
+            },
+            {
+              "key": "D",
+              "text": "REPLCONF ACK 只做 TCP 心跳"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "从节点断线重连时若上报的 offset 仍在 replbacklog 窗口内则走部分同步（CONTINUE）只补缺失区间；只有首次/换主/窗口被覆盖才 FULLRESYNC。replbacklog 是固定大小环形缓冲会被覆盖；REPLCONF ACK 上报的是复制 offset，用于计算 lag 与 min-replicas 保护。"
+        },
+        {
+          "id": "q1",
+          "stem": "关于 Redis 哨兵，下列说法正确的是？",
+          "title": "哨兵 quorum 与 leader 选举多数派的区别",
+          "options": [
+            {
+              "key": "A",
+              "text": "ODOWN 需多数派，quorum=N/2+1"
+            },
+            {
+              "key": "B",
+              "text": "quorum 是确认下线门槛，通常 < 总数"
+            },
+            {
+              "key": "C",
+              "text": "所有哨兵同时执行故障转移"
+            },
+            {
+              "key": "D",
+              "text": "SDOWN 自动等同 ODOWN"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "quorum 只是「确认 SDOWN 的哨兵数门槛」用于达成 ODOWN，不要求多数派、通常小于哨兵总数；真正执行故障转移的 leader 选举才需要 >N/2 多数派。SDOWN 是单哨兵主观判定，需经 is-master-down-by-addr 投票累计到 quorum 才变 ODOWN，且由选出的 leader 执行转移。"
+        },
+        {
+          "id": "q2",
+          "stem": "Redis Cluster 中，关于 MOVED 与 ASK，下列说法正确的是？",
+          "title": "Cluster 的 MOVED 与 ASK 重定向区别",
+          "options": [
+            {
+              "key": "A",
+              "text": "二者都刷新映射"
+            },
+            {
+              "key": "B",
+              "text": "MOVED 刷新、ASK 不刷新"
+            },
+            {
+              "key": "C",
+              "text": "ASK 刷新、MOVED 临时"
+            },
+            {
+              "key": "D",
+              "text": "只在跨槽多 key 出现"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "MOVED 表示槽归属已永久变更，客户端应刷新本地映射；ASK 仅发生在槽迁移中间态，是本次临时重定向、不刷新映射，等迁移完成收到 MOVED 才更新。二者都出现在单 key 路由错误/迁移场景，与跨槽多 key 的 CROSSSLOT 限制无关。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "04-redis-ha-practical-recipes.md",
+      "code": "# 方案一：关键读走主库（最简单）\ndef get_user(uid, need_fresh=False):\n    conn = master if need_fresh else ‹1›.get()\n    return conn.‹2›(f\"user:{uid}\")\n\n# 方案二：用 WAIT 命令同步等待（Redis 3.0+）\nmaster.set(\"k\", \"v\")\nreplicas_acked = master.execute_command(\"WAIT\", 1, 100)   # 等 1 个从库，超时 100ms\n# 返回实际确认的从库数，小于期望就说明没等到\n\n# 方案三：会话粘性 + 版本号校验\n# 写操作返回新版本号，读时带上版本号，从库落后就重试或降级读主",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "replica_pool",
+          "line": 3
+        },
+        {
+          "id": "b2",
+          "answer": "hgetall",
+          "line": 4
+        }
+      ],
+      "distractors": [
+        "partition",
+        "parts"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

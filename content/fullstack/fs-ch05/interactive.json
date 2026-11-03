@@ -1,0 +1,106 @@
+{
+  "chapter": "fs-ch05",
+  "subject": "fullstack",
+  "title": "数据库与 REST API 设计",
+  "fingerprint": "75852c7512",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "RESTful 资源命名、HTTP 方法语义（安全/幂等）与状态码映射表（纯函数，…",
+      "body": "什么场景更适合选文档型（MongoDB）"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "什么场景更适合选文档型（MongoDB）",
+      "body": "fs-ch05 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "fs-ch05-ex01",
+          "stem": "按「一次业务操作能否落在同一个聚合根内」这一判据，下列哪种场景最适合选文档型数据库？",
+          "title": "什么场景更适合选文档型（MongoDB）",
+          "options": [
+            {
+              "key": "A",
+              "text": "需要跨多张表保证「扣库存 + 建订单」的原子性"
+            },
+            {
+              "key": "B",
+              "text": "读多写少、需要对多表做任意 JOIN 与聚合报表"
+            },
+            {
+              "key": "C",
+              "text": "一次读取就把一个聚合根（含嵌套子结构）整体取回，且几乎不跨聚合 JOIN"
+            },
+            {
+              "key": "D",
+              "text": "需要严格的外键约束防止脏数据"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "文档型把聚合边界编码进物理布局，整存整取极快。A 需要跨文档事务（关系型更省心）、B 与 D 都需要关系型的 JOIN 与约束能力。选型判据是「聚合边界是否与写入边界重合」，不是性能数字。"
+        },
+        {
+          "id": "fs-ch05-ex02",
+          "stem": "表 events 上有复合索引 idx_tenant_kind(tenant_id, kind)。查询需要返回列 tenant_id、kind 以外的 payload 列时，下列哪条 WHERE 无法利用该索引的最左前缀定位行？",
+          "title": "复合索引 (tenantid, kind) 上哪条查询无法用索引定位",
+          "options": [
+            {
+              "key": "A",
+              "text": "WHERE tenantid = ?"
+            },
+            {
+              "key": "B",
+              "text": "WHERE tenantid = ? AND kind = ?"
+            },
+            {
+              "key": "C",
+              "text": "WHERE tenantid = ? AND kind > ?"
+            },
+            {
+              "key": "D",
+              "text": "WHERE kind = ?"
+            }
+          ],
+          "correct": [
+            "D"
+          ],
+          "explain": "索引只在 (tenantid, kind) 这个列序上有序，(kind) 单独不是任何前缀，无法定位起点。本章 ex09 实跑显示该查询的计划退化为 SCAN events（usesindex=False）。"
+        },
+        {
+          "id": "fs-ch05-ex07",
+          "stem": "关于 RFC 9457（Problem Details for HTTP APIs），下列说法哪一项正确？",
+          "title": "Problem Details 的成员与媒体类型",
+          "options": [
+            {
+              "key": "A",
+              "text": "媒体类型是 application/json，错误体与成功资源共用同一结构"
+            },
+            {
+              "key": "B",
+              "text": "核心成员为 type / title / status / detail / instance，允许添加不与核心成员冲突的扩展成员"
+            },
+            {
+              "key": "C",
+              "text": "type 必须是绝对 URL，不允许使用 about:blank 作为缺省值"
+            },
+            {
+              "key": "D",
+              "text": "字段级校验错误必须直接平铺在顶层，不能用扩展成员承载"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "RFC 9457 的媒体类型是 application/problem+json，五个核心成员为 type/title/status/detail/instance；type 缺省为 about:blank，且允许相对 URI 引用；扩展成员（如 errors 数组、retryAfterSec）可自由添加但不得与核心成员冲突。本章 ex06 实跑验证了这一点。"
+        }
+      ]
+    }
+  ]
+}

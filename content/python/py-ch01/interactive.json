@@ -1,0 +1,71 @@
+{
+  "chapter": "py-ch01",
+  "subject": "python",
+  "title": "语法与数据类型：变量/流程控制/字符串/列表/字典/元组/集合/推导式",
+  "fingerprint": "d03479d2ca",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "变量与基本运算",
+      "body": "关于 Python 变量语义，正确的是"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于 Python 变量语义，正确的是",
+      "body": "py-ch01 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "选择**正确**的描述。",
+          "title": "关于 Python 变量语义，正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "变量在赋值前必须声明类型"
+            },
+            {
+              "key": "B",
+              "text": "变量是名字，绑定到对象；对象分可变/不可变"
+            },
+            {
+              "key": "C",
+              "text": "列表是可哈希的，可作为 dict 的键"
+            },
+            {
+              "key": "D",
+              "text": "a=1; b=a; a=a+1 之后 b 变成 2"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "Python 动态类型，变量只是名字；列表不可哈希；不可变对象重新绑定不影响原绑定。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "02-control-flow.md",
+      "code": "for x in xs:\n    if x == ‹1›:\n        print(\"found\")\n        break\nelse:\n    print(\"not found\")     # 只有没 break 才走到这里",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "target",
+          "line": 2
+        }
+      ],
+      "distractors": [
+        "kafka",
+        "keepdims"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "chapter": "cpp-ch18",
+  "subject": "cpp",
+  "title": "性能与底层：内存对齐、缓存友好与内联",
+  "fingerprint": "e869cc1176",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "sizeof / alignof / offsetof 实测结构体布局与填充",
+      "body": "关于内存对齐与填充，下列说法正确的是"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于内存对齐与填充，下列说法正确的是",
+      "body": "cpp-ch18 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "选择**正确**的描述。",
+          "title": "关于内存对齐与填充，下列说法正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "alignas 可以把类型的对齐从 8 降低到 1"
+            },
+            {
+              "key": "B",
+              "text": "结构体的 sizeof 一定是其 alignof 的整数倍"
+            },
+            {
+              "key": "C",
+              "text": "把结构体 memcpy 到网络是安全且可移植的"
+            },
+            {
+              "key": "D",
+              "text": "#pragma pack(1) 会抬高成员对齐"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "sizeof 必须是 alignof 的整数倍，否则数组遍历会破坏成员对齐（B 正确）。alignas 只能抬高对齐（A 错）；带填充的结构体 memcpy 会泄漏未初始化内存且不可移植（C 错）；pack(1) 是降低对齐（D 错）。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "cpp",
+      "file": "02-false-sharing-and-cache.md",
+      "code": "#include <atomic>\n#include <chrono>\n#include <cstdio>\n#include <thread>\n\nstruct Together { std::atomic<long long> a{0}; std::atomic<long long> b{0}; };\nstruct Apart    { alignas(64) std::atomic<long long> a{0};\n                  alignas(64) std::atomic<long long> b{0}; };\n\ntemplate <class T>\nlong long time_two_writers(T& s, int iters) {\n    const auto t0 = std::chrono::steady_clock::now();\n    std::thread w1([&]{ for (int i = 0; i < iters; ++i)\n                            s.a.fetch_add(1, std::memory_order_relaxed); });\n    std::thread w2([&]{ for (int i = 0; i < iters; ++i)\n                            s.b.fetch_add(1, std::memory_order_relaxed); });\n    w1.join();\n    w2.join();\n    return std::chrono::‹1›<std::chrono::milliseconds>(\n               std::chrono::steady_clock::now() - t0).count();\n}\n\nint main() {\n    constexpr int kIters = 20000000;\n    Together same; Apart split;\n    std::printf(\"together=%lld ms\\n\", time_two_writers(same,  kIters));\n    std::printf(\"apart   =%lld ms\\n\", time_two_writers(split, kIters));\n}",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "duration_cast",
+          "line": 19
+        }
+      ],
+      "distractors": [
+        "function",
+        "iostream"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

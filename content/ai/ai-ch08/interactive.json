@@ -1,0 +1,183 @@
+{
+  "chapter": "ai-ch08",
+  "subject": "ai",
+  "title": "LLM 应用工程：推理优化、评测、可观测性与安全",
+  "fingerprint": "021879ea7d",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "KV Cache 显存占用公式计算器（MHA vs GQA）",
+      "body": "把 TTFT 与 TPOT 混成一个「延迟」"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "TTFT 与 TPOT 的归属阶段",
+      "body": "ai-ch08 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "把 TTFT 与 TPOT 混成一个「延迟」",
+          "right": "先分清是首 token 慢（Prefill/排队）还是逐 token 慢（Decode/带宽），两阶段药方完全不同（见 ex03）。"
+        },
+        {
+          "id": 2,
+          "left": "只看平均延迟做 SLA",
+          "right": "用 P95/P99 定义 SLO，并按阶段拆出 TTFT/TPOT 分位。"
+        },
+        {
+          "id": 3,
+          "left": "估算显存时只算权重、不算 KV Cache",
+          "right": "用 2×L×Hkv×dhead×S×B×字节 先算 KV 再选卡（见 ex01）。"
+        },
+        {
+          "id": 4,
+          "left": "把「注意力头数」当「KV 头数」",
+          "right": "查模型 config 里的 numkeyvalueheads。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "ai-ch08-q1",
+          "stem": "关于大模型推理的两阶段与延迟指标，下列说法正确的是？",
+          "title": "TTFT 与 TPOT 的归属阶段",
+          "options": [
+            {
+              "key": "A",
+              "text": "TTFT 由 Decode 阶段决定，TPOT 由 Prefill 阶段决定"
+            },
+            {
+              "key": "B",
+              "text": "TTFT 主要计入 Prefill（含排队与首步 Decode），TPOT 是 Decode 阶段的均摊步时"
+            },
+            {
+              "key": "C",
+              "text": "TTFT 与 TPOT 是同一个指标的两种叫法"
+            },
+            {
+              "key": "D",
+              "text": "端到端时延与 TPOT 无关，只取决于 TTFT"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "两阶段对应两指标：Prefill→TTFT、Decode→TPOT；二者需分开优化与告警。"
+        },
+        {
+          "id": "ai-ch08-q2",
+          "stem": "L 层、KV 头数 H_kv、头维 d、序列长 S、批 B、每元素字节 b 的 KV Cache 字节数为？",
+          "title": "KV Cache 显存的估算因子",
+          "options": [
+            {
+              "key": "A",
+              "text": "L × Hkv × d × S × B × b"
+            },
+            {
+              "key": "B",
+              "text": "2 × L × Hkv × d × S × B × b"
+            },
+            {
+              "key": "C",
+              "text": "L × (Hkv × d)² × S × b"
+            },
+            {
+              "key": "D",
+              "text": "2 × L × Hkv × d × S × b（不含批）"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "KVbytes = 2·L·Hkv·dhead·S·B·bytesdtype。"
+        },
+        {
+          "id": "ai-ch08-q5",
+          "stem": "线上 LLM 应用要降本提速，下列优化顺序最合理的是？",
+          "title": "成本与延迟优化的正确顺序",
+          "options": [
+            {
+              "key": "A",
+              "text": "先换推理框架并开启投机解码，再考虑其他"
+            },
+            {
+              "key": "B",
+              "text": "先度量 → 砍上下文 → 分模型（路由）→ 加缓存 → 再谈推理加速"
+            },
+            {
+              "key": "C",
+              "text": "先做模型路由，因为路由收益最大"
+            },
+            {
+              "key": "D",
+              "text": "先降价再优化，顺序无关"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "正确顺序：度量 → 砍上下文 → 分模型 → 加缓存 → 推理加速。"
+        },
+        {
+          "id": "ai-ch08-q7",
+          "stem": "语义缓存与前缀缓存都需要按容量淘汰最久未使用的条目。请在链接中查看题面与约束，并简述「O(1) 完成 get 与 put」的数据结构组合。",
+          "title": "LRU 缓存（语义缓存/前缀缓存淘汰基础）",
+          "options": [
+            {
+              "key": "A",
+              "text": "哈希表 + 双向链表"
+            },
+            {
+              "key": "B",
+              "text": "数组 + 二分查找"
+            },
+            {
+              "key": "C",
+              "text": "单一哈希表即可"
+            },
+            {
+              "key": "D",
+              "text": "最小堆 + 哈希表"
+            }
+          ],
+          "correct": [
+            "A"
+          ],
+          "explain": "LRU 的标准实现是哈希表 + 双向链表。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "06-llm-app-snippets.md",
+      "code": "def rough_tokens(text: str) -> int:\n    \"\"\"粗估 token 数：中文约 1 字 1 token，英文约 4 字符 1 token。\"\"\"\n    zh = sum(1 for c in text if '\\‹1›' <= c <= '\\u9fff')\n    en = len(text) - zh\n    return zh + max(1, en // 4)\n\ndef ‹2›(parts: list[str], limit: int = 8192) -> bool:\n    return sum(rough_tokens(p) for p in parts) < limit",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "u4e00",
+          "line": 3
+        },
+        {
+          "id": "b2",
+          "answer": "fits",
+          "line": 7
+        }
+      ],
+      "distractors": [
+        "validate",
+        "value"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

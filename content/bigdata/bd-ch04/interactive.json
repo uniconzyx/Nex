@@ -1,0 +1,132 @@
+{
+  "chapter": "bd-ch04",
+  "subject": "bigdata",
+  "title": "Spark 核心：RDD 与惰性求值（bd-ch04）",
+  "fingerprint": "d2c5c7b984",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "RDD 血缘 DAG 的构建与打印",
+      "body": "以为 transformation 会立即执行（忘了惰性求值）"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "下列关于 RDD 五大特性的描述，正确的是？",
+      "body": "bd-ch04 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "以为 transformation 会立即执行（忘了惰性求值）",
+          "right": "需要触发计算时显式调用 action；别在 transformation 链里期待「马上看到结果」，调试用 toDebugString 看计划而非随手 collect。"
+        },
+        {
+          "id": 2,
+          "left": "把 reduceByKey 当 groupByKey 用，导致 Shuffle 数据量爆炸",
+          "right": "聚合优先 reduceByKey/aggregateByKey/combineByKey，map 端 combiner 能把 Shuffle 量从「总记录数」压到「不同 key 数」。"
+        },
+        {
+          "id": 3,
+          "left": "在超大 key 上滥用 groupByKey",
+          "right": "可结合/可交换的聚合一律用 reduceByKey；不可结合的（如取 Top-N）用 reduceByKey+ 本地堆或 aggregateByKey 控制每 key 内存。"
+        },
+        {
+          "id": 4,
+          "left": "缓存用错级别 / 物化后不释放",
+          "right": "内存紧张用 MEMORYANDDISK；复用结束立即 unpersist()；只缓存「被多个 action 复用」的中间结果，而非一上来就缓存所有 RDD。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "Spark 官方给出的 RDD 五大特性包括：一组分区列表、对每个分区的计算函数、对其他 RDD 的依赖列表、（键值 RDD 的）分区器、（每个分区的）首选位置。下列说法正确的是？",
+          "title": "下列关于 RDD 五大特性的描述，正确的是？",
+          "options": [
+            {
+              "key": "A",
+              "text": "RDD 是可变数据集，transformation 会原地修改它"
+            },
+            {
+              "key": "B",
+              "text": "RDD 不可变，transformation 返回新 RDD；容错靠 lineage 重算而非副本"
+            },
+            {
+              "key": "C",
+              "text": "RDD 默认在内存中保留所有数据副本以实现容错"
+            },
+            {
+              "key": "D",
+              "text": "分区器是所有 RDD 都必须具备的特性"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "RDD 不可变，任何 transformation 返回新 RDD；容错依靠 lineage（依赖链）重算丢失分区，而不是数据副本（对比 HDFS）。分区器仅键值型 Shuffle RDD 有，非必选。"
+        },
+        {
+          "id": "q3",
+          "stem": "设 RDD 分区数 = 4。程序为：`sc.parallelize(...).map(...).filter(...).reduceByKey(...).map(...).collect()`。请问该 job 的 Stage 数与总 Task 数分别是？",
+          "title": "一段 RDD 程序的 Stage 数与总 Task 数",
+          "options": [
+            {
+              "key": "A",
+              "text": "Stage=1，Task=4"
+            },
+            {
+              "key": "B",
+              "text": "Stage=2，Task=8"
+            },
+            {
+              "key": "C",
+              "text": "Stage=2，Task=4"
+            },
+            {
+              "key": "D",
+              "text": "Stage=3，Task=12"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "reduceByKey 是宽依赖，把 DAG 切成 2 个 Stage（窄依赖链 map→filter 为一个，reduceByKey→map 为另一个）。每个 Stage 的 Task 数 = 末态分区数 = 4，总 Task = 4+4 = 8。"
+        },
+        {
+          "id": "q4",
+          "stem": "关于 `cache()`/`persist()` 与 `checkpoint()` 的区别，下列描述正确的是？",
+          "title": "cache 与 checkpoint 的区别",
+          "options": [
+            {
+              "key": "A",
+              "text": "两者都会截断 lineage，故障后都从可靠存储恢复"
+            },
+            {
+              "key": "B",
+              "text": "cache 保留 lineage、缓存丢失靠重算；checkpoint 斩断 lineage、从可靠存储恢复"
+            },
+            {
+              "key": "C",
+              "text": "checkpoint 比 cache 更快，应优先用 checkpoint"
+            },
+            {
+              "key": "D",
+              "text": "cache 后任何 executor 失效都不会触发重算"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "cache/persist 物化结果但保留 lineage，缓存丢失（executor 失效/被挤出）仍沿 lineage 重算；checkpoint 写入可靠存储并置空父指针，斩断 lineage，恢复从文件读。checkpoint 有额外写入代价，故常在之前先 cache。"
+        }
+      ]
+    }
+  ]
+}

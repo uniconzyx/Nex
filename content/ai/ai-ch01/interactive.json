@@ -1,0 +1,76 @@
+{
+  "chapter": "ai-ch01",
+  "subject": "ai",
+  "title": "深度学习基础：张量、前向与反向传播",
+  "fingerprint": "8822fef74f",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "张量的形状、strides 与广播（深度学习的内存基础）",
+      "body": "反向模式 AD 为什么比前向模式快"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "反向模式 AD 为什么比前向模式快",
+      "body": "ai-ch01 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "一个有 P 个参数、损失为**标量**的模型。前向模式自动微分与反向模式自动微分，各自求全部参数梯度需要多少次前向传播量级的计算？",
+          "title": "反向模式 AD 为什么比前向模式快",
+          "options": [
+            {
+              "key": "A",
+              "text": "前向模式 O(P)，反向模式 O(1)"
+            },
+            {
+              "key": "B",
+              "text": "前向模式 O(1)，反向模式 O(P)"
+            },
+            {
+              "key": "C",
+              "text": "两者都是 O(P)"
+            },
+            {
+              "key": "D",
+              "text": "两者都是 O(1)"
+            }
+          ],
+          "correct": [
+            "A"
+          ],
+          "explain": "JVP 与 VJP 的代价对比是理解反向传播的关键。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "04-regularization-and-training.md",
+      "code": "for ‹1› in range(epochs):\n    model.train()                      # 启用 Dropout / BN 更新统计量\n    for x, y in ‹2›:\n        opt.zero_grad()                # ① 清空梯度（否则会累加！）\n        loss = criterion(model(x), y)\n        loss.backward()                # ② 反向传播，累积到 .grad\n        torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)   # ③ 梯度裁剪（防爆炸）\n        opt.step()                     # ④ 更新参数\n    scheduler.step()                   # ⑤ 学习率调度\n    model.eval()                       # ⑥ 评估前切 eval：关闭 Dropout，冻结 BN\n    with torch.no_grad():              # ⑦ 推理不建图，省显存\n        ...",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "epoch",
+          "line": 1
+        },
+        {
+          "id": "b2",
+          "answer": "loader",
+          "line": 3
+        }
+      ],
+      "distractors": [
+        "amount",
+        "answer"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

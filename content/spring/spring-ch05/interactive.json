@@ -1,0 +1,183 @@
+{
+  "chapter": "spring-ch05",
+  "subject": "spring",
+  "title": "Web 层：REST 控制器与参数校验",
+  "fingerprint": "c43246b157",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "ex01-router-basic",
+      "body": "@RestController 与 @Controller 混用，返回 JSON 变成视图…"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "@RestController 与 @Controller 的区别",
+      "body": "spring-ch05 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "@RestController 与 @Controller 混用，返回 JSON 变成视图…",
+          "right": "要么类上用 @RestController，要么在方法上加 @ResponseBody；返回对象让消息转换器序列化。"
+        },
+        {
+          "id": 2,
+          "left": "@RequestParam 默认 required=true，缺参会直接 400 而非拿到…",
+          "right": "可选参数显式 required = false，或用 defaultValue；真正可空的字段就别依赖隐式 null。"
+        },
+        {
+          "id": 3,
+          "left": "@PathVariable 与 @RequestParam 混淆",
+          "right": "路径模板变量用 @PathVariable，查询串/表单用 @RequestParam，位置决定注解。"
+        },
+        {
+          "id": 4,
+          "left": "@RequestBody 只能读一次，拦截器/过滤器读过流后 Controller 收空体",
+          "right": "用 ContentCachingRequestWrapper 缓存请求体，或把读体逻辑放到最里层只读取一次。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "ex1",
+          "stem": "下列关于 `@RestController` 与 `@Controller` 的说法，哪一项是正确的？",
+          "title": "@RestController 与 @Controller 的区别",
+          "options": [
+            {
+              "key": "A",
+              "text": "@RestController 比 @Controller 多了路由匹配能力，因此能处理更多请求"
+            },
+            {
+              "key": "B",
+              "text": "@RestController = @Controller + @ResponseBody，方法返回值直接写响应体而非视图名"
+            },
+            {
+              "key": "C",
+              "text": "@Controller 不能返回 JSON，只能返回视图名"
+            },
+            {
+              "key": "D",
+              "text": "两者完全等价，只是名字不同"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "@RestController 是 @Controller 与 @ResponseBody 的组合注解，方法返回值交给 HttpMessageConverter 直接写响应体；@Controller 默认交给 ViewResolver 解析为视图名。路由能力来自 @RequestMapping 系列，两者相同。"
+        },
+        {
+          "id": "ex2",
+          "stem": "现有请求 `POST /users/42?verbose=true`，请求体是 JSON `{\"name\":\"alice\"}`。请问：路径里的 `42`、`verbose`、以及请求体里的 `name` 应分别用哪个注解接收？",
+          "title": "@RequestParam / @PathVariable / @RequestBody 的适用场景",
+          "options": [
+            {
+              "key": "A",
+              "text": "@PathVariable、@RequestParam、@RequestBody"
+            },
+            {
+              "key": "B",
+              "text": "@RequestParam、@PathVariable、@RequestBody"
+            },
+            {
+              "key": "C",
+              "text": "@RequestBody、@RequestParam、@PathVariable"
+            },
+            {
+              "key": "D",
+              "text": "三者都用 @RequestParam"
+            }
+          ],
+          "correct": [
+            "A"
+          ],
+          "explain": "位置决定注解：路径模板变量 /users/{id} 中的 id 用 @PathVariable；查询串 ?verbose=true 用 @RequestParam；请求体 JSON 对象用 @RequestBody。混淆会导致收不到值或 400。"
+        },
+        {
+          "id": "ex3",
+          "stem": "一个「创建用户」接口成功执行后，应返回哪个状态码最合适？",
+          "title": "HTTP 状态码的语义选择",
+          "options": [
+            {
+              "key": "A",
+              "text": "200 OK"
+            },
+            {
+              "key": "B",
+              "text": "201 Created（并带 Location 头）"
+            },
+            {
+              "key": "C",
+              "text": "204 No Content"
+            },
+            {
+              "key": "D",
+              "text": "202 Accepted"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "创建资源成功用 201 Created，并通常带 Location 指向新资源；200 语义过泛、204 表示无内容（适合删除）、202 表示已接受异步处理尚未完成。"
+        },
+        {
+          "id": "ex6",
+          "stem": "使用 `@ControllerAdvice` + `@ExceptionHandler` 做统一异常处理。对于「业务上资源不存在」抛出的 `ResourceNotFoundException`，最合适的状态码是？",
+          "title": "全局异常处理的映射",
+          "options": [
+            {
+              "key": "A",
+              "text": "400 Bad Request"
+            },
+            {
+              "key": "B",
+              "text": "404 Not Found"
+            },
+            {
+              "key": "C",
+              "text": "500 Internal Server Error"
+            },
+            {
+              "key": "D",
+              "text": "200 OK + 错误体"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "异常类型应映射到语义正确的状态码：资源不存在→404；未认证→401；无权限→403；业务冲突→409；未捕获运行时异常兜底 500。不要用 200 包错误体。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "java",
+      "file": "01-rest-controller-and-mapping.md",
+      "code": "import java.util.*;\npublic class Main {\n    static String extract(String template, String path){\n        String[] tp = template.split(\"/\");\n        String[] pp = path.split(\"/\");\n        if(tp.length!=pp.length) return null;\n        Map<String,String> vars=new LinkedHashMap<>();\n        for(int i=0;i<tp.length;i++){\n            if(tp[i].startsWith(\"{\")&&tp[i].endsWith(\"}\")){\n                vars.put(tp[i].substring(1,tp[i].length()-1), pp[i]);\n            } else if(!tp[i].‹1›(pp[i])){\n                return null;\n            }\n        }\n        return vars.‹2›()?\"\" : vars.toString();\n    }\n    public static void main(String[] a){\n        System.out.println(extract(\"/users/{id}\",\"/users/42\"));\n        System.out.println(extract(\"/users/{id}\",\"/users/abc\"));\n        System.out.println(extract(\"/users/{id}\",\"/posts/42\"));\n        System.out.println(extract(\"/users/{id}/posts/{pid}\",\"/users/7/posts/99\"));\n    }\n}",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "equals",
+          "line": 11
+        },
+        {
+          "id": "b2",
+          "answer": "isEmpty",
+          "line": 15
+        }
+      ],
+      "distractors": [
+        "config",
+        "consumer"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

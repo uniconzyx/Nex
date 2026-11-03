@@ -1,0 +1,52 @@
+{
+  "chapter": "cpp-ch08",
+  "subject": "cpp",
+  "title": "STL 容器：vector/list/map/set/unordered",
+  "fingerprint": "0291ee6062",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "vector 扩容观察：capacity 随 pushback 指数增长（约 2x）",
+      "body": "关于 vector 的扩容与迭代器失效，正确的是"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于 vector 的扩容与迭代器失效，正确的是",
+      "body": "cpp-ch08 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "以下描述中，选出**正确**的一项。",
+          "title": "关于 vector 的扩容与迭代器失效，正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "vector 每次 pushback 都会重新分配内存"
+            },
+            {
+              "key": "B",
+              "text": "pushback 发生扩容时，所有已有的迭代器/引用/指针都会失效"
+            },
+            {
+              "key": "C",
+              "text": "reserve(n) 会把 size 增加到 n"
+            },
+            {
+              "key": "D",
+              "text": "vector 的 operator[] 会做越界检查并抛异常"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "扩容会整体搬到新地址，故所有迭代器/引用/指针失效（B 对）；A 错在只有容量不足才分配；reserve 只改 capacity 不改 size（C 错）；operator[] 不检查越界、越界是 UB，at() 才抛异常（D 错）。"
+        }
+      ]
+    }
+  ]
+}

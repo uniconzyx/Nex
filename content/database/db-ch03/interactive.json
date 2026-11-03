@@ -1,0 +1,135 @@
+{
+  "chapter": "db-ch03",
+  "subject": "database",
+  "title": "索引与事务：B+树索引、ACID、隔离级别",
+  "fingerprint": "1fdc506916",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "建二级索引并用 EXPLAIN 验证走索引（type=ref）",
+      "body": "SELECT + 二级索引必然回表，大结果集时优化器会放弃索引"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于 InnoDB B+树索引，下列说法正确的是",
+      "body": "db-ch03 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "sequence",
+      "heading": "开场：慢查询的归因顺序",
+      "steps": [
+        "看执行计划（EXPLAIN），确认走了什么索引、扫了多少行。",
+        "看索引定义，确认「该走的索引存在且可用」。",
+        "看数据分布，确认优化器选择是否合理（区分度、回表代价）。",
+        "看锁与事务，确认是不是被阻塞而不是真的慢。"
+      ],
+      "file": "05-index-transaction-practical-recipes.md"
+    },
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "SELECT + 二级索引必然回表，大结果集时优化器会放弃索引",
+          "right": "只查需要的列，或建覆盖索引（Extra: Using index）避免回表。"
+        },
+        {
+          "id": 2,
+          "left": "违反最左前缀：跳列 / 前导通配 / 对列套函数，索引直接失效",
+          "right": "等值列放最左、范围列放中、用 createdat BETWEEN ... AND ... 替代函数包裹、前缀匹配才用 LIKE '明%'。"
+        },
+        {
+          "id": 3,
+          "left": "隐式类型转换导致索引失效",
+          "right": "WHERE phone='13800138000'（字符串加引号），并保证连接/比较两边类型一致。"
+        },
+        {
+          "id": 4,
+          "left": "长事务：持有 ReadView 不释放，undo 版本无法 purge",
+          "right": "事务尽量短、autocommit=1 默认开启；批量任务分批提交。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "下列说法哪项正确？",
+          "title": "关于 InnoDB B+树索引，下列说法正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "B+树的非叶子节点也存储完整行数据，因此查询更快"
+            },
+            {
+              "key": "B",
+              "text": "哈希索引支持高效的范围查询（如 salary > 5000）"
+            },
+            {
+              "key": "C",
+              "text": "B+树非叶子节点只存键+指针，扇出大、树高低；叶子节点存数据且用双向链表串联，范围查询只需顺链表扫描"
+            },
+            {
+              "key": "D",
+              "text": "聚簇索引的叶子节点存的是主键值，必须再回表才能拿到整行"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "B+树非叶子节点不存行（A 错）；哈希索引不支持范围（B 错）；聚簇索引叶子存的就是整行，无需回表（D 错）。C 准确描述了 B+树扇出大、范围查询沿叶子链表走的优势。"
+        },
+        {
+          "id": "q1",
+          "stem": "已知联合索引 idx(a,b,c)，下列哪些查询能充分利用到该索引对 c 列的定位（即不止用 a）？",
+          "title": "联合索引 (a,b,c) 的最左前缀应用",
+          "options": [
+            {
+              "key": "A",
+              "text": "WHERE a=1 AND b=2 AND c=3"
+            },
+            {
+              "key": "B",
+              "text": "WHERE a=1 AND c=3"
+            },
+            {
+              "key": "C",
+              "text": "WHERE b=2 AND c=3"
+            },
+            {
+              "key": "D",
+              "text": "WHERE a=1 AND b>2 AND c=3"
+            }
+          ],
+          "correct": [
+            "A"
+          ],
+          "explain": "最左前缀要求从 a 开始连续：A 三列都等值可用；B 只有 a 用得上、c 不能定位；C 缺 a 完全用不上；D 中 b 是范围，会截断后续列，c 无法用于索引定位（只能靠 ICP 过滤）。所以只有 A 充分利用到 c。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "sql",
+      "file": "05-index-transaction-practical-recipes.md",
+      "code": "-- 范围查询会截断后续列\nSELECT * FROM t WHERE a = 1 AND b > 2 AND c = 3;\n-- a 用于定位，b 用于范围扫，c 无法用于索引定位（但可用于覆盖/ICP）\n\n-- 排序也吃最左前缀\nSELECT * FROM t WHERE a = 1 ORDER BY b, c;   -- 能用索引顺序，免排序\nSELECT * FROM t WHERE a = 1 ORDER BY c;      -- 不能，会 ‹1›",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "filesort",
+          "line": 7
+        }
+      ],
+      "distractors": [
+        "dept_id",
+        "emp_id"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

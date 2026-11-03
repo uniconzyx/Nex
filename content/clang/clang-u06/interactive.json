@@ -1,0 +1,79 @@
+{
+  "chapter": "clang-u06",
+  "subject": "clang",
+  "title": "Makefile 与构建",
+  "fingerprint": "5d3ef17b93",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "编译四阶段：-E / -S / -c / 链接 各自的产物",
+      "body": "Make 判断「要不要重建」的唯一依据"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "Make 判断「要不要重建」的唯一依据",
+      "body": "clang-u06 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "给出一条规则 `app: main.o util.o`。下列哪种情况 Make **不会**重新执行 recipe？",
+          "title": "Make 判断「要不要重建」的唯一依据",
+          "options": [
+            {
+              "key": "A",
+              "text": "app 文件不存在"
+            },
+            {
+              "key": "B",
+              "text": "main.o 比 app 新"
+            },
+            {
+              "key": "C",
+              "text": "util.o 的内容变了，但 mtime 没变"
+            },
+            {
+              "key": "D",
+              "text": "main.o 的 mtime 比 app 早，但 util.o 比 app 新"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "考察对「增量构建判据」这一根基性事实的掌握，是本节第一个必背点。"
+        },
+        {
+          "id": "q3",
+          "stem": "```makefile A = $(B) B = 1 C := $(D) D = 2 all: \\t@echo \"A=[$(A)] C=[$(C)]\" ``` `make` 的输出是？",
+          "title": "= 与 := 的求值时机",
+          "options": [
+            {
+              "key": "A",
+              "text": "A=[1] C=[2]"
+            },
+            {
+              "key": "B",
+              "text": "A=[1] C=[]"
+            },
+            {
+              "key": "C",
+              "text": "A=[] C=[2]"
+            },
+            {
+              "key": "D",
+              "text": "A=[] C=[]"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "递归展开 vs 立即展开是 Makefile 里最反直觉的一处语义，也是 $(shell) 重复执行这类疑难问题的根因。"
+        }
+      ]
+    }
+  ]
+}

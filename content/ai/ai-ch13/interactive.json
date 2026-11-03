@@ -1,0 +1,103 @@
+{
+  "chapter": "ai-ch13",
+  "subject": "ai",
+  "title": "推理引擎与量化部署：KV Cache 分页、continuous batching、GPTQ/AWQ/GGUF",
+  "fingerprint": "fd8c6960a1",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "KV Cache 显存账：随 batch 与长度线性膨胀",
+      "body": "关于 PagedAttention，正确的是"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于 PagedAttention，正确的是",
+      "body": "ai-ch13 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q1",
+          "stem": "下列描述正确的是",
+          "title": "关于 PagedAttention，正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "PagedAttention 要求每条序列的 KV 显存连续分配，以保证访问速度"
+            },
+            {
+              "key": "B",
+              "text": "PagedAttention 把 KV 切成固定大小块，用块表映射物理块，支持前缀复用"
+            },
+            {
+              "key": "C",
+              "text": "PagedAttention 通过增大预留长度来消除碎片"
+            },
+            {
+              "key": "D",
+              "text": "前缀复用会增加显存，因为要为每条请求各存一份 KV"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "PagedAttention 借虚拟内存思想：KV 切块、块表（逻辑块号→物理块号）映射、物理块池化，按需分配消灭内部碎片，并允许多请求共享同一物理块实现前缀复用（减少而非增加显存）。A 描述的是被它取代的连续分配；C 反而制造内部碎片；D 说反了。"
+        },
+        {
+          "id": "q6",
+          "stem": "关于 GPTQ 与 AWQ，正确的是",
+          "title": "GPTQ 与 AWQ 的核心区别",
+          "options": [
+            {
+              "key": "A",
+              "text": "GPTQ 按激活显著性保护重要通道，AWQ 做层内最优舍入"
+            },
+            {
+              "key": "B",
+              "text": "GPTQ 在量化每层时最小化整层输出误差并做补偿，AWQ 按激活幅度对权重通道缩放保护"
+            },
+            {
+              "key": "C",
+              "text": "二者都是量化算法，且 GGUF 是其中精度最高的一种"
+            },
+            {
+              "key": "D",
+              "text": "AWQ 需要大量校准集且量化很慢，GPTQ 则很快"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "GPTQ 在量化每层时求解「整层输出误差最小」的舍入+补偿问题，精度高但要校准集、较慢；AWQ 的洞见是「激活大的通道更重要」，按激活幅度对权重通道缩放保护、再量化，量化快、对校准不敏感。A 说反了；C 错在 GGUF 是文件格式而非量化算法；D 说反了快慢。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "04-inference-engine-practical-recipes.md",
+      "code": "# 调度循环的核心结构\nwhile running or waiting:\n    # 1. 把已完成的请求移出\n    running = [r for r in running if not r.‹1›]\n    # 2. 用空出来的槽位接纳新请求\n    while waiting and len(running) < ‹2›:\n        running.append(waiting.popleft())\n    # 3. 所有 running 请求各前进一步\n    step(running)",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "finished",
+          "line": 4
+        },
+        {
+          "id": "b2",
+          "answer": "max_batch",
+          "line": 6
+        }
+      ],
+      "distractors": [
+        "hashlib",
+        "head"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

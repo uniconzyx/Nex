@@ -1,0 +1,188 @@
+{
+  "chapter": "ai-ch10",
+  "subject": "ai",
+  "title": "训练工程与规模化：从「能跑通」到「能训起来」",
+  "fingerprint": "3237491373",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "三种初始化下 50 层前向的激活方差",
+      "body": "把所有参数初始化成同一个值（包括全 0）"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "为什么必须存 fp32 主权重",
+      "body": "ai-ch10 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "把所有参数初始化成同一个值（包括全 0）",
+          "right": "随机初始化（He/Xavier），并保证每层方差约等于输入方差。"
+        },
+        {
+          "id": 2,
+          "left": "用 Xavier 配 ReLU、或用 He 配 tanh",
+          "right": "tanh/sigmoid → Xavier，ReLU/GELU → He。"
+        },
+        {
+          "id": 3,
+          "left": "以为「有 BN/LN 了就不用管初始化」",
+          "right": "归一化 + 合适初始化 + scaled init（残差末层乘 $1/\\sqrt{2N}$）三者并用。"
+        },
+        {
+          "id": 4,
+          "left": "Transformer 用 BatchNorm",
+          "right": "LN / RMSNorm。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "混合精度训练时，参数更新为什么必须在 fp32 主副本上做，而不能直接更新 fp16 参数？",
+          "title": "为什么必须存 fp32 主权重",
+          "options": [
+            {
+              "key": "A",
+              "text": "因为 fp16 计算速度比 fp32 慢"
+            },
+            {
+              "key": "B",
+              "text": "fp16 的精度不足以表示小更新量，直接更新会被舍入掉"
+            },
+            {
+              "key": "C",
+              "text": "因为 fp16 无法存储大于 1 的数"
+            },
+            {
+              "key": "D",
+              "text": "为了配合梯度裁剪的阈值计算"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "master weights 是混合精度可训练的必要条件，不是可选项。"
+        },
+        {
+          "id": "q1",
+          "stem": "把 weight decay 作为 $\\lambda\\theta$ 加进梯度再交给 Adam（即 Adam + L2），与 AdamW 的解耦衰减相比，主要问题是什么？",
+          "title": "AdamW 与 Adam + L2 的差别",
+          "options": [
+            {
+              "key": "A",
+              "text": "没有区别，两者在数学上完全等价"
+            },
+            {
+              "key": "B",
+              "text": "$\\lambda\\theta$ 会让梯度上溢成 inf"
+            },
+            {
+              "key": "C",
+              "text": "衰减项被 $\\sqrt{\\hat v}$ 归一化，导致不同参数的衰减强度不一致"
+            },
+            {
+              "key": "D",
+              "text": "Adam + L2 无法更新一阶矩估计"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "解耦衰减 = 把「正则」与「自适应缩放」分开，是 LLM 训练默认 AdamW 的原因。"
+        },
+        {
+          "id": "q2",
+          "stem": "ZeRO-1 / ZeRO-2 / ZeRO-3 依次增加了哪部分的分片？",
+          "title": "ZeRO 三个阶段各分片什么",
+          "options": [
+            {
+              "key": "A",
+              "text": "依次分片：数据 → 模型 → 激活"
+            },
+            {
+              "key": "B",
+              "text": "依次分片：优化器状态 → 梯度 → 参数"
+            },
+            {
+              "key": "C",
+              "text": "依次分片：激活 → 梯度 → 优化器状态"
+            },
+            {
+              "key": "D",
+              "text": "三个阶段分片对象相同，只是通信量不同"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "ZeRO 的分片是「由内到外」：优化器状态 → 梯度 → 参数。"
+        },
+        {
+          "id": "q3",
+          "stem": "GPT-2 之后普遍改用 Pre-LN（$x_{l+1}=x_l+F(\\mathrm{LN}(x_l))$）而非原始 Post-LN。最主要的原因是：",
+          "title": "Pre-LN 为什么能省掉长 warmup",
+          "options": [
+            {
+              "key": "A",
+              "text": "Pre-LN 的计算量比 Post-LN 少一半"
+            },
+            {
+              "key": "B",
+              "text": "残差是恒等路径，梯度可直通底层，不依赖 warmup 抑制早期不稳定"
+            },
+            {
+              "key": "C",
+              "text": "Pre-LN 让深层梯度更大，因此需要更小的学习率"
+            },
+            {
+              "key": "D",
+              "text": "Pre-LN 改变了位置编码的注入方式"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "梯度能否直通底层，决定了深网要不要靠 warmup 兜住早期不稳定。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "05-training-engineering-snippets.md",
+      "code": "def split_params(model):\n    decay, no_decay = [], []\n    for n, p in model.‹1›():\n        if not p.‹2›:\n            continue\n        if p.‹3› < 2 or n.endswith(\".bias\") or \"norm\" in n.lower():\n            no_decay.append(p)      # norm 权重、bias 不做衰减\n        else:\n            decay.append(p)\n    return [\n        {\"params\": decay, \"weight_decay\": 0.1},\n        {\"params\": no_decay, \"weight_decay\": 0.0},\n    ]",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "named_parameters",
+          "line": 3
+        },
+        {
+          "id": "b2",
+          "answer": "requires_grad",
+          "line": 4
+        },
+        {
+          "id": "b3",
+          "answer": "ndim",
+          "line": 6
+        }
+      ],
+      "distractors": [
+        "gather",
+        "gold"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

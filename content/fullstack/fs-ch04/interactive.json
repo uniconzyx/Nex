@@ -1,0 +1,130 @@
+{
+  "chapter": "fs-ch04",
+  "subject": "fullstack",
+  "title": "Node.js 与后端 API",
+  "fingerprint": "3722f0502e",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "事件循环阶段顺序：sync → nextTick → microtask → se…",
+      "body": "Node.js 最适合哪类场景？"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "Node.js 最适合哪类场景？",
+      "body": "fs-ch04 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "基于 Node 的单线程事件循环模型，下列哪一项是它的典型优势场景？",
+          "title": "Node.js 最适合哪类场景？",
+          "options": [
+            {
+              "key": "A",
+              "text": "CPU 密集型科学计算"
+            },
+            {
+              "key": "B",
+              "text": "高并发 I/O 密集型网络服务"
+            },
+            {
+              "key": "C",
+              "text": "海量内存图计算"
+            },
+            {
+              "key": "D",
+              "text": "GPU 模型训练"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "Node 单线程事件循环擅长非阻塞 I/O，适合高并发网络服务；CPU 密集任务会饿死事件循环，应放 workerthreads。"
+        },
+        {
+          "id": "q1",
+          "stem": "下列关于 Node 模块系统的说法，哪一项正确？",
+          "title": "关于 CommonJS 与 ESM，正确的是？",
+          "options": [
+            {
+              "key": "A",
+              "text": "require 是异步加载"
+            },
+            {
+              "key": "B",
+              "text": "ESM 的 import 是静态可分析的、支持 tree-shaking"
+            },
+            {
+              "key": "C",
+              "text": "module.exports 与 exports 是两个互相独立的对象"
+            },
+            {
+              "key": "D",
+              "text": "CommonJS 循环依赖下永远拿到完整 exports"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "ESM 的 import/export 在编译期可静态分析，支持 tree-shaking；require 同步；exports 是 module.exports 的别名；CJS 循环依赖可能拿到半截（undefined）exports。"
+        },
+        {
+          "id": "q7",
+          "stem": "对于 `const buf = Buffer.from('你好', 'utf8'); buf.subarray(1).toString('utf8')`，结果特征是？",
+          "title": "Buffer 按字节切片会怎样？",
+          "options": [
+            {
+              "key": "A",
+              "text": "正常得到「好」，无影响"
+            },
+            {
+              "key": "B",
+              "text": "在码点中间切断，产生替换符（U+FFFD）乱码"
+            },
+            {
+              "key": "C",
+              "text": "抛出 RangeError"
+            },
+            {
+              "key": "D",
+              "text": "返回空字符串"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "UTF-8 变长编码，subarray(1) 从字节 1 切断「你」（3 字节）得到非法序列，解码替换为 U+FFFD；应按字符（string.slice）或 StringDecoder 处理。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "js",
+      "file": "02-http-server-middleware.md",
+      "code": "function compose(middlewares) {\n  return function (ctx) {\n    let last = -1;                       // 防止同一个中间件里 next() 被调两次\n    function dispatch(i) {\n      if (i <= last) return Promise.reject(new Error(\"next() ‹1› multiple times\"));\n      last = i;\n      const fn = middlewares[i];\n      if (!fn) return Promise.resolve();\n      try {\n        return Promise.resolve(fn(ctx, () => dispatch(i + 1)));\n      } catch (err) {\n        return Promise.reject(err);\n      }\n    }\n    return dispatch(0);\n  };\n}\n\nconst mw = [\n  async (ctx, next) => { ctx.log.push(\"A-in\");  await next(); ctx.log.push(\"A-out\"); },\n  async (ctx, next) => { ctx.log.push(\"B-in\");  await next(); ctx.log.push(\"B-out\"); },\n];\n\nconst ctx = { log: [] };\ncompose(mw)(ctx).then(() => ‹2›.log(ctx.log));\n// [ 'A-in', 'B-in', 'B-out', 'A-out' ]",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "called",
+          "line": 5
+        },
+        {
+          "id": "b2",
+          "answer": "console",
+          "line": 25
+        }
+      ],
+      "distractors": [
+        "name",
+        "require"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

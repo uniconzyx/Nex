@@ -1,0 +1,107 @@
+{
+  "chapter": "tool-ch06",
+  "subject": "tooling",
+  "title": "Docker Compose 与部署实践",
+  "fingerprint": "7c4a1340a5",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "Compose 服务解析器：依赖图构建、拓扑排序与循环依赖检测（正反两组）",
+      "body": "用短语法 dependson 以为能保证依赖就绪"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "dependson 的局限与 condition: servicehealthy",
+      "body": "tool-ch06 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "用短语法 dependson 以为能保证依赖就绪",
+          "right": "被依赖方配 healthcheck，依赖方写 dependson: {db: {condition: servicehealthy}}；同时应用侧仍要有连接重试与退避。"
+        },
+        {
+          "id": 2,
+          "left": "写了 condition: servicehealthy 却忘了给被依赖方配 health…",
+          "right": "健康检查要成对配置——db 有、api 依赖 db；api 自己也必须有，才能供 web 依赖。"
+        },
+        {
+          "id": 3,
+          "left": "依赖图里出现环",
+          "right": "抽第三个服务、或改成消息队列异步解耦；绝不能靠 restart: always 掩盖——那只会变成两个服务互相等待的崩溃循环。（ex01 实测：三节点环与自环均无法排出拓扑序）"
+        },
+        {
+          "id": 4,
+          "left": "健康检查不设 startperiod 导致慢启动服务被反复杀",
+          "right": "设 startperiod（如 30s~60s）覆盖初始化窗口；经验值 interval=10s timeout=3s retries=3 startperiod=30s。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q1",
+          "stem": "一个 compose 文件里 `api` 依赖 `db`，写法是短语法 `depends_on: [db]`。`docker compose up` 之后一切正常，但 api 日志的第一行是 `connection refused to db`。 下列说法正确的是？（多选） A. 短语法 `depends_on` 等价于 `condition: service_started`，只保证 db 的**容器进程已创建** B. `service_started` 意味着数据库一定能接受连接 C. 要保证就绪，应写 `condition: service_healthy`，且 db 自己必须定义 `healthcheck` D. 即使编排层保证了依赖就绪，应用侧仍应有连接重试与退避 请选出全部正确选项。",
+          "title": "dependson 的局限与 condition: servicehealthy",
+          "options": [
+            {
+              "key": "A",
+              "text": "只保证容器进程已创建"
+            },
+            {
+              "key": "B",
+              "text": "servicestarted 意味着能接受连接"
+            },
+            {
+              "key": "C",
+              "text": "改用 servicehealthy 且被依赖方配 healthcheck"
+            },
+            {
+              "key": "D",
+              "text": "应用侧仍要重试与退避"
+            }
+          ],
+          "correct": [
+            "A",
+            "C",
+            "D"
+          ],
+          "explain": "考 dependson 的两种 condition 语义，是本章第一考点。"
+        },
+        {
+          "id": "q2",
+          "stem": "按 Docker 官方文档，Compose 环境变量的优先级从高到低依次是？ A. 镜像 ENV > env_file > environment > 插值 > CLI `-e` B. CLI `-e` > 插值（shell 优先于 .env）> environment > env_file > 镜像 ENV C. environment > CLI `-e` > env_file > 插值 > 镜像 ENV D. .env > shell > environment > env_file > 镜像 ENV 再判断：`.env` 文件里定义了 `TAG=1.2`，同时宿主 shell 里导出了 `TAG=1.3`，compose 里写 `environment: [TAG=${TAG}]`，容器内最终值是？",
+          "title": "环境变量五级优先级",
+          "options": [
+            {
+              "key": "A",
+              "text": "镜像 ENV 最高"
+            },
+            {
+              "key": "B",
+              "text": "CLI -e 最高，插值次之（shell 优先于 .env）"
+            },
+            {
+              "key": "C",
+              "text": "environment 高于 CLI -e"
+            },
+            {
+              "key": "D",
+              "text": ".env 高于 shell"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "考五级优先级与「shell 压 .env」这一最容易记反的细节。"
+        }
+      ]
+    }
+  ]
+}

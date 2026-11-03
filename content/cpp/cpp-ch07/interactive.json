@@ -1,0 +1,98 @@
+{
+  "chapter": "cpp-ch07",
+  "subject": "cpp",
+  "title": "模板与泛型：函数模板、类模板与特化",
+  "fingerprint": "1dbde13e92",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "函数模板基本用法（max）",
+      "body": "关于函数模板实例化与头文件，正确的是"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于函数模板实例化与头文件，正确的是",
+      "body": "cpp-ch07 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "选择**正确**的描述。",
+          "title": "关于函数模板实例化与头文件，正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "模板在编译时直接生成一份通用机器码，运行时按类型选择"
+            },
+            {
+              "key": "B",
+              "text": "模板实现通常放头文件，因为实例化需要模板完整定义对调用方可见（包含模型）"
+            },
+            {
+              "key": "C",
+              "text": "模板实参推导时，多个参数可以各自推出不同的 T"
+            },
+            {
+              "key": "D",
+              "text": "函数模板不能与普通函数构成重载"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "模板不是实体而是配方，实例化才生成具体代码（A 错）；多参数必须推出同一 T，否则推导冲突（C 错）；函数模板与普通函数参与同一套重载决议（D 错）。包含模型要求定义在调用处可见，故模板多放头文件（B 对）。"
+        },
+        {
+          "id": "q5",
+          "stem": "选择**正确**的描述。",
+          "title": "关于 SFINAE 与 std::enableif，正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "SFINAE 指替换失败时直接编译错误，必须修掉才能过"
+            },
+            {
+              "key": "B",
+              "text": "把 enableif 检查写进函数体，类型不满足时该候选会被悄悄丢弃"
+            },
+            {
+              "key": "C",
+              "text": "SFINAE = 替换失败并非错误；enableif 放在签名位置可在编译期按类型属性筛选重载"
+            },
+            {
+              "key": "D",
+              "text": "std::enableif 的两个条件无需互斥，编译器会自动选更优的一个"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "SFINAE 是“替换失败并非错误”，候选出局而非报错（A 错）；enableif 必须放在签名位置（返回类型/默认模板参数），写在函数体里是硬错误（B 错）；多个 enableif 条件必须互斥，否则同时启用会歧义（D 错）。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "cpp",
+      "file": "02-class-template-specialization.md",
+      "code": "template <typename T>\nclass Stack {\n    std::vector<T> data_;\npublic:\n    void push(const T& x) { data_.push_back(x); }\n    void pop()            { data_.pop_back(); }\n    T top() const         { return data_.‹1›(); }\n    bool empty() const    { return data_.empty(); }\n};",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "back",
+          "line": 7
+        }
+      ],
+      "distractors": [
+        "value",
+        "virtual"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

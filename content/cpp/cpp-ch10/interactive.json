@@ -1,0 +1,71 @@
+{
+  "chapter": "cpp-ch10",
+  "subject": "cpp",
+  "title": "智能指针与 RAII：unique_ptr / shared_ptr / weak_ptr",
+  "fingerprint": "5f4db6d84a",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "uniqueptr 独占所有权（移动而非拷贝）",
+      "body": "关于 uniqueptr 与 sharedptr 的所有权语义，正确的是"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于 uniqueptr 与 sharedptr 的所有权语义，正确的是",
+      "body": "cpp-ch10 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "以下描述中，选出**正确**的一项。",
+          "title": "关于 uniqueptr 与 sharedptr 的所有权语义，正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "uniqueptr 可以随意拷贝，多个 uniqueptr 指向同一对象"
+            },
+            {
+              "key": "B",
+              "text": "sharedptr 的引用计数存放在 sharedptr 对象本身里"
+            },
+            {
+              "key": "C",
+              "text": "uniqueptr 默认删除器为空类型，经空基类优化后与裸指针同尺寸、零额外开销"
+            },
+            {
+              "key": "D",
+              "text": "sharedptr 能自动回收循环引用，无需 weakptr"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "uniqueptr 独占、不可拷贝（A 错）；引用计数在独立的控制块里，不在 sharedptr 对象里（B 错）；sharedptr 无法自动回收循环引用，需把环的一侧改为 weakptr（D 错）。uniqueptr 的默认删除器是空类型，EBCO 后 sizeof(uniqueptr<T>)==sizeof(T)，零额外内存、删除调用可内联（C 对）。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "cpp",
+      "file": "01-raii.md",
+      "code": "#include <iostream>\n#include <memory>\n#include <stdexcept>\n\nstruct Guard {\n    const char* name;\n    explicit Guard(const char* n) : name(n) { std::cout << \"获取 \" << name << '\\n'; }\n    ~Guard() { std::cout << \"释放 \" << name << '\\n'; }\n};\n\nvoid risky(bool throw_it) {\n    Guard a(\"A\");\n    Guard b(\"B\");\n    if (throw_it) throw std::‹1›(\"boom\");\n    Guard c(\"C\");   // 仅在不抛异常时构造\n}\n\nint main() {\n    try { risky(false); } catch (...) {}\n    std::cout << \"--- 异常路径 ---\\n\";\n    try { risky(true); } catch (...) {}\n}",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "runtime_error",
+          "line": 14
+        }
+      ],
+      "distractors": [
+        "lock_guard",
+        "make_shared"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

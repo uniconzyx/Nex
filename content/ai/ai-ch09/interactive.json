@@ -1,0 +1,156 @@
+{
+  "chapter": "ai-ch09",
+  "subject": "ai",
+  "title": "生成模型：从自编码器到扩散",
+  "fingerprint": "eef3aac70e",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "自编码器前向与参数量",
+      "body": "VAE 的网络输出 sigma 而不是 logvar"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "VAE 的 KL 项在做什么",
+      "body": "ai-ch09 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "VAE 的网络输出 sigma 而不是 logvar",
+          "right": "输出 logvar，$\\sigma=\\exp(0.5\\cdot\\text{logvar})$；KL 项直接写成 0.5(mu2+logvar.exp()-1-logvar)。"
+        },
+        {
+          "id": 2,
+          "left": "VAE 损失只用 MSE 不加 KL，或 KL 权重给得过大",
+          "right": "从 KL 退火（前若干步 β=0 再线性升到 1）起步，并监控 KL 是否贴 0（后验坍塌）。"
+        },
+        {
+          "id": 3,
+          "left": "GAN 判别器用 BatchNorm",
+          "right": "用 InstanceNorm/LayerNorm 或不做归一化。"
+        },
+        {
+          "id": 4,
+          "left": "用原始饱和损失 $\\log(1-D(G(z)))$ 训练生成器",
+          "right": "改非饱和形式 $-\\log D(G(z))$，两者在最优 $D$ 附近方向一致但后者梯度充足。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "VAE 的目标是 ELBO = 重建项 − KL(q(z|x)||p(z))。关于 KL 项的必要性，下列说法正确的是：",
+          "title": "VAE 的 KL 项在做什么",
+          "options": [
+            {
+              "key": "A",
+              "text": "它是可选项：去掉 KL 项后模型退化成更强的自编码器，重建更准"
+            },
+            {
+              "key": "B",
+              "text": "它保证重建误差单调下降，否则训练不收敛"
+            },
+            {
+              "key": "C",
+              "text": "它把后验约束到先验附近，使先验采样点能被解码成有意义的样本"
+            },
+            {
+              "key": "D",
+              "text": "它通过增加参数容量来提高隐空间的表达能力"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "只保留重建项 = AE，只有两项同时存在才有生成模型语义。"
+        },
+        {
+          "id": "q1",
+          "stem": "固定生成器 G，使 GAN 目标 $\\mathbb{E}_{p_{data}}[\\log D]+\\mathbb{E}_{p_g}[\\log(1-D)]$ 最大化的判别器是：",
+          "title": "GAN 最优判别器的形式",
+          "options": [
+            {
+              "key": "A",
+              "text": "$D^(x)=1$（把所有样本判为真）"
+            },
+            {
+              "key": "B",
+              "text": "$D^(x)=\\dfrac{p{data}(x)}{p{data}(x)+pg(x)}$"
+            },
+            {
+              "key": "C",
+              "text": "$D^(x)=\\dfrac{p{data}(x)}{p{data}(x)-pg(x)}$"
+            },
+            {
+              "key": "D",
+              "text": "$D^(x)$ 由判别器参数量决定，越大越接近最优"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "最优判别器本质是密度比估计器，这是把 GAN 与 f-GAN、引导采样串起来的关键恒等式。"
+        },
+        {
+          "id": "q2",
+          "stem": "DDPM 的简化目标 $\\mathcal{L}_{simple}=\\mathbb{E}\\|\\varepsilon-\\varepsilon_\\theta(x_t,t)\\|^2$ 中，网络实际预测的是：",
+          "title": "扩散模型在回归什么",
+          "options": [
+            {
+              "key": "A",
+              "text": "干净样本 $x0$"
+            },
+            {
+              "key": "B",
+              "text": "前向过程加入的标准高斯噪声 $\\varepsilon$"
+            },
+            {
+              "key": "C",
+              "text": "时间步 $t$ 的类别标签"
+            },
+            {
+              "key": "D",
+              "text": "加噪后的样本 $xt$ 本身"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "ε-prediction 的目标尺度与 t 无关，因此训练最稳；它同时等价于 score prediction。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "02-gan.md",
+      "code": "import torch\nimport torch.nn.functional as F\n\ndef g_saturating(logit_fake):        # 原始 GAN：min log(1 - D(G(z)))\n    return F.binary_cross_entropy_with_logits(logit_fake, torch.‹1›(logit_fake))\n\ndef g_nonsaturating(logit_fake):     # 非饱和替代：max log D(G(z))\n    return F.binary_cross_entropy_with_logits(logit_fake, torch.‹2›(logit_fake))\n\nfor d in (-8.0, -2.0, 0.0, 4.0):\n    t1 = torch.tensor([d], requires_grad=True)\n    g_saturating(t1).backward()\n    t2 = torch.tensor([d], requires_grad=True)\n    g_nonsaturating(t2).backward()\n    print(f\"logit={d:5.1f}  饱和梯度={t1.grad.item():+.6f}  非饱和梯度={t2.grad.item():+.6f}\")",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "zeros_like",
+          "line": 5
+        },
+        {
+          "id": "b2",
+          "answer": "ones_like",
+          "line": 8
+        }
+      ],
+      "distractors": [
+        "time",
+        "timeout"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

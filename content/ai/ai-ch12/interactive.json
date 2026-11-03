@@ -1,0 +1,98 @@
+{
+  "chapter": "ai-ch12",
+  "subject": "ai",
+  "title": "SFT 数据工程：任务 schema、合成数据过滤、去重与污染、难例挖掘、标注一致性 Kappa",
+  "fingerprint": "35843a6e45",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "任务 schema 模板渲染：system/user 占位符填充",
+      "body": "关于 SFT 任务 schema，正确的是"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于 SFT 任务 schema，正确的是",
+      "body": "ai-ch12 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "选择**正确**的描述。",
+          "title": "关于 SFT 任务 schema，正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "system 模板里应写入样本特有的具体内容（如具体订单号）以提供更多上下文"
+            },
+            {
+              "key": "B",
+              "text": "user 模板用占位符描述输入骨架，真实内容在生成/标注时填充，可批量合成"
+            },
+            {
+              "key": "C",
+              "text": "多轮对话样本只需保留最后一轮 user/assistant 即可节省存储"
+            },
+            {
+              "key": "D",
+              "text": "标注规范写成「答案要正确完整」即可，不需要分维度打分"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "user 模板用占位符（如 {question}）描述输入骨架，真实内容填充后可由组合爆炸批量合成，且格式统一。A 错：system 应是与样本无关的常量，塞样本特有内容会让模板漂移；C 错：多轮必须保留完整 history，否则模型学不会基于上下文作答；D 错：规范必须是可打分的 rubric，否则标注员间分歧无法控制。"
+        },
+        {
+          "id": "q3",
+          "stem": "下列说法正确的是",
+          "title": "关于训练集污染与留验隔离",
+          "options": [
+            {
+              "key": "A",
+              "text": "先合成 100 万条，再随机抽 1 万条当测试集，这样测试集最多样"
+            },
+            {
+              "key": "B",
+              "text": "污染检测只需判断测试 prompt 是否整句等于某条训练样本"
+            },
+            {
+              "key": "C",
+              "text": "应冻结评测集，训练候选池里与其重叠率超阈值的样本必须剔除"
+            },
+            {
+              "key": "D",
+              "text": "评测集可以参与去重，反正最终也会从训练里拿掉"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "正确做法是先冻结评测集，合成/去重/过滤只在训练候选池进行，任何与评测集重叠率超阈值的候选直接丢弃，评测集要疫苗级干净。A 错：随机抽的测试集已被合成模板近重复污染；B 错：测试题常以同义改写/换数字形式泄进训练，整句相等永远 False；D 错：评测集绝不能参与任何清洗步骤，否则污染无法隔离。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "01-task-schema.md",
+      "code": "import json\n\nREQUIRED = (\"instruction\", \"output\")\n\ndef to_alpaca(rec: dict) -> dict:\n    \"\"\"把原始记录规整成 Alpaca 三段式；缺关键字段直接丢弃，而不是补空串。\"\"\"\n    missing = [k for k in REQUIRED if not rec.get(k)]\n    if missing:\n        raise ValueError(f\"缺字段 {missing}\")\n    return {\n        \"instruction\": rec[\"instruction\"].strip(),\n        \"input\": (rec.get(\"input\") or \"\").strip(),\n        \"output\": rec[\"output\"].strip(),\n    }\n\n# 落盘用 JSONL（每行一条）：便于流式读取、按行去重、按行抽样\nwith open(\"sft.jsonl\", \"w\", encoding=\"utf-8\") as f:\n    for rec in ‹1›:\n        f.write(json.dumps(to_alpaca(rec), ensure_ascii=False) + \"\\n\")",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "raw_records",
+          "line": 18
+        }
+      ],
+      "distractors": [
+        "question",
+        "randint"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

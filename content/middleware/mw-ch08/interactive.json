@@ -1,0 +1,125 @@
+{
+  "chapter": "mw-ch08",
+  "subject": "middleware",
+  "title": "消息队列选型与工程实践（mw-ch08）",
+  "fingerprint": "1709fa8d08",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "削峰填谷：脉冲流量需要多大缓冲（含反压拒绝量化）",
+      "body": "削峰填谷能解决什么、不能解决什么"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "削峰填谷能解决什么、不能解决什么",
+      "body": "mw-ch08 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "mw8-ex01",
+          "stem": "关于消息队列的「削峰填谷」，下列哪一项说法**错误**？",
+          "title": "削峰填谷能解决什么、不能解决什么",
+          "options": [
+            {
+              "key": "A",
+              "text": "削峰填谷平滑的是到达时间分布，并不减少总工作量"
+            },
+            {
+              "key": "B",
+              "text": "当生产速率长期大于消费速率时，积压会单调增长、永不清空"
+            },
+            {
+              "key": "C",
+              "text": "队列把「瞬时高并发」转成「平稳低并发」交给消费端处理"
+            },
+            {
+              "key": "D",
+              "text": "只要加了消息队列，消费端就永远不会被压垮"
+            }
+          ],
+          "correct": [
+            "D"
+          ],
+          "explain": "削峰填谷解决的是时间维度的错配：把尖峰摊到谷时。它不解决产能不足——那是空间/资源维度的问题。判断标准是净增速 rp - rc：为正则积压线性增长且永不清空，加多少缓冲也只是把崩溃时刻推迟。示例 x05 用四条用例把三态（增长 / 持平 / 清空）分开展示。"
+        },
+        {
+          "id": "mw8-ex02",
+          "stem": "在 Kafka / RabbitMQ / RocketMQ / ActiveMQ 中，**原生支持事务消息**（半消息 + 事务回查）的是哪一个？",
+          "title": "原生事务消息的归属",
+          "options": [
+            {
+              "key": "A",
+              "text": "Kafka"
+            },
+            {
+              "key": "B",
+              "text": "RabbitMQ"
+            },
+            {
+              "key": "C",
+              "text": "RocketMQ"
+            },
+            {
+              "key": "D",
+              "text": "ActiveMQ"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "四点务必区分清楚：① Kafka 有事务，但只覆盖「分区写入 + 位移提交」的原子性，不覆盖外部数据库，因此跨系统一致性仍需业务兜底（示例 x12 对比了状态机）；② RabbitMQ 只有 channel 级 tx 与 publisher confirm，没有半消息概念；③ RocketMQ 原生事务消息，是「本地事务与消息发送原子性」的现成解法；④ ActiveMQ 走 XA/JMS 事务，属于分布式事务协议而非半消息模型。"
+        },
+        {
+          "id": "mw8-ex05",
+          "stem": "某 topic 有 6 个分区，消费者组已有 6 个消费者且分区均匀分配。此时再启动第 7 个消费者，会发生什么？",
+          "title": "消费者数超过分区数之后",
+          "options": [
+            {
+              "key": "A",
+              "text": "触发 rebalance，6 个分区被 7 个消费者均分，吞吐提升"
+            },
+            {
+              "key": "B",
+              "text": "多出的消费者分不到分区、处于空闲，吞吐不再增长——分区数就是并行度上限"
+            },
+            {
+              "key": "C",
+              "text": "直接报错，消费者组拒绝新成员加入"
+            },
+            {
+              "key": "D",
+              "text": "集群自动扩容分区数，以匹配消费者数量"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "这是积压扩容最常见的一次无效操作。并行度 = min(消费者数, 分区数)，因此扩容前必须先看分区数——示例 x06 用 (分区数, 消费者数) 组合矩阵做了实证：达到分区数上限后继续加消费者，有效并行度与吞吐量都不再变化。若确需更高并行度，只能提前把分区数留足（Kafka 只能增不能减），或改用批量消费 / 提升单条处理并行度。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "02-selection-matrix.md",
+      "code": "CANDIDATES = {\n    \"kafka\":    {\"吞吐\": 10, \"延迟\": 6, \"运维\": 5, \"事务消息\": True},\n    \"rabbitmq\": {\"吞吐\": 4,  \"延迟\": 9, \"运维\": 7, \"事务消息\": False},\n    \"rocketmq\": {\"吞吐\": 9,  \"延迟\": 7, \"运维\": 6, \"事务消息\": True},\n    \"pulsar\":   {\"吞吐\": 9,  \"延迟\": 7, \"运维\": 3, \"事务消息\": True},\n}\nWEIGHTS  = {\"吞吐\": 0.4, \"延迟\": 0.3, \"运维\": 0.3}\nMUST_HAVE = {\"事务消息\": True}          # 硬约束：不满足直接淘汰，不参与打分\n\ndef score(spec):\n    if any(spec.get(k) != v for k, v in MUST_HAVE.items()):\n        return None\n    return round(sum(spec[k] * w for k, w in WEIGHTS.items()), 2)\n\nranked = sorted(((score(s), n) for n, s in CANDIDATES.items()\n                 if score(s) is not None), ‹1›=True)\nprint(ranked)   # [(7.5, 'rocketmq'), (7.3, 'kafka'), (6.6, 'pulsar')]",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "reverse",
+          "line": 16
+        }
+      ],
+      "distractors": [
+        "action",
+        "alias"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

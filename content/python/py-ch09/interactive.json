@@ -1,0 +1,98 @@
+{
+  "chapter": "py-ch09",
+  "subject": "python",
+  "title": "面向对象：类、继承与魔术方法",
+  "fingerprint": "8aec386f17",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "实例属性遮蔽类属性",
+      "body": "关于 super()，正确的是"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于 super()，正确的是",
+      "body": "py-ch09 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q1",
+          "stem": "在 `class D(B, C)` 的 `B` 的方法里调用 `super()`，它会去找",
+          "title": "关于 super()，正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "B 的所有直接父类，按定义顺序依次调用"
+            },
+            {
+              "key": "B",
+              "text": "B 的父类 object"
+            },
+            {
+              "key": "C",
+              "text": "type(self).mro 中 B 之后的下一个类，可能是 C"
+            },
+            {
+              "key": "D",
+              "text": "总是 B 自己，形成递归"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "无参 super() 的查找起点是「当前类在实例实际 MRO 中的位置之后」，因此 D 的实例走 B 时，下一个是 C 而不是 B 的父类。这正是协作式多继承能工作（也要求链上每个类都调用 super()）的原因。"
+        },
+        {
+          "id": "q3",
+          "stem": "需要一个「根据参数创建实例」的工厂方法，并希望子类调用时创建的是子类实例。应该用",
+          "title": "classmethod 与 staticmethod",
+          "options": [
+            {
+              "key": "A",
+              "text": "@staticmethod，因为它不依赖实例"
+            },
+            {
+              "key": "B",
+              "text": "@classmethod，第一个参数 cls 保证子类调用时绑定到子类"
+            },
+            {
+              "key": "C",
+              "text": "普通实例方法，在外部先 new 一个空对象"
+            },
+            {
+              "key": "D",
+              "text": "@property，把构造逻辑包装成属性"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "classmethod 的第一个参数是类本身，子类调用时 cls 就是子类，所以工厂里写 return cls(...) 能自动产出正确的子类实例。staticmethod 拿不到类，只能硬编码基类名，子类调用会返回基类实例——这是工厂方法最常见的隐蔽 bug。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "02-inheritance-mro-super.md",
+      "code": "class A:\n    def hello(self): return \"A\"\nclass B(A):\n    def hello(self): return \"B\"\nclass C(A):\n    def hello(self): return \"C\"\nclass D(B, C):\n    pass\n\nprint(D().hello())      # B —— B 在 MRO 里排在 C 前面\nprint([c.__name__ for c in D.__mro__])   # ['D', 'B', 'C', 'A', '‹1›']",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "object",
+          "line": 11
+        }
+      ],
+      "distractors": [
+        "evaluate",
+        "evidence"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

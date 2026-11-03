@@ -1,0 +1,52 @@
+{
+  "chapter": "cpp-ch09",
+  "subject": "cpp",
+  "title": "STL 算法与迭代器：sort/find/lambda/范围",
+  "fingerprint": "bf2d237570",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "sort：默认升序与自定义比较器（降序）",
+      "body": "关于 std::sort 的比较器，正确的是"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于 std::sort 的比较器，正确的是",
+      "body": "cpp-ch09 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "以下描述中，选出**正确**的一项。",
+          "title": "关于 std::sort 的比较器，正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "比较器可以写成 a <= b，方便表达「小于等于」"
+            },
+            {
+              "key": "B",
+              "text": "std::sort 的比较器必须满足严格弱序（Strict Weak Ordering）"
+            },
+            {
+              "key": "C",
+              "text": "std::list 可以直接传随机访问迭代器给 std::sort"
+            },
+            {
+              "key": "D",
+              "text": "std::sort 最坏复杂度可能退化到 O(N^2) 也无所谓"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "sort 要求严格弱序，违反即 UB（A 错）；list 是双向迭代器，不能调需要随机访问的 std::sort，只能 list::sort（C 错）；introsort 把最坏锁在 O(N log N)（D 错）。"
+        }
+      ]
+    }
+  ]
+}

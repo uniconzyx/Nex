@@ -1,0 +1,166 @@
+{
+  "chapter": "tool-ch03",
+  "subject": "tooling",
+  "title": "Git 核心：对象模型与分支",
+  "fingerprint": "667c40d116",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "blob 对象与内容寻址（SHA-1 复算）",
+      "body": "把 git commit 当成「提交工作区所有改动」"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "Git 与 SVN 的核心差异",
+      "body": "tool-ch03 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "把 git commit 当成「提交工作区所有改动」",
+          "right": "提交前用 git status 确认待提交项；需要全部提交用 git add -A 再 commit，或用 git commit -a（仅已 tracked 文件）。"
+        },
+        {
+          "id": 2,
+          "left": "git reset --hard 把未提交的改动全抹掉",
+          "right": "不确定时用 --soft/--mixed；确需 --hard 前先 git stash 或确认改动已提交。"
+        },
+        {
+          "id": 3,
+          "left": "对已经 push 的分支做 reset --hard + 强推",
+          "right": "共享分支永远用 git revert 做可协作回滚；必须强推时用 --force-with-lease 且先沟通。"
+        },
+        {
+          "id": 4,
+          "left": "在 detached HEAD 下提交后切走「提交丢了」",
+          "right": "提交后立即 git branch rescue <sha> 或 git checkout -b rescue 收编；若已切走，用 git reflog 找到旧 SHA 再建分支。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q1",
+          "stem": "关于 Git 与 SVN 的核心差异，下列说法正确的是？ 请选择并说明。",
+          "title": "Git 与 SVN 的核心差异",
+          "options": [
+            {
+              "key": "A",
+              "text": "SVN 是分布式版本控制，每个开发者都有完整仓库；Git 是集中式"
+            },
+            {
+              "key": "B",
+              "text": "Git 存储的是文件快照（snapshot）并以内容寻址（SHA-1）组织对象，SVN 主要存储文件差异（delta）"
+            },
+            {
+              "key": "C",
+              "text": "Git 的「分支」只是一个指向 commit 的轻量指针（约 41 字节），SVN 的分支是目录拷贝，开销大"
+            },
+            {
+              "key": "D",
+              "text": "Git 完全不需要任何服务器，因此无法做集中式协作"
+            }
+          ],
+          "correct": [
+            "B",
+            "C"
+          ],
+          "explain": "考 Git 与 SVN 的根本区别（分布式/快照/内容寻址/分支指针），是考研与面试高频。"
+        },
+        {
+          "id": "q2",
+          "stem": "关于工作区/暂存区/版本库与 `git reset` 三模式，正确的是？ 请选择并说明。",
+          "title": "三区模型与 reset 三模式",
+          "options": [
+            {
+              "key": "A",
+              "text": "git commit 会把「工作区所有改动」提交，无需 git add"
+            },
+            {
+              "key": "B",
+              "text": "git reset --hard HEAD~1 会把 HEAD、暂存区、工作区全部回退到上一个提交，未提交的改动会丢失"
+            },
+            {
+              "key": "C",
+              "text": "git reset --soft HEAD~1 只移动 HEAD，暂存区与工作区保持不变（改动仍 staged）"
+            },
+            {
+              "key": "D",
+              "text": "git reset --mixed（默认）会移动 HEAD 并重置暂存区，但保留工作区改动"
+            }
+          ],
+          "correct": [
+            "B",
+            "C",
+            "D"
+          ],
+          "explain": "考三区归属与 reset 三模式对三区的影响范围，是本章核心。"
+        },
+        {
+          "id": "q4",
+          "stem": "关于 detached HEAD，正确的是？ 请选择并说明。",
+          "title": "detached HEAD 与救援",
+          "options": [
+            {
+              "key": "A",
+              "text": "git checkout <commit-sha> 会进入 detached HEAD，此时 HEAD 直接指向某个 commit 而非分支引用"
+            },
+            {
+              "key": "B",
+              "text": "在 detached HEAD 状态下提交的 commit 会立即被垃圾回收（GC）删除，无法找回"
+            },
+            {
+              "key": "C",
+              "text": "离开 detached 状态（切回分支）后，该状态下产生的提交若未被任何分支/标签引用，确实可能「丢失」，但可用 git reflog 找回"
+            },
+            {
+              "key": "D",
+              "text": "救援 detached 提交的正确做法之一是 git checkout -b rescue <sha> 为其创建分支"
+            }
+          ],
+          "correct": [
+            "A",
+            "C",
+            "D"
+          ],
+          "explain": "考 detached HEAD 含义、reflog 救援网与收编手法。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "01-object-model.md",
+      "code": "import os, subprocess, tempfile, hashlib, pathlib\n\nGIT_ENV = dict(os.environ)\nfor _k, _v in [(\"GIT_AUTHOR_NAME\", \"dev\"), (\"GIT_AUTHOR_EMAIL\", \"dev@example.com\"),\n               (\"GIT_AUTHOR_DATE\", \"2026-01-01T00:00:00+00:00\"),\n               (\"GIT_COMMITTER_NAME\", \"dev\"), (\"GIT_COMMITTER_EMAIL\", \"dev@example.com\"),\n               (\"GIT_COMMITTER_DATE\", \"2026-01-01T00:00:00+00:00\")]:\n    GIT_ENV[_k] = _v\n\ndef g(args, cwd):\n    r = subprocess.run([\"git\"] + args, cwd=cwd, capture_output=True, text=True, env=GIT_ENV)\n    if r.‹1› != 0:\n        raise RuntimeError(\"git %s failed:\\n%s\" % (args, r.stderr))\n    return r.‹2›\n\ndef new_repo():\n    d = tempfile.mkdtemp(prefix=\"repo_\")\n    g([\"init\", \"-q\", \"-b\", \"main\"], d)\n    g([\"config\", \"user.name\", \"dev\"], d)\n    g([\"config\", \"user.email\", \"dev@example.com\"], d)\n    g([\"config\", \"commit.gpgsign\", \"false\"], d)\n    g([\"config\", \"core.autocrlf\", \"false\"], d)\n    g([\"config\", \"core.eol\", \"lf\"], d)\n    return d\n\ndef w(d, name, content):\n    p = pathlib.Path(d) / name\n    if isinstance(content, str):\n        p.write_bytes(content.encode(\"utf-8\"))\n    else:\n        p.write_bytes(content)\n\ndef blob_sha(content_bytes):\n    b = content_bytes.encode(\"utf-8\") if isinstance(content_bytes, str) else content_bytes\n    h = hashlib.sha1()\n    h.update(b\"blob \" + str(len(b)).encode() + b\"\\x00\" + b)\n    return h.‹3›()\n\n\nd = new_repo()\nw(d, \"a.txt\", \"hello\\n\")\nsha = g([\"hash-object\", \"-w\", \"a.txt\"], d).strip()\ncalc = blob_sha(\"hello\\n\")\nprint(\"blob 对象演示\")\nprint(\"  文件内容: hello\")\nprint(\"  git hash-object -w 计算的 SHA: \" + sha)\nprint(\"  hashlib 独立计算的 SHA: \" + calc)\nprint(\"  两者一致: \" + str(sha == calc))\nprint(\"  git cat-file -t \" + sha[:7] + \": \" + g([\"cat-file\", \"-t\", sha], d).strip())\nprint(\"  git cat-file -p \" + sha[:7] + \": \" + g([\"cat-file\", \"-p\", sha], d).strip())\nprint(\"结论: Git 用「内容」直接寻址，相同内容永远同一 SHA（内容寻址存储 CAS）\")",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "returncode",
+          "line": 12
+        },
+        {
+          "id": "b2",
+          "answer": "stdout",
+          "line": 14
+        },
+        {
+          "id": "b3",
+          "answer": "hexdigest",
+          "line": 37
+        }
+      ],
+      "distractors": [
+        "preprocessing",
+        "properties"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

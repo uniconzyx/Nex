@@ -1,0 +1,98 @@
+{
+  "chapter": "java-ch03",
+  "subject": "java",
+  "title": "继承与多态：extends、方法重写、抽象类与接口",
+  "fingerprint": "f063875e1d",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "继承与 super：构造器链与方法调用",
+      "body": "关于方法重写（override）与方法重载（overload），正确的是"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于方法重写（override）与方法重载（overload），正确的是",
+      "body": "java-ch03 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "选择**正确**的描述。",
+          "title": "关于方法重写（override）与方法重载（overload），正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "重载（overload）在运行期根据对象实际类型决定调用哪个方法"
+            },
+            {
+              "key": "B",
+              "text": "重写（override）要求子类方法访问权限可以比父类更小（如 public→protected）"
+            },
+            {
+              "key": "C",
+              "text": "重写（override）在运行期依据对象实际类型动态分派；重载（overload）在编译期按实参静态类型选定"
+            },
+            {
+              "key": "D",
+              "text": "字段也会参与多态，父类引用访问到子类字段"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "override 靠 invokevirtual 动态分派（运行期按实际类型），overload 编译期静态解析；重写不能缩小访问权限；字段没有多态（只有隐藏）。"
+        },
+        {
+          "id": "q4",
+          "stem": "选择**正确**的描述。",
+          "title": "关于抽象类与接口，正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "抽象类可以多重继承，接口只能单实现"
+            },
+            {
+              "key": "B",
+              "text": "接口的字段隐式为 public static final 常量，不能有实例字段；抽象类可以有实例字段与构造器"
+            },
+            {
+              "key": "C",
+              "text": "抽象类的方法调用编译为 invokeinterface"
+            },
+            {
+              "key": "D",
+              "text": "一个类可以实现多个抽象类"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "抽象类是单继承、可有字段与构造器、方法走 invokevirtual；接口字段是常量、无实例字段、方法走 invokeinterface；类只能 extends 一个类但可 implements 多个接口。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "java",
+      "file": "01-inheritance-super.md",
+      "code": "public class E302 {\n    static class Point {\n        int x, y;\n        Point(int x, int y){ this.x=x; this.y=y; }\n        @Override public String ‹1›(){ return \"(\" + x + \",\" + y + \")\"; }\n    }\n    public static void main(String[] args) {\n        System.out.println(new Point(1,2));\n    }\n}",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "toString",
+          "line": 5
+        }
+      ],
+      "distractors": [
+        "util",
+        "amount"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

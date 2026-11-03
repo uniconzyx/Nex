@@ -1,0 +1,152 @@
+{
+  "chapter": "fund-ch17",
+  "subject": "fundamentals",
+  "title": "I/O 系统",
+  "fingerprint": "cef71e58bb",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "I/O 端口编址：独立编址 vs 统一编址地址空间对比",
+      "body": "I/O 端口编址方式辨析"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "I/O 端口编址方式辨析",
+      "body": "fund-ch17 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "关于 I/O 端口编址，下列说法正确的是？",
+          "title": "I/O 端口编址方式辨析",
+          "options": [
+            {
+              "key": "A",
+              "text": "统一编址（MMIO）下 CPU 用专用的 IN/OUT 指令访问设备寄存器"
+            },
+            {
+              "key": "B",
+              "text": "独立编址把 I/O 端口映射到内存地址空间，与内存共用一套地址"
+            },
+            {
+              "key": "C",
+              "text": "独立编址有独立于内存的 I/O 地址空间，需专用 I/O 指令（如 x86 的 IN/OUT）"
+            },
+            {
+              "key": "D",
+              "text": "x86 架构采用统一编址"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "独立编址（Isolated I/O）有独立于内存的 I/O 地址空间，必须用专用 I/O 指令访问，x86 即此例；统一编址（MMIO）是把端口映射到内存地址、用普通访存指令访问（ARM/RISC-V 多用）。A、B 把两者说反，D 错（x86 是独立编址）。"
+        },
+        {
+          "id": "q1",
+          "stem": "CPU 响应可屏蔽中断时，硬件自动执行的第一步动作是？",
+          "title": "中断响应的第一步",
+          "options": [
+            {
+              "key": "A",
+              "text": "保存断点（把 PC 压栈）"
+            },
+            {
+              "key": "B",
+              "text": "关中断（置中断屏蔽标志）"
+            },
+            {
+              "key": "C",
+              "text": "引出中断服务程序（取向量跳转到 ISR）"
+            },
+            {
+              "key": "D",
+              "text": "保护现场（把通用寄存器压栈）"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "标准中断响应五步：① 关中断 → ② 保存断点 → ③ 引出 ISR → ④ 执行 ISR（软件保护现场/开中断/处理/恢复现场）→ ⑤ 中断返回。第一步必须是关中断，否则断点还没存完就可能被新的中断打乱。注意：保存断点由硬件自动完成，保护现场是 ISR 开头软件做的事，两者不同。"
+        },
+        {
+          "id": "q2",
+          "stem": "关于 DMA 方式，下列说法正确的是？",
+          "title": "DMA 方式与 CPU 的关系",
+          "options": [
+            {
+              "key": "A",
+              "text": "DMA 方式完全不需要 CPU 参与，连开始和结束都不要"
+            },
+            {
+              "key": "B",
+              "text": "DMA 传送的数据由 CPU 在中断服务程序里逐字搬移"
+            },
+            {
+              "key": "C",
+              "text": "DMA 的数据传送阶段由 DMA 控制器完成；传送结束通常由中断通知 CPU 做后处理"
+            },
+            {
+              "key": "D",
+              "text": "DMA 期间 CPU 完全不能访问内存"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "DMA 三阶段：预处理（CPU 设地址/计数/方向并启动）、数据传送（DMAC 接管总线批量搬，CPU 不参与）、后处理（传送结束发中断，CPU 收尾）。所以 DMA 不是完全不要 CPU，只是省下了「数据传送」这一阶段；结束仍需一次中断。D 也不对——「停止 CPU 访存」只是三种总线仲裁方式之一，并非 DMA 必然冻结 CPU。"
+        },
+        {
+          "id": "q3",
+          "stem": "通道（Channel）与 DMA 的主要区别在于？",
+          "title": "通道与 DMA 的区别",
+          "options": [
+            {
+              "key": "A",
+              "text": "通道位于 CPU 内部，DMA 是外部芯片"
+            },
+            {
+              "key": "B",
+              "text": "通道能执行「通道程序（CCW）」完成带格式/带跳转的复杂 I/O；DMA 主要只做内存与外设间的数据搬运"
+            },
+            {
+              "key": "C",
+              "text": "通道需要 CPU 逐字节干预，DMA 不需要"
+            },
+            {
+              "key": "D",
+              "text": "DMA 是 I/O 处理器，通道只是简单搬运电路"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "通道是专门的 I/O 处理器，执行由通道命令字（CCW）组成的通道程序，能处理复杂、多设备、带分支的 I/O；DMA 更像「自动搬运工」，负责内存↔外设的批量数据移动，控制面仍较简单。A、C、D 均把二者的角色说反或归错位置。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "c",
+      "file": "01-io-interface-and-addressing.md",
+      "code": "/* 独立编址(x86)：读 COM1 状态端口 0x3FD 的最低位判断是否收到字节 */\nstatic inline unsigned char inb(unsigned short port) {\n    unsigned char v;\n    __asm__ volatile(\"inb %1, %0\" : \"=a\"(v) : \"Nd\"(port));\n    return v;\n}\nint ‹1›(void) { return inb(0x3FD) & 0x01; }   /* 第0位=数据就绪 */",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "has_data",
+          "line": 7
+        }
+      ],
+      "distractors": [
+        "malloc",
+        "memcpy"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

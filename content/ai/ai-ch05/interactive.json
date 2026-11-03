@@ -1,0 +1,124 @@
+{
+  "chapter": "ai-ch05",
+  "subject": "ai",
+  "title": "提示工程与上下文工程",
+  "fingerprint": "3ae24217f7",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "token 计数估算器：按字符类别的近似规则",
+      "body": "把 CoT 和结构化输出混在同一字段"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "零样本、少样本与思维链的适用边界",
+      "body": "ai-ch05 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "把 CoT 和结构化输出混在同一字段",
+          "right": "推理放独立的 reasoning 字段，答案放 answer 字段，或干脆分两次调用。"
+        },
+        {
+          "id": 2,
+          "left": "只靠 prompt 保证 JSON 合法",
+          "right": "prompt 约定 + 结构化输出/Function Calling + 文法约束解码，外层再配校验-重试-降级。"
+        },
+        {
+          "id": 3,
+          "left": "重试时原样重发 prompt",
+          "right": "把结构化校验错误回喂（字段名、期望类型、实际值），一次修正全部违反项。"
+        },
+        {
+          "id": 4,
+          "left": "没有降级路径",
+          "right": "降级分支必须是确定性的（默认值 / 规则引擎 / 人工 / 显式错误）。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "关于 few-shot 与 CoT（Chain-of-Thought），下列说法**错误**的是？",
+          "title": "零样本、少样本与思维链的适用边界",
+          "options": [
+            {
+              "key": "A",
+              "text": "few-shot 通过示例隐式指定输出格式，比纯文字描述格式更稳"
+            },
+            {
+              "key": "B",
+              "text": "CoT 让模型先输出中间推理步骤，通常能提升多步推理任务准确率"
+            },
+            {
+              "key": "C",
+              "text": "CoT 提示只对足够大的模型有效，小模型上可能反而变差"
+            },
+            {
+              "key": "D",
+              "text": "few-shot 示例越多效果一定越好，所以应尽量塞满上下文窗口"
+            }
+          ],
+          "correct": [
+            "D"
+          ],
+          "explain": "few-shot 的收益是递减的，选示例的质量与相关性/多样性比数量更重要；上下文是有限资源，必须做预算分配。"
+        },
+        {
+          "id": "q1",
+          "stem": "研究表明，长上下文中模型对**中间位置**信息的利用率明显低于开头和结尾。实践中下列做法**最不能**缓解这一问题的是？",
+          "title": "「中间遗忘」现象与上下文位置",
+          "options": [
+            {
+              "key": "A",
+              "text": "把最关键的指令/检索片段放在上下文开头或结尾"
+            },
+            {
+              "key": "B",
+              "text": "对检索结果按相关性重排（rerank）后只保留 top-k"
+            },
+            {
+              "key": "C",
+              "text": "把无关的长文档全部塞进上下文「以防万一」"
+            },
+            {
+              "key": "D",
+              "text": "把长文档先做摘要/抽取再拼接，压缩无关内容"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "上下文工程的核心不是「塞多少」，而是「放什么、放哪里、留多少给输出」。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "02-cot-and-self-consistency.md",
+      "code": "from collections import Counter\n\ndef self_consistency(samples: list[str]) -> ‹1›[str, float]:\n    \"\"\"对多次采样的最终答案做多数表决，返回 (答案, 一致率)。\"\"\"\n    if not samples:\n        raise ValueError(\"samples 不能为空\")\n    cnt = Counter(s.strip() for s in samples)\n    ans, n = cnt.most_common(1)[0]\n    return ans, n / len(samples)\n\ncases = {\n    \"高一致\": [\"42\", \"42\", \"41\", \"42\", \"43\"],\n    \"全一致\": [\"42\"] * 5,\n    \"低一致\": [\"42\", \"17\", \"17\", \"9\", \"17\"],\n}\nfor name, votes in cases.items():\n    ans, conf = self_consistency(votes)\n    print(f\"{name}: 答案={ans} 一致率={conf:.2f}\")",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "tuple",
+          "line": 3
+        }
+      ],
+      "distractors": [
+        "forward",
+        "fp16"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

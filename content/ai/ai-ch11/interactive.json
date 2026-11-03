@@ -1,0 +1,157 @@
+{
+  "chapter": "ai-ch11",
+  "subject": "ai",
+  "title": "模型服务化落地：从 `train()` 跑到线上不崩",
+  "fingerprint": "1d1383f08e",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "批处理耗时曲线：固定开销如何被摊销",
+      "body": "maxbatchsize 与 maxwaitms 的关系"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "maxbatchsize 与 maxwaitms 的关系",
+      "body": "ai-ch11 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "ai-ch11-q1",
+          "stem": "某服务把 `max_batch_size` 从 8 调到 128，但 `max_wait_ms` 仍是 20ms，观察到的平均批大小几乎没变化。最合理的解释是？",
+          "title": "maxbatchsize 与 maxwaitms 的关系",
+          "options": [
+            {
+              "key": "A",
+              "text": "GPU 显存不足，框架自动把批降回去了"
+            },
+            {
+              "key": "B",
+              "text": "20ms 等待窗口内到达的请求数太少，批在达标前就因超时被发出，上限不起作用"
+            },
+            {
+              "key": "C",
+              "text": "maxbatchsize 只影响显存分配，不影响实际批大小"
+            },
+            {
+              "key": "D",
+              "text": "需要同时重启服务才能生效"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "两个参数是乘性关系：只有「窗口内能到的请求数」大于等于批上限时，上限才是有效约束。"
+        },
+        {
+          "id": "ai-ch11-q2",
+          "stem": "产品承诺 P99 延迟 < 500ms，模型单批计算耗时 100ms，框架与网络开销 50ms。合理的 `max_wait_ms` 取值最接近？",
+          "title": "等待窗口应该怎么定",
+          "options": [
+            {
+              "key": "A",
+              "text": "500ms，把整个预算都用来等，批能凑得最满"
+            },
+            {
+              "key": "B",
+              "text": "350ms 左右，即 SLO 减去计算耗时与框架开销后留些余量"
+            },
+            {
+              "key": "C",
+              "text": "10ms，等待越短用户体验越好"
+            },
+            {
+              "key": "D",
+              "text": "越小越好，因为等待是纯粹的成本"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "等待窗口必须从 SLO 倒推，两头都是约束：太长必然超时，太短必然浪费算力。"
+        },
+        {
+          "id": "ai-ch11-q5",
+          "stem": "某服务超时后按固定 50ms、150ms、350ms 退避重试。当 200 个客户端同时遇到超时时，最严重的后果是？",
+          "title": "重试为什么必须加抖动",
+          "options": [
+            {
+              "key": "A",
+              "text": "总重试次数超过预期，日志膨胀"
+            },
+            {
+              "key": "B",
+              "text": "所有客户端在同一毫秒重试，形成尖峰，把已过载的服务彻底压死"
+            },
+            {
+              "key": "C",
+              "text": "退避时间过长导致用户等待过久"
+            },
+            {
+              "key": "D",
+              "text": "固定退避没有副作用，等长退避本身就是最佳实践"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "退避解决的是「重试太频繁」，抖动解决的是「重试太同步」。两者缺一不可。"
+        },
+        {
+          "id": "ai-ch11-q6",
+          "stem": "服务重启后，`GET /health` 在权重加载完成时立刻返回 `ready: true`。此时网关把全量流量打进来，第一个用户请求超时。最合理的修法是？",
+          "title": "ready 与 warm 的区别",
+          "options": [
+            {
+              "key": "A",
+              "text": "把超时时间调大，让首次推理能跑完"
+            },
+            {
+              "key": "B",
+              "text": "健康检查增加 warm 层，摘流条件改为 ready AND warm，并在预热时用真实形状输入"
+            },
+            {
+              "key": "C",
+              "text": "增加副本数分摊首次请求压力"
+            },
+            {
+              "key": "D",
+              "text": "这是框架 bug，换推理框架即可"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "健康检查分三层：alive（进程在）、ready（权重已加载）、warm（已用真实形状预热）。摘流看后两者。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "02-input-contract.md",
+      "code": "import math\n\nclass BadInput(ValueError):\n    \"\"\"输入契约违规。与模型内部错误分开，便于统计与告警。\"\"\"\n\ndef validate_vector(x, *, dim: int, name: str = \"x\"):\n    if not isinstance(x, (list, ‹1›)):\n        raise BadInput(f\"{name} 必须是数组，收到 {type(x).__name__}\")\n    if len(x) != dim:\n        raise BadInput(f\"{name} 维度应为 {dim}，收到 {len(x)}\")\n    out = []\n    for i, v in enumerate(x):\n        if isinstance(v, bool) or not isinstance(v, (int, float)):\n            raise BadInput(f\"{name}[{i}] 必须是数值，收到 {type(v).__name__}\")\n        f = float(v)\n        if not math.‹2›(f):\n            raise BadInput(f\"{name}[{i}] 为 {f}，非有限值\")\n        out.append(f)\n    return out",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "tuple",
+          "line": 7
+        },
+        {
+          "id": "b2",
+          "answer": "isfinite",
+          "line": 16
+        }
+      ],
+      "distractors": [
+        "bits",
+        "block"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

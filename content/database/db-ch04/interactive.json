@@ -1,0 +1,79 @@
+{
+  "chapter": "db-ch04",
+  "subject": "database",
+  "title": "查询优化与执行计划（EXPLAIN）",
+  "fingerprint": "fa5caed0a1",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "B+ 树扇出、树高与等值查询 I/O 次数",
+      "body": "关于 EXPLAIN 的 rows 与 filtered 列，下列说法正确的是"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于 EXPLAIN 的 rows 与 filtered 列，下列说法正确的是",
+      "body": "db-ch04 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "执行计划里这两列各自表示什么？",
+          "title": "关于 EXPLAIN 的 rows 与 filtered 列，下列说法正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "rows 是实际返回的行数，filtered 是无用的装饰列"
+            },
+            {
+              "key": "B",
+              "text": "rows 是优化器根据统计信息估算的扫描行数；filtered 是存储引擎返回后经条件过滤剩下的百分比"
+            },
+            {
+              "key": "C",
+              "text": "rows 是磁盘 I/O 次数，filtered 是索引命中率"
+            },
+            {
+              "key": "D",
+              "text": "rows 与 filtered 都只在 EXPLAIN ANALYZE 中才有意义"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "rows 是「估算」而非实测，统计信息过时就会偏差很大；filtered 表示该访问路径过滤后剩余行占比，两者相乘才是最终参与 join 的估算行数。要实测必须用 EXPLAIN ANALYZE（MySQL 8.0.18+）。"
+        },
+        {
+          "id": "q1",
+          "stem": "从 const / ref / range / index / ALL 中选出最好与最差。",
+          "title": "下列 EXPLAIN type 取值中，性能最好的与最差的分别是",
+          "options": [
+            {
+              "key": "A",
+              "text": "最好 index，最差 ALL"
+            },
+            {
+              "key": "B",
+              "text": "最好 const，最差 ALL"
+            },
+            {
+              "key": "C",
+              "text": "最好 range，最差 index"
+            },
+            {
+              "key": "D",
+              "text": "最好 ref，最差 range"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "阶梯为 system > const > eqref > ref > range > index > ALL。const 表示通过主键/唯一索引等值定位到最多一行；ALL 是全表扫描。特别注意 index 虽然带「index」字样，其实是扫整棵索引树，通常仍属需优化项。"
+        }
+      ]
+    }
+  ]
+}

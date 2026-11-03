@@ -1,0 +1,97 @@
+{
+  "chapter": "cpp-ch16",
+  "subject": "cpp",
+  "title": "并发与多线程：thread / mutex / atomic / async",
+  "fingerprint": "62dfdf048a",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "thread 启动与 join（无共享状态）",
+      "body": "cv.wait 不带谓词"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于 std::thread 与数据竞争，正确的是",
+      "body": "cpp-ch16 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "cv.wait 不带谓词",
+          "right": "cv.wait(lk, [&]{ return ready; })，唤醒后重新检查谓词。"
+        },
+        {
+          "id": 2,
+          "left": "线程池任务用 [&] 捕获栈变量",
+          "right": "按值捕获或用 sharedptr 共享所有权。"
+        },
+        {
+          "id": 3,
+          "left": "把 atomic 的 ++ 当成组合原子操作",
+          "right": "需要「判断再改」的复合逻辑用锁或 compareexchange 循环。"
+        },
+        {
+          "id": 4,
+          "left": "锁内做阻塞 IO 或调回调",
+          "right": "锁内只保护共享数据的读写，IO、日志、回调移到锁外。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "选择**正确**的描述。",
+          "title": "关于 std::thread 与数据竞争，正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "std::thread 析构时若仍 joinable 会自动后台运行"
+            },
+            {
+              "key": "B",
+              "text": "没有同步原语的两个线程访问同一变量，读写顺序由编译器保证一致"
+            },
+            {
+              "key": "C",
+              "text": "counter++ 在多线程下可能因读-改-写非原子而丢失更新"
+            },
+            {
+              "key": "D",
+              "text": "volatile 能提供线程间的原子性与 happens-before"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "counter++ 非原子；thread 析构仍 joinable 会 terminate；无同步即数据竞争（UB）；volatile 不提供同步语义。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "cpp",
+      "file": "01-thread-basics.md",
+      "code": "#include <iostream>\n#include <thread>\n#include <vector>\n\nint main() {\n    std::vector<std::thread> ts;\n    for (int i = 0; i < 3; ++i)\n        ts.emplace_back([i]{ /* 各自独立工作，无共享 */ });\n    for (auto& t : ts) t.join();   // 必须 join，否则 ‹1›\n    std::cout << \"all joined\\n\";\n}",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "terminate",
+          "line": 9
+        }
+      ],
+      "distractors": [
+        "operator",
+        "override"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

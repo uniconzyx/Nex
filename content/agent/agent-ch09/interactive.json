@@ -1,0 +1,124 @@
+{
+  "chapter": "agent-ch09",
+  "subject": "agent",
+  "title": "多模态应用开发：图像、文档与语音的工程接口",
+  "fingerprint": "e7647c3a14",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "图像分块：patch 数量、局部性与「小字在入口处就丢了」",
+      "body": "1024×1024 发票截图原图直喂，视觉 token 爆窗或被静默截断"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "分辨率从 448×448 提到 1024×1024，哪一项增长最猛",
+      "body": "agent-ch09 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "1024×1024 发票截图原图直喂，视觉 token 爆窗或被静默截断",
+          "right": "入口处先做「token 预算门」：按切图策略算出 N，与上下文窗口比对， 超预算就降采样 / 只保留文字区域（先检测后裁剪）/ 分块处理；"
+        },
+        {
+          "id": 2,
+          "left": "把长表格硬塞进正方形画布，上下填白，小字被压缩得更糊",
+          "right": "按长宽比选画布或 anyres 切图（横向长图切成若干 448² 子图 + 全局缩略图）； 优先级是「文字区域分辨率」而非整图分辨率。切图策略要和训练/部署模型的能力对齐， 别自造模型没见过的图幅组合。"
+        },
+        {
+          "id": 3,
+          "left": "拿字符准确率 98% 当验收口径，上线后字段级准确率只有 80%",
+          "right": "验收口径必须是字段级准确率 + 混淆矩阵 Top-K 混淆对 + 兜底率； 判定规则（数值归一化 / 忽略大小写 / 单位换算）写进 schema 文档；"
+        },
+        {
+          "id": 4,
+          "left": "同一张图在一次会话里被反复编码，多图成本线性爆炸",
+          "right": "编码缓存（图片内容哈希 → 视觉 token 向量，附 TTL）；会话级 token 账本（Σ每图 token + prompt + maxtokens）与超窗预检；"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "某 VLM 用 p=14 的 patch，输入从 448×448 提高到 1024×1024。下列哪项描述正确？",
+          "title": "分辨率从 448×448 提到 1024×1024，哪一项增长最猛",
+          "options": [
+            {
+              "key": "A",
+              "text": "视觉 token 约变 4.5 倍，注意力矩阵显存约变 20 倍，因为显存随 token 数平方增长"
+            },
+            {
+              "key": "B",
+              "text": "视觉 token 约变 2 倍，显存也约变 2 倍，两者都是线性的"
+            },
+            {
+              "key": "C",
+              "text": "视觉 token 变 4 倍，显存不变，因为 FlashAttention 把显存降到 O(n)"
+            },
+            {
+              "key": "D",
+              "text": "视觉 token 和显存都只取决于图片文件大小，与分辨率无关"
+            }
+          ],
+          "correct": [
+            "A"
+          ],
+          "explain": "考点：视觉 token 随面积平方增长、注意力显存随 token 数平方增长的双平方结构。"
+        },
+        {
+          "id": "q1",
+          "stem": "一条 20 字段的发票抽取流水线（检测→识别→版面→映射），OCR 字符准确率 98%，但端到端字段级准确率只有约 80%。以下哪一项**不是**合理原因？",
+          "title": "为什么 OCR 字符准确率 98% 的引擎，字段级准确率可能只有 80%",
+          "options": [
+            {
+              "key": "A",
+              "text": "字段值要求字符串全等，千分位逗号、大小写、单位换算差异都会判错"
+            },
+            {
+              "key": "B",
+              "text": "区域误判与表格串行让整行/整列错位，错误按字段成倍放大"
+            },
+            {
+              "key": "C",
+              "text": "20 个字段链路上 0.98^20≈0.67，错误沿链路累积"
+            },
+            {
+              "key": "D",
+              "text": "因为字符准确率是逐字符算的，字段值越长的字段准确率反而越高"
+            }
+          ],
+          "correct": [
+            "D"
+          ],
+          "explain": "考点：字符级指标与字段级指标的差异来源——口径、链路放大、系统性错位。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "01-vision-tokens.md",
+      "code": "import numpy as np\n\ndef patch_embed(img, p=16):\n    \"\"\"img: (H, W, 3) → patches: (N, p*p*3)，N = (H//p)*(W//p)\"\"\"\n    H, W, _ = img.shape\n    H2, W2 = H // p * p, W // p * p               # 裁掉不整除的边缘\n    x = img[:H2, :W2].reshape(H2 // p, p, W2 // p, p, 3)\n    return x.‹1›(0, 2, 1, 3, 4).reshape(-1, p * p * 3)\n\nimg = (np.random.default_rng(0).random((224, 224, 3)) * 255).astype(\"uint8\")\npatches = patch_embed(img, p=16)\nassert patches.shape == (196, 768)                 # (224/16)^2 个 patch\nprint(f\"224×224, p=16 → {patches.shape[0]} 个视觉 Token，每 patch {patches.shape[1]} 维\")\n# 224×224, p=16 → 196 个视觉 Token，每 patch 768 维",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "transpose",
+          "line": 8
+        }
+      ],
+      "distractors": [
+        "batch",
+        "best"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

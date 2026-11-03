@@ -1,0 +1,107 @@
+{
+  "chapter": "tool-ch02",
+  "subject": "tooling",
+  "title": "Linux 进程、管道与 Shell 脚本",
+  "fingerprint": "db7328c5cf",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "进程树：fork/exec 建立进程树",
+      "body": "把 kill PID 当成 SIGKILL"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "僵尸进程与孤儿进程的成因与回收",
+      "body": "tool-ch02 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "把 kill PID 当成 SIGKILL",
+          "right": "先 kill PID（SIGTERM）给优雅退出机会；超时仍未退出再 kill -9 PID（SIGKILL）。把 SIGKILL 当首选会跳过清理逻辑，造成数据损坏或临时文件泄漏。"
+        },
+        {
+          "id": 2,
+          "left": "用 SIGKILL 杀正在写数据的进程",
+          "right": "优先 SIGTERM；只有确认进程已卡死（D 状态超时、死锁）才用 SIGKILL，且之后必须做一致性恢复（如 DB 的 crash recovery）。"
+        },
+        {
+          "id": 3,
+          "left": "僵尸进程用 kill -9 杀不掉",
+          "right": "杀掉它的父进程（或让父进程正确调用 wait/waitpid），父进程死后僵尸被 init/subreaper 收养并立即回收。"
+        },
+        {
+          "id": 4,
+          "left": "误以为孤儿进程「丢失」了",
+          "right": "这不是 bug；若你希望子进程随父退出而退出，应当显式处理 SIGHUP/SIGTERM 或 prctl(PRSETPDEATHSIG)。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q1",
+          "stem": "下列说法正确的是？（多选） 请选择并说明。",
+          "title": "僵尸进程与孤儿进程的成因与回收",
+          "options": [
+            {
+              "key": "A",
+              "text": "子进程先于父进程退出、父进程未调用 wait()，子进程会变成僵尸（Z）状态，残留 taskstruct 占一个 pid 槽"
+            },
+            {
+              "key": "B",
+              "text": "僵尸进程可以通过 kill -9 杀掉，因为它还「活着」"
+            },
+            {
+              "key": "C",
+              "text": "父进程先于子进程退出时，子进程会被 init（pid 1） 或最近的 subreaper 收养，照常运行，不是「丢失」"
+            },
+            {
+              "key": "D",
+              "text": "孤儿进程无法被回收，会一直泄漏资源"
+            }
+          ],
+          "correct": [
+            "A",
+            "C"
+          ],
+          "explain": "考僵尸/孤儿的发生条件与回收责任，是 408 与 SRE 面试高频。"
+        },
+        {
+          "id": "q2",
+          "stem": "运维需要停止一个正在运行的服务进程。关于 `SIGTERM(15)` 与 `SIGKILL(9)`，下列说法正确的是？ 请选择并说明。",
+          "title": "SIGTERM 与 SIGKILL 的语义差异",
+          "options": [
+            {
+              "key": "A",
+              "text": "kill PID（不带参数）默认发送 SIGKILL，立即强制杀掉进程"
+            },
+            {
+              "key": "B",
+              "text": "SIGTERM 可被进程捕获，进程可借机 flush 缓冲区、关连接、删 pidfile 后优雅退出"
+            },
+            {
+              "key": "C",
+              "text": "SIGKILL 不可被捕获、阻塞或忽略，内核直接回收进程，跳过所有清理逻辑"
+            },
+            {
+              "key": "D",
+              "text": "数据库正在写 WAL 时，应优先用 SIGKILL 以保证「立刻停」"
+            }
+          ],
+          "correct": [
+            "B",
+            "C"
+          ],
+          "explain": "考信号默认行为与「为什么不该把 SIGKILL 当首选」。"
+        }
+      ]
+    }
+  ]
+}

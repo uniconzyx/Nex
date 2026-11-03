@@ -1,0 +1,79 @@
+{
+  "chapter": "clang-u03",
+  "subject": "clang",
+  "title": "结构体与联合体",
+  "fingerprint": "c6079ed7cf",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "结构体 sizeof 与填充验证（char-double-char）",
+      "body": "结构体对齐与 sizeof"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "结构体对齐与 sizeof",
+      "body": "clang-u03 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "在 LP64（x86-64）平台上，`struct { char c; int i; };` 的 `sizeof` 最可能是多少？已知 `char` 对齐 1、`int` 对齐 4，结构体整体对齐为 4。",
+          "title": "结构体对齐与 sizeof",
+          "options": [
+            {
+              "key": "A",
+              "text": "5"
+            },
+            {
+              "key": "B",
+              "text": "8"
+            },
+            {
+              "key": "C",
+              "text": "6"
+            },
+            {
+              "key": "D",
+              "text": "9"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "char c 占 0（1 字节），其后需填充到 4 边界，int i 从 4 开始占 4 字节到 8；末尾圆整到对齐 4 的倍数，sizeof=8。未对齐时不是 5。"
+        },
+        {
+          "id": "q4",
+          "stem": "关于位域（bit-field），下列哪项是正确的？",
+          "title": "位域的可移植性",
+          "options": [
+            {
+              "key": "A",
+              "text": "位域从字的哪一端开始由 C 标准统一规定"
+            },
+            {
+              "key": "B",
+              "text": "位域成员可以取地址（&field 合法）"
+            },
+            {
+              "key": "C",
+              "text": "位域的比特排布是实现定义的，不宜用于跨平台二进制协议"
+            },
+            {
+              "key": "D",
+              "text": "位域成员必须是整数类型，但符号性由标准统一规定为无符号"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "位域的起始端、跨字行为、符号性都是实现定义的，A/D 错；位域没有独立地址，&field 非法，B 错。用于跨平台协议应改用位移+掩码。"
+        }
+      ]
+    }
+  ]
+}

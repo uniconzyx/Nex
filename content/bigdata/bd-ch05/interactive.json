@@ -1,0 +1,178 @@
+{
+  "chapter": "bd-ch05",
+  "subject": "bigdata",
+  "title": "Spark SQL、DataFrame 与 Catalyst（bd-ch05）",
+  "fingerprint": "44249cdc0d",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "DataFrame 惰性求值：构建期零执行，action 才触发",
+      "body": "以为 DataFrame 的 filter/select 会立刻执行"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "下列关于 RDD 与 DataFrame 差异的说法，错误的是？",
+      "body": "bd-ch05 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "以为 DataFrame 的 filter/select 会立刻执行",
+          "right": "调试用 df.explain() 看计划，别在链式调用中间插 print(df.count()) 之类的 action，那会重复触发整条计划。"
+        },
+        {
+          "id": 2,
+          "left": "把 RDD 的 map(lambda ...) 习惯带进 DataFrame，用 UDF …",
+          "right": "优先用内置函数（when/col/upper/substring 等）；必须用 UDF 时优先 Scala/Java UDF 或 Pandas UDF（向量化），并把它放在计划的最后以减少输入行数。"
+        },
+        {
+          "id": 3,
+          "left": "以为谓词下推一定会发生",
+          "right": "把过滤尽量贴着数据源写，别先 select 掉过滤列再 filter。"
+        },
+        {
+          "id": 4,
+          "left": "把 where 写在子查询/视图之外，指望优化器救你",
+          "right": "过滤条件尽量写在最靠近数据源的那一层；LEFT JOIN 里对右表的过滤条件写在 ON 后与写在 WHERE 后语义不同（后者会把外连接退化成内连接）。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "Spark 同时提供 RDD 与 DataFrame 两套 API。关于二者在「结构化信息与优化空间」上的差异，下列说法**错误**的是？",
+          "title": "下列关于 RDD 与 DataFrame 差异的说法，错误的是？",
+          "options": [
+            {
+              "key": "A",
+              "text": "DataFrame 带 schema 与逻辑计划，Spark 因此能做谓词下推与列裁剪"
+            },
+            {
+              "key": "B",
+              "text": "RDD 的 lambda 对 Spark 是不透明黑盒，无法做语义等价的重写"
+            },
+            {
+              "key": "C",
+              "text": "DataFrame 底层不依赖 RDD，是独立实现的一套执行引擎"
+            },
+            {
+              "key": "D",
+              "text": "DataFrame 使用 Tungsten 紧凑二进制表示，减少对象头与装箱开销"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "DataFrame 是建立在 RDD 之上的高层 API，df.rdd 可以取到底层 RDD；它并没有另起一套执行引擎，而是在 RDD 之上补了 schema 与逻辑计划两层信息，从而打开优化空间。A、B、D 均为标准表述。"
+        },
+        {
+          "id": "q1",
+          "stem": "Catalyst 优化器把一条 SQL 变成可执行代码要经过若干阶段。正确的顺序是？另外，`AnalysisException: Column 'xxx' cannot be resolved` 来自哪一阶段？",
+          "title": "一条 SQL 在 Spark SQL 中的处理顺序是？",
+          "options": [
+            {
+              "key": "A",
+              "text": "解析 → 分析（绑定元数据）→ 逻辑优化 → 物理计划 → 代码生成；报错来自分析阶段"
+            },
+            {
+              "key": "B",
+              "text": "解析 → 逻辑优化 → 分析 → 物理计划 → 代码生成；报错来自逻辑优化阶段"
+            },
+            {
+              "key": "C",
+              "text": "解析 → 物理计划 → 逻辑优化 → 代码生成；报错来自物理计划阶段"
+            },
+            {
+              "key": "D",
+              "text": "分析 → 解析 → 逻辑优化 → 物理计划 → 代码生成；报错来自解析阶段"
+            }
+          ],
+          "correct": [
+            "A"
+          ],
+          "explain": "顺序是：① 解析（ANTLR 生成未解析 AST）→ ② 分析（查 Catalog / Hive Metastore 绑定列名与类型，列不存在或类型不匹配就在这一步抛 AnalysisException）→ ③ 逻辑优化（规则批重写到不动点）→ ④ 物理计划（按代价选算子）→ ⑤ 代码生成。解析阶段只看语法，看不到列名是否存在。"
+        },
+        {
+          "id": "q2",
+          "stem": "谓词下推（Predicate Pushdown）是 Catalyst 最重要的优化之一，但有明确的失效条件。下列哪种情况**不会**下推？",
+          "title": "下列哪种情况谓词下推不会生效？",
+          "options": [
+            {
+              "key": "A",
+              "text": "谓词引用的列不在下方算子的输出列中"
+            },
+            {
+              "key": "B",
+              "text": "谓词是确定性表达式，且引用列可由下方算子提供"
+            },
+            {
+              "key": "C",
+              "text": "谓词作用在分区列上，且为「分区列 = 常量」的直接比较"
+            },
+            {
+              "key": "D",
+              "text": "谓词只引用左表的列，而它被写在 JOIN 之后"
+            }
+          ],
+          "correct": [
+            "A"
+          ],
+          "explain": "两条硬约束：① 谓词必须确定性（含 rand()、currenttimestamp() 的不下推，因为下推会改变每行求值次数）；② 谓词引用的列必须在下方算子输出列内——若 Project 已经把该列投影掉，就推不下去。B/C/D 都是可以下推的典型场景（C 还能进一步触发分区裁剪）。"
+        },
+        {
+          "id": "q4",
+          "stem": "广播 JOIN（BroadcastHashJoin）能消掉一次 Shuffle，但它有明确的触发条件与陷阱。下列表述正确的是？",
+          "title": "关于广播 JOIN 触发条件的正确表述是？",
+          "options": [
+            {
+              "key": "A",
+              "text": "只要小表的磁盘文件大小小于 10MB 就一定广播"
+            },
+            {
+              "key": "B",
+              "text": "必须是等值连接，且优化后计划的 sizeInBytes 不超过阈值，且统计信息存在"
+            },
+            {
+              "key": "C",
+              "text": "非等值连接同样可以走 BroadcastHashJoin"
+            },
+            {
+              "key": "D",
+              "text": "把 spark.sql.autoBroadcastJoinThreshold 调成 -1 会强制广播所有 JOIN"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "触发广播的三个前置条件：① 等值连接（非等值只能走 BroadcastNestedLoopJoin，代价 O(n×m)）；② 小表优化后计划的 sizeInBytes ≤ spark.sql.autoBroadcastJoinThreshold（默认 10MB）；③ 该统计存在——表没做过 ANALYZE TABLE 时 sizeInBytes 为缺省值，就不广播。A 错在 Spark 看的是逻辑计划的统计大小而非磁盘文件大小；D 错在 -1 是关闭广播。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "04-aqe-shuffle-and-metastore.md",
+      "code": "from pyspark.sql import SparkSession\n\nspark = (SparkSession.builder\n         .config(\"spark.sql.adaptive.enabled\", \"true\")\n         .config(\"spark.sql.adaptive.coalescePartitions.enabled\", \"true\")\n         # 单分区目标大小：太大退化成倾斜，太小增加 task 调度开销\n         .config(\"spark.sql.adaptive.advisoryPartitionSizeInBytes\", \"64m\")\n         # 倾斜合并：单个分区超过中位数 factor 倍即拆分\n         .config(\"spark.sql.adaptive.skewJoin.enabled\", \"true\")\n         .config(\"spark.sql.adaptive.skewJoin.skewedPartitionFactor\", \"5\")\n         .getOrCreate())\n\n# 验证是否真生效：计划里应出现 AdaptiveSparkPlan\nspark.sql(\"SELECT /*+ REPARTITION(8) */ 1\").‹1›(\"formatted\")",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "explain",
+          "line": 14
+        }
+      ],
+      "distractors": [
+        "done",
+        "dtype"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

@@ -1,0 +1,178 @@
+{
+  "chapter": "dm-ch01",
+  "subject": "discrete-math",
+  "title": "命题逻辑与谓词逻辑（知识表示与自动推理）",
+  "fingerprint": "8b856b4e9c",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "真值表枚举与重言式判定：假言三段论",
+      "body": "把 → 当因果，认为 p=0 时 p→q 无意义"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "蕴含 p→q 为假的唯一赋值",
+      "body": "dm-ch01 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "把 → 当因果，认为 p=0 时 p→q 无意义",
+          "right": "判定蕴含一律查真值表，不要凭语感。"
+        },
+        {
+          "id": 2,
+          "left": "\"只有 P 才 Q\" 译成 P→Q",
+          "right": "Q→P（P 是必要条件，落在后件）。口诀：\"只有\"后面的词后面接\"才\"在前，方向要反过来。同理\"仅当 P 时 Q\" = Q→P。"
+        },
+        {
+          "id": 3,
+          "left": "主析取范式的下标写反",
+          "right": "固定\"高位 = 第一个变量\"，写小项时变量取 1 写本身、取 0 写否定。"
+        },
+        {
+          "id": 4,
+          "left": "以为\"等值演算\"可以随手用分配律把 ∨ 分配到 ∧ 上而忘记反向",
+          "right": "先消 →、↔，只剩 ¬ ∧ ∨，再按\"先德摩根、再分配、后吸收\"的顺序推。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "命题公式 `p→q` 在下列哪种赋值下为假？",
+          "title": "蕴含 p→q 为假的唯一赋值",
+          "options": [
+            {
+              "key": "A",
+              "text": "p=0, q=0"
+            },
+            {
+              "key": "B",
+              "text": "p=0, q=1"
+            },
+            {
+              "key": "C",
+              "text": "p=1, q=0"
+            },
+            {
+              "key": "D",
+              "text": "p=1, q=1"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "按定义 p→q ≡ ¬p∨q，只有 p=1 且 q=0 时 ¬p∨q = 0∨0 = 0，即唯一为假的情形。p=0 的两行都属于「空真」（vacuous truth），整句为真。"
+        },
+        {
+          "id": "q1",
+          "stem": "把「只有通过考试，才能拿到证书」符号化为（P：通过考试，Q：拿到证书）：",
+          "title": "「只有 P 才 Q」的符号化方向",
+          "options": [
+            {
+              "key": "A",
+              "text": "P→Q"
+            },
+            {
+              "key": "B",
+              "text": "Q→P"
+            },
+            {
+              "key": "C",
+              "text": "P∧Q"
+            },
+            {
+              "key": "D",
+              "text": "¬P→Q"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "「只有 P 才 Q」表示 P 是 Q 的必要条件：拿到证书必然说明通过了考试，即 Q→P。注意与「如果 P 那么 Q」（P→Q，P 是充分条件）方向相反。D 项 ¬P→Q 是「除非 P，否则 Q」的译法。"
+        },
+        {
+          "id": "q2",
+          "stem": "求公式的主合取范式时，应取哪些赋值对应的极大项？",
+          "title": "主合取范式对应哪类赋值",
+          "options": [
+            {
+              "key": "A",
+              "text": "成真赋值"
+            },
+            {
+              "key": "B",
+              "text": "成假赋值"
+            },
+            {
+              "key": "C",
+              "text": "全部赋值"
+            },
+            {
+              "key": "D",
+              "text": "只取第一个成真赋值"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "主析取范式取成真赋值对应的小项（每个小项仅在该赋值下为真，析取起来恰好覆盖全部成真赋值）；主合取范式取成假赋值对应的极大项（每个极大项仅在该赋值下为假，合取起来恰好排除全部成假赋值）。两者下标集合互补，并起来是 2^n 个。"
+        },
+        {
+          "id": "q3",
+          "stem": "2-SAT 可以在 O(n+m) 时间内判定，其核心依据是：",
+          "title": "2-SAT 的线性判定依据",
+          "options": [
+            {
+              "key": "A",
+              "text": "子句化为蕴含边，判 x 与 ¬x 是否同属一个 SCC"
+            },
+            {
+              "key": "B",
+              "text": "2-SAT 是 3-SAT 特例，DPLL 可多项式求解"
+            },
+            {
+              "key": "C",
+              "text": "每个变量只出现一次"
+            },
+            {
+              "key": "D",
+              "text": "对偶图一定是二分图"
+            }
+          ],
+          "correct": [
+            "A"
+          ],
+          "explain": "(a∨b) 等价于两条蕴含 ¬a→b、¬b→a。公式可满足当且仅当没有任何变量使 x 与 ¬x 落在同一强连通分量（否则 x→¬x→x，自相矛盾）。B 错在把 NP 完全问题当成可多项式求解；C、D 与 2-SAT 结构无关。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "c",
+      "file": "01-truth-table-and-connectives.md",
+      "code": "#include <stdio.h>\n/* 蕴含：只在 1 -> 0 时为假 */\nstatic int imp(int a, int b) { return (!a) || b; }\n/* 等价：同真同假 */\nstatic int iff(int a, int b) { return a == b; }\n\n/*\n * c01：两个「看起来都对」的推理，只有一个有效\n * 肯定前件 (modus ponens):  p->q, p  ==>  q     有效\n * 肯定后件 (affirming consequent): p->q, q ==> p 无效\n * 打印两张真值表，并指出无效式的反例行。\n */\nint main(void) {\n    printf(\"A) modus ponens: p->q, p |- q\\n\");\n    printf(\"p q | p->q | (p->q)^p | q\\n\");\n    printf(\"----+------+----------+--\\n\");\n    int bad = 0;\n    for (int p = 0; p < 2; p++)\n        for (int q = 0; q < 2; q++) {\n            int i = imp(p, q), prem = i && p;\n            printf(\"%d %d |  %d   |    %d     | %d%s\\n\", p, q, i, prem, q,\n                   (prem && !q) ? \"  <-- would break validity\" : \"\");\n            if (prem && !q) bad = 1;\n        }\n    printf(\"=> %s\\n\\n\", bad ? \"INVALID\" : \"VALID: no row ‹1› premises true and conclusion false\");\n\n    printf(\"B) affirming the consequent: p->q, q |- p\\n\");\n    printf(\"p q | p->q | (p->q)^q | p\\n\");\n    printf(\"----+------+----------+--\\n\");\n    int ce = 0;\n    for (int p = 0; p < 2; p++)\n        for (int q = 0; q < 2; q++) {\n            int i = imp(p, q), prem = i && q;\n            printf(\"%d %d |  %d   |    %d     | %d%s\\n\", p, q, i, prem, p,\n                   (prem && !p) ? \"  <-- counterexample: q=1,p=0\" : \"\");\n            if (prem && !p) ce++;\n        }\n    printf(\"=> %s (%d counterexample row)\\n\", ce ? \"INVALID\" : \"VALID\", ce);\n    printf(\"\\nlesson: validity = 'premises true, conclusion must be true',\\n\");\n    printf(\"        not 'conclusion sounds plausible'.\\n\");\n    return 0;\n}",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "makes",
+          "line": 25
+        }
+      ],
+      "distractors": [
+        "step",
+        "total"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

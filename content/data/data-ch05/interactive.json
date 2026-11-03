@@ -1,0 +1,108 @@
+{
+  "chapter": "data-ch05",
+  "subject": "data",
+  "title": "数据采集：requests 与解析（含合规边界）",
+  "fingerprint": "513cf3568b",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "HTTP 状态码分类与重试判定",
+      "body": "采集时遇到 403，最合理的处置是"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "采集时遇到 403，最合理的处置是",
+      "body": "data-ch05 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "在编写爬虫采集数据时，服务端返回 **403 Forbidden**。下列处置方式中最合理的是？",
+          "title": "采集时遇到 403，最合理的处置是",
+          "options": [
+            {
+              "key": "A",
+              "text": "立即重试同一请求，直到返回 200"
+            },
+            {
+              "key": "B",
+              "text": "更换 User-Agent 伪装成浏览器后再抓"
+            },
+            {
+              "key": "C",
+              "text": "记录该 URL 与状态码后跳过，必要时通过站点公开接口或授权渠道获取"
+            },
+            {
+              "key": "D",
+              "text": "提高并发数抢占配额，把请求压过去"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "403 表示服务端拒绝该请求。重试无意义；伪装 UA 规避限制属于绕过技术措施。正确做法是记录并跳过，必要时联系站点申请接口权限。"
+        },
+        {
+          "id": "q1",
+          "stem": "关于 Python `requests` 库的超时（`timeout`）设置，下列说法正确的是？",
+          "title": "关于 requests 的超时设置，正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "requests 默认有 30 秒超时，通常不需要显式设置"
+            },
+            {
+              "key": "B",
+              "text": "timeout=5 表示整个请求（含重定向与下载）最多 5 秒"
+            },
+            {
+              "key": "C",
+              "text": "不设 timeout 会一直挂住；传单个数字时连接与读取都用该值，读取超时衡量的是两次数据到达之间的间隔"
+            },
+            {
+              "key": "D",
+              "text": "timeout 只对 GET 生效，POST 不受影响"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "requests 默认无超时（会永久挂住）；传单个数字等于连接与读取都用该值；读取超时衡量的是数据到达的间隔而非总时长；超时对所有方法生效。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "01-http-in-scraping.md",
+      "code": "import requests\n\ndef ‹1›(url: str, timeout=(3.05, 10)) -> str | None:\n    \"\"\"在采集里，「拿到响应」不等于「拿到能用的响应」。\"\"\"\n    resp = requests.get(url, timeout=timeout, allow_redirects=True)\n    if resp.‹2› != 200:\n        return None                        # 4xx/5xx 就放弃，别硬解析错误页\n    ctype = resp.headers.get(\"Content-Type\", \"\")\n    if not ctype.startswith((\"text/‹3›\", \"application/json\", \"text/xml\")):\n        return None                        # 二进制（PDF/图片）走另一条链路\n    resp.encoding = resp.apparent_encoding  # 服务端不声明 charset 时兜底\n    text = resp.text\n    return text if text.strip() else None    # 空壳页（靠前端渲染）同样不可用",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "fetch_usable",
+          "line": 3
+        },
+        {
+          "id": "b2",
+          "answer": "status_code",
+          "line": 6
+        },
+        {
+          "id": "b3",
+          "answer": "html",
+          "line": 9
+        }
+      ],
+      "distractors": [
+        "conf",
+        "confidence"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

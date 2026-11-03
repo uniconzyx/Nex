@@ -1,0 +1,172 @@
+{
+  "chapter": "java-ch08",
+  "subject": "java",
+  "title": "JVM 与内存模型、GC、类加载",
+  "fingerprint": "c696d020bc",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "运行时数据区与内存池：从 MemoryPoolMXBean 看堆/非堆划分",
+      "body": "运行时数据区的线程私有性"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "运行时数据区的线程私有性",
+      "body": "java-ch08 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "sequence",
+      "heading": "一、类加载五阶段",
+      "steps": [
+        "加载（Loading）：通过全限定名用类加载器读二进制字节流 → 生成方法区内的运行时数据结构 → 堆中生成 Class 对象作为访问入口。",
+        "解析（Resolution）：把常量池的符号引用替换为直接引用（类/字段/方法/接口方法四类）。",
+        "初始化（Initialization）：执行 <clinit>()（静态变量赋值 + 静态代码块，按源码顺序合并），是真正「用」类的开始。"
+      ],
+      "file": "03-class-loading.md"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "下列 JVM 运行时数据区中，**全部为线程私有**的一组是？",
+          "title": "运行时数据区的线程私有性",
+          "options": [
+            {
+              "key": "A",
+              "text": "程序计数器、虚拟机栈、本地方法栈"
+            },
+            {
+              "key": "B",
+              "text": "程序计数器、虚拟机栈、堆"
+            },
+            {
+              "key": "C",
+              "text": "虚拟机栈、堆、方法区"
+            },
+            {
+              "key": "D",
+              "text": "堆、方法区、运行时常量池"
+            }
+          ],
+          "correct": [
+            "A"
+          ],
+          "explain": "「两栈一计数私有，堆与方法区共享」。程序计数器、虚拟机栈、本地方法栈随线程创建/销毁；堆与方法区（JDK 8+ 为元空间）由所有线程共享。补充：程序计数器是唯一不会抛 OutOfMemoryError 的区域——它只存一个行号，大小由字节码格式固定。"
+        },
+        {
+          "id": "q1",
+          "stem": "关于类加载的**准备阶段**，下列说法**正确**的是？",
+          "title": "准备阶段与初始化阶段的差别",
+          "options": [
+            {
+              "key": "A",
+              "text": "为所有静态变量赋源码中的初始值，因此 static int a = 10; 在准备阶段后 a 就是 10"
+            },
+            {
+              "key": "B",
+              "text": "为静态变量分配内存并设零值，static int a = 10; 在准备阶段是 0；但 static final int A = 10; 作为编译期常量在准备阶段即为 10"
+            },
+            {
+              "key": "C",
+              "text": "准备阶段会执行静态代码块"
+            },
+            {
+              "key": "D",
+              "text": "准备阶段会把符号引用替换为直接引用"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "准备阶段只做「分配内存 + 设零值」。static int a = 10 的赋值要等初始化阶段执行 <clinit>()。而 static final int A = 10 是编译期常量，其值已写入常量池，准备阶段直接就 10（且访问它不会触发初始化）。静态代码块在初始化阶段执行（C 错）；符号引用→直接引用是解析阶段的活（D 错）。"
+        },
+        {
+          "id": "q2",
+          "stem": "下面关于垃圾判定的说法，**正确**的是？",
+          "title": "循环引用的回收与 GC Roots",
+          "options": [
+            {
+              "key": "A",
+              "text": "两个对象互相引用（a.next=b; b.next=a）永远不会被回收，所以 JVM 使用引用计数"
+            },
+            {
+              "key": "B",
+              "text": "JVM 使用可达性分析，上述互引对象只要从 GC Roots 不可达就会被回收"
+            },
+            {
+              "key": "C",
+              "text": "方法区中的静态变量引用的对象不能作为 GC Roots"
+            },
+            {
+              "key": "D",
+              "text": "被 synchronized 锁住的对象不能被回收"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "JVM 用可达性分析而非引用计数，所以循环引用不再是问题——只要从 GC Roots 不可达就会被回收（A 错 B 对）。GC Roots 包括：虚拟机栈局部变量、本地方法栈 JNI 引用、方法区静态变量、方法区常量、被 synchronized 持有的对象、JVM 内部引用（C、D 都说反了）。引用计数的致命伤正是循环引用。"
+        },
+        {
+          "id": "q3",
+          "stem": "关于垃圾收集器的取舍，下列说法**错误**的是？",
+          "title": "收集器选型与停顿模型",
+          "options": [
+            {
+              "key": "A",
+              "text": "CMS 使用标记-清除算法，会产生内存碎片，可能触发 Concurrent Mode Failure"
+            },
+            {
+              "key": "B",
+              "text": "G1 把堆划分为等大 Region，按回收收益优先回收，可设定目标停顿时间"
+            },
+            {
+              "key": "C",
+              "text": "ZGC 的停顿时间随堆大小线性增长，因此适合小堆"
+            },
+            {
+              "key": "D",
+              "text": "Parallel Scavenge / Parallel Old 以吞吐量为优先目标"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "ZGC 的目标是停顿时间与堆大小无关（只与 GC Roots 数量相关），做到亚毫秒级，适合大堆/超大堆（TB 级）低延迟场景——C 说反了。A 正确：CMS 用标记-清除，碎片化 + 浮动垃圾 + 并发模式失败是其固有代价。B 正确：G1 是 Garbage-First，Region + Remembered Set + SATB。D 正确：Parallel 系列的 GCTimeRatio 就是为吞吐量设计。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "java",
+      "file": "01-runtime-data-areas.md",
+      "code": "import java.lang.management.*;\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        // 1) 堆 / 非堆内存池：名称由所选收集器决定（默认 G1）\n        System.out.println(\"=== ‹1› pools ===\");\n        List<String> heap = new ArrayList<>(), nonHeap = new ArrayList<>();\n        for (MemoryPoolMXBean p : ManagementFactory.‹2›()) {\n            (p.‹3›() == MemoryType.HEAP ? heap : nonHeap).add(p.getName());\n        }\n        Collections.sort(heap); Collections.sort(nonHeap);\n        System.out.println(\"heap     : \" + heap);\n        System.out.println(\"non-heap : \" + nonHeap);\n\n        // 2) 收集器名称\n        System.out.println(\"=== collectors ===\");\n        for (GarbageCollectorMXBean g : ManagementFactory.getGarbageCollectorMXBeans())\n            System.out.println(\"  \" + g.getName());\n\n        // 3) 栈深度：递归到 StackOverflowError（深度机器相关，只输出布尔判据）\n        System.out.println(\"=== stack ===\");\n        System.out.println(\"StackOverflowError caught: \" + overflows(0));\n\n        // 4) 对象大小公式验证（不依赖 instrumentation，用字段数推导）\n        System.out.println(\"=== layout (formula, 64bit + compressed oops) ===\");\n        System.out.println(\"Object      : 8 mark + 4 klass + 4 pad = 16\");\n        System.out.println(\"int[10]     : 8 + 4 + 4 + 40 = 56\");\n    }\n\n    static boolean overflows(int d) {\n        try { return overflows(d + 1) > d; }\n        catch (StackOverflowError e) { return true; }\n    }\n}",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "memory",
+          "line": 7
+        },
+        {
+          "id": "b2",
+          "answer": "getMemoryPoolMXBeans",
+          "line": 9
+        },
+        {
+          "id": "b3",
+          "answer": "getType",
+          "line": 10
+        }
+      ],
+      "distractors": [
+        "cache",
+        "config"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

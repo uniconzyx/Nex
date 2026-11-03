@@ -1,0 +1,105 @@
+{
+  "chapter": "mw-ch02",
+  "subject": "middleware",
+  "title": "Redis 持久化与内存管理（mw-ch02）",
+  "fingerprint": "ca6746ee07",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "RDB 快照：fork + 写时复制(COW) 模拟",
+      "body": "以为 fork + COW 等于“数据不丢”"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "RDB 的 BGSAVE 为什么用 fork + 写时复制",
+      "body": "mw-ch02 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "以为 fork + COW 等于“数据不丢”",
+          "right": "回答 RDB 持久性时明确「快照点之前可恢复、快照点之后丢失」，不把 COW 当成不丢数据的安全机制。"
+        },
+        {
+          "id": 2,
+          "left": "把 no 策略理解成“不写文件”",
+          "right": "称其为「只写缓冲、由 OS 决定刷盘」，并说明它最不安全、绝不适用于来源唯一的数据。"
+        },
+        {
+          "id": 3,
+          "left": "混淆 AOF 重写与“压缩旧文件”",
+          "right": "磁盘需预留约 2 倍空间，并说明重写后体积由 O(操作数) 降到 O(当前数据量)，而非原地压缩。"
+        },
+        {
+          "id": 4,
+          "left": "认为过期 key 到期会“立刻自动删除”",
+          "right": "给 TTL 加随机抖动避免集中过期，并理解过期删除不生成 del 命令、主从靠主节点传播 del 同步。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "关于 Redis 的 RDB 快照与 `BGSAVE`，下列说法正确的是？",
+          "title": "RDB 的 BGSAVE 为什么用 fork + 写时复制",
+          "options": [
+            {
+              "key": "A",
+              "text": "BGSAVE 在主线程直接全量拷贝内存"
+            },
+            {
+              "key": "B",
+              "text": "BGSAVE 用 fork + COW，仅修改页才复制"
+            },
+            {
+              "key": "C",
+              "text": "COW 保证 RDB 不丢数据"
+            },
+            {
+              "key": "D",
+              "text": "SAVE 与 BGSAVE 都阻塞主线程"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "BGSAVE fork 子进程，父子共享页、写时复制仅复制被修改页，开销为 O(页表) 而非 O(数据量)；COW 只是降低快照成本，RDB 仍是点快照，间隔数据会丢失；SAVE 阻塞、BGSAVE 不阻塞主线程。"
+        },
+        {
+          "id": "q5",
+          "stem": "关于 `mem_fragmentation_ratio = used_memory_rss / used_memory`，下列说法正确的是？",
+          "title": "memfragmentationratio 的含义与异常处置",
+          "options": [
+            {
+              "key": "A",
+              "text": "比值越小于 1 越健康"
+            },
+            {
+              "key": "B",
+              "text": "比值>1.5 碎片严重，可 activedefrag/重启"
+            },
+            {
+              "key": "C",
+              "text": "比值<1 说明内存充足无碎片"
+            },
+            {
+              "key": "D",
+              "text": "只反映逻辑内存，与 OS 无关"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "ratio>1.5 表示碎片多（正常略大于 1）；ratio<1 说明 rss 小于逻辑内存，是部分内存被 OS 换页到 swap 的危险信号，性能会骤降，绝非健康。"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,162 @@
+{
+  "chapter": "tool-ch05",
+  "subject": "tooling",
+  "title": "Docker 基础：镜像、容器与 Dockerfile",
+  "fingerprint": "2633d67e94",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "namespace 隔离视图 + cgroup 限制资源（纯逻辑模拟）",
+      "body": "把容器当成轻量虚拟机，以为它有独立内核"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "容器与虚拟机的本质区别",
+      "body": "tool-ch05 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "把容器当成轻量虚拟机，以为它有独立内核",
+          "right": "需要不同内核/内核模块/强隔离时用虚拟机或 Kata/gVisor；不要把容器当作完整的独立机器。"
+        },
+        {
+          "id": 2,
+          "left": "只设了 memory.max 却不管应用感知",
+          "right": "开启容器感知（JVM UseContainerSupport、MaxRAMPercentage；Node --max-old-space-size），并用 docker stats 观察实际用量。"
+        },
+        {
+          "id": 3,
+          "left": "把数据写在容器可写层",
+          "right": "数据库数据、上传文件、需要留存的日志一律挂 volume 或 bind mount；容器保持无状态。"
+        },
+        {
+          "id": 4,
+          "left": "用 RUN rm -rf 想减小镜像体积",
+          "right": "用多阶段构建让这些文件根本不进入最终镜像；这是唯一能真正排除体积的方法。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q1",
+          "stem": "关于容器与虚拟机的区别，下列说法正确的是？ 请选择并说明。",
+          "title": "容器与虚拟机的本质区别",
+          "options": [
+            {
+              "key": "A",
+              "text": "容器拥有独立的 Guest OS 内核，因此隔离强度高于虚拟机"
+            },
+            {
+              "key": "B",
+              "text": "容器依靠 namespace 隔离「视图」、cgroup 限制「用量」，并共享宿主内核"
+            },
+            {
+              "key": "C",
+              "text": "虚拟机需要引导一份完整的 Guest 内核，因此启动更慢、镜像体积更大"
+            },
+            {
+              "key": "D",
+              "text": "容器可以在 Windows 宿主上直接运行依赖 Linux 系统调用的镜像，无需任何虚拟机"
+            }
+          ],
+          "correct": [
+            "B",
+            "C"
+          ],
+          "explain": "考容器的两根支柱（namespace/cgroup）与「共享内核」这一根本差异，是本章第一考点。"
+        },
+        {
+          "id": "q2",
+          "stem": "关于镜像分层与 overlayfs，下列说法正确的是？ 请选择并说明。",
+          "title": "镜像分层、overlayfs 与写时复制",
+          "options": [
+            {
+              "key": "A",
+              "text": "镜像层是只读的，多个容器可以共享同一份只读层，各自只多出一个可写层"
+            },
+            {
+              "key": "B",
+              "text": "修改一个来自 lower 层的文件时，overlayfs 会先把它复制到 upper 层再改（写时复制），lower 永不被改动"
+            },
+            {
+              "key": "C",
+              "text": "在 Dockerfile 里用 RUN rm -rf /big 删除大目录可以有效减小最终镜像体积"
+            },
+            {
+              "key": "D",
+              "text": "删除一个来自 lower 层的文件时，是在 upper 层放一个 whiteout 把它遮蔽，下层数据依然存在"
+            }
+          ],
+          "correct": [
+            "A",
+            "B",
+            "D"
+          ],
+          "explain": "考 overlayfs 的 lower/upper/merged 语义与「rm 不瘦身」的根因。"
+        },
+        {
+          "id": "q3",
+          "stem": "镜像里写了 `ENTRYPOINT [\"python\"]`、`CMD [\"app.py\"]`，执行 `docker run img -u` 时最终运行的命令是什么？",
+          "title": "CMD 与 ENTRYPOINT 的组合规则",
+          "options": [
+            {
+              "key": "A",
+              "text": "python app.py -u"
+            },
+            {
+              "key": "B",
+              "text": "python -u"
+            },
+            {
+              "key": "C",
+              "text": "-u"
+            },
+            {
+              "key": "D",
+              "text": "python app.py（docker run 尾部参数被忽略）"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "考 CMD/ENTRYPOINT 的组合与覆盖规则，以及 shell 形式的信号副作用。"
+        },
+        {
+          "id": "q3b",
+          "stem": "把上一题改成 shell 形式 `ENTRYPOINT python app.py` 后，下列哪种说法**正确**？",
+          "title": "shell 形式的 ENTRYPOINT 会带来什么",
+          "options": [
+            {
+              "key": "A",
+              "text": "等价于 exec 形式，CMD 仍会作为参数追加"
+            },
+            {
+              "key": "B",
+              "text": "等价于 /bin/sh -c \"python app.py\"，CMD 被完全忽略；且 PID 1 是 /bin/sh，SIGTERM 不会转发给应用"
+            },
+            {
+              "key": "C",
+              "text": "镜像构建会直接失败，因为 ENTRYPOINT 不支持 shell 形式"
+            },
+            {
+              "key": "D",
+              "text": "CMD 会覆盖 ENTRYPOINT，最终只执行 CMD 里的命令"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "shell 形式 ENTRYPOINT 的双重副作用：CMD 失效 + 信号不转发。"
+        }
+      ]
+    }
+  ]
+}

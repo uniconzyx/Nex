@@ -1,0 +1,92 @@
+{
+  "chapter": "cpp-ch03",
+  "subject": "cpp",
+  "title": "数组与字符串：C 数组、std::string 与字符串视图",
+  "fingerprint": "c1aeae2946",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "C 数组遍历求和",
+      "body": "cstr() 返回的指针在修改后失效"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于数组与指针，正确的是",
+      "body": "cpp-ch03 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "cstr() 返回的指针在修改后失效",
+          "right": "要长期持有就 strdup/拷贝，别存裸指针。"
+        },
+        {
+          "id": 2,
+          "left": "operator[] 越界不抛异常、at() 才抛",
+          "right": "需要边界检查用 at()，性能敏感且已确信安全才用 []。"
+        },
+        {
+          "id": 3,
+          "left": "用 sprintf/C 串函数导致缓冲区溢出",
+          "right": "用 snprintf(buf, sizeof buf, ...) 限长，或干脆用 std::string/std::format 完全避开手写缓冲。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "选择**正确**的描述。",
+          "title": "关于数组与指针，正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "数组作为函数参数时仍保留完整长度信息"
+            },
+            {
+              "key": "B",
+              "text": "a[i] 等价于 (a + i)"
+            },
+            {
+              "key": "C",
+              "text": "stringview 拥有底层字符存储"
+            },
+            {
+              "key": "D",
+              "text": "std::string 的 cstr() 不保证以 \\0 结尾"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "数组传参退化为指针丢失长度；stringview 不拥有存储；cstr() 以 \\0 结尾。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "cpp",
+      "file": "02-std-string.md",
+      "code": "#include <iostream>\n#include <string>\n\nint main() {\n    std::string s = \"hello world\";\n    std::cout << \"find=\" << s.find(\"world\") << \" npos=\" << (s.find(\"xyz\") == std::string::npos) << \"\\n\";\n    std::cout << \"substr=\" << s.substr(6, 5) << \" len=\" << s.substr(6, 5).size() << \"\\n\";\n\n    std::string short_s = \"abc\";\n    std::string long_s(100, 'x');\n    std::cout << \"short cap=\" << short_s.capacity() << \" long cap=\" << long_s.capacity() << \"\\n\";\n\n    std::string built;\n    built.reserve(64);\n    for (int i = 0; i < 5; ++i) { built += std::‹1›(i); built += ','; }\n    std::cout << \"built=\" << built << \" size=\" << built.size() << \" cap=\" << built.capacity() << \"\\n\";\n\n    const char raw[] = {'a', 'b', 'c'};        // 没有 \\0\n    std::string safe(raw, 3);                  // 用长度构造，安全\n    std::cout << \"raw_len=\" << safe.size() << \" content=\" << safe << \"\\n\";\n}",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "to_string",
+          "line": 15
+        }
+      ],
+      "distractors": [
+        "count",
+        "counter"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

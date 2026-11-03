@@ -1,0 +1,79 @@
+{
+  "chapter": "tool-ch01",
+  "subject": "tooling",
+  "title": "Linux 基础：文件系统与权限",
+  "fingerprint": "7ae3252852",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "逐字段拆解 ls -l 的一行：每个位置是什么含义",
+      "body": "chmod 777 当万能钥匙"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "目录权限 rwx 的语义：删除文件看的是谁的权限",
+      "body": "tool-ch01 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "chmod 777 当万能钥匙",
+          "right": "先 id + stat 定位是哪个分组缺权限，把属组设对（chgrp + setgid）而不是放开其他人；确需共享写时用 775 + setgid 目录。"
+        },
+        {
+          "id": 2,
+          "left": "chmod -R 777 递归放开上传目录",
+          "right": "chown -R www-data:www-data upload/ + chmod 755（目录）/ 644（文件），需要写权限就只给目录加组写位。"
+        },
+        {
+          "id": 3,
+          "left": "只看 rwx 不看属主/属组，误判 Permission denied",
+          "right": "排查三步 id（我是谁/在哪些组）→ stat file（属主属组权限）→ 分组比对；路径中间层缺 x 用 namei -l 逐级查。"
+        },
+        {
+          "id": 4,
+          "left": "以为符号链接的权限会生效",
+          "right": "要控制访问应改目标文件的权限，或把链接放进一个权限受控的目录（利用目录的 x 位控制穿越）。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "环境：目录 `d` 权限 `drwxr-x---`，属主 alice，属组 devs；其下文件 `d/f.txt` 权限 `-rw-r-----`，属主 alice，属组 devs。 - **bob**：既不是 alice，也不属于 devs - **carol**：属于 devs（但不是 alice） 下列判断正确的是？",
+          "title": "目录权限 rwx 的语义：删除文件看的是谁的权限",
+          "options": [
+            {
+              "key": "A",
+              "text": "alice 可以 ls d 列出目录中的文件名"
+            },
+            {
+              "key": "B",
+              "text": "bob 可以 cd d 进入该目录"
+            },
+            {
+              "key": "C",
+              "text": "carol 可以 cat d/f.txt 读到文件内容"
+            },
+            {
+              "key": "D",
+              "text": "carol 可以 rm d/f.txt 删除该文件"
+            }
+          ],
+          "correct": [
+            "A",
+            "C"
+          ],
+          "explain": "把「目录 rwx 的三重语义」「判定短路」与「删除看目录权限」三个考点合并成一道题。"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,121 @@
+{
+  "chapter": "tool-ch04",
+  "subject": "tooling",
+  "title": "Git 协作：分支策略与冲突处理",
+  "fingerprint": "95cbed9ed8",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "fetch 与 pull 的真实语义（pull = fetch + merge /…",
+      "body": "把 git pull 当成「只是把远端拉取下来」"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "fetch / pull / push 各自动了什么",
+      "body": "tool-ch04 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "sequence",
+      "heading": "二、冲突标记、解决流程与 rerere",
+      "steps": [
+        "git status 看哪些文件 Unmerged；",
+        "编辑文件（或 git checkout --ours/--theirs），手工删掉标记并确定最终语义；",
+        "git add <file> 告诉 Git「这个冲突我解决了」；",
+        "想反悔：git merge --abort / git rebase --abort（回到操作前的 refs）；",
+        "收尾：git diff HEAD~1 复核，跑测试，必要时 --verify-signatures。"
+      ],
+      "file": "02-conflict-resolution.md"
+    },
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "把 git pull 当成「只是把远端拉取下来」",
+          "right": "先 git fetch，用 git log --oneline main..origin/main 看清差异，再自己决定 merge 还是 rebase；个人分支可配 pull.rebase=true。"
+        },
+        {
+          "id": 2,
+          "left": "push 被拒就加 --force",
+          "right": "git fetch → git rebase origin/main（或 merge）→ 解决冲突 → 再 push；确需强推时用 --force-with-lease，且仅限已沟通的个人分支。"
+        },
+        {
+          "id": 3,
+          "left": "以为 --force-with-lease 是「安全的强推」，于是放心地改写共享分支",
+          "right": "共享分支回滚一律用 git revert（追加历史）；把 main/release 设为保护分支，从平台层面禁止强推。"
+        },
+        {
+          "id": 4,
+          "left": "对已经 push 的分支做 rebase 再推",
+          "right": "黄金法则——只对本地尚未推送的提交 rebase；已共享就用 merge。确需整理时全组沟通，重排后所有人 git reset --hard origin/<branch> 对齐。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q1",
+          "stem": "关于 Git 远端协作的三类引用与三条命令，下列说法正确的是？ 请选择全部正确项并说明理由。",
+          "title": "fetch / pull / push 各自动了什么",
+          "options": [
+            {
+              "key": "A",
+              "text": "git fetch 会把远端的新提交合并进当前分支"
+            },
+            {
+              "key": "B",
+              "text": "git fetch 只更新远端跟踪引用 refs/remotes/origin/，不碰本地分支与工作区"
+            },
+            {
+              "key": "C",
+              "text": "git pull = git fetch +（git merge 或 git rebase），默认行为由 pull.rebase 决定"
+            },
+            {
+              "key": "D",
+              "text": "git pull --rebase 会改写本地尚未推送的提交 SHA，使历史保持线性"
+            }
+          ],
+          "correct": [
+            "B",
+            "C",
+            "D"
+          ],
+          "explain": "考三类引用与 pull 的真实分解式，是本章最基础的考点，也是 tools/DevOps 面试开场题。"
+        },
+        {
+          "id": "q3",
+          "stem": "关于 `push` 被拒绝与强行推送，下列说法正确的是？ 请选择全部正确项。",
+          "title": "push 被拒、强推与共享分支回滚",
+          "options": [
+            {
+              "key": "A",
+              "text": "push 被拒最常见的原因是 non-fast-forward：远端引用当前值不是你本地 tip 的祖先"
+            },
+            {
+              "key": "B",
+              "text": "git push --force 一定会先把别人的提交合并进来，因此不会丢东西"
+            },
+            {
+              "key": "C",
+              "text": "--force-with-lease 会校验「远端引用 == 我本地记录的 origin/main」，不一致则拒绝（stale info）"
+            },
+            {
+              "key": "D",
+              "text": "对已经发布的共享分支做回滚，正确做法是 git revert 追加反向提交，而不是 reset --hard + 强推"
+            }
+          ],
+          "correct": [
+            "A",
+            "C",
+            "D"
+          ],
+          "explain": "考 push 的安全边界与共享分支回滚标准做法，是本章最常考的安全题。"
+        }
+      ]
+    }
+  ]
+}

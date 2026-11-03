@@ -1,0 +1,124 @@
+{
+  "chapter": "java-ch04",
+  "subject": "java",
+  "title": "集合框架：List、Set、Map、Queue 与泛型集合",
+  "fingerprint": "aee1bc9aed",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "ArrayList 扩容机制（复刻版）：默认容量 10，按 1.5 倍增长",
+      "body": "只重写 equals 不重写 hashCode"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于 ArrayList 的底层实现与扩容",
+      "body": "java-ch04 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "只重写 equals 不重写 hashCode",
+          "right": "用同一组字段成对重写 equals/hashCode，优先 record 或 Objects.hash。"
+        },
+        {
+          "id": 2,
+          "left": "用可变对象做 HashMap 的键",
+          "right": "键必须不可变（String/Integer/record 或 final 字段）。"
+        },
+        {
+          "id": 3,
+          "left": "for-each 遍历时调用 list.remove(...)",
+          "right": "用 iterator.remove() 或 removeIf。"
+        },
+        {
+          "id": 4,
+          "left": "误以为 LinkedList 比 ArrayList 快",
+          "right": "默认用 ArrayList；只在「已知节点处 O(1) 增删且几乎不随机访问」时用 LinkedList。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "关于 `ArrayList` 的实现，选出**正确**的描述。",
+          "title": "关于 ArrayList 的底层实现与扩容",
+          "options": [
+            {
+              "key": "A",
+              "text": "底层是双向链表，插入删除为 O(1)"
+            },
+            {
+              "key": "B",
+              "text": "底层是动态数组；默认构造首次 add 扩容到 10，之后容量不足时约以 1.5 倍扩容，随机访问为 O(1)"
+            },
+            {
+              "key": "C",
+              "text": "以 2 倍容量扩容，故随机访问是 O(n)"
+            },
+            {
+              "key": "D",
+              "text": "容量不足时原地扩展，不重新分配内存"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "ArrayList 封装 Object[] elementData，默认构造时数组为空（容量 0），首次 add 扩到 10，再满时 newCapacity = old + (old>>1) 即 1.5 倍；随机访问用下标 O(1)。扩容需要分配新数组并数组拷贝（Arrays.copyOf）。"
+        },
+        {
+          "id": "q1",
+          "stem": "关于 `HashMap` 的实现，选出**正确**的描述。",
+          "title": "关于 HashMap（Java 8+）的底层结构",
+          "options": [
+            {
+              "key": "A",
+              "text": "仅用数组存储，冲突后线性探测"
+            },
+            {
+              "key": "B",
+              "text": "数组 + 链表 + 红黑树；链表长度达到 8 且数组长度 ≥ 64 时树化为红黑树，退化为链表的阈值是 6"
+            },
+            {
+              "key": "C",
+              "text": "哈希冲突时新节点总是放在链表头部（头插法）"
+            },
+            {
+              "key": "D",
+              "text": "负载因子默认为 1.0"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "Java 8 节点是 Node（链表）或 TreeNode（红黑树）；当某桶链表长度 ≥ 8 且 table.length ≥ 64 时树化（否则优先扩容），长度 ≤ 6 时退化回链表。插入用尾插法（修复 1.7 头插的并发成环问题）。负载因子默认 0.75，是空间与冲突概率的折中。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "java",
+      "file": "06-collection-practical-recipes.md",
+      "code": "class User {\n    String id;\n    User(String id) { this.id = id; }\n    @Override public boolean equals(Object o) {\n        return o ‹1› User u && id.equals(u.id);\n    }\n    // ❌ 漏了 hashCode -> HashSet 不去重\n    @Override public int hashCode() { return id.hashCode(); }  // ✅ 补上\n}",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "instanceof",
+          "line": 5
+        }
+      ],
+      "distractors": [
+        "error",
+        "extends"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

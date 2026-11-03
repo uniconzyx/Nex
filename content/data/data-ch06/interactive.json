@@ -1,0 +1,103 @@
+{
+  "chapter": "data-ch06",
+  "subject": "data",
+  "title": "数据分析与数学建模实战",
+  "fingerprint": "0195d26d0f",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "数据质量体检清单：六项必查",
+      "body": "关于缺失值机制，正确的是"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于缺失值机制，正确的是",
+      "body": "data-ch06 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "某订单表「收货城市」字段缺失 12%。业务核查后确认：缺失与否与订单金额、用户等级、下单时间、注册渠道**均无关**，也无法由任何已观测字段预测。团队准备直接删除这 12% 的行。 关于该缺失机制与「直接删除」的后果，下列说法正确的是？",
+          "title": "关于缺失值机制，正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "只要缺失比例不高，无论哪种机制，删除缺失行都不会引入偏差"
+            },
+            {
+              "key": "B",
+              "text": "MCAR 下删除缺失行只损失样本量、不引入偏差；MAR 指缺失与已观测变量有关；MNAR 无法用数据自证"
+            },
+            {
+              "key": "C",
+              "text": "MAR 指缺失与缺失值本身有关，可以直接用均值填充"
+            },
+            {
+              "key": "D",
+              "text": "填充策略与缺失机制无关，选均值填充总是安全的"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "MCAR（完全随机缺失）下删除只损失样本量、不引入偏差；MAR 是缺失与其他已观测变量有关；MNAR 无法用数据自证，只能靠业务判断。填充策略必须随机制调整。"
+        },
+        {
+          "id": "q1",
+          "stem": "一份含 20 个特征的数据集里，有的特征量级是 $10^5$（金额），有的是 $10^{-2}$（比率）。现在用同一份数据分别训练 KNN、RBF 核 SVM、决策树、PCA，**不删特征、只考虑要不要先做缩放**。 下列判断中，正确的是？",
+          "title": "下列哪个模型不必须做特征缩放",
+          "options": [
+            {
+              "key": "A",
+              "text": "KNN"
+            },
+            {
+              "key": "B",
+              "text": "RBF 核 SVM"
+            },
+            {
+              "key": "C",
+              "text": "决策树"
+            },
+            {
+              "key": "D",
+              "text": "PCA"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "决策树的分裂只依赖单个特征上的样本排序，对单调变换不变，因此缩放不改变分裂结果。KNN/SVM/PCA 都基于距离或内积，量纲会被大尺度特征支配，必须缩放。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "01-cleaning-and-quality-checks.md",
+      "code": "import pandas as pd\n\ndef profile(df: pd.DataFrame) -> pd.DataFrame:\n    rows = []\n    for col in df.‹1›:\n        s = df[col]\n        rows.append({\n            \"列\": col,\n            \"类型\": str(s.dtype),\n            \"缺失率\": round(float(s.isna().mean()), 3),\n            \"唯一值\": int(s.nunique(dropna=True)),\n            \"样例\": s.dropna().‹2›[0] if s.notna().any() else None,\n        })\n    return (pd.DataFrame(rows)\n              .sort_values(\"缺失率\", ascending=False)\n              .reset_index(drop=True))\n\nprint(profile(df).to_string(index=False))\n\n# 唯一性：主键重复要看\"重复了几组\"，不是\"重复了几行\"\nprint(\"重复主键组数:\", int(df.duplicated(subset=[\"order_id\"]).sum()))\n\n# 一致性：同义异名会以多个键出现，值计数就能暴露\nprint(df[\"city\"].value_counts().head(10))",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "columns",
+          "line": 5
+        },
+        {
+          "id": "b2",
+          "answer": "iloc",
+          "line": 12
+        }
+      ],
+      "distractors": [
+        "metrics",
+        "missing"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

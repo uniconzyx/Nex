@@ -1,0 +1,188 @@
+{
+  "chapter": "bd-ch06",
+  "subject": "bigdata",
+  "title": "离线数仓实战：分层建模与调度（bd-ch06）",
+  "fingerprint": "ba0cafbc25",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "分层建模检查器：DWS 不得直接读 ODS、ADS 不得反向写 DWD",
+      "body": "为了赶需求直接 SELECT FROM odsxxx 出报表"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "ODS / DWD / DWS / ADS 的职责边界",
+      "body": "bd-ch06 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "为了赶需求直接 SELECT FROM odsxxx 出报表",
+          "right": "任何面向业务的结果表都必须从 DWS/ADS 出发；确实只有 ODS 有数据时，先在 DWD 建一张规范化明细表再引用。"
+        },
+        {
+          "id": 2,
+          "left": "认为「分层只是命名习惯，跳一层没关系」",
+          "right": "把「DWS 不得直接读 ODS」「ADS 不得反向写 DWD」写成可判定的检查，在 CI 里每天扫（见本章 ex01）。"
+        },
+        {
+          "id": 3,
+          "left": "ADS 任务直接 overwrite 一张 DWD 表的分区来「补数据」",
+          "right": "从上游往下游重跑——先 backfill DWD 的历史分区，再依次重跑 DWS、ADS；紧急止血只能写 ADS 自己的临时表并限期回收。"
+        },
+        {
+          "id": 4,
+          "left": "建事实表时不写粒度声明",
+          "right": "表注释第一行就写「本表粒度 = ...，粒度键 = ...，一行代表 ...」，并在每次跑完后校验 count() = count(distinct 粒度键)（见 ex05）。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "bd-ch06-ex01",
+          "stem": "某电商离线数仓每日凌晨跑一条从订单日志到管理层报表的链路。关于四层的职责，下列说法**正确**的是？",
+          "title": "ODS / DWD / DWS / ADS 的职责边界",
+          "options": [
+            {
+              "key": "A",
+              "text": "ODS 层会对业务库数据做深度业务清洗与维度整合，产出可直接分析的宽表"
+            },
+            {
+              "key": "B",
+              "text": "DWD 层存放最细粒度的明细事实，是下游所有复用逻辑的共同基础"
+            },
+            {
+              "key": "C",
+              "text": "DWS 层是面向某一张具体报表的最终结果表，口径可以直接写死"
+            },
+            {
+              "key": "D",
+              "text": "ADS 任务可以直接覆盖写入 DWD 表的分区来快速修正数据"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "DWD 是清洗、标准化后的明细事实层，粒度最细、可被反复复用，说法正确。A 错：ODS 是业务库的原样镜像，不做业务清洗；C 错：DWS 面向主题域（交易/用户/流量），ADS 才面向具体应用；D 错：这是越层写入，会用高层逻辑污染低层数据，导致所有依赖该 DWD 表的下游一起出错。"
+        },
+        {
+          "id": "bd-ch06-ex02",
+          "stem": "用户维度从「北京 / V1」在 2026-02-01 变为「北京 / V2」，在 2026-02-15 又迁到「上海 / V2」。采用 SCD Type 2 拉链表时，下列说法正确的是？",
+          "title": "缓慢变化维 SCD Type 2 的必备机制",
+          "options": [
+            {
+              "key": "A",
+              "text": "拉链表应为同一业务主键保留多行，并用代理键与事实表关联"
+            },
+            {
+              "key": "B",
+              "text": "事实表应继续用业务主键 userid 关联维表，靠 bizdate 过滤即可"
+            },
+            {
+              "key": "C",
+              "text": "当前有效行的 enddate 应填为当天的日期，便于区间查询"
+            },
+            {
+              "key": "D",
+              "text": "若某次变更的新属性与上一版本完全相同，也必须新增一行版本"
+            }
+          ],
+          "correct": [
+            "A"
+          ],
+          "explain": "Type 2 用「新增一行版本」保留历史，同一业务主键会有多行，因此必须引入代理键供事实表关联，A 正确。B 错：用业务主键 join 会导致事实表扇出（一笔事实匹配多个历史版本）。C 错：当前行的 enddate 必须用无穷大哨兵（业界惯用 9999-12-31），否则区间查询会漏掉当天之后的数据。D 错：属性无实质变化时不产生新版本（本章 ex02 实测 6 条变更合并为 5 个版本）。"
+        },
+        {
+          "id": "bd-ch06-ex03",
+          "stem": "订单明细表声明粒度为「一个订单的一个商品行」（粒度键 order_id + sku_id）。跑完后发现某个日期分区里 `count(*) = 12000` 而 `count(distinct order_id, sku_id) = 11800`。下列判断与对策正确的是？",
+          "title": "事实表粒度违背与 join 扇出",
+          "options": [
+            {
+              "key": "A",
+              "text": "属于正常现象，OLAP 明细表允许少量重复行"
+            },
+            {
+              "key": "B",
+              "text": "粒度已被违背（粒度键不再是超码），应先定位重复来源，最常见是 join 时维表连接键不唯一造成扇出"
+            },
+            {
+              "key": "C",
+              "text": "在最终聚合时加 DISTINCT 即可，不必追溯原因"
+            },
+            {
+              "key": "D",
+              "text": "说明 src 侧数据本身有 200 条脏数据，直接删除即可"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "粒度声明等价于「粒度键是表的超码」，count() != count(distinct 粒度键) 就说明粒度已被违背。A 错：明细事实表不允许重复行。C 错：DISTINCT 只随机去掉重复行的表象，会把本该计入的金额一起删掉，导致 SUM 口径错误且难以发现。D 错：未定位原因就删数据是危险操作。正确对策是 join 前先把维表按连接键聚合到唯一。"
+        },
+        {
+          "id": "bd-ch06-ex04",
+          "stem": "ADS 任务在 02:00 执行失败一次，运维在 02:30 手动重跑了同一天的同一任务。该任务的写表语句是 `INSERT INTO TABLE ads_gmv PARTITION(dt='2026-03-01')`。预料的结果是？",
+          "title": "幂等重跑：INSERT OVERWRITE 与 INSERT INTO",
+          "options": [
+            {
+              "key": "A",
+              "text": "分区仍是当天的正确结果，因为失败的那次没有写成功"
+            },
+            {
+              "key": "B",
+              "text": "分区行数与金额合计翻倍（或增加失败那次残留的部分），说明写入方式不幂等"
+            },
+            {
+              "key": "C",
+              "text": "分区被整分区替换，结果与跑一次完全相同"
+            },
+            {
+              "key": "D",
+              "text": "调度系统会自动回滚失败的写入，无需关心"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "INSERT INTO 是 append（累积）语义，重跑会把同样的数据再追加一遍：本章 ex12 实测同一批 100 行数据跑两次得到 200 行、金额 395 → 790、产生 100 个重复粒度键。正确写法是 INSERT OVERWRITE TABLE t PARTITION(dt=...) —— put（赋值）语义，天然幂等；注意必须指定分区，否则会退化成全表覆盖的历史删除事故。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "python",
+      "file": "01-layered-warehouse.md",
+      "code": "import re\n\nPATTERN = re.compile(r\"^(ods|dwd|dws|ads)_[a-z0-9_]+$\")\n\ndef ‹1›(spark, db: str) -> list[str]:\n    \"\"\"分层规范第一道门：表名前缀必须与所在库的层一致。\"\"\"\n    layer = db.split(\"_\")[0]                     # ods / dwd / dws / ads\n    bad = []\n    for t in spark.‹2›.listTables(db):\n        if not PATTERN.‹3›(t.name) or not t.name.startswith(layer + \"_\"):\n            bad.append(f\"{db}.{t.name}\")\n    return bad",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "check_table_names",
+          "line": 5
+        },
+        {
+          "id": "b2",
+          "answer": "catalog",
+          "line": 9
+        },
+        {
+          "id": "b3",
+          "answer": "match",
+          "line": 10
+        }
+      ],
+      "distractors": [
+        "standard_normal",
+        "start"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

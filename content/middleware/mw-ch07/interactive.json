@@ -1,0 +1,125 @@
+{
+  "chapter": "mw-ch07",
+  "subject": "middleware",
+  "title": "消息可靠性：不丢、不重、有序（mw-ch07）",
+  "fingerprint": "f3791bca46",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "丢失窗口清单：三段链路的危险配置与后果",
+      "body": "acks=all 与 min.insync.replicas 的联合语义"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "acks=all 与 min.insync.replicas 的联合语义",
+      "body": "mw-ch07 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "mw7-ex01",
+          "stem": "下面关于 `acks=all` 的说法，哪一项**正确**？",
+          "title": "acks=all 与 min.insync.replicas 的联合语义",
+          "options": [
+            {
+              "key": "A",
+              "text": "acks=all 要求所有副本（含尚未同步的 follower）都写入成功才返回"
+            },
+            {
+              "key": "B",
+              "text": "acks=all 的强度等于 min(ISR 实际大小, min.insync.replicas)；当 min.insync.replicas=1 时它会退化为 acks=1"
+            },
+            {
+              "key": "C",
+              "text": "acks=all 与 min.insync.replicas 无关，只要设了 all 就不会丢消息"
+            },
+            {
+              "key": "D",
+              "text": "acks=all 只能用于单副本 topic，多副本时必须用 acks=1"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "acks=all 保证的是「当前 ISR 全体接受」，而 ISR 是会缩容的动态集合。要使它有意义，必须同时设置 min.insync.replicas >= 2，否则 ISR 缩到 1 个副本时仍接受写入，该副本一挂就丢。"
+        },
+        {
+          "id": "mw7-ex02",
+          "stem": "关于生产者重试导致的乱序，下列哪一项**正确**？",
+          "title": "什么情况下生产者重试会导致分区内乱序",
+          "options": [
+            {
+              "key": "A",
+              "text": "只要 retries>0 就一定乱序，与其它参数无关"
+            },
+            {
+              "key": "B",
+              "text": "max.in.flight.requests.per.connection>1 且未开启幂等时，重试可能乱序；开启幂等后 Kafka 用 (PID, partition, seq) 保证有序，允许 in.flight ≤ 5"
+            },
+            {
+              "key": "C",
+              "text": "乱序只发生在消费者端，与生产者重试无关"
+            },
+            {
+              "key": "D",
+              "text": "开启幂等后必须把 in.flight 设为 1 才能保证有序"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "单分区在无故障时天然有序，但重试会让 broker 的接收顺序与发送顺序不一致。开启 enable.idempotence=true 后 broker 按序列号校验、缓存乱序消息并丢弃重复序列号，从而在允许 max.in.flight<=5 的同时保住分区内有序（示例 x05 实测）。"
+        },
+        {
+          "id": "mw7-ex04",
+          "stem": "要在订单表上实现幂等落库（`order_no` 有唯一索引），下面哪种写法在**并发重复投递**下是正确的？",
+          "title": "幂等落库的正确写法",
+          "options": [
+            {
+              "key": "A",
+              "text": "先 SELECT 判断 orderno 是否存在，不存在再 INSERT"
+            },
+            {
+              "key": "B",
+              "text": "INSERT ... ON CONFLICT (orderno) DO NOTHING，把原子性下沉到存储引擎"
+            },
+            {
+              "key": "C",
+              "text": "用 REPLACE INTO，冲突时直接覆盖"
+            },
+            {
+              "key": "D",
+              "text": "在应用层加一把 synchronized 锁，然后普通 INSERT"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "「先查后写」在并发下必然存在双写窗口（示例 x02 实测 3 个并发请求全部写入）。REPLACE INTO 语义是删除 + 插入，会把未指定字段置为默认值并可能触发级联。仅「忽略异常」也不够——需要区分重复消息与真实业务冲突。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "sql",
+      "file": "02-duplicate-and-idempotence.md",
+      "code": "CREATE TABLE consumed_msg (\n  msg_id      VARCHAR(64) PRIMARY KEY,      -- 唯一键就是去重闸门\n  topic       VARCHAR(64) NOT NULL,\n  consumed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);\n\n-- 业务写入与去重记录放在同一个事务里\nBEGIN;\nINSERT INTO consumed_msg (msg_id, topic) VALUES ('m-1001', 'order-created');\nINSERT INTO ‹1› (order_id, action) VALUES ('A1001', 'created');\nCOMMIT;",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "order_log",
+          "line": 10
+        }
+      ],
+      "distractors": [
+        "employee",
+        "name"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

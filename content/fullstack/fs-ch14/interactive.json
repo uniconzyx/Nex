@@ -1,0 +1,103 @@
+{
+  "chapter": "fs-ch14",
+  "subject": "fullstack",
+  "title": "Agent × 全栈工程接缝：流式、长任务、幂等与成本",
+  "fingerprint": "35a1ae8632",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "流式透传：后端逐块产生、网关逐块转发、客户端拼接",
+      "body": "关于流式穿过网关，正确的是"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于流式穿过网关，正确的是",
+      "body": "fs-ch14 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "选择**正确**的描述。",
+          "title": "关于流式穿过网关，正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "网关应在中间件里 await response.text() 把流读光再返回，这样最稳定"
+            },
+            {
+              "key": "B",
+              "text": "网关应做字节级透传，收到一块立刻转发一块，避免缓冲整条响应"
+            },
+            {
+              "key": "C",
+              "text": "SSE 需要像 WebSocket 一样独立握手一条全双工长连接"
+            },
+            {
+              "key": "D",
+              "text": "流式请求只要设一个整体超时即可，不需要首字节超时"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "流式网关的核心是「透传而非缓冲」：用 for await (chunk) 逐块转发，否则首字节延迟极高且内存随流增长。A 正是反面教材；SSE 复用普通 HTTP、无需独立握手（C 错）；首字节超时用于快速暴露上游无产出，不能省（D 错）。"
+        },
+        {
+          "id": "q4",
+          "stem": "关于令牌桶（token bucket）与漏桶（leaky bucket），正确的是",
+          "title": "令牌桶与漏桶的区别",
+          "options": [
+            {
+              "key": "A",
+              "text": "两者都强制恒定输出速率，不允许任何突发"
+            },
+            {
+              "key": "B",
+              "text": "令牌桶允许短时突发（桶内有存量时），漏桶强制平滑输出"
+            },
+            {
+              "key": "C",
+              "text": "漏桶允许短时突发，令牌桶强制平滑"
+            },
+            {
+              "key": "D",
+              "text": "两者没有区别，只是名字不同"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "令牌桶以固定速率加令牌，请求取令牌，桶里有存量时允许短时突发；漏桶以固定速率漏出，强制输出平滑、不允许突发。API 限流通常选令牌桶（容忍突发），保护下游数据库时才用漏桶（强制平滑）。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "js",
+      "file": "01-streaming-through-gateway.md",
+      "code": "async function* backend() {\n  for (const t of [\"思考中…\", \"检索知识库\", \"生成：你好\", \"，我是助手\"]) {\n    await new Promise(r => ‹1›(r, 5));\n    yield `data: ${t}\\n\\n`;\n  }\n}\nasync function gateway(src, sink) {\n  for await (const chunk of src) sink.‹2›(chunk); // 收到一块立刻转发一块\n}",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "setTimeout",
+          "line": 3
+        },
+        {
+          "id": "b2",
+          "answer": "push",
+          "line": 8
+        }
+      ],
+      "distractors": [
+        "name",
+        "require"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

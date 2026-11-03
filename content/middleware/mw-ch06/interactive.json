@@ -1,0 +1,173 @@
+{
+  "chapter": "mw-ch06",
+  "subject": "middleware",
+  "title": "Kafka 生产者与消费者机制（mw-ch06）",
+  "fingerprint": "d57efc4a24",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "分区器对比：murmur2 / crc32 / 弱哈希，以及粘性 vs 轮询",
+      "body": "acks 只在生产者设，忘了 min.insync.replicas"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "acks=all 究竟等价于写入几个副本",
+      "body": "mw-ch06 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "acks 只在生产者设，忘了 min.insync.replicas",
+          "right": "生产端 acks=all 必须配 broker/Topic 端 min.insync.replicas ≥ 2（3 副本场景）。"
+        },
+        {
+          "id": 2,
+          "left": "enable.auto.commit=true 却不处理业务失败",
+          "right": "生产环境设 enable.auto.commit=false，处理成功后手动提交。"
+        },
+        {
+          "id": 3,
+          "left": "commitSync() 写在业务处理之前",
+          "right": "先处理、成功后再提交（at-least-once），重复由业务幂等消化。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "关于 `acks=all`（即 `-1`）的语义，下列说法**正确**的是？",
+          "title": "acks=all 究竟等价于写入几个副本",
+          "options": [
+            {
+              "key": "A",
+              "text": "保证写入全部 RF 个副本"
+            },
+            {
+              "key": "B",
+              "text": "写入当前 ISR 全部，ISR 收缩则保护下降"
+            },
+            {
+              "key": "C",
+              "text": "等所有 broker 确认"
+            },
+            {
+              "key": "D",
+              "text": "与 acks=1 安全性等价"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "acks=all 的准确含义是「等待当前 ISR 中所有副本完成写入」，而不是「所有的 replication.factor 个副本」。ISR 会因副本落后而收缩：若只剩 leader，acks=all 就退化成 acks=1。 所以只写 acks=all、不配 min.insync.replicas 是纸糊的持久性保证。 C 错（非副本不参与）；A 错（不是全部 RF）；D 错（ISR 完整时两者差异巨大）。"
+        },
+        {
+          "id": "q1",
+          "stem": "`replication.factor=3`、`acks=all` 已配置。若 `min.insync.replicas` 仍为默认值 1， 当前 ISR 收缩到只有 leader 一个副本。此时最可能发生的是？",
+          "title": "min.insync.replicas 与 acks=all 的关系",
+          "options": [
+            {
+              "key": "A",
+              "text": "写入被拒绝"
+            },
+            {
+              "key": "B",
+              "text": "写入成功但已无保护"
+            },
+            {
+              "key": "C",
+              "text": "自动恢复 ISR"
+            },
+            {
+              "key": "D",
+              "text": "自动降级并警告"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "min.insync.replicas 是写入准入条件：ISR 大小 < 它时拒写。 默认值为 1，所以在 ISR=1 时 1 >= 1 成立 → 照常写入，只是此时的 acks=all 等同于 acks=1。 这不是自动降级（Kafka 不打印这种警告，也不会自动改配置），而是配置组合本身的漏洞。 修正方式是把 min.insync.replicas 设为 2（3 副本场景），此时 ISR=1 会直接拒写。"
+        },
+        {
+          "id": "q3",
+          "stem": "某 Topic 有 6 个分区，某个消费者组已有 8 个消费者实例。下列说法正确的是？",
+          "title": "消费者数超过分区数会发生什么",
+          "options": [
+            {
+              "key": "A",
+              "text": "分区可被多消费者共享"
+            },
+            {
+              "key": "B",
+              "text": "2 个空闲但仍是成员"
+            },
+            {
+              "key": "C",
+              "text": "多出的被踢出组"
+            },
+            {
+              "key": "D",
+              "text": "吞吐线性增长到 8 倍"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "Kafka 的核心不变式是「一个分区在同一时刻只能被组内一个消费者消费」， 因此并行度上限 = min(消费者数, 分区数) = 6。多出的 2 个消费者没有分区可分， 但它们仍是组成员（心跳正常、会参与 rebalance），只是 poll() 永远返回空。 A 违反不变式；C 错（空闲不等于死亡）；D 错（吞吐被分区数封顶）。"
+        },
+        {
+          "id": "q5",
+          "stem": "开启 `enable.idempotence=true` 后，关于它**能**与**不能**解决的问题，正确的是？",
+          "title": "enable.idempotence 的能力边界",
+          "options": [
+            {
+              "key": "A",
+              "text": "防消费重复，不防生产重试"
+            },
+            {
+              "key": "B",
+              "text": "防同分区重试重复，不防跨会话/跨分区"
+            },
+            {
+              "key": "C",
+              "text": "能全局去重，不保证顺序"
+            },
+            {
+              "key": "D",
+              "text": "保证 exactly-once，不保证 acks"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "幂等生产者用 (PID, 分区, 序列号) 三元组在 broker 端去重，所以它的作用域是 单分区 + 单会话：分区不同则去重域不同；生产者重启后 PID 变化、去重状态不延续。 A 错（它是生产端机制，与消费者重复无关）；C 错（跨分区不生效）； D 错（幂等会自动把 acks 提升为 all，且 exactly-once 还需要事务，幂等本身不够）。 补充：开启幂等后 Kafka 会把 max.in.flight.requests.per.connection 限制在 5 以保证顺序。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "java",
+      "file": "01-producer-partitioning-and-batching.md",
+      "code": "Properties p = new Properties();\np.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, \"localhost:9092\");\np.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);\np.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);\n\n// 攒批三件套\np.put(ProducerConfig.BATCH_SIZE_CONFIG, 32 * 1024);   // 单批上限 32KB\np.put(ProducerConfig.LINGER_MS_CONFIG, 5);            // 最多等 5ms 凑批\np.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, \"lz4\"); // 压缩在批级别生效\n\n// 可靠性：等 ISR 全部确认；幂等开启后 acks 会被自动提到 all\np.put(ProducerConfig.ACKS_CONFIG, \"all\");\np.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);\n\ntry (KafkaProducer<String, String> producer = new KafkaProducer<>(p)) {\n    for (int i = 0; i < 100_000; i++) {\n        // 同一个 key 必落同一分区 → 该 key 内顺序有保证\n        producer.send(new ProducerRecord<>(\"orders\", \"k\" + (i % 8), \"v\" + i),\n                      (md, ex) -> { if (ex != null) log.‹1›(\"send failed\", ex); });\n    }\n    producer.flush();   // 不 flush 直接 close，累加器里未发完的批会被丢弃\n}",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "error",
+          "line": 19
+        }
+      ],
+      "distractors": [
+        "extends",
+        "find"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}

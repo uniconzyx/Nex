@@ -1,0 +1,105 @@
+{
+  "chapter": "cpp-ch12",
+  "subject": "cpp",
+  "title": "现代 C++ 特性：auto / 移动语义 / 范围 for / emplace",
+  "fingerprint": "b8f0d516d2",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "auto / auto& / const auto& 的推导差异（issamev …",
+      "body": "auto 按值默默拷贝大对象"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "auto 推导会保留什么",
+      "body": "cpp-ch12 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "auto 按值默默拷贝大对象",
+          "right": "遍历大对象用 const auto&/auto&，只读不拷贝。"
+        },
+        {
+          "id": 2,
+          "left": "移动后误读对象内容",
+          "right": "移动后只重新赋值/析构，不假设其值为空或原值。"
+        },
+        {
+          "id": 3,
+          "left": "emplace 意外命中 initializerlist",
+          "right": "歧义时显式构造再传，或用 v.pushback(T{1,2})。"
+        },
+        {
+          "id": 4,
+          "left": "结构化绑定的值类别陷阱",
+          "right": "需修改元素绑定到引用。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "对于 `int n = 0; int& r = n; const int c = 1;`，下列哪项正确？",
+          "title": "auto 推导会保留什么",
+          "options": [
+            {
+              "key": "A",
+              "text": "auto a = r; 之后 a 是 int&"
+            },
+            {
+              "key": "B",
+              "text": "auto b = c; 之后 b 是 const int"
+            },
+            {
+              "key": "C",
+              "text": "auto& x = r; 之后 x 是 int&（引用被保留）"
+            },
+            {
+              "key": "D",
+              "text": "decltype(auto) y = r; 会丢失引用、得到 int 副本"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "auto 按值推导会丢弃引用与顶层 const，所以 a/b 都是 int；auto& 保留引用，x 是 int&；decltype(auto) 用 decltype 规则，会完整保留引用（y 是 int&）。见 concept/01 与 ex02、ex03。"
+        },
+        {
+          "id": "q3",
+          "stem": "关于范围 for，哪项正确？",
+          "title": "范围 for 中等价展开与迭代器失效",
+          "options": [
+            {
+              "key": "A",
+              "text": "每次判断都重新调用 end()"
+            },
+            {
+              "key": "B",
+              "text": "循环体里 pushback 总是安全的"
+            },
+            {
+              "key": "C",
+              "text": "range 绑定到 auto&&，end 只求值一次"
+            },
+            {
+              "key": "D",
+              "text": "只能用于数组"
+            }
+          ],
+          "correct": [
+            "C"
+          ],
+          "explain": "范围 for 等价于 auto&& range = range; for (auto b=begin,e=end; b!=e; ++b)，end 只算一次。因此在循环内增删 vector 会令已持有的迭代器失效（UB）。删除应改用迭代器循环 + erase 返回值（见 concept/03、ex07）。"
+        }
+      ]
+    }
+  ]
+}

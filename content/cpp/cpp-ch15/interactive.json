@@ -1,0 +1,97 @@
+{
+  "chapter": "cpp-ch15",
+  "subject": "cpp",
+  "title": "命名空间与模块化：namespace / inline namespace / C++20 模块",
+  "fingerprint": "5eb1792cb2",
+  "scenario": {
+    "work": {
+      "tag": "工作现场",
+      "head": "命名空间嵌套与 using 声明",
+      "body": "头文件里写 using namespace std;"
+    },
+    "exam": {
+      "tag": "考场视角",
+      "head": "关于命名空间与 ADL，正确的是",
+      "body": "cpp-ch15 · 本章真题口径"
+    }
+  },
+  "modules": [
+    {
+      "kind": "match",
+      "pairs": [
+        {
+          "id": 1,
+          "left": "头文件里写 using namespace std;",
+          "right": "头文件用完整限定名 std::，using 只放源文件或函数内部。"
+        },
+        {
+          "id": 2,
+          "left": "把类型定义在匿名命名空间里放头文件",
+          "right": "匿名命名空间只用于源文件的内部实现，头文件里别用。"
+        },
+        {
+          "id": 3,
+          "left": "头文件里定义非 inline 函数或全局变量",
+          "right": "头文件只放声明，定义放源文件或用 inline。"
+        },
+        {
+          "id": 4,
+          "left": "自定义运算符放错命名空间",
+          "right": "运算符重载与类型放在同一命名空间。"
+        }
+      ],
+      "tip": "左边是线上真出事的写法，右边是正确做法。一对一连上才算过。"
+    },
+    {
+      "kind": "boss",
+      "questions": [
+        {
+          "id": "q0",
+          "stem": "选择**正确**的描述。",
+          "title": "关于命名空间与 ADL，正确的是",
+          "options": [
+            {
+              "key": "A",
+              "text": "命名空间改变符号的外部链接属性"
+            },
+            {
+              "key": "B",
+              "text": "函数调用实参为用户自定义类型时，编译器会把该类型所在命名空间也纳入候选（ADL）"
+            },
+            {
+              "key": "C",
+              "text": "匿名命名空间的符号具有外部链接，可跨翻译单元共享"
+            },
+            {
+              "key": "D",
+              "text": "头文件中写 using namespace std; 是推荐做法"
+            }
+          ],
+          "correct": [
+            "B"
+          ],
+          "explain": "ADL 会依据实参类型把对应命名空间拉入候选集；命名空间本身不改变链接（匿名除外）；匿名命名空间是内部链接；头文件禁用 using namespace。"
+        }
+      ]
+    },
+    {
+      "kind": "fill",
+      "lang": "cpp",
+      "file": "03-inline-namespace.md",
+      "code": "#include <iostream>\nnamespace mylib {\n    ‹1› namespace v2 { const char* who() { return \"v2\"; } }\n    namespace v1       { const char* who() { return \"v1\"; } }\n}\nint main() {\n    std::cout << mylib::who() << ' ' << mylib::v1::who() << '\\n';\n}",
+      "marker": "‹%n›",
+      "blanks": [
+        {
+          "id": "b1",
+          "answer": "inline",
+          "line": 3
+        }
+      ],
+      "distractors": [
+        "stdexcept",
+        "temp"
+      ],
+      "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
+    }
+  ]
+}
