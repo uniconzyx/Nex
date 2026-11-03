@@ -2,7 +2,7 @@
   "chapter": "fund-ch09",
   "subject": "fundamentals",
   "title": "操作系统：进程、线程与调度",
-  "fingerprint": "0120092ff2",
+  "fingerprint": "81bb6f982e",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,73 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "时间片切多大才不浪费",
+      "brief": "q 不是 s 的因数时，最后一轮只跑半格；q 太小时轮数变多、周转时间跟着涨。拖三个旋钮。",
+      "params": [
+        {
+          "key": "q",
+          "label": "时间片 q",
+          "min": 1,
+          "max": 8,
+          "step": 1,
+          "value": 3,
+          "unit": "格"
+        },
+        {
+          "key": "s",
+          "label": "每进程服务时间 s",
+          "min": 4,
+          "max": 16,
+          "step": 2,
+          "value": 8,
+          "unit": "格"
+        },
+        {
+          "key": "n",
+          "label": "进程数",
+          "min": 2,
+          "max": 10,
+          "step": 1,
+          "value": 5
+        }
+      ],
+      "metrics": [
+        {
+          "key": "rounds",
+          "label": "轮数",
+          "expr": "ceil(s / q)",
+          "unit": "轮",
+          "fmt": "int"
+        },
+        {
+          "key": "wastePct",
+          "label": "时间片浪费",
+          "expr": "(ceil(s / q) * q - s) / s * 100",
+          "unit": "%",
+          "fmt": "int"
+        },
+        {
+          "key": "avgTurn",
+          "label": "平均周转",
+          "expr": "n * q * (ceil(s / q) - 1) + q * (n + 1) / 2",
+          "unit": "格",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "wastePct == 0",
+          "label": "时间片没有浪费（q 正好整除 s）"
+        },
+        {
+          "expr": "avgTurn <= 40",
+          "label": "平均周转压在 40 格以内"
+        }
+      ],
+      "insight": "平均周转 = n·q·(k−1) + q(n+1)/2，k 是每个进程的轮数。q 不能整除 s 时每轮都白扔一截；q 太小时 k 变大，切换开销和周转时间一起涨。真实系统取 10~100ms，就是为了让绝大多数进程在一两个片内跑完。"
+    },
     {
       "kind": "match",
       "pairs": [

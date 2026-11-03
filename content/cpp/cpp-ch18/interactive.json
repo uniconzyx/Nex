@@ -2,7 +2,7 @@
   "chapter": "cpp-ch18",
   "subject": "cpp",
   "title": "性能与底层：内存对齐、缓存友好与内联",
-  "fingerprint": "e869cc1176",
+  "fingerprint": "7a38bfea36",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,60 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "只改声明顺序，对象从 24 字节降到 16",
+      "brief": "64 位下三种字段顺序，同样的成员、不同的 sizeof。拖到最紧凑的那一版。",
+      "params": [
+        {
+          "key": "layout",
+          "label": "字段顺序",
+          "min": 0,
+          "max": 2,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "char, int, char, double",
+            "double, int, char, char",
+            "char, char, int, double"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "size",
+          "label": "sizeof",
+          "expr": "if(layout == 0, 24, 16)",
+          "unit": "字节",
+          "fmt": "int"
+        },
+        {
+          "key": "waste",
+          "label": "填充字节",
+          "expr": "if(layout == 0, 24, 16) - 14",
+          "unit": "字节",
+          "fmt": "int"
+        },
+        {
+          "key": "perMB",
+          "label": "每 MB 能放",
+          "expr": "1048576 / (if(layout == 0, 24, 16))",
+          "unit": "个",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "size == 16",
+          "label": "对象压到 16 字节"
+        },
+        {
+          "expr": "waste <= 2",
+          "label": "填充不超过 2 字节"
+        }
+      ],
+      "insight": "成员按“由大到小”排，填充最少：填充只发生在“下一个成员塞不进当前空洞”的时候。百万个对象，8 字节 × 100 万 = 8MB 内存，还有成片被打断的缓存行。"
+    },
     {
       "kind": "match",
       "pairs": [

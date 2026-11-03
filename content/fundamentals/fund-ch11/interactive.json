@@ -2,7 +2,7 @@
   "chapter": "fund-ch11",
   "subject": "fundamentals",
   "title": "计算机网络：分层模型与 TCP/IP",
-  "fingerprint": "5ba0759725",
+  "fingerprint": "a022b96d21",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,65 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "窗口小了，带宽白给",
+      "brief": "吞吐 ≤ 窗口 / RTT。链路再快，窗口不够也跑不满。拖窗口与 RTT，看吞吐卡在哪。",
+      "params": [
+        {
+          "key": "rtt",
+          "label": "往返时延 RTT",
+          "min": 10,
+          "max": 200,
+          "step": 10,
+          "value": 50,
+          "unit": "ms"
+        },
+        {
+          "key": "winKB",
+          "label": "接收窗口",
+          "min": 16,
+          "max": 1024,
+          "step": 16,
+          "value": 64,
+          "unit": "KB"
+        }
+      ],
+      "metrics": [
+        {
+          "key": "mbps",
+          "label": "吞吐上限",
+          "expr": "winKB * 8.192 / rtt",
+          "unit": "Mbps",
+          "fmt": "fix2"
+        },
+        {
+          "key": "needKB",
+          "label": "跑满百兆需要",
+          "expr": "100 * rtt / 8.192",
+          "unit": "KB",
+          "fmt": "int"
+        },
+        {
+          "key": "ratio",
+          "label": "占百兆链路的比例",
+          "expr": "winKB * 8.192 / rtt",
+          "unit": "%",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "mbps >= 100",
+          "label": "吞吐至少 100Mbps"
+        },
+        {
+          "expr": "winKB <= 256",
+          "label": "窗口不超过 256KB"
+        }
+      ],
+      "insight": "100Mbps 链路上 RTT 50ms，要跑满得 610KB 窗口，而经典 TCP 窗口上限是 64KB —— 所以长肥管道必须开窗口扩大（RFC 1323）。带宽时延积 BDP 就是“在途数据量”，窗口小于它，链路就是空转。"
+    },
     {
       "kind": "match",
       "pairs": [

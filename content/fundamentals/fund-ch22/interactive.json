@@ -2,7 +2,7 @@
   "chapter": "fund-ch22",
   "subject": "fundamentals",
   "title": "物理层",
-  "fingerprint": "cf94171ad6",
+  "fingerprint": "846ff857bc",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,73 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "30dB 的电话线能跑多快",
+      "brief": "奈奎斯特给“码元数”上限，香农给“信噪比”上限，实际速率取两者的小值。",
+      "params": [
+        {
+          "key": "bKHz",
+          "label": "带宽",
+          "min": 1,
+          "max": 20,
+          "step": 1,
+          "value": 4,
+          "unit": "kHz"
+        },
+        {
+          "key": "levels",
+          "label": "码元种类",
+          "min": 2,
+          "max": 64,
+          "step": 2,
+          "value": 16
+        },
+        {
+          "key": "snrDb",
+          "label": "信噪比",
+          "min": 0,
+          "max": 60,
+          "step": 5,
+          "value": 30,
+          "unit": "dB"
+        }
+      ],
+      "metrics": [
+        {
+          "key": "nyquist",
+          "label": "奈奎斯特上限",
+          "expr": "bKHz * 2 * log2(levels)",
+          "unit": "kbps",
+          "fmt": "fix2"
+        },
+        {
+          "key": "shannon",
+          "label": "香农上限",
+          "expr": "bKHz * log2(1 + pow(10, snrDb / 10))",
+          "unit": "kbps",
+          "fmt": "fix2"
+        },
+        {
+          "key": "realKbps",
+          "label": "实际可达",
+          "expr": "min(bKHz * 2 * log2(levels), bKHz * log2(1 + pow(10, snrDb / 10)))",
+          "unit": "kbps",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "realKbps >= 30",
+          "label": "实际速率至少 30kbps"
+        },
+        {
+          "expr": "realKbps == shannon",
+          "label": "而且此时卡在香农上限（不是奈奎斯特）"
+        }
+      ],
+      "insight": "4kHz 带宽 + 30dB 信噪比的香农极限约 40kbps —— 这就是 56k 猫要“借用”电话线没用上的高频段的原因。带宽和信噪比不够时，增加码元种类完全无效，那时候是奈奎斯特在管。"
+    },
     {
       "kind": "match",
       "pairs": [

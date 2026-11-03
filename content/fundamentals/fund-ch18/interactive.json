@@ -2,7 +2,7 @@
   "chapter": "fund-ch18",
   "subject": "fundamentals",
   "title": "并查集与字符串高级",
-  "fingerprint": "9623998d9f",
+  "fingerprint": "8ec65ea15b",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,72 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "并查集的两个优化各管一半",
+      "brief": "不优化时并查集能退化成一条链，find 是 O(n)；两个优化一起用才近似 O(1)。拖开关。",
+      "params": [
+        {
+          "key": "n",
+          "label": "元素个数",
+          "min": 1000,
+          "max": 1000000,
+          "step": 1000,
+          "value": 100000
+        },
+        {
+          "key": "compress",
+          "label": "路径压缩",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "不做",
+            "路径压缩"
+          ]
+        },
+        {
+          "key": "byRank",
+          "label": "合并策略",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "随便挂",
+            "按秩合并"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "worst",
+          "label": "最坏 find 步数",
+          "expr": "if(compress == 1 && byRank == 1, 4, if(compress == 1 || byRank == 1, log2(n), n))",
+          "unit": "步",
+          "fmt": "int"
+        },
+        {
+          "key": "total",
+          "label": "n 次 find 总步数",
+          "expr": "if(compress == 1 && byRank == 1, 4, if(compress == 1 || byRank == 1, log2(n), n)) * n",
+          "unit": "步",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "worst <= 5",
+          "label": "最坏情况 5 步以内查完"
+        },
+        {
+          "expr": "n >= 1000000",
+          "label": "而且规模要到百万"
+        }
+      ],
+      "insight": "只用其中一个：O(log n)；两个一起用：O(α(n))，α 是反阿克曼函数，10 亿个元素也只有 4。并查集“近似 O(1)”的前提，是两个优化都在。"
+    },
     {
       "kind": "match",
       "pairs": [

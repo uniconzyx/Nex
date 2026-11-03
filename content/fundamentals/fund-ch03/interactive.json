@@ -2,7 +2,7 @@
   "chapter": "fund-ch03",
   "subject": "fundamentals",
   "title": "树与二叉树",
-  "fingerprint": "4cfd21165c",
+  "fingerprint": "4de01a472d",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,62 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "5 层完全二叉树最少几个结点",
+      "brief": "高度 h 的完全二叉树，结点数落在 [2^(h-1), 2^h − 1]。拖结点数，看高度什么时候跳级。",
+      "params": [
+        {
+          "key": "n",
+          "label": "结点数",
+          "min": 1,
+          "max": 63,
+          "step": 1,
+          "value": 20
+        }
+      ],
+      "metrics": [
+        {
+          "key": "h",
+          "label": "高度",
+          "expr": "floor(log2(n)) + 1",
+          "unit": "层",
+          "fmt": "int"
+        },
+        {
+          "key": "minAtH",
+          "label": "该高度最少",
+          "expr": "pow(2, h - 1)",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "maxAtH",
+          "label": "该高度最多",
+          "expr": "pow(2, h) - 1",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "lastLevel",
+          "label": "最后一层结点",
+          "expr": "n - (pow(2, h - 1) - 1)",
+          "unit": "个",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "h == 5",
+          "label": "高度正好 5 层"
+        },
+        {
+          "expr": "lastLevel == 16",
+          "label": "最后一层满编 16 个"
+        }
+      ],
+      "insight": "高度 5 的完全二叉树，结点数只能落在 16~31；第 5 层从第 16 个结点开始排队。做 408 算结点数的题，先定高度、再定最后一层占几个 —— 顺序反了必错。"
+    },
     {
       "kind": "match",
       "pairs": [

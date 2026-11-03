@@ -2,7 +2,7 @@
   "chapter": "cpp-ch09",
   "subject": "cpp",
   "title": "STL 算法与迭代器：sort/find/lambda/范围",
-  "fingerprint": "bf2d237570",
+  "fingerprint": "4d3ad06d5c",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,48 @@
     }
   },
   "modules": [
+    {
+      "kind": "debug",
+      "title": "一边遍历一边 erase",
+      "lang": "cpp",
+      "file": "filter.cpp",
+      "symptom": "删掉所有偶数，结果只删掉一半；换到 Debug 版又在某些时刻崩。业务方的原话是“有时候删，有时候不删”。",
+      "code": "std::vector<int> v = {1, 2, 4, 6, 7, 8};\nfor (auto it = v.begin(); it != v.end(); ) {\n‹1›\n}\n// 期望 {1, 7}\n",
+      "marker": "‹%n›",
+      "slots": [
+        {
+          "id": "s1",
+          "hint": "用 erase 的返回值推进，别再 ++it"
+        }
+      ],
+      "blocks": [
+        {
+          "id": "b1",
+          "text": "    if (*it % 2 == 0) it = v.erase(it); else ++it;",
+          "for": "s1"
+        },
+        {
+          "id": "b2",
+          "text": "    if (*it % 2 == 0) v.erase(it);",
+          "for": "",
+          "why": "erase 之后 it 已失效，再拿它推进就是未定义行为 —— 这就是“有时候删有时候不删”的来源"
+        },
+        {
+          "id": "b3",
+          "text": "    if (*it % 2 == 0) { v.erase(it); --it; }",
+          "for": "",
+          "why": "对已经失效的迭代器做 --，行为完全不可预期"
+        },
+        {
+          "id": "b4",
+          "text": "    v.erase(std::remove_if(v.begin(), v.end(), [](int x) { return x % 2 == 0; }), v.end());",
+          "for": "",
+          "why": "写法本身没错，但它不是“循环体里的一句”：放进 for 里每轮都重置迭代器，等于死循环"
+        }
+      ],
+      "expect": "输出 1 7",
+      "pass": "erase 返回的是“下一个有效位置”。用返回值推进，而不是让循环头里的 ++it 去猜。"
+    },
     {
       "kind": "match",
       "pairs": [

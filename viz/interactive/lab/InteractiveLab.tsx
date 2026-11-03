@@ -34,7 +34,8 @@ import {
   useKaimao,
   Burst,
 } from '../mw-ch04/CacheDesignLab';
-import type { LabData, LabModule, DualScenario } from './types';
+import type { LabData, LabModule, DualScenario, SandboxModule, DebugModule } from './types';
+import { evalExpr, fmtNum } from './expr';
 
 /* ───────────────────────────── 小工具 ───────────────────────────── */
 
@@ -944,6 +945,489 @@ export const CodeFill: React.FC<FillProps> = ({ code, marker, blanks, distractor
   );
 };
 
+/* ═══════════════════════════ sandbox · 连续参数推演 ═══════════════════════════ */
+
+interface SandboxProps {
+  mod: SandboxModule;
+  seed: number;
+}
+
+/**
+ * 拖旋钮 → 三个指标实时重算 → 所有 checks 变绿才算通关。
+ *
+ * 关键取舍：指标不是写死的数字，而是 `expr` 表达式（见 ./expr.ts）。
+ * 这样一张表能同时服务「32 位 4KB 页」和「48 位 64KB 页」两种参数组合，
+ * 学生自己拖出来的反例才是真的反例，而不是作者编的。
+ */
+export const ParamSandbox: React.FC<SandboxProps> = ({ mod, seed }) => {
+  const [vals, setVals] = useState<Record<string, number>>(() =>
+    Object.fromEntries(mod.params.map((p) => [p.key, p.value])),
+  );
+  const [burstAt, setBurstAt] = useState(0);
+  const { line, say } = useKaimao(mod.brief);
+
+  const { metrics, checks, err } = useMemo(() => {
+    const env: Record<string, number> = { ...vals };
+    const ms: { key: string; label: string; unit?: string; fmt?: string; v: number }[] = [];
+    let e = '';
+    for (const m of mod.metrics) {
+      try {
+        const v = evalExpr(m.expr, env);
+        env[m.key] = v;
+        ms.push({ key: m.key, label: m.label, unit: m.unit, fmt: m.fmt, v });
+      } catch (x) {
+        e = (x as Error).message;
+        ms.push({ key: m.key, label: m.label, unit: m.unit, fmt: m.fmt, v: NaN });
+      }
+    }
+    const cs = mod.checks.map((c) => {
+      try {
+        return { label: c.label, ok: evalExpr(c.expr, env) !== 0 };
+      } catch (x) {
+        e = e || (x as Error).message;
+        return { label: c.label, ok: false };
+      }
+    });
+    return { metrics: ms, checks: cs, err: e };
+  }, [mod, vals]);
+
+  const okCount = checks.filter((c) => c.ok).length;
+  const passed = checks.length > 0 && okCount === checks.length;
+  const prevPassed = useRef(false);
+
+  useEffect(() => {
+    if (passed && !prevPassed.current) {
+      setBurstAt((x) => x + 1);
+      say('sb_pass', '这组参数达标了 —— 把边界再往两边拖一次，看看它从哪一格开始崩。',
+        '通关只是起点：真正记住的是「哪个参数一动，哪个指标就断崖」——考场问的就是这个断崖点。', 'ok');
+      // TODO: play sandbox_pass.mp3
+    }
+    prevPassed.current = passed;
+  }, [passed, say]);
+
+  return (
+    <div className="km-body" style={{ position: 'relative' }}>
+      <div style={glass({ padding: '10px 12px', marginBottom: 10, background: 'rgba(255,255,255,0.55)' })}>
+        <div style={{ fontSize: 12, color: C.mute, lineHeight: 1.65 }}>{mod.brief}</div>
+      </div>
+
+      {/* 旋钮 */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }} data-sandbox-params>
+        {mod.params.map((p) => {
+          const v = vals[p.key] ?? p.value;
+          const set = (nv: number) => {
+            setVals((prev) => ({ ...prev, [p.key]: nv }));
+            // TODO: play knob_tick.mp3
+          };
+          // 离散档位（顺序表/链表、三种布局）用分段按钮：滑块的 0/1/2 是裸数字，
+          // 用户得自己记"2 是哪一种"；「double,int,char,char」这种长标签塞进右侧
+          // 74px 还会溢出卡片外（实测 420px 下直接糊出边界）。
+          if (p.labels && p.labels.length >= 2) {
+            return (
+              <div key={p.key} data-param-row={p.key} style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 12, color: C.slate, marginBottom: 5 }}>{p.label}</div>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {p.labels.map((lb, i) => {
+                    const on = Math.abs(i - v) < 1e-9;
+                    return (
+                      <motion.button
+                        key={lb}
+                        type="button"
+                        whileTap={TAP}
+                        onClick={() => set(i)}
+                        data-param-opt={i}
+                        data-param-on={on ? '1' : '0'}
+                        animate={{
+                          backgroundColor: on ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.42)',
+                          borderColor: on ? C.iceDeep : 'rgba(255,255,255,0.7)',
+                        }}
+                        transition={SPRING}
+                        style={{
+                          border: '1px solid rgba(255,255,255,0.7)',
+                          borderRadius: 9,
+                          padding: '5px 10px',
+                          fontSize: 11.5,
+                          fontFamily: MONO,
+                          color: on ? C.iceDeep : C.mute,
+                          cursor: 'pointer',
+                          maxWidth: '100%',
+                          overflowWrap: 'anywhere',
+                          textAlign: 'left',
+                        }}
+                      >
+                        {lb}
+                      </motion.button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          }
+          return (
+            <div
+              key={p.key}
+              data-param-row={p.key}
+              style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}
+            >
+              <span style={{ fontSize: 12, color: C.slate, flex: '0 0 96px', minWidth: 0 }}>{p.label}</span>
+              <input
+                type="range"
+                min={p.min}
+                max={p.max}
+                step={p.step}
+                value={v}
+                aria-label={p.label}
+                data-param={p.key}
+                onChange={(ev) => set(Number(ev.target.value))}
+                style={{ flex: '1 1 auto', minWidth: 0, accentColor: C.iceDeep, cursor: 'pointer' }}
+              />
+              <span
+                data-param-val={p.key}
+                style={{
+                  fontFamily: MONO,
+                  fontSize: 12,
+                  color: C.iceDeep,
+                  flex: '0 0 74px',
+                  textAlign: 'right',
+                  overflowWrap: 'anywhere',
+                }}
+              >
+                {v}
+                {p.unit ? ` ${p.unit}` : ''}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* 指标 */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginTop: 12 }} data-sandbox-metrics>
+        {metrics.map((m) => (
+          <div
+            key={m.key}
+            style={glass({ padding: '7px 11px', flex: '1 1 116px', minWidth: 0, background: 'rgba(255,255,255,0.66)' })}
+          >
+            <div style={{ fontSize: 10.5, color: C.mute, marginBottom: 2 }}>{m.label}</div>
+            <div style={{ fontFamily: MONO, fontSize: 15, fontWeight: 600, color: C.slate, overflowWrap: 'anywhere' }}>
+              {fmtNum(m.v, m.fmt as 'int' | 'fix2' | 'pct' | undefined)}
+              {m.unit && <span style={{ fontSize: 10.5, color: C.mute, marginLeft: 3 }}>{m.unit}</span>}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* 判据 */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginTop: 10 }} data-sandbox-checks>
+        {checks.map((c, i) => (
+          <motion.div
+            key={i}
+            animate={{ borderColor: c.ok ? C.mint : 'rgba(255,255,255,0.75)' }}
+            transition={SPRING}
+            style={glass({
+              padding: '6px 10px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              border: `1px solid ${c.ok ? C.mint : 'rgba(255,255,255,0.75)'}`,
+              background: c.ok ? 'rgba(49,208,170,0.10)' : 'rgba(255,255,255,0.5)',
+            })}
+          >
+            <span style={{ fontSize: 12, color: c.ok ? C.mintDeep : C.mute, flex: '0 0 14px' }}>{c.ok ? '✓' : '○'}</span>
+            <span style={{ fontSize: 12, lineHeight: 1.5, color: c.ok ? C.mintDeep : C.slate, minWidth: 0 }}>
+              {c.label}
+            </span>
+          </motion.div>
+        ))}
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginTop: 11, flexWrap: 'wrap' }}>
+        <span style={{ fontFamily: MONO, fontSize: 11.5, color: passed ? C.mintDeep : C.mute }} data-sandbox-score>
+          {okCount} / {checks.length} 达标
+        </span>
+        <motion.button
+          type="button"
+          whileTap={TAP}
+          data-sandbox-reset
+          onClick={() => setVals(Object.fromEntries(mod.params.map((p) => [p.key, p.value])))}
+          style={{
+            border: `1px solid ${C.iceSoft}`,
+            background: 'rgba(255,255,255,0.7)',
+            borderRadius: 9,
+            padding: '5px 12px',
+            fontSize: 11.5,
+            color: C.iceDeep,
+            cursor: 'pointer',
+            fontFamily: SANS,
+          }}
+        >
+          复位
+        </motion.button>
+        {passed && <span style={{ fontSize: 12.5, fontWeight: 600, color: C.mintDeep }}>✓ 通关</span>}
+        {err && <span style={{ fontSize: 11, color: C.coralDeep }}>公式错误：{err}</span>}
+        <Burst play={burstAt} color={C.mint} />
+      </div>
+
+      {passed && (
+        <div className="km-tail">
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={SPRING}
+            style={{
+              ...glass({ marginTop: 9, padding: '10px 12px', borderLeft: `3px solid ${C.mint}` }),
+              fontSize: 12.5,
+              lineHeight: 1.7,
+              color: C.slate,
+            }}
+            data-sandbox-insight
+          >
+            {mod.insight}
+          </motion.div>
+        </div>
+      )}
+
+      <KaimaoBubble line={line} />
+    </div>
+  );
+};
+
+/* ═══════════════════════════ debug · 代码块拼装 ═══════════════════════════ */
+
+interface DebugProps {
+  mod: DebugModule;
+  seed: number;
+}
+
+/**
+ * 骨架里留 N 个整行空位，把托盘里的代码块拖进去。
+ *
+ * 和 fill 的区别：fill 挖的是「标识符」（拼写题），debug 补的是「整条语句」
+ * （因果关系题）—— 所以每个错块都带自己的 `why`，落错时说的是
+ * 「这块是修内存泄漏的，不是修并发」而不是笼统的"不对"。
+ */
+export const BlockAssemble: React.FC<DebugProps> = ({ mod, seed }) => {
+  const [placed, setPlaced] = useState<Record<string, string>>({}); // slotId -> blockId
+  const [wrongAt, setWrongAt] = useState<string | null>(null);
+  const [burstAt, setBurstAt] = useState(0);
+  const { line, say } = useKaimao(mod.symptom);
+
+  const slots = useRef<Record<string, HTMLElement | null>>({});
+  const slotIds = mod.slots.map((s) => s.id);
+  const blocks = useMemo(() => shuffleSeeded(mod.blocks, seed), [mod.blocks, seed]);
+
+  const okOf = (slot: string) => {
+    const bid = placed[slot];
+    if (!bid) return false;
+    return mod.blocks.find((b) => b.id === bid)?.for === slot;
+  };
+  const used = new Set(Object.values(placed));
+  const free = blocks.filter((b) => !used.has(b.id));
+  const allOk = mod.slots.every((s) => okOf(s.id));
+
+  useEffect(() => {
+    if (!allOk || !mod.slots.length) return;
+    setBurstAt((x) => x + 1);
+    say('dbg_pass', mod.pass, '排查顺序永远是「先复现症状 → 再定位那一条语句 → 最后才谈优化」，跳步就会改错地方。', 'ok');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allOk]);
+
+  const onDrop = (blk: { id: string; text: string; for: string; why?: string }) => (_: unknown, info: PanInfo) => {
+    const k = hitTest(slots, info.point, slotIds);
+    if (!k) {
+      say('dbg_miss', '没落在空位上，再拖一次。', '落点按松手时的指针位置算 —— 对准那一整行虚线框再松手。', 'idle');
+      return;
+    }
+    if (blk.for === k) {
+      setPlaced((p) => {
+        // 槽位已被占：把原来的块换出来（不然两个块抢一个位，托盘会空但缺口还在）
+        const next = { ...p };
+        for (const s of Object.keys(next)) if (next[s] === blk.id) delete next[s];
+        next[k] = blk.id;
+        return next;
+      });
+      setWrongAt(null);
+      // TODO: play block_snap.mp3
+    } else {
+      setWrongAt(k);
+      window.setTimeout(() => setWrongAt(null), 560);
+      say('dbg_bad', blk.why || '这块放到这里不对。', '看这一行前后在做什么：谁产出、谁消费，缺的那句自然就定下来了。', 'warn');
+      // TODO: play block_err.mp3
+    }
+  };
+
+  const lines = mod.code.split('\n');
+
+  return (
+    <div className="km-body" style={{ position: 'relative' }}>
+      <div
+        style={glass({
+          padding: '10px 12px',
+          marginBottom: 9,
+          borderLeft: `3px solid ${C.coral}`,
+          background: 'rgba(248,113,113,0.07)',
+        })}
+        data-debug-symptom
+      >
+        <div style={{ fontSize: 10.5, color: C.coralDeep, letterSpacing: 0.4, marginBottom: 2 }}>线上症状</div>
+        <div style={{ fontSize: 12.5, lineHeight: 1.65, color: C.slate }}>{mod.symptom}</div>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 7, flexWrap: 'wrap' }}>
+        <span
+          style={{
+            fontFamily: MONO,
+            fontSize: 10.5,
+            color: C.iceDeep,
+            border: `1px solid ${C.iceSoft}`,
+            borderRadius: 4,
+            padding: '0 5px',
+          }}
+        >
+          {mod.lang}
+        </span>
+        {mod.file && <span style={{ fontSize: 11, color: C.mute, minWidth: 0, overflowWrap: 'anywhere' }}>{mod.file}</span>}
+        <span style={{ flex: 1 }} />
+        <span style={{ fontFamily: MONO, fontSize: 11, color: allOk ? C.mintDeep : C.mute }} data-debug-progress>
+          {mod.slots.filter((s) => okOf(s.id)).length} / {mod.slots.length}
+        </span>
+      </div>
+
+      <div
+        style={glass({
+          padding: '11px 13px',
+          background: 'rgba(28,42,56,0.94)',
+          border: '1px solid rgba(255,255,255,0.16)',
+          overflowX: 'auto',
+          overflowY: 'auto',
+          maxHeight: 380,
+        })}
+        className="km-scroll"
+      >
+        <pre style={{ margin: 0, fontFamily: MONO, fontSize: 12, lineHeight: 1.75, color: '#DDEBF6' }}>
+          {lines.map((ln, li) => (
+            <div key={li} style={{ display: 'flex', gap: 10 }}>
+              <span style={{ color: 'rgba(160,200,230,0.35)', flex: '0 0 22px', textAlign: 'right', userSelect: 'none' }}>
+                {li + 1}
+              </span>
+              <span style={{ whiteSpace: 'pre-wrap', flex: 1, minWidth: 0 }}>
+                {splitMarker(ln, mod.marker).map((seg, si) => {
+                  if (seg.n === undefined) return <span key={si}>{seg.text}</span>;
+                  const sid = mod.slots[seg.n - 1]?.id;
+                  if (!sid) return <span key={si}>{seg.text}</span>;
+                  const bid = placed[sid];
+                  const blk = bid ? mod.blocks.find((b) => b.id === bid) : undefined;
+                  const good = !!blk && blk.for === sid;
+                  const bad = wrongAt === sid;
+                  return (
+                    <motion.span
+                      key={si}
+                      ref={(el) => {
+                        slots.current[sid] = el as HTMLElement | null;
+                      }}
+                      data-slot={sid}
+                      data-slot-ok={good ? '1' : '0'}
+                      title={mod.slots[seg.n - 1]?.hint}
+                      animate={bad ? { x: [0, -6, 6, -3, 0] } : { x: 0 }}
+                      transition={{ duration: 0.3 }}
+                      onClick={() => {
+                        if (!bid) return;
+                        setPlaced((p) => {
+                          const n = { ...p };
+                          delete n[sid];
+                          return n;
+                        });
+                      }}
+                      style={{
+                        display: 'inline-block',
+                        width: '100%',
+                        minWidth: 120,
+                        padding: '1px 8px',
+                        borderRadius: 6,
+                        border: `1.5px ${good ? 'solid' : 'dashed'} ${bad ? C.coral : good ? C.mint : 'rgba(140,200,255,0.55)'}`,
+                        background: bad
+                          ? 'rgba(248,113,113,0.20)'
+                          : good
+                            ? 'rgba(49,208,170,0.16)'
+                            : 'rgba(140,200,255,0.08)',
+                        color: good ? '#8EF0D2' : 'rgba(200,228,245,0.55)',
+                        fontStyle: blk ? 'normal' : 'italic',
+                        cursor: blk ? 'pointer' : 'default',
+                        whiteSpace: 'pre-wrap',
+                      }}
+                    >
+                      {blk ? blk.text : '␣ 拖一块代码到这里 ␣'}
+                    </motion.span>
+                  );
+                })}
+              </span>
+            </div>
+          ))}
+        </pre>
+      </div>
+
+      {free.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginTop: 10 }} data-blocks>
+          {free.map((b) => (
+            <motion.div
+              key={b.id}
+              drag
+              dragElastic={DRAG_ELASTIC}
+              dragSnapToOrigin
+              whileDrag={{ scale: 1.04, zIndex: 30, cursor: 'grabbing' }}
+              whileTap={TAP}
+              onDragEnd={onDrop(b)}
+              data-block={b.id}
+              style={{
+                ...glass({ padding: '5px 11px', cursor: 'grab', borderRadius: 8, maxWidth: 340 }),
+                fontFamily: MONO,
+                fontSize: 11.5,
+                lineHeight: 1.5,
+                color: C.iceDeep,
+                minWidth: 0,
+                overflowWrap: 'anywhere',
+              }}
+            >
+              {b.text}
+            </motion.div>
+          ))}
+        </div>
+      )}
+
+      {allOk && (
+        <div className="km-tail">
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={SPRING}
+            style={glass({ marginTop: 10, padding: '10px 12px', borderLeft: `3px solid ${C.mint}` })}
+            data-debug-expect
+          >
+            <div style={{ fontSize: 10.5, color: C.mintDeep, letterSpacing: 0.3, marginBottom: 4 }}>
+              编译通过 · 期望输出
+            </div>
+            <pre
+              style={{
+                margin: 0,
+                fontFamily: MONO,
+                fontSize: 11.5,
+                lineHeight: 1.7,
+                color: C.slate,
+                whiteSpace: 'pre-wrap',
+                overflowWrap: 'anywhere',
+              }}
+            >
+              {mod.expect}
+            </pre>
+          </motion.div>
+        </div>
+      )}
+
+      <Burst play={burstAt} color={C.mint} />
+      <KaimaoBubble line={line} />
+    </div>
+  );
+};
+
 /* ═══════════════════════════ 外壳 ═══════════════════════════ */
 
 /** lab 版最小样式：CacheDesignLab 的 GlobalStyle 只在自己的树上，这里补一份滚动条 */
@@ -955,6 +1439,15 @@ const LabStyle: React.FC = () => (
 .kmlab, .kmlab *{ box-sizing:border-box; }
 /* 同 CacheDesignLab/GlobalStyle：窄屏场景条换行后隐藏竖分隔线 */
 @media (max-width: 560px){ .kmlab .km-sb-div{ display:none } }
+/* 凯喵气泡是绝对定位的浮动层，窄屏下它会横跨大半个视口、盖住最后一排按钮。
+   所以模块根容器用 .km-body 预留底部空白：宽屏 56（一行气泡），窄屏 104（两行）。 */
+.kmlab .km-body{ padding-bottom: 56px; }
+@media (max-width: 760px){ .kmlab .km-body{ padding-bottom: 104px } }
+/* 凯喵气泡常驻右下（right:14 / maxWidth:330），最后一屏的结论框要给它让位，
+   否则通关那一下"结论被气泡压住半句"——正是最该看清的时刻。
+   窄屏气泡会浮在更下方，所以只在宽屏留这段空白。 */
+.kmlab .km-tail{ padding-right: 206px; }
+@media (max-width: 760px){ .kmlab .km-tail{ padding-right: 0 } }
 `}</style>
 );
 
@@ -1007,6 +1500,22 @@ const ModuleBody: React.FC<{ mod: LabModule; seed: number; sc?: DualScenario }> 
           tip={mod.tip}
           seed={seed}
         />
+      </>
+    );
+  }
+  if (mod.kind === 'sandbox') {
+    return (
+      <>
+        {scenario && <ScenarioBar work={scenario.work} exam={scenario.exam} />}
+        <ParamSandbox mod={mod} seed={seed} />
+      </>
+    );
+  }
+  if (mod.kind === 'debug') {
+    return (
+      <>
+        {scenario && <ScenarioBar work={scenario.work} exam={scenario.exam} />}
+        <BlockAssemble mod={mod} seed={seed} />
       </>
     );
   }

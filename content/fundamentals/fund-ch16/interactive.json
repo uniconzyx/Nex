@@ -2,7 +2,7 @@
   "chapter": "fund-ch16",
   "subject": "fundamentals",
   "title": "总线",
-  "fingerprint": "afeae9e99c",
+  "fingerprint": "0b8052fcdc",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,74 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "位宽 × 频率，还要扣开销",
+      "brief": "理论带宽 = 位宽/8 × 频率；实际还要乘上有效传输周期占比。拖三个旋钮。",
+      "params": [
+        {
+          "key": "width",
+          "label": "数据线宽度",
+          "min": 16,
+          "max": 128,
+          "step": 16,
+          "value": 32,
+          "unit": "bit"
+        },
+        {
+          "key": "mhz",
+          "label": "总线频率",
+          "min": 100,
+          "max": 3200,
+          "step": 100,
+          "value": 800,
+          "unit": "MHz"
+        },
+        {
+          "key": "eff",
+          "label": "有效周期占比",
+          "min": 50,
+          "max": 100,
+          "step": 10,
+          "value": 90,
+          "unit": "%"
+        }
+      ],
+      "metrics": [
+        {
+          "key": "theoryMBs",
+          "label": "理论带宽",
+          "expr": "width / 8 * mhz",
+          "unit": "MB/s",
+          "fmt": "int"
+        },
+        {
+          "key": "realMBs",
+          "label": "实际带宽",
+          "expr": "width / 8 * mhz * eff / 100",
+          "unit": "MB/s",
+          "fmt": "int"
+        },
+        {
+          "key": "perTransfer",
+          "label": "每次传输",
+          "expr": "width / 8",
+          "unit": "B",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "realMBs >= 4000",
+          "label": "实际带宽不低于 4000MB/s"
+        },
+        {
+          "expr": "width <= 64",
+          "label": "而且数据线不超过 64 位（别靠堆线宽硬凑）"
+        }
+      ],
+      "insight": "位宽翻倍、带宽翻倍，但要 64 根数据线加对应引脚，成本远高于翻倍；所以 DDR 走的是“一个时钟周期传两次”。算带宽题先问一句：这频率是总线时钟，还是数据传输率。"
+    },
     {
       "kind": "match",
       "pairs": [

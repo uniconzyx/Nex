@@ -2,7 +2,7 @@
   "chapter": "cpp-ch05",
   "subject": "cpp",
   "title": "类与对象：封装、构造/析构、拷贝与运算符重载",
-  "fingerprint": "0ff1538ddd",
+  "fingerprint": "8c97077ab4",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,80 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "一百万次调用里的拷贝",
+      "brief": "传值、const 引用、按值返回、出参引用 —— 同一段调用，四种写法各复制几次？拖动旋钮看总拷贝量。",
+      "params": [
+        {
+          "key": "n",
+          "label": "调用次数",
+          "min": 10000,
+          "max": 1000000,
+          "step": 10000,
+          "value": 100000,
+          "unit": "次"
+        },
+        {
+          "key": "pass",
+          "label": "传参方式",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "传值",
+            "const 引用"
+          ]
+        },
+        {
+          "key": "ret",
+          "label": "返回方式",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "按值返回",
+            "出参引用"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "copies",
+          "label": "拷贝构造次数",
+          "expr": "n * (if(pass == 0, 1, 0) + if(ret == 0, 1, 0))",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "bytes",
+          "label": "额外拷贝字节",
+          "expr": "n * (if(pass == 0, 1, 0) + if(ret == 0, 1, 0)) * 1024",
+          "unit": "字节",
+          "fmt": "int"
+        },
+        {
+          "key": "ms",
+          "label": "估算耗时",
+          "expr": "n * (if(pass == 0, 1, 0) + if(ret == 0, 1, 0)) * 0.00004",
+          "unit": "ms",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "copies == 0",
+          "label": "一次拷贝构造都不发生"
+        },
+        {
+          "expr": "n >= 1000000",
+          "label": "还得扛住一百万次调用"
+        }
+      ],
+      "insight": "按值传参 = 一次拷贝构造 + 一次析构；按值返回在关掉 NRVO 时还要再来一次。百万次调用就是百万次深拷贝。引用传参是零成本 —— 前提是你确实只读。"
+    },
     {
       "kind": "match",
       "pairs": [

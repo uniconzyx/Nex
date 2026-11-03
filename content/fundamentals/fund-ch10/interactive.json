@@ -2,7 +2,7 @@
   "chapter": "fund-ch10",
   "subject": "fundamentals",
   "title": "操作系统：内存管理、文件与 IO",
-  "fingerprint": "86e22cb570",
+  "fingerprint": "1c34c1bdba",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,81 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "一级页表为什么必须拆",
+      "brief": "32 位、4KB 页、4B 页表项：一个进程就是 4MB 页表，全常驻根本放不下。拖位宽与页大小看这张表。",
+      "params": [
+        {
+          "key": "bits",
+          "label": "虚拟地址位宽",
+          "min": 32,
+          "max": 48,
+          "step": 4,
+          "value": 40,
+          "unit": "bit"
+        },
+        {
+          "key": "pageKB",
+          "label": "页大小",
+          "min": 4,
+          "max": 64,
+          "step": 4,
+          "value": 4,
+          "unit": "KB"
+        },
+        {
+          "key": "entryB",
+          "label": "页表项大小",
+          "min": 4,
+          "max": 8,
+          "step": 4,
+          "value": 4,
+          "unit": "B"
+        }
+      ],
+      "metrics": [
+        {
+          "key": "pages",
+          "label": "页数",
+          "expr": "pow(2, bits) / (pageKB * 1024)",
+          "unit": "页",
+          "fmt": "int"
+        },
+        {
+          "key": "tableMB",
+          "label": "整张页表",
+          "expr": "pow(2, bits) / (pageKB * 1024) * entryB / 1048576",
+          "unit": "MB",
+          "fmt": "fix2"
+        },
+        {
+          "key": "levels",
+          "label": "最少级数",
+          "expr": "ceil(log(pow(2, bits) / (pageKB * 1024)) / log(pageKB * 1024 / entryB))",
+          "unit": "级",
+          "fmt": "int"
+        },
+        {
+          "key": "ptePerPage",
+          "label": "每页页表项",
+          "expr": "pageKB * 1024 / entryB",
+          "unit": "个",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "tableMB <= 4",
+          "label": "整张页表不超过 4MB"
+        },
+        {
+          "expr": "levels <= 2",
+          "label": "两级以内就能覆盖"
+        }
+      ],
+      "insight": "32 位 / 4KB 页 = 20 位页号，每页能放 1024 个页表项 = 10 位，所以正好两级、每级页表 4KB。多级页表不是为了更快，是为了让页表本身能按需换出。"
+    },
     {
       "kind": "match",
       "pairs": [

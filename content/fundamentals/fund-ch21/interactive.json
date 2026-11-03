@@ -2,7 +2,7 @@
   "chapter": "fund-ch21",
   "subject": "fundamentals",
   "title": "I/O 管理与磁盘",
-  "fingerprint": "453b4eb41e",
+  "fingerprint": "ff7e19dbc7",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,81 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "一次磁盘访问要多久",
+      "brief": "随机 I/O 的时间几乎全花在等磁头到位。拖寻道、转速与传输率，看单次访问和 IOPS。",
+      "params": [
+        {
+          "key": "seek",
+          "label": "平均寻道",
+          "min": 1,
+          "max": 20,
+          "step": 1,
+          "value": 5,
+          "unit": "ms"
+        },
+        {
+          "key": "rpm",
+          "label": "转速",
+          "min": 3600,
+          "max": 14400,
+          "step": 1800,
+          "value": 3600,
+          "unit": "rpm"
+        },
+        {
+          "key": "mbs",
+          "label": "持续传输率",
+          "min": 50,
+          "max": 500,
+          "step": 50,
+          "value": 200,
+          "unit": "MB/s"
+        }
+      ],
+      "metrics": [
+        {
+          "key": "rotMs",
+          "label": "平均旋转延迟",
+          "expr": "60000 / rpm / 2",
+          "unit": "ms",
+          "fmt": "fix2"
+        },
+        {
+          "key": "xferMs",
+          "label": "传输 4KB",
+          "expr": "4 / 1024 / mbs * 1000",
+          "unit": "ms",
+          "fmt": "fix2"
+        },
+        {
+          "key": "total",
+          "label": "单次随机读",
+          "expr": "seek + 60000 / rpm / 2 + 4 / 1024 / mbs * 1000",
+          "unit": "ms",
+          "fmt": "fix2"
+        },
+        {
+          "key": "iops",
+          "label": "IOPS",
+          "expr": "1000 / (seek + 60000 / rpm / 2 + 4 / 1024 / mbs * 1000)",
+          "unit": "次/秒",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "total <= 10",
+          "label": "单次随机读压在 10ms 内"
+        },
+        {
+          "expr": "iops >= 100",
+          "label": "IOPS 至少 100"
+        }
+      ],
+      "insight": "机械盘随机读那 8ms 里，7.98ms 是“等”——传输只占 0.02ms。所以数据库要 WAL 顺序化、OS 要预读、SSD 要有 FTL：全都在绕开“寻道 + 旋转”这两项。"
+    },
     {
       "kind": "boss",
       "questions": [

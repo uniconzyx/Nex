@@ -2,7 +2,7 @@
   "chapter": "cpp-ch06",
   "subject": "cpp",
   "title": "继承与多态：虚函数、抽象类与 RTTI",
-  "fingerprint": "a39dfcaec0",
+  "fingerprint": "686029f237",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,67 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "虚函数表到底占不占对象",
+      "brief": "加一个虚函数，对象会变大吗？加虚继承呢？拖两个旋钮，看 sizeof(Derived) 到底怎么变。",
+      "params": [
+        {
+          "key": "vfuncs",
+          "label": "虚函数个数",
+          "min": 0,
+          "max": 8,
+          "step": 1,
+          "value": 2
+        },
+        {
+          "key": "vbase",
+          "label": "继承方式",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "普通继承",
+            "虚继承 Base"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "objBytes",
+          "label": "sizeof(Derived)",
+          "expr": "8 + if(vfuncs > 0, 8, 0) + vbase * 8",
+          "unit": "字节",
+          "fmt": "int"
+        },
+        {
+          "key": "vtblEntries",
+          "label": "虚表条目",
+          "expr": "vfuncs",
+          "unit": "条",
+          "fmt": "int"
+        },
+        {
+          "key": "indirect",
+          "label": "每次调用额外跳转",
+          "expr": "if(vfuncs > 0, 2, 0)",
+          "unit": "次",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "objBytes == 16",
+          "label": "对象正好 16 字节（一个 int + 一个 vptr）"
+        },
+        {
+          "expr": "vtblEntries >= 3",
+          "label": "至少 3 个虚函数才够用"
+        }
+      ],
+      "insight": "对象里只放一个 vptr（8 字节），虚函数有多少个都写在同一张表里，对象不会变大；真正再加 8 字节的是虚继承（多一个虚基类指针）。所以“多态很贵”贵的不是对象大小，是间接跳转打断流水线。"
+    },
     {
       "kind": "match",
       "pairs": [

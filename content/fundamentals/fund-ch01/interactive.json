@@ -2,7 +2,7 @@
   "chapter": "fund-ch01",
   "subject": "fundamentals",
   "title": "数据结构 · 线性表与链表",
-  "fingerprint": "f2b2c29c61",
+  "fingerprint": "ef937af3c6",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,64 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "在第 i 个位置插入，谁更便宜",
+      "brief": "顺序表要搬后半段，链表要走到 i 的前驱。拖动位置和规模，看两种结构各付多少代价。",
+      "params": [
+        {
+          "key": "n",
+          "label": "元素个数",
+          "min": 1000,
+          "max": 100000,
+          "step": 1000,
+          "value": 10000
+        },
+        {
+          "key": "posPct",
+          "label": "插入位置",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "value": 50,
+          "unit": "%"
+        }
+      ],
+      "metrics": [
+        {
+          "key": "seqMoves",
+          "label": "顺序表搬移元素",
+          "expr": "n * (100 - posPct) / 100",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "listSteps",
+          "label": "链表步进结点",
+          "expr": "n * posPct / 100",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "listMemKB",
+          "label": "链表指针开销",
+          "expr": "n * 8 / 1024",
+          "unit": "KB",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "listSteps < seqMoves",
+          "label": "链表走的结点数少于顺序表搬移的元素数"
+        },
+        {
+          "expr": "posPct <= 15",
+          "label": "而且只在表头附近（前 15%）"
+        }
+      ],
+      "insight": "链表只在表头附近赢：走到第 i 个结点本身就是 O(i)，插入那一步 O(1) 根本不算钱。顺序表在表尾插入反而是 O(1)。所以“链表插入快”永远要补一句前提 —— 你已经在那个位置上了。"
+    },
     {
       "kind": "match",
       "pairs": [

@@ -2,7 +2,7 @@
   "chapter": "fund-ch06",
   "subject": "fundamentals",
   "title": "排序算法与复杂度分析",
-  "fingerprint": "d8d6bac2fd",
+  "fingerprint": "1e26345a14",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,72 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "百万数据要稳又要快",
+      "brief": "冒泡稳但 n²；快排快但不稳；堆排省空间也不稳。拖算法与规模，看比较次数和稳定性两栏怎么同时满足。",
+      "params": [
+        {
+          "key": "n",
+          "label": "元素个数",
+          "min": 1000,
+          "max": 1000000,
+          "step": 1000,
+          "value": 100000
+        },
+        {
+          "key": "algo",
+          "label": "算法",
+          "min": 0,
+          "max": 3,
+          "step": 1,
+          "value": 1,
+          "labels": [
+            "冒泡",
+            "快速排序",
+            "归并排序",
+            "堆排序"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "cmp",
+          "label": "比较次数",
+          "expr": "if(algo == 0, n * (n - 1) / 2, n * log2(n))",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "stable",
+          "label": "稳定",
+          "expr": "if(algo == 0 || algo == 2, 1, 0)",
+          "fmt": "int"
+        },
+        {
+          "key": "extraKB",
+          "label": "额外空间",
+          "expr": "if(algo == 2, n * 4 / 1024, 0)",
+          "unit": "KB",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "stable == 1",
+          "label": "必须是稳定排序"
+        },
+        {
+          "expr": "cmp <= 20000000",
+          "label": "比较次数压在两千万以内"
+        },
+        {
+          "expr": "n >= 1000000",
+          "label": "而且得撑住一百万条"
+        }
+      ],
+      "insight": "归并是唯一“稳定 + O(n log n)”的通用比较排序，代价是 O(n) 辅助空间；快排靠原地和常数小赢在工程上 —— 所以 std::sort 是内省快排、std::stable_sort 是归并。408 问“稳定且 O(n log n)”，答归并。"
+    },
     {
       "kind": "match",
       "pairs": [

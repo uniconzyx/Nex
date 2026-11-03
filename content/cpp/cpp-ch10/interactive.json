@@ -2,7 +2,7 @@
   "chapter": "cpp-ch10",
   "subject": "cpp",
   "title": "智能指针与 RAII：unique_ptr / shared_ptr / weak_ptr",
-  "fingerprint": "5f4db6d84a",
+  "fingerprint": "83d3e14be8",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,79 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "环形引用到底漏多少",
+      "brief": "两个对象互相用 shared_ptr 指着，引用计数永远到不了 0。加一条 weak_ptr 断环，看进程能回收多少。",
+      "params": [
+        {
+          "key": "nodes",
+          "label": "对象数",
+          "min": 10,
+          "max": 10000,
+          "step": 10,
+          "value": 1000,
+          "unit": "个"
+        },
+        {
+          "key": "cycle",
+          "label": "引用结构",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 1,
+          "labels": [
+            "无环",
+            "A↔B 互持"
+          ]
+        },
+        {
+          "key": "useWeak",
+          "label": "断环手段",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "shared 持环",
+            "weak 断环"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "leaked",
+          "label": "泄漏对象",
+          "expr": "cycle * (1 - useWeak) * nodes",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "leakedKB",
+          "label": "常驻内存",
+          "expr": "cycle * (1 - useWeak) * nodes * 48 / 1024",
+          "unit": "KB",
+          "fmt": "int"
+        },
+        {
+          "key": "refcntAtExit",
+          "label": "退出时引用计数",
+          "expr": "if(cycle * (1 - useWeak) > 0, 1, 0)",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "leaked == 0",
+          "label": "零泄漏"
+        },
+        {
+          "expr": "cycle == 1",
+          "label": "而且要真的存在环形引用（不能靠“本来就没环”蒙过去）"
+        }
+      ],
+      "insight": "shared_ptr 的计数只算强引用；weak_ptr 不参与计数，但能在对象死后安全探测。环上只要有一条边是 weak，计数就能降回 0。别指望“进程要退出了反正会回收”——长驻服务不退。"
+    },
     {
       "kind": "match",
       "pairs": [

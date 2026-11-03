@@ -2,7 +2,7 @@
   "chapter": "fund-ch13",
   "subject": "fundamentals",
   "title": "计算机系统概述",
-  "fingerprint": "be4ec3d41c",
+  "fingerprint": "9828f796a6",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,72 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "主频高就一定快吗",
+      "brief": "执行时间 = 指令数 × CPI / 主频。主频翻倍但 CPI 涨了，可能反而更慢。拖三个旋钮算总时间。",
+      "params": [
+        {
+          "key": "ghz",
+          "label": "主频",
+          "min": 1,
+          "max": 5,
+          "step": 0.5,
+          "value": 3,
+          "unit": "GHz"
+        },
+        {
+          "key": "cpi",
+          "label": "CPI",
+          "min": 1,
+          "max": 10,
+          "step": 1,
+          "value": 5
+        },
+        {
+          "key": "instrM",
+          "label": "指令数",
+          "min": 10,
+          "max": 1000,
+          "step": 10,
+          "value": 200,
+          "unit": "百万条"
+        }
+      ],
+      "metrics": [
+        {
+          "key": "ms",
+          "label": "执行时间",
+          "expr": "instrM * cpi / ghz",
+          "unit": "ms",
+          "fmt": "fix2"
+        },
+        {
+          "key": "mips",
+          "label": "MIPS",
+          "expr": "ghz * 1000 / cpi",
+          "fmt": "int"
+        },
+        {
+          "key": "cyclesM",
+          "label": "时钟周期",
+          "expr": "instrM * cpi",
+          "unit": "百万",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "ms <= 150",
+          "label": "总执行时间不超 150ms"
+        },
+        {
+          "expr": "mips >= 800",
+          "label": "MIPS 不低于 800"
+        }
+      ],
+      "insight": "主频只在分母，CPI 在分子：一段分支密集的代码 CPI 从 1.5 涨到 4.5，主频从 3G 提到 4G 还是亏。这就是流水线深度竞赛在 2005 年停下来的原因。"
+    },
     {
       "kind": "match",
       "pairs": [

@@ -86,7 +86,85 @@ export interface FillModule {
   scenario?: DualScenario;
 }
 
-export type LabModule = SequenceModule | MatchModule | BossModule | FillModule;
+/** 沙盒参数：一个可拖的旋钮 */
+export interface SandboxParam {
+  key: string;
+  label: string;
+  min: number;
+  max: number;
+  step: number;
+  value: number;
+  unit?: string;
+  /** 离散档位的文字名（如 0=顺序表 / 1=链表），有它就不显示裸数字 */
+  labels?: string[];
+}
+
+/** 沙盒指标：`expr` 里可引用参数与前面已算出的指标 key */
+export interface SandboxMetric {
+  key: string;
+  label: string;
+  expr: string;
+  unit?: string;
+  /** int = 取整显示；fix2 = 两位小数；默认按量级自动 */
+  fmt?: 'int' | 'fix2' | 'pct';
+}
+
+export interface SandboxCheck {
+  label: string;
+  /** 布尔表达式，全部为真即通关 */
+  expr: string;
+}
+
+export interface SandboxModule {
+  kind: 'sandbox';
+  title: string;
+  brief: string;
+  params: SandboxParam[];
+  metrics: SandboxMetric[];
+  checks: SandboxCheck[];
+  /** 通关后给的一句话（为什么这么调） */
+  insight: string;
+  scenario?: DualScenario;
+}
+
+/** 拼装块：`for` 指向唯一正确的槽位，错了用它自己的 why 说清是哪类 bug */
+export interface DebugBlock {
+  id: string;
+  text: string;
+  for: string;
+  why?: string;
+}
+
+export interface DebugSlot {
+  id: string;
+  hint: string;
+}
+
+export interface DebugModule {
+  kind: 'debug';
+  title: string;
+  lang: string;
+  file?: string;
+  /** 线上症状：先说清"出什么事"，才谈怎么补 */
+  symptom: string;
+  /** 骨架代码，缺口处写 ‹1› ‹2› */
+  code: string;
+  marker: string;
+  slots: DebugSlot[];
+  blocks: DebugBlock[];
+  /** 补全后应当看到的输出 */
+  expect: string;
+  pass: string;
+  scenario?: DualScenario;
+}
+
+export type LabModule =
+  | SequenceModule
+  | MatchModule
+  | BossModule
+  | FillModule
+  | SandboxModule
+  | DebugModule;
 
 export interface LabData {
   chapter: string;

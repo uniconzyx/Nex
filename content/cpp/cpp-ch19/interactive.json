@@ -2,7 +2,7 @@
   "chapter": "cpp-ch19",
   "subject": "cpp",
   "title": "工程化与测试：CMake、单元测试与 CI",
-  "fingerprint": "6f23089c4d",
+  "fingerprint": "029bc8e0a7",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,48 @@
     }
   },
   "modules": [
+    {
+      "kind": "debug",
+      "title": "add_library 之后还是 undefined reference",
+      "lang": "cmake",
+      "file": "CMakeLists.txt",
+      "symptom": "库编译通过、可执行文件编译通过，链接阶段一堆 undefined reference to 'common::parse()'。CMakeLists 看着“该加的加了”。",
+      "code": "add_library(common STATIC common.cpp)\nadd_executable(app main.cpp)\n\n‹1›\n",
+      "marker": "‹%n›",
+      "slots": [
+        {
+          "id": "s1",
+          "hint": "把 app 和 common 连起来"
+        }
+      ],
+      "blocks": [
+        {
+          "id": "b1",
+          "text": "target_link_libraries(app PRIVATE common)",
+          "for": "s1"
+        },
+        {
+          "id": "b2",
+          "text": "target_link_libraries(common PRIVATE app)",
+          "for": "",
+          "why": "方向反了：依赖是 app → common。写成 common 依赖 app，CMake 直接报错（不能链接可执行文件）"
+        },
+        {
+          "id": "b3",
+          "text": "include_directories(${CMAKE_SOURCE_DIR}/common)",
+          "for": "",
+          "why": "这只加头文件搜索路径，符号一个都没链上"
+        },
+        {
+          "id": "b4",
+          "text": "add_dependencies(app common)",
+          "for": "",
+          "why": "add_dependencies 只管构建顺序（保证先编 common），不传任何链接参数"
+        }
+      ],
+      "expect": "app 链接成功，common::parse() 能解析到符号",
+      "pass": "现代 CMake 里依赖是 target 之间的有向边：谁用谁，就从使用者指向被使用者，并且写明 PRIVATE / PUBLIC 作用域。"
+    },
     {
       "kind": "match",
       "pairs": [

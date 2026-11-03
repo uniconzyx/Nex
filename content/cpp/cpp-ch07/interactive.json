@@ -2,7 +2,7 @@
   "chapter": "cpp-ch07",
   "subject": "cpp",
   "title": "模板与泛型：函数模板、类模板与特化",
-  "fingerprint": "1dbde13e92",
+  "fingerprint": "f1e990968c",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,48 @@
     }
   },
   "modules": [
+    {
+      "kind": "debug",
+      "title": "undefined reference to Counter<int>::bump",
+      "lang": "cpp",
+      "file": "counter.h / counter.cpp",
+      "symptom": "模板在头文件里声明、实现写在 .cpp 里，主程序一调用就报 undefined reference to 'int Counter<int>::bump(int)'。编译期一句错都没有。",
+      "code": "// counter.h\n#pragma once\ntemplate <typename T>\nclass Counter {\npublic:\n    T bump(T v);\n};\n\n// counter.cpp\n#include \"counter.h\"\n\ntemplate <typename T>\nT Counter<T>::bump(T v) { return v + 1; }\n\n‹1›                       // main.cpp 要用 Counter<int>，这里还缺一句\n\n// main.cpp\n// Counter<int> c; c.bump(1);   // ← 链接期报错\n",
+      "marker": "‹%n›",
+      "slots": [
+        {
+          "id": "s1",
+          "hint": "让编译器为本 TU 生成 int 版本"
+        }
+      ],
+      "blocks": [
+        {
+          "id": "b1",
+          "text": "template class Counter<int>;",
+          "for": "s1"
+        },
+        {
+          "id": "b2",
+          "text": "extern template class Counter<int>;",
+          "for": "",
+          "why": "extern template 是反向声明“别在本 TU 实例化”，用它只会让符号更缺"
+        },
+        {
+          "id": "b3",
+          "text": "template <> T Counter<int>::bump(T v) { return v + 1; }",
+          "for": "",
+          "why": "这是全特化：T 已经没有归属，而且特化必须在首次隐式实例化之前声明"
+        },
+        {
+          "id": "b4",
+          "text": "#include \"main.cpp\"",
+          "for": "",
+          "why": "反过来包含使用方的源文件只会引入重复定义，治不了“模板实现没被实例化”"
+        }
+      ],
+      "expect": "Counter<int>{}.bump(1) 返回 2，链接通过",
+      "pass": "模板不是代码，是代码的图纸。图纸不给编译器看，就什么都不会生成。"
+    },
     {
       "kind": "match",
       "pairs": [

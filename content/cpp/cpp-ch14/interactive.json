@@ -2,7 +2,7 @@
   "chapter": "cpp-ch14",
   "subject": "cpp",
   "title": "预处理与宏：include/define/条件编译/头文件守卫",
-  "fingerprint": "05aded53a0",
+  "fingerprint": "d069d7a6af",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,48 @@
     }
   },
   "modules": [
+    {
+      "kind": "debug",
+      "title": "SQ(1+2) 算出来是 5",
+      "lang": "cpp",
+      "file": "macro.cpp",
+      "symptom": "单元测试里 SQ(1 + 2) 期望 9，实际 5。换成 SQ(w * h) 这种调用时又偶尔是对的。",
+      "code": "#define SQ(x)  ‹1›\n\nint main() {\n    std::cout << SQ(1 + 2) << '\\n';   // 期望 9\n}\n",
+      "marker": "‹%n›",
+      "slots": [
+        {
+          "id": "s1",
+          "hint": "宏体怎么写才安全"
+        }
+      ],
+      "blocks": [
+        {
+          "id": "b1",
+          "text": "((x) * (x))",
+          "for": "s1"
+        },
+        {
+          "id": "b2",
+          "text": "(x * x)",
+          "for": "",
+          "why": "整体括号有了、参数没括号：SQ(1+2) 展开成 (1+2 * 1+2) = 5"
+        },
+        {
+          "id": "b3",
+          "text": "x * x",
+          "for": "",
+          "why": "参数和整体都没括号，SQ(1+2) 展开成 1+2*1+2，连运算符优先级都变了"
+        },
+        {
+          "id": "b4",
+          "text": "((x) * (x));",
+          "for": "",
+          "why": "多出来的分号会被展开到调用点，if (a) SQ(b); else ... 直接编译不过"
+        }
+      ],
+      "expect": "9",
+      "pass": "宏是文本替换，不是函数调用：每个参数、整个表达式，各加一层括号。"
+    },
     {
       "kind": "match",
       "pairs": [

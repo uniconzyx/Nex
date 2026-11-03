@@ -2,7 +2,7 @@
   "chapter": "fund-ch14",
   "subject": "fundamentals",
   "title": "指令系统",
-  "fingerprint": "8a7740d651",
+  "fingerprint": "530595b5b0",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,63 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "指令格式怎么切位",
+      "brief": "指令长度 = 操作码位数 + 地址字段位数 × 个数。扩大操作码就挤压寻址空间，一增一减。",
+      "params": [
+        {
+          "key": "opBits",
+          "label": "操作码位数",
+          "min": 3,
+          "max": 8,
+          "step": 1,
+          "value": 6
+        },
+        {
+          "key": "addrBits",
+          "label": "每地址位数",
+          "min": 4,
+          "max": 12,
+          "step": 1,
+          "value": 8
+        }
+      ],
+      "metrics": [
+        {
+          "key": "instrCnt",
+          "label": "可编指令数",
+          "expr": "pow(2, opBits)",
+          "unit": "条",
+          "fmt": "int"
+        },
+        {
+          "key": "spaceB",
+          "label": "寻址空间",
+          "expr": "pow(2, addrBits)",
+          "unit": "B",
+          "fmt": "int"
+        },
+        {
+          "key": "lenBits",
+          "label": "指令长度",
+          "expr": "opBits + 2 * addrBits",
+          "unit": "bit",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "instrCnt == 64",
+          "label": "能编 64 条指令"
+        },
+        {
+          "expr": "spaceB == 4096",
+          "label": "地址能寻到 4KB"
+        }
+      ],
+      "insight": "同样总位数下，操作码和地址字段是零和：多一位操作码 = 少一位地址 = 寻址空间砍半。所以才有“扩展操作码”——把不用的地址字段借给操作码，用频率换空间。"
+    },
     {
       "kind": "match",
       "pairs": [

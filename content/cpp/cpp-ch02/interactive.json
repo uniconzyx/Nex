@@ -2,7 +2,7 @@
   "chapter": "cpp-ch02",
   "subject": "cpp",
   "title": "函数：声明/定义、重载、默认参数与 lambda",
-  "fingerprint": "1d9be9aad0",
+  "fingerprint": "35062e5e32",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,48 @@
     }
   },
   "modules": [
+    {
+      "kind": "debug",
+      "title": "默认参数写了两遍",
+      "lang": "cpp",
+      "file": "logging.h / logging.cpp",
+      "symptom": "编译报 error: call of overloaded 'log_msg(const char [6])' is ambiguous。声明和定义分在两个文件里，谁都没觉得有问题。",
+      "code": "// logging.h\n#pragma once\n#include <string>\n\n// 声明：默认值只允许出现在这里\nvoid log_msg(const std::string& s, int level = 2);\n\n// logging.cpp\n#include \"logging.h\"\n#include <iostream>\n\n‹1›\n\n// main.cpp\n// log_msg(\"ready\");   // ← 这一行编译不过\n",
+      "marker": "‹%n›",
+      "slots": [
+        {
+          "id": "s1",
+          "hint": "定义里不能再写一遍默认值"
+        }
+      ],
+      "blocks": [
+        {
+          "id": "b1",
+          "text": "void log_msg(const std::string& s, int level) { std::cout << s << '\\n'; }",
+          "for": "s1"
+        },
+        {
+          "id": "b2",
+          "text": "void log_msg(const std::string& s, int level = 2) { std::cout << s << '\\n'; }",
+          "for": "",
+          "why": "默认参数只能指定一次：定义里再写一遍是“重复指定默认实参”，直接报错"
+        },
+        {
+          "id": "b3",
+          "text": "void log_msg(const std::string& s) { std::cout << s << '\\n'; }",
+          "for": "",
+          "why": "这只是把单参版本又定义了一次，log_msg(\"ready\") 面对两个候选函数依旧二义"
+        },
+        {
+          "id": "b4",
+          "text": "void log_msg(std::string s, int level = 2) { std::cout << s << '\\n'; }",
+          "for": "",
+          "why": "形参从 const 引用变成值，和声明不是同一个函数——声明与定义对不上，链接期找不到符号"
+        }
+      ],
+      "expect": "ready",
+      "pass": "编译通过，log_msg(\"ready\") 走二参版本，level 取声明里的默认值 2。"
+    },
     {
       "kind": "match",
       "pairs": [

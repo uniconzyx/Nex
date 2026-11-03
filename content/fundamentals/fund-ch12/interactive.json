@@ -2,7 +2,7 @@
   "chapter": "fund-ch12",
   "subject": "fundamentals",
   "title": "计算机网络：应用层与链路排查",
-  "fingerprint": "ab97833602",
+  "fingerprint": "0745d6ad32",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,48 @@
     }
   },
   "modules": [
+    {
+      "kind": "debug",
+      "title": "上了 CDN，回源率还是 90%",
+      "lang": "js",
+      "file": "static.js",
+      "symptom": "资源文件名里已经打了内容指纹（app.9f3c1a.js），CDN 也接了，回源率还是 90% 以上。问题出在响应头。",
+      "code": "// GET /static/app.9f3c1a.js\nres.setHeader('Content-Type', 'application/javascript');\n‹1›\n",
+      "marker": "‹%n›",
+      "slots": [
+        {
+          "id": "s1",
+          "hint": "指纹资源该发什么缓存策略"
+        }
+      ],
+      "blocks": [
+        {
+          "id": "b1",
+          "text": "res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');",
+          "for": "s1"
+        },
+        {
+          "id": "b2",
+          "text": "res.setHeader('Cache-Control', 'no-cache');",
+          "for": "",
+          "why": "no-cache 不是“不缓存”，而是“用之前必须回源校验”（协商缓存）—— 回源一次都没少"
+        },
+        {
+          "id": "b3",
+          "text": "res.setHeader('Cache-Control', 'no-store');",
+          "for": "",
+          "why": "连存都不许存，CDN 和浏览器每次重新下载"
+        },
+        {
+          "id": "b4",
+          "text": "res.setHeader('Cache-Control', 'max-age=0');",
+          "for": "",
+          "why": "等价于立刻过期，每次都要协商"
+        }
+      ],
+      "expect": "指纹资源一年内不再回源，回源率降到个位数",
+      "pass": "带内容指纹的资源用 max-age 一年 + immutable；HTML 入口用 no-cache（必须校验）。这两条是两套策略，别用一条治所有请求。"
+    },
     {
       "kind": "match",
       "pairs": [

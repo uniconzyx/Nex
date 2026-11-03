@@ -2,7 +2,7 @@
   "chapter": "cpp-ch15",
   "subject": "cpp",
   "title": "命名空间与模块化：namespace / inline namespace / C++20 模块",
-  "fingerprint": "5eb1792cb2",
+  "fingerprint": "86c28b2ce6",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,48 @@
     }
   },
   "modules": [
+    {
+      "kind": "debug",
+      "title": "头文件里的计数器永远停在 0",
+      "lang": "cpp",
+      "file": "metrics.h",
+      "symptom": "头文件里放了个全局计数 hits，两个 .cpp 都 include 它。要么链接报 multiple definition，要么改完能编过、但主程序读到的永远是 0。",
+      "code": "// metrics.h\n#pragma once\n‹1›\ninline void hit() { ++hits; }\n\n// a.cpp / b.cpp 各自 #include \"metrics.h\" 并调用 hit()\n// main.cpp        打印 hits\n",
+      "marker": "‹%n›",
+      "slots": [
+        {
+          "id": "s1",
+          "hint": "头文件里的定义必须全程序唯一"
+        }
+      ],
+      "blocks": [
+        {
+          "id": "b1",
+          "text": "inline int hits = 0;",
+          "for": "s1"
+        },
+        {
+          "id": "b2",
+          "text": "static int hits = 0;",
+          "for": "",
+          "why": "static 给每个 TU 一份内部链接副本：a.cpp 和 b.cpp 各加各的，main.cpp 看到的那份永远是 0"
+        },
+        {
+          "id": "b3",
+          "text": "int hits = 0;",
+          "for": "",
+          "why": "头文件里写非 inline 定义，被两个 TU 包含就是重复定义，链接直接失败"
+        },
+        {
+          "id": "b4",
+          "text": "extern int hits = 0;",
+          "for": "",
+          "why": "extern 加初始化器仍然是定义，重复定义照旧；extern 只能配“不带初始化器”的声明"
+        }
+      ],
+      "expect": "累计命中数被所有 TU 共享，主程序读到的不是 0",
+      "pass": "头文件放声明、定义放一个 .cpp；C++17 之后也可以用 inline 变量 —— 它是唯一允许写进头文件的定义。"
+    },
     {
       "kind": "match",
       "pairs": [

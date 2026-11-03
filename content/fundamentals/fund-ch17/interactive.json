@@ -2,7 +2,7 @@
   "chapter": "fund-ch17",
   "subject": "fundamentals",
   "title": "I/O 系统",
-  "fingerprint": "cef71e58bb",
+  "fingerprint": "6ff5a573c6",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,77 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "每秒 5 万次 I/O，CPU 还剩多少",
+      "brief": "轮询每次两万周期、中断两千、DMA 只要一百。拖 I/O 方式与频率，看 CPU 占用。",
+      "params": [
+        {
+          "key": "iops",
+          "label": "每秒 I/O 次数",
+          "min": 1000,
+          "max": 100000,
+          "step": 1000,
+          "value": 50000
+        },
+        {
+          "key": "mode",
+          "label": "I/O 方式",
+          "min": 0,
+          "max": 2,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "程序轮询",
+            "中断驱动",
+            "DMA"
+          ]
+        },
+        {
+          "key": "ghz",
+          "label": "主频",
+          "min": 1,
+          "max": 4,
+          "step": 0.5,
+          "value": 3,
+          "unit": "GHz"
+        }
+      ],
+      "metrics": [
+        {
+          "key": "cycles",
+          "label": "每次 CPU 周期",
+          "expr": "if(mode == 0, 20000, if(mode == 1, 2000, 100))",
+          "unit": "周期",
+          "fmt": "int"
+        },
+        {
+          "key": "cpuPct",
+          "label": "CPU 占用",
+          "expr": "iops * (if(mode == 0, 20000, if(mode == 1, 2000, 100))) / (ghz * 1000000000) * 100",
+          "unit": "%",
+          "fmt": "fix2"
+        },
+        {
+          "key": "maxIops",
+          "label": "CPU 打满时上限",
+          "expr": "ghz * 1000000000 / (if(mode == 0, 20000, if(mode == 1, 2000, 100)))",
+          "unit": "次/秒",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "cpuPct <= 1",
+          "label": "CPU 占用不超 1%"
+        },
+        {
+          "expr": "iops >= 50000",
+          "label": "而且每秒得扛住 5 万次"
+        }
+      ],
+      "insight": "每次 I/O 的 CPU 周期从 2 万降到 100，差 200 倍 —— DMA 把“搬数据”从 CPU 手里拿走，只留一次“搬完了”的中断。高吞吐的磁盘和网卡必须走 DMA，就是这个道理。"
+    },
     {
       "kind": "boss",
       "questions": [

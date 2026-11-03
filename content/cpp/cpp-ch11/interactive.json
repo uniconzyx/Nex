@@ -2,7 +2,7 @@
   "chapter": "cpp-ch11",
   "subject": "cpp",
   "title": "异常处理与断言：try/catch、noexcept 与契约",
-  "fingerprint": "abbaf8243a",
+  "fingerprint": "9900de4dbb",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,48 @@
     }
   },
   "modules": [
+    {
+      "kind": "debug",
+      "title": "catch 里 typeid 恒为 Base",
+      "lang": "cpp",
+      "file": "handler.cpp",
+      "symptom": "业务抛的是 InvalidArgument，日志里 what() 却打印成 base —— 多态在 catch 里失效了。",
+      "code": "struct Base {\n    virtual ~Base() = default;\n    virtual std::string what() const { return \"base\"; }\n};\nstruct InvalidArgument : Base {\n    std::string what() const override { return \"bad arg\"; }\n};\n\ntry {\n    throw InvalidArgument{};\n}\n‹1›\n",
+      "marker": "‹%n›",
+      "slots": [
+        {
+          "id": "s1",
+          "hint": "捕获的写法决定切不切片"
+        }
+      ],
+      "blocks": [
+        {
+          "id": "b1",
+          "text": "catch (const Base& e) { std::cout << e.what(); }",
+          "for": "s1"
+        },
+        {
+          "id": "b2",
+          "text": "catch (Base e) { std::cout << e.what(); }",
+          "for": "",
+          "why": "按值捕获发生对象切片：InvalidArgument 的部分被切掉，vptr 变回 Base 的，what() 永远返回 base"
+        },
+        {
+          "id": "b3",
+          "text": "catch (Base* e) { std::cout << e->what(); }",
+          "for": "",
+          "why": "抛出的是对象不是指针，这个 catch 一条也接不住，异常直接逃到 terminate"
+        },
+        {
+          "id": "b4",
+          "text": "catch (InvalidArgument e) { std::cout << e.what(); }",
+          "for": "",
+          "why": "这样能打印对，但其他异常全部漏网，而且异常对象还要再拷贝一次"
+        }
+      ],
+      "expect": "输出 bad arg",
+      "pass": "捕获异常一律 const 引用：既不切片，也不多拷贝。"
+    },
     {
       "kind": "match",
       "pairs": [

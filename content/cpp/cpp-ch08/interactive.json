@@ -2,7 +2,7 @@
   "chapter": "cpp-ch08",
   "subject": "cpp",
   "title": "STL 容器：vector/list/map/set/unordered",
-  "fingerprint": "0291ee6062",
+  "fingerprint": "071095edf4",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,68 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "一百万次 push_back 要搬几次家",
+      "brief": "vector 满了就按倍数扩容，旧元素全部搬一遍。因子越小越省内存、越费拷贝 —— 拖到既不太慢也不浪费的那一档。",
+      "params": [
+        {
+          "key": "n",
+          "label": "元素个数",
+          "min": 10000,
+          "max": 1000000,
+          "step": 10000,
+          "value": 100000,
+          "unit": "个"
+        },
+        {
+          "key": "factor",
+          "label": "扩容因子",
+          "min": 1.5,
+          "max": 3,
+          "step": 0.5,
+          "value": 2
+        }
+      ],
+      "metrics": [
+        {
+          "key": "reallocs",
+          "label": "扩容次数",
+          "expr": "ceil(log(n) / log(factor))",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "copies",
+          "label": "累计搬迁元素",
+          "expr": "round(n * factor / (factor - 1))",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "wastePct",
+          "label": "容量浪费",
+          "expr": "(factor - 1) * 100",
+          "unit": "%",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "reallocs <= 17",
+          "label": "扩容次数压在 17 次以内"
+        },
+        {
+          "expr": "copies <= 2000000",
+          "label": "累计搬迁不超过 2 倍元素数"
+        },
+        {
+          "expr": "n >= 1000000",
+          "label": "还得撑住一百万个元素"
+        }
+      ],
+      "insight": "扩容是摊还 O(1)，但每一轮都是“申请新块 + 搬全部 + 释放旧块”，搬迁总量约 n·f/(f-1)。知道要放一百万个，就先 reserve(1000000)：一次都不搬。"
+    },
     {
       "kind": "match",
       "pairs": [

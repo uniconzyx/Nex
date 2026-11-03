@@ -38,6 +38,10 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONTENT = os.path.join(ROOT, "content")
 OUT_TS = os.path.join(ROOT, "viz", "interactive", "src", "data", "index.ts")
+# 手工精修的 sandbox / debug 模块。自动抽取对这两种玩法不可靠
+# （"拖哪个旋钮"、"缺的是哪条语句"都是作者判断，不是正则能猜的），
+# 所以数据单独放一份，生成器原样并入 interactive.json —— 重跑不会覆盖掉。
+HANDMADE = os.path.join(CONTENT, "_handmade", "labs.json")
 
 # ── 可参与 fill 的语言（sql/yaml 也算，database 章几乎全是 sql） ──
 CODE_LANGS = {
@@ -544,20 +548,46 @@ def collect_pool() -> Dict[str, List[str]]:
             for lang, bucket in by_lang.items()}
 
 
-def build_chapter(subject: str, cid: str, pool: Dict[str, List[str]], verbose: bool = False) -> Optional[Dict[str, Any]]:
+def load_handmade() -> Dict[str, List[Dict[str, Any]]]:
+    """读手工精修模块表：{"cpp/cpp-ch18": [ {kind: sandbox, …} ]}"""
+    if not os.path.exists(HANDMADE):
+        return {}
+    try:
+        d = json.loads(read(HANDMADE))
+    except json.JSONDecodeError as e:
+        print(f"!! {HANDMADE} 解析失败：{e}")
+        return {}
+    out: Dict[str, List[Dict[str, Any]]] = {}
+    for k, v in (d.get("chapters") or {}).items():
+        if isinstance(v, list) and v:
+            out[k] = v
+    return out
+
+
+def build_chapter(subject: str, cid: str, pool: Dict[str, List[str]],
+                  handmade: Optional[Dict[str, List[Dict[str, Any]]]] = None,
+                  verbose: bool = False) -> Optional[Dict[str, Any]]:
     chap_path = os.path.join(CONTENT, subject, cid)
     title = chapter_title(chap_path, cid, subject)
     boss = build_boss(chap_path)
     match = build_match(chap_path)
     seq = build_sequence(chap_path)
     fill = build_fill(chap_path, pool)
-    modules = [m for m in (seq, match, boss, fill) if m]
+    auto = [m for m in (seq, match, boss, fill) if m]
+    # 精修模块排在最前：它是本章最值得玩的一个，页签默认就落在它上面
+    hand = list((handmade or {}).get(f"{subject}/{cid}") or [])
+    hand_kinds = {m.get("kind") for m in hand}
+    modules = hand + [m for m in auto if m["kind"] not in hand_kinds]
     if not modules:
         return None
     sc = build_scenario(chap_path, cid, boss, match)
     fp_src = "".join(read(os.path.join(chap_path, f)) for f in
                      ("exercises.json", "pitfalls.md")) + "".join(
         read(p) for p in concept_files(chap_path))
+    # 指纹只喂"这一章真的用了精修模块"的内容：没精修时喂一个空串，
+    # 否则 122 章无关章节的指纹会一起变（前端 seed 跟着变，洗牌顺序全乱）
+    if hand:
+        fp_src += json.dumps(hand, ensure_ascii=False)
     data = {
         "chapter": cid,
         "subject": subject,
@@ -647,6 +677,11 @@ def main() -> int:
     print("· 收集干扰项 token 池 …")
     pool = collect_pool()
     print(f"  池大小 {len(pool)}")
+    handmade = load_handmade()
+    print(f"· 手工精修 {sum(len(v) for v in handmade.values())} 个模块 / {len(handmade)} 章")
+    unknown = [k for k in handmade if not os.path.isdir(os.path.join(CONTENT, k))]
+    if unknown:
+        print("  !! 精修表里指向不存在的章节:", ", ".join(unknown))
 
     all_labs: Dict[str, Dict[str, Any]] = {}
     stat: Dict[str, int] = {}
@@ -658,7 +693,7 @@ def main() -> int:
             key = f"{s}/{c}"
             if "/" in args.only and key != args.only:
                 continue
-            d = build_chapter(s, c, pool, args.verbose)
+            d = build_chapter(s, c, pool, handmade, args.verbose)
             if d is None:
                 missing.append(key)
                 continue

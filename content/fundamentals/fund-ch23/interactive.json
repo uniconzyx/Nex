@@ -2,7 +2,7 @@
   "chapter": "fund-ch23",
   "subject": "fundamentals",
   "title": "数据链路层",
-  "fingerprint": "b87f5e587b",
+  "fingerprint": "4f05d1ee24",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,83 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "停等协议的利用率",
+      "brief": "发一帧、等一个 RTT、再发下一帧 —— RTT 里链路完全空着。窗口是唯一的解药。",
+      "params": [
+        {
+          "key": "frameBits",
+          "label": "帧长",
+          "min": 1000,
+          "max": 16000,
+          "step": 1000,
+          "value": 4000,
+          "unit": "bit"
+        },
+        {
+          "key": "rate",
+          "label": "链路速率",
+          "min": 1,
+          "max": 100,
+          "step": 1,
+          "value": 100,
+          "unit": "Mbps"
+        },
+        {
+          "key": "rtt",
+          "label": "往返时延 RTT",
+          "min": 1,
+          "max": 200,
+          "step": 1,
+          "value": 20,
+          "unit": "ms"
+        },
+        {
+          "key": "win",
+          "label": "窗口大小",
+          "min": 1,
+          "max": 128,
+          "step": 1,
+          "value": 1,
+          "unit": "帧"
+        }
+      ],
+      "metrics": [
+        {
+          "key": "txMs",
+          "label": "发送时延",
+          "expr": "frameBits / (rate * 1000)",
+          "unit": "ms",
+          "fmt": "fix2"
+        },
+        {
+          "key": "utilPct",
+          "label": "链路利用率",
+          "expr": "min(1, win * frameBits / (rate * 1000) / (frameBits / (rate * 1000) + rtt)) * 100",
+          "unit": "%",
+          "fmt": "fix2"
+        },
+        {
+          "key": "realMbps",
+          "label": "有效吞吐",
+          "expr": "min(1, win * frameBits / (rate * 1000) / (frameBits / (rate * 1000) + rtt)) * rate",
+          "unit": "Mbps",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "utilPct >= 80",
+          "label": "链路利用率至少 80%"
+        },
+        {
+          "expr": "win <= 16",
+          "label": "窗口还不许开到 16 帧以上"
+        }
+      ],
+      "insight": "停等的利用率 = T/(T+RTT)：帧越小、RTT 越大越惨。把窗口开到 RTT/T 帧就能跑满 —— 这就是 GBN / 选择重传存在的理由，也是卫星链路不能用停等的原因。"
+    },
     {
       "kind": "match",
       "pairs": [

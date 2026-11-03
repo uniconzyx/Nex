@@ -2,7 +2,7 @@
   "chapter": "cpp-ch13",
   "subject": "cpp",
   "title": "输入/输出与文件：iostream、fstream 与格式化",
-  "fingerprint": "7ec5ea5a8d",
+  "fingerprint": "14017ed35a",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,48 @@
     }
   },
   "modules": [
+    {
+      "kind": "debug",
+      "title": "文件末尾多算了一行",
+      "lang": "cpp",
+      "file": "sum.cpp",
+      "symptom": "求和结果总比手算多一份。文件里是 1..10，程序输出 cnt=11。",
+      "code": "std::ifstream in(\"nums.txt\");\nint x = 0, sum = 0, cnt = 0;\nwhile (!in.eof()) {\n    in >> x;\n‹1›\n}\nstd::cout << \"sum=\" << sum << \" cnt=\" << cnt;\n",
+      "marker": "‹%n›",
+      "slots": [
+        {
+          "id": "s1",
+          "hint": "读失败那一次不能算进统计"
+        }
+      ],
+      "blocks": [
+        {
+          "id": "b1",
+          "text": "    if (!in.fail()) { sum += x; ++cnt; }",
+          "for": "s1"
+        },
+        {
+          "id": "b2",
+          "text": "    sum += x; ++cnt;",
+          "for": "",
+          "why": "这就是 bug 本身：最后一次 in >> x 失败时 x 还是上一轮的值，eof 要到失败之后才置位"
+        },
+        {
+          "id": "b3",
+          "text": "    if (!in.eof()) { sum += x; ++cnt; }",
+          "for": "",
+          "why": "同一轮里 eof 还没置位，判它等于没判"
+        },
+        {
+          "id": "b4",
+          "text": "    break;",
+          "for": "",
+          "why": "第一轮就退出，一个数都读不到"
+        }
+      ],
+      "expect": "sum=55 cnt=10",
+      "pass": "读操作本身的结果就是判据：写成 while (in >> x) —— 读失败即退出，根本不需要 eof。"
+    },
     {
       "kind": "match",
       "pairs": [

@@ -2,7 +2,7 @@
   "chapter": "fund-ch04",
   "subject": "fundamentals",
   "title": "fund-ch04",
-  "fingerprint": "41e19fa139",
+  "fingerprint": "c02a4c9797",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,71 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "稀疏图为什么不用矩阵",
+      "brief": "矩阵固定 n² 格，邻接表只存实际存在的边。拖顶点数和稠密度，看两者差几个数量级。",
+      "params": [
+        {
+          "key": "v",
+          "label": "顶点数",
+          "min": 4,
+          "max": 400,
+          "step": 4,
+          "value": 100
+        },
+        {
+          "key": "density",
+          "label": "稠密度",
+          "min": 1,
+          "max": 50,
+          "step": 1,
+          "value": 15,
+          "unit": "%"
+        }
+      ],
+      "metrics": [
+        {
+          "key": "e",
+          "label": "边数",
+          "expr": "round(v * (v - 1) / 2 * density / 100)",
+          "unit": "条",
+          "fmt": "int"
+        },
+        {
+          "key": "matrixKB",
+          "label": "邻接矩阵",
+          "expr": "v * v * 4 / 1024",
+          "unit": "KB",
+          "fmt": "int"
+        },
+        {
+          "key": "listKB",
+          "label": "邻接表",
+          "expr": "(v * 8 + round(v * (v - 1) / 2 * density / 100) * 12) / 1024",
+          "unit": "KB",
+          "fmt": "int"
+        },
+        {
+          "key": "ratio",
+          "label": "矩阵 / 表",
+          "expr": "(v * v * 4 / 1024) / ((v * 8 + round(v * (v - 1) / 2 * density / 100) * 12) / 1024)",
+          "unit": "倍",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "ratio >= 10",
+          "label": "矩阵比邻接表大 10 倍以上"
+        },
+        {
+          "expr": "density <= 10",
+          "label": "而且图是稀疏的（稠密度 ≤ 10%）"
+        }
+      ],
+      "insight": "矩阵的优势是 O(1) 判邻接，代价是 n² 空间和 n² 遍历；稠密图才划算。Prim 用矩阵 O(n²)、Kruskal 适合稀疏图，根子都在这张表上。"
+    },
     {
       "kind": "match",
       "pairs": [

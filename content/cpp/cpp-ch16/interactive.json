@@ -2,7 +2,7 @@
   "chapter": "cpp-ch16",
   "subject": "cpp",
   "title": "并发与多线程：thread / mutex / atomic / async",
-  "fingerprint": "62dfdf048a",
+  "fingerprint": "bbc4096ecb",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,62 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "加线程到底能快多少",
+      "brief": "加速比不是“线程数”，是 1/(串行比例 + 并行比例/线程数)。拖两个旋钮，找那条让 8 线程跑出 6 倍的分界线。",
+      "params": [
+        {
+          "key": "threads",
+          "label": "线程数",
+          "min": 1,
+          "max": 32,
+          "step": 1,
+          "value": 4
+        },
+        {
+          "key": "serialPct",
+          "label": "串行占比",
+          "min": 0,
+          "max": 50,
+          "step": 5,
+          "value": 10,
+          "unit": "%"
+        }
+      ],
+      "metrics": [
+        {
+          "key": "speedup",
+          "label": "加速比",
+          "expr": "1 / (serialPct / 100 + (1 - serialPct / 100) / threads)",
+          "fmt": "fix2"
+        },
+        {
+          "key": "eff",
+          "label": "每线程效率",
+          "expr": "(1 / (serialPct / 100 + (1 - serialPct / 100) / threads)) / threads",
+          "fmt": "fix2"
+        },
+        {
+          "key": "ms",
+          "label": "单次耗时",
+          "expr": "1000 / (1 / (serialPct / 100 + (1 - serialPct / 100) / threads))",
+          "unit": "ms",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "speedup >= 6",
+          "label": "加速比至少 6 倍"
+        },
+        {
+          "expr": "threads <= 8",
+          "label": "而且只能用 8 个线程"
+        }
+      ],
+      "insight": "串行占 10% 时理论上限就是 10 倍，和你加多少线程无关：8 线程只有 4.7 倍，加到 32 线程也只到 7.8 倍。优化的顺序永远是“先砍串行段”，而不是“再加机器”。"
+    },
     {
       "kind": "match",
       "pairs": [

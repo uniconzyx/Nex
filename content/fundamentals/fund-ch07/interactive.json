@@ -2,7 +2,7 @@
   "chapter": "fund-ch07",
   "subject": "fundamentals",
   "title": "计算机组成原理：数据表示与运算",
-  "fingerprint": "e0e555c1fe",
+  "fingerprint": "b3c27b0d4e",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,65 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "单精度为什么只有 7 位有效数字",
+      "brief": "1 位符号 + 8 位阶码 + 23 位尾数。拖位宽分配，凑出单精度的偏置和十进制精度。",
+      "params": [
+        {
+          "key": "expBits",
+          "label": "阶码位数",
+          "min": 4,
+          "max": 11,
+          "step": 1,
+          "value": 8
+        },
+        {
+          "key": "fracBits",
+          "label": "尾数位数",
+          "min": 8,
+          "max": 52,
+          "step": 1,
+          "value": 16
+        }
+      ],
+      "metrics": [
+        {
+          "key": "bias",
+          "label": "偏置",
+          "expr": "pow(2, expBits - 1) - 1",
+          "fmt": "int"
+        },
+        {
+          "key": "digits",
+          "label": "十进制有效位",
+          "expr": "floor(fracBits * log10(2)) + 1",
+          "unit": "位",
+          "fmt": "int"
+        },
+        {
+          "key": "maxExp",
+          "label": "最大阶",
+          "expr": "pow(2, expBits - 1) - 1",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "bias == 127",
+          "label": "偏置是 127（单精度约定）"
+        },
+        {
+          "expr": "digits == 7",
+          "label": "十进制有效位正好 7 位"
+        },
+        {
+          "expr": "fracBits == 23",
+          "label": "尾数 23 位"
+        }
+      ],
+      "insight": "阶码 8 位给出 −126~127 的指数范围，尾数 23 位给出约 7 位十进制精度。这也是 float 存 16777217 会变成 16777216 的原因：2^24 之后间隔已经大于 1。"
+    },
     {
       "kind": "match",
       "pairs": [

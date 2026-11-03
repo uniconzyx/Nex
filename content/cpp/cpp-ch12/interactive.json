@@ -2,7 +2,7 @@
   "chapter": "cpp-ch12",
   "subject": "cpp",
   "title": "现代 C++ 特性：auto / 移动语义 / 范围 for / emplace",
-  "fingerprint": "b8f0d516d2",
+  "fingerprint": "5b73db8238",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,48 @@
     }
   },
   "modules": [
+    {
+      "kind": "debug",
+      "title": "加了个 std::move，反而更慢",
+      "lang": "cpp",
+      "file": "buffer.cpp",
+      "symptom": "某个返回大 vector 的接口，性能剖析里多了一次 3 万元素的 memcpy。代码看起来很“现代”。",
+      "code": "std::vector<int> make_buf() {\n    std::vector<int> v(30000);\n    ‹1›\n}\n",
+      "marker": "‹%n›",
+      "slots": [
+        {
+          "id": "s1",
+          "hint": "返回局部变量该怎么写"
+        }
+      ],
+      "blocks": [
+        {
+          "id": "b1",
+          "text": "    return v;",
+          "for": "s1"
+        },
+        {
+          "id": "b2",
+          "text": "    return std::move(v);",
+          "for": "",
+          "why": "对局部变量写 move 会挡住 NRVO：编译器本来能在调用方原地构造，被 move 一搞必须先造临时对象再移出去，有些场景直接退化成拷贝"
+        },
+        {
+          "id": "b3",
+          "text": "    return std::move(std::vector<int>(30000));",
+          "for": "",
+          "why": "对临时量 move 是多余的（它本身就是右值），还平白多构造了一次"
+        },
+        {
+          "id": "b4",
+          "text": "    return &v;",
+          "for": "",
+          "why": "返回栈上对象的地址，函数一返回就是悬垂指针"
+        }
+      ],
+      "expect": "调用方直接拿到 30000 个元素的 vector，全程零拷贝（NRVO）",
+      "pass": "返回局部变量就写 return v; —— 标准明确允许并要求省略这次拷贝，画蛇添足的 move 只会挡住优化。"
+    },
     {
       "kind": "match",
       "pairs": [

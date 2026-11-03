@@ -2,7 +2,7 @@
   "chapter": "cpp-ch17",
   "subject": "cpp",
   "title": "元编程与类型萃取：type_traits / constexpr / SFINAE / concept",
-  "fingerprint": "eeec9828f8",
+  "fingerprint": "7b80bba2bc",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,48 @@
     }
   },
   "modules": [
+    {
+      "kind": "debug",
+      "title": "模板里缺一个 typename",
+      "lang": "cpp",
+      "file": "dump.h",
+      "symptom": "GCC 报 error: need 'typename' before 'C::const_iterator' because 'C' is a dependent scope。这份模板在 MSVC 下能过，换编译器就炸。",
+      "code": "template <typename C>\nvoid dump(const C& c) {\n‹1›\n    for (It it = c.begin(); it != c.end(); ++it)\n        std::cout << *it << ' ';\n}\n",
+      "marker": "‹%n›",
+      "slots": [
+        {
+          "id": "s1",
+          "hint": "取依赖类型要先消歧"
+        }
+      ],
+      "blocks": [
+        {
+          "id": "b1",
+          "text": "    using It = typename C::const_iterator;",
+          "for": "s1"
+        },
+        {
+          "id": "b2",
+          "text": "    using It = C::const_iterator;",
+          "for": "",
+          "why": "C 是依赖名，编译器无法判断 C::const_iterator 是类型还是静态成员，必须加 typename 消歧"
+        },
+        {
+          "id": "b3",
+          "text": "    typedef C::const_iterator It;",
+          "for": "",
+          "why": "typedef 也救不了，缺 typename 一样报那句错"
+        },
+        {
+          "id": "b4",
+          "text": "    using It = C::iterator;",
+          "for": "",
+          "why": "const 容器上 begin() 返回的是 const_iterator，取 iterator 类型对不上，实例化时才炸"
+        }
+      ],
+      "expect": "编译通过，对 int 容器实例化后输出 1 2 3",
+      "pass": "依赖名前面加 typename —— 它不是“这是类型”的修辞，是给编译器的消歧指令。"
+    },
     {
       "kind": "match",
       "pairs": [

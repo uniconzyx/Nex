@@ -2,7 +2,7 @@
   "chapter": "cpp-ch01",
   "subject": "cpp",
   "title": "C++ 基础语法",
-  "fingerprint": "dbe58fb658",
+  "fingerprint": "62ee75eb10",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,66 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "整型宽度与溢出边界",
+      "brief": "运营看板的计数用了 int，跑三个月后报表变成负数。拖动位宽与符号位，看同一个 4 字节能装多大的数。",
+      "params": [
+        {
+          "key": "bits",
+          "label": "位宽",
+          "min": 8,
+          "max": 64,
+          "step": 8,
+          "value": 32,
+          "unit": "bit"
+        },
+        {
+          "key": "sign",
+          "label": "符号",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 1,
+          "labels": [
+            "无符号",
+            "有符号"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "bytes",
+          "label": "占用",
+          "expr": "bits / 8",
+          "unit": "字节",
+          "fmt": "int"
+        },
+        {
+          "key": "maxv",
+          "label": "上限",
+          "expr": "if(sign, pow(2, bits - 1) - 1, pow(2, bits) - 1)",
+          "fmt": "int"
+        },
+        {
+          "key": "minv",
+          "label": "下限",
+          "expr": "if(sign, -pow(2, bits - 1), 0)",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "maxv >= 2147483648",
+          "label": "上限能装下 2,147,483,648（日活那类计数的量级）"
+        },
+        {
+          "expr": "bytes <= 4",
+          "label": "仍然只占 4 字节，不许换成 64 位"
+        }
+      ],
+      "insight": "32 位有符号的上限是 2^31-1 ≈ 21.47 亿；同样 4 字节，把符号位也让出来就能装 42.9 亿 —— 代价是没有负数。"
+    },
     {
       "kind": "match",
       "pairs": [

@@ -2,7 +2,7 @@
   "chapter": "fund-ch05",
   "subject": "fundamentals",
   "title": "查找与哈希",
-  "fingerprint": "b51f636bd0",
+  "fingerprint": "3b42dfaebc",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,64 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "哈希表装多满才不拖查找",
+      "brief": "线性探测的 ASL 随 α 爆炸，拉链法平缓得多。拖 α 和冲突处理方式，找那条让查找仍然便宜的分界线。",
+      "params": [
+        {
+          "key": "alpha",
+          "label": "装填因子 α",
+          "min": 0.1,
+          "max": 0.95,
+          "step": 0.05,
+          "value": 0.7
+        },
+        {
+          "key": "mode",
+          "label": "冲突处理",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "线性探测",
+            "拉链法"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "aslSucc",
+          "label": "查找成功 ASL",
+          "expr": "if(mode == 0, (1 + 1 / (1 - alpha)) / 2, 1 + alpha / 2)",
+          "fmt": "fix2"
+        },
+        {
+          "key": "aslFail",
+          "label": "查找失败 ASL",
+          "expr": "if(mode == 0, (1 + 1 / pow(1 - alpha, 2)) / 2, alpha)",
+          "fmt": "fix2"
+        },
+        {
+          "key": "cluster",
+          "label": "聚集程度",
+          "expr": "if(mode == 0, round(alpha * 20), 0)",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "aslSucc <= 1.4",
+          "label": "查找成功的 ASL 不超过 1.4"
+        },
+        {
+          "expr": "alpha >= 0.4",
+          "label": "而且表要装到 40% 以上，别靠空表取巧"
+        }
+      ],
+      "insight": "线性探测的失败 ASL 在 α=0.9 时是 50.5 —— 这就是“删一个元素能让整张表变慢”的原因（要用墓碑标记）。拉链法可以装到 α>1，代价是指针和缓存不友好。"
+    },
     {
       "kind": "match",
       "pairs": [

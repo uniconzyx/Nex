@@ -2,7 +2,7 @@
   "chapter": "cpp-ch20",
   "subject": "cpp",
   "title": "综合项目与面试冲刺：系统设计、代码规范与复盘",
-  "fingerprint": "e14837fea9",
+  "fingerprint": "6508c38931",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,75 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "连接池要开多大",
+      "brief": "池子按 CPU 核数拍脑袋定，晚高峰就排队。真实公式是“并发 = QPS × 单请求耗时”。拖三个旋钮凑够余量。",
+      "params": [
+        {
+          "key": "qps",
+          "label": "峰值 QPS",
+          "min": 500,
+          "max": 8000,
+          "step": 500,
+          "value": 1000
+        },
+        {
+          "key": "latency",
+          "label": "单请求耗时",
+          "min": 20,
+          "max": 200,
+          "step": 10,
+          "value": 60,
+          "unit": "ms"
+        },
+        {
+          "key": "pool",
+          "label": "连接池大小",
+          "min": 10,
+          "max": 400,
+          "step": 10,
+          "value": 50
+        }
+      ],
+      "metrics": [
+        {
+          "key": "concurrency",
+          "label": "需要并发数",
+          "expr": "qps * latency / 1000",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "util",
+          "label": "池利用率",
+          "expr": "qps * latency / 1000 / pool",
+          "fmt": "fix2"
+        },
+        {
+          "key": "queueMs",
+          "label": "估算排队",
+          "expr": "if(qps * latency / 1000 > pool, (qps * latency / 1000 - pool) * latency / pool, 0)",
+          "unit": "ms",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "concurrency <= pool",
+          "label": "峰值并发能被池子接住"
+        },
+        {
+          "expr": "util >= 0.6",
+          "label": "利用率不低于 60%，池子不能空转"
+        },
+        {
+          "expr": "queueMs == 0",
+          "label": "没有请求在池外排队"
+        }
+      ],
+      "insight": "池子至少 ≥ 峰值并发，否则请求在池外排队；但也别开太大：利用率长期低于 60% 说明瓶颈在别处（常见是慢 SQL），加连接只会把数据库压垮。"
+    },
     {
       "kind": "boss",
       "questions": [

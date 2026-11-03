@@ -2,7 +2,7 @@
   "chapter": "cpp-ch04",
   "subject": "cpp",
   "title": "指针与内存管理：指针运算、new/delete 与悬垂",
-  "fingerprint": "5c6db44a5d",
+  "fingerprint": "48d7c11f01",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,48 @@
     }
   },
   "modules": [
+    {
+      "kind": "debug",
+      "title": "函数里 new 了，收尾少一句",
+      "lang": "cpp",
+      "file": "aggregate.cpp",
+      "symptom": "服务跑三天 RSS 从 300MB 涨到 4.2GB。ASan 不报错 —— 不是崩溃，是没人释放。",
+      "code": "int sum(const int* v, int n) {\n    if (n <= 0) return 0;\n    int* copy = new int[n];\n    std::memcpy(copy, v, n * sizeof(int));\n\n    int s = 0;\n    for (int i = 0; i < n; ++i) s += copy[i];\n\n‹1›\n    return s;\n}\n",
+      "marker": "‹%n›",
+      "slots": [
+        {
+          "id": "s1",
+          "hint": "谁 new 谁 delete，而且要配对"
+        }
+      ],
+      "blocks": [
+        {
+          "id": "b1",
+          "text": "    delete[] copy;",
+          "for": "s1"
+        },
+        {
+          "id": "b2",
+          "text": "    delete copy;",
+          "for": "",
+          "why": "new[] 必须配 delete[]：对数组用 delete 只跑第一个元素的析构，堆头信息对不上，ASan 报 alloc-dealloc-mismatch"
+        },
+        {
+          "id": "b3",
+          "text": "    free(copy);",
+          "for": "",
+          "why": "new 和 malloc 不是同一套分配器，混用是未定义行为，glibc 下常常当场 abort"
+        },
+        {
+          "id": "b4",
+          "text": "    // 进程退出会回收，不用管",
+          "for": "",
+          "why": "进程退出回收的是整个地址空间，不是这次调用的生命周期 —— 长驻服务里就是每天涨几个 GB 的那种泄漏"
+        }
+      ],
+      "expect": "输入 8 个 int 返回它们的和；ASan / LSan 全程静默（无泄漏报告）",
+      "pass": "new[] 配 delete[]，且只在分配成功之后才走到释放。"
+    },
     {
       "kind": "boss",
       "questions": [

@@ -2,7 +2,7 @@
   "chapter": "fund-ch15",
   "subject": "fundamentals",
   "title": "中央处理器（CPU）",
-  "fingerprint": "071f69fa35",
+  "fingerprint": "6964da895d",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,72 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "5 级流水线能快几倍",
+      "brief": "理想加速比约等于级数，但冒险停顿会把它吃回去。拖级数、指令数与停顿比例。",
+      "params": [
+        {
+          "key": "stages",
+          "label": "流水级数",
+          "min": 3,
+          "max": 8,
+          "step": 1,
+          "value": 5
+        },
+        {
+          "key": "n",
+          "label": "指令数",
+          "min": 100,
+          "max": 1000,
+          "step": 100,
+          "value": 500
+        },
+        {
+          "key": "stallPct",
+          "label": "停顿比例",
+          "min": 0,
+          "max": 50,
+          "step": 5,
+          "value": 25,
+          "unit": "%"
+        }
+      ],
+      "metrics": [
+        {
+          "key": "base",
+          "label": "串行周期",
+          "expr": "n * stages",
+          "unit": "周期",
+          "fmt": "int"
+        },
+        {
+          "key": "piped",
+          "label": "流水周期",
+          "expr": "n + (stages - 1) + n * stallPct / 100",
+          "unit": "周期",
+          "fmt": "int"
+        },
+        {
+          "key": "speedup",
+          "label": "加速比",
+          "expr": "n * stages / (n + (stages - 1) + n * stallPct / 100)",
+          "unit": "倍",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "speedup >= 3",
+          "label": "加速比至少 3 倍"
+        },
+        {
+          "expr": "stallPct <= 10",
+          "label": "停顿比例压到 10% 以内"
+        }
+      ],
+      "insight": "加速比的上限就是级数，但每多一级就多一份冒险可能和一份寄存器开销。经典 5 级流水线（IF/ID/EX/MEM/WB）是“加速比 / 代价”的甜点，也是 408 必考那张时空图。"
+    },
     {
       "kind": "match",
       "pairs": [

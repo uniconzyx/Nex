@@ -2,7 +2,7 @@
   "chapter": "cpp-ch03",
   "subject": "cpp",
   "title": "数组与字符串：C 数组、std::string 与字符串视图",
-  "fingerprint": "c1aeae2946",
+  "fingerprint": "80c734e71c",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,56 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "std::string 什么时候开始要堆内存",
+      "brief": "libstdc++ 的 std::string 自带 15 字节内联缓冲（SSO）。拖动长度，看它从第几个字符开始去堆上要地方。",
+      "params": [
+        {
+          "key": "len",
+          "label": "字符串长度",
+          "min": 0,
+          "max": 32,
+          "step": 1,
+          "value": 8,
+          "unit": "字符"
+        }
+      ],
+      "metrics": [
+        {
+          "key": "heapBytes",
+          "label": "堆上申请",
+          "expr": "if(len > 15, pow(2, ceil(log2(len + 1))), 0)",
+          "unit": "字节",
+          "fmt": "int"
+        },
+        {
+          "key": "moveBytes",
+          "label": "再加一字符要搬",
+          "expr": "if(len >= 15, len + 1, 0)",
+          "unit": "字节",
+          "fmt": "int"
+        },
+        {
+          "key": "mallocs",
+          "label": "malloc 次数",
+          "expr": "if(len > 15, 1, 0)",
+          "unit": "次",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "heapBytes == 0",
+          "label": "还没有向堆申请内存（仍在 SSO 缓冲里）"
+        },
+        {
+          "expr": "len >= 15",
+          "label": "已经顶到 SSO 的最后一格（15 字节）"
+        }
+      ],
+      "insight": "15 字节以内直接塞进对象自己那 32 字节里，一次 malloc 都不需要；第 16 个字符才真正去堆上要地方。短 key 满天飞的场景，std::string 的分配开销是零。"
+    },
     {
       "kind": "match",
       "pairs": [

@@ -2,7 +2,7 @@
   "chapter": "fund-ch20",
   "subject": "fundamentals",
   "title": "文件管理",
-  "fingerprint": "e344caa019",
+  "fingerprint": "d2d39f5908",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,73 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "三级间接索引是怎么逼出来的",
+      "brief": "12 个直接块 + 一/二/三级间接。拖块大小和指针位数，看什么时候非上三级不可。",
+      "params": [
+        {
+          "key": "blockKB",
+          "label": "块大小",
+          "min": 1,
+          "max": 4,
+          "step": 1,
+          "value": 2,
+          "unit": "KB"
+        },
+        {
+          "key": "ptrBits",
+          "label": "块指针位数",
+          "min": 8,
+          "max": 10,
+          "step": 1,
+          "value": 8,
+          "unit": "bit"
+        },
+        {
+          "key": "direct",
+          "label": "直接块个数",
+          "min": 10,
+          "max": 12,
+          "step": 1,
+          "value": 12
+        }
+      ],
+      "metrics": [
+        {
+          "key": "ptrs",
+          "label": "每块指针数",
+          "expr": "pow(2, ptrBits)",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "noTripleKB",
+          "label": "只有两级间接",
+          "expr": "blockKB * (direct + pow(2, ptrBits) + pow(2, ptrBits) * pow(2, ptrBits))",
+          "unit": "KB",
+          "fmt": "int"
+        },
+        {
+          "key": "maxKB",
+          "label": "三级齐全",
+          "expr": "blockKB * (direct + pow(2, ptrBits) + pow(2, ptrBits) * pow(2, ptrBits) + pow(2, ptrBits) * pow(2, ptrBits) * pow(2, ptrBits))",
+          "unit": "KB",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "maxKB >= 102400",
+          "label": "最大文件能到 100MB"
+        },
+        {
+          "expr": "noTripleKB < 102400",
+          "label": "但只有两级时到不了 100MB（所以非上三级不可）"
+        }
+      ],
+      "insight": "1KB 块、8 位指针只能寻址 4MB，两级间接上限 64MB —— 所以 100MB 的文件必须有三级。这类题的抓手永远是“每一级能装多少个指针”，不是背公式。"
+    },
     {
       "kind": "match",
       "pairs": [

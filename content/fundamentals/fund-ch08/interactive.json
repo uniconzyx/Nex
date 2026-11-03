@@ -2,7 +2,7 @@
   "chapter": "fund-ch08",
   "subject": "fundamentals",
   "title": "计组：存储系统与 CPU",
-  "fingerprint": "c94ca3a524",
+  "fingerprint": "b645a136f8",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,73 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "命中率 90% 还不够",
+      "brief": "AMAT = 命中时间 + 缺失率 × 缺失代价。缺失代价通常是命中的几十倍，所以命中率差一个点就差很多。",
+      "params": [
+        {
+          "key": "hit",
+          "label": "命中率",
+          "min": 0.5,
+          "max": 0.99,
+          "step": 0.01,
+          "value": 0.9
+        },
+        {
+          "key": "hitNs",
+          "label": "命中时间",
+          "min": 1,
+          "max": 10,
+          "step": 1,
+          "value": 2,
+          "unit": "ns"
+        },
+        {
+          "key": "memNs",
+          "label": "缺失代价",
+          "min": 40,
+          "max": 200,
+          "step": 20,
+          "value": 100,
+          "unit": "ns"
+        }
+      ],
+      "metrics": [
+        {
+          "key": "amat",
+          "label": "AMAT",
+          "expr": "hitNs + (1 - hit) * memNs",
+          "unit": "ns",
+          "fmt": "fix2"
+        },
+        {
+          "key": "speedup",
+          "label": "相对无 Cache",
+          "expr": "memNs / (hitNs + (1 - hit) * memNs)",
+          "unit": "倍",
+          "fmt": "fix2"
+        },
+        {
+          "key": "missPct",
+          "label": "缺失耗时占比",
+          "expr": "(1 - hit) * memNs / (hitNs + (1 - hit) * memNs) * 100",
+          "unit": "%",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "amat <= 5",
+          "label": "AMAT 压到 5ns 以内"
+        },
+        {
+          "expr": "hit >= 0.9",
+          "label": "命中率不低于 90%"
+        }
+      ],
+      "insight": "命中率 95% 时仍有 60% 的时间花在缺失上（2ns vs 3ns）。所以优化优先级永远是：先减少缺失，再降低缺失代价（多级 Cache），最后才压命中时间。"
+    },
     {
       "kind": "match",
       "pairs": [

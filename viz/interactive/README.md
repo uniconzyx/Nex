@@ -18,10 +18,15 @@ npm run build      # tsc --noEmit && vite build
 ```
 viz/interactive/
 ├─ lab/                      数据驱动层（不认学科，只认 interactive.json）
-│  ├─ types.ts               数据契约
-│  └─ InteractiveLab.tsx     sequence / match / boss / fill 四种玩法
+│  ├─ types.ts               数据契约（六种玩法）
+│  ├─ expr.ts                沙盒公式求值器（不 eval、不 new Function）
+│  └─ InteractiveLab.tsx     六种玩法的通用实现
 ├─ mw-ch04/                  手写精修样板（四个模块，物理拖拽 + 时序回放）
 │  └─ CacheDesignLab.tsx     单文件，可直接拷走
+├─ verify/                   真浏览器验收（Edge headless + playwright-core）
+│  ├─ verify_lab.mjs         四玩法回归（索引 / 配对 / 打靶 / 挖空 / mw-ch04）
+│  ├─ verify_handmade.mjs    sandbox 全组合扫描 + debug 拼装
+│  └─ audit_labs.mjs         16 视口横向溢出审计
 ├─ src/
 │  ├─ main.tsx               预览台（索引 / #/mw-ch04 / #/<subject>/<chapter>）
 │  └─ data/
@@ -42,8 +47,8 @@ viz/interactive/
 | `match` | **配对连线**：左「出事的写法」↔ 右「正确做法」，点左再点右，真画贝塞尔线 | 一对一 id 相等 | `pitfalls.md` 每条陷阱显式标出的正解（「正确做法 / 怎么改 / ✅」三套写法都认） |
 | `boss` | **真题打靶**：答对削一层护甲，连答通关 | `answer.correct` 字母键 | `exercises.json` 的 choice 题（只读，文件不改） |
 | `fill` | **代码挖空**：把缺失的标识符拖回代码空位 | token === 该空答案 | concept 代码块里的关键标识符（同块唯一、非内建、小写开头） |
-| `sandbox` | 沙盒推演（手工精修） | 参数 → 实测曲线 | `examples/*.json` 的确定性输出 |
-| `debug` | 代码拼装（手工精修） | 块 → 槽位语义 | 同上 |
+| `sandbox` | **沙盒推演**：拖旋钮/点档位 → 指标实时重算 → 所有判据变绿才通关 | 判据表达式全部为真 | 手工精修：`content/_handmade/labs.json`（作者源 `scripts/_author_labs.py`） |
+| `debug` | **代码拼装**：骨架留整行空位，把语句块拖进去，错块会说自己错在哪 | 块归属的槽位 === 落点 | 手工精修：同上 |
 
 `boss` 与 `fill` 的选项/token 都会**确定性洗牌**（seed = 章节指纹），
 同一题每次打开顺序一致、可复现，但答案位置不再固定（原章三题答案全 B 也不送分）。
@@ -100,13 +105,15 @@ python scripts/gen_interactive.py --only middleware/mw-ch04 -v
 | 指标 | 数值 |
 |---|---|
 | 章节 | **165 / 165**（16 学科，全部有可交互模块） |
-| 模块总数 | **428**，平均 2.59 / 章 |
+| 模块总数 | **471**，平均 2.85 / 章 |
 | boss | 165 章（每章 1~6 题，从 choice 真题抽） |
 | match | **151 章**（595 对） |
 | fill | 99 章 |
+| sandbox | **31 章**（C/C++ 主线 9 + 408 主线 22） |
+| debug | **12 章**（C/C++ 主线 11 + 408 主线 1） |
 | sequence | 13 章 |
 
-每章模块数分布：**1 个 → 0 章**，2 个 → 74 章，3 个 → 84 章，4 个 → 7 章。
+每章模块数分布：**1 个 → 0 章**，2 个 → 48 章，3 个 → 93 章，4 个 → 24 章。
 **任何一章都至少「配对 + 打靶」两种玩法。**
 
 ### 为什么 sequence 只有 13 章（不是 165）
@@ -262,10 +269,69 @@ node .scratch/verify_all.mjs                                        # mw-ch04 �
 
 ---
 
-## 9. 已知边界
+12. **`log` 只在校验器里实现了**：`expr.ts` 一开始只写了 `log2/log10`，而数据里用 `log(n)/log(f)`，
+    前端整章指标显示 `—`（求值抛错被 catch 成 NaN），Python 守门却报"不认识函数 log"——
+    两边报的错不一样，恰恰说明两套实现都要跑。
+13. **校验器自己短路了**：Python 版把 `&&` 写成 `v and cmp()`，`or`/`and` 短路导致右边根本没解析，
+    解析器卡在下一个 token 上，报"期望 )"——看着像数据写错，其实是校验器的 bug。
+14. **只改 hash 不会重新加载**：验收脚本逐章 `goto('#/xx')` 时不 reload，等到的仍是上一章的 DOM，
+    断言于是拿 A 章的旋钮去评 B 章（第一版就这么"全绿"了一次）。改成 `goto + reload` 并等
+    `[data-chapter="<key>"]` 出现才对。
 
-- **`sandbox` / `debug` 只有 mw-ch04 有**：这两种需要「连续参数 + 实测曲线」「语义化拼装」，
-  自动抽取做不可靠，目前是手工精修。要铺到别的章，按 mw-ch04 的写法加一份即可，组件层不用改。
+## 9. 手工精修 · sandbox / debug 是怎么写出来的
+
+这两种玩法没法自动抽 —— 「该拖哪个旋钮」「缺的是哪条语句」都是作者判断，正则猜不出来。
+所以数据单独存一份，走三段式：
+
+```
+scripts/_author_labs.py         作者源（Python 三引号装代码片段，写 JSON 手打 
+ 太容易错）
+        ↓
+content/_handmade/labs.json     生成物：43 章 × 1 个模块（sandbox 31 / debug 12）
+        ↓  python scripts/gen_interactive.py
+content/<subj>/<chapter>/interactive.json   精修模块排在最前（页签默认落它上面）
+```
+
+覆盖率：**C/C++ 主线 20 章 + 408 主线 23 章，章章都有一个**。
+类型按「这一章的知识点有没有可算的量」分：
+
+| 走 sandbox 的（有连续量可推） | 走 debug 的（是个逐句判断） |
+|---|---|
+| 整型宽度与溢出、vector 扩容因子、虚表与对象大小、Amdahl、连接池容量、SSO 阈值、字段顺序对齐 | 默认参数写两遍、`delete` 忘配对、`erase` 迭代器失效、`return std::move(v)`、`while(!eof())`、宏不加括号、头文件里的全局变量、缺 `typename`、CMake 链接方向、`Cache-Control` 用错 |
+| 顺序表 vs 链表、循环队列容量、完全二叉树高度、邻接矩阵 vs 表、装填因子与 ASL、稳定排序、IEEE754 位宽、AMAT、RR 时间片、多级页表、BDP、CPI/MIPS、指令格式、流水线、总线带宽、轮询/中断/DMA、并查集优化、缓冲区大小、索引结点、磁盘访问时间、香农、停等利用率 | （408 只有这 1 个） |
+
+### sandbox 的公式为什么用表达式而不是写死的数字
+
+`metrics[].expr` 是一段表达式（`ceil(log(n) / log(factor))`），参数和前面算出的指标都能引用。
+理由：一张表要同时服务「32 位 4KB 页」和「48 位 64KB 页」，写死数字就只能演示一种参数组合；
+而**学生自己拖出来的反例才是真反例**，作者编的数字说服不了人。
+
+求值器 `lab/expr.ts` 是手写递归下降，**不用 `eval` / `new Function`**：这份 JSON 将来会被别的宿主
+（App 内嵌、分享页）复用，一旦有人能改数据就等于能执行任意脚本。只放行数字、标识符、
+四则/幂/比较/逻辑/三元 + 13 个纯函数（`min/max/abs/ceil/floor/round/sqrt/pow/log/log2/log10/exp/clamp/if`）。
+
+### 守门：`scripts/audit_handmade_labs.py`
+
+它回答两个只有作者才会犯、玩家一定会踩的问题：
+
+1. **这一关能不能通关**：把参数区间按 step 穷举（组合超过 2 万组就按"点最多的轴减半"抽样），
+   确认至少有一组参数让所有 `checks` 为真。一个括号写错，前端就是一排 ✗ 且永远不变 ✓ ——
+   玩家拖到手抽筋也不知道是数据错了。
+2. **开局是不是已经通关**：默认参数就全绿，等于模块一进来就"通过"，白给。
+
+浏览器侧 `verify_handmade.mjs` 用**另一套独立实现**（TS 求值器）把同一件事再做一遍，
+两边结论一致才说明没有语义漂移 —— 只跑 Python 会漏掉"TS 里 `log` 没实现"这类事故（真发生过）。
+
+### debug 的错块必须带 `why`
+
+「错了」不是反馈，「这块是修内存泄漏的，不是修并发」才是。所以每个干扰块都写自己的
+`why`，落错时凯喵气泡说的是那句话；正确块用 `for` 指向槽位，干扰块 `for` 留空。
+
+## 10. 已知边界
+
+- **`sandbox` / `debug` 覆盖 C/C++ 与 408 两条主线（43 章）**，其余 122 章还是四种自动玩法。
+  要铺到别的章不用改组件：往 `scripts/_author_labs.py` 加一段数据，跑 `_author_labs.py` +
+  `audit_handmade_labs.py` + `gen_interactive.py` 三条命令即可（见第 9 节）。
 - **「只有打靶」的章节已清零**（2026-11-03）。原来有 29 章只挂了一个 boss 模块，
   因为这些章既没有可用的 pitfall 正解结构、也没有合格代码块。补齐分两步：
   先让抽取器认 `✅` 与 `*怎么改*：` 两套等价标记（自动补回 19 章，不用改内容），

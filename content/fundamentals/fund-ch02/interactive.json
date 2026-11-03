@@ -2,7 +2,7 @@
   "chapter": "fund-ch02",
   "subject": "fundamentals",
   "title": "栈、队列与串",
-  "fingerprint": "74820a12de",
+  "fingerprint": "916197c4a5",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,67 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "数组 m 格，循环队列能装几个",
+      "brief": "“牺牲一个单元”判满时，m 格只能存 m-1 个。加一个 size 计数器才吃得满。拖两个旋钮看利用率。",
+      "params": [
+        {
+          "key": "m",
+          "label": "数组长度",
+          "min": 4,
+          "max": 64,
+          "step": 4,
+          "value": 16,
+          "unit": "格"
+        },
+        {
+          "key": "mode",
+          "label": "判满方式",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "牺牲一格",
+            "加 size 计数器"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "cap",
+          "label": "可存元素",
+          "expr": "m - (1 - mode)",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "util",
+          "label": "空间利用率",
+          "expr": "(m - (1 - mode)) / m",
+          "fmt": "pct"
+        },
+        {
+          "key": "worstPct",
+          "label": "最坏浪费",
+          "expr": "(1 - mode) / m * 100",
+          "unit": "%",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "cap == m",
+          "label": "一个格子都不浪费"
+        },
+        {
+          "expr": "util >= 0.9",
+          "label": "利用率至少 90%"
+        }
+      ],
+      "insight": "队空 front==rear、队满 front==rear，两个状态撞在一起，所以要么牺牲一格，要么记 size / 加 tag。牺牲一格在 m=16 时浪费 6%，m 越小比例越难看 —— 408 里两种写法都考。"
+    },
     {
       "kind": "match",
       "pairs": [
