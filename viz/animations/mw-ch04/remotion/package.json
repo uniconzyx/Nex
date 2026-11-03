@@ -1,0 +1,24 @@
+{
+  "name": "kaimao-mw-ch04-remotion",
+  "private": true,
+  "version": "1.0.0",
+  "description": "《凯喵Code试炼录》mw-ch04 实战/试题场景动画",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "render:s03": "remotion render src/index.ts S03Breakdown ../out/final/S03-breakdown.mp4 --browser-executable=\"C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe\"",
+    "render:s05": "remotion render src/index.ts S05WriteOrder ../out/final/S05-write-order.mp4 --browser-executable=\"C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe\"",
+    "render:s06": "remotion render src/index.ts S06Quiz ../out/final/S06-quiz.mp4 --browser-executable=\"C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe\"",
+    "render:s07": "remotion render src/index.ts S07Recap ../out/final/S07-recap.mp4 --browser-executable=\"C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe\"",
+    "render:all": "npm run render:s03 && npm run render:s05 && npm run render:s06 && npm run render:s07"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.540",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "remotion": "4.0.540"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.2",
+    "typescript": "5.9.3"
+  }
+}

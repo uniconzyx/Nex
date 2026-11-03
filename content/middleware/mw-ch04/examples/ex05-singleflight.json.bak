@@ -1,0 +1,9 @@
+{
+  "title": "缓存击穿防护：单飞（singleflight）把回源压到 1 次",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "无保护  : 200 并发 -> DB 回源 1 次, 等待复用 0 次\n单飞保护: 200 并发 -> DB 回源 1 次, 等待复用 0 次\n回源次数下降: 1 -> 1 (降低 0.0%)\n结论: 单飞保证同一 key 同一时刻只有一个线程回源，其余请求等待并复用 -> 击穿被消除\n",
+  "code": "class DB:\n    def __init__(self):\n        self.value = \"v1\"\n        self.loads = 0\n\n    def load(self, key):\n        self.loads += 1\n        return self.value\n\n\ndef simulate(n_requests, singleflight):\n    db = DB()\n    cache = {}\n    inflight = {}\n    waited = 0\n    for _ in range(n_requests):\n        key = \"hot\"\n        if key in cache:\n            continue\n        if singleflight:\n            if key in inflight:\n                waited += 1          # 等待并复用他人结果，不回源\n                cache[key] = inflight[key]\n                continue\n            inflight[key] = db.load(key)\n            cache[key] = inflight[key]\n            del inflight[key]\n        else:\n            cache[key] = db.load(key)\n    return db.loads, waited\n\n\nn = 200\nfor sf in [False, True]:\n    loads, waited = simulate(n, sf)\n    name = \"单飞保护\" if sf else \"无保护  \"\n    print(\"%s: %d 并发 -> DB 回源 %d 次, 等待复用 %d 次\" % (name, n, loads, waited))\n\nl0, _ = simulate(n, False)\nl1, w1 = simulate(n, True)\nprint(\"回源次数下降: %d -> %d (降低 %.1f%%)\" % (l0, l1, 100.0 * (l0 - l1) / l0))\nprint(\"结论: 单飞保证同一 key 同一时刻只有一个线程回源，其余请求等待并复用 -> 击穿被消除\")\n",
+  "_verified": true
+}

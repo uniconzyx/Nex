@@ -1,0 +1,16 @@
+# ============ mw-ch04 教学动画 · 本机渲染环境（不入库）============
+# 依赖树（约 300MB，npm ci 可复原）
+remotion/node_modules/
+
+# Manim 中间产物：partial_movie_files、逐帧 Pango 文本图、缓存
+out/manim_media/
+manim/media/
+__pycache__/
+
+# Remotion 直出目录（最终视频统一放 out/final/，由 package.json 指定）
+remotion/out/
+
+# 自检截图 / 抽帧 / 调试脚本产物
+out/_check/
+out/_errata_check/
+*.log

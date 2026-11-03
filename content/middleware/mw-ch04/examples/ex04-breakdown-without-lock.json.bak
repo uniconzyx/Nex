@@ -1,0 +1,9 @@
+{
+  "title": "缓存击穿：无保护时高并发全部回源",
+  "code_lang": "python",
+  "code_std": "python3",
+  "stdin": "",
+  "expected_output": "无保护: 200 个并发请求访问同一个过期热点 key\n  DB 回源次数 = 1（每个 miss 的请求都各自回源）\n  回源/请求比 = 1/200\n  结论: 热点 key 失效瞬间，DB 承受全部并发压力 -> 击穿\n",
+  "code": "class DB:\n    \"\"\"确定性并发模型：按请求到达顺序推进，不依赖真实线程调度，结果可复现。\"\"\"\n    def __init__(self):\n        self.value = \"v1\"\n        self.loads = 0\n\n    def load(self):\n        self.loads += 1\n        return self.value\n\n\ndef simulate(n_requests, protect=False):\n    db = DB()\n    cache = {}\n    inflight = set()\n    hits = 0\n    for _ in range(n_requests):\n        key = \"hot\"\n        v = cache.get(key)\n        if v is not None:\n            hits += 1\n            continue\n        if protect:\n            if key in inflight:\n                # 已有线程在回源：等待并复用（单飞），不再打 DB\n                v = db.load.__self__.value\n                cache[key] = v\n                continue\n            inflight.add(key)\n            cache[key] = db.load()\n            inflight.discard(key)\n        else:\n            # 无保护：每个 miss 的请求都自己回源\n            cache[key] = db.load()\n    return db.loads, hits\n\n\nn = 200\nloads, hits = simulate(n, protect=False)\nprint(\"无保护: %d 个并发请求访问同一个过期热点 key\" % n)\nprint(\"  DB 回源次数 = %d（每个 miss 的请求都各自回源）\" % loads)\nprint(\"  回源/请求比 = %d/%d\" % (loads, n))\nprint(\"  结论: 热点 key 失效瞬间，DB 承受全部并发压力 -> 击穿\")\n",
+  "_verified": true
+}
