@@ -2,7 +2,7 @@
   "chapter": "ml-ch08",
   "subject": "ml",
   "title": "强化学习：马尔可夫决策过程与 Q-learning",
-  "fingerprint": "254dd1c1c7",
+  "fingerprint": "2a08d956cf",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,61 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "折扣因子 γ 取多大才看得远",
+      "brief": "γ 太小只看眼前一步，γ 太大几乎不折扣、价值估计方差爆炸。拖 γ 和视野长度看有效规划步数。",
+      "params": [
+        {
+          "key": "gamma",
+          "label": "折扣因子 γ",
+          "min": 0.5,
+          "max": 0.95,
+          "step": 0.01,
+          "value": 0.5
+        },
+        {
+          "key": "H",
+          "label": "回合长度",
+          "min": 10,
+          "max": 50,
+          "step": 5,
+          "value": 30,
+          "unit": "步"
+        }
+      ],
+      "metrics": [
+        {
+          "key": "totalReturn",
+          "label": "累计折扣回报",
+          "expr": "(1 - pow(gamma, H)) / (1 - gamma)",
+          "unit": "单位",
+          "fmt": "fix2"
+        },
+        {
+          "key": "effHorizon",
+          "label": "有效视野",
+          "expr": "floor(log(0.05) / log(gamma))",
+          "unit": "步",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "gamma >= 0.8",
+          "label": "折扣因子足够大（有效视野不短于几十步）"
+        },
+        {
+          "expr": "gamma <= 0.95",
+          "label": "但不接近 1（否则训练不稳、信用分配难）"
+        },
+        {
+          "expr": "effHorizon >= 20",
+          "label": "有效视野 ≥ 20 步（能规划较远的未来）"
+        }
+      ],
+      "insight": "折扣回报 G=Σγᵗr。γ=0.9 时单步权重每步打九折，约 22 步后衰减到 5% 以下——这就是“有效视野”。γ 太小鼠目寸光，γ 太大长期信用分配困难。ε-贪心之外，γ 是 RL 里最容易被调崩的旋钮。"
+    },
     {
       "kind": "boss",
       "questions": [

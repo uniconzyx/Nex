@@ -2,7 +2,7 @@
   "chapter": "ai-ch01",
   "subject": "ai",
   "title": "深度学习基础：张量、前向与反向传播",
-  "fingerprint": "8822fef74f",
+  "fingerprint": "8acb5fa2c4",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,73 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "一次矩阵乘要多少 FLOPs",
+      "brief": "全连接层就是一次大矩阵乘。维度每翻一倍，计算量涨八倍。拖三个维度看单层前向耗时。",
+      "params": [
+        {
+          "key": "M",
+          "label": "输出维度",
+          "min": 64,
+          "max": 1856,
+          "step": 256,
+          "value": 64
+        },
+        {
+          "key": "N",
+          "label": "输入维度",
+          "min": 64,
+          "max": 1856,
+          "step": 256,
+          "value": 64
+        },
+        {
+          "key": "K",
+          "label": "隐维度",
+          "min": 64,
+          "max": 1856,
+          "step": 256,
+          "value": 64
+        },
+        {
+          "key": "tflops",
+          "label": "算力",
+          "min": 10,
+          "max": 100,
+          "step": 10,
+          "value": 10,
+          "unit": "TFLOPS"
+        }
+      ],
+      "metrics": [
+        {
+          "key": "flops",
+          "label": "浮点运算量",
+          "expr": "2 * M * N * K",
+          "unit": "FLOPs",
+          "fmt": "int"
+        },
+        {
+          "key": "ms",
+          "label": "前向耗时",
+          "expr": "2 * M * N * K / (tflops * 10000000000000) * 1000",
+          "unit": "ms",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "ms <= 50",
+          "label": "单层前向不超 50ms（实时推理预算内）"
+        },
+        {
+          "expr": "M >= 512 && N >= 512 && K >= 512",
+          "label": "三个维度都得上规模（小矩阵体现不出计算量）"
+        }
+      ],
+      "insight": "矩阵乘 FLOPs = 2·M·N·K（乘加各算一次）。维度翻倍 = 每个维度 ×2，总量 ×8。所以大模型里“宽一点”比“深一点”贵得多——也是 MoE 把“宽”稀疏化的动机。"
+    },
     {
       "kind": "match",
       "pairs": [

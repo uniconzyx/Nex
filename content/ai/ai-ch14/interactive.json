@@ -2,7 +2,7 @@
   "chapter": "ai-ch14",
   "subject": "ai",
   "title": "多模态落地：图文对齐、OCR→VLM 流水线、多模态 RAG、成本与延迟",
-  "fingerprint": "2dc400e8a3",
+  "fingerprint": "0286ace003",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,78 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "图像分辨率拉多高清才值",
+      "brief": "VLM 把图像切成 14×14 的小块，每块一个视觉 token——分辨率每翻一倍，token 数翻四倍、成本和延迟都涨。拖分辨率和单价看单图账单。",
+      "params": [
+        {
+          "key": "res",
+          "label": "分辨率",
+          "min": 224,
+          "max": 700,
+          "step": 28,
+          "value": 224,
+          "unit": "像素"
+        },
+        {
+          "key": "textTokens",
+          "label": "文本 token",
+          "min": 50,
+          "max": 500,
+          "step": 50,
+          "value": 50,
+          "unit": "token"
+        },
+        {
+          "key": "price",
+          "label": "单价",
+          "min": 0.001,
+          "max": 0.01,
+          "step": 0.001,
+          "value": 0.001,
+          "unit": "$/token"
+        }
+      ],
+      "metrics": [
+        {
+          "key": "visTokens",
+          "label": "视觉 token",
+          "expr": "(res / 14) * (res / 14)",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "totalTokens",
+          "label": "总 token",
+          "expr": "(res / 14) * (res / 14) + textTokens",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "cost",
+          "label": "单图成本",
+          "expr": "((res / 14) * (res / 14) + textTokens) * price",
+          "unit": "$",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "cost <= 5",
+          "label": "单张图成本压在 5 单位内（分辨率别无脑拉满）"
+        },
+        {
+          "expr": "res >= 336",
+          "label": "分辨率至少 336（太低 VLM 看不清细节）"
+        },
+        {
+          "expr": "visTokens >= 576",
+          "label": "视觉 token 够多（res≥336 → 24×24=576）"
+        }
+      ],
+      "insight": "视觉 token 数 = (分辨率/14)²，所以分辨率翻倍、token 翻四倍。224→448 看着只是“清晰点”，成本已经是 4 倍。多模态落地的成本优化第一招就是“按任务动态降分辨率”：OCR 要高清，分类 336 足够。"
+    },
     {
       "kind": "sequence",
       "heading": "链路拆解：版面检测 → 文本识别 →",

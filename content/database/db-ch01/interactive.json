@@ -2,7 +2,7 @@
   "chapter": "db-ch01",
   "subject": "database",
   "title": "关系模型与 SQL 基础（DDL/DML/SELECT/JOIN/聚合/分组）",
-  "fingerprint": "cd81c61cc5",
+  "fingerprint": "1438f1c41e",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,79 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "定长 CHAR 还是变长 VARCHAR",
+      "brief": "用户名、邮箱这种长短不一的字段，用 CHAR 会按声明宽度全补齐，白白浪费空间。拖三个旋钮看存储差异。",
+      "params": [
+        {
+          "key": "nRows",
+          "label": "表行数",
+          "min": 1000,
+          "max": 100000,
+          "step": 1000,
+          "value": 100000,
+          "unit": "行"
+        },
+        {
+          "key": "avgLen",
+          "label": "平均长度",
+          "min": 10,
+          "max": 100,
+          "step": 10,
+          "value": 10,
+          "unit": "字符"
+        },
+        {
+          "key": "declLen",
+          "label": "声明宽度",
+          "min": 20,
+          "max": 100,
+          "step": 10,
+          "value": 100,
+          "unit": "字符"
+        },
+        {
+          "key": "useVarchar",
+          "label": "类型",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "CHAR 定长",
+            "VARCHAR 变长"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "wastePct",
+          "label": "空间浪费",
+          "expr": "if(useVarchar == 1, 0, (declLen - avgLen) / declLen * 100)",
+          "unit": "%",
+          "fmt": "fix2"
+        },
+        {
+          "key": "bytes",
+          "label": "占用",
+          "expr": "if(useVarchar == 1, nRows * avgLen, nRows * declLen)",
+          "unit": "B",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "wastePct <= 20",
+          "label": "空间浪费不超过 20%（别用定长 CHAR 装长短不一的字段）"
+        },
+        {
+          "expr": "nRows >= 50000",
+          "label": "而且得是万行级以上的真实表"
+        }
+      ],
+      "insight": "CHAR 按声明宽度补齐，邮箱声明 100 字符、实际 20，剩下 80 都是空格；VARCHAR 按实际长度存。短字段 + 大宽度时，CHAR 浪费能到 80%。DDL 选型看着小，亿级行上一存就是几十 GB。"
+    },
     {
       "kind": "sequence",
       "heading": "五、UPDATE / DELETE 的安全流程",

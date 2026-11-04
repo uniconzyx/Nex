@@ -2,7 +2,7 @@
   "chapter": "db-ch07",
   "subject": "database",
   "title": "备份恢复与权限安全",
-  "fingerprint": "bd4ed766d7",
+  "fingerprint": "1b84f65a78",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,84 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "备份策略决定能丢多少",
+      "brief": "只做每周全量，最坏要丢一整周数据（RPO=7天）；加增量把 RPO 压到小时级，但存储会涨。拖两个旋钮平衡。",
+      "params": [
+        {
+          "key": "totalGB",
+          "label": "数据总量",
+          "min": 100,
+          "max": 5000,
+          "step": 100,
+          "value": 1000,
+          "unit": "GB"
+        },
+        {
+          "key": "hasIncr",
+          "label": "备份方式",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "仅全量",
+            "全量 + 增量"
+          ]
+        },
+        {
+          "key": "incrHours",
+          "label": "增量间隔",
+          "min": 1,
+          "max": 24,
+          "step": 1,
+          "value": 1,
+          "unit": "小时"
+        }
+      ],
+      "metrics": [
+        {
+          "key": "fullGB",
+          "label": "全量备份",
+          "expr": "totalGB * 0.3",
+          "unit": "GB",
+          "fmt": "int"
+        },
+        {
+          "key": "incrGB",
+          "label": "每日增量",
+          "expr": "totalGB * 0.01 * if(hasIncr == 1, 24 / incrHours, 0)",
+          "unit": "GB",
+          "fmt": "int"
+        },
+        {
+          "key": "storGB",
+          "label": "备份总存储",
+          "expr": "totalGB * 0.3 + totalGB * 0.01 * if(hasIncr == 1, 24 / incrHours, 0)",
+          "unit": "GB",
+          "fmt": "int"
+        },
+        {
+          "key": "rpoHours",
+          "label": "恢复点目标",
+          "expr": "if(hasIncr == 1, incrHours, 168)",
+          "unit": "小时",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "rpoHours <= 24",
+          "label": "RPO ≤ 1 天（不能靠每周全量，真出事丢一周）"
+        },
+        {
+          "expr": "storGB <= 2000",
+          "label": "备份存储不超过 2TB"
+        }
+      ],
+      "insight": "RPO 是“最多能丢多久的数据”。只做全量且一周一次，最坏丢 7 天；把增量频率提到每小时，RPO 就压到 1 小时，代价只是多存一份当天增量。容灾第一课是先定 RPO/RTO，再反推备份频率。"
+    },
     {
       "kind": "sequence",
       "heading": "二、时间点恢复（PITR）的完整流程",

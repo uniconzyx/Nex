@@ -2,7 +2,7 @@
   "chapter": "ml-ch09",
   "subject": "ml",
   "title": "支持向量机与核方法",
-  "fingerprint": "16711ec4e5",
+  "fingerprint": "0a964191ab",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,71 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "SVM 的 C 越大间隔越小",
+      "brief": "软间隔 SVM 里 C 控制“容忍误分类”的代价：C 太大硬要把样本全分开，间隔被压到极小（过拟合）；C 太小又留误分类。拖 C 和线性可分性找平衡。",
+      "params": [
+        {
+          "key": "C",
+          "label": "正则化 C",
+          "min": 0.1,
+          "max": 100,
+          "step": 0.1,
+          "value": 100
+        },
+        {
+          "key": "separable",
+          "label": "数据可分性",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 1,
+          "labels": [
+            "近似可分",
+            "严格线性可分"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "wNorm",
+          "label": "||w||",
+          "expr": "log10(C) + 2",
+          "unit": "单位",
+          "fmt": "fix2"
+        },
+        {
+          "key": "margin",
+          "label": "分类间隔",
+          "expr": "2 / (log10(C) + 2)",
+          "unit": "单位",
+          "fmt": "fix2"
+        },
+        {
+          "key": "misclassified",
+          "label": "误分类数",
+          "expr": "if(C < 1 && separable == 0, 3, 0)",
+          "unit": "个",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "margin >= 1.0",
+          "label": "间隔够大（至少 1.0，泛化好）"
+        },
+        {
+          "expr": "misclassified == 0",
+          "label": "没有误分类样本"
+        },
+        {
+          "expr": "C <= 50",
+          "label": "C 不过大（否则间隔被压到极小，过拟合）"
+        }
+      ],
+      "insight": "间隔 = 2/‖w‖，而 ‖w‖ 随 C 增大而增大（对误分类的惩罚更重）。C→∞ 逼出硬间隔，但间隔塌缩、对噪声极敏感；C 太小又容忍太多误分类。实践中用验证集挑 C，而不是训练集。"
+    },
     {
       "kind": "sequence",
       "heading": "🧑‍💻 程序员的判断流程图",

@@ -2,7 +2,7 @@
   "chapter": "ai-ch12",
   "subject": "ai",
   "title": "SFT 数据工程：任务 schema、合成数据过滤、去重与污染、难例挖掘、标注一致性 Kappa",
-  "fingerprint": "35843a6e45",
+  "fingerprint": "1d6f4a1aaf",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,56 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "标注一致性够不够用",
+      "brief": "两个标注员，光看“都标对了”还不够——随机也能蒙对一部分。Cohen's κ 扣掉随机一致率后，才算真一致。拖两个一致率看 κ。",
+      "params": [
+        {
+          "key": "po",
+          "label": "观察一致率",
+          "min": 0.5,
+          "max": 1.0,
+          "step": 0.01,
+          "value": 0.85
+        },
+        {
+          "key": "pe",
+          "label": "随机期望一致率",
+          "min": 0.1,
+          "max": 0.9,
+          "step": 0.01,
+          "value": 0.6
+        }
+      ],
+      "metrics": [
+        {
+          "key": "kappa",
+          "label": "Cohen κ",
+          "expr": "(po - pe) / (1 - pe)",
+          "unit": "系数",
+          "fmt": "fix2"
+        },
+        {
+          "key": "agree",
+          "label": "原始一致",
+          "expr": "po * 100",
+          "unit": "%",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "kappa >= 0.8",
+          "label": "κ ≥ 0.8（几乎完全一致，标注可用）"
+        },
+        {
+          "expr": "po >= 0.9",
+          "label": "观察一致率 ≥ 90%（标注本身得靠谱）"
+        }
+      ],
+      "insight": "κ=(Po−Pe)/(1−Pe)：Po 是实际一致率，Pe 是两个标注员“随便标也能撞上”的概率。Po 高但 Pe 也高（比如类别极不平衡），κ 照样低。SFT 数据质量的第一道关就是标注重复率，κ<0.6 的数据直接重标。"
+    },
     {
       "kind": "match",
       "pairs": [

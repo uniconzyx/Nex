@@ -2,7 +2,7 @@
   "chapter": "ml-ch03",
   "subject": "ml",
   "title": "神经网络：推理、训练与多分类",
-  "fingerprint": "38cfb39933",
+  "fingerprint": "5123563bed",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,65 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "批大小卡在哪最稳",
+      "brief": "批太小梯度噪声大、训练抖；批太大每轮更新步数太少、收敛慢。拖批大小和数据量找甜点。",
+      "params": [
+        {
+          "key": "B",
+          "label": "批大小",
+          "min": 16,
+          "max": 512,
+          "step": 16,
+          "value": 16,
+          "unit": "样本"
+        },
+        {
+          "key": "N",
+          "label": "样本总量",
+          "min": 1000,
+          "max": 100000,
+          "step": 1000,
+          "value": 100000,
+          "unit": "样本"
+        }
+      ],
+      "metrics": [
+        {
+          "key": "stepsPerEpoch",
+          "label": "每轮更新步数",
+          "expr": "N / B",
+          "unit": "步",
+          "fmt": "int"
+        },
+        {
+          "key": "gradNoise",
+          "label": "梯度噪声指数",
+          "expr": "100 / sqrt(B)",
+          "unit": "%",
+          "fmt": "fix2"
+        },
+        {
+          "key": "totalUpdates",
+          "label": "总更新步数",
+          "expr": "30 * N / B",
+          "unit": "步",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "gradNoise <= 20",
+          "label": "梯度噪声指数 ≤ 20（批太小噪声大、训练抖）"
+        },
+        {
+          "expr": "stepsPerEpoch >= 50",
+          "label": "每轮至少 50 步更新（批太大步数太少、收敛慢）"
+        }
+      ],
+      "insight": "批大小 B 决定两件事：梯度估计的方差 ∝ 1/√B，每轮更新步数 = N/B。B 太小方差爆炸、loss 上下乱跳；B 太大每轮只走几步、要更多轮才收敛。甜点通常是“方差可接受 + 每轮几十到几百步”。"
+    },
     {
       "kind": "match",
       "pairs": [

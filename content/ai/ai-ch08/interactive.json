@@ -2,7 +2,7 @@
   "chapter": "ai-ch08",
   "subject": "ai",
   "title": "LLM 应用工程：推理优化、评测、可观测性与安全",
-  "fingerprint": "021879ea7d",
+  "fingerprint": "884e59f8dc",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,71 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "提示缓存命中率决定成本",
+      "brief": "系统提示每次都前置、几乎不变，命中缓存后这部分不再计费。命中率越低，越是把同样的 token 反复付钱。拖三个旋钮看单价。",
+      "params": [
+        {
+          "key": "shared",
+          "label": "共享前缀 token",
+          "min": 100,
+          "max": 2000,
+          "step": 100,
+          "value": 1000,
+          "unit": "token"
+        },
+        {
+          "key": "unique",
+          "label": "每请求独有",
+          "min": 200,
+          "max": 2000,
+          "step": 100,
+          "value": 2000,
+          "unit": "token"
+        },
+        {
+          "key": "hitRate",
+          "label": "缓存命中率",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "value": 0,
+          "unit": "%"
+        }
+      ],
+      "metrics": [
+        {
+          "key": "costPerReq",
+          "label": "单请求成本",
+          "expr": "unique + shared * (1 - hitRate / 100)",
+          "unit": "token",
+          "fmt": "int"
+        },
+        {
+          "key": "savingPct",
+          "label": "省下比例",
+          "expr": "shared * hitRate / 100 / (unique + shared) * 100",
+          "unit": "%",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "costPerReq <= 800",
+          "label": "单请求成本压在 800 token 以内（共享前缀要真正被复用）"
+        },
+        {
+          "expr": "hitRate >= 80",
+          "label": "缓存命中率 ≥ 80%（系统提示要稳定前置）"
+        },
+        {
+          "expr": "unique <= 1500",
+          "label": "独有内容别太长（缓存只省共享部分）"
+        }
+      ],
+      "insight": "prompt caching 把“稳定前置的 token”缓存下来，命中后这部分计费打一折甚至免费。命中率从 0 提到 90%，成本能砍掉一大截——前提是系统提示真的稳定不变、且放在最前面。多轮对话、固定 few-shot 都是它的主场。"
+    },
     {
       "kind": "match",
       "pairs": [

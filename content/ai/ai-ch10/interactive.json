@@ -2,7 +2,7 @@
   "chapter": "ai-ch10",
   "subject": "ai",
   "title": "训练工程与规模化：从「能跑通」到「能训起来」",
-  "fingerprint": "3237491373",
+  "fingerprint": "f675ddd1ca",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,74 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "单卡放不下就切分",
+      "brief": "一个 7B 模型训练态要吃掉上百 GB 显存（参数+梯度+优化器状态）。单卡装不下时，数据并行是复制、模型并行是切分。拖参数量和卡数看单卡压力。",
+      "params": [
+        {
+          "key": "P",
+          "label": "参数量",
+          "min": 1,
+          "max": 70,
+          "step": 1,
+          "value": 7,
+          "unit": "B"
+        },
+        {
+          "key": "G",
+          "label": "GPU 数",
+          "min": 1,
+          "max": 8,
+          "step": 1,
+          "value": 8,
+          "unit": "张"
+        },
+        {
+          "key": "mode",
+          "label": "并行方式",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "数据并行(全复制)",
+            "模型并行(切分)"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "modelMemGB",
+          "label": "模型总显存",
+          "expr": "P * 16",
+          "unit": "GB",
+          "fmt": "int"
+        },
+        {
+          "key": "perGPU_GB",
+          "label": "单卡显存",
+          "expr": "P * 16 / if(mode == 1, G, 1)",
+          "unit": "GB",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "perGPU_GB <= 24",
+          "label": "单卡显存 ≤ 24GB（消费级/主流训练卡放得下）"
+        },
+        {
+          "expr": "mode == 1",
+          "label": "用模型并行切分（大模型的唯一出路）"
+        },
+        {
+          "expr": "G >= 4",
+          "label": "至少用 4 张卡分摊"
+        }
+      ],
+      "insight": "训练态显存 ≈ 16 字节/参数（FP16 参数+梯度 8B，加上 FP32 主副本与 Adam 动量/方差 12B）。7B 模型就是 ~112GB，单卡放不下；模型并行把权重切片分到多卡，每卡只扛 1/G。数据并行只是复制，解决不了单模型太大。"
+    },
     {
       "kind": "match",
       "pairs": [

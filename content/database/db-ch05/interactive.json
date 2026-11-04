@@ -2,7 +2,7 @@
   "chapter": "db-ch05",
   "subject": "database",
   "title": "存储过程 / 触发器 / 自定义函数",
-  "fingerprint": "ea9e333c38",
+  "fingerprint": "592838a631",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,68 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "游标逐行还是集合操作",
+      "brief": "存储过程里用游标一行一行处理，和写一句集合操作 SQL，差距不在写法而在它扫了多少遍。拖批量和写法看总成本。",
+      "params": [
+        {
+          "key": "n",
+          "label": "批量行数",
+          "min": 1000,
+          "max": 100000,
+          "step": 1000,
+          "value": 100000,
+          "unit": "行"
+        },
+        {
+          "key": "useCursor",
+          "label": "写法",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 1,
+          "labels": [
+            "集合操作",
+            "游标逐行"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "cursorCost",
+          "label": "游标总成本",
+          "expr": "n * 50",
+          "unit": "单位",
+          "fmt": "int"
+        },
+        {
+          "key": "setCost",
+          "label": "集合操作成本",
+          "expr": "n",
+          "unit": "单位",
+          "fmt": "int"
+        },
+        {
+          "key": "totalCost",
+          "label": "实际成本",
+          "expr": "if(useCursor == 1, n * 50, n)",
+          "unit": "单位",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "totalCost <= 200000",
+          "label": "总处理成本压在 20 万以内（别用游标逐行）"
+        },
+        {
+          "expr": "n >= 50000",
+          "label": "而且得是五万行以上的批量操作"
+        }
+      ],
+      "insight": "游标对每一行都走一遍完整处理（n×50），集合操作让引擎一次扫完（n）。几万行时游标就是几百倍的差距，而且还会长时间占锁。存储过程里能写集合 SQL 就别用游标。"
+    },
     {
       "kind": "match",
       "pairs": [

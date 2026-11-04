@@ -2,6 +2,171 @@
  "_comment": "sandbox / debug 手工精修模块。由 scripts/_author_labs.py 生成，gen_interactive.py 并入各章 interactive.json。改内容请改作者源。",
  "version": 1,
  "chapters": {
+  "ai/ai-ch01": [
+   {
+    "kind": "sandbox",
+    "title": "一次矩阵乘要多少 FLOPs",
+    "brief": "全连接层就是一次大矩阵乘。维度每翻一倍，计算量涨八倍。拖三个维度看单层前向耗时。",
+    "params": [
+     {
+      "key": "M",
+      "label": "输出维度",
+      "min": 64,
+      "max": 1856,
+      "step": 256,
+      "value": 64
+     },
+     {
+      "key": "N",
+      "label": "输入维度",
+      "min": 64,
+      "max": 1856,
+      "step": 256,
+      "value": 64
+     },
+     {
+      "key": "K",
+      "label": "隐维度",
+      "min": 64,
+      "max": 1856,
+      "step": 256,
+      "value": 64
+     },
+     {
+      "key": "tflops",
+      "label": "算力",
+      "min": 10,
+      "max": 100,
+      "step": 10,
+      "value": 10,
+      "unit": "TFLOPS"
+     }
+    ],
+    "metrics": [
+     {
+      "key": "flops",
+      "label": "浮点运算量",
+      "expr": "2 * M * N * K",
+      "unit": "FLOPs",
+      "fmt": "int"
+     },
+     {
+      "key": "ms",
+      "label": "前向耗时",
+      "expr": "2 * M * N * K / (tflops * 10000000000000) * 1000",
+      "unit": "ms",
+      "fmt": "fix2"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "ms <= 50",
+      "label": "单层前向不超 50ms（实时推理预算内）"
+     },
+     {
+      "expr": "M >= 512 && N >= 512 && K >= 512",
+      "label": "三个维度都得上规模（小矩阵体现不出计算量）"
+     }
+    ],
+    "insight": "矩阵乘 FLOPs = 2·M·N·K（乘加各算一次）。维度翻倍 = 每个维度 ×2，总量 ×8。所以大模型里“宽一点”比“深一点”贵得多——也是 MoE 把“宽”稀疏化的动机。"
+   }
+  ],
+  "ai/ai-ch02": [
+   {
+    "kind": "sandbox",
+    "title": "卷积为什么比全连接省参数",
+    "brief": "同样把一张图映射到特征，全连接会给每个像素对都配一套权重；卷积靠“权重共享”只学一组小核。拖架构和维度看差距。",
+    "params": [
+     {
+      "key": "arch",
+      "label": "层类型",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 0,
+      "labels": [
+       "全连接",
+       "卷积"
+      ]
+     },
+     {
+      "key": "H",
+      "label": "图高",
+      "min": 32,
+      "max": 128,
+      "step": 32,
+      "value": 64,
+      "unit": "像素"
+     },
+     {
+      "key": "W",
+      "label": "图宽",
+      "min": 32,
+      "max": 128,
+      "step": 32,
+      "value": 64,
+      "unit": "像素"
+     },
+     {
+      "key": "Cin",
+      "label": "输入通道",
+      "min": 3,
+      "max": 32,
+      "step": 1,
+      "value": 3
+     },
+     {
+      "key": "Cout",
+      "label": "输出通道",
+      "min": 8,
+      "max": 64,
+      "step": 8,
+      "value": 8
+     }
+    ],
+    "metrics": [
+     {
+      "key": "convParams",
+      "label": "卷积参数量",
+      "expr": "3 * 3 * Cin * Cout + Cout",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "fcParams",
+      "label": "全连接参数量",
+      "expr": "(H * W * Cin) * (H * W * Cout)",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "params",
+      "label": "实际参数量",
+      "expr": "if(arch == 1, 3 * 3 * Cin * Cout + Cout, (H * W * Cin) * (H * W * Cout))",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "ratio",
+      "label": "全连接/卷积",
+      "expr": "(H * W * Cin) * (H * W * Cout) / (3 * 3 * Cin * Cout + Cout)",
+      "unit": "倍",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "params <= 500000",
+      "label": "参数量压在 50 万以内（大模型也扛得住）"
+     },
+     {
+      "expr": "arch == 1",
+      "label": "用卷积层（权重共享）而不是全连接"
+     }
+    ],
+    "insight": "卷积核只有 k×k×Cin×Cout 个参数，却作用在 H×W 个位置上——权重共享让它不随图像尺寸爆炸。同样一张 64×64 图，全连接要给每个像素对配权重，参数量是卷积的几万倍。CNN 之所以能吃图像，靠的就是这招。"
+   }
+  ],
   "ai/ai-ch03": [
    {
     "kind": "sandbox",
@@ -136,6 +301,195 @@
     "insight": "LoRA 把权重更新约束成低秩矩阵 BA，可训练参数只有 2·r·d·L，是全量的百分之一。r 太小欠拟合，r 太大既失去低秩意义又把参数量拖回全量级——典型 r 取 8/16/32。"
    }
   ],
+  "ai/ai-ch08": [
+   {
+    "kind": "sandbox",
+    "title": "提示缓存命中率决定成本",
+    "brief": "系统提示每次都前置、几乎不变，命中缓存后这部分不再计费。命中率越低，越是把同样的 token 反复付钱。拖三个旋钮看单价。",
+    "params": [
+     {
+      "key": "shared",
+      "label": "共享前缀 token",
+      "min": 100,
+      "max": 2000,
+      "step": 100,
+      "value": 1000,
+      "unit": "token"
+     },
+     {
+      "key": "unique",
+      "label": "每请求独有",
+      "min": 200,
+      "max": 2000,
+      "step": 100,
+      "value": 2000,
+      "unit": "token"
+     },
+     {
+      "key": "hitRate",
+      "label": "缓存命中率",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "value": 0,
+      "unit": "%"
+     }
+    ],
+    "metrics": [
+     {
+      "key": "costPerReq",
+      "label": "单请求成本",
+      "expr": "unique + shared * (1 - hitRate / 100)",
+      "unit": "token",
+      "fmt": "int"
+     },
+     {
+      "key": "savingPct",
+      "label": "省下比例",
+      "expr": "shared * hitRate / 100 / (unique + shared) * 100",
+      "unit": "%",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "costPerReq <= 800",
+      "label": "单请求成本压在 800 token 以内（共享前缀要真正被复用）"
+     },
+     {
+      "expr": "hitRate >= 80",
+      "label": "缓存命中率 ≥ 80%（系统提示要稳定前置）"
+     },
+     {
+      "expr": "unique <= 1500",
+      "label": "独有内容别太长（缓存只省共享部分）"
+     }
+    ],
+    "insight": "prompt caching 把“稳定前置的 token”缓存下来，命中后这部分计费打一折甚至免费。命中率从 0 提到 90%，成本能砍掉一大截——前提是系统提示真的稳定不变、且放在最前面。多轮对话、固定 few-shot 都是它的主场。"
+   }
+  ],
+  "ai/ai-ch10": [
+   {
+    "kind": "sandbox",
+    "title": "单卡放不下就切分",
+    "brief": "一个 7B 模型训练态要吃掉上百 GB 显存（参数+梯度+优化器状态）。单卡装不下时，数据并行是复制、模型并行是切分。拖参数量和卡数看单卡压力。",
+    "params": [
+     {
+      "key": "P",
+      "label": "参数量",
+      "min": 1,
+      "max": 70,
+      "step": 1,
+      "value": 7,
+      "unit": "B"
+     },
+     {
+      "key": "G",
+      "label": "GPU 数",
+      "min": 1,
+      "max": 8,
+      "step": 1,
+      "value": 8,
+      "unit": "张"
+     },
+     {
+      "key": "mode",
+      "label": "并行方式",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 0,
+      "labels": [
+       "数据并行(全复制)",
+       "模型并行(切分)"
+      ]
+     }
+    ],
+    "metrics": [
+     {
+      "key": "modelMemGB",
+      "label": "模型总显存",
+      "expr": "P * 16",
+      "unit": "GB",
+      "fmt": "int"
+     },
+     {
+      "key": "perGPU_GB",
+      "label": "单卡显存",
+      "expr": "P * 16 / if(mode == 1, G, 1)",
+      "unit": "GB",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "perGPU_GB <= 24",
+      "label": "单卡显存 ≤ 24GB（消费级/主流训练卡放得下）"
+     },
+     {
+      "expr": "mode == 1",
+      "label": "用模型并行切分（大模型的唯一出路）"
+     },
+     {
+      "expr": "G >= 4",
+      "label": "至少用 4 张卡分摊"
+     }
+    ],
+    "insight": "训练态显存 ≈ 16 字节/参数（FP16 参数+梯度 8B，加上 FP32 主副本与 Adam 动量/方差 12B）。7B 模型就是 ~112GB，单卡放不下；模型并行把权重切片分到多卡，每卡只扛 1/G。数据并行只是复制，解决不了单模型太大。"
+   }
+  ],
+  "ai/ai-ch12": [
+   {
+    "kind": "sandbox",
+    "title": "标注一致性够不够用",
+    "brief": "两个标注员，光看“都标对了”还不够——随机也能蒙对一部分。Cohen's κ 扣掉随机一致率后，才算真一致。拖两个一致率看 κ。",
+    "params": [
+     {
+      "key": "po",
+      "label": "观察一致率",
+      "min": 0.5,
+      "max": 1.0,
+      "step": 0.01,
+      "value": 0.85
+     },
+     {
+      "key": "pe",
+      "label": "随机期望一致率",
+      "min": 0.1,
+      "max": 0.9,
+      "step": 0.01,
+      "value": 0.6
+     }
+    ],
+    "metrics": [
+     {
+      "key": "kappa",
+      "label": "Cohen κ",
+      "expr": "(po - pe) / (1 - pe)",
+      "unit": "系数",
+      "fmt": "fix2"
+     },
+     {
+      "key": "agree",
+      "label": "原始一致",
+      "expr": "po * 100",
+      "unit": "%",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "kappa >= 0.8",
+      "label": "κ ≥ 0.8（几乎完全一致，标注可用）"
+     },
+     {
+      "expr": "po >= 0.9",
+      "label": "观察一致率 ≥ 90%（标注本身得靠谱）"
+     }
+    ],
+    "insight": "κ=(Po−Pe)/(1−Pe)：Po 是实际一致率，Pe 是两个标注员“随便标也能撞上”的概率。Po 高但 Pe 也高（比如类别极不平衡），κ 照样低。SFT 数据质量的第一道关就是标注重复率，κ<0.6 的数据直接重标。"
+   }
+  ],
   "ai/ai-ch13": [
    {
     "kind": "sandbox",
@@ -206,6 +560,80 @@
      }
     ],
     "insight": "每降一档位宽，显存与带宽需求减半、吞吐近似翻倍；代价是量化误差。INT8 配校准通常只掉 1~2 个点，INT4 不校准能掉近 10 个点。先校准再量化、敏感层保留高精度是部署标配。"
+   }
+  ],
+  "ai/ai-ch14": [
+   {
+    "kind": "sandbox",
+    "title": "图像分辨率拉多高清才值",
+    "brief": "VLM 把图像切成 14×14 的小块，每块一个视觉 token——分辨率每翻一倍，token 数翻四倍、成本和延迟都涨。拖分辨率和单价看单图账单。",
+    "params": [
+     {
+      "key": "res",
+      "label": "分辨率",
+      "min": 224,
+      "max": 700,
+      "step": 28,
+      "value": 224,
+      "unit": "像素"
+     },
+     {
+      "key": "textTokens",
+      "label": "文本 token",
+      "min": 50,
+      "max": 500,
+      "step": 50,
+      "value": 50,
+      "unit": "token"
+     },
+     {
+      "key": "price",
+      "label": "单价",
+      "min": 0.001,
+      "max": 0.01,
+      "step": 0.001,
+      "value": 0.001,
+      "unit": "$/token"
+     }
+    ],
+    "metrics": [
+     {
+      "key": "visTokens",
+      "label": "视觉 token",
+      "expr": "(res / 14) * (res / 14)",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "totalTokens",
+      "label": "总 token",
+      "expr": "(res / 14) * (res / 14) + textTokens",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "cost",
+      "label": "单图成本",
+      "expr": "((res / 14) * (res / 14) + textTokens) * price",
+      "unit": "$",
+      "fmt": "fix2"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "cost <= 5",
+      "label": "单张图成本压在 5 单位内（分辨率别无脑拉满）"
+     },
+     {
+      "expr": "res >= 336",
+      "label": "分辨率至少 336（太低 VLM 看不清细节）"
+     },
+     {
+      "expr": "visTokens >= 576",
+      "label": "视觉 token 够多（res≥336 → 24×24=576）"
+     }
+    ],
+    "insight": "视觉 token 数 = (分辨率/14)²，所以分辨率翻倍、token 翻四倍。224→448 看着只是“清晰点”，成本已经是 4 倍。多模态落地的成本优化第一招就是“按任务动态降分辨率”：OCR 要高清，分类 336 足够。"
    }
   ],
   "cpp/cpp-ch01": [
@@ -1269,6 +1697,81 @@
     "insight": "池子至少 ≥ 峰值并发，否则请求在池外排队；但也别开太大：利用率长期低于 60% 说明瓶颈在别处（常见是慢 SQL），加连接只会把数据库压垮。"
    }
   ],
+  "database/db-ch01": [
+   {
+    "kind": "sandbox",
+    "title": "定长 CHAR 还是变长 VARCHAR",
+    "brief": "用户名、邮箱这种长短不一的字段，用 CHAR 会按声明宽度全补齐，白白浪费空间。拖三个旋钮看存储差异。",
+    "params": [
+     {
+      "key": "nRows",
+      "label": "表行数",
+      "min": 1000,
+      "max": 100000,
+      "step": 1000,
+      "value": 100000,
+      "unit": "行"
+     },
+     {
+      "key": "avgLen",
+      "label": "平均长度",
+      "min": 10,
+      "max": 100,
+      "step": 10,
+      "value": 10,
+      "unit": "字符"
+     },
+     {
+      "key": "declLen",
+      "label": "声明宽度",
+      "min": 20,
+      "max": 100,
+      "step": 10,
+      "value": 100,
+      "unit": "字符"
+     },
+     {
+      "key": "useVarchar",
+      "label": "类型",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 0,
+      "labels": [
+       "CHAR 定长",
+       "VARCHAR 变长"
+      ]
+     }
+    ],
+    "metrics": [
+     {
+      "key": "wastePct",
+      "label": "空间浪费",
+      "expr": "if(useVarchar == 1, 0, (declLen - avgLen) / declLen * 100)",
+      "unit": "%",
+      "fmt": "fix2"
+     },
+     {
+      "key": "bytes",
+      "label": "占用",
+      "expr": "if(useVarchar == 1, nRows * avgLen, nRows * declLen)",
+      "unit": "B",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "wastePct <= 20",
+      "label": "空间浪费不超过 20%（别用定长 CHAR 装长短不一的字段）"
+     },
+     {
+      "expr": "nRows >= 50000",
+      "label": "而且得是万行级以上的真实表"
+     }
+    ],
+    "insight": "CHAR 按声明宽度补齐，邮箱声明 100 字符、实际 20，剩下 80 都是空格；VARCHAR 按实际长度存。短字段 + 大宽度时，CHAR 浪费能到 80%。DDL 选型看着小，亿级行上一存就是几十 GB。"
+   }
+  ],
   "database/db-ch02": [
    {
     "kind": "sandbox",
@@ -1473,6 +1976,218 @@
      }
     ],
     "insight": "索引的代价是「选出的行 × 回表次数」，所以只有高选择性（小结果集）才划算。选择率超 10% 时优化器往往回头走全表——这就是「建了索引却不走」最常见的原因。"
+   }
+  ],
+  "database/db-ch05": [
+   {
+    "kind": "sandbox",
+    "title": "游标逐行还是集合操作",
+    "brief": "存储过程里用游标一行一行处理，和写一句集合操作 SQL，差距不在写法而在它扫了多少遍。拖批量和写法看总成本。",
+    "params": [
+     {
+      "key": "n",
+      "label": "批量行数",
+      "min": 1000,
+      "max": 100000,
+      "step": 1000,
+      "value": 100000,
+      "unit": "行"
+     },
+     {
+      "key": "useCursor",
+      "label": "写法",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 1,
+      "labels": [
+       "集合操作",
+       "游标逐行"
+      ]
+     }
+    ],
+    "metrics": [
+     {
+      "key": "cursorCost",
+      "label": "游标总成本",
+      "expr": "n * 50",
+      "unit": "单位",
+      "fmt": "int"
+     },
+     {
+      "key": "setCost",
+      "label": "集合操作成本",
+      "expr": "n",
+      "unit": "单位",
+      "fmt": "int"
+     },
+     {
+      "key": "totalCost",
+      "label": "实际成本",
+      "expr": "if(useCursor == 1, n * 50, n)",
+      "unit": "单位",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "totalCost <= 200000",
+      "label": "总处理成本压在 20 万以内（别用游标逐行）"
+     },
+     {
+      "expr": "n >= 50000",
+      "label": "而且得是五万行以上的批量操作"
+     }
+    ],
+    "insight": "游标对每一行都走一遍完整处理（n×50），集合操作让引擎一次扫完（n）。几万行时游标就是几百倍的差距，而且还会长时间占锁。存储过程里能写集合 SQL 就别用游标。"
+   }
+  ],
+  "database/db-ch06": [
+   {
+    "kind": "sandbox",
+    "title": "这张表到底到第几范式",
+    "brief": "部分函数依赖、传递函数依赖、非原子属性——每多一种异常，就掉一档范式。逐个关掉，看能爬到 BCNF 吗。",
+    "params": [
+     {
+      "key": "nonAtomic",
+      "label": "非原子属性",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 1,
+      "labels": [
+       "无",
+       "有（字段里塞列表）"
+      ]
+     },
+     {
+      "key": "partialDep",
+      "label": "部分函数依赖",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 0,
+      "labels": [
+       "无",
+       "有"
+      ]
+     },
+     {
+      "key": "transitDep",
+      "label": "传递函数依赖",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 0,
+      "labels": [
+       "无",
+       "有"
+      ]
+     }
+    ],
+    "metrics": [
+     {
+      "key": "nf",
+      "label": "达到范式",
+      "expr": "if(nonAtomic == 1, 1, if(partialDep == 1, 2, if(transitDep == 1, 3, 4)))",
+      "unit": "级",
+      "fmt": "int"
+     },
+     {
+      "key": "anomaly",
+      "label": "剩余异常数",
+      "expr": "nonAtomic + partialDep + transitDep",
+      "unit": "类",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "nf == 4",
+      "label": "达到 BCNF（消除全部三类异常）"
+     }
+    ],
+    "insight": "非原子属性卡在 1NF，部分依赖卡在 2NF，传递依赖卡在 3NF；三类都消掉才是 BCNF。范式的每一级都在消灭一类更新异常——不是为了考试，是怕同一份数据在表里存了 n 份、改一处漏九处。"
+   }
+  ],
+  "database/db-ch07": [
+   {
+    "kind": "sandbox",
+    "title": "备份策略决定能丢多少",
+    "brief": "只做每周全量，最坏要丢一整周数据（RPO=7天）；加增量把 RPO 压到小时级，但存储会涨。拖两个旋钮平衡。",
+    "params": [
+     {
+      "key": "totalGB",
+      "label": "数据总量",
+      "min": 100,
+      "max": 5000,
+      "step": 100,
+      "value": 1000,
+      "unit": "GB"
+     },
+     {
+      "key": "hasIncr",
+      "label": "备份方式",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 0,
+      "labels": [
+       "仅全量",
+       "全量 + 增量"
+      ]
+     },
+     {
+      "key": "incrHours",
+      "label": "增量间隔",
+      "min": 1,
+      "max": 24,
+      "step": 1,
+      "value": 1,
+      "unit": "小时"
+     }
+    ],
+    "metrics": [
+     {
+      "key": "fullGB",
+      "label": "全量备份",
+      "expr": "totalGB * 0.3",
+      "unit": "GB",
+      "fmt": "int"
+     },
+     {
+      "key": "incrGB",
+      "label": "每日增量",
+      "expr": "totalGB * 0.01 * if(hasIncr == 1, 24 / incrHours, 0)",
+      "unit": "GB",
+      "fmt": "int"
+     },
+     {
+      "key": "storGB",
+      "label": "备份总存储",
+      "expr": "totalGB * 0.3 + totalGB * 0.01 * if(hasIncr == 1, 24 / incrHours, 0)",
+      "unit": "GB",
+      "fmt": "int"
+     },
+     {
+      "key": "rpoHours",
+      "label": "恢复点目标",
+      "expr": "if(hasIncr == 1, incrHours, 168)",
+      "unit": "小时",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "rpoHours <= 24",
+      "label": "RPO ≤ 1 天（不能靠每周全量，真出事丢一周）"
+     },
+     {
+      "expr": "storGB <= 2000",
+      "label": "备份存储不超过 2TB"
+     }
+    ],
+    "insight": "RPO 是“最多能丢多久的数据”。只做全量且一周一次，最坏丢 7 天；把增量频率提到每小时，RPO 就压到 1 小时，代价只是多存一份当天增量。容灾第一课是先定 RPO/RTO，再反推备份频率。"
    }
   ],
   "database/db-ch08": [
@@ -3173,6 +3888,67 @@
     "insight": "测试误差随 λ 呈 U 形：λ=0 时把训练集噪声也背下来；λ 太大把真信号压平。甜点在中间，所以用验证集挑 λ，不是训练集。"
    }
   ],
+  "ml/ml-ch03": [
+   {
+    "kind": "sandbox",
+    "title": "批大小卡在哪最稳",
+    "brief": "批太小梯度噪声大、训练抖；批太大每轮更新步数太少、收敛慢。拖批大小和数据量找甜点。",
+    "params": [
+     {
+      "key": "B",
+      "label": "批大小",
+      "min": 16,
+      "max": 512,
+      "step": 16,
+      "value": 16,
+      "unit": "样本"
+     },
+     {
+      "key": "N",
+      "label": "样本总量",
+      "min": 1000,
+      "max": 100000,
+      "step": 1000,
+      "value": 100000,
+      "unit": "样本"
+     }
+    ],
+    "metrics": [
+     {
+      "key": "stepsPerEpoch",
+      "label": "每轮更新步数",
+      "expr": "N / B",
+      "unit": "步",
+      "fmt": "int"
+     },
+     {
+      "key": "gradNoise",
+      "label": "梯度噪声指数",
+      "expr": "100 / sqrt(B)",
+      "unit": "%",
+      "fmt": "fix2"
+     },
+     {
+      "key": "totalUpdates",
+      "label": "总更新步数",
+      "expr": "30 * N / B",
+      "unit": "步",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "gradNoise <= 20",
+      "label": "梯度噪声指数 ≤ 20（批太小噪声大、训练抖）"
+     },
+     {
+      "expr": "stepsPerEpoch >= 50",
+      "label": "每轮至少 50 步更新（批太大步数太少、收敛慢）"
+     }
+    ],
+    "insight": "批大小 B 决定两件事：梯度估计的方差 ∝ 1/√B，每轮更新步数 = N/B。B 太小方差爆炸、loss 上下乱跳；B 太大每轮只走几步、要更多轮才收敛。甜点通常是“方差可接受 + 每轮几十到几百步”。"
+   }
+  ],
   "ml/ml-ch04": [
    {
     "kind": "sandbox",
@@ -3353,6 +4129,130 @@
      }
     ],
     "insight": "肘部法则看 inertia 随 k 的下降拐点：k 小于真实簇数时每合并一个簇 inertia 暴涨，等于之后下降变缓。k 比真实簇数多只会徒增碎片。"
+   }
+  ],
+  "ml/ml-ch08": [
+   {
+    "kind": "sandbox",
+    "title": "折扣因子 γ 取多大才看得远",
+    "brief": "γ 太小只看眼前一步，γ 太大几乎不折扣、价值估计方差爆炸。拖 γ 和视野长度看有效规划步数。",
+    "params": [
+     {
+      "key": "gamma",
+      "label": "折扣因子 γ",
+      "min": 0.5,
+      "max": 0.95,
+      "step": 0.01,
+      "value": 0.5
+     },
+     {
+      "key": "H",
+      "label": "回合长度",
+      "min": 10,
+      "max": 50,
+      "step": 5,
+      "value": 30,
+      "unit": "步"
+     }
+    ],
+    "metrics": [
+     {
+      "key": "totalReturn",
+      "label": "累计折扣回报",
+      "expr": "(1 - pow(gamma, H)) / (1 - gamma)",
+      "unit": "单位",
+      "fmt": "fix2"
+     },
+     {
+      "key": "effHorizon",
+      "label": "有效视野",
+      "expr": "floor(log(0.05) / log(gamma))",
+      "unit": "步",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "gamma >= 0.8",
+      "label": "折扣因子足够大（有效视野不短于几十步）"
+     },
+     {
+      "expr": "gamma <= 0.95",
+      "label": "但不接近 1（否则训练不稳、信用分配难）"
+     },
+     {
+      "expr": "effHorizon >= 20",
+      "label": "有效视野 ≥ 20 步（能规划较远的未来）"
+     }
+    ],
+    "insight": "折扣回报 G=Σγᵗr。γ=0.9 时单步权重每步打九折，约 22 步后衰减到 5% 以下——这就是“有效视野”。γ 太小鼠目寸光，γ 太大长期信用分配困难。ε-贪心之外，γ 是 RL 里最容易被调崩的旋钮。"
+   }
+  ],
+  "ml/ml-ch09": [
+   {
+    "kind": "sandbox",
+    "title": "SVM 的 C 越大间隔越小",
+    "brief": "软间隔 SVM 里 C 控制“容忍误分类”的代价：C 太大硬要把样本全分开，间隔被压到极小（过拟合）；C 太小又留误分类。拖 C 和线性可分性找平衡。",
+    "params": [
+     {
+      "key": "C",
+      "label": "正则化 C",
+      "min": 0.1,
+      "max": 100,
+      "step": 0.1,
+      "value": 100
+     },
+     {
+      "key": "separable",
+      "label": "数据可分性",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 1,
+      "labels": [
+       "近似可分",
+       "严格线性可分"
+      ]
+     }
+    ],
+    "metrics": [
+     {
+      "key": "wNorm",
+      "label": "||w||",
+      "expr": "log10(C) + 2",
+      "unit": "单位",
+      "fmt": "fix2"
+     },
+     {
+      "key": "margin",
+      "label": "分类间隔",
+      "expr": "2 / (log10(C) + 2)",
+      "unit": "单位",
+      "fmt": "fix2"
+     },
+     {
+      "key": "misclassified",
+      "label": "误分类数",
+      "expr": "if(C < 1 && separable == 0, 3, 0)",
+      "unit": "个",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "margin >= 1.0",
+      "label": "间隔够大（至少 1.0，泛化好）"
+     },
+     {
+      "expr": "misclassified == 0",
+      "label": "没有误分类样本"
+     },
+     {
+      "expr": "C <= 50",
+      "label": "C 不过大（否则间隔被压到极小，过拟合）"
+     }
+    ],
+    "insight": "间隔 = 2/‖w‖，而 ‖w‖ 随 C 增大而增大（对误分类的惩罚更重）。C→∞ 逼出硬间隔，但间隔塌缩、对噪声极敏感；C 太小又容忍太多误分类。实践中用验证集挑 C，而不是训练集。"
    }
   ]
  }
