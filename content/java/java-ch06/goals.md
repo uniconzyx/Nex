@@ -60,10 +60,10 @@ Java 的 IO 是**面试密度最高、工程出事最多**的一块：
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §1.1 | 讲「字节流与字符流的边界」时读 `docs/java/io/` 的基础篇：编码发生在 `InputStreamReader` 这个桥接点，`FileReader` 用平台默认编码所以跨环境必乱码——这条结论在本章有对应的可运行代码 |
-| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §2.1 | 讲「Path 与 Files」时看 `mall-admin` 的文件上传实现：`Files.copy`/`Files.createDirectories` 替代了 `File` 的布尔返回值风格，异常直接抛出而不是静默返回 false |
-| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §3.1 | 讲「Selector 多路复用」时对照 `docs/high-concurrency/` 里「为什么 Redis 单线程还快」的分析：IO 多路复用把「等待」从线程里拿掉，与本章 Channel/Buffer/Selector 的模型是同一套思路 |
-| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §4.1 | 讲「序列化」时看 `core-java` 的序列化示例：`serialVersionUID` 不一致会抛 `InvalidClassException`、`transient` 字段不参与序列化，两个坑各有一条最小复现 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §1.1 主题一：字节与字符的分工 | 读 `docs/java/io/` 的基础篇：编码发生在 `InputStreamReader` 这个桥接点，`FileReader` 用平台默认编码所以跨环境必乱码——这条结论在本章有对应的可运行代码；配合 §1.2「装饰器模式与缓冲的语义」，就明白 `BufferedReader` 套在谁外面才有意义 |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §2.1 主题一：File 与 Path 的差别，以及「路径拼接」的正确算法 | 看 `mall-admin` 的文件上传实现：`Files.copy`/`Files.createDirectories` 替代了 `File` 的布尔返回值风格，异常直接抛出而不是静默返回 false；这对应 §2.2「目录遍历与文件属性」里 `Files.walk` 为什么用 `Stream` 而非返回数组 |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §3.2 主题二：Selector 多路复用与零拷贝 | 对照 `docs/high-concurrency/` 里「为什么 Redis 单线程还快」的分析：IO 多路复用把「等待」从线程里拿掉，与本章 Channel/Buffer/Selector 的模型是同一套思路；读之前先看 §3.1「ByteBuffer 的三游标与状态机」——不懂 flip 就理解不了非阻塞读写 |
+| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §4.1 主题一：序列化机制的三个真相 | 看 `core-java` 的序列化示例：`serialVersionUID` 不一致会抛 `InvalidClassException`、`transient` 字段不参与序列化，两个坑各有一条最小复现；配合 §4.2「IO 模型与 Java 的对应关系」，就能解释为什么跨进程传输更愿意用 JSON 而非原生序列化 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

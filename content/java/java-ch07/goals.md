@@ -34,10 +34,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §2.1 | 讲「JMM 与 happens-before」时读 `docs/java/concurrent/` 的并发基础问答：`volatile` 给可见性与有序性、不给原子性，`count++` 用它照样丢更新——本章的可运行代码会把这个结论跑出来 |
-| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §3.1 | 讲「线程池七参数」时看 `mall-portal` 里的异步任务配置：核心数、队列、拒绝策略三者的组合决定了「任务堆积时是先扩容还是先拒绝」，无界队列会让 OOM 来得更晚但更猛 |
-| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §3.2 | 讲「线程池任务流程」时对照 `docs/high-concurrency/threadpool.md`：核心线程 → 队列 → 最大线程 → 拒绝策略的四级判定，它用图示说明了「为什么不是先扩容」 |
-| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §4.1 | 讲「AQS 与 ReentrantLock」时看 `core-java` 的锁示例：公平锁与非公平锁的吞吐差异、`tryLock` 的超时语义，样例里能直接改参数对比 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §2.2 happens-before：JMM 给出的「可见性合同」 | 读 `docs/java/concurrent/` 的并发基础问答：`volatile` 给可见性与有序性、不给原子性，`count++` 用它照样丢更新——本章的可运行代码会把这个结论跑出来；先读 §2.1 并发三大问题，才知道要分别用哪条语义去解 |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §3.2 `ThreadPoolExecutor` 的七个构造参数 | 看 `mall-portal` 里的异步任务配置：核心数、队列、拒绝策略三者的组合决定了「任务堆积时是先扩容还是先拒绝」，无界队列会让 OOM 来得更晚但更猛；这正是 §3.3「execute() 的判定链」在真实项目里的落点 |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §3.3 任务提交流程（`execute()` 的判定链） | 对照 `docs/high-concurrency/threadpool.md`：核心线程 → 队列 → 最大线程 → 拒绝策略的四级判定，它用图示说明了「为什么不是先扩容」；配合 §3.8「Executors 四个工厂方法的误用风险」，就明白 `newFixedThreadPool` 的无界队列坑在哪 |
+| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §4.1 理论根基：AQS —— JUC 的「半成品锁」 | 看 `core-java` 的锁示例：公平锁与非公平锁的吞吐差异、`tryLock` 的超时语义，样例里能直接改参数对比；读完再回 §4.2「ReentrantLock vs synchronized」，取舍标准才对得上有依据 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

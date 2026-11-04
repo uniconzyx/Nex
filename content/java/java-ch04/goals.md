@@ -30,10 +30,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §2.1 | 讲「ArrayList 扩容」时读 `docs/java/collection/` 下的 ArrayList 源码分析：`oldCapacity + (oldCapacity >> 1)` 的 1.5 倍增长与 `Arrays.copyOf` 的整段复制，解释了「为什么预估容量能省掉多次复制」 |
-| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §5.1 | 讲「Queue/Deque 与批处理」时看 `mall-admin` 里批量导入的写法：一次查询取出 `List` 再分批处理，而不是循环单条查库——这是「集合选择决定 IO 次数」的直接证据 |
-| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §3.1 | 讲「HashMap 的四层结构」时对照 `docs/high-concurrency/` 的 HashMap 深挖系列：数组 + 链表 + 红黑树、树化阈值 8 与退化阈值 6、扩容时的「原位或原位+旧容量」，这三条是面试追问的固定落点 |
-| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §4.1 | 讲「Set 去重」时看 `core-java` 的集合示例：`HashSet` 去重依赖 `hashCode` + `equals`，`TreeSet` 依赖 `compareTo`，两份样例放在一起就能看出「去重判据被换掉了」 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §2.2 实现机制：ArrayList 扩容的 1.5 倍与 JVM 细节 | 读 `docs/java/collection/` 下的 ArrayList 源码分析：`oldCapacity + (oldCapacity >> 1)` 的 1.5 倍增长与 `Arrays.copyOf` 的整段复制，解释了「为什么预估容量能省掉多次复制」；配合 §2.4「怎么选」，就能算出「一万条数据差几次复制」 |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §5.1 Queue 与 Deque：双端抽象与 ArrayDeque | 看 `mall-admin` 里批量导入的写法：一次查询取出 `List` 再分批处理，而不是循环单条查库——这是「集合选择决定 IO 次数」的直接证据；读时对照 §2.5 边界与陷阱，就明白为什么这里不用 `LinkedList` |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §3.2 实现机制（JDK 8）：四层结构 | 对照 `docs/high-concurrency/` 的 HashMap 深挖系列：数组 + 链表 + 红黑树、树化阈值 8 与退化阈值 6、扩容时的「原位或原位+旧容量」，这三条是面试追问的固定落点；先读 §3.1「哈希表的本质」，再来看「为什么要树化」，逻辑才顺 |
+| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §4.1 理论根基：Set 是「约束后的 Map」 | 看 `core-java` 的集合示例：`HashSet` 去重依赖 `hashCode` + `equals`，`TreeSet` 依赖 `compareTo`，两份样例放在一起就能看出「去重判据被换掉了」；这正是 §4.3「去重与排序的正确姿势」要分开讲的原因 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

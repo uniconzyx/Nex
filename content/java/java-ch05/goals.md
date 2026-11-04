@@ -28,10 +28,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §1.1 | 讲「受检与非受检异常」时读 `docs/java/basis/` 的异常问答：`Error`/`Exception`/`RuntimeException` 三分与「受检异常强制调用方决策」的取舍，它给出了「什么时候该包成运行时异常」的判断口径 |
-| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §3.1 | 讲「异常链与根因保留」时看 `mall-common` 的统一返回体与业务异常：`ApiException` 携带错误码、原异常挂在 cause 上，缺了 cause 线上就只能看到「操作失败」四个字 |
-| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §2.1 | 讲「try-with-resources」时对照 `docs/distributed-system/` 里对「资源泄漏导致雪崩」的描述：连接/句柄不释放最终表现为「Too many open files」，TWR 的 suppressed 语义正是为了防止 close 异常掩盖主异常 |
-| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §4.1 | 讲「泛型擦除」时看 `core-java` 的泛型示例：`List<String>` 与 `List<Integer>` 在运行期是同一个类，所以不能 `new T[]`、不能对泛型做 `instanceof`——样例里有一条能编译失败的反例 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §1.2 实现机制：编译期的「受检」检查 | 读 `docs/java/basis/` 的异常体系问答：受检异常在字节码里与运行时异常没有区别，区别只在编译期的 `throws` 检查；理解这一点再看 §1.3「受检异常的调用方契约与函数式接口的冲突」，就明白 `Stream.map` 里为什么不能直接抛 `IOException` |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §2.1 理论根基：资源的「获取即释放」契约 | 看 `mall-admin` 里的文件读写实现：`try-with-resources` 把 `close()` 放进编译器生成的 `finally`，异常在 `close` 时也不会丢——这正是 §2.2 编译器展开 TWR 的关键；对照 §3.4 `suppressed` 与 `cause` 的配合，就知道被吞掉的异常去了哪 |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §3.1 理论根基：finally 的语义是「无论怎样都执行」 | 看 `core-java` 的 finally 示例：`finally` 里 `return` 会覆盖 try 的返回值，这条反例比任何描述都直接；配合 §3.2 字节码层面的顺序，就能解释「为什么 catch 里 return 了 finally 还在跑」 |
+| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §4.1 理论根基：为什么 Java 选了「擦除」而非「具化」 | 读 `docs/java/basis/` 的泛型章节：擦除是为了「升级 JDK 不破坏已有二进制」，代价是运行时拿不到类型参数；读完再回 §4.3「桥接方法为何存在」，就明白 `List<String>` 与 `List<Integer>` 为什么是同一个类 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

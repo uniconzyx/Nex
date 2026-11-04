@@ -13,10 +13,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §2.1 | 讲「方法重写的动态分派」时读 `docs/java/basis/` 的面向对象问答：它把「重载看编译期、重写看运行期」用一段代码跑出两种结果，正好对应本章 `invokevirtual` 的分派逻辑 |
-| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §3.2 | 讲「抽象类与模板方法」时看 `mall-security` 的 `JwtAuthenticationTokenFilter`：它继承 `OncePerRequestFilter` 只填 `doFilterInternal`，父类负责「只执行一次」的骨架——这是「抽象类给骨架、子类填一步」的工业样本 |
-| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §3.1 | 讲「抽象类 vs 接口」时对照 `docs/high-concurrency/` 与 `docs/micro-services/` 里的接口设计讨论：什么时候该用接口做「能力声明」、什么时候用抽象类做「骨架复用」，它的取舍标准和本章一致 |
-| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §4.1 | 讲「final 与不可变」时看 `core-java` 的 final 示例：final 字段必须在构造器结束前赋值、final 类不可继承，两个限制各有一个能编译失败的对照样例 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §2.2 实现机制：JVM 如何做动态分派 | 读 `docs/java/basis/` 的面向对象问答：它把「重载看编译期、重写看运行期」用一段代码跑出两种结果，正好对应本章 `invokevirtual` 的分派逻辑；读完再回 §2.1「override 是运行期的行为替换」，就明白为什么「字段不参与动态分派」 |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §3.2 实现机制：invokevirtual vs invokeinterface | 看 `mall-security` 的 `JwtAuthenticationTokenFilter`：它继承 `OncePerRequestFilter` 只填 `doFilterInternal`，父类负责「只执行一次」的骨架——这是「抽象类给骨架、子类填一步」的工业样本；注意它是继承而非实现接口，所以走 `invokevirtual` |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §3.1 理论根基：两者回答不同的问题 | 对照 `docs/high-concurrency/` 与 `docs/micro-services/` 里的接口设计讨论：什么时候该用接口做「能力声明」、什么时候用抽象类做「骨架复用」，它的取舍标准和本章一致；读完再看 §3.2 的字节码指令差异，就明白「接口多实现」为什么不增加方法表查找成本 |
+| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §4.1 理论根基：final 是「约束即契约」 | 看 `core-java` 的 final 示例：final 字段必须在构造器结束前赋值、final 类不可继承，两个限制各有一个能编译失败的对照样例；配合 §4.2 里 `String` 为什么是 final——不可变才能安全地被多线程共享 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

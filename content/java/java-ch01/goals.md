@@ -14,10 +14,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §2.1 | 讲「八种基本类型的固定位宽」时读 `docs/java/basis/` 下的基本类型问答：它把 `byte` 恒为有符号、`char` 是 16 位无符号 UTF-16 码元这两条一次讲透，正好解释「Java 没有无符号整型」为什么会让 `byte b = 200` 编译失败 |
-| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §1.4 | 讲「classpath 与包」时看 `mall-common` 模块的 `com.macro.mall.common` 包结构：一个被其余模块依赖的公共包必须只放「无业务状态」的工具与统一返回体，这比背 classpath 定义更能说明「包边界 = 依赖方向」 |
-| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §1.3 | 讲「JIT 让 Java 越跑越快」时对照 `docs/high-concurrency/` 里的 JVM 系列文章：它解释了「解释执行 → C1 → C2」的分层编译与逃逸分析，回读本章四步流程就能说清「为什么预热前后同一段循环耗时差一个数量级」 |
-| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §3.1 | 讲「if 与布尔条件」时看 `core-java` 模块的语法示例：Java 的 `if` 只接受 `boolean`，不存在 C 的「非零即真」，这份仓库用最小样例把这条差异固定下来，可直接拿来对照自己的写法 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §2.1 八种基本类型与它们的固定位宽 | 读 `docs/java/basis/` 下的基本类型问答：它把「`byte` 恒为有符号」与「`char` 是 16 位无符号 UTF-16 码元」两条一次讲透，正好解释「Java 没有无符号整型」为什么会让 `byte b = 200` 编译失败；配合 §2.4「char 是 UTF-16 码元，不是字符」，就明白 `emoji` 为什么占两个 char |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §1.4 classpath 与包：最常见的启动失败原因 | 看 `mall-common` 模块的 `com.macro.mall.common` 包结构：一个被其余模块依赖的公共包必须只放「无业务状态」的工具与统一返回体，这比背 classpath 定义更能说明「包边界 = 依赖方向」；这也解释了 §1.2 四个步骤里「class 找不到」为什么总发生在公共包被循环依赖之后 |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §1.3 JIT 为什么让 Java「越跑越快」 | 对照 `docs/high-concurrency/` 里的 JVM 系列文章：它解释了「解释执行 → C1 → C2」的分层编译与逃逸分析，回读本章 §1.2 四步流程就能说清「为什么预热前后同一段循环耗时差一个数量级」 |
+| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §3.1 `if` 与布尔条件：没有「真值」概念 | 看 `core-java` 模块的语法示例：Java 的 `if` 只接受 `boolean`，不存在 C 的「非零即真」，这份仓库用最小样例把这条差异固定下来，可直接拿来对照自己的写法；配合 §3.2 `switch` 从穿透到表达式，两条控制流的边界就都清楚了 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

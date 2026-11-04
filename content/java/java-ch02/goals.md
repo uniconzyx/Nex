@@ -13,10 +13,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §4.1 | 讲「equals 与 hashCode 契约」时读 `docs/java/basis/` 的对象基础问答：等价关系必须自反/对称/传递，哈希值必须与 equals 一致——它用 `HashMap` 查不到键的现场说明违反契约的后果 |
-| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §1.1 | 讲「对象内存布局」时看 `mall-common` 里的 `CommonResult`：一个只有 `code/message/data` 三个字段的返回体，字段顺序与类型决定对象头之后的内存排布，也是「为什么 DTO 要小而扁平」的现成样本 |
-| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §4.2 | 讲「哈希分布」时对照 `docs/high-concurrency/` 的 HashMap 系列：它把「扰动函数 + 扩容 rehash」讲到面试深度，能解释为什么自定义 key 的 `hashCode` 分布不均会让链表变长 |
-| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §3.2 | 讲「构造器与 this」时看 `core-java` 的构造器重载示例：`this(...)` 必须首行、`super(...)` 与它互斥，这两条限制在这份仓库里各有一个最小反例，比文字描述好记 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §4.2 实现机制：为什么两者必须同时重写 | 读 `docs/java/basis/` 的对象基础问答：等价关系必须自反/对称/传递，哈希值必须与 equals 一致——它用 `HashMap` 查不到键的现场说明违反契约的后果；先读 §4.1「等价关系是数学约束」，再看这个现场，因果链就完整了 |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §1.1 理论根基：对象是「带标签的连续内存」 | 看 `mall-common` 里的 `CommonResult`：一个只有 `code/message/data` 三个字段的返回体，字段顺序与类型决定对象头之后的内存排布，也是「为什么 DTO 要小而扁平」的现成样本；这直接对应 §4.2 里 hashCode 的计算成本——字段越多，默认哈希算得越慢 |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §4.2 实现机制：为什么两者必须同时重写（哈希分布视角） | 对照 `docs/high-concurrency/` 的 HashMap 系列：它把「扰动函数 + 扩容 rehash」讲到面试深度，能解释为什么自定义 key 的 `hashCode` 分布不均会让链表变长；读时对照本章 §4.3 工程实践里用 `Objects.hash` 与手写的取舍 |
+| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §3.2 实现机制：重载、this() 链与初始化顺序 | 看 `core-java` 的构造器重载示例：`this(...)` 必须首行、`super(...)` 与它互斥，这两条限制在这份仓库里各有一个最小反例，比文字描述好记；理解它们再看 §3.1「构造器是建立不变式的契约」，就明白为什么初始化顺序不能随意调 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

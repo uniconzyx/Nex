@@ -30,10 +30,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §1.1 | 讲「五块运行时数据区」时读 `docs/java/jvm/` 的内存区域篇：堆分代、方法区（元空间）、虚拟机栈的职责边界，它配了「哪块会 OOM、哪块不会」的对照表 |
-| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §2.1 | 讲「GC 与容器内存限制」时看 `mall-admin` 的 Dockerfile：容器里必须显式给 `-Xmx`，否则 JVM 按宿主机内存算堆，容器被 OOMKill 时日志里连 OOM 都不一定有 |
-| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §2.2 | 讲「七种收集器与停顿模型」时对照 `docs/high-concurrency/` 的 JVM 系列：CMS 的并发失败、G1 的 Region 与 Mixed GC、ZGC 的染色指针，三条线索能解释「为什么低延迟场景要换收集器」 |
-| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §3.1 | 讲「双亲委派」时看 `core-java` 的 ClassLoader 示例：自定义 ClassLoader 覆写 `findClass` 而不是 `loadClass`，才能保留委派链——这是「打破双亲委派」的正确姿势 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §1.1 五块运行时数据区 | 读 `docs/java/jvm/` 的内存区域篇：堆分代、方法区（元空间）、虚拟机栈的职责边界，它配了「哪块会 OOM、哪块不会」的对照表；配合 §1.2 堆的分代结构，就能解释「为什么栈溢出报 StackOverflowError 而不是 OOM」 |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §4.1 四类 OOM 与各自的第一反应 | 看 `mall-admin` 的 Dockerfile：容器里必须显式给 `-Xmx`，否则 JVM 按宿主机内存算堆，容器被 OOMKill 时日志里连 OOM 都不一定有——这正是本章「容器化后堆大小算错」的经典现场，定位要回 §4.2 工具链 |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §2.4 七种收集器与停顿模型 | 对照 `docs/high-concurrency/` 的 JVM 系列：CMS 的并发失败、G1 的 Region 与 Mixed GC、ZGC 的染色指针，三条线索能解释「为什么低延迟场景要换收集器」；读之前先看 §2.3 三大 GC 算法，否则分不清收集器之间的差别是在「算法」还是「工程实现」 |
+| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §3.3 双亲委派模型 | 看 `core-java` 的 ClassLoader 示例：自定义 ClassLoader 覆写 `findClass` 而不是 `loadClass`，才能保留委派链——这是「打破双亲委派」的正确姿势；对照 §3.4 三次「被打破」的历史，就明白 Tomcat 为什么要自己实现一个 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 
