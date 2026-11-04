@@ -61,10 +61,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [dmlc/xgboost](https://github.com/dmlc/xgboost) | 28,916 | 全章 | 课程 W4 直接讲到 XGBoost；这里看二阶泰勒与分裂增益的权威实现；本章先读与「不纯度与分裂准则」「连续特征的切分点」相关的部分 |
-| 2 | [shap/shap](https://github.com/shap/shap) | 25,840 | 全章 | TreeSHAP：树模型解释的工业标配；本章先读与「不纯度与分裂准则」「连续特征的切分点」相关的部分 |
-| 3 | [lightgbm-org/LightGBM](https://github.com/lightgbm-org/LightGBM) | 18,897 | 全章 | 直方图分箱 + leaf-wise + GOSS/EFB，大规模数据的工程解法；本章先读与「不纯度与分裂准则」「连续特征的切分点」相关的部分 |
-| 4 | [catboost/catboost](https://github.com/catboost/catboost) | 9,178 | 全章 | 有序目标统计解决类别特征泄漏；本章先读与「不纯度与分裂准则」「连续特征的切分点」相关的部分 |
+| 1 | [dmlc/xgboost](https://github.com/dmlc/xgboost) | 28,916 | §2.XGBoost 二阶泰勒与分裂增益 | §1.加法模型与负梯度：`src/tree/split_evaluator.h` 里 `CalcSplitGain` 就是本章那条分裂增益公式的实现，对照着读能看出正则项是怎么扣的 |
+| 2 | [shap/shap](https://github.com/shap/shap) | 25,840 | §1.连续特征切分点（相邻取值中点） | §3 树模型解释：`shap/explainers/_tree.py` 的 TreeSHAP 是精确解而非采样近似，读它就知道本章「树重要性会偏向高基数特征」为什么不适用于 SHAP 值 |
+| 3 | [lightgbm-org/LightGBM](https://github.com/lightgbm-org/LightGBM) | 18,897 | §3.LightGBM 三板斧（直方图/leaf-wise/GOSS） | §2.方差缩减：`src/io/` 与 `src/treelearner/` 分别是直方图分箱与 leaf-wise 生长，两处一读，本章「为什么 LightGBM 比 XGBoost 快」有了依据 |
+| 4 | [catboost/catboost](https://github.com/catboost/catboost) | 9,178 | §1 类别特征处理 | §2.特征抽样与去相关：`catboost/` 的 ordered target statistics 解决的是目标泄漏，正好对照本章「普通 target encoding 会把标签漏进特征」 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

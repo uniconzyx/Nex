@@ -89,10 +89,10 @@
           42609
         ],
         "github_notes": [
-          "生产级 ML 全流程：数据校验→训练→部署→监控，用来对照「课程里的玩具流程」与真实工程",
-          "工业标准 ML 库：每个算法的参考实现与 API 取舍",
-          "西瓜书公式推导详解，补课程里跳过推导的部分",
-          "《机器学习实战》中文笔记：经典算法的可运行实现"
+          "§2.从分解到工程：三个可控项 · §5.样本复杂度与学习曲线：`mlops/` 下从数据校验到监控的每一环都有可跑的 notebook，读它的数据切片与验证策略，对照本章「可控项只有三个」",
+          "§1.形式化：一个学习问题由五件东西组成 · §1.四种学习范式：`sklearn/api_reference.py` 的 `estimator_type` 字段把 classifier / regressor / clusterer 写成了显式属性——「监督信号从哪来」在 API 层是可读的",
+          "§2.分解的完整推导 · §4.正则化的两种解释：`pumpkin-book` 的附录把西瓜书的偏差-方差分解逐行展开，第 2 章对应的推导正好补本章「这一步必须会写」",
+          "§3.SGD 用方差换速度 · §6.把学习看成压缩：`src/` 里各算法的纯 NumPy 实现（没有 sklearn 封装）适合核对公式，对照本章「归纳偏置决定你能不能学」"
         ],
         "github_fetched_at": "2026-10-27",
         "bilibili": "https://www.bilibili.com/video/BV164411b7dx/",
@@ -162,10 +162,10 @@
           8224
         ],
         "github_notes": [
-          "linear_model 模块：闭式解、正则化与求解器选择的参考实现",
-          "《统计学习方法》全章代码：感知机、逻辑回归、最大熵",
-          "算法手写 + sklearn 对照，适合核对公式与实现",
-          "scikit-learn 作者写的入门书代码：讲清 API 背后的取舍"
+          "§1.岭回归闭式解与谱滤波 · §2.Lasso 的 L1 稀疏几何：`sklearn/linear_model/_ridge.py` 里 `_solve_svd` 与 `_solve_cholesky` 是两条路径，读它为什么默认走 SVD，就懂本章「条件数被平方放大」",
+          "§3.交叉熵 = 极大似然（为什么不用 MSE） · §2.软阈值：`lihang-code` 第 6 章逻辑回归与第 7 章 SVM 的代码连起来看，「为什么平方损失在这里不对」在梯度表达式上就看得出来",
+          "§1.正规方程与数值稳定性 · §4.弹性网在相关特征上救 Lasso：`code/` 每章都是手写实现 + sklearn 对照，把自己的手推结果和它的输出逐项核，公式错在哪一眼可见",
+          "§5.L1/L2 的贝叶斯先验（拉普拉斯 vs 高斯） · §2.Lasso 稀疏几何：`notebooks/` 里 L1/L2 的几何示意图是画出来的，对照本章「先验不同所以稀疏性不同」，比纯公式直观"
         ],
         "github_fetched_at": "2026-10-27",
         "bilibili": "https://www.bilibili.com/video/BV164411b7dx/",
@@ -233,9 +233,9 @@
           49828
         ],
         "github_notes": [
-          "吴恩达课程用 TensorFlow 演示；看 Keras 层的实现与自动微分",
-          "微软 12 周 ML 课程，含神经网络与分类的配套 Notebook",
-          "把「训练一个网络」放进完整工程链路里看"
+          "§2.一层：矩阵形式与维度约定 · §3.为什么必须有非线性：`keras/src/layers/core/dense.py` 里 `call()` 就是 `x @ kernel + bias` 一行，读它确认本章「维度约定」到底是怎么落地的",
+          "§1.一个神经元：加权和 + 偏置 + 激活 · §4.激活函数怎么选：`lessons/` 里的分类与神经网络 Notebook 都能直接跑，换激活函数重训一次，看本章「多层线性仍是线性」的实验证据",
+          "§6.训练循环的常见 bug · §2.数值梯度校验：`mlops/` 把训练放进完整工程链路（含数据校验与测试），它的测试用例正好是本章「手写网络要用数值梯度兜底」的实践版"
         ],
         "github_fetched_at": "2026-10-27",
         "bilibili": "https://www.bilibili.com/video/BV164411b7dx/",
@@ -306,10 +306,10 @@
           25823
         ],
         "github_notes": [
-          "model_selection 与 metrics：交叉验证、学习曲线、指标口径",
-          "误差分析与上线前检查的工程范例",
-          "贝叶斯超参搜索：比手工网格更接近「应用建议」的自动化版本",
-          "特征重要性的可解释替代，避免只看树模型 importance"
+          "§2.交叉验证把划分的运气摊平 · §3.切分策略必须匹配依赖结构：`sklearn/model_selection/_split.py` 里 `TimeSeriesSplit` 与 `GroupKFold` 是两条独立分支，读它为什么不能对时序用 KFold，就懂本章「切分要匹配依赖」",
+          "§2.学习曲线让诊断可复现 · §2 天花板：什么时候不该再调：`mlops/` 的评估与监控章节给了「上线前检查清单」，对照本章「训练/验证误差四象限」逐条核",
+          "§4.阈值是业务参数（代价矩阵） · §1.六个指标与各自盲区：`study/` 里有贝叶斯超参搜索的 notebook，它把「搜索目标」显式写成 metric——本章「选错指标等于调错方向」的实证",
+          "§5.概率校准（分数可排序不代表概率可信） · §1.混淆矩阵家族：`shap` 的 `plots/` 把「模型凭什么这么判」画出来，补本章「不能只看 importance 一个数」那一条"
         ],
         "github_fetched_at": "2026-10-27",
         "bilibili": "https://www.bilibili.com/video/BV164411b7dx/",
@@ -379,10 +379,10 @@
           9178
         ],
         "github_notes": [
-          "课程 W4 直接讲到 XGBoost；这里看二阶泰勒与分裂增益的权威实现",
-          "TreeSHAP：树模型解释的工业标配",
-          "直方图分箱 + leaf-wise + GOSS/EFB，大规模数据的工程解法",
-          "有序目标统计解决类别特征泄漏"
+          "§2.XGBoost 二阶泰勒与分裂增益 · §1.加法模型与负梯度：`src/tree/split_evaluator.h` 里 `CalcSplitGain` 就是本章那条分裂增益公式的实现，对照着读能看出正则项是怎么扣的",
+          "§1.连续特征切分点（相邻取值中点） · §3 树模型解释：`shap/explainers/_tree.py` 的 TreeSHAP 是精确解而非采样近似，读它就知道本章「树重要性会偏向高基数特征」为什么不适用于 SHAP 值",
+          "§3.LightGBM 三板斧（直方图/leaf-wise/GOSS） · §2.方差缩减：`src/io/` 与 `src/treelearner/` 分别是直方图分箱与 leaf-wise 生长，两处一读，本章「为什么 LightGBM 比 XGBoost 快」有了依据",
+          "§1 类别特征处理 · §2.特征抽样与去相关：`catboost/` 的 ordered target statistics 解决的是目标泄漏，正好对照本章「普通 target encoding 会把标签漏进特征」"
         ],
         "github_fetched_at": "2026-10-27",
         "bilibili": "https://www.bilibili.com/video/BV164411b7dx/",
@@ -450,9 +450,9 @@
           8224
         ],
         "github_notes": [
-          "cluster / covariance 模块：K-means、DBSCAN、GMM、异常检测",
-          "《Python 数据科学手册》：聚类与密度估计的可视化讲解",
-          "无监督方法的实际使用边界与常见误用"
+          "§2.Lloyd 迭代两步各自最优 · §4.k-means++ 的概率保证：`sklearn/cluster/_kmeans.py` 里 `_k_init` 就是 k-means++ 的实现，读它「按 D² 加权抽样」几行，本章「把运气变成概率保证」就落地了",
+          "§1.目标函数畸变 J · §6.失效边界（球状/等方差/同密度）：`notebooks/` 里聚类章节全是可视化，拿不同形状的合成数据跑一遍，本章失效条件当场可见",
+          "§3.多元高斯的协方差结构 · §2.ε 怎么选用 F1 口径：`notebooks/` 的 GMM 与密度估计部分画了等高线，对照本章「谁定义了异常」——协方差选 full 还是 diag 决定了判据"
         ],
         "github_fetched_at": "2026-10-27",
         "bilibili": "https://www.bilibili.com/video/BV164411b7dx/",
@@ -521,9 +521,9 @@
           30732
         ],
         "github_notes": [
-          "微软推荐系统最佳实践：召回-排序-评测的完整链路",
-          "统一推荐算法框架：100+ 模型的公平对比基线",
-          "工业界推荐/搜索落地案例与经验教训"
+          "§1.召回-排序链路 · §2.离线指标的口径（先把分母说清楚）：`examples/` 下每个 notebook 都从数据处理跑到评测，读它的评测单元就知道本章「分母不同指标不可比」指什么",
+          "§3.SGD 一次一个观测 · §4.ALS 固定一侧有闭式解：`recbole/model/` 里 MF 与 BPR 是分开的两个类，两者的 loss 与采样方式并排看，本章「优化排序 vs 优化评分」的差别一目了然",
+          "§6.流行度偏差与去偏 · §3.离线评估与线上 A/B 的差距：`README` 的 case study 收录了推荐系统线上踩坑，对照本章「离线涨了线上掉」的三种常见原因"
         ],
         "github_fetched_at": "2026-10-27",
         "bilibili": "https://www.bilibili.com/video/BV164411b7dx/",
@@ -591,9 +591,9 @@
           12738
         ],
         "github_notes": [
-          "经典 RL 算法的 Notebook 实现：Q-learning、策略迭代、价值迭代",
-          "RLlib：从单机 Q-learning 到分布式 RL 的工程路径",
-          "课程 W3 的 Lunar Lander 就是 Gym 环境；看 env 接口与环境设计"
+          "§3 动态规划三件套 · §2.Bellman 最优方程：`DP/` 下策略评估、策略迭代、价值迭代是三个独立 notebook，并排跑一次，本章「一个 max 让问题质变」在代码上看得见",
+          "§4 装上神经网络：致命三要素 · §5 为什么 RL 难复现：`rllib/algorithms/` 里每个算法都配了 tuned example，「换个环境超参全废」正是本章「难复现是方法问题」的证据",
+          "§3.Q-learning 与 SARSA 差一个 max · §3.ε-greedy：`gymnasium/envs/` 的 `step()` 返回五元组（含 truncated），读它区分 terminated 与 truncated，就懂本章「回合结束不等于失败」为什么会影响 TD 目标"
         ],
         "github_fetched_at": "2026-10-27",
         "bilibili": "https://www.bilibili.com/video/BV164411b7dx/",
@@ -663,10 +663,10 @@
           19606
         ],
         "github_notes": [
-          "SMO 官方实现：`svm.cpp` 的 `Solver::Solve` 与 `select_working_set` 就是本章 ex07/ex08 的工程版",
-          "坐标下降的线性 SVM：`n` 大且不核化时的正确选择，看它如何处理原始形式",
-          "`sklearn/svm/` 的封装层：确认 `SVC` 默认 OvO、`LinearSVC` 默认 OvR、`probability=True` 内部 5 折 Platt",
-          "《统计学习方法》第 7 章代码：教学版 SMO，可与本章推导逐行对照"
+          "§1.最大间隔 · §2.拉格朗日对偶：`svm.cpp` 的 `Solver::Solve` 与 `select_working_set` 就是本章 ex07/ex08 的工程版，读它「每次只动两个乘子」的选取规则，本章「对偶把约束变成内积」有了实现依据",
+          "§3.为什么对偶值得单独学 · §3 原始形式的适用面：`linear.cpp` 直接在原始形式做坐标下降，对照本章「n 大且不核化时别走对偶」，就知道两条路的分岔点在哪",
+          "§3.求解与工程：SMO、多分类与大规模 · §3 概率校准：`sklearn/svm/` 的封装层确认 `SVC` 默认 OvO、`LinearSVC` 默认 OvR、`probability=True` 内部走 5 折 Platt——本章「置信度要额外校准」的原型",
+          "§3.SMO 的单步更新 · §2.核的选择：`lihang-code` 第 7 章是教学版 SMO，可与本章推导逐行对照，看它的启发式选点比自己的实现快在哪"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [

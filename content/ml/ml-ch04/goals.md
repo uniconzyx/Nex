@@ -50,10 +50,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | 全章 | model_selection 与 metrics：交叉验证、学习曲线、指标口径；本章先读与「交叉验证」「切分策略必须匹配数据的依赖…」相关的部分 |
-| 2 | [GokuMohandas/Made-With-ML](https://github.com/GokuMohandas/Made-With-ML) | 49,873 | 全章 | 误差分析与上线前检查的工程范例；本章先读与「交叉验证」「切分策略必须匹配数据的依赖…」相关的部分 |
-| 3 | [optuna/optuna](https://github.com/optuna/optuna) | 14,945 | 全章 | 贝叶斯超参搜索：比手工网格更接近「应用建议」的自动化版本；本章先读与「交叉验证」「切分策略必须匹配数据的依赖…」相关的部分 |
-| 4 | [shap/shap](https://github.com/shap/shap) | 25,840 | 全章 | 特征重要性的可解释替代，避免只看树模型 importance；本章先读与「交叉验证」「切分策略必须匹配数据的依赖…」相关的部分 |
+| 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | §2.交叉验证把划分的运气摊平 | §3.切分策略必须匹配依赖结构：`sklearn/model_selection/_split.py` 里 `TimeSeriesSplit` 与 `GroupKFold` 是两条独立分支，读它为什么不能对时序用 KFold，就懂本章「切分要匹配依赖」 |
+| 2 | [GokuMohandas/Made-With-ML](https://github.com/GokuMohandas/Made-With-ML) | 49,873 | §2.学习曲线让诊断可复现 | §2 天花板：什么时候不该再调：`mlops/` 的评估与监控章节给了「上线前检查清单」，对照本章「训练/验证误差四象限」逐条核 |
+| 3 | [optuna/optuna](https://github.com/optuna/optuna) | 14,945 | §4.阈值是业务参数（代价矩阵） | §1.六个指标与各自盲区：`study/` 里有贝叶斯超参搜索的 notebook，它把「搜索目标」显式写成 metric——本章「选错指标等于调错方向」的实证 |
+| 4 | [shap/shap](https://github.com/shap/shap) | 25,840 | §5.概率校准（分数可排序不代表概率可信） | §1.混淆矩阵家族：`shap` 的 `plots/` 把「模型凭什么这么判」画出来，补本章「不能只看 importance 一个数」那一条 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

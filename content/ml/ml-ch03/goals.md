@@ -74,9 +74,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,257 | 全章 | 吴恩达课程用 TensorFlow 演示；看 Keras 层的实现与自动微分；本章先读与「一个神经元」「为什么必须有非线性」相关的部分 |
-| 2 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,917 | 全章 | 微软 12 周 ML 课程，含神经网络与分类的配套 Notebook；本章先读与「一个神经元」「为什么必须有非线性」相关的部分 |
-| 3 | [GokuMohandas/Made-With-ML](https://github.com/GokuMohandas/Made-With-ML) | 49,873 | 全章 | 把「训练一个网络」放进完整工程链路里看；本章先读与「一个神经元」「为什么必须有非线性」相关的部分 |
+| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,257 | §2.一层：矩阵形式与维度约定 | §3.为什么必须有非线性：`keras/src/layers/core/dense.py` 里 `call()` 就是 `x @ kernel + bias` 一行，读它确认本章「维度约定」到底是怎么落地的 |
+| 2 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,917 | §1.一个神经元：加权和 + 偏置 + 激活 | §4.激活函数怎么选：`lessons/` 里的分类与神经网络 Notebook 都能直接跑，换激活函数重训一次，看本章「多层线性仍是线性」的实验证据 |
+| 3 | [GokuMohandas/Made-With-ML](https://github.com/GokuMohandas/Made-With-ML) | 49,873 | §6.训练循环的常见 bug | §2.数值梯度校验：`mlops/` 把训练放进完整工程链路（含数据校验与测试），它的测试用例正好是本章「手写网络要用数值梯度兜底」的实践版 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

@@ -52,10 +52,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [GokuMohandas/Made-With-ML](https://github.com/GokuMohandas/Made-With-ML) | 49,873 | 全章 | 生产级 ML 全流程：数据校验→训练→部署→监控，用来对照「课程里的玩具流程」与真实工程；本章先读与「形式化」「经验风险最小化」相关的部分 |
-| 2 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | 全章 | 工业标准 ML 库：每个算法的参考实现与 API 取舍；本章先读与「形式化」「经验风险最小化」相关的部分 |
-| 3 | [datawhalechina/pumpkin-book](https://github.com/datawhalechina/pumpkin-book) | 26,146 | 全章 | 西瓜书公式推导详解，补课程里跳过推导的部分；本章先读与「形式化」「经验风险最小化」相关的部分 |
-| 4 | [apachecn/AiLearning](https://github.com/apachecn/AiLearning) | 42,609 | 全章 | 《机器学习实战》中文笔记：经典算法的可运行实现；本章先读与「形式化」「经验风险最小化」相关的部分 |
+| 1 | [GokuMohandas/Made-With-ML](https://github.com/GokuMohandas/Made-With-ML) | 49,873 | §2.从分解到工程：三个可控项 | §5.样本复杂度与学习曲线：`mlops/` 下从数据校验到监控的每一环都有可跑的 notebook，读它的数据切片与验证策略，对照本章「可控项只有三个」 |
+| 2 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | §1.形式化：一个学习问题由五件东西组成 | §1.四种学习范式：`sklearn/api_reference.py` 的 `estimator_type` 字段把 classifier / regressor / clusterer 写成了显式属性——「监督信号从哪来」在 API 层是可读的 |
+| 3 | [datawhalechina/pumpkin-book](https://github.com/datawhalechina/pumpkin-book) | 26,146 | §2.分解的完整推导 | §4.正则化的两种解释：`pumpkin-book` 的附录把西瓜书的偏差-方差分解逐行展开，第 2 章对应的推导正好补本章「这一步必须会写」 |
+| 4 | [apachecn/AiLearning](https://github.com/apachecn/AiLearning) | 42,609 | §3.SGD 用方差换速度 | §6.把学习看成压缩：`src/` 里各算法的纯 NumPy 实现（没有 sklearn 封装）适合核对公式，对照本章「归纳偏置决定你能不能学」 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

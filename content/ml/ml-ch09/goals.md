@@ -46,10 +46,12 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [cjlin1/libsvm](https://github.com/cjlin1/libsvm) | 4,716 | 全章 | SMO 官方实现：`svm.cpp` 的 `Solver::Solve` 与 `select_working_set` 就是本章 ex07/ex08 的工程版；本章先读与「最大间隔」「拉格朗日对偶」相关的部分 |
-| 2 | [cjlin1/liblinear](https://github.com/cjlin1/liblinear) | 1,052 | 全章 | 坐标下降的线性 SVM：`n` 大且不核化时的正确选择，看它如何处理原始形式；本章先读与「最大间隔」「拉格朗日对偶」相关的部分 |
-| 3 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | 全章 | `sklearn/svm/` 的封装层：确认 `SVC` 默认 OvO、`LinearSVC` 默认 OvR、`probability=True` 内部 5 折 Platt；本章先读与「最大间隔」「拉格朗日对偶」相关的部分 |
-| 4 | [fengdu78/lihang-code](https://github.com/fengdu78/lihang-code) | 19,605 | 全章 | 《统计学习方法》第 7 章代码：教学版 SMO，可与本章推导逐行对照；本章先读与「最大间隔」「拉格朗日对偶」相关的部分 |
+## 本章 GitHub 学习路线（按阅读顺序）
+
+| 1 | [cjlin1/libsvm](https://github.com/cjlin1/libsvm) | 4,716 | §1.最大间隔 | §2.拉格朗日对偶：`svm.cpp` 的 `Solver::Solve` 与 `select_working_set` 就是本章 ex07/ex08 的工程版，读它「每次只动两个乘子」的选取规则，本章「对偶把约束变成内积」有了实现依据 |
+| 2 | [cjlin1/liblinear](https://github.com/cjlin1/liblinear) | 1,052 | §3.为什么对偶值得单独学 | §3 原始形式的适用面：`linear.cpp` 直接在原始形式做坐标下降，对照本章「n 大且不核化时别走对偶」，就知道两条路的分岔点在哪 |
+| 3 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | §3.求解与工程：SMO、多分类与大规模 | §3 概率校准：`sklearn/svm/` 的封装层确认 `SVC` 默认 OvO、`LinearSVC` 默认 OvR、`probability=True` 内部走 5 折 Platt——本章「置信度要额外校准」的原型 |
+| 4 | [fengdu78/lihang-code](https://github.com/fengdu78/lihang-code) | 19,605 | §3.SMO 的单步更新 | §2.核的选择：`lihang-code` 第 7 章是教学版 SMO，可与本章推导逐行对照，看它的启发式选点比自己的实现快在哪 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

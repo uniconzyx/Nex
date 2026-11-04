@@ -63,9 +63,9 @@ DQN 部分只解释「用网络代替 Q 表时出现的两个问题及两个补�
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [dennybritz/reinforcement-learning](https://github.com/dennybritz/reinforcement-learning) | 22,165 | 全章 | 经典 RL 算法的 Notebook 实现：Q-learning、策略迭代、价值迭代；本章先读与「MDP 五元组」「回报 G_t」相关的部分 |
-| 2 | [ray-project/ray](https://github.com/ray-project/ray) | 44,096 | 全章 | RLlib：从单机 Q-learning 到分布式 RL 的工程路径；本章先读与「MDP 五元组」「回报 G_t」相关的部分 |
-| 3 | [Farama-Foundation/Gymnasium](https://github.com/Farama-Foundation/Gymnasium) | 12,738 | 全章 | 课程 W3 的 Lunar Lander 就是 Gym 环境；看 env 接口与环境设计；本章先读与「MDP 五元组」「回报 G_t」相关的部分 |
+| 1 | [dennybritz/reinforcement-learning](https://github.com/dennybritz/reinforcement-learning) | 22,165 | §3 动态规划三件套 | §2.Bellman 最优方程：`DP/` 下策略评估、策略迭代、价值迭代是三个独立 notebook，并排跑一次，本章「一个 max 让问题质变」在代码上看得见 |
+| 2 | [ray-project/ray](https://github.com/ray-project/ray) | 44,096 | §4 装上神经网络：致命三要素 | §5 为什么 RL 难复现：`rllib/algorithms/` 里每个算法都配了 tuned example，「换个环境超参全废」正是本章「难复现是方法问题」的证据 |
+| 3 | [Farama-Foundation/Gymnasium](https://github.com/Farama-Foundation/Gymnasium) | 12,738 | §3.Q-learning 与 SARSA 差一个 max | §3.ε-greedy：`gymnasium/envs/` 的 `step()` 返回五元组（含 truncated），读它区分 terminated 与 truncated，就懂本章「回合结束不等于失败」为什么会影响 TD 目标 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

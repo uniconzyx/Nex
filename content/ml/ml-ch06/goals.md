@@ -52,9 +52,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | 全章 | cluster / covariance 模块：K-means、DBSCAN、GMM、异常检测；本章先读与「目标函数」「Lloyd 迭代」相关的部分 |
-| 2 | [jakevdp/PythonDataScienceHandbook](https://github.com/jakevdp/PythonDataScienceHandbook) | 50,277 | 全章 | 《Python 数据科学手册》：聚类与密度估计的可视化讲解；本章先读与「目标函数」「Lloyd 迭代」相关的部分 |
-| 3 | [amueller/introduction_to_ml_with_python](https://github.com/amueller/introduction_to_ml_with_python) | 8,225 | 全章 | 无监督方法的实际使用边界与常见误用；本章先读与「目标函数」「Lloyd 迭代」相关的部分 |
+| 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | §2.Lloyd 迭代两步各自最优 | §4.k-means++ 的概率保证：`sklearn/cluster/_kmeans.py` 里 `_k_init` 就是 k-means++ 的实现，读它「按 D² 加权抽样」几行，本章「把运气变成概率保证」就落地了 |
+| 2 | [jakevdp/PythonDataScienceHandbook](https://github.com/jakevdp/PythonDataScienceHandbook) | 50,277 | §1.目标函数畸变 J | §6.失效边界（球状/等方差/同密度）：`notebooks/` 里聚类章节全是可视化，拿不同形状的合成数据跑一遍，本章失效条件当场可见 |
+| 3 | [amueller/introduction_to_ml_with_python](https://github.com/amueller/introduction_to_ml_with_python) | 8,225 | §3.多元高斯的协方差结构 | §2.ε 怎么选用 F1 口径：`notebooks/` 的 GMM 与密度估计部分画了等高线，对照本章「谁定义了异常」——协方差选 full 还是 diag 决定了判据 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

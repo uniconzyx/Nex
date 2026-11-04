@@ -41,10 +41,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | 全章 | linear_model 模块：闭式解、正则化与求解器选择的参考实现；本章先读与「几何本质」「正规方程与数值稳定性」相关的部分 |
-| 2 | [fengdu78/lihang-code](https://github.com/fengdu78/lihang-code) | 19,605 | 全章 | 《统计学习方法》全章代码：感知机、逻辑回归、最大熵；本章先读与「几何本质」「正规方程与数值稳定性」相关的部分 |
-| 3 | [rasbt/python-machine-learning-book](https://github.com/rasbt/python-machine-learning-book) | 12,659 | 全章 | 算法手写 + sklearn 对照，适合核对公式与实现；本章先读与「几何本质」「正规方程与数值稳定性」相关的部分 |
-| 4 | [amueller/introduction_to_ml_with_python](https://github.com/amueller/introduction_to_ml_with_python) | 8,225 | 全章 | scikit-learn 作者写的入门书代码：讲清 API 背后的取舍；本章先读与「几何本质」「正规方程与数值稳定性」相关的部分 |
+| 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | §1.岭回归闭式解与谱滤波 | §2.Lasso 的 L1 稀疏几何：`sklearn/linear_model/_ridge.py` 里 `_solve_svd` 与 `_solve_cholesky` 是两条路径，读它为什么默认走 SVD，就懂本章「条件数被平方放大」 |
+| 2 | [fengdu78/lihang-code](https://github.com/fengdu78/lihang-code) | 19,605 | §3.交叉熵 = 极大似然（为什么不用 MSE） | §2.软阈值：`lihang-code` 第 6 章逻辑回归与第 7 章 SVM 的代码连起来看，「为什么平方损失在这里不对」在梯度表达式上就看得出来 |
+| 3 | [rasbt/python-machine-learning-book](https://github.com/rasbt/python-machine-learning-book) | 12,659 | §1.正规方程与数值稳定性 | §4.弹性网在相关特征上救 Lasso：`code/` 每章都是手写实现 + sklearn 对照，把自己的手推结果和它的输出逐项核，公式错在哪一眼可见 |
+| 4 | [amueller/introduction_to_ml_with_python](https://github.com/amueller/introduction_to_ml_with_python) | 8,225 | §5.L1/L2 的贝叶斯先验（拉普拉斯 vs 高斯） | §2.Lasso 稀疏几何：`notebooks/` 里 L1/L2 的几何示意图是画出来的，对照本章「先验不同所以稀疏性不同」，比纯公式直观 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

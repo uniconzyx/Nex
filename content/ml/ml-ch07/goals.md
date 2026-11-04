@@ -46,9 +46,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [recommenders-team/recommenders](https://github.com/recommenders-team/recommenders) | 21,959 | 全章 | 微软推荐系统最佳实践：召回-排序-评测的完整链路；本章先读与「问题形式化」「user-based CF」相关的部分 |
-| 2 | [RUCAIBox/RecBole](https://github.com/RUCAIBox/RecBole) | 4,600 | 全章 | 统一推荐算法框架：100+ 模型的公平对比基线；本章先读与「问题形式化」「user-based CF」相关的部分 |
-| 3 | [eugeneyan/applied-ml](https://github.com/eugeneyan/applied-ml) | 30,756 | 全章 | 工业界推荐/搜索落地案例与经验教训；本章先读与「问题形式化」「user-based CF」相关的部分 |
+| 1 | [recommenders-team/recommenders](https://github.com/recommenders-team/recommenders) | 21,959 | §1.召回-排序链路 | §2.离线指标的口径（先把分母说清楚）：`examples/` 下每个 notebook 都从数据处理跑到评测，读它的评测单元就知道本章「分母不同指标不可比」指什么 |
+| 2 | [RUCAIBox/RecBole](https://github.com/RUCAIBox/RecBole) | 4,600 | §3.SGD 一次一个观测 | §4.ALS 固定一侧有闭式解：`recbole/model/` 里 MF 与 BPR 是分开的两个类，两者的 loss 与采样方式并排看，本章「优化排序 vs 优化评分」的差别一目了然 |
+| 3 | [eugeneyan/applied-ml](https://github.com/eugeneyan/applied-ml) | 30,756 | §6.流行度偏差与去偏 | §3.离线评估与线上 A/B 的差距：`README` 的 case study 收录了推荐系统线上踩坑，对照本章「离线涨了线上掉」的三种常见原因 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 
