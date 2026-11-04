@@ -11,9 +11,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [TheAlgorithms/C-Plus-Plus](https://github.com/TheAlgorithms/C-Plus-Plus) | 34,827 | 全章 | 本章讲「值传参 vs 引用传参」时，先看 `math/greatest_common_divisor.cpp` 与 `math/lcm.cpp`：参数写成 `int` 还是 `const T&` 不是风格问题——内建类型按值、可能很大的对象按 const 引用，这份仓库把两种写法放在同一个目录里，一眼能对照出选择依据 |
-| 2 | [fmtlib/fmt](https://github.com/fmtlib/fmt) | 25,899 | 全章 | 讲「引用绑定与类型退化」看 `include/fmt/base.h` 的 `type_mapper`（v11 起；v10 及以前在 `core.h`）：它把 `T`、`const T&`、`T&` 分别映射成同一套呈现方式，这是标准库 `std::decay` 之外最实用的「引用到底绑到了什么」的工业样本 |
-| 3 | [nlohmann/json](https://github.com/nlohmann/json) | 50,829 | 全章 | 讲「类型别名与 const 正确性」看 `include/nlohmann/json.hpp` 顶部的 `using string_t = StringType;`、`using number_integer_t = ...`：全部用 `using` 而不是 `typedef`，且返回 `const string_t&` 不返回副本，正是本章「引用避免拷贝」那一条的落地 |
+| 1 | [TheAlgorithms/C-Plus-Plus](https://github.com/TheAlgorithms/C-Plus-Plus) | 34,827 | §四 传参怎么选 | 本章讲「值传参 vs 引用传参」时，先看 `math/greatest_common_divisor.cpp` 与 `math/lcm.cpp`：参数写成 `int` 还是 `const T&` 不是风格问题——内建类型按值、可能很大的对象按 const 引用，这份仓库把两种写法放在同一个目录里，一眼能对照出选择依据 |
+| 2 | [fmtlib/fmt](https://github.com/fmtlib/fmt) | 25,899 | §三 引用是别名，不是指针 | 讲「引用绑定与类型退化」看 `include/fmt/base.h` 的 `type_mapper`（v11 起；v10 及以前在 `core.h`）：它把 `T`、`const T&`、`T&` 分别映射成同一套呈现方式，这是标准库 `std::decay` 之外最实用的「引用到底绑到了什么」的工业样本 |
+| 3 | [nlohmann/json](https://github.com/nlohmann/json) | 50,829 | §一 类型决定了什么 | 讲「类型别名与 const 正确性」看 `include/nlohmann/json.hpp` 顶部的 `using string_t = StringType;`、`using number_integer_t = ...`：全部用 `using` 而不是 `typedef`，且返回 `const string_t&` 不返回副本，正是本章「引用避免拷贝」那一条的落地 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

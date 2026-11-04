@@ -33,9 +33,9 @@
           50813
         ],
         "github_notes": [
-          "本章讲「值传参 vs 引用传参」时，先看 `math/greatest_common_divisor.cpp` 与 `math/lcm.cpp`：参数写成 `int` 还是 `const T&` 不是风格问题——内建类型按值、可能很大的对象按 const 引用，这份仓库把两种写法放在同一个目录里，一眼能对照出选择依据",
-          "讲「引用绑定与类型退化」看 `include/fmt/base.h` 的 `type_mapper`（v11 起；v10 及以前在 `core.h`）：它把 `T`、`const T&`、`T&` 分别映射成同一套呈现方式，这是标准库 `std::decay` 之外最实用的「引用到底绑到了什么」的工业样本",
-          "讲「类型别名与 const 正确性」看 `include/nlohmann/json.hpp` 顶部的 `using string_t = StringType;`、`using number_integer_t = ...`：全部用 `using` 而不是 `typedef`，且返回 `const string_t&` 不返回副本，正是本章「引用避免拷贝」那一条的落地"
+          "§四 传参怎么选 · 本章讲「值传参 vs 引用传参」时，先看 `math/greatest_common_divisor.cpp` 与 `math/lcm.cpp`：参数写成 `int` 还是 `const T&` 不是风格问题——内建类型按值、可能很大的对象按 const 引用，这份仓库把两种写法放在同一个目录里，一眼能对照出选择依据",
+          "§三 引用是别名，不是指针 · 讲「引用绑定与类型退化」看 `include/fmt/base.h` 的 `type_mapper`（v11 起；v10 及以前在 `core.h`）：它把 `T`、`const T&`、`T&` 分别映射成同一套呈现方式，这是标准库 `std::decay` 之外最实用的「引用到底绑到了什么」的工业样本",
+          "§一 类型决定了什么 · 讲「类型别名与 const 正确性」看 `include/nlohmann/json.hpp` 顶部的 `using string_t = StringType;`、`using number_integer_t = ...`：全部用 `using` 而不是 `typedef`，且返回 `const string_t&` 不返回副本，正是本章「引用避免拷贝」那一条的落地"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -160,9 +160,9 @@
           15147
         ],
         "github_notes": [
-          "本章讲「string_view 式零拷贝」看 `include/nlohmann/json.hpp` 的 `get_ref<const string_t&>()`：它不复制字符串，直接把内部 `std::string` 以 const 引用交出去；再读 `get<std::string>()` 的返回类型，对比「视图」和「拥有」在这一个 API 上的分野",
-          "`include/fmt/core.h`（v11 起并入 `base.h`）里的 `basic_string_view` 是 fmt 自带实现：只存 `const Char* data_` 与 `size_t size_`，`substr` 返回新视图而非新字符串；把它和 `std::string` 的 `substr` 并排看，就明白本章「视图不拥有内存」的代价与收益",
-          "「视图 vs 拥有」的极端案例：`include/rapidjson/document.h` 的 `kParseInsituFlag` 直接在你的缓冲区上把 token 切开（原地写 `\\\\0`），解析完字符串指针指向原缓冲——省掉全部拷贝，代价是原数据不能再用"
+          "§三 它不保证什么 · 本章讲「string_view 式零拷贝」看 `include/nlohmann/json.hpp` 的 `get_ref<const string_t&>()`：它不复制字符串，直接把内部 `std::string` 以 const 引用交出去；再读 `get<std::string>()` 的返回类型，对比「视图」和「拥有」在这一个 API 上的分野",
+          "§一 它到底是什么：两个字段 · `include/fmt/core.h`（v11 起并入 `base.h`）里的 `basic_string_view` 是 fmt 自带实现：只存 `const Char* data_` 与 `size_t size_`，`substr` 返回新视图而非新字符串；把它和 `std::string` 的 `substr` 并排看，就明白本章「视图不拥有内存」的代价与收益",
+          "§二 生命周期：唯一的、也是致命的风险 · 「视图 vs 拥有」的极端案例：`include/rapidjson/document.h` 的 `kParseInsituFlag` 直接在你的缓冲区上把 token 切开（原地写 `\\\\0`），解析完字符串指针指向原缓冲——省掉全部拷贝，代价是原数据不能再用"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -223,9 +223,9 @@
           76964
         ],
         "github_notes": [
-          "本章讲「大块预分配 + bump 指针」看 `util/arena.h` 与 `util/arena.cc`：`Arena::Allocate` 只在当前 4KB 块里移动 `alloc_ptr_`，块用完才 `new char[]`；`AllocateAligned` 还会按 `align` 把指针向上取整——这就是本章说的「指针运算 + 手动对齐」",
-          "「一 malloc 一 free 配对」的标准形态：`cJSON.c` 的 `cJSON_New_Item` 先 `malloc` 再 `memset` 清零，`cJSON_Delete` 递归释放 `child`/`next` 链表；重点看 `cJSON_Parse` 的失败路径——每个提前 return 前都先 `cJSON_Delete`，否则就是本书反复警告的那类泄漏",
-          "「指针往前挪一格做记账」看 `src/zmalloc.c`：`zmalloc` 多申请 `PREFIX_SIZE` 字节，把长度写在返回指针之前，`zmalloc_size` 用 `(size_t*)ptr - 1` 取回；这是本章「指针算术 + 内存布局」最直接的工业用法，也解释了 `zmalloc_used_memory` 为什么准"
+          "§四 operator new 可重载：内存池的入口 · 本章讲「大块预分配 + bump 指针」看 `util/arena.h` 与 `util/arena.cc`：`Arena::Allocate` 只在当前 4KB 块里移动 `alloc_ptr_`，块用完才 `new char[]`；`AllocateAligned` 还会按 `align` 把指针向上取整——这就是本章说的「指针运算 + 手动对齐」",
+          "§三 异常安全：为什么裸 new 一定会漏 · 「一 malloc 一 free 配对」的标准形态：`cJSON.c` 的 `cJSON_New_Item` 先 `malloc` 再 `memset` 清零，`cJSON_Delete` 递归释放 `child`/`next` 链表；重点看 `cJSON_Parse` 的失败路径——每个提前 return 前都先 `cJSON_Delete`，否则就是本书反复警告的那类泄漏",
+          "§一 进程地址空间：六个区 · 「指针往前挪一格做记账」看 `src/zmalloc.c`：`zmalloc` 多申请 `PREFIX_SIZE` 字节，把长度写在返回指针之前，`zmalloc_size` 用 `(size_t*)ptr - 1` 取回；这是本章「指针算术 + 内存布局」最直接的工业用法，也解释了 `zmalloc_used_memory` 为什么准"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -477,9 +477,9 @@
           34813
         ],
         "github_notes": [
-          "§1.2 的 2× 扩容：`stl/inc/vector` 的 `_Calculate_growth` 做 `max(size + size/2, requested)` 再对齐，`_Emplace_reallocate` 分配新块、搬移旧元素、释放旧块——三步全在这里；对照本章算的摊销 O(1)，能看出「1.5× 还是 2×」对重新分配次数的影响",
-          "§3.3 负载因子与 rehash：`src/dict.c` 的 `dictExpand` 建两张表，`dictRehash` 每次只搬 `n` 个桶（渐进式 rehash），查找时两张表都要看；这是「不一次性搬完以免卡顿」的工程答案，与 `unordered_map` 的一次性 rehash 形成对照",
-          "「选容器」的实例库：`data_structures/` 下同一个结构常有数组版与链表版两种实现，`sort/` 下也区分「适合 vector」与「只能链表做」的算法；把本章的容器选择决策树拿过来，逐目录验证一遍你的判断"
+          "§2.2 amortized 2× 扩容 · `stl/inc/vector` 的 `_Calculate_growth` 做 `max(size + size/2, requested)` 再对齐，`_Emplace_reallocate` 分配新块、搬移旧元素、释放旧块——三步全在这里；对照本章算的摊销 O(1)，能看出「1.5× 还是 2×」对重新分配次数的影响",
+          "§3.3 负载因子与再哈希 · `src/dict.c` 的 `dictExpand` 建两张表，`dictRehash` 每次只搬 `n` 个桶（渐进式 rehash），查找时两张表都要看；这是「不一次性搬完以免卡顿」的工程答案，与 `unordered_map` 的一次性 rehash 形成对照",
+          "§4.3 容器选择决策树 · `data_structures/` 下同一个结构常有数组版与链表版两种实现，`sort/` 下也区分「适合 vector」与「只能链表做」的算法；把本章的决策树拿过来，逐目录验证一遍你的判断"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [

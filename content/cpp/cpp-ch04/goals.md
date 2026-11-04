@@ -12,9 +12,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [google/leveldb](https://github.com/google/leveldb) | 39,514 | 全章 | 本章讲「大块预分配 + bump 指针」看 `util/arena.h` 与 `util/arena.cc`：`Arena::Allocate` 只在当前 4KB 块里移动 `alloc_ptr_`，块用完才 `new char[]`；`AllocateAligned` 还会按 `align` 把指针向上取整——这就是本章说的「指针运算 + 手动对齐」 |
-| 2 | [DaveGamble/cJSON](https://github.com/DaveGamble/cJSON) | 13,063 | 全章 | 「一 malloc 一 free 配对」的标准形态：`cJSON.c` 的 `cJSON_New_Item` 先 `malloc` 再 `memset` 清零，`cJSON_Delete` 递归释放 `child`/`next` 链表；重点看 `cJSON_Parse` 的失败路径——每个提前 return 前都先 `cJSON_Delete`，否则就是本书反复警告的那类泄漏 |
-| 3 | [redis/redis](https://github.com/redis/redis) | 77,127 | 全章 | 「指针往前挪一格做记账」看 `src/zmalloc.c`：`zmalloc` 多申请 `PREFIX_SIZE` 字节，把长度写在返回指针之前，`zmalloc_size` 用 `(size_t*)ptr - 1` 取回；这是本章「指针算术 + 内存布局」最直接的工业用法，也解释了 `zmalloc_used_memory` 为什么准 |
+| 1 | [google/leveldb](https://github.com/google/leveldb) | 39,514 | §四 operator new 可重载：内存池的入口 | 本章讲「大块预分配 + bump 指针」看 `util/arena.h` 与 `util/arena.cc`：`Arena::Allocate` 只在当前 4KB 块里移动 `alloc_ptr_`，块用完才 `new char[]`；`AllocateAligned` 还会按 `align` 把指针向上取整——这就是本章说的「指针运算 + 手动对齐」 |
+| 2 | [DaveGamble/cJSON](https://github.com/DaveGamble/cJSON) | 13,063 | §三 异常安全：为什么裸 new 一定会漏 | 「一 malloc 一 free 配对」的标准形态：`cJSON.c` 的 `cJSON_New_Item` 先 `malloc` 再 `memset` 清零，`cJSON_Delete` 递归释放 `child`/`next` 链表；重点看 `cJSON_Parse` 的失败路径——每个提前 return 前都先 `cJSON_Delete`，否则就是本书反复警告的那类泄漏 |
+| 3 | [redis/redis](https://github.com/redis/redis) | 77,127 | §一 进程地址空间：六个区 | 「指针往前挪一格做记账」看 `src/zmalloc.c`：`zmalloc` 多申请 `PREFIX_SIZE` 字节，把长度写在返回指针之前，`zmalloc_size` 用 `(size_t*)ptr - 1` 取回；这是本章「指针算术 + 内存布局」最直接的工业用法，也解释了 `zmalloc_used_memory` 为什么准 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 
