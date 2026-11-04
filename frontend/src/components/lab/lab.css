@@ -1,0 +1,312 @@
+/* ============================================================================
+   交互实验（InteractiveLab）样式
+   ----------------------------------------------------------------------------
+   这个文件是 lab 组件**唯一的色源**：组件里的令牌全部指向这里定义的
+   --kmlab-*，因此主题切换（.km-app[data-km-theme='dark']）只需在这一个
+   地方补一套值，不必改动任何 TSX。
+
+   为什么不全用 --km-*：--km-* 是「页面级」令牌（背景、文字阶、玻璃面），
+   lab 还需要几个只有自己用的中间色 —— 比如滑块的凹槽、猫脸底、升调的薄荷。
+   它们派生自 --km-*，在深色下单独调，而不是往全局令牌里塞一次性颜色。
+   ============================================================================ */
+
+.kmlab {
+  /* 白面（卡片、按钮底）的 RGB 分量：rgba(var(--kmlab-rgb), .5) 这样用，
+     深色下换成深蓝灰，半透明白卡就不会在暗背景上炸开 */
+  --kmlab-rgb: 255, 255, 255;
+  --kmlab-ice-rgb: 93, 180, 229;
+  --kmlab-mint-rgb: 49, 208, 170;
+  --kmlab-coral-rgb: 248, 113, 113;
+  --kmlab-shadow-rgb: 160, 190, 220;
+
+  --kmlab-bg: var(--km-env-1);
+  --kmlab-bg-deep: var(--km-env-3);
+  --kmlab-line: var(--km-track);
+  --kmlab-white: #ffffff;
+  --kmlab-face: #f2faff;
+  --kmlab-sunk: #ddebf6;
+  --kmlab-mint-deep: #0f8a6c;
+  --kmlab-mint-lift: #8ef0d2;
+  --kmlab-coral-deep: #c2413c;
+
+  --kmlab-glass: rgba(255, 255, 255, 0.6);
+  --kmlab-glass-border: rgba(255, 255, 255, 0.8);
+  --kmlab-shadow-soft: 0 8px 24px rgba(160, 190, 220, 0.15);
+  /* 外壳那层「冰蓝奶白」的径向渐变 */
+  --kmlab-panel: radial-gradient(120% 90% at 50% 0%, #ffffff 0%, var(--km-env-1) 55%, var(--km-env-3) 100%);
+
+  box-sizing: border-box;
+  font-family: 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Noto Sans SC', system-ui,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.kmlab *,
+.kmlab *::before,
+.kmlab *::after {
+  box-sizing: border-box;
+}
+
+/* ── 深色主题：只改 lab 自己那层，--km-* 的语义不变 ───────────────────
+   两个选择器都写：主题同时落在 <html>（progress.ts 落盘后写入，供概念图解等
+   全局样式用）和 .km-app（Shell 根节点）上，谁先谁后不该影响这里。 */
+html[data-km-theme='dark'] .kmlab,
+.km-app[data-km-theme='dark'] .kmlab {
+  --kmlab-rgb: 32, 46, 64;
+  --kmlab-shadow-rgb: 0, 0, 0;
+  --kmlab-bg: #1b2634;
+  --kmlab-bg-deep: #16202b;
+  --kmlab-line: rgba(160, 200, 235, 0.22);
+  --kmlab-white: #24303f;
+  --kmlab-face: #1b2634;
+  --kmlab-sunk: rgba(120, 180, 230, 0.16);
+  --kmlab-mint-deep: #6fe3c1;
+  --kmlab-mint-lift: #7ff0cf;
+  --kmlab-coral-deep: #ffb0b0;
+
+  --kmlab-glass: rgba(36, 50, 68, 0.66);
+  --kmlab-glass-border: rgba(180, 214, 245, 0.18);
+  --kmlab-shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --kmlab-panel: radial-gradient(120% 90% at 50% 0%, #26313f 0%, #1b2634 55%, #16202b 100%);
+}
+
+/* ── 滑块：沙盒参数的手感全靠这一颗 thumb ─────────────────────────────── */
+.kmlab input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--kmlab-sunk);
+  outline: none;
+  cursor: pointer;
+}
+.kmlab input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--kmlab-white);
+  border: 2px solid var(--km-primary);
+  box-shadow: 0 2px 8px rgba(var(--kmlab-ice-rgb), 0.4);
+  cursor: grab;
+  transition: transform 0.12s;
+}
+.kmlab input[type='range']::-webkit-slider-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.1);
+}
+.kmlab input[type='range']::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--kmlab-white);
+  border: 2px solid var(--km-primary);
+  box-shadow: 0 2px 8px rgba(var(--kmlab-ice-rgb), 0.4);
+  cursor: grab;
+}
+.kmlab input[type='range']:focus-visible {
+  outline: 2px solid var(--km-primary-deep);
+  outline-offset: 3px;
+}
+
+/* ── 内滚动区：代码块 / 参数面板 ─────────────────────────────────────── */
+.kmlab .km-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.kmlab .km-scroll::-webkit-scrollbar-thumb {
+  background: rgba(var(--kmlab-ice-rgb), 0.35);
+  border-radius: 4px;
+}
+.kmlab .km-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@keyframes km-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* 场景条在窄屏换行后，那条竖分隔线会孤零零挂在第一行末尾 —— 直接收掉 */
+@media (max-width: 560px) {
+  .kmlab .km-sb-div {
+    display: none;
+  }
+}
+
+/* 凯喵气泡是绝对定位的浮动层，窄屏下它会横跨大半个视口、盖住最后一排按钮。
+   所以模块根容器用 .km-body 预留底部空白：宽屏 56（一行气泡），窄屏 104（两行）。 */
+.kmlab .km-body {
+  padding-bottom: 56px;
+}
+@media (max-width: 760px) {
+  .kmlab .km-body {
+    padding-bottom: 104px;
+  }
+}
+/* 凯喵气泡常驻右下（right:14 / maxWidth:330），最后一屏的结论框要给它让位，
+   否则通关那一下「结论被气泡压住半句」—— 正是最该看清的时刻。
+   窄屏气泡会浮在更下方，所以只在宽屏留这段空白。 */
+.kmlab .km-tail {
+  padding-right: 206px;
+}
+@media (max-width: 760px) {
+  .kmlab .km-tail {
+    padding-right: 0;
+  }
+}
+
+/* ============================================================================
+   章节卡里的外壳（ChapterLab）：只加一行 eyebrow，不套第二层玻璃
+   —— InteractiveLab 自己就是一块玻璃面，外面再包一层会显得「盒子里套盒子」。
+   ============================================================================ */
+
+.km-lab {
+  margin-top: 14px;
+}
+
+.km-lab-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 9px;
+}
+.km-lab-eyebrow {
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--km-accent-ink);
+}
+.km-lab-meta {
+  font-size: 12px;
+  color: var(--km-ink-soft);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.km-lab-hint {
+  margin-left: auto;
+  font-size: 11.5px;
+  color: var(--km-ink-mute);
+}
+@media (max-width: 560px) {
+  .km-lab-hint {
+    margin-left: 0;
+  }
+}
+
+.km-lab-skeleton,
+.km-lab-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--km-surf2);
+  color: var(--km-ink-mute);
+  font-size: 12.5px;
+  line-height: 1.7;
+}
+.km-lab-empty b {
+  color: var(--km-ink);
+  font-size: 13px;
+}
+.km-lab-empty code {
+  font-family: var(--kmlab-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+  font-size: 11.5px;
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: rgba(var(--kmlab-ice-rgb), 0.14);
+  overflow-wrap: anywhere;
+}
+
+/* ============================================================================
+   实验台（LabPage）：学科胶囊 + 章节网格 + 就地展开
+   ============================================================================ */
+
+.lab-bench-subjects {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.lab-bench-subject {
+  border: 1px solid var(--kmlab-glass-border);
+  background: rgba(var(--kmlab-rgb), 0.5);
+  color: var(--km-ink-soft);
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: background 0.16s, color 0.16s, border-color 0.16s;
+}
+.lab-bench-subject em {
+  font-style: normal;
+  margin-left: 5px;
+  font-size: 11px;
+  opacity: 0.7;
+}
+.lab-bench-subject:hover {
+  background: rgba(var(--kmlab-rgb), 0.8);
+}
+.lab-bench-subject.on {
+  background: var(--km-primary);
+  border-color: var(--km-primary);
+  color: #fff;
+}
+
+.lab-bench-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(228px, 1fr));
+  gap: 8px;
+}
+.lab-bench-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: left;
+  padding: 9px 11px;
+  border-radius: 12px;
+  border: 1px solid var(--kmlab-glass-border);
+  background: rgba(var(--kmlab-rgb), 0.62);
+  cursor: pointer;
+  font-family: inherit;
+  min-width: 0;
+  transition: background 0.16s, border-color 0.16s, transform 0.12s;
+}
+.lab-bench-item:hover {
+  background: rgba(var(--kmlab-rgb), 0.9);
+}
+.lab-bench-item:active {
+  transform: scale(0.985);
+}
+.lab-bench-item.on {
+  border-color: var(--km-primary-deep);
+  background: rgba(var(--kmlab-ice-rgb), 0.16);
+}
+.lab-bench-item-id {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10.5px;
+  color: var(--km-primary-deep);
+  letter-spacing: 0.3px;
+}
+.lab-bench-item-title {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--km-ink);
+  overflow-wrap: anywhere;
+}
+.lab-bench-item-kinds {
+  font-size: 11px;
+  color: var(--km-ink-mute);
+}
+.lab-bench-stage {
+  margin-top: 14px;
+}

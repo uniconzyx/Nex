@@ -25,6 +25,7 @@ import { BUNDLE, type BundleChapter } from '../data/bundle';
 import { CLANG_CHAPTERS } from '../data/clangUnits';
 import { SubjectSwitch } from '../components/SubjectSwitch';
 import { ConceptViz } from '../components/ConceptViz';
+import { ChapterLab } from '../components/ChapterLab';
 import { subjectLabel, useSubject } from '../lib/subject';
 import { chapterMastery, resetChapter, useProgress } from '../lib/progress';
 import { STORY_BY_CHAPTER, isTeaser } from '../data/story';
@@ -317,6 +318,12 @@ export function LearnPage({ onNavigate }: { onNavigate?: (p: KmPage) => void }) 
                   场景灯（考试/事故/面谈）只改配色不改拓扑——同一个机制
                   被三种场景击中，才看得出哪一节最贵。真题只读，不写回。 */}
               <ConceptViz subject={subject} chapterId={c.id} />
+
+              {/* ── 交互实验（紧接图解，在判定之前） ──────────────────
+                  图讲清机制，实验让你亲手把它拖错一次：拖错 → 凯喵说错在哪 →
+                  再拖对。先看结构、再动手，最后才是三关判定，顺序不能倒。
+                  数据按学科懒加载，素材只读，判定全在本机。 */}
+              <ChapterLab subject={subject} chapterId={c.id} />
 
               {/* ── 三关 ─────────────────────────────────────────────── */}
               <div className="km-stages">

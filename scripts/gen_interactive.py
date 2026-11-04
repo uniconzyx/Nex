@@ -37,7 +37,15 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONTENT = os.path.join(ROOT, "content")
+# 脚本目录进 sys.path：fe_labs_emit 是本目录的兄弟模块（写前端 TS 的那段）
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from fe_labs_emit import write_frontend  # noqa: E402
 OUT_TS = os.path.join(ROOT, "viz", "interactive", "src", "data", "index.ts")
+# 应用内消费的产物：每学科一个模块（懒加载）+ 一份索引。
+# 为什么按学科拆而不是按章拆：165 个 chunk 太碎（HTTP/2 下也只是把请求数
+# 从 16 抬到 165），而单学科最大 161KB（gzip ≈ 30KB），打开任一章节时就地
+# 下载一科，比按章拆更快；也不像整包内联那样把首屏撑大。
+OUT_FE_DIR = os.path.join(ROOT, "frontend", "src", "data", "labs")
 # 手工精修的 sandbox / debug 模块。自动抽取对这两种玩法不可靠
 # （"拖哪个旋钮"、"缺的是哪条语句"都是作者判断，不是正则能猜的），
 # 所以数据单独放一份，生成器原样并入 interactive.json —— 重跑不会覆盖掉。
@@ -717,6 +725,9 @@ def main() -> int:
                 f.write("\n")
         write_ts(all_labs, args.check)
         print(f"· 已写 {len(all_labs)} 份 interactive.json + {os.path.relpath(OUT_TS, ROOT)}")
+        fe = write_frontend(all_labs, OUT_FE_DIR)
+        print(f"· 已写前端数据 {len(fe)} 个模块 → {os.path.relpath(OUT_FE_DIR, ROOT)}"
+              f"（{len(all_labs)} 章）")
     else:
         for key in list(all_labs)[:5]:
             print("  sample", key, [m["kind"] for m in all_labs[key]["modules"]])

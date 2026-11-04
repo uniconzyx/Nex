@@ -21,11 +21,14 @@ import { useEffect, useRef, useState } from 'react';
 import { LanSettingsBar } from '../components/LanSettingsBar';
 import { JudgePanel } from '../components/JudgePanel';
 import { ExerciseBank } from '../components/ExerciseBank';
+import { LabPage } from './LabPage';
 import { subjectLabel, useSubject } from '../lib/subject';
 import { clearJudgeTarget, peekJudgeTarget, usePendingJudgeProblem, useFocusedChapter } from '../lib/exerciseBank';
 import type { AiMode } from '../components/AiPanel';
 
-type Tab = 'bank' | 'judge';
+// labs：交互实验台。它和题库/判题台同属「练」，所以做成第三个 Tab，
+// 不新增侧栏项（侧栏 14 项已排满），也不让三个学科的实验无处可去。
+type Tab = 'bank' | 'judge' | 'labs';
 
 export function PracticePage({
   onAskCat,
@@ -78,6 +81,14 @@ export function PracticePage({
           判题台
           {target && <i>{target.title.slice(0, 14)}</i>}
         </button>
+        <button
+          type="button"
+          className={`bank-tab${tab === 'labs' ? ' on' : ''}`}
+          onClick={() => setTab('labs')}
+        >
+          实验台
+          <i>可点可拖</i>
+        </button>
         {tab === 'judge' && target && (
           <button
             type="button"
@@ -96,6 +107,12 @@ export function PracticePage({
       {tab === 'bank' && (
         <div style={{ marginTop: 16 }}>
           <ExerciseBank subject={subject} onGoJudge={goJudge} />
+        </div>
+      )}
+
+      {tab === 'labs' && (
+        <div style={{ marginTop: 16 }}>
+          <LabPage />
         </div>
       )}
 
