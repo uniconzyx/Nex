@@ -4254,6 +4254,347 @@
     ],
     "insight": "间隔 = 2/‖w‖，而 ‖w‖ 随 C 增大而增大（对误分类的惩罚更重）。C→∞ 逼出硬间隔，但间隔塌缩、对噪声极敏感；C 太小又容忍太多误分类。实践中用验证集挑 C，而不是训练集。"
    }
+  ],
+  "tooling/tool-ch06": [
+   {
+    "kind": "sandbox",
+    "title": "容器配额算总账：副本一多就爆",
+    "brief": "单实例看着小，副本数一上去 CPU/内存总需求就超主机预算。配额必须留 headroom 给突发与系统开销，否则调度成功也会运行时 OOMKill / CPU 被 throttle。拖副本数、单实例配额与主机预算，把总需求压进预算内。",
+    "params": [
+     {
+      "key": "svcCount",
+      "label": "服务副本数",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "value": 8
+     },
+     {
+      "key": "cpuPerSvc",
+      "label": "单实例 CPU 上限",
+      "min": 0.1,
+      "max": 2.0,
+      "step": 0.1,
+      "value": 1.0,
+      "unit": "核"
+     },
+     {
+      "key": "memPerSvc",
+      "label": "单实例内存上限",
+      "min": 128,
+      "max": 2048,
+      "step": 128,
+      "value": 1024,
+      "unit": "MB"
+     },
+     {
+      "key": "hostCPU",
+      "label": "主机 CPU 预算",
+      "min": 4,
+      "max": 16,
+      "step": 4,
+      "value": 8,
+      "unit": "核"
+     },
+     {
+      "key": "hostMem",
+      "label": "主机内存预算",
+      "min": 4096,
+      "max": 16384,
+      "step": 4096,
+      "value": 8192,
+      "unit": "MB"
+     },
+     {
+      "key": "reserveFrac",
+      "label": "预留缓冲比例",
+      "min": 0.0,
+      "max": 0.3,
+      "step": 0.05,
+      "value": 0.1
+     }
+    ],
+    "metrics": [
+     {
+      "key": "needCPU",
+      "label": "CPU 总需求",
+      "expr": "cpuPerSvc * svcCount",
+      "unit": "核",
+      "fmt": "fix2"
+     },
+     {
+      "key": "needMem",
+      "label": "内存总需求",
+      "expr": "memPerSvc * svcCount",
+      "unit": "MB",
+      "fmt": "int"
+     },
+     {
+      "key": "budgetCPU",
+      "label": "CPU 可用预算",
+      "expr": "hostCPU * (1 - reserveFrac)",
+      "unit": "核",
+      "fmt": "fix2"
+     },
+     {
+      "key": "budgetMem",
+      "label": "内存可用预算",
+      "expr": "hostMem * (1 - reserveFrac)",
+      "unit": "MB",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "needCPU <= budgetCPU",
+      "label": "CPU 总需求不超预算（含预留缓冲）"
+     },
+     {
+      "expr": "needMem <= budgetMem",
+      "label": "内存总需求不超预算（含预留缓冲）"
+     },
+     {
+      "expr": "reserveFrac >= 0.1",
+      "label": "预留 ≥10% 缓冲，避免突发 OOM"
+     },
+     {
+      "expr": "svcCount >= 3",
+      "label": "至少 3 副本（单点挂掉服务仍可用）"
+     },
+     {
+      "expr": "memPerSvc >= 512",
+      "label": "单实例内存 ≥512MB（容得下运行时）"
+     },
+     {
+      "expr": "hostCPU >= 8",
+      "label": "主机 ≥8 核（配额要按真实规格算，别缩机器）"
+     },
+     {
+      "expr": "hostMem >= 8192",
+      "label": "主机内存 ≥8GB（同上）"
+     },
+     {
+      "expr": "cpuPerSvc >= 0.5",
+      "label": "单实例 CPU ≥0.5 核（再小服务跑不动）"
+     }
+    ],
+    "insight": "配额要算总账：单实例看着小，副本一多总需求就线性上涨。且必须留 headroom（通常 10%~20%）给突发流量与系统进程开销——否则即使调度器允许部署，运行时也会被 OOMKill 或 CPU throttle。docker run 的 --cpus / --memory 是硬上限，超了直接被杀而非变慢。"
+   }
+  ],
+  "middleware/mw-ch03": [
+   {
+    "kind": "sandbox",
+    "title": "哨兵怎么判定该切主",
+    "brief": "哨兵的 quorum 是「确认 SDOWN 的哨兵数门槛」，要达成 ODOWN 需存活哨兵数 ≥ quorum；真正执行转移还需 >N/2 多数派。min-replicas-to-write 让主库在健康从节点过少时拒绝写入以防脑裂丢数据。拖存活守卫、quorum、复制延迟与从节点数，凑出一次安全切换。",
+    "params": [
+     {
+      "key": "replLag",
+      "label": "主从复制延迟",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "value": 20,
+      "unit": "s"
+     },
+     {
+      "key": "quorum",
+      "label": "ODOWN 确认门槛 quorum",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "value": 3
+     },
+     {
+      "key": "sentinelsDown",
+      "label": "已宕哨兵数（共3）",
+      "min": 0,
+      "max": 3,
+      "step": 1,
+      "value": 2
+     },
+     {
+      "key": "minReplicas",
+      "label": "min-replicas-to-write",
+      "min": 0,
+      "max": 2,
+      "step": 1,
+      "value": 0
+     },
+     {
+      "key": "healthyReplicas",
+      "label": "健康从节点数",
+      "min": 0,
+      "max": 2,
+      "step": 1,
+      "value": 1
+     }
+    ],
+    "metrics": [
+     {
+      "key": "availSent",
+      "label": "存活哨兵数",
+      "expr": "3 - sentinelsDown",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "odown",
+      "label": "能否达成 ODOWN",
+      "expr": "if(availSent >= quorum, 1, 0)",
+      "fmt": "int"
+     },
+     {
+      "key": "canWrite",
+      "label": "主库能否写入",
+      "expr": "if(healthyReplicas >= minReplicas, 1, 0)",
+      "fmt": "int"
+     },
+     {
+      "key": "lagSafe",
+      "label": "复制延迟是否安全",
+      "expr": "if(replLag <= 10, 1, 0)",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "odown == 1",
+      "label": "存活哨兵数 ≥ quorum，能达成 ODOWN 触发转移"
+     },
+     {
+      "expr": "canWrite == 1",
+      "label": "健康从节点 ≥ min-replicas-to-write，主库允许写入"
+     },
+     {
+      "expr": "lagSafe == 1",
+      "label": "复制延迟 ≤ 10s，从节点数据较新"
+     },
+     {
+      "expr": "quorum >= 2",
+      "label": "quorum ≥2（单个哨兵误判不足以触发下线）"
+     },
+     {
+      "expr": "minReplicas >= 1",
+      "label": "min-replicas ≥1（至少一个健康从节点才允许写，防脑裂）"
+     }
+    ],
+    "insight": "哨兵的 quorum 只是「确认下线的哨兵数门槛」，用于达成 ODOWN，不要求多数派、通常小于哨兵总数；真正执行故障转移的 leader 选举才需要 >N/2 多数派，二者独立配置。min-replicas-to-write 是主库在健康从节点不足时拒绝写入——宁可停写也不在脑裂里丢数据。复制延迟过大时切过去会丢近窗数据，所以延迟也要压进阈值。"
+   }
+  ],
+  "middleware/mw-ch05": [
+   {
+    "kind": "sandbox",
+    "title": "积压能不能在 SLA 内清掉",
+    "brief": "积压清理看净速率 = 消费总速 − 生产速。消费总速 = 单消费者速率 × 消费者数。净速率转正积压才下降；再拿初始积压除以净速率看清场时间是否压进 SLA。拖生产/消费速率、消费者数与 SLA。",
+    "params": [
+     {
+      "key": "prodRate",
+      "label": "生产速率",
+      "min": 100,
+      "max": 5000,
+      "step": 100,
+      "value": 3000,
+      "unit": "条/s"
+     },
+     {
+      "key": "consRate",
+      "label": "单消费者速率",
+      "min": 100,
+      "max": 3000,
+      "step": 100,
+      "value": 500,
+      "unit": "条/s"
+     },
+     {
+      "key": "consumers",
+      "label": "消费者数",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "value": 1
+     },
+     {
+      "key": "backlog0",
+      "label": "初始积压",
+      "min": 0,
+      "max": 1000000,
+      "step": 50000,
+      "value": 500000,
+      "unit": "条"
+     },
+     {
+      "key": "slaSec",
+      "label": "清场 SLA",
+      "min": 30,
+      "max": 600,
+      "step": 30,
+      "value": 120,
+      "unit": "s"
+     }
+    ],
+    "metrics": [
+     {
+      "key": "totalCons",
+      "label": "消费总速率",
+      "expr": "consRate * consumers",
+      "unit": "条/s",
+      "fmt": "int"
+     },
+     {
+      "key": "netRate",
+      "label": "净消化速率",
+      "expr": "consRate * consumers - prodRate",
+      "unit": "条/s",
+      "fmt": "int"
+     },
+     {
+      "key": "backlogGrows",
+      "label": "积压是否仍在涨",
+      "expr": "if(netRate < 0, 1, 0)",
+      "fmt": "int"
+     },
+     {
+      "key": "drainTime",
+      "label": "预计清场时间",
+      "expr": "if(netRate > 0, backlog0 / (netRate + if(netRate > 0, 0, 1)), -1)",
+      "unit": "s",
+      "fmt": "fix2"
+     },
+     {
+      "key": "meetsSLA",
+      "label": "是否在 SLA 内清场",
+      "expr": "if(netRate > 0, if(backlog0 / (netRate + if(netRate > 0, 0, 1)) <= slaSec, 1, 0), 0)",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "netRate > 0",
+      "label": "消费总速率 > 生产速率，积压开始下降"
+     },
+     {
+      "expr": "backlogGrows == 0",
+      "label": "积压不再增长（净速率非负）"
+     },
+     {
+      "expr": "meetsSLA == 1",
+      "label": "在 SLA 内清空积压（加消费者/提速消费）"
+     },
+     {
+      "expr": "backlog0 >= 100000",
+      "label": "初始积压 ≥10 万条（要面对真实积压）"
+     },
+     {
+      "expr": "consumers >= 2",
+      "label": "至少 2 个消费者（无单点，且能并行消费分区）"
+     },
+     {
+      "expr": "prodRate >= 1000",
+      "label": "生产速率 ≥1000 条/s（生产不受你控制，别靠降流量通关）"
+     }
+    ],
+    "insight": "积压治理看「净速率 = 消费总速 − 生产速」。加消费者线性提总速，但受分区数上限约束（本沙盒简化为线性）；真问题常是消费逻辑慢或分区太少，光加人可以缓解但不是根治。netRate>0 只是不涨，要清空还得看 backlog0/netRate 是否压进 SLA——积压越大、SLA 越紧，越要提前扩容。"
+   }
   ]
  }
 }

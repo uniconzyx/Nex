@@ -1,49 +1,4 @@
 {
- "ml/ml-ch03": {
-  "ok": true,
-  "params": [
-   {
-    "key": "B",
-    "type": "range",
-    "value": 32.0
-   },
-   {
-    "key": "N",
-    "type": "range",
-    "value": 2000.0
-   }
-  ]
- },
- "ml/ml-ch08": {
-  "ok": true,
-  "params": [
-   {
-    "key": "gamma",
-    "type": "range",
-    "value": 0.87
-   },
-   {
-    "key": "H",
-    "type": "range",
-    "value": 10.0
-   }
-  ]
- },
- "ml/ml-ch09": {
-  "ok": true,
-  "params": [
-   {
-    "key": "C",
-    "type": "range",
-    "value": 0.1
-   },
-   {
-    "key": "separable",
-    "type": "opt",
-    "value": 1
-   }
-  ]
- },
  "ai/ai-ch01": {
   "ok": true,
   "params": [
@@ -96,6 +51,46 @@
     "key": "Cout",
     "type": "range",
     "value": 8.0
+   }
+  ]
+ },
+ "ai/ai-ch03": {
+  "ok": true,
+  "params": [
+   {
+    "key": "seq",
+    "type": "range",
+    "value": 128.0
+   },
+   {
+    "key": "heads",
+    "type": "range",
+    "value": 1.0
+   },
+   {
+    "key": "dim",
+    "type": "range",
+    "value": 64.0
+   }
+  ]
+ },
+ "ai/ai-ch04": {
+  "ok": true,
+  "params": [
+   {
+    "key": "r",
+    "type": "range",
+    "value": 5.0
+   },
+   {
+    "key": "d",
+    "type": "range",
+    "value": 3328.0
+   },
+   {
+    "key": "layers",
+    "type": "range",
+    "value": 31.0
    }
   ]
  },
@@ -154,6 +149,26 @@
    }
   ]
  },
+ "ai/ai-ch13": {
+  "ok": true,
+  "params": [
+   {
+    "key": "bits",
+    "type": "range",
+    "value": 4.0
+   },
+   {
+    "key": "paramsB",
+    "type": "range",
+    "value": 1.0
+   },
+   {
+    "key": "calib",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
  "ai/ai-ch14": {
   "ok": true,
   "params": [
@@ -171,6 +186,146 @@
     "key": "price",
     "type": "range",
     "value": 0.001
+   }
+  ]
+ },
+ "cpp/cpp-ch01": {
+  "ok": true,
+  "params": [
+   {
+    "key": "bits",
+    "type": "range",
+    "value": 32.0
+   },
+   {
+    "key": "sign",
+    "type": "opt",
+    "value": 0
+   }
+  ]
+ },
+ "cpp/cpp-ch03": {
+  "ok": true,
+  "params": [
+   {
+    "key": "len",
+    "type": "range",
+    "value": 15.0
+   }
+  ]
+ },
+ "cpp/cpp-ch05": {
+  "ok": true,
+  "params": [
+   {
+    "key": "n",
+    "type": "range",
+    "value": 1000000.0
+   },
+   {
+    "key": "pass",
+    "type": "opt",
+    "value": 1
+   },
+   {
+    "key": "ret",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "cpp/cpp-ch06": {
+  "ok": true,
+  "params": [
+   {
+    "key": "vfuncs",
+    "type": "range",
+    "value": 3.0
+   },
+   {
+    "key": "vbase",
+    "type": "opt",
+    "value": 0
+   }
+  ]
+ },
+ "cpp/cpp-ch08": {
+  "ok": true,
+  "params": [
+   {
+    "key": "n",
+    "type": "range",
+    "value": 1000000.0
+   },
+   {
+    "key": "factor",
+    "type": "range",
+    "value": 2.5
+   }
+  ]
+ },
+ "cpp/cpp-ch10": {
+  "ok": true,
+  "params": [
+   {
+    "key": "nodes",
+    "type": "range",
+    "value": 10.0
+   },
+   {
+    "key": "cycle",
+    "type": "opt",
+    "value": 1
+   },
+   {
+    "key": "useWeak",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "cpp/cpp-ch16": {
+  "ok": true,
+  "params": [
+   {
+    "key": "threads",
+    "type": "range",
+    "value": 6.0
+   },
+   {
+    "key": "serialPct",
+    "type": "range",
+    "value": 0.0
+   }
+  ]
+ },
+ "cpp/cpp-ch18": {
+  "ok": true,
+  "params": [
+   {
+    "key": "layout",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "cpp/cpp-ch20": {
+  "ok": true,
+  "params": [
+   {
+    "key": "qps",
+    "type": "range",
+    "value": 500.0
+   },
+   {
+    "key": "latency",
+    "type": "range",
+    "value": 20.0
+   },
+   {
+    "key": "pool",
+    "type": "range",
+    "value": 10.0
    }
   ]
  },
@@ -196,6 +351,61 @@
     "key": "useVarchar",
     "type": "opt",
     "value": 1
+   }
+  ]
+ },
+ "database/db-ch02": {
+  "ok": true,
+  "params": [
+   {
+    "key": "R",
+    "type": "range",
+    "value": 1000.0
+   },
+   {
+    "key": "S",
+    "type": "range",
+    "value": 1000.0
+   },
+   {
+    "key": "idx",
+    "type": "opt",
+    "value": 0
+   }
+  ]
+ },
+ "database/db-ch03": {
+  "ok": true,
+  "params": [
+   {
+    "key": "N",
+    "type": "range",
+    "value": 10500000.0
+   },
+   {
+    "key": "fan",
+    "type": "range",
+    "value": 60.0
+   }
+  ]
+ },
+ "database/db-ch04": {
+  "ok": true,
+  "params": [
+   {
+    "key": "R",
+    "type": "range",
+    "value": 100000.0
+   },
+   {
+    "key": "sel",
+    "type": "range",
+    "value": 0.1
+   },
+   {
+    "key": "clustered",
+    "type": "opt",
+    "value": 0
    }
   ]
  },
@@ -251,6 +461,636 @@
     "key": "incrHours",
     "type": "range",
     "value": 1.0
+   }
+  ]
+ },
+ "database/db-ch08": {
+  "ok": true,
+  "params": [
+   {
+    "key": "totalGB",
+    "type": "range",
+    "value": 100.0
+   },
+   {
+    "key": "shards",
+    "type": "range",
+    "value": 4.0
+   }
+  ]
+ },
+ "fundamentals/fund-ch01": {
+  "ok": true,
+  "params": [
+   {
+    "key": "n",
+    "type": "range",
+    "value": 1000.0
+   },
+   {
+    "key": "posPct",
+    "type": "range",
+    "value": 0.0
+   }
+  ]
+ },
+ "fundamentals/fund-ch02": {
+  "ok": true,
+  "params": [
+   {
+    "key": "m",
+    "type": "range",
+    "value": 4.0
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "fundamentals/fund-ch03": {
+  "ok": true,
+  "params": [
+   {
+    "key": "n",
+    "type": "range",
+    "value": 31.0
+   }
+  ]
+ },
+ "fundamentals/fund-ch04": {
+  "ok": true,
+  "params": [
+   {
+    "key": "v",
+    "type": "range",
+    "value": 24.0
+   },
+   {
+    "key": "density",
+    "type": "range",
+    "value": 1.0
+   }
+  ]
+ },
+ "fundamentals/fund-ch05": {
+  "ok": true,
+  "params": [
+   {
+    "key": "alpha",
+    "type": "range",
+    "value": 0.4
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 0
+   }
+  ]
+ },
+ "fundamentals/fund-ch06": {
+  "ok": true,
+  "params": [
+   {
+    "key": "n",
+    "type": "range",
+    "value": 1000000.0
+   },
+   {
+    "key": "algo",
+    "type": "opt",
+    "value": 2
+   }
+  ]
+ },
+ "fundamentals/fund-ch07": {
+  "ok": true,
+  "params": [
+   {
+    "key": "expBits",
+    "type": "range",
+    "value": 8.0
+   },
+   {
+    "key": "fracBits",
+    "type": "range",
+    "value": 23.0
+   }
+  ]
+ },
+ "fundamentals/fund-ch08": {
+  "ok": true,
+  "params": [
+   {
+    "key": "hit",
+    "type": "range",
+    "value": 0.9
+   },
+   {
+    "key": "hitNs",
+    "type": "range",
+    "value": 1.0
+   },
+   {
+    "key": "memNs",
+    "type": "range",
+    "value": 40.0
+   }
+  ]
+ },
+ "fundamentals/fund-ch09": {
+  "ok": true,
+  "params": [
+   {
+    "key": "q",
+    "type": "range",
+    "value": 1.0
+   },
+   {
+    "key": "s",
+    "type": "range",
+    "value": 4.0
+   },
+   {
+    "key": "n",
+    "type": "range",
+    "value": 2.0
+   }
+  ]
+ },
+ "fundamentals/fund-ch10": {
+  "ok": true,
+  "params": [
+   {
+    "key": "bits",
+    "type": "range",
+    "value": 32.0
+   },
+   {
+    "key": "pageKB",
+    "type": "range",
+    "value": 4.0
+   },
+   {
+    "key": "entryB",
+    "type": "range",
+    "value": 4.0
+   }
+  ]
+ },
+ "fundamentals/fund-ch11": {
+  "ok": true,
+  "params": [
+   {
+    "key": "rtt",
+    "type": "range",
+    "value": 10.0
+   },
+   {
+    "key": "winKB",
+    "type": "range",
+    "value": 128.0
+   }
+  ]
+ },
+ "fundamentals/fund-ch13": {
+  "ok": true,
+  "params": [
+   {
+    "key": "ghz",
+    "type": "range",
+    "value": 1.0
+   },
+   {
+    "key": "cpi",
+    "type": "range",
+    "value": 1.0
+   },
+   {
+    "key": "instrM",
+    "type": "range",
+    "value": 10.0
+   }
+  ]
+ },
+ "fundamentals/fund-ch14": {
+  "ok": true,
+  "params": [
+   {
+    "key": "opBits",
+    "type": "range",
+    "value": 6.0
+   },
+   {
+    "key": "addrBits",
+    "type": "range",
+    "value": 12.0
+   }
+  ]
+ },
+ "fundamentals/fund-ch15": {
+  "ok": true,
+  "params": [
+   {
+    "key": "stages",
+    "type": "range",
+    "value": 4.0
+   },
+   {
+    "key": "n",
+    "type": "range",
+    "value": 100.0
+   },
+   {
+    "key": "stallPct",
+    "type": "range",
+    "value": 0.0
+   }
+  ]
+ },
+ "fundamentals/fund-ch16": {
+  "ok": true,
+  "params": [
+   {
+    "key": "width",
+    "type": "range",
+    "value": 16.0
+   },
+   {
+    "key": "mhz",
+    "type": "range",
+    "value": 2000.0
+   },
+   {
+    "key": "eff",
+    "type": "range",
+    "value": 100.0
+   }
+  ]
+ },
+ "fundamentals/fund-ch17": {
+  "ok": true,
+  "params": [
+   {
+    "key": "iops",
+    "type": "range",
+    "value": 50000.0
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 2
+   },
+   {
+    "key": "ghz",
+    "type": "range",
+    "value": 1.0
+   }
+  ]
+ },
+ "fundamentals/fund-ch18": {
+  "ok": true,
+  "params": [
+   {
+    "key": "n",
+    "type": "range",
+    "value": 1000000.0
+   },
+   {
+    "key": "compress",
+    "type": "opt",
+    "value": 1
+   },
+   {
+    "key": "byRank",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "fundamentals/fund-ch19": {
+  "ok": true,
+  "params": [
+   {
+    "key": "items",
+    "type": "range",
+    "value": 100000.0
+   },
+   {
+    "key": "buf",
+    "type": "range",
+    "value": 101.0
+   }
+  ]
+ },
+ "fundamentals/fund-ch20": {
+  "ok": true,
+  "params": [
+   {
+    "key": "blockKB",
+    "type": "range",
+    "value": 1.0
+   },
+   {
+    "key": "ptrBits",
+    "type": "range",
+    "value": 8.0
+   },
+   {
+    "key": "direct",
+    "type": "range",
+    "value": 10.0
+   }
+  ]
+ },
+ "fundamentals/fund-ch21": {
+  "ok": true,
+  "params": [
+   {
+    "key": "seek",
+    "type": "range",
+    "value": 1.0
+   },
+   {
+    "key": "rpm",
+    "type": "range",
+    "value": 3600.0
+   },
+   {
+    "key": "mbs",
+    "type": "range",
+    "value": 50.0
+   }
+  ]
+ },
+ "fundamentals/fund-ch22": {
+  "ok": true,
+  "params": [
+   {
+    "key": "bKHz",
+    "type": "range",
+    "value": 3.0
+   },
+   {
+    "key": "levels",
+    "type": "range",
+    "value": 58.0
+   },
+   {
+    "key": "snrDb",
+    "type": "range",
+    "value": 35.0
+   }
+  ]
+ },
+ "fundamentals/fund-ch23": {
+  "ok": true,
+  "params": [
+   {
+    "key": "frameBits",
+    "type": "range",
+    "value": 5000.0
+   },
+   {
+    "key": "rate",
+    "type": "range",
+    "value": 1.0
+   },
+   {
+    "key": "rtt",
+    "type": "range",
+    "value": 1.0
+   },
+   {
+    "key": "win",
+    "type": "range",
+    "value": 1.0
+   }
+  ]
+ },
+ "middleware/mw-ch03": {
+  "ok": true,
+  "params": [
+   {
+    "key": "replLag",
+    "type": "range",
+    "value": 0.0
+   },
+   {
+    "key": "quorum",
+    "type": "range",
+    "value": 2.0
+   },
+   {
+    "key": "sentinelsDown",
+    "type": "range",
+    "value": 0.0
+   },
+   {
+    "key": "minReplicas",
+    "type": "range",
+    "value": 1.0
+   },
+   {
+    "key": "healthyReplicas",
+    "type": "range",
+    "value": 1.0
+   }
+  ]
+ },
+ "middleware/mw-ch05": {
+  "ok": true,
+  "params": [
+   {
+    "key": "prodRate",
+    "type": "range",
+    "value": 1700.0
+   },
+   {
+    "key": "consRate",
+    "type": "range",
+    "value": 500.0
+   },
+   {
+    "key": "consumers",
+    "type": "range",
+    "value": 5.0
+   },
+   {
+    "key": "backlog0",
+    "type": "range",
+    "value": 200000.0
+   },
+   {
+    "key": "slaSec",
+    "type": "range",
+    "value": 270.0
+   }
+  ]
+ },
+ "ml/ml-ch01": {
+  "ok": true,
+  "params": [
+   {
+    "key": "lr",
+    "type": "range",
+    "value": 0.01
+   },
+   {
+    "key": "cond",
+    "type": "range",
+    "value": 5.0
+   }
+  ]
+ },
+ "ml/ml-ch02": {
+  "ok": true,
+  "params": [
+   {
+    "key": "lam",
+    "type": "range",
+    "value": 0.5
+   },
+   {
+    "key": "noise",
+    "type": "range",
+    "value": 0.0
+   },
+   {
+    "key": "n",
+    "type": "range",
+    "value": 50.0
+   }
+  ]
+ },
+ "ml/ml-ch03": {
+  "ok": true,
+  "params": [
+   {
+    "key": "B",
+    "type": "range",
+    "value": 32.0
+   },
+   {
+    "key": "N",
+    "type": "range",
+    "value": 2000.0
+   }
+  ]
+ },
+ "ml/ml-ch04": {
+  "ok": true,
+  "params": [
+   {
+    "key": "c",
+    "type": "range",
+    "value": 3.0
+   },
+   {
+    "key": "n",
+    "type": "range",
+    "value": 1500.0
+   }
+  ]
+ },
+ "ml/ml-ch05": {
+  "ok": true,
+  "params": [
+   {
+    "key": "d",
+    "type": "range",
+    "value": 6.0
+   },
+   {
+    "key": "n",
+    "type": "range",
+    "value": 200.0
+   }
+  ]
+ },
+ "ml/ml-ch06": {
+  "ok": true,
+  "params": [
+   {
+    "key": "k",
+    "type": "range",
+    "value": 2.0
+   },
+   {
+    "key": "g",
+    "type": "range",
+    "value": 2.0
+   },
+   {
+    "key": "n",
+    "type": "range",
+    "value": 500.0
+   }
+  ]
+ },
+ "ml/ml-ch08": {
+  "ok": true,
+  "params": [
+   {
+    "key": "gamma",
+    "type": "range",
+    "value": 0.87
+   },
+   {
+    "key": "H",
+    "type": "range",
+    "value": 10.0
+   }
+  ]
+ },
+ "ml/ml-ch09": {
+  "ok": true,
+  "params": [
+   {
+    "key": "C",
+    "type": "range",
+    "value": 0.1
+   },
+   {
+    "key": "separable",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "tooling/tool-ch06": {
+  "ok": true,
+  "params": [
+   {
+    "key": "svcCount",
+    "type": "range",
+    "value": 3.0
+   },
+   {
+    "key": "cpuPerSvc",
+    "type": "range",
+    "value": 0.5
+   },
+   {
+    "key": "memPerSvc",
+    "type": "range",
+    "value": 640.0
+   },
+   {
+    "key": "hostCPU",
+    "type": "range",
+    "value": 8.0
+   },
+   {
+    "key": "hostMem",
+    "type": "range",
+    "value": 8192.0
+   },
+   {
+    "key": "reserveFrac",
+    "type": "range",
+    "value": 0.1
    }
   ]
  }

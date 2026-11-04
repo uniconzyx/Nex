@@ -21,6 +21,10 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "scripts"))
 import audit_handmade_labs as A  # noqa: E402
 
+# 默认目标：第一/二批补的 13 章（历史清单，保持向后兼容）。
+# 现在更推荐 `python scripts/solve_sandbox.py --all`——扫描 labs.json 里
+# 所有带 sandbox 的章节，新增批次（tooling/middleware 等）会自动纳入，
+# 不用再手改这个列表。两种方式输出的 JSON 结构完全一致。
 TARGETS = [
     "ml/ml-ch03", "ml/ml-ch08", "ml/ml-ch09",
     "ai/ai-ch01", "ai/ai-ch02", "ai/ai-ch08", "ai/ai-ch10", "ai/ai-ch12", "ai/ai-ch14",
@@ -64,8 +68,14 @@ def solve(key, mod):
 def main() -> int:
     labs = json.load(open(os.path.join(ROOT, "content", "_handmade", "labs.json"), encoding="utf-8"))
     chapters = labs.get("chapters") or {}
+    # --all：扫描 labs.json 里所有含 sandbox 的章（新增批次自动纳入）
+    if "--all" in sys.argv:
+        targets = sorted(k for k, v in chapters.items()
+                         if isinstance(v, list) and any(m.get("kind") == "sandbox" for m in v))
+    else:
+        targets = TARGETS
     result = {}
-    for key in TARGETS:
+    for key in targets:
         mods = chapters.get(key, [])
         sb = next((m for m in mods if m.get("kind") == "sandbox"), None)
         if not sb:
@@ -74,8 +84,11 @@ def main() -> int:
         result[key] = solve(key, sb)
         print(f"{key}: {'OK ' + str(len(result[key]['params'])) + ' params' if result[key]['ok'] else 'NO SOLUTION'}")
     out_path = os.path.join(ROOT, "frontend", "scripts", "sandbox_solutions.json")
-    json.dump(result, open(out_path, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-    print("written ->", out_path)
+    # newline="\n"：Windows 上默认翻译成 CRLF，会让这份 JSON 的 diff 整文件翻转
+    with open(out_path, "w", encoding="utf-8", newline="\n") as f:
+        json.dump(result, f, ensure_ascii=False, indent=1)
+    ok = sum(1 for v in result.values() if v.get("ok"))
+    print(f"written -> {out_path}  ({ok}/{len(result)} 有解)")
     return 0
 
 

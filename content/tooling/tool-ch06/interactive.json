@@ -2,7 +2,7 @@
   "chapter": "tool-ch06",
   "subject": "tooling",
   "title": "Docker Compose 与部署实践",
-  "fingerprint": "7c4a1340a5",
+  "fingerprint": "2ffe00dac0",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,130 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "容器配额算总账：副本一多就爆",
+      "brief": "单实例看着小，副本数一上去 CPU/内存总需求就超主机预算。配额必须留 headroom 给突发与系统开销，否则调度成功也会运行时 OOMKill / CPU 被 throttle。拖副本数、单实例配额与主机预算，把总需求压进预算内。",
+      "params": [
+        {
+          "key": "svcCount",
+          "label": "服务副本数",
+          "min": 1,
+          "max": 10,
+          "step": 1,
+          "value": 8
+        },
+        {
+          "key": "cpuPerSvc",
+          "label": "单实例 CPU 上限",
+          "min": 0.1,
+          "max": 2.0,
+          "step": 0.1,
+          "value": 1.0,
+          "unit": "核"
+        },
+        {
+          "key": "memPerSvc",
+          "label": "单实例内存上限",
+          "min": 128,
+          "max": 2048,
+          "step": 128,
+          "value": 1024,
+          "unit": "MB"
+        },
+        {
+          "key": "hostCPU",
+          "label": "主机 CPU 预算",
+          "min": 4,
+          "max": 16,
+          "step": 4,
+          "value": 8,
+          "unit": "核"
+        },
+        {
+          "key": "hostMem",
+          "label": "主机内存预算",
+          "min": 4096,
+          "max": 16384,
+          "step": 4096,
+          "value": 8192,
+          "unit": "MB"
+        },
+        {
+          "key": "reserveFrac",
+          "label": "预留缓冲比例",
+          "min": 0.0,
+          "max": 0.3,
+          "step": 0.05,
+          "value": 0.1
+        }
+      ],
+      "metrics": [
+        {
+          "key": "needCPU",
+          "label": "CPU 总需求",
+          "expr": "cpuPerSvc * svcCount",
+          "unit": "核",
+          "fmt": "fix2"
+        },
+        {
+          "key": "needMem",
+          "label": "内存总需求",
+          "expr": "memPerSvc * svcCount",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "budgetCPU",
+          "label": "CPU 可用预算",
+          "expr": "hostCPU * (1 - reserveFrac)",
+          "unit": "核",
+          "fmt": "fix2"
+        },
+        {
+          "key": "budgetMem",
+          "label": "内存可用预算",
+          "expr": "hostMem * (1 - reserveFrac)",
+          "unit": "MB",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "needCPU <= budgetCPU",
+          "label": "CPU 总需求不超预算（含预留缓冲）"
+        },
+        {
+          "expr": "needMem <= budgetMem",
+          "label": "内存总需求不超预算（含预留缓冲）"
+        },
+        {
+          "expr": "reserveFrac >= 0.1",
+          "label": "预留 ≥10% 缓冲，避免突发 OOM"
+        },
+        {
+          "expr": "svcCount >= 3",
+          "label": "至少 3 副本（单点挂掉服务仍可用）"
+        },
+        {
+          "expr": "memPerSvc >= 512",
+          "label": "单实例内存 ≥512MB（容得下运行时）"
+        },
+        {
+          "expr": "hostCPU >= 8",
+          "label": "主机 ≥8 核（配额要按真实规格算，别缩机器）"
+        },
+        {
+          "expr": "hostMem >= 8192",
+          "label": "主机内存 ≥8GB（同上）"
+        },
+        {
+          "expr": "cpuPerSvc >= 0.5",
+          "label": "单实例 CPU ≥0.5 核（再小服务跑不动）"
+        }
+      ],
+      "insight": "配额要算总账：单实例看着小，副本一多总需求就线性上涨。且必须留 headroom（通常 10%~20%）给突发流量与系统进程开销——否则即使调度器允许部署，运行时也会被 OOMKill 或 CPU throttle。docker run 的 --cpus / --memory 是硬上限，超了直接被杀而非变慢。"
+    },
     {
       "kind": "match",
       "pairs": [

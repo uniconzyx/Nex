@@ -141,9 +141,9 @@ export const LAB_INDEX: LabIndexItem[] = [
   { key: "java/java-ch09", subject: "java", title: "工程与框架：Maven 与 Spring Boot 入门", kinds: ["boss", "match"], fingerprint: "f8e72843bc" },
   { key: "middleware/mw-ch01", subject: "middleware", title: "Redis 数据结构与底层编码（mw-ch01）", kinds: ["boss", "fill", "match"], fingerprint: "df3b743ccc" },
   { key: "middleware/mw-ch02", subject: "middleware", title: "Redis 持久化与内存管理（mw-ch02）", kinds: ["boss", "match"], fingerprint: "ca6746ee07" },
-  { key: "middleware/mw-ch03", subject: "middleware", title: "Redis 高可用：主从、哨兵与 Cluster（mw-ch03）", kinds: ["boss", "fill", "match"], fingerprint: "1c831257ae" },
+  { key: "middleware/mw-ch03", subject: "middleware", title: "Redis 高可用：主从、哨兵与 Cluster（mw-ch03）", kinds: ["boss", "fill", "match", "sandbox"], fingerprint: "29e60be822" },
   { key: "middleware/mw-ch04", subject: "middleware", title: "缓存设计与三大经典问题（mw-ch04）", kinds: ["boss", "fill", "match"], fingerprint: "02ef55dee8" },
-  { key: "middleware/mw-ch05", subject: "middleware", title: "Kafka 架构：Topic、Partition 与 Replica（mw-ch05）", kinds: ["boss", "match"], fingerprint: "ecbe76a647" },
+  { key: "middleware/mw-ch05", subject: "middleware", title: "Kafka 架构：Topic、Partition 与 Replica（mw-ch05）", kinds: ["boss", "match", "sandbox"], fingerprint: "57df7cc76b" },
   { key: "middleware/mw-ch06", subject: "middleware", title: "Kafka 生产者与消费者机制（mw-ch06）", kinds: ["boss", "fill", "match"], fingerprint: "d57efc4a24" },
   { key: "middleware/mw-ch07", subject: "middleware", title: "消息可靠性：不丢、不重、有序（mw-ch07）", kinds: ["boss", "fill"], fingerprint: "f3791bca46" },
   { key: "middleware/mw-ch08", subject: "middleware", title: "消息队列选型与工程实践（mw-ch08）", kinds: ["boss", "fill", "match"], fingerprint: "1709fa8d08" },
@@ -178,7 +178,7 @@ export const LAB_INDEX: LabIndexItem[] = [
   { key: "tooling/tool-ch03", subject: "tooling", title: "Git 核心：对象模型与分支", kinds: ["boss", "fill", "match"], fingerprint: "667c40d116" },
   { key: "tooling/tool-ch04", subject: "tooling", title: "Git 协作：分支策略与冲突处理", kinds: ["boss", "match", "sequence"], fingerprint: "95cbed9ed8" },
   { key: "tooling/tool-ch05", subject: "tooling", title: "Docker 基础：镜像、容器与 Dockerfile", kinds: ["boss", "match"], fingerprint: "2633d67e94" },
-  { key: "tooling/tool-ch06", subject: "tooling", title: "Docker Compose 与部署实践", kinds: ["boss", "match"], fingerprint: "7c4a1340a5" },
+  { key: "tooling/tool-ch06", subject: "tooling", title: "Docker Compose 与部署实践", kinds: ["boss", "match", "sandbox"], fingerprint: "2ffe00dac0" },
 ];
 
 export const LAB_KEYS = LAB_INDEX.map((x) => x.key).sort();

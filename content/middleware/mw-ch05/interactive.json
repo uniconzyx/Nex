@@ -2,7 +2,7 @@
   "chapter": "mw-ch05",
   "subject": "middleware",
   "title": "Kafka 架构：Topic、Partition 与 Replica（mw-ch05）",
-  "fingerprint": "ecbe76a647",
+  "fingerprint": "57df7cc76b",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,119 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "积压能不能在 SLA 内清掉",
+      "brief": "积压清理看净速率 = 消费总速 − 生产速。消费总速 = 单消费者速率 × 消费者数。净速率转正积压才下降；再拿初始积压除以净速率看清场时间是否压进 SLA。拖生产/消费速率、消费者数与 SLA。",
+      "params": [
+        {
+          "key": "prodRate",
+          "label": "生产速率",
+          "min": 100,
+          "max": 5000,
+          "step": 100,
+          "value": 3000,
+          "unit": "条/s"
+        },
+        {
+          "key": "consRate",
+          "label": "单消费者速率",
+          "min": 100,
+          "max": 3000,
+          "step": 100,
+          "value": 500,
+          "unit": "条/s"
+        },
+        {
+          "key": "consumers",
+          "label": "消费者数",
+          "min": 1,
+          "max": 10,
+          "step": 1,
+          "value": 1
+        },
+        {
+          "key": "backlog0",
+          "label": "初始积压",
+          "min": 0,
+          "max": 1000000,
+          "step": 50000,
+          "value": 500000,
+          "unit": "条"
+        },
+        {
+          "key": "slaSec",
+          "label": "清场 SLA",
+          "min": 30,
+          "max": 600,
+          "step": 30,
+          "value": 120,
+          "unit": "s"
+        }
+      ],
+      "metrics": [
+        {
+          "key": "totalCons",
+          "label": "消费总速率",
+          "expr": "consRate * consumers",
+          "unit": "条/s",
+          "fmt": "int"
+        },
+        {
+          "key": "netRate",
+          "label": "净消化速率",
+          "expr": "consRate * consumers - prodRate",
+          "unit": "条/s",
+          "fmt": "int"
+        },
+        {
+          "key": "backlogGrows",
+          "label": "积压是否仍在涨",
+          "expr": "if(netRate < 0, 1, 0)",
+          "fmt": "int"
+        },
+        {
+          "key": "drainTime",
+          "label": "预计清场时间",
+          "expr": "if(netRate > 0, backlog0 / (netRate + if(netRate > 0, 0, 1)), -1)",
+          "unit": "s",
+          "fmt": "fix2"
+        },
+        {
+          "key": "meetsSLA",
+          "label": "是否在 SLA 内清场",
+          "expr": "if(netRate > 0, if(backlog0 / (netRate + if(netRate > 0, 0, 1)) <= slaSec, 1, 0), 0)",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "netRate > 0",
+          "label": "消费总速率 > 生产速率，积压开始下降"
+        },
+        {
+          "expr": "backlogGrows == 0",
+          "label": "积压不再增长（净速率非负）"
+        },
+        {
+          "expr": "meetsSLA == 1",
+          "label": "在 SLA 内清空积压（加消费者/提速消费）"
+        },
+        {
+          "expr": "backlog0 >= 100000",
+          "label": "初始积压 ≥10 万条（要面对真实积压）"
+        },
+        {
+          "expr": "consumers >= 2",
+          "label": "至少 2 个消费者（无单点，且能并行消费分区）"
+        },
+        {
+          "expr": "prodRate >= 1000",
+          "label": "生产速率 ≥1000 条/s（生产不受你控制，别靠降流量通关）"
+        }
+      ],
+      "insight": "积压治理看「净速率 = 消费总速 − 生产速」。加消费者线性提总速，但受分区数上限约束（本沙盒简化为线性）；真问题常是消费逻辑慢或分区太少，光加人可以缓解但不是根治。netRate>0 只是不涨，要清空还得看 backlog0/netRate 是否压进 SLA——积压越大、SLA 越紧，越要提前扩容。"
+    },
     {
       "kind": "match",
       "pairs": [

@@ -2,7 +2,7 @@
   "chapter": "mw-ch03",
   "subject": "middleware",
   "title": "Redis 高可用：主从、哨兵与 Cluster（mw-ch03）",
-  "fingerprint": "1c831257ae",
+  "fingerprint": "29e60be822",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,104 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "哨兵怎么判定该切主",
+      "brief": "哨兵的 quorum 是「确认 SDOWN 的哨兵数门槛」，要达成 ODOWN 需存活哨兵数 ≥ quorum；真正执行转移还需 >N/2 多数派。min-replicas-to-write 让主库在健康从节点过少时拒绝写入以防脑裂丢数据。拖存活守卫、quorum、复制延迟与从节点数，凑出一次安全切换。",
+      "params": [
+        {
+          "key": "replLag",
+          "label": "主从复制延迟",
+          "min": 0,
+          "max": 30,
+          "step": 1,
+          "value": 20,
+          "unit": "s"
+        },
+        {
+          "key": "quorum",
+          "label": "ODOWN 确认门槛 quorum",
+          "min": 1,
+          "max": 3,
+          "step": 1,
+          "value": 3
+        },
+        {
+          "key": "sentinelsDown",
+          "label": "已宕哨兵数（共3）",
+          "min": 0,
+          "max": 3,
+          "step": 1,
+          "value": 2
+        },
+        {
+          "key": "minReplicas",
+          "label": "min-replicas-to-write",
+          "min": 0,
+          "max": 2,
+          "step": 1,
+          "value": 0
+        },
+        {
+          "key": "healthyReplicas",
+          "label": "健康从节点数",
+          "min": 0,
+          "max": 2,
+          "step": 1,
+          "value": 1
+        }
+      ],
+      "metrics": [
+        {
+          "key": "availSent",
+          "label": "存活哨兵数",
+          "expr": "3 - sentinelsDown",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "odown",
+          "label": "能否达成 ODOWN",
+          "expr": "if(availSent >= quorum, 1, 0)",
+          "fmt": "int"
+        },
+        {
+          "key": "canWrite",
+          "label": "主库能否写入",
+          "expr": "if(healthyReplicas >= minReplicas, 1, 0)",
+          "fmt": "int"
+        },
+        {
+          "key": "lagSafe",
+          "label": "复制延迟是否安全",
+          "expr": "if(replLag <= 10, 1, 0)",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "odown == 1",
+          "label": "存活哨兵数 ≥ quorum，能达成 ODOWN 触发转移"
+        },
+        {
+          "expr": "canWrite == 1",
+          "label": "健康从节点 ≥ min-replicas-to-write，主库允许写入"
+        },
+        {
+          "expr": "lagSafe == 1",
+          "label": "复制延迟 ≤ 10s，从节点数据较新"
+        },
+        {
+          "expr": "quorum >= 2",
+          "label": "quorum ≥2（单个哨兵误判不足以触发下线）"
+        },
+        {
+          "expr": "minReplicas >= 1",
+          "label": "min-replicas ≥1（至少一个健康从节点才允许写，防脑裂）"
+        }
+      ],
+      "insight": "哨兵的 quorum 只是「确认下线的哨兵数门槛」，用于达成 ODOWN，不要求多数派、通常小于哨兵总数；真正执行故障转移的 leader 选举才需要 >N/2 多数派，二者独立配置。min-replicas-to-write 是主库在健康从节点不足时拒绝写入——宁可停写也不在脑裂里丢数据。复制延迟过大时切过去会丢近窗数据，所以延迟也要压进阈值。"
+    },
     {
       "kind": "match",
       "pairs": [
