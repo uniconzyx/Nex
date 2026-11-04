@@ -37,9 +37,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §3.2 | 讲「树在系统设计里的位置」时读 `solutions/` 的索引设计：B 树/B+ 树把「有序 + 多叉」结合，是「树的高度决定磁盘 IO 次数」的工业应用 |
-| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | §2.2 | 讲「BST 与堆的区别」时读 README 的 Trees 一节：BST 保证「中序有序」、堆只保证「父大于子」，两者的不变量不同，适用的题也不同 |
-| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §1.1 | 讲「遍历序列互推」时读 `docs/算法/` 的二叉树篇：前序 + 中序能唯一确定、前序 + 后序不能——文档给了两组对照例子，把「为什么不能」演示清楚 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §2.4 四、B 树与 B+ 树：为磁盘而生的多叉树 | 读 `solutions/system_design/` 的 key-value 存储案例：它先说「内存里用哈希 O(1)、但需要范围扫描时哈希无能为力」，于是要加一层有序索引；而有序索引落到磁盘上就必须是矮胖的多叉树——因为一次磁盘 IO 只能取一个 4KB 页，二叉树的每一层都要一次 IO；这与本章 §2.5「堆：只保证部分有序的树」形成对照：不变量不同，代价模型就不同 |
+| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | §2.1 一、BST 的价值与致命弱点 | 读 README 的 Trees 一节：它把 BST 的「中序遍历有序」写成不变量，再给一组「按 1..n 顺序插入退化成链」的反例；这正好接得上本章 §2.2「AVL 树：最严格的平衡」与 §2.3「红黑树：工程上的最优折中」——为什么红黑树允许「最长路径 ≤ 2×最短路径」而不做到 AVL 的严格平衡？因为插入删除时的旋转次数才是写入路径的真实成本 |
+| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §1.1 一、树的递归定义，就是遍历的模板 | 读 `docs/算法/` 的二叉树篇：它用「前序 + 中序可唯一确定、前序 + 后序不能」的对照例子，把「序列互推」的歧义点演示得很清楚；本章 §1.4「非递归改写：用显式栈替代系统栈」则回答另一半问题——能推不等于能安全递归，深度到 10⁵ 的退化树会把系统栈撑爆 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

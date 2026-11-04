@@ -49,11 +49,11 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [torvalds/linux](https://github.com/torvalds/linux) | 254007 | §系统调用 | 只读 `include/linux/syscalls.h`：几百行全是 `SYSCALL_DEFINE*` 宏——这就是"系统调用表"的真身，你会看到每个调用号对应哪个服务例程 |
-| 2 | [mit-pdos/xv6-public](https://github.com/mit-pdos/xv6-public) | 9716 | §中断与陷入 | 读 `trap.c` 的 `alltraps`：硬件自动压栈一部分、软件再保存剩余寄存器——"中断发生时 CPU 做一半"这句话的实物证据；再读 `syscall.c` 的 `syscalls[]` 数组，一眼看懂系统调用号怎么分发 |
-| 3 | [sysprog21/lkmpg](https://github.com/sysprog21/lkmpg) | 8634 | §内核态 | 《Linux 内核模块编程指南》：写一个 hello 模块跑起来，你会第一次"以内核态身份"执行代码——比看十遍概念更直观 |
-| 4 | [remzi-arpacidusseau/ostep-code](https://github.com/remzi-arpacidusseau/ostep-code) | 4479 | §进程与系统调用 | 《操作系统导论》配套代码：`intro/` 下的 `cpu.c`、`mem.c` 演示 `gettimeofday`/`malloc` 背后都落到系统调用，适合边读边改 |
-| 5 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186408 | §全章速记 | 中文"操作系统概述"一节：考前 20 分钟过一遍四大特征、特权指令、系统调用步骤，性价比极高 |
+| 1 | [torvalds/linux](https://github.com/torvalds/linux) | 254007 | §2.2 特权指令与非特权指令、系统调用入口与陷入的完整路径 | 读 `include/linux/syscalls.h`：几百行全是 `SYSCALL_DEFINE*` 宏——这就是「系统调用表」的真身，你会看到每个调用号对应哪个服务例程；本章 §2.1「一行 open() 里 CPU 的特权级变了两次」讲的是用户态→内核态→用户态的往返，而这张表只覆盖中间那一段：进入内核后，靠调用号在 `sys_call_table` 里分发 |
+| 2 | [mit-pdos/xv6-public](https://github.com/mit-pdos/xv6-public) | 9716 | §2.2 特权指令与非特权指令、系统调用入口与陷入的完整路径（硬件侧） | 读 `trap.c` 的 `alltraps`：硬件自动压栈一部分、软件再保存剩余寄存器——「中断发生时 CPU 做一半」这句话的实物证据；再读 `syscall.c` 的 `syscalls[]` 数组，一眼看懂系统调用号怎么分发；这两份加起来正好覆盖本章 §2.2 的「陷入的完整路径」，也是理解「为什么系统调用比自己写循环慢」的起点 |
+| 3 | [sysprog21/lkmpg](https://github.com/sysprog21/lkmpg) | 8634 | §3.2 五种体系结构：大内核、微内核、宏内核、外核与混合结构 | 读 `sysprog21/lkmpg`（《Linux 内核模块编程指南》）：写一个 hello 模块跑起来，你会第一次「以内核态身份」执行代码——比看十遍概念更直观；而这件事本身就证明了本章 §3.1「把什么放进内核，本质上是一道工程取舍题」：模块能动态装入，说明「内核功能的边界」在工程上是可以后移的 |
+| 4 | [remzi-arpacidusseau/ostep-code](https://github.com/remzi-arpacidusseau/ostep-code) | 4479 | §1.2 四大特征的准确表述与常见辨析：并发不是并行 | 读 `ostep-code` 的 `intro/` 下 `cpu.c`、`mem.c`：演示 `gettimeofday` / `malloc` 背后都落到系统调用，适合边读边改；这两个程序恰好分别证明「虚拟」的两面：`cpu.c` 用时间片切换制造「每个进程独享 CPU」的假象，`mem.c` 用地址空间制造「每个进程独占内存」的假象——本章 §1.1「背得下并发、共享、虚拟、异步，却分不清它们谁依赖谁」的答案就在这里 |
+| 5 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186408 | §4.2 三种装入方式、静态与动态链接以及地址空间的建立 | 读 `docs/计算机操作系统/` 的「操作系统概述」一节：考前 20 分钟过一遍四大特征、特权指令、系统调用步骤，性价比极高；但本章 §4.1「从 a.c 到能跑：编译、链接、装入这三道工序各自解决什么」是它缺的一环——速记版通常只讲「装入」，而动态链接把「重定位」推迟到运行时，正是「地址空间」概念必须存在的理由 |
 
 ## 本章 B 站视频路线
 

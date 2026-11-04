@@ -42,9 +42,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §4.2 | 讲「多级缓存的设计」时读 `solutions/` 的缓存层设计：L1/L2/CDN 各挡一层，与 CPU 的 L1/L2/L3 是同一套「用容量换延迟」的思路 |
-| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | §3.1 | 讲「缓存局部性」时读 README 的 Cache 部分：时间局部性与空间局部性的定义、以及「按行遍历比按列快」的解释，与本章的实测结论一致 |
-| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §2.1 | 讲「地址字段划分」时读 `docs/计算机组成原理/` 的存储系统篇：标记/组索引/块内偏移的切分算法配了例题，重点是「组数 = 容量 /(块大小 × 路数)」 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §1.3 3. 量化：命中率与 AMAT | 读 `solutions/system_design/` 的缓存层设计：L1/L2/CDN 各挡一层、用容量换延迟，与本章 §1.2「两种局部性」是同一套思路的两种尺度；区别在于 CPU 侧的命中率只差几个百分点、缺失代价就翻倍（§1.4「缺失代价为什么这么高」），所以 AMAT 必须是「命中时间 + 缺失率 × 缺失代价」的加权，而不能简单取平均延迟 |
+| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | §1.2 2. 两种局部性 | 读 README 的 Cache 部分：时间局部性、空间局部性的定义，以及「按行遍历二维数组比按列快一个数量级」的解释——这正是本章 §1.5「局部性不是自然规律，而是可被破坏的」要说的：同一份数据换一种访问顺序就能把命中率从 99% 打到 10%，所以 §4.6 的 CPI 与流水线加速比计算里，必须先假定局部性成立才谈得上「理想 CPI=1」 |
+| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §2.1 1. 地址怎么被切分 | 读 `docs/计算机组成原理/` 的存储系统篇：标记/组索引/块内偏移的切分算法配了例题，重点是 `组数 = 容量 /(块大小 × 路数)`；本章 §2.3「替换算法」与 §2.4「三类缺失（3C）」都建立在这个切分上——容量缺失靠加容量、冲突缺失靠加路数、强制缺失只能靠预取，三类缺失各自的药方不同，前提是先把地址字段拆对 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

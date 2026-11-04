@@ -28,9 +28,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §4.1 | 讲「文件系统在存储设计里的取舍」时读 `solutions/` 的对象存储设计：元数据与数据分离、块大小影响寻址开销，与本章 inode 的设计动机一致 |
-| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | §3.3 | 讲「虚拟内存的意义」时读 README 的 Virtual Memory 一节：隔离、超额分配、按需调页三个目标，与本章「页表是间接层」的表述对应 |
-| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §2.2 | 讲「页面置换」时读 `docs/计算机操作系统/` 的内存管理篇：OPT/FIFO/LRU 的缺页次数逐个手算，Belady 异常只在 FIFO 出现这一点被单独标注 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §4.2 二、inode 与两种链接 | 读 `solutions/system_design/` 的对象存储设计：元数据与数据分离、块大小影响寻址开销——inode 就是这里说的「元数据」，而多级索引就是「块大小决定寻址层数」的实例；顺带看它对「硬链接只能同分区、软链接可以跨机」的处理，正好接上本章 §4.1「文件的物理结构（外存分配方式）」里的链接分配 |
+| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | §2.2 二、多级页表：为什么能省下 99% 的空间 | 读 README 的 Virtual Memory 一节：隔离、超额分配、按需调页三个目标并列，而本章 §2.1「分页的基本机制」先回答了「隔离」，§2.2 回答的是「超额分配怎么不把页表撑爆」——32 位进程的线性页表恒占 4MB、多级页表只在用到时才分配下级页框，这就是 99% 的来源 |
+| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §3.3 三、改进型 Clock：为什么要看「修改位」 | 读 `docs/计算机操作系统/` 的内存管理篇：OPT/FIFO/LRU 的缺页次数逐个手算，Belady 异常只在 FIFO 出现这一点被单独标注；本章 §3.1「四种置换算法的判定规则」是它的表格版，§3.2「Belady 异常」给了反例、§3.4「抖动与工作集模型」则回答「为什么光加内存也救不了抖动」——工作集超了物理页框，加多少都是缺页 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

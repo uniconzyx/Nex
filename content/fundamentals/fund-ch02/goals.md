@@ -40,9 +40,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §4.2 | 讲「消息队列为什么需要缓冲区」时读 `solutions/` 的队列相关设计：队列把「生产速率」与「消费速率」解耦，这与本章「先进先出保证公平」是同一件事的两个层面 |
-| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | §1.3 | 讲「栈与队列的适用场景」时读 README 里 Stack/Queue 的练习清单：括号匹配用栈、BFS 用队列，两条对应关系在清单里被反复强调 |
-| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §2.1 | 讲「循环队列」时读 `docs/算法/` 的栈与队列篇：牺牲一个单元判满、`(rear+1)%MaxSize==front` 的写法与本章一致，配了元素个数公式的推导 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §2.2 二、数组队列的致命问题：假溢出 | 读 `solutions/system_design/` 里带消息队列的案例（README 的 Asynchronism 一节）：队列的意义是「生产速率与消费速率解耦」，但底层一旦用固定数组存，队头出队不搬数据、队尾就迟早撞墙——这正是本章 §2.3「循环队列：让下标绕圈」要解决的假溢出，工业中间件换成链式或分段落盘是同一个矛盾的另一种解法 |
+| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | §1.3 三、递归与显式栈：等价但代价不同 | 读 README 里 Stack / Queue 的练习清单：括号匹配、逆波兰求值、BFS 用队列——它们被放在一起不是巧合：递归下降解析器内部就是这三个结构的组合；对照本章 §1.2「调用栈的硬件支撑：栈指针与栈帧」，就明白「显式栈」省下的是栈帧里的返回地址与寄存器保存，代价是要自己管生命周期 |
+| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §2.4 四、位运算优化：容量取 2 的幂 | 读 `docs/算法/` 的栈与队列篇：它用「牺牲一个单元判满」推导 `(rear+1)%MaxSize==front`，并给出元素个数公式 `(rear-front+MaxSize)%MaxSize`；本章 §2.4 补的那一步是——把 `%` 换成 `& (cap-1)` 后，容量必须严格是 2 的幂，否则下标会绕错，这是工程里唯一必须守的约束 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

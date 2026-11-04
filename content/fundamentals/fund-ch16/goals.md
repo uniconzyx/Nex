@@ -37,13 +37,13 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376373 | §互连与瓶颈 | 读「瓶颈在哪」的讨论方式：总线的带宽就是整机最典型的共享瓶颈，和分布式系统里的单点带宽同理 |
-| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363641 | §体系结构互连 | 看 Computer Architecture 清单里 bus/interconnect 相关条目，作为「五大部件靠什么连接」的索引 |
-| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186408 | §总线速查 | 中文速记：计组总线一节，重点背三种集中仲裁的线数与优先级、同步/异步定时的区别 |
-| 4 | [torvalds/linux](https://github.com/torvalds/linux) | 254007 | §总线标准/设备模型 | 读 `drivers/pci/` 与 `include/linux/device.h` 的 `struct bus_type`：`match`/`probe` 就是「总线如何发现并绑定设备」的软件实现 |
-| 5 | [chipsalliance/rocket-chip](https://github.com/chipsalliance/rocket-chip) | 3895 | §AXI 突发 | 读 `src/main/scala/amba/axi4/`：`arlen`/`arsize` 如何表达突发长度与每拍字节数，直接对应本章 burst 传送 |
-| 6 | [qemu/qemu](https://github.com/qemu/qemu) | 13968 | §总线事务追踪 | 用 `-trace` 打开 `memory_region_ops` 相关事件，跑一次设备读写，看一条总线事务在模拟器里被拆成哪些阶段 |
-| 7 | [raspberrypi/linux](https://github.com/raspberrypi/linux) | 13282 | §板级总线 | 读 `arch/arm/boot/dts/` 下树莓派的设备树：I²C/SPI/USB 控制器挂在哪个地址、走哪条总线，全在 DTS 里写着 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376373 | §1.2 按位置/功能/数据传输方式分类，以及带宽与传输率的量化 | 读 README 里「瓶颈在哪」的讨论方式（Performance vs scalability 一节）：总线的带宽就是整机最典型的共享瓶颈，和分布式系统里的单点带宽同理——本章 §1.1「整机所有部件都要互相说话，总线问题因此而来」是它的硬件版；带宽 = 总线宽度 × 频率 / 传输周期，这条式子与「网络带宽 = 包大小 × 包速率」同构 |
+| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363641 | §2.2 集中式与分布式仲裁：链式查询、计数器定时、独立请求 | 读 Computer Architecture 清单里 bus / interconnect 两条：作为「五大部件靠什么连接」的索引；本章 §2.1「多个主设备同时想用总线时，谁先说」问的就是仲裁，而三种集中仲裁的差别可以统一成「线数 / 优先级灵活性 / 故障容忍」三个维度——链式查询线少但离控制器远的设备总抢不到，独立请求线多但可任意设优先级 |
+| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186408 | §3.2 同步、异步与分离式事务：三种定时的时序与代价 | 读 `docs/计算机组成原理/` 总线一节的中文速记：重点背三种集中仲裁的线数与优先级、同步/异步定时的区别；本章 §3.1「一次传输该持续多久：定时问题绕不开的原因」给的是判断依据——同步定时按最慢设备定周期，异步定时靠握手信号自适应，分离式事务则把「请求」与「应答」拆成两个独立事务，所以它能让总线在被从设备处理期间去服务别的主设备 |
+| 4 | [torvalds/linux](https://github.com/torvalds/linux) | 254007 | §4.1 插上就能用：总线标准必须规定的四类内容 | 读 `drivers/pci/` 与 `include/linux/device.h` 的 `struct bus_type`：`match`/`probe`/`remove` 三个回调就是「插上就能用」的内核实现——设备树或 PCI 配置空间给出 vendor/device id，`match` 负责配对，`probe` 负责初始化；本章 §4.2「从 ISA 到 PCIe，以及突发传送如何摊薄地址开销」是它的协议侧说明 |
+| 5 | [chipsalliance/rocket-chip](https://github.com/chipsalliance/rocket-chip) | 3895 | §4.2 从 ISA 到 PCIe，以及突发传送如何摊薄地址开销 | 读 `src/main/scala/amba/axi4/`：`arlen`/`arsize` 如何表达突发长度与每拍字节数，直接对应本章「突发传送摊薄地址开销」的量化——一次突发只发一次地址，后续 N 拍只跟数据，所以地址开销从「每拍 1 次」降到「每 N 拍 1 次」，N 就是 `arlen+1` |
+| 6 | [qemu/qemu](https://github.com/qemu/qemu) | 13968 | §1.2 按位置/功能/数据传输方式分类，以及带宽与传输率的量化（事务视角） | 用 `-trace` 打开 QEMU 的 `memory_region_ops` 相关事件，跑一次设备读写，看一条总线事务在模拟器里被拆成哪些阶段（地址期 / 数据期 / 应答期）；这与本章 §3.2「分离式事务」的时序图完全对应——模拟器里能看见真实的阶段划分，比看书上的箭头实在 |
+| 7 | [raspberrypi/linux](https://github.com/raspberrypi/linux) | 13282 | §4.1 插上就能用：总线标准必须规定的四类内容（板级实例） | 读 `arch/arm/boot/dts/` 下树莓派的设备树：I²C/SPI/USB 控制器挂在哪个地址、走哪条总线，全在 DTS 里写着——这正是本章 §4.1 说的「地址空间分配、中断号、时序参数、电气特性」四类内容，设备树把它们从「硬件手册」变成了可被内核读取的文本；对照 §4.2「从 ISA 到 PCIe」可以看到：PCIe 用配置空间完成同样的声明，DTS 是 ARM 侧的等价物 |
 
 ## 本章 B 站视频路线
 | # | 系列 / UP 主 | 视频 | 对应本章 | 看什么 |

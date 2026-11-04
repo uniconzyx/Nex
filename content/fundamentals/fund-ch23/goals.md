@@ -39,11 +39,11 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [lwip-tcpip/lwip](https://github.com/lwip-tcpip/lwip) | 1773 | §1.2 组帧 / §4.4 以太网帧 | 读 `src/netif/ethernet.c` 的 `ethernet_input`：它先检查 `len >= SIZEOF_ETH_HDR`，再按 type 分发——「帧太短直接丢」在代码里只有一行，却对应本章的最小帧长约束；配套看 `src/core/ipv4/etharp.c` 的 ARP 表，就是「MAC 地址怎么被学出来」 |
-| 2 | [wireshark/wireshark](https://github.com/wireshark/wireshark) | 10134 | §4.4 以太网帧结构 | 读 `epan/dissectors/packet-eth.c`：字段注册顺序就是教材帧格式的顺序（dst/src/type），VLAN 用 `packet-vlan.c` 单独一层 dissector 插进去——「4 字节 Tag 插在哪」一看便知 |
-| 3 | [the-tcpdump-group/tcpdump](https://github.com/the-tcpdump-group/tcpdump) | 3256 | §4.4 帧解析与截断 | 读 `print-ether.c` 的 `ether_print`：它先打印长度、再判 `caplen < ETHER_HDRLEN` 就报 `[|ether]`——这正是「抓包丢失尾部导致无法校验 FCS」的现场 |
-| 4 | [torvalds/linux](https://github.com/torvalds/linux) | 254007 | §4.5 交换机与网桥 | 读 `net/core/dev.c` 的 `netif_receive_skb` 与 `net/bridge/br_fdb.c`：前者是「帧进入协议栈的总入口」，后者是**软件交换机 MAC 表**（`br_fdb_update` 更新、老化由 `br_fdb_cleanup` 定时器做）——交换机自学习在这里是几十行 C |
-| 5 | [mininet/mininet](https://github.com/mininet/mininet) | 5875 | §4.5 冲突域与实验 | 读 `mininet/link.py` 与 `mininet/node.py` 的 `OVSBridge`：用 `tc` 给链路注入带宽/延迟/丢包，用 OVS 做交换机——把本章的「最小帧长、争用期、退避」放进可控环境里实测 |
+| 1 | [lwip-tcpip/lwip](https://github.com/lwip-tcpip/lwip) | 1773 | §1.2 四种组帧方法与透明传输要解决的转义问题 | 读 `src/netif/ethernet.c` 的 `ethernet_input`：它先检查 `len >= SIZEOF_ETH_HDR`，再按 type 分发——「帧太短直接丢」在代码里只有一行，却对应本章的最小帧长约束（64 字节，为的是碰撞检测能撑够争用期）；配套看 `src/core/ipv4/etharp.c` 的 ARP 表，就是「MAC 地址怎么被学出来」——这是 §4.2「三类 MAC 方法」在协议栈里的落点 |
+| 2 | [wireshark/wireshark](https://github.com/wireshark/wireshark) | 10134 | §4.2 三类 MAC 方法、CSMA/CD 的碰撞处理与以太网帧/VLAN | 读 `epan/dissectors/packet-eth.c`：字段注册顺序就是教材帧格式的顺序（dst / src / type），VLAN 用 `packet-vlan.c` 单独一层 dissector 插进去——「4 字节 Tag 插在哪」一看便知；这正回答本章 §1.2 里「透明传输」的现代形态：VLAN Tag 插在源 MAC 之后，靠 Type 字段 0x8100 标记，而不是靠转义 |
+| 3 | [the-tcpdump-group/tcpdump](https://github.com/the-tcpdump-group/tcpdump) | 3256 | §2.2 奇偶校验、CRC 与海明码三者的检错纠错能力边界 | 读 `print-ether.c` 的 `ether_print`：它先打印长度、再判 `caplen < ETHER_HDRLEN` 就报截断——而 FCS 那 4 字节在大多数抓包里根本不在（网卡已剥离），这解释了为什么抓包看不到 CRC 校验失败：本章 §2.1「链路一定有误码：怎么知道错了、又怎么纠正」在真实链路上是「硬件丢弃 + 上层重传」，不给你纠正的机会 |
+| 4 | [torvalds/linux](https://github.com/torvalds/linux) | 254007 | §4.2 三类 MAC 方法、CSMA/CD 的碰撞处理与以太网帧/VLAN（交换机实现） | 读 `net/core/dev.c` 的 `netif_receive_skb` 与 `net/bridge/br_fdb.c`：前者是「帧进入协议栈的总入口」，后者是软件交换机的 MAC 表（`br_fdb_update` 更新、老化由 `br_fdb_cleanup` 定时器做）——交换机自学习在这里是几十行 C；本章 §4.1「多个站点共用一条信道，必须先回答「现在谁能说话」」在全双工交换机上被彻底绕开：点对点链路没有争用，CSMA/CD 因此被关掉 |
+| 5 | [mininet/mininet](https://github.com/mininet/mininet) | 5875 | §3.2 停等、GBN、SR 三个协议的窗口差异与重传代价 | 读 `mininet/link.py` 与 `mininet/node.py` 的 `OVSBridge`：用 `tc` 给链路注入带宽 / 延迟 / 丢包，用 OVS 做交换机——把本章的「最小帧长、争用期、退避」放进可控环境里实测；再加上丢包率后跑一遍 GBN 与 SR 的对比，就能看到 §3.1「「按序、不重不漏」被拆成流量控制与可靠传输两个子问题」在真实重传次数上的差距 |
 
 ## 本章 B 站视频路线
 

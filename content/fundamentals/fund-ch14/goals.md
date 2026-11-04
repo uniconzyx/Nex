@@ -30,13 +30,13 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376373 | §指令即接口 | 看 API 设计那一章：指令集本质上就是「硬件对外暴露的 API」，格式规整、向后兼容的取舍和接口设计同构 |
-| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363641 | §位运算与编码 | 看 Bitwise operations 一节：扩展操作码设计题全靠位域切分，先把「用几位表示几个状态」的手感练出来 |
-| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186408 | §CISC/RISC | 中文速记：计算机组成原理里的指令系统一节，重点背 CISC 与 RISC 的六条差异对照表 |
-| 4 | [llvm/llvm-project](https://github.com/llvm/llvm-project) | 41282 | §指令选择 | 读 `llvm/lib/Target/RISCV/` 的 InstrInfo 与 ISel：看真实编译器如何把 IR 落到具体指令格式，以及寻址模式如何被匹配 |
-| 5 | [chipsalliance/rocket-chip](https://github.com/chipsalliance/rocket-chip) | 3895 | §译码 | 读 `src/main/scala/rocket/Instructions.scala` 与 `IBuf.scala`：一条 32 位机器码怎么被拆成 opcode/rd/rs1/rs2，比看教材图直观得多 |
-| 6 | [riscv/riscv-isa-manual](https://github.com/riscv/riscv-isa-manual) | 4872 | §指令格式原文 | 第 2 章 RV32I 的指令编码表就是本章「指令格式」的权威原文，对照教材的 R/I/S/B/U/J 六种格式逐位核对 |
-| 7 | [riscv-collab/riscv-gnu-toolchain](https://github.com/riscv-collab/riscv-gnu-toolchain) | 4656 | §汇编与反汇编 | 装好后用 `riscv64-unknown-elf-as` 写几条带不同寻址方式的汇编，再 `objdump -d` 反汇编，亲眼看到 EA 是怎么算出来的 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376373 | §3.2 CISC 与 RISC 的六项对照：指令数、长度、寻址、访存与流水线友好度 | 读 README 里 API 设计那一章（System Design Topics → 各案例的接口段）：指令集本质上就是「硬件对外暴露的 API」，「格式规整、向后兼容」的取舍与接口设计同构——RISC 定长编码保证译码不用先猜长度，CISC 变长编码换来代码密度；这与本章 §3.1「同样的算力为什么会演化出两种相反的指令集哲学」同因 |
+| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363641 | §1.2 定长/变长格式与扩展操作码为什么不能占用「全 1」 | 读 README 的 Bitwise operations 一节：扩展操作码设计题全靠位域切分，先把「用几位表示几个状态」的手感练出来；本章 §1.1「一条指令的位数有限，操作码、地址码、寻址位怎么分」给的是分配原则，而「全 1 不能占用」的判据就在这里：全 1 是「扩展到下一张码表」的标志 |
+| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186408 | §5.2 收尾：编码题靠推，寻址题靠表 | 读 `docs/计算机组成原理/` 指令系统一节的中文速记：CISC 与 RISC 的六条差异对照表可以直接背，但本章 §3.2 要求你能从「指令长度是否定长」推导出其余五条——定长才能译码不猜、才能每周期取完一条，这是流水线友好度的来源 |
+| 4 | [llvm/llvm-project](https://github.com/llvm/llvm-project) | 41282 | §2.2 八种寻址方式的有效地址 EA 计算与各自访存次数 | 读 `llvm/lib/Target/RISCV/` 的 InstrInfo 与 ISel：看真实编译器如何把 IR 落到具体指令格式——LLVM 的 RISCVInstrInfo 里每个指令都标注了操作数类型（寄存器 / 立即数 / 内存），这就是本章 §2.1「同一个操作数可以有多种找法：寻址方式在解决什么」的机器可读版本；注意 RISC-V 只有基址 + 偏移一种访存寻址，其余七种在 RISC 上都要拆成多条指令，这是 §2.2 表格里访存次数差异的根源 |
+| 5 | [chipsalliance/rocket-chip](https://github.com/chipsalliance/rocket-chip) | 3895 | §4.2 四类指令周期的划分与用户态/内核态切换的代价 | 读 `src/main/scala/rocket/Instructions.scala` 与 `IBuf.scala`：一条 32 位机器码如何被拆成字段、译码成控制信号——这是本章 §4.1「取指、译码、执行之外：一条指令究竟走过几个周期」的硬件实现；重点看 `IBuf` 里的 valid/ready 握手：取指阶段本身就可能是多周期（等 I-cache、等分支解析），这就是「四类指令周期」里周期的差异来源 |
+| 6 | [riscv/riscv-isa-manual](https://github.com/riscv/riscv-isa-manual) | 4872 | §1.1 一条指令的位数有限，操作码、地址码、寻址位怎么分 | 读 `riscv-isa-manual` 第 2 章 RV32I 的指令编码表：R/I/S/B/U/J 六种格式的字段位置是本章最权威的原文，逐位对照教材可以发现「为什么 B 型要把立即数拆成两段」——为了复用同一套寄存器号位置，牺牲了字段连续性，这正是本章 §1.2「定长/变长格式」里「定长不是随便定的，是译码器成本倒推出来的」 |
+| 7 | [riscv-collab/riscv-gnu-toolchain](https://github.com/riscv-collab/riscv-gnu-toolchain) | 4656 | §2.1 同一个操作数可以有多种找法：寻址方式在解决什么 | 装好 `riscv-gnu-toolchain` 后用 `riscv64-unknown-elf-as` 写几条带不同寻址方式的汇编，再 `objdump -d` 反汇编：亲眼看到 EA 是怎么被算出来的；RISC-V 只有 `lw rd, offset(rs1)` 一种形式，所以教材里的「基址寻址 / 变址寻址 / 相对寻址」在 RISC 侧全靠 §2.2 的组合模拟——这也是为什么读反汇编比背表格有效 |
 
 ## 本章 B 站视频路线
 | # | 系列 / UP 主 | 视频 | 对应本章 | 看什么 |

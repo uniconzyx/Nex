@@ -41,9 +41,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §3.1 | 讲「为什么基础结构影响系统设计」时读 `solutions/` 里的缓存设计题：LRU 用哈希表 + 双向链表实现，本章的「已知位置才能 O(1) 删除」正是它成立的前提 |
-| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | §2.1 | 讲「双指针与链表操作」时读 README 里 Data Structures 的 Linked Lists 一节：给的练习题（逆置、找环、合并有序链表）与本章「一写就错」的清单高度重合 |
-| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §1.2 | 讲「顺序表与链表的取舍」时读 `docs/算法/` 下的线性表篇：它用「随机访问 vs 插入删除」两列对比，重点看它对「链表每结点多一个指针域」的空间代价的量化 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §1.3 三、真正的杀手：CPU 缓存局部性 | 读 `solutions/system_design/mint/` 与 README 的 Performance vs scalability 一节：它把「一次内存访问要 100ns、一次 L1 命中 1ns」的延迟表列出来，而本章要论证的正是「数组连续的 64 字节块能被硬件预取、链表靠指针跳着走每一步都可能缺失」——读完那张表再看 §1.4「工程结论：默认用数组」，就不是口号而是数量级的必然 |
+| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | §2.2 二、哨兵节点（dummy head）：消除边界分支 | 读 README 里 Data Structures → Linked Lists 的练习题清单：逆置、找环、合并两条有序链表——这三道全是「头结点可能被删/被换」的场景，加了哨兵之后「删头」和「删中间」走同一条代码路径，这正是本章 §2.3「双链表」里 `while (cur->next)` 能省掉 `if (head)` 的原因 |
+| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §3.2 二、均摊分析：动态数组为什么是 O(1) | 读 `docs/算法/` 下的线性表篇：它以 `vector` 扩容为例做了「总复制次数 ≤ 2n」的求和推导，与本章 §3.3「扩容倍数：1.5 还是 2？」形成一组对照——1.5 倍能让「释放的旧块」被后续分配复用（glibc 的 best-fit 更容易凑出连续区间），2 倍则可能永远等不到同样大小的空洞，这一条在教材里通常不写 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

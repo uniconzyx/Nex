@@ -36,13 +36,13 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376373 | §I/O 与背压 | 读异步 I/O 与队列/背压那一节：外设永远是慢速生产者，本章的四种 I/O 方式就是「怎么让快 CPU 不被慢外设拖死」的四代答案 |
-| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363641 | §中断与 DMA | 看 OS 部分的 interrupts 与 I/O 条目，把「中断 / DMA / 缓冲」三件套当成一个整体来记 |
-| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186408 | §I/O 高频考点 | 中文速记：计组 I/O 与 OS 设备管理两节交叉看，重点是四种 I/O 方式的 CPU 占用对比表 |
-| 4 | [torvalds/linux](https://github.com/torvalds/linux) | 254007 | §中断处理 | 读 `kernel/irq/manage.c` 与 `request_threaded_irq`：上半部（硬中断）与下半部（软中断/线程化）的分工，正是本章「中断处理过程」的工程版 |
-| 5 | [qemu/qemu](https://github.com/qemu/qemu) | 13968 | §DMA 与设备 | 看 `hw/block/virtio-blk.c`：一次 virtio 请求如何经 DMA 搬数据并注入中断，是本章 DMA 三阶段最完整的真实样本 |
-| 6 | [chipsalliance/rocket-chip](https://github.com/chipsalliance/rocket-chip) | 3895 | §接口编址 | 读 `src/main/scala/diplomacy/`：外设地址映射与中断线如何在生成 RTL 时被自动连线，理解「统一编址」在硬件侧的落地 |
-| 7 | [zephyrproject-rtos/zephyr](https://github.com/zephyrproject-rtos/zephyr) | 16942 | §中断控制器 | 读 `drivers/interrupt_controller/`：GIC/NVIC 的优先级、屏蔽、嵌套是怎么被抽象成 `irq_enable/irq_lock` 的，最贴近「I/O 软件四层」 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376373 | §2.2 程序查询、中断、DMA 与通道：CPU 占用率的四级台阶 | 读 README 的异步 I/O 与队列/背压一节：外设永远是慢速生产者，而本章 §2.1「CPU 该以多大代价去管外设：四种 I/O 方式的分野」就是「怎么让快 CPU 不被慢外设拖死」的四代答案；程序查询把 CPU 全押上、中断把等待转成事件、DMA 把搬运交给控制器、通道再让一个控制器管多台设备——每一级都对应背压策略的一次上移 |
+| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363641 | §3.2 中断响应的完整流程：关中断、保存断点、引出 ISR 与多重嵌套 | 读 README 的 Operating Systems 清单里 interrupts 与 I/O 两条：把「中断 / DMA / 缓冲」三件套当成一个整体记；本章 §4.2「DMA 的三种传送方式、通道结构与 I/O 软件的四个层次」是这三件套的展开——中断负责「什么时候有数据」，DMA 负责「数据怎么进内存」，缓冲负责「速度不匹配怎么抹平」 |
+| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186408 | §1.2 I/O 接口的四项功能与端口编址的统一/独立两种方案 | 读 `docs/计算机组成原理/` 的 I/O 与 OS 设备管理两节交叉看：重点是四种 I/O 方式的 CPU 占用对比表；本章 §1.1「外设五花八门，CPU 凭什么认得出它们」问的是编址，而「统一编址」的代价是占掉一部分内存地址空间、「独立编址」的代价是要专门的 `IN`/`OUT` 指令与引脚——RISC-V 走统一编址（MMIO），所以它的 `lw/sw` 就能访问外设寄存器 |
+| 4 | [torvalds/linux](https://github.com/torvalds/linux) | 254007 | §3.2 中断响应的完整流程：关中断、保存断点、引出 ISR 与多重嵌套 | 读 `kernel/irq/manage.c` 与 `request_threaded_irq`：上半部（硬中断）与下半部（软中断 / 线程化）的分层原因写在注释里——硬中断里不能睡、不能长耗时，所以把重活推到线程化下半部；这正是本章 §3.1「按一下键为什么能打断 CPU 正在做的事」之后必须回答的工程问题：打断之后**能不能久占 CPU** |
+| 5 | [qemu/qemu](https://github.com/qemu/qemu) | 13968 | §4.1 大批量数据搬运为什么不该由 CPU 亲自干 | 读 `hw/block/virtio-blk.c`：一次 virtio 请求如何经 DMA 搬数据并注入中断，是本章 DMA 三阶段（准备 / 传送 / 结束中断）最完整的实物；对照 §4.2「DMA 的三种传送方式」看 `virtqueue` 的描述符链，能分清「块传送」与「周期挪用」在实现上的差别——描述符表就是「一次给一批地址」的机制 |
+| 6 | [chipsalliance/rocket-chip](https://github.com/chipsalliance/rocket-chip) | 3895 | §1.2 I/O 接口的四项功能与端口编址的统一/独立两种方案（硬件侧） | 读 `src/main/scala/diplomacy/`：外设地址映射与中断线如何在生成 RTL 时被自动连线，理解「统一编址」在硬件侧的实现——Diplomacy 把「谁占哪段地址、谁的 irq 是几号」编译成约束求解问题；本章 §1.2 表格里的「地址译码」在这一层就是一张地址映射表 |
+| 7 | [zephyrproject-rtos/zephyr](https://github.com/zephyrproject-rtos/zephyr) | 16942 | §3.2 中断响应的完整流程：关中断、保存断点、引出 ISR 与多重嵌套（RTOS 视角） | 读 `drivers/interrupt_controller/`：GIC / NVIC 的优先级、屏蔽、嵌套怎么被抽象成 `irq_enable` / `irq_set_priority` 这些接口；嵌入式实时系统的中断嵌套比桌面更严苛，本章 §3.2 讲的「关中断—保存断点—取向量」在这份代码里是 `irq_wrapper` 的汇编段，而嵌套靠的是硬件自动入栈 + 优先级比较 |
 
 ## 本章 B 站视频路线
 | # | 系列 / UP 主 | 视频 | 对应本章 | 看什么 |

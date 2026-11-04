@@ -47,11 +47,11 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376373 | §性能指标 | 先读 Performance vs scalability 与 Latency numbers 两节：建立「吞吐率 / 响应时间 / 加速比」的工程直觉，再看本章 Amdahl 定律为什么是天花板 |
-| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363641 | §五大部件 | 看 Computer Architecture 清单里的「CPU / 内存 / 总线」条目，把它当成本章五大部件的检查表，缺一项就回头补概念 |
-| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186408 | §系统概述 | 中文速记：计算机系统概述 + 性能指标两节，考前 20 分钟过一遍，适合背「CPI / MIPS / 主频」三者的换算关系 |
-| 4 | [qemu/qemu](https://github.com/qemu/qemu) | 13968 | §软硬件协作 | 读 `hw/core/` 与 `target/`：一台被模拟的机器如何把 CPU、内存、设备挂到同一条总线上——这是冯·诺依曼结构最直白的运行时样本 |
-| 5 | [riscv/riscv-isa-manual](https://github.com/riscv/riscv-isa-manual) | 4872 | §指令驱动 | 只看第 1-2 章的 CSR 与特权级引言：理解「控制器靠指令驱动」，以及为什么指令集是软硬件之间的契约 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376373 | §3.2 一条主公式推出五个指标：CPI、MIPS、FLOPS、Amdahl 加速比 | 读 README 的 Performance vs scalability 与 Latency numbers 两节：先把「吞吐率 / 响应时间 / 加速比」三个词的口径分开——这正是本章最容易答错的地方（「主频高就等于快吗」）；须知 Amdahl 的「只优化一部分，整体加速有上限」与系统设计里「只加一台机器、吞吐不会翻倍」是同一个式子 |
+| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363641 | §2.2 运算器/控制器/存储器/输入/输出的职责边界与数据通路 | 读 Computer Architecture 清单里 CPU / 内存 / 总线 三条：把它当成本章五大部件的检查表，缺一项就回头补概念；本章 §2.1「把计算机当成一座工厂：五块拼件各自扮演什么角色」给的是类比，清单给的是每个部件在真实机器上的对应物——比如「运算器」在清单里对应的是 ALU 与寄存器堆，而不是一个黑盒 |
+| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186408 | §3.1 主频高就等于快吗：性能问题最常见的三种答错 | 读 `docs/计算机组成原理/` 的计算机系统概述与性能指标两节：中文速记版适合考前 20 分钟过一遍，重点是 CPI / MIPS / 主频 三者的换算；本章 §3.2 补的推导能让你不必背——`MIPS = 主频 / (CPI × 10⁶)`，而 CPI 又取决于指令混合与流水线停顿，所以「主频翻倍 MIPS 翻倍」只在 CPI 不变时成立 |
+| 4 | [qemu/qemu](https://github.com/qemu/qemu) | 13968 | §1.1 从插线编程到存储程序：为什么通用机器需要「程序也是数据」 | 读 `hw/core/` 与 `target/`：一台被模拟的机器如何把 CPU、内存、设备挂到同一条总线上——这是冯·诺依曼结构最直白的运行态证据：指令从内存取、数据和指令走同一套通路，所以「程序也是数据」不是哲学而是地址空间的安排；配合 §5.2「机器字长、数据通路宽度与层次化存储的层间契约」看，会发现字长决定了这条通路一次能搬多少 |
+| 5 | [riscv/riscv-isa-manual](https://github.com/riscv/riscv-isa-manual) | 4872 | §4.2 透明是「不用管」而不是「不存在」，以及固化实现为何与硬件等价 | 读 `riscv-isa-manual` 第 1~2 章的 CSR 与特权级引言：指令集是软硬件之间的契约，规范里写死的接口对上层就是「透明」的——本章 §4.1「换个内存条程序就快了、刷个固件就解锁新功能」问的正是这件事：透明意味着上层无需改代码，而不意味着这一层不存在；这也是 §4.2 里「固化实现与硬件逻辑等价」的判据——看的是接口契约，不是实现载体 |
 
 ## 本章 B 站视频路线
 

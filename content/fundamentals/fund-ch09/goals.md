@@ -42,9 +42,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §3.2 | 讲「并发在系统设计里的位置」时读 `solutions/` 的限流与线程池设计：线程数、队列、拒绝策略三者的取舍，与本章「时间片与上下文切换」同源 |
-| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | §2.1 | 讲「进程与线程的区别」时读 README 的 Operating Systems 清单：地址空间、切换代价、通信方式三条，是面试追问的固定落点 |
-| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §1.3 | 讲「调度算法的周转时间」时读 `docs/计算机操作系统/` 的进程管理篇：FCFS/SJF/SRTN/时间片轮转的甘特图画法，配「平均周转时间」的计算示例 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §1.3 3. 进程控制原语与上下文切换 | 读 `solutions/system_design/` 里带「线程池 / 限流」的案例：线程数、队列长度、拒绝策略三者的取舍背后，是「每多一个可运行线程就多一份切换开销与栈内存」这条硬约束——本章 §2.2「六种调度算法」里时间片调度的开销项，在实际系统里就是由「线程数 × 每秒切换次数」放大出来的 |
+| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | §1.2 2. 线程：CPU 调度的基本单位 | 读 README 的 Operating Systems 清单：地址空间、切换代价、通信方式三条并列，正是面试追问「进程与线程的区别」的固定落点；本章 §1.1「进程：资源分配的基本单位」给的是前一半（地址空间独立），§3.1「临界区与互斥的四条准则」给的是后一半——线程共享地址空间省了通信，却也把「并发安全」变成了必须自己管的问题 |
+| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §2.2 2. 六种调度算法 | 读 `docs/计算机操作系统/` 的进程管理篇：FCFS/SJF/SRTN/时间片轮转的甘特图画法、配「平均周转时间」与「平均带权周转时间」的计算示例——这一列正好对上本章 §2.1「调度的三个层次与评价指标」；注意它标出的两个反直觉点：SJF 平均等待时间最优但会饿死长作业、时间片越小响应越快但切换开销占比越高，本章 §2.3 的可运行代码可以把这两个结论跑成具体数字 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

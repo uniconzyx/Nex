@@ -64,9 +64,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §4.2 | 讲「CDN 与边缘节点」时读 `solutions/` 的 CDN 设计：把内容推到离用户最近的节点，本质是「用空间换 RTT」，与本章「时延带宽积」的量化视角互补 |
-| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | §3.2 | 讲「链路层排障」时读 README 的 Networking 练习：`ping`/`traceroute`/`curl -v` 各自回答什么问题，与本篇「分层排查」的顺序一致 |
-| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §2.1 | 讲「HTTP 与 DNS」时读 `docs/计算机网络/` 的应用层篇：DNS 递归/迭代查询的差别、HTTP 缓存头的组合，配了抓包示例 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §4.3 3. 分层排查：命令与顺序 | 读 `solutions/system_design/` 的 CDN 设计：把内容推到离用户最近的节点，本质是「用空间换 RTT」；而本章 §4.3 给的排查顺序（先 `ping` 验三层、再 `curl -v` 验七层）恰好也解释了「为什么 CDN 故障时用户侧看到的是 DNS 解析正常但首字节很慢」——把时延拆成「解析 / 建连 / 首字节 / 传输」四段才能定位 |
+| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | §2.1 1. DNS：把名字翻译成地址 | 读 README 的 Networking 练习：`ping`/`traceroute`/`curl -v` 各自回答什么问题，与本篇 §4.3「分层排查」的顺序一致；再对照本章 §2.2「从输入 URL 到页面渲染：完整链路」——DNS 在链路的第一跳，它慢一秒后面全慢一秒，所以排查表里它排在 TCP 握手之前 |
+| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §1.3 3. HTTP/3 与 QUIC：把传输层也换掉 | 读 `docs/计算机网络/` 的应用层篇：DNS 递归/迭代查询的差别、HTTP 缓存头的组合，配了抓包示例；本章 §1.1「HTTP/1.1：文本协议与队头阻塞」与 §1.2「HTTP/2：二进制分帧与多路复用」是它的前两代——HTTP/2 在 TCP 上做多路复用仍受 TCP 层队头阻塞，这正是为什么 §1.3 必须连传输层一起换 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

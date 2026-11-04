@@ -29,13 +29,13 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376373 | §吞吐与延迟 | 读 Latency numbers 与「吞吐 vs 延迟」：流水线的本质就是用延迟（单条指令变慢）换吞吐（单位时间完成更多），这个 trade-off 在这里讲得最清楚 |
-| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363641 | §CPU 缓存与流水 | 看 CPU caches 与「Instruction pipelining」条目：把 cache 与流水线当成同一套「让 CPI 下降」的手段来理解 |
-| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186408 | §CPU 高频考点 | 中文速记：CPU 结构与流水线一节，考前背「五段流水时空图 + 加速比公式 + 三类冒险」三件套 |
-| 4 | [llvm/llvm-project](https://github.com/llvm/llvm-project) | 41282 | §消除冒险 | 读 `MachineScheduler` 与 `llvm-mca`：`llvm-mca` 能直接对一段汇编出「周期表 + 停顿原因」，是本章模型最实用的工业级对照 |
-| 5 | [chipsalliance/rocket-chip](https://github.com/chipsalliance/rocket-chip) | 3895 | §数据通路 | 读 `src/main/scala/rocket/RocketCore.scala`：五级流水、旁路网络、stall 信号是怎么用几百行硬件描述写出来的 |
-| 6 | [riscv/riscv-isa-manual](https://github.com/riscv/riscv-isa-manual) | 4872 | §流水线相关 | 看 RISC-V 对 load-use 与分支延迟槽（无延迟槽）的规定：规范层面就把「哪些冒险必须由硬件处理」定死了 |
-| 7 | [qemu/qemu](https://github.com/qemu/qemu) | 13968 | §多发射建模 | 读 `accel/tcg/`：TCG 动态翻译如何把目标指令拆成微操作并重排——这是「多发射 + 乱序」在软件层的等价实现 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376373 | §3.1 流水线为什么能加速：时空图、吞吐率与加速比的正确算法 | 读 README 的 Latency numbers 与「吞吐 vs 延迟」：流水线的本质就是用延迟（单条指令变慢）换吞吐（单位时间完成更多），这个 trade-off 在系统设计里叫「批处理化」；本章 §3.2 的时空图必须自己画一遍——加速比的分母不是「段数」，而是「段数 + 指令数 − 1」，这一点算错就全错 |
+| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363641 | §4.2 CPU 性能公式的三项，改哪一项最有效 | 读 CPU caches 与 Instruction pipelining 两条：把 cache 与流水线当成同一套「让 CPI 下降」的手段——cache 降的是 load/store 的缺失代价，流水线降的是每条指令的平均周期；本章 §4.1「指令级并行还能往哪挖：超标量、多发射与乱序执行」是这条线的延伸，而 §4.2 给出的判据是：CPI 已接近 1 时，再优化的边际收益只能从「降低指令数」找 |
+| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186408 | §2.2 硬布线与微程序：微指令的水平型/垂直型与四种微地址形成方式 | 读 `docs/计算机组成原理/` CPU 结构与流水线一节的中文速记：考前背「五段流水时空图 + 加速比公式 + 三类冒险」三件套；但本章 §2.1「同一个控制信号源为什么会有两种实现路线」给的是选择依据——硬布线省一个节拍但改一条指令要重画逻辑，微程序多一个节拍但换指令只改微码；「水平型/垂直型」在这个对照里就是「并行度」与「微指令字长」的权衡 |
+| 4 | [llvm/llvm-project](https://github.com/llvm/llvm-project) | 41282 | §3.2 三类冒险的识别与对策：结构冒险、数据冒险、控制冒险 | 读 `llvm/lib/Target/` 的 `MachineScheduler` 与 `llvm-mca`：`llvm-mca` 能直接对一段汇编出「周期表 + 停顿原因」，是本章最好的实测工具——写一段有 load-use 依赖的代码，它会告诉你停了几拍；本章 §3.1 的加速比公式与 §3.2 的三类冒险，在 llvm-mca 的输出里是一一对应的数据 |
+| 5 | [chipsalliance/rocket-chip](https://github.com/chipsalliance/rocket-chip) | 3895 | §1.2 数据通路的微操作序列与单总线为什么必须分多节拍 | 读 `src/main/scala/rocket/RocketCore.scala`：五级流水、旁路网络、stall 信号是怎么用几百行硬件描述写出来的——重点看 `id_use`/`ex_rs` 的旁路（forwarding）逻辑，它对应的就是本章 §1.1「从寄存器堆到单总线数据通路」里「同一份数据有多条路径可走」这件事；单总线之所以要分节拍，是因为一条通路一个时刻只能传一份数据 |
+| 6 | [riscv/riscv-isa-manual](https://github.com/riscv/riscv-isa-manual) | 4872 | §3.2 三类冒险的识别与对策（规范视角） | 读 `riscv-isa-manual` 里对 load-use 与分支延迟槽（RISC-V 明确无延迟槽）的规定：规范层面就把「哪些冒险必须由硬件处理」定死了——load-use 必须插一拍停顿（或由硬件旁路到执行段），而分支不用延迟槽则要求分支结果尽早解析；这正是本章 §3.2 里「对策分硬件/软件两路」的理由 |
+| 7 | [qemu/qemu](https://github.com/qemu/qemu) | 13968 | §4.1 指令级并行还能往哪挖：超标量、多发射与乱序执行 | 读 `accel/tcg/`：TCG 动态翻译如何把目标指令拆成微操作并重排——这是「多发射 + 乱序」在软件层的等价实现；本章 §4.2「CPU 性能公式的三项」里，多发射改的是 CPI、而 TCG 的翻译缓存改的是「同一段代码第二次执行的指令数」——两者都在 CPI 这一项上做文章，只是一个在硬件、一个在模拟器 |
 
 ## 本章 B 站视频路线
 | # | 系列 / UP 主 | 视频 | 对应本章 | 看什么 |

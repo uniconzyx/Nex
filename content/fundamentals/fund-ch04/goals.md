@@ -36,9 +36,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §4.1 | 讲「图算法在系统设计中的应用」时读 `solutions/` 的社交网络设计：好友推荐本质是「图的邻居扩展」，与本章 BFS 分层是同一套思路 |
-| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | §3.1 | 讲「DFS 与 BFS 的模板」时读 README 的 Graphs 一节：递归 DFS 与队列 BFS 两份模板，配「什么时候该用哪个」的判断（最短路 / 连通性 / 拓扑） |
-| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §2.3 | 讲「图的两种存储」时读 `docs/算法/` 的图篇：邻接矩阵 O(V²) 空间换 O(1) 判边、邻接表相反，选择依据写作「稠密还是稀疏」 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §2.2 2. BFS 为什么能求无权最短路 | 读 `solutions/system_design/` 里带「好友推荐 / 社交图」的案例：「二度人脉」就是 BFS 第 2 层，而工程上不敢直接跑全图 BFS（邻接表在内存里放不下亿级节点），于是改成「先取种子节点的邻居、在内存里做 2 跳」——这正是本章 §1.3「邻接表：为稀疏图而生的默认答案」与 §1.5「决策表」的现实注脚 |
+| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | §2.1 1. DFS 与 BFS 不是「两种写法」，是「两种序」 | 读 README 的 Graphs 一节：递归 DFS 与队列 BFS 两份模板后面直接跟着「什么时候用哪个」的判据（连通性 / 最短路径 / 拓扑排序），这与本章 §2.3「拓扑排序：把偏序变成线序」的归属完全一致——拓扑排序本质就是 DFS 的退出序取反，或 BFS 的入度归零序 |
+| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §3.3 3. 并查集：Kruskal 的正确搭档 | 读 `docs/算法/` 的图篇：它把「邻接矩阵 O(V²) 空间换 O(1) 判边、邻接表反过来」写成「稠密还是稀疏」一句话判据；本章 §4.3「两个优化」补上的是另一半——Kruskal 每条边都要判「两端是否已连通」，不配路径压缩 + 按秩合并就会退化成 O(E·V)，所以 §3.1「最小生成树」的正确性依赖 §4 整个并查集章节 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

@@ -50,10 +50,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [torvalds/linux](https://github.com/torvalds/linux) | 254007 | §物理层设备与驱动 + §链路统计 | 两处对照：`drivers/net/phy/phy_device.c` 看内核如何读取 PHY 的链路状态/自协商结果（这就是"物理层真的连上了吗"的判据来源）；`net/core/dev.c` 里 `dev_get_stats` 把 `rx_crc_errors`、`rx_length_errors` 暴露给 `ethtool -S`，是现场排查物理层故障的入口 |
-| 2 | [lwip-tcpip/lwip](https://github.com/lwip-tcpip/lwip) | 1773 | §以太网帧与物理层接口 | `src/netif/ethernet.c` 只有几百行：`ethernet_input` 如何从"一块原始字节"解析出帧类型并分发 —— 看清"物理层交上来的是比特，链路层才开始认帧"这条边界 |
-| 3 | [wireshark/wireshark](https://github.com/wireshark/wireshark) | 10134 | §编码与帧结构验证 | `epan/dissectors/packet-eth.c` 是"教材帧格式"的权威对照物：抓一个包，逐字段对照本章的"前导码/帧首定界符/目的 MAC/类型/数据/FCS" |
-| 4 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186408 | §考前速记 | 中文「计算机网络 / 物理层」一节：奈氏与香农公式、编码波形图、复用方式对比，适合考前 20 分钟过一遍 |
+| 1 | [torvalds/linux](https://github.com/torvalds/linux) | 254007 | §4.3 3. 可运行代码（C，含中文注释 + 真实输出） | 读 `drivers/net/phy/phy_device.c`：看内核如何读取 PHY 的链路状态 / 自协商结果——这就是「物理层真的连上了吗」的判据来源；再读 `net/core/dev.c` 的 `dev_get_stats`：它把 `rx_crc_errors`、`rx_length_errors` 暴露给 `ethtool -S`，是现场排查物理层故障的入口；本章 §4.2「传输时延与传播时延的公式，以及时延带宽积的物理含义」在这些计数器里变成了可读的数字 |
+| 2 | [lwip-tcpip/lwip](https://github.com/lwip-tcpip/lwip) | 1773 | §4.2 传输时延与传播时延的公式，以及时延带宽积的物理含义 | 读 `src/netif/ethernet.c`：只有几百行，`ethernet_input` 如何从「一块原始字节」解析出帧类型并分发——看清「物理层交上来的是比特，链路层才开始认帧」这条边界；这条边界正好对应本章 §1.2「奈氏准则管码元上限、香农定理管信息上限」：物理层只保证「每赫兹能传几个码元」，帧的语义是上面一层的事 |
+| 3 | [wireshark/wireshark](https://github.com/wireshark/wireshark) | 10134 | §2.2 四种编码的跳变保证与效率，以及自同步的代价 | 读 `epan/dissectors/packet-eth.c`：它是「教材帧格式」的权威对照物——抓一个包，逐字段对照本章的「前导码 / 帧首定界符 / 目的 MAC / 类型 / 数据 / FCS」；注意前导码那 7 字节 `10101010` 就是为了让接收端锁定时钟，这正是 §2.1「把 1 变高电平、0 变低电平发出去，为什么还不够」的答案：长串同电平没有跳变，时钟就漂了 |
+| 4 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186408 | §3.2 FDM/TDM/WDM/CDM 四种复用靠什么正交、各自代价 | 读 `docs/计算机网络/` 的「物理层」一节：奈氏与香农公式、编码波形图、复用方式对比，适合考前 20 分钟过一遍；本章 §3.1「一根光纤很贵：让多个信号共享同一介质的技术」给出的组织方式是「靠什么维度正交」——频分靠频率、时分靠时间、波分靠波长、码分靠编码序列，正交维度一旦定下，干扰与容量就都能算 |
 
 ## 本章 B 站视频路线
 

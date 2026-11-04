@@ -48,10 +48,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [torvalds/linux](https://github.com/torvalds/linux) | 254007 | §inode 与索引 + §目录查找 | 两处对照读：`fs/ext4/inode.c` 的 `ext4_map_blocks` 把「逻辑块号」翻成「物理块号」（extent 树就是混合索引的工业版）；`fs/namei.c` 的 `link_path_walk` 把 `/a/b/c` 逐段解析成 dentry，配合 `fs/dcache.c` 看 dentry 缓存 |
-| 2 | [mit-pdos/xv6-public](https://github.com/mit-pdos/xv6-public) | 9716 | §目录结构 + §日志一致性 | `fs.c` 里 `dirlookup`/`namei`/`ialloc` 三个函数就讲完「目录是特殊文件」与 inode 分配；`log.c` 只有几百行，begin_op / log_write / commit 就是最小可读的 write-ahead 日志 |
-| 3 | [remzi-arpacidusseau/ostep-code](https://github.com/remzi-arpacidusseau/ostep-code) | 4479 | §全章实验 | 《操作系统导论》配套代码的文件系统实验：自己实现一遍 inode 分配与位示图，计算题就不再是背公式 |
-| 4 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186408 | §考前速记 | 中文「文件系统」一节：把本章的计算题套路（混合索引、位示图、FAT 大小）浓缩成几页，适合考前 30 分钟过一遍 |
+| 1 | [torvalds/linux](https://github.com/torvalds/linux) | 254007 | §3.2 FCB 与 inode、目录项的作用，以及硬链接与软链接的差别 | 读 `fs/ext4/inode.c` 的 `ext4_map_blocks` 把「逻辑块号」翻成「物理块号」（extent 树就是混合索引的工业版）；再读 `fs/namei.c` 的 `link_path_walk`：把 `/a/b/c` 逐段解析成 dentry，配合 `fs/dcache.c` 看 dentry 缓存——这正好回答本章 §3.1「文件本身并不知道自己叫什么名字」：名字在目录项里，inode 只管数据与元数据 |
+| 2 | [mit-pdos/xv6-public](https://github.com/mit-pdos/xv6-public) | 9716 | §3.2 FCB 与 inode、目录项的作用，以及硬链接与软链接的差别（教学实现版） | 读 `fs.c` 里 `dirlookup` / `namei` / `ialloc` 三个函数：它们就讲完「目录是特殊文件」与 inode 分配；`log.c` 只有几百行，begin_op / log_write / commit 就是最小可读的 write-ahead 日志——这正是本章 §4.2「位示图/成组链接等四种空闲管理，与日志式崩溃一致性」的后半部分；xv6 的规模让「崩溃一致性」第一次变成能读完的代码 |
+| 3 | [remzi-arpacidusseau/ostep-code](https://github.com/remzi-arpacidusseau/ostep-code) | 4479 | §2.2 连续、链接、索引三种分配，与三级间接索引的计算题 | 读 `ostep-code` 的文件系统实验：自己实现一遍 inode 分配与位示图，计算题就不再是背公式；本章 §2.1「逻辑结构决定用户怎么找，物理结构决定磁盘怎么放」的对照，在实验里会变成「改一个块指针数组，最大文件尺寸改了多少」的具体数字——三级间接索引的容量公式就是这套指针数组的乘法 |
+| 4 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186408 | §1.2 五种逻辑结构：无结构、顺序、索引、索引顺序与散列 | 读 `docs/计算机操作系统/` 的「文件系统」一节：把本章的计算题套路（混合索引、位示图、FAT 大小）浓缩成几页，适合考前 30 分钟过一遍；但它通常从「物理结构」讲起，而本章 §1.1「「文件」这个词的两种含义混在一起，就永远学不清」要求先分清「用户看到的逻辑结构」与「磁盘上的物理结构」——这个区分一旦建立，§1.2 的五种与 §2.2 的三种就不会再混淆 |
 
 ## 本章 B 站视频路线
 

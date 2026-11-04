@@ -40,9 +40,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §3.1 | 讲「浮点精度对业务的影响」时读 `solutions/` 里涉及计数的设计：金额必须用整数或定点数，浮点的非结合性会让「累加顺序不同结果不同」 |
-| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | §2.3 | 讲「位运算技巧」时读 README 的 Bit Manipulation 一节：`x & (x-1)` 清最低位 1、`x & -x` 取最低位 1，两道练习把这两个技巧练熟 |
-| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §1.1 | 讲「补码为什么统一加减法」时读 `docs/计算机组成原理/` 的数据表示篇：模 2^n 剩余类的角度解释了「取反加一」，比「记住规则」更能推导出范围 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §3.4 4. 为什么 0.1 存不准 | 读 `solutions/system_design/` 里涉及计数的设计（如限流器的令牌桶、计数器的累加）：金额与配额必须用整数或定点数，因为浮点不满足结合律——`(a+b)+c` 与 `a+(b+c)` 在 0.1/0.2 上就分道扬镳；本章 §3.5「浮点数的比较」给出的「绝对值差小于 eps」判据，正是工程上唯一能落地的写法（绝对误差 + 相对误差两条一起用） |
+| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | §4.4 4. 三个「看起来对其实错」的经典写法 | 读 README 的 Bit Manipulation 一节：`x & (x-1)` 清最低位 1、`x & -x` 取最低位 1，这两个技巧之所以成立，前提正是本章 §2.1「运算规则」里「负数按补码存」——`-x` 的位表示就是 `~x+1`，所以 `x & -x` 恰好留下最低那个 1；换个机器数表示（原码/反码）这两个式子立刻失效 |
+| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §1.1 1. 为什么要发明补码 | 读 `docs/计算机组成原理/` 的数据表示篇：它从「模 2ⁿ 剩余类」的角度解释「取反加一」，比「记住规则」更能推出表示范围；本章 §1.4「为什么 IEEE 754 的阶码用移码」延续的是同一套思路——移码让浮点的阶码可以用无符号比较做大小判断，本质是把「减去偏置」这一步融进了编码里（对应 §1.2「四种表示的定义」的对照表） |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

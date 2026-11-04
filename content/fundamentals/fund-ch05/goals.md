@@ -30,9 +30,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §3.3 | 讲「哈希在缓存里的作用」时读 `solutions/` 的 key-value 存储设计：哈希把 O(n) 查找变 O(1)，但代价是「不支持范围查询」——这正是要加有序索引的原因 |
-| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | §2.1 | 讲「二分的边界」时读 README 的 Binary Search 一节：`left <= right` 还是 `left < right`、`mid` 要不要 +1，这些「差一」错误在练习题里被逐个覆盖 |
-| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §1.2 | 讲「哈希冲突的处理」时读 `docs/算法/` 的查找篇：链地址法 vs 开放寻址的取舍，重点看「负载因子超过阈值就扩容」这条工程约定 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §3.3 3. 装填因子与 ASL：一切回到负载 | 读 `solutions/system_design/` 的 key-value 存储案例：哈希把 O(n) 查找变 O(1)，但代价是「不支持范围查询」，所以真实存储总要在哈希之上再挂有序索引；而负载因子一旦超过 0.75 就必须扩容重哈希，这个阈值不是拍脑袋——本章 §3.2「冲突处理：开放定址 vs 拉链法」里两种方案的 ASL 曲线在 0.75 附近开始陡升，§3.3 给的就是这条曲线的量化 |
+| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | §1.3 3. 折半查找：静态有序数据的最优解 | 读 README 的 Binary Search 一节：`left <= right` 还是 `left < right`、`mid` 要不要 `+1`、循环里 `mid` 怎么更新——这些「差一」错误被逐个覆盖；这正是本章 §1.2「顺序查找：最朴素但最鲁棒」与 §1.3 的分野：折半快在一个数量级，代价是「必须先有序且不能频繁插删」 |
+| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §2.2 2. B+ 树：数据下沉到叶子，叶子串成链 | 读 `docs/算法/` 的查找篇：它把「链地址法 vs 开放寻址」的取舍与「B 树 vs B+ 树」放在同一章，判据统一成「一次 IO 取回多少有效数据」；本章 §3.1「哈希函数的构造方法」与 §2.1「B 树：m 阶的定义与约束」的差别就在于此：哈希定位 O(1) 但拿不到范围序，B+ 树定位 O(log_m n) 但叶子链能顺序扫 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

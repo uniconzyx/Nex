@@ -50,10 +50,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [torvalds/linux](https://github.com/torvalds/linux) | 254007 | §中断上下半部 + §块层调度 + §DMA | 三处对照：`kernel/irq/manage.c` 的 `request_threaded_irq` 把"上半部只做最少的事、下半部交给线程"写成了 API；`block/mq-deadline.c` 是本章 SCAN 思想在 blk-mq 上的现代实现（deadline + fifo 双队列）；`block/blk-mq.c` 看一次 `submit_bio` 到设备队列的完整路径 |
-| 2 | [mit-pdos/xv6-public](https://github.com/mit-pdos/xv6-public) | 9716 | §驱动与缓冲的最小实现 | `bio.c` 只有一百多行：`bget`/`bread`/`bwrite` 就是一个**双链表 LRU 缓冲池**，比任何教材图都直观；`ide.c` 是极简的磁盘驱动（含中断处理），能看清"发命令-等中断-取数据"的完整握手 |
-| 3 | [remzi-arpacidusseau/ostep-code](https://github.com/remzi-arpacidusseau/ostep-code) | 4479 | §磁盘调度实验 | 《操作系统导论》配套的 `disksched.py`：改几行参数就能观察 FCFS/SSTF/SCAN 的总寻道距离差异，计算题从此不用背 |
-| 4 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186408 | §考前速记 | 中文「设备管理 / 磁盘」几节：四种 I/O 方式对比表、磁盘调度例题、RAID 对比，适合考前过一遍 |
+| 1 | [torvalds/linux](https://github.com/torvalds/linux) | 254007 | §4.2 访问时间三要素、四种调度算法与 RAID/SSD 的取舍 | 读 `kernel/irq/manage.c` 的 `request_threaded_irq`（上半部只做最少的事、下半部交给线程）与 `block/mq-deadline.c`（本章 SCAN 思想在 blk-mq 上的现代实现：deadline + fifo 双队列）；再读 `block/blk-mq.c` 看一次 `submit_bio` 到设备队列的完整路径——本章 §4.1「读 4KB 时传输只占 1.4%，剩下全花在挪磁头上」就是 mq-deadline 为什么要按「扇区就近」排序的理由 |
+| 2 | [mit-pdos/xv6-public](https://github.com/mit-pdos/xv6-public) | 9716 | §3.2 四种缓冲形态、缓冲池的四类工作区与假脱机的独占改造 | 读 `bio.c`：只有一百多行，`bget`/`bread`/`bwrite` 就是一个双链表 LRU 缓冲池，比任何教材图都直观；`ide.c` 是极简的磁盘驱动（含中断处理），能看清「发命令-等中断-取数据」的完整握手——本章 §3.1「缓冲与 SPOOLing 都拿存储做中转，但解决的不是同一个问题」在这里的答案是：缓冲对齐速度，SPOOLing 对齐独占 |
+| 3 | [remzi-arpacidusseau/ostep-code](https://github.com/remzi-arpacidusseau/ostep-code) | 4479 | §4.2 访问时间三要素、四种调度算法与 RAID/SSD 的取舍（实验版） | 读 `ostep-code` 配套的 `disksched.py`：改几行参数就能观察 FCFS/SSTF/SCAN 的总寻道距离差异，计算题从此不用背；本章 §4.1 的「1.4%」也在这份脚本里能复现——把传输时间与寻道时间设成真实量级，会发现 SSTF 在请求密集时胜出、SCAN 在请求稀疏时更稳 |
+| 4 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186408 | §1.2 程序查询、中断、DMA、通道四种方式的控制流与 CPU 开销 | 读 `docs/计算机操作系统/` 的「设备管理 / 磁盘」几节：四种 I/O 方式对比表、磁盘调度例题、RAID 对比，适合考前过一遍；但本章 §1.1「CPU 与机械盘差了七个数量级：谁等谁决定了 I/O 方式的演进」才是这张表的组织原则——按「CPU 等待的时间占比」排序，四种方式自然成台阶，而 RAID 的取舍（可靠 vs 容量 vs 速度）则是另一条正交的轴 |
 
 ## 本章 B 站视频路线
 

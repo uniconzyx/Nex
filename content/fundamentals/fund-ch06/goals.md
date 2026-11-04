@@ -36,9 +36,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §4.3 | 讲「外部排序的动机」时读 `solutions/` 的大数据处理题：内存装不下时先分块排序再归并，是「排序不止在内存里做」的直接案例 |
-| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | §3.2 | 讲「排序算法的选择」时读 README 的 Sorting 一节：小数据用插入、大数据用快排/归并、要求稳定用归并——选择依据与本章一致 |
-| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §2.1 | 讲「八种排序的复杂度表」时读 `docs/算法/` 的排序篇：时间/空间/稳定性三列齐全，重点看它对「快排最坏 O(n²) 与不稳定」的标注 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §3.1 1. 外部排序：数据装不进内存时怎么办 | 读 `solutions/system_design/` 的大数据处理案例：内存装不下时先分块排序再归并，而真实工程里分块大小由「一次能读多少页、留多少给输出缓冲」反推；这正是本章 §3.3「非比较排序：计数排序与基数排序」的边界——外部排序的第二阶段仍受比较排序下界约束，除非键的分布允许桶划分 |
+| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | §1.1 1. 八种内部排序的「时间·空间·稳定性」统一口径 | 读 README 的 Sorting 一节：小数据用插入、大数据用快排/归并、要求稳定用归并，这三条选择依据与本章 §2.1「快速排序：划分决定一切」、§2.3「归并排序：稳定、O(n log n)，但空间 O(n)」直接对应；注意它对「快排在已排序输入上退化成 O(n²)」的标注——这就是 §2.1 里必须聊「三数取中 / 随机化 pivot」的原因 |
+| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §2.2 2. 堆排序：建堆是 O(n) 而不是 O(n log n) | 读 `docs/算法/` 的排序篇：时间/空间/稳定性三列齐全，但它对「建堆为什么是 O(n)」只给结论、不给求和推导；本章 §2.2 补的正是这个推导（叶子层占一半节点、只需 1 次下沉，按层求和的几何级数收敛到 2n）；顺带对照 §2.1 的快排最坏 O(n²) 与不稳定标注，才能说清「为什么库排序用内省排序而不是纯快排」 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

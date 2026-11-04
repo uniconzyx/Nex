@@ -27,9 +27,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §3.1 | 讲「TCP 与 UDP 的选择」时读 `solutions/` 的实时通信设计：可靠 vs 低延迟的取舍，与本章「拥塞控制的代价」是同一权衡 |
-| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | §2.3 | 讲「分层模型」时读 README 的 Networking 清单：每层的职责与典型协议，用来校准「哪个问题该在哪一层解决」 |
-| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §1.2 | 讲「TCP 三次握手」时读 `docs/计算机网络/` 的传输层篇：SYN/ACK 的序号变化配了状态迁移图，重点是「为什么是三次而不是两次」 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §4.5 五、UDP 与 QUIC | 读 `solutions/system_design/` 的实时通信设计：可靠 vs 低延迟的取舍被拆成「重传策略 + 拥塞控制 + 缓冲队列」三项；QUIC 之所以把可靠传输搬进用户态，就是为了绕开 TCP 的队头阻塞——这正是本章 §4.4「流量控制与拥塞控制」与 §4.3「可靠传输与 RTT 估计」这两节在工程上的最大缺口 |
+| 2 | [jwasham/coding-interview-university](https://github.com/jwasham/coding-interview-university) | 363,641 | §1.3 三、各层的职责边界（考试最爱问「这是第几层的事」） | 读 README 的 Networking 清单：每层的职责与典型协议并列，用来校准「哪个问题该在哪一层解决」；本章 §1.1「OSI 七层 vs TCP/IP 四层」给的是分层依据，§1.2「封装与分用」给的是「一层只加自己的首部」这条纪律——面试里问「ARP 属于哪层」正是在考这条边界（链路层与网络层的缝上） |
+| 3 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §4.2 二、三次握手与四次挥手 | 读 `docs/计算机网络/` 的传输层篇：SYN/ACK 的序号变化配了状态迁移图，重点是「为什么是三次而不是两次」；本章 §4.1「TCP 首部（20 B 固定 + 可选项）」先给出序号/确认号字段的位置，§4.2 才能谈「谁确认谁」；而 §4.6 的可运行代码把「握手序号演算」跑成具体数字，比背状态图可靠得多 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 
