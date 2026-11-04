@@ -52,10 +52,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §1.1 | 讲「MQ 的三大价值」时读 `docs/database/kafka/` 的入门篇：削峰、解耦、异步——三者都成立的前提是「允许最终一致」，如果业务要求强一致，引入 MQ 只会把问题变成「分布式事务」 |
-| 2 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §2.2 | 讲「选型矩阵」时对照 `docs/high-concurrency/` 的消息队列对比文章：吞吐（Kafka/RocketMQ 高）、路由灵活度（RabbitMQ 强）、事务与延迟消息（RocketMQ 有）——先过硬约束再加权打分，不要一上来比 benchmark |
-| 3 | [redis/redis](https://github.com/redis/redis) | 77,127 | §1.3 | 讲「什么时候用 Redis Stream 而不是 MQ」时对照 `src/t_stream.c`：Stream 有消费组与 ACK，但没有分区与副本，「轻量队列」够用；一旦要「百万级积压 + 多副本」，就超出它的设计边界 |
-| 4 | [apache/kafka](https://github.com/apache/kafka) | 34,105 | §3.1 | 讲「积压的数学」时读 `core/src/main/scala/kafka/log/Log.scala` 的分区模型：单个分区只能被一个消费者消费，所以「加消费者」的上限就是分区数——积压时先扩分区再扩实例，顺序反了就白扩 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §1.1 三大价值：削峰填谷、系统解耦、异步化 | 读 `docs/database/kafka/` 的入门篇：三者都成立的前提是「允许最终一致」，如果业务要求强一致，引入 MQ 只会把问题变成「分布式事务」；读完再回 §1.2 四类新增复杂度，就知道代价具体压在谁身上 |
+| 2 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §2.1 五个维度的对比框架 | 对照 `docs/high-concurrency/` 的消息队列对比文章：吞吐（Kafka/RocketMQ 高）、路由灵活度（RabbitMQ 强）、事务与延迟消息（RocketMQ 有）——先过硬约束再加权打分，不要一上来比 benchmark；这正是 §2.3 选型判据的顺序，也是 §2.2 路由能力单独成节的理由 |
+| 3 | [redis/redis](https://github.com/redis/redis) | 77,127 | §1.3 边界：什么时候用 Redis Stream / DB 轮询 / 同步 RPC 反而更合适 | 对照 `src/t_stream.c`：Stream 有消费组与 ACK，但没有分区与副本，「轻量队列」够用；一旦要「百万级积压 + 多副本」，就超出它的设计边界——那条边界正好对应 §3.2 的分区数上限 |
+| 4 | [apache/kafka](https://github.com/apache/kafka) | 34,105 | §3.1 积压的数学：四个变量 | 读 `core/src/main/scala/kafka/log/Log.scala` 的分区模型：单个分区只能被一个消费者消费，所以「加消费者」的上限就是分区数——积压时先扩分区再扩实例，顺序反了就白扩；把这条带进 §3.3 的容量规划，就能算出「多久清完」而不是只说「要扩容」 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

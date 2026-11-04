@@ -18,10 +18,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §2.2 | 讲「AOF 重写」时读 `docs/database/redis/` 的持久化篇：重写不是读旧 AOF，而是「按当前内存状态生成最小命令集」，因此重写后的文件与历史无关——这也解释了混合持久化为什么能兼顾恢复速度与安全性 |
-| 2 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §3.1 | 讲「过期键删除与淘汰」时对照 `docs/high-concurrency/` 的 Redis 内存篇：惰性删除 + 定期删除两条腿走路，`maxmemory-policy` 的八种策略里 `allkeys-lru` 与 `volatile-lru` 的差别是「要不要保护无 TTL 的键」 |
-| 3 | [redis/redis](https://github.com/redis/redis) | 77,127 | §1.1 | 讲「RDB 与 fork + COW」时读 `src/rdb.c` 的 `rdbSaveBackground`：`fork()` 之后子进程持有快照视图，父进程写入触发缺页复制——「fork 瞬间内存翻倍」不是估算，而是 COW 的必然代价 |
-| 4 | [apache/kafka](https://github.com/apache/kafka) | 34,105 | §2.2 | 讲「AOF 与预写日志」时对照 `core/src/main/scala/kafka/log/Log.scala`：Kafka 用「追加日志 + 段文件」实现持久化，与 AOF 的 append-only 同源，区别在于 Kafka 靠「保留策略」删除旧段而不是重写 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §2.2 AOF 重写（rewrite）与混合持久化 | 读 `docs/database/redis/` 的持久化篇：重写不是读旧 AOF，而是「按当前内存状态生成最小命令集」，因此重写后的文件与历史无关——这也解释了 §2.1 `appendfsync` 三策略与重写为什么是两件独立的事：一个管安全，一个管体积 |
+| 2 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §3.2 内存淘汰、maxmemory 与碎片管理 | 对照 `docs/high-concurrency/` 的 Redis 内存篇：`maxmemory-policy` 的八种策略里 `allkeys-lru` 与 `volatile-lru` 的差别是「要不要保护无 TTL 的键」；配合 §3.1 惰性删除 + 定期删除两条腿，才能解释「内存没满但淘汰频繁」这类现场 |
+| 3 | [redis/redis](https://github.com/redis/redis) | 77,127 | §1.1 RDB 快照与 fork + 写时复制（COW） | 读 `src/rdb.c` 的 `rdbSaveBackground`：`fork()` 之后子进程持有快照视图，父进程写入触发缺页复制——「fork 瞬间内存翻倍」不是估算，而是 COW 的必然代价，也是 §1.2 `save m n` 触发频率的调优依据 |
+| 4 | [apache/kafka](https://github.com/apache/kafka) | 34,105 | §2.1 AOF 追加与 appendfsync 三策略 | 对照 `core/src/main/scala/kafka/log/Log.scala`：Kafka 用「追加日志 + 段文件」实现持久化，与 AOF 的 append-only 同源，区别在于 Kafka 靠「保留策略」删除旧段而不是重写；比对两者「什么时候算写成功」，就明白 `everysec` 与 `always` 的取舍本质 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

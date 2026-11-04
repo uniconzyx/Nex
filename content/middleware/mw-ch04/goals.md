@@ -20,10 +20,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §1.1 | 讲「缓存穿透/击穿/雪崩」时读 `docs/database/redis/` 的缓存专题：三者的触发条件不同（不存在 / 热点失效 / 批量同时失效），解法也不同（空值缓存+布隆 / 互斥重建 / TTL 抖动），混着答是面试扣分点 |
-| 2 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §4.2 | 讲「先更库再删缓存」时对照 `docs/high-concurrency/` 的缓存一致性文章：并发下「读请求把旧值写回缓存」的窗口无法完全消除，延迟双删只能降低概率，强一致必须加锁或串行化 |
-| 3 | [redis/redis](https://github.com/redis/redis) | 77,127 | §3.1 | 讲「过期与淘汰的边界」时读 `src/expire.c` 与 `src/evict.c`：过期键是「到点删除」，淘汰是「内存满了赶人」，两套逻辑独立；`volatile-*` 策略只对设了 TTL 的键生效，全都没 TTL 时它会退化成「不淘汰、直接报错」 |
-| 4 | [apache/kafka](https://github.com/apache/kafka) | 34,105 | §2.1 | 讲「缓存穿透的兜底」时对照 `core/src/main/scala/kafka/log/Log.scala` 的「读不存在返回空」：存储层对「查不到」与「出错」必须区分，否则缓存层会把「暂时查不到」也缓存成空值，把一次抖动放大成一片空白 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §1.1 布隆过滤器：用极少空间做「存在性」拦截 | 读 `docs/database/redis/` 的缓存专题：穿透 / 击穿 / 雪崩三者的触发条件不同（不存在 / 热点失效 / 批量同时失效），解法也不同（布隆 + 空值缓存 / 互斥重建 / TTL 抖动）；混着答是面试扣分点——先按 §1.2 与 §2.1、§2.2 把三者的边界分清楚 |
+| 2 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §3.1 Cache-Aside 的两种写顺序与并发脏数据 | 对照 `docs/high-concurrency/` 的缓存一致性文章：并发下「读请求把旧值写回缓存」的窗口无法完全消除，延迟双删只能降低概率，强一致必须加锁或串行化；读完再回 §3.2 看 Write-Through 为什么把窗口挪到写侧 |
+| 3 | [redis/redis](https://github.com/redis/redis) | 77,127 | §2.1 缓存击穿：一个热点 key 过期瞬间被海量并发打穿 | 读 `src/dict.c` 的 `lookupKey` 与 `dictAddRaw`：Redis 单命令原子但不提供「查不到就加锁重建」这种复合语义，所以互斥重建必须在客户端或 Lua 脚本里做——这正是 §2.2 雪崩要用「TTL 抖动」而非同一把锁的原因 |
+| 4 | [apache/kafka](https://github.com/apache/kafka) | 34,105 | §3.2 三大更新策略：Write-Through / Write-Behind / 延迟双删 | 对照 `core/src/main/scala/kafka/log/Log.scala`：Kafka 的页缓存在「写入即对读者可见」这一点上相当于 Write-Through，代价是写放大；把它和 §3.1 的 Cache-Aside 并排看，就是「一致性强度 ↔ 写延迟 ↔ 实现复杂度」的三角权衡 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

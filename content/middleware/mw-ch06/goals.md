@@ -50,10 +50,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §2.2 | 讲「幂等生产者」时读 `docs/database/kafka/` 的生产者篇：PID + 序列号让 broker 能识别「同一会话内的重试」，但它只管单分区单会话，跨会话仍会重复，所以业务幂等仍不可省 |
-| 2 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §4.1 | 讲「位移提交的四种方式」时对照 `docs/high-concurrency/` 的 Kafka 消费篇：自动提交是「按时间」、手动提交是「按处理进度」，前者在 rebalance 时会重复消费一批——「至少一次」的重复量级就由这个选择决定 |
-| 3 | [redis/redis](https://github.com/redis/redis) | 77,127 | §2.3 | 讲「幂等与去重」时对照 `src/db.c` 的 `setKey` 覆盖语义：Redis 的写是「后写覆盖」，天然不产生重复，而消息队列必须自己实现「重复消息只生效一次」——这就是为什么消费端幂等不能指望中间件 |
-| 4 | [apache/kafka](https://github.com/apache/kafka) | 34,105 | §1.3 | 讲「从 send() 到 Broker」时读 `clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java` 与 `internals/Sender.java`：消息先进 `RecordAccumulator` 按分区攒批，Sender 线程按 broker 聚合请求——「batch.size 与 linger.ms 决定吞吐」就发生在这两层 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §2.3 幂等生产者与事务 | 读 `docs/database/kafka/` 的生产者篇：PID + 序列号让 broker 能识别「同一会话内的重试」，但它只管单分区单会话，跨会话仍会重复，所以业务幂等仍不可省；对照 §2.1 三档 acks 各自的丢失窗口，就明白幂等与不丢是两套正交的保障 |
+| 2 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §4.1 位移提交的四种方式 | 对照 `docs/high-concurrency/` 的 Kafka 消费篇：自动提交是「按时间」、手动提交是「按处理进度」，前者在 rebalance 时会重复消费一批——「至少一次」的重复量级就由这个选择决定；配合 §4.2 三种交付语义，就能把「重复多少」算成一个区间而不是一句形容词 |
+| 3 | [redis/redis](https://github.com/redis/redis) | 77,127 | §2.2 min.insync.replicas：与 acks=all 的配合 | 对照 `src/db.c` 的 `setKey` 覆盖语义：Redis 的写是「后写覆盖」，天然不产生重复，但也不保证「已确认的写还在」；Kafka 用 min.insync.replicas 把「至少几个副本写成功才回 ACK」显式化，是两种截然不同的「成功」定义 |
+| 4 | [apache/kafka](https://github.com/apache/kafka) | 34,105 | §1.3 发送链路：从 send() 到 Broker | 读 `clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java` 与 `internals/Sender.java`：消息先进 `RecordAccumulator` 按分区攒批，Sender 线程按 broker 聚合请求——「batch.size 与 linger.ms 决定吞吐」就发生在这两层，对应 §1.2 攒批与吞吐那一节的算式 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

@@ -19,10 +19,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §2.1 | 讲「哨兵的主观/客观下线」时读 `docs/database/redis/` 的高可用篇：单个哨兵判 SDOWN 只是「我觉得」，凑够 quorum 才升 ODOWN，`majority` 与 `quorum` 是两个不同的数——配错就会「以为三个哨兵就安全」 |
-| 2 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §3.2 | 讲「脑裂与 min-replicas-to-write」时对照 `docs/high-concurrency/` 的 Redis 集群文章：老主库网络分区后仍接受写入，恢复时这部分数据被覆盖，`min-replicas-to-write` 用「写成功必须至少 N 个从库确认」把风险压到配置层面 |
-| 3 | [redis/redis](https://github.com/redis/redis) | 77,127 | §1.1 | 讲「全量同步 PSYNC」时读 `src/replication.c`：`repl_backlog` 环形缓冲区 + `master_repl_offset` 让「断线重连只补差额」成为可能，缓冲区太小就只能退回全量同步——这是「主从频繁全量」的第一排查点 |
-| 4 | [apache/kafka](https://github.com/apache/kafka) | 34,105 | §2.2 | 讲「选主与多数派」时对照 `core/src/main/scala/kafka/controller/` 的选举逻辑：Kafka 用 Controller + ZK/KRaft 选 leader，Redis Sentinel 用 Raft 式投票，两者的共同前提都是「多数派还活着」 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §2.1 主观下线 SDOWN 与客观下线 ODOWN（quorum 投票） | 读 `docs/database/redis/` 的高可用篇：单个哨兵判 SDOWN 只是「我觉得」，凑够 quorum 才升 ODOWN，`majority` 与 `quorum` 是两个不同的数——配错就会「以为三个哨兵就安全」，这正是 §2.2 选主前必须先满足的门槛 |
+| 2 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §3.3 脑裂（split-brain）与 min-replicas 防护 | 对照 `docs/high-concurrency/` 的 Redis 集群文章：老主库网络分区后仍接受写入，恢复时这部分数据被覆盖，`min-replicas-to-write` 用「写成功必须至少 N 个从库确认」把风险压到配置层面；配合 §3.1 的 MOVED/ASK 重定向，能看清「分区期间客户端被导向哪边」 |
+| 3 | [redis/redis](https://github.com/redis/redis) | 77,127 | §1.2 部分同步 repl_backlog、offset 与心跳 REPLCONF ACK | 读 `src/replication.c`：`repl_backlog` 环形缓冲区 + `master_repl_offset` 让「断线重连只补差额」成为可能，缓冲区太小就只能退回 §1.1 的全量同步——这是「主从频繁全量」的第一排查点 |
+| 4 | [apache/kafka](https://github.com/apache/kafka) | 34,105 | §2.2 Raft 式 leader 选举与故障转移的选主规则 | 对照 `core/src/main/scala/kafka/controller/` 的选举逻辑：Kafka 用 Controller + ZK/KRaft 选 leader，Redis Sentinel 用 Raft 式投票，两者的共同前提都是「多数派还活着」；差别在 Kafka 的 ISR 限制候选范围，而 Sentinel 靠 `replica-priority` 打分 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

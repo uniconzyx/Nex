@@ -52,10 +52,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §3.1 | 讲「三种顺序」时读 `docs/database/kafka/` 的顺序篇：分区内有序、分区之间无序、跨 topic 更无序，所谓「保证顺序」永远要附加「在哪个范围内」这个限定语 |
-| 2 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §4.2 | 讲「事务消息」时对照 `docs/high-concurrency/` 的分布式事务文章：Kafka 事务只保证「多条消息原子写入 + 消费端读已提交」，它不保证「业务操作与发消息」的原子性，后者要靠本地消息表或 Outbox |
-| 3 | [redis/redis](https://github.com/redis/redis) | 77,127 | §1.2 | 讲「存储端不丢」时对照 `src/rdb.c` 与 `src/aof.c` 的落盘时机：Redis 的 `appendfsync everysec` 最多丢 1 秒，Kafka 的 `acks=all` 不丢已确认消息——「不丢」的强度取决于「什么时候算成功」 |
-| 4 | [apache/kafka](https://github.com/apache/kafka) | 34,105 | §2.1 | 讲「重复从哪里来」时读 `internals/Sender.java` 的重试分支：网络超时后重发、但 broker 其实已写入，这是「生产者侧重复」的典型来源；`enable.idempotence=true` 用序列号把这类重复挡在 broker 侧 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §3.1 三种「顺序」必须先分清 | 读 `docs/database/kafka/` 的顺序篇：分区内有序、分区之间无序、跨 topic 更无序，所谓「保证顺序」永远要附加「在哪个范围内」这个限定语；弄清这条再读 §3.2，才能判断顺序是在生产、传输、重试还是消费哪一环被打破 |
+| 2 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §4.1 事务消息买到了什么、没买到什么 | 对照 `docs/high-concurrency/` 的分布式事务文章：Kafka 事务只保证「多条消息原子写入 + 消费端读已提交」，它不保证「业务操作与发消息」的原子性，后者要靠本地消息表或 Outbox；这正是 §4.2 重试策略必须区分「可重试/不可重试」的原因 |
+| 3 | [redis/redis](https://github.com/redis/redis) | 77,127 | §1.2 存储端：副本、ISR 与「少数派当选」 | 对照 `src/rdb.c` 与 `src/aof.c` 的落盘时机：Redis 的 `appendfsync everysec` 最多丢 1 秒，Kafka 的 `acks=all` 不丢已确认消息——「不丢」的强度取决于「什么时候算成功」；两者都把答案写在配置里而不是实现里 |
+| 4 | [apache/kafka](https://github.com/apache/kafka) | 34,105 | §2.1 重复从哪里来：四个不变的来源 | 读 `internals/Sender.java` 的重试分支：网络超时后重发、但 broker 其实已写入，这是「生产者侧重复」的典型来源；`enable.idempotence=true` 用序列号把这类重复挡在 broker 侧，而 §2.2 的幂等三件套负责挡住剩下的三种 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 
