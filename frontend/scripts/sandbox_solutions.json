@@ -1,0 +1,257 @@
+{
+ "ml/ml-ch03": {
+  "ok": true,
+  "params": [
+   {
+    "key": "B",
+    "type": "range",
+    "value": 32.0
+   },
+   {
+    "key": "N",
+    "type": "range",
+    "value": 2000.0
+   }
+  ]
+ },
+ "ml/ml-ch08": {
+  "ok": true,
+  "params": [
+   {
+    "key": "gamma",
+    "type": "range",
+    "value": 0.87
+   },
+   {
+    "key": "H",
+    "type": "range",
+    "value": 10.0
+   }
+  ]
+ },
+ "ml/ml-ch09": {
+  "ok": true,
+  "params": [
+   {
+    "key": "C",
+    "type": "range",
+    "value": 0.1
+   },
+   {
+    "key": "separable",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "ai/ai-ch01": {
+  "ok": true,
+  "params": [
+   {
+    "key": "M",
+    "type": "range",
+    "value": 576.0
+   },
+   {
+    "key": "N",
+    "type": "range",
+    "value": 576.0
+   },
+   {
+    "key": "K",
+    "type": "range",
+    "value": 576.0
+   },
+   {
+    "key": "tflops",
+    "type": "range",
+    "value": 10.0
+   }
+  ]
+ },
+ "ai/ai-ch02": {
+  "ok": true,
+  "params": [
+   {
+    "key": "arch",
+    "type": "opt",
+    "value": 1
+   },
+   {
+    "key": "H",
+    "type": "range",
+    "value": 32.0
+   },
+   {
+    "key": "W",
+    "type": "range",
+    "value": 32.0
+   },
+   {
+    "key": "Cin",
+    "type": "range",
+    "value": 3.0
+   },
+   {
+    "key": "Cout",
+    "type": "range",
+    "value": 8.0
+   }
+  ]
+ },
+ "ai/ai-ch08": {
+  "ok": true,
+  "params": [
+   {
+    "key": "shared",
+    "type": "range",
+    "value": 100.0
+   },
+   {
+    "key": "unique",
+    "type": "range",
+    "value": 200.0
+   },
+   {
+    "key": "hitRate",
+    "type": "range",
+    "value": 80.0
+   }
+  ]
+ },
+ "ai/ai-ch10": {
+  "ok": true,
+  "params": [
+   {
+    "key": "P",
+    "type": "range",
+    "value": 1.0
+   },
+   {
+    "key": "G",
+    "type": "range",
+    "value": 4.0
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "ai/ai-ch12": {
+  "ok": true,
+  "params": [
+   {
+    "key": "po",
+    "type": "range",
+    "value": 0.9
+   },
+   {
+    "key": "pe",
+    "type": "range",
+    "value": 0.1
+   }
+  ]
+ },
+ "ai/ai-ch14": {
+  "ok": true,
+  "params": [
+   {
+    "key": "res",
+    "type": "range",
+    "value": 336.0
+   },
+   {
+    "key": "textTokens",
+    "type": "range",
+    "value": 50.0
+   },
+   {
+    "key": "price",
+    "type": "range",
+    "value": 0.001
+   }
+  ]
+ },
+ "database/db-ch01": {
+  "ok": true,
+  "params": [
+   {
+    "key": "nRows",
+    "type": "range",
+    "value": 50000.0
+   },
+   {
+    "key": "avgLen",
+    "type": "range",
+    "value": 10.0
+   },
+   {
+    "key": "declLen",
+    "type": "range",
+    "value": 20.0
+   },
+   {
+    "key": "useVarchar",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "database/db-ch05": {
+  "ok": true,
+  "params": [
+   {
+    "key": "n",
+    "type": "range",
+    "value": 50000.0
+   },
+   {
+    "key": "useCursor",
+    "type": "opt",
+    "value": 0
+   }
+  ]
+ },
+ "database/db-ch06": {
+  "ok": true,
+  "params": [
+   {
+    "key": "nonAtomic",
+    "type": "opt",
+    "value": 0
+   },
+   {
+    "key": "partialDep",
+    "type": "opt",
+    "value": 0
+   },
+   {
+    "key": "transitDep",
+    "type": "opt",
+    "value": 0
+   }
+  ]
+ },
+ "database/db-ch07": {
+  "ok": true,
+  "params": [
+   {
+    "key": "totalGB",
+    "type": "range",
+    "value": 100.0
+   },
+   {
+    "key": "hasIncr",
+    "type": "opt",
+    "value": 1
+   },
+   {
+    "key": "incrHours",
+    "type": "range",
+    "value": 1.0
+   }
+  ]
+ }
+}

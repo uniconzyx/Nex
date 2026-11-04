@@ -975,7 +975,15 @@ export const ParamSandbox: React.FC<SandboxProps> = ({ mod }) => {
   const { line, say } = useKaimao(mod.brief);
 
   const { metrics, checks, err } = useMemo(() => {
-    const env: Record<string, number> = { ...vals };
+    // 与旋钮展示用的 `vals[p.key] ?? p.value` 保持同一套缺省语义：
+    // 某个参数还没被拖动/点选过（不在 vals 里）时，按它的默认值参与指标与判据求值，
+    // 而不是让 evalExpr 因「未定义的量」抛错、整组指标变成「—」。
+    // 否则 data 异步到货后 vals 只在首次挂载时用空 params 初始化过一次，
+    // 用户不逐个点一遍旋钮就永远算不出指标。
+    const env: Record<string, number> = {
+      ...Object.fromEntries(mod.params.map((p) => [p.key, p.value])),
+      ...vals,
+    };
     const ms: { key: string; label: string; unit?: string; fmt?: string; v: number }[] = [];
     let e = '';
     for (const m of mod.metrics) {
