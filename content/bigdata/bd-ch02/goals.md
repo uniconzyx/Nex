@@ -18,10 +18,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [DataTalksClub/data-engineering-zoomcamp](https://github.com/DataTalksClub/data-engineering-zoomcamp) | 46,562 | §2.1 | 讲「Shuffle 的磁盘溢出」时看 `week5-batch/` 的作业调优笔记：「分区数设太大 → 大量小文件」「设太小 → 单分区 OOM」这两条经验在本章有对应的计算式 |
-| 2 | [apache/spark](https://github.com/apache/spark) | 44,379 | §3.1 | 讲「YARN 的资源模型」时读 `resource-managers/yarn/src/main/scala/org/apache/spark/deploy/yarn/`：`ApplicationMaster` 申请 Container、`ExecutorAllocationManager` 动态伸缩，都是「RM 管资源、AM 管作业」的落地 |
-| 3 | [heibaiying/BigData-Notes](https://github.com/heibaiying/BigData-Notes) | 16,993 | §2.2 | 讲「Combiner 的语义边界」时读 `MapReduce.md`：它用 WordCount 演示「加 Combiner 前后 shuffle 数据量差多少」，并强调「求平均必须传 (sum, count)」这条限制 |
-| 4 | [apache/hadoop](https://github.com/apache/hadoop) | 15,705 | §1.1 | 讲「MapReduce 三阶段」时读 `hadoop-mapreduce-project/hadoop-mapreduce-client/` 下的 `MapTask`/`ReduceTask`：`MapTask` 的 `runNewMapper` 里就是 map → partition → sort → spill 的实际顺序，与本章数据流图一一对应 |
+| 1 | [DataTalksClub/data-engineering-zoomcamp](https://github.com/DataTalksClub/data-engineering-zoomcamp) | 46,562 | §4.1 二、FIFO / Capacity / Fair 三种调度器 | 读 `week5-batch/` 的作业提交脚本：同一份 Spark 作业换不同队列提交，排队时间差别很大——这就是三种调度器的差别落到「实际墙钟时间」上的样子；本节讲的是队列怎么分资源，而作业日志里从 `submitted` 到 `accepted by scheduler` 之间的空窗，就是排队本身 |
+| 2 | [apache/spark](https://github.com/apache/spark) | 44,379 | §3.1 二、归并（merge）与 Reduce 端的 fetch | 读 `core/src/main/scala/org/apache/spark/shuffle/` 的 `sort` 与 `hash` 两套实现：Spark 要自己做 shuffle，是因为 MR 的 merge-fetch 模型对迭代式计算不友好；对照本章 §2.1「Partitioner：决定 Reduce 数与数据分布」，Spark 的 `HashPartitioner`/`RangePartitioner` 与 MR 的 Partitioner 是同一个契约——「同键必同分区」，差别只在 spill 与 merge 的策略 |
+| 3 | [heibaiying/BigData-Notes](https://github.com/heibaiying/BigData-Notes) | 16,993 | §1.2 二、WordCount 端到端走读 | 读 `MapReduce.md`：它用 WordCount 把 map → partition → sort → spill → merge → reduce 六个动作逐步展开，并演示「加 Combiner 前后 shuffle 数据量差多少」；本节要走通的就是这六步，而「求平均不能直接 Combiner、必须先传 (sum, count)」这条限制正是本章 §3.1 归并阶段最容易踩的坑 |
+| 4 | [apache/hadoop](https://github.com/apache/hadoop) | 15,705 | §2.1 二、Partitioner：决定 Reduce 数与数据分布 | 读 `hadoop-mapreduce-project/hadoop-mapreduce-client/` 下的 `MapTask`/`ReduceTask`：`MapTask.runNewMapper` 里就是 map → partition → sort → spill 的实际顺序，`partition` 那一步调用的正是 `Partitioner.getPartition`；所以「分区数设太大 → 大量小文件、太小 → 单分区 OOM」这两条经验，在源码里就是一行 `numReduceTasks` 的取值 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

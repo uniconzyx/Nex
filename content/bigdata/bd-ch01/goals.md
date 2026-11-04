@@ -18,10 +18,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [DataTalksClub/data-engineering-zoomcamp](https://github.com/DataTalksClub/data-engineering-zoomcamp) | 46,562 | §1.3 | 讲「从单机到分布式的动机」时看 `week5-batch/` 的批处理作业脚本：同一份数据在单机 pandas 与集群 Spark 上的耗时对比，是「容量与吞吐」这两个动机的实测证据 |
-| 2 | [apache/spark](https://github.com/apache/spark) | 44,379 | §3.1 | 讲「HDFS 与计算引擎的分层」时读 `core/src/main/scala/org/apache/spark/rdd/` 里对 `HadoopRDD` 的实现：Spark 把 HDFS 的 split 直接当分区，不搬数据只搬计算——这就是「计算向数据靠拢」 |
-| 3 | [heibaiying/BigData-Notes](https://github.com/heibaiying/BigData-Notes) | 16,993 | §2.1 | 讲「写入 pipeline」时读根目录的 `HDFS.md`：它用一张流程图画出「客户端 → DN1 → DN2 → DN3 → ack 回传」，配本章的 pipeline 章节对照看，能把「哪个环节挂掉会重试」串起来 |
-| 4 | [apache/hadoop](https://github.com/apache/hadoop) | 15,705 | §1.2 | 讲「NameNode 元数据常驻内存」时读 `hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/` 下的 `FSDirectory` 与 `INodeFile`：目录树与块列表就是这两个类，内存占用随「文件数」而非「数据量」增长——小文件问题的物理根源在这 |
+| 1 | [DataTalksClub/data-engineering-zoomcamp](https://github.com/DataTalksClub/data-engineering-zoomcamp) | 46,562 | §1.2 二、从单机到分布式的动机：容量、吞吐、容错 | 读 `week5-batch/` 的批处理作业：同一份数据在单机 pandas 与集群 Spark 上的耗时对比，就是「容量」与「吞吐」这两个动机的实测证据；而「容错」那一条要回到本章 §3.1「fsimage / edits 与 checkpoint」——单机只需担心文件损坏，集群必须假设节点随时会掉，这才逼出了 edits 日志 |
+| 2 | [apache/spark](https://github.com/apache/spark) | 44,379 | §2.1 二、DataNode 与块存储（真正搬砖的劳工） | 读 `core/src/main/scala/org/apache/spark/rdd/` 里对 `HadoopRDD` 的实现：Spark 把 HDFS 的 split 直接当分区，不搬数据只搬计算——这正是本节「DataNode 只负责按块存取、计算要挪过去」的结构性理由；读完再回看本章 §4.1「读取、短路读与小文件问题」，短路读绕开的正是这一层 RPC |
+| 3 | [heibaiying/BigData-Notes](https://github.com/heibaiying/BigData-Notes) | 16,993 | §3.1 二、fsimage / edits 与 checkpoint（安全模式） | 读根目录的 `HDFS.md`：它把 NameNode 的内存结构、edits 追加、SecondaryNameNode 做 checkpoint 的时序画成一条时间线，并点明「edits 太长 → 重启要回放很久」这个痛点；这正是本节要讲的「为什么要 checkpoint」——它不是备份，而是「把 edits 折叠回 fsimage」的压缩动作 |
+| 4 | [apache/hadoop](https://github.com/apache/hadoop) | 15,705 | §4.1 二、读取、短路读与小文件问题 | 读 `hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/` 下的 `FSDirectory` 与 `INodeFile`：目录树与块列表就是这两个类，内存占用随「文件数」而非「数据量」增长——这就是本节「小文件问题」的物理根源：一个 1KB 文件也要占一份 INode 加一条块列表 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

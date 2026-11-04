@@ -18,10 +18,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [DataTalksClub/data-engineering-zoomcamp](https://github.com/DataTalksClub/data-engineering-zoomcamp) | 46,562 | §2.3 | 讲「惰性求值」时看 `week5-batch/` 的 Spark 作业：`df.filter(...)` 之后不打 `show()`/`count()` 就什么都不执行，脚本里加不加 action 决定「有没有真的跑」 |
-| 2 | [apache/spark](https://github.com/apache/spark) | 44,379 | §1.1 | 讲「RDD 的五大特性」时读 `core/src/main/scala/org/apache/spark/rdd/RDD.scala`：`getPartitions`/`compute`/`getDependencies` 三个抽象方法就是「分区列表 + 计算函数 + 依赖」的代码化，其余两个是优化信息 |
-| 3 | [heibaiying/BigData-Notes](https://github.com/heibaiying/BigData-Notes) | 16,993 | §3.1 | 讲「宽窄依赖与 Stage」时读 `Spark.md`：它画了「窄依赖可流水线、宽依赖要 shuffle」的依赖图，并给出「Stage 数 = 宽依赖数 + 1」的算式 |
-| 4 | [apache/hadoop](https://github.com/apache/hadoop) | 15,705 | §4.2 | 讲「血缘容错 vs 副本容错」时对照 `hadoop-hdfs-project/` 的副本机制：HDFS 靠「多存几份」，Spark 靠「重算丢失分区」——前者贵在存储、后者贵在计算，这是两种容错哲学 |
+| 1 | [DataTalksClub/data-engineering-zoomcamp](https://github.com/DataTalksClub/data-engineering-zoomcamp) | 46,562 | §2.1 二、Transformation 与 Action 的判别 | 读 `week5-batch/` 的 Spark 作业：`df.filter(...)` 之后不打 `show()`/`count()` 就什么都不执行，脚本里加不加 action 直接决定「有没有真的跑」；本节要练的判别方法在源码里就是「是否返回 RDD/DataFrame」——返回新 RDD 的是 transformation，返回数/列表/None 的是 action |
+| 2 | [apache/spark](https://github.com/apache/spark) | 44,379 | §1.1 二、不可变性与血缘（lineage）容错 | 读 `core/src/main/scala/org/apache/spark/rdd/RDD.scala`：`getPartitions`/`compute`/`getDependencies` 三个抽象方法就是「分区列表 + 计算函数 + 依赖」的代码化，其余两个是优化信息；本节讲的 lineage 容错，本质就是「只要 `getDependencies` 还在，丢掉的 `compute` 就能重跑」 |
+| 3 | [heibaiying/BigData-Notes](https://github.com/heibaiying/BigData-Notes) | 16,993 | §3.1 二、Stage 划分与 Task 数量计算 | 读 `Spark.md`：它画出「窄依赖可流水线、宽依赖要 shuffle」的依赖图，并给出「Stage 数 = 宽依赖数 + 1」的算式；本章 §1.1 里的 `getDependencies` 是这个算式唯一的输入——所以「怎么少一个 Stage」等价于「怎么消掉一次宽依赖」 |
+| 4 | [apache/hadoop](https://github.com/apache/hadoop) | 15,705 | §4.1 二、算子选择与数据倾斜（工程调优三板斧） | 读 `hadoop-hdfs-project/` 的副本机制做对照：HDFS 用「多存几份」换容错，Spark 用「血缘重算」换容错，所以 Spark 不能随意 `checkpoint`——一旦截断血缘，重算就退化成重读；这正是本节「该不该 cache」的判据，也对应本章 §5.2「收尾：Spark 调优就是守住那三条前提」 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

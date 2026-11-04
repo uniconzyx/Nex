@@ -18,10 +18,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [DataTalksClub/data-engineering-zoomcamp](https://github.com/DataTalksClub/data-engineering-zoomcamp) | 46,562 | §3.2 | 讲「列式存储的收益」时看 `week4-analytics/` 的查询对比：同一份数据存 CSV 与 Parquet，扫描列数少时后者快一个数量级——谓词下推与列裁剪的实测 |
-| 2 | [apache/spark](https://github.com/apache/spark) | 44,379 | §4.1 | 讲「HQL 到物理计划的映射」时读 `sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/optimizer/`：`PushPredicateThroughJoin`、`ColumnPruning` 这些规则就是「谓词下推、列裁剪」在 Spark 侧的等价物 |
-| 3 | [heibaiying/BigData-Notes](https://github.com/heibaiying/BigData-Notes) | 16,993 | §2.1 | 讲「内部表 vs 外部表」时读 `Hive.md`：删内部表连数据一起删、删外部表只删元数据，这条差异在文档里配了 `LOCATION` 的对照实验，比背定义好记 |
-| 4 | [apache/hadoop](https://github.com/apache/hadoop) | 15,705 | §1.3 | 讲「Hive 与 Hadoop 的关系」时读 `hive/` 模块（在 `apache/hive` 而非 hadoop 仓库）的执行计划接口：Hive 只负责把 HQL 编译成 MR/Tez 作业，真正的执行仍由 Hadoop 完成 |
+| 1 | [DataTalksClub/data-engineering-zoomcamp](https://github.com/DataTalksClub/data-engineering-zoomcamp) | 46,562 | §4.1 二、ORC/Parquet 列式存储与谓词下推 | 读 `week4-analytics/` 的查询对比：同一份数据存 CSV 与 Parquet，扫描列数少时后者快一个数量级——这就是本节「列裁剪 + 谓词下推」两条收益的实测；再配合本章 §2.2 的 `EXPLAIN` 验证法，能把「快了十倍」拆成「少读了多少列、少扫了多少分区」两个可对数 |
+| 2 | [apache/spark](https://github.com/apache/spark) | 44,379 | §2.2 可运行代码：用 EXPLAIN 验证裁剪是否生效 | 读 `sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/optimizer/`：`PushPredicateThroughJoin`、`ColumnPruning` 这些规则就是「谓词下推、列裁剪」在 Spark 侧的实现，Hive 的 `EXPLAIN` 里对应的也是同一批优化；先认清规则名，`EXPLAIN` 输出里的 `PartitionFilters` 才读得懂 |
+| 3 | [heibaiying/BigData-Notes](https://github.com/heibaiying/BigData-Notes) | 16,993 | §1.2 二、表的生命周期与 LOCATION / EXTERNAL 工程约定 | 读 `Hive.md`：删内部表连数据一起删、删外部表只删元数据，文档里配了 `LOCATION` 的对照实验，比背定义好记；本章 §1.1「可运行代码」那一节可以直接跑一遍这个对照——工程上默认建外部表，正因为「元数据可重建、数据不可重建」 |
+| 4 | [apache/hadoop](https://github.com/apache/hadoop) | 15,705 | §3.1 二、执行引擎与 JOIN 策略选择（MapJoin vs CommonJoin） | 读 `hadoop-mapreduce-project/` 的作业提交入口：Hive 把 HQL 编译成 MR/Tez 作业后，最终仍由 Hadoop 执行——这就是本节「Hive 只是编译器，执行归 Hadoop」的分工；MapJoin 的本质是「小表塞进 DistributedCache、大表在 map 阶段直接本地补全」，所以它省掉的正是 MR 那一次 shuffle |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

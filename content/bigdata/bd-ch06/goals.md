@@ -28,10 +28,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [DataTalksClub/data-engineering-zoomcamp](https://github.com/DataTalksClub/data-engineering-zoomcamp) | 46,562 | §1.2 | 讲「ODS/DWD/DWS/ADS 四层」时看 `week4-analytics/` 的数仓作业：从原始 JSON 到宽表再聚合到指标表，每一层的输入输出都是独立的表，层与层的调用关系就是分层规范的落地 |
-| 2 | [apache/spark](https://github.com/apache/spark) | 44,379 | §4.3 | 讲「小文件合并」时读 `sql/core/src/main/scala/org/apache/spark/sql/execution/datasources/` 的写入路径：`repartition` 与 `coalesce` 在写出前决定文件数，分区数乘作业批次就是「每天新增多少小文件」 |
-| 3 | [heibaiying/BigData-Notes](https://github.com/heibaiying/BigData-Notes) | 16,993 | §2.2 | 讲「维度建模与粒度」时读 `BigData-Notes` 里的数仓篇：「先声明粒度再选维度」这条顺序错了，后面所有指标口径都会漂移——文档给了「订单事实表」的完整推演 |
-| 4 | [apache/hadoop](https://github.com/apache/hadoop) | 15,705 | §3.1 | 讲「调度与 SLA」时对照 `hadoop-yarn-project/` 的队列与容量调度：YARN 的 `CapacityScheduler` 决定「哪个队列先跑」，数仓的基线任务要放在高优先级队列，否则被离线任务挤掉 |
+| 1 | [DataTalksClub/data-engineering-zoomcamp](https://github.com/DataTalksClub/data-engineering-zoomcamp) | 46,562 | §1.1 二、分层落地规范：命名、调用约束与自动化体检 | 读 `week4-analytics/` 的数仓作业：从原始 JSON 到宽表再聚合到指标表，每一层的输入输出都是独立的表——「层与层的调用关系」就是本节规范的落地样本；规范里最容易破的两条是「下游不许跨层读 ODS」与「同层不许互相依赖」，一旦破了，血缘图就从树变成环 |
+| 2 | [apache/spark](https://github.com/apache/spark) | 44,379 | §4.1 二、数据倾斜调优、元数据与数据血缘 | 读 `sql/core/src/main/scala/org/apache/spark/sql/execution/datasources/` 的写入路径：`repartition` 与 `coalesce` 在写出前决定文件数，分区数乘作业批次就是「每天新增多少小文件」；血缘由这些写入路径的输入表反推出来，所以小文件治理与血缘治理在同一个位置动手 |
+| 3 | [heibaiying/BigData-Notes](https://github.com/heibaiying/BigData-Notes) | 16,993 | §2.1 二、星型模型 vs 雪花模型：JOIN 次数与存储的定量取舍 | 读 `BigData-Notes` 里的数仓篇：「先声明粒度再选维度」这条顺序反了，后面所有指标口径都会漂移，文档给了「订单事实表」的完整推演；本节讲的定量取舍就落在这个推演上：雪花省了重复存储，代价是每查一层多一次 JOIN——「星型优先」不是审美而是算术 |
+| 4 | [apache/hadoop](https://github.com/apache/hadoop) | 15,705 | §3.1 二、指标口径治理：原子指标 / 派生指标与口径一致性 | 读 `hadoop-yarn-project/` 的队列与容量调度：`CapacityScheduler` 决定「哪个队列先跑」，指标口径的「日/时切换」要靠定时任务按时产出，任务抢不到资源就会断档；所以本节把口径分「原子 + 派生」两层，同时也是为了让调度只需盯住原子层那张表 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

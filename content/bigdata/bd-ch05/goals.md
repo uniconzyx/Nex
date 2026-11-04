@@ -26,10 +26,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [DataTalksClub/data-engineering-zoomcamp](https://github.com/DataTalksClub/data-engineering-zoomcamp) | 46,562 | §3.1 | 讲「AQE 纠正误判」时看 `week5-batch/` 的 Spark SQL 作业日志：`spark.sql.adaptive.enabled=true` 后，`SortMergeJoin` 会被运行时统计改成 `BroadcastHashJoin`，日志里能看到 `Plan changed` |
-| 2 | [apache/spark](https://github.com/apache/spark) | 44,379 | §2.1 | 讲「Catalyst 四阶段」时读 `sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/`：`analyzer/`（解析）→ `optimizer/`（逻辑优化）→ `planner/`（物理计划）→ `codegen`（生成字节码），目录结构本身就是四阶段的证据 |
-| 3 | [heibaiying/BigData-Notes](https://github.com/heibaiying/BigData-Notes) | 16,993 | §1.3 | 讲「DataFrame 与 RDD 的差别」时读 `Spark.md` 的 Spark SQL 篇：DataFrame 携带 schema、能进优化器，RDD 是黑盒函数——「结构化信息就是优化空间」这句话的来源 |
-| 4 | [apache/hadoop](https://github.com/apache/hadoop) | 15,705 | §4.1 | 讲「Metastore 的作用」时对照 `hive/` 的元数据表设计：库/表/分区/列都存 MySQL，Spark SQL 通过 `HiveExternalCatalog` 读写同一份元数据——这就是「湖仓共用 Metastore」的由来 |
+| 1 | [DataTalksClub/data-engineering-zoomcamp](https://github.com/DataTalksClub/data-engineering-zoomcamp) | 46,562 | §4.1 二、宽依赖 / 窄依赖与 Shuffle 边界 | 读 `week5-batch/` 的 Spark SQL 作业日志：`spark.sql.adaptive.enabled=true` 后，`SortMergeJoin` 会在运行时统计出来后被改写成 `BroadcastHashJoin`，日志里能看到 `Plan changed`；所以「Shuffle 边界在哪」不只看语法，还要看这一层运行时改写——本节讲边界，AQE 讲的是边界可以在跑起来之后重新画 |
+| 2 | [apache/spark](https://github.com/apache/spark) | 44,379 | §2.1 二、谓词下推、列裁剪、常量折叠与 JOIN 重排 | 读 `sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/` 的目录结构：`analyzer/`（解析）→ `optimizer/`（逻辑优化）→ `planner/`（物理计划）→ `codegen`（生成字节码），目录本身就是四阶段的证据；本节列的四条规则全部住在 `optimizer/` 里，所以 `EXPLAIN` 里 `Analyzed` 之前不该出现下推、`Optimized` 之后必须出现 |
+| 3 | [heibaiying/BigData-Notes](https://github.com/heibaiying/BigData-Notes) | 16,993 | §1.1 二、Dataset 的类型安全与编码器（Encoder） | 读 `Spark.md` 的 Spark SQL 篇：DataFrame 携带 schema、能进优化器，RDD 是黑盒函数——「结构化信息就是优化空间」这句话的来源就在这里；本节 Encoder 是同一件事再往前一步：Dataset 多的是「编译期类型 + 二进制编码」，既保留类型检查、又不付对象序列化的代价 |
+| 4 | [apache/hadoop](https://github.com/apache/hadoop) | 15,705 | §4.2 三、执行计划读法与 Hive Metastore 集成 | 读 `hive/` 的元数据表设计：库/表/分区/列都存 MySQL，Spark SQL 通过 `HiveExternalCatalog` 读写同一份元数据——这就是「湖仓共用 Metastore」的由来；本节读计划时看到的 `Location`、`PartitionFilters` 都来自这张表，所以元数据一旦不同步，就会出现「表存在但扫 0 行」这类怪现象 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 
