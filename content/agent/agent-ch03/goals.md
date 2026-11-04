@@ -55,7 +55,7 @@
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
 | 1 | [deepseek-ai/DeepSeek-V3](https://github.com/deepseek-ai/DeepSeek-V3) | 104,539 | §2.前缀缓存（唯一条件是前缀逐字节稳定） | §3.按请求计费三档单价：`README.md` 的 API 参数表里 `cache_hit` / `cache_miss` 两个单价是分开列的，把命中率代进去算一遍，就明白本章「缓存命中省的是哪一笔」 |
-| 2 | [deepseek-ai/DeepSeek-R1](https://github.com/deepseek-ai/DeepSeek-R1) | 91,920 | §3.推理能力从哪来 | §5.单位成本的三个杠杆：`inference/` 目录下的推理代码与技术报告里的训练/推理成本拆分，是「MoE 为何能把成本压下来」的第一手依据，别只看二手解读 |
+| 2 | [deepseek-ai/DeepSeek-R1](https://github.com/deepseek-ai/DeepSeek-R1) | 91,920 | §2.5 5. 单位成本的三个杠杆 | §3.2 2. 成本对比：算「每百万 token 的边际成本」而不是「显卡多少钱」：`inference/` 目录下的推理代码与技术报告里的训练/推理成本拆分，是「MoE 为何能把成本压下来」的第一手依据，别只看二手解读；§2.5 讲的是同一笔钱怎么在输入/缓存/输出三处压，§3.2 讲的是自建时该怎么折算——两者口径必须一致（都算边际成本），否则「本地便宜」只是摊错了分母 |
 | 3 | [deepseek-ai/awesome-deepseek-integration](https://github.com/deepseek-ai/awesome-deepseek-integration) | 39,457 | §3.错误码分类（先决定能不能重试） | §6.兼容层形状兼容≠语义兼容：`README` 的「OpenAI 兼容」一节列了哪些字段对齐、哪些没对齐，这正好是本章「换一家 API 不是改个 base_url」的证据 |
 | 4 | [ollama/ollama](https://github.com/ollama/ollama) | 185,510 | §5.混合路由 | §5.降级链路（逐级退到可用）：`README` 的模型列表带参数量与量化格式，对照本章的「本地能替到哪一步」逐档验证：哪一档是 7B-Q4 跑得动的，哪一档必须上云 |
 

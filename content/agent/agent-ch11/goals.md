@@ -76,7 +76,7 @@
 | 3 | [crewAIInc/crewAI](https://github.com/crewAIInc/crewAI) | 59,947 | §03 共享黑板 | §03 多智能体的 handoff：`crew.py` 里 Task 的 `context` 参数就是「共享黑板」的落点，读它如何把上游产出注入下游，就懂本章「角色分工靠数据流而非提示词」 |
 | 4 | [openai/openai-agents-python](https://github.com/openai/openai-agents-python) | 30,195 | §01 工具 schema 与参数校验 | §01 幂等与副作用：`openai-agents/` 的 handoff / guardrail / tracing 三个钩子各管一件事，其中 guardrail 是本章「重试不能让副作用叠加」的兜底层 |
 | 5 | [modelcontextprotocol/python-sdk](https://github.com/modelcontextprotocol/python-sdk) | 24,629 | §01 权限最小化与沙箱 | §01 MCP 的工具发现：`src/mcp/server/` 里 `list_tools` 与 `call_tool` 是两个分离的 RPC，schema 校验发生在执行前——正是本章「把自由发挥拦在执行前」的协议证据 |
-| 6 | [FoundationAgents/MetaGPT](https://github.com/FoundationAgents/MetaGPT) | 71,000 | §03 多智能体：SOP 如何被编码进角色 | §03 终止条件：`metagpt/roles/` 每个角色类都带 `_observe` / `_think` / `_act` 三段，把本章「角色 = 职责 + 可用动作 + 终止条件」落成了类结构 |
+| 6 | [FoundationAgents/MetaGPT](https://github.com/FoundationAgents/MetaGPT) | 71,000 | §3.3 3. 多智能体：角色分工、handoff、共享黑板与成本爆炸 | §3.2 2. 终止条件与死循环防护：三个检测器的分工：`metagpt/roles/` 每个角色类都带 `_observe` / `_think` / `_act` 三段，把本章「角色 = 职责 + 可用动作 + 终止条件」落成了类结构；注意它同时给了「成本随角色数超线性增长」的反面——角色越多，黑板越大，handoff 越频繁，所以终止条件不是保险丝，而是成本控制的第一道开关 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

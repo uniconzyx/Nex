@@ -71,7 +71,7 @@
 | 1 | [langgenius/dify](https://github.com/langgenius/dify) | 160,127 | §01 三种计费模式 | §02 单次任务成本四元组与报价下限：`api/` 目录里 workflow 的节点即计费单元，把一次运行的节点数 × 单节点 token 算一遍，就是本章「报价下限」的算式 |
 | 2 | [n8n-io/n8n](https://github.com/n8n-io/n8n) | 208,204 | §03 POC→试点→推广三段式 | §03 竞品对比矩阵：`packages/` 里每家集成（模型/存储/工具）都是可替换的适配器，这正好支撑本章「交付时按客户预算换供应商而不改架构」 |
 | 3 | [Azure-Samples/azure-search-openai-demo](https://github.com/Azure-Samples/azure-search-openai-demo) | 7,798 | §02 固定成本与规模效应 | §02 超支归因：`app/backend/approaches/` 三种答案生成策略的成本差异很大，对照本章「同一功能选不同策略，毛利差一个量级」 |
-| 4 | [microsoft/AI-For-Beginners](https://github.com/microsoft/AI-For-Beginners) | 70,422 | §01 毛利率不是净利率 | §01 毛利诊断三个误判：`azd up` 脚本把 RAG 应用从数据到部署全链路串了一遍，跟着算一遍自己的账单，就会发现本章「按 token 计价的幻觉」 |
+| 4 | [microsoft/AI-For-Beginners](https://github.com/microsoft/AI-For-Beginners) | 70,422 | §1.2 2. 毛利结构诊断：亏损从哪里来、怎么修 | §1.3 3. 毛利诊断的三个常见误判：`azd up` 脚本把 RAG 应用从数据到部署全链路串了一遍，跟着算一遍自己的账单，就会发现本章「按 token 计价的幻觉」；第二节给出「毛利 = 收入 − 直接成本」的正确拆法，第三节列的三个误判里第一个就是「把毛利率当净利率」——前者只扣直接成本，后者还要扣人力与摊销 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

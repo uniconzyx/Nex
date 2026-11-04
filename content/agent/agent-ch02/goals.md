@@ -71,7 +71,7 @@
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
 | 1 | [dair-ai/Prompt-Engineering-Guide](https://github.com/dair-ai/Prompt-Engineering-Guide) | 79,402 | §1.四段式（角色/任务/约束/示例） | §3.少样本怎么选：`pages/techniques/` 每个技巧一页，页面底部都挂着原论文链接——「这个技巧凭什么有效」去论文里找，别只背模板名 |
-| 2 | [openai/openai-cookbook](https://github.com/openai/openai-cookbook) | 76,730 | §2.结构化输出的三种机制 | §2.输出契约怎么写才不容易坏：`examples/` 下 function calling / structured outputs 的 notebook 直接可跑，照它的 schema 写一遍，就看懂「JSON mode / 函数调用 / 严格 schema」三者的差别 |
+| 2 | [openai/openai-cookbook](https://github.com/openai/openai-cookbook) | 76,730 | §2.1 1. 三种机制：能力不同，别混着用 | §2.2 2. 输出契约：Schema 怎么写才不容易坏：`examples/` 下 function calling / structured outputs 的 notebook 直接可跑，照它的 schema 写一遍，就看懂「JSON mode / 函数调用 / 严格 schema」三者的差别——第一节讲能力边界，第二节讲为什么宽松 schema 一定会坏；两节合起来才是本章「把自然语言当接口」的完整答案 |
 | 3 | [anthropics/claude-cookbooks](https://github.com/anthropics/claude-cookbooks) | 53,639 | §2.流式输出不要等最后一个括号 | §1.上下文预算：`misc/` 里有 streaming 与 prompt caching 的 notebook，运行一遍能看清「流式解析为什么要在最后一个括号前就开始处理」 |
 | 4 | [microsoft/promptflow](https://github.com/microsoft/promptflow) | 11,253 | §1.四段式与指令优先级 | §1.Prompt 也是代码（版本/测试/回滚）：`promptflow/` 目录把 prompt 当节点做版本与批量评测，这正是本章「把 prompt 纳入 CI」那一条的工程实现 |
 
