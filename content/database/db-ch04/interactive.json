@@ -2,7 +2,7 @@
   "chapter": "db-ch04",
   "subject": "database",
   "title": "查询优化与执行计划（EXPLAIN）",
-  "fingerprint": "fa5caed0a1",
+  "fingerprint": "efd6b46733",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,77 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "全表扫描还是走索引",
+      "brief": "EXPLAIN 里一张大表，过滤条件命中多少行决定走不走索引。拖行数与选择率。",
+      "params": [
+        {
+          "key": "R",
+          "label": "表行数",
+          "min": 100000,
+          "max": 10000000,
+          "step": 100000,
+          "value": 1000000,
+          "unit": "行"
+        },
+        {
+          "key": "sel",
+          "label": "选择率",
+          "min": 0.1,
+          "max": 50,
+          "step": 0.1,
+          "value": 20,
+          "unit": "%"
+        },
+        {
+          "key": "clustered",
+          "label": "聚簇索引",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "堆表",
+            "聚簇"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "scanCost",
+          "label": "全表扫描代价",
+          "expr": "R",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "idxCost",
+          "label": "索引扫描代价",
+          "expr": "R * sel / 100 * if(clustered, 1, 2)",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "savedPct",
+          "label": "省下比例",
+          "expr": "(R - R * sel / 100 * if(clustered, 1, 2)) / R * 100",
+          "unit": "%",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "idxCost < scanCost",
+          "label": "索引扫描比全表扫描便宜"
+        },
+        {
+          "expr": "sel <= 5",
+          "label": "选择率不超过 5%（高选择性才值得建索引）"
+        }
+      ],
+      "insight": "索引的代价是「选出的行 × 回表次数」，所以只有高选择性（小结果集）才划算。选择率超 10% 时优化器往往回头走全表——这就是「建了索引却不走」最常见的原因。"
+    },
     {
       "kind": "match",
       "pairs": [

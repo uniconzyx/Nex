@@ -2,7 +2,7 @@
   "chapter": "ml-ch01",
   "subject": "ml",
   "title": "学习范式与数学基础：从「拟合」到「泛化」",
-  "fingerprint": "357b822109",
+  "fingerprint": "3813b6b187",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,65 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "学习率调多大才不炸",
+      "brief": "学习率太小收敛慢，太大在碗壁间震荡甚至发散。拖学习率与问题条件数，找那条既稳又快的线。",
+      "params": [
+        {
+          "key": "lr",
+          "label": "学习率",
+          "min": 0.01,
+          "max": 2,
+          "step": 0.01,
+          "value": 1.5
+        },
+        {
+          "key": "cond",
+          "label": "条件数 κ",
+          "min": 1,
+          "max": 100,
+          "step": 1,
+          "value": 20
+        }
+      ],
+      "metrics": [
+        {
+          "key": "steps",
+          "label": "收敛步数",
+          "expr": "ceil(cond / lr / 5)",
+          "unit": "步",
+          "fmt": "int"
+        },
+        {
+          "key": "diverged",
+          "label": "是否发散",
+          "expr": "if(lr > 2 / cond, 1, 0)",
+          "fmt": "int"
+        },
+        {
+          "key": "finalErr",
+          "label": "终误差",
+          "expr": "if(lr > 2 / cond, 999, 1 / (1 + lr * cond))",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "diverged == 0",
+          "label": "没有发散（学习率没越过稳定上界 2/κ）"
+        },
+        {
+          "expr": "steps <= 2000",
+          "label": "收敛步数压在 2000 步内"
+        },
+        {
+          "expr": "cond >= 5",
+          "label": "而且问题得是有点病态的（条件数 ≥ 5）"
+        }
+      ],
+      "insight": "最速下降的稳定上界是 lr ≤ 2/κ。条件数越大（等值线越扁），能用的学习率越小——病态问题要靠特征缩放把 κ 压下来。lr 太大发散，太小只是慢。"
+    },
     {
       "kind": "sequence",
       "heading": "1. 分解的完整推导（这一步必须会写）",

@@ -2,7 +2,7 @@
   "chapter": "ai-ch04",
   "subject": "ai",
   "title": "高效微调与对齐：LoRA、RLHF 与 DPO",
-  "fingerprint": "d5895e923d",
+  "fingerprint": "fa43c0383c",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,71 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "LoRA 秩 r 取多大才够",
+      "brief": "秩 r 太小学不动，太大又失去低秩假设、参数量回弹。拖 r 看可训练参数占比。",
+      "params": [
+        {
+          "key": "r",
+          "label": "秩 r",
+          "min": 1,
+          "max": 64,
+          "step": 1,
+          "value": 1
+        },
+        {
+          "key": "d",
+          "label": "隐藏维度",
+          "min": 256,
+          "max": 4096,
+          "step": 256,
+          "value": 2048
+        },
+        {
+          "key": "layers",
+          "label": "LoRA 层数",
+          "min": 1,
+          "max": 32,
+          "step": 1,
+          "value": 16
+        }
+      ],
+      "metrics": [
+        {
+          "key": "loraParams",
+          "label": "LoRA 参数",
+          "expr": "2 * r * d * layers",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "fullParams",
+          "label": "全量参数",
+          "expr": "d * d * layers",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "trainablePct",
+          "label": "可训练占比",
+          "expr": "loraParams / (fullParams + loraParams) * 100",
+          "unit": "%",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "trainablePct <= 5",
+          "label": "可训练参数压在 5% 以内（低秩假设成立）"
+        },
+        {
+          "expr": "loraParams >= 1000000",
+          "label": "但也不能太小（r=1 基本学不动）"
+        }
+      ],
+      "insight": "LoRA 把权重更新约束成低秩矩阵 BA，可训练参数只有 2·r·d·L，是全量的百分之一。r 太小欠拟合，r 太大既失去低秩意义又把参数量拖回全量级——典型 r 取 8/16/32。"
+    },
     {
       "kind": "match",
       "pairs": [

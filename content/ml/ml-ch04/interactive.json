@@ -2,7 +2,7 @@
   "chapter": "ml-ch04",
   "subject": "ml",
   "title": "应用机器学习：评估、偏差方差与误差分析",
-  "fingerprint": "3038fa4b35",
+  "fingerprint": "c91c1724af",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,64 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "模型复杂度卡在哪最稳",
+      "brief": "太简单欠拟合（高偏差），太复杂过拟合（高方差）。拖复杂度与样本量，找总误差最低的那一档。",
+      "params": [
+        {
+          "key": "c",
+          "label": "模型复杂度",
+          "min": 1,
+          "max": 10,
+          "step": 1,
+          "value": 10
+        },
+        {
+          "key": "n",
+          "label": "样本量",
+          "min": 100,
+          "max": 100000,
+          "step": 100,
+          "value": 1000
+        }
+      ],
+      "metrics": [
+        {
+          "key": "bias",
+          "label": "偏差",
+          "expr": "20 / c",
+          "fmt": "fix2"
+        },
+        {
+          "key": "variance",
+          "label": "方差",
+          "expr": "c * 5000 / n",
+          "fmt": "fix2"
+        },
+        {
+          "key": "totalErr",
+          "label": "总误差",
+          "expr": "bias * bias / 10 + variance",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "totalErr <= 15",
+          "label": "总误差压在 15 以内（偏差方差取得平衡）"
+        },
+        {
+          "expr": "c <= 6",
+          "label": "复杂度不能顶满（太复杂方差爆炸）"
+        },
+        {
+          "expr": "c >= 3",
+          "label": "复杂度也不能太低（否则高偏差欠拟合）"
+        }
+      ],
+      "insight": "总误差 = 偏差² + 方差。复杂度低偏差主导，高方差随样本量反比暴涨。最佳在两者交叉处，且样本越多越能容忍高复杂度——更多数据 > 更花哨的模型。"
+    },
     {
       "kind": "match",
       "pairs": [

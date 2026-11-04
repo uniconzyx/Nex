@@ -2,6 +2,212 @@
  "_comment": "sandbox / debug 手工精修模块。由 scripts/_author_labs.py 生成，gen_interactive.py 并入各章 interactive.json。改内容请改作者源。",
  "version": 1,
  "chapters": {
+  "ai/ai-ch03": [
+   {
+    "kind": "sandbox",
+    "title": "注意力为什么吃显存",
+    "brief": "自注意力的显存与序列长度平方成正比。拖序列长度、头数与隐藏维度，看 KV 占用什么时候爆。",
+    "params": [
+     {
+      "key": "seq",
+      "label": "序列长度",
+      "min": 128,
+      "max": 8192,
+      "step": 128,
+      "value": 8192
+     },
+     {
+      "key": "heads",
+      "label": "注意力头数",
+      "min": 1,
+      "max": 32,
+      "step": 1,
+      "value": 8
+     },
+     {
+      "key": "dim",
+      "label": "隐藏维度",
+      "min": 64,
+      "max": 1024,
+      "step": 64,
+      "value": 512
+     }
+    ],
+    "metrics": [
+     {
+      "key": "attnMem",
+      "label": "注意力矩阵",
+      "expr": "seq * seq * heads * 2 / 1048576",
+      "unit": "MB",
+      "fmt": "int"
+     },
+     {
+      "key": "kvMem",
+      "label": "KV Cache",
+      "expr": "2 * seq * dim * 2 / 1048576",
+      "unit": "MB",
+      "fmt": "int"
+     },
+     {
+      "key": "totalMB",
+      "label": "合计显存",
+      "expr": "seq * seq * heads * 2 / 1048576 + 2 * seq * dim * 2 / 1048576",
+      "unit": "MB",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "attnMem <= 2048",
+      "label": "单卡 4GB 显存里注意力矩阵别超过 2GB"
+     },
+     {
+      "expr": "seq <= 4096",
+      "label": "序列长度别硬顶到 8192（长序列要用稀疏/分块注意力）"
+     }
+    ],
+    "insight": "自注意力是 O(n²) 显存：序列翻倍，注意力矩阵变四倍。所以长文本要分段/稀疏注意力，推理侧要 KV Cache 分页（PagedAttention）——都在绕开这个平方项。"
+   }
+  ],
+  "ai/ai-ch04": [
+   {
+    "kind": "sandbox",
+    "title": "LoRA 秩 r 取多大才够",
+    "brief": "秩 r 太小学不动，太大又失去低秩假设、参数量回弹。拖 r 看可训练参数占比。",
+    "params": [
+     {
+      "key": "r",
+      "label": "秩 r",
+      "min": 1,
+      "max": 64,
+      "step": 1,
+      "value": 1
+     },
+     {
+      "key": "d",
+      "label": "隐藏维度",
+      "min": 256,
+      "max": 4096,
+      "step": 256,
+      "value": 2048
+     },
+     {
+      "key": "layers",
+      "label": "LoRA 层数",
+      "min": 1,
+      "max": 32,
+      "step": 1,
+      "value": 16
+     }
+    ],
+    "metrics": [
+     {
+      "key": "loraParams",
+      "label": "LoRA 参数",
+      "expr": "2 * r * d * layers",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "fullParams",
+      "label": "全量参数",
+      "expr": "d * d * layers",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "trainablePct",
+      "label": "可训练占比",
+      "expr": "loraParams / (fullParams + loraParams) * 100",
+      "unit": "%",
+      "fmt": "fix2"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "trainablePct <= 5",
+      "label": "可训练参数压在 5% 以内（低秩假设成立）"
+     },
+     {
+      "expr": "loraParams >= 1000000",
+      "label": "但也不能太小（r=1 基本学不动）"
+     }
+    ],
+    "insight": "LoRA 把权重更新约束成低秩矩阵 BA，可训练参数只有 2·r·d·L，是全量的百分之一。r 太小欠拟合，r 太大既失去低秩意义又把参数量拖回全量级——典型 r 取 8/16/32。"
+   }
+  ],
+  "ai/ai-ch13": [
+   {
+    "kind": "sandbox",
+    "title": "量化到几位才划算",
+    "brief": "FP16/INT8/INT4 每降一档显存减半、速度变快，但精度会掉。拖位宽与校准开关看显存与精度损失。",
+    "params": [
+     {
+      "key": "bits",
+      "label": "权重位宽",
+      "min": 4,
+      "max": 16,
+      "step": 4,
+      "value": 4
+     },
+     {
+      "key": "paramsB",
+      "label": "参数量",
+      "min": 1,
+      "max": 70,
+      "step": 1,
+      "value": 7,
+      "unit": "B"
+     },
+     {
+      "key": "calib",
+      "label": "是否校准",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 0,
+      "labels": [
+       "不校准",
+       "校准后"
+      ]
+     }
+    ],
+    "metrics": [
+     {
+      "key": "memGB",
+      "label": "显存占用",
+      "expr": "paramsB * bits / 8",
+      "unit": "GB",
+      "fmt": "fix2"
+     },
+     {
+      "key": "speedup",
+      "label": "相对 FP16",
+      "expr": "16 / bits",
+      "unit": "倍",
+      "fmt": "fix2"
+     },
+     {
+      "key": "accDrop",
+      "label": "精度损失",
+      "expr": "if(calib, 1, 3) * (16 - bits) * 0.25",
+      "unit": "pt",
+      "fmt": "fix2"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "memGB <= 8",
+      "label": "单张消费级显卡（8GB）能装下"
+     },
+     {
+      "expr": "accDrop <= 3",
+      "label": "精度损失不超过 3 个百分点（可用范围）"
+     }
+    ],
+    "insight": "每降一档位宽，显存与带宽需求减半、吞吐近似翻倍；代价是量化误差。INT8 配校准通常只掉 1~2 个点，INT4 不校准能掉近 10 个点。先校准再量化、敏感层保留高精度是部署标配。"
+   }
+  ],
   "cpp/cpp-ch01": [
    {
     "kind": "sandbox",
@@ -1061,6 +1267,264 @@
      }
     ],
     "insight": "池子至少 ≥ 峰值并发，否则请求在池外排队；但也别开太大：利用率长期低于 60% 说明瓶颈在别处（常见是慢 SQL），加连接只会把数据库压垮。"
+   }
+  ],
+  "database/db-ch02": [
+   {
+    "kind": "sandbox",
+    "title": "两表 JOIN 该用哪种算法",
+    "brief": "小表驱动大表，嵌套循环是 R×S；哈希连接只扫一遍两表。拖行数与内表索引开关，看哪种更划算。",
+    "params": [
+     {
+      "key": "R",
+      "label": "外表行数",
+      "min": 1000,
+      "max": 1000000,
+      "step": 1000,
+      "value": 100000,
+      "unit": "行"
+     },
+     {
+      "key": "S",
+      "label": "内表行数",
+      "min": 1000,
+      "max": 1000000,
+      "step": 1000,
+      "value": 100000,
+      "unit": "行"
+     },
+     {
+      "key": "idx",
+      "label": "内表索引",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 0,
+      "labels": [
+       "无索引",
+       "有索引"
+      ]
+     }
+    ],
+    "metrics": [
+     {
+      "key": "nlCost",
+      "label": "嵌套循环代价",
+      "expr": "R * if(idx, log2(S), S)",
+      "unit": "次",
+      "fmt": "int"
+     },
+     {
+      "key": "hashCost",
+      "label": "哈希连接代价",
+      "expr": "R + S",
+      "unit": "次",
+      "fmt": "int"
+     },
+     {
+      "key": "speedup",
+      "label": "哈希/嵌套",
+      "expr": "R * if(idx, log2(S), S) / (R + S)",
+      "unit": "倍",
+      "fmt": "fix2"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "nlCost <= 100000000",
+      "label": "嵌套循环代价压在 1 亿次比较以内（大表不能裸跑）"
+     },
+     {
+      "expr": "hashCost <= 2000000",
+      "label": "哈希连接代价压在 200 万以内"
+     }
+    ],
+    "insight": "嵌套循环是 R×S，大表一上来就是十亿级比较；内表建索引降到 R·logS，哈希连接更是只扫一遍两表（R+S）。「小表驱动大表 + 建索引」不是玄学，是代价公式里那两个因子。"
+   }
+  ],
+  "database/db-ch03": [
+   {
+    "kind": "sandbox",
+    "title": "B+ 树要几层才够",
+    "brief": "一亿条记录，每页能放几百个指针。拖记录数与扇出，看树高会不会撑爆层数。",
+    "params": [
+     {
+      "key": "N",
+      "label": "记录数",
+      "min": 100000,
+      "max": 100000000,
+      "step": 100000,
+      "value": 1000000,
+      "unit": "条"
+     },
+     {
+      "key": "fan",
+      "label": "节点扇出",
+      "min": 10,
+      "max": 1000,
+      "step": 10,
+      "value": 200
+     }
+    ],
+    "metrics": [
+     {
+      "key": "height",
+      "label": "树高",
+      "expr": "ceil(log(N) / log(fan))",
+      "unit": "层",
+      "fmt": "int"
+     },
+     {
+      "key": "leaves",
+      "label": "叶子节点",
+      "expr": "ceil(N / fan)",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "io",
+      "label": "每次查询随机 IO",
+      "expr": "ceil(log(N) / log(fan))",
+      "unit": "次",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "height <= 4",
+      "label": "树高不超过 4 层（3 次磁盘 IO 内拿到数据）"
+     },
+     {
+      "expr": "N >= 10000000",
+      "label": "而且得是千万级以上的大表"
+     }
+    ],
+    "insight": "B+ 树把「记录数 N」换成「以扇出为底的对数」，千万级数据也只要 3~4 层。扇出每翻一倍，树高就降一层——所以页要塞满指针，别让它稀疏。"
+   }
+  ],
+  "database/db-ch04": [
+   {
+    "kind": "sandbox",
+    "title": "全表扫描还是走索引",
+    "brief": "EXPLAIN 里一张大表，过滤条件命中多少行决定走不走索引。拖行数与选择率。",
+    "params": [
+     {
+      "key": "R",
+      "label": "表行数",
+      "min": 100000,
+      "max": 10000000,
+      "step": 100000,
+      "value": 1000000,
+      "unit": "行"
+     },
+     {
+      "key": "sel",
+      "label": "选择率",
+      "min": 0.1,
+      "max": 50,
+      "step": 0.1,
+      "value": 20,
+      "unit": "%"
+     },
+     {
+      "key": "clustered",
+      "label": "聚簇索引",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 0,
+      "labels": [
+       "堆表",
+       "聚簇"
+      ]
+     }
+    ],
+    "metrics": [
+     {
+      "key": "scanCost",
+      "label": "全表扫描代价",
+      "expr": "R",
+      "unit": "次",
+      "fmt": "int"
+     },
+     {
+      "key": "idxCost",
+      "label": "索引扫描代价",
+      "expr": "R * sel / 100 * if(clustered, 1, 2)",
+      "unit": "次",
+      "fmt": "int"
+     },
+     {
+      "key": "savedPct",
+      "label": "省下比例",
+      "expr": "(R - R * sel / 100 * if(clustered, 1, 2)) / R * 100",
+      "unit": "%",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "idxCost < scanCost",
+      "label": "索引扫描比全表扫描便宜"
+     },
+     {
+      "expr": "sel <= 5",
+      "label": "选择率不超过 5%（高选择性才值得建索引）"
+     }
+    ],
+    "insight": "索引的代价是「选出的行 × 回表次数」，所以只有高选择性（小结果集）才划算。选择率超 10% 时优化器往往回头走全表——这就是「建了索引却不走」最常见的原因。"
+   }
+  ],
+  "database/db-ch08": [
+   {
+    "kind": "sandbox",
+    "title": "分几片才不撑爆单库",
+    "brief": "单库建议不超过 500GB。拖总数据量与分片数，看单片是不是落进安全区。",
+    "params": [
+     {
+      "key": "totalGB",
+      "label": "总数据量",
+      "min": 100,
+      "max": 5000,
+      "step": 100,
+      "value": 3000,
+      "unit": "GB"
+     },
+     {
+      "key": "shards",
+      "label": "分片数",
+      "min": 2,
+      "max": 64,
+      "step": 2,
+      "value": 2
+     }
+    ],
+    "metrics": [
+     {
+      "key": "perShard",
+      "label": "单片大小",
+      "expr": "totalGB / shards",
+      "unit": "GB",
+      "fmt": "int"
+     },
+     {
+      "key": "ratio",
+      "label": "占安全线比",
+      "expr": "totalGB / shards / 500",
+      "fmt": "fix2"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "perShard <= 500",
+      "label": "单片不超过 500GB 安全线"
+     },
+     {
+      "expr": "shards >= 4",
+      "label": "至少分 4 片（单分片既是容量瓶颈也是热点）"
+     }
+    ],
+    "insight": "分片数 = 总数据量 / 单分片安全容量。单分片既是容量天花板也是写入热点，通常按「2 的整数幂、每节点 1~2 片」来定。分太少撑不住，分太多元数据与跨片事务反而拖垮。"
    }
   ],
   "fundamentals/fund-ch01": [
@@ -2578,6 +3042,317 @@
      }
     ],
     "insight": "停等的利用率 = T/(T+RTT)：帧越小、RTT 越大越惨。把窗口开到 RTT/T 帧就能跑满 —— 这就是 GBN / 选择重传存在的理由，也是卫星链路不能用停等的原因。"
+   }
+  ],
+  "ml/ml-ch01": [
+   {
+    "kind": "sandbox",
+    "title": "学习率调多大才不炸",
+    "brief": "学习率太小收敛慢，太大在碗壁间震荡甚至发散。拖学习率与问题条件数，找那条既稳又快的线。",
+    "params": [
+     {
+      "key": "lr",
+      "label": "学习率",
+      "min": 0.01,
+      "max": 2,
+      "step": 0.01,
+      "value": 1.5
+     },
+     {
+      "key": "cond",
+      "label": "条件数 κ",
+      "min": 1,
+      "max": 100,
+      "step": 1,
+      "value": 20
+     }
+    ],
+    "metrics": [
+     {
+      "key": "steps",
+      "label": "收敛步数",
+      "expr": "ceil(cond / lr / 5)",
+      "unit": "步",
+      "fmt": "int"
+     },
+     {
+      "key": "diverged",
+      "label": "是否发散",
+      "expr": "if(lr > 2 / cond, 1, 0)",
+      "fmt": "int"
+     },
+     {
+      "key": "finalErr",
+      "label": "终误差",
+      "expr": "if(lr > 2 / cond, 999, 1 / (1 + lr * cond))",
+      "fmt": "fix2"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "diverged == 0",
+      "label": "没有发散（学习率没越过稳定上界 2/κ）"
+     },
+     {
+      "expr": "steps <= 2000",
+      "label": "收敛步数压在 2000 步内"
+     },
+     {
+      "expr": "cond >= 5",
+      "label": "而且问题得是有点病态的（条件数 ≥ 5）"
+     }
+    ],
+    "insight": "最速下降的稳定上界是 lr ≤ 2/κ。条件数越大（等值线越扁），能用的学习率越小——病态问题要靠特征缩放把 κ 压下来。lr 太大发散，太小只是慢。"
+   }
+  ],
+  "ml/ml-ch02": [
+   {
+    "kind": "sandbox",
+    "title": "正则化强度该取多大",
+    "brief": "λ=0 过拟合（训练好测试差），λ 太大又欠拟合。拖 λ 与样本噪声，看测试误差的 U 形最低点。",
+    "params": [
+     {
+      "key": "lam",
+      "label": "正则 λ",
+      "min": 0,
+      "max": 10,
+      "step": 0.5,
+      "value": 0
+     },
+     {
+      "key": "noise",
+      "label": "标签噪声",
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "value": 2
+     },
+     {
+      "key": "n",
+      "label": "样本量",
+      "min": 50,
+      "max": 5000,
+      "step": 50,
+      "value": 500
+     }
+    ],
+    "metrics": [
+     {
+      "key": "trainErr",
+      "label": "训练误差",
+      "expr": "1 + lam * 0.1",
+      "fmt": "fix2"
+     },
+     {
+      "key": "testErr",
+      "label": "测试误差",
+      "expr": "1 + lam * 0.1 + noise * noise * 0.3 + (lam - 2) * (lam - 2) * 0.15",
+      "fmt": "fix2"
+     },
+     {
+      "key": "gap",
+      "label": "泛化差距",
+      "expr": "noise * noise * 0.3 + (lam - 2) * (lam - 2) * 0.15",
+      "fmt": "fix2"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "testErr <= 3",
+      "label": "测试误差控制住（没过拟合也没欠拟合）"
+     },
+     {
+      "expr": "lam > 0",
+      "label": "λ 不能为 0（完全不正则就是过拟合）"
+     },
+     {
+      "expr": "lam <= 5",
+      "label": "λ 也不能太大（否则欠拟合，测试误差又升回去）"
+     }
+    ],
+    "insight": "测试误差随 λ 呈 U 形：λ=0 时把训练集噪声也背下来；λ 太大把真信号压平。甜点在中间，所以用验证集挑 λ，不是训练集。"
+   }
+  ],
+  "ml/ml-ch04": [
+   {
+    "kind": "sandbox",
+    "title": "模型复杂度卡在哪最稳",
+    "brief": "太简单欠拟合（高偏差），太复杂过拟合（高方差）。拖复杂度与样本量，找总误差最低的那一档。",
+    "params": [
+     {
+      "key": "c",
+      "label": "模型复杂度",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "value": 10
+     },
+     {
+      "key": "n",
+      "label": "样本量",
+      "min": 100,
+      "max": 100000,
+      "step": 100,
+      "value": 1000
+     }
+    ],
+    "metrics": [
+     {
+      "key": "bias",
+      "label": "偏差",
+      "expr": "20 / c",
+      "fmt": "fix2"
+     },
+     {
+      "key": "variance",
+      "label": "方差",
+      "expr": "c * 5000 / n",
+      "fmt": "fix2"
+     },
+     {
+      "key": "totalErr",
+      "label": "总误差",
+      "expr": "bias * bias / 10 + variance",
+      "fmt": "fix2"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "totalErr <= 15",
+      "label": "总误差压在 15 以内（偏差方差取得平衡）"
+     },
+     {
+      "expr": "c <= 6",
+      "label": "复杂度不能顶满（太复杂方差爆炸）"
+     },
+     {
+      "expr": "c >= 3",
+      "label": "复杂度也不能太低（否则高偏差欠拟合）"
+     }
+    ],
+    "insight": "总误差 = 偏差² + 方差。复杂度低偏差主导，高方差随样本量反比暴涨。最佳在两者交叉处，且样本越多越能容忍高复杂度——更多数据 > 更花哨的模型。"
+   }
+  ],
+  "ml/ml-ch05": [
+   {
+    "kind": "sandbox",
+    "title": "决策树砍多深才不记答案",
+    "brief": "深度越大训练集越准，但也把噪声背下来了。拖深度与样本量，看测试精度什么时候开始掉。",
+    "params": [
+     {
+      "key": "d",
+      "label": "最大深度",
+      "min": 1,
+      "max": 15,
+      "step": 1,
+      "value": 15
+     },
+     {
+      "key": "n",
+      "label": "样本量",
+      "min": 200,
+      "max": 20000,
+      "step": 200,
+      "value": 2000
+     }
+    ],
+    "metrics": [
+     {
+      "key": "trainAcc",
+      "label": "训练精度",
+      "expr": "clamp(50 + d * 5, 0, 100)",
+      "unit": "%",
+      "fmt": "int"
+     },
+     {
+      "key": "overfit",
+      "label": "过拟合惩罚",
+      "expr": "max(0, d - 6) * (2000 / n) * 6",
+      "unit": "%",
+      "fmt": "fix2"
+     },
+     {
+      "key": "testAcc",
+      "label": "测试精度",
+      "expr": "clamp(trainAcc - overfit, 0, 100)",
+      "unit": "%",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "testAcc >= 80",
+      "label": "测试精度保住 80% 以上"
+     },
+     {
+      "expr": "d <= 8",
+      "label": "深度不能无脑拉满（超过 8 就开始背噪声）"
+     }
+    ],
+    "insight": "训练精度随深度单调涨，测试精度在 6~8 之后掉头——多出来的层只是把训练集噪声背下来。max_depth 截断本质是卡在偏差方差交叉点之前。"
+   }
+  ],
+  "ml/ml-ch06": [
+   {
+    "kind": "sandbox",
+    "title": "k 选多少簇才不欠不溢",
+    "brief": "k 太小合并了本不同的簇，太大又把一团拆碎。拖 k 与真实簇数，看簇内平方和什么时候稳下来。",
+    "params": [
+     {
+      "key": "k",
+      "label": "设定簇数",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "value": 10
+     },
+     {
+      "key": "g",
+      "label": "真实簇数",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "value": 4
+     },
+     {
+      "key": "n",
+      "label": "样本量",
+      "min": 500,
+      "max": 20000,
+      "step": 500,
+      "value": 5000
+     }
+    ],
+    "metrics": [
+     {
+      "key": "inertia",
+      "label": "簇内平方和",
+      "expr": "5000 * g / k + if(k > g, (k - g) * 200, 0)",
+      "fmt": "int"
+     },
+     {
+      "key": "perCluster",
+      "label": "平均簇样本",
+      "expr": "n / k",
+      "unit": "个",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "k <= g",
+      "label": "不过度拆（k 不超过真实簇数）"
+     },
+     {
+      "expr": "k >= g - 1",
+      "label": "也不少并（k 不低于真实簇数 − 1）"
+     },
+     {
+      "expr": "inertia <= 6000",
+      "label": "簇内平方和在合理范围"
+     }
+    ],
+    "insight": "肘部法则看 inertia 随 k 的下降拐点：k 小于真实簇数时每合并一个簇 inertia 暴涨，等于之后下降变缓。k 比真实簇数多只会徒增碎片。"
    }
   ]
  }

@@ -2,7 +2,7 @@
   "chapter": "db-ch02",
   "subject": "database",
   "title": "表连接与子查询：JOIN、子查询、集合操作",
-  "fingerprint": "b60887e44f",
+  "fingerprint": "596fad2642",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,77 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "两表 JOIN 该用哪种算法",
+      "brief": "小表驱动大表，嵌套循环是 R×S；哈希连接只扫一遍两表。拖行数与内表索引开关，看哪种更划算。",
+      "params": [
+        {
+          "key": "R",
+          "label": "外表行数",
+          "min": 1000,
+          "max": 1000000,
+          "step": 1000,
+          "value": 100000,
+          "unit": "行"
+        },
+        {
+          "key": "S",
+          "label": "内表行数",
+          "min": 1000,
+          "max": 1000000,
+          "step": 1000,
+          "value": 100000,
+          "unit": "行"
+        },
+        {
+          "key": "idx",
+          "label": "内表索引",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "无索引",
+            "有索引"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "nlCost",
+          "label": "嵌套循环代价",
+          "expr": "R * if(idx, log2(S), S)",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "hashCost",
+          "label": "哈希连接代价",
+          "expr": "R + S",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "speedup",
+          "label": "哈希/嵌套",
+          "expr": "R * if(idx, log2(S), S) / (R + S)",
+          "unit": "倍",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "nlCost <= 100000000",
+          "label": "嵌套循环代价压在 1 亿次比较以内（大表不能裸跑）"
+        },
+        {
+          "expr": "hashCost <= 2000000",
+          "label": "哈希连接代价压在 200 万以内"
+        }
+      ],
+      "insight": "嵌套循环是 R×S，大表一上来就是十亿级比较；内表建索引降到 R·logS，哈希连接更是只扫一遍两表（R+S）。「小表驱动大表 + 建索引」不是玄学，是代价公式里那两个因子。"
+    },
     {
       "kind": "match",
       "pairs": [

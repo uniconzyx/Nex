@@ -2,7 +2,7 @@
   "chapter": "ai-ch03",
   "subject": "ai",
   "title": "Transformer 与大语言模型原理",
-  "fingerprint": "6cf0689a0d",
+  "fingerprint": "2e1bfe6bee",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,71 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "注意力为什么吃显存",
+      "brief": "自注意力的显存与序列长度平方成正比。拖序列长度、头数与隐藏维度，看 KV 占用什么时候爆。",
+      "params": [
+        {
+          "key": "seq",
+          "label": "序列长度",
+          "min": 128,
+          "max": 8192,
+          "step": 128,
+          "value": 8192
+        },
+        {
+          "key": "heads",
+          "label": "注意力头数",
+          "min": 1,
+          "max": 32,
+          "step": 1,
+          "value": 8
+        },
+        {
+          "key": "dim",
+          "label": "隐藏维度",
+          "min": 64,
+          "max": 1024,
+          "step": 64,
+          "value": 512
+        }
+      ],
+      "metrics": [
+        {
+          "key": "attnMem",
+          "label": "注意力矩阵",
+          "expr": "seq * seq * heads * 2 / 1048576",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "kvMem",
+          "label": "KV Cache",
+          "expr": "2 * seq * dim * 2 / 1048576",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "totalMB",
+          "label": "合计显存",
+          "expr": "seq * seq * heads * 2 / 1048576 + 2 * seq * dim * 2 / 1048576",
+          "unit": "MB",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "attnMem <= 2048",
+          "label": "单卡 4GB 显存里注意力矩阵别超过 2GB"
+        },
+        {
+          "expr": "seq <= 4096",
+          "label": "序列长度别硬顶到 8192（长序列要用稀疏/分块注意力）"
+        }
+      ],
+      "insight": "自注意力是 O(n²) 显存：序列翻倍，注意力矩阵变四倍。所以长文本要分段/稀疏注意力，推理侧要 KV Cache 分页（PagedAttention）——都在绕开这个平方项。"
+    },
     {
       "kind": "match",
       "pairs": [

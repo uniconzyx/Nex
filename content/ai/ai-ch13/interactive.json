@@ -2,7 +2,7 @@
   "chapter": "ai-ch13",
   "subject": "ai",
   "title": "推理引擎与量化部署：KV Cache 分页、continuous batching、GPTQ/AWQ/GGUF",
-  "fingerprint": "fd8c6960a1",
+  "fingerprint": "34e8cd10ff",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,76 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "量化到几位才划算",
+      "brief": "FP16/INT8/INT4 每降一档显存减半、速度变快，但精度会掉。拖位宽与校准开关看显存与精度损失。",
+      "params": [
+        {
+          "key": "bits",
+          "label": "权重位宽",
+          "min": 4,
+          "max": 16,
+          "step": 4,
+          "value": 4
+        },
+        {
+          "key": "paramsB",
+          "label": "参数量",
+          "min": 1,
+          "max": 70,
+          "step": 1,
+          "value": 7,
+          "unit": "B"
+        },
+        {
+          "key": "calib",
+          "label": "是否校准",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "不校准",
+            "校准后"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "memGB",
+          "label": "显存占用",
+          "expr": "paramsB * bits / 8",
+          "unit": "GB",
+          "fmt": "fix2"
+        },
+        {
+          "key": "speedup",
+          "label": "相对 FP16",
+          "expr": "16 / bits",
+          "unit": "倍",
+          "fmt": "fix2"
+        },
+        {
+          "key": "accDrop",
+          "label": "精度损失",
+          "expr": "if(calib, 1, 3) * (16 - bits) * 0.25",
+          "unit": "pt",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "memGB <= 8",
+          "label": "单张消费级显卡（8GB）能装下"
+        },
+        {
+          "expr": "accDrop <= 3",
+          "label": "精度损失不超过 3 个百分点（可用范围）"
+        }
+      ],
+      "insight": "每降一档位宽，显存与带宽需求减半、吞吐近似翻倍；代价是量化误差。INT8 配校准通常只掉 1~2 个点，INT4 不校准能掉近 10 个点。先校准再量化、敏感层保留高精度是部署标配。"
+    },
     {
       "kind": "match",
       "pairs": [

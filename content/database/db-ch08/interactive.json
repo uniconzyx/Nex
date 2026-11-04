@@ -2,7 +2,7 @@
   "chapter": "db-ch08",
   "subject": "database",
   "title": "高可用 / 主从复制 / 分库分表",
-  "fingerprint": "b2a06bc561",
+  "fingerprint": "191809f3b7",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,56 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "分几片才不撑爆单库",
+      "brief": "单库建议不超过 500GB。拖总数据量与分片数，看单片是不是落进安全区。",
+      "params": [
+        {
+          "key": "totalGB",
+          "label": "总数据量",
+          "min": 100,
+          "max": 5000,
+          "step": 100,
+          "value": 3000,
+          "unit": "GB"
+        },
+        {
+          "key": "shards",
+          "label": "分片数",
+          "min": 2,
+          "max": 64,
+          "step": 2,
+          "value": 2
+        }
+      ],
+      "metrics": [
+        {
+          "key": "perShard",
+          "label": "单片大小",
+          "expr": "totalGB / shards",
+          "unit": "GB",
+          "fmt": "int"
+        },
+        {
+          "key": "ratio",
+          "label": "占安全线比",
+          "expr": "totalGB / shards / 500",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "perShard <= 500",
+          "label": "单片不超过 500GB 安全线"
+        },
+        {
+          "expr": "shards >= 4",
+          "label": "至少分 4 片（单分片既是容量瓶颈也是热点）"
+        }
+      ],
+      "insight": "分片数 = 总数据量 / 单分片安全容量。单分片既是容量天花板也是写入热点，通常按「2 的整数幂、每节点 1~2 片」来定。分太少撑不住，分太多元数据与跨片事务反而拖垮。"
+    },
     {
       "kind": "match",
       "pairs": [

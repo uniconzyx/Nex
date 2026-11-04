@@ -2,7 +2,7 @@
   "chapter": "ml-ch05",
   "subject": "ml",
   "title": "决策树与集成学习：从信息增益到 XGBoost",
-  "fingerprint": "e94912588d",
+  "fingerprint": "a2e05f0d49",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,63 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "决策树砍多深才不记答案",
+      "brief": "深度越大训练集越准，但也把噪声背下来了。拖深度与样本量，看测试精度什么时候开始掉。",
+      "params": [
+        {
+          "key": "d",
+          "label": "最大深度",
+          "min": 1,
+          "max": 15,
+          "step": 1,
+          "value": 15
+        },
+        {
+          "key": "n",
+          "label": "样本量",
+          "min": 200,
+          "max": 20000,
+          "step": 200,
+          "value": 2000
+        }
+      ],
+      "metrics": [
+        {
+          "key": "trainAcc",
+          "label": "训练精度",
+          "expr": "clamp(50 + d * 5, 0, 100)",
+          "unit": "%",
+          "fmt": "int"
+        },
+        {
+          "key": "overfit",
+          "label": "过拟合惩罚",
+          "expr": "max(0, d - 6) * (2000 / n) * 6",
+          "unit": "%",
+          "fmt": "fix2"
+        },
+        {
+          "key": "testAcc",
+          "label": "测试精度",
+          "expr": "clamp(trainAcc - overfit, 0, 100)",
+          "unit": "%",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "testAcc >= 80",
+          "label": "测试精度保住 80% 以上"
+        },
+        {
+          "expr": "d <= 8",
+          "label": "深度不能无脑拉满（超过 8 就开始背噪声）"
+        }
+      ],
+      "insight": "训练精度随深度单调涨，测试精度在 6~8 之后掉头——多出来的层只是把训练集噪声背下来。max_depth 截断本质是卡在偏差方差交叉点之前。"
+    },
     {
       "kind": "match",
       "pairs": [

@@ -2,7 +2,7 @@
   "chapter": "db-ch03",
   "subject": "database",
   "title": "索引与事务：B+树索引、ACID、隔离级别",
-  "fingerprint": "1fdc506916",
+  "fingerprint": "54f22d289f",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,64 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "B+ 树要几层才够",
+      "brief": "一亿条记录，每页能放几百个指针。拖记录数与扇出，看树高会不会撑爆层数。",
+      "params": [
+        {
+          "key": "N",
+          "label": "记录数",
+          "min": 100000,
+          "max": 100000000,
+          "step": 100000,
+          "value": 1000000,
+          "unit": "条"
+        },
+        {
+          "key": "fan",
+          "label": "节点扇出",
+          "min": 10,
+          "max": 1000,
+          "step": 10,
+          "value": 200
+        }
+      ],
+      "metrics": [
+        {
+          "key": "height",
+          "label": "树高",
+          "expr": "ceil(log(N) / log(fan))",
+          "unit": "层",
+          "fmt": "int"
+        },
+        {
+          "key": "leaves",
+          "label": "叶子节点",
+          "expr": "ceil(N / fan)",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "io",
+          "label": "每次查询随机 IO",
+          "expr": "ceil(log(N) / log(fan))",
+          "unit": "次",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "height <= 4",
+          "label": "树高不超过 4 层（3 次磁盘 IO 内拿到数据）"
+        },
+        {
+          "expr": "N >= 10000000",
+          "label": "而且得是千万级以上的大表"
+        }
+      ],
+      "insight": "B+ 树把「记录数 N」换成「以扇出为底的对数」，千万级数据也只要 3~4 层。扇出每翻一倍，树高就降一层——所以页要塞满指针，别让它稀疏。"
+    },
     {
       "kind": "sequence",
       "heading": "开场：慢查询的归因顺序",

@@ -2,7 +2,7 @@
   "chapter": "ml-ch02",
   "subject": "ml",
   "title": "线性模型：最小二乘、正则化与逻辑回归",
-  "fingerprint": "7b64698d94",
+  "fingerprint": "8d51d6aaf5",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,72 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "正则化强度该取多大",
+      "brief": "λ=0 过拟合（训练好测试差），λ 太大又欠拟合。拖 λ 与样本噪声，看测试误差的 U 形最低点。",
+      "params": [
+        {
+          "key": "lam",
+          "label": "正则 λ",
+          "min": 0,
+          "max": 10,
+          "step": 0.5,
+          "value": 0
+        },
+        {
+          "key": "noise",
+          "label": "标签噪声",
+          "min": 0,
+          "max": 5,
+          "step": 0.5,
+          "value": 2
+        },
+        {
+          "key": "n",
+          "label": "样本量",
+          "min": 50,
+          "max": 5000,
+          "step": 50,
+          "value": 500
+        }
+      ],
+      "metrics": [
+        {
+          "key": "trainErr",
+          "label": "训练误差",
+          "expr": "1 + lam * 0.1",
+          "fmt": "fix2"
+        },
+        {
+          "key": "testErr",
+          "label": "测试误差",
+          "expr": "1 + lam * 0.1 + noise * noise * 0.3 + (lam - 2) * (lam - 2) * 0.15",
+          "fmt": "fix2"
+        },
+        {
+          "key": "gap",
+          "label": "泛化差距",
+          "expr": "noise * noise * 0.3 + (lam - 2) * (lam - 2) * 0.15",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "testErr <= 3",
+          "label": "测试误差控制住（没过拟合也没欠拟合）"
+        },
+        {
+          "expr": "lam > 0",
+          "label": "λ 不能为 0（完全不正则就是过拟合）"
+        },
+        {
+          "expr": "lam <= 5",
+          "label": "λ 也不能太大（否则欠拟合，测试误差又升回去）"
+        }
+      ],
+      "insight": "测试误差随 λ 呈 U 形：λ=0 时把训练集噪声也背下来；λ 太大把真信号压平。甜点在中间，所以用验证集挑 λ，不是训练集。"
+    },
     {
       "kind": "match",
       "pairs": [

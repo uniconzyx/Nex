@@ -2,7 +2,7 @@
   "chapter": "ml-ch06",
   "subject": "ml",
   "title": "无监督学习与降维：聚类、谱方法与 PCA",
-  "fingerprint": "e7d2f3c7de",
+  "fingerprint": "2da60f0511",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,67 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "k 选多少簇才不欠不溢",
+      "brief": "k 太小合并了本不同的簇，太大又把一团拆碎。拖 k 与真实簇数，看簇内平方和什么时候稳下来。",
+      "params": [
+        {
+          "key": "k",
+          "label": "设定簇数",
+          "min": 1,
+          "max": 10,
+          "step": 1,
+          "value": 10
+        },
+        {
+          "key": "g",
+          "label": "真实簇数",
+          "min": 2,
+          "max": 8,
+          "step": 1,
+          "value": 4
+        },
+        {
+          "key": "n",
+          "label": "样本量",
+          "min": 500,
+          "max": 20000,
+          "step": 500,
+          "value": 5000
+        }
+      ],
+      "metrics": [
+        {
+          "key": "inertia",
+          "label": "簇内平方和",
+          "expr": "5000 * g / k + if(k > g, (k - g) * 200, 0)",
+          "fmt": "int"
+        },
+        {
+          "key": "perCluster",
+          "label": "平均簇样本",
+          "expr": "n / k",
+          "unit": "个",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "k <= g",
+          "label": "不过度拆（k 不超过真实簇数）"
+        },
+        {
+          "expr": "k >= g - 1",
+          "label": "也不少并（k 不低于真实簇数 − 1）"
+        },
+        {
+          "expr": "inertia <= 6000",
+          "label": "簇内平方和在合理范围"
+        }
+      ],
+      "insight": "肘部法则看 inertia 随 k 的下降拐点：k 小于真实簇数时每合并一个簇 inertia 暴涨，等于之后下降变缓。k 比真实簇数多只会徒增碎片。"
+    },
     {
       "kind": "match",
       "pairs": [
