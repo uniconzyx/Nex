@@ -48,10 +48,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | 全章 | 系统设计入门：HTTP/API/缓存/CDN/负载均衡的工程视角（英文） |
-| 2 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | 全章 | 技术面试必备基础知识：计算机网络与 HTTP 专题的中文精华笔记 |
-| 3 | [nodejs/node](https://github.com/nodejs/node) | 122,410 | 全章 | Node.js 运行时：lib/http.js 为标准库 HTTP 实现，本章示例即基于其公开 API |
-| 4 | [hoppscotch/hoppscotch](https://github.com/hoppscotch/hoppscotch) | 80,699 | 全章 | 开源 API 调试工具：可直接观察请求头/响应头，配合本章 Network 面板学习 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §一 理论根基 | §二 报文的确切结构：`README.md` 的 HTTP 一节给了请求/响应报文的逐行拆解，对照本章「状态行 + 首部 + 空行 + 主体」四段结构，别只记「GET/POST」 |
+| 2 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §二 高频头部 | §三 工程实践（缓存）：`docs/` 里计算机网络专题把强缓存与协商缓存分成两节写，读它「304 为什么不带主体」，就懂本章「缓存省的是哪一段带宽」 |
+| 3 | [nodejs/node](https://github.com/nodejs/node) | 122,410 | §二 报文结构 | §四 边界与陷阱（首部时序）：`lib/_http_outgoing.js` 的 `writeHead` 决定首部何时定型，读它就知道本章「头部必须在主体前发完」不是约定而是实现约束 |
+| 4 | [hoppscotch/hoppscotch](https://github.com/hoppscotch/hoppscotch) | 80,699 | §四 边界与陷阱（CORS 预检） | §三 工程实践：`packages/` 里的请求模块能直接看/改请求头，手动构造一个 `OPTIONS` 预检，本章「简单请求 vs 预检请求」当场可见 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

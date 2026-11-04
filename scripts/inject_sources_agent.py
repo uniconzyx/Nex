@@ -401,9 +401,11 @@ def main() -> int:
         mark = "✓" if ok else "✗"
         print(f"  {cid:<12} {len(notes)} 条 · {mark} {msg:<12} · 首条 {notes[0][:26]}…")
 
-    # manifest 是 indent=2 + CRLF（实测 1509 个 \r\n），与 labs.json 的
-    # indent=1 + LF 完全不同。这里必须用 newline="\r\n"，否则整份 1500 行假 diff。
-    with open(MANIFEST, "w", encoding="utf-8", newline="\r\n") as f:
+    # 换行格式**按学科探测**：agent/ml/cpp 是 CRLF，其余 11 个学科是 LF。
+    # 写死任一种都会让另一种学科整份假 diff，这里统一读一次原文件判断。
+    with open(MANIFEST, "rb") as fb:
+        nl = "\r\n" if b"\r\n" in fb.read() else "\n"
+    with open(MANIFEST, "w", encoding="utf-8", newline=nl) as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     print(f"\n写入 {os.path.normpath(MANIFEST)}，共更新 {n} 章")
     return 0
