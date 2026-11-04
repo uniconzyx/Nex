@@ -38,9 +38,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §1.1 | 讲「复制链路」时读 `docs/database/mysql/` 的主从章节：`binlog dump → IO 线程写 relay log → SQL 线程重放`，三个环节各自的延迟来源不同，排查要分开看 |
-| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §1.2 | 讲「读写分离」时看 `mall` 的单库配置：这个项目没有分库分表，正好用来对照「什么规模不需要拆」——单表千万级以内、QPS 几千，加索引与缓存比拆库划算得多 |
-| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §2.1 | 讲「分片键与扩容」时对照 `docs/high-concurrency/mysql-sharding.md`：哈希分片扩容要「翻倍 + 迁移一半」，范围分片扩容简单但会热点——选哪种取决于「写入是否均匀」而不只是「查询方便」 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §1.1 复制链路：binlog dump → relay log → 重放 | 读 `docs/database/mysql/` 的主从章节：`binlog dump → IO 线程写 relay log → SQL 线程重放`，三个环节各自的延迟来源不同，排查要分开看；这正是 §1.3 主从延迟成因的分层依据——IO 慢还是 SQL 线程单线程回放慢，处置完全不同 |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §1.2 复制模式：异步 / 半同步 / 组复制 | 看 `mall` 的单库配置：这个项目没有分库分表，正好用来对照「什么规模不需要拆」——单表千万级以内、QPS 几千，加索引与缓存比拆库划算得多；这也解释了 §1.3「读己之写」为什么在小规模下几乎不是问题 |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §2.1 切分维度：范围 / 哈希 / 一致性哈希 / 基因法 | 对照 `docs/high-concurrency/mysql-sharding.md`：哈希分片扩容要「翻倍 + 迁移一半」，范围分片扩容简单但会热点——选哪种取决于「写入是否均匀」而不只是「查询方便」；配合 §2.3 分布式 ID 与二次分片，就能判断这次扩容要不要动分片键 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

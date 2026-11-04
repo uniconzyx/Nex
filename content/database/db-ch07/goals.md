@@ -31,9 +31,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §1.1 | 讲「逻辑备份 vs 物理备份」时读 `docs/database/mysql/` 的运维章节：`mysqldump` 导出的是 SQL 文本（可跨版本、慢），`xtrabackup` 拷的是数据文件（快、要同版本），两者的恢复时间差一个数量级 |
-| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §3.1 | 讲「最小权限」时看 `mall` 的 `application.yml` 里的数据源账号：业务账号只需要 `SELECT/INSERT/UPDATE/DELETE`，给 `DROP` 权限等于把「一次注入」升级成「删库」 |
-| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §2.2 | 讲「binlog 与 PITR」时对照 `docs/high-concurrency/` 的 MySQL 文章：`ROW` 格式记的是行变更前后镜像，所以能做「精确到秒的时间点恢复」，`STATEMENT` 格式在 `NOW()`/`UUID()` 上无法重现 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §1.1 逻辑备份与物理备份：两种「备份」根本不是一回事 | 读 `docs/database/mysql/` 的运维章节：`mysqldump` 导出的是 SQL 文本（可跨版本、慢），`xtrabackup` 拷的是数据文件（快、要同版本），两者的恢复时间差一个数量级；这正是 §1.3「备份要可信」必须先做恢复演练的原因 |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §3.3 最小权限：从原则到可执行的审计 | 看 `mall` 的 `application.yml` 里的数据源账号：业务账号只需要 `SELECT/INSERT/UPDATE/DELETE`，给 `DROP` 权限等于把「一次注入」升级成「删库」；读时对照 §3.1「账号是『用户@主机』」，就明白为什么 `'app'@'%'` 本身就是一条越权风险 |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §2.1 binlog 到底记了什么：三种格式（STATEMENT / ROW / MIXED） | 对照 `docs/high-concurrency/` 的 MySQL 文章：`ROW` 格式记的是行变更前后镜像，所以能配合 §2.2 的 PITR 做到「精确到秒的时间点恢复」，而 `STATEMENT` 格式在 `NOW()`/`UUID()` 上无法重现——这是「回滚后数据仍不一致」的经典根因 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

@@ -27,9 +27,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §1.2 | 讲「type 的优劣阶梯」时读 `docs/database/mysql/` 的 EXPLAIN 专题：`system > const > eq_ref > ref > range > index > ALL` 这条链要能背，且要知道 `ALL` 出现在大表上就意味着全表扫描 |
-| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §3.1 | 讲「索引失效」时看 `mall-admin` 的商品搜索实现：`LIKE "%关键词%"` 前导通配符让索引失效，真实工程用「ES 检索 + 主键回表」绕开，而不是硬调 SQL |
-| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §3.2 | 讲「深分页与 JOIN 优化」时对照 `docs/high-concurrency/` 的慢查询文章：`LIMIT 1000000, 20` 要先扫掉一百万行，正确写法是「延迟关联」或「游标分页（记住上一页最后一行的 id）」 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §1.2 type 的优劣阶梯（面试必背） | 读 `docs/database/mysql/` 的 EXPLAIN 专题：`system > const > eq_ref > ref > range > index > ALL` 这条链要能背，且要知道 `ALL` 出现在大表上就意味着全表扫描；配合 §1.3 Extra 的关键信号（`Using filesort` / `Using temporary`），才能从一列 `type` 看出真正的瓶颈 |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §2.1 索引失效清单（逐条给改写） | 看 `mall-admin` 的商品搜索实现：`LIKE "%关键词%"` 前导通配符让索引失效，真实工程用「ES 检索 + 主键回表」绕开，而不是硬调 SQL；这正是 §2.3「选择性为什么低区分度列不该单独建索引」的反面教材 |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §3.2 深分页：`LIMIT offset, n` 的线性代价 | 对照 `docs/high-concurrency/` 的慢查询文章：`LIMIT 1000000, 20` 要先扫掉一百万行，正确写法是「延迟关联」或「游标分页（记住上一页最后一行的 id）」；读时回 §3.1「先把慢 SQL 找出来」，慢日志里这类语句的 `Rows_examined` 会远大于返回行数 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

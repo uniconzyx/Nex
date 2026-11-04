@@ -13,9 +13,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §4.1 | 讲「子查询的三种形态」时读 `docs/database/mysql/` 的 SQL 优化篇：标量子查询、`IN`、`EXISTS` 在执行计划里的差异是「是否被改写成半连接」，这决定了相关子查询会不会被逐行执行 |
-| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §3.1 | 讲「JOIN 与聚合」时看 `mall-mbg` 生成的 Example/Criteria 类：它把「动态 WHERE + ORDER BY」拼成 SQL，能直观看到「条件组合爆炸」是怎么发生的，也能理解为什么复杂查询要手写 XML |
-| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §2.2 | 讲「IN vs EXISTS」时对照 `docs/high-concurrency/` 的 MySQL 优化文章：小表驱动大表、`EXISTS` 在外层小的时候更快，这条结论来自「谁做驱动表」而非语法本身 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §2.3 `IN` vs `EXISTS`：别再背「小表用 IN、大表用 EXISTS」 | 读 `docs/database/mysql/` 的 SQL 优化篇：标量子查询、`IN`、`EXISTS` 在执行计划里的差异是「是否被改写成半连接」，这决定了相关子查询会不会被逐行执行；先读 §2.2「MySQL 如何拆掉子查询」再来看这条结论 |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §1.2 实现机制：InnoDB/优化器怎么选 | 看 `mall-mbg` 生成的 Example/Criteria 类：它把「动态 WHERE + ORDER BY」拼成 SQL，能直观看到「条件组合爆炸」是怎么发生的，也能理解为什么 §1.3 工程实践里复杂的多表关联仍要手写 XML 而不是靠 Criteria 拼 |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §4.3 工程实践：何时反范式 | 对照 `docs/high-concurrency/` 的 MySQL 优化文章：「小表驱动大表」这条结论来自「谁做驱动表」而非语法本身；把它带到 §4.1「范式是不让数据说假话的规则」一起看，就明白为什么反范式是用冗余换掉一次 JOIN，而不是随手去重 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

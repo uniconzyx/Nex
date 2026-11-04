@@ -14,9 +14,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §1.2 | 讲「键的四层概念」时读 `docs/database/mysql/` 下的索引专题：超键/候选键/主键/外键的区别在文档里被压成一张表，重点是「主键选择为什么影响聚簇索引的物理顺序」 |
-| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §3.2 | 讲「JOIN 全景」时看 `document/sql/mall.sql`：`pms_product` 与 `pms_sku_stock` 的一对多、`oms_order` 与 `oms_order_item` 的从属关系，都是真实业务的连接样本，比教学用的 dept/emp 两表更接近工程 |
-| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §1.5 | 讲「NULL 与三值逻辑」时对照 `docs/high-concurrency/` 的 MySQL 系列：`count(col)` 跳过 NULL、`NOT IN` 遇到 NULL 返回空集，这两个坑它各给了一条可复现的 SQL |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §1.2 键的四层概念 | 读 `docs/database/mysql/` 下的索引专题：超键/候选键/主键/外键的区别在文档里被压成一张表，重点是「主键选择为什么影响聚簇索引的物理顺序」——这条直接接上 §1.3 三类完整性约束里的实体完整性 |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §3.3 JOIN 全景 | 看 `document/sql/mall.sql`：`pms_product` 与 `pms_sku_stock` 的一对多、`oms_order` 与 `oms_order_item` 的从属关系，都是真实业务的连接样本，比教学用的 dept/emp 两表更接近工程；读时对照 §3.2「两个顺序别搞混」——`FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY` |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §1.5 `NULL`：三值逻辑的代价 | 对照 `docs/high-concurrency/` 的 MySQL 系列：`count(col)` 跳过 NULL、`NOT IN` 遇到 NULL 返回空集，这两个坑它各给了一条可复现的 SQL；验证方法：把本章 §1.8 可运行示例里的表加一行 NULL，两个查询的结果会同时变空 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

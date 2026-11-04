@@ -14,9 +14,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §1.1 | 讲「为什么是 B+ 树」时读 `docs/database/mysql/mysql-index.md`：B+ 树把数据全放叶子、非叶子只存键，因此一个 16KB 页能装更多键、树更矮——磁盘 IO 次数稳定在 3~4 次，这是它胜过二叉树与哈希的根本原因 |
-| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §2.1 | 讲「聚簇索引与二级索引」时看 `document/sql/mall.sql` 里每张表的 `PRIMARY KEY (id)` 与业务唯一键：InnoDB 的二级索引叶子存主键，所以「按业务键查」要回表一次，这解释了「为什么覆盖索引能把这次回表省掉」 |
-| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §3.3 | 讲「MVCC 与当前读」时对照 `docs/high-concurrency/mysql-lock.md`：快照读靠 undo 版本链 + ReadView，当前读（`SELECT ... FOR UPDATE`）才加锁——「可重复读下仍会幻读」的现场就出在这两者的边界上 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §1.1 理论根基：为什么是 B+树，不是哈希/红黑树/B树 | 读 `docs/database/mysql/mysql-index.md`：B+ 树把数据全放叶子、非叶子只存键，因此一个 16KB 页能装更多键、树更矮——磁盘 IO 次数稳定在 3~4 次，这是它胜过二叉树与哈希的根本原因；对照 §1.2 的页结构，就能算出三层树能存多少行 |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §2.1 回表（Bookmark Lookup）：二级索引的隐含成本 | 看 `document/sql/mall.sql` 里每张表的 `PRIMARY KEY (id)` 与业务唯一键：InnoDB 的二级索引叶子存主键，所以「按业务键查」要回表一次；这解释了 §2.2 覆盖索引为什么能把这次回表省掉——代价是索引里多存几列 |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §3.3 MVCC：多版本并发控制（核心） | 对照 `docs/high-concurrency/mysql-lock.md`：快照读靠 undo 版本链 + ReadView，当前读（`SELECT ... FOR UPDATE`）才加锁——「可重复读下仍会幻读」的现场就出在这两者的边界上；配合 §3.4 当前读 vs 快照读，就能解释同一个事务里两次查询结果为何不一致 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

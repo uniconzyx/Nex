@@ -29,9 +29,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §2.1 | 讲「1NF 与 2NF」时读 `docs/database/mysql/` 的范式专题：属性原子性与「非主属性完全依赖候选键」是两个独立的判据，把「多值字段存逗号串」当 1NF 违规是最常见的误判 |
-| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §4.3 | 讲「何时故意反范式」时看 `pms_product` 与 `pms_sku_stock`：商品名、价格在 SKU 表里冗余一份，是为了「列表页一次查询拿全」而不做 JOIN——冗余的代价是「改商品名要同步更新所有 SKU」 |
-| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §3.2 | 讲「反范式与分库分表」时对照 `docs/high-concurrency/mysql-sharding.md`：分片后跨库 JOIN 不可用，只能靠「冗余字段 + 异步补偿」，这时范式让位于「查询能不能一次走完」 |
+| 1 | [Snailclimb/JavaGuide](https://github.com/Snailclimb/JavaGuide) | 159,366 | §2.1 1NF 与 2NF：原子性与部分依赖 | 读 `docs/database/mysql/` 的范式专题：属性原子性与「非主属性完全依赖候选键」是两个独立的判据，把「多值字段存逗号串」当 1NF 违规是最常见的误判；配合 §1.1 函数依赖的三种类型，才能判断一个表到底卡在哪一范 |
+| 2 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §4.3 反范式：何时故意冗余 | 看 `mall` 的 `pms_product` 与 `pms_sku_stock`：商品名、价格在 SKU 表里冗余一份，是为了「列表页一次查询拿全」而不做 JOIN——冗余的代价是「改商品名要同步更新所有 SKU」；读完再回 §4.1 ER 建模，就明白冗余字段本质上是把一次 JOIN 固化进表结构 |
+| 3 | [doocs/advanced-java](https://github.com/doocs/advanced-java) | 79,169 | §3.1 两个正确性标准：无损连接与保持依赖 | 对照 `docs/high-concurrency/mysql-sharding.md`：分片后跨库 JOIN 不可用，只能靠「冗余字段 + 异步补偿」，这时范式让位于「查询能不能一次走完」；但分片本身仍要满足 §3.2 无损连接——否则拆完的表拼不回原关系 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 
