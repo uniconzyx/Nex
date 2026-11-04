@@ -51,9 +51,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [isocpp/CppCoreGuidelines](https://github.com/isocpp/CppCoreGuidelines) | 45,390 | §3.1 异常安全等级 | §3.1 异常安全等级的规范表述：`CppCoreGuidelines.md` 的 E.6（RAII 保证）与 C.vector 相关条款把「Basic / Strong / No-throw」写成了可引用规则；面试口述前先按编号找到原文，比背二手总结更抗追问 |
-| 2 | [cpp-best-practices/cppbestpractices](https://github.com/cpp-best-practices/cppbestpractices) | 8,851 | §2.1 线程池 | §2.1 线程池之外的另一半——工程化清单：`chapters/` 目录按主题分章（工具、风格、CMake、测试、CI），每章末尾给可执行检查项；拿它给自己的项目做一次体检，能找出「能跑但不能交付」的具体项 |
-| 3 | [practical-tutorials/project-based-learning](https://github.com/practical-tutorials/project-based-learning) | 286,133 | §5.2 系统设计题答法 | §5.2 系统设计取材：`README.md` 的 C++ 一节列了几十个「从零写一个 X」的项目（解释器、渲染器、数据库）；面试讲项目经历时，从这类项目里挑一个真正做完的，比堆功能列表更能撑住「你解决过什么真实约束」的追问 |
+| 1 | [isocpp/CppCoreGuidelines](https://github.com/isocpp/CppCoreGuidelines) | 45,390 | §3.1 一、异常安全等级（Basic / Strong / No-throw） | 读 `isocpp/CppCoreGuidelines` 的 `CppCoreGuidelines.md`：E.6（RAII 保证）与 C.vector 相关条款把「Basic / Strong / No-throw」写成了可引用规则；面试口述前先按编号找到原文，比背二手总结更抗追问——尤其是「为什么 `vector::push_back` 只给基本保证」这类题，原文会直接指到「重分配时移动构造若不是 noexcept 就退化为拷贝」 |
+| 2 | [cpp-best-practices/cppbestpractices](https://github.com/cpp-best-practices/cppbestpractices) | 8,851 | §2.1 一、线程池：任务队列 + 条件变量 + 优雅关闭 | 读 `cpp-best-practices/cppbestpractices` 的 `README.md`：`chapters/` 目录按主题分章（工具、风格、CMake、测试、CI），每章末尾给可执行检查项；拿它给自己的项目做一次体检，能找出「能跑但不能交付」的具体项——这正是本章在 §3.2「RAII 与所有权」之外要补的工程面 |
+| 3 | [practical-tutorials/project-based-learning](https://github.com/practical-tutorials/project-based-learning) | 286,133 | §5.2 二、系统设计题答法 | 读 `practical-tutorials/project-based-learning` 的 `README.md` 的 C++ 一节：它列了几十个「从零写一个 X」的项目（解释器、渲染器、数据库）；面试讲项目经历时，从这类项目里挑一个真正做完的，比堆功能列表更能撑住「你解决过什么真实约束」的追问——配合本章 §5.1「白板 coding 训练法」看，系统设计题的答法本质是把 §1「迷你 vector」与 §2「线程池」这类「你亲手写过的组件」复用成论据 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

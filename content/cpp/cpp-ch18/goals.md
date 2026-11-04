@@ -39,9 +39,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [simdjson/simdjson](https://github.com/simdjson/simdjson) | 24,491 | §1.1 对齐规则与填充 | §1.1 对齐与 §1.2 显式对齐：`src/generic/stage1/json_structural_indexer.h` 每次吃 64 字节块，用 `SIMDJSON_ALIGNED` 保证输入指针对齐到 64 字节边界（否则 AVX2 加载会慢甚至崩）；这是「对齐不是学究问题，是 SIMD 的硬要求」的第一手证据 |
-| 2 | [google/benchmark](https://github.com/google/benchmark) | 10,486 | §3.2 链表 vs 数组，指针追逐… | 配 §3.2 的测量方法：`include/benchmark/benchmark.h` 的 `DoNotOptimize` 阻止编译器把结果删掉、`ClobberMemory` 强制刷新内存可见性；本章讲「链表 vs 数组」时，没有这两个工具测出来的数字基本不可信 |
-| 3 | [ClickHouse/ClickHouse](https://github.com/ClickHouse/ClickHouse) | 50,637 | §3.1 AoS vs SoA，行优… | §3.1 AoS vs SoA 的极致：`src/Columns/ColumnVector.cpp` 每个数值列就是一条连续 `PODArray`，`src/Common/PODArray.h` 负责带 padding 的增长；读 `ColumnVector::getData()` 直接返回裸指针——因为列存的前提就是「同类型紧挨着」，这正是本章要论证的局部性收益 |
+| 1 | [simdjson/simdjson](https://github.com/simdjson/simdjson) | 24,491 | §1.2 二、显式对齐与协议布局：alignas / #pragma pack / 干扰尺寸 | 读 `simdjson/simdjson` 的 `src/generic/stage1/json_structural_indexer.h`：每次吃 64 字节块，用 `SIMDJSON_ALIGNED` 保证输入指针对齐到 64 字节边界（否则 AVX2 加载会慢甚至崩）；这是「对齐不是学究问题，是 SIMD 的硬要求」的第一手证据——本章 §1.1「对齐规则与填充」讲的是编译器自动做的事，这里讲的是「编译器不肯做、只能手写」的那部分 |
+| 2 | [google/benchmark](https://github.com/google/benchmark) | 10,486 | §3.2 二、链表 vs 数组，指针追逐与 std::vector 的连续性 | 配 `google/benchmark` 的 `include/benchmark/benchmark.h`：`DoNotOptimize` 阻止编译器把结果删掉、`ClobberMemory` 强制刷新内存可见性；本章讲「链表 vs 数组」时，没有这两个工具测出来的数字基本不可信——编译器会把整个循环优化掉，而 §3.1「AoS vs SoA」的对比同样需要它们才有意义 |
+| 3 | [ClickHouse/ClickHouse](https://github.com/ClickHouse/ClickHouse) | 50,637 | §3.1 一、AoS vs SoA，行优先 vs 列优先 | 读 `ClickHouse/ClickHouse` 的 `src/Columns/ColumnVector.cpp`：每个数值列就是一条连续 `PODArray`，`src/Common/PODArray.h` 负责带 padding 的增长；读 `ColumnVector::getData()` 直接返回裸指针——因为列存的前提就是「同类型紧挨着」，这正是本章要论证的局部性收益；配合 §4.1「内联、条件提示与去虚化」看，列存的另一好处是「按列处理的算子可以整段内联」，而 AoS 每行都要跨字段取址 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

@@ -36,9 +36,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [microsoft/STL](https://github.com/microsoft/STL) | 11,177 | §1.1 <type_traits> | §1.1 与 §1.3 的原始实现：`stl/inc/type_traits` 里 `is_destructible` 靠 `declval<T>().~T()` 的SFINAE 探测，`conjunction`/`disjunction` 用短路继承避免多余实例化；把这几处读完，`<type_traits>` 就不再是「查表用的魔法」 |
-| 2 | [fmtlib/fmt](https://github.com/fmtlib/fmt) | 25,899 | §3.1 SFINAE | §3.1 与 §3.2 的过渡样本：`include/fmt/base.h` 里 `is_formattable` 同时有 C++20 concept 版（`requires` 表达式）与旧编译器的 SFINAE 版，两份实现并列；对照它们能看清 concept 把「替换失败」从错误信息里救出来这件事有多实际 |
-| 3 | [abseil/abseil-cpp](https://github.com/abseil/abseil-cpp) | 18,177 | §3.1 SFINAE | §3.1 的工具箱：`absl/meta/type_traits.h` 的 `absl::void_t`、`type_identity`、`is_comparable` 都是为「检测某操作是否合法」准备的积木；读 `is_comparable` 的 `decltype` 表达式，是本章 SFINAE 一节最干净的例题 |
+| 1 | [microsoft/STL](https://github.com/microsoft/STL) | 11,177 | §1.3 三、is_destructible 与「类型是否可销毁」 | 读 `microsoft/STL` 的 `stl/inc/type_traits`：`is_destructible` 靠 `declval<T>().~T()` 的 SFINAE 探测，`conjunction`/`disjunction` 用短路继承避免多余实例化；把这几处读完，`<type_traits>` 就不再是「查表用的魔法」——本章 §1.2「模板特化与偏特化」讲的机制，在这里就是两行 `true_type`/`false_type` 分支 |
+| 2 | [fmtlib/fmt](https://github.com/fmtlib/fmt) | 25,899 | §3.2 二、C++20 concept：可读的约束 | 读 `include/fmt/base.h` 里 `is_formattable`：它同时有 C++20 concept 版（`requires` 表达式）与旧编译器的 SFINAE 版，两份实现并列；对照它们能看清 concept 把「替换失败」从错误信息里救出来这件事有多实际——SFINAE 版报错指向模板定义处，concept 版直接说「T 不满足 formattable」 |
+| 3 | [abseil/abseil-cpp](https://github.com/abseil/abseil-cpp) | 18,177 | §3.1 一、SFINAE：替换失败不是错误 | 读 `abseil/abseil-cpp` 的 `absl/meta/type_traits.h`：`absl::void_t`、`type_identity`、`is_comparable` 都是为「检测某操作是否合法」准备的积木；读 `is_comparable` 的 `decltype` 表达式，是本章 SFINAE 一节最干净的例题——它同时检测 `a == b` 与 `a != b` 两侧，缺一个就整体失败，而本章 §3.3「requires 表达式与约束组合」用 `requires requires` 能写成两条并列约束 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

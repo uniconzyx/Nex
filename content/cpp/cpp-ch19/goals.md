@@ -68,9 +68,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [google/googletest](https://github.com/google/googletest) | 39,687 | §2.1 测试框架的最小内核与退出码… | §2.1 测试框架的最小内核：`googletest/src/gtest.cc` 的 `RUN_ALL_TESTS` → `UnitTest::Run` → 逐个 `TestInfo::Run`，最后把失败数折成进程退出码；看清「退出码即结论」这条链，CI 里的 `ctest` 才知道该不该红 |
-| 2 | [catchorg/Catch2](https://github.com/catchorg/Catch2) | 21,539 | §2.1 测试框架的最小内核与退出码… | §2.1 的另一种内核与 §1.2 的 CMake 用法：`src/catch2/catch_session.cpp` 的 `Session::run` 返回失败用例数，`CMakeLists.txt` 里 `catch_discover_tests` 把用例注册成独立测试；对照 googletest 的「一次跑完」与 Catch2 的「逐用例发现」，能看出两种框架对 CI 并行粒度的不同假设 |
-| 3 | [cpp-best-practices/gui_starter_template](https://github.com/cpp-best-practices/gui_starter_template) | 2,579 | §1.2 `PUBLIC` / `P… | §1.2、§1.3 与 §4.1 的整体样板：根 `CMakeLists.txt` 用 target-based 写法，`cmake/` 放自写模块，`.github/workflows/` 里是完整的矩阵构建 + 缓存 + artifact；把它当作本章的参考实现逐条对照——这是少数把「现代 CMake + 测试 + CI」串成一条线的小型仓库 |
+| 1 | [google/googletest](https://github.com/google/googletest) | 39,687 | §2.1 一、测试框架的最小内核与退出码语义 | 读 `google/googletest` 的 `googletest/src/gtest.cc`：`RUN_ALL_TESTS` → `UnitTest::Run` → 逐个 `TestInfo::Run`，最后把失败数折成进程退出码；看清「退出码即结论」这条链，CI 里的 `ctest` 才知道该不该红——本章 §2.2「用例设计：等价类、边界值、参数化与夹具隔离」都在这个外壳之内，外壳不成立，用例写得再好也无法被 CI 判读 |
+| 2 | [catchorg/Catch2](https://github.com/catchorg/Catch2) | 21,539 | §1.2 二、`PUBLIC` / `PRIVATE` / `INTERFACE`：使用要求的三种传播强度 | 读 `catchorg/Catch2` 的 `src/catch2/catch_session.cpp`：`Session::run` 返回失败用例数，`CMakeLists.txt` 里 `catch_discover_tests` 把用例注册成独立测试；对照 googletest 的「一次跑完」与 Catch2 的「逐用例发现」，能看出两种框架对 CI 并行粒度的不同假设——前者只需一个可执行文件，后者要求每个用例能被单点触发，这正是 `INTERFACE`（头文件依赖向上传递）在测试目标上的典型用法 |
+| 3 | [cpp-best-practices/gui_starter_template](https://github.com/cpp-best-practices/gui_starter_template) | 2,579 | §4.1 一、workflow 的结构与 DAG：`needs` 决定一切 | 读 `cpp-best-practices/gui_starter_template`：根 `CMakeLists.txt` 用 target-based 写法，`cmake/` 放自写模块，`.github/workflows/` 里是完整的矩阵构建 + 缓存 + artifact；把它当作本章的参考实现逐条对照——这是少数把「现代 CMake + 测试 + CI」串成一条线的小型仓库；注意它的 `needs` 图与 §3.3「运行期防线：sanitizer 与三层门禁的排布」是对应的：告警 → 静态分析 → sanitizer，越靠后越慢、越只在主干跑 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

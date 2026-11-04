@@ -12,9 +12,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [fmtlib/fmt](https://github.com/fmtlib/fmt) | 25,899 | §2.1 函数重载 | §2.1 函数重载的工业规模样本：`include/fmt/base.h` 里 `format_to` 有十几个重载（`OutputIt` 版本、`locale` 版本、`memory_buffer` 版本），参数个数与类型各差一点；读它们之前先问「编译器凭什么在这么多同名函数里选中这一个」，再回 §2.1 看重载决议的排序规则 |
-| 2 | [catchorg/Catch2](https://github.com/catchorg/Catch2) | 21,539 | §3.1 捕获方式 | §3.1 捕获方式：`src/catch2/catch_test_macros.hpp` 的 `TEST_CASE`/`SECTION` 宏最终展开成「注册一个 lambda」，`INTERNAL_CATCH_TEST` 里按值捕获比较表达式两侧；看清它为什么不按引用捕获（section 结束后临时对象已经没了） |
-| 3 | [TheAlgorithms/C-Plus-Plus](https://github.com/TheAlgorithms/C-Plus-Plus) | 34,827 | §2.2 默认参数 | §2.2 默认参数的替代方案：`sort/` 目录里同一算法常有两个版本——一个只用 `<`，一个多接一个比较器；对照本章说的「默认参数 vs 重载 vs 模板参数」，看真实代码更愿意选哪种、为什么 |
+| 1 | [fmtlib/fmt](https://github.com/fmtlib/fmt) | 25,899 | §2.2 二、重载决议的四级阶梯 | 读 `include/fmt/base.h` 里 `format_to` 的十几个重载（`OutputIt` 版本、`locale` 版本、`memory_buffer` 版本）：参数个数与类型各差一点，编译器凭什么在这么多同名函数里选中这一个——答案就是本章这四级阶梯（精确匹配 → 提升 → 转换 → 用户定义转换）；先看 §2.1「重载解决的是什么问题」再看它，才不会把「模板 + 重载」当两件事 |
+| 2 | [catchorg/Catch2](https://github.com/catchorg/Catch2) | 21,539 | §3.1 一、捕获方式与它们的真实含义 | 读 `catchorg/Catch2` 的 `src/catch2/catch_test_macros.hpp`：`TEST_CASE`/`SECTION` 宏最终展开成「注册一个 lambda」，`INTERNAL_CATCH_TEST` 里按值捕获比较表达式两侧——看清它为什么不按引用捕获：section 结束后临时对象已经没了，这正是本章 §3.3「生命周期：唯一真正危险的地方」在工业代码里的规避方式 |
+| 3 | [TheAlgorithms/C-Plus-Plus](https://github.com/TheAlgorithms/C-Plus-Plus) | 34,827 | §2.3 三、默认参数：调用点的静态填充 | 读 `TheAlgorithms/C-Plus-Plus` 的 `math/` 与 `sorting/` 下的实现：同一算法常有两个版本——一个只用 `<`，一个多接一个比较器；对照本章说的「默认参数 vs 重载 vs 模板参数」三种方案，看真实代码更愿意选哪种：库作者选重载（避免默认参数与虚函数、默认参数在派生类里的重绑定问题），算法示例选「多接一个比较器」的重载，因为调用点一眼能看出用的是哪种序 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

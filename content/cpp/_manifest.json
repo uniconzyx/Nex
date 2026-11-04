@@ -96,9 +96,9 @@
           34813
         ],
         "github_notes": [
-          "§2.1 函数重载的工业规模样本：`include/fmt/base.h` 里 `format_to` 有十几个重载（`OutputIt` 版本、`locale` 版本、`memory_buffer` 版本），参数个数与类型各差一点；读它们之前先问「编译器凭什么在这么多同名函数里选中这一个」，再回 §2.1 看重载决议的排序规则",
-          "§3.1 捕获方式：`src/catch2/catch_test_macros.hpp` 的 `TEST_CASE`/`SECTION` 宏最终展开成「注册一个 lambda」，`INTERNAL_CATCH_TEST` 里按值捕获比较表达式两侧；看清它为什么不按引用捕获（section 结束后临时对象已经没了）",
-          "§2.2 默认参数的替代方案：`sort/` 目录里同一算法常有两个版本——一个只用 `<`，一个多接一个比较器；对照本章说的「默认参数 vs 重载 vs 模板参数」，看真实代码更愿意选哪种、为什么"
+          "§2.2 二、重载决议的四级阶梯 · 读 `include/fmt/base.h` 里 `format_to` 的十几个重载（`OutputIt` 版本、`locale` 版本、`memory_buffer` 版本）：参数个数与类型各差一点，编译器凭什么在这么多同名函数里选中这一个——答案就是本章这四级阶梯（精确匹配 → 提升 → 转换 → 用户定义转换）；先看 §2.1「重载解决的是什么问题」再看它，才不会把「模板 + 重载」当两件事",
+          "§3.1 一、捕获方式与它们的真实含义 · 读 `catchorg/Catch2` 的 `src/catch2/catch_test_macros.hpp`：`TEST_CASE`/`SECTION` 宏最终展开成「注册一个 lambda」，`INTERNAL_CATCH_TEST` 里按值捕获比较表达式两侧——看清它为什么不按引用捕获：section 结束后临时对象已经没了，这正是本章 §3.3「生命周期：唯一真正危险的地方」在工业代码里的规避方式",
+          "§2.3 三、默认参数：调用点的静态填充 · 读 `TheAlgorithms/C-Plus-Plus` 的 `math/` 与 `sorting/` 下的实现：同一算法常有两个版本——一个只用 `<`，一个多接一个比较器；对照本章说的「默认参数 vs 重载 vs 模板参数」三种方案，看真实代码更愿意选哪种：库作者选重载（避免默认参数与虚函数、默认参数在派生类里的重绑定问题），算法示例选「多接一个比较器」的重载，因为调用点一眼能看出用的是哪种序"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -287,9 +287,9 @@
           39513
         ],
         "github_notes": [
-          "§3.2 与 §3.4 的活样本：`geometry.h` 里 `Vec3` 的 `operator+`/`operator*` 全部返回**值**（不是引用），因为 `a+b` 的结果是个临时量；而 `operator+=` 返回 `Vec3&` 以支持链式。把这两个返回类型并排看，就是「复合赋值返回引用、二元运算返回值」的判据",
-          "§2.2 与 §2.4 对照：`include/nlohmann/json.hpp` 的 `basic_json` 显式写了拷贝构造、拷贝赋值、`swap`；读 `swap` 的实现会发现它交换的是内部 `json_value` union 与指针——这正是「拷贝赋值用 copy-and-swap 拿到强异常安全」的实例",
-          "§1.2「对象在内存里到底是什么」：`include/leveldb/slice.h` 的 `Slice` 只有 `const char* data_` 与`size_t size_` 两个成员，`sizeof(Slice)` 就是 16 字节且不拥有任何内存；它把「轻量值类型」做到了极致——按值传参也不亏，因为拷贝的只是这两个字段"
+          "§3.4 四、工程实践：返回类型与复合赋值的约定 · 读 `ssloy/tinyrenderer` 的 `geometry.h`：`Vec3` 的 `operator+`/`operator*` 全部返回值（不是引用），因为 `a+b` 的结果是个临时量；而 `operator+=` 返回 `Vec3&` 以支持链式。把这两个返回类型并排看，就是本章「复合赋值返回引用、二元运算返回值」的判据；配合 §3.3「成员函数 vs 非成员函数：对称性判据」，再看 `Vec3 operator*(float, const Vec3&)` 为什么必须写成非成员",
+          "§2.4 四、工程实践：正确的拷贝赋值写法 · 读 `nlohmann/json` 的 `include/nlohmann/json.hpp` 里 `basic_json`：它显式写了拷贝构造、拷贝赋值、`swap`；读 `swap` 的实现会发现它交换的是内部 `json_value` union 与指针——这正是「拷贝赋值用 copy-and-swap 拿到强异常安全」的实例，对应本章 §2.3「实现机制：拷贝省略与 RVO」之外的另一半：RVO 省掉的是构造，copy-and-swap 保证的是「要么成功要么原样」",
+          "§1.2 二、实现机制：对象在内存里到底是什么 · 读 `google/leveldb` 的 `include/leveldb/env.h` 与同目录的 `slice.h`：`Slice` 只有 `const char* data_` 与 `size_t size_` 两个成员，`sizeof(Slice)` 就是 16 字节且不拥有任何内存；它把「轻量值类型」做到了极致——按值传参也不亏，因为拷贝的只是这两个字段；本章 §1.3「工程实践：程序员视角的取舍」里的「值语义 vs 引用语义」判据，在这两行成员上就有了具体形态"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -350,9 +350,9 @@
           39513
         ],
         "github_notes": [
-          "§2.2 vtable 与动态绑定：`googletest/src/gtest.cc` 里 `Test::Run()` 是虚函数，`UnitTestImpl::RunAllTests` 只持有 `TestInfo*`，通过基类指针调用 `Run()`——派生类 `TestBody()` 的具体实现到运行时才被选中，这就是 vptr 指到派生类 vtable 的结果",
-          "§3.2 RTTI 的另一条路：`llvm/include/llvm/Support/Casting.h` 的 `classof` + `dyn_cast` 自己实现类型判别，不依赖 `dynamic_cast`（LLVM 默认关闭 RTTI）。读 `isa`/`cast`/`dyn_cast` 三件套，就明白「RTTI 只是手段，类型判别可以有更便宜的实现」",
-          "§3.1 接口隔离的标准写法：`include/leveldb/env.h` 的 `class Env` 几乎全是纯虚函数（文件、锁、线程全抽象掉），实现放在 `util/env_posix.cc` 的 `PosixEnv : public Env`；整份 leveldb 只通过 `Env*` 访问系统调用——这是「面向接口编程」在 C++ 里的完整闭环"
+          "§2.2 二、实现机制：vtable 与 vptr（核心） · 读 `google/googletest` 的 `googletest/src/gtest.cc`：`Test::Run()` 是虚函数，`UnitTestImpl::RunAllTests` 只持有 `TestInfo*`，通过基类指针调用 `Run()`——派生类 `TestBody()` 的具体实现到运行时才被选中，这就是 vptr 指到派生类 vtable 的结果；本章 §2.1「理论根基：为什么需要运行期多态」给的是动机，这里给的是「为什么恰好快」",
+          "§3.2 二、RTTI：dynamic_cast 与 typeid 的运行时查表 · 读 `llvm/llvm-project` 的 `llvm/include/llvm/Support/Casting.h`：`classof` + `dyn_cast` 自己实现类型判别，不依赖 `dynamic_cast`（LLVM 默认关闭 RTTI）。读 `isa`/`cast`/`dyn_cast` 三件套，就明白「RTTI 只是手段，类型判别可以有更便宜的实现」——`classof` 基于一个静态的类 ID 字段做整数比较，代价是一次比较而非查表",
+          "§3.1 一、纯虚函数与抽象类：接口隔离的契约 · 读 `google/leveldb` 的 `include/leveldb/env.h`：`class Env` 几乎全是纯虚函数（文件、锁、线程全抽象掉），实现放在 `util/env_posix.cc` 的 `PosixEnv : public Env`；整份 leveldb 只通过 `Env*` 访问系统调用——这是「面向接口编程」在 C++ 里的完整闭环，也是本章 §2.4「override / final：把错误交给编译器」为什么必须开 `override` 的理由：接口一改，所有实现立刻编译不过"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -413,9 +413,9 @@
           11172
         ],
         "github_notes": [
-          "§2.3 全特化的实战：`include/fmt/base.h` 的 `template <typename T, typename Char> struct formatter` 主模板故意不实现 `format()`，谁要支持格式化就特化谁（`formatter<std::string>`、`formatter<int>`）；读主模板那条注释，它写清了「为什么主模板要留空」",
-          "§3.3 SFINAE 的工程写法：`include/nlohmann/json.hpp` 里 `is_compatible_type`、`has_to_json`、`has_from_json` 全靠「替换失败不算错」来探测用户类型有没有提供 `to_json`/`from_json`；顺着 `has_to_json` 的 `decltype` 表达式看，能看清 SFINAE 到底在哪一步生效",
-          "§3.3 与 §3.5 的底层：`stl/inc/type_traits` 里 `void_t`、`enable_if`、`conjunction` 的真实实现；看完再读 `stl/inc/concepts`（若你所看的版本已含 C++20 约束），就能对照出「SFINAE 时代」与「concept 时代」表达同一约束的成本差"
+          "§2.5 五、工程实践：特化的正确用法与陷阱 · 读 `include/fmt/base.h` 的 `template <typename T, typename Char> struct formatter`：主模板故意不实现 `format()`，谁要支持格式化就特化谁（`formatter<std::string>`、`formatter<int>`）；读主模板那条注释，它写清了「为什么主模板要留空」——留空让「不支持的类型」在编译期报错，而不是运行期输出垃圾；这正是本章 §2.3「全特化」与 §2.4「偏特化」的选用判据",
+          "§3.3 三、理论根基：SFINAE —— 替换失败并非错误 · 读 `nlohmann/json` 的 `include/nlohmann/json.hpp`：`is_compatible_type`、`has_to_json`、`has_from_json` 全靠「替换失败不算错」来探测用户类型有没有提供 `to_json`/`from_json`；顺着 `has_to_json` 的 `decltype` 表达式看，能看清 SFINAE 到底在哪一步生效——在模板实参替换阶段，而不是在函数体实例化阶段，这就是它和 §3.4「检测是否有某成员」的分界",
+          "§3.5 五、concept 的前世今生：SFINAE 的终结者 · 读 `microsoft/STL` 的 `stl/inc/type_traits` 里 `void_t`、`enable_if`、`conjunction` 的真实实现；看完再读同目录 `stl/inc/concepts`（C++20 约束），就能对照出「SFINAE 时代」与「concept 时代」表达同一约束的成本差——前者要写 `enable_if_t<...>` 挤在返回类型里、报错指向替换点，后者只写一行 `requires`、报错直接指出违反哪条约束；本章 §3.6「工程实践与陷阱」里说的「错误信息可读性」就是这么来的"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -477,9 +477,9 @@
           34813
         ],
         "github_notes": [
-          "§2.2 amortized 2× 扩容 · `stl/inc/vector` 的 `_Calculate_growth` 做 `max(size + size/2, requested)` 再对齐，`_Emplace_reallocate` 分配新块、搬移旧元素、释放旧块——三步全在这里；对照本章算的摊销 O(1)，能看出「1.5× 还是 2×」对重新分配次数的影响",
-          "§3.3 负载因子与再哈希 · `src/dict.c` 的 `dictExpand` 建两张表，`dictRehash` 每次只搬 `n` 个桶（渐进式 rehash），查找时两张表都要看；这是「不一次性搬完以免卡顿」的工程答案，与 `unordered_map` 的一次性 rehash 形成对照",
-          "§4.3 容器选择决策树 · `data_structures/` 下同一个结构常有数组版与链表版两种实现，`sort/` 下也区分「适合 vector」与「只能链表做」的算法；把本章的决策树拿过来，逐目录验证一遍你的判断"
+          "§1.2 二、实现机制：amortized 2× 扩容到底发生了什么 · 读 `microsoft/STL` 的 `stl/inc/vector`：`_Calculate_growth` 做 `max(size + size/2, requested)` 再对齐，`_Emplace_reallocate` 分配新块、搬移旧元素、释放旧块——三步全在这里；注意 MSVC 实际取的是 **1.5×**（`size + size/2`）而不是 2×，对照本章算的摊销 O(1)，能看出倍数只影响常数、不影响均摊结论，但会影响「旧块能否被后续分配复用」——这正是 §1.3「迭代器/引用/指针的失效规则」的由来",
+          "§3.3 三、实现机制：负载因子与再哈希（rehash） · 读 `redis/redis` 的 `src/dict.c`：`dictExpand` 建两张表，`dictRehash` 每次只搬 `n` 个桶（渐进式 rehash），查找时两张表都要看；这是「不一次性搬完以免卡顿」的工程答案，与 `unordered_map` 的一次性 rehash 形成对照——标准容器为了满足 §3.2「桶数组 + 链地址法」的迭代器语义只能整体重建，而 Redis 单线程服务可以接受「两张表短暂并存」",
+          "§4.3 三、容器选择决策树（工程实践） · 读 `TheAlgorithms/C-Plus-Plus` 的 `graph/` 与 `sorting/` 目录：同一个结构常有邻接矩阵版与邻接表版两种实现，排序也区分「适合 vector」与「只能链表做」的算法；把本章 §4.1「list / forward_list：节点结构为何缓存不友好」与 §4.4「内存局部性与缓存友好的量化直觉」的判据拿过来，逐目录验证一遍你的判断——同一份代码换成链表版，性能差的那部分就是节点指针跳转的代价"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -540,9 +540,9 @@
           34813
         ],
         "github_notes": [
-          "§2.2 sort 的真实实现：`stl/inc/algorithm` 的 `sort` 调 `_Sort_unchecked`，内部是「快排分区 → 递归深度超限就转堆排 → 小区间用插排」三段式（introsort）；找到那个深度阈值常量，就明白本章说的「最坏 O(n log n) 靠什么兜底」",
-          "§1.1「迭代器是算法与容器的契约」：`include/simdjson/dom/array.h` 的 `iterator` 只提供 `operator*`/`operator++`/`operator!=`，够 `std::distance` 与范围 for 用，却不暴露底层实现；再看 `ondemand` 版的迭代器语义差异，能体会「迭代器范畴决定算法能用多强」",
-          "§1.2 范畴差异的实际后果：`numeric/` 与 `sort/` 里 `std::accumulate`、`std::sort`、`std::reverse` 各自要求输入迭代器/随机访问迭代器；把同一段代码的容器从 `list` 换成 `vector` 再编译，报错信息就是范畴不够用的证据"
+          "§2.2 二、实现机制：sort 的 introsort（混合排序） · 读 `microsoft/STL` 的 `stl/inc/algorithm`：`sort` 调 `_Sort_unchecked`，内部是「快排分区 → 递归深度超限就转堆排 → 小区间用插排」三段式（introsort）；找到那个深度阈值常量（MSVC 是 `2 * log2(n)`），就明白本章说的「最坏 O(n log n) 靠什么兜底」——深度超限时切堆排，把快排的 O(n²) 最坏情况挡住",
+          "§1.1 一、理论根基：迭代器是「算法与容器之间的接口契约」 · 读 `simdjson/simdjson` 的 `include/simdjson/dom/array.h`：它的 `iterator` 只提供 `operator*`/`operator++`/`operator!=`，够 `std::distance` 与范围 for 用，却不暴露底层实现；再看 `ondemand` 版的迭代器语义差异，能体会「迭代器范畴决定算法能用多强」——本章 §1.2「范畴如何被编译器强制」说的就是这条契约怎么被静态检查出来",
+          "§1.2 二、实现机制：范畴如何被编译器强制（concept 之前 vs 之后） · 读 `TheAlgorithms/C-Plus-Plus` 的 `numeric/` 与 `sorting/`：`std::accumulate`、`std::sort`、`std::reverse` 各自要求输入迭代器 / 随机访问迭代器；把同一段代码的容器从 `list` 换成 `vector` 再编译，报错信息就是范畴不够用的证据——C++17 前是 `no matching function` 加几十行模板展开，C++20 后 concept 会直接说「list 的迭代器不满足 random_access_iterator」，这就是 §1.5「可运行示例：迭代器范畴差异（编译期可观察）」想让你亲眼看到的差别"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -604,9 +604,9 @@
           72137
         ],
         "github_notes": [
-          "§1.2「析构调用是编译器插入的」：`db/db_impl.cc` 的 `DBImpl::~DBImpl()` 里显式停后台线程、删 memtable、释放文件锁——所有清理都钉在析构里，因此 `DB::Open` 失败时只要 `delete impl` 就干净；注意 leveldb 用的是裸指针 + `delete`，正好用来对照「手写 RAII 与 unique_ptr 的等价关系」",
-          "§1.2 的通用化：`absl/cleanup/cleanup.h` 的 `absl::Cleanup` 把「析构时执行一段代码」抽成可组合对象，`absl/synchronization/mutex.h` 的 `MutexLock` 用它管锁；这两处合看，就明白 RAII 不是「智能指针专用技巧」，而是资源管理的通用形态",
-          "§2.2 与 §3.3 的所有权边界：`src/google/protobuf/arena.h` 里 `Arena` 用 `unique_ptr` 管自己的块，但 `CreateMessage` 在 arena 上创建的对象由 arena 统一回收（不逐个 delete）；这是「所有权不在指针、而在容器」的典型，也解释了自定义删除器为什么要做类型擦除"
+          "§1.2 二、实现机制：析构调用到底是怎么被「插入」的 · 读 `google/leveldb` 的 `db/db_impl.cc`：`DBImpl::~DBImpl()` 里显式停后台线程、删 memtable、释放文件锁——所有清理都钉在析构里，因此 `DB::Open` 失败时只要 `delete impl` 就干净；注意 leveldb 用的是裸指针 + `delete`，正好用来对照本章 §1.1「为什么确定性析构是 C++ 的脊梁」——手写 RAII 与 `unique_ptr` 在语义上完全等价，差别只在「有没有可能忘记 delete」",
+          "§1.3 三、工程实践：异常安全三保证与 RAII 的关系 · 读 `abseil/abseil-cpp` 的 `absl/cleanup/cleanup.h`：`absl::Cleanup` 把「析构时执行一段代码」抽成可组合对象，`absl/synchronization/mutex.h` 的 `MutexLock` 用它管锁；这两处合看，就明白 RAII 不是「智能指针专用技巧」，而是资源管理的通用形态——它保证的是「基本保证」这条下限：不管哪条路径退出，清理一定发生",
+          "§3.3 三、实现机制：自定义删除器（类型擦除的成本差异） · 读 `protocolbuffers/protobuf` 的 `src/google/protobuf/arena.h`：`Arena` 用 `unique_ptr` 管自己的块，但 `CreateMessage` 在 arena 上创建的对象由 arena 统一回收（不逐个 delete）；这是「所有权不在指针、而在容器」的典型，也解释了本章 §3.3 里自定义删除器为什么要做类型擦除——删除器一旦成为 `shared_ptr` 控制块的一部分，它就不再属于指针类型"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -667,9 +667,9 @@
           50813
         ],
         "github_notes": [
-          "§1.2 栈展开前的最后一站：`include/fmt/base.h` 的 `FMT_THROW` 可被配置成抛异常或直接 abort，`FMT_ASSERT` 在 debug 下抛 `format_error`；读这两个宏的分支，就看清「库要不要让异常穿过自己」是一个可配置的契约，而不是语言强制",
-          "§3.4 断言分级：`googletest/include/gtest/gtest.h` 里 `EXPECT_*` 失败继续跑、`ASSERT_*` 失败立刻 return，`EXPECT_THROW`/`EXPECT_NO_THROW` 把「抛不抛」变成可断言的性质，`ASSERT_DEATH` 连崩溃都能测；这套 API 是本章「断言与异常各管一段」的现实版",
-          "§2.1 异常安全契约的开关：`include/nlohmann/json.hpp` 的 `JSON_THROW` 由 `JSON_NOEXCEPTION` 决定展开成`throw` 还是 `std::abort`，`parse(..., allow_exceptions=false)` 则让调用方自己查 `is_discarded()`；同一个库给出三条错误处理路径，正好对本章的「异常 vs 错误码 vs 终止」取舍"
+          "§1.2 二、实现机制：栈展开到底发生了什么 · 读 `include/fmt/base.h` 的 `FMT_THROW` 与 `FMT_ASSERT`：前者可被配置成抛异常或直接 abort，后者在 debug 下抛 `format_error`；读这两个宏的分支，就看清「库要不要让异常穿过自己」是一个可配置的契约，而不是语言强制——这也是本章 §1.4「边界与陷阱」里「析构函数抛异常会 terminate」为什么让库作者宁可 abort 的理由",
+          "§3.4 四、断言：assert / static_assert / 契约（contracts） · 读 `google/googletest` 的 `googletest/include/gtest/gtest.h`：`EXPECT_*` 失败继续跑、`ASSERT_*` 失败立刻 return，`EXPECT_THROW`/`EXPECT_NO_THROW` 把「抛不抛」变成可断言的性质，`ASSERT_DEATH` 连崩溃都能测；这套 API 是本章「断言与异常各管一段」的现实版——断言管「程序写错了」，异常管「外部输入不合法」",
+          "§2.1 一、理论根基：异常安全的「契约」 · 读 `nlohmann/json` 的 `include/nlohmann/json.hpp`：`JSON_THROW` 由 `JSON_NOEXCEPTION` 决定展开成 `throw` 还是 `std::abort`，`parse(..., allow_exceptions=false)` 则让调用方自己查 `is_discarded()`；同一个库给出三条错误处理路径，正好对应本章 §2.4「在真实项目里给保证」要做的选择——「异常 vs 错误码 vs 终止」没有对错，只有调用方愿不愿意为此写分支"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -731,9 +731,9 @@
           18171
         ],
         "github_notes": [
-          "§2.2 值类别与 §4.1 结构化绑定的对照表：`README.md` 按 C++11/14/17/20 分节，每节都有最小可编译示例；建议先读「rvalue references」「structured bindings」两节，把本章的术语和标准里的正式名字对上，再回代码里验证",
-          "§3.3 emplace_back 与 push_back 的差别：`stl/inc/vector` 的 `emplace_back` 直接把参数转发给`_Emplace_reallocate` 里的 `construct_at`，全程只构造一次；而 `push_back(const T&)` 要先凑出一个 `T` 再移动。看这两条实现路径，就明白「构造次数差异」不是玄学而是参数转发位置不同",
-          "§2.3 `std::move` 只是一次 cast：`absl/utility/utility.h` 的 `absl::exchange` 与 `absl/types/optional.h` 的 `value() &&` 重载都靠 `std::move` 把左值转成右值再转发；注意它们转完从不「清空源对象」——移动后的源对象仍是有效但未指定状态，这是本章最常被误解的一条"
+          "§4.1 一、结构化绑定（Structured Bindings，C++17） · 读该仓 `README.md`：它按 C++11/14/17/20 分节，每节都有最小可编译示例；先读「rvalue references」「structured bindings」两节，把本章的术语和标准里的正式名字对上，再回代码里验证；本章 §2.2「值类别（Value Categories）：理解移动的前提」之所以难，就是因为「prvalue / xvalue / lvalue」这三个词在教材里常被简化成「左值/右值」",
+          "§3.3 三、`emplace_back` vs `push_back`：构造次数差异 · 读 `microsoft/STL` 的 `stl/inc/vector`：`emplace_back` 直接把参数转发给 `_Emplace_reallocate` 里的 `construct_at`，全程只构造一次；而 `push_back(const T&)` 要先凑出一个 `T` 再移动。看这两条实现路径，就明白「构造次数差异」不是玄学而是参数转发位置不同——配合本章 §3.4「转发引用参数的陷阱」，当参数是 `{}` 或隐式转换类型时，`emplace_back` 反而可能选错构造重载",
+          "§2.3 三、实现机制：`std::move` 只是一次无条件 cast · 读 `abseil/abseil-cpp` 的 `absl/utility/utility.h`：`absl::exchange` 与 `absl/types/optional.h` 的 `value() &&` 重载都靠 `std::move` 把左值转成右值再转发；注意它们转完从不「清空源对象」——移动后的源对象仍是有效但未指定状态，这是本章最常被误解的一条；而 §2.4「为什么移动构造要标 noexcept」正是这条语义的延伸：标记了才敢在扩容时搬而不是拷"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -794,9 +794,9 @@
           50813
         ],
         "github_notes": [
-          "§4.3 `std::format` 的设计动机：`include/fmt/format.h` 的 `format_to` 把结果直接写进输出迭代器，`include/fmt/ostream.h` 则给「只有 `operator<<` 的老类型」搭桥；两处合看就知道 `std::format` 为什么比 `stringstream` 快——它不建流对象、不碰 locale",
-          "§1.3 与 §3.2 的缓冲策略：`include/rapidjson/filereadstream.h` 的 `FileReadStream` 要你自己给一块`buffer`（默认 64KB），`FileWriteStream` 同理；这解释了本章「stdio 缓冲 vs 流对象」的层次——库不替你藏缓冲，性能就变得可预测",
-          "§4.4 结构化文本解析：`include/nlohmann/json.hpp` 的 `operator>>` 与 `dump()` 是「流式接口 + 一次性序列化」的组合；对比它和 `std::stringstream` 解析同一份 CSV 的代码量，能直观看出本章说的「手写分隔符解析为什么容易漏边界」"
+          "§4.3 三、std::format（C++20）的设计动机 · 读 `fmtlib/fmt` 的 `include/fmt/format.h`：`format_to` 把结果直接写进输出迭代器，`include/fmt/ostream.h` 则给「只有 `operator<<` 的老类型」搭桥；两处合看就知道 `std::format` 为什么比 `stringstream` 快——它不建流对象、不碰 locale，解析格式串是一次性编译期检查；本章 §4.2「为什么 stringstream 慢」给的是病因，这里给的是药",
+          "§3.2 二、实现机制：文件位置指针与文本/二进制差异 · 读 `Tencent/rapidjson` 的 `include/rapidjson/filereadstream.h`：`FileReadStream` 要你自己给一块 `buffer`（默认 64KB），`FileWriteStream` 同理；这解释了本章 §3.1「fstream 是流 + 文件缓冲区的组合」里的缓冲层次——库不替你藏缓冲，性能就变得可预测；对照 §1.3「`sync_with_stdio` 与 `tie` 的加速原理」会发现两者在做同一件事：把「每字符一次系统调用」换成「每块一次」",
+          "§4.4 四、工程实践：CSV 行解析 · 读 `nlohmann/json` 的 `include/nlohmann/json.hpp`：它的 `operator>>` 与 `dump()` 是「流式接口 + 一次性序列化」的组合；对比它和 `std::stringstream` 解析同一份 CSV 的代码量，能直观看出本章说的「手写分隔符解析为什么容易漏边界」——引号内的逗号、转义的双引号、行尾的 `\\r\\n`，每一条都是独立分支"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -857,9 +857,9 @@
           4781
         ],
         "github_notes": [
-          "§1.2 与 §1.3 头文件守卫的现实版：`cJSON.h` 顶部 `#ifndef cJSON__h` / `#define cJSON__h`，`CJSON_PUBLIC` 宏负责导出符号、`CJSON_EXPORT_SYMBOLS` 控制静态/动态；整个头文件只有声明——把「头文件该放什么」这件事做到了教科书级",
-          "§2.4 宏与 inline 的取舍：`include/fmt/base.h` 的 `FMT_BEGIN_NAMESPACE`/`FMT_END_NAMESPACE`、`FMT_API`、`FMT_INLINE` 三层宏分别管「命名空间版本化、符号可见性、强制内联」；看清每个宏存在的理由，就明白为什么现代库仍需要宏——跨编译器差异无法用 C++ 语法表达",
-          "§1.2 的量化工具：`iwyu.cc` 是主分析器，`iwyu_include_picker.cc` 维护「哪个头文件该由谁包含」的映射表；拿它跑一遍本章的示例工程，`#include` 的传递闭包会被直接列出——这是「文本包含」语义最硬的证据"
+          "§1.2 二、实现机制：#include 的「文本包含」语义 · 读 `DaveGamble/cJSON` 的 `cJSON.h`：顶部 `#ifndef cJSON__h` / `#define cJSON__h`，`CJSON_PUBLIC` 宏负责导出符号、`CJSON_EXPORT_SYMBOLS` 控制静态/动态；整个头文件只有声明——把「头文件该放什么」这件事做到了教科书级；本章 §1.3「`#pragma once` 与其局限」要对着它看：守卫宏防的是「同一编译单元重复包含」，防不住「两个不同路径指向同一文件」",
+          "§2.4 四、工程实践：宏与 inline 的取舍 · 读 `include/fmt/base.h` 的 `FMT_BEGIN_NAMESPACE`/`FMT_END_NAMESPACE`、`FMT_API`、`FMT_INLINE` 三层宏：它们分别管「命名空间版本化、符号可见性、强制内联」；看清每个宏存在的理由，就明白为什么现代库仍需要宏——跨编译器差异无法用 C++ 语法表达，这也正是本章 §2.2「实现机制与坑」里「宏不是坏东西，是最后手段」的分寸",
+          "§4.2 二、实现机制：日志宏如何「携带位置信息」 · 读 `include-what-you-use/include-what-you-use/iwyu.cc` 与同目录的 `iwyu_include_picker.cc`：前者是主分析器，后者维护「哪个头文件该由谁包含」的映射表；拿它跑一遍本章的示例工程，`#include` 的传递闭包会被直接列出——这是「文本包含」语义最硬的证据，也是 §4.1「预定义宏是编译器注入的编译期常量」之外的另一类「编译期注入」（`__FILE__` 靠宏展开注入，头文件靠文本粘贴注入）"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -920,9 +920,9 @@
           17638
         ],
         "github_notes": [
-          "§3.1 与 §3.2 inline namespace 的工业用法：`include/fmt/base.h` 里 `FMT_BEGIN_NAMESPACE` 展开成`namespace fmt { inline namespace v11 {`，于是 `fmt::format` 与 `fmt::v11::format` 是同一个实体；库靠它做到「ABI 版本可以换、用户代码不用改」",
-          "§3.1 的另一套做法：`absl/base/config.h` 的 `ABSL_NAMESPACE_BEGIN` 展开成 `namespace absl { ABSL_INTERNAL_NAMESPACE {`，具体名字由 `absl/base/options.h` 的 LTS 宏决定；对照 fmt 与 abseil 两种版本化命名空间，能看清「透明 vs 显式」的取舍",
-          "§1.2 名字查找的实际分层：`src/brpc/server.h` 里 `namespace brpc`，其下再分 `policy`、`detail` 等子命名空间，对外只暴露少数类型；读它的 include 顺序与 `using` 声明，能看到「哪些名字允许被 ADL 找到、哪些必须写全限定名」是被刻意设计的"
+          "§3.2 二、实现机制：透明性从何而来 · 读 `include/fmt/base.h`：`FMT_BEGIN_NAMESPACE` 展开成 `namespace fmt { inline namespace v11 {`，于是 `fmt::format` 与 `fmt::v11::format` 是同一个实体；库靠它做到「ABI 版本可以换、用户代码不用改」——本章 §3.1「为什么需要 inline namespace」的答案是：普通嵌套命名空间做不到「同名别名」，而 inline 让内层名字自动进入外层作用域",
+          "§3.1 一、理论根基：为什么需要「inline namespace」 · 读 `abseil/abseil-cpp` 的 `absl/base/config.h`：`ABSL_NAMESPACE_BEGIN` 展开成 `namespace absl { ABSL_INTERNAL_NAMESPACE {`，具体名字由 `absl/base/options.h` 的 LTS 宏决定；对照 fmt 与 abseil 两种版本化命名空间，能看清「透明 vs 显式」的取舍——fmt 用 inline 让用户无感，abseil 让用户可以显式写 `absl::lts_20240116::` 锁死版本",
+          "§1.2 二、实现机制：名字查找到底怎么走 · 读 `apache/brpc` 的 `src/brpc/server.h`：`namespace brpc` 下再分 `policy`、`detail` 等子命名空间，对外只暴露少数类型；读它的 include 顺序与 `using` 声明，能看到「哪些名字允许被 ADL 找到、哪些必须写全限定名」是被刻意设计的——这正是本章 §1.5「五、可运行示例：眼见为实」里 ADL 那一例的现实约束：ADL 只查实参类型所在命名空间，所以把重载放进 `detail` 就同时切断了 ADL"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -984,9 +984,9 @@
           17638
         ],
         "github_notes": [
-          "§2.2 三种 RAII 锁与 §4.2 wait 的三件事：`muduo/base/Mutex.h` 的 `MutexLockGuard` 只在构造/析构里加解锁，`muduo/base/Condition.h` 的 `wait()` 内部「解锁 → 等待 → 重新加锁」；`muduo/net/EventLoop.cc` 则示范 one loop per thread——三处合起来就是本章的锁 + 条件变量 + 线程模型",
-          "§5.3 线程池：`taskflow/core/executor.hpp` 的 `Executor` 预先起 `_config.num_workers` 个线程，每个 worker 在自己的 `_wsq`（work-stealing queue）上取任务，空闲时从别人队尾偷；读 `_wait_for_task` 与 `_steal` 两个函数，就懂「任务图 + 工作窃取」如何避免线程空转",
-          "§5.1 高层并发抽象的另一种答案：`src/bthread/` 用 M:N 调度（大量 bthread 跑在少量 pthread 上），把「阻塞等待」换成用户态挂起；对照 `std::thread` 的 1:1 模型，能看清本章说的「线程池解决的是创建成本，协程解决的是调度成本」"
+          "§2.2 二、实现机制：三种 RAII 锁的差异 · 读 `chenshuo/muduo` 的 `muduo/base/Mutex.h`：`MutexLockGuard` 只在构造/析构里加解锁；配套 `muduo/base/Condition.h` 的 `wait()` 内部「解锁 → 等待 → 重新加锁」，`muduo/net/EventLoop.cc` 则示范 one loop per thread——三处合起来就是本章 §4.2「实现机制：wait 的三件事」的完整实现；注意 `wait` 必须传加锁的 guard，否则「检查条件」与「进入等待」之间存在丢唤醒窗口",
+          "§5.3 三、线程池：为什么必要 · 读 `taskflow/taskflow` 的 `taskflow/core/executor.hpp`：`Executor` 预先起 `_config.num_workers` 个线程，每个 worker 在自己的 `_wsq`（work-stealing queue）上取任务，空闲时从别人队尾偷；读 `_wait_for_task` 与 `_steal` 两个函数，就懂「任务图 + 工作窃取」如何避免线程空转——这正是本章 §5.1「高层并发抽象」里说的「比裸线程多出来的那一层价值」",
+          "§5.1 一、理论根基：高层并发抽象 · 读 `apache/brpc` 的 `src/bthread/bthread.h`：`src/bthread/` 用 M:N 调度（大量 bthread 跑在少量 pthread 上），把「阻塞等待」换成用户态挂起；对照 `std::thread` 的 1:1 模型，能看清本章说的「线程池解决的是创建成本，协程解决的是调度成本」——两者叠加才是 §5.2「async 的启动策略」要权衡的全貌"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -1048,9 +1048,9 @@
           18171
         ],
         "github_notes": [
-          "§1.1 与 §1.3 的原始实现：`stl/inc/type_traits` 里 `is_destructible` 靠 `declval<T>().~T()` 的SFINAE 探测，`conjunction`/`disjunction` 用短路继承避免多余实例化；把这几处读完，`<type_traits>` 就不再是「查表用的魔法」",
-          "§3.1 与 §3.2 的过渡样本：`include/fmt/base.h` 里 `is_formattable` 同时有 C++20 concept 版（`requires` 表达式）与旧编译器的 SFINAE 版，两份实现并列；对照它们能看清 concept 把「替换失败」从错误信息里救出来这件事有多实际",
-          "§3.1 的工具箱：`absl/meta/type_traits.h` 的 `absl::void_t`、`type_identity`、`is_comparable` 都是为「检测某操作是否合法」准备的积木；读 `is_comparable` 的 `decltype` 表达式，是本章 SFINAE 一节最干净的例题"
+          "§1.3 三、is_destructible 与「类型是否可销毁」 · 读 `microsoft/STL` 的 `stl/inc/type_traits`：`is_destructible` 靠 `declval<T>().~T()` 的 SFINAE 探测，`conjunction`/`disjunction` 用短路继承避免多余实例化；把这几处读完，`<type_traits>` 就不再是「查表用的魔法」——本章 §1.2「模板特化与偏特化」讲的机制，在这里就是两行 `true_type`/`false_type` 分支",
+          "§3.2 二、C++20 concept：可读的约束 · 读 `include/fmt/base.h` 里 `is_formattable`：它同时有 C++20 concept 版（`requires` 表达式）与旧编译器的 SFINAE 版，两份实现并列；对照它们能看清 concept 把「替换失败」从错误信息里救出来这件事有多实际——SFINAE 版报错指向模板定义处，concept 版直接说「T 不满足 formattable」",
+          "§3.1 一、SFINAE：替换失败不是错误 · 读 `abseil/abseil-cpp` 的 `absl/meta/type_traits.h`：`absl::void_t`、`type_identity`、`is_comparable` 都是为「检测某操作是否合法」准备的积木；读 `is_comparable` 的 `decltype` 表达式，是本章 SFINAE 一节最干净的例题——它同时检测 `a == b` 与 `a != b` 两侧，缺一个就整体失败，而本章 §3.3「requires 表达式与约束组合」用 `requires requires` 能写成两条并列约束"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -1112,9 +1112,9 @@
           50637
         ],
         "github_notes": [
-          "§1.1 对齐与 §1.2 显式对齐：`src/generic/stage1/json_structural_indexer.h` 每次吃 64 字节块，用 `SIMDJSON_ALIGNED` 保证输入指针对齐到 64 字节边界（否则 AVX2 加载会慢甚至崩）；这是「对齐不是学究问题，是 SIMD 的硬要求」的第一手证据",
-          "配 §3.2 的测量方法：`include/benchmark/benchmark.h` 的 `DoNotOptimize` 阻止编译器把结果删掉、`ClobberMemory` 强制刷新内存可见性；本章讲「链表 vs 数组」时，没有这两个工具测出来的数字基本不可信",
-          "§3.1 AoS vs SoA 的极致：`src/Columns/ColumnVector.cpp` 每个数值列就是一条连续 `PODArray`，`src/Common/PODArray.h` 负责带 padding 的增长；读 `ColumnVector::getData()` 直接返回裸指针——因为列存的前提就是「同类型紧挨着」，这正是本章要论证的局部性收益"
+          "§1.2 二、显式对齐与协议布局：alignas / #pragma pack / 干扰尺寸 · 读 `simdjson/simdjson` 的 `src/generic/stage1/json_structural_indexer.h`：每次吃 64 字节块，用 `SIMDJSON_ALIGNED` 保证输入指针对齐到 64 字节边界（否则 AVX2 加载会慢甚至崩）；这是「对齐不是学究问题，是 SIMD 的硬要求」的第一手证据——本章 §1.1「对齐规则与填充」讲的是编译器自动做的事，这里讲的是「编译器不肯做、只能手写」的那部分",
+          "§3.2 二、链表 vs 数组，指针追逐与 std::vector 的连续性 · 配 `google/benchmark` 的 `include/benchmark/benchmark.h`：`DoNotOptimize` 阻止编译器把结果删掉、`ClobberMemory` 强制刷新内存可见性；本章讲「链表 vs 数组」时，没有这两个工具测出来的数字基本不可信——编译器会把整个循环优化掉，而 §3.1「AoS vs SoA」的对比同样需要它们才有意义",
+          "§3.1 一、AoS vs SoA，行优先 vs 列优先 · 读 `ClickHouse/ClickHouse` 的 `src/Columns/ColumnVector.cpp`：每个数值列就是一条连续 `PODArray`，`src/Common/PODArray.h` 负责带 padding 的增长；读 `ColumnVector::getData()` 直接返回裸指针——因为列存的前提就是「同类型紧挨着」，这正是本章要论证的局部性收益；配合 §4.1「内联、条件提示与去虚化」看，列存的另一好处是「按列处理的算子可以整段内联」，而 AoS 每行都要跨字段取址"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -1176,9 +1176,9 @@
           null
         ],
         "github_notes": [
-          "§2.1 测试框架的最小内核：`googletest/src/gtest.cc` 的 `RUN_ALL_TESTS` → `UnitTest::Run` → 逐个 `TestInfo::Run`，最后把失败数折成进程退出码；看清「退出码即结论」这条链，CI 里的 `ctest` 才知道该不该红",
-          "§2.1 的另一种内核与 §1.2 的 CMake 用法：`src/catch2/catch_session.cpp` 的 `Session::run` 返回失败用例数，`CMakeLists.txt` 里 `catch_discover_tests` 把用例注册成独立测试；对照 googletest 的「一次跑完」与 Catch2 的「逐用例发现」，能看出两种框架对 CI 并行粒度的不同假设",
-          "§1.2、§1.3 与 §4.1 的整体样板：根 `CMakeLists.txt` 用 target-based 写法，`cmake/` 放自写模块，`.github/workflows/` 里是完整的矩阵构建 + 缓存 + artifact；把它当作本章的参考实现逐条对照——这是少数把「现代 CMake + 测试 + CI」串成一条线的小型仓库"
+          "§2.1 一、测试框架的最小内核与退出码语义 · 读 `google/googletest` 的 `googletest/src/gtest.cc`：`RUN_ALL_TESTS` → `UnitTest::Run` → 逐个 `TestInfo::Run`，最后把失败数折成进程退出码；看清「退出码即结论」这条链，CI 里的 `ctest` 才知道该不该红——本章 §2.2「用例设计：等价类、边界值、参数化与夹具隔离」都在这个外壳之内，外壳不成立，用例写得再好也无法被 CI 判读",
+          "§1.2 二、`PUBLIC` / `PRIVATE` / `INTERFACE`：使用要求的三种传播强度 · 读 `catchorg/Catch2` 的 `src/catch2/catch_session.cpp`：`Session::run` 返回失败用例数，`CMakeLists.txt` 里 `catch_discover_tests` 把用例注册成独立测试；对照 googletest 的「一次跑完」与 Catch2 的「逐用例发现」，能看出两种框架对 CI 并行粒度的不同假设——前者只需一个可执行文件，后者要求每个用例能被单点触发，这正是 `INTERFACE`（头文件依赖向上传递）在测试目标上的典型用法",
+          "§4.1 一、workflow 的结构与 DAG：`needs` 决定一切 · 读 `cpp-best-practices/gui_starter_template`：根 `CMakeLists.txt` 用 target-based 写法，`cmake/` 放自写模块，`.github/workflows/` 里是完整的矩阵构建 + 缓存 + artifact；把它当作本章的参考实现逐条对照——这是少数把「现代 CMake + 测试 + CI」串成一条线的小型仓库；注意它的 `needs` 图与 §3.3「运行期防线：sanitizer 与三层门禁的排布」是对应的：告警 → 静态分析 → sanitizer，越靠后越慢、越只在主干跑"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -1241,9 +1241,9 @@
           286133
         ],
         "github_notes": [
-          "§3.1 异常安全等级的规范表述：`CppCoreGuidelines.md` 的 E.6（RAII 保证）与 C.vector 相关条款把「Basic / Strong / No-throw」写成了可引用规则；面试口述前先按编号找到原文，比背二手总结更抗追问",
-          "§2.1 线程池之外的另一半——工程化清单：`chapters/` 目录按主题分章（工具、风格、CMake、测试、CI），每章末尾给可执行检查项；拿它给自己的项目做一次体检，能找出「能跑但不能交付」的具体项",
-          "§5.2 系统设计取材：`README.md` 的 C++ 一节列了几十个「从零写一个 X」的项目（解释器、渲染器、数据库）；面试讲项目经历时，从这类项目里挑一个真正做完的，比堆功能列表更能撑住「你解决过什么真实约束」的追问"
+          "§3.1 一、异常安全等级（Basic / Strong / No-throw） · 读 `isocpp/CppCoreGuidelines` 的 `CppCoreGuidelines.md`：E.6（RAII 保证）与 C.vector 相关条款把「Basic / Strong / No-throw」写成了可引用规则；面试口述前先按编号找到原文，比背二手总结更抗追问——尤其是「为什么 `vector::push_back` 只给基本保证」这类题，原文会直接指到「重分配时移动构造若不是 noexcept 就退化为拷贝」",
+          "§2.1 一、线程池：任务队列 + 条件变量 + 优雅关闭 · 读 `cpp-best-practices/cppbestpractices` 的 `README.md`：`chapters/` 目录按主题分章（工具、风格、CMake、测试、CI），每章末尾给可执行检查项；拿它给自己的项目做一次体检，能找出「能跑但不能交付」的具体项——这正是本章在 §3.2「RAII 与所有权」之外要补的工程面",
+          "§5.2 二、系统设计题答法 · 读 `practical-tutorials/project-based-learning` 的 `README.md` 的 C++ 一节：它列了几十个「从零写一个 X」的项目（解释器、渲染器、数据库）；面试讲项目经历时，从这类项目里挑一个真正做完的，比堆功能列表更能撑住「你解决过什么真实约束」的追问——配合本章 §5.1「白板 coding 训练法」看，系统设计题的答法本质是把 §1「迷你 vector」与 §2「线程池」这类「你亲手写过的组件」复用成论据"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [

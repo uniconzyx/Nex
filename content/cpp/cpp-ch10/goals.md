@@ -30,9 +30,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [google/leveldb](https://github.com/google/leveldb) | 39,514 | §1.2 析构调用到底是怎么被"插入… | §1.2「析构调用是编译器插入的」：`db/db_impl.cc` 的 `DBImpl::~DBImpl()` 里显式停后台线程、删 memtable、释放文件锁——所有清理都钉在析构里，因此 `DB::Open` 失败时只要 `delete impl` 就干净；注意 leveldb 用的是裸指针 + `delete`，正好用来对照「手写 RAII 与 unique_ptr 的等价关系」 |
-| 2 | [abseil/abseil-cpp](https://github.com/abseil/abseil-cpp) | 18,177 | §1.2 析构调用到底是怎么被"插入… | §1.2 的通用化：`absl/cleanup/cleanup.h` 的 `absl::Cleanup` 把「析构时执行一段代码」抽成可组合对象，`absl/synchronization/mutex.h` 的 `MutexLock` 用它管锁；这两处合看，就明白 RAII 不是「智能指针专用技巧」，而是资源管理的通用形态 |
-| 3 | [protocolbuffers/protobuf](https://github.com/protocolbuffers/protobuf) | 72,137 | §2.2 unique_ptr 为何… | §2.2 与 §3.3 的所有权边界：`src/google/protobuf/arena.h` 里 `Arena` 用 `unique_ptr` 管自己的块，但 `CreateMessage` 在 arena 上创建的对象由 arena 统一回收（不逐个 delete）；这是「所有权不在指针、而在容器」的典型，也解释了自定义删除器为什么要做类型擦除 |
+| 1 | [google/leveldb](https://github.com/google/leveldb) | 39,514 | §1.2 二、实现机制：析构调用到底是怎么被「插入」的 | 读 `google/leveldb` 的 `db/db_impl.cc`：`DBImpl::~DBImpl()` 里显式停后台线程、删 memtable、释放文件锁——所有清理都钉在析构里，因此 `DB::Open` 失败时只要 `delete impl` 就干净；注意 leveldb 用的是裸指针 + `delete`，正好用来对照本章 §1.1「为什么确定性析构是 C++ 的脊梁」——手写 RAII 与 `unique_ptr` 在语义上完全等价，差别只在「有没有可能忘记 delete」 |
+| 2 | [abseil/abseil-cpp](https://github.com/abseil/abseil-cpp) | 18,177 | §1.3 三、工程实践：异常安全三保证与 RAII 的关系 | 读 `abseil/abseil-cpp` 的 `absl/cleanup/cleanup.h`：`absl::Cleanup` 把「析构时执行一段代码」抽成可组合对象，`absl/synchronization/mutex.h` 的 `MutexLock` 用它管锁；这两处合看，就明白 RAII 不是「智能指针专用技巧」，而是资源管理的通用形态——它保证的是「基本保证」这条下限：不管哪条路径退出，清理一定发生 |
+| 3 | [protocolbuffers/protobuf](https://github.com/protocolbuffers/protobuf) | 72,137 | §3.3 三、实现机制：自定义删除器（类型擦除的成本差异） | 读 `protocolbuffers/protobuf` 的 `src/google/protobuf/arena.h`：`Arena` 用 `unique_ptr` 管自己的块，但 `CreateMessage` 在 arena 上创建的对象由 arena 统一回收（不逐个 delete）；这是「所有权不在指针、而在容器」的典型，也解释了本章 §3.3 里自定义删除器为什么要做类型擦除——删除器一旦成为 `shared_ptr` 控制块的一部分，它就不再属于指针类型 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

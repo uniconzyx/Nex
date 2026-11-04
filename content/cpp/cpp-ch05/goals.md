@@ -26,9 +26,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [ssloy/tinyrenderer](https://github.com/ssloy/tinyrenderer) | 24,335 | §3.2 重载决议与 ADL | §3.2 与 §3.4 的活样本：`geometry.h` 里 `Vec3` 的 `operator+`/`operator*` 全部返回**值**（不是引用），因为 `a+b` 的结果是个临时量；而 `operator+=` 返回 `Vec3&` 以支持链式。把这两个返回类型并排看，就是「复合赋值返回引用、二元运算返回值」的判据 |
-| 2 | [nlohmann/json](https://github.com/nlohmann/json) | 50,829 | §2.2 编译器到底合成了哪些函数 | §2.2 与 §2.4 对照：`include/nlohmann/json.hpp` 的 `basic_json` 显式写了拷贝构造、拷贝赋值、`swap`；读 `swap` 的实现会发现它交换的是内部 `json_value` union 与指针——这正是「拷贝赋值用 copy-and-swap 拿到强异常安全」的实例 |
-| 3 | [google/leveldb](https://github.com/google/leveldb) | 39,514 | §1.2 对象在内存里到底是什么 | §1.2「对象在内存里到底是什么」：`include/leveldb/slice.h` 的 `Slice` 只有 `const char* data_` 与`size_t size_` 两个成员，`sizeof(Slice)` 就是 16 字节且不拥有任何内存；它把「轻量值类型」做到了极致——按值传参也不亏，因为拷贝的只是这两个字段 |
+| 1 | [ssloy/tinyrenderer](https://github.com/ssloy/tinyrenderer) | 24,335 | §3.4 四、工程实践：返回类型与复合赋值的约定 | 读 `ssloy/tinyrenderer` 的 `geometry.h`：`Vec3` 的 `operator+`/`operator*` 全部返回值（不是引用），因为 `a+b` 的结果是个临时量；而 `operator+=` 返回 `Vec3&` 以支持链式。把这两个返回类型并排看，就是本章「复合赋值返回引用、二元运算返回值」的判据；配合 §3.3「成员函数 vs 非成员函数：对称性判据」，再看 `Vec3 operator*(float, const Vec3&)` 为什么必须写成非成员 |
+| 2 | [nlohmann/json](https://github.com/nlohmann/json) | 50,829 | §2.4 四、工程实践：正确的拷贝赋值写法 | 读 `nlohmann/json` 的 `include/nlohmann/json.hpp` 里 `basic_json`：它显式写了拷贝构造、拷贝赋值、`swap`；读 `swap` 的实现会发现它交换的是内部 `json_value` union 与指针——这正是「拷贝赋值用 copy-and-swap 拿到强异常安全」的实例，对应本章 §2.3「实现机制：拷贝省略与 RVO」之外的另一半：RVO 省掉的是构造，copy-and-swap 保证的是「要么成功要么原样」 |
+| 3 | [google/leveldb](https://github.com/google/leveldb) | 39,514 | §1.2 二、实现机制：对象在内存里到底是什么 | 读 `google/leveldb` 的 `include/leveldb/env.h` 与同目录的 `slice.h`：`Slice` 只有 `const char* data_` 与 `size_t size_` 两个成员，`sizeof(Slice)` 就是 16 字节且不拥有任何内存；它把「轻量值类型」做到了极致——按值传参也不亏，因为拷贝的只是这两个字段；本章 §1.3「工程实践：程序员视角的取舍」里的「值语义 vs 引用语义」判据，在这两行成员上就有了具体形态 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

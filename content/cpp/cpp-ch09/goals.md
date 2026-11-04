@@ -27,9 +27,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [microsoft/STL](https://github.com/microsoft/STL) | 11,177 | §2.2 sort 的 intros… | §2.2 sort 的真实实现：`stl/inc/algorithm` 的 `sort` 调 `_Sort_unchecked`，内部是「快排分区 → 递归深度超限就转堆排 → 小区间用插排」三段式（introsort）；找到那个深度阈值常量，就明白本章说的「最坏 O(n log n) 靠什么兜底」 |
-| 2 | [simdjson/simdjson](https://github.com/simdjson/simdjson) | 24,491 | §1.1 迭代器是「算法与容器之间的… | §1.1「迭代器是算法与容器的契约」：`include/simdjson/dom/array.h` 的 `iterator` 只提供 `operator*`/`operator++`/`operator!=`，够 `std::distance` 与范围 for 用，却不暴露底层实现；再看 `ondemand` 版的迭代器语义差异，能体会「迭代器范畴决定算法能用多强」 |
-| 3 | [TheAlgorithms/C-Plus-Plus](https://github.com/TheAlgorithms/C-Plus-Plus) | 34,827 | §1.2 范畴如何被编译器强制 | §1.2 范畴差异的实际后果：`numeric/` 与 `sort/` 里 `std::accumulate`、`std::sort`、`std::reverse` 各自要求输入迭代器/随机访问迭代器；把同一段代码的容器从 `list` 换成 `vector` 再编译，报错信息就是范畴不够用的证据 |
+| 1 | [microsoft/STL](https://github.com/microsoft/STL) | 11,177 | §2.2 二、实现机制：sort 的 introsort（混合排序） | 读 `microsoft/STL` 的 `stl/inc/algorithm`：`sort` 调 `_Sort_unchecked`，内部是「快排分区 → 递归深度超限就转堆排 → 小区间用插排」三段式（introsort）；找到那个深度阈值常量（MSVC 是 `2 * log2(n)`），就明白本章说的「最坏 O(n log n) 靠什么兜底」——深度超限时切堆排，把快排的 O(n²) 最坏情况挡住 |
+| 2 | [simdjson/simdjson](https://github.com/simdjson/simdjson) | 24,491 | §1.1 一、理论根基：迭代器是「算法与容器之间的接口契约」 | 读 `simdjson/simdjson` 的 `include/simdjson/dom/array.h`：它的 `iterator` 只提供 `operator*`/`operator++`/`operator!=`，够 `std::distance` 与范围 for 用，却不暴露底层实现；再看 `ondemand` 版的迭代器语义差异，能体会「迭代器范畴决定算法能用多强」——本章 §1.2「范畴如何被编译器强制」说的就是这条契约怎么被静态检查出来 |
+| 3 | [TheAlgorithms/C-Plus-Plus](https://github.com/TheAlgorithms/C-Plus-Plus) | 34,827 | §1.2 二、实现机制：范畴如何被编译器强制（concept 之前 vs 之后） | 读 `TheAlgorithms/C-Plus-Plus` 的 `numeric/` 与 `sorting/`：`std::accumulate`、`std::sort`、`std::reverse` 各自要求输入迭代器 / 随机访问迭代器；把同一段代码的容器从 `list` 换成 `vector` 再编译，报错信息就是范畴不够用的证据——C++17 前是 `no matching function` 加几十行模板展开，C++20 后 concept 会直接说「list 的迭代器不满足 random_access_iterator」，这就是 §1.5「可运行示例：迭代器范畴差异（编译期可观察）」想让你亲眼看到的差别 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

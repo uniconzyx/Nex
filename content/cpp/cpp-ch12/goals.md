@@ -31,9 +31,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [AnthonyCalandra/modern-cpp-features](https://github.com/AnthonyCalandra/modern-cpp-features) | 21,924 | §2.2 值类别 | §2.2 值类别与 §4.1 结构化绑定的对照表：`README.md` 按 C++11/14/17/20 分节，每节都有最小可编译示例；建议先读「rvalue references」「structured bindings」两节，把本章的术语和标准里的正式名字对上，再回代码里验证 |
-| 2 | [microsoft/STL](https://github.com/microsoft/STL) | 11,177 | §3.3 `emplace_back… | §3.3 emplace_back 与 push_back 的差别：`stl/inc/vector` 的 `emplace_back` 直接把参数转发给`_Emplace_reallocate` 里的 `construct_at`，全程只构造一次；而 `push_back(const T&)` 要先凑出一个 `T` 再移动。看这两条实现路径，就明白「构造次数差异」不是玄学而是参数转发位置不同 |
-| 3 | [abseil/abseil-cpp](https://github.com/abseil/abseil-cpp) | 18,177 | §2.3 `std::move` 只… | §2.3 `std::move` 只是一次 cast：`absl/utility/utility.h` 的 `absl::exchange` 与 `absl/types/optional.h` 的 `value() &&` 重载都靠 `std::move` 把左值转成右值再转发；注意它们转完从不「清空源对象」——移动后的源对象仍是有效但未指定状态，这是本章最常被误解的一条 |
+| 1 | [AnthonyCalandra/modern-cpp-features](https://github.com/AnthonyCalandra/modern-cpp-features) | 21,924 | §4.1 一、结构化绑定（Structured Bindings，C++17） | 读该仓 `README.md`：它按 C++11/14/17/20 分节，每节都有最小可编译示例；先读「rvalue references」「structured bindings」两节，把本章的术语和标准里的正式名字对上，再回代码里验证；本章 §2.2「值类别（Value Categories）：理解移动的前提」之所以难，就是因为「prvalue / xvalue / lvalue」这三个词在教材里常被简化成「左值/右值」 |
+| 2 | [microsoft/STL](https://github.com/microsoft/STL) | 11,177 | §3.3 三、`emplace_back` vs `push_back`：构造次数差异 | 读 `microsoft/STL` 的 `stl/inc/vector`：`emplace_back` 直接把参数转发给 `_Emplace_reallocate` 里的 `construct_at`，全程只构造一次；而 `push_back(const T&)` 要先凑出一个 `T` 再移动。看这两条实现路径，就明白「构造次数差异」不是玄学而是参数转发位置不同——配合本章 §3.4「转发引用参数的陷阱」，当参数是 `{}` 或隐式转换类型时，`emplace_back` 反而可能选错构造重载 |
+| 3 | [abseil/abseil-cpp](https://github.com/abseil/abseil-cpp) | 18,177 | §2.3 三、实现机制：`std::move` 只是一次无条件 cast | 读 `abseil/abseil-cpp` 的 `absl/utility/utility.h`：`absl::exchange` 与 `absl/types/optional.h` 的 `value() &&` 重载都靠 `std::move` 把左值转成右值再转发；注意它们转完从不「清空源对象」——移动后的源对象仍是有效但未指定状态，这是本章最常被误解的一条；而 §2.4「为什么移动构造要标 noexcept」正是这条语义的延伸：标记了才敢在扩容时搬而不是拷 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

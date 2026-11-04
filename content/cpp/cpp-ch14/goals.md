@@ -26,9 +26,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [DaveGamble/cJSON](https://github.com/DaveGamble/cJSON) | 13,063 | §1.2 #include 的「文本… | §1.2 与 §1.3 头文件守卫的现实版：`cJSON.h` 顶部 `#ifndef cJSON__h` / `#define cJSON__h`，`CJSON_PUBLIC` 宏负责导出符号、`CJSON_EXPORT_SYMBOLS` 控制静态/动态；整个头文件只有声明——把「头文件该放什么」这件事做到了教科书级 |
-| 2 | [fmtlib/fmt](https://github.com/fmtlib/fmt) | 25,899 | §2.4 宏与 inline 的取舍 | §2.4 宏与 inline 的取舍：`include/fmt/base.h` 的 `FMT_BEGIN_NAMESPACE`/`FMT_END_NAMESPACE`、`FMT_API`、`FMT_INLINE` 三层宏分别管「命名空间版本化、符号可见性、强制内联」；看清每个宏存在的理由，就明白为什么现代库仍需要宏——跨编译器差异无法用 C++ 语法表达 |
-| 3 | [include-what-you-use/include-what-you-use](https://github.com/include-what-you-use/include-what-you-use) | 4,781 | §1.2 #include 的「文本… | §1.2 的量化工具：`iwyu.cc` 是主分析器，`iwyu_include_picker.cc` 维护「哪个头文件该由谁包含」的映射表；拿它跑一遍本章的示例工程，`#include` 的传递闭包会被直接列出——这是「文本包含」语义最硬的证据 |
+| 1 | [DaveGamble/cJSON](https://github.com/DaveGamble/cJSON) | 13,063 | §1.2 二、实现机制：#include 的「文本包含」语义 | 读 `DaveGamble/cJSON` 的 `cJSON.h`：顶部 `#ifndef cJSON__h` / `#define cJSON__h`，`CJSON_PUBLIC` 宏负责导出符号、`CJSON_EXPORT_SYMBOLS` 控制静态/动态；整个头文件只有声明——把「头文件该放什么」这件事做到了教科书级；本章 §1.3「`#pragma once` 与其局限」要对着它看：守卫宏防的是「同一编译单元重复包含」，防不住「两个不同路径指向同一文件」 |
+| 2 | [fmtlib/fmt](https://github.com/fmtlib/fmt) | 25,899 | §2.4 四、工程实践：宏与 inline 的取舍 | 读 `include/fmt/base.h` 的 `FMT_BEGIN_NAMESPACE`/`FMT_END_NAMESPACE`、`FMT_API`、`FMT_INLINE` 三层宏：它们分别管「命名空间版本化、符号可见性、强制内联」；看清每个宏存在的理由，就明白为什么现代库仍需要宏——跨编译器差异无法用 C++ 语法表达，这也正是本章 §2.2「实现机制与坑」里「宏不是坏东西，是最后手段」的分寸 |
+| 3 | [include-what-you-use/include-what-you-use](https://github.com/include-what-you-use/include-what-you-use) | 4,781 | §4.2 二、实现机制：日志宏如何「携带位置信息」 | 读 `include-what-you-use/include-what-you-use/iwyu.cc` 与同目录的 `iwyu_include_picker.cc`：前者是主分析器，后者维护「哪个头文件该由谁包含」的映射表；拿它跑一遍本章的示例工程，`#include` 的传递闭包会被直接列出——这是「文本包含」语义最硬的证据，也是 §4.1「预定义宏是编译器注入的编译期常量」之外的另一类「编译期注入」（`__FILE__` 靠宏展开注入，头文件靠文本粘贴注入） |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

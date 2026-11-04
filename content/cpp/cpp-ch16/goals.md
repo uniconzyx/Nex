@@ -33,9 +33,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [chenshuo/muduo](https://github.com/chenshuo/muduo) | 16,279 | §2.2 三种 RAII 锁的差异 | §2.2 三种 RAII 锁与 §4.2 wait 的三件事：`muduo/base/Mutex.h` 的 `MutexLockGuard` 只在构造/析构里加解锁，`muduo/base/Condition.h` 的 `wait()` 内部「解锁 → 等待 → 重新加锁」；`muduo/net/EventLoop.cc` 则示范 one loop per thread——三处合起来就是本章的锁 + 条件变量 + 线程模型 |
-| 2 | [taskflow/taskflow](https://github.com/taskflow/taskflow) | 12,214 | §5.3 线程池 | §5.3 线程池：`taskflow/core/executor.hpp` 的 `Executor` 预先起 `_config.num_workers` 个线程，每个 worker 在自己的 `_wsq`（work-stealing queue）上取任务，空闲时从别人队尾偷；读 `_wait_for_task` 与 `_steal` 两个函数，就懂「任务图 + 工作窃取」如何避免线程空转 |
-| 3 | [apache/brpc](https://github.com/apache/brpc) | 17,638 | §5.1 高层并发抽象 | §5.1 高层并发抽象的另一种答案：`src/bthread/` 用 M:N 调度（大量 bthread 跑在少量 pthread 上），把「阻塞等待」换成用户态挂起；对照 `std::thread` 的 1:1 模型，能看清本章说的「线程池解决的是创建成本，协程解决的是调度成本」 |
+| 1 | [chenshuo/muduo](https://github.com/chenshuo/muduo) | 16,279 | §2.2 二、实现机制：三种 RAII 锁的差异 | 读 `chenshuo/muduo` 的 `muduo/base/Mutex.h`：`MutexLockGuard` 只在构造/析构里加解锁；配套 `muduo/base/Condition.h` 的 `wait()` 内部「解锁 → 等待 → 重新加锁」，`muduo/net/EventLoop.cc` 则示范 one loop per thread——三处合起来就是本章 §4.2「实现机制：wait 的三件事」的完整实现；注意 `wait` 必须传加锁的 guard，否则「检查条件」与「进入等待」之间存在丢唤醒窗口 |
+| 2 | [taskflow/taskflow](https://github.com/taskflow/taskflow) | 12,214 | §5.3 三、线程池：为什么必要 | 读 `taskflow/taskflow` 的 `taskflow/core/executor.hpp`：`Executor` 预先起 `_config.num_workers` 个线程，每个 worker 在自己的 `_wsq`（work-stealing queue）上取任务，空闲时从别人队尾偷；读 `_wait_for_task` 与 `_steal` 两个函数，就懂「任务图 + 工作窃取」如何避免线程空转——这正是本章 §5.1「高层并发抽象」里说的「比裸线程多出来的那一层价值」 |
+| 3 | [apache/brpc](https://github.com/apache/brpc) | 17,638 | §5.1 一、理论根基：高层并发抽象 | 读 `apache/brpc` 的 `src/bthread/bthread.h`：`src/bthread/` 用 M:N 调度（大量 bthread 跑在少量 pthread 上），把「阻塞等待」换成用户态挂起；对照 `std::thread` 的 1:1 模型，能看清本章说的「线程池解决的是创建成本，协程解决的是调度成本」——两者叠加才是 §5.2「async 的启动策略」要权衡的全貌 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

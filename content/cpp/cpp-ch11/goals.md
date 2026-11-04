@@ -29,9 +29,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [fmtlib/fmt](https://github.com/fmtlib/fmt) | 25,899 | §1.2 栈展开到底发生了什么 | §1.2 栈展开前的最后一站：`include/fmt/base.h` 的 `FMT_THROW` 可被配置成抛异常或直接 abort，`FMT_ASSERT` 在 debug 下抛 `format_error`；读这两个宏的分支，就看清「库要不要让异常穿过自己」是一个可配置的契约，而不是语言强制 |
-| 2 | [google/googletest](https://github.com/google/googletest) | 39,687 | §3.4 断言 | §3.4 断言分级：`googletest/include/gtest/gtest.h` 里 `EXPECT_*` 失败继续跑、`ASSERT_*` 失败立刻 return，`EXPECT_THROW`/`EXPECT_NO_THROW` 把「抛不抛」变成可断言的性质，`ASSERT_DEATH` 连崩溃都能测；这套 API 是本章「断言与异常各管一段」的现实版 |
-| 3 | [nlohmann/json](https://github.com/nlohmann/json) | 50,829 | §2.1 异常安全的"契约" | §2.1 异常安全契约的开关：`include/nlohmann/json.hpp` 的 `JSON_THROW` 由 `JSON_NOEXCEPTION` 决定展开成`throw` 还是 `std::abort`，`parse(..., allow_exceptions=false)` 则让调用方自己查 `is_discarded()`；同一个库给出三条错误处理路径，正好对本章的「异常 vs 错误码 vs 终止」取舍 |
+| 1 | [fmtlib/fmt](https://github.com/fmtlib/fmt) | 25,899 | §1.2 二、实现机制：栈展开到底发生了什么 | 读 `include/fmt/base.h` 的 `FMT_THROW` 与 `FMT_ASSERT`：前者可被配置成抛异常或直接 abort，后者在 debug 下抛 `format_error`；读这两个宏的分支，就看清「库要不要让异常穿过自己」是一个可配置的契约，而不是语言强制——这也是本章 §1.4「边界与陷阱」里「析构函数抛异常会 terminate」为什么让库作者宁可 abort 的理由 |
+| 2 | [google/googletest](https://github.com/google/googletest) | 39,687 | §3.4 四、断言：assert / static_assert / 契约（contracts） | 读 `google/googletest` 的 `googletest/include/gtest/gtest.h`：`EXPECT_*` 失败继续跑、`ASSERT_*` 失败立刻 return，`EXPECT_THROW`/`EXPECT_NO_THROW` 把「抛不抛」变成可断言的性质，`ASSERT_DEATH` 连崩溃都能测；这套 API 是本章「断言与异常各管一段」的现实版——断言管「程序写错了」，异常管「外部输入不合法」 |
+| 3 | [nlohmann/json](https://github.com/nlohmann/json) | 50,829 | §2.1 一、理论根基：异常安全的「契约」 | 读 `nlohmann/json` 的 `include/nlohmann/json.hpp`：`JSON_THROW` 由 `JSON_NOEXCEPTION` 决定展开成 `throw` 还是 `std::abort`，`parse(..., allow_exceptions=false)` 则让调用方自己查 `is_discarded()`；同一个库给出三条错误处理路径，正好对应本章 §2.4「在真实项目里给保证」要做的选择——「异常 vs 错误码 vs 终止」没有对错，只有调用方愿不愿意为此写分支 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

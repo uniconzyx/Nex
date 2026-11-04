@@ -26,9 +26,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [fmtlib/fmt](https://github.com/fmtlib/fmt) | 25,899 | §4.3 std | §4.3 `std::format` 的设计动机：`include/fmt/format.h` 的 `format_to` 把结果直接写进输出迭代器，`include/fmt/ostream.h` 则给「只有 `operator<<` 的老类型」搭桥；两处合看就知道 `std::format` 为什么比 `stringstream` 快——它不建流对象、不碰 locale |
-| 2 | [Tencent/rapidjson](https://github.com/Tencent/rapidjson) | 15,150 | §1.3 性能本质 | §1.3 与 §3.2 的缓冲策略：`include/rapidjson/filereadstream.h` 的 `FileReadStream` 要你自己给一块`buffer`（默认 64KB），`FileWriteStream` 同理；这解释了本章「stdio 缓冲 vs 流对象」的层次——库不替你藏缓冲，性能就变得可预测 |
-| 3 | [nlohmann/json](https://github.com/nlohmann/json) | 50,829 | §4.4 CSV 行解析 | §4.4 结构化文本解析：`include/nlohmann/json.hpp` 的 `operator>>` 与 `dump()` 是「流式接口 + 一次性序列化」的组合；对比它和 `std::stringstream` 解析同一份 CSV 的代码量，能直观看出本章说的「手写分隔符解析为什么容易漏边界」 |
+| 1 | [fmtlib/fmt](https://github.com/fmtlib/fmt) | 25,899 | §4.3 三、std::format（C++20）的设计动机 | 读 `fmtlib/fmt` 的 `include/fmt/format.h`：`format_to` 把结果直接写进输出迭代器，`include/fmt/ostream.h` 则给「只有 `operator<<` 的老类型」搭桥；两处合看就知道 `std::format` 为什么比 `stringstream` 快——它不建流对象、不碰 locale，解析格式串是一次性编译期检查；本章 §4.2「为什么 stringstream 慢」给的是病因，这里给的是药 |
+| 2 | [Tencent/rapidjson](https://github.com/Tencent/rapidjson) | 15,150 | §3.2 二、实现机制：文件位置指针与文本/二进制差异 | 读 `Tencent/rapidjson` 的 `include/rapidjson/filereadstream.h`：`FileReadStream` 要你自己给一块 `buffer`（默认 64KB），`FileWriteStream` 同理；这解释了本章 §3.1「fstream 是流 + 文件缓冲区的组合」里的缓冲层次——库不替你藏缓冲，性能就变得可预测；对照 §1.3「`sync_with_stdio` 与 `tie` 的加速原理」会发现两者在做同一件事：把「每字符一次系统调用」换成「每块一次」 |
+| 3 | [nlohmann/json](https://github.com/nlohmann/json) | 50,829 | §4.4 四、工程实践：CSV 行解析 | 读 `nlohmann/json` 的 `include/nlohmann/json.hpp`：它的 `operator>>` 与 `dump()` 是「流式接口 + 一次性序列化」的组合；对比它和 `std::stringstream` 解析同一份 CSV 的代码量，能直观看出本章说的「手写分隔符解析为什么容易漏边界」——引号内的逗号、转义的双引号、行尾的 `\r\n`，每一条都是独立分支 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

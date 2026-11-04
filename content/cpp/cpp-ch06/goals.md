@@ -36,9 +36,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [google/googletest](https://github.com/google/googletest) | 39,687 | §2.2 vtable 与 vptr | §2.2 vtable 与动态绑定：`googletest/src/gtest.cc` 里 `Test::Run()` 是虚函数，`UnitTestImpl::RunAllTests` 只持有 `TestInfo*`，通过基类指针调用 `Run()`——派生类 `TestBody()` 的具体实现到运行时才被选中，这就是 vptr 指到派生类 vtable 的结果 |
-| 2 | [llvm/llvm-project](https://github.com/llvm/llvm-project) | 41,282 | §3.2 RTTI | §3.2 RTTI 的另一条路：`llvm/include/llvm/Support/Casting.h` 的 `classof` + `dyn_cast` 自己实现类型判别，不依赖 `dynamic_cast`（LLVM 默认关闭 RTTI）。读 `isa`/`cast`/`dyn_cast` 三件套，就明白「RTTI 只是手段，类型判别可以有更便宜的实现」 |
-| 3 | [google/leveldb](https://github.com/google/leveldb) | 39,514 | §3.1 纯虚函数与抽象类 | §3.1 接口隔离的标准写法：`include/leveldb/env.h` 的 `class Env` 几乎全是纯虚函数（文件、锁、线程全抽象掉），实现放在 `util/env_posix.cc` 的 `PosixEnv : public Env`；整份 leveldb 只通过 `Env*` 访问系统调用——这是「面向接口编程」在 C++ 里的完整闭环 |
+| 1 | [google/googletest](https://github.com/google/googletest) | 39,687 | §2.2 二、实现机制：vtable 与 vptr（核心） | 读 `google/googletest` 的 `googletest/src/gtest.cc`：`Test::Run()` 是虚函数，`UnitTestImpl::RunAllTests` 只持有 `TestInfo*`，通过基类指针调用 `Run()`——派生类 `TestBody()` 的具体实现到运行时才被选中，这就是 vptr 指到派生类 vtable 的结果；本章 §2.1「理论根基：为什么需要运行期多态」给的是动机，这里给的是「为什么恰好快」 |
+| 2 | [llvm/llvm-project](https://github.com/llvm/llvm-project) | 41,282 | §3.2 二、RTTI：dynamic_cast 与 typeid 的运行时查表 | 读 `llvm/llvm-project` 的 `llvm/include/llvm/Support/Casting.h`：`classof` + `dyn_cast` 自己实现类型判别，不依赖 `dynamic_cast`（LLVM 默认关闭 RTTI）。读 `isa`/`cast`/`dyn_cast` 三件套，就明白「RTTI 只是手段，类型判别可以有更便宜的实现」——`classof` 基于一个静态的类 ID 字段做整数比较，代价是一次比较而非查表 |
+| 3 | [google/leveldb](https://github.com/google/leveldb) | 39,514 | §3.1 一、纯虚函数与抽象类：接口隔离的契约 | 读 `google/leveldb` 的 `include/leveldb/env.h`：`class Env` 几乎全是纯虚函数（文件、锁、线程全抽象掉），实现放在 `util/env_posix.cc` 的 `PosixEnv : public Env`；整份 leveldb 只通过 `Env*` 访问系统调用——这是「面向接口编程」在 C++ 里的完整闭环，也是本章 §2.4「override / final：把错误交给编译器」为什么必须开 `override` 的理由：接口一改，所有实现立刻编译不过 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 
