@@ -104,6 +104,7 @@ python -m pip install -r server/requirements-audit.txt
 # 1) 校验（必须全绿）
 python server/scripts/validate_content.py      # 门禁：章节结构 / 三视角 / 八股模块
 python scripts/audit_sources.py                # 来源门禁：GitHub+B站 双来源与章节级锚点
+python scripts/audit_source_anchor.py          # 锚点门禁：§x.y 编号不越界 + 锚点标题须与真实 ## 标题重合
 python scripts/audit_correctness.py --all --skip-net   # 实跑 examples/习题，stdout 逐字节比对
 python scripts/check_md_outputs.py             # 正文 ```text 输出块必须在 examples 里有出处
 python scripts/audit_depth.py --min-grade C    # 深度分级（A/B/C），C 级不阻塞但要记账
