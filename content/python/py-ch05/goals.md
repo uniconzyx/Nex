@@ -50,9 +50,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 225,745 | §2.1 | 讲「上下文管理器」时读仓库里读文件的工具函数：显式 `with open(...)` 而不是手动 `close`，异常路径下也能保证句柄释放 |
-| 2 | [jackfrued/Python-100-Days](https://github.com/jackfrued/Python-100-Days) | 187,609 | §3.1 | 讲「文件编码」时看 `Day16-20/` 的文件篇：`open(..., encoding="utf-8")` 必须显式写，Windows 默认 GBK 会让中文读写互崩 |
-| 3 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,917 | §2.3 | 讲「大文件分块读」时看入门课处理数据集的方式：逐行迭代而不是 `readlines()` 全量入内存，这是「数据比内存大」时的基本写法 |
+| 1 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 225,745 | §2.1 `with` 究竟做了什么 | 读仓库里读文件的工具函数：显式 `with open(...)` 而不是手动 `close`，异常路径下也能保证句柄释放；读完再回 §2.2，就明白「句柄为什么一定被关掉」取决于 `__exit__` 是否吞掉异常 |
+| 2 | [jackfrued/Python-100-Days](https://github.com/jackfrued/Python-100-Days) | 187,609 | §1.2 `encoding` 必须显式写 | 看 `Day16-20/` 的文件篇：`open(..., encoding="utf-8")` 必须显式写，Windows 默认 GBK 会让中文读写互崩；配合 §1.4 的 BOM 与 §1.5 的 `errors` 策略，就是一整套「文本 IO 排障顺序」 |
+| 3 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,917 | §3.6 大文件处理的内存红线 | 看入门课处理数据集的方式：逐行迭代而不是 `readlines()` 全量入内存，这是「数据比内存大」时的基本写法；它的前提是 §3.2 的缓冲策略——读的时候对照 `buffering` 参数，算一下 10GB 文件逐行读的真实内存占用 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

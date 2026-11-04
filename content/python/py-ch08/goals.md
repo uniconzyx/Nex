@@ -54,9 +54,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 225,745 | §1.1 | 讲「纯 Python 与向量化的差距」时读 `sorts/` 的实现：纯 Python 循环排序在十万级数据上比 `numpy.sort` 慢两个数量级，这是「为什么数值计算要用 ndarray」的最直观对照 |
-| 2 | [jackfrued/Python-100-Days](https://github.com/jackfrued/Python-100-Days) | 187,609 | §3.1 | 讲「pandas 的索引与切片」时看 `Day41-55/` 的数据分析篇：`loc` 按标签、`iloc` 按位置，混用是「取出来的数据不对」的头号原因 |
-| 3 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,917 | §2.2 | 讲「特征矩阵的形状」时看入门课的回归案例：`X` 是 `(样本数, 特征数)`、`y` 是 `(样本数,)`，形状对不上是 `fit` 报错的第一排查点 |
+| 1 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 225,745 | §1.2 向量化与循环的对照 | 读 `sorts/` 的实现：纯 Python 循环排序在十万级数据上比 `numpy.sort` 慢两个数量级，这是「为什么数值计算要用 ndarray」的最直观对照；读时把 §1.1 的 dtype 与步长概念带上，就明白差距来自「解释器循环 vs C 循环 + 连续内存」 |
+| 2 | [jackfrued/Python-100-Days](https://github.com/jackfrued/Python-100-Days) | 187,609 | §4.1 `Series` / `DataFrame` 与索引对齐 | 看 `Day41-55/` 的数据分析篇：`loc` 按标签、`iloc` 按位置，混用是「取出来的数据不对」的头号原因；先把 §2.1 视图与副本的语义弄清，再读这段，就不会把「切片拿到的是视图」当成 bug |
+| 3 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,917 | §3.1 广播规则 | 看入门课的回归案例：`X` 是 `(样本数, 特征数)`、`y` 是 `(样本数,)`，形状对不上是 `fit` 报错的第一排查点；这正是 §3.2 axis 语义与聚合的直接应用——`(n,1) - (n,)` 为什么会广播成 `(n,n)`，在这里能一眼看出代价 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

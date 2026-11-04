@@ -12,10 +12,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [python/cpython](https://github.com/python/cpython) | 77,791 | §1.4 属性查找 · §2.3 C3 | 解释器本体：Objects/ 下是 MRO、描述符协议、属性查找的真实实现，读 `Objects/typeobject.c` 的 `tp_getattro` 与 MRO 计算，直接对应本章 §1.4、§2.3 |
-| 2 | [pallets/flask](https://github.com/pallets/flask) | 74,968 | §2.1 super | 工业级 metaclass 样例：Flask 用 `Scaffold` + `__init_subclass__` 收集视图，`App` 的继承与 `super()` 调用链正是 §2.1 讲的那套机制 |
-| 3 | [python-attrs/attrs](https://github.com/python-attrs/attrs) | 5,863 | §3.2 property | 描述符与 `__getattr__` 的工业级应用：读 `attrs` 如何用描述符把类属性变成带校验的字段，对应 §3.2 三种方法修饰符 |
-| 4 | [faif/python-patterns](https://github.com/faif/python-patterns) | 43,072 | §2.2 多继承 | GoF 设计模式合集，直接对应「继承 vs 组合」的取舍，§2.2 讲「什么时候真的该用多继承」时拿这里的 Strategy/Adapter 当反例 |
+| 1 | [python/cpython](https://github.com/python/cpython) | 77,791 | §1.1 可变类属性是共享的 | §2.1 `super()` 不是「父类」 · 读 `Objects/typeobject.c` 的 `tp_getattro` 与 MRO 计算：属性查找走的是「实例字典 → 类 MRO」这条链，所以类属性被所有实例共享、`super()` 找的是 MRO 里的下一个类而不是父类 |
+| 2 | [pallets/flask](https://github.com/pallets/flask) | 74,968 | §2.1 `super()` 不是「父类」 | Flask 用 `Scaffold` + `__init_subclass__` 收集视图，`App` 的继承与 `super()` 调用链正是 §2.1 讲的那套机制；读 `pallets/flask` 的 `app.py` 看 `__init_subclass__` 何时触发，就明白为什么插件能「声明即注册」 |
+| 3 | [python-attrs/attrs](https://github.com/python-attrs/attrs) | 5,863 | §3.2 `@property` 与三种方法修饰符 | 读 `attrs` 如何用描述符把类属性变成带校验的字段：`attrs` 的 `_make_init` 给每个字段生成 `__set__`，等同于本章说的「数据描述符优先于实例字典」；配合 §3.3 魔术方法查找为什么绕过实例字典，两条机制就对上了 |
+| 4 | [faif/python-patterns](https://github.com/faif/python-patterns) | 43,072 | §2.2 什么时候真的该用多继承 | 读 GoF 设计模式合集：`Strategy` / `Adapter` 在这里都是「组合 + 委托」而非继承，正好是本章「继承 vs 组合」取舍的反例样本；读的时候问一句：换成多继承会引入哪个 MRO 冲突——答不上来就说明该用组合 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

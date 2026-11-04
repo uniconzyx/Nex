@@ -16,9 +16,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 225,745 | §2.3 | 讲「闭包与高阶函数」时读 `dynamic_programming/` 里的记忆化实现：用字典缓存 + 嵌套函数把递归复杂度从指数压到多项式，是闭包最实用的场景 |
-| 2 | [jackfrued/Python-100-Days](https://github.com/jackfrued/Python-100-Days) | 187,609 | §4.1 | 讲「参数解包」时看 `Day01-15/` 的函数篇：`*args`/`**kwargs` 与「关键字参数必须写在位置参数之后」的规则，它给了能直接跑的反例 |
-| 3 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,917 | §1.2 | 讲「函数作为一等对象」时看入门课的特征工程脚本：把「清洗函数」作为参数传给 `apply`，这是「函数即值」在数据处理里的日常用法 |
+| 1 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 225,745 | §4.1 理论根基：函数是携带环境的对象 | 读 `dynamic_programming/` 里的记忆化实现：用字典缓存 + 嵌套函数把递归复杂度从指数压到多项式，是闭包最实用的场景；关键是看外层那个 `memo` 字典如何被内层函数「带着走」——这就是 §4.2 的 cell |
+| 2 | [jackfrued/Python-100-Days](https://github.com/jackfrued/Python-100-Days) | 187,609 | §2.2 实现机制：参数如何传递与解包 | 看 `Day01-15/` 的函数篇：`*args`/`**kwargs` 与「关键字参数必须写在位置参数之后」的规则，它给了能直接跑的反例；对照 §5.1 可变默认参数陷阱，能看出「解包」和「默认值」是两套独立机制 |
+| 3 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,917 | §3.1 理论根基：函数作为值 | 看入门课的特征工程脚本：把「清洗函数」作为参数传给 `apply`，这是「函数即值」在数据处理里的日常用法；读的时候数一下：这个函数被创建了几次、被调用了几次——这正是 §2.1「函数被延迟创建」的意思 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

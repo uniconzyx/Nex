@@ -13,9 +13,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 225,745 | §1.2 | 讲「流程控制与分支」时读 `maths/` 与 `conversions/` 下的单文件脚本：它们只用 if/for 与内建类型，没有框架依赖，适合用来对照「同一段逻辑用推导式写与用循环写」的差别 |
-| 2 | [jackfrued/Python-100-Days](https://github.com/jackfrued/Python-100-Days) | 187,609 | §2.1 | 讲「变量与类型」时看 `Day01-15/` 的基础语法篇：中文讲解配可运行片段，重点看它对「可变/不可变」的表述——这决定了后面默认参数与浅拷贝的坑 |
-| 3 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,917 | §3.3 | 讲「列表与字典的实际用途」时看入门课的数据准备一节：特征用列表、样本用字典，这种「列表套字典」的结构是读 CSV/JSON 时最常见的内存形态 |
+| 1 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 225,745 | §2.2 `for` 的本质：迭代器协议 | 读 `maths/` 与 `conversions/` 下的单文件脚本：它们几乎都用 `for x in 序列` 直取元素、从不靠下标推进，正好对照「for 拿到的是迭代器吐出的值」——想验证这一点，把这些脚本里的一层循环改成手动 `next()` 看输出是否一致 |
+| 2 | [jackfrued/Python-100-Days](https://github.com/jackfrued/Python-100-Days) | 187,609 | §1.2 可变与不可变：唯一需要背的分类 | 看 `Day01-15/` 的基础语法篇：它对「可变/不可变」的表述决定了后面默认参数与浅拷贝的坑，重点盯它对 `list` 与 `tuple` 的对比——本章「别名、缓存与浅拷贝」那节的示例就是这条的展开 |
+| 3 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,917 | §3.4 `dict`：哈希表，且保证插入顺序 | 看入门课的数据准备一节：特征用列表、样本用字典，这种「列表套字典」是读 CSV/JSON 时最常见的内存形态；本章 §3.1 复杂度速查里的 O(1) 平均查找，就是靠这里每条样本的键哈希换来的 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

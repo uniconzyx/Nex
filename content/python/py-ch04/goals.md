@@ -42,9 +42,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 225,745 | §1.3 | 讲「os 与路径处理」时读仓库根目录的脚本组织方式：所有算法按目录归类、用 `if __name__ == "__main__"` 提供自测入口，这是「模块 vs 脚本」的现成范例 |
-| 2 | [jackfrued/Python-100-Days](https://github.com/jackfrued/Python-100-Days) | 187,609 | §2.2 | 讲「datetime 与时区」时看 `Day16-20/` 的日期处理篇：`datetime` 是「无时区」的、`timezone` 要显式加，混用会导致跨时区差 8 小时 |
-| 3 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,917 | §1.2 | 讲「json 读写」时看入门课的数据集加载：把配置与标签放在 JSON 里、用 `json.load` 读，比硬编码在脚本里更好维护 |
+| 1 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 225,745 | §2.2 `sys.path` 与导入解析顺序 | 读仓库根目录的脚本组织方式：所有算法按目录归类、用 `if __name__ == "__main__"` 提供自测入口，这是「模块 vs 脚本」的现成范例；读完再回 §1.1，就明白为什么它不写 `sys.path.append` 也能互相导入 |
+| 2 | [jackfrued/Python-100-Days](https://github.com/jackfrued/Python-100-Days) | 187,609 | §3.1 三种时间表示，别混着用 | 看 `Day16-20/` 的日期处理篇：`datetime` 默认是「无时区」的 naive、`timezone` 要显式加，混用会导致跨时区差 8 小时；这正是 §3.2「naive 会被当成本地时间」那个坑的现场，再读 §3.3 的 `zoneinfo` 收尾 |
+| 3 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,917 | §4.1 类型映射表：什么能过、什么会炸 | 看入门课的数据集加载：把配置与标签放在 JSON 里、用 `json.load` 读，比硬编码在脚本里更好维护；读的时候顺手找一处「把 `datetime` 或 `set` 塞进 `json.dumps`」的写法——那就是 §4.3 `default` 参数存在的理由 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

@@ -36,9 +36,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 225,745 | §1.2 | 讲「字典的哈希实现」时读 `hashes/` 目录：`hash_table.py` 用「桶数组 + 链地址」实现，能直接看到「冲突怎么处理、扩容怎么触发」——比背复杂度直观 |
-| 2 | [jackfrued/Python-100-Days](https://github.com/jackfrued/Python-100-Days) | 187,609 | §3.1 | 讲「深浅拷贝」时看 `Day01-15/` 的容器篇：`copy.copy` 只复制外层、`deepcopy` 递归复制，嵌套列表的例子能把「改内层影响原对象」演示清楚 |
-| 3 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,917 | §4.2 | 讲「集合去重」时看入门课的数据清洗一节：用 `set` 找重复样本、用 `Counter` 统计类别分布，这两个操作是数据准备阶段的高频动作 |
+| 1 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 225,745 | §2.2 哈希冲突与「最坏 O(n)」 | 读 `hashes/` 目录的 `hash_table.py`：它用「桶数组 + 链地址」实现，能直接看到「冲突怎么处理、扩容怎么触发」——比背复杂度直观；读完再回本章 §2.1，就明白为什么 3.7 之前 dict 不保证顺序 |
+| 2 | [jackfrued/Python-100-Days](https://github.com/jackfrued/Python-100-Days) | 187,609 | §3.3 深浅拷贝：拷贝的是「引用」还是「对象图」 | 看 `Day01-15/` 的容器篇：`copy.copy` 只复制外层、`deepcopy` 递归复制，嵌套列表的例子能把「改内层影响原对象」演示清楚；配合 §3.4 的 `[[0]] * 3` 陷阱一起读，两个坑一次看清 |
+| 3 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,917 | §2.4 `set`：同一套哈希机制，只存 key | 看入门课的数据清洗一节：用 `set` 找重复样本、用 `Counter` 统计类别分布，是数据准备阶段的高频动作；注意 `set` 与 `dict` 在 §2.3 可哈希契约上的共同约束——存进去的东西必须 `__hash__` 与 `__eq__` 一致 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

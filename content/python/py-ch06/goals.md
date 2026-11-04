@@ -47,9 +47,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 225,745 | §1.2 | 讲「正则的字符类与量词」时读 `strings/` 目录下的校验脚本：邮箱/手机号的正则各一版，能对照出「什么时候该用正则、什么时候该写解析」 |
-| 2 | [jackfrued/Python-100-Days](https://github.com/jackfrued/Python-100-Days) | 187,609 | §2.1 | 讲「分组与替换」时看 `Day21-30/` 的文本处理篇：`re.sub` 配 `` 反向引用做「调换两段」的改写，比字符串切分稳 |
-| 3 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,917 | §3.4 | 讲「灾难性回溯」时看入门课的文本清洗：对长文本用简单字符类而不是嵌套量词 `(a+)+`，后者在异常输入上会指数级回溯 |
+| 1 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 225,745 | §4.4 什么时候不该用正则 | 读 `strings/` 目录下的校验脚本：邮箱/手机号的正则各一版，能对照出「什么时候该用正则、什么时候该写解析」；读完再回 §1.2 `findall` 的分组陷阱——这正是「正则看着对、结果不对」的常见来源 |
+| 2 | [jackfrued/Python-100-Days](https://github.com/jackfrued/Python-100-Days) | 187,609 | §2.3 反向引用：`\1` 与 `\g<1>` | 看 `Day21-30/` 的文本处理篇：`re.sub` 配反向引用做「调换两段」的改写，比字符串切分稳；先读 §2.1 三类括号弄清「哪个括号是分组、哪个是被捕获」，再回来看替换模板里的 `\g<name>` |
+| 3 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,917 | §3.2 回溯爆炸：为什么会指数级 | 看入门课的文本清洗：对长文本用简单字符类而不是嵌套量词 `(a+)+`，后者在异常输入上会指数级回溯；对照 §3.1 三种量词语义与 §3.3 三种解法（原子组 / 占有量词模拟 / 换算法），就是本章「灾难性回溯」的完整处置链 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

@@ -51,9 +51,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 225,745 | §3.2 | 讲「GIL 的边界」时读仓库里的并行示例：CPU 密集用多进程、IO 密集用多线程，这个目录的脚本大多是「纯计算」，正好说明「为什么它们不能靠 threading 提速」 |
-| 2 | [jackfrued/Python-100-Days](https://github.com/jackfrued/Python-100-Days) | 187,609 | §2.3 | 讲「asyncio 的事件循环」时看 `Day31-35/` 的并发篇：`async def` + `await` 把「等待」让出去，写法与线程池完全不同，别混着用 |
-| 3 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,917 | §4.1 | 讲「并发下载/预处理」时看入门课的批量处理脚本：用线程池做 IO 密集的图片下载，注意「线程数不是越多越好」——上下文切换会吃掉收益 |
+| 1 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 225,745 | §1.3 二维决策：IO 密集 vs CPU 密集 | 读仓库里的并行示例：CPU 密集用多进程、IO 密集用多线程，这个目录的脚本大多是「纯计算」，正好说明「为什么它们不能靠 threading 提速」；读的时候对照 §1.1 GIL 是什么，就知道提速失败不是写法问题而是锁的问题 |
+| 2 | [jackfrued/Python-100-Days](https://github.com/jackfrued/Python-100-Days) | 187,609 | §4.1 协程是「可暂停的函数」 | 看 `Day31-35/` 的并发篇：`async def` + `await` 把「等待」让出去，写法与线程池完全不同，别混着用；重点读 §4.4「最大的坑：阻塞事件循环」——一个同步 `time.sleep` 就能让整条协程链停摆 |
+| 3 | [microsoft/ML-For-Beginners](https://github.com/microsoft/ML-For-Beginners) | 91,917 | §3.2 线程池：别再手写 `Thread` | 看入门课的批量处理脚本：用线程池做 IO 密集的图片下载，注意「线程数不是越多越好」——上下文切换会吃掉收益；配合 §3.3 Future 与异常传播，看它的 `submit` 结果是怎么收集失败的，这决定了「下载失败会不会被静默吞掉」 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 
