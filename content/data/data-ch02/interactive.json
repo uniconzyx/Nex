@@ -2,7 +2,7 @@
   "chapter": "data-ch02",
   "subject": "data",
   "title": "NumPy 进阶：广播、随机与性能",
-  "fingerprint": "24f9b559d5",
+  "fingerprint": "bbf8441a27",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,114 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "广播零拷贝，物化就爆炸",
+      "brief": "广播不复制数据——它只是把该维的 stride 置 0，所以零内存。但一旦 np.array(broadcast) 物化，就会按广播后的完整 shape 分配缓冲。拖三个维度与是否物化，看什么时候内存会炸。",
+      "params": [
+        {
+          "key": "d1",
+          "label": "维度 1",
+          "min": 10,
+          "max": 2000,
+          "step": 10,
+          "value": 1000
+        },
+        {
+          "key": "d2",
+          "label": "维度 2",
+          "min": 10,
+          "max": 2000,
+          "step": 10,
+          "value": 1000
+        },
+        {
+          "key": "d3",
+          "label": "维度 3",
+          "min": 1,
+          "max": 200,
+          "step": 1,
+          "value": 100
+        },
+        {
+          "key": "itemsize",
+          "label": "单元素字节数",
+          "min": 1,
+          "max": 8,
+          "step": 1,
+          "value": 8,
+          "unit": "B"
+        },
+        {
+          "key": "materialize",
+          "label": "是否物化",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 1,
+          "labels": [
+            "惰性广播（stride=0）",
+            "np.array() 物化"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "outElems",
+          "label": "广播后元素数",
+          "expr": "d1 * d2 * d3",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "lazyMB",
+          "label": "惰性广播额外内存",
+          "expr": "0",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "matMB",
+          "label": "物化后内存",
+          "expr": "d1 * d2 * d3 * itemsize / 1000000",
+          "unit": "MB",
+          "fmt": "fix2"
+        },
+        {
+          "key": "actualMB",
+          "label": "实际额外内存",
+          "expr": "if(materialize == 1, d1 * d2 * d3 * itemsize / 1000000, 0)",
+          "unit": "MB",
+          "fmt": "fix2"
+        },
+        {
+          "key": "amplify",
+          "label": "相对单向量放大",
+          "expr": "d1 * d2 * d3 / d1",
+          "unit": "倍",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "actualMB <= 64",
+          "label": "额外内存 ≤64MB"
+        },
+        {
+          "expr": "materialize == 0",
+          "label": "保持惰性广播（不要 np.array 物化）"
+        },
+        {
+          "expr": "d1 >= 500 && d2 >= 500 && d3 >= 10",
+          "label": "三个维度都要有规模（d1/d2≥500、d3≥10）"
+        },
+        {
+          "expr": "itemsize >= 4",
+          "label": "单元素 ≥4 字节（float32 起步，别靠降精度省内存）"
+        }
+      ],
+      "insight": "广播的语义是「把该维 stride 置 0」，所以零内存、零拷贝——这就是为什么 (1000,1000) + (1000,1) 不报内存错。但只要你把它物化（np.array(broadcast)、concatenate、写进需要真实缓冲的算子），就会按广播后的完整 shape 分配：1000×1000×100 × 8B = 800MB。所以「广播很方便」和「广播后别手贱物化」要一起记。"
+    },
     {
       "kind": "match",
       "pairs": [

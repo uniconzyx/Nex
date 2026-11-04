@@ -2,7 +2,7 @@
   "chapter": "data-ch01",
   "subject": "data",
   "title": "NumPy 基础：ndarray 与向量化",
-  "fingerprint": "ae37da750e",
+  "fingerprint": "84c1bd5ff8",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,119 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "dtype 一升位，内存就翻倍",
+      "brief": "ndarray 的内存 = 元素数 × dtype 字节数。int8→int64 是 8 倍，float32→float64 是 2 倍——数据一样多，占的空间完全不同。而切片/reshape 是视图（零拷贝），花式索引/astype 一定拷贝。拖规模、dtype 位宽与操作类型，把内存压进预算。",
+      "params": [
+        {
+          "key": "rows",
+          "label": "行数",
+          "min": 100,
+          "max": 10000,
+          "step": 100,
+          "value": 4000
+        },
+        {
+          "key": "cols",
+          "label": "列数",
+          "min": 100,
+          "max": 10000,
+          "step": 100,
+          "value": 4000
+        },
+        {
+          "key": "itemsize",
+          "label": "单元素字节数",
+          "min": 1,
+          "max": 8,
+          "step": 1,
+          "value": 8,
+          "unit": "B"
+        },
+        {
+          "key": "isCopy",
+          "label": "操作类型",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 1,
+          "labels": [
+            "视图（零拷贝）",
+            "拷贝（新缓冲）"
+          ]
+        },
+        {
+          "key": "budgetMB",
+          "label": "内存预算",
+          "min": 200,
+          "max": 1024,
+          "step": 8,
+          "value": 200,
+          "unit": "MB"
+        }
+      ],
+      "metrics": [
+        {
+          "key": "elems",
+          "label": "元素个数",
+          "expr": "rows * cols",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "baseMB",
+          "label": "原数组内存",
+          "expr": "rows * cols * itemsize / 1000000",
+          "unit": "MB",
+          "fmt": "fix2"
+        },
+        {
+          "key": "extraMB",
+          "label": "额外占用",
+          "expr": "if(isCopy == 1, rows * cols * itemsize / 1000000, 0)",
+          "unit": "MB",
+          "fmt": "fix2"
+        },
+        {
+          "key": "peakMB",
+          "label": "峰值内存",
+          "expr": "rows * cols * itemsize / 1000000 + if(isCopy == 1, rows * cols * itemsize / 1000000, 0)",
+          "unit": "MB",
+          "fmt": "fix2"
+        },
+        {
+          "key": "bytesRatio",
+          "label": "相对 int8 的倍数",
+          "expr": "itemsize",
+          "unit": "倍",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "peakMB <= budgetMB",
+          "label": "峰值内存不超预算"
+        },
+        {
+          "expr": "itemsize >= 4",
+          "label": "单元素 ≥4 字节（int8/float16 精度不够）"
+        },
+        {
+          "expr": "isCopy == 0",
+          "label": "用视图而非拷贝（切片/reshape 零拷贝）"
+        },
+        {
+          "expr": "budgetMB == 200",
+          "label": "预算固定 200MB（机器内存既定）"
+        },
+        {
+          "expr": "rows == 4000 && cols == 4000",
+          "label": "矩阵固定 4000×4000（数据集既定）"
+        }
+      ],
+      "insight": "ndarray 内存 = 元素数 × itemsize。dtype 一升位就是成倍增长：int8→int64 是 8 倍。切片、reshape、transpose 都是视图（base 指向原数组，stride 改一下就行），零拷贝；花式索引、astype、ravel（非连续时）一定拷贝。所以「转置后再 ravel」会偷偷拷贝一份——这不是 bug，是内存布局不连续。"
+    },
     {
       "kind": "match",
       "pairs": [

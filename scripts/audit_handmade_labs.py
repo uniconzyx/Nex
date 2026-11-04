@@ -233,6 +233,10 @@ def sample_axes(axes: List[List[float]]) -> Tuple[List[List[float]], bool]:
 
     按"点最多的那个轴减半"逐轮抽样，直到 ≤ MAX_COMBOS。抽样不是穷举，
     所以只用来回答"有没有解"，不保证找到全部解 —— 报告里会标明是否抽样。
+
+    **必须保留首尾端点**：截断式 `[::2]` 会把 `rows=4000` 这种「偶数下标靠后」的
+    档位抽掉，于是 `rows == 4000` 这类锁定判据永远不成立，误报"这一关不可能通关"。
+    端点又恰好是最常见的解（默认值、上下界），丢了它们等于丢掉了大半可行域。
     """
     cur = [list(a) for a in axes]
     sampled = False
@@ -241,6 +245,9 @@ def sample_axes(axes: List[List[float]]) -> Tuple[List[List[float]], bool]:
         if len(cur[i]) <= 2:
             break
         cur[i] = cur[i][::2]
+        # 补回被抽掉的末端点——它是边界解所在处，不能丢
+        if cur[i][-1] != axes[i][-1]:
+            cur[i].append(axes[i][-1])
         sampled = True
     return cur, sampled
 
@@ -299,6 +306,23 @@ def run_sandbox(ch: str, mod: Dict[str, Any], verbose: bool) -> Tuple[List[str],
             errs.append("默认参数已经满足全部判据 —— 一进来就通关，等于没得玩")
 
     # 穷举（或抽样）找解
+    # 先把被 `key == 常数` 锁死的轴钉成一个点：这类「既定事实」判据本来就要求
+    # 精确命中，而 sample_axes 的隔位抽样极易把它抽掉（rows==4000、cores==8…），
+    # 会误报「这一关不可能通关」。锁死后搜索空间也更小，解更稳定。
+    for i, p in enumerate(mod["params"]):
+        m = re.search(rf"\b{re.escape(p['key'])}\s*==\s*([0-9]+(?:\.[0-9]+)?)\b",
+                      " ".join(c["expr"] for c in mod["checks"]))
+        if m:
+            lock = float(m.group(1))
+            if lock in axes[i]:
+                axes[i] = [lock]
+            else:
+                # 锁定的值不在网格上（如 min=16 step=16 时网格是 16,32,…,192,208，
+                # 永远取不到 200）→ 这条判据恒假，必须明确报出来，
+                # 否则结论会伪装成「不可能通关」，让人去查公式而不是查档位。
+                errs.append(
+                    f"判据要求 {p['key']} == {lock:g}，但参数网格 "
+                    f"({p['min']}~{p['max']} step {p['step']}) 取不到该值")
     axes, sampled = sample_axes(axes)
     sol: Optional[Dict[str, float]] = None
     for combo in itertools.product(*axes):

@@ -2,7 +2,7 @@
   "chapter": "agent-ch05",
   "subject": "agent",
   "title": "RAG 技术精讲：检索质量决定回答上限",
-  "fingerprint": "9874cc3642",
+  "fingerprint": "666c0ef3d2",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,136 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "RAG 的上下文预算怎么花",
+      "brief": "上下文 tokens = top-k × 每块 tokens + 系统提示。切块太小召回碎片、太大一两块就吃满窗口；重叠窗口能提升召回，但会让块数和每块长度同时放大。拖块大小、重叠率与 top-k，把整条链压进模型窗口。",
+      "params": [
+        {
+          "key": "chunkSize",
+          "label": "切块大小",
+          "min": 128,
+          "max": 2048,
+          "step": 128,
+          "value": 512,
+          "unit": "tok"
+        },
+        {
+          "key": "overlap",
+          "label": "重叠率",
+          "min": 0.0,
+          "max": 0.5,
+          "step": 0.05,
+          "value": 0.2
+        },
+        {
+          "key": "topK",
+          "label": "召回条数 top-k",
+          "min": 1,
+          "max": 20,
+          "step": 1,
+          "value": 5
+        },
+        {
+          "key": "docKTok",
+          "label": "文档规模",
+          "min": 10,
+          "max": 500,
+          "step": 10,
+          "value": 100,
+          "unit": "千 tok"
+        },
+        {
+          "key": "sysTok",
+          "label": "系统提示开销",
+          "min": 200,
+          "max": 2000,
+          "step": 100,
+          "value": 1000,
+          "unit": "tok"
+        },
+        {
+          "key": "windowK",
+          "label": "上下文窗口",
+          "min": 4,
+          "max": 128,
+          "step": 4,
+          "value": 4,
+          "unit": "K tok"
+        }
+      ],
+      "metrics": [
+        {
+          "key": "perChunkTok",
+          "label": "每块 tokens",
+          "expr": "chunkSize * (1 + overlap)",
+          "unit": "tok",
+          "fmt": "int"
+        },
+        {
+          "key": "ctxTok",
+          "label": "上下文占用",
+          "expr": "topK * chunkSize * (1 + overlap) + sysTok",
+          "unit": "tok",
+          "fmt": "int"
+        },
+        {
+          "key": "fillRatio",
+          "label": "窗口占用率",
+          "expr": "(topK * chunkSize * (1 + overlap) + sysTok) / (windowK * 1024)",
+          "unit": "倍",
+          "fmt": "fix2"
+        },
+        {
+          "key": "chunkCount",
+          "label": "索引块数",
+          "expr": "docKTok * 1000 / (chunkSize * (1 - overlap + if(overlap == 1, 0.01, 0)))",
+          "unit": "块",
+          "fmt": "int"
+        },
+        {
+          "key": "overflow",
+          "label": "是否溢出窗口",
+          "expr": "if(topK * chunkSize * (1 + overlap) + sysTok > windowK * 1024, 1, 0)",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "overflow == 0",
+          "label": "上下文不溢出模型窗口"
+        },
+        {
+          "expr": "fillRatio <= 0.7",
+          "label": "窗口占用 ≤70%（留 30% 给生成与多轮）"
+        },
+        {
+          "expr": "chunkSize >= 256",
+          "label": "块 ≥256 tok（再小召回碎片化）"
+        },
+        {
+          "expr": "topK >= 3",
+          "label": "top-k ≥3（召回太少答案容易漏）"
+        },
+        {
+          "expr": "overlap >= 0.1",
+          "label": "重叠 ≥10%（不然答案跨切点就召回不到）"
+        },
+        {
+          "expr": "docKTok == 100",
+          "label": "文档固定 10 万 tok（知识库规模既定）"
+        },
+        {
+          "expr": "sysTok == 1000",
+          "label": "系统提示固定 1000 tok（已写好的模板）"
+        },
+        {
+          "expr": "windowK == 4",
+          "label": "窗口固定 4K（模型能力既定，别换更大上下文的模型）"
+        }
+      ],
+      "insight": "RAG 的上下文预算 = top-k × 每块 tokens + 系统提示 + 生成预留。块切太小，召回的是碎片、单块缺上下文；切太大，一两块就吃满窗口。重叠窗口能救回「答案刚好跨在切点」的情况，代价是块数和每块长度同时放大——20% 重叠意味着有效块长 +20%、索引块数 +25%。所以调参数时先算账再动手。"
+    },
     {
       "kind": "match",
       "pairs": [

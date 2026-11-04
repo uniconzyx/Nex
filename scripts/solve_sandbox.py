@@ -46,9 +46,34 @@ def ok_of(env, mod):
     return True
 
 
+def locked_value(mod, axis_key):
+    """从 checks 里挖出 `key == 常数` 形式的锁定值。
+
+    为什么需要这一步：`sample_axes` 是隔位抽样，会把 `rows == 4000` 这种
+    「偶数下标靠后」的精确值抽掉，于是锁定判据永远不成立，误判「无解」。
+    这里把被锁定的轴直接收窄成一个点，既避开抽样盲区，也把搜索空间砍掉一大截
+    （8 个参数各抽 5 档也不够用，锁死后必然有解）。
+    """
+    import re
+    pat = re.compile(rf"\b{re.escape(axis_key)}\s*==\s*([0-9]+(?:\.[0-9]+)?)\b")
+    for c in mod["checks"]:
+        m = pat.search(c["expr"])
+        if m:
+            return float(m.group(1))
+    return None
+
+
 def solve(key, mod):
     keys = [p["key"] for p in mod["params"]]
-    axes = [A.grid(p) for p in mod["params"]]
+    axes = []
+    for p in mod["params"]:
+        full = A.grid(p)
+        lock = locked_value(mod, p["key"])
+        if lock is not None and lock in full:
+            # 被 == 锁死的轴：直接钉到那一个值，不参与抽样
+            axes.append([lock])
+        else:
+            axes.append(full)
     axes, _ = A.sample_axes(axes)
     for combo in itertools.product(*axes):
         vals = dict(zip(keys, combo))

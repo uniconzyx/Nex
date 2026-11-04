@@ -1,4 +1,89 @@
 {
+ "agent/agent-ch05": {
+  "ok": true,
+  "params": [
+   {
+    "key": "chunkSize",
+    "type": "range",
+    "value": 256.0
+   },
+   {
+    "key": "overlap",
+    "type": "range",
+    "value": 0.1
+   },
+   {
+    "key": "topK",
+    "type": "range",
+    "value": 3.0
+   },
+   {
+    "key": "docKTok",
+    "type": "range",
+    "value": 100.0
+   },
+   {
+    "key": "sysTok",
+    "type": "range",
+    "value": 1000.0
+   },
+   {
+    "key": "windowK",
+    "type": "range",
+    "value": 4.0
+   }
+  ]
+ },
+ "agent/agent-ch07": {
+  "ok": true,
+  "params": [
+   {
+    "key": "rank",
+    "type": "range",
+    "value": 8.0
+   },
+   {
+    "key": "dModel",
+    "type": "range",
+    "value": 4096.0
+   },
+   {
+    "key": "layers",
+    "type": "range",
+    "value": 32.0
+   },
+   {
+    "key": "mountLayers",
+    "type": "range",
+    "value": 4.0
+   },
+   {
+    "key": "batch",
+    "type": "range",
+    "value": 2.0
+   },
+   {
+    "key": "seqLen",
+    "type": "range",
+    "value": 512.0
+   },
+   {
+    "key": "baseGB",
+    "type": "range",
+    "value": 13.0
+   },
+   {
+    "key": "gpuGB",
+    "type": "range",
+    "value": 24.0
+   },
+   {
+    "key": "gradCkpt",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
  "ai/ai-ch01": {
   "ok": true,
   "params": [
@@ -189,6 +274,56 @@
    }
   ]
  },
+ "bigdata/bd-ch02": {
+  "ok": true,
+  "params": [
+   {
+    "key": "inputWan",
+    "type": "range",
+    "value": 100.0
+   },
+   {
+    "key": "kvPerRec",
+    "type": "range",
+    "value": 8.0
+   },
+   {
+    "key": "combRatio",
+    "type": "range",
+    "value": 0.4
+   },
+   {
+    "key": "numReduce",
+    "type": "range",
+    "value": 4.0
+   }
+  ]
+ },
+ "bigdata/bd-ch04": {
+  "ok": true,
+  "params": [
+   {
+    "key": "numPart",
+    "type": "range",
+    "value": 16.0
+   },
+   {
+    "key": "dataMB",
+    "type": "range",
+    "value": 1000.0
+   },
+   {
+    "key": "itemsPerKey",
+    "type": "range",
+    "value": 20.0
+   },
+   {
+    "key": "useReduceByKey",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
  "cpp/cpp-ch01": {
   "ok": true,
   "params": [
@@ -326,6 +461,66 @@
     "key": "pool",
     "type": "range",
     "value": 10.0
+   }
+  ]
+ },
+ "data/data-ch01": {
+  "ok": true,
+  "params": [
+   {
+    "key": "rows",
+    "type": "range",
+    "value": 4000.0
+   },
+   {
+    "key": "cols",
+    "type": "range",
+    "value": 4000.0
+   },
+   {
+    "key": "itemsize",
+    "type": "range",
+    "value": 4.0
+   },
+   {
+    "key": "isCopy",
+    "type": "opt",
+    "value": 0
+   },
+   {
+    "key": "budgetMB",
+    "type": "range",
+    "value": 200.0
+   }
+  ]
+ },
+ "data/data-ch02": {
+  "ok": true,
+  "params": [
+   {
+    "key": "d1",
+    "type": "range",
+    "value": 650.0
+   },
+   {
+    "key": "d2",
+    "type": "range",
+    "value": 650.0
+   },
+   {
+    "key": "d3",
+    "type": "range",
+    "value": 17.0
+   },
+   {
+    "key": "itemsize",
+    "type": "range",
+    "value": 4.0
+   },
+   {
+    "key": "materialize",
+    "type": "opt",
+    "value": 0
    }
   ]
  },
@@ -866,6 +1061,71 @@
     "key": "win",
     "type": "range",
     "value": 1.0
+   }
+  ]
+ },
+ "java/java-ch07": {
+  "ok": true,
+  "params": [
+   {
+    "key": "cores",
+    "type": "range",
+    "value": 8.0
+   },
+   {
+    "key": "ioBound",
+    "type": "opt",
+    "value": 0
+   },
+   {
+    "key": "waitMs",
+    "type": "range",
+    "value": 90.0
+   },
+   {
+    "key": "calcMs",
+    "type": "range",
+    "value": 1.0
+   },
+   {
+    "key": "poolSize",
+    "type": "range",
+    "value": 9.0
+   },
+   {
+    "key": "queueCap",
+    "type": "range",
+    "value": 650.0
+   },
+   {
+    "key": "qps",
+    "type": "range",
+    "value": 500.0
+   }
+  ]
+ },
+ "java/java-ch08": {
+  "ok": true,
+  "params": [
+   {
+    "key": "heapGB",
+    "type": "range",
+    "value": 13.0
+   },
+   {
+    "key": "newRatio",
+    "type": "range",
+    "value": 1.0
+   },
+   {
+    "key": "survRatio",
+    "type": "range",
+    "value": 8.0
+   },
+   {
+    "key": "allocGB",
+    "type": "range",
+    "value": 300.0
    }
   ]
  },

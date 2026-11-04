@@ -2,7 +2,7 @@
   "chapter": "java-ch08",
   "subject": "java",
   "title": "JVM 与内存模型、GC、类加载",
-  "fingerprint": "c696d020bc",
+  "fingerprint": "45dfbf3e88",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,111 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "堆怎么切，GC 就怎么跑",
+      "brief": "NewRatio=2 表示老年代:新生代=2:1，新生代只占堆的 1/3。SurvivorRatio=8 表示 Eden:单个Survivor=8:1。Eden 满就触发 Minor GC——分配量除以 Eden 大小就是 GC 次数。拖堆大小与代比例，既压 GC 次数又不让单次停顿超预算。",
+      "params": [
+        {
+          "key": "heapGB",
+          "label": "堆大小",
+          "min": 1,
+          "max": 32,
+          "step": 1,
+          "value": 2,
+          "unit": "GB"
+        },
+        {
+          "key": "newRatio",
+          "label": "NewRatio（老:新）",
+          "min": 1,
+          "max": 8,
+          "step": 1,
+          "value": 2
+        },
+        {
+          "key": "survRatio",
+          "label": "SurvivorRatio",
+          "min": 2,
+          "max": 16,
+          "step": 2,
+          "value": 8
+        },
+        {
+          "key": "allocGB",
+          "label": "总分配量",
+          "min": 10,
+          "max": 500,
+          "step": 10,
+          "value": 300,
+          "unit": "GB"
+        }
+      ],
+      "metrics": [
+        {
+          "key": "youngMB",
+          "label": "新生代大小",
+          "expr": "heapGB * 1024 / (1 + newRatio)",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "oldMB",
+          "label": "老年代大小",
+          "expr": "heapGB * 1024 * newRatio / (1 + newRatio)",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "edenMB",
+          "label": "Eden 大小",
+          "expr": "heapGB * 1024 / (1 + newRatio) * survRatio / (survRatio + 2)",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "gcCount",
+          "label": "Minor GC 次数",
+          "expr": "allocGB * 1024 / (heapGB * 1024 / (1 + newRatio) * survRatio / (survRatio + 2))",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "pauseMs",
+          "label": "单次停顿估算",
+          "expr": "heapGB * 1024 / (1 + newRatio) * survRatio / (survRatio + 2) / 1024 * 8",
+          "unit": "ms",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "gcCount <= 60",
+          "label": "Minor GC 次数 ≤60"
+        },
+        {
+          "expr": "pauseMs <= 50",
+          "label": "单次停顿 ≤50ms"
+        },
+        {
+          "expr": "oldMB >= 1024",
+          "label": "老年代 ≥1GB（太小会频繁 Full GC）"
+        },
+        {
+          "expr": "edenMB >= 256",
+          "label": "Eden ≥256MB（太小 GC 过密）"
+        },
+        {
+          "expr": "allocGB == 300",
+          "label": "分配量固定 300GB（业务吞吐既定）"
+        },
+        {
+          "expr": "survRatio == 8",
+          "label": "SurvivorRatio 固定 8（默认 Eden:S1:S2=8:1:1）"
+        }
+      ],
+      "insight": "NewRatio=2 表示老:新=2:1，新生代只占堆的 1/3；SurvivorRatio=8 表示 Eden 占新生代的 8/10。Eden 满即触发 Minor GC，所以「分配量 ÷ Eden 大小 = GC 次数」——想少 GC 就加大 Eden，但 Eden 越大单次扫描越久，停顿跟着涨。这就是为什么 G1/ZGC 要拆 Region 做增量回收：在「次数」和「单次停顿」之间找第三条路。"
+    },
     {
       "kind": "sequence",
       "heading": "一、类加载五阶段",

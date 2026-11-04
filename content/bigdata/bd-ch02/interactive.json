@@ -2,7 +2,7 @@
   "chapter": "bd-ch02",
   "subject": "bigdata",
   "title": "MapReduce 原理与 YARN 调度（bd-ch02）",
-  "fingerprint": "387061c9ab",
+  "fingerprint": "6005f6f4f5",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,109 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "Shuffle 到底要搬多少数据",
+      "brief": "Map 输出的每个 kv 都要跨网络搬到 reducer——这是 MapReduce 最贵的一步。Combiner 是本地预聚合，能在搬运前把相同 key 先合并，压缩率直接决定 Shuffle 总量；reduce 数决定这些数据分摊到几个 reducer，太少会单点 OOM。拖输入规模、Combiner 压缩率与 reduce 数，把 Shuffle 压进预算。",
+      "params": [
+        {
+          "key": "inputWan",
+          "label": "输入记录数",
+          "min": 10,
+          "max": 1000,
+          "step": 10,
+          "value": 100,
+          "unit": "万条"
+        },
+        {
+          "key": "kvPerRec",
+          "label": "每条记录产出 kv",
+          "min": 1,
+          "max": 20,
+          "step": 1,
+          "value": 8
+        },
+        {
+          "key": "combRatio",
+          "label": "Combiner 压缩率",
+          "min": 0.0,
+          "max": 0.95,
+          "step": 0.05,
+          "value": 0.0
+        },
+        {
+          "key": "numReduce",
+          "label": "reduce 任务数",
+          "min": 1,
+          "max": 40,
+          "step": 1,
+          "value": 2
+        }
+      ],
+      "metrics": [
+        {
+          "key": "mapOutWan",
+          "label": "map 输出 kv（万）",
+          "expr": "inputWan * kvPerRec",
+          "unit": "万",
+          "fmt": "int"
+        },
+        {
+          "key": "afterCombWan",
+          "label": "Combiner 后 kv（万）",
+          "expr": "inputWan * kvPerRec * (1 - combRatio)",
+          "unit": "万",
+          "fmt": "int"
+        },
+        {
+          "key": "shuffleMB",
+          "label": "Shuffle 总量",
+          "expr": "inputWan * kvPerRec * (1 - combRatio)",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "perReduceMB",
+          "label": "单 reduce 负载",
+          "expr": "inputWan * kvPerRec * (1 - combRatio) / numReduce",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "hasComb",
+          "label": "是否启用 Combiner",
+          "expr": "if(combRatio > 0, 1, 0)",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "perReduceMB <= 256",
+          "label": "单 reduce 负载 ≤256MB（超了会反复溢写）"
+        },
+        {
+          "expr": "shuffleMB <= 500",
+          "label": "Shuffle 总量 ≤500MB"
+        },
+        {
+          "expr": "hasComb == 1",
+          "label": "必须启用 Combiner（省下的就是省下的网络带宽）"
+        },
+        {
+          "expr": "numReduce >= 4",
+          "label": "reduce ≥4（太少单点、太多小文件）"
+        },
+        {
+          "expr": "inputWan == 100",
+          "label": "输入固定 100 万条（数据规模是既定事实）"
+        },
+        {
+          "expr": "kvPerRec == 8",
+          "label": "每条记录固定 8 个 kv（产出来自业务逻辑）"
+        }
+      ],
+      "insight": "Shuffle 是 MapReduce 的胜负手：Map 输出的每个 kv 都要跨网络搬运。Combiner 是「本地 reduce」，在搬运前先合并相同 key——WordCount 里加不加它，Shuffle 量能差一个数量级（但求平均这类不可交换的聚合不能加）。reduce 数就是分区数：太少单点 OOM，太多会产生大量小文件拖垮 NameNode。"
+    },
     {
       "kind": "match",
       "pairs": [

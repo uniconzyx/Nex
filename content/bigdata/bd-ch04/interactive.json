@@ -2,7 +2,7 @@
   "chapter": "bd-ch04",
   "subject": "bigdata",
   "title": "Spark 核心：RDD 与惰性求值（bd-ch04）",
-  "fingerprint": "d2c5c7b984",
+  "fingerprint": "fc9fc1ed00",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,106 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "并行度不是线程数，是分区数",
+      "brief": "Spark 里 Task 数 = 分区数，加 Executor 不会让任务变多。而 reduceByKey 有 map 端预聚合、groupByKey 没有，同样的数据后者 Shuffle 量会放大「每 key 平均条目数」倍。拖分区数、聚合算子与数据规模，让单个 Task 不爆、Shuffle 不炸。",
+      "params": [
+        {
+          "key": "numPart",
+          "label": "分区数",
+          "min": 2,
+          "max": 400,
+          "step": 2,
+          "value": 2
+        },
+        {
+          "key": "dataMB",
+          "label": "数据规模",
+          "min": 100,
+          "max": 20000,
+          "step": 100,
+          "value": 1000,
+          "unit": "MB"
+        },
+        {
+          "key": "itemsPerKey",
+          "label": "每 key 平均条目数",
+          "min": 1,
+          "max": 50,
+          "step": 1,
+          "value": 20
+        },
+        {
+          "key": "useReduceByKey",
+          "label": "聚合算子",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "groupByKey",
+            "reduceByKey"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "taskCount",
+          "label": "Task 数",
+          "expr": "numPart",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "perTaskMB",
+          "label": "单 Task 数据量",
+          "expr": "dataMB / numPart",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "shuffleMB",
+          "label": "Shuffle 量",
+          "expr": "if(useReduceByKey == 1, dataMB, dataMB * itemsPerKey)",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "hasPreAgg",
+          "label": "是否 map 端预聚合",
+          "expr": "useReduceByKey",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "perTaskMB <= 128",
+          "label": "单 Task ≤128MB（超了容易 spill 落盘）"
+        },
+        {
+          "expr": "shuffleMB <= 2000",
+          "label": "Shuffle 量 ≤2GB"
+        },
+        {
+          "expr": "numPart >= 16",
+          "label": "分区数 ≥16（并行度要压满可用核）"
+        },
+        {
+          "expr": "hasPreAgg == 1",
+          "label": "用 reduceByKey 而非 groupByKey（map 端预聚合省掉绝大部分 Shuffle）"
+        },
+        {
+          "expr": "dataMB == 1000",
+          "label": "数据固定 1GB（规模是既定事实）"
+        },
+        {
+          "expr": "itemsPerKey == 20",
+          "label": "每 key 固定 20 条（key 分布由数据决定）"
+        }
+      ],
+      "insight": "Task 数 = 分区数，这是 Spark 并行度的唯一来源；加 Executor 只是加「同时能跑几个 Task」的槽位。reduceByKey 在 map 端先按 key 聚合，搬出去的是「每 key 一条」；groupByKey 把每个 key 的全部条目原样搬——每 key 20 条就是 20 倍 Shuffle。所以能预聚合就别 groupByKey；join 时小表优先广播成窄依赖。"
+    },
     {
       "kind": "match",
       "pairs": [

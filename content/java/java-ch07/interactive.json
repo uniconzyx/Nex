@@ -2,7 +2,7 @@
   "chapter": "java-ch07",
   "subject": "java",
   "title": "并发：Thread、线程池与 JUC 并发容器",
-  "fingerprint": "4bcab6ee28",
+  "fingerprint": "6392ef0789",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,142 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "线程池大小不是拍脑袋",
+      "brief": "CPU 密集取 N_cpu+1；IO 密集取 N_cpu×(1+W/C)——等 90ms 算 10ms 就是 10 倍。线程数配好之后还要看队列：按 Little 定律，队列容量 ≈ 峰值QPS × 可接受排队秒数。拖核数、任务类型与队列容量，让请求不被拒绝。",
+      "params": [
+        {
+          "key": "cores",
+          "label": "可用核数",
+          "min": 2,
+          "max": 64,
+          "step": 2,
+          "value": 8
+        },
+        {
+          "key": "ioBound",
+          "label": "任务类型",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 1,
+          "labels": [
+            "CPU 密集",
+            "IO 密集"
+          ]
+        },
+        {
+          "key": "waitMs",
+          "label": "IO 等待时间",
+          "min": 0,
+          "max": 200,
+          "step": 10,
+          "value": 90,
+          "unit": "ms"
+        },
+        {
+          "key": "calcMs",
+          "label": "计算时间",
+          "min": 1,
+          "max": 50,
+          "step": 1,
+          "value": 10,
+          "unit": "ms"
+        },
+        {
+          "key": "poolSize",
+          "label": "实际线程数",
+          "min": 1,
+          "max": 200,
+          "step": 1,
+          "value": 8
+        },
+        {
+          "key": "queueCap",
+          "label": "队列容量",
+          "min": 10,
+          "max": 10000,
+          "step": 10,
+          "value": 100
+        },
+        {
+          "key": "qps",
+          "label": "峰值 QPS",
+          "min": 10,
+          "max": 5000,
+          "step": 10,
+          "value": 500
+        }
+      ],
+      "metrics": [
+        {
+          "key": "wcRatio",
+          "label": "等待/计算比",
+          "expr": "waitMs / calcMs",
+          "unit": "倍",
+          "fmt": "fix2"
+        },
+        {
+          "key": "idealThreads",
+          "label": "理论线程数",
+          "expr": "if(ioBound == 1, cores * (1 + waitMs / calcMs), cores + 1)",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "utilRatio",
+          "label": "相对理论值",
+          "expr": "poolSize / if(ioBound == 1, cores * (1 + waitMs / calcMs), cores + 1)",
+          "unit": "倍",
+          "fmt": "fix2"
+        },
+        {
+          "key": "needQueue",
+          "label": "需要的队列容量",
+          "expr": "qps",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "reject",
+          "label": "是否会拒绝请求",
+          "expr": "if(queueCap < qps && poolSize < qps, 1, 0)",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "reject == 0",
+          "label": "不触发拒绝策略（线程+队列能吸收峰值 QPS）"
+        },
+        {
+          "expr": "utilRatio >= 0.8",
+          "label": "线程数达理论值 80% 以上（IO 密集别按核数配）"
+        },
+        {
+          "expr": "utilRatio <= 2",
+          "label": "线程数不超理论值 2 倍（超了上下文切换反噬）"
+        },
+        {
+          "expr": "queueCap <= 5000",
+          "label": "队列有界且 ≤5000（无界队列掩盖背压）"
+        },
+        {
+          "expr": "cores == 8",
+          "label": "核数固定 8（机器规格既定）"
+        },
+        {
+          "expr": "qps == 500",
+          "label": "峰值 QPS 固定 500（流量由业务决定）"
+        },
+        {
+          "expr": "waitMs == 90",
+          "label": "IO 等待固定 90ms（真实 DB/RPC 往返量级）"
+        }
+      ],
+      "insight": "CPU 密集取 N_cpu+1；IO 密集取 N_cpu×(1+W/C)——等 90ms 算 10ms 就是 10 倍，8 核要 80 个线程而不是 8 个。但线程数只是第一层：队列容量按 Little 定律 L=λW 估，太小会拒绝、无界会掩盖背压直到 OOM。容器里还要注意 availableProcessors 读的是宿主核数而非 CPU quota——这是云原生经典故障源。"
+    },
     {
       "kind": "match",
       "pairs": [

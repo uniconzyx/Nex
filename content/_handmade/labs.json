@@ -4595,6 +4595,1000 @@
     ],
     "insight": "积压治理看「净速率 = 消费总速 − 生产速」。加消费者线性提总速，但受分区数上限约束（本沙盒简化为线性）；真问题常是消费逻辑慢或分区太少，光加人可以缓解但不是根治。netRate>0 只是不涨，要清空还得看 backlog0/netRate 是否压进 SLA——积压越大、SLA 越紧，越要提前扩容。"
    }
+  ],
+  "bigdata/bd-ch02": [
+   {
+    "kind": "sandbox",
+    "title": "Shuffle 到底要搬多少数据",
+    "brief": "Map 输出的每个 kv 都要跨网络搬到 reducer——这是 MapReduce 最贵的一步。Combiner 是本地预聚合，能在搬运前把相同 key 先合并，压缩率直接决定 Shuffle 总量；reduce 数决定这些数据分摊到几个 reducer，太少会单点 OOM。拖输入规模、Combiner 压缩率与 reduce 数，把 Shuffle 压进预算。",
+    "params": [
+     {
+      "key": "inputWan",
+      "label": "输入记录数",
+      "min": 10,
+      "max": 1000,
+      "step": 10,
+      "value": 100,
+      "unit": "万条"
+     },
+     {
+      "key": "kvPerRec",
+      "label": "每条记录产出 kv",
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "value": 8
+     },
+     {
+      "key": "combRatio",
+      "label": "Combiner 压缩率",
+      "min": 0.0,
+      "max": 0.95,
+      "step": 0.05,
+      "value": 0.0
+     },
+     {
+      "key": "numReduce",
+      "label": "reduce 任务数",
+      "min": 1,
+      "max": 40,
+      "step": 1,
+      "value": 2
+     }
+    ],
+    "metrics": [
+     {
+      "key": "mapOutWan",
+      "label": "map 输出 kv（万）",
+      "expr": "inputWan * kvPerRec",
+      "unit": "万",
+      "fmt": "int"
+     },
+     {
+      "key": "afterCombWan",
+      "label": "Combiner 后 kv（万）",
+      "expr": "inputWan * kvPerRec * (1 - combRatio)",
+      "unit": "万",
+      "fmt": "int"
+     },
+     {
+      "key": "shuffleMB",
+      "label": "Shuffle 总量",
+      "expr": "inputWan * kvPerRec * (1 - combRatio)",
+      "unit": "MB",
+      "fmt": "int"
+     },
+     {
+      "key": "perReduceMB",
+      "label": "单 reduce 负载",
+      "expr": "inputWan * kvPerRec * (1 - combRatio) / numReduce",
+      "unit": "MB",
+      "fmt": "int"
+     },
+     {
+      "key": "hasComb",
+      "label": "是否启用 Combiner",
+      "expr": "if(combRatio > 0, 1, 0)",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "perReduceMB <= 256",
+      "label": "单 reduce 负载 ≤256MB（超了会反复溢写）"
+     },
+     {
+      "expr": "shuffleMB <= 500",
+      "label": "Shuffle 总量 ≤500MB"
+     },
+     {
+      "expr": "hasComb == 1",
+      "label": "必须启用 Combiner（省下的就是省下的网络带宽）"
+     },
+     {
+      "expr": "numReduce >= 4",
+      "label": "reduce ≥4（太少单点、太多小文件）"
+     },
+     {
+      "expr": "inputWan == 100",
+      "label": "输入固定 100 万条（数据规模是既定事实）"
+     },
+     {
+      "expr": "kvPerRec == 8",
+      "label": "每条记录固定 8 个 kv（产出来自业务逻辑）"
+     }
+    ],
+    "insight": "Shuffle 是 MapReduce 的胜负手：Map 输出的每个 kv 都要跨网络搬运。Combiner 是「本地 reduce」，在搬运前先合并相同 key——WordCount 里加不加它，Shuffle 量能差一个数量级（但求平均这类不可交换的聚合不能加）。reduce 数就是分区数：太少单点 OOM，太多会产生大量小文件拖垮 NameNode。"
+   }
+  ],
+  "bigdata/bd-ch04": [
+   {
+    "kind": "sandbox",
+    "title": "并行度不是线程数，是分区数",
+    "brief": "Spark 里 Task 数 = 分区数，加 Executor 不会让任务变多。而 reduceByKey 有 map 端预聚合、groupByKey 没有，同样的数据后者 Shuffle 量会放大「每 key 平均条目数」倍。拖分区数、聚合算子与数据规模，让单个 Task 不爆、Shuffle 不炸。",
+    "params": [
+     {
+      "key": "numPart",
+      "label": "分区数",
+      "min": 2,
+      "max": 400,
+      "step": 2,
+      "value": 2
+     },
+     {
+      "key": "dataMB",
+      "label": "数据规模",
+      "min": 100,
+      "max": 20000,
+      "step": 100,
+      "value": 1000,
+      "unit": "MB"
+     },
+     {
+      "key": "itemsPerKey",
+      "label": "每 key 平均条目数",
+      "min": 1,
+      "max": 50,
+      "step": 1,
+      "value": 20
+     },
+     {
+      "key": "useReduceByKey",
+      "label": "聚合算子",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 0,
+      "labels": [
+       "groupByKey",
+       "reduceByKey"
+      ]
+     }
+    ],
+    "metrics": [
+     {
+      "key": "taskCount",
+      "label": "Task 数",
+      "expr": "numPart",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "perTaskMB",
+      "label": "单 Task 数据量",
+      "expr": "dataMB / numPart",
+      "unit": "MB",
+      "fmt": "int"
+     },
+     {
+      "key": "shuffleMB",
+      "label": "Shuffle 量",
+      "expr": "if(useReduceByKey == 1, dataMB, dataMB * itemsPerKey)",
+      "unit": "MB",
+      "fmt": "int"
+     },
+     {
+      "key": "hasPreAgg",
+      "label": "是否 map 端预聚合",
+      "expr": "useReduceByKey",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "perTaskMB <= 128",
+      "label": "单 Task ≤128MB（超了容易 spill 落盘）"
+     },
+     {
+      "expr": "shuffleMB <= 2000",
+      "label": "Shuffle 量 ≤2GB"
+     },
+     {
+      "expr": "numPart >= 16",
+      "label": "分区数 ≥16（并行度要压满可用核）"
+     },
+     {
+      "expr": "hasPreAgg == 1",
+      "label": "用 reduceByKey 而非 groupByKey（map 端预聚合省掉绝大部分 Shuffle）"
+     },
+     {
+      "expr": "dataMB == 1000",
+      "label": "数据固定 1GB（规模是既定事实）"
+     },
+     {
+      "expr": "itemsPerKey == 20",
+      "label": "每 key 固定 20 条（key 分布由数据决定）"
+     }
+    ],
+    "insight": "Task 数 = 分区数，这是 Spark 并行度的唯一来源；加 Executor 只是加「同时能跑几个 Task」的槽位。reduceByKey 在 map 端先按 key 聚合，搬出去的是「每 key 一条」；groupByKey 把每个 key 的全部条目原样搬——每 key 20 条就是 20 倍 Shuffle。所以能预聚合就别 groupByKey；join 时小表优先广播成窄依赖。"
+   }
+  ],
+  "data/data-ch01": [
+   {
+    "kind": "sandbox",
+    "title": "dtype 一升位，内存就翻倍",
+    "brief": "ndarray 的内存 = 元素数 × dtype 字节数。int8→int64 是 8 倍，float32→float64 是 2 倍——数据一样多，占的空间完全不同。而切片/reshape 是视图（零拷贝），花式索引/astype 一定拷贝。拖规模、dtype 位宽与操作类型，把内存压进预算。",
+    "params": [
+     {
+      "key": "rows",
+      "label": "行数",
+      "min": 100,
+      "max": 10000,
+      "step": 100,
+      "value": 4000
+     },
+     {
+      "key": "cols",
+      "label": "列数",
+      "min": 100,
+      "max": 10000,
+      "step": 100,
+      "value": 4000
+     },
+     {
+      "key": "itemsize",
+      "label": "单元素字节数",
+      "min": 1,
+      "max": 8,
+      "step": 1,
+      "value": 8,
+      "unit": "B"
+     },
+     {
+      "key": "isCopy",
+      "label": "操作类型",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 1,
+      "labels": [
+       "视图（零拷贝）",
+       "拷贝（新缓冲）"
+      ]
+     },
+     {
+      "key": "budgetMB",
+      "label": "内存预算",
+      "min": 200,
+      "max": 1024,
+      "step": 8,
+      "value": 200,
+      "unit": "MB"
+     }
+    ],
+    "metrics": [
+     {
+      "key": "elems",
+      "label": "元素个数",
+      "expr": "rows * cols",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "baseMB",
+      "label": "原数组内存",
+      "expr": "rows * cols * itemsize / 1000000",
+      "unit": "MB",
+      "fmt": "fix2"
+     },
+     {
+      "key": "extraMB",
+      "label": "额外占用",
+      "expr": "if(isCopy == 1, rows * cols * itemsize / 1000000, 0)",
+      "unit": "MB",
+      "fmt": "fix2"
+     },
+     {
+      "key": "peakMB",
+      "label": "峰值内存",
+      "expr": "rows * cols * itemsize / 1000000 + if(isCopy == 1, rows * cols * itemsize / 1000000, 0)",
+      "unit": "MB",
+      "fmt": "fix2"
+     },
+     {
+      "key": "bytesRatio",
+      "label": "相对 int8 的倍数",
+      "expr": "itemsize",
+      "unit": "倍",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "peakMB <= budgetMB",
+      "label": "峰值内存不超预算"
+     },
+     {
+      "expr": "itemsize >= 4",
+      "label": "单元素 ≥4 字节（int8/float16 精度不够）"
+     },
+     {
+      "expr": "isCopy == 0",
+      "label": "用视图而非拷贝（切片/reshape 零拷贝）"
+     },
+     {
+      "expr": "budgetMB == 200",
+      "label": "预算固定 200MB（机器内存既定）"
+     },
+     {
+      "expr": "rows == 4000 && cols == 4000",
+      "label": "矩阵固定 4000×4000（数据集既定）"
+     }
+    ],
+    "insight": "ndarray 内存 = 元素数 × itemsize。dtype 一升位就是成倍增长：int8→int64 是 8 倍。切片、reshape、transpose 都是视图（base 指向原数组，stride 改一下就行），零拷贝；花式索引、astype、ravel（非连续时）一定拷贝。所以「转置后再 ravel」会偷偷拷贝一份——这不是 bug，是内存布局不连续。"
+   }
+  ],
+  "data/data-ch02": [
+   {
+    "kind": "sandbox",
+    "title": "广播零拷贝，物化就爆炸",
+    "brief": "广播不复制数据——它只是把该维的 stride 置 0，所以零内存。但一旦 np.array(broadcast) 物化，就会按广播后的完整 shape 分配缓冲。拖三个维度与是否物化，看什么时候内存会炸。",
+    "params": [
+     {
+      "key": "d1",
+      "label": "维度 1",
+      "min": 10,
+      "max": 2000,
+      "step": 10,
+      "value": 1000
+     },
+     {
+      "key": "d2",
+      "label": "维度 2",
+      "min": 10,
+      "max": 2000,
+      "step": 10,
+      "value": 1000
+     },
+     {
+      "key": "d3",
+      "label": "维度 3",
+      "min": 1,
+      "max": 200,
+      "step": 1,
+      "value": 100
+     },
+     {
+      "key": "itemsize",
+      "label": "单元素字节数",
+      "min": 1,
+      "max": 8,
+      "step": 1,
+      "value": 8,
+      "unit": "B"
+     },
+     {
+      "key": "materialize",
+      "label": "是否物化",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 1,
+      "labels": [
+       "惰性广播（stride=0）",
+       "np.array() 物化"
+      ]
+     }
+    ],
+    "metrics": [
+     {
+      "key": "outElems",
+      "label": "广播后元素数",
+      "expr": "d1 * d2 * d3",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "lazyMB",
+      "label": "惰性广播额外内存",
+      "expr": "0",
+      "unit": "MB",
+      "fmt": "int"
+     },
+     {
+      "key": "matMB",
+      "label": "物化后内存",
+      "expr": "d1 * d2 * d3 * itemsize / 1000000",
+      "unit": "MB",
+      "fmt": "fix2"
+     },
+     {
+      "key": "actualMB",
+      "label": "实际额外内存",
+      "expr": "if(materialize == 1, d1 * d2 * d3 * itemsize / 1000000, 0)",
+      "unit": "MB",
+      "fmt": "fix2"
+     },
+     {
+      "key": "amplify",
+      "label": "相对单向量放大",
+      "expr": "d1 * d2 * d3 / d1",
+      "unit": "倍",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "actualMB <= 64",
+      "label": "额外内存 ≤64MB"
+     },
+     {
+      "expr": "materialize == 0",
+      "label": "保持惰性广播（不要 np.array 物化）"
+     },
+     {
+      "expr": "d1 >= 500 && d2 >= 500 && d3 >= 10",
+      "label": "三个维度都要有规模（d1/d2≥500、d3≥10）"
+     },
+     {
+      "expr": "itemsize >= 4",
+      "label": "单元素 ≥4 字节（float32 起步，别靠降精度省内存）"
+     }
+    ],
+    "insight": "广播的语义是「把该维 stride 置 0」，所以零内存、零拷贝——这就是为什么 (1000,1000) + (1000,1) 不报内存错。但只要你把它物化（np.array(broadcast)、concatenate、写进需要真实缓冲的算子），就会按广播后的完整 shape 分配：1000×1000×100 × 8B = 800MB。所以「广播很方便」和「广播后别手贱物化」要一起记。"
+   }
+  ],
+  "java/java-ch07": [
+   {
+    "kind": "sandbox",
+    "title": "线程池大小不是拍脑袋",
+    "brief": "CPU 密集取 N_cpu+1；IO 密集取 N_cpu×(1+W/C)——等 90ms 算 10ms 就是 10 倍。线程数配好之后还要看队列：按 Little 定律，队列容量 ≈ 峰值QPS × 可接受排队秒数。拖核数、任务类型与队列容量，让请求不被拒绝。",
+    "params": [
+     {
+      "key": "cores",
+      "label": "可用核数",
+      "min": 2,
+      "max": 64,
+      "step": 2,
+      "value": 8
+     },
+     {
+      "key": "ioBound",
+      "label": "任务类型",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 1,
+      "labels": [
+       "CPU 密集",
+       "IO 密集"
+      ]
+     },
+     {
+      "key": "waitMs",
+      "label": "IO 等待时间",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "value": 90,
+      "unit": "ms"
+     },
+     {
+      "key": "calcMs",
+      "label": "计算时间",
+      "min": 1,
+      "max": 50,
+      "step": 1,
+      "value": 10,
+      "unit": "ms"
+     },
+     {
+      "key": "poolSize",
+      "label": "实际线程数",
+      "min": 1,
+      "max": 200,
+      "step": 1,
+      "value": 8
+     },
+     {
+      "key": "queueCap",
+      "label": "队列容量",
+      "min": 10,
+      "max": 10000,
+      "step": 10,
+      "value": 100
+     },
+     {
+      "key": "qps",
+      "label": "峰值 QPS",
+      "min": 10,
+      "max": 5000,
+      "step": 10,
+      "value": 500
+     }
+    ],
+    "metrics": [
+     {
+      "key": "wcRatio",
+      "label": "等待/计算比",
+      "expr": "waitMs / calcMs",
+      "unit": "倍",
+      "fmt": "fix2"
+     },
+     {
+      "key": "idealThreads",
+      "label": "理论线程数",
+      "expr": "if(ioBound == 1, cores * (1 + waitMs / calcMs), cores + 1)",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "utilRatio",
+      "label": "相对理论值",
+      "expr": "poolSize / if(ioBound == 1, cores * (1 + waitMs / calcMs), cores + 1)",
+      "unit": "倍",
+      "fmt": "fix2"
+     },
+     {
+      "key": "needQueue",
+      "label": "需要的队列容量",
+      "expr": "qps",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "reject",
+      "label": "是否会拒绝请求",
+      "expr": "if(queueCap < qps && poolSize < qps, 1, 0)",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "reject == 0",
+      "label": "不触发拒绝策略（线程+队列能吸收峰值 QPS）"
+     },
+     {
+      "expr": "utilRatio >= 0.8",
+      "label": "线程数达理论值 80% 以上（IO 密集别按核数配）"
+     },
+     {
+      "expr": "utilRatio <= 2",
+      "label": "线程数不超理论值 2 倍（超了上下文切换反噬）"
+     },
+     {
+      "expr": "queueCap <= 5000",
+      "label": "队列有界且 ≤5000（无界队列掩盖背压）"
+     },
+     {
+      "expr": "cores == 8",
+      "label": "核数固定 8（机器规格既定）"
+     },
+     {
+      "expr": "qps == 500",
+      "label": "峰值 QPS 固定 500（流量由业务决定）"
+     },
+     {
+      "expr": "waitMs == 90",
+      "label": "IO 等待固定 90ms（真实 DB/RPC 往返量级）"
+     }
+    ],
+    "insight": "CPU 密集取 N_cpu+1；IO 密集取 N_cpu×(1+W/C)——等 90ms 算 10ms 就是 10 倍，8 核要 80 个线程而不是 8 个。但线程数只是第一层：队列容量按 Little 定律 L=λW 估，太小会拒绝、无界会掩盖背压直到 OOM。容器里还要注意 availableProcessors 读的是宿主核数而非 CPU quota——这是云原生经典故障源。"
+   }
+  ],
+  "java/java-ch08": [
+   {
+    "kind": "sandbox",
+    "title": "堆怎么切，GC 就怎么跑",
+    "brief": "NewRatio=2 表示老年代:新生代=2:1，新生代只占堆的 1/3。SurvivorRatio=8 表示 Eden:单个Survivor=8:1。Eden 满就触发 Minor GC——分配量除以 Eden 大小就是 GC 次数。拖堆大小与代比例，既压 GC 次数又不让单次停顿超预算。",
+    "params": [
+     {
+      "key": "heapGB",
+      "label": "堆大小",
+      "min": 1,
+      "max": 32,
+      "step": 1,
+      "value": 2,
+      "unit": "GB"
+     },
+     {
+      "key": "newRatio",
+      "label": "NewRatio（老:新）",
+      "min": 1,
+      "max": 8,
+      "step": 1,
+      "value": 2
+     },
+     {
+      "key": "survRatio",
+      "label": "SurvivorRatio",
+      "min": 2,
+      "max": 16,
+      "step": 2,
+      "value": 8
+     },
+     {
+      "key": "allocGB",
+      "label": "总分配量",
+      "min": 10,
+      "max": 500,
+      "step": 10,
+      "value": 300,
+      "unit": "GB"
+     }
+    ],
+    "metrics": [
+     {
+      "key": "youngMB",
+      "label": "新生代大小",
+      "expr": "heapGB * 1024 / (1 + newRatio)",
+      "unit": "MB",
+      "fmt": "int"
+     },
+     {
+      "key": "oldMB",
+      "label": "老年代大小",
+      "expr": "heapGB * 1024 * newRatio / (1 + newRatio)",
+      "unit": "MB",
+      "fmt": "int"
+     },
+     {
+      "key": "edenMB",
+      "label": "Eden 大小",
+      "expr": "heapGB * 1024 / (1 + newRatio) * survRatio / (survRatio + 2)",
+      "unit": "MB",
+      "fmt": "int"
+     },
+     {
+      "key": "gcCount",
+      "label": "Minor GC 次数",
+      "expr": "allocGB * 1024 / (heapGB * 1024 / (1 + newRatio) * survRatio / (survRatio + 2))",
+      "unit": "次",
+      "fmt": "int"
+     },
+     {
+      "key": "pauseMs",
+      "label": "单次停顿估算",
+      "expr": "heapGB * 1024 / (1 + newRatio) * survRatio / (survRatio + 2) / 1024 * 8",
+      "unit": "ms",
+      "fmt": "fix2"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "gcCount <= 60",
+      "label": "Minor GC 次数 ≤60"
+     },
+     {
+      "expr": "pauseMs <= 50",
+      "label": "单次停顿 ≤50ms"
+     },
+     {
+      "expr": "oldMB >= 1024",
+      "label": "老年代 ≥1GB（太小会频繁 Full GC）"
+     },
+     {
+      "expr": "edenMB >= 256",
+      "label": "Eden ≥256MB（太小 GC 过密）"
+     },
+     {
+      "expr": "allocGB == 300",
+      "label": "分配量固定 300GB（业务吞吐既定）"
+     },
+     {
+      "expr": "survRatio == 8",
+      "label": "SurvivorRatio 固定 8（默认 Eden:S1:S2=8:1:1）"
+     }
+    ],
+    "insight": "NewRatio=2 表示老:新=2:1，新生代只占堆的 1/3；SurvivorRatio=8 表示 Eden 占新生代的 8/10。Eden 满即触发 Minor GC，所以「分配量 ÷ Eden 大小 = GC 次数」——想少 GC 就加大 Eden，但 Eden 越大单次扫描越久，停顿跟着涨。这就是为什么 G1/ZGC 要拆 Region 做增量回收：在「次数」和「单次停顿」之间找第三条路。"
+   }
+  ],
+  "agent/agent-ch05": [
+   {
+    "kind": "sandbox",
+    "title": "RAG 的上下文预算怎么花",
+    "brief": "上下文 tokens = top-k × 每块 tokens + 系统提示。切块太小召回碎片、太大一两块就吃满窗口；重叠窗口能提升召回，但会让块数和每块长度同时放大。拖块大小、重叠率与 top-k，把整条链压进模型窗口。",
+    "params": [
+     {
+      "key": "chunkSize",
+      "label": "切块大小",
+      "min": 128,
+      "max": 2048,
+      "step": 128,
+      "value": 512,
+      "unit": "tok"
+     },
+     {
+      "key": "overlap",
+      "label": "重叠率",
+      "min": 0.0,
+      "max": 0.5,
+      "step": 0.05,
+      "value": 0.2
+     },
+     {
+      "key": "topK",
+      "label": "召回条数 top-k",
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "value": 5
+     },
+     {
+      "key": "docKTok",
+      "label": "文档规模",
+      "min": 10,
+      "max": 500,
+      "step": 10,
+      "value": 100,
+      "unit": "千 tok"
+     },
+     {
+      "key": "sysTok",
+      "label": "系统提示开销",
+      "min": 200,
+      "max": 2000,
+      "step": 100,
+      "value": 1000,
+      "unit": "tok"
+     },
+     {
+      "key": "windowK",
+      "label": "上下文窗口",
+      "min": 4,
+      "max": 128,
+      "step": 4,
+      "value": 4,
+      "unit": "K tok"
+     }
+    ],
+    "metrics": [
+     {
+      "key": "perChunkTok",
+      "label": "每块 tokens",
+      "expr": "chunkSize * (1 + overlap)",
+      "unit": "tok",
+      "fmt": "int"
+     },
+     {
+      "key": "ctxTok",
+      "label": "上下文占用",
+      "expr": "topK * chunkSize * (1 + overlap) + sysTok",
+      "unit": "tok",
+      "fmt": "int"
+     },
+     {
+      "key": "fillRatio",
+      "label": "窗口占用率",
+      "expr": "(topK * chunkSize * (1 + overlap) + sysTok) / (windowK * 1024)",
+      "unit": "倍",
+      "fmt": "fix2"
+     },
+     {
+      "key": "chunkCount",
+      "label": "索引块数",
+      "expr": "docKTok * 1000 / (chunkSize * (1 - overlap + if(overlap == 1, 0.01, 0)))",
+      "unit": "块",
+      "fmt": "int"
+     },
+     {
+      "key": "overflow",
+      "label": "是否溢出窗口",
+      "expr": "if(topK * chunkSize * (1 + overlap) + sysTok > windowK * 1024, 1, 0)",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "overflow == 0",
+      "label": "上下文不溢出模型窗口"
+     },
+     {
+      "expr": "fillRatio <= 0.7",
+      "label": "窗口占用 ≤70%（留 30% 给生成与多轮）"
+     },
+     {
+      "expr": "chunkSize >= 256",
+      "label": "块 ≥256 tok（再小召回碎片化）"
+     },
+     {
+      "expr": "topK >= 3",
+      "label": "top-k ≥3（召回太少答案容易漏）"
+     },
+     {
+      "expr": "overlap >= 0.1",
+      "label": "重叠 ≥10%（不然答案跨切点就召回不到）"
+     },
+     {
+      "expr": "docKTok == 100",
+      "label": "文档固定 10 万 tok（知识库规模既定）"
+     },
+     {
+      "expr": "sysTok == 1000",
+      "label": "系统提示固定 1000 tok（已写好的模板）"
+     },
+     {
+      "expr": "windowK == 4",
+      "label": "窗口固定 4K（模型能力既定，别换更大上下文的模型）"
+     }
+    ],
+    "insight": "RAG 的上下文预算 = top-k × 每块 tokens + 系统提示 + 生成预留。块切太小，召回的是碎片、单块缺上下文；切太大，一两块就吃满窗口。重叠窗口能救回「答案刚好跨在切点」的情况，代价是块数和每块长度同时放大——20% 重叠意味着有效块长 +20%、索引块数 +25%。所以调参数时先算账再动手。"
+   }
+  ],
+  "agent/agent-ch07": [
+   {
+    "kind": "sandbox",
+    "title": "LoRA 显存账本：先爆的不是权重",
+    "brief": "LoRA 参数量 = rank × (d_in+d_out) × 层数 × 挂载层数，rank 翻倍参数就翻倍。但显存账本里最大的一项往往是激活，不是权重。拖 rank、批大小、序列长度与挂载层数，把总占用压进显卡。",
+    "params": [
+     {
+      "key": "rank",
+      "label": "rank",
+      "min": 4,
+      "max": 128,
+      "step": 4,
+      "value": 16
+     },
+     {
+      "key": "dModel",
+      "label": "隐藏维度 d",
+      "min": 1024,
+      "max": 8192,
+      "step": 512,
+      "value": 4096
+     },
+     {
+      "key": "layers",
+      "label": "层数",
+      "min": 12,
+      "max": 80,
+      "step": 4,
+      "value": 32
+     },
+     {
+      "key": "mountLayers",
+      "label": "每层挂载数",
+      "min": 1,
+      "max": 7,
+      "step": 1,
+      "value": 4
+     },
+     {
+      "key": "batch",
+      "label": "批大小",
+      "min": 1,
+      "max": 32,
+      "step": 1,
+      "value": 32
+     },
+     {
+      "key": "seqLen",
+      "label": "序列长度",
+      "min": 256,
+      "max": 4096,
+      "step": 256,
+      "value": 4096,
+      "unit": "tok"
+     },
+     {
+      "key": "baseGB",
+      "label": "基座权重",
+      "min": 1,
+      "max": 70,
+      "step": 1,
+      "value": 13,
+      "unit": "GB"
+     },
+     {
+      "key": "gpuGB",
+      "label": "显卡显存",
+      "min": 8,
+      "max": 80,
+      "step": 8,
+      "value": 24,
+      "unit": "GB"
+     },
+     {
+      "key": "gradCkpt",
+      "label": "梯度检查点",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 0,
+      "labels": [
+       "关",
+       "开"
+      ]
+     }
+    ],
+    "metrics": [
+     {
+      "key": "paramsPerLayer",
+      "label": "每层挂载参数量",
+      "expr": "2 * rank * dModel",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "totalParams",
+      "label": "LoRA 总参数",
+      "expr": "2 * rank * dModel * layers * mountLayers",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "adapterMB",
+      "label": "适配器显存",
+      "expr": "2 * rank * dModel * layers * mountLayers * 2 / 1000000",
+      "unit": "MB",
+      "fmt": "fix2"
+     },
+     {
+      "key": "actMB",
+      "label": "激活显存",
+      "expr": "batch * seqLen * dModel * layers * 2 / 1000000 * if(gradCkpt == 1, 0.125, 1)",
+      "unit": "MB",
+      "fmt": "int"
+     },
+     {
+      "key": "totalGB",
+      "label": "显存总占用",
+      "expr": "baseGB + (2 * rank * dModel * layers * mountLayers * 2 / 1000000 + batch * seqLen * dModel * layers * 2 / 1000000 * if(gradCkpt == 1, 0.125, 1)) / 1024",
+      "unit": "GB",
+      "fmt": "fix2"
+     },
+     {
+      "key": "fits",
+      "label": "是否放得下",
+      "expr": "if(baseGB + (2 * rank * dModel * layers * mountLayers * 2 / 1000000 + batch * seqLen * dModel * layers * 2 / 1000000 * if(gradCkpt == 1, 0.125, 1)) / 1024 <= gpuGB, 1, 0)",
+      "fmt": "int"
+     },
+     {
+      "key": "scaleRatio",
+      "label": "缩放 α/r（α=32）",
+      "expr": "32 / rank",
+      "unit": "倍",
+      "fmt": "fix2"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "fits == 1",
+      "label": "显存放得下"
+     },
+     {
+      "expr": "adapterMB <= 512",
+      "label": "适配器 ≤512MB（LoRA 的意义是只训一小部分）"
+     },
+     {
+      "expr": "rank >= 8",
+      "label": "rank ≥8（再小往往学不会）"
+     },
+     {
+      "expr": "batch >= 2",
+      "label": "批 ≥2（单样本梯度噪声大）"
+     },
+     {
+      "expr": "seqLen >= 512",
+      "label": "序列 ≥512 tok（再短覆盖不了典型任务）"
+     },
+     {
+      "expr": "baseGB == 13",
+      "label": "基座固定 7B/13GB（fp16 的固有体积）"
+     },
+     {
+      "expr": "gpuGB == 24",
+      "label": "显卡固定 24GB（既定硬件预算）"
+     },
+     {
+      "expr": "mountLayers == 4",
+      "label": "每层固定挂 q/k/v/o 四件套"
+     },
+     {
+      "expr": "dModel == 4096",
+      "label": "隐藏维度固定 4096（模型结构既定）"
+     },
+     {
+      "expr": "layers == 32",
+      "label": "层数固定 32（模型结构既定）"
+     },
+     {
+      "expr": "gradCkpt == 1",
+      "label": "必须开梯度检查点（救 OOM 的第一步，几乎不损精度）"
+     }
+    ],
+    "insight": "LoRA 参数量 = rank × (d_in+d_out) × 层数 × 挂载层数，rank 翻倍参数量就翻倍，但表达力提升通常远小于 4 倍——所以默认 r=16 挂 q/k/v/o 跑基线。显存账本里最大的一项往往是激活而不是权重：7B 权重 13.5GB 是固定的，激活随手就是几 GB 且随 batch×seq 线性涨。所以救 OOM 的顺序是「先开梯度检查点 → 降 seq/batch → 最后才降 rank」。另外 α 要和 rank 一起调：LoRA 输出乘 α/r，只翻 rank 不调 α 等于把有效学习率减半。"
+   }
   ]
  }
 }
