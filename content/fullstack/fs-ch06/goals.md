@@ -25,9 +25,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [panva/jose](https://github.com/panva/jose) | 7,859 | §2.1 三段结构与签名 | 规范级实现：`docs/jws/flattened/sign/README.md`、`docs/jws/compact/verify/functions/compactVerify.md` 说明签名的输入是 `BASE64URL(header).BASE64URL(payload)` 这串字节，不是解析后的 JSON——§2.1「签的是串不是对象」由此而来 |
-| 2 | [auth0/node-jsonwebtoken](https://github.com/auth0/node-jsonwebtoken) | 18,182 | §2.2 alg 混淆 · §3.1 无法主动失效 | 坑位本体：`verify.js` 的 `options.algorithms` 白名单是唯一能挡住 `alg:none` 的地方（不传就按 header 里声明的算法验）；`sign.js` 的 `expiresIn` 只写进 exp，服务端不查黑名单就撤不掉——§3.1 的固有缺陷 |
-| 3 | [OWASP/CheatSheetSeries](https://github.com/OWASP/CheatSheetSeries) | 33,847 | §3.2 密码存储 · §4.2 CSRF/XSS | 权威基线：`cheatsheets/Password_Storage_Cheat_Sheet.md` 给了 argon2id 的参数下限与「不加盐等于送彩虹表」；`Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.md`、`Cross_Site_Scripting_Prevention_Cheat_Sheet.md` 分别对应 §4.2 的两类漏洞 |
+| 1 | [panva/jose](https://github.com/panva/jose) | 7,859 | §2.1 一、JWT 三段结构与签名算法（HS256 vs RS256） | 读 `panva/jose` 的 `docs/jws/compact/verify/functions/compactVerify.md`：它说明签名的输入是 `BASE64URL(header).BASE64URL(payload)` 这串字节，不是解析后的 JSON——本章「签的是串不是对象」由此而来；实务差别在于：任何重排 JSON 键序、改空白的外部处理都会让签名失效，所以验签必须先验串、再解析 |
+| 2 | [auth0/node-jsonwebtoken](https://github.com/auth0/node-jsonwebtoken) | 18,182 | §2.2 二、校验清单与 alg:none / 算法混淆攻击 | 读 `auth0/node-jsonwebtoken` 的 `verify.js`：`options.algorithms` 白名单是唯一能挡住 `alg:none` 的地方（不传就按 header 里声明的算法验，等于让攻击者选算法）；配套 `sign.js` 的 `expiresIn` 只写进 `exp`，服务端不查黑名单就撤不掉——这就是本章 §3.1「JWT 无法主动失效（固有缺陷）与缓解」的全部技术根源 |
+| 3 | [OWASP/CheatSheetSeries](https://github.com/OWASP/CheatSheetSeries) | 33,847 | §3.2 二、密码存储：bcrypt / scrypt / argon2 的加盐与成本 | 读 `OWASP/CheatSheetSeries` 的 `cheatsheets/Password_Storage_Cheat_Sheet.md`：它给了 argon2id 的参数下限与「不加盐等于送彩虹表」的量化说明；配套读同目录 `Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.md` 与 `Cross_Site_Scripting_Prevention_Cheat_Sheet.md`，正好对应本章 §4.2「OAuth2 授权码 + PKCE，CSRF/XSS 与常见漏洞」的两类攻击面——一个借用户的浏览器发请求，一个把脚本塞进你的页面 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

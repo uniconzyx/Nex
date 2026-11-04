@@ -11,10 +11,10 @@
 
 | # | 仓库 | Star | 对应本章 | 读什么 |
 | --- | --- | ---: | --- | --- |
-| 1 | [vuejs/core](https://github.com/vuejs/core) | 54,801 | §1.1 Proxy 依赖收集 · §1.2 computed 派发 | `packages/reactivity/src` 的 `effect.ts` 建 effect 树、`dep.ts` 用 Set 存订阅者、`baseHandlers.ts` 在 get 时 `track`、set 时 `trigger`；`computed.ts` 的 dirty 标记回答 §1.2「computed 什么时候才重算」 |
-| 2 | [vuejs/pinia](https://github.com/vuejs/pinia) | 14,755 | §3.1 两种写法 · §3.3 反模式 | `src/store.ts` 的 `defineStore` 同时接受对象与函数两种入参，内部都归一成 reactive state + actions——§3.1「两种写法不是两套机制」的源码依据；`mapHelpers` 里的 `storeToRefs` 是 §3.3 解构丢响应式的正解 |
-| 3 | [vuejs/router](https://github.com/vuejs/router) | 4,706 | §2.1 ref 与生命周期边界 | `src/router.ts` 的守卫按 `beforeEach → 组件内钩子 → afterEach` 排序；路由切换后 store 该不该重置，取决于你把 store 放进守卫还是放进组件——§2.1 的边界问题在这里有明确答案 |
-| 4 | [vuejs/rfcs](https://github.com/vuejs/rfcs) | 4,926 | §1.3 .value 的由来 · §2.3 设计取舍 | `active-rfcs/` 里响应式相关提案（ref 拆包、reactivity transform）的讨论解释了为什么模板里不写 `.value`、JS 里必须写——§1.3 与 §2.3 的边界是设计决议，不是实现巧合 |
+| 1 | [vuejs/core](https://github.com/vuejs/core) | 54,801 | §1.1 一、机制：Proxy 与依赖收集 | 读 `vuejs/core` 的 `packages/reactivity/src/effect.ts` 与同目录 `dep.ts`、`baseHandlers.ts`：`effect.ts` 建 effect 树、`dep.ts` 用 Set 存订阅者、`baseHandlers.ts` 在 get 时 `track`、set 时 `trigger`；再读 `computed.ts` 的 dirty 标记，就回答了本节 §1.2 里「computed 什么时候才重算」——只有依赖脏了才重算，否则直接返回缓存值 |
+| 2 | [vuejs/pinia](https://github.com/vuejs/pinia) | 14,755 | §3.1 一、写法、依赖与 Vuex 对照 | 读 `vuejs/pinia` 的 `packages/pinia/src/store.ts`：`defineStore` 同时接受对象与函数两种入参，内部都归一成 reactive state + actions——这就是本节「两种写法不是两套机制」的源码依据；而 `storeToRefs` 是本章 §3.2「四个高频陷阱」里「解构丢响应式」的正解：直接解构 `const { count } = store` 会把 proxy 拆成裸值 |
+| 3 | [vuejs/router](https://github.com/vuejs/router) | 4,706 | §2.1 一、选型与两个高频坑 | 读 `vuejs/router` 的 `src/router.ts`：守卫按 `beforeEach → 组件内钩子 → afterEach` 排序；路由切换后 store 该不该重置，取决于你把 store 放进守卫还是放进组件——本节「两个高频坑」里「跨路由共享的 store 状态残留」在这里有明确答案：守卫里 `store.$reset()` 能清，组件里 `onUnmounted` 只能清自己持有的那部分 |
+| 4 | [vuejs/rfcs](https://github.com/vuejs/rfcs) | 4,926 | §1.3 三、调试、对照与取舍 | 读 `vuejs/rfcs` 的 `active-rfcs/` 下响应式相关提案（ref 拆包、reactivity transform）：这些讨论解释了为什么模板里不写 `.value`、JS 里必须写——本节「调试」那一半的工具（`effectScope` 的 on 钩子、`triggerRef`）之所以存在，也是因为这些提案没有走到「自动拆包所有场景」；这与 §2.3「设计取舍与跨框架对照」一起说明：边界是设计决议，不是实现巧合 |
 
 > 全部为工业级真实仓库；Star 数为本会话经 GitHub API 实取快照，仅供路线排序参考。
 

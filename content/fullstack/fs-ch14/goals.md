@@ -12,10 +12,10 @@
 
 | # | 仓库 | Star | 对应本章 | 读什么 |
 | --- | --- | ---: | --- | --- |
-| 1 | [vercel/ai](https://github.com/vercel/ai) | 27,560 | §1.1 SSE · §3.1 callId | `packages/ai/core/generate-text/stream-text.ts` 把模型增量转成 data stream 协议（`0:"文本"` 这种带前缀的行），工具调用带 `toolCallId`——§3.1 唯一 id 的来源就是协议本身 |
-| 2 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | §2.5 幂等恢复 · §3.2 重试幂等 | `libs/core` 的 `Runnable` 组合子与 `with_retry`：重试只重放同一次调用，跨轮状态由外层 graph / checkpoint 保存，对应 §2.5「同一个 id 可以重入」 |
-| 3 | [gin-gonic/gin](https://github.com/gin-gonic/gin) | 89,466 | §1.2 网关透传流式 · §4.3 限流 | `context.go` 的 `Stream` 与 `sse.go` 的 `SSEvent` 是逐块 flush 的最小实现（不设 `Content-Length`、显式 `Flush`）；`middleware/` 里挂限流中间件正是 §4.3 的落地位置 |
-| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §4.1 token 计量 | `src/transformers/tokenization_utils.py` 的 `encode` / `decode` 决定「一段文本值多少 token」，同一句中文不同 tokenizer 能差一倍——§4.1 输入输出分开算的前提 |
+| 1 | [vercel/ai](https://github.com/vercel/ai) | 27,560 | §1.1 SSE 与 WebSocket 在协议层的差别 | 读 `vercel/ai` 的 `packages/ai/src/generate-text/stream-text.ts`：它把模型增量转成 data stream 协议（`0:"文本"` 这种带前缀的行），工具调用带 `toolCallId`——本节「SSE 之所以够用」的原因就在这里：单向、可断点续传、走普通 HTTP；而本章 §3.1「每次工具调用都要有唯一 id」的来源也正是这个协议字段 |
+| 2 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | §2.5 幂等恢复：同一个 id 可以重入 | 读 `langchain-ai/langchain` 的 `libs/core`：`Runnable` 组合子与 `with_retry` 让重试只重放同一次调用，跨轮状态由外层 graph / checkpoint 保存——这就对应本节「同一个 id 可以重入」；关键区别是「重试」与「重入」的边界：重试假设副作用没发生，重入必须假设可能已发生，所以要有 §3.2 的去重记录 |
+| 3 | [gin-gonic/gin](https://github.com/gin-gonic/gin) | 89,466 | §1.2 网关透传流式的三种实现路径 | 读 `gin-gonic/gin` 的 `context.go` 的 `Stream` 方法与 SSE 相关中间件：逐块 flush 的最小实现（不设 `Content-Length`、显式 `Flush`）；这正是本节「三种实现路径」里最直接的一种；而 `middleware/` 里挂限流中间件正是本章 §4.3「三种经典限流算法」的落地位置——注意流式响应一旦开始，限流只能按「连接数」而不能按「请求数」计 |
+| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §4.1 token 计量：输入与输出分开算 | 读 `huggingface/transformers` 的 `src/transformers/tokenization_utils.py`：`encode` / `decode` 决定「一段文本值多少 token」，同一句中文不同 tokenizer 能差一倍——这就是本节「输入输出分开算」的前提；§4.4「降级与预算」里的预算阈值必须按实际 tokenizer 估，用字符数折算会在中文场景系统性低估 |
 
 > 全部为工业级真实仓库；Star 数为本会话经 GitHub API 实取快照，仅供路线排序参考。
 

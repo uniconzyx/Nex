@@ -26,10 +26,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [moby/buildkit](https://github.com/moby/buildkit) | 10,353 | §2.1 缓存是前缀链 · §2.2 多阶段 | 构建器本体：`frontend/dockerfile/dockerfile2llb/convert.go` 把 Dockerfile 逐指令翻译成 LLB 图，`cache/manager.go` 按指令 + 输入摘要判命中——某层失效则其后全部重建，这条规律在这里是数据结构 |
-| 2 | [docker/compose](https://github.com/docker/compose) | 38,568 | §3.1 服务依赖与健康门 | 编排实现：`pkg/compose/create.go` 按 `depends_on` 与 `condition` 建依赖图并定启动顺序，`up.go` 负责等 healthcheck 通过再往下走——「死等 vs 直接报错」的循环依赖检测发生在建图阶段 |
-| 3 | [systemd/systemd](https://github.com/systemd/systemd) | 16,979 | §1.2 unit 文件 · §1.3 日志 | 语义权威：`man/systemd.service.xml` 规定 `Restart=` / `RestartSec=` / `StartLimitBurst=` 的精确含义（连重启节流都写在里面），`src/journal/journald.c` 说明结构化日志从哪来，`src/shared/logs-show.c` 是 `--since` / `--priority` 的过滤实现 |
-| 4 | [nektos/act](https://github.com/nektos/act) | 72,516 | §4.1 workflow → job → step | 本地执行器：`pkg/model/workflow.go` 是 YAML 到结构体的映射（缺 `on` / `runs-on` 在这里就露馅），`pkg/model/planner.go` 按 `needs` 建 DAG 并算出可并行的层——「needs 指向不存在的 job」本地一跑就复现 |
+| 1 | [moby/buildkit](https://github.com/moby/buildkit) | 10,353 | §2.1 一、镜像分层、写时复制与构建缓存 | 读 `moby/buildkit` 的 `frontend/dockerfile/dockerfile2llb/convert.go`：它把 Dockerfile 逐指令翻译成 LLB 图，而 `cache/manager.go` 按「指令 + 输入摘要」判命中——某层失效则其后全部重建，这条规律在这里是数据结构而不是经验；所以本章 §2.2「多阶段构建与镜像瘦身」里「把 COPY 依赖清单放在 COPY 源码之前」不是风格问题，而是让失效点尽量后移 |
+| 2 | [docker/compose](https://github.com/docker/compose) | 38,568 | §3.1 一、Docker Compose：服务依赖、网络、卷与健康检查 | 读 `docker/compose` 的 `pkg/compose/create.go`：它按 `depends_on` 与 `condition` 建依赖图并定启动顺序，`up.go` 负责等 healthcheck 通过再往下走——「死等 vs 直接报错」的循环依赖检测发生在建图阶段；这正对应本章 §3.2「12-Factor 与配置外置」之外的另一半：配置外置解决「同一镜像跑多环境」，依赖编排解决「多容器按什么顺序起」 |
+| 3 | [systemd/systemd](https://github.com/systemd/systemd) | 16,979 | §1.2 二、进程管理：systemd / pm2 / supervisor | 读 `systemd/systemd` 的 `man/systemd.service.xml`：它规定 `Restart=` / `RestartSec=` / `StartLimitBurst=` 的精确含义（连重启节流都写在里面）；配套 `src/journal/journald.c` 说明结构化日志从哪来，`src/shared/logs-show.c` 是 `--since` / `--priority` 的过滤实现——这正是本章 §1.3「日志：journalctl 与 logrotate」为什么能「按字段查」而不是「按行 grep」的技术底子 |
+| 4 | [nektos/act](https://github.com/nektos/act) | 72,516 | §4.1 一、CI/CD 流水线设计（GitHub Actions） | 读 `nektos/act` 的 `pkg/model/workflow.go`：它是 YAML 到结构体的映射（缺 `on` / `runs-on` 在这里就露馅），`pkg/model/planner.go` 按 `needs` 建 DAG 并算出可并行的层——「needs 指向不存在的 job」本地一跑就复现；本章 §4.2「环境与发布策略：蓝绿、金丝雀、滚动与回滚」要落在这张 DAG 上，所以顺序设计的本质是「哪些 job 可以并行、哪些必须串」 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

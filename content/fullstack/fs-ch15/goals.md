@@ -11,10 +11,10 @@
 
 | # | 仓库 | Star | 对应本章 | 读什么 |
 | --- | --- | ---: | --- | --- |
-| 1 | [gin-gonic/gin](https://github.com/gin-gonic/gin) | 89,466 | §2.1 路由树 · §2.2 中间件 | `tree.go` 是压缩前缀树，`routergroup.go` 的 `Use` 把 handler 拼成 `HandlersChain`，`context.go` 的 `Next()` 用索引往前走——与 Express 的数组栈是同一模型 |
-| 2 | [gofiber/fiber](https://github.com/gofiber/fiber) | 40,232 | §2.3 框架对照 | `app.go` 的路由与 `ctx.go` 的 `Next()` 形状和 Gin 几乎一样，但底层跑在 `fasthttp` 上、复用 `RequestCtx` 减少分配——对照点在于「API 相同、内存模型不同」 |
-| 3 | [golang/go](https://github.com/golang/go) | 139,482 | §1.1 goroutine 与 channel · §3.1 error 即值 | `src/runtime/proc.go` 的 GMP 调度与 `src/runtime/chan.go` 的 `hchan` 环形缓冲：channel 满时 `send` 阻塞并挂进 `sendq`——「不要通过共享内存通信」的机器实现 |
-| 4 | [spring-projects/spring-framework](https://github.com/spring-projects/spring-framework) | 60,307 | §2.3 中间件对照 · §3.3 契约对照 | `spring-web` 的 `ResponseEntityExceptionHandler` 把异常统一映射成 `ProblemDetail`（RFC 9457），和 Go 侧「error 作为值、显式返回」是两条路：一个靠容器兜底，一个靠调用方检查 |
+| 1 | [gin-gonic/gin](https://github.com/gin-gonic/gin) | 89,466 | §2.1 一、路由与中间件机制 | 读 `gin-gonic/gin` 的 `tree.go` 与 `routergroup.go`、`context.go`：`tree.go` 是压缩前缀树，`routergroup.go` 的 `Use` 把 handler 拼成 `HandlersChain`，`context.go` 的 `Next()` 用索引往前走——与 Express 的数组栈是同一模型，差别只在「路径匹配是树而不是正则」；这也解释本节 §2.2「与其他框架对照」里路由性能差距的来源 |
+| 2 | [gofiber/fiber](https://github.com/gofiber/fiber) | 40,232 | §2.2 二、与其他框架对照 | 读 `gofiber/fiber` 的 `app.go`：它的路由与 `Next()` 形状和 Gin 几乎一样，但底层跑在 `fasthttp` 上、复用 `RequestCtx` 减少分配——本节「与其他框架对照」的核心点就在「API 相同、内存模型不同」；代价是 `fasthttp` 的 ctx 不能跨 goroutine 持有，这与 Gin 可以直接把 `*http.Request` 传下去是两条契约 |
+| 3 | [golang/go](https://github.com/golang/go) | 139,482 | §1.1 一、模型本体：goroutine 与 channel | 读 `golang/go` 的 `src/runtime/proc.go` 的 GMP 调度与 `src/runtime/chan.go` 的 `hchan` 环形缓冲：channel 满时 `send` 阻塞并挂进 `sendq`——「不要通过共享内存通信」的机器实现；本节 §1.2「与其他运行时对照」里「Go 的 goroutine 比线程轻在哪」就在这里：栈初始 2KB 可增长、调度在用户态完成 |
+| 4 | [spring-projects/spring-framework](https://github.com/spring-projects/spring-framework) | 60,307 | §3.2 二、接口契约与跨语言对照 | 读 `spring-projects/spring-framework` 的 `spring-webmvc` 模块的 `org/springframework/web/servlet/mvc/method/annotation/` 下 `ResponseEntityExceptionHandler`：它把异常统一映射成 `ProblemDetail`（RFC 9457），和 Go 侧「error 作为值、显式返回」是两条路——一个靠容器兜底、一个靠调用方检查；这就是本节「跨语言对照」最值得对照的一处：容器兜底能保证「不漏」，显式返回能保证「不隐式」 |
 
 > 全部为工业级真实仓库；Star 数为本会话经 GitHub API 实取快照，仅供路线排序参考。
 

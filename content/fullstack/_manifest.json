@@ -35,10 +35,10 @@
           80699
         ],
         "github_notes": [
-          "§一 理论根基 · §二 报文的确切结构：`README.md` 的 HTTP 一节给了请求/响应报文的逐行拆解，对照本章「状态行 + 首部 + 空行 + 主体」四段结构，别只记「GET/POST」",
-          "§二 高频头部 · §三 工程实践（缓存）：`docs/` 里计算机网络专题把强缓存与协商缓存分成两节写，读它「304 为什么不带主体」，就懂本章「缓存省的是哪一段带宽」",
-          "§二 报文结构 · §四 边界与陷阱（首部时序）：`lib/_http_outgoing.js` 的 `writeHead` 决定首部何时定型，读它就知道本章「头部必须在主体前发完」不是约定而是实现约束",
-          "§四 边界与陷阱（CORS 预检） · §三 工程实践：`packages/` 里的请求模块能直接看/改请求头，手动构造一个 `OPTIONS` 预检，本章「简单请求 vs 预检请求」当场可见"
+          "§1.2 二、实现机制：报文的确切结构 · 读 `system-design-primer` 的 `README.md`：它的 HTTP 一节给了请求/响应报文的逐行拆解，对照本章这个 |状态行 + 首部 + 空行 + 主体| 的四段结构——重点是那个「空行」，它是首部结束的唯一判据，少一行就变成「首部还没发完，主体已经在路上」；别只记 GET/POST，先确认四段的边界怎么被协议解析器识别",
+          "§3.2 二、实现机制 · 读 `CyC2018/CS-Notes` 的 `docs/` 计算机网络专题：它把强缓存与协商缓存分成两节写，读它「304 为什么不带主体」，就懂本章 §3.1「HTTP 无状态，一切记忆都是外置的」为什么缓存也算一种「记忆」——`Cache-Control: max-age` 把服务端的状态搬到了客户端，而 304 是「你那份还能用，别再要」的确认，省的是主体那段带宽",
+          "§2.3 三、工程实践：头部才是 HTTP 的表达力所在 · 读 `nodejs/node` 的 `lib/_http_outgoing.js`：`writeHead` 决定首部何时定型；读它就知道本章 §1.4「边界与陷阱」里的首部时序里「头部必须在主体前发完」不是约定而是实现约束——一旦第一次 `write()` 调过，首部就已经写到 socket，此后想再 `setHeader` 只会抛 `ERR_HTTP_HEADERS_SENT`",
+          "§4.2 二、实现机制 · 读 `hoppscotch/hoppscotch` 的 `packages/` 请求模块：它能直接看/改请求头，手动构造一个 `OPTIONS` 预检，本章 §4.1「为什么必须知道整条链路」当场可见——预检里 `Access-Control-Request-Headers` 会把你准备用的异常头逐个列出来，服务端 `Access-Control-Allow-Headers` 少一项，真正的请求就发不出去"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -99,9 +99,9 @@
           44008
         ],
         "github_notes": [
-          "§2.2 box-sizing · §2.3 格式化上下文 规范原文：`css-box-3/Overview.bs` 里 box-sizing 与 margin 合并的定义、`css-display-3/Overview.bs` 里 flow-root 生成 BFC 的条文——「margin 为什么穿透父元素」在这里是规范，不是经验",
-          "§5 实用片段 片段库：读 `snippets/` 下带 `css` / `browser` 标签的条目（水平垂直居中、等分布局、清除浮动），每条都是可直接粘的最小实现，正好对照 §5 那四行 CSS 改了三天的那件事",
-          "§1.1 语义化 · §3.3 重排与重绘 题库：`questions/html-questions.md` 用「全 div 堆出来的页面哪里坏了」讲语义化，`questions/css-questions.md` 把 reflow / repaint / 合成层分开问——与 §1.1、§3.3 的判据一一对应"
+          "§2.2 二、实现机制：`content-box` vs `border-box` · 读 `w3c/csswg-drafts` 的 `css-box-3/Overview.bs`，再读同仓 `css-display-3/Overview.bs` 里 flow-root 生成 BFC 的条文：「margin 为什么穿透父元素」在规范里是定义，不是经验——本章 §2.3「BFC：块级格式化上下文」之所以能当「补丁」用，就是因为规范把「谁与谁参与同一个格式化上下文」写成了可判定的条件",
+          "§4.4 四、工程实践 · 读 `Chalarangelo/30-seconds-of-code` 的 `snippets/` 下带 `css` / `browser` 标签的条目（水平垂直居中、等分布局、清除浮动）：每条都是可直接粘的最小实现，正好对照本章 §4.2「实现机制：Flexbox」与 §4.3「Grid」——同一件事在 flex 时代只需三行，在 float 时代要一个 clearfix 加一个负 margin，这个差就是「一维 vs 二维」判据的实际收益",
+          "§3.3 三、Reflow / Repaint / Composite-only 的区别（面试高频） · 读 `yangshun/front-end-interview-handbook` 的 `questions/html-questions.md` 与 `questions/css-questions.md`：前者用「全 div 堆出来的页面哪里坏了」讲语义化，后者把 reflow / repaint / 合成层分开问——与本章 §1.1「语义化不是好看，而是机器可读」、§3.3 的判据一一对应；注意题库里对「transform 为什么不触发 reflow」的回答，正是本节「合成层只改图层属性」的直接推论"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -162,9 +162,9 @@
           44008
         ],
         "github_notes": [
-          "§1.2 相等性三兄弟 · §3.1 原型链 规范原文：`spec.html` 搜 `IsLooselyEqual` 与 `IsStrictlyEqual` 两段算法，`==` 的转换顺序（先 ToPrimitive，valueOf 优先于 toString）是逐条写死的，`[] == ![]` 可以照算法走一遍",
-          "§2.1 TDZ · §2.2 this 五条规则 书稿源码：`scope-closures/` 卷把提升与 TDZ 按「编译期 / 执行期」两段讲透，`objects-classes/` 卷把 this 的四类绑定排成判定树——对应 §2.1、§2.2，比背口诀可靠",
-          "§1.1 原始类型 · §4.2 组合子取舍 题库：`questions/javascript-questions.md` 把 `typeof null`、`NaN !== NaN`、装箱拆箱列成快问快答；Promise 串行/并行/竞速的选择题对应 §4.2 的组合子取舍"
+          "§1.2 相等性三兄弟 · §3.1 原型链 · 规范原文：`spec.html` 搜 `IsLooselyEqual` 与 `IsStrictlyEqual` 两段算法，`==` 的转换顺序（先 ToPrimitive，valueOf 优先于 toString）是逐条写死的，`[] == ![]` 可以照算法走一遍",
+          "§2.1 TDZ · §2.2 this 五条规则 · 书稿源码：`scope-closures/` 卷把提升与 TDZ 按「编译期 / 执行期」两段讲透，`objects-classes/` 卷把 this 的四类绑定排成判定树——对应 §2.1、§2.2，比背口诀可靠",
+          "§1.1 原始类型 · §4.2 组合子取舍 · 题库：`questions/javascript-questions.md` 把 `typeof null`、`NaN !== NaN`、装箱拆箱列成快问快答；Promise 串行/并行/竞速的选择题对应 §4.2 的组合子取舍"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -227,10 +227,10 @@
           17473
         ],
         "github_notes": [
-          "§1.1 结构 · §2.1 收窄 · §3.1 擦除 语言本体：读 `src/compiler/checker.ts` 的 `getPropertyAccessType` 与结构类型判定，直接对应 §1.1；`narrowTypeByKind` 对应 §2.1",
-          "§3.1 擦除 · §3.2 泛型 类型体操题库：从 `easy` 到 `extreme`，直接练条件类型与递归泛型，对应 §3.2 的「泛型不能越抽象越好」",
-          "§2.1 收窄 运行时校验 + 类型推断的工业样板：`z.infer` 把校验结果回推成静态类型，正是 §2.1「收窄」的运行时对应物",
-          "§3.2 泛型 几百个工具类型的源码合集，读 `PartialDeep` / `PackageJson` 理解条件类型与映射类型的实战写法，对应 §3.2"
+          "§1.1 为什么这样设计 · 读 `microsoft/TypeScript` 仓库的 `src/compiler/`（核心文件是 `checker.ts`）：里面的 `getPropertyAccessType` 与结构类型判定直接对应本节——TS 判「A 能否赋给 B」只看 B 要求的属性在 A 上是否存在且类型相容，完全不看声明关系；这解释了本章 §1.4「结构类型的三个边界反例」里「空对象 `{}` 能赋给几乎所有接口」为什么成立",
+          "§2.1 收窄的几种来源 · 先从 `type-challenges/type-challenges` 的 `easy` 到 `extreme` 练条件类型与递归泛型，再回 `src/compiler/` 的 `checker.ts` 读 `narrowTypeByKind`：题库让你先建立「类型是可以在编译期被计算的」直觉，源码告诉你收窄发生在 `if` / `typeof` / 判别式（`tagged union`）三个入口；配合 §2.2「为什么 `any` 是逃生舱而不是工具」——`any` 一旦进入表达式，后面的收窄全部失效，因为它的每个属性访问都是 `any`",
+          "§2.1 收窄的几种来源（运行时对应物） · 读 `colinhacks/zod`：`z.infer` 把校验结果回推成静态类型，正是本节「收窄」的运行时对应物——编译期的收窄只是「你怎么向编译器证明」，而 zod 是「你怎么向编译器证明这段外部数据确实是这个形状」；本章 §4.2「收尾：类型是文档，也是约束，但不是保证」说的就是这件事：没有运行时校验时，类型在边界上是一句无凭据的断言",
+          "§3.2 泛型不是越抽象越好 · 读 `sindresorhus/type-fest` 的几百个工具类型源码：先读 `PartialDeep` / `PackageJson` 理解条件类型与映射类型的实战写法，再回头看它为什么为每一个小场景单独出一个类型（而不是做一个万能 `Deep<T>`）——那就是本节「泛型不是越抽象越好」的证据：抽象层级每上一级，报错信息的可读性与推导性能都会下降"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -269,10 +269,10 @@
           4926
         ],
         "github_notes": [
-          "§1.1 Proxy 依赖收集 · §1.2 computed 派发 `packages/reactivity/src` 的 `effect.ts` 建 effect 树、`dep.ts` 用 Set 存订阅者、`baseHandlers.ts` 在 get 时 `track`、set 时 `trigger`；`computed.ts` 的 dirty 标记回答 §1.2「computed 什么时候才重算」",
-          "§3.1 两种写法 · §3.3 反模式 `src/store.ts` 的 `defineStore` 同时接受对象与函数两种入参，内部都归一成 reactive state + actions——§3.1「两种写法不是两套机制」的源码依据；`mapHelpers` 里的 `storeToRefs` 是 §3.3 解构丢响应式的正解",
-          "§2.1 ref 与生命周期边界 `src/router.ts` 的守卫按 `beforeEach → 组件内钩子 → afterEach` 排序；路由切换后 store 该不该重置，取决于你把 store 放进守卫还是放进组件——§2.1 的边界问题在这里有明确答案",
-          "§1.3 .value 的由来 · §2.3 设计取舍 `active-rfcs/` 里响应式相关提案（ref 拆包、reactivity transform）的讨论解释了为什么模板里不写 `.value`、JS 里必须写——§1.3 与 §2.3 的边界是设计决议，不是实现巧合"
+          "§1.1 一、机制：Proxy 与依赖收集 · 读 `vuejs/core` 的 `packages/reactivity/src/effect.ts` 与同目录 `dep.ts`、`baseHandlers.ts`：`effect.ts` 建 effect 树、`dep.ts` 用 Set 存订阅者、`baseHandlers.ts` 在 get 时 `track`、set 时 `trigger`；再读 `computed.ts` 的 dirty 标记，就回答了本节 §1.2 里「computed 什么时候才重算」——只有依赖脏了才重算，否则直接返回缓存值",
+          "§3.1 一、写法、依赖与 Vuex 对照 · 读 `vuejs/pinia` 的 `packages/pinia/src/store.ts`：`defineStore` 同时接受对象与函数两种入参，内部都归一成 reactive state + actions——这就是本节「两种写法不是两套机制」的源码依据；而 `storeToRefs` 是本章 §3.2「四个高频陷阱」里「解构丢响应式」的正解：直接解构 `const { count } = store` 会把 proxy 拆成裸值",
+          "§2.1 一、选型与两个高频坑 · 读 `vuejs/router` 的 `src/router.ts`：守卫按 `beforeEach → 组件内钩子 → afterEach` 排序；路由切换后 store 该不该重置，取决于你把 store 放进守卫还是放进组件——本节「两个高频坑」里「跨路由共享的 store 状态残留」在这里有明确答案：守卫里 `store.$reset()` 能清，组件里 `onUnmounted` 只能清自己持有的那部分",
+          "§1.3 三、调试、对照与取舍 · 读 `vuejs/rfcs` 的 `active-rfcs/` 下响应式相关提案（ref 拆包、reactivity transform）：这些讨论解释了为什么模板里不写 `.value`、JS 里必须写——本节「调试」那一半的工具（`effectScope` 的 on 钩子、`triggerRef`）之所以存在，也是因为这些提案没有走到「自动拆包所有场景」；这与 §2.3「设计取舍与跨框架对照」一起说明：边界是设计决议，不是实现巧合"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -311,10 +311,10 @@
           23477
         ],
         "github_notes": [
-          "§1.1 三层与依赖方向 `spring-boot-autoconfigure` 的 `AutoConfiguration.imports` + `@ConditionalOnMissingBean`：starter 只在你没自己声明时才装配——分层边界在框架里的落地方式",
-          "§2.1 统一异常收口 · §2.2 匹配顺序 `spring-webmvc` 的 `ExceptionHandlerExceptionResolver` 按 `@ExceptionHandler` 的匹配精度挑方法，`@ControllerAdvice` 的 `basePackages` / `assignableTypes` 决定它盖住哪些 Controller——§2.2 的作用域规则",
-          "§2.3 可观测性 · §1.2 职责边界 `FilterChainProxy` 在 DispatcherServlet 之前就拦掉未认证请求，`AuthenticationEntryPoint` 决定 401/403 的响应体——业务层拿不到原始异常，堆栈自然不会漏到前端（§2.4）",
-          "§3.2 边界与性能 `java.util.regex.Pattern` 的回溯实现：`(a+)+$` 这类嵌套量词能把校验入口的 CPU 打满（ReDoS）——§3.2「校验也要限长限深」不是洁癖"
+          "§1.2 二、把职责钉死在具体位置 · 读 `spring-projects/spring-boot` 的 `spring-boot-autoconfigure` 模块的 `AutoConfiguration.imports` 与 `@ConditionalOnMissingBean`：starter 只在你没自己声明时才装配——这就是本节「职责边界在框架里的落地方式」；注意 `@ConditionalOnMissingBean` 的判定发生在你定义的 Bean **之后**，所以想覆盖自动配置，只需声明同名同类型 Bean，不用排除自动配置类",
+          "§2.2 二、匹配顺序与作用域 · 读 `spring-projects/spring-framework` 的 `spring-webmvc` 模块的 `org/springframework/web/servlet/mvc/method/annotation/` 下 `ExceptionHandlerExceptionResolver`：它按 `@ExceptionHandler` 的匹配精度挑方法，`@ControllerAdvice` 的 `basePackages` / `assignableTypes` 决定它盖住哪些 Controller——本节要讲的「作用域规则」就是这两条：越精确的 `@ExceptionHandler` 优先，多个 `@ControllerAdvice` 之间按 `@Order` 而不是声明顺序",
+          "§2.4 四、事故复盘与协作边界 · 读 `spring-projects/spring-security` 的 `FilterChainProxy`：它在 DispatcherServlet 之前就拦掉未认证请求，`AuthenticationEntryPoint` 决定 401/403 的响应体——业务层拿不到原始异常，堆栈自然不会漏到前端；这解释了本节「协作边界」为什么必须落在过滤器层：放在 Controller 里，未进 Controller 的请求就没被覆盖",
+          "§3.2 二、边界、性能与文档 · 读 `openjdk/jdk` 里 `java.util.regex.Pattern` 的回溯实现：`(a+)+$` 这类嵌套量词能把校验入口的 CPU 打满（ReDoS）——本节「校验也要限长限深」不是洁癖，而是这条回溯路径的代价随嵌套层数指数增长；实务判据是先限长度上限，再确保正则里没有「量词套量词」的可选组"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -352,10 +352,10 @@
           51918
         ],
         "github_notes": [
-          "§2.1 网关该管什么 · §2.3 路由 网关实现：读 `RoutePredicateHandlerMapping` 与过滤器链，对应 §2.1、§2.3",
-          "§1 拆分 · §2 网关 模块化后端框架：module/provider 的边界设计与 §1 分层异曲同工",
-          "§2.6 BFF BFF 范式：前端定制的聚合层，对应 §2.6 BFF 模式",
-          "§3.5 配置中心 限流与缓存原语：RateLimiter 思路对应 §2.5 限流、§3.5 配置推送"
+          "§2.1 一、职责边界：该管与不该管 · 读 `spring-cloud/spring-cloud-gateway` 的 `RoutePredicateHandlerMapping` 与同模块的过滤器链：谓词决定「这个请求归哪条路由」，过滤器链决定「沿途改什么」——两段职责分开，就是本节「该管与不该管」的框架侧表达；本章 §2.2「四项核心能力与反模式」里的反模式，多半是把业务判断塞进了过滤器",
+          "§1.1 一、先想清楚：为什么拆、按什么切 · 读 `nestjs/nest` 的 module/provider 模型：它的边界设计（一个 module 显式声明 imports/providers/exports）与本节「按什么切」的判据同构——能写清「这个模块对外只暴露哪几个 provider」的服务边界才是真的，写不清的其实就是「一组文件的命名空间」",
+          "§2.2 二、四项核心能力与反模式 · 读 `vercel/next.js` 的中间件与 BFF 用法（`middleware.ts` 与 `app/api/` 路由）：BFF 是「为某一前端定制的聚合层」，而框架里的 middleware 只能改请求/响应、不能做重业务——这个能力边界正好划出本节「四项核心能力」里「聚合」与「编排」该放在 BFF、不该放进网关的那条线",
+          "§3.1 一、外置、隔离、热更新与密钥 · 读 `google/guava` 的 `RateLimiter`：它是「令牌桶」的原语实现，而本节要讲的是「限流参数本身就是配置中心最常见的动态项」——把 `RateLimiter` 的速率做成可热更新的配置，就同时踩了「热更新」与「密钥/阈值治理」两条；注意 `RateLimiter` 是单机限流，集群维度要靠配置中心下发一致的配额"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -394,10 +394,10 @@
           251766
         ],
         "github_notes": [
-          "§2.1 稳定的两条铁律 `docs` 的 auto-waiting 与 actionability checks：可见、稳定、可接收事件三个条件同时满足才动手，等于把 `sleep` 换成「等状态」；`packages/playwright-core/src/server` 里每个 action 都过这套检查",
-          "§2.3 工具差异与可观测 时间旅行调试靠命令队列快照：`packages/driver/src/cy` 把每条命令执行后的 DOM 存下来，失败时能回放到出错那一步——与 Playwright 用 trace 达到的是同一目的",
-          "§3.1 消费者驱动契约 · §3.3 Pact 工作流 `packages/core` 的 mock server 按消费者写的期望返回并生成 pact 文件，提供方用 `Verifier` 回放同一份契约——「契约是产物，不是文档」",
-          "§1.1 分层与测试替身 · §2.2 组件测试 框架自身的测试基建：`packages/react/src/__tests__` 配 `scripts/jest` 的自定义环境，断言的是渲染出来的树而非实现细节——这正是 §2.2 组件测试该断言的层次"
+          "§2.1 一、稳定的两条铁律 · 读 `microsoft/playwright` 的 `docs/src/api/class-page.md` 里 auto-waiting 与 actionability checks 两节：可见、稳定、可接收事件三个条件同时满足才动手，等于把 `sleep` 换成「等状态」——这就是本节「两条铁律」的第一条；第二条「只断言用户可见的结果」则对应它强调的 locator 语义（按 role/label 定位而非 DOM 路径）",
+          "§2.3 三、flaky 归因、工具差异与可观测 · 读 `cypress-io/cypress` 的 `packages/driver/src/cy/commands/actions/click.ts`：时间旅行调试靠命令队列快照把每条命令执行后的 DOM 存下来，失败时能回放到出错那一步——与 Playwright 用 trace 达到的是同一目的；本节「工具差异」的关键不在 API，而在「失败时你能看到哪一刻的状态」",
+          "§3.3 三、Pact 工作流与契约演进 · 读 `pact-foundation/pact-js` 的 `src/index.ts`：mock server 按消费者写的期望返回并生成 pact 文件，提供方用 `Verifier` 回放同一份契约——「契约是产物，不是文档」；本节 §3.1 讲的「值在哪」也由此落地：契约文件可以进 CI 当门禁（§3.2），而文档不能",
+          "§2.2 二、组件测试与测试卫生 · 读 `facebook/react` 的 `packages/react/src/` 下 `jsx/__tests__/` 等测试目录：框架自身的测试配 `scripts/jest` 的自定义环境，断言的是渲染出来的树而非实现细节——这正是本节「组件测试该断言的层次」；反过来说，一旦测试里出现对内部 state 变量名的断言，它就已经从组件测试退化成实现测试"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -437,10 +437,10 @@
           168266
         ],
         "github_notes": [
-          "§1.1 SSE · §3.1 callId `packages/ai/core/generate-text/stream-text.ts` 把模型增量转成 data stream 协议（`0:\"文本\"` 这种带前缀的行），工具调用带 `toolCallId`——§3.1 唯一 id 的来源就是协议本身",
-          "§2.5 幂等恢复 · §3.2 重试幂等 `libs/core` 的 `Runnable` 组合子与 `with_retry`：重试只重放同一次调用，跨轮状态由外层 graph / checkpoint 保存，对应 §2.5「同一个 id 可以重入」",
-          "§1.2 网关透传流式 · §4.3 限流 `context.go` 的 `Stream` 与 `sse.go` 的 `SSEvent` 是逐块 flush 的最小实现（不设 `Content-Length`、显式 `Flush`）；`middleware/` 里挂限流中间件正是 §4.3 的落地位置",
-          "§4.1 token 计量 `src/transformers/tokenization_utils.py` 的 `encode` / `decode` 决定「一段文本值多少 token」，同一句中文不同 tokenizer 能差一倍——§4.1 输入输出分开算的前提"
+          "§1.1 SSE 与 WebSocket 在协议层的差别 · 读 `vercel/ai` 的 `packages/ai/src/generate-text/stream-text.ts`：它把模型增量转成 data stream 协议（`0:\"文本\"` 这种带前缀的行），工具调用带 `toolCallId`——本节「SSE 之所以够用」的原因就在这里：单向、可断点续传、走普通 HTTP；而本章 §3.1「每次工具调用都要有唯一 id」的来源也正是这个协议字段",
+          "§2.5 幂等恢复：同一个 id 可以重入 · 读 `langchain-ai/langchain` 的 `libs/core`：`Runnable` 组合子与 `with_retry` 让重试只重放同一次调用，跨轮状态由外层 graph / checkpoint 保存——这就对应本节「同一个 id 可以重入」；关键区别是「重试」与「重入」的边界：重试假设副作用没发生，重入必须假设可能已发生，所以要有 §3.2 的去重记录",
+          "§1.2 网关透传流式的三种实现路径 · 读 `gin-gonic/gin` 的 `context.go` 的 `Stream` 方法与 SSE 相关中间件：逐块 flush 的最小实现（不设 `Content-Length`、显式 `Flush`）；这正是本节「三种实现路径」里最直接的一种；而 `middleware/` 里挂限流中间件正是本章 §4.3「三种经典限流算法」的落地位置——注意流式响应一旦开始，限流只能按「连接数」而不能按「请求数」计",
+          "§4.1 token 计量：输入与输出分开算 · 读 `huggingface/transformers` 的 `src/transformers/tokenization_utils.py`：`encode` / `decode` 决定「一段文本值多少 token」，同一句中文不同 tokenizer 能差一倍——这就是本节「输入输出分开算」的前提；§4.4「降级与预算」里的预算阈值必须按实际 tokenizer 估，用字符数折算会在中文场景系统性低估"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -479,10 +479,10 @@
           60300
         ],
         "github_notes": [
-          "§2.1 路由树 · §2.2 中间件 `tree.go` 是压缩前缀树，`routergroup.go` 的 `Use` 把 handler 拼成 `HandlersChain`，`context.go` 的 `Next()` 用索引往前走——与 Express 的数组栈是同一模型",
-          "§2.3 框架对照 `app.go` 的路由与 `ctx.go` 的 `Next()` 形状和 Gin 几乎一样，但底层跑在 `fasthttp` 上、复用 `RequestCtx` 减少分配——对照点在于「API 相同、内存模型不同」",
-          "§1.1 goroutine 与 channel · §3.1 error 即值 `src/runtime/proc.go` 的 GMP 调度与 `src/runtime/chan.go` 的 `hchan` 环形缓冲：channel 满时 `send` 阻塞并挂进 `sendq`——「不要通过共享内存通信」的机器实现",
-          "§2.3 中间件对照 · §3.3 契约对照 `spring-web` 的 `ResponseEntityExceptionHandler` 把异常统一映射成 `ProblemDetail`（RFC 9457），和 Go 侧「error 作为值、显式返回」是两条路：一个靠容器兜底，一个靠调用方检查"
+          "§2.1 一、路由与中间件机制 · 读 `gin-gonic/gin` 的 `tree.go` 与 `routergroup.go`、`context.go`：`tree.go` 是压缩前缀树，`routergroup.go` 的 `Use` 把 handler 拼成 `HandlersChain`，`context.go` 的 `Next()` 用索引往前走——与 Express 的数组栈是同一模型，差别只在「路径匹配是树而不是正则」；这也解释本节 §2.2「与其他框架对照」里路由性能差距的来源",
+          "§2.2 二、与其他框架对照 · 读 `gofiber/fiber` 的 `app.go`：它的路由与 `Next()` 形状和 Gin 几乎一样，但底层跑在 `fasthttp` 上、复用 `RequestCtx` 减少分配——本节「与其他框架对照」的核心点就在「API 相同、内存模型不同」；代价是 `fasthttp` 的 ctx 不能跨 goroutine 持有，这与 Gin 可以直接把 `*http.Request` 传下去是两条契约",
+          "§1.1 一、模型本体：goroutine 与 channel · 读 `golang/go` 的 `src/runtime/proc.go` 的 GMP 调度与 `src/runtime/chan.go` 的 `hchan` 环形缓冲：channel 满时 `send` 阻塞并挂进 `sendq`——「不要通过共享内存通信」的机器实现；本节 §1.2「与其他运行时对照」里「Go 的 goroutine 比线程轻在哪」就在这里：栈初始 2KB 可增长、调度在用户态完成",
+          "§3.2 二、接口契约与跨语言对照 · 读 `spring-projects/spring-framework` 的 `spring-webmvc` 模块的 `org/springframework/web/servlet/mvc/method/annotation/` 下 `ResponseEntityExceptionHandler`：它把异常统一映射成 `ProblemDetail`（RFC 9457），和 Go 侧「error 作为值、显式返回」是两条路——一个靠容器兜底、一个靠调用方检查；这就是本节「跨语言对照」最值得对照的一处：容器兜底能保证「不漏」，显式返回能保证「不隐式」"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -519,9 +519,9 @@
           35683
         ],
         "github_notes": [
-          "§1.2 队列顺序 · §3.1 背压 运行时本体：`lib/internal/process/task_queues.js` 是 nextTick 与微任务队列的真实调度，`lib/internal/streams/readable.js` 里 `highWaterMark` 与 `readableFlowing` 的状态迁移就是 §3.1 背压的机器版本",
-          "§2.1 手写 HTTP 服务 · §2.3 中间件 工业实现：`lib/application.js` 的 `app.use` 把中间件压进栈、`app.handle` 作为 `http.createServer` 的回调把 req/res 交出去；四参数错误中间件的识别就发生在这一层",
-          "§2.3 洋葱模型 对照实现：`lib/application.js` 的 `callback()` 用 `compose(this.middleware)` 把数组折成嵌套函数，`await next()` 前后各写一段——这就是 §2.3「进去一层、出来一层」的原始代码"
+          "§1.2 二、process.nextTick / Promise.then / setImmediate 三者顺序 · 读 `nodejs/node` 的 `lib/internal/process/task_queues.js`：它是 nextTick 与微任务队列的真实调度，配合 `lib/internal/streams/readable.js` 里 `highWaterMark` 与 `readableFlowing` 的状态迁移，就构成本章 §3.1「Stream 流控与背压」的机器版本；先看 §1.1 的六阶段图，再看这份调度代码，才会明白「nextTick 在自己那一层内递归，能把事件循环饿死」",
+          "§2.1 一、从零手写 HTTP 服务器（路由 / 路径变量 / JSON body / 状态码） · 读 `expressjs/express` 的 `lib/application.js`：`app.use` 把中间件压进栈、`app.handle` 作为 `http.createServer` 的回调把 req/res 交出去；四参数错误中间件的识别就发生在这一层——它靠 `fn.length === 4` 判断，这个「用参数个数编码语义」的做法正是本章 §2.3「中间件模型与 compose」的起点",
+          "§2.2 可运行代码：compose 的洋葱模型 · 读 `koajs/koa` 的 `lib/application.js`：它的 `callback()` 用 `compose(this.middleware)` 把数组折成嵌套函数，`await next()` 前后各写一段——这就是 §2.3「进去一层、出来一层」的原始代码；对照 express 的「线性 next()」，能看清 koa 的洋葱之所以可能，靠的是 async/await 的 Promise 链，而不是回调栈"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -584,9 +584,9 @@
           31291
         ],
         "github_notes": [
-          "§1.2 索引结构 · 最左前缀 存储引擎本体：`src/btree.c` 的 `sqlite3BtreeInsert` 与 `balance()` 演示 B+ 树怎么分裂合并，`src/where.c` 的 `whereBegin` 决定能用哪个索引前缀——「最左前缀」在这里是可用性判定，不是口诀",
-          "§2.2 N+1 修复范式：`src/index.js` 的 `enqueuePostPromiseJob` 把一个 tick 内的 key 全攒进 `_batch`，再一次性调 `batchLoadFn`——「用操作计数发现、用批量合并修复」的教科书实现",
-          "§4.1 契约优先 规范原文：`versions/3.1.0.md` 里 `paths` / `components/schemas` 的结构与 `$ref` 复用规则，`versions/3.0.3.md` 的 `nullable` 写法差异——先写契约再生成类型时，这两份是唯一权威"
+          "§1.2 二、索引：B+ 树、最左前缀与覆盖索引 · 读 `sqlite/sqlite` 的 `src/btree.c`：`sqlite3BtreeInsert` 与 `balance()` 演示 B+ 树怎么分裂合并，再做 `src/where.c` 的 `whereBegin` 决定能用哪个索引前缀——「最左前缀」在这里是可用性判定，不是口诀：where 子句里的列顺序与索引列顺序一旦错位，优化器就直接放弃这条索引；而本章 §1.1「关系型与文档型的选型判据」也由此落地——文档库没有这种「按前缀匹配的确定性」，代价是范围查询只能靠扫描",
+          "§2.2 二、N+1：用操作计数发现，用批量合并修复 · 读 `graphql/dataloader` 的 `src/index.js`：`enqueuePostPromiseJob` 把一个 tick 内的 key 全攒进 `_batch`，再一次性调 `batchLoadFn`——「用操作计数发现、用批量合并修复」的教科书实现；注意它靠的是「同一 tick 内合并」，所以跨 tick 循环里逐个 `await load(id)` 依然会 N+1，这正是本章 §2.1「ORM / ODM：用类型安全换控制力」要警惕的隐性成本",
+          "§4.1 一、契约优先（Design-First）与 OpenAPI · 读 `OAI/OpenAPI-Specification` 的 `versions/3.1.0.md`：`paths` / `components/schemas` 的结构与 `$ref` 复用规则写得很细，对照 `versions/3.0.3.md` 的 `nullable` 写法差异——3.1 用 JSON Schema 的 `type: [\"string\", \"null\"]` 取代了 3.0 的 `nullable: true`；先写契约再生成类型时，这两份是唯一权威，也是 §4.2「版本策略」为什么必须在契约层而不是在路由层决定的原因"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -650,9 +650,9 @@
           33847
         ],
         "github_notes": [
-          "§2.1 三段结构与签名 规范级实现：`docs/jws/flattened/sign/README.md`、`docs/jws/compact/verify/functions/compactVerify.md` 说明签名的输入是 `BASE64URL(header).BASE64URL(payload)` 这串字节，不是解析后的 JSON——§2.1「签的是串不是对象」由此而来",
-          "§2.2 alg 混淆 · §3.1 无法主动失效 坑位本体：`verify.js` 的 `options.algorithms` 白名单是唯一能挡住 `alg:none` 的地方（不传就按 header 里声明的算法验）；`sign.js` 的 `expiresIn` 只写进 exp，服务端不查黑名单就撤不掉——§3.1 的固有缺陷",
-          "§3.2 密码存储 · §4.2 CSRF/XSS 权威基线：`cheatsheets/Password_Storage_Cheat_Sheet.md` 给了 argon2id 的参数下限与「不加盐等于送彩虹表」；`Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.md`、`Cross_Site_Scripting_Prevention_Cheat_Sheet.md` 分别对应 §4.2 的两类漏洞"
+          "§2.1 一、JWT 三段结构与签名算法（HS256 vs RS256） · 读 `panva/jose` 的 `docs/jws/compact/verify/functions/compactVerify.md`：它说明签名的输入是 `BASE64URL(header).BASE64URL(payload)` 这串字节，不是解析后的 JSON——本章「签的是串不是对象」由此而来；实务差别在于：任何重排 JSON 键序、改空白的外部处理都会让签名失效，所以验签必须先验串、再解析",
+          "§2.2 二、校验清单与 alg:none / 算法混淆攻击 · 读 `auth0/node-jsonwebtoken` 的 `verify.js`：`options.algorithms` 白名单是唯一能挡住 `alg:none` 的地方（不传就按 header 里声明的算法验，等于让攻击者选算法）；配套 `sign.js` 的 `expiresIn` 只写进 `exp`，服务端不查黑名单就撤不掉——这就是本章 §3.1「JWT 无法主动失效（固有缺陷）与缓解」的全部技术根源",
+          "§3.2 二、密码存储：bcrypt / scrypt / argon2 的加盐与成本 · 读 `OWASP/CheatSheetSeries` 的 `cheatsheets/Password_Storage_Cheat_Sheet.md`：它给了 argon2id 的参数下限与「不加盐等于送彩虹表」的量化说明；配套读同目录 `Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.md` 与 `Cross_Site_Scripting_Prevention_Cheat_Sheet.md`，正好对应本章 §4.2「OAuth2 授权码 + PKCE，CSRF/XSS 与常见漏洞」的两类攻击面——一个借用户的浏览器发请求，一个把脚本塞进你的页面"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -714,9 +714,9 @@
           143463
         ],
         "github_notes": [
-          "§1 分层与契约 · §3.3 三态呈现 全栈样板：`docs/src/content/docs/specifications/frontend/api.md` 把「页面 → 数据层 → API」的边界写成契约，`backend/error-handling.md` 规定统一错误体——十几种语言实现共用同一份契约，正是 §1.2 的实物",
-          "§2.2 服务端状态 · 乐观更新 状态层本体：`packages/query-core/src/query.ts` 的 `staleTime` 与 `gcTime` 两个时钟把「新鲜度」和「回收」拆开；`mutation.ts` 的 `onMutate` / `onError` 回滚就是 §2.2 乐观更新的标准写法",
-          "§4.1 懒加载与代码分割 框架实现：`packages/next/src/client/` 的 `dynamic` 与路由级 chunk——构建期按入口拆 bundle、运行期按需拉，「首屏只付首屏的钱」在框架里是编译期决定，不是运行时的 `lazy()`"
+          "§1.2 二、契约优先：OpenAPI 驱动、类型生成与边界校验 · 读 `realworld-apps/realworld` 的 `README.md` 与 `specs/`：它把「页面 → 数据层 → API」的边界写成契约（`api.md`）并规定统一错误体（`error-handling.md`），十几种语言实现共用同一份契约——正是本节「契约先于实现」的实物；配合 §3.3「错误处理与三态呈现」看：统一错误体让 loading/empty/error 三态的判断不依赖各实现自己的约定",
+          "§2.2 二、数据流转：缓存失效、乐观更新与列表合并 · 读 `TanStack/query` 的 `packages/query-core/src/query.ts`：`staleTime` 与 `gcTime` 两个时钟把「新鲜度」和「回收」拆开，`packages/query-core/src/mutation.ts` 的 `onMutate` / `onError` 回滚就是本节乐观更新的标准写法；要点是 `onMutate` 里要返回旧快照，`onError` 才有东西可回滚",
+          "§4.1 一、性能：懒加载与代码分割、列表虚拟化、请求去重与取消 · 读 `vercel/next.js` 的 `packages/next/src/client/`：`dynamic` 与路由级 chunk——构建期按入口拆 bundle、运行期按需拉，「首屏只付首屏的钱」在框架里是编译期决定，不是运行时的 `lazy()`；这条区别解释了本章 §4.3「读得懂大厂源码：入口 → 路由 → 数据层 → 组件树」为什么第一步要看构建配置而不是组件"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [
@@ -781,10 +781,10 @@
           72516
         ],
         "github_notes": [
-          "§2.1 缓存是前缀链 · §2.2 多阶段 构建器本体：`frontend/dockerfile/dockerfile2llb/convert.go` 把 Dockerfile 逐指令翻译成 LLB 图，`cache/manager.go` 按指令 + 输入摘要判命中——某层失效则其后全部重建，这条规律在这里是数据结构",
-          "§3.1 服务依赖与健康门 编排实现：`pkg/compose/create.go` 按 `depends_on` 与 `condition` 建依赖图并定启动顺序，`up.go` 负责等 healthcheck 通过再往下走——「死等 vs 直接报错」的循环依赖检测发生在建图阶段",
-          "§1.2 unit 文件 · §1.3 日志 语义权威：`man/systemd.service.xml` 规定 `Restart=` / `RestartSec=` / `StartLimitBurst=` 的精确含义（连重启节流都写在里面），`src/journal/journald.c` 说明结构化日志从哪来，`src/shared/logs-show.c` 是 `--since` / `--priority` 的过滤实现",
-          "§4.1 workflow → job → step 本地执行器：`pkg/model/workflow.go` 是 YAML 到结构体的映射（缺 `on` / `runs-on` 在这里就露馅），`pkg/model/planner.go` 按 `needs` 建 DAG 并算出可并行的层——「needs 指向不存在的 job」本地一跑就复现"
+          "§2.1 一、镜像分层、写时复制与构建缓存 · 读 `moby/buildkit` 的 `frontend/dockerfile/dockerfile2llb/convert.go`：它把 Dockerfile 逐指令翻译成 LLB 图，而 `cache/manager.go` 按「指令 + 输入摘要」判命中——某层失效则其后全部重建，这条规律在这里是数据结构而不是经验；所以本章 §2.2「多阶段构建与镜像瘦身」里「把 COPY 依赖清单放在 COPY 源码之前」不是风格问题，而是让失效点尽量后移",
+          "§3.1 一、Docker Compose：服务依赖、网络、卷与健康检查 · 读 `docker/compose` 的 `pkg/compose/create.go`：它按 `depends_on` 与 `condition` 建依赖图并定启动顺序，`up.go` 负责等 healthcheck 通过再往下走——「死等 vs 直接报错」的循环依赖检测发生在建图阶段；这正对应本章 §3.2「12-Factor 与配置外置」之外的另一半：配置外置解决「同一镜像跑多环境」，依赖编排解决「多容器按什么顺序起」",
+          "§1.2 二、进程管理：systemd / pm2 / supervisor · 读 `systemd/systemd` 的 `man/systemd.service.xml`：它规定 `Restart=` / `RestartSec=` / `StartLimitBurst=` 的精确含义（连重启节流都写在里面）；配套 `src/journal/journald.c` 说明结构化日志从哪来，`src/shared/logs-show.c` 是 `--since` / `--priority` 的过滤实现——这正是本章 §1.3「日志：journalctl 与 logrotate」为什么能「按字段查」而不是「按行 grep」的技术底子",
+          "§4.1 一、CI/CD 流水线设计（GitHub Actions） · 读 `nektos/act` 的 `pkg/model/workflow.go`：它是 YAML 到结构体的映射（缺 `on` / `runs-on` 在这里就露馅），`pkg/model/planner.go` 按 `needs` 建 DAG 并算出可并行的层——「needs 指向不存在的 job」本地一跑就复现；本章 §4.2「环境与发布策略：蓝绿、金丝雀、滚动与回滚」要落在这张 DAG 上，所以顺序设计的本质是「哪些 job 可以并行、哪些必须串」"
         ],
         "github_fetched_at": "2026-10-27",
         "books": [

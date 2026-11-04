@@ -12,10 +12,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [microsoft/TypeScript](https://github.com/microsoft/TypeScript) | 111,640 | §1.1 结构 · §2.1 收窄 · §3.1 擦除 | 语言本体：读 `src/compiler/checker.ts` 的 `getPropertyAccessType` 与结构类型判定，直接对应 §1.1；`narrowTypeByKind` 对应 §2.1 |
-| 2 | [type-challenges/type-challenges](https://github.com/type-challenges/type-challenges) | 48,544 | §3.1 擦除 · §3.2 泛型 | 类型体操题库：从 `easy` 到 `extreme`，直接练条件类型与递归泛型，对应 §3.2 的「泛型不能越抽象越好」 |
-| 3 | [colinhacks/zod](https://github.com/colinhacks/zod) | 44,212 | §2.1 收窄 | 运行时校验 + 类型推断的工业样板：`z.infer` 把校验结果回推成静态类型，正是 §2.1「收窄」的运行时对应物 |
-| 4 | [sindresorhus/type-fest](https://github.com/sindresorhus/type-fest) | 17,473 | §3.2 泛型 | 几百个工具类型的源码合集，读 `PartialDeep` / `PackageJson` 理解条件类型与映射类型的实战写法，对应 §3.2 |
+| 1 | [microsoft/TypeScript](https://github.com/microsoft/TypeScript) | 111,640 | §1.1 为什么这样设计 | 读 `microsoft/TypeScript` 仓库的 `src/compiler/`（核心文件是 `checker.ts`）：里面的 `getPropertyAccessType` 与结构类型判定直接对应本节——TS 判「A 能否赋给 B」只看 B 要求的属性在 A 上是否存在且类型相容，完全不看声明关系；这解释了本章 §1.4「结构类型的三个边界反例」里「空对象 `{}` 能赋给几乎所有接口」为什么成立 |
+| 2 | [type-challenges/type-challenges](https://github.com/type-challenges/type-challenges) | 48,544 | §2.1 收窄的几种来源 | 先从 `type-challenges/type-challenges` 的 `easy` 到 `extreme` 练条件类型与递归泛型，再回 `src/compiler/` 的 `checker.ts` 读 `narrowTypeByKind`：题库让你先建立「类型是可以在编译期被计算的」直觉，源码告诉你收窄发生在 `if` / `typeof` / 判别式（`tagged union`）三个入口；配合 §2.2「为什么 `any` 是逃生舱而不是工具」——`any` 一旦进入表达式，后面的收窄全部失效，因为它的每个属性访问都是 `any` |
+| 3 | [colinhacks/zod](https://github.com/colinhacks/zod) | 44,212 | §2.1 收窄的几种来源（运行时对应物） | 读 `colinhacks/zod`：`z.infer` 把校验结果回推成静态类型，正是本节「收窄」的运行时对应物——编译期的收窄只是「你怎么向编译器证明」，而 zod 是「你怎么向编译器证明这段外部数据确实是这个形状」；本章 §4.2「收尾：类型是文档，也是约束，但不是保证」说的就是这件事：没有运行时校验时，类型在边界上是一句无凭据的断言 |
+| 4 | [sindresorhus/type-fest](https://github.com/sindresorhus/type-fest) | 17,473 | §3.2 泛型不是越抽象越好 | 读 `sindresorhus/type-fest` 的几百个工具类型源码：先读 `PartialDeep` / `PackageJson` 理解条件类型与映射类型的实战写法，再回头看它为什么为每一个小场景单独出一个类型（而不是做一个万能 `Deep<T>`）——那就是本节「泛型不是越抽象越好」的证据：抽象层级每上一级，报错信息的可读性与推导性能都会下降 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

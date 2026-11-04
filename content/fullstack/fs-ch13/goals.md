@@ -11,10 +11,10 @@
 
 | # | 仓库 | Star | 对应本章 | 读什么 |
 | --- | --- | ---: | --- | --- |
-| 1 | [microsoft/playwright](https://github.com/microsoft/playwright) | 98,704 | §2.1 稳定的两条铁律 | `docs` 的 auto-waiting 与 actionability checks：可见、稳定、可接收事件三个条件同时满足才动手，等于把 `sleep` 换成「等状态」；`packages/playwright-core/src/server` 里每个 action 都过这套检查 |
-| 2 | [cypress-io/cypress](https://github.com/cypress-io/cypress) | 51,015 | §2.3 工具差异与可观测 | 时间旅行调试靠命令队列快照：`packages/driver/src/cy` 把每条命令执行后的 DOM 存下来，失败时能回放到出错那一步——与 Playwright 用 trace 达到的是同一目的 |
-| 3 | [pact-foundation/pact-js](https://github.com/pact-foundation/pact-js) | 1,825 | §3.1 消费者驱动契约 · §3.3 Pact 工作流 | `packages/core` 的 mock server 按消费者写的期望返回并生成 pact 文件，提供方用 `Verifier` 回放同一份契约——「契约是产物，不是文档」 |
-| 4 | [facebook/react](https://github.com/facebook/react) | 251,766 | §1.1 分层与测试替身 · §2.2 组件测试 | 框架自身的测试基建：`packages/react/src/__tests__` 配 `scripts/jest` 的自定义环境，断言的是渲染出来的树而非实现细节——这正是 §2.2 组件测试该断言的层次 |
+| 1 | [microsoft/playwright](https://github.com/microsoft/playwright) | 98,704 | §2.1 一、稳定的两条铁律 | 读 `microsoft/playwright` 的 `docs/src/api/class-page.md` 里 auto-waiting 与 actionability checks 两节：可见、稳定、可接收事件三个条件同时满足才动手，等于把 `sleep` 换成「等状态」——这就是本节「两条铁律」的第一条；第二条「只断言用户可见的结果」则对应它强调的 locator 语义（按 role/label 定位而非 DOM 路径） |
+| 2 | [cypress-io/cypress](https://github.com/cypress-io/cypress) | 51,015 | §2.3 三、flaky 归因、工具差异与可观测 | 读 `cypress-io/cypress` 的 `packages/driver/src/cy/commands/actions/click.ts`：时间旅行调试靠命令队列快照把每条命令执行后的 DOM 存下来，失败时能回放到出错那一步——与 Playwright 用 trace 达到的是同一目的；本节「工具差异」的关键不在 API，而在「失败时你能看到哪一刻的状态」 |
+| 3 | [pact-foundation/pact-js](https://github.com/pact-foundation/pact-js) | 1,825 | §3.3 三、Pact 工作流与契约演进 | 读 `pact-foundation/pact-js` 的 `src/index.ts`：mock server 按消费者写的期望返回并生成 pact 文件，提供方用 `Verifier` 回放同一份契约——「契约是产物，不是文档」；本节 §3.1 讲的「值在哪」也由此落地：契约文件可以进 CI 当门禁（§3.2），而文档不能 |
+| 4 | [facebook/react](https://github.com/facebook/react) | 251,766 | §2.2 二、组件测试与测试卫生 | 读 `facebook/react` 的 `packages/react/src/` 下 `jsx/__tests__/` 等测试目录：框架自身的测试配 `scripts/jest` 的自定义环境，断言的是渲染出来的树而非实现细节——这正是本节「组件测试该断言的层次」；反过来说，一旦测试里出现对内部 state 变量名的断言，它就已经从组件测试退化成实现测试 |
 
 > 全部为工业级真实仓库；Star 数为本会话经 GitHub API 实取快照，仅供路线排序参考。
 

@@ -48,10 +48,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §一 理论根基 | §二 报文的确切结构：`README.md` 的 HTTP 一节给了请求/响应报文的逐行拆解，对照本章「状态行 + 首部 + 空行 + 主体」四段结构，别只记「GET/POST」 |
-| 2 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §二 高频头部 | §三 工程实践（缓存）：`docs/` 里计算机网络专题把强缓存与协商缓存分成两节写，读它「304 为什么不带主体」，就懂本章「缓存省的是哪一段带宽」 |
-| 3 | [nodejs/node](https://github.com/nodejs/node) | 122,410 | §二 报文结构 | §四 边界与陷阱（首部时序）：`lib/_http_outgoing.js` 的 `writeHead` 决定首部何时定型，读它就知道本章「头部必须在主体前发完」不是约定而是实现约束 |
-| 4 | [hoppscotch/hoppscotch](https://github.com/hoppscotch/hoppscotch) | 80,699 | §四 边界与陷阱（CORS 预检） | §三 工程实践：`packages/` 里的请求模块能直接看/改请求头，手动构造一个 `OPTIONS` 预检，本章「简单请求 vs 预检请求」当场可见 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §1.2 二、实现机制：报文的确切结构 | 读 `system-design-primer` 的 `README.md`：它的 HTTP 一节给了请求/响应报文的逐行拆解，对照本章这个 |状态行 + 首部 + 空行 + 主体| 的四段结构——重点是那个「空行」，它是首部结束的唯一判据，少一行就变成「首部还没发完，主体已经在路上」；别只记 GET/POST，先确认四段的边界怎么被协议解析器识别 |
+| 2 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 186,408 | §3.2 二、实现机制 | 读 `CyC2018/CS-Notes` 的 `docs/` 计算机网络专题：它把强缓存与协商缓存分成两节写，读它「304 为什么不带主体」，就懂本章 §3.1「HTTP 无状态，一切记忆都是外置的」为什么缓存也算一种「记忆」——`Cache-Control: max-age` 把服务端的状态搬到了客户端，而 304 是「你那份还能用，别再要」的确认，省的是主体那段带宽 |
+| 3 | [nodejs/node](https://github.com/nodejs/node) | 122,410 | §2.3 三、工程实践：头部才是 HTTP 的表达力所在 | 读 `nodejs/node` 的 `lib/_http_outgoing.js`：`writeHead` 决定首部何时定型；读它就知道本章 §1.4「边界与陷阱」里的首部时序里「头部必须在主体前发完」不是约定而是实现约束——一旦第一次 `write()` 调过，首部就已经写到 socket，此后想再 `setHeader` 只会抛 `ERR_HTTP_HEADERS_SENT` |
+| 4 | [hoppscotch/hoppscotch](https://github.com/hoppscotch/hoppscotch) | 80,699 | §4.2 二、实现机制 | 读 `hoppscotch/hoppscotch` 的 `packages/` 请求模块：它能直接看/改请求头，手动构造一个 `OPTIONS` 预检，本章 §4.1「为什么必须知道整条链路」当场可见——预检里 `Access-Control-Request-Headers` 会把你准备用的异常头逐个列出来，服务端 `Access-Control-Allow-Headers` 少一项，真正的请求就发不出去 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

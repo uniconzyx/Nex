@@ -24,9 +24,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [sqlite/sqlite](https://github.com/sqlite/sqlite) | 10,890 | §1.2 索引结构 · 最左前缀 | 存储引擎本体：`src/btree.c` 的 `sqlite3BtreeInsert` 与 `balance()` 演示 B+ 树怎么分裂合并，`src/where.c` 的 `whereBegin` 决定能用哪个索引前缀——「最左前缀」在这里是可用性判定，不是口诀 |
-| 2 | [graphql/dataloader](https://github.com/graphql/dataloader) | 13,391 | §2.2 N+1 | 修复范式：`src/index.js` 的 `enqueuePostPromiseJob` 把一个 tick 内的 key 全攒进 `_batch`，再一次性调 `batchLoadFn`——「用操作计数发现、用批量合并修复」的教科书实现 |
-| 3 | [OAI/OpenAPI-Specification](https://github.com/OAI/OpenAPI-Specification) | 31,291 | §4.1 契约优先 | 规范原文：`versions/3.1.0.md` 里 `paths` / `components/schemas` 的结构与 `$ref` 复用规则，`versions/3.0.3.md` 的 `nullable` 写法差异——先写契约再生成类型时，这两份是唯一权威 |
+| 1 | [sqlite/sqlite](https://github.com/sqlite/sqlite) | 10,890 | §1.2 二、索引：B+ 树、最左前缀与覆盖索引 | 读 `sqlite/sqlite` 的 `src/btree.c`：`sqlite3BtreeInsert` 与 `balance()` 演示 B+ 树怎么分裂合并，再做 `src/where.c` 的 `whereBegin` 决定能用哪个索引前缀——「最左前缀」在这里是可用性判定，不是口诀：where 子句里的列顺序与索引列顺序一旦错位，优化器就直接放弃这条索引；而本章 §1.1「关系型与文档型的选型判据」也由此落地——文档库没有这种「按前缀匹配的确定性」，代价是范围查询只能靠扫描 |
+| 2 | [graphql/dataloader](https://github.com/graphql/dataloader) | 13,391 | §2.2 二、N+1：用操作计数发现，用批量合并修复 | 读 `graphql/dataloader` 的 `src/index.js`：`enqueuePostPromiseJob` 把一个 tick 内的 key 全攒进 `_batch`，再一次性调 `batchLoadFn`——「用操作计数发现、用批量合并修复」的教科书实现；注意它靠的是「同一 tick 内合并」，所以跨 tick 循环里逐个 `await load(id)` 依然会 N+1，这正是本章 §2.1「ORM / ODM：用类型安全换控制力」要警惕的隐性成本 |
+| 3 | [OAI/OpenAPI-Specification](https://github.com/OAI/OpenAPI-Specification) | 31,291 | §4.1 一、契约优先（Design-First）与 OpenAPI | 读 `OAI/OpenAPI-Specification` 的 `versions/3.1.0.md`：`paths` / `components/schemas` 的结构与 `$ref` 复用规则写得很细，对照 `versions/3.0.3.md` 的 `nullable` 写法差异——3.1 用 JSON Schema 的 `type: ["string", "null"]` 取代了 3.0 的 `nullable: true`；先写契约再生成类型时，这两份是唯一权威，也是 §4.2「版本策略」为什么必须在契约层而不是在路由层决定的原因 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

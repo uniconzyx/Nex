@@ -27,9 +27,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [realworld-apps/realworld](https://github.com/realworld-apps/realworld) | 84,363 | §1 分层与契约 · §3.3 三态呈现 | 全栈样板：`docs/src/content/docs/specifications/frontend/api.md` 把「页面 → 数据层 → API」的边界写成契约，`backend/error-handling.md` 规定统一错误体——十几种语言实现共用同一份契约，正是 §1.2 的实物 |
-| 2 | [TanStack/query](https://github.com/TanStack/query) | 50,520 | §2.2 服务端状态 · 乐观更新 | 状态层本体：`packages/query-core/src/query.ts` 的 `staleTime` 与 `gcTime` 两个时钟把「新鲜度」和「回收」拆开；`mutation.ts` 的 `onMutate` / `onError` 回滚就是 §2.2 乐观更新的标准写法 |
-| 3 | [vercel/next.js](https://github.com/vercel/next.js) | 143,463 | §4.1 懒加载与代码分割 | 框架实现：`packages/next/src/client/` 的 `dynamic` 与路由级 chunk——构建期按入口拆 bundle、运行期按需拉，「首屏只付首屏的钱」在框架里是编译期决定，不是运行时的 `lazy()` |
+| 1 | [realworld-apps/realworld](https://github.com/realworld-apps/realworld) | 84,363 | §1.2 二、契约优先：OpenAPI 驱动、类型生成与边界校验 | 读 `realworld-apps/realworld` 的 `README.md` 与 `specs/`：它把「页面 → 数据层 → API」的边界写成契约（`api.md`）并规定统一错误体（`error-handling.md`），十几种语言实现共用同一份契约——正是本节「契约先于实现」的实物；配合 §3.3「错误处理与三态呈现」看：统一错误体让 loading/empty/error 三态的判断不依赖各实现自己的约定 |
+| 2 | [TanStack/query](https://github.com/TanStack/query) | 50,520 | §2.2 二、数据流转：缓存失效、乐观更新与列表合并 | 读 `TanStack/query` 的 `packages/query-core/src/query.ts`：`staleTime` 与 `gcTime` 两个时钟把「新鲜度」和「回收」拆开，`packages/query-core/src/mutation.ts` 的 `onMutate` / `onError` 回滚就是本节乐观更新的标准写法；要点是 `onMutate` 里要返回旧快照，`onError` 才有东西可回滚 |
+| 3 | [vercel/next.js](https://github.com/vercel/next.js) | 143,463 | §4.1 一、性能：懒加载与代码分割、列表虚拟化、请求去重与取消 | 读 `vercel/next.js` 的 `packages/next/src/client/`：`dynamic` 与路由级 chunk——构建期按入口拆 bundle、运行期按需拉，「首屏只付首屏的钱」在框架里是编译期决定，不是运行时的 `lazy()`；这条区别解释了本章 §4.3「读得懂大厂源码：入口 → 路由 → 数据层 → 组件树」为什么第一步要看构建配置而不是组件 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

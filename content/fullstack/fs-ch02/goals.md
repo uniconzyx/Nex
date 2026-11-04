@@ -27,9 +27,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [w3c/csswg-drafts](https://github.com/w3c/csswg-drafts) | 4,901 | §2.2 box-sizing · §2.3 格式化上下文 | 规范原文：`css-box-3/Overview.bs` 里 box-sizing 与 margin 合并的定义、`css-display-3/Overview.bs` 里 flow-root 生成 BFC 的条文——「margin 为什么穿透父元素」在这里是规范，不是经验 |
-| 2 | [Chalarangelo/30-seconds-of-code](https://github.com/Chalarangelo/30-seconds-of-code) | 129,352 | §5 实用片段 | 片段库：读 `snippets/` 下带 `css` / `browser` 标签的条目（水平垂直居中、等分布局、清除浮动），每条都是可直接粘的最小实现，正好对照 §5 那四行 CSS 改了三天的那件事 |
-| 3 | [yangshun/front-end-interview-handbook](https://github.com/yangshun/front-end-interview-handbook) | 44,008 | §1.1 语义化 · §3.3 重排与重绘 | 题库：`questions/html-questions.md` 用「全 div 堆出来的页面哪里坏了」讲语义化，`questions/css-questions.md` 把 reflow / repaint / 合成层分开问——与 §1.1、§3.3 的判据一一对应 |
+| 1 | [w3c/csswg-drafts](https://github.com/w3c/csswg-drafts) | 4,901 | §2.2 二、实现机制：`content-box` vs `border-box` | 读 `w3c/csswg-drafts` 的 `css-box-3/Overview.bs`，再读同仓 `css-display-3/Overview.bs` 里 flow-root 生成 BFC 的条文：「margin 为什么穿透父元素」在规范里是定义，不是经验——本章 §2.3「BFC：块级格式化上下文」之所以能当「补丁」用，就是因为规范把「谁与谁参与同一个格式化上下文」写成了可判定的条件 |
+| 2 | [Chalarangelo/30-seconds-of-code](https://github.com/Chalarangelo/30-seconds-of-code) | 129,352 | §4.4 四、工程实践 | 读 `Chalarangelo/30-seconds-of-code` 的 `snippets/` 下带 `css` / `browser` 标签的条目（水平垂直居中、等分布局、清除浮动）：每条都是可直接粘的最小实现，正好对照本章 §4.2「实现机制：Flexbox」与 §4.3「Grid」——同一件事在 flex 时代只需三行，在 float 时代要一个 clearfix 加一个负 margin，这个差就是「一维 vs 二维」判据的实际收益 |
+| 3 | [yangshun/front-end-interview-handbook](https://github.com/yangshun/front-end-interview-handbook) | 44,008 | §3.3 三、Reflow / Repaint / Composite-only 的区别（面试高频） | 读 `yangshun/front-end-interview-handbook` 的 `questions/html-questions.md` 与 `questions/css-questions.md`：前者用「全 div 堆出来的页面哪里坏了」讲语义化，后者把 reflow / repaint / 合成层分开问——与本章 §1.1「语义化不是好看，而是机器可读」、§3.3 的判据一一对应；注意题库里对「transform 为什么不触发 reflow」的回答，正是本节「合成层只改图层属性」的直接推论 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

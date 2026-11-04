@@ -11,10 +11,10 @@
 
 | # | 仓库 | Star | 对应本章 | 读什么 |
 | --- | --- | ---: | --- | --- |
-| 1 | [spring-cloud/spring-cloud-gateway](https://github.com/spring-cloud/spring-cloud-gateway) | 4,917 | §2.1 网关该管什么 · §2.3 路由 | 网关实现：读 `RoutePredicateHandlerMapping` 与过滤器链，对应 §2.1、§2.3 |
-| 2 | [nestjs/nest](https://github.com/nestjs/nest) | 76,927 | §1 拆分 · §2 网关 | 模块化后端框架：module/provider 的边界设计与 §1 分层异曲同工 |
-| 3 | [vercel/next.js](https://github.com/vercel/next.js) | 143,173 | §2.6 BFF | BFF 范式：前端定制的聚合层，对应 §2.6 BFF 模式 |
-| 4 | [google/guava](https://github.com/google/guava) | 51,918 | §3.5 配置中心 | 限流与缓存原语：RateLimiter 思路对应 §2.5 限流、§3.5 配置推送 |
+| 1 | [spring-cloud/spring-cloud-gateway](https://github.com/spring-cloud/spring-cloud-gateway) | 4,917 | §2.1 一、职责边界：该管与不该管 | 读 `spring-cloud/spring-cloud-gateway` 的 `RoutePredicateHandlerMapping` 与同模块的过滤器链：谓词决定「这个请求归哪条路由」，过滤器链决定「沿途改什么」——两段职责分开，就是本节「该管与不该管」的框架侧表达；本章 §2.2「四项核心能力与反模式」里的反模式，多半是把业务判断塞进了过滤器 |
+| 2 | [nestjs/nest](https://github.com/nestjs/nest) | 76,927 | §1.1 一、先想清楚：为什么拆、按什么切 | 读 `nestjs/nest` 的 module/provider 模型：它的边界设计（一个 module 显式声明 imports/providers/exports）与本节「按什么切」的判据同构——能写清「这个模块对外只暴露哪几个 provider」的服务边界才是真的，写不清的其实就是「一组文件的命名空间」 |
+| 3 | [vercel/next.js](https://github.com/vercel/next.js) | 143,173 | §2.2 二、四项核心能力与反模式 | 读 `vercel/next.js` 的中间件与 BFF 用法（`middleware.ts` 与 `app/api/` 路由）：BFF 是「为某一前端定制的聚合层」，而框架里的 middleware 只能改请求/响应、不能做重业务——这个能力边界正好划出本节「四项核心能力」里「聚合」与「编排」该放在 BFF、不该放进网关的那条线 |
+| 4 | [google/guava](https://github.com/google/guava) | 51,918 | §3.1 一、外置、隔离、热更新与密钥 | 读 `google/guava` 的 `RateLimiter`：它是「令牌桶」的原语实现，而本节要讲的是「限流参数本身就是配置中心最常见的动态项」——把 `RateLimiter` 的速率做成可热更新的配置，就同时踩了「热更新」与「密钥/阈值治理」两条；注意 `RateLimiter` 是单机限流，集群维度要靠配置中心下发一致的配额 |
 
 > 全部为工业级真实仓库；Star 数为本会话经 GitHub API 实取快照，仅供路线排序参考。
 
