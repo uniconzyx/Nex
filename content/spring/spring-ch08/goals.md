@@ -49,10 +49,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §3.1 | 讲「传播行为」时看 `mall` 的下单流程：主流程用 `REQUIRED`、记流水用 `REQUIRES_NEW`，后者会挂起外层事务并占用第二个连接，嵌套深了会打满连接池 |
-| 2 | [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81,722 | §1.1 | 讲「声明式事务的实现」时读 `spring-boot` 的 `TransactionAutoConfiguration`：`@EnableTransactionManagement` 加 AOP 代理，代理边界决定「哪些方法真的在事务里」——自调用不生效就出在这 |
-| 3 | [YunaiV/ruoyi-vue-pro](https://github.com/YunaiV/ruoyi-vue-pro) | 40,149 | §2.2 | 讲「多数据源事务」时看 `yudao-framework` 的多数据源配置：每个 `DataSource` 要配独立的事务管理器，`@Transactional` 必须指定 `transactionManager`，否则只对默认库生效 |
-| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §4.3 | 讲「`rollbackFor`」时看 `spring-boot-tutorials` 的事务示例：默认只回滚 `RuntimeException`，受检异常必须显式 `rollbackFor = Exception.class`，样例里有能复现的对照 |
+| 1 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §1.1 传播行为：7 种取值与嵌套回滚的真实语义 | 看 `mall` 的下单流程：主流程用 `REQUIRED`、记流水用 `REQUIRES_NEW`，后者会挂起外层事务并占用第二个连接，嵌套深了会打满连接池；配合 §5.4 传播行为的四行对照，就能算出「同一请求最多占几个连接」 |
+| 2 | [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81,722 | §2.2 事务与 AOP 代理：JDK 动态代理 vs CGLIB | 读 `spring-boot` 的 `TransactionAutoConfiguration`：`@EnableTransactionManagement` 加 AOP 代理，代理边界决定「哪些方法真的在事务里」——自调用不生效就出在这；这正是 §2.1 八类失效场景里最常见的一类，修法见 §5.2 三种 |
+| 3 | [YunaiV/ruoyi-vue-pro](https://github.com/YunaiV/ruoyi-vue-pro) | 40,149 | §4.2 多数据源与分布式事务：2PC/XA、TCC、Saga、本地消息表、Seata AT | 看 `yudao-framework` 的多数据源配置：每个 `DataSource` 要配独立的事务管理器，`@Transactional` 必须指定 `transactionManager`，否则只对默认库生效；这也说明「跨库」在单体里就已经不可原子，分布式事务方案是在补这个缺口 |
+| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §1.2 隔离级别、readOnly、timeout 与回滚规则 | 看 `spring-boot-tutorials` 的事务示例：默认只回滚 `RuntimeException`，受检异常必须显式 `rollbackFor = Exception.class`，样例里有能复现的对照；读时一并看 `readOnly=true` 的收益——它不只是提示，某些驱动会因此跳过脏检查 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

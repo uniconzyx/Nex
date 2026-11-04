@@ -65,10 +65,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §1.2 | 讲「动态 SQL」时看 `mall-mbg` 的 `Example` 生成的 `<if>`/`<foreach>`：条件越多 SQL 越不可控，复杂查询应手写 XML 而不是让代码生成器堆条件 |
-| 2 | [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81,722 | §2.2 | 讲「一级/二级缓存」时读 `spring-boot` 的事务同步机制：MyBatis 的一级缓存挂在 `SqlSession` 上，而 `SqlSession` 与事务绑定——所以「同一事务内改完再查仍是旧值」是缓存语义而非 bug |
-| 3 | [YunaiV/ruoyi-vue-pro](https://github.com/YunaiV/ruoyi-vue-pro) | 40,149 | §3.3 | 讲「插件机制」时看 `yudao-framework/yudao-spring-boot-starter-mybatis` 的分页与数据权限插件：拦截 `Executor.query` 改写 SQL，比在业务层手写 `limit` 更统一 |
-| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §4.1 | 讲「resultMap 关联查询」时看 `spring-boot-tutorials` 的 MyBatis 示例：`association`（一对一）与 `collection`（一对多）的嵌套映射，配 `fetchType="lazy"` 可延迟加载 |
+| 1 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §1.2 智能修剪：`<where>` / `<set>` / `<trim>` | 看 `mall-mbg` 的 `Example` 生成的 `<if>`/`<foreach>`：条件越多 SQL 越不可控，复杂查询应手写 XML 而不是让代码生成器堆条件；读时盯住 `<where>` 怎么自动吞掉多余的 `AND`——这正是 §1.1 `<if>` 拼不出合法 SQL 时的补丁 |
+| 2 | [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81,722 | §3.1 一级缓存：SqlSession 级，Key 由四元组决定 | 读 `spring-boot` 的事务同步机制：MyBatis 的一级缓存挂在 `SqlSession` 上，而 `SqlSession` 与事务绑定——所以「同一事务内改完再查仍是旧值」是缓存语义而非 bug；看清 Key 的四元组，就知道为什么「换个参数就查库」但「同一参数永远命中」 |
+| 3 | [YunaiV/ruoyi-vue-pro](https://github.com/YunaiV/ruoyi-vue-pro) | 40,149 | §3.3 缓存陷阱实战：四类症状与定位口径 | 看 `yudao-framework/yudao-spring-boot-starter-mybatis` 的分页与数据权限插件：拦截 `Executor.query` 改写 SQL，比在业务层手写 `limit` 更统一；但插件改写后缓存 Key 也随之变化——这是「加了分页插件后二级缓存命中率归零」的根因 |
+| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §2.2 注入利用链：从「拼进去」到「改语义」 | 看 `spring-boot-tutorials` 的 MyBatis 示例：它给了 `${}` 被拼接后改变 SQL 结构的对照；理解这一点再看 §2.1「ParameterMapping + TypeHandler vs OGNL 插值」，就知道 `#{}` 的安全不是因为「转义了引号」，而是因为它走的是参数绑定而非文本替换 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

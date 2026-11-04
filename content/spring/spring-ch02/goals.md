@@ -24,10 +24,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §1.3 | 讲「Aware 回调与初始化顺序」时看 `mall` 里实现 `ApplicationRunner` 的启动任务：它比 `@PostConstruct` 更晚，适合「容器就绪后才执行」的预热逻辑 |
-| 2 | [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81,722 | §2.2 | 讲「Bean 生命周期」时读 `spring-boot/src/main/java/org/springframework/boot/SpringApplication.java` 的 `run` 方法：`prepareContext` → `refreshContext` → `afterRefresh`，`BeanPostProcessor` 的介入点就藏在这三步之间 |
-| 3 | [YunaiV/ruoyi-vue-pro](https://github.com/YunaiV/ruoyi-vue-pro) | 40,149 | §3.2 | 讲「多模块下的 Bean 覆盖」时看 `yudao-module-system` 对 framework 里默认 Bean 的替换：靠 `@ConditionalOnMissingBean` 让业务方可以覆盖，这是 starter 设计的通用约定 |
-| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §4.2 | 讲「循环依赖」时看 `spring-boot-tutorials` 里的构造器注入案例：两个 Bean 互相构造器依赖会直接抛 `BeanCurrentlyInCreationException`，三级缓存救不了它 |
+| 1 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §3.2 Aware 回调体系 | 看 `mall` 里实现 `ApplicationRunner` 的启动任务：它比 `@PostConstruct` 更晚，适合「容器就绪后才执行」的预热逻辑；按时间轴排一遍 `@PostConstruct` → `InitializingBean.afterPropertiesSet` → `ApplicationRunner.run`，就对应 §1.2 初始化三种方式的顺序 |
+| 2 | [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81,722 | §1.1 完整生命周期阶段（中立陈述） | 读 `spring-boot/src/main/java/org/springframework/boot/SpringApplication.java` 的 `run` 方法：`prepareContext` → `refreshContext` → `afterRefresh`，`BeanPostProcessor` 的介入点就藏在这三步之间；配合 §1.3 可运行示例，能亲眼看到每个回调的打印顺序 |
+| 3 | [YunaiV/ruoyi-vue-pro](https://github.com/YunaiV/ruoyi-vue-pro) | 40,149 | §2.2 prototype 注入 singleton 的陷阱（中立陈述） | 看 `yudao-module-system` 对 framework 里默认 Bean 的替换：靠 `@ConditionalOnMissingBean` 让业务方可以覆盖，这是 starter 设计的通用约定；注意「覆盖」只在单例阶段有效——prototype Bean 每次新建，条件注解不再参与后续实例的判定 |
+| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §4.2 @Configuration 的 CGLIB 代理保证单例 | 看 `spring-boot-tutorials` 里的构造器注入案例：两个 Bean 互相构造器依赖会直接抛 `BeanCurrentlyInCreationException`，三级缓存救不了它；这正是 §4.1 三级缓存的天花板——它只对「字段/Setter 注入形成的环」有效 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

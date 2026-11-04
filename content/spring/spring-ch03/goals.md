@@ -30,10 +30,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §2.1 | 讲「自调用导致通知失效」时看 `mall-admin` 的 Service 实现：同类方法内部互调不经过代理，`@Transactional`/`@Cacheable` 直接失效，解法是注入自身或拆到另一个 Bean |
-| 2 | [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81,722 | §1.2 | 讲「AOP 的代理边界」时读 `spring-boot` 的 `@ConditionalOnMissingBean` 与 `AopAutoConfiguration`：`proxyTargetClass` 决定用 CGLIB 还是 JDK 代理，而 CGLIB 无法代理 `final` 类/方法——这就是「注解失效」的框架级原因 |
-| 3 | [YunaiV/ruoyi-vue-pro](https://github.com/YunaiV/ruoyi-vue-pro) | 40,149 | §3.2 | 讲「自定义切面」时看 `yudao-framework/yudao-spring-boot-starter-*` 里的日志与权限切面：用 `@Around` 包住方法、用 `@Order` 控制顺序，比散落的拦截器更好维护 |
-| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §4.1 | 讲「JDK 动态代理 vs CGLIB」时看 `spring-boot-tutorials` 的 AOP 示例：目标类实现接口时默认走 JDK 代理，注入时必须按接口类型，否则 `ClassCastException` |
+| 1 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §4.2 同类内部自调用导致代理失效 | 看 `mall-admin` 的 Service 实现：同类方法内部互调不经过代理，`@Transactional`/`@Cacheable` 直接失效，解法是注入自身或拆到另一个 Bean；理解它要先读 §4.1「this 与 target 的语义区别」——`this` 是原始对象，`target` 才是被代理的实例 |
+| 2 | [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81,722 | §2.2 JDK 与 CGLIB 的适用边界 | 读 `spring-boot` 的 `AopAutoConfiguration`：`proxyTargetClass` 决定用 CGLIB 还是 JDK 代理，而 CGLIB 无法代理 `final` 类/方法——这就是「注解失效」的框架级原因；对照 §1.1 JDK 动态代理的工作机制，就明白为什么「实现了接口」会改变默认代理方式 |
+| 3 | [YunaiV/ruoyi-vue-pro](https://github.com/YunaiV/ruoyi-vue-pro) | 40,149 | §3.2 通知执行顺序 | 看 `yudao-framework/yudao-spring-boot-starter-*` 里的日志与权限切面：用 `@Around` 包住方法、用 `@Order` 控制顺序，比散落的拦截器更好维护；读时注意多个切面套在同一个方法上时，`@Order` 小的在外层——这决定了权限校验能不能挡住日志切面里的参数打印 |
+| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §1.1 JDK 动态代理的工作机制 | 看 `spring-boot-tutorials` 的 AOP 示例：目标类实现接口时默认走 JDK 代理，注入时必须按接口类型，否则 `ClassCastException`；配合 §1.2 `InvocationHandler` 与反射委派，就明白「代理对象不是目标对象的子类」这条推断 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

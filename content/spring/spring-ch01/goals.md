@@ -22,10 +22,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §2.1 | 讲「同类型多 Bean 如何选」时看 `mall-security` 模块：安全配置类与业务 Service 分属不同包，靠 `@Qualifier` 或字段名消歧；字段名恰好等于 Bean 名才能注入成功，改名即启动失败 |
-| 2 | [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81,722 | §1.3 | 讲「构造器注入 vs 字段注入」时读 `spring-boot-project/spring-boot/src/main/java/org/springframework/boot/` 下的自动配置类：框架自己全部用构造器注入，依赖写在 `final` 字段上——这是「不可变 + 可单测」的示范，不是风格偏好 |
-| 3 | [YunaiV/ruoyi-vue-pro](https://github.com/YunaiV/ruoyi-vue-pro) | 40,149 | §3.1 | 讲「分包与组件扫描」时看 `yudao-framework/` 的 starter 划分：每个 starter 自带 `@AutoConfiguration` 与 `AutoConfiguration.imports`，业务模块只需引依赖——这是「扫描范围由 starter 决定」的工程化答案 |
-| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §4.1 | 讲「Bean 作用域」时看 `spring-boot-tutorials` 模块：`@Scope("prototype")` 注入到单例后只创建一次，样例里用 `ObjectProvider` 才能每次取新实例 |
+| 1 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §2.2 依赖解析：按类型与按名称（@Qualifier） | 看 `mall-security` 模块：安全配置类与业务 Service 分属不同包，靠 `@Qualifier` 或字段名消歧；字段名恰好等于 Bean 名才能注入成功，改名即启动失败——这正是 §2.1「字段注入」最脆的一处，对比构造器注入要靠 `@Primary` 才不打架 |
+| 2 | [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81,722 | §2.1 构造器注入 vs Setter 注入 vs 字段注入 | 读 `spring-boot-project/spring-boot/src/main/java/org/springframework/boot/` 下的自动配置类：框架自己全部用构造器注入，依赖写在 `final` 字段上——这是「不可变 + 可单测」的示范，不是风格偏好；配合 §4.1 三级缓存，也解释了为什么构造器注入的循环依赖救不了 |
+| 3 | [YunaiV/ruoyi-vue-pro](https://github.com/YunaiV/ruoyi-vue-pro) | 40,149 | §3.2 @Bean 与 @Configuration（Java 配置 / 工厂方法） | 看 `yudao-framework/` 的 starter 划分：每个 starter 自带 `@AutoConfiguration` 与 `AutoConfiguration.imports`，业务模块只需引依赖——这是「扫描范围由 starter 决定」的工程化答案；读时注意 `@Bean` 方法相互调用时 `@Configuration` 的 CGLIB 代理如何保证单例 |
+| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §4.1 单例循环依赖与三级缓存 | 看 `spring-boot-tutorials` 模块：`@Scope("prototype")` 注入到单例后只创建一次，样例里用 `ObjectProvider` 才能每次取新实例；同一个模块里另有构造器循环依赖的例子——它直接抛 `BeanCurrentlyInCreationException`，对应 §4.2「prototype 循环依赖为何必然失败」 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

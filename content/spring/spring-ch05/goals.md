@@ -49,10 +49,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §1.3 | 讲「统一返回体」时看 `mall-common` 的 `CommonResult`：`code/message/data` 三字段 + 静态工厂方法，配合 `@RestControllerAdvice` 把异常也转成同一结构，前端只需处理一种形状 |
-| 2 | [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81,722 | §2.1 | 讲「参数绑定与消息转换」时读 `spring-boot` 的 `HttpMessageConvertersAutoConfiguration`：`Content-Type` 决定选哪个转换器，选不到就报 415——这个错误码的根因在自动配置而非 Controller |
-| 3 | [YunaiV/ruoyi-vue-pro](https://github.com/YunaiV/ruoyi-vue-pro) | 40,149 | §3.2 | 讲「校验分组」时看 `yudao-module-system` 的 DTO：新增与修改用不同 group，`@Validated(AddGroup.class)` 才生效——不加 `@Valid` 的校验注解等于没写 |
-| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §4.1 | 讲「`@PathVariable` 与 `@RequestParam`」时看 `spring-boot-tutorials` 的 REST 示例：路径段用前者、查询串用后者，混用会导致 404 而不是 400，排查时容易误判 |
+| 1 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §4.1 @ControllerAdvice 全局异常处理与异常→状态码映射 | 看 `mall-common` 的 `CommonResult`：`code/message/data` 三字段 + 静态工厂方法，配合 `@RestControllerAdvice` 把异常也转成同一结构，前端只需处理一种形状；这正对应 §1.2「状态码选择」那条——业务码放 body、HTTP 码表语义 |
+| 2 | [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81,722 | §2.2 内容协商与消息转换器链 | 读 `spring-boot` 的 `HttpMessageConvertersAutoConfiguration`：`Content-Type` 决定选哪个转换器，选不到就报 415——这个错误码的根因在自动配置而非 Controller；读完再回 §2.1 三类参数绑定，就明白 `@RequestBody` 为什么不能用表单提交 |
+| 3 | [YunaiV/ruoyi-vue-pro](https://github.com/YunaiV/ruoyi-vue-pro) | 40,149 | §3.2 分组校验与级联校验 | 看 `yudao-module-system` 的 DTO：新增与修改用不同 group，`@Validated(AddGroup.class)` 才生效——不加 `@Valid` 的校验注解等于没写；配合 §3.1 JSR-303/380 的元数据模型，就能自己写一个 `ConstraintValidator` 而不用到处 if |
+| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §2.1 三类参数绑定：`@RequestParam` / `@PathVariable` / `@RequestBody` | 看 `spring-boot-tutorials` 的 REST 示例：路径段用 `@PathVariable`、查询串用 `@RequestParam`，混用会导致 404 而不是 400，排查时容易误判；这正是 §2.3「四种参数来源的绑定写法」要逐个跑一遍的原因 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

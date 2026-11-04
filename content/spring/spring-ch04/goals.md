@@ -54,10 +54,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §1.2 | 讲「`@SpringBootApplication` 的三合一」时看 `mall-admin` 的启动类：它只加这一个注解，扫描范围就是启动类所在包——所以 Controller 必须放在子包里，放外面就「找不到 Bean」 |
-| 2 | [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81,722 | §3.1 | 讲「自动配置的加载方式」时读 `spring-boot-project/spring-boot-autoconfigure/src/main/resources/META-INF/spring/` 下的 `AutoConfiguration.imports`：2.7 起用它替代 `spring.factories`，条件装配类按顺序列出 |
-| 3 | [YunaiV/ruoyi-vue-pro](https://github.com/YunaiV/ruoyi-vue-pro) | 40,149 | §4.1 | 讲「起步依赖怎么封」时看 `yudao-framework` 的模块组织：`starter` 只放依赖与自动配置类、具体实现在同级的 `-core` 模块，这是「依赖聚合与实现分离」的标准做法 |
-| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §2.2 | 讲「`@ConditionalOnProperty`」时看 `spring-boot-tutorials` 的条件装配示例：一个开关决定 Bean 是否注册，比在代码里写 if 更符合「配置驱动」的设计 |
+| 1 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §1.1 一个注解，三个职责 | 看 `mall-admin` 的启动类：它只加 `@SpringBootApplication` 一个注解，扫描范围就是启动类所在包——所以 Controller 必须放在子包里，放外面就「找不到 Bean」；这正是「`@ComponentScan` 默认基准包」那条隐含约定的实际后果 |
+| 2 | [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81,722 | §2.1 候选清单从哪来：SPI 机制的演进 | 读 `spring-boot-project/spring-boot-autoconfigure/src/main/resources/META-INF/spring/` 下的 `AutoConfiguration.imports`：2.7 起用它替代 `spring.factories`，条件装配类按顺序列出；配合 §2.3「顺序决定结果」，就明白为什么 `@AutoConfigureAfter` 不是可有可无的装饰 |
+| 3 | [YunaiV/ruoyi-vue-pro](https://github.com/YunaiV/ruoyi-vue-pro) | 40,149 | §3.3 自定义 starter 的两模块结构 | 看 `yudao-framework` 的模块组织：`starter` 只放依赖与自动配置类、具体实现在同级的 `-core` 模块，这是「依赖聚合与实现分离」的标准做法；读时对照 §3.1 `@ConfigurationProperties` 与 `@Value` 的取舍——前者才能给 starter 做类型化配置 |
+| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §2.2 条件装配：决定「装不装」的那组注解 | 看 `spring-boot-tutorials` 的条件装配示例：一个开关决定 Bean 是否注册，比在代码里写 if 更符合「配置驱动」的设计；重点看 `@ConditionalOnProperty` 与 `@ConditionalOnMissingBean` 的差别：前者读配置、后者看容器现状——这正是 §4.2「自动配置是有条件生效的默认值」的两种手段 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

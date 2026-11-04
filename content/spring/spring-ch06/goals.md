@@ -39,10 +39,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §2.1 | 讲「Mapper 与 XML 的对应」时看 `mall-mbg` 生成的 `*Mapper.xml`：`namespace` 必须等于 Mapper 接口全限定名、`id` 等于方法名，任一处写错就是 `BindingException` |
-| 2 | [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81,722 | §1.1 | 讲「MyBatis 与 Spring 的接缝」时读 `spring-boot` 的 `MybatisAutoConfiguration`（在 MyBatis 官方 starter 里）：`SqlSessionFactory` 由 `DataSource` 构建，这也是「多数据源要手动配多个 Factory」的原因 |
-| 3 | [YunaiV/ruoyi-vue-pro](https://github.com/YunaiV/ruoyi-vue-pro) | 40,149 | §3.1 | 讲「`#{}` 与 `${}`」时看 `yudao-module-system` 的分页查询 XML：所有用户输入走 `#{}`，只有排序字段用 `${}` 且必须白名单校验——这是防注入的底线 |
-| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §4.2 | 讲「驼峰映射」时看 `spring-boot-tutorials` 的 MyBatis 配置：`map-underscore-to-camel-case=true` 才能把 `user_name` 映射到 `userName`，不开就是一堆 `null` |
+| 1 | [macrozheng/mall](https://github.com/macrozheng/mall) | 84,995 | §1.1 半自动 ORM 的定位与 SqlSession / Mapper 动态代理 | 看 `mall-mbg` 生成的 `*Mapper.xml`：`namespace` 必须等于 Mapper 接口全限定名、`id` 等于方法名，任一处写错就是 `BindingException`——这就是「动态代理靠约定把方法调用翻译成 SQL」的代价；配合 §1.2 与 JDBC/JPA 的取舍，就明白半自动意味着「映射要自己写」 |
+| 2 | [spring-projects/spring-boot](https://github.com/spring-projects/spring-boot) | 81,722 | §4.1 主键回填：useGeneratedKeys 与 selectKey | 读 `spring-boot` 的 `MybatisAutoConfiguration`（在 MyBatis 官方 starter 里）：`SqlSessionFactory` 由 `DataSource` 构建，这也是「多数据源要手动配多个 Factory」的原因；理解这一层才能明白 `useGeneratedKeys` 的开关是配在 Factory 的全局配置上 |
+| 3 | [YunaiV/ruoyi-vue-pro](https://github.com/YunaiV/ruoyi-vue-pro) | 40,149 | §2.1 #{} 与 ${} 的语义差异 | 看 `yudao-module-system` 的分页查询 XML：所有用户输入走 `#{}`，只有排序字段用 `${}` 且必须白名单校验——这是防注入的底线；配合 §2.2 PreparedStatement 预编译原理，就明白 `#{}` 生成的是占位符而 `${}` 是字面拼接 |
+| 4 | [eugenp/tutorials](https://github.com/eugenp/tutorials) | 37,308 | §3.2 驼峰映射与关联映射 | 看 `spring-boot-tutorials` 的 MyBatis 配置：`map-underscore-to-camel-case=true` 才能把 `user_name` 映射到 `userName`，不开就是一堆 `null`；但这只解决同表映射，嵌套对象仍要 §3.1 的 `resultMap` 手写 `association`/`collection` |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 
