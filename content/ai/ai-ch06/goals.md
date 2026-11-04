@@ -29,12 +29,12 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,257 | §3.3 | 讲「嵌入模型的训练」时读 `tensorflow/python/keras/` 的对比学习示例：双塔 + 对比损失，与本章「余弦相似度排序」的用法对应 |
-| 2 | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 197,476 | §1.3 | 讲「文档解析的质量」时读 `apps/api/src/` 的 HTML → markdown：解析质量直接决定「切出来的块是否有语义完整性」，这是 RAG 效果的第一道闸 |
-| 3 | [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) | 187,852 | §4.1 | 讲「检索结果怎么进 prompt」时看 agent 的记忆检索：Top-K 片段拼接、带来源标注，与本章「检索不到必然答错」的判断一致 |
-| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §3.1 | 讲「向量检索的近似算法」时读 `src/transformers/` 与 `datasets` 的 FAISS 集成：HNSW/IVF 用「近似」换速度，召回率与延迟的权衡在这里可调 |
-| 5 | [langgenius/dify](https://github.com/langgenius/dify) | 160,127 | §1.1 | 讲「RAG 的四段流程」时读 `api/core/rag/`：`indexing`（分块+嵌入）、`retrieval`（向量+关键词）、`rerank`、`generate` 四个子目录就是本章流程的代码化 |
-| 6 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | §2.2 | 讲「分块策略」时读 `libs/langchain/langchain/text_splitter.py`：按字符/递归/按 token 三种切法各有实现，`chunk_overlap` 的作用在源码注释里写得很清楚 |
+| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,257 | §3.1 主题一：混合检索（向量 + BM25）与 RRF 融合 | 读 `tensorflow/python/ops/nn_ops.py`：向量检索的「相似」最终就是一次内积/余弦计算，而 BM25 走的是词频统计、完全不经过这一层——这正是本章「两路检索必须融合、不能互相替代」的底层原因；配合 §3.2「两阶段召回 + 重排」，就知道 RRF 只解决「怎么合」、不解决「合完还差」 |
+| 2 | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 197,476 | §1.2 主题二：分块（chunk）策略与粒度 | 读 `apps/api/src/index.ts` 的 HTML → markdown：解析质量直接决定「切出来的块是否有语义完整性」，这是 RAG 效果的第一道闸；配合 §1.3 那段可运行代码，就能用同一份 markdown 试不同 `chunk_size` 看块边界怎么变 |
+| 3 | [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) | 187,852 | §4.1 主题一：向量索引——HNSW / IVF / PQ 的召回-延迟-内存三角 | 看 `classic/original_autogpt/autogpt/app` 的记忆检索：Top-K 片段拼接、带来源标注，是「拿什么进上下文」的最小实现；对照本章「检索不到必然答错」的判断，就能理解为什么召回率比排序精度更值得先优化 |
+| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §2.3 主题二：余弦 / 内积 / L2 的等价条件 | 读 `src/transformers/models/bert/modeling_bert.py` 的输出层：同一句话取 `[CLS]` 还是 mean-pool 会得到不同向量，归一化前后三种度量的排序也会变；这正是 §2.2 那段可运行代码要证的事——工程上把 `normalize_embeddings=True` 写进配置，就是在强制走等价分支 |
+| 5 | [langgenius/dify](https://github.com/langgenius/dify) | 160,127 | §1.1 主题一：RAG 的两条链路——索引与查询 | 读 `api/core/rag/index_processor/index_processor_base.py` 与 `api/core/rag/retrieval/dataset_retrieval.py`：前者是离线索引链路、后者是在线查询链路，入口函数分居两个文件，这就是本章「索引与查询必须分开看」的代码证据；回读 §5.2「RAG 是一条漏斗，每一层都在漏」就明白为什么要分段评估 |
+| 6 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | §1.2 主题二：分块（chunk）策略与粒度（续） | 读 `libs/text-splitters/langchain_text_splitters/character.py` 与 `libs/text-splitters/langchain_text_splitters/markdown.py`：前者按分隔符层级递归下切、后者按标题目录切，`chunk_overlap` 负责保留跨块上下文；这解释了本章「块要语义完整」为什么在有标题结构的文档上更容易做到 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

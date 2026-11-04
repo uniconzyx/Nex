@@ -47,6 +47,18 @@
 | 3 | [ermongroup/ddim](https://github.com/ermongroup/ddim) | 1,855 | §3.3 采样 | DDIM 官方代码：`models/diffusion_utils.py` 的 `make_ddim_timesteps` 造跳步子序列、`ddim_step` 用 $\varepsilon_\theta$ 直接预测 $x_0$（§3.3 采样里的非马尔可夫边缘不变） |
 | 4 | [openai/guided-diffusion](https://github.com/openai/guided-diffusion) | 7,442 | §3.2 反向过程与训练目标 | ADM 架构与 guidance：`guided_diffusion/gaussian_diffusion.py` 的 `p_mean_variance` 是反向均值/方差的标准写法（§3.2），`condition_mean` 的两个分支就是 CFG 的 $\varepsilon_{uncond}+s(\varepsilon_{cond}-\varepsilon_{uncond})$（§3.3） |
 
+## 本章 GitHub 学习路线（按阅读顺序）
+
+> ★ 为 **2026-10-27** 的 GitHub API 快照（已逐条验证仓库存在）。
+> 顺序即路线：**先读能跑的最小实现 → 再读同章对照实现 → 最后读工业级库**。「对应本章」写 `§x.y` 的，说明这份仓库与本章那一节直接对应，先读那里；写「全章」的，按右侧「读什么」给的入口文件读，不要从 README 通读。
+
+| # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
+|---|---|---|---|---|
+| 1 | [huggingface/diffusers](https://github.com/huggingface/diffusers) | 34,819 | §3.1 前向过程：一条「闭式可算」的加噪链 | 读 `src/diffusers/schedulers/scheduling_ddpm.py`：`__init__` 里用 betas 累乘造出 `alphas_cumprod`（即 $\bar\alpha_t$ 表），`add_noise` 直接按闭式一次跳到第 t 步；对照 §3.2「反向过程与训练目标」，`step` 里那一步去噪就是 $L_{simple}$ 在推理时的用法 |
+| 2 | [CompVis/latent-diffusion](https://github.com/CompVis/latent-diffusion) | 14,180 | §1.2 VAE：用 ELBO 把「生成」变成可优化目标 | 读 `ldm/models/diffusion/ddpm.py` 的 `p_losses` 与 `apply_model`：潜空间扩散的主干是 VAE 编码器 + UNet，编码器负责「压到潜空间」、UNet 负责「在潜空间加噪去噪」，这正是本章「VAE 给出可优化的下界、扩散负责采样质量」的分工；再回看 §1.3「隐空间的性质：连续、解耦与『先验不匹配』」就明白压缩比的代价 |
+| 3 | [ermongroup/ddim](https://github.com/ermongroup/ddim) | 1,855 | §3.3 采样：DDPM → DDIM → 引导 | 读 `models/diffusion.py`：`ddim_sample` 用「预测 $x_0$ 再按跳步子序列反推」的非马尔可夫过程，把 1000 步压到几十步而不改训练目标——这就是本章「DDIM 的边缘分布不变」那句 |
+| 4 | [openai/guided-diffusion](https://github.com/openai/guided-diffusion) | 7,442 | §3.2 反向过程与训练目标：把「去噪」变成回归 | 读 `guided_diffusion/gaussian_diffusion.py`：`p_mean_variance` 是反向均值/方差的标准写法，`condition_mean` 的两个分支就是 CFG 的 $\varepsilon_{uncond}+s(\varepsilon_{cond}-\varepsilon_{uncond})$；这直接印证 §3.3 里「引导强度 s 是在放大条件与无条件的差」 |
+
 ## 本章 B 站视频路线（与 GitHub 互补）
 
 > 全部为 B 站直链（`bilibili.com/video/BV…`），BV 号均已通过站内接口核验可播放。

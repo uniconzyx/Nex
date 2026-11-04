@@ -72,10 +72,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [vllm-project/vllm](https://github.com/vllm-project/vllm) | 96,022 | §1.1 参数对 · §1.4 自适应 | continuous batching 与自适应等待窗口的真实实现：读 `vllm/core/scheduler.py` 的 `add_seq_group` 与 `_schedule_prefills`，直接对应 §1.1、§1.4 |
-| 2 | [ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp) | 133,016 | §1.3 同构批 | 批内同构 + KV cache 复用的工业级样例：读 `llama_batch` 与 `ggml_backend_sched`，对应 §1.3「批内请求必须同构」 |
-| 3 | [huggingface/text-generation-inference](https://github.com/huggingface/text-generation-inference) | 10,880 | §2.1 输入契约 · §3.1 故障 | 输入校验与错误处理的源码：读 `router/src` 的 `validation.rs` 与 `infer.rs`，对应 §2.1「五类必须拦的输入」、§3.1「故障的三种形态」 |
-| 4 | [triton-inference-server/server](https://github.com/triton-inference-server/server) | 11,115 | §3.4 版本 · §3.7 健康检查 | 模型版本管理与健康检查的真实实现：读 `src/model_repository_manager` 与 `src/health_monitor`，对应 §3.4「模型状态可追溯」、§3.7 |
+| 1 | [vllm-project/vllm](https://github.com/vllm-project/vllm) | 96,022 | §1.1 一个必须成对出现的参数对 | 读 `vllm/v1/core/sched/scheduler.py` 与 `vllm/v1/core/kv_cache_utils.py`：`max_num_seqs` 与 `max_num_batched_tokens` 必须成对设置（一个卡并发条数、一个卡单步 token 预算），只调一个会让另一侧先撞墙；配合 §1.2「为什么等待窗口应该由延迟预算倒推」，就能算出这两个值该取多少 |
+| 2 | [ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp) | 133,016 | §1.3 一个容易被忽略的细节：批内请求必须同构 | 读 `ggml/src/ggml-backend.cpp`：批处理要求所有张量的 stride 与类型一致，这就是「批内请求必须同构」在推理后端层的硬约束；而 `src/llama-context.cpp` 里按序列切分 batch 的做法，正是绕开这条约束的工业解法 |
+| 3 | [huggingface/text-generation-inference](https://github.com/huggingface/text-generation-inference) | 10,880 | §2.1 五类必须拦的输入 | 读 `router/src/validation.rs`：长度、token 上限、参数范围、非法字符、`NaN` 五类各自有独立校验函数，且都在进入推理前拦下——这就是本章「五类必须拦的输入」的原文；再读 `router/src/server.rs` 看它如何把错误转成 4xx 而不是 5xx |
+| 4 | [triton-inference-server/server](https://github.com/triton-inference-server/server) | 11,115 | §3.4 版本：模型状态必须能追溯与回滚 | 读 `src/main.cc`：模型仓库按版本号建目录、启动时显式加载指定版本，`--strict-model-config` 会在版本不全时直接拒绝启动；这正是本章「模型状态必须可追溯」的部署层落点；配合 §3.5「金丝雀：先让 5% 的流量试」，就能拼出「版本可切 + 流量可调」的灰度闭环 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

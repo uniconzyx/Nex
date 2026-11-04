@@ -31,12 +31,12 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,257 | §2.1 | 讲「推理与训练的资源差异」时读 `tensorflow/python/eager/` 的执行模式：推理不需要保留中间激活，显存占用远小于训练——本章的显存账本要分开算 |
-| 2 | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 197,476 | §3.3 | 讲「可观测性的输入侧」时读 `apps/api/src/` 的抓取日志：记录「抓了什么、耗时多少、失败原因」，是排查「RAG 突然答不准」的第一手材料 |
-| 3 | [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) | 187,852 | §4.3 | 讲「Agent 的失败模式」时看主循环的超时与重试：没有步数上限与超时就会无限循环烧 token，这是 LLM 应用最常见的成本事故 |
-| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §3.2 | 讲「评测与可观测」时读 `src/transformers/trainer.py` 的 `evaluate`：指标计算与日志记录绑在训练循环上，推理侧要自己搭一套对应的观测 |
-| 5 | [langgenius/dify](https://github.com/langgenius/dify) | 160,127 | §4.2 | 讲「提示缓存与成本」时读 `api/core/model_runtime/` 的调用封装：同样的系统提示重复发送可以命中上游缓存，这是「成本控制」最直接的一条 |
-| 6 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | §4.1 | 讲「LLM 应用的安全边界」时读 `libs/langchain/langchain/` 的 output parser 与 guard：解析失败要兜底、输出要过滤，不能假设模型一定守规矩 |
+| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,257 | §3.1 主题一：量化方案与精度取舍 | 读 `tensorflow/python/keras/layers/core.py`：把一层改成低比特权重等于改 `Dense` 里的 `kernel` 类型，`call` 里的矩阵乘不变但精度变了；这正是本章「量化不改结构、只改数值」的落点；配合 §3.2「模型路由、语义缓存与优化顺序」，就明白量化该排在路由与缓存之后——前两者省钱不改输出、量化会改 |
+| 2 | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 197,476 | §4.1 主题一：可观测性三件套与 AI 特有维度 | 读 `apps/api/src/index.ts`：「抓了什么、耗时多少、失败原因」三件事记在同一处，是排查「RAG 突然答不准」的第一手材料；对照 §4.2「线上评测与 LLM-as-Judge 校准」，就能看出离线指标好看但线上掉分的常见原因 |
+| 3 | [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) | 187,852 | §5.1 主题一：OWASP LLM Top 10 与提示注入的纵深防御 | 看 `classic/original_autogpt/autogpt/app` 的工具执行层：每一轮调用都要过权限与参数校验，不能假设「模型被对齐过就不会越界」；没有步数上限与超时就会无限循环烧 token——这是成本事故，也是拒绝服务面 |
+| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §4.2 主题二：线上评测与 LLM-as-Judge 校准 | 读 `src/transformers/trainer.py` 的 `evaluate`：指标计算与日志记录绑在训练循环上、每 `eval_steps` 吐一次，这套「在线指标 + 定期全量」的节奏可直接搬到推理侧；对应 §6.8「评测的最小骨架」，就知道最小可用版本只需要「样本集 + 打分器 + 趋势图」三件 |
+| 5 | [langgenius/dify](https://github.com/langgenius/dify) | 160,127 | §3.2 主题二：模型路由、语义缓存与优化顺序 | 读 `api/core/model_manager.py`：同一份请求按 `provider/model` 路由到不同后端，这是本章「先做便宜的模型路由、再做语义缓存」里路由那一步的实现；配合 §6.5「语义缓存」，就能说清「缓存命中率」与「路由准确率」哪个更该先优化 |
+| 6 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | §5.2 主题二：数据合规：最小化、脱敏与可删除 | 读 `libs/core/langchain_core/output_parsers/`：解析失败要兜底、输出要过滤，不能假设模型一定守规矩——这是「输出侧合规」的最小实现；对照 §6.7「提示注入的基础防护」，就能拼出「输入过滤 → 模型 → 输出过滤」的完整链路 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

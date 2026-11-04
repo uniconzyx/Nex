@@ -11,10 +11,10 @@
 
 | # | 仓库 | Star | 对应本章 | 读什么 |
 | --- | --- | ---: | --- | --- |
-| 1 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §1.1 CLIP · §2.1 流水线 | 多模态模型库：CLIP/Blip/Intern 实现，对应 §1.1、§2.1 |
-| 2 | [openai/CLIP](https://github.com/openai/CLIP) | 34,550 | §1.1 对比学习 | 图文对比学习本体：读 `model.py` 的 image-text 对比，对应 §1.1 |
-| 3 | [OpenGVLab/InternVL](https://github.com/OpenGVLab/InternVL) | 10,171 | §1.4 对齐 · §2.1 链路 | 多模态大模型：VLM 与 OCR 链路，对应 §1.4、§2.1 |
-| 4 | [microsoft/OmniParser](https://github.com/microsoft/OmniParser) | 25,578 | §2.1 OCR→VLM | 文档理解：版面检测+识别+VLM 端到端，对应 §2.1 |
+| 1 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §1.1 一、对比学习与投影层 | 读 `src/transformers/models/llama/modeling_llama.py` 的最后一层投影：文本塔把隐状态投到词表空间，CLIP 把图文各投到同一对比空间，两者都是「先把表示拉到目标空间、再算相似度」；认识这一点，就能理解 §1.1 里「投影层与归一化决定能不能对齐」；对照 §1.2「二、检索与模态鸿沟」就明白为什么换塔必须重算索引 |
+| 2 | [openai/CLIP](https://github.com/openai/CLIP) | 34,550 | §1.2 二、检索与模态鸿沟 | 读 `clip/model.py` 与 `clip/clip.py`：`build_model` 里视觉塔与文本塔各出一个向量，再经 `ln_final` 投影后做归一化点积——这就是「对比学习把两种模态拉到同一球面」；`clip.py` 的 `tokenize` 决定了文本侧输入长度上限，而视觉侧的分辨率上限在视觉塔里，两侧不对称正是「模态鸿沟」的来源 |
+| 3 | [OpenGVLab/InternVL](https://github.com/OpenGVLab/InternVL) | 10,171 | §1.2 二、检索与模态鸿沟（续） | 读 `internvl_chat/README.md`：它给出了图像切块（dynamic tiling）后每块各占多少视觉 token，切得越细越准但成本线性上涨——这正是本章「鸿沟不只在语义，也在分辨率与 token 预算」的落点；配合 §3.1「一、形态与图像预处理成本」，就能把预处理成本算进端到端预算 |
+| 4 | [microsoft/OmniParser](https://github.com/microsoft/OmniParser) | 25,578 | §2.1 一、链路拆解与成本口径 | 读 `README.md` 与 `omnitool/omniparserserver`：版面检测 → 元素识别 → VLM 理解三段，每段的输入输出尺寸直接决定成本口径；这正是本章「OCR→VLM 流水线的钱花在哪一段」的现成样本；对照 §3.2「二、延迟预算、成本模型与兜底」，就能定位误识别该在哪一段拦截、兜底该挂在哪一段之后 |
 
 > 全部为工业级真实仓库；Star 数为本会话经 GitHub API 实取快照，仅供路线排序参考。
 

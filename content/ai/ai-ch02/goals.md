@@ -27,12 +27,12 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,257 | §1.1 | 讲「卷积的计算量」时读 `tensorflow/python/keras/layers/convolutional/`：`Conv2D` 的 `call` 里就是「滑窗 + 乘加」，参数量 `k²·C_in·C_out` 与计算量 `k²·C_in·C_out·H·W` 的差别在这里能直接看出来 |
-| 2 | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 197,476 | §2.3 | 讲「图文数据的采集」时读 `apps/api/src/` 的抓取输出：markdown 里保留图片链接，是「图文对」最廉价的来源，也解释了为什么多模态数据质量参差 |
-| 3 | [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) | 187,852 | §4.2 | 讲「序列决策」时看 agent 的「观察 → 思考 → 行动」循环：与 RNN 的「隐状态随步更新」结构同构，区别是隐状态换成了上下文窗口 |
-| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §2.2 | 讲「从 RNN 到注意力」时读 `src/transformers/models/bert/` 与任一 RNN 模型的实现对比：注意力没有递归、整段并行，这是「训练能规模化」的根本原因 |
-| 5 | [langgenius/dify](https://github.com/langgenius/dify) | 160,127 | §4.1 | 讲「视觉模型在应用里的位置」时读 `api/core/model_runtime/model_providers/`：多模态 provider 把图片转成 base64 或 URL 再送模型，本章「视觉 token 数决定成本」在这里变成计费口径 |
-| 6 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | §3.2 | 讲「序列建模的输入表示」时读 `libs/core/langchain_core/messages/`：把对话压成 token 序列时「角色 + 内容」的拼接方式，决定了模型看到的是什么 |
+| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,257 | §1.1 卷积运算：局部连接与权值共享 | 读 `tensorflow/python/keras/layers/convolutional.py` 的 `Conv2D.call`：里面就是「滑窗 + 乘加」，而且卷积核只有 `k²·C_in·C_out` 个参数、与输入尺寸无关——这就是 §1.1 与 §1.2「感受野与尺寸递推」里「参数量与计算量不是一回事」的源码依据 |
+| 2 | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 197,476 | §2.3 可运行代码：用张量形状核对公式 | 读 `apps/api/src/index.ts`：抓取结果里图片以 URL 形式保留，不同站点给的图片尺寸差异很大，这正是「为什么必须先核对张量形状再进网络」的真实场景——配合 §2.2「padding='same' / 'valid' 与 stride 尺寸公式」，就能算出同一张图在两种 padding 下差几格 |
+| 3 | [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) | 187,852 | §3.2 LSTM / GRU 门控机制 | 看 `classic/original_autogpt/autogpt/app` 的主循环：「保留什么进历史、丢掉什么、这一步要不要输出」三件事各由一个判断控制，与 LSTM 的遗忘门/输入门/输出门是同一套结构；区别只在 LSTM 用 `sigmoid` 连续门控，Agent 用规则或模型做离散取舍——这也解释了 §3.1「BPTT 梯度消失」为什么在 Agent 里变成「上下文越滚越长」 |
+| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §4.1 缩放点积注意力与缩放动机 | 读 `src/transformers/models/bert/modeling_bert.py` 的 `BertSelfAttention`：进 softmax 前先乘 `1/√head_dim`，这正是 §4.1「不缩放会饱和、饱和就没梯度」的防御；配合 §4.2「多头、位置编码与复杂度对比」，就能看出多头的成本在多组投影而非 softmax 本身 |
+| 5 | [langgenius/dify](https://github.com/langgenius/dify) | 160,127 | §1.2 感受野与尺寸递推 | 读 `api/core/model_manager.py`：应用层按模型能力路由请求，一个模型能「看到」多长的上下文是硬性属性，与本章 §1.2「一层卷积只能看到 k×k、要靠堆层扩感受野」是同一类边界——区别是 CNN 可以靠加深扩，Decoder 只能靠换模型或改注意力实现 |
+| 6 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | §3.1 RNN 与 BPTT 的梯度消失（数学推导） | 读 `libs/core/langchain_core/messages/base.py`：把对话压成 token 序列时，越早的消息在 §3.1 的连乘里被乘的次数越多、衰减越狠；工程上靠「摘要 + 关键信息单独存」绕过，对照 §3.2「LSTM 门控」就能说清两种「保长期信息」方案的本质差别 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

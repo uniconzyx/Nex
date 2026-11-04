@@ -27,12 +27,12 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,257 | §2.3 | 讲「温度与采样的影响」时读 `tensorflow/python/ops/` 的 `top_k`/`top_p` 实现：它们改的是分布形状，不是「准确性」——低温更确定但不一定更对 |
-| 2 | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 197,476 | §4.2 | 讲「提示注入的防护」时读 `apps/api/src/` 的内容清洗：抓来的网页文本可能含指令，必须与系统提示隔离，否则「数据」会被当成「命令」 |
-| 3 | [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) | 187,852 | §3.1 | 讲「CoT 与自洽性」时看 agent 的思考链：它把「先计划再执行」写进提示，与 CoT 的「显式中间步骤」是同一机制在不同尺度上的应用 |
-| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §4.1 | 讲「结构化输出的可靠性」时读 `src/transformers/generation/` 的约束解码相关实现：用语法约束 token 采样，比「请在 JSON 里回答」可靠得多 |
-| 5 | [langgenius/dify](https://github.com/langgenius/dify) | 160,127 | §2.2 | 讲「少样本示例的组织」时读 `api/core/` 下的 prompt 编排模块：示例与指令分段存放、按场景组装，本章「例子要覆盖边界」在这里变成「示例集合的维护」 |
-| 6 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | §1.1 | 讲「提示模板的工程化」时读 `libs/core/langchain_core/prompts/`：`PromptTemplate` 把变量槽位与格式约束分开，避免「字符串拼接到处飞」 |
+| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,257 | §3.1 一、四层手段：从「约定」到「强制」 | 读 `tensorflow/python/ops/nn_ops.py` 的 `softmax` 与 argmax 相关实现：「在 logits 层直接屏蔽非法 token」这件事最终就落在这一步的算子链上，是本章四层手段里最强的一层；对照 §3.2「校验 - 重试 - 降级」就能看出，即便有约束解码也仍需要后置校验——语法合法不等于语义合法 |
+| 2 | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 197,476 | §4.5 五、Prompt 注入：结构性难题与纵深防御 | 读 `apps/api/src/index.ts`：抓来的网页正文与系统提示必须走不同通道，否则「数据」会被当成「命令」；这正是 §4.5 里「注入是结构性问题、不能靠提示词解决」的具体场景 |
+| 3 | [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) | 187,852 | §2.3 三、CoT 什么时候反而有害 | 看 `classic/original_autogpt/autogpt/app` 的主循环：它每一步都强制输出思考再行动，在简单任务上就是纯浪费 token 与延迟；这正好印证本章「CoT 在任务本身不需要分步时有害」；对照 §2.1「CoT 为什么有效」，就能划出该不该强制思考的分界线 |
+| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §3.2 二、校验 - 重试 - 降级：唯一的健壮架构 | 读 `src/transformers/generation/logits_process.py`：`LogitsProcessor` 链按顺序改写 logits，每一步都可能把整段概率压没，所以即便加了约束解码，也必须在上层做「解析失败 → 重试 → 降级」；与 §3.3「约束解码的边界」并读，就能说清为什么约束不是银弹 |
+| 5 | [langgenius/dify](https://github.com/langgenius/dify) | 160,127 | §2.1 一、CoT 为什么有效 | 读 `api/core/agent/cot_agent_runner.py`：它把「思考 → 行动 → 观察」写成显式状态循环，与 CoT 的「把中间步骤写出来」是同一机制在不同尺度上的实现；配合 §2.2「CoT 家族的主要变体」，就能看出 self-consistency 只是在同一个循环里采样多次再表决 |
+| 6 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | §4.3 三、位置策略：lost in the middle | 读 `libs/core/langchain_core/prompts/chat.py`：`ChatPromptTemplate` 把system / human / ai 拆成独立消息槽，顺序由模板决定而不是拼接顺序；这给了「把关键信息固定放在首尾」一个可执行的落点；配合 §4.4「前缀缓存与 token 预算」，就能权衡「省钱的顺序」与「模型实际读到的顺序」为什么冲突 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

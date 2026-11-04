@@ -28,12 +28,12 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,257 | §2.3 | 讲「RLHF 的奖励建模」时读 `tensorflow/python/keras/` 的自定义 loss 写法：奖励模型的训练目标是「偏好对排序」，loss 形式与本章的 Bradley-Terry 一致 |
-| 2 | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 197,476 | §4.1 | 讲「指令微调数据的来源」时读 `apps/api/src/` 的抓取与清洗：把网页转成 markdown 后还要做质量过滤，否则 SFT 会学到大量模板化噪声 |
-| 3 | [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) | 187,852 | §3.3 | 讲「对齐后模型的行为边界」时看 agent 的工具权限控制：即便模型被对齐过，也要在工具层加白名单与确认，不能把「模型不会做坏事」当作安全边界 |
-| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §1.2 | 讲「LoRA 的低秩分解」时读 `src/peft/`（PEFT 已并入 transformers 生态）的 `LoraLayer`：`A` 随机初始化、`B` 零初始化让「训练开始时等价于原模型」，这是 LoRA 能即插即用的关键 |
-| 5 | [langgenius/dify](https://github.com/langgenius/dify) | 160,127 | §3.3 对齐后模型的行为边界 | 看 `api/core/` 的模型配置与 `graph/` 的工作流节点：对齐只保证「模型倾向于不越界」，真正的边界写在这里的工具白名单与人工确认节点上——这正是本章「对齐不等于权限控制」那一条的工程落点 |
-| 6 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | §3.2 | 讲「DPO 与 RLHF 的差别」时读 `libs/langchain/langchain/chains/` 里的偏好优化封装：DPO 直接用偏好对做监督式优化，省掉「训练奖励模型 + PPO」两步 |
+| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,257 | §1.1 主题一：显存四件套——权重、梯度、优化器状态、激活 | 读 `tensorflow/python/keras/layers/core.py` 的自定义 `Layer` 写法：每一层在训练时除了权重还要存梯度和优化器槽位，前向的中间结果还要留着做反向——四件显存就是这样一层层堆出来的；带着这本账再读 §1.2「SFT 的数据构造与损失掩码」，就明白掩码省下的不只是损失、还有非 assistant 位置的激活 |
+| 2 | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 197,476 | §2.1 主题一：LoRA 的低秩假设、初始化与 target_modules | 读 `apps/api/src/index.ts` 的抓取管道：它把「抓取」与「清洗」两个职责拆成独立步骤、各自可替换，主流程只负责串起来——LoRA 的思路与此同构：不改主干（抓取器），只在旁边挂一个可训练的低秩增量（新步骤）；配合 §2.2「QLoRA 的四位量化与分页优化器」，就能说清「低秩」与「低比特」是省显存的两条独立轴 |
+| 3 | [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) | 187,852 | §3.1 主题一：从人类偏好到奖励模型（Bradley-Terry） | 看 `classic/original_autogpt/autogpt/app`：Agent 用「这步好不好」的规则决定要不要重试，就是一个手写的奖励信号；本章要做的只是把这个手写规则换成训练出来的标量模型，差别在于 §3.2「PPO 的 KL 约束」——手写规则不会过拟合人类偏好，学出来的会 |
+| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §2.2 主题二：QLoRA 的四位量化与分页优化器 | 读 `src/transformers/models/llama/modeling_llama.py` 的 `LlamaDecoderLayer`：主干层结构固定、参数量占绝对大头，所以「量化冻结的主干 + 训练低秩增量」才划得来；配合 §2.1「LoRA 的低秩假设」，就知道 target_modules 为什么几乎只挑 `q_proj`/`v_proj` 这类方阵 |
+| 5 | [langgenius/dify](https://github.com/langgenius/dify) | 160,127 | §4.2 主题二：选型原则——注知识用 RAG，改行为用微调 | 读 `api/core/rag/retrieval/dataset_retrieval.py`：检索层把外部知识按需拼进上下文、模型权重一点不动，这正是「注知识用 RAG」的工程形态；与 §4.1「DPO 的闭式推导与工程优势」并读，就形成「改行为才动权重」的完整判据 |
+| 6 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | §4.1 主题一：DPO 的闭式推导与工程优势 | 读 `libs/langchain_v1/langchain/chat_models/base.py`：同一套 chat 接口既能接「奖励模型 + PPO」的两段式，也能接「偏好对直接回归」的一段式，差别只在训练目标；对照 §3.2 里 PPO 需要的四个模型（策略/参考/奖励/价值），就能量化说明 DPO 省掉了哪两块显存 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

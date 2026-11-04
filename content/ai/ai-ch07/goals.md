@@ -32,12 +32,12 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,257 | §3.3 | 讲「记忆的向量化存储」时读 `tensorflow/python/ops/` 的嵌入运算：短期记忆放上下文、长期记忆进向量库，与本章「两层记忆」的分工一致 |
-| 2 | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 197,476 | §2.3 | 讲「工具的实际形态」时读 `apps/api/src/` 的抓取接口：输入 URL、输出 markdown，是 Agent 最常用的工具之一，也最容易「超时/被墙」 |
-| 3 | [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) | 187,852 | §2.2 | 讲「Agent 主循环」时看仓库里的 `run` 循环：规划 → 调工具 → 观察 → 再规划，直到「无需再调用工具」为止，本章的「状态机」就是它的形式化 |
-| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §4.2 | 讲「函数调用的模型侧支持」时读 `src/transformers/` 的 chat template：`tools` 字段被渲染成模型认识的格式，各家模板不同，这是「同一个工具定义换个模型就不work」的原因 |
-| 5 | [langgenius/dify](https://github.com/langgenius/dify) | 160,127 | §3.1 | 讲「工作流编排」时读 `api/core/workflow/`：节点 + 边 + 变量传递，把「多步 Agent」画成图，比纯 prompt 更可控 |
-| 6 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | §1.1 | 讲「工具调用的抽象」时读 `libs/core/langchain_core/tools/`：工具 = 名称 + 描述 + 参数 schema + 执行函数，模型只负责「选哪个、传什么」，执行永远在服务端 |
+| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,257 | §2.3 主题三：工具设计的七条原则 | 读 `tensorflow/python/eager/backprop.py` 的算子注册表：每个算子只暴露「名字 + 前向 + 反向」三件套、不暴露内部状态，这正是「好工具」的形状——职责单一、输入输出明确、无隐藏副作用；对照 §2.2「工具 schema 与参数强类型」，就能看出 schema 就是给模型看的「函数签名」 |
+| 2 | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 197,476 | §2.3 主题三：工具设计的七条原则（反面样本） | 读 `apps/api/src/index.ts`：「输入一个 URL、输出 markdown」这一个工具同时踩中「幂等」「超时」「限流」三条，是七条原则最好的反面教材；对照 §2.1「Function Calling 机制」就能看出，模型只负责选工具，超时与重试永远在服务端 |
+| 3 | [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) | 187,852 | §1.2 主题二：ReAct 范式——推理与行动交替 | 看 `classic/original_autogpt/autogpt/app` 的 `run` 循环：规划 → 调工具 → 观察 → 再规划，直到「无需再调用工具」为止，就是 ReAct 的字面实现；配合 §1.3「四种架构模式与『能用工作流就别用 Agent』判据」，就能判断什么时候该退回静态图 |
+| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §2.2 主题二：工具 schema 与参数强类型 | 读 `src/transformers/models/auto/tokenization_auto.py` 的 chat template 挂载点：工具定义最终要被渲染进模型认识的模板里，各家模板不同，这正是本章「同一个工具定义换个模型就不 work」的原因；配合 §2.1「Function Calling 机制」，就知道 schema 该写到多细才既不丢信息又不撑爆上下文 |
+| 5 | [langgenius/dify](https://github.com/langgenius/dify) | 160,127 | §3.1 主题一：记忆三层——工作记忆 / 短期记忆 / 长期记忆 | 读 `api/core/memory/token_buffer_memory.py`：`token_limit` 超了就丢最早的轮次，正是「短期记忆是窗口、不是仓库」的实现；这解释了本章「长期记忆必须外置」的必要性；配合 §3.2「写入-检索-遗忘策略」，就能说清为什么「只加不删」的记忆系统会越跑越慢 |
+| 6 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | §1.1 主题一：Agent 三要素——目标、工具、循环 | 读 `libs/core/langchain_core/tools/base.py`：`BaseTool` 把名称 + 描述 + 参数 schema + 执行函数四件套固定下来，模型只负责「选哪个、传什么」，执行永远在服务端；再读 `libs/core/langchain_core/runnables/base.py` 的 `invoke`/`stream`，就能看出「循环」在框架层被抽象成了可组合的链 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

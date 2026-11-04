@@ -39,12 +39,12 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,257 | §2.2 | 讲「缩放点积的数值行为」时读 `tensorflow/python/ops/nn_ops.py` 的 `softmax`：数值稳定实现会先减去最大值，这解释了「不缩放时 softmax 饱和」为什么会让梯度消失 |
-| 2 | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 197,476 | §2.1 | 讲「预处理对模型输入的影响」时读 `apps/api/src/` 的 markdown 清洗：去掉导航与广告后，进入上下文的 token 才是「有效信息」，这直接影响注意力的信噪比 |
-| 3 | [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) | 187,852 | §4.1 | 讲「长上下文的工程约束」时看 agent 的记忆管理：历史太长就摘要、关键信息单独存，与本章「KV Cache 随序列线性增长」是同一个约束的两种应对 |
-| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §1.1 | 讲「自注意力的实现」时读 `src/transformers/models/bert/modeling_bert.py` 的 `BertSelfAttention`：`query/key/value` 三个线性层 + `softmax(QKᵀ/√d)V`，与本章公式逐行对应 |
-| 5 | [langgenius/dify](https://github.com/langgenius/dify) | 160,127 | §4.3 | 讲「Transformer 在 RAG 里的位置」时读 `api/core/rag/`：检索出的片段被拼进 prompt，模型用注意力在这些片段上做「软对齐」——RAG 的效果上限由这一步决定 |
-| 6 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | §3.1 | 讲「上下文窗口的代价」时读 `libs/core/langchain_core/` 的消息裁剪逻辑：超长上下文要做截断或摘要，本质是「注意力 O(n²) 的成本」在应用层的体现 |
+| 1 | [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow) | 201,257 | §4.2 注意力效率工程：KV Cache / FlashAttention / MQA-GQA | 读 `tensorflow/python/ops/nn_ops.py` 的 `softmax`：数值稳定实现先减最大值再 `exp`，这是理解「注意力为什么不爆数值」的底层；再回到 §4.2 的 KV Cache——它省的是重算，而数值稳定省的是溢出，两者是同一块矩阵乘法的两个不同成本项 |
+| 2 | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 197,476 | §2.1 为什么需要位置编码 & 正弦式 | 读 `apps/api/src/index.ts` 的 markdown 清洗：去掉导航与广告后，进入上下文的 token 顺序被彻底改变，而顺序正是位置编码要表达的东西；配合 §2.3「RoPE：把位置旋转进隐空间」，就能说清「清洗改的是内容与顺序、位置编码改的是顺序的表示」 |
+| 3 | [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) | 187,852 | §4.2 注意力效率工程（续）：KV Cache 的显存代价 | 看 `classic/original_autogpt/autogpt/app` 的记忆管理：历史太长就摘要、关键信息单独存，与本章「KV Cache 随序列线性增长」是同一约束的两种应对——一个从显存侧省、一个从上下文侧省；对照 §3.2「残差 + LayerNorm 的梯度路径」，还能看出「层数越深、KV 越多」为什么让长上下文成本翻倍 |
+| 4 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §1.1 自注意力：从序列到「集合加权」的映射 | 读 `src/transformers/models/bert/modeling_bert.py` 的 `BertSelfAttention`：`query`/`key`/`value` 三个线性层 + `softmax(QKᵀ/√d)V`，与本章公式逐行对应；注意它进 softmax 前先乘 `1/√head_dim`，正是 §1.1 里「不缩放会饱和」的防御 |
+| 5 | [langgenius/dify](https://github.com/langgenius/dify) | 160,127 | §3.1 Encoder-Decoder vs Decoder-only | 读 `api/core/rag/retrieval/dataset_retrieval.py`：RAG 把检索片段拼进 prompt，走的是 Decoder-only 的单向注意力——模型只能在已生成的上下文里做「软对齐」，这决定了本章 §3.1 里两种架构在「读长文」上的能力差异；对照 §3.2 的 Pre-LN 残差，就明白为什么 Decoder-only 能堆到很深 |
+| 6 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | §2.3 RoPE：把位置「旋转」进隐空间 | 读 `libs/text-splitters/langchain_text_splitters/character.py`：切块时保留的 `chunk_overlap` 就是在人为制造「位置重叠」，而模型侧靠 RoPE 的角度差分辨「谁在谁前面几个位置」——一边是数据侧造位置关系、一边是模型侧编码位置关系；配合 §2.2「正弦编码与 RoPE 的对照」代码，就能看出 RoPE 为什么能外推到训练时没见过的长度 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

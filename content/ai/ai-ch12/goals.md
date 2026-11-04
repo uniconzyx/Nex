@@ -11,10 +11,10 @@
 
 | # | 仓库 | Star | 对应本章 | 读什么 |
 | --- | --- | ---: | --- | --- |
-| 1 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §1.2 | 讲「对话模板与 loss mask」时读 `src/transformers/models/*/tokenizer` 的 `apply_chat_template`：它按角色拼 token，非 assistant 部分要置 -100 不参与损失，本章的「移位一位」在这里落地 |
-| 2 | [huggingface/datasets](https://github.com/huggingface/datasets) | 22,091 | §2.1 | 讲「数据集的组织」时读 `src/datasets/` 的 `map`/`filter`：合成数据要先去重、再按长度/质量过滤，`filter` 的批处理模式能把这步跑得很快 |
-| 3 | [vllm-project/vllm](https://github.com/vllm-project/vllm) | 96,022 | §3.2 | 讲「合成数据的验证」时读 `vllm/` 的批量推理入口：用强模型生成、用规则或弱模型打分，是「合成数据规模化」的常见流水线 |
-| 4 | [facebookresearch/llama](https://github.com/facebookresearch/llama) | 59,628 | §4.1 | 讲「SFT 的数据格式」时读仓库里的训练脚本：`(prompt, response)` 对的组织方式决定了模型学到的是「补全」还是「对话」 |
+| 1 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §1.2 二、为什么需要 schema 与模板三层 | 读 `src/transformers/tokenization_utils_base.py` 的 `apply_chat_template`：它按角色拼 token、并用 `{% generation %}` 段标出该算 loss 的部分，非 assistant 内容置 -100——本章「模板三层」的第三层就在这里；配合 `src/transformers/models/llama/tokenization_llama.py` 的具体模板，就能把「格式漂移」追溯到模板版本变更 |
+| 2 | [huggingface/datasets](https://github.com/huggingface/datasets) | 22,091 | §2.1 一、前两段：规则过滤与语义去重 | 读 `src/datasets/arrow_dataset.py` 的 `map`/`filter`：`filter` 支持 `batched=True` 与多进程，正是本章「先按规则粗筛、再做语义去重」两段流水线要的吞吐能力；配合 §2.3「三、工程判据」，就知道去重阈值该怎么定才不至于把长尾样本一起删掉 |
+| 3 | [vllm-project/vllm](https://github.com/vllm-project/vllm) | 96,022 | §3.1 一、难例挖掘与 Kappa 的必要性 | 读 `vllm/v1/engine/llm_engine.py` 的批量接口：用强模型批量生成候选、再用规则或弱模型打分，是本章「合成数据规模化」的常见流水线；但生成质量要靠 §2.2「二、污染检测与留验隔离」守——强模型见过的题会被它自己答对，混进训练集就是污染 |
+| 4 | [facebookresearch/llama](https://github.com/facebookresearch/llama) | 59,628 | §1.1 一、schema 样例、配比与格式漂移事故 | 读 `README.md` 里给出的对话格式：`[INST]` / `<<SYS>>` 标记与角色轮次是硬约定，换一个模板而不同步改数据，就是本章「格式漂移事故」的经典形态；先读 §1.2 的三层模板，再对照这份 README，就能把「schema 是什么」落到具体字符上 |
 
 > 全部为工业级真实仓库；Star 数为本会话经 GitHub API 实取快照，仅供路线排序参考。
 
