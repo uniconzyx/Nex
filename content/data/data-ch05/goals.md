@@ -52,10 +52,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | §4.1 | 讲「采集数据的质量校验」时读 `sklearn/utils/validation.py` 的 `check_array`：形状、dtype、NaN 的检查顺序，可以直接照搬成采集后的自检清单 |
-| 2 | [jakevdp/PythonDataScienceHandbook](https://github.com/jakevdp/PythonDataScienceHandbook) | 50,277 | §1.1 | 讲「数据来源与格式」时读 `notebooks/03.03-Hierarchy-Indexing.ipynb`：层级索引能把「多来源数据」压进一个 DataFrame，比手工拼列更不容易错位 |
-| 3 | [pandas-dev/pandas](https://github.com/pandas-dev/pandas) | 50,278 | §3.1 | 讲「解析后落表」时读 `pandas/io/json/`：`json_normalize` 把嵌套 JSON 拍平成表，是「采集 → 结构化」最常用的一步 |
-| 4 | [microsoft/Data-Science-For-Beginners](https://github.com/microsoft/Data-Science-For-Beginners) | 37,860 | §2.2 | 讲「采集的合规边界」时看 `1-Introduction/` 里的数据伦理一课：只采公开且允许抓取的数据、遵守 robots.txt 与频率限制——这条在本章有明确约束 |
+| 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | §3.1 一、解析三件套：lxml / BeautifulSoup / 正则 | 读 `sklearn/utils/validation.py` 的 `check_array`：形状、dtype、NaN 的检查顺序，可以直接照搬成「采集结果落库前」的自检清单；本节讲的是「怎么把 HTML 变成结构化数据」，而自检清单回答的是「变出来的东西能不能用」——这两步顺序颠倒，脏数据会一路流到建模阶段 |
+| 2 | [jakevdp/PythonDataScienceHandbook](https://github.com/jakevdp/PythonDataScienceHandbook) | 50,277 | §2.3 三、会话复用与流式下载 | 读 `notebooks/03.07-Merge-and-Join.ipynb`：层级索引能把「多来源数据」压进一个 DataFrame，比手工拼列更不容易错位；本节「会话复用」解决的是请求侧的成本，而层级索引解决的是落表侧的错位——采集多个页面时，`pd.concat(..., keys=[...])` 天然带上来源层级 |
+| 3 | [pandas-dev/pandas](https://github.com/pandas-dev/pandas) | 50,278 | §3.4 四、从表格到 DataFrame：一次性说清 | 读 `pandas/io/json/_normalize.py`：`json_normalize` 把嵌套 JSON 拍平成表，是「采集 → 结构化」最常用的一步；本节要讲的「表格到 DataFrame」与它是对偶的两条路：一个从 HTML `<table>` 解析出来、一个从嵌套 JSON 拍平，最终都要对齐到「一行一条记录」的口径 |
+| 4 | [microsoft/Data-Science-For-Beginners](https://github.com/microsoft/Data-Science-For-Beginners) | 37,860 | §4.3 三、合规红线：这一节和技术同等重要 | 读 `Data-Science-For-Beginners` 的 `1-Introduction/` 里的数据伦理一课：只采公开且允许抓取的数据、遵守 robots.txt 与频率限制——这条在本节有明确约束；本节 §4.4「把合规检查做成代码」的意思是：把「是否允许抓」写成 `robots.txt` 解析 + 域名白名单，而不是写在 README 里靠自觉 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

@@ -29,10 +29,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | §3.2 | 讲「向量化不是银弹」时读 `sklearn/utils/` 里的分块处理：大数据集要先 `train_test_split` 或分块，否则一次性构造的距离矩阵会直接 OOM——这正是广播隐式物化的风险 |
-| 2 | [jakevdp/PythonDataScienceHandbook](https://github.com/jakevdp/PythonDataScienceHandbook) | 50,277 | §2.1 | 讲「广播从尾轴对齐」时读 `notebooks/02.05-Computation-on-arrays-broadcasting.ipynb`：它用 `(3,1)` 与 `(1,4)` 相加得到 `(3,4)` 的例子，把「缺的维补 1、1 可以拉伸」讲成一张图 |
-| 3 | [pandas-dev/pandas](https://github.com/pandas-dev/pandas) | 50,278 | §1.2 | 讲「einsum 与矩阵乘」时读 `pandas/core/array_algos/`：底层把「按轴求和」翻译成 `einsum`/`dot`，走的是同一套 BLAS 路径，所以「向量化写法性能接近」不是巧合 |
-| 4 | [microsoft/Data-Science-For-Beginners](https://github.com/microsoft/Data-Science-For-Beginners) | 37,860 | §4.1 | 讲「随机可复现」时看课程里的建模脚本：所有 `train_test_split` 都带 `random_state`，否则「同一份代码两次结果不同」无法排查 |
+| 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | §3.1 一、向量化 vs 显式循环：为什么快、何时不快 | 读 `sklearn/utils/extmath.py` 里的分块处理：大数据集要先分块、否则一次性构造的距离矩阵会直接 OOM——这正是本章 §1.2「广播的内存零拷贝本质与「内存爆炸」陷阱」的工业答案：广播本身零拷贝，但「广播后的运算符」会把结果物化，所以 `(n,1) - (1,m)` 的中间结果是 `n×m` 而不是 `n+m` |
+| 2 | [jakevdp/PythonDataScienceHandbook](https://github.com/jakevdp/PythonDataScienceHandbook) | 50,277 | §1.1 一、广播的三条规则与形状推导 | 读 `notebooks/02.05-Computation-on-arrays-broadcasting.ipynb`：它用 `(3,1)` 与 `(1,4)` 相加得到 `(3,4)` 的例子，把「缺的维补 1、1 可以拉伸」讲成一张图；配合本章 §1.2 看，就能分清「规则允许」与「内存真的被复制」是两件事——前者是语义，后者是 strides=0 的实现 |
+| 3 | [pandas-dev/pandas](https://github.com/pandas-dev/pandas) | 50,278 | §3.2 二、`np.einsum` 与 stride tricks：零拷贝的张量收缩 | 读 `pandas/core/reshape/merge.py` 与 `pandas/core/groupby/groupby.py`：pandas 的聚合底层把「按轴求和」翻译成 `einsum`/`dot`，走的是同一套 BLAS 路径，所以「einsum 写法性能接近 matmul」不是巧合；这也回答了本章 §3.1「何时不快」——一旦表达式涉及 fancy indexing（不连续访存），BLAS 的快路径就用不上了 |
+| 4 | [microsoft/Data-Science-For-Beginners](https://github.com/microsoft/Data-Science-For-Beginners) | 37,860 | §2.1 一、旧式 `np.random` 全局 API 与新式 `Generator` | 读 `Data-Science-For-Beginners` 课程里的建模脚本：所有 `train_test_split` 都带 `random_state`，否则「同一份代码两次结果不同」无法排查；本章 §2.2「可复现性、随机流与并行」的要点也在这里——旧式全局 API 共享一个隐式全局状态，多线程下会互相干扰，`Generator` 把状态装在实例里就是要解决这件事 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

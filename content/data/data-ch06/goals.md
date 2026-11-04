@@ -57,10 +57,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | §1.1 | 讲「建模流程」时读 `sklearn/pipeline.py`：`Pipeline` 把「预处理 + 模型」串成一步，`fit` 只在训练集上调用——这是防泄漏的结构性保证，不是纪律问题 |
-| 2 | [jakevdp/PythonDataScienceHandbook](https://github.com/jakevdp/PythonDataScienceHandbook) | 50,277 | §2.2 | 讲「特征与目标的关系」时读 `notebooks/05.xx` 系列（机器学习篇）：先用散点图看关系再选模型，比盲试模型更快排除方向性错误 |
-| 3 | [pandas-dev/pandas](https://github.com/pandas-dev/pandas) | 50,278 | §3.2 | 讲「结果汇总」时读 `pandas/core/reshape/`：`pivot_table` 把「模型 × 指标」摊成矩阵，是写实验报告最省事的结构 |
-| 4 | [microsoft/Data-Science-For-Beginners](https://github.com/microsoft/Data-Science-For-Beginners) | 37,860 | §4.1 | 讲「从问题到方案」时看 `4-Data-Science-Lifecycle/`：先定义「成功标准」再选指标，否则模型分数再高也可能答错了问题 |
+| 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | §4.1 一、建模流程：八步不可跳 | 读 `sklearn/pipeline.py`：`Pipeline` 把「预处理 + 模型」串成一步，`fit` 只在训练集上调用——这是防泄漏的结构性保证，不是纪律问题；本章 §2.3「数据泄漏：三个真实场景」的前两个（缩放/编码在全量数据上 fit、用未来数据算特征）都能被 Pipeline 挡住，第三个（目标泄漏）挡不住，只能靠业务理解 |
+| 2 | [jakevdp/PythonDataScienceHandbook](https://github.com/jakevdp/PythonDataScienceHandbook) | 50,277 | §3.3 三、相关系数三法：Pearson / Spearman / 互信息 | 读 `notebooks/05.02-Introducing-Scikit-Learn.ipynb`：它先用散点图看关系再选模型，比盲试模型更快排除方向性错误；本节的价值就在于给出「看图之后用什么数说话」——Pearson 只看线性、Spearman 看单调、互信息能抓非单调关系，三者不一致时通常说明关系非线性 |
+| 3 | [pandas-dev/pandas](https://github.com/pandas-dev/pandas) | 50,278 | §4.2 二、回归评价指标：五个数各自的脾气 | 读 `pandas/core/reshape/pivot.py` 与 `sklearn/metrics/_regression.py`：前者把「模型 × 指标」摊成矩阵（写实验报告最省事的结构），后者给出 MAE/MSE/RMSE/MAPE/R² 的确切定义；本节要讲的「脾气」在源码里就是式子的差别：MSE 平方放大离群点、MAPE 在真值为 0 时爆炸、R² 可以为负 |
+| 4 | [microsoft/Data-Science-For-Beginners](https://github.com/microsoft/Data-Science-For-Beginners) | 37,860 | §4.4 四、数学建模：把开放题答成规范报告 | 读 `Data-Science-For-Beginners` 的 `4-Data-Science-Lifecycle/`：先定义「成功标准」再选指标，否则模型分数再高也可能答错了问题；这正是本节「把开放题答成规范报告」的第一道工序——报告的结构（问题 → 假设 → 数据 → 方法 → 验证 → 结论）必须对应到一组可被判读的指标 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

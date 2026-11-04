@@ -34,10 +34,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | §3.1 | 讲「向量化与 BLAS」时读 `sklearn/utils/extmath.py`：所有矩阵运算最后都落到 `numpy.dot`（底层 BLAS），所以「特征矩阵按行存」不是风格问题，而是让 BLAS 能走连续内存 |
-| 2 | [jakevdp/PythonDataScienceHandbook](https://github.com/jakevdp/PythonDataScienceHandbook) | 50,277 | §1.1 | 讲「ndarray 是数据 + 形状 + 步长」时读 `notebooks/02.02-The-Basics-Of-NumPy-Arrays.ipynb`：它用 `flags`、`strides`、`nbytes` 三个属性把「一块内存 + 元信息」直接打出来，比画图更直观 |
-| 3 | [pandas-dev/pandas](https://github.com/pandas-dev/pandas) | 50,278 | §2.3 | 讲「连续内存与缓存」时读 `pandas/core/internals/` 下的 Block 管理：pandas 按 dtype 把同类型列聚成 Block，就是为了「连续访问 + 向量化」，与 ndarray 的 C 顺序是同一个动机 |
-| 4 | [microsoft/Data-Science-For-Beginners](https://github.com/microsoft/Data-Science-For-Beginners) | 37,860 | §2.1 | 讲「数据准备的第一步」时看 `2-Working-With-Data/`：先把数据读成 ndarray/DataFrame 再谈建模，形状与 dtype 没对齐时后面全是错 |
+| 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | §3.2 2. 三个数量级的差距从哪来 | 读 `sklearn/utils/extmath.py`：里面 `safe_sparse_dot` 最终都落到 `numpy.dot`（底层 BLAS），这就是「向量化快在哪」的工业侧证据——它快不是因为 Python 写得短，而是因为整段计算被交给了一个按连续内存布局优化的 C/Fortran 内核；对照本章 §3.1「ufunc 是什么」看，ufunc 是逐元素版的同一件事 |
+| 2 | [jakevdp/PythonDataScienceHandbook](https://github.com/jakevdp/PythonDataScienceHandbook) | 50,277 | §1.4 4. strides：NumPy 最精妙的设计 | 读 `notebooks/02.02-The-Basics-Of-NumPy-Arrays.ipynb`：它用 `flags`、`strides`、`nbytes` 三个属性把「一块内存 + 元信息」直接打出来，比画图更直观；看完再回头看本章 §2.1「视图（view）vs 拷贝（copy）」——`a[::2]` 之所以是视图，就是因为只改了 strides、没动数据 |
+| 3 | [pandas-dev/pandas](https://github.com/pandas-dev/pandas) | 50,278 | §1.5 5. C order vs F order | 读 `pandas/core/internals/managers.py`：pandas 按 dtype 把同类型列聚成 Block，就是为了「连续访问 + 向量化」，与 ndarray 的 C 顺序是同一个动机；这解释了本章 §1.3「ndarray 的内存模型」为什么强调「连续」——一旦混入 object dtype，Block 就被拆散，后面的向量化全部退化 |
+| 4 | [microsoft/Data-Science-For-Beginners](https://github.com/microsoft/Data-Science-For-Beginners) | 37,860 | §4.4 4. 用布尔索引做数据清洗（数据科学日常） | 读 `Data-Science-For-Beginners` 的 `2-Working-With-Data/`：先把数据读成 ndarray / DataFrame 再谈建模，形状与 dtype 没对齐时后面全是错——这正是本节「数据清洗」的入口；而本章 §4.3「布尔索引的组合与陷阱」里的 `&`/`|` 必须加括号，在这个阶段最容易被 `and`/`or` 写错成报错 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

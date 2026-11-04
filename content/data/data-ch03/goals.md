@@ -73,10 +73,10 @@ Pandas 的两次抽象升级正好对应这些需求：
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | §3.1 | 讲「缺失值处理」时读 `sklearn/impute/`：`SimpleImputer` 的 `strategy` 与 pandas 的 `fillna` 是两套语义（前者在管道内、后者在数据上），混用时要注意「训练/推理口径一致」 |
-| 2 | [jakevdp/PythonDataScienceHandbook](https://github.com/jakevdp/PythonDataScienceHandbook) | 50,277 | §2.2 | 讲「索引与切片」时读 `notebooks/03.02-Data-Indexing-and-Selection.ipynb`：`loc` 闭区间、`iloc` 左闭右开——两种切片的边界规则不同，混用就是「取出来的行数不对」 |
-| 3 | [pandas-dev/pandas](https://github.com/pandas-dev/pandas) | 50,278 | §1.1 | 讲「DataFrame 的列式存储」时读 `pandas/core/frame.py` 与 `internals/managers.py`：DataFrame 不是「行列表」，而是「按 dtype 分块的二维结构」，这解释了「混类型列会让操作变慢」 |
-| 4 | [microsoft/Data-Science-For-Beginners](https://github.com/microsoft/Data-Science-For-Beginners) | 37,860 | §4.2 | 讲「数据清洗的顺序」时看 `2-Working-With-Data/`：先处理类型与缺失、再做衍生特征，顺序反了会得到「用脏数据算出来的特征」 |
+| 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | §4.2 2. 检测与处理缺失 | 读 `sklearn/impute/_base.py`：`SimpleImputer` 的 `strategy` 与 pandas 的 `fillna` 是两套语义（前者在管道内、后者在数据上），混用时要注意「训练/推理口径一致」；本章 §4.1「缺失值的三种标记」正是这条差异的根源：`np.nan` / `None` / `pd.NaT` 三者被判空的方式不同，`SimpleImputer` 只认 `np.nan` 与 `NaN` 语义 |
+| 2 | [jakevdp/PythonDataScienceHandbook](https://github.com/jakevdp/PythonDataScienceHandbook) | 50,277 | §3.2 2. `iloc` 与 `loc` 的完整能力 | 读 `notebooks/03.02-Data-Indexing-and-Selection.ipynb`：`loc` 闭区间、`iloc` 左闭右开——两种切片的边界规则不同，混用就是「取出来的行数不对」；本节 §3.3「链式赋值与 `SettingWithCopyWarning`」也在这里埋下伏笔：`df[df.a > 0]['b'] = 1` 取到的是副本，赋值等于没做 |
+| 3 | [pandas-dev/pandas](https://github.com/pandas-dev/pandas) | 50,278 | §1.1 1. 两个核心数据结构 | 读 `pandas/core/frame.py` 与 `pandas/core/internals/managers.py`：DataFrame 不是「行列表」，而是「按 dtype 分块的二维结构」，这解释了「混类型列会让操作变慢」；本章 §1.2「自动对齐：Pandas 的灵魂」在这个结构上才说得通——对齐发生在每个 Series/Block 的索引上，而不是整行 |
+| 4 | [microsoft/Data-Science-For-Beginners](https://github.com/microsoft/Data-Science-For-Beginners) | 37,860 | §2.3 3. 分块读：文件比内存大怎么办 | 读 `pandas/io/parsers/readers.py` 里 `read_csv` 的 `chunksize` 参数实现：它返回的是一个迭代器，每次只解析一块，而不是「先全读进来再切」；这正是本节「文件比内存大」的答案，也解释了本章 §2.1「`read_csv` 的关键参数」里 `dtype` 为什么必须显式给——分块读时若靠推断，每一块的 dtype 可能都不同 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

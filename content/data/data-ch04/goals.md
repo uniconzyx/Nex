@@ -67,10 +67,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | §3.3 | 讲「时间序列的特征工程」时读 `sklearn/preprocessing/`：`rolling` 的窗口统计必须用「过去的数据」，否则就是未来信息泄漏——sklearn 的 pipeline 能强制这个边界 |
-| 2 | [jakevdp/PythonDataScienceHandbook](https://github.com/jakevdp/PythonDataScienceHandbook) | 50,277 | §2.3 | 讲「merge 的四种连接」时读 `notebooks/03.07-Merge-and-Join.ipynb`：inner/left/right/outer 的行数变化配了对照表，`indicator=True` 用来查「哪边没匹配上」 |
-| 3 | [pandas-dev/pandas](https://github.com/pandas-dev/pandas) | 50,278 | §1.2 | 讲「groupby 的实现」时读 `pandas/core/groupby/`：先按键做哈希分组、再对每组应用聚合，`as_index=False` 与 `reset_index()` 的差别就出在「分组键是否进索引」 |
-| 4 | [microsoft/Data-Science-For-Beginners](https://github.com/microsoft/Data-Science-For-Beginners) | 37,860 | §4.3 | 讲「聚合后的口径」时看课程里的分组分析：`count`/`nunique` 混用会把「订单数」算成「商品数」，指标定义要先写清再写代码 |
+| 1 | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) | 67,957 | §3.4 4. rolling / expanding / ewm：三种窗口 | 读 `pandas/core/resample.py` 与 `sklearn/model_selection/_split.py`：时序窗口统计必须只用「过去的数据」，而 sklearn 的 `TimeSeriesSplit` 用分割而非窗口来强制这个边界；两者的分工在于：`rolling` 保证「单行特征不偷看未来」，`TimeSeriesSplit` 保证「训练集不偷看测试集」，本章 §2.3「多对多：行数膨胀」提醒的另一类泄漏则在合并阶段发生 |
+| 2 | [jakevdp/PythonDataScienceHandbook](https://github.com/jakevdp/PythonDataScienceHandbook) | 50,277 | §2.2 2. 四种连接语义与 SQL 对照 | 读 `notebooks/03.07-Merge-and-Join.ipynb`：inner/left/right/outer 的行数变化配了对照表，`indicator=True` 用来查「哪边没匹配上」；本节 §2.3「多对多：行数膨胀（本章最重要的一节）」正是这张表的极端情形——键不唯一时，行数是两边的笛卡尔积，而不是 max |
+| 3 | [pandas-dev/pandas](https://github.com/pandas-dev/pandas) | 50,278 | §1.1 1. 心智模型：split → apply → combine | 读 `pandas/core/groupby/groupby.py`：先按键做哈希分组、再对每组应用聚合；`as_index=False` 与 `reset_index()` 的差别就出在「分组键是否进索引」，这正是本章 §1.4「命名聚合（Named Aggregation）」要绕开的坑——命名聚合直接产出扁平列名，省掉一次 `reset_index` |
+| 4 | [microsoft/Data-Science-For-Beginners](https://github.com/microsoft/Data-Science-For-Beginners) | 37,860 | §1.2 2. 四种聚合器：返回形状决定用途 | 读 `Data-Science-For-Beginners` 课程里的分组分析：`count`/`nunique` 混用会把「订单数」算成「商品数」，指标定义要先写清再写代码；本章 §4.1「pivot_table：带默认聚合的 groupby」也一样——它默认用 `mean`，所以「销售额汇总」必须显式写 `aggfunc='sum'`，否则得到的是「平均每行金额」 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 
