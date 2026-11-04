@@ -54,10 +54,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [deepseek-ai/DeepSeek-V3](https://github.com/deepseek-ai/DeepSeek-V3) | 104,539 | 全章 | DeepSeek 主力开源模型的技术报告与推理代码，理解成本为何能压这么低；本章先读与「鉴权与密钥管理」「错误码分类」相关的部分 |
-| 2 | [deepseek-ai/DeepSeek-R1](https://github.com/deepseek-ai/DeepSeek-R1) | 91,920 | 全章 | 推理模型 RL 训练范式，面试问「为什么 R1 会思考」时的第一手材料；本章先读与「鉴权与密钥管理」「错误码分类」相关的部分 |
-| 3 | [deepseek-ai/awesome-deepseek-integration](https://github.com/deepseek-ai/awesome-deepseek-integration) | 39,457 | 全章 | 官方集成清单：IDE/Agent/客服等落地形态，做选型时先看这里；本章先读与「鉴权与密钥管理」「错误码分类」相关的部分 |
-| 4 | [ollama/ollama](https://github.com/ollama/ollama) | 185,510 | 全章 | 本地一键跑模型，验证「私有化」可行性最快的路径；本章先读与「鉴权与密钥管理」「错误码分类」相关的部分 |
+| 1 | [deepseek-ai/DeepSeek-V3](https://github.com/deepseek-ai/DeepSeek-V3) | 104,539 | §2.前缀缓存（唯一条件是前缀逐字节稳定） | §3.按请求计费三档单价：`README.md` 的 API 参数表里 `cache_hit` / `cache_miss` 两个单价是分开列的，把命中率代进去算一遍，就明白本章「缓存命中省的是哪一笔」 |
+| 2 | [deepseek-ai/DeepSeek-R1](https://github.com/deepseek-ai/DeepSeek-R1) | 91,920 | §3.推理能力从哪来 | §5.单位成本的三个杠杆：`inference/` 目录下的推理代码与技术报告里的训练/推理成本拆分，是「MoE 为何能把成本压下来」的第一手依据，别只看二手解读 |
+| 3 | [deepseek-ai/awesome-deepseek-integration](https://github.com/deepseek-ai/awesome-deepseek-integration) | 39,457 | §3.错误码分类（先决定能不能重试） | §6.兼容层形状兼容≠语义兼容：`README` 的「OpenAI 兼容」一节列了哪些字段对齐、哪些没对齐，这正好是本章「换一家 API 不是改个 base_url」的证据 |
+| 4 | [ollama/ollama](https://github.com/ollama/ollama) | 185,510 | §5.混合路由 | §5.降级链路（逐级退到可用）：`README` 的模型列表带参数量与量化格式，对照本章的「本地能替到哪一步」逐档验证：哪一档是 7B-Q4 跑得动的，哪一档必须上云 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

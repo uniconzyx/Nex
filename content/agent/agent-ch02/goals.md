@@ -70,10 +70,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [dair-ai/Prompt-Engineering-Guide](https://github.com/dair-ai/Prompt-Engineering-Guide) | 79,402 | 全章 | 提示工程体系化教材：技巧分类 + 论文出处，适合建立方法论而不是背模板；本章先读与「四段式」「指令优先级」相关的部分 |
-| 2 | [openai/openai-cookbook](https://github.com/openai/openai-cookbook) | 76,730 | 全章 | 官方 API 用法与结构化输出范例，照它写第一次 function calling；本章先读与「四段式」「指令优先级」相关的部分 |
-| 3 | [anthropics/claude-cookbooks](https://github.com/anthropics/claude-cookbooks) | 53,639 | 全章 | Claude 的工具调用、长上下文、评测 notebook，对照 OpenAI 的差异；本章先读与「四段式」「指令优先级」相关的部分 |
-| 4 | [microsoft/promptflow](https://github.com/microsoft/promptflow) | 11,253 | 全章 | 提示流工程化：把 prompt 当代码做版本、测试、批量评测；本章先读与「四段式」「指令优先级」相关的部分 |
+| 1 | [dair-ai/Prompt-Engineering-Guide](https://github.com/dair-ai/Prompt-Engineering-Guide) | 79,402 | §1.四段式（角色/任务/约束/示例） | §3.少样本怎么选：`pages/techniques/` 每个技巧一页，页面底部都挂着原论文链接——「这个技巧凭什么有效」去论文里找，别只背模板名 |
+| 2 | [openai/openai-cookbook](https://github.com/openai/openai-cookbook) | 76,730 | §2.结构化输出的三种机制 | §2.输出契约怎么写才不容易坏：`examples/` 下 function calling / structured outputs 的 notebook 直接可跑，照它的 schema 写一遍，就看懂「JSON mode / 函数调用 / 严格 schema」三者的差别 |
+| 3 | [anthropics/claude-cookbooks](https://github.com/anthropics/claude-cookbooks) | 53,639 | §2.流式输出不要等最后一个括号 | §1.上下文预算：`misc/` 里有 streaming 与 prompt caching 的 notebook，运行一遍能看清「流式解析为什么要在最后一个括号前就开始处理」 |
+| 4 | [microsoft/promptflow](https://github.com/microsoft/promptflow) | 11,253 | §1.四段式与指令优先级 | §1.Prompt 也是代码（版本/测试/回滚）：`promptflow/` 目录把 prompt 当节点做版本与批量评测，这正是本章「把 prompt 纳入 CI」那一条的工程实现 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

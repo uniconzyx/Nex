@@ -71,10 +71,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | 全章 | 系统设计面试基础，Agent 服务也要过容量与一致性这关；本章先读与「能力矩阵与行为锚定等级」「自评的证据要求与常见偏差」相关的部分 |
-| 2 | [yangshun/tech-interview-handbook](https://github.com/yangshun/tech-interview-handbook) | 143,087 | 全章 | 技术面试通用题库与行为面框架；本章先读与「能力矩阵与行为锚定等级」「自评的证据要求与常见偏差」相关的部分 |
-| 3 | [alirezadir/Machine-Learning-Interviews](https://github.com/alirezadir/Machine-Learning-Interviews) | 9,931 | 全章 | ML/LLM 岗位面试题分类整理，含系统设计；本章先读与「能力矩阵与行为锚定等级」「自评的证据要求与常见偏差」相关的部分 |
-| 4 | [chiphuyen/ml-interviews-book](https://github.com/chiphuyen/ml-interviews-book) | 4,797 | 全章 | 《Machine Learning Interviews》开源书，面试官视角的评分逻辑；本章先读与「能力矩阵与行为锚定等级」「自评的证据要求与常见偏差」相关的部分 |
+| 1 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §01 BARS 行为锚定等级 | §02 JD 关键词反推能力要求：`README` 的面试题按主题归档，每道题背后就是一条能力要求，把题翻成「矩阵里的哪一格」，本章的方法就有了练习对象 |
+| 2 | [yangshun/tech-interview-handbook](https://github.com/yangshun/tech-interview-handbook) | 143,087 | §03 作品集 STAR-R 结构 | §03 量化指标三要素：`behavioral/` 与 `system-design/` 两卷的答题范例都带「结果如何量化」，照它的写法改自己的项目描述，能立刻看出缺的是基线还是归因 |
+| 3 | [alirezadir/Machine-Learning-Interviews](https://github.com/alirezadir/Machine-Learning-Interviews) | 9,931 | §02 四条路径的技能栈 | §01 自评的证据要求：`ML-Interviews` 里按岗位分的章节直接给出各路径的考点集合，对照本章四条路径，能判断自己缺的是「知识」还是「证据」 |
+| 4 | [chiphuyen/ml-interviews-book](https://github.com/chiphuyen/ml-interviews-book) | 4,797 | §01 自评为什么人人偏高 | §03 用一张表判 STAR-R 强弱：`chiphuyen` 的面试书把「你是否真的做过」拆成可追问的层级，拿它的追问链自测一遍，就等于做了一次本章的强弱判定 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

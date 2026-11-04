@@ -53,10 +53,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | 全章 | RAG 组件全家桶，适合快速拼原型，也适合读源码理解抽象边界；本章先读与「主题一」「主题二」相关的部分 |
-| 2 | [run-llama/llama_index](https://github.com/run-llama/llama_index) | 52,595 | 全章 | 以索引为中心的数据框架，文档解析与检索策略比 LangChain 更细；本章先读与「主题一」「主题二」相关的部分 |
-| 3 | [infiniflow/ragflow](https://github.com/infiniflow/ragflow) | 92,592 | 全章 | 带 UI 的 RAG 引擎，可直接对照「文档解析→切块→召回→重排」每一步的参数；本章先读与「主题一」「主题二」相关的部分 |
-| 4 | [HKUDS/LightRAG](https://github.com/HKUDS/LightRAG) | 40,252 | 全章 | 轻量图增强 RAG，理解「实体关系」如何补向量检索的短板；本章先读与「主题一」「主题二」相关的部分 |
+| 1 | [langchain-ai/langchain](https://github.com/langchain-ai/langchain) | 148,796 | §数据·主题二 切块策略（固定长度/语义块/父子块） | §检索·主题二 RRF 融合：`libs/text-splitters/` 里每种切块器都是独立类且带参数说明，把它和 `libs/retrievers/` 的 ensemble retriever（RRF）接起来跑，就能实测「重叠多少、块多大」对召回的影响 |
+| 2 | [run-llama/llama_index](https://github.com/run-llama/llama_index) | 52,595 | §数据·主题一 文档解析三道坎 | §检索·主题三 查询改写：`llama-index-core/` 的 node parser 与 query transform 是分开的两层，读这两层的接口边界，就看懂「解析/切块」与「改写/召回」为什么不该耦合 |
+| 3 | [infiniflow/ragflow](https://github.com/infiniflow/ragflow) | 92,592 | §检索·主题一 BM25 与向量为什么必须混合 | §评估·主题一 Recall@K/MRR：`rag/app/` 里每种 RAG 流都带可视化，直接调参对照「纯向量 vs 混合」的召回差异，比看论文曲线直观 |
+| 4 | [HKUDS/LightRAG](https://github.com/HKUDS/LightRAG) | 40,252 | §检索·主题三 多跳与图增强 | §评估·主题三 引用溯源：`LightRAG` 的实体关系抽取与 chunk 溯源字段，是本章「实体关系补向量短板」和「引用必须可回溯到块」两条的同时落地 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

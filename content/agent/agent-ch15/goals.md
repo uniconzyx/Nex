@@ -74,10 +74,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [datawhalechina/llm-universe](https://github.com/datawhalechina/llm-universe) | 14,178 | 全章 | 中文 LLM 应用开发教程：API→RAG→Agent→评估的完整路径；本章先读与「选题评分卡」「3 周可完成性拆解」相关的部分 |
-| 2 | [datawhalechina/happy-llm](https://github.com/datawhalechina/happy-llm) | 34,489 | 全章 | 从零构建大模型的教学项目，补「模型内部发生了什么」；本章先读与「选题评分卡」「3 周可完成性拆解」相关的部分 |
-| 3 | [langchain-ai/langgraph](https://github.com/langchain-ai/langgraph) | 44,248 | 全章 | 有状态 Agent 编排：图、检查点、人工介入，Agent 章的主线；本章先读与「选题评分卡」「3 周可完成性拆解」相关的部分 |
-| 4 | [langgenius/dify](https://github.com/langgenius/dify) | 160,127 | 全章 | 可视化 LLM 应用平台，商业化交付最常见的底座之一；本章先读与「选题评分卡」「3 周可完成性拆解」相关的部分 |
+| 1 | [datawhalechina/llm-universe](https://github.com/datawhalechina/llm-universe) | 14,178 | §01 选题评分卡（真实用户/明确痛点/3 周可完成） | §01 关键路径拆解：`docs/` 的案例都标了实现周期与团队规模，对照本章「3 周可完成性」判定，能校准自己对工作量的估计 |
+| 2 | [datawhalechina/happy-llm](https://github.com/datawhalechina/happy-llm) | 34,489 | §02 基线的意义 | §02 错误分析驱动迭代（按损失排序）：`app/backend/approaches/` 的三种策略天然构成 A/B 对照，先跑一份最简基线再迭代，这就是本章「回归安全带」 |
+| 3 | [langchain-ai/langgraph](https://github.com/langchain-ai/langgraph) | 44,248 | §03 监控面板四指标 | §03 成本看板与预算告警：`infra/` 下的 Application Insights 指标与告警模板，正是本章「把烧钱速度变成数字」的现成实现 |
+| 4 | [langgenius/dify](https://github.com/langgenius/dify) | 160,127 | §03 容器化与一键启动 | §03 文档四件套：`azd` 一键部署脚本与 README 的架构图，是本章「可复现是交付的定义」最省事的范本 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

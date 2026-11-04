@@ -53,10 +53,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [eugeneyan/applied-ml](https://github.com/eugeneyan/applied-ml) | 30,756 | 全章 | 工业界 ML 落地案例合集，看「模型之外」的评估、监控、组织协作怎么写；本章先读与「用户故事」「验收条件」相关的部分 |
-| 2 | [Azure-Samples/azure-search-openai-demo](https://github.com/Azure-Samples/azure-search-openai-demo) | 7,798 | 全章 | RAG 端到端参考架构（含引用溯源），企业方案的常见骨架；本章先读与「用户故事」「验收条件」相关的部分 |
-| 3 | [GokuMohandas/Made-With-ML](https://github.com/GokuMohandas/Made-With-ML) | 49,873 | 全章 | 从数据校验到部署监控的完整工程流水线，补「只会调 API」的短板；本章先读与「用户故事」「验收条件」相关的部分 |
-| 4 | [microsoft/AI-For-Beginners](https://github.com/microsoft/AI-For-Beginners) | 70,422 | 全章 | 12 周 24 课的 AI 通识课，用来快速补齐术语与全景，避免面试时概念串味；本章先读与「用户故事」「验收条件」相关的部分 |
+| 1 | [eugeneyan/applied-ml](https://github.com/eugeneyan/applied-ml) | 30,756 | §1.用户故事三段式是责任链 | §4.范围冻结：`docs/` 的 case study 每篇都写了「做了什么 / 没做什么」，拿它对照本章「不做什么清单」，能看到真实项目是怎么砍范围的 |
+| 2 | [Azure-Samples/azure-search-openai-demo](https://github.com/Azure-Samples/azure-search-openai-demo) | 7,798 | §3.AI 适用性四档 | §5.需求-能力匹配矩阵：`app/backend/approaches/` 下并排放着 chat / ask / one-shot 三种实现，同一个问题三种答法，正好用来标「这件事属于哪一档」 |
+| 3 | [GokuMohandas/Made-With-ML](https://github.com/GokuMohandas/Made-With-ML) | 49,873 | §5.指标三层不要混在一起 | §3.失败模式设计：`notebooks/` 从数据校验到部署监控逐段推进，它的监控指标分层就是本章「离线/线上/护栏」的落地版 |
+| 4 | [microsoft/AI-For-Beginners](https://github.com/microsoft/AI-For-Beginners) | 70,422 | §2.画布九格 | §4.人工接管触发条件：`lessons/` 每课末尾的「进一步学习」与练习，是在逼你想「这个功能失败时用户看到什么」，与画布的「失败兜底」格一一对应 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

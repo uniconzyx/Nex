@@ -43,10 +43,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [vllm-project/vllm](https://github.com/vllm-project/vllm) | 96,022 | §2.1 把卡喂满 | 生产级推理引擎：PagedAttention/连续批处理，部署章的性能基线 |
-| 2 | [sgl-project/sglang](https://github.com/sgl-project/sglang) | 37,561 | 全章 | 高吞吐推理框架，对比 vLLM 的调度与缓存策略；本章先读与「显存的四笔账」「把卡喂满」相关的部分 |
-| 3 | [ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp) | 133,016 | 全章 | CPU/量化推理的参考实现，理解 GGUF 与显存账本；本章先读与「显存的四笔账」「把卡喂满」相关的部分 |
-| 4 | [ollama/ollama](https://github.com/ollama/ollama) | 185,510 | 全章 | 本地一键跑模型，验证「私有化」可行性最快的路径；本章先读与「显存的四笔账」「把卡喂满」相关的部分 |
+| 1 | [vllm-project/vllm](https://github.com/vllm-project/vllm) | 96,022 | §01 显存四笔账 | §02 PagedAttention：`vllm/core/` 里 block_manager 把 KV Cache 切成固定块管理，读它就知道「显存碎片」为什么能被 PagedAttention 吃掉——这是本章显存账本最后一笔账的代码证据 |
+| 2 | [sgl-project/sglang](https://github.com/sgl-project/sglang) | 37,561 | §02 连续批处理 | §02 TTFT/TPOT/吞吐是三件事：`benchmarks/` 下的脚本同时输出 TTFT、TPOT 与吞吐，换 batch size 跑两轮，就能看到本章「三者互相牵制」的实测曲线 |
+| 3 | [ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp) | 133,016 | §01 量化省的是权重那笔账 | §01 显存的四笔账：`ggml/src/` 里各量化类型的反量化 kernel 一目了然，对照本章「Q4 省 4 倍但激活不变」，就明白为什么长上下文量化救不了 |
+| 4 | [ollama/ollama](https://github.com/ollama/ollama) | 185,510 | §03 多租户配额 | §03 容器化与灰度：`README` 的部署矩阵列出各后端与硬件组合，按它跑一次本地服务，能实测本章「显存是第一约束」这句话 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

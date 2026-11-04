@@ -69,9 +69,9 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [mli/paper-reading](https://github.com/mli/paper-reading) | 33,996 | 全章 | 李沐论文精读系列配套，建立「读一篇顶会」的节奏；本章先读与「信息源分层与可信度排序」「三遍读法与论文价值判断」相关的部分 |
-| 2 | [dair-ai/ML-Papers-of-the-Week](https://github.com/dair-ai/ML-Papers-of-the-Week) | 13,000 | 全章 | 每周论文榜，解决「不知道追什么」的问题；本章先读与「信息源分层与可信度排序」「三遍读法与论文价值判断」相关的部分 |
-| 3 | [Hannibal046/Awesome-LLM](https://github.com/Hannibal046/Awesome-LLM) | 27,468 | 全章 | LLM 生态索引：训练/推理/应用/评测的仓库地图，用来判断「这个方向还有没有坑」；本章先读与「信息源分层与可信度排序」「三遍读法与论文价值判断」相关的部分 |
+| 1 | [mli/paper-reading](https://github.com/mli/paper-reading) | 33,996 | §01 信息源分层与可信度排序 | §01 三遍读法：`README` 按会议/年份归档的精读列表就是「可信度分层」的现成样本，跟着它的顺序读三篇，能校准本章「先读什么后读什么」的节奏 |
+| 2 | [dair-ai/ML-Papers-of-the-Week](https://github.com/dair-ai/ML-Papers-of-the-Week) | 13,000 | §01 三遍读法带止损 | §02 指标对齐与差异归因：`README.md` 每周榜单里的论文都附一句话结论，拿它对照自己三遍读完的判断，就知道「摘要骗人」具体骗在哪 |
+| 3 | [Hannibal046/Awesome-LLM](https://github.com/Hannibal046/Awesome-LLM) | 27,468 | §03 四象限与打分 | §03 把雷达变成团队语言：`README` 的训练/推理/应用/评测四个分区正好对应本章四象限，把分区里的仓库挪到象限里，雷达就不是画着好看的图 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

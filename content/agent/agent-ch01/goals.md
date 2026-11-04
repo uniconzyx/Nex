@@ -70,10 +70,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [microsoft/AI-For-Beginners](https://github.com/microsoft/AI-For-Beginners) | 70,422 | 全章 | 12 周 24 课的 AI 通识课，用来快速补齐术语与全景，避免面试时概念串味；本章先读与「四层结构」「毛利结构」相关的部分 |
-| 2 | [Hannibal046/Awesome-LLM](https://github.com/Hannibal046/Awesome-LLM) | 27,468 | 全章 | LLM 生态索引：训练/推理/应用/评测的仓库地图，用来判断「这个方向还有没有坑」；本章先读与「四层结构」「毛利结构」相关的部分 |
-| 3 | [datawhalechina/self-llm](https://github.com/datawhalechina/self-llm) | 32,547 | 全章 | 开源大模型部署与微调实战教程，中文、可复现，适合做第一个私有化 demo；本章先读与「四层结构」「毛利结构」相关的部分 |
-| 4 | [eugeneyan/applied-ml](https://github.com/eugeneyan/applied-ml) | 30,756 | 全章 | 工业界 ML 落地案例合集，看「模型之外」的评估、监控、组织协作怎么写；本章先读与「四层结构」「毛利结构」相关的部分 |
+| 1 | [microsoft/AI-For-Beginners](https://github.com/microsoft/AI-For-Beginners) | 70,422 | §1.四层结构（算力→模型→推理服务→应用） | §4.一次请求的钱怎么分：`lessons/` 里每课都有可跑的 notebook，重点看「成本/延迟」那几课的账单表格——把「一次请求的钱如何在四层之间分」算成算式，而不是记结论 |
+| 2 | [Hannibal046/Awesome-LLM](https://github.com/Hannibal046/Awesome-LLM) | 27,468 | §1.四层结构 | §3.为什么应用层岗位最多却存活率最低：`README.md` 的 Train / Inference / Evaluation 分区就是价值链分层的索引，顺着分区看每个方向有哪些在维护的仓库，能判断「这个方向还有没有坑」 |
+| 3 | [datawhalechina/self-llm](https://github.com/datawhalechina/self-llm) | 32,547 | §2.JD 拆解成四层信号 | §5.把岗位地图变成可验证的表：`docs/` 下有部署与微调的完整命令（vllm/llama-factory 两条线），按它的步骤跑通一次私有化，才知道「推理服务层」岗位在交付什么 |
+| 4 | [eugeneyan/applied-ml](https://github.com/eugeneyan/applied-ml) | 30,756 | §5.把岗位地图变成可验证的表 | §5.用代码验证而不是背结论：`docs/` 收录了评估、监控、组织协作的工业案例，看它「模型之外」的衡量口径，正好补本章「岗位不只考模型」那一条 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

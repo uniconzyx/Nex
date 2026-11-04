@@ -38,10 +38,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [huggingface/peft](https://github.com/huggingface/peft) | 21,852 | 全章 | LoRA/QLoRA 官方实现，微调章的核心工具；本章先读与「什么时候不该微调」「微调 vs RAG 判定树」相关的部分 |
-| 2 | [hiyouga/LLaMA-Factory](https://github.com/hiyouga/LLaMA-Factory) | 76,000 | 全章 | 中文微调一站式工具，从数据格式到导出合并的完整链路；本章先读与「什么时候不该微调」「微调 vs RAG 判定树」相关的部分 |
-| 3 | [unslothai/unsloth](https://github.com/unslothai/unsloth) | 78,352 | 全章 | 单卡微调加速，显存不够时的现实解；本章先读与「什么时候不该微调」「微调 vs RAG 判定树」相关的部分 |
-| 4 | [huggingface/trl](https://github.com/huggingface/trl) | 19,561 | 全章 | RLHF/DPO/GRPO 训练库，理解对齐阶段的工程接口；本章先读与「什么时候不该微调」「微调 vs RAG 判定树」相关的部分 |
+| 1 | [huggingface/peft](https://github.com/huggingface/peft) | 21,852 | §02 LoRA 低秩分解 ΔW=BA | §02 rank/alpha 怎么选：`src/peft/tuners/lora/layer.py` 里 `scaling = alpha / r` 是写死的，读这一行就懂本章「只翻 rank 不调 alpha 等于改了有效学习率」——不是经验，是代码 |
+| 2 | [hiyouga/LLaMA-Factory](https://github.com/hiyouga/LLaMA-Factory) | 76,000 | §03 数据配比与去重 | §03 对话模板与 loss mask：`examples/` 下每种任务都有数据格式样板，`data/` 里 dataset_info 标了字段含义，照它的格式准备一份，就知道「只让 assistant 段产生梯度」在数据层怎么表达 |
+| 3 | [unslothai/unsloth](https://github.com/unslothai/unsloth) | 78,352 | §02 QLoRA 4bit NF4 + 双重量化 | §02 显存账本：`src/` 里 NF4 量化与双重量化的实现集中在 quant 相关模块，对照本章显存账本逐项核对，能算出「单卡 24G 能微调多大的模型」 |
+| 4 | [huggingface/trl](https://github.com/huggingface/trl) | 19,561 | §03 过拟合识别与失败归因 | §01 什么时候不该微调：`trl` 的 trainer 默认就带 eval 与早停钩子，看它记录哪些曲线，正好对应本章「过拟合怎么被发现」 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

@@ -70,10 +70,10 @@ judge 怎么用人工样本校准、门禁阈值怎么定到误报率 5%、回�
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [openai/evals](https://github.com/openai/evals) | 19,623 | 全章 | 评测框架与题库结构，学会把「感觉不错」变成可回归的分数；本章先读与「黄金集构建」「指标分层」相关的部分 |
-| 2 | [EleutherAI/lm-evaluation-harness](https://github.com/EleutherAI/lm-evaluation-harness) | 14,285 | 全章 | 学术基准评测标准，面试问 MMLU/GSM8K 口径时的依据；本章先读与「黄金集构建」「指标分层」相关的部分 |
-| 3 | [explodinggradients/ragas](https://github.com/explodinggradients/ragas) | 16,000 | 全章 | RAG 专用评测：faithfulness/answer relevancy 的计算方式；本章先读与「黄金集构建」「指标分层」相关的部分 |
-| 4 | [microsoft/AI-For-Beginners](https://github.com/microsoft/AI-For-Beginners) | 70,422 | 全章 | 12 周 24 课的 AI 通识课，用来快速补齐术语与全景，避免面试时概念串味；本章先读与「黄金集构建」「指标分层」相关的部分 |
+| 1 | [openai/evals](https://github.com/openai/evals) | 19,623 | §01 黄金集分层抽样 | §01 指标分层（离线/线上/护栏）：`evals/elsuite/` 下每个 suite 都是一套可复现的评分器，把本章「黄金集要版本化」落成 registry 里的固定条目 |
+| 2 | [EleutherAI/lm-evaluation-harness](https://github.com/EleutherAI/lm-evaluation-harness) | 14,285 | §02 judge 的偏差谱系 | §02 两种口径与 kappa 校准：`lm_eval/tasks/` 里每个任务都写了 metric 与 fewshot 口径，换口径重跑同一条目得到不同分数——这就是「口径必须随分数一起记录」的证据 |
+| 3 | [explodinggradients/ragas](https://github.com/explodinggradients/ragas) | 16,000 | §01 指标分层 | §02 忠实度/答案完整率：`ragas/metrics/` 里 faithfulness 被拆成「拆句→逐句验证→比例」三步，读源码比记定义更能理解「为什么忠实度可以自动化」 |
+| 4 | [microsoft/AI-For-Beginners](https://github.com/microsoft/AI-For-Beginners) | 70,422 | §03 A/B 样本量先算后跑 | §03 不确定性与错误可恢复：`lessons/` 每课的评测小节都把「这个结论基于什么样本」写清楚，正可用于本章「没有样本量说明的结论不可信」 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

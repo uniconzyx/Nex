@@ -71,12 +71,12 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [langchain-ai/langgraph](https://github.com/langchain-ai/langgraph) | 44,248 | 全章 | 有状态 Agent 编排：图、检查点、人工介入，Agent 章的主线；本章先读与「工具 schema 设计与…」「幂等与副作用」相关的部分 |
-| 2 | [microsoft/autogen](https://github.com/microsoft/autogen) | 61,505 | 全章 | 多智能体对话框架，理解角色分工与终止条件；本章先读与「工具 schema 设计与…」「幂等与副作用」相关的部分 |
-| 3 | [crewAIInc/crewAI](https://github.com/crewAIInc/crewAI) | 59,947 | 全章 | 角色化多 Agent 框架，快速搭「调研-写作-审核」流水线；本章先读与「工具 schema 设计与…」「幂等与副作用」相关的部分 |
-| 4 | [openai/openai-agents-python](https://github.com/openai/openai-agents-python) | 30,195 | 全章 | 官方 Agents SDK：handoff、guardrail、tracing 的最小实现；本章先读与「工具 schema 设计与…」「幂等与副作用」相关的部分 |
-| 5 | [modelcontextprotocol/python-sdk](https://github.com/modelcontextprotocol/python-sdk) | 24,629 | 全章 | MCP 官方 SDK，工具生态的标准接口，写一个 server 就懂；本章先读与「工具 schema 设计与…」「幂等与副作用」相关的部分 |
-| 6 | [FoundationAgents/MetaGPT](https://github.com/FoundationAgents/MetaGPT) | 71,000 | 全章 | 软件公司式多 Agent，看 SOP 如何被编码进角色；本章先读与「工具 schema 设计与…」「幂等与副作用」相关的部分 |
+| 1 | [langchain-ai/langgraph](https://github.com/langchain-ai/langgraph) | 44,248 | §02 检查点、断点续跑与状态机建模 | §03 终止条件与死循环防护：`libs/langgraph/` 的 graph + checkpointer 是本章「有状态编排」的直接实现，读 `checkpoint/` 的存储接口，就懂「断点续跑」靠什么落盘 |
+| 2 | [microsoft/autogen](https://github.com/microsoft/autogen) | 61,505 | §03 角色分工 | §03 成本爆炸：`autogen-core/` 里 agent 之间的消息协议与终止条件都显式定义，对照本章「多智能体的成本随角色数超线性增长」 |
+| 3 | [crewAIInc/crewAI](https://github.com/crewAIInc/crewAI) | 59,947 | §03 共享黑板 | §03 多智能体的 handoff：`crew.py` 里 Task 的 `context` 参数就是「共享黑板」的落点，读它如何把上游产出注入下游，就懂本章「角色分工靠数据流而非提示词」 |
+| 4 | [openai/openai-agents-python](https://github.com/openai/openai-agents-python) | 30,195 | §01 工具 schema 与参数校验 | §01 幂等与副作用：`openai-agents/` 的 handoff / guardrail / tracing 三个钩子各管一件事，其中 guardrail 是本章「重试不能让副作用叠加」的兜底层 |
+| 5 | [modelcontextprotocol/python-sdk](https://github.com/modelcontextprotocol/python-sdk) | 24,629 | §01 权限最小化与沙箱 | §01 MCP 的工具发现：`src/mcp/server/` 里 `list_tools` 与 `call_tool` 是两个分离的 RPC，schema 校验发生在执行前——正是本章「把自由发挥拦在执行前」的协议证据 |
+| 6 | [FoundationAgents/MetaGPT](https://github.com/FoundationAgents/MetaGPT) | 71,000 | §03 多智能体：SOP 如何被编码进角色 | §03 终止条件：`metagpt/roles/` 每个角色类都带 `_observe` / `_think` / `_act` 三段，把本章「角色 = 职责 + 可用动作 + 终止条件」落成了类结构 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

@@ -73,10 +73,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [alirezadir/Machine-Learning-Interviews](https://github.com/alirezadir/Machine-Learning-Interviews) | 9,931 | 全章 | ML/LLM 岗位面试题分类整理，含系统设计；本章先读与「一页纸结构与 STAR-R」「量化指标四要素」相关的部分 |
-| 2 | [chiphuyen/ml-interviews-book](https://github.com/chiphuyen/ml-interviews-book) | 4,797 | 全章 | 《Machine Learning Interviews》开源书，面试官视角的评分逻辑；本章先读与「一页纸结构与 STAR-R」「量化指标四要素」相关的部分 |
-| 3 | [GokuMohandas/Made-With-ML](https://github.com/GokuMohandas/Made-With-ML) | 49,873 | 全章 | 从数据校验到部署监控的完整工程流水线，补「只会调 API」的短板；本章先读与「一页纸结构与 STAR-R」「量化指标四要素」相关的部分 |
-| 4 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | 全章 | 系统设计面试基础，Agent 服务也要过容量与一致性这关；本章先读与「一页纸结构与 STAR-R」「量化指标四要素」相关的部分 |
+| 1 | [alirezadir/Machine-Learning-Interviews](https://github.com/alirezadir/Machine-Learning-Interviews) | 9,931 | §02 系统设计：知识库 Agent 的容量账本与分层架构 | §01 STAR-R 一页纸：`system-design-primer` 里容量估算章节给出了「先算 QPS 与存储再画图」的模板，套到本章的知识库 Agent 上，容量账本就不是凭感觉写的 |
+| 2 | [chiphuyen/ml-interviews-book](https://github.com/chiphuyen/ml-interviews-book) | 4,797 | §02 八股高频题从背定义到给判断 | §03 三道手写题：`technical-interview-handbook` 的追问链把「背了定义」和「能下判断」分开，拿它的追问自测，就知道自己停在哪一层 |
+| 3 | [GokuMohandas/Made-With-ML](https://github.com/GokuMohandas/Made-With-ML) | 49,873 | §02 系统设计手写题 | §02 行为面：`ML-Questions` 按 LLM/ML 岗位分类，每类都带系统设计题，与本章「三道手写题 + 行为面」正好对得上 |
+| 4 | [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) | 376,373 | §03 前 30 天读代码与小切口 | §03 转正答辩证据链：`chiphuyen` 把「入职后如何证明价值」拆成可执行动作，是本章「把试用期讲成留任理由」的对照读物 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 
