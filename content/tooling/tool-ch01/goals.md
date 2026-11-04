@@ -62,10 +62,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [trimstray/the-book-of-secret-knowledge](https://github.com/trimstray/the-book-of-secret-knowledge) | 254,934 | §3.1 | 讲「排障入口」时看分类里的「Sysadmin」一节：`df`/`du`/`lsof`/`ss` 这几个命令的定位分工，正好对应本章「先看哪一层」的顺序 |
-| 2 | [ohmyzsh/ohmyzsh](https://github.com/ohmyzsh/ohmyzsh) | 190,274 | §4.1 | 讲「Shell 环境」时读 `lib/` 下的主题与补全脚本：`PATH`、别名、补全函数的加载顺序，决定了「为什么我的命令找不到」 |
-| 3 | [jlevy/the-art-of-command-line](https://github.com/jlevy/the-art-of-command-line) | 162,646 | §1.2 | 讲「文件与目录操作」时读 `README.md` 的「文件及数据处理」一节：`find`/`xargs`/`grep` 的组合用法给了可直接抄的一行命令，比 man 手册好上手 |
-| 4 | [bregman-arie/devops-exercises](https://github.com/bregman-arie/devops-exercises) | 86,127 | §2.1 | 讲「权限位」时看 `topics/linux/` 的权限练习：`chmod 755` 与 `chmod u+x` 的等价关系、`umask` 如何影响新建文件，题后有答案可自测 |
+| 1 | [trimstray/the-book-of-secret-knowledge](https://github.com/trimstray/the-book-of-secret-knowledge) | 254,934 | §1.2 inode 里到底有什么 | 读 `topics/linux/README.md`：它把磁盘相关排障题按「症状」组织，其中「`df` 报满但 `du` 加起来没那么多」正是 inode 被占满或「已删除但仍被打开」的文件；配合 §1.3 三条反直觉推论，就能把「磁盘满了」拆成「块满」与「inode 满」两种现场 |
+| 2 | [ohmyzsh/ohmyzsh](https://github.com/ohmyzsh/ohmyzsh) | 190,274 | §2.2 核心难点：rwx 对目录的含义完全不同 | 看 `topics/linux/exercises/`：权限题会要求你只给某用户「进得去但列不出」的组合，答案只能靠「目录 `x` 管进入、`r` 管列出」来凑；做完再回本章验证那条：`ls dir` 能列但 `stat dir/file` 报 Permission denied，就是缺 `x` |
+| 3 | [jlevy/the-art-of-command-line](https://github.com/jlevy/the-art-of-command-line) | 162,646 | §4.6 组合成真实工具：四条经典管道 | 读 `the-art-of-command-line/README.md` 的「文件及数据处理」一节：`find` / `xargs` / `grep` 的组合用法给了可直接抄的一行命令；读时对照 §4.5「find 是文件系统的查询语言」——`-print0` + `xargs -0` 为什么必要，在文件名带空格时一眼可见 |
+| 4 | [bregman-arie/devops-exercises](https://github.com/bregman-arie/devops-exercises) | 86,127 | §2.3 umask：权限的「默认值生成器」 | 看 `topics/linux/exercises/` 里新建文件与目录的题目：`chmod 755` 与 `chmod u+x` 的等价关系、`umask 022` 下新建文件为什么是 644 而不是 755，题后都有答案；先把 §2.5 权限判定顺序读完再做题，才能解释「属主是 root 为什么我还是能读」 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

@@ -68,10 +68,10 @@ Linux 文件系统与进程模型；本章把版本控制的「底层模型」�
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [trimstray/the-book-of-secret-knowledge](https://github.com/trimstray/the-book-of-secret-knowledge) | 254,934 | §3.2 | 讲「分支与合并」时看「Git」分类里的速查：`rebase` 与 `merge` 的取舍、`reflog` 救回误删分支，都是高频操作 |
-| 2 | [ohmyzsh/ohmyzsh](https://github.com/ohmyzsh/ohmyzsh) | 190,274 | §4.1 | 讲「别名与效率」时读 `plugins/git/git.plugin.zsh`：几十个别名把长命令压成两三个字母，理解它们等于理解「日常 Git 的主力命令是哪些」 |
-| 3 | [jlevy/the-art-of-command-line](https://github.com/jlevy/the-art-of-command-line) | 162,646 | §1.1 | 讲「Git 的日常操作」时读 `README.md` 的「版本控制」一节：`add`/`commit`/`log`/`diff` 的最小闭环，配 `git log --oneline --graph` 看历史形状 |
-| 4 | [bregman-arie/devops-exercises](https://github.com/bregman-arie/devops-exercises) | 86,127 | §2.1 | 讲「对象模型」时看 `topics/git/` 的练习：`git cat-file -p` 查看 blob/tree/commit 的内容，能把「三个对象」从概念变成可见的文本 |
+| 1 | [trimstray/the-book-of-secret-knowledge](https://github.com/trimstray/the-book-of-secret-knowledge) | 254,934 | §3.1 快进合并 vs 三方合并（非快进） | 读 `topics/git/branch_01.md` 与 `solutions/branch_01_solution.md`：题目要求在两条分叉分支上完成合并，答案里能看到 fast-forward 与 `--no-ff` 两种结果的图；读之前先看 §1.2「tree 与 commit 是快照而非差异」——正因为存快照，三方合并才需要 `merge-base` 找共同祖先 |
+| 2 | [ohmyzsh/ohmyzsh](https://github.com/ohmyzsh/ohmyzsh) | 190,274 | §4.1 reset 三模式 + checkout/restore/revert 的区别 | 读 `plugins/git/git.plugin.zsh`：几十个别名把长命令压成两三个字母，理解它们等于理解「日常 Git 的主力命令是哪些」；重点找 `grhh`（reset --hard）与 `gco`（checkout）这对——它们分别对应 §4.1 的「动哪个区」与 §4.2 的「HEAD 怎么动」 |
+| 3 | [jlevy/the-art-of-command-line](https://github.com/jlevy/the-art-of-command-line) | 162,646 | §1.1 三类核心对象（blob/tree/commit）与内容寻址（CAS） | 读 `topics/git/commit_01.md` 与`solutions/commit_01_solution.md`：题目让你解释「同一个文件改一行，为什么 hash 全变而其他文件不变」；答案就落在 blob 内容寻址上——这正是 §2.1 三区模型里 `add` 把 blob 写进对象库那一步 |
+| 4 | [bregman-arie/devops-exercises](https://github.com/bregman-arie/devops-exercises) | 86,127 | §2.2 分支是指向 commit 的指针；HEAD 是「当前位置」 | 读 `topics/git/squashing_commits.md`：压缩提交本质上是在移动分支指针，而不改 commit 内容；对照 §4.2 的 detached HEAD——那时 HEAD 直接指向 commit 而非分支，所以新提交没有分支认领，这才需要 `reflog` 救援 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

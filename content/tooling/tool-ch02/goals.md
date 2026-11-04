@@ -76,10 +76,10 @@ fd（文件描述符）是访问资源的统一句柄；本章把这条主线推
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [trimstray/the-book-of-secret-knowledge](https://github.com/trimstray/the-book-of-secret-knowledge) | 254,934 | §4.2 | 讲「一行命令解决一件事」时看「Shell one-liners」分类：把常见运维动作压成单行，是「管道思维」的最好训练材料 |
-| 2 | [ohmyzsh/ohmyzsh](https://github.com/ohmyzsh/ohmyzsh) | 190,274 | §1.2 | 讲「Shell 脚本的健壮性」时读 `oh-my-zsh.sh` 开头的选项设置：`setopt` 系列让脚本遇错即停、未定义变量报错——这是「脚本别默默跑错」的开关 |
-| 3 | [jlevy/the-art-of-command-line](https://github.com/jlevy/the-art-of-command-line) | 162,646 | §2.2 | 讲「进程管理」时读 `README.md` 的「进程管理」一节：`ps`/`top`/`kill` 的组合，以及「先找 PID 再发信号」的顺序，避免 `kill -9` 乱杀 |
-| 4 | [bregman-arie/devops-exercises](https://github.com/bregman-arie/devops-exercises) | 86,127 | §3.1 | 讲「管道与重定向」时看 `topics/linux/` 的练习题：`|`、`>`、`2>`、`tee` 的差别在题里被拆成若干小问，答错会立刻暴露理解漏洞 |
+| 1 | [trimstray/the-book-of-secret-knowledge](https://github.com/trimstray/the-book-of-secret-knowledge) | 254,934 | §3.2 xargs/find -exec/tee：批量与组合的工程取舍 | 读 `the-art-of-command-line/README.md` 的「一行命令」部分：它把常见运维动作压成单行，读的时候盯住每行用 `xargs` 还是 `-exec`——前者批量传参、后者逐个执行，差别在 §3.1「管道本质是 fd 表复制」之后才讲得清 |
+| 2 | [ohmyzsh/ohmyzsh](https://github.com/ohmyzsh/ohmyzsh) | 190,274 | §4.1 变量、条件、循环、$? 与 set -euo pipefail | 读 `oh-my-zsh.sh` 开头的选项设置：`setopt` 系列让脚本遇错即停、未定义变量报错——这是「脚本别默默跑错」的开关；对照 bash 的 `set -euo pipefail` 逐条看，就明白 §5.4「管道的退出码陷阱」为什么只能靠 `pipefail` 解 |
+| 3 | [jlevy/the-art-of-command-line](https://github.com/jlevy/the-art-of-command-line) | 162,646 | §1.2 进程状态机：R / S / D / Z / T 与僵尸、孤儿 | 读 `topics/os/README.md` 的进程相关题目：它要求你解释「为什么 `kill -9` 杀不掉 D 状态进程」，答案在状态机里——D 是等待不可中断 IO，信号要等系统调用返回才送达；这正是本章「信号的递送模型」的边界 |
+| 4 | [bregman-arie/devops-exercises](https://github.com/bregman-arie/devops-exercises) | 86,127 | §3.1 管道与重定向的本质：fd 表的复制与重定向 | 看 `topics/linux/exercises/`：`|`、`>`、`2>`、`tee` 的差别被拆成若干小问，答错会立刻暴露理解漏洞；做完再回 §2.1 信号的递送模型，就明白 `kill` 为什么是「发信号」而不是「杀掉」 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

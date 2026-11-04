@@ -108,10 +108,10 @@ Compose 是把「一组容器的声明式期望状态」写进 YAML 的工具；
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [trimstray/the-book-of-secret-knowledge](https://github.com/trimstray/the-book-of-secret-knowledge) | 254,934 | §2.3 | 讲「部署的排障顺序」时看「Sysadmin」分类：先看端口是否监听（`ss -lntp`）、再看进程是否活着、最后看日志，三步定位比盲查快 |
-| 2 | [ohmyzsh/ohmyzsh](https://github.com/ohmyzsh/ohmyzsh) | 190,274 | §4.1 | 讲「环境变量与配置注入」时读 `lib/` 里对 `PATH` 的处理：容器里同样靠环境变量注入配置，理解 Shell 的变量作用域能避免「变量在容器里读不到」 |
-| 3 | [jlevy/the-art-of-command-line](https://github.com/jlevy/the-art-of-command-line) | 162,646 | §3.1 | 讲「网络与端口」时读「网络」一节：`curl -v`、`ss`、`tcpdump` 的分工——分别回答「应用层通不通」「端口开没开」「包到没到」 |
-| 4 | [bregman-arie/devops-exercises](https://github.com/bregman-arie/devops-exercises) | 86,127 | §1.3 | 讲「Compose 的编排模型」时看 `topics/docker/` 的多容器练习：`depends_on` 只管启动顺序不管就绪，所以健康检查要单独配——这是「服务起来了但连不上」的常见原因 |
+| 1 | [trimstray/the-book-of-secret-knowledge](https://github.com/trimstray/the-book-of-secret-knowledge) | 254,934 | §4.4 常见故障排查：症状 → 根因 → 处置 | 看 `topics/containers/running_containers.md`：题目按「容器起不来 / 起来了但连不通 / 起来了但立刻退出」分场景排查；这套分层正是本章排障表的骨架，先分清「没起来」还是「起来了但连不通」，比盲查日志快得多 |
+| 2 | [ohmyzsh/ohmyzsh](https://github.com/ohmyzsh/ohmyzsh) | 190,274 | §2.2 环境变量：五级优先级与变量插值 | 读 `lib/` 里对 `PATH` 的处理：容器里同样靠环境变量注入配置，理解 Shell 的变量作用域能避免「变量在容器里读不到」；关键要分清 compose 文件里的 `${VAR}`（编排时插值）与容器内的运行时变量——这是两级不同的作用点 |
+| 3 | [jlevy/the-art-of-command-line](https://github.com/jlevy/the-art-of-command-line) | 162,646 | §1.2 网络：自定义 bridge、服务名即 DNS、暴露 vs 发布 | 读 `topics/containers/containerized_web_server.md`与 `flask_container_ci2`：前者验证服务名解析，后者展示多容器间的网络打通；配合本章 `expose` 与 `ports` 的区别，就能解释「同网段服务名能通、宿主机 curl 不通」 |
+| 4 | [bregman-arie/devops-exercises](https://github.com/bregman-arie/devops-exercises) | 86,127 | §2.1 数据卷：命名卷 vs 绑定挂载，持久化与备份 | 读 `topics/containers/containerized_db_persistent_storage.md`：题目要求让数据库数据在容器重建后仍存在，答案对比命名卷与绑定挂载两种写法；这直接验证本章那条——容器的可写层随实例消亡，只有卷是「越过容器生命周期」的存储 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

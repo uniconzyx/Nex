@@ -84,10 +84,10 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [trimstray/the-book-of-secret-knowledge](https://github.com/trimstray/the-book-of-secret-knowledge) | 254,934 | §3.2 | 讲「namespace 与 cgroup」时看「Containers」分类：`unshare`/`nsenter`/`cgcreate` 这些底层命令能手工复现容器的隔离，验证「容器不是虚拟机」 |
-| 2 | [ohmyzsh/ohmyzsh](https://github.com/ohmyzsh/ohmyzsh) | 190,274 | §4.2 | 讲「开发环境一致性」时读 `lib/` 与 `plugins/` 的组织：把配置放进镜像而不是「每人本机装一遍」，是「环境即代码」的最小实践 |
-| 3 | [jlevy/the-art-of-command-line](https://github.com/jlevy/the-art-of-command-line) | 162,646 | §2.1 | 讲「容器里的调试」时读「系统调试」一节：容器内没有 `ps`/`curl` 时用 `docker exec` 进容器、或用 `nsenter` 进命名空间，是排障的两条路 |
-| 4 | [bregman-arie/devops-exercises](https://github.com/bregman-arie/devops-exercises) | 86,127 | §1.1 | 讲「镜像分层」时看 `topics/docker/` 的练习题：每条 `RUN` 生成一层、层是只读的，所以「合并 RUN」能减小体积——题里有前后对比 |
+| 1 | [trimstray/the-book-of-secret-knowledge](https://github.com/trimstray/the-book-of-secret-knowledge) | 254,934 | §1.1 容器 = namespace（隔离视图）+ cgroup（限制用量）+ 共享内核 | 看 `topics/containers/README.md` 与 `run_forest_run.md`：前者解释容器与虚拟机的边界，后者让你在同机上跑多个容器观察隔离；做完再读 §1.2 三方权衡，就明白隔离强度差在哪里（共享内核意味着内核漏洞无法隔离） |
+| 2 | [ohmyzsh/ohmyzsh](https://github.com/ohmyzsh/ohmyzsh) | 190,274 | §2.1 镜像 = 只读层的有序栈 + 内容寻址 | 读 `topics/containers/image_layers.md`：它要求你解释「同一个 `RUN` 写在 Dockerfile 不同位置为什么层数不同」；这是本章最有说服力的一条验证——层是只读且不可合并的，所以 §2.2 的 overlayfs 只能叠不能改 |
+| 3 | [jlevy/the-art-of-command-line](https://github.com/jlevy/the-art-of-command-line) | 162,646 | §4.1 指令语义：CMD vs ENTRYPOINT、COPY vs ADD | 读 `topics/containers/write_containerfile_run_container.md`：题目要求你写一份完整 Dockerfile 并跑起来，答案会展示 `CMD` 与 `ENTRYPOINT` 组合时的参数覆盖规则；对照 §3.1「可写层归属容器实例」，就明白为什么 `docker exec` 里改的配置在 `docker rm` 后消失 |
+| 4 | [bregman-arie/devops-exercises](https://github.com/bregman-arie/devops-exercises) | 86,127 | §2.2 联合文件系统 overlayfs：lower / upper / merged / work | 读 `topics/containers/working_with_images.md`：它让你对比镜像大小与 `docker history` 输出的层结构；配合 §3.3 数据卷——写入 merged 目录会落到 upper 层，这解释了「容器里明明改了文件，重启后又变回去」，要持久化必须挂卷 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

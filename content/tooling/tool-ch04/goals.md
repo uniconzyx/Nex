@@ -76,10 +76,10 @@ Git 是一个**内容寻址的对象库**、分支只是指向 commit 的指针�
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [trimstray/the-book-of-secret-knowledge](https://github.com/trimstray/the-book-of-secret-knowledge) | 254,934 | §4.3 | 讲「仓库卫生」时看「Git」分类里的清理命令：`git gc`、`git prune`、删除已合并分支，避免仓库越用越臃肿 |
-| 2 | [ohmyzsh/ohmyzsh](https://github.com/ohmyzsh/ohmyzsh) | 190,274 | §1.3 | 讲「提交前的自检」时读 `plugins/git/` 里的 `gst`/`gd`/`gl` 别名：把「看状态 → 看差异 → 看历史」压成三个动作，形成固定节奏 |
-| 3 | [jlevy/the-art-of-command-line](https://github.com/jlevy/the-art-of-command-line) | 162,646 | §2.2 | 讲「冲突解决」时读「版本控制」一节的合并说明：先 `git status` 看冲突文件、再逐个 `<<<<<<<` 标记处理，最后 `add` 结束合并——顺序错了会卡在中间态 |
-| 4 | [bregman-arie/devops-exercises](https://github.com/bregman-arie/devops-exercises) | 86,127 | §3.1 | 讲「分支策略」时看 `topics/git/` 的分支练习：feature/release/hotfix 三类分支的合并方向，题里给了「什么情况下该从哪个分支切」的判断 |
+| 1 | [trimstray/the-book-of-secret-knowledge](https://github.com/trimstray/the-book-of-secret-knowledge) | 254,934 | §4.2 仓库卫生：`.gitignore`、`.gitattributes` 与 Git LFS | 看 `the-art-of-command-line/README.md` 里与 `git` 相关的条目：它给了清理与检查的一行命令；注意 `git gc` / `git prune` 会真的删掉未引用对象——这正是 §3.2 reflog 救援网失效的边界，所以本章强调「先确认 reflog 里没有要救的东西再 prune」 |
+| 2 | [ohmyzsh/ohmyzsh](https://github.com/ohmyzsh/ohmyzsh) | 190,274 | §1.2 push 为什么被拒绝，以及 `--force-with-lease` 为什么比 `--force` 安全 | 读 `plugins/git/` 里的 `gst`/`gd`/`gl` 别名：把「看状态 → 看差异 → 看历史」压成三个动作，形成固定节奏；push 被拒时正是这套节奏救场——先 `gst` 看本地领先什么、`gl` 看远端多了什么，再决定 rebase 还是 merge |
+| 3 | [jlevy/the-art-of-command-line](https://github.com/jlevy/the-art-of-command-line) | 162,646 | §2.2 冲突标记、解决流程与 `rerere` | 读 `topics/git/README.md` 的合并与冲突题目：它要求按「先 `git status` 看冲突文件、再逐个处理 `<<<<<<<` 标记、最后 `add` 结束合并」的顺序操作——顺序错了会卡在中间态；读时对照 §2.1「冲突的充要条件是两边改了同一段」，就明白为什么有些改动永远不冲突 |
+| 4 | [bregman-arie/devops-exercises](https://github.com/bregman-arie/devops-exercises) | 86,127 | §4.1 分支策略选型（Git Flow / GitHub Flow / Trunk Based）与 PR 流程 | 看 `topics/git/branch_01.md`：题目要求从指定基点切分支再合并回去，答案是「什么情况下该从哪个分支切」的具体示例；配合 §3.1 三种「复制/抵消」语义，就能说清 hotfix 该 cherry-pick 还是 merge 回主干 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 
