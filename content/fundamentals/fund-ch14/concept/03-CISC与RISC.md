@@ -1,9 +1,9 @@
 # CISC 与 RISC
 
-## 1. 背景/动机
+## 同样的算力为什么会演化出两种相反的指令集哲学
 早期受"内存昂贵 + 编译器弱"约束，人们希望一条指令干尽量多的活（复杂指令、多地址、微程序控制），演化出 CISC（Complex Instruction Set Computer，如 x86）。后来发现：大部分程序只用少数简单指令，复杂指令反而拖慢流水线、难优化。于是提出 RISC（Reduced Instruction Set Computer，如 MIPS、ARM、RISC-V）——指令精简、格式规整、靠编译器与流水线取胜。
 
-## 2. 定义/要点
+## CISC 与 RISC 的六项对照：指令数、长度、寻址、访存与流水线友好度
 核心对比：
 
 | 维度 | CISC（如 x86） | RISC（如 MIPS/RISC-V/ARM） |
