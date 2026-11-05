@@ -2,7 +2,7 @@
   "chapter": "cpp-ch17",
   "subject": "cpp",
   "title": "元编程与类型萃取：type_traits / constexpr / SFINAE / concept",
-  "fingerprint": "7b80bba2bc",
+  "fingerprint": "a967d1de21",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,103 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "递归模板实例化一万层，编译器先崩",
+      "brief": "想用模板算 `1+2+...+N`，教科书写法是 `Sum<N>` 递归继承 `Sum<N-1>`——这会实例化 N 个**不同类型**，每个都进符号表和调试信息，编译器默认只允许 900 层深度，一万层直接报错退出。C++17 的折叠表达式 `(args + ...)` 一次展开，只产生一个表达式。把规模拖到真实元编程代码的量级，看编译器要背多少份实例化。",
+      "params": [
+        {
+          "key": "nK",
+          "label": "模板规模（千）",
+          "min": 1,
+          "max": 100,
+          "step": 1,
+          "value": 50
+        },
+        {
+          "key": "mode",
+          "label": "实现方式",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "递归模板实例化",
+            "折叠表达式 / constexpr"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "n",
+          "label": "规模 N",
+          "expr": "nK * 1000",
+          "unit": "层",
+          "fmt": "int"
+        },
+        {
+          "key": "naiveInsts",
+          "label": "递归实例化份数",
+          "expr": "nK * 1000",
+          "unit": "份",
+          "fmt": "int"
+        },
+        {
+          "key": "foldInsts",
+          "label": "折叠表达式份数",
+          "expr": "1",
+          "unit": "份",
+          "fmt": "int"
+        },
+        {
+          "key": "insts",
+          "label": "当前实例化份数",
+          "expr": "if(mode == 1, foldInsts, naiveInsts)",
+          "unit": "份",
+          "fmt": "int"
+        },
+        {
+          "key": "compileMs",
+          "label": "编译耗时",
+          "expr": "insts * 5 / 1000",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "depth",
+          "label": "模板递归深度",
+          "expr": "if(mode == 1, 1, nK * 1000)",
+          "unit": "层",
+          "fmt": "int"
+        },
+        {
+          "key": "overLimit",
+          "label": "超出默认深度上限",
+          "expr": "if(depth > 900, 1, 0)",
+          "unit": "",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "n >= 10000",
+          "label": "规模 ≥1 万（真实元编程代码的量级）"
+        },
+        {
+          "expr": "naiveInsts >= 10000",
+          "label": "递归方案 ≥1 万份实例化（这就是要解决的痛点）"
+        },
+        {
+          "expr": "compileMs <= 50",
+          "label": "编译耗时 ≤50ms"
+        },
+        {
+          "expr": "depth <= 900",
+          "label": "递归深度 ≤900（编译器默认上限，超了直接编译失败）"
+        }
+      ],
+      "insight": "模板实例化不是「编译期免费」：每个 `Sum<k>` 都是一个**独立类型**，要占符号表、调试信息、还要参与重载决议。一万层就是一万个类型，编译时间线性涨、内存跟着涨，超过默认深度 900 还会直接报错。C++17 的折叠表达式把整个展开压成一个表达式：`(std::forward<Ts>(args) + ...)` 编译期只走一遍 AST，运行期是 N-1 条加法指令。`constexpr` 函数循环是另一条路——它算的是值，不产生类型。判断标准很清楚：**要「类型」才用模板递归（typelist、tuple 展开），要「值」就用折叠表达式或 constexpr**。现代代码里还在用递归模板算数值的，基本都是没跟上 C++17 的老写法。"
+    },
     {
       "kind": "debug",
       "title": "模板里缺一个 typename",

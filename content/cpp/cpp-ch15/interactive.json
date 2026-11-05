@@ -2,7 +2,7 @@
   "chapter": "cpp-ch15",
   "subject": "cpp",
   "title": "命名空间与模块化：namespace / inline namespace / C++20 模块",
-  "fingerprint": "86c28b2ce6",
+  "fingerprint": "b2427a93b9",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,100 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "五百个源文件，为什么改一行要等十分钟",
+      "brief": "`#include` 本质是文本粘贴：一个 1 万行的头文件被 500 个 .cpp 各包含一次，编译器就要把这一万行解析 500 遍——500 万行，全是重复劳动。C++20 模块把这份头文件只编译一次、产出二进制接口（BMI），每个 TU 加载 BMI 是常数时间。把 TU 数与头文件规模拖到真实工程的量级，看这条线性增长从哪来。",
+      "params": [
+        {
+          "key": "tu",
+          "label": "编译单元（.cpp）数",
+          "min": 50,
+          "max": 1000,
+          "step": 50,
+          "value": 500
+        },
+        {
+          "key": "hLinesK",
+          "label": "公共头文件行数（千行）",
+          "min": 1,
+          "max": 20,
+          "step": 1,
+          "value": 10
+        },
+        {
+          "key": "mode",
+          "label": "组织方式",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "#include 头文件",
+            "C++20 模块"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "headerLines",
+          "label": "#include 解析行数",
+          "expr": "tu * hLinesK * 1000",
+          "unit": "行",
+          "fmt": "int"
+        },
+        {
+          "key": "moduleLines",
+          "label": "模块方案等效行数",
+          "expr": "hLinesK * 1000 + tu * 50",
+          "unit": "行",
+          "fmt": "int"
+        },
+        {
+          "key": "chosenLines",
+          "label": "当前方案等效行数",
+          "expr": "if(mode == 1, moduleLines, headerLines)",
+          "unit": "行",
+          "fmt": "int"
+        },
+        {
+          "key": "sec",
+          "label": "编译耗时",
+          "expr": "chosenLines * 2 / 1000000",
+          "unit": "秒",
+          "fmt": "fix2"
+        },
+        {
+          "key": "rebuild",
+          "label": "改头文件后重编 TU",
+          "expr": "tu",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "ratio",
+          "label": "#include / 模块",
+          "expr": "headerLines / moduleLines",
+          "unit": "倍",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "tu >= 200",
+          "label": "编译单元 ≥200 个（真实中型工程规模）"
+        },
+        {
+          "expr": "headerLines >= 2000000",
+          "label": "#include 解析 ≥200 万行（这就是编译慢的根因）"
+        },
+        {
+          "expr": "chosenLines <= 100000",
+          "label": "当前方案 ≤10 万行等效（约 0.2 秒）"
+        }
+      ],
+      "insight": "C++ 的编译慢有一半来自 `#include` 的语义：它把被包含文件的**全文**粘进当前 TU，再由编译器重新解析、重建符号表。500 个 TU 包含同一个 1 万行头文件，就是 500 万行重复解析——而你只改了一行注释。三种缓解手段的层次：① **前向声明 + 只在 .cpp 里 include**（最便宜，立刻见效）；② **PCH 预编译头**（`target_precompile_headers`），只省解析不省语义；③ **C++20 模块**：头文件编译一次产出 BMI，TU 只 `import`——这才是从 O(TU × N) 降到 O(TU + N)。注意 `rebuild` 那行：模块**没有自动解决**「改头文件重编所有下游」的问题，依赖图还是要正确（`ninja`/`ccache` 的用武之地）。"
+    },
     {
       "kind": "debug",
       "title": "头文件里的计数器永远停在 0",

@@ -2,7 +2,7 @@
   "chapter": "cpp-ch13",
   "subject": "cpp",
   "title": "输入/输出与文件：iostream、fstream 与格式化",
-  "fingerprint": "14017ed35a",
+  "fingerprint": "eceb025a2c",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,111 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "两百万行输出，为什么卡在 endl 上",
+      "brief": "`std::endl` 不只是换行，它等于 `'\\n'` 加一次 `flush()`——每写一行就发一次 write 系统调用，两百万行就是两百万次，光系统调用就两秒。`'\\n'` 只在缓冲区满（通常 4~8KB）时才真正写盘。再加上 iostream 默认要和 C 的 stdio 保持同步，每次 `<<` 都要多绕一圈。把行数与两个开关拖到真实日志的规模，看这几行代码值多少倍性能。",
+      "params": [
+        {
+          "key": "linesK",
+          "label": "输出行数（千行）",
+          "min": 100,
+          "max": 5000,
+          "step": 100,
+          "value": 2000
+        },
+        {
+          "key": "endl",
+          "label": "换行方式",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 1,
+          "labels": [
+            "'\\n'（缓冲）",
+            "std::endl（每次 flush）"
+          ]
+        },
+        {
+          "key": "sync",
+          "label": "stdio 同步",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 1,
+          "labels": [
+            "关闭（sync_with_stdio(false)）",
+            "保持默认同步"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "lines",
+          "label": "输出行数",
+          "expr": "linesK * 1000",
+          "unit": "行",
+          "fmt": "int"
+        },
+        {
+          "key": "endlSyscalls",
+          "label": "endl 的系统调用数",
+          "expr": "linesK * 1000",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "syscalls",
+          "label": "当前系统调用数",
+          "expr": "if(endl == 1, linesK * 1000, linesK * 5)",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "syscallMs",
+          "label": "系统调用耗时",
+          "expr": "syscalls / 1000",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "fmtMs",
+          "label": "格式化耗时",
+          "expr": "linesK * 1000 * 70 / 1000000 * if(sync == 1, 3, 1)",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "totalMs",
+          "label": "总耗时",
+          "expr": "syscallMs + fmtMs",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "ratio",
+          "label": "相对最优写法",
+          "expr": "totalMs / (linesK * 5 / 1000 + linesK * 1000 * 70 / 1000000)",
+          "unit": "倍",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "lines >= 1000000",
+          "label": "输出 ≥100 万行（真实日志/竞赛输出规模）"
+        },
+        {
+          "expr": "endlSyscalls >= 1000000",
+          "label": "endl 方案 ≥100 万次系统调用（这就是要解决的痛点）"
+        },
+        {
+          "expr": "totalMs <= 500",
+          "label": "总耗时 ≤500ms（交互/判题的时间预算）"
+        }
+      ],
+      "insight": "`std::endl` 是「换行 + 刷新」，不是「换行」。刷新意味着这次 write 必须真的落到内核，一次约 1μs；两百万行就是两秒，而 `'\\n'` 攒满 8KB 缓冲才写一次，只要一万次调用。第二个隐形开销是 iostream 默认 `sync_with_stdio(true)`：C++ 流要和 C 的 stdio 共享缓冲，每次 `<<` 都过一遍同步层，所以 `cin/cout` 比 `scanf/printf` 慢 3 倍左右。两行改动就能拿回几十倍：`ios::sync_with_stdio(false); cin.tie(nullptr);` + 全部 `endl` 改 `'\\n'`。（真需要立即落盘时才 flush——比如崩溃前要留下最后一行日志，那种场景该用 `std::flush` 或直接写无缓冲的 `write(2)`。）"
+    },
     {
       "kind": "debug",
       "title": "文件末尾多算了一行",

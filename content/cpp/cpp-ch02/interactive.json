@@ -2,7 +2,7 @@
   "chapter": "cpp-ch02",
   "subject": "cpp",
   "title": "函数：声明/定义、重载、默认参数与 lambda",
-  "fingerprint": "35062e5e32",
+  "fingerprint": "98b8273aca",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,129 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "一个 std::function，捕获大了就要堆分配",
+      "brief": "`std::function` 要先擦掉类型才能存任何可调用对象，它靠一块内置缓冲区（libstdc++ 里是 16 字节）装下小的捕获。装得下就原地存，装不下就 new。捕获三个 shared_ptr 就是 48 字节——每个回调一次堆分配。把捕获的指针个数与回调数量拖到真实事件系统的规模，看这一百万次 malloc 是怎么把注册接口拖慢的。",
+      "params": [
+        {
+          "key": "ptrs",
+          "label": "捕获 shared_ptr 个数",
+          "min": 1,
+          "max": 4,
+          "step": 1,
+          "value": 3
+        },
+        {
+          "key": "callbacksM",
+          "label": "回调数量（百万）",
+          "min": 1,
+          "max": 10,
+          "step": 1,
+          "value": 1
+        },
+        {
+          "key": "mode",
+          "label": "捕获方式",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "按值捕获全部",
+            "收敛成 1 个 Context 指针"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "callbacks",
+          "label": "回调数量",
+          "expr": "callbacksM * 1000000",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "capB",
+          "label": "捕获体积",
+          "expr": "ptrs * 16",
+          "unit": "B",
+          "fmt": "int"
+        },
+        {
+          "key": "sboB",
+          "label": "SBO 容量",
+          "expr": "16",
+          "unit": "B",
+          "fmt": "int"
+        },
+        {
+          "key": "naiveAllocs",
+          "label": "按值捕获的分配次数",
+          "expr": "if(ptrs * 16 <= 16, 0, callbacks)",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "naiveHeapMB",
+          "label": "按值捕获堆占用",
+          "expr": "if(ptrs * 16 <= 16, 0, callbacks * ptrs * 16 / 1048576)",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "ctxMB",
+          "label": "收敛方案占用",
+          "expr": "callbacks * 16 / 1048576",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "chosenAllocs",
+          "label": "当前分配次数",
+          "expr": "if(mode == 1, 0, naiveAllocs)",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "chosenMB",
+          "label": "当前堆占用",
+          "expr": "if(mode == 1, ctxMB, naiveHeapMB)",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "allocMs",
+          "label": "分配耗时",
+          "expr": "chosenAllocs * 100 / 1000000",
+          "unit": "ms",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "callbacks >= 1000000",
+          "label": "回调数 ≥100 万（真实事件系统的规模）"
+        },
+        {
+          "expr": "ptrs >= 2",
+          "label": "捕获 ≥2 个 shared_ptr（超过 16 字节的 SBO 才出问题）"
+        },
+        {
+          "expr": "naiveHeapMB >= 32",
+          "label": "按值捕获堆占用 ≥32MB（这就是要解决的痛点）"
+        },
+        {
+          "expr": "chosenAllocs <= 0",
+          "label": "当前方式堆分配 0 次（必须落进 SBO）"
+        },
+        {
+          "expr": "chosenMB <= 32",
+          "label": "当前堆占用 ≤32MB"
+        }
+      ],
+      "insight": "`std::function` 是类型擦除的代价：为了能存任意 lambda，它得在对象里留一块定长缓冲区，libstdc++ 给的是 16 字节（libc++ 更小）。捕获超过这个尺寸，构造时就要 `new`，调用时还要多一次指针间接——一百万个回调就是一百万次 malloc、0.1 秒和 45MB。工程上的三条对策：① 捕获 `this` 或一个指针（8 字节）而不是按值拷几个 shared_ptr；② 高频回调改用模板参数 / `function_ref`（C++26）/ 自定义类型擦除，把 SBO 做大；③ 真要共享状态，就让所有回调只捕获一个 `std::shared_ptr<Context>`——16 字节刚好卡在 SBO 阈值上（本关的收敛方案），共享一份上下文而不是每个回调拷一份。顺带一条反直觉的：`std::function` 的对象大小是固定的（32~40 字节），捕获多少都不影响 `sizeof`，超出的部分全在堆上——所以 `sizeof` 看不出这里的内存问题。"
+    },
     {
       "kind": "debug",
       "title": "默认参数写了两遍",

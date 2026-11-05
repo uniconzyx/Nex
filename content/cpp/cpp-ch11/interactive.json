@@ -2,7 +2,7 @@
   "chapter": "cpp-ch11",
   "subject": "cpp",
   "title": "异常处理与断言：try/catch、noexcept 与契约",
-  "fingerprint": "9900de4dbb",
+  "fingerprint": "088d08184f",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,112 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "用异常做控制流，代价是每次 2 微秒",
+      "brief": "异常在「不抛」的时候几乎不花钱——编译器用表驱动展开，运行期零判断。但一旦真的 throw，要查表、逐层展开栈、构造异常对象，一次约 2 微秒，比返回错误码贵两千倍。如果把它当 if/else 用（比如「找不到就抛」），错误率一高，整条路径就慢得离谱。把错误率和调用量拖到真实规模看看。",
+      "params": [
+        {
+          "key": "callsM",
+          "label": "调用量（百万次）",
+          "min": 1,
+          "max": 50,
+          "step": 1,
+          "value": 10
+        },
+        {
+          "key": "errPct",
+          "label": "错误率",
+          "min": 0,
+          "max": 50,
+          "step": 5,
+          "value": 10,
+          "unit": "%"
+        },
+        {
+          "key": "mode",
+          "label": "错误处理方式",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "throw 异常",
+            "返回错误码"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "calls",
+          "label": "调用次数",
+          "expr": "callsM * 1000000",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "errors",
+          "label": "错误次数",
+          "expr": "callsM * 1000000 * errPct / 100",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "excMs",
+          "label": "异常方案耗时",
+          "expr": "errors * 2000 / 1000000",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "errMs",
+          "label": "错误码方案耗时",
+          "expr": "calls * 1 / 1000000",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "chosenMs",
+          "label": "当前方案耗时",
+          "expr": "if(mode == 1, errMs, excMs)",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "ratio",
+          "label": "异常 / 错误码（单次错误）",
+          "expr": "2000",
+          "unit": "倍",
+          "fmt": "int"
+        },
+        {
+          "key": "okPathNs",
+          "label": "成功路径单次开销",
+          "expr": "if(mode == 1, 1, 0)",
+          "unit": "ns",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "calls >= 10000000",
+          "label": "调用 ≥1000 万次（真实热路径规模）"
+        },
+        {
+          "expr": "errors >= 100000",
+          "label": "错误 ≥10 万次（错误够多才暴露异常的开销）"
+        },
+        {
+          "expr": "excMs >= 100",
+          "label": "异常方案 ≥100ms（这就是要解决的痛点）"
+        },
+        {
+          "expr": "chosenMs <= 20",
+          "label": "当前方案 ≤20ms（热路径预算）"
+        }
+      ],
+      "insight": "C++ 的异常是**零成本抽象**，但「零成本」只针对不抛的那条路径：编译器把 try 块编译成表项，正常执行时一条指令都不多花。一旦 throw，就要查异常表、沿栈逐层找 handler、沿途析构局部对象——实测一次约 2μs，比 `return errno` 的 1ns 贵 **2000 倍**。所以判据只有一条：**异常用于「不该发生的事」**（磁盘掉了、协议被破坏、前置条件被违反），不要用于「常见分支」（查不到、解析失败、队列空）。Google C++ Style 直接禁异常、LLVM 用 `Expected<T>`、Rust 用 `Result`——思路一致：把「可预期的失败」放进返回值类型，让编译期强制处理；异常留给真正异常的状态。"
+    },
     {
       "kind": "debug",
       "title": "catch 里 typeid 恒为 Base",

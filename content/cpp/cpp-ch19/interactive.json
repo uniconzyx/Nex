@@ -2,7 +2,7 @@
   "chapter": "cpp-ch19",
   "subject": "cpp",
   "title": "工程化与测试：CMake、单元测试与 CI",
-  "fingerprint": "029bc8e0a7",
+  "fingerprint": "6e2a420696",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,97 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "一万个测试串行跑，CI 从八十分钟压到六分钟",
+      "brief": "CI 的总时长 = 固定开销（拉代码、配置、编译，约 1 分钟）+ 跑测试的时间 / 并行度。一万个测试、每个 500ms，串行跑是 83 分钟，开发者的每次提交都要等一个多小时。并行到 16 路只要 5 分钟——但再怎么加机器也压不到 1 分钟以下，那是固定开销，正是 Amdahl 定律限制的部分。把测试数与并行度拖到真实流水线规模，看这条曲线怎么变平。",
+      "params": [
+        {
+          "key": "testsK",
+          "label": "测试数（千个）",
+          "min": 1,
+          "max": 20,
+          "step": 1,
+          "value": 10
+        },
+        {
+          "key": "testMs",
+          "label": "单测试耗时",
+          "min": 100,
+          "max": 2000,
+          "step": 100,
+          "value": 500,
+          "unit": "ms"
+        },
+        {
+          "key": "parallel",
+          "label": "并行度",
+          "min": 1,
+          "max": 32,
+          "step": 1,
+          "value": 1
+        }
+      ],
+      "metrics": [
+        {
+          "key": "tests",
+          "label": "测试数",
+          "expr": "testsK * 1000",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "serialMin",
+          "label": "串行总时长",
+          "expr": "testsK * 1000 * testMs / 60000",
+          "unit": "分钟",
+          "fmt": "fix2"
+        },
+        {
+          "key": "fixedSec",
+          "label": "固定开销（checkout+构建）",
+          "expr": "60",
+          "unit": "秒",
+          "fmt": "int"
+        },
+        {
+          "key": "totalMin",
+          "label": "并行后总时长",
+          "expr": "60 / 60 + testsK * 1000 * testMs / parallel / 60000",
+          "unit": "分钟",
+          "fmt": "fix2"
+        },
+        {
+          "key": "speedup",
+          "label": "加速比",
+          "expr": "(testsK * 1000 * testMs / 60000) / totalMin",
+          "unit": "倍",
+          "fmt": "fix2"
+        },
+        {
+          "key": "floorMin",
+          "label": "理论下限（固定开销）",
+          "expr": "1",
+          "unit": "分钟",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "tests >= 5000",
+          "label": "测试数 ≥5000（真实项目的集成测试量级）"
+        },
+        {
+          "expr": "serialMin >= 30",
+          "label": "串行 ≥30 分钟（这就是要解决的痛点）"
+        },
+        {
+          "expr": "totalMin <= 10",
+          "label": "并行后 ≤10 分钟（开发者可接受的反馈时间）"
+        }
+      ],
+      "insight": "CI 时长可以拆成两段：**固定开销**（拉代码、装依赖、编译，1 分钟）和**可并行部分**（跑测试，`tests × testMs`）。加机器只能压第二段，所以 Amdahl 定律给出的下界就是固定开销那一分钟——从 83 分钟压到 5 分钟后，再加到 32 路并行也只能从 5 分钟降到 3.6 分钟，收益迅速归零。真正有效的优化顺序是：① 先把固定开销压下去（缓存依赖、增量构建、ccache）；② 再切分慢测试（一个跑 10 分钟的测试会拖死整个 job）；③ 最后才加并行度。另外并行度不等于机器数：测试之间有共享资源（数据库、端口、临时目录）时，盲上加并行会变成互相踩，收益远低于线性。"
+    },
     {
       "kind": "debug",
       "title": "add_library 之后还是 undefined reference",

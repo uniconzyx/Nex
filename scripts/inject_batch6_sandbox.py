@@ -594,7 +594,9 @@ def main() -> int:
     existed = sum(1 for k in MODULES if k in chapters)
     for key, mod in MODULES.items():
         # 幂等：同一章节重复运行结果一致，不会叠加两份
-        chapters[key] = [mod]
+        # 只替换本章的 sandbox，保留 debug 等其它模块（直接赋值会把同章其它玩法静默抹掉）
+        kept = [m for m in chapters.get(key, []) if m.get("kind") != "sandbox"]
+        chapters[key] = [mod] + kept
         print(f"added {key:<20} ({len(mod['params'])} params / {len(mod['metrics'])} metrics / {len(mod['checks'])} checks)")
 
     # indent=1 + newline="\n"：与仓库现有风格逐字节一致（indent=2 或 CRLF 会整份假 diff）

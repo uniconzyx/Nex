@@ -143,10 +143,16 @@ git commit -m "content(<subject>): 新增 <id> 三视角 + 双来源"
 | 生产者 | 拥有章节 | 语义 |
 |---|---|---|
 | `scripts/_author_labs.py` | cpp / fundamentals / ml / ai / database 共 68 章 | 作者源，`--check` 只比对自己拥有的章节 |
-| `scripts/inject_batch{3,4,5,6}_sandbox.py` | 其余章节（tooling / middleware / bigdata / data / java / agent / discrete-math / python …） | 幂等合并：`chapters[key] = [mod]` |
+| `scripts/inject_batch{3,4,5,6,7}_sandbox.py` | 其余章节（tooling / middleware / bigdata / data / java / agent / discrete-math / python / cpp …） | 幂等合并：只替换本章 sandbox，保留 debug 等其它玩法 |
 
 > ⚠️ 不要用「整份重写」的方式改 labs.json。`_author_labs.py` 现在只覆盖自己拥有的章、
 > 其余原样保留；在此之前的版本会静默抹掉外部批次的几十章手工模块。
+>
+> ⚠️ 注入脚本也**不能**直接 `chapters[key] = [mod]`：那会抹掉同章里其它 kind 的模块
+> （cpp 那 11 章原本各带一个 debug，batch7 首版就这么吞掉过 11 个）。正确写法是
+> `kept = [m for m in chapters.get(key, []) if m["kind"] != "sandbox"]; chapters[key] = [mod] + kept`。
+> 守门里的 `audit_handmade_labs` 只统计模块总数，**不会因为丢模块而报错**——所以
+> 每批注入后必须核对自己的「保留其它模块 N 个」输出，别只看 `通过`。
 
 改完按顺序跑（每一步都必须绿）：
 

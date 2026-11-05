@@ -2,7 +2,7 @@
   "chapter": "cpp-ch09",
   "subject": "cpp",
   "title": "STL 算法与迭代器：sort/find/lambda/范围",
-  "fingerprint": "4d3ad06d5c",
+  "fingerprint": "98bf4ef908",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,118 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "一万次查找要不要先排序",
+      "brief": "在一百万条记录里查一万次，最直接的办法是每次都从头扫一遍——那是 10¹⁰ 次比较，跑十秒以上。先花 n·log n 排一次序（或建哈希表），之后每次查询只要 log n 步，总代价掉到两千万次。把数据量与查询次数拖到真实业务规模，看「线性扫」和「排序 + 二分」两条线什么时候交叉、什么时候分岔。",
+      "params": [
+        {
+          "key": "nK",
+          "label": "数据量（千条）",
+          "min": 10,
+          "max": 2000,
+          "step": 10,
+          "value": 2000
+        },
+        {
+          "key": "qK",
+          "label": "查询次数（千次）",
+          "min": 2,
+          "max": 100,
+          "step": 2,
+          "value": 20
+        },
+        {
+          "key": "mode",
+          "label": "查找方案",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "每次线性扫",
+            "排序 + 二分"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "n",
+          "label": "数据量 n",
+          "expr": "nK * 1000",
+          "unit": "条",
+          "fmt": "int"
+        },
+        {
+          "key": "q",
+          "label": "查询次数 k",
+          "expr": "qK * 1000",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "linearOps",
+          "label": "线性扫比较次数",
+          "expr": "nK * 1000 * qK * 1000",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "sortOps",
+          "label": "排序比较次数 n·log₂n",
+          "expr": "nK * 1000 * log2(nK * 1000)",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "binOps",
+          "label": "二分比较次数 k·log₂n",
+          "expr": "qK * 1000 * log2(nK * 1000)",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "sortedOps",
+          "label": "排序+二分合计",
+          "expr": "sortOps + binOps",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "chosenOps",
+          "label": "当前方案比较次数",
+          "expr": "if(mode == 1, sortedOps, linearOps)",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "ms",
+          "label": "预计耗时",
+          "expr": "chosenOps / 1000000",
+          "unit": "ms",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "n >= 1000000",
+          "label": "数据量 ≥100 万条（真实业务表规模）"
+        },
+        {
+          "expr": "q >= 10000",
+          "label": "查询 ≥1 万次（查得够多才值得建索引）"
+        },
+        {
+          "expr": "linearOps >= 10000000000",
+          "label": "线性扫 ≥100 亿次比较（这就是要解决的痛点）"
+        },
+        {
+          "expr": "chosenOps <= 100000000",
+          "label": "当前方案 ≤1 亿次比较（约 0.1 秒）"
+        }
+      ],
+      "insight": "查找的复杂度账要按**总代价**算，不是单次：线性扫是 `k·n`，排序+二分是 `n·log n + k·log n`。k 一大，`n` 就被 `log n` 彻底压住。200 万条查 2 万次：线性 4×10¹⁰ vs 排序+二分 4.2×10⁷，差三个数量级。这条结论有三个推论：① 查一次就完事的场景（k=1）排序反而更慢，别过度索引；② 索引是**一次性投入**，摊到 k 次查询上才划算（和 ch04 的 arena 同构）；③ 哈希表把 `log n` 也省成 O(1)，但要求可哈希、且不支持范围查询——数据库里 B+ 树而不是哈希索引，正是为了 `ORDER BY` 和范围扫描。"
+    },
     {
       "kind": "debug",
       "title": "一边遍历一边 erase",

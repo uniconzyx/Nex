@@ -339,6 +339,26 @@
    }
   ]
  },
+ "cpp/cpp-ch02": {
+  "ok": true,
+  "params": [
+   {
+    "key": "ptrs",
+    "type": "range",
+    "value": 2.0
+   },
+   {
+    "key": "callbacksM",
+    "type": "range",
+    "value": 2.0
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
  "cpp/cpp-ch03": {
   "ok": true,
   "params": [
@@ -346,6 +366,21 @@
     "key": "len",
     "type": "range",
     "value": 15.0
+   }
+  ]
+ },
+ "cpp/cpp-ch04": {
+  "ok": true,
+  "params": [
+   {
+    "key": "nM",
+    "type": "range",
+    "value": 68.0
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 1
    }
   ]
  },
@@ -384,6 +419,26 @@
    }
   ]
  },
+ "cpp/cpp-ch07": {
+  "ok": true,
+  "params": [
+   {
+    "key": "types",
+    "type": "range",
+    "value": 8.0
+   },
+   {
+    "key": "funcs",
+    "type": "range",
+    "value": 8.0
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
  "cpp/cpp-ch08": {
   "ok": true,
   "params": [
@@ -396,6 +451,26 @@
     "key": "factor",
     "type": "range",
     "value": 2.5
+   }
+  ]
+ },
+ "cpp/cpp-ch09": {
+  "ok": true,
+  "params": [
+   {
+    "key": "nK",
+    "type": "range",
+    "value": 1000.0
+   },
+   {
+    "key": "qK",
+    "type": "range",
+    "value": 10.0
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 1
    }
   ]
  },
@@ -419,6 +494,101 @@
    }
   ]
  },
+ "cpp/cpp-ch11": {
+  "ok": true,
+  "params": [
+   {
+    "key": "callsM",
+    "type": "range",
+    "value": 10.0
+   },
+   {
+    "key": "errPct",
+    "type": "range",
+    "value": 5.0
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "cpp/cpp-ch12": {
+  "ok": true,
+  "params": [
+   {
+    "key": "nM",
+    "type": "range",
+    "value": 5.0
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "cpp/cpp-ch13": {
+  "ok": true,
+  "params": [
+   {
+    "key": "linesK",
+    "type": "range",
+    "value": 1000.0
+   },
+   {
+    "key": "endl",
+    "type": "opt",
+    "value": 0
+   },
+   {
+    "key": "sync",
+    "type": "opt",
+    "value": 0
+   }
+  ]
+ },
+ "cpp/cpp-ch14": {
+  "ok": true,
+  "params": [
+   {
+    "key": "sitesK",
+    "type": "range",
+    "value": 10.0
+   },
+   {
+    "key": "stmts",
+    "type": "range",
+    "value": 14.0
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "cpp/cpp-ch15": {
+  "ok": true,
+  "params": [
+   {
+    "key": "tu",
+    "type": "range",
+    "value": 200.0
+   },
+   {
+    "key": "hLinesK",
+    "type": "range",
+    "value": 10.0
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
  "cpp/cpp-ch16": {
   "ok": true,
   "params": [
@@ -434,6 +604,21 @@
    }
   ]
  },
+ "cpp/cpp-ch17": {
+  "ok": true,
+  "params": [
+   {
+    "key": "nK",
+    "type": "range",
+    "value": 10.0
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
  "cpp/cpp-ch18": {
   "ok": true,
   "params": [
@@ -441,6 +626,26 @@
     "key": "layout",
     "type": "opt",
     "value": 1
+   }
+  ]
+ },
+ "cpp/cpp-ch19": {
+  "ok": true,
+  "params": [
+   {
+    "key": "testsK",
+    "type": "range",
+    "value": 5.0
+   },
+   {
+    "key": "testMs",
+    "type": "range",
+    "value": 400.0
+   },
+   {
+    "key": "parallel",
+    "type": "range",
+    "value": 4.0
    }
   ]
  },

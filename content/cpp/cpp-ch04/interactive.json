@@ -2,7 +2,7 @@
   "chapter": "cpp-ch04",
   "subject": "cpp",
   "title": "指针与内存管理：指针运算、new/delete 与悬垂",
-  "fingerprint": "48d7c11f01",
+  "fingerprint": "4860fff3bf",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,103 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "一亿个小对象，为什么 new 出来的内存是 8 倍",
+      "brief": "`new int(0)` 只请求 4 字节，但 glibc 的 malloc 最小块是 32 字节——8 字节的 size 头、16 字节对齐、再加最小可用空间。一亿个 int 名义上 400MB，实际吃掉 3.2GB。换成一次分配大块、自己按下标切片（arena / 连续容器），元数据只付一次，内存立刻回到 400MB。把对象数与分配策略拖到真实规模试试。",
+      "params": [
+        {
+          "key": "nM",
+          "label": "对象数（百万）",
+          "min": 1,
+          "max": 200,
+          "step": 1,
+          "value": 100
+        },
+        {
+          "key": "mode",
+          "label": "分配策略",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "逐个 new int",
+            "一次大块 + 切片"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "objs",
+          "label": "对象数",
+          "expr": "nM * 1000000",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "newMB",
+          "label": "逐个 new 占用",
+          "expr": "nM * 1000000 * 32 / 1048576",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "arenaMB",
+          "label": "大块切片占用",
+          "expr": "nM * 1000000 * 4 / 1048576",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "chosenMB",
+          "label": "当前策略占用",
+          "expr": "if(mode == 1, arenaMB, newMB)",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "ratio",
+          "label": "new / 切片",
+          "expr": "newMB / arenaMB",
+          "unit": "倍",
+          "fmt": "fix2"
+        },
+        {
+          "key": "allocCount",
+          "label": "分配次数",
+          "expr": "if(mode == 1, 1, nM * 1000000)",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "allocMs",
+          "label": "分配耗时",
+          "expr": "allocCount * 50 / 1000000",
+          "unit": "ms",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "objs >= 50000000",
+          "label": "对象数 ≥5000 万（规模够大才看得见元数据开销）"
+        },
+        {
+          "expr": "newMB >= 2048",
+          "label": "逐个 new 占用 ≥2GB（这就是要解决的痛点）"
+        },
+        {
+          "expr": "chosenMB <= 1024",
+          "label": "当前策略 ≤1GB（容器内存预算内）"
+        },
+        {
+          "expr": "allocCount <= 1000",
+          "label": "分配次数 ≤1000（不能每个对象都向系统要一次）"
+        }
+      ],
+      "insight": "每个 `new` 都带一本账：glibc 的 chunk 要存 size、要满足 16 字节对齐，最小块 32 字节。请求 4 字节拿到 32 字节，**8 倍膨胀**；一亿个对象就是 3.2GB，而数据本身只有 400MB。更贵的是调用开销：一亿次 malloc 至少 5 秒（每次 50ns 起），还要加上碎片导致的 cache miss。对策按侵入性排序：`std::vector<int>` 连续存（最省）、对象池/arena 一次要一大块自己切片、`std::pmr::monotonic_buffer_resource`（标准库现成的 arena）。反面案例是「节点式容器 + 小对象」：`std::list<int>` 每个节点要两个指针加一次分配，一亿个 int 能吃到 2.4GB——这也是「默认用 vector」这条建议的数学依据。"
+    },
     {
       "kind": "debug",
       "title": "函数里 new 了，收尾少一句",

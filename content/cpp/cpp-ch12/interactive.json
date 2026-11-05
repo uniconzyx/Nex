@@ -2,7 +2,7 @@
   "chapter": "cpp-ch12",
   "subject": "cpp",
   "title": "现代 C++ 特性：auto / 移动语义 / 范围 for / emplace",
-  "fingerprint": "5b73db8238",
+  "fingerprint": "6462146a0b",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,99 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "push_back 和 emplace_back 差在哪",
+      "brief": "`v.push_back(std::string(1000, 'x'))` 会先在栈上造一个临时 string（一次堆分配），再把它移动进 vector（又一次构造）——两倍的开销。`v.emplace_back(1000, 'x')` 把参数直接转发到 vector 的内存上原地构造，只构造一次。一百万个元素就是一百万次多余的构造和析构。把元素数拖到真实规模，看这两种写法的构造成本差多少。",
+      "params": [
+        {
+          "key": "nM",
+          "label": "元素数（百万）",
+          "min": 1,
+          "max": 50,
+          "step": 1,
+          "value": 10
+        },
+        {
+          "key": "mode",
+          "label": "插入写法",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "push_back(T(...))",
+            "emplace_back(...)"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "elems",
+          "label": "元素数",
+          "expr": "nM * 1000000",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "pushCtors",
+          "label": "push_back 构造次数",
+          "expr": "nM * 1000000 * 2",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "emplaceCtors",
+          "label": "emplace_back 构造次数",
+          "expr": "nM * 1000000",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "ctors",
+          "label": "当前构造次数",
+          "expr": "if(mode == 1, emplaceCtors, pushCtors)",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "allocs",
+          "label": "堆分配次数",
+          "expr": "if(mode == 1, emplaceCtors, pushCtors)",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "ms",
+          "label": "构造耗时",
+          "expr": "ctors * 80 / 1000000",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "wasteMB",
+          "label": "多余临时对象内存",
+          "expr": "if(mode == 1, 0, nM * 1000000 * 32 / 1048576)",
+          "unit": "MB",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "elems >= 5000000",
+          "label": "元素数 ≥500 万（真实数据加载规模）"
+        },
+        {
+          "expr": "pushCtors >= 10000000",
+          "label": "push_back 构造 ≥1000 万次（这就是要解决的痛点）"
+        },
+        {
+          "expr": "ctors <= 8000000",
+          "label": "当前写法构造 ≤800 万次（一个元素只该构造一次）"
+        }
+      ],
+      "insight": "`push_back` 收的是**已经构造好的对象**，所以你必须先造一个临时的；`emplace_back` 收的是**构造函数的参数**，转发到容器内存上原地构造。对 `int` 这种平凡类型两者完全一样（编译器直接优化掉），但对 `std::string`、`std::vector`、带资源的类，差的是**一次构造 + 一次析构 + 一次移动**。不过 emplace 不是万能的，它有两个坑：① 遇到 explicit 构造会静默通过（`v.emplace_back(3.14)` 造出一个元素，而 `push_back(3.14)` 会编译失败）——想保持类型安全就还是 push_back；② emplace 传的是构造参数，`v.emplace_back(x)` 里 x 是另一个 vector 时可能命中拷贝构造而不是你以为的初始化列表。结论：**默认 emplace_back，遇到显式构造/初始化列表歧义时退回 push_back**。"
+    },
     {
       "kind": "debug",
       "title": "加了个 std::move，反而更慢",

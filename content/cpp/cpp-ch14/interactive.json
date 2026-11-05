@@ -2,7 +2,7 @@
   "chapter": "cpp-ch14",
   "subject": "cpp",
   "title": "预处理与宏：include/define/条件编译/头文件守卫",
-  "fingerprint": "d069d7a6af",
+  "fingerprint": "1ab47e7960",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,100 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "一个宏在两千个调用点展开成多少代码",
+      "brief": "宏是文本替换：写在头文件里的一行 `LOG(...)`，在两万个调用点就展开两万份代码，每份都占指令缓存。而同样功能的 inline / constexpr 函数，编译器只生成一份，其余地方都是一条 call。这就是「用宏做工具函数」在大型项目里最先撞上的墙——不是可读性，是体积。把调用点数与宏体大小拖到真实工程的规模看看。",
+      "params": [
+        {
+          "key": "sitesK",
+          "label": "调用点数（千个）",
+          "min": 1,
+          "max": 100,
+          "step": 1,
+          "value": 20
+        },
+        {
+          "key": "stmts",
+          "label": "宏体语句数",
+          "min": 2,
+          "max": 40,
+          "step": 2,
+          "value": 20
+        },
+        {
+          "key": "mode",
+          "label": "实现方式",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "宏 #define",
+            "inline / constexpr 函数"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "sites",
+          "label": "调用点数",
+          "expr": "sitesK * 1000",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "macroKB",
+          "label": "宏展开代码体积",
+          "expr": "sitesK * 1000 * stmts * 4 / 1024",
+          "unit": "KB",
+          "fmt": "int"
+        },
+        {
+          "key": "funcKB",
+          "label": "函数方案代码体积",
+          "expr": "stmts * 4 / 1024 + 0.01",
+          "unit": "KB",
+          "fmt": "fix2"
+        },
+        {
+          "key": "chosenKB",
+          "label": "当前方案体积",
+          "expr": "if(mode == 1, funcKB, macroKB)",
+          "unit": "KB",
+          "fmt": "fix2"
+        },
+        {
+          "key": "icachePages",
+          "label": "占用的 L1i 块数",
+          "expr": "if(mode == 1, 1, sitesK * 1000 * stmts * 4 / 32768)",
+          "unit": "块",
+          "fmt": "int"
+        },
+        {
+          "key": "compileMs",
+          "label": "展开耗时",
+          "expr": "sites * stmts / 100",
+          "unit": "ms",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "sites >= 10000",
+          "label": "调用点 ≥1 万（真实工程里日志/断言宏的量级）"
+        },
+        {
+          "expr": "macroKB >= 512",
+          "label": "宏展开 ≥512KB（这就是要解决的痛点）"
+        },
+        {
+          "expr": "chosenKB <= 16",
+          "label": "当前方案 ≤16KB（一份实现就够）"
+        }
+      ],
+      "insight": "宏做的是**文本替换**，编译器看不到「这是同一个函数」。两万个调用点就是两万份代码，每条语句 4 字节，20 条语句 × 2 万 = 1.6MB——塞满了指令缓存，热路径反而因为 I-cache miss 变慢。`inline` 函数只生成一份（编译器决定是否真的内联），其余走 call 复用；`constexpr` 更进一步，能在编译期算完的直接变成常量。而且宏还附带三个坑：没有类型检查、参数会被求值多次（`MAX(i++, j)`）、没有作用域（内部变量名污染调用点）。**现代 C++ 的判据**：能用 `constexpr` 函数就不用 `inline` 函数，能用 `inline` 函数就不用宏；宏只留给三件事——条件编译（`#if`）、字符串化（`#x`）、以及需要拿到调用点信息的断言/日志（`__FILE__`/`__LINE__`，这类用 `std::source_location` 也能替代）。"
+    },
     {
       "kind": "debug",
       "title": "SQ(1+2) 算出来是 5",
