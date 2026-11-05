@@ -170,7 +170,7 @@ HEAD 仅跟踪 3707 个文件，但工作树里还有 **175 个已跟踪文件�
 - 无明确知识点的章（如 cpp-ch01/03/04）如实标「全章」，不假装精确。
 - 改完跑 `audit_sources.py`，看「章节专属章」数上涨、被复制数下降。
 
-**遗留**：仓库-笔记错位检查仍靠 `.scratch/check_repo_align.py` 手工跑，未并入守门脚本。
+**完成（2026-11-05）**：仓库-笔记错位检查已提升为 `scripts/audit_repo_align.py` 并写入 CONTRIBUTING 第 8 节门禁清单（接在 `audit_source_anchor.py` 之后）。判据为「github_notes 代码路径须命中本章已登记仓库前缀」，宁松勿严：只认真实代码路径（带扩展名或 ≥2 级目录且含小写）、逐位配对、未登记仓库不判、正文点名仓库即视为对齐、不强制 github 与 github_notes 等长。全仓跑通 0 条错位，且正向测试能拦出 `sql/catalyst`（spark 路径）误挂 hadoop 行。旧 `.scratch/check_repo_align.py` 已删除。
 
 ---
 
