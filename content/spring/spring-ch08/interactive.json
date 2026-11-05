@@ -2,7 +2,7 @@
   "chapter": "spring-ch08",
   "subject": "spring",
   "title": "事务管理与工程实践",
-  "fingerprint": "62994e5932",
+  "fingerprint": "893f3c19e5",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,135 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "事务里调一次 RPC，连接池就被打满了",
+      "brief": "连接池该开多大？不是拍脑袋，是 Little 定律：**所需连接 = QPS × 平均持有时间**。一个事务如果只做本地 SQL，5ms 就还连接，1000 QPS 只要 5 个连接；但只要里面夹了一次 500ms 的远程调用，持有时间变成 505ms，同样 1000 QPS 就需要 505 个——50 个的池当场排队超时。把 QPS、RPC 耗时与池大小拖到真实负载，再决定这次调用该不该待在事务里。",
+      "params": [
+        {
+          "key": "qps",
+          "label": "QPS",
+          "min": 100,
+          "max": 5000,
+          "step": 100,
+          "value": 1000
+        },
+        {
+          "key": "rpcMs",
+          "label": "远程调用耗时",
+          "min": 100,
+          "max": 500,
+          "step": 50,
+          "value": 500,
+          "unit": "ms"
+        },
+        {
+          "key": "inTx",
+          "label": "RPC 的位置",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 1,
+          "labels": [
+            "在事务内（持锁期间调）",
+            "移到事务外（先调再开事务）"
+          ]
+        },
+        {
+          "key": "pool",
+          "label": "连接池大小",
+          "min": 10,
+          "max": 200,
+          "step": 10,
+          "value": 50
+        }
+      ],
+      "metrics": [
+        {
+          "key": "sqlMs",
+          "label": "本地 SQL 耗时",
+          "expr": "5",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "holdMs",
+          "label": "事务持有连接时间",
+          "expr": "5 + if(inTx == 1, rpcMs, 0)",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "naiveHoldMs",
+          "label": "RPC 留在事务内时持有",
+          "expr": "5 + rpcMs",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "connNeed",
+          "label": "所需连接数（Little 定律）",
+          "expr": "qps * (5 + if(inTx == 1, rpcMs, 0)) / 1000",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "naiveConn",
+          "label": "RPC 留在事务内所需连接",
+          "expr": "qps * (5 + rpcMs) / 1000",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "poolTps",
+          "label": "池能支撑的 TPS",
+          "expr": "pool * 1000 / (5 + if(inTx == 1, rpcMs, 0))",
+          "unit": "QPS",
+          "fmt": "int"
+        },
+        {
+          "key": "utilPct",
+          "label": "连接池利用率",
+          "expr": "qps * (5 + if(inTx == 1, rpcMs, 0)) * 100 / 1000 / pool",
+          "unit": "%",
+          "fmt": "int"
+        },
+        {
+          "key": "waitMs",
+          "label": "平均排队等待",
+          "expr": "if(qps * (5 + if(inTx == 1, rpcMs, 0)) / 1000 > pool, (qps * (5 + if(inTx == 1, rpcMs, 0)) / 1000 / pool - 1) * (5 + if(inTx == 1, rpcMs, 0)), 0)",
+          "unit": "ms",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "qps >= 500",
+          "label": "QPS ≥500（真实线上流量）"
+        },
+        {
+          "expr": "rpcMs >= 100",
+          "label": "远程调用 ≥100ms（真实的下游接口耗时）"
+        },
+        {
+          "expr": "naiveConn >= 150",
+          "label": "RPC 留在事务内需 ≥150 个连接（这就是连接池被打满的原因）"
+        },
+        {
+          "expr": "connNeed <= pool",
+          "label": "当前所需连接 ≤池大小（Little 定律不能破）"
+        },
+        {
+          "expr": "utilPct <= 80",
+          "label": "池利用率 ≤80%（留突发余量）"
+        },
+        {
+          "expr": "waitMs <= 0",
+          "label": "无排队等待"
+        }
+      ],
+      "insight": "连接池大小的唯一正确算法是 Little 定律：**`所需连接 = QPS × 平均持有时间`**。1000 QPS × 5ms = 5 个连接就够；一旦事务里夹了 500ms 的 RPC，持有时间变成 505ms，所需连接直接涨到 505 个——放大 100 倍。这就是「事务里不要做远程调用」的数学依据，不是风格建议：① **RPC/HTTP 移出事务**（先查后算，最后开短事务写）；② **事务里不做文件上传、发消息、调第三方**（改成事务提交后发，用 `@TransactionalEventListener`）；③ 池大小按 `QPS × p99 持有时间 × 1.2` 配，别照抄「HikariCP 默认 10」；④ 长事务还会拖住 `undo log`/MVCC 快照，让别的查询变慢——这是连接之外的第二种伤害。反过来，池开太大也不是好事：连接数是数据库的并发上限，开 500 个只会把数据库压垮，正确做法是「按数据库能承受的并发倒推池大小」。"
+    },
     {
       "kind": "match",
       "pairs": [

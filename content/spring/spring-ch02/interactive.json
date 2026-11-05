@@ -2,7 +2,7 @@
   "chapter": "spring-ch02",
   "subject": "spring",
   "title": "Bean 生命周期与作用域",
-  "fingerprint": "103e37c86f",
+  "fingerprint": "57a05c1636",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,116 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "prototype 作用域到底新建了多少个对象",
+      "brief": "`@Scope(\"prototype\")` 的语义是「每次要就给一个新的」——每次注入、每次 `getBean()` 都完整跑一遍构造和初始化。如果初始化里有加载配置、编译正则、建连接这类重活，二十万个注入点就是二十万次。而 singleton 全程只初始化一次。把注入点数与初始化成本拖到真实规模，看作用域这一行注解能放大出多少启动时间。",
+      "params": [
+        {
+          "key": "pointsK",
+          "label": "注入/取用次数（千）",
+          "min": 10,
+          "max": 500,
+          "step": 10,
+          "value": 200
+        },
+        {
+          "key": "initMs",
+          "label": "单次初始化成本",
+          "min": 1,
+          "max": 20,
+          "step": 1,
+          "value": 5,
+          "unit": "ms"
+        },
+        {
+          "key": "scope",
+          "label": "Bean 作用域",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 1,
+          "labels": [
+            "singleton（全容器一份）",
+            "prototype（每次新建）"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "points",
+          "label": "注入/取用次数",
+          "expr": "pointsK * 1000",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "creations",
+          "label": "对象创建次数",
+          "expr": "if(scope == 1, pointsK * 1000, 1)",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "initTotalMs",
+          "label": "初始化总耗时",
+          "expr": "if(scope == 1, pointsK * 1000 * initMs, initMs)",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "liveObjs",
+          "label": "同时存活实例",
+          "expr": "if(scope == 1, pointsK * 1000, 1)",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "heapMB",
+          "label": "实例堆占用",
+          "expr": "liveObjs * 3 / 1024",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "perCallMs",
+          "label": "单次取用延迟",
+          "expr": "if(scope == 1, initMs, 0)",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "naiveCreations",
+          "label": "若 prototype 的创建次数",
+          "expr": "pointsK * 1000",
+          "unit": "次",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "points >= 100000",
+          "label": "注入/取用 ≥10 万次（真实业务的 Bean 取用规模）"
+        },
+        {
+          "expr": "initMs >= 3",
+          "label": "单次初始化 ≥3ms（有 IO / 重计算的 Bean）"
+        },
+        {
+          "expr": "naiveCreations >= 100000",
+          "label": "若 prototype 要创建 ≥10 万次（这就是要解决的痛点）"
+        },
+        {
+          "expr": "initTotalMs <= 1000",
+          "label": "初始化总耗时 ≤1 秒"
+        },
+        {
+          "expr": "heapMB <= 64",
+          "label": "实例堆占用 ≤64MB"
+        }
+      ],
+      "insight": "`singleton` 和 `prototype` 的差别不是「线程安全与否」，是**创建次数**：singleton 全容器一份、初始化一次；prototype 每注入一次就完整跑一遍构造 + `@PostConstruct`。二十万次取用 × 5ms 初始化 = 1000 秒，而 singleton 只要 5ms。所以判断标准很简单：**这个 Bean 的初始化里有 IO 或重计算吗？有就别设 prototype**。什么时候真的需要 prototype？——Bean 持有**每次使用都必须独立**的可变状态（如一次请求的上下文、非线程安全的 builder）。更好的替代是 `ObjectProvider<T>` 按需取、或在方法里 `new` 一个普通对象（不归容器管），把「需要新实例」的范围缩到真正需要的地方，而不是让整个 Bean 都变成 prototype。"
+    },
     {
       "kind": "sequence",
       "heading": "一、完整生命周期阶段（中立陈述）",

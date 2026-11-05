@@ -7776,6 +7776,858 @@
     ],
     "insight": "`__dict__` 是 Python「对象可以随时长出新属性」的代价：每个实例一张哈希表，哪怕只有 4 个字段也要预留扩容空间，实测约 216 字节。`__slots__ = ('a','b','c','d')` 把字段名编译进类型，实例只存 4 个指针，单实例从 272B 降到 48B（5.7 倍），还能顺带防止手滑打错属性名。代价是：不能再动态加属性、不支持多继承中两个带非空 slots 的基类、也不能被 `__weakref__` 弱引用了（要弱引用得显式加进 slots）。工程判断：**大量小对象**（点、边、token、坐标、行情 tick）值得上 slots 或 `dataclass(slots=True)`；配置类、领域模型这类十几个实例的对象，可读性优先，不必折腾。另一条路是直接换 `numpy` 结构化数组 / `array` 模块，把「对象」变成「列」，但那就不再是 OOP 的用法了。"
    }
+  ],
+  "spring/spring-ch01": [
+   {
+    "kind": "sandbox",
+    "title": "两万个类全扫一遍，启动先花十秒",
+    "brief": "`@ComponentScan` 启动时要把类路径下每个 `.class` 都打开、用 ASM 读一遍注解，命中的还要反射创建、注入依赖、跑初始化回调。两万个类的单体应用，光这一步就是十几秒——每次改代码重启都要等。把类数量与懒加载开关拖到真实规模，看这十几秒花在哪一半。",
+    "params": [
+     {
+      "key": "classesK",
+      "label": "类路径类数（千）",
+      "min": 1,
+      "max": 60,
+      "step": 1,
+      "value": 20
+     },
+     {
+      "key": "lazy",
+      "label": "Bean 初始化",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 0,
+      "labels": [
+       "启动时全部实例化",
+       "@Lazy 按需实例化"
+      ]
+     }
+    ],
+    "metrics": [
+     {
+      "key": "classes",
+      "label": "类路径类数",
+      "expr": "classesK * 1000",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "scanMs",
+      "label": "注解扫描耗时",
+      "expr": "classesK * 1000 * 20 / 1000",
+      "unit": "ms",
+      "fmt": "int"
+     },
+     {
+      "key": "eagerMs",
+      "label": "全部实例化耗时",
+      "expr": "classesK * 1000 * 500 / 1000",
+      "unit": "ms",
+      "fmt": "int"
+     },
+     {
+      "key": "lazyMs",
+      "label": "按需实例化耗时",
+      "expr": "classesK * 1000 * 500 / 1000 / 10",
+      "unit": "ms",
+      "fmt": "int"
+     },
+     {
+      "key": "bootMs",
+      "label": "启动耗时",
+      "expr": "scanMs + if(lazy == 1, lazyMs, eagerMs)",
+      "unit": "ms",
+      "fmt": "int"
+     },
+     {
+      "key": "beanCount",
+      "label": "启动创建 Bean 数",
+      "expr": "if(lazy == 1, classesK * 100, classesK * 1000)",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "heapMB",
+      "label": "容器常驻内存",
+      "expr": "beanCount * 2 / 1024",
+      "unit": "MB",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "classes >= 10000",
+      "label": "类路径 ≥1 万个类（大型单体/多模块工程的规模）"
+     },
+     {
+      "expr": "eagerMs >= 5000",
+      "label": "全量实例化 ≥5 秒（这就是每次重启都要等的原因）"
+     },
+     {
+      "expr": "bootMs <= 3000",
+      "label": "启动 ≤3 秒（可接受的热重启时间）"
+     }
+    ],
+    "insight": "启动时间可以拆成两段：**扫描**（读每个 class 的注解，约 20μs/类，躲不掉）和**初始化**（反射建对象、注入依赖、执行 `@PostConstruct`，约 500μs/个，是扫描的 25 倍）。两万个类的工程：扫描 0.4 秒，初始化 10 秒。所以优化顺序是先砍初始化：① `@Lazy` / `spring.main.lazy-initialization=true`（只建真正被用到的）；② 缩小 `@ComponentScan` 范围（只扫业务包，别扫 `com.` 根）；③ 拆模块（`spring-boot-devtools` 的 restart classloader 只重载改动的类）。注意懒加载不是免费的：它把「启动时失败」变成「运行时第一次调用失败」，配置错误会推迟暴露——生产环境慎用全局懒加载，开发环境鼓励用。"
+   }
+  ],
+  "spring/spring-ch02": [
+   {
+    "kind": "sandbox",
+    "title": "prototype 作用域到底新建了多少个对象",
+    "brief": "`@Scope(\"prototype\")` 的语义是「每次要就给一个新的」——每次注入、每次 `getBean()` 都完整跑一遍构造和初始化。如果初始化里有加载配置、编译正则、建连接这类重活，二十万个注入点就是二十万次。而 singleton 全程只初始化一次。把注入点数与初始化成本拖到真实规模，看作用域这一行注解能放大出多少启动时间。",
+    "params": [
+     {
+      "key": "pointsK",
+      "label": "注入/取用次数（千）",
+      "min": 10,
+      "max": 500,
+      "step": 10,
+      "value": 200
+     },
+     {
+      "key": "initMs",
+      "label": "单次初始化成本",
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "value": 5,
+      "unit": "ms"
+     },
+     {
+      "key": "scope",
+      "label": "Bean 作用域",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 1,
+      "labels": [
+       "singleton（全容器一份）",
+       "prototype（每次新建）"
+      ]
+     }
+    ],
+    "metrics": [
+     {
+      "key": "points",
+      "label": "注入/取用次数",
+      "expr": "pointsK * 1000",
+      "unit": "次",
+      "fmt": "int"
+     },
+     {
+      "key": "creations",
+      "label": "对象创建次数",
+      "expr": "if(scope == 1, pointsK * 1000, 1)",
+      "unit": "次",
+      "fmt": "int"
+     },
+     {
+      "key": "initTotalMs",
+      "label": "初始化总耗时",
+      "expr": "if(scope == 1, pointsK * 1000 * initMs, initMs)",
+      "unit": "ms",
+      "fmt": "int"
+     },
+     {
+      "key": "liveObjs",
+      "label": "同时存活实例",
+      "expr": "if(scope == 1, pointsK * 1000, 1)",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "heapMB",
+      "label": "实例堆占用",
+      "expr": "liveObjs * 3 / 1024",
+      "unit": "MB",
+      "fmt": "int"
+     },
+     {
+      "key": "perCallMs",
+      "label": "单次取用延迟",
+      "expr": "if(scope == 1, initMs, 0)",
+      "unit": "ms",
+      "fmt": "int"
+     },
+     {
+      "key": "naiveCreations",
+      "label": "若 prototype 的创建次数",
+      "expr": "pointsK * 1000",
+      "unit": "次",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "points >= 100000",
+      "label": "注入/取用 ≥10 万次（真实业务的 Bean 取用规模）"
+     },
+     {
+      "expr": "initMs >= 3",
+      "label": "单次初始化 ≥3ms（有 IO / 重计算的 Bean）"
+     },
+     {
+      "expr": "naiveCreations >= 100000",
+      "label": "若 prototype 要创建 ≥10 万次（这就是要解决的痛点）"
+     },
+     {
+      "expr": "initTotalMs <= 1000",
+      "label": "初始化总耗时 ≤1 秒"
+     },
+     {
+      "expr": "heapMB <= 64",
+      "label": "实例堆占用 ≤64MB"
+     }
+    ],
+    "insight": "`singleton` 和 `prototype` 的差别不是「线程安全与否」，是**创建次数**：singleton 全容器一份、初始化一次；prototype 每注入一次就完整跑一遍构造 + `@PostConstruct`。二十万次取用 × 5ms 初始化 = 1000 秒，而 singleton 只要 5ms。所以判断标准很简单：**这个 Bean 的初始化里有 IO 或重计算吗？有就别设 prototype**。什么时候真的需要 prototype？——Bean 持有**每次使用都必须独立**的可变状态（如一次请求的上下文、非线程安全的 builder）。更好的替代是 `ObjectProvider<T>` 按需取、或在方法里 `new` 一个普通对象（不归容器管），把「需要新实例」的范围缩到真正需要的地方，而不是让整个 Bean 都变成 prototype。"
+   }
+  ],
+  "spring/spring-ch03": [
+   {
+    "kind": "sandbox",
+    "title": "五千个 Bean 全用 CGLIB，元空间先炸",
+    "brief": "Spring AOP 默认优先用 CGLIB——它给**每个被代理的类**生成一个子类，字节码常驻元空间，永远不回收。五千个类各生成一份，就是几十 MB 加上每个方法的拦截逻辑。JDK 动态代理按**接口**生成实现类，接口数通常只有几十个，元空间几乎不涨。把被代理类数与代理方式拖到真实工程规模，看元空间怎么被吃掉。",
+    "params": [
+     {
+      "key": "classes",
+      "label": "被代理类数",
+      "min": 100,
+      "max": 8000,
+      "step": 100,
+      "value": 5000
+     },
+     {
+      "key": "methods",
+      "label": "每类方法数",
+      "min": 2,
+      "max": 30,
+      "step": 2,
+      "value": 10
+     },
+     {
+      "key": "mode",
+      "label": "代理方式",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 0,
+      "labels": [
+       "CGLIB（按类）",
+       "JDK 动态代理（按接口）"
+      ]
+     }
+    ],
+    "metrics": [
+     {
+      "key": "cglibKB",
+      "label": "CGLIB 代理字节码",
+      "expr": "classes * 5 + classes * methods * 0.3",
+      "unit": "KB",
+      "fmt": "int"
+     },
+     {
+      "key": "jdkKB",
+      "label": "JDK 代理字节码",
+      "expr": "40 * 6 + 40 * methods * 0.3",
+      "unit": "KB",
+      "fmt": "int"
+     },
+     {
+      "key": "metaKB",
+      "label": "当前代理字节码",
+      "expr": "if(mode == 1, jdkKB, cglibKB)",
+      "unit": "KB",
+      "fmt": "int"
+     },
+     {
+      "key": "proxyClasses",
+      "label": "生成的代理类数",
+      "expr": "if(mode == 1, 40, classes)",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "metaMB",
+      "label": "元空间占用",
+      "expr": "metaKB / 1024",
+      "unit": "MB",
+      "fmt": "fix2"
+     },
+     {
+      "key": "callNs",
+      "label": "单次调用开销",
+      "expr": "3",
+      "unit": "ns",
+      "fmt": "int"
+     },
+     {
+      "key": "genMs",
+      "label": "生成代理耗时",
+      "expr": "proxyClasses * 1",
+      "unit": "ms",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "classes >= 1000",
+      "label": "被代理类 ≥1000 个（中大型工程的 Bean 量级）"
+     },
+     {
+      "expr": "cglibKB >= 15000",
+      "label": "CGLIB 代理 ≥15MB 字节码（这就是元空间压力的来源）"
+     },
+     {
+      "expr": "metaMB <= 8",
+      "label": "当前代理 ≤8MB（元空间预算内）"
+     },
+     {
+      "expr": "proxyClasses <= 100",
+      "label": "代理类 ≤100 个（按接口复用，不是按实现类）"
+     }
+    ],
+    "insight": "CGLIB 的代理是**继承**：给每个被代理的类生成一个子类，覆写所有非 final 方法。所以它的数量级跟「被代理的类数」走——五千个 `@Service` 就是五千个代理类，每个 5KB 起，加上方法拦截逻辑，元空间几十 MB，而且**永不回收**（Class 卸载条件极苛刻）。JDK 动态代理是**实现接口**：一个接口一个代理类，全工程四十个接口就只有四十份，跟实现类数量无关。Spring Boot 2.x 起默认 `proxyTargetClass=true`（全用 CGLIB），好处是不要求接口、能代理包级类；代价就是上面这笔元空间账。对策：① `spring.aop.proxy-target-class=false` 让有接口的走 JDK 代理；② 只给真正需要横切的 Bean 加切点（别用 `execution(* com..*.*(..))` 一把梭）；③ 元空间要给够（`-XX:MaxMetaspaceSize`），否则热部署时会 OOM。"
+   }
+  ],
+  "spring/spring-ch04": [
+   {
+    "kind": "sandbox",
+    "title": "引一个 starter，带进来一百个自动配置类",
+    "brief": "`spring-boot-starter-*` 的便利来自自动配置：每个 starter 都登记了一批配置类，启动时 Spring 要逐个评估 `@ConditionalOnClass`、`@ConditionalOnMissingBean` 这些条件。每个类约 2.5ms（读注解 + 类路径检查 + 容器查询），五十个 starter 就是上千个类、两三秒。把 starter 数与每个带来的配置类数拖到真实工程规模，看「随手加个依赖」的代价有多大。",
+    "params": [
+     {
+      "key": "deps",
+      "label": "starter 数量",
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "value": 50
+     },
+     {
+      "key": "autoPer",
+      "label": "每 starter 配置类数",
+      "min": 5,
+      "max": 30,
+      "step": 5,
+      "value": 20
+     },
+     {
+      "key": "mode",
+      "label": "依赖策略",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 0,
+      "labels": [
+       "全量引入",
+       "按需裁剪 / 排除"
+      ]
+     }
+    ],
+    "metrics": [
+     {
+      "key": "naiveAuto",
+      "label": "全量自动配置类数",
+      "expr": "deps * autoPer",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "trimmedAuto",
+      "label": "裁剪后配置类数",
+      "expr": "deps * autoPer / 10",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "autoClasses",
+      "label": "当前配置类数",
+      "expr": "if(mode == 1, trimmedAuto, naiveAuto)",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "startupMs",
+      "label": "条件评估耗时",
+      "expr": "autoClasses * 2500 / 1000",
+      "unit": "ms",
+      "fmt": "int"
+     },
+     {
+      "key": "transitiveDeps",
+      "label": "传递依赖数",
+      "expr": "deps * 3",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "metaMB",
+      "label": "配置类元数据",
+      "expr": "autoClasses / 1024",
+      "unit": "MB",
+      "fmt": "fix2"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "deps >= 30",
+      "label": "starter ≥30 个（中大型工程的真实依赖量）"
+     },
+     {
+      "expr": "autoPer >= 10",
+      "label": "每 starter ≥10 个配置类"
+     },
+     {
+      "expr": "naiveAuto >= 400",
+      "label": "全量自动配置 ≥400 个类（这就是启动慢的隐性成本）"
+     },
+     {
+      "expr": "autoClasses <= 300",
+      "label": "当前配置类 ≤300（条件评估控制在 1 秒内）"
+     },
+     {
+      "expr": "startupMs <= 1500",
+      "label": "条件评估 ≤1.5 秒"
+     }
+    ],
+    "insight": "自动配置的本质是「**条件装配的候选池**」：每个 starter 把自己的配置类登记到 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`，启动时 Spring 把它们全读进来，再逐个跑 `@Conditional`——条件不满足就跳过，但**评估本身要花钱**（读注解、查类路径、查容器）。五十个 starter × 二十个配置类 = 一千个候选，2.5 秒起步，还带来一百多个传递依赖。所以「引一个 starter 试试」不是零成本：① 用 `spring-boot-starter-web` 而不是挨个引 spring-webmvc/jackson/tomcat；② 用 `@SpringBootApplication(exclude = {...})` 或 `spring.autoconfigure.exclude` 排掉用不到的（如数据源、安全）；③ 用 `--debug` 或 `/actuator/conditions` 看「哪些配置类被评估、为什么没生效」——这是排查「Bean 没装上」的第一现场。"
+   }
+  ],
+  "spring/spring-ch05": [
+   {
+    "kind": "sandbox",
+    "title": "一万 QPS 的接口，响应体大一点就顶不住",
+    "brief": "接口的吞吐不是「QPS 多少」，而是 **QPS × 响应体大小**：一万 QPS 返回 200KB，就是每秒 2GB 出流量，按每核 100MB/s 的序列化速度，光 Jackson 就要 20 个核。打开 gzip 把体积压到五分之一，CPU 只多一倍，核数立刻掉到四个。把 QPS、响应体大小与压缩开关拖到真实场景，看带宽和 CPU 谁先成为瓶颈。",
+    "params": [
+     {
+      "key": "rps",
+      "label": "QPS",
+      "min": 1000,
+      "max": 50000,
+      "step": 1000,
+      "value": 10000
+     },
+     {
+      "key": "bodyKB",
+      "label": "响应体大小",
+      "min": 10,
+      "max": 500,
+      "step": 10,
+      "value": 200,
+      "unit": "KB"
+     },
+     {
+      "key": "gzip",
+      "label": "响应压缩",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 0,
+      "labels": [
+       "不压缩",
+       "gzip（压缩比约 5:1）"
+      ]
+     }
+    ],
+    "metrics": [
+     {
+      "key": "bwMBs",
+      "label": "出带宽",
+      "expr": "rps * bodyKB / 1024",
+      "unit": "MB/s",
+      "fmt": "int"
+     },
+     {
+      "key": "gzMBs",
+      "label": "压缩后带宽",
+      "expr": "rps * bodyKB / 1024 / 5",
+      "unit": "MB/s",
+      "fmt": "int"
+     },
+     {
+      "key": "chosenMBs",
+      "label": "当前出带宽",
+      "expr": "if(gzip == 1, gzMBs, bwMBs)",
+      "unit": "MB/s",
+      "fmt": "int"
+     },
+     {
+      "key": "netMbps",
+      "label": "折算网络带宽",
+      "expr": "chosenMBs * 8",
+      "unit": "Mbps",
+      "fmt": "int"
+     },
+     {
+      "key": "cores",
+      "label": "序列化所需核数",
+      "expr": "chosenMBs / 100 * if(gzip == 1, 2, 1)",
+      "unit": "核",
+      "fmt": "fix2"
+     },
+     {
+      "key": "nicMBs",
+      "label": "单张千兆网卡能力",
+      "expr": "125",
+      "unit": "MB/s",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "rps >= 5000",
+      "label": "QPS ≥5000（真实线上接口量级）"
+     },
+     {
+      "expr": "bwMBs >= 500",
+      "label": "未压缩出带宽 ≥500MB/s（这就是要解决的痛点）"
+     },
+     {
+      "expr": "cores <= 10",
+      "label": "序列化 ≤10 核（单机还有余量给业务逻辑）"
+     },
+     {
+      "expr": "chosenMBs <= 500",
+      "label": "出带宽 ≤500MB/s（四张千兆网卡的上限）"
+     }
+    ],
+    "insight": "接口优化的第一性原理是 **`吞吐 = QPS × 单响应字节`**，两个因子都要看。一万 QPS × 200KB = 2GB/s：按每核 100MB/s 的序列化速度要 20 个核，按千兆网卡 125MB/s 要 16 张网卡——两个维度同时爆。三条对策，按性价比排序：① **砍字段**（最有效）：DTO 只返回前端要的，别把整个实体（含大字段、关联对象）扔出去，`@JsonIgnore` / `@JsonView` / 专用 VO；② **gzip**：JSON 文本压缩比通常 5:1，用约 2 倍 CPU 换 5 倍带宽；③ **分页 + 缓存**：别让同一个重查询每秒跑一万次，加 Redis / HTTP 缓存。注意压缩不是万能的：已经压过的内容（图片、protobuf）再 gzip 只浪费 CPU；而且 gzip 有固定开销，小于 1KB 的响应压完反而更大（所以 Spring 的 `server.compression.min-response-size` 默认 2KB）。"
+   }
+  ],
+  "spring/spring-ch06": [
+   {
+    "kind": "sandbox",
+    "title": "一千条订单，为什么发了一千零一条 SQL",
+    "brief": "查订单列表时，每条订单还要查它的商品明细——循环里调一次 `selectByOrderId`，一千条订单就发了一千零一次 SQL。每次往返 1ms，光等数据库就是一秒。改成「先查主表，再用 `IN` 批量查子表」，两条 SQL 就够。把记录数与查询方式拖到真实业务规模，看这条 N+1 曲线怎么随数据量线性恶化。",
+    "params": [
+     {
+      "key": "parents",
+      "label": "主记录数",
+      "min": 100,
+      "max": 10000,
+      "step": 100,
+      "value": 1000
+     },
+     {
+      "key": "mode",
+      "label": "查询方式",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 0,
+      "labels": [
+       "N+1（循环里查）",
+       "批量 IN 查询"
+      ]
+     }
+    ],
+    "metrics": [
+     {
+      "key": "rows",
+      "label": "主记录数",
+      "expr": "parents",
+      "unit": "条",
+      "fmt": "int"
+     },
+     {
+      "key": "nPlusOne",
+      "label": "N+1 的 SQL 次数",
+      "expr": "parents + 1",
+      "unit": "次",
+      "fmt": "int"
+     },
+     {
+      "key": "batch",
+      "label": "批量方案的 SQL 次数",
+      "expr": "2",
+      "unit": "次",
+      "fmt": "int"
+     },
+     {
+      "key": "sqls",
+      "label": "当前 SQL 次数",
+      "expr": "if(mode == 1, 2, parents + 1)",
+      "unit": "次",
+      "fmt": "int"
+     },
+     {
+      "key": "totalMs",
+      "label": "数据库往返耗时",
+      "expr": "sqls * 1",
+      "unit": "ms",
+      "fmt": "int"
+     },
+     {
+      "key": "connHoldMs",
+      "label": "单请求持有连接",
+      "expr": "totalMs",
+      "unit": "ms",
+      "fmt": "int"
+     },
+     {
+      "key": "connNeed",
+      "label": "100 并发所需连接",
+      "expr": "totalMs * 100 / 1000",
+      "unit": "个",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "rows >= 1000",
+      "label": "主记录 ≥1000 条（真实列表页/批量任务规模）"
+     },
+     {
+      "expr": "nPlusOne >= 1000",
+      "label": "N+1 方案 ≥1000 次 SQL（这就是要解决的痛点）"
+     },
+     {
+      "expr": "sqls <= 10",
+      "label": "当前 SQL 次数 ≤10（批量一次拿完）"
+     },
+     {
+      "expr": "totalMs <= 50",
+      "label": "数据库往返 ≤50ms"
+     }
+    ],
+    "insight": "N+1 的公式就是它的名字：**1 次主查询 + N 次子查询**。代价不在数据库算得慢，而在**网络往返次数**——每次 1ms 的 RTT，一千条就是一秒，而且数据量越大越糟，是标准的线性恶化。修法有三档：① **批量 IN**（`WHERE order_id IN (...)`）：1000 条分成几十个批次，SQL 次数从 1001 降到 2；② **JOIN 一次查完**：适合一对一/一对少，注意一对多会笛卡尔膨胀（1000 订单 × 10 明细 = 1 万行，要自己做去重聚合）；③ **MyBatis 的 `<collection>` + `fetchType=\"lazy\"` 或 `@BatchSize`**，本质也是帮你做批量 IN。检测手段：开 MyBatis 的 SQL 日志或 `p6spy`，一眼就能看到「同一条 SQL 刷了 1000 遍」；Spring Data JPA 用 `@EntityGraph` / `join fetch` 解决同类问题。另外注意 `connHoldMs` 那行：N+1 把连接持有时间也放大了 1000 倍，高并发下会先把连接池打满（见 spring-ch08 的 Little 定律）。"
+   }
+  ],
+  "spring/spring-ch07": [
+   {
+    "kind": "sandbox",
+    "title": "十个 <if> 标签，组合出 1024 条不同的 SQL",
+    "brief": "动态 SQL 里每加一个 `<if test=\"...\">` 就多一种可选条件，K 个标签就有 2^K 种不同的 SQL 文本。执行计划缓存按文本命中，所以最坏要缓存 2^K 条计划——16 个标签就是 65536 条、一百多 MB，命中率还一路下滑。把条件数与组织方式拖到真实查询规模，看「一个万能查询」怎么把 plan cache 撑爆。",
+    "params": [
+     {
+      "key": "ifCount",
+      "label": "<if> 条件数",
+      "min": 4,
+      "max": 20,
+      "step": 1,
+      "value": 16
+     },
+     {
+      "key": "mode",
+      "label": "SQL 组织方式",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 0,
+      "labels": [
+       "一个万能动态 SQL",
+       "按场景拆成专用 SQL"
+      ]
+     }
+    ],
+    "metrics": [
+     {
+      "key": "ifs",
+      "label": "条件数 K",
+      "expr": "ifCount",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "naivePlans",
+      "label": "万能 SQL 的文本组合",
+      "expr": "pow(2, ifCount)",
+      "unit": "种",
+      "fmt": "int"
+     },
+     {
+      "key": "splitPlans",
+      "label": "拆分后的组合",
+      "expr": "pow(2, floor(ifCount / 2)) * 2",
+      "unit": "种",
+      "fmt": "int"
+     },
+     {
+      "key": "plans",
+      "label": "当前方案组合数",
+      "expr": "if(mode == 1, splitPlans, naivePlans)",
+      "unit": "种",
+      "fmt": "int"
+     },
+     {
+      "key": "cacheMB",
+      "label": "计划缓存占用",
+      "expr": "plans * 2 / 1024",
+      "unit": "MB",
+      "fmt": "fix2"
+     },
+     {
+      "key": "hitRate",
+      "label": "计划缓存命中率",
+      "expr": "if(plans <= 5000, 100, 5000 * 100 / plans)",
+      "unit": "%",
+      "fmt": "int"
+     },
+     {
+      "key": "parseMsPerSec",
+      "label": "硬解析每秒耗 CPU",
+      "expr": "(100 - if(plans <= 5000, 100, 5000 * 100 / plans)) * 10",
+      "unit": "ms/s",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "ifs >= 12",
+      "label": "条件数 ≥12（真实后台列表页的筛选维度）"
+     },
+     {
+      "expr": "naivePlans >= 4096",
+      "label": "万能 SQL ≥4096 种组合（这就是 plan cache 被撑爆的原因）"
+     },
+     {
+      "expr": "plans <= 2000",
+      "label": "当前组合数 ≤2000（计划缓存装得下）"
+     },
+     {
+      "expr": "cacheMB <= 4",
+      "label": "计划缓存 ≤4MB"
+     },
+     {
+      "expr": "parseMsPerSec <= 300",
+      "label": "硬解析 ≤300ms/s CPU（留余量给真正执行 SQL）"
+     }
+    ],
+    "insight": "动态 SQL 的成本不是「拼接字符串」，而是**文本组合数**：K 个 `<if>` 就是 2^K 条不同 SQL。数据库（和 MyBatis 自己的 `localCacheScope`/执行计划缓存）都按 SQL 文本命中，16 个条件 = 65536 条计划 × 2KB = 128MB，还要加上每条都要软解析、优化器对每条都重算一遍执行计划。两个层面的对策：① **拆 SQL**：按业务场景拆成「列表页查询」「导出查询」「后台检索」几条专用 SQL，每条只带自己需要的固定条件，组合数从 2^K 掉到 2·2^(K/2)；② **固定文本**：把可选条件改写成 `AND (col = #{v} OR #{v} IS NULL)`，SQL 文本恒定、永远只命中一条计划——代价是索引可能用不上（优化器对 `OR NULL` 的处理很保守），适合条件少、表小的场景。顺带一句：这也解释了为什么 `${}` 拼接（见 spring-ch06）比 `<if>` 更危险——它把**参数值**也变成 SQL 文本的一部分，组合数是参数取值数的乘积，且直接开 SQL 注入的口子。"
+   }
+  ],
+  "spring/spring-ch08": [
+   {
+    "kind": "sandbox",
+    "title": "事务里调一次 RPC，连接池就被打满了",
+    "brief": "连接池该开多大？不是拍脑袋，是 Little 定律：**所需连接 = QPS × 平均持有时间**。一个事务如果只做本地 SQL，5ms 就还连接，1000 QPS 只要 5 个连接；但只要里面夹了一次 500ms 的远程调用，持有时间变成 505ms，同样 1000 QPS 就需要 505 个——50 个的池当场排队超时。把 QPS、RPC 耗时与池大小拖到真实负载，再决定这次调用该不该待在事务里。",
+    "params": [
+     {
+      "key": "qps",
+      "label": "QPS",
+      "min": 100,
+      "max": 5000,
+      "step": 100,
+      "value": 1000
+     },
+     {
+      "key": "rpcMs",
+      "label": "远程调用耗时",
+      "min": 100,
+      "max": 500,
+      "step": 50,
+      "value": 500,
+      "unit": "ms"
+     },
+     {
+      "key": "inTx",
+      "label": "RPC 的位置",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 1,
+      "labels": [
+       "在事务内（持锁期间调）",
+       "移到事务外（先调再开事务）"
+      ]
+     },
+     {
+      "key": "pool",
+      "label": "连接池大小",
+      "min": 10,
+      "max": 200,
+      "step": 10,
+      "value": 50
+     }
+    ],
+    "metrics": [
+     {
+      "key": "sqlMs",
+      "label": "本地 SQL 耗时",
+      "expr": "5",
+      "unit": "ms",
+      "fmt": "int"
+     },
+     {
+      "key": "holdMs",
+      "label": "事务持有连接时间",
+      "expr": "5 + if(inTx == 1, rpcMs, 0)",
+      "unit": "ms",
+      "fmt": "int"
+     },
+     {
+      "key": "naiveHoldMs",
+      "label": "RPC 留在事务内时持有",
+      "expr": "5 + rpcMs",
+      "unit": "ms",
+      "fmt": "int"
+     },
+     {
+      "key": "connNeed",
+      "label": "所需连接数（Little 定律）",
+      "expr": "qps * (5 + if(inTx == 1, rpcMs, 0)) / 1000",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "naiveConn",
+      "label": "RPC 留在事务内所需连接",
+      "expr": "qps * (5 + rpcMs) / 1000",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "poolTps",
+      "label": "池能支撑的 TPS",
+      "expr": "pool * 1000 / (5 + if(inTx == 1, rpcMs, 0))",
+      "unit": "QPS",
+      "fmt": "int"
+     },
+     {
+      "key": "utilPct",
+      "label": "连接池利用率",
+      "expr": "qps * (5 + if(inTx == 1, rpcMs, 0)) * 100 / 1000 / pool",
+      "unit": "%",
+      "fmt": "int"
+     },
+     {
+      "key": "waitMs",
+      "label": "平均排队等待",
+      "expr": "if(qps * (5 + if(inTx == 1, rpcMs, 0)) / 1000 > pool, (qps * (5 + if(inTx == 1, rpcMs, 0)) / 1000 / pool - 1) * (5 + if(inTx == 1, rpcMs, 0)), 0)",
+      "unit": "ms",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "qps >= 500",
+      "label": "QPS ≥500（真实线上流量）"
+     },
+     {
+      "expr": "rpcMs >= 100",
+      "label": "远程调用 ≥100ms（真实的下游接口耗时）"
+     },
+     {
+      "expr": "naiveConn >= 150",
+      "label": "RPC 留在事务内需 ≥150 个连接（这就是连接池被打满的原因）"
+     },
+     {
+      "expr": "connNeed <= pool",
+      "label": "当前所需连接 ≤池大小（Little 定律不能破）"
+     },
+     {
+      "expr": "utilPct <= 80",
+      "label": "池利用率 ≤80%（留突发余量）"
+     },
+     {
+      "expr": "waitMs <= 0",
+      "label": "无排队等待"
+     }
+    ],
+    "insight": "连接池大小的唯一正确算法是 Little 定律：**`所需连接 = QPS × 平均持有时间`**。1000 QPS × 5ms = 5 个连接就够；一旦事务里夹了 500ms 的 RPC，持有时间变成 505ms，所需连接直接涨到 505 个——放大 100 倍。这就是「事务里不要做远程调用」的数学依据，不是风格建议：① **RPC/HTTP 移出事务**（先查后算，最后开短事务写）；② **事务里不做文件上传、发消息、调第三方**（改成事务提交后发，用 `@TransactionalEventListener`）；③ 池大小按 `QPS × p99 持有时间 × 1.2` 配，别照抄「HikariCP 默认 10」；④ 长事务还会拖住 `undo log`/MVCC 快照，让别的查询变慢——这是连接之外的第二种伤害。反过来，池开太大也不是好事：连接数是数据库的并发上限，开 500 个只会把数据库压垮，正确做法是「按数据库能承受的并发倒推池大小」。"
+   }
   ]
  }
 }

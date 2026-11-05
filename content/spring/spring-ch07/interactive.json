@@ -2,7 +2,7 @@
   "chapter": "spring-ch07",
   "subject": "spring",
   "title": "MyBatis 进阶：动态 SQL、缓存与插件",
-  "fingerprint": "c34f8832e5",
+  "fingerprint": "3aefd4f47f",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,107 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "十个 <if> 标签，组合出 1024 条不同的 SQL",
+      "brief": "动态 SQL 里每加一个 `<if test=\"...\">` 就多一种可选条件，K 个标签就有 2^K 种不同的 SQL 文本。执行计划缓存按文本命中，所以最坏要缓存 2^K 条计划——16 个标签就是 65536 条、一百多 MB，命中率还一路下滑。把条件数与组织方式拖到真实查询规模，看「一个万能查询」怎么把 plan cache 撑爆。",
+      "params": [
+        {
+          "key": "ifCount",
+          "label": "<if> 条件数",
+          "min": 4,
+          "max": 20,
+          "step": 1,
+          "value": 16
+        },
+        {
+          "key": "mode",
+          "label": "SQL 组织方式",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "一个万能动态 SQL",
+            "按场景拆成专用 SQL"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "ifs",
+          "label": "条件数 K",
+          "expr": "ifCount",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "naivePlans",
+          "label": "万能 SQL 的文本组合",
+          "expr": "pow(2, ifCount)",
+          "unit": "种",
+          "fmt": "int"
+        },
+        {
+          "key": "splitPlans",
+          "label": "拆分后的组合",
+          "expr": "pow(2, floor(ifCount / 2)) * 2",
+          "unit": "种",
+          "fmt": "int"
+        },
+        {
+          "key": "plans",
+          "label": "当前方案组合数",
+          "expr": "if(mode == 1, splitPlans, naivePlans)",
+          "unit": "种",
+          "fmt": "int"
+        },
+        {
+          "key": "cacheMB",
+          "label": "计划缓存占用",
+          "expr": "plans * 2 / 1024",
+          "unit": "MB",
+          "fmt": "fix2"
+        },
+        {
+          "key": "hitRate",
+          "label": "计划缓存命中率",
+          "expr": "if(plans <= 5000, 100, 5000 * 100 / plans)",
+          "unit": "%",
+          "fmt": "int"
+        },
+        {
+          "key": "parseMsPerSec",
+          "label": "硬解析每秒耗 CPU",
+          "expr": "(100 - if(plans <= 5000, 100, 5000 * 100 / plans)) * 10",
+          "unit": "ms/s",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "ifs >= 12",
+          "label": "条件数 ≥12（真实后台列表页的筛选维度）"
+        },
+        {
+          "expr": "naivePlans >= 4096",
+          "label": "万能 SQL ≥4096 种组合（这就是 plan cache 被撑爆的原因）"
+        },
+        {
+          "expr": "plans <= 2000",
+          "label": "当前组合数 ≤2000（计划缓存装得下）"
+        },
+        {
+          "expr": "cacheMB <= 4",
+          "label": "计划缓存 ≤4MB"
+        },
+        {
+          "expr": "parseMsPerSec <= 300",
+          "label": "硬解析 ≤300ms/s CPU（留余量给真正执行 SQL）"
+        }
+      ],
+      "insight": "动态 SQL 的成本不是「拼接字符串」，而是**文本组合数**：K 个 `<if>` 就是 2^K 条不同 SQL。数据库（和 MyBatis 自己的 `localCacheScope`/执行计划缓存）都按 SQL 文本命中，16 个条件 = 65536 条计划 × 2KB = 128MB，还要加上每条都要软解析、优化器对每条都重算一遍执行计划。两个层面的对策：① **拆 SQL**：按业务场景拆成「列表页查询」「导出查询」「后台检索」几条专用 SQL，每条只带自己需要的固定条件，组合数从 2^K 掉到 2·2^(K/2)；② **固定文本**：把可选条件改写成 `AND (col = #{v} OR #{v} IS NULL)`，SQL 文本恒定、永远只命中一条计划——代价是索引可能用不上（优化器对 `OR NULL` 的处理很保守），适合条件少、表小的场景。顺带一句：这也解释了为什么 `${}` 拼接（见 spring-ch06）比 `<if>` 更危险——它把**参数值**也变成 SQL 文本的一部分，组合数是参数取值数的乘积，且直接开 SQL 注入的口子。"
+    },
     {
       "kind": "match",
       "pairs": [

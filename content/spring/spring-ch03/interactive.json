@@ -2,7 +2,7 @@
   "chapter": "spring-ch03",
   "subject": "spring",
   "title": "AOP 与代理机制",
-  "fingerprint": "ff480d8235",
+  "fingerprint": "c3990afa51",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,111 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "五千个 Bean 全用 CGLIB，元空间先炸",
+      "brief": "Spring AOP 默认优先用 CGLIB——它给**每个被代理的类**生成一个子类，字节码常驻元空间，永远不回收。五千个类各生成一份，就是几十 MB 加上每个方法的拦截逻辑。JDK 动态代理按**接口**生成实现类，接口数通常只有几十个，元空间几乎不涨。把被代理类数与代理方式拖到真实工程规模，看元空间怎么被吃掉。",
+      "params": [
+        {
+          "key": "classes",
+          "label": "被代理类数",
+          "min": 100,
+          "max": 8000,
+          "step": 100,
+          "value": 5000
+        },
+        {
+          "key": "methods",
+          "label": "每类方法数",
+          "min": 2,
+          "max": 30,
+          "step": 2,
+          "value": 10
+        },
+        {
+          "key": "mode",
+          "label": "代理方式",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "CGLIB（按类）",
+            "JDK 动态代理（按接口）"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "cglibKB",
+          "label": "CGLIB 代理字节码",
+          "expr": "classes * 5 + classes * methods * 0.3",
+          "unit": "KB",
+          "fmt": "int"
+        },
+        {
+          "key": "jdkKB",
+          "label": "JDK 代理字节码",
+          "expr": "40 * 6 + 40 * methods * 0.3",
+          "unit": "KB",
+          "fmt": "int"
+        },
+        {
+          "key": "metaKB",
+          "label": "当前代理字节码",
+          "expr": "if(mode == 1, jdkKB, cglibKB)",
+          "unit": "KB",
+          "fmt": "int"
+        },
+        {
+          "key": "proxyClasses",
+          "label": "生成的代理类数",
+          "expr": "if(mode == 1, 40, classes)",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "metaMB",
+          "label": "元空间占用",
+          "expr": "metaKB / 1024",
+          "unit": "MB",
+          "fmt": "fix2"
+        },
+        {
+          "key": "callNs",
+          "label": "单次调用开销",
+          "expr": "3",
+          "unit": "ns",
+          "fmt": "int"
+        },
+        {
+          "key": "genMs",
+          "label": "生成代理耗时",
+          "expr": "proxyClasses * 1",
+          "unit": "ms",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "classes >= 1000",
+          "label": "被代理类 ≥1000 个（中大型工程的 Bean 量级）"
+        },
+        {
+          "expr": "cglibKB >= 15000",
+          "label": "CGLIB 代理 ≥15MB 字节码（这就是元空间压力的来源）"
+        },
+        {
+          "expr": "metaMB <= 8",
+          "label": "当前代理 ≤8MB（元空间预算内）"
+        },
+        {
+          "expr": "proxyClasses <= 100",
+          "label": "代理类 ≤100 个（按接口复用，不是按实现类）"
+        }
+      ],
+      "insight": "CGLIB 的代理是**继承**：给每个被代理的类生成一个子类，覆写所有非 final 方法。所以它的数量级跟「被代理的类数」走——五千个 `@Service` 就是五千个代理类，每个 5KB 起，加上方法拦截逻辑，元空间几十 MB，而且**永不回收**（Class 卸载条件极苛刻）。JDK 动态代理是**实现接口**：一个接口一个代理类，全工程四十个接口就只有四十份，跟实现类数量无关。Spring Boot 2.x 起默认 `proxyTargetClass=true`（全用 CGLIB），好处是不要求接口、能代理包级类；代价就是上面这笔元空间账。对策：① `spring.aop.proxy-target-class=false` 让有接口的走 JDK 代理；② 只给真正需要横切的 Bean 加切点（别用 `execution(* com..*.*(..))` 一把梭）；③ 元空间要给够（`-XX:MaxMetaspaceSize`），否则热部署时会 OOM。"
+    },
     {
       "kind": "match",
       "pairs": [

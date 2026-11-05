@@ -2,7 +2,7 @@
   "chapter": "spring-ch04",
   "subject": "spring",
   "title": "SpringBoot 自动配置与起步依赖",
-  "fingerprint": "a20e76df27",
+  "fingerprint": "28bac3ce47",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,108 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "引一个 starter，带进来一百个自动配置类",
+      "brief": "`spring-boot-starter-*` 的便利来自自动配置：每个 starter 都登记了一批配置类，启动时 Spring 要逐个评估 `@ConditionalOnClass`、`@ConditionalOnMissingBean` 这些条件。每个类约 2.5ms（读注解 + 类路径检查 + 容器查询），五十个 starter 就是上千个类、两三秒。把 starter 数与每个带来的配置类数拖到真实工程规模，看「随手加个依赖」的代价有多大。",
+      "params": [
+        {
+          "key": "deps",
+          "label": "starter 数量",
+          "min": 10,
+          "max": 100,
+          "step": 5,
+          "value": 50
+        },
+        {
+          "key": "autoPer",
+          "label": "每 starter 配置类数",
+          "min": 5,
+          "max": 30,
+          "step": 5,
+          "value": 20
+        },
+        {
+          "key": "mode",
+          "label": "依赖策略",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "全量引入",
+            "按需裁剪 / 排除"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "naiveAuto",
+          "label": "全量自动配置类数",
+          "expr": "deps * autoPer",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "trimmedAuto",
+          "label": "裁剪后配置类数",
+          "expr": "deps * autoPer / 10",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "autoClasses",
+          "label": "当前配置类数",
+          "expr": "if(mode == 1, trimmedAuto, naiveAuto)",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "startupMs",
+          "label": "条件评估耗时",
+          "expr": "autoClasses * 2500 / 1000",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "transitiveDeps",
+          "label": "传递依赖数",
+          "expr": "deps * 3",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "metaMB",
+          "label": "配置类元数据",
+          "expr": "autoClasses / 1024",
+          "unit": "MB",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "deps >= 30",
+          "label": "starter ≥30 个（中大型工程的真实依赖量）"
+        },
+        {
+          "expr": "autoPer >= 10",
+          "label": "每 starter ≥10 个配置类"
+        },
+        {
+          "expr": "naiveAuto >= 400",
+          "label": "全量自动配置 ≥400 个类（这就是启动慢的隐性成本）"
+        },
+        {
+          "expr": "autoClasses <= 300",
+          "label": "当前配置类 ≤300（条件评估控制在 1 秒内）"
+        },
+        {
+          "expr": "startupMs <= 1500",
+          "label": "条件评估 ≤1.5 秒"
+        }
+      ],
+      "insight": "自动配置的本质是「**条件装配的候选池**」：每个 starter 把自己的配置类登记到 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`，启动时 Spring 把它们全读进来，再逐个跑 `@Conditional`——条件不满足就跳过，但**评估本身要花钱**（读注解、查类路径、查容器）。五十个 starter × 二十个配置类 = 一千个候选，2.5 秒起步，还带来一百多个传递依赖。所以「引一个 starter 试试」不是零成本：① 用 `spring-boot-starter-web` 而不是挨个引 spring-webmvc/jackson/tomcat；② 用 `@SpringBootApplication(exclude = {...})` 或 `spring.autoconfigure.exclude` 排掉用不到的（如数据源、安全）；③ 用 `--debug` 或 `/actuator/conditions` 看「哪些配置类被评估、为什么没生效」——这是排查「Bean 没装上」的第一现场。"
+    },
     {
       "kind": "match",
       "pairs": [

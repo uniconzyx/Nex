@@ -1709,6 +1709,156 @@
    }
   ]
  },
+ "spring/spring-ch01": {
+  "ok": true,
+  "params": [
+   {
+    "key": "classesK",
+    "type": "range",
+    "value": 10.0
+   },
+   {
+    "key": "lazy",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "spring/spring-ch02": {
+  "ok": true,
+  "params": [
+   {
+    "key": "pointsK",
+    "type": "range",
+    "value": 100.0
+   },
+   {
+    "key": "initMs",
+    "type": "range",
+    "value": 3.0
+   },
+   {
+    "key": "scope",
+    "type": "opt",
+    "value": 0
+   }
+  ]
+ },
+ "spring/spring-ch03": {
+  "ok": true,
+  "params": [
+   {
+    "key": "classes",
+    "type": "range",
+    "value": 1100.0
+   },
+   {
+    "key": "methods",
+    "type": "range",
+    "value": 30.0
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "spring/spring-ch04": {
+  "ok": true,
+  "params": [
+   {
+    "key": "deps",
+    "type": "range",
+    "value": 30.0
+   },
+   {
+    "key": "autoPer",
+    "type": "range",
+    "value": 15.0
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "spring/spring-ch05": {
+  "ok": true,
+  "params": [
+   {
+    "key": "rps",
+    "type": "range",
+    "value": 5000.0
+   },
+   {
+    "key": "bodyKB",
+    "type": "range",
+    "value": 110.0
+   },
+   {
+    "key": "gzip",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "spring/spring-ch06": {
+  "ok": true,
+  "params": [
+   {
+    "key": "parents",
+    "type": "range",
+    "value": 1000.0
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "spring/spring-ch07": {
+  "ok": true,
+  "params": [
+   {
+    "key": "ifCount",
+    "type": "range",
+    "value": 12.0
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "spring/spring-ch08": {
+  "ok": true,
+  "params": [
+   {
+    "key": "qps",
+    "type": "range",
+    "value": 500.0
+   },
+   {
+    "key": "rpcMs",
+    "type": "range",
+    "value": 300.0
+   },
+   {
+    "key": "inTx",
+    "type": "opt",
+    "value": 0
+   },
+   {
+    "key": "pool",
+    "type": "range",
+    "value": 10.0
+   }
+  ]
+ },
  "tooling/tool-ch06": {
   "ok": true,
   "params": [

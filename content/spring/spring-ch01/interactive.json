@@ -2,7 +2,7 @@
   "chapter": "spring-ch01",
   "subject": "spring",
   "title": "Spring 核心：IoC 容器与依赖注入",
-  "fingerprint": "5e8ba5c986",
+  "fingerprint": "4f765b9d5d",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,99 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "两万个类全扫一遍，启动先花十秒",
+      "brief": "`@ComponentScan` 启动时要把类路径下每个 `.class` 都打开、用 ASM 读一遍注解，命中的还要反射创建、注入依赖、跑初始化回调。两万个类的单体应用，光这一步就是十几秒——每次改代码重启都要等。把类数量与懒加载开关拖到真实规模，看这十几秒花在哪一半。",
+      "params": [
+        {
+          "key": "classesK",
+          "label": "类路径类数（千）",
+          "min": 1,
+          "max": 60,
+          "step": 1,
+          "value": 20
+        },
+        {
+          "key": "lazy",
+          "label": "Bean 初始化",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "启动时全部实例化",
+            "@Lazy 按需实例化"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "classes",
+          "label": "类路径类数",
+          "expr": "classesK * 1000",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "scanMs",
+          "label": "注解扫描耗时",
+          "expr": "classesK * 1000 * 20 / 1000",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "eagerMs",
+          "label": "全部实例化耗时",
+          "expr": "classesK * 1000 * 500 / 1000",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "lazyMs",
+          "label": "按需实例化耗时",
+          "expr": "classesK * 1000 * 500 / 1000 / 10",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "bootMs",
+          "label": "启动耗时",
+          "expr": "scanMs + if(lazy == 1, lazyMs, eagerMs)",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "beanCount",
+          "label": "启动创建 Bean 数",
+          "expr": "if(lazy == 1, classesK * 100, classesK * 1000)",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "heapMB",
+          "label": "容器常驻内存",
+          "expr": "beanCount * 2 / 1024",
+          "unit": "MB",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "classes >= 10000",
+          "label": "类路径 ≥1 万个类（大型单体/多模块工程的规模）"
+        },
+        {
+          "expr": "eagerMs >= 5000",
+          "label": "全量实例化 ≥5 秒（这就是每次重启都要等的原因）"
+        },
+        {
+          "expr": "bootMs <= 3000",
+          "label": "启动 ≤3 秒（可接受的热重启时间）"
+        }
+      ],
+      "insight": "启动时间可以拆成两段：**扫描**（读每个 class 的注解，约 20μs/类，躲不掉）和**初始化**（反射建对象、注入依赖、执行 `@PostConstruct`，约 500μs/个，是扫描的 25 倍）。两万个类的工程：扫描 0.4 秒，初始化 10 秒。所以优化顺序是先砍初始化：① `@Lazy` / `spring.main.lazy-initialization=true`（只建真正被用到的）；② 缩小 `@ComponentScan` 范围（只扫业务包，别扫 `com.` 根）；③ 拆模块（`spring-boot-devtools` 的 restart classloader 只重载改动的类）。注意懒加载不是免费的：它把「启动时失败」变成「运行时第一次调用失败」，配置错误会推迟暴露——生产环境慎用全局懒加载，开发环境鼓励用。"
+    },
     {
       "kind": "match",
       "pairs": [

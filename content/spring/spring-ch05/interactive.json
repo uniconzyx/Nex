@@ -2,7 +2,7 @@
   "chapter": "spring-ch05",
   "subject": "spring",
   "title": "Web 层：REST 控制器与参数校验",
-  "fingerprint": "c43246b157",
+  "fingerprint": "2387cc454e",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,105 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "一万 QPS 的接口，响应体大一点就顶不住",
+      "brief": "接口的吞吐不是「QPS 多少」，而是 **QPS × 响应体大小**：一万 QPS 返回 200KB，就是每秒 2GB 出流量，按每核 100MB/s 的序列化速度，光 Jackson 就要 20 个核。打开 gzip 把体积压到五分之一，CPU 只多一倍，核数立刻掉到四个。把 QPS、响应体大小与压缩开关拖到真实场景，看带宽和 CPU 谁先成为瓶颈。",
+      "params": [
+        {
+          "key": "rps",
+          "label": "QPS",
+          "min": 1000,
+          "max": 50000,
+          "step": 1000,
+          "value": 10000
+        },
+        {
+          "key": "bodyKB",
+          "label": "响应体大小",
+          "min": 10,
+          "max": 500,
+          "step": 10,
+          "value": 200,
+          "unit": "KB"
+        },
+        {
+          "key": "gzip",
+          "label": "响应压缩",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "不压缩",
+            "gzip（压缩比约 5:1）"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "bwMBs",
+          "label": "出带宽",
+          "expr": "rps * bodyKB / 1024",
+          "unit": "MB/s",
+          "fmt": "int"
+        },
+        {
+          "key": "gzMBs",
+          "label": "压缩后带宽",
+          "expr": "rps * bodyKB / 1024 / 5",
+          "unit": "MB/s",
+          "fmt": "int"
+        },
+        {
+          "key": "chosenMBs",
+          "label": "当前出带宽",
+          "expr": "if(gzip == 1, gzMBs, bwMBs)",
+          "unit": "MB/s",
+          "fmt": "int"
+        },
+        {
+          "key": "netMbps",
+          "label": "折算网络带宽",
+          "expr": "chosenMBs * 8",
+          "unit": "Mbps",
+          "fmt": "int"
+        },
+        {
+          "key": "cores",
+          "label": "序列化所需核数",
+          "expr": "chosenMBs / 100 * if(gzip == 1, 2, 1)",
+          "unit": "核",
+          "fmt": "fix2"
+        },
+        {
+          "key": "nicMBs",
+          "label": "单张千兆网卡能力",
+          "expr": "125",
+          "unit": "MB/s",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "rps >= 5000",
+          "label": "QPS ≥5000（真实线上接口量级）"
+        },
+        {
+          "expr": "bwMBs >= 500",
+          "label": "未压缩出带宽 ≥500MB/s（这就是要解决的痛点）"
+        },
+        {
+          "expr": "cores <= 10",
+          "label": "序列化 ≤10 核（单机还有余量给业务逻辑）"
+        },
+        {
+          "expr": "chosenMBs <= 500",
+          "label": "出带宽 ≤500MB/s（四张千兆网卡的上限）"
+        }
+      ],
+      "insight": "接口优化的第一性原理是 **`吞吐 = QPS × 单响应字节`**，两个因子都要看。一万 QPS × 200KB = 2GB/s：按每核 100MB/s 的序列化速度要 20 个核，按千兆网卡 125MB/s 要 16 张网卡——两个维度同时爆。三条对策，按性价比排序：① **砍字段**（最有效）：DTO 只返回前端要的，别把整个实体（含大字段、关联对象）扔出去，`@JsonIgnore` / `@JsonView` / 专用 VO；② **gzip**：JSON 文本压缩比通常 5:1，用约 2 倍 CPU 换 5 倍带宽；③ **分页 + 缓存**：别让同一个重查询每秒跑一万次，加 Redis / HTTP 缓存。注意压缩不是万能的：已经压过的内容（图片、protobuf）再 gzip 只浪费 CPU；而且 gzip 有固定开销，小于 1KB 的响应压完反而更大（所以 Spring 的 `server.compression.min-response-size` 默认 2KB）。"
+    },
     {
       "kind": "match",
       "pairs": [

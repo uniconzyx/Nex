@@ -2,7 +2,7 @@
   "chapter": "spring-ch06",
   "subject": "spring",
   "title": "MyBatis 基础：映射与 CRUD",
-  "fingerprint": "2425df3157",
+  "fingerprint": "cb4a0a1529",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,103 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "一千条订单，为什么发了一千零一条 SQL",
+      "brief": "查订单列表时，每条订单还要查它的商品明细——循环里调一次 `selectByOrderId`，一千条订单就发了一千零一次 SQL。每次往返 1ms，光等数据库就是一秒。改成「先查主表，再用 `IN` 批量查子表」，两条 SQL 就够。把记录数与查询方式拖到真实业务规模，看这条 N+1 曲线怎么随数据量线性恶化。",
+      "params": [
+        {
+          "key": "parents",
+          "label": "主记录数",
+          "min": 100,
+          "max": 10000,
+          "step": 100,
+          "value": 1000
+        },
+        {
+          "key": "mode",
+          "label": "查询方式",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "N+1（循环里查）",
+            "批量 IN 查询"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "rows",
+          "label": "主记录数",
+          "expr": "parents",
+          "unit": "条",
+          "fmt": "int"
+        },
+        {
+          "key": "nPlusOne",
+          "label": "N+1 的 SQL 次数",
+          "expr": "parents + 1",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "batch",
+          "label": "批量方案的 SQL 次数",
+          "expr": "2",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "sqls",
+          "label": "当前 SQL 次数",
+          "expr": "if(mode == 1, 2, parents + 1)",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "totalMs",
+          "label": "数据库往返耗时",
+          "expr": "sqls * 1",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "connHoldMs",
+          "label": "单请求持有连接",
+          "expr": "totalMs",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "connNeed",
+          "label": "100 并发所需连接",
+          "expr": "totalMs * 100 / 1000",
+          "unit": "个",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "rows >= 1000",
+          "label": "主记录 ≥1000 条（真实列表页/批量任务规模）"
+        },
+        {
+          "expr": "nPlusOne >= 1000",
+          "label": "N+1 方案 ≥1000 次 SQL（这就是要解决的痛点）"
+        },
+        {
+          "expr": "sqls <= 10",
+          "label": "当前 SQL 次数 ≤10（批量一次拿完）"
+        },
+        {
+          "expr": "totalMs <= 50",
+          "label": "数据库往返 ≤50ms"
+        }
+      ],
+      "insight": "N+1 的公式就是它的名字：**1 次主查询 + N 次子查询**。代价不在数据库算得慢，而在**网络往返次数**——每次 1ms 的 RTT，一千条就是一秒，而且数据量越大越糟，是标准的线性恶化。修法有三档：① **批量 IN**（`WHERE order_id IN (...)`）：1000 条分成几十个批次，SQL 次数从 1001 降到 2；② **JOIN 一次查完**：适合一对一/一对少，注意一对多会笛卡尔膨胀（1000 订单 × 10 明细 = 1 万行，要自己做去重聚合）；③ **MyBatis 的 `<collection>` + `fetchType=\"lazy\"` 或 `@BatchSize`**，本质也是帮你做批量 IN。检测手段：开 MyBatis 的 SQL 日志或 `p6spy`，一眼就能看到「同一条 SQL 刷了 1000 遍」；Spring Data JPA 用 `@EntityGraph` / `join fetch` 解决同类问题。另外注意 `connHoldMs` 那行：N+1 把连接持有时间也放大了 1000 倍，高并发下会先把连接池打满（见 spring-ch08 的 Little 定律）。"
+    },
     {
       "kind": "match",
       "pairs": [
