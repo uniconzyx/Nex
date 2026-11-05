@@ -1,0 +1,8 @@
+{
+  "title": "偏序拓扑排序：依赖 DAG 的线性化",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "topological order: 0 1 2 3 \n",
+  "code": "#include <stdio.h>\nint main(void){\n    int n=4;\n    int deg[4]={0,1,1,2};\n    int adj[4][4]={0};\n    adj[0][1]=adj[0][2]=adj[1][3]=adj[2][3]=1;  /* 0→1, 0→2, 1→3, 2→3 */\n    int q[4], head=0, tail=0;\n    for (int i=0;i<n;i++) if (deg[i]==0) q[tail++]=i;\n    printf(\"topological order: \");\n    while (head<tail){\n        int u=q[head++]; printf(\"%d \", u);\n        for (int v=0;v<n;v++) if (adj[u][v] && --deg[v]==0) q[tail++]=v;\n    }\n    printf(\"\\n\");\n    return 0;\n}\n"
+}

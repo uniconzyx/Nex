@@ -1,0 +1,219 @@
+{
+  "meta": {
+    "chapter": "dm-ch02",
+    "note": "集合、关系与函数：幂集/笛卡尔积/容斥、关系性质与等价/偏序、函数单满双射与基数，基础题 + 算法题混合"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "幂集的元素个数",
+      "content_md": "集合 `S = {a,b,c}` 的幂集 `P(S)` 有多少个元素？\n\nA. 3\nB. 6\nC. 8\nD. 9",
+      "options": [
+        {
+          "key": "A",
+          "text": "3"
+        },
+        {
+          "key": "B",
+          "text": "6"
+        },
+        {
+          "key": "C",
+          "text": "8"
+        },
+        {
+          "key": "D",
+          "text": "9"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "C"
+        ]
+      },
+      "explanation": "幂集是「所有子集构成的集合」。含有 `n` 个元素的集合，每个元素在子集中有「在 / 不在」两种选择，故子集总数为 `2^n`；`|S|=3`，所以 `|P(S)| = 2^3 = 8`（含空集与自身）。",
+      "tags": [
+        "幂集",
+        "子集计数"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept 01 §2.2 子集、幂集、笛卡尔积"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "笛卡尔积的大小与对称性",
+      "content_md": "设 `|A|=4, |B|=5`，下列说法正确的是？\n\nA. `|A×B|=20`，且 `|B×A|=20`\nB. `|A×B|=9`，且 `|B×A|=9`\nC. `|A×B|=20`，但 `|B×A|=9`\nD. `|A×B|=9`，但 `|B×A|=20`",
+      "options": [
+        {
+          "key": "A",
+          "text": "|A×B|=20，且 |B×A|=20"
+        },
+        {
+          "key": "B",
+          "text": "|A×B|=9，且 |B×A|=9"
+        },
+        {
+          "key": "C",
+          "text": "|A×B|=20，但 |B×A|=9"
+        },
+        {
+          "key": "D",
+          "text": "|A×B|=9，但 |B×A|=20"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "A"
+        ]
+      },
+      "explanation": "笛卡尔积 `A×B = {(a,b) | a∈A, b∈B}`，元素个数是 `|A|·|B| = 4×5 = 20`。`A×B` 与 `B×A` 只是序对顺序相反（前者 `(a,b)`、后者 `(b,a)`），元素个数相同，均为 20。注意 `A×B ≠ B×A`（除非其中一个为空集或只含一个元素）。",
+      "tags": [
+        "笛卡尔积",
+        "基数"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept 01 §2.2 子集、幂集、笛卡尔积"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "整数集上的同余关系是等价关系",
+      "content_md": "在整数集 `Z` 上定义关系 `R: aRb ⟺ a ≡ b (mod 3)`。该关系满足：\n\nA. 仅自反\nB. 仅对称\nC. 等价关系（自反 + 对称 + 传递）\nD. 偏序关系",
+      "options": [
+        {
+          "key": "A",
+          "text": "仅自反"
+        },
+        {
+          "key": "B",
+          "text": "仅对称"
+        },
+        {
+          "key": "C",
+          "text": "等价关系"
+        },
+        {
+          "key": "D",
+          "text": "偏序关系"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "C"
+        ]
+      },
+      "explanation": "同余 mod 3 满足：自反（任意 `a`，`a≡a`）；对称（`a≡b ⇒ b≡a`）；传递（`a≡b, b≡c ⇒ a≡c`）。三者齐备即为等价关系。其等价类恰好是模 3 的三个余数类 `[0],[1],[2]`，它们把 `Z` 划分成三个互不相交的子集。",
+      "tags": [
+        "等价关系",
+        "划分"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept 02 §2.3 等价关系 → 等价类 → 划分"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "hard",
+      "title": "偏序与全序的区别",
+      "content_md": "关于偏序（partial order）与全序（total order），正确的是？\n\nA. 全序一定是偏序，且任意两元素可比\nB. 偏序要求任意两元素都可比\nC. 哈斯图必须画出所有自反边与传递边\nD. 等价关系就是偏序",
+      "options": [
+        {
+          "key": "A",
+          "text": "全序一定是偏序，且任意两元素可比"
+        },
+        {
+          "key": "B",
+          "text": "偏序要求任意两元素都可比"
+        },
+        {
+          "key": "C",
+          "text": "哈斯图必须画出所有自反边与传递边"
+        },
+        {
+          "key": "D",
+          "text": "等价关系就是偏序"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "A"
+        ]
+      },
+      "explanation": "全序（线性序）是偏序的特例：在自反 / 反对称 / 传递之外，再要求「任意两元素可比」。`≤` 在实数上、字典序在字符串上都是全序。偏序不要求全可比（如整除关系下 2 与 3 不可比）。哈斯图恰恰要省略自反边与由传递性隐含的边，只画「覆盖」关系，否则图会糊成一团。",
+      "tags": [
+        "偏序",
+        "全序",
+        "哈斯图"
+      ],
+      "source": "book",
+      "source_ref": "本章 concept 02 §2.4 偏序与哈斯图"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "三集合容斥原理数值计算",
+      "content_md": "三集合 `A, B, C`，已知 `|A|=10, |B|=12, |C|=8`，两两交集 `|A∩B|=3, |A∩C|=2, |B∩C|=4`，三交集 `|A∩B∩C|=1`。求 `|A∪B∪C|`。请只写出数字。",
+      "answer": {
+        "correct": [
+          "22"
+        ]
+      },
+      "explanation": "容斥原理：`|A∪B∪C| = |A|+|B|+|C| − |A∩B| − |A∩C| − |B∩C| + |A∩B∩C| = 10+12+8 −3−2−4 +1 = 30 − 9 + 1 = 22`。可由本章 ex02 的 C 程序实跑验证（把集合大小与交集作为输入）。",
+      "tags": [
+        "容斥原理",
+        "枚举"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept 01 §2.4 容斥原理 / ex02"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "Warshall 算法求传递闭包与可达对数",
+      "content_md": "给定有向图邻接矩阵（已置自反：主对角线为 1），用 Warshall 算法求传递闭包，并输出「可达对数」（含 `i→i` 自身可达）。矩阵如下（n=4）：\n\n```\n1 1 0 0\n0 1 0 0\n0 0 1 1\n0 0 0 1\n```\n\n输出格式：单行 `reachable pairs = <整数>`。",
+      "answer": {
+        "code": "def warshall(reach, n):\n    # reach[i][j] = 1 表示 i 可达 j；原地更新也能正确求值\n    for k in range(n):\n        for i in range(n):\n            if not reach[i][k]:\n                continue\n            for j in range(n):\n                if reach[k][j]:\n                    reach[i][j] = 1\n    return reach\n\n\nn = 4\nm = [\n    [1, 1, 0, 0],\n    [0, 1, 0, 0],\n    [0, 0, 1, 1],\n    [0, 0, 0, 1],\n]\nr = warshall([row[:] for row in m], n)\npairs = sum(r[i][j] for i in range(n) for j in range(n))\nprint(\"reachable pairs =\", pairs)\n"
+      },
+      "explanation": "传递闭包把「间接可达」补全。本例结构为两条互不相连的链 `0→1` 与 `2→3`：`0` 可达 `{0,1}`，`1` 可达 `{1}`，`2` 可达 `{2,3}`，`3` 可达 `{3}`，共 `2+1+2+1 = 6` 对。真实运行输出：\n\n```text\nreachable pairs = 6\n```\n\n这与本章 ex06 的 C 程序结果一致。注意 Warshall 内层 `k` 必须是最外层循环（用第 k 个节点做「中转」），否则会漏掉间接路径。",
+      "tags": [
+        "Warshall",
+        "传递闭包",
+        "可达性"
+      ],
+      "source": "book",
+      "source_ref": "本章 concept 02 §2.5 闭包 / ex06"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "hard",
+      "title": "并查集 find 没有爬到根导致等价误判",
+      "content_md": "下面用并查集判断等价类，给定边 `[(0,1),(1,2)]`，问 `0` 与 `2` 是否等价，代码却输出 `diff`。请指出错误并给出修正。\n\n```python\nparent = list(range(n))\n\ndef find(x):\n    return parent[x]          # 直接返回父节点\n\ndef union(a, b):\n    parent[find(a)] = find(b)\n\nprint(\"same\" if find(0) == find(2) else \"diff\")\n```\n\n提示：只比较了「直接父节点」。",
+      "answer": {
+        "text": "错误在 `find`：它直接返回 `parent[x]`，没有向上爬到代表元（根）。执行 `union(0,1)` 后 `parent[0]=1`，`union(1,2)` 后 `parent[1]=2`；此时 `find(0)=parent[0]=1`，而 `find(2)=2`，`1≠2` 于是误判为 `diff`。但 0、1、2 本应在同一等价类。\n\n修正：让 `find` 循环到根——\n\n```python\ndef find(x):\n    while parent[x] != x:\n        x = parent[x]\n    return x\n```\n\n或在 `union` 里先各自找根再挂接：`ra, rb = find(a), find(b); parent[ra] = rb`。修正后 `find(0)` 沿 `0→1→2→2` 得到 `2`，等于 `find(2)`，输出 `same`。\n\n（可选）再加路径压缩 `parent[x] = find(parent[x])` 把树压平，后续查询变快。"
+      },
+      "explanation": "等价类判定必须「按根归类」：只比较直接父节点会漏掉间接等价，这正是本章 pitfalls 里「传递漏间接」在代码层面的具体表现——关系满足传递性时，间接相连的元素也必须归到同一类。",
+      "tags": [
+        "并查集",
+        "等价类",
+        "调试"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept 02 §3.2 等价类划分（Python）/ ex05"
+    }
+  ]
+}

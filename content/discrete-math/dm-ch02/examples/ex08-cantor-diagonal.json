@@ -1,0 +1,8 @@
+{
+  "title": "康托尔对角线：构造一个不在列表中的串",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "escaped = 1000\ndiffers from row 0 at diagonal pos 0\ndiffers from row 1 at diagonal pos 1\ndiffers from row 2 at diagonal pos 2\ndiffers from row 3 at diagonal pos 3\n",
+  "code": "#include <stdio.h>\nint main(void){\n    char *rows[] = {\"0101\",\"1100\",\"1010\",\"1111\"};\n    int k=4; char x[5];\n    for (int i=0;i<k;i++) x[i] = (rows[i][i]=='0') ? '1' : '0';\n    x[k]='\\0';\n    printf(\"escaped = %s\\n\", x);\n    for (int i=0;i<k;i++) printf(\"differs from row %d at diagonal pos %d\\n\", i, i);\n    return 0;\n}\n"
+}

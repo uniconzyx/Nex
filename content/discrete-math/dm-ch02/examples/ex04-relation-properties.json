@@ -1,0 +1,8 @@
+{
+  "title": "关系性质判定：给定矩阵判自反/对称/传递",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "reflexive=1 symmetric=1 transitive=1 equivalence=1\n",
+  "code": "#include <stdio.h>\nint m[4][4] = {\n    {1,1,0,0},\n    {1,1,0,0},\n    {0,0,1,1},\n    {0,0,1,1}\n};  /* 两个等价块 {0,1} 与 {2,3} */\nint main(void){\n    int n=4, ref=1, sym=1, trans=1;\n    for (int i=0;i<n;i++) if (!m[i][i]) ref=0;\n    for (int i=0;i<n;i++) for (int j=0;j<n;j++) if (m[i][j]!=m[j][i]) sym=0;\n    for (int i=0;i<n;i++) for (int j=0;j<n;j++) if (m[i][j])\n        for (int k=0;k<n;k++) if (m[j][k] && !m[i][k]) trans=0;\n    printf(\"reflexive=%d symmetric=%d transitive=%d equivalence=%d\\n\",\n           ref, sym, trans, ref&&sym&&trans);\n    return 0;\n}\n"
+}

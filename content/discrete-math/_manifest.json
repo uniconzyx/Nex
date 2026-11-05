@@ -77,6 +77,77 @@
         ]
       },
       "soft_prerequisites": []
+    },
+    {
+      "id": "dm-ch02",
+      "order": 2,
+      "group": "DM2",
+      "title": "集合、关系与函数：离散世界的名词与动词",
+      "summary": "集合两种表示、子集/幂集/笛卡尔积、四种运算与对称差、容斥原理；关系即 A×B 的子集，判自反/对称/反对称/传递，等价关系→等价类→划分，偏序与哈斯图、闭包；函数=单值+全域的特殊关系，单射/满射/双射、复合与逆、基数谱（可数 vs 不可数）与康托尔对角线、康托尔定理。配套 10 个可编译 C/Python 程序覆盖幂集枚举、容斥、关系性质判定、等价类划分、Warshall 闭包、函数类型判定、康托尔对角线、可数性、拓扑排序。",
+      "prerequisites": [
+        "dm-ch01"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "sympy/sympy",
+          "networkx/networkx",
+          "google/or-tools",
+          "Z3Prover/z3",
+          "jwasham/coding-interview-university"
+        ],
+        "github_stars": [
+          15044,
+          14770,
+          14298,
+          12856,
+          363641
+        ],
+        "github_notes": [
+          "§1.2 2. 定义/要点 · 读 sympy/sets/sets.py 的 FiniteSet / Union / Intersection：教材里的并交差对称差是集合运算的工业实现，对照本章 01 §2.3 四种基本运算与对称差",
+          "§2.2 2. 定义/要点 · 读 networkx/classes/digraph.py：有向图的邻接关系本质就是二元关系（V×V 的子集），正好印证本章 02 §2.1 关系即子集",
+          "§3.2 2. 定义/要点 · 读 ortools/sat/cp_model.py 的 AddAllDifferent：要求一组变量两两取值不同，正是「双射」的约束表达，对应本章 03 §2.2 单射 / 满射 / 双射",
+          "§2.3 3. 可运行代码 · 读 Z3Prover/z3 的 src/smt：关系闭包与等价类归约在工程求解器里被复用，对照本章 02 §3.2 等价类划分（Python）",
+          "§3.3 3. 可运行代码 · 读 jwasham/coding-interview-university 的 README：核对集合/关系/函数在面试被追问的点（去重、拓扑排序、哈希单射），回看本章 03 §3.1 判单射/满射/双射"
+        ],
+        "github_fetched_at": "2026-10-31",
+        "books": [
+          "《离散数学及其应用》（第 8 版）Kenneth H. Rosen，第 2 章 集合 / 关系 / 函数",
+          "《离散数学》（第 6 版）耿素云、屈婉玲、张立昂，第 3–4 章 集合与关系 / 函数",
+          "《Logic in Computer Science: Modelling and Reasoning about Systems》Huth & Ryan，第 3–4 章 集合、关系与函数",
+          "《离散数学教程》Dominic Welsh，第 1–2 章 Sets and Functions / Relations（基数谱与康托尔定理的经典讲法）"
+        ],
+        "leetcode": [],
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1b7411N798/",
+        "bilibili_list": [
+          {
+            "name": "王道 · 数据结构（考研）",
+            "url": "https://www.bilibili.com/video/BV1b7411N798/",
+            "note": "集合去重 / 并查集 / 拓扑排序都建立在本章集合与关系之上",
+            "bv": "BV1b7411N798"
+          },
+          {
+            "name": "王道 · 计算机组成原理",
+            "url": "https://www.bilibili.com/video/BV1BE411D7ii/",
+            "note": "用门电路理解 ∧/∨/¬，与集合的并交补同构",
+            "bv": "BV1BE411D7ii"
+          },
+          {
+            "name": "王道 · 操作系统（考研）",
+            "url": "https://www.bilibili.com/video/BV1YE411D7nH/",
+            "note": "进程调度、资源依赖就是偏序，拓扑排序决定执行顺序",
+            "bv": "BV1YE411D7nH"
+          },
+          {
+            "name": "王道 · 计算机网络（考研）",
+            "url": "https://www.bilibili.com/video/BV19E411D78Q/",
+            "note": "地址映射、编码可逆性对应单射 / 满射 / 双射",
+            "bv": "BV19E411D78Q"
+          }
+        ]
+      },
+      "soft_prerequisites": []
     }
   ],
   "github_resources": [
@@ -103,6 +174,12 @@
       "stars": 14298,
       "url": "https://github.com/google/or-tools",
       "note": "Google 约束优化套件：CP-SAT 把业务约束编译成子句"
+    },
+    {
+      "repo": "networkx/networkx",
+      "stars": 14770,
+      "url": "https://github.com/networkx/networkx",
+      "note": "图与关系算法库：digraph.py 把关系即子集、等价类/SCC 归约做成工业级实现"
     },
     {
       "repo": "jwasham/coding-interview-university",

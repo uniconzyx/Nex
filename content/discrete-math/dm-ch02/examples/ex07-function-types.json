@@ -1,0 +1,8 @@
+{
+  "title": "函数类型判定：单射/满射/双射",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "injective=0 surjective=0 bijective=0\n",
+  "code": "#include <stdio.h>\nint f[] = {0,1,2,0};   /* 非单射（0 重复），非满射（缺 3）*/\nint n=4, m=4;\nint main(void){\n    int seen[8]={0}, hit[8]={0}, inj=1, sur=1;\n    for (int i=0;i<n;i++){ if (seen[f[i]]++) inj=0; hit[f[i]]=1; }\n    for (int b=0;b<m;b++) if (!hit[b]) sur=0;\n    printf(\"injective=%d surjective=%d bijective=%d\\n\", inj, sur, inj&&sur);\n    return 0;\n}\n"
+}

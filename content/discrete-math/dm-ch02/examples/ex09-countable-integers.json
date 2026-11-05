@@ -1,0 +1,8 @@
+{
+  "title": "可数性：N→Z 的双射枚举前 6 个整数",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "first 6 integers via N->Z bijection f(n):\nf(0)=0\nf(1)=-1\nf(2)=1\nf(3)=-2\nf(4)=2\nf(5)=-3\n",
+  "code": "#include <stdio.h>\nint main(void){\n    printf(\"first 6 integers via N->Z bijection f(n):\\n\");\n    for (int n=0;n<6;n++){\n        int z = (n%2==0) ? n/2 : -(n+1)/2;\n        printf(\"f(%d)=%d\\n\", n, z);\n    }\n    return 0;\n}\n"
+}

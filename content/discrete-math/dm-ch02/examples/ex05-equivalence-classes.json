@@ -1,0 +1,8 @@
+{
+  "title": "等价类划分：并查集把元素归到代表元",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "distinct equivalence classes = 3\n0->2 1->2 2->2 3->4 4->4 5->5 \n",
+  "code": "#include <stdio.h>\nint p[6];\nint find(int x){ while(p[x]!=x){ p[x]=p[p[x]]; x=p[x]; } return x; }\nint main(void){\n    int n=6; for (int i=0;i<n;i++) p[i]=i;\n    int rel[][2]={{0,1},{1,2},{3,4}}; int nr=3;\n    for (int e=0;e<nr;e++) p[find(rel[e][0])]=find(rel[e][1]);\n    int reps[6], cnt=0;\n    for (int i=0;i<n;i++){ int r=find(i), f=0; for(int c=0;c<cnt;c++) if(reps[c]==r) f=1; if(!f) reps[cnt++]=r; }\n    printf(\"distinct equivalence classes = %d\\n\", cnt);\n    for (int i=0;i<n;i++) printf(\"%d->%d \", i, find(i));\n    printf(\"\\n\");\n    return 0;\n}\n"
+}

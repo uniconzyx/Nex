@@ -1,0 +1,8 @@
+{
+  "title": "传递闭包：Warshall 算法",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "transitive closure:\n0111\n0011\n0001\n0000\n",
+  "code": "#include <stdio.h>\nint m[4][4];\nint main(void){\n    int n=4;\n    m[0][1]=m[1][2]=m[2][3]=m[0][2]=1;   /* 0→1→2→3，另有 0→2 */\n    for (int k=0;k<n;k++) for (int i=0;i<n;i++) for (int j=0;j<n;j++)\n        if (m[i][k] && m[k][j]) m[i][j]=1;\n    printf(\"transitive closure:\\n\");\n    for (int i=0;i<n;i++){ for (int j=0;j<n;j++) printf(\"%d\", m[i][j]); printf(\"\\n\"); }\n    return 0;\n}\n"
+}

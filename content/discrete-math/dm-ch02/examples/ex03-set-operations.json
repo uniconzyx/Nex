@@ -1,0 +1,8 @@
+{
+  "title": "集合运算：交 / 并 / 差（整型数组实现）",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "intersection: 2 3 \nunion: 1 2 3 4 \ndifference A\\B: 1 \n",
+  "code": "#include <stdio.h>\nint main(void){\n    int a[]={1,2,3}, b[]={2,3,4}, n=3, m=3;\n    printf(\"intersection: \");\n    for (int i=0;i<n;i++) for (int j=0;j<m;j++) if (a[i]==b[j]) printf(\"%d \", a[i]);\n    printf(\"\\nunion: \");\n    for (int i=0;i<n;i++) printf(\"%d \", a[i]);\n    for (int j=0;j<m;j++){ int f=0; for(int i=0;i<n;i++) if(b[j]==a[i]) f=1; if(!f) printf(\"%d \", b[j]); }\n    printf(\"\\ndifference A\\\\B: \");\n    for (int i=0;i<n;i++){ int f=0; for(int j=0;j<m;j++) if(a[i]==b[j]) f=1; if(!f) printf(\"%d \", a[i]); }\n    printf(\"\\n\");\n    return 0;\n}\n"
+}

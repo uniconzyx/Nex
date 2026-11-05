@@ -1,0 +1,8 @@
+{
+  "title": "容斥原理：三集合并集大小",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "|A|=4 |B|=3 |C|=3\n|A∩B|=2 |A∩C|=1 |B∩C|=2 |A∩B∩C|=1\n|A∪B∪C| = 6 (枚举验证: 1,2,3,4,5,6 共 6 个)\n",
+  "code": "#include <stdio.h>\nint main(void){\n    int nA=4, nB=3, nC=3;      /* |A|=4 {1,2,3,4}, |B|=3 {3,4,5}, |C|=3 {4,5,6} */\n    int AB=2, AC=1, BC=2, ABC=1; /* 两两交与三交的大小（手算）*/\n    int uni = nA + nB + nC - AB - AC - BC + ABC;\n    printf(\"|A|=%d |B|=%d |C|=%d\\n\", nA, nB, nC);\n    printf(\"|A∩B|=%d |A∩C|=%d |B∩C|=%d |A∩B∩C|=%d\\n\", AB, AC, BC, ABC);\n    printf(\"|A∪B∪C| = %d (枚举验证: 1,2,3,4,5,6 共 6 个)\\n\", uni);\n    return 0;\n}\n"
+}
