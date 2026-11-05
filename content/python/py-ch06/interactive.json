@@ -2,7 +2,7 @@
   "chapter": "py-ch06",
   "subject": "python",
   "title": "正则与文本处理：re / 分组 / 替换",
-  "fingerprint": "71e8cec7b1",
+  "fingerprint": "c861e57bf5",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,85 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "一条正则，把 CPU 卡死三十秒",
+      "brief": "`re.match(r'(a+)+$', 'aaaa...a!')` 对 30 个 a 加一个叹号，会让你等上几十秒——它不是一个字符一个字符地扫，而是在失败时枚举「这串 a 该切成几段」的所有可能，回溯 2³⁰ 次。长度每加 1，时间翻倍；这就是 ReDoS 攻击的原理。把输入长度拖到攻击者随手就能构造的规模，看灾难性回溯和线性匹配的差距。",
+      "params": [
+        {
+          "key": "n",
+          "label": "输入长度（个 a）",
+          "min": 10,
+          "max": 40,
+          "step": 2,
+          "value": 30
+        },
+        {
+          "key": "safe",
+          "label": "正则写法",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "(a+)+$ 嵌套量词",
+            "a+$ 单层量词"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "badSteps",
+          "label": "嵌套量词回溯次数",
+          "expr": "pow(2, n)",
+          "unit": "步",
+          "fmt": "int"
+        },
+        {
+          "key": "goodSteps",
+          "label": "单层量词步骤",
+          "expr": "n",
+          "unit": "步",
+          "fmt": "int"
+        },
+        {
+          "key": "steps",
+          "label": "当前写法步骤",
+          "expr": "if(safe == 1, goodSteps, badSteps)",
+          "unit": "步",
+          "fmt": "int"
+        },
+        {
+          "key": "ms",
+          "label": "预计耗时",
+          "expr": "steps / 100000",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "ratio",
+          "label": "嵌套 / 单层",
+          "expr": "badSteps / n",
+          "unit": "倍",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "n >= 28",
+          "label": "输入长度 ≥28（2²⁸ 已过亿步，攻击者随手就能构造）"
+        },
+        {
+          "expr": "steps <= 10000000",
+          "label": "匹配步骤 ≤1000 万（约 0.1 秒，不会被拖死）"
+        },
+        {
+          "expr": "badSteps >= 100000000",
+          "label": "嵌套量词 ≥1 亿步（灾难性回溯确实存在）"
+        }
+      ],
+      "insight": "正则引擎（PCRE、Python re、Java 的 java.util.regex）默认是**回溯式**的：遇到失败就退回上一个选择点换一种切分再试。`(a+)+` 给了引擎两层选择点，`aaaa...a!` 结尾那个 `!` 让每种切分都失败，于是 2ⁿ 种切分全试一遍。修法有三条，从轻到重：① 改成等价的线性写法（`a+$`）；② 用占有量词 `a++$` 或原子组 `(?>a+)+$` 禁止回溯；③ 换非回溯引擎（RE2、Rust regex），代价是不再支持反向引用。**永远不要用用户输入去匹配带嵌套量词的正则**——这就是 ReDoS，一个 30 字节的字符串能让单核跑满三十秒。"
+    },
     {
       "kind": "match",
       "pairs": [

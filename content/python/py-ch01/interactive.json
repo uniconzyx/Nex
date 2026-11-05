@@ -2,7 +2,7 @@
   "chapter": "py-ch01",
   "subject": "python",
   "title": "语法与数据类型：变量/流程控制/字符串/列表/字典/元组/集合/推导式",
-  "fingerprint": "d03479d2ca",
+  "fingerprint": "91802b8b21",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,92 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "循环里拼字符串，为什么越拼越慢",
+      "brief": "把一万条日志片段拼成一个大字符串，最直觉的写法是循环里 `s += part`。但 Python 的 str 是不可变的：每次 `+=` 都要新建一个更长的串，把旧内容和新增片段一起拷进去，第 i 次要拷 i 段。片段数翻倍，拷贝量翻四倍——这就是 O(n²) 的来源。把片段数拖到真实日志的规模，看两种写法的拷贝量差出几个数量级。",
+      "params": [
+        {
+          "key": "n",
+          "label": "片段数",
+          "min": 1000,
+          "max": 100000,
+          "step": 1000,
+          "value": 50000
+        },
+        {
+          "key": "mode",
+          "label": "拼接方式",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "循环 s += part",
+            "''.join(parts)"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "parts",
+          "label": "片段数 n",
+          "expr": "n",
+          "unit": "段",
+          "fmt": "int"
+        },
+        {
+          "key": "outKB",
+          "label": "结果字符串",
+          "expr": "n * 20 / 1024",
+          "unit": "KB",
+          "fmt": "int"
+        },
+        {
+          "key": "grossMB",
+          "label": "+= 累计拷贝",
+          "expr": "20 * n * (n + 1) / 2 / 1048576",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "joinMB",
+          "label": "join 拷贝",
+          "expr": "n * 20 / 1048576",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "chosenMB",
+          "label": "当前写法拷贝",
+          "expr": "if(mode == 1, joinMB, grossMB)",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "ratio",
+          "label": "+= / join",
+          "expr": "grossMB / joinMB",
+          "unit": "倍",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "parts >= 20000",
+          "label": "片段数 ≥2 万（规模够大才谈得上复杂度）"
+        },
+        {
+          "expr": "grossMB >= 1024",
+          "label": "+= 累计拷贝 ≥1GB（这就是要解决的痛点）"
+        },
+        {
+          "expr": "chosenMB <= 64",
+          "label": "当前写法拷贝 ≤64MB（常规内存带宽下秒级完成）"
+        }
+      ],
+      "insight": "`s += part` 看起来是「追加」，语义上却是「新建 + 全量拷贝」——不可变对象没有 append 这回事。n 段拼下来总拷贝量是 L·n²/2，5 万段就是 25GB 的内存搬运，而 `''.join` 只搬 1MB。CPython 确实对引用计数为 1 的 str 做过原地 resize 优化，但这属于实现细节、官方不承诺，PyPy 或一旦有别名就立刻退化。同样的道理适用于 bytes、tuple 的循环相加：**需要累积时先用 list 收着，最后一次性 join / tuple()**。"
+    },
     {
       "kind": "boss",
       "questions": [

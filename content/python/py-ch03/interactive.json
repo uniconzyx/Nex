@@ -2,7 +2,7 @@
   "chapter": "py-ch03",
   "subject": "python",
   "title": "内置数据结构：list / tuple / dict / set 与推导式、深浅拷贝",
-  "fingerprint": "cfc65b91a3",
+  "fingerprint": "1deaded3c7",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,92 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "一亿个整数，列表推导和生成器差多少内存",
+      "brief": "`[x*x for x in range(n)]` 会先把 n 个结果全建出来再交给你，每个 int 对象 28 字节，列表里还要一个 8 字节指针——一亿个就是 3.6GB。`(x*x for x in range(n))` 只返回一个生成器，算一个丢一个，内存是常数。把元素数拖到真实数据管道的规模，看「急切建表」和「惰性求值」的内存分岔。",
+      "params": [
+        {
+          "key": "nM",
+          "label": "元素数（百万）",
+          "min": 1,
+          "max": 200,
+          "step": 1,
+          "value": 50
+        },
+        {
+          "key": "mode",
+          "label": "求值方式",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "列表推导式 [ ]",
+            "生成器表达式 ( )"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "elems",
+          "label": "元素数",
+          "expr": "nM * 1000000",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "listMB",
+          "label": "列表推导占用",
+          "expr": "nM * 1000000 * 36 / 1048576",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "genMB",
+          "label": "生成器占用",
+          "expr": "0.05",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "chosenMB",
+          "label": "当前方案占用",
+          "expr": "if(mode == 1, genMB, listMB)",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "smallIntMB",
+          "label": "若命中整数缓存（只算指针）",
+          "expr": "nM * 1000000 * 8 / 1048576",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "ratio",
+          "label": "列表 / 生成器",
+          "expr": "listMB / 0.05",
+          "unit": "倍",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "elems >= 10000000",
+          "label": "元素数 ≥1000 万（规模够大才需要选惰性）"
+        },
+        {
+          "expr": "listMB >= 800",
+          "label": "列表推导占用 ≥800MB（这才是要解决的痛点）"
+        },
+        {
+          "expr": "chosenMB <= 64",
+          "label": "当前方案 ≤64MB（进程能安心活着）"
+        }
+      ],
+      "insight": "列表推导式不是「写法糖」，它是一句 `list(...)`：先把所有元素落实成对象，再交给你。每个非缓存 int 占 28 字节，列表还要 8 字节指针，所以一亿个元素是 3.6GB——而生成器只有 O(1) 的帧开销。这条差异决定了数据管道的写法：`sum(x*x for x in data)` 全程不落地，`sum([x*x for x in data])` 先建一遍全表。注意 `smallIntMB` 那行：0~256 的整数被 CPython 缓存复用，列表里只剩指针，这也是「同样一亿个元素，内存可能差 4.5 倍」的原因——**对象个数不等于元素个数**，这是 Python 内存账本里最容易漏的一项。"
+    },
     {
       "kind": "match",
       "pairs": [

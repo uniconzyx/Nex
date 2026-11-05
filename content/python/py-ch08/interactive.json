@@ -2,7 +2,7 @@
   "chapter": "py-ch08",
   "subject": "python",
   "title": "数据分析：numpy/pandas 入门",
-  "fingerprint": "87c1a3b83b",
+  "fingerprint": "37e9da84ff",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,92 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "一千万行 DataFrame，为什么光一列文本就吃掉 680MB",
+      "brief": "pandas 的 `object` 列并不是「紧凑的字符串数组」，它存的是指向 Python str 的指针——每个字符串至少 49 字节头加内容，一千万行就是几百 MB。而这些列往往只有几十个不同取值（城市、状态、品类）。`category` dtype 只存一个 4 字节整数 code，加一张几十项的字典表。把行数与 dtype 拖到真实数据规模，看这一列的内存怎么从 680MB 掉到 40MB。",
+      "params": [
+        {
+          "key": "rowsM",
+          "label": "行数（百万）",
+          "min": 1,
+          "max": 50,
+          "step": 1,
+          "value": 10
+        },
+        {
+          "key": "cat",
+          "label": "文本列 dtype",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "object（默认）",
+            "category"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "rows",
+          "label": "行数",
+          "expr": "rowsM * 1000000",
+          "unit": "行",
+          "fmt": "int"
+        },
+        {
+          "key": "objectMB",
+          "label": "object 列占用",
+          "expr": "rowsM * 1000000 * 68 / 1048576",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "catMB",
+          "label": "category 列占用",
+          "expr": "rowsM * 1000000 * 4 / 1048576 + 0.01",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "chosenMB",
+          "label": "当前 dtype 占用",
+          "expr": "if(cat == 1, catMB, objectMB)",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "ratio",
+          "label": "object / category",
+          "expr": "objectMB / catMB",
+          "unit": "倍",
+          "fmt": "fix2"
+        },
+        {
+          "key": "tableMB",
+          "label": "整表估算（另 3 个 float64 列）",
+          "expr": "chosenMB + rowsM * 1000000 * 24 / 1048576",
+          "unit": "MB",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "rows >= 5000000",
+          "label": "行数 ≥500 万（真实数据管线规模）"
+        },
+        {
+          "expr": "objectMB >= 450",
+          "label": "object 列 ≥450MB（这才是要解决的痛点）"
+        },
+        {
+          "expr": "chosenMB <= 128",
+          "label": "当前 dtype ≤128MB（单列不该吃掉半个容器）"
+        }
+      ],
+      "insight": "`object` dtype 是 pandas 的「什么都能装」，代价是每格一个 Python 对象指针。一千万行的城市列，虽然只有 100 个不同取值，却存了一千万个 str 对象——680MB 换 40MB，只要一句 `astype('category')`。低基数列（类别数 ≪ 行数）都是 category 的适用场景：省内存、`groupby` 更快、排序按类别顺序而不是字典序。反例是高基数列（user_id、订单号），转 category 反而更慢更占内存——它的字典表会涨到和行数同量级。配套的还有：`float64 → float32`、时间列用 `datetime64` 而不是字符串、`pd.read_csv(dtype=..., usecols=...)` 在**读入时**就定好类型（比读进来再转省一半峰值）。"
+    },
     {
       "kind": "match",
       "pairs": [

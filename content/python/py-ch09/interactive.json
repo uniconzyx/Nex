@@ -2,7 +2,7 @@
   "chapter": "py-ch09",
   "subject": "python",
   "title": "面向对象：类、继承与魔术方法",
-  "fingerprint": "8aec386f17",
+  "fingerprint": "2adfc72db6",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,92 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "一百万个对象，__slots__ 到底省了什么",
+      "brief": "普通类的每个实例都挂着一张 `__dict__`——一个为「随时能加任意属性」准备的哈希表。哪怕你只用了 4 个字段，这张小表也要两百多字节，比对象本身大一个数量级。`__slots__` 把字段布局直接钉进类型定义，实例里只剩对象头和 4 个指针，代价是不能再动态加属性。把实例数拖到百万级，看这笔账差出多少。",
+      "params": [
+        {
+          "key": "instM",
+          "label": "实例数（百万）",
+          "min": 1,
+          "max": 20,
+          "step": 1,
+          "value": 5
+        },
+        {
+          "key": "slots",
+          "label": "类定义",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "普通类（有 __dict__）",
+            "__slots__"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "inst",
+          "label": "实例数",
+          "expr": "instM * 1000000",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "dictMB",
+          "label": "普通类占用",
+          "expr": "instM * 1000000 * 272 / 1048576",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "slotsMB",
+          "label": "__slots__ 占用",
+          "expr": "instM * 1000000 * 48 / 1048576",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "chosenMB",
+          "label": "当前定义占用",
+          "expr": "if(slots == 1, slotsMB, dictMB)",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "perInst",
+          "label": "每实例字节",
+          "expr": "if(slots == 1, 48, 272)",
+          "unit": "B",
+          "fmt": "int"
+        },
+        {
+          "key": "ratio",
+          "label": "普通类 / __slots__",
+          "expr": "dictMB / slotsMB",
+          "unit": "倍",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "inst >= 2000000",
+          "label": "实例数 ≥200 万（规模够大才值得改类定义）"
+        },
+        {
+          "expr": "dictMB >= 480",
+          "label": "普通类 ≥480MB（这才是要解决的痛点）"
+        },
+        {
+          "expr": "chosenMB <= 320",
+          "label": "当前定义 ≤320MB（容器内存预算内）"
+        }
+      ],
+      "insight": "`__dict__` 是 Python「对象可以随时长出新属性」的代价：每个实例一张哈希表，哪怕只有 4 个字段也要预留扩容空间，实测约 216 字节。`__slots__ = ('a','b','c','d')` 把字段名编译进类型，实例只存 4 个指针，单实例从 272B 降到 48B（5.7 倍），还能顺带防止手滑打错属性名。代价是：不能再动态加属性、不支持多继承中两个带非空 slots 的基类、也不能被 `__weakref__` 弱引用了（要弱引用得显式加进 slots）。工程判断：**大量小对象**（点、边、token、坐标、行情 tick）值得上 slots 或 `dataclass(slots=True)`；配置类、领域模型这类十几个实例的对象，可读性优先，不必折腾。另一条路是直接换 `numpy` 结构化数组 / `array` 模块，把「对象」变成「列」，但那就不再是 OOP 的用法了。"
+    },
     {
       "kind": "match",
       "pairs": [

@@ -2,7 +2,7 @@
   "chapter": "py-ch02",
   "subject": "python",
   "title": "函数与作用域：def、参数解包、lambda、闭包、命名空间",
-  "fingerprint": "fe8927f971",
+  "fingerprint": "480809db64",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,92 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "一个闭包，把指数级递归按回线性",
+      "brief": "写 `fib(n)` 最自然的方式是递归：`fib(n-1) + fib(n-2)`。但每个 n 会被算过指数多次——n=35 时函数调用四千万次，本来该是毫秒级的计算要跑几十秒。解法不是改算法，而是加一层缓存：用一个 dict 记住算过的 n（闭包正好干这事），调用次数立刻从 φⁿ 掉到 n。拖动规模，看两条曲线怎么分岔。",
+      "params": [
+        {
+          "key": "n",
+          "label": "n",
+          "min": 20,
+          "max": 40,
+          "step": 1,
+          "value": 35
+        },
+        {
+          "key": "memo",
+          "label": "实现方式",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "朴素递归",
+            "闭包记忆化"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "naiveCalls",
+          "label": "朴素递归调用次数",
+          "expr": "2 * pow(1.618, n)",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "memoCalls",
+          "label": "记忆化调用次数",
+          "expr": "n",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "calls",
+          "label": "当前实现调用次数",
+          "expr": "if(memo == 1, memoCalls, naiveCalls)",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "cacheEntries",
+          "label": "缓存条目",
+          "expr": "if(memo == 1, n + 1, 0)",
+          "unit": "条",
+          "fmt": "int"
+        },
+        {
+          "key": "depth",
+          "label": "递归深度",
+          "expr": "n",
+          "unit": "层",
+          "fmt": "int"
+        },
+        {
+          "key": "sec",
+          "label": "预计耗时",
+          "expr": "calls / 10000000",
+          "unit": "秒",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "n >= 30",
+          "label": "n ≥30（φ³⁰ 已是百万级，指数爆炸才显形）"
+        },
+        {
+          "expr": "calls <= 1000000",
+          "label": "函数调用 ≤100 万次（约 0.1 秒可完成）"
+        },
+        {
+          "expr": "cacheEntries >= 31",
+          "label": "缓存条目 ≥31（说明 n 个状态各只算了一次）"
+        }
+      ],
+      "insight": "朴素递归慢的根源不是「递归」本身，是**重复子问题**：F(35) 里 F(20) 被算了上千次。调用次数服从 φⁿ（φ=1.618 是斐波那契的特征根），n 每加 5 就乘 11 倍。记忆化后每个 n 只算一次，调用次数 = n，复杂度从指数掉到线性。实现上闭包是最轻的载体——`cache = {}` 藏在函数对象里，调用方签名不用改，也不用引入全局变量：这正是「一等公民函数 + 闭包」在工程里第一个真实用途，也是 `functools.lru_cache` 的雏形（它只是把 dict 换成了 LRU 淘汰表）。"
+    },
     {
       "kind": "match",
       "pairs": [

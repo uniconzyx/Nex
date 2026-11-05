@@ -2,7 +2,7 @@
   "chapter": "py-ch05",
   "subject": "python",
   "title": "文件与 IO：读写 / 上下文管理器 / 序列化",
-  "fingerprint": "9b2ffdd43d",
+  "fingerprint": "97a1b9febf",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,93 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "两个 G 的日志，为什么 readlines 直接把进程打死",
+      "brief": "`f.readlines()` 会一次性把整个文件解成字符串列表塞进内存：不只是原始 2GB 字节，每行还要一个 49 字节的 str 对象头和 8 字节指针。两千万行日志，常驻内存直接冲到 3GB 以上，容器当场 OOM。`for line in f` 只维持一个 8KB 读缓冲和当前行，内存与文件大小完全无关。把文件规模拖到真实日志量级，看两条线的差别。",
+      "params": [
+        {
+          "key": "fileMB",
+          "label": "日志文件大小",
+          "min": 100,
+          "max": 4096,
+          "step": 100,
+          "value": 2048,
+          "unit": "MB"
+        },
+        {
+          "key": "mode",
+          "label": "读取方式",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "f.readlines() 全读",
+            "for line in f 流式"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "linesM",
+          "label": "行数",
+          "expr": "fileMB * 1048576 / 100 / 1000000",
+          "unit": "百万行",
+          "fmt": "fix2"
+        },
+        {
+          "key": "readMB",
+          "label": "readlines 常驻内存",
+          "expr": "fileMB * 1.57",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "streamMB",
+          "label": "流式常驻内存",
+          "expr": "0.05",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "chosenMB",
+          "label": "当前方案常驻",
+          "expr": "if(mode == 1, streamMB, readMB)",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "ratio",
+          "label": "全读 / 流式",
+          "expr": "readMB / 0.05",
+          "unit": "倍",
+          "fmt": "int"
+        },
+        {
+          "key": "totalGB",
+          "label": "总共要处理的字符",
+          "expr": "fileMB / 1024",
+          "unit": "GB",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "fileMB >= 1024",
+          "label": "文件 ≥1GB（真实日志量级）"
+        },
+        {
+          "expr": "readMB >= 1500",
+          "label": "readlines 常驻 ≥1.5GB（这就是 OOM 的原因）"
+        },
+        {
+          "expr": "chosenMB <= 512",
+          "label": "当前方案常驻 ≤512MB（容器能活下来）"
+        }
+      ],
+      "insight": "「文件大」本身不是问题，**峰值内存**才是。`readlines()` 把文件大小直接翻译成常驻内存，还要叠上每行一个 str 对象（49 字节头）的开销，2GB 日志能吃掉 3GB 内存。`for line in f` 用的是文件对象的迭代协议：内部 8KB 缓冲，读满解析出一行就交给你，内存是 O(1)，总处理量一点没少（总字符串总量还是 2GB）。所以流式处理的关键不是「更快」，是「峰值可控」——同理适用于 `csv.reader(f)`、`json.load` vs `ijson`、`pd.read_csv(chunksize=...)`。判据里那行 `totalGB` 就是提醒：流式不会让活儿变少，只让内存不涨。"
+    },
     {
       "kind": "match",
       "pairs": [

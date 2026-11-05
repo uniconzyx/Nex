@@ -2,7 +2,7 @@
   "chapter": "py-ch07",
   "subject": "python",
   "title": "并发：threading / asyncio",
-  "fingerprint": "b52ad8c94a",
+  "fingerprint": "e1ae4e2fab",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,100 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "多线程跑满八核，为什么总时长一点没降",
+      "brief": "八个 CPU-bound 任务，开 8 个线程跑，总时长几乎和串行一样——因为 CPython 有 GIL，同一时刻只有一个线程在执行字节码，多线程只是让它们在单核上轮流跑，还要额外付切换开销（比串行还慢一点）。要吃满多核必须换多进程。把核数与任务数拖到真实场景，看两种并发模型的加速比怎么分岔。",
+      "params": [
+        {
+          "key": "cores",
+          "label": "CPU 核数",
+          "min": 1,
+          "max": 16,
+          "step": 1,
+          "value": 4
+        },
+        {
+          "key": "mode",
+          "label": "并发模型",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "threading 多线程",
+            "multiprocessing 多进程"
+          ]
+        },
+        {
+          "key": "tasks",
+          "label": "任务数",
+          "min": 2,
+          "max": 64,
+          "step": 2,
+          "value": 32
+        }
+      ],
+      "metrics": [
+        {
+          "key": "threadSpeedup",
+          "label": "多线程加速比",
+          "expr": "1 / 1.05",
+          "unit": "倍",
+          "fmt": "fix2"
+        },
+        {
+          "key": "procSpeedup",
+          "label": "多进程加速比",
+          "expr": "min(cores, tasks) / 1.02",
+          "unit": "倍",
+          "fmt": "fix2"
+        },
+        {
+          "key": "speedup",
+          "label": "当前加速比",
+          "expr": "if(mode == 1, procSpeedup, threadSpeedup)",
+          "unit": "倍",
+          "fmt": "fix2"
+        },
+        {
+          "key": "gilSwitch",
+          "label": "GIL 每秒切换",
+          "expr": "200",
+          "unit": "次/秒",
+          "fmt": "int"
+        },
+        {
+          "key": "parallel",
+          "label": "实际并行度",
+          "expr": "if(mode == 1, min(cores, tasks), 1)",
+          "unit": "核",
+          "fmt": "int"
+        },
+        {
+          "key": "wasted",
+          "label": "闲置的核",
+          "expr": "cores - parallel",
+          "unit": "核",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "cores >= 4",
+          "label": "核数 ≥4（多核机器才有并行的余地）"
+        },
+        {
+          "expr": "tasks >= 8",
+          "label": "任务数 ≥8（任务比核少时，多进程也吃不满）"
+        },
+        {
+          "expr": "speedup >= 3.5",
+          "label": "加速比 ≥3.5 倍（要真加速，不是心理安慰）"
+        }
+      ],
+      "insight": "GIL（Global Interpreter Lock）是 CPython 为保护对象引用计数加的一把全局锁，同一时刻只有一个线程在执行 Python 字节码。所以：**CPU-bound 多线程 = 单核轮流跑 + 切换开销**，加速比约 0.95（负优化）；要吃满多核必须上 `multiprocessing`，每个进程一个解释器、一把自己的 GIL。反过来，**IO-bound 场景多线程是有效的**——线程在等 socket/磁盘时释放 GIL，这段时间别的线程能跑，所以爬虫、请求聚合用线程池完全够。判断标准只有一条：任务时间花在**算**上还是花在**等**上。（Python 3.13 起有 free-threaded 构建可以关掉 GIL，但生态兼容仍在推进中。）"
+    },
     {
       "kind": "boss",
       "questions": [

@@ -1364,6 +1364,146 @@
    }
   ]
  },
+ "python/py-ch01": {
+  "ok": true,
+  "params": [
+   {
+    "key": "n",
+    "type": "range",
+    "value": 20000.0
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "python/py-ch02": {
+  "ok": true,
+  "params": [
+   {
+    "key": "n",
+    "type": "range",
+    "value": 30.0
+   },
+   {
+    "key": "memo",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "python/py-ch03": {
+  "ok": true,
+  "params": [
+   {
+    "key": "nM",
+    "type": "range",
+    "value": 24.0
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "python/py-ch04": {
+  "ok": true,
+  "params": [
+   {
+    "key": "recsK",
+    "type": "range",
+    "value": 300.0
+   },
+   {
+    "key": "ascii",
+    "type": "opt",
+    "value": 0
+   }
+  ]
+ },
+ "python/py-ch05": {
+  "ok": true,
+  "params": [
+   {
+    "key": "fileMB",
+    "type": "range",
+    "value": 1100.0
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "python/py-ch06": {
+  "ok": true,
+  "params": [
+   {
+    "key": "n",
+    "type": "range",
+    "value": 28.0
+   },
+   {
+    "key": "safe",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "python/py-ch07": {
+  "ok": true,
+  "params": [
+   {
+    "key": "cores",
+    "type": "range",
+    "value": 4.0
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 1
+   },
+   {
+    "key": "tasks",
+    "type": "range",
+    "value": 8.0
+   }
+  ]
+ },
+ "python/py-ch08": {
+  "ok": true,
+  "params": [
+   {
+    "key": "rowsM",
+    "type": "range",
+    "value": 7.0
+   },
+   {
+    "key": "cat",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "python/py-ch09": {
+  "ok": true,
+  "params": [
+   {
+    "key": "instM",
+    "type": "range",
+    "value": 2.0
+   },
+   {
+    "key": "slots",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
  "tooling/tool-ch06": {
   "ok": true,
   "params": [

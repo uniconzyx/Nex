@@ -2,7 +2,7 @@
   "chapter": "py-ch04",
   "subject": "python",
   "title": "标准库：os / sys / re / datetime / json",
-  "fingerprint": "7c1bf5efd5",
+  "fingerprint": "c978d9a49c",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,99 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "接口返回的中文，为什么体积大了 1.7 倍",
+      "brief": "`json.dumps` 默认带 `ensure_ascii=True`，它会把所有非 ASCII 字符转成 `\\uXXXX`——一个中文字符从 UTF-8 的 3 字节变成 6 字节。一条记录里中文越多，膨胀越明显；日志和接口里那些 `\\u4f60\\u597d` 就是这么来的。拖动记录数与转义开关，把这个 1.7 倍的隐性开销压回预算里。",
+      "params": [
+        {
+          "key": "recsK",
+          "label": "记录数（千条）",
+          "min": 10,
+          "max": 350,
+          "step": 10,
+          "value": 350
+        },
+        {
+          "key": "ascii",
+          "label": "ensure_ascii",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 1,
+          "labels": [
+            "False（直接 UTF-8）",
+            "True（转成 \\uXXXX，默认）"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "recs",
+          "label": "记录数",
+          "expr": "recsK * 1000",
+          "unit": "条",
+          "fmt": "int"
+        },
+        {
+          "key": "perRecUtf",
+          "label": "每条（UTF-8）",
+          "expr": "180",
+          "unit": "B",
+          "fmt": "int"
+        },
+        {
+          "key": "perRecAsc",
+          "label": "每条（\\u 转义）",
+          "expr": "300",
+          "unit": "B",
+          "fmt": "int"
+        },
+        {
+          "key": "utfMB",
+          "label": "UTF-8 序列化体积",
+          "expr": "recsK * 1000 * 180 / 1048576",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "ascMB",
+          "label": "\\u 转义序列化体积",
+          "expr": "recsK * 1000 * 300 / 1048576",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "chosenMB",
+          "label": "当前设置体积",
+          "expr": "if(ascii == 1, ascMB, utfMB)",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "ratio",
+          "label": "转义 / UTF-8",
+          "expr": "ascMB / utfMB",
+          "unit": "倍",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "recs >= 300000",
+          "label": "记录数 ≥30 万（生产规模的接口/日志才有体积问题）"
+        },
+        {
+          "expr": "ascMB >= 80",
+          "label": "转义方案 ≥80MB（默认设置的真实代价）"
+        },
+        {
+          "expr": "chosenMB <= 64",
+          "label": "当前设置 ≤64MB（传输与落盘预算）"
+        }
+      ],
+      "insight": "`ensure_ascii=True` 是 json 模块为了「输出只含 ASCII、任何老系统都能读」做的保守默认，代价是每个非 ASCII 字符从 3 字节涨到 6 字节。一条 100 字符的记录里 40 个中文，体积从 180B 涨到 300B——1.67 倍。所以对接中文接口时先关掉它：`json.dumps(obj, ensure_ascii=False)`，再配合 `encode('utf-8')` 落盘。顺带一提，`indent=2` 是另一个隐性膨胀源：每层缩进都占字节，日志/传输场景一律用 `separators=(',', ':')` 压到最紧。"
+    },
     {
       "kind": "sequence",
       "heading": "2. sys.path 与导入解析顺序",
