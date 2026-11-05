@@ -1,0 +1,8 @@
+{
+  "title": "邻接矩阵存储与度数统计：无向图的度数",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "deg(0)=2\ndeg(1)=2\ndeg(2)=3\ndeg(3)=1\n",
+  "code": "#include <stdio.h>\n/* 无向图：4 顶点，边 (0-1)(1-2)(2-3)(0-2) */\nint main(void){\n    int n=4;\n    int adj[4][4]={0};\n    int e[][2]={{0,1},{1,2},{2,3},{0,2}};\n    int m=4;\n    for(int k=0;k<m;k++){ adj[e[k][0]][e[k][1]]=1; adj[e[k][1]][e[k][0]]=1; }\n    for(int i=0;i<n;i++){\n        int d=0;\n        for(int j=0;j<n;j++) d+=adj[i][j];\n        printf(\"deg(%d)=%d\\n\", i, d);\n    }\n    return 0;\n}\n"
+}

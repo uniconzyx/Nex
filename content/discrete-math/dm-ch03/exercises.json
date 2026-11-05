@@ -1,0 +1,198 @@
+{
+  "meta": {
+    "chapter": "dm-ch03",
+    "note": "图论：度数与握手定理、连通性、欧拉/哈密顿、最小生成树、最短路、拓扑排序、二分图——基础题 + 算法题混合"
+  },
+  "items": [
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "握手定理与奇度顶点个数",
+      "content_md": "无向图有 9 条边，度数序列为 `{4,3,2,2,1,1,1,? ,?}`（最后两个未知）。关于奇度顶点的个数，下列说法正确的是？\n\nA. 奇度顶点一定是 1 个\nB. 奇度顶点个数必为偶数（0/2/4…）\nC. 奇度顶点一定是 3 个\nD. 握手定理无法判断奇度顶点个数",
+      "options": [
+        {
+          "key": "A",
+          "text": "奇度顶点一定是 1 个"
+        },
+        {
+          "key": "B",
+          "text": "奇度顶点个数必为偶数"
+        },
+        {
+          "key": "C",
+          "text": "奇度顶点一定是 3 个"
+        },
+        {
+          "key": "D",
+          "text": "握手定理无法判断"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "握手定理：度数和 = 2×边数 = 18（偶数）。偶数度顶点贡献偶数，所以奇度顶点贡献的总和也必须是偶数，而每个奇度顶点贡献一个奇数，奇数个奇数相加是奇数——因此奇度顶点个数本身必须是偶数（0、2、4…）。这正是握手定理的经典推论，与具体未知度数无关。",
+      "tags": [
+        "握手定理",
+        "奇度顶点"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept 01 §2.2 握手定理"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "欧拉图的一笔画判定",
+      "content_md": "一个无向连通图能否「一笔画」(存在欧拉回路)，充要条件是？\n\nA. 每个顶点度数都是奇数\nB. 每个顶点度数都是偶数\nC. 存在哈密顿回路\nD. 图是二分图",
+      "options": [
+        {
+          "key": "A",
+          "text": "每个顶点度数都是奇数"
+        },
+        {
+          "key": "B",
+          "text": "每个顶点度数都是偶数"
+        },
+        {
+          "key": "C",
+          "text": "存在哈密顿回路"
+        },
+        {
+          "key": "D",
+          "text": "图是二分图"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "无向图存在欧拉回路的充要条件是「连通 + 所有顶点度数为偶数」（欧拉路径则允许恰两个奇度顶点作起终点）。选项 A 全奇度不可能（奇度顶点必为偶数个且全图奇度时边数非整数）；C 哈密顿与欧拉无关；D 二分图也可以有奇度顶点。可对照本章 ex08 的 5-环（每点度 2）判定为 eulerian: yes。",
+      "tags": [
+        "欧拉图",
+        "一笔画"
+      ],
+      "source": "book",
+      "source_ref": "本章 concept 02 §2.3 欧拉图与一笔画"
+    },
+    {
+      "type": "choice",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "二分图的判定条件",
+      "content_md": "关于二分图（二部图），正确的是？\n\nA. 含奇长度环的图一定是二分图\nB. 二分图等价于「不含奇数长度的环」\nC. 所有树都不是二分图\nD. 完全图 K₄ 是二分图",
+      "options": [
+        {
+          "key": "A",
+          "text": "含奇长度环的图一定是二分图"
+        },
+        {
+          "key": "B",
+          "text": "二分图等价于不含奇数长度的环"
+        },
+        {
+          "key": "C",
+          "text": "所有树都不是二分图"
+        },
+        {
+          "key": "D",
+          "text": "完全图 K₄ 是二分图"
+        }
+      ],
+      "answer": {
+        "correct": [
+          "B"
+        ]
+      },
+      "explanation": "二分图可用 2 色染色使相邻点异色，等价于「图中不含奇数长度的环」（奇数环必然撞色）。树无环、当然不含奇环，所以所有树都是二分图（C 错）。完全图 K₄ 含三角形（3-环，奇环），不是二分图（D 错）。可对照本章 ex09 的 4-环二染色得到 bipartite: yes。",
+      "tags": [
+        "二分图",
+        "二染色"
+      ],
+      "source": "book",
+      "source_ref": "本章 concept 03 §2.4 平面图与四色定理"
+    },
+    {
+      "type": "output",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "easy",
+      "title": "由度数和求边数",
+      "content_md": "无向图 6 个顶点，度数序列为 `{3,3,2,2,1,1}`。请根据握手定理求边数 `|E|`，只写数字。",
+      "answer": {
+        "correct": [
+          "6"
+        ]
+      },
+      "explanation": "度数和 = 3+3+2+2+1+1 = 12。握手定理 `|E| = 度数和 / 2 = 12/2 = 6`。注意奇度顶点 {3,3,1,1} 共 4 个（偶数个），自洽。可对照本章 ex02：`sum(deg)=8 → edges=4`。",
+      "tags": [
+        "握手定理",
+        "边数"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept 01 §2.2 握手定理 / ex02"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": "medium",
+      "title": "Dijkstra 求单源最短路距离",
+      "content_md": "给定 5 顶点带权有向图，边（u→v:权）如下：\n\n```\n0→1:4, 0→2:1, 2→1:2, 1→3:1, 2→3:5, 3→4:3\n```\n\n用 Dijkstra（非负权）求从顶点 0 到各点的最短距离，输出格式：单行 `dist: d0 d1 d2 d3 d4`。",
+      "answer": {
+        "code": "import heapq\nn = 5\ng = {0:[(4,1),(1,2)], 1:[(1,3)], 2:[(2,1),(5,3)], 3:[(3,4)], 4:[]}\ndist = [float('inf')] * n\ndist[0] = 0\npq = [(0, 0)]\nwhile pq:\n    d, u = heapq.heappop(pq)\n    if d > dist[u]:\n        continue\n    for w, v in g[u]:\n        if d + w < dist[v]:\n            dist[v] = d + w\n            heapq.heappush(pq, (dist[v], v))\nprint('dist:', ' '.join(str(x) for x in dist))\n"
+      },
+      "explanation": "逐步松弛：dist[0]=0 → 取 0 松弛得 dist[2]=1, dist[1]=4 → 取 2 松弛得 dist[1]=min(4,1+2)=3, dist[3]=min(∞,1+5)=6 → 取 1 松弛得 dist[3]=min(6,3+1)=4 → 取 3 松弛得 dist[4]=4+3=7。最终 `dist: 0 3 1 4 7`，与本章 ex05 的真实运行输出一致。注意 Dijkstra 不能处理负权边。",
+      "tags": [
+        "Dijkstra",
+        "最短路径"
+      ],
+      "source": "book",
+      "source_ref": "本章 concept 03 §2.3 最短路径 / ex05"
+    },
+    {
+      "type": "coding",
+      "category": "算法题",
+      "platform": "self",
+      "difficulty": "hard",
+      "title": "Kruskal 最小生成树总权",
+      "content_md": "给定 6 顶点无向带权图，边（u-v:权）如下：\n\n```\n(0,1):4 (0,2):4 (0,3):1 (1,3):2 (2,4):3 (3,4):2 (3,5):3 (4,5):1\n```\n\n用 Kruskal（并查集，按权升序、跳过成环边）求最小生成树的总权。输出格式：单行 `MST weight = <整数>`。",
+      "answer": {
+        "code": "parent = list(range(6))\ndef find(x):\n    while parent[x] != x:\n        x = parent[x]\n    return x\nedges = [(0,1,4),(0,2,4),(0,3,1),(1,3,2),(2,4,3),(3,4,2),(3,5,3),(4,5,1)]\nedges.sort(key=lambda e: e[2])\ntotal = 0; cnt = 0\nfor u,v,w in edges:\n    if cnt == 5: break\n    ru, rv = find(u), find(v)\n    if ru != rv:\n        parent[ru] = rv\n        total += w\n        cnt += 1\nprint('MST weight =', total)\n"
+      },
+      "explanation": "边按权升序：(0,3,1)(4,5,1)(1,3,2)(3,4,2)(2,4,3)(3,5,3)(0,1,4)(0,2,4)。依次取：(0,3)∪(4,5)∪(1,3)∪(3,4) 连通 {0,1,3,4,5}，再取 (2,4) 把 2 并入 → 共 5 条边、总权 1+1+2+2+3 = 9。第 6 条边 (3,5,3) 两端已同集（成环）跳过。最终 `MST weight = 9`，与本章 ex06 真实运行输出一致。",
+      "tags": [
+        "Kruskal",
+        "最小生成树",
+        "并查集"
+      ],
+      "source": "book",
+      "source_ref": "本章 concept 03 §2.2 最小生成树 / ex06"
+    },
+    {
+      "type": "fix_error",
+      "category": "基础题",
+      "platform": "self",
+      "difficulty": "hard",
+      "title": "拓扑排序漏掉有环检测导致静默丢点",
+      "content_md": "下面用 Kahn 算法做拓扑排序，但图里其实有环 `0→1→2→0`。代码输出 `topo: 0 1 2` 看似正常，实际却漏了顶点 3、4。请指出错误并修正。\n\n```python\nfrom collections import deque\nadj = {0:[1], 1:[2], 2:[0], 3:[4], 4:[]}\ndeg = {i:0 for i in range(5)}\nfor u in adj:\n    for v in adj[u]:\n        deg[v] += 1\nq = deque([i for i in range(5) if deg[i]==0])\norder = []\nwhile q:\n    u = q.popleft(); order.append(u)\n    for v in adj[u]:\n        deg[v] -= 1\n        if deg[v] == 0:\n            q.append(v)\nprint('topo:', order)\n```\n\n提示：环里的点入度永远降不到 0。",
+      "answer": {
+        "text": "错误：Kahn 算法没有检测「环导致部分顶点永远进不了队列」。本例中 `0→1→2→0` 成环，这三个点的入度互相抵消、永远不为 0，于是只有无环部分 `{3,4}` 能排出来；但代码只打印 `order=[3,4]`（你给的 `0 1 2` 是错的——实际上队列初始为空，因为 0/1/2 入度都是 1，只有 3 入度 0，所以只会输出 `[3,4]`），并「静默」漏掉了环里的点，没有任何报错。\n\n修正：拓扑排序只存在于 DAG。排完后必须检查 `len(order) == 总顶点数`，不等就说明有环、应报错而非静默输出：\n\n```python\nif len(order) != len(adj):\n    raise ValueError('图中存在环，无拓扑序')\n```\n\n或在工程里返回 `(order, has_cycle=len(order)!=n)`。这样循环依赖（构建系统、课程先修）能被明确暴露，而不是假装排好了。这与本章 pitfalls「有环图硬排拓扑」一致。"
+      },
+      "explanation": "拓扑排序的正确性前提是图无环。环中顶点的入度永远降不到 0，永远不会入队，于是被悄悄丢弃——这是构建系统「循环依赖」静默失败的典型根源。必须加「输出数 < 顶点数 ⇒ 有环」的守卫。注意原始代码实际只会输出 `[3,4]`，题目里写的 `0 1 2` 是误导性描述，正好说明「不检测环时连输出都不可信」。",
+      "tags": [
+        "拓扑排序",
+        "环检测",
+        "调试"
+      ],
+      "source": "self",
+      "source_ref": "本章 concept 02 §3.2 拓扑排序 / pitfalls"
+    }
+  ]
+}

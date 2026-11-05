@@ -1,0 +1,8 @@
+{
+  "title": "DFS 求连通分量个数",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "components=3\n",
+  "code": "#include <stdio.h>\nint adj[6][6]={0}, vis[6]={0};\nvoid dfs(int u, int n){\n    vis[u]=1;\n    for(int v=0;v<n;v++) if(adj[u][v] && !vis[v]) dfs(v,n);\n}\nint main(void){\n    int n=6;\n    int e[][2]={{0,1},{1,2},{3,4}};  /* {0,1,2}、{3,4} 两个块，顶点5孤立 */\n    int m=3;\n    for(int k=0;k<m;k++){ adj[e[k][0]][e[k][1]]=1; adj[e[k][1]][e[k][0]]=1; }\n    int comp=0;\n    for(int i=0;i<n;i++) if(!vis[i]){ comp++; dfs(i,n); }\n    printf(\"components=%d\\n\", comp);\n    return 0;\n}\n"
+}

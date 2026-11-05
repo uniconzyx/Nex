@@ -1,0 +1,8 @@
+{
+  "title": "二分图判定：BFS 二染色",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "bipartite: yes\n",
+  "code": "#include <stdio.h>\nint main(void){\n    int n=4;\n    int adj[4][4]={0};\n    int e[][2]={{0,1},{1,2},{2,3},{3,0}};  /* 偶环 => 二分 */\n    int m=4;\n    for(int k=0;k<m;k++){ adj[e[k][0]][e[k][1]]=1; adj[e[k][1]][e[k][0]]=1; }\n    int color[4]; for(int i=0;i<n;i++) color[i]=-1;\n    int q[4],head=0,tail=0; color[0]=0; q[tail++]=0; int bip=1;\n    while(head<tail){\n        int u=q[head++];\n        for(int v=0;v<n;v++) if(adj[u][v]){\n            if(color[v]<0){ color[v]=color[u]^1; q[tail++]=v; }\n            else if(color[v]==color[u]){ bip=0; }\n        }\n    }\n    printf(\"bipartite: %s\\n\", bip ? \"yes\" : \"no\");\n    return 0;\n}\n"
+}

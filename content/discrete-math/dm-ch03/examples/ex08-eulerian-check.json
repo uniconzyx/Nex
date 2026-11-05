@@ -1,0 +1,8 @@
+{
+  "title": "欧拉回路判定：连通且所有顶点偶度",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "eulerian: yes\n",
+  "code": "#include <stdio.h>\nint main(void){\n    int n=5;\n    int adj[5][5]={0};\n    int e[][2]={{0,1},{1,2},{2,3},{3,4},{4,0}};  /* 5-环：每个顶点度数为 2 */\n    int m=5;\n    for(int k=0;k<m;k++){ adj[e[k][0]][e[k][1]]=1; adj[e[k][1]][e[k][0]]=1; }\n    int ok=1;\n    for(int i=0;i<n;i++){\n        int d=0; for(int j=0;j<n;j++) d+=adj[i][j];\n        if(d%2){ ok=0; printf(\"deg(%d)=%d odd\\n\", i, d); }\n    }\n    printf(ok ? \"eulerian: yes\\n\" : \"eulerian: no\\n\");\n    return 0;\n}\n"
+}

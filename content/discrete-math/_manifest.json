@@ -148,6 +148,75 @@
         ]
       },
       "soft_prerequisites": []
+    },
+    {
+      "id": "dm-ch03",
+      "order": 3,
+      "group": "DM3",
+      "title": "图论：图的表示、连通性、欧拉哈密顿、最小生成树与最短路",
+      "summary": "图的基本要素（顶点/边/有向无向/加权）与三种存储（邻接矩阵/邻接表/边表）；握手定理（度数和=2×边数、奇度顶点必为偶数）；路径/回路/连通性与 DFS 求连通分量、强连通分量；欧拉图（连通+全偶度，一笔画充要条件）与哈密顿图（NP 完全，无高效判定）；树与森林、最小生成树（Kruskal 贪心+并查集/Prim）、单源最短路（Dijkstra 非负权/Bellman-Ford 可负权）、拓扑排序（DAG 线性化）、二分图二染色、平面图四色定理。配套 10 个可编译 C 程序覆盖度数统计、握手验证、连通分量、BFS 最短路、Dijkstra、Kruskal、拓扑排序、欧拉判定、二分染色、环检测。",
+      "prerequisites": [
+        "dm-ch02"
+      ],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "networkx/networkx",
+          "google/or-tools",
+          "Z3Prover/z3",
+          "jwasham/coding-interview-university"
+        ],
+        "github_stars": [
+          14770,
+          14298,
+          12856,
+          363641
+        ],
+        "github_notes": [
+          "§1.2 2. 定义/要点 · 读 networkx/algorithms/shortest_paths/dijkstra.py：工业级最短路实现，对照本章 01 §2.3 邻接矩阵 / 邻接表 / 边表理解图的存储取舍",
+          "§1.3 3. 可运行代码 · 读 networkx/classes/graph.py：邻接表/邻接矩阵两种存储的底层实现，对应本章 01 §3.1 邻接矩阵存储与度数统计",
+          "§2.2 2. 定义/要点 · 读 google/or-tools 的 ortools/constraint_solver/routing.cc：车辆路径/最短回路（VRP/TSP）被编译成约束求解，对应本章 02 §2.3 欧拉图与一笔画",
+          "§2.3 3. 可运行代码 · 读 Z3Prover/z3 的 src/sat/sat_solver.cpp：图着色、可达性这些存在性问题编码成 SAT，对应本章 02 §3.1 DFS 连通性 / 连通分量",
+          "§3.2 2. 定义/要点 · 读 jwasham/coding-interview-university 的 README：核对图论在面试被追问的点（BFS/DFS、拓扑、二分图、最短路），对应本章 03 §2.2 最小生成树"
+        ],
+        "github_fetched_at": "2026-10-31",
+        "books": [
+          "《离散数学及其应用》（第 8 版）Kenneth H. Rosen，第 10–11 章 图 / 树",
+          "《离散数学》（第 6 版）耿素云、屈婉玲、张立昂，第 6–7 章 图论 / 树",
+          "《Introduction to Graph Theory》Douglas B. West，第 1–4 章 基础、树、连通性、最短路",
+          "《算法导论》（第 4 版）Cormen 等，第 22–24 章 图遍历 / 最小生成树 / 最短路"
+        ],
+        "leetcode": [],
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1b7411N798/",
+        "bilibili_list": [
+          {
+            "name": "王道 · 数据结构（考研）",
+            "url": "https://www.bilibili.com/video/BV1b7411N798/",
+            "note": "图的存储、DFS/BFS、最小生成树、最短路径的标准讲法",
+            "bv": "BV1b7411N798"
+          },
+          {
+            "name": "王道 · 计算机组成原理",
+            "url": "https://www.bilibili.com/video/BV1BE411D7ii/",
+            "note": "状态转移图就是有向图，理解图 = 程序行为模型",
+            "bv": "BV1BE411D7ii"
+          },
+          {
+            "name": "王道 · 操作系统（考研）",
+            "url": "https://www.bilibili.com/video/BV1YE411D7nH/",
+            "note": "进程资源依赖图、死锁检测（环检测）、调度顺序（拓扑排序）",
+            "bv": "BV1YE411D7nH"
+          },
+          {
+            "name": "王道 · 计算机网络（考研）",
+            "url": "https://www.bilibili.com/video/BV19E411D78Q/",
+            "note": "路由表 = 最短路（Dijkstra/OSPF），AS 间的图结构",
+            "bv": "BV19E411D78Q"
+          }
+        ]
+      },
+      "soft_prerequisites": []
     }
   ],
   "github_resources": [

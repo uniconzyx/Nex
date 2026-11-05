@@ -1,0 +1,8 @@
+{
+  "title": "握手定理验证：度数和 = 2 * 边数",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "sum(deg)=8, 2*edges=8, edges=4\n",
+  "code": "#include <stdio.h>\n/* 握手定理：无向图所有顶点的度数之和必为偶数，且等于 2*边数 */\nint main(void){\n    int deg[]={2,2,3,1};   /* 取自 ex01 的度数 */\n    int n=4, sum=0;\n    for(int i=0;i<n;i++) sum+=deg[i];\n    int edges=sum/2;       /* 每条边被两个端点各数一次 */\n    printf(\"sum(deg)=%d, 2*edges=%d, edges=%d\\n\", sum, 2*edges, edges);\n    return 0;\n}\n"
+}

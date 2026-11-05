@@ -174,18 +174,16 @@ HEAD 仅跟踪 3707 个文件，但工作树里还有 **175 个已跟踪文件�
 
 ---
 
-## P2 · discrete-math 学科收尾（当前只有 1 章，未接线）
+## P2 · discrete-math 学科收尾（dm-ch01/dm-ch02/dm-ch03 全部接入，学科正式上线 ✅）
 
-现状：`content/discrete-math/dm-ch01` 已完整（且本轮补了 `_bagua.json`），但：
-- 缺 `content/discrete-math/_manifest.json` → 未进规划分母、未进前端。
-- `dm-ch01` 正文预告的 `dm-ch02`（集合/关系/函数）、`dm-ch03`（图论）**尚未创建**。
-- 前端 `graph.ts / exercises.ts / story.ts` 里搜不到 `dm-ch01` → 用户看不到。
+进度：
+- `dm-ch01`（命题逻辑）：已于 `bf99831` 建 `_manifest.json` 正式接入，`validate_content` 165→166、锚点 609/609、tsc 0 全绿。
+- `dm-ch02`（集合/关系/函数）：已于 `3802fbb` 从零建齐七类内容并接入。覆盖 166/166、锚点 10/10、tsc 0；深度审计 `code=12/pit=15/h3=29` 均 A，仅 `concept_chars=3529` 为 B（该章 3 个 concept 文件，A 线 6000 按典型 5 文件章校准，结构使然，非缺陷）。
+- `dm-ch03`（图论）：已于本轮从零建齐七类内容并接入（commit 见下方）。覆盖 167/167、锚点 15/15（含本组 5 条）、tsc 0；深度审计 `code=9/pit=15/h3=27/examples=100%/types=4` 均 A，仅 `concept_chars=3774` 为 B（同 dm-ch02 的结构性原因，3 个 concept 文件）。
 
-**动作**：
-1. 建 `dm-ch02`、`dm-ch03`（按标准一七类内容 + 标准二来源）。
-2. 写 `content/discrete-math/_manifest.json`（照 `data/_manifest.json` 结构）。
-3. 跑注册链路：`sync_bundle_chapters.py --write` → `gen_chapter_content.py` → `gen_tracks.py` → `gen_graph.py` → `gen_exercise_bundle.py`。
-4. 复跑 `validate_content.py`（规划分母应变 166+）与 `tsc`。
+**P2 已结清**：discrete-math 三章全部进入 manifest + 前端生成产物，守门全绿。`audit_depth` 现状 **A165 / B2（dm-ch02、dm-ch03）/ C0**，无 C 级章节，所有硬门禁通过。
+
+复盘要点：dm-ch03 的 example 生成脚本最初 `ROOT` 多算一层 `dirname`（把文件误写到 CppMind 的父目录），导致 `validate_content` 报 `examples:0`；修正为 `dirname×2` 并重跑后落盘正确。此坑已记工作记忆，后续 `gen_*_examples.py` 的 ROOT 一律用 `dirname(dirname(abspath(__file__)))`。
 
 ---
 

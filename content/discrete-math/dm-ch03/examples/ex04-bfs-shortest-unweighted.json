@@ -1,0 +1,8 @@
+{
+  "title": "BFS 求无权图单源最短路",
+  "code_lang": "c",
+  "code_std": "c11",
+  "stdin": "",
+  "expected_output": "dist from 0: 0 1 1 2 3 -1 \n",
+  "code": "#include <stdio.h>\nint main(void){\n    int n=6;\n    int adj[6][6]={0};\n    int e[][2]={{0,1},{0,2},{1,3},{2,3},{3,4}};\n    int m=5;\n    for(int k=0;k<m;k++){ adj[e[k][0]][e[k][1]]=1; adj[e[k][1]][e[k][0]]=1; }\n    int dist[6],q[6],head=0,tail=0;\n    for(int i=0;i<n;i++) dist[i]=-1;\n    dist[0]=0; q[tail++]=0;\n    while(head<tail){\n        int u=q[head++];\n        for(int v=0;v<n;v++) if(adj[u][v] && dist[v]<0){ dist[v]=dist[u]+1; q[tail++]=v; }\n    }\n    printf(\"dist from 0: \");\n    for(int i=0;i<n;i++) printf(\"%d \", dist[i]);\n    printf(\"\\n\");\n    return 0;\n}\n"
+}
