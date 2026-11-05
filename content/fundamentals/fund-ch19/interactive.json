@@ -2,7 +2,7 @@
   "chapter": "fund-ch19",
   "subject": "fundamentals",
   "title": "操作系统概述与运行机制",
-  "fingerprint": "e3d1b67029",
+  "fingerprint": "cdd915c4d4",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -201,8 +201,8 @@
         }
       ],
       "distractors": [
-        "after",
-        "bits"
+        "init",
+        "free"
       ],
       "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
     }

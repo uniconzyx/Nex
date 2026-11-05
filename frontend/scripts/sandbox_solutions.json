@@ -674,6 +674,51 @@
    }
   ]
  },
+ "discrete-math/dm-ch01": {
+  "ok": true,
+  "params": [
+   {
+    "key": "nVars",
+    "type": "range",
+    "value": 20.0
+   },
+   {
+    "key": "clauses",
+    "type": "range",
+    "value": 100.0
+   }
+  ]
+ },
+ "discrete-math/dm-ch02": {
+  "ok": true,
+  "params": [
+   {
+    "key": "n",
+    "type": "range",
+    "value": 24.0
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "discrete-math/dm-ch03": {
+  "ok": true,
+  "params": [
+   {
+    "key": "nK",
+    "type": "range",
+    "value": 10.0
+   },
+   {
+    "key": "avgDeg",
+    "type": "range",
+    "value": 4.0
+   }
+  ]
+ },
  "fundamentals/fund-ch01": {
   "ok": true,
   "params": [

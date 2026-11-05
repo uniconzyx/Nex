@@ -2,7 +2,7 @@
   "chapter": "fund-ch17",
   "subject": "fundamentals",
   "title": "I/O 系统",
-  "fingerprint": "6ff5a573c6",
+  "fingerprint": "c25bd75382",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -214,8 +214,8 @@
         }
       ],
       "distractors": [
-        "malloc",
-        "memcpy"
+        "total",
+        "include"
       ],
       "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
     }

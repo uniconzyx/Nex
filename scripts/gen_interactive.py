@@ -461,9 +461,18 @@ def build_fill(chap_path: str, pool: Dict[str, List[str]]) -> Optional[Dict[str,
         full = pool.get(lang, [])
         if not full:
             continue
-        # 用章节指纹做起点，让每章的干扰项不同（否则全站都是 action / alias）
-        start = int(sha10(chap_path), 16) % len(full)
-        cands = full[start:] + full[:start]
+        # 干扰项候选序：按 sha1(章节指纹, token) 排序，而不是「起点偏移 + 轮转」。
+        #
+        # 轮转法的起点是 `sha % len(pool)`，而池是**全局**的（df>=3 的跨章 token）。
+        # 于是任何一处新增内容只要改变了池的长度，就会把全站 80+ 个 fill 模块的
+        # 干扰项整体顶掉——一次内容新增变成 80 个文件的假 diff（实测 dm-ch02/03
+        # 入库时触发）。按 (章节, token) 哈希定序是**稳定序**：新增 token 只会插在
+        # 它自己该在的位置，已有选择基本不动。
+        seed = sha10(chap_path)
+        cands = sorted(
+            full,
+            key=lambda t: hashlib.sha1(f"{seed}\x00{t}".encode("utf-8")).hexdigest(),
+        )
         distractors: List[str] = []
         for t in cands:
             if t in own or t in STOP_TOKENS or len(t) < 4:

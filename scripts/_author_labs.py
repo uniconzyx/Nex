@@ -1198,23 +1198,47 @@ def main() -> int:
     ap.add_argument("--check", action="store_true")
     args = ap.parse_args()
 
-    chapters = {}
+    owned = {}
     for d in (CPP, FUND, ML, AI, DATABASE):
         for k, v in d.items():
-            chapters[k] = v
+            owned[k] = v
+
+    # ── 只覆盖自己拥有的章节，其余保留 ──────────────────────────────────
+    # 这个脚本原本是 labs.json 的"唯一真源"，会整份重写。后来 batch3/4/5
+    # （scripts/inject_batch*_sandbox.py）又直接往 labs.json 里加了几十章的
+    # sandbox——那些内容不在本文件的字典里，**跑一次就会全部丢失**，
+    # 而且删除是静默的（脚本只会打印"已写…共 N 章"）。
+    # 所以改成 merge：本文件负责的章节以作者源为准，别的章节原样带着走。
+    existing = {}
+    if os.path.exists(OUT):
+        try:
+            existing = (json.loads(open(OUT, encoding="utf-8").read()) or {}).get("chapters") or {}
+        except json.JSONDecodeError:
+            existing = {}  # 损坏时按"没有存量"处理，至少不会把作者源也带崩
+
+    # 顺序：已存在的章节保持原位（只换值），本脚本新增的章节追加到末尾。
+    # 不重新 sorted——batch3/4/5 是往文件尾部追加的，整份排序会把它们的
+    # 位置搬动，产生"内容没变但整份文件翻新"的假 diff。
+    chapters = dict(existing)
+    for k, v in owned.items():
+        chapters[k] = v
+
     doc = {
         "_comment": "sandbox / debug 手工精修模块。由 scripts/_author_labs.py 生成，gen_interactive.py 并入各章 interactive.json。改内容请改作者源。",
         "version": 1,
-        "chapters": dict(sorted(chapters.items())),
+        "chapters": chapters,
     }
     text = json.dumps(doc, ensure_ascii=False, indent=1) + "\n"
 
     if args.check:
-        old = open(OUT, encoding="utf-8").read() if os.path.exists(OUT) else ""
-        if old != text:
-            print("!! labs.json 与作者源不一致，跑一次 python scripts/_author_labs.py")
+        # 只比对自己负责的章节：外部批次（inject_batch*）的差异不算漂移
+        drift = [k for k in owned if existing.get(k) != owned[k]]
+        if drift:
+            print(f"!! {len(drift)} 个章节与作者源不一致，跑一次 python scripts/_author_labs.py")
+            print("   " + ", ".join(sorted(drift)[:8]) + (" …" if len(drift) > 8 else ""))
             return 1
-        print("· labs.json 与作者源一致")
+        print(f"· labs.json 与作者源一致（本脚本负责 {len(owned)} 章，"
+              f"另有 {len(existing) - len(set(existing) & set(owned))} 章由外部批次维护）")
         return 0
 
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
@@ -1225,7 +1249,9 @@ def main() -> int:
     for v in chapters.values():
         for m in v:
             kinds[m["kind"]] = kinds.get(m["kind"], 0) + 1
+    extra = len(chapters) - len(owned)
     print(f"· 已写 {OUT} · {n} 个模块 / {len(chapters)} 章 · {kinds}")
+    print(f"  （本脚本负责 {len(owned)} 章，保留外部批次 {extra} 章）")
     return 0
 
 

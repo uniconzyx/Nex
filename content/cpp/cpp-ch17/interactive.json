@@ -135,8 +135,8 @@
         }
       ],
       "distractors": [
-        "capacity",
-        "emplace_back"
+        "emplace_back",
+        "static_assert"
       ],
       "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
     }

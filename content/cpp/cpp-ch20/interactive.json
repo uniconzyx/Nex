@@ -2,7 +2,7 @@
   "chapter": "cpp-ch20",
   "subject": "cpp",
   "title": "综合项目与面试冲刺：系统设计、代码规范与复盘",
-  "fingerprint": "6508c38931",
+  "fingerprint": "d084e73ae1",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -212,8 +212,8 @@
         }
       ],
       "distractors": [
-        "constexpr",
-        "copy"
+        "copy",
+        "stdexcept"
       ],
       "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
     }

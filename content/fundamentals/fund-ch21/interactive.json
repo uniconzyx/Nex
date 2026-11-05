@@ -2,7 +2,7 @@
   "chapter": "fund-ch21",
   "subject": "fundamentals",
   "title": "I/O 管理与磁盘",
-  "fingerprint": "ff7e19dbc7",
+  "fingerprint": "df65bf7119",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -223,8 +223,8 @@
         }
       ],
       "distractors": [
-        "bytes",
-        "count"
+        "parent",
+        "bytes"
       ],
       "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
     }

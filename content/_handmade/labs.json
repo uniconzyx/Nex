@@ -5589,6 +5589,268 @@
     ],
     "insight": "LoRA 参数量 = rank × (d_in+d_out) × 层数 × 挂载层数，rank 翻倍参数量就翻倍，但表达力提升通常远小于 4 倍——所以默认 r=16 挂 q/k/v/o 跑基线。显存账本里最大的一项往往是激活而不是权重：7B 权重 13.5GB 是固定的，激活随手就是几 GB 且随 batch×seq 线性涨。所以救 OOM 的顺序是「先开梯度检查点 → 降 seq/batch → 最后才降 rank」。另外 α 要和 rank 一起调：LoRA 输出乘 α/r，只翻 rank 不调 α 等于把有效学习率减半。"
    }
+  ],
+  "discrete-math/dm-ch01": [
+   {
+    "kind": "sandbox",
+    "title": "真值表跑不动的时候，2-SAT 只扫一遍边",
+    "brief": "判一个公式可不可满足，最笨的办法是枚举 2^n 个赋值打真值表。变量数每加 1，行数就翻一倍——n=20 已是 104 万行，n=30 是 10 亿行，再多就不是慢，是根本跑不完。把变量数与子句数拖到工业规模，看真值表怎么指数爆炸，而 2-CNF 的蕴含图判定只随规模线性增长。",
+    "params": [
+     {
+      "key": "nVars",
+      "label": "变量数 n",
+      "min": 8,
+      "max": 40,
+      "step": 4,
+      "value": 8
+     },
+     {
+      "key": "clauses",
+      "label": "子句数 m",
+      "min": 10,
+      "max": 300,
+      "step": 10,
+      "value": 20
+     }
+    ],
+    "metrics": [
+     {
+      "key": "tableRows",
+      "label": "真值表行数 2^n",
+      "expr": "pow(2, nVars)",
+      "unit": "行",
+      "fmt": "int"
+     },
+     {
+      "key": "tableCells",
+      "label": "真值表单元格",
+      "expr": "pow(2, nVars) * nVars",
+      "unit": "格",
+      "fmt": "int"
+     },
+     {
+      "key": "nodes",
+      "label": "蕴含图节点 2n",
+      "expr": "2 * nVars",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "edges",
+      "label": "蕴含图边 2m",
+      "expr": "2 * clauses",
+      "unit": "条",
+      "fmt": "int"
+     },
+     {
+      "key": "sccOps",
+      "label": "SCC 判定代价 n+m",
+      "expr": "2 * nVars + 2 * clauses",
+      "unit": "步",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "tableRows >= 1048576",
+      "label": "真值表 ≥104 万行（2^20，确实跑不动了）"
+     },
+     {
+      "expr": "clauses >= 100",
+      "label": "子句数 ≥100（不是课堂玩具例子）"
+     },
+     {
+      "expr": "edges >= 200",
+      "label": "蕴含图 ≥200 条边（每个子句两条）"
+     },
+     {
+      "expr": "sccOps <= 600",
+      "label": "SCC 线性代价 ≤600 步（规模再大也不怕）"
+     }
+    ],
+    "insight": "真值表法是 O(2^n · m)，蕴含图法是 O(n + m)——差的不是常数，是指数。n=20 时真值表 104 万行还算能跑，n=30 就是 10 亿行、内存和时间同时告急；而 2-SAT 的判定只多 2n 个节点和 2m 条边。这也解释了为什么 2-SAT 是 P、3-SAT 却是 NP 完全：长度 >2 的子句没法拆成两条蕴含，线性结构一断，问题立刻变难。"
+   }
+  ],
+  "discrete-math/dm-ch02": [
+   {
+    "kind": "sandbox",
+    "title": "24 元集的幂集，你用列表还是位掩码",
+    "brief": "幂集有 2^n 个元素，n=24 就是 1677 万个子集。数量本身跑得动，真正决定成败的是每个子集怎么存：存成「元素指针列表」是 n 个 8 字节指针，存成「位掩码」是 ceil(n/8) 个字节。同一份幂集，两种表示能差出几十倍内存。拖动集合大小与存储方式，把这个差距压进 512MB 预算。",
+    "params": [
+     {
+      "key": "n",
+      "label": "集合大小 |A|",
+      "min": 10,
+      "max": 30,
+      "step": 2,
+      "value": 24
+     },
+     {
+      "key": "mode",
+      "label": "子集存储方式",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 0,
+      "labels": [
+       "元素指针列表",
+       "位掩码"
+      ]
+     }
+    ],
+    "metrics": [
+     {
+      "key": "subsets",
+      "label": "子集个数 2^n",
+      "expr": "pow(2, n)",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "listMB",
+      "label": "指针列表占用",
+      "expr": "pow(2, n) * n * 8 / 1048576",
+      "unit": "MB",
+      "fmt": "int"
+     },
+     {
+      "key": "bitsMB",
+      "label": "位掩码占用",
+      "expr": "pow(2, n) * ceil(n / 8) / 1048576",
+      "unit": "MB",
+      "fmt": "int"
+     },
+     {
+      "key": "chosenMB",
+      "label": "当前方案占用",
+      "expr": "if(mode == 1, bitsMB, listMB)",
+      "unit": "MB",
+      "fmt": "int"
+     },
+     {
+      "key": "ratio",
+      "label": "列表 / 位掩码",
+      "expr": "listMB / bitsMB",
+      "unit": "倍",
+      "fmt": "fix2"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "subsets >= 1000000",
+      "label": "幂集 ≥100 万个子集（规模够大才谈得上表示）"
+     },
+     {
+      "expr": "listMB >= 1024",
+      "label": "指针列表占用 ≥1GB（这就是要解决的痛点）"
+     },
+     {
+      "expr": "chosenMB <= 512",
+      "label": "当前方案 ≤512MB（常规进程内存上限）"
+     }
+    ],
+    "insight": "幂集的大小 2^n 改不了，能改的只有「一个子集占多少字节」。指针列表每个子集要 n 个 8 字节指针（24 元集 = 192B），位掩码只要 ceil(n/8) 字节（24 元集 = 3B），差 64 倍。这就是 concept 里位向量法的由来：位运算同时解决了存储和成员判断，`s & (1 << i)` 一条指令问出第 i 个元素在不在，比在列表里线性查找更快。"
+   }
+  ],
+  "discrete-math/dm-ch03": [
+   {
+    "kind": "sandbox",
+    "title": "十万顶点的图，邻接矩阵吃多少内存",
+    "brief": "同一张图，邻接矩阵是 n×n 个格子，邻接表是 n 个头指针加 2m 个边节点。顶点数一万时两者都无所谓，十万时就差出三个数量级。把顶点数与平均度拖到真实业务的规模，看矩阵怎么把内存吃爆、而邻接表还稳稳待在几十 MB，同时对比 Dijkstra 与 Floyd 的代价。",
+    "params": [
+     {
+      "key": "nK",
+      "label": "顶点数（千）",
+      "min": 1,
+      "max": 100,
+      "step": 1,
+      "value": 100,
+      "unit": "千"
+     },
+     {
+      "key": "avgDeg",
+      "label": "平均度",
+      "min": 2,
+      "max": 40,
+      "step": 2,
+      "value": 20
+     }
+    ],
+    "metrics": [
+     {
+      "key": "nodes",
+      "label": "顶点数 n",
+      "expr": "nK * 1000",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "edges",
+      "label": "边数 m = nd/2",
+      "expr": "nK * 1000 * avgDeg / 2",
+      "unit": "条",
+      "fmt": "int"
+     },
+     {
+      "key": "matMB",
+      "label": "邻接矩阵占用",
+      "expr": "nK * nK * 4000000 / 1048576",
+      "unit": "MB",
+      "fmt": "int"
+     },
+     {
+      "key": "listMB",
+      "label": "邻接表占用",
+      "expr": "(nK * 1000 + nK * 1000 * avgDeg) * 8 / 1048576",
+      "unit": "MB",
+      "fmt": "int"
+     },
+     {
+      "key": "memRatio",
+      "label": "矩阵 / 表",
+      "expr": "matMB / listMB",
+      "unit": "倍",
+      "fmt": "fix2"
+     },
+     {
+      "key": "dijOps",
+      "label": "Dijkstra 代价 m·log₂n",
+      "expr": "nK * 1000 * avgDeg / 2 * log2(nK * 1000)",
+      "unit": "次",
+      "fmt": "int"
+     },
+     {
+      "key": "floydOps",
+      "label": "Floyd 代价 n³",
+      "expr": "nK * nK * nK * 1000000000",
+      "unit": "次",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "matMB <= 1024",
+      "label": "邻接矩阵 ≤1GB（超了进程直接 OOM）"
+     },
+     {
+      "expr": "listMB <= 1024",
+      "label": "邻接表 ≤1GB"
+     },
+     {
+      "expr": "nodes >= 10000",
+      "label": "顶点数 ≥1 万（规模够大才需要选存储）"
+     },
+     {
+      "expr": "avgDeg >= 4",
+      "label": "平均度 ≥4（不是纯链或纯环）"
+     },
+     {
+      "expr": "dijOps <= 100000000",
+      "label": "Dijkstra ≤1 亿次操作（约 1 秒）"
+     }
+    ],
+    "insight": "矩阵的 n² 是「按最大可能边数」预留空间，邻接表的 n+m 是「按实际边数」分配——稀疏图（m ≪ n²）上两者差 n²/(n+2m) 倍。十万顶点、平均度 20 时：矩阵 38GB 直接起不来，邻接表 16MB 轻松装下。算法选择同理：Dijkstra 的 m log n 是 1.7e7 次，Floyd 的 n³ 是 1e15 次——后者不是「慢」，是宇宙年龄量级，所以全源最短路在大图上只能跑 n 次 Dijkstra 或用 Johnson，而不是直接上 Floyd。"
+   }
   ]
  }
 }

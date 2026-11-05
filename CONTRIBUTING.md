@@ -133,3 +133,38 @@ git commit -m "content(<subject>): 新增 <id> 三视角 + 双来源"
 
 > 凡要经 Bash 执行的生成脚本，请先 `Write` 落 `.py` 再执行（避免反引号命令替换吞掉内容）。
 > 跑完务必人眼核对关键数字，不能只看退出码 0。
+
+---
+
+## 9. 交互微游戏（sandbox / debug）管线
+
+`content/_handmade/labs.json` 是唯一数据源，但**由两类脚本分别维护**：
+
+| 生产者 | 拥有章节 | 语义 |
+|---|---|---|
+| `scripts/_author_labs.py` | cpp / fundamentals / ml / ai / database 共 68 章 | 作者源，`--check` 只比对自己拥有的章节 |
+| `scripts/inject_batch{3,4,5}_sandbox.py` | 其余章节（tooling / middleware / bigdata / data / java / agent / discrete-math …） | 幂等合并：`chapters[key] = [mod]` |
+
+> ⚠️ 不要用「整份重写」的方式改 labs.json。`_author_labs.py` 现在只覆盖自己拥有的章、
+> 其余原样保留；在此之前的版本会静默抹掉外部批次的几十章手工模块。
+
+改完按顺序跑（每一步都必须绿）：
+
+```bash
+python scripts/inject_batchN_sandbox.py        # 或 scripts/_author_labs.py（改了作者源）
+python scripts/audit_handmade_labs.py -v       # 结构 + 「这一关真能通关」穷举验证
+python scripts/solve_sandbox.py --all          # 产出 frontend/scripts/sandbox_solutions.json
+python scripts/gen_interactive.py              # 并入 interactive.json + 前端 TS
+./frontend/node_modules/.bin/tsc --noEmit -p frontend/tsconfig.json
+node frontend/scripts/verify_labs_sandbox13.mjs http://localhost:5230   # 真机把旋钮拖到通关
+```
+
+四条写法纪律（违反任一条都会变成「假游戏」）：
+
+1. **判据必须带下限**（`nodes >= 10000`、`clauses >= 100`）。只有上限时，穷举求解读会退化成
+   「所有旋钮拉到最小值」，玩家一拖就通关，等于没玩。
+2. **既定事实用 `==` 锁死**，且该值必须落在参数网格上（`min + i*step`）；网格取不到会让判据
+   恒假，报成「这一关不可能通关」。
+3. **默认值要写成「真实事故配置」**：一打开就红，但红得有道理（如 10 万顶点用邻接矩阵 = 38GB）。
+4. `if(c,a,b)` 在两套求值器里都是**急切求值**（两个分支都先算），除法要么保证除数恒非零，
+   要么不要放进 `if` 分支；`fmt` 只认 `int` / `fix2` / `pct`。

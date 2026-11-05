@@ -2,7 +2,7 @@
   "chapter": "dm-ch01",
   "subject": "discrete-math",
   "title": "命题逻辑与谓词逻辑（知识表示与自动推理）",
-  "fingerprint": "8b856b4e9c",
+  "fingerprint": "0523ec35a2",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,85 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "真值表跑不动的时候，2-SAT 只扫一遍边",
+      "brief": "判一个公式可不可满足，最笨的办法是枚举 2^n 个赋值打真值表。变量数每加 1，行数就翻一倍——n=20 已是 104 万行，n=30 是 10 亿行，再多就不是慢，是根本跑不完。把变量数与子句数拖到工业规模，看真值表怎么指数爆炸，而 2-CNF 的蕴含图判定只随规模线性增长。",
+      "params": [
+        {
+          "key": "nVars",
+          "label": "变量数 n",
+          "min": 8,
+          "max": 40,
+          "step": 4,
+          "value": 8
+        },
+        {
+          "key": "clauses",
+          "label": "子句数 m",
+          "min": 10,
+          "max": 300,
+          "step": 10,
+          "value": 20
+        }
+      ],
+      "metrics": [
+        {
+          "key": "tableRows",
+          "label": "真值表行数 2^n",
+          "expr": "pow(2, nVars)",
+          "unit": "行",
+          "fmt": "int"
+        },
+        {
+          "key": "tableCells",
+          "label": "真值表单元格",
+          "expr": "pow(2, nVars) * nVars",
+          "unit": "格",
+          "fmt": "int"
+        },
+        {
+          "key": "nodes",
+          "label": "蕴含图节点 2n",
+          "expr": "2 * nVars",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "edges",
+          "label": "蕴含图边 2m",
+          "expr": "2 * clauses",
+          "unit": "条",
+          "fmt": "int"
+        },
+        {
+          "key": "sccOps",
+          "label": "SCC 判定代价 n+m",
+          "expr": "2 * nVars + 2 * clauses",
+          "unit": "步",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "tableRows >= 1048576",
+          "label": "真值表 ≥104 万行（2^20，确实跑不动了）"
+        },
+        {
+          "expr": "clauses >= 100",
+          "label": "子句数 ≥100（不是课堂玩具例子）"
+        },
+        {
+          "expr": "edges >= 200",
+          "label": "蕴含图 ≥200 条边（每个子句两条）"
+        },
+        {
+          "expr": "sccOps <= 600",
+          "label": "SCC 线性代价 ≤600 步（规模再大也不怕）"
+        }
+      ],
+      "insight": "真值表法是 O(2^n · m)，蕴含图法是 O(n + m)——差的不是常数，是指数。n=20 时真值表 104 万行还算能跑，n=30 就是 10 亿行、内存和时间同时告急；而 2-SAT 的判定只多 2n 个节点和 2m 条边。这也解释了为什么 2-SAT 是 P、3-SAT 却是 NP 完全：长度 >2 的子句没法拆成两条蕴含，线性结构一断，问题立刻变难。"
+    },
     {
       "kind": "match",
       "pairs": [
@@ -169,8 +248,8 @@
         }
       ],
       "distractors": [
-        "step",
-        "total"
+        "head",
+        "name"
       ],
       "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
     }

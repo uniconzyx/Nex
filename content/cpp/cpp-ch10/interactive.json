@@ -161,8 +161,8 @@
         }
       ],
       "distractors": [
-        "lock_guard",
-        "make_shared"
+        "emplace_back",
+        "type_traits"
       ],
       "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
     }

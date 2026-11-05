@@ -255,8 +255,8 @@
         }
       ],
       "distractors": [
-        "dtype",
-        "dumps"
+        "tool",
+        "naive"
       ],
       "tip": "把缺失的标识符拖回代码里的空位 —— 位置对、词对才算补回来。"
     }
