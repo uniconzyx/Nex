@@ -1,7 +1,7 @@
 {
   "meta": {
     "chapter": "cpp-ch20",
-    "note": "8 题：基础题 6（choice/fix_error）+ 算法题 2（LeetCode 146 仅存元数据与链接，不搬运题面；线程池 submit 为自命题 coding）"
+    "note": "9 题：基础题 7（choice/fix_error/explain）+ 算法题 2（LeetCode 146 仅存元数据与链接，不搬运题面；线程池 submit 为自命题 coding）"
   },
   "items": [
     {
@@ -317,7 +317,7 @@
     {
       "id": "cpp-ch20-q9",
       "type": "explain",
-      "category": "综合题",
+      "category": "基础题",
       "platform": "self",
       "difficulty": "hard",
       "title": "讲清 mini-vector 的 push_back 如何在扩容时保住基本异常安全",
