@@ -2,7 +2,7 @@
   "chapter": "bd-ch01",
   "subject": "bigdata",
   "title": "Hadoop 生态与 HDFS 架构（bd-ch01）",
-  "fingerprint": "2a8f24eda6",
+  "fingerprint": "f6ced6cf77",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,111 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "一亿个小文件，NameNode 先崩",
+      "brief": "HDFS 每个文件在 NameNode 里约 150 字节元数据，而且**全量常驻堆内存**。一亿个 1MB 的小文件 = 14GB 元数据（堆里再放大一倍），外加一亿个 map task（每个启动 20ms）——光调度就要 23 天。把小文件数量、平均大小与是否合并拖到真实值，看「小文件问题」到底崩在哪一层。",
+      "params": [
+        {
+          "key": "filesM",
+          "label": "文件数（百万）",
+          "min": 1,
+          "max": 500,
+          "step": 1,
+          "value": 100
+        },
+        {
+          "key": "avgMB",
+          "label": "平均文件大小",
+          "min": 1,
+          "max": 128,
+          "step": 1,
+          "value": 1
+        },
+        {
+          "key": "merge",
+          "label": "小文件处理",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "保持原样",
+            "合并到 128MB 块"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "totalGB",
+          "label": "总数据量",
+          "expr": "filesM * 1000000 * avgMB / 1024",
+          "unit": "GB",
+          "fmt": "int"
+        },
+        {
+          "key": "mergedFiles",
+          "label": "合并后文件数",
+          "expr": "filesM * 1000000 * avgMB / 128",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "fileCount",
+          "label": "实际文件数",
+          "expr": "if(merge == 1, filesM * 1000000 * avgMB / 128, filesM * 1000000)",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "nnMB",
+          "label": "NameNode 元数据",
+          "expr": "if(merge == 1, filesM * 1000000 * avgMB / 128, filesM * 1000000) * 150 / 1048576",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "nnHeapGB",
+          "label": "NameNode 堆占用",
+          "expr": "if(merge == 1, filesM * 1000000 * avgMB / 128, filesM * 1000000) * 150 / 1048576 / 1024 * 2",
+          "unit": "GB",
+          "fmt": "int"
+        },
+        {
+          "key": "mapTasks",
+          "label": "map task 数",
+          "expr": "if(merge == 1, filesM * 1000000 * avgMB / 128, filesM * 1000000)",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "taskStartH",
+          "label": "任务启动总耗时",
+          "expr": "if(merge == 1, filesM * 1000000 * avgMB / 128, filesM * 1000000) * 20 / 1000 / 3600",
+          "unit": "小时",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "filesM * 1000000 >= 10000000",
+          "label": "文件数 ≥1000 万（典型的小文件事故规模）"
+        },
+        {
+          "expr": "nnHeapGB <= 20",
+          "label": "NameNode 堆 ≤20GB（留出 GC 余量）"
+        },
+        {
+          "expr": "mapTasks <= 1000000",
+          "label": "map task ≤100 万个"
+        },
+        {
+          "expr": "taskStartH <= 6",
+          "label": "任务启动总耗时 ≤6 小时"
+        }
+      ],
+      "insight": "HDFS 的设计假设是**大文件、顺序读、一次写多次读**，而「每个文件一个块」的小文件恰恰把三件事全违背了：**① NameNode 内存**：每个文件、目录、块在 NN 里都是独立对象（INode + 块列表），合计约 150 字节且**全部常驻堆**（JVM 对象还要放大 2 倍左右）。一亿文件 ≈ 14GB 原始 + 28GB 堆——单 NN 直接顶到上限（NN 的堆一般给 32GB 以内，因为 Full GC 停顿与堆大小成正比）。**② 计算层任务爆炸**：MapReduce/Spark 默认「一个文件至少一个 task」，一亿个 1MB 文件就是一亿个 task，每个启动 20ms（JVM 复用也要线程/调度开销），光启动 23 天——数据本身只有 100TB。**③ 随机 IO**：1MB 文件读一次就要一次 seek，吞吐远低于 128MB 顺序读。三种正解：① **入湖前合并**（Flume 的 `hdfs.rollSize`/`rollCount`、`FileCompactor`、Spark 的 `repartition` 后 `coalesce` 再写）；② **HAR 归档**（Hadoop Archives 把小文件打成 .har，NN 只记一个文件，但读性能一般，属于「能用但别长期用」）；③ **换存储格式**：直接写 ORC/Parquet（一个文件装几百万行），或者上 Hudi/Iceberg/Delta（它们用「文件组 + 元数据日志」管理小文件，并支持自动 compaction）。一句话判据：**单文件小于块大小（128MB）就是小文件**，小文件占比超过 10% 就该上合并任务了。"
+    },
     {
       "kind": "match",
       "pairs": [

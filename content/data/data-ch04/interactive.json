@@ -2,7 +2,7 @@
   "chapter": "data-ch04",
   "subject": "data",
   "title": "Pandas 进阶：分组聚合、合并与时间序列",
-  "fingerprint": "e426f2163c",
+  "fingerprint": "ab05a712f0",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,115 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "merge 前不聚合，200 万行变 1000 万行",
+      "brief": "左表 200 万个订单，按 `user_id` join 右表（每个用户平均 5 条行为记录），结果直接放大成 1000 万行，内存从 380MB 涨到 1.9GB。这不是索引问题是**语义问题**：一对多 join 本来就会复制行。正解是先把右表聚合到「每个 user_id 一行」再 join。把行数、匹配倍数与处理方式拖到真实值，看行数是怎么被放大的。",
+      "params": [
+        {
+          "key": "leftM",
+          "label": "左表行数（万）",
+          "min": 10,
+          "max": 1000,
+          "step": 10,
+          "value": 200
+        },
+        {
+          "key": "fanout",
+          "label": "右表每键平均匹配行数",
+          "min": 1,
+          "max": 20,
+          "step": 1,
+          "value": 5
+        },
+        {
+          "key": "mode",
+          "label": "join 前处理",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "直接 merge（一对多）",
+            "右表先聚合到唯一键"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "leftRows",
+          "label": "左表行数",
+          "expr": "leftM * 10000",
+          "unit": "行",
+          "fmt": "int"
+        },
+        {
+          "key": "resultRows",
+          "label": "结果行数",
+          "expr": "leftM * 10000 * if(mode == 0, fanout, 1)",
+          "unit": "行",
+          "fmt": "int"
+        },
+        {
+          "key": "blowup",
+          "label": "行数放大",
+          "expr": "if(mode == 0, fanout, 1)",
+          "unit": "×",
+          "fmt": "int"
+        },
+        {
+          "key": "memMB",
+          "label": "结果内存",
+          "expr": "leftM * 10000 * if(mode == 0, fanout, 1) * 200 / 1048576",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "timeS",
+          "label": "join+聚合耗时",
+          "expr": "leftM * 10000 * if(mode == 0, fanout, 1) * 0.5 / 1000000",
+          "unit": "秒",
+          "fmt": "fix2"
+        },
+        {
+          "key": "aggCostS",
+          "label": "预先聚合开销",
+          "expr": "if(mode == 1, leftM * 10000 * fanout * 0.2 / 1000000, 0)",
+          "unit": "秒",
+          "fmt": "fix2"
+        },
+        {
+          "key": "downstreamRows",
+          "label": "下游要处理行数",
+          "expr": "leftM * 10000 * if(mode == 0, fanout, 1)",
+          "unit": "行",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "leftRows >= 1000000",
+          "label": "左表 ≥100 万行（真实的事实表）"
+        },
+        {
+          "expr": "fanout >= 2",
+          "label": "右表每键 ≥2 行（一对多场景）"
+        },
+        {
+          "expr": "resultRows <= leftRows",
+          "label": "结果行数不超过左表（先聚合到唯一键）"
+        },
+        {
+          "expr": "memMB <= 500",
+          "label": "结果 ≤500MB"
+        },
+        {
+          "expr": "timeS <= 2",
+          "label": "join+聚合 ≤2 秒"
+        }
+      ],
+      "insight": "`merge` 的行数不是「左表行数」，而是 **`Σ(每个键在右表的匹配数)`**——一对一 join 不放大，一对多 join 按匹配数放大，多对多会**乘起来**放大（1000 行 × 1000 行共享一个键 = 100 万行）。本例 200 万 × 5 = 1000 万行，内存从 380MB 到 1.9GB，而且**下游的每一行都要重新算一遍**（聚合、排序、导出全部变慢）。三种正解，按推荐顺序：① **先聚合再 join**：右表 `groupby('user_id').agg(orders=('id','count'), amount=('amt','sum'))` 变成「一 user 一行」再 merge——本例多花 0.2 秒聚合，省掉 800 万行；② **用 `merge(..., validate='m:1')` 让 pandas 帮你查基数**：声明右表是「多对一」的唯一侧，基数不符直接抛 `MergeError`，把「悄悄放大」变成「当场失败」——**这是最该养成的习惯**；③ 只想「带一个标量过来」时用 `map`（`df['city'] = df.user_id.map(city_map)`），不产生中间表，也不会放大。另外两个常见爆点：**`groupby.apply` 返回 DataFrame** 会触发 `FutureWarning` 并重建索引（慢 10 倍），能用内置 `agg` 就别用 `apply`；**时间序列 `resample` 后的 `asfreq`/`ffill`** 在高频数据上会把稀疏表填成稠密表，内存按「时间跨度 × 频率」增长，而不是按原始行数。"
+    },
     {
       "kind": "match",
       "pairs": [

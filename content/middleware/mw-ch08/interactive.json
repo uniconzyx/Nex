@@ -2,7 +2,7 @@
   "chapter": "mw-ch08",
   "subject": "middleware",
   "title": "消息队列选型与工程实践（mw-ch08）",
-  "fingerprint": "1709fa8d08",
+  "fingerprint": "991e82fc30",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,119 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "消费者加到 20 个，吞吐一点没涨",
+      "brief": "消费者从 8 个加到 20 个，吞吐纹丝不动——因为只有 8 个分区，同一分区同时只能被一个消费者消费，多出来的 12 个完全空闲。要加吞吐必须**同时加分区**（分区是并行的硬上限）。把生产速率、单消费者能力、分区数与消费者数拖到真实值，看积压能不能追平、有多少消费者在白拿钱。",
+      "params": [
+        {
+          "key": "produceK",
+          "label": "生产速率（千条/秒）",
+          "min": 1,
+          "max": 200,
+          "step": 1,
+          "value": 100
+        },
+        {
+          "key": "perConsumerK",
+          "label": "单消费者消费能力（千条/秒）",
+          "min": 1,
+          "max": 50,
+          "step": 1,
+          "value": 10
+        },
+        {
+          "key": "partitions",
+          "label": "分区数",
+          "min": 1,
+          "max": 64,
+          "step": 1,
+          "value": 8
+        },
+        {
+          "key": "consumers",
+          "label": "消费者数",
+          "min": 1,
+          "max": 64,
+          "step": 1,
+          "value": 8
+        }
+      ],
+      "metrics": [
+        {
+          "key": "effective",
+          "label": "有效消费者数",
+          "expr": "min(consumers, partitions)",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "idle",
+          "label": "空闲消费者数",
+          "expr": "consumers - min(consumers, partitions)",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "consumeK",
+          "label": "消费速率",
+          "expr": "min(consumers, partitions) * perConsumerK",
+          "unit": "千条/秒",
+          "fmt": "int"
+        },
+        {
+          "key": "backlogK",
+          "label": "积压速率",
+          "expr": "produceK - min(consumers, partitions) * perConsumerK",
+          "unit": "千条/秒",
+          "fmt": "int"
+        },
+        {
+          "key": "lagPerHourW",
+          "label": "每小时堆积（万条）",
+          "expr": "(produceK - min(consumers, partitions) * perConsumerK) * 3600 / 10",
+          "unit": "万条",
+          "fmt": "int"
+        },
+        {
+          "key": "utilPct",
+          "label": "消费者利用率",
+          "expr": "min(consumers, partitions) * 100 / consumers",
+          "unit": "%",
+          "fmt": "int"
+        },
+        {
+          "key": "wasteYuan",
+          "label": "每月为空闲消费者付费",
+          "expr": "(consumers - min(consumers, partitions)) * 300",
+          "unit": "元",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "produceK >= 50",
+          "label": "生产速率 ≥5 万条/秒（真实的高吞吐 topic）"
+        },
+        {
+          "expr": "idle <= 0",
+          "label": "空闲消费者 = 0（消费者数不超过分区数）"
+        },
+        {
+          "expr": "backlogK <= 0",
+          "label": "积压速率 ≤0（消费追得上生产）"
+        },
+        {
+          "expr": "utilPct >= 90",
+          "label": "消费者利用率 ≥90%"
+        },
+        {
+          "expr": "wasteYuan <= 0",
+          "label": "空转实例开销 = 0 元/月"
+        }
+      ],
+      "insight": "Kafka 的消费并行度有一条硬约束：**同一分区在同一消费组内同时只能被一个消费者消费**。所以 `有效消费者数 = min(消费者数, 分区数)`，多出来的消费者**一个消息都分不到**，只是白拿实例费（本例 20 消费者 / 8 分区 = 12 个空转，每月 3600 元）。两条推论，都是工程上最常踩的：① **要提吞吐，先加分区**。分区数决定并行上限，消费者数决定实际用了几路。顺序反了就是「加机器不加吞吐」；② **分区不是越多越好**：分区多了元数据与副本开销涨（每个分区在 broker 上都有目录、索引、 follower 拉取线程），且 **Kafka 不支持减少分区**（只能新建 topic 迁移），所以初始分区数要按「未来 1~2 年峰值吞吐 ÷ 单分区能力」估。积压的账要单独算：**`追平时间 = 积压量 ÷ (消费速率 − 生产速率)`**。消费速率等于生产速率时追平时间是无穷大——这就是「积压了但看起来消费者都在跑」的真相：不是不消费，是**刚好抵平**，永远清不掉。扩容的正确姿势（在线无停机）：① 先给 topic 加分区（`kafka-topics.sh --alter --partitions N`）——**注意：加分区会破坏 key 的分区映射，同一 key 的新旧消息可能落到不同分区，依赖分区内有序的业务要谨慎**；② 再把消费者实例加到与分区数相等；③ 积压期间临时扩消费者是无效的（受分区数限制），要更快只能「起一个临时消费者组把消息转到更多分区的新 topic」。"
+    },
     {
       "kind": "match",
       "pairs": [

@@ -2,7 +2,7 @@
   "chapter": "mw-ch04",
   "subject": "middleware",
   "title": "缓存设计与三大经典问题（mw-ch04）",
-  "fingerprint": "02ef55dee8",
+  "fingerprint": "3e45a6a89b",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,119 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "缓存穿透：DB 替缓存挨打",
+      "brief": "命中率 90% 听起来很好，但每秒 10 万请求里仍有 1 万打到数据库；如果其中一半是「查一个根本不存在的 id」（爬虫、恶意扫描、前端传错参数），数据库就是在为必然为空的查询反复做全表/索引查找。布隆过滤器 + 空值缓存能把这类请求挡在缓存层。把请求量、命中率、恶意占比与防护手段拖到真实值，看 DB 承压多少。",
+      "params": [
+        {
+          "key": "reqK",
+          "label": "每秒请求（千）",
+          "min": 1,
+          "max": 200,
+          "step": 1,
+          "value": 100
+        },
+        {
+          "key": "hitPct",
+          "label": "缓存命中率",
+          "min": 50,
+          "max": 99,
+          "step": 1,
+          "value": 90
+        },
+        {
+          "key": "notExistPct",
+          "label": "未命中中不存在的 key 占比",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "value": 50
+        },
+        {
+          "key": "guard",
+          "label": "穿透防护",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "无防护",
+            "布隆过滤器 + 空值缓存"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "reqQps",
+          "label": "总请求 QPS",
+          "expr": "reqK * 1000",
+          "unit": "QPS",
+          "fmt": "int"
+        },
+        {
+          "key": "missQps",
+          "label": "缓存未命中 QPS",
+          "expr": "reqK * 1000 * (100 - hitPct) / 100",
+          "unit": "QPS",
+          "fmt": "int"
+        },
+        {
+          "key": "penetrateQps",
+          "label": "穿透请求 QPS",
+          "expr": "reqK * 1000 * (100 - hitPct) / 100 * notExistPct / 100",
+          "unit": "QPS",
+          "fmt": "int"
+        },
+        {
+          "key": "dbQps",
+          "label": "打到 DB 的 QPS",
+          "expr": "if(guard == 1, reqK * 1000 * (100 - hitPct) / 100 * 10 / 100, reqK * 1000 * (100 - hitPct) / 100)",
+          "unit": "QPS",
+          "fmt": "int"
+        },
+        {
+          "key": "dbCap",
+          "label": "DB 单机安全承载",
+          "expr": "5000",
+          "unit": "QPS",
+          "fmt": "int"
+        },
+        {
+          "key": "overload",
+          "label": "DB 超载倍数",
+          "expr": "if(guard == 1, reqK * 1000 * (100 - hitPct) / 100 * 10 / 100 / 5000, reqK * 1000 * (100 - hitPct) / 100 / 5000)",
+          "unit": "×",
+          "fmt": "fix2"
+        },
+        {
+          "key": "dbCpuPct",
+          "label": "DB CPU 估算",
+          "expr": "if(guard == 1, min(100, reqK * 1000 * (100 - hitPct) / 100 * 10 / 100 * 100 / 5000), min(100, reqK * 1000 * (100 - hitPct) / 100 * 100 / 5000))",
+          "unit": "%",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "reqK >= 50",
+          "label": "总请求 ≥5 万 QPS（真实的热点接口）"
+        },
+        {
+          "expr": "notExistPct >= 20",
+          "label": "未命中中 ≥20% 是根本不存在的 key（穿透场景）"
+        },
+        {
+          "expr": "overload <= 1",
+          "label": "DB 负载 ≤1 倍安全水位"
+        },
+        {
+          "expr": "dbCpuPct <= 80",
+          "label": "DB CPU ≤80%"
+        }
+      ],
+      "insight": "缓存三大问题是**三种不同的失效模式**，别混：**穿透**——查的数据根本不存在，缓存永远不命中，请求全打到 DB（恶意扫描、参数错误、爬虫遍历 id）；**击穿**——某个热点 key 过期瞬间，成百上千并发同时回源（正解是互斥锁/单飞 + 逻辑过期）；**雪崩**——大批 key 同一时刻过期，或缓存集群整体挂了（正解是过期时间加随机抖动 + 多级缓存 + 熔断降级）。穿透的两道防线：① **布隆过滤器**（`BF.ADD` / RedisBloom）：把「存在的 id」预先灌进去，查询前先问「可能存在吗」——**说不存在就一定不存在**，直接返回空；误判率可控（1% 误判率约 9.6 bit/元素），代价是**不支持删除**（要用 counting bloom 或定期重建）；② **空值缓存**：DB 查不到也写一个短 TTL（30~60 秒）的空值，挡住短时间内的重复穿透；TTL 不能长，否则数据补录后仍然返回空。本例的账：10 万 QPS × 10% 未命中 = 1 万打到 DB；加防护后剩 1000（布隆挡掉 98% 的不存在 key + 空值缓存兜住残余），**从 2 倍超载回到 20% 水位**。最后一条工程纪律：**布隆过滤器只能挡「不存在」，挡不住「存在但热点」**——后者要靠本地缓存 + 逻辑过期 + 限流，不要指望一个组件解决三个问题。"
+    },
     {
       "kind": "match",
       "pairs": [

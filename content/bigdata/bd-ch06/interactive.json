@@ -2,7 +2,7 @@
   "chapter": "bd-ch06",
   "subject": "bigdata",
   "title": "离线数仓实战：分层建模与调度（bd-ch06）",
-  "fingerprint": "ba0cafbc25",
+  "fingerprint": "7d27249ba5",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,97 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "60 个报表各扫一遍原始数据",
+      "brief": "不建分层，每个报表都直接查 ODS 明细，各扫 30% 原始数据——60 个报表 × 2TB × 30% = 每天 36TB，光扫描费就 1080 元。分层之后 ODS→DWD 只扫一次全量，报表改查 10GB 的 DWS 汇总表，一天 2.6TB、78 元。把报表数、原始数据量与是否分层拖到真实值，看「建模」这件事的 ROI。",
+      "params": [
+        {
+          "key": "reports",
+          "label": "报表/看板数量",
+          "min": 1,
+          "max": 200,
+          "step": 1,
+          "value": 60
+        },
+        {
+          "key": "odsGB",
+          "label": "ODS 原始数据量",
+          "min": 100,
+          "max": 10000,
+          "step": 100,
+          "value": 2000
+        },
+        {
+          "key": "layers",
+          "label": "数仓分层",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "直连 ODS 明细",
+            "ODS→DWD→DWS 分层"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "dailyScanGB",
+          "label": "每天扫描量",
+          "expr": "if(layers == 1, odsGB + reports * 10, reports * odsGB * 30 / 100)",
+          "unit": "GB",
+          "fmt": "int"
+        },
+        {
+          "key": "dailyScanTB",
+          "label": "每天扫描量（TB）",
+          "expr": "dailyScanGB / 1024",
+          "unit": "TB",
+          "fmt": "int"
+        },
+        {
+          "key": "dailyCost",
+          "label": "每天扫描成本",
+          "expr": "dailyScanGB / 1024 * 30",
+          "unit": "元",
+          "fmt": "int"
+        },
+        {
+          "key": "runtimeH",
+          "label": "每天总机时",
+          "expr": "dailyScanGB / 1024 / 5",
+          "unit": "小时",
+          "fmt": "fix2"
+        },
+        {
+          "key": "reuse",
+          "label": "DWD 被复用次数",
+          "expr": "if(layers == 1, reports, 0)",
+          "unit": "次",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "reports >= 30",
+          "label": "报表数 ≥30（真实的数据团队规模）"
+        },
+        {
+          "expr": "odsGB >= 1000",
+          "label": "ODS ≥1TB（建模才有意义）"
+        },
+        {
+          "expr": "dailyCost <= 150",
+          "label": "每天扫描成本 ≤150 元"
+        },
+        {
+          "expr": "runtimeH <= 8",
+          "label": "每天总机时 ≤8 小时（调度窗口跑得完）"
+        }
+      ],
+      "insight": "数仓分层的本质不是「规范」，而是**把 N 次重复计算收敛成 1 次**：不分层时每个报表都要自己从 ODS 明细里洗一遍（过滤、去重、维表关联），60 个报表就是 60 次同样的扫描——**36TB/天，其中 35TB 是重复劳动**。分层后的账：ODS→DWD 一天只跑一次（扫全量 2TB），DWD→DWS 按主题聚合成 100 个宽表（每个 10GB），报表直接查 DWS（60 × 10GB = 600GB）——**总量 2.6TB，省 93%**。四层的职责要分清，否则会退化成「分了很多层但每层都全量」：**ODS**：贴源，只做抽取与格式统一，不洗数据（保留回溯能力）；**DWD**：明细，做清洗、去重、维度退化、统一口径（一行一个业务事件）；**DWS**：汇总，按主题 + 粒度预聚合（一行一个实体一天）；**ADS**：应用层，直接对着报表/接口的形态（可以宽表、可以冗余）。两条判据看分层做得好不好：① **DWD 被复用次数**——一个 DWD 表只被一个报表用，等于没分层；② **单次调度能否在窗口内跑完**——分层后每个任务都变短，整条链路才能在 24 次调度里排得开（这也是「调度叠起来」的根因：单个任务太长，前一天的还没跑完，第二天的又开始了）。最后一点：**分层不是越深越好**。每加一层就多一次落盘与调度依赖，中小团队 ODS→DWD→ADS 三层足够；层数多到 5 层时，排查「这个指标为什么不对」要跨 5 张表追血缘，运维成本反超收益。"
+    },
     {
       "kind": "match",
       "pairs": [

@@ -2,7 +2,7 @@
   "chapter": "data-ch03",
   "subject": "data",
   "title": "Pandas 基础：Series 与 DataFrame",
-  "fingerprint": "df3ac2d2da",
+  "fingerprint": "b9471d1b7c",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,119 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "object 列 68 字节，category 只要 8 字节",
+      "brief": "一个 500 万行的订单表，城市列用 `object`（Python 字符串）要占 340MB，换成 `category`（整数码 + 字典）只要 38MB——因为 object 列存的只是指针，真正的字符串对象还各自带 49 字节的头。再加上 `iterrows` 逐行循环（每行造一个 Series，约 3 微秒），同样的清洗逻辑能从 15 秒变成 0.1 秒。把行数、列类型与遍历方式拖到真实值，看这两笔账。",
+      "params": [
+        {
+          "key": "rowsM",
+          "label": "数据行数（百万）",
+          "min": 1,
+          "max": 50,
+          "step": 1,
+          "value": 5
+        },
+        {
+          "key": "dtype",
+          "label": "字符串列类型",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "object（Python 字符串）",
+            "category（字典编码）"
+          ]
+        },
+        {
+          "key": "loop",
+          "label": "处理方式",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "iterrows 逐行",
+            "向量化 / .str 访问器"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "rows",
+          "label": "数据行数",
+          "expr": "rowsM * 1000000",
+          "unit": "行",
+          "fmt": "int"
+        },
+        {
+          "key": "perRow",
+          "label": "每行该列占用",
+          "expr": "if(dtype == 0, 68, 8)",
+          "unit": "字节",
+          "fmt": "int"
+        },
+        {
+          "key": "memMB",
+          "label": "该列内存",
+          "expr": "rowsM * 1000000 * if(dtype == 0, 68, 8) / 1048576",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "nsPerRow",
+          "label": "每行处理耗时",
+          "expr": "if(loop == 0, 3000, 20)",
+          "unit": "ns",
+          "fmt": "int"
+        },
+        {
+          "key": "totalS",
+          "label": "处理耗时",
+          "expr": "rowsM * 1000000 * if(loop == 0, 3000, 20) / 1000000000",
+          "unit": "秒",
+          "fmt": "fix2"
+        },
+        {
+          "key": "blowup",
+          "label": "相对 category 膨胀",
+          "expr": "if(dtype == 0, 9, 1)",
+          "unit": "×",
+          "fmt": "int"
+        },
+        {
+          "key": "memPct",
+          "label": "占 8GB 内存比例",
+          "expr": "rowsM * 1000000 * if(dtype == 0, 68, 8) / 1048576 * 100 / 8192",
+          "unit": "%",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "rows >= 1000000",
+          "label": "行数 ≥100 万（真实的分析表）"
+        },
+        {
+          "expr": "perRow <= 20",
+          "label": "每行该列 ≤20 字节（对象列要压到 8 字节）"
+        },
+        {
+          "expr": "memMB <= 100",
+          "label": "字符串列 ≤100MB"
+        },
+        {
+          "expr": "totalS <= 2",
+          "label": "处理耗时 ≤2 秒"
+        },
+        {
+          "expr": "memPct <= 2",
+          "label": "该列 ≤8GB 内存的 2%"
+        }
+      ],
+      "insight": "pandas 的 `object` 列是个**指针数组**：每行 8 字节指向一个 Python 字符串对象，而每个 `str` 对象自己还有约 49 字节的 `PyUnicodeObject` 头（引用计数、长度、hash、字符宽度标记）。所以「存一个 4 字的城市名」实际吃 68 字节。`category` 换成**字典编码**：内部维护一个唯一值数组，列里只存 int32 的码（8 字节/行，4 字节码 + 对齐），1000 个唯一值只占几 KB 的字典。本例 500 万行从 340MB 降到 38MB——而且 `groupby` 时**按码分组比按字符串哈希快得多**。什么时候该用：**唯一值比例 < 50%** 的列（城市、状态、品类、设备型号）都该转；唯一值接近行数（订单号、用户 id）时 category 反而更慢更占内存。第二笔账是遍历：`iterrows` 每行都会新建一个 `Series` 对象（约 3μs），1000 万行就是 30 秒；向量化写法（`.str.contains`、`np.where`、`df.loc` 掩码）在 C 层循环，每行 20ns，**快 150 倍**。四条实操：① **先看 `df.info(memory_usage='deep')`**——`memory_usage` 默认不统计 object 里的字符串，会严重低估；② 读 CSV 时用 `dtype={'city':'category'}` 直接在读入阶段省内存；③ 别用 `iterrows`/`apply(axis=1)` 做能向量化的运算；④ 数值列用 `int32`/`float32`（`pd.to_numeric(..., downcast=...)`），大表下 8 字节→4 字节就是一半内存。"
+    },
     {
       "kind": "match",
       "pairs": [

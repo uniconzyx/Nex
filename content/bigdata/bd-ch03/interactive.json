@@ -2,7 +2,7 @@
   "chapter": "bd-ch03",
   "subject": "bigdata",
   "title": "Hive 数据仓库与 HQL（bd-ch03）",
-  "fingerprint": "b4e694dff2",
+  "fingerprint": "d666a35e2a",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,115 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "不分区扫 2TB，分区只扫 5.5GB",
+      "brief": "同一张 2TB 的表，查一天的数据：不分区要全表扫 2TB（约 68 分钟），按天分区只扫 `dt=2026-11-05` 那个目录的 5.5GB（11 秒）。分区裁剪是 Hive 最便宜的优化，代价是分区太细会产生一堆小文件。把表大小、查询天数与分区方式拖到真实值，看扫多少数据、起多少任务。",
+      "params": [
+        {
+          "key": "tableGB",
+          "label": "表大小",
+          "min": 100,
+          "max": 10000,
+          "step": 100,
+          "value": 2000
+        },
+        {
+          "key": "days",
+          "label": "查询覆盖天数",
+          "min": 1,
+          "max": 365,
+          "step": 1,
+          "value": 1
+        },
+        {
+          "key": "partition",
+          "label": "分区方式",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "不分区（单目录）",
+            "按天分区"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "scanGB",
+          "label": "扫描数据量",
+          "expr": "if(partition == 1, tableGB * days / 365, tableGB)",
+          "unit": "GB",
+          "fmt": "int"
+        },
+        {
+          "key": "scanS",
+          "label": "扫描耗时",
+          "expr": "if(partition == 1, tableGB * days / 365, tableGB) * 1024 / 500",
+          "unit": "秒",
+          "fmt": "int"
+        },
+        {
+          "key": "files",
+          "label": "输入文件数",
+          "expr": "if(partition == 1, days * 200, 200)",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "taskStartS",
+          "label": "任务启动开销",
+          "expr": "if(partition == 1, days * 200, 200) * 20 / 1000",
+          "unit": "秒",
+          "fmt": "int"
+        },
+        {
+          "key": "totalS",
+          "label": "查询总耗时",
+          "expr": "if(partition == 1, tableGB * days / 365, tableGB) * 1024 / 500 + if(partition == 1, days * 200, 200) * 20 / 1000",
+          "unit": "秒",
+          "fmt": "int"
+        },
+        {
+          "key": "scanPct",
+          "label": "扫了表的百分之多少",
+          "expr": "if(partition == 1, days * 100 / 365, 100)",
+          "unit": "%",
+          "fmt": "int"
+        },
+        {
+          "key": "partitions",
+          "label": "分区数",
+          "expr": "if(partition == 1, 365, 1)",
+          "unit": "个",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "tableGB >= 1000",
+          "label": "表 ≥1TB（真实的事实表规模）"
+        },
+        {
+          "expr": "days <= 7",
+          "label": "查询只覆盖 ≤7 天"
+        },
+        {
+          "expr": "scanGB <= 50",
+          "label": "扫描 ≤50GB"
+        },
+        {
+          "expr": "totalS <= 200",
+          "label": "查询 ≤200 秒"
+        },
+        {
+          "expr": "scanPct <= 3",
+          "label": "只扫全表的 ≤3%（分区裁剪生效）"
+        }
+      ],
+      "insight": "Hive 的「分区」不是数据库意义上的逻辑分区，而是**目录**：`/warehouse/orders/dt=2026-11-05/`。所以 `WHERE dt='2026-11-05'` 时，执行引擎**连这个目录都不进**其他的——这就是分区裁剪，它省的是**磁盘 IO**（本例 2TB → 5.5GB，364 倍），也是 Hive 最便宜的优化。三条必须记住的规则：① **分区字段必须出现在 WHERE 里**，且不要套函数（`WHERE substr(dt,1,7)='2026-11'` 会让裁剪失效，要改成 `WHERE dt BETWEEN '2026-11-01' AND '2026-11-30'`）；② **分区粒度要匹配查询模式**：按天分区适合「查最近 N 天」，按小时分区会让分区数 ×24，小文件问题随之放大；③ **分区不是索引**：分区内还是全扫，所以分区内要用 **ORC/Parquet + 列裁剪**，再叠 **谓词下推**（`WHERE` 条件下推到存储层跳过 row group）与 **分桶**（`CLUSTERED BY`，让 join 走 Map-side merge）。反面的坑：「为了查询灵活，按 20 个维度都分区」——分区目录数 = 维度基数的笛卡尔积，几十万个空目录，`SHOW PARTITIONS` 都要跑几分钟，NameNode 也会被拖死。正确的做法是**只按时间分区（基数小、单调增长），其余维度靠分桶或数据布局**。"
+    },
     {
       "kind": "match",
       "pairs": [

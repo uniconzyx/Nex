@@ -2,7 +2,7 @@
   "chapter": "mw-ch02",
   "subject": "middleware",
   "title": "Redis 持久化与内存管理（mw-ch02）",
-  "fingerprint": "ca6746ee07",
+  "fingerprint": "d0e68dbfde",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,119 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "每次写都 fsync，吞吐掉到 1/50",
+      "brief": "`appendfsync always` 保证一条不丢：每条写命令都要等一次 `fsync` 落盘，机械盘 1ms 一次，单实例写吞吐被钉死在 1000 QPS。`everysec` 让后台线程每秒刷一次，吞吐跑满，代价是最多丢 1 秒数据。只开 RDB 则可能丢 5 分钟。把写入速率与持久化方式拖到真实值，看「不丢数据」这件事的价格。",
+      "params": [
+        {
+          "key": "writesK",
+          "label": "每秒写命令（千）",
+          "min": 1,
+          "max": 200,
+          "step": 1,
+          "value": 50
+        },
+        {
+          "key": "memGB",
+          "label": "实例内存",
+          "min": 1,
+          "max": 64,
+          "step": 1,
+          "value": 16
+        },
+        {
+          "key": "mode",
+          "label": "持久化方式",
+          "min": 0,
+          "max": 2,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "AOF appendfsync always",
+            "AOF appendfsync everysec",
+            "仅 RDB 快照"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "needQps",
+          "label": "需要的写 QPS",
+          "expr": "writesK * 1000",
+          "unit": "QPS",
+          "fmt": "int"
+        },
+        {
+          "key": "fsyncPerSec",
+          "label": "每秒 fsync 次数",
+          "expr": "if(mode == 0, writesK * 1000, if(mode == 1, 1, 0))",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "qpsCap",
+          "label": "写吞吐上限",
+          "expr": "if(mode == 0, 1000, if(mode == 1, 150000, 200000))",
+          "unit": "QPS",
+          "fmt": "int"
+        },
+        {
+          "key": "servedQps",
+          "label": "实际服务 QPS",
+          "expr": "min(writesK * 1000, if(mode == 0, 1000, if(mode == 1, 150000, 200000)))",
+          "unit": "QPS",
+          "fmt": "int"
+        },
+        {
+          "key": "overflowPct",
+          "label": "请求被挡比例",
+          "expr": "(writesK * 1000 - min(writesK * 1000, if(mode == 0, 1000, if(mode == 1, 150000, 200000)))) * 100 / (writesK * 1000)",
+          "unit": "%",
+          "fmt": "int"
+        },
+        {
+          "key": "rtoS",
+          "label": "崩溃最多丢数据",
+          "expr": "if(mode == 0, 0, if(mode == 1, 1, 300))",
+          "unit": "秒",
+          "fmt": "int"
+        },
+        {
+          "key": "cowMB",
+          "label": "fork 时 COW 复制",
+          "expr": "if(mode == 2, memGB * 1024 * 50 / 100, 0)",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "peakGB",
+          "label": "fork 期间峰值内存",
+          "expr": "memGB + if(mode == 2, memGB * 50 / 100, 0)",
+          "unit": "GB",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "writesK >= 20",
+          "label": "写吞吐 ≥2 万 QPS（真实的高写入场景）"
+        },
+        {
+          "expr": "rtoS <= 1",
+          "label": "崩溃最多丢 1 秒数据（RPO ≤1s）"
+        },
+        {
+          "expr": "overflowPct <= 5",
+          "label": "被挡请求 ≤5%（吞吐要跟得上）"
+        },
+        {
+          "expr": "peakGB <= memGB * 1.6",
+          "label": "fork 峰值内存 ≤1.6 倍（不能把机器撑爆）"
+        }
+      ],
+      "insight": "Redis 持久化的三种组合，本质是 **RPO（最多丢多少）与吞吐的交换**：**always**：每条写命令同步 `fsync`，RPO=0，但一次 `fsync` 约 1ms（机械盘）→ 单实例写吞吐上限 **1000 QPS**，是 everysec 的 1/150。**everysec**：命令先写 AOF 缓冲区就返回，后台线程每秒 `fsync` 一次，RPO≤1 秒，吞吐几乎不受影响——**生产环境的默认选择**。**仅 RDB**：每 5 分钟（默认 `save 900 1 / 300 10 / 60 10000`）一次快照，RPO 可能是几分钟，重启恢复也慢（要重放整个数据集）。两个必须知道的细节：① **fork 的 COW 代价**：RDB 快照和 AOF 重写都要 `fork` 子进程，fork 本身是 O(页表) 很快，但子进程写、父进程也写时触发 **copy-on-write**，被改写的页要复制一份——写入速率越高，COW 复制越多，峰值内存可能接近 2 倍。所以「`maxmemory` 要按 `实例内存 / 2` 规划」不是玄学；② **AOF 重写不能省**：AOF 是追加日志，`INCR` 一百万次就是一百万条命令，重写会生成「当前状态的最小命令集」（`SET counter 1000000` 一条），把文件从 GB 压回 MB。一句话选型：**要 RPO=0 就得接受 1000 QPS 的单实例上限**（或者上 Redis 集群分片），否则 everysec 是性价比最高的选择。"
+    },
     {
       "kind": "match",
       "pairs": [

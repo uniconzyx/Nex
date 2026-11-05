@@ -2,7 +2,7 @@
   "chapter": "mw-ch06",
   "subject": "middleware",
   "title": "Kafka 生产者与消费者机制（mw-ch06）",
-  "fingerprint": "d57efc4a24",
+  "fingerprint": "9b4b3cc584",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,112 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "一条一发 vs 攒够 64KB：吞吐差 64 倍",
+      "brief": "`producer.send(record)` 逐条发送时，每条消息都要等一次网络往返；`batch.size` 攒到 64KB（约 256 条）再一次发出去，同样一次往返搬 256 条。吞吐公式是「每批条数 × 在途请求数 ÷ 往返延迟」，所以批量大小是吞吐的第一杠杆，`acks=all` 则把往返拉长（要等 ISR 全部确认）。把消息速率、批量大小与 acks 拖到真实值，看能不能追上生产速率。",
+      "params": [
+        {
+          "key": "msgsK",
+          "label": "消息速率（千条/秒）",
+          "min": 1,
+          "max": 200,
+          "step": 1,
+          "value": 100
+        },
+        {
+          "key": "batchKB",
+          "label": "batch.size",
+          "min": 1,
+          "max": 64,
+          "step": 1,
+          "value": 1
+        },
+        {
+          "key": "acks",
+          "label": "acks",
+          "min": 0,
+          "max": 2,
+          "step": 1,
+          "value": 1,
+          "labels": [
+            "acks=0（不等确认）",
+            "acks=1（等 leader）",
+            "acks=all（等 ISR）"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "msgsPerBatch",
+          "label": "每批消息数",
+          "expr": "batchKB * 1024 / 256",
+          "unit": "条",
+          "fmt": "int"
+        },
+        {
+          "key": "rttMs",
+          "label": "单次往返延迟",
+          "expr": "if(acks == 0, 2, if(acks == 1, 5, 15))",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "inflight",
+          "label": "在途请求数",
+          "expr": "5",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "throughput",
+          "label": "吞吐上限",
+          "expr": "batchKB * 1024 / 256 * 5 * 1000 / if(acks == 0, 2, if(acks == 1, 5, 15))",
+          "unit": "条/秒",
+          "fmt": "int"
+        },
+        {
+          "key": "need",
+          "label": "需要吞吐",
+          "expr": "msgsK * 1000",
+          "unit": "条/秒",
+          "fmt": "int"
+        },
+        {
+          "key": "sendCalls",
+          "label": "每秒 send 调用",
+          "expr": "msgsK * 1000 * 256 / (batchKB * 1024)",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "lagPerSec",
+          "label": "每秒堆积消息",
+          "expr": "msgsK * 1000 - batchKB * 1024 / 256 * 5 * 1000 / if(acks == 0, 2, if(acks == 1, 5, 15))",
+          "unit": "条",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "msgsK >= 50",
+          "label": "消息速率 ≥5 万条/秒（日志/埋点这类真实流量）"
+        },
+        {
+          "expr": "throughput >= msgsK * 1000",
+          "label": "吞吐 ≥生产速率（不能堆积）"
+        },
+        {
+          "expr": "sendCalls <= 2000",
+          "label": "每秒 send 调用 ≤2000 次（别一条一发）"
+        },
+        {
+          "expr": "lagPerSec <= 0",
+          "label": "积压速率 ≤0（不产生堆积）"
+        }
+      ],
+      "insight": "Kafka 生产者的吞吐公式可以写成：**`吞吐 = 每批条数 × 在途请求数 ÷ 单次往返延迟`**。每批条数由 `batch.size`（默认 16KB）和 `linger.ms`（默认 0）共同决定——`linger.ms=0` 意味着「有就发」，批量永远攒不满；把它调到 5~20ms，用 5~20ms 的延迟换几十倍吞吐，是日志/埋点场景的标配。本例：1KB 批量 ≈ 4 条/批，5 个在途、5ms 往返 = **4000 条/秒**；64KB 批量 ≈ 256 条/批 = **25.6 万条/秒**——**64 倍**。`acks` 的影响是第二个维度：`acks=0`（发了就算，不等确认）往返 2ms，但**丢了不知道**；`acks=1`（等 leader 写入）5ms，leader 挂了可能丢；`acks=all`（等 ISR 全部确认）15ms，最强保证但往返慢 3 倍——所以「可靠性」和「吞吐」在这里是直接相乘的关系。三个配套参数：① **`compression.type=lz4/zstd`**：日志类文本压缩比 5~10 倍，把网络与磁盘成本直接降一个数量级（CPU 换带宽，几乎总是划算）；② **`max.in.flight.requests.per.connection`**：默认 5，配合 `acks=all` 时要开 `enable.idempotence=true`（否则重试会乱序）；③ **分区数 ≥ 消费者数**：否则加了消费者也吃不满（见 mw-ch08）。反过来，批量不是越大越好：`batch.size` 太大时内存占用涨（每分区一个缓冲），且 `linger.ms` 会真的增加端到端延迟——**实时性要求高的场景（风控、支付）宁可小批量**。"
+    },
     {
       "kind": "match",
       "pairs": [

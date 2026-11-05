@@ -2,7 +2,7 @@
   "chapter": "data-ch06",
   "subject": "data",
   "title": "数据分析与数学建模实战",
-  "fingerprint": "0195d26d0f",
+  "fingerprint": "0fec9a5c71",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,108 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "网格搜索 5000 次训练，跑两周",
+      "brief": "网格搜索的代价是三个因子**相乘**：组合数 × CV 折数 × 单次训练时间。1000 组参数 × 5 折 × 30 秒 = 41.7 小时，一周的算力就这么没了；开 8 核并行降到 5.2 小时，但更有效的做法是先随机搜索把范围缩小。把组合数、折数、单次训练时间与并行度拖到真实值，看「调参」这笔算力账。",
+      "params": [
+        {
+          "key": "combos",
+          "label": "参数组合数",
+          "min": 4,
+          "max": 5000,
+          "step": 4,
+          "value": 1000
+        },
+        {
+          "key": "folds",
+          "label": "交叉验证折数",
+          "min": 3,
+          "max": 10,
+          "step": 1,
+          "value": 5
+        },
+        {
+          "key": "oneTrainS",
+          "label": "单次训练耗时（秒）",
+          "min": 1,
+          "max": 300,
+          "step": 1,
+          "value": 30
+        },
+        {
+          "key": "parallel",
+          "label": "并行核数",
+          "min": 1,
+          "max": 64,
+          "step": 1,
+          "value": 1
+        }
+      ],
+      "metrics": [
+        {
+          "key": "fitCount",
+          "label": "总训练次数",
+          "expr": "combos * folds",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "serialH",
+          "label": "串行耗时",
+          "expr": "combos * folds * oneTrainS / 3600",
+          "unit": "小时",
+          "fmt": "fix2"
+        },
+        {
+          "key": "wallH",
+          "label": "并行后墙钟时间",
+          "expr": "combos * folds * oneTrainS / 3600 / parallel",
+          "unit": "小时",
+          "fmt": "fix2"
+        },
+        {
+          "key": "randomH",
+          "label": "随机搜索 60 组耗时",
+          "expr": "60 * folds * oneTrainS / 3600 / parallel",
+          "unit": "小时",
+          "fmt": "fix2"
+        },
+        {
+          "key": "gridVsRandom",
+          "label": "网格/随机 次数比",
+          "expr": "combos / 60",
+          "unit": "×",
+          "fmt": "int"
+        },
+        {
+          "key": "savedH",
+          "label": "改随机搜索可省",
+          "expr": "combos * folds * oneTrainS / 3600 / parallel - 60 * folds * oneTrainS / 3600 / parallel",
+          "unit": "小时",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "combos >= 200",
+          "label": "参数组合 ≥200 组（真实的调参规模）"
+        },
+        {
+          "expr": "oneTrainS >= 10",
+          "label": "单次训练 ≥10 秒（中等模型）"
+        },
+        {
+          "expr": "wallH <= 8",
+          "label": "调参墙钟时间 ≤8 小时（一夜能跑完）"
+        },
+        {
+          "expr": "parallel >= 4",
+          "label": "并行 ≥4 核"
+        }
+      ],
+      "insight": "调参的算力账是**三个因子相乘**：`组合数 × 折数 × 单次训练时间`。很多人只盯「组合数」，但折数从 5 加到 10 就是翻倍，单次训练从 30 秒涨到 5 分钟就是 10 倍——**乘积才是账单**。本例 1000 × 5 × 30 秒 = 41.7 小时，8 核并行 5.2 小时。降低这笔账的四个杠杆，按性价比排序：① **先随机搜索/贝叶斯搜索**（`RandomizedSearchCV` + `HalvingRandomSearchCV`）：60 组随机样本通常能找到网格 1000 组里 90% 的好区域，**成本降到 1/16**，再在那个小区域做精调；② **早停 / 逐次减半**（successive halving）：先在小数据/少轮次上跑所有组合，淘汰差的，只对好的跑全量——`HalvingGridSearchCV` 就是干这个的；③ **并行**：`n_jobs=-1` 几乎是免费的加速，但要注意 **每个 fold 内的模型自己也可能开多线程**（BLAS/OpenMP），会互相抢核，实测 `n_jobs=8` 配 `OMP_NUM_THREADS=1` 通常比 `n_jobs=-1` 更快；④ **缩小验证成本**：5 折已经够用，10 折的收益远小于 2 倍成本；大数据集上用 `train_test_split` + 单次验证先粗筛，最后才上 CV。还有一条容易被忽略的：**别在测试集上调参**。CV 是在训练集内部做模型选择，最终只在**留出的测试集**上评估一次——同一份数据既调参又评估，指标会系统性偏高（数据泄漏的一种）。"
+    },
     {
       "kind": "boss",
       "questions": [

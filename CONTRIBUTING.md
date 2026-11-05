@@ -143,7 +143,7 @@ git commit -m "content(<subject>): 新增 <id> 三视角 + 双来源"
 | 生产者 | 拥有章节 | 语义 |
 |---|---|---|
 | `scripts/_author_labs.py` | cpp / fundamentals / ml / ai / database 共 68 章 | 作者源，`--check` 只比对自己拥有的章节 |
-| `scripts/inject_batch{3,4,5,6,7,8,9}_sandbox.py` | 其余章节（tooling / middleware / bigdata / data / agent / discrete-math / python / cpp / spring / clang / java …） | 幂等合并：只替换本章 sandbox，保留 debug 等其它玩法 |
+| `scripts/inject_batch{3,4,5,6,7,8,9,10}_sandbox.py` | 其余章节（tooling / middleware / bigdata / data / agent / discrete-math / python / cpp / spring / clang / java …） | 幂等合并：只替换本章 sandbox，保留 debug 等其它玩法 |
 
 > ⚠️ 不要用「整份重写」的方式改 labs.json。`_author_labs.py` 现在只覆盖自己拥有的章、
 > 其余原样保留；在此之前的版本会静默抹掉外部批次的几十章手工模块。

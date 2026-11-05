@@ -2,7 +2,7 @@
   "chapter": "mw-ch01",
   "subject": "middleware",
   "title": "Redis 数据结构与底层编码（mw-ch01）",
-  "fingerprint": "df3b743ccc",
+  "fingerprint": "27deff3229",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,122 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "一百万个缓存 key，多花 2GB",
+      "brief": "同样存「100 万个 hash、每个 20 个字段」，Redis 可能只吃 565MB，也可能吃到 2.5GB——差别只在底层编码。小 hash 用 listpack（一块连续内存，每字段约 28 字节），超过阈值就转 hashtable（每字段两个 dictEntry + 两条 SDS，约 128 字节）。把 key 数量与编码拖到真实值，看这 4.4 倍是怎么来的。",
+      "params": [
+        {
+          "key": "keysW",
+          "label": "hash key 数量（万）",
+          "min": 10,
+          "max": 500,
+          "step": 10,
+          "value": 100
+        },
+        {
+          "key": "fields",
+          "label": "每个 hash 字段数",
+          "min": 4,
+          "max": 200,
+          "step": 4,
+          "value": 20
+        },
+        {
+          "key": "encoding",
+          "label": "hash 编码",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "hashtable（禁用 listpack）",
+            "listpack（默认自动）"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "keys",
+          "label": "hash key 总数",
+          "expr": "keysW * 10000",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "lpBytes",
+          "label": "listpack 每 key",
+          "expr": "fields * 28 + 32",
+          "unit": "字节",
+          "fmt": "int"
+        },
+        {
+          "key": "htBytes",
+          "label": "hashtable 每 key",
+          "expr": "fields * 128 + 64",
+          "unit": "字节",
+          "fmt": "int"
+        },
+        {
+          "key": "effLP",
+          "label": "实际是否 listpack",
+          "expr": "if(encoding == 1, if(fields <= 128, 1, 0), 0)",
+          "unit": "是/否",
+          "fmt": "int"
+        },
+        {
+          "key": "perKey",
+          "label": "每 key 实际占用",
+          "expr": "if(encoding == 1, if(fields <= 128, fields * 28 + 32, fields * 128 + 64), fields * 128 + 64)",
+          "unit": "字节",
+          "fmt": "int"
+        },
+        {
+          "key": "totalMB",
+          "label": "总内存占用",
+          "expr": "keysW * 10000 * if(encoding == 1, if(fields <= 128, fields * 28 + 32, fields * 128 + 64), fields * 128 + 64) / 1048576",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "blowup",
+          "label": "相对 listpack 膨胀",
+          "expr": "if(encoding == 1, if(fields <= 128, 1, 5), 4)",
+          "unit": "×",
+          "fmt": "int"
+        },
+        {
+          "key": "ptrChases",
+          "label": "单 key 平均指针跳转",
+          "expr": "if(encoding == 1, if(fields <= 128, 1, 4), 4)",
+          "unit": "次",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "keys >= 100000",
+          "label": "hash key ≥10 万个（真实的会话/购物车/画像场景）"
+        },
+        {
+          "expr": "fields >= 12",
+          "label": "每个 hash ≥12 个字段（用户画像/会话的真实形态）"
+        },
+        {
+          "expr": "totalMB <= 700",
+          "label": "总内存 ≤700MB"
+        },
+        {
+          "expr": "effLP == 1",
+          "label": "实际编码为 listpack（小 hash 用紧凑编码）"
+        },
+        {
+          "expr": "ptrChases <= 1",
+          "label": "单 key 指针跳转 ≤1 次（连续内存）"
+        }
+      ],
+      "insight": "Redis 的「一种数据结构」在底层有多种编码，选哪种由**规模阈值**自动决定：hash 在字段数 ≤128 且单值 ≤64 字节时用 **listpack**（Redis 7 之前叫 ziplist）——所有字段塞进一块连续内存，每字段约 28 字节（前驱长度 + 编码 + 内容），读一个 key 只需一次内存寻址，CPU 缓存友好。超过阈值转 **hashtable**：每个字段要有 key 和 value 两个 `dictEntry`，每个 entry 又是两条 SDS 字符串（还有各自的头部与预分配），实测约 128 字节/字段——**4 倍以上**，而且每读一个字段要跳 2~4 次指针。这不是配置洁癖：100 万个 20 字段的 hash，listpack 565MB、hashtable 2.5GB，直接决定你能不能塞进 4GB 的实例、会不会触发淘汰。三条实操：① **小对象尽量用 hash**（`HSET user:1 name x age 18`），比给每个字段建一个 string key 省得多（一个 string key 光是 key 本身 + robj + SDS 就要 100 字节）；② **别随手关掉阈值**：`hash-max-listpack-entries 0` 是性能调优的反模式，除非你确认字段数会稳定超过几百；③ **阈值是可调的**：字段数稳定在 200 时把 `hash-max-listpack-entries` 提到 256，仍是 O(n) 查找但 n=200 的线性扫描比指针跳转快——**在阈值内，线性扫描胜过哈希查找**，这是小对象压缩编码的核心取舍。"
+    },
     {
       "kind": "match",
       "pairs": [

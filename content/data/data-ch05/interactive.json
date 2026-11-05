@@ -2,7 +2,7 @@
   "chapter": "data-ch05",
   "subject": "data",
   "title": "数据采集：requests 与解析（含合规边界）",
-  "fingerprint": "513cf3568b",
+  "fingerprint": "9614273c18",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,127 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "一万页串行爬，五十分钟",
+      "brief": "10000 个页面、每页 300ms，串行抓要 50 分钟。并发能把它压下来，但**并发数不是越大越好**：站点限速 50 QPS、单请求 300ms 时，同时在途的请求最多 15 个（Little 定律），开 32 并发只会让请求在服务端排队、甚至触发封禁。把页数、并发、响应耗时与限速拖到真实值，找那个「不超限又能跑完」的并发数。",
+      "params": [
+        {
+          "key": "pages",
+          "label": "页面数",
+          "min": 100,
+          "max": 100000,
+          "step": 100,
+          "value": 10000
+        },
+        {
+          "key": "conc",
+          "label": "并发数",
+          "min": 1,
+          "max": 64,
+          "step": 1,
+          "value": 1
+        },
+        {
+          "key": "rttMs",
+          "label": "单页响应耗时",
+          "min": 50,
+          "max": 2000,
+          "step": 50,
+          "value": 300
+        },
+        {
+          "key": "limitQps",
+          "label": "站点限速（QPS）",
+          "min": 1,
+          "max": 200,
+          "step": 1,
+          "value": 50
+        }
+      ],
+      "metrics": [
+        {
+          "key": "serialS",
+          "label": "串行耗时",
+          "expr": "pages * rttMs / 1000",
+          "unit": "秒",
+          "fmt": "int"
+        },
+        {
+          "key": "idealS",
+          "label": "并发理论耗时",
+          "expr": "pages * rttMs / 1000 / conc",
+          "unit": "秒",
+          "fmt": "int"
+        },
+        {
+          "key": "limitS",
+          "label": "限速决定的下限",
+          "expr": "pages / limitQps",
+          "unit": "秒",
+          "fmt": "int"
+        },
+        {
+          "key": "actualS",
+          "label": "实际耗时",
+          "expr": "max(pages * rttMs / 1000 / conc, pages / limitQps)",
+          "unit": "秒",
+          "fmt": "int"
+        },
+        {
+          "key": "actualQps",
+          "label": "实际 QPS",
+          "expr": "pages / max(pages * rttMs / 1000 / conc, pages / limitQps)",
+          "unit": "QPS",
+          "fmt": "fix2"
+        },
+        {
+          "key": "maxConc",
+          "label": "不超限的最大并发",
+          "expr": "limitQps * rttMs / 1000",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "wasted",
+          "label": "超出限速的并发数",
+          "expr": "max(0, conc - limitQps * rttMs / 1000)",
+          "unit": "个",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "pages >= 5000",
+          "label": "页面数 ≥5000"
+        },
+        {
+          "expr": "actualS <= 600",
+          "label": "总耗时 ≤600 秒（10 分钟）"
+        },
+        {
+          "expr": "rttMs >= 200",
+          "label": "单页响应 ≥200ms（真实站点的响应时间）"
+        },
+        {
+          "expr": "limitQps <= 60",
+          "label": "站点限速 ≤60 QPS"
+        },
+        {
+          "expr": "conc <= limitQps * rttMs / 1000",
+          "label": "并发 ≤限速允许的在途数（Little 定律）"
+        },
+        {
+          "expr": "actualQps <= limitQps",
+          "label": "实际 QPS ≤站点限速"
+        },
+        {
+          "expr": "conc >= 4",
+          "label": "并发 ≥4（串行跑不完）"
+        }
+      ],
+      "insight": "采集的耗时模型只有两行：**串行 `N × RTT`**，**并发 `max(N × RTT / C, N / QPS_limit)`**。第二项是很多人忽略的：**限速是硬约束，并发再大也跑不过它**。本例 10000 页 × 300ms = 50 分钟串行；并发 15 时理论 200 秒，但限速 50 QPS 决定了至少 200 秒——两个下限刚好重合。**「不超限的最大并发」= 限速 × 单请求耗时**（Little 定律的采集版）：50 QPS × 0.3s = 15 个在途。开 16 个时第 16 个请求只会在服务端排队，开 32 个时服务端看到的是「瞬时 100 QPS 的突发」，轻则 429，重则封 IP。三条工程纪律：① **用令牌桶/信号量做客户端限速**（`aiohttp` 的 `Semaphore` + `asyncio.sleep` 补速率），别指望「并发数 = 限速」这种巧合；② **一定要有退避重试**（指数退避 + 抖动），429/503 时退到 1 QPS 等一分钟，比硬刚被封 IP 划算得多；③ **先看 `robots.txt` 与《数据安全法》《个人信息保护法》的边界**：公开数据也要遵守站点条款与抓取频率，绕过反爬、抓个人信息、抓完转卖都可能直接违法——**合规成本远高于技术成本**。顺带一句性能细节：串行的 300ms 里大部分是**等待 IO**（不是 CPU），所以异步（`aiohttp`/`httpx.AsyncClient`）比多线程更省资源；CPU 密集的解析（HTML→结构化）反而该放进线程池，别堵住事件循环。"
+    },
     {
       "kind": "boss",
       "questions": [

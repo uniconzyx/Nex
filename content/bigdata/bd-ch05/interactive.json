@@ -2,7 +2,7 @@
   "chapter": "bd-ch05",
   "subject": "bigdata",
   "title": "Spark SQL、DataFrame 与 Catalyst（bd-ch05）",
-  "fingerprint": "44249cdc0d",
+  "fingerprint": "0af6b751df",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,130 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "一次 join 白搬 1TB",
+      "brief": "事实表 1TB join 一张 500MB 的维表，默认走 sort-merge join——两张表都要按 join key 重分区，1TB 数据全量落盘再拉起来，光是 shuffle 就要一个多小时。维表只有 500MB，广播到每个 executor 就能变成 map 端 join，shuffle 归零。把事实表、维表大小与 join 策略拖到真实值，看这 1TB 是怎么白搬的。",
+      "params": [
+        {
+          "key": "factGB",
+          "label": "事实表大小",
+          "min": 10,
+          "max": 5000,
+          "step": 10,
+          "value": 1000
+        },
+        {
+          "key": "dimMB",
+          "label": "维表大小",
+          "min": 16,
+          "max": 16384,
+          "step": 16,
+          "value": 512
+        },
+        {
+          "key": "mode",
+          "label": "join 策略",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "sort-merge join（双表 shuffle）",
+            "broadcast join（广播维表）"
+          ]
+        },
+        {
+          "key": "cores",
+          "label": "集群核数",
+          "min": 10,
+          "max": 500,
+          "step": 10,
+          "value": 100
+        }
+      ],
+      "metrics": [
+        {
+          "key": "shuffleGB",
+          "label": "shuffle 数据量",
+          "expr": "if(mode == 0, factGB + dimMB / 1024, 0)",
+          "unit": "GB",
+          "fmt": "int"
+        },
+        {
+          "key": "spillGB",
+          "label": "磁盘溢写量",
+          "expr": "if(mode == 0, (factGB + dimMB / 1024) * 60 / 100, 0)",
+          "unit": "GB",
+          "fmt": "int"
+        },
+        {
+          "key": "scanS",
+          "label": "扫描事实表",
+          "expr": "factGB / 5",
+          "unit": "秒",
+          "fmt": "int"
+        },
+        {
+          "key": "totalS",
+          "label": "作业总耗时",
+          "expr": "if(mode == 0, (factGB + dimMB / 1024) * 1024 / 200 + factGB / 5, factGB / 5 + dimMB * cores / 4 / 1000)",
+          "unit": "秒",
+          "fmt": "int"
+        },
+        {
+          "key": "stages",
+          "label": "stage 数",
+          "expr": "if(mode == 0, 3, 2)",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "bcastLimitMB",
+          "label": "广播上限",
+          "expr": "8192",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "bcastOOM",
+          "label": "广播是否 OOM",
+          "expr": "if(mode == 1, if(dimMB > 8192, 1, 0), 0)",
+          "unit": "是/否",
+          "fmt": "int"
+        },
+        {
+          "key": "slowdown",
+          "label": "相对广播 join 减速",
+          "expr": "if(mode == 0, ((factGB + dimMB / 1024) * 1024 / 200 + factGB / 5) / (factGB / 5 + dimMB * cores / 4 / 1000), 1)",
+          "unit": "×",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "factGB >= 500",
+          "label": "事实表 ≥500GB（真实的大表 join）"
+        },
+        {
+          "expr": "shuffleGB <= 100",
+          "label": "shuffle ≤100GB（别把大表整体搬一遍）"
+        },
+        {
+          "expr": "totalS <= 260",
+          "label": "作业 ≤260 秒"
+        },
+        {
+          "expr": "bcastOOM == 0",
+          "label": "广播不 OOM（维表在广播上限内）"
+        },
+        {
+          "expr": "stages <= 2",
+          "label": "stage ≤2（无 shuffle 边界）"
+        }
+      ],
+      "insight": "Spark join 的物理计划只有两条主路：**sort-merge join**——两张表都按 join key 做 hash 重分区（shuffle），每个分区内排序再归并。代价是**两张大表都要过网络与磁盘**：1TB 事实表 shuffle 就是 1TB 落盘 + 1TB 拉取，按 200MB/s 算要 85 分钟；**broadcast join**——把小表收成一个哈希表，**广播到每个 executor**，大表只需本地扫描（map 端 join），shuffle 为 0。本例耗时从 5322 秒降到 212 秒。广播的边界是**内存**：`spark.sql.autoBroadcastJoinThreshold` 默认 10MB，实际可调到 8GB 左右（再大每个 executor 都放不下，直接 OOM）。所以判据是「维表是否装得进 executor 内存」，不是「维表小不小」。三条配套优化：① **统计信息**（`ANALYZE TABLE ... COMPUTE STATISTICS`）——Catalyst 靠它判断表大小，没有统计信息时可能选错策略（该广播的不广播，不该广播的硬广播）；② **AQE**（`spark.sql.adaptive.enabled=true`）：运行时发现某个分区特别大，自动拆分成更多分区（skew join 处理），把 1TB 里那个 300GB 的热点分区打散；③ **分桶 join**（`CLUSTERED BY ... INTO n BUCKETS` + 同桶数）：两表已经按同样规则分桶时，**连 shuffle 都不需要**，直接按桶对齐做 merge。一句话记住：**能广播就广播，不能广播就分桶，都不行才 shuffle**。"
+    },
     {
       "kind": "match",
       "pairs": [

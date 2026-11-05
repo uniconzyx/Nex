@@ -2,7 +2,7 @@
   "chapter": "mw-ch07",
   "subject": "middleware",
   "title": "消息可靠性：不丢、不重、有序（mw-ch07）",
-  "fingerprint": "f3791bca46",
+  "fingerprint": "183fb2b28d",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,127 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "先 ack 后处理，失败的消息就没了",
+      "brief": "「收到消息就 ack，再去处理业务」看着顺畅，但处理失败时位点已经提交，消息不会重投——**直接消失**。改成「处理成功再 ack」能保证至少一次，代价是失败重试会让同一条消息被消费多次，必须有幂等去重兜底。把消息速率、失败率、ack 时机与去重手段拖到真实值，看「不丢」和「不重」这两件事怎么同时成立。",
+      "params": [
+        {
+          "key": "msgsK",
+          "label": "消息速率（千条/秒）",
+          "min": 1,
+          "max": 100,
+          "step": 1,
+          "value": 20
+        },
+        {
+          "key": "failPct",
+          "label": "处理失败率",
+          "min": 1,
+          "max": 20,
+          "step": 1,
+          "value": 5
+        },
+        {
+          "key": "ackMode",
+          "label": "ack 时机",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "先 ack 再处理（自动提交）",
+            "先处理再 ack（手动提交）"
+          ]
+        },
+        {
+          "key": "dedup",
+          "label": "幂等去重",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "无（直接写库）",
+            "业务唯一键去重"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "msgs",
+          "label": "消息速率",
+          "expr": "msgsK * 1000",
+          "unit": "条/秒",
+          "fmt": "int"
+        },
+        {
+          "key": "failQps",
+          "label": "处理失败条数",
+          "expr": "msgsK * 1000 * failPct / 100",
+          "unit": "条/秒",
+          "fmt": "int"
+        },
+        {
+          "key": "lostQps",
+          "label": "丢失消息",
+          "expr": "if(ackMode == 0, msgsK * 1000 * failPct / 100, 0)",
+          "unit": "条/秒",
+          "fmt": "int"
+        },
+        {
+          "key": "dupQps",
+          "label": "重复消费",
+          "expr": "if(ackMode == 0, 0, if(dedup == 1, 0, msgsK * 1000 * failPct / 100))",
+          "unit": "条/秒",
+          "fmt": "int"
+        },
+        {
+          "key": "retryQps",
+          "label": "重试次数",
+          "expr": "if(ackMode == 0, 0, msgsK * 1000 * failPct / 100)",
+          "unit": "次/秒",
+          "fmt": "int"
+        },
+        {
+          "key": "effectivePct",
+          "label": "有效处理率",
+          "expr": "100 - if(ackMode == 0, failPct, if(dedup == 1, 0, failPct))",
+          "unit": "%",
+          "fmt": "int"
+        },
+        {
+          "key": "lostPct",
+          "label": "丢失比例",
+          "expr": "if(ackMode == 0, failPct, 0)",
+          "unit": "%",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "msgs >= 10000",
+          "label": "消息 ≥1 万条/秒（真实的订单/支付流水）"
+        },
+        {
+          "expr": "failPct >= 1",
+          "label": "处理失败率 ≥1%（真实链路必然有失败）"
+        },
+        {
+          "expr": "lostQps <= 0",
+          "label": "丢失消息 = 0（至少一次投递）"
+        },
+        {
+          "expr": "dupQps <= msgs * 0.001",
+          "label": "重复消费 ≤千分之一（幂等要生效）"
+        },
+        {
+          "expr": "effectivePct >= 99",
+          "label": "有效处理率 ≥99%"
+        }
+      ],
+      "insight": "消息可靠性有三条独立的账，必须分开记：**不丢**——位点什么时候提交？「收到就 ack」等于「还没处理就先记账」，处理失败时位点已前移，消息不会重投，**直接丢**。正解是**处理成功后再 ack**（手动提交/Kafka 的 `enable.auto.commit=false`），失败就不提交，重平衡或重投后还能再来一次——这就是「至少一次」。**不重**——至少一次的代价是**必然重复**：重复的条件是「处理成功但 ack 失败」，这个窗口永远存在（网络、进程崩溃、rebalance）。所以消费端**必须幂等**：业务唯一键 + 去重表、状态机（只允许 A→B 一次）、或数据库唯一约束 + `ON DUPLICATE KEY UPDATE`。**有序**——单分区内有序，但重试会打乱顺序（3 失败重投，4 已经处理完了）。要严格有序只能：① 失败就阻塞该分区（牺牲可用性）；② 用业务键做分区键，让同一实体落同一分区；③ 幂等 + 版本号丢弃旧消息。本例的账：2 万条/秒、5% 失败——自动 ack 丢 1000 条/秒（一天 8600 万条），手动 ack 不丢但重复 1000 条/秒，加去重表后两者都归零。一个常被忽略的坑：**去重表的 TTL**。消息可能延迟几小时才重投，去重键至少要保留「最大重投窗口」，否则过期后重复又进来了。"
+    },
     {
       "kind": "boss",
       "questions": [

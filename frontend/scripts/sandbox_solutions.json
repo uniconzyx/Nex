@@ -274,6 +274,26 @@
    }
   ]
  },
+ "bigdata/bd-ch01": {
+  "ok": true,
+  "params": [
+   {
+    "key": "filesM",
+    "type": "range",
+    "value": 13.0
+   },
+   {
+    "key": "avgMB",
+    "type": "range",
+    "value": 1.0
+   },
+   {
+    "key": "merge",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
  "bigdata/bd-ch02": {
   "ok": true,
   "params": [
@@ -299,6 +319,26 @@
    }
   ]
  },
+ "bigdata/bd-ch03": {
+  "ok": true,
+  "params": [
+   {
+    "key": "tableGB",
+    "type": "range",
+    "value": 1000.0
+   },
+   {
+    "key": "days",
+    "type": "range",
+    "value": 1.0
+   },
+   {
+    "key": "partition",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
  "bigdata/bd-ch04": {
   "ok": true,
   "params": [
@@ -319,6 +359,51 @@
    },
    {
     "key": "useReduceByKey",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "bigdata/bd-ch05": {
+  "ok": true,
+  "params": [
+   {
+    "key": "factGB",
+    "type": "range",
+    "value": 650.0
+   },
+   {
+    "key": "dimMB",
+    "type": "range",
+    "value": 16.0
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 1
+   },
+   {
+    "key": "cores",
+    "type": "range",
+    "value": 10.0
+   }
+  ]
+ },
+ "bigdata/bd-ch06": {
+  "ok": true,
+  "params": [
+   {
+    "key": "reports",
+    "type": "range",
+    "value": 33.0
+   },
+   {
+    "key": "odsGB",
+    "type": "range",
+    "value": 1000.0
+   },
+   {
+    "key": "layers",
     "type": "opt",
     "value": 1
    }
@@ -866,6 +951,96 @@
     "key": "materialize",
     "type": "opt",
     "value": 0
+   }
+  ]
+ },
+ "data/data-ch03": {
+  "ok": true,
+  "params": [
+   {
+    "key": "rowsM",
+    "type": "range",
+    "value": 1.0
+   },
+   {
+    "key": "dtype",
+    "type": "opt",
+    "value": 1
+   },
+   {
+    "key": "loop",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "data/data-ch04": {
+  "ok": true,
+  "params": [
+   {
+    "key": "leftM",
+    "type": "range",
+    "value": 100.0
+   },
+   {
+    "key": "fanout",
+    "type": "range",
+    "value": 2.0
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "data/data-ch05": {
+  "ok": true,
+  "params": [
+   {
+    "key": "pages",
+    "type": "range",
+    "value": 12900.0
+   },
+   {
+    "key": "conc",
+    "type": "range",
+    "value": 9.0
+   },
+   {
+    "key": "rttMs",
+    "type": "range",
+    "value": 250.0
+   },
+   {
+    "key": "limitQps",
+    "type": "range",
+    "value": 49.0
+   }
+  ]
+ },
+ "data/data-ch06": {
+  "ok": true,
+  "params": [
+   {
+    "key": "combos",
+    "type": "range",
+    "value": 516.0
+   },
+   {
+    "key": "folds",
+    "type": "range",
+    "value": 3.0
+   },
+   {
+    "key": "oneTrainS",
+    "type": "range",
+    "value": 33.0
+   },
+   {
+    "key": "parallel",
+    "type": "range",
+    "value": 5.0
    }
   ]
  },
@@ -1639,6 +1814,46 @@
    }
   ]
  },
+ "middleware/mw-ch01": {
+  "ok": true,
+  "params": [
+   {
+    "key": "keysW",
+    "type": "range",
+    "value": 10.0
+   },
+   {
+    "key": "fields",
+    "type": "range",
+    "value": 12.0
+   },
+   {
+    "key": "encoding",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "middleware/mw-ch02": {
+  "ok": true,
+  "params": [
+   {
+    "key": "writesK",
+    "type": "range",
+    "value": 21.0
+   },
+   {
+    "key": "memGB",
+    "type": "range",
+    "value": 1.0
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
  "middleware/mw-ch03": {
   "ok": true,
   "params": [
@@ -1669,6 +1884,31 @@
    }
   ]
  },
+ "middleware/mw-ch04": {
+  "ok": true,
+  "params": [
+   {
+    "key": "reqK",
+    "type": "range",
+    "value": 65.0
+   },
+   {
+    "key": "hitPct",
+    "type": "range",
+    "value": 50.0
+   },
+   {
+    "key": "notExistPct",
+    "type": "range",
+    "value": 20.0
+   },
+   {
+    "key": "guard",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
  "middleware/mw-ch05": {
   "ok": true,
   "params": [
@@ -1696,6 +1936,76 @@
     "key": "slaSec",
     "type": "range",
     "value": 270.0
+   }
+  ]
+ },
+ "middleware/mw-ch06": {
+  "ok": true,
+  "params": [
+   {
+    "key": "msgsK",
+    "type": "range",
+    "value": 51.0
+   },
+   {
+    "key": "batchKB",
+    "type": "range",
+    "value": 7.0
+   },
+   {
+    "key": "acks",
+    "type": "opt",
+    "value": 0
+   }
+  ]
+ },
+ "middleware/mw-ch07": {
+  "ok": true,
+  "params": [
+   {
+    "key": "msgsK",
+    "type": "range",
+    "value": 10.0
+   },
+   {
+    "key": "failPct",
+    "type": "range",
+    "value": 1.0
+   },
+   {
+    "key": "ackMode",
+    "type": "opt",
+    "value": 1
+   },
+   {
+    "key": "dedup",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "middleware/mw-ch08": {
+  "ok": true,
+  "params": [
+   {
+    "key": "produceK",
+    "type": "range",
+    "value": 65.0
+   },
+   {
+    "key": "perConsumerK",
+    "type": "range",
+    "value": 5.0
+   },
+   {
+    "key": "partitions",
+    "type": "range",
+    "value": 17.0
+   },
+   {
+    "key": "consumers",
+    "type": "range",
+    "value": 17.0
    }
   ]
  },
