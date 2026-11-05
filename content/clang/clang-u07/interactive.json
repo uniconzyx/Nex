@@ -2,7 +2,7 @@
   "chapter": "clang-u07",
   "subject": "clang",
   "title": "多文件编译与链接",
-  "fingerprint": "89011e0e1a",
+  "fingerprint": "2c24425a1f",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,115 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "修一个 CVE，要重发 N 个程序",
+      "brief": "静态链接把库代码复制进每个可执行文件：20 个程序各带一份 80MB 的库，磁盘和内存都是 1.7GB。更麻烦的是库爆了 CVE——静态链接意味着20 个程序全部重新编译、重新发布、重新部署；动态链接只要换一个 `.so`。把程序数量与库体积拖到真实值，看这两种链接方式在磁盘、内存、补丁成本上的账。",
+      "params": [
+        {
+          "key": "progs",
+          "label": "程序数量",
+          "min": 1,
+          "max": 60,
+          "step": 1,
+          "value": 20
+        },
+        {
+          "key": "libMB",
+          "label": "库体积",
+          "min": 5,
+          "max": 300,
+          "step": 5,
+          "value": 80
+        },
+        {
+          "key": "mode",
+          "label": "链接方式",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "静态链接",
+            "动态链接（共享库）"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "appMB",
+          "label": "单程序自身代码",
+          "expr": "5",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "diskMB",
+          "label": "部署磁盘总量",
+          "expr": "if(mode == 0, progs * (5 + libMB), libMB + progs * 5)",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "ramMB",
+          "label": "同时运行内存占用",
+          "expr": "if(mode == 0, progs * (5 + libMB), libMB + progs * 5)",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "perProgMB",
+          "label": "单个程序体积",
+          "expr": "if(mode == 0, 5 + libMB, 5)",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "rebuildCount",
+          "label": "修库 CVE 要重发的程序数",
+          "expr": "if(mode == 0, progs, 1)",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "patchMin",
+          "label": "补丁发布耗时",
+          "expr": "if(mode == 0, progs * 2, 2)",
+          "unit": "分钟",
+          "fmt": "int"
+        },
+        {
+          "key": "deployS",
+          "label": "全量部署传输耗时",
+          "expr": "if(mode == 0, progs * (5 + libMB), libMB + progs * 5) / 50",
+          "unit": "秒",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "progs >= 10",
+          "label": "程序数 ≥10 个（同一套库被多个程序复用）"
+        },
+        {
+          "expr": "libMB >= 50",
+          "label": "库体积 ≥50MB（重依赖：SSL/图像/数据库客户端）"
+        },
+        {
+          "expr": "diskMB <= 300",
+          "label": "部署磁盘 ≤300MB"
+        },
+        {
+          "expr": "rebuildCount <= 1",
+          "label": "修库 CVE 只需重发 ≤1 个产物"
+        },
+        {
+          "expr": "patchMin <= 10",
+          "label": "补丁发布 ≤10 分钟"
+        }
+      ],
+      "insight": "静态链接与动态链接的取舍是**「部署简单」对「运维成本」**：静态链接的产物是自包含的（不依赖目标机装了什么库，Docker 里特别省心，`scratch` 基础镜像就能跑），代价是**每个程序一份副本**——20 个程序 × 80MB 库 = 1.7GB 磁盘、1.7GB 内存（不同可执行文件的代码页不能互相共享，只有同一文件的多进程才共享）。更要命的是**补丁半径**：库爆 CVE 时，静态链接要重编重发 N 个程序（本例 20 个 × 2 分钟 = 40 分钟），动态链接只需替换一个 `.so`。动态链接的代价则转移到**运行时**：① `SONAME` 版本兼容——库升级了大版本，老程序可能直接 `symbol not found`；② `LD_LIBRARY_PATH` / `ldconfig` / rpath 配错就是「在我机器上能跑」；③ 启动时要走动态加载器解析符号（几十毫秒，对 CLI 工具是可见延迟）。所以真实工程的做法是分场景：**面向最终用户的桌面/CLI 工具倾向静态**（免装依赖、单文件分发）；**服务器端同一套服务多实例倾向动态**（共享页、补丁快、镜像层可复用）；**容器时代的新答案是「静态链接 + 多阶段构建」**——用静态换「镜像小、启动快」，补丁靠重建镜像统一走 CI，把「重发 N 次」自动化掉。"
+    },
     {
       "kind": "sequence",
       "heading": "2. 未定义符号的诊断流程",

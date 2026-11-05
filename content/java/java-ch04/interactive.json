@@ -2,7 +2,7 @@
   "chapter": "java-ch04",
   "subject": "java",
   "title": "集合框架：List、Set、Map、Queue 与泛型集合",
-  "fingerprint": "aee1bc9aed",
+  "fingerprint": "5a4b47576b",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,110 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "HashMap 不预设容量，扩容十八次",
+      "brief": "`new HashMap<>()` 默认 16 个桶、负载因子 0.75。往里塞 200 万条，它会从 16 一路翻倍扩到 419 万桶——**扩容 18 次，累计 rehash 800 万个节点**，最后一次扩容要搬 209 万个节点（约 84 毫秒的停顿）。`new HashMap<>(expected)` 一次算到位就没有这些。把条数与是否预设容量拖到真实值，看这笔「一行构造参数」的账。",
+      "params": [
+        {
+          "key": "entriesW",
+          "label": "键值对数量（万）",
+          "min": 10,
+          "max": 1000,
+          "step": 10,
+          "value": 200
+        },
+        {
+          "key": "preset",
+          "label": "构造方式",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "new HashMap<>() 默认 16",
+            "new HashMap<>(expected) 预设"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "entries",
+          "label": "键值对数量",
+          "expr": "entriesW * 10000",
+          "unit": "条",
+          "fmt": "int"
+        },
+        {
+          "key": "finalCap",
+          "label": "最终桶数组容量",
+          "expr": "pow(2, ceil(log2(entriesW * 10000 / 0.75)))",
+          "unit": "桶",
+          "fmt": "int"
+        },
+        {
+          "key": "resizes",
+          "label": "扩容次数",
+          "expr": "if(preset == 1, 0, round(log2(finalCap / 16)))",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "rehashOps",
+          "label": "累计 rehash 节点数",
+          "expr": "if(preset == 1, 0, finalCap * 2)",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "arrMB",
+          "label": "桶数组占用",
+          "expr": "finalCap * 4 / 1048576",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "nodeMB",
+          "label": "Node 对象占用",
+          "expr": "entriesW * 10000 * 32 / 1048576",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "totalMs",
+          "label": "总插入耗时",
+          "expr": "entriesW * 10000 * (50 + if(preset == 1, 0, 60)) / 1000000",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "pauseMs",
+          "label": "单次扩容最长停顿",
+          "expr": "if(preset == 1, 0, finalCap / 2 * 40 / 1000000)",
+          "unit": "ms",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "entries >= 1000000",
+          "label": "键值对 ≥100 万（真实的缓存/索引规模）"
+        },
+        {
+          "expr": "resizes <= 0",
+          "label": "扩容 0 次（一次算准容量）"
+        },
+        {
+          "expr": "totalMs <= 200",
+          "label": "总插入耗时 ≤200ms"
+        },
+        {
+          "expr": "pauseMs <= 5",
+          "label": "单次最长停顿 ≤5ms（别让扩容卡住请求）"
+        }
+      ],
+      "insight": "HashMap 的扩容逻辑是**翻倍 + 全量 rehash**：容量从 16 开始，负载因子 0.75，元素数超过 `capacity * 0.75` 就新建一个 2 倍大的桶数组，把每个节点按 `(n-1) & hash` 重新落位。200 万条要扩到 `2^22 = 419 万`桶，路径是 16→32→…→4194304，**18 次**；累计搬迁节点数约 `2 × 最终容量`（几何级数求和）≈ 800 万个。每次搬迁都要重新算索引、改链表/红黑树指针——**而且是在插入路径上同步做的**，所以是一次可见的停顿（本例最后一次约 84ms）。正解一行：`new HashMap<>((int) (expected / 0.75f) + 1)`（Guava 的 `Maps.newHashMapWithExpectedSize(n)` 帮你算好了）。注意几个细节：① **容量一定是 2 的幂**（`tableSizeFor` 会向上取整），因为有 `(n-1) & hash` 的位运算优化；② **树化阈值 8 / 退化 6**：单桶超过 8 个节点转红黑树（防哈希碰撞攻击），低于 6 退回链表，中间的 7 是缓冲带防抖动；③ **负载因子 0.75 是空间与查找长度的折中**（0.75 时桶内平均 0.75 个节点，泊松分布下长度 8 的概率约 6e-8，刚好是树化阈值）；④ 并发场景用 `ConcurrentHashMap`，它扩容是**多线程协同搬迁**（helpTransfer），单次停顿比 HashMap 小得多——这也是为什么高并发下不要用 `Collections.synchronizedMap`。"
+    },
     {
       "kind": "match",
       "pairs": [

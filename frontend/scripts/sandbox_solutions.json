@@ -324,6 +324,146 @@
    }
   ]
  },
+ "clang/clang-u01": {
+  "ok": true,
+  "params": [
+   {
+    "key": "total",
+    "type": "range",
+    "value": 500.0
+   },
+   {
+    "key": "pass",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "clang/clang-u02": {
+  "ok": true,
+  "params": [
+   {
+    "key": "recordsK",
+    "type": "range",
+    "value": 100.0
+   },
+   {
+    "key": "size",
+    "type": "range",
+    "value": 8.0
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "clang/clang-u03": {
+  "ok": true,
+  "params": [
+   {
+    "key": "recordsW",
+    "type": "range",
+    "value": 100.0
+   },
+   {
+    "key": "order",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "clang/clang-u04": {
+  "ok": true,
+  "params": [
+   {
+    "key": "fileMB",
+    "type": "range",
+    "value": 128.0
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "clang/clang-u05": {
+  "ok": true,
+  "params": [
+   {
+    "key": "tus",
+    "type": "range",
+    "value": 110.0
+   },
+   {
+    "key": "headerK",
+    "type": "range",
+    "value": 21.0
+   },
+   {
+    "key": "dup",
+    "type": "range",
+    "value": 1.0
+   },
+   {
+    "key": "guard",
+    "type": "opt",
+    "value": 0
+   },
+   {
+    "key": "pch",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "clang/clang-u06": {
+  "ok": true,
+  "params": [
+   {
+    "key": "files",
+    "type": "range",
+    "value": 500.0
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 1
+   },
+   {
+    "key": "decouple",
+    "type": "opt",
+    "value": 1
+   },
+   {
+    "key": "jobs",
+    "type": "range",
+    "value": 2.0
+   }
+  ]
+ },
+ "clang/clang-u07": {
+  "ok": true,
+  "params": [
+   {
+    "key": "progs",
+    "type": "range",
+    "value": 10.0
+   },
+   {
+    "key": "libMB",
+    "type": "range",
+    "value": 50.0
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
  "cpp/cpp-ch01": {
   "ok": true,
   "params": [
@@ -1314,6 +1454,106 @@
    }
   ]
  },
+ "java/java-ch01": {
+  "ok": true,
+  "params": [
+   {
+    "key": "itemsW",
+    "type": "range",
+    "value": 100.0
+   },
+   {
+    "key": "type",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "java/java-ch02": {
+  "ok": true,
+  "params": [
+   {
+    "key": "countW",
+    "type": "range",
+    "value": 500.0
+   },
+   {
+    "key": "kind",
+    "type": "opt",
+    "value": 0
+   }
+  ]
+ },
+ "java/java-ch03": {
+  "ok": true,
+  "params": [
+   {
+    "key": "impls",
+    "type": "range",
+    "value": 6.0
+   },
+   {
+    "key": "callsM",
+    "type": "range",
+    "value": 50.0
+   },
+   {
+    "key": "split",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "java/java-ch04": {
+  "ok": true,
+  "params": [
+   {
+    "key": "entriesW",
+    "type": "range",
+    "value": 100.0
+   },
+   {
+    "key": "preset",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "java/java-ch05": {
+  "ok": true,
+  "params": [
+   {
+    "key": "excK",
+    "type": "range",
+    "value": 101.0
+   },
+   {
+    "key": "depth",
+    "type": "range",
+    "value": 5.0
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "java/java-ch06": {
+  "ok": true,
+  "params": [
+   {
+    "key": "fileMB",
+    "type": "range",
+    "value": 256.0
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
  "java/java-ch07": {
   "ok": true,
   "params": [
@@ -1376,6 +1616,26 @@
     "key": "allocGB",
     "type": "range",
     "value": 300.0
+   }
+  ]
+ },
+ "java/java-ch09": {
+  "ok": true,
+  "params": [
+   {
+    "key": "modules",
+    "type": "range",
+    "value": 10.0
+   },
+   {
+    "key": "mirror",
+    "type": "opt",
+    "value": 0
+   },
+   {
+    "key": "cache",
+    "type": "opt",
+    "value": 1
    }
   ]
  },

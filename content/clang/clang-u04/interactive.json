@@ -2,7 +2,7 @@
   "chapter": "clang-u04",
   "subject": "clang",
   "title": "文件 IO 与二进制",
-  "fingerprint": "574363b0e8",
+  "fingerprint": "1091a1c2d8",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,111 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "逐字节写文件 = 两亿七千万次系统调用",
+      "brief": "`while (c = *p++) fputc(c, fp);` 看着很自然。如果没有缓冲，每个字节都要掉进内核一次 `write`，一次约 1 微秒——256MB 就是 2.7 亿次、268 秒。加了 4KB 缓冲后系统调用降到 6.5 万次，但 `fputc` 的每字节函数调用还在（用户态 1.3 秒）。把文件大小与缓冲方式拖到真实体量，看时间花在内核还是用户态。",
+      "params": [
+        {
+          "key": "fileMB",
+          "label": "文件大小",
+          "min": 1,
+          "max": 1024,
+          "step": 1,
+          "value": 256
+        },
+        {
+          "key": "mode",
+          "label": "写入方式",
+          "min": 0,
+          "max": 2,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "无缓冲逐字节",
+            "4KB 缓冲逐字节",
+            "64KB 缓冲逐字节"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "bytes",
+          "label": "总字节数",
+          "expr": "fileMB * 1048576",
+          "unit": "字节",
+          "fmt": "int"
+        },
+        {
+          "key": "userMs",
+          "label": "用户态 fputc 开销",
+          "expr": "fileMB * 1048576 * 5 / 1000000",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "bufKB",
+          "label": "缓冲块大小",
+          "expr": "if(mode == 0, 0, if(mode == 1, 4, 64))",
+          "unit": "KB",
+          "fmt": "int"
+        },
+        {
+          "key": "syscalls",
+          "label": "write 系统调用次数",
+          "expr": "if(mode == 0, fileMB * 1048576, fileMB * 1024 / if(mode == 1, 4, 64))",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "sysMs",
+          "label": "内核态开销",
+          "expr": "if(mode == 0, fileMB * 1048576 / 1000, fileMB * 1024 / if(mode == 1, 4, 64) / 1000)",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "totalMs",
+          "label": "总写入耗时",
+          "expr": "fileMB * 1048576 * 5 / 1000000 + if(mode == 0, fileMB * 1048576 / 1000, fileMB * 1024 / if(mode == 1, 4, 64) / 1000)",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "mbps",
+          "label": "有效吞吐",
+          "expr": "fileMB * 1000 / (fileMB * 1048576 * 5 / 1000000 + if(mode == 0, fileMB * 1048576 / 1000, fileMB * 1024 / if(mode == 1, 4, 64) / 1000))",
+          "unit": "MB/s",
+          "fmt": "fix2"
+        },
+        {
+          "key": "userPct",
+          "label": "用户态占比",
+          "expr": "userMs * 100 / totalMs",
+          "unit": "%",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "fileMB >= 128",
+          "label": "文件 ≥128MB（日志/导出/镜像这类真实体量）"
+        },
+        {
+          "expr": "syscalls <= 100000",
+          "label": "write 调用 ≤10 万次（别让 syscall 成为瓶颈）"
+        },
+        {
+          "expr": "totalMs <= 5000",
+          "label": "总耗时 ≤5 秒"
+        },
+        {
+          "expr": "mbps >= 40",
+          "label": "吞吐 ≥40MB/s"
+        }
+      ],
+      "insight": "写文件的时间由两段相加：**用户态每字节的函数调用** + **内核态每次 write 的切换成本**。`fputc` 本身约 5ns（一次函数调用 + 缓冲区判满），`write` 系统调用约 1μs（用户态/内核态切换 + VFS + 页缓存拷贝）。256MB：无缓冲 = 2.7 亿次 syscall ≈ 268 秒；4KB 缓冲 = 6.5 万次 ≈ 65 毫秒，**差了四千倍**。而且缓冲后剩下的 1.3 秒全是 `fputc` 的每字节调用——这才是该上 `fwrite(buf, 1, n, fp)` 的时候：一次调用搬一整块，用户态开销直接消失。四层优化，按收益排序：① **别关缓冲**（`setvbuf(fp, NULL, _IONBF, 0)` 是最常见的自伤）；② **整块 `fwrite`** 而不是逐字节 `fputc`；③ 大文件用 `writev`/`mmap` 或 `O_DIRECT`（绕过页缓存，适合顺序大 IO）；④ `fsync` 只在**需要持久性保证**时调，每写一次就 fsync 会把机械盘打到 100 IOPS 以下。还有一条容易忽略的：**缓冲不是万能的**，程序崩溃时缓冲区里的数据会丢；日志系统要在「每条日志 fsync」和「吞吐」之间明确取舍（通常选后者 + 定期 fsync）。"
+    },
     {
       "kind": "match",
       "pairs": [

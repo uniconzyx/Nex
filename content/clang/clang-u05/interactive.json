@@ -2,7 +2,7 @@
   "chapter": "clang-u05",
   "subject": "clang",
   "title": "预处理与宏",
-  "fingerprint": "cf44b6f54d",
+  "fingerprint": "263d524b09",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,124 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "头文件守卫治不了编译时间",
+      "brief": "`#ifndef HEADER_H` 只挡住「同一个 .c 里重复包含」，挡不住「两百个 .c 各自包含一遍」。每个翻译单元都要把这个三万行的头重新读进来、重新解析、重新建符号表。把翻译单元数与头文件规模拖到真实体量，看守卫、去重、预编译头各自能省下多少——你会发现前两者对总时间几乎无效。",
+      "params": [
+        {
+          "key": "tus",
+          "label": "翻译单元数（.c）",
+          "min": 10,
+          "max": 600,
+          "step": 10,
+          "value": 200
+        },
+        {
+          "key": "headerK",
+          "label": "头文件规模（千行）",
+          "min": 1,
+          "max": 60,
+          "step": 1,
+          "value": 30
+        },
+        {
+          "key": "dup",
+          "label": "每 TU 间接包含次数",
+          "min": 1,
+          "max": 5,
+          "step": 1,
+          "value": 3
+        },
+        {
+          "key": "guard",
+          "label": "头文件守卫",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "无守卫",
+            "#ifndef 守卫"
+          ]
+        },
+        {
+          "key": "pch",
+          "label": "预编译头",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "不用 PCH",
+            "预编译头 PCH"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "parses",
+          "label": "头文件被解析次数",
+          "expr": "if(pch == 1, 1, tus * if(guard == 1, 1, dup))",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "parseLines",
+          "label": "总解析行数",
+          "expr": "if(pch == 1, headerK * 1000, tus * headerK * 1000 * if(guard == 1, 1, dup))",
+          "unit": "行",
+          "fmt": "int"
+        },
+        {
+          "key": "parseMs",
+          "label": "头文件解析耗时",
+          "expr": "if(pch == 1, headerK * 1000 / 1000, tus * headerK * if(guard == 1, 1, dup))",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "pchLoadMs",
+          "label": "PCH 加载耗时",
+          "expr": "if(pch == 1, tus * 5, 0)",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "totalMs",
+          "label": "总耗时",
+          "expr": "if(pch == 1, headerK * 1000 / 1000 + tus * 5, tus * headerK * if(guard == 1, 1, dup))",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "pchMB",
+          "label": "PCH 文件体积",
+          "expr": "if(pch == 1, headerK * 1000 / 20 / 1024, 0)",
+          "unit": "MB",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "tus >= 100",
+          "label": "翻译单元 ≥100 个（真实的多文件工程）"
+        },
+        {
+          "expr": "headerK >= 20",
+          "label": "头文件 ≥2 万行（重模板/大接口头）"
+        },
+        {
+          "expr": "parseLines <= 2000000",
+          "label": "总解析行数 ≤200 万行"
+        },
+        {
+          "expr": "totalMs <= 3000",
+          "label": "总耗时 ≤3 秒"
+        }
+      ],
+      "insight": "**头文件守卫（include guard）解决的是「同一 TU 内重复包含」，不是「多 TU 重复解析」**。`#pragma once` 同理。200 个 `.c` 各自 `#include \"big.h\"`，`big.h` 就要被独立解析 200 次——守卫在每次编译新 TU 时都是「新的一局」，宏状态是空的。三种手段的收益量级：① **守卫**：只去掉同一 TU 内的重复（本例 dup=3 → 3 倍降到 1 倍），对「多 TU 各一遍」的 N 倍完全无效；② **预编译头 PCH**（`g++ -x c++-header big.h` 或 CMake 的 `target_precompile_headers`）：解析一次、序列化成二进制，之后每个 TU 直接 mmap 加载（约 5ms），把 N×T 变成 T + N×load——**这才是数量级的改善**；③ **C++20 模块（modules）**：`import big;` 从根本上不再有「文本包含」，编译器只构建一次 BMI，且不像 PCH 那样受宏状态影响，是长期正解。另外两条工程纪律：**头文件里少 include**（能前置声明就别 include 定义）、**用 `-H` 或 `clang -ftime-trace` 看是谁在拖时间**——真实项目里往往不是你的头，而是 `<iostream>`/`<regex>` 这类重型标准库头。"
+    },
     {
       "kind": "match",
       "pairs": [

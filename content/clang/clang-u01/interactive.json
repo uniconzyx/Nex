@@ -2,7 +2,7 @@
   "chapter": "clang-u01",
   "subject": "clang",
   "title": "指针与地址运算",
-  "fingerprint": "17379a5043",
+  "fingerprint": "c02096c41d",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,93 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "函数里的 sizeof 永远是 8",
+      "brief": "`void walk(int arr[])` 里的 `arr` 已经不是数组，是指针。于是 `sizeof(arr) / sizeof(arr[0])` 算出 `8 / 4 = 2`——无论你传进来一千个还是一万个元素，函数都只认两个。把数组规模与传参方式拖到真实体量，看这个「标准写法」漏掉多少数据、或者按真实长度去循环会越界读多少字节。",
+      "params": [
+        {
+          "key": "total",
+          "label": "数组元素数",
+          "min": 10,
+          "max": 5000,
+          "step": 10,
+          "value": 1000
+        },
+        {
+          "key": "pass",
+          "label": "函数接收方式",
+          "min": 0,
+          "max": 2,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "只传 int arr[]",
+            "传 arr + len",
+            "传带 len 的结构体"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "sizeofInFunc",
+          "label": "函数内 sizeof(arr)",
+          "expr": "8",
+          "unit": "字节",
+          "fmt": "int"
+        },
+        {
+          "key": "believed",
+          "label": "sizeof 推算的元素数",
+          "expr": "if(pass == 0, 2, total)",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "handled",
+          "label": "实际处理元素数",
+          "expr": "if(pass == 0, 2, total)",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "missed",
+          "label": "漏掉的元素数",
+          "expr": "if(pass == 0, total - 2, 0)",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "oobBytes",
+          "label": "越界读字节",
+          "expr": "if(pass == 0, (total - 2) * 4, 0)",
+          "unit": "字节",
+          "fmt": "int"
+        },
+        {
+          "key": "missPct",
+          "label": "漏掉的数据占比",
+          "expr": "if(pass == 0, (total - 2) * 100 / total, 0)",
+          "unit": "%",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "total >= 500",
+          "label": "数组 ≥500 个元素（真实的数据数组）"
+        },
+        {
+          "expr": "oobBytes <= 0",
+          "label": "越界读 0 字节（UB 一次都不能有）"
+        },
+        {
+          "expr": "missed <= 0",
+          "label": "漏掉 0 个元素（每个元素都要处理到）"
+        }
+      ],
+      "insight": "`sizeof(arr)` 在函数里恒等于 8，因为形参 `int arr[]` 被编译器改写成 `int *arr`——**数组名在参数位置一定会退化成指针**，这是 C 语言规定的，没有例外。所以 `sizeof(arr)/sizeof(arr[0])` 只在**同一作用域内的真数组**上成立，一旦跨过函数边界就变成 `8/4 = 2`，是个能编译、能跑、结果错一半的静默 bug。三种正解：① **显式传长度**（`walk(arr, n)`）——最常见，缺点是要调用方保证 `n` 正确；② **结构体打包**（`struct arr { int *p; size_t n; }`）——长度和指针绑在一起，传不错；③ **C23 的 `int arr[static n]`**（或 GCC 的 `arr[static n]`）——把长度写进形参类型，编译器还能据此做优化提示。C++ 里对应的是 `std::span` 或 `template <size_t N> void walk(int (&arr)[N])`。顺带一个残酷事实：`-Wall -Wextra` 对这条**不报警**（数组下标是真的，只是商家算错了长度），`-Wsizeof-array-argument` 也得你主动开。"
+    },
     {
       "kind": "match",
       "pairs": [

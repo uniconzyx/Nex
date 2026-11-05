@@ -2,7 +2,7 @@
   "chapter": "java-ch01",
   "subject": "java",
   "title": "环境与基础语法",
-  "fingerprint": "e174db3e6a",
+  "fingerprint": "a7be75a585",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,100 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "一千万笔账，double 差出五百块",
+      "brief": "金额用 `double` 存「元」，每笔乘完税率再累加——单笔误差小到看不见，但一千万笔之后对账就差出几百块。原因在二进制浮点：`0.1` 在 double 里不是精确的 0.1，每笔的舍入误差按半分累积。把笔数与金额类型拖到真实体量，看三种表示法在「精度」和「耗时」上怎么取舍。",
+      "params": [
+        {
+          "key": "itemsW",
+          "label": "交易笔数（万）",
+          "min": 10,
+          "max": 2000,
+          "step": 10,
+          "value": 1000
+        },
+        {
+          "key": "type",
+          "label": "金额表示",
+          "min": 0,
+          "max": 2,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "double 存元",
+            "long 存分",
+            "BigDecimal"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "items",
+          "label": "交易笔数",
+          "expr": "itemsW * 10000",
+          "unit": "笔",
+          "fmt": "int"
+        },
+        {
+          "key": "errPerItem",
+          "label": "单笔误差",
+          "expr": "if(type == 0, 0.005, 0)",
+          "unit": "分",
+          "fmt": "fix2"
+        },
+        {
+          "key": "errFen",
+          "label": "累计误差",
+          "expr": "itemsW * 10000 * if(type == 0, 0.005, 0)",
+          "unit": "分",
+          "fmt": "int"
+        },
+        {
+          "key": "errYuan",
+          "label": "累计误差（元）",
+          "expr": "errFen / 100",
+          "unit": "元",
+          "fmt": "fix2"
+        },
+        {
+          "key": "costNs",
+          "label": "单笔运算成本",
+          "expr": "if(type == 0, 2, if(type == 1, 1, 120))",
+          "unit": "ns",
+          "fmt": "int"
+        },
+        {
+          "key": "totalMs",
+          "label": "总耗时",
+          "expr": "itemsW * 10000 * if(type == 0, 2, if(type == 1, 1, 120)) / 1000000",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "msPerW",
+          "label": "每万笔耗时",
+          "expr": "10000 * if(type == 0, 2, if(type == 1, 1, 120)) / 1000000",
+          "unit": "ms",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "items >= 1000000",
+          "label": "交易 ≥100 万笔（日终对账的真实量级）"
+        },
+        {
+          "expr": "errFen <= 1",
+          "label": "累计误差 ≤1 分（对账必须平）"
+        },
+        {
+          "expr": "totalMs <= 3000",
+          "label": "总耗时 ≤3 秒"
+        }
+      ],
+      "insight": "`double` 是二进制浮点，**能精确表示的只有分母是 2 的幂的分数**；`0.1`、`0.01`、`0.13` 这些十进制小数在 double 里都是无限循环小数的截断。单笔误差在 1e-17 量级，肉眼不可见，但**每笔都要 `Math.round(x*100)/100` 保留到分**，这个舍入动作会把「截断误差」变成「半分级的偏差」，一千万笔累积就是几百元。这不是理论洁癖，是真实的日终对账差异来源（也是财务系统审计必查项）。三种正解，按推荐顺序：① **`long` 存「分」**（或「厘」）——纯整数运算，零误差、最快（1ns），范围 ±9.2e16 分 = ±9.2e14 元，一个国家的 GDP 都够存；② **`BigDecimal`**——任意精度 + 显式 `RoundingMode`，适合「利率/汇率/分摊」这类必须记录舍入规则的场景，代价是每次运算约 120ns（慢两个数量级）且**必须用 `String` 构造**（`new BigDecimal(0.1)` 会把 double 的误差原样带进来）；③ 展示层再格式化（`DecimalFormat`），**存储与计算永远用整数或 BigDecimal**。一句话记住：**钱不能是浮点数**。同理适用于任何「必须精确的小数」——税率、汇率、积分、库存数量（用最小单位整数）。"
+    },
     {
       "kind": "boss",
       "questions": [

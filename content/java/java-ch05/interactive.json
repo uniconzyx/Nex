@@ -2,7 +2,7 @@
   "chapter": "java-ch05",
   "subject": "java",
   "title": "异常体系与泛型进阶",
-  "fingerprint": "34fca93362",
+  "fingerprint": "ba4474cce3",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,104 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "用异常做控制流，一个核没了",
+      "brief": "「查不到就抛 NotFoundException」看着很干净——但每次 `new` 一个异常，JVM 都要 `fillInStackTrace()`：遍历整个调用栈，为每一帧创建一个 `StackTraceElement`（类名/方法名/文件/行号）。40 层栈约 5 微秒，每秒 20 万次就是一个核满载，还顺带每秒 250MB 垃圾。把异常频率、栈深与处理方式拖到真实值，看这笔账。",
+      "params": [
+        {
+          "key": "excK",
+          "label": "每秒异常次数（千）",
+          "min": 1,
+          "max": 500,
+          "step": 1,
+          "value": 200
+        },
+        {
+          "key": "depth",
+          "label": "调用栈深度",
+          "min": 5,
+          "max": 200,
+          "step": 5,
+          "value": 40
+        },
+        {
+          "key": "mode",
+          "label": "未命中处理方式",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "抛异常",
+            "返回 Optional/状态码"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "nsPer",
+          "label": "单次成本",
+          "expr": "if(mode == 0, 300 + depth * 120, 3)",
+          "unit": "ns",
+          "fmt": "int"
+        },
+        {
+          "key": "cpuMsPerSec",
+          "label": "每秒消耗 CPU",
+          "expr": "excK * 1000 * if(mode == 0, 300 + depth * 120, 3) / 1000000",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "cpuPct",
+          "label": "占单核比例",
+          "expr": "excK * 1000 * if(mode == 0, 300 + depth * 120, 3) / 1000000 / 10",
+          "unit": "%",
+          "fmt": "int"
+        },
+        {
+          "key": "gcMBPerSec",
+          "label": "每秒产生垃圾",
+          "expr": "if(mode == 0, excK * 1000 * (40 + depth * 24 + 16 + 8 * depth) / 1048576, 0)",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "cores",
+          "label": "折算核数",
+          "expr": "cpuMsPerSec / 1000",
+          "unit": "核",
+          "fmt": "fix2"
+        },
+        {
+          "key": "ygcPerSec",
+          "label": "每秒 Young GC 次数",
+          "expr": "gcMBPerSec / 20",
+          "unit": "次",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "excK >= 100",
+          "label": "异常 ≥10 万次/秒（高频未命中：缓存穿透/限流/参数校验）"
+        },
+        {
+          "expr": "cpuPct <= 20",
+          "label": "CPU 占用 ≤单核 20%"
+        },
+        {
+          "expr": "gcMBPerSec <= 5",
+          "label": "垃圾 ≤5MB/s（别让 GC 陪跑）"
+        },
+        {
+          "expr": "ygcPerSec <= 1",
+          "label": "Young GC ≤1 次/秒"
+        }
+      ],
+      "insight": "异常的昂贵不在「抛出」，在 `fillInStackTrace()`：**它要遍历当前线程的整个调用栈**，为每一帧 `new` 一个 `StackTraceElement`（含 declaringClass / methodName / fileName / lineNumber），再填进 `Throwable` 的 `stackTrace` 数组。40 层栈约 5μs，栈越深越慢——**成本与调用栈深度成正比**，这是它最反直觉的地方。高频路径的三条正解：① **返回值 / 状态码 / `Optional`**（本例 5μs → 3ns，差三个数量级）；② 必须用异常表达「业务失败」时，**关掉栈快照**：重写 `fillInStackTrace()` 返回 `this`（或构造器传 `writableStackTrace=false`），把 5μs 压到 0.3μs，代价是日志里没有堆栈（要自己补上下文）；③ **静态单例异常**（不填栈、不 new），适合「无参数、纯信号」的场景。反过来，**异常该用的地方不要为了性能不用**：真正的错误（文件不存在、连接断了、参数非法）就该抛，因为它的发生频率低，语义清晰比省 5μs 重要。判据是**频率**：每秒几千次以上就要考虑换控制流，每秒几次就老老实实抛。JIT 还能帮一点忙：同一异常反复抛时，热点代码里的 `fillInStackTrace` 会被优化，但**对象分配和数组填充不会被消除**（逃逸到 catch 块之外的语义要求）——所以 GC 压力是实打实的。"
+    },
     {
       "kind": "match",
       "pairs": [

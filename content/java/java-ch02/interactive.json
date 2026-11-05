@@ -2,7 +2,7 @@
   "chapter": "java-ch02",
   "subject": "java",
   "title": "类与对象：封装、构造器、this",
-  "fingerprint": "1c7aa377a5",
+  "fingerprint": "73a9fbd2c3",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,104 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "Integer[] 比 int[] 贵五倍",
+      "brief": "`new int[1000万]` 是 40MB；`new Integer[1000万]` 是 190MB。多出来的不是数据，是**每个元素一个对象**：对象头 12 字节 + value 4 字节，对齐后 16，再加引用本身 4 字节。而且 GC 要逐个扫描这一千万个对象。把规模与元素类型拖到真实值，看「自动装箱」在内存和 GC 上的账单。",
+      "params": [
+        {
+          "key": "countW",
+          "label": "元素数（万）",
+          "min": 10,
+          "max": 5000,
+          "step": 10,
+          "value": 1000
+        },
+        {
+          "key": "kind",
+          "label": "容器类型",
+          "min": 0,
+          "max": 2,
+          "step": 1,
+          "value": 1,
+          "labels": [
+            "int[] 原始数组",
+            "Integer[] 包装数组",
+            "Point[] 小对象数组"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "count",
+          "label": "元素数",
+          "expr": "countW * 10000",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "perElem",
+          "label": "每个元素占用",
+          "expr": "if(kind == 0, 4, if(kind == 1, 20, 28))",
+          "unit": "字节",
+          "fmt": "int"
+        },
+        {
+          "key": "heapMB",
+          "label": "堆占用",
+          "expr": "countW * 10000 * if(kind == 0, 4, if(kind == 1, 20, 28)) / 1048576",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "objects",
+          "label": "堆上对象数",
+          "expr": "if(kind == 0, 1, countW * 10000)",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "gcScanMs",
+          "label": "单次 GC 扫描耗时",
+          "expr": "if(kind == 0, 4, countW * 10000 * 4) / 1000",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "blowup",
+          "label": "相对 int[] 膨胀",
+          "expr": "if(kind == 0, 1, if(kind == 1, 5, 7))",
+          "unit": "×",
+          "fmt": "int"
+        },
+        {
+          "key": "copyMB",
+          "label": "扩容一次复制",
+          "expr": "countW * 10000 * 4 / 1048576",
+          "unit": "MB",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "count >= 5000000",
+          "label": "元素 ≥500 万（真实的数据批处理规模）"
+        },
+        {
+          "expr": "heapMB <= 60",
+          "label": "堆占用 ≤60MB"
+        },
+        {
+          "expr": "objects <= 1000000",
+          "label": "堆上对象 ≤100 万个"
+        },
+        {
+          "expr": "gcScanMs <= 60",
+          "label": "单次 GC 扫描 ≤60ms"
+        }
+      ],
+      "insight": "64 位 JVM 开压缩指针（`-XX:+UseCompressedOops`，默认开，堆 <32GB）时，**对象头 = 12 字节**（8 字节 Mark Word + 4 字节 Klass Pointer），引用 = 4 字节，对象整体按 8 字节对齐。于是：`Integer` = 12 + 4 = 16 字节；`Point{int x; int y;}` = 12 + 8 = 20 → 对齐 24；`Long` = 12 + 8 = 20 → 对齐 24。**而 `int[]` 的每个元素就是 4 字节，没有对象**——所以 `Integer[]` 是「4 字节引用 + 16 字节对象」= 20 字节/元素，**5 倍**。三个真实后果：① **内存**：一千万个 int 从 40MB 变 190MB，直接把堆推进老年代；② **GC**：标记阶段要遍历一千万个对象（每个至少一次指针追逐），停顿时间从「扫一个数组」变成「扫一千万个对象」；③ **缓存**：`int[]` 连续 40MB 顺序扫描，`Integer[]` 是指针跳跃，CPU 缓存命中率掉一个数量级。实操：**热数据用原始数组**（`int[]`/`long[]`/`double[]`），集合只在需要 API 时用；必须用 `List<Integer>` 时优先 `ArrayList` 预分配容量；小整数（-128~127）会命中 `Integer` 缓存不新建对象——**但这个优化只对小值有效，一千万个订单号完全用不上**。Java 的 `List<int>` 至今不存在，所以高性能数值代码通常直接操作数组 + 下标，或用第三方原始类型集合库（fastutil/trove）。"
+    },
     {
       "kind": "sequence",
       "heading": "二、实现机制：重载、this() 链与初始化顺序",

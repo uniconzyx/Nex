@@ -8628,6 +8628,1482 @@
     ],
     "insight": "连接池大小的唯一正确算法是 Little 定律：**`所需连接 = QPS × 平均持有时间`**。1000 QPS × 5ms = 5 个连接就够；一旦事务里夹了 500ms 的 RPC，持有时间变成 505ms，所需连接直接涨到 505 个——放大 100 倍。这就是「事务里不要做远程调用」的数学依据，不是风格建议：① **RPC/HTTP 移出事务**（先查后算，最后开短事务写）；② **事务里不做文件上传、发消息、调第三方**（改成事务提交后发，用 `@TransactionalEventListener`）；③ 池大小按 `QPS × p99 持有时间 × 1.2` 配，别照抄「HikariCP 默认 10」；④ 长事务还会拖住 `undo log`/MVCC 快照，让别的查询变慢——这是连接之外的第二种伤害。反过来，池开太大也不是好事：连接数是数据库的并发上限，开 500 个只会把数据库压垮，正确做法是「按数据库能承受的并发倒推池大小」。"
    }
+  ],
+  "clang/clang-u01": [
+   {
+    "kind": "sandbox",
+    "title": "函数里的 sizeof 永远是 8",
+    "brief": "`void walk(int arr[])` 里的 `arr` 已经不是数组，是指针。于是 `sizeof(arr) / sizeof(arr[0])` 算出 `8 / 4 = 2`——无论你传进来一千个还是一万个元素，函数都只认两个。把数组规模与传参方式拖到真实体量，看这个「标准写法」漏掉多少数据、或者按真实长度去循环会越界读多少字节。",
+    "params": [
+     {
+      "key": "total",
+      "label": "数组元素数",
+      "min": 10,
+      "max": 5000,
+      "step": 10,
+      "value": 1000
+     },
+     {
+      "key": "pass",
+      "label": "函数接收方式",
+      "min": 0,
+      "max": 2,
+      "step": 1,
+      "value": 0,
+      "labels": [
+       "只传 int arr[]",
+       "传 arr + len",
+       "传带 len 的结构体"
+      ]
+     }
+    ],
+    "metrics": [
+     {
+      "key": "sizeofInFunc",
+      "label": "函数内 sizeof(arr)",
+      "expr": "8",
+      "unit": "字节",
+      "fmt": "int"
+     },
+     {
+      "key": "believed",
+      "label": "sizeof 推算的元素数",
+      "expr": "if(pass == 0, 2, total)",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "handled",
+      "label": "实际处理元素数",
+      "expr": "if(pass == 0, 2, total)",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "missed",
+      "label": "漏掉的元素数",
+      "expr": "if(pass == 0, total - 2, 0)",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "oobBytes",
+      "label": "越界读字节",
+      "expr": "if(pass == 0, (total - 2) * 4, 0)",
+      "unit": "字节",
+      "fmt": "int"
+     },
+     {
+      "key": "missPct",
+      "label": "漏掉的数据占比",
+      "expr": "if(pass == 0, (total - 2) * 100 / total, 0)",
+      "unit": "%",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "total >= 500",
+      "label": "数组 ≥500 个元素（真实的数据数组）"
+     },
+     {
+      "expr": "oobBytes <= 0",
+      "label": "越界读 0 字节（UB 一次都不能有）"
+     },
+     {
+      "expr": "missed <= 0",
+      "label": "漏掉 0 个元素（每个元素都要处理到）"
+     }
+    ],
+    "insight": "`sizeof(arr)` 在函数里恒等于 8，因为形参 `int arr[]` 被编译器改写成 `int *arr`——**数组名在参数位置一定会退化成指针**，这是 C 语言规定的，没有例外。所以 `sizeof(arr)/sizeof(arr[0])` 只在**同一作用域内的真数组**上成立，一旦跨过函数边界就变成 `8/4 = 2`，是个能编译、能跑、结果错一半的静默 bug。三种正解：① **显式传长度**（`walk(arr, n)`）——最常见，缺点是要调用方保证 `n` 正确；② **结构体打包**（`struct arr { int *p; size_t n; }`）——长度和指针绑在一起，传不错；③ **C23 的 `int arr[static n]`**（或 GCC 的 `arr[static n]`）——把长度写进形参类型，编译器还能据此做优化提示。C++ 里对应的是 `std::span` 或 `template <size_t N> void walk(int (&arr)[N])`。顺带一个残酷事实：`-Wall -Wextra` 对这条**不报警**（数组下标是真的，只是商家算错了长度），`-Wsizeof-array-argument` 也得你主动开。"
+   }
+  ],
+  "clang/clang-u02": [
+   {
+    "kind": "sandbox",
+    "title": "24 字节的结构体，堆上吃了 32 字节",
+    "brief": "`malloc(24)` 拿到的看着是 24 字节，实际从分配器手里切走的是 32 字节：每块有 8 字节 chunk 头，再按 16 字节向上取整，最小块 32。而且每调一次 `malloc`/`free` 都要走一趟分配器（约 50ns）。把记录数与结构体大小拖到真实体量，看「一个个分配」和「一次要一大块自己切」在堆占用和调用次数上差多少。",
+    "params": [
+     {
+      "key": "recordsK",
+      "label": "记录数（千）",
+      "min": 10,
+      "max": 2000,
+      "step": 10,
+      "value": 200
+     },
+     {
+      "key": "size",
+      "label": "单条记录大小",
+      "min": 8,
+      "max": 256,
+      "step": 8,
+      "value": 24
+     },
+     {
+      "key": "mode",
+      "label": "分配策略",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 0,
+      "labels": [
+       "每条一次 malloc",
+       "批量池化（arena）"
+      ]
+     }
+    ],
+    "metrics": [
+     {
+      "key": "records",
+      "label": "记录数",
+      "expr": "recordsK * 1000",
+      "unit": "条",
+      "fmt": "int"
+     },
+     {
+      "key": "chunk",
+      "label": "每块实际占用（malloc）",
+      "expr": "max(32, round(ceil((size + 8) / 16) * 16))",
+      "unit": "字节",
+      "fmt": "int"
+     },
+     {
+      "key": "arenaChunk",
+      "label": "每块实际占用（池化）",
+      "expr": "round(ceil(size / 8) * 8)",
+      "unit": "字节",
+      "fmt": "int"
+     },
+     {
+      "key": "perRecord",
+      "label": "当前每记录占用",
+      "expr": "if(mode == 0, max(32, round(ceil((size + 8) / 16) * 16)), round(ceil(size / 8) * 8))",
+      "unit": "字节",
+      "fmt": "int"
+     },
+     {
+      "key": "overheadPct",
+      "label": "内部碎片率",
+      "expr": "if(mode == 0, (max(32, round(ceil((size + 8) / 16) * 16)) - size) * 100 / size, (round(ceil(size / 8) * 8) - size) * 100 / size)",
+      "unit": "%",
+      "fmt": "int"
+     },
+     {
+      "key": "heapMB",
+      "label": "堆占用",
+      "expr": "records * if(mode == 0, max(32, round(ceil((size + 8) / 16) * 16)), round(ceil(size / 8) * 8)) / 1048576",
+      "unit": "MB",
+      "fmt": "int"
+     },
+     {
+      "key": "allocCalls",
+      "label": "malloc/free 调用次数",
+      "expr": "if(mode == 0, records, 2)",
+      "unit": "次",
+      "fmt": "int"
+     },
+     {
+      "key": "allocMs",
+      "label": "分配开销",
+      "expr": "if(mode == 0, records * 50 / 1000000, records * 2 / 1000000)",
+      "unit": "ms",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "records >= 100000",
+      "label": "记录数 ≥10 万（真实的数据集）"
+     },
+     {
+      "expr": "overheadPct <= 15",
+      "label": "内部碎片率 ≤15%（堆不能一半喂给对齐）"
+     },
+     {
+      "expr": "allocCalls <= 1000",
+      "label": "malloc/free ≤1000 次（别让分配器成为热点）"
+     },
+     {
+      "expr": "allocMs <= 10",
+      "label": "分配开销 ≤10ms"
+     }
+    ],
+    "insight": "`malloc(24)` 的真实代价要分两层看。**空间层**：glibc 的每个 chunk 前面有 8 字节 size 字段，整块按 16 字节对齐，且最小 chunk 是 32 字节（要能装下 free list 的两个指针）。所以 `malloc(24)` 实占 32（+33%），`malloc(8)` 也占 32（+300%）。**时间层**：每次 `malloc`/`free` 都要走空闲链表、可能触发 `brk`/`mmap`、要做合并——约 50ns/次，一百万次就是 50 毫秒纯开销，还没算上缓存局部性变差。**正解是减少分配次数而不是减少字节数**：① **arena / 池化**：一次 `malloc(n * sizeof(T))`，自己用下标切；② **对象池 / free list**：回收复用，稳态零分配；③ **小对象分配器**（jemalloc / tcmalloc）把 size class 分得更细，对 24 字节这类尺寸的内部碎片比 glibc 小；④ C++ 侧用 `std::pmr::monotonic_buffer_resource` 或 `vector` 预留容量。反向的坑：池化后**每个对象不能单独 `free`**，生命周期要统一管理；池子按峰值大小长期占住，可能换来 RSS 不降——这是空间换时间的明账。"
+   }
+  ],
+  "clang/clang-u03": [
+   {
+    "kind": "sandbox",
+    "title": "字段顺序换一下，内存省三分之一",
+    "brief": "`struct { char a; int b; char c; double d; }` 的成员加起来 14 字节，`sizeof` 却是 24——中间和末尾被补了 10 字节 padding。编译器不会替你重排字段（C 标准保证声明顺序即内存顺序）。把记录数与字段顺序拖到真实体量，看这一行「调换顺序」能省下多少内存、以及每个缓存行里有多少字节是白读的。",
+    "params": [
+     {
+      "key": "recordsW",
+      "label": "记录数（万）",
+      "min": 10,
+      "max": 800,
+      "step": 10,
+      "value": 200
+     },
+     {
+      "key": "order",
+      "label": "字段声明顺序",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 0,
+      "labels": [
+       "char,int,char,double",
+       "double,int,char,char"
+      ]
+     }
+    ],
+    "metrics": [
+     {
+      "key": "records",
+      "label": "记录数",
+      "expr": "recordsW * 10000",
+      "unit": "条",
+      "fmt": "int"
+     },
+     {
+      "key": "sizeBytes",
+      "label": "sizeof(struct)",
+      "expr": "if(order == 0, 24, 16)",
+      "unit": "字节",
+      "fmt": "int"
+     },
+     {
+      "key": "payloadBytes",
+      "label": "真实数据字节",
+      "expr": "14",
+      "unit": "字节",
+      "fmt": "int"
+     },
+     {
+      "key": "paddingBytes",
+      "label": "padding 字节",
+      "expr": "if(order == 0, 10, 2)",
+      "unit": "字节",
+      "fmt": "int"
+     },
+     {
+      "key": "totalMB",
+      "label": "数组总占用",
+      "expr": "recordsW * 10000 * sizeBytes / 1048576",
+      "unit": "MB",
+      "fmt": "int"
+     },
+     {
+      "key": "padMB",
+      "label": "其中 padding 浪费",
+      "expr": "recordsW * 10000 * if(order == 0, 10, 2) / 1048576",
+      "unit": "MB",
+      "fmt": "int"
+     },
+     {
+      "key": "usefulPct",
+      "label": "缓存有效字节率",
+      "expr": "if(order == 0, 58, 88)",
+      "unit": "%",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "records >= 1000000",
+      "label": "记录数 ≥100 万（真实的表/数组规模）"
+     },
+     {
+      "expr": "paddingBytes <= 2",
+      "label": "padding ≤2 字节（只允许末尾对齐补齐）"
+     },
+     {
+      "expr": "totalMB <= 40",
+      "label": "总占用 ≤40MB"
+     },
+     {
+      "expr": "usefulPct >= 80",
+      "label": "缓存有效字节率 ≥80%（真实数据要占满缓存行）"
+     }
+    ],
+    "insight": "结构体的 `sizeof` 由三件事决定：**成员顺序**（C 保证按声明顺序排）、**每个成员的对齐要求**（`char` 1、`short` 2、`int` 4、`double`/指针 8）、**结构体整体对齐 = 最大成员的对齐**（末尾也要补齐）。`{char, int, char, double}`：`char`@0，`int` 要 4 对齐所以 @4（补 3），`char`@8，`double` 要 8 对齐所以 @16（补 7），尾部已是 8 的倍数 → **24 字节，10 字节 padding**。按对齐降序重排 `{double, int, char, char}`：@0 / @8 / @12 / @13，尾部补齐到 16 → **16 字节，padding 只剩 2**。省 33%，纯靠调顺序，零成本。三条实操：① **按对齐从大到小声明**（`double/long long/指针` → `int/float` → `short` → `char/bool`），这是唯一一条不需要思考就永远成立的规则；② 百万级数组要考虑 **AoS → SoA**（结构体数组改成数组结构体），顺序扫描只读用到的列，缓存命中率能翻倍；③ 真要压字节再上 `__attribute__((packed))`——但**会破坏对齐**，非对齐访问在 x86 上只是慢，在 ARM 上可能直接 fault，而且取地址会 UB。别忘了 `sizeof` 会和文件格式/网络协议绑定：落盘或发网络前先定死布局，否则换个编译器版本 padding 变了，旧数据就读不出来了（正解是用序列化库或显式 padding 字段）。"
+   }
+  ],
+  "clang/clang-u04": [
+   {
+    "kind": "sandbox",
+    "title": "逐字节写文件 = 两亿七千万次系统调用",
+    "brief": "`while (c = *p++) fputc(c, fp);` 看着很自然。如果没有缓冲，每个字节都要掉进内核一次 `write`，一次约 1 微秒——256MB 就是 2.7 亿次、268 秒。加了 4KB 缓冲后系统调用降到 6.5 万次，但 `fputc` 的每字节函数调用还在（用户态 1.3 秒）。把文件大小与缓冲方式拖到真实体量，看时间花在内核还是用户态。",
+    "params": [
+     {
+      "key": "fileMB",
+      "label": "文件大小",
+      "min": 1,
+      "max": 1024,
+      "step": 1,
+      "value": 256
+     },
+     {
+      "key": "mode",
+      "label": "写入方式",
+      "min": 0,
+      "max": 2,
+      "step": 1,
+      "value": 0,
+      "labels": [
+       "无缓冲逐字节",
+       "4KB 缓冲逐字节",
+       "64KB 缓冲逐字节"
+      ]
+     }
+    ],
+    "metrics": [
+     {
+      "key": "bytes",
+      "label": "总字节数",
+      "expr": "fileMB * 1048576",
+      "unit": "字节",
+      "fmt": "int"
+     },
+     {
+      "key": "userMs",
+      "label": "用户态 fputc 开销",
+      "expr": "fileMB * 1048576 * 5 / 1000000",
+      "unit": "ms",
+      "fmt": "int"
+     },
+     {
+      "key": "bufKB",
+      "label": "缓冲块大小",
+      "expr": "if(mode == 0, 0, if(mode == 1, 4, 64))",
+      "unit": "KB",
+      "fmt": "int"
+     },
+     {
+      "key": "syscalls",
+      "label": "write 系统调用次数",
+      "expr": "if(mode == 0, fileMB * 1048576, fileMB * 1024 / if(mode == 1, 4, 64))",
+      "unit": "次",
+      "fmt": "int"
+     },
+     {
+      "key": "sysMs",
+      "label": "内核态开销",
+      "expr": "if(mode == 0, fileMB * 1048576 / 1000, fileMB * 1024 / if(mode == 1, 4, 64) / 1000)",
+      "unit": "ms",
+      "fmt": "int"
+     },
+     {
+      "key": "totalMs",
+      "label": "总写入耗时",
+      "expr": "fileMB * 1048576 * 5 / 1000000 + if(mode == 0, fileMB * 1048576 / 1000, fileMB * 1024 / if(mode == 1, 4, 64) / 1000)",
+      "unit": "ms",
+      "fmt": "int"
+     },
+     {
+      "key": "mbps",
+      "label": "有效吞吐",
+      "expr": "fileMB * 1000 / (fileMB * 1048576 * 5 / 1000000 + if(mode == 0, fileMB * 1048576 / 1000, fileMB * 1024 / if(mode == 1, 4, 64) / 1000))",
+      "unit": "MB/s",
+      "fmt": "fix2"
+     },
+     {
+      "key": "userPct",
+      "label": "用户态占比",
+      "expr": "userMs * 100 / totalMs",
+      "unit": "%",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "fileMB >= 128",
+      "label": "文件 ≥128MB（日志/导出/镜像这类真实体量）"
+     },
+     {
+      "expr": "syscalls <= 100000",
+      "label": "write 调用 ≤10 万次（别让 syscall 成为瓶颈）"
+     },
+     {
+      "expr": "totalMs <= 5000",
+      "label": "总耗时 ≤5 秒"
+     },
+     {
+      "expr": "mbps >= 40",
+      "label": "吞吐 ≥40MB/s"
+     }
+    ],
+    "insight": "写文件的时间由两段相加：**用户态每字节的函数调用** + **内核态每次 write 的切换成本**。`fputc` 本身约 5ns（一次函数调用 + 缓冲区判满），`write` 系统调用约 1μs（用户态/内核态切换 + VFS + 页缓存拷贝）。256MB：无缓冲 = 2.7 亿次 syscall ≈ 268 秒；4KB 缓冲 = 6.5 万次 ≈ 65 毫秒，**差了四千倍**。而且缓冲后剩下的 1.3 秒全是 `fputc` 的每字节调用——这才是该上 `fwrite(buf, 1, n, fp)` 的时候：一次调用搬一整块，用户态开销直接消失。四层优化，按收益排序：① **别关缓冲**（`setvbuf(fp, NULL, _IONBF, 0)` 是最常见的自伤）；② **整块 `fwrite`** 而不是逐字节 `fputc`；③ 大文件用 `writev`/`mmap` 或 `O_DIRECT`（绕过页缓存，适合顺序大 IO）；④ `fsync` 只在**需要持久性保证**时调，每写一次就 fsync 会把机械盘打到 100 IOPS 以下。还有一条容易忽略的：**缓冲不是万能的**，程序崩溃时缓冲区里的数据会丢；日志系统要在「每条日志 fsync」和「吞吐」之间明确取舍（通常选后者 + 定期 fsync）。"
+   }
+  ],
+  "clang/clang-u05": [
+   {
+    "kind": "sandbox",
+    "title": "头文件守卫治不了编译时间",
+    "brief": "`#ifndef HEADER_H` 只挡住「同一个 .c 里重复包含」，挡不住「两百个 .c 各自包含一遍」。每个翻译单元都要把这个三万行的头重新读进来、重新解析、重新建符号表。把翻译单元数与头文件规模拖到真实体量，看守卫、去重、预编译头各自能省下多少——你会发现前两者对总时间几乎无效。",
+    "params": [
+     {
+      "key": "tus",
+      "label": "翻译单元数（.c）",
+      "min": 10,
+      "max": 600,
+      "step": 10,
+      "value": 200
+     },
+     {
+      "key": "headerK",
+      "label": "头文件规模（千行）",
+      "min": 1,
+      "max": 60,
+      "step": 1,
+      "value": 30
+     },
+     {
+      "key": "dup",
+      "label": "每 TU 间接包含次数",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "value": 3
+     },
+     {
+      "key": "guard",
+      "label": "头文件守卫",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 0,
+      "labels": [
+       "无守卫",
+       "#ifndef 守卫"
+      ]
+     },
+     {
+      "key": "pch",
+      "label": "预编译头",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 0,
+      "labels": [
+       "不用 PCH",
+       "预编译头 PCH"
+      ]
+     }
+    ],
+    "metrics": [
+     {
+      "key": "parses",
+      "label": "头文件被解析次数",
+      "expr": "if(pch == 1, 1, tus * if(guard == 1, 1, dup))",
+      "unit": "次",
+      "fmt": "int"
+     },
+     {
+      "key": "parseLines",
+      "label": "总解析行数",
+      "expr": "if(pch == 1, headerK * 1000, tus * headerK * 1000 * if(guard == 1, 1, dup))",
+      "unit": "行",
+      "fmt": "int"
+     },
+     {
+      "key": "parseMs",
+      "label": "头文件解析耗时",
+      "expr": "if(pch == 1, headerK * 1000 / 1000, tus * headerK * if(guard == 1, 1, dup))",
+      "unit": "ms",
+      "fmt": "int"
+     },
+     {
+      "key": "pchLoadMs",
+      "label": "PCH 加载耗时",
+      "expr": "if(pch == 1, tus * 5, 0)",
+      "unit": "ms",
+      "fmt": "int"
+     },
+     {
+      "key": "totalMs",
+      "label": "总耗时",
+      "expr": "if(pch == 1, headerK * 1000 / 1000 + tus * 5, tus * headerK * if(guard == 1, 1, dup))",
+      "unit": "ms",
+      "fmt": "int"
+     },
+     {
+      "key": "pchMB",
+      "label": "PCH 文件体积",
+      "expr": "if(pch == 1, headerK * 1000 / 20 / 1024, 0)",
+      "unit": "MB",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "tus >= 100",
+      "label": "翻译单元 ≥100 个（真实的多文件工程）"
+     },
+     {
+      "expr": "headerK >= 20",
+      "label": "头文件 ≥2 万行（重模板/大接口头）"
+     },
+     {
+      "expr": "parseLines <= 2000000",
+      "label": "总解析行数 ≤200 万行"
+     },
+     {
+      "expr": "totalMs <= 3000",
+      "label": "总耗时 ≤3 秒"
+     }
+    ],
+    "insight": "**头文件守卫（include guard）解决的是「同一 TU 内重复包含」，不是「多 TU 重复解析」**。`#pragma once` 同理。200 个 `.c` 各自 `#include \"big.h\"`，`big.h` 就要被独立解析 200 次——守卫在每次编译新 TU 时都是「新的一局」，宏状态是空的。三种手段的收益量级：① **守卫**：只去掉同一 TU 内的重复（本例 dup=3 → 3 倍降到 1 倍），对「多 TU 各一遍」的 N 倍完全无效；② **预编译头 PCH**（`g++ -x c++-header big.h` 或 CMake 的 `target_precompile_headers`）：解析一次、序列化成二进制，之后每个 TU 直接 mmap 加载（约 5ms），把 N×T 变成 T + N×load——**这才是数量级的改善**；③ **C++20 模块（modules）**：`import big;` 从根本上不再有「文本包含」，编译器只构建一次 BMI，且不像 PCH 那样受宏状态影响，是长期正解。另外两条工程纪律：**头文件里少 include**（能前置声明就别 include 定义）、**用 `-H` 或 `clang -ftime-trace` 看是谁在拖时间**——真实项目里往往不是你的头，而是 `<iostream>`/`<regex>` 这类重型标准库头。"
+   }
+  ],
+  "clang/clang-u06": [
+   {
+    "kind": "sandbox",
+    "title": "改一行代码等两分钟",
+    "brief": "全量重编 600 个文件 × 每个 800 毫秒 = 8 分钟；就算写了增量规则，改一个头文件也会让 60% 的 .c 重编（它们都 include 了它）；再加上 `make` 不加 `-j`，永远单线程。三个因素叠起来就是「改一行等两分钟」。把文件数、构建模式、解耦程度、并行度拖到真实值，看每一个旋钮各能省多少。",
+    "params": [
+     {
+      "key": "files",
+      "label": "源文件数",
+      "min": 10,
+      "max": 2000,
+      "step": 10,
+      "value": 600
+     },
+     {
+      "key": "mode",
+      "label": "构建模式",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 0,
+      "labels": [
+       "每次全量重编",
+       "按 .o 时间戳增量"
+      ]
+     },
+     {
+      "key": "decouple",
+      "label": "头文件耦合度",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 0,
+      "labels": [
+       "头里 include 实现依赖（改头 60% 重编）",
+       "前置声明+不透明指针（改头 10% 重编）"
+      ]
+     },
+     {
+      "key": "jobs",
+      "label": "make -j 并行度",
+      "min": 1,
+      "max": 16,
+      "step": 1,
+      "value": 1
+     }
+    ],
+    "metrics": [
+     {
+      "key": "fanoutPct",
+      "label": "改头文件影响面",
+      "expr": "if(decouple == 1, 10, 60)",
+      "unit": "%",
+      "fmt": "int"
+     },
+     {
+      "key": "recompiled",
+      "label": "实际重编文件数",
+      "expr": "if(mode == 0, files, round(files * if(decouple == 1, 10, 60) / 100))",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "perFileMs",
+      "label": "单文件编译耗时",
+      "expr": "800",
+      "unit": "ms",
+      "fmt": "int"
+     },
+     {
+      "key": "buildMs",
+      "label": "本次构建耗时",
+      "expr": "if(mode == 0, files * 800 / jobs, round(files * if(decouple == 1, 10, 60) / 100) * 800 / jobs)",
+      "unit": "ms",
+      "fmt": "int"
+     },
+     {
+      "key": "speedup",
+      "label": "相对单线程全量加速",
+      "expr": "(files * 800) / (if(mode == 0, files * 800 / jobs, round(files * if(decouple == 1, 10, 60) / 100) * 800 / jobs))",
+      "unit": "×",
+      "fmt": "fix2"
+     },
+     {
+      "key": "dailyMin",
+      "label": "每天等待（改 50 次）",
+      "expr": "buildMs * 50 / 60000",
+      "unit": "分钟",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "files >= 500",
+      "label": "源文件 ≥500 个（中大型工程）"
+     },
+     {
+      "expr": "recompiled <= files * 15 / 100",
+      "label": "重编文件 ≤总文件 15%（改一个头不该牵动半个工程）"
+     },
+     {
+      "expr": "buildMs <= 20000",
+      "label": "单次构建 ≤20 秒"
+     },
+     {
+      "expr": "speedup >= 10",
+      "label": "相比单线程全量加速 ≥10 倍"
+     }
+    ],
+    "insight": "编译慢是三个独立因素**相乘**的结果，所以也要三处一起改：**① 增量**——`make` 的规则是「目标比所有依赖旧才重编」。写成 `.PHONY: all` 把 `all` 声明成伪目标没问题，但把**源文件也列成伪目标**（或依赖里写了不存在的文件）就会每次都全量。检查方法：`make -n` 看它要编几个。**② 解耦**——改一个 `.h` 导致 60% 重编，是因为那 60% 都 include 了它，而它又 include 了一堆实现依赖。正解是**前置声明 + 不透明指针**（PImpl）：头里只写 `struct Foo;` 和函数签名，成员与 include 全搬进 `.c`；C++ 还可用 `std::unique_ptr<Impl>` 配显式析构函数。把「改头影响面」从 60% 压到 10%，等于把增量构建的收益放大 6 倍。**③ 并行**——`make -j$(nproc)`（或 `-j8`）几乎线性加速到核数为止；但注意 `-j` 会让编译错误信息交错、内存占用 ×N，CI 上还要配 `ccache`。顶层还有两招：**分布式编译**（distcc/icecc）和 **`ccache`**（命中时直接复用 .o，对「切换分支后重编」特别有效）。反过来说，如果一个工程 `make -j16` 还要几分钟，先量 `clang -ftime-trace`——通常时间不在你的代码里，而在几个重型模板头的实例化上。"
+   }
+  ],
+  "clang/clang-u07": [
+   {
+    "kind": "sandbox",
+    "title": "修一个 CVE，要重发 N 个程序",
+    "brief": "静态链接把库代码复制进每个可执行文件：20 个程序各带一份 80MB 的库，磁盘和内存都是 1.7GB。更麻烦的是库爆了 CVE——静态链接意味着20 个程序全部重新编译、重新发布、重新部署；动态链接只要换一个 `.so`。把程序数量与库体积拖到真实值，看这两种链接方式在磁盘、内存、补丁成本上的账。",
+    "params": [
+     {
+      "key": "progs",
+      "label": "程序数量",
+      "min": 1,
+      "max": 60,
+      "step": 1,
+      "value": 20
+     },
+     {
+      "key": "libMB",
+      "label": "库体积",
+      "min": 5,
+      "max": 300,
+      "step": 5,
+      "value": 80
+     },
+     {
+      "key": "mode",
+      "label": "链接方式",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 0,
+      "labels": [
+       "静态链接",
+       "动态链接（共享库）"
+      ]
+     }
+    ],
+    "metrics": [
+     {
+      "key": "appMB",
+      "label": "单程序自身代码",
+      "expr": "5",
+      "unit": "MB",
+      "fmt": "int"
+     },
+     {
+      "key": "diskMB",
+      "label": "部署磁盘总量",
+      "expr": "if(mode == 0, progs * (5 + libMB), libMB + progs * 5)",
+      "unit": "MB",
+      "fmt": "int"
+     },
+     {
+      "key": "ramMB",
+      "label": "同时运行内存占用",
+      "expr": "if(mode == 0, progs * (5 + libMB), libMB + progs * 5)",
+      "unit": "MB",
+      "fmt": "int"
+     },
+     {
+      "key": "perProgMB",
+      "label": "单个程序体积",
+      "expr": "if(mode == 0, 5 + libMB, 5)",
+      "unit": "MB",
+      "fmt": "int"
+     },
+     {
+      "key": "rebuildCount",
+      "label": "修库 CVE 要重发的程序数",
+      "expr": "if(mode == 0, progs, 1)",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "patchMin",
+      "label": "补丁发布耗时",
+      "expr": "if(mode == 0, progs * 2, 2)",
+      "unit": "分钟",
+      "fmt": "int"
+     },
+     {
+      "key": "deployS",
+      "label": "全量部署传输耗时",
+      "expr": "if(mode == 0, progs * (5 + libMB), libMB + progs * 5) / 50",
+      "unit": "秒",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "progs >= 10",
+      "label": "程序数 ≥10 个（同一套库被多个程序复用）"
+     },
+     {
+      "expr": "libMB >= 50",
+      "label": "库体积 ≥50MB（重依赖：SSL/图像/数据库客户端）"
+     },
+     {
+      "expr": "diskMB <= 300",
+      "label": "部署磁盘 ≤300MB"
+     },
+     {
+      "expr": "rebuildCount <= 1",
+      "label": "修库 CVE 只需重发 ≤1 个产物"
+     },
+     {
+      "expr": "patchMin <= 10",
+      "label": "补丁发布 ≤10 分钟"
+     }
+    ],
+    "insight": "静态链接与动态链接的取舍是**「部署简单」对「运维成本」**：静态链接的产物是自包含的（不依赖目标机装了什么库，Docker 里特别省心，`scratch` 基础镜像就能跑），代价是**每个程序一份副本**——20 个程序 × 80MB 库 = 1.7GB 磁盘、1.7GB 内存（不同可执行文件的代码页不能互相共享，只有同一文件的多进程才共享）。更要命的是**补丁半径**：库爆 CVE 时，静态链接要重编重发 N 个程序（本例 20 个 × 2 分钟 = 40 分钟），动态链接只需替换一个 `.so`。动态链接的代价则转移到**运行时**：① `SONAME` 版本兼容——库升级了大版本，老程序可能直接 `symbol not found`；② `LD_LIBRARY_PATH` / `ldconfig` / rpath 配错就是「在我机器上能跑」；③ 启动时要走动态加载器解析符号（几十毫秒，对 CLI 工具是可见延迟）。所以真实工程的做法是分场景：**面向最终用户的桌面/CLI 工具倾向静态**（免装依赖、单文件分发）；**服务器端同一套服务多实例倾向动态**（共享页、补丁快、镜像层可复用）；**容器时代的新答案是「静态链接 + 多阶段构建」**——用静态换「镜像小、启动快」，补丁靠重建镜像统一走 CI，把「重发 N 次」自动化掉。"
+   }
+  ],
+  "java/java-ch01": [
+   {
+    "kind": "sandbox",
+    "title": "一千万笔账，double 差出五百块",
+    "brief": "金额用 `double` 存「元」，每笔乘完税率再累加——单笔误差小到看不见，但一千万笔之后对账就差出几百块。原因在二进制浮点：`0.1` 在 double 里不是精确的 0.1，每笔的舍入误差按半分累积。把笔数与金额类型拖到真实体量，看三种表示法在「精度」和「耗时」上怎么取舍。",
+    "params": [
+     {
+      "key": "itemsW",
+      "label": "交易笔数（万）",
+      "min": 10,
+      "max": 2000,
+      "step": 10,
+      "value": 1000
+     },
+     {
+      "key": "type",
+      "label": "金额表示",
+      "min": 0,
+      "max": 2,
+      "step": 1,
+      "value": 0,
+      "labels": [
+       "double 存元",
+       "long 存分",
+       "BigDecimal"
+      ]
+     }
+    ],
+    "metrics": [
+     {
+      "key": "items",
+      "label": "交易笔数",
+      "expr": "itemsW * 10000",
+      "unit": "笔",
+      "fmt": "int"
+     },
+     {
+      "key": "errPerItem",
+      "label": "单笔误差",
+      "expr": "if(type == 0, 0.005, 0)",
+      "unit": "分",
+      "fmt": "fix2"
+     },
+     {
+      "key": "errFen",
+      "label": "累计误差",
+      "expr": "itemsW * 10000 * if(type == 0, 0.005, 0)",
+      "unit": "分",
+      "fmt": "int"
+     },
+     {
+      "key": "errYuan",
+      "label": "累计误差（元）",
+      "expr": "errFen / 100",
+      "unit": "元",
+      "fmt": "fix2"
+     },
+     {
+      "key": "costNs",
+      "label": "单笔运算成本",
+      "expr": "if(type == 0, 2, if(type == 1, 1, 120))",
+      "unit": "ns",
+      "fmt": "int"
+     },
+     {
+      "key": "totalMs",
+      "label": "总耗时",
+      "expr": "itemsW * 10000 * if(type == 0, 2, if(type == 1, 1, 120)) / 1000000",
+      "unit": "ms",
+      "fmt": "int"
+     },
+     {
+      "key": "msPerW",
+      "label": "每万笔耗时",
+      "expr": "10000 * if(type == 0, 2, if(type == 1, 1, 120)) / 1000000",
+      "unit": "ms",
+      "fmt": "fix2"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "items >= 1000000",
+      "label": "交易 ≥100 万笔（日终对账的真实量级）"
+     },
+     {
+      "expr": "errFen <= 1",
+      "label": "累计误差 ≤1 分（对账必须平）"
+     },
+     {
+      "expr": "totalMs <= 3000",
+      "label": "总耗时 ≤3 秒"
+     }
+    ],
+    "insight": "`double` 是二进制浮点，**能精确表示的只有分母是 2 的幂的分数**；`0.1`、`0.01`、`0.13` 这些十进制小数在 double 里都是无限循环小数的截断。单笔误差在 1e-17 量级，肉眼不可见，但**每笔都要 `Math.round(x*100)/100` 保留到分**，这个舍入动作会把「截断误差」变成「半分级的偏差」，一千万笔累积就是几百元。这不是理论洁癖，是真实的日终对账差异来源（也是财务系统审计必查项）。三种正解，按推荐顺序：① **`long` 存「分」**（或「厘」）——纯整数运算，零误差、最快（1ns），范围 ±9.2e16 分 = ±9.2e14 元，一个国家的 GDP 都够存；② **`BigDecimal`**——任意精度 + 显式 `RoundingMode`，适合「利率/汇率/分摊」这类必须记录舍入规则的场景，代价是每次运算约 120ns（慢两个数量级）且**必须用 `String` 构造**（`new BigDecimal(0.1)` 会把 double 的误差原样带进来）；③ 展示层再格式化（`DecimalFormat`），**存储与计算永远用整数或 BigDecimal**。一句话记住：**钱不能是浮点数**。同理适用于任何「必须精确的小数」——税率、汇率、积分、库存数量（用最小单位整数）。"
+   }
+  ],
+  "java/java-ch02": [
+   {
+    "kind": "sandbox",
+    "title": "Integer[] 比 int[] 贵五倍",
+    "brief": "`new int[1000万]` 是 40MB；`new Integer[1000万]` 是 190MB。多出来的不是数据，是**每个元素一个对象**：对象头 12 字节 + value 4 字节，对齐后 16，再加引用本身 4 字节。而且 GC 要逐个扫描这一千万个对象。把规模与元素类型拖到真实值，看「自动装箱」在内存和 GC 上的账单。",
+    "params": [
+     {
+      "key": "countW",
+      "label": "元素数（万）",
+      "min": 10,
+      "max": 5000,
+      "step": 10,
+      "value": 1000
+     },
+     {
+      "key": "kind",
+      "label": "容器类型",
+      "min": 0,
+      "max": 2,
+      "step": 1,
+      "value": 1,
+      "labels": [
+       "int[] 原始数组",
+       "Integer[] 包装数组",
+       "Point[] 小对象数组"
+      ]
+     }
+    ],
+    "metrics": [
+     {
+      "key": "count",
+      "label": "元素数",
+      "expr": "countW * 10000",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "perElem",
+      "label": "每个元素占用",
+      "expr": "if(kind == 0, 4, if(kind == 1, 20, 28))",
+      "unit": "字节",
+      "fmt": "int"
+     },
+     {
+      "key": "heapMB",
+      "label": "堆占用",
+      "expr": "countW * 10000 * if(kind == 0, 4, if(kind == 1, 20, 28)) / 1048576",
+      "unit": "MB",
+      "fmt": "int"
+     },
+     {
+      "key": "objects",
+      "label": "堆上对象数",
+      "expr": "if(kind == 0, 1, countW * 10000)",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "gcScanMs",
+      "label": "单次 GC 扫描耗时",
+      "expr": "if(kind == 0, 4, countW * 10000 * 4) / 1000",
+      "unit": "ms",
+      "fmt": "int"
+     },
+     {
+      "key": "blowup",
+      "label": "相对 int[] 膨胀",
+      "expr": "if(kind == 0, 1, if(kind == 1, 5, 7))",
+      "unit": "×",
+      "fmt": "int"
+     },
+     {
+      "key": "copyMB",
+      "label": "扩容一次复制",
+      "expr": "countW * 10000 * 4 / 1048576",
+      "unit": "MB",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "count >= 5000000",
+      "label": "元素 ≥500 万（真实的数据批处理规模）"
+     },
+     {
+      "expr": "heapMB <= 60",
+      "label": "堆占用 ≤60MB"
+     },
+     {
+      "expr": "objects <= 1000000",
+      "label": "堆上对象 ≤100 万个"
+     },
+     {
+      "expr": "gcScanMs <= 60",
+      "label": "单次 GC 扫描 ≤60ms"
+     }
+    ],
+    "insight": "64 位 JVM 开压缩指针（`-XX:+UseCompressedOops`，默认开，堆 <32GB）时，**对象头 = 12 字节**（8 字节 Mark Word + 4 字节 Klass Pointer），引用 = 4 字节，对象整体按 8 字节对齐。于是：`Integer` = 12 + 4 = 16 字节；`Point{int x; int y;}` = 12 + 8 = 20 → 对齐 24；`Long` = 12 + 8 = 20 → 对齐 24。**而 `int[]` 的每个元素就是 4 字节，没有对象**——所以 `Integer[]` 是「4 字节引用 + 16 字节对象」= 20 字节/元素，**5 倍**。三个真实后果：① **内存**：一千万个 int 从 40MB 变 190MB，直接把堆推进老年代；② **GC**：标记阶段要遍历一千万个对象（每个至少一次指针追逐），停顿时间从「扫一个数组」变成「扫一千万个对象」；③ **缓存**：`int[]` 连续 40MB 顺序扫描，`Integer[]` 是指针跳跃，CPU 缓存命中率掉一个数量级。实操：**热数据用原始数组**（`int[]`/`long[]`/`double[]`），集合只在需要 API 时用；必须用 `List<Integer>` 时优先 `ArrayList` 预分配容量；小整数（-128~127）会命中 `Integer` 缓存不新建对象——**但这个优化只对小值有效，一千万个订单号完全用不上**。Java 的 `List<int>` 至今不存在，所以高性能数值代码通常直接操作数组 + 下标，或用第三方原始类型集合库（fastutil/trove）。"
+   }
+  ],
+  "java/java-ch03": [
+   {
+    "kind": "sandbox",
+    "title": "多实现调用点，JIT 不再内联",
+    "brief": "一个 `shape.area()` 调用点在循环里被一百万个对象调用。如果这些对象的实际类型只有一两种，JIT 会内联成「判断类型 + 直接算」；一旦超过两种，调用点变成 megamorphic，只能查 itable，每次慢 10 倍，而且内联失效会连带失去逃逸分析和锁消除。把实现类数量、调用次数与调用点组织方式拖到真实值，看这 20 纳秒怎么来的。",
+    "params": [
+     {
+      "key": "impls",
+      "label": "实现类数量",
+      "min": 3,
+      "max": 24,
+      "step": 1,
+      "value": 12
+     },
+     {
+      "key": "callsM",
+      "label": "调用次数（百万）",
+      "min": 1,
+      "max": 200,
+      "step": 1,
+      "value": 100
+     },
+     {
+      "key": "split",
+      "label": "调用点组织",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 0,
+      "labels": [
+       "一个调用点吃下所有类型",
+       "按类型拆成独立调用点"
+      ]
+     }
+    ],
+    "metrics": [
+     {
+      "key": "calls",
+      "label": "调用次数",
+      "expr": "callsM * 1000000",
+      "unit": "次",
+      "fmt": "int"
+     },
+     {
+      "key": "nsPer",
+      "label": "单次调用成本",
+      "expr": "if(split == 1, 2, if(impls <= 2, 3, 22))",
+      "unit": "ns",
+      "fmt": "int"
+     },
+     {
+      "key": "totalMs",
+      "label": "总耗时",
+      "expr": "callsM * 1000000 * if(split == 1, 2, if(impls <= 2, 3, 22)) / 1000000",
+      "unit": "ms",
+      "fmt": "int"
+     },
+     {
+      "key": "itableLookups",
+      "label": "itable 查表次数",
+      "expr": "if(split == 1, 0, callsM * 1000000)",
+      "unit": "次",
+      "fmt": "int"
+     },
+     {
+      "key": "inlined",
+      "label": "是否可内联",
+      "expr": "if(split == 1, 1, 0)",
+      "unit": "是/否",
+      "fmt": "int"
+     },
+     {
+      "key": "slowdown",
+      "label": "相对单态减速",
+      "expr": "if(split == 1, 1, if(impls <= 2, 1, 11))",
+      "unit": "×",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "impls >= 6",
+      "label": "实现类 ≥6 种（真实业务的策略/插件体系）"
+     },
+     {
+      "expr": "calls >= 50000000",
+      "label": "调用 ≥5000 万次（热点路径）"
+     },
+     {
+      "expr": "totalMs <= 500",
+      "label": "总耗时 ≤500ms"
+     },
+     {
+      "expr": "slowdown <= 2",
+      "label": "相对单态减速 ≤2 倍（JIT 必须能内联）"
+     },
+     {
+      "expr": "itableLookups <= 1000000",
+      "label": "itable 查表 ≤100 万次"
+     }
+    ],
+    "insight": "JVM 的虚方法调用有四个 fast path（`invokevirtual` / `invokeinterface` 同理）：**单态（monomorphic）**——调用点只见过一种实际类型，JIT 编译成「比较 Klass 指针 + 直接跳转」，并且**可以内联**；**双态（bimorphic）**——见过两种，编译成一次条件分支 + 两段内联代码，仍然很快；**多态（polymorphic，≤2 种即算）** 同上；**超多态（megamorphic，>2 种）**——JIT 放弃，退回 itable 查表（约 20ns）。注意 20ns 本身不算什么，**真正的代价是内联失效**：内联是逃逸分析、标量替换、锁消除、常量折叠的**前置条件**，一个 megamorphic 调用点会让整条调用链失去优化机会——实测常常是 5-20 倍。三种正解：① **拆分调用点**：`for (Shape s : list) if (s instanceof Circle c) ... else if ...`，把类型判断提到循环外，每种类型一个单态循环（本例 22ns → 2ns）；② **Visitor 模式**（双重分派）：`shape.accept(visitor)`，每个实现类里写死自己的处理，调用点变成「每种类型一个单态点」；③ **数据导向**：把「按类型分支」换成「按字段/枚举 switch」，或干脆用「数组 + 类型标签」的 SoA 布局，绕开虚调用。反例：Spring 里 `List<Handler>` 遍历 `handler.supports()` 就是典型 megamorphic 场景，量小时无感，量大时要预分组。"
+   }
+  ],
+  "java/java-ch04": [
+   {
+    "kind": "sandbox",
+    "title": "HashMap 不预设容量，扩容十八次",
+    "brief": "`new HashMap<>()` 默认 16 个桶、负载因子 0.75。往里塞 200 万条，它会从 16 一路翻倍扩到 419 万桶——**扩容 18 次，累计 rehash 800 万个节点**，最后一次扩容要搬 209 万个节点（约 84 毫秒的停顿）。`new HashMap<>(expected)` 一次算到位就没有这些。把条数与是否预设容量拖到真实值，看这笔「一行构造参数」的账。",
+    "params": [
+     {
+      "key": "entriesW",
+      "label": "键值对数量（万）",
+      "min": 10,
+      "max": 1000,
+      "step": 10,
+      "value": 200
+     },
+     {
+      "key": "preset",
+      "label": "构造方式",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 0,
+      "labels": [
+       "new HashMap<>() 默认 16",
+       "new HashMap<>(expected) 预设"
+      ]
+     }
+    ],
+    "metrics": [
+     {
+      "key": "entries",
+      "label": "键值对数量",
+      "expr": "entriesW * 10000",
+      "unit": "条",
+      "fmt": "int"
+     },
+     {
+      "key": "finalCap",
+      "label": "最终桶数组容量",
+      "expr": "pow(2, ceil(log2(entriesW * 10000 / 0.75)))",
+      "unit": "桶",
+      "fmt": "int"
+     },
+     {
+      "key": "resizes",
+      "label": "扩容次数",
+      "expr": "if(preset == 1, 0, round(log2(finalCap / 16)))",
+      "unit": "次",
+      "fmt": "int"
+     },
+     {
+      "key": "rehashOps",
+      "label": "累计 rehash 节点数",
+      "expr": "if(preset == 1, 0, finalCap * 2)",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "arrMB",
+      "label": "桶数组占用",
+      "expr": "finalCap * 4 / 1048576",
+      "unit": "MB",
+      "fmt": "int"
+     },
+     {
+      "key": "nodeMB",
+      "label": "Node 对象占用",
+      "expr": "entriesW * 10000 * 32 / 1048576",
+      "unit": "MB",
+      "fmt": "int"
+     },
+     {
+      "key": "totalMs",
+      "label": "总插入耗时",
+      "expr": "entriesW * 10000 * (50 + if(preset == 1, 0, 60)) / 1000000",
+      "unit": "ms",
+      "fmt": "int"
+     },
+     {
+      "key": "pauseMs",
+      "label": "单次扩容最长停顿",
+      "expr": "if(preset == 1, 0, finalCap / 2 * 40 / 1000000)",
+      "unit": "ms",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "entries >= 1000000",
+      "label": "键值对 ≥100 万（真实的缓存/索引规模）"
+     },
+     {
+      "expr": "resizes <= 0",
+      "label": "扩容 0 次（一次算准容量）"
+     },
+     {
+      "expr": "totalMs <= 200",
+      "label": "总插入耗时 ≤200ms"
+     },
+     {
+      "expr": "pauseMs <= 5",
+      "label": "单次最长停顿 ≤5ms（别让扩容卡住请求）"
+     }
+    ],
+    "insight": "HashMap 的扩容逻辑是**翻倍 + 全量 rehash**：容量从 16 开始，负载因子 0.75，元素数超过 `capacity * 0.75` 就新建一个 2 倍大的桶数组，把每个节点按 `(n-1) & hash` 重新落位。200 万条要扩到 `2^22 = 419 万`桶，路径是 16→32→…→4194304，**18 次**；累计搬迁节点数约 `2 × 最终容量`（几何级数求和）≈ 800 万个。每次搬迁都要重新算索引、改链表/红黑树指针——**而且是在插入路径上同步做的**，所以是一次可见的停顿（本例最后一次约 84ms）。正解一行：`new HashMap<>((int) (expected / 0.75f) + 1)`（Guava 的 `Maps.newHashMapWithExpectedSize(n)` 帮你算好了）。注意几个细节：① **容量一定是 2 的幂**（`tableSizeFor` 会向上取整），因为有 `(n-1) & hash` 的位运算优化；② **树化阈值 8 / 退化 6**：单桶超过 8 个节点转红黑树（防哈希碰撞攻击），低于 6 退回链表，中间的 7 是缓冲带防抖动；③ **负载因子 0.75 是空间与查找长度的折中**（0.75 时桶内平均 0.75 个节点，泊松分布下长度 8 的概率约 6e-8，刚好是树化阈值）；④ 并发场景用 `ConcurrentHashMap`，它扩容是**多线程协同搬迁**（helpTransfer），单次停顿比 HashMap 小得多——这也是为什么高并发下不要用 `Collections.synchronizedMap`。"
+   }
+  ],
+  "java/java-ch05": [
+   {
+    "kind": "sandbox",
+    "title": "用异常做控制流，一个核没了",
+    "brief": "「查不到就抛 NotFoundException」看着很干净——但每次 `new` 一个异常，JVM 都要 `fillInStackTrace()`：遍历整个调用栈，为每一帧创建一个 `StackTraceElement`（类名/方法名/文件/行号）。40 层栈约 5 微秒，每秒 20 万次就是一个核满载，还顺带每秒 250MB 垃圾。把异常频率、栈深与处理方式拖到真实值，看这笔账。",
+    "params": [
+     {
+      "key": "excK",
+      "label": "每秒异常次数（千）",
+      "min": 1,
+      "max": 500,
+      "step": 1,
+      "value": 200
+     },
+     {
+      "key": "depth",
+      "label": "调用栈深度",
+      "min": 5,
+      "max": 200,
+      "step": 5,
+      "value": 40
+     },
+     {
+      "key": "mode",
+      "label": "未命中处理方式",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 0,
+      "labels": [
+       "抛异常",
+       "返回 Optional/状态码"
+      ]
+     }
+    ],
+    "metrics": [
+     {
+      "key": "nsPer",
+      "label": "单次成本",
+      "expr": "if(mode == 0, 300 + depth * 120, 3)",
+      "unit": "ns",
+      "fmt": "int"
+     },
+     {
+      "key": "cpuMsPerSec",
+      "label": "每秒消耗 CPU",
+      "expr": "excK * 1000 * if(mode == 0, 300 + depth * 120, 3) / 1000000",
+      "unit": "ms",
+      "fmt": "int"
+     },
+     {
+      "key": "cpuPct",
+      "label": "占单核比例",
+      "expr": "excK * 1000 * if(mode == 0, 300 + depth * 120, 3) / 1000000 / 10",
+      "unit": "%",
+      "fmt": "int"
+     },
+     {
+      "key": "gcMBPerSec",
+      "label": "每秒产生垃圾",
+      "expr": "if(mode == 0, excK * 1000 * (40 + depth * 24 + 16 + 8 * depth) / 1048576, 0)",
+      "unit": "MB",
+      "fmt": "int"
+     },
+     {
+      "key": "cores",
+      "label": "折算核数",
+      "expr": "cpuMsPerSec / 1000",
+      "unit": "核",
+      "fmt": "fix2"
+     },
+     {
+      "key": "ygcPerSec",
+      "label": "每秒 Young GC 次数",
+      "expr": "gcMBPerSec / 20",
+      "unit": "次",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "excK >= 100",
+      "label": "异常 ≥10 万次/秒（高频未命中：缓存穿透/限流/参数校验）"
+     },
+     {
+      "expr": "cpuPct <= 20",
+      "label": "CPU 占用 ≤单核 20%"
+     },
+     {
+      "expr": "gcMBPerSec <= 5",
+      "label": "垃圾 ≤5MB/s（别让 GC 陪跑）"
+     },
+     {
+      "expr": "ygcPerSec <= 1",
+      "label": "Young GC ≤1 次/秒"
+     }
+    ],
+    "insight": "异常的昂贵不在「抛出」，在 `fillInStackTrace()`：**它要遍历当前线程的整个调用栈**，为每一帧 `new` 一个 `StackTraceElement`（含 declaringClass / methodName / fileName / lineNumber），再填进 `Throwable` 的 `stackTrace` 数组。40 层栈约 5μs，栈越深越慢——**成本与调用栈深度成正比**，这是它最反直觉的地方。高频路径的三条正解：① **返回值 / 状态码 / `Optional`**（本例 5μs → 3ns，差三个数量级）；② 必须用异常表达「业务失败」时，**关掉栈快照**：重写 `fillInStackTrace()` 返回 `this`（或构造器传 `writableStackTrace=false`），把 5μs 压到 0.3μs，代价是日志里没有堆栈（要自己补上下文）；③ **静态单例异常**（不填栈、不 new），适合「无参数、纯信号」的场景。反过来，**异常该用的地方不要为了性能不用**：真正的错误（文件不存在、连接断了、参数非法）就该抛，因为它的发生频率低，语义清晰比省 5μs 重要。判据是**频率**：每秒几千次以上就要考虑换控制流，每秒几次就老老实实抛。JIT 还能帮一点忙：同一异常反复抛时，热点代码里的 `fillInStackTrace` 会被优化，但**对象分配和数组填充不会被消除**（逃逸到 catch 块之外的语义要求）——所以 GC 压力是实打实的。"
+   }
+  ],
+  "java/java-ch06": [
+   {
+    "kind": "sandbox",
+    "title": "逐字节读 512MB = 五亿次系统调用",
+    "brief": "`while ((b = in.read()) != -1)` 是最常见的读文件写法，也是最常见的性能事故：`FileInputStream.read()` 每次只读一个字节，每次都是一次系统调用（约 150 纳秒）。512MB 就是 5.37 亿次、80 秒。包一层 `BufferedInputStream`（8KB）系统调用降到 6.5 万次。把文件大小与读法拖到真实值，看时间花在哪。",
+    "params": [
+     {
+      "key": "fileMB",
+      "label": "文件大小",
+      "min": 16,
+      "max": 4096,
+      "step": 16,
+      "value": 512
+     },
+     {
+      "key": "mode",
+      "label": "读取方式",
+      "min": 0,
+      "max": 2,
+      "step": 1,
+      "value": 0,
+      "labels": [
+       "FileInputStream 逐字节",
+       "BufferedInputStream 8KB",
+       "FileChannel 64KB 直接缓冲"
+      ]
+     }
+    ],
+    "metrics": [
+     {
+      "key": "bytes",
+      "label": "总字节数",
+      "expr": "fileMB * 1048576",
+      "unit": "字节",
+      "fmt": "int"
+     },
+     {
+      "key": "bufB",
+      "label": "单次 read 字节数",
+      "expr": "if(mode == 0, 1, if(mode == 1, 8192, 65536))",
+      "unit": "字节",
+      "fmt": "int"
+     },
+     {
+      "key": "syscalls",
+      "label": "read 系统调用次数",
+      "expr": "fileMB * 1048576 / if(mode == 0, 1, if(mode == 1, 8192, 65536))",
+      "unit": "次",
+      "fmt": "int"
+     },
+     {
+      "key": "sysMs",
+      "label": "系统调用开销",
+      "expr": "fileMB * 1048576 / if(mode == 0, 1, if(mode == 1, 8192, 65536)) * 0.15 / 1000",
+      "unit": "ms",
+      "fmt": "int"
+     },
+     {
+      "key": "diskMs",
+      "label": "磁盘读取耗时",
+      "expr": "fileMB * 1024 / 2000",
+      "unit": "ms",
+      "fmt": "int"
+     },
+     {
+      "key": "totalMs",
+      "label": "总耗时",
+      "expr": "fileMB * 1048576 / if(mode == 0, 1, if(mode == 1, 8192, 65536)) * 0.15 / 1000 + fileMB * 1024 / 2000",
+      "unit": "ms",
+      "fmt": "int"
+     },
+     {
+      "key": "mbps",
+      "label": "有效吞吐",
+      "expr": "fileMB * 1000 / (fileMB * 1048576 / if(mode == 0, 1, if(mode == 1, 8192, 65536)) * 0.15 / 1000 + fileMB * 1024 / 2000)",
+      "unit": "MB/s",
+      "fmt": "fix2"
+     },
+     {
+      "key": "sysPct",
+      "label": "系统调用占比",
+      "expr": "sysMs * 100 / totalMs",
+      "unit": "%",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "fileMB >= 256",
+      "label": "文件 ≥256MB（日志/备份/镜像这类真实体量）"
+     },
+     {
+      "expr": "syscalls <= 1000000",
+      "label": "read 调用 ≤100 万次"
+     },
+     {
+      "expr": "totalMs <= 1500",
+      "label": "总耗时 ≤1.5 秒"
+     },
+     {
+      "expr": "mbps >= 150",
+      "label": "吞吐 ≥150MB/s"
+     }
+    ],
+    "insight": "`FileInputStream.read()` 的每一次调用都是一次 **`read(2)` 系统调用**：用户态 → 内核态（保存寄存器、切换栈）→ VFS 层 → 页缓存（命中则内存拷贝）→ 返回用户态，全程约 150ns。**读一个字节和读 8KB 的系统调用成本是一样的**，所以逐字节读等于把成本放大 8192 倍。512MB：5.37 亿次 ≈ 80 秒；8KB 缓冲：6.5 万次 ≈ 10 毫秒——**差了八千倍**。四层手段，按收益排序：① **`BufferedInputStream` / `BufferedReader`**（8KB 起步）——最小的改动，最大的收益；② **`FileChannel` + `ByteBuffer`**：批量搬运，`transferTo` 走 `sendfile` 还能零拷贝；③ **`MappedByteBuffer`（mmap）**：大文件随机访问，页缓存直接映射进地址空间，省掉内核→用户的拷贝（但要注意文件截断会触发 `SIGBUS`）；④ **直接缓冲（DirectByteBuffer）**：JVM 堆外，读写时不再有「堆内→堆外」的中转拷贝，适合长时间的大吞吐 IO。两个更常见的坑：**忘记 `close()`**（用 try-with-resources）导致句柄泄漏（Linux 默认 1024 个 fd，几千并发立刻 `Too many open files`）；**`read()` 返回值当「读满了」用**——`read(buf)` 返回的是**实际读到的字节数**，可能小于 buffer 大小，正确写法是 `while ((n = in.read(buf)) != -1) process(buf, 0, n)`。"
+   }
+  ],
+  "java/java-ch09": [
+   {
+    "kind": "sandbox",
+    "title": "Maven 首次构建，大半时间在等下载",
+    "brief": "`mvn clean package` 卡住十分钟，多数人以为是「代码多」。实际是依赖下载：12 个模块展开约 73 个 jar、182MB，中央仓库直连 2MB/s 就是 91 秒，而真正编译只占 36 秒。把模块数、仓库镜像与本地缓存拖到真实值，看「Maven 慢」到底慢在哪。",
+    "params": [
+     {
+      "key": "modules",
+      "label": "Maven 模块数",
+      "min": 1,
+      "max": 40,
+      "step": 1,
+      "value": 12
+     },
+     {
+      "key": "mirror",
+      "label": "仓库地址",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 0,
+      "labels": [
+       "中央仓库直连 2MB/s",
+       "国内镜像 20MB/s"
+      ]
+     },
+     {
+      "key": "cache",
+      "label": "本地仓库 ~/.m2",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "value": 0,
+      "labels": [
+       "空（首次构建）",
+       "已缓存依赖"
+      ]
+     }
+    ],
+    "metrics": [
+     {
+      "key": "jars",
+      "label": "依赖 jar 数",
+      "expr": "25 + modules * 4",
+      "unit": "个",
+      "fmt": "int"
+     },
+     {
+      "key": "depMB",
+      "label": "依赖总大小",
+      "expr": "(25 + modules * 4) * 2.5",
+      "unit": "MB",
+      "fmt": "int"
+     },
+     {
+      "key": "dlS",
+      "label": "依赖下载耗时",
+      "expr": "if(cache == 1, 0, (25 + modules * 4) * 2.5 / if(mirror == 1, 20, 2))",
+      "unit": "秒",
+      "fmt": "int"
+     },
+     {
+      "key": "compileS",
+      "label": "编译打包耗时",
+      "expr": "modules * 3",
+      "unit": "秒",
+      "fmt": "int"
+     },
+     {
+      "key": "totalS",
+      "label": "构建总耗时",
+      "expr": "if(cache == 1, 0, (25 + modules * 4) * 2.5 / if(mirror == 1, 20, 2)) + modules * 3",
+      "unit": "秒",
+      "fmt": "int"
+     },
+     {
+      "key": "dlPct",
+      "label": "下载占比",
+      "expr": "dlS * 100 / totalS",
+      "unit": "%",
+      "fmt": "int"
+     },
+     {
+      "key": "ciMinPerDay",
+      "label": "CI 每天等待（20 次）",
+      "expr": "totalS * 20 / 60",
+      "unit": "分钟",
+      "fmt": "int"
+     }
+    ],
+    "checks": [
+     {
+      "expr": "modules >= 10",
+      "label": "Maven 模块 ≥10 个（多模块工程）"
+     },
+     {
+      "expr": "totalS <= 90",
+      "label": "构建总耗时 ≤90 秒"
+     },
+     {
+      "expr": "dlS <= 30",
+      "label": "依赖下载 ≤30 秒"
+     },
+     {
+      "expr": "dlPct <= 50",
+      "label": "下载不超过总耗时一半（构建才是主体）"
+     }
+    ],
+    "insight": "Maven 的耗时 = **依赖解析与下载** + **插件执行（编译/测试/打包）**，而第一段跟你的代码量几乎无关，只跟依赖树的规模有关。12 个模块的工程依赖树展开约 73 个 jar（每个 starter 会带一串传递依赖），平均 2.5MB/个 = 182MB。中央仓库从国内直连约 2MB/s → 91 秒；换成国内镜像（阿里云/华为云）20MB/s → 9 秒；`~/.m2` 已缓存则 0 秒。三条实操：① **配镜像**（`settings.xml` 的 `<mirrors>` 指向阿里云），这是「Maven 慢」最常见也最有效的解法；② **CI 缓存 `~/.m2/repository`**（GitHub Actions 的 `actions/cache`、GitLab 的 `cache: paths`），命中后整个下载段归零；③ **`-o` 离线模式**（依赖已齐时跳过联网检查）+ **`-T 1C` 并行构建**（按核数并行跑模块，多模块工程能再省 50%）。顺带解释两个常见困惑：**为什么删了 `target` 还要重下依赖**——`target` 是构建输出，依赖在 `~/.m2`，删前者不影响后者；**为什么 `mvn` 第一次特别慢**——它在下载 Maven 自己的插件（`maven-compiler-plugin`、`maven-surefire-plugin` 等），这些也是 jar，也走同一条下载路径。更远一步：Gradle 的增量构建和构建缓存比 Maven 快，但多模块工程的依赖下载问题是一样的——**镜像 + 缓存**是通用解。"
+   }
   ]
  }
 }

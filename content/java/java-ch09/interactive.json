@@ -2,7 +2,7 @@
   "chapter": "java-ch09",
   "subject": "java",
   "title": "工程与框架：Maven 与 Spring Boot 入门",
-  "fingerprint": "f8e72843bc",
+  "fingerprint": "437070f155",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,115 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "Maven 首次构建，大半时间在等下载",
+      "brief": "`mvn clean package` 卡住十分钟，多数人以为是「代码多」。实际是依赖下载：12 个模块展开约 73 个 jar、182MB，中央仓库直连 2MB/s 就是 91 秒，而真正编译只占 36 秒。把模块数、仓库镜像与本地缓存拖到真实值，看「Maven 慢」到底慢在哪。",
+      "params": [
+        {
+          "key": "modules",
+          "label": "Maven 模块数",
+          "min": 1,
+          "max": 40,
+          "step": 1,
+          "value": 12
+        },
+        {
+          "key": "mirror",
+          "label": "仓库地址",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "中央仓库直连 2MB/s",
+            "国内镜像 20MB/s"
+          ]
+        },
+        {
+          "key": "cache",
+          "label": "本地仓库 ~/.m2",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "空（首次构建）",
+            "已缓存依赖"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "jars",
+          "label": "依赖 jar 数",
+          "expr": "25 + modules * 4",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "depMB",
+          "label": "依赖总大小",
+          "expr": "(25 + modules * 4) * 2.5",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "dlS",
+          "label": "依赖下载耗时",
+          "expr": "if(cache == 1, 0, (25 + modules * 4) * 2.5 / if(mirror == 1, 20, 2))",
+          "unit": "秒",
+          "fmt": "int"
+        },
+        {
+          "key": "compileS",
+          "label": "编译打包耗时",
+          "expr": "modules * 3",
+          "unit": "秒",
+          "fmt": "int"
+        },
+        {
+          "key": "totalS",
+          "label": "构建总耗时",
+          "expr": "if(cache == 1, 0, (25 + modules * 4) * 2.5 / if(mirror == 1, 20, 2)) + modules * 3",
+          "unit": "秒",
+          "fmt": "int"
+        },
+        {
+          "key": "dlPct",
+          "label": "下载占比",
+          "expr": "dlS * 100 / totalS",
+          "unit": "%",
+          "fmt": "int"
+        },
+        {
+          "key": "ciMinPerDay",
+          "label": "CI 每天等待（20 次）",
+          "expr": "totalS * 20 / 60",
+          "unit": "分钟",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "modules >= 10",
+          "label": "Maven 模块 ≥10 个（多模块工程）"
+        },
+        {
+          "expr": "totalS <= 90",
+          "label": "构建总耗时 ≤90 秒"
+        },
+        {
+          "expr": "dlS <= 30",
+          "label": "依赖下载 ≤30 秒"
+        },
+        {
+          "expr": "dlPct <= 50",
+          "label": "下载不超过总耗时一半（构建才是主体）"
+        }
+      ],
+      "insight": "Maven 的耗时 = **依赖解析与下载** + **插件执行（编译/测试/打包）**，而第一段跟你的代码量几乎无关，只跟依赖树的规模有关。12 个模块的工程依赖树展开约 73 个 jar（每个 starter 会带一串传递依赖），平均 2.5MB/个 = 182MB。中央仓库从国内直连约 2MB/s → 91 秒；换成国内镜像（阿里云/华为云）20MB/s → 9 秒；`~/.m2` 已缓存则 0 秒。三条实操：① **配镜像**（`settings.xml` 的 `<mirrors>` 指向阿里云），这是「Maven 慢」最常见也最有效的解法；② **CI 缓存 `~/.m2/repository`**（GitHub Actions 的 `actions/cache`、GitLab 的 `cache: paths`），命中后整个下载段归零；③ **`-o` 离线模式**（依赖已齐时跳过联网检查）+ **`-T 1C` 并行构建**（按核数并行跑模块，多模块工程能再省 50%）。顺带解释两个常见困惑：**为什么删了 `target` 还要重下依赖**——`target` 是构建输出，依赖在 `~/.m2`，删前者不影响后者；**为什么 `mvn` 第一次特别慢**——它在下载 Maven 自己的插件（`maven-compiler-plugin`、`maven-surefire-plugin` 等），这些也是 jar，也走同一条下载路径。更远一步：Gradle 的增量构建和构建缓存比 Maven 快，但多模块工程的依赖下载问题是一样的——**镜像 + 缓存**是通用解。"
+    },
     {
       "kind": "match",
       "pairs": [

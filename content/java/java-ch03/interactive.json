@@ -2,7 +2,7 @@
   "chapter": "java-ch03",
   "subject": "java",
   "title": "继承与多态：extends、方法重写、抽象类与接口",
-  "fingerprint": "f063875e1d",
+  "fingerprint": "b6a9027491",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,108 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "多实现调用点，JIT 不再内联",
+      "brief": "一个 `shape.area()` 调用点在循环里被一百万个对象调用。如果这些对象的实际类型只有一两种，JIT 会内联成「判断类型 + 直接算」；一旦超过两种，调用点变成 megamorphic，只能查 itable，每次慢 10 倍，而且内联失效会连带失去逃逸分析和锁消除。把实现类数量、调用次数与调用点组织方式拖到真实值，看这 20 纳秒怎么来的。",
+      "params": [
+        {
+          "key": "impls",
+          "label": "实现类数量",
+          "min": 3,
+          "max": 24,
+          "step": 1,
+          "value": 12
+        },
+        {
+          "key": "callsM",
+          "label": "调用次数（百万）",
+          "min": 1,
+          "max": 200,
+          "step": 1,
+          "value": 100
+        },
+        {
+          "key": "split",
+          "label": "调用点组织",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "一个调用点吃下所有类型",
+            "按类型拆成独立调用点"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "calls",
+          "label": "调用次数",
+          "expr": "callsM * 1000000",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "nsPer",
+          "label": "单次调用成本",
+          "expr": "if(split == 1, 2, if(impls <= 2, 3, 22))",
+          "unit": "ns",
+          "fmt": "int"
+        },
+        {
+          "key": "totalMs",
+          "label": "总耗时",
+          "expr": "callsM * 1000000 * if(split == 1, 2, if(impls <= 2, 3, 22)) / 1000000",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "itableLookups",
+          "label": "itable 查表次数",
+          "expr": "if(split == 1, 0, callsM * 1000000)",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "inlined",
+          "label": "是否可内联",
+          "expr": "if(split == 1, 1, 0)",
+          "unit": "是/否",
+          "fmt": "int"
+        },
+        {
+          "key": "slowdown",
+          "label": "相对单态减速",
+          "expr": "if(split == 1, 1, if(impls <= 2, 1, 11))",
+          "unit": "×",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "impls >= 6",
+          "label": "实现类 ≥6 种（真实业务的策略/插件体系）"
+        },
+        {
+          "expr": "calls >= 50000000",
+          "label": "调用 ≥5000 万次（热点路径）"
+        },
+        {
+          "expr": "totalMs <= 500",
+          "label": "总耗时 ≤500ms"
+        },
+        {
+          "expr": "slowdown <= 2",
+          "label": "相对单态减速 ≤2 倍（JIT 必须能内联）"
+        },
+        {
+          "expr": "itableLookups <= 1000000",
+          "label": "itable 查表 ≤100 万次"
+        }
+      ],
+      "insight": "JVM 的虚方法调用有四个 fast path（`invokevirtual` / `invokeinterface` 同理）：**单态（monomorphic）**——调用点只见过一种实际类型，JIT 编译成「比较 Klass 指针 + 直接跳转」，并且**可以内联**；**双态（bimorphic）**——见过两种，编译成一次条件分支 + 两段内联代码，仍然很快；**多态（polymorphic，≤2 种即算）** 同上；**超多态（megamorphic，>2 种）**——JIT 放弃，退回 itable 查表（约 20ns）。注意 20ns 本身不算什么，**真正的代价是内联失效**：内联是逃逸分析、标量替换、锁消除、常量折叠的**前置条件**，一个 megamorphic 调用点会让整条调用链失去优化机会——实测常常是 5-20 倍。三种正解：① **拆分调用点**：`for (Shape s : list) if (s instanceof Circle c) ... else if ...`，把类型判断提到循环外，每种类型一个单态循环（本例 22ns → 2ns）；② **Visitor 模式**（双重分派）：`shape.accept(visitor)`，每个实现类里写死自己的处理，调用点变成「每种类型一个单态点」；③ **数据导向**：把「按类型分支」换成「按字段/枚举 switch」，或干脆用「数组 + 类型标签」的 SoA 布局，绕开虚调用。反例：Spring 里 `List<Handler>` 遍历 `handler.supports()` 就是典型 megamorphic 场景，量小时无感，量大时要预分组。"
+    },
     {
       "kind": "match",
       "pairs": [

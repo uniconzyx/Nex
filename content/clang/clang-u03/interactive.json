@@ -2,7 +2,7 @@
   "chapter": "clang-u03",
   "subject": "clang",
   "title": "结构体与联合体",
-  "fingerprint": "c6079ed7cf",
+  "fingerprint": "52ba5b43d9",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,103 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "字段顺序换一下，内存省三分之一",
+      "brief": "`struct { char a; int b; char c; double d; }` 的成员加起来 14 字节，`sizeof` 却是 24——中间和末尾被补了 10 字节 padding。编译器不会替你重排字段（C 标准保证声明顺序即内存顺序）。把记录数与字段顺序拖到真实体量，看这一行「调换顺序」能省下多少内存、以及每个缓存行里有多少字节是白读的。",
+      "params": [
+        {
+          "key": "recordsW",
+          "label": "记录数（万）",
+          "min": 10,
+          "max": 800,
+          "step": 10,
+          "value": 200
+        },
+        {
+          "key": "order",
+          "label": "字段声明顺序",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "char,int,char,double",
+            "double,int,char,char"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "records",
+          "label": "记录数",
+          "expr": "recordsW * 10000",
+          "unit": "条",
+          "fmt": "int"
+        },
+        {
+          "key": "sizeBytes",
+          "label": "sizeof(struct)",
+          "expr": "if(order == 0, 24, 16)",
+          "unit": "字节",
+          "fmt": "int"
+        },
+        {
+          "key": "payloadBytes",
+          "label": "真实数据字节",
+          "expr": "14",
+          "unit": "字节",
+          "fmt": "int"
+        },
+        {
+          "key": "paddingBytes",
+          "label": "padding 字节",
+          "expr": "if(order == 0, 10, 2)",
+          "unit": "字节",
+          "fmt": "int"
+        },
+        {
+          "key": "totalMB",
+          "label": "数组总占用",
+          "expr": "recordsW * 10000 * sizeBytes / 1048576",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "padMB",
+          "label": "其中 padding 浪费",
+          "expr": "recordsW * 10000 * if(order == 0, 10, 2) / 1048576",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "usefulPct",
+          "label": "缓存有效字节率",
+          "expr": "if(order == 0, 58, 88)",
+          "unit": "%",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "records >= 1000000",
+          "label": "记录数 ≥100 万（真实的表/数组规模）"
+        },
+        {
+          "expr": "paddingBytes <= 2",
+          "label": "padding ≤2 字节（只允许末尾对齐补齐）"
+        },
+        {
+          "expr": "totalMB <= 40",
+          "label": "总占用 ≤40MB"
+        },
+        {
+          "expr": "usefulPct >= 80",
+          "label": "缓存有效字节率 ≥80%（真实数据要占满缓存行）"
+        }
+      ],
+      "insight": "结构体的 `sizeof` 由三件事决定：**成员顺序**（C 保证按声明顺序排）、**每个成员的对齐要求**（`char` 1、`short` 2、`int` 4、`double`/指针 8）、**结构体整体对齐 = 最大成员的对齐**（末尾也要补齐）。`{char, int, char, double}`：`char`@0，`int` 要 4 对齐所以 @4（补 3），`char`@8，`double` 要 8 对齐所以 @16（补 7），尾部已是 8 的倍数 → **24 字节，10 字节 padding**。按对齐降序重排 `{double, int, char, char}`：@0 / @8 / @12 / @13，尾部补齐到 16 → **16 字节，padding 只剩 2**。省 33%，纯靠调顺序，零成本。三条实操：① **按对齐从大到小声明**（`double/long long/指针` → `int/float` → `short` → `char/bool`），这是唯一一条不需要思考就永远成立的规则；② 百万级数组要考虑 **AoS → SoA**（结构体数组改成数组结构体），顺序扫描只读用到的列，缓存命中率能翻倍；③ 真要压字节再上 `__attribute__((packed))`——但**会破坏对齐**，非对齐访问在 x86 上只是慢，在 ARM 上可能直接 fault，而且取地址会 UB。别忘了 `sizeof` 会和文件格式/网络协议绑定：落盘或发网络前先定死布局，否则换个编译器版本 padding 变了，旧数据就读不出来了（正解是用序列化库或显式 padding 字段）。"
+    },
     {
       "kind": "match",
       "pairs": [
