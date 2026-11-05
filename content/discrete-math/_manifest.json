@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "subject": "discrete-math",
+  "title": "CppMind · 离散数学课程体系（命题逻辑 / 集合关系函数 / 图论）",
+  "note": "离散数学分支。每章须齐备 7 类内容（见 _template 规范），由 server/scripts/validate_content.py 校验。resources 仅存元数据与链接，不存第三方题面/正文，符合合规红线。本章 GitHub 锚点全部指向本章 concept 真实小节（§篇.节 = concept 文件序号.文件内 ## 序号）。",
+  "groups": {
+    "DM1": "命题逻辑与谓词逻辑",
+    "DM2": "集合、关系与函数",
+    "DM3": "图论"
+  },
+  "chapters": [
+    {
+      "id": "dm-ch01",
+      "order": 1,
+      "group": "DM1",
+      "title": "命题逻辑与谓词逻辑：知识表示与自动推理",
+      "summary": "真值表与五个联结词（重点在蕴含只在 1→0 为假、空真）；自然语言符号化与「除非/只有/仅当」方向；等值演算与主析取/主合取范式及其唯一性；推理有效性与归结原理（子句集、互补文字、空子句）；Horn 子句与前向链最小不动点；谓词逻辑的量词、辖域、量词否定与顺序不可交换；SAT 是 NP 完全、2-SAT 线性（蕴含图 + SCC）。配套 10 个可编译 C 程序覆盖真值表枚举、主范式、归结、前向链、2-SAT 判定。",
+      "prerequisites": [],
+      "status": "complete",
+      "resources": {
+        "github": [
+          "sympy/sympy",
+          "Z3Prover/z3",
+          "arminbiere/cadical",
+          "google/or-tools",
+          "jwasham/coding-interview-university"
+        ],
+        "github_stars": [
+          15044,
+          12856,
+          626,
+          14298,
+          363641
+        ],
+        "github_notes": [
+          "§2.2 2. 定义/要点 · 读 `sympy/logic/boolalg.py` 的 `to_dnf` / `to_cnf`：教材手算的「化成主析取/主合取范式」，工业实现就是这几百行——`satisfiable` 底层用 DPLL 判可满足；读完回看本节「范式唯一性」，就能明白机器为什么能靠范式做判定与化简",
+          "§3.2 2. 定义/要点 · 读 `Z3Prover/z3` 的 `src/smt/smt_context.cpp`：工业级 CDCL 的核心循环（单元传播、冲突分析、非时序回溯）都在这里，比任何伪代码都真实；本节讲「推理有效性 ≡ 前件合取蕴涵后件是永真式」，CDCL 正是把「永真/可满足」工程化的求解器",
+          "§3.3 3. 可运行代码 · 读 `arminbiere/cadical` 的 `src/cadical.cpp`：只有几千行却是 SAT Competition 冠军级实现，对照本节「归结 + 学习子句」理解为什么纯归结不够快——现代求解器靠冲突驱动的子句学习才把指数压下来",
+          "§3.4 4. 常用推理规则速查 · 读 `google/or-tools` 的 `ortools/sat/cp_model.cc`：它把业务约束（排班/路径/打包）编译成 SAT 子句，是本节推理规则「实体化」的最好样本——一条「互斥」约束落地就是一对互补文字",
+          "§1.3 3. 可运行代码 · 读 `jwasham/coding-interview-university` 的 README：用它核对「离散数学里哪些点会在面试被追问」（布尔逻辑、位运算、复杂度），再回看本章 examples——10 个 C 程序就是这些点的可运行版本"
+        ],
+        "github_fetched_at": "2026-10-31",
+        "books": [
+          "《离散数学及其应用》（第 8 版）Kenneth H. Rosen，第 1 章 基础：逻辑与证明",
+          "《离散数学》（第 6 版）耿素云、屈婉玲、张立昂，第 1–2 章 命题逻辑 / 谓词逻辑",
+          "《Logic in Computer Science: Modelling and Reasoning about Systems》Huth & Ryan，第 1–2 章",
+          "《Handbook of Satisfiability》（第 2 版）Biere 等，第 1–3 章（DPLL 与 CDCL 综述）"
+        ],
+        "leetcode": [],
+        "nowcoder": [],
+        "bilibili": "https://www.bilibili.com/video/BV1b7411N798/",
+        "bilibili_list": [
+          {
+            "name": "王道 · 数据结构（考研）",
+            "url": "https://www.bilibili.com/video/BV1b7411N798/",
+            "note": "命题逻辑是数据结构里「判定/约束」讨论的语言基础",
+            "bv": "BV1b7411N798"
+          },
+          {
+            "name": "王道 · 计算机组成原理",
+            "url": "https://www.bilibili.com/video/BV1BE411D7ii/",
+            "note": "用门电路理解 ∧/∨/¬ 的物理实现",
+            "bv": "BV1BE411D7ii"
+          },
+          {
+            "name": "王道 · 操作系统（考研）",
+            "url": "https://www.bilibili.com/video/BV1YE411D7nH/",
+            "note": "权限与调度约束里的条件判断",
+            "bv": "BV1YE411D7nH"
+          },
+          {
+            "name": "王道 · 计算机网络（考研）",
+            "url": "https://www.bilibili.com/video/BV19E411D78Q/",
+            "note": "协议状态机的条件组合",
+            "bv": "BV19E411D78Q"
+          }
+        ]
+      },
+      "soft_prerequisites": []
+    }
+  ],
+  "github_resources": [
+    {
+      "repo": "sympy/sympy",
+      "stars": 15044,
+      "url": "https://github.com/sympy/sympy",
+      "note": "符号计算库：logic/boolalg.py 的 to_dnf/to_cnf 是主范式工业实现"
+    },
+    {
+      "repo": "Z3Prover/z3",
+      "stars": 12856,
+      "url": "https://github.com/Z3Prover/z3",
+      "note": "工业级 SMT 求解器：smt_context.cpp 是 CDCL 核心循环"
+    },
+    {
+      "repo": "arminbiere/cadical",
+      "stars": 626,
+      "url": "https://github.com/arminbiere/cadical",
+      "note": "SAT Competition 冠军级 CDCL 求解器，代码精简可对照教学"
+    },
+    {
+      "repo": "google/or-tools",
+      "stars": 14298,
+      "url": "https://github.com/google/or-tools",
+      "note": "Google 约束优化套件：CP-SAT 把业务约束编译成子句"
+    },
+    {
+      "repo": "jwasham/coding-interview-university",
+      "stars": 363641,
+      "url": "https://github.com/jwasham/coding-interview-university",
+      "note": "面试知识地图：核对离散数学哪些点在面试被追问"
+    }
+  ],
+  "resources_fetched_at": "2026-10-31"
+}
