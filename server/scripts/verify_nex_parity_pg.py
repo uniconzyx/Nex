@@ -17,19 +17,31 @@ import subprocess
 import sys
 
 # 把 server 根目录加入 path，使 `app` 包可被导入（脚本位于 server/scripts/ 下）
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+SERVER_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, SERVER_ROOT)
 
-import embedded_postgres as ep
 from sqlalchemy import text
 
-PGDATA = "D:/WB_Workspace/_tmp_pg_verify/pgdata"
-server = ep.get_server(pgdata=PGDATA, cleanup_mode="stop")
-server.ensure_pgdata_inited()
-server.ensure_postgres_running()
-uri = server.get_uri()
-APG = uri.replace("postgresql://", "postgresql+asyncpg://")
-os.environ["DATABASE_URL"] = APG
-print(f"[setup] embedded PG at {APG}")
+# 数据库来源：优先用外部注入的 DATABASE_URL（CI 用 postgres service container），
+# 否则回退到本地 embedded-postgres（Windows 机器，含 PG 18.6 二进制）起临时库。
+# embedded_postgres 仅在本分支按需导入，CI 不装它也能跑。
+EXTERNAL_DB = os.environ.get("DATABASE_URL")
+server = None
+if EXTERNAL_DB:
+    APG = EXTERNAL_DB.replace("postgresql://", "postgresql+asyncpg://")
+    os.environ["DATABASE_URL"] = APG
+    print(f"[setup] 使用外部 DATABASE_URL: {APG}")
+else:
+    import embedded_postgres as ep
+
+    PGDATA = os.environ.get("EMBEDDED_PG_PGDATA", "D:/WB_Workspace/_tmp_pg_verify/pgdata")
+    server = ep.get_server(pgdata=PGDATA, cleanup_mode="stop")
+    server.ensure_pgdata_inited()
+    server.ensure_postgres_running()
+    uri = server.get_uri()
+    APG = uri.replace("postgresql://", "postgresql+asyncpg://")
+    os.environ["DATABASE_URL"] = APG
+    print(f"[setup] embedded PG at {APG}")
 
 # 必须在 import app 之前设置 DATABASE_URL，让 config 读到 PG
 from app.db import Base, SessionLocal, engine  # noqa: E402
@@ -176,7 +188,8 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())
     finally:
-        try:
-            server.cleanup()
-        except Exception:
-            pass
+        if server is not None:
+            try:
+                server.cleanup()
+            except Exception:
+                pass

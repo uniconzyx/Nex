@@ -187,11 +187,12 @@ HEAD 仅跟踪 3707 个文件，但工作树里还有 **175 个已跟踪文件�
 
 ---
 
-## P3 · 双后端收尾（非阻断）
+## P3 · 双后端收尾（非阻断）✅ 已收尾（2026-11-05）
 
-- `server/scripts/verify_nex_parity_pg.py`（真 PG 5 项验收）**尚未接入 CI**，目前靠手动跑。
-- 前端 dev server 长驻验证（`vite dev` + 真登录网关）未做常驻冒烟。
-- 说明：`nex` 与 `auth-server` 两套令牌互不通用，切后端先清令牌已实现，属于已知设计而非缺陷。
+- `server/scripts/verify_nex_parity_pg.py`（真 PG 5 项验收）**已接入 CI**：新增 `.github/workflows/ci.yml` 的 `backend-parity` job，在 `postgres:18` service container 上跑真 PG 端到端验收（迁移 ADD jsonb / 昵称校验 / 整份快照往返 / 非对象 400 / legacy 5 字段回退）。
+- 脚本已改造为 **CI 友好**：`PGDATA` 可用 `EMBEDDED_PG_PGDATA` 覆盖（默认仍为本机 Windows 路径），且若外部注入 `DATABASE_URL` 则跳过 embedded-postgres、直接用注入的真 PG（CI 不装 embedded 也能跑）；`embedded_postgres` 改为按需导入，`server.cleanup()` 也加了存在性保护。本地 embedded 路径已复跑验证：5 项全过、`PG_PARITY_OK`。
+- 前端**构建 + dev server 冒烟**已接入同一 workflow 的 `frontend-smoke` job：`npm ci` → `npm run build`（tsc --noEmit + vite build）→ 起 `vite dev`（:1420）轮询 HTTP 200 并校验入口挂载点，跑完 kill。**说明**：workflow 只在 GitHub 上执行，本沙箱无法实跑，已按仓库真实工具链（`requirements.txt`、`package-lock.json`、vite 端口 1420）对齐；push 后需以首次 CI 结果为准。
+- 说明：`nex` 与 `auth-server` 两套令牌互不通用，切后端先清令牌已实现，属于已知设计而非缺陷。前端"真登录网关"的全栈集成冒烟需活的后端 + 凭据，未纳入自动 job（避免不稳定），留作后续可选（Playwright + 双服务）。
 
 ---
 

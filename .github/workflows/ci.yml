@@ -1,0 +1,84 @@
+name: CI (后端对齐验收 + 前端冒烟)
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  # ===================== 后端双端对齐验收（真 Postgres） =====================
+  backend-parity:
+    name: Nex 后端 PG 端到端验收
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: cppmind
+          POSTGRES_PASSWORD: cppmind
+          POSTGRES_DB: cppmind
+        ports:
+          - "5432:5432"
+        options: >-
+          --health-cmd "pg_isready -U cppmind"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install backend deps
+        run: python -m pip install --upgrade pip && pip install -r requirements.txt
+        working-directory: server
+
+      - name: Run Nex backend parity (真 PG)
+        working-directory: server
+        env:
+          DATABASE_URL: "postgresql://cppmind:cppmind@localhost:5432/cppmind"
+        run: python scripts/verify_nex_parity_pg.py
+
+  # ===================== 前端构建 + dev server 冒烟 =====================
+  frontend-smoke:
+    name: Frontend 构建 + dev server 冒烟
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Build (tsc --noEmit + vite build)
+        run: npm run build
+
+      - name: Dev server 冒烟 (vite dev @ :1420)
+        run: |
+          nohup npm run dev > /tmp/vite-dev.log 2>&1 &
+          VITE_PID=$!
+          # 轮询直到 dev server 返回 200，最多 ~60s
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:1420 >/dev/null 2>&1; then break; fi
+            sleep 2
+          done
+          echo "--- dev server 响应检查 ---"
+          BODY=$(curl -s http://localhost:1420)
+          if [ -z "$BODY" ]; then
+            echo "dev server 未返回任何内容，冒烟失败"; cat /tmp/vite-dev.log; kill $VITE_PID 2>/dev/null; exit 1
+          fi
+          echo "$BODY" | grep -q '<div id="app">' || echo "提示：未检测到 <div id=\"app\">，请确认入口挂载点"
+          echo "dev server 冒烟通过 (HTTP 200, $(echo "$BODY" | wc -c) bytes)"
+          kill $VITE_PID 2>/dev/null
