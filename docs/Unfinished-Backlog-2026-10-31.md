@@ -11,7 +11,7 @@
 >   `verify_labs_sandbox13.mjs` 真机 167/167 通关、`fails: []`；`tsc --noEmit` 与 `vite build` 均通过。
 > - **当前唯一未闭环：推送 `main` 到 GitHub**（网络/认证受限，见文末 P4）。
 > - 全库 `audit_correctness --all --skip-net` 曾报 4 条星数不一致，已按 GitHub API 实时值
->   统一并同步 manifest 修复（`5a9e1ab`）；全量终验进行中。
+>   统一并同步 manifest 修复（`5a9e1ab`）；全量终验 **AUDIT_OK**（160 章 / 3964 检查项 / FAIL 0）。
 
 ## 一、当前达标情况（实跑）
 
