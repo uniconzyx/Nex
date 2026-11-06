@@ -1,4 +1,74 @@
 {
+ "agent/agent-ch01": {
+  "ok": true,
+  "params": [
+   {
+    "key": "util",
+    "type": "range",
+    "value": 0.5
+   },
+   {
+    "key": "retention",
+    "type": "range",
+    "value": 0.65
+   },
+   {
+    "key": "vertical",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "agent/agent-ch02": {
+  "ok": true,
+  "params": [
+   {
+    "key": "examples",
+    "type": "range",
+    "value": 4.0
+   },
+   {
+    "key": "quality",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "agent/agent-ch03": {
+  "ok": true,
+  "params": [
+   {
+    "key": "historyK",
+    "type": "range",
+    "value": 40.0
+   },
+   {
+    "key": "strategy",
+    "type": "opt",
+    "value": 1
+   },
+   {
+    "key": "budgetK",
+    "type": "range",
+    "value": 4.0
+   }
+  ]
+ },
+ "agent/agent-ch04": {
+  "ok": true,
+  "params": [
+   {
+    "key": "taskType",
+    "type": "opt",
+    "value": 1
+   },
+   {
+    "key": "impl",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
  "agent/agent-ch05": {
   "ok": true,
   "params": [
@@ -34,51 +104,176 @@
    }
   ]
  },
- "agent/agent-ch07": {
+ "agent/agent-ch06": {
   "ok": true,
   "params": [
    {
-    "key": "rank",
-    "type": "range",
-    "value": 8.0
+    "key": "quant",
+    "type": "opt",
+    "value": 1
    },
    {
-    "key": "dModel",
-    "type": "range",
-    "value": 4096.0
-   },
-   {
-    "key": "layers",
-    "type": "range",
-    "value": 32.0
-   },
-   {
-    "key": "mountLayers",
+    "key": "ctxK",
     "type": "range",
     "value": 4.0
    },
    {
-    "key": "batch",
+    "key": "concurrency",
     "type": "range",
-    "value": 2.0
+    "value": 4.0
+   }
+  ]
+ },
+ "agent/agent-ch07": {
+  "ok": true,
+  "params": [
+   {
+    "key": "method",
+    "type": "opt",
+    "value": 1
    },
    {
-    "key": "seqLen",
+    "key": "updateFreq",
     "type": "range",
-    "value": 512.0
+    "value": 5.0
    },
    {
-    "key": "baseGB",
+    "key": "dataSizeK",
     "type": "range",
-    "value": 13.0
+    "value": 1.0
+   }
+  ]
+ },
+ "agent/agent-ch08": {
+  "ok": true,
+  "params": [
+   {
+    "key": "scale",
+    "type": "opt",
+    "value": 1
    },
    {
-    "key": "gpuGB",
+    "key": "d_k",
     "type": "range",
-    "value": 24.0
+    "value": 32.0
+   }
+  ]
+ },
+ "agent/agent-ch09": {
+  "ok": true,
+  "params": [
+   {
+    "key": "res",
+    "type": "range",
+    "value": 768.0
    },
    {
-    "key": "gradCkpt",
+    "key": "images",
+    "type": "range",
+    "value": 3.0
+   },
+   {
+    "key": "downsample",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "agent/agent-ch10": {
+  "ok": true,
+  "params": [
+   {
+    "key": "sampleN",
+    "type": "range",
+    "value": 400.0
+   },
+   {
+    "key": "effect",
+    "type": "range",
+    "value": 0.05
+   }
+  ]
+ },
+ "agent/agent-ch11": {
+  "ok": true,
+  "params": [
+   {
+    "key": "toolCount",
+    "type": "range",
+    "value": 40.0
+   },
+   {
+    "key": "prune",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "agent/agent-ch12": {
+  "ok": true,
+  "params": [
+   {
+    "key": "humanPct",
+    "type": "range",
+    "value": 50.0
+   },
+   {
+    "key": "automation",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "agent/agent-ch13": {
+  "ok": true,
+  "params": [
+   {
+    "key": "pass1Frac",
+    "type": "range",
+    "value": 0.4
+   }
+  ]
+ },
+ "agent/agent-ch14": {
+  "ok": true,
+  "params": [
+   {
+    "key": "selfGrade",
+    "type": "range",
+    "value": 4.0
+   },
+   {
+    "key": "evidence",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "agent/agent-ch15": {
+  "ok": true,
+  "params": [
+   {
+    "key": "feasibleDays",
+    "type": "range",
+    "value": 30.0
+   },
+   {
+    "key": "availableDays",
+    "type": "range",
+    "value": 30.0
+   }
+  ]
+ },
+ "agent/agent-ch16": {
+  "ok": true,
+  "params": [
+   {
+    "key": "bullets",
+    "type": "range",
+    "value": 5.0
+   },
+   {
+    "key": "hasMetrics",
     "type": "opt",
     "value": 1
    }

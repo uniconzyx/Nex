@@ -2,7 +2,7 @@
   "chapter": "agent-ch11",
   "subject": "agent",
   "title": "Agent 系统开发：工具、记忆、规划与多智能体",
-  "fingerprint": "0523c6f099",
+  "fingerprint": "993436bdaa",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,53 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "工具清单不裁剪",
+      "brief": "一个 Agent 接了 50 个工具，每个工具的 JSON Schema 约 200 token。如果每次请求都把**全部 50 个**塞进上下文，光工具定义就占 1 万 token，模型还容易选错工具。把工具数和是否按会话裁剪拖一拖，看上下文占用。",
+      "params": [
+        {
+          "key": "toolCount",
+          "label": "接入的工具数",
+          "min": 2,
+          "max": 50,
+          "step": 1,
+          "value": 50
+        },
+        {
+          "key": "prune",
+          "label": "是否按会话裁剪",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "全量塞进上下文",
+            "按本轮会话裁剪到相关子集"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "ctxTokens",
+          "label": "工具占用 token",
+          "expr": "toolCount * 200 * if(prune == 1, 0.2, 1)",
+          "unit": "token",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "toolCount >= 40",
+          "label": "工具确实很多（成熟 Agent 的真实处境）"
+        },
+        {
+          "expr": "ctxTokens <= 4000",
+          "label": "工具占用 ≤4000 token（裁剪的硬判据）"
+        }
+      ],
+      "insight": "工具（function calling / MCP）是 Agent 的能力来源，但**工具越多不等于越强，反而越容易选错、越费 token**。50 个工具全塞进 system prompt，既吃掉上下文预算，又让模型在无关工具里犹豫。正确做法是**按会话/按子任务动态裁剪**：根据当前意图只暴露最相关的 5~10 个工具（类似 RAG 的检索思路）。配套纪律：① 工具描述也是 schema 的一部分，写清楚「何时用、参数含义、枚举值」；② **幂等键 + TTL** 防止重复调用；③ 副作用操作要权限最小化、可审计。工具清单是「越少越准」，不是「越多越全」。"
+    },
     {
       "kind": "match",
       "pairs": [

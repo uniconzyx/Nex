@@ -2,7 +2,7 @@
   "chapter": "agent-ch03",
   "subject": "agent",
   "title": "模型接入与 DeepSeek 实操：第一次让程序真的说话",
-  "fingerprint": "63589a3b0b",
+  "fingerprint": "573dfddf7b",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,68 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "上下文窗口不截断，成本爆炸",
+      "brief": "一个跑了一个上午的长对话，历史已经累积到 32K token。如果每轮都把**全部历史**重新发给模型，token 用量随轮次线性增长，到后面单次请求就顶满上下文、账单暴涨。把历史长度、是否截断和截断预算拖一拖，看实际发送量。",
+      "params": [
+        {
+          "key": "historyK",
+          "label": "历史累积 token",
+          "min": 4,
+          "max": 64,
+          "step": 1,
+          "value": 32
+        },
+        {
+          "key": "strategy",
+          "label": "历史处理",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "每轮全量重发历史",
+            "按预算截断（保留系统提示 + 最近若干轮）"
+          ]
+        },
+        {
+          "key": "budgetK",
+          "label": "截断预算（保留 token）",
+          "min": 4,
+          "max": 32,
+          "step": 1,
+          "value": 8
+        }
+      ],
+      "metrics": [
+        {
+          "key": "sentK",
+          "label": "单次实际发送 token",
+          "expr": "if(strategy == 0, historyK, min(historyK, budgetK))",
+          "unit": "K",
+          "fmt": "int"
+        },
+        {
+          "key": "ctxLimit",
+          "label": "上下文上限",
+          "expr": "16",
+          "unit": "K",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "historyK >= 40",
+          "label": "历史确实很长（长对话的真实状态）"
+        },
+        {
+          "expr": "sentK <= 16",
+          "label": "单次发送 ≤16K（不顶满上下文的硬判据）"
+        }
+      ],
+      "insight": "**上下文窗口不是「免费内存」**——每多塞一个 token 都直接变成钱（按 token 计费）和延迟。长对话最常见的浪费是「无脑重发全量历史」：第 100 轮和第 1 轮看到的是同一份 32K 历史，但第 100 轮其实只关心最近几轮 + 系统设定。正确做法是**预算化截断**：① 系统提示常驻；② 最近 N 轮全留；③ 更早的历史做摘要压缩成一小段；④ 必要时把长期记忆外置到向量库，按需检索而不是全塞进窗口。截断的代价是可能丢远期细节，所以**摘要**比硬删更稳——这是 RAG 与对话管理的通用思路。"
+    },
     {
       "kind": "match",
       "pairs": [

@@ -2,7 +2,7 @@
   "chapter": "agent-ch07",
   "subject": "agent",
   "title": "轻量化微调：LoRA / QLoRA 与数据工程",
-  "fingerprint": "81d2e75fd3",
+  "fingerprint": "bdab35fdbd",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -18,186 +18,58 @@
   "modules": [
     {
       "kind": "sandbox",
-      "title": "LoRA 显存账本：先爆的不是权重",
-      "brief": "LoRA 参数量 = rank × (d_in+d_out) × 层数 × 挂载层数，rank 翻倍参数就翻倍。但显存账本里最大的一项往往是激活，不是权重。拖 rank、批大小、序列长度与挂载层数，把总占用压进显卡。",
+      "title": "高频更新场景用微调",
+      "brief": "一个知识库每月更新 10 次。如果走微调路线，每次更新都要重新训练（训练费 + 数据准备 + 重部署）；如果走 RAG，更新只是往向量库里刷文档，几乎零成本。把实现方式、更新频率和数据量拖一拖，看月成本。",
       "params": [
         {
-          "key": "rank",
-          "label": "rank",
-          "min": 4,
-          "max": 128,
-          "step": 4,
-          "value": 16
-        },
-        {
-          "key": "dModel",
-          "label": "隐藏维度 d",
-          "min": 1024,
-          "max": 8192,
-          "step": 512,
-          "value": 4096
-        },
-        {
-          "key": "layers",
-          "label": "层数",
-          "min": 12,
-          "max": 80,
-          "step": 4,
-          "value": 32
-        },
-        {
-          "key": "mountLayers",
-          "label": "每层挂载数",
-          "min": 1,
-          "max": 7,
-          "step": 1,
-          "value": 4
-        },
-        {
-          "key": "batch",
-          "label": "批大小",
-          "min": 1,
-          "max": 32,
-          "step": 1,
-          "value": 32
-        },
-        {
-          "key": "seqLen",
-          "label": "序列长度",
-          "min": 256,
-          "max": 4096,
-          "step": 256,
-          "value": 4096,
-          "unit": "tok"
-        },
-        {
-          "key": "baseGB",
-          "label": "基座权重",
-          "min": 1,
-          "max": 70,
-          "step": 1,
-          "value": 13,
-          "unit": "GB"
-        },
-        {
-          "key": "gpuGB",
-          "label": "显卡显存",
-          "min": 8,
-          "max": 80,
-          "step": 8,
-          "value": 24,
-          "unit": "GB"
-        },
-        {
-          "key": "gradCkpt",
-          "label": "梯度检查点",
+          "key": "method",
+          "label": "实现方式",
           "min": 0,
           "max": 1,
           "step": 1,
           "value": 0,
           "labels": [
-            "关",
-            "开"
+            "微调（每次更新重训）",
+            "RAG（检索增强）"
           ]
+        },
+        {
+          "key": "updateFreq",
+          "label": "知识更新频率",
+          "min": 1,
+          "max": 30,
+          "step": 1,
+          "value": 10
+        },
+        {
+          "key": "dataSizeK",
+          "label": "训练数据量（千条）",
+          "min": 1,
+          "max": 100,
+          "step": 1,
+          "value": 50
         }
       ],
       "metrics": [
         {
-          "key": "paramsPerLayer",
-          "label": "每层挂载参数量",
-          "expr": "2 * rank * dModel",
-          "unit": "个",
+          "key": "trainCost",
+          "label": "训练/刷新月成本",
+          "expr": "if(method == 0, 5000 + updateFreq * 200 + dataSizeK * 10, updateFreq * 50)",
+          "unit": "元",
           "fmt": "int"
-        },
-        {
-          "key": "totalParams",
-          "label": "LoRA 总参数",
-          "expr": "2 * rank * dModel * layers * mountLayers",
-          "unit": "个",
-          "fmt": "int"
-        },
-        {
-          "key": "adapterMB",
-          "label": "适配器显存",
-          "expr": "2 * rank * dModel * layers * mountLayers * 2 / 1000000",
-          "unit": "MB",
-          "fmt": "fix2"
-        },
-        {
-          "key": "actMB",
-          "label": "激活显存",
-          "expr": "batch * seqLen * dModel * layers * 2 / 1000000 * if(gradCkpt == 1, 0.125, 1)",
-          "unit": "MB",
-          "fmt": "int"
-        },
-        {
-          "key": "totalGB",
-          "label": "显存总占用",
-          "expr": "baseGB + (2 * rank * dModel * layers * mountLayers * 2 / 1000000 + batch * seqLen * dModel * layers * 2 / 1000000 * if(gradCkpt == 1, 0.125, 1)) / 1024",
-          "unit": "GB",
-          "fmt": "fix2"
-        },
-        {
-          "key": "fits",
-          "label": "是否放得下",
-          "expr": "if(baseGB + (2 * rank * dModel * layers * mountLayers * 2 / 1000000 + batch * seqLen * dModel * layers * 2 / 1000000 * if(gradCkpt == 1, 0.125, 1)) / 1024 <= gpuGB, 1, 0)",
-          "fmt": "int"
-        },
-        {
-          "key": "scaleRatio",
-          "label": "缩放 α/r（α=32）",
-          "expr": "32 / rank",
-          "unit": "倍",
-          "fmt": "fix2"
         }
       ],
       "checks": [
         {
-          "expr": "fits == 1",
-          "label": "显存放得下"
+          "expr": "updateFreq >= 5",
+          "label": "知识确实频繁更新（这是场景前提）"
         },
         {
-          "expr": "adapterMB <= 512",
-          "label": "适配器 ≤512MB（LoRA 的意义是只训一小部分）"
-        },
-        {
-          "expr": "rank >= 8",
-          "label": "rank ≥8（再小往往学不会）"
-        },
-        {
-          "expr": "batch >= 2",
-          "label": "批 ≥2（单样本梯度噪声大）"
-        },
-        {
-          "expr": "seqLen >= 512",
-          "label": "序列 ≥512 tok（再短覆盖不了典型任务）"
-        },
-        {
-          "expr": "baseGB == 13",
-          "label": "基座固定 7B/13GB（fp16 的固有体积）"
-        },
-        {
-          "expr": "gpuGB == 24",
-          "label": "显卡固定 24GB（既定硬件预算）"
-        },
-        {
-          "expr": "mountLayers == 4",
-          "label": "每层固定挂 q/k/v/o 四件套"
-        },
-        {
-          "expr": "dModel == 4096",
-          "label": "隐藏维度固定 4096（模型结构既定）"
-        },
-        {
-          "expr": "layers == 32",
-          "label": "层数固定 32（模型结构既定）"
-        },
-        {
-          "expr": "gradCkpt == 1",
-          "label": "必须开梯度检查点（救 OOM 的第一步，几乎不损精度）"
+          "expr": "trainCost <= 2000",
+          "label": "月成本 ≤2000 元（RAG 的硬判据）"
         }
       ],
-      "insight": "LoRA 参数量 = rank × (d_in+d_out) × 层数 × 挂载层数，rank 翻倍参数量就翻倍，但表达力提升通常远小于 4 倍——所以默认 r=16 挂 q/k/v/o 跑基线。显存账本里最大的一项往往是激活而不是权重：7B 权重 13.5GB 是固定的，激活随手就是几 GB 且随 batch×seq 线性涨。所以救 OOM 的顺序是「先开梯度检查点 → 降 seq/batch → 最后才降 rank」。另外 α 要和 rank 一起调：LoRA 输出乘 α/r，只翻 rank 不调 α 等于把有效学习率减半。"
+      "insight": "「微调还是 RAG」这道题，**答案不在模型效果，在知识更新的频率**。 微调把知识**烧进权重**，好处是推理时零检索、延迟低；坏处是知识一变就得重训，而重训又慢又贵又容易遗忘旧知识（灾难性遗忘）。所以：知识稳定、追求低延迟 → 微调更合适；**知识频繁变动 → RAG 完胜**，因为更新只是刷检索库。一个常见误区是「想用微调提升推理能力」——微调主要补的是**领域知识/风格**，推理能力靠底座模型和基础 prompt，不会靠灌数据训出来。先问「这知识多久变一次」再选型。"
     },
     {
       "kind": "match",

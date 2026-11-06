@@ -2,7 +2,7 @@
   "chapter": "agent-ch12",
   "subject": "agent",
   "title": "商业化与行业解决方案：从 demo 到能签单",
-  "fingerprint": "5e0978053d",
+  "fingerprint": "de1de7feef",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,60 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "人工兜底吃掉利润",
+      "brief": "一个 AI 任务的成本分四块：token 费、推理卡时、向量库、人工兜底。前三项都随着规模摊薄，唯独**人工兜底最刚性**——每次兜底都要人肉介入。如果 60% 的任务要人工接手，单次成本直接翻倍。把人工兜底占比和是否自动化拖一拖，看单次成本。",
+      "params": [
+        {
+          "key": "humanPct",
+          "label": "人工兜底占比",
+          "min": 0,
+          "max": 80,
+          "step": 5,
+          "value": 60
+        },
+        {
+          "key": "automation",
+          "label": "是否自动化兜底",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "人工接手（无自动化）",
+            "用规则/模型自动兜底"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "effHuman",
+          "label": "实际人工占比",
+          "expr": "if(automation == 1, humanPct * 0.2, humanPct)",
+          "unit": "%",
+          "fmt": "int"
+        },
+        {
+          "key": "totalCost",
+          "label": "单次任务成本",
+          "expr": "100 + effHuman * 5",
+          "unit": "元",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "humanPct >= 50",
+          "label": "人工兜底确实大量存在（场景前提）"
+        },
+        {
+          "expr": "totalCost <= 300",
+          "label": "单次成本 ≤300 元（自动化的硬判据）"
+        }
+      ],
+      "insight": "算 AI 业务的单位经济（unit economics）时，最容易低估的一项是**人工兜底**。token、卡时、向量库都是「规模越大越便宜」的变动成本；人工兜底却是**刚性固定成本**——人不能无限堆叠，且人的时间贵。占比一高，毛利直接被吃穿。三种计费模式（按席位 / 按调用 / 按效果）的本质区别，就是**风险（包括兜底成本）由谁承担**：按效果计费最危险，因为「效果」本身可争议，兜底成本可能全落回服务商。破局靠**自动化兜底**：用规则 / 小模型处理高频简单 case，把人留给真正棘手的 5%，人工占比从 60% 压到 12%，成本曲线立刻变平。"
+    },
     {
       "kind": "match",
       "pairs": [

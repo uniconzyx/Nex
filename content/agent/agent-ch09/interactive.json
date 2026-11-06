@@ -2,7 +2,7 @@
   "chapter": "agent-ch09",
   "subject": "agent",
   "title": "多模态应用开发：图像、文档与语音的工程接口",
-  "fingerprint": "e7647c3a14",
+  "fingerprint": "4ba9b3f9cc",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,79 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "高分辨率多图，视觉 token 爆炸",
+      "brief": "多模态模型把图像切成 patch 变成视觉 token（每 14×14 像素一个）。一张 1024px 的图约 5300 个 token，8 张图就是 4.2 万——直接顶爆上下文、账单爆炸。把分辨率和是否降采样拖一拖，看视觉 token 数。",
+      "params": [
+        {
+          "key": "res",
+          "label": "图像边长",
+          "min": 224,
+          "max": 1024,
+          "step": 32,
+          "value": 1024
+        },
+        {
+          "key": "images",
+          "label": "图像张数",
+          "min": 1,
+          "max": 10,
+          "step": 1,
+          "value": 8
+        },
+        {
+          "key": "downsample",
+          "label": "是否降采样",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "原分辨率送模型",
+            "降采样到 256px 再切块"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "effRes",
+          "label": "实际边长",
+          "expr": "if(downsample == 1, 256, res)",
+          "unit": "px",
+          "fmt": "int"
+        },
+        {
+          "key": "patches",
+          "label": "切块数",
+          "expr": "pow(effRes / 14, 2) * images",
+          "unit": "块",
+          "fmt": "int"
+        },
+        {
+          "key": "visTokens",
+          "label": "视觉 token 数",
+          "expr": "pow(effRes / 14, 2) * images",
+          "unit": "个",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "res >= 768",
+          "label": "原图确实高分辨率（文档/图纸场景）"
+        },
+        {
+          "expr": "images >= 3",
+          "label": "确实多图（多页文档 / 多视角）"
+        },
+        {
+          "expr": "visTokens <= 5000",
+          "label": "视觉 token ≤5000（降采样的硬判据）"
+        }
+      ],
+      "insight": "多模态的成本几乎全藏在**视觉 token**里：文本 token 一个词几个，视觉 token 一张图几千上万个。而视觉 token 数 = (边长/14)² × 张数，是**随分辨率平方增长**的——1024px 比 256px 多 16 倍 token。降本是显学：① **降采样**到模型能接受的最低分辨率（很多任务 256~384px 足够）；② **限张数**（多页文档只送关键页）；③ **分块预算**（按内容重要性分配 token 配额）。还有「长宽比」陷阱：把长表格硬塞进正方形画布会丢失细节或产生大量空白 patch，应按原始纵横比切、再按需补充。"
+    },
     {
       "kind": "match",
       "pairs": [

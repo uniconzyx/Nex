@@ -2,7 +2,7 @@
   "chapter": "agent-ch15",
   "subject": "agent",
   "title": "项目实操：端到端交付一个可演示的 Agent 产品",
-  "fingerprint": "37ce31553e",
+  "fingerprint": "9dea04707e",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,56 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "关键路径超过可用人天",
+      "brief": "评估一个 idea 的可行性，核心公式是：**可行性 = 关键路径人天 ≤ 可用人天**。如果关键路径要 45 人天，但团队这个 sprint 只有 20 人天，这个项目就落不了地——不是「努力一下就行」，是数学上不可行。把关键路径和可用人天拖一拖，看是否成立。",
+      "params": [
+        {
+          "key": "feasibleDays",
+          "label": "关键路径人天",
+          "min": 5,
+          "max": 60,
+          "step": 1,
+          "value": 45
+        },
+        {
+          "key": "availableDays",
+          "label": "可用的人天",
+          "min": 5,
+          "max": 60,
+          "step": 1,
+          "value": 20
+        }
+      ],
+      "metrics": [
+        {
+          "key": "feasible",
+          "label": "是否可行",
+          "expr": "if(feasibleDays <= availableDays, 1, 0)",
+          "unit": "是/否",
+          "fmt": "int"
+        },
+        {
+          "key": "slack",
+          "label": "余量（人天）",
+          "expr": "availableDays - feasibleDays",
+          "unit": "天",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "feasibleDays >= 30",
+          "label": "关键路径确实很长（场景前提）"
+        },
+        {
+          "expr": "feasible == 1",
+          "label": "关键路径 ≤ 可用人天（可行性的硬判据）"
+        }
+      ],
+      "insight": "选题决策最容易被「我觉得能行」带偏。**可行性是个不等式，不是形容词**：关键路径（最长依赖链）的人天，必须 ≤ 这个周期内可用的人天，否则再好的 idea 也落不了地。关键动作有两个：① **先写基线**——一个最简可跑版本，用来暴露真问题，而不是一上来追求完美；② **缩小范围说明书**（scope freeze）：明确「不做什么」，任何变更请求先评估对工期的风险再决定。当关键路径超了，正确反应是**砍范围**（把 feasibleDays 压下来），而不是指望「大家加加班」——加班改变不了关键路径，只会 burnout。评分卡三维（痛感/可行性/差异化）里，可行性是硬闸。"
+    },
     {
       "kind": "match",
       "pairs": [

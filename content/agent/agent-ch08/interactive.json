@@ -2,7 +2,7 @@
   "chapter": "agent-ch08",
   "subject": "agent",
   "title": "Transformer 核心机理：能白板推一遍才算懂",
-  "fingerprint": "b9be0c19ff",
+  "fingerprint": "e1f06aef36",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,60 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "注意力忘了除以 √d_k",
+      "brief": "缩放点积注意力里，QK^T 的结果量级会随维度 d_k 线性膨胀。如果忘了除以 √d_k，d_k=64 时 logit 直接飙到 64，softmax 一饱和就变成 one-hot，梯度消失、模型学不到东西。把维度和是否缩放拖一拖，看 logit 量级。",
+      "params": [
+        {
+          "key": "scale",
+          "label": "是否按 √d_k 缩放",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "不缩放（QK^T 直接进 softmax）",
+            "除以 √d_k（标准做法）"
+          ]
+        },
+        {
+          "key": "d_k",
+          "label": "注意力维度",
+          "min": 32,
+          "max": 128,
+          "step": 32,
+          "value": 64
+        }
+      ],
+      "metrics": [
+        {
+          "key": "maxLogit",
+          "label": "注意力 logit 量级",
+          "expr": "if(scale == 0, d_k, round(pow(d_k, 0.5)))",
+          "unit": "×",
+          "fmt": "int"
+        },
+        {
+          "key": "softmaxEntropy",
+          "label": "softmax 熵（越低越饱和）",
+          "expr": "if(scale == 0, 0.1, 2.5)",
+          "unit": "nat",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "d_k >= 32",
+          "label": "维度至少 32（真实模型）"
+        },
+        {
+          "expr": "maxLogit <= 10",
+          "label": "logit 量级 ≤10（缩放的硬判据，否则 softmax 饱和）"
+        }
+      ],
+      "insight": "这是 Transformer 里最经典的一个「一行代码的 bug」。**QK^T 的方差随维度 d_k 线性增长**，不除以 √d_k 的话，维度一高 logit 就爆炸，softmax 把概率压成 one-hot，注意力变成「只盯一个词」，梯度也几乎为零——模型基本学不动。除以 √d_k 把 logit 拉回与维度无关的稳定量级（~√d_k），softmax 才有平滑的分布、梯度才正常流动。顺带的两个检查点：① **多头**不是装饰——h=1 时多头退化成单头，表达力骤降；② **mask 必须加在 softmax 之前**，否则未来 token 的信息会泄漏进当前位置。这些都是训练不出来、但一错就全跪的硬规则。"
+    },
     {
       "kind": "match",
       "pairs": [

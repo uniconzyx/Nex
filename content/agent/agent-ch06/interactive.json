@@ -2,7 +2,7 @@
   "chapter": "agent-ch06",
   "subject": "agent",
   "title": "私有化部署与推理服务：把模型放进自己的机房",
-  "fingerprint": "e1310dc8c4",
+  "fingerprint": "ae26f5505d",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,86 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "70B 模型显存放不进卡",
+      "brief": "要部署一个 70B 模型。FP16 权重约 140GB——单张 80GB 的卡根本放不下，要么多卡切分、要么量化。换成 INT4 权重约 35GB，单卡就能跑。把量化方式、上下文长度和并发拖一拖，看权重是否放得进显存。",
+      "params": [
+        {
+          "key": "quant",
+          "label": "量化方式",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "FP16（不量化）",
+            "INT4（4bit 量化）"
+          ]
+        },
+        {
+          "key": "ctxK",
+          "label": "上下文长度",
+          "min": 4,
+          "max": 32,
+          "step": 4,
+          "value": 16
+        },
+        {
+          "key": "concurrency",
+          "label": "目标并发",
+          "min": 1,
+          "max": 32,
+          "step": 1,
+          "value": 8
+        }
+      ],
+      "metrics": [
+        {
+          "key": "weightGB",
+          "label": "权重占用",
+          "expr": "if(quant == 0, 140, 35)",
+          "unit": "GB",
+          "fmt": "int"
+        },
+        {
+          "key": "kvGB",
+          "label": "KV Cache 占用",
+          "expr": "concurrency * ctxK * 0.02",
+          "unit": "GB",
+          "fmt": "fix2"
+        },
+        {
+          "key": "totalGB",
+          "label": "总显存",
+          "expr": "weightGB + kvGB",
+          "unit": "GB",
+          "fmt": "fix2"
+        },
+        {
+          "key": "gpuMem",
+          "label": "单卡显存",
+          "expr": "80",
+          "unit": "GB",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "ctxK >= 4",
+          "label": "上下文至少几 K（真实请求）"
+        },
+        {
+          "expr": "concurrency >= 4",
+          "label": "至少 4 并发（服务化部署）"
+        },
+        {
+          "expr": "weightGB <= gpuMem",
+          "label": "权重放得进单卡（INT4 的硬判据）"
+        }
+      ],
+      "insight": "部署大模型第一件事就是**算显存账本**：显存 = 权重 + KV Cache + 激活 + 碎片。权重是最大头，而**量化是并发成立的前提**——FP16 的 70B 要 140GB，单卡 80GB 根本塞不下，要么张量并行切多卡（通信开销、工程复杂），要么 INT4/INT8 量化把权重砍到 1/4~1/2。KV Cache 是第二大头，随「上下文长度 × 并发」线性增长，所以**长上下文 + 高并发**是显存杀手，vLLM 的 PagedAttention 就是把 KV Cache 当虚拟内存分页管理来省碎片。选型时先按「P99 上下文 × 目标并发」反推 KV 预算，再看权重放不放得下，最后才选引擎。"
+    },
     {
       "kind": "match",
       "pairs": [
