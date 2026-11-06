@@ -10,6 +10,8 @@
 > - **sandbox 交互玩法 167/167 全章闭合**（模块 179 = sandbox 167 + debug 12），
 >   `verify_labs_sandbox13.mjs` 真机 167/167 通关、`fails: []`；`tsc --noEmit` 与 `vite build` 均通过。
 > - **当前唯一未闭环：推送 `main` 到 GitHub**（网络/认证受限，见文末 P4）。
+> - 全库 `audit_correctness --all --skip-net` 曾报 4 条星数不一致，已按 GitHub API 实时值
+>   统一并同步 manifest 修复（`5a9e1ab`）；全量终验进行中。
 
 ## 一、当前达标情况（实跑）
 
@@ -228,7 +230,7 @@ HEAD 仅跟踪 3707 个文件，但工作树里还有 **175 个已跟踪文件�
 
 ## P4 · 推送远端（当前唯一未闭环，2026-11-06）
 
-本地 `main` 已到 `77224dd`，工作树干净，共 **177 个 commit**；`origin/main` 显示 `[gone]`
+本地 `main` 已到 `5a9e1ab`，工作树干净，共 **179 个 commit**；`origin/main` 显示 `[gone]`
 （远程分支引用不存在，大概率从未成功推送过）。
 
 **HTTPS 通道不通（已排除假阴性）**：`github.com:443` TCP 不可达（21s 超时）；对照组
@@ -250,3 +252,8 @@ GitHub → Settings → SSH and GPG keys，之后执行 `git push -u github-ssh 
 `frontend-smoke` 构建 + dev server 冒烟）。本沙箱无法实跑 workflow，但已静态核对
 `frontend/vite.config.ts` 的 `server.port = 1420` 与冒烟脚本 `curl :1420` 一致，
 且本地 `tsc --noEmit`、`vite build`（4.59s）均通过，前端 job 前置条件具备。
+
+**本轮「下一步」顺带闭环（2026-11-06）**：全库正确性审计实跑 `AUDIT_FAIL` 的 4 条
+（跨章仓库 star 不一致）已修复；同源校验另修掉 3 章 manifest 的历史漂移；
+`vite build` 通过；CI 依赖一致性静态核对通过（lock 根依赖一致、`requirements.txt`
+不含 embedded_postgres 且脚本在注入 `DATABASE_URL` 时跳过）。
