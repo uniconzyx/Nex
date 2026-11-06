@@ -3,6 +3,14 @@
 > 数据来源：`server/scripts/validate_content.py`、`scripts/audit_sources.py`、`scripts/audit_depth.py` 三份守门脚本的**实跑输出**（非历史文档）。
 > 结论先行：**结构与来源两条标准已 100% 达标**；剩余全部是「深度 / 路线颗粒度 / 新学科接线 / 工作区卫生」四类。
 
+> **【2026-11-06 复核】本文件是 10-31 快照，下列 P0~P3 绝大多数已结清；以本节为当前真实状态：**
+> - 章节 **167**（`validate_content` 167/167、100%）；来源锚点 **619/619** 真命中、仓库错位 **0**。
+> - `audit_depth` **A165 / B2 / C0**（B 为 `dm-ch02`、`dm-ch03`：各只有 3 个 concept 文件，
+>   `concept_chars` 卡在 ~3500–3800，A 线 6000 按典型 5 文件章校准，属结构性，非缺陷）。
+> - **sandbox 交互玩法 167/167 全章闭合**（模块 179 = sandbox 167 + debug 12），
+>   `verify_labs_sandbox13.mjs` 真机 167/167 通关、`fails: []`；`tsc --noEmit` 与 `vite build` 均通过。
+> - **当前唯一未闭环：推送 `main` 到 GitHub**（网络/认证受限，见文末 P4）。
+
 ## 一、当前达标情况（实跑）
 
 | 维度 | 结果 | 守门脚本 |
@@ -209,9 +217,36 @@ HEAD 仅跟踪 3707 个文件，但工作树里还有 **175 个已跟踪文件�
 2. ~~**P1 深度·最薄 7 章**~~ ✅ 已完成（全部 C→B，`audit_correctness` 对新改章节 `AUDIT_OK`）。
 3. ~~**P1 深度·仅缺 `code_blocks` 的 27 章**~~ ✅ 已完成（C 86→52；同批把 26 个 project.json 的 `requirement_md` 补成 `###` 四小节）。
 4. ~~**P1 审计可信度**~~ ✅ 已完成（装 numpy/pandas 让 ai/ml/data 真跑；84 个 examples 的 CRLF 污染清零；`data-ch06` 8 条题面真写；审计脚本三处加固）。**这一步做完，「内容正确性通过」才第一次有意义。**
-5. **P1 深度·仅缺 `h3` 的 23 章**：拆 `###` 小节标题即可，成本最低。
+5. ~~**P1 深度·仅缺 `h3` 的 23 章**~~ ✅ 已结清（`audit_depth` 现 A165 / B2 / C0，无 C 级）。
 6. **P1 路线** ✅ 已结清：95 章全部改成章节级路线（604 条锚点 100% 命中，`audit_source_anchor.py` 已入守门）。
 7. **P2 discrete-math**：补 dm-ch02/03 并接线（决定这个学科是否正式上线）。
 8. ~~**P1 残余 schema**~~ ✅ 已完成（2026-10-31）：`data-ch05`、`py-ch04~py-ch08`、`mw-ch02`、`mw-ch03`、`cpp-ch12` 全部迁到 canonical 八字段；顺带全库扫描修掉 14 处嵌套 `explanation`，1165 题 0 问题。
 9. ~~**图示例题库**~~ ✅ 已完成（2026-11-01）：605 个 concept 文件 ```` ```text ```` 覆盖 100%；14 个跨章仓库 star 归一化 + 77 个刷新为 GitHub API 实时值。
-10. **下一步候选**：P1 深度·仅缺 `h3` 的 23 章 / P1 路线颗粒度 95 章 / P2 discrete-math 接线。
+10. **下一步候选** → 已收敛为单一项：P4 推送远端并观察首次 CI；其余 P1/P2/P3 均已闭环。
+
+---
+
+## P4 · 推送远端（当前唯一未闭环，2026-11-06）
+
+本地 `main` 已到 `77224dd`，工作树干净，共 **177 个 commit**；`origin/main` 显示 `[gone]`
+（远程分支引用不存在，大概率从未成功推送过）。
+
+**HTTPS 通道不通（已排除假阴性）**：`github.com:443` TCP 不可达（21s 超时）；对照组
+`api.github.com:443` 返回 200、DNS 正常解析 → 是针对 `github.com` 的针对性不可达，不是断网。
+git 全局代理 `127.0.0.1:31180` / `31181` 两个端口均未 LISTENING，走代理也是 `000`。
+另：`gh` 未登录、`git credential fill` 无已存凭据。
+
+**SSH 通道可用**：`github.com:22` 与 `ssh.github.com:443` 均可达，
+`ssh -T git@github.com` 返回 `Permission denied (publickey)`（说明握手成功、只是缺授权）。
+已就绪：
+- 生成 `~/.ssh/id_ed25519_github`（ed25519，公钥在同目录 `.pub`）
+- `~/.ssh/config` 追加 `Host github.com` 段，指定 `IdentityFile` + `IdentitiesOnly yes`
+- 仓库新增 remote `github-ssh` → `git@github.com:uniconzyx/Nex.git`（原 `origin` 保留不动）
+
+**待主人一步授权**：把 `~/.ssh/id_ed25519_github.pub` 的内容加到
+GitHub → Settings → SSH and GPG keys，之后执行 `git push -u github-ssh main` 即可。
+
+**push 后的验证点**：`.github/workflows/ci.yml` 首次实跑（`backend-parity` 真 PG /
+`frontend-smoke` 构建 + dev server 冒烟）。本沙箱无法实跑 workflow，但已静态核对
+`frontend/vite.config.ts` 的 `server.port = 1420` 与冒烟脚本 `curl :1420` 一致，
+且本地 `tsc --noEmit`、`vite build`（4.59s）均通过，前端 job 前置条件具备。
