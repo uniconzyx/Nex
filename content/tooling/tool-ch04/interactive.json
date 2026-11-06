@@ -2,7 +2,7 @@
   "chapter": "tool-ch04",
   "subject": "tooling",
   "title": "Git 协作：分支策略与冲突处理",
-  "fingerprint": "95cbed9ed8",
+  "fingerprint": "7173896fb1",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,124 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "分支活了 30 天，解冲突花了 90 小时",
+      "brief": "主干上 200 行/天的改动速度，一个分支活了 30 天——分支这边改了 6000 行，主干那边也改了 6000 行，在 10 万行的代码库里期望重叠 360 行。每行冲突平均 15 分钟（读上下文、判断谁的逻辑对、跑测试），90 小时就没了，而这只是**一次**合并。冲突量按天数**平方**增长——分支活两倍久，冲突四倍。",
+      "params": [
+        {
+          "key": "branchDays",
+          "label": "分支存活天数",
+          "min": 7,
+          "max": 60,
+          "step": 1,
+          "value": 30
+        },
+        {
+          "key": "linesPerDay",
+          "label": "每天改动行数",
+          "min": 40,
+          "max": 500,
+          "step": 10,
+          "value": 200
+        },
+        {
+          "key": "codeKLines",
+          "label": "代码库规模（千行）",
+          "min": 10,
+          "max": 500,
+          "step": 10,
+          "value": 100
+        },
+        {
+          "key": "mode",
+          "label": "协作方式",
+          "min": 0,
+          "max": 2,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "长期分支，末尾一次性合",
+            "每天 rebase 到主干",
+            "trunk-based 小 PR（每日合并）"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "effDays",
+          "label": "未同步天数",
+          "expr": "if(mode == 0, branchDays, 1)",
+          "unit": "天",
+          "fmt": "int"
+        },
+        {
+          "key": "effLines",
+          "label": "每天改动（小 PR 更碎）",
+          "expr": "if(mode == 2, linesPerDay * 40 / 100, linesPerDay)",
+          "unit": "行",
+          "fmt": "int"
+        },
+        {
+          "key": "changedLines",
+          "label": "分支累计改动",
+          "expr": "effDays * effLines",
+          "unit": "行",
+          "fmt": "int"
+        },
+        {
+          "key": "conflictLines",
+          "label": "期望冲突行",
+          "expr": "changedLines * changedLines / (codeKLines * 1000)",
+          "unit": "行",
+          "fmt": "fix2"
+        },
+        {
+          "key": "conflictHours",
+          "label": "解冲突耗时",
+          "expr": "conflictLines * 15 / 60",
+          "unit": "小时",
+          "fmt": "fix2"
+        },
+        {
+          "key": "delayDays",
+          "label": "集成延迟",
+          "expr": "if(mode == 0, branchDays, 1)",
+          "unit": "天",
+          "fmt": "int"
+        },
+        {
+          "key": "mergeCount",
+          "label": "合并次数",
+          "expr": "if(mode == 2, branchDays, 1)",
+          "unit": "次",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "branchDays >= 14",
+          "label": "分支至少活 14 天（这就是要治的病）"
+        },
+        {
+          "expr": "linesPerDay >= 150",
+          "label": "团队每天改动 ≥150 行（真实节奏）"
+        },
+        {
+          "expr": "codeKLines >= 50",
+          "label": "代码库 ≥5 万行（有足够的重叠面积）"
+        },
+        {
+          "expr": "conflictHours <= 2",
+          "label": "解冲突 ≤2 小时/次"
+        },
+        {
+          "expr": "delayDays <= 3",
+          "label": "集成延迟 ≤3 天（问题要尽早暴露）"
+        }
+      ],
+      "insight": "冲突不是「运气不好撞上了」，而是可以估的：假设双方改动在文件里均匀分布，分支改了 `a` 行、主干同期改了 `b` 行、代码库 `N` 行，那么期望重叠行数 ≈ `a × b / N`。**关键在这个乘积**：分支活 30 天，`a` 和 `b` 都随时间线性增长，冲突量按**天数平方**涨——活 60 天不是冲突翻倍，是翻四倍。而且这只是冲突行数，每行还要读上下文、判断谁对、跑测试，15 分钟一行是低估。第二笔账是**集成延迟**：分支 30 天没合入，意味着这 30 天里主干上的所有改动（接口变化、依赖升级、别人的 bug 修复）都没和你的代码一起验证过。**风险在合并那一刻集中兑现**，而不是分摊到每一天。三条实操：① **trunk-based + 小 PR**：分支活不过 1~2 天，每天改动量也小，`a×b/N` 两头都小；配合 feature flag 让未完成的代码也能合入主干；② **每天 rebase 或 merge 主干**：`git rebase origin/main` 把冲突摊到每天几十行，而不是最后 360 行一次性砸过来——注意 rebase 改写历史，只在**自己的**分支上做；③ **`rerere` 记住你的解法**：`git config rerere.enabled true`，同一个冲突第二次出现时自动套用上次的解决方式，长期分支反复 rebase 时省大量手工；④ **冲突的充要条件是「同一文件同一区域」**——把大文件拆小、按模块划分所有权，能从结构上降低重叠概率。"
+    },
     {
       "kind": "sequence",
       "heading": "二、冲突标记、解决流程与 rerere",

@@ -2,7 +2,7 @@
   "chapter": "fund-ch12",
   "subject": "fundamentals",
   "title": "计算机网络：应用层与链路排查",
-  "fingerprint": "0745d6ad32",
+  "fingerprint": "17e6df4002",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,136 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "一百个资源、150ms RTT，首屏 3.4 秒",
+      "brief": "跨区域用户 RTT 150ms。HTTP/1.1 下浏览器对同一域名只开 6 个连接，100 个资源要排 17 轮：握手 4 个 RTT（DNS + TCP + TLS 1.2 两次）加上 17 轮，光在等网络上就 3.15 秒，而数据传输只要 240ms。HTTP/2 多路复用把 17 轮压成 1 轮，TLS 1.3 再省一次往返，CDN 把 RTT 降到 20ms。另外 HTTP/1.1 的队头阻塞会让长尾放大 3 倍——平均值好看不代表用户不骂。",
+      "params": [
+        {
+          "key": "rttMs",
+          "label": "到服务器的 RTT",
+          "min": 20,
+          "max": 300,
+          "step": 10,
+          "value": 150
+        },
+        {
+          "key": "assets",
+          "label": "首屏资源数",
+          "min": 10,
+          "max": 300,
+          "step": 10,
+          "value": 100
+        },
+        {
+          "key": "proto",
+          "label": "HTTP 版本",
+          "min": 0,
+          "max": 2,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "HTTP/1.1（6 连接）",
+            "HTTP/2（单连接多路复用）",
+            "HTTP/3 over QUIC"
+          ]
+        },
+        {
+          "key": "tls",
+          "label": "TLS 版本",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "TLS 1.2（2 RTT）",
+            "TLS 1.3（1 RTT）"
+          ]
+        },
+        {
+          "key": "cdn",
+          "label": "是否用 CDN",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "源站直连",
+            "CDN 边缘节点"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "effRtt",
+          "label": "实际 RTT",
+          "expr": "if(cdn == 1, 20, rttMs)",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "handshakeRtt",
+          "label": "握手往返数",
+          "expr": "if(proto == 2, 2, 1 + 1 + if(tls == 0, 2, 1))",
+          "unit": "RTT",
+          "fmt": "int"
+        },
+        {
+          "key": "connRtt",
+          "label": "资源并发轮次",
+          "expr": "if(proto == 0, ceil(assets / 6), ceil(assets / 100))",
+          "unit": "RTT",
+          "fmt": "int"
+        },
+        {
+          "key": "payloadMs",
+          "label": "数据传输",
+          "expr": "240",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "totalMs",
+          "label": "首屏耗时",
+          "expr": "(handshakeRtt + connRtt) * effRtt + payloadMs",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "ttfbMs",
+          "label": "首字节时间",
+          "expr": "handshakeRtt * effRtt",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "p95Ms",
+          "label": "p95 耗时",
+          "expr": "if(proto == 0, totalMs * 3, if(proto == 1, totalMs * 11 / 10, totalMs * 105 / 100))",
+          "unit": "ms",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "rttMs >= 100",
+          "label": "RTT ≥100ms（跨区域用户的真实网络）"
+        },
+        {
+          "expr": "assets >= 50",
+          "label": "首屏至少 50 个资源（现代前端的常态）"
+        },
+        {
+          "expr": "totalMs <= 1000",
+          "label": "首屏 ≤1 秒"
+        },
+        {
+          "expr": "p95Ms <= 1200",
+          "label": "p95 ≤1.2 秒"
+        }
+      ],
+      "insight": "首屏时间能拆成两台加法：**握手 RTT 数 + 资源并发轮次**，各自乘网络往返。HTTP/1.1 的模型是「6 个连接、连接内串行」：100 个资源要 17 轮，每轮一个 RTT，150ms 的 RTT 就是 2.55 秒——**这些时间全在等网络，一个字节都还没传**。握手更贵：DNS 1 次 + TCP 1 次 + TLS 1.2 两次 = 4 个 RTT；TLS 1.3 把密钥交换压进第一次往返（1-RTT，会话恢复还能 0-RTT），省一半。HTTP/2 的多路复用把 N 个请求切成帧塞进**一条**连接，17 轮变 1 轮；HTTP/3 再用 QUIC 把 TCP 与 TLS 握手合并，连队头阻塞（TCP 层的丢包重传）都绕开了。**为什么还要看 p95**：HTTP/1.1 下一条连接上有个慢资源（大图、慢接口），它后面的所有请求都得排队——平均耗时可能还行，p95 直接翻三倍。四条实操：① **先升级协议再优化别的**：H2 + TLS 1.3 是零成本的（服务端配置 + 客户端早就支持），跨区域用户的收益最大；② **CDN 治的是 RTT 本身**：150ms → 20ms，所有轮次一起打折，和协议升级是乘数关系（不是二选一）；③ **减少资源数是更根本的解**：打包、代码分割、雪碧图、字体子集化，`assets` 从 100 降到 30，轮次直接砍到 5；④ **排查链路要分段计时**：`curl -w '@curl-format.txt'` 看 `time_namelookup`（DNS）/ `time_connect`（TCP）/ `time_appconnect`（TLS）/ `time_starttransfer`（TTFB）四段，才知道慢在哪一环——DNS 慢就上 HTTPDNS/预解析，握手慢就上连接复用/QUIC，TTFB 慢就是服务端的事了。"
+    },
     {
       "kind": "debug",
       "title": "上了 CDN，回源率还是 90%",

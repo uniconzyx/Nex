@@ -2,7 +2,7 @@
   "chapter": "ai-ch06",
   "subject": "ai",
   "title": "RAG：向量检索与知识增强",
-  "fingerprint": "c38be31d68",
+  "fingerprint": "392a1d2ff6",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,152 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "二十万篇文档建索引，14GB 内存",
+      "brief": "20 万篇文档、平均 5000 token，按 256 token 切块得到 390 万个向量。768 维 float32 每个 3KB，光向量就 11GB，加上 HNSW 的图结构 14.5GB——一台 16GB 的机器直接 OOM。切大一点能省内存，但 topK 拼进上下文的 token 也跟着涨。分块大小是「索引内存 × 上下文预算」的双向取舍。",
+      "params": [
+        {
+          "key": "docsW",
+          "label": "文档数量（万篇）",
+          "min": 5,
+          "max": 100,
+          "step": 5,
+          "value": 20
+        },
+        {
+          "key": "avgDocK",
+          "label": "每篇平均（K token）",
+          "min": 1,
+          "max": 20,
+          "step": 1,
+          "value": 5
+        },
+        {
+          "key": "chunkIdx",
+          "label": "分块大小",
+          "min": 0,
+          "max": 3,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "256 token",
+            "512 token",
+            "1024 token",
+            "2048 token"
+          ]
+        },
+        {
+          "key": "dtype",
+          "label": "向量精度",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "float32（3KB/条）",
+            "int8 量化（768B/条）"
+          ]
+        },
+        {
+          "key": "topK",
+          "label": "召回条数 topK",
+          "min": 3,
+          "max": 20,
+          "step": 1,
+          "value": 5
+        }
+      ],
+      "metrics": [
+        {
+          "key": "totalM",
+          "label": "语料总量",
+          "expr": "docsW * 10000 * avgDocK / 1000",
+          "unit": "百万 token",
+          "fmt": "int"
+        },
+        {
+          "key": "chunkSize",
+          "label": "每块 token",
+          "expr": "if(chunkIdx == 0, 256, if(chunkIdx == 1, 512, if(chunkIdx == 2, 1024, 2048)))",
+          "unit": "token",
+          "fmt": "int"
+        },
+        {
+          "key": "chunks",
+          "label": "向量条数",
+          "expr": "ceil(totalM * 1000000 / chunkSize)",
+          "unit": "条",
+          "fmt": "int"
+        },
+        {
+          "key": "bytesPer",
+          "label": "每条向量字节",
+          "expr": "if(dtype == 0, 3072, 768)",
+          "unit": "字节",
+          "fmt": "int"
+        },
+        {
+          "key": "vecGB",
+          "label": "向量本体",
+          "expr": "chunks * bytesPer / 1073741824",
+          "unit": "GB",
+          "fmt": "fix2"
+        },
+        {
+          "key": "indexGB",
+          "label": "索引总内存",
+          "expr": "vecGB * 13 / 10",
+          "unit": "GB",
+          "fmt": "fix2"
+        },
+        {
+          "key": "ctxTokens",
+          "label": "拼进上下文的 token",
+          "expr": "topK * chunkSize",
+          "unit": "token",
+          "fmt": "int"
+        },
+        {
+          "key": "searchMs",
+          "label": "单次检索延迟",
+          "expr": "3 + chunks * 2 / 1000000",
+          "unit": "ms",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "docsW >= 20",
+          "label": "至少 20 万篇文档（知识库的真实规模）"
+        },
+        {
+          "expr": "avgDocK == 5",
+          "label": "每篇约 5000 token（真实文档的长度）"
+        },
+        {
+          "expr": "chunkSize >= 512",
+          "label": "每块 ≥512 token（装得下一个完整段落）"
+        },
+        {
+          "expr": "topK >= 5",
+          "label": "召回至少 5 条（召回率下限）"
+        },
+        {
+          "expr": "indexGB <= 4",
+          "label": "索引 ≤4GB"
+        },
+        {
+          "expr": "ctxTokens <= 6000",
+          "label": "拼进上下文 ≤6000 token"
+        },
+        {
+          "expr": "searchMs <= 30",
+          "label": "检索延迟 ≤30ms"
+        }
+      ],
+      "insight": "RAG 的内存账能精确到字节：`向量数 × 维度 × 每维字节数`。768 维 float32 = 3072 字节/条；1000 万条就是 30GB，HNSW 还要存邻居表（M=16 时约 +30%）。**分块大小是杠杆**：块从 256 调到 1024，向量数降到 1/4，内存直接省 3/4；但代价在另一头——`topK × 块大小` 就是拼进上下文的 token 数，topK=5、块 2048 时一次要塞 10240 token，比很多模型的输入预算还大。所以分块不是「越小越精确」，是**在检索精度、内存、上下文预算之间找交点**。四条实操：① **512~1024 token 是甜点**：语义完整度够、向量数可控；加 10%~20% 的 **overlap** 防止一句话被切断（块本身仍按 1024 算）；② **int8 量化是免费午餐**：768 维 float32 → int8 只损失 1%~2% 召回，内存降到 1/4，还提升缓存命中率；再狠一点用 PQ/OPQ，能压到 1/32 但有损；③ **别把整篇文档当一个向量**：语义被平均掉了，长文档检索几乎必失；也**别把句子当块**：检索命中了但上下文不够，模型答不出来；④ **混合检索 + rerank**：向量召回 top 50，再用 BM25 与 cross-encoder 重排到 top 5，比单纯调大 topK 更省 token 也更准——**召回宽、精排窄**是标准姿势。"
+    },
     {
       "kind": "match",
       "pairs": [

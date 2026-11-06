@@ -2,7 +2,7 @@
   "chapter": "tool-ch02",
   "subject": "tooling",
   "title": "Linux 进程、管道与 Shell 脚本",
-  "fingerprint": "db7328c5cf",
+  "fingerprint": "9d6fa9a73c",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,112 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "Shell 循环里 fork 了四十万次",
+      "brief": "`for f in *.log; do cat $f | grep 超时 >> bad.txt; done` 看起来是标准写法，但每轮循环都要 fork 出 `cat` 和 `grep` 两个进程（管道再加一个子 shell），一次 fork+exec 约 1.2ms。10 万个文件就是 40 万次 fork，光进程创建就烧掉 8 分钟——而实际读的数据只有 5GB，2.5 秒就读完了。",
+      "params": [
+        {
+          "key": "filesW",
+          "label": "待处理文件数（万）",
+          "min": 5,
+          "max": 40,
+          "step": 5,
+          "value": 10
+        },
+        {
+          "key": "dataGB",
+          "label": "数据总量（GB）",
+          "min": 1,
+          "max": 100,
+          "step": 1,
+          "value": 5
+        },
+        {
+          "key": "mode",
+          "label": "处理方式",
+          "min": 0,
+          "max": 2,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "每文件 cat|grep|sed（4 进程）",
+            "每文件单进程（awk 逐文件）",
+            "单进程批量（awk 一次读全部）"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "fileCount",
+          "label": "文件总数",
+          "expr": "filesW * 10000",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "forks",
+          "label": "fork+exec 次数",
+          "expr": "if(mode == 0, fileCount * 4, if(mode == 1, fileCount, 1))",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "forkSec",
+          "label": "进程创建耗时",
+          "expr": "forks * 12 / 10000",
+          "unit": "秒",
+          "fmt": "fix2"
+        },
+        {
+          "key": "ioSec",
+          "label": "读数据耗时",
+          "expr": "dataGB * 1024 / 2000",
+          "unit": "秒",
+          "fmt": "fix2"
+        },
+        {
+          "key": "totalSec",
+          "label": "总耗时",
+          "expr": "forkSec + ioSec",
+          "unit": "秒",
+          "fmt": "fix2"
+        },
+        {
+          "key": "forkPct",
+          "label": "fork 占比",
+          "expr": "round(forkSec * 100 / (forkSec + ioSec))",
+          "unit": "%",
+          "fmt": "int"
+        },
+        {
+          "key": "ctxSwitches",
+          "label": "上下文切换",
+          "expr": "forks * 2",
+          "unit": "次",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "fileCount >= 50000",
+          "label": "文件数 ≥5 万（日志切片的真实量级）"
+        },
+        {
+          "expr": "forkSec <= 20",
+          "label": "进程创建 ≤20 秒"
+        },
+        {
+          "expr": "forkPct <= 10",
+          "label": "fork 占比 ≤10%（别把时间花在创建进程上）"
+        },
+        {
+          "expr": "totalSec <= 60",
+          "label": "总耗时 ≤60 秒"
+        }
+      ],
+      "insight": "Unix 的「组合小工具」哲学在交互式场景很优雅，但放进**循环**里就变成 fork 炸弹的温和版本：每次 `cat`、每次 `grep`、管道两端的子 shell，都是一次 `fork()` + `execve()`。fork 要复制页表、exec 要重新加载 ELF、跑动态链接器，机械盘时代每次 1~3ms，SSD 机上也要 0.5~1.2ms。10 万个文件 × 4 个进程 = 40 万次，480 秒——**而这些时间没有一秒在干活**。判断标准很简单：**循环体里有没有 `|`、`$()`、`&&`**。有就至少多 2 个进程。三条实操：① **用 awk/sed 一次处理多个文件**：`awk 'FNR==1{f=FILENAME} /超时/{print f\":\"$0}' *.log` 只有一个进程，`FNR`/`FILENAME` 自动区分文件边界——这是 shell 里最低成本的替换；② **`xargs` 批量传参**：`find . -name '*.log' -print0 | xargs -0 -n 500 grep -l 超时` 把 500 个文件塞给一次 grep，fork 次数降到 1/500；③ **`while read` 循环里的 `ssh`/`curl` 是同一个病**：一万台机器逐个 ssh 要几十分钟，换成 `pssh`/Ansible 的并发批量、或者 `ssh -O` 复用连接。顺带一条：循环里 `>>` 追加写每次都要 open/write/close，`done > out.txt` 在循环外重定向一次能省掉 N 次系统调用。"
+    },
     {
       "kind": "match",
       "pairs": [

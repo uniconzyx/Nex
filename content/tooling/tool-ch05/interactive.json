@@ -2,7 +2,7 @@
   "chapter": "tool-ch05",
   "subject": "tooling",
   "title": "Docker 基础：镜像、容器与 Dockerfile",
-  "fingerprint": "2633d67e94",
+  "fingerprint": "c2308fd699",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,127 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "COPY . . 写在装依赖前面，每次构建多花 4 分钟",
+      "brief": "Dockerfile 里 `COPY . .` 排在 `RUN npm ci` 之前，看起来只是顺序问题——实际上每改一行代码，`COPY` 层的哈希就变了，**后面所有层全部失效**，400MB 依赖每次重装 4 分钟。一天构建 40 次就是 4 小时排队。另一半代价在镜像体积：单阶段构建把编译器、node_modules 缓存、源码全留在最终镜像里，1.3GB 每台机器都要拉一遍。",
+      "params": [
+        {
+          "key": "depMB",
+          "label": "依赖体积",
+          "min": 100,
+          "max": 1000,
+          "step": 50,
+          "value": 400
+        },
+        {
+          "key": "order",
+          "label": "COPY 与装依赖的顺序",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "COPY . . 在前（一行改动全失效）",
+            "先 COPY 依赖清单再装（缓存命中）"
+          ]
+        },
+        {
+          "key": "multi",
+          "label": "构建阶段",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "单阶段（编译产物与工具链同层）",
+            "多阶段（只拷产物到运行镜像）"
+          ]
+        },
+        {
+          "key": "buildsPerDay",
+          "label": "每天构建次数",
+          "min": 5,
+          "max": 100,
+          "step": 5,
+          "value": 40
+        }
+      ],
+      "metrics": [
+        {
+          "key": "installMin",
+          "label": "装依赖耗时",
+          "expr": "if(order == 1, 0, depMB / 100)",
+          "unit": "分钟",
+          "fmt": "fix2"
+        },
+        {
+          "key": "compileMin",
+          "label": "编译打包耗时",
+          "expr": "2",
+          "unit": "分钟",
+          "fmt": "int"
+        },
+        {
+          "key": "buildMin",
+          "label": "单次构建",
+          "expr": "installMin + compileMin",
+          "unit": "分钟",
+          "fmt": "fix2"
+        },
+        {
+          "key": "dailyHours",
+          "label": "每天排队时间",
+          "expr": "buildMin * buildsPerDay / 60",
+          "unit": "小时",
+          "fmt": "fix2"
+        },
+        {
+          "key": "imageMB",
+          "label": "镜像体积",
+          "expr": "if(multi == 1, depMB + 60, depMB + 900)",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "pushGB",
+          "label": "每天推送量",
+          "expr": "imageMB * buildsPerDay / 1024",
+          "unit": "GB",
+          "fmt": "fix2"
+        },
+        {
+          "key": "cacheHitPct",
+          "label": "依赖层缓存命中率",
+          "expr": "if(order == 1, 100, 0)",
+          "unit": "%",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "depMB >= 300",
+          "label": "依赖 ≥300MB（Node/Python 项目的常态）"
+        },
+        {
+          "expr": "buildsPerDay >= 20",
+          "label": "每天 ≥20 次构建（团队协作的正常频率）"
+        },
+        {
+          "expr": "dailyHours <= 1.5",
+          "label": "每天构建排队 ≤1.5 小时"
+        },
+        {
+          "expr": "imageMB <= 600",
+          "label": "镜像 ≤600MB（运行镜像不该带编译器）"
+        },
+        {
+          "expr": "cacheHitPct >= 90",
+          "label": "依赖层缓存命中率 ≥90%"
+        }
+      ],
+      "insight": "Docker 的层缓存规则只有一句：**每条指令的输入哈希变了，它和它之后的层全部失效**。`COPY . .` 的输入是**整个构建上下文**——改一个空格，哈希就变。所以 `COPY . .` 排在 `RUN npm ci` 前面时，依赖层永远命中不了，每次构建都从零装一遍；把它挪到后面、先 `COPY package*.json` 再装依赖，只有 lock 文件变化时才重装。**顺序不是风格问题，是 4 分钟 × 每天 40 次。**第二笔账是镜像体积。单阶段构建里，`RUN pip install` 拉的编译器、`node_modules` 里的构建工具、源码、`.npm` 缓存，全都留在最后一层。多阶段构建（`FROM builder AS build` → `FROM runtime` + `COPY --from=build`）让运行镜像只带产物和运行时，1.3GB 能砍到 400MB 出头。体积的代价是复利：每台机器、每次扩容、每次回滚都要拉 1.3GB。四条实操：① **依赖清单单独 COPY**：`COPY package.json package-lock.json ./` → `RUN npm ci` → `COPY . .`，最后才是代码；② **合并 RUN 减少层数**：`apt-get update && apt-get install -y ... && rm -rf /var/lib/apt/lists/*` 必须在**同一条** RUN 里，分开写的话 `rm` 只是在新层里加个白障，前一层的数据还在；③ **多阶段 + distroless/alpine 运行镜像**：不只有体积，还少了整条 CVE 攻击面；④ **`.dockerignore` 是免费加速**：`COPY . .` 的上下文包含 `node_modules`、`.git` 时，光是传输与哈希就要几十秒，别让它们进上下文。"
+    },
     {
       "kind": "match",
       "pairs": [

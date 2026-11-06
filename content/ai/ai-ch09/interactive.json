@@ -2,7 +2,7 @@
   "chapter": "ai-ch09",
   "subject": "ai",
   "title": "生成模型：从自编码器到扩散",
-  "fingerprint": "eef3aac70e",
+  "fingerprint": "3f108c275a",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,124 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "一千张图，五天才能生成完",
+      "brief": "扩散模型的生成时间 = 采样步数 × 每步前向。像素空间 512×512 的 UNet 每步约 200ms，标准 DDPM 要 1000 步 → 200 秒一张，一千张就是 55 小时，按 3 元/卡时算是 166 元。而潜空间扩散把 512² 压到 64² 再做，每步只要 15ms；再叠上蒸馏到 20 步，单张 0.3 秒。",
+      "params": [
+        {
+          "key": "steps",
+          "label": "采样步数",
+          "min": 20,
+          "max": 1000,
+          "step": 20,
+          "value": 1000
+        },
+        {
+          "key": "mode",
+          "label": "生成方式",
+          "min": 0,
+          "max": 2,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "像素空间 DDPM",
+            "潜空间 LDM（同样步数）",
+            "潜空间 + 蒸馏 20 步"
+          ]
+        },
+        {
+          "key": "batch",
+          "label": "批大小",
+          "min": 1,
+          "max": 16,
+          "step": 1,
+          "value": 1
+        },
+        {
+          "key": "imagesK",
+          "label": "要生成多少（千张）",
+          "min": 1,
+          "max": 20,
+          "step": 1,
+          "value": 1
+        }
+      ],
+      "metrics": [
+        {
+          "key": "stepMs",
+          "label": "每步前向耗时",
+          "expr": "if(mode == 0, 200, 15)",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "realSteps",
+          "label": "实际采样步数",
+          "expr": "if(mode == 2, 20, steps)",
+          "unit": "步",
+          "fmt": "int"
+        },
+        {
+          "key": "perImageS",
+          "label": "单张耗时",
+          "expr": "stepMs * realSteps / 1000",
+          "unit": "秒",
+          "fmt": "fix2"
+        },
+        {
+          "key": "totalH",
+          "label": "总耗时",
+          "expr": "imagesK * 1000 * perImageS / 3600 / batch",
+          "unit": "小时",
+          "fmt": "fix2"
+        },
+        {
+          "key": "vramGB",
+          "label": "显存占用",
+          "expr": "if(mode == 0, 20 + batch * 6, 6 + batch * 2)",
+          "unit": "GB",
+          "fmt": "int"
+        },
+        {
+          "key": "costYuan",
+          "label": "算力成本",
+          "expr": "totalH * 3",
+          "unit": "元",
+          "fmt": "int"
+        },
+        {
+          "key": "speedup",
+          "label": "相对像素空间 DDPM 提速",
+          "expr": "200 * steps / (stepMs * realSteps)",
+          "unit": "×",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "steps >= 100",
+          "label": "采样步数 ≥100（步数太少画质崩）"
+        },
+        {
+          "expr": "imagesK >= 1",
+          "label": "至少生成 1000 张（批量任务才谈得上成本）"
+        },
+        {
+          "expr": "perImageS <= 16",
+          "label": "单张 ≤16 秒"
+        },
+        {
+          "expr": "totalH <= 6",
+          "label": "总耗时 ≤6 小时（一个晚上跑完）"
+        },
+        {
+          "expr": "vramGB <= 23",
+          "label": "显存 ≤23GB（单卡 24GB）"
+        }
+      ],
+      "insight": "扩散模型的推理成本是**步数 × 单步前向**，两个因子各有各的解法：**减步数**（DDIM 20~50 步、DPM-Solver 10~20 步、一致性模型 1~4 步）和**减单步开销**（把 512² 的像素空间压到 64² 的潜空间，前向计算量按面积降 64 倍）。**两者正交，可以叠乘**：像素空间 1000 步 = 200 秒/张；潜空间同步数 15 秒；再蒸馏到 20 步 = 0.3 秒——**666 倍**，从「一千张要两天」变成「五分钟」。这条路线的代价要说清：① **潜空间有损**：VAE 编解码会丢掉高频细节，文字和小脸容易糊（所以有 SDXL 的双文本编码器、以及「潜空间 + 高分辨率精修」两段式）；② **步数不能无限压**：DDIM 低于 20 步结构开始崩，蒸馏模型（LCM/Turbo）用 4 步的代价是多样性和细节都变差；③ **批大小受显存硬限**：batch 翻倍吞吐接近翻倍，但激活显存线性涨，超了就 OOM——**先算显存再定 batch，比调采样器更立竿见影**；④ **评估别只看 FID**：FID 对模糊、对模式坍塌都不敏感，生成任务一定要人眼看 + 任务指标（OCR 准确率、下游分类精度）。"
+    },
     {
       "kind": "match",
       "pairs": [

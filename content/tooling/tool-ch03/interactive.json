@@ -2,7 +2,7 @@
   "chapter": "tool-ch03",
   "subject": "tooling",
   "title": "Git 核心：对象模型与分支",
-  "fingerprint": "667c40d116",
+  "fingerprint": "4abd9cb2f2",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,124 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "100MB 的模型文件提交 50 次，仓库 5GB",
+      "brief": "把 100MB 的模型权重放进 Git，每改一次提交一次——50 个版本之后，`.git` 里躺着 5GB。原因不是「Git 存了 50 份差量」，而是**每个 commit 都是快照**：内容变一个字节就是一个新 blob，二进制又压不动，`gc --aggressive` 也只能省 2%。而新人 `clone` 要把全部历史拉下来：5GB 在 12.5MB/s 的网络上要 6.7 小时。",
+      "params": [
+        {
+          "key": "fileMB",
+          "label": "单个大文件大小",
+          "min": 10,
+          "max": 500,
+          "step": 10,
+          "value": 100
+        },
+        {
+          "key": "versions",
+          "label": "提交了多少个版本",
+          "min": 5,
+          "max": 200,
+          "step": 5,
+          "value": 50
+        },
+        {
+          "key": "mode",
+          "label": "存放方式",
+          "min": 0,
+          "max": 2,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "直接 commit 进 Git",
+            "Git LFS（指针进库）",
+            "不进仓库（构建时下载）"
+          ]
+        },
+        {
+          "key": "gc",
+          "label": "是否定期 gc",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "从不 gc",
+            "定期 gc --aggressive"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "looseMB",
+          "label": "各版本原始体积",
+          "expr": "versions * fileMB",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "gcMB",
+          "label": "gc 后仓库体积",
+          "expr": "versions * fileMB * 98 / 100",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "repoMB",
+          "label": "仓库体积",
+          "expr": "if(mode == 0, if(gc == 1, gcMB, looseMB), if(mode == 1, versions * 13 / 10000, 1 / 1000))",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "lfsMB",
+          "label": "LFS 服务端存储",
+          "expr": "if(mode == 1, versions * fileMB, 0)",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "cloneMB",
+          "label": "clone 下载量",
+          "expr": "if(mode == 1, 2, repoMB)",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "cloneMin",
+          "label": "新人 clone 耗时",
+          "expr": "cloneMB * 8 / 100 / 60",
+          "unit": "分钟",
+          "fmt": "fix2"
+        },
+        {
+          "key": "clonePct",
+          "label": "clone 相对未 gc 的比例",
+          "expr": "round(cloneMB * 100 / looseMB)",
+          "unit": "%",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "fileMB >= 100",
+          "label": "文件 ≥100MB（模型权重的真实体积）"
+        },
+        {
+          "expr": "versions >= 50",
+          "label": "至少提交过 50 个版本"
+        },
+        {
+          "expr": "cloneMin <= 2",
+          "label": "clone ≤2 分钟"
+        },
+        {
+          "expr": "repoMB <= 300",
+          "label": "仓库 ≤300MB（Git 适合放代码，不适合放资产）"
+        }
+      ],
+      "insight": "「Git 存的是差异」是流传最广的误解。真相是：**commit 是快照**，每个版本都记录一份完整的 tree，指向当时的全部 blob；「省空间」发生在 `gc` 时的 **packfile delta** 压缩，而 delta 的前提是**相似文本**。二进制文件（模型权重、图片、视频、压缩包）改一个字节，整个字节流都变，delta 找不到匹配窗口——实测 100MB 的权重改 50 次，`gc --aggressive` 后仍有 200MB（只省了 2%），不 gc 就是 5GB。更贵的是**每个新人都得 clone 全部历史**：5GB 在 12.5MB/s 上要 6.7 小时，CI 每次全量 clone 更是持续放血。三条实操：① **Git LFS**：仓库里只存 130 字节的指针，对象在 LFS 服务端，clone 默认只拉当前版本，`git lfs fetch --all` 按需取历史——代价是服务端存储照旧、且 LFS 有自己的配额与「忘记 push LFS」的坑；② **干脆不进仓库**：构建产物、数据集、模型权重放对象存储/制品库，仓库里只留下载脚本与校验和（`sha256sum`），CI 层做缓存；③ **已经进了历史的**：`git filter-repo --path 大文件 --invert-paths` 重写历史，然后让所有人重新 clone（`filter-branch` 慢且易错，别用）；改写后旧 blob 仍会留在 reflog 和远端直到 `gc --prune=now`。判断标准：**文本用 Git，二进制用制品库**。"
+    },
     {
       "kind": "match",
       "pairs": [

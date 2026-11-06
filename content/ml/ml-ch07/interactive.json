@@ -2,7 +2,7 @@
   "chapter": "ml-ch07",
   "subject": "ml",
   "title": "推荐系统：协同过滤与矩阵分解",
-  "fingerprint": "f90f4e680d",
+  "fingerprint": "496a56edfe",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,132 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "一百万用户算全量相似度，3.6TB",
+      "brief": "user-based 协同过滤要给每两个用户算相似度：100 万用户是 5×10^11 个用户对，相似度矩阵 3.6TB，一天算不完。item-based 换了个方向，但 100 万物品全量也是同样的量级。工程上的两条出路：每个物品只保留 Top200 相似邻居（1.5GB），或者直接换矩阵分解，只存用户×隐向量 + 物品×隐向量（0.5GB）。",
+      "params": [
+        {
+          "key": "usersW",
+          "label": "用户数（万）",
+          "min": 10,
+          "max": 500,
+          "step": 10,
+          "value": 100
+        },
+        {
+          "key": "itemsW",
+          "label": "物品数（万）",
+          "min": 10,
+          "max": 100,
+          "step": 10,
+          "value": 100
+        },
+        {
+          "key": "algo",
+          "label": "召回算法",
+          "min": 0,
+          "max": 3,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "user-CF 全量相似度",
+            "item-CF 全量相似度",
+            "item-CF 只留 Top200 邻居",
+            "矩阵分解 ALS"
+          ]
+        },
+        {
+          "key": "factors",
+          "label": "隐向量维度 K",
+          "min": 16,
+          "max": 256,
+          "step": 16,
+          "value": 64
+        }
+      ],
+      "metrics": [
+        {
+          "key": "users",
+          "label": "用户数",
+          "expr": "usersW * 10000",
+          "unit": "人",
+          "fmt": "int"
+        },
+        {
+          "key": "items",
+          "label": "物品数",
+          "expr": "itemsW * 10000",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "pairs",
+          "label": "要算的相似度对",
+          "expr": "if(algo == 0, users * users / 2, if(algo == 1, items * items / 2, if(algo == 2, items * 200, (users + items) * 30)))",
+          "unit": "对",
+          "fmt": "int"
+        },
+        {
+          "key": "simTB",
+          "label": "相似度矩阵体积",
+          "expr": "if(algo == 0, users * users * 4 / 1099511627776, if(algo == 1, items * items * 4 / 1099511627776, if(algo == 2, items * 200 * 8 / 1073741824 / 1024, 0)))",
+          "unit": "TB",
+          "fmt": "fix2"
+        },
+        {
+          "key": "mfGB",
+          "label": "隐向量占用",
+          "expr": "if(algo == 3, (users + items) * factors * 4 / 1073741824, 0)",
+          "unit": "GB",
+          "fmt": "fix2"
+        },
+        {
+          "key": "memGB",
+          "label": "总内存",
+          "expr": "simTB * 1024 + mfGB",
+          "unit": "GB",
+          "fmt": "int"
+        },
+        {
+          "key": "trainMin",
+          "label": "离线计算耗时",
+          "expr": "pairs / 10000000 / 60",
+          "unit": "分钟",
+          "fmt": "fix2"
+        },
+        {
+          "key": "diskGB",
+          "label": "落盘体积",
+          "expr": "simTB * 1024 + mfGB",
+          "unit": "GB",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "usersW >= 50",
+          "label": "至少 50 万用户（真实平台量级）"
+        },
+        {
+          "expr": "itemsW >= 50",
+          "label": "至少 50 万物品"
+        },
+        {
+          "expr": "memGB <= 16",
+          "label": "常驻内存 ≤16GB"
+        },
+        {
+          "expr": "trainMin <= 60",
+          "label": "离线计算 ≤60 分钟（要能每天跑）"
+        },
+        {
+          "expr": "factors >= 32",
+          "label": "隐向量维度 ≥32（再低表达力不够）"
+        }
+      ],
+      "insight": "协同过滤的第一笔账是**用户对的数量**：`U(U-1)/2`。1 万用户 5000 万对还能算，100 万用户就是 **5×10^11 对**——按每秒 1000 万对也要 14 小时，相似度矩阵 3.6TB 根本存不下。**这不是「优化一下」能解决的，是复杂度不可行**。三条出路，各有代价：① **item-based + TopN 截断**：物品数通常比用户数小一个量级，而且「相似物品」是稳定的——离线算好每个物品的 Top200 邻居存下来（1.5GB），在线查表即可。代价是新品/长尾物品邻居稀疏，冷启动更严重；② **矩阵分解**：把 U×I 分解成 `U×K` 和 `I×K`（K=32~128），内存从 TB 降到 GB，还能泛化到没共现过的用户-物品对。但 ALS/SGD 是**非凸**优化，对隐式反馈和负采样敏感，冷启动仍然要靠内容特征补；③ **向量召回 + ANN**：把隐向量塞进 Faiss/HNSW，在线 topK 检索 O(log N)，这是工业界的标准形态（双塔 + ANN）。还有两条容易被忽略的：④ **均值归一化是必需品**：有人打分永远 4 分、有人永远 3 分，不减掉用户偏置，相似度会被「打分尺度」而不是「品味」主导；⑤ **评估别只看 RMSE**：评分预测准不等于排序好，线上要看 Recall@K / NDCG，还要看**覆盖率与热门偏差**——推荐系统把 80% 流量给头部 5% 物品，是协同过滤的结构性偏差。"
+    },
     {
       "kind": "match",
       "pairs": [

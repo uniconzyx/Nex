@@ -2,7 +2,7 @@
   "chapter": "ai-ch07",
   "subject": "ai",
   "title": "Agent 开发：工具调用、记忆与多智能体",
-  "fingerprint": "6cd688b3bf",
+  "fingerprint": "fa81c7fb31",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,136 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "五十个工具的 schema，每任务烧六万 token",
+      "brief": "function calling 的工具定义**每次请求都要重发一遍**，不是注册一次就完事。50 个工具、每个 schema 120 token = 6000 token 常驻，ReAct 跑 10 轮就是 6 万 token/任务——一天 1 万次任务烧 1216 元，而且工具越多模型越容易选错（准确率从 95% 掉到 62%）。先做意图路由把候选筛到 8 个，两项一起降。",
+      "params": [
+        {
+          "key": "tools",
+          "label": "注册的工具数",
+          "min": 5,
+          "max": 200,
+          "step": 5,
+          "value": 50
+        },
+        {
+          "key": "toolTokens",
+          "label": "每个 schema token",
+          "min": 40,
+          "max": 300,
+          "step": 10,
+          "value": 120
+        },
+        {
+          "key": "steps",
+          "label": "每任务 ReAct 轮数上限",
+          "min": 3,
+          "max": 20,
+          "step": 1,
+          "value": 10
+        },
+        {
+          "key": "tasksK",
+          "label": "每天任务数（千）",
+          "min": 1,
+          "max": 100,
+          "step": 1,
+          "value": 1
+        },
+        {
+          "key": "router",
+          "label": "工具选择方式",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "全量工具直接塞给模型",
+            "先意图路由，只给 8 个候选"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "schemaTokens",
+          "label": "工具 schema 占用",
+          "expr": "if(router == 1, 8 * toolTokens + 300, tools * toolTokens)",
+          "unit": "token",
+          "fmt": "int"
+        },
+        {
+          "key": "tokensPerTask",
+          "label": "每任务 token",
+          "expr": "schemaTokens * steps + 800",
+          "unit": "token",
+          "fmt": "int"
+        },
+        {
+          "key": "dailyMTokens",
+          "label": "每天 token 量",
+          "expr": "tasksK * 10000 * tokensPerTask / 1000000",
+          "unit": "百万 token",
+          "fmt": "fix2"
+        },
+        {
+          "key": "costYuan",
+          "label": "每天 token 成本",
+          "expr": "dailyMTokens * 2",
+          "unit": "元",
+          "fmt": "int"
+        },
+        {
+          "key": "latencySec",
+          "label": "单任务耗时",
+          "expr": "steps * 25 / 10",
+          "unit": "秒",
+          "fmt": "fix2"
+        },
+        {
+          "key": "toolPickPct",
+          "label": "工具选择准确率",
+          "expr": "if(router == 1, 95, if(tools <= 20, 88, if(tools <= 50, 75, 62)))",
+          "unit": "%",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "tasksK >= 1",
+          "label": "每天 ≥1000 次任务（线上 Agent 的真实量级）"
+        },
+        {
+          "expr": "tools >= 20",
+          "label": "工具库至少 20 个（真实系统的规模）"
+        },
+        {
+          "expr": "steps >= 4",
+          "label": "至少允许 4 轮（真实任务要多次调用工具）"
+        },
+        {
+          "expr": "schemaTokens <= 1500",
+          "label": "工具 schema ≤1500 token"
+        },
+        {
+          "expr": "costYuan <= 250",
+          "label": "每天 token 成本 ≤250 元"
+        },
+        {
+          "expr": "latencySec <= 20",
+          "label": "单任务 ≤20 秒"
+        },
+        {
+          "expr": "toolPickPct >= 90",
+          "label": "工具选择准确率 ≥90%"
+        },
+        {
+          "expr": "toolTokens >= 100",
+          "label": "每个 schema ≥100 token（再少就丢参数说明了）"
+        }
+      ],
+      "insight": "Agent 的成本结构和聊天完全不同：**工具定义是常驻开销**。function calling 的实现是把 JSON Schema 塞进 system 位置，每次请求都重发——50 个工具、每个 120 token，就是每轮 6000 token 的固定税，ReAct 跑 10 轮就变成 6 万 token，而其中 98% 的工具跟本次任务毫无关系。同时「工具越多越选不准」是有实测的：候选从 5 个涨到 50 个，选择准确率从 95% 掉到 75% 以下（模型要在长列表里做细粒度辨别）。**token 和准确率是同向恶化的，所以「先路由再调用」是双重收益。**四条实操：① **意图路由**：先用一次便宜的小模型（或 embedding 分类）把工具集筛到 5~10 个，再带着这撮候选做正式调用——路由本身只要 300 token，省下几千；② **限制轮数**：`max_steps` 不只是防死循环，直接决定成本上界；第 4 轮还没结论的任务，通常缺的是信息而不是更多轮次；③ **工具粒度要粗**：`get_user` + `get_user_orders` + `get_user_address` 三个工具不如一个 `query_user(field)`——工具数是成本，参数才是灵活性；④ **观察结果要截断**：工具返回的 JSON 动辄几千 token，只把模型需要的字段投影出来（`jq` 式裁剪），比压缩工具描述有用得多。"
+    },
     {
       "kind": "match",
       "pairs": [

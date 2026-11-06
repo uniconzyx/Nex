@@ -179,6 +179,91 @@
    }
   ]
  },
+ "ai/ai-ch05": {
+  "ok": true,
+  "params": [
+   {
+    "key": "windowK",
+    "type": "range",
+    "value": 8.0
+   },
+   {
+    "key": "shots",
+    "type": "range",
+    "value": 3.0
+   },
+   {
+    "key": "histTurns",
+    "type": "range",
+    "value": 20.0
+   },
+   {
+    "key": "histMode",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "ai/ai-ch06": {
+  "ok": true,
+  "params": [
+   {
+    "key": "docsW",
+    "type": "range",
+    "value": 20.0
+   },
+   {
+    "key": "avgDocK",
+    "type": "range",
+    "value": 5.0
+   },
+   {
+    "key": "chunkIdx",
+    "type": "opt",
+    "value": 1
+   },
+   {
+    "key": "dtype",
+    "type": "opt",
+    "value": 1
+   },
+   {
+    "key": "topK",
+    "type": "range",
+    "value": 5.0
+   }
+  ]
+ },
+ "ai/ai-ch07": {
+  "ok": true,
+  "params": [
+   {
+    "key": "tools",
+    "type": "range",
+    "value": 25.0
+   },
+   {
+    "key": "toolTokens",
+    "type": "range",
+    "value": 120.0
+   },
+   {
+    "key": "steps",
+    "type": "range",
+    "value": 5.0
+   },
+   {
+    "key": "tasksK",
+    "type": "range",
+    "value": 1.0
+   },
+   {
+    "key": "router",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
  "ai/ai-ch08": {
   "ok": true,
   "params": [
@@ -199,6 +284,31 @@
    }
   ]
  },
+ "ai/ai-ch09": {
+  "ok": true,
+  "params": [
+   {
+    "key": "steps",
+    "type": "range",
+    "value": 100.0
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 1
+   },
+   {
+    "key": "batch",
+    "type": "range",
+    "value": 1.0
+   },
+   {
+    "key": "imagesK",
+    "type": "range",
+    "value": 1.0
+   }
+  ]
+ },
  "ai/ai-ch10": {
   "ok": true,
   "params": [
@@ -216,6 +326,31 @@
     "key": "mode",
     "type": "opt",
     "value": 1
+   }
+  ]
+ },
+ "ai/ai-ch11": {
+  "ok": true,
+  "params": [
+   {
+    "key": "batch",
+    "type": "range",
+    "value": 5.0
+   },
+   {
+    "key": "promptTokens",
+    "type": "range",
+    "value": 600.0
+   },
+   {
+    "key": "outTokens",
+    "type": "range",
+    "value": 250.0
+   },
+   {
+    "key": "reqK",
+    "type": "range",
+    "value": 90.0
    }
   ]
  },
@@ -1414,6 +1549,36 @@
    }
   ]
  },
+ "fundamentals/fund-ch12": {
+  "ok": true,
+  "params": [
+   {
+    "key": "rttMs",
+    "type": "range",
+    "value": 100.0
+   },
+   {
+    "key": "assets",
+    "type": "range",
+    "value": 50.0
+   },
+   {
+    "key": "proto",
+    "type": "opt",
+    "value": 1
+   },
+   {
+    "key": "tls",
+    "type": "opt",
+    "value": 0
+   },
+   {
+    "key": "cdn",
+    "type": "opt",
+    "value": 0
+   }
+  ]
+ },
  "fundamentals/fund-ch13": {
   "ok": true,
   "params": [
@@ -2109,6 +2274,31 @@
    }
   ]
  },
+ "ml/ml-ch07": {
+  "ok": true,
+  "params": [
+   {
+    "key": "usersW",
+    "type": "range",
+    "value": 50.0
+   },
+   {
+    "key": "itemsW",
+    "type": "range",
+    "value": 50.0
+   },
+   {
+    "key": "algo",
+    "type": "opt",
+    "value": 2
+   },
+   {
+    "key": "factors",
+    "type": "range",
+    "value": 32.0
+   }
+  ]
+ },
  "ml/ml-ch08": {
   "ok": true,
   "params": [
@@ -2426,6 +2616,126 @@
     "key": "pool",
     "type": "range",
     "value": 10.0
+   }
+  ]
+ },
+ "tooling/tool-ch01": {
+  "ok": true,
+  "params": [
+   {
+    "key": "filesW",
+    "type": "range",
+    "value": 50.0
+   },
+   {
+    "key": "avgKB",
+    "type": "range",
+    "value": 1.0
+   },
+   {
+    "key": "blockIdx",
+    "type": "opt",
+    "value": 0
+   },
+   {
+    "key": "archive",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "tooling/tool-ch02": {
+  "ok": true,
+  "params": [
+   {
+    "key": "filesW",
+    "type": "range",
+    "value": 5.0
+   },
+   {
+    "key": "dataGB",
+    "type": "range",
+    "value": 1.0
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 2
+   }
+  ]
+ },
+ "tooling/tool-ch03": {
+  "ok": true,
+  "params": [
+   {
+    "key": "fileMB",
+    "type": "range",
+    "value": 100.0
+   },
+   {
+    "key": "versions",
+    "type": "range",
+    "value": 50.0
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 1
+   },
+   {
+    "key": "gc",
+    "type": "opt",
+    "value": 0
+   }
+  ]
+ },
+ "tooling/tool-ch04": {
+  "ok": true,
+  "params": [
+   {
+    "key": "branchDays",
+    "type": "range",
+    "value": 15.0
+   },
+   {
+    "key": "linesPerDay",
+    "type": "range",
+    "value": 160.0
+   },
+   {
+    "key": "codeKLines",
+    "type": "range",
+    "value": 50.0
+   },
+   {
+    "key": "mode",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "tooling/tool-ch05": {
+  "ok": true,
+  "params": [
+   {
+    "key": "depMB",
+    "type": "range",
+    "value": 300.0
+   },
+   {
+    "key": "order",
+    "type": "opt",
+    "value": 1
+   },
+   {
+    "key": "multi",
+    "type": "opt",
+    "value": 1
+   },
+   {
+    "key": "buildsPerDay",
+    "type": "range",
+    "value": 20.0
    }
   ]
  },

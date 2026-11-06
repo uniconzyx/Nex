@@ -2,7 +2,7 @@
   "chapter": "ai-ch11",
   "subject": "ai",
   "title": "模型服务化落地：从 `train()` 跑到线上不崩",
-  "fingerprint": "1d1383f08e",
+  "fingerprint": "ddf4afd63f",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,137 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "batch=1 跑 7B，十万请求要八张卡",
+      "brief": "自回归解码每生成一个 token 都要把 14GB 的权重从显存读一遍，batch=1 时 GPU 的算力单元基本在空转：一个 token 31ms，吞吐 32 tok/s。一天 10 万次请求、每次输出 200 token，需要 231 tok/s——要 8 张卡。批处理能把吞吐抬到 348 tok/s，但 KV cache 显存随 batch 线性涨，batch 开到 32 就 OOM 了。",
+      "params": [
+        {
+          "key": "batch",
+          "label": "批大小（并发请求）",
+          "min": 1,
+          "max": 32,
+          "step": 1,
+          "value": 1
+        },
+        {
+          "key": "promptTokens",
+          "label": "输入长度",
+          "min": 200,
+          "max": 4000,
+          "step": 200,
+          "value": 800
+        },
+        {
+          "key": "outTokens",
+          "label": "输出长度",
+          "min": 50,
+          "max": 1000,
+          "step": 50,
+          "value": 200
+        },
+        {
+          "key": "reqK",
+          "label": "每天请求数（千）",
+          "min": 10,
+          "max": 1000,
+          "step": 10,
+          "value": 100
+        }
+      ],
+      "metrics": [
+        {
+          "key": "stepMs",
+          "label": "每 token 耗时",
+          "expr": "30 + batch",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "genS",
+          "label": "单请求生成耗时",
+          "expr": "outTokens * stepMs / 1000",
+          "unit": "秒",
+          "fmt": "fix2"
+        },
+        {
+          "key": "tps",
+          "label": "单卡吞吐",
+          "expr": "batch * outTokens / (outTokens * stepMs / 1000)",
+          "unit": "token/s",
+          "fmt": "int"
+        },
+        {
+          "key": "needTps",
+          "label": "需要的吞吐",
+          "expr": "reqK * 1000 * outTokens / 86400",
+          "unit": "token/s",
+          "fmt": "int"
+        },
+        {
+          "key": "gpus",
+          "label": "需要几张卡",
+          "expr": "ceil(needTps / (batch * outTokens / (outTokens * stepMs / 1000)))",
+          "unit": "张",
+          "fmt": "int"
+        },
+        {
+          "key": "kvGB",
+          "label": "KV cache 占用",
+          "expr": "batch * (promptTokens + outTokens) * 5 / 10000",
+          "unit": "GB",
+          "fmt": "fix2"
+        },
+        {
+          "key": "vramGB",
+          "label": "总显存",
+          "expr": "14 + batch * (promptTokens + outTokens) * 5 / 10000",
+          "unit": "GB",
+          "fmt": "fix2"
+        },
+        {
+          "key": "ttftMs",
+          "label": "首 token 延迟",
+          "expr": "promptTokens * 5 / 100 + batch * 2",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "costMonth",
+          "label": "每月卡费",
+          "expr": "ceil(needTps / (batch * outTokens / (outTokens * stepMs / 1000))) * 3000",
+          "unit": "元",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "reqK >= 50",
+          "label": "每天 ≥5 万次请求（线上服务的真实量级）"
+        },
+        {
+          "expr": "promptTokens >= 500",
+          "label": "输入 ≥500 token（带上下文的真实请求）"
+        },
+        {
+          "expr": "outTokens >= 200",
+          "label": "输出 ≥200 token"
+        },
+        {
+          "expr": "gpus <= 2",
+          "label": "最多 2 张卡（预算约束）"
+        },
+        {
+          "expr": "vramGB <= 23",
+          "label": "显存 ≤23GB（单卡 24GB）"
+        },
+        {
+          "expr": "ttftMs <= 800",
+          "label": "首 token ≤800ms（交互体验底线）"
+        }
+      ],
+      "insight": "自回归解码是**访存瓶颈**，不是算力瓶颈：每生成一个 token，都要把整个模型的权重从 HBM 读进 SM——7B fp16 是 14GB，A10 的显存带宽约 600GB/s，理论下限 23ms/token，实测 30ms 上下。这 30ms 里 GPU 的 FMA 单元几乎全空转，**batch=1 是在给显存带宽交保护费**。批处理把同一时刻的所有请求拼成一个矩阵乘，权重只读一遍就服务 16 个请求：batch=1 吞吐 32 tok/s，batch=16 吞吐 348 tok/s——**10 倍，卡数从 8 张降到 1 张**。但 batch 有上限，卡在 **KV cache**：每个请求要缓存 `层数 × 2 × 头数 × 维度 × 序列长度` 的 K/V，7B fp16 约 0.5MB/token，1000 token 上下文就是 0.5GB/请求；batch=32 时 16GB 的 KV 加上 14GB 权重，24GB 卡直接 OOM。**所以真正的容量上限不是「能并行多少请求」，是「显存能装下多少 KV」。**四条实操：① **continuous batching**：不等整批结束，谁先生成完谁退出、新请求立刻补位，GPU 利用率从 40% 拉到 85% 以上（vLLM/TensorRT-LLM 默认）；② **PagedAttention**：把 KV cache 按 16 token 的块分页管理，消除预分配造成的 60%~80% 内部碎片，等效把可用 batch 抬 2~4 倍；③ **量化省的是显存不是算力**：INT8/INT4 把权重从 14GB 压到 7GB/3.5GB，腾出的空间全部给 KV cache，batch 能再翻倍；④ **首 token 与后续 token 要分开看**：prefill 是算力密集（可并行）、decode 是访存密集（受带宽限），混在一起调度才能两头都喂饱。"
+    },
     {
       "kind": "match",
       "pairs": [

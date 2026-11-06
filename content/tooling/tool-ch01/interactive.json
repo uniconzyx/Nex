@@ -2,7 +2,7 @@
   "chapter": "tool-ch01",
   "subject": "tooling",
   "title": "Linux 基础：文件系统与权限",
-  "fingerprint": "7ae3252852",
+  "fingerprint": "d3810d13fb",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,135 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "一百万个 1KB 文件，吃掉 4GB",
+      "brief": "日志切片、缓存缩略图、模型分片——这类「一堆 1KB 小文件」在 `du` 里只报 976MB，实际却占掉 3.9GB：块分配的最小单位是 4KB，1KB 的内容也要占满一整块。外加每个文件 256 字节的 inode，一百万文件又是 244MB。把文件数、块大小与存放方式拖一拖，看这 4 倍是怎么凭空多出来的。",
+      "params": [
+        {
+          "key": "filesW",
+          "label": "小文件数量（万）",
+          "min": 10,
+          "max": 200,
+          "step": 10,
+          "value": 100
+        },
+        {
+          "key": "avgKB",
+          "label": "每个文件大小",
+          "min": 1,
+          "max": 4,
+          "step": 1,
+          "value": 1
+        },
+        {
+          "key": "blockIdx",
+          "label": "文件系统块大小",
+          "min": 0,
+          "max": 2,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "4KB（ext4 默认）",
+            "16KB",
+            "64KB"
+          ]
+        },
+        {
+          "key": "archive",
+          "label": "存放方式",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "散落成一堆小文件",
+            "归档成少数大文件（tar/合并段）"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "fileCount",
+          "label": "文件总数",
+          "expr": "filesW * 10000",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "blockB",
+          "label": "块大小",
+          "expr": "if(blockIdx == 0, 4096, if(blockIdx == 1, 16384, 65536))",
+          "unit": "字节",
+          "fmt": "int"
+        },
+        {
+          "key": "dataMB",
+          "label": "数据本身",
+          "expr": "fileCount * avgKB / 1024",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "perFileB",
+          "label": "每个文件实占",
+          "expr": "if(archive == 1, avgKB * 1024, ceil(avgKB * 1024 / blockB) * blockB)",
+          "unit": "字节",
+          "fmt": "int"
+        },
+        {
+          "key": "totalMB",
+          "label": "实际占用磁盘",
+          "expr": "fileCount * perFileB / 1048576",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "wastePct",
+          "label": "块内浪费",
+          "expr": "round((perFileB - avgKB * 1024) * 100 / perFileB)",
+          "unit": "%",
+          "fmt": "int"
+        },
+        {
+          "key": "inodeCount",
+          "label": "inode 数量",
+          "expr": "if(archive == 1, 1, fileCount)",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "inodeMB",
+          "label": "inode 表占用",
+          "expr": "inodeCount * 256 / 1048576",
+          "unit": "MB",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "fileCount >= 500000",
+          "label": "文件数 ≥50 万（日志切片/缩略图的真实量级）"
+        },
+        {
+          "expr": "avgKB == 1",
+          "label": "每个文件就是 1KB（改大小等于换场景）"
+        },
+        {
+          "expr": "wastePct <= 10",
+          "label": "块内浪费 ≤10%"
+        },
+        {
+          "expr": "totalMB <= 1200",
+          "label": "实际占用 ≤1.2GB（数据只有 976MB）"
+        },
+        {
+          "expr": "inodeMB <= 4",
+          "label": "inode 表 ≤4MB（别把 inode 吃光）"
+        }
+      ],
+      "insight": "`du -sh` 报的是 976MB，`du --apparent-size` 也报 976MB，但 `df` 显示少了 3.9GB——差额在**块分配**。文件系统不给「字节」分配空间，给**块**分配：ext4 默认 4KB 一块，你写 1KB，剩下的 3KB 就是尾部浪费（internal fragmentation），976MB 的 1KB 文件实际占 `100 万 × 4KB = 3.9GB`，**浪费率 75%**。更容易被忽略的是 **inode**：每个文件（目录也是文件）都要一个 inode，ext4 每个 256 字节，`mkfs` 时按卷大小预分配固定数量。100 万个文件要 244MB 的 inode 表，而且**inode 总数是建卷时定死的**——`df -h` 还有 50GB 空间、`df -i` 已经 100%，此时 `touch` 报 `No space left on device`，这是排查小文件问题最容易踩的坑。三条实操：① **能合并就别散落**：日志按小时切片不如按 128MB 段写，或者直接进对象存储/时序库；`tar` 归档后连续存放，块浪费归零、inode 只要 1 个；② **块大小是权衡**：把块调到 64KB 能减少 inode 数量，但只要文件小于 64KB 浪费更严重（1KB 文件变 64 倍），所以「大块 + 大文件」要配套；③ **监控 `df -i`**：容器镜像层、CI 缓存、邮件队列都是小文件重灾区，inode 耗尽的表现是「有空间却写不进去」。"
+    },
     {
       "kind": "match",
       "pairs": [

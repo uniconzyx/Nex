@@ -2,7 +2,7 @@
   "chapter": "ai-ch05",
   "subject": "ai",
   "title": "提示工程与上下文工程",
-  "fingerprint": "3ae24217f7",
+  "fingerprint": "689806fc2c",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,128 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "8K 窗口，第 6 轮就开始丢对话",
+      "brief": "8K 上下文的模型，system prompt 占 500 token，塞 8 个 few-shot 示例占 1600，20 轮对话历史占 6000——再加上 20% 的输出预留，总需求 8100 > 6400 的预算。结果是**最前面的 6 轮对话被静默截断**，用户问「我刚才说的偏好是什么」时模型一脸茫然。这不是模型笨，是预算没算。",
+      "params": [
+        {
+          "key": "windowK",
+          "label": "上下文窗口（K token）",
+          "min": 4,
+          "max": 128,
+          "step": 4,
+          "value": 8
+        },
+        {
+          "key": "shots",
+          "label": "few-shot 示例数",
+          "min": 0,
+          "max": 20,
+          "step": 1,
+          "value": 8
+        },
+        {
+          "key": "histTurns",
+          "label": "对话历史轮数",
+          "min": 4,
+          "max": 40,
+          "step": 2,
+          "value": 20
+        },
+        {
+          "key": "histMode",
+          "label": "历史处理方式",
+          "min": 0,
+          "max": 2,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "全量保留",
+            "滑动窗口（只留最近 4 轮）",
+            "摘要压缩（每 5 轮压成 1 条）"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "budget",
+          "label": "输入预算",
+          "expr": "windowK * 1000 * 80 / 100",
+          "unit": "token",
+          "fmt": "int"
+        },
+        {
+          "key": "histTokens",
+          "label": "历史占用",
+          "expr": "if(histMode == 0, histTurns * 300, if(histMode == 1, 1200, ceil(histTurns / 5) * 200))",
+          "unit": "token",
+          "fmt": "int"
+        },
+        {
+          "key": "promptTokens",
+          "label": "输入总 token",
+          "expr": "500 + shots * 200 + histTokens",
+          "unit": "token",
+          "fmt": "int"
+        },
+        {
+          "key": "overflow",
+          "label": "超出预算",
+          "expr": "max(0, promptTokens - budget)",
+          "unit": "token",
+          "fmt": "int"
+        },
+        {
+          "key": "droppedTurns",
+          "label": "被丢掉的历史轮数",
+          "expr": "if(promptTokens - budget <= 0, 0, ceil((promptTokens - budget) / 300))",
+          "unit": "轮",
+          "fmt": "int"
+        },
+        {
+          "key": "keepPct",
+          "label": "历史保留率",
+          "expr": "round((histTurns - if(promptTokens - budget <= 0, 0, ceil((promptTokens - budget) / 300))) * 100 / max(histTurns, 1))",
+          "unit": "%",
+          "fmt": "int"
+        },
+        {
+          "key": "costPerK",
+          "label": "千次请求成本",
+          "expr": "promptTokens * 1000 / 1000000 * 2",
+          "unit": "元",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "windowK == 8",
+          "label": "上下文窗口 8K（换模型等于换场景）"
+        },
+        {
+          "expr": "histTurns == 20",
+          "label": "对话 20 轮（一次客服会话的真实长度）"
+        },
+        {
+          "expr": "shots >= 3",
+          "label": "至少保留 3 个 few-shot 示例"
+        },
+        {
+          "expr": "overflow == 0",
+          "label": "输入不能超出预算（溢出就要丢历史）"
+        },
+        {
+          "expr": "keepPct >= 100",
+          "label": "历史完整保留（不丢轮次）"
+        },
+        {
+          "expr": "costPerK <= 12",
+          "label": "千次请求 ≤12 元"
+        }
+      ],
+      "insight": "上下文窗口是**硬预算**，不是「大概够」：`system + few-shot + 历史 + 当前输入 + 输出预留` 五项加起来超过窗口，框架的做法通常是**从最早的消息开始丢**——用户第一轮说的「我是企业版用户、不要提价格」就这么消失了，而且**没有任何报错**。按 8K 窗口算：留 20% 给输出（1600），输入预算 6400；system 500 + 8 个示例 1600 + 20 轮历史 6000 = 8100，超 1700 → 丢 6 轮。三条实操：① **给每一项定额**：比如 system ≤500、few-shot ≤1500、检索片段 ≤2000、历史 ≤1500、输出预留 20%，加起来必须装得下；配额超了就按优先级砍，而不是让框架随机截断；② **历史要主动管理**：滑动窗口（只留最近 N 轮）最简单但会丢早期的关键约束；**摘要压缩**（把前 N 轮让模型总结成一条 200 token 的「已知信息」）保留语义、成本可控，是长会话的默认选择；③ **few-shot 的边际收益递减**：从 0 到 3 个示例提升最大，从 8 到 16 个几乎不涨，但 token 成本线性增长——**用 3~5 个高质量示例，不是 20 个平庸示例**；④ **把稳定的部分放前面**：system 与 few-shot 在前、易变的历史在后，还能吃到 prefix caching 的折扣（缓存命中的输入 token 通常便宜 50%~90%）。"
+    },
     {
       "kind": "match",
       "pairs": [
