@@ -2,7 +2,7 @@
   "chapter": "fs-ch12",
   "subject": "fullstack",
   "title": "服务拆分与网关：拆分判断、网关职责、配置中心",
-  "fingerprint": "32c0517817",
+  "fingerprint": "63ef489b2a",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,68 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "微服务跨服务调用开销",
+      "brief": "一个「下单」请求在微服务架构里要依次穿过 3 个服务（用户→库存→订单），每跳一次 RPC 都多约 2ms（1ms 网络往返 + 序列化/反序列化）。本次请求凭空多 8.4ms 延迟。单体架构里这只是一次进程内方法调用，延迟为 0。把跨服务跳数、架构和序列化体量拖一拖，看额外延迟。",
+      "params": [
+        {
+          "key": "svcHops",
+          "label": "本次请求跨服务跳数",
+          "min": 1,
+          "max": 10,
+          "step": 1,
+          "value": 3
+        },
+        {
+          "key": "arch",
+          "label": "架构",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 1,
+          "labels": [
+            "单体（进程内方法调用）",
+            "微服务（每跳一次 RPC）"
+          ]
+        },
+        {
+          "key": "serializeKB",
+          "label": "每次 RPC 序列化数据",
+          "min": 1,
+          "max": 64,
+          "step": 1,
+          "value": 8
+        }
+      ],
+      "metrics": [
+        {
+          "key": "perHopMs",
+          "label": "每跳额外延迟",
+          "expr": "if(arch == 0, 0, 2 + serializeKB * 0.1)",
+          "unit": "ms",
+          "fmt": "fix2"
+        },
+        {
+          "key": "extraLatency",
+          "label": "本次请求额外延迟",
+          "expr": "svcHops * perHopMs",
+          "unit": "ms",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "svcHops >= 2",
+          "label": "业务确实跨多个服务"
+        },
+        {
+          "expr": "extraLatency <= 5",
+          "label": "额外延迟 ≤5ms（默认微服务 8.4ms 过不了，需减少跨服务跳数 / 合并调用）"
+        }
+      ],
+      "insight": "「微服务」不是免费的：**每一次跨进程调用都比进程内方法调用多出网络往返 + 序列化/反序列化 + 重试/超时治理的成本**。翻过几道服务边界后，原本 1ms 的调用可能变成 5~10ms，且任何一跳抖动都会放大成端到端延迟。这章的核心不是「微服务好 / 单体好」，而是**何时拆**：当团队结构（康威定律）、独立部署粒度、技术异构需求真的出现时，付出的延迟与运维代价才值回票价；否则「为了微服务而微服务」只会在延迟和排障复杂度上双倍买单。降低开销的工程手段：合并相邻的同步 RPC、对非实时结果用异步事件、用 gRPC/protobuf 压缩序列化。"
+    },
     {
       "kind": "match",
       "pairs": [

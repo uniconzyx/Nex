@@ -2,7 +2,7 @@
   "chapter": "fs-ch10",
   "subject": "fullstack",
   "title": "Vue 3 + TypeScript + Pinia：响应式原理与 ref/reactive 边界",
-  "fingerprint": "4dc4bc63f5",
+  "fingerprint": "63281aebd2",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,76 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "模板里直接调重函数 vs computed",
+      "brief": "一个组件的模板里写 `{{ heavyCalc() }}`，父组件因为别的状态频繁重渲染，这个函数就被跟着调了 500 次（每次 3ms = 1.5 秒纯浪费）。改成 computed 后，它只在自己依赖的数据变化时重算——而依赖其实很少变（5 次）。把渲染次数、依赖变化次数和计算方式拖一拖，看重算次数。",
+      "params": [
+        {
+          "key": "renders",
+          "label": "组件渲染次数",
+          "min": 10,
+          "max": 1000,
+          "step": 10,
+          "value": 500
+        },
+        {
+          "key": "depsChange",
+          "label": "依赖变化次数",
+          "min": 1,
+          "max": 50,
+          "step": 1,
+          "value": 5
+        },
+        {
+          "key": "useComputed",
+          "label": "计算方式",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "模板里直接调 heavyCalc()（每次渲染都重算）",
+            "用 computed（依赖不变不重算）"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "calcRuns",
+          "label": "重算次数",
+          "expr": "if(useComputed == 1, depsChange, renders)",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "calcMs",
+          "label": "计算总耗时",
+          "expr": "calcRuns * 3",
+          "unit": "ms",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "renders >= 200",
+          "label": "至少 200 次渲染（列表频繁重渲染的真实场景）"
+        },
+        {
+          "expr": "depsChange <= 10",
+          "label": "依赖很少变（只变了 5 次）"
+        },
+        {
+          "expr": "calcRuns <= 20",
+          "label": "重算 ≤20 次（computed 缓存的硬判据）"
+        },
+        {
+          "expr": "calcMs <= 60",
+          "label": "计算总耗时 ≤60ms"
+        }
+      ],
+      "insight": "响应式框架里「在模板 / 渲染函数里直接调用重计算」是典型的性能反模式：渲染是**高频且常常被迫触发**的（父组件更新、兄弟状态变化都可能让本组件重渲染），而重计算本可以**只在它真正依赖的数据变化时**跑一次。computed（Vue）/ useMemo（React）/ memoized selector（状态库）做的就是这件事：① 记录依赖 → ② 依赖不变时返回缓存值、跳过计算 → ③ 只在依赖变时重算。注意 computed 不是万能药：**依赖要选得准**，把不相关的变量塞进依赖数组会让缓存频繁失效，等于又退化成每次重算。原则是「依赖 = 函数真正读到的响应式变量」。"
+    },
     {
       "kind": "match",
       "pairs": [

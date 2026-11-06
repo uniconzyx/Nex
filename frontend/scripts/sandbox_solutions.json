@@ -1374,6 +1374,271 @@
    }
   ]
  },
+ "fullstack/fs-ch01": {
+  "ok": true,
+  "params": [
+   {
+    "key": "payloadKB",
+    "type": "range",
+    "value": 80.0
+   },
+   {
+    "key": "qps",
+    "type": "range",
+    "value": 500.0
+   },
+   {
+    "key": "gzip",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "fullstack/fs-ch02": {
+  "ok": true,
+  "params": [
+   {
+    "key": "nodes",
+    "type": "range",
+    "value": 500.0
+   },
+   {
+    "key": "pattern",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "fullstack/fs-ch03": {
+  "ok": true,
+  "params": [
+   {
+    "key": "pollMs",
+    "type": "range",
+    "value": 100.0
+   },
+   {
+    "key": "usePush",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "fullstack/fs-ch04": {
+  "ok": true,
+  "params": [
+   {
+    "key": "fileMB",
+    "type": "range",
+    "value": 200.0
+   },
+   {
+    "key": "streaming",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "fullstack/fs-ch05": {
+  "ok": true,
+  "params": [
+   {
+    "key": "totalRows",
+    "type": "range",
+    "value": 1100000.0
+   },
+   {
+    "key": "page",
+    "type": "range",
+    "value": 121.0
+   },
+   {
+    "key": "perPage",
+    "type": "range",
+    "value": 10.0
+   },
+   {
+    "key": "cursor",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "fullstack/fs-ch06": {
+  "ok": true,
+  "params": [
+   {
+    "key": "scheme",
+    "type": "opt",
+    "value": 3
+   },
+   {
+    "key": "pwdLen",
+    "type": "range",
+    "value": 7.0
+   }
+  ]
+ },
+ "fullstack/fs-ch07": {
+  "ok": true,
+  "params": [
+   {
+    "key": "nodes",
+    "type": "range",
+    "value": 500.0
+   },
+   {
+    "key": "localState",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "fullstack/fs-ch08": {
+  "ok": true,
+  "params": [
+   {
+    "key": "buildTool",
+    "type": "opt",
+    "value": 0
+   },
+   {
+    "key": "baseImg",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "fullstack/fs-ch09": {
+  "ok": true,
+  "params": [
+   {
+    "key": "types",
+    "type": "range",
+    "value": 10.0
+   },
+   {
+    "key": "lang",
+    "type": "opt",
+    "value": 0
+   }
+  ]
+ },
+ "fullstack/fs-ch10": {
+  "ok": true,
+  "params": [
+   {
+    "key": "renders",
+    "type": "range",
+    "value": 200.0
+   },
+   {
+    "key": "depsChange",
+    "type": "range",
+    "value": 1.0
+   },
+   {
+    "key": "useComputed",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "fullstack/fs-ch11": {
+  "ok": true,
+  "params": [
+   {
+    "key": "inTxnCalls",
+    "type": "range",
+    "value": 3.0
+   },
+   {
+    "key": "txnScope",
+    "type": "opt",
+    "value": 1
+   },
+   {
+    "key": "rpcMs",
+    "type": "range",
+    "value": 50.0
+   }
+  ]
+ },
+ "fullstack/fs-ch12": {
+  "ok": true,
+  "params": [
+   {
+    "key": "svcHops",
+    "type": "range",
+    "value": 2.0
+   },
+   {
+    "key": "arch",
+    "type": "opt",
+    "value": 0
+   },
+   {
+    "key": "serializeKB",
+    "type": "range",
+    "value": 1.0
+   }
+  ]
+ },
+ "fullstack/fs-ch13": {
+  "ok": true,
+  "params": [
+   {
+    "key": "e2eCount",
+    "type": "range",
+    "value": 50.0
+   },
+   {
+    "key": "unitCount",
+    "type": "range",
+    "value": 500.0
+   }
+  ]
+ },
+ "fullstack/fs-ch14": {
+  "ok": true,
+  "params": [
+   {
+    "key": "tokens",
+    "type": "range",
+    "value": 500.0
+   },
+   {
+    "key": "flushEvery",
+    "type": "range",
+    "value": 1.0
+   },
+   {
+    "key": "buffered",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
+ "fullstack/fs-ch15": {
+  "ok": true,
+  "params": [
+   {
+    "key": "goroutines",
+    "type": "range",
+    "value": 50.0
+   },
+   {
+    "key": "perG",
+    "type": "range",
+    "value": 500.0
+   },
+   {
+    "key": "useMutex",
+    "type": "opt",
+    "value": 1
+   }
+  ]
+ },
  "fundamentals/fund-ch01": {
   "ok": true,
   "params": [

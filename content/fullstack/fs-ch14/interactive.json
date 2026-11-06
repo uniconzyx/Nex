@@ -2,7 +2,7 @@
   "chapter": "fs-ch14",
   "subject": "fullstack",
   "title": "Agent × 全栈工程接缝：流式、长任务、幂等与成本",
-  "fingerprint": "35a1ae8632",
+  "fingerprint": "73b134ce34",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,72 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "流式响应逐 token 推送",
+      "brief": "一个 LLM 网关要把生成的回复流式推给客户端。如果每产出一个 token 就立即 flush 一次 HTTP chunk，1000 个 token 就是 1000 个极小的网络包（每包几字节），TCP/HTTP 头部开销被放大。改成每攒够约 8 个 token 再发一次，包数降 8 倍。把 token 数、每包 flush 间隔和是否缓冲拖一拖，看网络包数。",
+      "params": [
+        {
+          "key": "tokens",
+          "label": "本次响应 token 数",
+          "min": 100,
+          "max": 4000,
+          "step": 100,
+          "value": 1000
+        },
+        {
+          "key": "flushEvery",
+          "label": "每多少 token flush 一次",
+          "min": 1,
+          "max": 64,
+          "step": 1,
+          "value": 1
+        },
+        {
+          "key": "buffered",
+          "label": "缓冲策略",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "每生成 1 个 token 立即 flush",
+            "按 ~8 token 批量缓冲再发"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "packets",
+          "label": "网络包数",
+          "expr": "if(buffered == 1, tokens / 8, tokens / flushEvery)",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "perPacketTokens",
+          "label": "每包 token 数",
+          "expr": "if(buffered == 1, 8, flushEvery)",
+          "unit": "个",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "tokens >= 500",
+          "label": "至少 500 个 token（长回复的真实体量）"
+        },
+        {
+          "expr": "packets <= 200",
+          "label": "网络包 ≤200 个（批量缓冲的硬判据）"
+        },
+        {
+          "expr": "perPacketTokens >= 4",
+          "label": "每包 ≥4 个 token（别发极小的包）"
+        }
+      ],
+      "insight": "流式（streaming）把「等全部生成完再返回」变成「边生成边推」，首字延迟（TTFT）大幅下降、体验更好；但**推送的粒度**有讲究：每产出 1 个 token 就 flush 一次，等于把 TCP 包和 HTTP chunk 头部的开销放大了几百倍，在网关 / CDN / 客户端还会触发过多的小包调度。工程上普遍做法是**攒一小批（~8 个 token，或按 ~50ms 时间窗）再 flush 一次**，既保持「打字机」体感，又把包数降一个数量级。另一个关联坑是**背压**：客户端消费慢时网关要停推，否则缓冲堆积把内存吃掉；以及 `Content-Type: text/event-stream` 下有些代理会缓冲，需要 `X-Accel-Buffering: no` 关掉。"
+    },
     {
       "kind": "match",
       "pairs": [

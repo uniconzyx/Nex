@@ -2,7 +2,7 @@
   "chapter": "fs-ch02",
   "subject": "fullstack",
   "title": "前端基础：HTML 语义化与 CSS 盒模型/布局",
-  "fingerprint": "d06d64439b",
+  "fingerprint": "7b017e928f",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,64 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "循环里读写交替，强制同步重排",
+      "brief": "要批量更新 1000 个节点的样式并读取它们的位置。如果循环里「写一行样式、读一次 offsetHeight」交替，浏览器每次读都会强制先做一遍布局（reflow），1000 个节点就是 1000 次重排。把节点数和处理模式拖一拖，看卡顿是怎么来的。",
+      "params": [
+        {
+          "key": "nodes",
+          "label": "节点数",
+          "min": 100,
+          "max": 5000,
+          "step": 100,
+          "value": 1000
+        },
+        {
+          "key": "pattern",
+          "label": "读写模式",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "循环里读写交替（每次读 offsetHeight 都强制重排）",
+            "先批量读、再批量写（只 1 次重排）"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "reflows",
+          "label": "重排次数",
+          "expr": "if(pattern == 0, nodes, 1)",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "costMs",
+          "label": "布局耗时",
+          "expr": "reflows * 2",
+          "unit": "ms",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "nodes >= 500",
+          "label": "至少 500 个节点（列表 / 表格的真实规模）"
+        },
+        {
+          "expr": "reflows <= 5",
+          "label": "重排 ≤5 次（读写分离的硬判据）"
+        },
+        {
+          "expr": "costMs <= 50",
+          "label": "布局耗时 ≤50ms（16ms 一帧，50ms 已掉 3 帧但可接受）"
+        }
+      ],
+      "insight": "浏览器的渲染是「JS 执行 → 样式计算 → 布局 → 绘制 → 合成」的流水线，**读几何属性（offsetHeight / offsetTop / getBoundingClientRect / 某些 getComputedStyle）会强制浏览器先 flush 掉之前积攒的写、立即跑一遍布局**——这就是 layout thrashing。循环里「写→读→写→读」等于每轮都重排一次。三条解法：① **读写分离**：先把所有要读的值一次性读出来，再统一写；② **用 DocumentFragment / 脱离文档的节点**做批量改动，只触发一次回流；③ **fast path**：改 class 而不是逐条改 style，交给 CSS 引擎批量处理。现代框架（React/Vue）的虚拟 DOM diff 也是在 commit 阶段统一写，本质就是避免读写交替。"
+    },
     {
       "kind": "sequence",
       "heading": "二、实现机制（按线程与阶段拆解）",

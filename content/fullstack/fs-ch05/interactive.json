@@ -2,7 +2,7 @@
   "chapter": "fs-ch05",
   "subject": "fullstack",
   "title": "数据库与 REST API 设计",
-  "fingerprint": "75852c7512",
+  "fingerprint": "5dfa29d989",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,91 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "深度分页 OFFSET 深翻页",
+      "brief": "一个千万行的订单表，前端「下一页」翻到第 1000 页。LIMIT 10 OFFSET 100000 看起来只取 10 行，但数据库得先扫出前 100000 行再丢弃，越翻越慢。把总行数、页码和分页方式拖一拖，看扫描行数。",
+      "params": [
+        {
+          "key": "totalRows",
+          "label": "表总行数",
+          "min": 100000,
+          "max": 10000000,
+          "step": 500000,
+          "value": 5000000
+        },
+        {
+          "key": "page",
+          "label": "翻到第几页",
+          "min": 1,
+          "max": 1000,
+          "step": 20,
+          "value": 1000
+        },
+        {
+          "key": "perPage",
+          "label": "每页条数",
+          "min": 10,
+          "max": 100,
+          "step": 10,
+          "value": 10
+        },
+        {
+          "key": "cursor",
+          "label": "分页方式",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "OFFSET 深翻页",
+            "游标分页（WHERE id > lastId）"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "offset",
+          "label": "OFFSET 值",
+          "expr": "page * perPage",
+          "unit": "行",
+          "fmt": "int"
+        },
+        {
+          "key": "scanned",
+          "label": "本次扫描行数",
+          "expr": "if(cursor == 1, perPage, offset + perPage)",
+          "unit": "行",
+          "fmt": "int"
+        },
+        {
+          "key": "scanMB",
+          "label": "本次扫描数据量",
+          "expr": "scanned * 200 / 1048576",
+          "unit": "MB",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "totalRows >= 1000000",
+          "label": "至少千万级大表（深翻页才会痛）"
+        },
+        {
+          "expr": "page >= 100",
+          "label": "确实翻到了很深的页"
+        },
+        {
+          "expr": "scanned <= 100",
+          "label": "本次扫描 ≤100 行（游标分页的硬判据）"
+        },
+        {
+          "expr": "scanMB <= 0.05",
+          "label": "扫描数据 ≤50KB（与页码无关的单位量）"
+        }
+      ],
+      "insight": "`OFFSET` 是「跳过前 N 行」，数据库**没有捷径**，必须真的先把前 N 行从存储读出来（即使丢弃）。翻到第 1000 页就是扫 10000 行，深翻页随着页码线性变慢，还会因 MVCC 反复读旧版本。游标分页（keyset pagination）用索引列做范围：`WHERE id > :lastId ORDER BY id LIMIT 10`，无论翻多深都只扫一页，**前提是排序列有索引且稳定**（所以别用 `ORDER BY rand()`）。限制：游标分页不支持「跳到第 N 页」的随机跳转，UI 上用「无限滚动 / 上一页下一页」替代页码输入即可。"
+    },
     {
       "kind": "match",
       "pairs": [

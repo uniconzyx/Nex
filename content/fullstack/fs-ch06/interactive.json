@@ -2,7 +2,7 @@
   "chapter": "fs-ch06",
   "subject": "fullstack",
   "title": "用户认证 / JWT / 鉴权",
-  "fingerprint": "0951560d3a",
+  "fingerprint": "4657f646a2",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,76 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "密码存储：明文 vs bcrypt",
+      "brief": "用户密码只有 8 位（大小写+数字）。如果数据库明文存、或只存一个 MD5，泄露后被 GPU 每秒枚举十亿次，几秒就全破。换成 bcrypt（故意慢哈希）后，同样一个密码要算几百年。把存储方案和密码长度拖一拖，看破解时间。",
+      "params": [
+        {
+          "key": "scheme",
+          "label": "存储方案",
+          "min": 0,
+          "max": 3,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "明文",
+            "快哈希（MD5 / SHA-1）",
+            "加盐快哈希",
+            "bcrypt 慢哈希"
+          ]
+        },
+        {
+          "key": "pwdLen",
+          "label": "密码长度",
+          "min": 6,
+          "max": 16,
+          "step": 1,
+          "value": 8
+        }
+      ],
+      "metrics": [
+        {
+          "key": "guessesPerSec",
+          "label": "每秒可试密码数",
+          "expr": "if(scheme == 0, 1000000000000, if(scheme == 1, 1000000000, if(scheme == 2, 1000000000, 10)))",
+          "unit": "次/s",
+          "fmt": "int"
+        },
+        {
+          "key": "keyspace",
+          "label": "密码空间",
+          "expr": "pow(62, pwdLen)",
+          "unit": "种",
+          "fmt": "int"
+        },
+        {
+          "key": "crackSec",
+          "label": "破解耗时（平均）",
+          "expr": "keyspace / guessesPerSec / 2",
+          "unit": "秒",
+          "fmt": "int"
+        },
+        {
+          "key": "crackYears",
+          "label": "破解耗时（年）",
+          "expr": "crackSec / 31536000",
+          "unit": "年",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "pwdLen <= 10",
+          "label": "用户就是弱密码（≤10 位才是真实风险）"
+        },
+        {
+          "expr": "crackYears >= 1000",
+          "label": "破解 ≥1000 年（bcrypt 的硬判据）"
+        }
+      ],
+      "insight": "密码存储的第一原则：**永远别存明文，也别用快哈希（MD5/SHA-1/SHA-256）**。 快哈希的设计目标是「快」，正好让攻击者的 GPU 农场每秒枚举几十亿个候选。正确做法是**慢哈希 + 每用户盐**：bcrypt / scrypt / Argon2 故意把单次计算做慢（bcrypt 默认约 100ms/次，且可随硬件升级调 cost），并给每个用户随机盐，让「彩虹表」失效、相同密码也存出不同摘要。现代框架（Django/Spring Security/Passlib）默认就走这套；如果还在手写 `md5(password)`，这是最需要优先修的安全债。"
+    },
     {
       "kind": "match",
       "pairs": [

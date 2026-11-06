@@ -2,7 +2,7 @@
   "chapter": "fs-ch03",
   "subject": "fullstack",
   "title": "JavaScript 核心：类型、原型链、DOM 与事件、异步(Promise/async)",
-  "fingerprint": "d08c31594d",
+  "fingerprint": "a4b48fdab1",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,64 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "100ms 轮询，空转请求",
+      "brief": "前端想实时看订单状态，用 setInterval 每 100ms 打一次接口问「变了吗」。绝大多数请求答案都是「没变」，等于每秒 10 次空转请求打到后端。把轮询间隔和是否用推送拖一拖，看空转量。",
+      "params": [
+        {
+          "key": "pollMs",
+          "label": "轮询间隔",
+          "min": 100,
+          "max": 5000,
+          "step": 100,
+          "value": 100
+        },
+        {
+          "key": "usePush",
+          "label": "数据获取方式",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "客户端定时轮询",
+            "服务端事件推送（SSE / WebSocket）"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "pollsPerSec",
+          "label": "每秒请求数",
+          "expr": "if(usePush == 1, 0, 1000 / pollMs)",
+          "unit": "次/s",
+          "fmt": "int"
+        },
+        {
+          "key": "wastedPerMin",
+          "label": "每分钟空转请求",
+          "expr": "pollsPerSec * 60",
+          "unit": "次",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "pollMs <= 1000",
+          "label": "轮询间隔不会太长（默认 100ms 很频繁）"
+        },
+        {
+          "expr": "pollsPerSec <= 0.2",
+          "label": "每秒请求 ≤0.2（推送后归零的硬判据）"
+        },
+        {
+          "expr": "wastedPerMin <= 12",
+          "label": "每分钟空转 ≤12 次"
+        }
+      ],
+      "insight": "轮询（polling）是最容易写的实时方案，但代价是**「询问」和「变化」解耦后的空转**：间隔短了空转多、间隔长了延迟高，永远在两难之间。三种更优的替代：① **长轮询（long-polling）**：请求挂起直到有变化才返回，把空转合并掉；② **SSE（Server-Sent Events）**：服务端单向推送，一条长连接复用；③ **WebSocket**：双向全双工，适合聊天 / 协同编辑。取舍点：读多写少、延迟敏感 → SSE；需要客户端主动发 → WebSocket；纯粹为了「知道变了」却用高频轮询，是典型的资源浪费。"
+    },
     {
       "kind": "match",
       "pairs": [

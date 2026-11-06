@@ -2,7 +2,7 @@
   "chapter": "fs-ch08",
   "subject": "fullstack",
   "title": "部署 / CI-CD / Docker",
-  "fingerprint": "4537d066a8",
+  "fingerprint": "e192225315",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,79 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "Docker 单阶段镜像含构建工具",
+      "brief": "一个 Java 服务，单阶段 Dockerfile 直接在最终镜像里 `apt install openjdk`，再 COPY 源码编译。最终镜像既含 JDK（~600MB）又含 ubuntu 基础（~70MB），体积 720MB，传输和启动都慢。多阶段只把 jar 拷进 distroless，7MB。把是否含构建工具链和基础镜像拖一拖，看最终体积。",
+      "params": [
+        {
+          "key": "buildTool",
+          "label": "最终镜像是否含构建工具",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 1,
+          "labels": [
+            "最终镜像含构建工具（gcc / JDK / node）",
+            "多阶段只 COPY 运行时产物"
+          ]
+        },
+        {
+          "key": "baseImg",
+          "label": "基础镜像",
+          "min": 0,
+          "max": 2,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "ubuntu（~70MB）",
+            "debian-slim（~30MB）",
+            "distroless / alpine（~5MB）"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "baseMB",
+          "label": "基础镜像体积",
+          "expr": "if(baseImg == 0, 70, if(baseImg == 1, 30, 5))",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "toolchainMB",
+          "label": "构建工具链体积",
+          "expr": "if(buildTool == 1, 600, 0)",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "depsMB",
+          "label": "运行时依赖体积",
+          "expr": "if(baseImg == 2, 2, 50)",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "imageMB",
+          "label": "最终镜像体积",
+          "expr": "baseMB + toolchainMB + depsMB",
+          "unit": "MB",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "imageMB <= 100",
+          "label": "最终镜像 ≤100MB（单阶段 ubuntu 720MB 会爆）"
+        },
+        {
+          "expr": "toolchainMB == 0",
+          "label": "运行时镜像不含构建工具（多阶段的硬判据）"
+        }
+      ],
+      "insight": "Docker 镜像分层的妙处不止缓存，**多阶段构建（multi-stage）还能让「构建环境」和「运行环境」彻底分离**：第一阶段用完整的 SDK 镜像编译，第二阶段从一个极小的运行时镜像（distroless / alpine）只 `COPY` 编译产物。收益有三：① 体积从几百 MB 降到几 MB，拉取和冷启动都快；② 攻击面骤减（运行镜像里没有 shell / 包管理器 / 编译器）；③ 构建工具链的 CVE 不会带进生产镜像。另外 `COPY . .` 要写在 `RUN npm install` **之后**、依赖文件单独 COPY 在前，才能命中 layer 缓存——这条和镜像体积同样重要。"
+    },
     {
       "kind": "match",
       "pairs": [

@@ -2,7 +2,7 @@
   "chapter": "fs-ch04",
   "subject": "fullstack",
   "title": "Node.js 与后端 API",
-  "fingerprint": "3722f0502e",
+  "fingerprint": "fe87cde25b",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,60 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "Node 一次性 readFile 大文件",
+      "brief": "要处理一个 500MB 的导出文件。fs.readFile 会把它整个读进内存再回调，内存峰值就是 500MB——容器内存限制 256MB 时直接 OOM 被 kill。换成流分块读，峰值只有 64KB。把文件大小和读取方式拖一拖，看内存峰值。",
+      "params": [
+        {
+          "key": "fileMB",
+          "label": "文件大小",
+          "min": 100,
+          "max": 2000,
+          "step": 50,
+          "value": 500
+        },
+        {
+          "key": "streaming",
+          "label": "读取方式",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "fs.readFile 一次性读进内存",
+            "fs.createReadStream 分块（64KB）"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "peakMB",
+          "label": "内存峰值",
+          "expr": "if(streaming == 1, 64, fileMB)",
+          "unit": "MB",
+          "fmt": "int"
+        },
+        {
+          "key": "chunks",
+          "label": "数据块数",
+          "expr": "if(streaming == 1, fileMB * 1024 / 64, 1)",
+          "unit": "块",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "fileMB >= 200",
+          "label": "至少 200MB（日志 / 导出文件的真实体量）"
+        },
+        {
+          "expr": "peakMB <= 128",
+          "label": "内存峰值 ≤128MB（容器常见限制）"
+        }
+      ],
+      "insight": "Node 是单进程，**一次性把大文件读进内存既撑爆 V8 堆又加长 GC 停顿**。Stream 的核心价值是**边读边处理 + 背压**：下游消费慢时，上游自动暂停推数据，内存峰值恒定在「一个 chunk」大小（默认 64KB）。两个要点：① 用 `stream.pipe(dest)` 或 `for await (const chunk of readable)` 而不是 readFile；② 网络 / 磁盘 / 压缩（zlib）之间用 pipe 串联，Node 会自动在两端速率不匹配时做背压，不会堆积。需要随机访问大文件时再考虑 mmap（Node 用 `fs.open` + `read` 按 offset 读）。"
+    },
     {
       "kind": "match",
       "pairs": [

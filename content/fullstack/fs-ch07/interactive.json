@@ -2,7 +2,7 @@
   "chapter": "fs-ch07",
   "subject": "fullstack",
   "title": "全栈项目实战（GitHub 资源驱动）",
-  "fingerprint": "98dbf3c5de",
+  "fingerprint": "130b823af2",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,64 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "状态放顶层，整树重渲染",
+      "brief": "一个 1000 节点的后台页面，把共享状态放在最顶层。任意子组件更新这个状态，整棵组件树都会被标记为需要重新渲染（diff），1000 个节点全量比对。把状态下沉到最小公共祖先、或用 store 的局部订阅后，每次更新只波及 20 个节点。把节点数和状态位置拖一拖，看单次更新参与渲染的节点数。",
+      "params": [
+        {
+          "key": "nodes",
+          "label": "组件节点数",
+          "min": 100,
+          "max": 5000,
+          "step": 100,
+          "value": 1000
+        },
+        {
+          "key": "localState",
+          "label": "状态位置",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "状态放顶层（任意子更新触发整树 diff）",
+            "状态下沉到最小公共祖先 / store 局部订阅"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "renderNodes",
+          "label": "每次更新参与渲染节点",
+          "expr": "if(localState == 1, 20, nodes)",
+          "unit": "个",
+          "fmt": "int"
+        },
+        {
+          "key": "renderMs",
+          "label": "单次更新耗时",
+          "expr": "renderNodes * 0.05",
+          "unit": "ms",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "nodes >= 500",
+          "label": "至少 500 个节点（真实页面组件树体量）"
+        },
+        {
+          "expr": "renderNodes <= 100",
+          "label": "每次更新 ≤100 节点（状态下沉的硬判据）"
+        },
+        {
+          "expr": "renderMs <= 10",
+          "label": "单次更新 ≤10ms"
+        }
+      ],
+      "insight": "「状态放得越高，重渲染范围越大」是 UI 性能的第一性原理（React/Vue 都适用）。顶层 state 一旦变化，其所有后代默认都会进入 reconcile/diff 队列——即使它们的 props 没变，纯函数 diff 本身也要花时间。三条解法：① **状态下沉**：把 state 移到「真正用到它的最小公共祖先」，父组件不持有它就不会被牵连；② **记忆化**：React.memo / Vue 的静态提升 + v-memo，让 props 未变的子节点跳过 diff；③ **细粒度订阅**：状态库（Redux/Zustand/Pinia）按 selector 订阅，只有用到该字段的组件才更新。经验法则：**状态离使用它的组件越近越好**。"
+    },
     {
       "kind": "match",
       "pairs": [

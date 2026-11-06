@@ -2,7 +2,7 @@
   "chapter": "fs-ch11",
   "subject": "fullstack",
   "title": "Spring Boot 3 工程骨架：分层边界、异常与校验收口",
-  "fingerprint": "99cf6be6ff",
+  "fingerprint": "d1f2036739",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,72 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "事务边界放在 Controller",
+      "brief": "一个下单接口，把数据库事务开在 Controller，包住了整个 HTTP 处理流程——其中还嵌着 5 次对其它微服务的 RPC 调用（每次 100ms）。事务一直持着数据库连接和行锁，505ms 里连接池被占着，并发一高就耗尽。把事务范围、RPC 次数和耗时拖一拖，看持锁时间。",
+      "params": [
+        {
+          "key": "inTxnCalls",
+          "label": "事务内的远程调用数",
+          "min": 0,
+          "max": 10,
+          "step": 1,
+          "value": 5
+        },
+        {
+          "key": "txnScope",
+          "label": "事务范围",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "事务包住整个 HTTP 处理（含 RPC / IO）",
+            "事务只在 Service 内部（短事务）"
+          ]
+        },
+        {
+          "key": "rpcMs",
+          "label": "单次 RPC 耗时",
+          "min": 10,
+          "max": 500,
+          "step": 10,
+          "value": 100
+        }
+      ],
+      "metrics": [
+        {
+          "key": "holdingMs",
+          "label": "事务持锁时间",
+          "expr": "if(txnScope == 1, 5, inTxnCalls * rpcMs + 5)",
+          "unit": "ms",
+          "fmt": "int"
+        },
+        {
+          "key": "connHeld",
+          "label": "连接被占用",
+          "expr": "holdingMs",
+          "unit": "ms",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "inTxnCalls >= 3",
+          "label": "业务确实跨多个服务（≥3 次远程调用）"
+        },
+        {
+          "expr": "rpcMs >= 50",
+          "label": "单次 RPC 至少 50ms（网络调用真实耗时）"
+        },
+        {
+          "expr": "holdingMs <= 50",
+          "label": "事务持锁 ≤50ms（短事务的硬判据）"
+        }
+      ],
+      "insight": "事务边界是后端最容易被放错的地方。**事务应该尽可能短、只包住真正的写操作**，决不该把 RPC / HTTP 调用 / 耗时计算裹在里面——这些都在占用数据库连接（连接池是稀缺资源）和数据库锁，并发稍高连接池就耗尽、请求开始排队。正确的分层是：Controller 负责协议转换与编排，**事务开在 Service 方法内部**，进入 Service 前先完成所有远程调用拿到数据，Service 里只做「读-算-写」的短事务。跨服务的「分布式事务」更不该用长事务硬撑，而是用 Saga / 本地消息表 / 最终一致。"
+    },
     {
       "kind": "match",
       "pairs": [

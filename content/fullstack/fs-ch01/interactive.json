@@ -2,7 +2,7 @@
   "chapter": "fs-ch01",
   "subject": "fullstack",
   "title": "Web 工作原理：HTTP 与浏览器-服务器交互",
-  "fingerprint": "2329247b1c",
+  "fingerprint": "74b0963c2a",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,90 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "100KB 响应不压缩，带宽打满",
+      "brief": "一个列表接口返回 100KB 的 JSON，线上 1000 QPS。明文发出去就是 97MB/s 的出带宽，单机千兆网卡直接打满、P99 抖动。把响应体大小、QPS 和是否压缩拖一拖，看 gzip 把带宽压到什么程度。",
+      "params": [
+        {
+          "key": "payloadKB",
+          "label": "单响应体大小",
+          "min": 80,
+          "max": 512,
+          "step": 10,
+          "value": 100
+        },
+        {
+          "key": "qps",
+          "label": "请求速率",
+          "min": 500,
+          "max": 5000,
+          "step": 50,
+          "value": 1000
+        },
+        {
+          "key": "gzip",
+          "label": "是否压缩",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "明文发送（无 Content-Encoding）",
+            "gzip 压缩后"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "ratio",
+          "label": "压缩比",
+          "expr": "if(gzip == 1, 0.15, 1)",
+          "unit": "×",
+          "fmt": "fix2"
+        },
+        {
+          "key": "rawMB",
+          "label": "每秒原始带宽",
+          "expr": "payloadKB * qps / 1024",
+          "unit": "MB/s",
+          "fmt": "int"
+        },
+        {
+          "key": "perReqMB",
+          "label": "单响应实际传输",
+          "expr": "payloadKB * ratio / 1024",
+          "unit": "MB",
+          "fmt": "fix2"
+        },
+        {
+          "key": "outMB",
+          "label": "每秒实际带宽",
+          "expr": "rawMB * ratio",
+          "unit": "MB/s",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "payloadKB >= 80",
+          "label": "响应体就是 100KB 上下（列表/详情页的真实体量）"
+        },
+        {
+          "expr": "qps >= 500",
+          "label": "至少 500 QPS（线上接口的常态）"
+        },
+        {
+          "expr": "outMB <= 30",
+          "label": "实际带宽 ≤30MB/s（千兆网卡要留余量）"
+        },
+        {
+          "expr": "perReqMB <= 0.05",
+          "label": "单响应 ≤50KB（与大小无关的单位量判据）"
+        }
+      ],
+      "insight": "HTTP 的 `Content-Encoding: gzip`（或 br/zstd）是性价比最高的优化之一：JSON/HTML 这类文本压缩比常常 5~8×，上面的 100KB 响应 gzip 后约 15KB。97MB/s 的明文带宽降到 14MB/s，单机直接多出 6 倍余量。注意三件事：① **反向代理（Nginx）统一开启**最省心，应用层不必每个接口自己压；② **已经压缩过的内容别再压**（图片、视频 gzip 反而变大），按 Content-Type 白名单；③ 压缩有 CPU 成本，极高 QPS 下可以 `gzip_static` 预压缩或交给 CDN 边缘做。"
+    },
     {
       "kind": "match",
       "pairs": [

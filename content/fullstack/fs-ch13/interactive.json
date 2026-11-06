@@ -2,7 +2,7 @@
   "chapter": "fs-ch13",
   "subject": "fullstack",
   "title": "前端测试与质量门禁：测试金字塔、E2E、契约测试",
-  "fingerprint": "3fa7fc71cb",
+  "fingerprint": "4e46de4762",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,74 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "测试金字塔倒挂",
+      "brief": "一个项目写了 300 个端到端（e2e）测试、每个跑 5 秒，单元测试却只有 1000 个。一次完整回归要把浏览器拉起来跑 25 分钟，开发等得抓狂，还动不动 flaky。把 e2e 数量、单测数量以及各自的耗时拖一拖，看一次回归总时长。",
+      "params": [
+        {
+          "key": "e2eCount",
+          "label": "e2e 测试数",
+          "min": 0,
+          "max": 500,
+          "step": 10,
+          "value": 300
+        },
+        {
+          "key": "unitCount",
+          "label": "单元测试数",
+          "min": 0,
+          "max": 10000,
+          "step": 100,
+          "value": 1000
+        }
+      ],
+      "metrics": [
+        {
+          "key": "e2eTotalS",
+          "label": "e2e 总耗时",
+          "expr": "e2eCount * 5",
+          "unit": "秒",
+          "fmt": "int"
+        },
+        {
+          "key": "unitTotalS",
+          "label": "单测总耗时",
+          "expr": "unitCount * 10 / 1000",
+          "unit": "秒",
+          "fmt": "int"
+        },
+        {
+          "key": "totalMin",
+          "label": "一次回归总时长",
+          "expr": "(e2eTotalS + unitTotalS) / 60",
+          "unit": "分钟",
+          "fmt": "fix2"
+        },
+        {
+          "key": "e2eRatio",
+          "label": "e2e 占比",
+          "expr": "if(e2eCount + unitCount > 0, e2eCount * 100 / max(e2eCount + unitCount, 1), 0)",
+          "unit": "%",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "e2eCount >= 50",
+          "label": "确实堆了大量 e2e（这是要改的现状）"
+        },
+        {
+          "expr": "e2eRatio <= 10",
+          "label": "e2e 占比 ≤10%（金字塔的硬判据）"
+        },
+        {
+          "expr": "totalMin <= 15",
+          "label": "一次回归 ≤15 分钟"
+        }
+      ],
+      "insight": "经典的**测试金字塔**：底层大量快、稳、便宜的单元测试，中层少量集成测试，顶层极少脆弱又慢的 e2e。倒挂（e2e 一大堆、单测寥寥）会同时踩三个坑：① e2e 慢（拉浏览器/建库/走网络），回归时间随用例数线性膨胀；② e2e 易 flaky（环境/时序任一抖动就红），降低团队对测试红绿的信任；③ 失败时定位难——e2e 只告诉你「端到端挂了」，得自己往下挖。纠偏：把能落单测的逻辑（算法、校验、状态机）下沉到底层，e2e 只覆盖「关键用户旅程的冒烟」；单测用真实实现而非满屏 mock，才能既快又真。"
+    },
     {
       "kind": "match",
       "pairs": [

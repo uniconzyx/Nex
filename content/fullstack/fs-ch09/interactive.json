@@ -2,7 +2,7 @@
   "chapter": "fs-ch09",
   "subject": "fullstack",
   "title": "TypeScript：结构化类型、泛型与类型收窄",
-  "fingerprint": "508eb340b4",
+  "fingerprint": "8ef3710b71",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,67 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "TS 泛型擦除 vs C++ 模板膨胀",
+      "brief": "一个泛型容器 `Box<T>` 被 20 种类型实例化。很多人以为「泛型会像 C++ 模板那样每种类型生成一份代码」，其实 TypeScript 的泛型在编译成 JS 后**完全擦除**——`Box<number>` 和 `Box<string>` 是同一份 JS。把类型数量和语言拖一拖，看额外产物体积。",
+      "params": [
+        {
+          "key": "types",
+          "label": "泛型实例化类型数",
+          "min": 2,
+          "max": 50,
+          "step": 1,
+          "value": 20
+        },
+        {
+          "key": "lang",
+          "label": "语言",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 1,
+          "labels": [
+            "TypeScript（泛型擦除）",
+            "C++（模板每类型实例化一份）"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "perTypeKB",
+          "label": "每类型额外体积",
+          "expr": "if(lang == 0, 0, 3)",
+          "unit": "KB",
+          "fmt": "int"
+        },
+        {
+          "key": "extraKB",
+          "label": "额外产物",
+          "expr": "types * perTypeKB",
+          "unit": "KB",
+          "fmt": "int"
+        },
+        {
+          "key": "extraMB",
+          "label": "额外产物（MB）",
+          "expr": "extraKB / 1024",
+          "unit": "MB",
+          "fmt": "fix2"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "types >= 10",
+          "label": "至少被 10 种类型使用（泛型容器的真实处境）"
+        },
+        {
+          "expr": "extraMB == 0",
+          "label": "TS 编译后泛型 0 额外体积（擦除的硬判据）"
+        }
+      ],
+      "insight": "这是 TS 和 C++ 泛型**最本质的区别**：C++ 模板是图灵完备的「代码生成器」，**每用一种类型就真编译出一份机器码**（所以 `std::vector<int>` 和 `std::vector<double>` 是两份代码，模板元编程能跑会显著增加二进制体积）；而 TypeScript 的类型系统**只在编译期存在**，类型信息（包括泛型参数）在 emit 成 JS 时被整体擦除，运行时只有一份无类型的 JS——所以「泛型会膨胀产物」在 TS 里是**误解**。代价是：TS 无法在运行时做基于类型的分发（需要 `typeof` / `instanceof` / 自定义 type guard 来窄化），也不能像 Java 那样 `T.class`。理解擦除才能正确设计运行时行为。"
+    },
     {
       "kind": "match",
       "pairs": [

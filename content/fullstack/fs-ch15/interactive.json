@@ -2,7 +2,7 @@
   "chapter": "fs-ch15",
   "subject": "fullstack",
   "title": "Go + Gin 后端：并发模型、接口契约与 Java 路线对照",
-  "fingerprint": "5e1365ac81",
+  "fingerprint": "00fee729a1",
   "scenario": {
     "work": {
       "tag": "工作现场",
@@ -16,6 +16,79 @@
     }
   },
   "modules": [
+    {
+      "kind": "sandbox",
+      "title": "无锁并发计数丢更新",
+      "brief": "用 Go 起 100 个 goroutine，每个对同一个共享计数器自增 1000 次。如果直接 `counter++`（没有锁、没有 atomic），自增在 CPU 上是「读-改-写」三步，多个 goroutine 会读到同一个旧值一起写回，互相覆盖——最终计数远小于 100×1000。把协程数、每协程次数和保护方式拖一拖，看最终值是否精确。",
+      "params": [
+        {
+          "key": "goroutines",
+          "label": "并发 goroutine 数",
+          "min": 10,
+          "max": 1000,
+          "step": 10,
+          "value": 100
+        },
+        {
+          "key": "perG",
+          "label": "每协程自增次数",
+          "min": 100,
+          "max": 10000,
+          "step": 100,
+          "value": 1000
+        },
+        {
+          "key": "useMutex",
+          "label": "保护方式",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "value": 0,
+          "labels": [
+            "共享变量直接 counter++（无锁）",
+            "用 atomic / mutex 保护"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "key": "expected",
+          "label": "期望最终值",
+          "expr": "goroutines * perG",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "lost",
+          "label": "丢失的更新",
+          "expr": "if(useMutex == 1, 0, round(expected * 0.4))",
+          "unit": "次",
+          "fmt": "int"
+        },
+        {
+          "key": "final",
+          "label": "实际最终值",
+          "expr": "expected - lost",
+          "unit": "次",
+          "fmt": "int"
+        }
+      ],
+      "checks": [
+        {
+          "expr": "goroutines >= 50",
+          "label": "至少 50 个并发协程（真实并发场景）"
+        },
+        {
+          "expr": "perG >= 500",
+          "label": "每协程至少自增 500 次"
+        },
+        {
+          "expr": "final == expected",
+          "label": "最终值 == 期望值（加锁的硬判据）"
+        }
+      ],
+      "insight": "`counter++` 看起来是一行，在机器码里是「从内存读 → 寄存器 +1 → 写回内存」三步，**根本不是原子的**。两个 goroutine 同时读到 42、都算成 43、都写回 43——一次自增就这么丢了。高并发下丢失比例可观（上面默认丢 40%）。四种修法按场景选：① **sync/atomic**（整数/指针计数器最轻量，无锁但用 CPU 原子指令）；② **mutex**（保护任意临界区，代价是串行化）；③ **channel** 把计数收拢到一个 owner goroutine（「不要通过共享内存来通信」的 Go 哲学）；④ 如果每个协程只管自己的局部计数，最后再汇总（避免共享），最优雅。写完记得 `go run -race` 跑一遍，race detector 能直接揪出这类数据竞争。"
+    },
     {
       "kind": "match",
       "pairs": [
