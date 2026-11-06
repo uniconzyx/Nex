@@ -797,7 +797,7 @@
           "openai/guided-diffusion"
         ],
         "github_stars": [
-          34819,
+          34880,
           14180,
           1855,
           7442
@@ -875,7 +875,7 @@
           43271,
           18278,
           30404,
-          64145
+          64506
         ],
         "github_notes": [
           "§3.3 并行策略：DP、TP、PP、EP 与 ZeRO/FSDP · 读 `deepspeed/runtime/zero/stage3.py` 与同目录 `stage_1_and_2.py`：stage1 切优化器状态、stage2 再切梯度、stage3 连参数一起切，三阶段一比较，就知道「切得越细通信越多」这条边界在哪；配合 §3.2「显存账：训练时到底谁在吃显存」，就能对上「12 字节/参数」这个经验值",

@@ -63,7 +63,7 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [huggingface/diffusers](https://github.com/huggingface/diffusers) | 34,844 | §01 图像分块与 patch embedding | §01 token/显存账本：`src/diffusers/pipelines/` 下每个 pipeline 都把「分块→编码→解码」拆成独立步骤，对照本章 patch 数公式，能算出「分辨率翻倍 token 翻四倍」 |
+| 1 | [huggingface/diffusers](https://github.com/huggingface/diffusers) | 34,880 | §01 图像分块与 patch embedding | §01 token/显存账本：`src/diffusers/pipelines/` 下每个 pipeline 都把「分块→编码→解码」拆成独立步骤，对照本章 patch 数公式，能算出「分辨率翻倍 token 翻四倍」 |
 | 2 | [openai/CLIP](https://github.com/openai/CLIP) | 34,550 | §03 CLIP 双塔与跨模态检索 | §03 对齐空间里检索为什么成立：`model.py` 里 `encode_image` / `encode_text` 两个独立塔 + 末尾归一化后的点积，整个「对齐空间里检索为什么成立」就这几十行 |
 | 3 | [AUTOMATIC1111/stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) | 165,088 | §03 扩散生成可控性 | §03 两个工程接口（scheduler / guidance）：`modules/` 下 scheduler 与 guidance 是分开的插件，换 scheduler 不改模型、调 guidance_scale 不改权重——这就是本章「两个工程接口」的分界 |
 | 4 | [QwenLM/Qwen3-VL](https://github.com/QwenLM/Qwen3-VL) | 20,000 | §02 OCR 两条路线 | §02 字段级准确率（混淆矩阵）：`README.md` 的模型卡标了各尺寸在文档理解类基准上的分数，拿它对照本章「字符对不等于字段对」，就知道该看哪个指标 |

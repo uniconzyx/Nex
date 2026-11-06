@@ -29,9 +29,9 @@
           "hoppscotch/hoppscotch"
         ],
         "github_stars": [
-          375800,
-          186353,
-          122410,
+          376373,
+          186408,
+          123319,
           80699
         ],
         "github_notes": [
@@ -348,7 +348,7 @@
         "github_stars": [
           4917,
           76927,
-          143173,
+          143364,
           51918
         ],
         "github_notes": [
@@ -514,7 +514,7 @@
           "koajs/koa"
         ],
         "github_stars": [
-          123194,
+          123319,
           69585,
           35683
         ],
@@ -711,7 +711,7 @@
         "github_stars": [
           84363,
           50520,
-          143463
+          143364
         ],
         "github_notes": [
           "§1.2 二、契约优先：OpenAPI 驱动、类型生成与边界校验 · 读 `realworld-apps/realworld` 的 `README.md` 与 `specs/`：它把「页面 → 数据层 → API」的边界写成契约（`api.md`）并规定统一错误体（`error-handling.md`），十几种语言实现共用同一份契约——正是本节「契约先于实现」的实物；配合 §3.3「错误处理与三态呈现」看：统一错误体让 loading/empty/error 三态的判断不依赖各实现自己的约定",

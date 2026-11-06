@@ -61,7 +61,7 @@ CUDA 实现，但要能算出 KV Cache 的显存账本。遇到「为什么这�
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [karpathy/nanoGPT](https://github.com/karpathy/nanoGPT) | 64,306 | §03 FFN 是键值记忆 | §03 参数量账本：`model.py` 全文不到 300 行，`CausalSelfAttention` 与 `MLP` 两个类把「QK 决定看哪里、V 决定取什么」和「FFN 两层线性之间塞词典」写成了可跑的张量 |
+| 1 | [karpathy/nanoGPT](https://github.com/karpathy/nanoGPT) | 64,506 | §03 FFN 是键值记忆 | §03 参数量账本：`model.py` 全文不到 300 行，`CausalSelfAttention` 与 `MLP` 两个类把「QK 决定看哪里、V 决定取什么」和「FFN 两层线性之间塞词典」写成了可跑的张量 |
 | 2 | [karpathy/build-nanogpt](https://github.com/karpathy/build-nanogpt) | 5,577 | §01 注意力在算什么 | §02 为什么要缩放 √d_k：`model.py` 里 `att / math.sqrt(self.head_dim)` 这一行就是本章缩放那节的答案，注释里直接写了「不缩放 logits 会饱和」 |
 | 3 | [huggingface/transformers](https://github.com/huggingface/transformers) | 168,400 | §02 Pre-LN vs Post-LN | §04 因果 mask：`model.py` 的 forward 里先 `ln_1` 再 attention（Pre-LN），`bias` 用上三角 -inf 做 causal mask，两处都是本章结论的逐行实现 |
 | 4 | [jingyaogong/minimind](https://github.com/jingyaogong/minimind) | 64,067 | §03 KV Cache 显存账本 | §03 采样参数：`modeling_*.py` 里 `past_key_value` 的拼接逻辑与 generate 的 temperature/top_p处理，是本章「长上下文贵在哪」与「采样参数只调分布不改模型」的工业版对照 |

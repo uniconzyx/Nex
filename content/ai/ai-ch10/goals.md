@@ -47,7 +47,7 @@
 | 1 | [microsoft/DeepSpeed](https://github.com/microsoft/DeepSpeed) | 43,271 | §3.3 并行策略 | `deepspeed/runtime/zero/stage3.py` 是 ZeRO-3 的参数分片（§3.3 三阶段表的第三行）；`stage1.py`/`stage2.py` 分别是优化器状态与梯度分片，看 `_partition_param` 就懂「12 字节/参数」怎么摊 |
 | 2 | [NVIDIA/Megatron-LM](https://github.com/NVIDIA/Megatron-LM) | 18,278 | §3.3 并行策略 | `megatron/core/tensor_parallel/layers.py` 里列并行/行并行两个 Linear 就是 §3.3 的 TP 原文；`pipeline_parallel/` 能对上 $(P-1)/(M+P-1)$ 的空泡推导 |
 | 3 | [google-research/tuning_playbook](https://github.com/google-research/tuning_playbook) | 30,404 | §2.2 学习率调度 | 先读「Batch size」与「Learning rate schedule」两节：§2.2 的 warmup+cosine、§2.4 的线性缩放规则都在这里给了工程口径，可与 ex06 的学习率曲线对照 |
-| 4 | [karpathy/nanoGPT](https://github.com/karpathy/nanoGPT) | 64,306 | §2.2 学习率调度 | 最小可训 GPT：`train.py` 的 `get_lr` 就是 warmup+cosine（§2.2），`model.py` 的 `Block` 是 Pre-LN 残差（§1.3），`estimate_loss` 是评估口径 |
+| 4 | [karpathy/nanoGPT](https://github.com/karpathy/nanoGPT) | 64,506 | §2.2 学习率调度 | 最小可训 GPT：`train.py` 的 `get_lr` 就是 warmup+cosine（§2.2），`model.py` 的 `Block` 是 Pre-LN 残差（§1.3），`estimate_loss` 是评估口径 |
 
 ## 本章 GitHub 学习路线（按阅读顺序）
 
@@ -59,7 +59,7 @@
 | 1 | [microsoft/DeepSpeed](https://github.com/microsoft/DeepSpeed) | 43,271 | §3.3 并行策略：DP、TP、PP、EP 与 ZeRO/FSDP | 读 `deepspeed/runtime/zero/stage3.py` 与同目录 `stage_1_and_2.py`：stage1 切优化器状态、stage2 再切梯度、stage3 连参数一起切，三阶段一比较，就知道「切得越细通信越多」这条边界在哪；配合 §3.2「显存账：训练时到底谁在吃显存」，就能对上「12 字节/参数」这个经验值 |
 | 2 | [NVIDIA/Megatron-LM](https://github.com/NVIDIA/Megatron-LM) | 18,278 | §3.3 并行策略（续）：张量并行 | 读 `megatron/core/tensor_parallel/layers.py` 的列并行 / 行并行两个 Linear：一个切输出维、一个切输入维，成对出现才能让中间结果不用 all-reduce；再读 `megatron/core/pipeline_parallel/schedules.py` 的 1F1B，就能对上 §3.3 里 $(P-1)/(M+P-1)$ 的空泡推导 |
 | 3 | [google-research/tuning_playbook](https://github.com/google-research/tuning_playbook) | 30,404 | §2.4 有效 batch：梯度累积、分布式与「等价性」的边界 | 读 `google-research/tuning_playbook` 的「Batch size」一节：它把「增大 batch 到多少就该同步调 lr」给了经验区间，并明确写出「换 batch 就要重调 lr、换优化器就要重扫一遍」这条边界；再读同书「Learning rate schedule」一节，就能对上 §2.2 里「warmup 长度要随 batch 变」的判据 |
-| 4 | [karpathy/nanoGPT](https://github.com/karpathy/nanoGPT) | 64,145 | §1.3 残差与梯度路径：深层网络的「高速公路」 | 读 `model.py` 的 `Block`：`x + attn(ln1(x))` 与 `x + mlp(ln2(x))` 两条残差支路，是 Pre-LN 结构的最小完整样本；把它和 §1.2「归一化：把『每层的输入分布』钉住」并读，就明白为什么 Pre-LN 比 Post-LN 更不需要 warmup；同文件的 `train.py` 里 `get_lr` 二十行就是 warmup + cosine，可对照 §2.2 |
+| 4 | [karpathy/nanoGPT](https://github.com/karpathy/nanoGPT) | 64,506 | §1.3 残差与梯度路径：深层网络的「高速公路」 | 读 `model.py` 的 `Block`：`x + attn(ln1(x))` 与 `x + mlp(ln2(x))` 两条残差支路，是 Pre-LN 结构的最小完整样本；把它和 §1.2「归一化：把『每层的输入分布』钉住」并读，就明白为什么 Pre-LN 比 Post-LN 更不需要 warmup；同文件的 `train.py` 里 `get_lr` 二十行就是 warmup + cosine，可对照 §2.2 |
 
 ## 本章 B 站视频路线（与 GitHub 互补）
 

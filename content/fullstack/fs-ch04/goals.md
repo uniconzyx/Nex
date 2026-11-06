@@ -30,7 +30,7 @@
 
 | # | 仓库 | ★ | 对应本章 | 读什么 / 怎么用 |
 |---|---|---|---|---|
-| 1 | [nodejs/node](https://github.com/nodejs/node) | 123,194 | §1.2 二、process.nextTick / Promise.then / setImmediate 三者顺序 | 读 `nodejs/node` 的 `lib/internal/process/task_queues.js`：它是 nextTick 与微任务队列的真实调度，配合 `lib/internal/streams/readable.js` 里 `highWaterMark` 与 `readableFlowing` 的状态迁移，就构成本章 §3.1「Stream 流控与背压」的机器版本；先看 §1.1 的六阶段图，再看这份调度代码，才会明白「nextTick 在自己那一层内递归，能把事件循环饿死」 |
+| 1 | [nodejs/node](https://github.com/nodejs/node) | 123,319 | §1.2 二、process.nextTick / Promise.then / setImmediate 三者顺序 | 读 `nodejs/node` 的 `lib/internal/process/task_queues.js`：它是 nextTick 与微任务队列的真实调度，配合 `lib/internal/streams/readable.js` 里 `highWaterMark` 与 `readableFlowing` 的状态迁移，就构成本章 §3.1「Stream 流控与背压」的机器版本；先看 §1.1 的六阶段图，再看这份调度代码，才会明白「nextTick 在自己那一层内递归，能把事件循环饿死」 |
 | 2 | [expressjs/express](https://github.com/expressjs/express) | 69,585 | §2.1 一、从零手写 HTTP 服务器（路由 / 路径变量 / JSON body / 状态码） | 读 `expressjs/express` 的 `lib/application.js`：`app.use` 把中间件压进栈、`app.handle` 作为 `http.createServer` 的回调把 req/res 交出去；四参数错误中间件的识别就发生在这一层——它靠 `fn.length === 4` 判断，这个「用参数个数编码语义」的做法正是本章 §2.3「中间件模型与 compose」的起点 |
 | 3 | [koajs/koa](https://github.com/koajs/koa) | 35,683 | §2.2 可运行代码：compose 的洋葱模型 | 读 `koajs/koa` 的 `lib/application.js`：它的 `callback()` 用 `compose(this.middleware)` 把数组折成嵌套函数，`await next()` 前后各写一段——这就是 §2.3「进去一层、出来一层」的原始代码；对照 express 的「线性 next()」，能看清 koa 的洋葱之所以可能，靠的是 async/await 的 Promise 链，而不是回调栈 |
 

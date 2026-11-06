@@ -122,3 +122,8 @@ src-tauri/gen/
 
 # 概念图解数据（由 scripts/gen_concept_viz.py 生成，不入库）
 viz/data.js
+
+# ---------- 审计实跑示例时由 cpp-ch13 fstream 示例写出的临时文件 ----------
+/demo_bin.bin
+/demo_text.txt
+/nums.txt
