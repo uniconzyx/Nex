@@ -20,6 +20,18 @@
   --danger-bg:rgba(255,236,233,.88); --danger-line:rgba(199,91,91,.34); --danger-ink:#8F3535;
   --sh-soft:0 4px 16px rgba(60,95,135,.12); --sh-pop:0 10px 32px rgba(60,95,135,.20);
   --r:14px; --r-sm:11px; --r-xs:8px;
+  /* ===== 上下均衡版：氛围层 + 通透液态玻璃（2026-11-07） ===== */
+  --env-1:#EBF4FA; --env-2:#F9FBFD; --env-3:#E2EEF8;
+  --glow-ice:rgba(197,228,255,.82); --glow-lilac:rgba(227,222,255,.70);
+  --glass-fill:rgba(255,255,255,.45);
+  --glass-border:rgba(255,255,255,.60);
+  --glass-top:rgba(255,255,255,.90);
+  --glass-shadow:0 10px 30px rgba(114,148,180,.12);
+  --glass-inset:inset 0 2px 4px rgba(255,255,255,.50);
+  --glass-press:0 4px 10px rgba(114,148,180,.08);
+  --dock-fill:rgba(255,255,255,.65);
+  --dock-border:rgba(255,255,255,.80);
+  --pill-active:linear-gradient(135deg,rgba(91,155,213,.86),rgba(63,125,184,.70));
 }
 [data-theme="dark"]{
   --accent:#8CC0EE; --accent-deep:#6FA8DC; --accent-ink:#A9CEEE; --accent-lift:#B9DCF6; --accent-soft:#23384E;
@@ -34,12 +46,24 @@
   --tip-bg:rgba(66,54,30,.82); --tip-line:rgba(214,170,84,.32); --tip-ink:#E8D5A8;
   --danger-bg:rgba(72,36,36,.76); --danger-line:rgba(199,91,91,.3); --danger-ink:#F0B8B8;
   --sh-soft:0 4px 16px rgba(0,0,0,.32); --sh-pop:0 10px 32px rgba(0,0,0,.46);
+  /* ===== 暗色下的同一套玻璃令牌（不可硬编码白） ===== */
+  --env-1:#182635; --env-2:#22334A; --env-3:#0B141D;
+  --glow-ice:rgba(91,155,213,.24); --glow-lilac:rgba(155,110,216,.20);
+  --glass-fill:rgba(30,46,66,.46);
+  --glass-border:rgba(180,210,240,.14);
+  --glass-top:rgba(200,225,250,.22);
+  --glass-shadow:0 10px 30px rgba(0,0,0,.34);
+  --glass-inset:inset 0 2px 4px rgba(255,255,255,.06);
+  --glass-press:0 4px 10px rgba(0,0,0,.24);
+  --dock-fill:rgba(28,43,64,.72);
+  --dock-border:rgba(180,210,240,.18);
+  --pill-active:linear-gradient(135deg,rgba(111,168,220,.76),rgba(63,125,184,.58));
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
 body{
   font-family:"HarmonyOS Sans SC","MiSans","PingFang SC","Microsoft YaHei UI","Microsoft YaHei",sans-serif;
-  background:radial-gradient(1200px 900px at 30% 0%,var(--bg1) 0%,var(--bg2) 55%,var(--bg3) 100%);
+  background:linear-gradient(135deg,var(--env-1) 0%,var(--env-2) 55%,var(--env-3) 100%);
   display:flex;align-items:center;justify-content:center;color:var(--ink);
   transition:background .4s;overflow:hidden;
 }
@@ -47,7 +71,7 @@ body{
 .phone{
   position:relative;width:100%;max-width:430px;height:100dvh;max-height:932px;
   display:flex;flex-direction:column;overflow:hidden;
-  background:radial-gradient(900px 680px at 25% -5%,var(--bg1) 0%,var(--bg2) 60%,var(--bg3) 100%);
+  background:linear-gradient(135deg,var(--env-1) 0%,var(--env-2) 52%,var(--env-3) 100%);
   box-shadow:0 30px 80px rgba(30,55,90,.35);
 }
 @media(min-width:460px){.phone{border-radius:38px;border:10px solid #1b2530;height:min(932px,94dvh)}}
@@ -89,42 +113,67 @@ img{user-select:none;-webkit-user-drag:none}
 .icon-btn:active{transform:scale(.88)}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 
-/* ============ 顶栏 ============ */
+/* ============ 顶部：轻量化导航（占屏约 15%，去掉实心块与分隔线） ============ */
 .topbar{
-  display:flex;align-items:center;gap:10px;flex:none;
-  padding:calc(10px + env(safe-area-inset-top)) 14px 10px;
-  background:var(--surf-2);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
-  border-bottom:1px solid var(--line-2);position:relative;z-index:30;
+  display:flex;align-items:center;gap:12px;flex:none;
+  padding:calc(16px + env(safe-area-inset-top)) 18px 8px;
+  background:transparent;border:none;position:relative;z-index:30;
 }
-.brand{display:flex;align-items:center;gap:9px;min-width:0;flex:1}
-.brand .bava{width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.85);box-shadow:0 2px 8px var(--accent-glow);flex:none}
-.brand .bt{display:flex;flex-direction:column;min-width:0}
-.brand .bt b{font-size:14.5px;font-weight:800;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.brand .bt span{font-size:10.5px;color:var(--ink-faint);line-height:1.15}
-.lv-pill{display:none}
-.icon-btns{display:flex;align-items:center;gap:6px;flex:none}
-.icon-btn{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:18px;
-  background:var(--surf-sunk);border:1px solid var(--line-2);transition:.15s;color:var(--ink-soft)}
-.icon-btn:active{background:rgba(91,155,213,.22);color:var(--accent-ink)}
+.brand{display:flex;align-items:center;gap:10px;min-width:0;flex:1;cursor:pointer}
+.brand .avatar-ring{position:relative;width:40px;height:40px;flex:none;border-radius:50%;display:grid;place-items:center;
+  background:var(--glass-fill);border:1px solid var(--glass-top);
+  backdrop-filter:blur(14px) saturate(160%);-webkit-backdrop-filter:blur(14px) saturate(160%);
+  box-shadow:var(--glass-shadow),var(--glass-inset)}
+.brand .avatar-ring::after{content:"";position:absolute;inset:-4px;border-radius:50%;
+  border:1px solid var(--accent-glow);animation:breathGlow 3.2s ease-in-out infinite}
+.brand .bava{width:32px;height:32px;border-radius:50%;object-fit:contain}
+.brand .lv-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;
+  background:var(--glass-fill);border:1px solid var(--glass-border);border-top-color:var(--glass-top);
+  backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
+  box-shadow:var(--glass-shadow),var(--glass-inset);
+  font-size:12px;font-weight:600;color:var(--ink-soft);white-space:nowrap}
+.brand .lv-chip b{font-size:13px;font-weight:800;color:var(--accent-ink)}
+.icon-btns{display:flex;align-items:center;gap:4px;flex:none}
+.icon-btn{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;
+  background:transparent;border:none;color:var(--accent);transition:.2s}
+.icon-btn svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round;transition:transform .35s}
+.icon-btn:hover{background:var(--glass-fill)}
+.icon-btn:active{transform:scale(.88);color:var(--accent-deep)}
+[data-theme="dark"] #themeBtn svg{transform:rotate(180deg)}
+@keyframes breathGlow{0%,100%{opacity:.32;transform:scale(.96)}50%{opacity:.9;transform:scale(1.05)}}
 
-/* ============ 横向滑动标签 ============ */
+/* ============ 无边框药丸标签：选中半透明冰蓝 + 底部悬浮光条 ============ */
 .tabbar{
-  display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;flex:none;
-  padding:8px 12px;background:var(--surf-2);backdrop-filter:blur(14px);border-bottom:1px solid var(--line-2);position:relative;z-index:20;
+  display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;flex:none;
+  padding:6px 18px 13px;background:transparent;border:none;position:relative;z-index:20;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 16px,#000 calc(100% - 32px),transparent 100%);
+  mask-image:linear-gradient(90deg,transparent 0,#000 16px,#000 calc(100% - 32px),transparent 100%);
 }
 .tabbar::-webkit-scrollbar{display:none}
-.tab{position:relative;flex:none;padding:7px 13px 9px;border-radius:11px 11px 0 0;font-size:13px;font-weight:600;color:var(--ink-soft);transition:.18s;white-space:nowrap}
-.tab .badge{position:absolute;top:2px;right:-2px;min-width:15px;height:15px;padding:0 3px;border-radius:99px;background:var(--bad);color:#fff;font-size:9px;font-weight:800;display:grid;place-items:center;box-shadow:0 0 0 2px var(--surf-2)}
-.tab:active{background:rgba(91,155,213,.14)}
-.tab.active{color:var(--accent-ink);font-weight:800}
-.tab.active::after{content:"";position:absolute;left:13px;right:13px;bottom:0;height:2.5px;border-radius:2px;background:linear-gradient(90deg,var(--accent),var(--accent-deep));box-shadow:0 0 8px var(--accent-glow)}
+.tab{position:relative;flex:none;padding:8px 15px;border-radius:999px;font-size:12.5px;font-weight:600;
+  color:var(--ink-faint);background:transparent;border:none;white-space:nowrap;
+  transition:.24s cubic-bezier(.25,.8,.25,1)}
+.tab .badge{position:absolute;top:-3px;right:-3px;min-width:16px;height:16px;padding:0 3px;border-radius:99px;
+  background:var(--bad);color:#fff;font-size:9px;font-weight:800;display:grid;place-items:center}
+.tab:active{transform:scale(.94)}
+.tab.active{background:var(--pill-active);color:#fff;font-weight:700;
+  box-shadow:0 6px 18px var(--accent-glow),inset 0 1px 0 rgba(255,255,255,.34);
+  text-shadow:0 1px 2px rgba(47,100,148,.26)}
+.tab.active::after{content:"";position:absolute;left:24%;right:24%;bottom:-6px;height:2px;border-radius:2px;
+  background:var(--accent-lift);box-shadow:0 0 9px var(--accent-glow)}
 
 /* ============ 主屏滚动区 ============ */
-.screen{flex:1;overflow-y:auto;scrollbar-width:none;-ms-overflow-style:none;padding:14px 13px calc(96px + env(safe-area-inset-bottom));position:relative;z-index:10}
+.screen{flex:1;overflow-y:auto;scrollbar-width:none;-ms-overflow-style:none;padding:14px 13px calc(120px + env(safe-area-inset-bottom));position:relative;z-index:10}
 .screen::-webkit-scrollbar{display:none}
 .view{display:none;flex-direction:column;gap:13px;animation:viewIn .35s ease}
 .view.active{display:flex}
-.card{background:var(--surf-1);border:1px solid var(--line-2);border-radius:var(--r);padding:15px;box-shadow:var(--sh-soft);backdrop-filter:blur(10px)}
+.card{background:var(--glass-fill);
+  backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);
+  border:1px solid var(--glass-border);border-top:1px solid var(--glass-top);
+  border-radius:var(--r);padding:15px;box-shadow:var(--glass-shadow),var(--glass-inset);
+  transition:transform .3s cubic-bezier(.25,.8,.25,1),box-shadow .3s cubic-bezier(.25,.8,.25,1)}
+.card:active{transform:scale(.96) translateY(2px);box-shadow:var(--glass-press),var(--glass-inset)}
 .card h3{font-size:15px;font-weight:800;display:flex;align-items:center;gap:7px;margin-bottom:11px}
 .card h3 .em{font-size:17px}
 .card .sub{font-size:11.5px;color:var(--ink-faint);margin-top:-7px;margin-bottom:10px}
@@ -546,23 +595,252 @@ img{user-select:none;-webkit-user-drag:none}
 .ach .pop{display:none}
 .hidden-tag-inline{font-size:10px;background:rgba(155,110,216,.14);color:#8A5FC7;padding:2px 8px;border-radius:99px;font-weight:700}
 [data-theme="dark"] .hidden-tag-inline{color:#C4A5EE}
+
+/* ==================================================================
+   APK 竖屏「上下均衡 · 视觉呼吸」治愈系布局 · 2026-11-07
+   顶部轻量 / 中部错落 / 底部悬浮锚点
+   设计稿内 .bottom-dock 用 absolute 相对 .phone；真机 WebView 全屏时
+   等价可换 fixed（bottom/left/right 取值不变）。
+   ================================================================== */
+
+/* ---------- 0. Ambient：对角冰蓝奶白 + 双光斑 + 5% 冰晶六边形线稿 ---------- */
+.ambient{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.ambient::before{content:"";position:absolute;inset:0;
+  background:linear-gradient(135deg,var(--env-1) 0%,var(--env-2) 52%,var(--env-3) 100%)}
+.ambient .orb{position:absolute;border-radius:50%;filter:blur(60px);will-change:transform}
+.ambient .orb-ice{width:300px;height:300px;left:-112px;top:-124px;background:var(--glow-ice);
+  animation:orbDrift 14s ease-in-out infinite}
+.ambient .orb-lilac{width:280px;height:280px;right:-116px;bottom:-96px;background:var(--glow-lilac);
+  animation:orbDrift 18s ease-in-out infinite reverse}
+.ambient .lineart{position:absolute;inset:0;opacity:.05;background-size:88px 152px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='88' height='152' viewBox='0 0 88 152'%3E%3Cg fill='none' stroke='%235B9BD5' stroke-width='1'%3E%3Cpath d='M44 4 L80 25 L80 66 L44 87 L8 66 L8 25 Z'/%3E%3Cpath d='M44 80 L80 101 L80 142 L44 163 L8 142 L8 101 Z'/%3E%3C/g%3E%3C/svg%3E")}
+@keyframes orbDrift{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(20px,16px) scale(1.09)}}
+
+/* ---------- 高级液态玻璃：主卡片 ---------- */
+.glass-card{
+  background:var(--glass-fill);
+  backdrop-filter:blur(20px) saturate(160%);
+  -webkit-backdrop-filter:blur(20px) saturate(160%);
+  border:1px solid var(--glass-border);
+  border-top:1px solid var(--glass-top);
+  border-radius:14px;
+  box-shadow:var(--glass-shadow),var(--glass-inset);
+  transition:transform .3s cubic-bezier(.25,.8,.25,1),box-shadow .3s cubic-bezier(.25,.8,.25,1);
+  position:relative;
+}
+.glass-card:active{
+  transform:scale(.96) translateY(2px);
+  box-shadow:var(--glass-press),var(--glass-inset);
+}
+
+/* ---------- 2A. 视觉 C 位：主城状态看板 ---------- */
+.board-card{display:flex;gap:14px;padding:16px 15px;align-items:center;overflow:hidden}
+.board-card::before{content:"";position:absolute;right:-46px;top:-66px;width:180px;height:180px;border-radius:50%;
+  background:radial-gradient(circle,var(--glow-ice),transparent 68%);filter:blur(24px);pointer-events:none}
+.board-left{flex:none;display:flex;flex-direction:column;align-items:center;gap:7px;position:relative;z-index:1}
+.ring{--pct:64;width:104px;height:104px;border-radius:50%;position:relative;display:grid;place-items:center;
+  background:conic-gradient(var(--accent) calc(var(--pct)*1%),rgba(255,255,255,.30) 0);
+  box-shadow:0 0 20px var(--accent-glow),inset 0 0 12px rgba(255,255,255,.4);
+  animation:ringGlow 4.2s ease-in-out infinite}
+[data-theme="dark"] .ring{background:conic-gradient(var(--accent) calc(var(--pct)*1%),rgba(255,255,255,.08) 0)}
+.ring::before{content:"";position:absolute;inset:7px;border-radius:50%;background:var(--glass-fill);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:var(--glass-inset)}
+.ring-core{position:relative;z-index:1;width:70px;height:70px;border-radius:50%;display:grid;place-items:center;
+  background:radial-gradient(circle at 50% 32%,rgba(255,255,255,.62),transparent 72%)}
+.ring-core img{width:64px;height:64px;object-fit:contain;
+  filter:drop-shadow(0 4px 8px var(--accent-glow));animation:catFloat 4.4s ease-in-out infinite}
+.ring-cap{font-size:10.5px;color:var(--ink-soft);white-space:nowrap}
+.ring-cap b{font-size:13px;color:var(--accent-ink);font-variant-numeric:tabular-nums}
+@keyframes ringGlow{0%,100%{box-shadow:0 0 16px var(--accent-glow),inset 0 0 12px rgba(255,255,255,.4)}
+  50%{box-shadow:0 0 28px var(--accent-glow),inset 0 0 12px rgba(255,255,255,.4)}}
+.board-right{flex:1;min-width:0;display:flex;flex-direction:column;gap:9px;position:relative;z-index:1}
+.weather-cap{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:999px;
+  background:var(--glass-fill);border:1px solid var(--glass-border);border-top-color:var(--glass-top);
+  box-shadow:var(--glass-inset);min-width:0}
+.weather-cap>span{font-size:19px;line-height:1;flex:none}
+.weather-cap b{display:block;font-size:12px;font-weight:700;color:var(--ink)}
+.weather-cap small{display:block;font-size:10px;color:var(--ink-faint);margin-top:1px}
+.secret-entry{display:flex;align-items:center;gap:9px;width:100%;padding:10px 11px;border-radius:12px;text-align:left;
+  background:linear-gradient(120deg,rgba(155,110,216,.16),rgba(91,155,213,.12));
+  border:1px solid var(--line);transition:.2s}
+[data-theme="dark"] .secret-entry{background:linear-gradient(120deg,rgba(155,110,216,.22),rgba(91,155,213,.16))}
+.secret-entry:active{transform:scale(.97)}
+.secret-entry .chest{font-size:22px;flex:none;filter:drop-shadow(0 3px 6px var(--accent-glow))}
+.secret-entry .se-t{flex:1;min-width:0}
+.secret-entry .se-t b{display:block;font-size:12.5px;font-weight:800;color:var(--ink)}
+.secret-entry .se-t small{display:block;font-size:10px;color:var(--ink-soft);margin-top:2px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.power-tag{flex:none;font-size:9.5px;font-weight:700;padding:3px 7px;border-radius:99px;
+  background:var(--glass-fill);color:var(--accent-ink);border:1px solid var(--glass-border)}
+.aff-mini{display:grid;grid-template-columns:1fr auto;gap:4px 8px;align-items:center;
+  font-size:10.5px;color:var(--ink-soft);padding:0 2px}
+.aff-mini .aff-bar{grid-column:1/-1;margin-top:2px}
+
+/* ---------- 2B. 今日试炼清单：三张独立小卡 ---------- */
+.flow-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:2px 3px 0;margin-top:2px}
+.flow-head h2{font-size:15px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
+.flow-head span{font-size:10.5px;color:var(--ink-faint)}
+.quest-list{display:flex;flex-direction:column;gap:10px}
+.quest-card{display:flex;align-items:center;gap:11px;padding:11px 12px}
+.quest-mon{flex:none;width:42px;height:42px;border-radius:13px;display:grid;place-items:center;font-size:21px;
+  background:var(--glass-fill);border:1px solid var(--glass-border);box-shadow:var(--glass-inset)}
+.quest-mon.q1{background:rgba(91,155,213,.15)}
+.quest-mon.q2{background:rgba(155,110,216,.14)}
+.quest-mon.q3{background:rgba(227,180,79,.15)}
+.quest-t{flex:1;min-width:0;display:grid;grid-template-columns:1fr auto;gap:1px 8px;align-items:center}
+.quest-t b{font-size:13.5px;font-weight:800;color:var(--ink)}
+.quest-t small{grid-column:1;font-size:10.5px;color:var(--ink-faint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.quest-t em{grid-column:2;grid-row:1/3;font-style:normal;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:16px;font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums}
+.quest-go{flex:none;min-width:64px;min-height:44px;padding:0 14px;border-radius:14px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-deep));color:#fff;font-size:12.5px;font-weight:800;
+  box-shadow:0 6px 16px var(--accent-glow);transition:.2s}
+.quest-go:active{transform:scale(.93)}
+
+/* ---------- 2C. 横向呼吸区：露半张，打破竖向单调 ---------- */
+.breathe-row{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;
+  padding:2px 2px 8px;margin:0 -2px}
+.breathe-row::-webkit-scrollbar{display:none}
+.breathe-card{flex:0 0 72%;scroll-snap-align:start;min-height:120px;padding:14px;
+  display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;overflow:hidden}
+.breathe-card::before{content:"";position:absolute;right:-30px;bottom:-46px;width:140px;height:140px;border-radius:50%;
+  filter:blur(30px);pointer-events:none}
+.breathe-card.bc-1::before{background:rgba(91,155,213,.34)}
+.breathe-card.bc-2::before{background:rgba(227,180,79,.32)}
+.breathe-card.bc-3::before{background:rgba(155,110,216,.30)}
+.breathe-card.bc-4::before{background:rgba(59,154,108,.30)}
+.breathe-card .bc-ico{font-size:26px;line-height:1;filter:drop-shadow(0 4px 8px var(--accent-glow));position:relative;z-index:1}
+.breathe-card b{display:block;font-size:13.5px;font-weight:800;color:var(--ink);margin-top:9px;position:relative;z-index:1}
+.breathe-card small{display:block;font-size:10.5px;color:var(--ink-soft);line-height:1.5;margin-top:3px;position:relative;z-index:1}
+.breathe-card .bc-more{font-size:10.5px;font-weight:700;color:var(--accent-ink);margin-top:9px;position:relative;z-index:1}
+.quick-strip{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 4px}
+.quick-strip::-webkit-scrollbar{display:none}
+.quick-strip button{flex:none;display:inline-flex;align-items:center;gap:5px;padding:8px 11px;border-radius:999px;
+  font-size:11px;font-weight:600;color:var(--ink-soft);white-space:nowrap;transition:.2s;
+  background:var(--glass-fill);border:1px solid var(--glass-border);border-top-color:var(--glass-top);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:var(--glass-inset)}
+.quick-strip button:active{transform:scale(.94)}
+.morning-note{padding:9px 12px;border-radius:12px;text-align:center;
+  font-size:11px;line-height:1.6;color:var(--ink-soft);
+  background:var(--glass-fill);border:1px solid var(--glass-border);box-shadow:var(--glass-inset)}
+
+/* ---------- 3A. 底部悬浮胶囊 Dock ---------- */
+.bottom-dock{
+  position:absolute;
+  bottom:calc(16px + env(safe-area-inset-bottom));
+  left:16px;right:16px;height:64px;border-radius:999px;
+  background:var(--dock-fill);
+  backdrop-filter:blur(24px) saturate(180%);
+  -webkit-backdrop-filter:blur(24px) saturate(180%);
+  border:1px solid var(--dock-border);border-top-color:var(--glass-top);
+  box-shadow:0 12px 32px rgba(114,148,180,.15),var(--glass-inset);
+  display:flex;justify-content:space-around;align-items:center;z-index:80;
+}
+.dock-item{flex:1;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  border-radius:999px;color:var(--ink-faint);transition:.25s cubic-bezier(.25,.8,.25,1)}
+.dock-ico{width:24px;height:24px;display:grid;place-items:center;transition:.25s}
+.dock-ico svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;
+  stroke-linecap:round;stroke-linejoin:round}
+.dock-lbl{font-size:10px;font-weight:600;transition:.25s}
+.dock-item.active{color:var(--accent-ink)}
+.dock-item.active .dock-ico{transform:scale(1.2);filter:drop-shadow(0 0 7px var(--accent-glow))}
+.dock-item.active .dock-lbl{font-weight:800;color:var(--ink)}
+.dock-item:active{transform:scale(.92)}
+
+/* ---------- 3B. 凯喵悬浮助手（魔法帽 + Y 轴浮动 + 闪烁光点 + 双色气泡） ---------- */
+.cat-fab{
+  position:absolute;right:22px;bottom:calc(88px + env(safe-area-inset-bottom));
+  width:56px;height:56px;border-radius:50%;z-index:90;
+  background:var(--glass-fill);border:1px solid var(--glass-top);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  box-shadow:0 10px 26px var(--accent-glow),var(--glass-inset);
+  display:grid;place-items:center;transition:transform .2s;
+  animation:floatyY 3.6s ease-in-out infinite}
+.cat-fab:active{transform:scale(.9)}
+.cat-fab img{width:46px;height:46px;object-fit:contain;filter:drop-shadow(0 3px 7px var(--accent-glow))}
+.cat-fab .fab-ring{position:absolute;inset:-5px;border-radius:50%;border:1.5px solid var(--accent-glow);
+  animation:pulse 2.8s ease-out infinite}
+.cat-fab .fab-mood{position:absolute;top:-6px;right:-5px;font-size:13px;width:21px;height:21px;border-radius:50%;
+  display:grid;place-items:center;background:var(--glass-fill);border:1px solid var(--glass-border);
+  box-shadow:var(--glass-shadow)}
+.cat-fab .fab-hat{position:absolute;top:-10px;left:50%;z-index:2;pointer-events:none;font-size:17px;
+  transform:translateX(-50%) rotate(-12deg);filter:drop-shadow(0 2px 3px rgba(60,95,135,.3))}
+.cat-fab .spark{position:absolute;width:4px;height:4px;border-radius:50%;
+  background:var(--accent-lift);box-shadow:0 0 6px var(--accent-lift);
+  animation:hintTwinkle 2.2s ease-in-out infinite}
+.cat-fab .s1{top:8px;left:6px}.cat-fab .s2{bottom:10px;right:5px;animation-delay:.9s}
+@keyframes floatyY{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes hintTwinkle{0%,100%{opacity:.2;transform:scale(.7)}50%{opacity:1;transform:scale(1.25)}}
+.cat-hint{
+  display:none;position:absolute;right:86px;bottom:calc(96px + env(safe-area-inset-bottom));z-index:89;
+  width:192px;padding:11px 12px;border-radius:16px 16px 4px 16px;text-align:left;
+  background:var(--glass-fill);border:1px solid var(--glass-border);border-top-color:var(--glass-top);
+  backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);
+  box-shadow:var(--glass-shadow),var(--glass-inset)}
+.cat-hint.show{display:block;animation:popIn .28s cubic-bezier(.175,.885,.32,1.275)}
+.cat-hint::after{content:"";position:absolute;right:-5px;bottom:11px;width:9px;height:9px;
+  background:var(--glass-fill);border-right:1px solid var(--glass-border);border-top:1px solid var(--glass-border);
+  transform:rotate(45deg)}
+.hint-txt{font-size:11.5px;line-height:1.55;font-weight:700;color:var(--ink)}
+.hint-txt i{display:inline-block;width:5px;height:5px;border-radius:50%;margin-left:5px;
+  background:var(--accent-lift);box-shadow:0 0 6px var(--accent-lift);
+  animation:hintTwinkle 1.8s ease-in-out infinite}
+.hint-row{display:flex;gap:7px;margin-top:10px}
+.hint-cta{flex:1;padding:8px 9px;border-radius:11px;font-size:11px;font-weight:800;color:#fff;
+  background:linear-gradient(135deg,var(--accent),var(--accent-deep));
+  box-shadow:0 4px 11px var(--accent-glow);transition:.2s}
+.hint-cta:active{transform:scale(.94)}
+.hint-later{flex:none;padding:8px 10px;border-radius:11px;font-size:11px;font-weight:600;
+  color:var(--ink-soft);background:var(--surf-sunk);border:1px solid var(--line-2);transition:.2s}
+.hint-later:active{transform:scale(.94)}
+
+/* 底部内容渐隐：让磨砂 Dock 后面不再透出清晰文字 */
+.dock-scrim{position:absolute;left:0;right:0;bottom:0;height:140px;z-index:70;pointer-events:none;
+  background:linear-gradient(to top,var(--env-2) 0%,var(--env-2) 60%,transparent 100%);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  -webkit-mask-image:linear-gradient(to top,#000 0%,#000 58%,transparent 100%);
+  mask-image:linear-gradient(to top,#000 0%,#000 58%,transparent 100%);opacity:.96}
+
+/* ---------- 入场：分节错落，60-90ms 递进 ---------- */
+#view-home.active>*{animation:cardIn .5s cubic-bezier(.22,.8,.32,1) backwards}
+#view-home.active>*:nth-child(1){animation-delay:0ms}
+#view-home.active>*:nth-child(2){animation-delay:70ms}
+#view-home.active>*:nth-child(3){animation-delay:130ms}
+#view-home.active>*:nth-child(4){animation-delay:200ms}
+#view-home.active>*:nth-child(5){animation-delay:270ms}
+#view-home.active>*:nth-child(6){animation-delay:340ms}
+#view-home.active>*:nth-child(7){animation-delay:410ms}
 </style>
 </head>
 <body>
 <div class="phone" id="phone">
+  <!-- 0. 底层氛围：双光斑 + 5% 冰晶六边形线稿 -->
+  <div class="ambient" aria-hidden="true">
+    <span class="orb orb-ice"></span>
+    <span class="orb orb-lilac"></span>
+    <span class="lineart"></span>
+  </div>
 
-  <!-- 顶栏 -->
+    <!-- 1. 轻量顶栏：呼吸微光头像 + 等级 Chip + 线性冰蓝图标 -->
   <header class="topbar">
     <div class="brand" onclick="logoEgg()">
-      <img class="bava" id="brandAva" src="assets/kaimao-transparent.png" alt="凯喵">
-      <div class="bt"><b>凯喵Code试炼录</b><span>轻RPG编程闯关</span></div>
+      <span class="avatar-ring"><img class="bava" id="brandAva" src="assets/kaimao-transparent.png" alt="凯喵"></span>
+      <span class="lv-chip"><b>Lv.7</b> 指针勇者</span>
     </div>
     <div class="icon-btns">
-      <button class="icon-btn" id="searchBtn" title="搜索">🔍</button>
-      <button class="icon-btn" id="themeBtn" title="主题切换">🌙</button>
-      <button class="icon-btn" id="topSetBtn" title="设置">⚙️</button>
+      <button class="icon-btn" id="searchBtn" title="搜索" aria-label="搜索">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
+      </button>
+      <button class="icon-btn" id="themeBtn" title="主题切换" aria-label="切换到暗夜模式">
+        <svg viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>
+      </button>
+      <button class="icon-btn" id="topSetBtn" title="设置" aria-label="设置">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v2.1M12 19.1v2.1M21.2 12h-2.1M4.9 12H2.8M18.5 5.5L17 7M7 17l-1.5 1.5M18.5 18.5L17 17M7 7L5.5 5.5"/></svg>
+      </button>
     </div>
   </header>
+
 
   <!-- 横向滑动标签 -->
   <nav class="tabbar" id="tabbar"></nav>
@@ -570,56 +848,90 @@ img{user-select:none;-webkit-user-drag:none}
   <!-- 主屏 -->
   <main class="screen" id="screen">
 
-    <!-- 主城首页 -->
-    <section class="view active" id="view-home">
-      <div class="card xp-card">
-        <div class="xp-top"><span class="lv">指针勇者 · Lv.7</span><span class="xp-num">9,820 / 15,000 EXP</span></div>
-        <div class="xp-bar"><i></i></div>
-        <div class="aff-row" style="margin-top:9px"><span id="homeAffLbl">💞 好感度 · 挚友 Lv.4</span><span id="homeAffPct">64%</span></div>
+    <!-- 主城首页 · 上下均衡：大卡 / 小卡流 / 横滑卡组 -->
+<section class="view active" id="view-home">
+
+  <!-- 视觉 C 位：悬浮玻璃大卡 -->
+  <div class="glass-card board-card">
+    <div class="board-left">
+      <div class="ring" style="--pct:64">
+        <div class="ring-core"><img src="assets/kaimao/mood-sleepy.png" alt="凯喵打坐"></div>
+      </div>
+      <div class="ring-cap">今日掌握度 <b>64%</b></div>
+    </div>
+    <div class="board-right">
+      <div class="weather-cap">
+        <span>🌤️</span>
+        <div><b>学习天气 · 晴朗</b><small>经验 +10% · 专注状态良好</small></div>
+      </div>
+      <button class="secret-entry" onclick="goTab('boss')">
+        <span class="chest">🎁</span>
+        <span class="se-t"><b>每日秘境</b><small>迷雾指针林 · 限时 30 分钟</small></span>
+        <span class="power-tag">战力 1,200</span>
+      </button>
+      <div class="aff-mini">
+        <span id="homeAffLbl">💞 好感度 · 挚友 Lv.4</span><span id="homeAffPct">64%</span>
         <div class="aff-bar"><i id="homeAffFill" style="width:64%"></i></div>
       </div>
+    </div>
+  </div>
 
-      <div class="card">
-        <h3><span class="em">📦</span>收集率 · 冒险图鉴</h3>
-        <div class="coll-grid">
-          <div class="coll-cell"><div class="cc-t">🐛 怪物图鉴</div><b>8 / 24</b><div class="cc-bar"><i style="width:33%"></i></div></div>
-          <div class="coll-cell"><div class="cc-t">🏅 成就徽章</div><b>6 / 16</b><div class="cc-bar"><i style="width:38%"></i></div></div>
-          <div class="coll-cell"><div class="cc-t">📜 章节通关</div><b>12 / 20</b><div class="cc-bar"><i style="width:60%"></i></div></div>
-          <div class="coll-cell"><div class="cc-t">👗 装扮收集</div><b>2 / 5</b><div class="cc-bar"><i style="width:40%"></i></div></div>
-        </div>
-      </div>
+  <!-- 行动引导：今日试炼清单 -->
+  <div class="flow-head"><h2>今日试炼</h2><span>3 项待完成</span></div>
+  <div class="quest-list">
+    <div class="glass-card quest-card">
+      <span class="quest-mon q1">🐛</span>
+      <div class="quest-t"><b>代码找茬</b><small>揪出 3 处隐藏 Bug</small><em>0/3</em></div>
+      <button class="quest-go" onclick="goTab('learn')">前往</button>
+    </div>
+    <div class="glass-card quest-card">
+      <span class="quest-mon q2">🦇</span>
+      <div class="quest-t"><b>错题救赎</b><small>黑化怪物 → 守护精灵</small><em>0/2</em></div>
+      <button class="quest-go" onclick="goTab('bestiary')">前往</button>
+    </div>
+    <div class="glass-card quest-card">
+      <span class="quest-mon q3">🧩</span>
+      <div class="quest-t"><b>项目 BOSS</b><small>学生成绩管理系统</small><em>0/1</em></div>
+      <button class="quest-go" onclick="goTab('boss')">前往</button>
+    </div>
+  </div>
 
-      <div class="card">
-        <div class="secret-card">
-          <div class="sc-ico">🌌</div>
-          <div class="sc-t"><b>今日秘境 · 迷雾指针林</b><span>限时 30 分钟 · 通关 +200 EXP 与稀有碎片</span></div>
-        </div>
-        <div style="margin-top:10px">
-          <span class="weather-chip sun">☀️ 学习天气：晴·专注 +15%</span>
-          <span class="weather-chip star">🌟 幸运值偏高</span>
-        </div>
-      </div>
+  <!-- 横向呼吸区：左右滑动，露半张 -->
+  <div class="flow-head"><h2>探索一下</h2><span>左右滑动 · 露半张</span></div>
+  <div class="breathe-row">
+    <div class="glass-card breathe-card bc-1" onclick="goTab('bestiary')">
+      <span class="bc-ico">📖</span>
+      <div><b>错题怪物图鉴</b><small>指针族群已收集 3/5，集齐解锁「指针宗师」</small><span class="bc-more">查看图鉴 →</span></div>
+    </div>
+    <div class="glass-card breathe-card bc-2" onclick="goTab('checkin')">
+      <span class="bc-ico">📅</span>
+      <div><b>今日签到祭坛</b><small>连续打卡 7 天，今日奖励：经验 ×1.5</small><span class="bc-more">立即签到 →</span></div>
+    </div>
+    <div class="glass-card breathe-card bc-3" onclick="goTab('achievements')">
+      <span class="bc-ico">🏅</span>
+      <div><b>冒险收集图鉴</b><small>怪物 8/24 · 徽章 6/16 · 章节 12/20</small><span class="bc-more">查看收集 →</span></div>
+    </div>
+    <div class="glass-card breathe-card bc-4" onclick="goTab('dress')">
+      <span class="bc-ico">👗</span>
+      <div><b>凯喵装扮衣柜</b><small>已解锁 2/5 套装，试试魔法帽与冰蓝斗篷</small><span class="bc-more">去换装 →</span></div>
+    </div>
+  </div>
 
-      <div class="card">
-        <h3><span class="em">⚡</span>快捷入口</h3>
-        <div class="quick-grid">
-          <button class="quick-cell" onclick="goTab('learn')"><span class="qe">📘</span><span>知识试炼</span></button>
-          <button class="quick-cell" onclick="goTab('boss')"><span class="qe">👹</span><span>BOSS实战</span></button>
-          <button class="quick-cell" onclick="goTab('checkin')"><span class="qe">📅</span><span>签到</span></button>
-          <button class="quick-cell" onclick="openMiniGame()"><span class="qe">🎮</span><span>小游戏</span></button>
-          <button class="quick-cell" onclick="goTab('lab')"><span class="qe">🧪</span><span>试炼实验室</span></button>
-          <button class="quick-cell" onclick="goTab('bag')"><span class="qe">🎒</span><span>背包</span></button>
-          <button class="quick-cell" onclick="goTab('rank')"><span class="qe">🏆</span><span>排行榜</span></button>
-          <button class="quick-cell" onclick="goTab('bestiary')"><span class="qe">📖</span><span>怪物图鉴</span></button>
-        </div>
-      </div>
+  <!-- 轻量快捷条：保留全部 8 个入口，不再用方块占位 -->
+  <div class="quick-strip">
+    <button onclick="goTab('learn')">📘 知识试炼</button>
+    <button onclick="goTab('boss')">👹 BOSS</button>
+    <button onclick="goTab('checkin')">📅 签到</button>
+    <button onclick="openMiniGame()">🎮 小游戏</button>
+    <button onclick="goTab('lab')">🧪 实验室</button>
+    <button onclick="goTab('bag')">🎒 背包</button>
+    <button onclick="goTab('rank')">🏆 排行</button>
+    <button onclick="goTab('dress')">👗 装扮</button>
+  </div>
+  <div class="morning-note">🐱 凯喵晨报 · 昨日击退 3 只 Bug 怪物，连续打卡 7 天</div>
+</section>
 
-      <div class="card ok-card">
-        <b style="color:var(--ok)">🐱 凯喵晨报</b><br>昨日你击退了 3 只 Bug 怪物，连续打卡 7 天！今天点亮「智能指针」章节，凯喵在右下角等你聊天喵～
-      </div>
-    </section>
-
-    <!-- 知识试炼 -->
+<!-- 知识试炼 -->
     <section class="view" id="view-learn">
       <div class="card">
         <h3><span class="em">🗺️</span>章节试炼地图</h3>
@@ -860,11 +1172,41 @@ img{user-select:none;-webkit-user-drag:none}
 
   </main>
 
-  <!-- 凯喵悬浮钮 -->
-  <button class="cat-fab" id="catFab" onclick="openCat()" title="凯喵伙伴">
+  <!-- 3. 底部重心稳定区：悬浮胶囊 Dock -->
+  <div class="dock-scrim" aria-hidden="true"></div>
+  <nav class="bottom-dock" id="bottomDock" aria-label="主导航">
+    <button class="dock-item active" data-view="home" onclick="goTab('home')">
+      <span class="dock-ico"><svg viewBox="0 0 24 24"><path d="M3 10.5L12 3l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5h4v5"/></svg></span>
+      <span class="dock-lbl">主城</span>
+    </button>
+    <button class="dock-item" data-view="learn" onclick="goTab('learn')">
+      <span class="dock-ico"><svg viewBox="0 0 24 24"><path d="M13 2L4.5 13H11l-1 9 8.5-11H12z"/></svg></span>
+      <span class="dock-lbl">试炼</span>
+    </button>
+    <button class="dock-item" data-view="bestiary" onclick="goTab('bestiary')">
+      <span class="dock-ico"><svg viewBox="0 0 24 24"><path d="M4 4.5h7a3 3 0 0 1 3 3V20a3 3 0 0 0-3-3H4z"/><path d="M20 4.5h-3a3 3 0 0 0-3 3V20a3 3 0 0 1 3-3h3z"/></svg></span>
+      <span class="dock-lbl">图鉴</span>
+    </button>
+    <button class="dock-item" data-view="me" onclick="goTab('me')">
+      <span class="dock-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg></span>
+      <span class="dock-lbl">我的</span>
+    </button>
+  </nav>
+
+  <!-- 凯喵悬浮助手：魔法帽 / Y 轴浮动 / 闪烁光点；点击弹出双色对话框 -->
+  <div class="cat-hint" id="catHint" role="dialog" aria-label="凯喵提示">
+    <div class="hint-txt">今天要去打 BOSS 吗喵？<i></i></div>
+    <div class="hint-row">
+      <button class="hint-cta" onclick="closeHint();goTab('boss')">去挑战 →</button>
+      <button class="hint-later" onclick="closeHint()">再等等</button>
+    </div>
+  </div>
+  <button class="cat-fab" id="catFab" onclick="toggleHint()" title="凯喵伙伴">
     <span class="fab-ring"></span>
+    <span class="fab-hat">🎩</span>
     <img id="fabImg" src="assets/kaimao/mood-idle.png" alt="凯喵">
     <span class="fab-mood" id="fabMood">💤</span>
+    <span class="spark s1"></span><span class="spark s2"></span>
   </button>
 
   <!-- 搜索弹层 -->
@@ -949,6 +1291,7 @@ function renderTabs(){
 }
 function goTab(v){
   document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
+  document.querySelectorAll('.dock-item').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
   document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
   const el=$('view-'+v);if(el)el.classList.add('active');
   $('screen').scrollTop=0;
@@ -966,7 +1309,7 @@ function goToMe(){goTab('me');}
 function syncThemeUI(){
   const dark=document.documentElement.getAttribute('data-theme')==='dark';
   syncSwitch();
-  $('themeBtn').textContent=dark?'☀️':'🌙';
+  $('themeBtn').setAttribute('aria-label',dark?'切换到白日模式':'切换到暗夜模式');
 }
 function toggleTheme(){
   const dark=document.documentElement.getAttribute('data-theme')==='dark';
@@ -979,7 +1322,9 @@ $('topSetBtn').addEventListener('click',()=>goTab('settings'));
 /* ================= 凯喵伙伴弹窗 ================= */
 function openCat(){$('catSheet').classList.add('open');resetIdle();}
 function closeCat(){$('catSheet').classList.remove('open');}
-$('catFab').addEventListener('click',openCat);
+function toggleHint(){const h=$('catHint');if(h)h.classList.toggle('show');}
+function closeHint(){const h=$('catHint');if(h)h.classList.remove('show');}
+/* FAB 只由 onclick="toggleHint()" 驱动，避免与 addEventListener 重复触发 */
 
 /* ================= 搜索 ================= */
 const SEARCH_ITEMS=[
