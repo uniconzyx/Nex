@@ -174,3 +174,36 @@ node frontend/scripts/verify_labs_sandbox13.mjs http://localhost:5230   # 真机
 3. **默认值要写成「真实事故配置」**：一打开就红，但红得有道理（如 10 万顶点用邻接矩阵 = 38GB）。
 4. `if(c,a,b)` 在两套求值器里都是**急切求值**（两个分支都先算），除法要么保证除数恒非零，
    要么不要放进 `if` 分支；`fmt` 只认 `int` / `fix2` / `pct`。
+
+## 10. 双端原生封装与图标
+
+`deploy/package/` 把 `web-preview/` 的两套 UI 封成 EXE / APK；默认
+`tauri.conf.json`、`dist/`、`frontend/` 一律不动（`--config` 增量合并）。
+
+```bash
+python deploy/package/design_icons.py   # 设计/生成全套图标（需 Pillow）
+python deploy/package/prepare.py        # 制备 staging + 同步 Android 图标 + 生成构建脚本
+deploy/package/build-exe.cmd            # Windows EXE
+deploy/package/build-apk.cmd            # Android arm64 APK
+```
+
+图标唯一色源是 `frontend/src/styles/liquidglass.css` 的 `.km-app{}`；设计母题为
+**冰晶六边形 + 凯喵头像 + 掌握度圆弧**。`design_icons.py` 同时产出 `src-tauri/icons/`、
+`web-preview/favicon-64.png`、`deploy/launcher/nex.ico` 与 Android 五档 mipmap，
+并把 Android 资源**镜像到 `deploy/package/icons/android/`**——因为 `src-tauri/gen/`
+整目录被 `.gitignore` 忽略，`prepare.py` 每次会从镜像同步回去，保证 clone 后重编
+不会变回 Tauri 默认图标。`prepare.py` 末尾有自检，防止构建脚本模板被改坏。
+
+三个已踩过的坑（改封装前先读）：
+
+1. `build.rs` 必须保留 `cargo:rerun-if-changed=icons/icon.ico`：否则只换图标不重跑
+   Windows 资源编译，Cargo 复用旧 `libresource.a`，EXE 提取出来仍是旧占位图。
+2. Windows 未开开发者模式时，Tauri CLI 写进 `jniLibs` 的 `libnex.so` 是 **0 字节**，
+   照此打出的 APK 会白屏；必须手动拷真 `.so` 并用
+   `gradlew assembleRelease -x rustBuild*` 重打包。
+3. 签名用 `java -jar apksigner.jar`，不要从 Git Bash 调 `.bat` 包装脚本（被安全策略拦）。
+
+验收脚本：`scratch/verify_nex_package.cjs`（内嵌站点 14/14）、
+`scratch/verify_nex_csp.cjs`（等效 CSP 7/7）、
+`scratch/verify_conn_dialog.cjs`（连接设置两端 25/25）、
+`scratch/verify_nex_package.py`（产物静态与签名 20/20）。

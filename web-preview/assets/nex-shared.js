@@ -519,15 +519,58 @@
   }
 
   function promptConnect() {
-    var cur = getBase();
-    var base = global.prompt('后端地址（留空恢复默认）', cur);
-    if (base === null) return;
-    setBase(base);
-    connect().then(function (ok) {
-      if (typeof global.toast === 'function') {
-        global.toast(ok ? '☁️ 已连接后端并同步快照' : '📴 未连上，已保留本地模式（功能不受影响）');
-      }
+    // 自绘对话框：window.prompt 在 Tauri / Android WebView 常被静默吞掉，
+    // 之前手机上「连接后端」按钮点了没反应。两端共用本层，不改任何 HTML。
+    var old = $('nxConnDlg');
+    if (old && old.parentNode) { old.parentNode.removeChild(old); return; }
+    var ci = connectionInfo();
+    var wrap = document.createElement('div');
+    wrap.id = 'nxConnDlg';
+    wrap.className = 'nx-overlay';
+    wrap.innerHTML = '' +
+      '<div class="nx-dialog" role="dialog" aria-modal="true" aria-label="连接后端">' +
+        '<h3>☁️ 连接后端</h3>' +
+        '<p class="nx-sub">当前：' + esc(ci.text) + '<br>' +
+          '桌面版默认连本机 <b>127.0.0.1:8000</b>；手机与电脑在同一 WiFi 时，' +
+          '请填电脑的局域网地址（如 <b>http://192.168.1.5:8000</b>），留空恢复默认。' +
+          '后端不可达会自动回落本地快照，功能不受影响。</p>' +
+        '<input id="nxConnInput" type="text" inputmode="url" autocomplete="off" spellcheck="false" ' +
+          'placeholder="http://192.168.1.5:8000" value="' + esc(getBase()) + '" ' +
+          'class="nx-input" aria-label="后端地址">' +
+        '<div class="nx-dlg-actions">' +
+          '<button type="button" class="nx-btn ghost" data-act="default">恢复默认</button>' +
+          '<button type="button" class="nx-btn ghost" data-act="cancel">取消</button>' +
+          '<button type="button" class="nx-btn" data-act="save">保存并重连</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(wrap);
+    var input = $('nxConnInput');
+    function close() { if (wrap.parentNode) wrap.parentNode.removeChild(wrap); }
+    function apply(val) {
+      setBase(val);
+      close();
+      connect().then(function (ok) {
+        if (typeof global.toast === 'function') {
+          global.toast(ok ? '☁️ 已连接后端并同步快照' : '📴 未连上，已保留本地模式（功能不受影响）');
+        }
+      });
+    }
+    wrap.addEventListener('click', function (e) {
+      if (e.target === wrap) { close(); return; }
+      var btn = e.target && e.target.closest ? e.target.closest('[data-act]') : null;
+      if (!btn) return;
+      var act = btn.getAttribute('data-act');
+      if (act === 'cancel') close();
+      else if (act === 'default') apply('');
+      else if (act === 'save') apply(input ? input.value : '');
     });
+    if (input) {
+      try { input.focus(); input.select(); } catch (e2) { /* 部分 WebView 禁止自动聚焦 */ }
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') apply(input.value);
+        else if (e.key === 'Escape') close();
+      });
+    }
   }
 
   function refresh() { return connect(); }
@@ -735,6 +778,12 @@
     '.nx-btn{padding:7px 14px;border-radius:99px;cursor:pointer;font-size:12px;font-weight:700;' +
       'color:#fff;background:var(--accent,#5B9BD5);border:0}' +
     '.nx-btn.ghost{color:var(--accent-ink,#2F6494);background:var(--surf-2,rgba(255,255,255,.6));border:1px solid var(--line,rgba(91,155,213,.26))}' +
+    /* 连接设置对话框：不依赖 window.prompt（原生 WebView 会吞掉 JS 原生对话框） */
+    '.nx-input{display:block;width:100%;box-sizing:border-box;margin:4px 0 14px;padding:10px 12px;border-radius:10px;' +
+      'font-size:13px;line-height:1.5;color:var(--ink,#26364A);background:var(--surf-2,rgba(255,255,255,.72));' +
+      'border:1px solid var(--line,rgba(91,155,213,.26));outline:none}' +
+    '.nx-input:focus{border-color:var(--accent,#5B9BD5);box-shadow:0 0 0 3px var(--accent-soft,#D9EAF7)}' +
+    '.nx-dlg-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:4px}' +
     '.nx-feedback{margin-top:9px;font-size:12px;line-height:1.6;color:var(--ink-soft,#54687D)}';
     var st = document.createElement('style');
     st.id = 'nex-shared-style';

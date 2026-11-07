@@ -47,6 +47,10 @@ const MANIFEST: &str = r#"<?xml version="1.0" encoding="UTF-8" standalone="yes"?
 "#;
 
 fn main() {
+    // 图标内容变化必须触发 Windows 资源重编。否则 Cargo 复用旧的
+    // libresource.a，EXE 里仍是旧图标（实测 2026-11-07：换了 icon.ico，
+    // 重编后 ExtractIconExW 取出来仍是蓝底白方块占位图）。
+    println!("cargo:rerun-if-changed=icons/icon.ico");
     build_manifest_resource();
     // 用 Tauri 默认属性，但去掉它自带的清单（我们的那份已编进所有目标）。
     let mut win = tauri_build::WindowsAttributes::new_without_app_manifest();

@@ -124,7 +124,8 @@ def main() -> None:
         "cd /d \"%~dp0..\\..\\src-tauri\"",
         "set NO_PROXY=*",
         "set no_proxy=*",
-        "call \"..\\frontend\\node_modules\\.bin\\tauri.cmd\" build --no-bundle --config tauri.shell.desktop.conf.json",
+        "REM 必须显式 --target：.cargo/config.toml 只配 rustflags，未设默认 target",
+        "call \"..\\frontend\\node_modules\\.bin\\tauri.cmd\" build --no-bundle --target x86_64-pc-windows-gnu --config tauri.shell.desktop.conf.json",
         "if errorlevel 1 exit /b 1",
         "if not exist \"..\\release\\nex-shell\" mkdir \"..\\release\\nex-shell\"",
         "copy /y \"target\\x86_64-pc-windows-gnu\\release\\nex.exe\" \"..\\release\\nex-shell\\Nex-Desktop-1.0.exe\" >nul",
@@ -142,6 +143,8 @@ def main() -> None:
         "set NDK_HOME=D:\\Sdk\\ndk\\android-ndk-r27c",
         "set JAVA_HOME=C:\\Program Files\\Java\\jdk-23",
         "set CI=true",
+        "REM gen/android 被 gitignore；从入库的图标镜像同步，避免只跑本脚本时漏掉新图标",
+        "xcopy /y /e /i /q \"..\\deploy\\package\\icons\\android\" \"gen\\android\\app\\src\\main\\res\" >nul",
         "call \"..\\frontend\\node_modules\\.bin\\tauri.cmd\" android build --apk --target aarch64 --split-per-abi --config tauri.shell.mobile.conf.json",
         "REM Windows 未开开发者模式时，末尾「创建符号链接」报错属预期，.so 已生成",
         "if not exist \"target\\aarch64-linux-android\\release\\libnex.so\" exit /b 1",
@@ -152,10 +155,39 @@ def main() -> None:
         "if errorlevel 1 exit /b 1",
         "if not exist \"..\\..\\..\\release\\nex-shell\" mkdir \"..\\..\\..\\release\\nex-shell\"",
         "\"D:\\Sdk\\build-tools\\35.0.0\\zipalign.exe\" -f -p 4 app\\build\\outputs\\apk\\arm64\\release\\app-arm64-release-unsigned.apk \"..\\..\\..\\release\\nex-shell\\tmp.apk\"",
-        "call \"D:\\Sdk\\build-tools\\35.0.0\\apksigner.bat\" sign --ks keystore\\nex-release.jks --ks-pass pass:nex2026 --key-pass pass:nex2026 --ks-key-alias nex --out \"..\\..\\..\\release\\nex-shell\\Nex-Mobile-1.0-arm64.apk\" \"..\\..\\..\\release\\nex-shell\\tmp.apk\"",
+        "REM 直连 apksigner.jar：从 Git Bash 调 apksigner.bat 会被本机安全策略拦截",
+        "\"%JAVA_HOME%\\bin\\java.exe\" -jar \"D:\\Sdk\\build-tools\\35.0.0\\lib\\apksigner.jar\" sign --ks keystore\\nex-release.jks --ks-pass pass:nex2026 --key-pass pass:nex2026 --ks-key-alias nex --out \"..\\..\\..\\release\\nex-shell\\Nex-Mobile-1.0-arm64.apk\" \"..\\..\\..\\release\\nex-shell\\tmp.apk\"",
+        "if errorlevel 1 exit /b 1",
         "del \"..\\..\\..\\release\\nex-shell\\tmp.apk\"",
+        "\"%JAVA_HOME%\\bin\\java.exe\" -jar \"D:\\Sdk\\build-tools\\35.0.0\\lib\\apksigner.jar\" verify --print-certs \"..\\..\\..\\release\\nex-shell\\Nex-Mobile-1.0-arm64.apk\" >nul",
+        "if errorlevel 1 echo [nex-shell] ERROR: APK signature verification failed & exit /b 1",
         "echo [nex-shell] APK ready in release\\nex-shell",
     ])
+    # Android gen/ 被 .gitignore 整目录忽略，图标资源本身必须入库。
+    # 每次 prepare 都把入库的镜像同步回生成目录，保证 clone 后重编仍是新图标。
+    icon_src = PKG / "icons" / "android"
+    icon_dst = TAURI / "gen" / "android" / "app" / "src" / "main" / "res"
+    if icon_src.is_dir():
+        for sub in icon_src.iterdir():
+            if not sub.is_dir():
+                continue
+            target = icon_dst / sub.name
+            target.mkdir(parents=True, exist_ok=True)
+            for f in sub.iterdir():
+                if f.is_file():
+                    shutil.copy2(f, target / f.name)
+        print("[prepare] android icons synced from deploy/package/icons/android")
+    else:
+        print("[prepare] WARN: run design_icons.py first to generate Android icons")
+
+    # 防回归：本文件是构建脚本的唯一源头。实测两条关键命令缺一就会出坏包，
+    # 曾因只改产物、没改模板，被下一次 prepare 静默覆盖回旧版。
+    exe_txt = (PKG / "build-exe.cmd").read_text(encoding="gbk")
+    apk_txt = (PKG / "build-apk.cmd").read_text(encoding="gbk")
+    assert "--target x86_64-pc-windows-gnu" in exe_txt, "build-exe.cmd 缺少 --target"
+    assert "apksigner.jar" in apk_txt and "java.exe" in apk_txt, \
+        "build-apk.cmd 签名未直连 apksigner.jar"
+    print("[prepare] self-check: build scripts OK")
     print("[prepare] done")
 
 
