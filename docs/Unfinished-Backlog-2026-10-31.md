@@ -230,8 +230,11 @@ HEAD 仅跟踪 3707 个文件，但工作树里还有 **175 个已跟踪文件�
 
 ## P4 · 推送远端（当前唯一未闭环，2026-11-06）
 
-本地 `main` 已到 `5a9e1ab`，工作树干净，共 **179 个 commit**；`origin/main` 显示 `[gone]`
-（远程分支引用不存在，大概率从未成功推送过）。
+本地 `main` 已到 `d074ef2`（+ 本次 backlog 修订），工作树干净。**【2026-11-07 更正】**
+`origin/main [gone]` 只是**本地远程跟踪引用丢失**，不是「从未推送」：用可达的
+`api.github.com` 查实远程 `uniconzyx/Nex` **存在且公开**、默认分支 `main`、HEAD
+`a9b94e5e`（2026-10-12）。该提交是本地 HEAD 的**祖先**（`git merge-base --is-ancestor`
+通过）→ **fast-forward 可直推，待推 174 个 commit**，无分叉/force-push 风险。
 
 **HTTPS 通道不通（已排除假阴性）**：`github.com:443` TCP 不可达（21s 超时）；对照组
 `api.github.com:443` 返回 200、DNS 正常解析 → 是针对 `github.com` 的针对性不可达，不是断网。
@@ -249,11 +252,37 @@ git 全局代理 `127.0.0.1:31180` / `31181` 两个端口均未 LISTENING，走�
 GitHub → Settings → SSH and GPG keys，之后执行 `git push -u github-ssh main` 即可。
 
 **push 后的验证点**：`.github/workflows/ci.yml` 首次实跑（`backend-parity` 真 PG /
-`frontend-smoke` 构建 + dev server 冒烟）。本沙箱无法实跑 workflow，但已静态核对
-`frontend/vite.config.ts` 的 `server.port = 1420` 与冒烟脚本 `curl :1420` 一致，
-且本地 `tsc --noEmit`、`vite build`（4.59s）均通过，前端 job 前置条件具备。
+`frontend-smoke` 构建 + dev server 冒烟）。远程 `.github/workflows/` 目前**只有
+`release.yml`**（历史 5 次 run 全是 tag 触发的 Release），`ci.yml` 尚未推上去，故 push
+后会首次触发。本沙箱无法实跑 workflow，但两个 job 的前置条件已本地等价验证：
+- `backend-parity`：本地按 `working-directory: server` 用 embedded PG 真跑
+  `verify_nex_parity_pg.py` → **PG_PARITY_OK / rc=0**（建表、ADD jsonb 迁移、昵称校验、
+  快照往返、非对象 400、legacy 回退全过）。脚本用进程内 `httpx.ASGITransport`，
+  **不需要** 后端 8000 / judge / arq 三件套，也不连 Redis；CI 注入 `DATABASE_URL`
+  时走 service-container 分支，逻辑等价。
+- `frontend-smoke`：CI `node-version: 20` 满足全部依赖 engines（vite 5.4.21
+  `^18 || >=20`、TS 5.9 `>=14.17`、esbuild `>=12`）；本地 `tsc --noEmit` 与
+  `vite build`（4.59s）通过；`vite.config.ts` 的 `server.port = 1420` 与冒烟脚本一致。
 
 **本轮「下一步」顺带闭环（2026-11-06）**：全库正确性审计实跑 `AUDIT_FAIL` 的 4 条
 （跨章仓库 star 不一致）已修复；同源校验另修掉 3 章 manifest 的历史漂移；
 `vite build` 通过；CI 依赖一致性静态核对通过（lock 根依赖一致、`requirements.txt`
 不含 embedded_postgres 且脚本在注入 `DATABASE_URL` 时跳过）。
+
+### 2026-11-07 推送前复核（仍未闭环，仅差一步授权）
+
+- **HTTPS 已榨干**：DNS 只给 `20.205.243.166`；连同 5 个常见 GitHub IP
+  （`140.82.112/113/114/116.3`、`20.27.177.113`）逐个 `--resolve` 直连 443 全为 `000`，
+  对照 `api.github.com` 仍 200 → 非抖动、非单个 IP 被污染。
+- **无可用凭据**：`~/.config/gh/hosts.yml`、`~/.git-credentials`、`~/.netrc` 均不存在，
+  环境变量无 GitHub token；`gh` 未登录。即使 HTTPS 通也推不了。
+- **SSH 配置已核验生效**：`ssh -G github.com` → `user git` / `port 22` /
+  `identitiesonly yes` / `identityfile ~/.ssh/id_ed25519_github`；config 中只有 1 个
+  `Host github.com` 段，无覆盖问题。公钥与已交给主人的字符串一致。
+  `ssh -T` / `git push github-ssh main` 仍返回 `Permission denied (publickey)`
+  → **握手成功，唯一障碍 = GitHub 账号未添加该公钥**。
+- **待推历史体检（公开仓库，防泄漏/防拒收）**：`a9b94e5e..HEAD` 共 10060 个对象路径，
+  **0 个 >5MB blob、0 个触犯 GitHub 100MB 硬限**；19 条「敏感路径」全是误报
+  （`token_bucket` / `token_estimator` / `vision-tokens` 等教学文件名），无 `.env`、
+  `.pem`、私钥或凭据文件。
+- `release.yml` 仅 `v*` tag / 手动触发，push main 不会连带发布。
