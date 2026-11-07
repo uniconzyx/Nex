@@ -113,3 +113,27 @@ jobs:
             echo "EXE/APK 为 .gitignore 的本机产物，CI 无二进制；源级 10/10 已覆盖。"
             echo "EXE 图标色差 / APK 启动图标逐像素 / arm64 so 非 0 字节由本机 verify_icons.py 守门。"
           fi
+
+  # ===================== 题集健康度 + 生成物同步 =====================
+  # 2026-11-07 收口：历史上 13 章 exercises.json 欠账（meta.note 题数滞后、
+  # 参考代码语法错误）长期无人发现；更严重的是加题后漏跑 gen_exercise_bundle.py，
+  # 入库的 exercises.ts 一度比 content/ 少 25 道题。verify_exercises.py 只读
+  # content/，看不见产物滞后，所以这一层「源健康 + 生成物同步」两者都守。
+  content-health:
+    name: 题集健康度 + 题库生成物同步
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 题集健康度（字段 / 链接 / 参考代码语法 / meta 自洽）
+        run: python server/scripts/verify_exercises.py
+
+      - name: 题库生成物与 content/ 同步（防漏跑生成器）
+        run: |
+          python server/scripts/gen_exercise_bundle.py
+          git diff --exit-code -- frontend/src/data/exercises.ts frontend/src/data/clangUnits.ts

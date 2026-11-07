@@ -2,7 +2,7 @@
   "meta": {
     "chapter": "agent-ch07",
     "title": "轻量化微调：LoRA / QLoRA 与数据工程 —— 习题集",
-    "count": 6,
+    "count": 7,
     "note": "3 道概念题（rank/alpha 缩放、微调 vs RAG 决策、留出集显著性）+ 3 道算法实践题（LoRA 参数量、显存账本边界、过拟合早停诊断），全部为原创题干。"
   },
   "items": [

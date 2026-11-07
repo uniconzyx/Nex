@@ -240,3 +240,25 @@ EXE / APK 是 `.gitignore` 的本机产物，CI 上**没有二进制**，所以 
 确实存在时才条件执行完整的 `verify_icons.py`；否则明确打印「由本机守门」，
 不假装验过。EXE 图标色差、APK 启动图标逐像素、arm64 `libnex.so` 非 0 字节
 这三项，永远以本机 `verify_icons.py` 为准。
+
+**题集防回归（`content-health` job）**：跑 `server/scripts/verify_exercises.py`
+（字段 / 平台链接 / Python 参考代码 `compile()` / `meta.note` 题数自洽），再重跑
+`server/scripts/gen_exercise_bundle.py` 并用 `git diff --exit-code` 核
+`exercises.ts`、`clangUnits.ts` 未漂移。两层缺一不可：检查器只读 `content/`，
+2026-11-07 前入库的 `exercises.ts` 一度比 `content/` **少 25 道题**（加题后漏跑
+生成器），`verify_exercises.py` 对此完全无感，全部 167 章照样报「通过」。
+同批还收掉 13 章历史欠账：11 处 `meta.note` 的**总题数与「基础题 N」分解同时滞后**
+（加题只改 items 没改 note）、2 处参考代码语法错误（`clang-u07-q7` 把换行写成
+字面量 `/n`；`ml-ch04` 生成器表达式少一个右括号）。改 `exercises.json` 后记得
+重跑生成器，`git diff` 里应只出现预期字段。
+
+**检查器盲区（同批补上）**：`verify_exercises.py` 原先只查 `meta.note` 里的
+「N 题」，全库复核又查出 **17 处 `meta.count` 漂移**（写 6 实为 7，多在
+agent / ml 线）、**5 处 note 分解漂移**（ai-ch09 / cpp-ch10 / fund-ch17），
+另有 5 章无 `note`。`validate_content.py`、`audit_correctness.py`、
+`gen_exercise_bundle.py` **都不读** `meta.count` / 分解数，所以这些漂移能长期
+躲过全部门禁。现已把 `meta.count` 与「基础题 N / 算法题 M」分解纳入第 ⑤ 类
+检查（`meta 自洽`），并修平 21 处客观数字；用
+`scratch/test_enhanced_checker.py` 对备份旧文件做过反向验证，5/5 能被拦下。
+无 `note` 的 5 章属正常（非必填），不强行编造描述文字。`ml-ch04` 的描述性
+题数（「3 道概念题 + 3 道算法实践题」）按实际 4 基础 + 3 算法同步为 4 道。

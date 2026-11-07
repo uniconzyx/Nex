@@ -181,7 +181,7 @@
       "content_md": "三个目标文件的符号表如下（`T` 已定义于代码段、`U` 引用但未定义）：\n\n```\nmain.o : U add, U mul, T main\nutil.o : T add, T sub\nmath.o : T mul, U sub\n```\n\n若链接命令误写成 `gcc main.o math.o -o app`（漏掉 `util.o`），链接器最终报出的 `undefined reference` 符号有几个？请输出个数。",
       "answer": {
         "output": "2",
-        "reference_code": "# 逐个符号追踪「是否在所有参与链接的 .o 中被定义」\nobjs = {\n    'main.o': {'U add', 'U mul', 'T main'},\n    'math.o': {'T mul', 'U sub'},\n}\ndefs, undef = set(), set()\nfor s in objs.values():\n    for x in s:/n        kind, name = x.split()\n        (defs if kind == 'T' else undef).add(name)\nprint(sorted(undef - defs), len(undef - defs))\n",
+        "reference_code": "# 逐个符号追踪「是否在所有参与链接的 .o 中被定义」\nobjs = {\n    'main.o': {'U add', 'U mul', 'T main'},\n    'math.o': {'T mul', 'U sub'},\n}\ndefs, undef = set(), set()\nfor s in objs.values():\n    for x in s:\n        kind, name = x.split()\n        (defs if kind == 'T' else undef).add(name)\nprint(sorted(undef - defs), len(undef - defs))\n",
         "explain": "参与链接的是 main.o 与 math.o。引用集 {add, mul, sub}，定义集 {main, mul}。差集 = {add, sub}，所以报 2 个 undefined reference。注意 `mul` 由 math.o 定义、不成问题；`sub` 虽然只在 math.o 里被引用，但它的定义在漏掉的 util.o 里，同样未解决。若把 util.o 加回，定义集变 {main, mul, add, sub}，未定义清零。"
       },
       "explanation": "引用集减定义集 = {add, sub}，共 2 个。",

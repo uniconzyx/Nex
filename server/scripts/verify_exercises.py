@@ -1,18 +1,24 @@
 #!/usr/bin/env python
-"""题集健康度检查器（常驻工具，报告项，不阻塞门禁）。
+"""题集健康度检查器（CI `content-health` job 的阻塞门禁，本地亦可直接跑）。
 
 动机：`verify_examples.py` 只回放 `examples/*.json`，**不检查 `exercises.json` 里的
 `answer.reference_code`**。已出现两次「参考代码语法/逻辑错误但无人发现」的事故
 （mw-ch07 的 `msgs[len(processed)+len(dlq):]` 切片恒为空，blocked 永远返回 0）。
+2026-11-07 起本检查为**阻塞门禁**：此前长期作为「报告项」运行，攒下 13 章欠账
+（11 处 meta.note 题数滞后 + 2 处参考代码语法错误）无人处理。CI 里另有一层
+`gen_exercise_bundle.py` 幂等比对，专防「改了 content/ 却漏跑生成器」——
+这类产物滞后本工具看不见（它只读 content/）。
 
-本工具做**客观可判定**的四类检查：
+本工具做**客观可判定**的五类检查：
   ① 字段合规：每题顶层必须有 category / platform / source / source_ref；
      platform 为 leetcode|nowcoder 时必须带 external_url（合规红线：只存链接不搬题面）。
   ② 参考代码语法：能识别为 Python 的 reference_code 必须 `compile()` 通过。
   ③ 编号唯一：同一章内题目 id 不得重复。
   ④ 题量结构：基础题 / 算法题 计数，且至少各 1 题。
-  ⑤ meta 自洽：`meta.note` 里若声称「N 题」，须与实际 items 数一致
-     （曾出现 cpp-ch01 写「6 题」实为 5 题）。
+  ⑤ meta 自洽：`meta.note` 的「N 题」、`meta.count`、note 里的
+     「基础题 N / 算法题 M」分解，都须与实际 items 一致
+     （曾出现 cpp-ch01 写「6 题」实为 5 题；2026-11-07 又收掉 17 处
+      count 漂移与 5 处分解漂移 —— 这两类此前完全没查）。
 
 用法：
   python server/scripts/verify_exercises.py                  # 全库
@@ -70,12 +76,36 @@ def check_chapter(ch_path: pathlib.Path) -> dict:
         return rep
     items = data.get("items") or []
     rep["total"] = len(items)
-    # meta.note 若声称「N 题」，须与实际条数一致（防 metadata 漂移）
-    note = (data.get("meta") or {}).get("note", "") or ""
+    # meta 自洽：note 声称的题数 / 基础·算法分解、meta.count，都须与实际 items 一致。
+    # 2026-11-07 补：此前只查 note 的「N 题」，meta.count 与分解数完全没查，
+    # 全库悄悄攒下 17 处 count 漂移 + 5 处分解漂移，其它门禁也都不读这些字段。
+    meta = data.get("meta") or {}
+    note = meta.get("note", "") or ""
     m = re.search(r"(\d+)\s*题", note)
     if m and int(m.group(1)) != len(items):
         rep["meta_issues"].append(
             f"meta.note 称「{m.group(1)} 题」但实际 {len(items)} 题"
+        )
+    cnt = meta.get("count")
+    if cnt is not None:
+        try:
+            if int(cnt) != len(items):
+                rep["meta_issues"].append(
+                    f"meta.count 为 {cnt} 但实际 {len(items)} 题"
+                )
+        except (TypeError, ValueError):
+            rep["meta_issues"].append(f"meta.count 非数字: {cnt!r}")
+    basic = sum(1 for x in items if x.get("category") == "基础题")
+    algo = sum(1 for x in items if x.get("category") == "算法题")
+    mb = re.search(r"基础题\s*(\d+)", note)
+    ma = re.search(r"算法题\s*(\d+)", note)
+    if mb and int(mb.group(1)) != basic:
+        rep["meta_issues"].append(
+            f"meta.note 称「基础题 {mb.group(1)}」但实际 {basic}"
+        )
+    if ma and int(ma.group(1)) != algo:
+        rep["meta_issues"].append(
+            f"meta.note 称「算法题 {ma.group(1)}」但实际 {algo}"
         )
     seen: dict[str, int] = {}
     for it in items:
@@ -168,7 +198,7 @@ def main() -> int:
     print()
     print(f"章节 {len(reports)} 个，题目 {tot_items} 道（基础 {tot_basic} / 算法 {tot_algo}）")
     print(f"字段缺失 {tot_field} 处 | 平台题缺链接 {tot_link} 处 | 参考代码语法错误 {tot_compile} 处"
-          f" | meta 题数不一致 {tot_meta} 处")
+          f" | meta 自洽不一致 {tot_meta} 处")
     print(f"结论: {'全部通过' if bad == 0 else f'{bad} 章有问题'}")
     return 0 if bad == 0 else 1
 
