@@ -137,3 +137,36 @@ C++11 之后的核心变化是「值类别」成为一等公民：左值/右值/
 2. **完美转发**：`std::forward<T>` 保持值类别，配合万能引用 `T&&` 实现。
 3. **RVO/NRVO**：返回值优化何时发生，为什么不要写 `return std::move(x)`。
 4. **`constexpr` 与 `consteval`**：前者「可以」在编译期求值，后者「必须」。
+
+```text
+05-modern-cpp-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）
+
+  [01] 现场 1：`auto` 推论出引用还是值？  (cpp)
+    |
+    v
+  [02] 现场 2：返回值误用 `std::move` 抑制 RVO  (cpp)
+    |
+    v
+  [03] 现场 3：`std::string_view` 悬垂  (cpp)
+    |
+    v
+  [04] 现场 4：`emplace_back` 比 `push_back` 少一次拷贝  (cpp)
+    |
+    v
+  [05] 现场 5：范围 for 里的 `auto&` 与 `auto`  (cpp)
+    |
+    v
+  [06] 现场 6：`auto&&` 的误解  (-)
+    |
+    v
+  [07] 现场 7：`emplace` 的歧义与 `initializer_list`  (cpp)
+    |
+    v
+  [08] 现场 8：结构化绑定解包 `tuple` / `pair`  (cpp)
+    |
+    v
+  [... 其余 6 节见正文 ...]
+    |
+    v
+  [END] 三视角解析收口
+```

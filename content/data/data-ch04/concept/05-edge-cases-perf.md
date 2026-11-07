@@ -75,3 +75,33 @@ merged["_merge"].value_counts()   # 检查 right_only 是否异常多
 3. **缺失值处理**：`dropna` 的 `how`/`thresh` 参数、`fillna` 的前向/后向填充。
 4. **内存优化**：`astype('category')`、降精度（`float64 → float32`）、分块读取 `chunksize`。
 答题时给出「数据量级 + 具体做法 + 预期收益」三件套，比罗列 API 更能体现工程能力。
+
+```text
+05-edge-cases-perf.md · 结构速览（节点=小节，括号=该节代码块语言）
+
+  [01] 2. groupby 后的索引重建  (python)
+    |
+    v
+  [02] 3. 命名聚合 namedAgg 一次算多种统计  (python)
+    |
+    v
+  [03] 4. merge 的 indicator 与 validate 实战  (python)
+    |
+    v
+  [04] 5. categorical 类型对内存与速度的影响  (-)
+    |
+    v
+  [05] 6. 多列 groupby 与 dropna 的交互  (-)
+    |
+    v
+  [06] 7. rolling 的 min_periods 与 center  (-)
+    |
+    v
+  [07] 8. apply 逐行陷阱与向量化替代  (-)
+    |
+    v
+  [08] 9. 大数据下的分块与类型优化  (-)
+    |
+    v
+  [END] 三视角解析收口
+```

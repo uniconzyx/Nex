@@ -186,3 +186,36 @@ Java IO 分两条脉络：字节流（`InputStream`/`OutputStream`）处理原�
 2. **BIO/NIO/AIO**：同步阻塞、同步非阻塞（多路复用）、异步回调的区别。
 3. **`try-with-resources`**：要求资源实现 `AutoCloseable`，关闭顺序与异常抑制。
 4. **序列化**：`Serializable` 的作用、`serialVersionUID` 的意义、`transient` 关键字。
+
+```text
+05-io-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）
+
+  [01] 现场一：忘记关流 = 句柄泄漏，三天后服务挂  (java)
+    |
+    v
+  [02] 现场二：编码发生在桥接点，不在 FileReader 里  (java)
+    |
+    v
+  [03] 现场三：read() 返回 -1 当结束标志，漏判就死循环  (java)
+    |
+    v
+  [04] 现场四：大文件一次性读进内存 = OOM  (java)
+    |
+    v
+  [05] 现场五：Files.walk 不关会锁目录  (java)
+    |
+    v
+  [06] 现场六：ByteBuffer 忘写 flip() 读出 0 字节  (java)
+    |
+    v
+  [07] 现场七：Selector 注册后忘 remove 就绪 key，事件被重复处理  (java)
+    |
+    v
+  [08] 现场八：无条件注册 OP_WRITE 导致 CPU 打满  (java)
+    |
+    v
+  [... 其余 4 节见正文 ...]
+    |
+    v
+  [END] 三视角解析收口
+```

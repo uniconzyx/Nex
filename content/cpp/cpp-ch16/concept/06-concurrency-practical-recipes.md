@@ -122,3 +122,36 @@ C++ 内存模型定义了「先行发生」（happens-before）关系：没有�
 2. **`lock_guard` / `unique_lock` / `scoped_lock`**：RAII 加锁、可手动解锁、一次锁多把避免死锁。
 3. **条件变量**：为什么 `wait` 要配 `while` 循环（虚假唤醒），以及谓词版本 `wait(lock, pred)`。
 4. **原子操作与内存序**：`memory_order_relaxed/acquire/release/seq_cst` 的语义差异。
+
+```text
+06-concurrency-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）
+
+  [01] 现场 1：joinable 线程析构直接 terminate  (cpp)
+    |
+    v
+  [02] 现场 2：detach 后的对象生命周期  (-)
+    |
+    v
+  [03] 现场 3：mutex 忘了 unlock 的死锁  (cpp)
+    |
+    v
+  [04] 现场 4：两个锁的加锁顺序不一致  (cpp)
+    |
+    v
+  [05] 现场 5：条件变量必须配谓词，防虚假唤醒  (cpp)
+    |
+    v
+  [06] 现场 6：忘记 notify 导致永久等待  (-)
+    |
+    v
+  [07] 现场 7：atomic 不等于「整段线程安全」  (cpp)
+    |
+    v
+  [08] 现场 8：内存序用错，编译器重排让你怀疑人生  (cpp)
+    |
+    v
+  [... 其余 7 节见正文 ...]
+    |
+    v
+  [END] 三视角解析收口
+```

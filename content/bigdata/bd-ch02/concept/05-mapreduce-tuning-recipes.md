@@ -86,3 +86,36 @@ MapReduce 的性能瓶颈几乎总在 shuffle：`map 输出 → 分区 → 排�
 2. **Combiner 的前提**：结合律与交换律，为什么求平均不能直接用。
 3. **数据倾斜**：表现（少数 Reduce 慢）、解法（加盐、自定义分区、MapJoin）。
 4. **YARN 架构**：RM/AM/NM/Container 的职责与交互流程。
+
+```text
+05-mapreduce-tuning-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）
+
+  [01] Combiner：本地先 reducer 省带宽  (java)
+    |
+    v
+  [02] Partitioner 决定数据去哪  (-)
+    |
+    v
+  [03] Shuffle 的磁盘溢出与合并  (-)
+    |
+    v
+  [04] YARN 的 RM / AM / NM 三角色  (-)
+    |
+    v
+  [05] Capacity vs Fair 调度差异  (-)
+    |
+    v
+  [06] 小文件问题的根源  (-)
+    |
+    v
+  [07] 数据倾斜：热点 key 怎么治  (-)
+    |
+    v
+  [08] Speculative 执行救慢任务  (-)
+    |
+    v
+  [... 其余 5 节见正文 ...]
+    |
+    v
+  [END] 三视角解析收口
+```

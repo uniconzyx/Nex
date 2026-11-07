@@ -28,6 +28,8 @@ import subprocess
 import sys
 import tempfile
 
+from verify_softlang import verify as verify_softlang
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Node 可执行文件：优先托管版本（隔离环境），否则回落到 PATH 里的 node。
@@ -76,6 +78,10 @@ class Report:
         # 已按「通过」处理、只做信息统计的项：不占 warn 名额，否则会淹没真问题
         self.soft_newline = 0
         self.soft_lang: dict[str, int] = {}
+        # 非 Python 示例的分层验证计数（见 scripts/verify_softlang.py）
+        self.soft_exec: dict[str, int] = {}
+        self.soft_struct: dict[str, int] = {}
+        self.soft_blocked: dict[str, int] = {}
 
     def fail(self, where: str, msg: str) -> None:
         self.fails.append('%s: %s' % (where, msg))
@@ -213,8 +219,15 @@ def check_examples(cdir: str, cid: str, rep: Report, tmp_root: str) -> None:
                                  text=True, encoding='utf-8', errors='replace',
                                  timeout=60, cwd=tmp)
         else:
-            # 未支持的语言无法实跑验证：按语言聚合计数，避免上百条重复 warn 淹没真问题
-            rep.soft_lang[lang] = rep.soft_lang.get(lang, 0) + 1
+            # 非 C/C++/Python/Java/JS 示例：分层验证，不冒充 stdout 逐字符比对。
+            # 四层判据见 scripts/verify_softlang.py 模块文档。
+            level, ok, detail = verify_softlang(lang, code, expect)
+            bucket = {'executed': rep.soft_exec, 'structural': rep.soft_struct,
+                      'env_blocked': rep.soft_blocked,
+                      'unverified': rep.soft_lang}[level]
+            bucket[lang] = bucket.get(lang, 0) + 1
+            if not ok:
+                rep.fail(cid + '/' + name, '[%s] %s' % (level, detail))
             continue
 
         # 示例可声明 expect_rc：'nonzero' 表示「故意崩溃」的演示（assert / 测试失败），
@@ -557,9 +570,20 @@ def main() -> int:
     print('审计章节 %d · 检查项 %d' % (len(chapters), rep.checked))
     if rep.soft_newline:
         print('[info] %d 个示例仅末尾换行不同（已按通过处理）' % rep.soft_newline)
+    def fmt_lang(d):
+        return ', '.join('%s×%d' % (k, v) for k, v in sorted(d.items()))
+
+    if rep.soft_exec:
+        print('[info] 已实跑验证（sqlite3 执行 SQL + 代码/输出关联检查）: %s'
+              % fmt_lang(rep.soft_exec))
+    if rep.soft_struct:
+        print('[info] 已结构校验（声明式/说明型，非 stdout 比对）: %s'
+              % fmt_lang(rep.soft_struct))
+    if rep.soft_blocked:
+        print('[info] 环境限制，仅静态配对（本机策略禁止启动 bash）: %s'
+              % fmt_lang(rep.soft_blocked))
     if rep.soft_lang:
-        parts = ', '.join('%s×%d' % (k, v) for k, v in sorted(rep.soft_lang.items()))
-        print('[info] 未支持实跑的 code_lang: %s（这些示例未经验证）' % parts)
+        print('[info] 仍未验证的 code_lang: %s' % fmt_lang(rep.soft_lang))
     if rep.warns:
         print('\n[warn] %d 条' % len(rep.warns))
         for w in rep.warns[:20]:

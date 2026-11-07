@@ -107,3 +107,30 @@ Go 面试高频：
 2. **channel**：有缓冲/无缓冲的语义、`close` 的规则（不能向已关闭的 channel 发送）。
 3. **`context`**：`WithCancel`/`WithTimeout`/`WithValue` 的用法与传播。
 4. **并发安全**：`sync.Mutex`、`sync.RWMutex`、`atomic`、`sync.Map` 的适用场景。
+
+```text
+04-snippets.md · 结构速览（节点=小节，括号=该节代码块语言）
+
+  [01] goroutine + channel 汇总  (go)
+    |
+    v
+  [02] context 取消信号  (go)
+    |
+    v
+  [03] 用 WaitGroup 等全部完成  (go)
+    |
+    v
+  [04] Gin 中间件（洋葱链）  (go)
+    |
+    v
+  [05] error 作为值：包装与判断  (go)
+    |
+    v
+  [06] 消费者定义小接口  (go)
+    |
+    v
+  [07] select + 超时避免永久阻塞  (go)
+    |
+    v
+  [END] 三视角解析收口
+```

@@ -224,6 +224,11 @@ def write_vectors() -> None:
         android:pathData="M54,42 L64,48 L64,60 L54,66 L44,60 L44,48 Z" />
 </vector>
 """
+    # 干净 checkout 里 src-tauri/gen/ 不存在（整目录被 gitignore），
+    # mipmap 的 write_png 会顺带建目录，但这两个 drawable 不会 —— 必须自己建，
+    # 否则 CI 上重跑图标生成器会 FileNotFoundError。
+    (RES / "drawable").mkdir(parents=True, exist_ok=True)
+    (RES / "drawable-v24").mkdir(parents=True, exist_ok=True)
     (RES / "drawable/ic_launcher_background.xml").write_text(bg, encoding="utf-8")
     (RES / "drawable-v24/ic_launcher_foreground.xml").write_text(fg, encoding="utf-8")
 

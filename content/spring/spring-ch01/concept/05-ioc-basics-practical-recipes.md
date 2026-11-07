@@ -147,3 +147,36 @@ IoC 容器的本质是「对象图的生命周期管理 + 依赖解析」：`Bea
 2. **三种注入方式**：构造器（推荐）、setter、字段；各自对循环依赖与不可变性的影响。
 3. **Bean 的作用域**：`singleton`（默认）、`prototype`、`request`、`session`、`application`。
 4. **Bean 的生命周期**：实例化 → 属性注入 → `Aware` 回调 → `BeanPostProcessor` 前置 → `init` → 使用 → `destroy`。
+
+```text
+05-ioc-basics-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）
+
+  [01] 现场一：同类型多 Bean 时靠字段名「猜」实现  (java)
+    |
+    v
+  [02] 现场二：忘了 @ComponentScan，一个 Bean 都没注册  (java)
+    |
+    v
+  [03] 现场三：构造器注入 vs setter 注入选型乱  (java)
+    |
+    v
+  [04] 现场四：构造器循环依赖，启动直接抛异常  (java)
+    |
+    v
+  [05] 现场五：@Autowired required 默认 true，缺 Bean 即失败  (java)
+    |
+    v
+  [06] 现场六：@Value 取不到配置，原因是占位符 or 类型  (java)
+    |
+    v
+  [07] 现场七：Bean 不是线程安全，singleton 里存状态  (java)
+    |
+    v
+  [08] 现场八：@Lazy 误用掩盖循环依赖  (java)
+    |
+    v
+  [... 其余 7 节见正文 ...]
+    |
+    v
+  [END] 三视角解析收口
+```

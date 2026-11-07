@@ -88,3 +88,36 @@ unordered_set<Pt, PtHash> s;
 2. **`reserve` 与 `resize`**：前者只改容量，后者改元素个数。
 3. **`map` 与 `unordered_map` 的取舍**：前者有序 O(log n)、后者平均 O(1) 但最坏 O(n)、内存开销更大。
 4. **`vector<bool>` 的坑**：它是特化版本，`operator[]` 返回代理对象而非 `bool&`，不能取地址。
+
+```text
+05-container-pitfalls-in-practice.md · 结构速览（节点=小节，括号=该节代码块语言）
+
+  [01] 真实场景：vector 扩容带来的隐性拷贝  (cpp)
+    |
+    v
+  [02] 迭代器失效的三种现场  (cpp)
+    |
+    v
+  [03] emplace_back 省掉的这一次拷贝  (cpp)
+    |
+    v
+  [04] map 还是 unordered_map 怎么选  (-)
+    |
+    v
+  [05] 用 reserve 消灭扩容抖动  (-)
+    |
+    v
+  [06] 用 shrink_to_fit 归还多余容量  (cpp)
+    |
+    v
+  [07] 自定义 key 时的相等与哈希  (cpp)
+    |
+    v
+  [08] 范围遍历里偷偷修改的陷阱  (-)
+    |
+    v
+  [... 其余 1 节见正文 ...]
+    |
+    v
+  [END] 三视角解析收口
+```

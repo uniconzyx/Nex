@@ -134,6 +134,25 @@ git commit -m "content(<subject>): 新增 <id> 三视角 + 双来源"
 > 凡要经 Bash 执行的生成脚本，请先 `Write` 落 `.py` 再执行（避免反引号命令替换吞掉内容）。
 > 跑完务必人眼核对关键数字，不能只看退出码 0。
 
+**非 Python 示例的四层验证**（`scripts/verify_softlang.py`，由 `audit_correctness.py`
+的 else 分支调用）：`executed` = SQL 真在 sqlite3 执行，且代码与声明输出有关联；
+`structural` = 声明式 / 说明型示例做语法结构校验（YAML 解析、HTML 标签闭合、
+CSS / CMake 括号、SQL 分词配对）；`env_blocked` = 本机安全策略禁止启动 bash
+（Python 调 bash 会拉起 WSL 启动器被拦），只做 heredoc / 引号静态配对；
+`unverified` = 确实无法验证。**这三层都不冒充 stdout 逐字符比对** —— 历史
+`expected_output` 格式并不统一（DDL 回显有无、分隔符、小数位都不一致），
+强行逐字符只会制造假失败。仅在 POSIX 且显式 `NEX_SOFTLANG_ALLOW_BASH=1`
+时 bash 才实跑并逐字符比对。审计输出按四层分别计数，别把「已结构校验」
+读成「已实跑通过」。YAML 结构校验依赖 `PyYAML`（已列入
+`server/requirements-audit.txt`）；换机器漏装时，该示例会明确落到
+`unverified` 并在汇总里点名，既不误报 FAIL，也不冒充「已结构校验」。
+
+**concept 结构速览图**：`scripts/add_concept_diagrams.py`（幂等）给缺 `text`
+围栏代码块的 concept 文件补图，节点取自文件自身真实的三级标题与该节代码语言。
+它不新增任何 #/##/### 标题、不写「输出 / 运行结果 / stdout」字样，因此不影响
+`audit_depth` 的 h3 计数、`audit_source_anchor` 的标题锚点，也不会被
+`check_md_outputs.py` 当成「正文抄录的程序输出」。
+
 ---
 
 ## 9. 交互微游戏（sandbox / debug）管线
@@ -206,4 +225,18 @@ deploy/package/build-apk.cmd            # Android arm64 APK
 验收脚本：`scratch/verify_nex_package.cjs`（内嵌站点 14/14）、
 `scratch/verify_nex_csp.cjs`（等效 CSP 7/7）、
 `scratch/verify_conn_dialog.cjs`（连接设置两端 25/25）、
-`scratch/verify_nex_package.py`（产物静态与签名 20/20）。
+`scratch/verify_nex_package.py`（产物静态与签名 20/20）、
+`deploy/package/verify_icons.py`（图标真进包 + so 非 0 字节，10/10）。
+
+**CI 与源级防回归**：`.github/workflows/ci.yml` 的 `package-assets` job 跑
+`deploy/package/verify_icon_sources.py`（10/10）：重跑 `design_icons.py` 后与库内
+资产做**像素级**幂等比对（不用字节比对 —— Pillow / zlib 版本会改 PNG 编码字节，
+但像素不该变），再核对三处 Windows 图标同源、非旧占位图、`build.rs` 的
+`rerun-if-changed` 声明与 `prepare.py` 模板关键串；比对后会把库内资产原样恢复，
+不留 diff。`design_icons.py::write_vectors()` 会自建 `drawable*/` 目录，保证
+干净 checkout（无 `gen/`）也能重跑。
+
+EXE / APK 是 `.gitignore` 的本机产物，CI 上**没有二进制**，所以 job 只在产物
+确实存在时才条件执行完整的 `verify_icons.py`；否则明确打印「由本机守门」，
+不假装验过。EXE 图标色差、APK 启动图标逐像素、arm64 `libnex.so` 非 0 字节
+这三项，永远以本机 `verify_icons.py` 为准。

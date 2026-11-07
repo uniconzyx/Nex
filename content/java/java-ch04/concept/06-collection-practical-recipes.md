@@ -178,3 +178,36 @@ for (Map.Entry<String, Integer> e : m.entrySet()) {
 2. **`HashMap` 的扩容**：负载因子 0.75、容量为 2 的幂、扩容后元素「要么原位、要么原位+旧容量」。
 3. **`ConcurrentModificationException`**：快速失败机制与 `modCount`。
 4. **`ArrayList` 与 `LinkedList` 的选型**：随机访问多选前者，头尾增删多选后者。
+
+```text
+06-collection-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）
+
+  [01] 现场一：ArrayList 扩容不是「翻倍」，是 1.5 倍  (java)
+    |
+    v
+  [02] 现场二：foreach 里 remove，单线程也会炸  (java)
+    |
+    v
+  [03] 现场三：LinkedList 当队列用，别用 get(i)  (java)
+    |
+    v
+  [04] 现场四：HashMap 的键必须是「不可变」且守契约  (java)
+    |
+    v
+  [05] 现场五：HashSet 去重靠的是 hashCode + equals，不是 ==  (java)
+    |
+    v
+  [06] 现场六：TreeMap/TreeSet 要求键可比较  (java)
+    |
+    v
+  [07] 现场七：PriorityQueue 不是「自动排序的 List」  (java)
+    |
+    v
+  [08] 现场八：Arrays.asList 返回的是固定大小视图  (java)
+    |
+    v
+  [... 其余 4 节见正文 ...]
+    |
+    v
+  [END] 三视角解析收口
+```

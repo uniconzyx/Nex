@@ -82,3 +82,34 @@ jobs:
           echo "$BODY" | grep -q '<div id="app">' || echo "提示：未检测到 <div id=\"app\">，请确认入口挂载点"
           echo "dev server 冒烟通过 (HTTP 200, $(echo "$BODY" | wc -c) bytes)"
           kill $VITE_PID 2>/dev/null
+
+  # ===================== 图标与封装资产防回归（源级） =====================
+  # EXE / APK 是 .gitignore 的本机产物，CI 上没有二进制，所以这一层校验的是
+  # 「能进版本库的那一半」：图标源文件、生成器幂等、build.rs 依赖声明、
+  # prepare.py 重编模板。产物里的图标色差 / so 非 0 字节由本机
+  # deploy/package/verify_icons.py 的 10 项断言守门。
+  package-assets:
+    name: 图标与封装资产防回归
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Pillow
+        run: python -m pip install Pillow
+
+      - name: 图标生成器幂等 + 构建链静态自检
+        run: python deploy/package/verify_icon_sources.py
+
+      - name: 原生包二进制校验（产物存在时）
+        run: |
+          if [ -f release/nex-shell/Nex-Desktop-1.0.exe ] && [ -f release/nex-shell/Nex-Mobile-1.0-arm64.apk ]; then
+            python deploy/package/verify_icons.py
+          else
+            echo "EXE/APK 为 .gitignore 的本机产物，CI 无二进制；源级 10/10 已覆盖。"
+            echo "EXE 图标色差 / APK 启动图标逐像素 / arm64 so 非 0 字节由本机 verify_icons.py 守门。"
+          fi

@@ -185,3 +185,36 @@ Spring AOP 是「运行期代理」而非「编译期织入」：JDK 动态代�
 2. **两种代理**：JDK 动态代理要求目标实现接口，CGLIB 生成子类；Boot 2.x 默认 CGLIB。
 3. **自调用失效**：原因（不走代理）与三种解法（自注入、`AopContext`、拆 Bean）。
 4. **通知执行顺序**：多个切面用 `@Order` 控制，环绕通知内可修改返回值。
+
+```text
+05-aop-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）
+
+  [01] 现场一：同类内部方法自调用，通知整段消失  (java)
+    |
+    v
+  [02] 现场二：AopContext.currentProxy() 忘了开 exposeProxy  (java)
+    |
+    v
+  [03] 现场三：final 类 / final 方法，CGLIB 代理不了  (java)
+    |
+    v
+  [04] 现场四：private 方法上的 @Transactional 不生效  (java)
+    |
+    v
+  [05] 现场五：@Around 不调 proceed，业务直接被吞  (java)
+    |
+    v
+  [06] 现场六：切点表达式太宽，把内部方法也织进去了  (java)
+    |
+    v
+  [07] 现场七：多个切面顺序混乱，日志和事务谁先谁后说不清  (java)
+    |
+    v
+  [08] 现场八：@After 读返回值永远是 null  (java)
+    |
+    v
+  [... 其余 4 节见正文 ...]
+    |
+    v
+  [END] 三视角解析收口
+```

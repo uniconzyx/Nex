@@ -102,3 +102,36 @@ Vue 3 的响应式基于 `Proxy`：读取时 `track` 收集依赖、写入时 `t
 2. **`computed` 与 `watch`**：缓存机制、副作用场景、`immediate`/`deep` 选项。
 3. **生命周期**：`setup` 中 `onMounted` 等钩子的执行时机、与 Vue 2 的对应关系。
 4. **响应式原理**：`Proxy` 的拦截点、依赖收集与派发更新流程。
+
+```text
+04-snippets.md · 结构速览（节点=小节，括号=该节代码块语言）
+
+  [01] ref 与 reactive 的基本形态  (ts)
+    |
+    v
+  [02] computed 派生  (ts)
+    |
+    v
+  [03] watch 精确监听某个字段  (ts)
+    |
+    v
+  [04] watchEffect 自动追踪  (ts)
+    |
+    v
+  [05] 解构保持响应性：storeToRefs  (ts)
+    |
+    v
+  [06] Pinia setup store  (ts)
+    |
+    v
+  [07] Pinia options store（对照）  (ts)
+    |
+    v
+  [08] 列表渲染与 key  (vue)
+    |
+    v
+  [... 其余 1 节见正文 ...]
+    |
+    v
+  [END] 三视角解析收口
+```

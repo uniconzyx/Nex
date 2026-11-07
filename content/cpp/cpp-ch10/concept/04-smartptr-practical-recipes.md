@@ -150,3 +150,36 @@ std::shared_ptr<Base> b = std::make_shared<Derived>();  // ✅ 显式基类指�
 2. **`make_shared` 的优势**：一次分配同时容纳对象与控制块，缓存更友好、异常安全。
 3. **循环引用与破解**：画出双向引用的计数变化，说明 `weak_ptr` 如何打破环。
 4. **`shared_ptr` 的线程安全性**：引用计数操作原子，但「同一个 shared_ptr 对象」的读写不是线程安全的。
+
+```text
+04-smartptr-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）
+
+  [01] 现场一：裸指针交给两个智能指针，双重释放  (cpp)
+    |
+    v
+  [02] 现场二：shared_ptr 循环引用，内存永远不释放  (cpp)
+    |
+    v
+  [03] 现场三：用 this 直接构造 shared_ptr，自引用炸裂  (cpp)
+    |
+    v
+  [04] 现场四：unique_ptr 当值返回会拷贝，编译失败  (cpp)
+    |
+    v
+  [05] 现场五：shared_ptr 和裸指针混用，生命周期失控  (cpp)
+    |
+    v
+  [06] 现场六：make_shared 与私有构造 / 单独控制块释放的权衡  (cpp)
+    |
+    v
+  [07] 现场七：把栈对象地址塞进智能指针，析构时 double free  (cpp)
+    |
+    v
+  [08] 现场八：数组用 shared_ptr<T> 而非 shared_ptr<T[]>，delete 错配  (cpp)
+    |
+    v
+  [... 其余 7 节见正文 ...]
+    |
+    v
+  [END] 三视角解析收口
+```

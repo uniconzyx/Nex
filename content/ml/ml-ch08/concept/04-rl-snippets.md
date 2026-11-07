@@ -210,3 +210,33 @@ Q-learning 是 off-policy：行为策略可以用 ε-greedy 探索，目标策�
 ## 收尾
 
 这八段代码覆盖了强化学习从 MDP 到 DQN 的完整骨架。凯喵的体会是，RL 的公式不多（Bellman 方程、TD 更新、策略梯度就这几个），但实现细节极多：迟到奖励的传播、探索与利用的平衡、目标网络的稳定性、经验回放的相关性。真正的门槛不在推导，而在「跑起来能收敛」——而这一步只能靠反复调参和看曲线积累手感。
+
+```text
+04-rl-snippets.md · 结构速览（节点=小节，括号=该节代码块语言）
+
+  [01] 一、GridWorld 环境  (python)
+    |
+    v
+  [02] 二、策略评估（迭代版 Bellman 期望）  (python)
+    |
+    v
+  [03] 三、值迭代求最优策略  (python)
+    |
+    v
+  [04] 四、Q-learning（off-policy TD 控制）  (python)
+    |
+    v
+  [05] 五、SARSA（on-policy 对照）  (python)
+    |
+    v
+  [06] 六、DQN 的两个关键部件  (python)
+    |
+    v
+  [07] 七、目标网络的软更新  (python)
+    |
+    v
+  [08] 八、回报与折扣因子的量化  (python)
+    |
+    v
+  [END] 三视角解析收口
+```

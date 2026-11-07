@@ -146,3 +146,36 @@ mm = np.load('big.npy', mmap_mode='r')  # 内存映射，不一次性读入内�
 2. **随机数**：`default_rng` 与旧的 `np.random` 的区别（前者是 Generator，不复用全局状态）；并行时如何给每个 worker 不同 seed。
 3. **性能判断**：什么时候向量化反而更慢（小数组、复杂分支、需要频繁创建临时数组）。
 4. **常见等价写法**：`np.where` vs 布尔索引、`einsum` vs 矩阵乘，能说清各自的适用面。
+
+```text
+05-numpy-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）
+
+  [01] 现场 1：广播规则是「从尾轴对齐」  (python)
+    |
+    v
+  [02] 现场 2：广播悄悄制造超大数组  (python)
+    |
+    v
+  [03] 现场 3：随机不可复现——忘了固定 seed  (python)
+    |
+    v
+  [04] 现场 4：`np.random.choice` 不放回采样  (python)
+    |
+    v
+  [05] 现场 5：向量化不是银弹，小数组反而慢  (python)
+    |
+    v
+  [06] 现场 6：`einsum` 默认不优化  (python)
+    |
+    v
+  [07] 现场 7：链式运算撑爆内存  (python)
+    |
+    v
+  [08] 现场 8：C 顺序 vs F 顺序影响性能  (python)
+    |
+    v
+  [... 其余 6 节见正文 ...]
+    |
+    v
+  [END] 三视角解析收口
+```

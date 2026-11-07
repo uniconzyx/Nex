@@ -126,3 +126,33 @@ Controller 只做「参数校验 + 调用 Service + 组装响应」，业务逻�
 2. **DTO 与 Entity**：为什么不能直接把 Entity 返回给前端（敏感字段、循环引用、耦合）。
 3. **统一异常**：`@ControllerAdvice` + 自定义异常 + 错误码设计。
 4. **参数校验**：`@Valid` 与 `@Validated` 的区别、分组校验、自定义校验注解。
+
+```text
+04-snippets.md · 结构速览（节点=小节，括号=该节代码块语言）
+
+  [01] 分层调用：Controller → Service → Repository  (java)
+    |
+    v
+  [02] 业务异常 + 错误码枚举  (java)
+    |
+    v
+  [03] 统一异常处理 @ControllerAdvice  (java)
+    |
+    v
+  [04] 入站 DTO + Jakarta 校验  (java)
+    |
+    v
+  [05] 分组校验  (java)
+    |
+    v
+  [06] 出站 VO 转换（避免实体直出）  (java)
+    |
+    v
+  [07] 声明式事务边界  (java)
+    |
+    v
+  [08] 自定义校验器只做格式级  (java)
+    |
+    v
+  [END] 三视角解析收口
+```

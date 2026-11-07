@@ -84,3 +84,36 @@ Java 内存模型（JMM）用 `happens-before` 定义跨线程可见性：`volat
 2. **`synchronized` 与 `Lock`**：前者自动释放、后者需 `finally` 解锁但支持可中断、超时、公平锁。
 3. **线程池七参数**：核心数、最大数、空闲存活、时间单位、工作队列、线程工厂、拒绝策略。
 4. **`volatile` 的两个语义**：可见性、有序性（禁止指令重排），不含原子性。
+
+```text
+05-concurrency-snippets.md · 结构速览（节点=小节，括号=该节代码块语言）
+
+  [01] Thread 创建与生命周期  (java)
+    |
+    v
+  [02] 可见性与 volatile  (java)
+    |
+    v
+  [03] 原子类与 CAS  (java)
+    |
+    v
+  [04] 线程池参数与拒绝策略  (java)
+    |
+    v
+  [05] Lock 与 synchronized 对比  (-)
+    |
+    v
+  [06] JUC 并发容器  (-)
+    |
+    v
+  [07] Future 与异常捕获  (java)
+    |
+    v
+  [08] ThreadLocal 与内存泄漏  (java)
+    |
+    v
+  [... 其余 2 节见正文 ...]
+    |
+    v
+  [END] 三视角解析收口
+```

@@ -152,3 +152,36 @@ std::optional<int> find(int k);
 2. **为什么析构函数默认 `noexcept`**：C++11 起析构默认不抛，抛出即 terminate。
 3. **`noexcept` 的性能意义**：`vector` 扩容时优先移动而非拷贝，前提是移动构造为 `noexcept`。
 4. **异常 vs 错误码**：异常适合「不可恢复且需跨层传播」的错误，热路径与嵌入式常禁用异常。
+
+```text
+04-exception-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）
+
+  [01] 现场一：异常对象用 throw new MyErr() 抛指针  (cpp)
+    |
+    v
+  [02] 现场二：catch 按值接，对象被 slicing  (cpp)
+    |
+    v
+  [03] 现场三：catch 顺序写反，窄的永远进不去  (cpp)
+    |
+    v
+  [04] 现场四：在析构函数里抛异常，程序直接 terminate  (cpp)
+    |
+    v
+  [05] 现场五：没用 RAII，异常跳过释放导致泄漏  (cpp)
+    |
+    v
+  [06] 现场六：noexcept 函数里抛异常，直接 terminate  (cpp)
+    |
+    v
+  [07] 现场七：用 assert 做运行期参数校验，release 下失效  (cpp)
+    |
+    v
+  [08] 现场八：catch (...) 吞掉一切却不知啥错  (cpp)
+    |
+    v
+  [... 其余 7 节见正文 ...]
+    |
+    v
+  [END] 三视角解析收口
+```

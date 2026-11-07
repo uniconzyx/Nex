@@ -126,3 +126,36 @@ REST 的约束（统一接口、无状态、可缓存、分层）决定了它适
 2. **RESTful 设计**：资源命名用名词复数、层级不超过两级、用查询参数做过滤与分页。
 3. **参数绑定**：`@PathVariable`、`@RequestParam`、`@RequestBody`、`@RequestHeader` 的区别。
 4. **全局异常处理**：`@RestControllerAdvice` + `@ExceptionHandler`，统一返回结构。
+
+```text
+05-rest-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）
+
+  [01] 现场 1：`@RequestBody` 与 `@RequestParam` 用错，参数永远是空  (java)
+    |
+    v
+  [02] 现场 2：路径变量与查询参数别混  (java)
+    |
+    v
+  [03] 现场 3：日期与枚举的绑定格式  (java)
+    |
+    v
+  [04] 现场 4：校验注解要配 `@Valid` 才生效  (java)
+    |
+    v
+  [05] 现场 5：嵌套对象的校验要加 `@Valid`  (-)
+    |
+    v
+  [06] 现场 6：校验失败要返回结构化错误，而不是 500  (java)
+    |
+    v
+  [07] 现场 7：全局异常处理不要吞掉异常  (-)
+    |
+    v
+  [08] 现场 8：HTTP 状态码要用对  (java)
+    |
+    v
+  [... 其余 7 节见正文 ...]
+    |
+    v
+  [END] 三视角解析收口
+```

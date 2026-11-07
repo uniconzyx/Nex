@@ -144,3 +144,36 @@ Hive 的本质是「把 SQL 编译成 MapReduce/Tez/Spark 作业」，因此 SQL
 2. **分区与分桶**：目录级裁剪 vs 文件级哈希，各自适用场景。
 3. **Join 策略**：MapJoin（小表广播）、CommonJoin（shuffle）、SMB Join（排序合并）。
 4. **数据倾斜**：加盐两阶段聚合、热点 key 单独处理。
+
+```text
+05-hive-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）
+
+  [01] 现场一：大表 Join 小表，不写 MapJoin 就 shuffle 到死  (sql)
+    |
+    v
+  [02] 现场二：数据倾斜靠加 Reduce 数，热 key 仍在同一个桶  (sql)
+    |
+    v
+  [03] 现场三：加盐（salting）+ 两阶段聚合消倾斜  (sql)
+    |
+    v
+  [04] 现场四：SELECT * 让列式存储优势归零  (sql)
+    |
+    v
+  [05] 现场五：动态分区不设 nonstrict，全表被重写到任意分区  (sql)
+    |
+    v
+  [06] 现场六：窗口函数不是 GROUP BY，行数不变  (sql)
+    |
+    v
+  [07] 现场七：分区裁剪看 dt 用对，否则全分区扫描  (sql)
+    |
+    v
+  [08] 现场八：小文件过多，Map 数爆炸还拖垮 NN  (sql)
+    |
+    v
+  [... 其余 4 节见正文 ...]
+    |
+    v
+  [END] 三视角解析收口
+```

@@ -180,3 +180,36 @@ SQL 的执行语义是「先 FROM/JOIN 构造笛卡尔积 → 再 WHERE 过滤 �
 2. **聚合**：`GROUP BY` 与 `HAVING` 的执行顺序、`COUNT(*)` 与 `COUNT(col)` 的差异。
 3. **子查询**：相关子查询与非相关子查询、`EXISTS` 与 `IN` 的取舍。
 4. **窗口函数**：`ROW_NUMBER`/`RANK`/`DENSE_RANK` 的差异、`PARTITION BY` 的用法。
+
+```text
+05-sql-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）
+
+  [01] 1. INNER JOIN 只留两表都匹配的行  (sql)
+    |
+    v
+  [02] 2. LEFT JOIN 之后 WHERE 过滤右表会退化成内连接  (sql)
+    |
+    v
+  [03] 3. 笛卡尔积：忘了 ON 条件的灾难  (sql)
+    |
+    v
+  [04] 4. 自连接：同一张表当两张用  (sql)
+    |
+    v
+  [05] 5. 子查询相关与不相关：性能天差地别  (sql)
+    |
+    v
+  [06] 6. EXISTS vs IN：NULL 语义与空值处理  (sql)
+    |
+    v
+  [07] 7. 集合运算：UNION 去重 vs UNION ALL  (sql)
+    |
+    v
+  [08] 8. INTERSECT / EXCEPT：交集与差集  (sql)
+    |
+    v
+  [... 其余 5 节见正文 ...]
+    |
+    v
+  [END] 三视角解析收口
+```

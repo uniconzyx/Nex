@@ -99,21 +99,30 @@ def first_para(body):
 
 
 def first_code(body):
-    m = re.search(r'^```([\w+-]*)\s*$', body, re.M)
-    if not m:
-        return None
-    lang = m.group(1) or 'text'
-    rest = body[m.end():]
-    end = rest.find('```')
-    if end < 0:
-        return None
-    code = rest[:end].strip('\n')
-    lines = code.split('\n')
-    if len(lines) > 9:
-        code = '\n'.join(lines[:9]) + '\n…'
-    if len(code) > 460:
-        code = code[:460] + '\n…'
-    return {'lang': lang, 'code': code}
+    # 「结构速览」是 add_concept_diagrams.py 追加的附录，不是本节的可运行代码，
+    # 不能顶替 first_code 展示给前端（否则整个收尾小节的代码块会变成目录）。
+    # 必须按「开始围栏 + 内容 + 结束围栏」成对消费；用 finditer 会把结束围栏
+    # 当成下一个块的起点，返回一个空的 text 块。
+    pos = 0
+    while True:
+        m = re.search(r'^```([\w+-]*)\s*$', body[pos:], re.M)
+        if not m:
+            return None
+        start = pos + m.end()
+        end = body.find('```', start)
+        if end < 0:
+            return None
+        lang = m.group(1) or 'text'
+        code = body[start:end].strip('\n')
+        pos = end + 3
+        if lang == 'text' and '结构速览' in code:
+            continue
+        lines = code.split('\n')
+        if len(lines) > 9:
+            code = '\n'.join(lines[:9]) + '\n…'
+        if len(code) > 460:
+            code = code[:460] + '\n…'
+        return {'lang': lang, 'code': code}
 
 
 KIND_RULES = [

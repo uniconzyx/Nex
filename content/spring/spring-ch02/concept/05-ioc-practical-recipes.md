@@ -137,3 +137,36 @@ Spring 的 Bean 创建流程可以概括为「推断构造器 → 实例化 → 
 2. **Bean 作用域与生命周期**：`singleton` 容器级、`prototype` 每次新建，销毁回调对 `prototype` 不生效。
 3. **`@Autowired` 与 `@Resource`**：前者按类型（可配 `@Qualifier`），后者按名称。
 4. **`FactoryBean` 与 `BeanFactory`**：前者是「生产 Bean 的 Bean」，后者是容器本身。
+
+```text
+05-ioc-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）
+
+  [01] 现场一：构造器注入循环依赖，容器直接抛 BeanCurrentlyInCreationException  (java)
+    |
+    v
+  [02] 现场二：prototype 注入 singleton，每次拿到的还是同一个  (java)
+    |
+    v
+  [03] 现场三：忘了加 @ComponentScan，一个 Bean 都没注册  (java)
+    |
+    v
+  [04] 现场四：@Lazy 误用，掩盖了真正的循环依赖  (java)
+    |
+    v
+  [05] 现场五：@PostConstruct / InitializingBean 顺序搞混  (java)
+    |
+    v
+  [06] 现场六：Bean 不是线程安全，singleton 里存了请求级状态  (java)
+    |
+    v
+  [07] 现场七：@Scope("prototype") 但被 singleton 持有，没真正多例  (java)
+    |
+    v
+  [08] 现场八：BeanPostProcessor 里注入业务 Bean，AOP 静默失效  (java)
+    |
+    v
+  [... 其余 4 节见正文 ...]
+    |
+    v
+  [END] 三视角解析收口
+```

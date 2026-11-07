@@ -82,3 +82,36 @@ Java 的异常体系分 `Throwable` 下两支：`Error`（JVM 级，不应捕获
 2. **`try-catch-finally` 的返回值**：`finally` 里的 `return` 覆盖 `try` 的返回值，且会吞异常。
 3. **泛型擦除**：为什么不能 `new T[]`、为什么静态方法不能用类的类型参数。
 4. **PECS**：`Producer Extends, Consumer Super`，给 `List<? extends Number>` 只能读不能写。
+
+```text
+06-exception-generic-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）
+
+  [01] 受检异常不是敌人  (-)
+    |
+    v
+  [02] 异常链：cause 别丢  (java)
+    |
+    v
+  [03] try-with-resources 自动关  (java)
+    |
+    v
+  [04] finally 里的 return 吞异常  (java)
+    |
+    v
+  [05] 泛型擦除的运行时真相  (-)
+    |
+    v
+  [06] 桥接方法为何而生  (-)
+    |
+    v
+  [07] PECS：生产者 extends 消费者 super  (java)
+    |
+    v
+  [08] 自限定类型做递归约束  (-)
+    |
+    v
+  [... 其余 2 节见正文 ...]
+    |
+    v
+  [END] 三视角解析收口
+```

@@ -157,3 +157,36 @@ ndarray 的内存模型是「一段连续缓冲区 + dtype + shape + strides」�
 3. **内存布局**：C order 与 F order 对遍历性能的影响，`ascontiguousarray` 的作用。
 4. **广播与 stride**：广播为什么不需要复制数据（stride 置 0）。
 答题时能画出「数据缓冲区 + strides」的示意图，比背结论更有说服力。
+
+```text
+05-ndarray-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）
+
+  [01] 现场 1：ndarray 是「数据 + 形状 + 步长」  (python)
+    |
+    v
+  [02] 现场 2：C 顺序与 F 顺序决定遍历快慢  (python)
+    |
+    v
+  [03] 现场 3：切片返回视图，改它就改原数组  (python)
+    |
+    v
+  [04] 现场 4：花式索引与布尔索引返回拷贝  (python)
+    |
+    v
+  [05] 现场 5：reshape 多数情况是视图  (python)
+    |
+    v
+  [06] 现场 6：transpose 只改步长，不搬数据  (python)
+    |
+    v
+  [07] 现场 7：广播不复制数据，但结果会实体化  (python)
+    |
+    v
+  [08] 现场 8：ufunc 是逐元素运算的引擎  (python)
+    |
+    v
+  [... 其余 7 节见正文 ...]
+    |
+    v
+  [END] 三视角解析收口
+```

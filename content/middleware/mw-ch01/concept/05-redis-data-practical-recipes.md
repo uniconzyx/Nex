@@ -121,3 +121,36 @@ Redis 的对象模型是「`redisObject` + 编码」：同一逻辑类型（stri
 2. **SDS 的优势**：O(1) 取长度、二进制安全、预分配减少重分配。
 3. **过期与淘汰**：惰性删除 + 定期删除，八种淘汰策略（`allkeys-lru`、`volatile-lfu` 等）。
 4. **持久化**：RDB 快照与 AOF 日志的取舍，混合持久化。
+
+```text
+05-redis-data-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）
+
+  [01] 现场 1：为什么 Redis 不用 C 字符串  (c)
+    |
+    v
+  [02] 现场 2：SDS 头部按长度自适应  (-)
+    |
+    v
+  [03] 现场 3：字符串的三种编码：int、embstr、raw  (bash)
+    |
+    v
+  [04] 现场 4：44 字节是 embstr 与 raw 的分界线  (-)
+    |
+    v
+  [05] 现场 5：append 让 embstr 悄悄变 raw  (bash)
+    |
+    v
+  [06] 现场 6：list 的演进：ziplist 到 quicklist  (-)
+    |
+    v
+  [07] 现场 7：hash 在 listpack 与 hashtable 之间切换  (bash)
+    |
+    v
+  [08] 现场 8：set 的三态：intset、listpack、hashtable  (-)
+    |
+    v
+  [... 其余 7 节见正文 ...]
+    |
+    v
+  [END] 三视角解析收口
+```

@@ -123,3 +123,36 @@ iostream 的设计是「流缓冲 + 状态机 + 格式化层」三层：`streamb
 2. **状态位判断**：`good()`、`eof()`、`fail()`、`bad()` 的区别与恢复方式。
 3. **`endl` 与 `\n`**：前者会 flush，频繁输出时应使用 `\n`。
 4. **格式化控制**：`setprecision`、`setw`、`fixed` 的作用范围（`setw` 只影响下一次输出）。
+
+```text
+05-stream-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）
+
+  [01] 现场 1：`ofstream` 默认截断清空文件  (cpp)
+    |
+    v
+  [02] 现场 2：`fstream` 同时读写未 seek 就换向  (cpp)
+    |
+    v
+  [03] 现场 3：文本模式读写二进制数据  (-)
+    |
+    v
+  [04] 现场 4：流状态位 `failbit`/`badbit` 不清除就卡死  (cpp)
+    |
+    v
+  [05] 现场 5：`getline` 与 `>>` 混用的换行残留  (cpp)
+    |
+    v
+  [06] 现场 6：浮点格式化精度陷阱  (cpp)
+    |
+    v
+  [07] 现场 7：`stringstream` 复用前要 `clear()` + `str("")`  (cpp)
+    |
+    v
+  [08] 现场 8：`std::endl` 每次都 flush，拖慢 IO  (-)
+    |
+    v
+  [... 其余 6 节见正文 ...]
+    |
+    v
+  [END] 三视角解析收口
+```
