@@ -9,7 +9,8 @@
 >   `concept_chars` 卡在 ~3500–3800，A 线 6000 按典型 5 文件章校准，属结构性，非缺陷）。
 > - **sandbox 交互玩法 167/167 全章闭合**（模块 179 = sandbox 167 + debug 12），
 >   `verify_labs_sandbox13.mjs` 真机 167/167 通关、`fails: []`；`tsc --noEmit` 与 `vite build` 均通过。
-> - **当前唯一未闭环：推送 `main` 到 GitHub**（网络/认证受限，见文末 P4）。
+> - **推送 `main` 到 GitHub 已闭环**（2026-11-07）：175 commits fast-forward 推成功，
+>   首次 CI 两个 job 全绿。见文末 P4 终态。
 > - 全库 `audit_correctness --all --skip-net` 曾报 4 条星数不一致，已按 GitHub API 实时值
 >   统一并同步 manifest 修复（`5a9e1ab`）；全量终验 **AUDIT_OK**（160 章 / 3964 检查项 / FAIL 0）。
 
@@ -224,11 +225,11 @@ HEAD 仅跟踪 3707 个文件，但工作树里还有 **175 个已跟踪文件�
 7. **P2 discrete-math**：补 dm-ch02/03 并接线（决定这个学科是否正式上线）。
 8. ~~**P1 残余 schema**~~ ✅ 已完成（2026-10-31）：`data-ch05`、`py-ch04~py-ch08`、`mw-ch02`、`mw-ch03`、`cpp-ch12` 全部迁到 canonical 八字段；顺带全库扫描修掉 14 处嵌套 `explanation`，1165 题 0 问题。
 9. ~~**图示例题库**~~ ✅ 已完成（2026-11-01）：605 个 concept 文件 ```` ```text ```` 覆盖 100%；14 个跨章仓库 star 归一化 + 77 个刷新为 GitHub API 实时值。
-10. **下一步候选** → 已收敛为单一项：P4 推送远端并观察首次 CI；其余 P1/P2/P3 均已闭环。
+10. **下一步候选** → ✅ P4 推送远端与首次 CI 已于 2026-11-07 闭环；P1/P2/P3/P4 全部结清。
 
 ---
 
-## P4 · 推送远端（当前唯一未闭环，2026-11-06）
+## P4 · 推送远端（✅ 2026-11-07 已闭环）
 
 本地 `main` 已到 `d074ef2`（+ 本次 backlog 修订），工作树干净。**【2026-11-07 更正】**
 `origin/main [gone]` 只是**本地远程跟踪引用丢失**，不是「从未推送」：用可达的
@@ -248,8 +249,8 @@ git 全局代理 `127.0.0.1:31180` / `31181` 两个端口均未 LISTENING，走�
 - `~/.ssh/config` 追加 `Host github.com` 段，指定 `IdentityFile` + `IdentitiesOnly yes`
 - 仓库新增 remote `github-ssh` → `git@github.com:uniconzyx/Nex.git`（原 `origin` 保留不动）
 
-**待主人一步授权**：把 `~/.ssh/id_ed25519_github.pub` 的内容加到
-GitHub → Settings → SSH and GPG keys，之后执行 `git push -u github-ssh main` 即可。
+**授权已完成**：主人已把 `~/.ssh/id_ed25519_github.pub` 加到 GitHub 账号，
+`ssh -T git@github.com` 返回 `Hi uniconzyx! You've successfully authenticated`。
 
 **push 后的验证点**：`.github/workflows/ci.yml` 首次实跑（`backend-parity` 真 PG /
 `frontend-smoke` 构建 + dev server 冒烟）。远程 `.github/workflows/` 目前**只有
@@ -286,3 +287,24 @@ GitHub → Settings → SSH and GPG keys，之后执行 `git push -u github-ssh 
   （`token_bucket` / `token_estimator` / `vision-tokens` 等教学文件名），无 `.env`、
   `.pem`、私钥或凭据文件。
 - `release.yml` 仅 `v*` tag / 手动触发，push main 不会连带发布。
+
+### ✅ P4 终态（2026-11-07 13:47 GMT+8）
+
+`git push -u github-ssh main` → **`a9b94e5..c71040f  main -> main`，175 commits，rc=0**。
+`api.github.com` 复核远程 `main` HEAD = `c71040f9733cf9392f933198e37d8365b6c23ca2`，与本地一致；
+`branch 'main' set up to track 'github-ssh/main'`（`origin` 仍保留 HTTPS 别名，不主动改动）。
+
+**首次 CI**（run `42344194691`，push 事件，
+https://github.com/uniconzyx/Nex/actions/runs/42344194691 ）→ `completed / success`：
+
+| job | 结论 | 关键步骤 |
+|---|---|---|
+| Nex 后端 PG 端到端验收 | `success` | `Run Nex backend parity (真 PG)` 成功（真 postgres:18 service container，非 embedded） |
+| Frontend 构建 + dev server 冒烟 | `success` | `npm ci` → `tsc --noEmit && vite build` → vite dev @ `:1420` HTTP 200 全通过 |
+
+即 `ci.yml` 的两个分支（CI 注入 `DATABASE_URL` 的外部 PG 路径、Node 20 + `npm ci` 的
+Linux 路径）都经真实 runner 验证通过；本地此前只覆盖了 embedded-PG 与 Node 22 分支，
+本次补齐了差异面。**全仓 P1/P2/P3/P4 至此全部结清，无已知未闭环项。**
+
+后续可选（非待办，需主人决定）：给 `origin` 换 SSH URL 以消除失效的 HTTPS 别名；
+或打 `v*` tag 触发 `release.yml`（历史 5 次 run 中 3 次失败，需先排查再打）。
