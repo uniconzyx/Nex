@@ -32,7 +32,15 @@
   var LS_BASE = 'nex.apiBaseUrl';
   var LS_TOKEN = 'nex.accessToken';
   var LS_PROGRESS_V2 = 'kaimao.progress.v2';
-  var DEFAULT_BASE = 'http://127.0.0.1:8000';
+  var DEFAULT_BASE = 'http://127.0.0.1:8000';   // 仅 file:// 打开时的回退
+  function defaultBase() {
+    // 由 http(s) 提供服务时（本机部署 / 局域网访问），API 与页面同源；
+    // 写死 127.0.0.1 会让手机/其它设备把请求发给自己，永远连不上后端。
+    try {
+      if (global.location && /^https?:$/.test(global.location.protocol)) return global.location.origin;
+    } catch (e) { /* file:// 或受限环境 */ }
+    return DEFAULT_BASE;
+  }
   var TOTAL_CHAPTERS = 20;   // 章节体系分母（成就/徽章墙都按 20 章）
   var FLASH_TTL = 3400;
   var PREVIEW_TTL = 8000;
@@ -275,7 +283,7 @@
 
   function getBase() {
     var b = lsGet(LS_BASE);
-    return (b && b.trim() ? b.trim() : DEFAULT_BASE).replace(/\/+$/, '');
+    return (b && b.trim() ? b.trim() : defaultBase()).replace(/\/+$/, '');
   }
   function setBase(b) { if (b && b.trim()) lsSet(LS_BASE, b.trim().replace(/\/+$/, '')); else lsDel(LS_BASE); }
   function getToken() { return lsGet(LS_TOKEN); }
@@ -445,6 +453,22 @@
   }
 
   /* ------------------------------------------------------------ 连接 */
+
+  function ensureSession() {
+    var canFetch = typeof global.fetch === 'function' && global.location &&
+                   /^https?:$/.test(global.location.protocol);
+    if (getToken() || !canFetch) { connect(); return; }
+    // 本机部署层提供 /api/local/session：自动领取长效本机令牌，无需手动登录。
+    // 普通静态托管没有这个端点 -> 静默忽略，照常回落本地快照。
+    global.fetch('/api/local/session', { headers: { 'Accept': 'application/json' } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        var d = j && j.data ? j.data : j;
+        if (d && d.access_token) lsSet(LS_TOKEN, d.access_token);
+      })
+      .catch(function () { /* noop */ })
+      .then(function () { connect(); });
+  }
 
   function applyRemote(data) {
     var snap = null;
@@ -860,7 +884,7 @@
       var label = (t.getAttribute('title') || t.textContent || '').trim().slice(0, 8) || '当前页面';
       setPage(t.dataset.view, label);
     }, true);
-    connect();                    // 再异步尝试后端；失败自动回落
+    ensureSession();              // 本机部署自动领会话后连后端；不可用则回落本地
     // 跨页签同步：另一端改动了快照，这一端跟着更新
     global.addEventListener('storage', function (e) {
       if (e.key === LS_STATE && e.newValue) {
