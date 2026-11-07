@@ -57,10 +57,14 @@ class Settings(BaseSettings):
     shared_dir: str = "../shared"
     content_dir: str = "../content"
 
+    # "null" 是 file:// 打开 web-preview/*.html 时的 Origin：本地设计预览页
+    # 需要直连本机后端才能验证前后端闭环。所有写接口仍需 Bearer token；
+    # 生产部署请用 CORS_ORIGINS 环境变量收紧（去掉 null）。
     cors_origins: str = (
         "http://localhost:3000,"
         "http://localhost:1420,http://127.0.0.1:1420,"
-        "tauri://localhost,http://tauri.localhost"
+        "tauri://localhost,http://tauri.localhost,"
+        "null"
     )
 
     @property

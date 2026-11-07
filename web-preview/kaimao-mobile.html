@@ -854,20 +854,20 @@ img{user-select:none;-webkit-user-drag:none}
   <!-- 视觉 C 位：悬浮玻璃大卡 -->
   <div class="glass-card board-card">
     <div class="board-left">
-      <div class="ring" style="--pct:64">
-        <div class="ring-core"><img src="assets/kaimao/mood-sleepy.png" alt="凯喵打坐"></div>
+      <div class="ring" data-nex-ring="mastery" style="--pct:64">
+        <div class="ring-core"><img data-nex-img="mood" src="assets/kaimao/mood-sleepy.png" alt="凯喵心情"></div>
       </div>
-      <div class="ring-cap">今日掌握度 <b>64%</b></div>
+      <div class="ring-cap">今日掌握度 <b data-nex="mastery">64%</b></div>
     </div>
     <div class="board-right">
       <div class="weather-cap">
-        <span>🌤️</span>
-        <div><b>学习天气 · 晴朗</b><small>经验 +10% · 专注状态良好</small></div>
+        <span data-nex="weatherIco">🌤️</span>
+        <div><b>学习天气 · <span data-nex="weather">晴朗</span></b><small data-nex="weatherTip">经验 +10% · 专注状态良好</small></div>
       </div>
       <button class="secret-entry" onclick="goTab('boss')">
         <span class="chest">🎁</span>
         <span class="se-t"><b>每日秘境</b><small>迷雾指针林 · 限时 30 分钟</small></span>
-        <span class="power-tag">战力 1,200</span>
+        <span class="power-tag">战力 <span data-nex="power">1,200</span></span>
       </button>
       <div class="aff-mini">
         <span id="homeAffLbl">💞 好感度 · 挚友 Lv.4</span><span id="homeAffPct">64%</span>
@@ -876,23 +876,26 @@ img{user-select:none;-webkit-user-drag:none}
     </div>
   </div>
 
+  <!-- 凯喵心情 · 由真实进度驱动，两端同源（NexApp） -->
+  <div class="glass-card" data-nex-card="mood" style="margin-top:12px"></div>
+
   <!-- 行动引导：今日试炼清单 -->
-  <div class="flow-head"><h2>今日试炼</h2><span>3 项待完成</span></div>
+  <div class="flow-head"><h2>今日试炼</h2><span><span data-nex="dailyLeft">3</span> 项待完成</span></div>
   <div class="quest-list">
     <div class="glass-card quest-card">
       <span class="quest-mon q1">🐛</span>
-      <div class="quest-t"><b>代码找茬</b><small>揪出 3 处隐藏 Bug</small><em>0/3</em></div>
-      <button class="quest-go" onclick="goTab('learn')">前往</button>
+      <div class="quest-t"><b>代码找茬</b><small>揪出 3 处隐藏 Bug</small><em data-nex="questCode">0/3</em></div>
+      <button class="quest-go" onclick="nexAction('quest','code');goTab('learn')">前往</button>
     </div>
     <div class="glass-card quest-card">
       <span class="quest-mon q2">🦇</span>
-      <div class="quest-t"><b>错题救赎</b><small>黑化怪物 → 守护精灵</small><em>0/2</em></div>
-      <button class="quest-go" onclick="goTab('bestiary')">前往</button>
+      <div class="quest-t"><b>错题救赎</b><small>黑化怪物 → 守护精灵</small><em data-nex="questRedeem">0/2</em></div>
+      <button class="quest-go" onclick="nexAction('quest','redeem');goTab('bestiary')">前往</button>
     </div>
     <div class="glass-card quest-card">
       <span class="quest-mon q3">🧩</span>
-      <div class="quest-t"><b>项目 BOSS</b><small>学生成绩管理系统</small><em>0/1</em></div>
-      <button class="quest-go" onclick="goTab('boss')">前往</button>
+      <div class="quest-t"><b>项目 BOSS</b><small>学生成绩管理系统</small><em data-nex="questBoss">0/1</em></div>
+      <button class="quest-go" onclick="nexAction('quest','boss');goTab('boss')">前往</button>
     </div>
   </div>
 
@@ -901,19 +904,19 @@ img{user-select:none;-webkit-user-drag:none}
   <div class="breathe-row">
     <div class="glass-card breathe-card bc-1" onclick="goTab('bestiary')">
       <span class="bc-ico">📖</span>
-      <div><b>错题怪物图鉴</b><small>指针族群已收集 3/5，集齐解锁「指针宗师」</small><span class="bc-more">查看图鉴 →</span></div>
+      <div><b>错题怪物图鉴</b><small>图鉴里还有 <span data-nex="wild">3</span> 只小怪，收服解锁「指针宗师」</small><span class="bc-more">查看图鉴 →</span></div>
     </div>
     <div class="glass-card breathe-card bc-2" onclick="goTab('checkin')">
       <span class="bc-ico">📅</span>
-      <div><b>今日签到祭坛</b><small>连续打卡 7 天，今日奖励：经验 ×1.5</small><span class="bc-more">立即签到 →</span></div>
+      <div><b>今日签到祭坛</b><small>连续打卡 <span data-nex="streak">7 天</span>，今日奖励：经验 ×1.5</small><span class="bc-more">立即签到 →</span></div>
     </div>
     <div class="glass-card breathe-card bc-3" onclick="goTab('achievements')">
       <span class="bc-ico">🏅</span>
-      <div><b>冒险收集图鉴</b><small>怪物 8/24 · 徽章 6/16 · 章节 12/20</small><span class="bc-more">查看收集 →</span></div>
+      <div><b>冒险收集图鉴</b><small>怪物 <span data-nex="bestiary">8/24</span> · 徽章 <span data-nex="badges">6/16</span> · 章节 <span data-nex="chapters">16/20</span></small><span class="bc-more">查看收集 →</span></div>
     </div>
     <div class="glass-card breathe-card bc-4" onclick="goTab('dress')">
       <span class="bc-ico">👗</span>
-      <div><b>凯喵装扮衣柜</b><small>已解锁 2/5 套装，试试魔法帽与冰蓝斗篷</small><span class="bc-more">去换装 →</span></div>
+      <div><b>凯喵装扮衣柜</b><small>已解锁 <span data-nex="outfits">2/5</span> 套装，试试魔法帽与冰蓝斗篷</small><span class="bc-more">去换装 →</span></div>
     </div>
   </div>
 
@@ -928,7 +931,7 @@ img{user-select:none;-webkit-user-drag:none}
     <button onclick="goTab('rank')">🏆 排行</button>
     <button onclick="goTab('dress')">👗 装扮</button>
   </div>
-  <div class="morning-note">🐱 凯喵晨报 · 昨日击退 3 只 Bug 怪物，连续打卡 7 天</div>
+  <div class="morning-note" data-nex="morning">🐱 凯喵晨报 · 昨日击退 3 只 Bug 怪物，连续打卡 7 天</div>
 </section>
 
 <!-- 知识试炼 -->
@@ -984,7 +987,7 @@ img{user-select:none;-webkit-user-drag:none}
         <div class="buff-bar" style="margin-top:9px">
           <span class="buff">🥇 已得 12 枚</span><span class="buff gold">🏅 待领 8 枚</span>
         </div>
-        <button class="btn btn-gold btn-block" style="margin-top:11px" onclick="toast('章节徽章墙：已点亮 12/20 枚 ✨')">查看徽章墙</button>
+        <button class="btn btn-gold btn-block" style="margin-top:11px" onclick="toast('章节徽章墙：已点亮 '+NexApp.view().doneChapters+'/20 枚 ✨')">查看徽章墙</button>
       </div>
     </section>
 
@@ -1118,8 +1121,8 @@ img{user-select:none;-webkit-user-drag:none}
       <div class="card">
         <h3><span class="em">🎮</span>支线小屋</h3>
         <div class="mini-card" onclick="openMiniGame()"><div class="mi-img">🧠</div><div class="mi-t"><b>指针记忆配对</b><span>翻牌匹配「符号 → 含义」，连对 3 组 +80 EXP</span></div><div class="mc-go">›</div></div>
-        <div class="mini-card" onclick="toast('语法接龙：用关键字续写合法语句，开发中~')"><div class="mi-img">🔤</div><div class="mi-t"><b>语法接龙</b><span>和凯喵轮流续写合法 C++ 语句</span></div><div class="mc-go">›</div></div>
-        <div class="mini-card" onclick="toast('Bug 消消乐：点击同类错误归堆，开发中~')"><div class="mi-img">🐛</div><div class="mi-t"><b>Bug 消消乐</b><span>消除同类错误，训练排错直觉</span></div><div class="mc-go">›</div></div>
+        <div class="mini-card" onclick="nexAction('game','chain')"><div class="mi-img">🔤</div><div class="mi-t"><b>语法接龙</b><span>选出能合法接续的 C++ 语句 · 共 5 题</span></div><div class="mc-go">›</div></div>
+        <div class="mini-card" onclick="nexAction('game','bugs')"><div class="mi-img">🐛</div><div class="mi-t"><b>Bug 消消乐</b><span>把同类错误配成一对消除 · 4 类 8 张</span></div><div class="mc-go">›</div></div>
       </div>
     </section>
 
@@ -1204,7 +1207,7 @@ img{user-select:none;-webkit-user-drag:none}
   <button class="cat-fab" id="catFab" onclick="toggleHint()" title="凯喵伙伴">
     <span class="fab-ring"></span>
     <span class="fab-hat">🎩</span>
-    <img id="fabImg" src="assets/kaimao/mood-idle.png" alt="凯喵">
+    <img id="fabImg" data-nex-img="mood" src="assets/kaimao/mood-idle.png" alt="凯喵">
     <span class="fab-mood" id="fabMood">💤</span>
     <span class="spark s1"></span><span class="spark s2"></span>
   </button>
@@ -1228,7 +1231,7 @@ img{user-select:none;-webkit-user-drag:none}
         <button class="sh-close" onclick="closeCat()">✕</button>
       </div>
       <div style="display:grid;place-items:center;padding:8px 0"><div class="cat-stage" id="catStage" data-mood="idle"><div class="cat-aura"></div><img id="catImg" src="assets/kaimao-transparent.png" alt="凯喵" onclick="catPat()"><span class="cat-float" id="catFloat" style="right:34%;top:6%">💤</span></div></div>
-      <div class="aff-row"><span>💞 好感度 · 挚友 Lv.4</span><span id="affPct">64%</span></div>
+      <div class="aff-row"><span data-nex="affLabel">💞 好感度 · 挚友 Lv.4</span><span id="affPct">64%</span></div>
       <div class="aff-bar"><i id="affFill"></i></div>
       <div class="cat-chat" id="catChat">
         <div class="bubble cat">主人好呀，我是凯喵 ⚔️ 随时可以问我代码问题，编译失败也可以找我诊断！点我头像还能摸摸头喵～</div>
@@ -1271,6 +1274,7 @@ img{user-select:none;-webkit-user-drag:none}
   <div class="toast" id="toast"></div>
 </div>
 
+<script src="assets/nex-shared.js"></script>
 <script>
 /* ================= 工具 ================= */
 const $=id=>document.getElementById(id);
@@ -1369,18 +1373,8 @@ const OUTFIT_IMG={
 let curOutfit='none';
 function catArt(){const o=OUTFIT_IMG[curOutfit];if(o)return o;
   return MOOD_IMG[$('catStage')?$('catStage').dataset.mood:'idle']||'assets/kaimao/mood-idle.png';}
-function setMood(m){
-  m=MOOD_ALIAS[m]||m;
-  $('catStage').dataset.mood=m;
-  $('catFloat').textContent=MOOD_FLOAT[m]||'💤';
-  $('moodLabel').textContent=MOOD_TEXT[m]||'';
-  $('fabMood').textContent=MOOD_FLOAT[m]||'💤';
-  document.querySelectorAll('#moodChips button').forEach(x=>x.classList.toggle('on',x.dataset.mood===m));
-  const img=$('catImg'),fab=$('fabImg');
-  if(img&&!OUTFIT_IMG[curOutfit])img.src=catArt();
-  if(fab)fab.src=catArt();
-}
-document.querySelectorAll('#moodChips button').forEach(b=>b.addEventListener('click',()=>setMood(b.dataset.mood)));
+function setMood(m){NexApp.flashMood(m);}
+document.querySelectorAll('#moodChips button').forEach(b=>b.addEventListener('click',()=>NexApp.previewMood(b.dataset.mood)));
 function pushBubble(text,who){
   const box=$('catChat');const d=document.createElement('div');d.className='bubble '+who;d.textContent=text;
   box.appendChild(d);box.scrollTop=box.scrollHeight;return d;
@@ -1410,13 +1404,8 @@ function catPat(){
 }
 
 /* ================= 好感度 / 闲置 ================= */
-let aff=64;
-function incAff(n){
-  aff=Math.min(100,aff+n);
-  ['affFill','homeAffFill'].forEach(id=>{const f=$(id);if(f)f.style.width=aff+'%';});
-  ['affPct','homeAffPct'].forEach(id=>{const p=$(id);if(p)p.textContent=aff+'%';});
-  const lbl=$('homeAffLbl');if(lbl&&aff>=80)lbl.textContent='💞 好感度 · 挚友 Max';
-}
+let aff=64; /* 兼容旧引用；真实值由 NexApp 统一计算 */
+function incAff(n){NexApp.bumpAff(n);aff=NexApp.view().affection;}
 const COLD_FACTS=[
   '冷知识：C++ 的引用不是对象，没有自己的地址，sizeof(引用)=sizeof(被引对象)～',
   '冷知识：nullptr 类型是 std::nullptr_t，能隐式转任何指针类型，但不会意外变整型 0～',
@@ -1675,7 +1664,7 @@ function renderMe(){renderAchView();}
 
 /* ================= 初始渲染 ================= */
 renderTabs();syncThemeUI();renderBag('use');renderRank('总经验');renderAchView();renderCheckinInline();renderDressRow();applyDressVisual();
-setMood('idle');
+NexApp.render();
 </script>
 </body>
 </html>

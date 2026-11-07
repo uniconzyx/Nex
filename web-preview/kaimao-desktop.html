@@ -773,7 +773,7 @@ input{font-family:inherit}
     </div>
     <div class="xp-wrap">
       <div class="xp-label"><span><b>Lv.4 语法学徒</b> · 闯关经验</span><span id="xpTopLabel">距离下一级「指针学徒」还差 270 EXP</span></div>
-      <div class="xp-bar"><div class="xp-fill"></div><div class="xp-text">总闯关经验 73%</div></div>
+      <div class="xp-bar"><div class="xp-fill" data-nex-bar="mastery"></div><div class="xp-text">总闯关经验 <span data-nex="mastery">73%</span></div></div>
     </div>
     <div class="coin-chip" title="经验结晶"><span class="ci"></span>1,280</div>
     <div class="top-icons">
@@ -870,18 +870,18 @@ input{font-family:inherit}
                 </linearGradient></defs>
                 <circle cx="64" cy="64" r="54" fill="none" stroke="rgba(91,155,213,.16)" stroke-width="12"/>
                 <circle cx="64" cy="64" r="54" fill="none" stroke="url(#rg)" stroke-width="12"
-                  stroke-linecap="round" stroke-dasharray="339.3" stroke-dashoffset="91.6"/>
+                  stroke-linecap="round" stroke-dasharray="339.3" stroke-dashoffset="91.6" data-nex-dash="mastery"/>
               </svg>
               <div class="ring-shine"></div>
-              <div class="ring-num">73%<small>综合进度</small></div>
+              <div class="ring-num"><span data-nex="mastery">73%</span><small>综合进度</small></div>
             </div>
             <div class="prog-info">
-              <div class="big">综合闯关进度 73%</div>
+              <div class="big">综合闯关进度 <span data-nex="mastery">73%</span></div>
               <div class="sub">距离晋升下一级「指针学徒」还差少量经验，保持这个节奏，本周就能升级！</div>
               <div class="stat-row">
                 <div class="stat"><b>128h</b><span>累计学习时长</span></div>
-                <div class="stat"><b>9 / 20</b><span>已完成章节</span></div>
-                <div class="stat"><b>7 天</b><span>连续打卡</span></div>
+                <div class="stat"><b data-nex="chapters">9 / 20</b><span>已完成章节</span></div>
+                <div class="stat"><b data-nex="streak">7 天</b><span>连续打卡</span></div>
               </div>
             </div>
           </div>
@@ -945,7 +945,7 @@ input{font-family:inherit}
             <h3>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/><path d="m9 15 2 2 4-4"/></svg>每日打卡
             </h3>
-            <p style="font-size:13px;color:var(--ink-soft);line-height:1.7">已连续打卡 <b style="color:var(--ink)">7 天</b>，今日未签到。坚持 30 天解锁「冰蓝誓约」头像框。</p>
+            <p style="font-size:13px;color:var(--ink-soft);line-height:1.7">已连续打卡 <b style="color:var(--ink)" data-nex="streak">7 天</b>，今日未签到。坚持 30 天解锁「冰蓝誓约」头像框。</p>
           </div>
         </div>
 
@@ -1086,10 +1086,15 @@ input{font-family:inherit}
             <span class="mi"><b>指针记忆配对</b><span class="mtags"><span class="tag tag-warn">进行中</span><span class="tag tag-gray">奖励 +80 EXP</span></span></span>
             <button class="btn btn-primary btn-sm">开始游戏</button>
           </div>
-          <div class="monster" style="cursor:pointer" onclick="toast('语法消消乐 · 关卡设计ing，即将开放')">
-            <span class="mimg">🍬</span>
-            <span class="mi"><b>语法消消乐</b><span class="mtags"><span class="tag tag-gray">即将开放</span></span></span>
-            <button class="btn btn-ghost btn-sm">敬请期待</button>
+          <div class="monster" style="cursor:pointer" onclick="nexAction('game','chain')">
+            <span class="mimg">🔤</span>
+            <span class="mi"><b>语法接龙</b><span class="mtags"><span class="tag tag-warn">可玩</span><span class="tag tag-gray">5 题 · +80 EXP</span></span></span>
+            <button class="btn btn-primary btn-sm">开始游戏</button>
+          </div>
+          <div class="monster" style="cursor:pointer" onclick="nexAction('game','bugs')">
+            <span class="mimg">🐛</span>
+            <span class="mi"><b>Bug 消消乐</b><span class="mtags"><span class="tag tag-warn">可玩</span><span class="tag tag-gray">4 类 · +80 EXP</span></span></span>
+            <button class="btn btn-primary btn-sm">开始游戏</button>
           </div>
         </div>
       </section>
@@ -1123,7 +1128,7 @@ input{font-family:inherit}
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/><path d="m9 15 2 2 4-4"/></svg>每日打卡
           </h3>
           <div class="daily-row">
-            <div class="txt">已连续打卡 <b>7 天</b>，今日未签到。坚持 30 天可解锁「冰蓝誓约」头像框。</div>
+            <div class="txt">已连续打卡 <b data-nex="streak">7 天</b>，今日未签到。坚持 30 天可解锁「冰蓝誓约」头像框。</div>
             <button class="btn btn-primary" onclick="event.stopPropagation();signIn()">立即签到 +20 EXP</button>
           </div>
         </div>
@@ -1135,10 +1140,10 @@ input{font-family:inherit}
           <div class="stats-grid">
             <div><b>128h</b><span>学习时长</span></div>
             <div><b>1,247</b><span>做题总数</span></div>
-            <div><b>9 / 20</b><span>通关章节</span></div>
+            <div><b data-nex="chapters">9 / 20</b><span>通关章节</span></div>
             <div><b>86%</b><span>平均正确率</span></div>
             <div><b>23</b><span>击败怪物数</span></div>
-            <div><b>7 天</b><span>连续打卡</span></div>
+            <div><b data-nex="streak">7 天</b><span>连续打卡</span></div>
           </div>
         </div>
 
@@ -1218,7 +1223,7 @@ input{font-family:inherit}
             <h3>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/><path d="m9 15 2 2 4-4"/></svg>签到祭坛
             </h3>
-            <span class="weather-chip">🔥 连续 7 天</span>
+            <span class="weather-chip">🔥 连续 <span data-nex="streakNum">7</span> 天</span>
           </div>
           <div class="cal-grid" id="checkinGrid" style="margin:6px 0 4px"></div>
           <div class="buff-bar"><span class="buff gold">🖼️ 7天：冰蓝头像框（已领）</span><span class="buff">🫧 30天：冰蓝气泡</span><span class="buff epic">🐱 90天：限定凯喵皮肤</span></div>
@@ -1321,7 +1326,9 @@ input{font-family:inherit}
         <img id="catImg" src="assets/kaimao-transparent.png" alt="凯喵立绘" title="点我聊聊～" onclick="catPat()">
         <span class="cat-float" id="catFloat" style="right:34%;top:14%">💤</span>
       </div>
-      <div class="aff-row"><span>💞 好感度 · 挚友 Lv.4</span><span id="affPct">64%</span></div>
+      <!-- 凯喵心情 · 与 APK 同源（NexApp） -->
+      <div class="nx-compact" data-nex-card="mood" style="margin:8px 0 2px"></div>
+      <div class="aff-row"><span data-nex="affLabel">💞 好感度 · 挚友 Lv.4</span><span id="affPct">64%</span></div>
       <div class="aff-bar"><i id="affFill"></i></div>
       <div class="quick-chips">
         <button onclick="askCat('这道题的思路该怎么想？','think')">💡 问思路</button>
@@ -1387,6 +1394,7 @@ input{font-family:inherit}
 
 <script src="assets/career-data.js"></script>
 <script src="assets/content-data.js"></script>
+<script src="assets/nex-shared.js"></script>
 <script>
 /* ================= 工具 ================= */
 const $=id=>document.getElementById(id);
@@ -1524,16 +1532,9 @@ const OUTFIT_IMG={
 let curOutfit='none';
 function catArt(){const o=OUTFIT_IMG[curOutfit];if(o)return o;
   return MOOD_IMG[$('catStage')?$('catStage').dataset.mood:'idle']||'assets/kaimao-transparent.png';}
-function setMood(m){
-  m=MOOD_ALIAS[m]||m;
-  $('catStage').dataset.mood=m;
-  $('catFloat').textContent=MOOD_FLOAT[m]||'💤';
-  $('moodLabel').textContent=MOOD_TEXT[m]||'';
-  document.querySelectorAll('#moodChips button').forEach(x=>x.classList.toggle('on',x.dataset.mood===m));
-  const img=$('catImg'); if(img&&!OUTFIT_IMG[curOutfit]) img.src=catArt();
-}
+function setMood(m){NexApp.flashMood(m);}
 document.querySelectorAll('#moodChips button').forEach(b=>{
-  b.addEventListener('click',()=>setMood(b.dataset.mood));
+  b.addEventListener('click',()=>NexApp.previewMood(b.dataset.mood));
 });
 function pushBubble(text,who){
   const box=$('catChat');
@@ -1923,14 +1924,8 @@ const COLD_FACTS=[
   '冷知识：unique_ptr 的删除器是类型的一部分，所以两个删除器不同的 unique_ptr 不是同一类型！',
   '冷知识：数组在传参时会退化成指针，所以 void f(int a[10]) 其实等价于 void f(int* a)～',
 ];
-let aff=64;
-function incAff(n){
-  aff=Math.min(100,aff+n);
-  const f=$('affFill'),p=$('affPct');
-  if(f)f.style.width=aff+'%';
-  if(p)p.textContent=aff+'%';
-  if(aff>=80&&p)p.previousElementSibling.textContent='💞 好感度 · 挚友 Max';
-}
+let aff=64; /* 兼容旧引用；真实值由 NexApp 统一计算 */
+function incAff(n){NexApp.bumpAff(n);aff=NexApp.view().affection;}
 const IDLE_ACTS=['act-wave','act-peek','act-tilt','act-blink','act-yawn'];
 function doIdle(){
   const st=$('catStage');
