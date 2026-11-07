@@ -292,7 +292,9 @@ git 全局代理 `127.0.0.1:31180` / `31181` 两个端口均未 LISTENING，走�
 
 `git push -u github-ssh main` → **`a9b94e5..c71040f  main -> main`，175 commits，rc=0**。
 `api.github.com` 复核远程 `main` HEAD = `c71040f9733cf9392f933198e37d8365b6c23ca2`，与本地一致；
-`branch 'main' set up to track 'github-ssh/main'`（`origin` 仍保留 HTTPS 别名，不主动改动）。
+`branch 'main' set up to track 'github-ssh/main'`。
+（**2026-11-07 后续**：主人指示「先 1 后 2」，已把 `origin` 收敛为 SSH、上游改回
+`origin/main`、删除重复的 `github-ssh` 别名，见文末「remote 收敛」段。）
 
 **首次 CI**（run `42344194691`，push 事件，
 https://github.com/uniconzyx/Nex/actions/runs/42344194691 ）→ `completed / success`：
@@ -309,8 +311,8 @@ Linux 路径）都经真实 runner 验证通过；本地此前只覆盖了 embed
 **CI 稳定性复核**：`4dc5f0f` 的 docs push 触发第二次 run `42344364772`，
 同样 `completed / success`（两个 job 全绿）→ 连续两次 CI 通过，非偶然。
 
-后续可选（非待办，需主人决定）：给 `origin` 换 SSH URL 以消除失效的 HTTPS 别名；
-或打 `v*` tag 触发 `release.yml`（排查结论见下）。
+后续两项已由主人指示「先 1 后 2」执行：**① remote 收敛**（已完成，见下）；
+**② 打 `v*` tag 走发布**（前置判据见下）。
 
 ### 发布流水线（release.yml）排查结论 · 只读，非待办
 
@@ -328,3 +330,33 @@ Linux 路径）都经真实 runner 验证通过；本地此前只覆盖了 embed
 结论：release 流水线当前是**健康的**，历史失败是 Flutter 侧代码/依赖问题、且已修复并连续
 两次验证通过；**不是** workflow 配置残留缺陷。若将来再打 tag，建议先本地跑一次
 `flutter build apk --release`（历史教训正是「Dart 编译错误从未本地编译暴露」）。
+
+### ① remote 收敛（2026-11-07，已完成）
+
+`github-ssh` 只在本文档被引用、无任何脚本依赖，故直接收敛为单一远端：
+
+```
+git remote set-url origin git@github.com:uniconzyx/Nex.git
+git fetch origin                       # 建立 refs/remotes/origin/main
+git branch --set-upstream-to=origin/main main
+git remote remove github-ssh           # 删除重复别名
+```
+
+验证：`git remote -v` 只剩 SSH `origin`；`git status -sb` → `## main...origin/main`
+（无 ahead/behind）；`git ls-remote origin HEAD` 返回当前 HEAD；
+`git push --dry-run origin main` → `Everything up-to-date`。失效的 HTTPS 别名已消除，
+今后 `git push` / `git fetch` 默认即走可用的 SSH 通道。
+
+### ② 发布前置判据（v1.0.5，打包链路与 v1.0.4 一致性核对）
+
+本机 **无 Flutter / Dart**（`command not found`），上轮建议的「本地先 `flutter build apk`」
+在这台机器上做不了；改用可查证的等价判据：`a854b44`(v1.0.4) → HEAD 共 **178 个提交**，
+其中打包链路 5 个输入文件经 `git diff --quiet` 逐个比对**全部 UNCHANGED**：
+`app/pubspec.yaml`、`app/assets/icon/nex_icon.png`、`deploy/ci/inject_android_icons.py`、
+`deploy/launcher/launcher.spec`、`.github/workflows/release.yml`，且文件均存在。
+→ 打 tag 触发的构建输入与 v1.0.4 成功发布**逐字节一致**，代码侧风险低。
+
+两点如实提示（非阻断，v1.0.4 同样如此）：
+- `subosito/flutter-action@v2` 取 `channel: stable`，10-12 → 11-07 间 Flutter 稳定版
+  可能已升级，**工具链版本漂移**是唯一不可本地排除的变量 → 打完必须盯 run 结果；
+- `API_BASE_URL` 若仓库未配 secret，APK 会用占位 `http://10.0.2.2:8000/api/v1`。
