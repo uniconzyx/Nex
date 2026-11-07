@@ -361,36 +361,6 @@ git remote remove github-ssh           # 删除重复别名
   可能已升级，**工具链版本漂移**是唯一不可本地排除的变量 → 打完必须盯 run 结果；
 - `API_BASE_URL` 若仓库未配 secret，APK 会用占位 `http://10.0.2.2:8000/api/v1`。
 
-### ① remote 收敛（2026-11-07，已完成）
-
-`github-ssh` 只在本文档被引用、无任何脚本依赖，故直接收敛为单一远端：
-
-```
-git remote set-url origin git@github.com:uniconzyx/Nex.git
-git fetch origin                       # 建立 refs/remotes/origin/main
-git branch --set-upstream-to=origin/main main
-git remote remove github-ssh           # 删除重复别名
-```
-
-验证：`git remote -v` 只剩 SSH `origin`；`git status -sb` → `## main...origin/main`
-（无 ahead/behind）；`git ls-remote origin HEAD` 返回当前 HEAD；
-`git push --dry-run origin main` → `Everything up-to-date`。失效的 HTTPS 别名已消除，
-今后 `git push` / `git fetch` 默认即走可用的 SSH 通道。
-
-### ② 发布前置判据（v1.0.5，打包链路与 v1.0.4 一致性核对）
-
-本机 **无 Flutter / Dart**（`command not found`），上轮建议的「本地先 `flutter build apk`」
-在这台机器上做不了；改用可查证的等价判据：`a854b44`(v1.0.4) → HEAD 共 **178 个提交**，
-其中打包链路 5 个输入文件经 `git diff --quiet` 逐个比对**全部 UNCHANGED**：
-`app/pubspec.yaml`、`app/assets/icon/nex_icon.png`、`deploy/ci/inject_android_icons.py`、
-`deploy/launcher/launcher.spec`、`.github/workflows/release.yml`，且文件均存在。
-→ 打 tag 触发的构建输入与 v1.0.4 成功发布**逐字节一致**，代码侧风险低。
-
-两点如实提示（非阻断，v1.0.4 同样如此）：
-- `subosito/flutter-action@v2` 取 `channel: stable`，10-12 → 11-07 间 Flutter 稳定版
-  可能已升级，**工具链版本漂移**是唯一不可本地排除的变量 → 打完必须盯 run 结果；
-- `API_BASE_URL` 若仓库未配 secret，APK 会用占位 `http://10.0.2.2:8000/api/v1`。
-
 ### ② 发布结果：v1.0.5 已发布（2026-11-07 14:20 GMT+8）
 
 `git tag -a v1.0.5`（annotated，指向 `61c10d1`）→ `git push origin v1.0.5` 成功。
@@ -422,33 +392,3 @@ git remote remove github-ssh           # 删除重复别名
 
 **全仓状态**：P1/P2/P3/P4 结清，remote 收敛完成，v1.0.5 发布完成，工作树干净。
 
-### ② 发布结果：v1.0.5 已发布（2026-11-07 14:20 GMT+8）
-
-`git tag -a v1.0.5`（annotated，指向 `61c10d1`）→ `git push origin v1.0.5` 成功。
-（注：tag 创建命令因沙箱升级被重跑一次，首次已建 tag、第二次报 already exists；
-核对 `git cat-file -t` / `v1.0.5^{}` 确认指向正确后单独推送，未重复创建。）
-
-**Release run `42346235323` → `completed / success`（耗时 4m31s）**：
-
-| job | 结论 |
-|---|---|
-| Build Android APK | `success`（Flutter stable 云端生成 + `flutter build apk --release`） |
-| Build Windows Launcher EXE | `success`（PyInstaller） |
-| Create GitHub Release | `success` |
-
-发布页 https://github.com/uniconzyx/Nex/releases/tag/v1.0.5 ，
-`draft = false`，`published_at = 2026-11-07T06:20:56Z`，两个产物：
-
-- `app-release.apk` — 64,523,119 bytes（约 61.5 MB）
-- `Nex-Launcher.exe` — 8,901,341 bytes（约 8.5 MB）
-
-**结论**：先前担心的 `flutter-action` stable 版本漂移**未造成回归**；「打包链路 5 个
-输入文件与 v1.0.4 逐字节一致」这一替代判据成立，在本机无 Flutter 工具链的情况下
-足以支撑发布决策。这是 v1.0.3 之后**连续第三次**成功的发布（v1.0.3 / v1.0.4 / v1.0.5）。
-
-两点如实留档：
-- `API_BASE_URL` secret 是否配置无法从未认证 API 查证（需仓库 admin 权限）；
-  若未配，本次 APK 仍使用占位 `http://10.0.2.2:8000/api/v1`，与 v1.0.4 行为一致。
-- 本段 backlog 记录提交于 tag **之后**，不在 v1.0.5 发布快照内（不影响产物）。
-
-**全仓状态**：P1/P2/P3/P4 结清，remote 收敛完成，v1.0.5 发布完成，工作树干净。
