@@ -306,5 +306,25 @@ https://github.com/uniconzyx/Nex/actions/runs/42344194691 ）→ `completed / su
 Linux 路径）都经真实 runner 验证通过；本地此前只覆盖了 embedded-PG 与 Node 22 分支，
 本次补齐了差异面。**全仓 P1/P2/P3/P4 至此全部结清，无已知未闭环项。**
 
+**CI 稳定性复核**：`4dc5f0f` 的 docs push 触发第二次 run `42344364772`，
+同样 `completed / success`（两个 job 全绿）→ 连续两次 CI 通过，非偶然。
+
 后续可选（非待办，需主人决定）：给 `origin` 换 SSH URL 以消除失效的 HTTPS 别名；
-或打 `v*` tag 触发 `release.yml`（历史 5 次 run 中 3 次失败，需先排查再打）。
+或打 `v*` tag 触发 `release.yml`（排查结论见下）。
+
+### 发布流水线（release.yml）排查结论 · 只读，非待办
+
+历史 5 次 run：v1.0.0 / v1.0.1 / v1.0.2 **失败**，v1.0.3 / v1.0.4 **成功**。
+三次失败**全部**落在 `Build Android APK` job 的 `[7] Build release APK` 步骤；
+`Build Windows Launcher EXE` job 三次都成功，`Create GitHub Release` 被 skip。
+（job logs 下载需认证，API 返回 403，故改从本地 git 历史定位，不猜。）
+
+修复链（本地提交可直接核对）：
+- `bf92c40` 补 `audioplayers` 依赖声明 → 修 v1.0.1 的缺依赖；
+- `44de503` 修 EXE 产物路径/名称对齐 → 但 v1.0.2 的 APK 仍失败；
+- **`5acac58` 修复 Flutter 云构建全部 Dart 编译错误（从未本地编译暴露）** → 真正的转折点，
+  之后 `5acac58`(v1.0.3) 与 `a854b44`(v1.0.4) 连续成功。
+
+结论：release 流水线当前是**健康的**，历史失败是 Flutter 侧代码/依赖问题、且已修复并连续
+两次验证通过；**不是** workflow 配置残留缺陷。若将来再打 tag，建议先本地跑一次
+`flutter build apk --release`（历史教训正是「Dart 编译错误从未本地编译暴露」）。
