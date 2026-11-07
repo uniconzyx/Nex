@@ -37,7 +37,15 @@
     // 由 http(s) 提供服务时（本机部署 / 局域网访问），API 与页面同源；
     // 写死 127.0.0.1 会让手机/其它设备把请求发给自己，永远连不上后端。
     try {
-      if (global.location && /^https?:$/.test(global.location.protocol)) return global.location.origin;
+      if (global.location && /^https?:$/.test(global.location.protocol)) {
+        var host = global.location.hostname || '';
+        // Tauri 原生壳（.exe / .apk）用 tauri.localhost 托管内嵌资源，那里没有 API。
+        // 此时回落到可配置的本机 / 局域网服务地址：桌面默认 127.0.0.1:8000，
+        // 移动端可设 localStorage['nex.apiBaseUrl'] 指向同一 WiFi 下的 PC。
+        // 服务不可达时仍自动回落本地快照，功能完整不白屏。
+        if (host === 'tauri' || /(^|\.)tauri\.localhost$/i.test(host)) return DEFAULT_BASE;
+        return global.location.origin;
+      }
     } catch (e) { /* file:// 或受限环境 */ }
     return DEFAULT_BASE;
   }

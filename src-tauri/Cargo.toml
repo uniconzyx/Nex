@@ -6,6 +6,10 @@ authors = ["uniconzyx"]
 license = "MIT"
 edition = "2021"
 rust-version = "1.77"
+# src/bin/probe_smoke.rs 让工程存在两个 bin target；Tauri CLI 2.12 在
+# --no-bundle / 指定 target 时会要求明确的主二进制，否则报
+# "failed to find main binary"。显式指定不影响任何编译产物。
+default-run = "nex"
 
 # ---- 构建脚本：Tauri v2 必须在 build.rs 里调用 tauri_build ----
 [build-dependencies]

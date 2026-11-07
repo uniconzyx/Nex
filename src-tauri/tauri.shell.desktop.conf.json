@@ -1,0 +1,25 @@
+{
+  "build": {
+    "frontendDist": "../deploy/package/desktop",
+    "beforeBuildCommand": null,
+    "beforeDevCommand": null
+  },
+  "app": {
+    "security": {
+      "csp": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' ipc: http: https: ws: wss: data: blob:"
+    },
+    "windows": [
+      {
+        "label": "main",
+        "title": "Nex · 桌面版",
+        "width": 1280,
+        "height": 820,
+        "minWidth": 900,
+        "minHeight": 640,
+        "resizable": true,
+        "fullscreen": false,
+        "center": true
+      }
+    ]
+  }
+}
