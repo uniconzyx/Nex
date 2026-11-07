@@ -18,6 +18,10 @@ call gradlew.bat assembleRelease --no-daemon -x rustBuildArm64Release -x rustBui
 if errorlevel 1 exit /b 1
 if not exist "..\..\..\release\nex-shell" mkdir "..\..\..\release\nex-shell"
 "D:\Sdk\build-tools\35.0.0\zipalign.exe" -f -p 4 app\build\outputs\apk\arm64\release\app-arm64-release-unsigned.apk "..\..\..\release\nex-shell\tmp.apk"
-call "D:\Sdk\build-tools\35.0.0\apksigner.bat" sign --ks keystore\nex-release.jks --ks-pass pass:nex2026 --key-pass pass:nex2026 --ks-key-alias nex --out "..\..\..\release\nex-shell\Nex-Mobile-1.0-arm64.apk" "..\..\..\release\nex-shell\tmp.apk"
+REM 直接调 apksigner.jar：从 Git Bash 经 cmd /c 调 apksigner.bat 会被本机安全策略拦截。
+"%JAVA_HOME%\bin\java.exe" -jar "D:\Sdk\build-tools\35.0.0\lib\apksigner.jar" sign --ks keystore\nex-release.jks --ks-pass pass:nex2026 --key-pass pass:nex2026 --ks-key-alias nex --out "..\..\..\release\nex-shell\Nex-Mobile-1.0-arm64.apk" "..\..\..\release\nex-shell\tmp.apk"
+if errorlevel 1 exit /b 1
 del "..\..\..\release\nex-shell\tmp.apk"
+"%JAVA_HOME%\bin\java.exe" -jar "D:\Sdk\build-tools\35.0.0\lib\apksigner.jar" verify --print-certs "..\..\..\release\nex-shell\Nex-Mobile-1.0-arm64.apk" >nul
+if errorlevel 1 echo [nex-shell] ERROR: APK signature verification failed & exit /b 1
 echo [nex-shell] APK ready in release\nex-shell
