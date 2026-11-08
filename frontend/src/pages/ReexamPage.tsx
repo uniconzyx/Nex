@@ -14,7 +14,8 @@
  * ============================================================================
  */
 import { useMemo, useState } from 'react';
-import { buildReexamView, filterMachineTests, reexamToMarkdown } from '../lib/reexam';
+import { buildReexamView, filterMachineTests, frameworkFor, reexamToMarkdown } from '../lib/reexam';
+import type { AnswerFramework } from '../data/reexamFrameworks';
 import './ReexamPage.css';
 
 /** 复制 Markdown 到剪贴板：安全上下文走 navigator.clipboard，否则降级 textarea+execCommand */
@@ -35,6 +36,121 @@ async function copyMarkdown(text: string): Promise<void> {
     }
     document.body.removeChild(ta);
   }
+}
+
+/** 单个「答题框架」折叠卡：结构步骤 + 示范回答 + 避坑 */
+function FrameworkCard({ fw }: { fw: AnswerFramework }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className={`rx-fw${open ? ' open' : ''}`}>
+      <button
+        type="button"
+        className="rx-fw-head"
+        onClick={() => setOpen(!open)}
+        aria-expanded={open}
+      >
+        <span className="rx-fw-kicker">框架问答</span>
+        <b>{fw.name}</b>
+        <span className="rx-fw-caret">{open ? '▾' : '▸'}</span>
+      </button>
+      {open && (
+        <div className="rx-fw-body">
+          <p className="rx-fw-applies">{fw.applies}</p>
+          <div className="rx-steps">
+            {fw.steps.map((s) => (
+              <div className="rx-step" key={s.name}>
+                <div className="rx-step-name">{s.name}</div>
+                <p className="rx-step-detail">{s.detail}</p>
+              </div>
+            ))}
+          </div>
+          <div className="rx-fw-example">
+            <span className="rx-fw-label">示范回答</span>
+            <p>{fw.example}</p>
+          </div>
+          <div className="rx-fw-pitfalls">
+            <span className="rx-fw-label">避坑</span>
+            <ul>
+              {fw.pitfalls.map((p, i) => (
+                <li key={i}>{p}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** 英文口语面试框架专项：四段模板 + 句式库 + 救场句 + 训练提示 */
+function EnglishFrameworkCard({ en }: { en: import('../data/reexamFrameworks').EnglishFramework }) {
+  const [open, setOpen] = useState(true);
+  return (
+    <section className="km-card rx-english">
+      <button
+        type="button"
+        className="rx-english-head"
+        onClick={() => setOpen(!open)}
+        aria-expanded={open}
+      >
+        <span className="rx-fw-kicker">专项框架</span>
+        <h3 style={{ margin: 0 }}>{en.title}</h3>
+        <span className="rx-fw-caret">{open ? '▾' : '▸'}</span>
+      </button>
+      {open && (
+        <div className="rx-english-body">
+          <p className="km-hint" style={{ marginTop: 0 }}>{en.desc}</p>
+
+          <div className="rx-en-block">
+            <div className="rx-en-title">英文自我介绍 · 四段模板（1–2 min）</div>
+            <div className="rx-en-paras">
+              {en.intro.map((p) => (
+                <div className="rx-en-para" key={p.label}>
+                  <div className="rx-en-para-label">{p.label} <span>{p.point}</span></div>
+                  <p className="rx-en-line">{p.line.en}</p>
+                  <p className="rx-en-line-zh">{p.line.zh}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rx-en-block">
+            <div className="rx-en-title">高频问答句式库</div>
+            <div className="rx-en-rows">
+              {en.patterns.map((p) => (
+                <div className="rx-en-row" key={p.scene}>
+                  <div className="rx-en-row-scene">{p.scene}</div>
+                  <code className="rx-en-row-en">{p.en}</code>
+                  <div className="rx-en-row-zh">{p.zh}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rx-en-block">
+            <div className="rx-en-title">卡壳救场句</div>
+            <div className="rx-en-rows">
+              {en.rescue.map((r, i) => (
+                <div className="rx-en-row" key={i}>
+                  <code className="rx-en-row-en">{r.en}</code>
+                  <div className="rx-en-row-zh">{r.zh}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rx-en-block rx-en-tips">
+            <div className="rx-en-title">训练提示</div>
+            <ul>
+              {en.tips.map((t, i) => (
+                <li key={i}>{t}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+    </section>
+  );
 }
 
 export function ReexamPage() {
@@ -116,12 +232,18 @@ export function ReexamPage() {
                         </li>
                       ))}
                     </ol>
+                    {(() => {
+                      const fw = frameworkFor(c.category);
+                      return fw ? <FrameworkCard fw={fw} /> : null;
+                    })()}
                   </div>
                 )}
               </div>
             );
           })}
         </div>
+        {/* 英文口语：问题清单保留在上面，这里补一套可照着练的框架 */}
+        <EnglishFrameworkCard en={v.english} />
       </section>
 
       {/* ── 二、常考算法思想与框架 ───────────────────────── */}

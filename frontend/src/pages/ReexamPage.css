@@ -531,3 +531,144 @@
     margin-top: 4px;
   }
 }
+
+/* ── 面试答题框架（保留原问答清单，追加「怎么答」） ───────────────── */
+.rx-fw {
+  margin: 12px 0 4px;
+  border: 1px solid var(--km-line, #e3e8ef);
+  border-radius: 12px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--km-glow, #4f9dff) 5%, transparent);
+}
+
+.rx-fw-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  font-size: 13.5px;
+  color: var(--km-ink, #333);
+}
+
+.rx-fw-head b { font-weight: 700; }
+.rx-fw.open .rx-fw-head { background: color-mix(in srgb, var(--km-glow, #4f9dff) 10%, transparent); }
+
+.rx-fw-kicker {
+  flex: none;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #1c4a8a;
+  background: color-mix(in srgb, var(--km-glow, #4f9dff) 22%, transparent);
+}
+
+.rx-fw-caret { margin-left: auto; opacity: 0.6; }
+
+.rx-fw-body { padding: 6px 14px 14px; }
+.rx-fw-applies { margin: 4px 0 12px; font-size: 12.5px; opacity: 0.8; line-height: 1.6; }
+
+.rx-fw-example,
+.rx-fw-pitfalls {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(127, 127, 127, 0.05);
+}
+
+.rx-fw-example p { margin: 6px 0 0; font-size: 13px; line-height: 1.7; }
+.rx-fw-pitfalls ul { margin: 6px 0 0; padding-left: 18px; }
+.rx-fw-pitfalls li { font-size: 12.5px; line-height: 1.65; opacity: 0.85; }
+
+.rx-fw-label {
+  display: inline-block;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--km-accent-ink, #1c4a8a);
+}
+
+/* ── 英文口语面试框架专项 ─────────────────────────────────────────── */
+.rx-english { margin-top: 14px; }
+
+.rx-english-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  color: var(--km-ink, #333);
+}
+
+.rx-english-head h3 { font-size: 15.5px; }
+.rx-english-body { margin-top: 12px; }
+
+.rx-en-block { margin-top: 16px; }
+.rx-en-title {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  padding-left: 9px;
+  border-left: 3px solid var(--km-glow, #4f9dff);
+}
+
+.rx-en-paras { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; }
+
+.rx-en-para {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--km-line, #e3e8ef);
+  background: rgba(127, 127, 127, 0.04);
+}
+
+.rx-en-para-label { font-size: 12px; font-weight: 700; margin-bottom: 6px; }
+.rx-en-para-label span { display: block; font-weight: 400; opacity: 0.72; margin-top: 2px; line-height: 1.5; }
+
+.rx-en-line {
+  margin: 0 0 4px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--km-ink, #333);
+  font-style: italic;
+}
+
+.rx-en-line-zh { margin: 0; font-size: 12px; line-height: 1.55; opacity: 0.72; }
+
+.rx-en-rows { display: flex; flex-direction: column; gap: 8px; }
+
+.rx-en-row {
+  padding: 9px 12px;
+  border-radius: 9px;
+  border: 1px solid var(--km-line, #e3e8ef);
+  background: rgba(127, 127, 127, 0.04);
+}
+
+.rx-en-row-scene { font-size: 11.5px; font-weight: 700; margin-bottom: 4px; opacity: 0.8; }
+
+.rx-en-row-en {
+  display: block;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #1c4a8a;
+  white-space: pre-wrap;
+}
+
+.rx-en-row-zh { margin-top: 4px; font-size: 12px; line-height: 1.55; opacity: 0.78; }
+
+.rx-en-tips ul { margin: 0; padding-left: 18px; }
+.rx-en-tips li { font-size: 12.5px; line-height: 1.7; opacity: 0.85; }
+
+@media (max-width: 720px) {
+  .rx-en-paras { grid-template-columns: 1fr; }
+  .rx-fw-head, .rx-english-head { flex-wrap: wrap; }
+}

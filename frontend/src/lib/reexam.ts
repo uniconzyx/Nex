@@ -17,6 +17,18 @@ import {
   type ReexamMachineTest,
   type ReexamPlaybookGroup,
 } from '../data/reexam';
+import {
+  ANSWER_FRAMEWORKS,
+  ENGLISH_FRAMEWORK,
+  type AnswerFramework,
+  type EnglishFramework,
+} from '../data/reexamFrameworks';
+
+/** 按分类名取答题框架：英语口语类由英文专项框架接管，这里返回 null */
+export function frameworkFor(category: string): AnswerFramework | null {
+  const f = ANSWER_FRAMEWORKS.find((x) => x.category === category);
+  return f && f.steps.length > 0 ? f : null;
+}
 
 export interface InterviewQuestion {
   q: string;
@@ -77,6 +89,10 @@ export interface ReexamView {
   /** 去重后的题型列表（机试题分类维度） */
   types: TypeBucket[];
   playbook: PlaybookView;
+  /** 六类面试问题的答题框架（结构步骤 + 示范回答 + 避坑），英语口语 steps 为空 */
+  answerFrameworks: AnswerFramework[];
+  /** 英文口语面试框架专项（自我介绍模板 + 句式库 + 救场句） */
+  english: EnglishFramework;
   totalQuestions: number;
   totalMachineTests: number;
 }
@@ -136,6 +152,8 @@ export function buildReexamView(): ReexamView {
     modules,
     types,
     playbook,
+    answerFrameworks: ANSWER_FRAMEWORKS,
+    english: ENGLISH_FRAMEWORK,
     totalQuestions,
     totalMachineTests: machineTests.length,
   };
@@ -207,6 +225,33 @@ export function reexamToMarkdown(v: ReexamView): string {
     return lines.join('\n');
   });
 
+  // 面试答题框架（保留原有问答清单，追加「怎么答」的结构化框架）
+  const fwHead = ['## 一·附 复试面试答题框架（保留原问答，补充框架）', ''];
+  const fwBlocks = ANSWER_FRAMEWORKS.filter((f) => f.steps.length > 0).map((f) => {
+    const lines = [`### ${f.category} · ${f.name}`, '', `> ${f.applies}`, ''];
+    f.steps.forEach((s, i) => lines.push(`${i + 1}. **${s.name}**：${s.detail}`));
+    lines.push('', `**示范回答**：${f.example}`, '', '**避坑**：');
+    f.pitfalls.forEach((p) => lines.push(`- ${p}`));
+    lines.push('');
+    return lines.join('\n');
+  });
+
+  const en = ENGLISH_FRAMEWORK;
+  const enHead = [`## 一·附 ${en.title}`, '', `> ${en.desc}`, '', '### 英文自我介绍四段模板', ''];
+  en.intro.forEach((p) => {
+    enHead.push(`**${p.label}** — ${p.point}`);
+    enHead.push('', `> ${p.line.en}`, `> ${p.line.zh}`, '');
+  });
+  enHead.push('### 高频问答句式库', '');
+  en.patterns.forEach((p) => {
+    enHead.push(`- **${p.scene}**：\`${p.en}\` — ${p.zh}`);
+  });
+  enHead.push('', '### 卡壳救场句', '');
+  en.rescue.forEach((r) => enHead.push(`- \`${r.en}\` — ${r.zh}`));
+  enHead.push('', '### 训练提示', '');
+  en.tips.forEach((t) => enHead.push(`- ${t}`));
+  enHead.push('');
+
   const pb = v.playbook;
   const pbHead = [
     '## 二、常考算法思想与框架（速查）',
@@ -262,6 +307,9 @@ export function reexamToMarkdown(v: ReexamView): string {
     ...head,
     ...ivHead,
     ...catBlocks,
+    ...fwHead,
+    ...fwBlocks,
+    ...enHead,
     ...pbHead,
     ...pbBlocks,
     ...pbTail,
