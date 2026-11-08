@@ -114,13 +114,14 @@ jobs:
             echo "EXE 图标色差 / APK 启动图标逐像素 / arm64 so 非 0 字节由本机 verify_icons.py 守门。"
           fi
 
-  # ===================== 题集健康度 + 生成物同步 =====================
+  # ===================== 内容健康度 + 前端数据生成物同步 =====================
   # 2026-11-07 收口：历史上 13 章 exercises.json 欠账（meta.note 题数滞后、
-  # 参考代码语法错误）长期无人发现；更严重的是加题后漏跑 gen_exercise_bundle.py，
-  # 入库的 exercises.ts 一度比 content/ 少 25 道题。verify_exercises.py 只读
-  # content/，看不见产物滞后，所以这一层「源健康 + 生成物同步」两者都守。
+  # 参考代码语法错误）长期无人发现；更严重的是加题后漏跑生成器，入库产物一度
+  # 比 content/ 少 25 道题（exercises.ts）、discrete-math.ts 只含 1/3 章。
+  # 检查器只读 content/，看不见产物滞后，所以这一层「源健康 + 生成物同步」两者
+  # 都守；2026-11-08 起把 chapterContent.ts / viz/*.ts 也一并纳入幂等比对。
   content-health:
-    name: 题集健康度 + 题库生成物同步
+    name: 内容健康度 + 前端数据生成物同步
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -133,7 +134,24 @@ jobs:
       - name: 题集健康度（字段 / 链接 / 参考代码语法 / meta 自洽）
         run: python server/scripts/verify_exercises.py
 
-      - name: 题库生成物与 content/ 同步（防漏跑生成器）
+      - name: 前端数据生成物与 content/ 同步（防漏跑生成器）
         run: |
           python server/scripts/gen_exercise_bundle.py
-          git diff --exit-code -- frontend/src/data/exercises.ts frontend/src/data/clangUnits.ts
+          python scripts/gen_chapter_content.py
+          python scripts/gen_concept_viz.py
+          # git diff --exit-code 只看 tracked 文件的修改，抓不到「新增学科生成了
+          # 新 .ts 却没入库」这种 untracked 情况；用 status --porcelain 同时覆盖
+          # modified / untracked / deleted。viz/data.js 是 .gitignore 的本机产物，
+          # 不在下面限定的路径里，重跑不会造成假 diff。
+          CHANGED=$(git status --porcelain -- \
+            frontend/src/data/exercises.ts \
+            frontend/src/data/clangUnits.ts \
+            frontend/src/data/chapterContent.ts \
+            frontend/src/data/viz/)
+          if [ -n "$CHANGED" ]; then
+            echo "::error::前端数据生成物与 content/ 不同步，请重跑上面三个生成器并把产物入库"
+            echo "$CHANGED"
+            git diff -- frontend/src/data/ | head -80
+            exit 1
+          fi
+          echo "三个生成器幂等：exercises.ts / clangUnits.ts / chapterContent.ts / viz/*.ts 均已同步"

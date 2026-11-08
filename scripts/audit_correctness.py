@@ -7,7 +7,8 @@
   3. 三视角标记：每个 concept/*.md 必须含三个规范标题（含 ZWJ）；
   4. 来源真实性：goals.md 里每个 github.com/<owner>/<repo> 必须 HTTP 200；
   5. 星数一致性：同一仓库在所有章节里必须用同一个快照值；
-  6. 输出卫生：expected_output 不得含 Traceback / bash: / command not found / error:。
+  6. 输出卫生：Traceback / bash: / command not found 直接 FAIL；error:/Error: 只在
+     「该示例没有 stdout 实跑证据」时 warn（实跑通过即证明是程序正常打印的教学反例）。
 
 用法：
   python scripts/audit_correctness.py                      # 审计 fund-ch13..23
@@ -47,8 +48,10 @@ TRI_VIEWS = [
 # Python 崩溃转储必带 Traceback；shell 失败带 bash:/command not found。
 BAD_OUTPUT_FAIL = ['Traceback', 'bash:', 'command not found']
 # 弱信号：error:/Error: 在合法教学示例里高频出现（argparse 的 "prog: error:"、
-# RuntimeError/ValueError 等异常演示、HTTPError 等），单独出现不足以判定造假，
-# 降级为 WARN 提示人工复核，避免对正确内容产生误报。
+# TypeError:/ValueError: 等异常类名、HTTPError 等）。它是子串匹配，几乎必然命中
+# 异常类名，单独出现不足以判定造假。对能实跑的示例，下面 stdout 逐字符比对 +
+# 退出码检查已经证明「这串由程序正常打印」，无需再 warn；仅对走 verify_softlang
+# 分层验证（没有 stdout 实跑证据）的示例保留 warn 提示人工复核。
 BAD_OUTPUT_WARN = ['error:', 'Error:']
 VIEW_RE = re.compile(r'^\| *(\U0001F9D1\u200D\U0001F4BB|[\U0001F393\U0001F4DA])', re.M)
 DEFAULT_CHAPTERS = ['fund-ch%02d' % i for i in range(13, 24)]
@@ -82,6 +85,8 @@ class Report:
         self.soft_exec: dict[str, int] = {}
         self.soft_struct: dict[str, int] = {}
         self.soft_blocked: dict[str, int] = {}
+        # 含 error:/Error: 但已由 stdout 实跑比对 + 退出码证实为正常输出的示例数
+        self.hygiene_verified = 0
 
     def fail(self, where: str, msg: str) -> None:
         self.fails.append('%s: %s' % (where, msg))
@@ -146,10 +151,9 @@ def check_examples(cdir: str, cid: str, rep: Report, tmp_root: str) -> None:
                          'expected_output 含 %r，但该串来自 code 中的样例数据（反例教学）' % bad)
             else:
                 rep.fail(cid + '/' + name, 'expected_output 含可疑字样 %r' % bad)
-        for bad in BAD_OUTPUT_WARN:
-            if bad in expect:
-                rep.warn(cid + '/' + name,
-                         'expected_output 含 %r，请确认它不是「崩溃输出误当期望值」（argparse/异常演示属正常）' % bad)
+        # error:/Error: 不再在这里无条件 warn：它几乎总是 TypeError: 这类异常类名。
+        # 判定后移到实跑结果处 —— 有 stdout 比对证据的算合法（hygiene_verified），
+        # 没有实跑证据的（verify_softlang 分层）才 warn 提示人工复核。
 
         if lang in ('c', 'cpp', 'c++'):
             is_cpp = lang in ('cpp', 'c++')
@@ -228,6 +232,12 @@ def check_examples(cdir: str, cid: str, rep: Report, tmp_root: str) -> None:
             bucket[lang] = bucket.get(lang, 0) + 1
             if not ok:
                 rep.fail(cid + '/' + name, '[%s] %s' % (level, detail))
+            elif any(b in expect for b in BAD_OUTPUT_WARN):
+                # 这一层没有 stdout 实跑证据，无法自证「报错串是程序正常打印」，
+                # 保留 warn 让人工复核；不能因为判据放宽就一并静默。
+                rep.warn(cid + '/' + name,
+                         'expected_output 含 error:/Error:，且该示例未经 stdout 实跑比对'
+                         '（%s 层），请人工确认不是崩溃输出误当期望值' % level)
             continue
 
         # 示例可声明 expect_rc：'nonzero' 表示「故意崩溃」的演示（assert / 测试失败），
@@ -260,11 +270,19 @@ def check_examples(cdir: str, cid: str, rep: Report, tmp_root: str) -> None:
         # expected 侧同口径归一化：历史数据里存在 CRLF 被截断成孤立 '\r' 的情况，
         # 若只替换 '\r\n'，残留的 '\r' 会让逐行 diff 显示成「两行一模一样却不等」
         want = expect.replace('\r\n', '\n').replace('\r', '\n')
+        # 能走到这里，说明退出码符合声明、stdout 与 expected_output 一致：
+        # expect 里的 error:/Error: 必是程序正常打印出来的，不是崩溃输出误当期望值。
+        # 计入 hygiene_verified（透明统计），不再占 warn 名额。
+        weak_error = any(b in expect for b in BAD_OUTPUT_WARN)
         if got == want:
+            if weak_error:
+                rep.hygiene_verified += 1
             continue
         # 允许「末尾换行数不同」不算错，否则报差异首行
         if got.rstrip('\r\n') == want.rstrip('\r\n'):
             rep.soft_newline += 1
+            if weak_error:
+                rep.hygiene_verified += 1
             continue
         gl, wl = got.split('\n'), want.split('\n')
         for i in range(max(len(gl), len(wl))):
@@ -584,16 +602,22 @@ def main() -> int:
               % fmt_lang(rep.soft_blocked))
     if rep.soft_lang:
         print('[info] 仍未验证的 code_lang: %s' % fmt_lang(rep.soft_lang))
-    if rep.warns:
-        print('\n[warn] %d 条' % len(rep.warns))
-        for w in rep.warns[:20]:
-            print('  - ' + w)
-        if len(rep.warns) > 20:
-            print('  ... 另 %d 条（加 --warn-out 可看全量）' % (len(rep.warns) - 20))
-        if args.warn_out:
-            with io.open(args.warn_out, 'w', encoding='utf-8', newline='\n') as f:
-                f.write('\n'.join(rep.warns) + '\n')
-            print('  （完整清单已写入 %s）' % args.warn_out)
+    if rep.hygiene_verified:
+        print('[info] 输出卫生：%d 个含 error:/Error: 的示例已由 stdout 逐字符比对 + '
+              '退出码证实为程序正常打印（教学反例），不再计入 warn'
+              % rep.hygiene_verified)
+    # 无条件写 --warn-out：warn 归零时也要把文件清空，否则上一轮的旧清单会残留，
+    # 让人误以为告警还在（2026-11-08 实测：判据修好后文件里仍是上一轮残留的旧措辞）。
+    print('\n[warn] %d 条' % len(rep.warns))
+    for w in rep.warns[:20]:
+        print('  - ' + w)
+    if len(rep.warns) > 20:
+        print('  ... 另 %d 条（加 --warn-out 可看全量）' % (len(rep.warns) - 20))
+    if args.warn_out:
+        with io.open(args.warn_out, 'w', encoding='utf-8', newline='\n') as f:
+            f.write('\n'.join(rep.warns) + ('\n' if rep.warns else ''))
+        print('  （完整清单已写入 %s%s）'
+              % (args.warn_out, '' if rep.warns else '，本次为空'))
     if rep.fails:
         print('\n[FAIL] %d 条' % len(rep.fails))
         for f in rep.fails:

@@ -119,8 +119,9 @@ python server/scripts/sync_github_resources.py
 # 3) 更新 manifest 状态
 python server/scripts/sync_manifest_status.py
 python server/scripts/sync_dart_manifest.py    # 同步前端 content_manifest.dart
-python server/scripts/gen_exercise_bundle.py   # 改过 exercises.json 必须重跑，产出 frontend/src/data/exercises.ts
+python server/scripts/gen_exercise_bundle.py   # 改过 exercises.json 必须重跑，产出 exercises.ts / clangUnits.ts
 python scripts/gen_chapter_content.py          # 改过 pitfalls.md 必须重跑，产出 chapterContent.ts
+python scripts/gen_concept_viz.py              # 改过 concept/exercises/pitfalls/interview 必重跑，产出 frontend/src/data/viz/*.ts
 
 # 4) 提交（不要提交 .env / 大二进制）
 git add content/<subject>/<id> ...
@@ -152,6 +153,27 @@ CSS / CMake 括号、SQL 分词配对）；`env_blocked` = 本机安全策略禁
 它不新增任何 #/##/### 标题、不写「输出 / 运行结果 / stdout」字样，因此不影响
 `audit_depth` 的 h3 计数、`audit_source_anchor` 的标题锚点，也不会被
 `check_md_outputs.py` 当成「正文抄录的程序输出」。
+
+**输出卫生判据（弱信号不猜字符串，读实跑证据）**：`audit_correctness.py` 里
+`BAD_OUTPUT_FAIL = ['Traceback', 'bash:', 'command not found']` 是强信号，直接
+FAIL；`BAD_OUTPUT_WARN = ['error:', 'Error:']` 原先是**无条件 warn**。但它是子串
+匹配，命中的几乎全是 `TypeError:` / `ValueError:` / `MergeError:` 这类**异常类名**。
+2026-11-08 逐条核过全量审计剩下的 22 条 warn：20 个 Python + 2 个 JS，全部是
+try/except 捕获异常后正常打印、或 argparse / git / docker 报错文案样例；`code`
+里 18 条含该字样，另 4 条是异常类名由 pandas / argparse 动态生成（不在源码字面
+里）；**没有一条是「把程序崩溃输出抄进 expected_output」**。
+
+判据因此改为**后置判定**：能实跑的示例（C/C++/Python/Java/JS）在 stdout 逐字符
+比对通过 + 退出码符合声明后，`error:` 必是程序正常打印，只计入
+`[info] 输出卫生：N 个…` 统计，不占 warn 名额；只有走 `verify_softlang` 分层
+验证、**没有 stdout 实跑证据**的示例（bash / sql / css / …）才保留 warn 要求
+人工复核。既不再制造 22 条噪声 warn 让人麻木，也不是「凡含 Error: 一律放行」。
+回归用例 `scripts/verify_output_hygiene.py` 直接调 `check_examples` 验四类行为
+（实跑反例静默 / 无实跑证据仍 warn / Traceback 仍 FAIL / 干净示例无记录），5/5。
+
+另修 `--warn-out`：原先 `rep.warns` 为空时**不写文件**，判据修好后旧清单还留在
+磁盘上（实测残留着上一轮 4 条旧措辞），会让人误以为告警还在。现在无条件写，
+归零时清空并在汇总打印「本次为空」。
 
 ---
 
@@ -241,12 +263,24 @@ EXE / APK 是 `.gitignore` 的本机产物，CI 上**没有二进制**，所以 
 不假装验过。EXE 图标色差、APK 启动图标逐像素、arm64 `libnex.so` 非 0 字节
 这三项，永远以本机 `verify_icons.py` 为准。
 
-**题集防回归（`content-health` job）**：跑 `server/scripts/verify_exercises.py`
-（字段 / 平台链接 / Python 参考代码 `compile()` / `meta.note` 题数自洽），再重跑
-`server/scripts/gen_exercise_bundle.py` 并用 `git diff --exit-code` 核
-`exercises.ts`、`clangUnits.ts` 未漂移。两层缺一不可：检查器只读 `content/`，
-2026-11-07 前入库的 `exercises.ts` 一度比 `content/` **少 25 道题**（加题后漏跑
-生成器），`verify_exercises.py` 对此完全无感，全部 167 章照样报「通过」。
+**内容防回归（`content-health` job）**：跑 `server/scripts/verify_exercises.py`
+（字段 / 平台链接 / Python 参考代码 `compile()` / `meta` 自洽），再重跑三个生成器
+—— `server/scripts/gen_exercise_bundle.py`、`scripts/gen_chapter_content.py`、
+`scripts/gen_concept_viz.py` —— 并核四类入库产物
+（`exercises.ts` / `clangUnits.ts` / `chapterContent.ts` / `viz/*.ts`）未漂移。
+两层缺一不可：检查器只读 `content/`，2026-11-07 前入库的 `exercises.ts` 一度比
+`content/` **少 25 道题**（加题后漏跑生成器）、`discrete-math.ts` 只含 dm-ch01
+一章，`verify_exercises.py` 对此完全无感，全部 167 章照样报「通过」。
+
+判据用 `git status --porcelain -- <产物路径>` 而非 `git diff --exit-code`：
+后者只看 tracked 文件的**修改**，抓不到「新增学科生成了新 `.ts` 却没入库」这种
+untracked 情况。`.gitattributes` 的 `* text=auto eol=lf` 保证 Windows 本地写出的
+CRLF 与 CI Linux 的 LF 在 Git 眼里一致，跨平台重跑不会假红；`viz/data.js` 是
+`.gitignore` 的本机产物，不参与比对。三个生成器均零第三方依赖，CI 干净
+checkout 即可直接跑。判据本身由 `scripts/verify_ci_idempotency_gate.py` 反向
+验证：临时制造 modified 与 untracked 两类漂移，确认都会被拦下（2/2），
+跑完自动恢复、不留工作区残留。
+
 同批还收掉 13 章历史欠账：11 处 `meta.note` 的**总题数与「基础题 N」分解同时滞后**
 （加题只改 items 没改 note）、2 处参考代码语法错误（`clang-u07-q7` 把换行写成
 字面量 `/n`；`ml-ch04` 生成器表达式少一个右括号）。改 `exercises.json` 后记得
