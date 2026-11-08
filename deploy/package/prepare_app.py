@@ -127,17 +127,35 @@ def build_staging() -> None:
     vite = FRONTEND / "node_modules" / "vite" / "bin" / "vite.js"
     if not vite.is_file():
         raise SystemExit(f"缺少 vite CLI：{vite}（先在 frontend/ 装依赖）")
-    # outDir 相对 vite 的 root（=frontend/）解析；不要加 --emptyOutDir，
-    # 本机批量删除守卫会拦，目录已由 clean_staging() 清空。
-    cmd = [node_bin(), str(vite), "build", "--outDir", "../deploy/package/app"]
-    r = subprocess.run(cmd, cwd=str(FRONTEND), capture_output=True,
-                       text=True, errors="replace")
-    tail = (r.stdout or "")[-1200:]
+    # 注入线上后端地址：Vite 仅从 .env 读取 VITE_* 变量，故临时写 frontend/.env
+    # 并在构建后恢复。NEX_API_BASE 缺省为 127.0.0.1:8000（本机 Docker 后端）；
+    # 分发版应由构建环境传入真实线上地址（如 https://api.你的域名.com），
+    # 这样烤进 EXE/APK 的默认地址就是线上服务，装到别人电脑上也会默认连线上后端。
+    api_base = os.environ.get("NEX_API_BASE", "http://127.0.0.1:8000")
+    env_file = FRONTEND / ".env"
+    prev = env_file.read_text(encoding="utf-8") if env_file.is_file() else None
+    lines = (prev.splitlines() if prev else [])
+    lines = [ln for ln in lines if not ln.startswith("VITE_NEX_API_BASE=")]
+    lines.append(f"VITE_NEX_API_BASE={api_base}")
+    env_file.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    try:
+        # outDir 相对 vite 的 root（=frontend/）解析；不要加 --emptyOutDir，
+        # 本机批量删除守卫会拦，目录已由 clean_staging() 清空。
+        cmd = [node_bin(), str(vite), "build", "--outDir", "../deploy/package/app"]
+        r = subprocess.run(cmd, cwd=str(FRONTEND), capture_output=True,
+                           text=True, errors="replace")
+        tail = (r.stdout or "")[-1200:]
     if tail.strip():
         print(tail)
     if r.returncode != 0:
         print((r.stderr or "")[-2000:], file=sys.stderr)
         raise SystemExit(f"vite build 失败 rc={r.returncode}")
+    finally:
+        # 恢复 frontend/.env，避免把 NEX_API_BASE 写死进仓库或污染后续构建。
+        if prev is None:
+            env_file.unlink(missing_ok=True)
+        else:
+            env_file.write_text(prev, encoding="utf-8")
 
 
 def verify_staging() -> None:

@@ -18,7 +18,12 @@
  *     供设置页与顶栏展示「后端在线 / 离线 / 哪些功能可用」。
  */
 
-const DEFAULT_BASE = 'http://127.0.0.1:8000';
+// 分发版后端地址：构建期由 Vite 注入 VITE_NEX_API_BASE（见 deploy/package/prepare_app.py）。
+// 这样烤进 EXE/APK 的默认地址就是线上服务（如 https://api.你的域名.com），
+// 装到别人电脑上也会默认连线上后端，而不是写死的 127.0.0.1（只有本机才有后端）。
+// 缺省回落 127.0.0.1:8000（本机 Docker 后端），仍可被 localStorage / 客户端解析器覆盖。
+const DEFAULT_BASE = (import.meta.env as Record<string, string | undefined>).VITE_NEX_API_BASE
+  || 'http://127.0.0.1:8000';
 
 /** 客户端注入的基址解析器（Rust 侧探测结果）。返回 null 表示客户端没意见。 */
 type BaseResolver = () => string | null | Promise<string | null>;
