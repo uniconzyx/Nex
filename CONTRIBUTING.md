@@ -301,16 +301,37 @@ deploy/package/build-app-apk.cmd       # -> release/nex-shell/Nex-App-Mobile-1.0
 不能直接把 `frontendDist` 指回 `../dist`：`vite.config.ts` 的 `emptyOutDir=false`
 让 dist/ 累积了历次哈希产物（实测 207 文件 / 195MB），整目录塞进 Tauri 会把包
 撑爆。生成器从 `index.html` 沿 JS/CSS 引用走闭包体检，并用「>120 文件或 >40MB」
-挡住误拷。增量配置只覆盖 `build.frontendDist` / 构建钩子 / 窗口标题，**不覆盖
-CSP** —— 沿用默认 `script-src 'self'`（dist 是外链模块脚本，本就不需要
-`unsafe-inline`，比设计稿路线更严）。`beforeBuildCommand` 置空，避免再跑一次
-`npm run build` 去重写 dist/。
+挡住误拷；Pyodide 那几个文件不在 HTML 引用图上，另按白名单单独验。增量配置覆盖
+`build.frontendDist` / 构建钩子 / 窗口标题 / `app.security.csp`。`beforeBuildCommand`
+置空，避免再跑一次 `npm run build` 去重写 dist/。
 
-冷启动会显示登录网关，点「先逛逛 · 本地模式」即可离线使用（进度存本机），
-判题仍需 go-judge 服务。出包前用 `scratch/verify_app_staging.cjs`（gitignored 的
-本机脚本）以真实 CSP + 无后端场景实跑两端视口，验证挂载、本地模式、0 JS 错误、
-0 静态 404、无横向溢出（12/12）。`prepare_app.py` 末尾自检会断言两个构建脚本的
-输出名**不含**设计稿包文件名，防止误覆盖已验收产物。
+**判题运行时是这条路最容易漏的两件事**（都曾在封装后静默失效，别删）：
+
+1. CSP 必须比默认多一条 `'wasm-unsafe-eval'`。判题用 Pyodide（WASM），
+   Chromium 在 `script-src 'self'` 下拒绝 `WebAssembly.instantiateStreaming`，
+   现象是点「提交判题」后永远停在「准备解释器…」，控制台**不报** CSP 违规、
+   静态资源也不 404，极难定位。该 source 只放开 wasm 编译，不等于
+   `unsafe-eval`，不引入 JS eval。
+2. 解释器不能走 CDN。`frontend/public/pyodide/`（5 文件 / 11.7MB，由
+   `scripts/fetch_pyodide.py` 从 npm tarball 取，版本与 `protocol.ts` 的
+   `PYODIDE_VERSION` 对齐）由 vite 原样拷进包根，`DEFAULT_INDEX_URL` 指同源
+   `/pyodide/`。原先指 `cdn.jsdelivr.net`，封装后既被 CSP 拦、离线又必然失败。
+   桌面端另需 `src-tauri/binaries/go-judge.exe` 随 EXE 落到同级 `binaries/`
+   （`build-app-exe.cmd` 已自动拷）；Rust `detect_go_judge()` 只认这个位置，
+   漏了会静默降级成 mock 直跑，而不是真编译。
+
+冷启动会显示登录网关，点「先逛逛 · 本地模式」即可离线使用（进度存本机）。
+**离线能用的边界**：章节 / 题库 / 实验沙箱 / 图表 / 装扮 / 签到 / 成就 /
+每日试炼 / 本地进度 / 双端判题都自洽；AI 对话、Agent 陪练的模型洞察、账号注册
+登录与云端进度同步仍需 FastAPI 后端（页面会明确提示「未登录」「未连接」）。
+
+出包前验收：`verify_app_staging.cjs` 以真实 CSP + 无后端实跑两端（12/12）、
+`audit_app_features.cjs` 遍历两端 23 个路由（46 页 0 白屏 / 0 报错）、
+`verify_app_judge.cjs` 点真「提交判题」跑 `print(6*7)` 拿 2/2 通过（7/7，
+同时断言 0 外部 CDN 请求）。源级门禁 `scripts/verify_app_package_sources.py`
+11/11 会守住「Pyodide 同源 / SDK 版本一致 / 五件资源齐备 / go-judge 落盘 /
+双端 CSP / 生成器幂等」；`prepare_app.py` 末尾自检还会断言两个构建脚本的输出名
+**不含**设计稿包文件名，防止误覆盖已验收产物。
 
 **内容防回归（`content-health` job）**：跑 `server/scripts/verify_exercises.py`
 （字段 / 平台链接 / Python 参考代码 `compile()` / `meta` 自洽），再重跑三个生成器

@@ -107,8 +107,10 @@ jobs:
 
       # 真应用封装（prepare_app.py）是另一条独立路线；重放它不依赖 vite 的模板
       # 部分，比对两份增量配置与两个构建脚本，并断言产物名绝不覆盖设计稿包。
+      # 另加判题运行时源级防回归：Pyodide 同源 / SDK 版本一致 / 五件资源齐备 /
+      # go-judge 随 EXE 落盘 / 双端 CSP 放行 wasm，共 11 项。
       # 纯标准库、不跑 vite、不碰 staging，CI Linux 可直接跑。
-      - name: 真应用封装配置幂等 + 产物名隔离
+      - name: 真应用封装配置幂等 + 判题运行时 + 产物名隔离
         run: python scripts/verify_app_package_sources.py
 
       - name: 原生包二进制校验（产物存在时）
@@ -116,7 +118,7 @@ jobs:
           if [ -f release/nex-shell/Nex-Desktop-1.0.exe ] && [ -f release/nex-shell/Nex-Mobile-1.0-arm64.apk ]; then
             python deploy/package/verify_icons.py
           else
-            echo "EXE/APK 为 .gitignore 的本机产物，CI 无二进制；源级 10/10 已覆盖。"
+            echo "EXE/APK 为 .gitignore 的本机产物，CI 无二进制；源级门禁已覆盖。"
             echo "EXE 图标色差 / APK 启动图标逐像素 / arm64 so 非 0 字节由本机 verify_icons.py 守门。"
           fi
 

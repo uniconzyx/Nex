@@ -77,9 +77,20 @@ export type WorkerInbound =
  * 常量
  * ========================================================================== */
 
-/** 与 pyodide 官方 CDN 对齐。升级 SDK 版本时只改这里。 */
+/**
+ * 解释器资源随包发布，不再走 CDN。
+ *
+ * 封装后的 Tauri 应用有两个硬约束：① CSP 是 `script-src 'self'`，跨源动态
+ * import 会被直接拦掉；② 学习场景要求离线可用，没网时 CDN 必然失败。
+ * 这两条在浏览器 dev 模式都碰不到，但 APK / EXE 里会让「提交判题」稳定报错
+ * `Failed to fetch dynamically imported module`。因此资源由
+ * `scripts/fetch_pyodide.py` 落到 frontend/public/pyodide/，vite build 原样
+ * 拷进产物根目录，这里用同源绝对路径指向它。
+ *
+ * 升级 SDK 版本时：改 PYODIDE_VERSION → 重跑 fetch_pyodide.py → 重跑 build。
+ */
 export const PYODIDE_VERSION = '0.28.3';
-export const DEFAULT_INDEX_URL = `https://cdn.jsdelivr.net/pyodide/v${PYODIDE_VERSION}/full/`;
+export const DEFAULT_INDEX_URL = `/pyodide/`;
 
 /**
  * 判题用默认限额。
