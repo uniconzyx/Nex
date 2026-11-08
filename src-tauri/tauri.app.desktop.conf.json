@@ -1,0 +1,22 @@
+{
+  "build": {
+    "frontendDist": "../deploy/package/app",
+    "beforeBuildCommand": null,
+    "beforeDevCommand": null
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Nex 学习版",
+        "width": 1280,
+        "height": 820,
+        "minWidth": 900,
+        "minHeight": 640,
+        "resizable": true,
+        "fullscreen": false,
+        "center": true
+      }
+    ]
+  }
+}

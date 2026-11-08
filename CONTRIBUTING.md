@@ -283,6 +283,35 @@ EXE / APK 是 `.gitignore` 的本机产物，CI 上**没有二进制**，所以 
 不假装验过。EXE 图标色差、APK 启动图标逐像素、arm64 `libnex.so` 非 0 字节
 这三项，永远以本机 `verify_icons.py` 为准。
 
+## 10.1 真应用封装路线（与设计稿包并存，2026-11-08 新增）
+
+`prepare.py` 封的是 `web-preview/` 两套静态设计稿（页面 title 自带「UI 设计稿」，
+进度数字写死、交互多为 toast 提示），**不是功能完整的学习应用**。功能完整的 App
+在 `frontend/`（章节 / 题库 / 判题 / 实验 / 9 大学科 / 进度同步），默认
+`tauri.conf.json` 的 `frontendDist: ../dist` 本来就是为它准备的。现另开一条独立
+路线，两条路线产物名不同、互不覆盖，**现有设计稿包与其验收结论原样保留**：
+
+```bash
+python deploy/package/prepare_app.py   # 生成 staging + 两份增量配置 + 两个构建脚本
+deploy/package/build-app-exe.cmd       # -> release/nex-shell/Nex-App-Desktop-1.0.exe
+deploy/package/build-app-apk.cmd       # -> release/nex-shell/Nex-App-Mobile-1.0-arm64.apk
+```
+
+`prepare_app.py` 让 vite 把当前构建输出到干净的 `deploy/package/app/`（gitignore）。
+不能直接把 `frontendDist` 指回 `../dist`：`vite.config.ts` 的 `emptyOutDir=false`
+让 dist/ 累积了历次哈希产物（实测 207 文件 / 195MB），整目录塞进 Tauri 会把包
+撑爆。生成器从 `index.html` 沿 JS/CSS 引用走闭包体检，并用「>120 文件或 >40MB」
+挡住误拷。增量配置只覆盖 `build.frontendDist` / 构建钩子 / 窗口标题，**不覆盖
+CSP** —— 沿用默认 `script-src 'self'`（dist 是外链模块脚本，本就不需要
+`unsafe-inline`，比设计稿路线更严）。`beforeBuildCommand` 置空，避免再跑一次
+`npm run build` 去重写 dist/。
+
+冷启动会显示登录网关，点「先逛逛 · 本地模式」即可离线使用（进度存本机），
+判题仍需 go-judge 服务。出包前用 `scratch/verify_app_staging.cjs`（gitignored 的
+本机脚本）以真实 CSP + 无后端场景实跑两端视口，验证挂载、本地模式、0 JS 错误、
+0 静态 404、无横向溢出（12/12）。`prepare_app.py` 末尾自检会断言两个构建脚本的
+输出名**不含**设计稿包文件名，防止误覆盖已验收产物。
+
 **内容防回归（`content-health` job）**：跑 `server/scripts/verify_exercises.py`
 （字段 / 平台链接 / Python 参考代码 `compile()` / `meta` 自洽），再重跑三个生成器
 —— `server/scripts/gen_exercise_bundle.py`、`scripts/gen_chapter_content.py`、

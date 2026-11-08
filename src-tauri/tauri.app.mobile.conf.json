@@ -1,0 +1,7 @@
+{
+  "build": {
+    "frontendDist": "../deploy/package/app",
+    "beforeBuildCommand": null,
+    "beforeDevCommand": null
+  }
+}

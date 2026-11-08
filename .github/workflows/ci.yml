@@ -105,6 +105,12 @@ jobs:
       - name: 图标生成器幂等 + 构建链静态自检
         run: python deploy/package/verify_icon_sources.py
 
+      # 真应用封装（prepare_app.py）是另一条独立路线；重放它不依赖 vite 的模板
+      # 部分，比对两份增量配置与两个构建脚本，并断言产物名绝不覆盖设计稿包。
+      # 纯标准库、不跑 vite、不碰 staging，CI Linux 可直接跑。
+      - name: 真应用封装配置幂等 + 产物名隔离
+        run: python scripts/verify_app_package_sources.py
+
       - name: 原生包二进制校验（产物存在时）
         run: |
           if [ -f release/nex-shell/Nex-Desktop-1.0.exe ] && [ -f release/nex-shell/Nex-Mobile-1.0-arm64.apk ]; then

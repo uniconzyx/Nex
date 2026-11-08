@@ -128,6 +128,7 @@ viz/data.js
 /demo_text.txt
 /nums.txt
 
-# ---------- 双端原生封装的制备产物（deploy/package/prepare.py 生成，不入库）----------
+# ---------- 双端原生封装的制备产物（prepare.py / prepare_app.py 生成，不入库）----------
 deploy/package/desktop/
 deploy/package/mobile/
+deploy/package/app/
