@@ -27,6 +27,8 @@ winget install cloudflare.cloudflared
 
 ## 三、零域名先验证（5 分钟看到别人能连）
 
+双击 `deploy/local/start_tunnel.cmd`（保持窗口开着），或手敲：
+
 ```bat
 cloudflared tunnel --url http://localhost:8000
 ```
