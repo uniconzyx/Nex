@@ -1,9 +1,17 @@
-"""反向验证 content-health 的生成物同步门禁。
+"""反向验证 content-health 的生成物同步门禁（CI content-health 第 2 步）。
 
 验证 `git status --porcelain -- <产物路径>` 能抓到两类漂移：
   A. tracked 产物被改（modified）—— 旧 git diff --exit-code 也能抓
   B. 新增学科生成了新 .ts 但没入库（untracked）—— 旧判据抓不到，本次增强的重点
 并确认验证过程本身不留下任何工作区噪声。
+
+前提与顺序：必须在 git 仓库内跑，且「限定产物路径」的基线必须干净，
+因此 CI 里必须排在「重跑三个生成器」那一步之前——生成器若不同步，
+基线就已经是脏的，脚本会直接判 FAIL 而分不清是谁的问题。
+探针 A 用字节级还原（write_bytes(orig)），探针 B 用 unlink(missing_ok=True)
+清理，两处都在 finally 里，异常路径也不会留下残留。
+
+返回码：0 = 2/2 命中且恢复干净；1 = 基线不干净 / 漏判 / 有残留。
 """
 import pathlib
 import subprocess

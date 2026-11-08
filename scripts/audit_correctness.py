@@ -9,6 +9,8 @@
   5. 星数一致性：同一仓库在所有章节里必须用同一个快照值；
   6. 输出卫生：Traceback / bash: / command not found 直接 FAIL；error:/Error: 只在
      「该示例没有 stdout 实跑证据」时 warn（实跑通过即证明是程序正常打印的教学反例）。
+  7. 输出口径：末尾换行由语言运行时决定，不参与判定；剥掉两侧末尾换行后
+     仍严格逐字符比对，中间任何一行不同都 FAIL（显式口径，不是放宽）。
 
 用法：
   python scripts/audit_correctness.py                      # 审计 fund-ch13..23
@@ -78,8 +80,16 @@ class Report:
         self.fails: list[str] = []
         self.warns: list[str] = []
         self.checked = 0
-        # 已按「通过」处理、只做信息统计的项：不占 warn 名额，否则会淹没真问题
-        self.soft_newline = 0
+        # ---- 输出口径统计（不是待办、不占 warn 名额）----
+        # expected_output 写的是「人在终端看到的内容」，末尾换行由语言运行时决定：
+        # Python print / Java println / JS console.log 必带一个 '\n'，
+        # C printf("a=2 b=1") / System.out.print 则完全不带；内容作者通常省略它。
+        # 全库 1842 个示例里 1410 个写 1 个末尾换行、431 个不写、1 个写 2 个。
+        # 比对前把两侧末尾换行剥掉再严格逐字符比对（见 check_examples 注释），
+        # 这里按方向记录数量，便于诊断是「声明侧少写」还是「运行侧少输出」。
+        self.soft_newline = 0       # 归一后一致、但原始末尾换行写法不同的示例数
+        self.soft_newline_decl = 0  # 声明侧省略末尾换行（want 尾 < got 尾）
+        self.soft_newline_run = 0   # 运行侧没输出那么多换行（want 尾 > got 尾）
         self.soft_lang: dict[str, int] = {}
         # 非 Python 示例的分层验证计数（见 scripts/verify_softlang.py）
         self.soft_exec: dict[str, int] = {}
@@ -270,19 +280,32 @@ def check_examples(cdir: str, cid: str, rep: Report, tmp_root: str) -> None:
         # expected 侧同口径归一化：历史数据里存在 CRLF 被截断成孤立 '\r' 的情况，
         # 若只替换 '\r\n'，残留的 '\r' 会让逐行 diff 显示成「两行一模一样却不等」
         want = expect.replace('\r\n', '\n').replace('\r', '\n')
-        # 能走到这里，说明退出码符合声明、stdout 与 expected_output 一致：
-        # expect 里的 error:/Error: 必是程序正常打印出来的，不是崩溃输出误当期望值。
-        # 计入 hygiene_verified（透明统计），不再占 warn 名额。
+
+        # ---- 输出口径：末尾换行不参与判定，之后仍严格逐字符比对 ----
+        # 为什么不像以前那样「rstrip 相等就放过」：那样读起来像在容忍缺陷。
+        # 这里把口径显式化：先剥掉两侧末尾换行，剩下内容必须**完全一致**，
+        # 中间任何一行不同仍会走下面的逐行 diff 直接 FAIL。
+        # 为什么不统一 expected_output 来消除这个计数：末尾换行由运行时决定
+        # （Python print / Java println 必带，C printf / System.out.print 不带），
+        # 强行统一既覆盖不全，也会让声明与 verify_examples.py 的「按行包含匹配、
+        # 忽略空行」口径脱节；scripts/audit_reexam_code.py 同样明写「末尾换行不计」。
+        # 分方向计数只用于可观测性，不是待办清单。
+        got_n = got.rstrip('\r\n')
+        want_n = want.rstrip('\r\n')
         weak_error = any(b in expect for b in BAD_OUTPUT_WARN)
-        if got == want:
+        if got_n == want_n:
+            # 退出码符合声明 + 归一后 stdout 与 expected_output 严格一致：
+            # expect 里的 error:/Error: 必是程序正常打印，不是崩溃输出误当期望值。
             if weak_error:
                 rep.hygiene_verified += 1
-            continue
-        # 允许「末尾换行数不同」不算错，否则报差异首行
-        if got.rstrip('\r\n') == want.rstrip('\r\n'):
-            rep.soft_newline += 1
-            if weak_error:
-                rep.hygiene_verified += 1
+            if got != want:
+                rep.soft_newline += 1
+                tail_got = len(got) - len(got_n)
+                tail_want = len(want) - len(want_n)
+                if tail_want < tail_got:
+                    rep.soft_newline_decl += 1
+                else:
+                    rep.soft_newline_run += 1
             continue
         gl, wl = got.split('\n'), want.split('\n')
         for i in range(max(len(gl), len(wl))):
@@ -587,7 +610,11 @@ def main() -> int:
     print('\n' + '=' * 66)
     print('审计章节 %d · 检查项 %d' % (len(chapters), rep.checked))
     if rep.soft_newline:
-        print('[info] %d 个示例仅末尾换行不同（已按通过处理）' % rep.soft_newline)
+        # 这是已定义的输出口径，不是待办：不要为了把这个数字清零去批量改
+        # expected_output（理由见 check_examples 的「输出口径」注释）。
+        print('[info] 输出口径：%d 个示例末尾换行写法不同，归一后逐字符一致'
+              '（声明侧省略 %d / 运行侧省略 %d；属预期，不是待办）'
+              % (rep.soft_newline, rep.soft_newline_decl, rep.soft_newline_run))
     def fmt_lang(d):
         return ', '.join('%s×%d' % (k, v) for k, v in sorted(d.items()))
 

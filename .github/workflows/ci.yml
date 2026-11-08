@@ -120,6 +120,8 @@ jobs:
   # 比 content/ 少 25 道题（exercises.ts）、discrete-math.ts 只含 1/3 章。
   # 检查器只读 content/，看不见产物滞后，所以这一层「源健康 + 生成物同步」两者
   # 都守；2026-11-08 起把 chapterContent.ts / viz/*.ts 也一并纳入幂等比对。
+  # 同日起再加一层「判据自测」：门禁逻辑自己也会被改坏，用三个纯标准库回归脚本
+  # 反向验证输出判据、status --porcelain 判据与 meta 自洽判据，三层缺一不可。
   content-health:
     name: 内容健康度 + 前端数据生成物同步
     runs-on: ubuntu-latest
@@ -133,6 +135,19 @@ jobs:
 
       - name: 题集健康度（字段 / 链接 / 参考代码语法 / meta 自洽）
         run: python server/scripts/verify_exercises.py
+
+      # 判据自测：上面两层门禁本身也可能被改坏（例如把软换行放过写成全放行、
+      # 把 status --porcelain 退回 git diff 而漏掉 untracked、或让 meta 漂移再次
+      # 无人读取）。三个脚本用构造用例反向验证判据，纯标准库、零第三方依赖；
+      # 必须放在「生成物同步」之前——它们要求限定产物路径的基线是干净的，
+      # 且自身会临时改动文件再还原。
+      # CI 是 Linux：verify_output_hygiene 的 bash 用例在 os.name=='posix' 且未设
+      # NEX_SOFTLANG_ALLOW_BASH 时同样落 env_blocked，与本机 Windows 判定一致。
+      - name: 判据自测（输出 8/8 + 生成物同步 2/2 + meta 自洽 11/11）
+        run: |
+          python scripts/verify_output_hygiene.py
+          python scripts/verify_ci_idempotency_gate.py
+          python scripts/verify_exercise_meta_checker.py
 
       - name: 前端数据生成物与 content/ 同步（防漏跑生成器）
         run: |

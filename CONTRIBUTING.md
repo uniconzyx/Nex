@@ -168,8 +168,26 @@ try/except 捕获异常后正常打印、或 argparse / git / docker 报错文�
 `[info] 输出卫生：N 个…` 统计，不占 warn 名额；只有走 `verify_softlang` 分层
 验证、**没有 stdout 实跑证据**的示例（bash / sql / css / …）才保留 warn 要求
 人工复核。既不再制造 22 条噪声 warn 让人麻木，也不是「凡含 Error: 一律放行」。
-回归用例 `scripts/verify_output_hygiene.py` 直接调 `check_examples` 验四类行为
-（实跑反例静默 / 无实跑证据仍 warn / Traceback 仍 FAIL / 干净示例无记录），5/5。
+回归用例 `scripts/verify_output_hygiene.py` 直接调 `check_examples`，七个用例
+锁死两类判据（实跑反例静默 / 无实跑证据仍 warn / Traceback 仍 FAIL /
+干净示例无记录 / 末尾换行两侧省略均按口径通过 / **中间行不同仍 FAIL**），8/8。
+
+**输出口径：末尾换行不参与判定（254 条 info 不是待办）**：全量审计汇总里的
+「N 个示例末尾换行写法不同」曾被当成历史噪声想批量统一。2026-11-08 抽样实跑
+查明它**不是数据缺陷**：`expected_output` 写的是「人在终端看到的内容」，而末尾
+换行由语言运行时决定 —— Python `print` / Java `println` / JS `console.log` 必带
+一个 `\n`，C `printf("a=2 b=1")` / `System.out.print` 则完全不带。全库 1842 个
+示例里 1410 个写 1 个末尾换行、431 个不写、1 个写 2 个。`verify_examples.py`
+本就是「按行包含匹配、忽略空行」，`scripts/audit_reexam_code.py` 也明写
+「行尾空白不计，末尾换行不计」，`docs/Unfinished-Backlog-2026-10-31.md` 早已把
+它定性为「主动降级为 info 的噪声治理」。
+
+因此处理方式是把**口径显式化**，不是改 254 个文件：比对前先剥掉两侧末尾换行，
+剩余内容仍**严格逐字符比对**，中间任何一行不同照样 FAIL；汇总按方向拆成
+「声明侧省略 N / 运行侧省略 M」，只作可观测性统计。**不要为了把数字清零去批量
+补 `expected_output` 的末尾换行** —— 既覆盖不全所有运行时，也会让声明与
+`verify_examples.py` 的口径脱节。`verify_output_hygiene.py` 的 E/F/G 三个用例
+就是用来锁死这条边界的（尤其 G：防止有人把归一写成「一律放行」）。
 
 另修 `--warn-out`：原先 `rep.warns` 为空时**不写文件**，判据修好后旧清单还留在
 磁盘上（实测残留着上一轮 4 条旧措辞），会让人误以为告警还在。现在无条件写，
@@ -244,7 +262,9 @@ deploy/package/build-apk.cmd            # Android arm64 APK
    `gradlew assembleRelease -x rustBuild*` 重打包。
 3. 签名用 `java -jar apksigner.jar`，不要从 Git Bash 调 `.bat` 包装脚本（被安全策略拦）。
 
-验收脚本：`scratch/verify_nex_package.cjs`（内嵌站点 14/14）、
+以下四项是**本机封装验收脚本**（`scratch/` 整体 gitignore，不在版本库里），
+由主人在打出 EXE / APK 后本机执行；CI 只做源级校验，不假装验过二进制：
+`scratch/verify_nex_package.cjs`（内嵌站点 14/14）、
 `scratch/verify_nex_csp.cjs`（等效 CSP 7/7）、
 `scratch/verify_conn_dialog.cjs`（连接设置两端 25/25）、
 `scratch/verify_nex_package.py`（产物静态与签名 20/20）、
@@ -274,12 +294,23 @@ EXE / APK 是 `.gitignore` 的本机产物，CI 上**没有二进制**，所以 
 
 判据用 `git status --porcelain -- <产物路径>` 而非 `git diff --exit-code`：
 后者只看 tracked 文件的**修改**，抓不到「新增学科生成了新 `.ts` 却没入库」这种
-untracked 情况。`.gitattributes` 的 `* text=auto eol=lf` 保证 Windows 本地写出的
-CRLF 与 CI Linux 的 LF 在 Git 眼里一致，跨平台重跑不会假红；`viz/data.js` 是
-`.gitignore` 的本机产物，不参与比对。三个生成器均零第三方依赖，CI 干净
-checkout 即可直接跑。判据本身由 `scripts/verify_ci_idempotency_gate.py` 反向
-验证：临时制造 modified 与 untracked 两类漂移，确认都会被拦下（2/2），
-跑完自动恢复、不留工作区残留。
+untracked 情况。三个生成器均零第三方依赖，CI 干净 checkout 即可直接跑。
+
+跨平台换行前提（2026-11-08 用干净 clone 实测）：`.gitattributes` 是
+`* text=auto eol=lf`，CI 是 Linux，`os.linesep` 为 `\n`，生成器写出与 checkout
+同为 LF，天然一致；本机 Windows 的 `Path.write_text()` 写 CRLF，主仓库因工作区
+本来就是 CRLF 且 `autocrlf=true` 也判为一致。但**在刚 clone 出来的目录里**直接
+重跑生成器会看到三个产物变 `M` —— 字节级比对证明归一成 LF 后内容完全相同，
+纯粹是换行差异，不是内容漂移。本地模拟 CI 时须按 `eol=lf` 归一再判 status，
+否则是 Windows 特有的假红。`viz/data.js` 是 `.gitignore` 的本机产物，不参与比对。
+
+**判据自测（第 2 个 step）**：门禁逻辑自己也会被改坏，所以新加一层反向验证，
+三个脚本纯标准库、零第三方依赖，且排在「生成物同步」之前（要求基线干净）：
+`scripts/verify_output_hygiene.py`（输出判据 8/8）、
+`scripts/verify_ci_idempotency_gate.py`（临时制造 modified 与 untracked 两类漂移，
+确认都被拦下，2/2，跑完自动恢复无残留）、
+`scripts/verify_exercise_meta_checker.py`（自造 5 类 meta 漂移 + 真实章节对照，
+11/11）。已用 `git clone` 出的干净 checkout 完整模拟过该 job 的全部 step，均 rc=0。
 
 同批还收掉 13 章历史欠账：11 处 `meta.note` 的**总题数与「基础题 N」分解同时滞后**
 （加题只改 items 没改 note）、2 处参考代码语法错误（`clang-u07-q7` 把换行写成
@@ -292,7 +323,8 @@ agent / ml 线）、**5 处 note 分解漂移**（ai-ch09 / cpp-ch10 / fund-ch17
 另有 5 章无 `note`。`validate_content.py`、`audit_correctness.py`、
 `gen_exercise_bundle.py` **都不读** `meta.count` / 分解数，所以这些漂移能长期
 躲过全部门禁。现已把 `meta.count` 与「基础题 N / 算法题 M」分解纳入第 ⑤ 类
-检查（`meta 自洽`），并修平 21 处客观数字；用
-`scratch/test_enhanced_checker.py` 对备份旧文件做过反向验证，5/5 能被拦下。
+检查（`meta 自洽`），并修平 21 处客观数字；`scripts/verify_exercise_meta_checker.py`
+在临时目录自造 5 类漂移（count / 总题数 / 基础题分解 / 算法题分解 / 非数字）做
+反向验证，并用真实章节对照防误报，11/11。该脚本零外部依赖，已随判据自测进 CI。
 无 `note` 的 5 章属正常（非必填），不强行编造描述文字。`ml-ch04` 的描述性
 题数（「3 道概念题 + 3 道算法实践题」）按实际 4 基础 + 3 算法同步为 4 道。
