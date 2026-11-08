@@ -12,8 +12,9 @@ from app.core.rate_limit import check_daily_quota
 from app.core.responses import AppError, NOT_FOUND, ok
 from app.db import get_db
 from app.models.ai import AIConversation, AIMessage
-from app.models.enums import AIMode, MessageRole, Plan
-from app.models.exercise import Exercise
+from app.models.content import KnowledgePoint
+from app.models.enums import AIMode, MessageRole, Plan, QuestionType
+from app.models.exercise import Exercise, InterviewQuestion
 from app.models.progress import Progress, WrongQuestion
 from app.models.user import User, UserProfile
 from app.schemas.ai import (
@@ -111,7 +112,6 @@ async def _wrong_rows(db: AsyncSession, user_id: int) -> list[dict]:
     rows = (
         await db.execute(
             select(
-                WrongQuestion.chapter_id,
                 WrongQuestion.question_type,
                 WrongQuestion.question_id,
                 WrongQuestion.wrong_count,
@@ -119,16 +119,50 @@ async def _wrong_rows(db: AsyncSession, user_id: int) -> list[dict]:
             ).where(WrongQuestion.user_id == user_id)
         )
     ).all()
-    return [
-        {
-            "chapter_id": r.chapter_id,
-            "question_type": r.question_type.value if hasattr(r.question_type, "value") else r.question_type,
-            "question_id": r.question_id,
-            "wrong_count": r.wrong_count,
-            "right_count": r.right_count,
-        }
-        for r in rows
-    ]
+
+    # WrongQuestion 模型无 chapter_id 列；章节信号要按 question_type 反查：
+    #   exercise  -> exercises.chapter_id
+    #   interview -> interview_questions.chapter_id
+    #（analyze_weakness 容忍 chapter_id 为 None：仅不影响弱章节排名，题型排名照常统计。）
+    ex_ids = [r.question_id for r in rows if r.question_type == QuestionType.exercise]
+    iv_ids = [r.question_id for r in rows if r.question_type == QuestionType.interview]
+    ex_chap: dict[int, int] = {}
+    iv_chap: dict[int, int] = {}
+    if ex_ids:
+        ex = (
+            await db.execute(
+                select(Exercise.id, Exercise.chapter_id).where(Exercise.id.in_(ex_ids))
+            )
+        ).all()
+        ex_chap = {eid: cid for eid, cid in ex}
+    if iv_ids:
+        iv = (
+            await db.execute(
+                select(InterviewQuestion.id, InterviewQuestion.chapter_id).where(
+                    InterviewQuestion.id.in_(iv_ids)
+                )
+            )
+        ).all()
+        iv_chap = {iid: cid for iid, cid in iv}
+
+    out = []
+    for r in rows:
+        if r.question_type == QuestionType.exercise:
+            chapter_id = ex_chap.get(r.question_id)
+        elif r.question_type == QuestionType.interview:
+            chapter_id = iv_chap.get(r.question_id)
+        else:
+            chapter_id = None
+        out.append(
+            {
+                "chapter_id": chapter_id,
+                "question_type": r.question_type.value if hasattr(r.question_type, "value") else r.question_type,
+                "question_id": r.question_id,
+                "wrong_count": r.wrong_count,
+                "right_count": r.right_count,
+            }
+        )
+    return out
 
 
 async def _build_index(db: AsyncSession) -> KnowledgeIndex:
@@ -368,11 +402,23 @@ async def insight(
     wrong = await _wrong_rows(db, user.id)
     progress_rows = (
         await db.execute(
-            select(Progress.kp_id, Progress.chapter_id, Progress.mastery).where(Progress.user_id == user.id)
+            select(Progress.kp_id, Progress.mastery).where(Progress.user_id == user.id)
         )
     ).all()
+    # Progress 以知识点(kp_id)为粒度，模型无 chapter_id 列；反查 KnowledgePoint
+    # 补全 analyze_weakness 需要的章节信号（chapter_id 缺失的行不计入弱章节补充）。
+    kp_ids = [r.kp_id for r in progress_rows]
+    chap_map = {}
+    if kp_ids:
+        kp_chap = (
+            await db.execute(
+                select(KnowledgePoint.id, KnowledgePoint.chapter_id).where(KnowledgePoint.id.in_(kp_ids))
+            )
+        ).all()
+        chap_map = {kid: cid for kid, cid in kp_chap}
     progress = [
-        {"kp_id": p.kp_id, "chapter_id": p.chapter_id, "mastery": p.mastery} for p in progress_rows
+        {"kp_id": r.kp_id, "chapter_id": chap_map.get(r.kp_id), "mastery": r.mastery}
+        for r in progress_rows
     ]
     result = analyze_weakness(error_book=wrong, progress=progress)
     return ok(InsightOut(
@@ -400,10 +446,23 @@ async def plan(
     wrong = await _wrong_rows(db, user.id)
     progress_rows = (
         await db.execute(
-            select(Progress.chapter_id, Progress.mastery).where(Progress.user_id == user.id)
+            select(Progress.kp_id, Progress.mastery).where(Progress.user_id == user.id)
         )
     ).all()
-    progress = [{"chapter_id": p.chapter_id, "mastery": p.mastery} for p in progress_rows]
+    # Progress 以知识点(kp_id)为粒度，模型无 chapter_id 列；反查 KnowledgePoint 补全章节信号。
+    kp_ids = [p.kp_id for p in progress_rows]
+    chap_map = {}
+    if kp_ids:
+        kp_chap = (
+            await db.execute(
+                select(KnowledgePoint.id, KnowledgePoint.chapter_id).where(KnowledgePoint.id.in_(kp_ids))
+            )
+        ).all()
+        chap_map = {kid: cid for kid, cid in kp_chap}
+    progress = [
+        {"kp_id": p.kp_id, "chapter_id": chap_map.get(p.kp_id), "mastery": p.mastery}
+        for p in progress_rows
+    ]
     analysis = analyze_weakness(error_book=wrong, progress=progress)
 
     context = {
