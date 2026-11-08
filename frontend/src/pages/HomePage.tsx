@@ -69,7 +69,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: KmPage) => void }) {
   const [subject, setSubject] = useSubject();
 
   // 章节数改读 masterySummary：它把 clang 的 7 个独立单元也算进来（141 章），
-  // 旧写法只数 BUNDLE.chapters（133 章），少算了 C 语言模块。
+  // 旧写法只数 BUNDLE.chapters（现在 160 章），少算了 C 语言模块。
   const summary = masterySummary(p);
   const totalChapters = summary.total;
   const done = summary.done;

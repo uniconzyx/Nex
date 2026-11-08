@@ -1,5 +1,5 @@
 /* 由 scripts/gen_story_data.py 从 content/_story/acts.json 生成，请勿手改。
-   164 条台词 / 41 幕 / 13 个学科。
+   167 条台词 / 42 幕 / 14 个学科。
    可见性规则：pitfall 与 scene 未完成也能看（悬念即钩子）；archive 已说半个答案，必须完成后才显示。 */
 /* eslint-disable */
 
@@ -297,6 +297,13 @@ export const STORY: StorySubject[] = [
       { chapterId: "tool-ch04", title: "Git 协作：分支策略与冲突处理", tone: "pitfall", line: "git pull 我以为只是下载。它先 fetch 再 merge，我本地一堆提交被合了进来。", anchor: "goals-1 三类引用与 pull 语义" },
       { chapterId: "tool-ch05", title: "Docker 基础：镜像、容器与 Dockerfile", tone: "archive", line: "镜像是摞只读层，容器是顶上那层可写的。所以重启容器数据会没——要留下来，得挂在数据卷上，不是放在容器里。", anchor: "goals-1 分层与写时复制" },
       { chapterId: "tool-ch06", title: "Docker Compose 与部署实践", tone: "archive", line: "depends_on 只保证启动顺序，不保证依赖能用了。中间那段空窗，得靠健康检查和就绪门控自己填。", anchor: "goals-1 健康检查与就绪门控" },
+    ] },
+  ] },
+  { key: "discrete-math", label: "离散数学", acts: [
+    { id: "dm-a1", group: "离散结构", title: "把话、东西、网络都写成能算的对象", chapters: [
+      { chapterId: "dm-ch01", title: "命题逻辑与谓词逻辑：知识表示与自动推理", tone: "pitfall", line: "我把「只有…才…」翻成了 A→B，真值表一跑全反了。方向错一步，后面推得再漂亮都是错的。", anchor: "goals-2 除非/只有/仅当 的翻译方向" },
+      { chapterId: "dm-ch02", title: "集合、关系与函数：离散世界的名词与动词", tone: "archive", line: "等价关系凭什么能把集合切成互不重叠的组？自反、对称、传递三条，恰好就是「同类」构成划分的充要条件。", anchor: "goals-3 等价类与划分" },
+      { chapterId: "dm-ch03", title: "图论：图的表示、连通性、欧拉哈密顿、最小生成树与最短路", tone: "pitfall", line: "度数和算出来是奇数，我以为是数据脏了。其实是漏画一条边——握手定理永远给出偶数。", anchor: "goals-1 握手定理与度数校验" },
     ] },
   ] },
 ];

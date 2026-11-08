@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import json
 import pathlib
+import io
 import re
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -29,6 +30,7 @@ DIR_PREFIX: dict[str, str] = {
     "clang": "clang",
     "cpp": "cpp",
     "data": "data",
+    "discrete-math": "dm",
     "database": "db",
     "fullstack": "fs",
     "fundamentals": "fund",
@@ -57,11 +59,12 @@ SUBJECT_META: dict[str, dict] = {
     "fs":      {"name": "全栈工程", "note": "前端到后端，把能力交到用户手里", "hue": "#5d7d9a"},
     "agent":   {"name": "智能体",   "note": "工具 / 记忆 / 规划，会干活的 AI", "hue": "#2c6e8f"},
     "clang":   {"name": "编译原理", "note": "从源码到机器码的全链路", "hue": "#6a7d5a"},
+    "dm":      {"name": "离散数学", "note": "命题逻辑 / 集合关系 / 图论 —— 可计算对象的数学底座", "hue": "#4a6b8c"},
 }
 
 # 学习链顺序（只出现在有图学科里）
 SUBJECT_ORDER = ["fund", "cpp", "java", "py", "data", "db", "spring",
-                 "mw", "bd", "tool", "ml", "ai", "fs", "agent", "clang"]
+                 "mw", "bd", "tool", "ml", "ai", "fs", "agent", "clang", "dm"]
 
 CHAP_RE = re.compile(r"^([a-z]+)-(ch|u)\d", re.IGNORECASE)
 FENCE = re.compile(r"^```text\s*$(.*?)^```\s*$", re.MULTILINE | re.DOTALL)
@@ -218,7 +221,7 @@ def main() -> int:
         + json.dumps(subjects, ensure_ascii=False, indent=2)
         + ";\n"
     )
-    OUT.write_text(ts, encoding="utf-8")
+    io.open(OUT, "w", encoding="utf-8", newline="\n").write(ts)
     print(f"[ok] 写出 {OUT}  学科数={len(subjects)}  图表总数={total}")
     for s in subjects:
         print(f"     {s['name']:>6} ({s['key']}): {len(s['entries'])} 张")

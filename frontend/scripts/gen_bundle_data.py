@@ -13,6 +13,11 @@
   content/_guides/11408.json               → GUIDES
 
 用法：python scripts/gen_bundle_data.py
+
+注意：本文件只做生成链的第 ① 步，产物还要经过
+    scripts/merge_agent_ml_into_ai.py --apply   （agent/ml 并入 ai）
+    scripts/sync_bundle_chapters.py --write    （补新章节 / 新学科包，幂等）
+才是最终形态；单独重跑本脚本会把合并打回三包。详见 CONTRIBUTING §10.2。
 """
 from __future__ import annotations
 

@@ -61,7 +61,7 @@ import { changePassword, switchAuthBackend, useSession } from '../lib/session';
 
 /**
  * 内容规模 —— 从数据实时算，不写字面量。
- * 之前这里硬编码「13 学科 · 107 章」，内容早已长到 160+ 章，写死就必然过期。
+ * 之前这里硬编码「13 学科 · 107 章」，内容早已长到 14 学科 / 167 章，写死就必然过期。
  *
  * 章节数必须走 `allChapters()`（依赖图）而不是 `BUNDLE.chapters`：
  * 后者漏掉 clang 的 7 个独立单元（157 vs 164），会和右栏「今日目标」显示两个不同的数字。

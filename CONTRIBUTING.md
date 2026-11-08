@@ -5,14 +5,23 @@
 
 ## 1. 学科与章节结构
 
-- 13 个学科目录：`content/<subject>/`，其中 `subject ∈`
-  `cpp, clang, java, python, database, fullstack, spring, middleware, bigdata,
-  fundamentals, tooling, data, ai`。
+- 16 个学科目录：`content/<subject>/`，其中 **15 个有独立 `_manifest.json`**：
+  `cpp, java, python, database, fullstack, spring, middleware, bigdata,
+  fundamentals, tooling, data, ai, agent, ml, discrete-math`；
+  `clang/` 是第 16 个目录但**无独立 manifest**。
 - 章节目录：`content/<subject>/<id>/`，其中 C/C++/clang 用 `cpp-chNN` / `clang-uNN`，
-  其余用 `<subject>-chNN`。
-- `clang` 的元数据挂在 `content/cpp/_manifest.json` 的 `clang_module.units[]`，**无独立 manifest**。
+  其余用 `<subject>-chNN`（离散数学为 `dm-chNN`）。
+- `clang` 的元数据挂在 `content/cpp/_manifest.json` 的 `clang_module.units[]`。
 - 母清单：`content/cpp/_manifest.json`（含 `clang_module.units`）。其余学科各有
-  `<subject>_manifest.json`。门禁以 manifest 的 `chapters[]` 作为"规划单元"分母。
+  `_manifest.json`。门禁以 manifest 的 `chapters[]` 作为"规划单元"分母：**167 章**。
+- **前端呈现 14 个学科胶囊**（`frontend/src/lib/subject.ts` 的 `SUBJECTS`）：
+  `agent`(16 章) 与 `ml`(9 章) 按方案 A 并入 `ai`；`clang` 由 `clangUnits.ts`
+  单独提供 7 个单元；`discrete-math` 自 2026-11-08 起是第 14 个正式学科。
+  因此 `BUNDLE.chapters` 有 13 个学科包 / 160 章，加 clang 7 单元 = 167 章。
+- **离散数学不属 408 统考**（408 四门：数据结构 / 计算机组成原理 / 操作系统 /
+  计算机网络），它是独立正式学科。`content/_exam/knowledge/discrete-dm.json` 与
+  `content/_exam/questions/discrete-dm.json` 是院校自命题 / 复试口径的题库数据，
+  **不挂** `content/_tracks/408.json`，也不要往 408 专轨里塞 `dm-ch*`。
 
 ## 2. 每章 7 类文件（缺一不可）
 
@@ -287,7 +296,7 @@ EXE / APK 是 `.gitignore` 的本机产物，CI 上**没有二进制**，所以 
 
 `prepare.py` 封的是 `web-preview/` 两套静态设计稿（页面 title 自带「UI 设计稿」，
 进度数字写死、交互多为 toast 提示），**不是功能完整的学习应用**。功能完整的 App
-在 `frontend/`（章节 / 题库 / 判题 / 实验 / 9 大学科 / 进度同步），默认
+在 `frontend/`（章节 / 题库 / 判题 / 实验 / 14 个学科 / 进度同步），默认
 `tauri.conf.json` 的 `frontendDist: ../dist` 本来就是为它准备的。现另开一条独立
 路线，两条路线产物名不同、互不覆盖，**现有设计稿包与其验收结论原样保留**：
 
@@ -334,10 +343,11 @@ deploy/package/build-app-apk.cmd       # -> release/nex-shell/Nex-App-Mobile-1.0
 **不含**设计稿包文件名，防止误覆盖已验收产物。
 
 **内容防回归（`content-health` job）**：跑 `server/scripts/verify_exercises.py`
-（字段 / 平台链接 / Python 参考代码 `compile()` / `meta` 自洽），再重跑三个生成器
+（字段 / 平台链接 / Python 参考代码 `compile()` / `meta` 自洽），再重跑四个生成器
 —— `server/scripts/gen_exercise_bundle.py`、`scripts/gen_chapter_content.py`、
-`scripts/gen_concept_viz.py` —— 并核四类入库产物
-（`exercises.ts` / `clangUnits.ts` / `chapterContent.ts` / `viz/*.ts`）未漂移。
+`scripts/gen_concept_viz.py`、`scripts/gen_concept_docs.py` —— 并核五类入库产物
+（`exercises.ts` / `clangUnits.ts` / `chapterContent.ts` / `concepts/*.ts` /
+`viz/*.ts`）未漂移。
 两层缺一不可：检查器只读 `content/`，2026-11-07 前入库的 `exercises.ts` 一度比
 `content/` **少 25 道题**（加题后漏跑生成器）、`discrete-math.ts` 只含 dm-ch01
 一章，`verify_exercises.py` 对此完全无感，全部 167 章照样报「通过」。
@@ -378,3 +388,39 @@ agent / ml 线）、**5 处 note 分解漂移**（ai-ch09 / cpp-ch10 / fund-ch17
 反向验证，并用真实章节对照防误报，11/11。该脚本零外部依赖，已随判据自测进 CI。
 无 `note` 的 5 章属正常（非必填），不强行编造描述文字。`ml-ch04` 的描述性
 题数（「3 道概念题 + 3 道算法实践题」）按实际 4 基础 + 3 算法同步为 4 道。
+
+
+## 10.2 前端数据生成链与入口闭环（2026-11-08 新增）
+
+`frontend/src/data/bundle.ts` **不是**单生成器产物：改完 `content/` 后单独重跑
+`frontend/scripts/gen_bundle_data.py`，会把方案 A 合并打回三包（`ai` 从 39 章退回 14 章）。
+正确顺序是：
+
+```bash
+python frontend/scripts/gen_bundle_data.py          # ① 按学科读 manifest 生成
+python scripts/merge_agent_ml_into_ai.py --apply   # ② agent/ml 并入 ai（方案 A）
+python scripts/sync_bundle_chapters.py --write     # ③ 补新章节 + 新学科包（幂等）
+python scripts/verify_subject_reach.py             # ④ 入口闭环门禁
+```
+
+第 ③ 步在 2026-11-08 前只会补「已有学科的新章节」，遇到整个新学科
+（`content/discrete-math/`）只打一行告警就跳过：三章数据、21 道题、实验、图解
+全都在包里，却因 `BUNDLE.chapters` / `SUBJECTS` / `story.ts` 都没有它而在学习页
+完全选不到。现已支持整包新建，并把 ④ 接进 `content-health` job（纯标准库、只读）。
+
+其余前端数据各自单生成器幂等：`gen_exercise_bundle.py`（题库 / clangUnits）、
+`gen_chapter_content.py`（章节切片）、`gen_concept_viz.py`（图解）、
+`gen_bagua_data.py`（八股）、`gen_story_data.py`（剧情）、
+`gen_diagrams_data.py`（ASCII 图解）、`gen_tracks.py`（专轨）、
+`gen_concept_docs.py`（概念全文，见下）。
+改 `content/` 后按对应生成器重跑并把产物入库；`docs/*` 里的历史体检报告是
+当时快照，**不要**为了追新数字去改它们。
+
+**概念全文（2026-11-08 接入）**：`chapterContent.ts` 只是切片（条目 + 概念首
+标题），723 篇 `concept/*.md` 正文由 `scripts/gen_concept_docs.py` 生成
+`frontend/src/data/concepts/`（16 个学科懒加载 chunk + `index.ts` 里 167 章映射），
+学习页 `ConceptReader` 点开折叠面板才 `import()`，渲染复用 `lib/markdown.ts`
+与 `.md-body` 样式，不新增 Markdown 依赖、不新增色彩变量。按学科切而非按章切，
+是为了不撞 `prepare_app.py` 的 120 文件 / 40MB 挡错阈值；`vite build` 直接输出
+到 staging，动态 chunk 会随 outDir 一起进包，`verify_staging()` 的引用闭包只
+校验「引用到的文件存在」，不是「只拷闭包」。

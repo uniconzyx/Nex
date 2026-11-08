@@ -13,7 +13,7 @@ Nex/
 ├── app/           Flutter 客户端（Android / iOS / Web，蓝白猫咪版）
 ├── web-preview/   自包含产品演示 SPA（双击即可在浏览器预览）
 ├── shared/        共享配置：GitHub 仓库清单、LeetCode 映射、题库样例
-├── content/       学习内容源文件（13 学科 / 114 章 × 7 类内容，阶段 7 量产）
+├── content/       学习内容源文件（16 目录 / 167 章 × 7 类内容）
 ├── deploy/        Docker Compose / Nginx / Prometheus / 桌面启动器
 └── .github/       云端构建流水线（.apk / .exe 发布物）
 ```
@@ -40,7 +40,7 @@ Nex/
 | 概念文件三视角 | **436 / 436** 齐备（🧑‍💻程序员 / 🎓博士生 / 📚考研者） |
 | 习题 | **818 道**（基础 562 / 算法 256），字段缺失 0、平台题缺链接 0 |
 | 示例真实回放 | **1303 / 1303** 通过（C/C++/Java/Python/SQL 等真实编译器实测） |
-| 八股模块 | 13 / 13 学科达标 |
+| 八股模块 | 14 / 14 学科达标 |
 | 学习来源 | **每章 `goals.md` 同时含 GitHub（star 最高）+ B 站真实教程双来源** |
 
 校验入口（常驻 `server/scripts/`）：

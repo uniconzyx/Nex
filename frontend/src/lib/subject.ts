@@ -2,7 +2,7 @@
  * subject.ts —— 全局「当前学科」状态
  *
  * 为什么需要它：
- *   项目页把 13 个学科平铺成一排胶囊，切走再切回就丢状态；学习/练习页又各自写死 C++。
+ *   项目页把 14 个学科平铺成一排胶囊，切走再切回就丢状态；学习/练习页又各自写死 C++。
  *   用户真实的心智是「我现在在学哪一科」，这个状态应该跨页面存活。
  *
  * 设计：
@@ -33,6 +33,7 @@ export const SUBJECTS: Subject[] = [
   { key: 'bigdata', label: '大数据', short: '大数据' },
   { key: 'data', label: '数据分析', short: '数据分析' },
   { key: 'fundamentals', label: '计算机基础', short: '基础' },
+  { key: 'discrete-math', label: '离散数学', short: '离散' },
   { key: 'tooling', label: '工具链', short: '工具链' },
 ];
 

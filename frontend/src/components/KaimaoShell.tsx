@@ -134,7 +134,7 @@ export function KaimaoShell({
   
 
   // 章节总数与平均掌握度都从依赖图取：它包含 clang 的 7 个独立单元（141 章），
-  // 只数 BUNDLE.chapters 会漏掉 C 语言模块（133 章）。
+  // 只数 BUNDLE.chapters 会漏掉 C 语言模块（160 章 + clang 7 单元）。
   const mastery = useMemo(() => masterySummary(p), [p]);
   const totalChapters = mastery.total;
   const avgMastery = mastery.avg;

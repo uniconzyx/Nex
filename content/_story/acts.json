@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "note": "141 幕旁白源文件。tone: pitfall=错误认知自述(未完成可预告) / archive=旁观记录(必须完成后才显示)。line 不含书名引号，由 UI 负责排版。anchor 指向该章 goals.md 的认知点，改内容时须同步核对。",
+  "note": "旁白源文件（当前 42 幕 / 167 条）。tone: pitfall=错误认知自述(未完成可预告) / archive=旁观记录(必须完成后才显示)。line 不含书名引号，由 UI 负责排版。anchor 指向该章 goals.md 的认知点，改内容时须同步核对。",
   "subjects": {
     "ai": {
       "label": "AI · Agent 开发",
@@ -1342,6 +1342,36 @@
               "tone": "archive",
               "line": "depends_on 只保证启动顺序，不保证依赖能用了。中间那段空窗，得靠健康检查和就绪门控自己填。",
               "anchor": "goals-1 健康检查与就绪门控"
+            }
+          ]
+        }
+      ]
+    },
+    "discrete-math": {
+      "label": "离散数学",
+      "acts": [
+        {
+          "id": "dm-a1",
+          "group": "离散结构",
+          "title": "把话、东西、网络都写成能算的对象",
+          "chapters": [
+            {
+              "id": "dm-ch01",
+              "tone": "pitfall",
+              "line": "我把「只有…才…」翻成了 A→B，真值表一跑全反了。方向错一步，后面推得再漂亮都是错的。",
+              "anchor": "goals-2 除非/只有/仅当 的翻译方向"
+            },
+            {
+              "id": "dm-ch02",
+              "tone": "archive",
+              "line": "等价关系凭什么能把集合切成互不重叠的组？自反、对称、传递三条，恰好就是「同类」构成划分的充要条件。",
+              "anchor": "goals-3 等价类与划分"
+            },
+            {
+              "id": "dm-ch03",
+              "tone": "pitfall",
+              "line": "度数和算出来是奇数，我以为是数据脏了。其实是漏画一条边——握手定理永远给出偶数。",
+              "anchor": "goals-1 握手定理与度数校验"
             }
           ]
         }

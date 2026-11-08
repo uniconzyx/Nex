@@ -48,7 +48,7 @@ DIFFS = ("easy", "medium", "hard")
 # 注意：content/*/exercises.json 里保留原名（描述更准确），只在生成产物时归一。
 TYPE_ALIAS = {"judge": "explain", "fix": "fix_error"}
 
-# 方案 A：agent(16 章) 与 ml(8 章) 挂到 ai 学科下（见 scripts/merge_agent_ml_into_ai.py）。
+# 方案 A：agent(16 章) 与 ml(9 章) 挂到 ai 学科下（见 scripts/merge_agent_ml_into_ai.py）。
 # 这里必须在打题时就把 subj 归一，否则前端按 SUBJECTS 过滤题库时这 144 道题
 # 会因为 subj="agent"/"ml" 而永远筛不出来。
 SUBJ_ALIAS = {"agent": "ai", "ml": "ai"}

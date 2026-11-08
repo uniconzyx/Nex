@@ -1,12 +1,13 @@
 /**
  * index.ts —— 按学科懒加载图解数据
  *
- * 为什么拆成 16 个模块：165 章全量 1.8MB，直接 import 会进主 chunk。
+ * 为什么拆成 16 个模块：167 章全量约 1.8MB，直接 import 会进主 chunk。
  * 这里每个学科一个 `import()`，Vite 会切成独立 chunk，只在真的打开某学科
  * 章节时才下载（最大单学科 fundamentals 248KB）。
  *
- * 注意：agent / ml / discrete-math 目前不在 LearnPage 的学科胶囊里（分别走
- * AgentPage / AiHubPage / 408 专轨），但数据照样生成，谁先接谁直接用。
+ * 注意：agent / ml 的数据按方案 A 并入 `ai` 学科，这里仍按 content 目录名
+ * 单独切 chunk；discrete-math 自 2026-11-08 起是 SUBJECTS 的第 14 个正式
+ * 学科，学习页可直接选中，也不再是「只走 408 专轨」（离散数学本就不属 408）。
  */
 import type { VizChapter } from './types';
 

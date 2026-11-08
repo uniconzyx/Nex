@@ -162,6 +162,7 @@ jobs:
           python server/scripts/gen_exercise_bundle.py
           python scripts/gen_chapter_content.py
           python scripts/gen_concept_viz.py
+          python scripts/gen_concept_docs.py
           # git diff --exit-code 只看 tracked 文件的修改，抓不到「新增学科生成了
           # 新 .ts 却没入库」这种 untracked 情况；用 status --porcelain 同时覆盖
           # modified / untracked / deleted。viz/data.js 是 .gitignore 的本机产物，
@@ -170,6 +171,7 @@ jobs:
             frontend/src/data/exercises.ts \
             frontend/src/data/clangUnits.ts \
             frontend/src/data/chapterContent.ts \
+            frontend/src/data/concepts/ \
             frontend/src/data/viz/)
           if [ -n "$CHANGED" ]; then
             echo "::error::前端数据生成物与 content/ 不同步，请重跑上面三个生成器并把产物入库"
@@ -177,4 +179,11 @@ jobs:
             git diff -- frontend/src/data/ | head -80
             exit 1
           fi
-          echo "三个生成器幂等：exercises.ts / clangUnits.ts / chapterContent.ts / viz/*.ts 均已同步"
+          echo "四个生成器幂等：exercises.ts / clangUnits.ts / chapterContent.ts / concepts/*.ts / viz/*.ts 均已同步"
+
+      # 生成器幂等只能保证「产物和源一致」，不能保证「源里的学科真的有 UI 入口」。
+      # 2026-11-08 发现 content/discrete-math 三章数据齐全却整科没进 BUNDLE/SUBJECTS，
+      # 学习页选不到、题库筛不到；这道门禁把 manifest → BUNDLE → SUBJECTS →
+      # 剧情/题库/辅助面板 的链路闭合起来，纯标准库、只读。
+      - name: 学科/章节入口闭环（防「有数据、无入口」）
+        run: python scripts/verify_subject_reach.py

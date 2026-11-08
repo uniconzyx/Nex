@@ -1,19 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""把 content/<学科>/_manifest.json 里新增、但还没进 bundle.ts 的章节补进去。
+"""把 content/<学科>/_manifest.json 里新增、但还没进 bundle.ts 的章节/学科补进去。
 
 【为什么需要这一步】
-  frontend/src/data/bundle.ts 是「生成 + 一次合并补丁」的产物：
+  frontend/src/data/bundle.ts 是「生成 + 合并补丁 + 增量同步」的产物：
     gen_bundle_data.py 先按学科生成 agent / ml / ai 三包；
-    merge_agent_ml_into_ai.py 再把 agent/ml 并进 ai（方案 A）。
+    merge_agent_ml_into_ai.py 再把 agent/ml 并进 ai（方案 A）；
+    本脚本负责之后往 content 里加的东西。
   之后如果又往 content 里加了章节（例：ml-ch09 支持向量机），只重跑
   gen_bundle_data.py 会把合并打回三包，只跑 merge 又不会重新读 manifest，
   于是新章节永远到不了学习页 —— 内容在、题在、但地图上没有这一章。
 
 【做法】
-  只做加法：以 bundle 现状为基线，把 manifest 里有、bundle 里没有的章节
-  按 merged 学科（agent/ml → ai）追加到对应包尾，order 取该包最大值 +1，
-  group 用源 manifest 的组名，键统一编成 A<n> 继续排，避免和既有 A1..A13 撞。
+  两种加法，都只读 manifest、只写 bundle 的 chapters 字段：
+  1) 已有学科包补章：按 merged 学科（agent/ml → ai）追加到对应包尾，
+     order 取该包最大值 +1，group 统一编成 A<n> 继续排，避免和既有 A1..A13 撞。
+  2) 全新学科包（例：discrete-math）：整包新建。groups 直接用源 manifest 的
+     组键（DM1..DM3），chapters 按源 order 排序，字段与 gen_bundle_data.py 同口径。
+     以前这里只打一行「本脚本不新建学科包」的告警，结果整个学科有数据、
+     有题、有实验，却在学习页/题库里完全选不到 —— 这是 2026-11-08 修掉的入口缺口。
 
   幂等：已经全在 bundle 里时不做任何写入。
   不触碰项目 / 指南 / 已有章节的任何字段（星标、读法、书单都不动）。
@@ -25,6 +30,7 @@
 from __future__ import annotations
 
 import argparse
+import io
 import json
 import re
 from pathlib import Path
@@ -48,7 +54,8 @@ def load_manifest_chapters() -> dict[str, dict]:
         d = json.loads(path.read_text(encoding="utf-8"))
         subject = d.get("subject") or path.parent.name
         subject = SUBJECT_ALIAS.get(subject, subject)
-        pack = packs.setdefault(subject, {"groups": {}, "chapters": []})
+        pack = packs.setdefault(subject, {"title": "", "groups": {}, "chapters": []})
+        pack["title"] = re.sub(r"\s+", " ", d.get("title") or "").strip()
         for k, v in (d.get("groups") or {}).items():
             pack["groups"].setdefault(k, v)
         for c in d.get("chapters") or []:
@@ -116,15 +123,24 @@ def main() -> None:
             next_order += 1
             next_group += 1
 
+    # 全新学科包：整包新建，组键沿用源 manifest，章节按源 order 排。
+    # 不做这步的话，新学科永远不会出现在 BUNDLE.chapters，学习页与题库都选不到。
     missing_packs = sorted(set(src_packs) - set(bundle["chapters"]))
     for subject in missing_packs:
-        print(f"! manifest 有 {subject} 学科，bundle 里没有这个包（本脚本不新建学科包）")
+        src = src_packs[subject]
+        new_pack = {
+            "title": src["title"],
+            "groups": dict(src["groups"]),
+            "chapters": sorted(src["chapters"], key=lambda c: c["order"]),
+        }
+        bundle["chapters"][subject] = new_pack
+        added.append(f'学科包 {subject}: +{len(new_pack["chapters"])} 章 · {src["title"][:28]}')
 
     if not added:
         print("bundle 已与 content 对齐，无需补章")
         return
 
-    print(f"需要补 {len(added)} 章：")
+    print(f"需要补 {len(added)} 项：")
     for line in added:
         print("  +", line)
 
@@ -142,8 +158,12 @@ def main() -> None:
         flags=re.S,
     )
     payload = json.dumps(bundle, ensure_ascii=False, separators=(",", ":"))
-    OUT.write_text(head + "export const BUNDLE = " + payload + " as unknown as Bundle;\n", encoding="utf-8")
-    print(f"\n写入 {OUT.relative_to(ROOT)}：章节 {total} 章")
+    # 与 gen_bundle_data.py 一致：显式 LF，避免 Windows 上 write_text 把整文件翻成 CRLF
+    # 后在干净 clone（eol=lf）里跑幂等检查出现假红。
+    io.open(OUT, "w", encoding="utf-8", newline="\n").write(
+        head + "export const BUNDLE = " + payload + " as unknown as Bundle;\n"
+    )
+    print(f"\n写入 {OUT.relative_to(ROOT)}：章节 {total} 章 / {len(bundle['chapters'])} 个学科")
 
 
 if __name__ == "__main__":

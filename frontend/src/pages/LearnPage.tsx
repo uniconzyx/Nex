@@ -36,6 +36,7 @@ import { isUnlocked } from '../lib/logicChain';
 import { chapterStages, STAGE_META, type StageView } from '../lib/stages';
 import { buildChapterSummary, contentOf, summaryToMarkdown, type ChapterSummary, type SummaryDim } from '../lib/chapterSummary';
 import type { ChapterContent } from '../data/chapterContent';
+import { ConceptReader } from '../components/ConceptReader';
 import type { KmPage } from '../lib/nav';
 
 const TYPE_ORDER: BankType[] = ['choice', 'coding', 'output', 'fix_error', 'explain', 'design'];
@@ -278,6 +279,11 @@ export function LearnPage({ onNavigate }: { onNavigate?: (p: KmPage) => void }) 
               <p style={{ margin: '12px 0 0', color: 'var(--km-ink-soft)', fontSize: 13, lineHeight: 1.8 }}>
                 {c.summary}
               </p>
+
+              {/* ── 概念全文（按学科懒加载，默认折叠） ────────────
+                  切片只给「本章有哪些概念」，这里给正文。用户点开才
+                  import 对应学科 chunk，首屏与包体都不为此付代价。 */}
+              <ConceptReader chapterId={c.id} />
 
               {/*
                 本章旁白（P3 · C4）：一句话把这一章的认知点说完。

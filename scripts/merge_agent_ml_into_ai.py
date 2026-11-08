@@ -1,25 +1,29 @@
-"""把 content/agent（16 章）与 content/ml（8 章）并入前端的 ai 学科（方案 A）。
+"""把 content/agent（16 章）与 content/ml（9 章）并入前端的 ai 学科（方案 A）。
 
 背景
 --------------------------------------------------------------------
 `content/agent/` 和 `content/ml/` 各有 7 类文件齐全的完整章节，但它们不在
-`frontend/src/lib/subject.ts` 的 13 个学科里，`BUNDLE.chapters` 也没有对应键，
-于是这 24 章 / 144 道题**在 UI 上永远选不到** —— 有内容、无入口。
+`frontend/src/lib/subject.ts` 的学科胶囊里，`BUNDLE.chapters` 也没有对应键，
+于是这些章节**在 UI 上永远选不到** —— 有内容、无入口。
 
-方案 A：不新增学科（避免和「13 学科」口径冲突），把两科挂到 `ai` 学科下。
+方案 A：不新增学科（保持学科胶囊口径稳定），把两科挂到 `ai` 学科下。
 `ai` 的 label 本来就是「AI / Agent 开发」，项目库已含 agent 项目，语义自洽。
 
 分组映射（保留原子结构，不揉成一坨）：
     ai 原有 A1..A4  ── 深度学习 / 大模型 / 提示与知识增强 / Agent 工程化
     agent G1..G6    → A5..A10
     ml    C1..C3    → A11..A13
-章节 order 从 9 续到 32。
+章节 order 从 9 续到 32（之后新增章节由 sync_bundle_chapters.py 续排）。
 
 用法
 --------------------------------------------------------------------
     python scripts/merge_agent_ml_into_ai.py            # dry-run
     python scripts/merge_agent_ml_into_ai.py --apply    # 写入 bundle.ts
     python scripts/merge_agent_ml_into_ai.py --restore  # 还原
+
+注意：本脚本是 bundle.ts 生成链的**第 2 步** ——
+    gen_bundle_data.py → merge_agent_ml_into_ai.py --apply → sync_bundle_chapters.py --write
+单独重跑第 1 步会把合并打回三包（ai 从 39 章退回 14 章）。详见 CONTRIBUTING §10.2。
 """
 from __future__ import annotations
 
@@ -160,7 +164,7 @@ def main() -> int:
     if head_note in text_new and "agent/ml 并入 ai" not in text_new:
         text_new = text_new.replace(
             head_note,
-            head_note + "\n   agent(16 章) 与 ml(8 章) 已按方案 A 并入 ai 学科（scripts/merge_agent_ml_into_ai.py）。",
+            head_note + "\n   agent(16 章) 与 ml(9 章) 已按方案 A 并入 ai 学科（scripts/merge_agent_ml_into_ai.py）。",
             1,
         )
 

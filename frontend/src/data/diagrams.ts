@@ -28,10 +28,66 @@ export const DIAGRAM_SUBJECTS: DiagramSubject[] = [
         "desc": ""
       },
       {
+        "chapter": "fund-ch01",
+        "title": "顺序表与链表：内存布局决定的性能差异",
+        "source": "fund-ch01/concept/03-complexity-and-cost.md",
+        "code": "容量序列：1 → 2 → 4 → 8 → ... → 2^k\n第 k 次扩容的搬移成本 = 2^(k-1)\n总成本 = 1 + 2 + 4 + ... + 2^(k-1) = 2^k - 1\n元素总数 = 2^k\n均摊成本 = (2^k - 1) / 2^k < 2  → 常数！",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch01",
+        "title": "顺序表与链表：内存布局决定的性能差异",
+        "source": "fund-ch01/concept/04-linear-list-practical-recipes.md",
+        "code": "04-linear-list-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场一：顺序表的「下标访问 O(1)」依赖元素大小相同  (cpp)\n    |\n    v\n  [02] 现场二：顺序表插入是 O(n)，但常数很小  (cpp)\n    |\n    v\n  [03] 现场三：链表的 O(1) 插入有前提——已知位置  (cpp)\n    |\n    v\n  [04] 现场四：缓存行是 64 字节，这决定了一切  (cpp)\n    |\n    v\n  [05] 现场五：均摊 O(1) 不是「每次都快」  (cpp)\n    |\n    v\n  [06] 现场六：链表的「变体」各自解决什么问题  (cpp)\n    |\n    v\n  [07] 现场七：删除节点必须释放内存  (cpp)\n    |\n    v\n  [08] 现场八：链表节点的内存开销是隐藏成本  (cpp)\n    |\n    v\n  [... 其余 4 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
         "chapter": "fund-ch02",
         "title": "栈：LIFO 与函数调用栈的硬件支撑",
         "source": "fund-ch02/concept/01-stack-and-call-frame.md",
         "code": "栈(Stack, LIFO):   push▶[ A ][ B ][ C ]◀pop     后进先出，用数组/链表尾作栈顶\n队列(Queue, FIFO): enq▶[ A ][ B ][ C ]◀deq     先进先出，需头指针+尾指针\n循环队列:  尾到头绕回，用 (rear+1)%cap==front 判满\n串匹配:  KMP 靠失配函数 next[] 跳过已匹配前缀，避免主串指针回退",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch02",
+        "title": "栈：LIFO 与函数调用栈的硬件支撑",
+        "source": "fund-ch02/concept/02-queue-and-circular-buffer.md",
+        "code": "FIFO 的语义价值：公平、有序（先到先服务）\n\n数组实现的问题：出队后 front 后移 -> 前面的空间永久浪费\n\n循环队列（ring buffer）：\n    ┌───┬───┬───┬───┬───┬───┐\n    │   │ 3 │ 4 │ 5 │   │   │     front=1, rear=4\n    └───┴───┴───┴───┴───┴───┘\n    入队 rear = (rear+1) % cap      出队 front = (front+1) % cap\n\n    空 / 满判定的三种写法：\n      留一格空位   front==rear 为空；(rear+1)%cap==front 为满 -> 有效容量 -1\n      加 size 计数 最直观，可满容量\n      加 tag       记录最后一次是入队还是出队\n\n    真实应用：网卡收发环、日志缓冲、（概念上）Kafka 分区是持久化的顺序环形日志",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch02",
+        "title": "栈：LIFO 与函数调用栈的硬件支撑",
+        "source": "fund-ch02/concept/05-ds-practical-recipes.md",
+        "code": "05-ds-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 1. 栈是「后进先出」，队列是「先进先出」  (-)\n    |\n    v\n  [02] 2. 数组栈的均摊分析：push 不是真 O(1)  (-)\n    |\n    v\n  [03] 3. 循环队列：用模运算复用空间  (cpp)\n    |\n    v\n  [04] 4. 单调栈：O(n) 求「下一个更大元素」  (python)\n    |\n    v\n  [05] 5. 单调队列：滑动窗口最大值  (python)\n    |\n    v\n  [06] 6. 双栈模拟队列 / 双队列模拟栈  (-)\n    |\n    v\n  [07] 7. 括号匹配：栈的招牌应用  (python)\n    |\n    v\n  [08] 8. 字符串是不可变还是可变：先看清语言  (python)\n    |\n    v\n  [... 其余 5 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch03",
+        "title": "树的遍历：三种序的本质与递归的非递归改写",
+        "source": "fund-ch03/concept/03-recursion-and-tree-dp.md",
+        "code": "递归版本                          迭代版本\n─────────────────────────────    ─────────────────────────────\nif (终止) return ...               显式栈 / 队列\nf(子)                            while (栈非空) { 弹栈处理；子节点入栈 }\n合并                              用「入栈顺序」编码遍历序",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch03",
+        "title": "树的遍历：三种序的本质与递归的非递归改写",
+        "source": "fund-ch03/concept/04-tree-practical-recipes.md",
+        "code": "04-tree-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场 1：递归的前中后序只差「访问时机」  (python)\n    |\n    v\n  [02] 现场 2：空节点是递归的终止条件，漏了必崩  (-)\n    |\n    v\n  [03] 现场 3：BFS 用队列，DFS 用栈或递归  (python)\n    |\n    v\n  [04] 现场 4：深度与高度差一，是边界题的重灾区  (-)\n    |\n    v\n  [05] 现场 5：BST 的中序遍历是有序的  (python)\n    |\n    v\n  [06] 现场 6：只比较父子会误判 BST  (-)\n    |\n    v\n  [07] 现场 7：平衡树的旋转要理解「谁当新根」  (-)\n    |\n    v\n  [08] 现场 8：递归树形 DP 要「后序」收集子树信息  (python)\n    |\n    v\n  [... 其余 7 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch04",
+        "title": "图的存储结构：邻接矩阵、邻接表与十字链表",
+        "source": "fund-ch04/concept/02-dfs-bfs-topo.md",
+        "code": "     A\n    ╱ ╲\n   B   C\n   │   │\n   D   E\n    ╲ ╱\n     F\n\nDFS（从 A，栈）：A → C → E → F → D → B      一路到底再回头\nBFS（从 A，队列）：A → B → C → D → E → F     一层一层摊开",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch04",
+        "title": "图的存储结构：邻接矩阵、邻接表与十字链表",
+        "source": "fund-ch04/concept/05-graph-practical-recipes.md",
+        "code": "05-graph-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场一：邻接表用 ArrayList 还是数组，先想清空  (java)\n    |\n    v\n  [02] 现场二：BFS 最短路要在「入队时」设距离  (java)\n    |\n    v\n  [03] 现场三：DFS 递归爆栈，十万点要改显式栈  (java)\n    |\n    v\n  [04] 现场四：有向图判环别用 bool visited  (java)\n    |\n    v\n  [05] 现场五：Kruskal 收边前必须判环  (java)\n    |\n    v\n  [06] 现场六：Dijkstra 不能处理负权，别硬上  (java)\n    |\n    v\n  [07] 现场七：邻接矩阵在 V=10^5 时直接 MLE  (java)\n    |\n    v\n  [08] 现场八：拓扑排序遇到环要能识别  (java)\n    |\n    v\n  [... 其余 4 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
         "desc": ""
       },
       {
@@ -42,10 +98,52 @@ export const DIAGRAM_SUBJECTS: DiagramSubject[] = [
         "desc": ""
       },
       {
+        "chapter": "fund-ch06",
+        "title": "排序总览：内部排序分类与复杂度/稳定性对照表",
+        "source": "fund-ch06/concept/04-sort-practical-recipes.md",
+        "code": "总数据 1GB，内存 100MB → 初始归并段数 R = 1GB / 100MB = 10 段\n每趟 k 路归并，段数变为 ⌈R / k⌉\n第 1 趟：10 → ⌈10/10⌉ = 1 段，完成\n\n结论：1 趟归并",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch07",
+        "title": "四种机器数：原码、反码、补码、移码",
+        "source": "fund-ch07/concept/03-ieee754-float-representation.md",
+        "code": " bit: 31        30 ......... 23   22 ................... 0\n      ┌───┬──────────────────────┬────────────────────────┐\n      │ S │        E (8 位)       │       M (23 位)         │\n      └───┴──────────────────────┴────────────────────────┘\n        1        阶码（偏置 127）          尾数（隐含最高位 1）",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch07",
+        "title": "四种机器数：原码、反码、补码、移码",
+        "source": "fund-ch07/concept/05-arithmetic-practical-recipes.md",
+        "code": "05-arithmetic-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 原码补码反码：为什么计算机用补码  (-)\n    |\n    v\n  [02] 补码加法的统一之美  (python)\n    |\n    v\n  [03] 溢出如何判定（符号位 + 进位）  (-)\n    |\n    v\n  [04] IEEE754 为什么 0.1 + 0.2 ≠ 0.3  (python)\n    |\n    v\n  [05] 规格化与隐藏位  (-)\n    |\n    v\n  [06] 位运算的奇技：交换/判奇偶/取模  (c)\n    |\n    v\n  [07] 算术移位 vs 逻辑移位  (-)\n    |\n    v\n  [08] 浮点比较必须用容差  (-)\n    |\n    v\n  [... 其余 5 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
         "chapter": "fund-ch08",
         "title": "存储层次与局部性原理",
         "source": "fund-ch08/concept/01-memory-hierarchy-and-locality.md",
         "code": "存储层次(越往外越慢越大):\n  CPU寄存器 ─ L1 ─ L2 ─ L3 ─ 内存 ─ SSD ─ HDD\nCPU 五级流水: 取指 → 译码 → 执行 → 访存 → 写回  (理想吞吐≈单级延迟)\nCache 映射: 直接映射 / 组相联 / 全相联   命中率取决于时间+空间局部性",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch08",
+        "title": "存储层次与局部性原理",
+        "source": "fund-ch08/concept/02-cache-mapping-replacement-write.md",
+        "code": "  ┌──────────────┬──────────────┬────────────┐\n  │     tag      │     index    │   offset   │\n  └──────────────┴──────────────┴────────────┘\n     用于比对          选择组/行       块内位置",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch08",
+        "title": "存储层次与局部性原理",
+        "source": "fund-ch08/concept/03-virtual-memory-page-table-tlb.md",
+        "code": "CPU 给出虚拟地址\n   │\n   ├─ 拆成 VPN + offset\n   │\n   ▼\n TLB 查 VPN ──命中──► 物理页号 PPN ──► 拼接 offset ──► 物理地址\n   │                                                     │\n   └─未命中─► 多级页表遍历 (访问内存 2~4 次)               │\n                │                                        │\n                ├─ 页表项有效位 = 1 ──► 填 TLB，返回 PPN   │\n                └─ 页表项有效位 = 0 ──► 缺页异常 → 调入 → 重执行\n                                                          │\n                                                          ▼\n                                              用物理地址访问 Cache",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch08",
+        "title": "存储层次与局部性原理",
+        "source": "fund-ch08/concept/05-storage-cpu-codes.md",
+        "code": "05-storage-cpu-codes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] Cache 命中率与平均访问时间  (python)\n    |\n    v\n  [02] 地址字段划分（标记 / 组 / 块内）  (python)\n    |\n    v\n  [03] 直接映射 vs 全相联 vs 组相联  (-)\n    |\n    v\n  [04] 替换算法（LRU / FIFO / 随机）  (-)\n    |\n    v\n  [05] 写策略（写回 vs 写直达）  (-)\n    |\n    v\n  [06] 虚拟地址到物理地址翻译  (python)\n    |\n    v\n  [07] 流水线数据冒险与转发  (-)\n    |\n    v\n  [08] 流水线控制冒险与分支预测  (-)\n    |\n    v\n  [... 其余 5 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
         "desc": ""
       },
       {
@@ -56,10 +154,31 @@ export const DIAGRAM_SUBJECTS: DiagramSubject[] = [
         "desc": ""
       },
       {
+        "chapter": "fund-ch09",
+        "title": "进程与线程：状态机、PCB 与上下文切换",
+        "source": "fund-ch09/concept/04-os-codes-snippets.md",
+        "code": "04-os-codes-snippets.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 一、进程状态机的模拟  (python)\n    |\n    v\n  [02] 二、FCFS / SJF / SRTF 的统一模拟框架  (python)\n    |\n    v\n  [03] 三、RR 时间片轮转  (python)\n    |\n    v\n  [04] 四、银行家算法的安全性检查  (python)\n    |\n    v\n  [05] 五、信号量实现生产者消费者  (python)\n    |\n    v\n  [06] 六、死锁四条件的检测  (python)\n    |\n    v\n  [07] 七、上下文切换的代价测量  (python)\n    |\n    v\n  [08] 收尾  (-)\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
         "chapter": "fund-ch10",
         "title": "01 · 连续分配与碎片：首次/最佳/最坏适应到底差在哪",
         "source": "fund-ch10/concept/01-contiguous-allocation-and-fragmentation.md",
         "code": "虚拟地址 ─MMU─▶ 页表 ─▶ 物理页帧       分页让进程以为独占内存\n页面置换: FIFO / LRU / Clock   缺页率高 → 频繁换入换出(颠簸)\n文件: inode ─▶ 数据块链表            IO 缓冲/缓存减少 syscall 与磁盘次数",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch10",
+        "title": "01 · 连续分配与碎片：首次/最佳/最坏适应到底差在哪",
+        "source": "fund-ch10/concept/02-paging-segmentation-and-address-translation.md",
+        "code": "|     页号 P (k 位)     |    页内偏移 W (n 位)    |\n            ↓ 查页表\n|   页框号 F (m 位)     |    页内偏移 W (n 位)    |  = 物理地址",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch10",
+        "title": "01 · 连续分配与碎片：首次/最佳/最坏适应到底差在哪",
+        "source": "fund-ch10/concept/05-os-codes.md",
+        "code": "05-os-codes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 分页地址翻译（逻辑 → 物理）  (python)\n    |\n    v\n  [02] 页表项与多级页表  (-)\n    |\n    v\n  [03] LRU 页面置换模拟  (python)\n    |\n    v\n  [04] 银行家算法安全检查  (-)\n    |\n    v\n  [05] 磁盘调度（SCAN / LOOK）  (-)\n    |\n    v\n  [06] 文件分配（连续 / 链表 / 索引）  (-)\n    |\n    v\n  [07] 空闲空间管理（位示图 / 成组链接）  (-)\n    |\n    v\n  [08] IO 控制方式（轮询 / 中断 / DMA）  (-)\n    |\n    v\n  [... 其余 2 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
         "desc": ""
       },
       {
@@ -70,10 +189,535 @@ export const DIAGRAM_SUBJECTS: DiagramSubject[] = [
         "desc": ""
       },
       {
+        "chapter": "fund-ch11",
+        "title": "01 · 分层模型与封装：每一层到底加了什么",
+        "source": "fund-ch11/concept/04-tcp-udp-and-congestion.md",
+        "code": " 0                   1                   2                   3\n 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1\n+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n|          源端口(16)           |         目的端口(16)          |\n+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n|                        序号 seq(32)                           |\n+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n|                      确认号 ack(32)                           |\n+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n| 数据偏移(4)|保留(6)|U|A|P|R|S|F|        窗口 win(16)          |\n+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n|         校验和(16)            |        紧急指针(16)           |\n+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n|                    选项（含 MSS、窗口扩大、SACK）              |\n+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch11",
+        "title": "01 · 分层模型与封装：每一层到底加了什么",
+        "source": "fund-ch11/concept/05-netw-codes.md",
+        "code": "05-netw-codes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 帧封装与 CRC 校验  (python)\n    |\n    v\n  [02] 滑动窗口（GBN / SR）  (-)\n    |\n    v\n  [03] IP 分片与重组  (-)\n    |\n    v\n  [04] 子网划分与 CIDR  (-)\n    |\n    v\n  [05] TCP 三次握手状态迁移  (-)\n    |\n    v\n  [06] TCP 拥塞控制（慢启动 / 拥塞避免）  (-)\n    |\n    v\n  [07] RTT 估计与 RTO 计算  (-)\n    |\n    v\n  [08] DNS 递归与迭代查询  (-)\n    |\n    v\n  [... 其余 4 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
         "chapter": "fund-ch12",
         "title": "HTTP 的演进：1.1 → 2 → 3",
         "source": "fund-ch12/concept/01-http-evolution.md",
         "code": "浏览器 ─DNS解析─▶ IP ─TCP握手─▶ TLS ─HTTP请求─▶ 服务器 ─响应─▶ 渲染\n排错自底向上:\n  ping       (网络层连通)\n  traceroute (路径哪跳丢包)\n  curl -v    (应用层请求/响应头)\n  RTT / 丢包率 / 重传 定位瓶颈",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch12",
+        "title": "HTTP 的演进：1.1 → 2 → 3",
+        "source": "fund-ch12/concept/02-dns-and-url-to-render.md",
+        "code": "                       ┌───────────────┐\n                       │  根域名服务器  │  \".\"           13 组（a~m.root-servers.net）\n                       └───────┬───────┘\n                               │\n              ┌────────────────┴────────────────┐\n              │                                 │\n      ┌───────▼────────┐                ┌───────▼────────┐\n      │  顶级域 TLD     │  \".com\"        │  顶级域 TLD     │  \".cn\" / \".org\"\n      └───────┬────────┘                └───────┬────────┘\n              │                                 │\n      ┌───────▼────────┐                ┌───────▼────────┐\n      │  权威域名服务器  │ \"example.com\"  │  权威域名服务器  │\n      └────────────────┘                └────────────────┘",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch12",
+        "title": "HTTP 的演进：1.1 → 2 → 3",
+        "source": "fund-ch12/concept/03-https-and-tls.md",
+        "code": "客户端                                            服务器\n  │                                                 │\n  │──① ClientHello ────────────────────────────────▶│  支持的版本/套件、随机数 R_c\n  │                                                 │\n  │◀─② ServerHello + Certificate + ServerKeyExchange│  选定套件、随机数 R_s、证书\n  │                                                 │\n  │──③ ClientKeyExchange + ChangeCipherSpec ───────▶│  用服务器公钥加密pre_master_secret\n  │                                                 │\n  │◀─④ ChangeCipherSpec + Finished ────────────────│  双方各自算出 master_secret\n  │                                                 │\n  │════════ 后续全部用对称加密传输 ════════════════│",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch13",
+        "title": "冯·诺依曼结构 vs 哈佛结构",
+        "source": "fund-ch13/concept/01-冯诺依曼与哈佛结构.md",
+        "code": "冯·诺依曼（普林斯顿）结构            哈佛结构\n┌──────────┐                        ┌────────────┐   ┌────────────┐\n│  存储器   │◀──地址/数据 单一总线──▶│   CPU      │   │ 程序存储器 │◀─▶CPU(取指)\n│ 指令+数据 │                        │ 运算器+控制 │   │ 数据存储器 │◀─▶CPU(取数)\n└──────────┘                        └────────────┘   └────────────┘\n   取指与访存争用同一条总线             取指、访存走不同总线，可并行",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch13",
+        "title": "冯·诺依曼结构 vs 哈佛结构",
+        "source": "fund-ch13/concept/02-五大部件与数据通路.md",
+        "code": "            ┌─────────── 控制总线(CB)：发读/写/中断等控制信号 ───────────┐\n            │                                                          │\n   CPU ── 地址总线(AB) ──▶ 存储器/IO     数据总线(DB) ◀──▶ 存储器/IO\n   (运算器+控制器)         (存放指令+数据)                  (双向传输数据)",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch13",
+        "title": "冯·诺依曼结构 vs 哈佛结构",
+        "source": "fund-ch13/concept/03-性能指标CPI-MIPS-FLOPS-加速比.md",
+        "code": "设可优化部分在原任务占比为 f（0≤f≤1），该部分加速 S 倍，\n则整体加速比：\n        S_total = 1 / ( (1 − f) + f / S )\n\n当 S → ∞（把可优化部分瞬间完成）：\n        S_max = 1 / (1 − f)\n例：f=0.9, S→∞ ⇒ 上限 1/0.1 = 10 倍；f=0.5 ⇒ 上限 2 倍",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch13",
+        "title": "冯·诺依曼结构 vs 哈佛结构",
+        "source": "fund-ch13/concept/03-性能指标CPI-MIPS-FLOPS-加速比.md",
+        "code": "性能关系一览：\n  CPU时间 ↑  ⟺   指令数↑ / CPI↑ / 主频↓\n  主频↑     ⟹   周期↓（但 CPI 可能变化）\n  优化算法  ⟹   指令数↓    （最能影响，且不限 Amdahl 上限）\n  优化微架构⟹   CPI↓       （受 Amdahl：仅当该部分占比高才有效）",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch13",
+        "title": "冯·诺依曼结构 vs 哈佛结构",
+        "source": "fund-ch13/concept/04-透明性与软硬件逻辑等价.md",
+        "code": "对不同层级，透明性不同（同一事物，对象不同结论不同）：\n  对象：高级语言程序员           Cache          → 透明（写 a[i] 不用管在哪级）\n                                虚拟地址转换   → 透明（直接用变量名/指针）\n                                指令流水线     → 透明（顺序写代码即可）\n  对象：汇编/编译器工程师        Cache          → 不透明（要做预取/数据排布）\n                                流水线冒险     → 不透明（要插 NOP/调度）\n  对象：体系结构/驱动工程师      物理地址、总线 → 不透明（直接操作）",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch13",
+        "title": "冯·诺依曼结构 vs 哈佛结构",
+        "source": "fund-ch13/concept/05-层次化存储与机器字长.md",
+        "code": "易混三点（常考辨析）：\n  机器字长   = ALU/寄存器位宽   → 决定\"算多大、地址空间多大\"\n  数据通路宽 = 总线/内部互连位宽 → 决定\"一次搬多少\"\n  存储器字长 = 一次访存读出的位数 → 常等于或小于数据通路宽度\n三者数值可以完全不同：如早期 32 位字长 CPU，外部数据总线 64 位。",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch14",
+        "title": "指令格式与扩展操作码",
+        "source": "fund-ch14/concept/01-指令格式与扩展操作码.md",
+        "code": "指令字长 16 位，地址码字段 4 位（共 4 段）\n\n三地址：┌──────┬──────┬──────┬──────┐\n        │ OP 4 │ A1 4 │ A2 4 │ A3 4 │   OP=0000~1110 → 15 条，1111 留作扩展\n        └──────┴──────┴──────┴──────┘\n二地址：        ┌──────┬──────┬──────┐\n        OP=1111 │ OP2 4│ A1 4 │ A2 4 │   OP2=0000~1110 → 15 条，1111 再扩展\n                └──────┴──────┴──────┘\n一地址：        ┌────────────┬──────┐\n    1111 1111   │ OP3 4      │ A1 4 │   OP3=0000~1110 → 15 条，1111 再扩展\n                └────────────┴──────┘\n零地址：        1111 1111 1111 xxxx        xxxx 有 16 种 → 16 条\n\n每\"留一个码点\"就换来下一层的 16 个槽位：15 + 15 + 15 + 16",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch14",
+        "title": "指令格式与扩展操作码",
+        "source": "fund-ch14/concept/04-指令周期与特权.md",
+        "code": "        ┌───────────┐\n   ┌───▶│  取指周期  │  PC → MAR → 主存 → MDR → IR，PC+1\n   │    └─────┬─────┘\n   │          │ 需要间址？\n   │    ┌─────▼─────┐  是\n   │    │  间址周期  │  M[IR.addr] → MDR → IR.addr（取出真正的 EA）\n   │    └─────┬─────┘\n   │          │\n   │    ┌─────▼─────┐\n   │    │  执行周期  │  取操作数 → ALU 运算 → 写回；或访存/转移\n   │    └─────┬─────┘\n   │          │ 有中断请求且允许？\n   │    ┌─────▼─────┐  是\n   │    │  中断周期  │  关中断 → 保存断点(PC/PSW) → 引出中断服务程序\n   │    └─────┬─────┘\n   └──────────┘\n\n四个周期各自对应一个\"机器周期（CPU 周期）\"，每个机器周期又由若干节拍（时钟周期）组成。\n特权指令（如 cli / hlt / mov cr3,eax）只能在核心态执行 —— 用户态执行会触发 #GP 异常，\n由内核接管；而\"陷入指令\"（syscall / int 0x80）是唯一允许用户态主动进入内核的入口。",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch14",
+        "title": "指令格式与扩展操作码",
+        "source": "fund-ch14/concept/05-instruction-practical-recipes.md",
+        "code": "16 位指令字长：\n三地址（操作码 4 位）：每个地址码 (16-4)/3 = 4 位 → 寻址 16 个单元\n二地址（操作码 4 位）：每个地址码 (16-4)/2 = 6 位 → 寻址 64 个单元\n一地址（操作码 4 位）：地址码 12 位 → 寻址 4096 个单元\n零地址：无地址码",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch15",
+        "title": "CPU 结构与数据通路",
+        "source": "fund-ch15/concept/01-cpu-structure-datapath.md",
+        "code": "        ┌─────────────────────────────────────────────┐\n        │                   CPU                         │\n        │                                               │\n        │   ┌──────────┐        ┌──────────┐            │\n        │   │ 运算器 ALU│◀──────▶│ 寄存器堆 │            │\n        │   │ (算/逻/移位)│       │ (通用+暂存)│            │\n        │   └────┬─────┘        └────┬─────┘            │\n        │        │                    │                  │\n        │   ┌────▼────────────────────▼────┐            │\n        │   │       内部总线 (单/多/专用)     │            │\n        │   └────┬────────────────────┬────┘            │\n        │        │                    │                  │\n        │   ┌────▼────┐        ┌─────▼─────┐            │\n        │   │ 控制器   │        │  MAR/MDR  │            │\n        │   │(取指/译码/│        │ (地址/数据 │            │\n        │   │ 发微命令) │        │  缓冲)    │            │\n        │   └─────────┘        └──────────┘            │\n        └─────────────────────────────────────────────┘\n                   │\n        系统总线 ──▶ 内存 / 外设（注意：这是系统总线，不是上面的内部总线）",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch15",
+        "title": "CPU 结构与数据通路",
+        "source": "fund-ch15/concept/01-cpu-structure-datapath.md",
+        "code": "(1) 单总线结构：所有部件挂同一条内部总线，任意时刻只有一对部件能传数\n       ALU ─┐\n       REG ─┼──[内部总线]── MAR/MDR ─ 系统总线 ─▶ 内存\n       PC  ─┘\n       缺点：ALU 双操作数需分两拍（先送一个到暂存器）；总线是瓶颈。\n\n(2) 多总线结构：2~3 条内部总线（如 A 总线 / B 总线 / 结果总线）\n       ALU 可同时从总线A、总线B取两操作数，结果走结果总线\n       并行度提高，节拍数下降，硬件成本上升。\n\n(3) 专用通路（专用数据通路）：为关键路径单独连线（如 REG 直连 ALU 输入）\n       速度最快、无总线争用，但连线爆炸、不灵活。",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch15",
+        "title": "CPU 结构与数据通路",
+        "source": "fund-ch15/concept/01-cpu-structure-datapath.md",
+        "code": "一条 ADD R1,R2,R3 的典型流程（多周期，每拍走总线一次）：\n  T1  PC → MAR, 读内存          （取指：送地址）\n  T2  MDR → IR, PC+1 → PC       （取指：取回指令、PC 自增）\n  T3  R2 → 暂存Y,  R3 → 暂存Z    （译码 + 取源操作数到 ALU 输入锁存）\n  T4  Y + Z → 暂存结果          （执行：ALU 加法）\n  T5  结果 → R1                 （写回）\n  （若是间址/转移，还会插入间址周期、转移周期）",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch15",
+        "title": "CPU 结构与数据通路",
+        "source": "fund-ch15/concept/02-hardwired-vs-microprogram.md",
+        "code": "机器指令（如 ADD）\n   │  被\"翻译\"成\n   ▼\n微程序（一段微指令序列，存于控存）\n   │  由若干\n   ▼\n微指令（控存里的一行：包含多个微命令 + 下址信息）\n   │  每个微指令并行发出\n   ▼\n微命令（最基本控制信号：如 ALU 加、寄存器写使能，原子操作）",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch15",
+        "title": "CPU 结构与数据通路",
+        "source": "fund-ch15/concept/02-hardwired-vs-microprogram.md",
+        "code": "水平型微指令（直接控制 / 水平编码）：\n   ┌──────────────────────────────────────────┐\n   │ 每一位直接对应一个微命令（1=发,0=不发）      │\n   │ 位数长(几十~上百位)，并行度高，不用译码       │\n   │ 例: [RegWr][ALUSel][MemRd][MemWr][...]      │\n   └──────────────────────────────────────────┘\n   特点：字长↑ 并行度↑ 速度↑ 但控存容量大、编写难\n\n垂直型微指令（类似\"微汇编\"，经译码）：\n   ┌──────────────────────────────────────────┐\n   │ 格式像机器指令：操作码字段 + 地址/寄存器字段  │\n   │ 位数短(几~十几位)，要译码才能变微命令        │\n   │ 例: MOV R1, R2  (一条只做一件微操作)         │\n   └──────────────────────────────────────────┘\n   特点：字长↓ 并行度↓ 需译码(慢) 控存省、好写",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch15",
+        "title": "CPU 结构与数据通路",
+        "source": "fund-ch15/concept/03-pipeline-hazard-bypass.md",
+        "code": "时空图（4 条无冒险指令，每段 1 拍）：\n 拍:  1   2   3   4   5   6   7   8\nI1:  IF  ID  EX  MEM WB\nI2:      IF  ID  EX  MEM WB\nI3:          IF  ID  EX  MEM WB\nI4:              IF  ID  EX  MEM WB\n  → 4 条指令 8 拍完成（理想 = n + k - 1 = 4 + 5 - 1 = 8）\n  → 稳态每拍流出 1 条，吞吐率 ≈ 1/拍",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch15",
+        "title": "CPU 结构与数据通路",
+        "source": "fund-ch15/concept/03-pipeline-hazard-bypass.md",
+        "code": "(1) 结构冒险（Structural）：两个指令同拍争同一资源\n     例：单口存储器既要 IF 取指又要 MEM 访存 → 冲突\n     解：分离 I-Cache / D-Cache、增加端口、或插入 stall\n\n(2) 数据冒险（Data）：RAW/WAR/WAW，后指令要前指令还没写回的结果\n     例： ADD R1,R2,R3\n          SUB R4,R1,R5     ← R1 还没 WB，SUB 的 ID/EX 就要用 → RAW\n     解：① 旁路/转发（forwarding）：把 EX/MEM 或 MEM/WB 的结果直接送回\n           当前指令的 ALU 输入，避免等 WB；② load-use 来不及则插 1 拍 stall\n\n(3) 控制冒险（Control）：遇分支，下一条该取哪？\n     例： BEQ 之后，PC 目标未知，简单实现要等 EX 算出才知\n     解：① 排空（最慢）；② 分支预测 + 预测执行；③ 延迟槽",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch15",
+        "title": "CPU 结构与数据通路",
+        "source": "fund-ch15/concept/04-superscalar-performance.md",
+        "code": "超线程(SMT)：一个物理核内两套上下文(PC/寄存器)，共享执行单元/Cache。\n  → 当一个线程因访存/分支停顿空出执行单元，另一线程立刻用上 → 提升吞吐\n  → 但两线程共享 Cache/带宽，单线程延迟未必改善，甚至互相挤占而变慢\n多核：多个完整核，真正并行，共享末级Cache；与超标量是正交的两个维度。",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch15",
+        "title": "CPU 结构与数据通路",
+        "source": "fund-ch15/concept/04-superscalar-performance.md",
+        "code": "A 核：3.0 GHz，CPI = 1.5  → CPU时间 ∝ 1.5 / 3.0 = 0.50 (每指令)\nB 核：2.5 GHz，CPI = 1.0  → CPU时间 ∝ 1.0 / 2.5 = 0.40 (每指令)\n→ B 虽主频低，但 CPI 更优，跑同一程序更快！",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch15",
+        "title": "CPU 结构与数据通路",
+        "source": "fund-ch15/concept/05-cpu-practical-recipes.md",
+        "code": "第1拍：R1 → 总线 → 暂存器A\n第2拍：R2 → 总线 → 暂存器B（同时 ALU 计算 A+B）\n第3拍：ALU结果 → 总线 → R3",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch15",
+        "title": "CPU 结构与数据通路",
+        "source": "fund-ch15/concept/05-cpu-practical-recipes.md",
+        "code": "指令周期（取指 + 间址 + 执行 + 中断）\n  └─ 机器周期（如：取指周期、访存周期、执行周期）\n       └─ 节拍（时钟周期，如 T0/T1/T2）\n            └─ 节拍电位（一拍内的不同电平阶段）",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch16",
+        "title": "总线的分类与性能指标",
+        "source": "fund-ch16/concept/01-总线分类与性能指标.md",
+        "code": "CPU ──┐\n      ├──[ 系统总线 ]── 北桥 ── 内存\nI/O ──┘                  └── 南桥 ── PCIe/USB/磁盘\n                                 │\n                          [ 通信总线 ]── 外部设备（串口/网络）\n\n片内总线：CPU 内部  ALU↔寄存器↔Cache  各部件之间的连线（最宽、最快）",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch16",
+        "title": "总线的分类与性能指标",
+        "source": "fund-ch16/concept/01-总线分类与性能指标.md",
+        "code": "并行总线：多根数据线同时传多位\n  D0 D1 D2 D3 ... D31  ── 一个时钟沿 32 位一起到\n  优点：单拍量大  缺点：线间串扰 + 时钟偏移随长度恶化 → 频率上不去\n\n串行总线：一对差分线逐位传\n  TX+ TX-  ── 一位一位来，靠高频率 + 多 Lane 堆叠带宽\n  优点：线少、抗干扰、可跑极高频率  缺点：单 Lane 单拍量小\n  （PCIe、USB、SATA、以太网全是串行）",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch16",
+        "title": "总线的分类与性能指标",
+        "source": "fund-ch16/concept/02-总线仲裁.md",
+        "code": "多个主设备(Master)要同时用总线：\n  CPU ─┐\n  DMA ─┼──[ 仲裁器 ]── 决定这一拍谁上总线 ──[ 总线 ]── 从设备\n  GPU ─┘\n核心矛盾：总线同一时刻只能被一个主设备占用 → 必须\"裁判\"。",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch16",
+        "title": "总线的分类与性能指标",
+        "source": "fund-ch16/concept/02-总线仲裁.md",
+        "code": "仲裁器                      设备链（物理顺序=优先级）\n  ├── BG(Bus Grant) ──▶ 设备0 ──BG──▶ 设备1 ──BG──▶ 设备2 ──▶ ...\n  ▲                         │            │            │\n  └─────────────── BS(Bus Status / 忙) ┘            ┘\n请求：各设备共用一根 BR(Bus Request)\n\n工作：仲裁器收到 BR → 发 BG(高电平) → 沿链传；\n      第一个\"有请求\"的设备截住 BG（不发往下游），并占用总线；\n      总线忙时 BS 拉高，仲裁器不再发新 BG。",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch16",
+        "title": "总线的分类与性能指标",
+        "source": "fund-ch16/concept/02-总线仲裁.md",
+        "code": "仲裁器                      设备0  设备1  设备2 ... 设备N-1\n  ├── BR(请求，共用)          │      │      │\n  ├── 设备地址线(⌈log₂N⌉根) ─┴──────┴──────┴── (二进制计数)\n  └── BS(忙)\n\n工作：收到 BR → 仲裁器启动计数器，把计数值放到\"设备地址线\"上；\n      被选中编号的设备若有请求 → 占用总线并拉 BS；\n      计数器可\"从 0 递增\"(近似轮转) 或\"从中断点续数\"(更公平)。",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch16",
+        "title": "总线的分类与性能指标",
+        "source": "fund-ch16/concept/02-总线仲裁.md",
+        "code": "仲裁器\n  ├── BR0 ─ 设备0\n  │    BG0 ─ 设备0\n  ├── BR1 ─ 设备1     每个设备一对线，全部并行连到中央仲裁器\n  │    BG1 ─ 设备1\n  ├── BR2 ─ 设备2\n  │    BG2 ─ 设备2\n  └── (内部优先级编码器，速度最快)\n\n工作：各设备独立发 BRi；仲裁器内\"优先级编码器\"立刻算出最高优先级，\n      直接回 GBi，无链式传播延迟。",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch16",
+        "title": "总线的分类与性能指标",
+        "source": "fund-ch16/concept/03-总线定时.md",
+        "code": "时钟 CLK 统一驱动：\n  ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐\n  │ │ │ │ │ │ │ │ │ │   CLK\n  └─┘ └─┘ └─┘ └─┘ └─┘\n  T1   T2   T3   T4   ...  每个时钟沿规定一个动作（如 T1 放地址、T2 数据稳定、T3 采样）\n特点：所有信号在时钟边沿生效，无需握手。\n约束：① 周期必须 ≥ 最慢设备延迟；② 时钟偏移(skew)限制总线长度/频率。",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch16",
+        "title": "总线的分类与性能指标",
+        "source": "fund-ch16/concept/03-总线定时.md",
+        "code": "不互锁（Non-interlocked，最松）：\n  主：发出 Request ──► 延时固定时间 ──► 撤 Request（不管从有没有收到）\n  从：收到后处理 ──► 发 Acknowledge ──► 延时固定 ──► 撤\n  风险：若从太慢没收到就撤了 → 请求丢失。靠\"足够长延时\"赌。\n\n半互锁（Half-interlocked）：\n  主：发 Request ──►【等到 Acknowledge 才撤 Request】──► 撤\n  从：收到 Request 后发 Acknowledge ──►（不互等，延时自动撤 Acknowledge）\n  风险：Acknowledge 可能\"发早了/撤早了\"，从方状态不稳，但主方不会丢请求。\n\n全互锁（Full-interlocked，最严）：\n  主：发 Request ──►【等 Acknowledge 才撤 Request】\n  从：收到 Request ──► 发 Acknowledge ──►【等 Request 撤才撤 Acknowledge】\n  双向互锁：每一步都确认对方\"收到并准备就绪\"才进下一步。\n  最可靠、绝不失步；代价是每一步多一轮握手、延迟最大。",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch16",
+        "title": "总线的分类与性能指标",
+        "source": "fund-ch16/concept/03-总线定时.md",
+        "code": "主发址/数据  ▓▓▓▓▓▓                ▓▓▓▓▓▓\nRequest     ┌─────┐                ┌─────┐\n            │     │                │     │\n            └─────┘                └─────┘\n                  │  从处理         │\nAcknowledge       ┌───────┐        ┌───────┐\n            ──────┘       └────────┘       └──────\n                  ▲ 主看到ACK才撤REQ    ▲ 从看到REQ撤才撤ACK",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch16",
+        "title": "总线的分类与性能指标",
+        "source": "fund-ch16/concept/03-总线定时.md",
+        "code": "CLK  ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐\n     └─┘ └─┘ └─┘ └─┘ └─┘ └─┘\n     T1   T2   T3   Tw   Tw   T4   慢设备在 T3 后拉 READY=0 插入 Tw\nREADY       ──────┐       ┌──────\n                  └───────┘",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch16",
+        "title": "总线的分类与性能指标",
+        "source": "fund-ch16/concept/03-总线定时.md",
+        "code": "普通（非分离）：\n  主：请求+地址 ──► 占着总线干等 ──► 从忙完回数据 ──► 释放\n  （总线在\"从设备准备数据\"期间被白白占用）\n\n分离式：\n  主：发请求+地址 ──►【立刻释放总线】──► 去干别的事(别的 master 可用)\n  ...从设备慢慢准备...\n  从：准备好后 ──► 重新竞争总线 ──► 回数据给原主",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch16",
+        "title": "总线的分类与性能指标",
+        "source": "fund-ch16/concept/04-总线标准与突发传送.md",
+        "code": "并行共享(PCI) 的死穴：\n  线间串扰 + 时钟偏移随长度/频率恶化 → 频率封顶；所有设备抢一条总线 → 带宽被平分。\n串行交换(PCIe) 的解法：\n  每 Lane 一对差分线跑极高频（GHz 级）+ 多 Lane 并发 + 点对点交换（不共享）→ 带宽随 Lane 线性涨。\n突发 + 握手(AXI/PCIe) 的解法：\n  一次地址连续传 + READY/VALID 自适应 → 有效带宽高且能跨时钟域。",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch17",
+        "title": "I/O 接口的功能与结构、I/O 端口编址",
+        "source": "fund-ch17/concept/01-io-interface-and-addressing.md",
+        "code": "CPU 为什么要 I/O 接口？（不能直接连外设的原因）\n  1. 速度不匹配：CPU 纳秒级，键盘毫秒级、磁盘微秒~毫秒级\n  2. 时序不匹配：外设有自己的握手/就绪信号\n  3. 信息格式不匹配：外设是串行/并行、模拟/数字、电平不同\n  4. 信息类型多：数据 / 状态 / 控制 三类信号\n  → 接口 = CPU 与外设之间的\"翻译官 + 缓冲 + 协调器\"\n\n典型 I/O 接口内部寄存器（端口）：\n  CPU ──地址/数据/控制总线──▶ [ 数据寄存器 DR ] ◀──▶ 外设\n                              [ 状态寄存器 SR ] ──▶ CPU 读\"就绪/忙/错误\"\n                              [ 控制寄存器 CR ] ◀── CPU 写\"启动/中断使能\"",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch17",
+        "title": "I/O 接口的功能与结构、I/O 端口编址",
+        "source": "fund-ch17/concept/01-io-interface-and-addressing.md",
+        "code": "        CPU\n         │  地址总线(A)、数据总线(D)、控制总线(C)\n         ▼\n   ┌───────────── 系统总线 ─────────────┐\n         │                              │\n    [ 地址译码 ]                   [ 总线接口逻辑 ]\n         │                              │\n   ┌─────┴──────┐                ┌──────┴──────┐\n   │ 数据端口 DR │◀─── 数据 ────▶│  外设/外设接口 │\n   │ 状态端口 SR │──状态──▶ CPU   └─────────────┘\n   │ 控制端口 CR │◀──控制── CPU\n   └────────────┘",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch17",
+        "title": "I/O 接口的功能与结构、I/O 端口编址",
+        "source": "fund-ch17/concept/02-four-io-methods.md",
+        "code": "① 程序查询（Polling）\n  CPU: while ((SR & READY)==0) { /* 空转 */ }   // 一直在问\"好了吗\"\n       data = DR;                                // 好了就读\n  ─ 全程 CPU 被占用，外设慢则 CPU 闲等。\n\n② 程序中断（Interrupt）\n  CPU: 启动设备; 去做别的事;            // 不被设备拖住\n       ... (设备就绪) → 硬件置 IRR, 发 INTR\n       CPU 响应: 关中断→保存断点→取向量→跳 ISR\n       ISR: 读 DR 把数据搬进内存; 开中断; IRET 返回\n  ─ \"等待\"阶段 CPU 自由，但每次只搬少量数据，且搬运在 ISR 内由 CPU 完成。\n\n③ DMA\n  CPU: 设 DMAC(源/目的/长度/方向); 启动 DMAC; 去做别的事;\n       DMAC: 每来一个\"设备就绪\"就偷一个总线周期，把 1 个字/1 块搬进内存;\n             全部传完 → 向 CPU 发一次\"DMA 结束中断\"\n  ─ 数据传送完全不经过 CPU 寄存器，仅开始/结束需 CPU。\n\n④ 通道（Channel）\n  CPU: 在内存写好\"通道程序(CCW 链表)\"; 执行一条\"启动 I/O\"指令;\n       通道: 取 CCW → 执行(读/写/转移/停止) → 取下一条 → ...\n             全部完成 → 发\"通道中断\"通知 CPU\n  ─ 通道是 I/O 处理器，能处理带格式、带分支的复杂传送。",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch17",
+        "title": "I/O 接口的功能与结构、I/O 端口编址",
+        "source": "fund-ch17/concept/02-four-io-methods.md",
+        "code": "方式          CPU参与度   每次传送单位   与CPU并行   硬件成本   典型适用\n─────────────────────────────────────────────────────────────────────\n程序查询      最高(忙等)   字节/字        否          极低      极低速/偶发/固件初始化\n程序中断      中(等中断)   字节/字        等待时可并行 低        中低速、不定时(键盘/鼠标)\nDMA          低(仅首尾)   块/连续区     是          中        高速大块(磁盘/网卡/声卡)\n通道          极低        复杂I/O流     是          高(处理器) 大型机多设备/复杂格式",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch17",
+        "title": "I/O 接口的功能与结构、I/O 端口编址",
+        "source": "fund-ch17/concept/02-four-io-methods.md",
+        "code": "  数据少又急不得  → 查询(简单确定)\n  来了不知道何时  → 中断(等通知)\n  一大块猛搬      → DMA(省 CPU)\n  一堆设备多格式  → 通道(专业外包)",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch17",
+        "title": "I/O 接口的功能与结构、I/O 端口编址",
+        "source": "fund-ch17/concept/03-interrupt-response-and-handling.md",
+        "code": "【中断响应五步】（硬件 + 软件协作）\n  ① 关中断        : CPU 屏蔽新的可屏蔽中断（置屏蔽标志），防止ISR被打乱\n  ② 保存断点      : 把当前 PC（断点）压栈或存入特定寄存器\n  ③ 引出中断服务程序: 由硬件/软件找到 ISR 入口（向量 or 查询）\n  ④ 执行 ISR      : 保护现场→开中断(如需嵌套)→具体处理→关中断→恢复现场\n  ⑤ 中断返回(IRET): 恢复断点(PC)、恢复屏蔽标志，回到被中断的程序\n\n【单级 vs 多级中断】\n  单级: 只有一级中断，优先级无细分；或全程关中断，不允许任何嵌套\n  多级: 中断分多个优先级；高优先级可在低优先级ISR执行时被响应 → 多重中断(嵌套)",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch17",
+        "title": "I/O 接口的功能与结构、I/O 端口编址",
+        "source": "fund-ch17/concept/03-interrupt-response-and-handling.md",
+        "code": "外设就绪 ──置 IRR 相应位、发 INTR──▶ CPU 在\"指令边界\"检查\n   │\n   ▼\n① 关中断      （CPU 内部置\"中断屏蔽\"位；可屏蔽中断被挡住，NMI 不受此限）\n   ▼\n② 保存断点    （PC 当前值入栈/存专用寄存器；这是\"回到原处\"的依据）\n   ▼\n③ 引出 ISR    （取中断向量/查询入口 → 把 ISR 首地址装入 PC）\n   ▼\n④ 执行 ISR    （见下：保护现场→[开中断]→处理→[关中断]→恢复现场）\n   ▼\n⑤ 中断返回     （IRET：恢复 PC（断点）+ 恢复原来的中断屏蔽状态）",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch17",
+        "title": "I/O 接口的功能与结构、I/O 端口编址",
+        "source": "fund-ch17/concept/03-interrupt-response-and-handling.md",
+        "code": "向量中断（Vector Interrupt）：\n  外设/中断控制器把\"中断类型号/向量号\"送上数据总线 → CPU 用它在\n  [中断向量表/IDT] 里查到 ISR 入口。 一步定位，快，能区分来源。\n      CPU: 向量号 n → 入口 = *(向量表基址 + n×表项大小)\n\n查询中断（Polled Interrupt）：\n  CPU 进一个公共入口，再依次读各设备状态位判断\"是谁\"：\n      if (KBD_SR & INT) service_kbd();\n      else if (NET_SR & INT) service_net();  // 顺序决定优先级",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch17",
+        "title": "I/O 接口的功能与结构、I/O 端口编址",
+        "source": "fund-ch17/concept/03-interrupt-response-and-handling.md",
+        "code": "单级中断：\n  - 所有中断同等对待，或全程关中断 → 不允许嵌套；\n  - 优点简单，缺点：低优先级中断会阻塞高优先级（若先到的是低优先级且关了中断）。\n\n多级中断：\n  - 中断分优先级，高可打断低 → 支持多重中断(嵌套)；\n  - 需要中断控制器做优先级仲裁（如 8259A 的 IR0~IR7 优先级、ARM GIC 的优先级分组）。",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch17",
+        "title": "I/O 接口的功能与结构、I/O 端口编址",
+        "source": "fund-ch17/concept/04-dma-and-channel.md",
+        "code": "① 预处理（CPU 做）\n   CPU ──▶ DMAC: 设 源地址(MAR) / 目的地址 / 计数(DAR) / 方向(读内存还是写内存)\n                发 \"启动 DMA\" 命令\n   CPU ──▶ 去做别的（此时数据还没开始传）\n\n② 数据传送（DMAC 做，CPU 不介入）\n   设备就绪一次 → DMAC 申请总线 → 挪用一个总线周期 → 搬 1 个字/1 块\n   地址寄存器 +1，计数 -1，直到计数=0\n\n③ 后处理（CPU 做，靠中断）\n   计数到 0 → DMAC 拉高 \"DMA 结束中断\" → CPU 进 ISR\n   ISR: 通知等待的进程、更新 buffer 指针、释放资源",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch17",
+        "title": "I/O 接口的功能与结构、I/O 端口编址",
+        "source": "fund-ch17/concept/04-dma-and-channel.md",
+        "code": "(1) 停止 CPU 访存（DMA 优先，CPU 停）\n    |CPU访存|............DMA独占总线............|CPU访存|\n    CPU 在 DMA 期间无法取指/取数 → 简单但浪费\n\n(2) 周期挪用 / 透明 DMA（偷空闲周期）\n    CPU周期 CPU周期 [DMA偷1周期] CPU周期 CPU周期 [DMA偷1周期]\n    CPU 不访存的那一瞬间被 DMA 借用 → CPU 几乎无感\n\n(3) 交替访存 / 分时（总线按时分）\n    [C1][D1][C2][D2]...  C=CPU周期 D=DMA周期，各自专用 → 需硬件把总线时序分开",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch17",
+        "title": "I/O 接口的功能与结构、I/O 端口编址",
+        "source": "fund-ch17/concept/04-dma-and-channel.md",
+        "code": "CCW（通道命令字）字段示意：\n  [命令码][数据区首址][计数值][标志:链/转移/暂停...]\n通道程序 = CCW0 → CCW1 → CCW2(链位=1) → ... → CCWn(链位=0,停止)\n\nCPU 侧：\n  1) 在内存写好通道程序(CCW 链)\n  2) 执行 \"启动 I/O\" 指令(特权指令)，把通道程序首址告诉通道\n  3) 通道自主取 CCW 执行：读设备→搬内存→遇\"转移CCW\"跳转→遇\"停止\"结束\n  4) 完成 → 发 \"通道中断\" → CPU 收尾",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch17",
+        "title": "I/O 接口的功能与结构、I/O 端口编址",
+        "source": "fund-ch17/concept/04-dma-and-channel.md",
+        "code": "类型          服务方式                      适用设备\n─────────────────────────────────────────────────────────\n字节多路通道   轮流、分时服务多个低速设备     打印机/终端(字符流)\n选择通道      独占一个高速设备直到传完       磁盘(一次一大块)\n数组多路通道  分块+轮流(每块间让出)多个中高速 多台磁盘/磁带(兼顾并行)",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch17",
+        "title": "I/O 接口的功能与结构、I/O 端口编址",
+        "source": "fund-ch17/concept/04-dma-and-channel.md",
+        "code": "┌─────────────────────────────────────────────┐\n│ 用户层 I/O 软件   : 库函数、SPOOLING、用户缓冲 │  ← 你调用的 printf/read\n├─────────────────────────────────────────────┤\n│ 与设备无关OS软件  : 统一命名/缓冲/错误处理/保护 │  ← 抽象成 \"文件/设备\" 概念\n├─────────────────────────────────────────────┤\n│ 设备驱动程序      : 具体寄存器操作、命令序列    │  ← 直接面向硬件\n├─────────────────────────────────────────────┤\n│ 中断处理程序      : 清中断、收数据、唤醒进程    │  ← 最靠近硬件\n└─────────────────────────────────────────────┘\n         ▲ 向下逐层调用，向上逐层返回",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch18",
+        "title": "并查集：路径压缩 + 按秩合并",
+        "source": "fund-ch18/concept/05-dsu-string-practical-recipes.md",
+        "code": "i=0: \"a\"            → 0\ni=1: \"ab\"           → 0\ni=2: \"aba\"          → 1（前 \"a\" = 后 \"a\"）\ni=3: \"abab\"         → 2（\"ab\" = \"ab\"）\ni=4: \"ababa\"        → 3（\"aba\" = \"aba\"）\ni=5: \"ababac\"       → 0\ni=6: \"ababaca\"      → 1（\"a\" = \"a\"）\nnext = [0, 0, 1, 2, 3, 0, 1]",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch19",
+        "title": "并发、共享、虚拟、异步：操作系统的四个字到底在说什么",
+        "source": "fund-ch19/concept/01-concurrency-and-os-features.md",
+        "code": "      物理上只有一颗 CPU、一份内存\n                │\n        ┌───────┴────────┐\n        │  ① 并发         │  多个程序在\"同一段时间\"内都在推进\n        │  (交替执行)     │  —— 这是 OS 存在的前提\n        └───────┬────────┘\n                │ 要并发，就必须让它们共用资源\n        ┌───────┴────────┐\n        │  ② 共享         │  互斥共享(打印机/临界区) / 同时共享(只读代码段)\n        └───────┬────────┘\n                │ 资源只有一份怎么办？把\"一份\"变出\"多份\"\n        ┌───────┴────────┐\n        │  ③ 虚拟         │  时分复用(CPU→每进程一个\"自己的CPU\")\n        │                 │  空分复用(内存→每进程一个\"自己的地址空间\")\n        └───────┬────────┘\n                │ 交替+抢占+中断，导致程序走走停停\n        ┌───────┴────────┐\n        │  ④ 异步         │  程序以不可预知的速度推进\n        └────────────────┘",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch19",
+        "title": "并发、共享、虚拟、异步：操作系统的四个字到底在说什么",
+        "source": "fund-ch19/concept/02-kernel-mode-syscall-interrupt.md",
+        "code": "        用户态 (目态, ring3)                内核态 (管态, ring0)\n   ┌──────────────────────────┐        ┌──────────────────────────┐\n   │ 你的代码 / malloc / printf │        │ 调度器 / 内存管理 / 驱动   │\n   │ 只能访问自己的地址空间      │        │ 可访问全部物理内存与设备   │\n   │ 特权指令 -> #GP 异常       │        │ 特权指令合法              │\n   └───────────┬──────────────┘        └───────────┬──────────────┘\n               │                                     │\n               │   ① 陷入指令 syscall / int 0x80      │\n               │   ② 外中断（时钟/网卡）               │\n               │   ③ 异常（缺页/除零）                 │\n               └──────────────► 只能由这三类事件跨过 ◄┘",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch19",
+        "title": "并发、共享、虚拟、异步：操作系统的四个字到底在说什么",
+        "source": "fund-ch19/concept/02-kernel-mode-syscall-interrupt.md",
+        "code": "  ① 硬件自动做（中断隐指令，不用软件写）：\n       关中断 → 保存断点(PC/PSW) → 根据中断号查中断向量表 → 跳到服务程序入口\n  ② 软件（服务程序）做：\n       保存通用寄存器等现场 → 具体处理 → 恢复现场 → 开中断 → 中断返回(iret)",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch19",
+        "title": "并发、共享、虚拟、异步：操作系统的四个字到底在说什么",
+        "source": "fund-ch19/concept/02-kernel-mode-syscall-interrupt.md",
+        "code": "用户态：  ① 把系统调用号放入寄存器（如 eax=1 表示 write）\n          ② 把参数放入寄存器/栈（rdi, rsi, rdx）\n          ③ 执行陷入指令 syscall\n            │\n────────────┼──────────── 硬件：切到 ring0，跳到内核入口\n            ▼\n内核态：  ④ 保存现场 → 按 eax 的值查 sys_call_table 取服务例程\n          ⑤ 执行服务例程（校验参数、真正干活）\n          ⑥ 把返回值放回寄存器 → 恢复现场 → iret 返回用户态",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch19",
+        "title": "并发、共享、虚拟、异步：操作系统的四个字到底在说什么",
+        "source": "fund-ch19/concept/03-os-architecture-monolithic-vs-microkernel.md",
+        "code": "   大内核 (monolithic)                     微内核 (microkernel)\n┌─────────────────────────┐          ┌───────────────────────────────┐\n│ 用户态                    │          │ 用户态                         │\n│  应用 / 库函数            │          │  应用  文件系统服务  驱动服务   │\n├─────────────────────────┤          ├───────────────────────────────┤\n│ 内核态（一大坨）           │          │ 内核态（很小）                  │\n│  文件系统 网络 驱动 内存   │          │  进程通信(IPC) 低级调度 中断    │\n│  调度 内存管理 中断        │          │                               │\n└─────────────────────────┘          └───────────────────────────────┘\n 优点：调用链短、性能好                  优点：内核小、隔离强、可验证\n 缺点：一处 bug 全崩、代码巨复杂          缺点：服务间全靠 IPC，开销大",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch19",
+        "title": "并发、共享、虚拟、异步：操作系统的四个字到底在说什么",
+        "source": "fund-ch19/concept/04-program-loading-and-linking.md",
+        "code": "   编译                 链接                    装入                执行\n a.c ──► a.o        a.o + libc ──► a.out      a.out ──► 内存映像       PC 指向 _start\n (-c)               (符号解析+重定位)            (地址重定位)          → main",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch19",
+        "title": "并发、共享、虚拟、异步：操作系统的四个字到底在说什么",
+        "source": "fund-ch19/concept/04-program-loading-and-linking.md",
+        "code": " 高地址  ┌──────────────────────────┐\n         │ 内核空间（用户态不可访问）    │  ← ring3 访问触发段错误\n         ├──────────────────────────┤\n         │ 栈 stack（向下增长）        │  ← 局部变量、返回地址\n         │      ↓                   │\n         │      ...                 │\n         │      ↑                   │\n         │ 堆 heap（向上增长）         │  ← malloc / new\n         ├──────────────────────────┤\n         │ bss（未初始化全局，清零）    │  ← 不占文件，占内存！\n         │ data（已初始化全局/静态）    │\n         │ rodata（字符串常量、只读表）  │\n         │ text（代码段，只读可执行）    │\n 低地址  └──────────────────────────┘",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch20",
+        "title": "文件的逻辑结构：用户看到的样子",
+        "source": "fund-ch20/concept/01-logical-file-structure.md",
+        "code": "   用户视角（逻辑结构）                      磁盘视角（物理结构）\n┌──────────────────────────┐          ┌──────────────────────────┐\n│ 无结构：一堆字节             │          │ 连续分配：占一段连续块        │\n│ 顺序文件：记录按关键字有序     │   正交    │ 链接分配：块里存下一块号      │\n│ 索引文件：主文件+索引表       │ ◄──────► │ 索引分配：索引块存数据块号    │\n│ 索引顺序文件：分组+组内顺序    │          │ （单级/多级/混合）           │\n│ 直接文件：关键字哈希→块       │          └──────────────────────────┘\n└──────────────────────────┘",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch20",
+        "title": "文件的逻辑结构：用户看到的样子",
+        "source": "fund-ch20/concept/02-file-allocation-and-indirect-index.md",
+        "code": "   连续分配            链接分配（隐式）           索引分配\n┌──────────────┐    ┌──────────────┐        ┌──────────────┐\n│ 块100..107    │    │ 100→205→310  │        │ 索引块:      │\n│ 一段连着的块   │    │ 块尾存下一块号 │        │ [100,205,310]│\n└──────────────┘    └──────────────┘        └──────────────┘\n 读第k块 = 1 次 I/O   读第k块 = k+1 次 I/O     读第k块 = 2 次 I/O\n 增长：难（要挪）     增长：易（挂到链尾）      增长：易（加索引项）\n 随机访问：最快       随机访问：最差            随机访问：好",
+        "desc": "**要让文件能随便长大（增长性），又要能随便跳到任意位置（随机访问），还要省元数据（空间开销）。** 三者不可兼得。"
+      },
+      {
+        "chapter": "fund-ch20",
+        "title": "文件的逻辑结构：用户看到的样子",
+        "source": "fund-ch20/concept/02-file-allocation-and-indirect-index.md",
+        "code": "最大文件 = 10·B + (B/p)·B + (B/p)²·B + (B/p)³·B\n访问第 k 块的 I/O 次数：\n  前 10 块            → 1 次（直接读数据块）\n  一级间接范围内       → 2 次（索引块 + 数据块）\n  二级间接范围内       → 3 次\n  三级间接范围内       → 4 次",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch20",
+        "title": "文件的逻辑结构：用户看到的样子",
+        "source": "fund-ch20/concept/03-directory-inode-and-links.md",
+        "code": "        目录（本质是\"名字→inode号\"的表）\n   ┌───────────────────────────────┐\n   │  \"report.csv\"   →  inode 1024  │──┐\n   │  \"backup.csv\"   →  inode 1024  │──┤  两个名字，同一个 inode（硬链接）\n   │  \"latest\"       →  inode 2048  │  │\n   └───────────────────────────────┘  │\n                                      ▼\n                        ┌──────────────────────────┐\n                        │ inode 1024               │\n                        │  link_count = 2          │\n                        │  权限 / 大小 / 时间戳      │\n                        │  数据块指针（直接+间接）    │\n                        └──────────────────────────┘\n                                      │\n                        ┌─────────────┴────────────┐\n                        │  inode 2048（软链接）      │\n                        │  内容 = \"report.csv\" 路径  │\n                        └──────────────────────────┘",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch20",
+        "title": "文件的逻辑结构：用户看到的样子",
+        "source": "fund-ch20/concept/04-free-space-and-journaling.md",
+        "code": "   问题一：空闲空间管理                问题二：崩溃一致性\n┌────────────────────────┐      ┌──────────────────────────────┐\n│ 空闲表 / 空闲链表         │      │ 直接写：改数据→改位图→改inode    │\n│ 位示图（1bit/块）        │      │        中间掉电 = 元数据不一致    │\n│ 成组链接（块号存空闲块里） │      │ 日志：先写日志+commit，再改原位   │\n│ B+树/区段树（ZFS/Btrfs） │      │        掉电 = 重放或回滚          │\n└────────────────────────┘      └──────────────────────────────┘",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch20",
+        "title": "文件的逻辑结构：用户看到的样子",
+        "source": "fund-ch20/concept/05-filesystem-practical-recipes.md",
+        "code": "块大小 B = 4KB = 4096B\n指针大小 P = 4B\n每个间接块能装 N = B / P = 1024 个指针\n\n直接块：        12 × B            = 12 × 4096 = 48 KB\n一级间接：       N × B            = 1024 × 4096 = 4 MB\n二级间接：    N² × B              = 1024² × 4096 = 4 GB\n三级间接：    N³ × B              = 1024³ × 4096 = 4 TB\n──────────────────────────────────────────────\n最大文件 ≈ 4 TB + 4 GB + 4 MB + 48 KB",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch21",
+        "title": "四种 I/O 控制方式：从\"CPU 死等\"到\"CPU 只发命令\"",
+        "source": "fund-ch21/concept/01-io-control-methods.md",
+        "code": "① 程序查询（轮询）\n   CPU: [查状态][查状态][查状态] ... [读数据][查状态][查状态] ... \n         └────────── 传输 2048ms 期间 CPU 全程被钉住 ──────────┘\n\n② 程序中断\n   CPU: [启动设备] → 去干别的 → 中断! [传1字] → 去干别的 → 中断! [传1字] ...\n        每传 1 字被打扰一次，等待时间被回收，但\"搬\"还是 CPU 搬\n\n③ DMA\n   CPU: [设源/目的/长度][启动] → 去干别的 → 中断! [整块已完成]\n        搬运由 DMA 控制器直接读写内存（不经过 CPU 寄存器）\n\n④ 通道\n   CPU: [发一条 I/O 指令，给一个通道程序] → 去干别的 → 中断! [通道程序执行完]\n        通道本身是一台小处理器，能执行通道程序、同时管多台设备",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch21",
+        "title": "四种 I/O 控制方式：从\"CPU 死等\"到\"CPU 只发命令\"",
+        "source": "fund-ch21/concept/02-interrupt-and-bottom-half.md",
+        "code": "设备发出中断请求 (IRQ)\n        │\n        ▼\n① 中断判优 ──── 多个请求同时到达时，按优先级选一个\n        │\n        ▼\n② 关中断 ────── 硬件自动清除 IF 标志（防止现场被破坏）\n        │\n        ▼\n③ 保存断点 ──── 硬件自动把 PC 与 PSW 压栈（只保证\"回来能继续\"）\n        │\n        ▼\n④ 引出服务程序 ─ 向量中断：按中断号查中断向量表，跳到入口\n        │         （非向量中断：软件查询是哪个设备）\n        ▼\n⑤ 保存现场 ──── 服务程序自己保存通用寄存器（这一步是软件做的！）\n        │\n        ▼\n⑥ 执行服务 ──── 处理数据、清中断标志、唤醒下半部\n        │\n        ▼\n⑦ 恢复现场 → 开中断 → 中断返回 (IRET)",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch21",
+        "title": "四种 I/O 控制方式：从\"CPU 死等\"到\"CPU 只发命令\"",
+        "source": "fund-ch21/concept/03-buffering-and-spooling.md",
+        "code": "              输入井（磁盘）                     输出井（磁盘）\n   用户进程 ──写入──▶ [ 作业1 ][ 作业2 ]...     用户进程 ──写入──▶ [ 报表A ][ 报表B ]...\n                        │                                            │\n                   输入进程 SPi                                输出进程 SPo\n                        │ 按需调作业                                 │ 按序打印\n                        ▼                                            ▼\n                   内存输入缓冲区 ──▶ CPU                    打印机（独占设备）",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch21",
+        "title": "四种 I/O 控制方式：从\"CPU 死等\"到\"CPU 只发命令\"",
+        "source": "fund-ch21/concept/04-disk-scheduling-raid-ssd.md",
+        "code": "SCAN（向大方向，初始 53，上界 199）\n53 ──▶ 65 ──▶ 67 ──▶ 98 ──▶ 122 ──▶ 124 ──▶ 183 ──▶ 199(到头) ──▶ 37 ──▶ 14\n        去程服务全部较大请求                          到头折返，服务较小请求\n\nC-SCAN（同上，但返程不服务）\n53 ──▶ ... ──▶ 183 ──▶ 199 ──(空返)──▶ 0 ──▶ 14 ──▶ 37\n                                回程不服务，保证每个磁道的等待上界一致",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch22",
+        "title": "信道容量：奈氏与香农，两个上限取较小值",
+        "source": "fund-ch22/concept/01-nyquist-vs-shannon.md",
+        "code": "两个上限谁在起约束？（W=3kHz）\n\n  速率\n  40k ┤                       ╭──── 奈氏(V=16) = 24k 被封顶\n       │                  ╭────╯\n  24k ┤ ─ ─ ─ ─ ─ ─ ─ ─ ╯  ← 奈氏上限（水平线，与信噪比无关）\n       │            ╭────╯\n  10k ┤      ╭─────╯   ← 香农上限（随信噪比上升）\n       │  ╭──╯\n    0  └──┴────┴────┴────┴──▶ S/N\n        10   20   30   40  dB\n\n  10/20dB：香农 < 奈氏 → 噪声是瓶颈（提高电平数没用）\n  30/40dB：香农 > 奈氏 → 码元速率是瓶颈（该加带宽了）",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch22",
+        "title": "信道容量：奈氏与香农，两个上限取较小值",
+        "source": "fund-ch22/concept/02-line-coding-and-self-sync.md",
+        "code": "### 波形对照：谁能自己恢复时钟\n\n比特:      1     0     1     1     0     0     1\n          ┌─┐   ┌─┐   ┌─┐   ┌─┐   ┌─┐   ┌─┐   ┌─┐\nNRZ    ───┘ └───┘ └───┘ └───┘ └───┘ └───┘ └───┘ └───\n        高位持续 → 连续相同位时「零跳变」，接收方无法定时\n\n曼彻斯特（每位中间必有跳变，跳变即时钟）\n   1: ──┐___      0: ___┌──\n        ↑ 位中      ↑ 位中\n       低→高        高→低\n\n差分曼彻斯特（看「位首有无跳变」）\n   位首跳变 = 0 ；位首不跳 = 1 ；位中必跳\n   好处：双绞线接反了也能解码（只看\"变没变\"，不看\"高还是低\"）",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch22",
+        "title": "信道容量：奈氏与香农，两个上限取较小值",
+        "source": "fund-ch22/concept/03-multiplexing-fdm-tdm-wdm-cdm.md",
+        "code": "FDM（频分）：把频带切成段\n  频率\n   ▲\n f3│▓▓▓▓ 用户3 ▓▓▓▓\n f2│▓▓▓▓ 用户2 ▓▓▓▓\n f1│▓▓▓▓ 用户1 ▓▓▓▓\n   └──────────────────▶ 时间\n     （所有人「一直」在传，各占一段频率）\n\nTDM（时分）：把时间切成帧，帧里切时隙\n  时隙\n   ┌──帧──┬──帧──┬──帧──┐\n   │1│2│3│1│2│3│1│2│3│...\n   └─┴─┴─┴─┴─┴─┴─┴─┴─┘\n     （每人在自己的时隙里「独占」全带宽）\n\nCDM（码分）：所有人同时同频，靠正交码片区分\n   用户A: [+1 +1 +1 +1]  发 1 -> +A\n   用户B: [+1 +1 -1 -1]  发 0 -> -B\n   用户C: [+1 -1 +1 -1]  静默 -> 0\n   ────────────────────────────\n   信道信号 S = A - B = [+0 +0 +2 +2]   ← 叠加在同一频率、同一时刻\n   接收端: 用各自码片做内积，只有自己的码片能\"解出\"自己的数据",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch22",
+        "title": "信道容量：奈氏与香农，两个上限取较小值",
+        "source": "fund-ch22/concept/04-delay-bdp-and-phy-devices.md",
+        "code": "把链路想成一根「管子」：\n\n  发送端 ──────────────────────────────────▶ 接收端\n         ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓\n         ↑                              ↑\n      正在「推上线路」            正在「跑在路上」\n       T_trans = L/R               T_prop = d/v\n\n  管子的「粗细」 = 带宽 R\n  管子的「长度」 = 传播时延 T_prop\n  管子的「容积」 = BDP = T_prop × R  ← 同时\"在路上\"的比特数\n\n  想让管子灌满 → 发送窗口/缓冲区 ≥ BDP",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch22",
+        "title": "信道容量：奈氏与香农，两个上限取较小值",
+        "source": "fund-ch22/concept/05-units-and-conversions.md",
+        "code": "┌──────────────────────────────────────────────┐\n│  30 dB  →  功率 ×1000  →  log2(1+1000) ≈ 9.97 bit/符号 │\n│  16-QAM →  每码元 4 bit  →  2400 Baud = 9600 bps  │\n│  1 Gbps × 100 ms → BDP 100 Mbit = 12.5 MB       │\n│  采样 ≥ 2 × 最高频率  →  20 kHz 音频取 44.1 kHz   │\n│  500 GB(10³) ≈ 465 GiB(2¹⁰)                    │\n└──────────────────────────────────────────────┘",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch23",
+        "title": "组帧与透明传输",
+        "source": "fund-ch23/concept/01-framing-and-transparency.md",
+        "code": "① 字符计数法（character count）\n   +--------+------------------------+\n   | 计数=5 | 5 个字符的数据 ...      |  下一帧 ...\n   +--------+------------------------+\n   优点：不用填充，零开销\n   缺点：计数字段一错，后面全乱，且无法自恢复   ← 已被淘汰\n\n② 字节填充 / 字符填充（PPP 异步链路）\n   定界：FLAG = 0x7E，转义：ESC = 0x7D\n   发送：数据里的 0x7E -> 0x7D 0x5E\n         数据里的 0x7D -> 0x7D 0x5D\n   接收：见到 0x7D 就把下一个字节 XOR 0x20 还原\n   优点：自恢复（找到下一个 0x7E 就重新同步）\n\n③ 零比特填充 / 比特填充（HDLC）\n   定界：FLAG = 01111110\n   发送：每出现 5 个连续 1，立即插入一个 0\n   接收：每见到 5 个连续 1，就把紧跟的 0 删掉\n   效果：数据区永远不会出现 6 个连续 1 -> 永远撞不上 FLAG\n\n④ 违规编码法（物理层编码配合）\n   例如曼彻斯特编码中「高-高」「低-低」是非法码元，\n   就用这种不可能出现的组合当定界符（早期局域网用过）",
+        "desc": ""
+      },
+      {
+        "chapter": "fund-ch23",
+        "title": "组帧与透明传输",
+        "source": "fund-ch23/concept/04-mac-csmacd-ethernet-vlan.md",
+        "code": "前导码 7B | SFD 1B | 目的MAC 6B | 源MAC 6B | 类型 2B | 数据 46~1500B | FCS 4B\n10101010... 10101011   <- SFD 的最后两位 11 表示「帧开始了」\n\n帧长（不含前导码与 SFD）= 6+6+2+46+4 .. 6+6+2+1500+4 = 64 .. 1518 字节\n帧间最小间隔 IFG = 12 字节时间（让接收方有时间处理）\n\n802.1Q VLAN Tag（4 字节）插在「源 MAC」之后、「类型」之前：\n  +--------+------------------+\n  | TPID   | TCI              |\n  | 0x8100 | PCP(3) DEI(1) VID(12) |\n  +--------+------------------+\n  后果：帧头 14B -> 18B；帧长上限 1518 -> 1522（老设备可能当超长帧丢弃）",
         "desc": ""
       }
     ]
@@ -85,11 +729,172 @@ export const DIAGRAM_SUBJECTS: DiagramSubject[] = [
     "hue": "#2c7a8c",
     "entries": [
       {
+        "chapter": "cpp-ch01",
+        "title": "变量、类型与引用",
+        "source": "cpp-ch01/concept/01-types-and-references.md",
+        "code": "窄化发生的位置（编译期可查 vs 运行期静默）\n\n  int x{3.14}        → 编译错误（列表初始化禁止窄化）   ✔ 早发现\n  int x = 3.14       → 编译通过，x == 3，无任何提示     ✘ 静默\n  int x = big_long   → 实现定义，可能截断高位           ✘ 静默\n  double d = 1/2     → d == 0.0，整除发生在赋值之前     ✘ 静默",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch01",
+        "title": "变量、类型与引用",
+        "source": "cpp-ch01/concept/01-types-and-references.md",
+        "code": "参数传递决策表\n\n  内建类型（int/double/指针）      → 按值 T\n  只读的大对象（string/vector/自定义类） → const T&\n  需要修改调用方的对象             → T&\n  需要表达\"可能没有\"               → T* （或 std::optional<T>）\n  需要转移所有权                   → std::unique_ptr<T>（移动）\n  需要共享所有权                   → std::shared_ptr<T>",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch01",
+        "title": "变量、类型与引用",
+        "source": "cpp-ch01/concept/02-type-deduction-auto.md",
+        "code": "推导规则对照（设 int a = 1; const int c = 2; int& r = a;）\n\n  auto        x = r;   → int             丢掉引用\n  auto&       x = r;   → int&            保留引用\n  const auto& x = r;   → const int&      既能绑左值也能绑临时对象\n  auto        x = c;   → int             丢掉顶层 const\n  decltype(r) x = r;   → int&            声明类型原样\n  decltype((r)) x = r; → int&            带括号 → 左值 → T&\n  auto        x = arr; → int*            数组退化为指针（arr 为 int[3]）",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch01",
+        "title": "变量、类型与引用",
+        "source": "cpp-ch01/concept/03-std-string-vector.md",
+        "code": "std::string 的两种存储形态（libstdc++，64 位）\n\n  短串（≤15 字节）      长串（>15 字节）\n  ┌──────────────┐      ┌──────────────┐\n  │ ptr ────────►│ 指向  │ ptr ─────────┼──► 堆上缓冲\n  │ size         │ 自身  │ size         │\n  │ 内联缓冲 16B │ 缓冲  │ capacity     │\n  └──────────────┘      └──────────────┘\n  无堆分配              1 次分配 + 扩容时搬移",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch01",
+        "title": "变量、类型与引用",
+        "source": "cpp-ch01/concept/04-basics-practical-recipes.md",
+        "code": "04-basics-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场一：引用绑定到临时对象，离开作用域变悬垂  (cpp)\n    |\n    v\n  [02] 现场二：auto 退化掉引用和 const，副本悄悄产生  (cpp)\n    |\n    v\n  [03] 现场三：有符号与无符号混比，-1 秒变超大正数  (cpp)\n    |\n    v\n  [04] 现场四：reserve 当成 resize 用，v[0] 直接越界 UB  (cpp)\n    |\n    v\n  [05] 现场五：c_str() 指针跨修改使用，悬垂  (cpp)\n    |\n    v\n  [06] 现场六：const T& 绑定函数返回的引用不延长生命周期  (cpp)\n    |\n    v\n  [07] 现场七：列表初始化才挡窄化，= 初始化静默截断  (cpp)\n    |\n    v\n  [08] 现场八：string 拼接用 + 连 char 而不是 string，类型错乱  (cpp)\n    |\n    v\n  [... 其余 4 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch02",
+        "title": "函数声明与定义",
+        "source": "cpp-ch02/concept/01-function-decl-def.md",
+        "code": "编译-链接流水线（两个 TU 各自编译，最后拼接）\n\n  a.cpp ──compile──► a.o ──┐\n                           ├──link──► app（解析符号引用，填地址）\n  b.cpp ──compile──► b.o ──┘\n     ▲                 ▲\n     └─ 头文件只提供声明   └─ 未解析符号在这里被绑定",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch02",
+        "title": "函数声明与定义",
+        "source": "cpp-ch02/concept/03-lambda-captures.md",
+        "code": "lambda 展开后的等价类（[&total](int x){ total += x; }）\n\n  struct __lambda_1 {\n      int& total;                          // 引用捕获 → 引用成员\n      void operator()(int x) const { total += x; }   // 默认 const\n  };\n\n  [=] 展开 → 成员是 int total;（副本）\n  [x] 展开 → 成员是 int x;（同名副本）",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch02",
+        "title": "函数声明与定义",
+        "source": "cpp-ch02/concept/04-func-practical-recipes.md",
+        "code": "04-func-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场一：f(NULL) 选中 f(int)，空指针歧义  (cpp)\n    |\n    v\n  [02] 现场二：[=] 在成员函数里捕获的是 this，不是对象副本  (cpp)\n    |\n    v\n  [03] 现场三：循环里按引用捕获循环变量，闭包全看到退出值  (cpp)\n    |\n    v\n  [04] 现场四：mutable 改的是闭包内副本，外部变量纹丝不动  (cpp)\n    |\n    v\n  [05] 现场五：头文件里定义非 inline 函数，multiple definition  (cpp)\n    |\n    v\n  [06] 现场六：默认参数只能写在声明一处，调用处再写就重定义  (cpp)\n    |\n    v\n  [07] 现场七：重载决议被隐式转换带偏，调到意外版本  (cpp)\n    |\n    v\n  [08] 现场八：返回局部变量的引用/指针，悬垂  (cpp)\n    |\n    v\n  [... 其余 5 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch03",
+        "title": "C 风格数组与指针",
+        "source": "cpp-ch03/concept/03-string-view.md",
+        "code": "string_view 的生命周期契约\n\n  调用方 ──持有──► std::string 所有者\n                        │ data() + size()\n                        ▼\n                    string_view（只观察）\n                        │\n  规则：视图的存活期必须严格短于底层对象的存活期\n        类型系统不检查这一条 —— 全靠接口契约与代码审查",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch03",
+        "title": "C 风格数组与指针",
+        "source": "cpp-ch03/concept/04-pointer-string-practical-recipes.md",
+        "code": "04-pointer-string-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场 1：数组退化成指针，`sizeof` 当场翻车  (cpp)\n    |\n    v\n  [02] 现场 2：`char[]` 与 `char*` 的本质区别  (-)\n    |\n    v\n  [03] 现场 3：字符串拼接用 `+` 在循环里 O(n²)  (cpp)\n    |\n    v\n  [04] 现场 4：`std::string` 的 SSO 与扩容  (-)\n    |\n    v\n  [05] 现场 5：`string_view` 悬垂的经典场景  (cpp)\n    |\n    v\n  [06] 现场 6：`substr` 的零拷贝替代  (-)\n    |\n    v\n  [07] 现场 7：C 风格字符串结尾 `\\0` 的坑  (-)\n    |\n    v\n  [08] 现场 8：`c_str()` 返回的指针有效期  (cpp)\n    |\n    v\n  [... 其余 8 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch04",
+        "title": "指针基础",
+        "source": "cpp-ch04/concept/01-pointer-basics.md",
+        "code": "指针的语义分层\n\n  T* p\n   ├─ 地址         可比较、可打印（%p）\n   ├─ 类型         *p 的类型是 T；p+1 前进 sizeof(T)\n   ├─ 有效性       ✗ 不检查（悬垂、野指针都是 UB）\n   └─ 所有权       ✗ 不表达（由命名/接口约定承载）",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch04",
+        "title": "指针基础",
+        "source": "cpp-ch04/concept/02-dynamic-memory.md",
+        "code": "new / delete 的分步结构\n\n  new T(args)\n    ① operator new(sizeof(T))  ──► 原始内存（未构造）\n    ② placement new T(args)    ──► 构造函数执行，对象诞生\n\n  delete p\n    ① p->~T()                  ──► 析构函数执行，对象死亡\n    ② operator delete(p)       ──► 内存归还",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch04",
+        "title": "指针基础",
+        "source": "cpp-ch04/concept/03-memory-layout.md",
+        "code": "典型 64 位 Linux 进程布局（低地址 → 高地址）\n\n  ┌──────────────┐ 低地址\n  │ .text        │ 机器码（只读、可执行）\n  ├──────────────┤\n  │ .rodata      │ 字符串字面量、const 全局（只读）  ← \"abc\" 在这里\n  ├──────────────┤\n  │ .data        │ 已初始化的全局/静态变量（可写）\n  ├──────────────┤\n  │ .bss         │ 未初始化（零初始化）的全局/静态\n  ├──────────────┤\n  │ 堆 heap      │ new / malloc 分配，向高地址生长\n  │     ↓        │\n  │              │\n  │     ↑        │\n  │ 栈 stack     │ 局部变量、函数帧，向低地址生长\n  ├──────────────┤\n  │ 环境变量/argv│\n  └──────────────┘ 高地址",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch04",
+        "title": "指针基础",
+        "source": "cpp-ch04/concept/04-pointer-practical-recipes.md",
+        "code": "04-pointer-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 1. 空指针解引用：最朴素的段错误  (cpp)\n    |\n    v\n  [02] 2. 悬垂指针：对象早死了，指针还活着  (cpp)\n    |\n    v\n  [03] 3. 数组退化与 `sizeof` 陷阱  (cpp)\n    |\n    v\n  [04] 4. 指针算术越界：一步踏出数组  (cpp)\n    |\n    v\n  [05] 5. `new`/`delete` 必须配平，且配对  (cpp)\n    |\n    v\n  [06] 6. 内存布局：栈、堆、全局、代码段各住哪  (cpp)\n    |\n    v\n  [07] 7. 浅拷贝与深拷贝：指针成员被「共享」  (cpp)\n    |\n    v\n  [08] 8. 智能指针才是现代写法  (cpp)\n    |\n    v\n  [... 其余 5 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch05",
+        "title": "01 · 类与对象：从对象模型到内存布局",
+        "source": "cpp-ch05/concept/04-class-practical-recipes.md",
+        "code": "04-class-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场一：初始化列表的书写顺序骗了你  (cpp)\n    |\n    v\n  [02] 现场二：const 成员函数的边界与 mutable 的例外  (cpp)\n    |\n    v\n  [03] 现场三：拷贝构造与拷贝赋值，两手都要硬  (cpp)\n    |\n    v\n  [04] 现场四：自赋值不是理论问题  (cpp)\n    |\n    v\n  [05] 现场五：链式调用真正需要的是引用返回  (cpp)\n    |\n    v\n  [06] 现场六：比较运算符的一致性  (cpp)\n    |\n    v\n  [07] 现场七：友元不是封装的敌人，滥用才是  (-)\n    |\n    v\n  [08] 现场八：静态成员的初始化位置  (cpp)\n    |\n    v\n  [... 其余 4 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
         "chapter": "cpp-ch06",
         "title": "01 · 继承的本质：子对象模型、访问边界与对象切片",
         "source": "cpp-ch06/concept/01-inheritance-basics.md",
         "code": "基类 Base { virtual void f(); virtual void g(); }\n派生类 Drv  { void f() override;        /* g 沿用 Base */ }\n\n        Base 对象                 Drv 对象\n        ┌──────────┐              ┌──────────┐\n  vptr─▶│ &Base::f │        vptr─▶│ &Drv::f  │   ← f 被覆盖\n        │ &Base::g │              │ &Base::g │   ← g 沿用基类\n        └──────────┘              └──────────┘\n          vtable(Base)              vtable(Drv)\n\nBase* p = new Drv();\np->f();   // 查 p 的实际 vtable → 调 Drv::f()   （运行期分发）\np->g();   // 查 p 的实际 vtable → 调 Base::g()\n代价：一次指针间接寻址 + 缓存不友好；收益：开闭原则、可替换实现。",
         "desc": "虚函数表（vtable）是 C++ 多态的运行期核心：每个含虚函数的类编译期生成一张函数指针表，对象头部藏一个 vptr 指向它。基类指针调用的虚函数，会在运行期按对象「真实类型」查表分发，这就是「同一行代码、不同行为」的实现机理。"
+      },
+      {
+        "chapter": "cpp-ch06",
+        "title": "01 · 继承的本质：子对象模型、访问边界与对象切片",
+        "source": "cpp-ch06/concept/02-virtual-dispatch.md",
+        "code": "                .rodata (只读)                        栈/堆 (对象)\n            +-------------------+                 +------------------+\n            |  Base vtable:     |                 |  Base 对象:      |\n            |  [0] &Base::f     | ←---┐           |  vptr ───────────┼──┐\n            |  [1] &Base::g     |     │           +------------------+  │\n            +-------------------+     │                               │\n                                      └───────────────────────────────┘\n            +-------------------+                 +------------------+\n            |  Der vtable:      |                 |  Der 对象:        |\n            |  [0] &Der::f  ◄── 覆盖 | ←──┐        |  vptr ───────────┼──┐\n            |  [1] &Base::g (继承) |     │        |  Base 子对象部分  │  │\n            +-------------------+     │        |  Der 自己的成员   │  │\n                                      └────────┘  +------------------+  │\n                                                 │                      │\n             调用 p->f():                        │                      │\n             ① 取对象 vptr  → ② 取槽 [0]  →  ③ 间接调用 (*vptr[0])(p)   │\n                                                                      │\n         （this = p 被作为隐式实参传入被调函数） ◄────────────────────┘",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch06",
+        "title": "01 · 继承的本质：子对象模型、访问边界与对象切片",
+        "source": "cpp-ch06/concept/03-abstract-rtti.md",
+        "code": "dynamic_cast<Derived*>(base_ptr) 的运行期动作：\n  取 base_ptr 指向对象的 vtable → 读取 type_info / 继承链\n     ├─ 找到 Derived 在链上 → 计算 this 调整偏移 → 返回修正后的 Derived*\n     └─ 找不到            → 返回 nullptr（指针）/ 抛 bad_cast（引用）",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch06",
+        "title": "01 · 继承的本质：子对象模型、访问边界与对象切片",
+        "source": "cpp-ch06/concept/04-inheritance-practical-recipes.md",
+        "code": "04-inheritance-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场 1：基类指针调派生类方法，忘了 `virtual`  (cpp)\n    |\n    v\n  [02] 现场 2：构造/析构里调虚函数不触发多态  (cpp)\n    |\n    v\n  [03] 现场 3：名字遮蔽（Name Hiding）掩盖基类重载  (-)\n    |\n    v\n  [04] 现场 4：对象切片（Slicing）悄悄丢数据  (cpp)\n    |\n    v\n  [05] 现场 5：`dynamic_cast` 对引用失败抛异常  (-)\n    |\n    v\n  [06] 现场 6：基类成员遮蔽与 `protected`  (-)\n    |\n    v\n  [07] 现场 7：纯虚析构必须给定义  (cpp)\n    |\n    v\n  [08] 现场 8：多重继承的菱形与虚继承  (cpp)\n    |\n    v\n  [... 其余 6 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch08",
+        "title": "01 · vector：连续内存、2× 扩容与迭代器失效",
+        "source": "cpp-ch08/concept/04-selection.md",
+        "code": "需要频繁随机访问（按下标）？\n├─ 是 → vector（默认）/ deque（头尾都频繁）/ array（固定大小）\n└─ 否 → 需要保持有序 / 范围查询？\n        ├─ 是 → map / set（红黑树，O(log n) 有序）\n        └─ 否 → 只去重 / 只点查？\n                ├─ 是 → unordered_set / unordered_map（平均 O(1)）\n                └─ 否 → 频繁在**中部**插入删除且持有迭代器？\n                        ├─ 是 → list / forward_list\n                        └─ 否 → vector（再次回到默认）",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch08",
+        "title": "01 · vector：连续内存、2× 扩容与迭代器失效",
+        "source": "cpp-ch08/concept/05-container-pitfalls-in-practice.md",
+        "code": "05-container-pitfalls-in-practice.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 真实场景：vector 扩容带来的隐性拷贝  (cpp)\n    |\n    v\n  [02] 迭代器失效的三种现场  (cpp)\n    |\n    v\n  [03] emplace_back 省掉的这一次拷贝  (cpp)\n    |\n    v\n  [04] map 还是 unordered_map 怎么选  (-)\n    |\n    v\n  [05] 用 reserve 消灭扩容抖动  (-)\n    |\n    v\n  [06] 用 shrink_to_fit 归还多余容量  (cpp)\n    |\n    v\n  [07] 自定义 key 时的相等与哈希  (cpp)\n    |\n    v\n  [08] 范围遍历里偷偷修改的陷阱  (-)\n    |\n    v\n  [... 其余 1 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch09",
+        "title": "01 · 迭代器分类：算法契约与复杂度边界",
+        "source": "cpp-ch09/concept/02-algorithms-lambda.md",
+        "code": "泛型算法 = 对「迭代器区间」施加的纯函数式操作\n    [first, last) ──▶ 算法 ──▶ 就地改写 / 返回新迭代器（算法不持有数据）\n\nstd::sort 的 introsort（三段混合，兼顾最坏 O(n log n)）：\n    quicksort ──递归过深(2·log2 n)──▶ heapsort\n        └─ 区间 ≤ 16 ──▶ insertion_sort（小数组常数更小）\n\n比较器必须是「严格弱序」，否则是 UB：\n    合法  a < b   不对称、传递；两向都不可比才算等价\n    非法  a <= b  自反 -> 等价判定崩坏 -> 元素可能被丢弃\n\nlambda 与算法配合：\n    sort(v.begin(), v.end(), [](const A& a, const A& b){ return a.key < b.key; });\n                             ↑ 捕获: [] 空  [&] 引用  [=] 值  [x,&y] 混合",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch09",
+        "title": "01 · 迭代器分类：算法契约与复杂度边界",
+        "source": "cpp-ch09/concept/03-ranges-cpp20.md",
+        "code": "ranges 管道描述计算，不搬运数据\n    v | views::filter(even) | views::transform(sq) | views::take(3)\n      └── 每个 | 只是包一层适配器，编译期展开为嵌套迭代器\n\n惰性如何发生（pull 模型）：\n    take(3) 要第 1 个 ──▶ transform 要输入 ──▶ filter 要输入 ──▶ v 的下一元素\n    每个元素只流过一遍，无中间 vector 分配\n\n对比：\n    for + 算法       立即执行，边界易写错\n    ranges 视图      惰性、零分配；但视图不拥有数据 -> 悬垂风险\n    std::ranges::sort 原地排序（不是视图，立即执行）",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch09",
+        "title": "01 · 迭代器分类：算法契约与复杂度边界",
+        "source": "cpp-ch09/concept/04-iterator-algo-practical-recipes.md",
+        "code": "04-iterator-algo-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场一：五类迭代器是能力层级，不是分类标签  (cpp)\n    |\n    v\n  [02] 现场二：sort 的比较器必须满足严格弱序  (cpp)\n    |\n    v\n  [03] 现场三：stable_sort 的代价是内存  (cpp)\n    |\n    v\n  [04] 现场四：lower_bound 的前置条件是「已排序」  (cpp)\n    |\n    v\n  [05] 现场五：find 与 binary_search 是两种完全不同的东西  (cpp)\n    |\n    v\n  [06] 现场六：迭代器失效是「静默 UB」的重灾区  (cpp)\n    |\n    v\n  [07] 现场七：erase-remove 惯用法，不是历史包袱  (cpp)\n    |\n    v\n  [08] 现场八：lambda 的捕获方式决定生命周期  (cpp)\n    |\n    v\n  [... 其余 4 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
       },
       {
         "chapter": "cpp-ch10",
@@ -99,10 +904,150 @@ export const DIAGRAM_SUBJECTS: DiagramSubject[] = [
         "desc": "RAII 把「资源生命周期」绑死在「对象作用域」上：构造即获取、析构即释放，离开作用域（无论正常 return 还是抛异常）都会自动回收，是 C++ 防泄漏的基石。三种智能指针表达三种所有权语义——unique 独占、shared 引用计数、weak 旁观不持有。"
       },
       {
+        "chapter": "cpp-ch10",
+        "title": "01 · RAII：资源获取即初始化，与异常安全的第一性原理",
+        "source": "cpp-ch10/concept/04-smartptr-practical-recipes.md",
+        "code": "04-smartptr-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场一：裸指针交给两个智能指针，双重释放  (cpp)\n    |\n    v\n  [02] 现场二：shared_ptr 循环引用，内存永远不释放  (cpp)\n    |\n    v\n  [03] 现场三：用 this 直接构造 shared_ptr，自引用炸裂  (cpp)\n    |\n    v\n  [04] 现场四：unique_ptr 当值返回会拷贝，编译失败  (cpp)\n    |\n    v\n  [05] 现场五：shared_ptr 和裸指针混用，生命周期失控  (cpp)\n    |\n    v\n  [06] 现场六：make_shared 与私有构造 / 单独控制块释放的权衡  (cpp)\n    |\n    v\n  [07] 现场七：把栈对象地址塞进智能指针，析构时 double free  (cpp)\n    |\n    v\n  [08] 现场八：数组用 shared_ptr<T> 而非 shared_ptr<T[]>，delete 错配  (cpp)\n    |\n    v\n  [... 其余 7 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch11",
+        "title": "01 · try/catch 与栈展开：从控制流到 unwind table",
+        "source": "cpp-ch11/concept/03-noexcept-assert.md",
+        "code": "noexcept 是契约，不是优化提示\n    违约 = 直接 std::terminate（与「栈展开途中再抛」同一套机制）\n\n它如何改变 vector 扩容行为：\n    扩容要把旧元素搬到新缓冲：\n      移动构造 noexcept ? ──是──▶ 用移动（O(1)/元素）\n                        └─否──▶ 退回拷贝（才能提供强异常安全）\n    -> 少写 noexcept 的移动构造，会让扩容从移动退化成拷贝\n\n    class T { T(T&&) noexcept; };   // 加上这几个字符，push_back 可能快数倍\n\n断言分层：\n    assert        仅 Debug，NDEBUG 下消失    用于「不可能发生」的内部不变式\n    static_assert 编译期，条件须常量表达式    用于类型/尺寸约束",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch11",
+        "title": "01 · try/catch 与栈展开：从控制流到 unwind table",
+        "source": "cpp-ch11/concept/04-exception-practical-recipes.md",
+        "code": "04-exception-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场一：异常对象用 throw new MyErr() 抛指针  (cpp)\n    |\n    v\n  [02] 现场二：catch 按值接，对象被 slicing  (cpp)\n    |\n    v\n  [03] 现场三：catch 顺序写反，窄的永远进不去  (cpp)\n    |\n    v\n  [04] 现场四：在析构函数里抛异常，程序直接 terminate  (cpp)\n    |\n    v\n  [05] 现场五：没用 RAII，异常跳过释放导致泄漏  (cpp)\n    |\n    v\n  [06] 现场六：noexcept 函数里抛异常，直接 terminate  (cpp)\n    |\n    v\n  [07] 现场七：用 assert 做运行期参数校验，release 下失效  (cpp)\n    |\n    v\n  [08] 现场八：catch (...) 吞掉一切却不知啥错  (cpp)\n    |\n    v\n  [... 其余 7 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch12",
+        "title": "01 · `auto` 的类型推导规则（与模板推导一致）",
+        "source": "cpp-ch12/concept/02-move-semantics.md",
+        "code": "        可移动(move) ──┐\n                       │\n   lvalue ──── xvalue ─┤── 泛左值 glvalue（有身份）\n                       │\n   prvalue ───────────┘\n\n  lvalue  : 有身份、通常不可移动（如变量名、*p、++i 的结果）\n  prvalue  : 无身份、可移动（如 42、T() 临时量、a+b 的结果）—— 纯右值\n  xvalue  : 有身份、但可被移动（eXpiring value，如 std::move(x) 的结果）—— 将亡值",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch12",
+        "title": "01 · `auto` 的类型推导规则（与模板推导一致）",
+        "source": "cpp-ch12/concept/04-structured-binding-optional-stringview.md",
+        "code": "结构化绑定：把聚合体拆成具名绑定\n    auto [a, b] = std::pair{1, 2.0};      // 拷贝：a:int, b:double\n    for (auto& [k, v] : m) v += 1;        // 引用：改 v 即改容器内元素\n\noptional<T>：表达「可能没有」，替代哨兵值与裸指针\n    has_value() ─┬─ 是 ─▶ *opt / opt.value()\n                 └─ 否 ─▶ value() 抛 bad_optional_access；value_or(d) 给默认\n\nstring_view：指针 + 长度，零拷贝只读视图\n    std::string s = \"hello world\";\n    std::string_view sv{s.data() + 6, 5};   // \"world\"，不分配\n\n    危险：不拥有内存 -> 源 string 销毁/重分配后即悬垂\n          也不保证以 '\\0' 结尾，不能直接传给要 C 字符串的接口",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch12",
+        "title": "01 · `auto` 的类型推导规则（与模板推导一致）",
+        "source": "cpp-ch12/concept/05-modern-cpp-practical-recipes.md",
+        "code": "05-modern-cpp-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场 1：`auto` 推论出引用还是值？  (cpp)\n    |\n    v\n  [02] 现场 2：返回值误用 `std::move` 抑制 RVO  (cpp)\n    |\n    v\n  [03] 现场 3：`std::string_view` 悬垂  (cpp)\n    |\n    v\n  [04] 现场 4：`emplace_back` 比 `push_back` 少一次拷贝  (cpp)\n    |\n    v\n  [05] 现场 5：范围 for 里的 `auto&` 与 `auto`  (cpp)\n    |\n    v\n  [06] 现场 6：`auto&&` 的误解  (-)\n    |\n    v\n  [07] 现场 7：`emplace` 的歧义与 `initializer_list`  (cpp)\n    |\n    v\n  [08] 现场 8：结构化绑定解包 `tuple` / `pair`  (cpp)\n    |\n    v\n  [... 其余 6 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch13",
+        "title": "01 · 流的状态位与性能本质：从 streambuf 到 sync_with_stdio",
+        "source": "cpp-ch13/concept/05-stream-practical-recipes.md",
+        "code": "05-stream-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场 1：`ofstream` 默认截断清空文件  (cpp)\n    |\n    v\n  [02] 现场 2：`fstream` 同时读写未 seek 就换向  (cpp)\n    |\n    v\n  [03] 现场 3：文本模式读写二进制数据  (-)\n    |\n    v\n  [04] 现场 4：流状态位 `failbit`/`badbit` 不清除就卡死  (cpp)\n    |\n    v\n  [05] 现场 5：`getline` 与 `>>` 混用的换行残留  (cpp)\n    |\n    v\n  [06] 现场 6：浮点格式化精度陷阱  (cpp)\n    |\n    v\n  [07] 现场 7：`stringstream` 复用前要 `clear()` + `str(\"\")`  (cpp)\n    |\n    v\n  [08] 现场 8：`std::endl` 每次都 flush，拖慢 IO  (-)\n    |\n    v\n  [... 其余 6 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch14",
+        "title": "01 · 翻译阶段与 #include：预处理在编译流程中的位置",
+        "source": "cpp-ch14/concept/05-preprocessor-practical-recipes.md",
+        "code": "05-preprocessor-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场 1：预处理是编译的第一道工序  (bash)\n    |\n    v\n  [02] 现场 2：`#include` 是文本替换，不是模块导入  (-)\n    |\n    v\n  [03] 现场 3：头文件守卫防止重复包含  (cpp)\n    |\n    v\n  [04] 现场 4：宏参数不加括号，优先级被重写  (cpp)\n    |\n    v\n  [05] 现场 5：多语句宏要用 `do { } while(0)`  (cpp)\n    |\n    v\n  [06] 现场 6：宏没有类型检查，优先 `inline` 与 `constexpr`  (-)\n    |\n    v\n  [07] 现场 7：`#` 字符串化与 `##` 连接  (cpp)\n    |\n    v\n  [08] 现场 8：条件编译做平台与调试开关  (-)\n    |\n    v\n  [... 其余 7 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch15",
+        "title": "01 · 命名空间基础：作用域、查找与 ADL",
+        "source": "cpp-ch15/concept/01-namespace-basics.md",
+        "code": "命名空间解决：全局名字污染 + 库间符号冲突\n\n非限定名查找顺序（由内向外）：\n    块作用域 ─▶ 函数参数作用域 ─▶ 类作用域 ─▶ 所在命名空间 ─▶ 全局\n                                              │\n                                     ADL：实参所属命名空间也参与查找\n\nADL（参数依赖查找）：\n    namespace ns { struct S{}; void swap(S&, S&); }\n    ns::S a, b;\n    swap(a, b);        // 不写 ns::，ADL 由实参类型 ns::S 找到 ns::swap\n\n工程口径：\n    using namespace std;  头文件里绝不要写（污染所有包含者）\n    swap 惯用法：using std::swap; swap(a, b);   先引入默认，再让 ADL 选更优",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch15",
+        "title": "01 · 命名空间基础：作用域、查找与 ADL",
+        "source": "cpp-ch15/concept/05-namespace-modules-practical-recipes.md",
+        "code": "05-namespace-modules-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场 1：命名空间不是「访问控制」，只是「防重名」  (cpp)\n    |\n    v\n  [02] 现场 2：`using namespace` 在头文件里是灾难  (-)\n    |\n    v\n  [03] 现场 3：匿名命名空间等价于「内部链接」  (cpp)\n    |\n    v\n  [04] 现场 4：匿名命名空间放进头文件会「每文件一份」  (-)\n    |\n    v\n  [05] 现场 5：内联命名空间做版本管理  (cpp)\n    |\n    v\n  [06] 现场 6：`inline namespace` 不是「内联函数」  (-)\n    |\n    v\n  [07] 现场 7：嵌套命名空间的 C++17 简写  (-)\n    |\n    v\n  [08] 现场 8：ADL 让运算符找对命名空间  (cpp)\n    |\n    v\n  [... 其余 7 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch16",
+        "title": "01 · std::thread：启动、join/detach 与数据竞争",
+        "source": "cpp-ch16/concept/02-mutex-raii.md",
+        "code": "互斥把「读-改-写」变成临界区\n    lock ─┬─ 临界区（同一时刻仅一个线程） ─┬─ unlock\n    mutex 只保证互斥，不保证公平，也不保证等待顺序\n\n三种 RAII 锁：\n    lock_guard    构造加锁、析构解锁；不可手动解锁、不可移动      最简单\n    unique_lock   可 lock/unlock、可移动、可配合 condition_variable   最灵活\n    scoped_lock   C++17，一次锁多个 mutex，内部用 std::lock 避免死锁   多锁首选\n\n死锁四个必要条件（缺一不成立）：\n    互斥 / 持有并等待 / 不可剥夺 / 循环等待\n    工程解法：\n      固定全局加锁顺序        打破「循环等待」\n      scoped_lock(lk1, lk2)   打破「持有并等待」",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch16",
+        "title": "01 · std::thread：启动、join/detach 与数据竞争",
+        "source": "cpp-ch16/concept/05-async-future-pool-jthread.md",
+        "code": "async 的启动策略：\n    std::launch::async      一定新开线程（真并行）\n    std::launch::deferred   延迟到 get()/wait() 才在当前线程执行\n    async(f) 默认 = async|deferred -> 可能根本没并行（经典陷阱）\n\nfuture / promise：\n    promise.set_value(x) ──共享状态──▶ future.get()（只能取一次，之后 valid()==false）\n    注意：async 返回的 future 若不 get/wait，析构会阻塞等待 -> 可能退化成串行\n\n线程池：固定 N 个 worker + 任务队列\n    submit ─▶ queue ─▶ worker 取任务 ─▶ 结果写回 packaged_task / future\n    为什么必要：建线程成本高（~10μs 级），线程数还必须受控\n\njthread（C++20）：析构自动 join + 内置 stop_token 协作取消",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch16",
+        "title": "01 · std::thread：启动、join/detach 与数据竞争",
+        "source": "cpp-ch16/concept/06-concurrency-practical-recipes.md",
+        "code": "06-concurrency-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场 1：joinable 线程析构直接 terminate  (cpp)\n    |\n    v\n  [02] 现场 2：detach 后的对象生命周期  (-)\n    |\n    v\n  [03] 现场 3：mutex 忘了 unlock 的死锁  (cpp)\n    |\n    v\n  [04] 现场 4：两个锁的加锁顺序不一致  (cpp)\n    |\n    v\n  [05] 现场 5：条件变量必须配谓词，防虚假唤醒  (cpp)\n    |\n    v\n  [06] 现场 6：忘记 notify 导致永久等待  (-)\n    |\n    v\n  [07] 现场 7：atomic 不等于「整段线程安全」  (cpp)\n    |\n    v\n  [08] 现场 8：内存序用错，编译器重排让你怀疑人生  (cpp)\n    |\n    v\n  [... 其余 7 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch17",
+        "title": "01 · 类型萃取 type_traits 与模板特化/偏特化",
+        "source": "cpp-ch17/concept/05-template-meta-practical-recipes.md",
+        "code": "05-template-meta-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场一：type_traits 是「编译期的类型查询」  (cpp)\n    |\n    v\n  [02] 现场二：SFINAE 不是「替换失败就报错」，而是「替换失败就放弃这个候选」  (cpp)\n    |\n    v\n  [03] 现场三：enable_if 放哪里，决定了报错好不好看  (cpp)\n    |\n    v\n  [04] 现场四：if constexpr 是编译期的 if，不是运行期的  (cpp)\n    |\n    v\n  [05] 现场五：全特化与偏特化，区别在「特化了几个参数」  (cpp)\n    |\n    v\n  [06] 现场六：模板的实例化是「按需」的，但成员函数不是  (cpp)\n    |\n    v\n  [07] 现场七：static_assert 是编译期的断言，消息要写清楚  (cpp)\n    |\n    v\n  [08] 现场八：constexpr 函数不等于「一定在编译期执行」  (cpp)\n    |\n    v\n  [... 其余 4 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
         "chapter": "cpp-ch18",
         "title": "01 · 内存对齐、填充与显式布局",
         "source": "cpp-ch18/concept/01-alignment-and-layout.md",
         "code": "偏移:  0        8               16             24\n      +--------+----------------+------+--------+\n      |  a(1)  | padding (7)    | b(8) | c(1)   |  padding(7)\n      +--------+----------------+------+--------+\n      sizeof(S) = 24, alignof(S) = 8",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch18",
+        "title": "01 · 内存对齐、填充与显式布局",
+        "source": "cpp-ch18/concept/02-false-sharing-and-cache.md",
+        "code": "缓存层次与局部性：\n    L1 ~1ns(32~64KB) ─ L2 ~4ns ─ L3 ~15ns ─ 主存 ~100ns\n    搬运单位是 64 字节 cache line，不是单个变量\n\nfalse sharing：两线程改「不同变量」，但落在同一 cache line\n    struct { int a; int b; } s;        // a、b 同处一个 64B 行\n    T1: ++s.a;   T2: ++s.b;\n    -> 该行在两核间反复失效同步（MESI 乒乓），性能可能不如单线程\n\n        core0 [ a | b ] ──invalidate──▶ core1 [ a | b ]\n              ◀──invalidate──\n\n解法：\n    alignas(64) 隔离热点字段        每线程计数独占 cache line\n    每线程本地累加，最后汇总         彻底避免共享写",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch18",
+        "title": "01 · 内存对齐、填充与显式布局",
+        "source": "cpp-ch18/concept/05-alignment-cache-cookbook.md",
+        "code": "AoS 布局（每 16B 一颗粒子，取 z 要跨 3 次）\n┌──────────┬──────────┬──────────┬──────────┐\n│ x y z q  │ x y z q  │ x y z q  │ x y z q  │   ← 扫描 z 时 75% 的带宽被浪费\n└──────────┴──────────┴──────────┴──────────┘\nSoA 布局（同字段连成一条线，取 z 连续命中）\n┌──────────┬──────────┬──────────┬──────────┐\n│ z z z z  │ q q q q  │ y y y y  │ x x x x  │   ← 一条 cache line 全是 z\n└──────────┴──────────┴──────────┴──────────┘",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch19",
+        "title": "01 · 现代 CMake：target-centric 与 usage requirements 传播",
+        "source": "cpp-ch19/concept/01-cmake-target-centric-usage-requirements.md",
+        "code": "从目录级变量到目标级属性：\n    旧写法  include_directories(inc)   link_libraries(foo)   全局污染、顺序敏感\n    新写法  target_include_directories(t PUBLIC inc)         随 target 传播\n\nusage requirements 的传播：\n    target_link_libraries(app PRIVATE fmt)\n    -> fmt 的 INTERFACE_INCLUDE_DIRECTORIES / INTERFACE_COMPILE_FEATURES\n       自动进入 app 的编译命令行\n\n三个可见性关键字：\n    PUBLIC     自己用 + 传给依赖者     （接口的一部分）\n    PRIVATE    自己用，不传            （实现细节）\n    INTERFACE  自己不用，只传          （纯头文件库）\n\n    app ──PRIVATE──▶ libA ──PUBLIC──▶ libB      app 也继承 libB 的用法要求",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch19",
+        "title": "01 · 现代 CMake：target-centric 与 usage requirements 传播",
+        "source": "cpp-ch19/concept/02-unit-test-design-and-isolation.md",
+        "code": "测试框架的最小内核：\n    注册用例 ─▶ 收集 ─▶ 运行 ─▶ 汇总 ─▶ 退出码（0 全过 / 非 0 失败）\n    断言失败只记录不中断进程，由 runner 统一汇总 -> CI 才能拿到结果\n\n用例设计：\n    一个用例只验证一个行为        失败时能直接定位\n    三 A 结构  Arrange / Act / Assert\n    覆盖边界   空输入、单元素、溢出、异常路径\n\n依赖隔离（把不可控变可控）：\n    被测代码 ──依赖接口──▶ 真实实现（慢 / 不确定 / 有副作用）\n                 └──────▶ 测试替身：stub(固定值) / fake(轻量实现) / mock(验交互)\n\n    典型替身对象：时间、随机数、网络、文件系统",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch20",
+        "title": "01 · 综合项目一：迷你 STL 组件（vector / shared_ptr / RAII）",
+        "source": "cpp-ch20/concept/02-concurrency-projects.md",
+        "code": "线程池 = 任务队列 + 条件变量 + 优雅关闭\n    submit ──▶ ┌───── queue ─────┐ ──▶ worker×N ──▶ 执行 ──▶ 结果写回 future\n               └─────────────────┘\n\n三处关键细节：\n    ① 谓词等待   cv.wait(lk, [&]{ return stop || !q.empty(); })\n    ② 关闭语义   置 stop=true + notify_all -> worker 排空队列后退出\n    ③ 任务异常   worker 内 try/catch 兜住，否则异常穿出线程 -> terminate\n\n简易 HTTP 服务器：\n    listen ─▶ accept ─▶ 每连接投递一个任务 ─▶ 解析请求行/头 ─▶ 路由 ─▶ 响应\n    必须处理的边界：短读（read 可能少于预期）、keep-alive、请求体上限、超时",
+        "desc": ""
+      },
+      {
+        "chapter": "cpp-ch20",
+        "title": "01 · 综合项目一：迷你 STL 组件（vector / shared_ptr / RAII）",
+        "source": "cpp-ch20/concept/05-whiteboard-and-system-design.md",
+        "code": "白板 coding 四步（先说再做，考官看的是过程）：\n    ① 澄清 输入范围/空值/规模/是否要求原地\n    ② 思路 口述暴力解 -> 复杂度 -> 优化方向（哈希 / 双指针 / 二分）\n    ③ 编码 先框架后细节，命名清晰，边写边讲\n    ④ 自测 用小例子手跑，主动点出边界（空、单元素、重复）\n\n系统设计题答法（分层展开）：\n    需求 ─▶ 容量估算(QPS/存储) ─▶ 接口 ─▶ 数据模型 ─▶ 架构图 ─▶ 瓶颈与扩展\n      │                                                  │\n      └ 明确「不做什么」同样重要                          └ 缓存/分片/异步/降级\n\n节奏：先给 3 分钟全局方案，再按追问深入某一层",
         "desc": ""
       }
     ]
@@ -114,6 +1059,132 @@ export const DIAGRAM_SUBJECTS: DiagramSubject[] = [
     "hue": "#3f8a6b",
     "entries": [
       {
+        "chapter": "java-ch01",
+        "title": "JDK 环境与第一个 Java 程序",
+        "source": "java-ch01/concept/01-jdk-hello-world.md",
+        "code": "JDK / JRE / JVM 的包含关系\n\n  ┌──────────── JDK（开发用）────────────┐\n  │  javac 编译器、jdb 调试器、jlink 等工具 │\n  │  ┌──────────── JRE（运行用）────────┐  │\n  │  │  标准类库 rt（java.lang 等）      │  │\n  │  │  ┌────────── JVM ──────────┐    │  │\n  │  │  │  字节码执行引擎、GC、     │    │  │\n  │  │  │  解释器 + JIT 编译器      │    │  │\n  │  │  └────────────────────────┘    │  │\n  │  └──────────────────────────────┘  │\n  └────────────────────────────────────┘",
+        "desc": ""
+      },
+      {
+        "chapter": "java-ch01",
+        "title": "JDK 环境与第一个 Java 程序",
+        "source": "java-ch01/concept/03-control-flow-arrays.md",
+        "code": "int[][] 的内存结构（Java）\n\n  grid ──► [ ref0, ref1, ref2 ]      外层数组（长度 3）\n              │     │     │\n              ▼     ▼     ▼\n            [0,0] [0,1] [0,2]        三个独立的内层数组\n                  [1,0] [1,1]",
+        "desc": ""
+      },
+      {
+        "chapter": "java-ch01",
+        "title": "JDK 环境与第一个 Java 程序",
+        "source": "java-ch01/concept/04-java-basics-practical-recipes.md",
+        "code": "04-java-basics-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场一：main 签名写错，运行时找不到主方法  (java)\n    |\n    v\n  [02] 现场二：把文件名和 public 类名写不一致，编译失败  (java)\n    |\n    v\n  [03] 现场三：整数溢出不报错，结果变负数  (java)\n    |\n    v\n  [04] 现场四：== 比较包装类型比的是地址  (java)\n    |\n    v\n  [05] 现场五：浮点数直接判相等，永远不等  (java)\n    |\n    v\n  [06] 现场六：数组下标越界，运行时崩  (java)\n    |\n    v\n  [07] 现场七：foreach 遍历时修改集合，抛异常  (java)\n    |\n    v\n  [08] 现场八：字符串用 == 比较内容，永远不对  (java)\n    |\n    v\n  [... 其余 8 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "java-ch02",
+        "title": "01 · 对象内存模型与 this：从字节码到对象头",
+        "source": "java-ch02/concept/02-encapsulation-access-control.md",
+        "code": "封装 = 收窄「合法状态空间」，不是把字段藏起来\n    公开字段    balance 可被改成任意值（含不合法）\n    私有+方法   只能走 deposit/withdraw -> 每个入口都校验不变式\n\n访问修饰符是编译期名字查找规则：\n    ┌ 类内 ┬ 同包 ┬ 子类 ┬ 其他 ┐\nprivate    ✓    ✗     ✗    ✗\npackage    ✓    ✓     ✗    ✗\nprotected  ✓    ✓     ✓*   ✗     * 跨包时只能经子类类型访问\npublic     ✓    ✓     ✓    ✓\n\n不变式三道防线：\n    字段 private final  +  构造器校验  +  集合返回不可变视图（List.copyOf）",
+        "desc": ""
+      },
+      {
+        "chapter": "java-ch02",
+        "title": "01 · 对象内存模型与 this：从字节码到对象头",
+        "source": "java-ch02/concept/03-constructor-and-this.md",
+        "code": "构造器是「建立不变式」的唯一入口，不是赋值工具\n初始化顺序（牢记）：\n    静态成员（父 -> 子，仅一次）\n      ─▶ 实例字段默认值（0/null）\n      ─▶ 父类构造器\n      ─▶ 本类字段初始化 + 初始化块\n      ─▶ 本类构造器体\n      ─▶ 返回引用\n\nthis(...) 复用构造器：\n    Foo() { this(0); }        // 必须是构造器体的第一条语句\n    Foo(int x) { this.x = x; }\n    super(...) 与 this(...) 互斥，二选一\n\n陷阱：父类构造器里调用可重写方法 -> 子类字段仍未初始化（读到 null/0）",
+        "desc": ""
+      },
+      {
+        "chapter": "java-ch02",
+        "title": "01 · 对象内存模型与 this：从字节码到对象头",
+        "source": "java-ch02/concept/04-equals-and-hashcode.md",
+        "code": "等价关系三性质：自反、对称、传递（外加一致性）\n    状态不变时，多次调用结果必须相同\n\n为什么必须同时重写：\n    HashMap 先用 hashCode 定位桶，再用 equals 在桶内确认\n    ┌ hashCode 相同 ┬ equals 真 ─▶ 命中\n    │               └ equals 假 ─▶ 同桶不同键（链表/红黑树）\n    └ hashCode 不同 ─▶ 根本不去比较 -> put 进去就再也 get 不到\n\n    只重写 equals：两个「相等」对象 hashCode 不同 -> 直接丢数据\n\n契约：a.equals(b) 为真 => a.hashCode() == b.hashCode()（反向不要求）\n    可变字段做键 = 埋雷：改字段后 hashCode 变了，原桶里找不到\n    便捷实现：Objects.equals(...) / Objects.hash(...)",
+        "desc": ""
+      },
+      {
+        "chapter": "java-ch02",
+        "title": "01 · 对象内存模型与 this：从字节码到对象头",
+        "source": "java-ch02/concept/05-object-practical-recipes.md",
+        "code": "05-object-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场一：构造器里调用可被重写的方法，读到未初始化字段  (java)\n    |\n    v\n  [02] 现场二：== 比较对象比的是地址，不是内容  (java)\n    |\n    v\n  [03] 现场三：equals 写了 hashCode 没写，HashMap 找不到 key  (java)\n    |\n    v\n  [04] 现场四：可变对象当 HashMap 的 key，改完就找不到  (java)\n    |\n    v\n  [05] 现场五：字段没封装，外部直接改破坏不变量  (java)\n    |\n    v\n  [06] 现场六：this 在内部类/lambda 里指向谁要想清  (java)\n    |\n    v\n  [07] 现场七：构造器没写 this(...) / super(...)，默认调无参父类构造器  (java)\n    |\n    v\n  [08] 现场八：重写 equals 参数写 Object 却漏 @Override，变成重载  (java)\n    |\n    v\n  [... 其余 5 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "java-ch03",
+        "title": "01 · 继承与 super：单继承、is-a 与构造器链",
+        "source": "java-ch03/concept/02-override-polymorphism-invokevirtual.md",
+        "code": "override 是运行期行为替换；overload 是编译期选择\n    A a = new B();  a.f();\n    编译期按 A 找签名 -> 运行期按实际类型 B 分派\n\ninvokevirtual 的动态分派：\n    对象头 ─▶ Klass ─▶ vtable（按签名槽位索引）\n    槽位在编译期确定，槽里放的是「实际类型的方法入口」\n    a ─▶ [Klass*] ─▶ vtable[3] = B.f     调用点只写「第 3 槽」\n\n四种调用指令：\n    invokevirtual   虚方法，走 vtable\n    invokespecial   私有 / 构造器 / super，静态绑定\n    invokeinterface 接口方法，运行时查 itable\n    invokestatic    静态方法\n\n不可 override：final / static / private（private 方法压根不是虚方法）",
+        "desc": ""
+      },
+      {
+        "chapter": "java-ch03",
+        "title": "01 · 继承与 super：单继承、is-a 与构造器链",
+        "source": "java-ch03/concept/05-oop-practical-recipes.md",
+        "code": "05-oop-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场一：重写签名差一个参数，变成了重载  (java)\n    |\n    v\n  [02] 现场二：父类 private 方法被同名方法「重写」的错觉  (java)\n    |\n    v\n  [03] 现场三：静态方法不能被重写，调用看编译期类型  (java)\n    |\n    v\n  [04] 现场四：字段不多态，子类同名字段只是隐藏  (java)\n    |\n    v\n  [05] 现场五：抽象类不能实例化，却常被当普通类 new  (java)\n    |\n    v\n  [06] 现场六：接口默认方法冲突，忘了显式重写  (java)\n    |\n    v\n  [07] 现场七：equals 不重写 hashCode，HashMap 找不到  (java)\n    |\n    v\n  [08] 现场八：equals 里用 getClass() 还是 instanceof 没想清  (java)\n    |\n    v\n  [... 其余 4 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "java-ch04",
+        "title": "01 · 集合框架总览：接口层次、迭代器与泛型集合的类型安全",
+        "source": "java-ch04/concept/01-collection-framework-overview.md",
+        "code": "Collection\n ├─ List      → ArrayList（动态数组） / LinkedList（双向链表） / Vector（线程安全但已过时）\n ├─ Set       → HashSet（哈希） / LinkedHashSet（哈希+插入序） / TreeSet（红黑树有序）\n └─ Queue/Deque → PriorityQueue（堆） / ArrayDeque（循环数组双端队列）\nMap\n ├─ HashMap / LinkedHashMap / TreeMap / WeakHashMap\n └─ 并发：ConcurrentHashMap / ConcurrentSkipListMap",
+        "desc": ""
+      },
+      {
+        "chapter": "java-ch04",
+        "title": "01 · 集合框架总览：接口层次、迭代器与泛型集合的类型安全",
+        "source": "java-ch04/concept/02-list-arraylist-linkedlist.md",
+        "code": "ArrayList = 动态数组：连续内存，随机访问 O(1)\n    [0][1][2][3][ ][ ][ ]      size=4, capacity=7\n    扩容：newCap = oldCap + (oldCap >> 1)   即 1.5 倍\n          Arrays.copyOf 搬整个数组（均摊 O(1) 的尾部 add）\n    中间插入/删除 O(n)：要移动后续所有元素\n\nLinkedList = 双向链表：头尾增删 O(1)，随机访问 O(n)\n    null ◀─ [prev|v|next] ◀─▶ [prev|v|next] ─▶ null\n    get(i) 从更近的一端遍历，最坏 n/2 步；每个节点额外两个引用开销\n\n选型：\n    默认 ArrayList（缓存友好，遍历与随机访问都更快）\n    只有「频繁头部增删 + 几乎不随机访问」才考虑 LinkedList\n    真正当队列/栈用时选 ArrayDeque（循环数组，快过 LinkedList）",
+        "desc": ""
+      },
+      {
+        "chapter": "java-ch04",
+        "title": "01 · 集合框架总览：接口层次、迭代器与泛型集合的类型安全",
+        "source": "java-ch04/concept/03-hashmap-deep.md",
+        "code": "JDK 8 的四层结构：\n    table[]（长度 2^n）\n      └ 桶：链表（长度 < 8）\n             └ 长度 ≥ 8 且 table.length ≥ 64 -> 转红黑树（查询 O(log n)）\n                    └ 退化到 ≤ 6 时退回链表\n\n扰动函数：(h = key.hashCode()) ^ (h >>> 16)\n    把高 16 位混进低位 -> 让下标 (n-1) & hash 分布更均匀\n\n扩容：threshold = capacity × 0.75\n    rehash 无需重算 hash：元素要么留原位 i，要么移到 i + oldCap\n    （2 的幂带来的性质，只需判断 hash & oldCap 是否为 0）\n\nConcurrentHashMap（JDK 8）：CAS + 桶级 synchronized，读无锁\n键可变 = 埋雷：改字段后 hashCode 变了，原桶里再也找不到",
+        "desc": ""
+      },
+      {
+        "chapter": "java-ch04",
+        "title": "01 · 集合框架总览：接口层次、迭代器与泛型集合的类型安全",
+        "source": "java-ch04/concept/06-collection-practical-recipes.md",
+        "code": "06-collection-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场一：ArrayList 扩容不是「翻倍」，是 1.5 倍  (java)\n    |\n    v\n  [02] 现场二：foreach 里 remove，单线程也会炸  (java)\n    |\n    v\n  [03] 现场三：LinkedList 当队列用，别用 get(i)  (java)\n    |\n    v\n  [04] 现场四：HashMap 的键必须是「不可变」且守契约  (java)\n    |\n    v\n  [05] 现场五：HashSet 去重靠的是 hashCode + equals，不是 ==  (java)\n    |\n    v\n  [06] 现场六：TreeMap/TreeSet 要求键可比较  (java)\n    |\n    v\n  [07] 现场七：PriorityQueue 不是「自动排序的 List」  (java)\n    |\n    v\n  [08] 现场八：Arrays.asList 返回的是固定大小视图  (java)\n    |\n    v\n  [... 其余 4 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "java-ch05",
+        "title": "01 · 异常体系总览：Throwable 的二分与受检/非受检",
+        "source": "java-ch05/concept/01-exception-hierarchy.md",
+        "code": "Throwable\n ├─ Error          （非受检）严重系统错误：OutOfMemoryError / StackOverflowError\n └─ Exception\n     ├─ RuntimeException 及其子类（非受检）：NullPointerException / IllegalArgumentException ...\n     └─ 其余 Exception      （受检）：IOException / SQLException ...",
+        "desc": ""
+      },
+      {
+        "chapter": "java-ch05",
+        "title": "01 · 异常体系总览：Throwable 的二分与受检/非受检",
+        "source": "java-ch05/concept/05-pecs-wildcard-selfbounded.md",
+        "code": "PECS：Producer Extends, Consumer Super\n                             能 get 出        能 add\n    List<? extends Number>   Number           ✗（连 Integer 都不行）\n    List<? super Integer>    Object           Integer\n    List<Number>             Number           Number\n\n    为什么 extends 不能 add：编译器不知道实际是 List<Integer> 还是 List<Double>\n    为什么 super 只能 get 到 Object：上界可能是任意父类型\n\n典型签名：\n    Collections.copy(List<? super T> dest, List<? extends T> src)\n                     └ 消费者(写)        生产者(读) ┘\n\n自限定泛型：class Enum<E extends Enum<E>>\n    -> 让 compareTo(E) 的参数类型精确为子类型，而不是 Enum",
+        "desc": ""
+      },
+      {
+        "chapter": "java-ch05",
+        "title": "01 · 异常体系总览：Throwable 的二分与受检/非受检",
+        "source": "java-ch05/concept/06-exception-generic-recipes.md",
+        "code": "06-exception-generic-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 受检异常不是敌人  (-)\n    |\n    v\n  [02] 异常链：cause 别丢  (java)\n    |\n    v\n  [03] try-with-resources 自动关  (java)\n    |\n    v\n  [04] finally 里的 return 吞异常  (java)\n    |\n    v\n  [05] 泛型擦除的运行时真相  (-)\n    |\n    v\n  [06] 桥接方法为何而生  (-)\n    |\n    v\n  [07] PECS：生产者 extends 消费者 super  (java)\n    |\n    v\n  [08] 自限定类型做递归约束  (-)\n    |\n    v\n  [... 其余 2 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "java-ch06",
+        "title": "字节流与字符流：编码的边界在哪里",
+        "source": "java-ch06/concept/01-byte-and-char-streams.md",
+        "code": "字节与字符的分工：\n    InputStream / OutputStream   8 bit 字节，用于二进制（图片、压缩包、协议）\n    Reader / Writer              16 bit char，内部持有一个解码器\n\n编码边界就在这里：\n    字节流 ──CharsetDecoder──▶ 字符流 ──▶ String\n    new InputStreamReader(bin, UTF_8)\n    new OutputStreamWriter(bout, UTF_8)\n\n    多字节字符会被 buffer 边界切断 -> 必须用 Reader，别手工 new String(bytes)\n    （切在 UTF-8 三字节序列中间 -> 出现替换字符）\n\n几乎永远要包一层缓冲：\n    new BufferedReader(new InputStreamReader(in, UTF_8))\n    单字节 read 是系统调用级开销；Files.newBufferedReader 已含缓冲与默认 UTF-8",
+        "desc": ""
+      },
+      {
+        "chapter": "java-ch06",
+        "title": "字节流与字符流：编码的边界在哪里",
+        "source": "java-ch06/concept/05-io-practical-recipes.md",
+        "code": "05-io-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场一：忘记关流 = 句柄泄漏，三天后服务挂  (java)\n    |\n    v\n  [02] 现场二：编码发生在桥接点，不在 FileReader 里  (java)\n    |\n    v\n  [03] 现场三：read() 返回 -1 当结束标志，漏判就死循环  (java)\n    |\n    v\n  [04] 现场四：大文件一次性读进内存 = OOM  (java)\n    |\n    v\n  [05] 现场五：Files.walk 不关会锁目录  (java)\n    |\n    v\n  [06] 现场六：ByteBuffer 忘写 flip() 读出 0 字节  (java)\n    |\n    v\n  [07] 现场七：Selector 注册后忘 remove 就绪 key，事件被重复处理  (java)\n    |\n    v\n  [08] 现场八：无条件注册 OP_WRITE 导致 CPU 打满  (java)\n    |\n    v\n  [... 其余 4 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
         "chapter": "java-ch07",
         "title": "01 · 线程的创建与生命周期：从 `start()` 到六种状态",
         "source": "java-ch07/concept/01-thread-creation-and-lifecycle.md",
@@ -121,11 +1192,67 @@ export const DIAGRAM_SUBJECTS: DiagramSubject[] = [
         "desc": "线程池用「一个阻塞队列 + 一组常驻 worker」解耦「提交任务」与「执行任务」：提交方只丢进队列，worker 循环取任务跑。核心线程保活、队列满再扩容到最大线程、再满则按拒绝策略处理。"
       },
       {
+        "chapter": "java-ch07",
+        "title": "01 · 线程的创建与生命周期：从 `start()` 到六种状态",
+        "source": "java-ch07/concept/02-jmm-visibility-and-atomicity.md",
+        "code": "无锁 ──(首次竞争)──> 偏向锁 ──(第二个线程来)──> 轻量级锁(自旋 CAS)\n                                                    │\n                                          自旋失败/竞争激烈\n                                                    ↓\n                                              重量级锁(操作系统 mutex，挂起线程)",
+        "desc": ""
+      },
+      {
+        "chapter": "java-ch07",
+        "title": "01 · 线程的创建与生命周期：从 `start()` 到六种状态",
+        "source": "java-ch07/concept/03-threadpool-and-executors.md",
+        "code": "提交任务\n  ├─ 1. 运行中的线程数 < corePoolSize ?           → 新建核心线程执行\n  ├─ 2. 否则尝试入队 workQueue.offer(task)  成功 ? → 进队列排队\n  ├─ 3. 否则（队满）线程数 < maximumPoolSize ?    → 新建非核心线程执行\n  └─ 4. 否则                                     → 触发拒绝策略",
+        "desc": ""
+      },
+      {
+        "chapter": "java-ch07",
+        "title": "01 · 线程的创建与生命周期：从 `start()` 到六种状态",
+        "source": "java-ch07/concept/04-juc-locks-and-containers.md",
+        "code": "AQS 是 JUC 的「半成品锁」：\n    volatile int state   含义由子类定义（重入次数 / 许可数 / 计数）\n    + CLH 双向等待队列\n    + acquire/release 模板方法，子类只实现 tryAcquire / tryRelease\n\n    ReentrantLock   state = 重入次数（0 空闲）\n    Semaphore       state = 剩余许可\n    CountDownLatch  state = 计数（不可重置）\n\nReentrantLock vs synchronized：\n    可中断等待 lockInterruptibly()      synchronized 不能\n    超时       tryLock(timeout)         不能\n    公平锁     构造参数 fair            不能\n    多条件队列 newCondition() 多个       只有一个 wait set\n    -> 需要上面任一条才用 Lock，否则 synchronized 更省心（JIT 会优化）\n\n并发容器：ConcurrentHashMap（CAS + 桶锁）/ CopyOnWriteArrayList（读多写极少）/ BlockingQueue",
+        "desc": ""
+      },
+      {
+        "chapter": "java-ch07",
+        "title": "01 · 线程的创建与生命周期：从 `start()` 到六种状态",
+        "source": "java-ch07/concept/05-concurrency-snippets.md",
+        "code": "05-concurrency-snippets.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] Thread 创建与生命周期  (java)\n    |\n    v\n  [02] 可见性与 volatile  (java)\n    |\n    v\n  [03] 原子类与 CAS  (java)\n    |\n    v\n  [04] 线程池参数与拒绝策略  (java)\n    |\n    v\n  [05] Lock 与 synchronized 对比  (-)\n    |\n    v\n  [06] JUC 并发容器  (-)\n    |\n    v\n  [07] Future 与异常捕获  (java)\n    |\n    v\n  [08] ThreadLocal 与内存泄漏  (java)\n    |\n    v\n  [... 其余 2 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
         "chapter": "java-ch08",
         "title": "01 · 运行时数据区与对象内存布局：栈、堆、方法区各放什么",
         "source": "java-ch08/concept/01-runtime-data-areas.md",
         "code": "运行时数据区\n┌──────────────────────────────────────────────────────┐\n│ 线程私有（每线程一份）                                  │\n│   程序计数器 │ 虚拟机栈(栈帧/局部变量) │ 本地方法栈     │\n├──────────────────────────────────────────────────────┤\n│ 线程共享                                              │\n│   方法区/元空间（类信息·常量·静态）                     │\n│   堆 Heap  ───  GC 主战场                              │\n│     ├─ 年轻代 Young: Eden + S0 + S1  (复制算法)        │\n│     └─ 老年代 Old:            (标记-整理)              │\n└──────────────────────────────────────────────────────┘\n\n对象出生在 Eden → 满触发 Minor GC → 存活进 S0/S1 来回复制\n→ 熬过阈值(默认15)进 Old → Old 满触发 Major/Full GC(STW 更久)\nGC  Roots: 栈帧局部变量、静态字段、JNI 引用（可达性分析起点）",
         "desc": "JVM 把内存切成「线程私有」与「线程共享」两大块。方法区/元空间存类元信息，堆是对象之家；GC 主要扫堆，采用分代假设（大部分对象朝生暮死），年轻代用复制算法、老年代用标记-整理。"
+      },
+      {
+        "chapter": "java-ch08",
+        "title": "01 · 运行时数据区与对象内存布局：栈、堆、方法区各放什么",
+        "source": "java-ch08/concept/02-gc-algorithms-and-collectors.md",
+        "code": "新生代          老年代            特点\nSerial          Serial Old        单线程，STW，客户端模式\nParNew          CMS               JDK 8 的主流组合（CMS 已废弃）\nParallel Scavenge  Parallel Old  吞吐量优先（-XX:+UseParallelGC）\n───────────────────────────────────────────────────\nG1（Region）     同一收集器管全堆    JDK 9+ 默认，可预测停顿（-XX:MaxGCPauseMillis）\nZGC / Shenandoah  同一收集器管全堆  亚毫秒停顿，染色指针 + 读屏障，TB 级堆",
+        "desc": ""
+      },
+      {
+        "chapter": "java-ch08",
+        "title": "01 · 运行时数据区与对象内存布局：栈、堆、方法区各放什么",
+        "source": "java-ch08/concept/04-jvm-tuning-and-troubleshooting.md",
+        "code": "四类 OOM 与第一反应：\n    Java heap space                 对象太多或泄漏 -> 抓堆 dump，MAT 看支配树\n    Metaspace                       类加载过多（动态代理/CGLIB）-> 查类加载器泄漏\n    GC overhead limit exceeded      98% 时间在 GC 却只回收 <2% -> 本质还是内存不足\n    unable to create native thread  线程数超限 -> 查线程泄漏，或降 -Xss\n\n工具链（从现象到对象）：\n    jps 看进程 ─▶ jstat -gcutil 看 GC 趋势 ─▶ jmap -dump 抓堆\n      ─▶ MAT 分析支配树 ─▶ jstack 抓线程栈（死锁/卡住）\n      ─▶ async-profiler / JFR 看 CPU 与分配热点\n\n调优顺序：先测量（GC 日志 + 火焰图），再动参数；别凭感觉调 Xmx",
+        "desc": ""
+      },
+      {
+        "chapter": "java-ch08",
+        "title": "01 · 运行时数据区与对象内存布局：栈、堆、方法区各放什么",
+        "source": "java-ch08/concept/05-troubleshooting-tools.md",
+        "code": "05-troubleshooting-tools.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 2. 堆 OOM 的定位：jmap + MAT  (-)\n    |\n    v\n  [02] 3. 元空间 OOM 与类卸载  (-)\n    |\n    v\n  [03] 4. 线程泄漏与死锁：jstack  (-)\n    |\n    v\n  [04] 5. Arthas 在线诊断  (-)\n    |\n    v\n  [05] 6. GC 日志与停顿分析  (-)\n    |\n    v\n  [06] 7. 容器环境的内存视图（RSS vs -Xmx）  (-)\n    |\n    v\n  [07] 8. 一套可落地的 JVM 启动参数模板  (-)\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "java-ch09",
+        "title": "01 · Maven 坐标、依赖调解与冲突排查",
+        "source": "java-ch09/concept/03-springboot-startup-and-autoconfig.md",
+        "code": "@SpringBootApplication 是三个注解的合成：\n    @SpringBootConfiguration   标记配置类（本质 @Configuration）\n    @EnableAutoConfiguration   触发自动配置\n    @ComponentScan             扫描当前包及子包\n\nSpringApplication.run 的阶段：\n    ① 准备 Environment（yml / 命令行 / 环境变量，后者优先级更高）\n    ② 创建 ApplicationContext（Servlet 或 Reactive）\n    ③ 加载 BeanDefinition（组件扫描 + 自动配置类）\n    ④ refresh：实例化单例、注入依赖、启动内嵌容器\n    ⑤ 发布 ApplicationReadyEvent\n\n自动配置的筛选链：\n    候选清单（AutoConfiguration.imports）\n      ─▶ @ConditionalOnClass        依赖类在不在\n      ─▶ @ConditionalOnMissingBean  用户没定义才生效\n      ─▶ @ConditionalOnProperty     开关是否打开\n    -> 自定义 Bean 总能覆盖默认配置，这就是「约定优于配置」",
+        "desc": ""
       }
     ]
   },
@@ -136,6 +1263,55 @@ export const DIAGRAM_SUBJECTS: DiagramSubject[] = [
     "hue": "#4a6fa5",
     "entries": [
       {
+        "chapter": "py-ch01",
+        "title": "01 · 变量与动态类型",
+        "source": "py-ch01/concept/01-variables-and-dynamic-typing.md",
+        "code": "名字 → 对象（CPython 的对象头）\n\n  a ──┐\n      ├──► [ ob_refcnt=2 | ob_type=int | 值=1 ]   ← 同一个对象\n  b ──┘\n\n  a = a + 1 之后\n  a ──────► [ refcnt=1 | int | 值=2 ]   ← 新对象\n  b ──────► [ refcnt=1 | int | 值=1 ]   ← 老对象仍被 b 引用",
+        "desc": ""
+      },
+      {
+        "chapter": "py-ch01",
+        "title": "01 · 变量与动态类型",
+        "source": "py-ch01/concept/02-control-flow.md",
+        "code": "可迭代对象 vs 迭代器\n\n  可迭代对象（iterable）        迭代器（iterator）\n  ┌──────────────┐            ┌──────────────┐\n  │ __iter__()   │──产生──────►│ __next__()   │ 逐个给值\n  │ list/tuple/  │             │ 内部记位置    │ 耗尽后 StopIteration\n  │ dict/set/str │             └──────────────┘\n  └──────────────┘              一次性，不能重置",
+        "desc": ""
+      },
+      {
+        "chapter": "py-ch01",
+        "title": "01 · 变量与动态类型",
+        "source": "py-ch01/concept/03-collections-and-comprehensions.md",
+        "code": "list 的内存结构（ob_item 数组）\n\n  list ─► [ size=3 | allocated=4 ]\n              │\n              ▼\n         ┌────┬────┬────┬────┐\n         │ *  │ *  │ *  │ 空 │   元素是指针，指向真正的对象\n         └─┼──┴─┼──┴─┼──┴────┘\n           ▼    ▼    ▼\n          1    \"a\"  [2]       各自的 Python 对象",
+        "desc": ""
+      },
+      {
+        "chapter": "py-ch01",
+        "title": "01 · 变量与动态类型",
+        "source": "py-ch01/concept/04-foundations-practical-recipes.md",
+        "code": "04-foundations-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 1. 动态类型不是「不用声明」，是「运行到才认类型」  (python)\n    |\n    v\n  [02] 2. 可变默认参数的「共享幽灵」  (python)\n    |\n    v\n  [03] 3. 闭包捕获的是变量，不是那一刻的值  (python)\n    |\n    v\n  [04] 4. `==` 和 `is` 的边界：小整数池与驻留  (python)\n    |\n    v\n  [05] 5. 深浅拷贝：你改的到底是「同一份」还是「副本」  (python)\n    |\n    v\n  [06] 6. 可变对象不能当字典键  (python)\n    |\n    v\n  [07] 7. `for...else` 不是「如果没进循环」而是「循环没 break」  (python)\n    |\n    v\n  [08] 8. 生成器一次遍历即耗尽  (python)\n    |\n    v\n  [... 其余 5 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "py-ch02",
+        "title": "01 · 对象模型与命名空间：从 CPython 视角看\"变量\"",
+        "source": "py-ch02/concept/01-object-model-and-namespaces.md",
+        "code": "变量是「名字 -> 对象」的绑定，不是内存盒子\n    a = [1, 2];  b = a        # 同一对象两个名字：id(a) == id(b)\n    b.append(3)               # a 也变了\n\nCPython 对象头（PyObject）：\n    ┌──────────────┬──────────────┐\n    │ ob_refcnt    │ ob_type      │   引用计数 + 类型指针\n    └──────────────┴──────────────┘\n    绑名字 +1，del / 离开作用域 -1；归零即释放\n\n命名空间就是「名字 -> 对象」的字典：\n    LEGB：Local ─▶ Enclosing ─▶ Global(模块) ─▶ Builtins\n    globals() / locals() 可直接检视这两张表\n    赋值 = 往当前作用域的表里写一条，不修改对象本身",
+        "desc": ""
+      },
+      {
+        "chapter": "py-ch02",
+        "title": "01 · 对象模型与命名空间：从 CPython 视角看\"变量\"",
+        "source": "py-ch02/concept/05-mutable-default-and-decorator.md",
+        "code": "可变默认参数陷阱：\n    def add(x, acc=[]):        # [] 在 def 执行时创建一次，所有调用共用\n        acc.append(x); return acc\n    add(1) -> [1]   add(2) -> [1, 2]     <- 不是 [2]\n    正解：def add(x, acc=None): acc = [] if acc is None else acc\n\n装饰器 = 接受函数、返回函数的高阶函数（本质是闭包）\n    @log\n    def f(): ...\n    # 等价于 f = log(f)\n\n    f(...) ─▶ wrapper(*a, **kw) ─▶ 前置 ─▶ 原函数 ─▶ 后置 ─▶ 返回\n    必须用 functools.wraps 保留 __name__/__doc__，否则调试与文档全乱",
+        "desc": ""
+      },
+      {
+        "chapter": "py-ch02",
+        "title": "01 · 对象模型与命名空间：从 CPython 视角看\"变量\"",
+        "source": "py-ch02/concept/06-object-practical-recipes.md",
+        "code": "06-object-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场 1：可变默认参数是共享的陷阱  (python)\n    |\n    v\n  [02] 现场 2：闭包延迟绑定（late binding）  (python)\n    |\n    v\n  [03] 现场 3：`UnboundLocalError` 的编译期决定  (python)\n    |\n    v\n  [04] 现场 4：装饰器丢元信息  (python)\n    |\n    v\n  [05] 现场 5：参数顺序的硬规则  (-)\n    |\n    v\n  [06] 现场 6：`*args` / `**kwargs` 解包重复键  (python)\n    |\n    v\n  [07] 现场 7：函数属性当「静态变量」却忘了全局共享  (python)\n    |\n    v\n  [08] 现场 8：把函数属性当\"静态变量\"却忘了它是全局共享  (-)\n    |\n    v\n  [... 其余 6 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
         "chapter": "py-ch03",
         "title": "list 与 tuple 的底层：动态指针数组 vs 定长引用数组",
         "source": "py-ch03/concept/01-list-and-tuple-internals.md",
@@ -143,11 +1319,67 @@ export const DIAGRAM_SUBJECTS: DiagramSubject[] = [
         "desc": "Python dict 是「开地址哈希表」：底层是 entries 数组，每个槽存 hash、key、value。删除不真删而是打「哑元」标记，插入时复用；负载过高触发扩容并重新散列，查找平均接近 O(1)。"
       },
       {
+        "chapter": "py-ch03",
+        "title": "list 与 tuple 的底层：动态指针数组 vs 定长引用数组",
+        "source": "py-ch03/concept/04-container-practical-recipes.md",
+        "code": "04-container-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场 1：`in list` 是线性扫描，`in set` 是哈希查找  (python)\n    |\n    v\n  [02] 现场 2：列表的插入与删除不是免费的  (-)\n    |\n    v\n  [03] 现场 3：字典的键必须可哈希  (python)\n    |\n    v\n  [04] 现场 4：自定义对象当键要实现 `__hash__` 与 `__eq__`  (-)\n    |\n    v\n  [05] 现场 5：集合去重会丢掉顺序  (python)\n    |\n    v\n  [06] 现场 6：切片是浅拷贝，嵌套对象仍共享  (-)\n    |\n    v\n  [07] 现场 7：列表推导式比循环 append 快，但不是万能  (python)\n    |\n    v\n  [08] 现场 8：`sort()` 原地排序返回 None  (-)\n    |\n    v\n  [... 其余 7 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "py-ch05",
+        "title": "文本模式与二进制模式：编码、换行与 BOM",
+        "source": "py-ch05/concept/03-buffering-flush-fsync.md",
+        "code": "三层存储，三次「提交」：\n    Python 缓冲 ──flush()──▶ OS 页缓存 ──fsync()──▶ 磁盘\n\n    f.write(b'x')          只进了 Python 缓冲区，磁盘上什么都没有\n    f.flush()              推给内核（页缓存），断电仍可能丢\n    os.fsync(f.fileno())   落到物理介质，每次几 ms\n\n    with 退出 -> 隐式 flush（但不 fsync！）\n\n缓冲策略：\n    buffering=0   仅二进制模式，完全无缓冲\n    buffering=1   行缓冲，仅文本模式\n    buffering=N   固定字节缓冲\n    默认          文本实际是块缓冲；重定向到文件时通常 4~8KB\n\n原子写：写临时文件 -> flush + fsync -> os.replace(tmp, dst)（同分区才原子）",
+        "desc": ""
+      },
+      {
+        "chapter": "py-ch06",
+        "title": "01 · re 的四个入口：match / search / fullmatch / finditer",
+        "source": "py-ch06/concept/05-regex-practical-recipes.md",
+        "code": "05-regex-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 1. 贪婪匹配会「贪」到不该吞的地方  (python)\n    |\n    v\n  [02] 2. 灾难性回溯：一行正则拖垮整台服务  (python)\n    |\n    v\n  [03] 3. 分组与反向引用：配对才是真功夫  (python)\n    |\n    v\n  [04] 4. 命名分组：让提取结果可读  (python)\n    |\n    v\n  [05] 5. `re.sub` 的替换函数：不只是字符串  (python)\n    |\n    v\n  [06] 6. 字符类与转义：`.` 不匹配换行  (python)\n    |\n    v\n  [07] 7. `search` vs `match`：一个从开头一个从任意位置  (python)\n    |\n    v\n  [08] 8. 预编译：热点路径别反复编译  (python)\n    |\n    v\n  [... 其余 5 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
         "chapter": "py-ch07",
         "title": "01 · GIL 与线程边界：什么时候多线程真的有效",
         "source": "py-ch07/concept/01-gil-and-threading-boundary.md",
         "code": "CPU 密集 vs IO 密集 的两条路：\n\n  多线程 threading           asyncio 协程\n  ┌─────────────┐           ┌──────────────────────────┐\n  │ GIL 串行执行 │           │ 事件循环 event loop        │\n  │ T1 ─┐       │           │  await 遇到 IO 就 yield    │\n  │ T2 ─┤ 争锁   │           │  coroA ─▶ IO挂起▶ coroB跑  │\n  │ T3 ─┘       │           │  单线程切换，零锁开销       │\n  └─────────────┘           └──────────────────────────┘\n  适合：IO 等待(网络/文件)    适合：海量并发 IO(万级连接)\n\n  多进程 multiprocessing：每进程独立 GIL → 真并行 CPU 密集\n  注：GIL 在 IO 阻塞时会释放，故 threading 对 IO 仍有效。",
         "desc": "GIL（全局解释器锁）让 CPython 同一时刻只在一个线程执行字节码，所以多线程只适合 IO 等待，真并行要靠多进程；而 asyncio 用「单线程 + 事件循环 + 协程」在 IO 等待时让出控制权，适合高并发 IO。"
+      },
+      {
+        "chapter": "py-ch07",
+        "title": "01 · GIL 与线程边界：什么时候多线程真的有效",
+        "source": "py-ch07/concept/03-queue-and-executor.md",
+        "code": "queue.Queue 天生线程安全（内部自带锁 + 条件变量）\n    put / get / task_done / join\n    边界：maxsize 满时 put 阻塞；put_nowait 会抛 Full\n\n生产者-消费者：\n    生产者 ──put──▶ [ Queue ] ──get──▶ 消费者 ──task_done──▶ 未完成数归零 ──▶ join 返回\n\nThreadPoolExecutor：\n    with ThreadPoolExecutor(max_workers=8) as ex:\n        futs = [ex.submit(fn, i) for i in range(20)]\n        for f in as_completed(futs): f.result()     # 谁先完成先拿\n    submit 返回 Future；result() 阻塞取结果，异常在此处重抛\n\n选型：\n    CPU 密集 -> ProcessPoolExecutor（绕开 GIL）\n    IO 密集  -> 线程池 / asyncio",
+        "desc": ""
+      },
+      {
+        "chapter": "py-ch07",
+        "title": "01 · GIL 与线程边界：什么时候多线程真的有效",
+        "source": "py-ch07/concept/04-asyncio-event-loop.md",
+        "code": "协程是「可暂停的函数」：await 处让出控制权给事件循环\n    async def fetch(): await asyncio.sleep(1)    # 不阻塞线程，只让出\n\n事件循环：单线程内轮转所有就绪任务\n    ┌───────────────────────────────────┐\n    │ ready 队列 ─▶ 执行到 await ─▶ 挂起  │\n    │      ▲                │           │\n    │      └── IO 就绪 ◀─────┘           │\n    └───────────────────────────────────┘\n\n三种编排：\n    gather(*aws)     并发跑；默认一个异常就外抛（return_exceptions=True 可收集）\n    TaskGroup()      结构化并发，退出时自动等全部，异常聚合成 ExceptionGroup\n    wait(...)        按 FIRST_COMPLETED / ALL_COMPLETED 精细控制\n\n取消：task.cancel() 在下一个 await 点抛 CancelledError -> 需 try/finally 清理",
+        "desc": ""
+      },
+      {
+        "chapter": "py-ch08",
+        "title": "01 · ndarray 与向量化",
+        "source": "py-ch08/concept/01-ndarray-and-vectorization.md",
+        "code": "ndarray 特殊在哪：\n    ┌ 连续内存块 + dtype + shape + strides ┐\n    同构（同一 dtype）-> 可整块 SIMD 运算，无需逐元素解释\n    list 存的是 PyObject 指针数组 -> 每个元素一次类型检查，慢两个数量级\n\n向量化 = 把循环交给编译好的 C 循环\n    [x*2 for x in lst]     Python 层循环，每次乘都要拆装箱\n    arr * 2                C 循环 + SIMD，无解释器开销\n\n经验：数组运算通常比等价 Python 循环快 10~100 倍\n     dtype 选小（int32 而非 int64、float32 而非 float64）可省一半内存与带宽",
+        "desc": ""
+      },
+      {
+        "chapter": "py-ch08",
+        "title": "01 · ndarray 与向量化",
+        "source": "py-ch08/concept/04-pandas-series-dataframe-csv.md",
+        "code": "DataFrame = 一组共享索引的 Series（列）\n               index\n                ┌───┬────┬────┐\n                │   │ A  │ B  │   每列一个 dtype\n                ├───┼────┼────┤\n                │ 0 │ 1  │ 3  │\n                │ 1 │ 2  │ 4  │\n                └───┴────┴────┘\n\n索引对齐（比按位置更重要）：\n    s1 + s2     按索引标签对齐相加，不是按行号\n    缺失标签 -> NaN（不报错）-> 用 fill_value 或先 reindex\n\nCSV 读写：\n    pd.read_csv(p, dtype={'id': str}, parse_dates=['ts'], na_values=['', 'NA'])\n    -> id 必须显式 str，否则 001 变 1、大整数丢精度\n    to_csv(p, index=False, encoding='utf-8-sig')      # Excel 需要 BOM",
+        "desc": ""
+      },
+      {
+        "chapter": "py-ch09",
+        "title": "类、实例与属性查找顺序",
+        "source": "py-ch09/concept/04-oop-practical-recipes.md",
+        "code": "04-oop-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场一：类属性是共享的，可变类属性是灾难  (python)\n    |\n    v\n  [02] 现场二：名字改写让「私有」变成 _ClassName__attr  (python)\n    |\n    v\n  [03] 现场三：MRO 是 C3 线性化，不是「深度优先」  (python)\n    |\n    v\n  [04] 现场四：super() 不是「调用父类」，是「沿 MRO 找下一个」  (python)\n    |\n    v\n  [05] 现场五：mixin 不能带状态  (python)\n    |\n    v\n  [06] 现场六：__eq__ 一写，对象就不可哈希了  (python)\n    |\n    v\n  [07] 现场七：__repr__ 是调试的第一生产力  (python)\n    |\n    v\n  [08] 现场八：__str__ 与 __repr__ 的职责不同  (python)\n    |\n    v\n  [... 其余 4 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
       }
     ]
   },
@@ -163,6 +1395,76 @@ export const DIAGRAM_SUBJECTS: DiagramSubject[] = [
         "source": "data-ch01/concept/01-ndarray-memory.md",
         "code": "内存布局（一维视角）:\n   [ a0 ][ a1 ][ a2 ][ a3 ][ a4 ][ a5 ]  连续字节\n   shape=(2,3)  strides=(3*8, 1*8) 字节\n\n  视图 vs 复制:\n   a.T       只换 shape/strides，不搬数据（视图）\n   a.reshape  → 连续则视图，否则复制\n   a.copy()  强制复制\n\n  广播 Broadcasting（从尾部对齐）:\n   (3,1) 与 (3,) → 对齐为 (3,3) 逐元素\n   (2,3) 与 (3,)  → (2,3) 行复制 (3,) 成 (2,3)\n   规则：维度相等 或 其一为 1，否则报错\n\n  向量化：用数组运算替代 Python for 循环 → 接近 C 速度",
         "desc": "ndarray 本质是「一块连续同质内存」加「shape/strides 视图」：逻辑维度由 strides 决定，很多操作（转置、reshape）只改视图不复制数据；广播（broadcasting）按尾部对齐、长度为1的轴复制，让不同形状数组也能逐元素运算，是 NumPy 向量化提速的核心。"
+      },
+      {
+        "chapter": "data-ch01",
+        "title": "ndarray 的内存布局：为什么它比 list 快两个数量级",
+        "source": "data-ch01/concept/05-ndarray-practical-recipes.md",
+        "code": "05-ndarray-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场 1：ndarray 是「数据 + 形状 + 步长」  (python)\n    |\n    v\n  [02] 现场 2：C 顺序与 F 顺序决定遍历快慢  (python)\n    |\n    v\n  [03] 现场 3：切片返回视图，改它就改原数组  (python)\n    |\n    v\n  [04] 现场 4：花式索引与布尔索引返回拷贝  (python)\n    |\n    v\n  [05] 现场 5：reshape 多数情况是视图  (python)\n    |\n    v\n  [06] 现场 6：transpose 只改步长，不搬数据  (python)\n    |\n    v\n  [07] 现场 7：广播不复制数据，但结果会实体化  (python)\n    |\n    v\n  [08] 现场 8：ufunc 是逐元素运算的引擎  (python)\n    |\n    v\n  [... 其余 7 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "data-ch02",
+        "title": "广播规则与内存爆炸陷阱",
+        "source": "data-ch02/concept/01-broadcasting-rules.md",
+        "code": "例1: (3,1) + (3,)   →  (3,1) 与 (1,3) 对齐? 不，(3,) 补成 (1,3)\n      (3,1) 尾维1, (1,3) 尾维3 → 不相容? \n      —— 正确推导：(3,1) 与 (3,) 从尾对齐：1 vs 3 → 1 可扩成 3 → (3,3)\n例2: (2,1,3) + (4,3) → 补维 (1,4,3) 与 (2,1,3)：尾维3==3、1==1、2==1(扩) → (2,4,3)\n例3: (3,) + (3,4)   → 尾维 3 vs 4 既不等的也不是 1 → ValueError",
+        "desc": ""
+      },
+      {
+        "chapter": "data-ch02",
+        "title": "广播规则与内存爆炸陷阱",
+        "source": "data-ch02/concept/05-numpy-practical-recipes.md",
+        "code": "05-numpy-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场 1：广播规则是「从尾轴对齐」  (python)\n    |\n    v\n  [02] 现场 2：广播悄悄制造超大数组  (python)\n    |\n    v\n  [03] 现场 3：随机不可复现——忘了固定 seed  (python)\n    |\n    v\n  [04] 现场 4：`np.random.choice` 不放回采样  (python)\n    |\n    v\n  [05] 现场 5：向量化不是银弹，小数组反而慢  (python)\n    |\n    v\n  [06] 现场 6：`einsum` 默认不优化  (python)\n    |\n    v\n  [07] 现场 7：链式运算撑爆内存  (python)\n    |\n    v\n  [08] 现场 8：C 顺序 vs F 顺序影响性能  (python)\n    |\n    v\n  [... 其余 6 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "data-ch03",
+        "title": "Series、DataFrame 与「自动对齐」",
+        "source": "data-ch03/concept/03-iloc-loc-and-chained-assignment.md",
+        "code": "你要按什么取？\n├─ 按「第几行/第几列」 → iloc（永远是位置，不含右端点）\n├─ 按「标签/条件」     → loc（切片含右端点）\n└─ 取单列\n   ├─ 列名是合法标识符  → df.colname（属性访问，但可能与方法名冲突）\n   └─ 其它情况         → df[\"col name\"]（**永远安全，推荐**）",
+        "desc": ""
+      },
+      {
+        "chapter": "data-ch03",
+        "title": "Series、DataFrame 与「自动对齐」",
+        "source": "data-ch03/concept/04-missing-values-dtype-and-memory.md",
+        "code": "df.memory_usage(deep=True).sort_values(ascending=False)   # 先排序，看大户\n│\n├─ 最大的是 object 列？\n│   ├─ nunique()/len() < 0.5 → astype(\"category\")   ← 收益最大\n│   └─ 基数很高（如 ID）      → 考虑 drop 或哈希编码，category 会变慢\n│\n├─ 最大的是 int64 列？\n│   └─ to_numeric(downcast=\"integer\")  ← 收益 = 原字节/新字节\n│\n├─ 最大的是 float64 列？\n│   └─ 精度要求不高时 downcast=\"float\"\n│\n└─ 有大量 NaN 的稀疏列？\n    └─ 考虑用稀疏数组或转换存储形式",
+        "desc": ""
+      },
+      {
+        "chapter": "data-ch04",
+        "title": "groupby：split-apply-combine 与四种聚合器",
+        "source": "data-ch04/concept/01-groupby-split-apply-combine.md",
+        "code": "   ┌── split ──┐     ┌── apply ──┐     ┌── combine ──┐\n   │ 按 key 把  │     │ 对每个子集 │     │ 把子结果按  │\n   │ 行切成若干组│ ──▶ │ 施加一个函数│ ──▶ │ 组标签拼回  │\n   └───────────┘     └───────────┘     └─────────────┘",
+        "desc": ""
+      },
+      {
+        "chapter": "data-ch04",
+        "title": "groupby：split-apply-combine 与四种聚合器",
+        "source": "data-ch04/concept/02-merge-join-concat.md",
+        "code": "要按列连？  ── 是 ──▶ merge(on=..., how=...)\n            └─ 否 ─▶ 要按索引连？ ── 是 ──▶ join(how=...)\n                                   └─ 否 ─▶ 只是堆叠？ ──▶ concat(axis=...)",
+        "desc": ""
+      },
+      {
+        "chapter": "data-ch04",
+        "title": "groupby：split-apply-combine 与四种聚合器",
+        "source": "data-ch04/concept/05-edge-cases-perf.md",
+        "code": "05-edge-cases-perf.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 2. groupby 后的索引重建  (python)\n    |\n    v\n  [02] 3. 命名聚合 namedAgg 一次算多种统计  (python)\n    |\n    v\n  [03] 4. merge 的 indicator 与 validate 实战  (python)\n    |\n    v\n  [04] 5. categorical 类型对内存与速度的影响  (-)\n    |\n    v\n  [05] 6. 多列 groupby 与 dropna 的交互  (-)\n    |\n    v\n  [06] 7. rolling 的 min_periods 与 center  (-)\n    |\n    v\n  [07] 8. apply 逐行陷阱与向量化替代  (-)\n    |\n    v\n  [08] 9. 大数据下的分块与类型优化  (-)\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "data-ch05",
+        "title": "HTTP 在采集场景的落地",
+        "source": "data-ch05/concept/03-parsing-and-encoding.md",
+        "code": "解析三件套：\n    lxml            快，支持 XPath / CSS，容错好（首选）\n    BeautifulSoup   容错最强、API 友好，速度较慢\n    正则            只适合行内、结构简单的补充提取\n\n    选择器稳定性：id / data-* > 语义 class > 层级结构 > 位置序号\n    依赖 nth-child 的规则最易碎（页面一改版就全崩）\n\n编码链路：\n    bytes ──(声明或猜测的 charset)──▶ str ──▶ DOM\n    resp.encoding 猜错（声明 iso-8859-1 实际 utf-8）-> 中文乱码\n    修法：用 resp.content 交给 BeautifulSoup(..., from_encoding='utf-8')\n\n    输出统一成 dict -> DataFrame，字段缺失用 None 而不是跳过（否则行错位）",
+        "desc": ""
+      },
+      {
+        "chapter": "data-ch06",
+        "title": "数据清洗与质量体检",
+        "source": "data-ch06/concept/04-modeling-metrics-and-math-modeling.md",
+        "code": "① 明确目标与评价口径  → ② 划分数据（时间序务必按时间切）\n   → ③ 建立基线（先跑最笨的模型） → ④ 迭代特征与模型\n   → ⑤ 交叉验证调参 → ⑥ 在留出集上评估 → ⑦ 误差分析\n   → ⑧ 结论 + 局限 + 灵敏度",
+        "desc": ""
       }
     ]
   },
@@ -173,11 +1475,88 @@ export const DIAGRAM_SUBJECTS: DiagramSubject[] = [
     "hue": "#5a7d9a",
     "entries": [
       {
+        "chapter": "db-ch01",
+        "title": "01 · 关系模型基本概念",
+        "source": "db-ch01/concept/01-relational-model.md",
+        "code": "关系代数 → SQL 的映射（注意去重语义）\n\n  σ_{salary>5000}(employee)        →  WHERE salary > 5000\n  π_{name}(employee)               →  SELECT DISTINCT name\n  employee ⋈_{dept_id} dept        →  INNER JOIN ... ON ...\n  A ∪ B                            →  UNION（去重） / UNION ALL（不去重）\n  A − B                            →  EXCEPT（MySQL 8.0.31+ 支持）",
+        "desc": ""
+      },
+      {
+        "chapter": "db-ch01",
+        "title": "01 · 关系模型基本概念",
+        "source": "db-ch01/concept/02-sql-ddl-dml.md",
+        "code": "危险语句的检查清单\n\n  UPDATE / DELETE\n    ├─ 有 WHERE 吗？          无 → 全表操作，事故\n    ├─ WHERE 用到索引吗？      否 → 锁全表扫描的行\n    ├─ 影响行数是多少？        超大 → 拆批\n    └─ 在事务里吗？            是 → 注意长事务与 undo 膨胀",
+        "desc": ""
+      },
+      {
+        "chapter": "db-ch02",
+        "title": "01 · JOIN 的执行算法：从\"双重循环\"到 Hash/Merge Join",
+        "source": "db-ch02/concept/05-sql-practical-recipes.md",
+        "code": "05-sql-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 1. INNER JOIN 只留两表都匹配的行  (sql)\n    |\n    v\n  [02] 2. LEFT JOIN 之后 WHERE 过滤右表会退化成内连接  (sql)\n    |\n    v\n  [03] 3. 笛卡尔积：忘了 ON 条件的灾难  (sql)\n    |\n    v\n  [04] 4. 自连接：同一张表当两张用  (sql)\n    |\n    v\n  [05] 5. 子查询相关与不相关：性能天差地别  (sql)\n    |\n    v\n  [06] 6. EXISTS vs IN：NULL 语义与空值处理  (sql)\n    |\n    v\n  [07] 7. 集合运算：UNION 去重 vs UNION ALL  (sql)\n    |\n    v\n  [08] 8. INTERSECT / EXCEPT：交集与差集  (sql)\n    |\n    v\n  [... 其余 5 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
         "chapter": "db-ch03",
         "title": "01 · InnoDB B+树索引的物理结构",
         "source": "db-ch03/concept/01-bplus-tree-index.md",
         "code": "B+树（m=3 示意）\n        [ 50 ]\n       /      \\\n  [10,30]    [70,90]\n   │││        │││\n  叶子层有序链表: 10-20-30-40-50-60-70-80-90   ← 真正数据/指针在这\n  查找 72：根 50→右 70→叶子 70..90，O(log) 且稳定\n\n  事务 ACID:\n   A 原子  全做或全不做（undo log 回滚）\n   C 一致  约束不被破坏\n   I 隔离  并发互不干扰\n   D 持久  commit 后不丢（redo log）\n\n  隔离级别（并发 vs 异常）：\n   RU 读未提交 → 脏读     RC 读已提交 → 不可重复读\n   RR 可重复读 → 防幻读    Serializable 全串行（最安全最慢）",
         "desc": "B+树索引把「有序性」与「矮树高扇出」结合：所有数据在叶子层串成有序链表，非叶只存路由键，三层即可索引千万行；事务靠 ACID 四性守住正确，隔离级别用锁/多版本在「并发」与「脏读/幻读」间权衡。"
+      },
+      {
+        "chapter": "db-ch03",
+        "title": "01 · InnoDB B+树索引的物理结构",
+        "source": "db-ch03/concept/05-index-transaction-practical-recipes.md",
+        "code": "RC（读已提交）：每次 SELECT 都新建一个 Read View\n  → 所以能看到其他事务已提交的最新数据 → 不可重复读\n\nRR（可重复读）：只在事务的第一次 SELECT 时创建 Read View，之后复用\n  → 整个事务看到的是同一个快照 → 可重复读",
+        "desc": ""
+      },
+      {
+        "chapter": "db-ch03",
+        "title": "01 · InnoDB B+树索引的物理结构",
+        "source": "db-ch03/concept/05-index-transaction-practical-recipes.md",
+        "code": "m_ids          当前活跃（未提交）的事务 ID 列表\nmin_trx_id     m_ids 中的最小值\nmax_trx_id     下一个将分配的事务 ID\ncreator_trx_id 创建该 Read View 的事务 ID\n\n判断某行版本（trx_id）是否可见：\n  trx_id < min_trx_id      → 可见（事务已提交）\n  trx_id >= max_trx_id     → 不可见（事务在快照之后才开始）\n  min_trx_id <= trx_id < max_trx_id：\n      在 m_ids 中            → 不可见（还活着）\n      不在 m_ids 中          → 可见（已提交）",
+        "desc": ""
+      },
+      {
+        "chapter": "db-ch04",
+        "title": "01 · EXPLAIN 输出解读：type、key、rows 与 Extra",
+        "source": "db-ch04/concept/01-explain-columns-and-type-ladder.md",
+        "code": "+----+-------------+-------+------+---------------+---------+---------+-------+------+-----------------------+\n| id | select_type | table | type | possible_keys | key     | key_len | ref   | rows | Extra                 |\n+----+-------------+-------+------+---------------+---------+---------+-------+------+-----------------------+\n|  1 | SIMPLE      | o     | ref  | idx_user_id   | idx_uid | 8       | const |   12 | Using index condition |\n+----+-------------+-------+------+---------------+---------+---------+-------+------+-----------------------+",
+        "desc": ""
+      },
+      {
+        "chapter": "db-ch06",
+        "title": "01 · 函数依赖、Armstrong 公理与候选键求解",
+        "source": "db-ch06/concept/01-functional-dependency-and-closure.md",
+        "code": "完全函数依赖  K ──决定──▶ A     且 K 的**任何真子集**都决定不了 A\n部分函数依赖  K ──决定──▶ A     但存在真子集 K' (K' ⊂ K) 也决定 A\n传递函数依赖  A ──▶ B ──▶ C     且 B ↛ A, C ⊄ B   ⇒  A → C 是传递依赖",
+        "desc": ""
+      },
+      {
+        "chapter": "db-ch07",
+        "title": "01 · 备份的两条路线：逻辑备份与物理备份",
+        "source": "db-ch07/concept/01-logical-vs-physical-backup-and-strategy.md",
+        "code": "逻辑备份（sql 文本）                      物理备份（数据文件副本）\n+--------------------------+             +--------------------------+\n| CREATE TABLE `orders`... |             | ibdata1  orders.ibd      |\n| INSERT INTO `orders` ... |             | #ib_redo...  undo_001     |\n| INSERT INTO `orders` ... |             | (页 = 16KB 的二进制块)    |\n+--------------------------+             +--------------------------+\n        |  重放 SQL 重建                        |  直接挂载/拷贝回去\n        v                                      v\n    恢复慢，但透明、可编辑、可裁剪          恢复快，但黑盒、与版本强绑定",
+        "desc": ""
+      },
+      {
+        "chapter": "db-ch07",
+        "title": "01 · 备份的两条路线：逻辑备份与物理备份",
+        "source": "db-ch07/concept/02-binlog-formats-and-pitr.md",
+        "code": "  客户端 SQL\n      |\n      v\n  [ 服务层 ]  --写-->  binlog（逻辑事件，用于复制 / PITR）  --两阶段提交--> 存储引擎\n      |\n      v\n  [ InnoDB ]  --写-->  redo log（物理页变更，用于崩溃恢复）\n                --写-->  undo log（版本链，用于回滚与 MVCC）",
+        "desc": ""
+      },
+      {
+        "chapter": "db-ch08",
+        "title": "01 · 主从复制：binlog、relay log 与复制模式",
+        "source": "db-ch08/concept/01-mysql-replication-and-read-write-split.md",
+        "code": "主库                                          从库\n┌────────────┐      COM_BINLOG_DUMP      ┌──────────────────────┐\n│ 事务提交     │  ◀────────────────────    │ IO_THREAD            │\n│    ↓        │      binlog events        │    ↓ 落盘（顺序追加）  │\n│ binlog      │  ─────────────────────▶   │ relay log            │\n└────────────┘                           │    ↓                 │\n   dump 线程                              │ SQL_THREAD 重放       │\n   （持有快照读 binlog）                    │    ↓                 │\n                                          │ 数据页 + redo log     │\n                                          └──────────────────────┘",
+        "desc": ""
+      },
+      {
+        "chapter": "db-ch08",
+        "title": "01 · 主从复制：binlog、relay log 与复制模式",
+        "source": "db-ch08/concept/03-high-availability-and-failover.md",
+        "code": "        RPO 小（不丢数据）\n              ▲\n              │  MGR（多数派提交，自动选主）\n              │      · 3/5 节点，RPO=0，RTO 秒级\n              │\n   半同步 ────┤  半同步 + Orchestrator\n   （≥1 ACK） │      · RPO≈0，RTO 十秒级，需外部仲裁\n              │\n   异步复制 ──┤  主从 + MHA\n              │      · RPO>0（可能丢最后一批），RTO 十秒~分钟级\n              └──────────────────────────────▶ RTO 大（恢复慢）",
+        "desc": ""
       }
     ]
   },
@@ -188,11 +1567,67 @@ export const DIAGRAM_SUBJECTS: DiagramSubject[] = [
     "hue": "#2f8f7a",
     "entries": [
       {
+        "chapter": "spring-ch01",
+        "title": "一、IoC 基础与容器定位",
+        "source": "spring-ch01/concept/05-ioc-basics-practical-recipes.md",
+        "code": "05-ioc-basics-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场一：同类型多 Bean 时靠字段名「猜」实现  (java)\n    |\n    v\n  [02] 现场二：忘了 @ComponentScan，一个 Bean 都没注册  (java)\n    |\n    v\n  [03] 现场三：构造器注入 vs setter 注入选型乱  (java)\n    |\n    v\n  [04] 现场四：构造器循环依赖，启动直接抛异常  (java)\n    |\n    v\n  [05] 现场五：@Autowired required 默认 true，缺 Bean 即失败  (java)\n    |\n    v\n  [06] 现场六：@Value 取不到配置，原因是占位符 or 类型  (java)\n    |\n    v\n  [07] 现场七：Bean 不是线程安全，singleton 里存状态  (java)\n    |\n    v\n  [08] 现场八：@Lazy 误用掩盖循环依赖  (java)\n    |\n    v\n  [... 其余 7 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "spring-ch02",
+        "title": "一、Bean 生命周期：从定义到销毁",
+        "source": "spring-ch02/concept/05-ioc-practical-recipes.md",
+        "code": "05-ioc-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场一：构造器注入循环依赖，容器直接抛 BeanCurrentlyInCreationException  (java)\n    |\n    v\n  [02] 现场二：prototype 注入 singleton，每次拿到的还是同一个  (java)\n    |\n    v\n  [03] 现场三：忘了加 @ComponentScan，一个 Bean 都没注册  (java)\n    |\n    v\n  [04] 现场四：@Lazy 误用，掩盖了真正的循环依赖  (java)\n    |\n    v\n  [05] 现场五：@PostConstruct / InitializingBean 顺序搞混  (java)\n    |\n    v\n  [06] 现场六：Bean 不是线程安全，singleton 里存了请求级状态  (java)\n    |\n    v\n  [07] 现场七：@Scope(\"prototype\") 但被 singleton 持有，没真正多例  (java)\n    |\n    v\n  [08] 现场八：BeanPostProcessor 里注入业务 Bean，AOP 静默失效  (java)\n    |\n    v\n  [... 其余 4 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
         "chapter": "spring-ch03",
         "title": "一、JDK 动态代理：原理与四类通知",
         "source": "spring-ch03/concept/01-jdk-proxy.md",
         "code": "目标 Bean 被包一层代理：\n\n   调用方 ─▶ [ Proxy 代理 ]\n                 │  @Before   (前置：记日志/开事务)\n                 │  @Around   (环绕：计时/鉴权，可改参/拦返回)\n                 ▼\n              [ Target 真实方法 ]\n                 │  @AfterReturning / @AfterThrowing\n                 ▼\n               返回调用方\n\n  代理选型：\n   目标实现接口 → JDK 动态代理（同接口）\n   目标无接口   → CGLIB 生成子类代理\n  执行顺序：环绕前 → 前置 → 目标 → 后置/异常 → 环绕后\n\n  横切关注点（日志/事务/安全）与业务解耦，集中维护。",
         "desc": "AOP 用「代理」在目标方法周围织入横切逻辑（日志、事务、鉴权），业务代码零侵入。有接口走 JDK 动态代理（实现同一接口），无接口走 CGLIB 子类代理；调用经代理先跑通知再转目标。"
+      },
+      {
+        "chapter": "spring-ch03",
+        "title": "一、JDK 动态代理：原理与四类通知",
+        "source": "spring-ch03/concept/05-aop-practical-recipes.md",
+        "code": "05-aop-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场一：同类内部方法自调用，通知整段消失  (java)\n    |\n    v\n  [02] 现场二：AopContext.currentProxy() 忘了开 exposeProxy  (java)\n    |\n    v\n  [03] 现场三：final 类 / final 方法，CGLIB 代理不了  (java)\n    |\n    v\n  [04] 现场四：private 方法上的 @Transactional 不生效  (java)\n    |\n    v\n  [05] 现场五：@Around 不调 proceed，业务直接被吞  (java)\n    |\n    v\n  [06] 现场六：切点表达式太宽，把内部方法也织进去了  (java)\n    |\n    v\n  [07] 现场七：多个切面顺序混乱，日志和事务谁先谁后说不清  (java)\n    |\n    v\n  [08] 现场八：@After 读返回值永远是 null  (java)\n    |\n    v\n  [... 其余 4 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "spring-ch04",
+        "title": "一、@SpringBootApplication 的「三合一」与启动主干",
+        "source": "spring-ch04/concept/01-application-and-startup.md",
+        "code": "SpringApplication.run()\n └─ new SpringApplication(...)                  /* 推断应用类型 SERVLET/REACTIVE/NONE */\n └─ run(args)\n     ├─ 1. 准备 Environment（加载配置源、命令行参数、profile）\n     ├─ 2. 打印 Banner\n     ├─ 3. 创建 ApplicationContext（按类型选 Servlet/Reactive/Annotation）\n     ├─ 4. prepareContext：把主配置类注册为 BeanDefinition\n     ├─ 5. refreshContext()   ← 就是 spring-ch01 讲过的 AbstractApplicationContext#refresh\n     │      ├─ invokeBeanFactoryPostProcessors()\n     │      │    └─ ConfigurationClassPostProcessor\n     │      │         ├─ 解析 @ComponentScan  → 注册你的 Bean\n     │      │         └─ 解析 @Import(AutoConfigurationImportSelector)\n     │      │              └─ 读 SPI 清单 → 条件过滤 → 注册自动配置类\n     │      ├─ registerBeanPostProcessors()\n     │      ├─ onRefresh()  ← Servlet 容器在此创建并启动（内嵌 Tomcat）\n     │      └─ finishRefresh()\n     └─ 6. 发布 ApplicationReadyEvent，启动完成",
+        "desc": ""
+      },
+      {
+        "chapter": "spring-ch04",
+        "title": "一、@SpringBootApplication 的「三合一」与启动主干",
+        "source": "spring-ch04/concept/03-config-binding-and-starter.md",
+        "code": "my-name      → my-name\nmyName       → my-name\nmy_name      → my-name\nMY_NAME      → my-name\napp.myName   → app.my-name",
+        "desc": ""
+      },
+      {
+        "chapter": "spring-ch05",
+        "title": "一、REST 控制器与请求映射",
+        "source": "spring-ch05/concept/04-exception-handling-and-dto.md",
+        "code": "@ControllerAdvice 把异常统一翻译成响应\n    @ExceptionHandler(BizException)                     -> 400 + 业务码\n    @ExceptionHandler(MethodArgumentNotValidException)  -> 字段级错误列表\n    @ExceptionHandler(Exception)                        -> 500 兜底，不泄漏堆栈\n\nDTO 隔离（不要直接暴露 Entity）：\n    Entity ──映射──▶ DTO（Request / Response）\n    理由：\n      不把内部字段（密码、逻辑删除标记）暴露出去\n      避免懒加载代理序列化异常\n      接口契约可独立演进，不必跟着表结构改\n      每个接口只带需要的字段，减小 payload",
+        "desc": ""
+      },
+      {
+        "chapter": "spring-ch05",
+        "title": "一、REST 控制器与请求映射",
+        "source": "spring-ch05/concept/05-rest-practical-recipes.md",
+        "code": "05-rest-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场 1：`@RequestBody` 与 `@RequestParam` 用错，参数永远是空  (java)\n    |\n    v\n  [02] 现场 2：路径变量与查询参数别混  (java)\n    |\n    v\n  [03] 现场 3：日期与枚举的绑定格式  (java)\n    |\n    v\n  [04] 现场 4：校验注解要配 `@Valid` 才生效  (java)\n    |\n    v\n  [05] 现场 5：嵌套对象的校验要加 `@Valid`  (-)\n    |\n    v\n  [06] 现场 6：校验失败要返回结构化错误，而不是 500  (java)\n    |\n    v\n  [07] 现场 7：全局异常处理不要吞掉异常  (-)\n    |\n    v\n  [08] 现场 8：HTTP 状态码要用对  (java)\n    |\n    v\n  [... 其余 7 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "spring-ch06",
+        "title": "一、MyBatis 定位与 Mapper 绑定",
+        "source": "spring-ch06/concept/05-mybatis-practical-recipes.md",
+        "code": "1. 表名/列名动态（无法用占位符）\n   SELECT * FROM ${tableName} WHERE id = #{id}\n   → 但 tableName 必须来自白名单枚举，绝不能直接用请求参数\n\n2. ORDER BY 的字段名\n   ORDER BY ${sortField} ${sortOrder}\n   → 同样必须白名单校验（sortField ∈ {id, created_at}，sortOrder ∈ {ASC, DESC}）\n\n3. LIKE 的模糊匹配（也不推荐，见现场二）",
+        "desc": ""
       },
       {
         "chapter": "spring-ch07",
@@ -214,6 +1649,20 @@ export const DIAGRAM_SUBJECTS: DiagramSubject[] = [
         "source": "spring-ch07/concept/03-cache-l1-l2.md",
         "code": "  查询请求 (MappedStatement + 参数)\n        |\n        v\n  +---------------------------+\n  |  一级缓存 LocalCache      |  作用域: SqlSession（PerpetualCache + HashMap）\n  |  Key = CacheKey            |  默认开启，无开关\n  +---------------------------+\n        | miss\n        v\n  +---------------------------+\n  |  二级缓存 (namespace 级)   |  作用域: Mapper namespace（需 <cache/> 显式开启）\n  |  TransactionalCache        |  事务提交后才对外可见\n  +---------------------------+\n        | miss\n        v\n  +---------------------------+\n  |  Database                  |\n  +---------------------------+",
         "desc": ""
+      },
+      {
+        "chapter": "spring-ch08",
+        "title": "一、@Transactional 的完整语义",
+        "source": "spring-ch08/concept/02-transaction-failure-and-proxy.md",
+        "code": "失效归因两大分支\n├── 代理没生效（拦截器没跑）\n│   ├── 同类自调用：this.method()\n│   ├── 非 public 方法：代理不增强\n│   ├── 对象不是 Spring Bean（自己 new 出来的）\n│   └── 数据库引擎不支持事务（MyISAM）\n└── 代理跑了，但规则不回滚\n    ├── 异常被 catch 吞掉（方法正常返回）\n    ├── checked 异常默认不回滚\n    ├── 多线程/异步：不在同一线程，上下文丢失\n    └── 传播行为用错（如误用 NOT_SUPPORTED / NEVER）",
+        "desc": ""
+      },
+      {
+        "chapter": "spring-ch08",
+        "title": "一、@Transactional 的完整语义",
+        "source": "spring-ch08/concept/04-layering-and-distributed-tx.md",
+        "code": "Controller  --(DTO 入参 / VO 出参)-->  Service  --(Entity / 领域对象)-->  Mapper\n   |                                     |\n   |  参数校验、HTTP 语义                 |  事务边界（@Transactional 加在 Service）\n   +-------------------------------------+",
+        "desc": ""
       }
     ]
   },
@@ -224,6 +1673,48 @@ export const DIAGRAM_SUBJECTS: DiagramSubject[] = [
     "hue": "#7a6a4a",
     "entries": [
       {
+        "chapter": "mw-ch01",
+        "title": "一、SDS 与 String 对象编码",
+        "source": "mw-ch01/concept/03-set-zset-encoding.md",
+        "code": "Set：\n    intset     全整数且元素少 -> 有序紧凑数组，查找用二分\n    hashtable  含非整数或超阈值（set-max-intset-entries）\n    （7.2 起小集合也可用 listpack）\n\nZSet：\n    listpack          元素少且短 -> 按 score 有序的紧凑数组\n    skiplist + dict   超阈值 -> 跳表（按 score 有序）+ 字典（member -> score）\n                      为什么要两个结构：跳表管范围查询，字典管 O(1) 取分数\n\n    跳表期望 O(log n)，每层约 1/4 概率向上生长：\n    L3  ──────────●──────────────\n    L2  ────●─────●──────●───────\n    L1  ●─●─●─●─●─●─●─●─●─●─●─●\n\n    ZRANGEBYSCORE 走跳表    ZSCORE 走字典",
+        "desc": ""
+      },
+      {
+        "chapter": "mw-ch01",
+        "title": "一、SDS 与 String 对象编码",
+        "source": "mw-ch01/concept/04-dict-rehash-and-object.md",
+        "code": "dict 是 Redis 的心脏（所有 key 都在这），单线程下不能一次性 rehash\n    两张表：ht[0] 旧 / ht[1] 新（2 倍大小）\n    渐进式：每次增删查顺带搬 1 个桶 + 定时任务搬一批\n    查找：先 ht[0] 再 ht[1]；新增只写 ht[1]\n    rehashidx = 已搬迁到的桶下标；-1 表示当前未在 rehash\n\n    -> 把 O(n) 的搬迁摊到 O(1)/次，避免单次卡顿\n\nredisObject 头（所有 value 的外壳）：\n    ┌ type(4b) │ encoding(4b) │ lru(24b) │ refcount │ ptr ┐\n    type      string / list / set / zset / hash\n    encoding  int / embstr / raw / listpack / quicklist / skiplist ...\n    lru       空闲时间（maxmemory-policy 的 LRU/LFU 依据）\n    refcount  共享常用整数对象（0~9999）",
+        "desc": ""
+      },
+      {
+        "chapter": "mw-ch01",
+        "title": "一、SDS 与 String 对象编码",
+        "source": "mw-ch01/concept/05-redis-data-practical-recipes.md",
+        "code": "05-redis-data-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场 1：为什么 Redis 不用 C 字符串  (c)\n    |\n    v\n  [02] 现场 2：SDS 头部按长度自适应  (-)\n    |\n    v\n  [03] 现场 3：字符串的三种编码：int、embstr、raw  (bash)\n    |\n    v\n  [04] 现场 4：44 字节是 embstr 与 raw 的分界线  (-)\n    |\n    v\n  [05] 现场 5：append 让 embstr 悄悄变 raw  (bash)\n    |\n    v\n  [06] 现场 6：list 的演进：ziplist 到 quicklist  (-)\n    |\n    v\n  [07] 现场 7：hash 在 listpack 与 hashtable 之间切换  (bash)\n    |\n    v\n  [08] 现场 8：set 的三态：intset、listpack、hashtable  (-)\n    |\n    v\n  [... 其余 7 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "mw-ch02",
+        "title": "一、RDB 快照：fork 与写时复制（COW）",
+        "source": "mw-ch02/concept/04-redis-practical-recipes.md",
+        "code": "04-redis-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场一：忽略 RDB fork 的 COW 放大，被 OOM kill  (bash)\n    |\n    v\n  [02] 现场二：AOF 用 always 把吞吐打到地板  (conf)\n    |\n    v\n  [03] 现场三：bigkey 一把删，主线程卡死  (bash)\n    |\n    v\n  [04] 现场四：热点 key 打爆单线程，CPU 100%  (java)\n    |\n    v\n  [05] 现场五：内存淘汰策略配错，该清的没清  (conf)\n    |\n    v\n  [06] 现场六：过期键没及时删，内存悄悄涨  (bash)\n    |\n    v\n  [07] 现场七：把 Redis 当持久数据库，重启数据没了  (conf)\n    |\n    v\n  [08] 现场八：keys * 在生产环境一键卡死  (bash)\n    |\n    v\n  [... 其余 7 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "mw-ch03",
+        "title": "一、主从复制：全量同步与部分同步",
+        "source": "mw-ch03/concept/04-redis-ha-practical-recipes.md",
+        "code": "1. kill -9 主库进程        → 验证哨兵切换耗时与客户端跟随\n2. 断开主库网络（iptables）  → 验证脑裂防护是否生效（min-replicas）\n3. 挂掉一个哨兵              → 验证剩余哨兵仍能形成多数派\n4. 从库延迟 30 秒再切换      → 验证业务能接受多少数据丢失\n5. Cluster 迁移中 kill 节点  → 验证 slot 状态能自愈",
+        "desc": ""
+      },
+      {
+        "chapter": "mw-ch03",
+        "title": "一、主从复制：全量同步与部分同步",
+        "source": "mw-ch03/concept/04-redis-ha-practical-recipes.md",
+        "code": "master_link_status == down                 → P1 立即\nmaster_last_io_seconds_ago > 30            → P2\nrepl_offset 差值 > 10MB 且持续 1 分钟       → P2\n哨兵 s_down / o_down 计数 > 0               → P1\nCluster cluster_state != ok                → P1",
+        "desc": ""
+      },
+      {
         "chapter": "mw-ch04",
         "title": "一、缓存穿透：查不到的数据把压力打到数据库",
         "source": "mw-ch04/concept/01-cache-penetration.md",
@@ -231,11 +1722,60 @@ export const DIAGRAM_SUBJECTS: DiagramSubject[] = [
         "desc": "缓存三大经典问题本质是「查不到时往哪去、什么时候失效」：穿透是查不存在的 key 直击库，击穿是热点 key 突失效瞬间被打穿，雪崩是大量 key 同时过期把库冲垮。解法分别是空值/布隆、单飞/逻辑过期、错峰 TTL。"
       },
       {
+        "chapter": "mw-ch04",
+        "title": "一、缓存穿透：查不到的数据把压力打到数据库",
+        "source": "mw-ch04/concept/04-cache-design-practical-recipes.md",
+        "code": "命中率高但延迟高    → 大 key / 慢命令 / 网络\n命中率低            → TTL 太短 / key 设计粒度太细 / 缓存被频繁淘汰\nevicted_keys 增长快 → 内存不足，加内存或缩短 TTL\nmem_fragmentation>1.5 → 内存碎片，考虑重启或 activedefrag",
+        "desc": ""
+      },
+      {
         "chapter": "mw-ch05",
         "title": "一、提交日志模型：Kafka 为什么不是「队列」",
         "source": "mw-ch05/concept/01-commit-log-and-partition.md",
         "code": "Topic = orders\n  Partition-0  [replica: L P F]      ← Leader(L) 在 broker2\n  Partition-1  [replica: P F L]      ← Leader 在 broker0\n  Partition-2  [replica: F L P]      ← Leader 在 broker1\n\n  Producer: key=user_id → hash → 固定 Partition（同用户有序）\n  Consumer Group G:\n     C1 消费 P0, P1\n     C2 消费 P2          （每 Partition 同组仅 1 消费者）\n  再起 C3 → 自动 rebalance 重新分配\n  某 broker 挂 → Partition 的 Follower 之一升 Leader，服务不中断\n\n  ISR = 与 Leader 同步的副本集；ack=all 才算写入成功。",
         "desc": "Kafka 用「一个 Topic 切成多个 Partition（并行单位）+ 每个 Partition 多 Replica（容错单位）」同时拿到吞吐与高可用：Producer 按 key 哈希落 Partition 保顺序，Consumer Group 每组每 Partition 至多一个消费者。"
+      },
+      {
+        "chapter": "mw-ch06",
+        "title": "一、生产者：分区策略、攒批与发送链路",
+        "source": "mw-ch06/concept/01-producer-partitioning-and-batching.md",
+        "code": "send(record)\n  → Interceptor 链（onSend）\n  → Serializer（key / value 序列化）\n  → Partitioner（决定 partition）\n  → RecordAccumulator（按 partition 分桶，攒成 batch）\n  → Sender 线程（每 broker 一个 in-flight 请求）\n  → NetworkClient（NIO）\n  → Broker\n  → 回调（Callback / Future）在 Sender 线程完成",
+        "desc": ""
+      },
+      {
+        "chapter": "mw-ch06",
+        "title": "一、生产者：分区策略、攒批与发送链路",
+        "source": "mw-ch06/concept/02-acks-retries-and-idempotence.md",
+        "code": "acks 三档与各自的丢失窗口：\n    acks=0       不等确认 -> 网络一抖就丢（吞吐最高）\n    acks=1       只等 leader 落盘 -> leader 崩溃且未同步则丢\n    acks=all     等 ISR 全部同步 -> 最安全（配 min.insync.replicas）\n\n    + enable.idempotence=true：broker 按 (PID, seq) 去重 -> 抵消重试造成的重复\n    + 事务：跨分区原子写，读端需 isolation.level=read_committed\n\n重试的三个约束：\n    重试可能重复 -> 必须业务幂等，或开启幂等生产者\n    重试会造成乱序 -> max.in.flight.requests 需为 1（或配幂等时 5）\n    retries 与 delivery.timeout.ms 要一起看，别让重试无限拖长尾",
+        "desc": "「Kafka 会不会丢消息」这个问题问得太粗。正确问法是： **在 acks 取什么值、`min.insync.replicas` 取什么值、重试开不开、幂等开不开的组合下，最坏会丢多少？**"
+      },
+      {
+        "chapter": "mw-ch06",
+        "title": "一、生产者：分区策略、攒批与发送链路",
+        "source": "mw-ch06/concept/05-reliability-recipe.md",
+        "code": "触发 rebalance 的四种情况：\n1) 消费者加入/退出（扩缩容、滚动重启）\n2) 分区数变化（给 topic 加分区）\n3) 消费超时（max.poll.interval.ms 到了还没 poll）\n4) 心跳丢失（session.timeout.ms 内没心跳）\n\nEager（默认 RangeAssignor）：\n   撤销所有分区 → 重新分配 → 全部消费者重新加入\n   → 期间该组所有分区都暂停消费\nCooperativeSticky（推荐）：\n   分批撤销/分配，未受影响的分区继续消费\n   → 滚动升级要用 upgrade.from 过渡，不能直接改策略\n\n配套参数：\n  max.poll.interval.ms  要大于单批处理耗时（否则\"活着但太慢\"被踢出组）\n  max.poll.records       一次拉多少条，调小可降低单次处理时长\n  session.timeout.ms / heartbeat.interval.ms  心跳与超时",
+        "desc": ""
+      },
+      {
+        "chapter": "mw-ch08",
+        "title": "MQ 的价值与边界：该不该上消息队列（mw-ch08）",
+        "source": "mw-ch08/concept/04-dlq-compensation-and-ops.md",
+        "code": "重试策略先分类，别对不可重试的错误反复消耗：\n    可重试    超时、连接失败、下游 5xx、锁冲突\n    不可重试  参数非法、业务规则拒绝、数据不存在（重试无意义）\n    退避 + 抖动，并设最大次数与总时限（避免无限堆积）\n\n死信处理闭环（缺一环就会变黑洞）：\n    DLQ ─▶ 告警（数量 / 速率阈值）\n        ─▶ 分类面板（按错误码聚合，找共性根因）\n        ─▶ 修复（改数据 / 改代码 / 补依赖）\n        ─▶ 回放（按 messageId 单条，或按时间区间批量）\n        ─▶ 归档（超保留期转冷存储，不要直接删）\n\n    回放工具必须：幂等、可限速、可中断 —— 否则回放本身会变成二次事故",
+        "desc": ""
+      },
+      {
+        "chapter": "mw-ch08",
+        "title": "MQ 的价值与边界：该不该上消息队列（mw-ch08）",
+        "source": "mw-ch08/concept/05-mq-selection-playbook.md",
+        "code": "┌──────────────┬────────────────────────┬────────────────────────┐\n│ 维度          │ RabbitMQ               │ Kafka                  │\n├──────────────┼────────────────────────┼────────────────────────┤\n│ 投递语义      │ 逐条 ack/nack，可重投    │ 按 offset 提交，批量确认 │\n│ 路由能力      │ 交换机/队列/主题灵活      │ 只能按分区消费，路由弱   │\n│ 单条延迟      │ 毫秒级（低吞吐时更优）    │ 毫秒~十毫秒（批量更大） │\n│ 峰值吞吐      │ 万级/秒（多实例可堆）     │ 百万级/秒              │\n│ 顺序保证      │ 队列内 FIFO            │ 分区内有序（全局无序）   │\n│ 回放/重算     │ 需自己留队列            │ 换 offset 重放，天然支持 │\n│ 延迟队列      │ 插件原生支持            │ 需自己搭多级 topic       │\n│ 运维成本      │ 管理台友好，参数少       │ 调优项多（JVM/ISR/分区） │\n└──────────────┴────────────────────────┴────────────────────────┘\n结论：**\"一条消息要送达才算数\" → RabbitMQ；\"高吞吐日志流 + 回放\" → Kafka。**",
+        "desc": ""
+      },
+      {
+        "chapter": "mw-ch08",
+        "title": "MQ 的价值与边界：该不该上消息队列（mw-ch08）",
+        "source": "mw-ch08/concept/05-mq-selection-playbook.md",
+        "code": "排障三问：\n1) 消息去哪了？   → 看 DLQ 速率与失败原因分布（多半是反序列化/下游超时）\n2) 消费慢在哪？   → 看单条处理耗时 P99（不是平均值）与 GC/连接池等待\n3) 会不会重复？   → 看位移提交方式 + 下游是否幂等（没有幂等 = 迟早重复）",
+        "desc": ""
       }
     ]
   },
@@ -246,11 +1786,67 @@ export const DIAGRAM_SUBJECTS: DiagramSubject[] = [
     "hue": "#4a8c8c",
     "entries": [
       {
+        "chapter": "bd-ch01",
+        "title": "Hadoop 生态全景与组件分工",
+        "source": "bd-ch01/concept/04-write-pipeline-read.md",
+        "code": "写 pipeline（客户端只发给 DN1，逐级转发）：\n    Client ─▶ DN1 ─▶ DN2 ─▶ DN3\n              ack ◀── ack ◀── ack      （ack 反向逐级回传）\n\n    ① create -> NN 返回 block 与 3 个 DN\n    ② 建 pipeline，按 packet（约 64KB）流式发送\n    ③ 每 packet 带序号，DN 转发并缓存\n    ④ 全部 ack 回来，Client 才认为该 packet 成功\n    ⑤ 块完成 -> 汇报 NN -> 申请下一块\n\n    失败：DN 掉线 -> 剔除该节点重建 pipeline，块 genstamp 递增\n    读：就近优先（同机架），校验和不符则换副本重读",
+        "desc": ""
+      },
+      {
         "chapter": "bd-ch02",
-        "title": "一、Map/Shuffle/Reduce 三阶段数据流",
+        "title": "Map/Shuffle/Reduce 三阶段数据流",
         "source": "bd-ch02/concept/01-mapreduce-dataflow.md",
         "code": "input 分片 ──▶ Map(本地,并行) ──▶ [ Shuffle: 按 key 分组 ] ──▶ Reduce ──▶ 输出\n                 (k1,v1)          partition+sort       (k2, [v2..])\n                 (k1,v2)   ─────────────┐\n                 (k3,v1)   ───┐         │\n                               ▼         ▼\n                            reduce0    reduce1\n                            k1→聚合    k3→聚合\n\n  Map:  逐行转 (key, value)       例: (word,1)\n  Shuffle: 同 key 进同 reducer（网络传输，最贵一步）\n  Reduce: 同 key 的 values 聚合    例: word→count\n\n  YARN: ResourceManager 调度，NodeManager 在 DataNode 本地起 Container 跑任务。",
         "desc": "MapReduce 把「计算」搬近「数据」，避免搬大盘：Map 在本地切片并行处理，Shuffle 按 key 归并到同 reducer，Reduce 聚合输出。YARN 负责把任务调度到数据所在的节点，做到「数据不动、计算动」。"
+      },
+      {
+        "chapter": "bd-ch02",
+        "title": "Map/Shuffle/Reduce 三阶段数据流",
+        "source": "bd-ch02/concept/02-combiner-partitioner.md",
+        "code": "Combiner = map 端本地 reduce（预聚合）\n    map 输出 ─▶ Combiner 局部聚合 ─▶ shuffle ─▶ Reducer 全局聚合\n    价值：直接减少 shuffle 的网络与磁盘数据量\n\n    语义边界：只对满足结合律、交换律的操作安全\n      ✔ sum / max / min / count\n      ✘ avg（要先转成 sum+count 两列）、median、简单去重计数\n\nPartitioner 决定 key 落到哪个 reduce：\n    默认 hash(key) % numReduceTasks\n    倾斜来自 key 分布不均 -> 加盐 / 两阶段聚合 / 自定义 Partitioner\n\n    改变 reduce 数会改变分区映射 -> 输出目录不能直接复用",
+        "desc": ""
+      },
+      {
+        "chapter": "bd-ch02",
+        "title": "Map/Shuffle/Reduce 三阶段数据流",
+        "source": "bd-ch02/concept/05-mapreduce-tuning-recipes.md",
+        "code": "05-mapreduce-tuning-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] Combiner：本地先 reducer 省带宽  (java)\n    |\n    v\n  [02] Partitioner 决定数据去哪  (-)\n    |\n    v\n  [03] Shuffle 的磁盘溢出与合并  (-)\n    |\n    v\n  [04] YARN 的 RM / AM / NM 三角色  (-)\n    |\n    v\n  [05] Capacity vs Fair 调度差异  (-)\n    |\n    v\n  [06] 小文件问题的根源  (-)\n    |\n    v\n  [07] 数据倾斜：热点 key 怎么治  (-)\n    |\n    v\n  [08] Speculative 执行救慢任务  (-)\n    |\n    v\n  [... 其余 5 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "bd-ch03",
+        "title": "内部表（MANAGED）vs 外部表（EXTERNAL）",
+        "source": "bd-ch03/concept/03-hql-compile-execution.md",
+        "code": "编译链：\n    SQL ─▶ AST（Antlr）─▶ 逻辑计划（TS / FILTER / JOIN / AGG 算子树）\n        ─▶ 优化器（谓词下推、列裁剪、join 重排、分区裁剪）\n        ─▶ 物理计划（MapJoin / CommonJoin，是否引入 reduce）\n        ─▶ Tez / Spark / MR 的任务 DAG\n\n    常见可优化信号：\n      小表 join 大表      -> MapJoin（广播小表，无 reduce）\n      where 可下推        -> 减少扫描量\n      select 只取少数列    -> 列裁剪（列存收益最大）\n\n    用 EXPLAIN 看执行计划，不要靠猜",
+        "desc": ""
+      },
+      {
+        "chapter": "bd-ch03",
+        "title": "内部表（MANAGED）vs 外部表（EXTERNAL）",
+        "source": "bd-ch03/concept/05-hive-practical-recipes.md",
+        "code": "05-hive-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场一：大表 Join 小表，不写 MapJoin 就 shuffle 到死  (sql)\n    |\n    v\n  [02] 现场二：数据倾斜靠加 Reduce 数，热 key 仍在同一个桶  (sql)\n    |\n    v\n  [03] 现场三：加盐（salting）+ 两阶段聚合消倾斜  (sql)\n    |\n    v\n  [04] 现场四：SELECT * 让列式存储优势归零  (sql)\n    |\n    v\n  [05] 现场五：动态分区不设 nonstrict，全表被重写到任意分区  (sql)\n    |\n    v\n  [06] 现场六：窗口函数不是 GROUP BY，行数不变  (sql)\n    |\n    v\n  [07] 现场七：分区裁剪看 dt 用对，否则全分区扫描  (sql)\n    |\n    v\n  [08] 现场八：小文件过多，Map 数爆炸还拖垮 NN  (sql)\n    |\n    v\n  [... 其余 4 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "bd-ch04",
+        "title": "RDD 的本质与五大特性",
+        "source": "bd-ch04/concept/05-spark-practical-recipes.md",
+        "code": "Job\n├─ Stage 0（读文件 → filter → map）      16 tasks\n│     ↓ Shuffle（reduceByKey）\n└─ Stage 1（聚合 → 输出）                8 tasks",
+        "desc": ""
+      },
+      {
+        "chapter": "bd-ch05",
+        "title": "从 RDD 到 DataFrame：结构化信息就是优化空间",
+        "source": "bd-ch05/concept/02-catalyst-optimizer.md",
+        "code": "SQL / DataFrame API\n   │  ① 解析 Parsing（ANTLR 语法分析，未解析的 AST，未知列名与类型）\n   ▼\nUnresolved Logical Plan\n   │  ② 分析 Analysis（查 Catalog / Hive Metastore 绑定列名与类型，做类型检查）\n   ▼\nResolved(Analyzed) Logical Plan\n   │  ③ 逻辑优化 Logical Optimization（规则批重写：谓词下推、列裁剪、常量折叠、JOIN 重排……）\n   ▼\nOptimized Logical Plan\n   │  ④ 物理计划 Physical Planning（按代价/规则选算子：Broadcast vs SortMerge；插入 Exchange）\n   ▼\nPhysical Plan  →  ⑤ 代码生成 Codegen（Whole-Stage Codegen 把算子链编译成一个循环）",
+        "desc": ""
+      },
+      {
+        "chapter": "bd-ch05",
+        "title": "从 RDD 到 DataFrame：结构化信息就是优化空间",
+        "source": "bd-ch05/concept/03-tungsten-and-codegen.md",
+        "code": "Tungsten 解决两件事：内存布局 + 代码生成\n    堆外内存自己管理 -> 绕过 JVM 对象头与 GC\n    紧凑二进制：多列拼成一条 UnsafeRow（定长偏移表 + 变长区）\n    whole-stage codegen：把 filter+project+agg 编成一个 Java 循环\n\n    效果：消除虚函数调用与中间对象，CPU 缓存友好\n\n    逻辑计划（scan/filter/agg） ──codegen──▶ 单个生成方法\n                                              for (row : rows) { ... }\n\n    代价：生成代码难调试；部分算子回退解释执行（explain 里带 * 的就是）",
+        "desc": ""
       }
     ]
   },
@@ -261,11 +1857,81 @@ export const DIAGRAM_SUBJECTS: DiagramSubject[] = [
     "hue": "#5d6e8c",
     "entries": [
       {
+        "chapter": "tool-ch01",
+        "title": "一切皆文件：inode、目录项与文件系统布局",
+        "source": "tool-ch01/concept/01-fhs-and-inode.md",
+        "code": "目录 /home/zyx 的数据块（概念示意）：\n┌─────────────┬────────────┐\n│ 名称        │ inode 编号 │\n├─────────────┼────────────┤\n│ .           │  131074    │   ← 指向自己（目录自身）\n│ ..          │  131073    │   ← 指向父目录\n│ report.txt  │  262145    │  ─┐\n│ notes.md    │  262146    │   │  两条记录可以指向同一个 inode\n│ report-old  │  262145    │  ─┘  → 这就是硬链接\n└─────────────┴────────────┘",
+        "desc": ""
+      },
+      {
+        "chapter": "tool-ch01",
+        "title": "一切皆文件：inode、目录项与文件系统布局",
+        "source": "tool-ch01/concept/02-permissions.md",
+        "code": "i_mode（16 位）\n┌──┬──┬──┬───┬───┬───┬───┬───┬───┬───┬───┬───┐\n│  │  │  │ U │ U │ U │ G │ G │ G │ O │ O │ O │\n│  │  │  │ r │ w │ x │ r │ w │ x │ r │ w │ x │\n└──┴──┴──┴───┴───┴───┴───┴───┴───┴───┴───┴───┘\n  ↑  ↑  ↑   └User┘    └Group┘    └Other┘\n  │  │  └ sticky（1）\n  │  └ setgid（2）\n  └ setuid（4）        高 4 位是文件类型：S_IFREG / S_IFDIR / S_IFLNK ...",
+        "desc": ""
+      },
+      {
+        "chapter": "tool-ch02",
+        "title": "进程模型：fork/exec 与进程树、状态机",
+        "source": "tool-ch02/concept/01-process-model.md",
+        "code": "进程树（概念示意，PID 为示意值）\nsystemd(1)\n  └─ bash(1000)               ← 交互 shell\n       ├─ fork→ ls(1001)      ← bash fork 后 exec 成 ls\n       ├─ fork→ grep(1002)    ← 管道右侧：bash 先建 pipe 再 fork 两端\n       └─ fork→ bash(1003)    ← 执行脚本：fork 出的子 bash，退出不回传变量",
+        "desc": ""
+      },
+      {
+        "chapter": "tool-ch02",
+        "title": "进程模型：fork/exec 与进程树、状态机",
+        "source": "tool-ch02/concept/02-signals.md",
+        "code": "信号递送（简化）\n  事件(内核/其他进程) ──► 置位 pending 位图 ──► 内核在「从内核态返回用户态」的时机检查\n    │                                                  │\n    │ 若被阻塞(blocked) ──► 保持 pending，解阻塞后再递送\n    ▼\n  按 disposition 处理：handler / 默认(Term|Core|Ign|Stop|Cont)",
+        "desc": ""
+      },
+      {
+        "chapter": "tool-ch02",
+        "title": "进程模型：fork/exec 与进程树、状态机",
+        "source": "tool-ch02/concept/03-pipe-redirection.md",
+        "code": "ls | wc -l 的 fd 表（简化）\n  ls : fd0=终端  fd1 ──┐      wc : fd0 ──┐  fd1=终端\n                       │pipe 写端        │pipe 读端\n  （ls 的 stdout 重定向到 pipe 写端，wc 的 stdin 重定向到 pipe 读端）",
+        "desc": ""
+      },
+      {
+        "chapter": "tool-ch02",
+        "title": "进程模型：fork/exec 与进程树、状态机",
+        "source": "tool-ch02/concept/05-linux-process-snippets.md",
+        "code": "05-linux-process-snippets.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 一、查看进程树与真实父进程  (bash)\n    |\n    v\n  [02] 二、按端口找进程  (bash)\n    |\n    v\n  [03] 三、信号的正确发送方式  (bash)\n    |\n    v\n  [04] 四、管道的退出码陷阱  (bash)\n    |\n    v\n  [05] 五、进程替换避免临时文件  (bash)\n    |\n    v\n  [06] 六、按条件批量处理文件  (bash)\n    |\n    v\n  [07] 七、后台任务与作业控制  (bash)\n    |\n    v\n  [08] 收尾  (-)\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
         "chapter": "tool-ch03",
         "title": "对象模型：blob/tree/commit 与内容寻址存储",
         "source": "tool-ch03/concept/01-object-model.md",
         "code": "对象模型（内容寻址）：\n  blob   文件内容（与名字无关，同内容同 hash）\n  tree   目录：文件名 → blob/tree 的指针\n  commit 指向一个 tree + 父 commit + 作者/信息\n\n  三区流动：\n   工作区(编辑) ──git add──▶ 暂存区(index) ──git commit──▶ 版本库(.git)\n        ▲                                            │\n        └──────────── git checkout ──────────────────┘\n\n  分支只是指向 commit 的轻量指针：\n    main ─▶ C3 ← C2 ← C1\n    feat ─▶ C4 (从 C3 分出)\n  merge: 建新 commit 把两历史汇合；rebase: 把提交重放到目标之后（线性）。",
         "desc": "Git 把版本存成「blob(文件内容)/tree(目录结构)/commit(快照指针)」三类对象的有向图，内容寻址（SHA-1 去重）；工作区、暂存区、版本库「三区」是改动流动的三个站点。"
+      },
+      {
+        "chapter": "tool-ch03",
+        "title": "对象模型：blob/tree/commit 与内容寻址存储",
+        "source": "tool-ch03/concept/05-git-objects-practical-recipes.md",
+        "code": "--soft    只移动分支指针，暂存区和工作区不动\n          → 想「撤销 commit 但保留改动已暂存」\n--mixed   移动指针 + 重置暂存区，工作区不动（默认）\n          → 想「撤销 commit 和 add，改动还在工作区」\n--hard    三处全改\n          → 想「彻底丢弃」，也是唯一会丢工作区改动的模式",
+        "desc": ""
+      },
+      {
+        "chapter": "tool-ch04",
+        "title": "远端协作：三类引用、fetch/pull 语义与 push 的安全边界",
+        "source": "tool-ch04/concept/01-fetch-pull-push.md",
+        "code": "本地仓库                                  远端仓库(origin)\nrefs/heads/main       ──push──▶         refs/heads/main\nrefs/remotes/origin/main ◀──fetch──      refs/heads/main   （快照，只在 fetch/push 时更新）",
+        "desc": ""
+      },
+      {
+        "chapter": "tool-ch05",
+        "title": "隔离原理：namespace、cgroup 与「容器不是虚拟机」",
+        "source": "tool-ch05/concept/01-container-vs-vm-isolation.md",
+        "code": "容器 = namespace（隔离视图）+ cgroup（限制用量）+ 共享宿主内核\n虚拟机 = 独立内核 + 硬件虚拟化（Hypervisor）\n\n    ┌ 容器 ──────────────┐        ┌ 虚拟机 ───────────┐\n    │ app A │ app B       │        │ guest OS + app    │\n    │ ── 共享宿主内核 ──   │        │ 独立 guest 内核    │\n    │ 宿主操作系统         │        │ Hypervisor        │\n    └────────────────────┘        └──────────────────┘\n\n    启动：容器毫秒级，VM 秒级\n    体积：容器镜像 MB 级，VM 镜像 GB 级\n    隔离强度：VM 强于容器（共享内核 -> 内核漏洞可逃逸）\n\nnamespace 负责「看不见」：pid / net / mnt / uts / ipc / user\ncgroup 负责「用不多」：cpu / memory / io 的配额与统计",
+        "desc": ""
+      },
+      {
+        "chapter": "tool-ch05",
+        "title": "隔离原理：namespace、cgroup 与「容器不是虚拟机」",
+        "source": "tool-ch05/concept/02-image-layers-overlayfs.md",
+        "code": "  ┌──────────────────────────────┐\n  │ 层5 COPY app.py .      (可写? 否，只读) │\n  ├──────────────────────────────┤\n  │ 层4 RUN pip install          │\n  ├──────────────────────────────┤\n  │ 层3 COPY requirements.txt    │\n  ├──────────────────────────────┤\n  │ 层2 RUN apt-get install curl │\n  ├──────────────────────────────┤\n  │ 层1 FROM debian:bookworm-slim│\n  └──────────────────────────────┘\n          ↑ 全部只读，靠内容摘要寻址",
+        "desc": ""
       }
     ]
   },
@@ -276,11 +1942,95 @@ export const DIAGRAM_SUBJECTS: DiagramSubject[] = [
     "hue": "#3f6f9a",
     "entries": [
       {
+        "chapter": "ml-ch01",
+        "title": "学习范式：从「拟合训练集」到「在未见数据上不犯错」",
+        "source": "ml-ch01/concept/01-learning-paradigms.md",
+        "code": "        未知分布 D                    假设空间 H\n   (x, y) ~ D  ──────────────►   f ∈ H : X → Y\n        │                              │\n        │  抽样                          │  学习算法 A\n        ▼                              ▼\n   训练集 S = {(xᵢ,yᵢ)}ᵐᵢ₌₁  ──►  f_S = A(S)\n                                       │\n                                       ▼\n                        风险 R(f) = E_{(x,y)~D}[ ℓ(y, f(x)) ]\n                        经验风险 R̂_S(f) = (1/m) Σ ℓ(yᵢ, f(xᵢ))",
+        "desc": ""
+      },
+      {
+        "chapter": "ml-ch02",
+        "title": "最小二乘与极大似然：线性模型的地基",
+        "source": "ml-ch02/concept/04-linear-model-practical-recipes.md",
+        "code": "Ridge 的约束区域是圆（‖w‖₂ ≤ t）\nLasso 的约束区域是菱形（‖w‖₁ ≤ t）\n\n损失函数的等高线是椭圆。椭圆与圆相切，切点通常不在坐标轴上 → 分量都非零\n椭圆与菱形相切，切点极大概率落在菱形的「顶点」上 → 某个分量为 0",
+        "desc": ""
+      },
+      {
         "chapter": "ml-ch03",
         "title": "前向传播：神经元、层与激活函数",
         "source": "ml-ch03/concept/01-forward-propagation.md",
         "code": "前向 (forward):\n   z = W·x + b ;  a = σ(z)        逐层传播\n   ŷ = softmax(z_last)            多分类输出概率\n\n损失 L = CrossEntropy(ŷ, y_true)\n\n反向 (backward) — 链式法则:\n   ∂L/∂W = ∂L/∂a · ∂a/∂z · ∂z/∂W\n   从输出层往回，把梯度「分摊」给每层权重\n\n更新 (SGD / Adam):\n   W ← W − η · ∂L/∂W             η=学习率\n\n  多分类: 输出层 softmax + 交叉熵；二分类: sigmoid + BCE\n  梯度消失: 深层 + sigmoid → 梯度趋零 → 用 ReLU/BatchNorm\n  学习率太大震荡、太小慢 → 用自适应(Adam)或 warmup+衰减",
         "desc": "神经网络训练由三步循环构成：前向（输入经层层加权求和+激活得到预测）、反向（链式法则从损失算每层权重梯度）、更新（优化器沿负梯度调权）。梯度消失/爆炸、学习率大小是训练稳定性的关键旋钮。"
+      },
+      {
+        "chapter": "ml-ch03",
+        "title": "前向传播：神经元、层与激活函数",
+        "source": "ml-ch03/concept/02-backprop-and-training.md",
+        "code": "X ──► Z₁=XW₁+b₁ ──► A₁=g₁(Z₁) ──► Z₂=A₁W₂+b₂ ──► P=σ(Z₂) ──► L=BCE(P,Y)\n       │                  │                  │\n     cache Z₁          cache A₁          cache P",
+        "desc": ""
+      },
+      {
+        "chapter": "ml-ch03",
+        "title": "前向传播：神经元、层与激活函数",
+        "source": "ml-ch03/concept/03-model-diagnostics.md",
+        "code": "误差\n │\n │ 验证 ──╮\n │        ╰──╮\n │           ╰──────╮         ← 过拟合：验证回升\n │ 训练 ─────────────╲────    ← 训练继续降\n └──────────────────────── 轮数\n        ↑\n      早停点（验证最低）",
+        "desc": ""
+      },
+      {
+        "chapter": "ml-ch04",
+        "title": "数据划分与交叉验证：切分方式错了，分数就只是幻觉",
+        "source": "ml-ch04/concept/01-splitting-and-cross-validation.md",
+        "code": "候选模型们 ──► 在训练集上分别 fit ──► 在验证集上打分 ──► 选出冠军\n                                                      │\n                                             只在测试集上评一次 ──► 报告值",
+        "desc": ""
+      },
+      {
+        "chapter": "ml-ch04",
+        "title": "数据划分与交叉验证：切分方式错了，分数就只是幻觉",
+        "source": "ml-ch04/concept/02-bias-variance-diagnosis.md",
+        "code": "验证误差 │\n        │  ① 都高、靠近            ② 训练低、验证高\n        │     → 高偏差                → 高方差\n        │     加容量/加特征            加数据/加正则/早停\n        │\n        │  ③ 都低、靠近            ④ 都高、远离\n        │     → 可接受                 → 数据/标注/管道问题\n        └──────────────────────────── 训练误差 →",
+        "desc": ""
+      },
+      {
+        "chapter": "ml-ch07",
+        "title": "协同过滤：用「谁和谁像」填补评分矩阵",
+        "source": "ml-ch07/concept/01-collaborative-filtering.md",
+        "code": "                 i₁     i₂     i₃     i₄     i₅     i₆\n          ┌──────────────────────────────────────────────┐\n    u₁    │  5      ?      4      ?      ?      1        │  爱打高分\n    u₂    │  ?      2      ?      ?      5      ?        │  口味独特\n    u₃    │  4      ?      5      ?      ?      ?        │\n    u₄    │  ?      ?      ?      3      ?      2        │  只评低分\n    u₅    │  1      ?      ?      ?      4      ?        │\n          └──────────────────────────────────────────────┘\n          ? = 未观测（missing），不是 0",
+        "desc": ""
+      },
+      {
+        "chapter": "ml-ch07",
+        "title": "协同过滤：用「谁和谁像」填补评分矩阵",
+        "source": "ml-ch07/concept/02-matrix-factorization.md",
+        "code": "r̂_ui = μ + b_u + b_i + p_uᵀ q_i\n        └──── baseline ────┘   └ 交互 ┘\n\np_u ∈ ℝ^k：用户 u 的隐向量\nq_i ∈ ℝ^k：物品 i 的隐向量\nk ≪ min(m, n)：隐维度（常见 8~128）",
+        "desc": ""
+      },
+      {
+        "chapter": "ml-ch07",
+        "title": "协同过滤：用「谁和谁像」填补评分矩阵",
+        "source": "ml-ch07/concept/03-ranking-and-evaluation.md",
+        "code": "        ┌─────────────────────────────────────────────────────────┐\n        │ 物品库 10⁵ ~ 10⁷                                        │\n        └───────────────────────┬─────────────────────────────────┘\n                                │  多路召回（每路几十~几百）\n        ┌───────────────────────▼─────────────────────────────────┐\n        │ 召回：itemCF / 双塔 / 热门 / 内容 / 社交 / 地理          │\n        │ 目标：高 recall，允许低 precision；延迟 < 10ms           │\n        └───────────────────────┬─────────────────────────────────┘\n                                │  候选集 500~2000\n        ┌───────────────────────▼─────────────────────────────────┐\n        │ 粗排：轻量模型（双塔/GBDT），候选压到 100~300            │\n        └───────────────────────┬─────────────────────────────────┘\n                                │\n        ┌───────────────────────▼─────────────────────────────────┐\n        │ 精排：重模型（DNN/GBDT+特征交叉），输出 pCTR/pCVR        │\n        │ 目标：AUC / LogLoss / 校准；延迟 < 100ms                 │\n        └───────────────────────┬─────────────────────────────────┘\n                                │  Top 20~50\n        ┌───────────────────────▼─────────────────────────────────┐\n        │ 重排：多样性、打散、业务规则、长期价值                   │\n        └───────────────────────┬─────────────────────────────────┘\n                                │\n                            最终曝光 6~20 个",
+        "desc": ""
+      },
+      {
+        "chapter": "ml-ch08",
+        "title": "马尔可夫决策过程：把「序贯决策」写成数学",
+        "source": "ml-ch08/concept/01-mdp-and-value-functions.md",
+        "code": "   ┌───┬───┬───┬───┐\n   │ S │   │   │ +1│      规则（每步）：\n   ├───┼───┼───┼───┤      · 智能体在格子里，每步选 上/下/左/右\n   │   │ × │   │ −1│      · 有 0.8 概率按所选方向移动，0.1/0.1 滑向垂直两侧\n   ├───┼───┼───┼───┤      · 撞墙不动；走到 +1 或 −1 得奖励并终止\n   │   │   │   │   │      · 普通格每步奖励 r = −0.01（催它别磨蹭）\n   └───┴───┴───┴───┘",
+        "desc": ""
+      },
+      {
+        "chapter": "ml-ch08",
+        "title": "马尔可夫决策过程：把「序贯决策」写成数学",
+        "source": "ml-ch08/concept/04-rl-snippets.md",
+        "code": "04-rl-snippets.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 一、GridWorld 环境  (python)\n    |\n    v\n  [02] 二、策略评估（迭代版 Bellman 期望）  (python)\n    |\n    v\n  [03] 三、值迭代求最优策略  (python)\n    |\n    v\n  [04] 四、Q-learning（off-policy TD 控制）  (python)\n    |\n    v\n  [05] 五、SARSA（on-policy 对照）  (python)\n    |\n    v\n  [06] 六、DQN 的两个关键部件  (python)\n    |\n    v\n  [07] 七、目标网络的软更新  (python)\n    |\n    v\n  [08] 八、回报与折扣因子的量化  (python)\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "ml-ch09",
+        "title": "核心概念（一）：最大间隔、对偶与 KKT",
+        "source": "ml-ch09/concept/04-svm-snippets.md",
+        "code": "04-svm-snippets.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 一、硬间隔 SVM：直接解二次规划  (python)\n    |\n    v\n  [02] 二、对偶问题与支持向量的识别  (python)\n    |\n    v\n  [03] 三、核技巧：只改内积，不改算法  (python)\n    |\n    v\n  [04] 四、SMO 的单步更新  (python)\n    |\n    v\n  [05] 五、用 sklearn 做正确的调参流程  (python)\n    |\n    v\n  [06] 六、不平衡数据下的类别权重  (python)\n    |\n    v\n  [07] 七、决策函数与置信度  (python)\n    |\n    v\n  [08] 收尾  (-)\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
       }
     ]
   },
@@ -291,6 +2041,139 @@ export const DIAGRAM_SUBJECTS: DiagramSubject[] = [
     "hue": "#3f6f8a",
     "entries": [
       {
+        "chapter": "ai-ch01",
+        "title": "张量、计算图与反向模式自动微分",
+        "source": "ai-ch01/concept/01-tensor-and-autograd.md",
+        "code": "Tensor 对象\n┌────────────────────────────────────┐\n│ data      : ndarray（真实数值）      │\n│ grad      : ndarray（累积的梯度）    │\n│ requires_grad : bool（是否需要梯度） │\n│ grad_fn   : 产生它的操作（用于反向） │\n│ _backward : 该操作的 VJP 闭包        │\n└────────────────────────────────────┘",
+        "desc": ""
+      },
+      {
+        "chapter": "ai-ch01",
+        "title": "张量、计算图与反向模式自动微分",
+        "source": "ai-ch01/concept/05-ml-practical-recipes.md",
+        "code": "05-ml-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场一：张量维度对不上，矩阵乘直接报错  (python)\n    |\n    v\n  [02] 现场二：autograd 没清梯度，loss 越训越怪  (python)\n    |\n    v\n  [03] 现场三：PyTorch 默认 train/eval 模式不分，BN/Dropout 乱来  (python)\n    |\n    v\n  [04] 现场四：学习率太大，loss 直接 NaN  (python)\n    |\n    v\n  [05] 现场五：特征没归一化，梯度东倒西歪  (python)\n    |\n    v\n  [06] 现场六：过拟合——训练集 100% 测试集拉胯  (python)\n    |\n    v\n  [07] 现场七：类别不平衡，模型全猜多数类  (python)\n    |\n    v\n  [08] 现场八：把测试集泄露进训练（数据泄漏）  (python)\n    |\n    v\n  [... 其余 4 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "ai-ch02",
+        "title": "卷积：局部连接、权值共享与感受野",
+        "source": "ai-ch02/concept/02-pooling-stride.md",
+        "code": "输入 7×7、核 k=3，输出尺寸公式：\n    out = floor((in + 2p - k) / s) + 1\n\n    valid (p=0, k=3, s=1):  (7-3)/1+1 = 5   -> 5×5\n    same  (p=1, k=3, s=1):  (7+2-3)/1+1 = 7 -> 7×7  （尺寸不变）\n    valid (p=0, k=3, s=2):  (7-3)/2+1 = 3   -> 3×3\n\n池化二选一（都以丢弃位置信息换取平移不变性）：\n    ┌───┬───┐   max -> 6     只留「局部最强响应」\n    │ 1 │ 6 │   avg -> 3.5   保留整体强度\n    ├───┼───┤\n    │ 2 │ 5 │   stride=2 时窗口不重叠 -> 尺寸恰好减半\n    └───┴───┘",
+        "desc": "下采样解决「不变性」与「计算量」，但代价是空间信息损失。尺寸公式必须精确，因为张量对不齐是 CNN 工程里最常见的形状 bug。"
+      },
+      {
+        "chapter": "ai-ch02",
+        "title": "卷积：局部连接、权值共享与感受野",
+        "source": "ai-ch02/concept/03-rnn-lstm.md",
+        "code": "展开 3 步的 RNN：梯度沿时间连乘同一个 W\n    h0 --W--> h1 --W--> h2 --W--> h3 --> loss\n    dL/dh0 = dL/dh3 · (Wᵀ diag(σ'))³      <- 同一个矩阵乘 T 次\n    特征值 |λ|<1 -> 指数衰减（梯度消失）   |λ|>1 -> 爆炸\n\nLSTM 用「加法旁路」绕开纯连乘：\n                    ┌──────── c_{t-1}（细胞状态，近乎直通）────────┐\n                    │      ×f_t(遗忘门)        + i_t⊙g_t(输入门)   │\n    h_{t-1} ─▶ [σ] ──▶ × ──▶ (+) ──▶ c_t ──▶ tanh ──▶ ×o_t ──▶ h_t\n                        ▲                              ▲\n                        └── 三门全由 (h_{t-1}, x_t) 算出 ┘\n    梯度可沿 c 的加法路径直传，不必穿越 T 次矩阵乘",
+        "desc": "序列建模的第一性困境：要让远端信息影响当前输出，梯度必须沿时间反向穿越很多步。RNN 的连乘结构让这几乎不可能——这正是注意力要解决的痛点。"
+      },
+      {
+        "chapter": "ai-ch02",
+        "title": "卷积：局部连接、权值共享与感受野",
+        "source": "ai-ch02/concept/04-attention.md",
+        "code": "缩放点积注意力：\n    Q (n×d) ─┐\n    K (m×d) ─┼─▶ S = QKᵀ/√d ─▶ softmax(行) ─▶ A (n×m) ─▶ A·V (n×dv)\n    V (m×dv)─┘        ↑\n              除以 √d：否则 d 大时点积方差 ≈ d，softmax 进入饱和区 -> 梯度 ≈ 0\n\n    Decoder 单向 mask         Encoder 双向\n    ■ □ □ □                   ■ ■ ■ ■\n    ■ ■ □ □                   ■ ■ ■ ■\n    ■ ■ ■ □                   ■ ■ ■ ■\n\n多头：在 d_model 上切 h 份并行，各学一种关系，最后拼接投影\n    [head1 | head2 | ... | headh] · W_O\n\n复杂度 O(n²·d)，平方项就是长上下文的成本上限：\n    n=1k -> 1e6    n=8k -> 6.4e7    n=32k -> 1e9",
+        "desc": "注意力用「内容寻址」替代「位置递推」：每个位置直接 attend 到任意历史位置，从根上绕开了 RNN 的长程梯度连乘。这是 Transformer 的全部前提。"
+      },
+      {
+        "chapter": "ai-ch02",
+        "title": "卷积：局部连接、权值共享与感受野",
+        "source": "ai-ch02/concept/05-cnn-rnn-attention-practical-recipes.md",
+        "code": "05-cnn-rnn-attention-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场 1：卷积的通道维是最容易搞错的一维  (python)\n    |\n    v\n  [02] 现场 2：卷积输出尺寸的公式要背熟  (python)\n    |\n    v\n  [03] 现场 3：池化与步长卷积的区别被混为一谈  (-)\n    |\n    v\n  [04] 现场 4：RNN 的序列维与批次维要对齐  (python)\n    |\n    v\n  [05] 现场 5：LSTM 的门控不是「三个开关」那么简单  (-)\n    |\n    v\n  [06] 现场 6：注意力的缩放因子不能省  (python)\n    |\n    v\n  [07] 现场 7：因果掩码要用负无穷，不是零  (python)\n    |\n    v\n  [08] 现场 8：位置编码要加在嵌入上，不是加在 QKV 上  (-)\n    |\n    v\n  [... 其余 7 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "ai-ch03",
+        "title": "核心概念（一）：自注意力与多头注意力",
+        "source": "ai-ch03/concept/02-position-encoding.md",
+        "code": "自注意力对顺序无感（打乱 token 结果不变）-> 必须显式注入位置\n\n正弦式（绝对位置，加到 embedding 上）：\n    PE(pos, 2i)   = sin(pos / 10000^(2i/d))\n    PE(pos, 2i+1) = cos(pos / 10000^(2i/d))\n    低维波长短（区分近邻）  高维波长长（区分远距）\n\nRoPE（旋转位置编码，乘在 q/k 上）：\n    q_m = R(θ, m)·q      k_n = R(θ, n)·k\n    q_mᵀ·k_n 只依赖 (m-n)  ->  内积里天然携带「相对距离」\n\n    位置 m 的 q  ──▶ 旋转 mθ ──▶ 与旋转 nθ 的 k 做内积 = f(m-n)\n\n外推：正弦式训练 2k 用到 4k 会崩；RoPE + 插值/NTK 可扩到 32k+",
+        "desc": "视角覆盖：程序员（外推工程）/ 博士生（相对位置性质）/ 考研者（演进口径）。三者互补、不重复。"
+      },
+      {
+        "chapter": "ai-ch03",
+        "title": "核心概念（一）：自注意力与多头注意力",
+        "source": "ai-ch03/concept/03-architecture-and-training.md",
+        "code": "三种架构的分工：\n    Encoder-Decoder   [双向编码器] ──交叉注意力──▶ [单向解码器]   翻译 / T5\n    Decoder-only      [单向自注意力 × N 层]                     GPT / LLaMA\n    Encoder-only      [双向] ─▶ 只出表征，不生成                  BERT\n\n残差 + LayerNorm 的梯度路径：\n    x ──┬──────────────────▶ (+) ──▶ LN ──▶ 下一层\n        └──▶ 子层 F(x) ─────▶\n    dL/dx = dL/dout · (1 + dF/dx)   <- 恒等项 1 让梯度始终有直通路\n\n    Pre-LN  : x -> LN -> F -> (+)   训练稳、可深堆（GPT 系）\n    Post-LN : x -> F -> (+) -> LN   原始 Transformer，必须 warmup",
+        "desc": "视角覆盖：程序员（上下文/工程）/ 博士生（梯度路径、Scaling Law）/ 考研者（LN vs BN、GPT 目标）。三者互补、不重复。"
+      },
+      {
+        "chapter": "ai-ch03",
+        "title": "核心概念（一）：自注意力与多头注意力",
+        "source": "ai-ch03/concept/04-sampling-and-serving.md",
+        "code": "从 logits 到 token：\n    logits ──/T──▶ softmax ──┬──▶ argmax        贪心，确定但易重复\n                             ├──▶ top-k / top-p 截断长尾再按概率抽\n                             └──▶ T↓ 更确定，T↑ 更发散（T→0 退化为 argmax）\n\nKV Cache：自回归每步只算新 token\n    无 cache：每步重算全部历史 K,V   -> 累计 O(n²)\n    有 cache：只算第 n+1 个，历史直接读 -> 每步 O(n)，显存 ∝ 层数×n×d\n\n    每 token 每层显存 = 2(K,V) · d_model · 2 字节(fp16)\n    7B / 32 层 / d=4096 -> 2·4096·2·32 ≈ 0.5 MB/token -> 4k 上下文 ≈ 2 GB\n\nMQA / GQA：多个 Q 头共享 1 组（MQA）或 G 组（GQA）K,V\n    -> KV 显存降为 1/h 或 G/h，长上下文才跑得动",
+        "desc": "视角覆盖：程序员（采样参数/KV 账）/ 博士生（温度形式化、O(n²) 来源）/ 考研者（PPL、参数量估算）。三者互补、不重复。"
+      },
+      {
+        "chapter": "ai-ch03",
+        "title": "核心概念（一）：自注意力与多头注意力",
+        "source": "ai-ch03/concept/05-transformer-practical-recipes.md",
+        "code": "05-transformer-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场一：Q/K/V 的来历不是「三个不同的东西」  (python)\n    |\n    v\n  [02] 现场二：√d_k 缩放不是可选项  (python)\n    |\n    v\n  [03] 现场三：softmax 的温度是「除以」不是「乘以」  (python)\n    |\n    v\n  [04] 现场四：因果掩码写成上三角，位置别搞反  (python)\n    |\n    v\n  [05] 现场五：多头注意力的「拆」与「拼」要对齐  (python)\n    |\n    v\n  [06] 现场六：位置编码必须加在 embedding 上  (python)\n    |\n    v\n  [07] 现场七：RoPE 是「旋转」而不是「相加」  (python)\n    |\n    v\n  [08] 现场八：长度外推不处理，直接拉长会崩  (python)\n    |\n    v\n  [... 其余 4 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "ai-ch05",
+        "title": "零样本、少样本与示例选择",
+        "source": "ai-ch05/concept/02-cot-and-self-consistency.md",
+        "code": "CoT 的本质：把「一步到位」拆成「多步可算」\n    直接答：x ──────────────────▶ y    需单步覆盖复合映射（难）\n    CoT：   x ─▶ z1 ─▶ z2 ─▶ z3 ─▶ y   每步简单，中间状态可检查可纠错\n\n家族谱：\n    零样本 CoT        \"Let's think step by step\"\n    少样本 CoT        给带推理链的示例\n    Self-Consistency  采样 k 条链，对最终答案投票（多数派）\n    Tool-loop         推理 -> 调工具 -> 用返回值继续推理\n\n什么时候反而有害：\n    查表/记忆型任务     CoT 会编造中间「事实」\n    长链无校验          错误逐级放大\n    延迟敏感场景        token ×k，成本与首字延迟一起涨",
+        "desc": ""
+      },
+      {
+        "chapter": "ai-ch05",
+        "title": "零样本、少样本与示例选择",
+        "source": "ai-ch05/concept/03-structured-output-and-reliability.md",
+        "code": "四层强制力，从弱到强：\n    ① 提示约定     \"请返回 JSON\"                  最弱，会漂移\n    ② 示例/schema   给 few-shot 样例               中等\n    ③ 函数调用      tool schema，模型侧约束         强\n    ④ 约束解码      grammar 级 token 掩码           最强，结构必合法\n\n健壮架构（结构合法 != 语义正确，必须有闭环）：\n    生成 ─▶ 解析 ─▶ schema 校验 ─┬─ ok ──▶ 业务校验 ─┬─ ok ──▶ 使用\n                                 │                    └─ fail ▶ 修复重试(≤N)\n                                 └─ fail ─▶ 带错误信息重试 ─▶ 仍失败 ▶ 降级\n\n边界：约束解码只保证「语法」，不保证「字段间逻辑」\n    如 end > start、金额合计一致，仍需业务校验兜底",
+        "desc": ""
+      },
+      {
+        "chapter": "ai-ch05",
+        "title": "零样本、少样本与示例选择",
+        "source": "ai-ch05/concept/05-prompt-recipes.md",
+        "code": "例1（典型）：\"物流很快\" → 正面\n例2（边界）：\"不好不坏\" → 中性\n例3（易错）：\"还行吧，就是慢了点\" → 偏负面",
+        "desc": ""
+      },
+      {
+        "chapter": "ai-ch06",
+        "title": "RAG 全流程与分块策略",
+        "source": "ai-ch06/concept/03-hybrid-retrieval-rerank.md",
+        "code": "混合检索：稀疏(BM25) 与稠密(向量) 互补\n    查询 ──┬─▶ BM25  ─▶ 排名 L1（擅长精确词、编号、专名）\n           └─▶ 向量   ─▶ 排名 L2（擅长同义改写、语义）\n                        │\n              RRF 融合：score(d) = Σ 1/(k + rank_i(d))，k≈60\n                        │  只看名次不看分数 -> 免疫两路分数量纲不同\n                        ▼\n                  候选 top-100\n\n两阶段「召回 + 重排」：\n    召回 recall@100   便宜、粗排，目标是「别漏」\n        └─▶ 重排 cross-encoder  对每个 (q,d) 成对打分，精排 top-10\n              代价：n 次模型前向 -> 所以只对少量候选做\n\n常见错误：直接在融合分上截到 top-3、跳过重排 -> 语义相近但答案错的片段胜出",
+        "desc": ""
+      },
+      {
+        "chapter": "ai-ch06",
+        "title": "RAG 全流程与分块策略",
+        "source": "ai-ch06/concept/04-vector-index-eval.md",
+        "code": "索引选型：召回率 <-→ 延迟 <-→ 内存，三者互斥\n    Flat   精确、O(n)、内存最高          小库 / 离线评测基线\n    IVF    先聚类，只搜 nprobe 个簇       nprobe↑ 召回↑ 延迟↑\n    PQ     向量切段量化，用码本近似       内存↓4~32× 召回↓\n    HNSW   多层图，贪心跳跃              延迟最低，内存最高（存图边）\n\n    ┌───────────────────────────────┐\n    │ 高召回                        │\n    │  Flat ●            ● HNSW     │\n    │        ● IVF                  │\n    │  PQ ●                         │\n    │ 低内存 ────────────▶ 高内存    │\n    └───────────────────────────────┘\n\nRAG 分层评估（出错要能定位到层，而不是只说「答得不好」）：\n    检索层 recall@k / MRR  ->  生成层 忠实度  ->  端到端 答案正确率\n    检索全 miss 时生成再强也答不对 -> 先修召回，再调提示",
+        "desc": ""
+      },
+      {
+        "chapter": "ai-ch07",
+        "title": "Agent 本质与 ReAct 范式",
+        "source": "ai-ch07/concept/01-agent-loop-react.md",
+        "code": "        +----------------------------------------------+\n        |        目标 Goal（可判定的终止条件）           |\n        +----------------------------------------------+\n                 ^                            |\n                 | 未达成                      v\n   +-------------------------+     +----------------------+\n   |  观察 Observation       |<----|  行动 Action         |\n   |  (工具返回值 / 环境状态)  |     |  (调用某个工具)       |\n   +-------------------------+     +----------------------+\n                 |                            ^\n                 v                            |\n        +----------------------------------------------+\n        |  思考 Thought（LLM 决策下一步做什么）          |\n        +----------------------------------------------+",
+        "desc": ""
+      },
+      {
+        "chapter": "ai-ch07",
+        "title": "Agent 本质与 ReAct 范式",
+        "source": "ai-ch07/concept/02-function-calling-tools.md",
+        "code": "用户请求 + 工具清单(schema)\n        |\n        v\n   [ LLM ]  --> 结构化调用意图：{\"name\": \"get_weather\", \"arguments\": {\"city\": \"Beijing\"}}\n        |                                   （只产出意图，不执行）\n        v\n   宿主程序校验 schema --> 执行真实函数 --> 得到结果\n        |\n        v\n   结果作为一条新消息回填上下文 --> 进入下一轮 --> 模型据此继续或作答",
+        "desc": ""
+      },
+      {
+        "chapter": "ai-ch07",
+        "title": "Agent 本质与 ReAct 范式",
+        "source": "ai-ch07/concept/03-memory-system.md",
+        "code": "   用户输入\n      |\n      v\n [短期记忆: 最近若干轮]  <--- 摘要压缩 <--- 溢出部分\n      |\n      v\n [工作记忆: 本步状态]  -- 提级(importance>=阈值) --> [长期记忆: 跨会话事实]\n      ^                                                   |\n      |                                                   v\n      +----------------- 检索(相关度+新近度+重要性) ---------+",
+        "desc": ""
+      },
+      {
+        "chapter": "ai-ch07",
+        "title": "Agent 本质与 ReAct 范式",
+        "source": "ai-ch07/concept/04-multiagent-mcp-security.md",
+        "code": "                 [ 编排者 Orchestrator ]\n                   |        |        |\n          +--------+        |        +--------+\n          v                 v                 v\n   [检索 Agent]      [分析 Agent]      [写作 Agent]\n          |                 |                 |\n          +--------> [共享状态 state] <-------+\n                          |\n                  [ 状态机守卫 Guard ]\n         PENDING -> RUNNING -> REVIEW -> DONE\n                       |          |\n                       +-> FAILED +-> (重试/升级给人类)",
+        "desc": ""
+      },
+      {
         "chapter": "ai-ch08",
         "title": "推理两阶段：Prefill 与 Decode",
         "source": "ai-ch08/concept/01-inference-two-phase.md",
@@ -300,8 +2183,50 @@ export const DIAGRAM_SUBJECTS: DiagramSubject[] = [
       {
         "chapter": "ai-ch08",
         "title": "推理两阶段：Prefill 与 Decode",
+        "source": "ai-ch08/concept/03-quantization-routing-cache.md",
+        "code": "① 度量（Trace 找到瓶颈） → ② 砍上下文（精简 prompt/去重/压缩）\n→ ③ 分模型（路由 + 小模型兜底） → ④ 加缓存（前缀缓存 + 语义缓存）\n→ ⑤ 最后才是推理加速（量化/投机/换框架）",
+        "desc": ""
+      },
+      {
+        "chapter": "ai-ch08",
+        "title": "推理两阶段：Prefill 与 Decode",
+        "source": "ai-ch08/concept/04-observability-eval.md",
+        "code": "可观测性三件套 + AI 特有维度：\n    Logs    ─▶ prompt / 输出 / token 数 / 模型版本 / 用户反馈\n    Metrics ─▶ 延迟 p50/p95、QPS、错误率、成本/请求、缓存命中率\n    Traces  ─▶ 一次请求的链路：检索 -> 拼接 -> 生成 -> 校验（含各段耗时）\n\n传统 APM 看不到的：\n    输出质量（抽检打分）、幻觉率、拒答率、token 成本漂移、注入/越权命中\n\nLLM-as-Judge 校准闭环：\n    人工标注集(200~500) ─▶ judge 打分 ─▶ 与人工算一致性 κ / 准确率\n                              │                  │\n                              └── 调 rubric ◀────┘   κ < 0.6 不可上线\n    陷阱：位置偏置（偏爱第一个）、长度偏置（偏爱长答案）-> 交换顺序双评",
+        "desc": ""
+      },
+      {
+        "chapter": "ai-ch08",
+        "title": "推理两阶段：Prefill 与 Decode",
         "source": "ai-ch08/concept/05-security-compliance.md",
         "code": "不可信输入 ──► 净化(规则/白名单) ──► 通道隔离(数据≠指令) ──► 模型\n                                          │\n                       最小权限工具 ◄─────┴────► 输出校验 ──► 用户",
+        "desc": ""
+      },
+      {
+        "chapter": "ai-ch08",
+        "title": "推理两阶段：Prefill 与 Decode",
+        "source": "ai-ch08/concept/06-llm-app-snippets.md",
+        "code": "06-llm-app-snippets.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 一、token 计数与上下文预算  (python)\n    |\n    v\n  [02] 二、超时、重试与退避  (python)\n    |\n    v\n  [03] 三、流式输出的聚合  (python)\n    |\n    v\n  [04] 四、结构化输出的容错解析  (python)\n    |\n    v\n  [05] 五、语义缓存  (python)\n    |\n    v\n  [06] 六、成本与延迟埋点  (python)\n    |\n    v\n  [07] 七、提示注入的基础防护  (python)\n    |\n    v\n  [08] 八、评测的最小骨架  (python)\n    |\n    v\n  [... 其余 1 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "ai-ch09",
+        "title": "核心概念（一）：自编码器与变分自编码器",
+        "source": "ai-ch09/concept/03-diffusion.md",
+        "code": "前向：一步到位加噪（闭式，不用迭代）\n    x_t = √ᾱ_t · x_0 + √(1-ᾱ_t) · ε ,  ε ~ N(0,I)\n    t=0 ─────────────▶ t=T      ᾱ_t 单调递减，x_0 逐渐变纯噪声\n\n训练：随机取 t，让网络从 x_t 预测 ε（本质是一个回归任务）\n    loss = E‖ε - ε_θ(x_t, t)‖²\n\n反向：从纯噪声逐步去噪\n    x_T ─▶ x_{T-1} ─▶ … ─▶ x_0\n    每步 x_{t-1} = (x_t - 系数·ε_θ)/√α_t + σ_t·z\n    DDIM：跳步采样（T=1000 可只跑 20~50 步），确定性可复现\n    CFG ：ε = ε_uncond + s·(ε_cond - ε_uncond)，s↑ 更贴提示词、多样性↓\n\n账本：采样步数 × 每步一次 U-Net 前向 = 延迟，这就是少步采样/蒸馏是热点的原因",
+        "desc": "视角覆盖：程序员（工程决策）/ 博士生（第一性原理）/ 考研者（笔面口径）。三者互补、不重复。 本章 `examples/ex07~ex11` 用 NumPy 从零实现加噪、反向单步、DDIM 与 CFG，输出与公式可逐项对账。"
+      },
+      {
+        "chapter": "ai-ch10",
+        "title": "核心概念（一）：初始化、归一化与梯度路径",
+        "source": "ai-ch10/concept/02-optimizer-and-schedule.md",
+        "code": "优化器演进，每一步改的是什么：\n    SGD        θ ← θ - lr·g                        只用一阶梯度\n    Momentum   v ← βv + g ;  θ ← θ - lr·v          加惯性，平滑噪声方向\n    Adam       m,v 是一阶/二阶矩的指数均值\n               θ ← θ - lr·m̂/(√v̂+ε)                每参数自适应步长\n    AdamW      把 weight decay 从梯度里挪出来\n               θ ← θ - lr·(m̂/(√v̂+ε)) - lr·λ·θ      衰减不再被自适应缩放\n\n学习率调度：\n    lr ┤      ╭───╮\n       │     ╱     ╲___\n       │  __╱          ╲___             warmup：避开初期大梯度把参数带偏\n       └─┴──┴──────────────┴──▶ step    decay：后期小步收敛\n        warmup   decay\n    Adam 的二阶矩估计在初期不准 -> warmup 不是玄学，是必需",
+        "desc": "视角覆盖：程序员（工程决策）/ 博士生（第一性原理）/ 考研者（笔面口径）。三者互补、不重复。"
+      },
+      {
+        "chapter": "ai-ch10",
+        "title": "核心概念（一）：初始化、归一化与梯度路径",
+        "source": "ai-ch10/concept/05-training-engineering-snippets.md",
+        "code": "05-training-engineering-snippets.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 一、参数分组：weight decay 不该作用于 norm 与 bias  (python)\n    |\n    v\n  [02] 二、warmup + 余弦衰减  (python)\n    |\n    v\n  [03] 三、梯度裁剪与梯度范数监控  (python)\n    |\n    v\n  [04] 四、混合精度与 GradScaler  (python)\n    |\n    v\n  [05] 五、梯度累积模拟大 batch  (python)\n    |\n    v\n  [06] 六、梯度检查点  (python)\n    |\n    v\n  [07] 七、损失尖峰检测与自动回滚  (python)\n    |\n    v\n  [08] 收尾  (-)\n    |\n    v\n  [END] 三视角解析收口",
         "desc": ""
       },
       {
@@ -319,6 +2244,20 @@ export const DIAGRAM_SUBJECTS: DiagramSubject[] = [
         "desc": ""
       },
       {
+        "chapter": "ai-ch11",
+        "title": "动态批处理：延迟与吞吐的对冲",
+        "source": "ai-ch11/concept/04-slo-rollout-observability.md",
+        "code": "04-slo-rollout-observability.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 2. SLO 与延迟预算的反推  (-)\n    |\n    v\n  [02] 3. 容量规划的显存与副本数学  (-)\n    |\n    v\n  [03] 4. 金丝雀发布的流量切分  (-)\n    |\n    v\n  [04] 5. 回滚的原子性  (-)\n    |\n    v\n  [05] 6. 可观测性三件套  (-)\n    |\n    v\n  [06] 7. 队列深度与背压  (-)\n    |\n    v\n  [07] 8. 冷启动与预热  (-)\n    |\n    v\n  [08] 9. 多副本下的会话与缓存亲和  (-)\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "ai-ch12",
+        "title": "任务 schema 与指令设计：从一句话需求到可训练样本",
+        "source": "ai-ch12/concept/01-task-schema.md",
+        "code": "Alpaca 三段式（字段解耦：不变的进 system，可变的进 user）\n    {\n      \"system\": \"你是……（角色/边界，全库共享，不随样本变）\",\n      \"user\":   \"……{占位符}……（可程序化填充）\",\n      \"output\": \"……（目标答案，训练时作为 label）\"\n    }\n\n为什么必须 schema，而不是随手写 prompt：\n    ┌ 随手 prompt ─────────┐      ┌ schema ──────────────┐\n    │ 格式随人变 -> 格式漂移 │  ->  │ 字段固定 -> 可批量校验 │\n    │ 无法批量统计 / 去重    │      │ 可加 meta 追溯出身     │\n    │ 改动无法回溯          │      │ 版本化 + 可回归测试    │\n    └──────────────────────┘      └──────────────────────┘\n\n样本流水线：\n    原始语料 ─▶ 模板渲染(user) ─▶ 产出(output) ─▶ 质量标注 ─▶ 去重/配比 ─▶ 训练集\n                                                     ↑\n                                    每条带 source / version / annotator",
+        "desc": ""
+      },
+      {
         "chapter": "ai-ch12",
         "title": "任务 schema 与指令设计：从一句话需求到可训练样本",
         "source": "ai-ch12/concept/02-synthetic-filter-dedup-contamination.md",
@@ -326,10 +2265,59 @@ export const DIAGRAM_SUBJECTS: DiagramSubject[] = [
         "desc": ""
       },
       {
+        "chapter": "ai-ch12",
+        "title": "任务 schema 与指令设计：从一句话需求到可训练样本",
+        "source": "ai-ch12/concept/03-hard-negative-kappa.md",
+        "code": "难例（hard negative）：与正样本语义极近、但确实是负例\n    正样本   「如何重置密码」    ─┐\n    易负例   「今天天气怎么样」    │ 模型轻松分开 -> 对训练贡献 ≈ 0\n    难负例   「如何修改密码」    ─┘ 一字之差 -> 逼模型学细粒度边界\n\n为什么需要 Kappa：一致率会骗人\n                    标注员A 是   标注员A 否\n        标注员B 是      80          10\n        标注员B 否      10           0\n    表面一致率 90/100 = 90% 很高；但两人几乎只标「是」，随机也能到这个数\n    κ = (p_o - p_e) / (1 - p_e)     扣掉「碰巧一致」，κ<0.6 说明指南不可用\n\n闭环：低 κ 样本 -> 回看指南歧义 -> 改判定标准 -> 重标 -> κ↑ -> 再挖更难例",
+        "desc": ""
+      },
+      {
+        "chapter": "ai-ch12",
+        "title": "任务 schema 与指令设计：从一句话需求到可训练样本",
+        "source": "ai-ch12/concept/04-llm-eval-practical-recipes.md",
+        "code": "04-llm-eval-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场一：评测集被训练集污染，分数虚高到离谱  (python)\n    |\n    v\n  [02] 现场二：只报均值不报方差，结论不可信  (python)\n    |\n    v\n  [03] 现场三：用准确率评不平衡数据，瞎猜也有 99%  (python)\n    |\n    v\n  [04] 现场四：合成数据不过滤，模型学了一堆重复模板  (python)\n    |\n    v\n  [05] 现场五：难负例没挖，检索召回全是送分题  (python)\n    |\n    v\n  [06] 现场六：人工标注一致性（Kappa）太低，标签本身不可信  (python)\n    |\n    v\n  [07] 现场七：测试集泄漏进 few-shot 示例，评测失真  (python)\n    |\n    v\n  [08] 现场八：只评最终答案不评过程，错误答案蒙混过关  (python)\n    |\n    v\n  [... 其余 5 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "ai-ch13",
+        "title": "KV Cache 与分页注意力：显存账、碎片与复用",
+        "source": "ai-ch13/concept/02-continuous-batching.md",
+        "code": "静态批处理：凑齐一整批，等最慢那条结束才收\n    时间 ─────────────────────────▶\n    A ████████████████  长请求\n    B ██████            已结束但槽位被占 -> GPU 空转\n    C ████              同上\n    -> 吞吐被最慢样本拖住，空泡明显\n\n连续批处理：以「一次解码迭代」为调度单位，谁结束谁让位\n    step  1  2  3  4  5  6  7\n    A     █  █  █  █  █  █  █\n    B     █  █  █  █  -  C  C    <- B 结束，新请求 C 立刻补进同一批\n    D     -  -  D  D  D  D  D\n    每步尽量填满 batch -> 吞吐显著上升，代价是需要 paged KV cache 管碎片\n\n取舍：静态实现简单、延迟可预测；连续吞吐高、单请求延迟抖动更大",
+        "desc": ""
+      },
+      {
+        "chapter": "ai-ch13",
+        "title": "KV Cache 与分页注意力：显存账、碎片与复用",
+        "source": "ai-ch13/concept/04-inference-engine-practical-recipes.md",
+        "code": "04-inference-engine-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 开场：为什么 7B 模型在一张 24G 卡上跑不了长上下文  (-)\n    |\n    v\n  [02] 现场一：KV Cache 到底缓存了什么  (python)\n    |\n    v\n  [03] 现场二：预分配最大长度，等于给每个请求留一间空房  (python)\n    |\n    v\n  [04] 现场三：连续批处理让 GPU 不再等最慢的那个  (python)\n    |\n    v\n  [05] 现场四：chunked prefill 解决长 prompt 抢占  (python)\n    |\n    v\n  [06] 现场五：量化不是「把权重压小」这么简单  (python)\n    |\n    v\n  [07] 现场六：GPTQ 与 AWQ 的取舍  (-)\n    |\n    v\n  [08] 现场七：GGUF 是格式，不是量化算法  (-)\n    |\n    v\n  [... 其余 6 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "ai-ch14",
+        "title": "图文对齐与表征：CLIP 式对比学习、投影层、跨模态检索",
+        "source": "ai-ch14/concept/01-image-text-alignment.md",
+        "code": "对比学习：一个 batch 内 N 图 × N 文，构成 N×N 相似度矩阵\n                  t1    t2    t3   …  tN\n        i1      [ ✔     ✘     ✘        ✘ ]   对角线 = 正确配对（正样本）\n        i2      [ ✘     ✔     ✘        ✘ ]   其余全为 in-batch 负样本\n        i3      [ ✘     ✘     ✔        ✘ ]\n         ⋮\n    图->文、文->图 两个方向各做 softmax，对称损失：配对拉近、他配推远\n\n投影层：两个塔维度不同，映射到同一空间才能算余弦\n    f_img(224d) ─▶ W_i(224×512) ─┐\n                                  ├─▶ 同一 512 维空间 ─▶ 跨模态最近邻检索\n    f_txt(768d) ─▶ W_t(768×512) ─┘\n\n模态鸿沟仍在：抽象词、细粒度计数、空间关系 -> 对齐明显变弱",
+        "desc": ""
+      },
+      {
         "chapter": "ai-ch14",
         "title": "图文对齐与表征：CLIP 式对比学习、投影层、跨模态检索",
         "source": "ai-ch14/concept/02-ocr-vlm-pipeline.md",
         "code": "   图像 → 版面检测(版心/表格) → 文本识别(OCR) → VLM 问答\n            │                      │\n            └── 失败模式：漏检/错认 ─┘ → 答案幻觉的来源\n   成本：识别 + VLM 各算一次；延迟预算要拆成「预处理 / 推理 / 回传」",
+        "desc": ""
+      },
+      {
+        "chapter": "ai-ch14",
+        "title": "图文对齐与表征：CLIP 式对比学习、投影层、跨模态检索",
+        "source": "ai-ch14/concept/03-multimodal-rag-cost-latency.md",
+        "code": "多模态 RAG 链路：\n    图片 ─▶ 预处理(缩放/纠正方向/去噪) ─▶ 视觉编码 ─▶ 向量库\n                                                      │\n    问题 ─▶ 文本编码 ─▶ 检索 top-k 图 ─▶ 拼进上下文 ─▶ VLM 生成 ─▶ 答案\n\n延迟预算（3s 目标的典型拆法）：\n    预处理      100~300 ms   高分辨率缩放最贵，也最容易被忽略\n    检索         20~80  ms\n    VLM 生成   1.5~2.5 s     输入图 token 越多越慢\n    ────────────────────\n    一张 1024² 图 ≈ 数百~上千 token，是主要成本项\n    -> 降本：缩图 / 只送 top-1 关键图 / 先 OCR 抽文字再走文本 RAG\n\n成本模型：Σ(预处理 CPU) + Σ(嵌入调用) + (输入 token + 输出 token) × 单价\n兜底：图看不清 -> 回退纯文本答案，并显式说明「未能识别图中内容」",
+        "desc": ""
+      },
+      {
+        "chapter": "ai-ch14",
+        "title": "图文对齐与表征：CLIP 式对比学习、投影层、跨模态检索",
+        "source": "ai-ch14/concept/04-multimodal-practical-recipes.md",
+        "code": "04-multimodal-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场 1：图文对齐不是「图配一句话」这么简单  (python)\n    |\n    v\n  [02] 现场 2：图像分辨率决定 token 成本  (python)\n    |\n    v\n  [03] 现场 3：OCR 与 VLM 是互补而非替代  (python)\n    |\n    v\n  [04] 现场 4：流水线要设超时与降级  (-)\n    |\n    v\n  [05] 现场 5：多模态 RAG 不要无脑召回所有图  (python)\n    |\n    v\n  [06] 现场 6：图像描述要缓存  (python)\n    |\n    v\n  [07] 现场 7：用固定预算做容量规划，别用计时器  (-)\n    |\n    v\n  [08] 现场 8：批处理能显著降本  (python)\n    |\n    v\n  [... 其余 7 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
         "desc": ""
       }
     ]
@@ -341,10 +2329,115 @@ export const DIAGRAM_SUBJECTS: DiagramSubject[] = [
     "hue": "#5d7d9a",
     "entries": [
       {
+        "chapter": "fs-ch02",
+        "title": "01 · HTML 语义化：从「机器可读」到「可访问」",
+        "source": "fs-ch02/concept/01-html-semantics.md",
+        "code": "语义化 = 让「机器可读」，不是让「页面好看」\n    <div onclick>   无语义：无障碍树里只有「一个容器」\n    <button>        自带角色、键盘可达（Enter/Space）、焦点管理\n\n解析器产出两棵树：\n    HTML 文本 ─▶ DOM 树（结构）\n              └─▶ Accessibility Tree（角色 / 名称 / 状态）─▶ 屏幕阅读器、语音控制\n\n    所以 <h1> 的意义是「给无障碍树一个 heading 角色与层级」，不是「变大变粗」\n    想改样子 -> CSS；想让它成为标题 -> <h1>..<h6>\n\n语义元素的分工：\n    header / nav / main / footer   地标（landmark），可快速跳转\n    section + 标题                  有主题的分块；没有标题的 section 没有意义\n    article                         可独立分发的内容单元\n    label + input                   建立可访问名称（for/id 或包裹）",
+        "desc": ""
+      },
+      {
+        "chapter": "fs-ch02",
+        "title": "01 · HTML 语义化：从「机器可读」到「可访问」",
+        "source": "fs-ch02/concept/03-rendering-pipeline.md",
+        "code": "字节 → 字符 → Token → DOM        (HTML 解析)\nCSS  → CSSOM                     (样式解析)\nDOM + CSSOM → Render Tree        (样式计算)\nRender Tree → Layout(Reflow)     (几何)\nLayout → Paint(Raster)           (绘制)\nPaint → Composite → 像素          (合成，常走 GPU)",
+        "desc": ""
+      },
+      {
+        "chapter": "fs-ch02",
+        "title": "01 · HTML 语义化：从「机器可读」到「可访问」",
+        "source": "fs-ch02/concept/05-html-css-practical-recipes.md",
+        "code": "05-html-css-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场一：用 div 堆出来的页面，屏幕阅读器读不懂  (html)\n    |\n    v\n  [02] 现场二：一个页面上出现了三个 h1  (html)\n    |\n    v\n  [03] 现场三：content-box 让宽度计算永远对不上  (css)\n    |\n    v\n  [04] 现场四：margin 折叠让你以为样式没生效  (css)\n    |\n    v\n  [05] 现场五：BFC 不是玄学，是一个明确的触发条件  (css)\n    |\n    v\n  [06] 现场六：Flex 的 align-items 默认值把你骗了  (css)\n    |\n    v\n  [07] 现场七：flex 子元素不肯缩小  (css)\n    |\n    v\n  [08] 现场八：Grid 的 fr 单位不是「比例」  (css)\n    |\n    v\n  [... 其余 4 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "fs-ch03",
+        "title": "01 · 类型系统与相等性：原始类型、typeof 陷阱、== 与 Object.is",
+        "source": "fs-ch03/concept/03-prototype-oop.md",
+        "code": "原型链：属性查找沿 __proto__ 逐级上溯，直到 null\n    obj ─▶ Foo.prototype ─▶ Object.prototype ─▶ null\n    读：先查自身，未命中沿链上溯\n    写：永远写自身（除非原型上有 setter / 只读属性）\n\nclass 是语法糖：\n    class Foo { m(){} }   ≈   function Foo(){}; Foo.prototype.m = function(){}\n    差异：不可当普通函数调用、方法不可枚举、默认严格模式、super 绑定\n\n两种继承：\n    Object.create(proto)   显式指定原型，最清晰\n    class B extends A      双链：B.__proto__ = A（静态继承）\n                                B.prototype.__proto__ = A.prototype（实例继承）\n\ninstanceof 本质就是查链：A.prototype 是否出现在 obj 的原型链上",
+        "desc": ""
+      },
+      {
+        "chapter": "fs-ch03",
+        "title": "01 · 类型系统与相等性：原始类型、typeof 陷阱、== 与 Object.is",
+        "source": "fs-ch03/concept/04-async-eventloop.md",
+        "code": "单线程如何不卡死：把「等待」交给宿主（浏览器/Node），回调进队列\n    call stack 空 ──▶ 清空 microtask 队列\n                     ──▶ 取 1 个 macrotask ──▶ 再清空 microtask\n\n    microtask   Promise.then / queueMicrotask / MutationObserver\n    macrotask   setTimeout / setInterval / IO / UI 事件\n\n    setTimeout(f, 0) 不保证 0ms 后执行，只保证「下一轮才轮到」\n    微任务可以饿死渲染：无限 then 链 -> 页面完全无响应\n\nPromise 组合子：\n    all         全成功才成功，任一 reject 即整体 reject\n    allSettled  等全部落定，返回 {status, value|reason}\n    race        第一个落定（成功或失败都算）\n    any         第一个成功（全失败才 reject）",
+        "desc": ""
+      },
+      {
+        "chapter": "fs-ch03",
+        "title": "01 · 类型系统与相等性：原始类型、typeof 陷阱、== 与 Object.is",
+        "source": "fs-ch03/concept/05-js-core-practical-recipes.md",
+        "code": "05-js-core-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场一：typeof null 是 \"object\"  (javascript)\n    |\n    v\n  [02] 现场二：== 的隐式转换规则，只有背下来才敢用  (javascript)\n    |\n    v\n  [03] 现场三：Object.is 处理了 === 的两个例外  (javascript)\n    |\n    v\n  [04] 现场四：var 提升到 undefined，let 是暂时性死区  (javascript)\n    |\n    v\n  [05] 现场五：循环里的 var 与闭包，是同一个问题的两面  (javascript)\n    |\n    v\n  [06] 现场六：this 的五条绑定规则，按优先级排  (javascript)\n    |\n    v\n  [07] 现场七：箭头函数没有 arguments、没有 prototype、不能 new  (javascript)\n    |\n    v\n  [08] 现场八：原型链的查找是「沿链向上，直到 null」  (javascript)\n    |\n    v\n  [... 其余 4 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "fs-ch04",
+        "title": "Node 运行时与事件循环",
+        "source": "fs-ch04/concept/02-http-server-middleware.md",
+        "code": "从零手写 HTTP 的最小闭环：\n    net.createServer ─▶ 逐 chunk 拼接 body（不是一次到齐）\n      ─▶ 解析 start-line + headers（\\r\\n\\r\\n 是分界）\n      ─▶ 路由匹配（method + path 模板 / token）\n      ─▶ res.writeHead(status, headers) ─▶ res.end(body)\n\n中间件 = (req, res, next) 的洋葱链：\n    ┌ A 前 ─┬ B 前 ─┬ handler ┬ B 后 ┬ A 后 ┐\n    next() 向下走；返回时向上走；next(err) 直接跳到错误中间件\n\n必须处理的边界：\n    Content-Length 与实际 body 不一致 / chunked 传输编码\n    请求体大小上限（否则一个超大 body 打满内存）\n    未捕获异常 -> 统一 500，且不把堆栈泄漏给客户端",
+        "desc": ""
+      },
+      {
+        "chapter": "fs-ch04",
+        "title": "Node 运行时与事件循环",
+        "source": "fs-ch04/concept/03-streams-buffer.md",
+        "code": "流的四种：Readable / Writable / Duplex / Transform（Transform 是双工特例）\n\n背压（backpressure）：写端比读端快时必须刹车\n    write(chunk) 返回 false  -> 缓冲区达到 highWaterMark，应暂停\n    等 'drain' 事件再继续\n    ┌ 读 ──write()=false──▶ 暂停读取 ──drain──▶ 继续读取 ┐\n    忽略返回值 = 内存无限增长（生产 OOM 的常见来源之一）\n\npipe 已内建背压，但错误不会自动传播：\n    stream.pipeline(src, transform, dst, cb)     // 推荐\n\nBuffer 编码：\n    Buffer.from(str, 'utf8') / buf.toString('utf8')\n    按字节切片可能切在多字节字符中间 -> 用 StringDecoder 保住字符边界",
+        "desc": ""
+      },
+      {
+        "chapter": "fs-ch04",
+        "title": "Node 运行时与事件循环",
+        "source": "fs-ch04/concept/05-node-practical-recipes.md",
+        "code": "05-node-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场 1：JS 是单线程，但 Node 不是  (-)\n    |\n    v\n  [02] 现场 2：事件循环的六个阶段要有个整体印象  (js)\n    |\n    v\n  [03] 现场 3：CPU 密集任务会阻塞整个服务  (js)\n    |\n    v\n  [04] 现场 4：`await` 不等于「并行」  (js)\n    |\n    v\n  [05] 现场 5：未捕获的 Promise 拒绝会拖垮进程  (-)\n    |\n    v\n  [06] 现场 6：中间件顺序决定行为  (js)\n    |\n    v\n  [07] 现场 7：错误处理中间件要四个参数  (js)\n    |\n    v\n  [08] 现场 8：请求体要限流，JSON 要 try-catch  (-)\n    |\n    v\n  [... 其余 7 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "fs-ch06",
+        "title": "一、认证 vs 鉴权；会话与令牌机制",
+        "source": "fs-ch06/concept/01-authn-authz-session-vs-token.md",
+        "code": "请求 -->[认证中间件]--401--> 拒绝（无/坏凭证）\n              |通过\n              v\n        [授权中间件]--403--> 拒绝（凭证有效但无权）\n              |通过\n              v\n      [资源级校验]--404/403-> 拒绝（不是你的资源）\n              |通过\n              v\n           [handler] --200-->",
+        "desc": ""
+      },
+      {
+        "chapter": "fs-ch06",
+        "title": "一、认证 vs 鉴权；会话与令牌机制",
+        "source": "fs-ch06/concept/05-jwt-in-practice.md",
+        "code": "header.payload.signature\n│      │        └── HMAC-SHA256(base64url(header) + \".\" + base64url(payload), secret)\n│      └─────────── Claims：sub(用户) exp(过期) iat(签发) jti(唯一 id) aud/iss(受众/签发者)\n└────────────────── alg:HS256 / RS256\n\n校验五步：\n1) 取 Authorization: Bearer <token>（或 HttpOnly Cookie）\n2) 拆三段，base64url 解出 header/payload（**不要**在这里信任任何字段）\n3) 验签：用密钥重算签名比对（HS256 用 secret，RS256 用公钥）\n4) 查 claims：exp 未过期、iss/aud 匹配、nbf 未提前\n5) 再查服务端状态：tokenVersion / 黑名单 / 用户是否被封禁",
+        "desc": ""
+      },
+      {
+        "chapter": "fs-ch06",
+        "title": "一、认证 vs 鉴权；会话与令牌机制",
+        "source": "fs-ch06/concept/05-jwt-in-practice.md",
+        "code": "两种防御的分工：\n  SameSite=strict/lax  → 浏览器层面「跨站不带 Cookie」（第一道）\n  X-CSRF-Token 校验    → 服务端层面「请求确实来自本站页面」（第二道）\n  只做 SameSite 不够：老浏览器不支持、且 SameSite=None 的跨站场景仍需 token\n  只做 token 也不够：token 若通过 localStorage 传递，XSS 能直接读走 → 所以 Cookie 必须 HttpOnly",
+        "desc": ""
+      },
+      {
+        "chapter": "fs-ch07",
+        "title": "一、全栈分层、目录组织与契约优先",
+        "source": "fs-ch07/concept/01-architecture-contract-first.md",
+        "code": "repo/\n├── apps/\n│   ├── web/            前端应用：视图层 + 客户端状态（可依赖 shared / contract）\n│   └── api/            后端服务：路由 + 领域逻辑 + 持久化（可依赖 shared / contract）\n├── packages/\n│   ├── shared/         共享纯逻辑：类型、校验函数、领域常量（零 IO、零框架）\n│   └── contract/       OpenAPI 文档 + 由它生成的前端类型与服务端校验器\n├── pnpm-workspace.yaml\n└── README.md",
+        "desc": ""
+      },
+      {
+        "chapter": "fs-ch09",
+        "title": "结构类型：形状对了就是对的",
+        "source": "fs-ch09/concept/04-typescript-practical-recipes.md",
+        "code": "04-typescript-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场一：结构化类型让「鸭子」混进来了  (typescript)\n    |\n    v\n  [02] 现场二：多余属性检查只在字面量上生效  (typescript)\n    |\n    v\n  [03] 现场三：类型收窄只对联合类型有效  (typescript)\n    |\n    v\n  [04] 现场四：可辨识联合是穷尽性检查的基础  (typescript)\n    |\n    v\n  [05] 现场五：as 断言是「我说了算」，不是「帮我检查」  (typescript)\n    |\n    v\n  [06] 现场六：泛型在运行时不存在  (typescript)\n    |\n    v\n  [07] 现场七：条件类型与 infer 是类型层面的 if  (typescript)\n    |\n    v\n  [08] 现场八：映射类型能改写整个类型的形状  (typescript)\n    |\n    v\n  [... 其余 4 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
         "chapter": "fs-ch10",
         "title": "响应式原理与依赖追踪",
         "source": "fs-ch10/concept/01-reactivity-and-dependency-tracking.md",
         "code": "   reactive(obj.x)          effect(fn)\n        │                        │\n        ▼                        ▼\n   ┌─────────┐   track()   ┌──────────┐\n   │  dep: x  │◀───────────│  active   │  读 obj.x 时把 effect 登记为依赖\n   └─────────┘             │  effect   │\n        ▲                   └──────────┘\n        │   trigger()               │\n        └────── obj.x = new ────────┘  写时反向通知 effect 重跑",
+        "desc": ""
+      },
+      {
+        "chapter": "fs-ch10",
+        "title": "响应式原理与依赖追踪",
+        "source": "fs-ch10/concept/04-snippets.md",
+        "code": "04-snippets.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] ref 与 reactive 的基本形态  (ts)\n    |\n    v\n  [02] computed 派生  (ts)\n    |\n    v\n  [03] watch 精确监听某个字段  (ts)\n    |\n    v\n  [04] watchEffect 自动追踪  (ts)\n    |\n    v\n  [05] 解构保持响应性：storeToRefs  (ts)\n    |\n    v\n  [06] Pinia setup store  (ts)\n    |\n    v\n  [07] Pinia options store（对照）  (ts)\n    |\n    v\n  [08] 列表渲染与 key  (vue)\n    |\n    v\n  [... 其余 1 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
         "desc": ""
       },
       {
@@ -355,10 +2448,38 @@ export const DIAGRAM_SUBJECTS: DiagramSubject[] = [
         "desc": ""
       },
       {
+        "chapter": "fs-ch11",
+        "title": "分层边界与依赖方向",
+        "source": "fs-ch11/concept/04-snippets.md",
+        "code": "04-snippets.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 分层调用：Controller → Service → Repository  (java)\n    |\n    v\n  [02] 业务异常 + 错误码枚举  (java)\n    |\n    v\n  [03] 统一异常处理 @ControllerAdvice  (java)\n    |\n    v\n  [04] 入站 DTO + Jakarta 校验  (java)\n    |\n    v\n  [05] 分组校验  (java)\n    |\n    v\n  [06] 出站 VO 转换（避免实体直出）  (java)\n    |\n    v\n  [07] 声明式事务边界  (java)\n    |\n    v\n  [08] 自定义校验器只做格式级  (java)\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
         "chapter": "fs-ch12",
         "title": "什么时候该拆：单体到微服务的触发条件与代价",
         "source": "fs-ch12/concept/02-gateway-boundary.md",
         "code": "   client ─▶ Gateway ──┬─ 路由     ─▶ service A\n                       ├─ 鉴权     ─▶ service B\n                       ├─ 限流     ─▶ (超阈值则拒绝 429)\n                       └─ 聚合(BFF)─▶ 多服务扇出后合并\n   网关不管：具体业务校验、DB 连接、领域计算（那是服务的事）",
+        "desc": ""
+      },
+      {
+        "chapter": "fs-ch12",
+        "title": "什么时候该拆：单体到微服务的触发条件与代价",
+        "source": "fs-ch12/concept/04-snippets.md",
+        "code": "04-snippets.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 2. 网关路由：精确优先 + 显式优先级  (yaml)\n    |\n    v\n  [02] 3. 配置中心客户端：默认值兜底  (java)\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "fs-ch13",
+        "title": "测试金字塔：分层策略与测试替身",
+        "source": "fs-ch13/concept/03-contract-and-gates.md",
+        "code": "消费者驱动契约（CDC）：\n    消费者声明「我期望的请求与响应形状」-> 产出契约 -> 提供者验证\n    两个方向：\n      消费者测试  用 mock 提供者验证自己的调用\n      提供者测试  用契约回放，确认自己仍满足\n\n    价值：把「接口不兼容」提前到提供者 CI，而不是集成环境才炸\n\n质量门禁（按顺序拦截，快反馈在前）：\n    编译 ─▶ 单测 ─▶ 契约测试 ─▶ 静态检查/类型检查\n      ─▶ 镜像构建与扫描 ─▶ 部署预发 ─▶ 冒烟 / E2E ─▶ 放量\n\n门禁设计原则：\n    pre-commit 只跑 lint + 受影响单测（秒级）\n    失败必须可解释：指出哪条规则、哪个契约、哪个字段",
+        "desc": ""
+      },
+      {
+        "chapter": "fs-ch13",
+        "title": "测试金字塔：分层策略与测试替身",
+        "source": "fs-ch13/concept/04-snippets.md",
+        "code": "04-snippets.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 2. E2E：用等待条件替代 sleep  (ts)\n    |\n    v\n  [02] 3. 组件测试：按用户感知查询，不碰实现细节  (ts)\n    |\n    v\n  [03] 4. 契约测试：消费者驱动（CDC）  (ts)\n    |\n    v\n  [04] 5. 质量门禁：CI 双卡（PR + 主干）  (yaml)\n    |\n    v\n  [END] 三视角解析收口",
         "desc": ""
       },
       {
@@ -371,8 +2492,22 @@ export const DIAGRAM_SUBJECTS: DiagramSubject[] = [
       {
         "chapter": "fs-ch14",
         "title": "流式响应穿过网关：透传、背压与取消",
+        "source": "fs-ch14/concept/02-long-task-state-and-reconnect.md",
+        "code": "为什么不能一直占着连接：占用网关连接数，且会被中间设备超时切断\n两种常用模式：\n    ① 提交返回 202 + taskId -> 客户端轮询 /api/tasks/{id}\n    ② SSE / WebSocket 推进度（仍需断线重连兜底）\n\n任务状态机（只允许这些迁移）：\n    pending ─▶ running ─▶ succeeded\n                    ├──▶ failed\n                    └──▶ canceled\n    终态不可逆；重试是新建一次 attempt，不篡改历史\n\n幂等与断线重连：\n    客户端带 idempotency-key -> 服务端去重，重试不会重复执行/计费\n    进度必须持久化（DB / Redis），只放内存则重启即丢\n    重连后按 since=cursor 拉增量，不要全量重放",
+        "desc": ""
+      },
+      {
+        "chapter": "fs-ch14",
+        "title": "流式响应穿过网关：透传、背压与取消",
         "source": "fs-ch14/concept/03-tool-call-idempotency-and-audit.md",
         "code": "   tool call ──callId=abc──▶ 去重表 ──首次──▶ 真正执行 → 结果\n      (重试)   callId=abc ──▶ 去重表 ──命中──▶ 直接返回已存结果\n   审计日志：callId + 输入哈希 + 输出哈希 → 哈希链，篡改即可检出",
+        "desc": ""
+      },
+      {
+        "chapter": "fs-ch14",
+        "title": "流式响应穿过网关：透传、背压与取消",
+        "source": "fs-ch14/concept/05-agent-snippets.md",
+        "code": "05-agent-snippets.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 流式响应（SSE 透传）  (ts)\n    |\n    v\n  [02] 长任务状态机与重连  (ts)\n    |\n    v\n  [03] tool_call 幂等键  (ts)\n    |\n    v\n  [04] 审计日志落库  (ts)\n    |\n    v\n  [05] 成本与限流中间件  (ts)\n    |\n    v\n  [06] 降级开关热更新  (ts)\n    |\n    v\n  [07] 背压与排队  (-)\n    |\n    v\n  [08] 断点续传 chunk 恢复  (-)\n    |\n    v\n  [... 其余 2 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
         "desc": ""
       },
       {
@@ -380,6 +2515,20 @@ export const DIAGRAM_SUBJECTS: DiagramSubject[] = [
         "title": "Goroutine 与 Channel：轻量并发与「不要通过共享内存通信」",
         "source": "fs-ch15/concept/01-goroutine-and-channel.md",
         "code": "   G(goroutine) ─▶ P(逻辑处理器, 数量≈CPU) ─▶ M(系统线程) ─▶ 核\n        │                │\n        └──── channel 通信 ──── 代替「共享内存 + 锁」\n   「不要通过共享内存来通信，而要通过通信来共享内存」",
+        "desc": ""
+      },
+      {
+        "chapter": "fs-ch15",
+        "title": "Goroutine 与 Channel：轻量并发与「不要通过共享内存通信」",
+        "source": "fs-ch15/concept/02-gin-routing-and-middleware.md",
+        "code": "路由树（radix tree）：\n    /users/:id          参数节点\n    /users/:id/posts    同一前缀共享节点\n    /static/*filepath   通配节点，捕获剩余路径\n    冲突：/users/new 与 /users/:id 在同一层冲突 -> Gin 启动时 panic（好事，早暴露）\n\n中间件链：洋葱模型\n    r.Use(A, B)\n    A 前 ─▶ B 前 ─▶ handler ─▶ B 后 ─▶ A 后\n    c.Next()  显式进入下一环\n    c.Abort() 直接中断，不再调后续\n    c.Set(\"user\", u) / c.Get 在链上传值（本质 map，注意类型断言）\n\n    gin.Recovery() 放最外层：panic 转 500，别让单个请求拖垮进程",
+        "desc": ""
+      },
+      {
+        "chapter": "fs-ch15",
+        "title": "Goroutine 与 Channel：轻量并发与「不要通过共享内存通信」",
+        "source": "fs-ch15/concept/04-snippets.md",
+        "code": "04-snippets.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] goroutine + channel 汇总  (go)\n    |\n    v\n  [02] context 取消信号  (go)\n    |\n    v\n  [03] 用 WaitGroup 等全部完成  (go)\n    |\n    v\n  [04] Gin 中间件（洋葱链）  (go)\n    |\n    v\n  [05] error 作为值：包装与判断  (go)\n    |\n    v\n  [06] 消费者定义小接口  (go)\n    |\n    v\n  [07] select + 超时避免永久阻塞  (go)\n    |\n    v\n  [END] 三视角解析收口",
         "desc": ""
       }
     ]
@@ -391,11 +2540,60 @@ export const DIAGRAM_SUBJECTS: DiagramSubject[] = [
     "hue": "#2c6e8f",
     "entries": [
       {
+        "chapter": "agent-ch01",
+        "title": "AI 产业链四层：钱从哪来，毛利被谁拿走",
+        "source": "agent-ch01/concept/01-industry-value-chain.md",
+        "code": "产业链四层（价值自上而下流动）:\n  算力层 ──▶ 模型层 ──▶ 推理服务层 ──▶ 应用与工具层\n  卖产能      训+授权     按token/卡时    卖结果(订阅/席位)\n  利润靠利用率  固定成本亿级  薄利靠调度     最薄靠留存/获客\n关键: 越靠下像「卖产能」，越靠上像「卖结果」",
+        "desc": "这一章不讲「AI 很火」，讲一件更硬的事：**同样的 100 元收入，落在产业链不同层， 成本结构、现金流形态、倒闭原因完全不同**。看懂这件事，你才知道自己投的岗位 是在「卖水」还是在「淘金」，以及面试时该用什么语言描述自己的价值。"
+      },
+      {
+        "chapter": "agent-ch01",
+        "title": "AI 产业链四层：钱从哪来，毛利被谁拿走",
+        "source": "agent-ch01/concept/02-job-map-and-skills.md",
+        "code": "五类岗位，边界在「交付物」而非技术栈:\n  算法研究  模型工程  应用开发  数据/评测  产品/PM\n      \\         |         |         |        /\n       └── 用交付物形态反推 {团队阶段, 交付形态, 考核方式} ──┘\n  会读 JD = 从 10 行技术栈还原出上面的三维",
+        "desc": "招聘 JD 是**压缩过的需求文档**：它把「我们要解决什么问题」压成了「要什么技术栈」。 会读的人能从 10 行字里还原出团队阶段、交付形态、考核方式；不会读的人只会数关键词。"
+      },
+      {
+        "chapter": "agent-ch01",
+        "title": "AI 产业链四层：钱从哪来，毛利被谁拿走",
+        "source": "agent-ch01/concept/03-tech-literacy.md",
+        "code": "一次请求的全链路（client.chat 只是中间一行）:\n  点击 ─▶ 鉴权 ─▶ 限流 ─▶ 编排 ─▶ 检索 ─▶ 工具 ─▶ 解析 ─▶ 重试/降级 ─▶ 答案落库\n  延迟·成本·失败模式 标注在每一段",
+        "desc": "「会调 API」是 `client.chat.completions.create(...)` 这一行； 「能交付」是这一行**前后各 200 行**：鉴权、限流、编排、检索、工具、解析、重试、 降级、日志、计费。这一章把这条链路拆开，逐段标注延迟、成本与失败模式。"
+      },
+      {
+        "chapter": "agent-ch02",
+        "title": "Prompt 作为接口：四段式、优先级与上下文预算",
+        "source": "agent-ch02/concept/01-prompt-as-interface.md",
+        "code": "把 Prompt 当接口: 四段式 + 接口契约\n  ┌──────┬──────┬──────┬──────┐\n  │ 角色 │ 任务 │ 约束 │ 示例 │\n  └──────┴──────┴──────┴──────┘\n  还要定义: 输入 / 输出 / 版本 / 测试\n  指令冲突→优先级  少样本→精选  CoT→并非总有益",
+        "desc": "把 prompt 当「咒语」的人，调参靠感觉、回归靠肉眼； 把 prompt 当**接口**的人，会定义输入、输出、约束、版本与测试。 这一章只讲后者：为什么四段式有效、指令冲突时谁优先、少样本怎么选、 CoT 什么时候是负收益、上下文预算怎么分。"
+      },
+      {
+        "chapter": "agent-ch02",
+        "title": "Prompt 作为接口：四段式、优先级与上下文预算",
+        "source": "agent-ch02/concept/03-injection-and-safety.md",
+        "code": "模型只有一个文本通道，万物汇入同一串 token:\n  系统指令 + 用户输入 + 检索网页 + 工具返回 ──▶ [同一 token 通道]\n  攻击者只需让自己的文本进入通道，即可「说话像系统」\n  防御必须分层: 直接注入(输入) / 间接注入(数据)",
+        "desc": "提示注入不是「模型不听话」，而是**架构问题**：模型只有一个文本通道， 系统指令、用户输入、检索到的网页、工具返回的结果，最终都变成同一串 token。 只要攻击者能让自己的文本进入这个通道，他就有机会「说话像系统」。 这一章讲清楚攻击面，以及为什么防御必须分层。"
+      },
+      {
+        "chapter": "agent-ch04",
+        "title": "用户故事与范围：先把「做什么」写死，再谈模型",
+        "source": "agent-ch04/concept/01-user-story-and-scope.md",
+        "code": "用户故事 = 责任链（三段式）:\n  作为<角色> / 为了<价值> / 当<条件>→<行为>\n  + 验收条件(可量化)  → 否则上线变无限责任\n  + 不做什么         → 否则第三周范围蔓延",
+        "desc": "需求文档里最贵的不是「写了什么」，而是「没写什么」。 一个没有验收条件的需求，会在上线后变成无限责任； 一个没有「不做什么」的项目，会在第三周开始范围蔓延。"
+      },
+      {
         "chapter": "agent-ch05",
         "title": "数据侧：文档解析与切块，决定召回的天花板",
         "source": "agent-ch05/concept/01_data_side.md",
         "code": "知识入库（离线）:\n   文档 → 切片 chunk → Embedding 模型 → 向量库(如 Milvus)\n\n在线问答（实时）:\n   用户问题 → Embedding → 向量检索 Top-K 片段\n        │\n        ▼\n   拼装 Prompt: [系统: 只依据下列资料] + [资料:K个片段] + [问题]\n        │\n        ▼\n   LLM 生成（带引用来源）\n\n  质量杠杆：\n   切片粒度 / 检索召回率 / 重排(Rerank) / 来源可信度\n  常见坑：检索不到→答非所问；片段太长→淹没重点",
         "desc": "RAG（检索增强生成）让模型「先查资料再回答」：把知识切块向量化建库，提问时先检索最相关片段，拼接进 prompt 再生成。它把「参数记忆」变成「可更新的外部知识」，幻觉与时效问题大幅缓解——但上限由检索质量决定。"
+      },
+      {
+        "chapter": "agent-ch05",
+        "title": "数据侧：文档解析与切块，决定召回的天花板",
+        "source": "agent-ch05/concept/02_retrieval_side.md",
+        "code": "检索侧流水线（把对的内容捞上来）:\n  查询 ─▶ [稠密向量检索 ∥ 稀疏 BM25] ─▶ 融合(RRF) ─▶ 重排(rerank) ─▶ TopK\n  混合检索补召回，重排提精度",
+        "desc": ""
       },
       {
         "chapter": "agent-ch06",
@@ -412,10 +2610,94 @@ export const DIAGRAM_SUBJECTS: DiagramSubject[] = [
         "desc": ""
       },
       {
+        "chapter": "agent-ch06",
+        "title": "显存账本：权重、KV Cache、激活与量化损失",
+        "source": "agent-ch06/concept/04-deployment-practical-recipes.md",
+        "code": "错一：用注意力头数代替 KV 头数 → GQA/MQA 模型上高估 4~8 倍\n      （Llama-3-8B 是 32 头 / 8 KV 头，用 32 会算出 4 倍）\n错二：忘乘 2（K 和 V 是两份）\n错三：用最大上下文算平均占用 → 实际平均长度远小于上限，\n      按最大算会严重低估可承载并发（但也可能因个别长请求而 OOM）",
+        "desc": ""
+      },
+      {
         "chapter": "agent-ch07",
         "title": "决策：先问「该不该微调」，再问「怎么微调」",
         "source": "agent-ch07/concept/03-data-engineering.md",
         "code": "1. 绝对判据：val 连续 N 轮不降（N=3~8，按数据量定）→ 回滚到最佳 checkpoint；\n2. 相对判据：val/train > 1.5 且持续 5 轮 → 过拟合，降 rank / 加 dropout / 减 epoch；\n3. 数据判据：val 曲线抖动方差突然变大 → 验证集太小，先扩验证集再谈调参。",
+        "desc": ""
+      },
+      {
+        "chapter": "agent-ch08",
+        "title": "注意力机制：QKV 的几何意义、缩放、多头与因果 mask",
+        "source": "agent-ch08/concept/01-attention.md",
+        "code": "注意力 = Token 间唯一的信息混合处:\n  Q·Kᵀ/√d ─softmax─▶ 注意力权重 ─▶ ×V ─▶ 输出\n  QK 决定「看哪里」   V 决定「取什么」\n  多头 = 在多个子空间并行看",
+        "desc": "注意力是 Transformer 唯一做「Token 间信息混合」的地方。其余组件（embedding、FFN、 LayerNorm、残差）都在逐个 Token 独立处理。把这一节讲清，后面一切（位置编码、KV Cache、 长上下文成本）都挂在它上面。"
+      },
+      {
+        "chapter": "agent-ch08",
+        "title": "注意力机制：QKV 的几何意义、缩放、多头与因果 mask",
+        "source": "agent-ch08/concept/02-position-norm.md",
+        "code": "注意力本身置换等变 → 模型「不知谁前谁后」\n  顺序感必须显式注入: 位置编码(RoPE/ALiBi...)\n  另一主线: 残差流 + 归一化(LN / RMSNorm) 位置之争\n  → 决定深层网络能不能训得动、训得稳",
+        "desc": "注意力对输入顺序是**置换等变**的——把句子里的词打乱，输出只是跟着打乱，模型本身「不知道」 谁在前谁在后。位置信息必须显式注入。另一根主线是归一化与残差的位置之争，它直接决定 深层网络能不能训得动、训得稳。"
+      },
+      {
+        "chapter": "agent-ch08",
+        "title": "注意力机制：QKV 的几何意义、缩放、多头与因果 mask",
+        "source": "agent-ch08/concept/04-transformer-internals-practical-recipes.md",
+        "code": "Q @ Kᵀ       : [T,d] × [d,T] → [T,T]，代价 T²·d\nsoftmax      : [T,T]，代价 T²\nweights @ V  : [T,T] × [T,d] → [T,d]，代价 T²·d",
+        "desc": ""
+      },
+      {
+        "chapter": "agent-ch09",
+        "title": "视觉编码与 token 成本：把图像「读」成序列的工程账",
+        "source": "agent-ch09/concept/01-vision-tokens.md",
+        "code": "图像 → token 的工程账（一切成本从这里开始）:\n  图 ─▶ patch 切分 ─▶ token 序列\n  token 数 ≈ (H/p)·(W/p)\n  分辨率翻倍 → token×4 → 注意力显存×16",
+        "desc": "多模态理解的第一步不是「看懂图」，而是「把图切成 Token」。一切成本（延迟、显存、账单）、 一切能力边界（小字看不清、多图看不全）都从这一步的分辨率与切图决策开始。 本章 tech_load 是发票/报表抽取，先记住一句话：**token 数 ≈ (H/p)·(W/p)，分辨率翻倍， token 变 4 倍、注意力显存变 16 倍**。"
+      },
+      {
+        "chapter": "agent-ch09",
+        "title": "视觉编码与 token 成本：把图像「读」成序列的工程账",
+        "source": "agent-ch09/concept/02-ocr-layout.md",
+        "code": "截图 → 字段级 JSON 的流水线:\n  检测 ─▶ OCR ─▶ 版面还原 ─▶ 字段映射 ─▶ 低置信路由\n  每环吃掉一部分准确率\n  验收口径 = 字段级准确率（非字符级）",
+        "desc": "tech_load 的场景：把一张发票/报表截图变成机器可校验的 JSON。这条流水线 （检测 → OCR → 版面还原 → 字段映射 → 低置信度路由）里，每一环都会吃掉一部分准确率， 而最终验收口径是**字段级准确率**，不是字符级准确率。本章把每一环的接口、 指标与失败模式讲清。"
+      },
+      {
+        "chapter": "agent-ch09",
+        "title": "视觉编码与 token 成本：把图像「读」成序列的工程账",
+        "source": "agent-ch09/concept/04-multimodal-doc-practical-recipes.md",
+        "code": "A4 @ 300dpi ≈ 2480 × 3508 像素\npatch = 14px → 网格 = ceil(2480/14) × ceil(3508/14) = 178 × 251 ≈ 44,678 个视觉 token\n\n即使做 2×2 下采样（常见做法），仍有 ~11,000 token/页\n50 页 → 55 万 token，远超任何模型的上下文",
+        "desc": ""
+      },
+      {
+        "chapter": "agent-ch09",
+        "title": "视觉编码与 token 成本：把图像「读」成序列的工程账",
+        "source": "agent-ch09/concept/04-multimodal-doc-practical-recipes.md",
+        "code": "粗读档（页级摘要、判断有无表格）：缩放到长边 1024px  → ~600 token/页\n精读档（正文抽取）：长边 1600px，按行切 2-3 块     → ~1200 token/块\n定位档（表格/公式细节）：局部裁剪 512×512 @ 原始分辨率 → ~400 token/块",
+        "desc": ""
+      },
+      {
+        "chapter": "agent-ch10",
+        "title": "黄金集与指标设计：从「抽样」到「门禁」的工程学",
+        "source": "agent-ch10/concept/01-goldenset-metrics.md",
+        "code": "黄金集 → 指标门禁 全链路\n┌─────────────┐   分层抽样    ┌─────────────┐   口径版本化   ┌─────────────┐\n│ 全量流量日志 │ ───────────▶ │  黄金集(分层抽样 │ ───────────▶ │  v1/v2/v3   │\n└─────────────┘   难例挖掘    │ +难例挖掘)    │   标签冻结    └─────────────┘\n                            └─────────────┘\n        │                                  │\n  离线指标(精确率/召回/分数)          线上指标(真实解决率/补救率)\n        │                                  │\n        └──────────▶ 据口径映射 ◀──────────┘\n                    门禁: 离线≥阈值 且 线上漂移≤Δ",
+        "desc": "评估的第一性问题不是「用什么指标」，而是「评测数据从哪来、代表谁」。 demo 集里 90% 的通过率，和线上流量里 65% 的真实解决率，可以同时为真—— 差别全在**抽样**上。本章把黄金集构建、指标分层与离线到线上的映射落成可计算的东西。"
+      },
+      {
+        "chapter": "agent-ch10",
+        "title": "黄金集与指标设计：从「抽样」到「门禁」的工程学",
+        "source": "agent-ch10/concept/02-llm-as-judge.md",
+        "code": "LLM-as-judge 校准闭环\n  人工标注集(金标准)\n        │\n        ▼\n   ┌──────────┐   分数比对   ┌──────────────────┐\n   │  judge   │ ──────────▶ │ 偏差清单(位置/长度/ │\n   │ (待校准) │             │ 自我偏好/格式)    │\n   └──────────┘             └──────────────────┘\n        ▲                         │\n        │   两种口径(成对/打分)    │ 偏差超限→重标定\n        └─────────────────────────┘\n  验收: judge 与人工 一致性 ≥ κ 方可上岗",
+        "desc": "用 LLM 评 LLM 是规模化的唯一出路：人工标注一条样本几分钟，judge 只要几秒。 但 judge 是**带系统性偏差的测量仪器**——直接信它的分数，等于把偏差写进验收标准。 本章讲 judge 的偏差清单、两种口径、以及「用人工标注校准 judge」的完整流程。"
+      },
+      {
+        "chapter": "agent-ch10",
+        "title": "黄金集与指标设计：从「抽样」到「门禁」的工程学",
+        "source": "agent-ch10/concept/03-design-and-a-b.md",
+        "code": "设计侧五件事 → 上线可敢性\n 不确定性表达 ─┐\n 错误可恢复  ─┤\n 渐进式授权  ─┼─▶ 把失败设计进产品(给退路) 而非祈祷不发生\n 人机接管   ─┤\n A/B 实验纪律─┘\n   ┌────────────┐   显著性+护栏   ┌────────────┐\n   │ 新策略(实验)│ ─────────────▶ │ 全量/回滚  │\n   └────────────┘   超阈值即停     └────────────┘",
+        "desc": "评估决定「系统好不好」，设计决定「系统**敢不敢**上线」。 同一个 80% 准确的系统，把错误包装成「猜错但不吭声」是事故， 包装成「不确定并给用户退路」是产品。本章讲设计侧的五件事： 不确定性表达、错误可恢复、渐进式授权与人机接管、A/B 的实验纪律、审计与合规。"
+      },
+      {
+        "chapter": "agent-ch10",
+        "title": "黄金集与指标设计：从「抽样」到「门禁」的工程学",
+        "source": "agent-ch10/concept/04-eval-practical-recipes.md",
+        "code": "一、总体\n   总分 86%（↑2.1），样本 320 条，置信区间 ±3.4%\n\n二、按意图拆分\n   退款政策   72%（↓8）  ← 唯一回退项，需排查\n   物流查询   95%（↑1）\n   发票问题   88%（↑3）\n\n三、失败模式归类（人工抽检 50 条错例）\n   检索未命中   18 条（36%）  ← 最大类，优先修\n   引用错误     12 条（24%）\n   答非所问      9 条（18%）\n   格式问题      6 条（12%）\n   其他          5 条（10%）\n\n四、结论与动作\n   - 退款政策回退疑似与新 prompt 的「简洁优先」指令冲突 → 回滚该项\n   - 检索未命中集中在小众政策文档 → 补 30 篇文档进索引",
         "desc": ""
       },
       {
@@ -424,6 +2706,76 @@ export const DIAGRAM_SUBJECTS: DiagramSubject[] = [
         "source": "agent-ch11/concept/01-tools-and-mcp.md",
         "code": "单 Agent 闭环:\n   目标 → [Planner 规划] → 步骤1 → [Tool 调搜索/代码/API]\n                               │ 结果\n                               ▼\n                          [Memory 记忆] ← 短期(上下文)+长期(向量库)\n                               │\n                               ▼\n                          完成? → 是: 交付 / 否: 回到 Planner\n\n多智能体（分角色）:\n   UserRequest → Orchestrator(路由)\n        ├─ Planner  Agent  拆解任务\n        ├─ Worker   Agent  调工具执行\n        └─ Critic   Agent  评审/纠错\n   角色间经消息总线协作，各自持独立上下文\n\n  稳定性关键：工具调用结果要校验、步骤要可回滚、错误要进记忆。",
         "desc": "一个能真正干活的 Agent 由三件套组成：规划（把目标拆成步骤）、工具（调用搜索/代码/API）、记忆（短期上下文 + 长期存储）。多智能体则是把「规划/执行/评审」分给不同角色，靠消息协作，适合复杂任务。"
+      },
+      {
+        "chapter": "agent-ch11",
+        "title": "工具层：function calling 的 schema、幂等与权限，MCP 的工具发现",
+        "source": "agent-ch11/concept/02-memory-and-state.md",
+        "code": "记忆两层 + 检查点续跑\n 上下文内(每请求重放,贵且有限)\n        │ 压缩=决定丢什么\n        ▼\n 短期上下文窗口 ──滑动/摘要──▶ 摘要\n 上下文外(主动写入/检索/遗忘)\n        │\n        ▼\n 长期记忆(向量/KV/文件) ◀──检查点=决定重跑单位── 崩溃后接着跑\n 验收口径: 同一批任务 成功率 不变",
+        "desc": "Agent 的「记忆」分两层：**上下文里**的（随每次请求重放，贵且有限）和 **上下文外**的（要主动写入、检索、遗忘）。状态则是「崩溃后能不能接着跑」的问题。 本章 tech_load 要求检查点与断点续跑——先记住一句话： **压缩的本质是决定「丢什么」，检查点的本质是决定「重跑单位」， 两者共同的验收口径是「同一批任务上的成功率不变」。**"
+      },
+      {
+        "chapter": "agent-ch11",
+        "title": "工具层：function calling 的 schema、幂等与权限，MCP 的工具发现",
+        "source": "agent-ch11/concept/03-planning-and-multiagent.md",
+        "code": "规划循环 vs 多智能体成本\n 单 Agent + 好工具  ──优先──▶ 解决问题(不拆)\n        │ 角色上下文互相污染 / 需并行\n        ▼\n 多智能体: A ─handoff▶ B ─handoff▶ C   (每跳=全额计费调用)\n ReAct 循环: Thought→Action→Obs ──必须有终止条件兜底\n 判据: 单Agent能解就别上多智能体",
+        "desc": "规划回答「 Agent 怎么决定下一步」，多智能体回答「什么时候值得拆成多个」。 这两个问题的工程答案都比直觉保守：**ReAct 的循环必须有终止条件兜底， 多智能体的每一跳 handoff 都是全额计费的调用**。 先记住一句话：**单 Agent + 好工具能解决就不要上多智能体； 上多智能体的合法理由只有「角色上下文互相污染」和「并行刚需」。**"
+      },
+      {
+        "chapter": "agent-ch12",
+        "title": "计费模式与毛利结构：按席位、按调用、按效果怎么选",
+        "source": "agent-ch12/concept/02-unit-economics.md",
+        "code": "单次任务成本四元账 → 报价下限\n token ─┐\n 卡时  ─┼─▶ 单任务可变成本 ─▶ +固定成本/规模效应 ─▶ 报价下限\n 向量库─┤                              │\n 人工兜底─┘                       超支归因: 哪项最先爆\n 报价 < 下限 → POC不亏、规模化必亏",
+        "desc": "tech_load 的场景：报价会上客户问「这么贵，你们成本到底多少」。 答不上来，或者答上来但漏了一项，POC 阶段不亏、规模化之后必亏。 本章把单次任务成本拆成 **token / 卡时 / 向量库 / 人工兜底** 四项， 加上固定成本与规模效应，算出报价下限，并给出超支归因法。"
+      },
+      {
+        "chapter": "agent-ch13",
+        "title": "信息过滤：信息源分层、三遍读法与论文价值判断",
+        "source": "agent-ch13/concept/01-information-filtering.md",
+        "code": "两级过滤系统(追前沿不崩)\n 一级 信息源分层(先验): 顶会>实验室博客>工程复盘>社区热帖\n        │ 默认值得看\n        ▼\n 二级 三遍读法(逐级加深): 一遍扫结论→二遍看方法→三遍抠细节\n        每遍带时间盒+止损判据\n 出口 → 值得复现的候选",
+        "desc": "前沿追踪的第一性问题不是「读得快」，而是「读得完」：一届顶会录用上千篇， 实验室博客、工程复盘、社区热帖每天还在源源不断地来。**任何试图全读的策略都会在 第三周崩溃**，所以本章把「追前沿」改造成一个两级过滤系统： 第一级用信息源分层做先验过滤（什么来源默认值得看），第二级用三遍读法做逐级加深 （每遍带时间盒与止损判据）。本章 tech_load 是 3 篇论文的最小复现， 复现对象就是从这套过滤系统的出口选出来的。"
+      },
+      {
+        "chapter": "agent-ch13",
+        "title": "信息过滤：信息源分层、三遍读法与论文价值判断",
+        "source": "agent-ch13/concept/02-minimal-reproduction.md",
+        "code": "最小复现四步闭环\n 数据 ─▶ 脚本 ─▶ 指标 ─▶ 差异归因\n   │      │       │        │\n   └──── 可跑/可记录/可止损(任一步失败即停) ◀─┘\n 裁剪: 三因素(算力/语料/细节)缩到可跑\n 验收: 与原文指标偏差可解释",
+        "desc": "tech_load 是「3 篇论文的最小复现脚本（可跑、有指标、记录与原文差异）」。 复现的第一障碍不是「看不懂论文」，而是「论文的实验你跑不起」： 8 卡 × 数天、TB 级语料、未公开的清洗细节。本章把复现改造成 **数据 → 脚本 → 指标 → 差异归因** 四步闭环，每一步都可执行、可记录、可止损。"
+      },
+      {
+        "chapter": "agent-ch14",
+        "title": "能力矩阵：四维五级行为锚点与自评的证据要求",
+        "source": "agent-ch14/concept/01-competency-matrix.md",
+        "code": "四维五级 BARS(行为锚定)\n 维度: 工程/算法/系统/业务\n 等级: L1跑通 → L2改参 → L3独立交付含评估\n        → L4设计系统+兜底 → L5定义标准+带人\n 红线: 每级必须挂可出示产物, 无产物自评在首追问即塌",
+        "desc": "tech_load 的第一件交付物。职业规划类内容最大的风险是写成鸡汤——本章的全部内容都落在 一个可操作的判据上：**每一个自评等级都必须挂一个可出示产物**。跑通教程是 L1， 能改参数是 L2，独立交付含评估的产物是 L3，设计系统与兜底是 L4，定义标准与带人是 L5。 面试官的追问路径永远是「产物 → 指标 → 取舍 → 复盘」，没有产物的自评在第一个追问就会塌。"
+      },
+      {
+        "chapter": "agent-ch14",
+        "title": "能力矩阵：四维五级行为锚点与自评的证据要求",
+        "source": "agent-ch14/concept/02-path-selection.md",
+        "code": "四条路径 × 四维权重(先定终点)\n 算法 / 工程 / 系统 / 业务  → 四维权重各不相同\n 反推: JD关键词 → 能力项 → 权重\n 症状: 每维都3级但无4级 = 没先定路径",
+        "desc": "tech_load 的第二件交付物。能力矩阵回答「我在哪」，路径选择回答「我要去哪」。 同一张四维矩阵，在四条路径下的权重完全不同；不先定路径就补能力， 典型症状是「每个维度都 3 级，但没有一个维度到 4 级」。本章给出四条路径的 技能栈与考核差异表，以及一套「JD 关键词 → 四维能力项 → 权重」的反推方法。"
+      },
+      {
+        "chapter": "agent-ch15",
+        "title": "选题与范围冻结：用评分卡决定做什么，用冻结单防止范围蠕动",
+        "source": "agent-ch15/concept/01-selection-scope.md",
+        "code": "选题评分卡 + 冻结单\n 评分卡三维: 真实用户 / 明确痛点 / 3周可完成\n        │\n        ▼ 命中后写冻结单\n 冻结单价值: 在\"加个小功能\"时说\"不\"\n 范围=冻结出来的, 不是谈出来的",
+        "desc": "本章 tech_load 是端到端交付，第一死因不是技术难，是**选题烂 + 范围蠕动**： 第 2 周发现用户不存在、第 3 周被新需求拖着改、答辩前一天还在「加个小功能」。 本章把「选什么题、砍到什么范围、变更怎么管」变成可打分的决策。 先记住一句话：**范围不是谈出来的，是冻结出来的；冻结单的价值在说「不」的时候。**"
+      },
+      {
+        "chapter": "agent-ch15",
+        "title": "选题与范围冻结：用评分卡决定做什么，用冻结单防止范围蠕动",
+        "source": "agent-ch15/concept/02-baseline-iteration.md",
+        "code": "基线→迭代→回归(全链路有数字)\n 最笨方案跑通 ─▶ 基线(对照+回归安全带+demo保底)\n        │\n        ▼ 错误分析排序(按损失,非感觉)\n 迭代优化 ─▶ 回归: 修一个不能坏三个\n 无基线=拆盲盒  无回归=修一坏三",
+        "desc": "本章 tech_load 要求「基线 → 迭代 → 回归」全链路有数字。多数人把 80% 时间花在 「让方案变聪明」上，而正确姿势是相反的：**先用最笨的方案把链路跑通建立基线， 再用错误分析决定下一步修什么。** 迭代的依据是错误类型的损失排序，不是 「我感觉检索不行」的感觉。 先记住一句话：**没有基线的优化是拆盲盒，没有回归的迭代是修一个坏三个。**"
+      },
+      {
+        "chapter": "agent-ch15",
+        "title": "选题与范围冻结：用评分卡决定做什么，用冻结单防止范围蠕动",
+        "source": "agent-ch15/concept/03-delivery-trio.md",
+        "code": "交付另一半 = 别人也能跑/看得见/讲得清\n 容器化 ─ 一键复现\n 监控面板 ─ 故障可见(含健康检查+回滚)\n 成本面板 ─ 账单不惊吓\n 文档四件套+15min答辩 ─ 价值被传递",
+        "desc": "demo 能跑只是交付的一半。另一半是**「别人也能跑、跑砸了能发现、花了多少钱 看得见、讲得清为什么」**：容器化保证一键复现，监控面板保证故障可见， 成本看板保证账单不惊吓，文档四件套 + 15 分钟答辩保证价值被传递。 先记住一句话：**没有健康检查与回滚的 demo 是演示时祈祷，没有成本面板的 Agent 是月底账单惊吓。**"
       }
     ]
   },
@@ -434,10 +2786,144 @@ export const DIAGRAM_SUBJECTS: DiagramSubject[] = [
     "hue": "#6a7d5a",
     "entries": [
       {
+        "chapter": "clang-u01",
+        "title": "地址、指针与数组退化",
+        "source": "clang-u01/concept/02-multilevel-and-function-pointer.md",
+        "code": "多级指针：每多一级 *，多一次间接\n    int x = 1;  int *p = &x;  int **pp = &p;\n    pp ─▶ p ─▶ x          *pp == p,  **pp == 1\n    用途：在函数内修改调用方的指针（如 malloc 包装、char **out）\n\n数组指针 vs 指针数组（最易混的一对）：\n    int *a[10];    指针数组：10 个 int*\n    int (*b)[10];  数组指针：指向「10 个 int 的数组」\n\n函数指针：\n    int (*f)(int, int) = add;      f(1,2) 或 (*f)(1,2) 等价\n    typedef int (*BinOp)(int, int);  命名后可读性大幅提升\n    典型用途：回调、状态机跳转表、qsort 的比较器",
+        "desc": ""
+      },
+      {
+        "chapter": "clang-u01",
+        "title": "地址、指针与数组退化",
+        "source": "clang-u01/concept/04-pointer-practical-recipes.md",
+        "code": "04-pointer-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场一：a、&a、&a[0] 三者类型不同  (c)\n    |\n    v\n  [02] 现场二：数组退化的三条规则与两个例外  (c)\n    |\n    v\n  [03] 现场三：字符串常量在只读段，不能改  (c)\n    |\n    v\n  [04] 现场四：sizeof 与 strlen 完全不同  (c)\n    |\n    v\n  [05] 现场五：strcpy 是缓冲区溢出之王  (c)\n    |\n    v\n  [06] 现场六：memset 按字节填充，不是按元素  (c)\n    |\n    v\n  [07] 现场七：二级指针的分配要分两层  (c)\n    |\n    v\n  [08] 现场八：函数指针的声明括号不能省  (c)\n    |\n    v\n  [... 其余 4 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "clang-u02",
+        "title": "栈与堆：两种生命周期",
+        "source": "clang-u02/concept/01-stack-vs-heap.md",
+        "code": "+---------------------+  高地址\n|   命令行参数/环境变量  |\n+---------------------+\n|        栈 (stack)     |  ↓ 向下增长：局部变量、参数、返回地址\n+---------------------+\n|         ↓             |\n|        ...            |\n|         ↑             |\n+---------------------+\n|        堆 (heap)      |  ↑ 向上增长：malloc/free\n+---------------------+\n|   BSS 段（未初始化全局） |\n+---------------------+\n|   数据段（已初始化全局）  |\n+---------------------+\n|  只读数据段（字面量）    |\n+---------------------+\n|   代码段 (.text)      |  低地址\n+---------------------+",
+        "desc": ""
+      },
+      {
+        "chapter": "clang-u02",
+        "title": "栈与堆：两种生命周期",
+        "source": "clang-u02/concept/03-leaks-and-tooling.md",
+        "code": "栈/全局：p ─╳    （p 被覆盖或作用域结束）\n堆：      [==============]  ← 失去引用，永不释放",
+        "desc": ""
+      },
+      {
+        "chapter": "clang-u02",
+        "title": "栈与堆：两种生命周期",
+        "source": "clang-u02/concept/04-malloc-practical-recipes.md",
+        "code": "04-malloc-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场一：malloc 返回的是 void*，需要检查 NULL  (c)\n    |\n    v\n  [02] 现场二：malloc 不清零，calloc 清零  (c)\n    |\n    v\n  [03] 现场三：realloc 可能搬迁，直接赋值会丢指针  (c)\n    |\n    v\n  [04] 现场四：realloc 的 size 是「新大小」，不是「增量」  (c)\n    |\n    v\n  [05] 现场五：free 必须传 malloc 返回的原地址  (c)\n    |\n    v\n  [06] 现场六：free 之后指针值不变，是悬垂指针  (c)\n    |\n    v\n  [07] 现场七：free(NULL) 是安全的，但重复 free 不是  (c)\n    |\n    v\n  [08] 现场八：内存泄漏的三种形态  (c)\n    |\n    v\n  [... 其余 4 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "clang-u03",
+        "title": "01 · 内存对齐、填充与结构体布局",
+        "source": "clang-u03/concept/04-layout-practical-recipes.md",
+        "code": "04-layout-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场 1：结构体大小不等于成员大小之和  (c)\n    |\n    v\n  [02] 现场 2：成员顺序影响结构体大小  (c)\n    |\n    v\n  [03] 现场 3：对齐是硬件的要求，不是编译器的怪癖  (-)\n    |\n    v\n  [04] 现场 4：`#pragma pack` 能压紧，但有代价  (c)\n    |\n    v\n  [05] 现场 5：位域省空间，但布局是实现定义的  (c)\n    |\n    v\n  [06] 现场 6：位域不能取地址  (-)\n    |\n    v\n  [07] 现场 7：联合体共享内存，写一个读另一个是未定义  (c)\n    |\n    v\n  [08] 现场 8：联合体可以用来省内存  (-)\n    |\n    v\n  [... 其余 7 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "clang-u04",
+        "title": "01 · FILE 句柄、缓冲与文件描述符",
+        "source": "clang-u04/concept/04-fileio-practical-recipes.md",
+        "code": "04-fileio-practical-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 现场一：写完之后不 fclose，数据可能没落盘  (c)\n    |\n    v\n  [02] 现场二：换行符转换让二进制数据在 Windows 上损坏  (c)\n    |\n    v\n  [03] 现场三：fopen 的返回值为 NULL 必须检查  (c)\n    |\n    v\n  [04] 现场四：fread/fwrite 的返回值是「成功读写的元素个数」  (c)\n    |\n    v\n  [05] 现场五：feof 只在「读越界之后」才为真  (c)\n    |\n    v\n  [06] 现场六：文本模式下 ftell 的值不可移植  (c)\n    |\n    v\n  [07] 现场七：fseek 的返回值要检查  (c)\n    |\n    v\n  [08] 现场八：读写切换之间必须定位或刷新  (c)\n    |\n    v\n  [... 其余 4 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "clang-u05",
+        "title": "01 · 翻译阶段与 `#include` 的文本包含语义",
+        "source": "clang-u05/concept/01-translation-phases.md",
+        "code": "源文件(.c/.h)\n   │  phase 1  三字符序列/换行规范、源/执行字符集识别\n   ▼\n   │  phase 2  反斜杠换行 \\ 拼接物理行 → 逻辑行\n   ▼\n   │  phase 3  分解为 注释/空白/预处理 token（标识符、数字、标点、字符串等）\n   ▼\n   │  phase 4  ★ 预处理：执行 #include/#define/#if 等指令\n   │           - #include 把目标文件整体「文本替换」进来（可递归）\n   │           - 宏在此时被展开（# 与 ## 也在此阶段完成）\n   ▼\n   │  phase 5  字符常量/字符串字面量中的源字符集 → 执行字符集\n   ▼\n   │  phase 6  相邻字符串字面量拼接（\"a\" \"b\" → \"ab\"）\n   ▼\n   │  phase 7  语法与语义分析 → 生成翻译单元（一个 .o 的目标代码）\n   ▼\n翻译单元 ──(链接器链接多个 .o 与库)──▶ 可执行映像",
+        "desc": ""
+      },
+      {
+        "chapter": "clang-u05",
+        "title": "01 · 翻译阶段与 `#include` 的文本包含语义",
+        "source": "clang-u05/concept/06-macro-recipes.md",
+        "code": "06-macro-recipes.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 宏只是文本替换，不是函数  (c)\n    |\n    v\n  [02] 宏卫生：括号与 do-while(0)  (c)\n    |\n    v\n  [03] # 与 ## 运算符  (c)\n    |\n    v\n  [04] 条件编译的开关自检  (c)\n    |\n    v\n  [05] 头文件守卫的两种写法  (-)\n    |\n    v\n  [06] 头文件守卫忘了会怎样  (-)\n    |\n    v\n  [07] 宏名拼错的静默 else  (-)\n    |\n    v\n  [08] 多行宏与反斜杠续行  (-)\n    |\n    v\n  [... 其余 2 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
         "chapter": "clang-u06",
         "title": "编译四阶段：从 `.c` 到可执行文件",
         "source": "clang-u06/concept/01-compilation-phases.md",
         "code": "main.c ──[预处理 -E]──> main.i ──[编译 -S]──> main.s ──[汇编 -c]──> main.o ─┐\n                                                                            ├─[链接]─> app\nutil.c ──[预处理 -E]──> util.i ──[编译 -S]──> util.s ──[汇编 -c]──> util.o ─┘",
+        "desc": ""
+      },
+      {
+        "chapter": "clang-u06",
+        "title": "编译四阶段：从 `.c` 到可执行文件",
+        "source": "clang-u06/concept/04-debugging-make-and-modern-builds.md",
+        "code": "04-debugging-make-and-modern-builds.md · 结构速览（节点=小节，括号=该节代码块语言）\n\n  [01] 用 `make -n` / `--dry-run` 预览命令  (make)\n    |\n    v\n  [02] 用 `make -d` / `--debug` 追踪「为什么某目标被认为最新」  (bash)\n    |\n    v\n  [03] 用 `make -p` 打印完整规则库（含隐式规则）  (bash)\n    |\n    v\n  [04] 用 `make -t` / `--touch` 假装构建  (bash)\n    |\n    v\n  [05] 用 `make -k` / `--keep-going` 一个失败也继续  (bash)\n    |\n    v\n  [06] 用 `make -w` / `--print-directory` 看目录切换  (-)\n    |\n    v\n  [07] 用 `$(info)` / `$(warning)` / `$(error)` 插桩变量  (make)\n    |\n    v\n  [08] `.DEFAULT` 规则兜底未知目标  (make)\n    |\n    v\n  [... 其余 4 节见正文 ...]\n    |\n    v\n  [END] 三视角解析收口",
+        "desc": ""
+      },
+      {
+        "chapter": "clang-u07",
+        "title": "翻译单元、声明与定义、链接属性",
+        "source": "clang-u07/concept/01-translation-unit-and-linkage.md",
+        "code": "main.c ──预处理──> main.i ──编译──> main.o ─┐\n                                            ├─链接器──> app.exe\nutil.c ──预处理──> util.i ──编译──> util.o ─┘",
+        "desc": ""
+      }
+    ]
+  },
+  {
+    "key": "dm",
+    "name": "离散数学",
+    "note": "命题逻辑 / 集合关系 / 图论 —— 可计算对象的数学底座",
+    "hue": "#4a6b8c",
+    "entries": [
+      {
+        "chapter": "dm-ch01",
+        "title": "真值表与联结词：蕴含为什么会\"假前提为真\"",
+        "source": "dm-ch01/concept/05-propositional-practical-recipes.md",
+        "code": "除非 q，否则 p     →  ¬q → p   ≡  p ∨ q\n只有 p，才 q       →  q → p\np 仅当 q           →  p → q\np 当且仅当 q       →  p ↔ q\np 是 q 的充分条件  →  p → q\np 是 q 的必要条件  →  q → p",
+        "desc": ""
+      },
+      {
+        "chapter": "dm-ch01",
+        "title": "真值表与联结词：蕴含为什么会\"假前提为真\"",
+        "source": "dm-ch01/concept/05-propositional-practical-recipes.md",
+        "code": "¬(∀x (P(x) → Q(x)))\n≡ ∃x ¬(P(x) → Q(x))          （否定穿过 ∀）\n≡ ∃x (P(x) ∧ ¬Q(x))          （¬(p→q) ≡ p∧¬q）",
+        "desc": ""
+      },
+      {
+        "chapter": "dm-ch01",
+        "title": "真值表与联结词：蕴含为什么会\"假前提为真\"",
+        "source": "dm-ch01/concept/05-propositional-practical-recipes.md",
+        "code": "p q | 结果\n0 0 |  1     → 小项 m0 = ¬p∧¬q\n0 1 |  0     → 极大项 M1 = p∨¬q\n1 0 |  1     → 小项 m2 = p∧¬q\n1 1 |  0     → 极大项 M3 = ¬p∨¬q\n\n主析取：m0 ∨ m2 = (¬p∧¬q) ∨ (p∧¬q)\n主合取：M1 ∧ M3 = (p∨¬q) ∧ (¬p∨¬q)",
+        "desc": ""
+      },
+      {
+        "chapter": "dm-ch01",
+        "title": "真值表与联结词：蕴含为什么会\"假前提为真\"",
+        "source": "dm-ch01/concept/05-propositional-practical-recipes.md",
+        "code": "判断：p→q, q ⊢ p 是否有效？（肯定后件）\n找反例：p=0, q=1\n  前提1：0→1 = 1 ✓\n  前提2：q=1 ✓\n  结论：p=0 ✗\n所以无效。",
+        "desc": ""
+      },
+      {
+        "chapter": "dm-ch01",
+        "title": "真值表与联结词：蕴含为什么会\"假前提为真\"",
+        "source": "dm-ch01/concept/05-propositional-practical-recipes.md",
+        "code": "证明：p→q, q→r ⊢ p→r\n1. 把结论取反：¬(p→r) = p ∧ ¬r\n2. 写成子句集：\n   C1: ¬p ∨ q        （来自 p→q）\n   C2: ¬q ∨ r        （来自 q→r）\n   C3: p             （来自 ¬(p→r)）\n   C4: ¬r            （来自 ¬(p→r)）\n3. 归结：\n   C1 + C3 → q\n   C2 + q  → r\n   r + C4  → □\n4. 推出空子句，证明成立",
+        "desc": ""
+      },
+      {
+        "chapter": "dm-ch01",
+        "title": "真值表与联结词：蕴含为什么会\"假前提为真\"",
+        "source": "dm-ch01/concept/05-propositional-practical-recipes.md",
+        "code": "∀x (P(x) → ∃y Q(x, y))\n= ∀x (¬P(x) ∨ ∃y Q(x, y))        消蕴涵\n= ∀x ∃y (¬P(x) ∨ Q(x, y))        前束化\n→ 子句：¬P(x) ∨ Q(x, f(x))        Skolem 函数 f(x) 替代 y",
+        "desc": ""
+      },
+      {
+        "chapter": "dm-ch01",
+        "title": "真值表与联结词：蕴含为什么会\"假前提为真\"",
+        "source": "dm-ch01/concept/05-propositional-practical-recipes.md",
+        "code": "2-SAT 子句 (a ∨ b) 的两条蕴含边：\n¬a → b\n¬b → a\n建图 → Tarjan 求 SCC → 判 x 与 ¬x 是否同 SCC",
         "desc": ""
       }
     ]

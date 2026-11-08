@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""生成 153 幕旁白的数据侧（P3 · C4）。
+"""生成剧情旁白的数据侧（P3 · C4）。
 
 【唯一源】content/_story/acts.json —— 手写。其余全部由本脚本产出：
   - frontend/src/data/story.ts      剧情页直接读
   - docs/Playability-P3-Story-Script.md  人读的台词本（和 json 同源，不会各说各话）
 
 【为什么要有校验】
-  141 条台词靠人工写，必然混进几条「议论文」：太长、没锚点、语气跑调。
+  台词靠人工写，必然混进几条「议论文」：太长、没锚点、语气跑调。
   与其上线后被人肉发现，不如让生成阶段直接拦下来 —— 不合格就不生成。
 
 校验五条：
-  1. 覆盖：13 学科合计 153 章，与 graph.ts 的 chapterSubject 完全一致（无重、无漏、无孤儿）；
+  1. 覆盖：14 学科合计 167 章，与 graph.ts 的 chapterSubject 完全一致（无重、无漏、无孤儿）；
   2. 归属：每章的学科必须和所属幕的学科一致（防止把 cpp 章节塞进 java 幕）；
   3. 长度：line 有效长度 15~45（代码/英文标识符按 1 字计，否则 p = realloc(p, n) 一条吃掉半句预算）；
   4. 锚点：anchor 非空（对应 goals.md 的哪条认知，改内容时要能回查）；
@@ -61,6 +61,8 @@ SUBJECT_CHAPTER_PREFIX = {
     "bigdata": ("bd-",),
     "data": ("data-",),
     "tooling": ("tool-",),
+    # 离散数学：content/discrete-math 的 3 章（2026-11-08 补为正式学科）
+    "discrete-math": ("dm-",),
 }
 
 
@@ -239,7 +241,7 @@ def emit_md(doc: dict, chapters: dict[str, dict]) -> str:
     total = sum(len(a["chapters"]) for s in doc["subjects"].values() for a in s["acts"])
     acts = sum(len(s["acts"]) for s in doc["subjects"].values())
     out = [
-        "# P3 · 141 幕台词本（自动生成）",
+        f"# P3 · {acts} 幕台词本（自动生成）",
         "",
         "> 由 `scripts/gen_story_data.py` 从 `content/_story/acts.json` 生成，**请勿手改本文**；",
         "> 改台词请改 json 再重跑脚本。",
