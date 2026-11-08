@@ -24,6 +24,12 @@ unsafe-eval，不会引入 JS eval；其余指令逐字沿用 tauri.conf.json。
 beforeBuildCommand 置空：staging 已由本脚本产出，不必再跑 npm run build
 去重写 dist/。
 
+APK 注意（既有缺陷，别再踩）：Tauri v2 在 android build 时不会把
+frontendDist 指向的 staging 拷进 app/src/main/assets/dist，导致打出的 APK
+内只有 Rust 二进制、没有前端页面（首发版 APK 也有此缺陷，解包后 0 个
+html/js）。build-app-apk.cmd 里因此在 gradlew 之前补一道 xcopy，把
+deploy/package/app 同步进该目录。改这条逻辑务必同步 .cmd 与下方 self_check。
+
 运行期资源（缺一项就会让「提交判题」静默变坏，别删）：
   * frontend/public/pyodide/ 由 scripts/fetch_pyodide.py 落地，vite 原样拷进
     staging 根；protocol.ts 的 DEFAULT_INDEX_URL 指向同源 /pyodide/。
@@ -258,6 +264,9 @@ def write_build_scripts() -> None:
         "if not exist \"target\\aarch64-linux-android\\release\\libnex.so\" exit /b 1",
         "if not exist \"gen\\android\\app\\src\\main\\jniLibs\\arm64-v8a\" mkdir \"gen\\android\\app\\src\\main\\jniLibs\\arm64-v8a\"",
         "copy /y \"target\\aarch64-linux-android\\release\\libnex.so\" \"gen\\android\\app\\src\\main\\jniLibs\\arm64-v8a\\libnex.so\" >nul",
+        "REM Tauri v2 不把 frontendDist 拷进 APK 资源目录（既有缺陷），手动同步",
+        "if not exist \"gen\\android\\app\\src\\main\\assets\\dist\" mkdir \"gen\\android\\app\\src\\main\\assets\\dist\"",
+        "xcopy /y /e /i /q \"..\\deploy\\package\\app\" \"gen\\android\\app\\src\\main\\assets\\dist\" >nul",
         "cd /d \"gen\\android\"",
         "call gradlew.bat assembleRelease --no-daemon -x rustBuildArm64Release -x rustBuildArmRelease -x rustBuildX86Release -x rustBuildX86_64Release",
         "if errorlevel 1 exit /b 1",
@@ -283,6 +292,9 @@ def self_check() -> None:
     assert "tauri.app.mobile.conf.json" in apk_txt, "APK 脚本没用真应用配置"
     assert "apksigner.jar" in apk_txt and "java.exe" in apk_txt, \
         "签名未直连 apksigner.jar"
+    # APK 必须把前端塞进 assets/dist，否则打出的包只有 Rust 二进制没有页面。
+    assert "assets\\dist" in apk_txt and "..\\deploy\\package\\app" in apk_txt, \
+        "APK 脚本未把 Web 前端拷进 assets/dist（Tauri v2 不自动拷贝，曾致已发布 APK 无页面）"
     assert EXE_OUT in exe_txt and "Nex-Desktop-1.0.exe" not in exe_txt, \
         "EXE 输出名会覆盖设计稿包"
     assert APK_OUT in apk_txt and "Nex-Mobile-1.0-arm64.apk" not in apk_txt, \

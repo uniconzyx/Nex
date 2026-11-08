@@ -16,6 +16,9 @@ REM Windows 未开开发者模式时末尾「创建符号链接」报错属预期，.so 已生成
 if not exist "target\aarch64-linux-android\release\libnex.so" exit /b 1
 if not exist "gen\android\app\src\main\jniLibs\arm64-v8a" mkdir "gen\android\app\src\main\jniLibs\arm64-v8a"
 copy /y "target\aarch64-linux-android\release\libnex.so" "gen\android\app\src\main\jniLibs\arm64-v8a\libnex.so" >nul
+REM Tauri v2 不把 frontendDist 拷进 APK 资源目录（既有缺陷），手动同步
+if not exist "gen\android\app\src\main\assets\dist" mkdir "gen\android\app\src\main\assets\dist"
+xcopy /y /e /i /q "..\deploy\package\app" "gen\android\app\src\main\assets\dist" >nul
 cd /d "gen\android"
 call gradlew.bat assembleRelease --no-daemon -x rustBuildArm64Release -x rustBuildArmRelease -x rustBuildX86Release -x rustBuildX86_64Release
 if errorlevel 1 exit /b 1
