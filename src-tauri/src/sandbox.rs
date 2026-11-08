@@ -86,6 +86,11 @@ impl JudgeManager {
         // 传错名字的后果极难排查：go-judge 打印 usage 后退出，supervisor 每 500ms
         // 重启刷屏，wait_ready 超时后又静默降级 mock 模式。
         cmd.arg("-http-addr").arg(addr);
+        // Windows：go-judge 是控制台子系统程序，直接 spawn 会弹出一个黑色 cmd 窗口，
+        // 盖在 app 主界面上（截图里那串 GIN-debug / Starting http server 就是它）。
+        // CREATE_NO_WINDOW = 0x08000000，隐藏控制台但保留 stdout/stderr 管道。
+        #[cfg(windows)]
+        cmd.creation_flags(0x0800_0000);
         // v1.13.3 已无 `-enable-network` / `-enable-unsafe` 旗标：
         //  * 网络策略改为「默认隔离，要共享宿主网络才显式加 -net-share」——
         //    不加即是 enable_network=false 的语义；
@@ -141,12 +146,15 @@ impl JudgeManager {
                 }
                 // 退避后重启（v1.13.3：只传 -http-addr，见 spawn_go_judge 注释）
                 tokio::time::sleep(Duration::from_millis(500)).await;
-                let nc = match TokioCommand::new(path.clone())
-                    .arg("-http-addr")
-                    .arg(&addr)
-                    .kill_on_drop(true)
-                    .spawn()
-                {
+                // 与 spawn_go_judge 同口径：Windows 下隐藏 go-judge 控制台窗口，
+                // 否则每次守护重启都会再弹一个黑框盖住 app。
+                #[cfg(windows)]
+                const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+                let mut restart_cmd = TokioCommand::new(path.clone());
+                restart_cmd.arg("-http-addr").arg(&addr).kill_on_drop(true);
+                #[cfg(windows)]
+                restart_cmd.creation_flags(CREATE_NO_WINDOW);
+                let nc = match restart_cmd.spawn() {
                     Ok(c) => c,
                     Err(e) => {
                         eprintln!("[judge] 重启失败: {e}");

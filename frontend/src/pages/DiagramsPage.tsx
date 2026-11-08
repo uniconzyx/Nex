@@ -14,14 +14,23 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import { DIAGRAM_SUBJECTS } from '../data/diagrams';
 import type { DiagramSubject } from '../data/diagrams';
+import { ZoomLightbox } from '../components/ZoomLightbox';
 import './DiagramsPage.css';
 
 type CSSVars = React.CSSProperties & Record<`--${string}`, string>;
+
+/** 灯箱里正在放大的图 */
+interface ZoomTarget {
+  title: string;
+  chapter: string;
+  code: string;
+}
 
 export function DiagramsPage() {
   const [query, setQuery] = useState('');
   const [active, setActive] = useState('');
   const [anim, setAnim] = useState(false);
+  const [zoom, setZoom] = useState<ZoomTarget | null>(null);
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
 
   const q = query.trim().toLowerCase();
@@ -187,7 +196,16 @@ export function DiagramsPage() {
                       <h3 className="dgv-card-title">{e.title}</h3>
                     </div>
                     {e.desc && <p className="dgv-card-desc">{e.desc}</p>}
-                    <pre className="dgv-code">{e.code}</pre>
+                    <button
+                      type="button"
+                      className="dgv-code-btn"
+                      onClick={() => setZoom({ title: e.title, chapter: e.chapter, code: e.code })}
+                      aria-label={`放大查看 ${e.title} 结构图`}
+                      title="点击放大 / 缩小查看"
+                    >
+                      <pre className="dgv-code">{e.code}</pre>
+                      <span className="dgv-zoom-hint" aria-hidden="true">⤢ 点击放大查看</span>
+                    </button>
                     <div className="dgv-card-foot">{e.source}</div>
                   </article>
                 ))}
@@ -196,6 +214,15 @@ export function DiagramsPage() {
           ))}
         </div>
       </div>
+
+      {/* 结构图放大查看器：点卡片里的图弹出，支持缩放/拖拽/Esc */}
+      <ZoomLightbox
+        open={zoom !== null}
+        onClose={() => setZoom(null)}
+        title={zoom ? `${zoom.chapter} · ${zoom.title}` : ''}
+      >
+        {zoom && <pre>{zoom.code}</pre>}
+      </ZoomLightbox>
     </div>
   );
 }

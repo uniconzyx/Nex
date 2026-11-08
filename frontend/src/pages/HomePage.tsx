@@ -14,8 +14,10 @@
  *   2. 「今日试炼」不再是硬编码推荐项目，而是今天的 3 道真题（一半来自错题），
  *      点一条直接进对应的判题台/题库。
  */
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import type { CSSProperties } from 'react';
+
+import { ZoomLightbox } from '../components/ZoomLightbox';
 
 import { BUNDLE } from '../data/bundle';
 import { DIFF_META, TYPE_META, chapterTitle, exerciseById, focusChapter } from '../lib/exerciseBank';
@@ -67,6 +69,7 @@ const TIER_NAME: Record<string, string> = {
 export function HomePage({ onNavigate }: { onNavigate: (p: KmPage) => void }) {
   const p = useProgress();
   const [subject, setSubject] = useSubject();
+  const [zoomCat, setZoomCat] = useState<string | null>(null);
 
   // 章节数改读 masterySummary：它把 clang 的 7 个独立单元也算进来（141 章），
   // 旧写法只数 BUNDLE.chapters（现在 160 章），少算了 C 语言模块。
@@ -171,7 +174,15 @@ export function HomePage({ onNavigate }: { onNavigate: (p: KmPage) => void }) {
 
           {/* 凯喵：表情 + 心情牌 + 台词气泡（桌面端在塔右侧，窄屏落到场景下方） */}
           <div className="km-scene-mood-card" style={{ '--mood-aura': mood.aura } as CSSProperties}>
-            <img className="km-scene-cat" src={moodImage(moodKey)} alt={`凯喵此刻的表情：${mood.label}`} />
+            <button
+              type="button"
+              className="km-scene-cat-btn"
+              onClick={() => setZoomCat(moodImage(moodKey))}
+              title="放大 / 缩小查看凯喵立绘"
+              aria-label={`放大查看凯喵立绘（${mood.label}）`}
+            >
+              <img className="km-scene-cat" src={moodImage(moodKey)} alt={`凯喵此刻的表情：${mood.label}`} />
+            </button>
             <div className="km-scene-mood-text">
               <span className="km-scene-mood">
                 <i aria-hidden="true">{mood.emoji}</i>
@@ -182,6 +193,14 @@ export function HomePage({ onNavigate }: { onNavigate: (p: KmPage) => void }) {
           </div>
         </div>
       </section>
+
+      <ZoomLightbox
+        open={zoomCat !== null}
+        onClose={() => setZoomCat(null)}
+        title={`凯喵 · ${mood.label}`}
+        src={zoomCat ?? undefined}
+        alt={`凯喵此刻的表情：${mood.label}`}
+      />
 
       <section className="km-card km-home-progress">
         <div className="km-prog-row">

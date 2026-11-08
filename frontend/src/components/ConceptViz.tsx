@@ -18,6 +18,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { loadVizChapters, peekVizChapters } from '../data/viz';
 import type { VizChapter, VizConcept, VizMode, VizSec } from '../data/viz';
+import { ZoomLightbox } from './ZoomLightbox';
 import './ConceptViz.css';
 
 /* ── 命中算法：把章节级的题/坑/面经挂到某个小节 ────────────────────
@@ -353,6 +354,8 @@ export function ConceptViz({ subject, chapterId }: { subject: string; chapterId:
   const [mode, setMode] = useState<VizMode>('exam');
   const [item, setItem] = useState(-1);
   const [revealed, setRevealed] = useState(false);
+  /** 灯箱里放大的机制图：打开瞬间快照当前 SVG（本地数据渲染，无外部输入） */
+  const [zoomSvg, setZoomSvg] = useState<string | null>(null);
   const hostRef = useRef<HTMLDivElement>(null);
 
   // 章节换了 → 回到第一个概念第一节
@@ -482,7 +485,7 @@ export function ConceptViz({ subject, chapterId }: { subject: string; chapterId:
         ))}
       </div>
 
-      {/* 图 */}
+      {/* 图：点击放大查看（保留原有节点点击步进，放大是独立入口） */}
       <div className={`km-viz-canvas${layout.height > 720 ? ' tall' : ''}`} ref={hostRef}>
         <svg
           viewBox={`0 0 ${Math.max(280, width)} ${layout.height}`}
@@ -559,6 +562,26 @@ export function ConceptViz({ subject, chapterId }: { subject: string; chapterId:
           })}
         </svg>
       </div>
+
+      <button
+        type="button"
+        className="km-viz-zoom"
+        onClick={() => {
+          const svg = hostRef.current?.querySelector('svg');
+          if (svg) setZoomSvg(svg.outerHTML);
+        }}
+        title="放大 / 缩小查看整张机制图"
+      >
+        ⤢ 放大查看机制图
+      </button>
+
+      <ZoomLightbox
+        open={zoomSvg !== null}
+        onClose={() => setZoomSvg(null)}
+        title={`${tidyTitle(concept.title)} · ${KIND_NAME[layout.kind]}`}
+      >
+        {zoomSvg && <div className="km-viz-zoom-svg" dangerouslySetInnerHTML={{ __html: zoomSvg }} />}
+      </ZoomLightbox>
 
       {layout.height > 720 && <span className="km-viz-scrollhint">图比较高，可上下滚动；也可以直接用下面的「下一节」逐节走</span>}
 

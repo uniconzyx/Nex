@@ -723,3 +723,40 @@ html[data-km-theme='dark'] .km-viz {
     max-height: 430px;
   }
 }
+
+/* ── 机制图放大查看入口 ─────────────────────────────────────────── */
+.km-viz-zoom {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 6px 12px;
+  border: 1px solid var(--km-line, #e3e8ef);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--km-glow, #4f9dff) 8%, transparent);
+  color: var(--km-accent-ink, #1c4a8a);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: zoom-in;
+  transition: background 0.15s ease, transform 0.12s ease;
+}
+
+.km-viz-zoom:hover { background: color-mix(in srgb, var(--km-glow, #4f9dff) 20%, transparent); }
+.km-viz-zoom:active { transform: scale(0.96); }
+.km-viz-zoom:focus-visible { outline: 2px solid var(--km-glow, #4f9dff); outline-offset: 2px; }
+
+/* 灯箱里的 SVG 快照：给一个浅色画布，保证 vz-* 配色在深色遮罩上仍可读 */
+.km-viz-zoom-svg {
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--km-surf1, #fff);
+  max-width: 88vw;
+  max-height: 76vh;
+  overflow: auto;
+}
+
+.km-viz-zoom-svg svg { display: block; width: 640px; max-width: 84vw; height: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  .km-viz-zoom { transition: none; }
+}

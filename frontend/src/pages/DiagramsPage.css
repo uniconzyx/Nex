@@ -327,3 +327,53 @@
   .dgv-card:hover { transform: none; }
   .dgv-spine-item.on .dgv-dot { transform: none; }
 }
+
+/* ── 结构图可点击放大（ZoomLightbox 触发区） ─────────────────────── */
+.dgv-code-btn {
+  position: relative;
+  display: block;
+  width: 100%;
+  margin: 11px 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: zoom-in;
+  border-radius: 10px;
+}
+
+.dgv-code-btn .dgv-code {
+  margin: 0;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.dgv-code-btn:hover .dgv-code,
+.dgv-code-btn:focus-visible .dgv-code {
+  border-color: var(--dgv-accent, #4f9dff);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--dgv-accent, #4f9dff) 28%, transparent);
+}
+
+.dgv-code-btn:focus-visible { outline: none; }
+
+.dgv-zoom-hint {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #1c4a8a;
+  background: color-mix(in srgb, var(--dgv-accent, #4f9dff) 20%, #fff);
+  opacity: 0;
+  transform: translateY(3px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  pointer-events: none;
+}
+
+.dgv-code-btn:hover .dgv-zoom-hint,
+.dgv-code-btn:focus-visible .dgv-zoom-hint { opacity: 1; transform: translateY(0); }
+
+@media (prefers-reduced-motion: reduce) {
+  .dgv-code-btn .dgv-code, .dgv-zoom-hint { transition: none; }
+}

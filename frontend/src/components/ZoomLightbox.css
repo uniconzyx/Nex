@@ -1,0 +1,123 @@
+/* ZoomLightbox —— 全屏可缩放查看器。只用 --km-* 变量，沿用冰蓝体系。 */
+.zl-root {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  display: flex;
+  flex-direction: column;
+  background: rgba(14, 26, 42, 0.88);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  animation: zl-in 0.18s ease both;
+}
+
+@keyframes zl-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.zl-bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: color-mix(in srgb, var(--km-surf1, #fff) 92%, transparent);
+  border-bottom: 1px solid var(--km-line, #e3e8ef);
+  color: var(--km-ink, #333);
+}
+
+.zl-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.zl-actions { display: flex; align-items: center; gap: 6px; }
+
+.zl-actions button {
+  min-width: 34px;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--km-line, #e3e8ef);
+  border-radius: 8px;
+  background: var(--km-surf1, #fff);
+  color: var(--km-ink, #333);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.12s ease;
+}
+
+.zl-actions button:hover { background: color-mix(in srgb, var(--km-glow, #4f9dff) 16%, transparent); }
+.zl-actions button:active { transform: scale(0.94); }
+.zl-actions button:focus-visible { outline: 2px solid var(--km-glow, #4f9dff); outline-offset: 2px; }
+.zl-actions .zl-close { color: #b23b3b; }
+
+.zl-pct {
+  min-width: 52px;
+  text-align: center;
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.75;
+}
+
+.zl-stage {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: 24px;
+  touch-action: none;
+}
+
+.zl-content {
+  transform-origin: center center;
+  transition: transform 0.12s ease-out;
+  max-width: 92vw;
+  max-height: 100%;
+  will-change: transform;
+}
+
+.zl-content img {
+  display: block;
+  max-width: 88vw;
+  max-height: 76vh;
+  object-fit: contain;
+  border-radius: 10px;
+  user-select: none;
+}
+
+/* 文本结构图放进灯箱时给足对比度与留白 */
+.zl-content pre {
+  margin: 0;
+  padding: 20px 24px;
+  max-width: 88vw;
+  max-height: 76vh;
+  overflow: auto;
+  border-radius: 12px;
+  background: var(--km-surf1, #fff);
+  color: var(--km-ink, #333);
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre;
+}
+
+.zl-content svg { max-width: 88vw; max-height: 76vh; }
+
+.zl-tip {
+  flex: none;
+  padding: 8px 16px 12px;
+  text-align: center;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zl-root, .zl-content { animation: none; transition: none; }
+}

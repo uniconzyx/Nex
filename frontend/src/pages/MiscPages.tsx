@@ -27,6 +27,7 @@ import { chapterTitle } from '../lib/exerciseBank';
 import { RARITY_META, type Monster } from '../lib/gameTypes';
 import type { KmPage } from '../lib/nav';
 import { MonsterSprite } from '../components/MonsterSprite';
+import { ZoomLightbox } from '../components/ZoomLightbox';
 import { LongPressPreview } from '../components/LongPressPreview';
 import { useParticles } from '../components/Particles';
 import { usePageFade } from '../lib/hooks/usePageFade';
@@ -854,13 +855,28 @@ function MonsterDetail({ monster, onNavigate }: { monster: Monster; onNavigate: 
   const tags = useMemo(() => tagsOf(monster.questionId), [monster.questionId]);
   const v = visualOf(monster);
   const meta = RARITY_META[v.rarity];
+  const [zoom, setZoom] = useState(false);
   const fmt = (ts?: number) =>
     ts ? new Date(ts).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—';
 
   return (
     <div className="km-mon-detail">
+      <ZoomLightbox open={zoom} onClose={() => setZoom(false)} title={`${monster.title} · ${meta.label}`}>
+        <div className="km-mon-zoom-svg">
+          <MonsterSprite monster={monster} size={320} />
+          <p>{monster.title} · {meta.label}</p>
+        </div>
+      </ZoomLightbox>
       <div className="km-mon-detail-head">
-        <MonsterSprite monster={monster} size={76} />
+        <button
+          type="button"
+          className="km-mon-spr-btn"
+          onClick={() => setZoom(true)}
+          title="放大 / 缩小查看怪物立绘"
+          aria-label={`放大查看 ${monster.title} 立绘`}
+        >
+          <MonsterSprite monster={monster} size={76} />
+        </button>
         <div style={{ minWidth: 0, flex: 1 }}>
           <h4>{monster.title}</h4>
           <div className="km-mon-meta">

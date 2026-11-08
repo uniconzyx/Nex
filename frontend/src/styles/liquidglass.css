@@ -2405,3 +2405,19 @@ html.lg-b .km-card {
 }
 
 
+
+/* 凯喵立绘：可点击放大（不改变原有尺寸/浮动动画，只做无样式包裹） */
+.km-scene-cat-btn {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+  border-radius: 12px;
+  line-height: 0;
+  transition: transform 0.15s ease;
+}
+.km-scene-cat-btn:hover { transform: scale(1.04); }
+.km-scene-cat-btn:active { transform: scale(0.98); }
+.km-scene-cat-btn:focus-visible { outline: 2px solid var(--km-glow, #4f9dff); outline-offset: 4px; }
+@media (prefers-reduced-motion: reduce) { .km-scene-cat-btn { transition: none; } }

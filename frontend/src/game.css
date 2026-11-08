@@ -1515,3 +1515,22 @@ html[data-km-theme='dark'] .km-enc {
     transform: none;
   }
 }
+
+/* 怪物详情立绘：可点击放大（不改变原尺寸，只做无样式包裹） */
+.km-mon-spr-btn {
+  display: block;
+  flex: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+  border-radius: 12px;
+  line-height: 0;
+  transition: transform 0.15s ease;
+}
+.km-mon-spr-btn:hover { transform: scale(1.06); }
+.km-mon-spr-btn:active { transform: scale(0.97); }
+.km-mon-spr-btn:focus-visible { outline: 2px solid var(--km-glow, #4f9dff); outline-offset: 3px; }
+.km-mon-zoom-svg { padding: 20px 28px; border-radius: 14px; background: var(--km-surf1, #fff); text-align: center; }
+.km-mon-zoom-svg p { margin: 10px 0 0; font-size: 13px; color: var(--km-ink, #333); }
+@media (prefers-reduced-motion: reduce) { .km-mon-spr-btn { transition: none; } }
