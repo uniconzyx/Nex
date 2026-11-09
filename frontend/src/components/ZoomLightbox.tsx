@@ -9,8 +9,14 @@
  *   - 内容用 transform: scale + translate，不改布局，避免重排抖动
  *   - 尊重 prefers-reduced-motion：过渡关掉，功能保留
  *   - 关闭时恢复 body 滚动，键盘可聚焦
+ *
+ * 必须 Portal 到 body：.km-app / .km-card 上的 backdrop-filter、transform
+ * 会为 position:fixed 创建包含块（CSS 规范），若不脱离该祖先，遮罩只会盖住
+ * 主内容区、右栏漏出、工具栏被压在卡片顶部 —— 即「被覆盖 / 上下层错位」。
+ * 脱离后拿不到 .km-app 上的 --km-* 变量，故同步 data-km-theme 供 CSS 自给配色。
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import './ZoomLightbox.css';
 
 const MIN = 0.5;
@@ -87,9 +93,13 @@ export function ZoomLightbox({ open, onClose, title, src, alt, children }: ZoomL
 
   if (!open) return null;
 
-  return (
+  // 从 .km-app 同步主题：Portal 出去后不再继承其 CSS 变量，深色主题需 CSS 自给
+  const theme = document.querySelector('.km-app')?.getAttribute('data-km-theme') ?? '';
+
+  return createPortal(
     <div
       className="zl-root"
+      data-km-theme={theme || undefined}
       role="dialog"
       aria-modal="true"
       aria-label={title || '放大查看'}
@@ -125,7 +135,8 @@ export function ZoomLightbox({ open, onClose, title, src, alt, children }: ZoomL
         </div>
       </div>
       <div className="zl-tip">滚轮或 ＋/− 缩放 · 放大后可拖拽 · 0 复位 · Esc 关闭</div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

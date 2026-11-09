@@ -121,3 +121,15 @@
 @media (prefers-reduced-motion: reduce) {
   .zl-root, .zl-content { animation: none; transition: none; }
 }
+
+/* Portal 到 body 后不再继承 .km-app 的 --km-* 变量，深色主题自给一套 */
+.zl-root[data-km-theme='dark'] .zl-bar {
+  background: #1b2735;
+  border-bottom-color: #33445a;
+  color: #e8f1fa;
+}
+.zl-root[data-km-theme='dark'] .zl-actions button {
+  background: #22303f;
+  border-color: #33445a;
+  color: #e8f1fa;
+}

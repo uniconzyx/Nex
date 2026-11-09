@@ -568,7 +568,27 @@ export function ConceptViz({ subject, chapterId }: { subject: string; chapterId:
         className="km-viz-zoom"
         onClick={() => {
           const svg = hostRef.current?.querySelector('svg');
-          if (svg) setZoomSvg(svg.outerHTML);
+          if (!svg) return;
+          // 灯箱 Portal 到 body 后脱离 .km-app / .km-viz 作用域，
+          // .vz-* 类用到的 --vz-* / --km-* 变量全部失效 → fill 回退成黑色。
+          // 因此快照时把每个元素的计算样式固化成内联，颜色/字号随当前主题而定。
+          const clone = svg.cloneNode(true) as SVGSVGElement;
+          const srcEls: Element[] = [svg, ...Array.from(svg.querySelectorAll('*'))];
+          const dstEls: Element[] = [clone, ...Array.from(clone.querySelectorAll('*'))];
+          const PROPS = [
+            'fill', 'stroke', 'stroke-width', 'color', 'opacity',
+            'font-size', 'font-family', 'font-weight', 'text-anchor',
+            'letter-spacing', 'dominant-baseline',
+          ];
+          srcEls.forEach((el, i) => {
+            const cs = getComputedStyle(el);
+            const decl = PROPS.map((p) => {
+              const v = cs.getPropertyValue(p);
+              return v ? `${p}:${v}` : '';
+            }).filter(Boolean).join(';');
+            dstEls[i]?.setAttribute('style', decl);
+          });
+          setZoomSvg(clone.outerHTML);
         }}
         title="放大 / 缩小查看整张机制图"
       >
