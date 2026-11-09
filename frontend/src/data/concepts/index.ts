@@ -3,6 +3,8 @@
    不占首屏主 chunk。章节 → 学科模块的映射由生成器从 content/ 推出。 */
 import type { ConceptDoc } from './types';
 export type { ConceptDoc } from './types';
+export { CONCEPT_META } from './meta';
+export type { ConceptMeta } from './meta';
 
 type Loader = () => Promise<Record<string, ConceptDoc[]>>;
 

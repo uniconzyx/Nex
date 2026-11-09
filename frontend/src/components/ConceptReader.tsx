@@ -7,9 +7,14 @@
  * 不引入新的 Markdown 依赖，也不新增色彩变量。
  *
  * 为什么默认折叠：一章正文平均 4~5 篇 / 40KB，平铺会把三关和图解推到屏幕外。
+ *
+ * 2026-11-09 改「深度可见」：正文其实一直在包里，但折叠标题只写章节 id，
+ * 学习页卡片也完全没有提示，看上去就是「这章没内容、深度不够」。现在读
+ * meta.ts 的轻量索引（167 条 / 7.3KB，静态进主包），把「N 篇 · 约 X 万字」
+ * 直接写在标题上；正文仍然点开才 import，离线（Tauri 内嵌）照常可读。
  */
 import { useEffect, useMemo, useState } from 'react';
-import { hasConceptDocs, loadConceptDocs, type ConceptDoc } from '../data/concepts';
+import { hasConceptDocs, loadConceptDocs, CONCEPT_META, type ConceptDoc } from '../data/concepts';
 import { renderMarkdown } from '../lib/markdown';
 
 const FRAME = {
@@ -22,8 +27,14 @@ const FRAME = {
 
 const HINT = { margin: '8px 0 0', color: 'var(--km-ink-soft)', fontSize: 13 } as const;
 
+/** 字符数 → 「约 X.X 万字」；chars 含 Markdown 标记，只作内容量指标。 */
+function wan(chars: number): string {
+  return (chars / 10000).toFixed(1);
+}
+
 export function ConceptReader({ chapterId }: { chapterId: string }) {
   const available = hasConceptDocs(chapterId);
+  const meta = CONCEPT_META[chapterId];
   const [open, setOpen] = useState(false);
   const [docs, setDocs] = useState<ConceptDoc[] | null>(null);
   const [error, setError] = useState('');
@@ -54,6 +65,9 @@ export function ConceptReader({ chapterId }: { chapterId: string }) {
 
   if (!available) return null;
 
+  const count = docs?.length ?? meta?.n ?? 0;
+  const size = `${count} 篇${meta ? ` · 约 ${wan(meta.chars)} 万字` : ''}`;
+
   return (
     <details
       className="km-concept-full"
@@ -61,7 +75,10 @@ export function ConceptReader({ chapterId }: { chapterId: string }) {
       style={FRAME}
     >
       <summary style={{ cursor: 'pointer', fontWeight: 600, fontSize: 14 }}>
-        {`概念全文 · ${docs ? `${docs.length} 篇` : `${chapterId}（点击加载）`}`}
+        {`概念全文 · ${size}`}
+        <span style={{ marginLeft: 10, fontSize: 12, fontWeight: 400, color: 'var(--km-ink-soft)' }}>
+          {open ? '（已展开 · 正文内置在 App 中，离线可读）' : '展开阅读本章正文'}
+        </span>
       </summary>
       {error && <p style={HINT}>{`加载失败：${error}`}</p>}
       {open && !docs && !error && <p style={HINT}>正在加载本章概念正文…</p>}

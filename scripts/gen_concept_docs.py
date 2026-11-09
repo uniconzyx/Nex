@@ -8,6 +8,12 @@
 723 篇概念正文（约 6.7MB）从没进过包 —— 学习页能看「本章讲了哪些概念」，
 却读不到概念本身。2026-11-08 把它接进来。
 
+2026-11-09 补「深度可见性」：正文已在包里，但章节卡片没有任何提示，
+折叠标题还只写章节 id，用户看不出这一章到底有多少内容，观感就是
+「知识试炼区没有内容、深度不够」。于是额外产一份**轻量索引** meta.ts
+（167 条：篇数 + 字符数，约 12KB），静态进主包；章节卡片和折叠标题
+据此显示「5 篇 · 4.2 万字」，正文仍然点开才 import。
+
 为什么按学科切而不是按章切
 --------------------------------------------------------------------
 `deploy/package/prepare_app.py` 用 vite 直接输出到 staging，并设了
@@ -22,6 +28,7 @@
   frontend/src/data/concepts/types.ts        ConceptDoc 接口
   frontend/src/data/concepts/<subject>.ts    该学科全部章节的正文
   frontend/src/data/concepts/index.ts        16 个 loader + 167 章映射 + CACHE
+  frontend/src/data/concepts/meta.ts         167 章的篇数/字符数索引
 
 用法：python scripts/gen_concept_docs.py
 幂等：内容不变则写出的字节完全一致（git status 判空）。零第三方依赖。
@@ -49,6 +56,9 @@ def write(path: Path, text: str) -> None:
 
 def read_md(path: Path) -> str:
     t = path.read_text(encoding="utf-8").replace("\r\n", "\n").replace("\r", "\n")
+    # 防御：讲 C 字符串结束符时容易把字面 `\0` 误写成裸 NUL 字节。
+    # NUL 会让 PostgreSQL 的 UTF8 Text 列直接拒绝，也会在 HTML 里变成不可见控制字符。
+    t = t.replace("\x00", "\\0")
     return t[1:] if t.startswith("\ufeff") else t
 
 
@@ -88,6 +98,29 @@ def emit_types() -> str:
     )
 
 
+def emit_meta(packs: dict[str, dict[str, list[dict[str, str]]]]) -> str:
+    """轻量索引：不加载正文也能显示「这一章有多厚」。
+
+    chars 用 Markdown 原文长度（含标记与代码块），只当内容量指标，
+    不冒充「纯字数」；展示时统一说「约 N 万字正文」。
+    """
+    lines = [
+        "/* 由 scripts/gen_concept_docs.py 生成，请勿手改。 */",
+        "/** 章节概念正文的轻量索引：篇数 + 原文字符数（含 Markdown 标记）。",
+        "    给章节卡片/折叠标题显示「这一章有多厚」，无需加载 6.57MB 正文。 */",
+        "export interface ConceptMeta { n: number; chars: number; }",
+        "",
+        "export const CONCEPT_META: Record<string, ConceptMeta> = {",
+    ]
+    for subject in sorted(packs):
+        for chapter in sorted(packs[subject]):
+            docs = packs[subject][chapter]
+            chars = sum(len(d["markdown"]) for d in docs)
+            lines.append(f'  {json.dumps(chapter)}: {{ "n": {len(docs)}, "chars": {chars} }},')
+    lines += ["};", ""]
+    return "\n".join(lines) + "\n"
+
+
 def emit_index(packs: dict[str, dict[str, list[dict[str, str]]]]) -> str:
     lines = [
         "/* 由 scripts/gen_concept_docs.py 生成，请勿手改。",
@@ -95,6 +128,8 @@ def emit_index(packs: dict[str, dict[str, list[dict[str, str]]]]) -> str:
         "   不占首屏主 chunk。章节 → 学科模块的映射由生成器从 content/ 推出。 */",
         "import type { ConceptDoc } from './types';",
         "export type { ConceptDoc } from './types';",
+        "export { CONCEPT_META } from './meta';",
+        "export type { ConceptMeta } from './meta';",
         "",
         "type Loader = () => Promise<Record<string, ConceptDoc[]>>;",
         "",
@@ -155,18 +190,21 @@ def main() -> None:
         n_bytes += len(body.encode("utf-8"))
 
     write(OUT / "index.ts", emit_index(packs))
+    write(OUT / "meta.ts", emit_meta(packs))
 
-    # 学科目录被删掉时清掉残留模块（types/index 是固定文件，不动）
-    keep = {f"{s}.ts" for s in packs} | {"types.ts", "index.ts"}
+    # 学科目录被删掉时清掉残留模块（types/index/meta 是固定文件，不动）
+    keep = {f"{s}.ts" for s in packs} | {"types.ts", "index.ts", "meta.ts"}
     for p in sorted(OUT.glob("*.ts")):
         if p.name not in keep:
             p.unlink()
             print(f"  - 清理残留模块 {p.name}")
 
     n_chapters = sum(len(v) for v in packs.values())
+    meta_bytes = (OUT / "meta.ts").stat().st_size
     print(
         f"wrote frontend/src/data/concepts/: {len(packs)} 学科 / "
-        f"{n_chapters} 章 / {n_docs} 篇 / {n_bytes / 1024 / 1024:.2f} MB"
+        f"{n_chapters} 章 / {n_docs} 篇 / {n_bytes / 1024 / 1024:.2f} MB 正文"
+        f" + meta.ts {meta_bytes / 1024:.1f} KB"
     )
 
 

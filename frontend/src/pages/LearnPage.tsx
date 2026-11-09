@@ -37,6 +37,7 @@ import { chapterStages, STAGE_META, type StageView } from '../lib/stages';
 import { buildChapterSummary, contentOf, summaryToMarkdown, type ChapterSummary, type SummaryDim } from '../lib/chapterSummary';
 import type { ChapterContent } from '../data/chapterContent';
 import { ConceptReader } from '../components/ConceptReader';
+import { CONCEPT_META } from '../data/concepts';
 import type { KmPage } from '../lib/nav';
 
 const TYPE_ORDER: BankType[] = ['choice', 'coding', 'output', 'fix_error', 'explain', 'design'];
@@ -230,6 +231,22 @@ export function LearnPage({ onNavigate }: { onNavigate?: (p: KmPage) => void }) 
                           {st.total} 题
                         </span>
                       )}
+                      {/* 概念正文的深度要看得见：正文在包里，但卡片原先只显示题数，
+                          看上去就像「这章没内容」。索引来自 concepts/meta.ts（7KB），
+                          不为此加载 6.57MB 正文。 */}
+                      {(() => {
+                        const cm = CONCEPT_META[c.id];
+                        if (!cm) return null;
+                        return (
+                          <span
+                            className="km-tag km-tag-lv"
+                            style={{ marginLeft: 8 }}
+                            title="本章概念全文已内置在 App 中，展开章节即可阅读（离线可用）"
+                          >
+                            {`${cm.n} 篇概念 · 约 ${(cm.chars / 10000).toFixed(1)} 万字`}
+                          </span>
+                        );
+                      })()}
                     </b>
                     <span>{c.summary}</span>
                   </button>

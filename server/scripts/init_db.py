@@ -54,14 +54,17 @@ async def main() -> None:
         existing_ch = set(
             (await db.execute(select(Chapter.code))).scalars().all()
         )
+        # 章节 code 必须与 content/<subject>/<chapter>/ 对齐（内容体系是唯一事实源）。
+        # 旧版从 00 起，会让 /chapters 返回的 code 和前端 BUNDLE 对不上，也会让
+        # seed 把 cpp-ch20 误判成新章、留下孤儿 cpp-ch00。
         for i, title in enumerate(CPP_CHAPTERS):
-            code = f"cpp-ch{i:02d}"
+            code = f"cpp-ch{i + 1:02d}"
             if code in existing_ch:
                 continue
             db.add(Chapter(course_id=cpp.id, idx=i, code=code, title=title,
                            goals=[], is_free=i < 3))  # 前 3 章游客可体验
         for i, title in enumerate(CLANG_UNITS):
-            code = f"clang-ch{i:02d}"
+            code = f"clang-ch{i + 1:02d}"
             if code in existing_ch:
                 continue
             db.add(Chapter(course_id=clang.id, idx=i, code=code, title=f"C 语言 · {title}",
@@ -75,7 +78,16 @@ async def main() -> None:
                 continue
             db.add(Achievement(code=code, title=title, description=desc, icon=icon))
         await db.commit()
-    print(f"OK: courses=2, chapters={len(CPP_CHAPTERS) + len(CLANG_UNITS)}, achievements={len(ACHIEVEMENTS)}")
+
+    # 内容侧一并播种：以前只建 2 门课 / 27 章，knowledge_points 恒 0 行，
+    # /chapters 的掌握度、/mindmap、/search 全是空壳。seed 幂等、纯增量。
+    from scripts.seed_knowledge_points import seed
+
+    await seed()
+    print(
+        f"OK: courses=2, chapters={len(CPP_CHAPTERS) + len(CLANG_UNITS)}, "
+        f"achievements={len(ACHIEVEMENTS)}；概念体系已播种"
+    )
 
 
 if __name__ == "__main__":
