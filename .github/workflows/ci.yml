@@ -42,6 +42,12 @@ jobs:
           DATABASE_URL: "postgresql://cppmind:cppmind@localhost:5432/cppmind"
         run: python scripts/verify_nex_parity_pg.py
 
+      - name: 知识点播种端到端（真 PG：723 KP / 723 课文 / 掌握度非 0）
+        working-directory: server
+        env:
+          DATABASE_URL: "postgresql://cppmind:cppmind@localhost:5432/cppmind"
+        run: python scripts/verify_kp_seed.py
+
   # ===================== 前端构建 + dev server 冒烟 =====================
   frontend-smoke:
     name: Frontend 构建 + dev server 冒烟
@@ -151,6 +157,11 @@ jobs:
       # 且自身会临时改动文件再还原。
       # CI 是 Linux：verify_output_hygiene 的 bash 用例在 os.name=='posix' 且未设
       # NEX_SOFTLANG_ALLOW_BASH 时同样落 env_blocked，与本机 Windows 判定一致。
+      # 2026-11-09 真事故：讲「C 字符串以 \0 结尾」时把转义写成裸 NUL 字节，
+      # 前端只是不可见字符，后端灌进 PG 的 UTF8 Text 列却整批失败（0x00）。
+      - name: content/ 无裸 NUL 字节（防知识点播种失败）
+        run: python scripts/verify_no_nul.py
+
       - name: 判据自测（输出 8/8 + 生成物同步 2/2 + meta 自洽 11/11）
         run: |
           python scripts/verify_output_hygiene.py

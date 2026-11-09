@@ -71,12 +71,28 @@ async def main() -> None:
     async with engine.begin() as c:
         await c.run_sync(Base.metadata.create_all)
 
-    # 造一个用户（get_current_user 需要账号是 active）
+    # 造一个用户（get_current_user 需要账号是 active）。
+    # CI 里本脚本排在 verify_nex_parity_pg 之后：parity 显式插 User.id=1..4，
+    # 但 PostgreSQL 的序列不会因此前进，自动分配 id 会撞 users_pkey。
+    # 所以按 email 复用 / 显式取 max(id)+1，单独跑（空库）时同样成立。
+    from sqlalchemy import func as sa_func
+
     async with SessionLocal() as db:
-        user = User(email="kpseed@verify.dev", password_hash=hash_password("x"))
-        db.add(user)
-        await db.commit()
-        uid = user.id
+        existing = (
+            await db.execute(select(User).where(User.email == "kpseed@verify.dev"))
+        ).scalar_one_or_none()
+        if existing is not None:
+            uid = existing.id
+        else:
+            max_id = (await db.execute(select(sa_func.max(User.id)))).scalar_one() or 0
+            user = User(
+                id=max_id + 1,
+                email="kpseed@verify.dev",
+                password_hash=hash_password("x"),
+            )
+            db.add(user)
+            await db.commit()
+            uid = user.id
     token = create_access_token(uid)
     headers = {"Authorization": f"Bearer {token}"}
 
@@ -113,8 +129,17 @@ async def main() -> None:
         check("KP 摘要非空", all(k.summary for k in kps), f"空={sum(1 for k in kps if not k.summary)}")
         check("课文非空", all(l.content_md for l in lessons), f"空={sum(1 for l in lessons if not l.content_md)}")
 
-        # 给一个 KP 记掌握度 3（精通），验证 mastery_avg 不再是恒 0
-        db.add(Progress(user_id=uid, kp_id=kp1.id, mastery=3))
+        # 给一个 KP 记掌握度 3（精通），验证 mastery_avg 不再是恒 0。
+        # 幂等：重复跑同一库时只更新，不撞 uq_progress_user_kp。
+        prog = (
+            await db.execute(
+                select(Progress).where(Progress.user_id == uid, Progress.kp_id == kp1.id)
+            )
+        ).scalar_one_or_none()
+        if prog is None:
+            db.add(Progress(user_id=uid, kp_id=kp1.id, mastery=3))
+        else:
+            prog.mastery = 3
         await db.commit()
         cpp_id, ch1_id, kp1_id, kp1_title = cpp.id, ch1.id, kp1.id, kp1.title
 
