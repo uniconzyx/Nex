@@ -145,11 +145,11 @@ def build_staging() -> None:
         r = subprocess.run(cmd, cwd=str(FRONTEND), capture_output=True,
                            text=True, errors="replace")
         tail = (r.stdout or "")[-1200:]
-    if tail.strip():
-        print(tail)
-    if r.returncode != 0:
-        print((r.stderr or "")[-2000:], file=sys.stderr)
-        raise SystemExit(f"vite build 失败 rc={r.returncode}")
+        if tail.strip():
+            print(tail)
+        if r.returncode != 0:
+            print((r.stderr or "")[-2000:], file=sys.stderr)
+            raise SystemExit(f"vite build 失败 rc={r.returncode}")
     finally:
         # 恢复 frontend/.env，避免把 NEX_API_BASE 写死进仓库或污染后续构建。
         if prev is None:
