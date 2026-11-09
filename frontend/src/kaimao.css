@@ -4240,3 +4240,51 @@ html[data-km-theme='dark'] .km-app .km-tl.locked .km-tag-gray {
     grid-template-columns: 200px 1fr;
   }
 }
+
+/* ── 章节就地展开（知识试炼区）──────────────────────────────────────────
+ * 展开区原先挂在所有分组之后（实测 y≈4734，点开后视口里毫无变化）。
+ * 现紧跟所点章节节点渲染在 .km-map 内，抵消地图左缩进保持与卡片同宽。 */
+.km-map > .km-chapter-open {
+  margin: 12px 0 18px -38px;
+  width: calc(100% + 38px);
+}
+
+/* 本章内容速览：与 408 下钻区同一套视觉，不新增色彩语言 */
+.km-chapter-brief {
+  margin: 12px 0 4px;
+}
+
+.km-chapter-brief-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.km-chapter-brief-item {
+  border: 1px solid var(--km-line2);
+  border-radius: 12px;
+  background: var(--km-sunk);
+  padding: 10px 12px;
+}
+
+.km-chapter-brief-item > summary {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.km-chapter-brief-item ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
+}
+
+.km-chapter-brief-item li {
+  margin-bottom: 5px;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--km-ink-soft);
+}

@@ -19,7 +19,7 @@
  *   真在别处学过的人，答完 5 道题也就 3 分钟；想重来则用「重置本章」。
  * ============================================================================
  */
-import { useMemo, useState } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 
 import { BUNDLE, type BundleChapter } from '../data/bundle';
 import { CLANG_CHAPTERS } from '../data/clangUnits';
@@ -108,6 +108,257 @@ export function LearnPage({ onNavigate }: { onNavigate?: (p: KmPage) => void }) 
     onNavigate?.('lab');
   };
 
+  const chapterOpenNode = openChapter
+    ? (() => {
+    const c = openChapter;
+    const st = chapterBankStats(c.id);
+    const stages = chapterStages(c.id, p);
+    const mastery = chapterMastery(c.id, p);
+    const deps = chapterDeps(c.id);
+    return (
+      <section className="km-card km-chapter-open" style={{ borderColor: 'var(--km-glow)' }}>
+        <div className="km-cont-top">
+          <h3 style={{ margin: 0 }}>{c.title}</h3>
+          <span className={`km-mastery-chip${mastery >= 100 ? ' done' : ''}`}>掌握 {mastery}%</span>
+        </div>
+        <div className="km-mastery-bar" aria-label={`掌握度 ${mastery}%`}>
+          {stages.map((s) => (
+            <i
+              key={s.key}
+              className={`km-mastery-seg${s.done ? ' on' : ''}`}
+              style={{ flexGrow: s.weight }}
+              title={`${s.label} ${s.weight} 分`}
+            />
+          ))}
+        </div>
+
+        <p style={{ margin: '12px 0 0', color: 'var(--km-ink-soft)', fontSize: 13, lineHeight: 1.8 }}>
+          {c.summary}
+        </p>
+
+        {/* 本章内容速览：切片来自 chapterContent.ts，与 7 维表同源，
+            但不要求三关全通，避免点开章节后第一屏只有一句锁定提示。 */}
+        {(() => {
+          const ct = contentOf(c.id);
+          if (!ct) return null;
+          const groups = [
+            { label: '本章目标', items: ct.goals },
+            { label: '核心概念', items: ct.concepts },
+            { label: '易错点', items: ct.pitfalls },
+            { label: '面试 / 真题', items: ct.interviews },
+            { label: '实战项目', items: ct.projects },
+          ].filter((g) => g.items.length > 0);
+          if (!groups.length) return null;
+          const total = groups.reduce((n, g) => n + g.items.length, 0);
+          return (
+            <div className="km-chapter-brief">
+              <p className="km-hint" style={{ marginTop: 0 }}>
+                本章内容速览 · {total} 条正文切片（下方概念全文可展开阅读）
+              </p>
+              <div className="km-chapter-brief-grid">
+                {groups.map((g) => (
+                  <details
+                    className="km-chapter-brief-item"
+                    key={g.label}
+                    open={g.label === '本章目标' || g.label === '核心概念'}
+                  >
+                    <summary>
+                      {g.label}
+                      <span className="km-tag km-tag-gray">{g.items.length}</span>
+                    </summary>
+                    <ul>
+                      {g.items.slice(0, 6).map((it, i) => (
+                        <li key={i}>{it}</li>
+                      ))}
+                    </ul>
+                  </details>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* ── 概念全文（按学科懒加载，默认折叠） ────────────
+            切片只给「本章有哪些概念」，这里给正文。用户点开才
+            import 对应学科 chunk，首屏与包体都不为此付代价。 */}
+        <ConceptReader chapterId={c.id} />
+
+        {/*
+          本章旁白（P3 · C4）：一句话把这一章的认知点说完。
+          pitfall / scene 类未完成也能读——它讲的是"当初怎么想错的"，提前读是钩子；
+          archive 类必须掌握度 ≥ 60%，因为它已经给出半个答案。
+        */}
+        {(() => {
+          const line = STORY_BY_CHAPTER[c.id];
+          if (!line) return null;
+          const open = mastery >= 60 || isTeaser(line.tone);
+          return (
+            <div className={`km-chapter-line${open ? '' : ' locked'}`}>
+              <span className="km-chapter-line-tag">{open ? '本章旁白' : '旁白未解锁'}</span>
+              <p>{open ? line.line : `掌握度达到 60% 后解锁。锚点：${line.anchor}`}</p>
+            </div>
+          );
+        })()}
+        {deps.length > 0 && (
+          <p className="km-hint">
+            前置：
+            {deps.map((d, i) => {
+              const m = masteryOfChapter(d, p);
+              return (
+                <span key={d}>
+                  {i > 0 ? ' / ' : ''}
+                  <span className={m >= 60 ? 'km-dep-ok' : 'km-dep-bad'}>
+                    {chapterName(d)}（{m}%）
+                  </span>
+                </span>
+              );
+            })}
+          </p>
+        )}
+
+        {/* ── 机制图解（按章节就地展开） ────────────────────────
+            图不是另画的一套结构：节点就是 concept 里的 `##` 小节，
+            所以正文写「见 §2.3」时，图上第 2 个文件第 3 节就是它。
+            场景灯（考试/事故/面谈）只改配色不改拓扑——同一个机制
+            被三种场景击中，才看得出哪一节最贵。真题只读，不写回。 */}
+        <ConceptViz subject={subject} chapterId={c.id} />
+
+        {/* ── 交互实验（紧接图解，在判定之前） ──────────────────
+            图讲清机制，实验让你亲手把它拖错一次：拖错 → 凯喵说错在哪 →
+            再拖对。先看结构、再动手，最后才是三关判定，顺序不能倒。
+            数据按学科懒加载，素材只读，判定全在本机。 */}
+        <ChapterLab subject={subject} chapterId={c.id} />
+
+        {/* ── 三关 ─────────────────────────────────────────────── */}
+        <div className="km-stages">
+          {stages.map((s) => (
+            <div key={s.key} className={`km-stage${s.done ? ' done' : ''}`}>
+              <div className="km-stage-head">
+                <i className={`km-pip${s.done ? ' on' : ''}`}>{s.icon}</i>
+                <b>{s.label}</b>
+                <span className="km-stage-weight">{s.weight} 分</span>
+                {s.done && <span className="km-tag km-tag-ok">已通过</span>}
+              </div>
+              <div className="km-stage-bar">
+                <i style={{ width: `${s.need ? (s.got / s.need) * 100 : 0}%` }} />
+              </div>
+              <p className="km-stage-desc">{STAGE_META[s.key].desc}</p>
+              <p className="km-stage-hint">{s.hint}</p>
+              {s.blockers.length > 0 && (
+                <ul className="km-stage-blockers">
+                  {s.blockers.map((b) => (
+                    <li key={b}>{b}</li>
+                  ))}
+                </ul>
+              )}
+              <button
+                type="button"
+                className={`km-btn km-btn-sm ${s.done ? 'km-btn-ghost' : 'km-btn-primary'}`}
+                onClick={() => goStage(c.id, s)}
+              >
+                {s.done ? '再过一遍' : s.key === 'boss' ? '打首领' : '去攻这一关'}
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {c.github.length > 0 && (
+          <>
+            <div className="km-hint" style={{ marginTop: 12, fontWeight: 600 }}>
+              延伸仓库（GitHub 实测）
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 6 }}>
+              {c.github.map((repo, i) => (
+                <a
+                  key={repo}
+                  href={`https://github.com/${repo}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="km-repo"
+                >
+                  <b>{repo}</b>
+                  <span>★ {(c.github_stars[i] ?? 0).toLocaleString('zh-CN')}</span>
+                </a>
+              ))}
+            </div>
+          </>
+        )}
+        {c.books.length > 0 && <p className="km-hint">推荐：{c.books.join('；')}</p>}
+
+        {/* ── 本章题目 ─────────────────────────────────────────── */}
+        <div className="learn-bank">
+          <div className="learn-bank-head">
+            <b>本章题目</b>
+            <span>
+              {st.total} 题
+              {st.judgeable > 0 ? ` · 可直接判 ${st.judgeable} 题` : ''}
+            </span>
+          </div>
+          {st.total === 0 ? (
+            <p className="km-hint" style={{ margin: 0 }}>
+              这一章暂未配套练习题。
+            </p>
+          ) : (
+            <>
+              <div className="learn-bank-chips">
+                {TYPE_ORDER.filter((t) => (st.byType[t] ?? 0) > 0).map((t) => (
+                  <span key={t} className={`bank-type t-${t}`}>
+                    {TYPE_META[t].short} {st.byType[t]}
+                  </span>
+                ))}
+              </div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  className="km-btn km-btn-sm km-btn-primary"
+                  onClick={() => {
+                    focusChapter(c.id);
+                    onNavigate?.('lab');
+                  }}
+                >
+                  做本章这 {st.total} 题
+                </button>
+                <button
+                  type="button"
+                  className="km-btn km-btn-sm km-btn-ghost"
+                  onClick={() => {
+                    if (masteryOfChapter(c.id, p) === 0) return;
+                    resetChapter(c.id);
+                  }}
+                  disabled={mastery === 0}
+                  title={mastery === 0 ? '这一章还没有任何记录' : '清空本章三关、作答记录与怪物，重新打一遍'}
+                >
+                  重置本章
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* ── 本章总结（仅三关全通后可见，P3） ───────────── */}
+        {(() => {
+          const sum = buildChapterSummary(c.id, p);
+          if (!sum) {
+            return (
+              <p className="km-summary-locked">
+                通关三关（概念 / 演练 / BOSS 全绿）后，这里会解锁「本章总结 · 7 维表」与一键导出 Markdown。
+              </p>
+            );
+          }
+          return (
+            <ChapterSummaryPanel
+              summary={sum}
+              content={contentOf(c.id)}
+              copied={copiedId === c.id}
+              onCopy={() => handleCopySummary(sum)}
+            />
+          );
+        })()}
+      </section>
+    );
+    })()
+    : null;
+
   return (
     <div className="km-view">
       <section className="km-card">
@@ -186,8 +437,8 @@ export function LearnPage({ onNavigate }: { onNavigate?: (p: KmPage) => void }) 
               const blocked = !unlocked;
               const blockingDeps = deps.filter((d) => masteryOfChapter(d, p) < UNLOCK_MASTERY);
               return (
+                <Fragment key={c.id}>
                 <div
-                  key={c.id}
                   className={`km-node${mastery >= 100 ? ' done' : ''}${mastery > 0 ? ' partial' : ''}${open ? ' current' : ''}${blocked ? ' locked' : ''}`}
                 >
                   <button
@@ -263,219 +514,14 @@ export function LearnPage({ onNavigate }: { onNavigate?: (p: KmPage) => void }) 
                   </span>
                   <span className="km-tag km-tag-gray">{open ? '收起' : '展开'}</span>
                 </div>
+                {open && chapterOpenNode}
+                </Fragment>
               );
             })}
           </div>
         </section>
       ))}
 
-      {openChapter &&
-        (() => {
-          const c = openChapter;
-          const st = chapterBankStats(c.id);
-          const stages = chapterStages(c.id, p);
-          const mastery = chapterMastery(c.id, p);
-          const deps = chapterDeps(c.id);
-          return (
-            <section className="km-card km-chapter-open" style={{ borderColor: 'var(--km-glow)' }}>
-              <div className="km-cont-top">
-                <h3 style={{ margin: 0 }}>{c.title}</h3>
-                <span className={`km-mastery-chip${mastery >= 100 ? ' done' : ''}`}>掌握 {mastery}%</span>
-              </div>
-              <div className="km-mastery-bar" aria-label={`掌握度 ${mastery}%`}>
-                {stages.map((s) => (
-                  <i
-                    key={s.key}
-                    className={`km-mastery-seg${s.done ? ' on' : ''}`}
-                    style={{ flexGrow: s.weight }}
-                    title={`${s.label} ${s.weight} 分`}
-                  />
-                ))}
-              </div>
-
-              <p style={{ margin: '12px 0 0', color: 'var(--km-ink-soft)', fontSize: 13, lineHeight: 1.8 }}>
-                {c.summary}
-              </p>
-
-              {/* ── 概念全文（按学科懒加载，默认折叠） ────────────
-                  切片只给「本章有哪些概念」，这里给正文。用户点开才
-                  import 对应学科 chunk，首屏与包体都不为此付代价。 */}
-              <ConceptReader chapterId={c.id} />
-
-              {/*
-                本章旁白（P3 · C4）：一句话把这一章的认知点说完。
-                pitfall / scene 类未完成也能读——它讲的是"当初怎么想错的"，提前读是钩子；
-                archive 类必须掌握度 ≥ 60%，因为它已经给出半个答案。
-              */}
-              {(() => {
-                const line = STORY_BY_CHAPTER[c.id];
-                if (!line) return null;
-                const open = mastery >= 60 || isTeaser(line.tone);
-                return (
-                  <div className={`km-chapter-line${open ? '' : ' locked'}`}>
-                    <span className="km-chapter-line-tag">{open ? '本章旁白' : '旁白未解锁'}</span>
-                    <p>{open ? line.line : `掌握度达到 60% 后解锁。锚点：${line.anchor}`}</p>
-                  </div>
-                );
-              })()}
-              {deps.length > 0 && (
-                <p className="km-hint">
-                  前置：
-                  {deps.map((d, i) => {
-                    const m = masteryOfChapter(d, p);
-                    return (
-                      <span key={d}>
-                        {i > 0 ? ' / ' : ''}
-                        <span className={m >= 60 ? 'km-dep-ok' : 'km-dep-bad'}>
-                          {chapterName(d)}（{m}%）
-                        </span>
-                      </span>
-                    );
-                  })}
-                </p>
-              )}
-
-              {/* ── 机制图解（按章节就地展开） ────────────────────────
-                  图不是另画的一套结构：节点就是 concept 里的 `##` 小节，
-                  所以正文写「见 §2.3」时，图上第 2 个文件第 3 节就是它。
-                  场景灯（考试/事故/面谈）只改配色不改拓扑——同一个机制
-                  被三种场景击中，才看得出哪一节最贵。真题只读，不写回。 */}
-              <ConceptViz subject={subject} chapterId={c.id} />
-
-              {/* ── 交互实验（紧接图解，在判定之前） ──────────────────
-                  图讲清机制，实验让你亲手把它拖错一次：拖错 → 凯喵说错在哪 →
-                  再拖对。先看结构、再动手，最后才是三关判定，顺序不能倒。
-                  数据按学科懒加载，素材只读，判定全在本机。 */}
-              <ChapterLab subject={subject} chapterId={c.id} />
-
-              {/* ── 三关 ─────────────────────────────────────────────── */}
-              <div className="km-stages">
-                {stages.map((s) => (
-                  <div key={s.key} className={`km-stage${s.done ? ' done' : ''}`}>
-                    <div className="km-stage-head">
-                      <i className={`km-pip${s.done ? ' on' : ''}`}>{s.icon}</i>
-                      <b>{s.label}</b>
-                      <span className="km-stage-weight">{s.weight} 分</span>
-                      {s.done && <span className="km-tag km-tag-ok">已通过</span>}
-                    </div>
-                    <div className="km-stage-bar">
-                      <i style={{ width: `${s.need ? (s.got / s.need) * 100 : 0}%` }} />
-                    </div>
-                    <p className="km-stage-desc">{STAGE_META[s.key].desc}</p>
-                    <p className="km-stage-hint">{s.hint}</p>
-                    {s.blockers.length > 0 && (
-                      <ul className="km-stage-blockers">
-                        {s.blockers.map((b) => (
-                          <li key={b}>{b}</li>
-                        ))}
-                      </ul>
-                    )}
-                    <button
-                      type="button"
-                      className={`km-btn km-btn-sm ${s.done ? 'km-btn-ghost' : 'km-btn-primary'}`}
-                      onClick={() => goStage(c.id, s)}
-                    >
-                      {s.done ? '再过一遍' : s.key === 'boss' ? '打首领' : '去攻这一关'}
-                    </button>
-                  </div>
-                ))}
-              </div>
-
-              {c.github.length > 0 && (
-                <>
-                  <div className="km-hint" style={{ marginTop: 12, fontWeight: 600 }}>
-                    延伸仓库（GitHub 实测）
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 6 }}>
-                    {c.github.map((repo, i) => (
-                      <a
-                        key={repo}
-                        href={`https://github.com/${repo}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="km-repo"
-                      >
-                        <b>{repo}</b>
-                        <span>★ {(c.github_stars[i] ?? 0).toLocaleString('zh-CN')}</span>
-                      </a>
-                    ))}
-                  </div>
-                </>
-              )}
-              {c.books.length > 0 && <p className="km-hint">推荐：{c.books.join('；')}</p>}
-
-              {/* ── 本章题目 ─────────────────────────────────────────── */}
-              <div className="learn-bank">
-                <div className="learn-bank-head">
-                  <b>本章题目</b>
-                  <span>
-                    {st.total} 题
-                    {st.judgeable > 0 ? ` · 可直接判 ${st.judgeable} 题` : ''}
-                  </span>
-                </div>
-                {st.total === 0 ? (
-                  <p className="km-hint" style={{ margin: 0 }}>
-                    这一章暂未配套练习题。
-                  </p>
-                ) : (
-                  <>
-                    <div className="learn-bank-chips">
-                      {TYPE_ORDER.filter((t) => (st.byType[t] ?? 0) > 0).map((t) => (
-                        <span key={t} className={`bank-type t-${t}`}>
-                          {TYPE_META[t].short} {st.byType[t]}
-                        </span>
-                      ))}
-                    </div>
-                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                      <button
-                        type="button"
-                        className="km-btn km-btn-sm km-btn-primary"
-                        onClick={() => {
-                          focusChapter(c.id);
-                          onNavigate?.('lab');
-                        }}
-                      >
-                        做本章这 {st.total} 题
-                      </button>
-                      <button
-                        type="button"
-                        className="km-btn km-btn-sm km-btn-ghost"
-                        onClick={() => {
-                          if (masteryOfChapter(c.id, p) === 0) return;
-                          resetChapter(c.id);
-                        }}
-                        disabled={mastery === 0}
-                        title={mastery === 0 ? '这一章还没有任何记录' : '清空本章三关、作答记录与怪物，重新打一遍'}
-                      >
-                        重置本章
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {/* ── 本章总结（仅三关全通后可见，P3） ───────────── */}
-              {(() => {
-                const sum = buildChapterSummary(c.id, p);
-                if (!sum) {
-                  return (
-                    <p className="km-summary-locked">
-                      通关三关（概念 / 演练 / BOSS 全绿）后，这里会解锁「本章总结 · 7 维表」与一键导出 Markdown。
-                    </p>
-                  );
-                }
-                return (
-                  <ChapterSummaryPanel
-                    summary={sum}
-                    content={contentOf(c.id)}
-                    copied={copiedId === c.id}
-                    onCopy={() => handleCopySummary(sum)}
-                  />
-                );
-              })()}
-            </section>
-          );
-        })()}
     </div>
   );
 }
