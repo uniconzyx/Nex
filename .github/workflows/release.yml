@@ -1,9 +1,12 @@
 name: Release (APK + EXE)
 
 on:
-  push:
-    tags:
-      - "v*"
+  # 不再随 v* tag 自动发版：本流水线构建的是 web-preview 静态站产物
+  # （Flutter APK + Nex-Launcher.exe），而正式 Release 的产品是 frontend/ React
+  # 真应用（桌面 EXE 自拉后端 + Android 真应用 APK），由本机构建后经
+  # GitHub Release API 上传。2026-11-10 推 v1.0.6 tag 时本工作流曾自动
+  # 创建 Release 并挂上旧包、覆盖发布说明，故改为仅手动触发。
+  # 需要重建静态站产物时，在 Actions 页面手动运行 "Release (APK + EXE)" 即可。
   workflow_dispatch:
 
 permissions:
