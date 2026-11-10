@@ -5,6 +5,9 @@
 //     通过 JNI 调用 `#[mobile_entry_point] fn run()`。
 //   - 桌面端的 main.rs 只是薄壳：`fn main() { nex::run() }`。
 //   - 两边共用同一份 setup / 命令注册，保证 .exe 与 .apk 行为一致。
+// 桌面端专用：开机自动拉起本机 FastAPI 后端（Android 瘦客户端不需要）
+#[cfg(windows)]
+pub mod backend_supervisor;
 mod api_client;
 // 暴露给 examples/ 做真机探测取证（不改动应用行为，仅重导出）。
 pub use crate::api_client::{probe, ApiTarget};
@@ -31,7 +34,7 @@ use crate::ws_handler::start_ws_server;
 /// 启动诊断日志：写到 exe 同级的 nex-boot.log（同时 stderr 一份）。
 /// 用文件是为了在无桌面的会话里也能确证「窗口有没有真的开始加载」。
 #[allow(dead_code)]
-fn boot_log(msg: &str) {
+pub(crate) fn boot_log(msg: &str) {
     eprintln!("[boot] {msg}");
     let path = std::env::current_exe()
         .ok()
@@ -102,6 +105,10 @@ async fn get_status(
 /// 于是前端的所有请求都打到客户端确认过的地址上。
 #[tauri::command]
 async fn api_probe() -> Result<api_client::ApiTarget, String> {
+    // 桌面端：等后台把本机后端拉起来再探，避免 app 启动时必然 false。
+    // 等不到也只多花最多 6s，随后仍按原逻辑回落默认地址（不更差）。
+    #[cfg(windows)]
+    backend_supervisor::wait_ready(std::time::Duration::from_secs(6)).await;
     let t = api_client::probe().await;
     // 落盘探测证据：候选地址 / 是否可达 / 后端版本 / 耗时。
     // 真客户端（浏览器里 isClient() 为 false）跑不到这条路径，
@@ -119,6 +126,10 @@ async fn api_probe() -> Result<api_client::ApiTarget, String> {
 pub fn run() {
     tauri::Builder::default()
         .setup(|app| {
+            // 桌面端：后台确保本机 FastAPI 后端可用（不阻塞窗口创建）。
+            #[cfg(windows)]
+            backend_supervisor::spawn_ensure();
+
             // 优先级 3：Defender 排除项（Windows 静默提权；真正无感在 NSIS 安装期）
             if let Err(e) = defender::ensure_exclusion(app.path().resource_dir().ok()) {
                 eprintln!("[defender] 跳过排除项: {e}");

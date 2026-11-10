@@ -1,0 +1,6 @@
+{
+  "_readme": "复制本文件到 EXE 同目录并改名为 nex-backend.json，把下面两个绝对路径改成本机真实路径。EXE 启动时若 :8000/health 不通，会用它起一个隐藏窗口的 uvicorn；日志写到同目录 nex-backend.log。",
+  "python": "D:/path/to/CppMind/server/.venv/Scripts/python.exe",
+  "cwd": "D:/path/to/CppMind/server",
+  "args": ["-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", "8000", "--log-level", "info"]
+}
