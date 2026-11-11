@@ -4288,3 +4288,9 @@ html[data-km-theme='dark'] .km-app .km-tl.locked .km-tag-gray {
   line-height: 1.65;
   color: var(--km-ink-soft);
 }
+
+
+/* 展开即见：details 被滚到内容区顶部时留 12px，别被 64px 顶栏压住 */
+.km-chapter-open details {
+  scroll-margin-top: 12px;
+}

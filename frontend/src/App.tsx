@@ -118,6 +118,36 @@ export function App() {
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
+
+  /**
+   * 「展开后看不到内容」修复（主人 11-10 验收反馈）：
+   * 章节里的 details（本章速览 / 概念全文 / 本章全部条目 / 每节参考答案）
+   * 展开时正文常整段落在视口之外 —— 实测概念全文 summary 在 y=855、
+   * 视口底 900，点开后 1.8 万字全在屏幕下方，还把机制图推到 5800px 外。
+   * toggle 事件不冒泡，故在捕获阶段监听；把刚展开的 details 滚到
+   * .km-content 视口内，实现「点开即见」。一处覆盖所有页面的折叠块。
+   */
+  useEffect(() => {
+    const onToggle = (e: Event) => {
+      const d = e.target as HTMLDetailsElement;
+      if (!(d instanceof HTMLDetailsElement) || !d.open) return;
+      // 概念全文里还有一层篇目 details、参考答案里还有「本章全部」二级折叠：
+      // 它们展开时也会派发 toggle，若一并处理会二次滚动、把 summary 顶出视口。
+      if (d.parentElement?.closest('details')) return;
+      const scroller = d.closest('.km-content') as HTMLElement | null;
+      if (!scroller) return;
+      requestAnimationFrame(() => {
+        const r = d.getBoundingClientRect();
+        const sr = scroller.getBoundingClientRect();
+        // 已经在视口上半部就别抢滚动，只救「展开后内容在屏幕外」的情况
+        if (r.top >= sr.top && r.top < sr.top + sr.height * 0.55) return;
+        // 交给浏览器按当前布局算，避免手动 delta 与滚动锚定叠加导致滚过头
+        d.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      });
+    };
+    document.addEventListener('toggle', onToggle, true);
+    return () => document.removeEventListener('toggle', onToggle, true);
+  }, []);
   const [ai, setAi] = useState<AiInvocation>({ open: false });
 
   // 首屏恢复主题，避免刷新时白闪

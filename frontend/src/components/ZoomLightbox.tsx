@@ -14,6 +14,12 @@
  * 会为 position:fixed 创建包含块（CSS 规范），若不脱离该祖先，遮罩只会盖住
  * 主内容区、右栏漏出、工具栏被压在卡片顶部 —— 即「被覆盖 / 上下层错位」。
  * 脱离后拿不到 .km-app 上的 --km-* 变量，故同步 data-km-theme 供 CSS 自给配色。
+ *
+ * 「无法移动」修复（主人 11-10 验收反馈）：
+ *   旧版 onPointerDown 有 `if (scale <= 1) return`，打开灯箱默认就是 100%，
+ *   于是按住完全拖不动，提示却写着「放大后可拖拽」。现在任何比例都能平移；
+ *   当内容是可滚动的 <pre>（ASCII 内容图）时，按住改为滚动它本身，
+ *   这样右侧被裁掉的字符能拖出来看；滚轮在 <pre> 上也交还原生滚动。
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -38,7 +44,10 @@ export interface ZoomLightboxProps {
 export function ZoomLightbox({ open, onClose, title, src, alt, children }: ZoomLightboxProps) {
   const [scale, setScale] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [dragging, setDragging] = useState(false);
   const dragRef = useRef<{ x: number; y: number; ox: number; oy: number } | null>(null);
+  /** 结构图是横向溢出的 <pre>：按住拖动应滚动内容本身，而不是整体平移 */
+  const preDragRef = useRef<{ el: HTMLElement; x: number; y: number; sl: number; st: number } | null>(null);
   const stageRef = useRef<HTMLDivElement>(null);
 
   const reset = useCallback(() => {
@@ -50,6 +59,9 @@ export function ZoomLightbox({ open, onClose, title, src, alt, children }: ZoomL
   useEffect(() => {
     if (!open) return;
     reset();
+    setDragging(false);
+    dragRef.current = null;
+    preDragRef.current = null;
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
@@ -73,22 +85,43 @@ export function ZoomLightbox({ open, onClose, title, src, alt, children }: ZoomL
   const zoom = (delta: number) => setScale((s) => Math.max(MIN, Math.min(MAX, +(s + delta).toFixed(2))));
 
   const onWheel = (e: React.WheelEvent) => {
+    // 结构图自身能滚时把滚轮还给它，别吞掉阅读体验
+    const pre = (e.target as HTMLElement).closest?.('pre') as HTMLElement | null;
+    if (pre && !e.ctrlKey && (pre.scrollWidth > pre.clientWidth + 2 || pre.scrollHeight > pre.clientHeight + 2)) return;
     e.preventDefault();
     zoom(e.deltaY < 0 ? STEP : -STEP);
   };
 
   const onPointerDown = (e: React.PointerEvent) => {
-    if (scale <= 1) return;
+    const pre = (e.target as HTMLElement).closest?.('pre') as HTMLElement | null;
+    if (pre && (pre.scrollWidth > pre.clientWidth + 2 || pre.scrollHeight > pre.clientHeight + 2)) {
+      preDragRef.current = { el: pre, x: e.clientX, y: e.clientY, sl: pre.scrollLeft, st: pre.scrollTop };
+      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+      setDragging(true);
+      return;
+    }
+    // 任何缩放比例都允许平移：默认 100% 时宽图同样能被拖着看
     dragRef.current = { x: e.clientX, y: e.clientY, ox: offset.x, oy: offset.y };
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    setDragging(true);
   };
+
   const onPointerMove = (e: React.PointerEvent) => {
+    const p = preDragRef.current;
+    if (p) {
+      p.el.scrollLeft = p.sl - (e.clientX - p.x);
+      p.el.scrollTop = p.st - (e.clientY - p.y);
+      return;
+    }
     const d = dragRef.current;
     if (!d) return;
     setOffset({ x: d.ox + (e.clientX - d.x), y: d.oy + (e.clientY - d.y) });
   };
+
   const onPointerUp = () => {
     dragRef.current = null;
+    preDragRef.current = null;
+    setDragging(false);
   };
 
   if (!open) return null;
@@ -125,7 +158,7 @@ export function ZoomLightbox({ open, onClose, title, src, alt, children }: ZoomL
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
-        style={{ cursor: scale > 1 ? (dragRef.current ? 'grabbing' : 'grab') : 'default' }}
+        style={{ cursor: dragging ? 'grabbing' : 'grab' }}
       >
         <div
           className="zl-content"
@@ -134,7 +167,7 @@ export function ZoomLightbox({ open, onClose, title, src, alt, children }: ZoomL
           {src ? <img src={src} alt={alt ?? title ?? ''} draggable={false} /> : children}
         </div>
       </div>
-      <div className="zl-tip">滚轮或 ＋/− 缩放 · 放大后可拖拽 · 0 复位 · Esc 关闭</div>
+      <div className="zl-tip">按住可拖动整张图 · 结构图可直接横向拖 · 滚轮或 ＋/− 缩放 · 0 复位 · Esc 关闭</div>
     </div>,
     document.body,
   );

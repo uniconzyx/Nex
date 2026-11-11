@@ -276,6 +276,13 @@
   line-height: 1.55;
   white-space: pre;
   overflow-x: auto;
+  overscroll-behavior: contain;
+  cursor: grab;
+}
+
+.dgv-code.dragging {
+  cursor: grabbing;
+  user-select: none;
 }
 .dgv-card-foot {
   margin-top: 10px;

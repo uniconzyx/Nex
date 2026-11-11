@@ -19,6 +19,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { loadVizChapters, peekVizChapters } from '../data/viz';
 import type { VizChapter, VizConcept, VizMode, VizSec } from '../data/viz';
 import { ZoomLightbox } from './ZoomLightbox';
+import { useDragScroll } from './useDragScroll';
 import './ConceptViz.css';
 
 /* ── 命中算法：把章节级的题/坑/面经挂到某个小节 ────────────────────
@@ -356,7 +357,10 @@ export function ConceptViz({ subject, chapterId }: { subject: string; chapterId:
   const [revealed, setRevealed] = useState(false);
   /** 灯箱里放大的机制图：打开瞬间快照当前 SVG（本地数据渲染，无外部输入） */
   const [zoomSvg, setZoomSvg] = useState<string | null>(null);
+  /** 每节参考答案一律默认掩藏；展开时才渲染内容（全章答案可能很长） */
+  const [ansOpen, setAnsOpen] = useState(false);
   const hostRef = useRef<HTMLDivElement>(null);
+  const codeDrag = useDragScroll<HTMLPreElement>();
 
   // 章节换了 → 回到第一个概念第一节
   useEffect(() => {
@@ -365,6 +369,7 @@ export function ConceptViz({ subject, chapterId }: { subject: string; chapterId:
     setMode('exam');
     setItem(-1);
     setRevealed(false);
+    setAnsOpen(false);
   }, [chapterId]);
 
   const concept = chapter?.concepts[con];
@@ -392,8 +397,10 @@ export function ConceptViz({ subject, chapterId }: { subject: string; chapterId:
 
   const current = secs[step];
   const list = bind[mode];
-  const cur = item >= 0 && list[item] ? list[item] : null;
+  // 未命中的小节也要有答案可看：回落到本章第 1 条，按钮文案注明「本节未直接命中」
+  const cur = item >= 0 && list[item] ? list[item] : (list.length ? list[0] : null);
   const hitHere = list.map((h, i) => ({ h, i })).filter((x) => x.h.node === step && x.h.score >= HIT_THRESHOLD);
+  const curIsFallback = hitHere.length === 0;
 
   const goto = (i: number) => {
     if (!secs.length) return;
@@ -402,6 +409,7 @@ export function ConceptViz({ subject, chapterId }: { subject: string; chapterId:
     const hit = list.findIndex((x) => x.node === next && x.score >= HIT_THRESHOLD);
     setItem(hit);
     setRevealed(false);
+    setAnsOpen(false);
   };
 
   const pickConcept = (i: number) => {
@@ -409,6 +417,7 @@ export function ConceptViz({ subject, chapterId }: { subject: string; chapterId:
     setStep(0);
     setItem(-1);
     setRevealed(false);
+    setAnsOpen(false);
   };
 
   const pickMode = (m: VizMode) => {
@@ -416,6 +425,7 @@ export function ConceptViz({ subject, chapterId }: { subject: string; chapterId:
     const hit = bind[m].findIndex((x) => x.node === step && x.score >= HIT_THRESHOLD);
     setItem(hit);
     setRevealed(false);
+    setAnsOpen(false);
   };
 
   if (loading) {
@@ -642,11 +652,62 @@ export function ConceptViz({ subject, chapterId }: { subject: string; chapterId:
         <h5>{current?.h ?? ''}</h5>
         <p>{current?.s || '这一节以代码 / 表格为主，点上面的节点或下面的条目，看它被怎么考、怎么翻车。'}</p>
         {current?.c && (
-          <pre>
+          <pre
+            ref={codeDrag.ref}
+            {...codeDrag.handlers}
+            className={codeDrag.dragging ? 'dragging' : undefined}
+            title="按住可拖动，宽图能横向平移；也可用「放大查看机制图」全屏查看"
+          >
             <code>{current.c.code}</code>
           </pre>
         )}
       </div>
+
+      {/* 每节参考答案：一律默认掩藏，点开才看（主人 11-10 验收要求） */}
+      <details
+        className="km-viz-sec-answer"
+        open={ansOpen}
+        onToggle={(e) => setAnsOpen(e.currentTarget.open)}
+      >
+        <summary>
+          第 {step + 1} 节参考答案
+          <span className="km-tag km-tag-gray">{hitHere.length > 0 ? `${hitHere.length} 条命中` : '本章通用'}</span>
+        </summary>
+        {ansOpen && (
+          <div className="km-viz-sec-answer-body">
+            <p className="km-viz-sec-tip">
+              {hitHere.length > 0
+                ? `下面 ${hitHere.length} 条${modeLabel}直接打在「${current?.h ?? ''}」这一节，答案与解析收在这里，点开才看。`
+                : `「${current?.h ?? ''}」没有被${modeLabel}直接命中。先看本节要点，再展开本章全部 ${list.length} 条${modeLabel}的参考答案。`}
+            </p>
+            {hitHere.length > 0 ? (
+              hitHere.map(({ h, i }) => (
+                <div className="km-viz-sec-answer-item" key={`sa${i}`}>
+                  <b>{itemTitle(mode, h)}</b>
+                  <AnswerBox mode={mode} item={h.item} />
+                </div>
+              ))
+            ) : (
+              <>
+                <p className="km-viz-sec-point">{current?.s || '这一节以代码 / 表格为主，正文要点见上方快照。'}</p>
+                {list.length > 0 && (
+                  <details className="km-viz-sec-answer-all">
+                    <summary>展开本章全部 {list.length} 条{modeLabel}的参考答案</summary>
+                    <ul>
+                      {list.map((h, i) => (
+                        <li key={`al${i}`}>
+                          <b>{itemTitle(mode, h)}</b>
+                          <AnswerBox mode={mode} item={h.item} />
+                        </li>
+                      ))}
+                    </ul>
+                  </details>
+                )}
+              </>
+            )}
+          </div>
+        )}
+      </details>
 
       {/* 场景：本节命中项优先，本章全量可展开 */}
       <div className="km-viz-scene">
@@ -684,7 +745,9 @@ export function ConceptViz({ subject, chapterId }: { subject: string; chapterId:
 
         {!revealed && cur && (
           <button type="button" className="km-viz-reveal" onClick={() => setRevealed(true)}>
-            {mode === 'exam' ? '看答案与解析' : mode === 'ask' ? '看参考回答' : '看现场经过'}
+            {curIsFallback
+              ? '看本章参考答案（本节未直接命中）'
+              : mode === 'exam' ? '看答案与解析' : mode === 'ask' ? '看参考回答' : '看现场经过'}
           </button>
         )}
 

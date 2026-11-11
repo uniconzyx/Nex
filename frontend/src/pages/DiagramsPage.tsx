@@ -100,6 +100,68 @@ export function DiagramsPage() {
     };
   }, [filtered]);
 
+  /**
+   * 「内容的图也不能动」修复：卡片里的 ASCII 结构图是 <pre>，右侧常被裁掉，
+   * 按住拖动应该滚动它本身。但它在「点击放大」的 button 内，拖完会误触发
+   * 放大灯箱，所以在捕获阶段把这次 click 吃掉；单击（未移动）仍照常放大。
+   * 用 document 委托而非逐卡片 hook：卡片是 map 出来的，数量不固定。
+   */
+  useEffect(() => {
+    let el: HTMLElement | null = null;
+    let sx = 0;
+    let sy = 0;
+    let sl = 0;
+    let st = 0;
+    let moved = false;
+    const down = (e: PointerEvent) => {
+      const pre = (e.target as HTMLElement | null)?.closest?.('.dgv-code') as HTMLElement | null;
+      if (!pre || e.button !== 0) return;
+      if (pre.scrollWidth <= pre.clientWidth + 2 && pre.scrollHeight <= pre.clientHeight + 2) return;
+      el = pre;
+      sx = e.clientX;
+      sy = e.clientY;
+      sl = pre.scrollLeft;
+      st = pre.scrollTop;
+      moved = false;
+      pre.classList.add('dragging');
+      try {
+        pre.setPointerCapture(e.pointerId);
+      } catch {
+        /* 某些浏览器对非主元素拒绝捕获，忽略即可 */
+      }
+    };
+    const move = (e: PointerEvent) => {
+      if (!el) return;
+      const dx = e.clientX - sx;
+      const dy = e.clientY - sy;
+      if (Math.abs(dx) + Math.abs(dy) > 4) moved = true;
+      el.scrollLeft = sl - dx;
+      el.scrollTop = st - dy;
+    };
+    const up = () => {
+      el?.classList.remove('dragging');
+      el = null;
+    };
+    const click = (e: MouseEvent) => {
+      if (!moved) return;
+      e.preventDefault();
+      e.stopPropagation();
+      moved = false;
+    };
+    document.addEventListener('pointerdown', down, true);
+    document.addEventListener('pointermove', move, true);
+    document.addEventListener('pointerup', up, true);
+    document.addEventListener('pointercancel', up, true);
+    document.addEventListener('click', click, true);
+    return () => {
+      document.removeEventListener('pointerdown', down, true);
+      document.removeEventListener('pointermove', move, true);
+      document.removeEventListener('pointerup', up, true);
+      document.removeEventListener('pointercancel', up, true);
+      document.removeEventListener('click', click, true);
+    };
+  }, []);
+
   const scrollToSubject = (key: string) => {
     const el = sectionRefs.current[key];
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });

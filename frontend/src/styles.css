@@ -1549,19 +1549,40 @@ button:disabled {
 }
 
 .ss-panel {
-  position: absolute;
-  top: 38px;
-  left: 0;
-  z-index: 60;
-  width: 440px;
-  max-width: calc(100vw - 40px);
-  max-height: calc(100vh - 120px);
+  /* Portal 到 body：脱离 .km-card 的 transform / backdrop-filter 层叠上下文，
+     也脱离 .km-content 的滚动裁切。位置由 SubjectSwitch.place() 按触发按钮
+     rect 计算后以 inline style 给出（top/left/width/maxHeight）。 */
+  position: fixed;
+  z-index: 300;
   overflow: auto;
   padding: 12px;
   border: 1px solid var(--nex-border);
   border-radius: 14px;
   background: var(--nex-card);
   box-shadow: 0 14px 36px rgb(15 23 42 / 0.14);
+  /* Portal 后不再继承 .km-app 上的 --nex-*，这里自给一套（沿用冰蓝色源） */
+  --nex-border: #dce8f3;
+  --nex-card: #ffffff;
+  --nex-text: #26364a;
+  --nex-text-2: #4a5d72;
+  --nex-bg: #eef4fb;
+  --nex-blue: #5b9bd5;
+  --nex-blue-soft: #8fc0ea;
+  --nex-blue-light: #d9eaf7;
+  color: var(--nex-text);
+}
+
+.ss-panel[data-km-theme='dark'] {
+  --nex-border: #33445a;
+  --nex-card: #1b2735;
+  --nex-text: #e8f1fa;
+  --nex-text-2: #bcd0e2;
+  --nex-bg: #182635;
+  --nex-blue: #8cc0ee;
+  --nex-blue-soft: #6fa8dc;
+  --nex-blue-light: #23384e;
+  box-shadow: 0 14px 36px rgb(0 0 0 / 0.45);
+  color-scheme: dark;
 }
 
 .ss-panel-head {
@@ -1634,11 +1655,7 @@ button:disabled {
     max-width: 88px;
   }
 
-  .ss-panel {
-    left: -60px;
-    width: calc(100vw - 32px);
-  }
-
+  /* 面板已 Portal + fixed，位置由 place() 按触发按钮 rect 收敛；窄屏只需收网格 */
   .ss-grid {
     grid-template-columns: 1fr;
   }

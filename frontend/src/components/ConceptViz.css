@@ -425,8 +425,18 @@ html[data-km-theme='dark'] .km-viz {
   font-family: var(--km-mono, 'JetBrains Mono', Consolas, monospace);
   font-size: 12.5px;
   line-height: 1.62;
+  /* 宽 ASCII 图右侧常被裁掉：明确横向滚动 + 按住拖动平移（useDragScroll） */
+  white-space: pre;
   overflow: auto;
+  overscroll-behavior: contain;
   max-height: 260px;
+  cursor: grab;
+  scrollbar-width: thin;
+}
+
+.km-viz-nodebox pre.dragging {
+  cursor: grabbing;
+  user-select: none;
 }
 
 /* ── 场景面板 ───────────────────────────────────────────────────── */
@@ -759,4 +769,82 @@ html[data-km-theme='dark'] .km-viz {
 
 @media (prefers-reduced-motion: reduce) {
   .km-viz-zoom { transition: none; }
+}
+
+
+/* ── 每节参考答案（一律默认掩藏，点开才看）────────────────────────────
+   与 .km-viz-all 同一套视觉语言，不新增色源；答案内容只在展开时渲染。 */
+.km-viz-sec-answer {
+  margin-top: 10px;
+  padding: 10px 13px;
+  border: 1px solid var(--km-line2);
+  border-radius: var(--km-r-sm);
+  background: var(--km-surf1);
+}
+
+.km-viz-sec-answer > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--km-ink);
+}
+
+.km-viz-sec-answer > summary::-webkit-details-marker { display: none; }
+.km-viz-sec-answer > summary::before {
+  content: '\25B8';
+  font-size: 12px;
+  color: var(--km-accent-ink);
+}
+.km-viz-sec-answer[open] > summary::before { content: '\25BE'; }
+
+.km-viz-sec-answer-body { margin-top: 10px; }
+
+.km-viz-sec-tip,
+.km-viz-sec-point {
+  margin: 0 0 8px;
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--km-ink-soft);
+}
+
+.km-viz-sec-answer-item { margin-bottom: 12px; }
+
+.km-viz-sec-answer-item > b,
+.km-viz-sec-answer-all li > b {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 13px;
+  color: var(--km-ink);
+}
+
+.km-viz-sec-answer-all {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--km-line2);
+}
+
+.km-viz-sec-answer-all > summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--km-accent-ink);
+}
+
+.km-viz-sec-answer-all ul {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  max-height: 420px;
+  overflow: auto;
+}
+
+.km-viz-sec-answer-all li {
+  margin-bottom: 12px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--km-sunk);
 }
