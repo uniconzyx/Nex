@@ -271,7 +271,7 @@
   border: 1px solid var(--dgv-line);
   border-radius: 10px;
   padding: 13px 14px;
-  font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-family: "Cascadia Code", Consolas, "Microsoft YaHei", "PingFang SC", monospace;
   font-size: 12px;
   line-height: 1.55;
   white-space: pre;
@@ -288,7 +288,7 @@
   margin-top: 10px;
   font-size: 11px;
   color: var(--dgv-ink-faint);
-  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-family: "Cascadia Code", Consolas, "Microsoft YaHei", monospace;
   word-break: break-all;
 }
 

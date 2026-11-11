@@ -361,6 +361,7 @@ export function ConceptViz({ subject, chapterId }: { subject: string; chapterId:
   const [ansOpen, setAnsOpen] = useState(false);
   const hostRef = useRef<HTMLDivElement>(null);
   const codeDrag = useDragScroll<HTMLPreElement>();
+  const dotsDrag = useDragScroll<HTMLDivElement>();
 
   // 章节换了 → 回到第一个概念第一节
   useEffect(() => {
@@ -620,7 +621,13 @@ export function ConceptViz({ subject, chapterId }: { subject: string; chapterId:
         <button type="button" className="km-viz-nav" onClick={() => goto(step - 1)} disabled={step === 0} aria-label="上一节">
           上一节
         </button>
-        <div className="km-viz-dots" role="tablist" aria-label="小节">
+        <div
+          className={`km-viz-dots${dotsDrag.dragging ? ' dragging' : ''}`}
+          role="tablist"
+          aria-label="小节"
+          ref={dotsDrag.ref}
+          {...dotsDrag.handlers}
+        >
           {secs.map((s, i) => (
             <button
               key={`p${i}`}

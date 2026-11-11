@@ -360,7 +360,20 @@ html[data-km-theme='dark'] .km-viz {
   align-items: center;
   flex: 1 1 auto;
   min-width: 0;
-  overflow: hidden;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  cursor: grab;
+}
+.km-viz-dots.dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+.km-viz-dots::-webkit-scrollbar {
+  height: 6px;
+}
+.km-viz-dots::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--km-accent) 40%, transparent);
+  border-radius: 3px;
 }
 
 .km-viz-dots button {
@@ -422,7 +435,7 @@ html[data-km-theme='dark'] .km-viz {
   border-radius: 10px;
   background: #1e2f3f;
   color: #dbe9f4;
-  font-family: var(--km-mono, 'JetBrains Mono', Consolas, monospace);
+  font-family: var(--km-mono, 'Cascadia Code', Consolas, 'Microsoft YaHei', monospace);
   font-size: 12.5px;
   line-height: 1.62;
   /* 宽 ASCII 图右侧常被裁掉：明确横向滚动 + 按住拖动平移（useDragScroll） */

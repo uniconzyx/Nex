@@ -140,6 +140,37 @@ def grab_desc(text: str, start: int) -> str:
     return " ".join(out).strip()
 
 
+# 归一化：把 Consolas（WebView2 在 Windows 上的默认等宽字体）不支持、会回退到
+# Segoe UI Symbol 等别的字体、从而宽度/风格与框线字符 ─│┌ 不一致、整张图看起来「乱」的
+# 装饰性字形，替换为等宽安全的等价物。数学/希腊字母（θ λ √ ∈ 等）是内容，保留不动。
+_GLYPH_MAP = {
+    "\u25CF": "o",        # ● 实心圆 → o（链表节点）
+    "\u25CB": "o",        # ○ 空心圆 → o
+    "\u25B6": "\u2192",   # ▶ →
+    "\u25C0": "\u2190",   # ◀ ←
+    "\u25BA": "\u2192",   # ► →
+    "\u25C4": "\u2190",   # ◄ ←
+    "\u25BC": "\u2193",   # ▼ ↓
+    "\u25B2": "\u2191",   # ▲ ↑
+    "\u25A0": "\u2588",   # ■ → █（实心块，Consolas 有）
+    "\u25A1": "#",        # □ → # 占位标记
+    "\u25C6": "*",        # ◆ → *
+    "\u25C7": "*",        # ◇ → *
+    "\u2713": "v",        # ✓ → v
+    "\u2714": "v",        # ✔ → v
+    "\u2717": "x",        # ✗ → x
+    "\u2718": "x",        # ✘ → x
+    "\u2205": "x",        # ∅ → x（空 / 空指针）
+    "\u2460": "1", "\u2461": "2", "\u2462": "3", "\u2463": "4",  # ①②③④
+    "\u2464": "5", "\u2465": "6", "\u2466": "7", "\u2467": "8",  # ⑤⑥⑦⑧
+    "\u2468": "9", "\u2469": "10",                                   # ⑨⑩
+}
+
+
+def sanitize_glyphs(s: str) -> str:
+    return "".join(_GLYPH_MAP.get(ch, ch) for ch in s)
+
+
 def extract_chapter(subject_dir: str, ch: str):
     d = CONTENT / subject_dir / ch / "concept"
     if not d.exists():
@@ -148,10 +179,10 @@ def extract_chapter(subject_dir: str, ch: str):
     for f in sorted(d.glob("*.md")):
         text = f.read_text(encoding="utf-8")
         for m in FENCE.finditer(text):
-            body = m.group(1).strip("\n")
+            body = sanitize_glyphs(m.group(1).strip("\n"))
             if not is_diagram(body):
                 continue
-            desc = grab_desc(text, m.start())
+            desc = sanitize_glyphs(grab_desc(text, m.start()))
             out.append({
                 "chapter": ch,
                 "title": chapter_topic(subject_dir, ch),
