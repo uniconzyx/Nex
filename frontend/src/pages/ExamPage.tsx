@@ -12,6 +12,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
+import { Tex, TexMixed } from '../components/Tex';
 import {
   getCatalog,
   getFrameworks,
@@ -21,6 +22,9 @@ import {
   getQuestion,
   getPapers,
   getPaper,
+  getVocab,
+  getListening,
+  getFormulas,
   grade,
   type Catalog,
   type ExamSummary,
@@ -35,6 +39,9 @@ import {
   type PaperList,
   type PaperDetail,
   type Walkthrough,
+  type VocabDoc,
+  type ListeningDoc,
+  type FormulaDoc,
   type GradeResult,
 } from '../lib/exam';
 
@@ -188,27 +195,45 @@ function WalkthroughView({ wt }: { wt: Walkthrough }) {
 // ─────────────────────────── 顶层：考试/科目/视图 ───────────────────────────
 
 type ExamView = 'framework' | 'papers' | 'training';
+type FrameworkSub = 'framework' | 'knowledge' | 'summary' | 'vocab' | 'listening' | 'formulas';
 
-export function ExamPage({ embedded = false }: { embedded?: boolean }) {
+export function ExamPage({
+  embedded = false,
+  initialExam,
+  initialSubject,
+  initialView = 'framework',
+  initialSub,
+}: {
+  embedded?: boolean;
+  /** 外部入口直达：从考研中枢点「数英政」进来时直接落在指定考试 */
+  initialExam?: string;
+  initialSubject?: string;
+  initialView?: ExamView;
+  /** 框架视图下的子页直达（词表 / 听力），中枢子入口用得到 */
+  initialSub?: FrameworkSub;
+}) {
   const cat = useExamData<Catalog>(() => getCatalog(), []);
-  const [examKey, setExamKey] = useState('');
-  const [subjectKey, setSubjectKey] = useState('');
-  const [view, setView] = useState<ExamView>('framework');
+  const [examKey, setExamKey] = useState(initialExam ?? '');
+  const [subjectKey, setSubjectKey] = useState(initialSubject ?? '');
+  const [view, setView] = useState<ExamView>(initialView);
 
   const exam: ExamSummary | undefined = useMemo(
     () => cat.data?.items.find((e) => e.key === examKey),
     [cat.data, examKey],
   );
 
-  // 科目跟着考试走：切换考试时重置为第一个科目
+  // 外部指定了考试：目录回来后只校正科目，不把用户拽回第一场考试
   useEffect(() => {
     if (!cat.data) return;
-    const first = cat.data.items[0];
-    if (first && !examKey) {
-      setExamKey(first.key);
-      setSubjectKey(first.subjects[0]?.key ?? '');
+    const target = initialExam
+      ? cat.data.items.find((e) => e.key === initialExam)
+      : cat.data.items[0];
+    if (!target) return;
+    if (!examKey) setExamKey(target.key);
+    if (!subjectKey || !(target.subjects.some((s) => s.key === subjectKey))) {
+      setSubjectKey(target.subjects[0]?.key ?? '');
     }
-  }, [cat.data, examKey]);
+  }, [cat.data, examKey, subjectKey, initialExam]);
 
   useEffect(() => {
     if (!exam) return;
@@ -332,7 +357,7 @@ export function ExamPage({ embedded = false }: { embedded?: boolean }) {
       </div>
 
       {exam && subjectKey && view === 'framework' && (
-        <FrameworkView exam={exam.key} subject={subjectKey} />
+        <FrameworkView exam={exam.key} subject={subjectKey} initialSub={initialSub} />
       )}
       {exam && view === 'papers' && <PapersView exam={exam.key} subjects={exam.subjects} />}
       {exam && subjectKey && view === 'training' && (
@@ -344,14 +369,30 @@ export function ExamPage({ embedded = false }: { embedded?: boolean }) {
 
 // ─────────────────────────── 视图一：框架 ───────────────────────────
 
-type FrameworkSub = 'framework' | 'knowledge' | 'summary';
-
-function FrameworkView({ exam, subject }: { exam: string; subject: string }) {
-  const [sub, setSub] = useState<FrameworkSub>('framework');
+function FrameworkView({
+  exam,
+  subject,
+  initialSub = 'framework',
+}: {
+  exam: string;
+  subject: string;
+  initialSub?: FrameworkSub;
+}) {
+  const [sub, setSub] = useState<FrameworkSub>(initialSub);
 
   const fw = useExamData<FrameworkDoc>(() => getFrameworks(exam, subject), [exam, subject, sub === 'framework']);
   const kd = useExamData<KnowledgeDoc>(() => getKnowledge(exam, subject), [exam, subject, sub === 'knowledge']);
   const sm = useExamData<SummaryDoc>(() => getSummaries(exam, subject), [exam, subject, sub === 'summary']);
+  // 词表目前只有英语有；空组会被 VocabBody 渲染成「本页暂无」而不是报错
+  const vb = useExamData<VocabDoc>(() => getVocab(exam, subject), [exam, subject, sub === 'vocab']);
+  const ls = useExamData<ListeningDoc>(() => getListening(exam, subject), [exam, subject, sub === 'listening']);
+  const fm = useExamData<FormulaDoc>(() => getFormulas(exam, subject), [exam, subject, sub === 'formulas']);
+
+  // 词表与听力只有英语有、公式只有数学有。无关科目的标签不显示，
+  // 否则数英政共用一套子页签时会点出三个「暂无」，看起来像功能坏了。
+  const hasVocab = exam === 'english';
+  const hasListening = exam === 'english';
+  const hasFormulas = exam === 'math';
 
   return (
     <div className="ex-subwrap">
@@ -365,6 +406,21 @@ function FrameworkView({ exam, subject }: { exam: string; subject: string }) {
         <button type="button" role="tab" aria-selected={sub === 'summary'} className={`ex-tab${sub === 'summary' ? ' on' : ''}`} onClick={() => setSub('summary')}>
           分类总结
         </button>
+        {hasFormulas && (
+          <button type="button" role="tab" aria-selected={sub === 'formulas'} className={`ex-tab${sub === 'formulas' ? ' on' : ''}`} onClick={() => setSub('formulas')}>
+            公式速查
+          </button>
+        )}
+        {hasVocab && (
+          <button type="button" role="tab" aria-selected={sub === 'vocab'} className={`ex-tab${sub === 'vocab' ? ' on' : ''}`} onClick={() => setSub('vocab')}>
+            高频词表
+          </button>
+        )}
+        {hasListening && (
+          <button type="button" role="tab" aria-selected={sub === 'listening'} className={`ex-tab${sub === 'listening' ? ' on' : ''}`} onClick={() => setSub('listening')}>
+            听力
+          </button>
+        )}
       </div>
 
       {sub === 'framework' &&
@@ -393,6 +449,396 @@ function FrameworkView({ exam, subject }: { exam: string; subject: string }) {
         ) : (
           <SummaryBody doc={sm.data!} exam={exam} subject={subject} />
         ))}
+
+      {sub === 'vocab' &&
+        (vb.loading ? (
+          <div className="km-empty">加载高频词表…</div>
+        ) : vb.error ? (
+          <LoadError error={vb.error} onRetry={vb.reload} />
+        ) : (
+          <VocabBody doc={vb.data!} />
+        ))}
+
+      {sub === 'listening' &&
+        (ls.loading ? (
+          <div className="km-empty">加载听力训练…</div>
+        ) : ls.error ? (
+          <LoadError error={ls.error} onRetry={ls.reload} />
+        ) : (
+          <ListeningBody doc={ls.data!} />
+        ))}
+
+      {sub === 'formulas' &&
+        (fm.loading ? (
+          <div className="km-empty">加载公式表…</div>
+        ) : fm.error ? (
+          <LoadError error={fm.error} onRetry={fm.reload} />
+        ) : (
+          <FormulasBody doc={fm.data!} />
+        ))}
+    </div>
+  );
+}
+
+/**
+ * 阅读高频词表：按组折叠展示，默认只展开第一组。
+ * 做成折叠而不是一次铺 80 个词，是因为背单词需要「一组一组过」，
+ * 全铺会让人一眼看晕、无法聚焦。
+ */
+function VocabBody({ doc }: { doc: VocabDoc }) {
+  const [open, setOpen] = useState<Set<string>>(() => {
+    const first = doc.groups[0]?.id;
+    return new Set(first ? [first] : []);
+  });
+  const [q, setQ] = useState('');
+
+  const toggle = (id: string) =>
+    setOpen((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
+  if (!doc.groups.length) {
+    return (
+      <div className="cp-state">
+        <b>本考试暂无高频词表</b>
+        <p>词表目前为考研英语（一）/（二）准备，其它科目可先看「知识点」。</p>
+      </div>
+    );
+  }
+
+  const kw = q.trim().toLowerCase();
+  const match = (w: { word: string; cn: string }) =>
+    !kw || w.word.toLowerCase().includes(kw) || w.cn.includes(kw);
+
+  return (
+    <div className="ex-vocab">
+      {doc.note && <p className="ex-vocab-note">{doc.note}</p>}
+
+      <div className="ex-vocab-bar">
+        <span className="ex-vocab-total">
+          共 {doc.total} 词 · {doc.groups.length} 组
+        </span>
+        <input
+          className="ex-vocab-search"
+          type="search"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="搜单词或中文释义…"
+          aria-label="搜索词表"
+        />
+      </div>
+
+      {doc.groups.map((g) => {
+        const words = g.words.filter(match);
+        const isOpen = open.has(g.id) || !!kw;
+        return (
+          <section key={g.id} className="ex-vocab-group">
+            <button
+              type="button"
+              className={`ex-vocab-head${isOpen ? ' on' : ''}`}
+              onClick={() => toggle(g.id)}
+              aria-expanded={isOpen}
+            >
+              <span className="ex-vocab-title">{g.title}</span>
+              <span className="ex-vocab-count">{words.length} 词</span>
+              <span className="ex-vocab-caret" aria-hidden="true">
+                {isOpen ? '−' : '+'}
+              </span>
+            </button>
+
+            {isOpen && (
+              <>
+                {g.desc && <p className="ex-vocab-desc">{g.desc}</p>}
+                {words.length === 0 ? (
+                  <p className="ex-vocab-empty">这一组没有匹配「{q}」的词。</p>
+                ) : (
+                  <ul className="ex-vocab-list">
+                    {words.map((w) => (
+                      <li key={`${g.id}-${w.word}`} className="ex-vocab-item">
+                        <span className="ex-vocab-word">{w.word}</span>
+                        <span className="ex-vocab-pos">{w.pos}</span>
+                        <span className="ex-vocab-cn">{w.cn}</span>
+                        {w.note && <span className="ex-vocab-note2">{w.note}</span>}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </>
+            )}
+          </section>
+        );
+      })}
+    </div>
+  );
+}
+
+/**
+ * 听力训练：不依赖音频文件，把听力能力拆成可练的单元。
+ * 每个单元固定三段——练什么(goal)、怎么练(steps)、别踩什么(traps)，
+ * 中间按单元类型插入不同的练习板（场景词 / 同义替换 / 速记符号 / 复述题）。
+ */
+function ListeningBody({ doc }: { doc: ListeningDoc }) {
+  const [open, setOpen] = useState<Set<string>>(() => new Set(doc.units[0]?.id ? [doc.units[0].id] : []));
+
+  const toggle = (id: string) =>
+    setOpen((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
+  if (!doc.units.length) {
+    return (
+      <div className="cp-state">
+        <b>本考试暂无听力训练</b>
+        <p>听力模块为考研英语准备，覆盖复试口语听力与四六级式听力训练。</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="ex-listen">
+      {doc.note && <p className="ex-listen-note">{doc.note}</p>}
+      <p className="ex-listen-total">
+        共 {doc.total} 个训练单元 · 建议按顺序过，每单元 10~15 分钟
+      </p>
+
+      {doc.units.map((u, i) => {
+        const isOpen = open.has(u.id);
+        return (
+          <section key={u.id} className={`ex-listen-unit${isOpen ? ' on' : ''}`}>
+            <button
+              type="button"
+              className="ex-listen-head"
+              onClick={() => toggle(u.id)}
+              aria-expanded={isOpen}
+            >
+              <span className="ex-listen-no">{String(i + 1).padStart(2, '0')}</span>
+              <span className="ex-listen-title">{u.title}</span>
+              <span className="ex-listen-caret" aria-hidden="true">
+                {isOpen ? '−' : '+'}
+              </span>
+            </button>
+
+            {isOpen && (
+              <div className="ex-listen-body">
+                {u.goal && (
+                  <p className="ex-listen-goal">
+                    <b>目标</b>
+                    {u.goal}
+                  </p>
+                )}
+
+                {u.steps.length > 0 && (
+                  <ol className="ex-listen-steps">
+                    {u.steps.map((s, k) => (
+                      <li key={k}>{s}</li>
+                    ))}
+                  </ol>
+                )}
+
+                {u.scenes && u.scenes.length > 0 && (
+                  <div className="ex-listen-board">
+                    <h5>场景定场词</h5>
+                    <div className="ex-listen-scenes">
+                      {u.scenes.map((sc) => (
+                        <article key={sc.name} className="ex-listen-scene">
+                          <h6>{sc.name}</h6>
+                          <div className="ex-listen-keys">
+                            {sc.keys.map((k) => (
+                              <span key={k} className="ex-listen-key">
+                                {k}
+                              </span>
+                            ))}
+                          </div>
+                          <p className="ex-listen-ask">{sc.ask}</p>
+                        </article>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {u.pairs && u.pairs.length > 0 && (
+                  <div className="ex-listen-board">
+                    <h5>原文 → 选项 同义替换对照</h5>
+                    <ul className="ex-listen-pairs">
+                      {u.pairs.map((p) => (
+                        <li key={p.heard} className="ex-listen-pair">
+                          <span className="ex-listen-heard">{p.heard}</span>
+                          <span className="ex-listen-arrow" aria-hidden="true">
+                            →
+                          </span>
+                          <span className="ex-listen-option">{p.option}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {u.symbols && u.symbols.length > 0 && (
+                  <div className="ex-listen-board">
+                    <h5>速记符号表</h5>
+                    <div className="ex-listen-symbols">
+                      {u.symbols.map((s) => (
+                        <div key={s.sym} className="ex-listen-symbol">
+                          <span className="ex-listen-sym">{s.sym}</span>
+                          <span className="ex-listen-means">{s.means}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {u.drills && u.drills.length > 0 && (
+                  <div className="ex-listen-board">
+                    <h5>复述练习</h5>
+                    <ol className="ex-listen-drills">
+                      {u.drills.map((d, k) => (
+                        <li key={k} className="ex-listen-drill">
+                          <p className="ex-listen-prompt">{d.prompt}</p>
+                          {d.tip && <p className="ex-listen-tip">{d.tip}</p>}
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                )}
+
+                {u.traps.length > 0 && (
+                  <div className="ex-listen-traps">
+                    <h5>常见陷阱</h5>
+                    <ul>
+                      {u.traps.map((t, k) => (
+                        <li key={k}>{t}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+          </section>
+        );
+      })}
+    </div>
+  );
+}
+
+/**
+ * 公式速查：章节折叠 + 组内条目 + 关键词过滤。
+ * 折叠层级只到「章」，组内直接列条目——查公式时人脑里想的是
+ * 「我在找哪个章」，而不是「哪个组」，再套一层只会多点一次。
+ */
+function FormulasBody({ doc }: { doc: FormulaDoc }) {
+  const [open, setOpen] = useState<Set<string>>(() => {
+    const first = doc.chapters[0]?.id;
+    return new Set(first ? [first] : []);
+  });
+  const [q, setQ] = useState('');
+  const [onlyNotes, setOnlyNotes] = useState(false);
+
+  const toggle = (id: string) =>
+    setOpen((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
+  if (!doc.chapters.length) {
+    return (
+      <div className="cp-state">
+        <b>本考试暂无公式表</b>
+        <p>公式速查目前为考研数学（一）/（二）准备。</p>
+      </div>
+    );
+  }
+
+  const kw = q.trim().toLowerCase();
+  const hit = (it: { name: string; tex: string; note?: string }) =>
+    !kw ||
+    it.name.toLowerCase().includes(kw) ||
+    it.tex.toLowerCase().includes(kw) ||
+    (it.note || '').toLowerCase().includes(kw);
+
+  return (
+    <div className="ex-formulas">
+      {doc.note && <p className="ex-fm-note">{doc.note}</p>}
+
+      <div className="ex-fm-bar">
+        <span className="ex-fm-total">共 {doc.total} 条 · {doc.chapters.length} 章</span>
+        <label className="ex-fm-switch">
+          <input
+            type="checkbox"
+            checked={onlyNotes}
+            onChange={(e) => setOnlyNotes(e.target.checked)}
+          />
+          只看有「用法提示」的结论
+        </label>
+        <input
+          className="ex-fm-search"
+          type="search"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="搜公式名 / 符号 / 说明…"
+          aria-label="搜索公式"
+        />
+      </div>
+
+      {doc.chapters.map((ch) => {
+        // 过滤后统计命中条数：搜索时自动展开命中的章
+        const filtered = ch.groups
+          .map((g) => ({ ...g, items: g.items.filter((it) => hit(it) && (!onlyNotes || it.note)) }))
+          .filter((g) => g.items.length > 0);
+        const count = filtered.reduce((n, g) => n + g.items.length, 0);
+        const isOpen = open.has(ch.id) || !!kw || onlyNotes;
+        if ((kw || onlyNotes) && count === 0) return null;
+
+        return (
+          <section key={ch.id} className={`ex-fm-chapter${isOpen ? ' on' : ''}`}>
+            <button
+              type="button"
+              className="ex-fm-head"
+              onClick={() => toggle(ch.id)}
+              aria-expanded={isOpen}
+            >
+              <span className="ex-fm-title">{ch.title}</span>
+              <span className="ex-fm-count">{count} 条</span>
+              <span className="ex-fm-caret" aria-hidden="true">
+                {isOpen ? '−' : '+'}
+              </span>
+            </button>
+
+            {isOpen && (
+              <div className="ex-fm-body">
+                {ch.note && <p className="ex-fm-intro">{ch.note}</p>}
+                {filtered.map((g) => (
+                  <div key={g.title} className="ex-fm-group">
+                    <h5>{g.title}</h5>
+                    <ul className="ex-fm-list">
+                      {g.items.map((it) => (
+                        <li key={it.name} className="ex-fm-item">
+                          <div className="ex-fm-name">{it.name}</div>
+                          <div className="ex-fm-tex">
+                            <Tex tex={it.tex} display />
+                          </div>
+                          {it.note && (
+                            <p className="ex-fm-tip">
+                              <TexMixed text={it.note} />
+                            </p>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        );
+      })}
     </div>
   );
 }

@@ -36,6 +36,17 @@ export default defineConfig({
     // Android WebView（系统 WebView 版本杂）保守一点，避免原生 ESM 兼容问题
     target: 'es2020',
     sourcemap: false,
+    rollupOptions: {
+      output: {
+        // KaTeX 只服务「数学 → 公式速查」一个页面，打进主包会让首屏
+        // 白白多背 ~800KB（gzip 后 ~250KB）。单独成 chunk 后，
+        // 只有真的点进公式页才去拉它。
+        manualChunks(id: string) {
+          if (id.includes('node_modules/katex')) return 'katex';
+          return undefined;
+        },
+      },
+    },
   },
 
   // 依赖预构建：tauri 的 api 包走 ESM，交给 esbuild 处理

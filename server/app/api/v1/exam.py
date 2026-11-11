@@ -80,6 +80,34 @@ async def subject_reading(exam: str, subject: str):
     return ok(exam_bank.reading_index(exam, subject))
 
 
+@router.get("/exams/{exam}/subjects/{subject}/vocab")
+async def subject_vocab(exam: str, subject: str):
+    """阅读高频词表：按态度/论证/题材/熟词僻义/动词分组。
+
+    与 reading 分开是因为二者数据结构不同：精读是「篇章 + 长难句」，
+    词表是「可背的词条组」。混在一个接口里会让客户端分两套 if 去猜。
+    """
+    return ok(exam_bank.vocab_index(exam, subject))
+
+
+@router.get("/exams/{exam}/subjects/{subject}/listening")
+async def subject_listening(exam: str, subject: str):
+    """听力训练单元（复试 / 四六级方向，初试不考）。
+
+    不含音频：练的是场景词、同义替换听辨、速记符号与复述框架。
+    """
+    return ok(exam_bank.listening_index(exam, subject))
+
+
+@router.get("/exams/{exam}/subjects/{subject}/formulas")
+async def subject_formulas(exam: str, subject: str):
+    """公式与二级结论速查（数学专用）。
+
+    条目带 KaTeX 源码，前端渲染成公式；没有公式表的科目返回空 chapters。
+    """
+    return ok(exam_bank.formulas_index(exam, subject))
+
+
 @router.get("/exams/{exam}/subjects/{subject}/reading/{passage_id}")
 async def reading_passage(exam: str, subject: str, passage_id: str):
     """篇目详情：段落主旨、词伙、长难句拆解、题目定位、读后复盘。"""

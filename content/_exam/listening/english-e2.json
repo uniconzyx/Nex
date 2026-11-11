@@ -1,0 +1,249 @@
+{
+ "exam": "english",
+ "subject": "e2",
+ "note": "听力训练。考研英语（二）初试不含听力，本模块服务两类真实场景：① 复试口语听力；② 四六级听力备考。不依赖音频文件——用「听辨要点 + 场景词 + 速记符号 + 干扰设计」把听力能力拆成可练的单元，配合朗读/跟读使用。",
+ "units": [
+  {
+   "id": "e2-listen-scene",
+   "title": "场景与信号词（听得懂的前提）",
+   "goal": "听到开头 3 秒就能判断对话发生在什么场景，从而预判会问什么。",
+   "steps": [
+    "抓场景定场词：听到 check in / room service 立刻定位酒店；听到 lab report / deadline 定位校园学术。",
+    "抓关系词：听到 sir / madam / professor 判断身份差，身份差决定语气与信息密度。",
+    "抓数字与时间：half past、a quarter to、two fifteen 先记阿拉伯数字，别在脑中翻译成中文。"
+   ],
+   "scenes": [
+    {
+     "name": "校园 · 选课与作业",
+     "keys": [
+      "register",
+      "seminar",
+      "assignment",
+      "deadline",
+      "extension"
+     ],
+     "ask": "常考：截止时间、能否延期、找谁签字"
+    },
+    {
+     "name": "校园 · 图书馆",
+     "keys": [
+      "renew",
+      "overdue",
+      "reserve",
+      "periodical",
+      "stacks"
+     ],
+     "ask": "常考：续借、罚款、馆藏位置"
+    },
+    {
+     "name": "求职 · 面试",
+     "keys": [
+      "resume",
+      "position",
+      "qualification",
+      "salary",
+      "probation"
+     ],
+     "ask": "常考：岗位要求、待遇、入职时间"
+    },
+    {
+     "name": "旅行 · 交通",
+     "keys": [
+      "boarding",
+      "layover",
+      "departure",
+      "aisle",
+      "delay"
+     ],
+     "ask": "常考：航班延误、座位、转机时间"
+    },
+    {
+     "name": "医疗 · 就诊",
+     "keys": [
+      "symptom",
+      "prescription",
+      "appointment",
+      "dose",
+      "side effect"
+     ],
+     "ask": "常考：症状、用药频次、复诊时间"
+    },
+    {
+     "name": "生活 · 租房",
+     "keys": [
+      "lease",
+      "deposit",
+      "utilities",
+      "furnished",
+      "landlord"
+     ],
+     "ask": "常考：押金、是否含水电、租期"
+    }
+   ],
+   "traps": [
+    "选项里出现对话中说过但属于「干扰信息」的数字（如先报错的航班号再改）——后出现的才是答案",
+    "听到原词就选，往往掉进同义替换陷阱：原文说 cut down on，选项写 reduce"
+   ]
+  },
+  {
+   "id": "e2-listen-synonym",
+   "title": "同义替换听辨（听力得分核心）",
+   "goal": "听力题的正确选项几乎都是原文的同义改写，而不是原词复现。",
+   "steps": [
+    "预读选项，圈出选项之间的差异点（时间、地点、态度、数量）。",
+    "听的时候不找原词，找「意思」：原文用 postpone，选项用 put off 就是它。",
+    "两个选项都听到相关信息时，看语气与转折词——however/but 之后才是最终决定。"
+   ],
+   "pairs": [
+    {
+     "heard": "cut down on",
+     "option": "reduce"
+    },
+    {
+     "heard": "put off",
+     "option": "postpone / delay"
+    },
+    {
+     "heard": "turn down",
+     "option": "reject / decline"
+    },
+    {
+     "heard": "make up for",
+     "option": "compensate"
+    },
+    {
+     "heard": "come up with",
+     "option": "propose / devise"
+    },
+    {
+     "heard": "look into",
+     "option": "investigate"
+    },
+    {
+     "heard": "run out of",
+     "option": "exhaust / use up"
+    },
+    {
+     "heard": "in charge of",
+     "option": "responsible for"
+    },
+    {
+     "heard": "figure out",
+     "option": "determine / work out"
+    },
+    {
+     "heard": "hold up",
+     "option": "delay"
+    }
+   ],
+   "traps": [
+    "同义替换的「替换方向」可能反向：听到 A 选 B，也可能是听到 A 但不能选 A 的某个形近词",
+    "词义相近但搭配不同：borrow 与 lend 方向相反，听力里极易混"
+   ]
+  },
+  {
+   "id": "e2-listen-notes",
+   "title": "速记与符号（长对话、讲座）",
+   "goal": "听力材料语速快，必须用符号把信息压缩下来，否则听到后面忘了前面。",
+   "steps": [
+    "只记名词、动词、数字——形容词和副词先放弃。",
+    "用固定符号：↑ 上升 / ↓ 下降 / → 导致 / ← 因为 / ≠ 不是 / ? 存疑。",
+    "记「对比」不记「内容」：同一题两个选项时，只记差异点。"
+   ],
+   "symbols": [
+    {
+     "sym": "↑",
+     "means": "increase / rise / grow"
+    },
+    {
+     "sym": "↓",
+     "means": "decrease / fall / drop"
+    },
+    {
+     "sym": "→",
+     "means": "lead to / result in / cause"
+    },
+    {
+     "sym": "←",
+     "means": "because / due to / owing to"
+    },
+    {
+     "sym": "≠",
+     "means": "not / rather than"
+    },
+    {
+     "sym": "≈",
+     "means": "about / approximately"
+    },
+    {
+     "sym": "+",
+     "means": "and / plus / besides"
+    },
+    {
+     "sym": "-",
+     "means": "except / without"
+    },
+    {
+     "sym": "w/",
+     "means": "with"
+    },
+    {
+     "sym": "w/o",
+     "means": "without"
+    },
+    {
+     "sym": "gov",
+     "means": "government"
+    },
+    {
+     "sym": "edu",
+     "means": "education"
+    },
+    {
+     "sym": "env",
+     "means": "environment"
+    },
+    {
+     "sym": "eco",
+     "means": "economy / economic"
+    }
+   ],
+   "traps": [
+    "记太多导致漏听——速记只服务「当前这道题」，不要试图记全文",
+    "符号自己看不懂：符号必须提前固定，临场发明等于没记"
+   ]
+  },
+  {
+   "id": "e2-listen-retell",
+   "title": "复试听力与复述",
+   "goal": "复试常见形式：听一段 1~2 分钟材料，然后口头复述或回答提问。",
+   "steps": [
+    "第一遍只抓主旨与结构（讲了什么、分几点），不写细节。",
+    "第二遍补关键数据与人名，用速记符号压缩。",
+    "复述按「总—分—总」：一句话概括主旨 → 两到三个要点 → 一句结论或评价。"
+   ],
+   "drills": [
+    {
+     "prompt": "用一句话概括这段材料的主题，再补两句支撑细节。",
+     "tip": "概括句用 This passage mainly discusses...；细节用 First... Second..."
+    },
+    {
+     "prompt": "材料中的说话人对该现象持什么态度？给出一处依据。",
+     "tip": "态度题一定要引原文一处措辞，不能只说「他觉得不好」"
+    },
+    {
+     "prompt": "如果你是研究者，下一步会怎么做？",
+     "tip": "这是复试最常考的发散题，答「验证—扩大样本—应用」三段最稳"
+    },
+    {
+     "prompt": "Repeat the main idea in your own words within 30 seconds.",
+     "tip": "先说替换关键词，再说一句 paraphrase，最后一句 conclusion"
+    }
+   ],
+   "traps": [
+    "听不懂就沉默——复试里「表达出听到了什么」比「完整听懂」更重要，至少复述主旨",
+    "追求逐字翻译——复述看的是信息准确与流畅，不是口译精度"
+   ]
+  }
+ ]
+}

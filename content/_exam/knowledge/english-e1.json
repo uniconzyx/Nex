@@ -1,225 +1,337 @@
 {
-  "subject": "e1",
-  "exam": "english",
-  "book": "考研英语一",
-  "items": [
+ "subject": "e1",
+ "exam": "english",
+ "book": "考研英语一",
+ "items": [
+  {
+   "topic": "e1-cloze",
+   "chapter": "第一部分 英语知识运用",
+   "knowledge": [
     {
-      "topic": "e1-cloze",
-      "chapter": "第一部分 英语知识运用",
-      "knowledge": [
-        {
-          "id": "e1-cloze-k1",
-          "title": "逻辑连接词",
-          "chapter": "完形填空",
-          "patterns": [
-            "e1-cloze-p1"
-          ],
-          "core": "转折、因果、递进、让步、并列五类关系，靠前后句语义方向判断。",
-          "tip": "先判断同向还是反向，再选词；while 既能表时间也能表让步。"
-        },
-        {
-          "id": "e1-cloze-k2",
-          "title": "实词搭配与语境",
-          "chapter": "完形填空",
-          "patterns": [
-            "e1-cloze-p2"
-          ],
-          "core": "动词看介词搭配，名词看可数与修饰语，形容词看褒贬。",
-          "tip": "四个选项中文都「说得通」时，用搭配和感情色彩做最后一刀。"
-        },
-        {
-          "id": "e1-cloze-k3",
-          "title": "复现原则",
-          "chapter": "完形填空",
-          "patterns": [
-            "e1-cloze-p2"
-          ],
-          "core": "正确选项的词义常在前文以同义词、反义词或上下义词形式出现。",
-          "tip": "填不出时回上文找同一话题的词，比在选项里纠结更快。"
-        }
-      ]
+     "id": "e1-cloze-k1",
+     "title": "逻辑连接词",
+     "chapter": "完形填空",
+     "patterns": [
+      "e1-cloze-p1"
+     ],
+     "core": "转折、因果、递进、让步、并列五类关系，靠前后句语义方向判断。",
+     "tip": "先判断同向还是反向，再选词；while 既能表时间也能表让步。"
     },
     {
-      "topic": "e1-reading",
-      "chapter": "第二部分 阅读理解 A 节",
-      "knowledge": [
-        {
-          "id": "e1-reading-k1",
-          "title": "细节定位与同义替换",
-          "chapter": "阅读理解",
-          "patterns": [
-            "e1-reading-p1"
-          ],
-          "core": "题干关键词回原文定位，正确选项是定位句的同义改写。",
-          "tip": "定位不到就换关键词（名词优先于动词），别顺着题干原词硬找。"
-        },
-        {
-          "id": "e1-reading-k2",
-          "title": "推理判断的边界",
-          "chapter": "阅读理解",
-          "patterns": [
-            "e1-reading-p2"
-          ],
-          "core": "推理只走一步，答案必须有原文依据。",
-          "tip": "含 all/only/must/never 的选项大概率错，除非原文同样绝对。"
-        },
-        {
-          "id": "e1-reading-k3",
-          "title": "主旨与作者态度",
-          "chapter": "阅读理解",
-          "patterns": [
-            "e1-reading-p3"
-          ],
-          "core": "首末段加各段首句定主旨；评价性形容词定态度。",
-          "tip": "学术文章作者极少 indifferent，态度题遇到它基本可排除。"
-        },
-        {
-          "id": "e1-reading-k4",
-          "title": "词义猜测",
-          "chapter": "阅读理解",
-          "patterns": [
-            "e1-reading-p2"
-          ],
-          "core": "看定义（that is）、举例（such as）、对比（rather than）三处线索。",
-          "tip": "熟词僻义题一定按上下文解，不能按第一义项选。"
-        }
-      ]
+     "id": "e1-cloze-k2",
+     "title": "实词搭配与语境",
+     "chapter": "完形填空",
+     "patterns": [
+      "e1-cloze-p2"
+     ],
+     "core": "动词看介词搭配，名词看可数与修饰语，形容词看褒贬。",
+     "tip": "四个选项中文都「说得通」时，用搭配和感情色彩做最后一刀。"
     },
     {
-      "topic": "e1-newtype",
-      "chapter": "第三部分 新题型",
-      "knowledge": [
-        {
-          "id": "e1-newtype-k1",
-          "title": "语篇衔接手段",
-          "chapter": "新题型",
-          "patterns": [
-            "e1-newtype-p1"
-          ],
-          "core": "代词指代、连接词、词汇复现、同义替换是四大焊接点。",
-          "tip": "先做钩子最明显的空，剩下的用排除法，比从头硬推快。"
-        },
-        {
-          "id": "e1-newtype-k2",
-          "title": "段落功能识别",
-          "chapter": "新题型",
-          "patterns": [
-            "e1-newtype-p2"
-          ],
-          "core": "段首主题句、段中承接、段尾总结；首段无指代无转折。",
-          "tip": "排序题先定首尾段，中间用时间线与逻辑方向串。"
-        }
-      ]
+     "id": "e1-cloze-k3",
+     "title": "复现原则",
+     "chapter": "完形填空",
+     "patterns": [
+      "e1-cloze-p2"
+     ],
+     "core": "正确选项的词义常在前文以同义词、反义词或上下义词形式出现。",
+     "tip": "填不出时回上文找同一话题的词，比在选项里纠结更快。"
     },
     {
-      "topic": "e1-translation",
-      "chapter": "第四部分 翻译",
-      "knowledge": [
-        {
-          "id": "e1-translation-k1",
-          "title": "长难句切分",
-          "chapter": "翻译",
-          "patterns": [
-            "e1-translation-p1"
-          ],
-          "core": "按引导词、介词短语、分词结构切意群，先定主谓宾。",
-          "tip": "先找主句谓语，排除从句谓语，否则主干必错。"
-        },
-        {
-          "id": "e1-translation-k2",
-          "title": "语序调整与增补",
-          "chapter": "翻译",
-          "patterns": [
-            "e1-translation-p1"
-          ],
-          "core": "英语后置定语译成汉语前置；抽象名词转动词；补出汉语所需范畴词。",
-          "tip": "被动句按汉语习惯转主动或无主句，硬译「被」会很别扭。"
-        },
-        {
-          "id": "e1-translation-k3",
-          "title": "指代与术语统一",
-          "chapter": "翻译",
-          "patterns": [
-            "e1-translation-p2"
-          ],
-          "core": "代词还原为所指名词；同一术语全段同一译法。",
-          "tip": "it 作形式主语时译成「……是……」结构，不要译「它」。"
-        }
-      ]
+     "id": "e1-cloze-k4",
+     "title": "固定搭配与短语动词",
+     "chapter": "完形填空",
+     "patterns": [],
+     "core": "完形 20 题里约 1/3 考搭配而非词义：动词+介词、形容词+介词、名词+介词。选项中出现两个近义动词时，差异几乎总在搭配上。",
+     "tip": "先把四个选项各自能接的介词写出来，与题干已给的介词比对，能直接排除一半。"
     },
     {
-      "topic": "e1-writing",
-      "chapter": "第五部分 写作",
-      "knowledge": [
-        {
-          "id": "e1-writing-k1",
-          "title": "应用文格式与信息点",
-          "chapter": "写作",
-          "patterns": [
-            "e1-writing-p1"
-          ],
-          "core": "称呼、目的句、主体信息、客套、落款五段；信息点逐条覆盖。",
-          "tip": "动笔前把题目要求拆成 3 个信息点写在草稿上，写完逐条打勾。"
-        },
-        {
-          "id": "e1-writing-k2",
-          "title": "议论段展开",
-          "chapter": "写作",
-          "patterns": [
-            "e1-writing-p2"
-          ],
-          "core": "观点句 + 解释 + 例证 + 小结，四句一段。",
-          "tip": "例证要具体到人/机构/年份，泛泛而谈拿不到发展分。"
-        },
-        {
-          "id": "e1-writing-k3",
-          "title": "图表描述",
-          "chapter": "写作",
-          "patterns": [
-            "e1-writing-p2"
-          ],
-          "core": "点题 + 两个关键数据 + 趋势词，数字保留一位小数。",
-          "tip": "rise/decline/fluctuate/peak at 这些动词要配对使用，别全用 increase。"
-        }
-      ]
-    },
-    {
-      "topic": "e1-listening",
-      "chapter": "第六部分 听力（复试 / 四六级）",
-      "knowledge": [
-        {
-          "id": "e1-listening-k1",
-          "title": "场景词与信号词",
-          "chapter": "听力",
-          "patterns": [
-            "e1-listening-p1"
-          ],
-          "core": "按场景积累高频词（机场、银行、面试、租房），信号词决定答案位置。",
-          "tip": "听到 but/however/actually 立刻提高注意力，答案通常在其后。"
-        },
-        {
-          "id": "e1-listening-k2",
-          "title": "同义替换听辨",
-          "chapter": "听力",
-          "patterns": [
-            "e1-listening-p1",
-            "e1-listening-p2"
-          ],
-          "core": "正确选项很少照搬原词，而是同义改写（book ↔ reserve, cheap ↔ affordable）。",
-          "tip": "平时练「听一句、写同义改写」，比反复听同一段更有效。"
-        },
-        {
-          "id": "e1-listening-k3",
-          "title": "笔记与速记",
-          "chapter": "听力",
-          "patterns": [
-            "e1-listening-p2",
-            "e1-listening-p3"
-          ],
-          "core": "用首字母、箭头、符号记录数字与逻辑关系，不追求完整拼写。",
-          "tip": "听写填空先记词尾（-s/-ed），第二遍再补全，避免为一个空丢整段。"
-        }
-      ]
+     "id": "e1-cloze-k5",
+     "title": "上下文语义场",
+     "chapter": "完形填空",
+     "patterns": [],
+     "core": "一篇完形的主题词会反复以同义/反义/上下义形式出现。空格所在句往往能被前后 1~2 句的语义场锁定，不要孤立看单句。",
+     "tip": "读第一遍不看选项通读全文，先建立主题与褒贬倾向，第二遍再填。"
     }
-  ]
+   ]
+  },
+  {
+   "topic": "e1-reading",
+   "chapter": "第二部分 阅读理解 A 节",
+   "knowledge": [
+    {
+     "id": "e1-reading-k1",
+     "title": "细节定位与同义替换",
+     "chapter": "阅读理解",
+     "patterns": [
+      "e1-reading-p1"
+     ],
+     "core": "题干关键词回原文定位，正确选项是定位句的同义改写。",
+     "tip": "定位不到就换关键词（名词优先于动词），别顺着题干原词硬找。"
+    },
+    {
+     "id": "e1-reading-k2",
+     "title": "推理判断的边界",
+     "chapter": "阅读理解",
+     "patterns": [
+      "e1-reading-p2"
+     ],
+     "core": "推理只走一步，答案必须有原文依据。",
+     "tip": "含 all/only/must/never 的选项大概率错，除非原文同样绝对。"
+    },
+    {
+     "id": "e1-reading-k3",
+     "title": "主旨与作者态度",
+     "chapter": "阅读理解",
+     "patterns": [
+      "e1-reading-p3"
+     ],
+     "core": "首末段加各段首句定主旨；评价性形容词定态度。",
+     "tip": "学术文章作者极少 indifferent，态度题遇到它基本可排除。"
+    },
+    {
+     "id": "e1-reading-k4",
+     "title": "词义猜测",
+     "chapter": "阅读理解",
+     "patterns": [
+      "e1-reading-p2"
+     ],
+     "core": "看定义（that is）、举例（such as）、对比（rather than）三处线索。",
+     "tip": "熟词僻义题一定按上下文解，不能按第一义项选。"
+    },
+    {
+     "id": "e1-reading-k5",
+     "title": "题干定位与干扰项设计",
+     "chapter": "阅读理解 A 节",
+     "patterns": [],
+     "core": "四类干扰项：偷换主体、扩大/缩小范围、绝对化（all/never/must）、无中生有（原文没提）。正确答案几乎都是原文的合理同义改写。",
+     "tip": "选项里出现 all/only/never/must 先标红，除非原文明确写了绝对表述，否则基本是错的。"
+    },
+    {
+     "id": "e1-reading-k6",
+     "title": "例证题与段落功能",
+     "chapter": "阅读理解 A 节",
+     "patterns": [],
+     "core": "问「作者举某例子是为了说明什么」，答案在例子**之前**的主题句或之后一句，而不是例子里本身。",
+     "tip": "例证题永远向上（或向下）找论点句，紧扣例子细节的选项都是陷阱。"
+    },
+    {
+     "id": "e1-reading-k7",
+     "title": "态度题与语气判断",
+     "chapter": "阅读理解 A 节",
+     "patterns": [],
+     "core": "态度词分三类：正向（approval, support）、负向（critical, skeptical）、中立（objective, neutral）。「indifferent（漠不关心）」几乎从不作正确答案。",
+     "tip": "找形容词/副词与转折词后的评价，作者真实态度通常藏在 however/but 之后。"
+    }
+   ]
+  },
+  {
+   "topic": "e1-newtype",
+   "chapter": "第三部分 新题型",
+   "knowledge": [
+    {
+     "id": "e1-newtype-k1",
+     "title": "语篇衔接手段",
+     "chapter": "新题型",
+     "patterns": [
+      "e1-newtype-p1"
+     ],
+     "core": "代词指代、连接词、词汇复现、同义替换是四大焊接点。",
+     "tip": "先做钩子最明显的空，剩下的用排除法，比从头硬推快。"
+    },
+    {
+     "id": "e1-newtype-k2",
+     "title": "段落功能识别",
+     "chapter": "新题型",
+     "patterns": [
+      "e1-newtype-p2"
+     ],
+     "core": "段首主题句、段中承接、段尾总结；首段无指代无转折。",
+     "tip": "排序题先定首尾段，中间用时间线与逻辑方向串。"
+    },
+    {
+     "id": "e1-newtype-k3",
+     "title": "七选五的衔接判定",
+     "chapter": "新题型",
+     "patterns": [],
+     "core": "三个抓手：代词指代（this/these/it 必指前文）、逻辑连接词（however/moreover 定方向）、复现词（同词或同义重复）。",
+     "tip": "先做含明显代词或连接词的题，用求解出的位置排除其他选项，比顺序硬做快得多。"
+    },
+    {
+     "id": "e1-newtype-k4",
+     "title": "排序题的逻辑链",
+     "chapter": "新题型",
+     "patterns": [],
+     "core": "先定首段（通常给引言或背景，无代词指前文），再按时间/因果/递进关系串。每段首句的衔接词是主要线索。",
+     "tip": "先锁定首段与末段，中间两段靠「代词指代 + 连接词」双向验证。"
+    }
+   ]
+  },
+  {
+   "topic": "e1-translation",
+   "chapter": "第四部分 翻译",
+   "knowledge": [
+    {
+     "id": "e1-translation-k1",
+     "title": "长难句切分",
+     "chapter": "翻译",
+     "patterns": [
+      "e1-translation-p1"
+     ],
+     "core": "按引导词、介词短语、分词结构切意群，先定主谓宾。",
+     "tip": "先找主句谓语，排除从句谓语，否则主干必错。"
+    },
+    {
+     "id": "e1-translation-k2",
+     "title": "语序调整与增补",
+     "chapter": "翻译",
+     "patterns": [
+      "e1-translation-p1"
+     ],
+     "core": "英语后置定语译成汉语前置；抽象名词转动词；补出汉语所需范畴词。",
+     "tip": "被动句按汉语习惯转主动或无主句，硬译「被」会很别扭。"
+    },
+    {
+     "id": "e1-translation-k3",
+     "title": "指代与术语统一",
+     "chapter": "翻译",
+     "patterns": [
+      "e1-translation-p2"
+     ],
+     "core": "代词还原为所指名词；同一术语全段同一译法。",
+     "tip": "it 作形式主语时译成「……是……」结构，不要译「它」。"
+    },
+    {
+     "id": "e1-translation-k4",
+     "title": "被动语态与无灵主语",
+     "chapter": "翻译",
+     "patterns": [],
+     "core": "英语被动句常含无灵主语（it is said that / it is believed that），中文宜转为主动或加泛指主语（人们认为 / 据说），直译会生硬。",
+     "tip": "遇到「It is + 过去分词 + that」，先判断能否译成「据……」「人们……」再动笔。"
+    },
+    {
+     "id": "e1-translation-k5",
+     "title": "定语从句的拆分与前置",
+     "chapter": "翻译",
+     "patterns": [],
+     "core": "短定语从句前置译为「……的」；长定语从句（尤其非限定）拆分独立成句，用「这/它/该」承接，避免一句套一句。",
+     "tip": "从句超过 8 个词就别硬塞前置，拆句比长句更符合中文习惯。"
+    }
+   ]
+  },
+  {
+   "topic": "e1-writing",
+   "chapter": "第五部分 写作",
+   "knowledge": [
+    {
+     "id": "e1-writing-k1",
+     "title": "应用文格式与信息点",
+     "chapter": "写作",
+     "patterns": [
+      "e1-writing-p1"
+     ],
+     "core": "称呼、目的句、主体信息、客套、落款五段；信息点逐条覆盖。",
+     "tip": "动笔前把题目要求拆成 3 个信息点写在草稿上，写完逐条打勾。"
+    },
+    {
+     "id": "e1-writing-k2",
+     "title": "议论段展开",
+     "chapter": "写作",
+     "patterns": [
+      "e1-writing-p2"
+     ],
+     "core": "观点句 + 解释 + 例证 + 小结，四句一段。",
+     "tip": "例证要具体到人/机构/年份，泛泛而谈拿不到发展分。"
+    },
+    {
+     "id": "e1-writing-k3",
+     "title": "图表描述",
+     "chapter": "写作",
+     "patterns": [
+      "e1-writing-p2"
+     ],
+     "core": "点题 + 两个关键数据 + 趋势词，数字保留一位小数。",
+     "tip": "rise/decline/fluctuate/peak at 这些动词要配对使用，别全用 increase。"
+    },
+    {
+     "id": "e1-writing-k4",
+     "title": "大小作文模板骨架",
+     "chapter": "写作",
+     "patterns": [],
+     "core": "小作文（应用文）三段：写信目的 → 具体内容 → 期待回复。大作文（图画/图表）三段：描述图 → 分析原因 → 总结建议。",
+     "tip": "大作文第一段只描述不评论，把「描述 + 分析」搅在一起是最大的结构失分。"
+    },
+    {
+     "id": "e1-writing-k5",
+     "title": "高分句式与连接",
+     "chapter": "写作",
+     "patterns": [],
+     "core": "递进（moreover, what's more）、转折（however, nevertheless）、因果（consequently, hence）、举例（for instance）。每段 2~3 个连接词足够，堆砌反而扣分。",
+     "tip": "背 5 个万能句式（非谓语开头、强调句、倒装、同位语、数据描述）比背整篇模板更抗查重。"
+    }
+   ]
+  },
+  {
+   "topic": "e1-listening",
+   "chapter": "第六部分 听力（复试 / 四六级）",
+   "knowledge": [
+    {
+     "id": "e1-listening-k1",
+     "title": "场景词与信号词",
+     "chapter": "听力",
+     "patterns": [
+      "e1-listening-p1"
+     ],
+     "core": "按场景积累高频词（机场、银行、面试、租房），信号词决定答案位置。",
+     "tip": "听到 but/however/actually 立刻提高注意力，答案通常在其后。"
+    },
+    {
+     "id": "e1-listening-k2",
+     "title": "同义替换听辨",
+     "chapter": "听力",
+     "patterns": [
+      "e1-listening-p1",
+      "e1-listening-p2"
+     ],
+     "core": "正确选项很少照搬原词，而是同义改写（book ↔ reserve, cheap ↔ affordable）。",
+     "tip": "平时练「听一句、写同义改写」，比反复听同一段更有效。"
+    },
+    {
+     "id": "e1-listening-k3",
+     "title": "笔记与速记",
+     "chapter": "听力",
+     "patterns": [
+      "e1-listening-p2",
+      "e1-listening-p3"
+     ],
+     "core": "用首字母、箭头、符号记录数字与逻辑关系，不追求完整拼写。",
+     "tip": "听写填空先记词尾（-s/-ed），第二遍再补全，避免为一个空丢整段。"
+    },
+    {
+     "id": "e1-listening-k4",
+     "title": "听力长对话的信号词",
+     "chapter": "听力",
+     "patterns": [],
+     "core": "转折（but, however）、因果（because, so, therefore）、建议（why not, you'd better）、数字与时间（half past, quarter to）是考点密集区。",
+     "tip": "听到 but/however 立刻提高警觉，其后一句八成是答案所在。"
+    },
+    {
+     "id": "e1-listening-k5",
+     "title": "听力做题节奏控制",
+     "chapter": "听力",
+     "patterns": [],
+     "core": "预读选项（利用读题间隙）→ 抓听到的关键词定位 → 边听边记缩写。错过一题立即放手，追题会连丢三题。",
+     "tip": "预读时圈出选项中「互不相同」的那个词，那就是要靠听辨确认的信息点。"
+    },
+    {
+     "id": "e1-listening-k6",
+     "title": "复试口语与听力应对",
+     "chapter": "听力（复试）",
+     "patterns": [],
+     "core": "复试常见：英文自我介绍（1~2 分钟）、专业问题英文作答、听一段材料复述。评分看流利度与信息完整度，不苛求口音。",
+     "tip": "自我介绍备「学业背景 → 项目/科研经历 → 报考动机」三段式，每段留一句可展开的钩子。"
+    }
+   ]
+  }
+ ]
 }

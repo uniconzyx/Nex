@@ -1,0 +1,124 @@
+{
+ "exam": "english",
+ "subject": "e1",
+ "note": "考研英语阅读高频词表。分层依据：① 近十年真题阅读中出现 ≥3 次的实词；② 影响定位与同义替换判断的词；③ 易被忽视的熟词僻义。词义只给「考研语境下最常用」的那一个，避免多义干扰记忆。",
+ "groups": [
+  {
+   "id": "e1-vocab-attitude",
+   "title": "态度与评价（态度题高频）",
+   "desc": "态度题的正确选项几乎都出自这一组。注意区分「作者态度」与「文中人物态度」。",
+   "words": [
+    {"word": "skeptical", "pos": "a.", "cn": "怀疑的", "note": "比 doubtful 更常用于评价研究方法与结论"},
+    {"word": "critical", "pos": "a.", "cn": "批判的 / 至关重要的", "note": "熟词僻义：be critical to = 对……至关重要"},
+    {"word": "objective", "pos": "a.", "cn": "客观的", "note": "中立态度的标准答案词"},
+    {"word": "indifferent", "pos": "a.", "cn": "漠不关心的", "note": "态度题极少作为正确答案"},
+    {"word": "approval", "pos": "n.", "cn": "赞同", "note": "正向态度，动词 approve of"},
+    {"word": "controversial", "pos": "a.", "cn": "有争议的", "note": "一旦出现，后文必有一方反对"},
+    {"word": "ambivalent", "pos": "a.", "cn": "矛盾的（既支持又反对）", "note": "复杂态度的正确选项标志"},
+    {"word": "reserved", "pos": "a.", "cn": "保留的、不置可否的", "note": "常用来替代 neutral"},
+    {"word": "outrage", "pos": "n.", "cn": "愤怒", "note": "强负向评价"},
+    {"word": "advocate", "pos": "v.", "cn": "主张、提倡", "note": "advocate doing sth，后接动名词"},
+    {"word": "at odds with", "pos": "phr.", "cn": "与……相矛盾", "note": "与 contradict 同义"},
+    {"word": "downplay", "pos": "v.", "cn": "淡化、轻描淡写", "note": "暗含作者不认同"},
+    {"word": "skepticism", "pos": "n.", "cn": "怀疑态度", "note": "与 skeptical 同源，名词形式"},
+    {"word": "reassuring", "pos": "a.", "cn": "令人安心的", "note": "正向，但常带「表面安抚」的隐含语气"}
+   ]
+  },
+  {
+   "id": "e1-vocab-argument",
+   "title": "论证与逻辑（推理题、新题型高频）",
+   "desc": "这一类词决定你能否看出一篇文章的论证方向，比背单词本身更重要。",
+   "words": [
+    {"word": "assert", "pos": "v.", "cn": "断言、主张", "note": "比 say 更强调「未经证明的判断」"},
+    {"word": "contend", "pos": "v.", "cn": "主张、争论", "note": "阅读中极高频的「提出观点」动词"},
+    {"word": "presume", "pos": "v.", "cn": "假定、推测", "note": "暗示缺乏充分证据"},
+    {"word": "infer", "pos": "v.", "cn": "推断", "note": "推理题题干的标志词"},
+    {"word": "implication", "pos": "n.", "cn": "含义、潜在影响", "note": "比 meaning 更强调「言外之意」"},
+    {"word": "underlying", "pos": "a.", "cn": "潜在的、根本的", "note": "underlying cause = 根本原因"},
+    {"word": "counterintuitive", "pos": "a.", "cn": "反直觉的", "note": "出现即暗示后文是重点"},
+    {"word": "plausible", "pos": "a.", "cn": "貌似合理的", "note": "隐含「其实未必」的保留语气"},
+    {"word": "fallacy", "pos": "n.", "cn": "谬误", "note": "指出论证缺陷时用"},
+    {"word": "concede", "pos": "v.", "cn": "（不情愿地）承认", "note": "让步，后常接 but"},
+    {"word": "refute", "pos": "v.", "cn": "驳倒", "note": "强于 deny，指成功反驳"},
+    {"word": "premise", "pos": "n.", "cn": "前提", "note": "逻辑论证的起点"},
+    {"word": "correlation", "pos": "n.", "cn": "相关性", "note": "不是因果，常是干扰陷阱"},
+    {"word": "causation", "pos": "n.", "cn": "因果关系", "note": "与 correlation 对立，二者混用是常见错误选项"}
+   ]
+  },
+  {
+   "id": "e1-vocab-society",
+   "title": "社会与经济（按题材高频）",
+   "desc": "考研阅读题材集中在教育、科技、经济、环境、媒体五类，这组覆盖其中出现率最高的实词。",
+   "words": [
+    {"word": "subsidy", "pos": "n.", "cn": "补贴", "note": "政策类文章高频"},
+    {"word": "incentive", "pos": "n.", "cn": "激励、诱因", "note": "economic incentive"},
+    {"word": "disparity", "pos": "n.", "cn": "差距、悬殊", "note": "income disparity 收入差距"},
+    {"word": "inequality", "pos": "n.", "cn": "不平等", "note": "常与 widen/narrow 搭配"},
+    {"word": "regulation", "pos": "n.", "cn": "监管、法规", "note": "与 deregulation 相对"},
+    {"word": "productivity", "pos": "n.", "cn": "生产率", "note": "经济学文章核心词"},
+    {"word": "infrastructure", "pos": "n.", "cn": "基础设施", "note": "常作不可数名词"},
+    {"word": "sustainability", "pos": "n.", "cn": "可持续性", "note": "环境类必考"},
+    {"word": "legislation", "pos": "n.", "cn": "立法、法规", "note": "不可数，指法律整体"},
+    {"word": "transparency", "pos": "n.", "cn": "透明度", "note": "治理类文章"},
+    {"word": "accountability", "pos": "n.", "cn": "问责制", "note": "与 responsibility 近但更强调「被追究」"},
+    {"word": "consensus", "pos": "n.", "cn": "共识", "note": "reach a consensus"},
+    {"word": "unprecedented", "pos": "a.", "cn": "前所未有的", "note": "绝对化倾向，慎选"},
+    {"word": "marginalize", "pos": "v.", "cn": "边缘化", "note": "社会群体类文章高频"}
+   ]
+  },
+  {
+   "id": "e1-vocab-tricky",
+   "title": "熟词僻义（定位对了也读错）",
+   "desc": "这些词你「认识」，但在考研语境下意思完全不同，是失分的隐形来源。",
+   "words": [
+    {"word": "address", "pos": "v.", "cn": "应对、处理", "note": "address the issue 不是「演讲问题」"},
+    {"word": "appreciate", "pos": "v.", "cn": "意识到、理解", "note": "不是「感激」"},
+    {"word": "argue", "pos": "v.", "cn": "主张（而非「争吵」）", "note": "学术语境下几乎都是这个义"},
+    {"word": "capital", "pos": "n.", "cn": "资本", "note": "不是「首都」"},
+    {"word": "check", "pos": "v.", "cn": "抑制、制约", "note": "checks and balances 制衡"},
+    {"word": "compromise", "pos": "v.", "cn": "损害、削弱", "note": "compromise safety 危及安全"},
+    {"word": "discount", "pos": "v.", "cn": "低估、不予考虑", "note": "discount the risk 低估风险"},
+    {"word": "employ", "pos": "v.", "cn": "采用（方法）", "note": "employ a strategy"},
+    {"word": "fine", "pos": "a.", "cn": "细微的", "note": "fine distinction 细微差别"},
+    {"word": "issue", "pos": "n.", "cn": "问题、议题", "note": "不是「发行」"},
+    {"word": "minute", "pos": "a.", "cn": "微小的", "note": "读 /maɪˈnjuːt/"},
+    {"word": "novel", "pos": "a.", "cn": "新颖的", "note": "不是「小说」"},
+    {"word": "observe", "pos": "v.", "cn": "指出、评论", "note": "不是「观察」"},
+    {"word": "save", "pos": "prep.", "cn": "除……之外", "note": "save for = 除了"},
+    {"word": "sound", "pos": "a.", "cn": "合理的、健全的", "note": "sound argument"},
+    {"word": "still", "pos": "v.", "cn": "使平静", "note": "still the fears"},
+    {"word": "subject", "pos": "v.", "cn": "使遭受", "note": "be subjected to"},
+    {"word": "the last", "pos": "phr.", "cn": "最不可能的", "note": "the last person to do"},
+    {"word": "vessel", "pos": "n.", "cn": "容器、血管", "note": "不一定是「船」"},
+    {"word": "wear", "pos": "n.", "cn": "磨损", "note": "wear and tear"}
+   ]
+  },
+  {
+   "id": "e1-vocab-verb",
+   "title": "高频动词（影响句意判断）",
+   "desc": "动词决定句子的方向。这组词在真题阅读里反复出现，认不出就整句读反。",
+   "words": [
+    {"word": "attribute", "pos": "v.", "cn": "把……归因于", "note": "attribute A to B"},
+    {"word": "assess", "pos": "v.", "cn": "评估", "note": "比 measure 更强调判断"},
+    {"word": "assume", "pos": "v.", "cn": "假定、承担", "note": "熟词：assume responsibility"},
+    {"word": "constrain", "pos": "v.", "cn": "限制、约束", "note": "常被动：be constrained by"},
+    {"word": "deteriorate", "pos": "v.", "cn": "恶化", "note": "健康、环境、关系都用它"},
+    {"word": "diminish", "pos": "v.", "cn": "减少、削弱", "note": "比 decrease 更书面"},
+    {"word": "encompass", "pos": "v.", "cn": "包含、涵盖", "note": "比 include 更强调范围广"},
+    {"word": "exacerbate", "pos": "v.", "cn": "加剧", "note": "贬义，比 worsen 更正式"},
+    {"word": "facilitate", "pos": "v.", "cn": "促进、使便利", "note": "后接动名词"},
+    {"word": "hamper", "pos": "v.", "cn": "妨碍", "note": "比 hinder 更常用于抽象事物"},
+    {"word": "mitigate", "pos": "v.", "cn": "缓解", "note": "mitigate the impact"},
+    {"word": "offset", "pos": "v.", "cn": "抵消", "note": "经济、环境文章高频"},
+    {"word": "outweigh", "pos": "v.", "cn": "重于、超过", "note": "benefits outweigh risks"},
+    {"word": "perceive", "pos": "v.", "cn": "认为、察觉", "note": "perceive A as B"},
+    {"word": "prompt", "pos": "v.", "cn": "促使、引起", "note": "prompt sb to do"},
+    {"word": "render", "pos": "v.", "cn": "使成为", "note": "render sth useless"},
+    {"word": "stem from", "pos": "phr.", "cn": "源于", "note": "主语是结果，宾语是原因"},
+    {"word": "undermine", "pos": "v.", "cn": "削弱、损害", "note": "阅读中极高频率"},
+    {"word": "warrant", "pos": "v.", "cn": "使有必要、证明正当", "note": "warrant attention"},
+    {"word": "yield", "pos": "v.", "cn": "产生、让步", "note": "yield results 产生结果"}
+   ]
+  }
+ ]
+}

@@ -58,6 +58,9 @@ class Bank:
     summaries: dict[tuple[str, str], dict] = field(default_factory=dict)
     questions: dict[tuple[str, str], list[dict]] = field(default_factory=dict)
     reading: dict[tuple[str, str], dict] = field(default_factory=dict)
+    vocab: dict[tuple[str, str], dict] = field(default_factory=dict)
+    listening: dict[tuple[str, str], dict] = field(default_factory=dict)
+    formulas: dict[tuple[str, str], dict] = field(default_factory=dict)
     papers: dict[str, dict] = field(default_factory=dict)
     questions_by_id: dict[str, dict] = field(default_factory=dict)
     question_scope: dict[str, tuple[str, str]] = field(default_factory=dict)
@@ -171,6 +174,24 @@ def _build() -> Bank:
         exam, subject = doc.get("exam"), doc.get("subject")
         if exam and subject:
             bank.reading[(exam, subject)] = doc
+
+    # 词表单独一个目录：reading/ 下的文件按 (exam, subject) 互相覆盖，
+    # 把高频词塞进 reading/ 会把精读篇目顶掉。
+    for doc in _scan(root / "vocab"):
+        exam, subject = doc.get("exam"), doc.get("subject")
+        if exam and subject:
+            bank.vocab[(exam, subject)] = doc
+
+    for doc in _scan(root / "listening"):
+        exam, subject = doc.get("exam"), doc.get("subject")
+        if exam and subject:
+            bank.listening[(exam, subject)] = doc
+
+    # 公式表同样独立成目录：它是「速查」而非「精读/框架」，混进去会互相覆盖
+    for doc in _scan(root / "formulas"):
+        exam, subject = doc.get("exam"), doc.get("subject")
+        if exam and subject:
+            bank.formulas[(exam, subject)] = doc
 
     for doc in _scan(root / "papers"):
         if doc.get("id"):
@@ -613,6 +634,95 @@ def reading_passage(exam: str, subject: str, passage_id: str) -> dict:
         NOT_FOUND, f"精读文章不存在：{passage_id}", http_status=404,
         data={"exam": exam, "subject": subject},
     )
+
+
+# ---------------------------------------------------------------- 词表 ----
+
+def vocab_index(exam: str, subject: str) -> dict:
+    """阅读高频词表：按「态度 / 论证 / 题材 / 熟词僻义 / 动词」分组。
+
+    没有词表的科目返回空列表而不是 404 —— 与 reading_index 同一约定：
+    集合存在但为空，和资源不存在是两件事。
+    """
+    b = bank()
+    b.scope(exam, subject)
+    doc = b.vocab.get((exam, subject)) or {}
+    groups = []
+    total = 0
+    for g in doc.get("groups") or []:
+        words = g.get("words") or []
+        total += len(words)
+        groups.append({
+            "id": g.get("id"),
+            "title": g.get("title"),
+            "desc": g.get("desc"),
+            "words": words,
+            "count": len(words),
+        })
+    return {
+        "exam": exam,
+        "subject": subject,
+        "note": doc.get("note"),
+        "groups": groups,
+        "total": total,
+    }
+
+
+# ---------------------------------------------------------------- 听力 ----
+
+def listening_index(exam: str, subject: str) -> dict:
+    """听力训练单元：场景词 / 同义替换 / 速记 / 复述。
+
+    考研英语初试不考听力，这里的单元服务复试与四六级，
+    因此数据里不含音频，练的是「听辨要点」而不是「听音频答题」。
+    """
+    b = bank()
+    b.scope(exam, subject)
+    doc = b.listening.get((exam, subject)) or {}
+    units = doc.get("units") or []
+    return {
+        "exam": exam,
+        "subject": subject,
+        "note": doc.get("note"),
+        "units": units,
+        "total": len(units),
+    }
+
+
+def formulas_index(exam: str, subject: str) -> dict:
+    """公式与二级结论速查：按章 → 分组 → 条目三级组织。
+
+    条目里 tex 是 KaTeX 源码，前端渲染；note 用来说明「什么时候用」，
+    比公式本身更容易被忘掉，所以必须一起返回。
+    """
+    b = bank()
+    b.scope(exam, subject)
+    doc = b.formulas.get((exam, subject)) or {}
+    chapters = []
+    total = 0
+    for ch in doc.get("chapters") or []:
+        groups = []
+        for g in ch.get("groups") or []:
+            items = g.get("items") or []
+            total += len(items)
+            groups.append({
+                "title": g.get("title"),
+                "items": items,
+                "count": len(items),
+            })
+        chapters.append({
+            "id": ch.get("id"),
+            "title": ch.get("title"),
+            "note": ch.get("note"),
+            "groups": groups,
+        })
+    return {
+        "exam": exam,
+        "subject": subject,
+        "note": doc.get("note"),
+        "chapters": chapters,
+        "total": total,
+    }
 
 
 # ---------------------------------------------------------------- 判分 ----

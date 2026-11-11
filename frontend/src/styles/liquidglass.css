@@ -239,7 +239,6 @@ html.lg-b .km-account-chip {
   gap: 10px;
   padding: 18px;
   text-align: left;
-  cursor: pointer;
   color: var(--km-ink, #1f2937);
   font: inherit;
 }
@@ -253,12 +252,45 @@ html.lg-b .km-account-chip {
   color: var(--km-ink-2, #475569);
   line-height: 1.55;
 }
-.kaoyan-board .kb-cta {
+/* 主按钮：原先整卡是 button，现在卡片是 article（内含多个子入口），
+   主 CTA 退化为真正的按钮，子入口单独成排。 */
+.kaoyan-board .kaoyan-enter {
   margin-top: auto;
   align-self: flex-start;
   font-size: 13px;
   font-weight: 600;
   color: #1d4ed8;
+  background: none;
+  border: 0;
+  padding: 4px 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+.kaoyan-board .kaoyan-enter:hover {
+  text-decoration: underline;
+}
+/* 细分入口：数一/数二、做题方法/高频词/听力/题库…… */
+.kaoyan-subs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+.kaoyan-sub {
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(29, 78, 216, 0.22);
+  background: rgba(29, 78, 216, 0.06);
+  color: #1d4ed8;
+  font-size: 12.5px;
+  line-height: 1.3;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.16s ease, border-color 0.16s ease;
+}
+.kaoyan-sub:hover {
+  background: rgba(29, 78, 216, 0.14);
+  border-color: rgba(29, 78, 216, 0.4);
 }
 .km-tag-blue {
   align-self: flex-start;

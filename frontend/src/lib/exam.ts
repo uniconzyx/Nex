@@ -246,8 +246,7 @@ export interface ReadingIndex {
   total: number;
 }
 
-export interface Passage {
-  id: string;
+export interface Passage {  id: string;
   exam: string;
   subject: string;
   title: string;
@@ -260,6 +259,72 @@ export interface Passage {
   takeaway: string[];
   false_friends: { word: string; usual: string; here: string; note: string }[];
   synonyms: { from: string; to: string }[];
+}
+
+/** 阅读高频词表：按「态度 / 论证 / 题材 / 熟词僻义 / 动词」分组，用于背诵 */
+export interface VocabGroup {
+  id: string;
+  title: string;
+  desc?: string | null;
+  words: { word: string; pos: string; cn: string; note?: string }[];
+  count: number;
+}
+
+export interface VocabDoc {
+  exam: string;
+  subject: string;
+  note?: string | null;
+  groups: VocabGroup[];
+  total: number;
+}
+
+/** 听力训练单元：场景词 / 同义替换 / 速记 / 复述（复试与四六级方向） */
+export interface ListeningUnit {
+  id: string;
+  title: string;
+  goal: string;
+  steps: string[];
+  traps: string[];
+  scenes?: { name: string; keys: string[]; ask: string }[];
+  pairs?: { heard: string; option: string }[];
+  symbols?: { sym: string; means: string }[];
+  drills?: { prompt: string; tip: string }[];
+}
+
+export interface ListeningDoc {
+  exam: string;
+  subject: string;
+  note?: string | null;
+  units: ListeningUnit[];
+  total: number;
+}
+
+/** 公式条目：tex 为 KaTeX 源码，note 说明适用场景 */
+export interface FormulaItem {
+  name: string;
+  tex: string;
+  note?: string;
+}
+
+export interface FormulaGroup {
+  title: string;
+  items: FormulaItem[];
+  count: number;
+}
+
+export interface FormulaChapter {
+  id: string;
+  title: string;
+  note?: string | null;
+  groups: FormulaGroup[];
+}
+
+export interface FormulaDoc {
+  exam: string;
+  subject: string;
+  note?: string | null;
+  chapters: FormulaChapter[];
+  total: number;
 }
 
 // ───────────────────────────── 判分 ─────────────────────────────
@@ -361,6 +426,18 @@ export function getReading(exam: string, subject: string): Promise<ReadingIndex>
 
 export function getPassage(exam: string, subject: string, id: string): Promise<Passage> {
   return apiGet<Passage>(`${P}/exams/${exam}/subjects/${subject}/reading/${id}`);
+}
+
+export function getVocab(exam: string, subject: string): Promise<VocabDoc> {
+  return apiGet<VocabDoc>(`${P}/exams/${exam}/subjects/${subject}/vocab`);
+}
+
+export function getListening(exam: string, subject: string): Promise<ListeningDoc> {
+  return apiGet<ListeningDoc>(`${P}/exams/${exam}/subjects/${subject}/listening`);
+}
+
+export function getFormulas(exam: string, subject: string): Promise<FormulaDoc> {
+  return apiGet<FormulaDoc>(`${P}/exams/${exam}/subjects/${subject}/formulas`);
 }
 
 export interface PaperQuery {

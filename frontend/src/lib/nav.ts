@@ -29,6 +29,7 @@ export type KmPage =
   | 'employment'
   | 'reexam'
   | 'agent'
+  | 'exam'
   | 'kaoyan';
 
 export interface NavItem {

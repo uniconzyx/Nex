@@ -35,6 +35,7 @@ import { Track408Page } from './pages/Track408Page';
 import { EmploymentPage } from './pages/EmploymentPage';
 import { ReexamPage } from './pages/ReexamPage';
 import { KaoyanPage } from './pages/KaoyanPage';
+import { ExamPage } from './pages/ExamPage';
 import { AgentPage } from './pages/AgentPage';
 import {
   AchievementsPage,
@@ -209,6 +210,32 @@ export function App() {
   }, []);
 
   /**
+   * 带参数的考试入口：从考研中枢点「数学 / 英语 / 政治」直接落到对应题库。
+   * 单独一条通道，避免把业务参数塞进通用 navigate、污染侧栏与深链。
+   */
+  const [examEntry, setExamEntry] = useState<{
+    exam: string;
+    subject?: string;
+    view?: 'framework' | 'papers' | 'training';
+    sub?: 'framework' | 'knowledge' | 'summary' | 'vocab' | 'listening' | 'formulas';
+  } | null>(null);
+
+  const navigateExams = useCallback(
+    (
+      exam: string,
+      subject?: string,
+      view?: 'framework' | 'papers' | 'training',
+      sub?: 'framework' | 'knowledge' | 'summary' | 'vocab' | 'listening' | 'formulas',
+    ) => {
+      setExamEntry({ exam, subject, view, sub });
+      setPage('exam');
+      if (location.hash !== '#exam') history.replaceState(null, '', '#exam');
+      setAi((prev) => ({ ...prev, open: false }));
+    },
+    [],
+  );
+
+  /**
    * 把导航函数注入 challenge.ts。
    * 图鉴卡片、遭遇弹窗、每日试炼都要「带着题目跳到试炼实验室」，
    * 但它们不该各自拿一份 navigate props；lib 层拿不到 React 上下文，
@@ -258,7 +285,18 @@ export function App() {
           {page === 'track408' && <Track408Page onNavigate={navigate} />}
           {page === 'employment' && <EmploymentPage onNavigate={navigate} />}
           {page === 'reexam' && <ReexamPage />}
-          {page === 'kaoyan' && <KaoyanPage onNavigate={navigate} />}
+          {page === 'kaoyan' && (
+            <KaoyanPage onNavigate={navigate} onNavigateExams={navigateExams} />
+          )}
+          {page === 'exam' && (
+            <ExamPage
+              key={`${examEntry?.exam ?? 'all'}-${examEntry?.subject ?? ''}-${examEntry?.view ?? ''}-${examEntry?.sub ?? ''}`}
+              initialExam={examEntry?.exam}
+              initialSubject={examEntry?.subject}
+              initialView={examEntry?.view}
+              initialSub={examEntry?.sub}
+            />
+          )}
           {page === 'agent' && <AgentPage />}
         </div>
       </KaimaoShell>

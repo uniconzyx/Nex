@@ -1,0 +1,1355 @@
+{
+ "exam": "math",
+ "subject": "m1",
+ "note": "考研数学（一）公式与二级结论速查。按章组织：每章先给「必背公式」，再给「二级结论」（由基本公式推得、考场上可直接引用省时间的结论）。公式为 KaTeX 语法，可在推导题之外直接套用；二级结论建议自己推一遍再用，否则容易记混条件。",
+ "chapters": [
+  {
+   "id": "m1-f-limits",
+   "title": "第 1 章 函数、极限与连续",
+   "note": "极限是整张卷子的地基，本章公式几乎每题都用。重点在等价无穷小与泰勒展开的阶数管理。",
+   "groups": [
+    {
+     "title": "重要极限",
+     "items": [
+      {
+       "name": "第一重要极限",
+       "tex": "\\lim_{x\\to 0}\\frac{\\sin x}{x}=1",
+       "note": "推论：$\\lim_{x\\to0}\\frac{\\tan x}{x}=1$，$\\lim_{x\\to0}\\frac{\\arcsin x}{x}=1$，$\\lim_{x\\to0}\\frac{\\arctan x}{x}=1$"
+      },
+      {
+       "name": "第二重要极限",
+       "tex": "\\lim_{x\\to\\infty}\\left(1+\\frac1x\\right)^x=e",
+       "note": "$1^{\\infty}$ 型统一写成 $e^{\\lim (f-1)g}$，这是最省事的写法"
+      },
+      {
+       "name": "1^∞ 通用式",
+       "tex": "\\lim u^v=e^{\\lim v(u-1)}\\quad(u\\to1,\\ v\\to\\infty)",
+       "note": "底数不趋于 1 时不能套，先判型"
+      },
+      {
+       "name": "对数型极限",
+       "tex": "\\lim_{x\\to0}\\frac{\\ln(1+x)}{x}=1,\\quad \\lim_{x\\to0}\\frac{a^x-1}{x}=\\ln a",
+       "note": "$a=e$ 时退化为 $\\lim_{x\\to0}\\frac{e^x-1}{x}=1$"
+      },
+      {
+       "name": "幂型极限",
+       "tex": "\\lim_{x\\to0}\\frac{(1+x)^{\\alpha}-1}{x}=\\alpha",
+       "note": "α 为任意实数，这是广义二项式的导数形式"
+      }
+     ]
+    },
+    {
+     "title": "洛必达与未定式",
+     "items": [
+      {
+       "name": "洛必达法则",
+       "tex": "\\lim\\frac{f(x)}{g(x)}=\\lim\\frac{f'(x)}{g'(x)}",
+       "note": "仅限 0/0 与 ∞/∞；用前必须验型，用完再验型，不是未定式就停手"
+      },
+      {
+       "name": "七种未定式",
+       "tex": "0/0,\\ \\infty/\\infty,\\ 0\\cdot\\infty,\\ \\infty-\\infty,\\ 1^{\\infty},\\ 0^{0},\\ \\infty^{0}",
+       "note": "后五种必须先化成前两种才能用洛必达"
+      },
+      {
+       "name": "0·∞ 化形",
+       "tex": "f\\cdot g=\\frac{f}{1/g}\\ \\text{或}\\ \\frac{g}{1/f}",
+       "note": "选求导后更简单的那个放分母"
+      },
+      {
+       "name": "∞−∞ 化形",
+       "tex": "\\text{通分或有理化}",
+       "note": "不能直接洛必达"
+      },
+      {
+       "name": "幂指化形",
+       "tex": "f^g=e^{g\\ln f}",
+       "note": "1^∞ / 0^0 / ∞^0 一律先取对数"
+      },
+      {
+       "name": "二级结论：洛必达失效",
+       "tex": "\\text{导数极限不存在，不能推出原极限不存在}",
+       "note": "反例：$f(x)=x+\\sin x$、$g(x)=x$ 时 $\\dfrac{f}{g}$ 的极限为 1，但导数之比的极限振荡不存在"
+      },
+      {
+       "name": "二级结论：等价无穷小优于洛必达",
+       "tex": "0/0\\ \\text{型先替换再洛必达}",
+       "note": "直接洛必达常把式子越求越复杂"
+      }
+     ]
+    },
+    {
+     "title": "等价无穷小（x→0）",
+     "items": [
+      {
+       "name": "一阶组",
+       "tex": "\\sin x\\sim x,\\ \\tan x\\sim x,\\ \\arcsin x\\sim x,\\ \\arctan x\\sim x,\\ \\ln(1+x)\\sim x,\\ e^x-1\\sim x",
+       "note": "乘除场景随便替换；加减场景慎用"
+      },
+      {
+       "name": "幂差组",
+       "tex": "(1+x)^{\\alpha}-1\\sim \\alpha x,\\quad a^x-1\\sim x\\ln a",
+       "note": "$\\alpha$ 可为分数，如 $\\sqrt{1+x}-1\\sim\\frac{x}{2}$"
+      },
+      {
+       "name": "二阶组",
+       "tex": "1-\\cos x\\sim \\frac{x^2}{2}",
+       "note": "cos 的等价是二阶，别写成 x"
+      },
+      {
+       "name": "三阶组",
+       "tex": "x-\\sin x\\sim \\frac{x^3}{6},\\quad \\tan x-x\\sim \\frac{x^3}{3},\\quad \\arcsin x-x\\sim \\frac{x^3}{6}",
+       "note": "这三个是最常考的「差式」，加减法必须用它们"
+      },
+      {
+       "name": "对数差组",
+       "tex": "x-\\ln(1+x)\\sim \\frac{x^2}{2}",
+       "note": "注意与 1-cos x 同阶"
+      }
+     ]
+    },
+    {
+     "title": "泰勒展开（麦克劳林）",
+     "items": [
+      {
+       "name": "e^x",
+       "tex": "e^x=1+x+\\frac{x^2}{2!}+\\frac{x^3}{3!}+\\cdots+\\frac{x^n}{n!}+o(x^n)"
+      },
+      {
+       "name": "sin x",
+       "tex": "\\sin x=x-\\frac{x^3}{3!}+\\frac{x^5}{5!}-\\cdots+(-1)^{n}\\frac{x^{2n+1}}{(2n+1)!}+o(x^{2n+1})"
+      },
+      {
+       "name": "cos x",
+       "tex": "\\cos x=1-\\frac{x^2}{2!}+\\frac{x^4}{4!}-\\cdots+(-1)^{n}\\frac{x^{2n}}{(2n)!}+o(x^{2n})"
+      },
+      {
+       "name": "ln(1+x)",
+       "tex": "\\ln(1+x)=x-\\frac{x^2}{2}+\\frac{x^3}{3}-\\cdots+(-1)^{n-1}\\frac{x^n}{n}+o(x^n)"
+      },
+      {
+       "name": "(1+x)^α",
+       "tex": "(1+x)^{\\alpha}=1+\\alpha x+\\frac{\\alpha(\\alpha-1)}{2!}x^2+\\cdots+\\frac{\\alpha(\\alpha-1)\\cdots(\\alpha-n+1)}{n!}x^n+o(x^n)"
+      },
+      {
+       "name": "tan x",
+       "tex": "\\tan x=x+\\frac{x^3}{3}+\\frac{2x^5}{15}+o(x^5)"
+      },
+      {
+       "name": "arctan x",
+       "tex": "\\arctan x=x-\\frac{x^3}{3}+\\frac{x^5}{5}+o(x^5)"
+      },
+      {
+       "name": "arcsin x",
+       "tex": "\\arcsin x=x+\\frac{x^3}{6}+\\frac{3x^5}{40}+o(x^5)"
+      },
+      {
+       "name": "二阶结论：展开阶数确定",
+       "tex": "\\text{阶数} \\ge \\text{分子分母最低次非零项之差}",
+       "note": "做题先看分母的最低阶，分子至少展开到同一阶；展开少了会得到 0 或 ∞ 的错误结论"
+      }
+     ]
+    },
+    {
+     "title": "连续与间断",
+     "items": [
+      {
+       "name": "连续定义",
+       "tex": "\\lim_{x\\to x_0}f(x)=f(x_0)",
+       "note": "三要素：有定义、极限存在、二者相等"
+      },
+      {
+       "name": "间断点分类",
+       "tex": "\\text{第一类：左右极限都存在；第二类：至少一侧不存在}",
+       "note": "第一类再分可去（相等）与跳跃（不等）；第二类含无穷与振荡"
+      },
+      {
+       "name": "闭区间连续性质",
+       "tex": "\\text{有界性 · 最值性 · 介值性 · 零点定理}",
+       "note": "证明方程有根用零点定理：先找两端异号"
+      },
+      {
+       "name": "二级结论：无穷小×有界",
+       "tex": "\\lim_{x\\to x_0}\\alpha(x)\\beta(x)=0\\quad(\\alpha\\to0,\\ |\\beta|\\le M)",
+       "note": "典型：$x\\sin\\frac1x\\to0$，振荡函数也压得住"
+      },
+      {
+       "name": "二级结论：夹逼",
+       "tex": "g(x)\\le f(x)\\le h(x),\\ \\lim g=\\lim h=A\\ \\Rightarrow\\ \\lim f=A",
+       "note": "n 项和求极限的标准手段，先放大缩小到同极限"
+      },
+      {
+       "name": "二级结论：定积分定义求和式",
+       "tex": "\\lim_{n\\to\\infty}\\frac1n\\sum_{k=1}^{n}f\\left(\\frac{k}{n}\\right)=\\int_0^1 f(x)\\,dx",
+       "note": "项数必须与 n 同阶；项数随 n 变时不能直接套"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "m1-f-derivative",
+   "title": "第 2 章 一元函数微分学",
+   "note": "导数与微分、中值定理、单调性与极值、凹凸与拐点。中值定理是证明题的固定套路。",
+   "groups": [
+    {
+     "title": "基本求导公式",
+     "items": [
+      {
+       "name": "幂与指对",
+       "tex": "(x^{\\alpha})'=\\alpha x^{\\alpha-1},\\quad (a^x)'=a^x\\ln a,\\quad (\\log_a x)'=\\frac{1}{x\\ln a}"
+      },
+      {
+       "name": "三角",
+       "tex": "(\\sin x)'=\\cos x,\\quad (\\cos x)'=-\\sin x,\\quad (\\tan x)'=\\sec^2 x,\\quad (\\cot x)'=-\\csc^2 x"
+      },
+      {
+       "name": "反三角",
+       "tex": "(\\arcsin x)'=\\frac{1}{\\sqrt{1-x^2}},\\quad (\\arccos x)'=-\\frac{1}{\\sqrt{1-x^2}},\\quad (\\arctan x)'=\\frac{1}{1+x^2}"
+      },
+      {
+       "name": "双曲与反双曲",
+       "tex": "(\\sinh x)'=\\cosh x,\\quad (\\cosh x)'=\\sinh x,\\quad (\\operatorname{arsinh}x)'=\\frac{1}{\\sqrt{1+x^2}}"
+      }
+     ]
+    },
+    {
+     "title": "求导法则",
+     "items": [
+      {
+       "name": "四则",
+       "tex": "(uv)'=u'v+uv',\\quad \\left(\\frac uv\\right)'=\\frac{u'v-uv'}{v^2}"
+      },
+      {
+       "name": "复合（链式）",
+       "tex": "\\frac{dy}{dx}=\\frac{dy}{du}\\cdot\\frac{du}{dx}",
+       "note": "多层复合一层层剥，别跳步"
+      },
+      {
+       "name": "反函数",
+       "tex": "\\frac{dx}{dy}=\\frac{1}{y'}",
+       "note": "要求 y'≠0"
+      },
+      {
+       "name": "参数方程",
+       "tex": "\\frac{dy}{dx}=\\frac{y'(t)}{x'(t)},\\quad \\frac{d^2y}{dx^2}=\\frac{y''(t)x'(t)-y'(t)x''(t)}{[x'(t)]^3}",
+       "note": "二阶是把一阶再对 t 求导后除以 x'(t)，不是直接比"
+      },
+      {
+       "name": "隐函数",
+       "tex": "F(x,y)=0\\ \\Rightarrow\\ y'=-\\frac{F_x}{F_y}"
+      },
+      {
+       "name": "对数求导法",
+       "tex": "(\\ln y)'=\\frac{y'}y",
+       "note": "适用于 u^v、连乘连除"
+      },
+      {
+       "name": "高阶导莱布尼茨",
+       "tex": "(uv)^{(n)}=\\sum_{k=0}^{n}\\binom{n}{k}u^{(n-k)}v^{(k)}",
+       "note": "一项是多项式时只用前几项"
+      }
+     ]
+    },
+    {
+     "title": "中值定理",
+     "items": [
+      {
+       "name": "罗尔",
+       "tex": "f\\in C[a,b],\\ f\\in D(a,b),\\ f(a)=f(b)\\Rightarrow\\exists\\xi,\\ f'(\\xi)=0"
+      },
+      {
+       "name": "拉格朗日",
+       "tex": "f(b)-f(a)=f'(\\xi)(b-a),\\quad \\xi\\in(a,b)"
+      },
+      {
+       "name": "柯西",
+       "tex": "\\frac{f(b)-f(a)}{g(b)-g(a)}=\\frac{f'(\\xi)}{g'(\\xi)}",
+       "note": "两个函数都要满足条件，g'≠0"
+      },
+      {
+       "name": "泰勒中值",
+       "tex": "f(x)=\\sum_{k=0}^{n}\\frac{f^{(k)}(x_0)}{k!}(x-x_0)^k+\\frac{f^{(n+1)}(\\xi)}{(n+1)!}(x-x_0)^{n+1}"
+      },
+      {
+       "name": "二级结论：构造辅助函数",
+       "tex": "\\text{证 } f'(\\xi)+g'(\\xi)f(\\xi)=0\\ \\Rightarrow\\ F(x)=f(x)e^{g(x)}",
+       "note": "见到 f'+kf 就乘 e^{kx}，这是最常用的一类"
+      },
+      {
+       "name": "二级结论：证存在两个 ξ",
+       "tex": "\\text{两次拉格朗日，区间分别取 }[a,c],[c,b]",
+       "note": "先找中间点 c，通常由已知条件给出或取中点"
+      }
+     ]
+    },
+    {
+     "title": "单调、极值与凹凸",
+     "items": [
+      {
+       "name": "单调判定",
+       "tex": "f'(x)>0\\Rightarrow\\text{递增}",
+       "note": "f'≥0 且不在任何区间恒为 0"
+      },
+      {
+       "name": "极值必要条件",
+       "tex": "f'(x_0)=0\\ \\text{或}\\ f'(x_0)\\ \\text{不存在}"
+      },
+      {
+       "name": "第一充分条件",
+       "tex": "f' \\text{在 } x_0 \\text{左右变号} \\Rightarrow \\text{极值}",
+       "note": "左正右负为极大，反之极小"
+      },
+      {
+       "name": "第二充分条件",
+       "tex": "f'(x_0)=0,\\ f''(x_0)<0\\Rightarrow\\text{极大}",
+       "note": "f''=0 时此条失效，退回第一条件"
+      },
+      {
+       "name": "凹凸判定",
+       "tex": "f''(x)>0\\Rightarrow\\text{凹（下凸）},\\quad f''(x)<0\\Rightarrow\\text{凸（上凸）}"
+      },
+      {
+       "name": "拐点",
+       "tex": "f'' \\text{变号处}",
+       "note": "f''=0 不一定是拐点，必须变号"
+      },
+      {
+       "name": "渐近线·水平",
+       "tex": "\\lim_{x\\to\\infty}f(x)=b\\Rightarrow y=b"
+      },
+      {
+       "name": "渐近线·铅直",
+       "tex": "\\lim_{x\\to x_0}f(x)=\\infty\\Rightarrow x=x_0"
+      },
+      {
+       "name": "渐近线·斜",
+       "tex": "k=\\lim_{x\\to\\infty}\\frac{f(x)}{x},\\quad b=\\lim_{x\\to\\infty}[f(x)-kx]"
+      },
+      {
+       "name": "曲率",
+       "tex": "K=\\frac{|y''|}{(1+y'^2)^{3/2}},\\quad \\rho=\\frac1K",
+       "note": "仅数一、数二要求，参数式另有公式"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "m1-f-integral",
+   "title": "第 3 章 一元函数积分学",
+   "note": "不定积分、定积分、反常积分。积分表要背到「看到形式就知道换什么」的程度。",
+   "groups": [
+    {
+     "title": "基本积分表",
+     "items": [
+      {
+       "name": "幂与指",
+       "tex": "\\int x^{\\alpha}dx=\\frac{x^{\\alpha+1}}{\\alpha+1}+C\\ (\\alpha\\ne-1),\\quad \\int\\frac{dx}{x}=\\ln|x|+C"
+      },
+      {
+       "name": "指数",
+       "tex": "\\int a^x dx=\\frac{a^x}{\\ln a}+C,\\quad \\int e^x dx=e^x+C"
+      },
+      {
+       "name": "三角",
+       "tex": "\\int\\sin x\\,dx=-\\cos x+C,\\quad \\int\\cos x\\,dx=\\sin x+C,\\quad \\int\\sec^2x\\,dx=\\tan x+C"
+      },
+      {
+       "name": "三角进阶",
+       "tex": "\\int\\frac{dx}{\\cos x}=\\ln\\left|\\sec x+\\tan x\\right|+C,\\quad \\int\\frac{dx}{\\sin x}=\\ln\\left|\\tan\\frac x2\\right|+C"
+      },
+      {
+       "name": "反三角型",
+       "tex": "\\int\\frac{dx}{1+x^2}=\\arctan x+C,\\quad \\int\\frac{dx}{\\sqrt{1-x^2}}=\\arcsin x+C"
+      },
+      {
+       "name": "二次型",
+       "tex": "\\int\\frac{dx}{a^2+x^2}=\\frac1a\\arctan\\frac xa+C,\\quad \\int\\frac{dx}{\\sqrt{a^2-x^2}}=\\arcsin\\frac xa+C"
+      },
+      {
+       "name": "对数型",
+       "tex": "\\int\\frac{dx}{x^2-a^2}=\\frac{1}{2a}\\ln\\left|\\frac{x-a}{x+a}\\right|+C"
+      },
+      {
+       "name": "根号型",
+       "tex": "\\int\\frac{dx}{\\sqrt{x^2\\pm a^2}}=\\ln\\left|x+\\sqrt{x^2\\pm a^2}\\right|+C"
+      }
+     ]
+    },
+    {
+     "title": "积分方法",
+     "items": [
+      {
+       "name": "第一换元（凑微分）",
+       "tex": "\\int f(\\varphi(x))\\varphi'(x)dx=\\int f(u)du",
+       "note": "九成不定积分靠这一条"
+      },
+      {
+       "name": "第二换元",
+       "tex": "x=\\varphi(t),\\quad \\int f(x)dx=\\int f(\\varphi(t))\\varphi'(t)dt",
+       "note": "根号用三角代换：$\\sqrt{a^2-x^2}$ 令 $x=a\\sin t$"
+      },
+      {
+       "name": "三角代换三种",
+       "tex": "\\sqrt{a^2-x^2}:x=a\\sin t;\\quad \\sqrt{a^2+x^2}:x=a\\tan t;\\quad \\sqrt{x^2-a^2}:x=a\\sec t"
+      },
+      {
+       "name": "分部积分",
+       "tex": "\\int u\\,dv=uv-\\int v\\,du",
+       "note": "选 u 的顺序：反、对、幂、三、指（越靠前越当 u）"
+      },
+      {
+       "name": "有理函数拆分",
+       "tex": "\\frac{P(x)}{Q(x)}=\\sum\\left[\\frac{A_i}{(x-a)^i}+\\frac{Bx+C}{(x^2+px+q)^j}\\right]",
+       "note": "先判真假分式，假分式先做长除法"
+      },
+      {
+       "name": "二级结论：区间再现",
+       "tex": "\\int_a^b f(x)dx=\\int_a^b f(a+b-x)dx",
+       "note": "对称区间、含三角的定积分首选"
+      },
+      {
+       "name": "二级结论：奇偶性",
+       "tex": "\\int_{-a}^{a}f(x)dx=\\begin{cases}2\\int_0^af(x)dx,&f\\text{ 偶}\\\\0,&f\\text{ 奇}\\end{cases}"
+      },
+      {
+       "name": "二级结论：华里士公式",
+       "tex": "\\int_0^{\\pi/2}\\sin^n x\\,dx=\\int_0^{\\pi/2}\\cos^n x\\,dx=\\begin{cases}\\frac{n-1}{n}\\cdot\\frac{n-3}{n-2}\\cdots\\frac12\\cdot\\frac{\\pi}{2},&n\\text{ 偶}\\\\ \\frac{n-1}{n}\\cdot\\frac{n-3}{n-2}\\cdots\\frac23,&n\\text{ 奇}\\end{cases}"
+      },
+      {
+       "name": "二级结论：周期函数",
+       "tex": "\\int_a^{a+T}f(x)dx=\\int_0^Tf(x)dx",
+       "note": "只要求 f 以 T 为周期"
+      }
+     ]
+    },
+    {
+     "title": "定积分应用",
+     "items": [
+      {
+       "name": "变上限求导",
+       "tex": "\\frac{d}{dx}\\int_a^{u(x)}f(t)dt=f(u(x))u'(x)",
+       "note": "上下限都是函数时相减"
+      },
+      {
+       "name": "面积·直角坐标",
+       "tex": "S=\\int_a^b|f(x)-g(x)|dx"
+      },
+      {
+       "name": "面积·参数方程",
+       "tex": "S=\\int_{t_1}^{t_2}y(t)x'(t)dt"
+      },
+      {
+       "name": "面积·极坐标",
+       "tex": "S=\\frac12\\int_{\\alpha}^{\\beta}r^2(\\theta)d\\theta"
+      },
+      {
+       "name": "旋转体·绕 x 轴",
+       "tex": "V=\\pi\\int_a^b f^2(x)dx"
+      },
+      {
+       "name": "旋转体·绕 y 轴（柱壳）",
+       "tex": "V=2\\pi\\int_a^b x f(x)dx"
+      },
+      {
+       "name": "弧长·直角坐标",
+       "tex": "s=\\int_a^b\\sqrt{1+y'^2}\\,dx"
+      },
+      {
+       "name": "弧长·参数",
+       "tex": "s=\\int_{t_1}^{t_2}\\sqrt{x'^2(t)+y'^2(t)}\\,dt"
+      },
+      {
+       "name": "弧长·极坐标",
+       "tex": "s=\\int_{\\alpha}^{\\beta}\\sqrt{r^2+r'^2}\\,d\\theta"
+      },
+      {
+       "name": "旋转曲面面积",
+       "tex": "S=2\\pi\\int_a^b|y|\\sqrt{1+y'^2}\\,dx",
+       "note": "仅数一、数二"
+      },
+      {
+       "name": "形心",
+       "tex": "\\bar x=\\frac{1}{S}\\int_a^b x|f(x)-g(x)|dx"
+      },
+      {
+       "name": "二级结论：古尔丁定理",
+       "tex": "V=2\\pi\\bar x\\cdot S",
+       "note": "平面图形绕轴旋转体积=形心路程×面积"
+      }
+     ]
+    },
+    {
+     "title": "反常积分",
+     "items": [
+      {
+       "name": "p 积分（无穷限）",
+       "tex": "\\int_1^{\\infty}\\frac{dx}{x^p}\\ \\text{收敛}\\iff p>1"
+      },
+      {
+       "name": "p 积分（瑕点）",
+       "tex": "\\int_0^{1}\\frac{dx}{x^p}\\ \\text{收敛}\\iff p<1"
+      },
+      {
+       "name": "指数型",
+       "tex": "\\int_0^{\\infty}e^{-px}dx=\\frac1p\\ (p>0)"
+      },
+      {
+       "name": "Γ 函数",
+       "tex": "\\Gamma(\\alpha)=\\int_0^{\\infty}x^{\\alpha-1}e^{-x}dx,\\quad \\Gamma(n+1)=n!,\\ \\Gamma\\left(\\tfrac12\\right)=\\sqrt\\pi",
+       "note": "了解即可，偶尔压轴"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "m1-f-multivar",
+   "title": "第 4 章 多元函数微积分",
+   "note": "偏导、全微分、极值、二重三重积分、曲线曲面积分。数一独有场论三大公式。",
+   "groups": [
+    {
+     "title": "偏导与全微分",
+     "items": [
+      {
+       "name": "全微分",
+       "tex": "dz=\\frac{\\partial z}{\\partial x}dx+\\frac{\\partial z}{\\partial y}dy"
+      },
+      {
+       "name": "可微必要条件",
+       "tex": "\\text{可微}\\Rightarrow\\text{偏导存在且连续}",
+       "note": "反之不成立，偏导存在不能推可微"
+      },
+      {
+       "name": "可微充分条件",
+       "tex": "\\text{偏导连续}\\Rightarrow\\text{可微}"
+      },
+      {
+       "name": "复合求导（链式）",
+       "tex": "\\frac{\\partial z}{\\partial s}=\\frac{\\partial z}{\\partial x}\\frac{\\partial x}{\\partial s}+\\frac{\\partial z}{\\partial y}\\frac{\\partial y}{\\partial s}"
+      },
+      {
+       "name": "隐函数",
+       "tex": "F(x,y,z)=0\\Rightarrow \\frac{\\partial z}{\\partial x}=-\\frac{F_x}{F_z},\\quad \\frac{\\partial z}{\\partial y}=-\\frac{F_y}{F_z}"
+      },
+      {
+       "name": "方向导数",
+       "tex": "\\frac{\\partial f}{\\partial \\vec l}=\\nabla f\\cdot\\vec e_l=f_x\\cos\\alpha+f_y\\cos\\beta"
+      },
+      {
+       "name": "梯度",
+       "tex": "\\nabla f=(f_x,f_y)",
+       "note": "方向导数最大值=|∇f|，方向即梯度方向"
+      }
+     ]
+    },
+    {
+     "title": "多元极值",
+     "items": [
+      {
+       "name": "无条件极值·必要条件",
+       "tex": "f_x=0,\\ f_y=0"
+      },
+      {
+       "name": "二阶判别",
+       "tex": "A=f_{xx},\\ B=f_{xy},\\ C=f_{yy},\\ \\Delta=AC-B^2",
+       "note": "Δ>0 且 A>0 极小；Δ>0 且 A<0 极大；Δ<0 非极值；Δ=0 失效"
+      },
+      {
+       "name": "条件极值·拉格朗日",
+       "tex": "L=f(x,y)+\\lambda\\varphi(x,y),\\quad L_x=L_y=L_\\lambda=0"
+      },
+      {
+       "name": "有界闭域最值",
+       "tex": "\\text{内部驻点} + \\text{边界（降维或拉格朗日）}",
+       "note": "两类点都算出来再比大小，漏边界是常见丢分点"
+      }
+     ]
+    },
+    {
+     "title": "重积分",
+     "items": [
+      {
+       "name": "直角坐标（X 型）",
+       "tex": "\\iint_D f\\,d\\sigma=\\int_a^b dx\\int_{y_1(x)}^{y_2(x)}f(x,y)dy"
+      },
+      {
+       "name": "极坐标",
+       "tex": "\\iint_D f\\,d\\sigma=\\int_\\alpha^\\beta d\\theta\\int_{r_1(\\theta)}^{r_2(\\theta)}f(r\\cos\\theta,r\\sin\\theta)r\\,dr",
+       "note": "别忘雅可比 r"
+      },
+      {
+       "name": "二重换序",
+       "tex": "\\int_0^1dx\\int_x^1f\\,dy=\\int_0^1dy\\int_0^y f\\,dx",
+       "note": "画出积分域再换，闭眼换必错"
+      },
+      {
+       "name": "对称性",
+       "tex": "D\\text{ 关于 }y\\text{ 轴对称},\\ f\\text{ 对 }x\\text{ 为奇}\\Rightarrow\\iint_D f\\,d\\sigma=0"
+      },
+      {
+       "name": "柱坐标",
+       "tex": "\\iiint_\\Omega f\\,dV=\\iiint f(r\\cos\\theta,r\\sin\\theta,z)\\,r\\,dr\\,d\\theta\\,dz"
+      },
+      {
+       "name": "球坐标",
+       "tex": "\\iiint_\\Omega f\\,dV=\\iiint f(\\rho\\sin\\varphi\\cos\\theta,\\rho\\sin\\varphi\\sin\\theta,\\rho\\cos\\varphi)\\rho^2\\sin\\varphi\\,d\\rho\\,d\\varphi\\,d\\theta"
+      },
+      {
+       "name": "曲面面积",
+       "tex": "S=\\iint_D\\sqrt{1+z_x^2+z_y^2}\\,dxdy"
+      }
+     ]
+    },
+    {
+     "title": "曲线曲面积分（数一）",
+     "items": [
+      {
+       "name": "第一类曲线",
+       "tex": "\\int_L f\\,ds=\\int_\\alpha^\\beta f(x(t),y(t))\\sqrt{x'^2+y'^2}\\,dt"
+      },
+      {
+       "name": "第二类曲线",
+       "tex": "\\int_L P\\,dx+Q\\,dy=\\int_\\alpha^\\beta[P x'+Q y']\\,dt"
+      },
+      {
+       "name": "格林公式",
+       "tex": "\\oint_L P\\,dx+Q\\,dy=\\iint_D(Q_x-P_y)\\,d\\sigma",
+       "note": "L 取正向（逆时针），否则加负号"
+      },
+      {
+       "name": "路径无关条件",
+       "tex": "P_y=Q_x\\ \\text{（单连通域）}\\iff\\int_L P\\,dx+Q\\,dy\\ \\text{与路径无关}"
+      },
+      {
+       "name": "第一类曲面",
+       "tex": "\\iint_\\Sigma f\\,dS=\\iint_D f\\sqrt{1+z_x^2+z_y^2}\\,dxdy"
+      },
+      {
+       "name": "第二类曲面",
+       "tex": "\\iint_\\Sigma P\\,dydz+Q\\,dzdx+R\\,dxdy"
+      },
+      {
+       "name": "高斯公式",
+       "tex": "\\oiint_\\Sigma P\\,dydz+Q\\,dzdx+R\\,dxdy=\\iiint_\\Omega(P_x+Q_y+R_z)\\,dV",
+       "note": "Σ 取外侧"
+      },
+      {
+       "name": "斯托克斯公式",
+       "tex": "\\oint_\\Gamma P\\,dx+Q\\,dy+R\\,dz=\\iint_\\Sigma\\begin{vmatrix}dydz&dzdx&dxdy\\\\\\partial_x&\\partial_y&\\partial_z\\\\P&Q&R\\end{vmatrix}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "m1-f-ode",
+   "title": "第 5 章 常微分方程",
+   "note": "一阶四类 + 二阶常系数线性 + 欧拉方程。认型是第一步。",
+   "groups": [
+    {
+     "title": "一阶方程",
+     "items": [
+      {
+       "name": "可分离变量",
+       "tex": "\\frac{dy}{dx}=f(x)g(y)\\Rightarrow\\int\\frac{dy}{g(y)}=\\int f(x)dx"
+      },
+      {
+       "name": "齐次型",
+       "tex": "\\frac{dy}{dx}=\\varphi\\left(\\frac yx\\right)\\ \\Rightarrow\\ u=\\frac yx,\\ y'=u+xu'",
+       "note": "换成 u 后化为可分离"
+      },
+      {
+       "name": "一阶线性",
+       "tex": "y'+P(x)y=Q(x)\\Rightarrow y=e^{-\\int P dx}\\left[\\int Q e^{\\int P dx}dx+C\\right]"
+      },
+      {
+       "name": "伯努利",
+       "tex": "y'+P y=Q y^n\\ \\Rightarrow\\ z=y^{1-n}",
+       "note": "化成线性再套公式"
+      },
+      {
+       "name": "全微分方程",
+       "tex": "P\\,dx+Q\\,dy=0,\\ P_y=Q_x\\Rightarrow \\exists u,\\ du=P\\,dx+Q\\,dy"
+      }
+     ]
+    },
+    {
+     "title": "可降阶",
+     "items": [
+      {
+       "name": "缺 y 型",
+       "tex": "y''=f(x,y')\\ \\Rightarrow\\ p=y'",
+       "note": "降成一阶"
+      },
+      {
+       "name": "缺 x 型",
+       "tex": "y''=f(y,y')\\ \\Rightarrow\\ p=y',\\ y''=p\\frac{dp}{dy}"
+      }
+     ]
+    },
+    {
+     "title": "二阶常系数线性",
+     "items": [
+      {
+       "name": "齐次通解",
+       "tex": "y''+py'+qy=0",
+       "note": "看特征方程 r^2+pr+q=0：两不等实根 C₁e^{r₁x}+C₂e^{r₂x}；重根 (C₁+C₂x)e^{rx}；共轭复根 e^{αx}(C₁cos βx+C₂sin βx)"
+      },
+      {
+       "name": "特征方程",
+       "tex": "r^2+pr+q=0"
+      },
+      {
+       "name": "非齐次·f=P_m(x)e^{λx}",
+       "tex": "y^*=x^kQ_m(x)e^{\\lambda x}",
+       "note": "k 取 λ 作为特征根的重数（0/1/2）"
+      },
+      {
+       "name": "非齐次·三角型",
+       "tex": "f=e^{\\alpha x}[P_l\\cos\\beta x+P_n\\sin\\beta x]",
+       "note": "看 α±βi 是否为特征根决定是否乘 x"
+      },
+      {
+       "name": "叠加原理",
+       "tex": "f=f_1+f_2\\Rightarrow y^*=y_1^*+y_2^*"
+      }
+     ]
+    },
+    {
+     "title": "欧拉方程（数一）",
+     "items": [
+      {
+       "name": "欧拉方程",
+       "tex": "x^2y''+pxy'+qy=f(x)",
+       "note": "令 x=e^t 化为常系数，x>0 时 t=ln x"
+      },
+      {
+       "name": "算子形式",
+       "tex": "xy'=D_ty,\\quad x^2y''=D_t(D_t-1)y"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "m1-f-linear",
+   "title": "第 6 章 行列式、矩阵与向量",
+   "note": "线代的地基。行列式性质与矩阵运算必须条件反射式熟练。",
+   "groups": [
+    {
+     "title": "行列式",
+     "items": [
+      {
+       "name": "二阶三阶",
+       "tex": "\\begin{vmatrix}a&b\\\\c&d\\end{vmatrix}=ad-bc"
+      },
+      {
+       "name": "转置不变",
+       "tex": "|A^T|=|A|"
+      },
+      {
+       "name": "数乘",
+       "tex": "|kA|=k^n|A|",
+       "note": "n 阶，最容易错成 k|A|"
+      },
+      {
+       "name": "乘积",
+       "tex": "|AB|=|A||B|"
+      },
+      {
+       "name": "逆",
+       "tex": "|A^{-1}|=\\frac{1}{|A|}"
+      },
+      {
+       "name": "伴随",
+       "tex": "|A^*|=|A|^{n-1}"
+      },
+      {
+       "name": "换行变号",
+       "tex": "\\text{交换两行}\\Rightarrow|A|\\to-|A|"
+      },
+      {
+       "name": "某行相加不变",
+       "tex": "\\text{一行的 k 倍加到另一行}\\Rightarrow|A|\\text{ 不变}"
+      },
+      {
+       "name": "秩与行列式",
+       "tex": "|A|\\ne0\\iff r(A)=n\\iff A\\text{ 可逆}"
+      },
+      {
+       "name": "范德蒙德",
+       "tex": "\\begin{vmatrix}1&1&\\cdots&1\\\\x_1&x_2&\\cdots&x_n\\\\\\vdots&&&\\vdots\\\\x_1^{n-1}&x_2^{n-1}&\\cdots&x_n^{n-1}\\end{vmatrix}=\\prod_{1\\le j<i\\le n}(x_i-x_j)"
+      },
+      {
+       "name": "二级结论：分块行列式",
+       "tex": "\\begin{vmatrix}A&0\\\\0&B\\end{vmatrix}=|A||B|,\\quad \\begin{vmatrix}0&A\\\\B&0\\end{vmatrix}=(-1)^{mn}|A||B|"
+      },
+      {
+       "name": "二级结论：特征值积",
+       "tex": "|A|=\\prod\\lambda_i,\\quad \\operatorname{tr}A=\\sum\\lambda_i"
+      }
+     ]
+    },
+    {
+     "title": "矩阵运算",
+     "items": [
+      {
+       "name": "转置性质",
+       "tex": "(AB)^T=B^TA^T,\\quad (A^T)^T=A,\\quad (A+B)^T=A^T+B^T"
+      },
+      {
+       "name": "逆的公式",
+       "tex": "A^{-1}=\\frac{1}{|A|}A^*",
+       "note": "A* 是伴随矩阵，元素为代数余子式转置"
+      },
+      {
+       "name": "逆的性质",
+       "tex": "(AB)^{-1}=B^{-1}A^{-1},\\quad (A^T)^{-1}=(A^{-1})^T"
+      },
+      {
+       "name": "伴随核心式",
+       "tex": "AA^*=A^*A=|A|E"
+      },
+      {
+       "name": "伴随的逆",
+       "tex": "(A^*)^{-1}=\\frac{A}{|A|}"
+      },
+      {
+       "name": "秩不等式",
+       "tex": "r(AB)\\le\\min\\{r(A),r(B)\\},\\quad r(A+B)\\le r(A)+r(B)"
+      },
+      {
+       "name": "满秩分解式",
+       "tex": "r(A)=n\\Rightarrow A\\text{ 行（列）满秩，可由行变换化到 }E"
+      },
+      {
+       "name": "二级结论：幂零",
+       "tex": "A^2=0\\Rightarrow A^n=0\\ (n\\ge2)"
+      },
+      {
+       "name": "二级结论：分块求逆",
+       "tex": "\\begin{pmatrix}A&0\\\\0&B\\end{pmatrix}^{-1}=\\begin{pmatrix}A^{-1}&0\\\\0&B^{-1}\\end{pmatrix}"
+      }
+     ]
+    },
+    {
+     "title": "向量组",
+     "items": [
+      {
+       "name": "线性相关定义",
+       "tex": "\\exists k_i\\text{ 不全为 }0,\\ \\sum k_i\\alpha_i=0"
+      },
+      {
+       "name": "相关 ⟺ 秩",
+       "tex": "\\alpha_1,\\dots,\\alpha_s\\text{ 相关}\\iff r(\\alpha_1,\\dots,\\alpha_s)<s"
+      },
+      {
+       "name": "向量个数与维数",
+       "tex": "n+1\\text{ 个 }n\\text{ 维向量必相关}"
+      },
+      {
+       "name": "极大无关组",
+       "tex": "r\\text{ 个线性无关，且其余可由其表出}"
+      },
+      {
+       "name": "施密特正交化",
+       "tex": "\\beta_1=\\alpha_1,\\ \\beta_2=\\alpha_2-\\frac{(\\alpha_2,\\beta_1)}{(\\beta_1,\\beta_1)}\\beta_1,\\ \\beta_k=\\alpha_k-\\sum_{i<k}\\frac{(\\alpha_k,\\beta_i)}{(\\beta_i,\\beta_i)}\\beta_i"
+      },
+      {
+       "name": "二级结论：正交矩阵",
+       "tex": "Q^TQ=E\\Rightarrow Q^{-1}=Q^T,\\ |Q|=\\pm1"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "m1-f-equation",
+   "title": "第 7 章 线性方程组与特征值",
+   "note": "方程组解的结构 + 特征值特征向量相似对角化。这两块是线代大题的主战场。",
+   "groups": [
+    {
+     "title": "线性方程组",
+     "items": [
+      {
+       "name": "有解判定",
+       "tex": "Ax=b\\ \\text{有解}\\iff r(A)=r(A,b)"
+      },
+      {
+       "name": "唯一解",
+       "tex": "r(A)=r(A,b)=n"
+      },
+      {
+       "name": "无穷多解",
+       "tex": "r(A)=r(A,b)<n",
+       "note": "基础解系含 n-r 个向量"
+      },
+      {
+       "name": "齐次基础解系",
+       "tex": "\\eta_1,\\dots,\\eta_{n-r}\\ \\text{为解且线性无关}",
+       "note": "通解 $x=k_1\\eta_1+\\cdots+k_{n-r}\\eta_{n-r}$"
+      },
+      {
+       "name": "非齐次通解",
+       "tex": "x=x^*+\\sum k_i\\eta_i",
+       "note": "特解 + 齐次通解"
+      },
+      {
+       "name": "克拉默法则",
+       "tex": "x_i=\\frac{|A_i|}{|A|}\\ (|A|\\ne0)"
+      },
+      {
+       "name": "二级结论：n 个方程 n 元",
+       "tex": "|A|\\ne0\\iff\\text{唯一解}",
+       "note": "|A|=0 时要分 b 讨论有无穷解还是无解"
+      }
+     ]
+    },
+    {
+     "title": "特征值与特征向量",
+     "items": [
+      {
+       "name": "定义",
+       "tex": "A\\alpha=\\lambda\\alpha\\ (\\alpha\\ne0)"
+      },
+      {
+       "name": "特征方程",
+       "tex": "|\\lambda E-A|=0"
+      },
+      {
+       "name": "迹与行列式",
+       "tex": "\\sum\\lambda_i=\\operatorname{tr}A,\\quad \\prod\\lambda_i=|A|"
+      },
+      {
+       "name": "特征值运算",
+       "tex": "A^2\\to\\lambda^2,\\ A^{-1}\\to\\frac1\\lambda,\\ A^*\\to\\frac{|A|}{\\lambda},\\ f(A)\\to f(\\lambda)"
+      },
+      {
+       "name": "相似判定",
+       "tex": "A\\sim B\\iff\\exists P,\\ P^{-1}AP=B",
+       "note": "相似必有相同特征多项式、秩、迹、行列式"
+      },
+      {
+       "name": "相似对角化条件",
+       "tex": "A\\sim\\Lambda\\iff A\\text{ 有 }n\\text{ 个线性无关特征向量}"
+      },
+      {
+       "name": "代数几何重数",
+       "tex": "\\text{几何重数}\\le\\text{代数重数}",
+       "note": "全部相等才可对角化"
+      },
+      {
+       "name": "实对称三定理",
+       "tex": "\\text{特征值实} · \\text{不同特征值的特征向量正交} · \\text{必可正交对角化}"
+      },
+      {
+       "name": "二级结论：λ=0 与秩",
+       "tex": "\\lambda=0\\text{ 的重数}=n-r(A)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "m1-f-quadratic",
+   "title": "第 8 章 二次型",
+   "note": "合同变换、标准形、正定性。惯用套路：写出矩阵 → 求特征值 → 正交变换化标准形。",
+   "groups": [
+    {
+     "title": "二次型与合同",
+     "items": [
+      {
+       "name": "矩阵表示",
+       "tex": "f=x^TAx,\\quad A=A^T"
+      },
+      {
+       "name": "合同定义",
+       "tex": "A\\simeq B\\iff\\exists C\\ (|C|\\ne0),\\ C^TAC=B"
+      },
+      {
+       "name": "惯性定理",
+       "tex": "\\text{正负惯性指数在合同变换下不变}"
+      },
+      {
+       "name": "规范形",
+       "tex": "f=y_1^2+\\cdots+y_p^2-y_{p+1}^2-\\cdots-y_{p+q}^2",
+       "note": "p 正惯性指数，q 负惯性指数，p+q=r"
+      },
+      {
+       "name": "配方法",
+       "tex": "\\text{逐个变量配成完全平方}",
+       "note": "没有平方项时先做 x_1=y_1+y_2, x_2=y_1-y_2"
+      }
+     ]
+    },
+    {
+     "title": "正定性",
+     "items": [
+      {
+       "name": "定义",
+       "tex": "\\forall x\\ne0,\\ x^TAx>0"
+      },
+      {
+       "name": "特征值判据",
+       "tex": "f\\text{ 正定}\\iff\\lambda_i>0\\ (\\forall i)"
+      },
+      {
+       "name": "顺序主子式",
+       "tex": "f\\text{ 正定}\\iff\\Delta_k>0\\ (k=1,\\dots,n)"
+      },
+      {
+       "name": "负定判据",
+       "tex": "\\text{奇数阶主子式为负，偶数阶为正}"
+      },
+      {
+       "name": "二级结论：A 正定 ⇒ |A|>0",
+       "tex": "|A|=\\prod\\lambda_i>0",
+       "note": "只是必要，不能反推"
+      },
+      {
+       "name": "二级结论：A 正定 ⇒ A⁻¹ 正定",
+       "tex": "\\lambda^{-1}>0"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "m1-f-series",
+   "title": "第 9 章 无穷级数（数一 · 数三）",
+   "note": "常数项级数判敛 + 幂级数收敛域 + 展开与求和。判敛方法要按「看型选法」记。",
+   "groups": [
+    {
+     "title": "判敛法",
+     "items": [
+      {
+       "name": "必要条件",
+       "tex": "\\sum u_n\\ \\text{收敛}\\Rightarrow u_n\\to0",
+       "note": "只能反用：u_n 不趋 0 则发散"
+      },
+      {
+       "name": "p 级数",
+       "tex": "\\sum_{n=1}^{\\infty}\\frac{1}{n^p}\\ \\text{收敛}\\iff p>1"
+      },
+      {
+       "name": "几何级数",
+       "tex": "\\sum aq^n\\ \\text{收敛}\\iff|q|<1,\\quad S=\\frac{a}{1-q}"
+      },
+      {
+       "name": "比较判别",
+       "tex": "u_n\\le v_n,\\ \\sum v_n\\text{ 收敛}\\Rightarrow\\sum u_n\\text{ 收敛}"
+      },
+      {
+       "name": "极限比较",
+       "tex": "\\lim\\frac{u_n}{v_n}=l\\in(0,\\infty)\\Rightarrow\\text{同敛散}"
+      },
+      {
+       "name": "比值判别",
+       "tex": "\\lim\\frac{u_{n+1}}{u_n}=\\rho",
+       "note": "ρ<1 收敛，ρ>1 发散，ρ=1 失效"
+      },
+      {
+       "name": "根值判别",
+       "tex": "\\lim\\sqrt[n]{u_n}=\\rho",
+       "note": "含 n 次方的优先用这个"
+      },
+      {
+       "name": "莱布尼茨（交错）",
+       "tex": "u_n\\downarrow0\\Rightarrow\\sum(-1)^{n-1}u_n\\ \\text{收敛}"
+      },
+      {
+       "name": "绝对收敛",
+       "tex": "\\sum|u_n|\\text{ 收敛}\\Rightarrow\\sum u_n\\text{ 收敛}"
+      }
+     ]
+    },
+    {
+     "title": "幂级数",
+     "items": [
+      {
+       "name": "收敛半径",
+       "tex": "R=\\lim\\left|\\frac{a_n}{a_{n+1}}\\right|",
+       "note": "或 $R=\\dfrac{1}{\\varlimsup_{n\\to\\infty}\\sqrt[n]{|a_n|}}$"
+      },
+      {
+       "name": "收敛域",
+       "tex": "(-R,R)\\ \\text{再单独讨论} x=\\pm R"
+      },
+      {
+       "name": "逐项求导",
+       "tex": "S'(x)=\\sum n a_n x^{n-1}",
+       "note": "收敛半径不变，但端点可能变"
+      },
+      {
+       "name": "逐项积分",
+       "tex": "\\int_0^x S(t)dt=\\sum\\frac{a_n}{n+1}x^{n+1}"
+      },
+      {
+       "name": "常用展开·几何",
+       "tex": "\\frac{1}{1-x}=\\sum_{n=0}^{\\infty}x^n\\ (|x|<1)"
+      },
+      {
+       "name": "常用展开·e^x",
+       "tex": "e^x=\\sum_{n=0}^{\\infty}\\frac{x^n}{n!}\\ (x\\in\\mathbb R)"
+      },
+      {
+       "name": "常用展开·ln",
+       "tex": "\\ln(1+x)=\\sum_{n=1}^{\\infty}(-1)^{n-1}\\frac{x^n}{n}\\ (-1<x\\le1)"
+      },
+      {
+       "name": "常用展开·sin/cos",
+       "tex": "\\sin x=\\sum_{n=0}^{\\infty}(-1)^n\\frac{x^{2n+1}}{(2n+1)!},\\quad \\cos x=\\sum_{n=0}^{\\infty}(-1)^n\\frac{x^{2n}}{(2n)!}"
+      },
+      {
+       "name": "常用展开·arctan",
+       "tex": "\\arctan x=\\sum_{n=0}^{\\infty}(-1)^n\\frac{x^{2n+1}}{2n+1}\\ (|x|\\le1)"
+      },
+      {
+       "name": "二级结论：求和套路",
+       "tex": "\\sum\\frac{x^n}{n}\\ \\Rightarrow\\ \\text{先求导得几何级数再积分}",
+       "note": "分母带 n 就求导，分子带 n 就积分，这是通用口诀"
+      }
+     ]
+    },
+    {
+     "title": "傅里叶级数（数一）",
+     "items": [
+      {
+       "name": "系数公式",
+       "tex": "a_n=\\frac1\\pi\\int_{-\\pi}^{\\pi}f(x)\\cos nx\\,dx,\\quad b_n=\\frac1\\pi\\int_{-\\pi}^{\\pi}f(x)\\sin nx\\,dx"
+      },
+      {
+       "name": "狄利克雷条件",
+       "tex": "\\text{连续点收敛于 }f(x),\\ \\text{间断点收敛于}\\frac{f(x^-)+f(x^+)}2"
+      },
+      {
+       "name": "奇偶延拓",
+       "tex": "\\text{奇函数}\\,b_n\\ \\text{only};\\quad\\text{偶函数}\\,a_n\\ \\text{only}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "m1-f-prob",
+   "title": "第 10 章 概率论（数一 · 数三）",
+   "note": "随机事件、一维二维分布、数字特征、大数定律。分布函数与密度是核心。",
+   "groups": [
+    {
+     "title": "概率基本公式",
+     "items": [
+      {
+       "name": "加法",
+       "tex": "P(A\\cup B)=P(A)+P(B)-P(AB)"
+      },
+      {
+       "name": "条件概率",
+       "tex": "P(A|B)=\\frac{P(AB)}{P(B)}"
+      },
+      {
+       "name": "乘法",
+       "tex": "P(AB)=P(B)P(A|B)"
+      },
+      {
+       "name": "全概率",
+       "tex": "P(A)=\\sum P(B_i)P(A|B_i)"
+      },
+      {
+       "name": "贝叶斯",
+       "tex": "P(B_i|A)=\\frac{P(B_i)P(A|B_i)}{\\sum_j P(B_j)P(A|B_j)}"
+      },
+      {
+       "name": "独立性",
+       "tex": "P(AB)=P(A)P(B)"
+      },
+      {
+       "name": "二级结论：三事件独立",
+       "tex": "\\text{两两独立}+P(ABC)=P(A)P(B)P(C)",
+       "note": "两两独立不蕴含相互独立"
+      }
+     ]
+    },
+    {
+     "title": "常见分布",
+     "items": [
+      {
+       "name": "二项",
+       "tex": "X\\sim B(n,p),\\ P(X=k)=\\binom nk p^k(1-p)^{n-k},\\ E=np,\\ D=np(1-p)"
+      },
+      {
+       "name": "泊松",
+       "tex": "P(X=k)=\\frac{\\lambda^k e^{-\\lambda}}{k!},\\ E=D=\\lambda"
+      },
+      {
+       "name": "几何",
+       "tex": "P(X=k)=(1-p)^{k-1}p,\\ E=\\frac1p,\\ D=\\frac{1-p}{p^2}"
+      },
+      {
+       "name": "均匀",
+       "tex": "f=\\frac{1}{b-a},\\ E=\\frac{a+b}2,\\ D=\\frac{(b-a)^2}{12}"
+      },
+      {
+       "name": "指数",
+       "tex": "f=\\lambda e^{-\\lambda x}(x>0),\\ E=\\frac1\\lambda,\\ D=\\frac1{\\lambda^2}"
+      },
+      {
+       "name": "正态",
+       "tex": "X\\sim N(\\mu,\\sigma^2),\\ f=\\frac{1}{\\sqrt{2\\pi}\\sigma}e^{-\\frac{(x-\\mu)^2}{2\\sigma^2}}"
+      },
+      {
+       "name": "标准正态",
+       "tex": "X\\sim N(\\mu,\\sigma^2)\\Rightarrow\\frac{X-\\mu}{\\sigma}\\sim N(0,1)"
+      },
+      {
+       "name": "卡方",
+       "tex": "\\chi^2=\\sum_{i=1}^n Z_i^2,\\ Z_i\\sim N(0,1)"
+      },
+      {
+       "name": "t 分布",
+       "tex": "t=\\frac{Z}{\\sqrt{Y/n}},\\ Y\\sim\\chi^2(n)"
+      },
+      {
+       "name": "F 分布",
+       "tex": "F=\\frac{U/n_1}{V/n_2},\\ U\\sim\\chi^2(n_1),\\ V\\sim\\chi^2(n_2)"
+      }
+     ]
+    },
+    {
+     "title": "数字特征",
+     "items": [
+      {
+       "name": "期望",
+       "tex": "E(X)=\\int x f(x)dx\\ \\text{或}\\ \\sum x_k p_k"
+      },
+      {
+       "name": "方差",
+       "tex": "D(X)=E(X^2)-[E(X)]^2"
+      },
+      {
+       "name": "线性性",
+       "tex": "E(aX+bY)=aE(X)+bE(Y)",
+       "note": "不要求独立"
+      },
+      {
+       "name": "方差可加",
+       "tex": "D(X\\pm Y)=DX+DY\\pm2\\operatorname{Cov}(X,Y)"
+      },
+      {
+       "name": "独立时",
+       "tex": "\\text{独立}\\Rightarrow D(X\\pm Y)=DX+DY"
+      },
+      {
+       "name": "协方差",
+       "tex": "\\operatorname{Cov}(X,Y)=E(XY)-E(X)E(Y)"
+      },
+      {
+       "name": "相关系数",
+       "tex": "\\rho=\\frac{\\operatorname{Cov}(X,Y)}{\\sqrt{DX}\\sqrt{DY}},\\ |\\rho|\\le1"
+      },
+      {
+       "name": "切比雪夫",
+       "tex": "P(|X-E(X)|\\ge\\varepsilon)\\le\\frac{D(X)}{\\varepsilon^2}"
+      },
+      {
+       "name": "二级结论：不相关≠独立",
+       "tex": "\\rho=0\\iff\\text{不相关}\\nRightarrow\\text{独立}",
+       "note": "二维正态是例外，此时等价"
+      }
+     ]
+    },
+    {
+     "title": "二维与函数分布",
+     "items": [
+      {
+       "name": "边缘密度",
+       "tex": "f_X(x)=\\int f(x,y)dy"
+      },
+      {
+       "name": "独立性",
+       "tex": "f(x,y)=f_X(x)f_Y(y)"
+      },
+      {
+       "name": "Z=X+Y 卷积",
+       "tex": "f_Z(z)=\\int f(x,z-x)dx"
+      },
+      {
+       "name": "Z=max",
+       "tex": "F_{Z}(z)=[F(z)]^n\\ (\\text{iid})"
+      },
+      {
+       "name": "Z=min",
+       "tex": "F_Z(z)=1-[1-F(z)]^n"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "m1-f-stat",
+   "title": "第 11 章 数理统计（数一 · 数三）",
+   "note": "统计量、抽样分布、参数估计。矩估计与最大似然是必考计算。",
+   "groups": [
+    {
+     "title": "抽样分布",
+     "items": [
+      {
+       "name": "样本均值",
+       "tex": "\\bar X=\\frac1n\\sum X_i,\\quad E(\\bar X)=\\mu,\\ D(\\bar X)=\\frac{\\sigma^2}{n}"
+      },
+      {
+       "name": "样本方差",
+       "tex": "S^2=\\frac{1}{n-1}\\sum(X_i-\\bar X)^2,\\quad E(S^2)=\\sigma^2"
+      },
+      {
+       "name": "正态总体定理",
+       "tex": "\\bar X\\sim N(\\mu,\\sigma^2/n)"
+      },
+      {
+       "name": "卡方定理",
+       "tex": "\\frac{(n-1)S^2}{\\sigma^2}\\sim\\chi^2(n-1)"
+      },
+      {
+       "name": "t 定理",
+       "tex": "\\frac{\\bar X-\\mu}{S/\\sqrt n}\\sim t(n-1)"
+      },
+      {
+       "name": "F 定理",
+       "tex": "\\frac{S_1^2/\\sigma_1^2}{S_2^2/\\sigma_2^2}\\sim F(n_1-1,n_2-1)"
+      }
+     ]
+    },
+    {
+     "title": "参数估计",
+     "items": [
+      {
+       "name": "矩估计",
+       "tex": "\\text{用样本矩替代总体矩，解出参数}"
+      },
+      {
+       "name": "最大似然",
+       "tex": "L(\\theta)=\\prod f(x_i;\\theta)\\Rightarrow\\frac{\\partial\\ln L}{\\partial\\theta}=0"
+      },
+      {
+       "name": "无偏性",
+       "tex": "E(\\hat\\theta)=\\theta"
+      },
+      {
+       "name": "有效性",
+       "tex": "D(\\hat\\theta_1)<D(\\hat\\theta_2)\\Rightarrow\\hat\\theta_1\\ \\text{更有效}"
+      },
+      {
+       "name": "一致性",
+       "tex": "\\hat\\theta\\xrightarrow{P}\\theta"
+      },
+      {
+       "name": "二级结论：S² 无偏而 S_n² 有偏",
+       "tex": "\\frac{1}{n}\\sum(X_i-\\bar X)^2\\ \\text{的期望为}\\frac{n-1}{n}\\sigma^2"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

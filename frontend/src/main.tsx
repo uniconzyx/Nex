@@ -18,6 +18,8 @@ import { ParticleProvider } from './components/Particles';
 import { applyLgMode } from './lib/liquidGlass';
 import { applyMotionPref } from './lib/motion';
 import './styles.css';
+// KaTeX 字体与版面：必须在业务样式之前，让 .km-tex 的尺寸微调能覆盖它
+import 'katex/dist/katex.min.css';
 // 凯喵外壳样式放在业务样式之后：令牌覆盖 + 三栏布局优先级更高
 import './kaimao.css';
 // 玩法层（动画 / 图鉴 / 每日试炼）在最后：它依赖 kaimao.css 定义的 --km-* 令牌

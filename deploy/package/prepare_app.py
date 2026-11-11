@@ -73,7 +73,12 @@ APP_CSP = (
 
 # staging 体检阈值：一次正常的 vite build 远低于这两个数；
 # 一旦有人误把整个 dist/ 拷进来，这里会立刻挡下而不是打出一个巨型包。
-MAX_FILES = 120
+#
+# 2026-11：加入 KaTeX（考研数学「公式速查」）后文件数从 ~78 涨到 139。
+# 其中 59 个是 KaTeX 字族文件（Math/Size/AMS/Calligraphic…），缺一个
+# 公式就缺字形，不能按需裁剪，合计只有 1MB。因此把文件数上限放到 170，
+# 体积上限仍留在 40MB —— 体积才是「误拷 dist」真正的判别信号。
+MAX_FILES = 170
 MAX_MB = 40
 
 # Pyodide 运行时必备文件（vite 从 public/ 原样拷进 staging 根）。
