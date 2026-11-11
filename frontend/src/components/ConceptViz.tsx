@@ -362,6 +362,9 @@ export function ConceptViz({ subject, chapterId }: { subject: string; chapterId:
   const hostRef = useRef<HTMLDivElement>(null);
   const codeDrag = useDragScroll<HTMLPreElement>();
   const dotsDrag = useDragScroll<HTMLDivElement>();
+  /* 概念切换条：溢出时可按住拖动（滚动条被 CSS 藏掉了，鼠标只能靠拖）。
+     胶囊可点击，「拖完松手误点」由 useDragScroll 内置的 onClickCapture 阈值抑制。 */
+  const consDrag = useDragScroll<HTMLDivElement>();
 
   // 章节换了 → 回到第一个概念第一节
   useEffect(() => {
@@ -467,9 +470,15 @@ export function ConceptViz({ subject, chapterId }: { subject: string; chapterId:
         </div>
       </header>
 
-      {/* 本章概念切换：一章通常 3~6 个概念 */}
+      {/* 本章概念切换：一章通常 3~6 个概念；溢出时按住可横向拖动 */}
       {chapter.concepts.length > 1 && (
-        <div className="km-viz-cons" role="tablist" aria-label="本章概念">
+        <div
+          className={`km-viz-cons${consDrag.dragging ? ' dragging' : ''}`}
+          role="tablist"
+          aria-label="本章概念"
+          ref={consDrag.ref}
+          {...consDrag.handlers}
+        >
           {chapter.concepts.map((c, i) => (
             <button
               key={c.id}
