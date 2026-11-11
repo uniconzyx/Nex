@@ -89,7 +89,9 @@ fn http_client(timeout: Duration) -> reqwest::Client {
 pub async fn probe() -> ApiTarget {
     let start = std::time::Instant::now();
     let candidates = candidate_bases();
-    let client = http_client(Duration::from_millis(1500));
+    // 单个地址超时压到 900ms（原来 1500ms）：候选最多 4 个，
+    // 冷启动时前端在等这一次结果，探得慢等于红字挂得久。
+    let client = http_client(Duration::from_millis(900));
 
     for base in &candidates {
         // 优先打 /api/v1/system/health（能同时确认「活着」与「是 Nex 后端」）。
@@ -117,12 +119,20 @@ pub async fn probe() -> ApiTarget {
         }
     }
 
-    // 全都没通：给兜底默认值，让前端至少有个明确的地址可显示/可改。
+    // 全都没通：**仍然返回候选里最可能是后端的那一个**（而不是第一个）。
+    //
+    // 候选顺序是 [NEX_API_BASE?, 127.0.0.1, localhost, LAN IP]。
+    // 项目后端默认绑 127.0.0.1:8000，所以回落时优先给回环地址；
+    // 只有候选里压根没有回环（用户用环境变量指定了远端）时才取第一个。
+    let fallback = candidates
+        .iter()
+        .find(|c| c.contains("127.0.0.1") || c.contains("localhost"))
+        .cloned()
+        .or_else(|| candidates.first().cloned())
+        .unwrap_or_else(|| format!("http://127.0.0.1:{}", DEFAULT_API_PORT));
+
     ApiTarget {
-        base_url: candidates
-            .first()
-            .cloned()
-            .unwrap_or_else(|| format!("http://127.0.0.1:{}", DEFAULT_API_PORT)),
+        base_url: fallback,
         reachable: false,
         candidates,
         backend_version: None,

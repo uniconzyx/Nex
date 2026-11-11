@@ -33,6 +33,12 @@ static READY: AtomicBool = AtomicBool::new(false);
 static DONE: AtomicBool = AtomicBool::new(false);
 /// 只 spawn 一次后台任务
 static SPAWNED: AtomicBool = AtomicBool::new(false);
+/// 探测窗口：spawn 之后、25s 就绪窗口之内的这段时间，允许 api_probe 多次来问。
+/// api_probe 自己也只等 6s，单次等不到不代表后端不会起来。
+static PROBING: AtomicBool = AtomicBool::new(false);
+
+/// 就绪超时：uvicorn 冷启动 + 加载题库的时间（实测 3~10s，慢机器更久）。
+const READY_TIMEOUT_SECS: u64 = 40;
 
 #[derive(Debug, Deserialize)]
 struct BackendSpec {
@@ -153,6 +159,15 @@ pub async fn ensure() {
     DONE.store(false, Ordering::SeqCst);
     let client = health_client();
 
+    // ── 关键（2026-11-11 修）────────────────────────────────────────
+    // 以前这里是「一进来先 health_ok 一次，不通就 spawn」。问题在于：
+    // ensure 是 detached 后台任务，而 api_probe 的 wait_ready 只等 6s；
+    // 一旦冷启动时 uvicorn 起得慢（题库加载、杀软扫描），api_probe 先超时返回
+    // reachable=false，前端就把兜底地址钉死了。后来即使后端起来了，
+    // 前端也不会再问一次 —— 于是「后端明明在跑，登录页永远是红的」。
+    //
+    // 现在：spawn 出来的进程由 ensure 一直守着直到真就绪（最长 40s），
+    // 期间任何一次 api_probe 都可以重新问你「好了吗」（见 wait_ready）。
     if health_ok(&client).await {
         READY.store(true, Ordering::SeqCst);
         DONE.store(true, Ordering::SeqCst);
@@ -176,13 +191,16 @@ pub async fn ensure() {
         return;
     }
     boot_log(&format!("[backend] spawned uvicorn via {}", spec.python));
+    // 从这一刻起进入「正在起」窗口：api_probe 每等完一轮都可以再来问
+    PROBING.store(true, Ordering::SeqCst);
 
     let start = Instant::now();
-    while start.elapsed() < Duration::from_secs(25) {
+    while start.elapsed() < Duration::from_secs(READY_TIMEOUT_SECS) {
         tokio::time::sleep(Duration::from_millis(400)).await;
         if health_ok(&client).await {
             READY.store(true, Ordering::SeqCst);
             DONE.store(true, Ordering::SeqCst);
+            PROBING.store(false, Ordering::SeqCst);
             boot_log(&format!(
                 "[backend] ready in {}ms",
                 start.elapsed().as_millis()
@@ -190,14 +208,33 @@ pub async fn ensure() {
             return;
         }
     }
-    boot_log("[backend] WARN: 25s 内未就绪，检查 nex-backend.log / PG5432 / Redis6379");
+    PROBING.store(false, Ordering::SeqCst);
+    boot_log(&format!(
+        "[backend] WARN: {}s 内未就绪，检查 nex-backend.log / PG5432 / Redis6379",
+        READY_TIMEOUT_SECS
+    ));
     DONE.store(true, Ordering::SeqCst);
 }
 
-/// api_probe 调用：后端正在被拉起时最多等 max，超时就按原逻辑回落默认地址。
+/// api_probe 调用：后端正在被拉起时最多等 max。
+///
+/// 两个必须分清的情况：
+///   * 已经 ready（或 ensure 已彻底结束）→ 立刻返回，不必等；
+///   * 仍在「正在起」窗口内（PROBING）→ 等满 max 也值得，让前端这一次就能拿到地址。
+///
+/// 以前只判 DONE：ensure 里一旦 "spawned" 就把 DONE 置位的情况会让这里提前返回，
+/// 前端拿到 reachable=false 后**再也不会重问**（App 里只在启动时调一次），
+/// 这是冷启动「红字不消失」的直接成因。
 pub async fn wait_ready(max: Duration) {
     let start = Instant::now();
-    while !DONE.load(Ordering::SeqCst) && start.elapsed() < max {
+    while start.elapsed() < max {
+        if READY.load(Ordering::SeqCst) {
+            return;
+        }
+        // ensure 已结束（无论成功失败）且不在探测窗口 → 没得等了
+        if DONE.load(Ordering::SeqCst) && !PROBING.load(Ordering::SeqCst) {
+            return;
+        }
         tokio::time::sleep(Duration::from_millis(120)).await;
     }
 }

@@ -7,7 +7,7 @@
     prepare.py      web-preview/ 两套静态设计稿
                     -> Nex-Desktop-1.0.exe / Nex-Mobile-1.0-arm64.apk
     本脚本           frontend/ React 应用（章节 / 题库 / 判题 / 实验 / 进度）
-                    -> Nex-App-Desktop-1.0.exe / Nex-App-Mobile-1.0-arm64.apk
+                    -> Nex.exe / Nex.apk
 
 为什么单独出一份 staging，而不是直接把 frontendDist 指回 ../dist：
   vite.config.ts 里 emptyOutDir=false（清空 outDir 会触发本机批量删除守卫），
@@ -58,8 +58,8 @@ PKG = ROOT / "deploy" / "package"
 TAURI = ROOT / "src-tauri"
 STAGING = PKG / "app"
 
-EXE_OUT = "Nex-App-Desktop-1.0.exe"
-APK_OUT = "Nex-App-Mobile-1.0-arm64.apk"
+EXE_OUT = "Nex.exe"
+APK_OUT = "Nex.apk"
 
 # 与 tauri.conf.json 的 app.security.csp 逐字一致，只多放一条 wasm 编译权限。
 # 改动这里必须同步 scratch/ 里几个 headless 验收脚本的 CSP 常量。
@@ -210,6 +210,28 @@ def verify_staging() -> None:
         raise SystemExit("staging 没有任何 JS chunk，构建不完整")
 
 
+# ── WebView2 启动参数：BLACK-SCREEN 根治 ────────────────────────────────
+#
+# 2026-11-11 实测：同一份 staging 在 Edge 里渲染完全正常，装进 EXE 后
+# WebView 内是**纯黑**，前端脚本一行都没执行（localStorage 无任何新写入）。
+# 这类「浏览器好、WebView 黑」几乎都是 GPU 合成路径的问题：界面大量使用
+# backdrop-filter / filter: blur（liquidglass 33 处 + kaimao 40 处），
+# WebView2 在显卡驱动异常 / 远程桌面 / 虚拟机 / 显卡被占用时会拿到一个
+# 半坏的 D3D 设备，合成层直接输出黑帧，而 DOM 与 JS 都是好的。
+#
+# 因此固定带上这几个开关：
+#   --disable-gpu-compositing  关掉 GPU 合成，改用 CPU 合成（最关键的一条）
+#   --disable-features=...     关掉 WebView2 部分版本里默认开着的几个合成特性
+#   --in-process-gpu           避免独立 GPU 子进程在某些驱动上反复崩溃
+# 代价是模糊效果走 CPU，滚动会稍重，但「能看见」永远优先于「好看」。
+# 想恢复 GPU 合成可设环境变量 NEX_WEBVIEW_GPU=1（排查用）。
+WEBVIEW_ARGS = (
+    "--disable-gpu-compositing "
+    "--in-process-gpu "
+    "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection,CalculateNativeWinOcclusion"
+)
+
+
 def write_conf(name: str, title: str | None) -> None:
     """两份 --config 增量配置；覆盖 frontendDist / 构建钩子 / CSP / 窗口标题。"""
     conf: dict = {
@@ -232,6 +254,8 @@ def write_conf(name: str, title: str | None) -> None:
             "resizable": True,
             "fullscreen": False,
             "center": True,
+            # 只在桌面端加：Android WebView 不认这些 Chromium 开关。
+            "additionalBrowserArgs": WEBVIEW_ARGS,
         }]
     path = TAURI / name
     path.write_text(json.dumps(conf, ensure_ascii=False, indent=2) + "\n",
@@ -322,6 +346,8 @@ def self_check() -> None:
         "EXE 输出名会覆盖设计稿包"
     assert APK_OUT in apk_txt and "Nex-Mobile-1.0-arm64.apk" not in apk_txt, \
         "APK 输出名会覆盖设计稿包"
+    # 桌面产物必须叫 Nex.exe：主人点击的就是这个文件名，别再带 -Desktop-1.0 后缀。
+    assert EXE_OUT == "Nex.exe", "桌面 EXE 输出名应为 Nex.exe"
     assert "binaries\\go-judge.exe" in exe_txt, \
         "EXE 脚本没落盘 go-judge，桌面判题会静默降级成 mock"
     proto = (ROOT / "frontend" / "src" / "lib" / "pyodide" /
@@ -342,7 +368,7 @@ def main() -> None:
     clean_staging()
     build_staging()
     verify_staging()
-    write_conf("tauri.app.desktop.conf.json", "Nex 学习版")
+    write_conf("tauri.app.desktop.conf.json", "Nex")
     write_conf("tauri.app.mobile.conf.json", None)
     write_build_scripts()
     self_check()

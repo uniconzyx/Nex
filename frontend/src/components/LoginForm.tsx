@@ -14,10 +14,11 @@
  * 但「无法闭环」和「点了没反应」是两回事——点按钮会真的去问后端
  * GET /api/v1/auth/wechat/config，把「缺资质 / 缺实现 / 连不上服务」分开告诉用户。
  */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { resolveApiBase } from '../lib/api';
 import { authBackendInfo } from '../lib/authBackend';
+import { onConnectionEvent } from '../lib/connection';
 import { useSession } from '../lib/session';
 
 /** 后端 /auth/wechat/config 的返回；unreachable 是前端自己补的（请求失败） */
@@ -71,6 +72,21 @@ export function LoginForm({ onSuccess }: Props) {
       setWxBusy(false);
     }
   };
+
+  // 后端恢复在线 → 清掉上一次的失败红字。
+  //
+  // 为什么不能省：msg 是组件局部 state，后端起来之后它不会自己消失，
+  // 用户看到的就是「明明已经能连上，红字还挂着」——这正是之前反馈的
+  // 「连不上内容服务：无法连接后端（http://127.0.0.1:8000）」的来源。
+  useEffect(
+    () =>
+      onConnectionEvent((e) => {
+        // offline → online 时清；只清「连不上 / 后端」类文案，
+        // 密码错误之类的业务错误不该被心跳抹掉。
+        if (e.type === 'online' && /连不上|后端|无法连接/.test(msg)) setMsg('');
+      }),
+    [msg],
+  );
 
   const submit = async () => {
     setMsg('');

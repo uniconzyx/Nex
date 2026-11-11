@@ -11,14 +11,15 @@
     "windows": [
       {
         "label": "main",
-        "title": "Nex 学习版",
+        "title": "Nex",
         "width": 1280,
         "height": 820,
         "minWidth": 900,
         "minHeight": 640,
         "resizable": true,
         "fullscreen": false,
-        "center": true
+        "center": true,
+        "additionalBrowserArgs": "--disable-gpu-compositing --in-process-gpu --disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection,CalculateNativeWinOcclusion"
       }
     ]
   }

@@ -107,7 +107,7 @@ def main() -> int:
         spec.loader.exec_module(mod)
 
         # 只重放模板部分；build_staging()/verify_staging() 需要 vite，CI 不跑。
-        mod.write_conf("tauri.app.desktop.conf.json", "Nex 学习版")
+        mod.write_conf("tauri.app.desktop.conf.json", "Nex")
         mod.write_conf("tauri.app.mobile.conf.json", None)
         mod.write_build_scripts()
 

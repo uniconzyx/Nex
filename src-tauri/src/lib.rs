@@ -103,12 +103,20 @@ async fn get_status(
 /// 探测内容服务（FastAPI）在哪、是否可达。
 /// 前端拿到后把 base_url 交给 api.ts 的 registerBaseResolver，
 /// 于是前端的所有请求都打到客户端确认过的地址上。
+///
+/// 探测不通时**也会返回 base_url**（候选列表第一个），前端照样注册它 ——
+/// 「不通就不注册」会让前端一直用自己那份兜底地址，而冷启动时那份地址
+/// 从没被验证过，正是「连不上 http://127.0.0.1:8000」的老根因。
 #[tauri::command]
 async fn api_probe() -> Result<api_client::ApiTarget, String> {
-    // 桌面端：等后台把本机后端拉起来再探，避免 app 启动时必然 false。
-    // 等不到也只多花最多 6s，随后仍按原逻辑回落默认地址（不更差）。
+    // 桌面端：等后台把本机后端拉起来再探。
+    //
+    // 等待上限给到 12s（原来 6s）：uvicorn 冷启动要加载题库 + 建索引，
+    // 实测 3~10s，慢机器更久。只等 6s 会稳定地在「差一点就起来」的时候返回
+    // reachable=false，前端于是把兜底地址钉死。
+    // 等不到也只是多花这 12s（前端此时本来就是「连不上」状态，不更差）。
     #[cfg(windows)]
-    backend_supervisor::wait_ready(std::time::Duration::from_secs(6)).await;
+    backend_supervisor::wait_ready(std::time::Duration::from_secs(12)).await;
     let t = api_client::probe().await;
     // 落盘探测证据：候选地址 / 是否可达 / 后端版本 / 耗时。
     // 真客户端（浏览器里 isClient() 为 false）跑不到这条路径，
@@ -129,6 +137,33 @@ pub fn run() {
             // 桌面端：后台确保本机 FastAPI 后端可用（不阻塞窗口创建）。
             #[cfg(windows)]
             backend_supervisor::spawn_ensure();
+
+            // 窗口就绪 + WebView 加载结果落盘。
+            //
+            // 为什么必须记：2026-11-11 出现过「窗口起来了、里面全黑」的情况，
+            // 从外部完全看不出是 WebView 没加载、JS 崩了、还是 CSP 拦了资源。
+            // 前端一旦渲染失败，它自己也没机会写日志（脚本根本没跑起来），
+            // 所以这条证据只能由 Rust 侧在网络/加载层记下来。
+            #[cfg(windows)]
+            {
+                use tauri::Manager;
+                if let Some(win) = app.get_webview_window("main") {
+                    boot_log(&format!(
+                        "[window] created label=main visible={:?} size={:?} url={:?}",
+                        win.is_visible().ok(),
+                        win.inner_size().ok().map(|s| (s.width, s.height)),
+                        win.url().ok().map(|u| u.to_string())
+                    ));
+                    // 兜底：某些会话里窗口以最小化状态创建（后台启动时容易命中），
+                    // 用户会以为「程序没开」。这里保证第一次显示一定是正常尺寸。
+                    let _ = win.unminimize();
+                    let _ = win.show();
+                    let _ = win.set_focus();
+
+                } else {
+                    boot_log("[window] WARN: 找不到 main 窗口");
+                }
+            }
 
             // 优先级 3：Defender 排除项（Windows 静默提权；真正无感在 NSIS 安装期）
             if let Err(e) = defender::ensure_exclusion(app.path().resource_dir().ok()) {

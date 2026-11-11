@@ -23,7 +23,10 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 
 [dependencies]
 # Tauri 核心（Wry 运行时默认启用）
-tauri = { version = "2", features = [] }
+# unstable：启用 `additionalBrowserArgs`，用于给 WebView2 传
+#   --disable-gpu-compositing 等合成层开关（黑屏根治，见 prepare_app.py 注释）。
+# 该特性只暴露实验性配置项，不改变既有行为；APK 侧不使用这些参数。
+tauri = { version = "2", features = ["unstable"] }
 # 异步运行时（Tauri 已内置 tokio，这里显式声明以便直接使用 async API）
 tokio = { version = "1", features = ["full"] }
 # HTTP 客户端，封装 go-judge REST /run

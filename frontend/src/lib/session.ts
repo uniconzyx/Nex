@@ -26,6 +26,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { ApiError, ApiNetworkError, apiGet, apiHealth, apiPatch, apiPost, setRefreshHandler } from './api';
 import { getAuthBackendId, setAuthBackendId, type AuthBackendId } from './authBackend';
 import { localChangePassword, localHealth, localLogin, localLogout, localMe, localUpdateProfile, type LocalUser } from './authLocal';
+import { onConnectionEvent } from './connection';
 
 const K_ACCESS = 'nex.accessToken';
 const K_REFRESH = 'nex.refreshToken';
@@ -157,8 +158,10 @@ export function getAccessToken(): string | null {
 function friendly(exc: unknown): string {
   const local = getAuthBackendId() === 'local';
   const svc = local ? '本地账号服务' : '内容服务';
+  // 地址前缀统一由这一处加，不在文案里重复（否则会出现
+  // 「连不上内容服务：无法连接后端（http://127.0.0.1:8000）。(http://127.0.0.1:8000)」）
   if (exc instanceof ApiNetworkError) {
-    return `连不上${svc}：${exc.message}`;
+    return `连不上${svc}（${exc.base}）：后端未响应。请稍候重试，或在「设置」里修正服务地址。`;
   }
   if (exc instanceof ApiError) {
     if (exc.status === 0) return `连不上${svc}：请确认服务已启动。`;
@@ -428,6 +431,8 @@ export function useSession(): SessionState & {
   signUp: (e: string, p: string, n?: string) => Promise<{ ok: boolean; error: string }>;
   signOut: () => void;
   retry: () => void;
+  /** 清掉最近一次失败原因（后端恢复后由 connection 广播触发） */
+  clearError: () => void;
 } {
   const [value, setValue] = useState(state);
 
@@ -445,9 +450,27 @@ export function useSession(): SessionState & {
     };
   }, []);
 
+  // 后端恢复在线 → 清掉「连不上内容服务」这类过期红字，并重探一次会话。
+  // 为什么放在这里而不是各页面各写一遍：提示文案的归属地是本模块，
+  // 谁来清也必须在这里，否则 LoginForm 的局部 msg 会一直挂到用户重开应用。
+  useEffect(
+    () =>
+      onConnectionEvent((e) => {
+        if (e.type !== 'online') return;
+        if (state.error) emit({ error: '' });
+        probed = true;
+        void probe();
+      }),
+    [],
+  );
+
   const retry = useCallback(() => {
     probed = true;
     void probe();
+  }, []);
+
+  const clearError = useCallback(() => {
+    if (state.error) emit({ error: '' });
   }, []);
 
   return {
@@ -456,5 +479,6 @@ export function useSession(): SessionState & {
     signUp: register,
     signOut: logout,
     retry,
+    clearError,
   };
 }

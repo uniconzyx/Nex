@@ -39,8 +39,48 @@ import './styles/motion.css';
 applyLgMode();
 applyMotionPref();
 
+/**
+ * 启动自证：把「前端真的跑起来了 + 渲染失败原因」记进 localStorage，
+ * 桌面端由 Rust 侧在窗口就绪后读出来写进 nex-boot.log。
+ *
+ * 为什么绕这一圈：如果构建出来的 bundle 在 WebView 里直接抛错（语法/兼容/
+ * CSP/资源 404），用户看到的是**纯黑窗口**，前端一句话都留不下，日志里只有
+ * 后端那几行 —— 2026-11-11 的黑屏就是这样查了很久。
+ * 有了这条记录，「窗口黑屏」至少能立刻区分成三类：
+ *   boot 有 ok  → 前端正常，问题在别处；
+ *   boot 有 err → 前端抛错了，栈在这里；
+ *   boot 完全没有 → 脚本压根没执行（资源 404 / CSP 拦截 / WebView 加载失败）。
+ */
+function markBoot(payload: Record<string, unknown>): void {
+  try {
+    const prev = localStorage.getItem('nex.bootTrace');
+    const prevObj = prev ? (JSON.parse(prev) as Record<string, unknown>) : {};
+    localStorage.setItem(
+      'nex.bootTrace',
+      JSON.stringify({ ...prevObj, ...payload, at: new Date().toISOString() }),
+    );
+  } catch {
+    /* 存不进去也不能影响启动 */
+  }
+}
+
+markBoot({ stage: 'module-loaded', hash: location.hash || '#home' });
+
+window.addEventListener('error', (e) => {
+  markBoot({
+    stage: 'error',
+    message: String(e.message || '').slice(0, 300),
+    src: String(e.filename || '').slice(0, 200),
+  });
+});
+window.addEventListener('unhandledrejection', (e) => {
+  const r = e.reason as { message?: string; stack?: string } | undefined;
+  markBoot({ stage: 'rejection', message: String(r?.message || r || '').slice(0, 300) });
+});
+
 const container = document.getElementById('root');
 if (!container) {
+  markBoot({ stage: 'fatal', message: '找不到 #root 挂载点' });
   throw new Error('找不到 #root 挂载点：请检查 frontend/index.html 是否被改动');
 }
 
@@ -51,3 +91,12 @@ createRoot(container).render(
     </ParticleProvider>
   </React.StrictMode>,
 );
+
+// React 首帧提交后再确认一次：能跑到这里，说明整棵组件树(含路由)渲染成功。
+requestAnimationFrame(() => {
+  markBoot({
+    stage: 'rendered',
+    rootChildren: container.childElementCount,
+    text: (container.textContent || '').trim().slice(0, 60),
+  });
+});

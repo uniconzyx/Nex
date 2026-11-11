@@ -45,6 +45,16 @@ function normalize(url: string): string {
   return url.trim().replace(/\/+$/, '');
 }
 
+/** 判断一个地址是否指向本机回环（127.0.0.0/8、localhost、[::1]）。 */
+export function isLoopbackBase(url: string): boolean {
+  try {
+    const h = new URL(url).hostname.toLowerCase();
+    return h === 'localhost' || h === '::1' || h === '[::1]' || h.startsWith('127.');
+  } catch {
+    return false;
+  }
+}
+
 /** 同步取基址（不等待客户端解析器）。 */
 export function getApiBase(): string {
   if (typeof localStorage !== 'undefined') {
@@ -79,11 +89,24 @@ export function lastApiBase(): string {
   return cachedResolvedBase ?? getApiBase();
 }
 
+/**
+ * 手动指定基址（设置页「保存」用）。
+ *
+ * 用户填了地址就是用户的意志，必须压过客户端探测结果 —— 否则在桌面端改了
+ * 也没用（每次请求都被解析器改回去，这是「设置里改了还是连不上」的成因之一）。
+ * 清空（传空串）时把解析器也恢复，交还给客户端探测。
+ */
 export function setApiBase(url: string): void {
   if (typeof localStorage === 'undefined') return;
   const v = normalize(url);
-  if (v) localStorage.setItem('nex.apiBaseUrl', v);
-  else localStorage.removeItem('nex.apiBaseUrl');
+  if (v) {
+    localStorage.setItem('nex.apiBaseUrl', v);
+    const pinned = v;
+    baseResolver = () => pinned;
+  } else {
+    localStorage.removeItem('nex.apiBaseUrl');
+    baseResolver = null;
+  }
   cachedResolvedBase = v || DEFAULT_BASE;
 }
 
@@ -176,9 +199,12 @@ export interface ApiHealth {
 /**
  * 打后端健康检查。
  * 永不抛异常——调用方只想知道「通没通」，异常信息在 error 字段里。
+ *
+ * @param deep  深探测（连数据库）
+ * @param baseOverride  指定基址（用于验证某个具体地址，不影响全局解析缓存）
  */
-export async function apiHealth(deep = false): Promise<ApiHealth> {
-  const base = await resolveApiBase();
+export async function apiHealth(deep = false, baseOverride?: string): Promise<ApiHealth> {
+  const base = baseOverride ? normalize(baseOverride) : await resolveApiBase();
   try {
     const res = await fetch(`${base}/api/v1/system/health${deep ? '?deep=1' : ''}`, {
       headers: { Accept: 'application/json' },

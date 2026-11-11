@@ -12,7 +12,7 @@
  *
  * 另外顺带把「判题通道」的选择也收敛到这里，UI 层不再自己判断平台。
  */
-import { registerBaseResolver } from './api';
+import { registerBaseResolver, resolveApiBase } from './api';
 
 /** Rust 侧 api_probe 的返回形状（与 api_client.rs 的 ApiTarget 对齐）。 */
 export interface ApiTarget {
@@ -42,10 +42,21 @@ export async function connectContentService(): Promise<ApiTarget | null> {
     const { invoke } = await import('@tauri-apps/api/core');
     const target = (await invoke('api_probe')) as ApiTarget;
 
-    // 只有探测通了才注册。探测不通时保持前端自身的兜底地址，
-    // 免得把一个错的地址钉死、把 localStorage 里用户手填的正确地址也盖掉。
-    if (target?.reachable && target.baseUrl) {
-      registerBaseResolver(() => target.baseUrl);
+    // 客户端是「后端在哪」的权威来源，两种结果都要注册：
+    //
+    //  * 探测通 → 注册它给的地址，前端请求打到客户端确认过的那台机器；
+    //  * 探测不通 → **也必须注册**。以前的写法是「不通就什么都不做」，
+    //    结果是前端继续用 localStorage / 默认兜底地址，而桌面端最常见的
+    //    「连不上 http://127.0.0.1:8000」正是这么来的：
+    //      1. 冷启动时 api_probe 等不到后端（Rust 侧最多等 6s，uvicorn 起得慢就超时），
+    //         reachable=false → 不注册 → 前端锁死在兜底地址；
+    //      2. 之后即使 Rust 侧确认后端 ready，前端也永远不会再问一次，
+    //         只能靠 60s 心跳干等，且注册表里的错误地址不会自己修好。
+    //    现在改成「不通也注册」+ 交给 connection.ts 的重连逻辑：
+    //    后端一旦起来立刻 reprobe，把地址和离线状态一起纠正。
+    const resolverBase = target?.baseUrl || null;
+    if (resolverBase) {
+      registerBaseResolver(() => resolverBase);
     }
     probed = target;
     return target;
@@ -64,4 +75,29 @@ export function lastProbe(): ApiTarget | null {
  */
 export async function reprobe(): Promise<ApiTarget | null> {
   return connectContentService();
+}
+
+/**
+ * 客户端侧的重连：探测 + 同步解析缓存。
+ *
+ * 与 reprobe 的区别是它会把结果应用到 api.ts 的解析缓存上：
+ * api.ts 每次请求都会调 resolveApiBase()，客户端解析器生效时它会重算，
+ * 所以这里还要调用一次 resolveApiBase() 让缓存立刻跟上新地址，
+ * 否则「刚重连成功、下一个请求还打旧地址」还会再多错一次。
+ */
+let reconnecting: Promise<ApiTarget | null> | null = null;
+
+export function reconnectContentService(): Promise<ApiTarget | null> {
+  // 并发去重：心跳 + 用户点重试 + 网络错误上报可能在同一个瞬间一起触发
+  if (reconnecting) return reconnecting;
+  reconnecting = (async () => {
+    try {
+      const t = await reprobe();
+      if (t?.reachable) await resolveApiBase();
+      return t;
+    } finally {
+      reconnecting = null;
+    }
+  })();
+  return reconnecting;
 }

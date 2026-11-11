@@ -34,7 +34,7 @@ import {
   type ImportPreview,
 } from '../lib/progress';
 import { apiHealth, getApiBase, setApiBase, type ApiHealth } from '../lib/api';
-import { checkConnection, describeCapabilities, useConnection } from '../lib/connection';
+import { checkConnection, describeCapabilities, getConnection, useConnection } from '../lib/connection';
 import { goJudgeClient, LAN_DEFAULT_PORT } from '../lib/GoJudgeClient';
 import {
   getLgIntensity,
@@ -186,13 +186,13 @@ export function SettingsPage({ onNavigate }: { onNavigate: (page: KmPage) => voi
 
   const checkNow = useCallback(async (deep = false) => {
     setChecking(true);
-    const h = await apiHealth(deep);
-    setHealth(h);
+    // 只走 checkConnection 这一条链路：它内部会处理「离线时先让客户端重探地址」，
+    // 再用最终地址做健康检查。以前的写法是「先按旧地址量一次、再同步全局状态」，
+    // 于是设置页明明能连通、全局状态却还是离线（两者量的不是同一个地址）。
+    await checkConnection(true);
+    const h = deep ? await apiHealth(true) : getConnection().health;
+    setHealth(h ?? null);
     setChecking(false);
-    // 浅探测同时同步全局状态：设置页是用户修完地址后的第一站，
-    // 这里通了，顶栏指示灯与离线横幅必须**同一刻**跟着变绿/消失，
-    // 否则会出现「横幅还挂着但其实已经通了」的割裂感（Phase18）。
-    if (!deep) await checkConnection();
   }, []);
 
   // 打开设置页时自动浅探一次（毫秒级），用户不用点按钮才知道通没通。

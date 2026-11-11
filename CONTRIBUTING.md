@@ -302,8 +302,8 @@ EXE / APK 是 `.gitignore` 的本机产物，CI 上**没有二进制**，所以 
 
 ```bash
 python deploy/package/prepare_app.py   # 生成 staging + 两份增量配置 + 两个构建脚本
-deploy/package/build-app-exe.cmd       # -> release/nex-shell/Nex-App-Desktop-1.0.exe
-deploy/package/build-app-apk.cmd       # -> release/nex-shell/Nex-App-Mobile-1.0-arm64.apk
+deploy/package/build-app-exe.cmd       # -> release/nex-shell/Nex.exe
+deploy/package/build-app-apk.cmd       # -> release/nex-shell/Nex.apk
 ```
 
 `prepare_app.py` 让 vite 把当前构建输出到干净的 `deploy/package/app/`（gitignore）。
