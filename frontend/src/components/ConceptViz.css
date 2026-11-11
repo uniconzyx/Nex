@@ -96,18 +96,17 @@ html[data-km-theme='dark'] .km-viz {
   gap: 6px;
   margin-top: 10px;
   overflow-x: auto;
-  padding-bottom: 2px;
-  scrollbar-width: none;
-  cursor: grab;
-}
-
-.km-viz-cons.dragging {
-  cursor: grabbing;
-  user-select: none;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
 }
 
 .km-viz-cons::-webkit-scrollbar {
-  display: none;
+  height: 8px;
+}
+
+.km-viz-cons::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--km-accent) 40%, transparent);
+  border-radius: 4px;
 }
 
 .km-viz-cons button {
@@ -368,11 +367,6 @@ html[data-km-theme='dark'] .km-viz {
   min-width: 0;
   overflow-x: auto;
   scrollbar-width: thin;
-  cursor: grab;
-}
-.km-viz-dots.dragging {
-  cursor: grabbing;
-  user-select: none;
 }
 .km-viz-dots::-webkit-scrollbar {
   height: 6px;
