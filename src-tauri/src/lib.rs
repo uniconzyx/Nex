@@ -129,6 +129,26 @@ async fn api_probe() -> Result<api_client::ApiTarget, String> {
     Ok(t)
 }
 
+/// 前端告诉 Rust「这个地址可用」——移动端的关键补丁。
+///
+/// 手机上没有任何可用的默认后端地址：127.0.0.1 指向手机自己，
+/// LAN IP 猜出来的也是手机自己。用户必须在设置页填一次电脑的地址
+/// （如 `http://192.168.1.10:8000`）。前端把它存进 localStorage 之后
+/// 再调这个命令，Rust 记在进程内，下次 api_probe 会把它排到候选首位，
+/// 不会再拿一条死地址去耗超时。
+///
+/// 传空串 = 清除记忆（用户点「恢复默认地址」时）。
+#[tauri::command]
+fn nex_os_mark_base_ok(base: String) -> Result<(), String> {
+    if base.trim().is_empty() {
+        api_client::forget_base();
+    } else {
+        api_client::remember_base(&base);
+    }
+    boot_log(&format!("[api_base] marked ok: {base}"));
+    Ok(())
+}
+
 /// 应用入口：桌面由 main.rs 调用，Android 由 `mobile_entry_point` 生成的 JNI 桥调用。
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -229,7 +249,8 @@ pub fn run() {
             judge_ws_url,
             check_environment,
             get_status,
-            api_probe
+            api_probe,
+            nex_os_mark_base_ok
         ])
         .build(tauri::generate_context!())
         .expect("error while building Nex")

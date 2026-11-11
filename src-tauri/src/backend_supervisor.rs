@@ -52,12 +52,19 @@ struct BackendSpec {
 }
 
 fn default_args() -> Vec<String> {
+    // ── 为什么是 0.0.0.0 而不是 127.0.0.1（2026-11-11 修）────────────
+    // 手机上的 APK 是「瘦客户端」：自身不起后端，走局域网连电脑上的 :8000
+    // （候选地址见 api_client::candidate_bases 的第 4 项 LAN IP）。
+    // 原先写 127.0.0.1 → 只监听回环网卡，手机通过 172.27.x.x:8000 永远
+    // 连不上，表现为 APK 一路「无法连接内容服务」。
+    // 判题服务 go-judge 本来就是 0.0.0.0:8080，这里补齐后端即可。
+    // 健康检查仍打 127.0.0.1（见 HEALTH_URL），本机自检不受影响。
     [
         "-m",
         "uvicorn",
         "app.main:app",
         "--host",
-        "127.0.0.1",
+        "0.0.0.0",
         "--port",
         "8000",
     ]
@@ -254,6 +261,16 @@ mod tests {
         assert_eq!(a.first().map(String::as_str), Some("-m"));
         assert!(a.iter().any(|s| s == "uvicorn"));
         assert!(a.windows(2).any(|w| w[0] == "--port" && w[1] == "8000"));
+    }
+
+    /// 回归护栏：手机端要靠局域网访问 :8000，绑回环会让 APK 连不上后端。
+    #[test]
+    fn default_args_bind_all_interfaces_for_lan_clients() {
+        let a = default_args();
+        assert!(
+            a.windows(2).any(|w| w[0] == "--host" && w[1] == "0.0.0.0"),
+            "host 必须是 0.0.0.0，否则 Android 客户端经 LAN IP 连不上，args={a:?}"
+        );
     }
 
     #[test]

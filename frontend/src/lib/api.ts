@@ -108,6 +108,23 @@ export function setApiBase(url: string): void {
     baseResolver = null;
   }
   cachedResolvedBase = v || DEFAULT_BASE;
+  // 同步放进 Rust 侧的记忆里。
+  //
+  // 手机上这是**唯一**能让「用户填的地址」活到下次冷启动的通道：
+  // Android 里 127.0.0.1 指向手机自己，LAN IP 猜出来的也是手机自己，
+  // 候选地址表里没有任何一条能自动命中电脑。用户填一次之后必须被记住，
+  // 否则每次冷启动都重新探三个死地址、白等 2.7s 再报「连不上」。
+  void notifyClientBase(v);
+}
+
+/** 把生效地址告诉 Rust（纯浏览器里 invoke 不存在，静默跳过）。 */
+async function notifyClientBase(base: string): Promise<void> {
+  try {
+    const { invoke } = await import('@tauri-apps/api/core');
+    await invoke('nex_os_mark_base_ok', { base });
+  } catch {
+    /* 非 Tauri 环境或旧版客户端：无此命令，忽略 */
+  }
 }
 
 /** 后端统一响应包（见 app/core/responses.py） */

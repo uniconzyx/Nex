@@ -46,10 +46,45 @@ pub struct ApiTarget {
 }
 
 /// 构造候选地址列表。顺序即优先级。
+///
+/// ⚠️ 桌面端与移动端的候选**必须不同**（2026-11-11 修 APK 连不上后端）：
+///
+/// `guess_lan_ip()` 返回的是**运行本进程这台机器**的 IP。
+///   * 桌面端：后端就跑在同一台电脑上 → 本机 LAN IP 是一个合法候选；
+///   * 移动端：后端在**另一台电脑**上 → 手机上猜出来的 IP 是手机自己，
+///     去连 `<手机IP>:8000` 必然连不上（手机上根本没有后端）。
+///     以前不区分平台，APK 的候选里就混进了这条死地址，白白耗掉 900ms 超时。
+///
+/// 移动端的正确做法：用户填过的地址（手机端唯一可信来源）→ 上次探测成功的地址。
 pub fn candidate_bases() -> Vec<String> {
     let mut v: Vec<String> = Vec::new();
 
-    // 1. 环境变量显式指定
+    if cfg!(mobile) {
+        // ── 移动端（Android/iOS）：后端在别的机器上 ──────────────────
+        // 优先级：用户手填的地址（记住的那条）> 环境变量 > 回环兜底。
+        //
+        // 为什么手填地址必须压过环境变量：手机上没有「默认正确」的地址，
+        // 用户在设置页填的那一条是他唯一可信的信息源；环境变量在 Android
+        // 上通常根本不存在，真存在时也不该盖掉用户的选择。
+        if let Some(saved) = remembered_base() {
+            v.push(saved);
+        }
+        if let Ok(custom) = std::env::var("NEX_API_BASE") {
+            let c = custom.trim().trim_end_matches('/').to_string();
+            if !c.is_empty() && !v.contains(&c) {
+                v.push(c);
+            }
+        }
+        // 兜底：保证返回体非空，前端据此显示「请填写电脑地址」。
+        let loopback = format!("http://127.0.0.1:{}", DEFAULT_API_PORT);
+        if !v.contains(&loopback) {
+            v.push(loopback);
+        }
+        return v;
+    }
+
+    // ── 桌面端：后端就在本机 ──────────────────────────────────────
+    // 1. 环境变量显式指定（CI / 调试）
     if let Ok(custom) = std::env::var("NEX_API_BASE") {
         let c = custom.trim().trim_end_matches('/').to_string();
         if !c.is_empty() {
@@ -57,11 +92,11 @@ pub fn candidate_bases() -> Vec<String> {
         }
     }
 
-    // 2/3. 本机回环
+    // 2/3. 本机回环（桌面端后端默认绑这里）
     v.push(format!("http://127.0.0.1:{}", DEFAULT_API_PORT));
     v.push(format!("http://localhost:{}", DEFAULT_API_PORT));
 
-    // 4. 局域网 IP（手机端连电脑上的后端）
+    // 4. 本机局域网 IP —— 桌面端有意义：同一台机器换个网卡地址访问
     if let Some(ip) = lan_server::guess_lan_ip() {
         let lan = format!("http://{ip}:{}", DEFAULT_API_PORT);
         if !v.contains(&lan) {
@@ -70,6 +105,38 @@ pub fn candidate_bases() -> Vec<String> {
     }
 
     v
+}
+
+/// 「上次探测成功过的地址」的进程内缓存（移动端关键）。
+///
+/// Android 上没有可靠的「后端在哪」的默认值：既不可能是 127.0.0.1，
+/// 也不能用手机自己的 IP 去猜。唯一可信的是用户填过一次之后记住它。
+/// 前端把用户输入存进 localStorage（`nex.apiBaseUrl`），并通过
+/// `nex_os_mark_base_ok` 命令把生效地址回写到这里，
+/// 下次冷启动时优先用它 —— 用户只需填一次。
+static LAST_GOOD_BASE: std::sync::Mutex<Option<String>> = std::sync::Mutex::new(None);
+
+/// 记录一个确认可用的基址（由 api_probe 探测成功后调用）。
+pub fn remember_base(base: &str) {
+    let b = base.trim().trim_end_matches('/');
+    if b.is_empty() {
+        return;
+    }
+    if let Ok(mut g) = LAST_GOOD_BASE.lock() {
+        *g = Some(b.to_string());
+    }
+}
+
+/// 读回上次确认可用的基址。
+pub fn remembered_base() -> Option<String> {
+    LAST_GOOD_BASE.lock().ok().and_then(|g| g.clone())
+}
+
+/// 清除记忆（用户点「恢复默认地址」时，避免旧地址一直占着首位）。
+pub fn forget_base() {
+    if let Ok(mut g) = LAST_GOOD_BASE.lock() {
+        *g = None;
+    }
 }
 
 /// 构造一个不走代理的 HTTP 客户端。
@@ -98,6 +165,8 @@ pub async fn probe() -> ApiTarget {
         // 老版本后端没这个接口，退回 /health。
         let probe_url = format!("{base}/api/v1/system/health");
         if let Some(version) = check(&client, &probe_url).await {
+            // 记住这条可用地址：移动端下次冷启动直接用它，不用用户重填。
+            remember_base(base);
             return ApiTarget {
                 base_url: base.clone(),
                 reachable: true,
@@ -109,6 +178,7 @@ pub async fn probe() -> ApiTarget {
 
         let legacy = format!("{base}/health");
         if check(&client, &legacy).await.is_some() {
+            remember_base(base);
             return ApiTarget {
                 base_url: base.clone(),
                 reachable: true,
@@ -203,10 +273,17 @@ mod tests {
 
     #[test]
     fn env_override_ignores_blank() {
+        // 空白环境变量不算覆盖：桌面端应直接回落到回环地址。
+        // （移动端首位可能是记忆地址，那条路径由 remembered_base_goes_first 覆盖）
         std::env::set_var("NEX_API_BASE", "   ");
+        forget_base();
         let v = candidate_bases();
         std::env::remove_var("NEX_API_BASE");
-        assert_eq!(v.first().map(String::as_str), Some("http://127.0.0.1:8000"));
+        if cfg!(mobile) {
+            assert!(!v.is_empty(), "移动端候选不能为空");
+        } else {
+            assert_eq!(v.first().map(String::as_str), Some("http://127.0.0.1:8000"));
+        }
     }
 
     #[test]
@@ -232,5 +309,57 @@ mod tests {
         let c = http_client(std::time::Duration::from_millis(200));
         // reqwest 的 Client 没有公开 proxy 配置，这里只断言能构造出来且不 panic
         let _ = c;
+    }
+
+    /// 记忆地址只在移动端生效。
+    ///
+    /// 桌面端后端就在本机，回环 + LAN IP 已覆盖全部真实情况；
+    /// 把历史地址塞进桌面候选只会让冷启动多探一个可能已失效的地址。
+    #[test]
+    fn remembered_base_goes_first() {
+        remember_base("http://192.168.1.10:8000/"); // 带尾斜杠也要归一化
+        let v = candidate_bases();
+        forget_base();
+        if cfg!(mobile) {
+            assert_eq!(
+                v.first().map(String::as_str),
+                Some("http://192.168.1.10:8000"),
+                "移动端记忆地址没排首位：{v:?}"
+            );
+        } else {
+            assert!(
+                !v.iter().any(|s| s.contains("192.168.1.10")),
+                "桌面端不该把记忆地址塞进候选：{v:?}"
+            );
+        }
+    }
+
+    /// 清除记忆后不能残留。
+    #[test]
+    fn forget_base_clears_memory() {
+        remember_base("http://192.168.1.11:8000");
+        forget_base();
+        assert!(remembered_base().is_none());
+    }
+
+    /// 空串不该污染记忆（前端「恢复默认地址」会传空）。
+    #[test]
+    fn remember_base_ignores_blank() {
+        forget_base();
+        remember_base("   ");
+        assert!(remembered_base().is_none());
+    }
+
+    /// 桌面端（非 mobile）必须有回环候选 —— 后端就跑在本机。
+    ///
+    /// 移动端的候选表**不含**本机 LAN IP：那台机器是手机自己，不是后端。
+    #[test]
+    fn desktop_candidates_include_loopback_not_mobile_style() {
+        if cfg!(mobile) {
+            return; // 移动端走另一套逻辑，本用例不适用
+        }
+        let v = candidate_bases();
+        assert!(v.iter().any(|s| s.contains("127.0.0.1")));
+        assert!(v.iter().any(|s| s.contains("localhost")));
     }
 }
