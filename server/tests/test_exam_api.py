@@ -199,3 +199,41 @@ def test_reading_is_empty_not_missing(client):
     ))["data"]
     assert passage["paragraphs"] and passage["vocab"] and passage["sentences"]
     assert "false_friends" in passage and "synonyms" in passage
+
+
+def test_private_network_preflight_for_android(client):
+    """Android WebView 从 tauri.localhost 访问局域网后端会先发 PNA 预检。
+
+    真机上表现为「连不上内容服务」：Starlette 默认回 400
+    Disallowed CORS private-network，真题模式整个页面都拿不到数据。
+    """
+    resp = client.options("/api/v1/exams/408/papers", headers={
+        "Origin": "http://tauri.localhost",
+        "Access-Control-Request-Method": "GET",
+        "Access-Control-Request-Private-Network": "true",
+    })
+    assert resp.status_code == 200, resp.text
+    assert resp.headers["access-control-allow-private-network"] == "true"
+    assert resp.headers["access-control-allow-origin"] == "http://tauri.localhost"
+
+    # 真题模式：授信 Origin 下套卷列表与详情都能取到数据
+    papers = body(client.get(
+        "/api/v1/exams/408/papers",
+        headers={"Origin": "http://tauri.localhost"},
+    ))["data"]
+    assert papers["total"] == 18 and papers["items"]
+    detail = body(client.get(
+        f"/api/v1/exams/408/papers/{papers['items'][0]['id']}",
+        headers={"Origin": "http://tauri.localhost"},
+    ))["data"]
+    assert detail["sections"] and detail["sections"][0]["items"]
+
+
+def test_pna_preflight_still_rejects_untrusted_origin(client):
+    """开启 PNA 不能把 CORS 放开成任意来源。"""
+    resp = client.options("/api/v1/exams/408/papers", headers={
+        "Origin": "https://untrusted.example",
+        "Access-Control-Request-Method": "GET",
+        "Access-Control-Request-Private-Network": "true",
+    })
+    assert resp.status_code == 400

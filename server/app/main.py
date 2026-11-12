@@ -18,6 +18,13 @@ def create_app() -> FastAPI:
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
+        # 真机（Android WebView）从 http://tauri.localhost 访问局域网
+        # http://<PC-IP>:8000 时，Chromium 会先发 Private Network Access
+        # 预检（Access-Control-Request-Private-Network: true）。Starlette 的
+        # CORSMiddleware 默认拒绝并返回 400 "Disallowed CORS private-network"，
+        # 表现为手机上「连不上内容服务」。白名单是显式 Origin 列表而非 "*"，
+        # 开启该开关只对已授信的 Tauri Origin 放行，桌面端不受影响。
+        allow_private_network=True,
     )
 
     @app.exception_handler(AppError)

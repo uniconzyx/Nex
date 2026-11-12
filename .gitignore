@@ -18,6 +18,8 @@ env/
 .mypy_cache/
 .ruff_cache/
 .pytest_cache/
+# 测试自建 sqlite（tests/test_nex_account_parity.py 的临时库，失败时会残留）
+server/.parity_test.db
 .idea/
 .vscode/
 
