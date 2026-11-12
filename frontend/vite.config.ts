@@ -5,8 +5,11 @@ import react from '@vitejs/plugin-react';
 // ---------------------------------------------------------------------------
 // 目录约定（与 src-tauri/tauri.conf.json 对齐）：
 //   frontend/            本工程（源码）
-//   ../dist              构建产物 -> tauri.conf.json 的 "frontendDist": "../dist"
-//                         （frontendDist 相对 tauri.conf.json 所在目录解析）
+//   ../dist              vite 默认输出；emptyOutDir=false 会累积历次哈希产物。
+//                         **不参与打包**：别把 frontendDist 指回这里，曾因此
+//                         把 304 个孤儿文件编进 .rodata，打出 120MB APK。
+//   ../deploy/package/app  干净 staging，由 deploy/package/prepare_app.py 产出，
+//                         tauri.conf.json 的 frontendDist 指向它。
 export default defineConfig({
   plugins: [react()],
 
@@ -27,7 +30,7 @@ export default defineConfig({
   },
 
   build: {
-    // 对齐 tauri.conf.json: "frontendDist": "../dist"
+    // 只是 vite 输出目录；frontendDist 已指向 deploy/package/app（干净 staging）
     outDir: '../dist',
     // 不清空 outDir：产物文件名带内容哈希，互不覆盖；
     // 清空会触发宿主安全守卫（批量删除保护），导致 tauri build 的
