@@ -15,7 +15,7 @@
       "cwd": "../frontend",
       "wait": true
     },
-    "frontendDist": "../dist"
+    "frontendDist": "../deploy/package/app"
   },
   "app": {
     "windows": [

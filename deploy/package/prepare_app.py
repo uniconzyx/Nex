@@ -339,16 +339,29 @@ def write_build_scripts() -> None:
         "set NDK_HOME=D:\\Sdk\\ndk\\android-ndk-r27c",
         "set JAVA_HOME=C:\\Program Files\\Java\\jdk-23",
         "set CI=true",
+        "REM ~/.cargo/bin/cargo.exe 曾损坏成 0 字节，tauri CLI 调 cargo metadata",
+        "REM 会报 os error 193 却没人检查 errorlevel，最终拿旧 so 打出一个巨包。",
+        "REM 这里把真 toolchain 的 bin 前置，绕开 rustup shim。",
+        "set \"RUSTUP_TOOLCHAIN=stable-x86_64-pc-windows-gnu\"",
+        "set \"PATH=%USERPROFILE%\\.rustup\\toolchains\\stable-x86_64-pc-windows-gnu\\bin;%PATH%\"",
         "REM gen/android 被 gitignore；从入库的图标镜像同步",
         "xcopy /y /e /i /q \"..\\deploy\\package\\icons\\android\" \"gen\\android\\app\\src\\main\\res\" >nul",
         "call \"..\\frontend\\node_modules\\.bin\\tauri.cmd\" android build --apk --target aarch64 --split-per-abi --config tauri.app.mobile.conf.json",
         "REM Windows 未开开发者模式时末尾「创建符号链接」报错属预期，.so 已生成",
         "if not exist \"target\\aarch64-linux-android\\release\\libnex.so\" exit /b 1",
+        "REM 护栏：tauri 判定无改动而沿用旧 so、或 cargo metadata 静默失败时，",
+        "REM 都会把 ../dist 累积的历次 vite 产物编进 .rodata（实测 85MB so / 120MB APK）。",
+        "REM 正常 staging 编出的 so 远小于 50MB，超了就说明根本没用干净 frontendDist。",
+        "for %%A in (\"target\\aarch64-linux-android\\release\\libnex.so\") do set \"SO_BYTES=%%~zA\"",
+        "if %SO_BYTES% GTR 52428800 echo [nex-app] ERROR: libnex.so too large, clean staging not used & exit /b 1",
         "if not exist \"gen\\android\\app\\src\\main\\jniLibs\\arm64-v8a\" mkdir \"gen\\android\\app\\src\\main\\jniLibs\\arm64-v8a\"",
         "copy /y \"target\\aarch64-linux-android\\release\\libnex.so\" \"gen\\android\\app\\src\\main\\jniLibs\\arm64-v8a\\libnex.so\" >nul",
         "REM Tauri v2 不把 frontendDist 拷进 APK 资源目录（既有缺陷），手动同步",
         "if not exist \"gen\\android\\app\\src\\main\\assets\\dist\" mkdir \"gen\\android\\app\\src\\main\\assets\\dist\"",
         "xcopy /y /e /i /q \"..\\deploy\\package\\app\" \"gen\\android\\app\\src\\main\\assets\\dist\" >nul",
+        "REM bundle.resources 是全局的，tauri 会把 Windows PE 的 go-judge.exe 拷进 Android",
+        "REM assets；手机判题走局域网后端，这份 PE 无法执行，纯死重量（压缩后 7.8MB）。",
+        "if exist \"gen\\android\\app\\src\\main\\assets\\binaries\" rmdir /s /q \"gen\\android\\app\\src\\main\\assets\\binaries\"",
         "cd /d \"gen\\android\"",
         "call gradlew.bat assembleRelease --no-daemon -x rustBuildArm64Release -x rustBuildArmRelease -x rustBuildX86Release -x rustBuildX86_64Release",
         "if errorlevel 1 exit /b 1",
@@ -376,6 +389,10 @@ def self_check() -> None:
     assert "-outputresource:" in exe_txt and "nex.manifest.xml" in exe_txt, \
         "EXE 脚本没注入 SxS manifest：MSVC 产物会 0xC0000139 秒退"
     assert "tauri.app.mobile.conf.json" in apk_txt, "APK 脚本没用真应用配置"
+    assert "RUSTUP_TOOLCHAIN=stable-x86_64-pc-windows-gnu" in apk_txt, \
+        "APK 脚本没前置真 cargo：~/.cargo/bin/cargo.exe 损坏会让 tauri build 静默失败"
+    assert "SO_BYTES" in apk_txt and "GTR 52428800" in apk_txt, \
+        "APK 脚本缺 libnex.so 体积护栏：会静默打出 120MB 巨包"
     assert "apksigner.jar" in apk_txt and "java.exe" in apk_txt, \
         "签名未直连 apksigner.jar"
     # APK 必须把前端塞进 assets/dist，否则打出的包只有 Rust 二进制没有页面。
@@ -386,6 +403,8 @@ def self_check() -> None:
     assert APK_OUT in apk_txt and "Nex-Mobile-1.0-arm64.apk" not in apk_txt, \
         "APK 输出名会覆盖设计稿包"
     # 桌面产物必须叫 Nex.exe：主人点击的就是这个文件名，别再带 -Desktop-1.0 后缀。
+    assert "rmdir /s /q" in apk_txt and "go-judge.exe" in apk_txt, \
+        "APK 脚本没剔除 Android 里无法执行的 Windows go-judge.exe"
     assert EXE_OUT == "Nex.exe", "桌面 EXE 输出名应为 Nex.exe"
     assert "binaries\\go-judge.exe" in exe_txt, \
         "EXE 脚本没落盘 go-judge，桌面判题会静默降级成 mock"
