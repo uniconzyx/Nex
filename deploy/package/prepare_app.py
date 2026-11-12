@@ -30,6 +30,14 @@ frontendDist 指向的 staging 拷进 app/src/main/assets/dist，导致打出的
 html/js）。build-app-apk.cmd 里因此在 gradlew 之前补一道 xcopy，把
 deploy/package/app 同步进该目录。改这条逻辑务必同步 .cmd 与下方 self_check。
 
+APK 默认后端地址（2026-11-12）：手机上 127.0.0.1 指手机自己，而后端在
+打包用的 PC 上，冷启动不可能自己猜到。本脚本调用 detect_mobile_bases()
+探测本机真实网卡 IPv4，写进 build-app-apk.cmd 的 NEX_MOBILE_DEFAULT_BASES
+环境变量，由 Rust 的 option_env! 编进 libnex.so，作为移动端首选候选。
+链路跨 .cmd → build.rs（rerun-if-env-changed）→ api_client.rs → probe()，
+self_check() 对四处都做了断言，删任何一环都会让手机退回「连不上内容服务」。
+换网络后重跑本脚本再重打 APK 即可；临时改地址也可在 APP 设置页手填。
+
 运行期资源（缺一项就会让「提交判题」静默变坏，别删）：
   * frontend/public/pyodide/ 由 scripts/fetch_pyodide.py 落地，vite 原样拷进
     staging 根；protocol.ts 的 DEFAULT_INDEX_URL 指向同源 /pyodide/。
@@ -60,6 +68,10 @@ STAGING = PKG / "app"
 
 EXE_OUT = "Nex.exe"
 APK_OUT = "Nex.apk"
+
+# 手机端默认后端端口。必须与 src-tauri/src/api_client.rs::DEFAULT_API_PORT、
+# server 的 uvicorn --port 保持一致；改一处要同步另外两处。
+MOBILE_API_PORT = 8000
 
 # 与 tauri.conf.json 的 app.security.csp 逐字一致，只多放一条 wasm 编译权限。
 # 改动这里必须同步 scratch/ 里几个 headless 验收脚本的 CSP 常量。
@@ -293,8 +305,59 @@ def write_cmd(name: str, lines: list[str]) -> None:
     print(f"[prepare_app] script -> {path.relative_to(ROOT)}")
 
 
+def detect_mobile_bases() -> str:
+    """探测「手机能连上」的本机局域网地址，返回注入 APK 的环境变量值。
+
+    APK 里的 WebView 跑在手机上，127.0.0.1 指手机自己；后端却在打包用的
+    PC 上。以前只能让用户在设置页手填一次，换网络/重装就得重填，且冷启动
+    期间反复重连刷屏。现在打包时把 PC 地址编进 libnex.so（Rust 侧
+    option_env!("NEX_MOBILE_DEFAULT_BASES") 读取），冷启动直接命中。
+
+    复用 verify_android.lan_ips()：与真机验包脚本共用同一套网卡筛选口径，
+    避免「打包挑的网卡」和「验收用的网卡」不是同一张。多张真实网卡会一并
+    注入，换 WiFi/插网线时能自动 fallback。
+
+    若打包环境设了 NEX_API_BASE（线上服务器路线），同一条地址也喂给
+    VITE_NEX_API_BASE（见 build_staging）。Rust 侧必须拿到它并排在首位，
+    否则 api_probe 仍先试局域网、失败后把前端锁在局域网地址上，线上后端
+    反而连不上 —— 两端用同一个变量，才不会打架。
+    """
+    from verify_android import lan_ips  # 同目录，延迟导入不影响纯构建路径
+
+    explicit = os.environ.get("NEX_API_BASE", "").strip().rstrip("/")
+    entries: list[str] = []
+    if explicit.startswith(("http://", "https://")) and not any(
+        h in explicit for h in ("127.0.0.1", "localhost", "0.0.0.0", "::1")
+    ):
+        entries.append(explicit)
+    for ip in lan_ips():
+        base = f"http://{ip}:{MOBILE_API_PORT}"
+        if base not in entries:
+            entries.append(base)
+    if not entries:
+        print("[prepare_app] WARN: 未探测到真实网卡 IPv4，本次 APK 不注入默认地址")
+        return ""
+    bases = ",".join(entries)
+    print(f"[prepare_app] mobile default bases -> {bases}")
+    return bases
+
+
 def write_build_scripts() -> None:
     mt = find_mt_exe()
+    mobile_bases = detect_mobile_bases()
+    # 未探测到时显式清空（cmd 的 `set VAR=` 是删除变量），
+    # 防止上一次构建残留的地址被悄悄编进新 APK。
+    mobile_env_lines = (
+        [
+            "REM 打包时把 PC 局域网地址编进 libnex.so：手机冷启动直连，无需手填",
+            f'set "NEX_MOBILE_DEFAULT_BASES={mobile_bases}"',
+        ]
+        if mobile_bases
+        else [
+            "REM 未探测到真实网卡 IPv4，本次 APK 不注入默认后端地址",
+            'set "NEX_MOBILE_DEFAULT_BASES="',
+        ]
+    )
     write_cmd("build-app-exe.cmd", [
         "@echo off",
         "REM Nex 真应用 Windows EXE（单文件，不需要 WebView2Loader.dll）",
@@ -339,6 +402,8 @@ def write_build_scripts() -> None:
         "set NDK_HOME=D:\\Sdk\\ndk\\android-ndk-r27c",
         "set JAVA_HOME=C:\\Program Files\\Java\\jdk-23",
         "set CI=true",
+        # 必须在 tauri android build 之前设置：cargo 才会把它编进 libnex.so。
+        *mobile_env_lines,
         "REM ~/.cargo/bin/cargo.exe 曾损坏成 0 字节，tauri CLI 调 cargo metadata",
         "REM 会报 os error 193 却没人检查 errorlevel，最终拿旧 so 打出一个巨包。",
         "REM 这里把真 toolchain 的 bin 前置，绕开 rustup shim。",
@@ -395,6 +460,20 @@ def self_check() -> None:
         "APK 脚本缺 libnex.so 体积护栏：会静默打出 120MB 巨包"
     assert "apksigner.jar" in apk_txt and "java.exe" in apk_txt, \
         "签名未直连 apksigner.jar"
+    # ── 移动端冷启动默认地址的端到端护栏 ──────────────────────────
+    # 这条链路跨 .cmd 环境变量 → build.rs → Rust option_env! → 候选列表，
+    # 任何一环被删掉，现象都是「手机又连不上内容服务、反复重试」，
+    # 而且从 APK 表面完全看不出来。所以三处一起断言。
+    assert "NEX_MOBILE_DEFAULT_BASES" in apk_txt, \
+        "APK 脚本没注入 PC 局域网地址：手机冷启动会退回 127.0.0.1（手机自己）"
+    assert "NEX_MOBILE_DEFAULT_BASES" not in exe_txt, \
+        "桌面 EXE 不需要注入局域网地址，别把两边配置混了"
+    api_client = (TAURI / "src" / "api_client.rs").read_text(encoding="utf-8")
+    assert 'option_env!("NEX_MOBILE_DEFAULT_BASES")' in api_client, \
+        "Rust 侧没读打包注入的地址：.cmd 设了环境变量也不会生效"
+    build_rs = (TAURI / "build.rs").read_text(encoding="utf-8")
+    assert "cargo:rerun-if-env-changed=NEX_MOBILE_DEFAULT_BASES" in build_rs, \
+        "build.rs 没声明环境变量依赖：换网络重打包会复用旧 .so 里的旧 IP"
     # APK 必须把前端塞进 assets/dist，否则打出的包只有 Rust 二进制没有页面。
     assert "assets\\dist" in apk_txt and "..\\deploy\\package\\app" in apk_txt, \
         "APK 脚本未把 Web 前端拷进 assets/dist（Tauri v2 不自动拷贝，曾致已发布 APK 无页面）"

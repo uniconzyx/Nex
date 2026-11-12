@@ -51,6 +51,11 @@ fn main() {
     // libresource.a，EXE 里仍是旧图标（实测 2026-11-07：换了 icon.ico，
     // 重编后 ExtractIconExW 取出来仍是蓝底白方块占位图）。
     println!("cargo:rerun-if-changed=icons/icon.ico");
+    // 移动端打包时把 PC 的局域网地址通过 NEX_MOBILE_DEFAULT_BASES 编译进
+    // libnex.so（api_client.rs 的 option_env! 读取）。必须声明这个依赖：
+    // 换网络后重打包时源码一个字没变，Cargo 若复用旧的 .so，APK 里仍是
+    // 上一次的 IP —— 手机会连到一台已经不存在的机器，且现象极难定位。
+    println!("cargo:rerun-if-env-changed=NEX_MOBILE_DEFAULT_BASES");
     build_manifest_resource();
     // 用 Tauri 默认属性，但去掉它自带的清单（我们的那份已编进所有目标）。
     let mut win = tauri_build::WindowsAttributes::new_without_app_manifest();

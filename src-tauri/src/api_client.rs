@@ -10,12 +10,17 @@
 //!   这些差异客户端（Rust）比前端更适合判断：它有环境变量、网卡信息、
 //!   以及「刚才启动的那个后端进程」的上下文。
 //!
-//! 探测顺序（先快后慢，先本机后外网）：
+//! 桌面端探测顺序：
 //!   1. `NEX_API_BASE` 环境变量 —— 显式指定，最高优先级；
 //!   2. `http://127.0.0.1:8000`     —— 本机回环；
 //!   3. `http://localhost:8000`     —— 同上，换个写法；
-//!   4. 局域网 IP + :8000           —— 手机端场景（后端跑在电脑上）；
-//!   5. `http://127.0.0.1:8000` 回落 —— 探测失败也要给前端一个可用的默认值。
+//!   4. 局域网 IP + :8000           —— 同一台机器换个网卡地址访问。
+//!
+//! 移动端（2026-11-12 起）：后端在**另一台机器（打包用的 PC）**上，
+//! 手机上没有任何能自己猜出来的地址。所以 `prepare_app.py` 在打 APK 时
+//! 探测 PC 的局域网 IP，经 `NEX_MOBILE_DEFAULT_BASES` 编译进 libnex.so，
+//! 冷启动直接作为首选候选 —— 不用手填、不会退回 127.0.0.1（手机自己）。
+//! 用户手填的地址仍然压过内置地址，换网络后可以在设置页覆盖。
 //!
 //! ⚠️ 沙箱/CI 环境常注入 `HTTP_PROXY`，会让回环请求被丢给代理。
 //!    所有请求必须 `.no_proxy()`，否则「自己连自己」都会失败。
@@ -28,6 +33,41 @@ use crate::lan_server;
 
 /// 后端默认端口。与 deploy/docker-compose.yml、server 启动命令保持一致。
 pub const DEFAULT_API_PORT: u16 = 8000;
+
+/// 打包时注入的 PC 局域网地址列表（逗号分隔，由 build-app-apk.cmd 设置）。
+///
+/// 用 `option_env!` 而非运行时读文件：Android assets 对 Rust 侧不可见（要绕 JNI），
+/// 编译期注入是唯一零依赖的做法。桌面构建不设这个变量 → `None` → 行为完全不变。
+/// `build.rs` 已声明 `rerun-if-env-changed`，换网络重打包会强制重编 .so。
+const PACKAGED_MOBILE_BASES: Option<&str> = option_env!("NEX_MOBILE_DEFAULT_BASES");
+
+/// 解析注入的地址串：去空白/尾斜杠、只收 http(s) 开头、按原序去重。
+///
+/// 单独抽成纯函数是为了在桌面 `cargo test` 里也能验解析逻辑
+/// （桌面构建 `PACKAGED_MOBILE_BASES` 恒为 None，走不到真实注入值）。
+/// 收 https 是为了「以后部署线上后端」那条路：打包时用
+/// `NEX_API_BASE=https://api.xxx.com` 即可，不必再改 Rust。
+fn parse_packaged_bases(raw: &str) -> Vec<String> {
+    let mut out: Vec<String> = Vec::new();
+    for part in raw.split(',') {
+        let c = part.trim().trim_end_matches('/').to_string();
+        if c.is_empty()
+            || !(c.starts_with("http://") || c.starts_with("https://"))
+            || out.contains(&c)
+        {
+            continue;
+        }
+        out.push(c);
+    }
+    out
+}
+
+/// 本次构建注入的移动端默认候选（桌面构建返回空）。
+fn packaged_mobile_bases() -> Vec<String> {
+    PACKAGED_MOBILE_BASES
+        .map(parse_packaged_bases)
+        .unwrap_or_default()
+}
 
 /// 探测结果：给前端用的后端描述。
 #[derive(Serialize, Clone, Debug)]
@@ -55,17 +95,17 @@ pub struct ApiTarget {
 ///     去连 `<手机IP>:8000` 必然连不上（手机上根本没有后端）。
 ///     以前不区分平台，APK 的候选里就混进了这条死地址，白白耗掉 900ms 超时。
 ///
-/// 移动端的正确做法：用户填过的地址（手机端唯一可信来源）→ 上次探测成功的地址。
+/// 2026-11-12 补上移动端真正可用的默认地址：打包时把 PC 的局域网 IP
+/// 编译进来（见 `PACKAGED_MOBILE_BASES`）。冷启动顺序变成
+///   `上次成功的地址 > NEX_API_BASE > 打包时 PC 地址 > 回环兜底`，
+/// 绝大多数情况下**第一个候选就命中**，不再需要手填、也不再反复重试。
 pub fn candidate_bases() -> Vec<String> {
     let mut v: Vec<String> = Vec::new();
 
     if cfg!(mobile) {
         // ── 移动端（Android/iOS）：后端在别的机器上 ──────────────────
-        // 优先级：用户手填的地址（记住的那条）> 环境变量 > 回环兜底。
-        //
-        // 为什么手填地址必须压过环境变量：手机上没有「默认正确」的地址，
-        // 用户在设置页填的那一条是他唯一可信的信息源；环境变量在 Android
-        // 上通常根本不存在，真存在时也不该盖掉用户的选择。
+        // 用户手填的地址优先级最高：那是他针对当前网络明确指定的信息源，
+        // 不该被打包时（可能已过期）的 PC 地址盖掉。
         if let Some(saved) = remembered_base() {
             v.push(saved);
         }
@@ -75,7 +115,15 @@ pub fn candidate_bases() -> Vec<String> {
                 v.push(c);
             }
         }
-        // 兜底：保证返回体非空，前端据此显示「请填写电脑地址」。
+        // 打包时写入的 PC 地址：冷启动的主路径。多网卡会注入多条，
+        // 按顺序探测，第一条通常几十毫秒就命中。
+        for base in packaged_mobile_bases() {
+            if !v.contains(&base) {
+                v.push(base);
+            }
+        }
+        // 兜底：保证返回体非空。注意这只是「地址列表非空」的保险，
+        // 探测全失败时前端显示的基址由 probe() 的 fallback 决定。
         let loopback = format!("http://127.0.0.1:{}", DEFAULT_API_PORT);
         if !v.contains(&loopback) {
             v.push(loopback);
@@ -191,15 +239,20 @@ pub async fn probe() -> ApiTarget {
 
     // 全都没通：**仍然返回候选里最可能是后端的那一个**（而不是第一个）。
     //
-    // 候选顺序是 [NEX_API_BASE?, 127.0.0.1, localhost, LAN IP]。
-    // 项目后端默认绑 127.0.0.1:8000，所以回落时优先给回环地址；
-    // 只有候选里压根没有回环（用户用环境变量指定了远端）时才取第一个。
-    let fallback = candidates
-        .iter()
-        .find(|c| c.contains("127.0.0.1") || c.contains("localhost"))
-        .cloned()
-        .or_else(|| candidates.first().cloned())
-        .unwrap_or_else(|| format!("http://127.0.0.1:{}", DEFAULT_API_PORT));
+    // 桌面端候选是 [NEX_API_BASE?, 127.0.0.1, localhost, LAN IP]，
+    // 后端默认绑 127.0.0.1:8000，所以回落时优先给回环地址。
+    // 移动端反过来：回环是手机自己，把它显示成「当前连的是哪台机器」
+    // 纯属误导；应该给候选首位的 PC 地址，用户照着排查才有意义。
+    let fallback = if cfg!(mobile) {
+        candidates.first().cloned()
+    } else {
+        candidates
+            .iter()
+            .find(|c| c.contains("127.0.0.1") || c.contains("localhost"))
+            .cloned()
+            .or_else(|| candidates.first().cloned())
+    }
+    .unwrap_or_else(|| format!("http://127.0.0.1:{}", DEFAULT_API_PORT));
 
     ApiTarget {
         base_url: fallback,
@@ -249,7 +302,10 @@ mod tests {
         let v = candidate_bases();
         for c in &v {
             assert!(!c.ends_with('/'), "候选带尾斜杠：{c}");
-            assert!(c.starts_with("http://"), "候选不是 http：{c}");
+            assert!(
+                c.starts_with("http://") || c.starts_with("https://"),
+                "候选不是 http(s)：{c}"
+            );
         }
     }
 
@@ -361,5 +417,68 @@ mod tests {
         let v = candidate_bases();
         assert!(v.iter().any(|s| s.contains("127.0.0.1")));
         assert!(v.iter().any(|s| s.contains("localhost")));
+    }
+
+    /// 打包注入串必须归一：尾斜杠、空白、重复项、非 http 项都要挡掉。
+    /// 桌面构建注入值为 None，靠这个纯函数直接验解析逻辑。
+    #[test]
+    fn parse_packaged_bases_normalizes_and_dedups() {
+        let v = parse_packaged_bases(concat!(
+            "http://192.168.1.7:8000/, http://10.0.0.2:8000 ,",
+            "http://192.168.1.7:8000/ , ,not-a-url, ftp://bad:21",
+        ));
+        assert_eq!(
+            v,
+            vec![
+                "http://192.168.1.7:8000".to_string(),
+                "http://10.0.0.2:8000".to_string()
+            ],
+            "注入串解析结果不对：{v:?}"
+        );
+    }
+
+    /// 线上部署那条路：打包时用 NEX_API_BASE=https://api.xxx.com 指定，
+    /// 注入串必须收 https，否则手机又会退回局域网地址。
+    #[test]
+    fn parse_packaged_bases_accepts_https() {
+        let v = parse_packaged_bases("  https://api.example.com/ , http://172.27.30.62:8000 ");
+        assert_eq!(
+            v,
+            vec![
+                "https://api.example.com".to_string(),
+                "http://172.27.30.62:8000".to_string()
+            ]
+        );
+    }
+
+    #[test]
+    fn parse_packaged_bases_handles_empty() {
+        assert!(parse_packaged_bases("").is_empty());
+        assert!(parse_packaged_bases("  , , ").is_empty());
+    }
+
+    /// 移动端（且本次构建确实注入了 PC 地址时）内置地址必须排在回环之前：
+    /// 否则冷启动第一个打的是手机自己，白等一次 900ms 超时。
+    #[test]
+    fn mobile_packaged_base_precedes_loopback() {
+        if !cfg!(mobile) || PACKAGED_MOBILE_BASES.is_none() {
+            return;
+        }
+        if parse_packaged_bases(PACKAGED_MOBILE_BASES.unwrap()).is_empty() {
+            return;
+        }
+        forget_base();
+        let v = candidate_bases();
+        let first_lan = v
+            .iter()
+            .position(|s| !s.contains("127.0.0.1") && !s.contains("localhost"));
+        let first_loopback = v.iter().position(|s| s.contains("127.0.0.1"));
+        assert!(
+            first_lan.is_some(),
+            "注入了 PC 地址却没进候选：{v:?}"
+        );
+        if let (Some(a), Some(b)) = (first_lan, first_loopback) {
+            assert!(a < b, "内置 PC 地址被回环抢在前面：{v:?}");
+        }
     }
 }
