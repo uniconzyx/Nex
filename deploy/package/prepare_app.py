@@ -263,6 +263,28 @@ def write_conf(name: str, title: str | None) -> None:
     print(f"[prepare_app] config -> {path.relative_to(ROOT)}")
 
 
+def find_mt_exe() -> str:
+    """定位 Windows SDK 的 mt.exe（给 MSVC 产物补 Win32 manifest）。
+
+    vcvars64.bat 并不会把 Windows Kits\\10\\bin\\<ver>\\x64 加进 PATH，
+    所以构建脚本里不能写裸 `mt.exe`。生成器在生成时探测绝对路径并写死进
+    .cmd，主人双击时无需 Python、也无需额外环境变量。
+    """
+    hit = shutil.which("mt.exe")
+    if hit:
+        return hit
+    kits = pathlib.Path(
+        os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)")
+    ) / "Windows Kits" / "10" / "bin"
+    cands = sorted(kits.glob("*/x64/mt.exe"), key=lambda p: p.parent.parent.name)
+    if not cands:
+        raise RuntimeError(
+            "找不到 Windows SDK 的 mt.exe；MSVC 产物缺 manifest 会直接 "
+            "0xC0000139 启动失败。请安装 Windows 10/11 SDK。"
+        )
+    return str(cands[-1])
+
+
 def write_cmd(name: str, lines: list[str]) -> None:
     """与 prepare.py 同口径：GBK + CRLF，供主人本机双击。"""
     path = PKG / name
@@ -272,19 +294,32 @@ def write_cmd(name: str, lines: list[str]) -> None:
 
 
 def write_build_scripts() -> None:
+    mt = find_mt_exe()
     write_cmd("build-app-exe.cmd", [
         "@echo off",
-        "REM Nex 真应用 Windows EXE（内嵌 frontend React 应用）",
+        "REM Nex 真应用 Windows EXE（单文件，不需要 WebView2Loader.dll）",
         "REM 由 deploy/package/prepare_app.py 生成，请改生成器而不是改本文件",
+        "REM 必须用 msvc 工具链：webview2-com-sys 只在 target_env=msvc 时静态链接",
+        "REM WebView2LoaderStatic.lib；gnu 工具链退化成动态加载 WebView2Loader.dll。",
         "cd /d \"%~dp0..\\..\\src-tauri\"",
         "set NO_PROXY=*",
         "set no_proxy=*",
+        "REM vcvars64 提供 MSVC link.exe / LIB / INCLUDE，须在追加 PATH 之前调用",
+        "call \"C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Auxiliary\\Build\\vcvars64.bat\"",
+        "if errorlevel 1 exit /b 1",
+        "set \"MSVC_BIN=C:\\Users\\zyx\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\"",
+        "set \"PATH=%MSVC_BIN%;%PATH%\"",
+        "set \"RUSTUP_TOOLCHAIN=stable-x86_64-pc-windows-msvc\"",
         "REM 必须显式 --target：.cargo/config.toml 只配 rustflags，未设默认 target",
-        "call \"..\\frontend\\node_modules\\.bin\\tauri.cmd\" build --no-bundle --target x86_64-pc-windows-gnu --config tauri.app.desktop.conf.json",
+        "call \"..\\frontend\\node_modules\\.bin\\tauri.cmd\" build --no-bundle --target x86_64-pc-windows-msvc --config tauri.app.desktop.conf.json",
         "if errorlevel 1 exit /b 1",
         "if not exist \"..\\release\\nex-shell\" mkdir \"..\\release\\nex-shell\"",
-        f"copy /y \"target\\x86_64-pc-windows-gnu\\release\\nex.exe\" \"..\\release\\nex-shell\\{EXE_OUT}\" >nul",
-        "if exist \"target\\x86_64-pc-windows-gnu\\release\\WebView2Loader.dll\" copy /y \"target\\x86_64-pc-windows-gnu\\release\\WebView2Loader.dll\" \"..\\release\\nex-shell\\\" >nul",
+        f"copy /y \"target\\x86_64-pc-windows-msvc\\release\\nex.exe\" \"..\\release\\nex-shell\\{EXE_OUT}\" >nul",
+        "if errorlevel 1 exit /b 1",
+        "REM 关键：MSVC 产物不带 Win32 manifest，缺它会在加载阶段直接 0xC0000139 退出",
+        "REM （无 WER 记录、无日志、无 stderr，极难定位）。注入与 gnu 版同源的 manifest。",
+        f"\"{mt}\" -manifest \"..\\deploy\\package\\nex.manifest.xml\" \"-outputresource:..\\release\\nex-shell\\{EXE_OUT};#1\"",
+        "if errorlevel 1 echo [nex-app] ERROR: manifest injection failed & exit /b 1",
         "REM 桌面判题资源：Rust detect_go_judge() 只认 EXE 同级 binaries/go-judge.exe",
         "if not exist \"..\\release\\nex-shell\\binaries\" mkdir \"..\\release\\nex-shell\\binaries\"",
         "if not exist \"binaries\\go-judge.exe\" echo [nex-app] ERROR: src-tauri/binaries/go-judge.exe missing & exit /b 1",
@@ -334,8 +369,12 @@ def self_check() -> None:
     """防回归：输出名必须独立，绝不能覆盖已验收的设计稿包。"""
     exe_txt = (PKG / "build-app-exe.cmd").read_text(encoding="gbk")
     apk_txt = (PKG / "build-app-apk.cmd").read_text(encoding="gbk")
-    assert "--target x86_64-pc-windows-gnu" in exe_txt, "EXE 脚本缺 --target"
+    assert "--target x86_64-pc-windows-msvc" in exe_txt, "EXE 脚本缺 msvc --target"
+    assert "x86_64-pc-windows-gnu" not in exe_txt, \
+        "EXE 脚本退回 gnu 工具链会重新依赖 WebView2Loader.dll"
     assert "tauri.app.desktop.conf.json" in exe_txt, "EXE 脚本没用真应用配置"
+    assert "-outputresource:" in exe_txt and "nex.manifest.xml" in exe_txt, \
+        "EXE 脚本没注入 SxS manifest：MSVC 产物会 0xC0000139 秒退"
     assert "tauri.app.mobile.conf.json" in apk_txt, "APK 脚本没用真应用配置"
     assert "apksigner.jar" in apk_txt and "java.exe" in apk_txt, \
         "签名未直连 apksigner.jar"
@@ -350,6 +389,18 @@ def self_check() -> None:
     assert EXE_OUT == "Nex.exe", "桌面 EXE 输出名应为 Nex.exe"
     assert "binaries\\go-judge.exe" in exe_txt, \
         "EXE 脚本没落盘 go-judge，桌面判题会静默降级成 mock"
+    manifest = (PKG / "nex.manifest.xml").read_text(encoding="utf-8")
+    assert "Microsoft.Windows.Common-Controls" in manifest, \
+        "nex.manifest.xml 缺 Common-Controls 依赖，注入后仍可能加载失败"
+    # mt.exe 对 manifest 很挑：非法 XML（例如注释里出现 `--`）会静默报 rc=31，
+    # 而 self_check 若只查关键字就会放过，等主人双击时才炸。此处直接解析兜底。
+    try:
+        import xml.etree.ElementTree as ET
+        ET.fromstring(manifest)
+    except Exception as exc:  # noqa: BLE001 - 任何解析错误都应拦住构建
+        raise AssertionError(
+            f"nex.manifest.xml 不是合法 XML，mt.exe 会报 rc=31：{exc}"
+        ) from exc
     proto = (ROOT / "frontend" / "src" / "lib" / "pyodide" /
              "protocol.ts").read_text(encoding="utf-8")
     assert "DEFAULT_INDEX_URL = `/pyodide/`" in proto, \
