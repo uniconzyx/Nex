@@ -134,3 +134,10 @@ viz/data.js
 deploy/package/desktop/
 deploy/package/mobile/
 deploy/package/app/
+
+# ---------- 本机改动前的备份（*.bak-* 等，纯本地安全网，不入库）----------
+*.bak
+*.bak-*
+
+# ---------- 前端氛围层验收截图（本地看，不入库）----------
+frontend/.cyber-shots/

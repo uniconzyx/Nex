@@ -10,7 +10,7 @@ set NDK_HOME=D:\Sdk\ndk\android-ndk-r27c
 set JAVA_HOME=C:\Program Files\Java\jdk-23
 set CI=true
 REM 打包时把 PC 局域网地址编进 libnex.so：手机冷启动直连，无需手填
-set "NEX_MOBILE_DEFAULT_BASES=http://172.27.30.62:8000"
+set "NEX_MOBILE_DEFAULT_BASES=http://10.77.254.66:8000"
 REM ~/.cargo/bin/cargo.exe 曾损坏成 0 字节，tauri CLI 调 cargo metadata
 REM 会报 os error 193 却没人检查 errorlevel，最终拿旧 so 打出一个巨包。
 REM 这里把真 toolchain 的 bin 前置，绕开 rustup shim。

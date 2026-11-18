@@ -148,7 +148,9 @@ def build_staging() -> None:
     # 并在构建后恢复。NEX_API_BASE 缺省为 127.0.0.1:8000（本机 Docker 后端）；
     # 分发版应由构建环境传入真实线上地址（如 https://api.你的域名.com），
     # 这样烤进 EXE/APK 的默认地址就是线上服务，装到别人电脑上也会默认连线上后端。
-    api_base = os.environ.get("NEX_API_BASE", "http://127.0.0.1:8000")
+    # 去尾斜杠：api.ts 的 rawFetch 用 base + path 拼接且 path 以 '/' 开头，
+    # 若此处带尾斜杠会拼出 '//api/...' → 服务端 404（登录/同步全挂）。
+    api_base = os.environ.get("NEX_API_BASE", "http://127.0.0.1:8000").strip().rstrip("/")
     env_file = FRONTEND / ".env"
     prev = env_file.read_text(encoding="utf-8") if env_file.is_file() else None
     lines = (prev.splitlines() if prev else [])
@@ -264,7 +266,7 @@ def write_conf(name: str, title: str | None) -> None:
             "minWidth": 900,
             "minHeight": 640,
             "resizable": True,
-            "fullscreen": False,
+            "fullscreen": True,
             "center": True,
             # 只在桌面端加：Android WebView 不认这些 Chromium 开关。
             "additionalBrowserArgs": WEBVIEW_ARGS,
