@@ -29,7 +29,10 @@ body::before {
   inset: 0;
   z-index: 9998;
   pointer-events: none;
+  /* 第一层是可选颗粒噪点：默认 none；html.km-cyber-grain 时由 §10 提供 SVG 纹理。
+     background-image 接受 var()，所以开关不改变扫描线/网格，只多/少这一层。 */
   background-image:
+    var(--km-cyber-grain, none),
     repeating-linear-gradient(
       0deg,
       rgba(26, 56, 92, 0.05) 0px,
@@ -57,6 +60,7 @@ body::before {
    :has 若不被旧 WebView 支持，则保留上面的默认暗线（退化为稍弱纹理，不破坏）。 */
 html:has(.km-app[data-km-theme='dark']) body::before {
   background-image:
+    var(--km-cyber-grain, none),
     repeating-linear-gradient(
       0deg,
       rgba(178, 214, 255, 0.05) 0px,
@@ -335,6 +339,112 @@ html.km-cyber-layout .km-cy-term-dots {
   }
 }
 
+/* ════════════════════════════════════════════════════════════════════════
+   以下三层是 11-18 追加的「加厚」部分。每一层都有独立开关类，
+   删掉对应类即只少这一层，其它层不受影响：
+
+     html.km-cyber-grain  ── §10 胶片颗粒 + 滚动条 + 选区
+     html.km-cyber-hud    ── §11 卡片内描边 + 输入框聚焦线
+     html.km-cyber-rain   ── §12 背景数据流（唯一需要新增 DOM 的一层）
+
+   三层都不碰色板令牌、不碰栅格尺寸、不新增 backdrop-filter。
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── 10. 胶片颗粒 / 滚动条 / 选区（开关：html.km-cyber-grain）─────────
+   噪点由 SVG feTurbulence 现场生成、去饱和后压到 5.5% 不透明度，
+   只给画面一层极细的颗粒，不干扰文字；CSP 的 img-src 已允许 data:，
+   EXE（WebView2）与 APK（Android WebView）都能渲染。
+   开关只切换 --km-cyber-grain 变量，扫描线与网格保持原样。 */
+html.km-cyber-grain {
+  --km-cyber-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.1'/%3E%3C/svg%3E");
+}
+
+html.km-cyber-grain ::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+html.km-cyber-grain ::-webkit-scrollbar-track {
+  background: rgba(26, 56, 92, 0.06);
+}
+html.km-cyber-grain ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(91, 155, 213, 0.5), rgba(91, 155, 213, 0.22));
+  border-radius: 6px;
+}
+html.km-cyber-grain ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(91, 155, 213, 0.72), rgba(91, 155, 213, 0.35));
+}
+html.km-cyber-grain ::selection {
+  background: rgba(91, 155, 213, 0.3);
+}
+
+/* ── 11. 卡片 HUD 内描边 / 输入框聚焦线（开关：html.km-cyber-hud）─────
+   刻意用 outline 而不是 box-shadow：.km-card 原本的 --km-sh-soft 软阴影
+   与 backdrop-filter 玻璃层完全不动，不会被覆盖掉。
+   outline-offset:-1px 让线贴着圆角内侧走，像面板内嵌了一圈 HUD 线框。 */
+html.km-cyber-hud .km-card,
+html.km-cyber-hud .km-side-card {
+  outline: 1px solid rgba(91, 155, 213, 0.13);
+  outline-offset: -1px;
+  transition: outline-color 0.2s ease;
+}
+html.km-cyber-hud .km-card:hover {
+  outline-color: rgba(91, 155, 213, 0.26);
+}
+html.km-cyber-hud .km-input:focus,
+html.km-cyber-hud .km-input:focus-visible {
+  outline: 1px solid rgba(91, 155, 213, 0.55);
+  outline-offset: -1px;
+}
+
+/* ── 12. 背景数据流（开关：html.km-cyber-rain）────────────────────────
+   App.tsx 在 KaimaoShell 之后插一层 .km-cyber-drops，内含 8 条竖线。
+   纯装饰、pointer-events:none；只用 transform，不触发重排。
+   未加开关类时整层 display:none —— 裸 DOM 不会出现在旧布局里。 */
+.km-cyber-drops {
+  display: none;
+}
+html.km-cyber-rain .km-cyber-drops {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0.62;
+}
+html.km-cyber-rain .km-cyber-drops i {
+  position: absolute;
+  top: -36vh;
+  width: 2px;
+  height: 36vh;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(120, 178, 232, 0.5) 55%,
+    rgba(186, 220, 255, 0.95) 100%
+  );
+  animation: km-cyber-fall 12s linear infinite;
+  will-change: transform;
+}
+html.km-cyber-rain .km-cyber-drops i:nth-child(1) { left: 7%;  animation-duration: 15s; animation-delay: -3s; }
+html.km-cyber-rain .km-cyber-drops i:nth-child(2) { left: 19%; animation-duration: 11s; animation-delay: -7s; opacity: 0.7; }
+html.km-cyber-rain .km-cyber-drops i:nth-child(3) { left: 31%; animation-duration: 18s; animation-delay: -1s; opacity: 0.5; }
+html.km-cyber-rain .km-cyber-drops i:nth-child(4) { left: 44%; animation-duration: 13s; animation-delay: -9s; }
+html.km-cyber-rain .km-cyber-drops i:nth-child(5) { left: 57%; animation-duration: 16s; animation-delay: -5s; opacity: 0.6; }
+html.km-cyber-rain .km-cyber-drops i:nth-child(6) { left: 69%; animation-duration: 10s; animation-delay: -11s; opacity: 0.8; }
+html.km-cyber-rain .km-cyber-drops i:nth-child(7) { left: 81%; animation-duration: 17s; animation-delay: -2s; opacity: 0.45; }
+html.km-cyber-rain .km-cyber-drops i:nth-child(8) { left: 92%; animation-duration: 14s; animation-delay: -6s; opacity: 0.65; }
+@keyframes km-cyber-fall {
+  to { transform: translateY(142vh); }
+}
+
+/* 窄屏（手机）：8 条线在 390px 宽下容易压到正文，减到 4 条并调淡。
+   用 nth-child(odd) 隐藏一半，不改 DOM 也不改布局。 */
+@media (max-width: 760px) {
+  html.km-cyber-rain .km-cyber-drops { opacity: 0.4; }
+  html.km-cyber-rain .km-cyber-drops i:nth-child(odd) { display: none; }
+}
+
 /* ── 9. 减少动效兜底 ───────────────────────────────────────────────────
    motion.css 用 [data-km-motion='reduce'] 已能关掉动画；这里补系统级
    prefers-reduced-motion，保证未手动设置、但系统开了减少动效时也停。
@@ -343,7 +453,8 @@ html.km-cyber-layout .km-cy-term-dots {
   body::after,
   .km-gate-card--wide .km-gate-hero h1,
   .km-topbar,
-  .km-cyber-flash {
+  .km-cyber-flash,
+  .km-cyber-drops i {
     animation: none !important;
     display: none !important;
   }

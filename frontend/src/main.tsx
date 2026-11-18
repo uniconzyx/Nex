@@ -38,7 +38,25 @@ import './styles/motion.css';
 // 格局增强由 html.km-cyber-layout 开关控制：删掉下面这行赋值即回到原登录布局，
 // 氛围层（扫描线/光带/glitch/切页闪）不受影响。
 import './styles/cyberpunk.css';
-document.documentElement.classList.add('km-cyber-layout');
+
+/**
+ * 赛博朋克「分层开关」——每一行只控制一层，删哪行就只少哪层效果。
+ *
+ *   km-cyber-layout  登录页 HUD 格局（状态条 / 旋转取景框 / 身份标签 / 终端提示行）
+ *   km-cyber-grain   胶片颗粒 + 冰蓝滚动条 + 文本选区底色
+ *   km-cyber-hud     卡片内描边 + 输入框聚焦线
+ *   km-cyber-rain    背景数据流（8 条竖线，手机上自动减到 4 条）
+ *
+ * 不在这份列表里的效果属于基础层（CRT 扫描线 / 微网格 / 扫描光带 /
+ * 登录卡四角框 / 标题 glitch / 切页扫描闪），始终开启；
+ * 要整体撤掉赛博层，删掉上面那行 import 即可。
+ */
+document.documentElement.classList.add(
+  'km-cyber-layout',
+  'km-cyber-grain',
+  'km-cyber-hud',
+  'km-cyber-rain',
+);
 
 // 启动即按平台 / 省电开关确定玻璃方案与强度（APK→A 冰蓝磨砂，EXE→B 通透折射），
 // 同时把动效偏好写到 <html>，避免首帧先播一遍动画再被关掉

@@ -326,6 +326,17 @@ export function App() {
       */}
       <div className="km-cyber-flash" key={`flash-${page}`} aria-hidden="true" />
 
+      {/*
+        背景数据流（赛博朋克氛围层 §12）：纯装饰、pointer-events:none，
+        不参与任何交互与布局。开关类 html.km-cyber-rain 在 main.tsx，
+        未开启时整层 display:none。
+        注意：元素类名用 drops 而非 rain —— 否则 .km-cyber-rain 会同时
+        命中 <html>（开关类同名），其 display:none 会把整页藏掉。
+      */}
+      <div className="km-cyber-drops" aria-hidden="true">
+        <i /><i /><i /><i /><i /><i /><i /><i />
+      </div>
+
       {/* 全局反馈层：toast + 怪物遭遇，任何页面的动作都从这里出声 */}
       <ToastHost />
       <SettlementOverlay />
