@@ -12,7 +12,7 @@
  *
  * 另外顺带把「判题通道」的选择也收敛到这里，UI 层不再自己判断平台。
  */
-import { registerBaseResolver, resolveApiBase } from './api';
+import { registerBaseResolver, resolveApiBase, isLoopbackBase, getApiBase } from './api';
 
 /** Rust 侧 api_probe 的返回形状（与 api_client.rs 的 ApiTarget 对齐）。 */
 export interface ApiTarget {
@@ -56,7 +56,19 @@ export async function connectContentService(): Promise<ApiTarget | null> {
     //    后端一旦起来立刻 reprobe，把地址和离线状态一起纠正。
     const resolverBase = target?.baseUrl || null;
     if (resolverBase) {
-      registerBaseResolver(() => resolverBase);
+      // 分发版（VITE_NEX_API_BASE 烤进了公网地址）：客户端 api_probe 只探本机回环，
+      // 若让它注册回环地址会盖掉构建期注入的公网基址 —— 装到别人电脑上的 EXE
+      // 就永远连 127.0.0.1:8000（那台机器没有后端）→ 登录/同步全挂。
+      // 规则：探测值是回环、而默认地址是非回环公网时，不注册客户端 resolver，
+      // 让 resolveApiBase 回落到 getApiBase()（即公网 DEFAULT_BASE）。
+      // 本机开发版（默认也是回环）行为不变；用户手填地址由 setApiBase pin，不受此处影响。
+      const fallbackBase = getApiBase();
+      if (isLoopbackBase(resolverBase) && !isLoopbackBase(fallbackBase)) {
+        registerBaseResolver(null);
+        console.info('[clientBridge] 保留分发版公网后端地址，忽略本机回环探测:', resolverBase, '->', fallbackBase);
+      } else {
+        registerBaseResolver(() => resolverBase);
+      }
     }
     probed = target;
     return target;

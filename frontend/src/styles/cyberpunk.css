@@ -1,0 +1,350 @@
+/* ============================================================================
+   cyberpunk.css —— 赛博朋克氛围层（单色冰蓝 / 不改动任何色板与布局）
+   ----------------------------------------------------------------------------
+   目标：在「凯喵Code试炼录」既有冰蓝液态玻璃视觉之上叠加一层科技 HUD 质感，
+   让整个 app（登录网关 + 主界面）更赛博朋克，同时严格守住两条硬约束：
+
+     1. 不改颜色体系 —— 只用现有 --km-* 令牌与中性黑白透明；不引入品红/青/黄
+        这类典型赛博朋克撞色，配色仍是原来的冰蓝，只是多了辉光与层次。
+     2. 不改内容布局 —— 不动 grid/flex、不动尺寸、不动定位；所有效果都挂在
+        空闲的 body 伪元素与已有 relative 容器的 ::after 上，pointer-events:none。
+
+   兼容性红线：绝不新增 backdrop-filter。本项目 EXE 曾因大量 backdrop-filter
+   走 GPU 合成而输出黑帧，氛围层只用 repeating-linear-gradient 与 box-shadow，
+   在 WebView2 / Android WebView 上都只合成一次，不会触发黑屏。
+
+   加载顺序：main.tsx 中放在 motion.css 之后（最后加载）；文件末尾自带
+   prefers-reduced-motion 兜底，确保系统级「减少动效」也能关掉光带与 glitch。
+   ============================================================================ */
+
+/* ── 1. 全屏 CRT 扫描线 + 微网格 ────────────────────────────────────────
+   挂在 body::before（全项目未占用）。三层背景一次合成：
+     横向 1px 暗线（3px 周期）——显像管扫描纹
+     纵向 44px 极淡蓝线       ——HUD 坐标网格
+     横向 44px 极淡蓝线       ——HUD 坐标网格
+   线上不带任何新色相；pointer-events:none 保证不挡点击。 */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      rgba(26, 56, 92, 0.05) 0px,
+      rgba(26, 56, 92, 0.05) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(91, 155, 213, 0.035) 0px,
+      rgba(91, 155, 213, 0.035) 1px,
+      transparent 1px,
+      transparent 44px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(91, 155, 213, 0.03) 0px,
+      rgba(91, 155, 213, 0.03) 1px,
+      transparent 1px,
+      transparent 44px
+    );
+}
+
+/* 深色主题：暗线在深底上几乎不可见，改为极淡亮线维持同等纹理密度。
+   :has 若不被旧 WebView 支持，则保留上面的默认暗线（退化为稍弱纹理，不破坏）。 */
+html:has(.km-app[data-km-theme='dark']) body::before {
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      rgba(178, 214, 255, 0.05) 0px,
+      rgba(178, 214, 255, 0.05) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(140, 192, 238, 0.045) 0px,
+      rgba(140, 192, 238, 0.045) 1px,
+      transparent 1px,
+      transparent 44px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(140, 192, 238, 0.035) 0px,
+      rgba(140, 192, 238, 0.035) 1px,
+      transparent 1px,
+      transparent 44px
+    );
+}
+
+/* ── 2. 缓慢下移的扫描光带 ──────────────────────────────────────────────
+   一条高约 22vh 的冰蓝亮带，10s 匀速扫过全屏，像终端刷新。
+   只动 transform（GPU 友好），透明度很低，绝不遮挡阅读。 */
+body::after {
+  content: '';
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 22vh;
+  z-index: 9999;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(140, 192, 238, 0.05) 42%,
+    rgba(197, 228, 255, 0.1) 50%,
+    rgba(140, 192, 238, 0.05) 58%,
+    transparent 100%
+  );
+  animation: km-cyber-sweep 10s linear infinite;
+  will-change: transform;
+}
+@keyframes km-cyber-sweep {
+  0% { transform: translateY(-30vh); }
+  100% { transform: translateY(130vh); }
+}
+
+/* ── 3. 登录卡片四角 HUD 瞄准框 ────────────────────────────────────────
+   .km-gate-card 已是 position:relative 且伪元素空闲，用 ::after 画四角 L 形。
+   四组线性渐变各画一条边，两两成角；inset 收缩 8px 让角标浮在卡片内侧。
+   颜色取 --km-accent，仍属原冰蓝色系。 */
+.km-gate-card::after {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  z-index: 3;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    linear-gradient(var(--km-accent-ink, #2f6494), var(--km-accent-ink, #2f6494)) left top / 20px 2px no-repeat,
+    linear-gradient(var(--km-accent-ink, #2f6494), var(--km-accent-ink, #2f6494)) left top / 2px 20px no-repeat,
+    linear-gradient(var(--km-accent-ink, #2f6494), var(--km-accent-ink, #2f6494)) right top / 20px 2px no-repeat,
+    linear-gradient(var(--km-accent-ink, #2f6494), var(--km-accent-ink, #2f6494)) right top / 2px 20px no-repeat,
+    linear-gradient(var(--km-accent-ink, #2f6494), var(--km-accent-ink, #2f6494)) left bottom / 20px 2px no-repeat,
+    linear-gradient(var(--km-accent-ink, #2f6494), var(--km-accent-ink, #2f6494)) left bottom / 2px 20px no-repeat,
+    linear-gradient(var(--km-accent-ink, #2f6494), var(--km-accent-ink, #2f6494)) right bottom / 20px 2px no-repeat,
+    linear-gradient(var(--km-accent-ink, #2f6494), var(--km-accent-ink, #2f6494)) right bottom / 2px 20px no-repeat;
+  opacity: 0.78;
+  transition: opacity 0.25s ease;
+}
+.km-gate-card:hover::after {
+  opacity: 1;
+}
+
+/* ── 4. 标题轻微 glitch ────────────────────────────────────────────────
+   登录大标题偶发冰蓝双重影错位（克制的 3 帧抖动），不用青/品红撞色。 */
+.km-gate-card--wide .km-gate-hero h1 {
+  animation: km-cyber-glitch 7s steps(1) infinite;
+}
+@keyframes km-cyber-glitch {
+  0%, 92%, 100% {
+    text-shadow: 0 0 18px rgba(91, 155, 213, 0.22);
+    transform: none;
+  }
+  93% {
+    text-shadow: 1px 0 rgba(91, 155, 213, 0.45), -1px 0 rgba(143, 192, 234, 0.35);
+    transform: translateX(-1px);
+  }
+  95% {
+    text-shadow: -1px 0 rgba(91, 155, 213, 0.4), 1px 0 rgba(143, 192, 234, 0.3);
+    transform: translateX(2px);
+  }
+  97% {
+    text-shadow: 0 0 18px rgba(91, 155, 213, 0.22);
+    transform: none;
+  }
+}
+
+/* ── 5. 顶栏能量线 ─────────────────────────────────────────────────────
+   顶栏底部一条极细冰蓝内发光，脉动呼吸。用 inset box-shadow 动画，
+   不碰 .km-topbar::after（已被流光占用）。 */
+.km-topbar {
+  animation: km-cyber-topbar 6s ease-in-out infinite;
+}
+@keyframes km-cyber-topbar {
+  0%, 100% { box-shadow: inset 0 -1px 0 rgba(91, 155, 213, 0.18); }
+  50% { box-shadow: inset 0 -2px 6px rgba(91, 155, 213, 0.4); }
+}
+
+/* ── 6. 交互霓虹反馈 ───────────────────────────────────────────────────
+   主按钮 / 图标按钮 hover、focus 时加冰蓝辉光；只叠加阴影，不改底色。 */
+.km-gate-skip:hover,
+.km-scene-cta:hover {
+  box-shadow: 0 0 18px var(--km-glow, rgba(91, 155, 213, 0.38));
+}
+.km-icon-btn:focus-visible,
+.km-nav-item:focus-visible,
+.km-gate-skip:focus-visible {
+  outline: 2px solid var(--km-accent, #5b9bd5);
+  outline-offset: 2px;
+}
+
+/* ── 7. 切页扫描闪（C 档 · 主人选定）─────────────────────────────────
+   App.tsx 用 key={page} 让此节点每次切页重新挂载，动画只播一次。
+   fixed + pointer-events:none，不占布局、不挡点击；冰蓝细带自左向右
+   扫过后立刻淡出（forwards 停在透明态），不叠加在既有 km-page-in 上。 */
+.km-cyber-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 9997;
+  pointer-events: none;
+  background: linear-gradient(
+    100deg,
+    transparent 38%,
+    rgba(140, 192, 238, 0.11) 50%,
+    rgba(197, 228, 255, 0.18) 51%,
+    transparent 64%
+  );
+  background-size: 260% 100%;
+  background-position: 130% 0;
+  opacity: 0;
+  animation: km-cyber-pageflash 0.32s ease-out forwards;
+}
+@keyframes km-cyber-pageflash {
+  0% { opacity: 0.9; background-position: 130% 0; }
+  100% { opacity: 0; background-position: -40% 0; }
+}
+
+/* ── 8. 格局增强（主人放宽约束后新增 · 可开关）──────────────────────
+   全部包在 html.km-cyber-layout 作用域：删掉这个类即完全回到原格局。
+   只重塑登录网关为「身份核验终端」气质，不改任何业务页栅格/尺寸。
+   新元素一律绝对定位或占位极小，不挤动原有 flex 的上下分布。 */
+html.km-cyber-layout .km-gate-side {
+  padding-top: 58px; /* 给顶部状态条让位，仅左栏内边距，不动卡片宽高 */
+}
+
+/* 关闭格局时，新增元素必须彻底隐藏（否则裸 DOM 会挤在原布局里）。
+   放在开关规则最前面，靠后面的 km-cyber-layout 规则重新 display。 */
+.km-cy-sysbar,
+.km-cy-avatar-frame,
+.km-cy-kicker,
+.km-cy-termbar {
+  display: none !important;
+}
+html.km-cyber-layout .km-cy-sysbar,
+html.km-cyber-layout .km-cy-avatar-frame,
+html.km-cyber-layout .km-cy-kicker,
+html.km-cyber-layout .km-cy-termbar {
+  display: flex !important;
+}
+
+/* 系统状态条：贴左栏顶部，左侧呼吸状态点 + 右节点号 */
+html.km-cyber-layout .km-cy-sysbar {
+  position: absolute;
+  top: 22px;
+  left: 34px;
+  right: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--km-accent-ink, #2f6494);
+  opacity: 0.8;
+}
+html.km-cyber-layout .km-cy-sysbar-id {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+html.km-cyber-layout .km-cy-sysbar-id i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--km-accent, #5b9bd5);
+  box-shadow: 0 0 8px var(--km-accent, #5b9bd5);
+  animation: km-cy-blink 2.4s ease-in-out infinite;
+}
+html.km-cyber-layout .km-cy-sysbar-node {
+  opacity: 0.7;
+}
+@keyframes km-cy-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+
+/* 头像外的方形扫描框（切角），与原有圆虚线环叠加成双重取景器 */
+html.km-cyber-layout .km-cy-avatar-frame {
+  position: absolute;
+  inset: -16px;
+  pointer-events: none;
+  border: 1px solid rgb(93 180 229 / 0.45);
+  clip-path: polygon(
+    0 0, 24% 0, 24% 3%, 3% 3%, 3% 24%, 0 24%,
+    0 76%, 3% 76%, 3% 97%, 24% 97%, 24% 100%, 0 100%,
+    100% 100%, 76% 100%, 76% 97%, 97% 97%, 97% 76%, 100% 76%,
+    100% 24%, 97% 24%, 97% 3%, 76% 3%, 76% 0, 100% 0
+  );
+  animation: km-cy-frame-spin 18s linear infinite;
+}
+@keyframes km-cy-frame-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* 身份核验前缀标签 */
+html.km-cyber-layout .km-cy-kicker {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--km-accent, #5b9bd5);
+  margin-top: 10px;
+}
+
+/* 表单区终端提示行：贴在 LoginForm 上方，占一行但不改表单宽度 */
+html.km-cyber-layout .km-gate-main {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+}
+html.km-cyber-layout .km-cy-termbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--km-line2, rgb(91 155 213 / 0.14));
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--km-accent-ink, #2f6494);
+}
+html.km-cyber-layout .km-cy-term-dots {
+  letter-spacing: 0.3em;
+  opacity: 0.55;
+}
+
+/* 窄屏：状态条缩到卡片内边距、扫描框同比缩小、提示行保留 */
+@media (max-width: 760px) {
+  html.km-cyber-layout .km-gate-side { padding-top: 54px; }
+  html.km-cyber-layout .km-cy-sysbar { top: 18px; left: 28px; right: 28px; font-size: 9px; }
+  html.km-cyber-layout .km-cy-avatar-frame { inset: -12px; }
+  html.km-cyber-layout .km-cy-termbar { margin-bottom: 14px; }
+}
+
+/* 减少动效：状态点与扫描框转起来也属循环动效，一并关掉 */
+@media (prefers-reduced-motion: reduce) {
+  html.km-cyber-layout .km-cy-sysbar-id i,
+  html.km-cyber-layout .km-cy-avatar-frame {
+    animation: none !important;
+  }
+}
+
+/* ── 9. 减少动效兜底 ───────────────────────────────────────────────────
+   motion.css 用 [data-km-motion='reduce'] 已能关掉动画；这里补系统级
+   prefers-reduced-motion，保证未手动设置、但系统开了减少动效时也停。
+   静态扫描线 / 网格 / 四角框保留（它们不动画，属质感不属运动）。 */
+@media (prefers-reduced-motion: reduce) {
+  body::after,
+  .km-gate-card--wide .km-gate-hero h1,
+  .km-topbar,
+  .km-cyber-flash {
+    animation: none !important;
+    display: none !important;
+  }
+}

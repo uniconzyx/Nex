@@ -33,6 +33,12 @@ import './styles/liquidglass.css';
 // 动效偏好（跟随系统 / 始终减少 / 完整动效）：放最后，才能压住前面各处的
 // @media (prefers-reduced-motion) 规则（用户手动选「完整动效」时要能反悔）
 import './styles/motion.css';
+// 赛博朋克氛围层：扫描线 / 微网格 / HUD 角标 / 霓虹辉光 + 登录页格局增强。
+// 放在 motion.css 之后，文件内自带 reduce 兜底。
+// 格局增强由 html.km-cyber-layout 开关控制：删掉下面这行赋值即回到原登录布局，
+// 氛围层（扫描线/光带/glitch/切页闪）不受影响。
+import './styles/cyberpunk.css';
+document.documentElement.classList.add('km-cyber-layout');
 
 // 启动即按平台 / 省电开关确定玻璃方案与强度（APK→A 冰蓝磨砂，EXE→B 通透折射），
 // 同时把动效偏好写到 <html>，避免首帧先播一遍动画再被关掉

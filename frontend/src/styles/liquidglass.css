@@ -2453,3 +2453,150 @@ html.lg-b .km-card {
 .km-scene-cat-btn:active { transform: scale(0.98); }
 .km-scene-cat-btn:focus-visible { outline: 2px solid var(--km-glow, #4f9dff); outline-offset: 4px; }
 @media (prefers-reduced-motion: reduce) { .km-scene-cat-btn { transition: none; } }
+
+
+/* ============================================================================
+ * 登录网关 · 横向双栏（启动全屏后的宽屏布局）
+ * 左栏品牌 / 右栏表单，沿用冰蓝玻璃令牌；窄屏回落竖版。
+ * ========================================================================== */
+.km-gate-card--wide {
+  flex-direction: row;
+  width: min(1200px, 100%);
+  max-width: min(1200px, 100%);
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+}
+.km-gate-card--wide .km-gate-side {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 28px;
+  flex: 0 0 42%;
+  padding: 40px 34px 32px;
+  background:
+    radial-gradient(120% 80% at 20% 0%, rgb(197 228 255 / 0.7), transparent 62%),
+    linear-gradient(160deg, var(--km-env-1) 0%, var(--km-env-2) 100%);
+  position: relative;
+  border-right: 0;
+}
+/* 左右栏柔和过渡：左栏右缘渐隐融入右栏玻璃底，取代硬分隔线 */
+.km-gate-card--wide .km-gate-side::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 52px;
+  height: 100%;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent 0%, rgb(226 240 255 / 0.4) 62%, rgb(255 255 255 / 0.6) 100%);
+}
+.km-gate-card--wide .km-gate-hero {
+  align-items: flex-start;
+  text-align: left;
+  gap: 8px;
+}
+.km-gate-card--wide .km-gate-avatar {
+  width: 108px;
+  height: 108px;
+  margin-bottom: 8px;
+}
+.km-gate-card--wide .km-gate-avatar img {
+  width: 108px;
+  height: 108px;
+}
+.km-gate-card--wide .km-gate-hero h1 {
+  margin: 6px 0 0;
+  font-size: 30px;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+.km-gate-card--wide .km-gate-hero p {
+  max-width: 22ch;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.km-gate-card--wide .km-gate-side-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.km-gate-card--wide .km-gate-note {
+  text-align: left;
+}
+.km-gate-card--wide .km-gate-main {
+  display: flex;
+  align-items: center;
+  flex: 1 1 58%;
+  padding: 40px 40px 36px;
+}
+.km-gate-card--wide .km-login-form {
+  width: 100%;
+}
+@media (max-width: 760px) {
+  .km-gate-card--wide {
+    flex-direction: column;
+    width: min(432px, 100%);
+    max-width: min(432px, 100%);
+  }
+  .km-gate-card--wide .km-gate-side {
+    flex: none;
+    padding: 30px 28px 8px;
+    border-right: 0;
+    gap: 20px;
+  }
+  .km-gate-card--wide .km-gate-hero {
+    align-items: center;
+    text-align: center;
+  }
+  .km-gate-card--wide .km-gate-avatar { width: 92px; height: 92px; margin-bottom: 0; }
+  .km-gate-card--wide .km-gate-avatar img { width: 92px; height: 92px; }
+  .km-gate-card--wide .km-gate-hero h1 { font-size: 24px; }
+  .km-gate-card--wide .km-gate-hero p { max-width: none; font-size: 13.5px; }
+  .km-gate-card--wide .km-gate-note { text-align: center; }
+  .km-gate-card--wide .km-gate-main { flex: none; padding: 8px 28px 30px; }
+}
+
+
+/* 登录网关 · 三键窗口控件（全屏无标题栏时的窗口管理入口，挂卡片右上角） */
+.km-gate-card--wide { position: relative; }
+.km-gate-winctl {
+  position: fixed;
+  top: 14px;
+  right: 16px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+.km-gate-winctl .km-win { gap: 2px; margin-left: 0; }
+.km-gate-winctl .km-win-btn { width: 30px; height: 30px; border-radius: 8px; }
+@media (max-width: 760px) {
+  .km-gate-winctl { top: 10px; right: 10px; padding: 2px 4px; }
+  .km-gate-winctl .km-win-btn { width: 28px; height: 28px; }
+}
+
+
+/* 个人页 · 本地模式引导条：提示当前为本地模式并给出切换到在线的入口 */
+.km-localmode-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 12px;
+  padding: 13px 15px;
+  border-radius: var(--km-r-sm, 12px);
+  background: linear-gradient(100deg, var(--km-env-1, #ebf4fa), var(--km-env-3, #e2eef8));
+  border: 1px solid var(--km-glass-border);
+}
+.km-localmode-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.km-localmode-text b { font-size: 14px; color: var(--km-ink, #26364a); }
+.km-localmode-text span { font-size: 12.5px; line-height: 1.5; color: var(--km-ink-mute, #5c6e83); }
+.km-localmode-banner .km-btn { flex: none; white-space: nowrap; }
+@media (max-width: 520px) {
+  .km-localmode-banner { flex-direction: column; align-items: stretch; }
+  .km-localmode-banner .km-btn { width: 100%; }
+}

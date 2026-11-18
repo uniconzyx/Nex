@@ -62,8 +62,13 @@
   --nex-shadow: var(--km-sh-soft);
 
   display: grid;
+  /* 顶部安全区：Android 全屏(edge-to-edge)下状态栏会盖住顶栏，
+     整页下移 safe-area-inset-top；grid 行高保持 64px 不变，
+     避免重复让出导致主内容被压缩。顶栏按钮因此不再被状态栏压住。 */
   grid-template-rows: 64px 1fr;
   height: 100dvh;
+  padding-top: env(safe-area-inset-top, 0px);
+  box-sizing: border-box;
   overflow: hidden;
   color: var(--km-ink);
   background: radial-gradient(1200px 800px at 20% 10%, var(--km-bg1) 0%, var(--km-bg2) 55%, var(--km-bg3) 100%);

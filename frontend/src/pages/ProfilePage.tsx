@@ -112,6 +112,17 @@ export function ProfilePage({
             </span>
           </div>
         </div>
+        {s.status !== 'online' && (
+          <div className="km-localmode-banner">
+            <div className="km-localmode-text">
+              <b>当前是本地模式</b>
+              <span>进度只存这台设备。登录即可切换到在线模式、多端同步。</span>
+            </div>
+            <button type="button" className="km-btn km-btn-primary km-btn-sm" onClick={onOpenAccount}>
+              登录 · 切到在线
+            </button>
+          </div>
+        )}
         {s.status === 'online' && (
           <div className="km-name-edit">
             {editingName ? (

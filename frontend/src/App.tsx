@@ -103,6 +103,23 @@ export function App() {
   }, []);
 
   /**
+   * 本地模式 → 在线模式的切换：一旦登录成功（status 变 online），
+   * 立刻清掉 localMode 标记并同步 state。否则标记会永久留在 localStorage，
+   * 用户即使从「我的 → 登录/注册」登录成功，仍被当作本地模式，
+   * 退出登录后又被当成"从没登录过"而弹回网关，看起来像切不回在线。
+   */
+  useEffect(() => {
+    if (session.status === 'online' && localMode) {
+      try {
+        localStorage.removeItem('nex.localMode');
+      } catch {
+        /* 忽略写入失败 */
+      }
+      setLocalMode(false);
+    }
+  }, [session.status, localMode]);
+
+  /**
    * 外部改 hash 也要切页：站内 <a href="#employment">、手敲地址、浏览器前进/后退
    * 都不会经过 navigate()。以前只在挂载时读一次 hash，导致「已经是 #employment
    * 但页面还停在首页」和后退键失效两个现象。
@@ -300,6 +317,14 @@ export function App() {
           {page === 'agent' && <AgentPage />}
         </div>
       </KaimaoShell>
+
+      {/*
+        切页扫描闪（赛博朋克氛围层，仅视觉、不参与交互）：
+        key={page} 让每次切页重新挂载这个节点，CSS 动画因此只播一次。
+        它是 fixed + pointer-events:none 的独立层，不改 .km-page 的定位，
+        也不覆盖 km-page-in —— 现有切页上滑淡入手感原样保留。
+      */}
+      <div className="km-cyber-flash" key={`flash-${page}`} aria-hidden="true" />
 
       {/* 全局反馈层：toast + 怪物遭遇，任何页面的动作都从这里出声 */}
       <ToastHost />
